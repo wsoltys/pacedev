@@ -1,0 +1,229 @@
+<html><head><title>Ultimate Amiga PS/2 Wheel Mouse Controller</title></head><body bgcolor="#ffffff" link="#ff4040" vlink="#ff4040">
+
+<a href="http://ps2m.sotchenko.ru/index.html">Main page</a>
+
+<h2>How to build PS/2 Wheel Mouse Controller</h2>
+
+For beginning: from <b>version 1.4</b>, there is new version of hardware - but you can
+still use your old hardware because of two new firmware versions.  Detailed description of
+each of them with schemes and links to firmwares you can read <a href="http://ps2m.sotchenko.ru/version.html">here</a>.
+<p>
+
+</p><h2>Part list</h2>
+
+You will need at least following for building this controller:
+
+<ul>
+<li>PIC16F627 or PIC16F628
+</li><li>DB-9 female connector - to Amiga side
+</li><li>MiniDIN-6 female connector - to mouse side
+</li><li>Some wires (or <a href="http://ps2m.sotchenko.ru/pcb.html">PCB</a>)
+</li></ul>
+
+If you don't have PIC16F62x, or you want to modify existing PIC16F84-based controller
+and anyway don't want to use 2-wheel mice or joystick simulation in future, you can still
+use
+
+<ul>
+<li>PIC16F84 (PIC16F84A, or even old PIC16C84)
+</li><li>4MHz crystal or ceramic resonator
+</li></ul>
+
+instead of PIC16F62x.  Current and all next versions of firmware anyway will support both
+PICs.<p>
+
+If you want to reduce cost of controller by approx. 2 USD, you can replace flash PIC by
+OTP (One-Time-Programmable) PIC.  It may be one of following PICs: PIC16C554, PIC16C558,
+PIC16C620, PIC16C621, PIC16C622 and some others.  Them are cheaper, but you can't update
+firmware - you will need to replace PIC for that.  Additionally, there is no OTP PIC
+programmers on Amiga now (June 2001), and you will need to program it elsewhere.</p><p>
+
+Optionally, you may use following parts:
+
+</p><ul>
+<li>18pin socket for PIC - highly recommended for PIC &amp; firmware upgrades!<br>
+(but you can install PIC16F627 even now and use in-circuit programming)
+</li><li>Two 20pF capacitors - them are required if resonator doesn't start or start at wrong
+frequency (and recommended - but in most cases not needed).
+</li><li>0.1uF blocking capacitor in parallel with mouse power - recommended too, but not required.
+</li><li>2k resistor - recommended for 4-button version.
+</li><li>Second DB-9 female connector, if you want to use wheel and additional buttons.
+</li><li>DB-9 connector cases (boxes)
+</li></ul><p>
+
+</p><h2>PIC programming</h2>
+
+You can program PIC on existing programmer, or build my simple <b>devpic package</b>.
+
+<ul>
+<li><b>In case of programming PIC on existing programmer</b>, you must select following
+options:
+<table cellspacing="7">
+<tbody><tr><td>OSC</td><td>=</td><td>HS</td></tr>
+<tr><td>WDT</td><td>=</td><td>ON</td></tr>
+</tbody></table>
+That was parameters for all usable PICs including OTP, but not for PIC16F62x.  If you will
+use PIC16F627 or PIC16F628, you must select following options:
+<table cellspacing="7">
+<tbody><tr><td>OSC</td><td>=</td><td>INTRC <b>without CLKOUT</b></td></tr>
+<tr><td>WDT</td><td>=</td><td>ON</td></tr>
+<tr><td>LVP</td><td>=</td><td>OFF</td></tr>
+<tr><td>MCLRE</td><td>=</td><td>OFF (digital I/O or something similar)</td></tr>
+</tbody></table>
+Other options don't play any role.<p>
+</p></li><li><b>In case of building devpic</b>,
+<a href="ftp://de.aminet.net/pub/aminet/dev/cross/devpic.lha">download it from Aminet</a>
+and build it.  Devpic is a simple device on parallel port, based on one «glue
+logic» chip and some resistors &amp; diodes.  One of useful devpic features is an
+in-circuit programming - you can reprogram PIC for future versions <b>even in working
+device</b> (but for some reason you must disconnect it from joyport during programming).<p>
+
+<table border="1" cellpadding="10"><tbody><tr><td>
+Devpic will program <b>PIC16F84(A)</b> by following command:<p>
+<b>picprog ps2m.hex force=16382</b>
+</p></td></tr><tr><td>
+For programming <b>PIC16F627</b> or <b>PIC16F628</b> you will use command:<p>
+<b>picprog ps2m.hex force=16212 sf=2</b>
+</p></td></tr></tbody></table>&nbsp;</p><p>
+
+«FORCE» keyword describes configuration word, that contains configuration bits
+like OSC and WDT (and also LVP &amp; MCLRE for PIC16F62x).  Normally it can be
+«CW» keyword, but «FORCE» does also code deprotection if PIC was
+protected.  Don't use that keywords when you update firmware - PIC remembers last
+configword.  «SF» is «SmartFlash» mode of picprog, that speed ups
+new PIC's programming up to 5 times in comparison with PIC16F84.</p><p>
+
+OSC is an OSCillator mode (PIC can handle resonators or RC circuit), and WDT is WatchDog
+Timer - it is an internal PIC circuit, that automatically resets it if it hangs.  WDT is
+required for PS/2 controller - it is used in algorithm not only for exception cases, but
+even for mouse waiting.  LVP is a Low Voltage Programming - in this mode programmer
+doesn't need 12v, but we lose RB4 PIC pin.  MCLRE - purpose of MCLR pin, in our case it
+works as general input pin (maybe useful in future versions).  If you don't want to
+understand all this details - simply use string as described above.</p><p> If you had problems
+with PIC programming - forget your old devpic archive, and try new devpic release (now
+1.6) with v3 hardware, it is more stable than v2.</p><p> </p></li></ul>
+
+<h2>Building of device</h2>
+
+Finally select <a href="http://ps2m.sotchenko.ru/version.html">hardware version</a>, and build it by schematic
+diagrams.  Personally I don't use PCB, and I assemble it directly in DB-9 connector case
+(see <a href="http://ps2m.sotchenko.ru/index.html">photos</a> on front page of manual).  But if you want to
+do PCB - there is a <a href="http://ps2m.sotchenko.ru/pcb.html">reference PCB design</a>, done by Marc SAVART
+[sil51#ifrance.com].  It is designed for use on A4000T (also you can see
+<a href="ftp://de.aminet.net/pub/aminet/hard/hack/ps2m_example.lha">photos archive</a> of
+ready device).  I can't give any warranty for this PCB design, but now I manually check
+every version for wrong connections :)<p>
+
+</p><h2>Debugging</h2>
+
+If assembled device doesn't work - there is a list of probable errors:
+
+<ul>
+<li>Incompatibility with your mouse - try another one
+</li><li>Overloading of 4-button version (by optical mouse for example)
+</li><li>Error in connections
+</li><li>Erroneous PIC programming or incorrect configuration word
+</li><li>Bad resonator (try to install 20pF capacitors)
+</li></ul>
+
+If you have oscilloscope - see signal at OSC pins (not for PIC16F62x).  Schematic diagram
+is already tested and doesn't contain bugs.  There are tens of people that assembled and
+use it now.<p>
+
+</p><h2>Modifications</h2>
+
+Probably it is a most interesting part of this manual :-)&nbsp; Because of open source you
+can modify <a href="http://ps2m.sotchenko.ru/pic/ps2m.asm">source code</a><a> for your needs.  This source may be
+recompiled by picasm assembler (you can find it in
+</a><a href="ftp://de.aminet.net/pub/aminet/dev/cross/devpic.lha">devpic package</a>).  There
+is <b>macros.i</b> file, contains my favorite macro operators - it must be in current
+directory for picasm with source file.  Usage of picasm is very simple:<p>
+
+<b>picasm ps2m</b></p><p>
+
+Both firmware versions may be generated from one source because of conditional asseymbly
+usage.  POWER variable (see line <b>POWER equ</b>...) defines it - 0 value is a 5-button
+version, and 1 value is a 4-button version.  SPEED variable allows you to use different
+resonators, than 4MHz (see comment).</p><p>
+
+Some comments about several program parts destination:
+<table border="1">
+<tbody><tr><th>Label</th><th>Description</th></tr>
+<tr><td>int</td><td>Interrupt handler - it is called every mouse clock (11 times per byte)
+and eats approximately a half of 4MHz PIC speed.  After byte receiving, this routine
+stores received byte in <b>recvdt</b> and sets flag <b>fbyte</b>.  These bytes are stored
+in packet buffer in «main loop».</td></tr>
+
+<tr><td>start<br>
+start_a</td><td>
+Init code.  Some details about mouse detection:
+<ul>
+<li>At first, there is Genius init sequence: <b>0xE8 0x03 0xE6 0xE6 0xE6 0xE9</b>.
+After 0xE9 command mouse sends status bytes, or Genius NetScroll magic sequence <b>0x00
+0x33 0x55</b>. In last case (it means that it is Genius NetScroll with 5 buttons),
+controller uses Genius mode and skips next init sequences.
+</li><li>At second, there is Microsoft init sequence: <b>0xF3 0xC8 0xF3 0x64 0xF3 0x50</b>.
+After this, controller reads mouse ID (<b>0xF2</b>) and checks it for equivalence with
+<b>3</b>.  If it is true - mouse is in Intellimouse mode now (wheel + 3 buttons).
+</li><li>At third, there is new Microsoft init sequence: <b>0xF3 0xC8 0xF3 0xC8 0xF3 0x50</b>.
+After this, controller reads mouse ID again and checks it for equivalence with
+<b>4</b>.  If it is true - mouse is in Intellimouse Explorer mode now (wheel + 5 buttons).
+If mouse ID still is 3 - it means that it is only Intellimouse - not Explorer.
+</li></ul>
+</td></tr>
+<tr><td>m_check</td><td>
+It is a code, that will be executed after 2 seconds of mouse «silence».
+It reads mouse status and sees stream mode flag.  If stream mode is disabled - this means
+that mouse was reconnected.  In this case controller will reset it.</td></tr>
+<tr><td>p_init</td><td>
+Here is setting of initial values of «virtual sync serial port».
+It is used mainly for «re-sync» if sync was lost due to electric
+surge/noise (bit(s) was lost or unnecessary bit(s) was added).<p>
+Additionally, this routine contains check for «alien» signal on LMB pin (for
+example - second joystick «fire») and disable controller.
+</p></td></tr>
+<tr><td>schk</td><td>
+This routine receives bytes in packet buffer (byte1-byte4). After this it sets <b>fpkt1</b>
+flag.</td></tr>
+<tr><td>pchk1</td><td>
+This routine will be called after receiving of full packet.  Because of controller is all
+time in «main loop» simulates mouse movement, packet processing is done by
+several parts.  It is a first part - processing of horisontal movement.  After processing
+this routine sets flag for next routine (<b>fpkt2</b>), and without own flag (<b>fpkt1</b>)
+it will not be processed again up to next packet receiving.<p>
+Processing of movement contains calculating of mouse speed - movement will be done with
+this speed.</p></td></tr>
+<tr><td>pchk2</td><td>
+This routine is like previous, and it processes vertical movement.</td></tr>
+<tr><td>pchk3</td><td>
+This routine processes all mouse buttons (at first - standard three buttons),
+and then it processes additional buttons and wheel (only if these were detected).</td></tr>
+<tr><td>tchk</td><td>
+It is a timer support.  Controller updates mouse signals only approx. 6000 times per
+second.  If next 1/6000 of second doesn't approach yet, controller will return to checking
+of next byte.</td></tr>
+<tr><td>mchk</td><td>
+It is a mouse checking - as described above.</td></tr>
+<tr><td>xchk<br>ychk</td><td>
+It is realtime update of movement counters with needed speed.</td></tr>
+<tr><td>zchk</td><td>
+Wheel counter update.</td></tr>
+<tr><td>xyout</td><td>
+Movement counters and fourth button are simultaneously updated here.</td></tr>
+<tr><td>cpoff</td><td>
+This subroutine enables controller, if it is disabled.  Additionally it sets counters in
+default state.</td></tr>
+<tr><td>testms</td><td>
+Check for Microsoft protocol(s).  Both protocols are checked in one subroutine because of
+similarity (one byte difference).</td></tr>
+<tr><td>send</td><td>
+Sending byte to mouse.  Because of rare nature of this action, it is not done by
+interrupt engine (that also unloads interrupt routine from rare instructions).</td></tr>
+<tr><td>bwait</td><td>
+It is a waiting for byte from mouse.  Actually a byte receiving subroutine.</td></tr>
+<tr><td>delayms<br>delayus</td><td>
+Delays by milliseconds and fourt microseconds (in W).</td></tr>
+</tbody></table>
+
+
+</p></body></html>

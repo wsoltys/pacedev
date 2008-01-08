@@ -1,0 +1,565 @@
+//
+// Written by Synplify
+// Synplify 7.3, Build 192R.
+// Tue Feb 03 11:59:39 2004
+// Core Revision: 1.00.00
+//
+// Source file index table:
+// Object locations will have the form <file>:<line>
+// file 0 "noname"
+// file 1 "\c:\eda\synplicity\synplify_731\lib\vhd\std.vhd "
+// file 2 "\c:\projects\boc\cores\source code\nanoboard\source\project_max1104_dac\max1104dac_ctrl.vhd "
+// file 3 "\c:\eda\synplicity\synplify_731\lib\vhd\std1164.vhd "
+// file 4 "\c:\projects\boc\cores\source code\nanoboard\work\cyclone\max1104_dac.vhd "
+
+module MAX1104_CodecDriver_DAC_cell_state_0_7__h_1 (
+  state_i_0_0,
+  countreg_2,
+  countreg_0,
+  countreg_1,
+  state_6,
+  state_4,
+  state_5,
+  state_2,
+  state_0,
+  state_1,
+  state_i_i_n_0,
+  RST,
+  CLK
+);
+output state_i_0_0 ;
+input countreg_2 ;
+input countreg_0 ;
+input countreg_1 ;
+output state_6 ;
+output state_4 ;
+output state_5 ;
+output state_2 ;
+output state_0 ;
+output state_1 ;
+output state_i_i_n_0 ;
+input RST ;
+input CLK ;
+wire state_i_0_0 ;
+wire countreg_2 ;
+wire countreg_0 ;
+wire countreg_1 ;
+wire state_6 ;
+wire state_4 ;
+wire state_5 ;
+wire state_2 ;
+wire state_0 ;
+wire state_1 ;
+wire state_i_i_n_0 ;
+wire RST ;
+wire CLK ;
+wire [6:6] state_ns_i_and2_0_a;
+wire [3:3] state;
+wire VCC ;
+wire GND ;
+  assign  state_i_i_n_0 = ~ state_1;
+// @2:120
+  cyclone_lcell state_0_ (
+	.regout(state_0),
+	.clk(CLK),
+	.datad(state_1),
+	.aclr(RST)
+);
+defparam state_0_.operation_mode="normal";
+defparam state_0_.output_mode="reg_only";
+defparam state_0_.lut_mask="ff00";
+defparam state_0_.synch_mode="off";
+defparam state_0_.sum_lutc_input="datac";
+// @2:114
+  cyclone_lcell state_1_ (
+	.regout(state_1),
+	.clk(CLK),
+	.dataa(state_ns_i_and2_0_a[6]),
+	.datab(state_0),
+	.datac(state_2),
+	.datad(countreg_1),
+	.aclr(RST)
+);
+defparam state_1_.operation_mode="normal";
+defparam state_1_.output_mode="reg_only";
+defparam state_1_.lut_mask="fcf4";
+defparam state_1_.synch_mode="off";
+defparam state_1_.sum_lutc_input="datac";
+// @2:109
+  cyclone_lcell state_2_ (
+	.regout(state_2),
+	.clk(CLK),
+	.dataa(state_5),
+	.datab(state[3]),
+	.aclr(RST)
+);
+defparam state_2_.operation_mode="normal";
+defparam state_2_.output_mode="reg_only";
+defparam state_2_.lut_mask="eeee";
+defparam state_2_.synch_mode="off";
+defparam state_2_.sum_lutc_input="datac";
+// @2:102
+  cyclone_lcell state_3_ (
+	.regout(state[3]),
+	.clk(CLK),
+	.datad(state_4),
+	.aclr(RST)
+);
+defparam state_3_.operation_mode="normal";
+defparam state_3_.output_mode="reg_only";
+defparam state_3_.lut_mask="ff00";
+defparam state_3_.synch_mode="off";
+defparam state_3_.sum_lutc_input="datac";
+// @2:98
+  cyclone_lcell state_4_ (
+	.regout(state_4),
+	.clk(CLK),
+	.dataa(countreg_0),
+	.datab(countreg_1),
+	.datac(countreg_2),
+	.datad(state_0),
+	.aclr(RST)
+);
+defparam state_4_.operation_mode="normal";
+defparam state_4_.output_mode="reg_only";
+defparam state_4_.lut_mask="0100";
+defparam state_4_.synch_mode="off";
+defparam state_4_.sum_lutc_input="datac";
+// @2:94
+  cyclone_lcell state_5_ (
+	.regout(state_5),
+	.clk(CLK),
+	.datad(state_6),
+	.aclr(RST)
+);
+defparam state_5_.operation_mode="normal";
+defparam state_5_.output_mode="reg_only";
+defparam state_5_.lut_mask="ff00";
+defparam state_5_.synch_mode="off";
+defparam state_5_.sum_lutc_input="datac";
+// @2:90
+  cyclone_lcell state_6_ (
+	.regout(state_6),
+	.clk(CLK),
+	.dataa(state_i_0_0),
+	.aclr(RST)
+);
+defparam state_6_.operation_mode="normal";
+defparam state_6_.output_mode="reg_only";
+defparam state_6_.lut_mask="5555";
+defparam state_6_.synch_mode="off";
+defparam state_6_.sum_lutc_input="datac";
+// @2:86
+  cyclone_lcell state_i_0_7_ (
+	.regout(state_i_0_0),
+	.clk(CLK),
+	.datad(VCC),
+	.aclr(RST)
+);
+defparam state_i_0_7_.operation_mode="normal";
+defparam state_i_0_7_.output_mode="reg_only";
+defparam state_i_0_7_.lut_mask="ff00";
+defparam state_i_0_7_.synch_mode="off";
+defparam state_i_0_7_.sum_lutc_input="datac";
+// @2:77
+  cyclone_lcell state_ns_i_and2_0_a_6_ (
+	.combout(state_ns_i_and2_0_a[6]),
+	.dataa(countreg_2),
+	.datab(countreg_0)
+);
+defparam state_ns_i_and2_0_a_6_.operation_mode="normal";
+defparam state_ns_i_and2_0_a_6_.output_mode="comb_only";
+defparam state_ns_i_and2_0_a_6_.lut_mask="1111";
+defparam state_ns_i_and2_0_a_6_.synch_mode="off";
+defparam state_ns_i_and2_0_a_6_.sum_lutc_input="datac";
+//@1:1
+  assign VCC = 1'b1;
+  assign GND = 1'b0;
+endmodule /* MAX1104_CodecDriver_DAC_cell_state_0_7__h_1 */
+
+module MAX1104_CodecDriver_DAC (
+  DATA_0,
+  DATA_1,
+  DATA_2,
+  DATA_3,
+  DATA_4,
+  DATA_5,
+  DATA_6,
+  DATA_7,
+  Codec_SCLK,
+  Codec_DOUT,
+  SPI_DIN,
+  RST,
+  CLK,
+  codec_cs_buffer_i
+);
+input DATA_0 ;
+input DATA_1 ;
+input DATA_2 ;
+input DATA_3 ;
+input DATA_4 ;
+input DATA_5 ;
+input DATA_6 ;
+input DATA_7 ;
+output Codec_SCLK ;
+output Codec_DOUT ;
+input SPI_DIN ;
+input RST ;
+input CLK ;
+output codec_cs_buffer_i ;
+wire DATA_0 ;
+wire DATA_1 ;
+wire DATA_2 ;
+wire DATA_3 ;
+wire DATA_4 ;
+wire DATA_5 ;
+wire DATA_6 ;
+wire DATA_7 ;
+wire Codec_SCLK ;
+wire Codec_DOUT ;
+wire SPI_DIN ;
+wire RST ;
+wire CLK ;
+wire codec_cs_buffer_i ;
+wire [6:0] state;
+wire [2:0] countreg;
+wire [1:0] countreg_cout;
+wire [1:1] state_i_i_n;
+wire [7:0] spireg;
+wire [7:7] state_i_0;
+wire VCC ;
+wire un13_codec_cs_buffer ;
+wire GND ;
+wire un8_spireg_i_and2 ;
+wire un10_codec_dout_buffer_i_and2 ;
+wire un5_codec_sclk_buffer_i_and2 ;
+  cyclone_lcell codec_cs_buffer (
+	.combout(codec_cs_buffer_i),
+	.clk(CLK),
+	.datac(state[6]),
+	.aclr(RST),
+	.sload(VCC),
+	.ena(!un13_codec_cs_buffer)
+);
+defparam codec_cs_buffer.operation_mode="normal";
+defparam codec_cs_buffer.output_mode="comb_only";
+defparam codec_cs_buffer.lut_mask="0f0f";
+defparam codec_cs_buffer.synch_mode="on";
+defparam codec_cs_buffer.sum_lutc_input="qfbk";
+// @2:77
+  cyclone_lcell countreg_0_ (
+	.regout(countreg[0]),
+	.cout(countreg_cout[0]),
+	.clk(CLK),
+	.dataa(countreg[0]),
+	.datab(state_i_i_n[1]),
+	.datac(GND),
+	.aclr(RST),
+	.sload(state[2])
+);
+defparam countreg_0_.operation_mode="arithmetic";
+defparam countreg_0_.output_mode="reg_only";
+defparam countreg_0_.lut_mask="99ee";
+defparam countreg_0_.synch_mode="on";
+defparam countreg_0_.sum_lutc_input="datac";
+// @2:77
+  cyclone_lcell countreg_1_ (
+	.regout(countreg[1]),
+	.cout(countreg_cout[1]),
+	.clk(CLK),
+	.dataa(countreg[1]),
+	.datac(GND),
+	.aclr(RST),
+	.sload(state[2]),
+	.cin(countreg_cout[0])
+);
+defparam countreg_1_.cin_used="true";
+defparam countreg_1_.operation_mode="arithmetic";
+defparam countreg_1_.output_mode="reg_only";
+defparam countreg_1_.lut_mask="a5fa";
+defparam countreg_1_.synch_mode="on";
+defparam countreg_1_.sum_lutc_input="cin";
+// @2:77
+  cyclone_lcell countreg_2_ (
+	.regout(countreg[2]),
+	.clk(CLK),
+	.dataa(countreg[2]),
+	.datac(GND),
+	.aclr(RST),
+	.sload(state[2]),
+	.cin(countreg_cout[1])
+);
+defparam countreg_2_.cin_used="true";
+defparam countreg_2_.operation_mode="normal";
+defparam countreg_2_.output_mode="reg_only";
+defparam countreg_2_.lut_mask="a5a5";
+defparam countreg_2_.synch_mode="on";
+defparam countreg_2_.sum_lutc_input="cin";
+// @2:77
+  cyclone_lcell spireg_7_ (
+	.regout(spireg[7]),
+	.clk(CLK),
+	.dataa(DATA_7),
+	.datab(state[5]),
+	.datac(spireg[6]),
+	.datad(state[1]),
+	.aclr(RST),
+	.ena(!un8_spireg_i_and2)
+);
+defparam spireg_7_.operation_mode="normal";
+defparam spireg_7_.output_mode="reg_only";
+defparam spireg_7_.lut_mask="fcee";
+defparam spireg_7_.synch_mode="off";
+defparam spireg_7_.sum_lutc_input="datac";
+// @2:77
+  cyclone_lcell spireg_6_ (
+	.regout(spireg[6]),
+	.clk(CLK),
+	.dataa(DATA_6),
+	.datab(state[5]),
+	.datac(spireg[5]),
+	.datad(state[1]),
+	.aclr(RST),
+	.ena(!un8_spireg_i_and2)
+);
+defparam spireg_6_.operation_mode="normal";
+defparam spireg_6_.output_mode="reg_only";
+defparam spireg_6_.lut_mask="fcee";
+defparam spireg_6_.synch_mode="off";
+defparam spireg_6_.sum_lutc_input="datac";
+// @2:77
+  cyclone_lcell spireg_5_ (
+	.regout(spireg[5]),
+	.clk(CLK),
+	.dataa(DATA_5),
+	.datab(state[5]),
+	.datac(spireg[4]),
+	.datad(state[1]),
+	.aclr(RST),
+	.ena(!un8_spireg_i_and2)
+);
+defparam spireg_5_.operation_mode="normal";
+defparam spireg_5_.output_mode="reg_only";
+defparam spireg_5_.lut_mask="3022";
+defparam spireg_5_.synch_mode="off";
+defparam spireg_5_.sum_lutc_input="datac";
+// @2:77
+  cyclone_lcell spireg_4_ (
+	.regout(spireg[4]),
+	.clk(CLK),
+	.dataa(DATA_4),
+	.datab(state[5]),
+	.datac(spireg[3]),
+	.datad(state[1]),
+	.aclr(RST),
+	.ena(!un8_spireg_i_and2)
+);
+defparam spireg_4_.operation_mode="normal";
+defparam spireg_4_.output_mode="reg_only";
+defparam spireg_4_.lut_mask="3022";
+defparam spireg_4_.synch_mode="off";
+defparam spireg_4_.sum_lutc_input="datac";
+// @2:77
+  cyclone_lcell spireg_3_ (
+	.regout(spireg[3]),
+	.clk(CLK),
+	.dataa(DATA_3),
+	.datab(state[5]),
+	.datac(spireg[2]),
+	.datad(state[1]),
+	.aclr(RST),
+	.ena(!un8_spireg_i_and2)
+);
+defparam spireg_3_.operation_mode="normal";
+defparam spireg_3_.output_mode="reg_only";
+defparam spireg_3_.lut_mask="fcee";
+defparam spireg_3_.synch_mode="off";
+defparam spireg_3_.sum_lutc_input="datac";
+// @2:77
+  cyclone_lcell spireg_2_ (
+	.regout(spireg[2]),
+	.clk(CLK),
+	.dataa(DATA_2),
+	.datab(state[5]),
+	.datac(spireg[1]),
+	.datad(state[1]),
+	.aclr(RST),
+	.ena(!un8_spireg_i_and2)
+);
+defparam spireg_2_.operation_mode="normal";
+defparam spireg_2_.output_mode="reg_only";
+defparam spireg_2_.lut_mask="3022";
+defparam spireg_2_.synch_mode="off";
+defparam spireg_2_.sum_lutc_input="datac";
+// @2:77
+  cyclone_lcell spireg_1_ (
+	.regout(spireg[1]),
+	.clk(CLK),
+	.dataa(DATA_1),
+	.datab(state[5]),
+	.datac(spireg[0]),
+	.datad(state[1]),
+	.aclr(RST),
+	.ena(!un8_spireg_i_and2)
+);
+defparam spireg_1_.operation_mode="normal";
+defparam spireg_1_.output_mode="reg_only";
+defparam spireg_1_.lut_mask="3022";
+defparam spireg_1_.synch_mode="off";
+defparam spireg_1_.sum_lutc_input="datac";
+// @2:77
+  cyclone_lcell spireg_0_ (
+	.regout(spireg[0]),
+	.clk(CLK),
+	.dataa(DATA_0),
+	.datab(SPI_DIN),
+	.datac(state[5]),
+	.datad(state[1]),
+	.aclr(RST),
+	.ena(!un8_spireg_i_and2)
+);
+defparam spireg_0_.operation_mode="normal";
+defparam spireg_0_.output_mode="reg_only";
+defparam spireg_0_.lut_mask="fcfa";
+defparam spireg_0_.synch_mode="off";
+defparam spireg_0_.sum_lutc_input="datac";
+// @2:77
+  cyclone_lcell Codec_DOUT_0 (
+	.regout(Codec_DOUT),
+	.clk(CLK),
+	.datad(spireg[7]),
+	.aclr(RST),
+	.ena(!un10_codec_dout_buffer_i_and2)
+);
+defparam Codec_DOUT_0.operation_mode="normal";
+defparam Codec_DOUT_0.output_mode="reg_only";
+defparam Codec_DOUT_0.lut_mask="ff00";
+defparam Codec_DOUT_0.synch_mode="off";
+defparam Codec_DOUT_0.sum_lutc_input="datac";
+// @2:77
+  cyclone_lcell Codec_SCLK_0 (
+	.regout(Codec_SCLK),
+	.clk(CLK),
+	.datad(state[1]),
+	.aclr(RST),
+	.ena(!un5_codec_sclk_buffer_i_and2)
+);
+defparam Codec_SCLK_0.operation_mode="normal";
+defparam Codec_SCLK_0.output_mode="reg_only";
+defparam Codec_SCLK_0.lut_mask="ff00";
+defparam Codec_SCLK_0.synch_mode="off";
+defparam Codec_SCLK_0.sum_lutc_input="datac";
+// @2:85
+  cyclone_lcell FSM_un8_spireg_i_and2 (
+	.combout(un8_spireg_i_and2),
+	.dataa(state[5]),
+	.datab(state[4]),
+	.datac(state[1])
+);
+defparam FSM_un8_spireg_i_and2.operation_mode="normal";
+defparam FSM_un8_spireg_i_and2.output_mode="comb_only";
+defparam FSM_un8_spireg_i_and2.lut_mask="0101";
+defparam FSM_un8_spireg_i_and2.synch_mode="off";
+defparam FSM_un8_spireg_i_and2.sum_lutc_input="datac";
+// @2:85
+  cyclone_lcell FSM_un10_codec_dout_buffer_i_and2 (
+	.combout(un10_codec_dout_buffer_i_and2),
+	.dataa(state[2]),
+	.datab(state[0])
+);
+defparam FSM_un10_codec_dout_buffer_i_and2.operation_mode="normal";
+defparam FSM_un10_codec_dout_buffer_i_and2.output_mode="comb_only";
+defparam FSM_un10_codec_dout_buffer_i_and2.lut_mask="1111";
+defparam FSM_un10_codec_dout_buffer_i_and2.synch_mode="off";
+defparam FSM_un10_codec_dout_buffer_i_and2.sum_lutc_input="datac";
+// @2:85
+  cyclone_lcell FSM_un5_codec_sclk_buffer_i_and2 (
+	.combout(un5_codec_sclk_buffer_i_and2),
+	.dataa(state[0]),
+	.datab(state[1])
+);
+defparam FSM_un5_codec_sclk_buffer_i_and2.operation_mode="normal";
+defparam FSM_un5_codec_sclk_buffer_i_and2.output_mode="comb_only";
+defparam FSM_un5_codec_sclk_buffer_i_and2.lut_mask="1111";
+defparam FSM_un5_codec_sclk_buffer_i_and2.synch_mode="off";
+defparam FSM_un5_codec_sclk_buffer_i_and2.sum_lutc_input="datac";
+// @2:85
+  cyclone_lcell FSM_un13_codec_cs_buffer (
+	.combout(un13_codec_cs_buffer),
+	.dataa(state[6]),
+	.datab(state_i_0[7])
+);
+defparam FSM_un13_codec_cs_buffer.operation_mode="normal";
+defparam FSM_un13_codec_cs_buffer.output_mode="comb_only";
+defparam FSM_un13_codec_cs_buffer.lut_mask="4444";
+defparam FSM_un13_codec_cs_buffer.synch_mode="off";
+defparam FSM_un13_codec_cs_buffer.sum_lutc_input="datac";
+// @2:77
+  MAX1104_CodecDriver_DAC_cell_state_0_7__h_1 state_h (
+	.state_i_0_0(state_i_0[7]),
+	.countreg_2(countreg[2]),
+	.countreg_0(countreg[0]),
+	.countreg_1(countreg[1]),
+	.state_6(state[6]),
+	.state_4(state[4]),
+	.state_5(state[5]),
+	.state_2(state[2]),
+	.state_0(state[0]),
+	.state_1(state[1]),
+	.state_i_i_n_0(state_i_i_n[1]),
+	.RST(RST),
+	.CLK(CLK)
+);
+//@1:1
+  assign VCC = 1'b1;
+//@1:1
+  assign GND = 1'b0;
+endmodule /* MAX1104_CodecDriver_DAC */
+
+module MAX1104_DAC (
+  CLK,
+  DATA,
+  RST,
+  SPI_CS,
+  SPI_DIN,
+  SPI_DOUT,
+  SPI_SCLK
+);
+input CLK ;
+input [7:0] DATA ;
+input RST ;
+output SPI_CS ;
+input SPI_DIN ;
+output SPI_DOUT ;
+output SPI_SCLK ;
+wire CLK ;
+wire RST ;
+wire SPI_CS ;
+wire SPI_DIN ;
+wire SPI_DOUT ;
+wire SPI_SCLK ;
+wire VCC ;
+wire GND ;
+//@1:1
+  assign VCC = 1'b1;
+//@1:1
+  assign GND = 1'b0;
+// @4:62
+  MAX1104_CodecDriver_DAC U1 (
+	.DATA_0(DATA[0]),
+	.DATA_1(DATA[1]),
+	.DATA_2(DATA[2]),
+	.DATA_3(DATA[3]),
+	.DATA_4(DATA[4]),
+	.DATA_5(DATA[5]),
+	.DATA_6(DATA[6]),
+	.DATA_7(DATA[7]),
+	.Codec_SCLK(SPI_SCLK),
+	.Codec_DOUT(SPI_DOUT),
+	.SPI_DIN(SPI_DIN),
+	.RST(RST),
+	.CLK(CLK),
+	.codec_cs_buffer_i(SPI_CS)
+);
+endmodule /* MAX1104_DAC */
+

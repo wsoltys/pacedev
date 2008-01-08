@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>c1541_app</name>
+	<comment></comment>
+	<projects>
+		<project>c1541_syslib</project>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>com.altera.ide.core.alterabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.cdt.core.cnature</nature>
+		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
+		<nature>com.altera.ide.core.AlteraNios2Nature</nature>
+		<nature>com.altera.ide.core.AlteraApplicationNature</nature>
+	</natures>
+</projectDescription>

@@ -1,0 +1,245 @@
+# Copyright (C) 1991-2005 Altera Corporation
+# Your use of Altera Corporation's design tools, logic functions 
+# and other software and tools, and its AMPP partner logic       
+# functions, and any output files any of the foregoing           
+# (including device programming or simulation files), and any    
+# associated documentation or information are expressly subject  
+# to the terms and conditions of the Altera Program License      
+# Subscription Agreement, Altera MegaCore Function License       
+# Agreement, or other applicable license agreement, including,   
+# without limitation, that your use is for the sole purpose of   
+# programming logic devices manufactured by Altera and sold by   
+# Altera or its authorized distributors.  Please refer to the    
+# applicable agreement for further details.
+
+
+# The default values for assignments are stored in the file
+#		galxwars_assignment_defaults.qdf
+# If this file doesn't exist, and for assignments not listed, see file
+#		assignment_defaults.qdf
+
+# Altera recommends that you do not modify this file. This
+# file is updated automatically by the Quartus II software
+# and any changes you make may be lost or overwritten.
+
+
+# Project-Wide Assignments
+# ========================
+set_global_assignment -name SMART_RECOMPILE OFF
+set_global_assignment -name INCREMENTAL_COMPILATION FULL_INCREMENTAL_COMPILATION
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.0
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "19:21:54  AUGUST 25, 2005"
+set_global_assignment -name LAST_QUARTUS_VERSION 7.2
+
+# Pin & Location Assignments
+# ==========================
+set_global_assignment -name RESERVE_PIN "AS INPUT TRI-STATED"
+set_location_assignment PIN_177 -to AUDIO_DIN
+set_location_assignment PIN_178 -to AUDIO_DOUT
+set_location_assignment PIN_179 -to AUDIO_SCLK
+set_location_assignment PIN_181 -to AUDIO_SPICS
+set_location_assignment PIN_153 -to CLK_BRD
+set_location_assignment PIN_152 -to CLK_REF
+set_location_assignment PIN_159 -to HB3
+set_location_assignment PIN_161 -to HB5
+set_location_assignment PIN_38 -to HB7
+set_location_assignment PIN_41 -to HB9
+set_location_assignment PIN_43 -to HB11
+set_location_assignment PIN_45 -to HB13
+set_location_assignment PIN_47 -to HB15
+set_location_assignment PIN_49 -to HB17
+set_location_assignment PIN_50 -to HB18
+set_location_assignment PIN_53 -to HB19
+set_location_assignment PIN_74 -to LEDS[7]
+set_location_assignment PIN_75 -to LEDS[6]
+set_location_assignment PIN_76 -to LEDS[5]
+set_location_assignment PIN_77 -to LEDS[4]
+set_location_assignment PIN_78 -to LEDS[3]
+set_location_assignment PIN_79 -to LEDS[2]
+set_location_assignment PIN_82 -to LEDS[1]
+set_location_assignment PIN_83 -to LEDS[0]
+set_location_assignment PIN_164 -to PS2B_CLK
+set_location_assignment PIN_163 -to PS2B_DATA
+set_location_assignment PIN_107 -to RAM0_DATA[7]
+set_location_assignment PIN_106 -to RAM0_DATA[6]
+set_location_assignment PIN_105 -to RAM0_DATA[5]
+set_location_assignment PIN_104 -to RAM0_DATA[4]
+set_location_assignment PIN_101 -to RAM0_DATA[3]
+set_location_assignment PIN_100 -to RAM0_DATA[2]
+set_location_assignment PIN_99 -to RAM0_DATA[1]
+set_location_assignment PIN_98 -to RAM0_DATA[0]
+set_location_assignment PIN_202 -to RAM0_OE
+set_location_assignment PIN_233 -to RAM0_WE
+set_location_assignment PIN_187 -to RAM_ADDR[16]
+set_location_assignment PIN_193 -to RAM_ADDR[15]
+set_location_assignment PIN_195 -to RAM_ADDR[14]
+set_location_assignment PIN_197 -to RAM_ADDR[13]
+set_location_assignment PIN_217 -to RAM_ADDR[12]
+set_location_assignment PIN_219 -to RAM_ADDR[11]
+set_location_assignment PIN_223 -to RAM_ADDR[10]
+set_location_assignment PIN_225 -to RAM_ADDR[9]
+set_location_assignment PIN_227 -to RAM_ADDR[8]
+set_location_assignment PIN_228 -to RAM_ADDR[7]
+set_location_assignment PIN_226 -to RAM_ADDR[6]
+set_location_assignment PIN_224 -to RAM_ADDR[5]
+set_location_assignment PIN_222 -to RAM_ADDR[4]
+set_location_assignment PIN_196 -to RAM_ADDR[3]
+set_location_assignment PIN_194 -to RAM_ADDR[2]
+set_location_assignment PIN_188 -to RAM_ADDR[1]
+set_location_assignment PIN_186 -to RAM_ADDR[0]
+set_location_assignment PIN_200 -to RAM_CS
+set_location_assignment PIN_182 -to RS_CTS
+set_location_assignment PIN_184 -to RS_RTS
+set_location_assignment PIN_185 -to RS_RX
+set_location_assignment PIN_183 -to RS_TX
+set_location_assignment PIN_15 -to SPI_CLK
+set_location_assignment PIN_16 -to SPI_DIN
+set_location_assignment PIN_13 -to SPI_DOUT
+set_location_assignment PIN_12 -to SPI_MODE
+set_location_assignment PIN_14 -to SPI_SEL
+set_location_assignment PIN_84 -to SW[7]
+set_location_assignment PIN_85 -to SW[6]
+set_location_assignment PIN_86 -to SW[5]
+set_location_assignment PIN_87 -to SW[4]
+set_location_assignment PIN_88 -to SW[3]
+set_location_assignment PIN_93 -to SW[2]
+set_location_assignment PIN_94 -to SW[1]
+set_location_assignment PIN_95 -to SW[0]
+set_location_assignment PIN_234 -to TEST_BUTTON
+set_location_assignment PIN_167 -to VGA_B[1]
+set_location_assignment PIN_168 -to VGA_B[0]
+set_location_assignment PIN_169 -to VGA_G[1]
+set_location_assignment PIN_170 -to VGA_G[0]
+set_location_assignment PIN_166 -to VGA_HSYN
+set_location_assignment PIN_173 -to VGA_R[1]
+set_location_assignment PIN_174 -to VGA_R[0]
+set_location_assignment PIN_165 -to VGA_VSYN
+
+# Timing Assignments
+# ==================
+set_global_assignment -name DO_MIN_ANALYSIS ON
+set_global_assignment -name INCLUDE_EXTERNAL_PIN_DELAYS_IN_FMAX_CALCULATIONS OFF
+set_global_assignment -name FMAX_REQUIREMENT "20.0 MHz"
+
+# Analysis & Synthesis Assignments
+# ================================
+set_global_assignment -name SAVE_DISK_SPACE OFF
+set_global_assignment -name EDA_DESIGN_ENTRY_SYNTHESIS_TOOL Custom
+set_global_assignment -name FAMILY Cyclone
+set_global_assignment -name TOP_LEVEL_ENTITY target_top
+set_global_assignment -name AUTO_ENABLE_SMART_COMPILE on
+
+# Fitter Assignments
+# ==================
+set_global_assignment -name DEVICE EP1C12Q240C7
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED"
+set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR 1
+
+# EDA Netlist Writer Assignments
+# ==============================
+set_global_assignment -name EDA_SIMULATION_TOOL "<None>"
+
+# Assembler Assignments
+# =====================
+set_global_assignment -name ON_CHIP_BITSTREAM_DECOMPRESSION OFF
+set_global_assignment -name GENERATE_RBF_FILE ON
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS INPUT TRI-STATED"
+set_global_assignment -name AUTO_RESTART_CONFIGURATION OFF
+
+# SignalTap II Assignments
+# ========================
+set_global_assignment -name ENABLE_SIGNALTAP off
+set_global_assignment -name USE_SIGNALTAP_FILE ../ep1c12/stp1.stp
+
+# --------------------
+# start CLOCK(clk_brd)
+
+	# Timing Assignments
+	# ==================
+	set_global_assignment -name FMAX_REQUIREMENT "30 MHz" -section_id clk_brd
+set_global_assignment -name DUTY_CYCLE 50 -section_id clk_brd
+
+# end CLOCK(clk_brd)
+# ------------------
+
+# --------------------
+# start CLOCK(clk_ref)
+
+	# Timing Assignments
+	# ==================
+	set_global_assignment -name FMAX_REQUIREMENT "20 MHz" -section_id clk_ref
+set_global_assignment -name DUTY_CYCLE 50 -section_id clk_ref
+
+# end CLOCK(clk_ref)
+# ------------------
+
+# ---------------------------------------
+# start EDA_TOOL_SETTINGS(eda_simulation)
+
+	# EDA Netlist Writer Assignments
+	# ==============================
+set_global_assignment -name EDA_INCLUDE_VHDL_CONFIGURATION_DECLARATION OFF -section_id eda_simulation
+set_global_assignment -name EDA_MAINTAIN_DESIGN_HIERARCHY OFF -section_id eda_simulation
+set_global_assignment -name EDA_MAP_ILLEGAL_CHARACTERS OFF -section_id eda_simulation
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT NONE -section_id eda_simulation
+
+# end EDA_TOOL_SETTINGS(eda_simulation)
+# -------------------------------------
+
+# -----------------------
+# start ENTITY(nanoboard)
+
+	# Timing Assignments
+	# ==================
+
+	# ---------------------------
+	# start DESIGN_PARTITION(Top)
+
+		# Incremental Compilation Assignments
+		# ===================================
+
+	# end DESIGN_PARTITION(Top)
+	# -------------------------
+
+# end ENTITY(nanoboard)
+# ---------------------
+
+set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id Top
+set_instance_assignment -name CLOCK_SETTINGS clk_ref -to clk_ref
+set_instance_assignment -name CLOCK_SETTINGS clk_brd -to clk_brd
+set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
+set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE project_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/platform_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/galxwars/platform_variant_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/target/nanoboard/target_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/cyclone/pll.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/cyclone/sprom.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/cyclone/spram.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/cyclone/dpram.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/cyclone/dpram_1r1w.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/clk_div.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_Pack.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_ALU.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_MCode.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_Reg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80se.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/frogger/uPse.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/InputMapper.VHDL
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/Inputs.VHD
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/altera_mem.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/Game.VHD
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/invaders/invaders_audio.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/Sound.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/videocontroller_800x600_60Hz.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/bitmapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/Graphics.VHD
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
+set_global_assignment -name VQM_FILE ../../../../../src/target/nanoboard/ep1c12/MAX1104_DAC.VQM
+set_global_assignment -name VHDL_FILE ../../../../../src/target/nanoboard/target_top.vhd

@@ -1,0 +1,10 @@
+bin2hex C0i.bin >C0i.hex 
+bin2hex C0s.bin >C0s.hex 
+bin2hex C8.bin  >C8.hex  
+bin2hex D0.bin  >D0.hex  
+bin2hex D8.bin  >D8.hex  
+bin2hex E0.bin  >E0.hex  
+bin2hex E8.bin  >E8.hex  
+bin2hex F0.bin  >F0.hex  
+bin2hex F8.bin  >F8.hex  
+bin2hex chargen.bin  >chargen.hex  

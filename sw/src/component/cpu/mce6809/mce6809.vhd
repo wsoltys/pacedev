@@ -1,0 +1,371 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use work.mce6809_pack.all;
+
+entity mce6809 is
+	port (
+		clk:        in  std_logic;
+		clken:      in  std_logic;
+		reset:      in  std_logic;
+		rw:         out std_logic;
+		vma:        out std_logic;
+		address:    out std_logic_vector(15 downto 0);
+		data_i: 	  in  std_logic_vector(7 downto 0);
+		data_o:		 	out std_logic_vector(7 downto 0);
+		halt:     	in  std_logic;
+		hold:     	in  std_logic;
+		irq:      	in  std_logic;
+		firq:     	in  std_logic;
+		nmi:      	in  std_logic
+	);
+end;
+
+architecture SYN of mce6809 is
+
+	-- Internal buses
+	signal		dbus					: std_logic_vector(7 downto 0);
+	--signal		abush					: std_logic_vector(7 downto 0);
+	--signal		abusl					: std_logic_vector(7 downto 0);
+	signal		abus					: std_logic_vector(15 downto 0);
+
+	-- CPU registers
+	signal		ir						: std_logic_vector(7 downto 0);
+	signal		ir_page				: ir_page_type;
+	signal		pc						: std_logic_vector(15 downto 0);
+	signal		u							: std_logic_vector(15 downto 0);
+	signal		s							: std_logic_vector(15 downto 0);
+	signal		y							: std_logic_vector(15 downto 0);
+	signal		x							: std_logic_vector(15 downto 0);
+	signal		acca					: std_logic_vector(7 downto 0);
+	signal		accb					: std_logic_vector(7 downto 0);
+	signal		dp						: std_logic_vector(7 downto 0);
+	signal		cc						: std_logic_vector(7 downto 0);
+	signal		ea						: std_logic_vector(15 downto 0);
+	signal		post					: std_logic_vector(7 downto 0);
+
+	-- ALU signals
+	signal		left					: std_logic_vector(7 downto 0);		-- ALU left
+	signal		right					: std_logic_vector(7 downto 0);		-- ALU right
+	signal		alu_out				: std_logic_vector(7 downto 0);
+	signal		cc_out				: std_logic_vector(7 downto 0);
+
+	-- Microcode controls
+	signal		mc_addr				: mc_state_type := mc_fetch0;
+	signal		mc_jump				: std_logic;
+	signal		mc_jump_addr	: mc_state_type;
+
+	-- Operational controls
+	signal		alu_ctrl			:	alu_type;
+	signal		drive_vma			: std_logic;
+
+	-- Register controls
+	signal		pc_ctrl				: pc_type;
+	signal		ir_ctrl				: ir_type;
+	signal		s_ctrl				: s_type;
+	signal		lda						: std_logic;
+	signal		ldb						: std_logic;
+	signal		ldxl					: std_logic;
+	signal		ldxh					: std_logic;
+	signal		ldyl					: std_logic;
+	signal		ldyh					: std_logic;
+	signal		ldul					: std_logic;
+	signal		lduh					: std_logic;
+	signal		ldeal					: std_logic;
+	signal		ldeah					: std_logic;
+	signal		lddp					: std_logic;
+	signal		ldpost				: std_logic;
+	signal		ldcc					: std_logic;
+
+	-- Mux controls
+	signal		dbus_ctrl			: dbus_type;
+	signal		abus_ctrl			: abus_type;
+	--signal		abusl_ctrl		: abus_type;
+	signal		left_ctrl			: left_type;
+	signal		right_ctrl		: right_type;
+
+begin
+	--abus		<= abush & abusl;
+
+	address <= abus when drive_vma = '1' else (others => 'X');
+	vma			<= drive_vma;
+
+	mcode : mce6809_mcode port map (
+		-- Inputs
+		clk						=> clk,
+		clken					=> clken,
+		ir						=> ir,
+		ir_page				=> ir_page,
+		mc_addr				=> mc_addr,
+		dbus					=> dbus,
+
+		-- Microcode controls
+		mc_jump				=> mc_jump,
+		mc_jump_addr	=> mc_jump_addr,
+	
+		-- Operational controls
+		alu_ctrl			=> alu_ctrl,
+		mem_read			=> rw,
+		drive_vma			=> drive_vma,
+	
+		-- Register controls
+		pc_ctrl				=> pc_ctrl,
+		ir_ctrl				=> ir_ctrl,
+		s_ctrl				=> s_ctrl,
+		lda						=> lda,
+		ldb						=> ldb,
+		ldxl					=> ldxl,
+		ldxh					=> ldxh,
+		ldyl					=> ldyl,
+		ldyh					=> ldyh,
+		ldul					=> ldul,
+		lduh					=> lduh,
+		ldeal					=> ldeal,
+		ldeah					=> ldeah,
+		lddp					=> lddp,
+		ldpost				=> ldpost,
+		ldcc					=> ldcc,
+	
+		-- Mux controls
+		dbus_ctrl			=> dbus_ctrl,
+		abus_ctrl		=> abus_ctrl,
+		--abusl_ctrl		=> abusl_ctrl,
+		left_ctrl			=> left_ctrl,
+		right_ctrl		=> right_ctrl
+	);
+
+	-- Microcode address
+	ma_reg: process(clk, clken, reset)
+	begin
+		if reset = '1' then
+			mc_addr <= mc_fetch0;
+		elsif rising_edge(clk) and clken = '1' then
+			if hold = '0' then
+				if mc_jump = '1' then
+					mc_addr <= mc_jump_addr;
+				else
+					-- Normal progression of microcode address
+					case mc_addr is
+					when mc_fetch0 => mc_addr <= mc_fetch1;
+					when mc_fetch1 => mc_addr <= mc_exec0;
+					when mc_exec0	 => mc_addr <= mc_exec1;
+					when mc_exec1	 => mc_addr <= mc_exec2;
+					when mc_exec2	 => mc_addr <= mc_exec3;
+					when mc_exec3	 => mc_addr <= mc_fetch0;
+					when others =>
+						mc_addr <= mc_fetch0;
+					end case;
+				end if;
+			end if;
+		end if;
+	end process;
+
+	-- Registers
+	regs: process(clk, clken, reset)
+	begin
+		if reset = '1' then
+			pc			<= (others => '0');
+			ir			<= (others => '0');
+			ir_page	<= ir_page0;
+			u				<= (others => '0');
+			s				<= (others => '0');
+			y				<= (others => '0');
+			x				<= (others => '0');
+			acca 		<= (others => '0');
+			accb		<= (others => '0');
+			dp			<= (others => '0');
+			cc			<= (others => '0');
+			ea			<= (others => '0');
+			post		<= (others => '0');
+		elsif rising_edge(clk) and clken = '1' then
+			if hold = '0' then
+				-- PC
+				case pc_ctrl is
+				when incr_pc		=> pc <= pc + 1;
+				when loadhi_pc	=> pc(15 downto 8) <= dbus;
+				when loadlo_pc	=> pc(7 downto 0) <= dbus;
+				when load_a_pc	=> pc <= abus;
+				when others			=> pc <= pc;
+				end case;
+
+				-- IR and IR_page
+				case ir_ctrl is
+				when load_1st_ir =>
+					ir <= dbus;
+					ir_page <= ir_page0;
+				when load_2nd_ir =>
+					if ir = X"10" or ir = X"11" then
+						if ir = X"10" then
+							ir_page <= ir_page1;
+						else
+							ir_page <= ir_page2;
+						end if;
+						ir <= dbus;
+					else
+						ir <= ir;
+						ir_page <= ir_page0;
+					end if;
+				when latch_ir =>
+					ir <= ir;
+					ir_page <= ir_page;
+				end case;
+
+				-- S
+				case s_ctrl is
+				when loadhi_s		=> s(15 downto 8) <= dbus;
+				when loadlo_s		=> s(7 downto 0) <= dbus;
+				when load_a_s		=> s <= abus;
+				when others			=> s <= s;
+				end case;
+
+				-- A
+				if lda = '1' then
+					--acca <= dbus;
+					acca <= alu_out;
+				end if;
+
+				-- B
+				if ldb = '1' then
+					--accb <= dbus;
+					accb <= alu_out;
+				end if;
+
+				-- X
+				if ldxh = '1' then
+					x(15 downto 8) <= dbus;
+				end if;
+				if ldxl = '1' then
+					x(7 downto 0) <= dbus;
+				end if;
+
+				-- Y
+				if ldyh = '1' then
+					y(15 downto 8) <= dbus;
+				end if;
+				if ldyl = '1' then
+					y(7 downto 0) <= dbus;
+				end if;
+
+				-- U
+				if lduh = '1' then
+					u(15 downto 8) <= dbus;
+				end if;
+				if ldul = '1' then
+					u(7 downto 0) <= dbus;
+				end if;
+
+				-- DP
+				if lddp = '1' then
+					dp <= dbus;
+				end if;
+
+				-- CC
+				if ldcc = '1' then
+					cc <= cc_out;
+				end if;
+
+				-- EA
+				if ldeah = '1' then
+					ea(15 downto 8) <= dbus;
+				end if;
+				if ldeal = '1' then
+					ea(7 downto 0) <= dbus;
+				end if;
+
+				-- POST
+				if ldpost = '1' then
+					post <= dbus;
+				end if;
+			end if;
+		end if;
+	end process;
+
+	-- D bus mux
+	dbus_pr: process(dbus_ctrl, data_i, alu_out)
+	begin
+		case dbus_ctrl is
+		when dbus_mem 	=>		dbus <= data_i;
+		when dbus_a			=>		dbus <= acca;
+		when dbus_b			=>		dbus <= accb;		
+		when dbus_pch		=>		dbus <= pc(15 downto 8);		
+		when dbus_pcl		=>		dbus <= pc(7 downto 0);		
+		when dbus_uh		=>		dbus <= u(15 downto 8);		
+		when dbus_ul		=>		dbus <= u(7 downto 0);		
+		when dbus_sh		=>		dbus <= s(15 downto 8);		
+		when dbus_sl		=>		dbus <= s(7 downto 0);		
+		when dbus_yh		=>		dbus <= y(15 downto 8);		
+		when dbus_yl		=>		dbus <= y(7 downto 0);		
+		when dbus_xh		=>		dbus <= x(15 downto 8);		
+		when dbus_xl		=>		dbus <= x(7 downto 0);		
+		when dbus_eah		=>		dbus <= ea(15 downto 8);		
+		when dbus_eal		=>		dbus <= ea(7 downto 0);		
+		when dbus_cc		=>		dbus <= cc;		
+		when dbus_dp		=>		dbus <= dp;
+		when dbus_post	=>		dbus <= post;
+		when dbus_alu 	=>		dbus <= alu_out;
+		end case;
+	end process;
+
+	-- A bus mux
+	abus_pr : process(abus_ctrl, pc, ea)
+	begin
+		case abus_ctrl is
+		when abus_ea =>
+			abus <= ea;
+		-- abus_d, abus_u, abus_s, abus_y, abus_x
+		when others =>	-- abus_pc
+			abus <= pc;
+		end case;
+	end process;
+
+	-- ALU left mux
+	aluleft_pr : process(left_ctrl, acca, accb, ea)
+	begin
+		case left_ctrl is
+		when left_a			=> left <= acca;
+		when left_b			=> left <= accb;
+		when left_eal		=> left <= ea(7 downto 0);
+		when left_eah		=> left <= ea(15 downto 8);
+		end case;
+	end process;
+
+	-- ALU right
+	-- ALU left mux
+	aluright_pr : process(left_ctrl, dbus)
+	begin
+		case right_ctrl is
+		when right_dbus	=> right <= dbus;
+		when right_c0		=> right <= X"00";
+		when right_c1		=> right <= X"01";
+		when right_c2		=> right <= X"02";
+		end case;
+	end process;
+
+	-- ALU
+	alu_pr: process(alu_ctrl, cc, left, right)
+		variable C_in			: std_logic;
+		variable C_out		: std_logic;
+	begin
+		C_in <= '0';
+		C_out <= '0';
+		case alu_ctrl is
+		when alu_add	=>		C_out & alu_out <= '0' & left + '0' & right + C_in;
+		when alu_sub	=>		C_out & alu_out <= '0' & left - '0' & right - C_in;
+		when alu_and	=>		alu_out <= left and right;
+		when alu_or		=>		alu_out <= left or right;
+		when alu_eor	=>		alu_out <= left xor right;
+		when alu_rol	=>		C_out & alu_out(7 downto 0) <= left(7 downto 0) & C_in;
+		when alu_ror	=>		alu_out(7 downto 0) & C_out <= C_in & left(7 downto 0);
+		when others =>		alu_out <= X"00"; --(others => 'X');
+		end case;
+
+		cc_out(Flag_Z) <= '1' when alu_out = X"00" else '0';
+		cc_out(Flag_C) <= C_out;
+		cc_out(Flag_N) <= alu_out(alu_out'LEFT);
+		cc_out(Flag_V) <= '0';	-- LATER
+		cc_out(Flag_H) 
+	end process;
+
+end architecture;
+
+

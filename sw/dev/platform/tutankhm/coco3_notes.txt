@@ -1,0 +1,57 @@
+Getting the roms into coco memory
+=================================
+
+Requires the following steps
+1. getting raw bin files onto Coco DSK images
+2. loading the bin files into high (banked) memory
+3. saving the images as hi-loadable .BIN files
+
+Getting the raw bin files onto Coco DSK images
+----------------------------------------------
+
+Easiest way is to use Portal-9.
+1. Copy rom image file to Portal-9 "tutankham" project directory
+2. Open files as project "bin" files (this adds them to the project)
+3. Select type "", output filename "same"
+4. Build project - this adds them to the DSK file.
+5. By closing the file tabs, you can remove them from the project
+   as they will no longer be required (replaced by hi-load versions)
+
+Loading the bin files into high (banked) memory
+-----------------------------------------------
+
+10 Q=106496 <- pick an address to copy file data into
+20 OPEN"D",#1,"ROMA000.BIN",1
+30 FORG=1TOLOF(1):GET#1,G:LPOKEQ,PEEK(2441):Q=Q+1:NEXT
+40 CLOSE
+
+Use "LREADME.BAS" (as above) on virtual disk image.
+Note: that by default, MMU is using (8KB) pages 48-63 for task 0,1.
+Examples:
+ROM $A000-$BFFF loaded to $1A000-$1BFFF (bank 13)
+So Q=106,496
+ROM $C000-$FFFF loaded to $1C000-$1FFFF (banks 14,15)
+So Q=114,688
+ROM $9000-$9FFF loaded to $19000-$19FFF (bank 12)
+So Q=102,400
+
+Saving the images as hi-loadable .BIN files
+-------------------------------------------
+
+Use "LSAVEM.BAS" (as supplied by sockmaster via email) on virtual disk image.
+Choose 1) LSAVEM Utility
+Choose start,end as below
+Press <ENTER> for EXEC address.
+Examples:
+ROM $1A000-$1BFFF
+start,end = 106496,114687
+ROM $1C000-$1CFFF
+start,end = 114688,131071
+ROM $19000-$19FFF
+start,end = 102400,106495
+
+eg. MMU register for task 1, $6000-$7FFF at $FFA3 (65443)
+so to check...
+LOADM"ROM1A000.BIN" (this loads to $1A000)
+poke 65443,13 (this maps bank 13 ($1A000) to $6000)
+examine memory $6000 in MESS debug window
