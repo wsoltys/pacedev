@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE ON
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 7.2
 
 # Pin & Location Assignments
 # ==========================
@@ -741,17 +741,17 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/fpgaarcade/source/T65_Pack.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/fpgaarcade/source/T65_MCode.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/fpgaarcade/source/T65_ALU.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/fpgaarcade/source/T65.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/unzip/source/T65_Pack.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/unzip/source/T65_MCode.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/unzip/source/T65_ALU.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/unzip/source/T65.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/pkg_asteroids_xilinx_prims.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/fpgaarcade/source/pkg_asteroids.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/unzip/source/pkg_asteroids.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/wrappers.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/fpgaarcade/source/asteroids_ram.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/fpgaarcade/source/asteroids_pokey.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/fpgaarcade/source/asteroids_vg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/fpgaarcade/source/asteroids.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/unzip/source/asteroids_ram.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/unzip/source/asteroids_pokey.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/unzip/source/asteroids_vg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/unzip/source/asteroids.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/videocontroller_800x600_60Hz.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/bitmapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/inputmapper.vhd

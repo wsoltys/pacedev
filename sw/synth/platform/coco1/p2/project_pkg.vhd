@@ -30,6 +30,10 @@ package project_pkg is
 	constant PACE_ENABLE_ADV724					: std_logic := '1';
 	constant PACE_ADV724_STD						: std_logic := ADV724_STD_PAL;
 
+  -- P2-specific constants
+  constant P2_JAMMA_IS_MAPLE          : boolean := false;
+  constant P2_JAMMA_IS_NGC            : boolean := true;
+
   -- Coco1-specific constants
 
 	constant USE_VIDEO_VBLANK_INTERRUPT : boolean := true;

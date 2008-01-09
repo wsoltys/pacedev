@@ -17,6 +17,10 @@ package project_pkg is
 	constant SCRAMBLE_VIDEO_CVBS				: std_logic := '0';
 	constant SCRAMBLE_VIDEO_VGA					: std_logic := not SCRAMBLE_VIDEO_CVBS;
 				
+  -- P2-specific constants
+  constant P2_JAMMA_IS_MAPLE          : boolean := false;
+  constant P2_JAMMA_IS_NGC            : boolean := true;
+
 	--  
 	-- PACE constants which *MUST* be defined
 	--
