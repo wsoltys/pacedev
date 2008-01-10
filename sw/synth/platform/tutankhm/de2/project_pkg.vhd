@@ -12,18 +12,21 @@ package project_pkg is
 	--
 	
   -- Reference clock is 50MHz
-	constant PACE_HAS_PLL								: boolean := true;
-  constant PACE_CLK0_DIVIDE_BY        : natural := 5;
-  constant PACE_CLK0_MULTIPLY_BY      : natural := 3;   -- 50*3/5 = 30MHz
-  constant PACE_CLK1_DIVIDE_BY        : natural := 5;
-  constant PACE_CLK1_MULTIPLY_BY      : natural := 4;  	-- 50*4/5 = 40MHz
+	constant PACE_HAS_PLL								      : boolean := true;
+  constant PACE_CLK0_DIVIDE_BY              : natural := 5;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 3;   -- 50*3/5 = 30MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 5;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 4;  	-- 50*4/5 = 40MHz
 
-	constant PACE_VIDEO_H_SCALE         : integer := 2;
-	constant PACE_VIDEO_V_SCALE         : integer := 2;
+	constant PACE_VIDEO_H_SCALE               : integer := 2;
+	constant PACE_VIDEO_V_SCALE               : integer := 2;
 
 	-- DE2 constants which *MUST* be defined
 	
-	constant DE2_LCD_LINE2							: string := " TUTANKHAM-VGA  ";
+	constant DE2_JAMMA_IS_MAPLE	              : boolean := false;
+	constant DE2_JAMMA_IS_NGC                 : boolean := false;
+	
+	constant DE2_LCD_LINE2							      : string := " TUTANKHAM-VGA  ";
 		
 	-- Tutankham-specific constants
 

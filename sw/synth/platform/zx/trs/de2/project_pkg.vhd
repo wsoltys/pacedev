@@ -25,7 +25,11 @@ package project_pkg is
   constant PACE_CLK1_MULTIPLY_BY      : natural := 3;  			-- 50*3/7 = 21.428MHz (used for scan doubler)
 	constant PACE_ADV724_STD						: std_logic := ADV724_STD_NTSC;
 
-	-- DE2-TRS-80-specific constants
+	-- DE2 constants which *MUST* be defined
+	
+	constant DE2_JAMMA_IS_MAPLE	              : boolean := false;
+	constant DE2_JAMMA_IS_NGC                 : boolean := true;
+
 	--constant DE2_LCD_LINE2							: string := " TRS-80 LEVEL 1 ";		-- 16 chars exactly
 	constant DE2_LCD_LINE2							: string := " TRS-80 LEVEL 2 ";		-- 16 chars exactly
 	--constant DE2_LCD_LINE2							: string := "    SYSTEM 80   ";		-- 16 chars exactly

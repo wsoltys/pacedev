@@ -25,7 +25,7 @@
 
 # Project-Wide Assignments
 # ========================
-set_global_assignment -name LAST_QUARTUS_VERSION 7.0
+set_global_assignment -name LAST_QUARTUS_VERSION 7.2
 
 # Pin & Location Assignments
 # ==========================
@@ -579,3 +579,5 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwm_chaser.
 set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwmout.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/de2/target_top.vhd
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"

@@ -674,7 +674,7 @@ begin
 			I2C_SDAT					=> I2C_SDAT
 		);
 
-	assert (not (DE2_JAMMA_IS_MAPLE and DE2_JAMMA_IS_GAMECUBE))
+	assert (not (DE2_JAMMA_IS_MAPLE and DE2_JAMMA_IS_NGC))
 		report "Cannot choose both MAPLE and GAMECUBE interfaces"
 		severity error;
 	
@@ -712,7 +712,7 @@ begin
 
 	end generate GEN_MAPLE;
 
-	GEN_GAMECUBE : if DE2_JAMMA_IS_GAMECUBE generate
+	GEN_GAMECUBE : if DE2_JAMMA_IS_NGC generate
 	
 		GC_JOY: gamecube_joy
 			generic map( MHZ => 50 )

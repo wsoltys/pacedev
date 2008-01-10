@@ -11,17 +11,25 @@ package project_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 	
-  constant PACE_CLK0_DIVIDE_BY        : natural := 5;
-  constant PACE_CLK0_MULTIPLY_BY      : natural := 2;   -- 50*2/5 = 20MHz
-  constant PACE_CLK1_DIVIDE_BY        : natural := 5;
-  constant PACE_CLK1_MULTIPLY_BY      : natural := 4;   -- 50*9/25 = 18MHz
+	constant PACE_HAS_PLL								      : boolean := true;
+  constant PACE_CLK0_DIVIDE_BY              : natural := 5;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 2;   -- 50*2/5 = 20MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 5;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 4;   -- 50*9/25 = 18MHz
 
-	constant PACE_VIDEO_H_SCALE         : integer := 1;
-	constant PACE_VIDEO_V_SCALE         : integer := 1;
+	constant PACE_VIDEO_H_SCALE               : integer := 1;
+	constant PACE_VIDEO_V_SCALE               : integer := 1;
 
+	-- DE2 constants which *MUST* be defined
+	
+	constant DE2_JAMMA_IS_MAPLE	              : boolean := false;
+	constant DE2_JAMMA_IS_NGC                 : boolean := false;
+	
+	constant DE2_LCD_LINE2							      : string := "  DEFENDER-LCD  ";
+		
 	-- Defender constants
 	
-	constant DEFENDER_ROMS_IN_SRAM			: boolean := true;	
-	constant DEFENDER_VRAM_WIDTHAD			: integer := 15;	-- 32kB
+	constant DEFENDER_ROMS_IN_SRAM			      : boolean := true;	
+	constant DEFENDER_VRAM_WIDTHAD			      : integer := 15;	-- 32kB
 	
 end;

@@ -11,19 +11,22 @@ package project_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 
-	constant PACE_HAS_PLL								: boolean := false;	
-  constant PACE_CLK0_DIVIDE_BY        : natural := 1;
-  constant PACE_CLK0_MULTIPLY_BY      : natural := 1;
-  constant PACE_CLK1_DIVIDE_BY        : natural := 1;
-  constant PACE_CLK1_MULTIPLY_BY      : natural := 1;
+	constant PACE_HAS_PLL								      : boolean := false;	
+  constant PACE_CLK0_DIVIDE_BY              : natural := 1;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 1;
+  constant PACE_CLK1_DIVIDE_BY              : natural := 1;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 1;
 
 	-- DE2 constants which *MUST* be defined
 	
-	constant DE2_LCD_LINE2							: string := "BALLY  ASTROCADE";
+	constant DE2_JAMMA_IS_MAPLE	              : boolean := false;
+	constant DE2_JAMMA_IS_NGC                 : boolean := true;
+	
+	constant DE2_LCD_LINE2							      : string := "BALLY  ASTROCADE";
 		
 	-- Astrocade-specific constants
-	constant ASTROCADE_HAS_CART							: boolean := true;
-	constant ASTROCADE_CART_NAME						: string := "muncher";
-	--constant ASTROCADE_CART_NAME						: string := "treasure";
+	constant ASTROCADE_HAS_CART							  : boolean := true;
+	constant ASTROCADE_CART_NAME						  : string := "muncher";
+	--constant ASTROCADE_CART_NAME						  : string := "treasure";
 			
 end;

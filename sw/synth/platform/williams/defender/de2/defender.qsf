@@ -25,7 +25,7 @@
 
 # Project-Wide Assignments
 # ========================
-set_global_assignment -name LAST_QUARTUS_VERSION "6.0 SP1.18"
+set_global_assignment -name LAST_QUARTUS_VERSION 7.2
 
 # Pin & Location Assignments
 # ==========================
@@ -494,6 +494,8 @@ set_instance_assignment -name IO_STANDARD LVTTL -to FL_ADDR[21]
 set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS INPUT TRI-STATED"
 
 set_global_assignment -name SEED 1
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/williams/platform_pkg.vhd
@@ -520,6 +522,8 @@ set_global_assignment -name VHDL_FILE ../../../../../src/platform/williams/tilem
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/williams/bitmapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Graphics.VHD
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/io/maple/maple_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/io/gamecube/gamecube_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/toys/pwm_chaser.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/toys/pwmout.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/toys/led_chaser.vhd

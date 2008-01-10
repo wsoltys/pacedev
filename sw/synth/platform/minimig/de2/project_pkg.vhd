@@ -11,8 +11,13 @@ package project_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 	
-	constant PACE_ENABLE_ADV724					: std_logic := '0';
-	constant PACE_ADV724_STD						: std_logic := ADV724_STD_PAL;
+	constant PACE_ENABLE_ADV724					      : std_logic := '0';
+	constant PACE_ADV724_STD						      : std_logic := ADV724_STD_PAL;
+
+	-- DE2 constants which *MUST* be defined
+	
+	constant DE2_JAMMA_IS_MAPLE	              : boolean := false;
+	constant DE2_JAMMA_IS_NGC                 : boolean := false;
 
 	-- Minimig-specific constants
 
