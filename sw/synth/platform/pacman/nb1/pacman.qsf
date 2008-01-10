@@ -29,7 +29,7 @@ set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "19:21:54  AUGUST 25, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "6.0 SP1.18"
+set_global_assignment -name LAST_QUARTUS_VERSION 7.2
 
 # Pin & Location Assignments
 # ==========================
@@ -264,11 +264,18 @@ set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
 set_global_assignment -name FITTER_AGGRESSIVE_ROUTABILITY_OPTIMIZATION ALWAYS
 set_global_assignment -name OPTIMIZE_TIMING OFF
 set_global_assignment -name PLACEMENT_EFFORT_MULTIPLIER 2
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/nanoboard/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cyclone/pll.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cyclone/sprom.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cyclone/dprom_2r.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cyclone/dpram_1r1w.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cyclone/dpram.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/clk_div.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
@@ -279,24 +286,21 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_R
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80se.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/frogger/uPse.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/mapctl.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cyclone/dpram_1r1w.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/altera_mem.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/videocontroller_800x600_60Hz.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/SptReg.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/mapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/flipRow.VHDL
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/sptCtlVHDL.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/spritectl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/SptReg.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/pace/SptArray.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Graphics.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/InputMapper.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/Pacman_Interrupts.VHD
-set_global_assignment -name VHDL_FILE ../../../device/cyclone/dprom_2r.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/sound.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/pacsnd.Vhd
-set_global_assignment -name VHDL_FILE ../../../device/cyclone/sprom.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cyclone/dpram.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/Pacman_vramMapper.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/Game.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/pacsnd.Vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
 set_global_assignment -name VQM_FILE ../../../../src/target/nanoboard/ep1c12/MAX1104_DAC.VQM
 set_global_assignment -name VHDL_FILE ../../../../src/target/nanoboard/target_top.vhd

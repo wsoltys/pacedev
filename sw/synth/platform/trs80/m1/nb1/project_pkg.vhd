@@ -4,6 +4,7 @@ use ieee.std_logic_unsigned.all;
 
 library work;
 use work.pace_pkg.all;
+use work.target_pkg.all;
 
 package project_pkg is
 
@@ -19,6 +20,10 @@ package project_pkg is
 
 	constant PACE_VIDEO_H_SCALE       	: integer := 1;
 	constant PACE_VIDEO_V_SCALE       	: integer := 2;
+
+  -- NB1-specific constants that must be defined
+  constant NB1_PLL_INCLK              : NANOBOARD_PLL_INCLK_Type := NANOBOARD_PLL_INCLK_REF;
+  constant NB1_INCLK0_INPUT_FREQUENCY : natural := 50000;   -- 20MHz
 
 	constant USE_VIDEO_VBLANK_INTERRUPT : boolean := false;
 	

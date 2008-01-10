@@ -29,7 +29,7 @@ set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name INCREMENTAL_COMPILATION FULL_INCREMENTAL_COMPILATION
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "19:21:54  AUGUST 25, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "6.0 SP1.18"
+set_global_assignment -name LAST_QUARTUS_VERSION 7.2
 
 # Pin & Location Assignments
 # ==========================
@@ -229,3 +229,6 @@ set_global_assignment -name VHDL_FILE ../../../../../src/pace/Graphics.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
 set_global_assignment -name VQM_FILE ../../../../../src/target/nanoboard/ep1c12/MAX1104_DAC.VQM
 set_global_assignment -name VHDL_FILE ../../../../../src/target/nanoboard/target_top.vhd
+set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"

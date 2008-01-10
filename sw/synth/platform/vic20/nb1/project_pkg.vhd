@@ -27,7 +27,11 @@ package project_pkg is
 	constant PACE_ENABLE_ADV724					: std_logic := '0';
 	constant PACE_ADV724_STD						: std_logic := ADV724_STD_PAL;
 
-	-- C64-specific constants
+  -- NB1-specific constants that must be defined
+  constant NB1_PLL_INCLK              : NANOBOARD_PLL_INCLK_Type := NANOBOARD_PLL_INCLK_REF;
+  constant NB1_INCLK0_INPUT_FREQUENCY : natural := 50000;   -- 20MHz
+
+	-- VIC20-specific constants
 	--constant VIDEOPAC_CART_NAME					: string := "kcmunch.hex";
 					
 end;

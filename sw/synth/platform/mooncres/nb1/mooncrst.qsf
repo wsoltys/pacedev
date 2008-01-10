@@ -257,8 +257,10 @@ set_global_assignment -name EDA_OUTPUT_DATA_FORMAT NONE -section_id eda_simulati
 # ---------------------
 
 
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../galaxian/nanoboard/project_pkg.vhd
+set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/mooncres/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/nanoboard/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cyclone/pll.vhd

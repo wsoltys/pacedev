@@ -18,19 +18,21 @@ package project_pkg is
   constant PACE_CLK1_DIVIDE_BY        : natural := 1;
   constant PACE_CLK1_MULTIPLY_BY      : natural := 2;   -- 20*2/1 = 40MHz
 
-	constant PACE_VIDEO_H_SCALE       	: integer := 2;
-	constant PACE_VIDEO_V_SCALE       	: integer := 2;
+	constant PACE_VIDEO_H_SCALE         : integer := 2;
+	constant PACE_VIDEO_V_SCALE         : integer := 2;
 
   -- NB1-specific constants that must be defined
   constant NB1_PLL_INCLK              : NANOBOARD_PLL_INCLK_Type := NANOBOARD_PLL_INCLK_REF;
   constant NB1_INCLK0_INPUT_FREQUENCY : natural := 50000;   -- 20MHz
 
-	-- Jumpbug-specific constants
+	-- Mooncres-specific constants
 			
-	constant JUMPBUG_CPU_CLK_ENA_DIVIDE_BY	: natural := 10;
-	constant JUMPBUG_1MHz_CLK0_COUNTS				: natural := 30;
-	constant GALAXIAN_1MHz_CLK0_COUNTS      : natural := JUMPBUG_1MHz_CLK0_COUNTS;
+	constant MOONCRES_CPU_CLK_ENA_DIVIDE_BY	  : natural := 10;
+	constant MOONCRES_1MHz_CLK0_COUNTS				: natural := 30;
+	alias GALAXIAN_1MHz_CLK0_COUNTS				    : natural is MOONCRES_1MHz_CLK0_COUNTS;
 	
-	constant USE_VIDEO_VBLANK_INTERRUPT : boolean := true;
+	constant MOONCRES_USE_INTERNAL_WRAM			  : boolean := true;
+	
+	constant USE_VIDEO_VBLANK_INTERRUPT       : boolean := true;
 	
 end;
