@@ -22,8 +22,11 @@ package project_pkg is
 	constant PACE_VIDEO_V_SCALE       	: integer := 1;
 
 	-- Space Invaders-specific constants
-	
-	constant INVADERS_USE_INTERNAL_WRAM	: boolean := true;
-	constant USE_VIDEO_VBLANK_INTERRUPT : boolean := false;
+			
+	constant INVADERS_CPU_CLK_ENA_DIVIDE_BY		: natural := 10;
+	constant INVADERS_1MHz_CLK0_COUNTS				: natural := 20;
+
+	constant INVADERS_USE_INTERNAL_WRAM				: boolean := true;
+	constant USE_VIDEO_VBLANK_INTERRUPT 			: boolean := false;
 	
 end;

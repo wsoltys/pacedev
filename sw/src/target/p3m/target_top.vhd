@@ -299,7 +299,8 @@ begin
 
 	    -- sound
 	    snd_clk          	=> open,
-	    snd_data         	=> open,
+	    snd_data_l       	=> open,
+			snd_data_r				=> open,
 
 	    -- SPI (flash)
 	    spi_clk          	=> open,
