@@ -746,13 +746,13 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80se
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/spram.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/spectrum/wrappers.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/zxgate/zx/spectrum/spectrum48_glue.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/zxgate/zx/spectrum/spectrum_vid.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/zxgate/zx/spectrum/spectrum_ps2.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/zxgate/zx/spectrum/cvm.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/zxgate/zx/spectrum/ddsrom.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/zxgate/zx/spectrum/dds.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/zxgate/zx/spectrum/qam.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/unzip/zx/spectrum/spectrum48_glue.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/unzip/zx/spectrum/spectrum_vid.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/unzip/zx/spectrum/spectrum_ps2.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/unzip/zx/spectrum/cvm.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/unzip/zx/spectrum/ddsrom.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/unzip/zx/spectrum/dds.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/unzip/zx/spectrum/qam.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/spectrum/spectrum48.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/spectrum/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/io/gamecube/gamecube_pkg.vhd
@@ -764,3 +764,5 @@ set_global_assignment -name VHDL_FILE ../../../../../src/target/p2/target_top.vh
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
+set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top

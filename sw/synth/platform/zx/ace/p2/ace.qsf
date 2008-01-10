@@ -748,8 +748,8 @@ set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/spram.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/ace/wrappers.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/ace/ace_vid.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/zxgate/ace/rtl/ace_glue.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/zxgate/ace/rtl/ace_ps2.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/unzip/ace/rtl/ace_glue.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/unzip/ace/rtl/ace_ps2.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/ace/ace.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/ace/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/io/gamecube/gamecube_pkg.vhd

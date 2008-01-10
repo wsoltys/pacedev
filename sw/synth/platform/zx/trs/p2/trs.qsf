@@ -753,7 +753,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/trs/trs_vid
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/trs/dblscan.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/trs/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/trs/trs80xm.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/zxgate/trs/rtl/trs_ps2.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/unzip/trs/rtl/trs_ps2.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/trs/trs80.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/io/gamecube/gamecube_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/io/maple/conversion.vhd

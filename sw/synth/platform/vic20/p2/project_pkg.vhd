@@ -11,18 +11,22 @@ package project_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 	
-	constant PACE_HAS_PLL								: boolean := true;
+	constant PACE_HAS_PLL								      : boolean := true;
 	
   -- Reference clock is 24MHz
-  constant PACE_CLK0_DIVIDE_BY        : natural := 3;
-  constant PACE_CLK0_MULTIPLY_BY      : natural := 5;  			-- 24*5/3 = 40Mhz
-  constant PACE_CLK1_DIVIDE_BY        : natural := 3;
-  constant PACE_CLK1_MULTIPLY_BY      : natural := 5;  			-- 24*5/3 = 40MHz
+  constant PACE_CLK0_DIVIDE_BY              : natural := 3;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 5;  			-- 24*5/3 = 40Mhz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 3;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 5;  			-- 24*5/3 = 40MHz
 
-	constant PACE_SRAM_DATA_WIDTH				: natural := 8;
+	constant PACE_SRAM_DATA_WIDTH				      : natural := 8;
 	
-	constant PACE_ENABLE_ADV724					: std_logic := '1';
-	constant PACE_ADV724_STD						: std_logic := ADV724_STD_PAL;
+	constant PACE_ENABLE_ADV724					      : std_logic := '1';
+	constant PACE_ADV724_STD						      : std_logic := ADV724_STD_PAL;
+
+  -- P2-specific constants
+  constant P2_JAMMA_IS_MAPLE                : boolean := false;
+  constant P2_JAMMA_IS_NGC                  : boolean := true;
 
 	-- VIC20-specific constants
 					

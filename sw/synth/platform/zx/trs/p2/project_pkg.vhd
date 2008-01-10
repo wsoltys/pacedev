@@ -30,6 +30,10 @@ package project_pkg is
 	--constant PACE_ADV724_STD						: std_logic := ADV724_STD_PAL;
 	constant PACE_ADV724_STD						: std_logic := ADV724_STD_NTSC;
 
+  -- P2-specific constants
+  constant P2_JAMMA_IS_MAPLE          : boolean := false;
+  constant P2_JAMMA_IS_NGC            : boolean := true;
+
 	-- TRS-80-specific constants
 	
 	constant TRS_LEVEL1_INTERNAL				: boolean := false;

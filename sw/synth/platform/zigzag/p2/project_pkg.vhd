@@ -24,13 +24,17 @@ package project_pkg is
 	constant PACE_ENABLE_ADV724							: std_logic := '0';
 	constant PACE_ADV724_STD								: std_logic := ADV724_STD_PAL;
 
-	-- Jumpbug-specific constants
+  -- P2-specific constants
+  constant P2_JAMMA_IS_MAPLE              : boolean := false;
+  constant P2_JAMMA_IS_NGC                : boolean := false;
+
+	-- Zigzag-specific constants
 			
-	constant JUMPBUG_CPU_CLK_ENA_DIVIDE_BY	: natural := 10;
-	constant JUMPBUG_1MHz_CLK0_COUNTS				: natural := 30;
-	constant GALAXIAN_1MHz_CLK0_COUNTS      : natural := JUMPBUG_1MHz_CLK0_COUNTS;
+	constant ZIGZAG_CPU_CLK_ENA_DIVIDE_BY	  : natural := 10;
+	constant ZIGZAG_1MHz_CLK0_COUNTS				: natural := 30;
+	constant GALAXIAN_1MHz_CLK0_COUNTS      : natural := ZIGZAG_1MHz_CLK0_COUNTS;
 	
-	constant PACMAN_USE_INTERNAL_WRAM				: boolean := true;
+	constant ZIGZAG_USE_INTERNAL_WRAM				: boolean := true;
 	
 	constant USE_VIDEO_VBLANK_INTERRUPT 		: boolean := true;
 	
