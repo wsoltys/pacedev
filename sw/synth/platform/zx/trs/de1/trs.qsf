@@ -25,7 +25,7 @@
 
 # project-wide assignments
 # ========================
-set_global_assignment -name LAST_QUARTUS_VERSION 7.0
+set_global_assignment -name LAST_QUARTUS_VERSION 7.2
 
 # pin & location assignments
 # ==========================
@@ -492,6 +492,11 @@ set_location_assignment PIN_C9 -to vga_r[1]
 set_location_assignment PIN_A7 -to vga_r[2]
 set_location_assignment PIN_B7 -to vga_r[3]
 set_location_assignment PIN_B11 -to vga_vs
+set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/de1/target_pkg.vhd
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/I2C_AV_Config.v
@@ -516,7 +521,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/trs/trs_vid
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/trs/dblscan.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/trs/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/trs/trs80xm.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/zxgate/trs/rtl/trs_ps2.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/unzip/trs/rtl/trs_ps2.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/zx/trs/trs80.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/toys/pwm_chaser.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/toys/pwmout.vhd
@@ -536,5 +541,3 @@ set_global_assignment -name VHDL_FILE ../../../../../src/target/de2/audio_if.vhd
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/i2c_controller.v
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/seg7_lut.v
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/i2s_controller.v
-set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
-set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top

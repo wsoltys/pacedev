@@ -169,9 +169,11 @@ architecture SYN of target_top is
 	signal sram_i			: from_SRAM_t;
 	signal sram_o			: to_SRAM_t;	
 
-    signal snd_data   		: std_logic_vector(15 downto 0);
-    alias aud_clk    		: std_logic is clk(2);
-    signal aud_data   		: std_logic_vector(15 downto 0);
+  signal snd_data_l  	: std_logic_vector(15 downto 0);
+  signal snd_data_r  	: std_logic_vector(15 downto 0);
+  alias aud_clk    		: std_logic is clk(2);
+  signal aud_data_l  	: std_logic_vector(15 downto 0);
+  signal aud_data_r  	: std_logic_vector(15 downto 0);
 
 	-- maple/dreamcast controller interface
 	signal maple_sense		: std_logic;
@@ -297,8 +299,8 @@ begin
   		-- Inputs
       clk           => aud_clk,
       reset         => reset,
-      datal         => aud_data,
-      datar         => aud_data,
+      datal         => aud_data_l,
+      datar         => aud_data_r,
   
       -- Outputs
       aud_xck       => aud_xck,
@@ -311,20 +313,39 @@ begin
 
   -- Unmeta sound data
   process(aud_clk, reset)
-    variable data0 : std_logic_vector(snd_data'range);
-    variable data1 : std_logic_vector(snd_data'range);
-    variable data2 : std_logic_vector(snd_data'range);
+    variable data0_l : std_logic_vector(snd_data_l'range);
+    variable data0_r : std_logic_vector(snd_data_r'range);
+    variable data1_l : std_logic_vector(snd_data_l'range);
+    variable data1_r : std_logic_vector(snd_data_r'range);
+    variable data2_l : std_logic_vector(snd_data_l'range);
+    variable data2_r : std_logic_vector(snd_data_r'range);
   begin
-    aud_data <= data2;
     if reset = '1' then
-      data0 := (others => '0');
-      data1 := (others => '0');
-      data2 := (others => '0');
+      data0_l := (others => '0');
+      data0_r := (others => '0');
+      data1_l := (others => '0');
+      data1_r := (others => '0');
+      data2_l := (others => '0');
+      data2_r := (others => '0');
     elsif rising_edge(aud_clk) then
-      data2 := data1;
-      data1 := data0;
-      data0 := snd_data;
+      data2_l := data1_l;
+      data2_r := data1_r;
+      data1_l := data0_l;
+      data1_r := data0_r;
+      data0_l := snd_data_l;
+      data0_r := snd_data_r;
     end if;
+		-- assign outputs
+		if sw_s(9) = '1' then
+    	aud_data_l <= data2_l;
+		else
+			aud_data_l <= (others => '0');
+		end if;
+		if sw_s(8) = '1' then
+			aud_data_r <= data2_r;
+		else
+			aud_data_r <= (others => '0');
+		end if;
   end process;
 
   -- *MUST* be high to use 27MHz clock as input
@@ -457,7 +478,8 @@ begin
   
       -- sound
       snd_clk          	=> open,
-      snd_data         	=> snd_data(15 downto 8),
+      snd_data_l       	=> snd_data_l,
+      snd_data_r       	=> snd_data_r,
   
       -- SPI (flash)
       spi_clk          	=> open,
@@ -474,8 +496,6 @@ begin
       leds             	=> yoffs --ledg(7 downto 0)
     );
 
-	snd_data(7 downto 0) <= (others => '0');
-	
 	av_init : I2C_AV_Config
 		port map
 		(
@@ -488,11 +508,11 @@ begin
 			I2C_SDAT					=> I2C_SDAT
 		);
 
-	assert (not (DE2_JAMMA_IS_MAPLE and DE2_JAMMA_IS_GAMECUBE))
+	assert (not (DE1_JAMMA_IS_MAPLE and DE1_JAMMA_IS_NGC))
 		report "Cannot choose both MAPLE and GAMECUBE interfaces"
 		severity error;
 	
-	GEN_MAPLE : if DE2_JAMMA_IS_MAPLE generate
+	GEN_MAPLE : if DE1_JAMMA_IS_MAPLE generate
 	
 		-- Dreamcast MapleBus joystick interface
 		MAPLE_JOY : entity work.maple_joy
@@ -526,7 +546,7 @@ begin
 
 	end generate GEN_MAPLE;
 
-	GEN_GAMECUBE : if DE2_JAMMA_IS_GAMECUBE generate
+	GEN_GAMECUBE : if DE1_JAMMA_IS_NGC generate
 	
 		GC_JOY: gamecube_joy
 			generic map( MHZ => 50 )
