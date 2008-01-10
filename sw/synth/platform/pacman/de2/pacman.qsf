@@ -25,7 +25,7 @@
 
 # Project-Wide Assignments
 # ========================
-set_global_assignment -name LAST_QUARTUS_VERSION 7.0
+set_global_assignment -name LAST_QUARTUS_VERSION 7.2
 
 # Pin & Location Assignments
 # ==========================
@@ -496,11 +496,21 @@ set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS INPUT TRI-
 set_global_assignment -name SEED 1
 
 set_parameter -name CYCLONEII_SAFE_WRITE VERIFIED_SAFE
+set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/de2/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram_1r1w.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/altera_mem.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/clk_div.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
@@ -516,7 +526,6 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80se
 set_global_assignment -name VHDL_FILE ../../../../src/platform/frogger/uPse.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/mapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/LCMcontroller_320x240_60Hz.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram_1r1w.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/SptReg.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/pace/flipRow.VHDL
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/spritectl.vhd
@@ -527,8 +536,6 @@ set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/Pacman_Interrupts.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/pacsnd.Vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/sound.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/Pacman_vramMapper.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/Game.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd

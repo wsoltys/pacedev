@@ -25,7 +25,7 @@
 
 # Project-Wide Assignments
 # ========================
-set_global_assignment -name LAST_QUARTUS_VERSION "6.0 SP1.18"
+set_global_assignment -name LAST_QUARTUS_VERSION 7.2
 
 # Pin & Location Assignments
 # ==========================
@@ -494,6 +494,8 @@ set_instance_assignment -name IO_STANDARD LVTTL -to FL_ADDR[21]
 set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS INPUT TRI-STATED"
 
 set_global_assignment -name SEED 1
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/platform_pkg.vhd
@@ -501,8 +503,10 @@ set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/lre
 set_global_assignment -name VHDL_FILE ../../../../../src/target/de2/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/sprom.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/spram.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/dpram.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/dpram_1r1w.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/altera_mem.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/clk_div.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/de2/audio_if.vhd
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/I2C_Controller.v
@@ -518,7 +522,6 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd_pk
 set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/InputMapper.VHDL
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Inputs.VHD
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/Midway_Interrupts.VHD
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/Game.VHD
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/invaders/invaders_audio.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/Sound.vhd
@@ -526,6 +529,8 @@ set_global_assignment -name VHDL_FILE ../../../../../src/pace/LCMcontroller_320x
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/bitmapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Graphics.VHD
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/io/maple/maple_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/io/gamecube/gamecube_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/toys/pwm_chaser.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/toys/pwmout.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/toys/led_chaser.vhd

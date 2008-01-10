@@ -15,12 +15,6 @@ package target_pkg is
 	constant PACE_FPGA_VENDOR		: PACEFpgaVendor_t := PACE_FPGA_VENDOR_ALTERA;
 	constant PACE_FPGA_FAMILY		: PACEFpgaFamily_t := PACE_FPGA_FAMILY_CYCLONE2;
 
-	constant DE2_JAMMA_IS_MAPLE	: boolean := false;
-	alias DE2_JAMMA_IS_DREAMCAST : boolean is DE2_JAMMA_IS_MAPLE;
-
-	constant DE2_JAMMA_IS_NGC : boolean := false;
-	alias DE2_JAMMA_IS_GAMECUBE : boolean is DE2_JAMMA_IS_NGC;
-
 	--
 	-- DE2-specific constants
 	--

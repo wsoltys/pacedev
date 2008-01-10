@@ -17,8 +17,12 @@ package project_pkg is
   constant PACE_CLK1_DIVIDE_BY        : natural := 5;
   constant PACE_CLK1_MULTIPLY_BY      : natural := 4;   -- 50*9/25 = 18MHz
 
-	constant PACE_VIDEO_H_SCALE       : integer := 1;
-	constant PACE_VIDEO_V_SCALE       : integer := 1;
+	constant PACE_VIDEO_H_SCALE         : integer := 1;
+	constant PACE_VIDEO_V_SCALE         : integer := 1;
+
+  -- DE2-specific constants
+	constant DE2_JAMMA_IS_MAPLE	        : boolean := false;
+	constant DE2_JAMMA_IS_NGC           : boolean := true;
 
 	-- DE2-APPLEIIPLUS-specific constants
 	constant DE2_LCD_LINE2							: string := "   APPLE II+    ";		-- 16 chars exactly

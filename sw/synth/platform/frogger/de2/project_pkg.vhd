@@ -22,7 +22,10 @@ package project_pkg is
 
 	-- DE2 constants which *MUST* be defined
 	
-	constant DE2_LCD_LINE2							: string := "  FROGGER-LCD   ";
+	constant DE2_JAMMA_IS_MAPLE	              : boolean := false;
+	constant DE2_JAMMA_IS_NGC                 : boolean := true;
+
+	constant DE2_LCD_LINE2							      : string := "  FROGGER-LCD   ";
 		
 	-- Frogger-specific constants
 	constant FROGGER_CPU_CLK_ENA_DIVIDE_BY		: natural := 10;
