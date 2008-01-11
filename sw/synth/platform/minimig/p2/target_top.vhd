@@ -306,13 +306,13 @@ begin
     )
     port map
     (
-      joya(5)       => jamma_s.p(1).button(2),
-      joya(4)       => jamma_s.p(1).button(1),
-      joya(3)       => jamma_s.p(1).up,
-      joya(2)       => jamma_s.p(1).down,
-      joya(1)       => jamma_s.p(1).left,
-      joya(0)       => jamma_s.p(1).right,
-      joyb          => (others => '1'),
+      joya          => (others => '1'),
+      joyb(5)       => jamma_s.p(1).button(2),
+      joyb(4)       => jamma_s.p(1).button(1),
+      joyb(3)       => jamma_s.p(1).up,
+      joyb(2)       => jamma_s.p(1).down,
+      joyb(1)       => jamma_s.p(1).left,
+      joyb(0)       => jamma_s.p(1).right,
       sd_dat        => sd_dat,
       joy           => (others => '0'), -- not used
       clock_27(1)   => '0', -- not used
@@ -372,7 +372,7 @@ begin
       sd_clk        => sd_clk,
       sd_cmd        => sd_cmd,
       aud_adclrck   => open,
-      uart_txd      => open,
+      uart_txd      => gat_txd,
       hex0          => open,
       hex1          => open,
       hex2          => open,

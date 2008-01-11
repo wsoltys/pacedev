@@ -165,15 +165,15 @@ BEGIN
 		clk2_divide_by => 5,
 		clk2_duty_cycle => 50,
 		clk2_multiply_by => 24,
-		clk2_phase_shift => "-2894",
-		compensate_clock => "CLK0",
+		clk2_phase_shift => "-3000",
+		compensate_clock => "CLK2",
 		gate_lock_signal => "NO",
 		inclk0_input_frequency => 41666,
 		intended_device_family => "Cyclone II",
 		invalid_lock_multiplier => 5,
 		lpm_hint => "CBX_MODULE_PREFIX=amigaclk",
 		lpm_type => "altpll",
-		operation_mode => "NORMAL",
+		operation_mode => "ZERO_DELAY_BUFFER",
 		port_activeclock => "PORT_UNUSED",
 		port_areset => "PORT_USED",
 		port_clkbad0 => "PORT_UNUSED",
@@ -246,7 +246,7 @@ END SYN;
 -- Retrieval info: PRIVATE: CREATE_CLKBAD_CHECK STRING "0"
 -- Retrieval info: PRIVATE: CREATE_INCLK1_CHECK STRING "0"
 -- Retrieval info: PRIVATE: CUR_DEDICATED_CLK STRING "c0"
--- Retrieval info: PRIVATE: CUR_FBIN_CLK STRING "e0"
+-- Retrieval info: PRIVATE: CUR_FBIN_CLK STRING "c2"
 -- Retrieval info: PRIVATE: DEVICE_SPEED_GRADE STRING "6"
 -- Retrieval info: PRIVATE: DIV_FACTOR0 NUMERIC "5"
 -- Retrieval info: PRIVATE: DIV_FACTOR1 NUMERIC "7"
@@ -282,7 +282,7 @@ END SYN;
 -- Retrieval info: PRIVATE: MULT_FACTOR0 NUMERIC "24"
 -- Retrieval info: PRIVATE: MULT_FACTOR1 NUMERIC "8"
 -- Retrieval info: PRIVATE: MULT_FACTOR2 NUMERIC "24"
--- Retrieval info: PRIVATE: NORMAL_MODE_RADIO STRING "1"
+-- Retrieval info: PRIVATE: NORMAL_MODE_RADIO STRING "0"
 -- Retrieval info: PRIVATE: OUTPUT_FREQ0 STRING "114.75000000"
 -- Retrieval info: PRIVATE: OUTPUT_FREQ1 STRING "28.00000000"
 -- Retrieval info: PRIVATE: OUTPUT_FREQ2 STRING "100.00000000"
@@ -296,11 +296,11 @@ END SYN;
 -- Retrieval info: PRIVATE: PHASE_RECONFIG_INPUTS_CHECK STRING "0"
 -- Retrieval info: PRIVATE: PHASE_SHIFT0 STRING "0.00000000"
 -- Retrieval info: PRIVATE: PHASE_SHIFT1 STRING "0.00000000"
--- Retrieval info: PRIVATE: PHASE_SHIFT2 STRING "-120.00000000"
+-- Retrieval info: PRIVATE: PHASE_SHIFT2 STRING "-3.00000000"
 -- Retrieval info: PRIVATE: PHASE_SHIFT_STEP_ENABLED_CHECK STRING "0"
 -- Retrieval info: PRIVATE: PHASE_SHIFT_UNIT0 STRING "deg"
 -- Retrieval info: PRIVATE: PHASE_SHIFT_UNIT1 STRING "deg"
--- Retrieval info: PRIVATE: PHASE_SHIFT_UNIT2 STRING "deg"
+-- Retrieval info: PRIVATE: PHASE_SHIFT_UNIT2 STRING "ns"
 -- Retrieval info: PRIVATE: PLL_ADVANCED_PARAM_CHECK STRING "0"
 -- Retrieval info: PRIVATE: PLL_ARESET_CHECK STRING "1"
 -- Retrieval info: PRIVATE: PLL_AUTOPLL_CHECK NUMERIC "1"
@@ -336,7 +336,7 @@ END SYN;
 -- Retrieval info: PRIVATE: USE_CLKENA1 STRING "0"
 -- Retrieval info: PRIVATE: USE_CLKENA2 STRING "0"
 -- Retrieval info: PRIVATE: USE_MIL_SPEED_GRADE NUMERIC "0"
--- Retrieval info: PRIVATE: ZERO_DELAY_RADIO STRING "0"
+-- Retrieval info: PRIVATE: ZERO_DELAY_RADIO STRING "1"
 -- Retrieval info: LIBRARY: altera_mf altera_mf.altera_mf_components.all
 -- Retrieval info: CONSTANT: CLK0_DIVIDE_BY NUMERIC "5"
 -- Retrieval info: CONSTANT: CLK0_DUTY_CYCLE NUMERIC "50"
@@ -349,14 +349,14 @@ END SYN;
 -- Retrieval info: CONSTANT: CLK2_DIVIDE_BY NUMERIC "5"
 -- Retrieval info: CONSTANT: CLK2_DUTY_CYCLE NUMERIC "50"
 -- Retrieval info: CONSTANT: CLK2_MULTIPLY_BY NUMERIC "24"
--- Retrieval info: CONSTANT: CLK2_PHASE_SHIFT STRING "-2894"
--- Retrieval info: CONSTANT: COMPENSATE_CLOCK STRING "CLK0"
+-- Retrieval info: CONSTANT: CLK2_PHASE_SHIFT STRING "-3000"
+-- Retrieval info: CONSTANT: COMPENSATE_CLOCK STRING "CLK2"
 -- Retrieval info: CONSTANT: GATE_LOCK_SIGNAL STRING "NO"
 -- Retrieval info: CONSTANT: INCLK0_INPUT_FREQUENCY NUMERIC "41666"
 -- Retrieval info: CONSTANT: INTENDED_DEVICE_FAMILY STRING "Cyclone II"
 -- Retrieval info: CONSTANT: INVALID_LOCK_MULTIPLIER NUMERIC "5"
 -- Retrieval info: CONSTANT: LPM_TYPE STRING "altpll"
--- Retrieval info: CONSTANT: OPERATION_MODE STRING "NORMAL"
+-- Retrieval info: CONSTANT: OPERATION_MODE STRING "ZERO_DELAY_BUFFER"
 -- Retrieval info: CONSTANT: PORT_ACTIVECLOCK STRING "PORT_UNUSED"
 -- Retrieval info: CONSTANT: PORT_ARESET STRING "PORT_USED"
 -- Retrieval info: CONSTANT: PORT_CLKBAD0 STRING "PORT_UNUSED"

@@ -361,7 +361,6 @@ set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
 
 # Timing Assignments
 # ==================
-set_global_assignment -name FMAX_REQUIREMENT "25 MHz" -section_id ethernet_clocks
 
 # end CLOCK(ethernet_clocks)
 # --------------------------
@@ -385,7 +384,7 @@ set_global_assignment -name FMAX_REQUIREMENT "25 MHz" -section_id ethernet_clock
 # -------------------------------------------------
 
 # ---------------------
-# start ENTITY(P2_top)
+# start ENTITY(DLB_top)
 
 # Pin & Location Assignments
 # ==========================
@@ -405,16 +404,13 @@ set_global_assignment -name FMAX_REQUIREMENT "25 MHz" -section_id ethernet_clock
 # end DESIGN_PARTITION(Top)
 # -------------------------
 
-# end ENTITY(P2_top)
+# end ENTITY(DLB_top)
 # -------------------
 
 set_global_assignment -name ADV_NETLIST_OPT_RETIME_CORE_AND_IO ON
 set_global_assignment -name OPTIMIZE_POWER_DURING_FITTING OFF
 set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id Top
 set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to *dr1*
-set_instance_assignment -name CUT ON -from reset_shift_n[0] -to *
-set_instance_assignment -name CLOCK_SETTINGS ethernet_clocks -to RXCLK_enet
-set_instance_assignment -name CLOCK_SETTINGS ethernet_clocks -to TXCLK_enet
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to scl
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to sda
 
@@ -777,3 +773,26 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/convers
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gc_tx_bit.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_joy.vhd
 set_global_assignment -name VHDL_FILE target_top.vhd
+set_global_assignment -name FMAX_REQUIREMENT "7 MHz" -section_id c7
+set_global_assignment -name FMAX_REQUIREMENT "28 MHz" -section_id c28
+set_global_assignment -name FMAX_REQUIREMENT "56 MHz" -section_id c56
+set_instance_assignment -name REPORT_DELAY ON -from * -to a_dr2[*]
+set_instance_assignment -name REPORT_DELAY ON -from * -to d_dr2[*]
+set_instance_assignment -name REPORT_DELAY ON -from * -to ba_dr2[*]
+set_instance_assignment -name REPORT_DELAY ON -from * -to ncas_dr2
+set_instance_assignment -name REPORT_DELAY ON -from * -to nras_dr2
+set_instance_assignment -name REPORT_DELAY ON -from * -to ncs_dr2
+set_instance_assignment -name REPORT_DELAY ON -from * -to dqm_dr2[*]
+set_instance_assignment -name REPORT_DELAY ON -from * -to nwe_dr2
+set_instance_assignment -name TPD_REQUIREMENT "11 ns" -from * -to a_dr2[*]
+set_instance_assignment -name TPD_REQUIREMENT "11 ns" -from * -to dqm_dr2[*]
+set_instance_assignment -name TPD_REQUIREMENT "11 ns" -from * -to ba_dr2[*]
+set_instance_assignment -name TPD_REQUIREMENT "11 ns" -from * -to ncs_dr2
+set_instance_assignment -name TPD_REQUIREMENT "11 ns" -from * -to ncas_dr2
+set_instance_assignment -name TPD_REQUIREMENT "11 ns" -from * -to nras_dr2
+set_instance_assignment -name TPD_REQUIREMENT "11 ns" -from * -to nwe_dr2
+set_instance_assignment -name TPD_REQUIREMENT "11 ns" -from * -to d_dr2[*]
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to *dr2*
+set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to d_dr2[*]
+set_instance_assignment -name FAST_INPUT_REGISTER ON -to *dr2*
+set_instance_assignment -name FAST_INPUT_REGISTER ON -to d_dr2[*]
