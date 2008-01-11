@@ -21,8 +21,8 @@ architecture SYN of gamecube_joy is
 	use work.conversion.to_vector;
 
 	-- this should be calculated from MHZ
-	--constant POLL_1ms_COUNTER_WIDTH		: natural := 20;
-	constant POLL_1ms_COUNTER_WIDTH		: natural := 13;
+	constant POLL_1ms_COUNTER_WIDTH		: natural := 20;
+	--constant POLL_1ms_COUNTER_WIDTH		: natural := 13;
 	
 	signal gc_byte_strobe		: std_logic;
 	signal gc_d_i						: std_logic;
