@@ -2,6 +2,7 @@
 -- T65(b) core. In an effort to merge and maintain bug fixes ....
 --
 --
+-- Ver 302 minor timing fixes
 -- Ver 301 Jump timing fixed
 -- Ver 300 Bugfixes by ehenciak added
 -- MikeJ March 2005
@@ -594,13 +595,14 @@ begin
 					when others =>
 					end case;
 				else
-					LCycle <= "101";
+					--LCycle <= "101";
+					LCycle <= "100"; -- mikej
 					case to_integer(unsigned(MCycle)) is
-					when 2 =>
+					when 1 =>
 						Jump <= "01";
 						LDDI <= '1';
 						LDBAL <= '1';
-					when 3 =>
+					when 2 =>
 						LDBAH <= '1';
 						if Mode /= "00" then
 							Jump <= "10"; -- DIDL
@@ -608,7 +610,7 @@ begin
 						if Mode = "00" then
 							Set_Addr_To <= "11"; -- BA
 						end if;
-					when 4 =>
+					when 3 =>
 						LDDI <= '1';
 						if Mode = "00" then
 							Set_Addr_To <= "11"; -- BA
@@ -616,7 +618,7 @@ begin
 						else
 							Jump <= "01";
 						end if;
-					when 5 =>
+					when 4 =>
 						Jump <= "10"; -- DIDL
 					when others =>
 					end case;
