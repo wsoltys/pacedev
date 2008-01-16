@@ -161,8 +161,20 @@ begin
 			inputs					=> inputs
 	  );
 
-  dip_block_1_s <= lb_dip_block_1_c;
-  dip_block_2_s <= lb_dip_block_2_c;
+  GEN_CAVENGER_DIPS : if GAME_NAME = "CAVENGER" generate
+    dip_block_1_s <= ca_dip_block_1_c;
+    dip_block_2_s <= ca_dip_block_2_c;
+  end generate GEN_CAVENGER_DIPS;
+
+  GEN_DORODON_DIPS : if GAME_NAME = "DORODON" generate
+    dip_block_1_s <= do_dip_block_1_c;
+    dip_block_2_s <= do_dip_block_2_c;
+  end generate GEN_DORODON_DIPS;
+
+  GEN_LADYBUG_DIPS : if GAME_NAME = "LADYBUG" generate
+    dip_block_1_s <= lb_dip_block_1_c;
+    dip_block_2_s <= lb_dip_block_2_c;
+  end generate GEN_LADYBUG_DIPS;
 
   -----------------------------------------------------------------------------
   -- Ladybug Machine

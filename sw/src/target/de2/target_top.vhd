@@ -681,6 +681,18 @@ begin
 
 	end generate GEN_GAMECUBE;
 	
+	GEN_NO_JAMMA : if not (DE2_JAMMA_IS_MAPLE or DE2_JAMMA_IS_NGC) generate
+
+		jamma.coin(1) <= '1';
+		jamma.p(1).start <= '1';
+		jamma.p(1).up <= '1';
+		jamma.p(1).down <= '1';
+		jamma.p(1).left <= '1';
+		jamma.p(1).right <= '1';
+		jamma.p(1).button <= (others => '1');
+
+  end generate GEN_NO_JAMMA;
+
 	-- not currently wired to any inputs
 	jamma.coin(2) <= '1';
 	jamma.p(2).start <= '1';
