@@ -419,7 +419,7 @@ begin
     );
 
   -- Unmeta sound data
-  process(aud_clk, reset)
+  process(aud_clk, reset, sw_s)
     variable data0_l : std_logic_vector(snd_data_l'range);
     variable data0_r : std_logic_vector(snd_data_r'range);
     variable data1_l : std_logic_vector(snd_data_l'range);
@@ -713,7 +713,8 @@ begin
 	ledr(8) <= not jamma.p(1).button(3);
 	ledr(7) <= not jamma.p(1).button(4);
 	ledr(6) <= not jamma.p(1).button(5);
-		
+  ledr(5 downto 0) <= (others => '0');
+
   pchaser: work.pwm_chaser 
 	  generic map(nleds  => 8, nbits => 8, period => 4, hold_time => 12)
     port map (clk => clock_50, clk_en => chaseen, pwm_en => pwmen, reset => reset, fade => X"0F", ledout => ledg(7 downto 0));
