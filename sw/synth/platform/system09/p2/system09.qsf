@@ -742,18 +742,18 @@ set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/wrappers.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/johnkent/cpu09.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/johnkent/datram.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/johnkent/rxunit3.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/johnkent/txunit3.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/johnkent/miniUART3.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/cpu09.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/datram.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/rxunit3.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/txunit3.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/miniUART3.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/ps2_keyboard.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/johnkent/key_slice.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/johnkent/keyboard.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/johnkent/vdu8.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/johnkent/timer.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/johnkent/trap.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/johnkent/ioport.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/key_slice.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/keyboard.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/vdu8.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/timer.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/trap.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/ioport.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/System09.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
@@ -762,3 +762,5 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/convers
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gc_tx_bit.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_joy.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_top.vhd
+set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
+set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top

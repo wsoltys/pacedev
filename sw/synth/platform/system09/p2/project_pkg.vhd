@@ -26,6 +26,10 @@ package project_pkg is
 	constant PACE_ENABLE_ADV724					: std_logic := '0';
 	constant PACE_ADV724_STD						: std_logic := ADV724_STD_PAL;
 
+  -- P2-specific constants
+  constant P2_JAMMA_IS_MAPLE          : boolean := false;
+  constant P2_JAMMA_IS_NGC            : boolean := false;
+
 	-- System09-specific constants
 			
 	--constant SYSTEM09_CPU_CLK_ENA_DIVIDE_BY		: natural := 10;

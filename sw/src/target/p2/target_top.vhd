@@ -105,9 +105,9 @@ port
     ba19              : in std_logic;
     ba18              : in std_logic;
     ba17              : in std_logic;
-    ba16              : in std_logic;
+    ba16              : inout std_logic;
     ba15              : in std_logic;
-    ba14              : in std_logic;
+    ba14              : inout std_logic;
     ba13              : in std_logic;
     ba12              : in std_logic;
     ba11              : in std_logic;
@@ -175,6 +175,8 @@ architecture SYN of target_top is
   alias clk_24M       : std_logic is clock8;
   alias audio_left    : std_logic is ba9;
   alias audio_right   : std_logic is ba20;
+  alias ps2_kclk      : std_logic is ba16;
+  alias ps2_kdat      : std_logic is ba14;
 	alias ps2_mclk      : std_logic is bd(14);
 	alias ps2_mdat      : std_logic is bd(10);
   alias sd_cmd        : std_logic is bd(1);
@@ -264,9 +266,6 @@ begin
 	ba6 <= ad724_stnd;
 	ba4 <= not ad724_stnd;
 
-	ps2clk_s <= ba16;
-	ps2dat_s <= ba14;
-  
 	-- GPIO - not driven
 	gpio_oe <= (others => '0');
 	
@@ -373,8 +372,8 @@ begin
 	    reset            	=> reset,
 
 	    -- game I/O
-	    ps2clk           	=> ps2clk_s,
-	    ps2data          	=> ps2dat_s,
+	    ps2clk           	=> ps2_kclk,
+	    ps2data          	=> ps2_kdat,
 	    dip              	=> (others => '0'),
 			jamma							=> jamma_s,
 			
