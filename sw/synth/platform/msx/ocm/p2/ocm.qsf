@@ -353,8 +353,8 @@ set_global_assignment -name STRATIX_DEVICE_IO_STANDARD LVTTL
 
 # SignalTap II Assignments
 # ========================
-set_global_assignment -name ENABLE_SIGNALTAP OFF
-set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
+set_global_assignment -name ENABLE_SIGNALTAP ON
+set_global_assignment -name USE_SIGNALTAP_FILE ../../../../../src/target/p2/stp1.stp
 
 # ----------------------------
 # start CLOCK(ethernet_clocks)
@@ -802,3 +802,4 @@ set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/msx/ocm/emsx_top.vhd
 set_global_assignment -name VHDL_FILE target_top.vhd
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
+set_global_assignment -name SIGNALTAP_FILE ../../../../../src/target/p2/stp1.stp

@@ -143,6 +143,10 @@ architecture SYN of target_top is
 
   alias ps2_kclk      : std_logic is ba16;
   alias ps2_kdat      : std_logic is ba14;
+  alias sd_cmd        : std_logic is bd(1);
+  alias sd_dat3       : std_logic is bd(9);
+  alias sd_clk        : std_logic is bd(15);
+  alias sd_dat        : std_logic is bd(7);
 
   signal clk          : std_logic_vector(0 to 3);
   signal init        	: std_logic;
@@ -268,12 +272,14 @@ begin
 	
 	-- default the dipswitches
 	-- note: they get inverted in emsx_top before being used
-	GEN_DIP_VGA : if PACE_ENABLE_ADV724 = '0' generate
-		dip_s <= "11111100"; 		-- VGA 31kHz (full amplitude)
-	end generate GEN_DIP_VGA;
-	GEN_DIP_CVBS : if PACE_ENABLE_ADV724 = '1' generate
-		dip_s <= "11111111";		-- TV 15kHz
-	end generate GEN_DIP_CVBS;
+  dip_s <= not (OCM_DIP_SLOT2_1 &
+                OCM_DIP_SLOT2_0 &
+                OCM_DIP_CPU_CLOCK &
+                OCM_DIP_DISK_ROM &
+                OCM_DIP_KEYBOARD &
+                OCM_DIP_RED_CINCH &
+                OCM_DIP_VGA_1 &
+                OCM_DIP_VGA_0);
 
 	-- slot data bus driver
 	sltdat <= bios_rom_data when (sltsltsl_n = '0' and sltrd_n = '0' and sltadr(15) = '0') else 
@@ -349,9 +355,12 @@ begin
 	    pStrB       => open,
 
 	    -- SD/MMC slot ports
-	    pSd_Ck      => open,							-- pin 5
-	    pSd_Cm      => open,							-- pin 2
-	    pSd_Dt      => open,							-- pin 1(D3), 9(D2), 8(D1), 7(D0)
+	    pSd_Ck      => sd_clk,						-- pin 5
+	    pSd_Cm      => sd_cmd,						-- pin 2
+	    pSd_Dt(3)   => sd_dat3,						-- pin 1(D3)
+	    pSd_Dt(2)   => open,							-- pin 9(D2)
+	    pSd_Dt(1)   => open,							-- pin 8(D1)
+	    pSd_Dt(0)   => sd_dat,						-- pin 7(D0)
 
 	    -- DIP switch, Lamp ports
 	    pDip        => dip_s,							-- 0=ON,  1=OFF(default on shipment)
