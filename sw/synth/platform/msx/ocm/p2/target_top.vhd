@@ -102,9 +102,9 @@ port
     ba19              : in std_logic;
     ba18              : in std_logic;
     ba17              : in std_logic;
-    ba16              : in std_logic;
+    ba16              : inout std_logic;
     ba15              : in std_logic;
-    ba14              : in std_logic;
+    ba14              : inout std_logic;
     ba13              : in std_logic;
     ba12              : in std_logic;
     ba11              : in std_logic;
@@ -141,6 +141,9 @@ end target_top;
 
 architecture SYN of target_top is
 
+  alias ps2_kclk      : std_logic is ba16;
+  alias ps2_kdat      : std_logic is ba14;
+
   signal clk          : std_logic_vector(0 to 3);
   signal init        	: std_logic;
 	signal reset				: std_logic;
@@ -153,8 +156,6 @@ architecture SYN of target_top is
 
 	signal bd_out				: std_logic_vector(31 downto 0);
 
-	signal ps2clk_s			: std_logic;
-	signal ps2dat_s			: std_logic;
 	signal jamma_s			: JAMMAInputsType;
 	
 	signal sram_addr_s	: std_logic_vector(23 downto 0);
@@ -250,9 +251,6 @@ begin
 	ba6 <= ad724_stnd;
 	ba4 <= not ad724_stnd;
 
-	ps2clk_s <= ba16;
-	ps2dat_s <= ba14;
-
 	-- JAMMA signals are all active LOW
 	jamma_s.coin_cnt <= (others => '1');
 	jamma_s.service <= '1';
@@ -341,8 +339,8 @@ begin
 	    pMemDat     => d_dr1(15 downto 0),	-- SD-RAM Data
 
 	    -- PS/2 keyboard ports
-	    pPs2Clk     => ps2clk_s,
-	    pPs2Dat     => ps2dat_s,
+	    pPs2Clk     => ps2_kclk,
+	    pPs2Dat     => ps2_kdat,
 
 	    -- Joystick ports (Port_A, Port_B)
 	    pJoyA       => open,

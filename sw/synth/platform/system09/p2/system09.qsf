@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE ON
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 7.2
 
 # Pin & Location Assignments
 # ==========================
@@ -734,6 +734,8 @@ set_parameter -name CYCLONEII_SAFE_WRITE "\"VERIFIED_SAFE\""
 
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
+set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/platform_pkg.vhd
@@ -747,7 +749,7 @@ set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/da
 set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/rxunit3.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/txunit3.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/miniUART3.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/ps2_keyboard.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/ps2_keyboard.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/key_slice.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/keyboard.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/vdu8.vhd
@@ -762,5 +764,3 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/convers
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gc_tx_bit.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_joy.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_top.vhd
-set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
-set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
