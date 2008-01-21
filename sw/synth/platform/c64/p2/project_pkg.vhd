@@ -29,7 +29,7 @@ package project_pkg is
 	-- C64-specific constants
 
 	constant C64_HAS_C64								: boolean := true;
-	constant C64_HAS_1541								: boolean := true;
+	constant C64_HAS_1541								: boolean := false;
 	constant C64_HAS_EXT_SB							: boolean := false;
 	constant C64_RESET_CYCLES						: natural := 4095;
 

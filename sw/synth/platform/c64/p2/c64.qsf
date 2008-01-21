@@ -742,7 +742,8 @@ set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_pkg.vhd
 set_global_assignment -name VHDL_FILE c64_pll.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/cpu65xx_e.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/cpu65xx_fast.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/vicii_6567_6569.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/video_vicII_656x_e.vhdl
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/video_vicII_656x_a.vhdl
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/cpu_6510.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/fpga64_singleram.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/fpga64_rwram.vhd

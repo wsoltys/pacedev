@@ -117,7 +117,6 @@ architecture Behavioral of fpga64_pace is
 
 signal endOfCycle : std_logic;
 signal busCycle: unsigned(5 downto 0);
-signal lastCycleVic : std_logic;
 signal phi0_cpu : std_logic;
 signal phi0_vic : std_logic;
 signal ramData_o_s	: unsigned(7 downto 0);
@@ -130,6 +129,7 @@ signal ramData_oe_s	: std_logic;
 	signal cpuGetsBus : std_logic;
 	signal enableCpu: std_logic;
 	signal enableVic : std_logic;
+	signal enablePixel : std_logic;
 	signal enableBus : std_logic;
 
 	signal irq_cia1: std_logic;
@@ -296,7 +296,13 @@ begin
 			di => cpuDo(3 downto 0),
 			do => colorData
 		);
-	colorWe <= (cs_color and pulseWrRam);
+		
+	process (clk32)
+  begin
+    if rising_edge(clk32) then
+      colorWe <= (cs_color and pulseWrRam);
+    end if;
+  end process;
 
 	buslogic: entity work.fpga64_buslogic_roms
 		port map (
@@ -338,20 +344,25 @@ begin
 
   notNtscMode <= not ntscMode;
 	
-	vic: entity work.vicii_6567_6569
+	vic: entity work.video_vicii_656x
 		generic map (
-			graphicsEnabled => '1'
+			emulateRefresh => '0',
+			emulateLightpen => '1',
+			emulateGraphics => '1'
 		)			
 		port map (
 			clk => clk32,
-			enablePixel => enableVic,
-			enableData => enableVic,
-			endOfCycle => lastCycleVic,
-			phi0_cpu => phi0_cpu,
-			phi0_vic => phi0_vic,
-			mode6569 => notNtscMode,
+			enaPixel => enablePixel,
+			enaData => enableVic,
+			phi => phi0_cpu,
+			
+			baSync => '0',
+			ba => ba,
+
+			mode6569 => (not ntscMode),
 			mode6567old => '0',
 			mode6567R8 => ntscMode,
+			mode6572 => '0',
 			
 			cs => cs_vic,
 			we => pulseWrIo,
@@ -364,10 +375,8 @@ begin
 			diColor => colorData,
 			do => vicData,
 
-			ba => ba,
 			vicAddr => vicAddr(13 downto 0),
---			vid_di => (others => '0'),
-			
+
 			hsync => vicHSync,
 			vsync => vicVSync,
 			colorIndex => vicColorIndex,
@@ -424,6 +433,11 @@ begin
 		);
 
 	cpu: entity work.cpu_6510
+		generic map (
+			pipelineOpcode => false,
+			pipelineAluMux => false,
+			pipelineAluOut => false
+		)
 		port map (
 			clk => clk32,
 			reset => reset,
@@ -742,19 +756,16 @@ begin
 	process(clk32)
 	begin
 		if rising_edge(clk32) then
-			lastCycleVic <= '0';
 			enableVic <= '0';
 			enableCpu <= '0';
 			enableCia <= '0';
 			enableBus <= '0';
+			enablePixel <= '0';
 			pulseWrIo <= '0';
 			pulseRd <= '0';
-			if busCycle = "011110" then
-				lastCycleVic <= '1';
-			end if;
 			if busCycle(5) = '0' then
 				if busCycle(1 downto 0) = "10" then
-					enableVic <= '1';
+					enablePixel <= '1';
 					enableBus <= '1';
 					if phi0_cpu = '1' then
 						enableCia <= '1';
@@ -766,6 +777,9 @@ begin
 						else
 							pulseRd <= '1';
 						end if;
+					end if;
+					if (phi0_vic or phi0_cpu) = '1' then
+						enableVic <= '1';
 					end if;
 				end if;
 			end if;				
