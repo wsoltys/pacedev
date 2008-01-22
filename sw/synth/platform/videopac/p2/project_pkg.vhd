@@ -19,11 +19,6 @@ package project_pkg is
   constant PACE_CLK1_DIVIDE_BY        : natural := 21;
   constant PACE_CLK1_MULTIPLY_BY      : natural := 31;  		-- (not used)
 
-	constant PACE_SRAM_DATA_WIDTH				: natural := 8;
-	
-	--constant PACE_VIDEO_H_SCALE         : integer := 2;
-	--constant PACE_VIDEO_V_SCALE         : integer := 2;
-
 	constant PACE_ENABLE_ADV724					: std_logic := '1';
 	constant PACE_ADV724_STD						: std_logic := ADV724_STD_PAL;
 

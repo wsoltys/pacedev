@@ -170,6 +170,34 @@ architecture SYN of target_top is
 	-- gamecube controller interface
 	signal gcj						: work.gamecube_pkg.joystate_type;
 			
+	-- signals needed by OCM core
+
+	signal cpuclk				: std_logic;
+	signal dip_s				: std_logic_vector(7 downto 0);
+	
+	signal sltsltsl_n		: std_logic;
+	signal sltrd_n			: std_logic;
+	signal sltwr_n			: std_logic;
+	signal sltadr				: std_logic_vector(15 downto 0);
+	signal sltdat				: std_logic_vector(7 downto 0);
+
+	signal sltcs1_n			: std_logic;
+	signal sltcs2_n			: std_logic;
+	signal sltcs12_n		: std_logic;
+	signal sltrfsh_n		: std_logic;
+	signal sltwait_n		: std_logic;
+	signal sltint_n			: std_logic;
+	signal sltm1_n			: std_logic;
+	signal sltmerq_n		: std_logic;
+
+  signal dram_addr_s  : std_logic_vector(12 downto 0);
+  signal red_s        : std_logic_vector(5 downto 0);
+  signal green_s      : std_logic_vector(5 downto 0);
+  signal blue_s       : std_logic_vector(5 downto 0);
+
+	signal bios_rom_data	: std_logic_vector(7 downto 0);
+	signal ext_rom_data		: std_logic_vector(7 downto 0);
+				
 begin
 
 	-- FPGA STARTUP
@@ -278,101 +306,141 @@ begin
 	--ledr(7) <= not jamma.p(1).button(4);
 	--ledr(6) <= not jamma.p(1).button(5);
 		
-  c24mhz_inst : ENTITY work.c24mhz
-    PORT map
-    (
-      inclk0		    => clock_50,
-      c0		        => clk_24M
-    );
 
-  minimig_de1_inst : entity work.minimig_de1
-    generic map
-    (
-      HAS_I2C_AV_CONFIG  => true
-    )
-    port map
-    (
-      joya          => (others => '1'),
-      joyb          => (others => '1'),
-      sd_dat        => sd_dat,
-      joy           => (others => '0'), -- not used
-      clock_27(1)   => '0', -- not used
-      clock_27(0)   => clock_27,
-      clock_24(1)   => '0',
-      clock_24(0)   => clk_24M,
-      ext_clock     => ext_clock, -- not used,
-      clock_50      => clock_50, -- not used
-      key           => key, -- active low
-      sw(9)        => sw(17), -- 15kHz
-      sw(8 downto 0) => sw(8 downto 0),
-      aud_adcdat    => aud_adcdat,
-      uart_rxd      => uart_rxd,
-      tdi           => tdi,
-      tck           => tck,
-      tcs           => tcs,
-      dram_cke      => dram_cke,
-      dram_dq       => dram_dq,
-      dram_addr(11 downto 0) => dram_addr,
-      dram_cs_n     => dram_cs_n,
-      ledg          => ledg(7 downto 0),
-      dram_ba_0     => dram_ba_0,
-      dram_ba_1     => dram_ba_1,
-      dram_we_n     => dram_we_n,
-      dram_ldqm     => dram_ldqm,
-      dram_ras_n    => dram_ras_n,
-      dram_udqm     => dram_udqm,
-      dram_cas_n    => dram_cas_n,
-      fl_dq         => fl_dq,
-      fl_ce_n       => fl_ce_n,
-      fl_oe_n       => fl_oe_n,
-      fl_rst_n      => fl_rst_n,
-      fl_we_n       => fl_we_n,
-      sram_dq       => sram_dq,
-      fl_addr       => fl_addr,
-      sram_addr     => sram_addr,
-      sram_ub_n     => sram_ub_n,
-      sram_lb_n     => sram_lb_n,
-      sram_we_n     => sram_we_n,
-      sram_ce_n     => sram_ce_n,
-      ps2_mdat      => ps2_mdat,
-      sram_oe_n     => sram_oe_n,
-      ps2_mclk      => ps2_mclk,
-      ps2_dat       => ps2_dat,
-      ps2_clk       => ps2_clk,
-      vga_hs        => vga_hs_s,
-      tdo           => tdo,
-      vga_vs        => vga_vs_s,
-      vga_r         => vga_r(9 downto 6),
-      vga_g         => vga_g(9 downto 6),
-      vga_b         => vga_b(9 downto 6),
-      sd_dat3       => sd_dat3,
-      sd_clk        => sd_clk,
-      sd_cmd        => sd_cmd,
-      aud_adclrck   => aud_adclrck,
-      uart_txd      => uart_txd,
-      hex0          => hex0,
-      hex1          => hex1,
-      hex2          => hex2,
-      hex3          => hex3,
-      ledr          => ledr(9 downto 0),
-      aud_xck       => aud_xck,
-      aud_dacdat    => aud_dacdat,
-      aud_daclrck   => aud_daclrck,
-      aud_bclk      => aud_bclk,
-      dram_clk      => dram_clk_s,
-      i2c_sclk      => i2c_sclk,
-      i2c_sdat      => i2c_sdat
-    );
-  vga_hs <= vga_hs_s;
-  vga_vs <= vga_vs_s;
-  dram_clk <= dram_clk_s;
+	-- default the dipswitches
+	-- note: they get inverted in emsx_top before being used
+  dip_s <= not (OCM_DIP_SLOT2_1 &
+                OCM_DIP_SLOT2_0 &
+                OCM_DIP_CPU_CLOCK &
+                OCM_DIP_DISK_ROM &
+                OCM_DIP_KEYBOARD &
+                OCM_DIP_RED_CINCH &
+                OCM_DIP_VGA_1 &
+                OCM_DIP_VGA_0);
 
-  vga_r(5 downto 0) <= (others => '0');
-  vga_g(5 downto 0) <= (others => '0');
-  vga_b(5 downto 0) <= (others => '0');
-  vga_clk <= dram_clk_s;
-  vga_blank <= vga_hs_s and vga_vs_s;
-  vga_sync <= '0';
+	-- slot data bus driver
+	sltdat <= bios_rom_data when (sltsltsl_n = '0' and sltrd_n = '0' and sltadr(15) = '0') else 
+						ext_rom_data when (sltsltsl_n = '0' and sltrd_n = '0' and sltadr(15) = '1') else 
+						(others =>'Z');
+
+	sltcs1_n <= 'Z';
+	sltcs2_n <= 'Z';
+	sltcs12_n <= 'Z';
+	sltrfsh_n <= 'Z';
+	sltwait_n <= 'Z';
+	sltint_n <= 'Z';
+	sltm1_n <= 'Z';
+	sltmerq_n <= 'Z';
+
+	ocm_inst : entity work.emsx_top
+	  port map
+		(
+	    -- Clock, Reset ports
+	    pClk21m     => clock_50,					-- VDP clock ... 21.48MHz
+	    pExtClk     => '0',						    -- Reserved (for multi FPGAs)
+	    pCpuClk     => cpuclk,						-- CPU clock ... 3.58MHz (up to 10.74MHz/21.48MHz)
+	--  pCpuRst_n   : out std_logic;			-- CPU reset
+
+	    -- MSX cartridge slot ports
+	    pSltClk     => cpuclk,						-- pCpuClk returns here, for Z80, etc.
+	    pSltRst_n   => reset_n,						-- pCpuRst_n returns here
+	    pSltSltsl_n => sltsltsl_n,
+	    pSltSlts2_n => open,
+	    pSltIorq_n  => open,
+	    pSltRd_n    => sltrd_n,
+	    pSltWr_n    => sltwr_n,
+	    pSltAdr     => sltadr,
+	    pSltDat     => sltdat,
+	    pSltBdir_n  => open,							-- Bus direction (not used in master mode)
+
+	    pSltCs1_n   => sltcs1_n,
+	    pSltCs2_n   => sltcs2_n,
+	    pSltCs12_n  => sltcs12_n,
+	    pSltRfsh_n  => sltrfsh_n,
+	    pSltWait_n  => sltwait_n,
+	    pSltInt_n   => sltint_n,
+	    pSltM1_n    => sltm1_n,
+	    pSltMerq_n  => sltmerq_n,
+
+	    pSltRsv5    => open,							-- Reserved
+	    pSltRsv16   => open,							-- Reserved (w/ external pull-up)
+	    pSltSw1     => open,								-- Reserved (w/ external pull-up)
+	    pSltSw2     => open,							-- Reserved
+
+	    -- SD-RAM ports
+	    pMemClk     => dram_clk,					-- SD-RAM Clock
+	    pMemCke     => dram_cke,					-- SD-RAM Clock enable
+	    pMemCs_n    => dram_cs_n,					-- SD-RAM Chip select
+	    pMemRas_n   => dram_ras_n,				-- SD-RAM Row/RAS
+	    pMemCas_n   => dram_cas_n,				-- SD-RAM /CAS
+	    pMemWe_n    => dram_we_n,					-- SD-RAM /WE
+	    pMemUdq     => dram_udqm,				  -- SD-RAM UDQM
+	    pMemLdq     => dram_ldqm,				  -- SD-RAM LDQM
+	    pMemBa1     => dram_ba_1,				  -- SD-RAM Bank select address 1
+	    pMemBa0     => dram_ba_0,				  -- SD-RAM Bank select address 0
+	    pMemAdr     => dram_addr_s, 			-- SD-RAM Address
+	    pMemDat     => dram_dq,	          -- SD-RAM Data
+
+	    -- PS/2 keyboard ports
+	    pPs2Clk     => ps2_clk,
+	    pPs2Dat     => ps2_dat,
+
+	    -- Joystick ports (Port_A, Port_B)
+	    pJoyA       => open,
+	    pStrA       => open,
+	    pJoyB       => open,
+	    pStrB       => open,
+
+	    -- SD/MMC slot ports
+	    pSd_Ck      => sd_clk,						-- pin 5
+	    pSd_Cm      => sd_cmd,						-- pin 2
+	    pSd_Dt(3)   => sd_dat3,						-- pin 1(D3)
+	    pSd_Dt(2)   => open,							-- pin 9(D2)
+	    pSd_Dt(1)   => open,							-- pin 8(D1)
+	    pSd_Dt(0)   => sd_dat,						-- pin 7(D0)
+
+	    -- DIP switch, Lamp ports
+	    pDip        => dip_s,							-- 0=ON,  1=OFF(default on shipment)
+	    pLed        => open,							-- 0=OFF, 1=ON(green)
+	    pLedPwr     => open,							-- 0=OFF, 1=ON(red) ...Power & SD/MMC access lamp
+
+	    -- Video, Audio/CMT ports
+	    pDac_VR     => red_s,             -- RGB_Red / Svideo_C
+	    pDac_VG     => green_s,	          -- RGB_Grn / Svideo_Y
+	    pDac_VB     => blue_s,	          -- RGB_Blu / CompositeVideo
+	    pDac_SL     => open,							-- Sound-L
+	    pDac_SR     => open,							-- Sound-R / CMT
+
+	    pVideoHS_n  => vga_hs,						-- Csync(RGB15K), HSync(VGA31K)
+	    pVideoVS_n  => vga_vs,					  -- Audio(RGB15K), VSync(VGA31K)
+
+	    pVideoClk   => open,							-- (Reserved)
+	    pVideoDat   => open,							-- (Reserved)
+
+	    -- Reserved ports (USB)
+	    pUsbP1      => open,
+	    pUsbN1      => open,
+	    pUsbP2      => open,
+	    pUsbN2      => open,
+
+	    -- Reserved ports
+	    pIopRsv14   => 'X',
+	    pIopRsv15   => 'X',
+	    pIopRsv16   => 'X',
+	    pIopRsv17   => 'X',
+	    pIopRsv18   => 'X',
+	    pIopRsv19   => 'X',
+	    pIopRsv20   => 'X',
+	    pIopRsv21   => 'X'
+	  );
+
+  dram_addr <= dram_addr_s(dram_addr'range);
+
+  vga_clk <= clock_50;
+  vga_r <= red_s & "0000";
+  vga_g <= green_s & "0000";
+  vga_b <= blue_s & "0000";
+
   hex4 <= (others => '1');
   hex5 <= (others => '1');
   hex6 <= (others => '1');
