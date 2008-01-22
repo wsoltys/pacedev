@@ -14,7 +14,7 @@
 
 
 # The default values for assignments are stored in the file
-#		c64_assignment_defaults.qdf
+#		ocm_assignment_defaults.qdf
 # If this file doesn't exist, and for assignments not listed, see file
 #		assignment_defaults.qdf
 
@@ -465,7 +465,7 @@ set_global_assignment -name TOP_LEVEL_ENTITY target_top
 set_global_assignment -name DEVICE EP2C35F672C6
 set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
 set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED"
-set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS INPUT TRI-STATED"
+set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS OUTPUT DRIVING AN UNSPECIFIED SIGNAL"
 set_instance_assignment -name IO_STANDARD LVTTL -to TD_DATA[0]
 set_instance_assignment -name IO_STANDARD LVTTL -to TD_DATA[1]
 set_instance_assignment -name IO_STANDARD LVTTL -to TD_DATA[2]
@@ -498,81 +498,98 @@ set_global_assignment -name SEED 1
 set_parameter -name CYCLONEII_SAFE_WRITE VERIFIED_SAFE
 set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
-set_global_assignment -name ENABLE_SIGNALTAP ON
-set_global_assignment -name USE_SIGNALTAP_FILE c64.stp
-set_global_assignment -name MAX_PROCESSORS_USED_FOR_MULTITHREADING 2
-set_global_assignment -name SMART_RECOMPILE OFF
-set_instance_assignment -name PARTITION_HIERARCHY c1541_63c6ab44be41fedc7e4dc9a25171f74b1 -to "PACE:pace_inst|c1541_top:\\GEN_1541:c1541_inst|c1541_diskif:c1541_diskif_inst" -section_id "c1541_diskif:c1541_diskif_inst"
-set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id "c1541_diskif:c1541_diskif_inst"
-set_instance_assignment -name PARTITION_HIERARCHY c1541_8473a77373531ff4de856a878225b9561 -to "PACE:pace_inst|c1541_top:\\GEN_1541:c1541_inst|c1541_logic:c1541_logic_inst" -section_id "c1541_logic:c1541_logic_inst"
-set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id "c1541_logic:c1541_logic_inst"
-set_global_assignment -name INCREMENTAL_COMPILATION OFF
-set_global_assignment -name SAVE_DISK_SPACE OFF
+set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
-set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/platform_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/target/de2/target_pkg.vhd
-set_global_assignment -name VHDL_FILE c64_pll.vhd
-set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/LCD_Controller.v
-set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/LCD_TEST.v
-set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2S_Controller.v
-set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2S_LCM_Config.v
-set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/I2C_Controller.v
-set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/I2C_AV_Config.v
-set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/SEG7_LUT.v
-set_global_assignment -name VHDL_FILE ../../../../src/target/de2/audio_if.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gc_tx_bit.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_joy.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/target/de2/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_upcounter.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/conversion.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_read2.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_write.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/mfifo.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_bus.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_joy.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/toys/led_chaser.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwm_chaser.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwmout.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/fpga64_keyboard_matrix.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/cpu65xx_e.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/cpu65xx_fast.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/video_vicII_656x_e.vhdl
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/video_vicII_656x_a.vhdl
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/cpu_6510.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/fpga64_singleram.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/fpga64_rwram.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/fpga64_hexy.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/fpga64_hexy_vmode.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/fpga64_scandoubler.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/io_ps2_keyboard.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/cia6526.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/c64rom_basic.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/c64rom_chargen.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/c64rom_kernal.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/fpga64_buslogic_roms.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/fpga64_bustiming.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/fpga64_rgbcolor.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/sound/sid/sid_components.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/sound/sid/sid_voice.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/sound/sid/sid6581.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/fpga64_pace.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_Pack.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_MCode.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_ALU.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/m6522.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/c1541_diskif.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/c1541_logic.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/c1541_top_template.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
+set_global_assignment -name VHDL_FILE pll4x_cycii.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/msx/ocm/pll4x.vhd
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/video/vdp_package.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/cpu/T80_Pack.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/cpu/T80_ALU.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/cpu/T80_MCode.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/cpu/T80_Reg.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/cpu/T80.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/cpu/T80a.vhd"
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/msx/ocm/iplrom.vhd
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/peripheral/megasd.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/peripheral/mapper.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/peripheral/eseps2.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/peripheral/ram.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/peripheral/keymap.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/peripheral/rtc.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/peripheral/kanji.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/video/ntsc.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/video/pal.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/video/vga.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/video/linebuf.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/video/doublebuf.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/video/text12.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/video/graphic123M.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/video/graphic4567.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/video/spinforam.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/video/sprite.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/video/font0406.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/video/osd.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/video/osdnametable.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/video/vencode.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/video/vdp.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/psg/psg.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/psg/psg_wave.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/scc/megaram.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/scc/scc_wave.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/opll/eseopll.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/opll/vm2413/VoiceRom.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/opll/vm2413/AttackTable.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/opll/vm2413/Controller.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/opll/vm2413/EnvelopeGenerator.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/opll/vm2413/EnvelopeMemory.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/opll/vm2413/FeedbackMemory.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/opll/vm2413/LinearTable.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/opll/vm2413/Operator.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/opll/vm2413/Opll.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/opll/vm2413/OutputGenerator.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/opll/vm2413/OutputMemory.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/opll/vm2413/PhaseGenerator.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/opll/vm2413/PhaseMemory.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/opll/vm2413/RegisterMemory.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/opll/vm2413/SineTable.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/opll/vm2413/SlotCounter.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/opll/vm2413/TemporalMixer.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/opll/vm2413/VoiceMemory.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/opll/vm2413/vm2413.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/dac/esepwm.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/filter/esefir5.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/filter/tapram.vhd"
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/msx/ocm/emsx_top.vhd
 set_global_assignment -name VHDL_FILE target_top.vhd
-set_global_assignment -name SIGNALTAP_FILE stp1.stp
-set_global_assignment -name SIGNALTAP_FILE c1541_diskif.stp
-set_global_assignment -name SIGNALTAP_FILE c64.stp
+set_global_assignment -name NUMBER_OF_SOURCES_PER_DESTINATION_TO_REPORT 100
+set_global_assignment -name NUMBER_OF_PATHS_TO_REPORT 2000
+set_global_assignment -name NUMBER_OF_DESTINATION_TO_REPORT 100
+set_global_assignment -name DO_COMBINED_ANALYSIS ON
+set_global_assignment -name ENABLE_CLOCK_LATENCY ON
+set_global_assignment -name REPORT_IO_PATHS_SEPARATELY ON
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
+set_global_assignment -name OPTIMIZE_FAST_CORNER_TIMING ON
+set_global_assignment -name OPTIMIZE_POWER_DURING_FITTING OFF
+set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
+set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_ASYNCHRONOUS_SIGNAL_PIPELINING ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
+set_global_assignment -name INCREMENTAL_COMPILATION OFF
+set_global_assignment -name ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP ON
+set_global_assignment -name ADV_NETLIST_OPT_SYNTH_GATE_RETIME ON
+set_global_assignment -name SAVE_DISK_SPACE OFF
+set_global_assignment -name SMART_RECOMPILE ON
+set_global_assignment -name CYCLONEII_OPTIMIZATION_TECHNIQUE SPEED
+set_global_assignment -name MUX_RESTRUCTURE OFF
+set_global_assignment -name OPTIMIZE_POWER_DURING_SYNTHESIS OFF
