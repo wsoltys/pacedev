@@ -6,6 +6,14 @@ use ieee.std_logic_unsigned.all;
 
 package video_controller_pkg is
 
+  type PACEVideoController_t is
+  (
+    PACE_VIDEO_VGA_800x600_60Hz,      -- generic VGA
+    PACE_VIDEO_VGA_240x320_60Hz,      -- P3M video
+    PACE_VIDEO_LCM_320x240_60Hz,      -- DE2 LCD
+    PACE_VIDEO_CVBS_720x288p_50Hz     -- generic composite
+  );
+
   component pace_video_controller is
     generic
     (
@@ -38,6 +46,10 @@ package video_controller_pkg is
       hsync   	: out std_logic
     );
   end component pace_video_controller;
+
+	-- ADV724 constants (P2 target)
+	constant ADV724_STD_PAL		      : std_logic := '0';
+	constant ADV724_STD_NTSC	      : std_logic := not ADV724_STD_PAL;
 
 end;
 

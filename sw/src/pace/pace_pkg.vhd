@@ -43,10 +43,6 @@ package pace_pkg is
 
 	type ByteArrayType is array (natural range <>) of std_logic_vector(7 downto 0);
 
-	-- ADV724 constants
-	constant ADV724_STD_PAL		: std_logic := '0';
-	constant ADV724_STD_NTSC	: std_logic := not ADV724_STD_PAL;
-
 	--
 	-- JAMMA interface data structures
 	-- - note: all signals are active LOW

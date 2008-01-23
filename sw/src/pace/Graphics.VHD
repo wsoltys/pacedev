@@ -1,8 +1,10 @@
-Library IEEE;
-Use     IEEE.std_logic_1164.all;
+library IEEE;
+use IEEE.std_logic_1164.all;
 
 library work;
 use work.pace_pkg.all;
+use work.video_controller_pkg.all;
+use work.project_pkg.all;
 use work.platform_pkg.all;
 
 entity Graphics is
@@ -204,36 +206,82 @@ begin
 
 	-- because some video controllers only strobe during active video
   pix_clk_ena <= strobe or hblank_s;
-		
-  vgacontroller_inst : entity work.pace_video_controller
-    port map
-    (
-      clk         => clk,
-			reset				=> reset,
 
-			xcentre			=> xcentre,
-			ycentre			=> ycentre,
-			
-			-- video control signals (out)
-      strobe      => strobe,
-			pixel_x			=> pix_x,
-			pixel_y			=> pix_y,
-      hblank      => hblank_s,
-      vblank      => vblank_s,
+  --
+  --  THIS IS BLOODY ANNOYING
+  --
+  --  SURELY THERE IS *SOME* WAY OF USING CONSTANTS AND CONFIGURATIONS
+  --  TO SELECT A PARTICULAR ARCHITECTURE OF AN ENTITY
+  --  WITHOUT RESORTING TO SUCH YUKKINESS?!?!?!?
+  --
 
-			-- video data signals (in)
-			r_i					=> rgb_data.r,
-			g_i					=> rgb_data.g,
-			b_i					=> rgb_data.b,
+  GEN_VGA_800x600_60Hz : if PACE_VIDEO_CONTROLLER_TYPE = PACE_VIDEO_VGA_800x600_60Hz generate
 
-			-- VGA signals (out)
-      red         => red,
-      green       => green,
-      blue        => blue,
-			lcm_data		=> lcm_data,
-      hsync       => hsync,
-      vsync       => vsync
-    );
+    pace_video_controller_inst : entity work.pace_video_controller(VGA_800X600_60HZ)
+      port map
+      (
+        clk         => clk,
+        reset				=> reset,
+
+        xcentre			=> xcentre,
+        ycentre			=> ycentre,
+        
+        -- video control signals (out)
+        strobe      => strobe,
+        pixel_x			=> pix_x,
+        pixel_y			=> pix_y,
+        hblank      => hblank_s,
+        vblank      => vblank_s,
+
+        -- video data signals (in)
+        r_i					=> rgb_data.r,
+        g_i					=> rgb_data.g,
+        b_i					=> rgb_data.b,
+
+        -- VGA signals (out)
+        red         => red,
+        green       => green,
+        blue        => blue,
+        lcm_data		=> lcm_data,
+        hsync       => hsync,
+        vsync       => vsync
+      );
+
+  end generate GEN_VGA_800x600_60Hz;
+
+  GEN_CVBS_720x288p_50Hz : if PACE_VIDEO_CONTROLLER_TYPE = PACE_VIDEO_CVBS_720x288p_50Hz generate
+
+    pace_video_controller_inst : entity work.pace_video_controller(CVBS_720X288p_50HZ)
+      port map
+      (
+        clk         => clk,
+        reset				=> reset,
+
+        xcentre			=> xcentre,
+        ycentre			=> ycentre,
+        
+        -- video control signals (out)
+        strobe      => strobe,
+        pixel_x			=> pix_x,
+        pixel_y			=> pix_y,
+        hblank      => hblank_s,
+        vblank      => vblank_s,
+
+        -- video data signals (in)
+        r_i					=> rgb_data.r,
+        g_i					=> rgb_data.g,
+        b_i					=> rgb_data.b,
+
+        -- VGA signals (out)
+        red         => red,
+        green       => green,
+        blue        => blue,
+        lcm_data		=> lcm_data,
+        hsync       => hsync,
+        vsync       => vsync
+      );
+
+  end generate GEN_CVBS_720x288p_50Hz;
 
 	GEN_NO_BITMAPS : if PACE_VIDEO_NUM_BITMAPS = 0 generate
 	
@@ -360,3 +408,11 @@ begin
 	
 end SYN;
 
+--configuration cfg_graphics of Graphics is
+--  for SYN
+--    for pace_video_controller_inst : pace_video_controller
+--      --use entity work.pace_video_controller(VGA_800X600_60HZ);
+--      use entity work.pace_video_controller(CVBS_720X288P_50HZ);
+--    end for;
+--  end for;
+--end configuration cfg_graphics;
