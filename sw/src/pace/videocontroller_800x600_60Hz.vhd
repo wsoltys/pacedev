@@ -6,38 +6,11 @@ use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
+use work.video_controller_pkg.all;
 use work.platform_pkg.all;
 use work.project_pkg.all;
 
-entity VGAController is
-  port
-  (
-    clk        	: in  std_logic;
-		reset				: in std_logic;
-
-		xcentre			: in std_logic_vector(9 downto 0);
-		ycentre			: in std_logic_vector(9 downto 0);
-		
-    strobe     	: out std_logic;                          
-		pixel_x			: out std_logic_vector(9 downto 0);
-		pixel_y			: out std_logic_vector(9 downto 0);
-    hblank     	: out std_logic;
-    vblank     	: out std_logic;                          
-
-		r_i					: in std_logic_vector(9 downto 0);
-		g_i					: in std_logic_vector(9 downto 0);
-		b_i					: in std_logic_vector(9 downto 0);
-
-    red        	: out std_logic_vector(9 downto 0);       
-    green      	: out std_logic_vector(9 downto 0);       
-    blue       	: out std_logic_vector(9 downto 0);       
-		lcm_data		: out std_logic_vector(9 downto 0);
-    hsync      	: out std_logic;
-    vsync      	: out std_logic
-  );
-end VGAController;
-
-architecture SYN of VGAController is
+architecture VGA_800X600_60HZ of pace_video_controller is
 
 	-- user-defined constants	
 	constant H_SIZE							: integer := PACE_VIDEO_H_SIZE * PACE_VIDEO_H_SCALE;
@@ -218,5 +191,5 @@ begin
 
 	lcm_data <= (others => '0');
 		
-end SYN;
+end VGA_800X600_60HZ;
 

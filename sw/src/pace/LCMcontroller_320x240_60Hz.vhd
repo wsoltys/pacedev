@@ -5,43 +5,13 @@ use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 
 library work;
+use work.pace_pkg.all;
+use work.video_controller_pkg.all;
 use work.project_pkg.all;
 use work.platform_pkg.all;
 
-entity VGAController is
-  generic
-  (
-    delay   : in integer := 0   -- Number of clocks to delay sync and blank signals
-  );
-  port
-  (
-		-- Inputs
-    clk     	: in std_logic;
-    reset   	: in std_logic;
-    r_i     	: in std_logic_vector(9 downto 0);
-    g_i     	: in std_logic_vector(9 downto 0);
-    b_i     	: in std_logic_vector(9 downto 0);
-		xcentre 	: in std_logic_vector(9 downto 0);
-		ycentre 	: in std_logic_vector(9 downto 0);
+architecture LCM_320X240_60HZ of pace_video_controller is
 
-		-- Video control signals (out)
-    strobe  	: out std_logic;
-    pixel_x 	: out std_logic_vector(9 downto 0);
-    pixel_y 	: out std_logic_vector(9 downto 0);
-    hblank  	: out std_logic;
-    vblank  	: out std_logic;
-
-    -- Outputs
-    red     	: out std_logic_vector(9 downto 0);
-    green   	: out std_logic_vector(9 downto 0);
-    blue    	: out std_logic_vector(9 downto 0);
-		lcm_data	: out std_logic_vector(9 downto 0);
-    vsync   	: out std_logic;
-    hsync   	: out std_logic
-  );
-end VGAController;
-
-architecture SYN of VGAController is
 	-- derived constants
 
   constant VIDEO_H_SIZE       : integer := PACE_VIDEO_H_SIZE * PACE_VIDEO_H_SCALE;
@@ -263,4 +233,4 @@ begin
     end if;
   end process;
 
-end SYN;
+end LCM_320X240_60HZ;
