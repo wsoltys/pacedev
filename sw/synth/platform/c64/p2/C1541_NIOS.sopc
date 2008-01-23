@@ -1,0 +1,1359 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<system name="C1541_NIOS">
+    <parameter valueString="15515435125" name="systemHash"/>
+    <parameter name="quartusRootDir">c:\altera\72\quartus</parameter>
+    <parameter valueString="1199847416530" name="timeStamp"/>
+    <parameter valueString="false" name="generateLegacySDK"/>
+    <parameter name="bonusData">bonusData 
+{
+   element pio_di
+   {
+      datum _enabled
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum _sortIndex
+      {
+         value = "5";
+         type = "int";
+      }
+   }
+   element pio_gpo.s1
+   {
+      datum baseAddress
+      {
+         value = "67111008";
+         type = "long";
+      }
+   }
+   element pio_mech_out
+   {
+      datum _enabled
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum _sortIndex
+      {
+         value = "11";
+         type = "int";
+      }
+   }
+   element timer_0.s1
+   {
+      datum baseAddress
+      {
+         value = "67110944";
+         type = "long";
+      }
+   }
+   element pio_do.s1
+   {
+      datum baseAddress
+      {
+         value = "67110976";
+         type = "long";
+      }
+   }
+   element pio_gpi.s1
+   {
+      datum baseAddress
+      {
+         value = "67110992";
+         type = "long";
+      }
+   }
+   element pio_mech_out.s1
+   {
+      datum baseAddress
+      {
+         value = "67111056";
+         type = "long";
+      }
+   }
+   element ocide3_controller_0.pio_slave
+   {
+      datum baseAddress
+      {
+         value = "67111168";
+         type = "long";
+      }
+   }
+   element pio_gpi
+   {
+      datum _enabled
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum _sortIndex
+      {
+         value = "7";
+         type = "int";
+      }
+   }
+   element cpu_0
+   {
+      datum _enabled
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum _sortIndex
+      {
+         value = "1";
+         type = "int";
+      }
+   }
+   element ocide3_controller_0
+   {
+      datum _enabled
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum _sortIndex
+      {
+         value = "13";
+         type = "int";
+      }
+   }
+   element jtag_uart_0
+   {
+      datum _enabled
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum _sortIndex
+      {
+         value = "2";
+         type = "int";
+      }
+   }
+   element pio_fifo.s1
+   {
+      datum baseAddress
+      {
+         value = "67111024";
+         type = "long";
+      }
+   }
+   element jtag_uart_0.avalon_jtag_slave
+   {
+      datum baseAddress
+      {
+         value = "67110912";
+         type = "long";
+      }
+   }
+   element clk.clk
+   {
+      datum clock_domain
+      {
+         value = "clk";
+         type = "String";
+      }
+   }
+   element pio_do
+   {
+      datum _enabled
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum _sortIndex
+      {
+         value = "6";
+         type = "int";
+      }
+   }
+   element sdram_0.s1
+   {
+      datum baseAddress
+      {
+         value = "0";
+         type = "long";
+      }
+   }
+   element pio_di.s1
+   {
+      datum baseAddress
+      {
+         value = "67110928";
+         type = "long";
+      }
+   }
+   element pio_gpo
+   {
+      datum _enabled
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum _sortIndex
+      {
+         value = "8";
+         type = "int";
+      }
+   }
+   element dma_0
+   {
+      datum _enabled
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum _sortIndex
+      {
+         value = "14";
+         type = "int";
+      }
+   }
+   element pio_mech_in
+   {
+      datum _enabled
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum _sortIndex
+      {
+         value = "10";
+         type = "int";
+      }
+   }
+   element pio_mech_io.s1
+   {
+      datum baseAddress
+      {
+         value = "67111072";
+         type = "long";
+      }
+   }
+   element cpu_0.jtag_debug_module
+   {
+      datum baseAddress
+      {
+         value = "67108864";
+         type = "long";
+      }
+   }
+   element sdram_0
+   {
+      datum _enabled
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum _sortIndex
+      {
+         value = "0";
+         type = "int";
+      }
+   }
+   element pio_mech_in.s1
+   {
+      datum baseAddress
+      {
+         value = "67111040";
+         type = "long";
+      }
+   }
+   element timer_0
+   {
+      datum _enabled
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum _sortIndex
+      {
+         value = "4";
+         type = "int";
+      }
+   }
+   element pio_mech_io
+   {
+      datum _enabled
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum _sortIndex
+      {
+         value = "12";
+         type = "int";
+      }
+   }
+   element sysid
+   {
+      datum _enabled
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum _sortIndex
+      {
+         value = "3";
+         type = "int";
+      }
+   }
+   element dma_0.control_port_slave
+   {
+      datum baseAddress
+      {
+         value = "67111104";
+         type = "long";
+      }
+   }
+   element pio_fifo
+   {
+      datum _enabled
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum _sortIndex
+      {
+         value = "9";
+         type = "int";
+      }
+   }
+   element sysid.control_slave
+   {
+      datum baseAddress
+      {
+         value = "67110920";
+         type = "long";
+      }
+   }
+   element ocide3_controller_0.dma_slave
+   {
+      datum baseAddress
+      {
+         value = "67111088";
+         type = "long";
+      }
+   }
+}
+</parameter>
+    <parameter valueString="false" name="hardcopyCompatible"/>
+    <parameter valueString="CYCLONEII" name="deviceFamily"/>
+    <parameter valueString="false" name="generateLegacySim"/>
+    <parameter valueString="c64.qpf" name="projectName"/>
+    <parameter valueString="VHDL" name="hdlLanguage"/>
+    <parameter name="projectDirectory">D:\projects\pace\pacedev.net\sw\synth\platform\c64\p2</parameter>
+    <module version="7.2" name="clk" kind="clock_source">
+        <parameter valueString="true" name="clockFrequencyKnown"/>
+        <parameter valueString="96000000" name="clockFrequency"/>
+    </module>
+    <module version="7.2" name="sdram_0" kind="altera_avalon_new_sdram_controller">
+        <parameter valueString="20.0" name="TRP"/>
+        <parameter valueString="32" name="dataWidth"/>
+        <parameter valueString="13" name="rowWidth"/>
+        <parameter valueString="65.0" name="TRFC"/>
+        <parameter valueString="true" name="registerDataIn"/>
+        <parameter valueString="3" name="casLatency"/>
+        <parameter valueString="200.0" name="powerUpDelay"/>
+        <parameter valueString="true" name="generateSimulationModel"/>
+        <parameter valueString="2" name="initRefreshCommands"/>
+        <parameter valueString="" name="masteredTristateBridgeSlave"/>
+        <parameter valueString="3" name="TMRD"/>
+        <parameter valueString="16.0" name="TWR"/>
+        <parameter valueString="0.0" name="initNOPDelay"/>
+        <parameter valueString="7.813" name="refreshPeriod"/>
+        <parameter valueString="5.5" name="TAC"/>
+        <parameter valueString="9" name="columnWidth"/>
+        <parameter valueString="4" name="numberOfBanks"/>
+        <parameter valueString="1" name="numberOfChipSelects"/>
+        <parameter valueString="false" name="pinsSharedViaTriState"/>
+        <parameter valueString="20.0" name="TRCD"/>
+        <parameter valueString="custom" name="model"/>
+        <parameter valueString="67108864" name="size"/>
+    </module>
+    <module version="7.2" name="cpu_0" kind="altera_nios2">
+        <parameter valueString="" name="userDefinedSettings"/>
+        <parameter valueString="Dynamic" name="setting_branchPredictionType"/>
+        <parameter valueString="_10" name="mmu_processIDNumBits"/>
+        <parameter valueString="32" name="exceptionOffset"/>
+        <parameter valueString="EmbeddedMulFast" name="muldiv_multiplierType"/>
+        <parameter valueString="_1024" name="icache_size"/>
+        <parameter valueString="_128" name="debug_OCIOnchipTrace"/>
+        <parameter valueString="Fast" name="impl"/>
+        <parameter valueString="_4" name="mmu_uitlbNumEntries"/>
+        <parameter valueString="sdram_0.s1" name="exceptionSlave"/>
+        <parameter valueString="false" name="dcache_omitDataMaster"/>
+        <parameter valueString="0" name="mmu_TLBMissExcOffset"/>
+        <parameter valueString="false" name="setting_illegalMemAccessDetection"/>
+        <parameter valueString="32" name="breakOffset"/>
+        <parameter valueString="true" name="debug_embeddedPLL"/>
+        <parameter valueString="false" name="setting_debugSimGen"/>
+        <parameter valueString="false" name="setting_alwaysBypassDCache"/>
+        <parameter valueString="_0" name="icache_numTCIM"/>
+        <parameter valueString="false" name="setting_showInternalSettings"/>
+        <parameter valueString="false" name="setting_illegalInstructionsTrap"/>
+        <parameter valueString="0" name="resetOffset"/>
+        <parameter valueString="false" name="setting_bhtIndexPcOnly"/>
+        <parameter valueString="true" name="setting_HDLSimCachesCleared"/>
+        <parameter valueString="true" name="setting_alwaysEncrypt"/>
+        <parameter valueString="false" name="setting_activateModelChecker"/>
+        <parameter valueString="_32" name="dcache_lineSize"/>
+        <parameter valueString="false" name="setting_allowFullAddressRange"/>
+        <parameter valueString="_7" name="mmu_dtlbPtrSz"/>
+        <parameter valueString="_4" name="mmu_itlbNumWays"/>
+        <parameter valueString="false" name="setting_avalonDebugPortPresent"/>
+        <parameter valueString="false" name="cpuReset"/>
+        <parameter valueString="true" name="setting_clearXBitsLDNonBypass"/>
+        <parameter valueString="_4" name="mmu_dtlbNumWays"/>
+        <parameter valueString="sdram_0.s1" name="resetSlave"/>
+        <parameter valueString="_32" name="setting_perfCounterWidth"/>
+        <parameter valueString="" name="mmu_TLBMissExcSlave"/>
+        <parameter name="breakSlave">cpu_0.jtag_debug_module</parameter>
+        <parameter valueString="false" name="setting_preciseIllegalMemAccessException"/>
+        <parameter valueString="Level1" name="debug_level"/>
+        <parameter valueString="false" name="muldiv_divider"/>
+        <parameter valueString="false" name="dcache_bursts"/>
+        <parameter valueString="true" name="setting_activateMonitors"/>
+        <parameter valueString="true" name="setting_bit31BypassDCache"/>
+        <parameter valueString="Automatic" name="icache_ramBlockType"/>
+        <parameter valueString="_8" name="setting_bhtPtrSz"/>
+        <parameter valueString="false" name="setting_preciseDivisionErrorException"/>
+        <parameter valueString="false" name="setting_preciseSlaveAccessErrorException"/>
+        <parameter valueString="false" name="debug_debugReqSignals"/>
+        <parameter valueString="_6" name="mmu_udtlbNumEntries"/>
+        <parameter valueString="_0" name="dcache_numTCDM"/>
+        <parameter valueString="false" name="setting_fullWaveformSignals"/>
+        <parameter valueString="false" name="setting_performanceCounter"/>
+        <parameter valueString="_7" name="mmu_itlbPtrSz"/>
+        <parameter valueString="_1024" name="dcache_size"/>
+        <parameter valueString="Automatic" name="dcache_ramBlockType"/>
+        <parameter valueString="true" name="setting_activateTrace"/>
+        <parameter valueString="false" name="setting_HBreakTest"/>
+        <parameter valueString="false" name="setting_exportPCB"/>
+        <parameter valueString="false" name="setting_activateTestEndChecker"/>
+        <parameter valueString="None" name="icache_burstType"/>
+        <parameter valueString="false" name="setting_showUnpublishedSettings"/>
+        <parameter valueString="true" name="debug_triggerArming"/>
+        <parameter valueString="false" name="mmu_enabled"/>
+    </module>
+    <module version="7.2" name="jtag_uart_0" kind="altera_avalon_jtag_uart">
+        <parameter valueString="8" name="readIRQThreshold"/>
+        <parameter valueString="" name="simInputCharacterStream"/>
+        <parameter valueString="0" name="hubInstanceID"/>
+        <parameter valueString="64" name="readBufferDepth"/>
+        <parameter valueString="false" name="allowMultipleConnections"/>
+        <parameter valueString="64" name="writeBufferDepth"/>
+        <parameter valueString="8" name="writeIRQThreshold"/>
+        <parameter valueString="false" name="useRegistersForWriteBuffer"/>
+        <parameter valueString="false" name="useRegistersForReadBuffer"/>
+        <parameter name="simInteractiveOptions">INTERACTIVE_ASCII_OUTPUT</parameter>
+    </module>
+    <module version="7.2" name="sysid" kind="altera_avalon_sysid">
+        <parameter valueString="1199847417" name="timestamp"/>
+        <parameter valueString="483049596" name="id"/>
+    </module>
+    <module version="7.2" name="timer_0" kind="altera_avalon_timer">
+        <parameter valueString="CUSTOM" name="timerPreset"/>
+        <parameter valueString="10.0" name="period"/>
+        <parameter valueString="false" name="resetOutput"/>
+        <parameter valueString="USEC" name="periodUnits"/>
+        <parameter valueString="false" name="fixedPeriod"/>
+        <parameter valueString="false" name="alwaysRun"/>
+        <parameter valueString="false" name="timeoutPulseOutput"/>
+        <parameter valueString="true" name="snapshot"/>
+    </module>
+    <module version="7.2" name="pio_di" kind="altera_avalon_pio">
+        <parameter valueString="RISING" name="edgeType"/>
+        <parameter valueString="8" name="width"/>
+        <parameter valueString="Input" name="direction"/>
+        <parameter valueString="LEVEL" name="irqType"/>
+        <parameter valueString="false" name="captureEdge"/>
+        <parameter valueString="false" name="simDoTestBenchWiring"/>
+        <parameter valueString="false" name="generateIRQ"/>
+        <parameter valueString="false" name="bitClearingEdgeCapReg"/>
+        <parameter valueString="0" name="simDrivenValue"/>
+    </module>
+    <module version="7.2" name="pio_do" kind="altera_avalon_pio">
+        <parameter valueString="RISING" name="edgeType"/>
+        <parameter valueString="8" name="width"/>
+        <parameter valueString="Output" name="direction"/>
+        <parameter valueString="LEVEL" name="irqType"/>
+        <parameter valueString="false" name="captureEdge"/>
+        <parameter valueString="false" name="simDoTestBenchWiring"/>
+        <parameter valueString="false" name="generateIRQ"/>
+        <parameter valueString="false" name="bitClearingEdgeCapReg"/>
+        <parameter valueString="0" name="simDrivenValue"/>
+    </module>
+    <module version="7.2" name="pio_gpi" kind="altera_avalon_pio">
+        <parameter valueString="RISING" name="edgeType"/>
+        <parameter valueString="8" name="width"/>
+        <parameter valueString="Input" name="direction"/>
+        <parameter valueString="LEVEL" name="irqType"/>
+        <parameter valueString="false" name="captureEdge"/>
+        <parameter valueString="false" name="simDoTestBenchWiring"/>
+        <parameter valueString="true" name="generateIRQ"/>
+        <parameter valueString="false" name="bitClearingEdgeCapReg"/>
+        <parameter valueString="0" name="simDrivenValue"/>
+    </module>
+    <module version="7.2" name="pio_gpo" kind="altera_avalon_pio">
+        <parameter valueString="RISING" name="edgeType"/>
+        <parameter valueString="8" name="width"/>
+        <parameter valueString="Output" name="direction"/>
+        <parameter valueString="LEVEL" name="irqType"/>
+        <parameter valueString="false" name="captureEdge"/>
+        <parameter valueString="false" name="simDoTestBenchWiring"/>
+        <parameter valueString="false" name="generateIRQ"/>
+        <parameter valueString="false" name="bitClearingEdgeCapReg"/>
+        <parameter valueString="0" name="simDrivenValue"/>
+    </module>
+    <module version="7.2" name="pio_fifo" kind="altera_avalon_pio">
+        <parameter valueString="RISING" name="edgeType"/>
+        <parameter valueString="16" name="width"/>
+        <parameter valueString="InOut" name="direction"/>
+        <parameter valueString="LEVEL" name="irqType"/>
+        <parameter valueString="false" name="captureEdge"/>
+        <parameter valueString="false" name="simDoTestBenchWiring"/>
+        <parameter valueString="true" name="generateIRQ"/>
+        <parameter valueString="false" name="bitClearingEdgeCapReg"/>
+        <parameter valueString="0" name="simDrivenValue"/>
+    </module>
+    <module version="7.2" name="pio_mech_in" kind="altera_avalon_pio">
+        <parameter valueString="RISING" name="edgeType"/>
+        <parameter valueString="32" name="width"/>
+        <parameter valueString="Output" name="direction"/>
+        <parameter valueString="LEVEL" name="irqType"/>
+        <parameter valueString="false" name="captureEdge"/>
+        <parameter valueString="false" name="simDoTestBenchWiring"/>
+        <parameter valueString="false" name="generateIRQ"/>
+        <parameter valueString="false" name="bitClearingEdgeCapReg"/>
+        <parameter valueString="0" name="simDrivenValue"/>
+    </module>
+    <module version="7.2" name="pio_mech_out" kind="altera_avalon_pio">
+        <parameter valueString="RISING" name="edgeType"/>
+        <parameter valueString="32" name="width"/>
+        <parameter valueString="Input" name="direction"/>
+        <parameter valueString="LEVEL" name="irqType"/>
+        <parameter valueString="false" name="captureEdge"/>
+        <parameter valueString="false" name="simDoTestBenchWiring"/>
+        <parameter valueString="false" name="generateIRQ"/>
+        <parameter valueString="false" name="bitClearingEdgeCapReg"/>
+        <parameter valueString="0" name="simDrivenValue"/>
+    </module>
+    <module version="7.2" name="pio_mech_io" kind="altera_avalon_pio">
+        <parameter valueString="RISING" name="edgeType"/>
+        <parameter valueString="32" name="width"/>
+        <parameter valueString="Input" name="direction"/>
+        <parameter valueString="LEVEL" name="irqType"/>
+        <parameter valueString="false" name="captureEdge"/>
+        <parameter valueString="false" name="simDoTestBenchWiring"/>
+        <parameter valueString="false" name="generateIRQ"/>
+        <parameter valueString="false" name="bitClearingEdgeCapReg"/>
+        <parameter valueString="0" name="simDrivenValue"/>
+    </module>
+    <module version="1.0" name="ocide3_controller_0" kind="ocide3_controller">
+        <parameter valueString="" name="sharedPorts"/>
+        <parameter name="instancePTF">MODULE ocide3_controller_0
+{
+   class = "ocide3_controller";
+   class_version = "1.0";
+   SYSTEM_BUILDER_INFO 
+   {
+      Instantiate_In_System_Module = "1";
+      Top_Level_Ports_Are_Enumerated = "1";
+      Is_Enabled = "1";
+      Clock_Source = "clk";
+      View 
+      {
+         MESSAGES 
+         {
+         }
+         Is_Collapsed = "0";
+      }
+   }
+   COMPONENT_BUILDER 
+   {
+      GLS_SETTINGS 
+      {
+      }
+   }
+   PORT_WIRING 
+   {
+      PORT resetn_pad_o
+      {
+         width = "1";
+         width_expression = "";
+         direction = "output";
+         type = "export";
+         is_shared = "0";
+      }
+      PORT dd_pad_i
+      {
+         width = "16";
+         width_expression = "";
+         direction = "input";
+         type = "export";
+         is_shared = "0";
+      }
+      PORT dd_pad_o
+      {
+         width = "16";
+         width_expression = "";
+         direction = "output";
+         type = "export";
+         is_shared = "0";
+      }
+      PORT dd_padoe_o
+      {
+         width = "1";
+         width_expression = "";
+         direction = "output";
+         type = "export";
+         is_shared = "0";
+      }
+      PORT da_pad_o
+      {
+         width = "3";
+         width_expression = "";
+         direction = "output";
+         type = "export";
+         is_shared = "0";
+      }
+      PORT cs0n_pad_o
+      {
+         width = "1";
+         width_expression = "";
+         direction = "output";
+         type = "export";
+         is_shared = "0";
+      }
+      PORT cs1n_pad_o
+      {
+         width = "1";
+         width_expression = "";
+         direction = "output";
+         type = "export";
+         is_shared = "0";
+      }
+      PORT diorn_pad_o
+      {
+         width = "1";
+         width_expression = "";
+         direction = "output";
+         type = "export";
+         is_shared = "0";
+      }
+      PORT diown_pad_o
+      {
+         width = "1";
+         width_expression = "";
+         direction = "output";
+         type = "export";
+         is_shared = "0";
+      }
+      PORT iordy_pad_i
+      {
+         width = "1";
+         width_expression = "";
+         direction = "input";
+         type = "export";
+         is_shared = "0";
+      }
+      PORT intrq_pad_i
+      {
+         width = "1";
+         width_expression = "";
+         direction = "input";
+         type = "export";
+         is_shared = "0";
+      }
+      PORT dmarq_pad_i
+      {
+         width = "1";
+         width_expression = "";
+         direction = "input";
+         type = "export";
+         is_shared = "0";
+      }
+      PORT dmackn_pad_o
+      {
+         width = "1";
+         width_expression = "";
+         direction = "output";
+         type = "export";
+         is_shared = "0";
+      }
+   }
+   SIMULATION 
+   {
+      DISPLAY 
+      {
+         SIGNAL x101
+         {
+            name = "OCIDE3 Controller/global_signals";
+            format = "Divider";
+         }
+         SIGNAL x102
+         {
+            name = "resetn_pad_o";
+         }
+         SIGNAL x103
+         {
+            name = "dd_pad_i";
+            radix = "hexadecimal";
+         }
+         SIGNAL x104
+         {
+            name = "dd_pad_o";
+            radix = "hexadecimal";
+         }
+         SIGNAL x105
+         {
+            name = "dd_padoe_o";
+         }
+         SIGNAL x106
+         {
+            name = "da_pad_o";
+            radix = "hexadecimal";
+         }
+         SIGNAL x107
+         {
+            name = "cs0n_pad_o";
+         }
+         SIGNAL x108
+         {
+            name = "cs1n_pad_o";
+         }
+         SIGNAL x109
+         {
+            name = "diorn_pad_o";
+         }
+         SIGNAL x110
+         {
+            name = "diown_pad_o";
+         }
+         SIGNAL x111
+         {
+            name = "iordy_pad_i";
+         }
+         SIGNAL x112
+         {
+            name = "intrq_pad_i";
+         }
+         SIGNAL x113
+         {
+            name = "dmarq_pad_i";
+         }
+         SIGNAL x114
+         {
+            name = "dmackn_pad_o";
+         }
+         SIGNAL x115
+         {
+            name = "OCIDE3 Controller/pio_slave";
+            format = "Divider";
+         }
+         SIGNAL x116
+         {
+            name = "wb_clk_i";
+         }
+         SIGNAL x117
+         {
+            name = "arst_i";
+         }
+         SIGNAL x118
+         {
+            name = "wb_rst_i";
+         }
+         SIGNAL x119
+         {
+            name = "wb_cyc_i";
+         }
+         SIGNAL x120
+         {
+            name = "wb_stb_i";
+         }
+         SIGNAL x121
+         {
+            name = "wb_ack_o";
+         }
+         SIGNAL x122
+         {
+            name = "wb_rty_o";
+         }
+         SIGNAL x123
+         {
+            name = "wb_err_o";
+         }
+         SIGNAL x124
+         {
+            name = "wb_adr_i";
+            radix = "hexadecimal";
+         }
+         SIGNAL x125
+         {
+            name = "wb_dat_i";
+            radix = "hexadecimal";
+         }
+         SIGNAL x126
+         {
+            name = "wb_dat_o";
+            radix = "hexadecimal";
+         }
+         SIGNAL x127
+         {
+            name = "wb_sel_i";
+            radix = "hexadecimal";
+         }
+         SIGNAL x128
+         {
+            name = "wb_we_i";
+         }
+         SIGNAL x129
+         {
+            name = "wb_inta_o";
+         }
+         SIGNAL x130
+         {
+            name = "wb_dma_req_o";
+         }
+         SIGNAL x131
+         {
+            name = "wb_dma_done_i";
+         }
+         SIGNAL x132
+         {
+            name = "OCIDE3 Controller/dma_slave";
+            format = "Divider";
+         }
+         SIGNAL x133
+         {
+            name = "wb_dma_clk_i";
+         }
+         SIGNAL x134
+         {
+            name = "wb_dma_cyc_i";
+         }
+         SIGNAL x135
+         {
+            name = "wb_dma_stb_i";
+         }
+         SIGNAL x136
+         {
+            name = "wb_dma_ack_o";
+         }
+         SIGNAL x137
+         {
+            name = "wb_dma_rty_o";
+         }
+         SIGNAL x138
+         {
+            name = "wb_dma_err_o";
+         }
+         SIGNAL x139
+         {
+            name = "wb_dma_dat_i";
+            radix = "hexadecimal";
+         }
+         SIGNAL x140
+         {
+            name = "wb_dma_dat_o";
+            radix = "hexadecimal";
+         }
+         SIGNAL x141
+         {
+            name = "wb_dma_sel_i";
+            radix = "hexadecimal";
+         }
+         SIGNAL x142
+         {
+            name = "wb_dma_we_i";
+         }
+      }
+   }
+   SLAVE pio_slave
+   {
+      SYSTEM_BUILDER_INFO 
+      {
+         Bus_Type = "avalon";
+         Address_Width = "5";
+         Address_Alignment = "native";
+         Data_Width = "32";
+         Has_Base_Address = "1";
+         Has_IRQ = "1";
+         Setup_Time = "0";
+         Hold_Time = "0";
+         Read_Wait_States = "peripheral_controlled";
+         Write_Wait_States = "peripheral_controlled";
+         Read_Latency = "0";
+         Maximum_Pending_Read_Transactions = "0";
+         Is_Printable_Device = "0";
+         Is_Memory_Device = "0";
+         Is_Readable = "1";
+         Is_Writable = "1";
+         Minimum_Uninterrupted_Run_Length = "1";
+         MASTERED_BY cpu_0/data_master
+         {
+            priority = "1";
+         }
+         IRQ_MASTER cpu_0/data_master
+         {
+            IRQ_Number = "4";
+         }
+         Base_Address = "0x04000900";
+         Address_Group = "0";
+      }
+      COMPONENT_BUILDER 
+      {
+         AVS_SETTINGS 
+         {
+            Setup_Value = "0";
+            Read_Wait_Value = "1";
+            Write_Wait_Value = "1";
+            Hold_Value = "0";
+            Timing_Units = "cycles";
+            Read_Latency_Value = "0";
+            Max_Pending_Read_Transactions_Value = "1";
+            Address_Alignment = "native";
+            Is_Printable_Device = "0";
+            interface_name = "Avalon Slave";
+            Minimum_Arbitration_Shares = "1";
+            external_wait = "1";
+            Is_Memory_Device = "0";
+         }
+      }
+      PORT_WIRING 
+      {
+         PORT wb_clk_i
+         {
+            width = "1";
+            width_expression = "";
+            direction = "input";
+            type = "clk";
+            is_shared = "0";
+         }
+         PORT arst_i
+         {
+            width = "1";
+            width_expression = "";
+            direction = "input";
+            type = "reset_n";
+            is_shared = "0";
+         }
+         PORT wb_rst_i
+         {
+            width = "1";
+            width_expression = "";
+            direction = "input";
+            type = "export";
+            is_shared = "0";
+         }
+         PORT wb_cyc_i
+         {
+            width = "1";
+            width_expression = "";
+            direction = "input";
+            type = "chipselect";
+            is_shared = "0";
+         }
+         PORT wb_stb_i
+         {
+            width = "1";
+            width_expression = "";
+            direction = "input";
+            type = "chipselect";
+            is_shared = "0";
+         }
+         PORT wb_ack_o
+         {
+            width = "1";
+            width_expression = "";
+            direction = "output";
+            type = "waitrequest_n";
+            is_shared = "0";
+         }
+         PORT wb_rty_o
+         {
+            width = "1";
+            width_expression = "";
+            direction = "output";
+            type = "export";
+            is_shared = "0";
+         }
+         PORT wb_err_o
+         {
+            width = "1";
+            width_expression = "";
+            direction = "output";
+            type = "export";
+            is_shared = "0";
+         }
+         PORT wb_adr_i
+         {
+            width = "5";
+            width_expression = "";
+            direction = "input";
+            type = "address";
+            is_shared = "0";
+         }
+         PORT wb_dat_i
+         {
+            width = "32";
+            width_expression = "";
+            direction = "input";
+            type = "writedata";
+            is_shared = "0";
+         }
+         PORT wb_dat_o
+         {
+            width = "32";
+            width_expression = "";
+            direction = "output";
+            type = "readdata";
+            is_shared = "0";
+         }
+         PORT wb_sel_i
+         {
+            width = "4";
+            width_expression = "";
+            direction = "input";
+            type = "byteenable";
+            is_shared = "0";
+         }
+         PORT wb_we_i
+         {
+            width = "1";
+            width_expression = "";
+            direction = "input";
+            type = "write";
+            is_shared = "0";
+         }
+         PORT wb_inta_o
+         {
+            width = "1";
+            width_expression = "";
+            direction = "output";
+            type = "irq";
+            is_shared = "0";
+         }
+         PORT wb_dma_req_o
+         {
+            width = "1";
+            width_expression = "";
+            direction = "output";
+            type = "export";
+            is_shared = "0";
+         }
+         PORT wb_dma_done_i
+         {
+            width = "1";
+            width_expression = "";
+            direction = "input";
+            type = "export";
+            is_shared = "0";
+         }
+      }
+   }
+   SLAVE dma_slave
+   {
+      SYSTEM_BUILDER_INFO 
+      {
+         Bus_Type = "avalon";
+         Address_Width = "0";
+         Address_Alignment = "native";
+         Data_Width = "32";
+         Has_Base_Address = "1";
+         Has_IRQ = "0";
+         Setup_Time = "0";
+         Hold_Time = "0";
+         Read_Wait_States = "peripheral_controlled";
+         Write_Wait_States = "peripheral_controlled";
+         Read_Latency = "0";
+         Maximum_Pending_Read_Transactions = "0";
+         Is_Printable_Device = "0";
+         Is_Memory_Device = "0";
+         Is_Readable = "1";
+         Is_Writable = "1";
+         Minimum_Uninterrupted_Run_Length = "1";
+         Base_Address = "0x040008B0";
+         Address_Group = "1";
+         MASTERED_BY dma_0/write_master
+         {
+            priority = "1";
+         }
+         MASTERED_BY dma_0/read_master
+         {
+            priority = "1";
+         }
+         MASTERED_BY cpu_0/data_master
+         {
+            priority = "1";
+         }
+         IRQ_MASTER cpu_0/data_master
+         {
+            IRQ_Number = "NC";
+         }
+      }
+      COMPONENT_BUILDER 
+      {
+         AVS_SETTINGS 
+         {
+            Setup_Value = "0";
+            Read_Wait_Value = "1";
+            Write_Wait_Value = "1";
+            Hold_Value = "0";
+            Timing_Units = "cycles";
+            Read_Latency_Value = "0";
+            Max_Pending_Read_Transactions_Value = "1";
+            Address_Alignment = "native";
+            Is_Printable_Device = "0";
+            interface_name = "Avalon Slave";
+            Minimum_Arbitration_Shares = "1";
+            external_wait = "1";
+            Is_Memory_Device = "0";
+         }
+      }
+      PORT_WIRING 
+      {
+         PORT wb_dma_clk_i
+         {
+            width = "1";
+            width_expression = "";
+            direction = "input";
+            type = "clk";
+            is_shared = "0";
+         }
+         PORT wb_dma_cyc_i
+         {
+            width = "1";
+            width_expression = "";
+            direction = "input";
+            type = "chipselect";
+            is_shared = "0";
+         }
+         PORT wb_dma_stb_i
+         {
+            width = "1";
+            width_expression = "";
+            direction = "input";
+            type = "chipselect";
+            is_shared = "0";
+         }
+         PORT wb_dma_ack_o
+         {
+            width = "1";
+            width_expression = "";
+            direction = "output";
+            type = "waitrequest_n";
+            is_shared = "0";
+         }
+         PORT wb_dma_rty_o
+         {
+            width = "1";
+            width_expression = "";
+            direction = "output";
+            type = "export";
+            is_shared = "0";
+         }
+         PORT wb_dma_err_o
+         {
+            width = "1";
+            width_expression = "";
+            direction = "output";
+            type = "export";
+            is_shared = "0";
+         }
+         PORT wb_dma_dat_i
+         {
+            width = "32";
+            width_expression = "";
+            direction = "input";
+            type = "writedata";
+            is_shared = "0";
+         }
+         PORT wb_dma_dat_o
+         {
+            width = "32";
+            width_expression = "";
+            direction = "output";
+            type = "readdata";
+            is_shared = "0";
+         }
+         PORT wb_dma_sel_i
+         {
+            width = "4";
+            width_expression = "";
+            direction = "input";
+            type = "byteenable";
+            is_shared = "0";
+         }
+         PORT wb_dma_we_i
+         {
+            width = "1";
+            width_expression = "";
+            direction = "input";
+            type = "write";
+            is_shared = "0";
+         }
+      }
+   }
+   WIZARD_SCRIPT_ARGUMENTS 
+   {
+      hdl_parameters 
+      {
+         twidth = "8";
+         pio_mode0_t1 = "6";
+         pio_mode0_t2 = "28";
+         pio_mode0_t4 = "2";
+         pio_mode0_teoc = "23";
+         dma_mode0_tm = "0";
+         dma_mode0_td = "10";
+         dma_mode0_teoc = "12";
+      }
+   }
+   HDL_INFO 
+   {
+      Synthesis_HDL_Files = "__PROJECT_DIRECTORY__/ATAHOST_CONTROLLER.vhd,__PROJECT_DIRECTORY__/ATAHOST_DMA.vhd,__PROJECT_DIRECTORY__/atahost_pio_actrl.vhd,__PROJECT_DIRECTORY__/atahost_pio_controller.vhd,__PROJECT_DIRECTORY__/atahost_pio_tctrl.vhd,__PROJECT_DIRECTORY__/atahost_reg_buf.vhd,__PROJECT_DIRECTORY__/atahost_top.vhd,__PROJECT_DIRECTORY__/atahost_wb_slave.vhd,__PROJECT_DIRECTORY__/ro_cnt.vhd,__PROJECT_DIRECTORY__/ud_cnt.vhd,__PROJECT_DIRECTORY__/ATAHOST_FIFO_RX.vhd,__PROJECT_DIRECTORY__/ATAHOST_FIFO_TX.vhd, __PROJECT_DIRECTORY__/ocide3_controller_0.vhd";
+   }
+}
+</parameter>
+    </module>
+    <module version="7.2" name="dma_0" kind="altera_avalon_dma">
+        <parameter valueString="true" name="allowByteTransactions"/>
+        <parameter valueString="true" name="allowDoubleWordTransactions"/>
+        <parameter valueString="16383" name="minimumNumberOfByteTransfers"/>
+        <parameter valueString="true" name="allowWordTransactions"/>
+        <parameter valueString="1" name="maxBurstSize"/>
+        <parameter valueString="14" name="minimumDmaTransactionRegisterWidth"/>
+        <parameter valueString="false" name="burstEnable"/>
+        <parameter valueString="false" name="bigEndian"/>
+        <parameter valueString="true" name="allowHalfWordTransactions"/>
+        <parameter valueString="true" name="allowQuadWordTransactions"/>
+        <parameter valueString="26" name="actualDmaTransactionRegisterWidth"/>
+        <parameter valueString="true" name="useRegistersForFIFO"/>
+    </module>
+    <connection version="7.2" start="clk.clk" kind="clock" end="sdram_0.clk"/>
+    <connection version="7.2" start="clk.clk" kind="clock" end="cpu_0.clk"/>
+    <connection version="7.2" start="clk.clk" kind="clock" end="jtag_uart_0.clk"/>
+    <connection version="7.2" start="clk.clk" kind="clock" end="sysid.clk"/>
+    <connection version="7.2" start="clk.clk" kind="clock" end="timer_0.clk"/>
+    <connection version="7.2" start="clk.clk" kind="clock" end="pio_di.clk"/>
+    <connection version="7.2" start="clk.clk" kind="clock" end="pio_do.clk"/>
+    <connection version="7.2" start="clk.clk" kind="clock" end="pio_gpi.clk"/>
+    <connection version="7.2" start="clk.clk" kind="clock" end="pio_gpo.clk"/>
+    <connection version="7.2" start="clk.clk" kind="clock" end="pio_fifo.clk"/>
+    <connection version="7.2" start="clk.clk" kind="clock" end="pio_mech_in.clk"/>
+    <connection version="7.2" start="clk.clk" kind="clock" end="pio_mech_out.clk"/>
+    <connection version="7.2" start="clk.clk" kind="clock" end="pio_mech_io.clk"/>
+    <connection version="7.2" start="clk.clk" kind="clock" end="ocide3_controller_0.pio_slave_clock"/>
+    <connection version="7.2" start="clk.clk" kind="clock" end="ocide3_controller_0.dma_slave_clock"/>
+    <connection version="7.2" start="clk.clk" kind="clock" end="dma_0.clk"/>
+    <connection version="7.2" start="cpu_0.instruction_master" kind="avalon" end="sdram_0.s1">
+        <parameter valueString="1" name="arbitrationPriority"/>
+        <parameter valueString="0x0000" name="baseAddress"/>
+    </connection>
+    <connection version="7.2" start="cpu_0.data_master" kind="avalon" end="sdram_0.s1">
+        <parameter valueString="1" name="arbitrationPriority"/>
+        <parameter valueString="0x0000" name="baseAddress"/>
+    </connection>
+    <connection version="7.2" start="dma_0.read_master" kind="avalon" end="sdram_0.s1">
+        <parameter valueString="1" name="arbitrationPriority"/>
+        <parameter valueString="0x0000" name="baseAddress"/>
+    </connection>
+    <connection version="7.2" start="dma_0.write_master" kind="avalon" end="sdram_0.s1">
+        <parameter valueString="1" name="arbitrationPriority"/>
+        <parameter valueString="0x0000" name="baseAddress"/>
+    </connection>
+    <connection version="7.2" start="cpu_0.instruction_master" kind="avalon" end="cpu_0.jtag_debug_module">
+        <parameter valueString="1" name="arbitrationPriority"/>
+        <parameter valueString="0x04000000" name="baseAddress"/>
+    </connection>
+    <connection version="7.2" start="cpu_0.data_master" kind="avalon" end="cpu_0.jtag_debug_module">
+        <parameter valueString="1" name="arbitrationPriority"/>
+        <parameter valueString="0x04000000" name="baseAddress"/>
+    </connection>
+    <connection version="7.2" start="cpu_0.data_master" kind="avalon" end="jtag_uart_0.avalon_jtag_slave">
+        <parameter valueString="1" name="arbitrationPriority"/>
+        <parameter valueString="0x04000800" name="baseAddress"/>
+    </connection>
+    <connection version="7.2" start="cpu_0.d_irq" kind="interrupt" end="jtag_uart_0.irq">
+        <parameter valueString="0" name="irqNumber"/>
+    </connection>
+    <connection version="7.2" start="cpu_0.data_master" kind="avalon" end="sysid.control_slave">
+        <parameter valueString="1" name="arbitrationPriority"/>
+        <parameter valueString="0x04000808" name="baseAddress"/>
+    </connection>
+    <connection version="7.2" start="cpu_0.data_master" kind="avalon" end="timer_0.s1">
+        <parameter valueString="1" name="arbitrationPriority"/>
+        <parameter valueString="0x04000820" name="baseAddress"/>
+    </connection>
+    <connection version="7.2" start="cpu_0.d_irq" kind="interrupt" end="timer_0.irq">
+        <parameter valueString="1" name="irqNumber"/>
+    </connection>
+    <connection version="7.2" start="cpu_0.data_master" kind="avalon" end="pio_di.s1">
+        <parameter valueString="1" name="arbitrationPriority"/>
+        <parameter valueString="0x04000810" name="baseAddress"/>
+    </connection>
+    <connection version="7.2" start="cpu_0.data_master" kind="avalon" end="pio_do.s1">
+        <parameter valueString="1" name="arbitrationPriority"/>
+        <parameter valueString="0x04000840" name="baseAddress"/>
+    </connection>
+    <connection version="7.2" start="cpu_0.data_master" kind="avalon" end="pio_gpi.s1">
+        <parameter valueString="1" name="arbitrationPriority"/>
+        <parameter valueString="0x04000850" name="baseAddress"/>
+    </connection>
+    <connection version="7.2" start="cpu_0.d_irq" kind="interrupt" end="pio_gpi.irq">
+        <parameter valueString="2" name="irqNumber"/>
+    </connection>
+    <connection version="7.2" start="cpu_0.data_master" kind="avalon" end="pio_gpo.s1">
+        <parameter valueString="1" name="arbitrationPriority"/>
+        <parameter valueString="0x04000860" name="baseAddress"/>
+    </connection>
+    <connection version="7.2" start="cpu_0.data_master" kind="avalon" end="pio_fifo.s1">
+        <parameter valueString="1" name="arbitrationPriority"/>
+        <parameter valueString="0x04000870" name="baseAddress"/>
+    </connection>
+    <connection version="7.2" start="cpu_0.d_irq" kind="interrupt" end="pio_fifo.irq">
+        <parameter valueString="3" name="irqNumber"/>
+    </connection>
+    <connection version="7.2" start="cpu_0.data_master" kind="avalon" end="pio_mech_in.s1">
+        <parameter valueString="1" name="arbitrationPriority"/>
+        <parameter valueString="0x04000880" name="baseAddress"/>
+    </connection>
+    <connection version="7.2" start="cpu_0.data_master" kind="avalon" end="pio_mech_out.s1">
+        <parameter valueString="1" name="arbitrationPriority"/>
+        <parameter valueString="0x04000890" name="baseAddress"/>
+    </connection>
+    <connection version="7.2" start="cpu_0.data_master" kind="avalon" end="pio_mech_io.s1">
+        <parameter valueString="1" name="arbitrationPriority"/>
+        <parameter valueString="0x040008a0" name="baseAddress"/>
+    </connection>
+    <connection version="7.2" start="cpu_0.data_master" kind="avalon" end="ocide3_controller_0.pio_slave">
+        <parameter valueString="1" name="arbitrationPriority"/>
+        <parameter valueString="0x04000900" name="baseAddress"/>
+    </connection>
+    <connection version="7.2" start="cpu_0.d_irq" kind="interrupt" end="ocide3_controller_0.pio_slave_irq">
+        <parameter valueString="4" name="irqNumber"/>
+    </connection>
+    <connection version="7.2" start="dma_0.write_master" kind="avalon" end="ocide3_controller_0.dma_slave">
+        <parameter valueString="1" name="arbitrationPriority"/>
+        <parameter valueString="0x040008b0" name="baseAddress"/>
+    </connection>
+    <connection version="7.2" start="dma_0.read_master" kind="avalon" end="ocide3_controller_0.dma_slave">
+        <parameter valueString="1" name="arbitrationPriority"/>
+        <parameter valueString="0x040008b0" name="baseAddress"/>
+    </connection>
+    <connection version="7.2" start="cpu_0.data_master" kind="avalon" end="ocide3_controller_0.dma_slave">
+        <parameter valueString="1" name="arbitrationPriority"/>
+        <parameter valueString="0x040008b0" name="baseAddress"/>
+    </connection>
+    <connection version="7.2" start="cpu_0.data_master" kind="avalon" end="dma_0.control_port_slave">
+        <parameter valueString="1" name="arbitrationPriority"/>
+        <parameter valueString="0x040008c0" name="baseAddress"/>
+    </connection>
+    <connection version="7.2" start="cpu_0.d_irq" kind="interrupt" end="dma_0.irq">
+        <parameter valueString="5" name="irqNumber"/>
+    </connection>
+</system>
+

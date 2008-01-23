@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE ON
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 7.2
 
 # Pin & Location Assignments
 # ==========================
@@ -785,3 +785,4 @@ set_global_assignment -name VHDL_FILE target_top.vhd
 set_global_assignment -name SIGNALTAP_FILE sb.stp
 set_global_assignment -name VHDL_FILE altera_europa_support.vhd
 set_global_assignment -name SIGNALTAP_FILE stp_c1541_core.stp
+set_global_assignment -name QIP_FILE C1541_NIOS.qip
