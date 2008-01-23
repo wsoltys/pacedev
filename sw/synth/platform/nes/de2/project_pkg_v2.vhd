@@ -20,17 +20,17 @@ package project_pkg is
   constant PACE_CLK1_DIVIDE_BY        		: natural := 7;
   constant PACE_CLK1_MULTIPLY_BY      		: natural := 3;   -- 50*3/7 = 21.428571MHz
 
-	constant PACE_ENABLE_ADV724					    : std_logic := '0';
-	constant PACE_ADV724_STD						    : std_logic := ADV724_STD_PAL;
-
 	-- DE2 constants which *MUST* be defined
 	
 	constant DE2_JAMMA_IS_MAPLE	              : boolean := false;
 	constant DE2_JAMMA_IS_NGC                 : boolean := true;
 	
-	constant DE2_LCD_LINE2									: string := "   NES TENNIS   ";
+	constant DE2_LCD_LINE2									: string := "NES TENNIS (VGA)";
 
 	-- NES-specific constants
+
+  -- used to specify VGA/CVBS
+	constant PACE_ENABLE_ADV724					    : std_logic := '0';
 
 	constant NES_USE_INTERNAL_WRAM					: boolean := true;
 	

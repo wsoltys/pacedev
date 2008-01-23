@@ -28,7 +28,7 @@ set_global_assignment -name FAMILY "Cyclone II"
 set_global_assignment -name TOP_LEVEL_ENTITY target_top
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 7.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "07:57:19  AUGUST 20, 2007"
-set_global_assignment -name LAST_QUARTUS_VERSION 7.2
+set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
 set_location_assignment PIN_E19 -to sdram_clock
 set_location_assignment PIN_L22 -to clock
 set_location_assignment PIN_N1 -to lcd_dclk
@@ -255,6 +255,7 @@ set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/p3m/target_pkg.vhd
@@ -276,7 +277,8 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80se.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/frogger/uPse.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/mapctl.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/videocontroller_240x320_60Hz.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/vga_240x320_60Hz.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/SptReg.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/pace/flipRow.VHDL
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/spritectl.vhd

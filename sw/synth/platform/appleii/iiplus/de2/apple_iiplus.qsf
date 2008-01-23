@@ -498,6 +498,7 @@ set_parameter -name CYCLONEII_SAFE_WRITE VERIFIED_SAFE
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/iiplus/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/de2/target_pkg.vhd
@@ -519,7 +520,8 @@ set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/inputm
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Inputs.VHD
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/intgen.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/iiplus/Game.VHD
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/LCMcontroller_320x240_60Hz.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/lcm_320x240_60Hz.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/bitmapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/mapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/graphics.vhd

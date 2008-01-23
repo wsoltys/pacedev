@@ -25,7 +25,7 @@
 
 # Project-Wide Assignments
 # ========================
-set_global_assignment -name LAST_QUARTUS_VERSION 7.2
+set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -497,6 +497,7 @@ set_global_assignment -name SEED 1
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/invadpt2/platform_variant_pkg.vhd
@@ -525,7 +526,8 @@ set_global_assignment -name VHDL_FILE ../../../../../src/pace/Inputs.VHD
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/Game.VHD
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/invaders/invaders_audio.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/Sound.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/LCMcontroller_320x240_60Hz.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/lcm_320x240_60Hz.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/bitmapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Graphics.VHD
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
@@ -540,3 +542,6 @@ set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/I2S_Contr
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/I2S_LCM_Config.v
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/LCD_Controller.v
 set_global_assignment -name VHDL_FILE ../../../../../src/target/de2/target_top.vhd
+set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top

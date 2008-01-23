@@ -29,7 +29,7 @@ set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "19:21:54  AUGUST 25, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION 7.2
+set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -256,7 +256,10 @@ set_global_assignment -name EDA_OUTPUT_DATA_FORMAT NONE -section_id eda_simulati
 # end ENTITY(target_top)
 # ---------------------
 
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/nanoboard/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/jumpbug/platform_pkg.vhd
@@ -274,7 +277,8 @@ set_global_assignment -name VHDL_FILE ../../../../src/platform/frogger/uPse.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/bitmapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/mapCtl.VHDL
 set_global_assignment -name VHDL_FILE ../../../device/cyclone/dpram_1r1w.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/videocontroller_800x600_60Hz.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/vga_800x600_60Hz.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/SptReg.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/pace/flipRow.VHDL
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/sptCtlVHDL.VHD
@@ -294,5 +298,3 @@ set_global_assignment -name VHDL_FILE ../../../../src/platform/jumpbug/Game.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
 set_global_assignment -name VQM_FILE ../../../../src/target/nanoboard/ep1c12/MAX1104_DAC.VQM
 set_global_assignment -name VHDL_FILE ../../../../src/target/nanoboard/target_top.vhd
-set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
-set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"

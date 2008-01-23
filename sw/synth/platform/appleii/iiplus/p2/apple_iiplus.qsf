@@ -738,6 +738,7 @@ set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
 set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/iiplus/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/p2/target_pkg.vhd
@@ -757,7 +758,6 @@ set_global_assignment -name VHDL_FILE ../../../../../src/pace/Inputs.VHD
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/intgen.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/iiplus/Game.VHD
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/sound.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/vga_800x600_60Hz.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/bitmapctl.vhd

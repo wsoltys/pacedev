@@ -7,6 +7,10 @@ use work.pace_pkg.all;
 
 package project_pkg is
 
+  -- borrowed from P2 target_pkg
+	constant ADV724_STD_PAL		  : std_logic := '0';
+	constant ADV724_STD_NTSC	  : std_logic := not ADV724_STD_PAL;
+
 	--  
 	-- PACE constants which *MUST* be defined
 	--

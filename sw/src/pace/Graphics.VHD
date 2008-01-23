@@ -249,6 +249,74 @@ begin
 
   end generate GEN_VGA_800x600_60Hz;
 
+  GEN_VGA_240x320_60Hz : if PACE_VIDEO_CONTROLLER_TYPE = PACE_VIDEO_VGA_240x320_60Hz generate
+
+    pace_video_controller_inst : entity work.pace_video_controller(VGA_240X320_60HZ)
+      port map
+      (
+        clk         => clk,
+        reset				=> reset,
+
+        xcentre			=> xcentre,
+        ycentre			=> ycentre,
+        
+        -- video control signals (out)
+        strobe      => strobe,
+        pixel_x			=> pix_x,
+        pixel_y			=> pix_y,
+        hblank      => hblank_s,
+        vblank      => vblank_s,
+
+        -- video data signals (in)
+        r_i					=> rgb_data.r,
+        g_i					=> rgb_data.g,
+        b_i					=> rgb_data.b,
+
+        -- VGA signals (out)
+        red         => red,
+        green       => green,
+        blue        => blue,
+        lcm_data		=> lcm_data,
+        hsync       => hsync,
+        vsync       => vsync
+      );
+
+  end generate GEN_VGA_240x320_60Hz;
+
+  GEN_VGA_320x240_60Hz : if PACE_VIDEO_CONTROLLER_TYPE = PACE_VIDEO_LCM_320x240_60Hz generate
+
+    pace_video_controller_inst : entity work.pace_video_controller(LCM_320X240_60HZ)
+      port map
+      (
+        clk         => clk,
+        reset				=> reset,
+
+        xcentre			=> xcentre,
+        ycentre			=> ycentre,
+        
+        -- video control signals (out)
+        strobe      => strobe,
+        pixel_x			=> pix_x,
+        pixel_y			=> pix_y,
+        hblank      => hblank_s,
+        vblank      => vblank_s,
+
+        -- video data signals (in)
+        r_i					=> rgb_data.r,
+        g_i					=> rgb_data.g,
+        b_i					=> rgb_data.b,
+
+        -- VGA signals (out)
+        red         => red,
+        green       => green,
+        blue        => blue,
+        lcm_data		=> lcm_data,
+        hsync       => hsync,
+        vsync       => vsync
+      );
+
+  end generate GEN_VGA_320x240_60Hz;
+
   GEN_CVBS_720x288p_50Hz : if PACE_VIDEO_CONTROLLER_TYPE = PACE_VIDEO_CVBS_720x288p_50Hz generate
 
     pace_video_controller_inst : entity work.pace_video_controller(CVBS_720X288p_50HZ)

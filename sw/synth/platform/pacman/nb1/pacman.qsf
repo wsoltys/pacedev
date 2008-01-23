@@ -29,7 +29,7 @@ set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "19:21:54  AUGUST 25, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION 7.2
+set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -267,6 +267,7 @@ set_global_assignment -name PLACEMENT_EFFORT_MULTIPLIER 2
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/nanoboard/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/platform_pkg.vhd
@@ -287,7 +288,8 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80.v
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80se.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/frogger/uPse.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/altera_mem.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/videocontroller_800x600_60Hz.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/vga_800x600_60Hz.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/mapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/flipRow.VHDL
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/spritectl.vhd

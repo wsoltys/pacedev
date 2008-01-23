@@ -733,6 +733,7 @@ set_parameter -name CYCLONEII_SAFE_WRITE "\"VERIFIED_SAFE\""
 
 
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/ii/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/p2/target_pkg.vhd
@@ -752,7 +753,8 @@ set_global_assignment -name VHDL_FILE ../../../../../src/pace/Inputs.VHD
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/intgen.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/ii/Game.VHD
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/sound.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/videocontroller_800x600_60Hz.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/vga_800x600_60Hz.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/bitmapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/mapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/graphics.vhd

@@ -22,11 +22,6 @@ package project_pkg is
   constant PACE_CLK1_DIVIDE_BY        : natural := 1;
   constant PACE_CLK1_MULTIPLY_BY      : natural := 2;  			-- 20*2/1 = 40MHz
 
-	constant PACE_SRAM_DATA_WIDTH				: natural := 8;
-	
-	constant PACE_ENABLE_ADV724					: std_logic := '0';
-	constant PACE_ADV724_STD						: std_logic := ADV724_STD_PAL;
-
   -- NB1-specific constants that must be defined
   constant NB1_PLL_INCLK              : NANOBOARD_PLL_INCLK_Type := NANOBOARD_PLL_INCLK_REF;
   constant NB1_INCLK0_INPUT_FREQUENCY : natural := 50000;   -- 20MHz

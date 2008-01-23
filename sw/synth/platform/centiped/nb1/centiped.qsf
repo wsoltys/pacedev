@@ -29,7 +29,7 @@ set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "19:21:54  AUGUST 25, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION 7.2
+set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -264,7 +264,10 @@ set_instance_assignment -name CLOCK_SETTINGS clk_30M -to "PACE:pace_inst|clk[0]"
 set_global_assignment -name BASED_ON_CLOCK_SETTINGS clk_ref -section_id clk_40M
 set_global_assignment -name DIVIDE_BASE_CLOCK_PERIOD_BY 2 -section_id clk_40M
 set_instance_assignment -name CLOCK_SETTINGS clk_40M -to "PACE:pace_inst|clk[1]"
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/nanoboard/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/centiped/platform_pkg.vhd
@@ -277,7 +280,8 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_ALU.
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_MCode.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cyclone/dpram_1r1w.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/videocontroller_800x600_60Hz.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/vga_800x600_60Hz.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/centiped/mapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/centiped/sptreg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/flipRow.VHDL
@@ -298,5 +302,3 @@ set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
 set_global_assignment -name VQM_FILE ../../../../src/target/nanoboard/ep1c12/MAX1104_DAC.VQM
 set_global_assignment -name VHDL_FILE ../../../../src/target/nanoboard/target_top.vhd
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
-set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
-set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"

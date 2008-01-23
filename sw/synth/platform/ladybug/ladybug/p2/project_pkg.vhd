@@ -4,6 +4,7 @@ use ieee.std_logic_unsigned.all;
 
 library work;
 use work.pace_pkg.all;
+use work.target_pkg.all;
 
 package project_pkg is
 
