@@ -26,39 +26,10 @@
 # Project-Wide Assignments
 # ========================
 set_global_assignment -name SMART_RECOMPILE OFF
-set_global_assignment -name INCREMENTAL_COMPILATION FULL_INCREMENTAL_COMPILATION
+set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "19:21:54  AUGUST 25, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
-set_global_assignment -name VQM_FILE ../../DXP/ep1c12/VGA.VQM
-set_global_assignment -name VHDL_FILE ../../Common/ttl_74LS138_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../Common/ttl_74LS138.vhd
-set_global_assignment -name VHDL_FILE ../../Common/mc6883/mc6883_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../Common/mc6883/mc6883.vhd
-set_global_assignment -name VHDL_FILE ../../Common/mc6847/ep1c12/linebuf_dpram.vhd
-set_global_assignment -name VHDL_FILE ../../Common/mc6847/mc6847_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../Common/mc6847/mc6847.vhd
-set_global_assignment -name VHDL_FILE ../../Common/vga/vga.vhd
-set_global_assignment -name VHDL_FILE ../../Common/vga/vga_pkg.vhd
-set_global_assignment -name VHDL_FILE ../coco_pkg.vhd
-set_global_assignment -name VHDL_FILE ../ep1c12/tiledata.vhd
-set_global_assignment -name VHDL_FILE ../ep1c12/vram.vhd
-set_global_assignment -name VHDL_FILE ../ep1c12/Basic10/basrom.vhd
-set_global_assignment -name VHDL_FILE ../ep1c12/ExtBas10/extbasrom.vhd
-set_global_assignment -name VHDL_FILE ../ep1c12/palx4_clk.vhd
-set_global_assignment -name VHDL_FILE ../ep1c12/vga_clk.vhd
-set_global_assignment -name VHDL_FILE ../../Common/cpus/6809/cpu09/cpu09.vhd
-set_global_assignment -name VHDL_FILE ../../Common/kbd_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../Common/ps2/ps2kbd.vhd
-set_global_assignment -name VHDL_FILE ../Keyboard.VHDL
-set_global_assignment -name VHDL_FILE ../../Common/pia6821.vhd
-set_global_assignment -name VHDL_FILE ../Game.VHD
-set_global_assignment -name VHDL_FILE ../PACE.VHD
-set_global_assignment -name VQM_FILE ../../DXP/ep1c12/BUF.VQM
-set_global_assignment -name VQM_FILE ../../DXP/ep1c12/MAX1104_DAC.VQM
-set_global_assignment -name VHDL_FILE ../../Stubs/Sound.vhd
-set_global_assignment -name VHDL_FILE ../../Common/NoJTAG/Nanoboard.vhd
-set_global_assignment -name SIGNALTAP_FILE ../ep1c12/stp1.stp
+set_global_assignment -name LAST_QUARTUS_VERSION 7.2
 
 # Pin & Location Assignments
 # ==========================
@@ -155,7 +126,7 @@ set_global_assignment -name FMAX_REQUIREMENT "20.0 MHz"
 set_global_assignment -name SAVE_DISK_SPACE OFF
 set_global_assignment -name EDA_DESIGN_ENTRY_SYNTHESIS_TOOL Custom
 set_global_assignment -name FAMILY Cyclone
-set_global_assignment -name TOP_LEVEL_ENTITY nanoboard
+set_global_assignment -name TOP_LEVEL_ENTITY target_top
 set_global_assignment -name AUTO_ENABLE_SMART_COMPILE on
 
 # Fitter Assignments
@@ -185,7 +156,6 @@ set_global_assignment -name USE_SIGNALTAP_FILE ../ep1c12/stp1.stp
 
 	# Timing Assignments
 	# ==================
-	set_global_assignment -name FMAX_REQUIREMENT "58 MHz" -section_id clk_PALx4
 
 # end CLOCK(clk_PALx4)
 # --------------------
@@ -195,7 +165,7 @@ set_global_assignment -name USE_SIGNALTAP_FILE ../ep1c12/stp1.stp
 
 	# Timing Assignments
 	# ==================
-	set_global_assignment -name FMAX_REQUIREMENT "30 MHz" -section_id clk_brd
+set_global_assignment -name FMAX_REQUIREMENT "30 MHz" -section_id clk_brd
 
 # end CLOCK(clk_brd)
 # ------------------
@@ -205,7 +175,7 @@ set_global_assignment -name USE_SIGNALTAP_FILE ../ep1c12/stp1.stp
 
 	# Timing Assignments
 	# ==================
-	set_global_assignment -name FMAX_REQUIREMENT "20 MHz" -section_id clk_ref
+set_global_assignment -name FMAX_REQUIREMENT "20 MHz" -section_id clk_ref
 
 # end CLOCK(clk_ref)
 # ------------------
@@ -228,17 +198,12 @@ set_global_assignment -name EDA_OUTPUT_DATA_FORMAT NONE -section_id eda_simulati
 
 	# Timing Assignments
 	# ==================
-	set_instance_assignment -name CLOCK_SETTINGS clk_ref -to clk_ref
-	set_instance_assignment -name CLOCK_SETTINGS clk_brd -to clk_brd
-	set_instance_assignment -name CLOCK_SETTINGS clk_PALx4 -to "PACE:pace_inst|Game:U_Game|palx4_clk:palx4_clk_inst|c0"
 
 	# ---------------------------------------
 	# start DESIGN_PARTITION("Sound:U_Sound")
 
 		# Incremental Compilation Assignments
 		# ===================================
-		set_instance_assignment -name PARTITION_HIERARCHY db/usoun_1 -to "PACE:pace_inst|Sound:U_Sound" -section_id "Sound:U_Sound"
-		set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id "Sound:U_Sound"
 
 	# end DESIGN_PARTITION("Sound:U_Sound")
 	# -------------------------------------
@@ -248,8 +213,6 @@ set_global_assignment -name EDA_OUTPUT_DATA_FORMAT NONE -section_id eda_simulati
 
 		# Incremental Compilation Assignments
 		# ===================================
-		set_instance_assignment -name PARTITION_HIERARCHY db/basro_1 -to "PACE:pace_inst|Game:U_Game|basrom:basrom_inst" -section_id "basrom:basrom_inst"
-		set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id "basrom:basrom_inst"
 
 	# end DESIGN_PARTITION("basrom:basrom_inst")
 	# ------------------------------------------
@@ -259,8 +222,6 @@ set_global_assignment -name EDA_OUTPUT_DATA_FORMAT NONE -section_id eda_simulati
 
 		# Incremental Compilation Assignments
 		# ===================================
-		set_instance_assignment -name PARTITION_HIERARCHY db/cpuin_1 -to "PACE:pace_inst|Game:U_Game|cpu09:cpu_inst" -section_id "cpu09:cpu_inst"
-		set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id "cpu09:cpu_inst"
 
 	# end DESIGN_PARTITION("cpu09:cpu_inst")
 	# --------------------------------------
@@ -270,8 +231,6 @@ set_global_assignment -name EDA_OUTPUT_DATA_FORMAT NONE -section_id eda_simulati
 
 		# Incremental Compilation Assignments
 		# ===================================
-		set_instance_assignment -name PARTITION_HIERARCHY db/vdgin_1 -to "PACE:pace_inst|Game:U_Game|mc6847:vdg_inst" -section_id "mc6847:vdg_inst"
-		set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id "mc6847:vdg_inst"
 
 	# end DESIGN_PARTITION("mc6847:vdg_inst")
 	# ---------------------------------------
@@ -281,8 +240,6 @@ set_global_assignment -name EDA_OUTPUT_DATA_FORMAT NONE -section_id eda_simulati
 
 		# Incremental Compilation Assignments
 		# ===================================
-		set_instance_assignment -name PARTITION_HIERARCHY db/samin_1 -to "PACE:pace_inst|Game:U_Game|mc6883:sam_inst" -section_id "mc6883:sam_inst"
-		set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id "mc6883:sam_inst"
 
 	# end DESIGN_PARTITION("mc6883:sam_inst")
 	# ---------------------------------------
@@ -292,8 +249,6 @@ set_global_assignment -name EDA_OUTPUT_DATA_FORMAT NONE -section_id eda_simulati
 
 		# Incremental Compilation Assignments
 		# ===================================
-		set_instance_assignment -name PARTITION_HIERARCHY db/u11in_1 -to "PACE:pace_inst|Game:U_Game|ttl_74ls138_p:U11_inst" -section_id "ttl_74ls138_p:U11_inst"
-		set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id "ttl_74ls138_p:U11_inst"
 
 	# end DESIGN_PARTITION("ttl_74ls138_p:U11_inst")
 	# ----------------------------------------------
@@ -303,8 +258,6 @@ set_global_assignment -name EDA_OUTPUT_DATA_FORMAT NONE -section_id eda_simulati
 
 		# Incremental Compilation Assignments
 		# ===================================
-		set_instance_assignment -name PARTITION_HIERARCHY db/vrami_1 -to "PACE:pace_inst|Game:U_Game|vram:vram_inst" -section_id "vram:vram_inst"
-		set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id "vram:vram_inst"
 
 	# end DESIGN_PARTITION("vram:vram_inst")
 	# --------------------------------------
@@ -314,8 +267,6 @@ set_global_assignment -name EDA_OUTPUT_DATA_FORMAT NONE -section_id eda_simulati
 
 		# Incremental Compilation Assignments
 		# ===================================
-		set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
-		set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id Top
 
 	# end DESIGN_PARTITION(Top)
 	# -------------------------
@@ -323,13 +274,39 @@ set_global_assignment -name EDA_OUTPUT_DATA_FORMAT NONE -section_id eda_simulati
 # end ENTITY(nanoboard)
 # ---------------------
 
+set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id Top
 set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
-set_global_assignment -name PARTITION_COLOR 2154329 -section_id "Sound:U_Sound"
-set_global_assignment -name PARTITION_COLOR 9035552 -section_id "basrom:basrom_inst"
-set_global_assignment -name PARTITION_COLOR 14650912 -section_id "cpu09:cpu_inst"
-set_global_assignment -name PARTITION_COLOR 14622805 -section_id "mc6847:vdg_inst"
-set_global_assignment -name PARTITION_COLOR 13115615 -section_id "mc6883:sam_inst"
-set_global_assignment -name PARTITION_COLOR 2105567 -section_id "ttl_74ls138_p:U11_inst"
-set_global_assignment -name PARTITION_COLOR 6345704 -section_id "vram:vram_inst"
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_instance_assignment -name CLOCK_SETTINGS clk_ref -to clk_ref
+set_instance_assignment -name CLOCK_SETTINGS clk_brd -to clk_brd
+set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/nanoboard/target_pkg.vhd
+set_global_assignment -name VHDL_FILE project_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/coco1/platform_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/coco1/platform_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/target/nb1/target_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cyclone/pll.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cyclone/dpram_1r1w.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cyclone/sprom.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cyclone/dpram.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cyclone/dprom_2r.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/clk_div.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/cpu09/cpu09.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/inputmapper.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/component/ttl/ttl_74LS138.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/pia6821.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/game.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/mapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/video/mc6883.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/video/mc6847.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/pace.vhd
+set_global_assignment -name VQM_FILE ../../../../src/target/nanoboard/ep1c12/VGA.VQM
+set_global_assignment -name VQM_FILE ../../../../src/target/nanoboard/ep1c12/BUF.VQM
+set_global_assignment -name VQM_FILE ../../../../src/target/nanoboard/ep1c12/MAX1104_DAC.VQM
+set_global_assignment -name VHDL_FILE ../../../../src/target/nanoboard/target_top.vhd
