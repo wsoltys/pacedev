@@ -48,6 +48,8 @@ package project_pkg is
 	
 	constant INVADERS_CPU_CLK_ENA_DIVIDE_BY		: natural := 12;
 	constant INVADERS_1MHz_CLK0_COUNTS				: natural := 24;
+	--constant INVADERS_CPU_CLK_ENA_DIVIDE_BY		: natural := 10;
+	--constant INVADERS_1MHz_CLK0_COUNTS				: natural := 20;
 
 	constant INVADERS_USE_INTERNAL_WRAM				: boolean := true;
 	constant USE_VIDEO_VBLANK_INTERRUPT 			: boolean := false;

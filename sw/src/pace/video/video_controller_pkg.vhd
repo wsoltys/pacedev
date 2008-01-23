@@ -47,9 +47,5 @@ package video_controller_pkg is
     );
   end component pace_video_controller;
 
-	-- ADV724 constants (P2 target)
-	constant ADV724_STD_PAL		      : std_logic := '0';
-	constant ADV724_STD_NTSC	      : std_logic := not ADV724_STD_PAL;
-
 end;
 

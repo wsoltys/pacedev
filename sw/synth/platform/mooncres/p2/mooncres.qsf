@@ -14,7 +14,7 @@
 
 
 # The default values for assignments are stored in the file
-#		pacman_cvbs_assignment_defaults.qdf
+#		mooncres_assignment_defaults.qdf
 # If this file doesn't exist, and for assignments not listed, see file
 #		assignment_defaults.qdf
 
@@ -25,10 +25,10 @@
 
 # Project-Wide Assignments
 # ========================
-set_global_assignment -name SMART_RECOMPILE ON
+set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION 6.1
+set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -353,8 +353,8 @@ set_global_assignment -name STRATIX_DEVICE_IO_STANDARD LVTTL
 
 # SignalTap II Assignments
 # ========================
-set_global_assignment -name ENABLE_SIGNALTAP OFF
-set_global_assignment -name USE_SIGNALTAP_FILE signaltap.stp
+set_global_assignment -name ENABLE_SIGNALTAP ON
+set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
 
 # ----------------------------
 # start CLOCK(ethernet_clocks)
@@ -709,7 +709,6 @@ set_global_assignment -name FLOW_ENABLE_TIMING_CONSTRAINT_CHECK OFF
 set_global_assignment -name DO_COMBINED_ANALYSIS ON
 set_global_assignment -name ENABLE_CLOCK_LATENCY ON
 set_global_assignment -name REPORT_IO_PATHS_SEPARATELY ON
-set_instance_assignment -name GLOBAL_SIGNAL "GLOBAL CLOCK" -to "meb_pll:MEB_PLL_0|altpll:altpll_component|_clk1"
 set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_ASYNCHRONOUS_SIGNAL_PIPELINING ON
@@ -732,13 +731,19 @@ set_instance_assignment -name REPORT_DELAY ON -from * -to ncs_s
 set_parameter -name CYCLONEII_SAFE_WRITE "\"VERIFIED_SAFE\""
 
 
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
+set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
-set_global_assignment -name VHDL_FILE project_pkg_cvbs.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/platform_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE project_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/mooncres/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/p2/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram_1r1w.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dprom_2r.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/clk_div.vhd
@@ -751,19 +756,27 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_Reg.
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80se.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/frogger/uPse.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/mapctl.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/videocontroller_720x288p_50Hz.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/SptReg.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/vga_800x600_60Hz.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/cvbs_720x288p_50Hz.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/bitmapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/mapCtl.VHDL
 set_global_assignment -name VHDL_FILE ../../../../src/pace/flipRow.VHDL
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/spritectl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/SptReg.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/sptCtlVHDL.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/pace/SptArray.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Graphics.VHD
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/InputMapper.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/platform/mooncres/InputMapper.VHDL
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/Pacman_Interrupts.VHD
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/sound.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/pacsnd.Vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/Pacman_vramMapper.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/Game.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/Galaxian_Interrupts.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/Galaxian_vramMapper.VHDL
+set_global_assignment -name VHDL_FILE ../../../../src/platform/mooncres/Game.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/conversion.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_upcounter.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gc_tx_bit.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_joy.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_top.vhd
+set_global_assignment -name SIGNALTAP_FILE stp1.stp
