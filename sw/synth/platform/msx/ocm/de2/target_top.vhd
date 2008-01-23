@@ -215,7 +215,8 @@ begin
 		end if;
 	end process;
   reset <= init or not sw(0);
-
+	reset_n <= not reset;
+			
   -- *MUST* be high to use 27MHz clock as input
   td_reset <= '1';
 

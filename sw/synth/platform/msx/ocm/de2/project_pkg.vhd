@@ -19,7 +19,7 @@ package project_pkg is
   constant OCM_DIP_SLOT2_1              : std_logic := '0';
   constant OCM_DIP_SLOT2_0              : std_logic := '0';
   constant OCM_DIP_CPU_CLOCK            : std_logic := '0';
-  constant OCM_DIP_DISK_ROM             : std_logic := '0';
+  constant OCM_DIP_DISK_ROM             : std_logic := '1';
   constant OCM_DIP_KEYBOARD             : std_logic := '1';
   constant OCM_DIP_RED_CINCH            : std_logic := '0';
   constant OCM_DIP_VGA_1                : std_logic := '1';
