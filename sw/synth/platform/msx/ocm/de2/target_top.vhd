@@ -310,6 +310,7 @@ begin
 
 	-- default the dipswitches
 	-- note: they get inverted in emsx_top before being used
+  -- - these can go on real dipswitches?!?
   dip_s <= not (OCM_DIP_SLOT2_1 &
                 OCM_DIP_SLOT2_0 &
                 OCM_DIP_CPU_CLOCK &
@@ -402,8 +403,8 @@ begin
 
 	    -- DIP switch, Lamp ports
 	    pDip        => dip_s,							-- 0=ON,  1=OFF(default on shipment)
-	    pLed        => open,							-- 0=OFF, 1=ON(green)
-	    pLedPwr     => open,							-- 0=OFF, 1=ON(red) ...Power & SD/MMC access lamp
+	    pLed        => ledg(7 downto 0),	-- 0=OFF, 1=ON(green)
+	    pLedPwr     => ledr(0),						-- 0=OFF, 1=ON(red) ...Power & SD/MMC access lamp
 
 	    -- Video, Audio/CMT ports
 	    pDac_VR     => red_s,             -- RGB_Red / Svideo_C
@@ -415,7 +416,7 @@ begin
 	    pVideoHS_n  => vga_hs,						-- Csync(RGB15K), HSync(VGA31K)
 	    pVideoVS_n  => vga_vs,					  -- Audio(RGB15K), VSync(VGA31K)
 
-	    pVideoClk   => open,							-- (Reserved)
+	    pVideoClk   => vga_clk,						-- modified MMc = clk21m
 	    pVideoDat   => open,							-- (Reserved)
 
 	    -- Reserved ports (USB)
@@ -437,7 +438,6 @@ begin
 
   dram_addr <= dram_addr_s(dram_addr'range);
 
-  vga_clk <= clock_50;
   vga_r <= red_s & "0000";
   vga_g <= green_s & "0000";
   vga_b <= blue_s & "0000";
@@ -450,4 +450,3 @@ begin
   ledr(15 downto 10) <= (others => '0');
 
 end SYN;
-

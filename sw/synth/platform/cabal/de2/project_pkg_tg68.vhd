@@ -23,6 +23,10 @@ package project_pkg is
 	constant PACE_VIDEO_V_SCALE       			: integer := 1;
 
 	-- DE2-C64-specific constants
+
+	constant DE2_JAMMA_IS_MAPLE	            : boolean := false;
+	constant DE2_JAMMA_IS_NGC               : boolean := true;
+
 	constant DE2_LCD_LINE2									: string := "     CABAL      ";		-- 16 chars exactly
 
 	-- Cabal-specific constants

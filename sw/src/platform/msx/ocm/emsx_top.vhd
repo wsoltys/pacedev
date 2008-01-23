@@ -1387,7 +1387,7 @@ begin
   DispMode(1)<= iDipLed(0);
   DispMode(0)<= iDipLed(1);
 
-  pVideoClk <= 'Z';
+  pVideoClk <= clk21m; -- for DE2 etc
   pVideoDat <= 'Z';
 
 

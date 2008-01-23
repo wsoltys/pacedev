@@ -30,6 +30,7 @@ package project_pkg is
 	constant MOONCRES_1MHz_CLK0_COUNTS			: natural := 27;
 	-- needed by Galaxian_Interrupts
 	alias GALAXIAN_1MHz_CLK0_COUNTS			    : natural is MOONCRES_1MHz_CLK0_COUNTS;
+	alias GALAXIAN_CPU_CLK_ENA_DIVIDE_BY    : natural is MOONCRES_CPU_CLK_ENA_DIVIDE_BY;
 	
 	constant GALAXIAN_USE_INTERNAL_WRAM			: boolean := true;
 	constant USE_VIDEO_VBLANK_INTERRUPT     : boolean := false;

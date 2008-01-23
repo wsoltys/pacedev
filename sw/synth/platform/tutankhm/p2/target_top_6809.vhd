@@ -318,11 +318,11 @@ begin
 			
 	end generate GEN_NO_PLL;
 	
-	assert (not (P2_JAMMA_IS_MAPLE and P2_JAMMA_IS_GAMECUBE))
+	assert (not (P2_JAMMA_IS_MAPLE and P2_JAMMA_IS_NGC))
 		report "Cannot choose both MAPLE and GAMECUBE interfaces"
 		severity error;
 	
-	GEN_GAMECUBE : if P2_JAMMA_IS_GAMECUBE generate
+	GEN_GAMECUBE : if P2_JAMMA_IS_NGC generate
 	
 		GC_JOY: gamecube_joy
 			generic map
@@ -353,7 +353,7 @@ begin
 		
 	end generate GEN_GAMECUBE;
 
-	GEN_NO_JAMMA : if not P2_JAMMA_IS_GAMECUBE generate
+	GEN_NO_JAMMA : if not P2_JAMMA_IS_NGC generate
 	
 		jamma_s.coin(1) <= '1';
 		jamma_s.p(1).start <= '1';

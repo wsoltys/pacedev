@@ -20,11 +20,17 @@ package project_pkg is
 	constant PACE_VIDEO_H_SCALE       			: integer := 1;
 	constant PACE_VIDEO_V_SCALE       			: integer := 1;
 
-	-- DE2-C64-specific constants
-	constant DE2_LCD_LINE2									: string := "     CABAL      ";		-- 16 chars exactly
+  -- DE2-specific constants
+	constant DE2_JAMMA_IS_MAPLE	            : boolean := false;
+	constant DE2_JAMMA_IS_NGC               : boolean := true;
 
-	-- Pacman-specific constants
+	constant DE2_LCD_LINE2									: string := "   CABAL-LCD    ";		-- 16 chars exactly
+
+	-- Cabal-specific constants
 			
+	constant CABAL_USE_WF68K_CORE						: boolean := true;
+	constant CABAL_USE_TG68_CORE						: boolean := not CABAL_USE_WF68K_CORE;
+	
 	constant CABAL_CPU_CLK_ENA_DIVIDE_BY		: natural := 10;
 	constant CABAL_1MHz_CLK0_COUNTS				  : natural := 30;
 	

@@ -25,6 +25,11 @@ package project_pkg is
 	constant PACE_ENABLE_ADV724							: std_logic := '0';
 	constant PACE_ADV724_STD								: std_logic := ADV724_STD_PAL;
 
+  -- P2-specific constants
+
+  constant P2_JAMMA_IS_MAPLE              : boolean := false;
+  constant P2_JAMMA_IS_NGC                : boolean := true;
+
 	-- Cabal-specific constants
 
 	constant CABAL_USE_WF68K_CORE						: boolean := false;
