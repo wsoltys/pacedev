@@ -12,24 +12,39 @@ package project_pkg is
 	--
 	
   -- Reference clock is 24MHz
-	constant PACE_HAS_PLL								: boolean := true;
-  constant PACE_CLK0_DIVIDE_BY        : natural := 1;
-  constant PACE_CLK0_MULTIPLY_BY      : natural := 1;   -- 24*1/1 = 24MHz
-  constant PACE_CLK1_DIVIDE_BY        : natural := 3;
-  constant PACE_CLK1_MULTIPLY_BY      : natural := 5;  	-- 24*5/3 = 40MHz
+	constant PACE_HAS_PLL								      : boolean := true;
+	
+	-- VGA
+  constant PACE_CLK0_DIVIDE_BY              : natural := 1;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 1;   -- 24*1/1 = 24MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 3;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 5;  	-- 24*5/3 = 40MHz
+	constant PACE_VIDEO_H_SCALE       	      : integer := 2;
+	constant PACE_VIDEO_V_SCALE       	      : integer := 2;
+	constant PACE_ENABLE_ADV724					      : std_logic := '0';
 
-	constant PACE_VIDEO_H_SCALE       	: integer := 2;
-	constant PACE_VIDEO_V_SCALE       	: integer := 2;
+  -- CVBS
+  --constant PACE_CLK0_DIVIDE_BY              : natural := 32;
+  --constant PACE_CLK0_MULTIPLY_BY            : natural := 27;   	-- 24*27/32 = 20M25Hz
+  --constant PACE_CLK1_DIVIDE_BY              : natural := 16;
+  --constant PACE_CLK1_MULTIPLY_BY            : natural := 9;  		-- 24*9/16 = 13.5MHz
+	--constant PACE_VIDEO_H_SCALE       	      : integer := 2;
+	--constant PACE_VIDEO_V_SCALE       	      : integer := 1;
+	--constant PACE_ENABLE_ADV724					      : std_logic := '1';
 
-	constant PACE_ENABLE_ADV724					: std_logic := '0';
-	constant PACE_ADV724_STD						: std_logic := ADV724_STD_PAL;
+	constant PACE_ADV724_STD						      : std_logic := ADV724_STD_PAL;
 
+  --
   -- P2-specific constants
-  constant P2_JAMMA_IS_MAPLE          : boolean := false;
-  constant P2_JAMMA_IS_NGC            : boolean := true;
+  --
 
+  constant P2_JAMMA_IS_MAPLE                : boolean := false;
+  constant P2_JAMMA_IS_NGC                  : boolean := true;
+
+  --
 	-- Space Invaders-specific constants
-			
+	--
+	
 	constant INVADERS_CPU_CLK_ENA_DIVIDE_BY		: natural := 12;
 	constant INVADERS_1MHz_CLK0_COUNTS				: natural := 24;
 
@@ -37,3 +52,15 @@ package project_pkg is
 	constant USE_VIDEO_VBLANK_INTERRUPT 			: boolean := false;
 	
 end;
+
+configuration cfg_TARGET_TOP of target_top is
+	for SYN
+		for pace_inst : PACE
+      for U_Graphics : Graphics
+        for vgacontroller_inst : pace_video_controller
+          use entity work.pace_video_controller(VGA_800X600_60HZ);
+        end for;
+      end for;
+		end for;
+	end for;
+end configuration cfg_TARGET_TOP;

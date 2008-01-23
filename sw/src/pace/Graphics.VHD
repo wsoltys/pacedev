@@ -205,7 +205,7 @@ begin
 	-- because some video controllers only strobe during active video
   pix_clk_ena <= strobe or hblank_s;
 		
-  vgacontroller_inst : entity work.VGAController
+  vgacontroller_inst : entity work.pace_video_controller
     port map
     (
       clk         => clk,

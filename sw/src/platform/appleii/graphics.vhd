@@ -102,7 +102,7 @@ begin
 	spriteaddr <= (others => '0');
 	spr0_hit <= '0';
 				
-  vgacontroller_inst : entity work.VGAController
+  vgacontroller_inst : entity work.pace_video_controller
     port map
     (
       clk         => clk,
