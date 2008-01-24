@@ -29,7 +29,7 @@ set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "19:21:54  AUGUST 25, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION 7.2
+set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -259,7 +259,8 @@ set_global_assignment -name VHDL_FILE ../../../../src/target/nanoboard/target_pk
 set_global_assignment -name VHDL_FILE ../../../device/cyclone/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/cpu65xx_e.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/cpu65xx_fast.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/vicii_6567_6569.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/video_vicII_656x_e.vhdl
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/video_vicII_656x_a.vhdl
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/cpu_6510.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/fpga64_singleram.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/fpga64_rwram.vhd

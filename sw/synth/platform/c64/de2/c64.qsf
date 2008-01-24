@@ -576,3 +576,4 @@ set_global_assignment -name VHDL_FILE target_top.vhd
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
 set_global_assignment -name SIGNALTAP_FILE c1541_diskif.stp
 set_global_assignment -name SIGNALTAP_FILE c64.stp
+set_global_assignment -name QIP_FILE C1541_NIOS.qip

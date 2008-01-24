@@ -1,7 +1,7 @@
 SYSTEM C1541_NIOS
 {
    System_Wizard_Version = "7.20";
-   System_Wizard_Build = "151";
+   System_Wizard_Build = "175";
    Builder_Application = "sopc_builder_ca";
    WIZARD_SCRIPT_ARGUMENTS 
    {
@@ -192,6 +192,8 @@ SYSTEM C1541_NIOS
             Maximum_Pending_Read_Transactions = "7";
             Minimum_Uninterrupted_Run_Length = "1";
             Accepts_Internal_Connections = "1";
+            Write_Latency = "0";
+            Is_Flash = "0";
             Data_Width = "32";
             Address_Width = "24";
             Maximum_Burst_Size = "1";
@@ -843,6 +845,8 @@ SYSTEM C1541_NIOS
             Maximum_Pending_Read_Transactions = "0";
             Minimum_Uninterrupted_Run_Length = "1";
             Accepts_Internal_Connections = "1";
+            Write_Latency = "0";
+            Is_Flash = "0";
             Data_Width = "32";
             Address_Width = "9";
             Maximum_Burst_Size = "1";
@@ -1244,6 +1248,7 @@ SYSTEM C1541_NIOS
          device_family_id = "CYCLONEII";
          address_stall_present = "1";
          dsp_block_supports_shift = "0";
+         mrams_present = "0";
          do_generate = "1";
          cpuid_value = "0";
          cpuid_sz = "1";
@@ -2114,6 +2119,8 @@ SYSTEM C1541_NIOS
             Maximum_Pending_Read_Transactions = "0";
             Minimum_Uninterrupted_Run_Length = "1";
             Accepts_Internal_Connections = "1";
+            Write_Latency = "0";
+            Is_Flash = "0";
             Data_Width = "32";
             Address_Width = "1";
             Maximum_Burst_Size = "1";
@@ -2303,6 +2310,8 @@ SYSTEM C1541_NIOS
             Maximum_Pending_Read_Transactions = "0";
             Minimum_Uninterrupted_Run_Length = "1";
             Accepts_Internal_Connections = "1";
+            Write_Latency = "0";
+            Is_Flash = "0";
             Data_Width = "32";
             Address_Width = "1";
             Maximum_Burst_Size = "1";
@@ -2341,7 +2350,7 @@ SYSTEM C1541_NIOS
          Has_Clock = "1";
          View 
          {
-            Settings_Summary = "System ID (at last Generate):<br> <b>1CCAC07C</b>    (unique ID tag) <br> <b>479761E7</b> (timestamp: Thu Jan 24, 2008 @2:48 AM)";
+            Settings_Summary = "System ID (at last Generate):<br> <b>1CCAC07C</b>    (unique ID tag) <br> <b>479764D1</b> (timestamp: Thu Jan 24, 2008 @3:01 AM)";
             MESSAGES 
             {
             }
@@ -2350,7 +2359,7 @@ SYSTEM C1541_NIOS
       WIZARD_SCRIPT_ARGUMENTS 
       {
          id = "483049596u";
-         timestamp = "1201103335u";
+         timestamp = "1201104081u";
          regenerate_values = "0";
          MAKE 
          {
@@ -2359,7 +2368,7 @@ SYSTEM C1541_NIOS
                verifysysid 
                {
                   All_Depends_On = "0";
-                  Command = "nios2-download $(JTAG_CABLE)                                --sidp=0x04000808 --id=483049596 --timestamp=1201103335";
+                  Command = "nios2-download $(JTAG_CABLE)                                --sidp=0x04000808 --id=483049596 --timestamp=1201104081";
                   Is_Phony = "1";
                   Target_File = "dummy_verifysysid_file";
                }
@@ -2457,6 +2466,8 @@ SYSTEM C1541_NIOS
             Maximum_Pending_Read_Transactions = "0";
             Minimum_Uninterrupted_Run_Length = "1";
             Accepts_Internal_Connections = "1";
+            Write_Latency = "0";
+            Is_Flash = "0";
             Data_Width = "16";
             Address_Width = "3";
             Maximum_Burst_Size = "1";
@@ -2574,6 +2585,8 @@ SYSTEM C1541_NIOS
             Maximum_Pending_Read_Transactions = "0";
             Minimum_Uninterrupted_Run_Length = "1";
             Accepts_Internal_Connections = "1";
+            Write_Latency = "0";
+            Is_Flash = "0";
             Data_Width = "8";
             Address_Width = "2";
             Maximum_Burst_Size = "1";
@@ -2731,6 +2744,8 @@ SYSTEM C1541_NIOS
             Maximum_Pending_Read_Transactions = "0";
             Minimum_Uninterrupted_Run_Length = "1";
             Accepts_Internal_Connections = "1";
+            Write_Latency = "0";
+            Is_Flash = "0";
             Data_Width = "8";
             Address_Width = "2";
             Maximum_Burst_Size = "1";
@@ -2903,6 +2918,8 @@ SYSTEM C1541_NIOS
             Maximum_Pending_Read_Transactions = "0";
             Minimum_Uninterrupted_Run_Length = "1";
             Accepts_Internal_Connections = "1";
+            Write_Latency = "0";
+            Is_Flash = "0";
             Data_Width = "8";
             Address_Width = "2";
             Maximum_Burst_Size = "1";
@@ -3059,6 +3076,8 @@ SYSTEM C1541_NIOS
             Maximum_Pending_Read_Transactions = "0";
             Minimum_Uninterrupted_Run_Length = "1";
             Accepts_Internal_Connections = "1";
+            Write_Latency = "0";
+            Is_Flash = "0";
             Data_Width = "8";
             Address_Width = "2";
             Maximum_Burst_Size = "1";
@@ -3231,6 +3250,8 @@ SYSTEM C1541_NIOS
             Maximum_Pending_Read_Transactions = "0";
             Minimum_Uninterrupted_Run_Length = "1";
             Accepts_Internal_Connections = "1";
+            Write_Latency = "0";
+            Is_Flash = "0";
             Data_Width = "16";
             Address_Width = "2";
             Maximum_Burst_Size = "1";
@@ -3388,6 +3409,8 @@ SYSTEM C1541_NIOS
             Maximum_Pending_Read_Transactions = "0";
             Minimum_Uninterrupted_Run_Length = "1";
             Accepts_Internal_Connections = "1";
+            Write_Latency = "0";
+            Is_Flash = "0";
             Data_Width = "32";
             Address_Width = "2";
             Maximum_Burst_Size = "1";
@@ -3531,6 +3554,8 @@ SYSTEM C1541_NIOS
             Maximum_Pending_Read_Transactions = "0";
             Minimum_Uninterrupted_Run_Length = "1";
             Accepts_Internal_Connections = "1";
+            Write_Latency = "0";
+            Is_Flash = "0";
             Data_Width = "32";
             Address_Width = "2";
             Maximum_Burst_Size = "1";
@@ -3674,6 +3699,8 @@ SYSTEM C1541_NIOS
             Maximum_Pending_Read_Transactions = "0";
             Minimum_Uninterrupted_Run_Length = "1";
             Accepts_Internal_Connections = "1";
+            Write_Latency = "0";
+            Is_Flash = "0";
             Data_Width = "32";
             Address_Width = "2";
             Maximum_Burst_Size = "1";
@@ -3934,6 +3961,8 @@ SYSTEM C1541_NIOS
             Maximum_Pending_Read_Transactions = "0";
             Minimum_Uninterrupted_Run_Length = "1";
             Accepts_Internal_Connections = "1";
+            Write_Latency = "0";
+            Is_Flash = "0";
             Data_Width = "32";
             Address_Width = "5";
             Maximum_Burst_Size = "1";
@@ -4093,6 +4122,8 @@ SYSTEM C1541_NIOS
             Maximum_Pending_Read_Transactions = "0";
             Minimum_Uninterrupted_Run_Length = "1";
             Accepts_Internal_Connections = "1";
+            Write_Latency = "0";
+            Is_Flash = "0";
             Data_Width = "32";
             Address_Width = "0";
             Maximum_Burst_Size = "1";
@@ -4593,6 +4624,8 @@ SYSTEM C1541_NIOS
             Maximum_Pending_Read_Transactions = "0";
             Minimum_Uninterrupted_Run_Length = "1";
             Accepts_Internal_Connections = "1";
+            Write_Latency = "0";
+            Is_Flash = "0";
             Data_Width = "27";
             Address_Width = "3";
             Maximum_Burst_Size = "1";
