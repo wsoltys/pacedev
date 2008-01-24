@@ -12,7 +12,6 @@ tpat='*'
 fpat='*.qpf'
 ts=`date +"_%Y%m%d_%H%M%S"`
 logfile="build$ts.log"
-detailfail="detail.log"
 
 while getopts elsp:t: opt; do
 	case "$opt" in
@@ -24,7 +23,7 @@ while getopts elsp:t: opt; do
 	esac
 done
 
-rm -f $logfile detailfile
+rm -f $logfile detail.log
 (
 echo -n "Start " 
 date 
@@ -33,7 +32,7 @@ for f in `find platform -path "*/$ppat/$tpat/$fpat"`; do
 	case "$op" in
 	"list")	echo $f;;
 	"elab")	echo -n "Elaborating $f: " 
-		quartus_map $f --analysis_and_elaboration >> detailfile
+		quartus_map $f --analysis_and_elaboration >> detail.log
 		rc="$?"
 		if [ "$rc" -eq "0" ]; then
 			echo "OK";
@@ -41,7 +40,7 @@ for f in `find platform -path "*/$ppat/$tpat/$fpat"`; do
 			echo "*** FAILED ($rc) ***"
 		fi ;;
 	"synt")	echo -n "Synthesizing $f: " 
-		#quartus_map $f --analysis_and_elaboration >> detailfile
+		#quartus_map $f --analysis_and_elaboration >> detail.log
 		rc="$?"
 		if [ "$rc" -eq "0" ]; then
 			echo "OK";
