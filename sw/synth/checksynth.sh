@@ -1,12 +1,41 @@
-rm build.log detail.log
+#!/bin/sh
+
+# -l list projects
+# -e elaborate
+# -s synthesize
+# -t target pattern
+# -p platform pattern
+
+op="list"
+ppat='*'
+tpat='*'
+fpat='*.qpf'
+
+while getopts elsp:t: opt; do
+	case "$opt" in
+	e)	op="elab";;
+	l)	op="list";;
+	s)	op="synt";;
+	p)	ppat="$OPTARG";;
+	t)	tpat="$OPTARG";;
+	esac
+done
+
+rm -f build.log detail.log
 (
 echo -n "Start " 
 date 
 
-for f in `find . -name \*.qpf`; do 
-	echo -n "Checking $f: " 
-	quartus_map $f --analysis_and_elaboration >> detail.log
-	echo returned $?
+for f in `find platform -path "*/$ppat/$tpat/$fpat"`; do 
+	case "$op" in
+	"list")	echo $f;;
+	"elab")	echo -n "Elaborating $f: " 
+		quartus_map $f --analysis_and_elaboration >> detail.log
+		echo returned $? ;;
+	"synt")	echo -n "Synthesizing $f: " 
+		#quartus_map $f --analysis_and_elaboration >> detail.log
+		echo returned $? ;;
+	esac
 done
 
 echo -n "End "
