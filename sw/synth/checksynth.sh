@@ -31,10 +31,18 @@ for f in `find platform -path "*/$ppat/$tpat/$fpat"`; do
 	"list")	echo $f;;
 	"elab")	echo -n "Elaborating $f: " 
 		quartus_map $f --analysis_and_elaboration >> detail.log
-		echo returned $? ;;
+		if [ "$?" -eq "0" ]; then
+			echo "OK";
+		else
+			echo "*** FAILED ($?) ***"
+		fi ;;
 	"synt")	echo -n "Synthesizing $f: " 
 		#quartus_map $f --analysis_and_elaboration >> detail.log
-		echo returned $? ;;
+		if [ "$?" -eq "0" ]; then
+			echo "OK";
+		else
+			echo "*** FAILED ($?) ***"
+		fi ;;
 	esac
 done
 
