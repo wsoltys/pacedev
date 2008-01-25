@@ -59,7 +59,7 @@ end fpga64_keyboard_matrix;
 
 architecture Behavioral of fpga64_keyboard_matrix is	
 	signal extendedFlag: std_logic := '0';
-	signal releaseFlag: std_logic := '1';
+	signal releaseFlag: std_logic := '0';
 
 	signal key_del: std_logic := '0';
 	signal key_return: std_logic := '0';
