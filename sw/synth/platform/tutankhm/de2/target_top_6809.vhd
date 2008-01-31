@@ -669,6 +669,7 @@ begin
 		BLK_CLK : block
 			signal cnt		: integer range 0 to 15;
 			signal phase	: integer range 0 to 3;
+			alias clk_30M : std_logic is clk(0);
 		begin
 			cpu_6809_clk_en <= '1' when phase = 3 and cnt = 0 else '0';
 			cpu_6809_e <= '1' when phase = 2 or phase = 3 else '0';
@@ -676,18 +677,20 @@ begin
 			
 			ledr(2) <= cpu_6809_clk_en;
 
-			process(clock_50, reset)
-				variable c			: integer range 0 to 15;
-				variable p			: integer range 0 to 3;
+			process(clk_30M, reset)
+        subtype count_t is integer range 0 to 4; -- 30/(5*4)=1.5MHz
+				variable c      : count_t;
+				subtype phase_t is integer range 0 to 3;
+				variable p			: phase_t;
 				variable h			: integer range 0 to 255;
 			begin
 				if reset = '1' then 
-					c := 7;
+					c := count_t'high;
 					p := 0;
-				elsif rising_edge(clock_50) then
+				elsif rising_edge(clk_30M) then
 					if c = 0 then
-						c := 7;
-						if p = 3 then
+						c := count_t'high;
+						if p = phase_t'high then
 							p := 0;
 						else 
 							p := p + 1; 

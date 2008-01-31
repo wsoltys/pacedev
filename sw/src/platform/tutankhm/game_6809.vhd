@@ -116,7 +116,6 @@ architecture SYN of Game is
 	alias video_counter		: std_logic_vector(7 downto 0) is attr_addr(7 downto 0);
 		
   -- uP signals  
---  signal clk_1M5_en			: std_logic;
 	signal clk_1M5_en			: std_logic;
 	signal clk_1M5_en_n		: std_logic;
 	signal cpu_rw					: std_logic;
