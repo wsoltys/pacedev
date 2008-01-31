@@ -116,7 +116,8 @@ architecture SYN of Game is
 	alias video_counter		: std_logic_vector(7 downto 0) is attr_addr(7 downto 0);
 		
   -- uP signals  
-  signal clk_1M5_en			: std_logic;
+--  signal clk_1M5_en			: std_logic;
+	signal clk_1M5_en			: std_logic;
 	signal clk_1M5_en_n		: std_logic;
 	signal cpu_rw					: std_logic;
 	signal cpu_vma				: std_logic;
@@ -170,6 +171,15 @@ architecture SYN of Game is
 	alias game_reset			: std_logic is inputs(3)(0);
 
 begin
+
+	gpio_o(16) <= clk_1M5_en;
+	gpio_o(17) <= vblank;
+
+	GEN_EXT_CLOCK : if DE2_USE_EXT_CPU generate
+	
+	clk_1M5_en <= gpio_i(30);
+	
+	end generate;
 
 	-- cpu09 core uses negative clock edge
 	clk_1M5_en_n <= not clk_1M5_en;
@@ -360,6 +370,8 @@ begin
 	ser_tx <= 'X';
 	leds <= (others => '0');
 
+	GEN_CLK_DIVISOR : if not DE2_USE_EXT_CPU generate
+
 	clk_en_inst : entity work.clk_div
 		generic map
 		(
@@ -371,6 +383,8 @@ begin
 			reset			=> reset,
 			clk_en		=> clk_1M5_en
 		);
+		
+	end generate;
 		
 	--cpu_inst : entity work.cpu09
 	--	port map

@@ -29,6 +29,8 @@ package project_pkg is
 	constant DE2_JAMMA_IS_NGC                 : boolean := false;
 	
 	constant DE2_LCD_LINE2							      : string := " TUTANKHAM-VGA  ";
+
+	constant DE2_USE_EXT_CPU									: boolean := false;
 		
 	-- Tutankham-specific constants
 

@@ -205,7 +205,8 @@ architecture SYN of target_top is
 	end component;
 
 	alias gpio_maple 		: std_logic_vector(35 downto 0) is gpio_0;
-	alias gpio_lcd 			: std_logic_vector(35 downto 0) is gpio_1;
+	alias gpio_lcd 			: std_logic_vector(35 downto 0) is gpio_0;
+	alias gpio_cpu	 		: std_logic_vector(35 downto 0) is gpio_1;
 	
 	signal clk					: std_logic_vector(0 to 3);
   signal init       	: std_logic;
@@ -258,8 +259,8 @@ architecture SYN of target_top is
   -- portal for the external CPU
   signal cpuio_i              : std_logic_vector(39 downto 0);
   signal cpuio_o              : std_logic_vector(39 downto 0);
-  alias cpu_6809_q            : std_logic is cpuio_i(0);
-  alias cpu_6809_e            : std_logic is cpuio_i(1);
+--  alias cpu_6809_q            : std_logic is cpuio_i(0);
+--  alias cpu_6809_e            : std_logic is cpuio_i(1);
   alias cpu_6809_a            : std_logic_vector(15 downto 0) is cpuio_o(15 downto 0);
   alias cpu_6809_rst_n        : std_logic is cpuio_i(2);
   alias cpu_6809_halt_n       : std_logic is cpuio_i(3);
@@ -275,7 +276,10 @@ architecture SYN of target_top is
   alias cpu_6809_avma         : std_logic is cpuio_o(21);
   alias cpu_6809_d_i          : std_logic_vector(7 downto 0) is cpuio_i(15 downto 8);
   alias cpu_6809_d_o          : std_logic_vector(7 downto 0) is cpuio_o(29 downto 22);
+	alias cpu_6809_clk_en				: std_logic is cpuio_o(30);
 
+	signal cpu_6809_q						: std_logic;
+	signal cpu_6809_e						: std_logic;
 begin
 
 	-- FPGA STARTUP
@@ -319,12 +323,12 @@ begin
 	sram_we_n <= not sram_o.we;
 
   -- turn off LEDs
-  hex0 <= (others => '1');
-  hex1 <= (others => '1');
-  hex2 <= (others => '1');
-  hex3 <= (others => '1');
-  hex4 <= (others => '1');
-  hex5 <= (others => '1');
+  --hex0 <= (others => '1');
+  --hex1 <= (others => '1');
+  --hex2 <= (others => '1');
+  --hex3 <= (others => '1');
+  --hex4 <= (others => '1');
+  --hex5 <= (others => '1');
   --hex6 <= (others => '1');
   --hex7 <= (others => '1');
   ledg(8) <= '0';
@@ -573,7 +577,9 @@ begin
 	lcm_hsync <= vga_hs_s;
 	lcm_vsync <= vga_vs_s;
 	
-	BLK_6809 : block
+	GEN_INT_CPU : if not DE2_USE_EXT_CPU generate
+
+	BLK_INT_6809 : block
 
     signal cpu_6809_rst   : std_logic;
     signal cpu_6809_halt  : std_logic;
@@ -584,7 +590,7 @@ begin
 	begin
 	
     cpu_6809_rst <= not cpu_6809_rst_n;
-    cpu_6809_halt <= not cpu_6809_halt_n;
+    cpu_6809_halt <= '0'; --not cpu_6809_halt_n;
     cpu_6809_irq <= not cpu_6809_irq_n;
     cpu_6809_firq <= not cpu_6809_firq;
     cpu_6809_nmi <= not cpu_6809_nmi;
@@ -605,8 +611,106 @@ begin
         firq			=> cpu_6809_firq,
         nmi				=> cpu_6809_nmi
       );
-  end block BLK_6809;
+  end block BLK_INT_6809;
 
+	end generate;
+	
+	GEN_EXT_CPU : if DE2_USE_EXT_CPU generate
+
+	BLK_EXT_6809 : block
+  
+		signal cpu_6809_rst   : std_logic;
+		signal cpu_irq_n			: std_logic;
+	
+	begin
+	
+		cpu_6809_rst <= not key(1);
+		cpu_irq_n <= cpu_6809_irq_n and key(2);
+
+		ledr(5) <= cpuio_i(17);
+		ledr(4) <= cpuio_i(16);
+		ledr(3) <= not cpu_irq_n;
+		ledr(1) <= cpu_6809_q;
+		ledr(0) <= cpu_6809_e; 
+	
+		m6809 : entity work.m6809_if port map (
+			-- IO signals
+			mainclk    			  => clock_50,
+			reset						  => reset,
+			cpuq              => cpu_6809_q,
+			cpue              => cpu_6809_e,
+			io							  => gpio_cpu(31 downto 0),
+
+			-- M6809E signals
+			m6809e_q					=> open,
+			m6809e_e					=> open,
+			m6809e_reset_o_n	=> '1',
+			m6809e_halt_o_n		=> '1',
+			m6809e_d_o				=> cpu_6809_d_i,
+			m6809e_d_i				=> cpu_6809_d_o,
+			m6809e_a					=> cpu_6809_a,
+			m6809e_tsc			  => cpu_6809_tsc,
+			m6809e_nmi_n		  => cpu_6809_nmi_n,
+			m6809e_irq_n		  => cpu_6809_irq_n,
+			m6809e_firq_n		  => cpu_6809_firq_n,
+			m6809e_rd_nwr 	  => cpu_6809_rw_n,
+			m6809e_ba   		  => cpu_6809_ba,
+			m6809e_bs   		  => cpu_6809_bs,
+			m6809e_busy			  => cpu_6809_busy,
+			m6809e_lic			  => cpu_6809_lic,
+			m6809e_avma			  => cpu_6809_avma,
+
+			-- Output enable for tristate M6809E outputs
+			m6809e_oe_reset		=> cpu_6809_rst,
+			m6809e_oe_d				=> cpu_6809_rw_n
+		);
+
+		-- Generate CPU Q and E
+		BLK_CLK : block
+			signal cnt		: integer range 0 to 15;
+			signal phase	: integer range 0 to 3;
+		begin
+			cpu_6809_clk_en <= '1' when phase = 3 and cnt = 0 else '0';
+			cpu_6809_e <= '1' when phase = 2 or phase = 3 else '0';
+			cpu_6809_q <= '1' when phase = 1 or phase = 2 else '0';
+			
+			ledr(2) <= cpu_6809_clk_en;
+
+			process(clock_50, reset)
+				variable c			: integer range 0 to 15;
+				variable p			: integer range 0 to 3;
+				variable h			: integer range 0 to 255;
+			begin
+				if reset = '1' then 
+					c := 7;
+					p := 0;
+				elsif rising_edge(clock_50) then
+					if c = 0 then
+						c := 7;
+						if p = 3 then
+							p := 0;
+						else 
+							p := p + 1; 
+						end if;
+					else
+						c := c - 1;
+					end if;
+				end if;
+				
+				cnt <= c;
+				phase <= p;
+			end process;
+		end block BLK_CLK;
+			
+		seg7_c0: SEG7_LUT port map (iDIG => cpu_6809_a(3 downto 0), oSEG => hex0);
+		seg7_c1: SEG7_LUT port map (iDIG => cpu_6809_a(7 downto 4), oSEG => hex1);
+		seg7_c2: SEG7_LUT port map (iDIG => cpu_6809_a(11 downto 8), oSEG => hex2);
+		seg7_c3: SEG7_LUT port map (iDIG => cpu_6809_a(15 downto 12), oSEG => hex3);
+
+	end block BLK_EXT_6809;
+	
+	end generate;
+		
   pace_inst : work.pace                                            
     port map
     (
