@@ -8,6 +8,7 @@ package video_controller_pkg is
 
   type PACEVideoController_t is
   (
+    PACE_VIDEO_NONE,                  -- PACE video controller not used
     PACE_VIDEO_VGA_800x600_60Hz,      -- generic VGA
     PACE_VIDEO_VGA_240x320_60Hz,      -- P3M video
     PACE_VIDEO_LCM_320x240_60Hz,      -- DE2 LCD
