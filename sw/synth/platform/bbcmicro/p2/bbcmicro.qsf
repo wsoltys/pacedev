@@ -754,6 +754,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/platform/bbcmicro/alter
 set_global_assignment -name VHDL_FILE ../../../../src/platform/bbcmicro/inputmapper.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/inputs.vhd
 set_global_assignment -name VERILOG_FILE ../../../../src/component/video/crtc6845s.v
+set_global_assignment -name VHDL_FILE ../../../../src/component/video/saa505x.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/bbcmicro/game.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/conversion.vhd

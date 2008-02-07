@@ -158,6 +158,34 @@ begin
         O_DISPTMG   => crtc6845_disptmg
       );
 
+    saa505x_inst : entity work.saa505x
+      port map
+      (
+        clk				=> clk(0),
+        reset			=> reset,
+
+        si_i_n		=> '0',
+        si_o			=> open,
+        data_n		=> '0',
+        d					=> (others => '0'),
+        dlim			=> '0',
+        glr				=> '0',
+        dew				=> '0',
+        crs				=> '0',
+        bcs_n			=> '1',
+        tlc_n			=> open,
+        tr6				=> '0',
+        f1				=> '0',
+        y					=> open,
+        b					=> open,
+        g					=> open,
+        r					=> open,
+        blan			=> open,
+        lose			=> '0',
+        po				=> '0',
+        de				=> '0'
+      );
+
   end block BLK_VIDEO;
 		
 end SYN;
