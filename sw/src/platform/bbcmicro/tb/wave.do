@@ -1,5 +1,9 @@
 onerror {resume}
 quietly WaveActivateNextPane {} 0
+add wave -noupdate -format Literal /tb_top/pace_inst/red
+add wave -noupdate -format Literal /tb_top/pace_inst/green
+add wave -noupdate -format Literal /tb_top/pace_inst/blue
+add wave -noupdate -divider GAME
 add wave -noupdate -format Logic /tb_top/pace_inst/u_game/reset
 add wave -noupdate -format Logic /tb_top/pace_inst/u_game/reset_n
 add wave -noupdate -format Logic /tb_top/pace_inst/u_game/clk_16m
@@ -32,4 +36,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {19966718631 ps} {19970749781 ps}
+WaveRestoreZoom {0 ps} {42 ms}

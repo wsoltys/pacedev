@@ -91,6 +91,9 @@ wire   [1:0] W_CScue;
 
 mpu_if mpu_if(
 
+// added MMc
+.I_RSTn(I_RSTn),
+
 .I_E(I_E),
 .I_DI(I_DI),
 .I_RS(I_RS),
@@ -146,6 +149,9 @@ endmodule
 
 module mpu_if(
 
+// added MMc
+I_RSTn,
+
 I_E,
 I_DI,
 I_RS,
@@ -169,6 +175,9 @@ O_CScue,
 O_VMode,
 O_IntSync
 );
+
+// added MMc
+input	 I_RSTn;
 
 input  I_E;
 input  [7:0]I_DI;
@@ -224,8 +233,25 @@ assign O_IntSync =  R_Intr[0];
 assign O_DScue   = R_Intr[5:4]; // disp   scue 0,1,2 or OFF
 assign O_CScue   = R_Intr[7:6]; // cursor scue 0,1,2 or OFF
 
-always@(negedge I_E)
+always@(negedge I_RSTn or negedge I_E)
 begin
+	// added MMc for testing
+	if(~I_RSTn)begin
+		// MODE6 // MODE7
+    R_Nht  <= 8'h3F;
+    R_Nhd  <= 8'h28;
+    R_Nhsp <= 8'h31;	//8'h33;
+    R_Nsw  <= 8'h24;
+    R_Nvt  <= 7'h1E;
+    R_Nadj <= 5'h02;
+    R_Nvd  <= 7'h19;
+    R_Nvsp <= 7'h1C;
+    R_Intr <= 8'h01;	//8'h93;
+    R_Nr   <= 5'h09;	//5'h12;
+    R_Msah <= 6'h0C;	//6'h28;
+    R_Msal <= 8'h00;
+	end else
+	// end of addition
   if(~I_CSn)begin
     if(~I_RWn)begin
       if(~I_RS)begin      

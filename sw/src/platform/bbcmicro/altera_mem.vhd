@@ -65,24 +65,25 @@ use ieee.std_logic_1164.all;
 library work;
 use work.pace_pkg.all;
 
-ENTITY wram IS
+ENTITY dram IS
 	PORT
 	(
-		address		: IN STD_LOGIC_VECTOR (9 DOWNTO 0);
-		clock		: IN STD_LOGIC ;
-		data		: IN STD_LOGIC_VECTOR (7 DOWNTO 0);
-		wren		: IN STD_LOGIC ;
-		q		: OUT STD_LOGIC_VECTOR (7 DOWNTO 0)
+		address		: IN STD_LOGIC_VECTOR (12 DOWNTO 0);
+		clock			: IN STD_LOGIC ;
+		data			: IN STD_LOGIC_VECTOR (7 DOWNTO 0);
+		wren			: IN STD_LOGIC ;
+		q					: OUT STD_LOGIC_VECTOR (7 DOWNTO 0)
 	);
-END wram;
+END dram;
 
-architecture SYN of wram is
+architecture SYN of dram is
 begin
 	spram_inst : entity work.spram
 		generic map
 		(
-			numwords_a => 1024,
-			widthad_a => 10
+			init_file => "dram.hex",
+			numwords_a => 8192,
+			widthad_a => 13
 		)
 		port map
 		(

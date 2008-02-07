@@ -1291,4 +1291,8 @@ architecture SYN of saa505x is
 	);
 
 begin
+
+  -- not supported
+  si_o <= 'X';
+
 end SYN;

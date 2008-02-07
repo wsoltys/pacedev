@@ -48,6 +48,10 @@ void main (int argc, char *argv[])
 	fread (mem, 1, 64*1024, fp);
   fclose (fp);
 
+	fp = fopen ("mode6ram.bin", "wb");
+	fwrite (&mem[0x2000], 1, 0x2000, fp);
+	fclose (fp);
+
   char buf[80];
 
 	allegro_init ();
