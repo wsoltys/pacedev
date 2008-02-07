@@ -1,461 +1,364 @@
-library ieee;
-use ieee.std_logic_1164.all;
+library IEEE;
+use IEEE.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use	ieee.numeric_std.all;
 use ieee.std_logic_arith.EXT;
 
 library work;
-use work.kbd_pkg.in8;
 use work.pace_pkg.all;
+use work.kbd_pkg.all;
 use work.platform_pkg.all;
-use work.target_pkg.all;
 
 entity Game is
   port
   (
     -- clocking and reset
-    clk							: in std_logic_vector(0 to 3);
-    reset           : in std_logic;                       
-    test_button     : in std_logic;                       
+    clk         		: in std_logic_vector(0 to 3);
+    reset           : in    std_logic;                       
+    test_button     : in    std_logic;                       
 
     -- inputs
     ps2clk          : inout std_logic;                       
     ps2data         : inout std_logic;                       
-    dip             : in std_logic_vector(7 downto 0);    
-		jamma						: in JAMMAInputsType;
-		
+    dip             : in    std_logic_vector(7 downto 0);    
+
     -- micro buses
-    upaddr          : out std_logic_vector(15 downto 0);   
-    updatao         : out std_logic_vector(7 downto 0);    
+    upaddr          : out   std_logic_vector(15 downto 0);   
+    updatao         : out   std_logic_vector(7 downto 0);    
 
     -- SRAM
 		sram_i					: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
 
     gfxextra_data   : out std_logic_vector(7 downto 0);
-		palette_data		: out ByteArrayType(15 downto 0);
-
-    -- graphics (bitmap)
-    bitmap_addr			: in    std_logic_vector(15 downto 0);   
-    bitmap_data			: out   std_logic_vector(7 downto 0);    
-
-    -- graphics (tilemap)
-    tileaddr        : in std_logic_vector(15 downto 0);   
-    tiledatao       : out std_logic_vector(7 downto 0);    
-    tilemapaddr     : in std_logic_vector(15 downto 0);   
-    tilemapdatao    : out std_logic_vector(15 downto 0);    
-    attr_addr       : in std_logic_vector(9 downto 0);    
-    attr_dout       : out std_logic_vector(15 downto 0);   
-
-    -- graphics (sprite)
-    sprite_reg_addr : out std_logic_vector(7 downto 0);    
-    sprite_wr       : out std_logic;                       
-    spriteaddr      : in std_logic_vector(15 downto 0);   
-    spritedata      : out std_logic_vector(31 downto 0);   
-    spr0_hit        : in std_logic;
 
     -- graphics (control)
-    vblank          : in std_logic;    
-		xcentre					: out std_logic_vector(9 downto 0);
-		ycentre					: out std_logic_vector(9 downto 0);
-		
+    red							: out		std_logic_vector(7 downto 0);
+		green						: out		std_logic_vector(7 downto 0);
+		blue						: out		std_logic_vector(7 downto 0);
+		hsync						: out		std_logic;
+		vsync						: out		std_logic;
+
+    cvbs            : out   std_logic_vector(7 downto 0);
+			  
     -- sound
-    snd_rd          : out std_logic;                       
-    snd_wr          : out std_logic;
-    sndif_datai     : in std_logic_vector(7 downto 0);    
+    snd_rd          : out   std_logic;                       
+    snd_wr          : out   std_logic;
+    sndif_datai     : in    std_logic_vector(7 downto 0);    
 
     -- spi interface
-    spi_clk         : out std_logic;                       
-    spi_din         : in std_logic;                       
-    spi_dout        : out std_logic;                       
-    spi_ena         : out std_logic;                       
-    spi_mode        : out std_logic;                       
-    spi_sel         : out std_logic;                       
+    spi_clk         : out   std_logic;                       
+    spi_din         : in    std_logic;                       
+    spi_dout        : out   std_logic;                       
+    spi_ena         : out   std_logic;                       
+    spi_mode        : out   std_logic;                       
+    spi_sel         : out   std_logic;                       
 
     -- serial
-    ser_rx          : in std_logic;                       
-    ser_tx          : out std_logic;                       
+    ser_rx          : in    std_logic;                       
+    ser_tx          : out   std_logic;                       
 
     -- on-board leds
-    leds            : out std_logic_vector(7 downto 0)    
+    leds            : out   std_logic_vector(7 downto 0)    
   );
+
 end Game;
 
 architecture SYN of Game is
 
-	-- need this for projects that don't have it!
-	component FDC_1793 is 
-		port
-	   (
-	     clk            : in    std_logic;
-	     uPclk          : in    std_logic;
-	     reset          : in    std_logic;
-
-	     fdcaddr        : in    std_logic_vector(2 downto 0);
-	     fdcdatai       : in    std_logic_vector(7 downto 0);
-	     fdcdatao       : out   std_logic_vector(7 downto 0);
-	     fdc_rd         : in    std_logic;
-	     fdc_wr         : in    std_logic;
-	     fdc_drq_int    : out   std_logic;
-	     fdc_dto_int		: out   std_logic;
-
-	     spi_clk        : out   std_logic;
-	     spi_ena        : out   std_logic;
-	     spi_mode       : out   std_logic;
-	     spi_sel        : out   std_logic;
-	     spi_din        : in    std_logic;
-	     spi_dout       : out   std_logic;
-
-	     ser_rx         : in    std_logic;
-	     ser_tx         : out   std_logic;
-
-	     debug          : out   std_logic_vector(7 downto 0)
-	   );
-	end component;
+	component palx4_clk IS
+	PORT
+		(
+			inclk0		: IN STD_LOGIC  := '0';
+			c0				: OUT STD_LOGIC 
+		);
+	END component;
 
 	alias clk_20M					: std_logic is clk(0);
-	alias clk_40M					: std_logic is clk(1);
+	alias clk_57M272			: std_logic is clk(1);
 	
+	-- clocks
+	signal sys_clk				: std_logic;			-- 14M318
+	signal clk_q					: std_logic;
+	signal clk_e					: std_logic;
+	
+	signal cpu_reset			: std_logic;
+	
+	-- clock helpers
+	signal falling_edge_q	: std_logic;
+	signal falling_edge_e	: std_logic;
+	signal sys_count			: std_logic_vector(3 downto 0);
+  signal vdgclk         : std_logic;
+
+  -- system signals
+  signal sys_write      : std_logic;
+	
+	-- multiplexed address
+	signal ma							: std_logic_vector(7 downto 0);
+
+	signal mpu_addr				: std_logic_vector(15 downto 0);
+
+  alias vdg_addr        : std_logic_vector(15 downto 0) is mpu_addr;
+  signal vdg_data       : std_logic_vector(7 downto 0);
+  signal vdg_y          : std_logic_vector(3 downto 0);						
+  signal vdg_x          : std_logic_vector(4 downto 0);
+
   -- uP signals  
-  signal clk_2M_en			: std_logic;
+  alias uPclk          	: std_logic is clk_e;
   signal uP_addr        : std_logic_vector(15 downto 0);
   signal uP_datai       : std_logic_vector(7 downto 0);
   signal uP_datao       : std_logic_vector(7 downto 0);
-  signal uPmemrd        : std_logic;
-  signal uPmemwr        : std_logic;
-  signal uPiord         : std_logic;
-  signal uPiowr         : std_logic;
+  signal uPrdwr					: std_logic;
+  signal uPvma					: std_logic;
   signal uPintreq       : std_logic;
-  signal uPintvec       : std_logic_vector(7 downto 0);
-  signal uPintack       : std_logic;
+  signal uPfintreq			: std_logic;
   signal uPnmireq       : std_logic;
-	alias io_addr					: std_logic_vector(7 downto 0) is uP_addr(7 downto 0);
-	                        
-  -- ROM signals        
-	signal rom_cs					: std_logic;
-  signal rom_datao      : std_logic_vector(7 downto 0);
-                        
+
   -- keyboard signals
-	signal kbd_cs					: std_logic;
-	signal kbd_data				: std_logic_vector(7 downto 0);
-	                        
+	signal jamma_s				: JAMMAInputsType;
+  signal kbd_matrix			: in8(0 to 8);
+	alias game_reset			: std_logic is kbd_matrix(8)(0);
+	
+  -- PIA signals
+  signal pia_datao  		: std_logic_vector(7 downto 0);
+  signal pia_irqa      	: std_logic;
+  signal pia_irqb      	: std_logic;
+  signal pia_pa        	: std_logic_vector(7 downto 0);
+  signal pia_ca1       	: std_logic;
+  signal pia_ca2       	: std_logic;
+  signal pia_pb        	: std_logic_vector(7 downto 0);
+  signal pia_cb1       	: std_logic;
+  signal pia_cb2       	: std_logic;
+
+  signal pia_cs					: std_logic;
+
+	-- SAM signals
+  signal sam_cs					: std_logic;
+  signal sam_datao			: std_logic_vector(7 downto 0);
+                        
+  -- ROM signals        
+  signal rom_wr					: std_logic;
+  signal rom_datao      : std_logic_vector(7 downto 0);
+	signal rom_cs					: std_logic;
+
+  -- EXTROM signals	                        
+  signal extrom_datao   : std_logic_vector(7 downto 0);
+	signal extrom_cs			: std_logic;
+
   -- VRAM signals       
-	signal vram_cs				: std_logic;
+  --signal vram_cs        : std_logic;
   signal vram_wr        : std_logic;
-  signal vram_datao     : std_logic_vector(7 downto 0);
+  --signal vram_datao     : std_logic_vector(7 downto 0);
                         
   -- RAM signals        
-  signal ram_wr         : std_logic;
-  alias ram_datao      	: std_logic_vector(7 downto 0) is sram_i.d(7 downto 0);
+  signal ram_cs         : std_logic;
+  signal ram_datao      : std_logic_vector(7 downto 0);
 
-  -- interrupt signals
-	signal int_cs					: std_logic;
-  signal intena_wr      : std_logic;
-  signal int_status     : std_logic_vector(7 downto 0);
-  signal rtc_intrst     : std_logic;  -- clear RTC interrupt
-	signal nmi_cs					: std_logic;
-  signal nmiena_wr      : std_logic;
-  signal nmi_status     : std_logic_vector(7 downto 0);
-  signal nmirst         : std_logic;  -- clear NMI
+	-- system chipselect selector from SAM
+	signal cs_sel					: std_logic_vector(2 downto 0);
+	signal y              : std_logic_vector(7 downto 0);
 
-  -- fdc signals
-	signal fdc_cs					: std_logic;
-  signal fdc_rd         : std_logic;
-  signal fdc_wr         : std_logic;
-  signal fdc_datao      : std_logic_vector(7 downto 0);
-  signal fdc_drq_int    : std_logic;
-  signal fdc_dto_int    : std_logic;
-                        
-  -- other signals      
-	signal inputs					: in8(0 to 8);  
-	alias game_reset			: std_logic is inputs(8)(0);
-	signal cpu_reset			: std_logic;  
-	signal alpha_joy_cs		: std_logic;
-	signal rtc_cs					: std_logic;
-	signal snd_cs					: std_logic;
-  signal uPmem_datai    : std_logic_vector(7 downto 0);
-  signal uPio_datai     : std_logic_vector(7 downto 0);
+  -- VDG signals
+  signal vdg_reset      : std_logic;
+  signal hs_n           : std_logic;
+  signal fs_n           : std_logic;
+  signal da0            : std_logic;
+  signal vdg_sram_cs    : std_logic;
+
+  -- only for test vga controller
+	signal vga_clk_s				: std_logic;
 	
 begin
 
 	cpu_reset <= reset or game_reset;
 	
-  -- not used for now
-  uPintvec <= (others => '0');
+  --
+  --  Clocking
+  --
 
-  -- read mux
-  uP_datai <= uPmem_datai when (uPmemrd = '1') else uPio_datai;
+	-- produce a PAL clock (sys_clk) from the PLL output
+	process (clk_57M272, reset)
+		variable count : std_logic_vector(1 downto 0);
+	begin
+		if reset = '1' then
+			count := (others => '0');
+		elsif rising_edge(clk_57M272) then
+			sys_clk <= count(1);
+			count := count + 1;
+		end if;
+	end process;
 
-  -- SRAM signals (may or may not be used)
-  sram_o.a <= EXT(uP_addr, sram_o.a'length);
+	-- generate clock helpers
+	process (sys_clk, reset, clk_e, clk_q)
+		variable old_q	: std_logic;
+		variable old_e	: std_logic;
+	begin
+		if reset = '1' then
+			old_q := '0';
+			old_e := '0';
+		elsif falling_edge (sys_clk) then
+			falling_edge_q <= '0';
+			if old_q = '1' and clk_q = '0' then
+				falling_edge_q <= '1';
+			end if;
+			old_q := clk_q;
+			falling_edge_e <= '0';
+			if old_e = '1' and clk_e = '0' then
+				falling_edge_e <= '1';
+				sys_count <= (others => '1');
+			else
+				sys_count <= sys_count + 1;
+			end if;
+			old_e := clk_e;
+		end if;
+	end process;
+
+  -- need to sync reset to VDG with Q
+  process (clk_q, reset)
+  begin
+    if reset = '1' then
+      vdg_reset <= '1';
+    elsif falling_edge (clk_q) then
+      if reset = '0' then
+        vdg_reset <= '0';
+      end if;
+    end if;
+  end process;
+
+  --	
+	-- system control
+  --
+
+  -- assign chipselects from MC6883 selector output
+  pia_cs <= y(4);
+  extrom_cs <= y(1);
+  rom_cs <= y(2);
+	ram_cs <= y(0) or y(7);
+  -- this is yet to be implemented in the 6883/6847
+  --vram_cs <= '1' when uP_addr(15 downto 10) = "000001" else '0';
+
+  ---
+  --- yucky yucky yucky
+  --- the cpu and MC6883 are running off falling_edge
+  --- but the vram runs off rising_edge (ahh!!)
+  ---
+
+  -- runs off PAL clk (E x 16)
+	process (sys_clk, sys_count)
+	begin
+		if falling_edge (sys_clk) then
+			-- defaults
+      sys_write <= '0';
+      vdg_sram_cs <= '0';
+      vram_wr <= '0';
+			case sys_count is
+        when X"0" =>
+          -- latch VDG address (row)
+          vdg_addr(7 downto 0) <= ma;
+        when X"3" =>
+          -- latch VDG address (column)
+          vdg_addr(15 downto 8) <= ma;
+        when X"4" =>
+          -- read SRAM data here because we're multiplexing it with CPU
+          vdg_sram_cs <= '1';
+        when X"5" =>
+      	  vdg_data <= sram_i.d(vdg_data'range);
+				when X"6" =>
+          if hs_n = '1' and fs_n = '1' then
+            vram_wr <= '1';
+          end if;
+				when X"8" =>
+          -- latch MPU address (row)
+					mpu_addr(7 downto 0) <= ma;
+				when X"B" =>
+          -- latch MPU address (column)
+					mpu_addr(15 downto 8) <= ma;
+          -- enable bus write i/o
+          sys_write <= '1';
+				when X"C" =>
+          -- read SRAM data here because we're multiplexing it with video
+      	  ram_datao <= sram_i.d(ram_datao'range);
+				when others =>
+			end case;
+		end if;
+	end process;
+
+  -- memory read mux
+  uP_datai <= pia_datao when pia_cs = '1' else
+              rom_datao when rom_cs = '1' else
+              extrom_datao when extrom_cs = '1' else
+              ram_datao when ram_cs = '1' else
+              --vram_datao when vram_cs = '1' else
+              X"FF";
+
+  -- SRAM signals
+  sram_o.a <= EXT(mpu_addr, sram_o.a'length);
+  --sram_data <= uP_datao when (uPvma = '1' and ram_cs = '1' and uPrdwr = '0' and vdg_sram_cs = '0') 
   sram_o.d <= EXT(uP_datao, sram_o.d'length);
 	sram_o.be <= EXT("1", sram_o.be'length);
-  sram_o.cs <= '1';
-  sram_o.oe <= not ram_wr;
-  sram_o.we <= ram_wr;
+  sram_o.cs <= (uPvma and ram_cs) or vdg_sram_cs;
+	sram_o.oe <= uPrdwr or vdg_sram_cs;
+	sram_o.we <= sys_write and not uPrdwr;
 
-	-- memory chip selects
-	-- ROM $0000-$37FF
-	rom_cs <= '1' when uP_addr(15 downto 14) = "00" and uP_addr(13 downto 11) /= "111" else '0';
-	-- KEYBOARD $3800-$38FF
-	kbd_cs <= '1' when uP_addr(15 downto 10) = (X"3" & "10") else '0';
-	-- RAM (everything else)
-	vram_cs <= '1' when uP_addr(15 downto 10) = (X"3" & "11") else '0';
-	
-	-- memory write enables
-	vram_wr <= vram_cs and uPmemwr;
-	-- always write thru to RAM
-	ram_wr <= uPmemwr;
+  -- CPU interrupts	
+	uPintreq <= '0';
+	uPfintreq <= '0';
+	uPnmireq <= '0';
 
-	-- I/O chip selects
-	-- Alpha Joystick $00 (active low)
-	alpha_joy_cs <= '1' when io_addr = X"00" else '0';
-	-- RDINTSTATUS $E0-E3 (active low)
-	int_cs <= '1' when io_addr(7 downto 2) = "111000" else '0';
-	-- NMI STATUS $E4
-	nmi_cs <= '1' when io_addr = X"E4" else '0';
-  -- reset RTC any read $EC-EF
-  rtc_cs <= '1' when io_addr(7 downto 2) = "111011" else '0';
-	-- FDC $F0-$F7
-	fdc_cs <= '1' when io_addr(7 downto 3) = "11110" else '0';
-  -- SOUND $FC-FF (Model I is $FF only)
-	snd_cs <= '1' when io_addr(7 downto 2) = "111111" else '0';
+	-- PIA edge inputs
+	pia_ca1 <= '0';
+	pia_ca2 <= '0';
+	pia_cb1 <= '0';
+	pia_cb2 <= '0';
+	--pia_pb <= (others => '0');
 	
-	-- io read strobes
-	fdc_rd <= fdc_cs and uPiord;
-	nmirst <= nmi_cs and uPiord;
-	rtc_intrst <= rtc_cs and uPiord;
-	
-	-- io write enables
-	-- WRINTMASKREQ $E0-E3
-  intena_wr <= int_cs and uPiowr;
-  -- NMIMASKREQ $E4
-  nmiena_wr <= nmi_cs and uPiowr;
-  -- FDC $F0-$F7
-  fdc_wr <= fdc_cs and uPiowr;
-	-- SOUND OUTPUT $FC-FF (Model I is $FF only)
-  snd_wr <= snd_cs and uPiowr;
-		
-	-- memory read mux
-	uPmem_datai <= 	rom_datao when rom_cs = '1' else
-									kbd_data when kbd_cs = '1' else
-									vram_datao when vram_cs = '1' else
-									ram_datao;
-	
-	-- io read mux
-	uPio_datai <= X"FF" when alpha_joy_cs = '1' else
-								(not int_status) when int_cs = '1' else
-								(not nmi_status) when nmi_cs = '1' else
-								fdc_datao when fdc_cs = '1' else
-								X"FF";
-		
-	KBD_MUX : process (uP_addr, inputs)
-  	variable kbd_data_v : std_logic_vector(7 downto 0);
+	-- keyboard matrix
+	process (clk_20M, reset)
+	  variable keys : std_logic_vector(7 downto 0);
 	begin
-    
-  	kbd_data_v := X"00";
-		for i in 0 to 7 loop
-	 		if uP_addr(i) = '1' then
-			  kbd_data_v := kbd_data_v or inputs(i);
-		  end if;
-		end loop;
+	  if reset = '1' then
+  		keys := (others => '0');
+	  elsif rising_edge (clk_20M) then
+  		keys := (others => '0');
+  		-- note that row select is active low
+  		if pia_pb(0) = '0' then
+  			keys := keys or kbd_matrix(0);
+  		end if;
+  		if pia_pb(1) = '0' then
+  			keys := keys or kbd_matrix(1);
+  		end if;
+  		if pia_pb(2) = '0' then
+  			keys := keys or kbd_matrix(2);
+  		end if;
+  		if pia_pb(3) = '0' then
+  			keys := keys or kbd_matrix(3);
+  		end if;
+  		if pia_pb(4) = '0' then
+  			keys := keys or kbd_matrix(4);
+  		end if;
+  		if pia_pb(5) = '0' then
+  			keys := keys or kbd_matrix(5);
+  		end if;
+  		if pia_pb(6) = '0' then
+  			keys := keys or kbd_matrix(6);
+  		end if;
+  		if pia_pb(7) = '0' then
+  			keys := keys or kbd_matrix(7);
+  		end if;
+	  end if;
+	  -- key inputs are active low
+	  pia_pa <= not keys;
+	end process;
 
-  	-- assign the output
-		kbd_data <= kbd_data_v;
-
-  end process KBD_MUX;
-
-	xcentre <= (others => '0');
-	ycentre <= (others => '0');
-	
   gfxextra_data <= (others => '0');
-	GEN_PAL_DAT : for i in palette_data'range generate
-		palette_data(i) <= (others => '0');
-	end generate GEN_PAL_DAT;
 
-    -- unused outputs
+  -- unused outputs
 	upaddr <= uP_addr;
 	updatao <= uP_datao;
-	bitmap_data <= (others => '0');
-  sprite_reg_addr <= (others => '0');
-  sprite_wr <= '0';
-  spriteData <= (others => '0');
-  attr_dout <= X"00" & dip;
   snd_rd <= '0';
 
-	clk_en_inst : entity work.clk_div
-		generic map
-		(
-			DIVISOR		=> 10
-		)
-		port map
-		(
-			clk				=> clk_20M,
-			reset			=> reset,
-			clk_en		=> clk_2M_en
-		);
-
-    up_inst : entity work.uPse                                                
-      port map
-      (
-        clk			=> clk_20M,                                   
-        clk_en	=> clk_2M_en,
-        reset  	=> cpu_reset,                                     
-
-        addr   	=> uP_addr,
-        datai  	=> uP_datai,
-        datao  	=> uP_datao,
-
-        mem_rd 	=> uPmemrd,
-        mem_wr 	=> uPmemwr,
-        io_rd  	=> uPiord,
-        io_wr  	=> uPiowr,
-
-        intreq 	=> uPintreq,
-        intvec 	=> uPintvec,
-        intack 	=> uPintack,
-        nmi    	=> uPnmireq
-      );
-
-	inputs_inst : entity work.Inputs
-		generic map
-		(
-			NUM_INPUTS	=> inputs'length
-		)
-	  port map
-	  (
-	    clk     		=> clk_20M,
-	    reset   		=> reset,
-	    ps2clk  		=> ps2clk,
-	    ps2data 		=> ps2data,
-			jamma				=> jamma,
-			
-	    dips				=> dip,
-	    inputs			=> inputs
-	  );
-
-	rom_inst : entity work.sprom
-		generic map
-		(
-			init_file		=> "../../../../../src/platform/trs80/m3/roms/m3rom.hex",
-			numwords_a	=> 16384,
-			widthad_a		=> 14
-		)
-		port map
-		(
-			clock			=> clk_20M,
-			address		=> up_addr(13 downto 0),
-			q					=> rom_datao
-		);
-	
-	tilerom_inst : entity work.sprom
-		generic map
-		(
-			init_file		=> "../../../../../src/platform/trs80/m3/roms/trstile.hex",
-			numwords_a	=> 4096,
-			widthad_a		=> 12
-		)
-		port map
-		(
-			clock			=> clk_20M,
-			address		=> tileaddr(11 downto 0),
-			q					=> tileDatao
-		);
-	
-	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-	vram_inst : entity work.dpram
-		generic map
-		(
-			init_file		=> "../../../../../src/platform/trs80/m3/roms/trsvram.hex",
-			numwords_a	=> 1024,
-			widthad_a		=> 10
-		)
-		port map
-		(
-			clock_b			=> clk_20M,
-			address_b		=> uP_addr(9 downto 0),
-			wren_b			=> vram_wr,
-			data_b			=> uP_datao,
-			q_b					=> vram_datao,
-
-			clock_a			=> clk_40M,
-			address_a		=> tilemapaddr(9 downto 0),
-			wren_a			=> '0',
-			data_a			=> (others => 'X'),
-			q_a					=> tileMapDatao(7 downto 0)
-		);
-
-    interrupts_inst : entity work.TRS80_Interrupts                    
-      port map
-      (
-        clk           => clk_20M,
-        reset         => cpu_reset,
-
-        -- enable inputs                    
-        z80_data      => uP_datao,
-        intena_wr     => intena_wr,                  
-        nmiena_wr     => nmiena_wr,
-                    
-        -- IRQ inputs
-        reset_btn_int => '0',
-        fdc_drq_int   => fdc_drq_int,                    
-        fdc_dto_int   => fdc_dto_int,
-
-        -- IRQ/status outputs
-        int_status    => int_status,
-        int_req       => uPintreq,
-        nmi_status    => nmi_status,
-        nmi_req       => uPnmireq,
-
-        -- interrupt clear inputs
-        rtc_reset     => rtc_intrst,
-        nmi_reset     => nmirst
-      );
-
-		GEN_FDC : if INCLUDE_FDC_SUPPORT generate
+  --
+  --  COMPONENT INSTANTIATION
+  --
 		
-			GEN_SPI_FDC : if PACE_TARGET = PACE_TARGET_NANOBOARD_NB1 generate
-			
-		    fdc_inst : FDC_1793                                    
-		      port map
-		      (
-		        clk         => clk_20M,
-		        upclk       => clk_2M_en,
-		        reset       => cpu_reset,
-		                    
-		        fdcaddr     => uP_addr(2 downto 0),          
-		        fdcdatai    => uP_datao,
-		        fdcdatao    => fdc_datao,
-		        fdc_rd      => fdc_rd,                      
-		        fdc_wr      => fdc_wr,                      
-		        fdc_drq_int => fdc_drq_int,   
-		        fdc_dto_int => fdc_dto_int,         
-
-		        spi_clk     => spi_clk,            
-		        spi_din     => spi_din,                                 
-		        spi_dout    => spi_dout,           
-		        spi_ena     => spi_ena,            
-		        spi_mode    => spi_mode,           
-		        spi_sel     => spi_sel,            
-		                    
-		        ser_rx      => ser_rx,                                  
-		        ser_tx      => ser_tx,
-
-		        debug       => leds
-		      );
-		
-			end generate GEN_SPI_FDC;
-		
-		end generate GEN_FDC;
-
-		GEN_NO_FDC : 	if 	not INCLUDE_FDC_SUPPORT or 
-											PACE_TARGET /= PACE_TARGET_NANOBOARD_NB1 
-									generate
-									
-			fdc_datao <= X"FF";
-			fdc_drq_int <= '0';
-			fdc_dto_int <= '0';
-			leds <= (others => '0');
-					
-		end generate GEN_NO_FDC;
-					
 end SYN;
-
