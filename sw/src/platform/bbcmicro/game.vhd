@@ -66,299 +66,98 @@ end Game;
 
 architecture SYN of Game is
 
-	component palx4_clk IS
-	PORT
-		(
-			inclk0		: IN STD_LOGIC  := '0';
-			c0				: OUT STD_LOGIC 
-		);
-	END component;
+  --
+  -- COMPONENTS
+  --
 
-	alias clk_20M					: std_logic is clk(0);
-	alias clk_57M272			: std_logic is clk(1);
-	
-	-- clocks
-	signal sys_clk				: std_logic;			-- 14M318
-	signal clk_q					: std_logic;
-	signal clk_e					: std_logic;
-	
-	signal cpu_reset			: std_logic;
-	
-	-- clock helpers
-	signal falling_edge_q	: std_logic;
-	signal falling_edge_e	: std_logic;
-	signal sys_count			: std_logic_vector(3 downto 0);
-  signal vdgclk         : std_logic;
+  component crtc6845s is
+    port
+    (
+      -- INPUT
+      I_E         : in std_logic;
+      I_DI        : in std_logic_vector(7 downto 0);
+      I_RS        : in std_logic;
+      I_RWn       : in std_logic;
+      I_CSn       : in std_logic;
+      I_CLK       : in std_logic;
+      I_RSTn      : in std_logic;
 
-  -- system signals
-  signal sys_write      : std_logic;
-	
-	-- multiplexed address
-	signal ma							: std_logic_vector(7 downto 0);
+      -- OUTPUT
+      O_RA        : out std_logic_vector(4 downto 0);
+      O_MA        : out std_logic_vector(13 downto 0);
+      O_H_SYNC    : out std_logic;
+      O_V_SYNC    : out std_logic;
+      O_DISPTMG   : out std_logic
+    );
+  end component crtc6845s;
 
-	signal mpu_addr				: std_logic_vector(15 downto 0);
+  --
+  -- SIGNALS
+  --
 
-  alias vdg_addr        : std_logic_vector(15 downto 0) is mpu_addr;
-  signal vdg_data       : std_logic_vector(7 downto 0);
-  signal vdg_y          : std_logic_vector(3 downto 0);						
-  signal vdg_x          : std_logic_vector(4 downto 0);
+  signal reset_n            : std_logic;
 
-  -- uP signals  
-  alias uPclk          	: std_logic is clk_e;
-  signal uP_addr        : std_logic_vector(15 downto 0);
-  signal uP_datai       : std_logic_vector(7 downto 0);
-  signal uP_datao       : std_logic_vector(7 downto 0);
-  signal uPrdwr					: std_logic;
-  signal uPvma					: std_logic;
-  signal uPintreq       : std_logic;
-  signal uPfintreq			: std_logic;
-  signal uPnmireq       : std_logic;
+  -- CPU signals
+  signal cpu_d_i            : std_logic_vector(7 downto 0);
+  signal cpu_d_o            : std_logic_vector(7 downto 0);
 
-  -- keyboard signals
-	signal jamma_s				: JAMMAInputsType;
-  signal kbd_matrix			: in8(0 to 8);
-	alias game_reset			: std_logic is kbd_matrix(8)(0);
-	
-  -- PIA signals
-  signal pia_datao  		: std_logic_vector(7 downto 0);
-  signal pia_irqa      	: std_logic;
-  signal pia_irqb      	: std_logic;
-  signal pia_pa        	: std_logic_vector(7 downto 0);
-  signal pia_ca1       	: std_logic;
-  signal pia_ca2       	: std_logic;
-  signal pia_pb        	: std_logic_vector(7 downto 0);
-  signal pia_cb1       	: std_logic;
-  signal pia_cb2       	: std_logic;
+  -- CRTC6845 signals
+  signal crtc6845_cs_n      : std_logic;
+  signal crtc6845_rs        : std_logic;
+  signal crtc6845_e         : std_logic;
+  signal crtc6845_rw_n      : std_logic;
+  signal crtc6845_ra        : std_logic_vector(4 downto 0);
+  signal crtc6845_ma        : std_logic_vector(13 downto 0);
+  signal crtc6845_disptmg   : std_logic;
 
-  signal pia_cs					: std_logic;
-
-	-- SAM signals
-  signal sam_cs					: std_logic;
-  signal sam_datao			: std_logic_vector(7 downto 0);
-                        
-  -- ROM signals        
-  signal rom_wr					: std_logic;
-  signal rom_datao      : std_logic_vector(7 downto 0);
-	signal rom_cs					: std_logic;
-
-  -- EXTROM signals	                        
-  signal extrom_datao   : std_logic_vector(7 downto 0);
-	signal extrom_cs			: std_logic;
-
-  -- VRAM signals       
-  --signal vram_cs        : std_logic;
-  signal vram_wr        : std_logic;
-  --signal vram_datao     : std_logic_vector(7 downto 0);
-                        
-  -- RAM signals        
-  signal ram_cs         : std_logic;
-  signal ram_datao      : std_logic_vector(7 downto 0);
-
-	-- system chipselect selector from SAM
-	signal cs_sel					: std_logic_vector(2 downto 0);
-	signal y              : std_logic_vector(7 downto 0);
-
-  -- VDG signals
-  signal vdg_reset      : std_logic;
-  signal hs_n           : std_logic;
-  signal fs_n           : std_logic;
-  signal da0            : std_logic;
-  signal vdg_sram_cs    : std_logic;
-
-  -- only for test vga controller
-	signal vga_clk_s				: std_logic;
-	
 begin
 
-	cpu_reset <= reset or game_reset;
-	
-  --
-  --  Clocking
-  --
-
-	-- produce a PAL clock (sys_clk) from the PLL output
-	process (clk_57M272, reset)
-		variable count : std_logic_vector(1 downto 0);
-	begin
-		if reset = '1' then
-			count := (others => '0');
-		elsif rising_edge(clk_57M272) then
-			sys_clk <= count(1);
-			count := count + 1;
-		end if;
-	end process;
-
-	-- generate clock helpers
-	process (sys_clk, reset, clk_e, clk_q)
-		variable old_q	: std_logic;
-		variable old_e	: std_logic;
-	begin
-		if reset = '1' then
-			old_q := '0';
-			old_e := '0';
-		elsif falling_edge (sys_clk) then
-			falling_edge_q <= '0';
-			if old_q = '1' and clk_q = '0' then
-				falling_edge_q <= '1';
-			end if;
-			old_q := clk_q;
-			falling_edge_e <= '0';
-			if old_e = '1' and clk_e = '0' then
-				falling_edge_e <= '1';
-				sys_count <= (others => '1');
-			else
-				sys_count <= sys_count + 1;
-			end if;
-			old_e := clk_e;
-		end if;
-	end process;
-
-  -- need to sync reset to VDG with Q
-  process (clk_q, reset)
-  begin
-    if reset = '1' then
-      vdg_reset <= '1';
-    elsif falling_edge (clk_q) then
-      if reset = '0' then
-        vdg_reset <= '0';
-      end if;
-    end if;
-  end process;
-
-  --	
-	-- system control
-  --
-
-  -- assign chipselects from MC6883 selector output
-  pia_cs <= y(4);
-  extrom_cs <= y(1);
-  rom_cs <= y(2);
-	ram_cs <= y(0) or y(7);
-  -- this is yet to be implemented in the 6883/6847
-  --vram_cs <= '1' when uP_addr(15 downto 10) = "000001" else '0';
-
-  ---
-  --- yucky yucky yucky
-  --- the cpu and MC6883 are running off falling_edge
-  --- but the vram runs off rising_edge (ahh!!)
-  ---
-
-  -- runs off PAL clk (E x 16)
-	process (sys_clk, sys_count)
-	begin
-		if falling_edge (sys_clk) then
-			-- defaults
-      sys_write <= '0';
-      vdg_sram_cs <= '0';
-      vram_wr <= '0';
-			case sys_count is
-        when X"0" =>
-          -- latch VDG address (row)
-          vdg_addr(7 downto 0) <= ma;
-        when X"3" =>
-          -- latch VDG address (column)
-          vdg_addr(15 downto 8) <= ma;
-        when X"4" =>
-          -- read SRAM data here because we're multiplexing it with CPU
-          vdg_sram_cs <= '1';
-        when X"5" =>
-      	  vdg_data <= sram_i.d(vdg_data'range);
-				when X"6" =>
-          if hs_n = '1' and fs_n = '1' then
-            vram_wr <= '1';
-          end if;
-				when X"8" =>
-          -- latch MPU address (row)
-					mpu_addr(7 downto 0) <= ma;
-				when X"B" =>
-          -- latch MPU address (column)
-					mpu_addr(15 downto 8) <= ma;
-          -- enable bus write i/o
-          sys_write <= '1';
-				when X"C" =>
-          -- read SRAM data here because we're multiplexing it with video
-      	  ram_datao <= sram_i.d(ram_datao'range);
-				when others =>
-			end case;
-		end if;
-	end process;
-
-  -- memory read mux
-  uP_datai <= pia_datao when pia_cs = '1' else
-              rom_datao when rom_cs = '1' else
-              extrom_datao when extrom_cs = '1' else
-              ram_datao when ram_cs = '1' else
-              --vram_datao when vram_cs = '1' else
-              X"FF";
-
-  -- SRAM signals
-  sram_o.a <= EXT(mpu_addr, sram_o.a'length);
-  --sram_data <= uP_datao when (uPvma = '1' and ram_cs = '1' and uPrdwr = '0' and vdg_sram_cs = '0') 
-  sram_o.d <= EXT(uP_datao, sram_o.d'length);
-	sram_o.be <= EXT("1", sram_o.be'length);
-  sram_o.cs <= (uPvma and ram_cs) or vdg_sram_cs;
-	sram_o.oe <= uPrdwr or vdg_sram_cs;
-	sram_o.we <= sys_write and not uPrdwr;
-
-  -- CPU interrupts	
-	uPintreq <= '0';
-	uPfintreq <= '0';
-	uPnmireq <= '0';
-
-	-- PIA edge inputs
-	pia_ca1 <= '0';
-	pia_ca2 <= '0';
-	pia_cb1 <= '0';
-	pia_cb2 <= '0';
-	--pia_pb <= (others => '0');
-	
-	-- keyboard matrix
-	process (clk_20M, reset)
-	  variable keys : std_logic_vector(7 downto 0);
-	begin
-	  if reset = '1' then
-  		keys := (others => '0');
-	  elsif rising_edge (clk_20M) then
-  		keys := (others => '0');
-  		-- note that row select is active low
-  		if pia_pb(0) = '0' then
-  			keys := keys or kbd_matrix(0);
-  		end if;
-  		if pia_pb(1) = '0' then
-  			keys := keys or kbd_matrix(1);
-  		end if;
-  		if pia_pb(2) = '0' then
-  			keys := keys or kbd_matrix(2);
-  		end if;
-  		if pia_pb(3) = '0' then
-  			keys := keys or kbd_matrix(3);
-  		end if;
-  		if pia_pb(4) = '0' then
-  			keys := keys or kbd_matrix(4);
-  		end if;
-  		if pia_pb(5) = '0' then
-  			keys := keys or kbd_matrix(5);
-  		end if;
-  		if pia_pb(6) = '0' then
-  			keys := keys or kbd_matrix(6);
-  		end if;
-  		if pia_pb(7) = '0' then
-  			keys := keys or kbd_matrix(7);
-  		end if;
-	  end if;
-	  -- key inputs are active low
-	  pia_pa <= not keys;
-	end process;
-
-  gfxextra_data <= (others => '0');
+  reset_n <= not reset;
 
   -- unused outputs
-	upaddr <= uP_addr;
-	updatao <= uP_datao;
+  gfxextra_data <= (others => '0');
+  cvbs <= (others => '0');
   snd_rd <= '0';
+  snd_wr <= '0';
+  spi_clk <= '0';
+  spi_dout <= '0';
+  spi_ena <= '0';
+  spi_mode <= '0';
+  spi_sel <= '0';
+  ser_tx <= '0';
+  leds <= (others => '0');
 
   --
   --  COMPONENT INSTANTIATION
   --
+
+  BLK_VIDEO : block
+
+    signal crtc6845_hsync : std_logic;
+    signal crtc6845_vsync : std_logic;
+
+  begin
+
+    crtc6845s_inst : crtc6845s
+      port map
+      (
+        -- INPUT
+        I_E         => crtc6845_e,
+        I_DI        => cpu_d_o,
+        I_RS        => crtc6845_rs,
+        I_RWn       => crtc6845_rw_n,
+        I_CSn       => crtc6845_cs_n,
+        I_CLK       => clk(0),
+        I_RSTn      => reset_n,
+
+        -- OUTPUT
+        O_RA        => crtc6845_ra,
+        O_MA        => crtc6845_ma,
+        O_H_SYNC    => crtc6845_hsync,
+        O_V_SYNC    => crtc6845_vsync,
+        O_DISPTMG   => crtc6845_disptmg
+      );
+
+  end block BLK_VIDEO;
 		
 end SYN;

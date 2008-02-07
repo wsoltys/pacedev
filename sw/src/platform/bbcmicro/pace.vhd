@@ -146,21 +146,31 @@ begin
       leds            => leds
     );
 
-  U_Sound : entity work.Sound                                          
-    Port Map
-    (
-      sysclk      => clk(0),                   
-      reset       => reset,
+	SOUND_BLOCK : block
+		signal snd_data		: std_logic_vector(7 downto 0);
+	begin
+	
+	  U_Sound : entity work.Sound                                          
+	    Port Map
+	    (
+	      sysclk      => clk(0),    -- fudge for now
+	      reset       => reset,
 
-      sndif_rd    => snd_rd,              
-      sndif_wr    => snd_wr,              
-      sndif_addr  => uPaddr,
-      sndif_datai => uPdatao,
+	      sndif_rd    => snd_rd,              
+	      sndif_wr    => snd_wr,              
+	      sndif_addr  => uPaddr,
+	      sndif_datai => uPdatao,
 
-      snd_clk     => snd_clk,
-      snd_data    => snd_data_l(15 downto 8),           
-      sndif_datao => sndif_data
-    );
+	      snd_clk     => snd_clk,
+	      snd_data    => snd_data,           
+	      sndif_datao => sndif_data
+	    );
 
+		-- route audio to both channels
+		snd_data_l <= snd_data & "00000000";
+		snd_data_r <= snd_data & "00000000";
+	
+	end block SOUND_BLOCK;
+		
 end SYN;
 
