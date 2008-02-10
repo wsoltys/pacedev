@@ -121,8 +121,12 @@ architecture SYN of Game is
   signal crtc6845_rw_n      : std_logic;
   signal crtc6845_disptmg   : std_logic;
 
-	signal video_ram_a				: std_logic_vector(13 downto 0);
+	signal video_ram_a				: std_logic_vector(14 downto 0);
 	signal video_ram_d				: std_logic_vector(7 downto 0);
+
+  -- System 6522 VIA $40-$4F
+  signal sysVIA_PB    : std_logic_vector(7 downto 0);
+  alias c             : std_logic_vector(1 downto 0) is sysVIA_PB(5 downto 4);
 
 begin
 
@@ -158,6 +162,7 @@ begin
     signal saa5050_dew    : std_logic;
     signal saa5050_de     : std_logic;
 
+    signal video_ULA_de   : std_logic;
 		signal video_r				: std_logic_vector(0 downto 0);
 		signal video_g				: std_logic_vector(0 downto 0);
 		signal video_b				: std_logic_vector(0 downto 0);
@@ -170,7 +175,7 @@ begin
 			alias flash_r				: std_logic is control_r(0);
 			alias teletext_r		: std_logic is control_r(1);
 			alias cpl_r					: std_logic_vector(1 downto 0) is control_r(3 downto 2);	-- 10/20/40/80
-			alias clk_rate_r		: std_logic is control_r(4);
+			alias clk_rate_r		: std_logic is control_r(4);                              -- 1/2MHz
 			alias cursor_w_r		: std_logic_vector(1 downto 0) is control_r(6 downto 5);	-- 1/NA/2/4
 			alias m_cursor_w_r	: std_logic is control_r(7);
 
@@ -207,11 +212,7 @@ begin
         end if;
       end process;
 
-      -- arrghh the CRTC6845 is not synchronous!!!
-      -- this is purely a guess!?!
-      crtc6845_clk <= clk_1M_en when clk_rate_r = '0' else clk_2M_en;
-
-			-- registers
+      -- registers
       process (clk_16M, reset)
       begin
         if reset = '1' then
@@ -253,6 +254,9 @@ begin
 				video_b(video_b'left) <= video_data(video_data'left);
 			end process;
 
+      -- the CRTC6845 implementation is not synchronous!!!
+      crtc6845_clk <= clk_1M_en when clk_rate_r = '0' else clk_2M_en;
+
     end block BLK_VIDEO_ULA;
 
     crtc6845s_inst : crtc6845s
@@ -275,11 +279,32 @@ begin
         O_DISPTMG   => crtc6845_disptmg
       );
 
-    -- in non-teletext mode
-    -- video address is computed as
-    -- [(C(1..0)+MA12) + MA(11..8)???] & [RA(2..0)&MA(7..0)]
-		video_ram_a(video_ram_a'left downto 11) <= (others => '0');
-		video_ram_a(10 downto 0) <= crtc6845_ma(7 downto 0) & crtc6845_ra(2 downto 0);
+    -- enable output of the video ULA
+    video_ULA_de <= crtc6845_disptmg and not crtc6845_ra(3);
+
+    BLK_VIDADDR : block
+
+      signal b  : std_logic_vector(4 downto 1);
+      signal s  : std_logic_vector(4 downto 1);
+
+    begin
+      -- fudge
+      c <= "01"; -- mode 6
+
+      -- IC36/40/27
+      b(1) <= not (c(0) and c(1) and crtc6845_ma(12));
+      b(2) <= not (c(1) and b(3) and crtc6845_ma(12));
+      b(3) <= c(0) nand crtc6845_ma(12);
+      b(4) <= b(3) nand crtc6845_ma(12);
+
+      -- IC39 (74LS283)
+      s <= crtc6845_ma(11 downto 8) + b + 1;
+
+      -- MA13=0 (hires), MA13=1 (teletext)
+      video_ram_a <=  s(4) & "1111" & crtc6845_ma(9 downto 0) when crtc6845_ma(13) = '1' else
+                      s & crtc6845_ma(7 downto 0) & crtc6845_ra(2 downto 0);
+
+    end block BLK_VIDADDR;
 
     saa505x_inst : entity work.saa505x
       port map
@@ -313,9 +338,9 @@ begin
     -- fudge for now
     hsync <= not crtc6845_hsync;
     vsync <= not crtc6845_vsync;
-    red <= (others => video_r(video_r'left)) when crtc6845_disptmg = '1' else (others => '0');
-    green <= (others => video_g(video_g'left)) when crtc6845_disptmg = '1' else (others => '0');
-    blue <= (others => video_b(video_b'left)) when crtc6845_disptmg = '1' else (others => '0');
+    red <= (others => video_r(video_r'left)) when video_ULA_de = '1' else (others => '0');
+    green <= (others => video_g(video_g'left)) when video_ULA_de = '1' else (others => '0');
+    blue <= (others => video_b(video_b'left)) when video_ULA_de = '1' else (others => '0');
 
   end block BLK_VIDEO;
 
