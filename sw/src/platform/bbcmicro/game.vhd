@@ -208,6 +208,12 @@ begin
               end if;
             end if;
           end if;
+          -- fudge
+          if count = "1111" then
+            crtc6845_clk <= '1';
+          else
+            crtc6845_clk <= '0';
+          end if;
           count := count + 1;
         end if;
       end process;
@@ -255,7 +261,7 @@ begin
 			end process;
 
       -- the CRTC6845 implementation is not synchronous!!!
-      crtc6845_clk <= clk_1M_en when clk_rate_r = '0' else clk_2M_en;
+      --crtc6845_clk <= clk_1M_en when clk_rate_r = '0' else clk_2M_en;
 
     end block BLK_VIDEO_ULA;
 
