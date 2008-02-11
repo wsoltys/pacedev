@@ -2,6 +2,7 @@ library IEEE;
 use ieee.std_logic_1164.all;
 library work;
 use work.pace_pkg.all;
+use work.platform_pkg.all;
 
 ENTITY mos_rom IS
 	PORT
@@ -17,7 +18,7 @@ begin
 	rom_inst : entity work.sprom
 		generic map
 		(
-			init_file		=> "../../../../src/platform/bbc/roms/os12.hex",
+			init_file		=> BBCMICRO_SRC_DIR & "/roms/os12.hex",
 			numwords_a	=> 16384,
 			widthad_a		=> 14
 		)
@@ -33,6 +34,7 @@ library IEEE;
 use ieee.std_logic_1164.all;
 library work;
 use work.pace_pkg.all;
+use work.platform_pkg.all;
 
 ENTITY basic_rom IS
 	PORT
@@ -48,7 +50,7 @@ begin
 	rom_inst : entity work.sprom
 		generic map
 		(
-			init_file		=> "../../../../src/platform/bbc/roms/basic2.hex",
+			init_file		=> BBCMICRO_SRC_DIR & "/roms/basic2.hex",
 			numwords_a	=> 16384,
 			widthad_a		=> 14
 		)

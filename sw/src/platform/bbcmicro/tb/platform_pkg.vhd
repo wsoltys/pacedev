@@ -15,6 +15,6 @@ package platform_pkg is
 	-- BBCMicro-specific constants (optional)
 	--
 
-	constant BBCMICRO_SRC_DIR							: string := "../../../../src/platform/bbcmicro";
+	constant BBCMICRO_SRC_DIR							: string := "..";
 
 end;
