@@ -23,6 +23,66 @@ architecture SYN of tb_top is
 
 begin
 
+  -- some test clocking stuff
+  BLK_TEST_CLOCK : block
+
+    signal clk_32M : std_logic := '0';
+    signal clk_1M_pulse : std_logic;
+    signal p2_h : std_logic;
+    signal clk_4M_en : std_logic;
+
+  begin
+
+    clk_32M <= not clk_32M after 15625 ps;
+
+    process (clk_32M, reset)
+      variable count  : std_logic_vector(8 downto 0) := (others => '0');
+      alias hcnt : std_logic_vector(1 downto 0) is count(4 downto 3);
+    begin
+      if rising_edge(clk_32M) then
+        -- generate 1MHz pulse
+        clk_1M_pulse <= '0';
+        --if count(4 downto 0) = "00111" then
+        if count(4 downto 0) = "01000" then
+          clk_1M_pulse <= '1';
+        end if;
+        count := count + 1;
+      end if;
+      p2_h <= not hcnt(1);
+      clk_4M_en <= not count(2);
+    end process;
+
+  end block BLK_TEST_CLOCK;
+
+  -- some test clocking stuff
+  BLK_TEST_CLOCK2 : block
+
+    signal clk_16M : std_logic := '0';
+    signal clk_2M_pulse : std_logic;
+    signal p2_h : std_logic;
+    signal clk_4M_en : std_logic;
+
+  begin
+
+    clk_16M <= not clk_16M after 31250 ps; -- 16MHz
+
+    process (clk_16M, reset)
+      variable count  : std_logic_vector(3 downto 0) := (others => '0');
+    begin
+      if rising_edge(clk_16M) then
+        -- generate 1MHz pulse
+        clk_2M_pulse <= '0';
+        if count(2 downto 0) = "000" then
+          clk_2M_pulse <= '1';
+        end if;
+        count := count + 1;
+      end if;
+      p2_h <= not count(3);
+      clk_4M_en <= not count(1);
+    end process;
+
+  end block BLK_TEST_CLOCK2;
+
 	-- Generate CLK and reset
   clk(0) <= not clk(0) after 31250 ps; -- 16MHz
 	reset <= '0' after 100 ns;

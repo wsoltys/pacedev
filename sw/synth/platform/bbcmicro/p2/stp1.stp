@@ -1,25 +1,22 @@
-<session jtag_chain="USB-Blaster [USB-0]" jtag_device="@1: EP2C35 (0x020B40DD)" sof_file="bbcmicro.sof" top_level_entity="target_top">
+<session jtag_chain="ByteBlasterMV [LPT1]" jtag_device="@1: EP2C35 (0x020B40DD)" sof_file="bbcmicro.sof" top_level_entity="target_top">
   <display_tree gui_logging_enabled="0">
     <display_branch instance="auto_signaltap_0" log="USE_GLOBAL_TEMP" signal_set="USE_GLOBAL_TEMP" trigger="USE_GLOBAL_TEMP"/>
   </display_tree>
-  <global_info>
-    <multi attribute="window position" size="9" value="1002,699,398,124,0,50,124,0,0"/>
-    <single attribute="active instance" value="0"/>
-    <single attribute="lock mode" value="36110"/>
-  </global_info>
-  <instance compilation_mode="full" entity_name="sld_signaltap" is_auto_node="yes" name="auto_signaltap_0" source_file="sld_signaltap.vhd">
+  <instance compilation_mode="full" entity_name="sld_signaltap" is_auto_node="yes" is_expanded="true" name="auto_signaltap_0" source_file="sld_signaltap.vhd">
     <node_ip_info instance_id="0" mfg_id="110" node_id="0" version="6"/>
     <position_info>
       <single attribute="active tab" value="0"/>
+      <single attribute="data horizontal scroll position" value="8"/>
       <single attribute="data vertical scroll position" value="0"/>
-      <single attribute="data horizontal scroll position" value="15"/>
-      <single attribute="zoom level numerator" value="16"/>
       <single attribute="zoom level denominator" value="1"/>
-      <single attribute="zoom offset numerator" value="8184"/>
+      <single attribute="zoom level numerator" value="16"/>
       <single attribute="zoom offset denominator" value="1"/>
+      <single attribute="zoom offset numerator" value="8184"/>
+      <single attribute="setup vertical scroll position" value="0"/>
+      <single attribute="setup horizontal scroll position" value="0"/>
     </position_info>
-    <signal_set global_temp="1" name="signal_set: 2008/02/11 18:44:53  #0">
-      <clock name="PACE:PACE_INST|Game:U_Game|clk_1M_en" polarity="posedge" tap_mode="probeonly"/>
+    <signal_set global_temp="1" name="signal_set: 2008/02/11 23:20:42  #0">
+      <clock name="PACE:PACE_INST|Game:U_Game|clk_2M_en" polarity="posedge" tap_mode="probeonly"/>
       <config ram_type="M4K" reserved_data_nodes="0" reserved_trigger_nodes="0" sample_depth="128" trigger_in_enable="no" trigger_out_enable="no"/>
       <top_entity/>
       <signal_vec>
@@ -31,15 +28,7 @@
           <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[13]" tap_mode="classic" type="combinatorial"/>
           <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[14]" tap_mode="classic" type="combinatorial"/>
           <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[15]" tap_mode="classic" type="combinatorial"/>
-          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[16]" tap_mode="classic" type="combinatorial"/>
-          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[17]" tap_mode="classic" type="combinatorial"/>
-          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[18]" tap_mode="classic" type="combinatorial"/>
-          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[19]" tap_mode="classic" type="combinatorial"/>
           <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[20]" tap_mode="classic" type="combinatorial"/>
-          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[21]" tap_mode="classic" type="combinatorial"/>
-          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[22]" tap_mode="classic" type="combinatorial"/>
-          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[23]" tap_mode="classic" type="combinatorial"/>
           <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[2]" tap_mode="classic" type="combinatorial"/>
           <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[3]" tap_mode="classic" type="combinatorial"/>
           <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[4]" tap_mode="classic" type="combinatorial"/>
@@ -48,7 +37,27 @@
           <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[7]" tap_mode="classic" type="combinatorial"/>
           <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[8]" tap_mode="classic" type="combinatorial"/>
           <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[9]" tap_mode="classic" type="combinatorial"/>
-          <wire name="PACE:PACE_INST|Game:U_Game|\BLK_VIDEO:BLK_VIDEO_ULA:control_r" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|reset" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|paged_rom_r[0]" tap_mode="probeonly" type="register"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|paged_rom_r[1]" tap_mode="probeonly" type="register"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|paged_rom_r[2]" tap_mode="probeonly" type="register"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|paged_rom_r[3]" tap_mode="probeonly" type="register"/>
         </trigger_input_vec>
         <data_input_vec>
           <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[0]" tap_mode="classic" type="combinatorial"/>
@@ -58,15 +67,7 @@
           <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[13]" tap_mode="classic" type="combinatorial"/>
           <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[14]" tap_mode="classic" type="combinatorial"/>
           <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[15]" tap_mode="classic" type="combinatorial"/>
-          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[16]" tap_mode="classic" type="combinatorial"/>
-          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[17]" tap_mode="classic" type="combinatorial"/>
-          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[18]" tap_mode="classic" type="combinatorial"/>
-          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[19]" tap_mode="classic" type="combinatorial"/>
           <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[20]" tap_mode="classic" type="combinatorial"/>
-          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[21]" tap_mode="classic" type="combinatorial"/>
-          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[22]" tap_mode="classic" type="combinatorial"/>
-          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[23]" tap_mode="classic" type="combinatorial"/>
           <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[2]" tap_mode="classic" type="combinatorial"/>
           <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[3]" tap_mode="classic" type="combinatorial"/>
           <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[4]" tap_mode="classic" type="combinatorial"/>
@@ -75,7 +76,27 @@
           <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[7]" tap_mode="classic" type="combinatorial"/>
           <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[8]" tap_mode="classic" type="combinatorial"/>
           <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[9]" tap_mode="classic" type="combinatorial"/>
-          <wire name="PACE:PACE_INST|Game:U_Game|\BLK_VIDEO:BLK_VIDEO_ULA:control_r" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|reset" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|paged_rom_r[0]" tap_mode="probeonly" type="register"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|paged_rom_r[1]" tap_mode="probeonly" type="register"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|paged_rom_r[2]" tap_mode="probeonly" type="register"/>
+          <wire name="PACE:PACE_INST|Game:U_Game|paged_rom_r[3]" tap_mode="probeonly" type="register"/>
         </data_input_vec>
       </signal_vec>
       <presentation>
@@ -97,16 +118,34 @@
             <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[13]"/>
             <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[14]"/>
             <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[15]"/>
-            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[16]"/>
-            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[17]"/>
-            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[18]"/>
-            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[19]"/>
-            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[20]"/>
-            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[21]"/>
-            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[22]"/>
-            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[23]"/>
           </bus>
-          <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|\BLK_VIDEO:BLK_VIDEO_ULA:control_r"/>
+          <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|reset"/>
+          <bus is_signal_inverted="no" link="all" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[0]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[1]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[2]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[3]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[4]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[5]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[6]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[7]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[0]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[1]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[2]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[3]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[4]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[5]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[6]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[7]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:PACE_INST|Game:U_Game|paged_rom_r" order="lsb_to_msb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|paged_rom_r[0]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|paged_rom_r[1]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|paged_rom_r[2]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|paged_rom_r[3]"/>
+          </bus>
         </data_view>
         <setup_view>
           <bus is_signal_inverted="no" link="all" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
@@ -126,34 +165,57 @@
             <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[13]"/>
             <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[14]"/>
             <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[15]"/>
-            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[16]"/>
-            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[17]"/>
-            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[18]"/>
-            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[19]"/>
-            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[20]"/>
-            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[21]"/>
-            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[22]"/>
-            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[23]"/>
           </bus>
-          <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|\BLK_VIDEO:BLK_VIDEO_ULA:control_r"/>
+          <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|reset"/>
+          <bus is_signal_inverted="no" link="all" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[0]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[1]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[2]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[3]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[4]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[5]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[6]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DI[7]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[0]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[1]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[2]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[3]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[4]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[5]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[6]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|T65:cpu_inst|DO[7]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:PACE_INST|Game:U_Game|paged_rom_r" order="lsb_to_msb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|paged_rom_r[0]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|paged_rom_r[1]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|paged_rom_r[2]"/>
+            <net is_signal_inverted="no" name="PACE:PACE_INST|Game:U_Game|paged_rom_r[3]"/>
+          </bus>
         </setup_view>
       </presentation>
-      <trigger CRC="2DB53377" global_temp="1" name="trigger: 2008/02/11 19:00:30  #0" position="pre" power_up_trigger_mode="false" segment_size="1" trigger_in="dont_care" trigger_out="active high" trigger_type="circular">
+      <trigger CRC="5F6278F5" global_temp="1" name="trigger: 2008/02/12 00:25:18  #0" position="pre" power_up_trigger_mode="false" segment_size="1" trigger_in="dont_care" trigger_out="active high" trigger_type="circular">
         <power_up_trigger position="pre" trigger_in="dont_care" trigger_out="active high"/>
         <events use_custom_flow_control="no">
-          <level enabled="yes" name="condition1" type="basic">'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[0]' == high &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[10]' == low &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[11]' == high &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[12]' == high &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[13]' == low &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[14]' == high &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[15]' == high &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[16]' == high &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[17]' == high &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[18]' == high &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[19]' == high &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[1]' == low &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[20]' == high &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[21]' == high &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[22]' == high &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[23]' == high &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[2]' == low &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[3]' == low &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[4]' == high &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[5]' == low &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[6]' == low &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[7]' == low &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[8]' == high &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[9]' == high
+          <level enabled="yes" name="condition1" type="basic">'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[0]' == high &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[10]' == low &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[11]' == high &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[12]' == high &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[13]' == low &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[14]' == high &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[15]' == high &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[1]' == low &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[2]' == low &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[3]' == high &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[4]' == high &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[5]' == high &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[6]' == low &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[7]' == low &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[8]' == low &amp;&amp; 'PACE:PACE_INST|Game:U_Game|T65:cpu_inst|A[9]' == high
             <power_up enabled="yes">
             </power_up>
             <op_node/>
           </level>
         </events>
         <log>
-          <data global_temp="1" name="log: 2008/02/11 19:00:30  #1" power_up_mode="false" sample_depth="128" trigger_position="-1">11001111111111110001110000000000000000000001111100110011111111111101110010011001111111011111111001001100111111111111001001100100000000000000000111110010000000000100000011111000111011111101111001111010011101111111111100111101000000001111111111001110001111011111101111101111010011101111111111110011101010000001111111111111110001111011111101111010111010111101111111111101011101010000000000000000000100100111011111111111110111010100000000001000000111110011110111111111111101110100100111111101111011110100100000000001000011101001011001111111111110111101001100111111101111000001100110011111111111100000110001001111111011111000011001100111111101111011100100010011111111111101110010010000000000000000011111001100111111111111011100100110011111110111100011000001001111111111110001100000000000000000000110100010010011111110111110011000010000000000100001101111000100111111111111100110000110011111111111110011000000000000000000000110110100100111111111111010110000100000000000000000011101011001111111011111101100000100111111101111000111000000000000001000011011110011001111111011110001110000100111111111111000111000100000000001000011011110010000000000000000011111000100111111101111111100100110011111111111100100110001001111111011111010011000000000000010000001111100111101111111111111011101011110111111011110011110101111011111111111001111010011101111110111110111101001110111111111111001110101111011111111111100111010011101111110111101011101001110111111111110101110100111011111101111110111010111101111110111111011101010000000000100000011111000000000000010000001111100110011111111111110111010011001111111011110111101000100111111111111011110100110011111110111100000110001001111111111110000011000000000000000000010110010110011111110111110000110011001111111011110111001001000000000000000001111100000000000000000000111110001001111111011110001100001100111111101111000110000110011111111111100011000010000000000000001101000101100111111101111100110000110011111110111110011000001001111111111111001100000100111111101111010110000110011111110111101011000011001111111111110101100000100111111101111110110000010011111110111100011100011001111111011110001110001000000000010000110111100010011111111111100011100011001111111111110001110000000000000000000001111100110011111111111101110010011001111111011111111001001100111111111111001001100100000000000000000111110010000000000100000011111000111011111101111001111010011101111111111100111101000000001111111111001110001111011111101111101111010011101111111111110011101010000001111111111111110001111011111101111010111010111101111111111101011101010000000000000000000100100111011111111111110111010100000000001000000111110011110111111111111101110100100111111101111011110100100000000001000011101001011001111111111110111101001100111111101111000001100110011111111111100000110001001111111011111000011001100111111101111011100100010011111111111101110010010000000000000000011111001100111111111111011100100110011111110111100011000001001111111111110001100000000000000000000110100010010011111110111110011000010000000000100001101111000100111111111111100110000110011111111111110011000000000000000000000110110100100111111111111010110000100000000000000000011101011001111111011111101100001111011111101111001111010</data>
-          <extradata>11111111111111111111111111111T11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111</extradata>
+          <data global_temp="1" name="log: 2008/02/12 00:52:33  #0" power_up_mode="false" sample_depth="128" trigger_position="16">10110111100100010011100100100100000110011011001010001000001010010010000011101101100101000110110001001001000001100110111010100010001011000100100000111011011101010001000011110010010000011000000011111111000000000001001000001110000001111111100101101100100100000111011011101010001000011110010010000011001101101101000110010000001001000001100110111101100010111011110010000000110011011110110001011101111001000000011101101111011000110110001100100000001100110110011100010100000010010000000111000000011000101000000001001000000011100000001100010100000000000000000001110000000110001010000000010000000000111011011001110001101001011000000000011001101110111000100111111100000000001100000000111111000000000010000000000111011011101110001100100101000000000011001101101111000111111111100000000001110110110111100011011000110000000000110011011111110001111100011000000000011101101111111000101000000111111110001110000001110001010000000011111111000110011011000001001010001011111111100011101101100000100100001001111111110001100110111000010011001010110000000000111011011100001001000000001000000000011001101101000100100000111100000000001110110110100010010111001110000000000110011011110001001000010011000000000011101101111000100101000000100000000001100110111010010011011100110110001000110011011101001001101110011011000100011101101110100100100000000101100010001100110110110010010100000000000000000110000000000100101000000000000000000011000000000010010100000000000000000001110110110110010010001011100000000000110011011111001001000010110000000000011001101111100100100001011010000000001110110111110010010010111101000000000110011011010001001000001110010111100011001101101000100100000111001011110001110110110100010010111001100101111000110011011110001001000010010010111100011101101111000100101000000001011110001100110111010010011011100110110001000110011011101001001101110011011000100011101101110100100100000000101100010001100110110110010010100000000000000000111000000000100101000000000000000000011100000000010010100000000000000000001110110110110010010001011100000000000110011011111001001000010110000000000011001101111100100100001011010000000001110110111110010010010111101000000000110011011010001001000001110010111100011001101101000100100000111001011110001110110110100010010111001100101111000110011011110001001000010010010111100011101101111000100101000000001011110001100110111010010011011100110110001000110011011101001001101110011011000100011101101110100100100000000101100010001100110110110010010100000000000000000110000000100100101000000000000000000011000000010010010100000000000000000001110110110110010010001011100000000000110011011111001001000010110000000000011001101111100100100001011010000000001110110111110010010010111101000000000110011011010001001000001110010111100011001101101000100100000111001011110001110110110100010010111001100101111000110011011110001001000010010010111100011101101111000100101000000001011110001100110111010010011011100110110001000110011011101001001101110011011000100011101101110100100100000000101100010001100110110110010010100000000000000000111000000100100101000000000000000000011100000010010010100000000000000000001110110110110010010001011100000000000110011011111001001000010110000000000011001101111100100100001011010000000001110110111110010010010111101000000000110011011010001001000001110010111100011001101101000100100000111001011110001110110110100010010111001100101111000110011011110001001000010010010111100011101101111000100101000000001011110001100110111010010011011100110110001000110011011101001001101110011011000100011101101110100100100000000101100010001100110110110010010100000000000000000110000000010100101000000000000000000011000000001010010100000000000000000001110110110110010010001011100000000000110011011111001001000010110000000000011001101111100100100001011010000000001110110111110010010010111101000000000110011011010001001000001110010111100011001101101000100100000111001011110001110110110100010010111001100101111000110011011110001001000010010010111100011101101111000100101000000001011110001100110111010010011011100110110001000110011011101001001101110011011000100011101101110100100100000000101100010001100110110110010010100000000000000000111000000010100101000000000000000000011100000001010010100000000000000000001110110110110010010001011100000000000110011011111001001000010110000000000011001101111100100100001011010000000001110110111110010010010111101000000000110011011010001001000001110010111100011001101101000100100000111001011110001110110110100010010111001100101111000110011011110001001000010010010111100011101101111000100101000000001011110001100110111010010011011100110110001000110011011101001001101110011011000100011101101110100100100000000101100010001100110110110010010100000000000000000110000000110100101000000000000000000011</data>
+          <extradata>1111111111111111T111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111</extradata>
         </log>
       </trigger>
     </signal_set>
   </instance>
   <mnemonics/>
   <static_plugin_mnemonics/>
+  <global_info>
+    <single attribute="active instance" value="0"/>
+    <single attribute="lock mode" value="36110"/>
+    <multi attribute="window position" size="9" value="799,470,398,124,0,50,124,0,2"/>
+  </global_info>
 </session>

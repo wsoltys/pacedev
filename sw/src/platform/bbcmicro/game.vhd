@@ -111,12 +111,18 @@ architecture SYN of Game is
   signal cpu_d_o            : std_logic_vector(7 downto 0);
 	signal cpu_rw_n						: std_logic;
   signal cpu_we             : std_logic;
+  signal cpu_nmi_n          : std_logic;
+  signal cpu_irq_n          : std_logic;
 
-  -- ROM signals
+  -- MOS ROM signals
   signal mos_rom_cs         : std_logic;
   signal mos_rom_d          : std_logic_vector(7 downto 0);
-  signal basic_rom_cs       : std_logic;
-  signal basic_rom_d        : std_logic_vector(7 downto 0);
+
+  -- paged ROM signals
+  signal paged_rom_r        : std_logic_vector(3 downto 0);
+  signal paged_rom_cs       : std_logic;
+  signal paged_rom_d        : std_logic_vector(7 downto 0);
+  signal rom_12_d           : std_logic_vector(7 downto 0);
 
   -- RAM signals
   signal ram_cs             : std_logic;
@@ -180,6 +186,7 @@ architecture SYN of Game is
   alias sound_we            : std_logic is sysvia_pb_o(0);
   signal sysvia_ca2_i       : std_logic;
   alias kbd_int             : std_logic is sysvia_ca2_i;
+  signal sysvia_irq_n       : std_logic;
 
 begin
 
@@ -191,8 +198,8 @@ begin
 
   -- RAM $0000-$3FFF (16KB)
   ram_cs <=       '1' when STD_MATCH(cpu_a, "00--------------") else '0';
-  -- BASIC ROM $8000-$BFFF (16KB)
-  basic_rom_cs <= '1' when STD_MATCH(cpu_a, "10--------------") else '0';
+  -- PAGED ROM $8000-$BFFF (16KB)
+  paged_rom_cs <= '1' when STD_MATCH(cpu_a, "10--------------") else '0';
   -- MOS ROM $C000-$FFFF (16KB)
   mos_rom_cs <=   '1' when STD_MATCH(cpu_a, "11--------------") else '0';
   -- FRED $FC00-$FCFF
@@ -202,15 +209,23 @@ begin
   -- SHEILA $FE00-$FEFF
   sheila_cs <=    '1' when STD_MATCH(cpu_a, X"FE"&"--------") else '0';
 
+  -- paged rom mux
+  paged_rom_d <=  rom_12_d when paged_rom_r = X"C" else
+                  (others => '1');
+
   -- read mux
   cpu_d_i <=  ram_d when ram_cs = '1' else
-              basic_rom_d when basic_rom_cs = '1' else
+              paged_rom_d when paged_rom_cs = '1' else
               fred_d when fred_cs = '1' else
               jim_d when jim_cs = '1' else
               sheila_d when sheila_cs = '1' else
               -- MOS ROM must be decoded *after* SHEILA
               mos_rom_d when mos_rom_cs = '1' else
               (others => '1');
+
+  -- interrupt muxes
+  cpu_nmi_n <= '1'; -- not used on basic system
+  cpu_irq_n <= sysvia_irq_n;
 
   --
   --  FRED
@@ -291,8 +306,24 @@ begin
     adc7002_cs <=   sheila_cs when STD_MATCH(sheila_a, "110-----") else '0';
     tubeula_cs <=   sheila_cs when STD_MATCH(sheila_a, "111-----") else '0';
 
-    sheila_d <= sysvia_d when sysvia_cs = '1' else
+    sheila_d <= EXT(paged_rom_r, sheila_d'length) when pagedrom_cs = '1' else
+                sysvia_d when sysvia_cs = '1' else
                 (others => '0');
+
+    -- paged ROM process
+    process (clk_16M, cpu_clk_en, reset)
+    begin
+      if reset = '1' then
+      elsif rising_edge (clk_16M) then
+        if cpu_clk_en = '1' then
+          if pagedrom_cs = '1' then
+            if cpu_rw_n = '0' then
+              paged_rom_r <= cpu_d_o(paged_rom_r'range);
+            end if; -- cpuo_rw_n
+          end if; -- pagedrom_cs
+        end if; -- cpu_clk_en
+      end if;
+    end process;
 
     -- keyboard scan process
     process (clk_16M, clk_1M_en, reset)
@@ -314,12 +345,12 @@ begin
         col := (others => '0');
       elsif rising_edge(clk_16M) then
         if clk_1M_en = '1' then
-          -- disable col autoinc if writing to kbd
+          -- autoscan only if kbd_we not asserted
           if kbd_we_n = '1' then
             kbd_int <= '0';
             col := col + 1;
             if kbd(conv_integer(col))(7 downto 1) /= "1111111" then
-              -- generate interrupt
+              -- generate interrupt via CA2 of the system VIA
               kbd_int <= '1';
             end if;
           end if;
@@ -328,7 +359,7 @@ begin
     end process;
 
     -- keyboard selector/mux (74LS251)
-    kbd_bit <=  '0' when kbd_we_n = '0' else
+    kbd_bit <=  '0' when kbd_we_n = '1' else
                 kbd(conv_integer(kbd_col))(conv_integer(kbd_row));
 
     sysvia_inst : entity work.M6522
@@ -343,7 +374,7 @@ begin
         CS1             => sysvia_cs,
         CS2_L           => '0',
 
-        IRQ_L           => open,
+        IRQ_L           => sysvia_irq_n,
 
         -- port a
         CA1_IN          => '0', -- 50Hz VSYNC
@@ -401,8 +432,8 @@ begin
 			Clk     		=> clk_16M,
 			Rdy     		=> '1',
 			Abort_n 		=> '1',
-			IRQ_n   		=> '1',
-			NMI_n   		=> '1',
+			IRQ_n   		=> cpu_irq_n,
+			NMI_n   		=> cpu_nmi_n,
 			SO_n    		=> '1',
 			R_W_n   		=> cpu_rw_n,
 			Sync    		=> open,
@@ -421,7 +452,7 @@ begin
   BLK_VIDEO : block
 
     -- CRTC6545 signals
-    signal crtc6845_e         : std_logic;
+    signal crtc6845_clk       : std_logic;
     signal crtc6845_cs_n      : std_logic;
 	  signal crtc6845_ra        : std_logic_vector(4 downto 0);
 	  signal crtc6845_ma        : std_logic_vector(13 downto 0);
@@ -481,8 +512,8 @@ begin
           end if;
           count := count + 1;
           -- clocks for 6522 (taken from C1541 emulation)
-          via6522_p2 <= not count(2);
-          via6522_clk4 <= not count(0);
+          via6522_p2 <= not count(3);
+          via6522_clk4 <= not count(1);
         end if;
       end process;
 
@@ -491,7 +522,7 @@ begin
       begin
         if reset = '1' then
 					-- MODE 6
-					control_r <= (others => '0');
+					control_r <= X"88"; --(others => '0');
 					palette_r <= (others => '0');
         elsif rising_edge(clk_16M) then
 					if cpu_clk_en = '1' then
@@ -499,7 +530,7 @@ begin
               if cpu_rw_n = '0' then
                 case cpu_a(0) is
                   when '0' =>
-                    control_r <= cpu_d_o;
+                    --control_r <= cpu_d_o;
                   when others =>
                     palette_r <= cpu_d_o;
                 end case;
@@ -531,7 +562,7 @@ begin
 			end process;
 
       -- the CRTC6845 implementation is not synchronous!!!
-      crtc6845_e <= clk_1M_en when clk_rate_r = '0' else clk_2M_en;
+      crtc6845_clk <= clk_1M_en when clk_rate_r = '0' else clk_2M_en;
 
     end block BLK_VIDEO_ULA;
 
@@ -542,12 +573,12 @@ begin
       port map
       (
         -- INPUT
-        I_E         => crtc6845_e,
+        I_E         => cpu_clk_en,
         I_DI        => cpu_d_o,
         I_RS        => cpu_a(0),
-        I_RWn       => cpu_rw_n,
+        I_RWn       => '1', --cpu_rw_n,
         I_CSn       => crtc6845_cs_n,
-        I_CLK       => clk_16M,
+        I_CLK       => crtc6845_clk,
         I_RSTn      => reset_n,
 
         -- OUTPUT
@@ -633,12 +664,13 @@ begin
       q		        => mos_rom_d
     );
 
+  -- ROM 12
   basic_rom_inst : entity work.basic_rom
     port map
     (
       clock		    => clk_16M,
       address		  => cpu_a(13 downto 0),
-      q		        => basic_rom_d
+      q		        => rom_12_d
     );
 
 	-- this is a fudge for now...
