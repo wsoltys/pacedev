@@ -168,7 +168,7 @@ architecture SYN of Game is
   signal via6522_p2         : std_logic;
   signal via6522_clk4       : std_logic;
 
-  -- System 6522 VIA $40-$4F
+  -- System 6522 VIA $40-$4F (IC3)
   signal sysvia_pa_o        : std_logic_vector(7 downto 0);
   signal sysvia_pa_oe_n     : std_logic_vector(7 downto 0);
   alias kbd_col             : std_logic_vector(3 downto 0) is sysvia_pa_o(3 downto 0);
@@ -177,16 +177,19 @@ architecture SYN of Game is
   alias kbd_bit             : std_logic is sysvia_pa_i(7);
   signal sysvia_pb_o        : std_logic_vector(7 downto 0);
   signal sysvia_pb_oe_n     : std_logic_vector(7 downto 0);
-  alias shift_led           : std_logic is sysvia_pb_o(7);
-  alias caps_led            : std_logic is sysvia_pb_o(6);
-  alias c                   : std_logic_vector(1 downto 0) is sysvia_pb_o(5 downto 4);
-  alias kbd_we_n            : std_logic is sysvia_pb_o(3);
-  alias speech_wr           : std_logic is sysvia_pb_o(2);
-  alias speech_rd           : std_logic is sysvia_pb_o(1);
-  alias sound_we            : std_logic is sysvia_pb_o(0);
   signal sysvia_ca2_i       : std_logic;
   alias kbd_int             : std_logic is sysvia_ca2_i;
   signal sysvia_irq_n       : std_logic;
+
+  -- Addressable Latch (IC32)
+  signal addressable_latch  : std_logic_vector(7 downto 0);
+  alias shift_led           : std_logic is addressable_latch(7);
+  alias caps_led            : std_logic is addressable_latch(6);
+  alias c                   : std_logic_vector(1 downto 0) is addressable_latch(5 downto 4);
+  alias kbd_we_n            : std_logic is addressable_latch(3);
+  alias speech_wr           : std_logic is addressable_latch(2);
+  alias speech_rd           : std_logic is addressable_latch(1);
+  alias sound_we            : std_logic is addressable_latch(0);
 
 begin
 
@@ -332,14 +335,15 @@ begin
       if reset = '1' then
         -- init keyboard matrix (active low)
         kbd <= (
-                2 => (0=>'1', others =>'1'),  -- (not used)
-                3 => (0=>'1', others =>'1'),  -- (not used)
-                4 => (0=>'1', others =>'1'),  -- DISC-SPEED:1
-                5 => (0=>'1', others =>'1'),  -- DISC-SPEED:0
-                6 => (0=>'1', others =>'1'),  -- SHIFT-BREAK
-                7 => (0=>'1', others =>'1'),  -- MODE:2
-                8 => (0=>'1', others =>'1'),  -- MODE:1
-                9 => (0=>'0', others =>'1'),  -- MODE:0
+                -- setup options (row 0) is inverted
+                2 => (0=>'0', others =>'1'),  -- (not used)
+                3 => (0=>'0', others =>'1'),  -- (not used)
+                4 => (0=>'0', others =>'1'),  -- DISC-SPEED:1
+                5 => (0=>'0', others =>'1'),  -- DISC-SPEED:0
+                6 => (0=>'0', others =>'1'),  -- SHIFT-BREAK
+                7 => (0=>'0', others =>'1'),  -- MODE:2
+                8 => (0=>'0', others =>'1'),  -- MODE:1
+                9 => (0=>'1', others =>'1'),  -- MODE:0
                 others => (others => '1')
                 );
         col := (others => '0');
@@ -361,6 +365,8 @@ begin
     -- keyboard selector/mux (74LS251)
     kbd_bit <=  '0' when kbd_we_n = '1' else
                 kbd(conv_integer(kbd_col))(conv_integer(kbd_row));
+    -- the remainder of the bits *MUST* be 0 for keyboard logic to work
+    sysvia_pa_i(6 downto 0) <= (others => '0');
 
     sysvia_inst : entity work.M6522
       port map
@@ -395,7 +401,7 @@ begin
         CB2_OUT         => open,
         CB2_OUT_OE_L    => open,
 
-        PB_IN           => (others => '1'), -- joystick fire, active low, speech
+        PB_IN           => "00110000",      -- speech, joystick fire (active low)
         PB_OUT          => sysvia_pb_o,     -- system latch
         PB_OUT_OE_L     => sysvia_pb_oe_n,
 
@@ -403,6 +409,18 @@ begin
         P2_H            => via6522_p2,      -- high for phase 2 clock  ____----__
         CLK_4           => via6522_clk4     -- 4x system clock (4HZ)   _-_-_-_-_-
       );
+
+    -- 74LS259 addressable latch (IC32)
+    process (clk_16M, clk_1M_en, reset)
+    begin
+      if reset = '1' then
+        addressable_latch <= (others => '0');
+      elsif rising_edge(clk_16M) then
+        if clk_1M_en = '1' then
+          addressable_latch(conv_integer(sysvia_pb_o(2 downto 0))) <= sysvia_pb_o(3);
+        end if;
+      end if;
+    end process;
 
   end block BLK_SHEILA;
 
@@ -493,6 +511,8 @@ begin
       begin
         if reset = '1' then
           count := (others => '0');
+					via6522_p2 <= '0';
+					via6522_clk4 <= '0';
         elsif rising_edge(clk_16M) then
           clk_8M_en <= '0';
           clk_4M_en <= '0';
@@ -511,9 +531,16 @@ begin
             end if;
           end if;
           count := count + 1;
-          -- clocks for 6522 (taken from C1541 emulation)
-          via6522_p2 <= not count(3);
-          via6522_clk4 <= not count(1);
+          -- clocks for 6522
+          -- P2 must lead cpu_clk_en by 1 system clock
+          -- - and is same frequency as cpu_clk but 50% duty cycle
+          -- clk4 goes low on rising edge of P2
+					if count(2 downto 0) = "000" then
+          	via6522_p2 <= '1';
+					elsif count(2 downto 0) = "100" then
+						via6522_p2 <= '0';
+					end if;
+          via6522_clk4 <= not clk_8M_en;
         end if;
       end process;
 
@@ -530,7 +557,7 @@ begin
               if cpu_rw_n = '0' then
                 case cpu_a(0) is
                   when '0' =>
-                    --control_r <= cpu_d_o;
+                    control_r <= cpu_d_o;
                   when others =>
                     palette_r <= cpu_d_o;
                 end case;
@@ -562,7 +589,8 @@ begin
 			end process;
 
       -- the CRTC6845 implementation is not synchronous!!!
-      crtc6845_clk <= clk_1M_en when clk_rate_r = '0' else clk_2M_en;
+      --crtc6845_clk <= clk_1M_en when clk_rate_r = '0' else clk_2M_en;
+      crtc6845_clk <= clk_1M_en;
 
     end block BLK_VIDEO_ULA;
 
