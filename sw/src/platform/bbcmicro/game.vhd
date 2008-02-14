@@ -165,6 +165,8 @@ architecture SYN of Game is
 	signal video_ram_a				: std_logic_vector(14 downto 0);
 	signal video_ram_d				: std_logic_vector(7 downto 0);
 
+  signal crtc6845_vsync     : std_logic;
+
   -- VIA clocks
   signal via6522_p2         : std_logic;
   signal via6522_clk4       : std_logic;
@@ -178,6 +180,8 @@ architecture SYN of Game is
   alias kbd_bit             : std_logic is sysvia_pa_i(7);
   signal sysvia_pb_o        : std_logic_vector(7 downto 0);
   signal sysvia_pb_oe_n     : std_logic_vector(7 downto 0);
+  signal sysvia_ca1_i       : std_logic;
+  alias vsync_int           : std_logic is sysvia_ca1_i;
   signal sysvia_ca2_i       : std_logic;
   alias kbd_int             : std_logic is sysvia_ca2_i;
   signal sysvia_irq_n       : std_logic;
@@ -388,7 +392,7 @@ begin
         IRQ_L           => sysvia_irq_n,
 
         -- port a
-        CA1_IN          => '0', -- 50Hz VSYNC
+        CA1_IN          => vsync_int,
         CA2_IN          => kbd_int,
         CA2_OUT         => open,
         CA2_OUT_OE_L    => open,
@@ -628,6 +632,9 @@ begin
 
     -- enable output of the video ULA
     video_ULA_de <= crtc6845_disptmg and not crtc6845_ra(3);
+
+    -- interrupt set on negative edge of VSYNC
+    vsync_int <= not crtc6845_vsync;
 
     BLK_VIDADDR : block
 
