@@ -471,6 +471,7 @@ begin
 
     -- CRTC6545 signals
     signal crtc6845_clk       : std_logic;
+    signal crtc6845_e         : std_logic;
     signal crtc6845_cs_n      : std_logic;
 	  signal crtc6845_ra        : std_logic_vector(4 downto 0);
 	  signal crtc6845_ma        : std_logic_vector(13 downto 0);
@@ -596,12 +597,13 @@ begin
 
     -- needs inverted CS
     crtc6845_cs_n <= not crtc6845_cs;
+    crtc6845_e <= not cpu_clk_en;
 
     crtc6845s_inst : crtc6845s
       port map
       (
         -- INPUT
-        I_E         => cpu_clk_en,
+        I_E         => crtc6845_e,
         I_DI        => cpu_d_o,
         I_RS        => cpu_a(0),
         I_RWn       => '1', --cpu_rw_n,

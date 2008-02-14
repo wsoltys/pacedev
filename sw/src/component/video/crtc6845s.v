@@ -248,7 +248,7 @@ begin
     R_Nvsp <= 7'h1C;
     R_Intr <= 8'h01;	//8'h93;
     R_Nr   <= 5'h09;	//5'h12;
-    R_Msah <= 6'h0C;	//6'h28;
+    R_Msah <= 6'h20; //h0C;	//6'h28;
     R_Msal <= 8'h00;
 	end else
 	// end of addition
