@@ -49,7 +49,7 @@ void main (int argc, char *argv[])
   fclose (fp);
 
 	fp = fopen ("mode6ram.bin", "wb");
-	fwrite (&mem[0x2000], 1, 0x2000, fp);
+	fwrite (&mem[0x0000], 1, 0x4000, fp);
 	fclose (fp);
 
   char buf[80];

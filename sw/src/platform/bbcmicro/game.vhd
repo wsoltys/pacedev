@@ -200,7 +200,8 @@ begin
   -- main chip-select logic
 
   -- RAM $0000-$3FFF (16KB)
-  ram_cs <=       '1' when STD_MATCH(cpu_a, "00--------------") else '0';
+  --ram_cs <=       '1' when STD_MATCH(cpu_a, "00--------------") else '0';
+  ram_cs <=       '1' when STD_MATCH(cpu_a, "0---------------") else '0';
   -- PAGED ROM $8000-$BFFF (16KB)
   paged_rom_cs <= '1' when STD_MATCH(cpu_a, "10--------------") else '0';
   -- MOS ROM $C000-$FFFF (16KB)
