@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define BUFSIZE 16
 
@@ -43,6 +44,7 @@ int main (int argc, char *argv[])
   int i;
   unsigned int base_addr = 0x0000;
   unsigned int xfer_addr = 0x0000;
+	bool xfer_spec = false;
   unsigned char CRC;
 
   *fname = '\0';
@@ -52,15 +54,16 @@ int main (int argc, char *argv[])
     case '/' :
       switch (tolower (argv[argc][1])) {
       case 'b' :
-	base_addr = ahtoi (&argv[argc][2]);
-	break;
+				base_addr = ahtoi (&argv[argc][2]);
+				break;
       case 't' :
-	xfer_addr = ahtoi (&argv[argc][2]);
-	break;
+				xfer_addr = ahtoi (&argv[argc][2]);
+				xfer_spec = true;
+				break;
       default :
-	usage (argv[0]);
+				usage (argv[0]);
       }
-      break;
+      	break;
     default :
       strcpy (fname, argv[argc]);
       break;
@@ -96,7 +99,8 @@ int main (int argc, char *argv[])
   CRC += xfer_addr & 0xff;
   CRC += 0x03;
   CRC = 0x100 - (CRC & 0xff);
-  printf (":00%04X03%02X\n", xfer_addr, CRC);
+	if (xfer_spec)
+  	printf (":00%04X03%02X\n", xfer_addr, CRC);
 
   printf (":00000001FF\n");
 
