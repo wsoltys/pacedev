@@ -127,6 +127,7 @@ architecture SYN of Game is
   -- RAM signals
   signal ram_cs             : std_logic;
   signal ram_d              : std_logic_vector(7 downto 0);
+  signal ram_we             : std_logic;
 
   -- FRED memory space
   signal fred_cs            : std_logic;
@@ -185,7 +186,8 @@ architecture SYN of Game is
   signal addressable_latch  : std_logic_vector(7 downto 0);
   alias shift_led           : std_logic is addressable_latch(7);
   alias caps_led            : std_logic is addressable_latch(6);
-  alias c                   : std_logic_vector(1 downto 0) is addressable_latch(5 downto 4);
+  --alias c                   : std_logic_vector(1 downto 0) is addressable_latch(5 downto 4);
+  signal c                  : std_logic_vector(1 downto 0);
   alias kbd_we_n            : std_logic is addressable_latch(3);
   alias speech_wr           : std_logic is addressable_latch(2);
   alias speech_rd           : std_logic is addressable_latch(1);
@@ -199,8 +201,7 @@ begin
 
   -- main chip-select logic
 
-  -- RAM $0000-$3FFF (16KB)
-  --ram_cs <=       '1' when STD_MATCH(cpu_a, "00--------------") else '0';
+  -- RAM $0000-$3FFF (16KB) - mirrored $4000-$7FFF
   ram_cs <=       '1' when STD_MATCH(cpu_a, "0---------------") else '0';
   -- PAGED ROM $8000-$BFFF (16KB)
   paged_rom_cs <= '1' when STD_MATCH(cpu_a, "10--------------") else '0';
@@ -212,6 +213,9 @@ begin
   jim_cs <=       '1' when STD_MATCH(cpu_a, X"FD"&"--------") else '0';
   -- SHEILA $FE00-$FEFF
   sheila_cs <=    '1' when STD_MATCH(cpu_a, X"FE"&"--------") else '0';
+
+  -- write-enables
+  ram_we <= ram_cs and not cpu_rw_n;
 
   -- paged rom mux
   paged_rom_d <=  rom_12_d when paged_rom_r = X"C" else
@@ -402,7 +406,7 @@ begin
         CB2_OUT         => open,
         CB2_OUT_OE_L    => open,
 
-        PB_IN           => "00110000",      -- speech, joystick fire (active low)
+        PB_IN           => "00111111",      -- speech, joystick fire (active low)
         PB_OUT          => sysvia_pb_o,     -- system latch
         PB_OUT_OE_L     => sysvia_pb_oe_n,
 
@@ -422,6 +426,8 @@ begin
         end if;
       end if;
     end process;
+    -- temp fudge for now
+    c <= "01";
 
   end block BLK_SHEILA;
 
@@ -717,7 +723,7 @@ begin
 			clock_b				=> cpu_clk_en,
 			address_b			=> cpu_a(13 downto 0),
 			data_b				=> cpu_d_o,
-			wren_b				=> cpu_we,
+			wren_b				=> ram_we,
 			q_b						=> ram_d,
 
 			clock_a				=> clk_16M,
