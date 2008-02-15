@@ -342,18 +342,18 @@ begin
       variable col : std_logic_vector(3 downto 0);
     begin
       if reset = '1' then
-        -- init keyboard matrix (active low)
+        -- init keyboard matrix (active low) are inverted
         kbd <= (
-                -- setup options (row 0) is inverted
-                2 => (0=>'0', others =>'1'),  -- (not used)
-                3 => (0=>'0', others =>'1'),  -- (not used)
-                4 => (0=>'0', others =>'1'),  -- DISC-SPEED:1
-                5 => (0=>'0', others =>'1'),  -- DISC-SPEED:0
-                6 => (0=>'0', others =>'1'),  -- SHIFT-BREAK
-                7 => (0=>'0', others =>'1'),  -- MODE:2
-                8 => (0=>'0', others =>'1'),  -- MODE:1
-                9 => (0=>'1', others =>'1'),  -- MODE:0
-                others => (others => '1')
+                -- setup options (row 0)
+                2 => (0=>'0', others =>'0'),  -- (not used)
+                3 => (0=>'0', others =>'0'),  -- (not used)
+                4 => (0=>'0', others =>'0'),  -- DISC-SPEED:1
+                5 => (0=>'0', others =>'0'),  -- DISC-SPEED:0
+                6 => (0=>'0', others =>'0'),  -- SHIFT-BREAK
+                7 => (0=>'0', others =>'0'),  -- MODE:2
+                8 => (0=>'0', others =>'0'),  -- MODE:1
+                9 => (0=>'1', others =>'0'),  -- MODE:0
+                others => (others => '0')
                 );
         col := (others => '0');
       elsif rising_edge(clk_16M) then
@@ -362,7 +362,7 @@ begin
           if kbd_we_n = '1' then
             kbd_int <= '0';
             col := col + 1;
-            if kbd(conv_integer(col))(7 downto 1) /= "1111111" then
+            if kbd(conv_integer(col))(7 downto 1) /= "0000000" then
               -- generate interrupt via CA2 of the system VIA
               kbd_int <= '1';
             end if;
