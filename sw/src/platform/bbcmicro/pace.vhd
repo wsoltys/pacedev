@@ -107,7 +107,8 @@ begin
       ps2clk          => ps2clk,
       ps2data         => ps2data,
       dip             => dip,
-  
+      jamma           => jamma,
+
       -- micro buses
       upaddr          => uPaddr,
       updatao         => uPdatao,

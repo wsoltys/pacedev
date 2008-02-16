@@ -8,6 +8,7 @@ library work;
 use work.pace_pkg.all;
 use work.kbd_pkg.all;
 use work.platform_pkg.all;
+use work.project_pkg.all;
 
 entity Game is
   port
@@ -21,6 +22,7 @@ entity Game is
     ps2clk          : inout std_logic;                       
     ps2data         : inout std_logic;                       
     dip             : in    std_logic_vector(7 downto 0);    
+		jamma						: in JAMMAInputsType;
 
     -- micro buses
     upaddr          : out   std_logic_vector(15 downto 0);   
@@ -197,6 +199,10 @@ architecture SYN of Game is
   alias speech_rd           : std_logic is addressable_latch(1);
   alias sound_we            : std_logic is addressable_latch(0);
 
+  -- other signals
+  signal kbd					      : in8(0 to 16);  
+  alias game_reset			    : std_logic is kbd(16)(0);
+
 begin
 
   -- some simple inversions
@@ -277,7 +283,7 @@ begin
     end process;
 
     fred_d <= jim_page_r when jimpage_cs = '1' else 
-              (others => '0');
+              X"FF"; -- *MUST* return $FF
 
   end block BLK_FRED;
 
@@ -287,7 +293,7 @@ begin
   BLK_JIM : block
   begin
 
-    jim_d <= (others => '1');
+    jim_d <= X"FF"; -- *MUST* return $FF
 
   end block BLK_JIM;
 
@@ -300,9 +306,6 @@ begin
 
     signal sysvia_d     : std_logic_vector(7 downto 0);
     signal sysvia_oe_n  : std_logic;
-
-    type kbd_col_t is array (natural range <>) of std_logic_vector(7 downto 0);
-    signal kbd          : kbd_col_t(15 downto 0);
 
   begin
 
@@ -320,7 +323,7 @@ begin
 
     sheila_d <= EXT(paged_rom_r, sheila_d'length) when pagedrom_cs = '1' else
                 sysvia_d when sysvia_cs = '1' else
-                (others => '0');
+                X"FE"; -- *MUST* return $FE
 
     -- paged ROM process
     process (clk_16M, cpu_clk_en, reset)
@@ -342,19 +345,6 @@ begin
       variable col : std_logic_vector(3 downto 0);
     begin
       if reset = '1' then
-        -- init keyboard matrix (active low) are inverted
-        kbd <= (
-                -- setup options (row 0)
-                2 => (0=>'0', others =>'0'),  -- (not used)
-                3 => (0=>'0', others =>'0'),  -- (not used)
-                4 => (0=>'0', others =>'0'),  -- DISC-SPEED:1
-                5 => (0=>'0', others =>'0'),  -- DISC-SPEED:0
-                6 => (0=>'0', others =>'0'),  -- SHIFT-BREAK
-                7 => (0=>'0', others =>'0'),  -- MODE:2
-                8 => (0=>'0', others =>'0'),  -- MODE:1
-                9 => (0=>'1', others =>'0'),  -- MODE:0
-                others => (others => '0')
-                );
         col := (others => '0');
       elsif rising_edge(clk_16M) then
         if clk_1M_en = '1' then
@@ -375,7 +365,7 @@ begin
     kbd_bit <=  '0' when kbd_we_n = '1' else
                 kbd(conv_integer(kbd_col))(conv_integer(kbd_row));
     -- the remainder of the bits *MUST* be 0 for keyboard logic to work
-    sysvia_pa_i(6 downto 0) <= (others => '0');
+    sysvia_pa_i(6 downto 0) <= sysvia_pa_o(6 downto 0);
 
     sysvia_inst : entity work.M6522
       port map
@@ -397,8 +387,8 @@ begin
         CA2_OUT         => open,
         CA2_OUT_OE_L    => open,
 
-        PA_IN           => sysvia_pa_i,
-        PA_OUT          => sysvia_pa_o,
+        PA_IN           => sysvia_pa_i,     -- keyboard
+        PA_OUT          => sysvia_pa_o,     -- keyboard
         PA_OUT_OE_L     => sysvia_pa_oe_n,
 
         -- port b
@@ -406,11 +396,11 @@ begin
         CB1_OUT         => open,
         CB1_OUT_OE_L    => open,
 
-        CB2_IN          => '0', -- light-pen strobe
+        CB2_IN          => '1', -- light-pen strobe
         CB2_OUT         => open,
         CB2_OUT_OE_L    => open,
 
-        PB_IN           => "00111111",      -- speech, joystick fire (active low)
+        PB_IN           => "11111111",      -- speech, joystick fire (active low)
         PB_OUT          => sysvia_pb_o,     -- system latch
         PB_OUT_OE_L     => sysvia_pb_oe_n,
 
@@ -634,7 +624,10 @@ begin
     video_ULA_de <= crtc6845_disptmg and not crtc6845_ra(3);
 
     -- interrupt set on negative edge of VSYNC
-    vsync_int <= not crtc6845_vsync;
+    -- according to the schematics, the VSYNC output (active high)
+    --   from 6845 is connected directly to the CA1 input of the 6522
+    --   - so the interrupt will happen at the _end_ of VSYNC
+    vsync_int <= crtc6845_vsync;
 
     BLK_VIDADDR : block
 
@@ -695,6 +688,24 @@ begin
     blue <= (others => video_b(video_b'left)) when video_ULA_de = '1' else (others => '0');
 
   end block BLK_VIDEO;
+
+	inputs_inst : entity work.inputs
+		generic map
+		(
+			NUM_INPUTS	=> kbd'length,
+			CLK_1US_DIV	=> BBC_1MHz_CLK0_COUNTS
+		)
+	  port map
+	  (
+	    clk     		=> clk_16M,
+	    reset   		=> reset,
+	    ps2clk  		=> ps2clk,
+	    ps2data 		=> ps2data,
+			jamma				=> jamma,
+
+	    dips				=> (others => '0'),
+	    inputs			=> kbd
+	  );
 
   --
   --  MEMORIES

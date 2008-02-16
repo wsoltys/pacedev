@@ -13,7 +13,7 @@ package project_pkg is
 	--
 	
   -- Reference clock is 24MHz
-	constant PACE_HAS_PLL										: boolean := true;
+	constant PACE_HAS_PLL										  : boolean := true;
 
   constant PACE_CLK0_DIVIDE_BY        		  : natural := 3;
   constant PACE_CLK0_MULTIPLY_BY      		  : natural := 2;   -- 24*2/3 = 16MHz
@@ -29,7 +29,6 @@ package project_pkg is
 
 	-- Pacman-specific constants
 			
-	constant PACMAN_CPU_CLK_ENA_DIVIDE_BY		  : natural := 8;
-	constant PACMAN_1MHz_CLK0_COUNTS				  : natural := 24;
+	constant BBC_1MHz_CLK0_COUNTS				      : natural := 16;
 	
 end;
