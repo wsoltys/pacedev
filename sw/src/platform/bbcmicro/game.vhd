@@ -106,7 +106,7 @@ architecture SYN of Game is
   signal clk_1M_en          : std_logic;  -- SAA5050
 
   -- CPU signals
-	alias cpu_clk_en					: std_logic is clk_2M_en;
+	signal cpu_clk_en					: std_logic;
   signal cpu_reset_n        : std_logic;
 	signal cpu_a_ext					: std_logic_vector(23 downto 0);
 	alias cpu_a								: std_logic_vector(15 downto 0) is cpu_a_ext(15 downto 0);
@@ -193,8 +193,7 @@ architecture SYN of Game is
   signal addressable_latch  : std_logic_vector(7 downto 0);
   alias shift_led           : std_logic is addressable_latch(7);
   alias caps_led            : std_logic is addressable_latch(6);
-  --alias c                   : std_logic_vector(1 downto 0) is addressable_latch(5 downto 4);
-  signal c                  : std_logic_vector(1 downto 0);
+  alias c                   : std_logic_vector(1 downto 0) is addressable_latch(5 downto 4);
   alias kbd_we_n            : std_logic is addressable_latch(3);
   alias speech_wr           : std_logic is addressable_latch(2);
   alias speech_rd           : std_logic is addressable_latch(1);
@@ -271,7 +270,7 @@ begin
     -- registers
     process (clk_16M, cpu_clk_en, reset)
     begin
-      if reset = '1' then
+      if cpu_reset_n = '0' then
         jim_page_r <= (others => '0');
       elsif rising_edge(clk_16M) then
         if cpu_clk_en = '1' then
@@ -331,7 +330,7 @@ begin
     -- paged ROM process
     process (clk_16M, cpu_clk_en, reset)
     begin
-      if reset = '1' then
+      if cpu_reset_n = '0' then
       elsif rising_edge (clk_16M) then
         if cpu_clk_en = '1' then
           if pagedrom_cs = '1' then
@@ -348,7 +347,7 @@ begin
       variable auto_col : std_logic_vector(3 downto 0);
       variable col      : integer range 0 to 15;
     begin
-      if reset = '1' then
+      if cpu_reset_n = '0' then
         auto_col := (others => '0');
         col := 0;
       elsif rising_edge(clk_16M) then
@@ -410,15 +409,16 @@ begin
         PB_OUT          => sysvia_pb_o,     -- system latch
         PB_OUT_OE_L     => sysvia_pb_oe_n,
 
-        RESET_L         => reset_n,
+        RESET_L         => cpu_reset_n,
         P2_H            => via6522_p2,      -- high for phase 2 clock  ____----__
         CLK_4           => via6522_clk4     -- 4x system clock (4HZ)   _-_-_-_-_-
       );
 
     -- 74LS259 addressable latch (IC32)
+    -- updated at 1MHz irrespective of CPU clock
     process (clk_16M, clk_1M_en, reset)
     begin
-      if reset = '1' then
+      if cpu_reset_n = '0' then
         addressable_latch <= (others => '0');
       elsif rising_edge(clk_16M) then
         if clk_1M_en = '1' then
@@ -426,8 +426,6 @@ begin
         end if;
       end if;
     end process;
-    -- temp fudge for now
-    c <= "01";
 
   end block BLK_SHEILA;
 
@@ -453,7 +451,7 @@ begin
 		(
 			Mode    		=> "00",	-- 6502
 			Res_n   		=> cpu_reset_n,
-			Enable  		=> clk_2M_en,
+			Enable  		=> cpu_clk_en,
 			Clk     		=> clk_16M,
 			Rdy     		=> '1',
 			Abort_n 		=> '1',
@@ -519,7 +517,7 @@ begin
       begin
         if reset = '1' then
           count := (others => '0');
-					via6522_p2 <= '0';
+					via6522_p2 <= '1';
 					via6522_clk4 <= '0';
         elsif rising_edge(clk_16M) then
           clk_8M_en <= '0';
@@ -543,21 +541,23 @@ begin
           -- P2 must lead cpu_clk_en by 1 system clock
           -- - and is same frequency as cpu_clk but 50% duty cycle
           -- clk4 goes low on rising edge of P2
-					if count(2 downto 0) = "000" then
-          	via6522_p2 <= '1';
-					elsif count(2 downto 0) = "100" then
-						via6522_p2 <= '0';
-					end if;
-          via6522_clk4 <= not clk_8M_en;
+          if count(2 downto 0) = "00" then
+            via6522_p2 <= not via6522_p2;
+          end if;
+          if count(0) = '0' then
+            via6522_clk4 <= not via6522_clk4;
+          end if;
         end if;
       end process;
+
+      -- fixed at 1MHz for now...
+      cpu_clk_en <= clk_1M_en;
 
       -- registers
       process (clk_16M, reset)
       begin
-        if reset = '1' then
-					-- MODE 6
-					control_r <= X"88"; --(others => '0');
+        if cpu_reset_n = '0' then
+					control_r <= (others => '0');
 					palette_r <= (others => '0');
         elsif rising_edge(clk_16M) then
 					if cpu_clk_en = '1' then
@@ -597,8 +597,7 @@ begin
 			end process;
 
       -- the CRTC6845 implementation is not synchronous!!!
-      --crtc6845_clk <= clk_1M_en when clk_rate_r = '0' else clk_2M_en;
-      crtc6845_clk <= clk_1M_en;
+      crtc6845_clk <= clk_1M_en when clk_rate_r = '0' else clk_2M_en;
 
     end block BLK_VIDEO_ULA;
 
@@ -613,10 +612,10 @@ begin
         I_E         => crtc6845_e,
         I_DI        => cpu_d_o,
         I_RS        => cpu_a(0),
-        I_RWn       => '1', --cpu_rw_n,
+        I_RWn       => cpu_rw_n,
         I_CSn       => crtc6845_cs_n,
         I_CLK       => crtc6845_clk,
-        I_RSTn      => reset_n,
+        I_RSTn      => cpu_reset_n,
 
         -- OUTPUT
         O_RA        => crtc6845_ra,

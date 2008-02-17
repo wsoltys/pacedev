@@ -5,6 +5,7 @@ use IEEE.std_logic_unsigned.all;
 library work;
 use work.pace_pkg.all;
 use work.kbd_pkg.all;
+use work.project_pkg.all;
 
 entity inputmapper is
 	generic
@@ -46,14 +47,14 @@ begin
         if rst_n = '0' then
           inputs <= 
           (
-            2 => (0=>'0', others =>'0'),  -- (not used)
-            3 => (0=>'0', others =>'0'),  -- (not used)
-            4 => (0=>'0', others =>'0'),  -- DISC-SPEED:1
-            5 => (0=>'0', others =>'0'),  -- DISC-SPEED:0
-            6 => (0=>'0', others =>'0'),  -- SHIFT-BREAK
-            7 => (0=>'0', others =>'0'),  -- MODE:2
-            8 => (0=>'0', others =>'0'),  -- MODE:1
-            9 => (0=>'1', others =>'0'),  -- MODE:0
+            2 => (0=>not BBC_STARTUP_OPT_NOT_USED(1), others =>'0'),
+            3 => (0=>not BBC_STARTUP_OPT_NOT_USED(0), others =>'0'),
+            4 => (0=>not BBC_STARTUP_OPT_DISK_SPEED(1), others =>'0'),
+            5 => (0=>not BBC_STARTUP_OPT_DISK_SPEED(0), others =>'0'),
+            6 => (0=>not BBC_STARTUP_OPT_SHIFT_BREAK, others =>'0'),
+            7 => (0=>not BBC_STARTUP_OPT_MODE(2), others =>'0'),
+            8 => (0=>not BBC_STARTUP_OPT_MODE(1), others =>'0'),
+            9 => (0=>not BBC_STARTUP_OPT_MODE(0), others =>'0'),
             others => (others => '0')
           );
           ctrl := '0';
@@ -66,12 +67,12 @@ begin
                     inputs(0)(0) <= press;
                   when SCANCODE_Q =>              -- "Q"
                     inputs(0)(1) <= press;
-                  --when SCANCODE_0_PAD =>          -- "F0"
-                  --  inputs(0)(2) <= press;
+                  when SCANCODE_PAD0 =>           -- "F0"
+                    inputs(0)(2) <= press;
                   when SCANCODE_1 =>              -- "1"
                     inputs(0)(3) <= press;
-                  --when SCANCODE_CAPS =>           -- "CAPS LOCK"
-                  --  inputs(0)(4) <= press;
+                  when SCANCODE_CAPSLOCK =>       -- "CAPS LOCK"
+                    inputs(0)(4) <= press;
                   when SCANCODE_LALT =>           -- "SHIFT LOCK"
                     inputs(0)(5) <= press;
                   when SCANCODE_TAB =>            -- "TAB"
@@ -95,8 +96,8 @@ begin
                     inputs(1)(5) <= press;
                   when SCANCODE_Z =>              -- "Z"
                     inputs(1)(6) <= press;
-                  --when SCANCODE_1_PAD =>          -- "F1"
-                  --  inputs(1)(7) <= press;
+                  when SCANCODE_PAD1 =>           -- "F1"
+                    inputs(1)(7) <= press;
                   -- column 2
                   when SCANCODE_4 =>              -- "4"
                     inputs(2)(1) <= press;
@@ -110,8 +111,8 @@ begin
                     inputs(2)(5) <= press;
                   when SCANCODE_SPACE =>          -- " "
                     inputs(2)(6) <= press;
-                  --when SCANCODE_2_PAD =>          -- "F2"
-                  --  inputs(2)(7) <= press;
+                  when SCANCODE_PAD2 =>           -- "F2"
+                    inputs(2)(7) <= press;
                   -- column 3
                   when SCANCODE_5 =>              -- "5"
                     inputs(3)(1) <= press;
@@ -125,11 +126,11 @@ begin
                     inputs(3)(5) <= press;
                   when SCANCODE_V =>              -- "V"
                     inputs(3)(6) <= press;
-                  --when SCANCODE_3_PAD =>          -- "F3"
-                  --  inputs(3)(7) <= press;
+                  when SCANCODE_PAD3 =>           -- "F3"
+                    inputs(3)(7) <= press;
                   -- column 4
-                  --when SCANCODE_4_PAD =>          -- "F4"
-                  --  inputs(4)(1) <= press;
+                  when SCANCODE_PAD4 =>           -- "F4"
+                    inputs(4)(1) <= press;
                   when SCANCODE_7 =>              -- "7"
                     inputs(4)(2) <= press;
                   when SCANCODE_6 =>              -- "6"
@@ -140,8 +141,8 @@ begin
                     inputs(4)(5) <= press;
                   when SCANCODE_B =>              -- "B"
                     inputs(4)(6) <= press;
-                  --when SCANCODE_5_PAD =>          -- "F5"
-                  --  inputs(4)(7) <= press;
+                  when SCANCODE_PAD5 =>           -- "F5"
+                    inputs(4)(7) <= press;
                   -- column 5
                   when SCANCODE_8 =>              -- "8"
                     inputs(5)(1) <= press;
@@ -155,11 +156,11 @@ begin
                     inputs(5)(5) <= press;
                   when SCANCODE_M =>              -- "M"
                     inputs(5)(6) <= press;
-                  --when SCANCODE_6_PAD =>          -- "F6"
-                  --  inputs(5)(7) <= press;
+                  when SCANCODE_PAD6 =>           -- "F6"
+                    inputs(5)(7) <= press;
                   -- column 6
-                  --when SCANCODE_7_PAD =>          -- "F7"
-                  --  inputs(6)(1) <= press;
+                  when SCANCODE_PAD7 =>           -- "F7"
+                    inputs(6)(1) <= press;
                   when SCANCODE_9 =>              -- "9"
                     inputs(6)(2) <= press;
                   when SCANCODE_O =>              -- "O" (letter O)
@@ -170,8 +171,8 @@ begin
                     inputs(6)(5) <= press;
                   when SCANCODE_COMMA =>          -- ","
                     inputs(6)(6) <= press;
-                  --when SCANCODE_8_PAD =>          -- "F8"
-                  --  inputs(6)(7) <= press;
+                  when SCANCODE_PAD8 =>           -- "F8"
+                    inputs(6)(7) <= press;
                   -- column 7
                   when SCANCODE_MINUS =>          -- "-"
                     inputs(7)(1) <= press;
@@ -179,44 +180,44 @@ begin
                     inputs(7)(2) <= press;
                   when SCANCODE_P =>              -- "P"
                     inputs(7)(3) <= press;
-                  --when SCANCODE_BACKSLASH =>      -- "@"
-                  --  inputs(7)(4) <= press;
+                  when SCANCODE_BACKSLASH =>      -- "@"
+                    inputs(7)(4) <= press;
                   when SCANCODE_SEMICOLON =>      -- ";"
                     inputs(7)(5) <= press;
                   when SCANCODE_PERIOD =>         -- "."
                     inputs(7)(6) <= press;
-                  --when SCANCODE_9_PAD =>          -- "F9"
-                  --  inputs(7)(7) <= press;
+                  when SCANCODE_PAD9 =>           -- "F9"
+                    inputs(7)(7) <= press;
                   -- column 8
                   when SCANCODE_EQUALS =>         -- "^"
                     inputs(8)(1) <= press;
-                  --when SCANCODE_TILDE =>          -- "_"
-                  --  inputs(8)(2) <= press;
-                  --when SCANCODE_OPENBRACE =>      -- "["
-                  --  inputs(8)(3) <= press;
+                  when SCANCODE_TILDE =>          -- "_"
+                    inputs(8)(2) <= press;
+                  when SCANCODE_OPENBRACE =>      -- "["
+                    inputs(8)(3) <= press;
                   when SCANCODE_QUOTE =>          -- ":"
                     inputs(8)(4) <= press;
-                  --when SCANCODE_CLOSEBRACE =>     -- "]"
-                  --  inputs(8)(5) <= press;
+                  when SCANCODE_CLOSEBRACE =>     -- "]"
+                    inputs(8)(5) <= press;
                   when SCANCODE_SLASH =>          -- "/"
                     inputs(8)(6) <= press;
                   --when SCANCODE_9_BACKSLASH2 =>   -- "\\"
                   --  inputs(8)(7) <= press;
                   -- column 9
-                  when SCANCODE_LEFT =>           -- "left"
-                    inputs(9)(1) <= press;
-                  when SCANCODE_DOWN =>           -- "down"
-                    inputs(9)(2) <= press;
-                  when SCANCODE_UP =>             -- "up"
-                    inputs(9)(3) <= press;
+                  --when SCANCODE_LEFT =>           -- "left"
+                  --  inputs(9)(1) <= press;
+                  --when SCANCODE_DOWN =>           -- "down"
+                  --  inputs(9)(2) <= press;
+                  --when SCANCODE_UP =>             -- "up"
+                  --  inputs(9)(3) <= press;
                   when SCANCODE_ENTER =>          -- "return"
                     inputs(9)(4) <= press;
                   when SCANCODE_BACKSPACE =>      -- "delete"
                     inputs(9)(5) <= press;
                   --when SCANCODE_END =>            -- "copy"
                   --  inputs(9)(6) <= press;
-                  when SCANCODE_RIGHT =>          -- "right"
-                    inputs(9)(7) <= press;
+                  --when SCANCODE_RIGHT =>          -- "right"
+                  --  inputs(9)(7) <= press;
                   when others =>
                     null;
                end case;
@@ -224,14 +225,14 @@ begin
             if (reset = '1') then
               inputs <= 
               (
-                2 => (0=>'0', others =>'0'),  -- (not used)
-                3 => (0=>'0', others =>'0'),  -- (not used)
-                4 => (0=>'0', others =>'0'),  -- DISC-SPEED:1
-                5 => (0=>'0', others =>'0'),  -- DISC-SPEED:0
-                6 => (0=>'0', others =>'0'),  -- SHIFT-BREAK
-                7 => (0=>'0', others =>'0'),  -- MODE:2
-                8 => (0=>'0', others =>'0'),  -- MODE:1
-                9 => (0=>'1', others =>'0'),  -- MODE:0
+                2 => (0=>not BBC_STARTUP_OPT_NOT_USED(1), others =>'0'),
+                3 => (0=>not BBC_STARTUP_OPT_NOT_USED(0), others =>'0'),
+                4 => (0=>not BBC_STARTUP_OPT_DISK_SPEED(1), others =>'0'),
+                5 => (0=>not BBC_STARTUP_OPT_DISK_SPEED(0), others =>'0'),
+                6 => (0=>not BBC_STARTUP_OPT_SHIFT_BREAK, others =>'0'),
+                7 => (0=>not BBC_STARTUP_OPT_MODE(2), others =>'0'),
+                8 => (0=>not BBC_STARTUP_OPT_MODE(1), others =>'0'),
+                9 => (0=>not BBC_STARTUP_OPT_MODE(0), others =>'0'),
                 others => (others => '0')
               );
               ctrl := '0';

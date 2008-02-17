@@ -27,8 +27,14 @@ package project_pkg is
   constant P2_JAMMA_IS_MAPLE                : boolean := false;
   constant P2_JAMMA_IS_NGC                  : boolean := true;
 
-	-- Pacman-specific constants
-			
+	-- BBC-specific constants
+
+  -- startup link options (on keyboard PCB)
+  constant BBC_STARTUP_OPT_NOT_USED         : std_logic_vector(1 downto 0) := "11";
+  constant BBC_STARTUP_OPT_DISK_SPEED       : std_logic_vector(1 downto 0) := "11";
+  constant BBC_STARTUP_OPT_SHIFT_BREAK      : std_logic := '1';
+  constant BBC_STARTUP_OPT_MODE             : std_logic_vector(2 downto 0) := "110";
+
 	constant BBC_1MHz_CLK0_COUNTS				      : natural := 16;
 	
 end;
