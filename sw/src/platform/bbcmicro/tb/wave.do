@@ -21,6 +21,7 @@ add wave -noupdate -format Literal /tb_top/pace_inst/u_game/cpu_d_o
 add wave -noupdate -format Logic /tb_top/pace_inst/u_game/cpu_rw_n
 add wave -noupdate -format Literal /tb_top/pace_inst/u_game/cpu_inst/x
 add wave -noupdate -format Literal /tb_top/pace_inst/u_game/cpu_inst/alu/p_in
+add wave -noupdate -format Logic /tb_top/pace_inst/u_game/cpu_irq_n
 add wave -noupdate -divider SHEILA
 add wave -noupdate -format Logic /tb_top/pace_inst/u_game/via6522_p2
 add wave -noupdate -format Logic /tb_top/pace_inst/u_game/via6522_clk4
@@ -32,6 +33,8 @@ add wave -noupdate -format Literal /tb_top/pace_inst/u_game/sysvia_pa_o
 add wave -noupdate -format Literal /tb_top/pace_inst/u_game/kbd_col
 add wave -noupdate -format Literal /tb_top/pace_inst/u_game/kbd_row
 add wave -noupdate -format Logic /tb_top/pace_inst/u_game/kbd_bit
+add wave -noupdate -format Logic /tb_top/pace_inst/u_game/kbd_int
+add wave -noupdate -format Logic /tb_top/pace_inst/u_game/vsync_int
 add wave -noupdate -divider SYSVIA
 add wave -noupdate -format Logic /tb_top/pace_inst/u_game/blk_sheila/sysvia_inst/cs
 add wave -noupdate -divider VIDEO
@@ -42,9 +45,9 @@ add wave -noupdate -format Literal /tb_top/pace_inst/u_game/blk_video/crtc6845s_
 add wave -noupdate -format Literal /tb_top/pace_inst/u_game/blk_video/crtc6845s_inst/O_MA
 add wave -noupdate -format Logic /tb_top/pace_inst/u_game/blk_video/crtc6845s_inst/O_DISPTMG
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {127581814 ns} 0} {{Cursor 2} {122135325 ns} 0}
-configure wave -namecolwidth 333
-configure wave -valuecolwidth 100
+WaveRestoreCursors {{Cursor 1} {151287161 ns} 0} {{Cursor 2} {122135325 ns} 0}
+configure wave -namecolwidth 293
+configure wave -valuecolwidth 56
 configure wave -justifyvalue left
 configure wave -signalnamewidth 0
 configure wave -snapdistance 10
@@ -56,4 +59,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {74810234 ns} {80409803 ns}
+WaveRestoreZoom {0 ns} {168 ms}

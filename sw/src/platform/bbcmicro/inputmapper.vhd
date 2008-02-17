@@ -162,7 +162,7 @@ begin
                   --  inputs(6)(1) <= press;
                   when SCANCODE_9 =>              -- "9"
                     inputs(6)(2) <= press;
-                  when SCANCODE_0 =>              -- "0"
+                  when SCANCODE_O =>              -- "O" (letter O)
                     inputs(6)(3) <= press;
                   when SCANCODE_K =>              -- "K"
                     inputs(6)(4) <= press;
@@ -175,7 +175,7 @@ begin
                   -- column 7
                   when SCANCODE_MINUS =>          -- "-"
                     inputs(7)(1) <= press;
-                  when SCANCODE_O =>              -- "O"
+                  when SCANCODE_0 =>              -- "0" (zero)
                     inputs(7)(2) <= press;
                   when SCANCODE_P =>              -- "P"
                     inputs(7)(3) <= press;
@@ -234,6 +234,8 @@ begin
                 9 => (0=>'1', others =>'0'),  -- MODE:0
                 others => (others => '0')
               );
+              ctrl := '0';
+              esc := '0';
             end if;
 					-- special keys
 					inputs(16)(0) <= ctrl and esc;		-- game reset

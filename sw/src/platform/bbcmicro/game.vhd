@@ -107,6 +107,7 @@ architecture SYN of Game is
 
   -- CPU signals
 	alias cpu_clk_en					: std_logic is clk_2M_en;
+  signal cpu_reset_n        : std_logic;
 	signal cpu_a_ext					: std_logic_vector(23 downto 0);
 	alias cpu_a								: std_logic_vector(15 downto 0) is cpu_a_ext(15 downto 0);
   signal cpu_d_i            : std_logic_vector(7 downto 0);
@@ -207,6 +208,7 @@ begin
 
   -- some simple inversions
   reset_n <= not reset;
+  cpu_reset_n <= not (reset or game_reset);
   cpu_we <= not cpu_rw_n;
 
   -- main chip-select logic
@@ -322,6 +324,7 @@ begin
     tubeula_cs <=   sheila_cs when STD_MATCH(sheila_a, "111-----") else '0';
 
     sheila_d <= EXT(paged_rom_r, sheila_d'length) when pagedrom_cs = '1' else
+                X"00" when acia6850_cs = '1' else
                 sysvia_d when sysvia_cs = '1' else
                 X"FE"; -- *MUST* return $FE
 
@@ -342,29 +345,32 @@ begin
 
     -- keyboard scan process
     process (clk_16M, clk_1M_en, reset)
-      variable col : std_logic_vector(3 downto 0);
+      variable auto_col : std_logic_vector(3 downto 0);
+      variable col      : integer range 0 to 15;
     begin
       if reset = '1' then
-        col := (others => '0');
+        auto_col := (others => '0');
+        col := 0;
       elsif rising_edge(clk_16M) then
         if clk_1M_en = '1' then
+          kbd_int <= '0';
           -- autoscan only if kbd_we not asserted
-          if kbd_we_n = '1' then
-            kbd_int <= '0';
-            col := col + 1;
-            if kbd(conv_integer(col))(7 downto 1) /= "0000000" then
-              -- generate interrupt via CA2 of the system VIA
-              kbd_int <= '1';
-            end if;
+          if kbd_we_n = '0' then
+            col := conv_integer(kbd_col);
+          else
+            col := conv_integer(auto_col);
+            auto_col := auto_col + 1;
+          end if;
+          if kbd(col)(7 downto 1) /= "0000000" then
+            -- generate interrupt? via CA2 of the system VIA
+            kbd_int <= '1';
           end if;
         end if;
       end if;
+      kbd_bit <= kbd(col)(conv_integer(kbd_row));
     end process;
 
-    -- keyboard selector/mux (74LS251)
-    kbd_bit <=  '0' when kbd_we_n = '1' else
-                kbd(conv_integer(kbd_col))(conv_integer(kbd_row));
-    -- the remainder of the bits *MUST* be 0 for keyboard logic to work
+    -- the remainder of the bits *MUST* reflect the output
     sysvia_pa_i(6 downto 0) <= sysvia_pa_o(6 downto 0);
 
     sysvia_inst : entity work.M6522
@@ -446,7 +452,7 @@ begin
 		port map
 		(
 			Mode    		=> "00",	-- 6502
-			Res_n   		=> reset_n,
+			Res_n   		=> cpu_reset_n,
 			Enable  		=> clk_2M_en,
 			Clk     		=> clk_16M,
 			Rdy     		=> '1',
