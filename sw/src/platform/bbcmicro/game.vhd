@@ -35,9 +35,9 @@ entity Game is
     gfxextra_data   : out std_logic_vector(7 downto 0);
 
     -- graphics (control)
-    red							: out		std_logic_vector(7 downto 0);
-		green						: out		std_logic_vector(7 downto 0);
-		blue						: out		std_logic_vector(7 downto 0);
+    red							: out		std_logic_vector(9 downto 0);
+		green						: out		std_logic_vector(9 downto 0);
+		blue						: out		std_logic_vector(9 downto 0);
 		hsync						: out		std_logic;
 		vsync						: out		std_logic;
 
@@ -489,9 +489,9 @@ begin
     signal saa5050_de         : std_logic;
 
     signal video_ULA_de       : std_logic;
-		signal video_r				    : std_logic_vector(0 downto 0);
-		signal video_g				    : std_logic_vector(0 downto 0);
-		signal video_b				    : std_logic_vector(0 downto 0);
+		signal video_r				    : std_logic_vector(9 downto 0);
+		signal video_g				    : std_logic_vector(9 downto 0);
+		signal video_b				    : std_logic_vector(9 downto 0);
 
   begin
 
@@ -575,25 +575,80 @@ begin
         end if;
       end process;
 
-			-- de-serialiser
+			-- graphics data serialiser
 			process (clk_16M, reset)
-				variable video_data : std_logic_vector(7 downto 0) := (others => '0');
+				variable video_data 	: std_logic_vector(7 downto 0) := (others => '0');
+				variable clock_i			: std_logic_vector(2 downto 0);
 			begin
+
+				clock_i := clk_rate_r & cpl_r;
+
 				if reset = '1' then
 					video_data := (others => '0');
 				elsif rising_edge(clk_16M) then
-					if clk_1M_en = '1' then
-						-- latch data
+
+					case clock_i is
+						when "000" =>								-- Mode 4, 1MHz 2ppb/4bpp
+							if clk_2M_en = '1' then
+								video_data := video_data(3 downto 0) & "0000";
+							end if;
+						when "001" =>								-- Mode 5, 1MHz 4ppb/2bpp
+							if clk_4M_en = '1' then
+								video_data := video_data(5 downto 0) & "00";
+							end if;
+						when "010" =>								-- Mode 6, 1MHz 8ppb/1bpp
+							if clk_8M_en = '1' then
+								video_data := video_data(6 downto 0) & '0';
+							end if;
+						when "011" =>								-- Mode 7, 1Mhz 16ppb (not used)
+							null;
+						when "100" =>								-- Mode 0, 2MHz 1ppb/8bpp
+							null;
+						when "101" =>								-- Mode 1, 2MHz 2ppb/4bpp
+							if clk_4M_en = '1' then
+								video_data := video_data(3 downto 0) & "0000";
+							end if;
+						when "110" =>								-- Mode 2, 2MHz 4ppb/2bpp
+							if clk_2M_en = '1' then
+								video_data := video_data(5 downto 0) & "00";
+							end if;
+						when others =>			        -- Mode 3, 2MHz 8ppb/1bpp
+							if clk_1M_en = '1' then
+								video_data := video_data(6 downto 0) & '0';
+							end if;
+					end case;
+
+					-- data is latched at the 6845 clock rate
+					if clk_rate_r = '0' then
+						if clk_1M_en = '1' then
+							video_data := video_ram_d;
+						end if;
+					elsif clk_2M_en = '1' then
 						video_data := video_ram_d;
-					elsif clk_8M_en = '1' then
-						-- rotate
-						video_data := video_data(6 downto 0) & '0';
 					end if;
+
 				end if;
-				-- assign RGB outputs
-				video_r(video_r'left) <= video_data(video_data'left);
-				video_g(video_g'left) <= video_data(video_data'left);
-				video_b(video_b'left) <= video_data(video_data'left);
+
+				-- assign RGB outputs (quick fudge)
+				case clock_i is
+					when "011" | "110" =>			-- Modes 3,6 1bpp
+						video_r <= video_data(video_data'left) & "000000000";
+						video_g <= video_data(video_data'left) & "000000000";
+						video_b <= video_data(video_data'left) & "000000000";
+					when "010" | "101" =>			-- Modes 2,5 2bpp
+						video_r <= video_data(video_data'left downto video_data'left-1) & "00000000";
+						video_g <= video_data(video_data'left downto video_data'left-1) & "00000000";
+						video_b <= video_data(video_data'left downto video_data'left-1) & "00000000";
+					when "001" | "100" =>			-- Modes 1,4 4bpp
+						video_r <= video_data(video_data'left downto video_data'left-3) & "000000";
+						video_g <= video_data(video_data'left downto video_data'left-3) & "000000";
+						video_b <= video_data(video_data'left downto video_data'left-3) & "000000";
+					when others =>						-- Mode 0    8bpp
+						video_r <= video_data & "00";
+						video_g <= video_data & "00";
+						video_b <= video_data & "00";
+				end case;
+
 			end process;
 
       -- the CRTC6845 implementation is not synchronous!!!
@@ -688,9 +743,9 @@ begin
     -- fudge for now
     hsync <= not crtc6845_hsync;
     vsync <= not crtc6845_vsync;
-    red <= (others => video_r(video_r'left)) when video_ULA_de = '1' else (others => '0');
-    green <= (others => video_g(video_g'left)) when video_ULA_de = '1' else (others => '0');
-    blue <= (others => video_b(video_b'left)) when video_ULA_de = '1' else (others => '0');
+    red <= video_r when video_ULA_de = '1' else (others => '0');
+    green <= video_g when video_ULA_de = '1' else (others => '0');
+    blue <= video_b when video_ULA_de = '1' else (others => '0');
 
   end block BLK_VIDEO;
 

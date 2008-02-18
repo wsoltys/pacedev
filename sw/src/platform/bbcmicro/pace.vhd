@@ -63,9 +63,9 @@ architecture SYN of PACE is
   signal uPaddr           : std_logic_vector(15 downto 0);
   signal uPdatao          : std_logic_vector(7 downto 0);
 
-	signal vga_red					: std_logic_vector(7 downto 0);
-	signal vga_green				: std_logic_vector(7 downto 0);
-	signal vga_blue					: std_logic_vector(7 downto 0);
+	signal vga_red					: std_logic_vector(9 downto 0);
+	signal vga_green				: std_logic_vector(9 downto 0);
+	signal vga_blue					: std_logic_vector(9 downto 0);
 	signal vga_hsync				: std_logic;
 	signal vga_vsync				: std_logic;
 			        
@@ -89,9 +89,9 @@ begin
   spi_sel <= 'Z';
 
 	-- hook up VGA output
-	red <= vga_red(7 downto 0) & "00";
-	green <= vga_green(7 downto 0) & "00";
-	blue <= vga_blue(7 downto 0) & "00";
+	red <= vga_red;
+	green <= vga_green;
+	blue <= vga_blue;
 	hsync <= vga_hsync;
 	vsync <= vga_vsync;
 	    
