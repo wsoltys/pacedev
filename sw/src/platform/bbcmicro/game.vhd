@@ -100,10 +100,13 @@ architecture SYN of Game is
   signal reset_n            : std_logic;
 
   alias clk_16M             : std_logic is clk(0);
+  signal sys_cycle          : std_logic_vector(3 downto 0);
   signal clk_8M_en          : std_logic;
   signal clk_4M_en          : std_logic;
   signal clk_2M_en          : std_logic;  -- CPU
-  signal clk_1M_en          : std_logic;  -- SAA5050
+  signal clk_2M_180_en      : std_logic;  -- 6845
+  signal clk_1M_en          : std_logic;  -- CPU/SAA5050
+  signal clk_1M_90_en       : std_logic;  -- 6845
 
   -- CPU signals
 	signal cpu_clk_en					: std_logic;
@@ -165,8 +168,8 @@ architecture SYN of Game is
   signal adc7002_cs         : std_logic;
   signal tubeula_cs         : std_logic;
 
-	signal video_ram_a				: std_logic_vector(14 downto 0);
-	signal video_ram_d				: std_logic_vector(7 downto 0);
+	signal video_a				    : std_logic_vector(14 downto 0);
+	signal video_d				    : std_logic_vector(7 downto 0);
 
   signal crtc6845_vsync     : std_logic;
 
@@ -205,6 +208,54 @@ architecture SYN of Game is
 
 begin
 
+  -- clock generation - phase-aligned
+  process (clk_16M, reset)
+  begin
+    if reset = '1' then
+      sys_cycle <= (others => '0');
+      via6522_p2 <= '1';
+      via6522_clk4 <= '0';
+    elsif rising_edge(clk_16M) then
+      clk_8M_en <= '0';
+      clk_4M_en <= '0';
+      clk_2M_en <= '0';
+      clk_2M_180_en <= '0';
+      clk_1M_en <= '0';
+      clk_1M_90_en <= '0';
+      if sys_cycle(0) = '0' then
+        clk_8M_en <= '1';
+        if sys_cycle(1) = '0' then
+          clk_4M_en <= '1';
+          if sys_cycle(2) = '0' then
+            clk_2M_en <= '1';
+            if sys_cycle(3) = '0' then
+              clk_1M_en <= '1';
+            end if;
+          else
+            clk_2M_180_en <= '1';
+            if sys_cycle(3) = '0' then
+              clk_1M_90_en <= '1';
+            end if;
+          end if;
+        end if;
+      end if;
+      sys_cycle <= sys_cycle + 1;
+      -- clocks for 6522
+      -- P2 must lead cpu_clk_en by 1 system clock
+      -- - and is same frequency as cpu_clk but 50% duty cycle
+      -- clk4 goes low on rising edge of P2
+      if sys_cycle(2 downto 0) = "00" then
+        via6522_p2 <= not via6522_p2;
+      end if;
+      if sys_cycle(0) = '0' then
+        via6522_clk4 <= not via6522_clk4;
+      end if;
+    end if;
+  end process;
+
+  -- fixed at 1MHz for now...
+  cpu_clk_en <= clk_1M_en;
+
   -- some simple inversions
   reset_n <= not reset;
   cpu_reset_n <= not (reset or game_reset);
@@ -212,7 +263,7 @@ begin
 
   -- main chip-select logic
 
-  -- RAM $0000-$3FFF (16KB) - mirrored $4000-$7FFF
+  -- RAM $0000-$3FFF (16KB) - mirrored $4000-$7FFF for 16K machines
   ram_cs <=       '1' when STD_MATCH(cpu_a, "0---------------") else '0';
   -- PAGED ROM $8000-$BFFF (16KB)
   paged_rom_cs <= '1' when STD_MATCH(cpu_a, "10--------------") else '0';
@@ -511,48 +562,6 @@ begin
 
     begin
 
-      -- clock generation - phase-aligned
-      process (clk_16M, reset)
-        variable count : std_logic_vector(3 downto 0);
-      begin
-        if reset = '1' then
-          count := (others => '0');
-					via6522_p2 <= '1';
-					via6522_clk4 <= '0';
-        elsif rising_edge(clk_16M) then
-          clk_8M_en <= '0';
-          clk_4M_en <= '0';
-          clk_2M_en <= '0';
-          clk_1M_en <= '0';
-          if count(0) = '0' then
-            clk_8M_en <= '1';
-            if count(1) = '0' then
-              clk_4M_en <= '1';
-              if count(2) = '0' then
-                clk_2M_en <= '1';
-                if count(3) = '0' then
-                  clk_1M_en <= '1';
-                end if;
-              end if;
-            end if;
-          end if;
-          count := count + 1;
-          -- clocks for 6522
-          -- P2 must lead cpu_clk_en by 1 system clock
-          -- - and is same frequency as cpu_clk but 50% duty cycle
-          -- clk4 goes low on rising edge of P2
-          if count(2 downto 0) = "00" then
-            via6522_p2 <= not via6522_p2;
-          end if;
-          if count(0) = '0' then
-            via6522_clk4 <= not via6522_clk4;
-          end if;
-        end if;
-      end process;
-
-      -- fixed at 1MHz for now...
-      cpu_clk_en <= clk_1M_en;
-
       -- registers
       process (clk_16M, reset)
       begin
@@ -575,84 +584,83 @@ begin
         end if;
       end process;
 
+      -- the CRTC6845 implementation is not synchronous!!!
+      crtc6845_clk <= clk_1M_90_en when clk_rate_r = '0' else clk_2M_180_en;
+
 			-- graphics data serialiser
 			process (clk_16M, reset)
-				variable video_data 	: std_logic_vector(7 downto 0) := (others => '0');
-				variable clock_i			: std_logic_vector(2 downto 0);
+				variable video_byte 	: std_logic_vector(7 downto 0) := (others => '0');
+        variable v_mode       : std_logic_vector(2 downto 0);
 			begin
-
-				clock_i := clk_rate_r & cpl_r;
+			
+        v_mode := clk_rate_r & cpl_r;
 
 				if reset = '1' then
-					video_data := (others => '0');
+					video_byte := (others => '0');
 				elsif rising_edge(clk_16M) then
-
-					case clock_i is
-						when "000" =>								-- Mode 4, 1MHz 2ppb/4bpp
-							if clk_2M_en = '1' then
-								video_data := video_data(3 downto 0) & "0000";
-							end if;
-						when "001" =>								-- Mode 5, 1MHz 4ppb/2bpp
-							if clk_4M_en = '1' then
-								video_data := video_data(5 downto 0) & "00";
-							end if;
-						when "010" =>								-- Mode 6, 1MHz 8ppb/1bpp
-							if clk_8M_en = '1' then
-								video_data := video_data(6 downto 0) & '0';
-							end if;
-						when "011" =>								-- Mode 7, 1Mhz 16ppb (not used)
-							null;
-						when "100" =>								-- Mode 0, 2MHz 1ppb/8bpp
-							null;
-						when "101" =>								-- Mode 1, 2MHz 2ppb/4bpp
-							if clk_4M_en = '1' then
-								video_data := video_data(3 downto 0) & "0000";
-							end if;
-						when "110" =>								-- Mode 2, 2MHz 4ppb/2bpp
-							if clk_2M_en = '1' then
-								video_data := video_data(5 downto 0) & "00";
-							end if;
-						when others =>			        -- Mode 3, 2MHz 8ppb/1bpp
-							if clk_1M_en = '1' then
-								video_data := video_data(6 downto 0) & '0';
-							end if;
-					end case;
-
-					-- data is latched at the 6845 clock rate
-					if clk_rate_r = '0' then
-						if clk_1M_en = '1' then
-							video_data := video_ram_d;
-						end if;
-					elsif clk_2M_en = '1' then
-						video_data := video_ram_d;
-					end if;
-
-				end if;
+          
+          if clk_rate_r = '0' then
+            -- 6845 clk rate = 1MHz
+						if clk_1M_90_en = '1' then
+							video_byte := video_d;
+						else
+              case cpl_r is
+                when "01" =>								  -- Mode 5, 1MHz 4ppb/2bpp
+                  if clk_4M_en = '1' then
+                    video_byte := video_byte(6 downto 4) & '0' & video_byte(2 downto 0) & '0';
+                  end if;
+                when "10" =>								  -- Mode 4,6 1MHz 8ppb/1bpp
+                  if clk_8M_en = '1' then
+                    video_byte := video_byte(6 downto 0) & '0';
+                  end if;
+                when others =>
+                  null;
+              end case; -- cpl_r
+            end if; -- clk_1M_en
+          else
+            -- 6845 clk rate = 2MHz
+            if clk_2M_180_en = '1' then
+              video_byte := video_d;
+            else
+              case cpl_r is
+                when "01" =>								-- Mode 2, 2MHz 2ppb/4bpp
+                  if clk_4M_en = '1' then
+                    video_byte := video_byte(6) & '0' & video_byte(4) & '0' & 
+                                  video_byte(2) & '0' & video_byte(0) & '0';
+                  end if;
+                when "10" =>								-- Mode 1, 2MHz 4ppb/2bpp
+                  if clk_8M_en = '1' then
+                    video_byte := video_byte(6 downto 4) & '0' & video_byte(2 downto 0) & '0';
+                  end if;
+                when "11" =>			          -- Mode 0,3, 2MHz 8ppb/1bpp
+                  video_byte := video_byte(6 downto 0) & '0';
+                when others =>
+                  null;
+              end case; -- cpl_r
+            end if; -- clk_2M_en = '0'
+          end if; -- clk_rate_r = '1'
+				end if; -- rising_edge(clk_16M)
 
 				-- assign RGB outputs (quick fudge)
-				case clock_i is
-					when "011" | "110" =>			-- Modes 3,6 1bpp
-						video_r <= video_data(video_data'left) & "000000000";
-						video_g <= video_data(video_data'left) & "000000000";
-						video_b <= video_data(video_data'left) & "000000000";
-					when "010" | "101" =>			-- Modes 2,5 2bpp
-						video_r <= video_data(video_data'left downto video_data'left-1) & "00000000";
-						video_g <= video_data(video_data'left downto video_data'left-1) & "00000000";
-						video_b <= video_data(video_data'left downto video_data'left-1) & "00000000";
-					when "001" | "100" =>			-- Modes 1,4 4bpp
-						video_r <= video_data(video_data'left downto video_data'left-3) & "000000";
-						video_g <= video_data(video_data'left downto video_data'left-3) & "000000";
-						video_b <= video_data(video_data'left downto video_data'left-3) & "000000";
-					when others =>						-- Mode 0    8bpp
-						video_r <= video_data & "00";
-						video_g <= video_data & "00";
-						video_b <= video_data & "00";
+				case v_mode is
+					when "111" | "010" =>			-- Modes 0,3,4,6 1bpp
+						video_r <= video_byte(7) & "000000000";
+						video_g <= video_byte(7) & "000000000";
+						video_b <= video_byte(7) & "000000000";
+					when "110" | "001" =>			-- Modes 1,5 2bpp
+						video_r <= video_byte(7) & video_byte(3) & "00000000";
+						video_g <= video_byte(7) & video_byte(3) & "00000000";
+						video_b <= video_byte(7) & video_byte(3) & "00000000";
+					when "101" =>			        -- Mode 2 4bpp
+						video_r <= video_byte(7) & video_byte(5) & video_byte(3) & video_byte(1) & "000000";
+						video_g <= video_byte(7) & video_byte(5) & video_byte(3) & video_byte(1) & "000000";
+						video_b <= video_byte(7) & video_byte(5) & video_byte(3) & video_byte(1) & "000000";
+					when others =>						-- Invalid (8bpp)
+						video_r <= video_byte & "00";
+						video_g <= video_byte & "00";
+						video_b <= video_byte & "00";
 				end case;
-
 			end process;
-
-      -- the CRTC6845 implementation is not synchronous!!!
-      crtc6845_clk <= clk_1M_en when clk_rate_r = '0' else clk_2M_en;
 
     end block BLK_VIDEO_ULA;
 
@@ -706,7 +714,7 @@ begin
       s <= crtc6845_ma(11 downto 8) + b + 1;
 
       -- MA13=0 (hires), MA13=1 (teletext)
-      video_ram_a <=  s(4) & "1111" & crtc6845_ma(9 downto 0) when crtc6845_ma(13) = '1' else
+      video_a <=  s(4) & "1111" & crtc6845_ma(9 downto 0) when crtc6845_ma(13) = '1' else
                       s & crtc6845_ma(7 downto 0) & crtc6845_ra(2 downto 0);
 
     end block BLK_VIDADDR;
@@ -788,27 +796,66 @@ begin
       q		        => rom_12_d
     );
 
-	-- this is a fudge for now...
-	dram_inst : entity work.dpram
-    generic map
-    (
-			init_file => "dram.hex",
-			numwords_a => 16384,
-			widthad_a => 14
-    )
-		port map
-		(
-			clock_b				=> cpu_clk_en,
-			address_b			=> cpu_a(13 downto 0),
-			data_b				=> cpu_d_o,
-			wren_b				=> ram_we,
-			q_b						=> ram_d,
+  -- RAM
 
-			clock_a				=> clk_16M,
-			address_a			=> video_ram_a(13 downto 0),
-			data_a				=> (others => '0'),
-			wren_a				=> '0',
-			q_a						=> video_ram_d
-		);
-		
+  GEN_INTERNAL_RAM : if BBC_USE_INTERNAL_RAM generate
+
+    dram_inst : entity work.dpram
+      generic map
+      (
+        init_file => "dram.hex",
+        numwords_a => 16384,
+        widthad_a => 14
+      )
+      port map
+      (
+        clock_b				=> cpu_clk_en,
+        address_b			=> cpu_a(13 downto 0),
+        data_b				=> cpu_d_o,
+        wren_b				=> ram_we,
+        q_b						=> ram_d,
+
+        clock_a				=> clk_16M,
+        address_a			=> video_a(13 downto 0),
+        data_a				=> (others => '0'),
+        wren_a				=> '0',
+        q_a						=> video_d
+      );
+
+  end generate GEN_INTERNAL_RAM;
+
+  GEN_EXTERNAL_RAM : if not BBC_USE_INTERNAL_RAM generate
+
+    process (clk_16M, reset)
+      variable ram_a  : std_logic_vector(13 downto 0);
+    begin
+      if reset = '1' then
+        null;
+      elsif rising_edge(clk_16M) then
+        if sys_cycle = X"2" then
+          ram_a := cpu_a(ram_a'range);
+          sram_o.cs <= ram_cs;
+          sram_o.oe <= cpu_rw_n;
+          sram_o.we <= ram_we;
+        elsif sys_cycle = X"4" then
+          ram_d <= sram_i.d(ram_d'range);
+        elsif sys_cycle = X"6" then
+          ram_a := video_a(ram_a'range);
+          sram_o.cs <= '1';
+          sram_o.oe <= '1';
+          sram_o.we <= '0';
+        elsif sys_cycle = X"8" then
+          video_d <= sram_i.d(ram_d'range);
+        end if;
+        -- mask off high bit for 16K machines
+        --ram_a := (ram_a(14) and BBC_RAM_32K) & ram_a(13 downto 0);
+        sram_o.a <= EXT(ram_a, sram_o.a'length);
+      end if;
+    end process;
+
+    sram_o.d <= EXT(cpu_d_o, sram_o.d'length);
+    sram_o.be <= EXT("1", sram_o.be'length);
+
+  end generate GEN_EXTERNAL_RAM;
+
 end SYN;

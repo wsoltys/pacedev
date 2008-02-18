@@ -29,6 +29,9 @@ package project_pkg is
 
 	-- BBC-specific constants
 
+  constant BBC_RAM_32K                      : std_logic := '0';
+  constant BBC_RAM_16K                      : std_logic := not BBC_RAM_32K;
+
   -- startup link options (on keyboard PCB)
   constant BBC_STARTUP_OPT_NOT_USED         : std_logic_vector(1 downto 0) := "11";
   constant BBC_STARTUP_OPT_DISK_SPEED       : std_logic_vector(1 downto 0) := "11";
@@ -36,5 +39,7 @@ package project_pkg is
   constant BBC_STARTUP_OPT_MODE             : std_logic_vector(2 downto 0) := "110";
 
 	constant BBC_1MHz_CLK0_COUNTS				      : natural := 16;
-	
+
+  constant BBC_USE_INTERNAL_RAM             : boolean := true;
+
 end;
