@@ -244,10 +244,10 @@ begin
       -- P2 must lead cpu_clk_en by 1 system clock
       -- - and is same frequency as cpu_clk but 50% duty cycle
       -- clk4 goes low on rising edge of P2
-      if sys_cycle(2 downto 0) = "00" then
+      if sys_cycle(2 downto 0) = "111" then
         via6522_p2 <= not via6522_p2;
       end if;
-      if sys_cycle(0) = '0' then
+      if sys_cycle(0) = '1' then
         via6522_clk4 <= not via6522_clk4;
       end if;
     end if;
@@ -827,7 +827,7 @@ begin
   GEN_EXTERNAL_RAM : if not BBC_USE_INTERNAL_RAM generate
 
     process (clk_16M, reset)
-      variable ram_a  : std_logic_vector(13 downto 0);
+      variable ram_a  : std_logic_vector(14 downto 0);
     begin
       if reset = '1' then
         null;
@@ -848,7 +848,7 @@ begin
           video_d <= sram_i.d(ram_d'range);
         end if;
         -- mask off high bit for 16K machines
-        --ram_a := (ram_a(14) and BBC_RAM_32K) & ram_a(13 downto 0);
+        ram_a := (ram_a(14) and BBC_RAM_32K) & ram_a(13 downto 0);
         sram_o.a <= EXT(ram_a, sram_o.a'length);
       end if;
     end process;
