@@ -556,10 +556,14 @@ begin
 			alias cursor_w_r		: std_logic_vector(1 downto 0) is control_r(6 downto 5);	-- 1/NA/2/4
 			alias m_cursor_w_r	: std_logic is control_r(7);
 
-			signal palette_r		: std_logic_vector(7 downto 0);
-			alias log_clr_r			: std_logic_vector(3 downto 0) is palette_r(7 downto 4);
-			alias act_clr_r			: std_logic_vector(3 downto 0) is palette_r(3 downto 0);
-
+      subtype phys_clr_t is std_logic_vector(3 downto 0);
+      type palette_t is array (natural range <>) of phys_clr_t;
+			signal palette_r		: palette_t(15 downto 0);
+      -- physical colour mapping
+      -- - bit 3 - flashing c and ~c
+      -- - bit 2 - blue component
+      -- - bit 1 - green component
+      -- - bit 0 - red component
     begin
 
       -- registers
@@ -567,7 +571,7 @@ begin
       begin
         if cpu_reset_n = '0' then
 					control_r <= (others => '0');
-					palette_r <= (others => '0');
+					palette_r <= (others => (others => '0'));
         elsif rising_edge(clk_16M) then
 					if cpu_clk_en = '1' then
 						if videoula_cs = '1' then
@@ -576,7 +580,10 @@ begin
                   when '0' =>
                     control_r <= cpu_d_o;
                   when others =>
-                    palette_r <= cpu_d_o;
+                    -- colours are inverted in the palette register for some reason
+                    -- - see AUG 19.2.3
+                    palette_r(conv_integer(cpu_d_o(7 downto 4))) <= 
+                      cpu_d_o(3) & not cpu_d_o(2 downto 0);
                 end case;
               end if; -- cpu_rw_n
 						end if; -- videoula_cs
@@ -591,6 +598,8 @@ begin
 			process (clk_16M, reset)
 				variable video_byte 	: std_logic_vector(7 downto 0) := (others => '0');
         variable v_mode       : std_logic_vector(2 downto 0);
+        variable log_clr      : std_logic_vector(3 downto 0);
+        variable phys_clr     : phys_clr_t;
 			begin
 			
         v_mode := clk_rate_r & cpl_r;
@@ -607,11 +616,11 @@ begin
               case cpl_r is
                 when "01" =>								  -- Mode 5, 1MHz 4ppb/2bpp
                   if clk_4M_en = '1' then
-                    video_byte := video_byte(6 downto 4) & '0' & video_byte(2 downto 0) & '0';
+                    video_byte := video_byte(6 downto 4) & '1' & video_byte(2 downto 0) & '1';
                   end if;
                 when "10" =>								  -- Mode 4,6 1MHz 8ppb/1bpp
                   if clk_8M_en = '1' then
-                    video_byte := video_byte(6 downto 0) & '0';
+                    video_byte := video_byte(6 downto 0) & '1';
                   end if;
                 when others =>
                   null;
@@ -625,15 +634,15 @@ begin
               case cpl_r is
                 when "01" =>								-- Mode 2, 2MHz 2ppb/4bpp
                   if clk_4M_en = '1' then
-                    video_byte := video_byte(6) & '0' & video_byte(4) & '0' & 
-                                  video_byte(2) & '0' & video_byte(0) & '0';
+                    video_byte := video_byte(6) & '1' & video_byte(4) & '1' & 
+                                  video_byte(2) & '1' & video_byte(0) & '1';
                   end if;
                 when "10" =>								-- Mode 1, 2MHz 4ppb/2bpp
                   if clk_8M_en = '1' then
-                    video_byte := video_byte(6 downto 4) & '0' & video_byte(2 downto 0) & '0';
+                    video_byte := video_byte(6 downto 4) & '1' & video_byte(2 downto 0) & '1';
                   end if;
                 when "11" =>			          -- Mode 0,3, 2MHz 8ppb/1bpp
-                  video_byte := video_byte(6 downto 0) & '0';
+                  video_byte := video_byte(6 downto 0) & '1';
                 when others =>
                   null;
               end case; -- cpl_r
@@ -641,25 +650,14 @@ begin
           end if; -- clk_rate_r = '1'
 				end if; -- rising_edge(clk_16M)
 
-				-- assign RGB outputs (quick fudge)
-				case v_mode is
-					when "111" | "010" =>			-- Modes 0,3,4,6 1bpp
-						video_r <= video_byte(7) & "000000000";
-						video_g <= video_byte(7) & "000000000";
-						video_b <= video_byte(7) & "000000000";
-					when "110" | "001" =>			-- Modes 1,5 2bpp
-						video_r <= video_byte(7) & video_byte(3) & "00000000";
-						video_g <= video_byte(7) & video_byte(3) & "00000000";
-						video_b <= video_byte(7) & video_byte(3) & "00000000";
-					when "101" =>			        -- Mode 2 4bpp
-						video_r <= video_byte(7) & video_byte(5) & video_byte(3) & video_byte(1) & "000000";
-						video_g <= video_byte(7) & video_byte(5) & video_byte(3) & video_byte(1) & "000000";
-						video_b <= video_byte(7) & video_byte(5) & video_byte(3) & video_byte(1) & "000000";
-					when others =>						-- Invalid (8bpp)
-						video_r <= video_byte & "00";
-						video_g <= video_byte & "00";
-						video_b <= video_byte & "00";
-				end case;
+				-- assign RGB outputs
+				-- - doesn't handle flashing colours
+        log_clr := video_byte(7) & video_byte(5) & video_byte(3) & video_byte(1);
+        -- bit 3 of the physical colour is the flashing bit
+        phys_clr := palette_r(conv_integer(log_clr));
+        video_r <= (others => (flash_r and phys_clr(3)) xor phys_clr(0));
+        video_g <= (others => (flash_r and phys_clr(3)) xor phys_clr(1));
+        video_b <= (others => (flash_r and phys_clr(3)) xor phys_clr(2));
 			end process;
 
     end block BLK_VIDEO_ULA;
@@ -668,25 +666,65 @@ begin
     crtc6845_cs_n <= not crtc6845_cs;
     crtc6845_e <= not cpu_clk_en;
 
-    crtc6845s_inst : crtc6845s
-      port map
-      (
-        -- INPUT
-        I_E         => crtc6845_e,
-        I_DI        => cpu_d_o,
-        I_RS        => cpu_a(0),
-        I_RWn       => cpu_rw_n,
-        I_CSn       => crtc6845_cs_n,
-        I_CLK       => crtc6845_clk,
-        I_RSTn      => cpu_reset_n,
+    GEN_ROCKOLA_6845 : if BBC_USE_ROCKOLA_6845 generate
 
-        -- OUTPUT
-        O_RA        => crtc6845_ra,
-        O_MA        => crtc6845_ma,
-        O_H_SYNC    => crtc6845_hsync,
-        O_V_SYNC    => crtc6845_vsync,
-        O_DISPTMG   => crtc6845_disptmg
-      );
+      crtc6845s_inst : crtc6845s
+        port map
+        (
+          -- INPUT
+          I_E         => crtc6845_e,
+          I_DI        => cpu_d_o,
+          I_RS        => cpu_a(0),
+          I_RWn       => cpu_rw_n,
+          I_CSn       => crtc6845_cs_n,
+          I_CLK       => crtc6845_clk,
+          I_RSTn      => cpu_reset_n,
+
+          -- OUTPUT
+          O_RA        => crtc6845_ra,
+          O_MA        => crtc6845_ma,
+          O_H_SYNC    => crtc6845_hsync,
+          O_V_SYNC    => crtc6845_vsync,
+          O_DISPTMG   => crtc6845_disptmg
+        );
+  
+    end generate GEN_ROCKOLA_6845;
+
+    GEN_OPENCORES_6845 : if BBC_USE_OC_6845 generate
+
+      crtc6845s_inst : entity work.crtc6845
+        port map
+        (
+          MA          => crtc6845_ma,
+          RA          => crtc6845_ra,
+          HSYNC       => crtc6845_hsync,
+          VSYNC       => crtc6845_vsync,
+          DE          => crtc6845_disptmg,
+          CURSOR      => open,
+          LPSTBn      => '1',
+          E           => crtc6845_e,
+          RS          => cpu_a(0),
+          CSn         => crtc6845_cs_n,
+          RW          => cpu_rw_n,
+          DI          => cpu_d_o,
+          DO          => open,
+          RESETn      => cpu_reset_n,
+          CLK         => crtc6845_clk,
+          -- not standard
+          REG_INIT    => '0',
+          --
+          Hend        => open,
+          HS          => open,
+          CHROW_CLK   => open,
+          Vend        => open,
+          SLadj       => open,
+          H           => open,
+          V           => open,
+          CURSOR_ACTIVE => open,
+          VERT_RST    => open
+        );
+
+    end generate GEN_OPENCORES_6845;
 
     -- enable output of the video ULA
     video_ULA_de <= crtc6845_disptmg and not crtc6845_ra(3);
@@ -839,12 +877,12 @@ begin
           sram_o.we <= ram_we;
         elsif sys_cycle = X"4" then
           ram_d <= sram_i.d(ram_d'range);
-        elsif sys_cycle = X"6" then
+        elsif sys_cycle(2 downto 0) = "110" then
           ram_a := video_a(ram_a'range);
           sram_o.cs <= '1';
           sram_o.oe <= '1';
           sram_o.we <= '0';
-        elsif sys_cycle = X"8" then
+        elsif sys_cycle(2 downto 0) = "000" then
           video_d <= sram_i.d(ram_d'range);
         end if;
         -- mask off high bit for 16K machines

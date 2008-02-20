@@ -42,4 +42,9 @@ package project_pkg is
 
   constant BBC_USE_INTERNAL_RAM             : boolean := false;
 
+  -- implementation options
+
+  constant BBC_USE_ROCKOLA_6845             : boolean := true;
+  constant BBC_USE_OC_6845                  : boolean := not BBC_USE_ROCKOLA_6845;
+
 end;
