@@ -24,6 +24,8 @@ entity PACE is
 			sram_o					: out to_SRAM_t;
 
      -- VGA video
+     vga_clk          : out std_logic;
+     lcm_data         : out std_logic_vector(9 downto 2);
      red              : out   std_logic_vector(9 downto 0);
      green            : out   std_logic_vector(9 downto 0);
      blue             : out   std_logic_vector(9 downto 0);
@@ -89,6 +91,7 @@ begin
   spi_sel <= 'Z';
 
 	-- hook up VGA output
+  vga_clk <= clk(0);
 	red <= vga_red;
 	green <= vga_green;
 	blue <= vga_blue;
