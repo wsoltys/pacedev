@@ -125,10 +125,10 @@ architecture SYN of Game is
   signal mos_rom_d          : std_logic_vector(7 downto 0);
 
   -- paged ROM signals
-  signal paged_rom_r        : std_logic_vector(3 downto 0);
+  signal paged_rom_r        : std_logic_vector(1 downto 0);
   signal paged_rom_cs       : std_logic;
   signal paged_rom_d        : std_logic_vector(7 downto 0);
-  signal rom_12_d           : std_logic_vector(7 downto 0);
+  signal rom_3_d            : std_logic_vector(7 downto 0);
 
   -- RAM signals
   signal ram_cs             : std_logic;
@@ -280,7 +280,7 @@ begin
   ram_we <= ram_cs and not cpu_rw_n;
 
   -- paged rom mux
-  paged_rom_d <=  rom_12_d when paged_rom_r = X"C" else
+  paged_rom_d <=  rom_3_d when paged_rom_r = "11" else
                   (others => '1');
 
   -- read mux
@@ -373,12 +373,12 @@ begin
     adc7002_cs <=   sheila_cs when STD_MATCH(sheila_a, "110-----") else '0';
     tubeula_cs <=   sheila_cs when STD_MATCH(sheila_a, "111-----") else '0';
 
-    sheila_d <= EXT(paged_rom_r, sheila_d'length) when pagedrom_cs = '1' else
-                X"00" when acia6850_cs = '1' else
+    sheila_d <= X"00" when acia6850_cs = '1' else
                 sysvia_d when sysvia_cs = '1' else
                 X"FE"; -- *MUST* return $FE
 
     -- paged ROM process
+    -- note this register is write-only
     process (clk_16M, cpu_clk_en, reset)
     begin
       if cpu_reset_n = '0' then
@@ -825,13 +825,13 @@ begin
       q		        => mos_rom_d
     );
 
-  -- ROM 12
+  -- ROM 3
   basic_rom_inst : entity work.basic_rom
     port map
     (
       clock		    => clk_16M,
       address		  => cpu_a(13 downto 0),
-      q		        => rom_12_d
+      q		        => rom_3_d
     );
 
   -- RAM
