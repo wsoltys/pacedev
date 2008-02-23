@@ -233,11 +233,11 @@ begin
             end if;
           else
             clk_2M_180_en <= '1';
-            if sys_cycle(3) = '0' then
-              clk_1M_90_en <= '1';
-            end if;
           end if;
         end if;
+      end if;
+      if sys_cycle = "1100" then
+        clk_1M_90_en <= '1';
       end if;
       sys_cycle <= sys_cycle + 1;
       -- clocks for 6522
@@ -610,7 +610,7 @@ begin
           
           if clk_rate_r = '0' then
             -- 6845 clk rate = 1MHz
-						if clk_1M_90_en = '1' then
+						if clk_1M_en = '1' then
 							video_byte := video_d;
 						else
               case cpl_r is
@@ -628,7 +628,7 @@ begin
             end if; -- clk_1M_en
           else
             -- 6845 clk rate = 2MHz
-            if clk_2M_180_en = '1' then
+            if clk_2M_en = '1' then
               video_byte := video_d;
             else
               case cpl_r is
