@@ -727,7 +727,17 @@ begin
     end generate GEN_OPENCORES_6845;
 
     -- enable output of the video ULA
-    video_ULA_de <= crtc6845_disptmg and not crtc6845_ra(3);
+    -- pipeline delay because of clock phasing
+    process (clk_16M, reset)
+      variable de_r : std_logic_vector(3 downto 0);
+    begin
+      if reset = '1' then
+        de_r := (others => '0');
+      elsif rising_edge(clk_16M) then
+        de_r := de_r(de_r'left-1 downto 0) & (crtc6845_disptmg and not crtc6845_ra(3));
+      end if;
+      video_ULA_de <= de_r(de_r'left);
+    end process;
 
     -- interrupt set on negative edge of VSYNC
     -- according to the schematics, the VSYNC output (active high)
@@ -857,7 +867,7 @@ begin
         address_a			=> video_a(13 downto 0),
         data_a				=> (others => '0'),
         wren_a				=> '0',
-        q_a						=> video_d
+        q_a						=> open --video_d
       );
 
   end generate GEN_INTERNAL_RAM;
@@ -895,5 +905,16 @@ begin
     sram_o.be <= EXT("1", sram_o.be'length);
 
   end generate GEN_EXTERNAL_RAM;
+
+    process (clk_16M, reset)
+    begin
+      if reset = '1' then
+        --video_d <= (others => '0');
+      elsif rising_edge(clk_16M) then
+        if clk_1M_en = '1' then
+          --video_d <= not video_d;
+        end if;
+      end if;
+    end process;
 
 end SYN;
