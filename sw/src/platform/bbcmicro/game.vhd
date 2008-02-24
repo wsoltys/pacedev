@@ -363,7 +363,7 @@ begin
 
     crtc6845_cs <=  sheila_cs when STD_MATCH(sheila_a, "00000---") else '0';
     acia6850_cs <=  sheila_cs when STD_MATCH(sheila_a, "00001---") else '0';
-    serialula_cs <= sheila_cs when STD_MATCH(sheila_a, "0001----") else '0';
+    serialula_cs <= sheila_cs when STD_MATCH(sheila_a, "00010---") else '0';
     videoula_cs <=  sheila_cs when STD_MATCH(sheila_a, "0010----") else '0';
     pagedrom_cs  <= sheila_cs when STD_MATCH(sheila_a, "0011----") else '0';
     sysvia_cs <=    sheila_cs when STD_MATCH(sheila_a, "010-----") else '0';
@@ -651,7 +651,6 @@ begin
 				end if; -- rising_edge(clk_16M)
 
 				-- assign RGB outputs
-				-- - doesn't handle flashing colours
         log_clr := video_byte(7) & video_byte(5) & video_byte(3) & video_byte(1);
         -- bit 3 of the physical colour is the flashing bit
         phys_clr := palette_r(conv_integer(log_clr));
