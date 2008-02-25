@@ -536,8 +536,10 @@ begin
     signal crtc6845_vsync     : std_logic;
 
     -- SAA5050 signals
-    signal saa5050_dew        : std_logic;
-    signal saa5050_de         : std_logic;
+    signal clk_6M_en          : std_logic;
+    signal saa5050_r          : std_logic;
+    signal saa5050_g          : std_logic;
+    signal saa5050_b          : std_logic;
 
     signal video_ULA_de       : std_logic;
 		signal video_r				    : std_logic_vector(9 downto 0);
@@ -654,9 +656,15 @@ begin
         log_clr := video_byte(7) & video_byte(5) & video_byte(3) & video_byte(1);
         -- bit 3 of the physical colour is the flashing bit
         phys_clr := palette_r(conv_integer(log_clr));
-        video_r <= (others => (flash_r and phys_clr(3)) xor phys_clr(0));
-        video_g <= (others => (flash_r and phys_clr(3)) xor phys_clr(1));
-        video_b <= (others => (flash_r and phys_clr(3)) xor phys_clr(2));
+        if teletext_r = '1' then
+          video_r <=  (others => saa5050_r);
+          video_g <=  (others => saa5050_g);
+          video_b <=  (others => saa5050_b);
+        else
+          video_r <=  (others => (flash_r and phys_clr(3)) xor phys_clr(0));
+          video_g <=  (others => (flash_r and phys_clr(3)) xor phys_clr(1));
+          video_b <=  (others => (flash_r and phys_clr(3)) xor phys_clr(2));
+        end if;
 			end process;
 
     end block BLK_VIDEO_ULA;
@@ -766,32 +774,51 @@ begin
 
     end block BLK_VIDADDR;
 
+    -- generate 6M clock for SAA5050
+    -- ** check phase relationship!!!
+    process (clk_16M, reset)
+      subtype count_t is integer range 0 to 5;
+      variable count : count_t;
+    begin
+      if reset = '1' then
+        count := 0;
+      elsif rising_edge(clk_16M) then
+        clk_6M_en <= '0';
+        if count = count_t'high then
+          clk_6M_en <= '1';
+          count := 0;
+        else
+          count := count + 1;
+        end if;
+      end if;
+    end process;
+
     saa505x_inst : entity work.saa505x
       port map
       (
-        clk				=> clk(0),
+        clk				=> clk_16M,
         reset			=> reset,
 
-        si_i_n		=> '0',               -- hard-wired text mode
+        si_i_n		=> '0',               -- tied low on schematic
         si_o			=> open,              -- not used
-        data_n		=> '0',               -- not used
-        d					=> (others => '0'),
-        dlim			=> '0',               -- not used
-        glr				=> '0',               -- not used
-        dew				=> saa5050_dew,
-        crs				=> '0',
-        bcs_n			=> '1',
+        data_n		=> '1',               -- tied high on schematic
+        d					=> video_d(6 downto 0),
+        dlim			=> '1',               -- tied high on schematic
+        glr				=> crtc6845_hsync,
+        dew				=> crtc6845_vsync,
+        crs				=> '0',               -- to be implemented?
+        bcs_n			=> '1',               -- tied high on schematic
         tlc_n			=> open,
-        tr6				=> '0',
-        f1				=> '0',
-        y					=> open,
-        b					=> open,
-        g					=> open,
-        r					=> open,
-        blan			=> open,
-        lose			=> '0',
-        po				=> '0',
-        de				=> saa5050_de
+        tr6				=> clk_6M_en,
+        f1				=> clk_1M_en,
+        y					=> open,              -- N/C on schematic
+        b					=> saa5050_b,
+        g					=> saa5050_g,
+        r					=> saa5050_r,
+        blan			=> open,              -- N/C on schematic
+        lose			=> crtc6845_disptmg,
+        po				=> '0',               -- tied low on schematic
+        de				=> '1'                -- tied high on schematic
       );
 
     -- drive VGA outputs
@@ -904,16 +931,5 @@ begin
     sram_o.be <= EXT("1", sram_o.be'length);
 
   end generate GEN_EXTERNAL_RAM;
-
-    process (clk_16M, reset)
-    begin
-      if reset = '1' then
-        --video_d <= (others => '0');
-      elsif rising_edge(clk_16M) then
-        if clk_1M_en = '1' then
-          --video_d <= not video_d;
-        end if;
-      end if;
-    end process;
 
 end SYN;

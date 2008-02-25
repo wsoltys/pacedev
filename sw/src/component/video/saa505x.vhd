@@ -13,7 +13,7 @@ entity saa505x is
 		si_i_n		: in std_logic;
 		si_o			: out std_logic;
 		data_n		: in std_logic;
-		d					: in std_logic_vector(7 downto 1);
+		d					: in std_logic_vector(6 downto 0);
 		dlim			: in std_logic;
 		glr				: in std_logic;
 		dew				: in std_logic;
@@ -1290,9 +1290,60 @@ architecture SYN of saa505x is
 	  )
 	);
 
+  signal ra   : integer range 0 to 9;
+
 begin
+
+  -- generate row address
+  process (clk, reset)
+    variable glr_r  : std_logic;
+  begin
+    if reset = '1' then
+    elsif rising_edge(clk) then
+      -- VSYNC, reset row address
+      if dew = '1' then
+        ra <= 0;
+      -- HYSNC, increment row address
+      elsif glr = '1' and glr_r = '0' then
+        if ra = 9 then
+          ra <= 0;
+        else
+          ra <= ra + 1;
+        end if;
+      end if;
+      glr_r := glr;
+    end if;
+  end process;
+
+  -- latch and output data
+  process (clk, reset)
+    variable char_row_data : std_logic_vector(5 downto 0);
+  begin
+    if reset = '1' then
+      null;
+    elsif rising_edge(clk) then
+      if f1 = '1' then
+        --latch data
+        if d(6 downto 5) = "00" then
+          char_row_data := (others => '0');
+        else
+          char_row_data := charset(conv_integer(d))(ra);
+        end if;
+      elsif tr6 = '1' then
+        -- assign output
+        r <= char_row_data(char_row_data'left);
+        g <= char_row_data(char_row_data'left);
+        b <= char_row_data(char_row_data'left);
+        -- shift data
+        char_row_data := char_row_data(4 downto 0) & '0';
+      end if;
+    end if;
+  end process;
 
   -- not supported
   si_o <= 'X';
+  tlc_n <= 'X';
+  y <= 'X';
+  blan <= 'X';
 
 end SYN;
