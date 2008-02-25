@@ -537,10 +537,13 @@ begin
 
     -- SAA5050 signals
     signal clk_6M_en          : std_logic;
+    signal saa5050_d          : std_logic_vector(6 downto 0);
+    signal saa5050_de         : std_logic;
     signal saa5050_r          : std_logic;
     signal saa5050_g          : std_logic;
     signal saa5050_b          : std_logic;
 
+    -- video ULA signals
     signal video_ULA_de       : std_logic;
 		signal video_r				    : std_logic_vector(9 downto 0);
 		signal video_g				    : std_logic_vector(9 downto 0);
@@ -737,13 +740,15 @@ begin
     -- pipeline delay because of clock phasing
     process (clk_16M, reset)
       variable de_r : std_logic_vector(3 downto 0);
+      variable ra3_r : std_logic_vector(3 downto 0);
     begin
       if reset = '1' then
         de_r := (others => '0');
       elsif rising_edge(clk_16M) then
-        de_r := de_r(de_r'left-1 downto 0) & (crtc6845_disptmg and not crtc6845_ra(3));
+        de_r := de_r(de_r'left-1 downto 0) & crtc6845_disptmg;
       end if;
-      video_ULA_de <= de_r(de_r'left);
+      video_ULA_de <= de_r(de_r'left) and not crtc6845_ra(3);
+      saa5050_de <= de_r(de_r'left);
     end process;
 
     -- interrupt set on negative edge of VSYNC
@@ -793,6 +798,9 @@ begin
       end if;
     end process;
 
+    -- bit 6 is gated by the teletext display enable bit
+    saa5050_d <= (video_d(6) and saa5050_de) & video_d(5 downto 0);
+
     saa505x_inst : entity work.saa505x
       port map
       (
@@ -802,7 +810,7 @@ begin
         si_i_n		=> '0',               -- tied low on schematic
         si_o			=> open,              -- not used
         data_n		=> '1',               -- tied high on schematic
-        d					=> video_d(6 downto 0),
+        d					=> saa5050_d,
         dlim			=> '1',               -- tied high on schematic
         glr				=> crtc6845_hsync,
         dew				=> crtc6845_vsync,
