@@ -797,8 +797,7 @@ begin
     end process;
 
     -- bit 6 is gated by the teletext display enable bit
-    --saa5050_d <= (video_d(6) and saa5050_de) & video_d(5 downto 0);
-    saa5050_d <= (others => '0');
+    saa5050_d <= (video_d(6) and crtc6845_disptmg) & video_d(5 downto 0);
 
     saa505x_inst : entity work.saa505x
       port map
@@ -900,7 +899,7 @@ begin
         address_a			=> video_a(13 downto 0),
         data_a				=> (others => '0'),
         wren_a				=> '0',
-        q_a						=> open --video_d
+        q_a						=> video_d
       );
 
   end generate GEN_INTERNAL_RAM;
