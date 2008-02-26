@@ -538,16 +538,18 @@ begin
     -- SAA5050 signals
     signal clk_6M_en          : std_logic;
     signal saa5050_d          : std_logic_vector(6 downto 0);
-    signal saa5050_de         : std_logic;
     signal saa5050_r          : std_logic;
     signal saa5050_g          : std_logic;
     signal saa5050_b          : std_logic;
+		signal saa5050_de					: std_logic;
 
     -- video ULA signals
-    signal video_ULA_de       : std_logic;
+		signal ula_de							: std_logic;
 		signal video_r				    : std_logic_vector(9 downto 0);
 		signal video_g				    : std_logic_vector(9 downto 0);
 		signal video_b				    : std_logic_vector(9 downto 0);
+
+    signal video_de       		: std_logic;
 
   begin
 
@@ -660,17 +662,34 @@ begin
         -- bit 3 of the physical colour is the flashing bit
         phys_clr := palette_r(conv_integer(log_clr));
         if teletext_r = '1' then
-          video_r <=  (others => saa5050_r);
-          video_g <=  (others => saa5050_g);
-          video_b <=  (others => saa5050_b);
+          video_r <= (others => saa5050_r);
+          video_g <= (others => saa5050_g);
+          video_b <= (others => saa5050_b);
+					video_de <= saa5050_de;
         else
-          video_r <=  (others => (flash_r and phys_clr(3)) xor phys_clr(0));
-          video_g <=  (others => (flash_r and phys_clr(3)) xor phys_clr(1));
-          video_b <=  (others => (flash_r and phys_clr(3)) xor phys_clr(2));
+          video_r <= (others => (flash_r and phys_clr(3)) xor phys_clr(0));
+          video_g <= (others => (flash_r and phys_clr(3)) xor phys_clr(1));
+          video_b <= (others => (flash_r and phys_clr(3)) xor phys_clr(2));
+					video_de <= ula_de;
         end if;
 			end process;
 
     end block BLK_VIDEO_ULA;
+
+    -- enable output of the video ULA
+    -- pipeline delay because of clock phasing
+    process (clk_16M, reset)
+      variable de_r : std_logic_vector(3 downto 0);
+      variable ra3_r : std_logic_vector(3 downto 0);
+    begin
+      if reset = '1' then
+        de_r := (others => '0');
+      elsif rising_edge(clk_16M) then
+        de_r := de_r(de_r'left-1 downto 0) & crtc6845_disptmg;
+      end if;
+      ula_de <= de_r(de_r'left) and not crtc6845_ra(3);
+      saa5050_de <= de_r(de_r'left);
+    end process;
 
     -- needs inverted CS
     crtc6845_cs_n <= not crtc6845_cs;
@@ -715,7 +734,7 @@ begin
           E           => crtc6845_e,
           RS          => cpu_a(0),
           CSn         => crtc6845_cs_n,
-          RW          => cpu_rw_n,
+          RW          => '1', --cpu_rw_n,
           DI          => cpu_d_o,
           DO          => open,
           RESETn      => cpu_reset_n,
@@ -735,21 +754,6 @@ begin
         );
 
     end generate GEN_OPENCORES_6845;
-
-    -- enable output of the video ULA
-    -- pipeline delay because of clock phasing
-    process (clk_16M, reset)
-      variable de_r : std_logic_vector(3 downto 0);
-      variable ra3_r : std_logic_vector(3 downto 0);
-    begin
-      if reset = '1' then
-        de_r := (others => '0');
-      elsif rising_edge(clk_16M) then
-        de_r := de_r(de_r'left-1 downto 0) & crtc6845_disptmg;
-      end if;
-      video_ULA_de <= de_r(de_r'left) and not crtc6845_ra(3);
-      saa5050_de <= de_r(de_r'left);
-    end process;
 
     -- interrupt set on negative edge of VSYNC
     -- according to the schematics, the VSYNC output (active high)
@@ -780,26 +784,21 @@ begin
     end block BLK_VIDADDR;
 
     -- generate 6M clock for SAA5050
-    -- ** check phase relationship!!!
+		-- fudge for now - use 2 out of every 3 8M clocks
     process (clk_16M, reset)
-      subtype count_t is integer range 0 to 5;
-      variable count : count_t;
+      variable timing_chain : std_logic_vector(7 downto 0);
     begin
       if reset = '1' then
-        count := 0;
+        timing_chain := "10101000";
       elsif rising_edge(clk_16M) then
-        clk_6M_en <= '0';
-        if count = count_t'high then
-          clk_6M_en <= '1';
-          count := 0;
-        else
-          count := count + 1;
-        end if;
+				clk_6M_en <= timing_chain(timing_chain'left);
+				timing_chain := timing_chain(timing_chain'left-1 downto 0) & timing_chain(timing_chain'left);
       end if;
     end process;
 
     -- bit 6 is gated by the teletext display enable bit
-    saa5050_d <= (video_d(6) and saa5050_de) & video_d(5 downto 0);
+    --saa5050_d <= (video_d(6) and saa5050_de) & video_d(5 downto 0);
+    saa5050_d <= (others => '0');
 
     saa505x_inst : entity work.saa505x
       port map
@@ -833,9 +832,9 @@ begin
     -- fudge for now
     hsync <= not crtc6845_hsync;
     vsync <= not crtc6845_vsync;
-    red <= video_r when video_ULA_de = '1' else (others => '0');
-    green <= video_g when video_ULA_de = '1' else (others => '0');
-    blue <= video_b when video_ULA_de = '1' else (others => '0');
+    red <= video_r when video_de = '1' else (others => '0');
+    green <= video_g when video_de = '1' else (others => '0');
+    blue <= video_b when video_de = '1' else (others => '0');
 
   end block BLK_VIDEO;
 

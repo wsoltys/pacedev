@@ -91,6 +91,7 @@ wire   [1:0] W_CScue;
 
 mpu_if mpu_if(
 
+.I_RSTn(I_RSTn),
 .I_E(I_E),
 .I_DI(I_DI),
 .I_RS(I_RS),
@@ -146,6 +147,7 @@ endmodule
 
 module mpu_if(
 
+I_RSTn,
 I_E,
 I_DI,
 I_RS,
@@ -170,6 +172,7 @@ O_VMode,
 O_IntSync
 );
 
+input I_RSTn;
 input  I_E;
 input  [7:0]I_DI;
 input  I_RS;
@@ -224,8 +227,24 @@ assign O_IntSync =  R_Intr[0];
 assign O_DScue   = R_Intr[5:4]; // disp   scue 0,1,2 or OFF
 assign O_CScue   = R_Intr[7:6]; // cursor scue 0,1,2 or OFF
 
-always@(negedge I_E)
+always@(negedge I_RSTn or negedge I_E)
 begin
+  if(~I_RSTn) begin
+		// this is currently set for "non-interlace MODE 7"
+		// - it's a fudge because this controller doesn't support interlace
+    R_Nht  <= 8'h3F;				// 0
+    R_Nhd  <= 8'h28;				// 1
+    R_Nhsp <= 8'h33;				// 2
+    R_Nsw  <= 8'h24;				// 3
+    R_Nvt  <= 7'h1E;				// 4
+    R_Nadj <= 5'h02;				// 5
+    R_Nvd  <= 7'h19;				// 6
+    R_Nvsp <= 7'h1B; //1C;				// 7
+    R_Intr <= 8'h91; //93;				// 8
+    R_Nr   <= 5'h09; //12;				// 9
+    R_Msah <= 6'h28;				// 12
+    R_Msal <= 8'h00;				// 13
+	end else
   if(~I_CSn)begin
     if(~I_RWn)begin
       if(~I_RS)begin      

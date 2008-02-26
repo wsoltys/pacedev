@@ -45,13 +45,21 @@ add wave -noupdate -format Logic /tb_top/pace_inst/u_game/blk_video/crtc6845_hsy
 add wave -noupdate -format Logic /tb_top/pace_inst/u_game/blk_video/crtc6845_vsync
 add wave -noupdate -format Literal /tb_top/pace_inst/u_game/video_a
 add wave -noupdate -format Literal /tb_top/pace_inst/u_game/video_d
+add wave -noupdate -format Logic /tb_top/pace_inst/u_game/blk_video/ula_de
+add wave -noupdate -format Logic /tb_top/pace_inst/u_game/blk_video/video_de
 add wave -noupdate -divider CRTC6845S
-add wave -noupdate -format Literal /tb_top/pace_inst/u_game/blk_video/crtc6845s_inst/O_RA
-add wave -noupdate -format Literal /tb_top/pace_inst/u_game/blk_video/crtc6845s_inst/O_MA
-add wave -noupdate -format Logic /tb_top/pace_inst/u_game/blk_video/crtc6845s_inst/O_DISPTMG
+add wave -noupdate -format Literal /tb_top/pace_inst/u_game/blk_video/gen_rockola_6845/crtc6845s_inst/O_RA
+add wave -noupdate -format Literal /tb_top/pace_inst/u_game/blk_video/gen_rockola_6845/crtc6845s_inst/O_MA
+add wave -noupdate -format Logic /tb_top/pace_inst/u_game/blk_video/gen_rockola_6845/crtc6845s_inst/O_H_SYNC
+add wave -noupdate -format Logic /tb_top/pace_inst/u_game/blk_video/gen_rockola_6845/crtc6845s_inst/O_V_SYNC
+add wave -noupdate -divider SAA5050
+add wave -noupdate -format Logic /tb_top/pace_inst/u_game/blk_video/saa505x_inst/f1
+add wave -noupdate -format Logic /tb_top/pace_inst/u_game/blk_video/saa505x_inst/tr6
+add wave -noupdate -format Literal /tb_top/pace_inst/u_game/blk_video/saa505x_inst/d
+add wave -noupdate -format Logic /tb_top/pace_inst/u_game/blk_video/saa5050_de
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {98360 ns} 0} {{Cursor 2} {62899 ns} 0}
-configure wave -namecolwidth 279
+WaveRestoreCursors {{Cursor 1} {17140737 ns} 0} {{Cursor 2} {79803393 ns} 0}
+configure wave -namecolwidth 469
 configure wave -valuecolwidth 56
 configure wave -justifyvalue left
 configure wave -signalnamewidth 0
@@ -64,4 +72,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {97947 ns} {100779 ns}
+WaveRestoreZoom {79864327 ns} {79876671 ns}

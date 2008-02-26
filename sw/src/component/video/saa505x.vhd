@@ -1318,7 +1318,6 @@ begin
   -- latch and output data
   process (clk, reset)
     variable char_row_data  : std_logic_vector(5 downto 0);
-    variable char           : integer range 0 to 127;
   begin
     if reset = '1' then
       null;
@@ -1328,8 +1327,7 @@ begin
         if d(6 downto 5) = "00" then
           char_row_data := (others => '0');
         else
-          char := conv_integer(d) - 32;
-          char_row_data := charset(char)(ra);
+          char_row_data := charset(conv_integer(d)-32)(ra);
         end if;
       elsif tr6 = '1' then
         -- assign output
