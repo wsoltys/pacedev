@@ -1330,14 +1330,14 @@ begin
           char_row_data := charset(conv_integer(d)-32)(ra);
         end if;
       elsif tr6 = '1' then
-        -- assign output
-        r <= char_row_data(char_row_data'left);
-        g <= char_row_data(char_row_data'left);
-        b <= char_row_data(char_row_data'left);
         -- shift data
         char_row_data := char_row_data(4 downto 0) & '0';
       end if;
     end if;
+    -- assign output
+    r <= char_row_data(char_row_data'left);
+    g <= char_row_data(char_row_data'left);
+    b <= char_row_data(char_row_data'left);
   end process;
 
   -- not supported
