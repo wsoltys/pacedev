@@ -40,7 +40,7 @@ package project_pkg is
 
 	constant BBC_1MHz_CLK0_COUNTS				      : natural := 16;
 
-  constant BBC_USE_INTERNAL_RAM             : boolean := false;
+  constant BBC_USE_INTERNAL_RAM             : boolean := true;
 
   -- implementation options
 
