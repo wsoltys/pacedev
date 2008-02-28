@@ -5,10 +5,6 @@ use ieee.std_logic_arith.all;
 use ieee.numeric_std.all;
 
 entity tone_generator is
-  generic
-  (
-    AUDIO_RES   : natural := 16
-  );
 	port
 	(
 		clk					: in std_logic;
@@ -18,36 +14,36 @@ entity tone_generator is
 		freq        : in std_logic_vector(9 downto 0);
     attn        : in std_logic_vector(3 downto 0);
 
-		audio_out		: out std_logic_vector(AUDIO_RES-1 downto 0)
+		audio_out		: out std_logic
 	);
 end entity tone_generator;
 
 architecture SYN of tone_generator is
 
-  signal tone   : std_logic;
-
 begin
 
+  -- check for compatibility with freq = 0!
+
   process (clk, reset)
-    variable count : std_logic_vector(13 downto 0);
+    variable count  : std_logic_vector(13 downto 0);
+    variable tone   : std_logic;
   begin
     if reset = '1' then
       count := freq & "0000";
-      tone <= '0';
+      tone := '0';
     elsif rising_edge(clk) then
       if clk_en = '1' then
         if count = 0 then
-          tone <= not tone;
+          tone := not tone;
           count := freq & "0000";
         else
           count := count - 1;
         end if;
       end if;
     end if;
+    -- assign output
+    audio_out <= tone;
   end process;
-
-  -- no attenuation atm
-  audio_out <= (others => tone);
 
 end SYN;
 
@@ -90,8 +86,7 @@ architecture SYN of sn76489 is
   constant NOISE_CTL    : natural := 6;
   constant NOISE_ATTN   : natural := 7;
 
-  type audio_ch_t is array (natural range <>) of std_logic_vector(AUDIO_RES-1 downto 0);
-  signal audio_ch : audio_ch_t(0 to 3);
+  signal audio_d        : std_logic_vector(0 to 3);
 
 begin
 
@@ -125,10 +120,6 @@ begin
   GEN_TONE_GENS : for i in 0 to 2 generate
 
     tone_inst : entity work.tone_generator
-      generic map
-      (
-        AUDIO_RES   => AUDIO_RES
-      )
       port map
       (
         clk					=> clk,
@@ -138,7 +129,7 @@ begin
         freq        => reg(i*2),
         attn        => reg(i*2+1)(9 downto 6),
 
-        audio_out		=> audio_ch(i)
+        audio_out		=> audio_d(i)
       );
 
   end generate GEN_TONE_GENS;
@@ -155,7 +146,10 @@ begin
       end if;
     end if;
     -- no attentuation atm
-    audio_ch(3) <= (others => noise_r(0));
+    audio_d(3) <= noise_r(0);
   end process;
+
+  -- just T1 for now
+  audio_out <= (others => audio_d(0));
 
 end SYN;

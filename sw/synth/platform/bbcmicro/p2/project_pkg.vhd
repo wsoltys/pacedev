@@ -36,7 +36,7 @@ package project_pkg is
   constant BBC_STARTUP_OPT_NOT_USED         : std_logic_vector(1 downto 0) := "11";
   constant BBC_STARTUP_OPT_DISK_SPEED       : std_logic_vector(1 downto 0) := "11";
   constant BBC_STARTUP_OPT_SHIFT_BREAK      : std_logic := '1';
-  constant BBC_STARTUP_OPT_MODE             : std_logic_vector(2 downto 0) := "111";
+  constant BBC_STARTUP_OPT_MODE             : std_logic_vector(2 downto 0) := "110"; -- MODE 6
 
 	constant BBC_1MHz_CLK0_COUNTS				      : natural := 32;
 

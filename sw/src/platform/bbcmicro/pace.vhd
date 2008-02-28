@@ -130,9 +130,9 @@ begin
       cvbs            => GS_CVBS,
 
       -- sound
-      snd_rd          => snd_rd,
-      snd_wr          => snd_wr,
-      sndif_datai     => sndif_data,
+      snd_clk         => snd_clk,
+      snd_data_l      => snd_data_l,
+      snd_data_r      => snd_data_r,
   
       -- spi interface
       spi_clk         => spi_clk_s,
@@ -150,31 +150,5 @@ begin
       leds            => leds
     );
 
-	SOUND_BLOCK : block
-		signal snd_data		: std_logic_vector(7 downto 0);
-	begin
-	
-	  U_Sound : entity work.Sound                                          
-	    Port Map
-	    (
-	      sysclk      => clk(0),    -- fudge for now
-	      reset       => reset,
-
-	      sndif_rd    => snd_rd,              
-	      sndif_wr    => snd_wr,              
-	      sndif_addr  => uPaddr,
-	      sndif_datai => uPdatao,
-
-	      snd_clk     => snd_clk,
-	      snd_data    => snd_data,           
-	      sndif_datao => sndif_data
-	    );
-
-		-- route audio to both channels
-		snd_data_l <= snd_data & "00000000";
-		snd_data_r <= snd_data & "00000000";
-	
-	end block SOUND_BLOCK;
-		
 end SYN;
 

@@ -44,9 +44,9 @@ entity Game is
     cvbs            : out   std_logic_vector(7 downto 0);
 			  
     -- sound
-    snd_rd          : out   std_logic;                       
-    snd_wr          : out   std_logic;
-    sndif_datai     : in    std_logic_vector(7 downto 0);    
+    snd_clk         : out   std_logic;
+    snd_data_l      : out   std_logic_vector(15 downto 0);
+    snd_data_r      : out   std_logic_vector(15 downto 0);
 
     -- spi interface
     spi_clk         : out   std_logic;                       
@@ -171,6 +171,8 @@ architecture SYN of Game is
 
 	signal video_a				    : std_logic_vector(14 downto 0);
 	signal video_d				    : std_logic_vector(7 downto 0);
+
+  signal audio_d            : std_logic_vector(15 downto 0);
 
   signal crtc6845_vsync     : std_logic;
 
@@ -486,6 +488,10 @@ begin
     end process;
 
   sn76489_inst : entity work.sn76489
+    generic map
+    (
+      AUDIO_RES   => 16
+    )
     port map
     (
       clk					=> clk_32M,
@@ -497,16 +503,19 @@ begin
       we_n				=> sound_we,
       ce_n				=> '0',             -- as per schematic
 
-      audio_out		=> open
+      audio_out		=> audio_d
     );
+
+    -- hook up sound to output
+    snd_clk <= clk_4M_en;
+    snd_data_l <= audio_d;
+    snd_data_r <= audio_d;
 
   end block BLK_SHEILA;
 
   -- unused outputs
   gfxextra_data <= (others => '0');
   cvbs <= (others => '0');
-  snd_rd <= '0';
-  snd_wr <= '0';
   spi_clk <= '0';
   spi_dout <= '0';
   spi_ena <= '0';
