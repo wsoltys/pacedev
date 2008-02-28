@@ -7,7 +7,8 @@ add wave -noupdate -divider TIMING/VIDEO
 add wave -noupdate -format Logic /tb_top/pace_inst/u_game/reset
 add wave -noupdate -format Logic /tb_top/pace_inst/u_game/reset_n
 add wave -noupdate -format Literal /tb_top/pace_inst/u_game/sys_cycle
-add wave -noupdate -format Logic /tb_top/pace_inst/u_game/clk_16m
+add wave -noupdate -format Logic /tb_top/pace_inst/u_game/clk_32m
+add wave -noupdate -format Logic /tb_top/pace_inst/u_game/clk_16m_en
 add wave -noupdate -format Logic /tb_top/pace_inst/u_game/clk_8m_en
 add wave -noupdate -format Logic /tb_top/pace_inst/u_game/clk_4m_en
 add wave -noupdate -format Logic /tb_top/pace_inst/u_game/clk_2m_en
@@ -64,7 +65,7 @@ add wave -noupdate -format Logic /tb_top/pace_inst/u_game/blk_video/saa505x_inst
 add wave -noupdate -format Logic /tb_top/pace_inst/u_game/blk_video/saa505x_inst/g
 add wave -noupdate -format Logic /tb_top/pace_inst/u_game/blk_video/saa505x_inst/b
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {17140737 ns} 0} {{Cursor 2} {79803393 ns} 0}
+WaveRestoreCursors {{Cursor 1} {18001 ns} 0} {{Cursor 2} {79803393 ns} 0}
 configure wave -namecolwidth 349
 configure wave -valuecolwidth 56
 configure wave -justifyvalue left
@@ -78,4 +79,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {19868223 ns} {19880736 ns}
+WaveRestoreZoom {17075 ns} {18351 ns}

@@ -99,8 +99,9 @@ architecture SYN of Game is
 
   signal reset_n            : std_logic;
 
-  alias clk_16M             : std_logic is clk(0);
-  signal sys_cycle          : std_logic_vector(3 downto 0);
+  alias clk_32M             : std_logic is clk(0);
+  signal sys_cycle          : std_logic_vector(4 downto 0);
+  signal clk_16M_en         : std_logic;
   signal clk_8M_en          : std_logic;
   signal clk_4M_en          : std_logic;
   signal clk_2M_en          : std_logic;  -- CPU
@@ -179,10 +180,12 @@ architecture SYN of Game is
 
   -- System 6522 VIA $40-$4F (IC3)
   signal sysvia_pa_o        : std_logic_vector(7 downto 0);
+  alias slow_databus_o      : std_logic_vector(7 downto 0) is sysvia_pa_o;
   signal sysvia_pa_oe_n     : std_logic_vector(7 downto 0);
   alias kbd_col             : std_logic_vector(3 downto 0) is sysvia_pa_o(3 downto 0);
   alias kbd_row             : std_logic_vector(2 downto 0) is sysvia_pa_o(6 downto 4);
   signal sysvia_pa_i        : std_logic_vector(7 downto 0);
+  alias slow_databus_i      : std_logic_vector(7 downto 0) is sysvia_pa_i;
   alias kbd_bit             : std_logic is sysvia_pa_i(7);
   signal sysvia_pb_o        : std_logic_vector(7 downto 0);
   signal sysvia_pb_oe_n     : std_logic_vector(7 downto 0);
@@ -209,13 +212,14 @@ architecture SYN of Game is
 begin
 
   -- clock generation - phase-aligned
-  process (clk_16M, reset)
+  process (clk_32M, reset)
   begin
     if reset = '1' then
       sys_cycle <= (others => '0');
       via6522_p2 <= '1';
       via6522_clk4 <= '0';
-    elsif rising_edge(clk_16M) then
+    elsif rising_edge(clk_32M) then
+      clk_16M_en <= '0';
       clk_8M_en <= '0';
       clk_4M_en <= '0';
       clk_2M_en <= '0';
@@ -223,20 +227,23 @@ begin
       clk_1M_en <= '0';
       clk_1M_90_en <= '0';
       if sys_cycle(0) = '0' then
-        clk_8M_en <= '1';
+        clk_16M_en <= '1';
         if sys_cycle(1) = '0' then
-          clk_4M_en <= '1';
+          clk_8M_en <= '1';
           if sys_cycle(2) = '0' then
-            clk_2M_en <= '1';
+            clk_4M_en <= '1';
             if sys_cycle(3) = '0' then
-              clk_1M_en <= '1';
+              clk_2M_en <= '1';
+              if sys_cycle(4) = '0' then
+                clk_1M_en <= '1';
+              end if;
+            else
+              clk_2M_180_en <= '1';
             end if;
-          else
-            clk_2M_180_en <= '1';
           end if;
         end if;
       end if;
-      if sys_cycle = "1100" then
+      if sys_cycle = "11000" then
         clk_1M_90_en <= '1';
       end if;
       sys_cycle <= sys_cycle + 1;
@@ -244,10 +251,10 @@ begin
       -- P2 must lead cpu_clk_en by 1 system clock
       -- - and is same frequency as cpu_clk but 50% duty cycle
       -- clk4 goes low on rising edge of P2
-      if sys_cycle(2 downto 0) = "111" then
+      if sys_cycle(3 downto 0) = "1111" then
         via6522_p2 <= not via6522_p2;
       end if;
-      if sys_cycle(0) = '1' then
+      if sys_cycle(1) = '1' then
         via6522_clk4 <= not via6522_clk4;
       end if;
     end if;
@@ -319,11 +326,11 @@ begin
     jimpage_cs <=     fred_cs when STD_MATCH(fred_a, "11111111") else '0';
 
     -- registers
-    process (clk_16M, cpu_clk_en, reset)
+    process (clk_32M, cpu_clk_en, reset)
     begin
       if cpu_reset_n = '0' then
         jim_page_r <= (others => '0');
-      elsif rising_edge(clk_16M) then
+      elsif rising_edge(clk_32M) then
         if cpu_clk_en = '1' then
           if jimpage_cs = '1' then
             if cpu_rw_n = '0' then
@@ -379,10 +386,10 @@ begin
 
     -- paged ROM process
     -- note this register is write-only
-    process (clk_16M, cpu_clk_en, reset)
+    process (clk_32M, cpu_clk_en, reset)
     begin
       if cpu_reset_n = '0' then
-      elsif rising_edge (clk_16M) then
+      elsif rising_edge (clk_32M) then
         if cpu_clk_en = '1' then
           if pagedrom_cs = '1' then
             if cpu_rw_n = '0' then
@@ -394,14 +401,14 @@ begin
     end process;
 
     -- keyboard scan process
-    process (clk_16M, clk_1M_en, reset)
+    process (clk_32M, clk_1M_en, reset)
       variable auto_col : std_logic_vector(3 downto 0);
       variable col      : integer range 0 to 15;
     begin
       if cpu_reset_n = '0' then
         auto_col := (others => '0');
         col := 0;
-      elsif rising_edge(clk_16M) then
+      elsif rising_edge(clk_32M) then
         if clk_1M_en = '1' then
           kbd_int <= '0';
           -- autoscan only if kbd_we not asserted
@@ -443,8 +450,8 @@ begin
         CA2_OUT         => open,
         CA2_OUT_OE_L    => open,
 
-        PA_IN           => sysvia_pa_i,     -- keyboard
-        PA_OUT          => sysvia_pa_o,     -- keyboard
+        PA_IN           => slow_databus_i,  -- incl. keyboard
+        PA_OUT          => slow_databus_o,
         PA_OUT_OE_L     => sysvia_pa_oe_n,
 
         -- port b
@@ -467,16 +474,31 @@ begin
 
     -- 74LS259 addressable latch (IC32)
     -- updated at 1MHz irrespective of CPU clock
-    process (clk_16M, clk_1M_en, reset)
+    process (clk_32M, clk_1M_en, reset)
     begin
       if cpu_reset_n = '0' then
         addressable_latch <= (others => '0');
-      elsif rising_edge(clk_16M) then
+      elsif rising_edge(clk_32M) then
         if clk_1M_en = '1' then
           addressable_latch(conv_integer(sysvia_pb_o(2 downto 0))) <= sysvia_pb_o(3);
         end if;
       end if;
     end process;
+
+  sn76489_inst : entity work.sn76489
+    port map
+    (
+      clk					=> clk_32M,
+      clk_en			=> clk_4M_en,
+      reset				=> reset,
+                  
+      d						=> slow_databus_o,
+      ready				=> open,            -- tied to GND on schematic
+      we_n				=> sound_we,
+      ce_n				=> '0',             -- as per schematic
+
+      audio_out		=> open
+    );
 
   end block BLK_SHEILA;
 
@@ -503,7 +525,7 @@ begin
 			Mode    		=> "00",	-- 6502
 			Res_n   		=> cpu_reset_n,
 			Enable  		=> cpu_clk_en,
-			Clk     		=> clk_16M,
+			Clk     		=> clk_32M,
 			Rdy     		=> '1',
 			Abort_n 		=> '1',
 			IRQ_n   		=> cpu_irq_n,
@@ -574,12 +596,12 @@ begin
     begin
 
       -- registers
-      process (clk_16M, reset)
+      process (clk_32M, reset)
       begin
         if cpu_reset_n = '0' then
 					control_r <= (others => '0');
 					palette_r <= (others => (others => '0'));
-        elsif rising_edge(clk_16M) then
+        elsif rising_edge(clk_32M) then
 					if cpu_clk_en = '1' then
 						if videoula_cs = '1' then
               if cpu_rw_n = '0' then
@@ -602,7 +624,7 @@ begin
       crtc6845_clk <= clk_1M_90_en when clk_rate_r = '0' else clk_2M_180_en;
 
 			-- graphics data serialiser
-			process (clk_16M, reset)
+			process (clk_32M, reset)
 				variable video_byte 	: std_logic_vector(7 downto 0) := (others => '0');
         variable v_mode       : std_logic_vector(2 downto 0);
         variable log_clr      : std_logic_vector(3 downto 0);
@@ -613,7 +635,7 @@ begin
 
 				if reset = '1' then
 					video_byte := (others => '0');
-				elsif rising_edge(clk_16M) then
+				elsif rising_edge(clk_32M) then
           
           if clk_rate_r = '0' then
             -- 6845 clk rate = 1MHz
@@ -649,13 +671,15 @@ begin
                     video_byte := video_byte(6 downto 4) & '1' & video_byte(2 downto 0) & '1';
                   end if;
                 when "11" =>			          -- Mode 0,3, 2MHz 8ppb/1bpp
-                  video_byte := video_byte(6 downto 0) & '1';
+									if clk_16M_en = '1' then
+                  	video_byte := video_byte(6 downto 0) & '1';
+									end if;
                 when others =>
                   null;
               end case; -- cpl_r
             end if; -- clk_2M_en = '0'
           end if; -- clk_rate_r = '1'
-				end if; -- rising_edge(clk_16M)
+				end if; -- rising_edge(clk_32M)
 
 				-- assign RGB outputs
         log_clr := video_byte(7) & video_byte(5) & video_byte(3) & video_byte(1);
@@ -678,13 +702,13 @@ begin
 
     -- enable output of the video ULA
     -- pipeline delay because of clock phasing
-    process (clk_16M, reset)
-      variable de_r : std_logic_vector(3 downto 0);
-      variable ra3_r : std_logic_vector(3 downto 0);
+    process (clk_32M, reset)
+      variable de_r : std_logic_vector(7 downto 0);
+      variable ra3_r : std_logic_vector(7 downto 0);
     begin
       if reset = '1' then
         de_r := (others => '0');
-      elsif rising_edge(clk_16M) then
+      elsif rising_edge(clk_32M) then
         de_r := de_r(de_r'left-1 downto 0) & crtc6845_disptmg;
       end if;
       ula_de <= de_r(de_r'left) and not crtc6845_ra(3);
@@ -704,7 +728,7 @@ begin
           I_E         => crtc6845_e,
           I_DI        => cpu_d_o,
           I_RS        => cpu_a(0),
-          I_RWn       => '1', --cpu_rw_n,
+          I_RWn       => cpu_rw_n,
           I_CSn       => crtc6845_cs_n,
           I_CLK       => crtc6845_clk,
           I_RSTn      => cpu_reset_n,
@@ -785,12 +809,12 @@ begin
 
     -- generate 6M clock for SAA5050
 		-- fudge for now - use 2 out of every 3 8M clocks
-    process (clk_16M, reset)
+    process (clk_32M, reset)
       variable timing_chain : std_logic_vector(7 downto 0);
     begin
       if reset = '1' then
         timing_chain := "10101000";
-      elsif rising_edge(clk_16M) then
+      elsif rising_edge(clk_32M) then
 				clk_6M_en <= timing_chain(timing_chain'left);
 				timing_chain := timing_chain(timing_chain'left-1 downto 0) & timing_chain(timing_chain'left);
       end if;
@@ -802,7 +826,7 @@ begin
     saa505x_inst : entity work.saa505x
       port map
       (
-        clk				=> clk_16M,
+        clk				=> clk_32M,
         reset			=> reset,
 
         si_i_n		=> '0',               -- tied low on schematic
@@ -845,7 +869,7 @@ begin
 		)
 	  port map
 	  (
-	    clk     		=> clk_16M,
+	    clk     		=> clk_32M,
 	    reset   		=> reset,
 	    ps2clk  		=> ps2clk,
 	    ps2data 		=> ps2data,
@@ -862,7 +886,7 @@ begin
   mos_rom_inst : entity work.mos_rom
     port map
     (
-      clock		    => clk_16M,
+      clock		    => clk_32M,
       address		  => cpu_a(13 downto 0),
       q		        => mos_rom_d
     );
@@ -871,7 +895,7 @@ begin
   basic_rom_inst : entity work.basic_rom
     port map
     (
-      clock		    => clk_16M,
+      clock		    => clk_32M,
       address		  => cpu_a(13 downto 0),
       q		        => rom_3_d
     );
@@ -895,7 +919,7 @@ begin
         wren_b				=> ram_we,
         q_b						=> ram_d,
 
-        clock_a				=> clk_16M,
+        clock_a				=> clk_32M,
         address_a			=> video_a(13 downto 0),
         data_a				=> (others => '0'),
         wren_a				=> '0',
@@ -906,25 +930,25 @@ begin
 
   GEN_EXTERNAL_RAM : if not BBC_USE_INTERNAL_RAM generate
 
-    process (clk_16M, reset)
+    process (clk_32M, reset)
       variable ram_a  : std_logic_vector(14 downto 0);
     begin
       if reset = '1' then
         null;
-      elsif rising_edge(clk_16M) then
-        if sys_cycle = X"2" then
+      elsif rising_edge(clk_32M) then
+        if sys_cycle = X"4" then
           ram_a := cpu_a(ram_a'range);
           sram_o.cs <= ram_cs;
           sram_o.oe <= cpu_rw_n;
           sram_o.we <= ram_we;
-        elsif sys_cycle = X"4" then
+        elsif sys_cycle = X"8" then
           ram_d <= sram_i.d(ram_d'range);
-        elsif sys_cycle(2 downto 0) = "110" then
+        elsif sys_cycle(3 downto 0) = "1100" then
           ram_a := video_a(ram_a'range);
           sram_o.cs <= '1';
           sram_o.oe <= '1';
           sram_o.we <= '0';
-        elsif sys_cycle(2 downto 0) = "000" then
+        elsif sys_cycle(3 downto 0) = "0000" then
           video_d <= sram_i.d(ram_d'range);
         end if;
         -- mask off high bit for 16K machines

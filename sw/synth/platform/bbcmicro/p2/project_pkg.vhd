@@ -16,9 +16,9 @@ package project_pkg is
 	constant PACE_HAS_PLL										  : boolean := true;
 
   constant PACE_CLK0_DIVIDE_BY        		  : natural := 3;
-  constant PACE_CLK0_MULTIPLY_BY      		  : natural := 2;   -- 24*2/3 = 16MHz
+  constant PACE_CLK0_MULTIPLY_BY      		  : natural := 4;   -- 24*4/3 = 32MHz
   constant PACE_CLK1_DIVIDE_BY        		  : natural := 3;
-  constant PACE_CLK1_MULTIPLY_BY      		  : natural := 2;  	-- 24*2/3 = 16MHz
+  constant PACE_CLK1_MULTIPLY_BY      		  : natural := 4;  	-- 24*4/3 = 32MHz
 	constant PACE_ENABLE_ADV724							  : std_logic := '1';
 
 	constant PACE_ADV724_STD								  : std_logic := ADV724_STD_PAL;
@@ -29,7 +29,7 @@ package project_pkg is
 
 	-- BBC-specific constants
 
-  constant BBC_RAM_32K                      : std_logic := '0';
+  constant BBC_RAM_32K                      : std_logic := '1';
   constant BBC_RAM_16K                      : std_logic := not BBC_RAM_32K;
 
   -- startup link options (on keyboard PCB)
@@ -38,9 +38,9 @@ package project_pkg is
   constant BBC_STARTUP_OPT_SHIFT_BREAK      : std_logic := '1';
   constant BBC_STARTUP_OPT_MODE             : std_logic_vector(2 downto 0) := "111";
 
-	constant BBC_1MHz_CLK0_COUNTS				      : natural := 16;
+	constant BBC_1MHz_CLK0_COUNTS				      : natural := 32;
 
-  constant BBC_USE_INTERNAL_RAM             : boolean := true;
+  constant BBC_USE_INTERNAL_RAM             : boolean := false;
 
   -- implementation options
 

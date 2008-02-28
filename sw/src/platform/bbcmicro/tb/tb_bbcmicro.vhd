@@ -84,7 +84,7 @@ begin
   end block BLK_TEST_CLOCK2;
 
 	-- Generate CLK and reset
-  clk(0) <= not clk(0) after 31250 ps; -- 16MHz
+  clk(0) <= not clk(0) after 15625 ps; -- 32MHz
 	reset <= '0' after 100 ns;
 	reset_n <= not reset;
   clk(1) <= clk(0);
