@@ -1,6 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
+use ieee.std_logic_arith.conv_std_logic_vector;
 
 library work;
 
@@ -41,30 +42,57 @@ begin
 
   -- test
   process
+
+		procedure wr_reg ( d_i 	: in std_logic_vector(7 downto 0) ) is
+		begin
+	    wait for 5 ns;
+			d <= d_i;
+	    wait until rising_edge(clk_4M_en);
+	    we_n <= '0';
+	    wait until rising_edge(clk_4M_en);
+	    we_n <= '1';
+		end procedure wr_reg;
+
+		procedure wr_freq ( ch : in integer range 0 to 2;
+												n  : in integer range 0 to 1023) is
+			variable n_s : std_logic_vector(9 downto 0);
+		begin
+			n_s := conv_std_logic_vector(n, 10);
+			d <= n_s(9 downto 6) & conv_std_logic_vector(ch, 2) & '0' & '1';
+			wr_reg (d);
+			d <= n_s(5 downto 0) & '0' & '0';
+			wr_reg (d);
+		end procedure wr_freq;
+
+		procedure wr_attn ( ch : in integer range 0 to 3;
+												a  : in integer range 0 to 15) is
+			variable a_s : std_logic_vector(3 downto 0);
+		begin
+			a_s := conv_std_logic_vector(a, 4);
+			d <= a_s & conv_std_logic_vector(ch, 2) & '1' & '1';
+			wr_reg (d);
+		end procedure wr_attn;
+
   begin
     we_n <= '1';
     wait until reset = '0';
-    wait for 5 ns;
-
-    -- T0 frequency - N=25 (5000Hz)
-    d <= '1' & "000" & "0000";
-    wait until rising_edge(clk_4M_en);
-    we_n <= '0';
-    wait until rising_edge(clk_4M_en);
-    we_n <= '1';
-    wait for 5 ns;
-    d <= '0' & '0' & "100110";
-    wait until rising_edge(clk_4M_en);
-    we_n <= '0';
-    wait until rising_edge(clk_4M_en);
-    we_n <= '1';
-
-    wait for 5 ns;
+		wr_freq (0, 25);
+		wr_attn (0, 12);
+		wr_freq (1, 50);
+		wr_attn (1, 8);
+		wr_freq (2, 12);
+		wr_attn (2, 4);
+		wr_attn (3, 0);
+		-- noise control
+		wr_reg ("00" & "00" & "110" & '1');
+		wait for 4 ms;
+		wr_reg ("01" & "00" & "110" & '1');
+		wait for 4 ms;
+		wr_reg ("10" & "00" & "110" & '1');
+		wait for 4 ms;
+		wr_reg ("11" & "00" & "110" & '1');
+		wait for 4 ms;
   end process;
-
-  GEN_D_S : for i in 0 to 7 generate
-    d_s(i) <= d(7-i);
-  end generate GEN_D_S;
 
   sn76489_inst : entity work.sn76489
     generic map
@@ -77,7 +105,7 @@ begin
   		clk_en			=> clk_4M_en,
   		reset				=> reset,
                 	
-  		d						=> d_s,
+  		d						=> d,
   		ready				=> open,
   		we_n				=> we_n,
   		ce_n				=> '1',

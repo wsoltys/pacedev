@@ -7,14 +7,13 @@ use ieee.numeric_std.all;
 entity tone_generator is
 	port
 	(
-		clk					: in std_logic;
-		clk_en			: in std_logic;
-		reset				: in std_logic;
+		clk						: in std_logic;
+		clk_div16_en	: in std_logic;
+		reset					: in std_logic;
               	
-		freq        : in std_logic_vector(9 downto 0);
-    attn        : in std_logic_vector(3 downto 0);
+		freq        	: in std_logic_vector(9 downto 0);
 
-		audio_out		: out std_logic
+		audio_out			: out std_logic
 	);
 end entity tone_generator;
 
@@ -22,20 +21,22 @@ architecture SYN of tone_generator is
 
 begin
 
-  -- check for compatibility with freq = 0!
+  -- the datasheet suggests that the frequency register is loaded
+	-- into a 10-bit counter and decremented until it hits 0
+	-- however, this results in a half-period of FREQ+1!
 
   process (clk, reset)
-    variable count  : std_logic_vector(13 downto 0);
+    variable count  : std_logic_vector(9 downto 0);
     variable tone   : std_logic;
   begin
     if reset = '1' then
-      count := freq & "0000";
+      count := freq;
       tone := '0';
     elsif rising_edge(clk) then
-      if clk_en = '1' then
+      if clk_div16_en = '1' then
         if count = 0 then
           tone := not tone;
-          count := freq & "0000";
+          count := freq;
         else
           count := count - 1;
         end if;
@@ -86,9 +87,28 @@ architecture SYN of sn76489 is
   constant NOISE_CTL    : natural := 6;
   constant NOISE_ATTN   : natural := 7;
 
+	signal clk_div16_en		: std_logic;
   signal audio_d        : std_logic_vector(0 to 3);
 
+	--signal shift_s				: std_logic;	-- debug only
+
 begin
+
+	process (clk, reset)
+		variable count : std_logic_vector(3 downto 0) := (others => '0');
+	begin
+		if reset = '1' then
+			count := (others => '0');
+		elsif rising_edge(clk) then
+			clk_div16_en <= '0';
+			if clk_en = '1' then
+				if count = 0 then
+					clk_div16_en <= '1';
+				end if;
+				count := count + 1;
+			end if;
+		end if;
+	end process;
 
   -- register interface
   process (clk, reset)
@@ -122,28 +142,49 @@ begin
     tone_inst : entity work.tone_generator
       port map
       (
-        clk					=> clk,
-        clk_en			=> clk_en,
-        reset				=> reset,
+        clk							=> clk,
+        clk_div16_en		=> clk_div16_en,
+        reset						=> reset,
                     
-        freq        => reg(i*2),
-        attn        => reg(i*2+1)(9 downto 6),
+        freq        		=> reg(i*2),
 
-        audio_out		=> audio_d(i)
+        audio_out				=> audio_d(i)
       );
 
   end generate GEN_TONE_GENS;
 
   -- noise generator
   process (clk, reset)
-    variable noise_r  : std_logic_vector(14 downto 0);
+    variable noise_r  		: std_logic_vector(14 downto 0);
+		variable count				: std_logic_vector(6 downto 0);
+		variable audio_d2_r		: std_logic; -- T3 output registered
+		variable shift				: boolean;
   begin
     if reset = '1' then
       noise_r := (noise_r'left => '1', others => '0');
+			count := (others => '0');
+			shift := false;
     elsif rising_edge(clk) then
-      if clk_en = '1' then
-        noise_r := (noise_r(1) xor noise_r(0)) & noise_r(noise_r'left downto 1);
+			shift := false;
+      if clk_div16_en = '1' then
+				case reg(NOISE_CTL)(9 downto 8) is
+					when "00" =>
+						shift := count(count'left-2 downto 0) = 0;
+					when "01" =>
+						shift := count(count'left-1 downto 0) = 0;
+					when "10" =>
+						shift := count(count'left downto 0) = 0;
+					when others =>
+						-- shift rate governed by T3 output?!?
+						shift := audio_d(2) = '1' and audio_d2_r = '0';
+				end case;
+				if shift then
+	    		noise_r := (noise_r(1) xor noise_r(0)) & noise_r(noise_r'left downto 1);
+				end if;
+				count := count + 1;
+				audio_d2_r := audio_d(2);
       end if;
+			--if shift then shift_s <= '1'; else shift_s <= '0'; end if; -- debug only
     end if;
     -- no attentuation atm
     audio_d(3) <= noise_r(0);
