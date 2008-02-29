@@ -528,31 +528,75 @@ begin
   --  COMPONENT INSTANTIATION
   --
 
-	cpu_inst : entity work.T65
-		port map
-		(
-			Mode    		=> "00",	-- 6502
-			Res_n   		=> cpu_reset_n,
-			Enable  		=> cpu_clk_en,
-			Clk     		=> clk_32M,
-			Rdy     		=> '1',
-			Abort_n 		=> '1',
-			IRQ_n   		=> cpu_irq_n,
-			NMI_n   		=> cpu_nmi_n,
-			SO_n    		=> '1',
-			R_W_n   		=> cpu_rw_n,
-			Sync    		=> open,
-			EF      		=> open,
-			MF      		=> open,
-			XF      		=> open,
-			ML_n    		=> open,
-			VP_n    		=> open,
-			VDA     		=> open,
-			VPA     		=> open,
-			A       		=> cpu_a_ext,
-			DI      		=> cpu_d_i,
-			DO      		=> cpu_d_o
-		);
+  GEN_T65 : if BBC_USE_T65 generate
+    cpu_inst : entity work.T65
+      port map
+      (
+        Mode    		=> "00",	-- 6502
+        Res_n   		=> cpu_reset_n,
+        Enable  		=> cpu_clk_en,
+        Clk     		=> clk_32M,
+        Rdy     		=> '1',
+        Abort_n 		=> '1',
+        IRQ_n   		=> cpu_irq_n,
+        NMI_n   		=> cpu_nmi_n,
+        SO_n    		=> '1',
+        R_W_n   		=> cpu_rw_n,
+        Sync    		=> open,
+        EF      		=> open,
+        MF      		=> open,
+        XF      		=> open,
+        ML_n    		=> open,
+        VP_n    		=> open,
+        VDA     		=> open,
+        VPA     		=> open,
+        A       		=> cpu_a_ext,
+        DI      		=> cpu_d_i,
+        DO      		=> cpu_d_o
+      );
+  end generate GEN_T65;
+
+  GEN_65XX : if BBC_USE_65XX generate
+    BLK_65XX : block
+      signal cpu_reset  : std_logic;
+      signal cpu_we     : std_logic;
+      signal cpu_d_o_u  : unsigned(7 downto 0);
+      signal cpu_a_u    : unsigned(15 downto 0);
+    begin
+      cpu_reset <= not cpu_reset_n;
+      cpu_inst : entity work.cpu65xx
+        generic map
+        (
+          pipelineOpcode => false,
+          pipelineAluMux => false,
+          pipelineAluOut => false
+        )
+        port map
+        (
+          clk         => clk_32M,
+          enable      => cpu_clk_en,
+          reset       => cpu_reset,
+          nmi_n       => cpu_nmi_n,
+          irq_n       => cpu_irq_n,
+          so_n        => '1',
+
+          di          => unsigned(cpu_d_i),
+          do          => cpu_d_o_u,
+          addr        => cpu_a_u,
+          we          => cpu_we,
+          
+          debugOpcode => open,
+          debugPc     => open,
+          debugA      => open,
+          debugX      => open,
+          debugY      => open,
+          debugS      => open
+        );
+      cpu_rw_n <= not cpu_we;
+      cpu_d_o <= std_logic_vector(cpu_d_o_u);
+      cpu_a <= std_logic_vector(cpu_a_u);
+    end block BLK_65XX;
+  end generate GEN_65XX;
 
   BLK_VIDEO : block
 
