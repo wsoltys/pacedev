@@ -269,6 +269,7 @@ architecture SYN of target_top is
 
   -- appleii-freed signals
   signal key          : std_logic_vector(3 downto 0);
+  signal switch       : std_logic_vector(9 downto 0);
   signal fl_dq        : std_logic_vector(7 downto 0);
   signal fl_addr      : std_logic_vector(21 downto 0);
   signal fl_oe_n      : std_logic;
@@ -379,7 +380,12 @@ begin
 	jamma_s.p(2).right <= '1';
 	jamma_s.p(2).button <= (others => '1');
 
-  key <= "000" & not reset;
+  -- keys (pusbuttons) are active LOW on the DE1/2
+  --key <= "111" & not reset; -- control system reset
+  key <= not reset & "111"; -- control 6502 reset
+  -- switches are active HIGH on the DE1/2
+  -- SW1 must be in the 'ON' position
+  switch <= "00000000" & '1' & '0';
 
   appleii_freed_inst : MMC_start_DE1_TOP
     port map
@@ -392,7 +398,7 @@ begin
        --////////////////////	Push Button		////////////////////
        KEY              => key,
        --////////////////////	DPDT Switch		////////////////////
-       SW               => "0000000010",
+       SW               => switch,
        --////////////////////	7-SEG Dispaly	////////////////////
        HEX0             => open,
        HEX1             => open,
@@ -482,7 +488,11 @@ begin
 
     rom_clk <= gpio_1(35);
 
-    rom_d_o <=  c6_d_o when fl_addr(15) = '0' and fl_addr(13 downto 8) = "000110" else
+    rom_d_o <=  -- slot rom, mapped to 16'h0000 + cpu_addr[13:0]
+                -- disk rom $C600-$C6FF
+                c6_d_o when fl_addr(15) = '0' and fl_addr(13 downto 8) = "000110" else
+                -- apple ii rom, mapped to 16'h1000 + cpu_addr[13:0]
+                -- $D000-$DFFF, $E000-$EFFF, $F000-$FFFF
                 d0_d_o when fl_addr(15) = '1' and fl_addr(13 downto 12) = "01" else
                 e0_d_o when fl_addr(15) = '1' and fl_addr(13 downto 12) = "10" else
                 f0_d_o when fl_addr(15) = '1' and fl_addr(13 downto 12) = "11" else
