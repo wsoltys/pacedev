@@ -382,11 +382,10 @@ begin
 
   -- keys (pusbuttons) are active LOW on the DE1/2
   --key <= "111" & not reset; -- control system reset
-  key <= not reset & "111"; -- control 6502 reset
+  key <= not reset & "11" & not init; -- control 6502 reset
   -- switches are active HIGH on the DE1/2
   -- SW1 must be in the 'ON' position for MMC support
-  switch <= "00000000" & '0' & '0';
-  --switch <= "00000000" & '1' & '0';
+  switch <= "00000000" & APPLEII_ENABLE_MMC & '0';
 
   appleii_freed_inst : MMC_start_DE1_TOP
     port map
@@ -462,7 +461,7 @@ begin
        VGA_G            => green_s(9 downto 6),
        VGA_B            => blue_s(9 downto 6),
        --////////////////	Audio CODEC		////////////////////////
-       AUD_ADCLRCK      => '0',
+       AUD_ADCLRCK      => open,
        AUD_ADCDAT       => '0',
        AUD_DACLRCK      => open,
        AUD_DACDAT       => open,
@@ -475,6 +474,7 @@ begin
 
   -- unused SRAM address lines
   ba_ns(19 downto 18) <= (others => '0');
+  bd_ns(31 downto 16) <= (others => 'Z');
 
   BLK_ROM : block
 
