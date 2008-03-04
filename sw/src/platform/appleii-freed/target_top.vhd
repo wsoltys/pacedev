@@ -384,8 +384,9 @@ begin
   --key <= "111" & not reset; -- control system reset
   key <= not reset & "111"; -- control 6502 reset
   -- switches are active HIGH on the DE1/2
-  -- SW1 must be in the 'ON' position
-  switch <= "00000000" & '1' & '0';
+  -- SW1 must be in the 'ON' position for MMC support
+  switch <= "00000000" & '0' & '0';
+  --switch <= "00000000" & '1' & '0';
 
   appleii_freed_inst : MMC_start_DE1_TOP
     port map
