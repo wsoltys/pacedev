@@ -44,7 +44,7 @@ package project_pkg is
 
   -- implementation options
 
-  constant BBC_USE_T65                      : boolean := false;
+  constant BBC_USE_T65                      : boolean := true;
   constant BBC_USE_65XX                     : boolean := not BBC_USE_T65;
 
   constant BBC_USE_ROCKOLA_6845             : boolean := true;

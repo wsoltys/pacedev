@@ -18,7 +18,6 @@ architecture SYN of tb_top is
   signal reset      : std_logic := '1';
 
   signal d          : std_logic_vector(7 downto 0) := (others => '0');
-  signal d_s        : std_logic_vector(7 downto 0) := (others => '0');
   signal we_n       : std_logic := '0';
 
 begin
@@ -58,9 +57,9 @@ begin
 			variable n_s : std_logic_vector(9 downto 0);
 		begin
 			n_s := conv_std_logic_vector(n, 10);
-			d <= n_s(9 downto 6) & conv_std_logic_vector(ch, 2) & '0' & '1';
+			d <= '1' & conv_std_logic_vector(ch, 2) & '0' & n_s(3 downto 0);
 			wr_reg (d);
-			d <= n_s(5 downto 0) & '0' & '0';
+			d <= '0' & '0' & n_s(9 downto 4);
 			wr_reg (d);
 		end procedure wr_freq;
 
@@ -69,7 +68,7 @@ begin
 			variable a_s : std_logic_vector(3 downto 0);
 		begin
 			a_s := conv_std_logic_vector(a, 4);
-			d <= a_s & conv_std_logic_vector(ch, 2) & '1' & '1';
+			d <= '1' & conv_std_logic_vector(ch, 2) & '1' & a_s;
 			wr_reg (d);
 		end procedure wr_attn;
 
@@ -84,13 +83,13 @@ begin
 		wr_attn (2, 4);
 		wr_attn (3, 0);
 		-- noise control
-		wr_reg ("00" & "00" & "110" & '1');
+		wr_reg ('1' & "110" & "00" & "00");
 		wait for 4 ms;
-		wr_reg ("01" & "00" & "110" & '1');
+		wr_reg ('1' & "110" & "00" & "01");
 		wait for 4 ms;
-		wr_reg ("10" & "00" & "110" & '1');
+		wr_reg ('1' & "110" & "00" & "10");
 		wait for 4 ms;
-		wr_reg ("11" & "00" & "110" & '1');
+		wr_reg ('1' & "110" & "00" & "11");
 		wait for 4 ms;
   end process;
 
@@ -108,7 +107,7 @@ begin
   		d						=> d,
   		ready				=> open,
   		we_n				=> we_n,
-  		ce_n				=> '1',
+  		ce_n				=> '0',
   
   		audio_out		=> open
   	);

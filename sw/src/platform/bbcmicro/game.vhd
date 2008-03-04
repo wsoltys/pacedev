@@ -328,7 +328,7 @@ begin
     jimpage_cs <=     fred_cs when STD_MATCH(fred_a, "11111111") else '0';
 
     -- registers
-    process (clk_32M, cpu_clk_en, reset)
+    process (clk_32M, cpu_reset_n)
     begin
       if cpu_reset_n = '0' then
         jim_page_r <= (others => '0');
@@ -388,7 +388,7 @@ begin
 
     -- paged ROM process
     -- note this register is write-only
-    process (clk_32M, cpu_clk_en, reset)
+    process (clk_32M, cpu_reset_n)
     begin
       if cpu_reset_n = '0' then
       elsif rising_edge (clk_32M) then
@@ -403,7 +403,7 @@ begin
     end process;
 
     -- keyboard scan process
-    process (clk_32M, clk_1M_en, reset)
+    process (clk_32M, cpu_reset_n)
       variable auto_col : std_logic_vector(3 downto 0);
       variable col      : integer range 0 to 15;
     begin
@@ -476,13 +476,15 @@ begin
 
     -- 74LS259 addressable latch (IC32)
     -- updated at 1MHz irrespective of CPU clock
-    process (clk_32M, clk_1M_en, reset)
+    process (clk_32M, cpu_reset_n)
     begin
       if cpu_reset_n = '0' then
         addressable_latch <= (others => '0');
       elsif rising_edge(clk_32M) then
         if clk_1M_en = '1' then
-          addressable_latch(conv_integer(sysvia_pb_o(2 downto 0))) <= sysvia_pb_o(3);
+          if sysvia_pb_oe_n(3 downto 0) /= "1111" then
+            addressable_latch(conv_integer(sysvia_pb_o(2 downto 0))) <= sysvia_pb_o(3);
+          end if;
         end if;
       end if;
     end process;
@@ -649,7 +651,7 @@ begin
     begin
 
       -- registers
-      process (clk_32M, reset)
+      process (clk_32M, cpu_reset_n)
       begin
         if cpu_reset_n = '0' then
 					control_r <= (others => '0');
