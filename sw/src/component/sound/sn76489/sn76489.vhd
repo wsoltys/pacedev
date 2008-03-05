@@ -95,6 +95,10 @@ architecture SYN of sn76489 is
 
 	--signal shift_s				: std_logic;	-- debug only
 
+  -- yes, a shared variable! 
+  -- - written in 1 process, read in another
+  shared variable reg_a : integer range 0 to 7;
+
 begin
 
 	process (clk, reset)
@@ -117,8 +121,6 @@ begin
 
   -- register interface
   process (clk, reset)
-    variable reg_a  : integer range 0 to 7;
-    variable a      : std_logic_vector(2 downto 0);
   begin
     if reset = '1' then
       -- attenutation registers are the important bits
@@ -128,8 +130,7 @@ begin
           -- data is strobed in on WE_n
         if ce_n = '0' and we_n = '0' then
           if d(0) = '1' then
-            a := d(1 to 3);
-            reg_a := conv_integer(a);
+            reg_a := conv_integer(d(1 to 3));
             -- always latch high nibble into R(3:0)
             reg(reg_a)(3 downto 0) <= d(4 to 7);
           else
@@ -164,9 +165,6 @@ begin
   end generate GEN_TONE_GENS;
 
   -- noise generator
-	-- note: technically the shift register is cleared on
-	--       all writes to the noise control register
-	--       -- this is yet to be implemented
   process (clk, reset)
     variable noise_r  			: std_logic_vector(14 downto 0);
 		variable count					: std_logic_vector(6 downto 0);
@@ -198,6 +196,14 @@ begin
 				count := count + 1;
 				noise_f_ref_r := noise_f_ref;
       end if;
+
+			-- writing to the NOISE_CTL register reloads the noise shift register
+			if clk_en = '1' then
+        if ce_n = '0' and we_n = '0' and reg_a = NOISE_CTL then
+          noise_r := (noise_r'left => '1', others => '0');
+        end if;
+      end if;
+
 			--if shift then shift_s <= '1'; else shift_s <= '0'; end if; -- debug only
     end if;
     -- assign digital output
