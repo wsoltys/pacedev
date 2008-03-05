@@ -491,12 +491,12 @@ begin
 
     rom_d_o <=  -- slot rom, mapped to 16'h0000 + cpu_addr[13:0]
                 -- disk rom $C600-$C6FF
-                c6_d_o when fl_addr(15) = '0' and fl_addr(13 downto 8) = "000110" else
+                c6_d_o when fl_addr(14 downto 12) = "000" and fl_addr(11 downto 8) = X"6" else
                 -- apple ii rom, mapped to 16'h1000 + cpu_addr[13:0]
                 -- $D000-$DFFF, $E000-$EFFF, $F000-$FFFF
-                d0_d_o when fl_addr(15) = '1' and fl_addr(13 downto 12) = "01" else
-                e0_d_o when fl_addr(15) = '1' and fl_addr(13 downto 12) = "10" else
-                f0_d_o when fl_addr(15) = '1' and fl_addr(13 downto 12) = "11" else
+                d0_d_o when fl_addr(14 downto 12) = "010" else
+                e0_d_o when fl_addr(14 downto 12) = "011" else
+                f0_d_o when fl_addr(14 downto 12) = "100" else
                 (others => '1');
 
     fl_dq <=  rom_d_o when fl_ce_n = '0' and fl_oe_n = '0' else

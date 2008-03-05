@@ -29,6 +29,6 @@ package project_pkg is
 
 	-- Appleii-freed-specific constants
 
-  constant APPLEII_ENABLE_MMC               : std_logic := '0';
+  constant APPLEII_ENABLE_MMC               : std_logic := '1';
 
 end;
