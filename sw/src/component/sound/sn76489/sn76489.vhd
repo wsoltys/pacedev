@@ -30,13 +30,13 @@ begin
     variable tone   : std_logic;
   begin
     if reset = '1' then
-      count := freq - 1;
+      count := freq;
       tone := '0';
     elsif rising_edge(clk) then
       if clk_div16_en = '1' then
         if count = 0 then
           tone := not tone;
-          count := freq - 1;
+          count := freq;
         else
           count := count - 1;
         end if;
@@ -90,7 +90,10 @@ architecture SYN of sn76489 is
 	signal clk_div16_en		: std_logic;
   signal audio_d        : std_logic_vector(0 to 3);
 
-	signal shift_s				: std_logic;	-- debug only
+	-- the channel used to control the noise shifter frequency
+	alias noise_f_ref			: std_logic is audio_d(2);
+
+	--signal shift_s				: std_logic;	-- debug only
 
 begin
 
@@ -134,7 +137,9 @@ begin
               when T1_FREQ | T2_FREQ | T3_FREQ =>
                 reg(reg_a)(9 downto 4) <= d(2 to 7);
               when others =>
-                null;
+								-- apparently writing a 'data' byte to non-Freq registers
+								-- does actually work!
+                reg(reg_a)(3 downto 0) <= d(4 to 7);
             end case;
           end if; -- d(0) = 0/1
         end if; -- ce_n = 0 & we_n = 0
@@ -159,11 +164,14 @@ begin
   end generate GEN_TONE_GENS;
 
   -- noise generator
+	-- note: technically the shift register is cleared on
+	--       all writes to the noise control register
+	--       -- this is yet to be implemented
   process (clk, reset)
-    variable noise_r  		: std_logic_vector(14 downto 0);
-		variable count				: std_logic_vector(6 downto 0);
-		variable audio_d2_r		: std_logic; -- T3 output registered
-		variable shift				: boolean;
+    variable noise_r  			: std_logic_vector(14 downto 0);
+		variable count					: std_logic_vector(6 downto 0);
+		variable noise_f_ref_r	: std_logic;
+		variable shift					: boolean;
   begin
     if reset = '1' then
       noise_r := (noise_r'left => '1', others => '0');
@@ -180,22 +188,22 @@ begin
 					when "10" =>
 						shift := count(count'left downto 0) = 0;
 					when others =>
-						-- shift rate governed by T3 output?!?
-						shift := audio_d(2) = '1' and audio_d2_r = '0';
+						-- shift rate governed by reference tone output
+						shift := noise_f_ref = '1' and noise_f_ref_r = '0';
 				end case;
 				if shift then
 	    		noise_r := (noise_r(1) xor noise_r(0)) & noise_r(noise_r'left downto 1);
 				end if;
 				count := count + 1;
-				audio_d2_r := audio_d(2);
+				noise_f_ref_r := noise_f_ref;
       end if;
-			if shift then shift_s <= '1'; else shift_s <= '0'; end if; -- debug only
+			--if shift then shift_s <= '1'; else shift_s <= '0'; end if; -- debug only
     end if;
-    -- no attentuation atm
-    audio_d(3) <= noise_r(0);
+    -- assign digital output
+    audio_d(3) <= not noise_r(0);
   end process;
 
-  BLK_ATTN : block
+  BLK_ATTN_MIXER : block
     type scale_t is array (natural range <>) of std_logic_vector(13 downto 0);
     constant scale : scale_t(0 to 15) :=
       (
@@ -220,18 +228,21 @@ begin
   begin
     process (audio_d, reg)
       type ch_t is array (natural range <>) of std_logic_vector(15 downto 0);
-      variable ch : ch_t(0 to 3);
+      variable ch 					: ch_t(0 to 3);
+			variable audio_out_v 	: std_logic_vector(15 downto 0);
     begin
-      GEN_TONES : for i in 0 to 3 loop
+      GEN_ATTN : for i in 0 to 3 loop
         if audio_d(i) = '1' then
           ch(i) := "00" & scale(conv_integer(reg(i*2+1)(3 downto 0)));
         else
           ch(i) := (others => '0');
         end if;
-      end loop GEN_TONES;
+      end loop GEN_ATTN;
       -- now mix them
-      audio_out <= ch(0) + ch(1) + ch(2) + ch(3);
+      audio_out_v := ch(0) + ch(1) + ch(2) + ch(3);
     end process;
-  end block BLK_ATTN;
+		-- handle user-defined audio resolution
+		audio_out <= audio_out_v(audio_out_v'left downto audio_out_v'left-(AUDIO_RES-1));
+  end block BLK_ATTN_MIXER;
 
 end SYN;
