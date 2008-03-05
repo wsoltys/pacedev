@@ -192,7 +192,8 @@ begin
 						shift := noise_f_ref = '1' and noise_f_ref_r = '0';
 				end case;
 				if shift then
-	    		noise_r := (noise_r(1) xor noise_r(0)) & noise_r(noise_r'left downto 1);
+          -- for periodic noise, don't use bit 0 tap
+          noise_r := (noise_r(1) xor (reg(NOISE_CTL)(2) and noise_r(0))) & noise_r(noise_r'left downto 1);
 				end if;
 				count := count + 1;
 				noise_f_ref_r := noise_f_ref;
@@ -240,9 +241,9 @@ begin
       end loop GEN_ATTN;
       -- now mix them
       audio_out_v := ch(0) + ch(1) + ch(2) + ch(3);
+      -- handle user-defined audio resolution
+      audio_out <= audio_out_v(audio_out_v'left downto audio_out_v'left-(AUDIO_RES-1));
     end process;
-		-- handle user-defined audio resolution
-		audio_out <= audio_out_v(audio_out_v'left downto audio_out_v'left-(AUDIO_RES-1));
   end block BLK_ATTN_MIXER;
 
 end SYN;
