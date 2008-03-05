@@ -118,7 +118,8 @@ begin
     variable a      : std_logic_vector(2 downto 0);
   begin
     if reset = '1' then
-      reg <= (others => (others => '0'));
+      -- attenutation registers are the important bits
+      reg <= (others => (others => '1'));
     elsif rising_edge(clk) then
       if clk_en = '1' then
           -- data is strobed in on WE_n
@@ -194,7 +195,43 @@ begin
     audio_d(3) <= noise_r(0);
   end process;
 
-  -- just T1 for now
-  audio_out <= (others => audio_d(0));
+  BLK_ATTN : block
+    type scale_t is array (natural range <>) of std_logic_vector(13 downto 0);
+    constant scale : scale_t(0 to 15) :=
+      (
+        -- fixed-point scaled by 2^14
+         0 => "11111111111111",
+         1 => "11001011010110", -- -2dB
+         2 => "10100001100010", -- -4dB
+         3 => "10000000010011", -- -6dB
+         4 => "01100101111011", -- -8dB
+         5 => "01010000111101", -- -10dB
+         6 => "01000000010011", -- -12dB
+         7 => "00110011000101", -- -14dB
+         8 => "00101000100101", -- -16dB
+         9 => "00100000001111", -- -18dB
+        10 => "00011001100110", -- -20dB
+        11 => "00010100010101", -- -22dB
+        12 => "00010000001010", -- -24dB
+        13 => "00001100110101", -- -26dB
+        14 => "00001010001100", -- -28dB
+        15 => "00000000000000"
+      );
+  begin
+    process (audio_d, reg)
+      type ch_t is array (natural range <>) of std_logic_vector(15 downto 0);
+      variable ch : ch_t(0 to 3);
+    begin
+      GEN_TONES : for i in 0 to 3 loop
+        if audio_d(i) = '1' then
+          ch(i) := "00" & scale(conv_integer(reg(i*2+1)(3 downto 0)));
+        else
+          ch(i) := (others => '0');
+        end if;
+      end loop GEN_TONES;
+      -- now mix them
+      audio_out <= ch(0) + ch(1) + ch(2) + ch(3);
+    end process;
+  end block BLK_ATTN;
 
 end SYN;
