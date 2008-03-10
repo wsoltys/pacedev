@@ -16,27 +16,6 @@ module spi_controller(
 		      is_idle
 		      );
 
-   parameter [4:0] 
-		   RESET_STATE = 0,
-		   RESET_CLOCKS1 = 1,
-		   RESET_CLOCKS2 = 2,
-		   RESET_SEND_CMD0 = 3,
-		   RESET_SEND_CMD1 = 4,
-		   RESET_CHECK_CMD1 = 5,
-		   RESET_SEND_SET_BLOCKLEN = 6,
-		   IDLE = 7,
-		   READ_TRACK = 8,
-		   READ_BLOCK = 9,
-		   READ_BLOCK_WAIT = 10,
-		   READ_BLOCK_DATA = 11,
-		   READ_BLOCK_CRC = 12,
-		   SEND_CMD = 13,
-		   RECEIVE_BYTE_WAIT = 14,
-		   RECEIVE_BYTE = 15,
-		   NEW_TRACK = 16,
-       RESET_WAIT_1 = 17,
-       RESET_WAIT_2 = 18;
-
    output CS_N;
    // MMC chip select
    output MOSI,is_idle;
@@ -59,21 +38,6 @@ module spi_controller(
    // System clock
    input 	 reset;
 
-   reg [4:0] 	   state;
-   reg [4:0] 	   return_state;
-   reg 		   sclk_sig;
-   reg [7:0] 	   counter;
-   reg [8:0] 	   byte_counter;
-   wire [5:0] 	   current_track;
-   reg [13:0] 	   write_addr;
-   reg [47:0] 	   command;
-   reg [7:0] 	   recv_byte;
-   reg [31:0] 	   address;
-   reg [22:0] 	   last_block = -1;
-   
-	wire [15:0] track_offset; //track * 13 - offset in blocks
-
-
    reg 		 CS_N;
    wire 	 MOSI;
    wire 	 MISO;
@@ -91,14 +55,47 @@ module spi_controller(
    assign 	 is_idle = (state == IDLE);
 
 
+   parameter [4:0] 
+		   RESET_STATE = 0,
+		   RESET_CLOCKS1 = 1,
+		   RESET_CLOCKS2 = 2,
+		   RESET_SEND_CMD0 = 3,
+		   RESET_SEND_CMD1 = 4,
+		   RESET_CHECK_CMD1 = 5,
+		   RESET_SEND_SET_BLOCKLEN = 6,
+		   IDLE = 7,
+		   READ_TRACK = 8,
+		   READ_BLOCK = 9,
+		   READ_BLOCK_WAIT = 10,
+		   READ_BLOCK_DATA = 11,
+		   READ_BLOCK_CRC = 12,
+		   SEND_CMD = 13,
+		   RECEIVE_BYTE_WAIT = 14,
+		   RECEIVE_BYTE = 15,
+		   NEW_TRACK = 16;
+
+   reg [4:0] 	   state;
+   reg [4:0] 	   return_state;
+   reg 		   sclk_sig;
+   reg [7:0] 	   counter;
+   reg [8:0] 	   byte_counter;
+   wire [5:0] 	   current_track;
+   reg [13:0] 	   write_addr;
+   reg [55:0] 	   command;
+   reg [7:0] 	   recv_byte;
+   reg [31:0] 	   address;
+   reg [22:0] 	   last_block = -1;
+   
+	wire [15:0] track_offset; //track * 13 - offset in blocks
+
    assign 	   ram_write_addr = write_addr;
    assign 	   SCLK = sclk_sig;
 
 // easy enough to use adders, but we have plenty of unused multipliers
 // actually we need to multiply by 13 (512 byte blocks in a NIB track)
-//mult1 mult_by_1a00(
-//	.dataa(track),
-//	.result(track_offset));
+mult1 mult_by_1a00(
+	.dataa(track),
+	.result(track_offset));
 
 
 
@@ -108,7 +105,7 @@ module spi_controller(
 	 	 state <= RESET_STATE;
 		 sclk_sig <= 0;
 		 CS_N <= 1'b1;
-		 command <= 48'hffffffffffff;
+		 command <= 56'hffffffffffffff;
 		 counter <= 8'h00;
 		 byte_counter <= 9'h00;
 		 write_addr <= 14'h0;
@@ -126,7 +123,7 @@ module spi_controller(
 	   RESET_CLOCKS1: begin
               if (counter == 0) begin
 		 counter <= 32;
-		 //CS_N <= 1'b0;
+		 CS_N <= 1'b0;
 		 state <= RESET_CLOCKS2;
 	      end  else begin
 		 counter <= counter - 1;
@@ -148,32 +145,17 @@ module spi_controller(
            // Send CMD0 : GO_IDLE_STATE
 	   RESET_SEND_CMD0: 
 	     begin
-		command <= 48'h400000000095;
-    CS_N <= 1'b0;
-		counter <= 47;
-		return_state <= RESET_WAIT_1;
+		command <= 56'hff400000000095;
+		counter <= 55;
+		return_state <= RESET_SEND_CMD1;
 		state <= SEND_CMD;
 	     end 
-
-    RESET_WAIT_1:
-    begin
-      CS_N <= 1'b1;
-      counter <= 8'hff;
-      state <= RESET_WAIT_2;
-    end
-    
-    RESET_WAIT_2:
-    if (counter == 0)
-      state <= RESET_SEND_CMD1;
-    else
-      counter <= counter - 1;
 
            // Send CMD1 : SEND_OP_CMD
 	   RESET_SEND_CMD1:
 	     begin
-		command <= 48'h410000000001;
-    CS_N <= 1'b0;
-		counter <= 47;
+		command <= 56'hff410000000001;
+		counter <= 55;
 		return_state <= RESET_CHECK_CMD1;
 		state <= SEND_CMD;
 	     end   
@@ -228,8 +210,8 @@ module spi_controller(
 	   READ_BLOCK:
 	     begin
 			CS_N <= 1'b0;
-			command <= {8'h51, address, 8'h01};  // READ_SINGLE_BLOCK
-			counter <= 47;
+			command <= {8'hff, 8'h51, address, 8'h01};  // READ_SINGLE_BLOCK
+			counter <= 55;
 			return_state <= READ_BLOCK_WAIT;
 			state <= SEND_CMD;
 			last_block <= block_to_read;
@@ -287,7 +269,7 @@ module spi_controller(
                     state <= RECEIVE_BYTE_WAIT;
 		 		end else begin
                     counter <= counter - 1;
-                    command <= {command[46:0],1'b1};
+                    command <= {command[54:0],1'b1};
 		 		end
               end
               sclk_sig <= ~sclk_sig;
@@ -327,6 +309,6 @@ module spi_controller(
       end    
    end
 
-   assign MOSI = command[47] ;
+   assign MOSI = command[55] ;
 
 endmodule

@@ -381,7 +381,7 @@ begin
 	jamma_s.p(2).button <= (others => '1');
 
   -- keys (pusbuttons) are active LOW on the DE1/2
-  --key <= "111" & not reset; -- control system reset
+  --key <= not reset & "11" & not reset; -- control (6502 &) system reset
   key <= not reset & "11" & not init; -- control 6502 reset
   -- switches are active HIGH on the DE1/2
   -- SW1 must be in the 'ON' position for MMC support

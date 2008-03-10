@@ -10,8 +10,10 @@ add wave -noupdate -format Logic /tb_top/spi_controller_inst/SCLK
 add wave -noupdate -format Logic /tb_top/spi_controller_inst/CS_N
 add wave -noupdate -format Logic /tb_top/spi_controller_inst/MOSI
 add wave -noupdate -format Logic /tb_top/spi_controller_inst/MISO
+add wave -noupdate -format Literal -radix unsigned /tb_top/spi_controller_inst/state
+add wave -noupdate -format Literal /tb_top/spi_controller_inst/counter
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {4770 ns} 0} {{Cursor 2} {4698 ns} 0}
+WaveRestoreCursors {{Cursor 1} {12591 ns} 0} {{Cursor 2} {4698 ns} 0}
 configure wave -namecolwidth 220
 configure wave -valuecolwidth 100
 configure wave -justifyvalue left
@@ -25,4 +27,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {4631 ns} {4820 ns}
+WaveRestoreZoom {0 ns} {42 us}
