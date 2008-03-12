@@ -138,7 +138,13 @@ port
     nwe_s             : out std_logic;    -- sram only
     ncs_s             : out std_logic;    -- sram only
     nce_n             : out std_logic;    -- eeprom only
-    noe_ns            : out std_logic
+    noe_ns            : out std_logic;
+
+    -- JTAG
+    tdi               : in std_logic;
+    tck               : in std_logic;
+    tms               : in std_logic;
+    tdo               : out std_logic
   );
 end target_top;
 
@@ -350,10 +356,10 @@ begin
       sd_cmd        => sd_cmd,
       sd_clk        => sd_clk,
       --////////////////////	USB JTAG link	////////////////////
-      tdi           => '0',
-      tck           => '0',
-      tcs           => '0',
-      tdo           => open,
+      tdi           => tdi,
+      tck           => tck,
+      tcs           => tms,
+      tdo           => tdo,
       --////////////////////	I2C		////////////////////////////
       i2c_sdat      => open,
       i2c_sclk      => open,
