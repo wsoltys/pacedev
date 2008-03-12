@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 7.2
 
 # Pin & Location Assignments
 # ==========================
@@ -751,7 +751,6 @@ set_global_assignment -name VERILOG_FILE ../../../../src/platform/vector06c/unzi
 set_global_assignment -name VERILOG_FILE ../../../../src/platform/vector06c/unzip/src/DE1/CMD_Decode.v
 set_global_assignment -name VERILOG_FILE ../../../../src/platform/vector06c/unzip/src/DE1/I2C_AV_Config.v
 set_global_assignment -name VERILOG_FILE ../../../../src/platform/vector06c/unzip/src/DE1/I2C_Controller.v
-set_global_assignment -name SOURCE_FILE ../../../../src/platform/vector06c/unzip/src/DE1/RS232_Command.h
 set_global_assignment -name VHDL_FILE ../../../../src/platform/vector06c/unzip/src/T80/T80_Pack.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/vector06c/unzip/src/T80/T80.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/vector06c/unzip/src/T80/T80_ALU.vhd
@@ -768,7 +767,7 @@ set_global_assignment -name VERILOG_FILE ../../../../src/platform/vector06c/unzi
 set_global_assignment -name VERILOG_FILE ../../../../src/platform/vector06c/unzip/src/video/shiftreg2.v
 set_global_assignment -name VERILOG_FILE ../../../../src/platform/vector06c/unzip/src/video/vga_refresh.v
 set_global_assignment -name VERILOG_FILE ../../../../src/platform/vector06c/unzip/src/oneshot.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/vector06c/unzip/src/altmodules/palette_ram.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/vector06c/palette_ram.v
 set_global_assignment -name VERILOG_FILE ../../../../src/platform/vector06c/unzip/src/keyboard/vectorkeys.v
 set_global_assignment -name VERILOG_FILE ../../../../src/platform/vector06c/unzip/src/keyboard/ps2k.v
 set_global_assignment -name VERILOG_FILE ../../../../src/platform/vector06c/unzip/src/keyboard/scan2matrix.v
@@ -779,7 +778,7 @@ set_global_assignment -name VHDL_FILE ../../../../src/platform/vector06c/unzip/s
 set_global_assignment -name VERILOG_FILE ../../../../src/platform/vector06c/unzip/src/floppy/wd1793.v
 set_global_assignment -name VERILOG_FILE ../../../../src/platform/vector06c/unzip/src/floppy/dma_rw.v
 set_global_assignment -name VERILOG_FILE ../../../../src/platform/vector06c/unzip/src/floppy/floppy.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/vector06c/unzip/src/floppy/floppyram.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/vector06c/floppyram.v
 set_global_assignment -name VERILOG_FILE ../../../../src/platform/vector06c/unzip/src/floppy/floppyrom.v
 set_global_assignment -name VERILOG_FILE ../../../../src/platform/vector06c/unzip/src/osd/textmode.v
 set_global_assignment -name VERILOG_FILE ../../../../src/platform/vector06c/chargen.v

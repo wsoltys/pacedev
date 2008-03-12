@@ -381,6 +381,12 @@ begin
       gpio_1        => open
     );
 
+  -- unused SRAM address lines
+  ba_ns(19 downto 19) <= (others => '0');
+  -- unused SDRAM lines
+  a_dr2(12) <= '0';
+  dqm_dr2(3 downto 2) <= (others => '0');
+
 	-- assign video outputs
 	bd_out(20) <= red_s(9);
 	bd_out(27) <= red_s(8);
