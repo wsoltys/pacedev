@@ -358,7 +358,7 @@ begin
       --////////////////////	USB JTAG link	////////////////////
       tdi           => tdi,
       tck           => tck,
-      tcs           => tms,
+      tcs           => '0', -- see DE2 schematic, pg21 EPM3128AT:72->FPNCS0->LINK_D1
       tdo           => tdo,
       --////////////////////	I2C		////////////////////////////
       i2c_sdat      => open,
