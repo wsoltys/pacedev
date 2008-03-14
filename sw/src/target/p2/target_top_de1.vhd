@@ -150,7 +150,7 @@ end target_top;
 
 architecture SYN of target_top is
 
-  component de1_top is
+  component de1_wrapper is
     port
     (
       --////////////////////	Clock Input	 	////////////////////	 
@@ -239,7 +239,7 @@ architecture SYN of target_top is
       gpio_0        : inout std_logic_vector(35 downto 0);  --	GPIO Connection 0
       gpio_1        : inout std_logic_vector(35 downto 0)   --	GPIO Connection 1
     );
-  end component de1_top;
+  end component de1_wrapper;
 
   alias clk_24M       : std_logic is clock8;
   alias audio_left    : std_logic is ba9;
@@ -296,7 +296,7 @@ begin
 	-- this is akin to an "ON" switch flicked down to turn on
 	reset <= init or sw2_1;
 		
-  de1_top_inst : de1_top
+  de1_wrapper_inst : de1_wrapper
     port map
     (
       --////////////////////	Clock Input	 	////////////////////	 
