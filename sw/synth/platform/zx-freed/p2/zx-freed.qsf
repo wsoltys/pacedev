@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 7.2
 
 # Pin & Location Assignments
 # ==========================
@@ -750,6 +750,10 @@ set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE "../../../../src/platform/zx-freed/platform_pkg.vhd"
 set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/DE1/AUDIO_DAC.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/DE1/I2C_Controller.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/DE1/VGA_Audio_PLL.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/DE1/I2C_AV_Config.v"
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/ps2_kbd.v"
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/spec_trans.v"
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/kbd_intf.v"
@@ -762,18 +766,15 @@ set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzi
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/CPU_TV80/tv80_reg.v"
 set_global_assignment -name VERILOG_FILE pll.v
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/spi_mmc.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/fontrom.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/fontrom.v"
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/rambuff1.v"
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/mmc_cont.v"
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/translate.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/DE1/AUDIO_DAC.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/DE1/I2C_Controller.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/DE1/VGA_Audio_PLL.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/DE1/I2C_AV_Config.v"
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/ay-8910.v"
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/buff_ram.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/mmc_ram.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/mmc_ram.v"
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/zx2_sram.v"
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/DE1_TOP.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/rom16k.v"
 set_global_assignment -name VHDL_FILE "../../../../src/platform/zx-freed/de1_top_zx-freed.vhd"
 set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_top_de1.vhd
