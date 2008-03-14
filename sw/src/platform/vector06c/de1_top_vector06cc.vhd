@@ -238,7 +238,7 @@ begin
     );
 
   vga_blank <= '0';
-  vga_clk <= '0';
+  vga_clk <= clock_27(0);
   vga_sync <= '0';
 
   --/////////////////////	SDRAM Interface		////////////////

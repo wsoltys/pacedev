@@ -223,11 +223,13 @@ begin
 	reset <= init or sw(0);
 		
   -- keys (pusbuttons) are active LOW on the DE1/2
-  --key_s <= not reset & "11" & not reset; -- control (6502 &) system reset
-  key_s <= not reset & "11" & not init; -- control 6502 reset
+  key_s <= "111" & not reset;
   -- switches are active HIGH on the DE1/2
-  -- SW1 must be in the 'ON' position for MMC support
-  switch_s <= "00000000" & ZX_ENABLE_MMC & '0';
+  -- SW0 use ext. flash for ROM
+  -- SW1 MMC support
+  -- SW8 audio source?
+  -- SW9 cpu clk enable?
+  switch_s <= '1' & '1' & "000000" & ZX_ENABLE_MMC & ZX_ROM_IN_FLASH;
 
   zx_freed_inst : DE1_TOP
     port map
@@ -314,93 +316,17 @@ begin
        GPIO_1           => gpio_1_s
      );
 
-  BLK_ROM : block
-
-    signal rom_clk      : std_logic;
-    signal c6_d_o       : std_logic_vector(7 downto 0);
-    signal d0_d_o       : std_logic_vector(7 downto 0);
-    signal e0_d_o       : std_logic_vector(7 downto 0);
-    signal f0_d_o       : std_logic_vector(7 downto 0);
-    signal rom_d_o      : std_logic_vector(7 downto 0);
-
-  begin
-
-    rom_clk <= gpio_1_s(35);
-
-    rom_d_o <=  -- slot rom, mapped to 16'h0000 + cpu_addr[13:0]
-                -- disk rom $C600-$C6FF
-                c6_d_o when fl_addr_s(14 downto 12) = "000" and fl_addr_s(11 downto 8) = X"6" else
-                -- apple ii rom, mapped to 16'h1000 + cpu_addr[13:0]
-                -- $D000-$DFFF, $E000-$EFFF, $F000-$FFFF
-                d0_d_o when fl_addr_s(14 downto 12) = "010" else
-                e0_d_o when fl_addr_s(14 downto 12) = "011" else
-                f0_d_o when fl_addr_s(14 downto 12) = "100" else
-                (others => '1');
-
-    fl_dq_s <=  rom_d_o when fl_ce_n_s = '0' and fl_oe_n_s = '0' else
-                (others => 'Z');
-
-    c6_rom : entity work.sprom
-      generic map
-      (
-        init_file		=> "../../../../src/platform/appleii-freed/roms/c6.hex",
-        numwords_a	=> 256,
-        widthad_a		=> 8
-      )
-      port map
-      (
-        address		  => fl_addr_s(7 downto 0),
-        clock		    => rom_clk,
-        q		        => c6_d_o
-      );
-
-    d0_rom : entity work.sprom
-      generic map
-      (
-        init_file		=> "../../../../src/platform/appleii-freed/roms/d0.hex",
-        numwords_a	=> 4096,
-        widthad_a		=> 12
-      )
-      port map
-      (
-        address		  => fl_addr_s(11 downto 0),
-        clock		    => rom_clk,
-        q		        => d0_d_o
-      );
-
-    e0_rom : entity work.sprom
-      generic map
-      (
-        init_file		=> "../../../../src/platform/appleii-freed/roms/e0.hex",
-        numwords_a	=> 4096,
-        widthad_a		=> 12
-      )
-      port map
-      (
-        address		  => fl_addr_s(11 downto 0),
-        clock		    => rom_clk,
-        q		        => e0_d_o
-      );
-
-    f0_rom : entity work.sprom
-      generic map
-      (
-        init_file		=> "../../../../src/platform/appleii-freed/roms/f0.hex",
-        numwords_a	=> 4096,
-        widthad_a		=> 12
-      )
-      port map
-      (
-        address		  => fl_addr_s(11 downto 0),
-        clock		    => rom_clk,
-        q		        => f0_d_o
-      );
-
-  end block BLK_ROM;
-
   vga_blank <= '0';
   vga_clk <= '0';
   vga_sync <= '0';
+
+  --////////////////////	Flash Interface		////////////////
+  --fl_dq         : inout std_logic_vector(7 downto 0);   --	FLASH Data bus 8 Bits
+  fl_addr       <= (others => '0');
+  fl_we_n       <= '1';
+  fl_rst_n      <= '1';
+  fl_oe_n       <= '1';
+  fl_ce_n       <= '1';
 
   --/////////////////////	SDRAM Interface		////////////////
   --dram_dq       => dram_dq,

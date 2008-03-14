@@ -30,5 +30,6 @@ package project_pkg is
 	--ZX-freed-specific constants
 
   constant ZX_ENABLE_MMC                    : std_logic := '1';
+  constant ZX_ROM_IN_FLASH                  : std_logic := '0';
 
 end;

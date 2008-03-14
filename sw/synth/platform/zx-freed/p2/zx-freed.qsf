@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION 7.2
+set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -760,7 +760,7 @@ set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzi
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/CPU_TV80/tv80_core.v"
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/CPU_TV80/tv80_mcode.v"
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/CPU_TV80/tv80_reg.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/pll.v"
+set_global_assignment -name VERILOG_FILE pll.v
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/spi_mmc.v"
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/fontrom.v"
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/zx-freed/unzip/rambuff1.v"
