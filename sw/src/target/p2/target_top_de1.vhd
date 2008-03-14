@@ -138,13 +138,13 @@ port
     nwe_s             : out std_logic;    -- sram only
     ncs_s             : out std_logic;    -- sram only
     nce_n             : out std_logic;    -- eeprom only
-    noe_ns            : out std_logic;
+    noe_ns            : out std_logic
 
     -- JTAG
-    tdi               : in std_logic;
-    tck               : in std_logic;
-    tms               : in std_logic;
-    tdo               : out std_logic
+    --tdi               : in std_logic;
+    --tck               : in std_logic;
+    --tms               : in std_logic;
+    --tdo               : out std_logic
   );
 end target_top;
 
@@ -307,7 +307,8 @@ begin
       --////////////////////	Push Button		////////////////////
       key           => (others => '1'),
       --////////////////////	DPDT Switch		////////////////////
-      sw            => (others => '0'),
+      sw(9 downto 1) => (others => '0'),
+      sw(0)         => sw2_1,
       --////////////////////	7-SEG Dispaly	////////////////////
       hex0          => open,
       hex1          => open,
@@ -356,10 +357,10 @@ begin
       sd_cmd        => sd_cmd,
       sd_clk        => sd_clk,
       --////////////////////	USB JTAG link	////////////////////
-      tdi           => tdi,
-      tck           => tck,
+      tdi           => '0',--tdi,
+      tck           => '0', --tck,
       tcs           => '0', -- see DE2 schematic, pg21 EPM3128AT:72->FPNCS0->LINK_D1
-      tdo           => tdo,
+      tdo           => open, --tdo,
       --////////////////////	I2C		////////////////////////////
       i2c_sdat      => open,
       i2c_sclk      => open,

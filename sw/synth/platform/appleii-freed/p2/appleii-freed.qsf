@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 7.2
 
 # Pin & Location Assignments
 # ==========================
@@ -715,7 +715,7 @@ set_global_assignment -name PHYSICAL_SYNTHESIS_ASYNCHRONOUS_SIGNAL_PIPELINING ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
 
 set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED WITH WEAK PULL-UP"
-set_global_assignment -name DEVICE_MIGRATION_LIST "EP2C35F484C6,EP2C20F484C6"
+set_global_assignment -name DEVICE_MIGRATION_LIST EP2C35F484C6
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to clk_ee
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to data_ee
 set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to d_dr1[*]
@@ -792,130 +792,29 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_up
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gc_tx_bit.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_joy.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
-set_global_assignment -name VHDL_FILE "../../../../src/platform/appleii-freed/target_top.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/appleii-freed/de1_top_appleii-freed.vhd"
+set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_top_de1.vhd
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to clock0 -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[0] -to "MMC_start_DE1_TOP:appleii_freed_inst|CPU_reset_n" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[1] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[2] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[10]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[3] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[11]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[4] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[12]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[5] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[13]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[6] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[14]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[7] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[15]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[8] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[16]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[9] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[17]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[10] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[18]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[11] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[19]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[12] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[13] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[20]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[14] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[21]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[15] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[16] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[17] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[18] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[19] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[20] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[21] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[8]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[22] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[9]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[23] -to "MMC_start_DE1_TOP:appleii_freed_inst|KEY[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[24] -to "MMC_start_DE1_TOP:appleii_freed_inst|KEY[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[25] -to "MMC_start_DE1_TOP:appleii_freed_inst|KEY[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[26] -to "MMC_start_DE1_TOP:appleii_freed_inst|KEY[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[27] -to "MMC_start_DE1_TOP:appleii_freed_inst|SW[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[28] -to "MMC_start_DE1_TOP:appleii_freed_inst|SW[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[29] -to "MMC_start_DE1_TOP:appleii_freed_inst|SW[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[30] -to "MMC_start_DE1_TOP:appleii_freed_inst|SW[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[31] -to "MMC_start_DE1_TOP:appleii_freed_inst|SW[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[32] -to "MMC_start_DE1_TOP:appleii_freed_inst|SW[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[33] -to "MMC_start_DE1_TOP:appleii_freed_inst|SW[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[34] -to "MMC_start_DE1_TOP:appleii_freed_inst|SW[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[35] -to "MMC_start_DE1_TOP:appleii_freed_inst|SW[8]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[36] -to "MMC_start_DE1_TOP:appleii_freed_inst|SW[9]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[37] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|clk" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[38] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[39] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[10]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[40] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[11]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[41] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[12]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[42] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[13]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[43] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[14]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[44] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[15]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[45] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[46] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[47] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[48] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[49] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[50] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[51] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[52] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[8]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[53] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[9]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[54] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|reset" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[55] -to "MMC_start_DE1_TOP:appleii_freed_inst|mmc_load_mode" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[56] -to "MMC_start_DE1_TOP:appleii_freed_inst|mmc_mode" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[57] -to "\\BLK_ROM:rom_clk" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[0] -to "MMC_start_DE1_TOP:appleii_freed_inst|CPU_reset_n" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[1] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[2] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[10]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[3] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[11]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[4] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[12]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[5] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[13]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[6] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[14]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[7] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[15]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[8] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[16]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[9] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[17]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[10] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[18]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[11] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[19]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[12] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[13] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[20]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[14] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[21]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[15] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[16] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[17] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[18] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[19] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[20] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[21] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[8]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[22] -to "MMC_start_DE1_TOP:appleii_freed_inst|FL_ADDR[9]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[23] -to "MMC_start_DE1_TOP:appleii_freed_inst|KEY[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[24] -to "MMC_start_DE1_TOP:appleii_freed_inst|KEY[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[25] -to "MMC_start_DE1_TOP:appleii_freed_inst|KEY[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[26] -to "MMC_start_DE1_TOP:appleii_freed_inst|KEY[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[27] -to "MMC_start_DE1_TOP:appleii_freed_inst|SW[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[28] -to "MMC_start_DE1_TOP:appleii_freed_inst|SW[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[29] -to "MMC_start_DE1_TOP:appleii_freed_inst|SW[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[30] -to "MMC_start_DE1_TOP:appleii_freed_inst|SW[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[31] -to "MMC_start_DE1_TOP:appleii_freed_inst|SW[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[32] -to "MMC_start_DE1_TOP:appleii_freed_inst|SW[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[33] -to "MMC_start_DE1_TOP:appleii_freed_inst|SW[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[34] -to "MMC_start_DE1_TOP:appleii_freed_inst|SW[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[35] -to "MMC_start_DE1_TOP:appleii_freed_inst|SW[8]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[36] -to "MMC_start_DE1_TOP:appleii_freed_inst|SW[9]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[37] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|clk" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[38] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[39] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[10]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[40] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[11]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[41] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[12]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[42] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[13]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[43] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[14]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[44] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[15]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[45] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[46] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[47] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[48] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[49] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[50] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[51] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[52] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[8]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[53] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|ma[9]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[54] -to "MMC_start_DE1_TOP:appleii_freed_inst|bc6502:cpu0|reset" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[55] -to "MMC_start_DE1_TOP:appleii_freed_inst|mmc_load_mode" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[56] -to "MMC_start_DE1_TOP:appleii_freed_inst|mmc_mode" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[57] -to "\\BLK_ROM:rom_clk" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=58" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=58" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=195" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=128" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=51717" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=982" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=128" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to "MMC_start_DE1_TOP:appleii_freed_inst|mmc_disk:mmc_disk|spi_controller:spi_controller1|CLK_14M" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[0] -to "MMC_start_DE1_TOP:appleii_freed_inst|mmc_disk:mmc_disk|spi_controller:spi_controller1|CS_N" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[1] -to "MMC_start_DE1_TOP:appleii_freed_inst|mmc_disk:mmc_disk|spi_controller:spi_controller1|MISO" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[2] -to "MMC_start_DE1_TOP:appleii_freed_inst|mmc_disk:mmc_disk|spi_controller:spi_controller1|MOSI" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[3] -to "MMC_start_DE1_TOP:appleii_freed_inst|mmc_disk:mmc_disk|spi_controller:spi_controller1|SCLK" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[4] -to reset -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[0] -to "MMC_start_DE1_TOP:appleii_freed_inst|mmc_disk:mmc_disk|spi_controller:spi_controller1|CS_N" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[1] -to "MMC_start_DE1_TOP:appleii_freed_inst|mmc_disk:mmc_disk|spi_controller:spi_controller1|MISO" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[2] -to "MMC_start_DE1_TOP:appleii_freed_inst|mmc_disk:mmc_disk|spi_controller:spi_controller1|MOSI" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[3] -to "MMC_start_DE1_TOP:appleii_freed_inst|mmc_disk:mmc_disk|spi_controller:spi_controller1|SCLK" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[4] -to reset -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=5" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=5" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=000000000000000000000000000000000000000000" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=42" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=8192" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=18404" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=16129" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=8192" -section_id auto_signaltap_0
+set_location_assignment PIN_K5 -to tdi
+set_location_assignment PIN_K6 -to tms
+set_location_assignment PIN_K2 -to tck
+set_location_assignment PIN_L5 -to tdo
