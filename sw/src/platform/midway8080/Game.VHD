@@ -57,7 +57,8 @@ entity Game is
     vblank					: in std_logic;    
 		xcentre					: out std_logic_vector(9 downto 0);
 		ycentre					: out std_logic_vector(9 downto 0);
-		
+    osd_en          : out std_logic;
+
     -- sound
     snd_rd          : out std_logic;                       
     snd_wr          : out std_logic;
@@ -292,6 +293,24 @@ begin
 		end process;
 
 	end block INT_BLOCK;	
+
+  -- osd toggle (TAB)
+  process (clk_24M, reset)
+    variable osd_key_r  : std_logic;
+    variable osd_en_v   : std_logic;
+  begin
+    if reset = '1' then
+      osd_en_v := '0';
+      osd_key_r := '0';
+    elsif rising_edge(clk_24M) then
+      -- toggle on OSD KEY PRESS
+      if inputs(2)(1) = '1' and osd_key_r = '0' then
+        osd_en_v := not osd_en_v;
+      end if;
+      osd_key_r := inputs(2)(1);
+    end if;
+    osd_en <= osd_en_v;
+  end process;
 
 	-- old vram mapper logic
   bitmap_addr_rotated(4 downto 0) <= not bitmap_addr(12 downto 8);

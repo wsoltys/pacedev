@@ -89,6 +89,8 @@ begin
 										-- Special keys
 										when SCANCODE_F3 =>
 											keybd_v(2)(0) := press;			-- CPU RESET
+										when SCANCODE_TAB =>
+                      keybd_v(2)(1) := press;     -- OSD TOGGLE
                     when others =>
                end case;
             end if; -- press or release

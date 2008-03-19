@@ -87,7 +87,8 @@ architecture SYN of PACE is
   signal vblank_s       	: std_logic;
 	signal xcentre					: std_logic_vector(9 downto 0);
 	signal ycentre					: std_logic_vector(9 downto 0);
-        
+  signal osd_en           : std_logic;
+
   -- sound signals
   signal snd_rd           : std_logic;
   signal snd_wr           : std_logic;
@@ -161,7 +162,8 @@ begin
       vblank					=> vblank_s,
 			xcentre					=> xcentre,
 			ycentre					=> ycentre,
-  
+      osd_en          => osd_en,
+
       -- sound
       snd_rd          => snd_rd,
       snd_wr          => snd_wr,
@@ -191,6 +193,7 @@ begin
   
 			xcentre					=> xcentre,
 			ycentre					=> ycentre,
+      osd_en          => osd_en,
 
       extra_data      => gfxextra_data,
 			palette_data		=> palette_data,

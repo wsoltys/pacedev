@@ -36,6 +36,10 @@ package project_pkg is
 
 	constant PACE_ADV724_STD						      : std_logic := ADV724_STD_PAL;
 
+  constant PACE_HAS_OSD                     : boolean := true;
+  constant PACE_OSD_XPOS                    : natural := 128;
+  constant PACE_OSD_YPOS                    : natural := 176;
+
   --
   -- P2-specific constants
   --

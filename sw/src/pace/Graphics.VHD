@@ -1,5 +1,7 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use ieee.std_logic_arith.all;
 
 library work;
 use work.pace_pkg.all;
@@ -15,6 +17,7 @@ entity Graphics is
 
 		xcentre					: in std_logic_vector(9 downto 0);
 		ycentre					: in std_logic_vector(9 downto 0);
+    osd_en          : in std_logic;
 
     extra_data      : in std_logic_vector(7 downto 0);
 		palette_data		: in ByteArrayType(15 downto 0);
@@ -168,6 +171,7 @@ architecture SYN of Graphics is
   signal strobe       : std_logic;
 	signal pix_x				: std_logic_vector(9 downto 0);
 	signal pix_y				: std_logic_vector(9 downto 0);
+  signal hsync_s      : std_logic;
   signal hblank_s     : std_logic;
   signal vblank_s     : std_logic;
 
@@ -182,8 +186,16 @@ architecture SYN of Graphics is
 	signal sprite_pri		: std_logic;
 	signal sprite0_on		: std_logic;
 
+  signal osd_active   : std_logic;
+  signal osd_colour   : std_logic_vector(7 downto 0);
+
 	signal rgb_data			: RGBType;
-			
+
+  -- before OSD is mixed in
+  signal red_s        : std_logic_vector(9 downto 0);
+  signal green_s      : std_logic_vector(9 downto 0);
+  signal blue_s       : std_logic_vector(9 downto 0);
+
 begin
 
 	-- generate final RGB signal
@@ -191,7 +203,12 @@ begin
 							tilemap_rgb(1) when tilemap_on(1) = '1' else
 							sprite_rgb when sprite_on = '1' else
 							bitmap_rgb(1);
-	
+
+  -- no OSD transparency yet...
+  red <= red_s when (osd_en and osd_active) = '0' else osd_colour(2 downto 0) & "0000000";
+  green <= green_s when (osd_en and osd_active) = '0' else osd_colour(5 downto 3) & "0000000";
+  blue <= blue_s when (osd_en and osd_active) = '0' else osd_colour(7 downto 6) & "00000000";
+
 	-- it's actually more complicated than this on the NES
 	-- but it'll do for now...
 	spr0_hit <= sprite0_on;
@@ -199,7 +216,8 @@ begin
 	-- needed in a lot of games
 	hblank <= hblank_s;
 	vblank <= vblank_s;
-	
+  hsync <= hsync_s;
+
   -- assign top-level output ports
   bw_cvbs <= (others => '0');
   gs_cvbs <= (others => '0');
@@ -239,11 +257,11 @@ begin
         b_i					=> rgb_data.b,
 
         -- VGA signals (out)
-        red         => red,
-        green       => green,
-        blue        => blue,
+        red         => red_s,
+        green       => green_s,
+        blue        => blue_s,
         lcm_data		=> lcm_data,
-        hsync       => hsync,
+        hsync       => hsync_s,
         vsync       => vsync
       );
 
@@ -277,7 +295,7 @@ begin
         green       => green,
         blue        => blue,
         lcm_data		=> lcm_data,
-        hsync       => hsync,
+        hsync       => hsync_s,
         vsync       => vsync
       );
 
@@ -311,7 +329,7 @@ begin
         green       => green,
         blue        => blue,
         lcm_data		=> lcm_data,
-        hsync       => hsync,
+        hsync       => hsync_s,
         vsync       => vsync
       );
 
@@ -345,7 +363,7 @@ begin
         green       => green,
         blue        => blue,
         lcm_data		=> lcm_data,
-        hsync       => hsync,
+        hsync       => hsync_s,
         vsync       => vsync
       );
 
@@ -473,7 +491,117 @@ begin
 			);
 
 	end generate GEN_SPRITES;
-	
+
+  GEN_OSD : if PACE_HAS_OSD generate
+
+    OSD_BLOCK : block
+
+      component textmode is
+        port
+        (
+          clk           : in std_logic;
+          ce            : in std_logic;
+          vsync         : in std_logic;
+          hsync         : in std_logic;
+          pixel         : out std_logic;
+          background    : out std_logic;
+          address       : in std_logic_vector(7 downto 0);
+          data          : in std_logic_vector(7 downto 0);
+          wren          : in std_logic;
+          q             : out std_logic_vector(7 downto 0)
+        );
+      end component textmode;
+
+      component oneshot is
+        generic
+        (
+          CLOCKS    : natural := 16
+        );
+        port
+        (
+          clk       : in std_logic;
+          ce        : in std_logic;
+          trigger   : in std_logic;
+          q         : out std_logic
+        );
+      end component oneshot;
+
+      signal hsync_p        : std_logic;
+      signal osd_vsync      : std_logic;
+      signal osd_hsync      : std_logic;
+      signal osd_fg         : std_logic;
+      signal osd_bg         : std_logic;
+      signal osd_xdelay     : std_logic;
+
+    begin
+
+      -- oneshot triggers on rising_egde
+      hsync_p <= not hsync_s;
+
+      lineos0 : oneshot
+        generic map
+        (
+          CLOCKS          => PACE_OSD_XPOS
+        )
+        port map
+        (
+          clk             => clk,
+          ce              => '1',
+          trigger         => hsync_p, 
+          q               => osd_xdelay
+        );
+
+      -- active low line 128
+      osd_vsync <= '0' when conv_integer(pix_y) = PACE_OSD_YPOS else '1';
+
+      process (clk)
+        variable osd_xdelaybuf : std_logic;
+      begin
+        if rising_edge(clk) then
+          if osd_xdelaybuf = '1' and osd_xdelay = '0' then
+            osd_hsync <= '0';
+          else
+            osd_hsync <= '1';
+          end if;
+          osd_xdelaybuf := osd_xdelay;
+        end if;
+      end process;
+
+      osd_inst : textmode
+        port map
+        (
+          clk             => clk,
+          ce              => '1',
+          vsync           => osd_vsync,
+          hsync           => osd_hsync,
+          pixel           => osd_fg,
+          background      => osd_bg,
+          address         => (others => '0'),
+          data            => (others => '0'),
+          wren            => '0',
+          q               => open
+        );
+
+      process (clk)
+      begin
+        if rising_edge(clk) then
+          if osd_bg = '1' then
+            osd_active <= '1';
+            if osd_fg = '1' then
+              osd_colour <= X"FE";
+            else
+              osd_colour <= X"59";
+            end if;
+          else
+            osd_active <= '0';
+          end if;
+        end if;
+      end process;
+
+    end block OSD_BLOCK;
+
+  end generate GEN_OSD;
+
 end SYN;
 
 --configuration cfg_graphics of Graphics is
