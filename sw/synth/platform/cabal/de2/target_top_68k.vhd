@@ -205,7 +205,7 @@ architecture SYN of target_top is
 	end component;
 
 	alias gpio_maple 		: std_logic_vector(35 downto 0) is gpio_0;
-	alias gpio_lcd 			: std_logic_vector(35 downto 0) is gpio_1;
+	alias gpio_lcd 			: std_logic_vector(35 downto 0) is gpio_0;
 	
 	signal clk					: std_logic_vector(0 to 3);
   signal init       	: std_logic;
@@ -556,51 +556,81 @@ begin
 	lcm_hsync <= vga_hs_s;
 	lcm_vsync <= vga_vs_s;
 
-  mc68k : entity work.m68k_if generic map (
-    clk_mult          => 1,       -- Clock frequency multiplier
-    clk_div           => 3       -- Clock frequency divider
-	)
-	port map (
-		-- IO signals
-  	mainclk    			  => clock_27,
-		reset						  => reset,
-    cpuclk            => open,
-    cpuclken          => cpuclken,
-		io							  => gpio_cpu(31 downto 0),
+	BLK_M68K : block
+	
+		signal cpuclken			: std_logic;
+		signal cpu_rd_nwr		: std_logic;
+		signal cpu_oe_reset	: std_logic;
+		signal cpu_oe_d 		: std_logic;
 
-		-- MC68K signals
-		m68k_reset_o_n		=> gpio_to_the_68k(0),
-		m68k_reset_i_n		=> gpio_from_the_68k(0),
-		m68k_halt_o_n			=> gpio_to_the_68k(1),
-		m68k_halt_i_n			=> gpio_from_the_68k(1),
-		m68k_d_o					=> gpio_to_the_68k(17 downto 2),	
-		m68k_d_i					=> gpio_from_the_68k(17 downto 2),
-		m68k_a						=> gpio_from_the_68k(40 downto 18),
-		m68k_fc						=> gpio_from_the_68k(43 downto 41),
-		m68k_ipl_n 				=> gpio_to_the_68k(20 downto 18),
-		m68k_berr_n 			=> gpio_to_the_68k(21),
-		m68k_vpa_n  			=> gpio_to_the_68k(22),
-		m68k_e						=> gpio_from_the_68k(44),
-		m68k_vma_n  			=> gpio_from_the_68k(45),
-		m68k_br_n					=> gpio_to_the_68k(23),
-		m68k_bgack_n			=> gpio_to_the_68k(24),
-		m68k_bg_n					=> gpio_from_the_68k(46),
-		m68k_dtack_n			=> gpio_to_the_68k(25),
-		m68k_rd_nwr				=> gpio_from_the_68k(47),
-		m68k_lds_n				=> gpio_from_the_68k(48),
-		m68k_uds_n				=> gpio_from_the_68k(49),
-		m68k_as_n					=> gpio_from_the_68k(50),
+	begin
+		
+		mc68k : entity work.m68k_if generic map (
+			clk_mult          => 1,       -- Clock frequency multiplier
+			clk_div           => 3       -- Clock frequency divider
+		)
+		port map (
+			-- IO signals
+			mainclk    			  => clock_27,
+			reset						  => reset,
+			cpuclk            => open,
+			cpuclken          => cpuclken,
+			io							  => gpio_cpu(31 downto 0),
 
-    -- Mux bus control signals
-		m68k_sync					=> cpu_sync,
-		m68k_do_wr				=> cpu_do_wr,
+			-- MC68K signals
+			m68k_reset_o_n		=> '0',
+			m68k_reset_i_n		=> gpio_from_the_68k(0),
+			m68k_halt_o_n			=> gpio_to_the_68k(1),
+			m68k_halt_i_n			=> gpio_from_the_68k(1),
+			m68k_d_o					=> gpio_to_the_68k(17 downto 2),	
+			m68k_d_i					=> gpio_from_the_68k(17 downto 2),
+			m68k_a						=> gpio_from_the_68k(40 downto 18),
+			m68k_fc						=> gpio_from_the_68k(43 downto 41),
+			m68k_ipl_n 				=> gpio_to_the_68k(20 downto 18),
+			m68k_berr_n 			=> gpio_to_the_68k(21),
+			m68k_vpa_n  			=> gpio_to_the_68k(22),
+			m68k_e						=> gpio_from_the_68k(44),
+			m68k_vma_n  			=> gpio_from_the_68k(45),
+			m68k_br_n					=> gpio_to_the_68k(23),
+			m68k_bgack_n			=> gpio_to_the_68k(24),
+			m68k_bg_n					=> gpio_from_the_68k(46),
+			m68k_dtack_n			=> gpio_to_the_68k(25),
+			m68k_rd_nwr				=> gpio_from_the_68k(47),
+			m68k_lds_n				=> gpio_from_the_68k(48),
+			m68k_uds_n				=> gpio_from_the_68k(49),
+			m68k_as_n					=> gpio_from_the_68k(50),
 
-		-- Output enable for tristate MC68K outputs
-		m68k_oe_reset			=> cpu_oe_reset,
-		m68k_oe_halt			=> cpu_oe_halt,
-		m68k_oe_d					=> cpu_oe_d
-	);
+			-- Mux bus control signals
+			m68k_sync					=> open,
+			m68k_do_wr				=> '1',
 
+			-- Output enable for tristate MC68K outputs
+			m68k_oe_reset			=> cpu_oe_reset,
+			m68k_oe_halt			=> '0',
+			m68k_oe_d					=> cpu_oe_d
+		);
+
+		gpio_from_the_68k(51) <= cpuclken;
+		cpu_rd_nwr <= gpio_from_the_68k(47);
+		cpu_oe_d <= cpu_rd_nwr;
+		
+		-- Generate 68k reset
+		process (reset, clock_27, cpuclken)
+			variable rcnt : std_logic_vector (7 downto 0) := (others => '0');
+		begin
+			if reset = '1' then
+				cpu_oe_reset <= '1';
+				rcnt := (others => '0');
+			elsif rising_edge(clock_27) and cpuclken = '1' then
+				if rcnt = X"40" then
+					cpu_oe_reset <= not key(1);
+				else
+					rcnt := rcnt + 1;
+				end if;
+			end if;
+		end process;
+	end block BLK_M68K;
+	
   BLK_PACE : block
 
     -- uP signals

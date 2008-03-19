@@ -26,7 +26,7 @@ package project_pkg is
 	-- DE2-C64-specific constants
 
 	constant DE2_JAMMA_IS_MAPLE	              : boolean := false;
-	constant DE2_JAMMA_IS_NGC                 : boolean := true;
+	constant DE2_JAMMA_IS_NGC                 : boolean := false;
 
 	constant DE2_LCD_LINE2									  : string := "   CABAL-LCD    ";		-- 16 chars exactly
 
