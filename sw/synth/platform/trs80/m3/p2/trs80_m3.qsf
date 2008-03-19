@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 7.2
 
 # Pin & Location Assignments
 # ==========================
@@ -709,7 +709,6 @@ set_global_assignment -name FLOW_ENABLE_TIMING_CONSTRAINT_CHECK OFF
 set_global_assignment -name DO_COMBINED_ANALYSIS ON
 set_global_assignment -name ENABLE_CLOCK_LATENCY ON
 set_global_assignment -name REPORT_IO_PATHS_SEPARATELY ON
-set_instance_assignment -name GLOBAL_SIGNAL "GLOBAL CLOCK" -to "meb_pll:MEB_PLL_0|altpll:altpll_component|_clk1"
 set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_ASYNCHRONOUS_SIGNAL_PIPELINING ON
@@ -764,6 +763,10 @@ set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_contro
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/vga_800x600_60Hz.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/cvbs_720x288p_50Hz.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/mapctl.vhd
+set_global_assignment -name VERILOG_FILE ../../../../../src/platform/midway8080/chargen.v
+set_global_assignment -name VERILOG_FILE ../../../../../src/platform/midway8080/screenbuffer.v
+set_global_assignment -name VERILOG_FILE ../../../../../src/pace/osd/oneshot.v
+set_global_assignment -name VERILOG_FILE ../../../../../src/pace/osd/textmode.v
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Graphics.VHD
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/io/gamecube/gamecube_pkg.vhd

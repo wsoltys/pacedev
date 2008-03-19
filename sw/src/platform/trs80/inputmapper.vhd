@@ -173,6 +173,8 @@ begin
 											ctrl := press;
 										when SCANCODE_ESC =>
 											esc := press;
+                    when SCANCODE_TAB =>
+                      inputs(8)(1) <= press;
                     when others =>
                end case;
             end if; -- press or release

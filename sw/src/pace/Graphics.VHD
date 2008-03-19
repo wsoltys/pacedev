@@ -204,10 +204,10 @@ begin
 							sprite_rgb when sprite_on = '1' else
 							bitmap_rgb(1);
 
-  -- no OSD transparency yet...
-  red <= red_s when (osd_en and osd_active) = '0' else osd_colour(2 downto 0) & "0000000";
-  green <= green_s when (osd_en and osd_active) = '0' else osd_colour(5 downto 3) & "0000000";
-  blue <= blue_s when (osd_en and osd_active) = '0' else osd_colour(7 downto 6) & "00000000";
+  -- dodgy OSD transparency...
+  red <= red_s when (osd_en and osd_active) = '0' else osd_colour(2 downto 0) & red_s(9 downto 6) & "000";
+  green <= green_s when (osd_en and osd_active) = '0' else osd_colour(5 downto 3) & green_s(9 downto 6) & "000";
+  blue <= blue_s when (osd_en and osd_active) = '0' else osd_colour(7 downto 6) & '0' & blue_s(9 downto 6) & "000";
 
 	-- it's actually more complicated than this on the NES
 	-- but it'll do for now...
@@ -601,6 +601,12 @@ begin
     end block OSD_BLOCK;
 
   end generate GEN_OSD;
+
+  GEN_NO_OSD : if not PACE_HAS_OSD generate
+
+    osd_active <= '0';
+
+  end generate GEN_NO_OSD;
 
 end SYN;
 

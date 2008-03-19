@@ -56,6 +56,7 @@ entity Game is
     vblank          : in std_logic;    
 		xcentre					: out std_logic_vector(9 downto 0);
 		ycentre					: out std_logic_vector(9 downto 0);
+		osd_en          : out std_logic;
 		
     -- sound
     snd_rd          : out std_logic;                       
@@ -262,6 +263,24 @@ begin
 		kbd_data <= kbd_data_v;
 
   end process KBD_MUX;
+
+  -- osd toggle (TAB)
+  process (clk_20M, reset)
+    variable osd_key_r  : std_logic;
+    variable osd_en_v   : std_logic;
+  begin
+    if reset = '1' then
+      osd_en_v := '0';
+      osd_key_r := '0';
+    elsif rising_edge(clk_20M) then
+      -- toggle on OSD KEY PRESS
+      if inputs(8)(1) = '1' and osd_key_r = '0' then
+        osd_en_v := not osd_en_v;
+      end if;
+      osd_key_r := inputs(8)(1);
+    end if;
+    osd_en <= osd_en_v;
+  end process;
 
 	xcentre <= (others => '0');
 	ycentre <= (others => '0');
