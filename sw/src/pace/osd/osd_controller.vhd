@@ -8,6 +8,10 @@ library work;
 use work.pace_pkg.all;
 
 entity osd_controller is
+  generic
+  (
+    WIDTH_GPIO  : natural := 8
+  );
   port
   (
     clk         : in std_logic;
@@ -17,7 +21,11 @@ entity osd_controller is
     osd_key     : in std_logic;
 
     to_osd      : out to_OSD_t;
-    from_osd    : in from_OSD_t
+    from_osd    : in from_OSD_t;
+
+    gpio_i      : in std_logic_vector(WIDTH_GPIO-1 downto 0);
+    gpio_o      : out std_logic_vector(WIDTH_GPIO-1 downto 0);
+    gpio_oe     : out std_logic_vector(WIDTH_GPIO-1 downto 0)
   );
 end entity osd_controller;
 
@@ -35,6 +43,9 @@ architecture SYN of osd_controller is
   signal ram_cs     : std_logic;
   signal ram_we     : std_logic;
   signal ram_d      : std_logic_vector(7 downto 0);
+
+  signal gpio_cs    : std_logic;
+  signal gpio_d     : std_logic_vector(7 downto 0);
 
   signal osd_cs     : std_logic;
 
@@ -82,16 +93,23 @@ begin
 
   -- address decoding
   -- ROM/RAM $0000-$7FFF (32K)
-  ram_cs <= '1' when STD_MATCH(cpu_a, "0---------------") else '0';
+  ram_cs <= '1'   when STD_MATCH(cpu_a, "0---------------") else '0';
+  -- GPIO $E000-$E0FF
+  gpio_cs <= '1'  when STD_MATCH(cpu_a, X"E0" & "--------") else '0';
   -- OSD screen buffer $E100-$E1FF (256 bytes)
-  osd_cs <= '1' when STD_MATCH(cpu_a, X"E1" & "--------") else '0';
+  osd_cs <= '1'   when STD_MATCH(cpu_a, X"E1" & "--------") else '0';
   -- reset vectors $FFF0-$FFFF (16 bytes)
-  vec_cs <= '1' when STD_MATCH(cpu_a,    X"FFF" & "----") else '0';
+  vec_cs <= '1'   when STD_MATCH(cpu_a,    X"FFF" & "----") else '0';
+
   -- write enables
   ram_we <= ram_cs and cpu_we;
 
+  -- gpio read mux
+  gpio_d <= gpio_i;
+
   -- read mux
   cpu_d_i <=  ram_d when ram_cs = '1' else
+              gpio_d when gpio_cs = '1' else
               (from_osd.d + 32) when osd_cs = '1' else
               X"08" when (vec_cs = '1' and cpu_a(0) = '1') else
               X"00" when (vec_cs = '1' and cpu_a(0) = '0') else

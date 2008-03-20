@@ -160,6 +160,10 @@ architecture SYN of Game is
   signal nmi_status     : std_logic_vector(7 downto 0);
   signal nmirst         : std_logic;  -- clear NMI
 
+  -- OSD GPIO signals
+  signal gpio_to_osd    : std_logic_vector(7 downto 0);
+  signal gpio_from_osd  : std_logic_vector(7 downto 0);
+
   -- fdc signals
 	signal fdc_cs					: std_logic;
   signal fdc_rd         : std_logic;
@@ -460,8 +464,20 @@ begin
 			leds <= (others => '0');
 					
 		end generate GEN_NO_FDC;
-					
+
+  -- wire some keys to the osd module
+  gpio_to_osd(0) <= inputs(6)(3); -- UP
+  gpio_to_osd(1) <= inputs(6)(4); -- DOWN
+  gpio_to_osd(2) <= inputs(6)(5); -- LEFT
+  gpio_to_osd(3) <= inputs(6)(6); -- RIGHT
+  gpio_to_osd(4) <= inputs(6)(0); -- ENTER
+  gpio_to_osd(7 downto 5) <= (others => '0');
+
   osd_inst : entity work.osd_controller
+    generic map
+    (
+      WIDTH_GPIO  => gpio_to_osd'length
+    )
     port map
     (
       clk         => clk_20M,
@@ -471,7 +487,10 @@ begin
       osd_key     => inputs(8)(1),
 
       to_osd      => to_osd,
-      from_osd    => from_osd
+      from_osd    => from_osd,
+
+      gpio_i      => gpio_to_osd,
+      gpio_o      => gpio_from_osd
     );
 
 end SYN;
