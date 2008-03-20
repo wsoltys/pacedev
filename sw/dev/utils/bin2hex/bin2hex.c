@@ -75,7 +75,8 @@ int main (int argc, char *argv[])
   if (!fp )
     exit (1);
 
-  rd = fread (buf, sizeof(unsigned char), 16, fp);
+	memset (buf, 0, BUFSIZE);
+  rd = fread (buf, sizeof(unsigned char), BUFSIZE, fp);
   while (rd > 0 || !feof (fp)) {
 
     printf (":%02X%04X00", BUFSIZE, base_addr);
@@ -83,7 +84,7 @@ int main (int argc, char *argv[])
     CRC += (base_addr >> 8) & 0xff;
     CRC += base_addr & 0xff;
 
-    for (i=0; i<rd; i++) {
+    for (i=0; i<BUFSIZE; i++) {
       printf ("%02X", buf[i]);
       CRC += buf[i];
     }
@@ -92,6 +93,7 @@ int main (int argc, char *argv[])
     printf ("%02X\n", CRC);
     base_addr += rd;
 
+		memset (buf, 0, BUFSIZE);
     rd = fread (buf, sizeof(unsigned char), BUFSIZE, fp);
   }
 
