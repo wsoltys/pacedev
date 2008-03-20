@@ -81,17 +81,20 @@ void main(void)
 	while (1)
 	{
 		BYTE *gpio = (BYTE *)0xE000;
-		BYTE b;
+		BYTE en, keys;
+
+		en = *gpio;
+		keys = *(gpio+1);
 
 		osd_gotoxy (0, 2);
-
-		// read gpio input
-		b = *gpio;
-		if (b & (1<<0)) osd_puts ("UP");
-		else if (b & (1<<1)) osd_puts ("DOWN");
-		else if (b & (1<<2)) osd_puts ("LEFT");
-		else if (b & (1<<3)) osd_puts ("RIGHT");
-		else if (b & (1<<4)) osd_puts ("ENTER");
+		if ((en & (1<<7)) != 0)
+		{
+			if (keys & (1<<0)) 			osd_puts ("UP");
+			else if (keys & (1<<1)) osd_puts ("DOWN");
+			else if (keys & (1<<2)) osd_puts ("LEFT");
+			else if (keys & (1<<3)) osd_puts ("RIGHT");
+			else if (keys & (1<<4)) osd_puts ("ENTER");
+		}
 	}
 
 #if 0
