@@ -51,27 +51,28 @@ architecture SYN of osd_controller is
 
   signal vec_cs     : std_logic;
 
+  signal osd_en_s   : std_logic;
+
 begin
 
   -- osd toggle (TAB)
   process (clk, reset)
     variable osd_key_r  : std_logic;
-    variable osd_en_v   : std_logic;
   begin
     if reset = '1' then
-      osd_en_v := '0';
+      osd_en_s <= '0';
       osd_key_r := '0';
     elsif rising_edge(clk) then
       if clk_en = '1' then
         -- toggle on OSD KEY PRESS
         if osd_key = '1' and osd_key_r = '0' then
-          osd_en_v := not osd_en_v;
+          osd_en_s <= not osd_en_s;
         end if;
         osd_key_r := osd_key;
       end if;
     end if;
     -- assign outputs
-    to_osd.en <= osd_en_v;
+    to_osd.en <= osd_en_s;
   end process;
 
   -- produce a slower cpu clock
@@ -105,7 +106,8 @@ begin
   ram_we <= ram_cs and cpu_we;
 
   -- gpio read mux
-  gpio_d <= gpio_i;
+  gpio_d <= osd_en_s & "0000000" when cpu_a(0) = '0' else
+            gpio_i;
 
   -- read mux
   cpu_d_i <=  ram_d when ram_cs = '1' else
