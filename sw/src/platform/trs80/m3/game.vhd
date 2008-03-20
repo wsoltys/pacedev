@@ -267,24 +267,6 @@ begin
 
   end process KBD_MUX;
 
-  -- osd toggle (TAB)
-  process (clk_20M, reset)
-    variable osd_key_r  : std_logic;
-    variable osd_en_v   : std_logic;
-  begin
-    if reset = '1' then
-      osd_en_v := '0';
-      osd_key_r := '0';
-    elsif rising_edge(clk_20M) then
-      -- toggle on OSD KEY PRESS
-      if inputs(8)(1) = '1' and osd_key_r = '0' then
-        osd_en_v := not osd_en_v;
-      end if;
-      osd_key_r := inputs(8)(1);
-    end if;
-    to_osd.en <= osd_en_v;
-  end process;
-
 	xcentre <= (others => '0');
 	ycentre <= (others => '0');
 	
@@ -315,27 +297,27 @@ begin
 			clk_en		=> clk_2M_en
 		);
 
-    up_inst : entity work.uPse                                                
-      port map
-      (
-        clk			=> clk_20M,                                   
-        clk_en	=> clk_2M_en,
-        reset  	=> cpu_reset,                                     
+  up_inst : entity work.uPse                                                
+    port map
+    (
+      clk			=> '0', --clk_20M,                                   
+      clk_en	=> clk_2M_en,
+      reset  	=> cpu_reset,                                     
 
-        addr   	=> uP_addr,
-        datai  	=> uP_datai,
-        datao  	=> uP_datao,
+      addr   	=> uP_addr,
+      datai  	=> uP_datai,
+      datao  	=> uP_datao,
 
-        mem_rd 	=> uPmemrd,
-        mem_wr 	=> uPmemwr,
-        io_rd  	=> uPiord,
-        io_wr  	=> uPiowr,
+      mem_rd 	=> uPmemrd,
+      mem_wr 	=> uPmemwr,
+      io_rd  	=> uPiord,
+      io_wr  	=> uPiowr,
 
-        intreq 	=> uPintreq,
-        intvec 	=> uPintvec,
-        intack 	=> uPintack,
-        nmi    	=> uPnmireq
-      );
+      intreq 	=> uPintreq,
+      intvec 	=> uPintvec,
+      intack 	=> uPintack,
+      nmi    	=> uPnmireq
+    );
 
 	inputs_inst : entity work.Inputs
 		generic map
@@ -479,5 +461,18 @@ begin
 					
 		end generate GEN_NO_FDC;
 					
+  osd_inst : entity work.osd_controller
+    port map
+    (
+      clk         => clk_20M,
+      clk_en      => '1',
+      reset       => cpu_reset,
+
+      osd_key     => inputs(8)(1),
+
+      to_osd      => to_osd,
+      from_osd    => from_osd
+    );
+
 end SYN;
 
