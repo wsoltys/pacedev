@@ -581,10 +581,10 @@ begin
           hsync           => osd_hsync,
           pixel           => osd_fg,
           background      => osd_bg,
-          address         => (others => '0'),
-          data            => (others => '0'),
-          wren            => '0',
-          q               => open
+          address         => to_osd.a,
+          data            => to_osd.d,
+          wren            => to_osd.we,
+          q               => from_osd.d
         );
 
       process (clk)
