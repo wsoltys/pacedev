@@ -12,6 +12,9 @@ add wave -noupdate -format Literal /tb_top/c1541_core_inst/stp
 add wave -noupdate -format Logic /tb_top/c1541_core_inst/stp_in
 add wave -noupdate -format Logic /tb_top/c1541_core_inst/stp_out
 add wave -noupdate -format Logic /tb_top/c1541_core_inst/fifo_aclr
+add wave -noupdate -format Literal /tb_top/c1541_core_inst/fifo_q
+add wave -noupdate -format Logic /tb_top/c1541_core_inst/byte_n
+add wave -noupdate -format Logic /tb_top/c1541_core_inst/sync_n
 add wave -noupdate -divider FIFO_INST
 add wave -noupdate -format Logic /tb_top/c1541_core_inst/mtr
 add wave -noupdate -format Logic /tb_top/c1541_core_inst/fifo_inst/rdclk
@@ -20,8 +23,8 @@ add wave -noupdate -format Logic /tb_top/c1541_core_inst/fifo_inst/wrfull
 add wave -noupdate -format Literal /tb_top/c1541_core_inst/fifo_inst/wrusedw
 add wave -noupdate -format Literal /tb_top/c1541_core_inst/fifo_wrusedw_s
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {147966464 ps} 0}
-configure wave -namecolwidth 244
+WaveRestoreCursors {{Cursor 1} {260953125 ps} 0}
+configure wave -namecolwidth 268
 configure wave -valuecolwidth 100
 configure wave -justifyvalue left
 configure wave -signalnamewidth 0

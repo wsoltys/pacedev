@@ -21,7 +21,7 @@ package platform_pkg is
 	-- Number of tracks on disk
   constant num_tracks : integer := 84; 
 
-	subtype track_type is integer range 1 to num_tracks;
+	subtype track_type is integer range 0 to num_tracks;
 	
 	type sectsize_arr_type is array(natural range <>) of integer;
 	

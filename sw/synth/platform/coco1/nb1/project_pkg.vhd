@@ -24,6 +24,10 @@ package project_pkg is
   --constant PACE_CLK1_DIVIDE_BY        : natural := 1;
   --constant PACE_CLK1_MULTIPLY_BY      : natural := 3;  		-- 24*3/1 = 72MHz
 
+  constant PACE_HAS_OSD                     : boolean := false;
+  constant PACE_OSD_XPOS                    : natural := 0;
+  constant PACE_OSD_YPOS                    : natural := 0;
+
   -- NB1-specific constants that must be defined
   constant NB1_PLL_INCLK              			: NANOBOARD_PLL_INCLK_Type := NANOBOARD_PLL_INCLK_REF;
   constant NB1_INCLK0_INPUT_FREQUENCY 			: natural := 50000;   -- 20MHz

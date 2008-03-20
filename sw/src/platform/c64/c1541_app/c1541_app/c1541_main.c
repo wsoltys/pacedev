@@ -312,7 +312,7 @@ int main()
         vc1541->d64.sector = 0; // or -1?
         vc1541->d64.pos = 511;
         block += 16;
-        printf ("\nt=%.1lf\n", vc1541->track);
+        //printf ("\nt=%.1lf\n", vc1541->track);
       }
     }
     if ((gpi & C1541_STP_OUT) != (old_gpi & C1541_STP_OUT))
@@ -324,7 +324,7 @@ int main()
         vc1541->d64.sector = 0; // or -1?
         vc1541->d64.pos = 511;
         block -= 16;
-        printf ("\nt=%.1lf\n", vc1541->track);
+        //printf ("\nt=%.1lf\n", vc1541->track);
       }
     }
 
@@ -358,7 +358,7 @@ int main()
         {
           (vc1541->d64.sector)++;
           vc1541->d64.pos = 0;
-          printf ("r=%d,", block+vc1541->d64.sector);
+          //printf ("r=%d,", block+vc1541->d64.sector);
           #ifdef OCIDE_PIO_MODE
             pio_read_512 (ATA_CMD_READ_SECTORS, block+vc1541->d64.sector, (alt_u16 *)(vc1541->d64.data));
           #else
@@ -370,7 +370,7 @@ int main()
         {
           vc1541->d64.sector = 0;
           vc1541->d64.pos = 0;
-          printf ("end\nr=%d,", block+vc1541->d64.sector);
+          //printf ("end\nr=%d,", block+vc1541->d64.sector);
           #ifdef OCIDE_PIO_MODE
             pio_read_512 (ATA_CMD_READ_SECTORS, block+vc1541->d64.sector, (alt_u16 *)(vc1541->d64.data));
           #else

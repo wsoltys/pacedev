@@ -27,9 +27,9 @@ architecture SIM of c1541_diskif_tb is
 	signal	reset	        :	std_logic;
 
   -- generic drive mechanism i/o ports
-  signal  mech_in				: std_logic_vector(31 downto 0);
-  signal  mech_out			: std_logic_vector(31 downto 0);
-  signal  mech_io				: std_logic_vector(31 downto 0);
+  signal  mech_in				: std_logic_vector(63 downto 0);
+  signal  mech_out			: std_logic_vector(63 downto 0);
+  signal  mech_io				: std_logic_vector(63 downto 0);
 
 	-- drive-side interface
 	signal  di						: std_logic_vector(7 downto 0);		-- disk write data

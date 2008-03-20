@@ -35,6 +35,9 @@ entity Graphics is
     sprite_wr       : in std_logic;
 		spr0_hit				: out std_logic;
 
+		to_osd          : in to_OSD_t; 
+		from_osd        : out from_OSD_t;
+		
     red             : out std_logic_vector(9 downto 0);    
     green           : out std_logic_vector(9 downto 0);    
     blue            : out std_logic_vector(9 downto 0);

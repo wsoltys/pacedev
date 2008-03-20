@@ -43,6 +43,10 @@ entity Game is
 
     cvbs            : out   std_logic_vector(7 downto 0);
 			  
+    -- OSD
+    to_osd          : out to_OSD_t;
+    from_osd        : in from_OSD_t;
+
     -- sound
     snd_clk         : out   std_logic;
     snd_data_l      : out   std_logic_vector(15 downto 0);

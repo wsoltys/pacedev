@@ -17,8 +17,7 @@ entity Graphics is
 
 		xcentre					: in std_logic_vector(9 downto 0);
 		ycentre					: in std_logic_vector(9 downto 0);
-    osd_en          : in std_logic;
-
+		
     extra_data      : in std_logic_vector(7 downto 0);
 		palette_data		: in ByteArrayType(15 downto 0);
 						
@@ -38,6 +37,9 @@ entity Graphics is
     sprite_wr       : in std_logic;
 		spr0_hit				: out std_logic;
 
+		to_osd          : in to_OSD_t; 
+		from_osd        : out from_OSD_t;
+		
     red             : out std_logic_vector(9 downto 0);    
     green           : out std_logic_vector(9 downto 0);    
     blue            : out std_logic_vector(9 downto 0);
@@ -205,9 +207,12 @@ begin
 							bitmap_rgb(1);
 
   -- dodgy OSD transparency...
-  red <= red_s when (osd_en and osd_active) = '0' else osd_colour(2 downto 0) & red_s(9 downto 6) & "000";
-  green <= green_s when (osd_en and osd_active) = '0' else osd_colour(5 downto 3) & green_s(9 downto 6) & "000";
-  blue <= blue_s when (osd_en and osd_active) = '0' else osd_colour(7 downto 6) & '0' & blue_s(9 downto 6) & "000";
+  red <=    red_s when (to_osd.en and osd_active) = '0' else 
+            osd_colour(2 downto 0) & red_s(9 downto 6) & "000";
+  green <=  green_s when (to_osd.en and osd_active) = '0' else 
+            osd_colour(5 downto 3) & green_s(9 downto 6) & "000";
+  blue <=   blue_s when (to_osd.en and osd_active) = '0' else 
+            osd_colour(7 downto 6) & '0' & blue_s(9 downto 6) & "000";
 
 	-- it's actually more complicated than this on the NES
 	-- but it'll do for now...
@@ -291,9 +296,9 @@ begin
         b_i					=> rgb_data.b,
 
         -- VGA signals (out)
-        red         => red,
-        green       => green,
-        blue        => blue,
+        red         => red_s,
+        green       => green_s,
+        blue        => blue_s,
         lcm_data		=> lcm_data,
         hsync       => hsync_s,
         vsync       => vsync
@@ -325,9 +330,9 @@ begin
         b_i					=> rgb_data.b,
 
         -- VGA signals (out)
-        red         => red,
-        green       => green,
-        blue        => blue,
+        red         => red_s,
+        green       => green_s,
+        blue        => blue_s,
         lcm_data		=> lcm_data,
         hsync       => hsync_s,
         vsync       => vsync
@@ -359,9 +364,9 @@ begin
         b_i					=> rgb_data.b,
 
         -- VGA signals (out)
-        red         => red,
-        green       => green,
-        blue        => blue,
+        red         => red_s,
+        green       => green_s,
+        blue        => blue_s,
         lcm_data		=> lcm_data,
         hsync       => hsync_s,
         vsync       => vsync

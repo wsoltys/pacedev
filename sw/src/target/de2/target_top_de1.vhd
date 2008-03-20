@@ -145,7 +145,7 @@ end target_top;
 
 architecture SYN of target_top is
 
-  component de1_top is
+  component de1_wrapper is
     port
     (
       --////////////////////	Clock Input	 	////////////////////	 
@@ -234,14 +234,14 @@ architecture SYN of target_top is
       gpio_0        : inout std_logic_vector(35 downto 0);  --	GPIO Connection 0
       gpio_1        : inout std_logic_vector(35 downto 0)   --	GPIO Connection 1
     );
-  end component de1_top;
+  end component de1_wrapper;
 
 	alias gpio_maple 		: std_logic_vector(35 downto 0) is gpio_0;
 	alias gpio_lcd 			: std_logic_vector(35 downto 0) is gpio_1;
 	
 begin
 
-  de1_top_inst : de1_top
+  de1_top_inst : de1_wrapper
     port map
     (
       --////////////////////	Clock Input	 	////////////////////	 

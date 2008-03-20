@@ -36,6 +36,10 @@ package project_pkg is
 	--constant PACE_ENABLE_ADV724					      : std_logic := '1';
 	--constant USE_VIDEO_VBLANK_INTERRUPT 		  : boolean := false;
 
+  constant PACE_HAS_OSD                     : boolean := false;
+  constant PACE_OSD_XPOS                    : natural := 0;
+  constant PACE_OSD_YPOS                    : natural := 0;
+
 	constant PACE_ADV724_STD								  : std_logic := ADV724_STD_PAL;
 
   -- P2-specific constants

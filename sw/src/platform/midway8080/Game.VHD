@@ -57,7 +57,10 @@ entity Game is
     vblank					: in std_logic;    
 		xcentre					: out std_logic_vector(9 downto 0);
 		ycentre					: out std_logic_vector(9 downto 0);
-    osd_en          : out std_logic;
+
+    -- OSD
+    to_osd          : out to_OSD_t;
+    from_osd        : in from_OSD_t;
 
     -- sound
     snd_rd          : out std_logic;                       
@@ -309,7 +312,7 @@ begin
       end if;
       osd_key_r := inputs(2)(1);
     end if;
-    osd_en <= osd_en_v;
+    to_osd.en <= osd_en_v;
   end process;
 
 	-- old vram mapper logic

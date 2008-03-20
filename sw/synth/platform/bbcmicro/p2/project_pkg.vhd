@@ -21,6 +21,10 @@ package project_pkg is
   constant PACE_CLK1_MULTIPLY_BY      		  : natural := 4;  	-- 24*4/3 = 32MHz
 	constant PACE_ENABLE_ADV724							  : std_logic := '1';
 
+  constant PACE_HAS_OSD                     : boolean := false;
+  constant PACE_OSD_XPOS                    : natural := 0;
+  constant PACE_OSD_YPOS                    : natural := 0;
+
 	constant PACE_ADV724_STD								  : std_logic := ADV724_STD_PAL;
 
   -- P2-specific constants

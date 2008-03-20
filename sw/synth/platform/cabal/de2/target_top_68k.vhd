@@ -657,7 +657,10 @@ begin
     signal vblank_s       	: std_logic;
     signal xcentre					: std_logic_vector(9 downto 0);
     signal ycentre					: std_logic_vector(9 downto 0);
-          
+
+    signal to_osd           : to_OSD_t;
+    signal from_osd         : from_OSD_t;
+
     -- sound signals
     signal snd_rd           : std_logic;
     signal snd_wr           : std_logic;
@@ -718,6 +721,9 @@ begin
         xcentre					=> xcentre,
         ycentre					=> ycentre,
     
+        to_osd          => to_osd,
+        from_osd        => from_osd,
+
         -- sound
         snd_rd          => snd_rd,
         snd_wr          => snd_wr,
@@ -771,6 +777,9 @@ begin
         sprite_wr       => sprite_wr,
         spr0_hit				=> spr0_hit,
     
+        to_osd          => to_osd,
+        from_osd        => from_osd,
+
         red             => vga_r,
         green           => vga_g,
         blue            => vga_b,

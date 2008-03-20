@@ -22,6 +22,10 @@ package project_pkg is
 	constant PACE_VIDEO_H_SCALE       				: integer := 1;
 	constant PACE_VIDEO_V_SCALE       				: integer := 1;
 
+  constant PACE_HAS_OSD                     : boolean := false;
+  constant PACE_OSD_XPOS                    : natural := 0;
+  constant PACE_OSD_YPOS                    : natural := 0;
+
 	-- DE2 constants which *MUST* be defined
 	
 	constant DE2_JAMMA_IS_MAPLE	              : boolean := false;

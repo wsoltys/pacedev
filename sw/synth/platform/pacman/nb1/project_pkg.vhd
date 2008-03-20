@@ -27,6 +27,10 @@ package project_pkg is
   constant NB1_PLL_INCLK                    : NANOBOARD_PLL_INCLK_Type := NANOBOARD_PLL_INCLK_REF;
   constant NB1_INCLK0_INPUT_FREQUENCY       : natural := 50000;   -- 20MHz
 
+  constant PACE_HAS_OSD                     : boolean := false;
+  constant PACE_OSD_XPOS                    : natural := 0;
+  constant PACE_OSD_YPOS                    : natural := 0;
+
 	-- Pacman-specific constants
 			
 	constant PACMAN_CPU_CLK_ENA_DIVIDE_BY		  : natural := 10;

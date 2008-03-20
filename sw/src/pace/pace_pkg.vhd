@@ -84,6 +84,20 @@ package pace_pkg is
 		we				: std_logic;
 	end record;
 	
+	--
+  -- OSD interface data structure
+  --
+  type from_OSD_t is record
+    d         : std_logic_vector(7 downto 0);
+  end record;
+
+  type to_OSD_t is record
+    en        : std_logic;
+    a         : std_logic_vector(7 downto 0);
+    d         : std_logic_vector(7 downto 0);
+    we        : std_logic;
+  end record;
+
 	-- create a constant that automatically determines 
 	-- whether this is simulation or synthesis
 	constant in_simulation : BOOLEAN := false

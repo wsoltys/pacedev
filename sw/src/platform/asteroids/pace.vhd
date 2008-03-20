@@ -96,7 +96,9 @@ architecture SYN of PACE is
 	alias toggle_erase					: std_logic is inputs(1)(1);
 	signal cpu_reset						: std_logic;
 	signal erase								: std_logic;
-		
+
+  signal to_osd               : to_OSD_t;
+
 begin
 
 	-- map inputs
@@ -301,6 +303,8 @@ graphics_inst : entity work.Graphics
     sprite_reg_addr 		=> (others => 'X'),
     updata          		=> (others => 'X'),
     sprite_wr       		=> 'X',
+
+    to_osd              => to_osd,
 
     red             		=> red,
     green           		=> green,

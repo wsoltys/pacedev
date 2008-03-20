@@ -19,6 +19,10 @@ package project_pkg is
   constant PACE_CLK1_DIVIDE_BY              : natural := 25;
   constant PACE_CLK1_MULTIPLY_BY            : natural := 8;   -- 50*8/25 = 16MHz
 
+  constant PACE_HAS_OSD                     : boolean := false;
+  constant PACE_OSD_XPOS                    : natural := 0;
+  constant PACE_OSD_YPOS                    : natural := 0;
+
   -- DE2-specific constants
   constant DE2_JAMMA_IS_MAPLE               : boolean := false;
   constant DE2_JAMMA_IS_NGC                 : boolean := true;
@@ -41,6 +45,9 @@ package project_pkg is
   constant BBC_USE_INTERNAL_RAM             : boolean := false;
 
   -- implementation options
+
+  constant BBC_USE_T65                      : boolean := true;
+  constant BBC_USE_65XX                     : boolean := not BBC_USE_T65;
 
   constant BBC_USE_ROCKOLA_6845             : boolean := true;
   constant BBC_USE_OC_6845                  : boolean := not BBC_USE_ROCKOLA_6845;

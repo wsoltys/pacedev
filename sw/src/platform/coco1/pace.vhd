@@ -68,7 +68,9 @@ architecture SYN of PACE is
 	signal vga_blue					: std_logic_vector(7 downto 0);
 	signal vga_hsync				: std_logic;
 	signal vga_vsync				: std_logic;
-			        
+
+  signal from_osd         : from_OSD_t;
+
   -- sound signals
   signal snd_rd           : std_logic;
   signal snd_wr           : std_logic;
@@ -124,6 +126,9 @@ begin
 	    vsync						=> vga_vsync,
 
       cvbs            => GS_CVBS,
+
+      to_osd          => open,
+      from_osd        => from_osd,
 
       -- sound
       snd_rd          => snd_rd,

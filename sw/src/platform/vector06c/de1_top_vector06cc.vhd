@@ -11,7 +11,7 @@ use work.project_pkg.all;
 --use work.platform_pkg.all;
 use work.target_pkg.all;
 
-entity de1_top is
+entity de1_wrapper is
   port
   (
     --////////////////////	Clock Input	 	////////////////////	 
@@ -100,9 +100,9 @@ entity de1_top is
     gpio_0        : inout std_logic_vector(35 downto 0);  --	GPIO Connection 0
     gpio_1        : inout std_logic_vector(35 downto 0)   --	GPIO Connection 1
   );
-end entity de1_top;
+end entity de1_wrapper;
 
-architecture SYN of de1_top is
+architecture SYN of de1_wrapper is
 
   component vector06cc is
     port

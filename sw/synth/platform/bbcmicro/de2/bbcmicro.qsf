@@ -516,6 +516,8 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_Pack
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_ALU.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_MCode.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/65xx/cpu65xx_e.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/65xx/cpu65xx_fast.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/bbcmicro/inputmapper.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/inputs.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/m6522.vhd
@@ -523,6 +525,7 @@ set_global_assignment -name VERILOG_FILE ../../../../src/component/video/crtc684
 set_global_assignment -name VHDL_FILE ../../../../src/component/video/cursor.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/video/oc_crtc6845.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/video/saa505x.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/sound/sn76489/sn76489.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/bbcmicro/altera_mem.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/bbcmicro/game.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd

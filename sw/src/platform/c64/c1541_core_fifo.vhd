@@ -213,8 +213,8 @@ architecture SYN of c1541_core is
 		-- assign external outputs	
 		fifo_wrfull <= fifo_wrfull_s;
     fifo_wrusedw <= fifo_wrusedw_s;
-    sync_n <= sync_n_s;
-    byte_n <= byte_n_s or not sync_n_s;
+    sync_n <= sync_n_s or byte_n;
+    byte_n <= byte_n_s; -- or not sync_n_s;
 
 		--
 		--	Component instantiation
