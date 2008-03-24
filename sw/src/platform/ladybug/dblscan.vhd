@@ -1,4 +1,9 @@
 --
+--	This file is a *derivative* work of the source cited below.
+--	The original source can be downloaded from <http://www.fpgaarcade.com>
+--
+
+--
 -- Adapted for Lady Bug by A. Laeuger, 08-Feb-2006
 --
 -- Based on

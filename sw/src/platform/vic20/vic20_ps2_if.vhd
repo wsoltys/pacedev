@@ -1,4 +1,9 @@
 --
+--	This file is a *derivative* work of the source cited below.
+--	The original source can be downloaded from <http://www.fpgaarcade.com>
+--
+
+--
 -- A simulation model of VIC20 hardware
 -- Copyright (c) MikeJ - March 2003
 --

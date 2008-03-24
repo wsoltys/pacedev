@@ -1,4 +1,9 @@
 --
+--	This file is a *derivative* work of the source cited below.
+--	The original source can be downloaded from <http://www.fpgaarcade.com>
+--
+
+--
 -- A simulation model of Scramble hardware
 -- Copyright (c) MikeJ - Feb 2007
 --

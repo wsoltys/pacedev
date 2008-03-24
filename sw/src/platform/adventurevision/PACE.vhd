@@ -1,6 +1,6 @@
 --
 --	This file is a *derivative* work of the source cited below.
---	It can be downloaded from <http://www.fpgaarcade.com>
+--	The original source can be downloaded from <http://www.fpgaarcade.com>
 --
 
 -------------------------------------------------------------------------------

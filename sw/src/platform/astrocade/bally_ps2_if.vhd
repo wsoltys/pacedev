@@ -1,4 +1,9 @@
 --
+--	This file is a *derivative* work of the source cited below.
+--	The original source can be downloaded from <http://www.fpgaarcade.com>
+--
+
+--
 -- A simulation model of Bally Astrocade hardware
 -- Copyright (c) MikeJ - Nov 2004
 --

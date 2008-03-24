@@ -1,3 +1,8 @@
+--
+--	This file is a *derivative* work of MikeJ's Asteroids Deluxe implementation.
+--	The original source can be downloaded from <http://www.fpgaarcade.com>
+--
+
 Library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_unsigned.all;
