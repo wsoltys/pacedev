@@ -20,7 +20,9 @@ entity PACE is
     dip             : in std_logic_vector(7 downto 0);
 		jamma						: in JAMMAInputsType;
 
-    -- external RAM
+    -- external ROM/RAM
+    flash_i         : in from_FLASH_t;
+    flash_o         : out to_flash_t;
     sram_i       		: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
 
@@ -135,7 +137,9 @@ begin
       upaddr          => uPaddr,
       updatao         => uPdatao,
   
-      -- SRAM
+      -- FLASH/SRAM
+      flash_i         => flash_i,
+      flash_o         => flash_o,
 			sram_i					=> sram_i,
 			sram_o					=> sram_o,
   

@@ -13,10 +13,11 @@ package target_pkg is
 	
 	constant PACE_TARGET : PACETargetType := PACE_TARGET_DE1;
 
+  constant PACE_FPGA_VENDOR : PACEFpgaVendor_t := PACE_FPGA_VENDOR_ALTERA;
+  constant PACE_FPGA_FAMILY : PACEFpgaFamily_t := PACE_FPGA_FAMILY_CYCLONE2;
+  
 	--
-	-- DE2-specific constants
+	-- DE1-specific constants
 	--
-	
-	constant DE1_LCD_LINE1							: string := "   PACE  2008   ";		-- 16 chars exactly
 	
 end;

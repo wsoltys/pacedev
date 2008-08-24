@@ -287,23 +287,11 @@ begin
   -----------------------------------------------------------------------------
   pll_inclk_s(1) <= '0';
   pll_inclk_s(0) <= ext_clk_i;
-  pll_b : altpll
-    generic map (
-      lpm_type               => "altpll",
-      inclk0_input_frequency => 50000,  -- 20MHz = 50000ps
-      pll_type               => "AUTO",
-      intended_device_family => "Cyclone",
-      operation_mode         => "NORMAL",
-      compensate_clock       => "CLK0",
-      clk0_duty_cycle        => 50,
-      clk0_multiply_by       => 8,
-      clk0_divide_by         => 9,
-      clk0_time_delay        => "0",
-      clk0_phase_shift       => "0"
-    )
-    port map (
-      inclk => pll_inclk_s,
-      clk   => pll_clk_s
+  pll_b : entity work.cv_pll
+    port map 
+    (
+      inclk0  => pll_inclk_s(0),
+      c0      => pll_clk_s(0)
     );
   clk_s <= pll_clk_s(0);
 

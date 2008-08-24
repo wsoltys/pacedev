@@ -31,6 +31,13 @@ package pace_pkg is
 		PACE_FPGA_FAMILY_SPARTAN3
 	);
 
+  type PACEJamma_t is
+  (
+    PACE_JAMMA_NONE,
+    PACE_JAMMA_MAPLE,
+    PACE_JAMMA_NGC
+  );
+
   -- Types
 
   type RGBType is record
@@ -82,6 +89,21 @@ package pace_pkg is
 		cs				: std_logic;
 		oe				: std_logic;
 		we				: std_logic;
+	end record;
+	
+	--
+	-- FLASH interface data structure
+	--
+	type from_FLASH_t is record
+		d					: std_logic_vector(7 downto 0);
+	end record;
+	
+	type to_FLASH_t is record
+		a					: std_logic_vector(21 downto 0);
+		d					: std_logic_vector(7 downto 0);
+		we				: std_logic;
+		cs				: std_logic;
+		oe				: std_logic;
 	end record;
 	
 	--

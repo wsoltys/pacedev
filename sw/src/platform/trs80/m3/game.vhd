@@ -5,6 +5,7 @@ use ieee.std_logic_arith.EXT;
 library work;
 use work.kbd_pkg.in8;
 use work.pace_pkg.all;
+use work.project_pkg.all;
 use work.platform_pkg.all;
 use work.target_pkg.all;
 
@@ -114,6 +115,28 @@ architecture SYN of Game is
 	     debug          : out   std_logic_vector(7 downto 0)
 	   );
 	end component;
+
+  component osd_controller is
+    generic
+    (
+      WIDTH_GPIO  : natural := 8
+    );
+    port
+    (
+      clk         : in std_logic;
+      clk_en      : in std_logic;
+      reset       : in std_logic;
+
+      osd_key     : in std_logic;
+
+      to_osd      : out to_OSD_t;
+      from_osd    : in from_OSD_t;
+
+      gpio_i      : in std_logic_vector(WIDTH_GPIO-1 downto 0);
+      gpio_o      : out std_logic_vector(WIDTH_GPIO-1 downto 0);
+      gpio_oe     : out std_logic_vector(WIDTH_GPIO-1 downto 0)
+    );
+  end component osd_controller;
 
 	alias clk_20M					: std_logic is clk(0);
 	alias clk_40M					: std_logic is clk(1);
@@ -473,25 +496,29 @@ begin
   gpio_to_osd(4) <= inputs(6)(0); -- ENTER
   gpio_to_osd(7 downto 5) <= (others => '0');
 
-  osd_inst : entity work.osd_controller
-    generic map
-    (
-      WIDTH_GPIO  => gpio_to_osd'length
-    )
-    port map
-    (
-      clk         => clk_20M,
-      clk_en      => '1',
-      reset       => cpu_reset,
+  GEN_OSD : if PACE_HAS_OSD generate
 
-      osd_key     => inputs(8)(1),
+    osd_inst : osd_controller
+      generic map
+      (
+        WIDTH_GPIO  => gpio_to_osd'length
+      )
+      port map
+      (
+        clk         => clk_20M,
+        clk_en      => '1',
+        reset       => cpu_reset,
 
-      to_osd      => to_osd,
-      from_osd    => from_osd,
+        osd_key     => inputs(8)(1),
 
-      gpio_i      => gpio_to_osd,
-      gpio_o      => gpio_from_osd
-    );
+        to_osd      => to_osd,
+        from_osd    => from_osd,
 
+        gpio_i      => gpio_to_osd,
+        gpio_o      => gpio_from_osd
+      );
+
+  end generate GEN_OSD;
+  
 end SYN;
 

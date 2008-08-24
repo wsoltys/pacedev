@@ -27,7 +27,9 @@ entity Game is
     upaddr          : out std_logic_vector(15 downto 0);   
     updatao         : out std_logic_vector(7 downto 0);    
 
-    -- SRAM
+    -- FLASH/SRAM
+    flash_i         : in from_FLASH_t;
+    flash_o         : out to_FLASH_t;
 		sram_i					: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
 

@@ -164,10 +164,12 @@ architecture SYN of target_top is
 	
 	signal ps2clk_s			: std_logic;
 	signal ps2dat_s			: std_logic;
-	signal jamma			: JAMMAInputsType;
+	signal jamma			  : JAMMAInputsType;
 
-	signal sram_i			: from_SRAM_t;
-	signal sram_o			: to_SRAM_t;	
+  signal flash_i      : from_FLASH_t;
+  signal flash_o      : to_FLASH_t;
+	signal sram_i			  : from_SRAM_t;
+	signal sram_o			  : to_SRAM_t;	
 
   signal snd_data_l  	: std_logic_vector(15 downto 0);
   signal snd_data_r  	: std_logic_vector(15 downto 0);
@@ -184,13 +186,13 @@ architecture SYN of target_top is
 	signal gcj						: work.gamecube_pkg.joystate_type;
 			
 	signal video_clk_s	: std_logic;
-    signal lcm_sclk   	: std_logic;
-    signal lcm_sdat   	: std_logic;
-    signal lcm_scen   	: std_logic;
-    signal lcm_data   	: std_logic_vector(7 downto 0);
-    signal lcm_grst  		: std_logic;
-    signal lcm_hsync  	: std_logic;
-    signal lcm_vsync  	: std_logic;
+  signal lcm_sclk   	: std_logic;
+  signal lcm_sdat   	: std_logic;
+  signal lcm_scen   	: std_logic;
+  signal lcm_data   	: std_logic_vector(7 downto 0);
+  signal lcm_grst  		: std_logic;
+  signal lcm_hsync  	: std_logic;
+  signal lcm_vsync  	: std_logic;
 	signal lcm_dclk  		: std_logic;
 	signal lcm_shdb  		: std_logic;
 	signal lcm_clk			: std_logic;
@@ -232,16 +234,71 @@ begin
 	ps2clk_s <= ps2_clk;
 	ps2dat_s <= ps2_dat;
 
-	-- enable both bytes
-	sram_addr <= sram_o.a(sram_addr'range);
-	sram_i.d <= EXT(sram_dq, sram_i.d'length);
-	sram_dq <= sram_o.d(sram_dq'range) when (sram_o.cs = '1' and sram_o.we = '1') else (others => 'Z');
-    sram_ub_n <= not sram_o.be(1);
-    sram_lb_n <= not sram_o.be(0);
-	sram_ce_n <= not sram_o.cs;
-	sram_oe_n <= not sram_o.oe;
-	sram_we_n <= not sram_o.we;
+  -- flash memory
+  BLK_FLASH : block
+  begin
+    fl_rst_n <= '0';
 
+    GEN_FLASH : if PACE_HAS_FLASH generate
+      flash_i.d <= fl_dq;
+      fl_dq <= flash_o.d when (flash_o.cs = '1' and flash_o.oe = '1') else (others => 'Z');
+      fl_addr <= flash_o.a;
+      fl_we_n <= not flash_o.we;
+      fl_oe_n <= not flash_o.oe;
+      fl_ce_n <= not flash_o.cs;
+    end generate GEN_FLASH;
+    
+    GEN_NO_FLASH : if not PACE_HAS_FLASH generate
+      flash_i.d <= (others => '1');
+      fl_dq <= (others => 'Z');
+      fl_addr <= (others => 'Z');
+      fl_ce_n <= '1';
+      fl_oe_n <= '1';
+      fl_we_n <= '1';
+    end generate GEN_NO_FLASH;
+
+  end block BLK_FLASH;
+  
+  -- static memory
+  BLK_SRAM : block
+  begin
+  
+    GEN_SRAM : if PACE_HAS_SRAM generate
+      sram_addr <= sram_o.a(sram_addr'range);
+      sram_i.d <= EXT(sram_dq, sram_i.d'length);
+      sram_dq <= sram_o.d(sram_dq'range) when (sram_o.cs = '1' and sram_o.we = '1') else (others => 'Z');
+      sram_ub_n <= not sram_o.be(1);
+      sram_lb_n <= not sram_o.be(0);
+      sram_ce_n <= not sram_o.cs;
+      sram_oe_n <= not sram_o.oe;
+      sram_we_n <= not sram_o.we;
+    end generate GEN_SRAM;
+    
+    GEN_NO_SRAM : if not PACE_HAS_SRAM generate
+      sram_addr <= (others => 'Z');
+      sram_i.d <= (others => '1');
+      sram_dq <= (others => 'Z');
+      sram_ub_n <= '1';
+      sram_lb_n <= '1';
+      sram_ce_n <= '1';
+      sram_oe_n <= '1';
+      sram_we_n <= '1';  
+    end generate GEN_NO_SRAM;
+    
+  end block BLK_SRAM;
+
+  BLK_SDRAM : block
+  begin
+    GEN_NO_SDRAM : if not PACE_HAS_SDRAM generate
+      dram_addr <= (others => 'Z');
+      dram_we_n <= '1';
+      dram_cs_n <= '1';
+      dram_clk <= '0';
+      dram_cke <= '0';
+    end generate GEN_NO_SDRAM;
+  
+  end block BLK_SDRAM;
+    
   -- turn off LEDs
   hex0 <= (others => '1');
   hex1 <= (others => '1');
@@ -250,21 +307,6 @@ begin
   -- ledg(8) <= '0';
   ledr(9 downto 8) <= (others => '0');
 	
-  -- disable DRAM
-  dram_addr <= (others => 'Z');
-  dram_we_n <= '1';
-  dram_cs_n <= '1';
-  dram_clk <= '0';
-  dram_cke <= '0';
-
-  -- disable flash
-  fl_dq <= (others => 'Z');
-  fl_addr <= (others => 'Z');
-  fl_we_n <= '1';
-  fl_rst_n <= '0';
-  fl_oe_n <= '1';
-  fl_ce_n <= '1';
-
   -- disable SD card
   sd_clk <= '0';
   sd_dat <= 'Z';
@@ -459,7 +501,9 @@ begin
       dip             	=> sw_s(7 downto 0),
   	  jamma							=> jamma,
 
-     	-- external RAM
+     	-- external ROM/RAM
+     	flash_i           => flash_i,
+      flash_o           => flash_o,
       sram_i        		=> sram_i,
       sram_o        		=> sram_o,
   
@@ -508,11 +552,7 @@ begin
 			I2C_SDAT					=> I2C_SDAT
 		);
 
-	assert (not (DE1_JAMMA_IS_MAPLE and DE1_JAMMA_IS_NGC))
-		report "Cannot choose both MAPLE and GAMECUBE interfaces"
-		severity error;
-	
-	GEN_MAPLE : if DE1_JAMMA_IS_MAPLE generate
+	GEN_MAPLE : if PACE_JAMMA = PACE_JAMMA_MAPLE generate
 	
 		-- Dreamcast MapleBus joystick interface
 		MAPLE_JOY : entity work.maple_joy
@@ -546,7 +586,7 @@ begin
 
 	end generate GEN_MAPLE;
 
-	GEN_GAMECUBE : if DE1_JAMMA_IS_NGC generate
+	GEN_GAMECUBE : if PACE_JAMMA = PACE_JAMMA_NGC generate
 	
 		GC_JOY: gamecube_joy
 			generic map( MHZ => 50 )
