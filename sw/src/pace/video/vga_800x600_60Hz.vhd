@@ -48,7 +48,7 @@ architecture VGA_800X600_60HZ of pace_video_controller is
   signal hblank_s          		: std_logic_vector(5 downto 0);
   signal vblank_s          		: std_logic;
 
-	signal test_pixel						: RGBType;
+	signal test_pixel						: RGB_t;
 
   --signal active_v_s           : std_logic_vector(8 downto 0);
   --signal count_v_s            : integer;

@@ -22,7 +22,7 @@ entity inputmapper is
     release   : in     std_logic;
     data      : in     std_logic_vector(7 downto 0);
 		-- JAMMA interface
-		jamma			: in JAMMAInputsType;
+		jamma			: in from_JAMMA_t;
 
     -- user outputs
     dips			: in		std_logic_vector(7 downto 0);

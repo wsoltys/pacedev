@@ -30,7 +30,7 @@ port
     bitmap_a   		: out std_logic_vector(15 downto 0);
 
 		-- RGB output (10-bits each)
-		rgb						: out RGBType;
+		rgb						: out rgb_t;
 		bitmap_on			: out std_logic
 );
 end bitmapCtl_1;

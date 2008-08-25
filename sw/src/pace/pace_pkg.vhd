@@ -40,16 +40,27 @@ package pace_pkg is
 
   -- Types
 
-  type RGBType is record
+  type RGB_t is record
     r : std_logic_vector(9 downto 0);
     g : std_logic_vector(9 downto 0);
     b : std_logic_vector(9 downto 0);
   end record;
 
-  type RGBArrayType is array (natural range <>) of RGBType;
+  type RGBArrayType is array (natural range <>) of rgb_t;
 
 	type ByteArrayType is array (natural range <>) of std_logic_vector(7 downto 0);
 
+  -- maximums from the DE2 target
+
+  constant PACE_NUM_SWITCHES  : natural := 18;
+  subtype from_SWITCHES_t is std_logic_vector(PACE_NUM_SWITCHES-1 downto 0);
+  
+  constant PACE_NUM_BUTTONS   : natural := 4;
+  subtype from_BUTTONS_t is std_logic_vector(PACE_NUM_BUTTONS-1 downto 0);
+  
+  constant PACE_NUM_LEDS      : natural := 18;
+  subtype to_LEDS_t is std_logic_vector(PACE_NUM_LEDS-1 downto 0);
+  
 	--
 	-- JAMMA interface data structures
 	-- - note: all signals are active LOW
@@ -66,7 +77,7 @@ package pace_pkg is
 
 	type JAMMAPlayerInputsArrayType is array (natural range <>) of JAMMAPlayerInputsType;
 	
-	type JAMMAInputsType is record
+	type from_JAMMA_t is record
 		coin_cnt	: std_logic_vector(1 to 2);
 		service		: std_logic;
 		tilt			: std_logic;
@@ -74,7 +85,18 @@ package pace_pkg is
 		coin			: std_logic_vector(1 to 2);
 		p					: JAMMAPlayerInputsArrayType(1 to 2);
 	end record;
-	
+
+  --
+  -- INPUTS
+  --
+	type from_INPUTS_t is record
+    ps2_kclk  : std_logic;
+    ps2_kdat  : std_logic;
+    ps2_mclk  : std_logic;
+    ps2_mdat  : std_logic;
+    jamma_n   : from_JAMMA_t;
+  end record;
+  
 	--
 	-- SRAM interface data structure
 	--
@@ -105,8 +127,57 @@ package pace_pkg is
 		cs				: std_logic;
 		oe				: std_logic;
 	end record;
-	
-	--
+
+  type from_VIDEO_t is record
+    clk       : std_logic;
+    clk_ena   : std_logic;
+  end record;
+  
+  type to_VIDEO_t is record
+    clk       : std_logic;
+    rgb       : rgb_t;
+    hsync     : std_logic;
+    vsync     : std_logic;
+    hblank    : std_logic;
+    vblank    : std_logic;
+  end record;
+
+  type from_AUDIO_t is record
+    clk       : std_logic;
+  end record;
+  
+  type to_AUDIO_t is record
+    clk       : std_logic;
+    ldata     : std_logic_vector(15 downto 0);
+    rdata     : std_logic_vector(15 downto 0);
+  end record;
+  
+  type from_SPI_t is record
+    din       : std_logic;
+  end record;
+  
+  type to_SPI_t is record
+    clk       : std_logic;
+    mode      : std_logic;
+    sel       : std_logic;
+    ena       : std_logic;
+    dout      : std_logic;
+  end record;
+  
+  type to_SERIAL_t is record
+    txd       : std_logic;
+  end record;
+  
+  type from_SERIAL_t is record
+    rxd       : std_logic;
+  end record;
+  
+  constant PACE_NUM_GPI : natural := 32;
+  subtype from_GP_t is std_logic_vector(PACE_NUM_GPI-1 downto 0);
+  constant PACE_NUM_GPO : natural := 32;
+  subtype to_GP_t is std_logic_vector(PACE_NUM_GPO-1 downto 0);
+
+ 	--
   -- OSD interface data structure
   --
   type from_OSD_t is record

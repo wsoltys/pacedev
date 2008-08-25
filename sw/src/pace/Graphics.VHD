@@ -82,7 +82,7 @@ architecture SYN of Graphics is
 	    bitmap_a   		: out std_logic_vector(15 downto 0);
 
 			-- RGB output (10-bits each)
-			rgb						: out RGBType;
+			rgb						: out RGB_t;
 			bitmap_on			: out std_logic
 	) ;
 	end component;
@@ -112,7 +112,7 @@ architecture SYN of Graphics is
 	    attr_a      : out std_logic_vector(9 downto 0);
 
 			-- RGB output (10-bits each)
-			rgb					: out RGBType;
+			rgb					: out RGB_t;
 			tilemap_on	: out std_logic
 	) ;
 	end component;
@@ -139,7 +139,7 @@ architecture SYN of Graphics is
 	    attr_a      : out std_logic_vector(9 downto 0);
 
 			-- RGB output (10-bits each)
-			rgb					: out RGBType;
+			rgb					: out RGB_t;
 			tilemap_on	: out std_logic
 	) ;
 	end component;
@@ -162,7 +162,7 @@ architecture SYN of Graphics is
 			sprite_wr		: in std_logic;
 			sprRegAddr	: in std_logic_vector(7 downto 0);
 			
-			rgb					: out RGBType;
+			rgb					: out RGB_t;
 			spr_on			: out std_logic;
 			spr_pri			: out std_logic;
 			spr0_on			: out std_logic
@@ -183,7 +183,7 @@ architecture SYN of Graphics is
 	signal tilemap_rgb	: RGBArrayType(1 to 1);
 	signal tilemap_on		: std_logic_vector(1 to 1);
 	
-	signal sprite_rgb		: RGBType;
+	signal sprite_rgb		: RGB_t;
 	signal sprite_on		: std_logic;
 	signal sprite_pri		: std_logic;
 	signal sprite0_on		: std_logic;
@@ -191,7 +191,7 @@ architecture SYN of Graphics is
   signal osd_active   : std_logic;
   signal osd_colour   : std_logic_vector(7 downto 0);
 
-	signal rgb_data			: RGBType;
+	signal rgb_data			: RGB_t;
 
   -- before OSD is mixed in
   signal red_s        : std_logic_vector(9 downto 0);

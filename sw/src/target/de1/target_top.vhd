@@ -73,7 +73,7 @@ entity target_top is
 		tdi           : in std_logic;                         -- CPLD -> FPGA (data in)
 		tck           : in std_logic;                         -- CPLD -> FPGA (clk)
 		tcs           : in std_logic;                         -- CPLD -> FPGA (CS)
-	    tdo           : out std_logic;                        -- FPGA -> CPLD (data out)
+	  tdo           : out std_logic;                        -- FPGA -> CPLD (data out)
 		--////////////////////	I2C		////////////////////////////
 		i2c_sdat      : inout std_logic;                      --	I2C Data
 		i2c_sclk      : out std_logic;                        --	I2C Clock
@@ -130,60 +130,58 @@ architecture SYN of target_top is
   end component I2S_LCM_Config;
 
   component SEG7_LUT is
-    port (
+    port 
+    (
       iDIG : in std_logic_vector(3 downto 0); 
       oSEG : out std_logic_vector(6 downto 0)
     );
   end component;
 
-  	component gamecube_joy is
-		generic (
+ 	component gamecube_joy is
+		generic 
+		(
 			MHZ				: natural := 50
 		);
-	  port (
-			clk  	    	: in std_logic;
+	  port 
+		(
+			clk  	    : in std_logic;
 			reset			: in std_logic;
 			oe				: out std_logic;
-			d				: inout std_logic;
-			joystate		: out work.gamecube_pkg.joystate_type
+			d				  : inout std_logic;
+			joystate	: out work.gamecube_pkg.joystate_type
 		);
 	end component;
 
 	alias gpio_maple 		: std_logic_vector(35 downto 0) is gpio_0;
 	alias gpio_lcd 			: std_logic_vector(35 downto 0) is gpio_1;
 	
-	signal clk				: std_logic_vector(0 to 3);
-    signal init       		: std_logic;
-    signal reset      		: std_logic;
-    signal button_p   		: std_logic;
+	signal clk_i			  : std_logic_vector(0 to 3);
+  signal init       	: std_logic;
+  signal reset_i     	: std_logic;
 	signal reset_n			: std_logic;
 
-	signal sw_s				: std_logic_vector(9 downto 0);
-	signal vga_hs_s			: std_logic;
-	signal vga_vs_s			: std_logic;
-	
-	signal ps2clk_s			: std_logic;
-	signal ps2dat_s			: std_logic;
-	signal jamma			  : JAMMAInputsType;
-
+  signal buttons_i    : from_BUTTONS_t;
+  signal switches_i   : from_SWITCHES_t;
+  signal leds_o       : to_LEDS_t;
+  signal inputs_i     : from_INPUTS_t;
   signal flash_i      : from_FLASH_t;
   signal flash_o      : to_FLASH_t;
 	signal sram_i			  : from_SRAM_t;
 	signal sram_o			  : to_SRAM_t;	
-
-  signal snd_data_l  	: std_logic_vector(15 downto 0);
-  signal snd_data_r  	: std_logic_vector(15 downto 0);
-  alias aud_clk    		: std_logic is clk(2);
-  signal aud_data_l  	: std_logic_vector(15 downto 0);
-  signal aud_data_r  	: std_logic_vector(15 downto 0);
-
+	signal video_i      : from_VIDEO_t;
+  signal video_o      : to_VIDEO_t;
+  signal audio_i      : from_AUDIO_t;
+  signal audio_o      : to_AUDIO_t;
+  signal ser_i        : from_SERIAL_t;
+  signal ser_o        : to_SERIAL_t;
+  
 	-- maple/dreamcast controller interface
-	signal maple_sense		: std_logic;
+	signal maple_sense	: std_logic;
 	signal maple_oe			: std_logic;
-	signal mpj				: work.maple_pkg.joystate_type;
+	signal mpj				  : work.maple_pkg.joystate_type;
 
 	-- gamecube controller interface
-	signal gcj						: work.gamecube_pkg.joystate_type;
+	signal gcj					: work.gamecube_pkg.joystate_type;
 			
 	signal video_clk_s	: std_logic;
   signal lcm_sclk   	: std_logic;
@@ -199,12 +197,68 @@ architecture SYN of target_top is
 
   signal yoffs      	: std_logic_vector(7 downto 0);
 
-  signal pwmen      	: std_logic;
-  signal chaseen    	: std_logic;
-	
 begin
 
-	-- FPGA STARTUP
+  BLK_CLOCKING : block
+  begin
+  
+    GEN_PLL : if PACE_HAS_PLL generate
+    
+      pll_50_inst : entity work.pll
+        generic map
+        (
+          -- INCLK0
+          INCLK0_INPUT_FREQUENCY  => 20000,
+    
+          -- CLK0
+          CLK0_DIVIDE_BY          => PACE_CLK0_DIVIDE_BY,
+          CLK0_MULTIPLY_BY        => PACE_CLK0_MULTIPLY_BY,
+      
+          -- CLK1
+          CLK1_DIVIDE_BY          => PACE_CLK1_DIVIDE_BY,
+          CLK1_MULTIPLY_BY        => PACE_CLK1_MULTIPLY_BY
+        )
+        port map
+        (
+          inclk0  => clock_50,
+          c0      => clk_i(0),
+          c1      => clk_i(1)
+        );
+
+    end generate GEN_PLL;
+    
+    GEN_NO_PLL : if not PACE_HAS_PLL generate
+
+      -- feed input clocks into PACE core
+      clk_i(0) <= clock_50;
+      clk_i(1) <= clock_27;
+        
+    end generate GEN_NO_PLL;
+      
+    pll_27_inst : entity work.pll
+      generic map
+      (
+        -- INCLK0
+        INCLK0_INPUT_FREQUENCY  => 37037,
+
+        -- CLK0 - 18M432Hz for audio
+        CLK0_DIVIDE_BY          => 22,
+        CLK0_MULTIPLY_BY        => 15,
+    
+        -- CLK1 - not used
+        CLK1_DIVIDE_BY          => 1,
+        CLK1_MULTIPLY_BY        => 1
+      )
+      port map
+      (
+        inclk0  => clock_27,
+        c0      => clk_i(2),
+        c1      => clk_i(3)
+      );
+
+  end block BLK_CLOCKING;
+	
+  -- FPGA STARTUP
 	-- should extend power-on reset if registers init to '0'
 	process (clock_50)
 		variable count : std_logic_vector (11 downto 0) := (others => '0');
@@ -219,29 +273,130 @@ begin
 		end if;
 	end process;
 
-  -- reset logic
-  button_p <= not key(0);
-  reset <= init or button_p;
-	reset_n <= not reset;
+  reset_i <= init or not key(0);
+	reset_n <= not reset_i;
 	
-	-- invert switch inputs
-	sw_s <= not sw;
+  -- buttons - active low
+  buttons_i <= EXT(not key, buttons_i'length);
+  -- switches - up = high
+  switches_i <= EXT(sw, switches_i'length);
+  -- leds
+  ledr <= leds_o(ledr'range);
+  
+	-- inputs
+	inputs_i.ps2_kclk <= ps2_clk;
+	inputs_i.ps2_kdat <= ps2_dat;
+  inputs_i.ps2_mclk <= '0';
+  inputs_i.ps2_mdat <= '0';
 
-  -- Light red leds for corresponding switch
-  --ledr <= sw;
+	GEN_MAPLE : if PACE_JAMMA = PACE_JAMMA_MAPLE generate
 	
-	-- PS/2 inout signal drivers
-	ps2clk_s <= ps2_clk;
-	ps2dat_s <= ps2_dat;
+		-- Dreamcast MapleBus joystick interface
+		MAPLE_JOY : entity work.maple_joy
+			port map
+			(
+				clk				=> clock_50,
+				reset			=> reset_i,
+				sense			=> maple_sense,
+				oe				=> maple_oe,
+				a					=> gpio_maple(14),
+				b					=> gpio_maple(13),
+				joystate	=> mpj
+			);
+		gpio_maple(12) <= maple_oe;
+		gpio_maple(11) <= not maple_oe;
+		maple_sense <= gpio_maple(17); -- and sw(0);
+
+		-- map maple bus to jamma inputs
+		-- - same mappings as default mappings for MAMED (DCMAME)
+		inputs_i.jamma_n.coin(1) 				  <= mpj.lv(7);		-- MSB of right analogue trigger (0-255)
+		inputs_i.jamma_n.p(1).start 			<= mpj.start;
+		inputs_i.jamma_n.p(1).up 				  <= mpj.d_up;
+		inputs_i.jamma_n.p(1).down 			  <= mpj.d_down;
+		inputs_i.jamma_n.p(1).left	 			<= mpj.d_left;
+		inputs_i.jamma_n.p(1).right 			<= mpj.d_right;
+		inputs_i.jamma_n.p(1).button(1) 	<= mpj.a;
+		inputs_i.jamma_n.p(1).button(2) 	<= mpj.x;
+		inputs_i.jamma_n.p(1).button(3) 	<= mpj.b;
+		inputs_i.jamma_n.p(1).button(4) 	<= mpj.y;
+		inputs_i.jamma_n.p(1).button(5)	  <= '1';
+
+	end generate GEN_MAPLE;
+
+	GEN_GAMECUBE : if PACE_JAMMA = PACE_JAMMA_NGC generate
+	
+		GC_JOY: gamecube_joy
+			generic map( MHZ => 50 )
+  		port map
+		  (
+  			clk 				=> clock_50,
+				reset 			=> reset_i,
+				--oe 					=> gc_oe,
+				d 					=> gpio_0(25),
+				joystate 		=> gcj
+			);
+
+		-- map gamecube controller to jamma inputs
+		inputs_i.jamma_n.coin(1) <= not gcj.l;
+		inputs_i.jamma_n.p(1).start <= not gcj.start;
+		inputs_i.jamma_n.p(1).up <= not gcj.d_up;
+		inputs_i.jamma_n.p(1).down <= not gcj.d_down;
+		inputs_i.jamma_n.p(1).left <= not gcj.d_left;
+		inputs_i.jamma_n.p(1).right <= not gcj.d_right;
+		inputs_i.jamma_n.p(1).button(1) <= not gcj.a;
+		inputs_i.jamma_n.p(1).button(2) <= not gcj.b;
+		inputs_i.jamma_n.p(1).button(3) <= not gcj.x;
+		inputs_i.jamma_n.p(1).button(4) <= not gcj.y;
+		inputs_i.jamma_n.p(1).button(5)	<= not gcj.z;
+
+	end generate GEN_GAMECUBE;
+	
+	GEN_NO_JAMMA : if PACE_JAMMA = PACE_JAMMA_NONE generate
+		inputs_i.jamma_n.coin(1) <= '1';
+		inputs_i.jamma_n.p(1).start <= '1';
+		inputs_i.jamma_n.p(1).up <= '1';
+		inputs_i.jamma_n.p(1).down <= '1';
+		inputs_i.jamma_n.p(1).left <= '1';
+		inputs_i.jamma_n.p(1).right <= '1';
+		inputs_i.jamma_n.p(1).button <= (others => '1');
+  end generate GEN_NO_JAMMA;
+  
+	-- not currently wired to any inputs
+	inputs_i.jamma_n.coin_cnt <= (others => '1');
+	inputs_i.jamma_n.coin(2) <= '1';
+	inputs_i.jamma_n.p(2).start <= '1';
+  inputs_i.jamma_n.p(2).up <= '1';
+  inputs_i.jamma_n.p(2).down <= '1';
+	inputs_i.jamma_n.p(2).left <= '1';
+	inputs_i.jamma_n.p(2).right <= '1';
+	inputs_i.jamma_n.p(2).button <= (others => '1');
+	inputs_i.jamma_n.service <= '1';
+	inputs_i.jamma_n.tilt <= '1';
+	inputs_i.jamma_n.test <= '1';
+		
+	-- show JAMMA inputs on LED bank
+--	ledr(17) <= not jamma_n.coin(1);
+--	ledr(16) <= not jamma_n.coin(2);
+--	ledr(15) <= not jamma_n.p(1).start;
+--	ledr(14) <= not jamma_n.p(1).up;
+--	ledr(13) <= not jamma_n.p(1).down;
+--	ledr(12) <= not jamma_n.p(1).left;
+--	ledr(11) <= not jamma_n.p(1).right;
+--	ledr(10) <= not jamma_n.p(1).button(1);
+--	ledr(9) <= not jamma_n.p(1).button(2);
+--	ledr(8) <= not jamma_n.p(1).button(3);
+--	ledr(7) <= not jamma_n.p(1).button(4);
+--	ledr(6) <= not jamma_n.p(1).button(5);
 
   -- flash memory
   BLK_FLASH : block
   begin
-    fl_rst_n <= '0';
+    fl_rst_n <= '1';
 
     GEN_FLASH : if PACE_HAS_FLASH generate
       flash_i.d <= fl_dq;
-      fl_dq <= flash_o.d when (flash_o.cs = '1' and flash_o.oe = '1') else (others => 'Z');
+      fl_dq <=  flash_o.d when (flash_o.cs = '1' and flash_o.we = '1' and flash_o.oe = '0') else 
+                (others => 'Z');
       fl_addr <= flash_o.a;
       fl_we_n <= not flash_o.we;
       fl_oe_n <= not flash_o.oe;
@@ -298,14 +453,70 @@ begin
     end generate GEN_NO_SDRAM;
   
   end block BLK_SDRAM;
+
+  BLK_VIDEO : block
+  begin
+    vga_clk <= video_o.clk;
+    vga_r <= video_o.rgb.r(video_o.rgb.r'left downto video_o.rgb.r'left-3);
+    vga_g <= video_o.rgb.g(video_o.rgb.g'left downto video_o.rgb.g'left-3);
+    vga_b <= video_o.rgb.b(video_o.rgb.b'left downto video_o.rgb.b'left-3);
+    vga_hs <= video_o.hsync;
+    vga_vs <= video_o.vsync;
+    vga_sync <= video_o.hsync and video_o.vsync;
+    vga_blank <= '1';
+  end block BLK_VIDEO;
+
+  BLK_AUDIO : block
+    alias aud_clk    		: std_logic is clk_i(2);
+    signal aud_data_l  	: std_logic_vector(audio_o.ldata'range);
+    signal aud_data_r  	: std_logic_vector(audio_o.rdata'range);
+  begin
+
+    -- enable each channel independantly for debugging
+    aud_data_l <= audio_o.ldata when switches_i(9) = '0' else (others => '0');
+    aud_data_r <= audio_o.rdata when switches_i(8) = '0' else (others => '0');
+
+    -- Audio
+    audif_inst : work.audio_if
+      generic map 
+      (
+        REF_CLK       => 18432000,  -- Set REF clk frequency here
+        SAMPLE_RATE   => 48000,     -- 48000 samples/sec
+        DATA_WIDTH    => 16,			  --	16		Bits
+        CHANNEL_NUM   => 2  			  --	Dual Channel
+      )
+      port map
+      (
+        -- Inputs
+        clk           => aud_clk,
+        reset         => reset_i,
+        datal         => aud_data_l,
+        datar         => aud_data_r,
     
+        -- Outputs
+        aud_xck       => aud_xck,
+        aud_adclrck   => aud_adclrck,
+        aud_daclrck   => aud_daclrck,
+        aud_bclk      => aud_bclk,
+        aud_dacdat    => aud_dacdat,
+        next_sample   => open
+      );
+
+  end block BLK_AUDIO;
+  
+  BLK_SERIAL : block
+  begin
+    GEN_NO_SERIAL : if not PACE_HAS_SERIAL generate
+      uart_txd <='0';
+      ser_i.rxd <= '0';
+    end generate GEN_NO_SERIAL;
+  end block BLK_SERIAL;
+  
   -- turn off LEDs
   hex0 <= (others => '1');
   hex1 <= (others => '1');
   hex2 <= (others => '1');
   hex3 <= (others => '1');
-  -- ledg(8) <= '0';
-  ledr(9 downto 8) <= (others => '0');
 	
   -- disable SD card
   sd_clk <= '0';
@@ -316,79 +527,10 @@ begin
   -- disable JTAG
   tdo <= 'Z';
   
-  -- VGA signals
-  vga_clk <= video_clk_s;
-  vga_blank <= '1'; -- no blanking
-  vga_hs <= vga_hs_s;
-  vga_vs <= vga_vs_s;
-  vga_sync <= vga_hs_s and vga_vs_s;
-	
   -- Display funkalicious pacman sprite y offset on 7seg display
   -- Why?  Because we can
   -- seg7_0: SEG7_LUT port map (iDIG => yoffs(7 downto 4), oSEG => hex7);
   -- seg7_1: SEG7_LUT port map (iDIG => yoffs(3 downto 0), oSEG => hex6);
-
-  -- Audio
-  audif_inst : work.audio_if
-    generic map (
-      REF_CLK       => 18432000,  -- Set REF clk frequency here
-      SAMPLE_RATE   => 48000,     -- 48000 samples/sec
-      DATA_WIDTH    => 16,			  --	16		Bits
-      CHANNEL_NUM   => 2  			  --	Dual Channel
-    )
-    port map
-    (
-  		-- Inputs
-      clk           => aud_clk,
-      reset         => reset,
-      datal         => aud_data_l,
-      datar         => aud_data_r,
-  
-      -- Outputs
-      aud_xck       => aud_xck,
-      aud_adclrck   => aud_adclrck,
-      aud_daclrck   => aud_daclrck,
-      aud_bclk      => aud_bclk,
-      aud_dacdat    => aud_dacdat,
-      next_sample   => open
-    );
-
-  -- Unmeta sound data
-  process(aud_clk, reset)
-    variable data0_l : std_logic_vector(snd_data_l'range);
-    variable data0_r : std_logic_vector(snd_data_r'range);
-    variable data1_l : std_logic_vector(snd_data_l'range);
-    variable data1_r : std_logic_vector(snd_data_r'range);
-    variable data2_l : std_logic_vector(snd_data_l'range);
-    variable data2_r : std_logic_vector(snd_data_r'range);
-  begin
-    if reset = '1' then
-      data0_l := (others => '0');
-      data0_r := (others => '0');
-      data1_l := (others => '0');
-      data1_r := (others => '0');
-      data2_l := (others => '0');
-      data2_r := (others => '0');
-    elsif rising_edge(aud_clk) then
-      data2_l := data1_l;
-      data2_r := data1_r;
-      data1_l := data0_l;
-      data1_r := data0_r;
-      data0_l := snd_data_l;
-      data0_r := snd_data_r;
-    end if;
-		-- assign outputs
-		if sw_s(9) = '1' then
-    	aud_data_l <= data2_l;
-		else
-			aud_data_l <= (others => '0');
-		end if;
-		if sw_s(8) = '1' then
-			aud_data_r <= data2_r;
-		else
-			aud_data_r <= (others => '0');
-		end if;
-  end process;
 
   -- *MUST* be high to use 27MHz clock as input
   -- td_reset <= '1';
@@ -415,60 +557,60 @@ begin
   gpio_lcd(33) <=	lcm_scen;
   gpio_lcd(34) <= lcm_sdat;
 
-	GEN_PLL : if PACE_HAS_PLL generate
-	
-    pll_50_inst : entity work.pll
-      generic map
-      (
-        -- INCLK0
-        INCLK0_INPUT_FREQUENCY  => 20000,
-  
-        -- CLK0
-        CLK0_DIVIDE_BY          => PACE_CLK0_DIVIDE_BY,
-        CLK0_MULTIPLY_BY        => PACE_CLK0_MULTIPLY_BY,
-    
-        -- CLK1
-        CLK1_DIVIDE_BY          => PACE_CLK1_DIVIDE_BY,
-        CLK1_MULTIPLY_BY        => PACE_CLK1_MULTIPLY_BY
-      )
-      port map
-      (
-        inclk0  => clock_50,
-        c0      => clk(0),
-        c1      => clk(1)
-      );
-
-	end generate GEN_PLL;
-	
-	GEN_NO_PLL : if not PACE_HAS_PLL generate
-
-		-- feed input clocks into PACE core
-		clk(0) <= clock_50;
-		clk(1) <= clock_27;
-			
-	end generate GEN_NO_PLL;
-    
-  pll_27_inst : entity work.pll
-    generic map
-    (
-      -- INCLK0
-      INCLK0_INPUT_FREQUENCY  => 37037,
-
-      -- CLK0 - 18M432Hz for audio
-      CLK0_DIVIDE_BY          => 22,
-      CLK0_MULTIPLY_BY        => 15,
-  
-      -- CLK1 - not used
-      CLK1_DIVIDE_BY          => 1,
-      CLK1_MULTIPLY_BY        => 1
-    )
+  pace_inst : work.pace                                            
     port map
     (
-      inclk0  => clock_27,
-      c0      => clk(2),
-      c1      => clk(3)
-    );
+    	-- clocks and resets
+	  	clk_i							=> clk_i,
+      reset_i          	=> reset_i,
+
+      -- misc inputs and outputs
+      buttons_i         => buttons_i,
+      switches_i        => switches_i,
+      leds_o            => leds_o,
+      
+      -- controller inputs
+      inputs_i          => inputs_i,
+
+     	-- external ROM/RAM
+     	flash_i           => flash_i,
+      flash_o           => flash_o,
+      sram_i        		=> sram_i,
+      sram_o        		=> sram_o,
   
+      -- VGA video
+      video_i           => video_i,
+      video_o           => video_o,
+      
+      -- sound
+      audio_i           => audio_i,
+      audio_o           => audio_o,
+
+      -- SPI (flash)
+      spi_i.din         => '0',
+      spi_o             => open,
+  
+      -- serial
+      ser_i             => ser_i,
+      ser_o             => ser_o,
+      
+      -- general purpose
+      gp_i              => (others => '0'),
+      gp_o              => open
+    );
+
+	av_init : I2C_AV_Config
+		port map
+		(
+			--	Host Side
+			iCLK							=> clock_50,
+			iRST_N						=> reset_n,
+			
+			--	I2C Side
+			I2C_SCLK					=> I2C_SCLK,
+			I2C_SDAT					=> I2C_SDAT
+		);
+
   lcmc: I2S_LCM_Config
     port map
     (   --  Host Side
@@ -484,186 +626,45 @@ begin
 	lcm_grst <= reset_n;
   lcm_dclk	<=	not lcm_clk;
   lcm_shdb	<=	'1';
-	lcm_hsync <= vga_hs_s;
-	lcm_vsync <= vga_vs_s;
-	
-  pace_inst : work.pace                                            
-    port map
-    (
-    	-- clocks and resets
-	  	clk								=> clk,
-      test_button     	=> button_p,
-      reset           	=> reset,
-  
-      -- game I/O
-      ps2clk         		=> ps2clk_s,
-      ps2data         	=> ps2dat_s,
-      dip             	=> sw_s(7 downto 0),
-  	  jamma							=> jamma,
+	lcm_hsync <= video_o.hsync;
+	lcm_vsync <= video_o.vsync;
 
-     	-- external ROM/RAM
-     	flash_i           => flash_i,
-      flash_o           => flash_o,
-      sram_i        		=> sram_i,
-      sram_o        		=> sram_o,
-  
-      -- VGA video
-	  	vga_clk						=> video_clk_s,
-      red(9 downto 6)		=> vga_r,
-      green(9 downto 6)	=> vga_g,
-      blue(9 downto 6)	=> vga_b,
-      lcm_data(9 downto 2)	=> lcm_data,
-      hsync            	=> vga_hs_s,
-      vsync            	=> vga_vs_s,
-  
-      -- composite video
-      BW_CVBS          	=> open,
-      GS_CVBS          	=> open,
-  
-      -- sound
-      snd_clk          	=> open,
-      snd_data_l       	=> snd_data_l,
-      snd_data_r       	=> snd_data_r,
-  
-      -- SPI (flash)
-      spi_clk          	=> open,
-      spi_mode         	=> open,
-      spi_sel          	=> open,
-      spi_din          	=> '0',
-      spi_dout         	=> open,
-  
-      -- serial
-      ser_tx           	=> uart_txd,
-      ser_rx           	=> uart_rxd,
-  
-      -- debug
-      leds             	=> yoffs --ledg(7 downto 0)
-    );
-
-	av_init : I2C_AV_Config
-		port map
-		(
-			--	Host Side
-			iCLK							=> clock_50,
-			iRST_N						=> reset_n,
-			
-			--	I2C Side
-			I2C_SCLK					=> I2C_SCLK,
-			I2C_SDAT					=> I2C_SDAT
-		);
-
-	GEN_MAPLE : if PACE_JAMMA = PACE_JAMMA_MAPLE generate
-	
-		-- Dreamcast MapleBus joystick interface
-		MAPLE_JOY : entity work.maple_joy
-			port map
-			(
-				clk				=> clock_50,
-				reset			=> reset,
-				sense			=> maple_sense,
-				oe				=> maple_oe,
-				a					=> gpio_maple(14),
-				b					=> gpio_maple(13),
-				joystate	=> mpj
-			);
-		gpio_maple(12) <= maple_oe;
-		gpio_maple(11) <= not maple_oe;
-		maple_sense <= gpio_maple(17); -- and sw(0);
-
-		-- map maple bus to jamma inputs
-		-- - same mappings as default mappings for MAMED (DCMAME)
-		jamma.coin(1) 				<= mpj.lv(7);		-- MSB of right analogue trigger (0-255)
-		jamma.p(1).start 			<= mpj.start;
-		jamma.p(1).up 				<= mpj.d_up;
-		jamma.p(1).down 			<= mpj.d_down;
-		jamma.p(1).left	 			<= mpj.d_left;
-		jamma.p(1).right 			<= mpj.d_right;
-		jamma.p(1).button(1) 	<= mpj.a;
-		jamma.p(1).button(2) 	<= mpj.x;
-		jamma.p(1).button(3) 	<= mpj.b;
-		jamma.p(1).button(4) 	<= mpj.y;
-		jamma.p(1).button(5)	<= '1';
-
-	end generate GEN_MAPLE;
-
-	GEN_GAMECUBE : if PACE_JAMMA = PACE_JAMMA_NGC generate
-	
-		GC_JOY: gamecube_joy
-			generic map( MHZ => 50 )
-  		port map
-		  (
-  			clk 				=> clock_50,
-				reset 			=> reset,
-				--oe 					=> gc_oe,
-				d 					=> gpio_0(25),
-				joystate 		=> gcj
-			);
-
-		-- map gamecube controller to jamma inputs
-		jamma.coin(1) <= not gcj.l;
-		jamma.p(1).start <= not gcj.start;
-		jamma.p(1).up <= not gcj.d_up;
-		jamma.p(1).down <= not gcj.d_down;
-		jamma.p(1).left <= not gcj.d_left;
-		jamma.p(1).right <= not gcj.d_right;
-		jamma.p(1).button(1) <= not gcj.a;
-		jamma.p(1).button(2) <= not gcj.b;
-		jamma.p(1).button(3) <= not gcj.x;
-		jamma.p(1).button(4) <= not gcj.y;
-		jamma.p(1).button(5)	<= not gcj.z;
-
-	end generate GEN_GAMECUBE;
-	
-	-- not currently wired to any inputs
-	jamma.coin(2) <= '1';
-	jamma.p(2).start <= '1';
-	jamma.service <= '1';
-	jamma.tilt <= '1';
-	jamma.test <= '1';
-		
-	-- show JAMMA inputs on LED bank
---	ledr(17) <= not jamma.coin(1);
---	ledr(16) <= not jamma.coin(2);
---	ledr(15) <= not jamma.p(1).start;
---	ledr(14) <= not jamma.p(1).up;
---	ledr(13) <= not jamma.p(1).down;
---	ledr(12) <= not jamma.p(1).left;
---	ledr(11) <= not jamma.p(1).right;
---	ledr(10) <= not jamma.p(1).button(1);
---	ledr(9) <= not jamma.p(1).button(2);
---	ledr(8) <= not jamma.p(1).button(3);
---	ledr(7) <= not jamma.p(1).button(4);
---	ledr(6) <= not jamma.p(1).button(5);
-		
-  pchaser: work.pwm_chaser 
-	  generic map(nleds  => 8, nbits => 8, period => 4, hold_time => 12)
-    port map (clk => clock_50, clk_en => chaseen, pwm_en => pwmen, reset => reset, fade => X"0F", ledout => ledg(7 downto 0));
-
-  -- Generate pwmen pulse every 1024 clocks, chase pulse every 512k clocks
-  process(clock_50, reset)
-    variable pcount     : std_logic_vector(9 downto 0);
-    variable pwmen_r    : std_logic;
-    variable ccount     : std_logic_vector(18 downto 0);
-    variable chaseen_r  : std_logic;
+  BLK_CHASER : block
+    signal pwmen      	: std_logic;
+    signal chaseen    	: std_logic;
   begin
-    pwmen <= pwmen_r;
-    chaseen <= chaseen_r;
-    if reset = '1' then
-      pcount := (others => '0');
-      ccount := (others => '0');
-    elsif rising_edge(clock_50) then
-      pwmen_r := '0';
-      if pcount = std_logic_vector(conv_unsigned(0, pcount'length)) then
-        pwmen_r := '1';
+  
+    pchaser: work.pwm_chaser 
+      generic map(nleds  => 8, nbits => 8, period => 4, hold_time => 12)
+      port map (clk => clock_50, clk_en => chaseen, pwm_en => pwmen, reset => reset_i, fade => X"0F", ledout => ledg(7 downto 0));
+
+    -- Generate pwmen pulse every 1024 clocks, chase pulse every 512k clocks
+    process(clock_50, reset_i)
+      variable pcount     : std_logic_vector(9 downto 0);
+      variable pwmen_r    : std_logic;
+      variable ccount     : std_logic_vector(18 downto 0);
+      variable chaseen_r  : std_logic;
+    begin
+      pwmen <= pwmen_r;
+      chaseen <= chaseen_r;
+      if reset_i = '1' then
+        pcount := (others => '0');
+        ccount := (others => '0');
+      elsif rising_edge(clock_50) then
+        pwmen_r := '0';
+        if pcount = std_logic_vector(conv_unsigned(0, pcount'length)) then
+          pwmen_r := '1';
+        end if;
+        chaseen_r := '0';
+        if ccount = std_logic_vector(conv_unsigned(0, ccount'length)) then
+          chaseen_r := '1';
+        end if;
+        pcount := pcount + 1;
+        ccount := ccount + 1;
       end if;
-      chaseen_r := '0';
-      if ccount = std_logic_vector(conv_unsigned(0, ccount'length)) then
-        chaseen_r := '1';
-      end if;
-      pcount := pcount + 1;
-      ccount := ccount + 1;
-    end if;
-  end process;
+    end process;
+    
+  end block BLK_CHASER;
 	    
 end SYN;
 

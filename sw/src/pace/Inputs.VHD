@@ -13,11 +13,11 @@ entity Inputs is
 	);
   port
   (
-    clk     : in    std_logic;                               
-    reset   : in    std_logic;                               
-    ps2clk  : inout std_logic;                               
-    ps2data : inout std_logic;                               
-		jamma		: in JAMMAInputsType;
+    clk     : in std_logic;                               
+    reset   : in std_logic;                               
+    ps2clk  : in std_logic;                               
+    ps2data : in std_logic;                               
+		jamma		: in from_JAMMA_t;
 		
 		dips		: in		std_logic_vector(7 downto 0);
 		inputs	: out		in8(0 to NUM_INPUTS-1)

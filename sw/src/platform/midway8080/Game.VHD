@@ -13,15 +13,16 @@ entity Game is
   port
   (
     -- clocking and reset
-    clk         		: in std_logic_vector(0 to 3);
-    reset           : in std_logic;                       
-    test_button     : in std_logic;                       
+    clk_i           : in std_logic_vector(0 to 3);
+    reset_i         : in std_logic;
 
-    -- inputs
-    ps2clk          : inout std_logic;                       
-    ps2data         : inout std_logic;                       
-    dip             : in std_logic_vector(7 downto 0);    
-		jamma						: in JAMMAInputsType;
+    -- misc I/O
+    buttons_i       : in from_BUTTONS_t;
+    switches_i      : in from_SWITCHES_t;
+    leds_o          : out to_LEDS_t;
+
+    -- controller inputs
+    inputs_i        : in from_INPUTS_t;
 
     -- micro buses
     upaddr          : out std_logic_vector(15 downto 0);   
@@ -32,6 +33,22 @@ entity Game is
     flash_o         : out to_FLASH_t;
 		sram_i					: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
+
+    -- SPI (flash)
+    spi_i           : in from_SPI_t;
+    spi_o           : out to_SPI_t;
+
+    -- serial
+    ser_i           : in from_SERIAL_t;
+    ser_o           : out to_SERIAL_t;
+
+    -- general purpose I/O
+    gp_i            : in from_GP_t;
+    gp_o            : out to_GP_t;
+    
+    --
+    --
+    --
 
     gfxextra_data   : out std_logic_vector(7 downto 0);
 		palette_data		: out ByteArrayType(15 downto 0);
@@ -60,36 +77,20 @@ entity Game is
 		xcentre					: out std_logic_vector(9 downto 0);
 		ycentre					: out std_logic_vector(9 downto 0);
 
+    snd_rd          : out std_logic;
+    snd_wr          : out std_logic;
+    sndif_datai     : in std_logic_vector(7 downto 0);
+
     -- OSD
     to_osd          : out to_OSD_t;
-    from_osd        : in from_OSD_t;
-
-    -- sound
-    snd_rd          : out std_logic;                       
-    snd_wr          : out std_logic;
-    sndif_datai     : in std_logic_vector(7 downto 0);    
-
-    -- spi interface
-    spi_clk         : out std_logic;                       
-    spi_din         : in std_logic;                       
-    spi_dout        : out std_logic;                       
-    spi_ena         : out std_logic;                       
-    spi_mode        : out std_logic;                       
-    spi_sel         : out std_logic;                       
-
-    -- serial
-    ser_rx          : in std_logic;                       
-    ser_tx          : out std_logic;                       
-
-    -- on-board leds
-    leds            : out std_logic_vector(7 downto 0)    
+    from_osd        : in from_OSD_t
   );
 end Game;
 
 architecture SYN of Game is
 
-	alias clk_24M					: std_logic is clk(0);
-	alias clk_40M					: std_logic is clk(1);
+	alias clk_24M					: std_logic is clk_i(0);
+	alias clk_40M					: std_logic is clk_i(1);
 	
   -- uP signals  
   signal clk_2M_en			: std_logic;
@@ -126,7 +127,7 @@ architecture SYN of Game is
 	signal port_wr				: std_logic_vector(5 downto 2);
 	signal inputs					: in8(0 to 2);
 	alias game_reset			: std_logic is inputs(2)(0);
-	signal dip_n					: std_logic_vector(dip'range);
+	signal dip_n					: std_logic_vector(7 downto 0);
 	signal shift_dout			: std_logic_vector(7 downto 0);
 
   -- other signals      
@@ -138,8 +139,8 @@ architecture SYN of Game is
 	
 begin
 
-	cpu_reset <= reset or game_reset;
-	dip_n <= not dip;
+	cpu_reset <= reset_i or game_reset;
+	dip_n <= switches_i(dip_n'range);
 	
   -- read mux
   uP_datai <= uPmem_datai when (uPmemrd = '1') else uPio_datai;
@@ -221,13 +222,13 @@ begin
 								X"00";
 
 	-- shifter block
-	process (clk_24M, reset)
+	process (clk_24M, reset_i)
 		variable shift_din	: std_logic_vector(15 downto 0);
 		variable shift_amt 	: std_logic_vector(2 downto 0);
 		variable wr2_r 			: std_logic := '0';
 		variable wr4_r 			: std_logic := '0';
 	begin
-		if reset = '1' then
+		if reset_i = '1' then
 			wr2_r := '0';
 			wr4_r := '0';
 		elsif rising_edge(clk_24M) then
@@ -300,11 +301,11 @@ begin
 	end block INT_BLOCK;	
 
   -- osd toggle (TAB)
-  process (clk_24M, reset)
+  process (clk_24M, reset_i)
     variable osd_key_r  : std_logic;
     variable osd_en_v   : std_logic;
   begin
-    if reset = '1' then
+    if reset_i = '1' then
       osd_en_v := '0';
       osd_key_r := '0';
     elsif rising_edge(clk_24M) then
@@ -340,13 +341,7 @@ begin
   spriteData <= (others => '0');
   attr_dout <= X"00" & dip_n;
 
-	spi_clk <= '0';
-	spi_dout <= '0';
-	spi_ena <= '0';
-	spi_mode <= '0';
-	spi_sel <= '0';
-	ser_tx <= '0';
-	leds <= (others => '0');
+	leds_o <= (others => '0');
 	
 	-- generate CPU clock (2MHz from 20MHz)
 	clk_en_inst : entity work.clk_div
@@ -357,7 +352,7 @@ begin
 		port map
 		(
 			clk				=> clk_24M,
-			reset			=> reset,
+			reset			=> reset_i,
 			clk_en		=> clk_2M_en
 		);
 		
@@ -392,30 +387,41 @@ begin
 	  port map
 	  (
 	    clk     	=> clk_24M,
-	    reset   	=> reset,
-	    ps2clk  	=> ps2clk,
-	    ps2data 	=> ps2data,
-			jamma			=> jamma,
+	    reset   	=> reset_i,
+	    ps2clk  	=> inputs_i.ps2_kclk,
+	    ps2data 	=> inputs_i.ps2_kdat,
+			jamma			=> inputs_i.jamma_n,
 	
 	    dips     	=> dip_n,
 	    inputs		=> inputs
 	  );
 
-	rom_inst : entity work.invaders_rom
-    port map
-    (
+  GEN_INTERNAL_ROM : if not INVADERS_ROM_IN_FLASH generate
+    rom_inst : entity work.invaders_rom
+      port map
+      (
         clock		=> clk_24M,
         address => uP_addr(12 downto 0),
         q				=> rom_datao
-    );
+      );
+  end generate GEN_INTERNAL_ROM;
 
+  GEN_FLASH_ROM : if INVADERS_ROM_IN_FLASH generate
+    flash_o.a <= EXT(uP_addr(12 downto 0), flash_o.a'length);
+    flash_o.d <= (others => 'Z');
+    flash_o.we <= '0';
+    flash_o.cs <= rom_cs;
+    flash_o.oe <= uPmemrd;
+    rom_datao <= flash_i.d;
+  end generate GEN_FLASH_ROM;
+  
 	GEN_ROM2 : if ROM_2_NAME /= "" generate
 		rom2_inst : entity work.invaders_rom_2
 	    port map
 	    (
-	        clock		=> clk_24M,
-	        address => uP_addr(11 downto 0),
-	        q				=> rom2_datao
+        clock		=> clk_24M,
+        address => uP_addr(11 downto 0),
+        q				=> rom2_datao
 	    );
 	end generate GEN_ROM2;
 		

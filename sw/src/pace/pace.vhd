@@ -10,15 +10,16 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk             : in std_logic_vector(0 to 3);
-    test_button     : in std_logic;
-    reset           : in std_logic;
+    clk_i           : in std_logic_vector(0 to 3);
+    reset_i         : in std_logic;
 
-    -- game I/O
-    ps2clk          : inout std_logic;
-    ps2data         : inout std_logic;
-    dip             : in std_logic_vector(7 downto 0);
-		jamma						: in JAMMAInputsType;
+    -- misc I/O
+    buttons_i       : in from_BUTTONS_t;
+    switches_i      : in from_SWITCHES_t;
+    leds_o          : out to_LEDS_t;
+
+    -- controller inputs
+    inputs_i        : in from_INPUTS_t;
 
     -- external ROM/RAM
     flash_i         : in from_FLASH_t;
@@ -26,42 +27,27 @@ entity PACE is
     sram_i       		: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
 
-    -- VGA video
-		vga_clk					: out std_logic;
-    red             : out std_logic_vector(9 downto 0);
-    green           : out std_logic_vector(9 downto 0);
-    blue            : out std_logic_vector(9 downto 0);
-		lcm_data				:	out std_logic_vector(9 downto 0);
-		hblank					: out std_logic;
-		vblank					: out std_logic;
-    hsync           : out std_logic;
-    vsync           : out std_logic;
+    -- video
+    video_i         : in from_VIDEO_t;
+    video_o         : out to_VIDEO_t;
 
-    -- composite video
-    BW_CVBS         : out std_logic_vector(1 downto 0);
-    GS_CVBS         : out std_logic_vector(7 downto 0);
-
-    -- sound
-    snd_clk         : out std_logic;
-    snd_data_l      : out std_logic_vector(15 downto 0);
-    snd_data_r      : out std_logic_vector(15 downto 0);
-
+    -- audio
+    audio_i         : in from_AUDIO_t;
+    audio_o         : out to_AUDIO_t;
+    
     -- SPI (flash)
-    spi_clk         : out std_logic;
-    spi_mode        : out std_logic;
-    spi_sel         : out std_logic;
-    spi_din         : in std_logic;
-    spi_dout        : out std_logic;
+    spi_i           : in from_SPI_t;
+    spi_o           : out to_SPI_t;
 
     -- serial
-    ser_tx          : out std_logic;
-    ser_rx          : in std_logic;
-
-    -- debug
-    leds            : out std_logic_vector(7 downto 0)
+    ser_i           : in from_SERIAL_t;
+    ser_o           : out to_SERIAL_t;
+    
+    -- general purpose I/O
+    gp_i            : in from_GP_t;
+    gp_o            : out to_GP_t
   );
-
-end PACE;
+end entity PACE;
 
 architecture SYN of PACE is
 
@@ -99,40 +85,25 @@ architecture SYN of PACE is
   signal snd_wr           : std_logic;
   signal sndif_data       : std_logic_vector(7 downto 0);
 
-  -- spi signals
-  signal spi_clk_s        : std_logic;
-  signal spi_dout_s       : std_logic;
-  signal spi_ena          : std_logic;
-  signal spi_mode_s       : std_logic;
-  signal spi_sel_s        : std_logic;
-
-	signal leds_s						: std_logic_vector(7 downto 0);
-	
 begin
 
-	vga_clk <= clk(1);	-- fudge
-
-  spi_clk <= spi_clk_s when (spi_ena = '1') else 'Z';
-  spi_dout <= spi_dout_s when (spi_ena = '1') else 'Z';
-  spi_mode <= spi_mode_s when (spi_ena = '1') else 'Z';
-  spi_sel <= spi_sel_s when (spi_ena = '1') else 'Z';
+	video_o.clk <= clk_i(1);	-- fudge
   
-	leds <= leds_s;
-	  
   U_Game : entity work.Game                                            
     Port Map
     (
       -- clocking and reset
-      clk             => clk,
-      reset           => reset,
-      test_button     => test_button,
-  
-      -- inputs
-      ps2clk          => ps2clk,
-      ps2data         => ps2data,
-      dip             => dip,
-			jamma						=> jamma,
-			
+      clk_i           => clk_i,
+      reset_i         => reset_i,
+      
+      -- misc inputs and outputs
+      buttons_i       => buttons_i,
+      switches_i      => switches_i,
+      leds_o          => leds_o,
+      
+      -- controller inputs
+      inputs_i        => inputs_i,
+
       -- micro buses
       upaddr          => uPaddr,
       updatao         => uPdatao,
@@ -143,6 +114,22 @@ begin
 			sram_i					=> sram_i,
 			sram_o					=> sram_o,
   
+      -- spi interface
+      spi_i           => spi_i,
+      spi_o           => spi_o,
+  
+      -- serial
+      ser_i           => ser_i,
+      ser_o           => ser_o,
+
+      -- general purpose I/O
+      gp_i            => gp_i,
+      gp_o            => gp_o,
+
+      --
+      --
+      --
+      
       gfxextra_data   => gfxextra_data,
 			palette_data		=> palette_data,
 			
@@ -170,36 +157,21 @@ begin
 			xcentre					=> xcentre,
 			ycentre					=> ycentre,
 			
-			-- OSD
-			to_osd          => to_osd,
-			from_osd        => from_osd,
-
       -- sound
       snd_rd          => snd_rd,
       snd_wr          => snd_wr,
       sndif_datai     => sndif_data,
-  
-      -- spi interface
-      spi_clk         => spi_clk_s,
-      spi_din         => spi_din,
-      spi_dout        => spi_dout_s,
-      spi_ena         => spi_ena,
-      spi_mode        => spi_mode_s,
-      spi_sel         => spi_sel_s,
-  
-      -- serial
-      ser_rx          => ser_rx,
-      ser_tx          => ser_tx,
-  
-      -- on-board leds
-      leds            => leds_s
+      
+			-- OSD
+			to_osd          => to_osd,
+			from_osd        => from_osd
     );
 
  U_Graphics : entity work.Graphics                                    
     Port Map
     (
-      clk             => clk(1),      -- fudge for now
-      reset           => reset,
+      clk             => clk_i(1),      -- fudge for now
+      reset           => reset_i,
   
 			xcentre					=> xcentre,
 			ycentre					=> ycentre,
@@ -227,20 +199,20 @@ begin
 			to_osd          => to_osd,
 			from_osd        => from_osd,
 
-      red             => red,
-      green           => green,
-      blue            => blue,
-			lcm_data				=> lcm_data,
-			hblank					=> hblank,
+      red             => video_o.rgb.r,
+      green           => video_o.rgb.g,
+      blue            => video_o.rgb.b,
+			lcm_data				=> open,
+			hblank					=> video_o.hblank,
 			vblank					=> vblank_s,
-      hsync           => hsync,
-      vsync           => vsync,
+      hsync           => video_o.hsync,
+      vsync           => video_o.vsync,
 	
-      bw_cvbs         => bw_cvbs,
-      gs_cvbs         => gs_cvbs
+      bw_cvbs         => open,
+      gs_cvbs         => open
     );
 
-	vblank <= vblank_s;
+	video_o.vblank <= vblank_s;
 
 	SOUND_BLOCK : block
 		signal snd_data		: std_logic_vector(7 downto 0);
@@ -249,22 +221,22 @@ begin
 	  U_Sound : entity work.Sound                                          
 	    Port Map
 	    (
-	      sysclk      => clk(0),    -- fudge for now
-	      reset       => reset,
+	      sysclk      => clk_i(0),    -- fudge for now
+	      reset       => reset_i,
 
 	      sndif_rd    => snd_rd,              
 	      sndif_wr    => snd_wr,              
 	      sndif_addr  => uPaddr,
 	      sndif_datai => uPdatao,
 
-	      snd_clk     => snd_clk,
+	      snd_clk     => audio_o.clk,
 	      snd_data    => snd_data,           
 	      sndif_datao => sndif_data
 	    );
 
 		-- route audio to both channels
-		snd_data_l <= snd_data & "00000000";
-		snd_data_r <= snd_data & "00000000";
+		audio_o.ldata <= snd_data & "00000000";
+		audio_o.rdata <= snd_data & "00000000";
 	
 	end block SOUND_BLOCK;
 		
