@@ -6,9 +6,8 @@ add wave -noupdate -format Logic /video_tb/reset
 add wave -noupdate -format Logic /video_tb/strobe
 add wave -noupdate -format Literal -radix decimal /video_tb/x
 add wave -noupdate -format Literal -radix decimal /video_tb/y
-add wave -noupdate -format Literal /video_tb/vid_r
-add wave -noupdate -format Literal /video_tb/vid_g
-add wave -noupdate -format Literal /video_tb/vid_b
+add wave -noupdate -format Logic /video_tb/hsync
+add wave -noupdate -format Logic /video_tb/vsync
 add wave -noupdate -format Logic /video_tb/hblank
 add wave -noupdate -format Logic /video_tb/vblank
 add wave -noupdate -format Literal /video_tb/red
@@ -49,8 +48,10 @@ add wave -noupdate -format Logic /video_tb/vgacontroller_1/hactive_s
 add wave -noupdate -format Logic /video_tb/vgacontroller_1/vactive_s
 add wave -noupdate -format Logic /video_tb/vgacontroller_1/hblank_s
 add wave -noupdate -format Logic /video_tb/vgacontroller_1/vblank_s
+add wave -noupdate -format Logic /video_tb/vgacontroller_1/hsync_s
+add wave -noupdate -format Logic /video_tb/vgacontroller_1/vsync_s
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {136303630 ps} 0}
+WaveRestoreCursors {{Cursor 1} {16447516185 ps} 0} {{Cursor 2} {16458527439 ps} 0}
 configure wave -namecolwidth 275
 configure wave -valuecolwidth 60
 configure wave -justifyvalue left
@@ -64,4 +65,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {0 ps} {1050 us}
+WaveRestoreZoom {16412215402 ps} {16486217503 ps}

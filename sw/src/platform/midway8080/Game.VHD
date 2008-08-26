@@ -359,7 +359,7 @@ begin
   U_uP : entity work.uPse                                                
     port map
     (
-      clk			=> clk_24M,                                   
+      clk			=> '0', --clk_24M,                                   
       clk_en	=> clk_2M_en,
       reset  	=> cpu_reset,                                     
 

@@ -100,7 +100,8 @@ architecture SYN of video_tb is
 begin
 	-- Generate CLK and reset
 	--clk <= not clk after 12500 ps;
-  clk <= not clk after 44899 ps; -- 11.136MHz
+  --clk <= not clk after 44899 ps; -- 11.136MHz
+  clk <= not clk after 12500 ps; -- 40MHz
 	reset <= '0' after 10 ns;
 
 	-- Signals

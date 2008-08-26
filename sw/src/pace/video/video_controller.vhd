@@ -207,6 +207,9 @@ begin
       end if; -- rising_edge(clk) and clk_ena = '1'
     end if;
   end process;
+
+  -- for video DACs and TFT output
+  video_o.clk <= clk;
   
   process (reset, clk, clk_ena)
   begin
@@ -227,14 +230,14 @@ begin
         video_o.rgb.g <= (others => '1');
         video_o.rgb.b <= (others => '1');
       else
-        video_o.rgb.r <= (others => '0');
+        video_o.rgb.r <= (others => '1');
         video_o.rgb.g <= (others => '0');
         video_o.rgb.b <= (others => '0');
       end if;
-      video_o.hsync <= hsync_s;
-      video_o.vsync <= vsync_s;
-      video_o.hblank <= not hactive_s;
-      video_o.vblank <= not vactive_s;
+      video_o.hsync <= not hsync_s;
+      video_o.vsync <= not vsync_s;
+      video_o.hblank <= hblank_s;
+      video_o.vblank <= vblank_s;
     end if;
   end process;
   
