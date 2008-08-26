@@ -173,9 +173,6 @@ architecture SYN of Graphics is
   signal strobe       : std_logic;
 	signal pix_x				: std_logic_vector(9 downto 0);
 	signal pix_y				: std_logic_vector(9 downto 0);
-  signal hsync_s      : std_logic;
-  signal hblank_s     : std_logic;
-  signal vblank_s     : std_logic;
 
 	signal bitmap_rgb		: RGBArrayType(1 to 1);
 	signal bitmap_on		: std_logic_vector(1 to 1);
@@ -192,12 +189,9 @@ architecture SYN of Graphics is
   signal osd_colour   : std_logic_vector(7 downto 0);
 
 	signal rgb_data			: RGB_t;
-
   -- before OSD is mixed in
-  signal red_s        : std_logic_vector(9 downto 0);
-  signal green_s      : std_logic_vector(9 downto 0);
-  signal blue_s       : std_logic_vector(9 downto 0);
-
+  signal video_o_s    : to_VIDEO_t;
+  
 begin
 
 	-- generate final RGB signal
@@ -207,172 +201,59 @@ begin
 							bitmap_rgb(1);
 
   -- dodgy OSD transparency...
-  red <=    red_s when (to_osd.en and osd_active) = '0' else 
-            osd_colour(2 downto 0) & red_s(9 downto 6) & "000";
-  green <=  green_s when (to_osd.en and osd_active) = '0' else 
-            osd_colour(5 downto 3) & green_s(9 downto 6) & "000";
-  blue <=   blue_s when (to_osd.en and osd_active) = '0' else 
-            osd_colour(7 downto 6) & '0' & blue_s(9 downto 6) & "000";
+  red <=    video_o_s.rgb.r when (to_osd.en and osd_active) = '0' else 
+            osd_colour(2 downto 0) & video_o_s.rgb.r(9 downto 6) & "000";
+  green <=  video_o_s.rgb.g when (to_osd.en and osd_active) = '0' else 
+            osd_colour(5 downto 3) & video_o_s.rgb.g(9 downto 6) & "000";
+  blue <=   video_o_s.rgb.b when (to_osd.en and osd_active) = '0' else 
+            osd_colour(7 downto 6) & '0' & video_o_s.rgb.b(9 downto 6) & "000";
 
 	-- it's actually more complicated than this on the NES
 	-- but it'll do for now...
 	spr0_hit <= sprite0_on;
 	
 	-- needed in a lot of games
-	hblank <= hblank_s;
-	vblank <= vblank_s;
-  hsync <= hsync_s;
-
+  hsync <= video_o_s.hsync;
+  vsync <= video_o_s.vsync;
+	hblank <= video_o_s.hblank;
+	vblank <= video_o_s.vblank;
+  
   -- assign top-level output ports
   bw_cvbs <= (others => '0');
   gs_cvbs <= (others => '0');
 
 	-- because some video controllers only strobe during active video
-  pix_clk_ena <= strobe or hblank_s;
+  pix_clk_ena <= strobe or video_o_s.hblank;
 
-  --
-  --  THIS IS BLOODY ANNOYING
-  --
-  --  SURELY THERE IS *SOME* WAY OF USING CONSTANTS AND CONFIGURATIONS
-  --  TO SELECT A PARTICULAR ARCHITECTURE OF AN ENTITY
-  --  WITHOUT RESORTING TO SUCH YUKKINESS?!?!?!?
-  --
+  pace_video_controller_inst : entity work.pace_video_controller
+    generic map
+    (
+      CONFIG		=> PACE_VIDEO_NONE,
+      H_SIZE    => PACE_VIDEO_H_SIZE,
+      V_SIZE    => PACE_VIDEO_V_SIZE,
+      H_SCALE   => PACE_VIDEO_H_SCALE,
+      V_SCALE   => PACE_VIDEO_V_SCALE
+    )
+    port map
+    (
+      clk         => clk,
+      clk_ena     => '1',
+      reset				=> reset,
 
-  GEN_VGA_800x600_60Hz : if PACE_VIDEO_CONTROLLER_TYPE = PACE_VIDEO_VGA_800x600_60Hz generate
+      --xcentre			=> xcentre,
+      --ycentre			=> ycentre,
 
-    pace_video_controller_inst : entity work.pace_video_controller(VGA_800X600_60HZ)
-      port map
-      (
-        clk         => clk,
-        reset				=> reset,
+      -- video data signals (in)
+      rgb_i		    => rgb_data,
 
-        xcentre			=> xcentre,
-        ycentre			=> ycentre,
-        
-        -- video control signals (out)
-        strobe      => strobe,
-        pixel_x			=> pix_x,
-        pixel_y			=> pix_y,
-        hblank      => hblank_s,
-        vblank      => vblank_s,
+      -- video control signals (out)
+      stb         => strobe,
+      x(9 downto 0) => pix_x,
+      y(9 downto 0) => pix_y,
 
-        -- video data signals (in)
-        r_i					=> rgb_data.r,
-        g_i					=> rgb_data.g,
-        b_i					=> rgb_data.b,
-
-        -- VGA signals (out)
-        red         => red_s,
-        green       => green_s,
-        blue        => blue_s,
-        lcm_data		=> lcm_data,
-        hsync       => hsync_s,
-        vsync       => vsync
-      );
-
-  end generate GEN_VGA_800x600_60Hz;
-
-  GEN_VGA_240x320_60Hz : if PACE_VIDEO_CONTROLLER_TYPE = PACE_VIDEO_VGA_240x320_60Hz generate
-
-    pace_video_controller_inst : entity work.pace_video_controller(VGA_240X320_60HZ)
-      port map
-      (
-        clk         => clk,
-        reset				=> reset,
-
-        xcentre			=> xcentre,
-        ycentre			=> ycentre,
-        
-        -- video control signals (out)
-        strobe      => strobe,
-        pixel_x			=> pix_x,
-        pixel_y			=> pix_y,
-        hblank      => hblank_s,
-        vblank      => vblank_s,
-
-        -- video data signals (in)
-        r_i					=> rgb_data.r,
-        g_i					=> rgb_data.g,
-        b_i					=> rgb_data.b,
-
-        -- VGA signals (out)
-        red         => red_s,
-        green       => green_s,
-        blue        => blue_s,
-        lcm_data		=> lcm_data,
-        hsync       => hsync_s,
-        vsync       => vsync
-      );
-
-  end generate GEN_VGA_240x320_60Hz;
-
-  GEN_VGA_320x240_60Hz : if PACE_VIDEO_CONTROLLER_TYPE = PACE_VIDEO_LCM_320x240_60Hz generate
-
-    pace_video_controller_inst : entity work.pace_video_controller(LCM_320X240_60HZ)
-      port map
-      (
-        clk         => clk,
-        reset				=> reset,
-
-        xcentre			=> xcentre,
-        ycentre			=> ycentre,
-        
-        -- video control signals (out)
-        strobe      => strobe,
-        pixel_x			=> pix_x,
-        pixel_y			=> pix_y,
-        hblank      => hblank_s,
-        vblank      => vblank_s,
-
-        -- video data signals (in)
-        r_i					=> rgb_data.r,
-        g_i					=> rgb_data.g,
-        b_i					=> rgb_data.b,
-
-        -- VGA signals (out)
-        red         => red_s,
-        green       => green_s,
-        blue        => blue_s,
-        lcm_data		=> lcm_data,
-        hsync       => hsync_s,
-        vsync       => vsync
-      );
-
-  end generate GEN_VGA_320x240_60Hz;
-
-  GEN_CVBS_720x288p_50Hz : if PACE_VIDEO_CONTROLLER_TYPE = PACE_VIDEO_CVBS_720x288p_50Hz generate
-
-    pace_video_controller_inst : entity work.pace_video_controller(CVBS_720X288p_50HZ)
-      port map
-      (
-        clk         => clk,
-        reset				=> reset,
-
-        xcentre			=> xcentre,
-        ycentre			=> ycentre,
-        
-        -- video control signals (out)
-        strobe      => strobe,
-        pixel_x			=> pix_x,
-        pixel_y			=> pix_y,
-        hblank      => hblank_s,
-        vblank      => vblank_s,
-
-        -- video data signals (in)
-        r_i					=> rgb_data.r,
-        g_i					=> rgb_data.g,
-        b_i					=> rgb_data.b,
-
-        -- VGA signals (out)
-        red         => red_s,
-        green       => green_s,
-        blue        => blue_s,
-        lcm_data		=> lcm_data,
-        hsync       => hsync_s,
-        vsync       => vsync
-      );
-
-  end generate GEN_CVBS_720x288p_50Hz;
+      -- VGA signals (out)
+      video_o     => video_o_s
+    );
 
 	GEN_NO_BITMAPS : if PACE_VIDEO_NUM_BITMAPS = 0 generate
 	
@@ -394,8 +275,8 @@ begin
 				clk_ena				=> pix_clk_ena,
 				reset					=> reset,
 				
-	      hblank   			=> hblank_s,
-	      vblank   			=> vblank_s,
+	      hblank   			=> video_o_s.hblank,
+	      vblank   			=> video_o_s.vblank,
 	      pix_x     		=> pix_x,
 	      pix_y     		=> pix_y,
 
@@ -432,8 +313,8 @@ begin
 				clk_ena				=> pix_clk_ena,
 				reset					=> reset,
 				
-	      hblank   			=> hblank_s,
-	      vblank   			=> vblank_s,
+	      hblank   			=> video_o_s.hblank,
+	      vblank   			=> video_o_s.vblank,
 	      pix_x     		=> pix_x,
 	      pix_y     		=> pix_y,
 
@@ -480,7 +361,7 @@ begin
 				
         bank_data   => extra_data,
 
-				hblank			=> hblank_s,
+				hblank			=> video_o_s.hblank,
 				xAddr				=> pix_x(7 downto 0),
 				yAddr				=> pix_y(8 downto 0),
 				dIn					=> uPdata,
@@ -541,7 +422,7 @@ begin
     begin
 
       -- oneshot triggers on rising_egde
-      hsync_p <= not hsync_s;
+      hsync_p <= not video_o_s.hsync;
 
       lineos0 : oneshot
         generic map
