@@ -413,14 +413,18 @@ begin
       if reset_i = '1' then
         null;
       elsif rising_edge (clk_24M) then
-        flash_o.a <= EXT(uP_addr(12 downto 0), flash_o.a'length);
-        flash_o.d <= (others => 'Z');
-        flash_o.we <= '0';
-        flash_o.cs <= rom_cs;
-        flash_o.oe <= uPmemrd;
-        rom_datao <= flash_i.d;
+        -- 70ns flash - update address and latch every 500ns
+        if clk_2M_en = '1' then
+          flash_o.a <= EXT(uP_addr(12 downto 0), flash_o.a'length);
+          rom_datao <= flash_i.d;
+        end if;
       end if;
     end process;
+
+    flash_o.d <= (others => 'Z');
+    flash_o.we <= '0';
+    flash_o.cs <= '1';
+    flash_o.oe <= '1';
 
   end generate GEN_FLASH_ROM;
   
