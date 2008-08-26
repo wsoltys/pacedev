@@ -122,8 +122,8 @@ begin
 			CONFIG		=> PACE_VIDEO_CONTROLLER_TYPE,
 			H_SIZE    => PACE_VIDEO_H_SIZE,
 			V_SIZE    => PACE_VIDEO_V_SIZE,
-			H_SCALE   => 1,
-			V_SCALE   => 1
+			H_SCALE   => 2,
+			V_SCALE   => 2
 		)
 		port map 
 		(

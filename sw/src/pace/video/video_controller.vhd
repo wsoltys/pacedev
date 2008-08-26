@@ -84,6 +84,8 @@ architecture SYN of pace_video_controller is
   signal x_active               : std_logic_vector(10 downto 0) := (others => '0');
   signal y_active               : std_logic_vector(10 downto 0) := (others => '0');
   
+  signal extended_reset         : std_logic := '1';
+
 begin
 
   -- registers
@@ -93,7 +95,7 @@ begin
 			case CONFIG is
 
         when PACE_VIDEO_VGA_800x600_60Hz =>
-          -- generic VGA
+          -- generic VGA, clk=40MHz
           h_front_porch_r <= 40;
           h_sync_r <= 128;
           h_back_porch_r <= 88;
@@ -138,10 +140,29 @@ begin
     end if;
   end process;
   
-  -- video control outputs
-  process (reset, clk, clk_ena)
+  process (reset, clk)
+    variable count_v : integer;
   begin
     if reset = '1' then
+      extended_reset <= '1';
+      count_v := 7;
+    elsif rising_edge(clk) then
+      if count_v = 0 then
+        extended_reset <= '0';
+      else
+        count_v := count_v - 1;
+      end if;
+    end if;
+  end process;
+
+  -- video control outputs
+  process (extended_reset, clk, clk_ena)
+  begin
+    if extended_reset = '1' then
+      hblank_s <= '1';
+      vblank_s <= '1';
+      hactive_s <= '0';
+      vactive_s <= '0';
       hsync_s <= '0';
       x_count <= 0;
       y_count <= 0;
@@ -152,7 +173,7 @@ begin
           vblank_s <= '1';
           y_count <= 0;
         else
-          y_active <= x_active + 1;
+          y_active <= y_active + 1;
           if y_count = v_sync_start then
             vsync_s <= '1';
           elsif y_count = v_back_porch_start then
@@ -196,11 +217,24 @@ begin
       stb <= '1';
       x <= x_active;
       y <= y_active;
-      -- register video outpus
+      -- register video outputs
+      if hactive_s = '1' and vactive_s = '1' then
+        -- active video
+        video_o.rgb <= rgb_i;
+      elsif hblank_s = '0' and vblank_s = '0' then
+        -- border (fix me)
+        video_o.rgb.r <= (others => '1');
+        video_o.rgb.g <= (others => '1');
+        video_o.rgb.b <= (others => '1');
+      else
+        video_o.rgb.r <= (others => '0');
+        video_o.rgb.g <= (others => '0');
+        video_o.rgb.b <= (others => '0');
+      end if;
       video_o.hsync <= hsync_s;
       video_o.vsync <= vsync_s;
-      video_o.hblank <= hactive_s;
-      video_o.vblank <= vactive_s;
+      video_o.hblank <= not hactive_s;
+      video_o.vblank <= not vactive_s;
     end if;
   end process;
   
