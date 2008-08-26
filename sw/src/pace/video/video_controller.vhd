@@ -7,7 +7,8 @@ use ieee.std_logic_unsigned.all;
 entity pace_video_controller is
   generic
   (
-    delay   : in integer := 0   -- Number of clocks to delay sync and blank signals
+		CONFIG		: PACEVideoController_t := PACE_VIDEO_NONE;
+    DELAY			: integer := 0   		-- Number of clocks to delay sync and blank signals
   );
   port
   (
@@ -36,3 +37,18 @@ entity pace_video_controller is
     hsync   	: out std_logic
   );
 end pace_video_controller;
+
+architecture SYN of pace_video_controller is
+begin
+
+	process (reset, clk)
+	begin
+		if reset = '1' then
+			case CONFIG is
+				when PACE_VIDEO_NONE =>
+					null;
+			end case;
+		end if;
+	end process;
+
+end SYN;
