@@ -4,6 +4,10 @@ use IEEE.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 
+library work;
+use work.pace_pkg.RGB_t;
+use work.pace_pkg.to_VIDEO_t;
+
 package video_controller_pkg is
 
   type PACEVideoController_t is
@@ -18,35 +22,30 @@ package video_controller_pkg is
   component pace_video_controller is
     generic
     (
-      delay   : in integer := 0   -- Number of clocks to delay sync and blank signals
+      CONFIG		: PACEVideoController_t := PACE_VIDEO_NONE;
+      H_SIZE    : integer;
+      V_SIZE    : integer;
+      H_SCALE   : integer;
+      V_SCALE   : integer;
+      DELAY			: integer := 0   		-- Number of clocks to delay sync and blank signals
     );
     port
     (
-  		-- Inputs
-      clk     	: in std_logic;
-      reset   	: in std_logic;
-      r_i     	: in std_logic_vector(9 downto 0);
-      g_i     	: in std_logic_vector(9 downto 0);
-      b_i     	: in std_logic_vector(9 downto 0);
-  		xcentre 	: in std_logic_vector(9 downto 0);
-  		ycentre 	: in std_logic_vector(9 downto 0);
-  
-  		-- Video control signals (out)
-      strobe  	: out std_logic;
-      pixel_x 	: out std_logic_vector(9 downto 0);
-      pixel_y 	: out std_logic_vector(9 downto 0);
-      hblank  	: out std_logic;
-      vblank  	: out std_logic;
-  
-      -- Outputs
-      red     	: out std_logic_vector(9 downto 0);
-      green   	: out std_logic_vector(9 downto 0);
-      blue    	: out std_logic_vector(9 downto 0);
-  		lcm_data	: out std_logic_vector(9 downto 0);
-      vsync   	: out std_logic;
-      hsync   	: out std_logic
+    clk     	: in std_logic;
+    clk_ena   : in std_logic;
+    reset   	: in std_logic;
+    
+    -- video input data
+    rgb_i     : in RGB_t;
+
+		-- control signals (out)
+    stb  	    : out std_logic;
+    x 	      : out std_logic_vector(10 downto 0);
+    y 	      : out std_logic_vector(10 downto 0);
+
+    -- Outputs to video
+    video_o   : out to_VIDEO_t
     );
   end component pace_video_controller;
 
 end;
-
