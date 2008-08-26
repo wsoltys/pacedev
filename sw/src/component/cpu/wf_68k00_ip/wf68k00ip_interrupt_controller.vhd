@@ -29,7 +29,7 @@
 ---- error to withdrawn. It is assumed, that the bus error is     ----
 ---- released by the bus interface logic during the exception     ----
 ---- processing takes place. Double bus errors / address errors   ----
----- cause the processor to go in the 'HALT' state.               ----
+---- cause the processor to enter the 'HALT' state.               ----
 ----                                                              ----
 ----                                                              ----
 ---- Author(s):                                                   ----
@@ -37,28 +37,24 @@
 ----                                                              ----
 ----------------------------------------------------------------------
 ----                                                              ----
----- Copyright (C) 2006 Wolfgang Foerster                         ----
-----                                                              ----
----- This source file may be used and distributed without         ----
----- restriction provided that this copyright statement is not    ----
----- removed from the file and that any derivative work contains  ----
----- the original copyright notice and the associated disclaimer. ----
+---- Copyright (C) 2006 - 2008 Wolfgang Foerster                  ----
 ----                                                              ----
 ---- This source file is free software; you can redistribute it   ----
----- and/or modify it under the terms of the GNU Lesser General   ----
----- Public License as published by the Free Software Foundation; ----
----- either version 2.1 of the License, or (at your option) any   ----
----- later version.                                               ----
+---- and/or modify it under the terms of the GNU General Public   ----
+---- License as published by the Free Software Foundation; either ----
+---- version 2 of the License, or (at your option) any later      ----
+---- version.                                                     ----
 ----                                                              ----
----- This source is distributed in the hope that it will be       ----
+---- This program is distributed in the hope that it will be      ----
 ---- useful, but WITHOUT ANY WARRANTY; without even the implied   ----
 ---- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR      ----
----- PURPOSE. See the GNU Lesser General Public License for more  ----
+---- PURPOSE.  See the GNU General Public License for more        ----
 ---- details.                                                     ----
 ----                                                              ----
----- You should have received a copy of the GNU Lesser General    ----
----- Public License along with this source; if not, download it   ----
----- from http://www.gnu.org/licenses/lgpl.html                   ----
+---- You should have received a copy of the GNU General Public    ----
+---- License along with this program; if not, write to the Free   ----
+---- Software Foundation, Inc., 51 Franklin Street, Fifth Floor,  ----
+---- Boston, MA 02110-1301, USA.                                  ----
 ----                                                              ----
 ----------------------------------------------------------------------
 -- 
@@ -68,7 +64,10 @@
 --   Initial Release.
 -- Revision 2K7A  2007/05/31 WF
 --   Updated all modules.
---   CPU is now working.
+-- Revision 2K7B  2007/12/24 WF
+--   See the 68K00 top level file.
+-- Revision 2K8A  2008/07/14 WF
+--   See the 68K00 top level file.
 -- 
 
 library ieee;
@@ -81,7 +80,7 @@ entity WF68K00IP_INTERRUPT_CONTROL is
 		RESETn				: in bit; -- Core reset.
 
 		RESET_CPUn			: in bit; -- Internal reset used for CPU initialization.
-		BERRn				: in bit; -- Bus error detection.
+		BERR				: in bit; -- Bus error detection.
 		HALTn				: in std_logic;
 
 		-- Data and address bus:
@@ -100,26 +99,24 @@ entity WF68K00IP_INTERRUPT_CONTROL is
 		FC_IN				: in std_logic_vector(2 downto 0);
 		FC_OUT				: out std_logic_vector(2 downto 0);
 		FC_EN				: out bit;
+		SEL_BUFF_A_LO		: out bit; -- Select data A buffer low word.
+		SEL_BUFF_A_HI		: out bit; -- Select data A buffer high word.
 
 		-- Address register controls 
 		-- (Address reisters, status register and program counter):
 		STATUS_REG_IN		: in std_logic_vector(15 downto 0);
 		PC					: in std_logic_vector(31 downto 0);
-		SET_S				: out bit;
-		CLR_T				: out bit;
+		INIT_STATUS			: out bit;
 		PRESET_IRQ_MASK		: out bit;
 		SSP_DEC				: out bit;
-		SSP_INIT_HI			: out bit;
-		SSP_INIT_LO			: out bit;
-		PC_INIT_HI			: out bit;
-		PC_INIT_LO			: out bit;
+		SSP_INIT			: out bit;
+		PC_INIT				: out bit;
 
 		-- Operation decoder stuff:
 		BIW_0				: in std_logic_vector(15 downto 0); -- First instruction word.
 
-		-- Main control machine signals:
+		-- Control state machine signals:
 		BUS_CYC_RDY			: in bit;
-		TRAP_AERR			: in bit; -- Address error indication.
 		CTRL_RDY			: in bit; -- Main controller finished an execution.
 		CTRL_EN				: out bit; -- Enable main controller.
 		EXEC_ABORT			: out bit; -- Abort the current execution.
@@ -128,12 +125,12 @@ entity WF68K00IP_INTERRUPT_CONTROL is
 		-- Interrupt controls:
 		IRQ				: in std_logic_vector(2 downto 0);
 		AVECn			: in bit; -- Originally 68Ks use VPAn.
-		IRQ_LVL			: out std_logic_vector(2 downto 0); -- Auto vector level.
-		INT_VECT		: out std_logic_vector(9 downto 1); -- Interrupt vector number.
+        IRQ_SAVE        : out bit;
+		INT_VECT		: out std_logic_vector(9 downto 0); -- Interrupt vector number.
 		USE_INT_VECT	: out bit;
 
-
 		-- Trap signals:
+		TRAP_AERR		: in bit; -- Address error indication.
 		TRAP_OP			: in bit; -- TRAP instruction.
 		TRAP_VECTOR		: in std_logic_vector(3 downto 0); -- Vector of the TRAP instruction.
 		TRAP_V			: in bit; -- TRAPV instruction.
@@ -151,24 +148,18 @@ architecture BEHAVIOR of WF68K00IP_INTERRUPT_CONTROL is
 type EX_STATES is (IDLE, WAIT_CTRL_RDY, INIT, VECT_NR, GET_VECTOR, STACK_MISC, STACK_ACCESS_ADR_HI,
 				   STACK_ACCESS_ADR_LO, STACK_INSTRUCTION, STACK_STATUS, STACK_PC_HI, STACK_PC_LO, 
 				   UPDATE_SSP_HI, UPDATE_SSP_LO, UPDATE_PC_HI, UPDATE_PC_LO, HALT);
-type EXCEPTIONS is (EX_RESET, EX_BUS_ERR, EX_ADR_ERR, EX_ILLEGAL, EX_DIVZERO, EXEC_CHK, EX_TRAPV, 
+type EXCEPTIONS is (EX_RESET, EX_BUS_ERR, EX_ADR_ERR, EX_ILLEGAL, EX_DIVZERO, EX_CHK, EX_TRAPV, 
 					EX_PRIV, EX_TRACE, EX_1010, EX_1111, EX_TRAP, EX_INT, EX_NONE);
 signal EX_STATE			: EX_STATES;
 signal NEXT_EX_STATE	: EX_STATES;
-signal EXCEPTION_D		: EXCEPTIONS;
 signal EXCEPTION_Q		: EXCEPTIONS; -- Currently executed exception.
-signal INT_MASK			: std_logic_vector(2 downto 0);
-signal INTERRUPT		: bit;
-signal IRQ_SAVE			: bit;
-signal TMP_COPY			: bit;
+signal TMP_CPY			: bit;
 signal STATUS_REG_TMP	: std_logic_vector(15 downto 0);
 signal RWn_TMP			: std_logic_vector(0 downto 0);
 signal FC_TMP			: std_logic_vector(2 downto 0);
 signal INSTRn			: std_logic;
 signal ADR_TMP			: std_logic_vector(31 downto 0);
-signal IRQ_LVL_I		: std_logic_vector(2 downto 0); -- Auto vector level.
-signal INT_VECT_I		: std_logic_vector(9 downto 1); -- Interrupt vector number.
-signal INT_VECT_INC		: bit;
+signal INC_TMP_VECTOR	: bit;
 signal EX_P_RESET		: bit; -- ..._P are the pending exceptions.
 signal EX_P_ADR_ERR		: bit;
 signal EX_P_BUS_ERR		: bit;
@@ -184,21 +175,19 @@ signal EX_P_CHK			: bit;
 signal EX_P_DIVZERO		: bit;
 signal FORCE_HALT		: boolean;
 begin
-	IRQ_LVL <= IRQ_LVL_I;
-	INT_MASK <= STATUS_REG_IN(10 downto 8);
-	
 	-- The processor gets halted, if a bus error occurs in the stacking or updating states during
 	-- the exception processing of a bus error, an address error or a reset.
 	HALT_EN <= '1' when EX_STATE = HALT else '0';
-	FORCE_HALT <= true when (EXCEPTION_Q = EX_RESET or EXCEPTION_Q = EX_ADR_ERR or 
-							 EXCEPTION_Q = EX_BUS_ERR) and (BERRn = '0' or TRAP_AERR = '1') else false;
+    FORCE_HALT <= true when EX_STATE /= IDLE and (BERR = '1' or TRAP_AERR = '1') and 
+							(EXCEPTION_Q = EX_RESET or EXCEPTION_Q = EX_ADR_ERR or EXCEPTION_Q = EX_BUS_ERR) else false;
 
 	-- This is the flag which enables the main execution processing state machine. It is enabled, if there
 	-- is no pending interrupt and if the interrupt exception handler state machine is inactive.
-	CTRL_EN <= '1' when EX_STATE = IDLE and EX_P_RESET = '0' and EX_P_ADR_ERR = '0' and EX_P_BUS_ERR = '0' and
-						EX_P_TRACE = '0' and EX_P_INT = '0' and EX_P_ILLEGAL = '0' and EX_P_1010 = '0' and 
-						EX_P_1111 = '0' and EX_P_PRIV = '0' and EX_P_TRAP = '0' and EX_P_TRAPV = '0' and
-						EX_P_CHK = '0' and EX_P_DIVZERO = '0' else '0';
+    CTRL_EN <= '1' when EX_STATE = IDLE and
+                        EX_P_RESET = '0' and EX_P_ADR_ERR = '0' and EX_P_BUS_ERR = '0' and
+                        EX_P_TRACE = '0' and EX_P_INT = '0' and EX_P_ILLEGAL = '0' and EX_P_1010 = '0' and 
+                        EX_P_1111 = '0' and EX_P_PRIV = '0' and EX_P_TRAP = '0' and EX_P_TRAPV = '0' and
+                        EX_P_CHK = '0' and EX_P_DIVZERO = '0' else '0';          
 
 	-- Flag, if the processor is executing an instruction or a type 0 or 1 exception.
 	-- 0: instruction, 1: exception.
@@ -209,7 +198,9 @@ begin
 	-- IACK cycle resides in the CPU space, the RESET resides in the supervisor 
 	-- program space and all others reside in the supervisor data space.
 	FC_OUT <=	"111" when EX_STATE = GET_VECTOR else -- IACK space cycle.
-				"110" when INT_VECT_I < "000000100" else "101"; -- Interrupt vector is 9 downto 1!
+				"110" when EX_STATE = UPDATE_SSP_HI or EX_STATE = UPDATE_SSP_LO else
+				"110" when EX_STATE = UPDATE_PC_HI or EX_STATE = UPDATE_PC_LO else
+				"101";
 
 	FC_EN <= '0' when EX_STATE = IDLE else
 			 '0' when EX_STATE = WAIT_CTRL_RDY else
@@ -223,6 +214,11 @@ begin
 					'1' when EX_STATE = STACK_STATUS else
 					'1' when EX_STATE = STACK_PC_HI else
 					'1' when EX_STATE = STACK_PC_LO else '0';
+
+	SEL_BUFF_A_LO <= '1' when EX_STATE = UPDATE_SSP_LO else
+					 '1' when EX_STATE = UPDATE_PC_LO else '0';
+	SEL_BUFF_A_HI <= '1' when EX_STATE = UPDATE_SSP_HI else
+					 '1' when EX_STATE = UPDATE_PC_HI else '0';
 
 	ADR_EN_VECTOR <= '1' when EX_STATE = GET_VECTOR else '0'; -- IACK space cycle.
 
@@ -249,22 +245,15 @@ begin
 				'1' when EX_STATE = STACK_PC_HI else
 				'1' when EX_STATE = STACK_PC_LO else '0';
 
-	INTERRUPT <= 	'1' when IRQ = "111" else -- Level 7 is nonmaskable ...
-					'1' when INT_MASK < IRQ else '0'; -- ... but all others.
-
-	EXEC_RESUME <= '1' when INTERRUPT = '1' or TRAP_TRACE = '1' else '0';
+    -- Resume the STOP operation, when an external interrupt is going 
+    -- to be processed.
+    EXEC_RESUME <= '1' when EX_P_INT = '1' else '0';
 
 	PENDING: process(RESETn, CLK)
 	-- The exceptions which occurs are stored in this pending register until the
 	-- interrupt handler handled the respective exception.
-	-- This process is modelled in a way, that the reset signal RESET_CPUn, the bus error signal 
-	-- BERRn and the external interrupt INTERRUPT may not be a strobe of 1 clock period.
 	-- The TRAP_PRIV, TRAP_1010, TRAP_1111, TRAP_ILLEGAL, TRAP_OP and TRAP_V may be a strobe
-	-- of 1 clock period. All others must be strobes of 1 clock period..
-	variable LOCK_RESET	: boolean;
-	variable LOCK_BERR	: boolean;
-	variable LOCK_INT	: boolean;
-	variable LOCK_TRAP	: boolean;
+	-- of 1 clock period. All others must be strobes of 1 clock period.
 	begin
 		if RESETn = '0' then
 			EX_P_RESET   <= '0';
@@ -280,80 +269,63 @@ begin
 			EX_P_TRAPV   <= '0';
 			EX_P_CHK     <= '0';
 			EX_P_DIVZERO <= '0';
-			LOCK_RESET 	:= false;
-			LOCK_BERR 	:= false;
-			LOCK_INT 	:= false;
-			LOCK_TRAP 	:= false;
 		elsif CLK = '1' and CLK' event then
-			if RESET_CPUn = '0' and LOCK_RESET = false then
-				LOCK_RESET := true;
+			if RESET_CPUn = '0' then
 				EX_P_RESET <= '1';
-			elsif EXCEPTION_Q = EX_RESET then
+            elsif EX_STATE = UPDATE_PC_HI and BUS_CYC_RDY = '1' and EXCEPTION_Q = EX_RESET then
 				EX_P_RESET <= '0';
-			elsif RESET_CPUn = '1' then
-				LOCK_RESET := false;
 			end if;
 			--
 			if TRAP_AERR = '1' then
 				EX_P_ADR_ERR <= '1';
-			elsif EXCEPTION_Q = EX_ADR_ERR then
+            elsif EX_STATE = UPDATE_PC_HI and BUS_CYC_RDY = '1' and EXCEPTION_Q = EX_ADR_ERR then
 				EX_P_ADR_ERR <= '0';
 			elsif RESET_CPUn = '0' then
 				EX_P_ADR_ERR <= '0';
 			end if;
 			--
-			if BERRn = '0' and HALTn = '1' and EX_STATE /= GET_VECTOR and LOCK_BERR = false then
+			if BERR = '1' and HALTn = '1' and EX_STATE /= GET_VECTOR then
 				-- Do not store the bus error during the interrupt acknowledge
 				-- cycle (GET_VECTOR).
-				LOCK_BERR := true;
 				EX_P_BUS_ERR <= '1';
-			elsif EXCEPTION_Q = EX_BUS_ERR then
+            elsif EX_STATE = UPDATE_PC_HI and BUS_CYC_RDY = '1' and EXCEPTION_Q = EX_BUS_ERR then
 				EX_P_BUS_ERR <= '0';
 			elsif RESET_CPUn = '0' then
 				EX_P_BUS_ERR <= '0';
-			elsif BERRn = '1' then
-				LOCK_BERR := false;
 			end if;
 			--
 			if TRAP_TRACE = '1' then
 				EX_P_TRACE <= '1';
-			elsif EXCEPTION_Q = EX_TRACE then
+            elsif EX_STATE = UPDATE_PC_HI and BUS_CYC_RDY = '1' and EXCEPTION_Q = EX_TRACE then
 				EX_P_TRACE <= '0';
 			elsif RESET_CPUn = '0' then
 				EX_P_TRACE <= '0';
 			end if;
 			--
-			if INTERRUPT = '1' and LOCK_INT = false then
-				LOCK_INT := true;
-				EX_P_INT <= '1';
-			elsif EXCEPTION_Q = EX_INT then
+            if IRQ = "111" then -- Level 7 is nonmaskable ...
+                EX_P_INT <= '1';
+            elsif STATUS_REG_IN(10 downto 8) < IRQ then
+                EX_P_INT <= '1';
+            elsif EX_STATE = GET_VECTOR then
 				EX_P_INT <= '0';
 			elsif RESET_CPUn = '0' then
 				EX_P_INT <= '0';
-			elsif INTERRUPT = '0' then
-				LOCK_INT := false;
-			end if;
-			--
+            end if;
+            --
 			-- The following six traps never appear at the same time:
-			if TRAP_PRIV = '1' and LOCK_TRAP = false then
-				EX_P_PRIV <= '1';
-				LOCK_TRAP := true;
-			elsif TRAP_1010 = '1' and LOCK_TRAP = false then
+			if TRAP_1010 = '1' then
 				EX_P_1010 <= '1';
-				LOCK_TRAP := true;
-			elsif TRAP_1111 = '1' and LOCK_TRAP = false then
+			elsif TRAP_1111 = '1' then
 				EX_P_1111 <= '1';
-				LOCK_TRAP := true;
-			elsif TRAP_ILLEGAL = '1' and LOCK_TRAP = false then
+			elsif TRAP_ILLEGAL = '1' then
 				EX_P_ILLEGAL <= '1';
-				LOCK_TRAP := true;
-			elsif TRAP_OP = '1' and LOCK_TRAP = false then
+			elsif TRAP_PRIV = '1' then
+				EX_P_PRIV <= '1';
+			elsif TRAP_OP = '1' then
 				EX_P_TRAP <= '1';
-				LOCK_TRAP := true;
-			elsif TRAP_V = '1' and LOCK_TRAP = false then
+			elsif TRAP_V = '1' then
 				EX_P_TRAPV <= '1';
-				LOCK_TRAP := true;
-			elsif EX_STATE = INIT or RESET_CPUn = '0' then
+            elsif (EX_STATE = UPDATE_PC_HI and BUS_CYC_RDY = '1') or RESET_CPUn = '0' then
 				case EXCEPTION_Q is
 					when EX_PRIV | EX_1010 | EX_1111 | EX_ILLEGAL | EX_TRAP | EX_TRAPV =>
 						EX_P_PRIV <= '0';
@@ -362,22 +334,14 @@ begin
 						EX_P_ILLEGAL <= '0';
 						EX_P_TRAP <= '0';
 						EX_P_TRAPV <= '0';
-						LOCK_TRAP := false;
 					when others =>
 						null;
 				end case;
-			else
-				EX_P_PRIV <= '0';
-				EX_P_1010 <= '0';
-				EX_P_1111 <= '0';
-				EX_P_ILLEGAL <= '0';
-				EX_P_TRAP <= '0';
-				EX_P_TRAPV <= '0';
 			end if;
 			--
 			if TRAP_CHK = '1' then
 				EX_P_CHK <= '1';
-			elsif EXCEPTION_Q = EXEC_CHK then
+            elsif EX_STATE = UPDATE_PC_HI and BUS_CYC_RDY = '1' and EXCEPTION_Q = EX_CHK then
 				EX_P_CHK <= '0';
 			elsif RESET_CPUn = '0' then
 				EX_P_CHK <= '0';
@@ -385,7 +349,7 @@ begin
 			--
 			if TRAP_DIVZERO = '1' then
 				EX_P_DIVZERO <= '1';
-			elsif EXCEPTION_Q = EX_DIVZERO then
+            elsif EX_STATE = UPDATE_PC_HI and BUS_CYC_RDY = '1' and EXCEPTION_Q = EX_DIVZERO then
 				EX_P_DIVZERO <= '0';
 			elsif RESET_CPUn = '0' then
 				EX_P_DIVZERO <= '0';
@@ -402,13 +366,41 @@ begin
 		if RESETn = '0' then
 			EXCEPTION_Q <= EX_NONE;
 		elsif CLK = '1' and CLK' event then
-			if EX_STATE = IDLE then
-				EXCEPTION_Q <= EXCEPTION_D;
-			end if;
+            if EX_STATE = IDLE and EX_P_RESET = '1' then
+                EXCEPTION_Q <= EX_RESET;
+            elsif EX_STATE = IDLE and EX_P_ADR_ERR = '1' then
+                EXCEPTION_Q <= EX_ADR_ERR;
+            elsif EX_STATE = IDLE and EX_P_BUS_ERR = '1' and BERR = '1' then
+                EXCEPTION_Q <= EX_NONE; -- Wait until BERR is negated.
+            elsif EX_STATE = IDLE and EX_P_BUS_ERR = '1' then
+                EXCEPTION_Q <= EX_BUS_ERR;
+            elsif EX_STATE = WAIT_CTRL_RDY and CTRL_RDY = '1' and EX_P_ILLEGAL = '1' then
+                EXCEPTION_Q <= EX_ILLEGAL;
+            elsif EX_STATE = WAIT_CTRL_RDY and CTRL_RDY = '1' and EX_P_1010 = '1' then
+                EXCEPTION_Q <= EX_1010;
+            elsif EX_STATE = WAIT_CTRL_RDY and CTRL_RDY = '1' and EX_P_1111 = '1' then
+                EXCEPTION_Q <= EX_1111;
+            elsif EX_STATE = WAIT_CTRL_RDY and CTRL_RDY = '1' and EX_P_PRIV = '1' then
+                EXCEPTION_Q <= EX_PRIV;
+            elsif EX_STATE = WAIT_CTRL_RDY and CTRL_RDY = '1' and EX_P_TRAP = '1' then
+                EXCEPTION_Q <= EX_TRAP;
+            elsif EX_STATE = WAIT_CTRL_RDY and CTRL_RDY = '1' and EX_P_TRAPV = '1' then
+                EXCEPTION_Q <= EX_TRAPV;
+            elsif EX_STATE = WAIT_CTRL_RDY and CTRL_RDY = '1' and EX_P_CHK = '1' then
+                EXCEPTION_Q <=EX_CHK;
+            elsif EX_STATE = WAIT_CTRL_RDY and CTRL_RDY = '1' and EX_P_DIVZERO = '1' then
+                EXCEPTION_Q <= EX_DIVZERO;
+            elsif EX_STATE = WAIT_CTRL_RDY and CTRL_RDY = '1' and EX_P_TRACE = '1' then
+                EXCEPTION_Q <= EX_TRACE;
+            elsif EX_STATE = WAIT_CTRL_RDY and CTRL_RDY = '1' and EX_P_INT = '1' then
+                EXCEPTION_Q <= EX_INT;
+            elsif NEXT_EX_STATE = IDLE then
+                EXCEPTION_Q <= EX_NONE;
+            end if;
 		end if;
 	end process STORE_CURRENT_EXCEPTION;
 
-	P_TMP_COPY: process(RESETn, CLK)
+	P_TMP_CPY: process (CLK)
 	-- For the most interrupts, a status register copy is necessary.
 	-- This is the register for a temporary copy of the status register
 	-- made in the first step of the exception processing. This copy is
@@ -422,10 +414,8 @@ begin
 	-- appear immediately after the bus error occurs.
 	variable SR_MEM: std_logic_vector(9 downto 0);
 	begin
-		if RESETn = '0' then
-			SR_MEM := "0000000000";
-		elsif CLK = '1' and CLK' event then
-			if TMP_COPY = '1' then
+		if CLK = '1' and CLK' event then
+			if TMP_CPY = '1' then
 				SR_MEM := STATUS_REG_IN(15) & STATUS_REG_IN(13) & STATUS_REG_IN(10 downto 8) & STATUS_REG_IN(4 downto 0);
 				RWn_TMP <= To_StdLogicVector(RWn);
 				FC_TMP <= FC_IN;
@@ -433,109 +423,90 @@ begin
 			end if;
 		end if;
 		STATUS_REG_TMP <= SR_MEM(9) & '0' & SR_MEM(8) & "00" & SR_MEM(7 downto 5) & "000" & SR_MEM(4 downto 0);
-	end process P_TMP_COPY;
+	end process P_TMP_CPY;
 
-	P_IRQ_LVL_I: process(RESETn, CLK)
-	-- The autovector is generated from the IRQ level inputs. The level is saved
-	-- at the time, the interrupt is get to be processed (EX_STATE = IDLE), even 
-	-- if the vector is not used later.
-	begin
-		if RESETn = '0' then
-			IRQ_LVL_I <= "000";
-		elsif CLK = '1' and CLK' event then
-			if IRQ_SAVE = '1' then
-				IRQ_LVL_I <= IRQ;
-			end if;
-		end if;
-	end process P_IRQ_LVL_I;
-
-	INT_VECTOR: process(RESETn, CLK, INT_VECT_I)
+	INT_VECTOR: process(RESETn, CLK)
+	variable VECTOR_No : std_logic_vector(7 downto 0);
+	variable VECT_TMP : std_logic_vector(1 downto 0);
 	-- This process provides the interrupt vector number INT_VECT, which
 	-- is determined during interrupt processing.
 	begin
 		if RESETn = '0' then
-			INT_VECT_I <= (others => '0'); -- Dummy assignement.
+			VECTOR_No := (others => '0'); -- Dummy assignement.
 		elsif CLK = '1' and CLK' event then
-			if EX_STATE = VECT_NR or EX_STATE = GET_VECTOR then
+            if EX_STATE = VECT_NR or EX_STATE = GET_VECTOR then
 				case EXCEPTION_Q is
-					when EX_RESET 	=> INT_VECT_I <= x"00" & '0';
-					when EX_BUS_ERR => INT_VECT_I <= x"02" & '0';
-					when EX_ADR_ERR => INT_VECT_I <= x"03" & '0';
-					when EX_ILLEGAL => INT_VECT_I <= x"04" & '0';
-					when EX_DIVZERO => INT_VECT_I <= x"05" & '0';
-					when EXEC_CHK 	=> INT_VECT_I <= x"06" & '0';
-					when EX_TRAPV 	=> INT_VECT_I <= x"07" & '0';
-					when EX_PRIV 	=> INT_VECT_I <= x"08" & '0';
-					when EX_TRACE 	=> INT_VECT_I <= x"09" & '0';
-					when EX_1010 	=> INT_VECT_I <= x"0A" & '0';
-					when EX_1111 	=> INT_VECT_I <= x"0B" & '0';
-					when EX_TRAP 	=> INT_VECT_I <= x"2" & TRAP_VECTOR & '0';
-					when EX_INT 	=>
-						if BUS_CYC_RDY = '1' and BERRn = '0' then
-							INT_VECT_I <= x"18" & '0'; -- Spurious interrupt.
+					when EX_RESET 	=> VECTOR_No := x"00";
+					when EX_BUS_ERR => VECTOR_No := x"02";
+					when EX_ADR_ERR => VECTOR_No := x"03";
+					when EX_ILLEGAL => VECTOR_No := x"04";
+					when EX_DIVZERO => VECTOR_No := x"05";
+					when EX_CHK 	=> VECTOR_No := x"06";
+					when EX_TRAPV 	=> VECTOR_No := x"07";
+					when EX_PRIV 	=> VECTOR_No := x"08";
+					when EX_TRACE 	=> VECTOR_No := x"09";
+					when EX_1010 	=> VECTOR_No := x"0A";
+					when EX_1111 	=> VECTOR_No := x"0B";
+					-- The uninitialized interrupt vector number x"0F"
+					-- is provided by the peripheral interrupt source
+					-- during the auto vector bus cycle.
+					when EX_INT =>
+						if BUS_CYC_RDY = '1' and BERR = '1' then
+							VECTOR_No := x"18"; -- Spurious interrupt.
 						elsif BUS_CYC_RDY = '1' and AVECn = '0' then
-							INT_VECT_I <= x"18" + IRQ_LVL_I & '0'; -- Autovector.
-						elsif BUS_CYC_RDY = '1' then
+                            VECTOR_No := x"18" + STATUS_REG_IN(10 downto 8); -- Autovector.
+                        elsif BUS_CYC_RDY = '1' then
 							-- This is the vector number provided by the device.
-							-- If the returned INT_VECT_I is x"0F" then it is the
+							-- If the returned Vector Number is x"0F" then it is the
 							-- uninitialized interrupt vector due to non initia-
 							-- lized vector register of the peripheral device.
-							INT_VECT_I <= DATA_IN & '0'; -- Non autovector.
+							VECTOR_No := DATA_IN; -- Non autovector.
 						end if;
-					when others	=> INT_VECT_I <= (others => '-'); -- Don't care.
+					when EX_TRAP => VECTOR_No := x"2" & TRAP_VECTOR;
+					when others	=> VECTOR_No := (others => '-'); -- Don't care.
 				end case;
-			elsif INT_VECT_INC = '1' then
+				VECT_TMP := "00";
+			elsif INC_TMP_VECTOR = '1' then
 				 -- Offset for the next two initial bytes during system initialisation.
-				INT_VECT_I <= INT_VECT_I + '1'; -- Increment always by two.
+				VECT_TMP := VECT_TMP + '1'; -- Increment.
 			end if;
 		end if;
 		--
-		INT_VECT <= INT_VECT_I;
-		--
+		INT_VECT <= (VECTOR_No & "00") + (VECT_TMP & '0');
 	end process INT_VECTOR;
 
 	EXCEPTION_HANDLER_REG: process(RESETn, CLK)
 	-- This is the register portion of the exception control state machine.
-	variable LOCK: boolean;
 	begin
 		if RESETn = '0' then
 			EX_STATE <= IDLE;
-			LOCK := false;
-		elsif CLK = '1' and CLK' event then
-			-- The falling edge of the RESET_CPUn exception 
-			-- aborts all other exceptions in progress.
-			if RESET_CPUn = '0' and LOCK = false then
+  		elsif CLK = '1' and CLK' event then
+			if RESET_CPUn = '0' then
 				EX_STATE <= IDLE;
-				LOCK := true;
-			elsif RESET_CPUn = '1' then
-				EX_STATE <= NEXT_EX_STATE;
-				LOCK := false;
+			elsif FORCE_HALT = true then
+				EX_STATE <= HALT;
 			else
 				EX_STATE <= NEXT_EX_STATE;
 			end if;
 		end if;
 	end process EXCEPTION_HANDLER_REG;
 
-	EXCEPTION_HANDLER_DEC: process(EX_STATE, EX_P_RESET, EX_P_ADR_ERR, EX_P_BUS_ERR, EX_P_TRACE, EX_P_INT, EX_P_ILLEGAL, 
-						 EX_P_1010, EX_P_1111, EX_P_PRIV, EX_P_TRAP, EX_P_TRAPV, EX_P_CHK, EX_P_DIVZERO, EXCEPTION_Q, 
-						 BUS_CYC_RDY, AVECn, CTRL_RDY, FORCE_HALT, BERRn, TRAP_AERR, RESET_CPUn)
+    EXCEPTION_HANDLER_DEC: process(EX_STATE, EX_P_RESET, EX_P_ADR_ERR, EX_P_BUS_ERR, EX_P_TRACE, EX_P_INT, EX_P_ILLEGAL, 
+                                   EX_P_1010, EX_P_1111, EX_P_PRIV, EX_P_TRAP, EX_P_TRAPV, EX_P_CHK, EX_P_DIVZERO, EXCEPTION_Q, 
+                                   BUS_CYC_RDY, CTRL_RDY, BERR)
 	-- This is the decoder portion of the exception control state machine.
 	begin
 		-- Default assignements:
 		EXEC_ABORT 		<= '0';
-		TMP_COPY 		<= '0';
+		TMP_CPY 		<= '0';
 		IRQ_SAVE 		<= '0';
-		SET_S 			<= '0';
-		CLR_T 			<= '0';
+		INIT_STATUS		<= '0';
 		PRESET_IRQ_MASK <= '0';
-		SSP_INIT_HI 	<= '0';
-		SSP_INIT_LO 	<= '0';
-		PC_INIT_HI 		<= '0';
-		PC_INIT_LO 		<= '0';
+		SSP_INIT	 	<= '0';
+		PC_INIT 		<= '0';
 		SSP_DEC 		<= '0';
-		EXCEPTION_D 	<= EX_NONE;
 		USE_INT_VECT 	<= '0';
-		INT_VECT_INC	<= '0';
+		INC_TMP_VECTOR	<= '0';
 		case EX_STATE is
 			when IDLE =>
 				-- The priority of the exception execution is given by the
@@ -545,54 +516,28 @@ begin
 				-- as basic interrupts and therefore are not an interrupt source.
 				-- During IDLE, when an interrupt occurs, the status register copy
 				-- control is asserted and the current interrupt controll is given
-				-- to the STORE_EXCEPTION process.
+				-- to the STORE_EXCEPTION process. During bus or address errors,
+				-- the status register must be copied immediately to recognize
+				-- the current status for RWn etc. (before the faulty bus cycle is
+				-- finished).
 				if EX_P_RESET = '1' then
 					EXEC_ABORT <= '1';
-					EXCEPTION_D <= EX_RESET;
 					NEXT_EX_STATE <= INIT;
 				elsif EX_P_ADR_ERR = '1' then
 					EXEC_ABORT <= '1';
-					EXCEPTION_D <= EX_ADR_ERR;
-					TMP_COPY <= '1'; -- Immediate copy of the status register.
+					TMP_CPY <= '1'; -- Immediate copy of the status register.
 					NEXT_EX_STATE <= INIT;
-				elsif EX_P_BUS_ERR = '1' then
+				elsif EX_P_BUS_ERR = '1' and BERR = '1' then -- Wait until BERR is negated.
+					NEXT_EX_STATE <= IDLE;
+				elsif EX_P_BUS_ERR = '1' then -- Enter after BERR is negated.
 					EXEC_ABORT <= '1';
-					EXCEPTION_D <= EX_BUS_ERR;
-					TMP_COPY <= '1'; -- Immediate copy of the status register.
+					TMP_CPY <= '1'; -- Immediate copy of the status register.
 					NEXT_EX_STATE <= INIT;
-				elsif EX_P_TRACE = '1' then
-					EXCEPTION_D <= EX_TRACE;
-					NEXT_EX_STATE <= WAIT_CTRL_RDY;
-				elsif EX_P_INT = '1' then
-					EXCEPTION_D <= EX_INT;
-					IRQ_SAVE <= '1';
-					NEXT_EX_STATE <= WAIT_CTRL_RDY;
-				elsif EX_P_ILLEGAL = '1' then
-					EXCEPTION_D <= EX_ILLEGAL;
-					NEXT_EX_STATE <= WAIT_CTRL_RDY;
-				elsif EX_P_1010 = '1' then
-					EXCEPTION_D <= EX_1010;
-					NEXT_EX_STATE <= WAIT_CTRL_RDY;
-				elsif EX_P_1111 = '1' then
-					EXCEPTION_D <= EX_1111;
-					NEXT_EX_STATE <= WAIT_CTRL_RDY;
-				elsif EX_P_PRIV = '1' then
-					EXCEPTION_D <= EX_PRIV;
-					NEXT_EX_STATE <= WAIT_CTRL_RDY;
-				elsif EX_P_TRAP = '1' then
-					EXCEPTION_D <= EX_TRAP;
-					NEXT_EX_STATE <= WAIT_CTRL_RDY;
-				elsif EX_P_TRAPV = '1' then
-					EXCEPTION_D <= EX_TRAPV;
-					NEXT_EX_STATE <= WAIT_CTRL_RDY;
-				elsif EX_P_CHK = '1' then
-					EXCEPTION_D <= EXEC_CHK;
-					NEXT_EX_STATE <= WAIT_CTRL_RDY;
-				elsif EX_P_DIVZERO = '1' then
-					EXCEPTION_D <= EX_DIVZERO;
-					NEXT_EX_STATE <= WAIT_CTRL_RDY;
+                elsif EX_P_TRAP = '1' or EX_P_TRAPV = '1' or EX_P_CHK = '1' or EX_P_DIVZERO = '1' or EX_P_TRACE = '1' then
+                    NEXT_EX_STATE <= WAIT_CTRL_RDY;
+                elsif EX_P_INT = '1' or EX_P_ILLEGAL = '1' or EX_P_1010 = '1' or EX_P_1111 = '1'  or EX_P_PRIV = '1' then
+                    NEXT_EX_STATE <= WAIT_CTRL_RDY;
 				else -- No exception.
-					EXCEPTION_D <= EX_NONE;
 					NEXT_EX_STATE <= IDLE;
 				end if;
 			when WAIT_CTRL_RDY =>
@@ -600,7 +545,7 @@ begin
 				-- operation execution has finished. The copy of the status register
 				-- is made after the excecution has finished.
 				if CTRL_RDY = '1' then
-					TMP_COPY <= '1';
+					TMP_CPY <= '1'; -- Copy the status register.
 					NEXT_EX_STATE <= INIT;
 				else
 					NEXT_EX_STATE <= WAIT_CTRL_RDY;
@@ -608,28 +553,22 @@ begin
 			when INIT =>
 				-- In this state, the supervisor mode is switched on (the S bit is set)
 				-- and the trace mode is switched off (the T bit is cleared).
-				SET_S <= '1';
-				CLR_T <= '1';
+				INIT_STATUS <= '1';
 				case EXCEPTION_Q is
 					when EX_RESET =>
 						PRESET_IRQ_MASK <= '1';
-						if RESET_CPUn = '0' then
-							NEXT_EX_STATE <= INIT; -- Wait until the reset is deasserted.
-						else
-							NEXT_EX_STATE <= VECT_NR;
-						end if;
-					when EX_INT 	=> NEXT_EX_STATE <= GET_VECTOR;
-					when others 	=> NEXT_EX_STATE <= VECT_NR;
+						NEXT_EX_STATE <= VECT_NR;
+					when EX_INT => 
+                        IRQ_SAVE <= '1';					
+                        NEXT_EX_STATE <= GET_VECTOR;
+					when others => NEXT_EX_STATE <= VECT_NR;
 				end case;
 			when VECT_NR =>
 				-- This state is introduced to control the generation of the vector number
-				-- for all exceptions except the INTERRUPTs.
+				-- for all exceptions except the external interrupts.
 				case EXCEPTION_Q is
 					when EX_RESET => 
 						NEXT_EX_STATE <= UPDATE_SSP_HI; -- Do not stack anything but update the SSP and PC.
-					when EX_BUS_ERR | EX_ADR_ERR =>
-						SSP_DEC <= '1';
-						NEXT_EX_STATE <= STACK_MISC;
 					when others => 
 						SSP_DEC <= '1';
 						NEXT_EX_STATE <= STACK_PC_LO;
@@ -638,9 +577,6 @@ begin
 				-- This state is intended to determine the vector number for the current process.
 				-- See also the process EX_VECTOR for the handling of the vector determination.
 				if BUS_CYC_RDY = '1' then
-					SSP_DEC <= '1';
-					NEXT_EX_STATE <= STACK_PC_LO;
-				elsif AVECn = '0' then
 					SSP_DEC <= '1';
 					NEXT_EX_STATE <= STACK_PC_LO;
 				else
@@ -656,129 +592,88 @@ begin
 			-- If the errors occur during other exception processings, the current
 			-- processing is aborted and this exception handler state machine will
 			-- immediately begin with the bus error exception handling.
-			when STACK_MISC =>
-				if FORCE_HALT = true then
-					NEXT_EX_STATE <= HALT;
-				elsif BERRn = '0' or TRAP_AERR = '1' then
-					NEXT_EX_STATE <= IDLE;
-				elsif BUS_CYC_RDY = '1' then
-					SSP_DEC <= '1';
-					NEXT_EX_STATE <= STACK_ACCESS_ADR_LO;
-				else
-					NEXT_EX_STATE <= STACK_MISC;
-				end if;
-			when STACK_ACCESS_ADR_LO =>
-				if FORCE_HALT = true then
-					NEXT_EX_STATE <= HALT;
-				elsif BERRn = '0' or TRAP_AERR = '1' then
-					NEXT_EX_STATE <= IDLE;
-				elsif BUS_CYC_RDY = '1' then
-					SSP_DEC <= '1';
-					NEXT_EX_STATE <= STACK_ACCESS_ADR_HI;
-				else
-					NEXT_EX_STATE <= STACK_ACCESS_ADR_LO;
-				end if;
-			when STACK_ACCESS_ADR_HI =>
-				if FORCE_HALT = true then
-					NEXT_EX_STATE <= HALT;
-				elsif BERRn = '0' or TRAP_AERR = '1' then
-					NEXT_EX_STATE <= IDLE;
-				elsif BUS_CYC_RDY = '1' then
-					SSP_DEC <= '1';
-					NEXT_EX_STATE <= STACK_INSTRUCTION;
-				else
-					NEXT_EX_STATE <= STACK_ACCESS_ADR_HI;
-				end if;
-			when STACK_INSTRUCTION =>
-				if FORCE_HALT = true then
-					NEXT_EX_STATE <= HALT;
-				elsif BERRn = '0' or TRAP_AERR = '1' then
-					NEXT_EX_STATE <= IDLE;
-				elsif BUS_CYC_RDY = '1' then
-					SSP_DEC <= '1';
-					NEXT_EX_STATE <= STACK_STATUS;
-				else
-					NEXT_EX_STATE <= STACK_INSTRUCTION;
-				end if;
 			when STACK_PC_LO =>
-				if FORCE_HALT = true then
-					NEXT_EX_STATE <= HALT;
-				elsif BERRn = '0' or TRAP_AERR = '1' then
-					NEXT_EX_STATE <= IDLE;
-				elsif BUS_CYC_RDY = '1' then
+				if BUS_CYC_RDY = '1' then
 					SSP_DEC <= '1';
 					NEXT_EX_STATE <= STACK_PC_HI;
 				else
 					NEXT_EX_STATE <= STACK_PC_LO;
 				end if;
 			when STACK_PC_HI =>
-				if FORCE_HALT = true then
-					NEXT_EX_STATE <= HALT;
-				elsif BERRn = '0' or TRAP_AERR = '1' then
-					NEXT_EX_STATE <= IDLE;
-				elsif BUS_CYC_RDY = '1' then
+				if BUS_CYC_RDY = '1' then
 					SSP_DEC <= '1';
 					NEXT_EX_STATE <= STACK_STATUS;
 				else
 					NEXT_EX_STATE <= STACK_PC_HI;
 				end if;
 			when STACK_STATUS =>
-				if FORCE_HALT = true then
-					NEXT_EX_STATE <= HALT;
-				elsif BERRn = '0' or TRAP_AERR = '1' then
-					NEXT_EX_STATE <= IDLE;
-				elsif BUS_CYC_RDY = '1' then
-					NEXT_EX_STATE <= UPDATE_PC_HI;
+				if BUS_CYC_RDY = '1' then
+					case EXCEPTION_Q is
+						when EX_BUS_ERR | EX_ADR_ERR =>
+							SSP_DEC <= '1';
+							NEXT_EX_STATE <= STACK_INSTRUCTION;
+						when others =>
+							NEXT_EX_STATE <= UPDATE_PC_HI;
+					end case;
 				else
 					NEXT_EX_STATE <= STACK_STATUS;
 				end if;
+			when STACK_INSTRUCTION =>
+				if BUS_CYC_RDY = '1' then
+					SSP_DEC <= '1';
+					NEXT_EX_STATE <= STACK_ACCESS_ADR_LO;
+				else
+					NEXT_EX_STATE <= STACK_INSTRUCTION;
+				end if;
+			when STACK_ACCESS_ADR_LO =>
+				if BUS_CYC_RDY = '1' then
+					SSP_DEC <= '1';
+					NEXT_EX_STATE <= STACK_ACCESS_ADR_HI;
+				else
+					NEXT_EX_STATE <= STACK_ACCESS_ADR_LO;
+				end if;
+			when STACK_ACCESS_ADR_HI =>
+				if BUS_CYC_RDY = '1' then
+					SSP_DEC <= '1';
+					NEXT_EX_STATE <= STACK_MISC;
+				else
+					NEXT_EX_STATE <= STACK_ACCESS_ADR_HI;
+				end if;
+			when STACK_MISC =>
+				if BUS_CYC_RDY = '1' then
+					NEXT_EX_STATE <= UPDATE_PC_HI;
+				else
+					NEXT_EX_STATE <= STACK_MISC;
+				end if;
 			when UPDATE_SSP_HI =>
-				if FORCE_HALT = true then
-					NEXT_EX_STATE <= HALT;
-				elsif BERRn = '0' or TRAP_AERR = '1' then
-					NEXT_EX_STATE <= IDLE;
-				elsif BUS_CYC_RDY = '1' then
-					INT_VECT_INC <= '1';
-					SSP_INIT_HI <= '1';
+				if BUS_CYC_RDY = '1' then
+					INC_TMP_VECTOR <= '1';
 					NEXT_EX_STATE <= UPDATE_SSP_LO;
 				else
 					NEXT_EX_STATE <= UPDATE_SSP_HI;
 				end if;
 				USE_INT_VECT <= '1';
 			when UPDATE_SSP_LO =>
-				if FORCE_HALT = true then
-					NEXT_EX_STATE <= HALT;
-				elsif BERRn = '0' or TRAP_AERR = '1' then
-					NEXT_EX_STATE <= IDLE;
-				elsif BUS_CYC_RDY = '1' then
-					INT_VECT_INC <= '1';
-					SSP_INIT_LO <= '1';
+				if BUS_CYC_RDY = '1' then
+					INC_TMP_VECTOR <= '1';
+					SSP_INIT <= '1';
 					NEXT_EX_STATE <= UPDATE_PC_HI;
 				else
 					NEXT_EX_STATE <= UPDATE_SSP_LO;
 				end if;
 				USE_INT_VECT <= '1';
 			when UPDATE_PC_HI =>
-				if FORCE_HALT = true then
-					NEXT_EX_STATE <= HALT;
-				elsif BERRn = '0' or TRAP_AERR = '1' then
-					NEXT_EX_STATE <= IDLE;
-				elsif BUS_CYC_RDY = '1' then
-					INT_VECT_INC <= '1';
-					PC_INIT_HI <= '1';
+				if BUS_CYC_RDY = '1' then
+					INC_TMP_VECTOR <= '1';
 					NEXT_EX_STATE <= UPDATE_PC_LO;
 				else
 					NEXT_EX_STATE <= UPDATE_PC_HI;
 				end if;
 				USE_INT_VECT <= '1';
 			when UPDATE_PC_LO =>
-				if FORCE_HALT = true then
-					NEXT_EX_STATE <= HALT;
-				elsif BERRn = '0' or TRAP_AERR = '1' then
-					NEXT_EX_STATE <= IDLE;
-				elsif BUS_CYC_RDY = '1' then
-					PC_INIT_LO <= '1';
-					NEXT_EX_STATE <= IDLE;
+                if BUS_CYC_RDY = '1' then
+					PC_INIT <= '1';
+                    NEXT_EX_STATE <= IDLE;
 				else
 					NEXT_EX_STATE <= UPDATE_PC_LO;
 				end if;

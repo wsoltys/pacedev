@@ -24,28 +24,24 @@
 ----                                                              ----
 ----------------------------------------------------------------------
 ----                                                              ----
----- Copyright (C) 2006 Wolfgang Foerster                         ----
-----                                                              ----
----- This source file may be used and distributed without         ----
----- restriction provided that this copyright statement is not    ----
----- removed from the file and that any derivative work contains  ----
----- the original copyright notice and the associated disclaimer. ----
+---- Copyright (C) 2006 - 2008 Wolfgang Foerster                  ----
 ----                                                              ----
 ---- This source file is free software; you can redistribute it   ----
----- and/or modify it under the terms of the GNU Lesser General   ----
----- Public License as published by the Free Software Foundation; ----
----- either version 2.1 of the License, or (at your option) any   ----
----- later version.                                               ----
+---- and/or modify it under the terms of the GNU General Public   ----
+---- License as published by the Free Software Foundation; either ----
+---- version 2 of the License, or (at your option) any later      ----
+---- version.                                                     ----
 ----                                                              ----
----- This source is distributed in the hope that it will be       ----
+---- This program is distributed in the hope that it will be      ----
 ---- useful, but WITHOUT ANY WARRANTY; without even the implied   ----
 ---- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR      ----
----- PURPOSE. See the GNU Lesser General Public License for more  ----
+---- PURPOSE.  See the GNU General Public License for more        ----
 ---- details.                                                     ----
 ----                                                              ----
----- You should have received a copy of the GNU Lesser General    ----
----- Public License along with this source; if not, download it   ----
----- from http://www.gnu.org/licenses/lgpl.html                   ----
+---- You should have received a copy of the GNU General Public    ----
+---- License along with this program; if not, write to the Free   ----
+---- Software Foundation, Inc., 51 Franklin Street, Fifth Floor,  ----
+---- Boston, MA 02110-1301, USA.                                  ----
 ----                                                              ----
 ----------------------------------------------------------------------
 -- 
@@ -55,7 +51,10 @@
 --   Initial Release.
 -- Revision 2K7A  2007/05/31 WF
 --   Updated all modules.
---   CPU is now working.
+-- Revision 2K7B  2007/12/24 WF
+--   See the 68K00 top level file.
+-- Revision 2K8A  2008/07/14 WF
+--   See the 68K00 top level file.
 -- 
 
 use work.wf68k00ip_pkg.all;
@@ -81,10 +80,11 @@ entity WF68K00IP_CONTROL is
 		CTRL_RDY		: out bit; -- Main controller finished an execution.
 
 		-- Status register and controls:
-		CLR_T			: in bit;
-		SET_S			: in bit;
+		INIT_STATUS		: in bit;
 		PRESET_IRQ_MASK	: in bit;
 		SR_CCR_IN		: in std_logic_vector(15 downto 0); -- Status and condition code register input.
+        IRQ			    : in std_logic_vector(2 downto 0);
+        IRQ_SAVE        : in bit;
 		XNZVC_IN		: in std_logic_vector(4 downto 0); -- Conditional flags.
 		STATUS_REG_OUT	: out std_logic_vector(15 downto 0);
 
@@ -121,10 +121,10 @@ entity WF68K00IP_CONTROL is
 		FC_EN			: out bit;
 
 		-- Program counter controls:
-		PC_INIT_HI		: out bit; -- Write the hi PC portion.
-		PC_INIT_LO		: out bit; -- Write the low PC portion.
+		PC_INIT			: out bit; -- Write the hi PC portion.
 		PC_WR			: out bit; -- Write program counter (PC).
 		PC_INC			: out bit; -- Increment PC.
+		PC_TMP_CLR		: out bit; -- Clear temporary PC.
 		PC_TMP_INC		: out bit; -- Increment temporary PC.
 		PC_ADD_DISPL	: out bit; -- Forces the adding of the sign extended displacement to the PC.
 
@@ -149,6 +149,7 @@ entity WF68K00IP_CONTROL is
 		DR_DEC			: out bit; -- Decrement data register by 1.
 
 		-- Traps:
+		SCAN_TRAPS		: out bit; -- Scan the traps in the end of FETCH_BIW_1.
 		TRAP_PRIV		: in bit; -- Trap by violation of the priviledge.
 		TRAP_TRACE		: out bit; -- Trap due to the trace mode.
 
@@ -201,58 +202,40 @@ signal MOVEM_EN			: bit;
 signal MOVEM_CPY		: std_logic;
 signal MOVEM_ADn_I		: bit;
 signal MOVEM_PI_CORR	: bit;
-signal COND				: boolean; -- used for conditional tests.
+signal COND				: boolean; -- Used for conditional tests.
 signal OP_END_I			: bit;
 signal RD_BUS_I			: bit;
 signal WR_BUS_I			: bit;
 signal RDWR_BUS_I		: bit;
 signal AR_INC_I			: bit;
 signal AR_DEC_I			: bit;
+signal UPDT_CC          : bit;
+signal SBIT_I           : bit;
+signal TRAPLOCK         : boolean;
 begin
 	-- OP_START indicates the start condition of the MULS, MULU, DIVS or DIVU computation.
-	OP_START <=	'1' when OP /= STOP and EXEC_STATE /= WAIT_OPERATION and NEXT_EXEC_STATE = WAIT_OPERATION else '0';
+    OP_START <=	'1' when OP = MOVEM and EXEC_STATE = FETCH_BIW_1 and BUS_CYC_RDY = '1' else
+                '1' when OP /= STOP and EXEC_STATE /= WAIT_OPERATION and NEXT_EXEC_STATE = WAIT_OPERATION else '0';
 
 	-- The end of an operation is indicated by the NEXT_EXEC_STATE for one clock cycle.
 	OP_END_I <= '1' when EXEC_STATE /= IDLE and EXEC_STATE /= FETCH_BIW_1 and NEXT_EXEC_STATE = FETCH_BIW_1 else
 			  	'1' when EXEC_STATE = FETCH_BIW_1 and NEXT_EXEC_STATE = FETCH_BIW_1 and BUS_CYC_RDY = '1' else '0';
 
+	CTRL_RDY <= '1' when EXEC_STATE = IDLE else '0';
+
 	-- Signal to switch the stack pointer addresses to the address bus.
 	USE_SP_ADR <= 	'1' when EXEC_STATE = RD_SP else
 					'1' when EXEC_STATE = RD_SP_HI else
 					'1' when EXEC_STATE = RD_SP_LO else
-					'1' when EXEC_STATE = WR_SP_LO else
-					'1' when EXEC_STATE = WR_SP_HI else '0';
+					'1' when EXEC_STATE = WR_SP_HI else
+					'1' when EXEC_STATE = WR_SP_LO else '0';
 
 	SHIFTER_LOAD <= '1' when (OP = ASL or OP = ASR) and EXEC_STATE /= WAIT_OPERATION and NEXT_EXEC_STATE = WAIT_OPERATION else
 					'1' when (OP = LSL or OP = LSR) and EXEC_STATE /= WAIT_OPERATION and NEXT_EXEC_STATE = WAIT_OPERATION else
 					'1' when (OP = ROTL or OP = ROTR) and EXEC_STATE /= WAIT_OPERATION and NEXT_EXEC_STATE = WAIT_OPERATION else
 					'1' when (OP = ROXL or OP = ROXR) and EXEC_STATE /= WAIT_OPERATION and NEXT_EXEC_STATE = WAIT_OPERATION else '0';
 
-	P_TRACE: process(RESETn, CLK, OP, OP_END_I)
-	-- This process controls the tracing of an operation. The trace mode is enabled
-	-- at the beginning of the operation. A TRAP_TRACE occurs in case of an enabled
-	-- trace mode after the operation has completed. The STOP instruction forces a
-	-- TRAP_TRACE in the beginning of it's execution.
-	variable TRACE_EN : boolean;
-	begin
-		if RESETn = '0' then
-			TRACE_EN := false;
-		elsif CLK = '1' and CLK' event then
-			if NEXT_EXEC_STATE = FETCH_BIW_1 and STATUS_REG(15) = '1' then
-				TRACE_EN := true;
-			elsif NEXT_EXEC_STATE = FETCH_BIW_1 then
-				TRACE_EN := false;
-			end if;
-		end if;
-		--
-		if OP /= STOP and OP_END_I = '1' and TRACE_EN = true then
-			TRAP_TRACE <= '1';
-		elsif OP = STOP and TRACE_EN = true then
-			TRAP_TRACE <= '1';
-		else
-			TRAP_TRACE <= '0';
-		end if;
-	end process P_TRACE;
+	TRAP_TRACE <= '1' when OP_END_I = '1' and STATUS_REG(15) = '1' else '0';
 
 	CHK_ADR_STRB: process(RESETn, CLK)
 	-- This process provides strobe controls for checking the adress error in the address register
@@ -268,7 +251,9 @@ begin
 		elsif CLK = '1' and CLK' event then
 			CHK_PC <= '0';
 			CHK_ADR <= '0';
-			if (EXEC_STATE = FETCH_BIW_1 or EXEC_STATE = FETCH_BIW_2 or EXEC_STATE = FETCH_BIW_3) and LOCK = false then
+			if CTRL_EN = '0' then
+				null; -- Do nothing during exception handling.
+            elsif (EXEC_STATE = FETCH_BIW_1 or EXEC_STATE = FETCH_BIW_2 or EXEC_STATE = FETCH_BIW_3) and LOCK = false then
 				LOCK := true;
 				CHK_PC <= '1';
 			elsif (EXEC_STATE = FETCH_EXT or EXEC_STATE = FETCH_DEST_EXT) and LOCK = false then
@@ -280,6 +265,7 @@ begin
 			elsif BUS_CYC_RDY = '1' or EXEC_STATE = IDLE then
 				LOCK := false;
 				CHK_ADR <= '0';
+                CHK_PC <= '0';
 			end if;
 		end if;
 	end process CHK_ADR_STRB;
@@ -302,7 +288,10 @@ begin
 					 '1' when EXEC_STATE = RD_SRC_2_LO else '0';
 	SEL_BUFF_B_HI <= '1' when EXEC_STATE = RD_SRC_2_HI else '0';
 
-	SBIT <= '1' when STATUS_REG(13) = '1' else '0'; -- Superuser flag, bit 13.
+	SCAN_TRAPS <= '1' when EXEC_STATE = FETCH_BIW_1 and BUS_CYC_RDY = '1' else '0';
+
+    SBIT <= SBIT_I;
+    SBIT_I <= '1' when STATUS_REG(13) = '1' else '0';
 
 	-- The function codes are as follows:
 	-- 001: User data, 010: User program, 101: Supervisor data, 110: Supervisor program.
@@ -310,12 +299,12 @@ begin
 	-- This implementation does not affect any drawback because the bus is not driven during
 	-- these states.
 	FC_EN <= '1' when (RD_BUS_I = '1' or WR_BUS_I = '1' or RDWR_BUS_I = '1') else '0';
-	FC_OUT <= "010" when STATUS_REG(13) = '0' and (EXEC_STATE = FETCH_BIW_1 or EXEC_STATE = FETCH_BIW_2 or 
+	FC_OUT <= "010" when SBIT_I = '0' and (EXEC_STATE = FETCH_BIW_1 or EXEC_STATE = FETCH_BIW_2 or 
 					EXEC_STATE = FETCH_BIW_3 or EXEC_STATE = FETCH_EXT or EXEC_STATE = FETCH_DEST_EXT) else
-			  "110" when STATUS_REG(13) = '1' and (EXEC_STATE = FETCH_BIW_1 or EXEC_STATE = FETCH_BIW_2 or 
+			  "110" when SBIT_I = '1' and (EXEC_STATE = FETCH_BIW_1 or EXEC_STATE = FETCH_BIW_2 or 
 					EXEC_STATE = FETCH_BIW_3 or EXEC_STATE = FETCH_EXT or EXEC_STATE = FETCH_DEST_EXT) else
-			  "001" when (RD_BUS_I = '1' or WR_BUS_I = '1' or RDWR_BUS_I = '1') and STATUS_REG(13) = '0' else
-			  "101" when (RD_BUS_I = '1' or WR_BUS_I = '1' or RDWR_BUS_I = '1') and STATUS_REG(13) = '1' else "000";
+			  "001" when (RD_BUS_I = '1' or WR_BUS_I = '1' or RDWR_BUS_I = '1') and SBIT_I = '0' else
+			  "101" when (RD_BUS_I = '1' or WR_BUS_I = '1' or RDWR_BUS_I = '1') and SBIT_I = '1' else "000";
 
 	-- Status register conditions: (STATUS_REG(4) = X, STATUS_REG(3) = N, STATUS_REG(2) = Z,
 	--                              STATUS_REG(1) = V, STATUS_REG(0) = C.)
@@ -348,8 +337,6 @@ begin
 	IW_WR <= '1' when EXEC_STATE = FETCH_BIW_1 and DATA_VALID = '1' else
 			 '1' when EXEC_STATE = FETCH_BIW_2 and DATA_VALID = '1' else
 			 '1' when EXEC_STATE = FETCH_BIW_3 and DATA_VALID = '1' else '0';
-
-	CTRL_RDY  <= '1' when EXEC_STATE = IDLE else '0';
 
 	-- Select stack pointer or address data:
 	-- '1' means: write address register to stack pointer.
@@ -425,9 +412,9 @@ begin
 			  	'1' when OP = MOVE and EXEC_STATE = WR_DEST_1_LO and MOVE_D_AM = "011" and BUS_CYC_RDY = '1' else
 				'1' when (OP = MOVEA or OP = MOVE_FROM_CCR or OP = MOVE_FROM_SR) and ADR_MODE = "011" and OP_END_I = '1' else
 				'1' when (OP = MOVE_TO_CCR or OP = MOVE_TO_SR) and ADR_MODE = "011" and OP_END_I = '1' else
-				'1' when OP = MOVEM and ADR_MODE = "011" and EXEC_STATE = RD_SRC_1 and BUS_CYC_RDY = '1' else
-				'1' when OP = MOVEM and ADR_MODE = "011" and EXEC_STATE = RD_SRC_1_LO and BUS_CYC_RDY = '1' else
-				'1' when OP = MOVEM and MOVEM_PI_CORR = '1' else -- MOVEM postincrement correction
+                '1' when OP = MOVEM and ADR_MODE = "011" and EXEC_STATE = RD_SRC_1 and BUS_CYC_RDY = '1' else
+                '1' when OP = MOVEM and ADR_MODE = "011" and EXEC_STATE = RD_SRC_1_LO and BUS_CYC_RDY = '1' else
+                '1' when OP = MOVEM and MOVEM_PI_CORR = '1' else -- MOVEM postincrement correction
 				'1' when (OP = MULS or OP = MULU) and ADR_MODE = "011" and OP_END_I = '1' else
 				'1' when (OP = NBCD or OP = NEG or OP = NEGX) and ADR_MODE = "011" and OP_END_I = '1' else
 				'1' when (OP = NOT_B or OP = OR_B or OP = ORI) and ADR_MODE = "011" and OP_END_I = '1' else
@@ -499,7 +486,7 @@ begin
 						if (EXEC_STATE = RD_SRC_1 or EXEC_STATE = RD_SRC_1_HI) and ADR_MODE = "100" then -- Read from source.
 							AR_DEC_I <= '1';
 							LOCK := true;
-						elsif MOVE_D_AM = "100" then -- Write to destination.
+						elsif (EXEC_STATE = WR_DEST_1 or EXEC_STATE = WR_DEST_1_HI) and MOVE_D_AM = "100" then -- Write to destination.
 							AR_DEC_I <= '1';
 							LOCK := true;
 						end if;
@@ -522,17 +509,19 @@ begin
 	-- Opereation ends (after a write process).
 	-- Post increment or pre decrement addressing mode (during increments / decrements).
 	-- After the end of the respective read periods (take care of the MOVEM).
+	-- The OP /= MOVEM ... is important for the MOVEM in the non predecrement / postincrement 
+	-- address modes see also ADR_TMP_INC.
 	ADR_TMP_CLR <= 	'1' when OP_END_I = '1' or AR_INC_I = '1' or AR_DEC_I = '1' else
-					'1' when OP /= MOVEM and EXEC_STATE = RD_SRC_1 and BUS_CYC_RDY = '1' else
+                    '1' when OP /= MOVEM and EXEC_STATE = RD_SRC_1 and BUS_CYC_RDY = '1' else
 					'1' when EXEC_STATE = RD_SRC_2 and BUS_CYC_RDY = '1' else -- For ABCD, ADDX, SBCD, SUBX.
-					'1' when OP /= MOVEM and EXEC_STATE = RD_SRC_1_LO and BUS_CYC_RDY = '1' else
+                    '1' when OP /= MOVEM and EXEC_STATE = RD_SRC_1_LO and BUS_CYC_RDY = '1' else
 					'1' when EXEC_STATE = RD_SRC_2_LO and BUS_CYC_RDY = '1' else '0'; -- ADDX, SUBX.
 
-	ADR_TMP_INC <= 	'1' when OP = MOVEM and EXEC_STATE = RD_SRC_1 and BUS_CYC_RDY = '1' else
+    ADR_TMP_INC <= 	'1' when OP = MOVEM and EXEC_STATE = RD_SRC_1 and BUS_CYC_RDY = '1' else
 					'1' when EXEC_STATE = RD_SRC_1_HI and BUS_CYC_RDY = '1' else
 				  	'1' when EXEC_STATE = RD_SRC_1_LO and BUS_CYC_RDY = '1' else
 			  		'1' when EXEC_STATE = RD_SRC_2_HI and BUS_CYC_RDY = '1' else
-					'1' when OP = MOVEM and EXEC_STATE = WR_DEST_1 and BUS_CYC_RDY = '1' else
+                    '1' when OP = MOVEM and EXEC_STATE = WR_DEST_1 and BUS_CYC_RDY = '1' else
 			  		'1' when EXEC_STATE = WR_DEST_1_HI and BUS_CYC_RDY = '1' else
 			  		'1' when EXEC_STATE = WR_DEST_1_LO and BUS_CYC_RDY = '1' else
 			  		'1' when EXEC_STATE = WR_DEST_2_HI and BUS_CYC_RDY = '1' else '0';
@@ -541,36 +530,34 @@ begin
 
 	SP_ADD_DISPL <= '1' when OP = LINK and OP_END_I = '1' else '0';
 
-	USP_INC <= 	'1' when EXEC_STATE = RD_SP and BUS_CYC_RDY = '1' and STATUS_REG(13) = '0' else
-				'1' when EXEC_STATE = RD_SP_HI and BUS_CYC_RDY = '1' and STATUS_REG(13) = '0' else
-				'1' when EXEC_STATE = RD_SP_LO and BUS_CYC_RDY = '1' and STATUS_REG(13) = '0' else '0'; 
+	USP_INC <= 	'1' when EXEC_STATE = RD_SP and BUS_CYC_RDY = '1' and SBIT_I = '0' else
+				'1' when EXEC_STATE = RD_SP_HI and BUS_CYC_RDY = '1' and SBIT_I = '0' else
+				'1' when EXEC_STATE = RD_SP_LO and BUS_CYC_RDY = '1' and SBIT_I = '0' else '0'; 
 
 	-- Decrement before use:
-	USP_DEC <= 	'1' when EXEC_STATE /= WR_SP_LO and NEXT_EXEC_STATE = WR_SP_LO and STATUS_REG(13) = '0' else
-				'1' when EXEC_STATE /= WR_SP_HI and NEXT_EXEC_STATE = WR_SP_HI and STATUS_REG(13) = '0' else '0';
+	USP_DEC <= 	'1' when EXEC_STATE /= WR_SP_HI and NEXT_EXEC_STATE = WR_SP_HI and SBIT_I = '0' else
+				'1' when EXEC_STATE /= WR_SP_LO and NEXT_EXEC_STATE = WR_SP_LO and SBIT_I = '0' else '0';
 
-	SSP_INC <= 	'1' when EXEC_STATE = RD_SP and BUS_CYC_RDY = '1' and STATUS_REG(13) = '1' else
-				'1' when EXEC_STATE = RD_SP_HI and BUS_CYC_RDY = '1' and STATUS_REG(13) = '1' else
-				'1' when EXEC_STATE = RD_SP_LO and BUS_CYC_RDY = '1' and STATUS_REG(13) = '1' else '0';
+	SSP_INC <= 	'1' when EXEC_STATE = RD_SP and BUS_CYC_RDY = '1' and SBIT_I = '1' else
+				'1' when EXEC_STATE = RD_SP_HI and BUS_CYC_RDY = '1' and SBIT_I = '1' else
+				'1' when EXEC_STATE = RD_SP_LO and BUS_CYC_RDY = '1' and SBIT_I = '1' else '0';
 
 	-- Decrement before use:
-	SSP_DEC <= 	'1' when EXEC_STATE /= WR_SP_LO and NEXT_EXEC_STATE = WR_SP_LO and STATUS_REG(13) = '1' else
-				'1' when EXEC_STATE /= WR_SP_HI and NEXT_EXEC_STATE = WR_SP_HI and STATUS_REG(13) = '1' else '0';
+    SSP_DEC <= '1' when EXEC_STATE /= WR_SP_HI and NEXT_EXEC_STATE = WR_SP_HI and SBIT_I = '1' else
+               '1' when EXEC_STATE /= WR_SP_LO and NEXT_EXEC_STATE = WR_SP_LO and SBIT_I = '1' else '0';
 
 	PC_ADD_DISPL <= '1' when (OP = BRA or OP = BSR) and OP_END_I = '1' else
 					'1' when OP = Bcc and COND = true and OP_END_I = '1' else
 					'1' when OP = DBcc and OP_END_I = '1' and COND = false and DBcc_COND = false else '0';
 
-	-- The PC_INC in the end of an operation. In case of the STOP, the increment takes place right before
-	-- the wait phase. The reason is to point to the next instruction during the wait phase. For the traps,
-	-- the increment takes place entering the IDLE mode. This is correct for the stacking of the next
-	-- operation program counter value.
-	PC_INC <= 		'1' when OP_END_I = '1' else -- STOP never sees this.
-					'1' when OP = STOP and EXEC_STATE = FETCH_BIW_2 and NEXT_EXEC_STATE = WAIT_OPERATION else
-					'1' when OP = ILLEGAL and EXEC_STATE /= IDLE and NEXT_EXEC_STATE = IDLE else
-					'1' when OP = TRAP and EXEC_STATE /= IDLE and NEXT_EXEC_STATE = IDLE else
-					'1' when OP = TRAPV and EXEC_STATE /= IDLE and NEXT_EXEC_STATE = IDLE else '0';
+	-- The PC_INC takes place in the end of an operation. In case of the ILLEGAL, STOP, TRAP and TRAPV the
+	-- inrement is produced 'artificially' by generating the OP_END signal although the state machine register
+	-- changes to IDLE. See the respective state machine decoding for more details. For the UNIMPLEMENTED,
+	-- the priviledge trap and the reserved patterns, the PC may not be incremented.
+	PC_INC <= '1' when OP_END_I = '1' else '0';
 
+	PC_TMP_CLR <= '1' when EXEC_STATE = IDLE else '0'; -- Clear the temporary PC during exceptions.
+	
 	-- The PC_TMP may increment during the fetch phase but must not increment in the last step of the fetch phase.
 	PC_TMP_INC <= 	'1' when EXEC_STATE = FETCH_BIW_1 and BUS_CYC_RDY = '1' and NEXT_EXEC_STATE = FETCH_BIW_2 else
 					'1' when EXEC_STATE = FETCH_BIW_1 and BUS_CYC_RDY = '1' and NEXT_EXEC_STATE = FETCH_EXT else
@@ -582,19 +569,14 @@ begin
 					'1' when EXEC_STATE = FETCH_EXT and BUS_CYC_RDY = '1' and NEXT_EXEC_STATE = FETCH_DEST_EXT else
 					'1' when EXEC_STATE = FETCH_DEST_EXT and BUS_CYC_RDY = '1' and NEXT_EXEC_STATE = FETCH_DEST_EXT else '0';
 
-	PC_INIT_HI <=	'1' when OP = RTE and EXEC_STATE = RD_SP_HI and BUS_CYC_RDY = '1' else
-					'1' when OP = RTR and EXEC_STATE = RD_SP_HI and BUS_CYC_RDY = '1' else
-			 		'1' when OP = RTS and EXEC_STATE = RD_SP_HI and BUS_CYC_RDY = '1' else '0';
-
-	PC_INIT_LO <=	'1' when OP = RTE and EXEC_STATE = RD_SP_LO and BUS_CYC_RDY = '1' else
-			 		'1' when OP = RTR and EXEC_STATE = RD_SP_LO and BUS_CYC_RDY = '1' else
-			 		'1' when OP = RTS and EXEC_STATE = RD_SP_LO and BUS_CYC_RDY = '1' else '0';
+	PC_INIT <= 	'1' when OP = RTE and EXEC_STATE = RD_SP_LO and BUS_CYC_RDY = '1' else
+				'1' when OP = RTR and EXEC_STATE = RD_SP_LO and BUS_CYC_RDY = '1' else
+				'1' when OP = RTS and EXEC_STATE = RD_SP_LO and BUS_CYC_RDY = '1' else '0';
 
 	PC_WR <= '1' when (OP = JMP or OP = JSR) and OP_END_I = '1' else '0';
 
-	SR_WR <= 	'1' when (OP = ANDI_TO_SR or OP = EORI_TO_SR or OP = ORI_TO_SR) and OP_END_I = '1' else
-				'1' when OP = MOVE_TO_SR and OP_END_I = '1' else
-				'1' when OP = RTE and EXEC_STATE = RD_SP and BUS_CYC_RDY = '1' else
+    SR_WR <= 	'1' when (OP = ANDI_TO_SR or OP = EORI_TO_SR or OP = ORI_TO_SR) and OP_END_I = '1' else
+                '1' when (OP = MOVE_TO_SR or OP = RTE) and OP_END_I = '1' else
 				'1' when OP = STOP and EXEC_STATE = FETCH_BIW_2 and BUS_CYC_RDY = '1' else '0';
 
 	CCR_WR <= 	'1' when (OP = ANDI_TO_CCR or OP = EORI_TO_CCR or OP = ORI_TO_CCR) and OP_END_I = '1' else
@@ -607,12 +589,15 @@ begin
 	-- Enables the reset counter in the bus interface.
 	RESET_EN <= '1' when OP = RESET and EXEC_STATE = WAIT_OPERATION else '0';
 
+    UPDT_CC <= OP_END_I when ADR_MODE /= "001" else '0'; -- Valid for ADDQ and SUBQ.
+
 	with OP select
-	CC_UPDT <= OP_END_I when ABCD | ADD | ADDI | ADDQ | ADDX | AND_B | ANDI | ASL | ASR | BCHG |
-							 BCLR | BSET | BTST | CHK | CLR | CMP | CMPA | CMPI | CMPM | DIVS | DIVU |
-							 EOR | EORI | EXTW | LSL | LSR | MOVE | MOVEQ | MULS | MULU | NBCD | NEG |
-							 NEGX | NOT_B | OR_B | ORI | ROTL | ROTR | ROXL | ROXR | SBCD | SUB |
-							 SUBI | SUBQ | SUBX | SWAP | TAS | TST, '0' when others;
+	CC_UPDT <= UPDT_CC  when ADDQ | SUBQ, -- Do not update when destination is an address register.
+               OP_END_I when ABCD | ADD | ADDI | ADDX | AND_B | ANDI | ASL | ASR | BCHG | BCLR |
+							 BSET | BTST | CHK | CLR | CMP | CMPA | CMPI | CMPM | DIVS | DIVU |
+							 EOR | EORI | EXTW | LSL | LSR | MOVE | MOVEQ | MULS | MULU | NBCD |
+							 NEG | NEGX | NOT_B | OR_B | ORI | ROTL | ROTR | ROXL | ROXR | SBCD |
+							 SUB | SUBI | SUBX | SWAP | TAS | TST, '0' when others;
 
 	-- The 16 bit bus must be written in two portions: hi word and low word. 
 	-- This control is not valid for MOVEP.
@@ -625,19 +610,19 @@ begin
 				'1' when EXEC_STATE = WR_DEST_1_LO else
 				'1' when EXEC_STATE = WR_DEST_2_HI else
 				'1' when EXEC_STATE = WR_DEST_2_LO else
-				'1' when EXEC_STATE = WR_SP_LO else
-				'1' when EXEC_STATE = WR_SP_HI else '0';
+				'1' when EXEC_STATE = WR_SP_HI else
+				'1' when EXEC_STATE = WR_SP_LO else '0';
 
 	RDWR_BUS <= RDWR_BUS_I;
 	RDWR_BUS_I <= '1' when OP = TAS and EXEC_STATE = RD_SRC_1 else '0';
 
 	RD_BUS <= RD_BUS_I;
-	RD_BUS_I <=	'1' when EXEC_STATE = FETCH_BIW_1 and CTRL_EN = '1' else
-				-- The previous condition disables the bus cycle if the controller
-				-- is disabled by the exception handler. This condtion occurs, when
-				-- an exception is detected during the last clock cycle of an 
-				-- instruction. In this case, the EXEC_STATE changes to FETCH_BIW_1
-				-- and simultaneously, the EX_STATE machine changes from it's IDLE.
+    RD_BUS_I <=	'1' when EXEC_STATE = FETCH_BIW_1 and (CTRL_EN = '1' or TRAPLOCK = true) else
+                -- The previous condition disables the bus cycle if the controller
+                -- is disabled by the exception handler. This condtion occurs, when
+                -- an exception is detected during the last clock cycle of an 
+                -- instruction. In this case, the EXEC_STATE changes to FETCH_BIW_1
+                -- and simultaneously, the EX_STATE machine changes from it's IDLE.
 				'1' when EXEC_STATE = FETCH_BIW_2 else
 				'1' when EXEC_STATE = FETCH_BIW_3 else
 				'1' when EXEC_STATE = FETCH_EXT else
@@ -652,40 +637,52 @@ begin
 				'1' when EXEC_STATE = RD_SP_HI else
 				'1' when EXEC_STATE = RD_SP_LO else '0';
 
-	P_STATUS_REG: process(RESETn, CLK, STATUS_REG)
+    P_STATUS_REG: process(RESETn, CLK, STATUS_REG)
 	-- This process is the status register with
 	-- it's related logic.
 	variable SREG_MEM : std_logic_vector(9 downto 0);
+	variable SREG_MEM_TMP : std_logic_vector(9 downto 0);
 	begin
 		if RESETn = '0' then
 			SREG_MEM := "0000000000";
+			SREG_MEM_TMP := "0000000000";
 		elsif CLK = '1' and CLK' event then
-			if SET_S = '1' then
-				SREG_MEM(8) := '1';
-			end if;
-			--
-			if CLR_T = '1' then
-				SREG_MEM(9) := '0';
+            -- *. Store a temporary copy of the status register and restore it
+            -- in the end of the RTE instruction. This is important to
+            -- handle the correct stacks when the supervisor bit is modified
+            -- in the trap handler routine.
+            if OP = RTE and EXEC_STATE = RD_SP and BUS_CYC_RDY = '1' then
+                SREG_MEM_TMP := SR_CCR_IN(15) & SR_CCR_IN(13) & SR_CCR_IN(10 downto 8) & SR_CCR_IN(4 downto 0);
+            end if;
+            --
+			if INIT_STATUS = '1' then
+				SREG_MEM(9 downto 8) := "01";
 			end if;
 			--
 			if PRESET_IRQ_MASK = '1' then
 				SREG_MEM(7 downto 5) := "111";
 			end if;
 			--
-			if CC_UPDT = '1' then
+			if IRQ_SAVE = '1' then
+				SREG_MEM(7 downto 5) := IRQ;
+			end if;
+			--
+            if CC_UPDT = '1' then
 				SREG_MEM(4 downto 0) := XNZVC_IN;
 			end if;
 			--
-			if SR_WR = '1' then
+            if SR_WR = '1' and OP = RTE then -- *.
+                SREG_MEM := SREG_MEM_TMP;
+            elsif SR_WR = '1' then -- For ANDI_TO_SR, EORI_TO_SR, ORI_TO_SR, MOVE_TO_SR, STOP.
 				SREG_MEM := SR_CCR_IN(15) & SR_CCR_IN(13) & SR_CCR_IN(10 downto 8) & SR_CCR_IN(4 downto 0);
 			elsif CCR_WR = '1' then
 				SREG_MEM(4 downto 0) := SR_CCR_IN(4 downto 0);
 			end if;
 		end if;
-		STATUS_REG <= SREG_MEM(9) & '0' & SREG_MEM(8) & "00" & SREG_MEM(7 downto 5) & "000" & SREG_MEM(4 downto 0);
+        --
+        STATUS_REG <= SREG_MEM(9) & '0' & SREG_MEM(8) & "00" & SREG_MEM(7 downto 5) & "000" & SREG_MEM(4 downto 0);
 		STATUS_REG_OUT <= STATUS_REG;
 	end process P_STATUS_REG;
-
 
 	EXWORD_COUNTER: process(RESETn, CLK, EXT_CNT, DEST_EXT_CNT, EXEC_STATE)
 	-- This process provides the temporary counting of the already read extension words.
@@ -786,7 +783,7 @@ begin
 				MOVEM_ADn_I <= '0'; -- Select data registers.
 			end if;
 			--
-			if ADR_MODE = "011" and REGSEL_TMP = REGSEL_20 and MOVEM_ADn_I = '1' and DR = '1' and REGLISTMASK(BIT_PNT) = '1' then
+            if ADR_MODE = "011" and REGSEL_TMP = REGSEL_20 and BIT_PNT > 7 and REGLISTMASK(BIT_PNT) = '1' then
 			-- Special case: in the postincrement mode, the addressing register is written with the postincremented 
 			-- effective address: suppress the respective memory access.
 				MOVEM_PI_CORR <= '1';
@@ -800,12 +797,28 @@ begin
 		--
 		-- The MOVEM_CPY must be asserted asynchronous due to the latency of the REGLISTMASK
 		-- in the FETCH_BIW_2 control state:
-		if ADR_MODE = "011" and REGSEL_TMP = REGSEL_20 and MOVEM_ADn_I = '1' and DR = '1' then
-			MOVEM_CPY <= '0';
+        if ADR_MODE = "011" and REGSEL_TMP = REGSEL_20 and MOVEM_ADn_I = '1' and DR = '1' then
+			MOVEM_CPY <= '0'; -- Do not overwrite the addressing register with the value from the stack.
 		else 
 			MOVEM_CPY <= REGLISTMASK(BIT_PNT);
 		end if;
 	end process MOVEM_CTRL;
+
+    TRAP_LOCK: process
+	-- This flag enables the recognition of exceptions in the first
+	-- clock cycle of the main state FETCH_BIW_1. During all other
+	-- clock cycles, the recognition is disabled to avoid breaks of
+	-- started bus cycles.
+	begin
+		wait until CLK = '1' and CLK' event;
+        if EXEC_STATE /= FETCH_BIW_1 then
+			TRAPLOCK <= false;
+        elsif EXEC_STATE = FETCH_BIW_1 and BUS_CYC_RDY = '1' then
+            TRAPLOCK <= false;
+        elsif EXEC_STATE = FETCH_BIW_1 then
+            TRAPLOCK <= true;
+		end if;
+	end process TRAP_LOCK;
 
 	EXEC_REG: process(RESETn, CLK)
 	begin
@@ -814,17 +827,15 @@ begin
 		elsif CLK = '1' and CLK' event then
 			if EXEC_ABORT = '1' then
 				EXEC_STATE <= IDLE; -- Abort current execution.
-			elsif EXEC_STATE = FETCH_BIW_1 and TRAP_PRIV = '1' and  BUS_CYC_RDY = '1' then
-				EXEC_STATE <= IDLE; -- Break due to traps.
 			else
 				EXEC_STATE <= NEXT_EXEC_STATE;
 			end if;
 		end if;
 	end process EXEC_REG;
 	
-	EXEC_DEC: process(EXEC_STATE, CTRL_EN, BUS_CYC_RDY, FORCE_BIW2, FORCE_BIW3, GOT_EXT, GOT_DEST_EXT, SHFT_BUSY,
-					  OP, RM, RESET_RDY, OP_MODE, OP_SIZE, COND, EXEC_RESUME, ADR_MODE, DIV_MUL_32n64, OP_BUSY,
-					  MOVE_D_AM, MOVEM_EN, MOVEM_CPY, DR, STATUS_REG, MEM_SHFT, DEST_EXT_CNT, REGSEL_20)
+	EXEC_DEC: process(EXEC_STATE, CTRL_EN, TRAPLOCK, BUS_CYC_RDY, FORCE_BIW2, FORCE_BIW3, GOT_EXT, GOT_DEST_EXT, SHFT_BUSY, OP,
+					  RM, RESET_RDY, OP_MODE, OP_SIZE, COND, EXEC_RESUME, ADR_MODE, DIV_MUL_32n64, OP_BUSY, STATUS_REG,
+					  MOVE_D_AM, MOVEM_EN, MOVEM_CPY, DR, MEM_SHFT, DEST_EXT_CNT, REGLISTMASK, REGSEL_20, TRAP_PRIV)
 	begin
 		case EXEC_STATE is
 			when IDLE =>
@@ -838,8 +849,10 @@ begin
 			-- OP_SIZE etc. is not required because this information is included implicitely in the
 			-- FORCE_BIWx and the FETCH_x_EXT signals.
 			when FETCH_BIW_1 =>
-				if CTRL_EN = '0' then
-					NEXT_EXEC_STATE <= IDLE; -- Stop due to exception.
+                if CTRL_EN = '0' and TRAPLOCK = false then
+                    NEXT_EXEC_STATE <= IDLE; -- Break due to exceptions.
+                elsif BUS_CYC_RDY = '1' and TRAP_PRIV = '1' then
+					NEXT_EXEC_STATE <= IDLE; -- Exception without modifying any registers.
 				elsif BUS_CYC_RDY = '1' and FORCE_BIW2 = '1' then
 					NEXT_EXEC_STATE <= FETCH_BIW_2;
 				elsif BUS_CYC_RDY = '1' and GOT_EXT = false then
@@ -850,14 +863,10 @@ begin
 					case OP is
 						when RESET =>
 							NEXT_EXEC_STATE <= WAIT_OPERATION;
-						when ILLEGAL | TRAP =>
+						when ILLEGAL | UNIMPLEMENTED | RESERVED =>
 							NEXT_EXEC_STATE <= IDLE;
-						when TRAPV =>
-							if STATUS_REG(1) = '1' then
-								NEXT_EXEC_STATE <= IDLE;
-							else
-								NEXT_EXEC_STATE <= FETCH_BIW_1;
-							end if;
+                        when TRAP | TRAPV =>
+                            NEXT_EXEC_STATE <= FETCH_BIW_1;
 						when ABCD | SBCD | ADDX | SUBX =>
 							if RM = '0' then -- Register direct.
 								NEXT_EXEC_STATE <= FETCH_BIW_1;
@@ -1038,7 +1047,9 @@ begin
 								NEXT_EXEC_STATE <= RD_SRC_1_HI;
 							end if;
 						when MOVEM =>
-							if MOVEM_CPY = '1' and OP_SIZE = LONG and DR = '1' then
+							if REGLISTMASK = x"0000" then
+								NEXT_EXEC_STATE <= FETCH_BIW_1; -- Do nothing.
+							elsif MOVEM_CPY = '1' and OP_SIZE = LONG and DR = '1' then
 								NEXT_EXEC_STATE <= RD_SRC_1_HI; -- Memory to register LONG.
 							elsif MOVEM_CPY = '1' and OP_SIZE = LONG then
 								NEXT_EXEC_STATE <= WR_DEST_1_HI; -- Register to memory LONG.
@@ -1059,8 +1070,12 @@ begin
 							else -- OP_MODE = "110"
 								NEXT_EXEC_STATE <= WR_DEST_2_HI; -- Register to memory, word.
 							end if;
-						when STOP => 
-							NEXT_EXEC_STATE <= WAIT_OPERATION;
+						when STOP =>
+							if STATUS_REG(15) = '1' then -- Trace condition.
+								NEXT_EXEC_STATE <= FETCH_BIW_1;
+							else
+								NEXT_EXEC_STATE <= WAIT_OPERATION;
+							end if;
 						when others =>
 							NEXT_EXEC_STATE <= FETCH_BIW_1; -- Should never appear.
 					end case;
@@ -1139,7 +1154,7 @@ begin
 							NEXT_EXEC_STATE <= RD_SRC_1; -- A memory access is always BYTE wide.
 						when CHK | MOVEA | TST =>
 							if ADR_MODE = "111" and REGSEL_20 = "100" then
-								NEXT_EXEC_STATE <= WAIT_OPERATION; -- Immediate data.
+								NEXT_EXEC_STATE <= FETCH_BIW_1; -- Immediate data.
 							else
 								case OP_SIZE is
 									when LONG => NEXT_EXEC_STATE <= RD_SRC_1_HI;
@@ -1174,7 +1189,7 @@ begin
 								end if;
 							end if;
 						when MOVE =>
-							if ADR_MODE = "111" and REGSEL_20 = "100" and MOVE_D_AM = "0000" then
+							if ADR_MODE = "111" and REGSEL_20 = "100" and MOVE_D_AM = "000" then
 									NEXT_EXEC_STATE <= FETCH_BIW_1; -- Immediate data to data registers.
 							elsif ADR_MODE = "111" and REGSEL_20 = "100" then
 								case OP_SIZE is
@@ -1188,7 +1203,9 @@ begin
 								end case;
 							end if;
 						when MOVEM =>
-							if MOVEM_CPY = '1' and OP_SIZE = LONG and DR = '1' then
+							if REGLISTMASK = x"0000" then
+								NEXT_EXEC_STATE <= FETCH_BIW_1; -- Do nothing.
+							elsif MOVEM_CPY = '1' and OP_SIZE = LONG and DR = '1' then
 								NEXT_EXEC_STATE <= RD_SRC_1_HI; -- Memory to register LONG.
 							elsif MOVEM_CPY = '1' and OP_SIZE = LONG then
 								NEXT_EXEC_STATE <= WR_DEST_1_HI; -- Register to memory LONG.
@@ -1261,7 +1278,7 @@ begin
 						when DIVS | DIVU | MULS | MULU =>
 							NEXT_EXEC_STATE <= WAIT_OPERATION;
 						when MOVEM =>
-							NEXT_EXEC_STATE <= MOVEM_TST;
+                            NEXT_EXEC_STATE <= MOVEM_TST;
 						when others =>
 							NEXT_EXEC_STATE <= FETCH_BIW_1; -- Should never appear.
 					end case;
@@ -1286,7 +1303,7 @@ begin
 								NEXT_EXEC_STATE <= FETCH_BIW_1;
 							end if;
 						when MOVE =>
-							if MOVE_D_AM = "0000" then
+							if MOVE_D_AM = "000" then
 								NEXT_EXEC_STATE <= FETCH_BIW_1;
 							else
 								NEXT_EXEC_STATE <= WR_DEST_1_HI;
@@ -1422,9 +1439,9 @@ begin
 						end if;
 					when STOP => 
 						-- This state is valid until an interrupt, a trace exception or a
-						-- reset occurs. This is the reason, that the following state is IDLE.
+						-- reset occurs.
 						if EXEC_RESUME = '1' then
-							NEXT_EXEC_STATE <= IDLE;
+							NEXT_EXEC_STATE <= FETCH_BIW_1;
 						else
 							NEXT_EXEC_STATE <= WAIT_OPERATION;
 						end if;

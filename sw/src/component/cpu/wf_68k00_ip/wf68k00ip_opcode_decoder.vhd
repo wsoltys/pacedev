@@ -25,28 +25,24 @@
 ----                                                              ----
 ----------------------------------------------------------------------
 ----                                                              ----
----- Copyright (C) 2006 Wolfgang Foerster                         ----
-----                                                              ----
----- This source file may be used and distributed without         ----
----- restriction provided that this copyright statement is not    ----
----- removed from the file and that any derivative work contains  ----
----- the original copyright notice and the associated disclaimer. ----
+---- Copyright (C) 2006 - 2008 Wolfgang Foerster                  ----
 ----                                                              ----
 ---- This source file is free software; you can redistribute it   ----
----- and/or modify it under the terms of the GNU Lesser General   ----
----- Public License as published by the Free Software Foundation; ----
----- either version 2.1 of the License, or (at your option) any   ----
----- later version.                                               ----
+---- and/or modify it under the terms of the GNU General Public   ----
+---- License as published by the Free Software Foundation; either ----
+---- version 2 of the License, or (at your option) any later      ----
+---- version.                                                     ----
 ----                                                              ----
----- This source is distributed in the hope that it will be       ----
+---- This program is distributed in the hope that it will be      ----
 ---- useful, but WITHOUT ANY WARRANTY; without even the implied   ----
 ---- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR      ----
----- PURPOSE. See the GNU Lesser General Public License for more  ----
+---- PURPOSE.  See the GNU General Public License for more        ----
 ---- details.                                                     ----
 ----                                                              ----
----- You should have received a copy of the GNU Lesser General    ----
----- Public License along with this source; if not, download it   ----
----- from http://www.gnu.org/licenses/lgpl.html                   ----
+---- You should have received a copy of the GNU General Public    ----
+---- License along with this program; if not, write to the Free   ----
+---- Software Foundation, Inc., 51 Franklin Street, Fifth Floor,  ----
+---- Boston, MA 02110-1301, USA.                                  ----
 ----                                                              ----
 ----------------------------------------------------------------------
 -- 
@@ -56,7 +52,10 @@
 --   Initial Release.
 -- Revision 2K7A  2007/05/31 WF
 --   Updated all modules.
---   CPU is now working.
+-- Revision 2K7B  2007/12/24 WF
+--   See the 68K00 top level file.
+-- Revision 2K8A  2008/07/14 WF
+--   See the 68K00 top level file.
 -- 
 
 use work.wf68k00ip_pkg.all;
@@ -112,6 +111,7 @@ entity WF68K00IP_OPCODE_DECODER is
 		REG_Dhr			: out std_logic_vector(2 downto 0);
 
 		-- Traps:
+		SCAN_TRAPS		: in bit;
 		TRAP_ILLEGAL	: out bit;
 		TRAP_1010		: out bit;
 		TRAP_1111		: out bit;
@@ -178,13 +178,14 @@ begin
 	OP <= OP_I;
 
 	-- TRAPS:
-	TRAP_PRIV <= '1' when (OP_I = ANDI_TO_SR or OP_I = EORI_TO_SR or OP_I = MOVE_TO_SR) and SBIT = '0' else
-				 '1' when (OP_I = MOVE_USP or OP_I = ORI_TO_SR or OP_I = RESET or OP_I = RTE or OP_I = STOP) and SBIT = '0' else '0';
-	TRAP_1010 <= '1' when OP_I = NOP and BIW(0)(15 downto 12) = "1010" else '0';
-	TRAP_1111 <= '1' when OP_I = NOP and BIW(0)(15 downto 12) = "1111" else '0';
-	TRAP_ILLEGAL <= '1' when OP_I = ILLEGAL else '0';
-	TRAP_OP <= '1' when OP_I = TRAP else '0';
-	TRAP_V <= '1' when OP_I = TRAPV and OV = '1' else '0';
+	TRAP_1010 <= '1' when SCAN_TRAPS = '1' and BIW(0)(15 downto 12) = "1010" else '0';
+	TRAP_1111 <= '1' when SCAN_TRAPS = '1' and BIW(0)(15 downto 12) = "1111" else '0';
+	TRAP_ILLEGAL <= '1' when SCAN_TRAPS = '1' and OP_I = ILLEGAL else '0';
+	TRAP_OP <= '1' when SCAN_TRAPS = '1' and OP_I = TRAP else '0';
+	TRAP_V <= '1' when SCAN_TRAPS = '1' and OP_I = TRAPV and OV = '1' else '0';
+	with OP_I select
+		TRAP_PRIV <= not SBIT and SCAN_TRAPS when ANDI_TO_SR | EORI_TO_SR | MOVE_TO_SR | MOVE_USP | ORI_TO_SR | RESET | RTE | STOP,
+					 '0' when others;
 	
 	OPCODE_REG: process(RESETn, CLK)
 	-- In this process the different OPCODE registers store all required information for
@@ -238,7 +239,7 @@ begin
 	REGSEL_INDEX <= EXWORD_REG(0)(14 downto 12) when SRC_DESTn = '1' else DEST_EXWORD_REG(0)(14 downto 12);
 
 	C_CODE <= 	To_BitVector(BIW(0)(11 downto 8)); -- Valid for Bcc, DBcc, Scc.
-	
+
 	OP_MODE <= 	BIW(0)(7 downto 3) when OP_I = EXG else
 				"00" & BIW(0)(8 downto 6); -- Valid for EXT, OR, SUB, SUBA, CMP, CMPA, EOR, AND, ADDA, ADD.
 	TRAP_VECTOR <= BIW(0)(3 downto 0); -- Valid for TRAP.
@@ -246,8 +247,10 @@ begin
 	with OP_I select
 		SEL_DISPLACE_BIW <= '1' when Bcc | BRA | BSR | DBcc | MOVEP | LINK, '0' when others;
 		
-	DISPLACE_BIW <= x"0000" & BIW(1) when OP_I = BRA and BIW(0)(7 downto 0) = x"00" else
+	DISPLACE_BIW <= x"0000" & BIW(1) when OP_I = BRA and BIW(0)(7 downto 0) = x"00" else -- Word displacement.
+                    BIW(1) & BIW(2) when OP_I = BRA and BIW(0)(7 downto 0) = x"FF" else -- LONG displacement 68K20+.
 					x"0000" & BIW(1) when OP_I = BSR and BIW(0)(7 downto 0) = x"00" else
+                    BIW(1) & BIW(2) when OP_I = BSR and BIW(0)(7 downto 0) = x"FF" else -- LONG displacement 68K20+.
 					x"0000" & BIW(1) when OP_I = Bcc and BIW(0)(7 downto 0) = x"00" else
 					x"000000" & BIW(0)(7 downto 0) when OP_I = BRA or OP_I = BSR or OP_I = Bcc else
 					BIW(1) & BIW(2) when OP_I = LINK and OP_SIZE_I = LONG else
@@ -256,11 +259,14 @@ begin
 	EXT_DSIZE <= 	LONG when OP_I = LINK and OP_SIZE_I = LONG else
 					WORD when OP_I = DBcc or OP_I = MOVEP or OP_I = LINK else
 					WORD when OP_I = BRA and BIW(0)(7 downto 0) = x"00" else
+                    LONG when OP_I = BRA and BIW(0)(7 downto 0) = x"FF" else -- 68K20+.
 					WORD when OP_I = BSR and BIW(0)(7 downto 0) = x"00" else
+                    LONG when OP_I = BSR and BIW(0)(7 downto 0) = x"FF" else -- 68K20+.
+                    LONG when OP_I = Bcc and BIW(0)(7 downto 0) = x"FF" else -- 68K20+.
 					WORD when OP_I = Bcc and BIW(0)(7 downto 0) = x"00" else
 					BYTE when OP_I = BRA or OP_I = BSR or OP_I = Bcc else
-					WORD when BIW(0)(8 downto 6) = "111" and BIW(0)(2 downto 0) = "010" and SRC_DESTn = '0' else -- MOVE.
 					WORD when BIW(0)(8 downto 6) = "101" and SRC_DESTn = '0' else -- MOVE.
+                    BYTE when BIW(0)(8 downto 6) = "110" and SRC_DESTn = '0' else -- MOVE.
 					WORD when BIW(0)(5 downto 3) = "111" and BIW(0)(2 downto 0) = "010" else
 					WORD when BIW(0)(5 downto 3) = "101" else BYTE;
 
@@ -294,7 +300,7 @@ begin
 	BIT_POS <= BIW(1)(4 downto 0);
 
 	-- Multiplication / Division:
-	DIV_MUL_32n64 <= To_Bit(BIW(1)(10));
+    DIV_MUL_32n64 <= To_Bit(BIW(1)(10));
 	REG_Dlq <= BIW(1)(14 downto 12);
 	REG_Dhr <= BIW(1)(2 downto 0);
 
@@ -328,7 +334,7 @@ begin
 				 LONG when OP_I = EXTW and BIW(0)(7 downto 6) = "11" else
 				 WORD when OP_I = EXTW and BIW(0)(7 downto 6) = "10" else
 				 WORD when OP_I = LINK and BIW(0)(15 downto 3) = "0100111001010" else
-				 LONG when OP_I = LINK and BIW(0)(15 downto 3) = "0100100000001" else
+                 LONG when OP_I = LINK and BIW(0)(15 downto 3) = "0100100000001" else
 				 BYTE when OP_I = MOVE and BIW(0)(13 downto 12) = "01" else
 				 WORD when OP_I = MOVE and BIW(0)(13 downto 12) = "11" else
 				 LONG when OP_I = MOVE and BIW(0)(13 downto 12) = "10" else
@@ -355,12 +361,13 @@ begin
 				 WORD when (OP_I = LSL or OP_I = LSR) and BIW(0)(7 downto 6) = "11" else -- Memory Shifts.
 				 WORD when (OP_I = ROTL or OP_I = ROTR) and BIW(0)(7 downto 6) = "11" else -- Memory Shifts.
 				 WORD when (OP_I = ROXL or OP_I = ROXR) and BIW(0)(7 downto 6) = "11" else -- Memory Shifts.
+				 LONG when OP_I = BSR or OP_I = PEA or OP_I = RTS else -- Long words to/from the stack.
 				 -- The following three conditions are valid for the listed operations:
-				 -- ADDI, ANDI, CMPI, EORI, ORI, SUBI, ADDQ, SUBQ, ADDX, NEGX, SUBX, ASR,
-				 -- ASL, LSR, LSL, ROXR, ROXL, ROTR, ROTL, CLR, NEG, NOT_B, TST, CMPM.
+				 -- ADDI, ANDI, CMP, CMPI, EORI, ORI, SUBI, ADDQ, SUBQ, ADDX, NEGX, SUBX, ASR,
+				 -- ASL, LSR, LSL, ROXR, ROXL, ROTR, ROTL, CLR, NEG, NOT_B, TST, CMPM, JSR.
 				 BYTE when BIW(0)(7 downto 6) = "00" else
 				 WORD when BIW(0)(7 downto 6) = "01" else
-				 LONG when BIW(0)(7 downto 6) = "10" else LONG; -- The default is used for unsized operations.
+				 LONG when BIW(0)(7 downto 6) = "10" else LONG; -- The default is used for unsized operations LEA, MOVEQ ...
 
 	-- The FORCE_BIW2 indicates, that an operation needs obligatory a further instruction word.
 	FORCE_BIW2 <= 	'1' when OP_I = ORI_TO_CCR or OP_I = ORI_TO_SR or OP_I = ORI or OP_I = ANDI_TO_CCR else
@@ -372,7 +379,7 @@ begin
 					'1' when (OP_I = MULS or OP_I = MULU) and BIW(0)(8 downto 6) = "000" else
 					'1' when OP_I = MOVEM or OP_I = DBcc else
 					'1' when (OP_I = BRA or OP_I = BSR or OP_I = Bcc) and BIW(0)(7 downto 0) = x"00" else
-					'1' when (OP_I = BRA or OP_I = BSR or OP_I = Bcc) and BIW(0)(7 downto 0) = x"FF" else '0';
+                    '1' when (OP_I = BRA or OP_I = BSR or OP_I = Bcc) and BIW(0)(7 downto 0) = x"FF" else '0';
 
 	-- The FORCE_BIW3 indicates, that an operation needs obligatory a third instruction word.
 	FORCE_BIW3 <= '1' when OP_I = ORI and OP_SIZE_I = LONG else
@@ -416,11 +423,11 @@ begin
 
 	OP_DECODE: process(BIW)
 	begin
-		-- The default OPCODE is the NOP operation, if no of the following conditions are met.
-		-- If any not used bit pattern occurs, the CPU will proceed after the NOP cycle with
-		-- fetching and executing further operations. An exception of this behavior is the OPCODE
-		-- with the 1010 or the 1111 pattern in the four MSBs. These lead to the respective traps.
-		OP_I <= NOP;
+		-- The default OPCODE is the ILLEGAL operation, if no of the following conditions are met.
+		-- If any not used bit pattern occurs, the CPU will result in an ILLEGAL trap. An exception of
+		-- this behavior is the OPCODE with the 1010 or the 1111 pattern in the four MSBs. 
+		-- These lead to the respective traps.
+		OP_I <= ILLEGAL;
 		case BIW(0)(15 downto 12) is -- Operation code map.
 			when x"0" => -- Bit manipulation / MOVEP / Immediate.
 				if BIW(0)(11 downto 0) = x"03C" then
@@ -493,8 +500,8 @@ begin
 							OP_I <= ADDI;
 						elsif BIW(0)(11 downto 8) = x"A" and BIW(0)(7 downto 6) < "11" and BIW(0)(2 downto 0) < "010" then
 							OP_I <= EORI;
-						elsif BIW(0)(11 downto 8) = x"C" and BIW(0)(7 downto 6) < "11" and BIW(0)(2 downto 0) < "010" then -- 68K.
---						elsif BIW(0)(11 downto 8) = x"C" and BIW(0)(7 downto 6) < "11" and BIW(0)(2 downto 0) < "100" then -- 68K+
+						--elsif BIW(0)(11 downto 8) = x"C" and BIW(0)(7 downto 6) < "11" and BIW(0)(2 downto 0) < "010" then -- 68K.
+						elsif BIW(0)(11 downto 8) = x"C" and BIW(0)(7 downto 6) < "11" and BIW(0)(2 downto 0) < "100" then -- 68K+
 							OP_I <= CMPI;
 						-- Bit operations with dynamic bit number:
 						elsif BIW(0)(8 downto 6) = "100" and BIW(0)(2 downto 0) < "101" then
@@ -555,6 +562,10 @@ begin
 					OP_I <= TRAPV;
 				elsif BIW(0)(11 downto 0) = x"E77" then
 					OP_I <= RTR;
+				elsif BIW(0)(11 downto 0) = x"AFA" then
+					OP_I <= RESERVED;
+				elsif BIW(0)(11 downto 0) = x"AFB" then
+					OP_I <= RESERVED;
 				elsif BIW(0)(11 downto 0) = x"AFC" then
 					OP_I <= ILLEGAL;
 				elsif BIW(0)(11 downto 3) = "100000001" then -- 68K20, 68K30, 68K40
@@ -579,9 +590,10 @@ begin
 							else
 								OP_I <= DIVU; -- Long.
 							end if;
-						elsif BIW(0)(11 downto 6) = "001011" then
-							OP_I <= MOVE_FROM_CCR;
-						elsif BIW(0)(11 downto 6) = "000011" then
+-- 68010 up stuff:
+--						elsif BIW(0)(11 downto 6) = "001011" then
+-- 							OP_I <= MOVE_FROM_CCR; -- 68K+ enhancement.
+                        elsif BIW(0)(11 downto 6) = "000011" then
 							OP_I <= MOVE_FROM_SR;
 						elsif BIW(0)(11 downto 6) = "010011" then
 							OP_I <= MOVE_TO_CCR;					
@@ -605,8 +617,9 @@ begin
 							else
 								OP_I <= DIVU; -- Long.
 							end if;
-						elsif BIW(0)(11 downto 6) = "001011" and BIW(0)(2 downto 0) < "010" then
-							OP_I <= MOVE_FROM_CCR;
+-- 68010 up stuff:
+--						elsif BIW(0)(11 downto 6) = "001011" and BIW(0)(2 downto 0) < "010" then
+--							OP_I <= MOVE_FROM_CCR; -- 68K+ enhancement.
 						elsif BIW(0)(11 downto 6) = "000011" and BIW(0)(2 downto 0) < "010" then
 							OP_I <= MOVE_FROM_SR;
 						elsif BIW(0)(11 downto 6) = "010011" and BIW(0)(2 downto 0) < "101" then
@@ -671,7 +684,7 @@ begin
 				end if;
 
 				-- if BIW(0)(11 downto 8) = x"A" and BIW(0)(7 downto 6) < "11" and BIW(0)(5 downto 3) = "111" and (BIW(0)(2 downto 0) < "010" or BIW(0)(2 downto 0) = "100") then -- 68K
-				if BIW(0)(11 downto 8) = x"A" and BIW(0)(7 downto 6) < "11" and BIW(0)(5 downto 3) = "111" and BIW(0)(2 downto 0) < "101" then -- 68K+
+                if BIW(0)(11 downto 8) = x"A" and BIW(0)(7 downto 6) < "11" and BIW(0)(5 downto 3) = "111" and BIW(0)(2 downto 0) < "101" then -- 68K+
 					case BIW(0)(7 downto 6) is
 						when "01" | "10" => OP_I <= TST; -- Long or word, all addressing modes.
 						when others => -- Byte: Address register direct not allowed.
@@ -731,19 +744,18 @@ begin
 						end case;
 					end if;
 				end if;
-
 				-- The size must be "10" or "11" and the OPMODE may not be "001".
-				if BIW(0)(8 downto 7) >= "10" and BIW(0)(6 downto 3) = x"7" and BIW(0)(2 downto 0) < "101" then
+                if BIW(0)(8 downto 7) >= "10" and BIW(0)(6 downto 3) = x"7" and BIW(0)(2 downto 0) < "101" then
 					OP_I <= CHK;
-				elsif BIW(0)(8 downto 7) >= "10" and BIW(0)(6 downto 3) /= x"1" and BIW(0)(6 downto 3) < x"7" then
+                elsif BIW(0)(8 downto 7) >= "10" and BIW(0)(6 downto 3) /= x"1" and BIW(0)(6 downto 3) < x"7" then
 					OP_I <= CHK;
 				end if;
-			when x"5" => -- ADDQ / SUBQ / Scc / DBcc / TRAPcc.
+			when x"5" => -- ADDQ / SUBQ / Scc / DBcc.
 				if BIW(0)(7 downto 3) = "11001" then
 					OP_I <= DBcc;
-				elsif BIW(0)(11 downto 8) > x"1" and BIW(0)(7 downto 6) = "11" and BIW(0)(5 downto 3) = "111" and BIW(0)(2 downto 0) < "010" then
+				elsif BIW(0)(7 downto 6) = "11" and BIW(0)(5 downto 3) = "111" and BIW(0)(2 downto 0) < "010" then
 					OP_I <= Scc;
-				elsif BIW(0)(11 downto 8) > x"1" and BIW(0)(7 downto 6) = "11" and BIW(0)(5 downto 3) /= "001" and BIW(0)(5 downto 3) /= "111" then
+				elsif BIW(0)(7 downto 6) = "11" and BIW(0)(5 downto 3) /= "001" and BIW(0)(5 downto 3) /= "111" then
 					OP_I <= Scc;
 				--
 				elsif BIW(0)(8) = '0' and BIW(0)(7 downto 6) < "11" and BIW(0)(5 downto 3) = "111" and BIW(0)(2 downto 0) < "010" then
@@ -841,7 +853,7 @@ begin
 						null;
 				end case;
 			when x"A" => -- (1010, Unassigned, Reserved).
-				OP_I <= NOP;
+				OP_I <= UNIMPLEMENTED; -- Dummy.
 			when x"B" => -- CMP / EOR.
 				if BIW(0)(8) = '1' and BIW(0)(7 downto 6) < "11" and BIW(0)(5 downto 3) = "001" then
 					OP_I <= CMPM;
@@ -996,7 +1008,7 @@ begin
 					OP_I <= ROTL; -- Register shifts.
 				end if;
 			when x"F" => -- 1111, Coprocessor Interface / 68K40 Extensions.
-				OP_I <= NOP;
+				OP_I <= UNIMPLEMENTED; -- Dummy.
 			when others => -- U, X, Z, W, H, L, -.
 				null;
 			end case;

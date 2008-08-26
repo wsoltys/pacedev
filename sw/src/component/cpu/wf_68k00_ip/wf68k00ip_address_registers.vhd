@@ -25,28 +25,24 @@
 ----                                                              ----
 ----------------------------------------------------------------------
 ----                                                              ----
----- Copyright (C) 2006 Wolfgang Foerster                         ----
-----                                                              ----
----- This source file may be used and distributed without         ----
----- restriction provided that this copyright statement is not    ----
----- removed from the file and that any derivative work contains  ----
----- the original copyright notice and the associated disclaimer. ----
+---- Copyright (C) 2006 - 2008 Wolfgang Foerster                  ----
 ----                                                              ----
 ---- This source file is free software; you can redistribute it   ----
----- and/or modify it under the terms of the GNU Lesser General   ----
----- Public License as published by the Free Software Foundation; ----
----- either version 2.1 of the License, or (at your option) any   ----
----- later version.                                               ----
+---- and/or modify it under the terms of the GNU General Public   ----
+---- License as published by the Free Software Foundation; either ----
+---- version 2 of the License, or (at your option) any later      ----
+---- version.                                                     ----
 ----                                                              ----
----- This source is distributed in the hope that it will be       ----
+---- This program is distributed in the hope that it will be      ----
 ---- useful, but WITHOUT ANY WARRANTY; without even the implied   ----
 ---- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR      ----
----- PURPOSE. See the GNU Lesser General Public License for more  ----
+---- PURPOSE.  See the GNU General Public License for more        ----
 ---- details.                                                     ----
 ----                                                              ----
----- You should have received a copy of the GNU Lesser General    ----
----- Public License along with this source; if not, download it   ----
----- from http://www.gnu.org/licenses/lgpl.html                   ----
+---- You should have received a copy of the GNU General Public    ----
+---- License along with this program; if not, write to the Free   ----
+---- Software Foundation, Inc., 51 Franklin Street, Fifth Floor,  ----
+---- Boston, MA 02110-1301, USA.                                  ----
 ----                                                              ----
 ----------------------------------------------------------------------
 -- 
@@ -56,7 +52,10 @@
 --   Initial Release.
 -- Revision 2K7A  2007/05/31 WF
 --   Updated all modules.
---   CPU is now working.
+-- Revision 2K7B  2007/12/24 WF
+--   See the 68K00 top level file.
+-- Revision 2K8A  2008/07/14 WF
+--   See the 68K00 top level file.
 -- 
 
 use work.wf68k00ip_pkg.all;
@@ -98,16 +97,15 @@ entity WF68K00IP_ADDRESS_REGISTERS is
 		AR_DEC			: in bit; -- Address register decrement.
 		SSP_INC			: in bit; -- Supervisor stack pointer increment by 2.
 		SSP_DEC			: in bit; -- Supervisor stack pointer decrement by 2.
-		SSP_INIT_HI		: in bit; -- Initialize the high portion.
-		SSP_INIT_LO		: in bit; -- Initialize the low portion.
+		SSP_INIT		: in bit; -- Initialize SSP.
 		SP_ADD_DISPL	: in bit; -- Forces the adding of the sign extended displacement to the SP.
 		USE_SP_ADR		: in bit; -- Indicates the use of the stack (suer or supervisor).
 		USE_SSP_ADR		: in bit; -- Indicates the use of the supervisor stack.
 		PC_WR			: in bit; -- Program counter write.
 		PC_INC			: in bit; -- Program counter increment.
+		PC_TMP_CLR		: in bit; -- Clear temporary PC.
 		PC_TMP_INC		: in bit; -- Increment temporary PC.
-		PC_INIT_HI		: in bit; -- Initialize the high portion of the program counter.
-		PC_INIT_LO		: in bit; -- Initialize the low portion of the program counter.
+		PC_INIT			: in bit; -- Initialize the program counter.
 		PC_ADD_DISPL	: in bit; -- Forces the adding of the sign extended displacement to the SP.
 
 		-- Misc controls:
@@ -116,8 +114,11 @@ entity WF68K00IP_ADDRESS_REGISTERS is
 		OP				: in OP_68K00; -- the operations.
 		OP_SIZE			: in OP_SIZETYPE; -- BYTE, WORD or LONG.
 		OP_MODE			: in std_logic_vector(4 downto 0);
+		OP_START		: in bit; -- Used for the MOVEM.
 		ADR_MODE		: in std_logic_vector(2 downto 0); -- Address mode indicator.
 		MOVE_D_AM		: in std_logic_vector(2 downto 0); -- Destination address mode for MOVE.
+        FORCE_BIW2		: in bit;
+        FORCE_BIW3		: in bit;
 
 		-- Displacement stuff:
 		EXT_DSIZE			: in D_SIZETYPE;
@@ -145,6 +146,7 @@ signal DATA_SIGNED		: std_logic_vector(31 downto 0); -- Sign extended data.
 signal USP				: std_logic_vector(31 downto 0); -- User stack pointer (refers to A7 in the user mode.).
 signal SSP				: std_logic_vector(31 downto 0); -- Supervisor stack pointer (refers to A7' in the supervisor mode).
 signal PC				: std_logic_vector(31 downto 0); -- Program counter.
+signal AREG_TMP			: std_logic_vector(31 downto 0); -- Temporary address holding register.
 signal ADR_MODE_I		: std_logic_vector(2 downto 0);
 signal DISPLACE			: std_logic_vector(31 downto 0);
 signal DISPL_EXT 		: std_logic_vector(31 downto 0);
@@ -159,8 +161,9 @@ signal AR_NR_B			: integer range 0 to 7;
 signal AR_NR_I			: integer range 0 to 7;
 signal ADR_EFF_I		: std_logic_vector(31 downto 0);
 signal ADR_TMP			: std_logic_vector(5 downto 0);
-signal AR_MEM			: std_logic_vector(31 downto 0); -- MOVEM stuff.
 signal PC_TMP			: std_logic_vector(4 downto 0);
+signal PC_OFFSET		: std_logic_vector(3 downto 0); -- Used for PC relative addressing modes.
+signal AR_STEP			: std_logic_vector(2 downto 0);
 begin
 	-- Address mode selector switch:
 	-- The default assignment is valid for source and destination access
@@ -182,41 +185,55 @@ begin
 				 '1' when CHK_ADR = '1' and USE_SP_ADR = '1' and SBIT = '1' and SSP(0) = '1' else
 				 '1' when CHK_ADR = '1' and USE_SP_ADR = '1' and USP(0) = '1' else
 				 '0' when CHK_ADR = '1' and (USE_SSP_ADR = '1' or USE_SP_ADR = '1') else  -- Stack is correct.
-				 '1' when CHK_ADR = '1' and OP_SIZE = LONG and ADR_EFF_I(0) = '1' else -- LONG at an odd address.
-				 '1' when CHK_ADR = '1' and OP_SIZE = WORD and ADR_EFF_I(0) = '1' else '0'; -- WORD at an odd address.
+                 -- MOVEP size is long or word but the acces is at byte boarders:
+				 '1' when CHK_ADR = '1' and OP /= MOVEP and OP_SIZE = LONG and ADR_EFF_I(0) = '1' else -- LONG at an odd address.
+				 '1' when CHK_ADR = '1' and OP /= MOVEP and OP_SIZE = WORD and ADR_EFF_I(0) = '1' else '0'; -- WORD at an odd address.
 			
+	-- The address register increment and decrement values:
+	AR_STEP <= 	"100" when OP_SIZE = LONG else
+				"010" when OP_SIZE = WORD else
+				"010" when OP_SIZE = BYTE and AR_NR_B = 7 else "001";
+
 	-- Data outputs:
 	USP_OUT 	 <= USP;
 	SSP_OUT 	 <= SSP;
 	PC_OUT 		 <= PC + PC_TMP; -- Plus offset.
-	ADR_REG_QA <= SSP when AR_NR_A = 7 and SBIT= '1' else -- Supervisor stack pointer.
+
+    ADR_REG_QA <= AREG_TMP when OP = MOVEM and ADR_MODE_I = "100" and REGSEL_A = REGSEL_B else -- See P_AREG_TMP, case A.
+				  SSP when AR_NR_A = 7 and SBIT= '1' else -- Supervisor stack pointer.
 				  USP when AR_NR_A = 7 and SBIT= '0' else -- User stack pointer.
-				  AR_MEM when OP = MOVEM and ADR_MODE_I = "100" and REGSEL_A = REGSEL_B else -- Predecrement correction.
 				  AR(AR_NR_A);
 
 	ADR_REG_QB <= SSP when AR_NR_B = 7 and SBIT= '1' else -- Supervisor stack pointer.
 				  USP when AR_NR_B = 7 and SBIT= '0' else -- User stack pointer.
 				  AR(AR_NR_B);
-	
-	MOVEM_AREG_MEM: process(RESETn, CLK)
-	-- In the MOVEM predecrement addressing mode, the memory is written with the
-	-- initial value of the address register, in the case it is included in the
-	-- transfer register list. This register stores the initial value.
-	variable LOCK	: boolean;
+
+    P_AREG_TMP: process(RESETn, CLK)
+    -- This register holds a temporary copy of the desired address register
+    -- for the MOVEM operation. There are two special cases:
+    -- Case A: if the addressing register in the predecrement mode is
+    -- written to memory, the initial value (not decremented) is written out.
+    -- Case B: If the addressing register in the non postincrement 
+    -- addressing mode is loaded from memory, the AREG_TMP holds the 
+    -- old addressing register value until the end of the MOVEM.
 	begin
 		if RESETn = '0' then
-			AR_MEM <= x"00000000";
-			LOCK := false;
-		elsif CLK = '1' and CLK' event then
-			if OP /= MOVEM then
-				LOCK := false;
-			elsif OP = MOVEM and LOCK = false then
-				AR_MEM <= AR(AR_NR_B); -- Store.
-				LOCK := true;
+			AREG_TMP <= x"00000000";
+        elsif CLK = '1' and CLK' event then
+            if OP = MOVEM and OP_START = '1' then
+				case AR_NR_B is
+					when 7 =>
+						if SBIT= '1' then
+							AREG_TMP <= SSP;
+						else
+							AREG_TMP <= USP;
+						end if;
+					when others => AREG_TMP <= AR(AR_NR_B);
+				end case;
 			end if;
 		end if;
-	end process MOVEM_AREG_MEM;
-	
+	end process P_AREG_TMP;
+
 	SRC_SIGNEXT: process(OP, OP_SIZE, ADATA_IN, ADR_EFF_I)
 	-- The MOVEA and MOVEM require a sign extended source data
 	-- which is provided by this logic. The BYTE size is not
@@ -287,7 +304,10 @@ begin
 
 	-- Displacement multiplexer:
 	DISPLACE <= DISPLACE_BIW when SEL_DISPLACE_BIW = '1' else
-				x"0000" & EXWORD(0) when SRC_DESTn = '1' else x"0000" & DEST_EXWORD(0);
+				x"0000" & EXWORD(0) when EXT_DSIZE = WORD and SRC_DESTn = '1' else
+				x"000000" & EXWORD(0)(7 downto 0) when EXT_DSIZE = BYTE and SRC_DESTn = '1' else
+				x"0000" & DEST_EXWORD(0) when EXT_DSIZE = WORD else
+				x"000000" & DEST_EXWORD(0)(7 downto 0);
 
 	EXTEND_DISPLACEMENT: process(DISPLACE, EXT_DSIZE)
 	-- The displacement needs to be sign extended from 8 bit to 32, from 16 bit to 32 bit or 
@@ -312,7 +332,8 @@ begin
 	P_ADR_TMP: process(RESETn, CLK)
 	-- This process provides a temporary address offset during
 	-- bus access over several bytes. The 6 bits are used for 
-	-- the MOVEM command. other commands requires a maximum of
+    -- the MOVEM command in the non postincrement /predecrement mode.
+    -- Other commands requires a maximum of
 	-- 3 bits.
 	begin
 		if RESETn = '0' then
@@ -321,7 +342,7 @@ begin
 			if ADR_TMP_CLR = '1' then
 				ADR_TMP <= "000000";
 			elsif ADR_TMP_INC = '1' and OP_SIZE = BYTE then
-				ADR_TMP <= ADR_TMP + '1';
+				ADR_TMP <= ADR_TMP + "01";
 			elsif ADR_TMP_INC = '1' then
 				ADR_TMP <= ADR_TMP + "10";
 			end if;
@@ -336,7 +357,7 @@ begin
 		if RESETn = '0' then
 			PC_TMPVAR := x"0";
 		elsif CLK = '1' and CLK' event then
-			if PC_INC = '1' then
+			if PC_INC = '1' or PC_TMP_CLR = '1' then
 				PC_TMPVAR := x"0";
 			elsif PC_TMP_INC = '1' then
 				PC_TMPVAR := PC_TMPVAR + '1';
@@ -345,22 +366,29 @@ begin
 		PC_TMP <= PC_TMPVAR & "0"; -- Increment always by two.
 	end process P_PC_TMP;
 
-	ADDRESS_MODES: process(ADR_MODE_I, REGSEL_B, AR, AR_NR_B, SBIT, USP, SSP, DISPL_EXT,
-	ADR_TMP, OP, INDEX_SCALED, ABS_ADDRESS, PC, PC_TMP, ADR_EFF_I)
+    PC_OFFSET <= x"6" when FORCE_BIW3 = '1' and FORCE_BIW2 = '1' else
+                 x"4" when FORCE_BIW2 = '1' else x"2";
+
+	ADDRESS_MODES: process(ADR_MODE_I, REGSEL_B, AR, AR_NR_B, SBIT, USP, SSP, DISPL_EXT, AREG_TMP,
+                           ADR_TMP, OP, INDEX_SCALED, ABS_ADDRESS, PC, PC_OFFSET, ADR_EFF_I, DR)
 	-- The effective address calculation takes place in this process depending on the 
 	-- chosen addressing mode.
 	variable ADR_EFF_TMP 	: std_logic_vector(31 downto 0);
 	variable AREG			: std_logic_vector(31 downto 0);
 	begin
-		case AR_NR_B is
-			when 7 =>
-				if SBIT= '1' then
-					AREG := SSP;
-				else
-					AREG := USP;
-				end if;
-			when others => AREG := AR(AR_NR_B);
-		end case;
+        if OP = MOVEM and (ADR_MODE_I = "010" or ADR_MODE_I = "101" or ADR_MODE_I = "110") and DR = '1' then
+            AREG := AREG_TMP; -- See P_AREG_TMP, case B.
+        else
+            case AR_NR_B is
+                when 7 =>
+                    if SBIT= '1' then
+                        AREG := SSP;
+                    else
+                        AREG := USP;
+                    end if;
+                when others => AREG := AR(AR_NR_B);
+            end case;
+        end if;
 		--
 		case ADR_MODE_I is
 			-- when "000" | "001" => Direct address modes: no effective address required.
@@ -395,12 +423,12 @@ begin
 						-- Assembler syntax: (d16,PC).
 						-- The effective address during PC relative addressing
 						-- contains the PC offset plus two.
-						ADR_EFF_TMP := PC + PC_TMP + DISPL_EXT;
+                        ADR_EFF_TMP := PC + PC_OFFSET + DISPL_EXT;
 					when "011" => -- Program counter relative with index and offset.
 						-- Assembler syntax: (d8,PC,Xn.SIZE*SCALE).
 						-- The effective address during PC relative addressing
 						-- contains the PC offset plus two.
-						ADR_EFF_TMP := PC + PC_TMP + DISPL_EXT + INDEX_SCALED;
+                        ADR_EFF_TMP := PC + PC_OFFSET + DISPL_EXT + INDEX_SCALED;
 					when others =>
 						ADR_EFF_TMP := (others => '-'); -- Don't care, not used dummy.
 				end case;
@@ -426,7 +454,7 @@ begin
 			SSP <= (others => '0');
 			PC <= (others => '0');
 		elsif CLK = '1' and CLK' event then
-			-- Write operations:
+			-- Write operations are always long:
 			if AR_WR = '1' then
 				if AR_NR_A < 7 then
 					AR(AR_NR_A) <= DATA_SIGNED; -- Load AREG.
@@ -439,41 +467,17 @@ begin
 
 			-- Predecrement and postincrement:
 			if AR_INC = '1' and AR_NR_B < 7 then
-				case OP_SIZE is
-					when BYTE		=> AR(AR_NR_B) <= AR(AR_NR_B) + '1'; -- Increment by one.
-					when WORD		=> AR(AR_NR_B) <= AR(AR_NR_B) + "10"; -- Increment by two.
-					when others		=> AR(AR_NR_B) <= AR(AR_NR_B) + "100"; -- Increment by four, (LONG).
-				end case;
+				AR(AR_NR_B) <= AR(AR_NR_B) + AR_STEP;
 			elsif AR_INC = '1' and SBIT= '1' then
-				case OP_SIZE is
-					when BYTE		=> SSP <= SSP + "10"; -- Increment by two!
-					when WORD		=> SSP <= SSP + "10"; -- Increment by two.
-					when others		=> SSP <= SSP + "100"; -- Increment by four, (LONG).
-				end case;
+				SSP <= SSP + AR_STEP;
 			elsif AR_INC = '1' then
-				case OP_SIZE is
-					when BYTE		=> USP <= USP + "10"; -- Increment by two!
-					when WORD		=> USP <= USP + "10"; -- Increment by two.
-					when others		=> USP <= USP + "100"; -- Increment by four, (LONG).
-				end case;
+				USP <= USP + AR_STEP;
 			elsif AR_DEC = '1' and AR_NR_B < 7 then
-				case OP_SIZE is
-					when BYTE		=> AR(AR_NR_B) <= AR(AR_NR_B) - '1'; -- Decrement by one.
-					when WORD		=> AR(AR_NR_B) <= AR(AR_NR_B) - "10"; -- Decrement by two.
-					when others		=> AR(AR_NR_B) <= AR(AR_NR_B) - "100"; -- Increment by four, (LONG).
-				end case;
+				AR(AR_NR_B) <= AR(AR_NR_B) - AR_STEP;
 			elsif AR_DEC = '1' and SBIT= '1' then
-				case OP_SIZE is
-					when BYTE		=> SSP <= SSP - "10"; -- Decrement by two!
-					when WORD		=> SSP <= SSP - "10"; -- Decrement by two.
-					when others		=> SSP <= SSP - "100"; -- Decrement by four, (LONG).
-				end case;
+				SSP <= SSP - AR_STEP;
 			elsif AR_DEC = '1' then
-				case OP_SIZE is
-					when BYTE		=> USP <= USP - "10"; -- Decrement by two!
-					when WORD		=> USP <= USP - "10"; -- Decrement by two.
-					when others		=> USP <= USP - "100"; -- Decrement by four, (LONG).
-				end case;
+				USP <= USP - AR_STEP;
 			end if;
 
 			-- Increment / decrement the stack:
@@ -481,10 +485,8 @@ begin
 				USP <= USP + "10"; -- Increment 2 bytes.
 			elsif USP_DEC = '1' then
 				USP <= USP - "10"; -- Decrement 2 bytes.
-			elsif SSP_INIT_HI = '1' then
-				SSP(31 downto 16) <= ADATA_IN(15 downto 0);
-			elsif SSP_INIT_LO = '1' then
-				SSP(15 downto 0) <= ADATA_IN(15 downto 0);
+			elsif SSP_INIT = '1' then
+				SSP <= ADATA_IN;
 			elsif SSP_INC = '1' then
 				SSP <= SSP + "10"; -- Increment 2 bytes.
 			elsif SSP_DEC = '1' then
@@ -500,8 +502,8 @@ begin
 
 			-- Exchange the content of address registers:
 			if AR_EXG = '1' and OP_MODE = "01001" then -- Exchange two address registers.
-				AR(AR_NR_B) <= AR(AR_NR_A);
-				AR(AR_NR_A) <= AR(AR_NR_B);
+				AR(AR_NR_B) <= AR(AR_NR_A); -- Internal wired because there is no second data input.
+				AR(AR_NR_A) <= ADATA_IN;
 			elsif AR_EXG = '1' and OP_MODE = "10001" then -- Exchange a data and an address register.
 				AR(AR_NR_B) <= ADATA_IN;
 			end if;
@@ -524,10 +526,8 @@ begin
 			-- Program counter arithmetics:
 			if PC_WR = '1' then -- JMP, JSR.
 				PC <= DATA_SIGNED;
-			elsif PC_INIT_HI = '1' then
-				PC(31 downto 16) <= ADATA_IN(15 downto 0);
-			elsif PC_INIT_LO = '1' then
-				PC(15 downto 0) <= ADATA_IN(15 downto 0);
+			elsif PC_INIT = '1' then
+				PC <= ADATA_IN;
 			-- The PC_ADD_DISPL and the PC_INC are asserted simultaneously when the
 			-- operation is used for Bcc and BRA. Therefore the prioritization of
 			-- PC_ADD_DISPL over PC_INC is important.

@@ -22,28 +22,24 @@
 ----                                                              ----
 ----------------------------------------------------------------------
 ----                                                              ----
----- Copyright (C) 2006 Wolfgang Foerster                         ----
-----                                                              ----
----- This source file may be used and distributed without         ----
----- restriction provided that this copyright statement is not    ----
----- removed from the file and that any derivative work contains  ----
----- the original copyright notice and the associated disclaimer. ----
+---- Copyright (C) 2006 - 2008 Wolfgang Foerster                  ----
 ----                                                              ----
 ---- This source file is free software; you can redistribute it   ----
----- and/or modify it under the terms of the GNU Lesser General   ----
----- Public License as published by the Free Software Foundation; ----
----- either version 2.1 of the License, or (at your option) any   ----
----- later version.                                               ----
+---- and/or modify it under the terms of the GNU General Public   ----
+---- License as published by the Free Software Foundation; either ----
+---- version 2 of the License, or (at your option) any later      ----
+---- version.                                                     ----
 ----                                                              ----
----- This source is distributed in the hope that it will be       ----
+---- This program is distributed in the hope that it will be      ----
 ---- useful, but WITHOUT ANY WARRANTY; without even the implied   ----
 ---- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR      ----
----- PURPOSE. See the GNU Lesser General Public License for more  ----
+---- PURPOSE.  See the GNU General Public License for more        ----
 ---- details.                                                     ----
 ----                                                              ----
----- You should have received a copy of the GNU Lesser General    ----
----- Public License along with this source; if not, download it   ----
----- from http://www.gnu.org/licenses/lgpl.html                   ----
+---- You should have received a copy of the GNU General Public    ----
+---- License along with this program; if not, write to the Free   ----
+---- Software Foundation, Inc., 51 Franklin Street, Fifth Floor,  ----
+---- Boston, MA 02110-1301, USA.                                  ----
 ----                                                              ----
 ----------------------------------------------------------------------
 -- 
@@ -53,7 +49,10 @@
 --   Initial Release.
 -- Revision 2K7A  2007/05/31 WF
 --   Updated all modules.
---   CPU is now working.
+-- Revision 2K7B  2007/12/24 WF
+--   See the 68K00 top level file.
+-- Revision 2K8A  2008/07/14 WF
+--   See the 68K00 top level file.
 -- 
 
 use work.wf68k00ip_pkg.all;
@@ -70,20 +69,17 @@ entity WF68K00IP_DATA_REGISTERS is
 		-- Data lines:
 		DATA_IN_A		: in std_logic_vector(31 downto 0);
 		DATA_IN_B		: in std_logic_vector(31 downto 0);
-		DATA_IN_C		: in std_logic_vector(31 downto 0);
 		
 		-- Registers controls:
 		REGSEL_A		: in std_logic_vector(2 downto 0);
 		REGSEL_B		: in std_logic_vector(2 downto 0);
 		REGSEL_C		: in std_logic_vector(2 downto 0);
-		REGSEL_I		: in std_logic_vector(2 downto 0);
 		DIV_MUL_32n64	: in bit;
 
 		-- Data outputs A and B:
-		DATA_OUT_C		: out std_logic_vector(31 downto 0);
-		DATA_OUT_B		: out std_logic_vector(31 downto 0);
 		DATA_OUT_A		: out std_logic_vector(31 downto 0);
-		INDEX_OUT		: out std_logic_vector(31 downto 0);
+		DATA_OUT_B		: out std_logic_vector(31 downto 0);
+		DATA_OUT_C		: out std_logic_vector(31 downto 0);
 		
 		DR_EXG			: in bit; -- Exchange a data register.
 		DR_DEC			: in bit; -- Decrement by 1.
@@ -103,19 +99,16 @@ signal DR			: DR_TYPE; -- Data registers D0 to D7.
 signal DR_NR_A		: integer range 0 to 7;
 signal DR_NR_B		: integer range 0 to 7;
 signal DR_NR_C		: integer range 0 to 7;
-signal INDEX_NR		: integer range 0 to 7;
 begin
 	-- Address pointers:
-	DR_NR_B <= conv_integer(REGSEL_B);
 	DR_NR_A <= conv_integer(REGSEL_A);
+	DR_NR_B <= conv_integer(REGSEL_B);
 	DR_NR_C <= conv_integer(REGSEL_C);
-	INDEX_NR <= conv_integer(REGSEL_I);
 
 	-- Output Multiplexer A and B:
-	DATA_OUT_C <= DR(DR_NR_C);
-	DATA_OUT_B <= DR(DR_NR_B);
 	DATA_OUT_A <= DR(DR_NR_A);
-	INDEX_OUT <= DR(INDEX_NR);
+	DATA_OUT_B <= DR(DR_NR_B);
+	DATA_OUT_C <= DR(DR_NR_C);
 
 	REGISTERS: process(RESETn, CLK, DR_NR_B, DR)
 	-- This process provides data transfer to the respective registers (write).
@@ -133,11 +126,11 @@ begin
 						when WORD =>
 							DR(DR_NR_A) <= DATA_IN_A;
 						when others => -- LONG.
-							if DIV_MUL_32n64 = '0' and DR(DR_NR_A) = DR(DR_NR_C) then -- Long 1.
+							if DIV_MUL_32n64 = '0' and DR(DR_NR_A) = DR(DR_NR_B) then -- Long 1.
 								DR(DR_NR_A) <= DATA_IN_A; -- Quotient returned.
 							else -- Long 2, 3.
 								DR(DR_NR_A) <= DATA_IN_A;
-								DR(DR_NR_C) <= DATA_IN_C;
+								DR(DR_NR_B) <= DATA_IN_B;
 							end if;
 					end case;
  				elsif OP = MULS or OP = MULU then
@@ -147,7 +140,7 @@ begin
 						DR(DR_NR_A) <= DATA_IN_A;
 					else -- Long 2.
 						DR(DR_NR_A) <= DATA_IN_A;
-						DR(DR_NR_C) <= DATA_IN_C;
+						DR(DR_NR_B) <= DATA_IN_B;
 					end if;
 				elsif OP = MOVE or OP = MOVEP then
 					case OP_SIZE is
@@ -182,8 +175,8 @@ begin
 				end if;
 			-- Exchange the content of data registers:
 			elsif DR_EXG = '1' and OP_MODE = "01000" then -- Exchange two data registers.
-				DR(DR_NR_B) <= DR(DR_NR_A);
-				DR(DR_NR_A) <= DR(DR_NR_B);
+				DR(DR_NR_B) <= DATA_IN_A;
+				DR(DR_NR_A) <= DATA_IN_B;
 			elsif DR_EXG = '1' and OP_MODE = "10001" then -- Exchange a data and an address register.
 				DR(DR_NR_A) <= DATA_IN_A;
 			-- And decrement:

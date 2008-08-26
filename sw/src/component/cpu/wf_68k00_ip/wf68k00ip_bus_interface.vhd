@@ -43,7 +43,7 @@
 ---- Bus error topics:                                            ----
 ---- During a bus error, the bus cycle finishes also asserting    ----
 ---- the BUS_CYC_RDY signal during S9 for read, write and the     ----
----- read portion of the read modify write cycle and during S21   ----
+---- read portion of the read modify write cycle and during S19   ----
 ---- for the write portion of a read modify write cycle.          ----
 ----                                                              ----
 ---- Bus re-run topics:                                           ----
@@ -63,28 +63,24 @@
 ----                                                              ----
 ----------------------------------------------------------------------
 ----                                                              ----
----- Copyright (C) 2006 Wolfgang Foerster                         ----
-----                                                              ----
----- This source file may be used and distributed without         ----
----- restriction provided that this copyright statement is not    ----
----- removed from the file and that any derivative work contains  ----
----- the original copyright notice and the associated disclaimer. ----
+---- Copyright (C) 2006 - 2008 Wolfgang Foerster                  ----
 ----                                                              ----
 ---- This source file is free software; you can redistribute it   ----
----- and/or modify it under the terms of the GNU Lesser General   ----
----- Public License as published by the Free Software Foundation; ----
----- either version 2.1 of the License, or (at your option) any   ----
----- later version.                                               ----
+---- and/or modify it under the terms of the GNU General Public   ----
+---- License as published by the Free Software Foundation; either ----
+---- version 2 of the License, or (at your option) any later      ----
+---- version.                                                     ----
 ----                                                              ----
----- This source is distributed in the hope that it will be       ----
+---- This program is distributed in the hope that it will be      ----
 ---- useful, but WITHOUT ANY WARRANTY; without even the implied   ----
 ---- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR      ----
----- PURPOSE. See the GNU Lesser General Public License for more  ----
+---- PURPOSE.  See the GNU General Public License for more        ----
 ---- details.                                                     ----
 ----                                                              ----
----- You should have received a copy of the GNU Lesser General    ----
----- Public License along with this source; if not, download it   ----
----- from http://www.gnu.org/licenses/lgpl.html                   ----
+---- You should have received a copy of the GNU General Public    ----
+---- License along with this program; if not, write to the Free   ----
+---- Software Foundation, Inc., 51 Franklin Street, Fifth Floor,  ----
+---- Boston, MA 02110-1301, USA.                                  ----
 ----                                                              ----
 ----------------------------------------------------------------------
 -- 
@@ -94,7 +90,10 @@
 --   Initial Release.
 -- Revision 2K7A  2007/05/31 WF
 --   Updated all modules.
---   CPU is now working.
+-- Revision 2K7B  2007/12/24 WF
+--   See the 68K00 top level file.
+-- Revision 2K8A  2008/07/14 WF
+--   See the 68K00 top level file.
 -- 
 
 library work;
@@ -127,6 +126,7 @@ entity WF68K00IP_BUS_INTERFACE is
 		SEL_BUFF_A_HI	: in bit; -- Select data A buffer high word.
 		SEL_BUFF_B_LO	: in bit; -- Select data B buffer low word.
 		SEL_BUFF_B_HI	: in bit; -- Select data B buffer high word.
+		SYS_INIT		: in bit; -- Indicates the system initialisation (PC, SSP).
 		OP_SIZE			: in OP_SIZETYPE; -- Used for the input multiplexer (buffers).
 		BUFFER_A		: out std_logic_vector(31 downto 0); -- Receive buffer A.
 		BUFFER_B		: out std_logic_vector(31 downto 0); -- Receive buffer B.
@@ -178,8 +178,7 @@ end entity WF68K00IP_BUS_INTERFACE;
 	
 architecture BEHAVIOR of WF68K00IP_BUS_INTERFACE is
 type ARB_STATES is(IDLE, GRANT, WAIT_RELEASE_3WIRE, WAIT_RELEASE_2WIRE);
-type TIME_SLICES is (IDLE, S0, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11,
-										S12, S13, S14, S15, S16, S17, S18, S19, S20, S21);
+type TIME_SLICES is (S0, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, S17, S18, S19, S20);
 signal RESET_OUT_EN_I	: bit;
 signal RESET_CPU_In		: bit;
 signal ARB_STATE		: ARB_STATES;
@@ -210,8 +209,6 @@ signal LDS_RDWR_EN		: bit; -- For read modify write;
 signal AS_ENAB_N		: bit;
 signal AS_ENAB_P		: bit;
 signal AS_ENAB			: bit;
-signal AS_RDWR_INH_N	: bit; -- For read modify write;
-signal AS_RDWR_INH_P	: bit; -- For read modify write;
 signal AS_RDWR_INH		: bit; -- For read modify write;
 signal DATA_EN_N		: bit;
 signal DATA_EN_P		: bit;
@@ -223,14 +220,10 @@ signal WR_ENAB_P		: bit;
 signal WR_ENAB			: bit;
 signal WR_EN_RDWR_P		: bit; -- For read modify write;
 signal WR_RDWR_EN		: bit; -- For read modify write;
-signal ADR_INH_N		: bit;
-signal ADR_INH_P		: bit;
 signal ADR_INH			: bit;
-signal ADR_RDWR_INH_N	: bit; -- For read modify write;
-signal ADR_RDWR_INH_P	: bit; -- For read modify write;
 signal ADR_RDWR_INH		: bit; -- For read modify write;
 signal WAITSTATES		: bit;
-signal BUS_LOCKED		: bit;
+signal HALTED			: bit;
 signal SYNCn			: bit;
 begin
 	-- Three state controls:
@@ -269,6 +262,10 @@ begin
 			elsif T_SLICE = S6 and SEL_A_LO = '1' and RD_BUS = '1' then
 				BUFFER_A(7 downto 0) <= DATA_IN(7 downto 0);
 			--
+			elsif T_SLICE = S6 and SYS_INIT = '1' and SEL_BUFF_A_HI = '1' then -- During system startup.
+				BUFFER_A(31 downto 16) <= DATA_IN;
+			elsif T_SLICE = S6 and SYS_INIT = '1' and SEL_BUFF_A_LO = '1' then -- During system startup.
+				BUFFER_A(15 downto 0) <= DATA_IN;
 			elsif T_SLICE = S6 and SEL_BUFF_A_LO = '1' and OP_SIZE = BYTE and A0 = '0' then -- Byte from an even address.
 				BUFFER_A <= x"000000" & DATA_IN(15 downto 8);
 			elsif T_SLICE = S6 and SEL_BUFF_A_LO = '1' and OP_SIZE = BYTE then -- Byte from an odd address.
@@ -295,54 +292,45 @@ begin
 
 	-- For the condition of the bus error see the 68K family user manual.
 	-- Bus errors during S0, S1 and S2 cannot occur.
-	BERR <= '1' when BERRn = '0' and HALTn = '1' and DTACKn = '1' and T_SLICE /= S0 and 
-														T_SLICE /= S1 and T_SLICE /= S2 else '0';
+	-- There are no retry cycles in the read modify write mode.
+	BERR <= '1' when BERRn = '0' and HALTn = '1' and DTACKn = '1' and T_SLICE /= S0 and T_SLICE /= S1 and T_SLICE /= S2 else
+			'1' when BERRn = '0' and HALTn = '0' and RDWR_BUS = '1' and T_SLICE /= S0 and T_SLICE /= S1 and T_SLICE /= S2 else '0';
 
-	BUS_CYC_RDY <= 	'1' when (RD_BUS = '1' or WR_BUS = '1') and T_SLICE = S7 and BERR = '0' else
-					'1' when RDWR_BUS = '1' and T_SLICE = S19 and BERR = '0' else
-					-- Bus error exceptions:
-					'1' when (RD_BUS = '1' or WR_BUS = '1') and BERR = '1' and SLICE_CNT = "0011" else -- S9
-					'1' when RDWR_BUS = '1' and BERR = '1' and SLICE_CNT = "0011" else -- Read portion, S9.
-					'1' when RDWR_BUS = '1' and BERR = '1' and SLICE_CNT = "1010" else '0'; -- Write portion, S21.
+	BUS_CYC_RDY <= 	'0' when BERRn = '0' and HALTn = '0' else -- Force a retry cycle.
+					'1' when HALTED = '1' and HALTn = '1' else -- Release immediately after the halt.
+					'1' when (RD_BUS = '1' or WR_BUS = '1') and T_SLICE = S7 else 
+					'1' when RDWR_BUS = '1' and T_SLICE = S19 else '0';
 
-	FC_EN <= 	'1' when FC_ENAB = '1' else 
-				'1' when BERR = '1' and SLICE_CNT /= "1111" else '0';
+	FC_EN <= 	'1' when FC_ENAB = '1' else '0';
 
-	ADR_EN <= 	
-				'1' when (RD_BUS = '1' or WR_BUS = '1') and ADR_INH = '0' else
-				'1' when RDWR_BUS = '1' and ADR_RDWR_INH = '0' else
-				'1' when BERR = '1' and SLICE_CNT /= "1111" else '0';
+	ADR_EN <= 	'1' when (RD_BUS = '1' or WR_BUS = '1') and ADR_INH = '0' else
+				'1' when RDWR_BUS = '1' and ADR_RDWR_INH = '0' else '0';
 
 	ASn  <= 	'0' when (RD_BUS = '1' or WR_BUS = '1') and AS_ENAB = '1' else
-				'0' when RDWR_BUS = '1' and AS_RDWR_INH = '0' else
-				'0' when BERR = '1' and SLICE_CNT /= "1111" else '1';
+				'0' when RDWR_BUS = '1' and AS_RDWR_INH = '0' else '1';
 
 	UDSn <= 	'0' when RD_BUS = '1' and UDS_RD_EN = '1' and A0 = '0' and BYTEn_WORD = '0' else
 				'0' when WR_BUS = '1' and UDS_WR_EN = '1' and A0 = '0' and BYTEn_WORD = '0' else
 				'0' when RD_BUS = '1' and UDS_RD_EN = '1' and BYTEn_WORD = '1' else
 				'0' when WR_BUS = '1' and UDS_WR_EN = '1' and BYTEn_WORD = '1' else
 				-- Read modify write is always byte wide:
-				'0' when RDWR_BUS = '1' and UDS_RDWR_EN = '1' and A0 = '0' else
-				'0' when BERR = '1' and SLICE_CNT /= "1111" else '1';
+				'0' when RDWR_BUS = '1' and UDS_RDWR_EN = '1' and A0 = '0' else '1';
 
 	LDSn <= 	'0' when RD_BUS = '1' and LDS_RD_EN = '1' and A0 = '1' and BYTEn_WORD = '0' else
 				'0' when WR_BUS = '1' and LDS_WR_EN = '1' and A0 = '1' and BYTEn_WORD = '0' else
 				'0' when RD_BUS = '1' and LDS_RD_EN = '1' and BYTEn_WORD = '1' else
 				'0' when WR_BUS = '1' and LDS_WR_EN = '1' and BYTEn_WORD = '1' else
 				-- Read modify write is always byte wide:
-				'0' when RDWR_BUS = '1' and LDS_RDWR_EN = '1' and A0 = '1' else
-				'0' when BERR = '1' and SLICE_CNT /= "1111" else '1';
+				'0' when RDWR_BUS = '1' and LDS_RDWR_EN = '1' and A0 = '1' else '1';
 
 	RWn  <= 	'0' when WR_BUS = '1' and WR_ENAB = '1' else
-				'0' when RDWR_BUS = '1' and WR_RDWR_EN = '1' else
-				'0' when BERR = '1' and SLICE_CNT /= "1111" else '1';
+				'0' when RDWR_BUS = '1' and WR_RDWR_EN = '1' else '1';
 
 	-- To meet the behavior of the bus during bus error, the HI_WORD_EN must have higher priority than
 	-- HI_BYTE_EN or LOW_BYTE_EN (using these signals for the bus drivers).
 	-- Nevertheless during bus error, there will be written invalid data via the HI_WORD_EN signal to the bus.
 	-- Read modify write is always byte wide due to used exclusively by the TAS operation.
-	HI_WORD_EN <= 	'1' when WR_BUS = '1' and DATA_EN = '1' and WR_HI = '1' else
-					'1' when WR_BUS = '1' and BERR = '1' and SLICE_CNT /= "1111" else '0';
+	HI_WORD_EN <= 	'1' when WR_BUS = '1' and DATA_EN = '1' and WR_HI = '1' else '0';
 	HI_BYTE_EN <= 	'1' when WR_BUS = '1' and DATA_EN = '1' and A0 = '0' and BYTEn_WORD = '0' else
 					'1' when WR_BUS = '1' and DATA_EN = '1' and BYTEn_WORD = '1' else
 					'1' when RDWR_BUS = '1' and DATA_RDWR_EN = '1' and A0 = '0' else '0';
@@ -358,65 +346,67 @@ begin
 	-- for not asserted DTACKn. This process provides a locking of this forbidden case and the
 	-- stop control for the slice counter. For more information see the 68000 processor data 
 	-- sheet (bus cycles).
+	-- In case of a buss error, the bus cycle is finished by realeasing the WAITSTATES via BERR.
 	-- The SYNCn controls the synchronous bus timing. This is not valid for read modify write
 	-- cycles.
 	-- The AVECn ends the bus cycle in case of an autovector interrupt acknowledge cycle.
 	begin
 		wait until CLK = '0' and CLK' event;
 		if T_SLICE = S4 then
-			WAITSTATES <= DTACKn and SYNCn and AVECn;
+			WAITSTATES <= DTACKn and SYNCn and AVECn and not BERR;
 		elsif T_SLICE = S16 then
-			WAITSTATES <= DTACKn; -- For read modify write.
+			WAITSTATES <= DTACKn and not BERR; -- For read modify write.
 		else
 			WAITSTATES <= '0';
 		end if;
 	end process P_WAITSTATES;
 	
+	HALTSTATE: process
+	-- This is a flag to control the halted state of a bus cycle
+	-- and to release the BUS_CYC_RDY in the halted state.
+	begin
+		wait until CLK = '1' and CLK' event;
+		if HALTn = '0' and BERRn = '1' then
+			HALTED <= '1';
+		elsif SLICE_CNT = "0000" and HALTn = '1' then
+			HALTED <= '0';
+		end if;
+	end process HALTSTATE;
+
 	SLICES: process(RESETn, CLK)
-	-- This process provides the central timing for the read, write and read modify write cycle as also
-	-- for the bus arbitration procedure. The BUS_LOCKED modelling in this way allows the timer to end
-	-- up correctly, if the bus is requested early (special case). The timer will not start, if the bus
-	-- is requested by an external device and therefore controls all internal bus signal high impedant.
+	-- This process provides the central timing for the read, write and read modify write cycle 
+    -- as also for the bus arbitration procedure.
 	begin
 		if RESETn = '0' then
 			SLICE_CNT <= "1111";
 		elsif CLK = '1' and CLK' event then
 			-- Cycle reset:
-			if RESET_CPU_In = '0' or EXEC_ABORT = '1' then
-				SLICE_CNT <= "1111"; -- Abort current bus cycle.
-			-- Exceptional initializing:
-			elsif (RD_BUS = '1' or WR_BUS = '1') and BERR = '1' and SLICE_CNT = "0100" then
-				SLICE_CNT <= "1111"; -- Bus error during read or write sequence.
-			elsif RDWR_BUS = '1' and BERR = '1' and SLICE_CNT = "0011" then
-				SLICE_CNT <= "1111"; -- Bus error during the read portion of a read modify write.
-			elsif RDWR_BUS = '1' and BERR = '1' and SLICE_CNT = "1010" then
-				SLICE_CNT <= "1111"; -- Bus error during the write portion of a read modify write.
-			-- Exceptional counting:
-			elsif BERRn = '0' and HALTn = '0' and SLICE_CNT /= "1111" then
-				SLICE_CNT <= SLICE_CNT + '1'; -- Rerun exception: count up to finish the cycle.
-			elsif BERR = '1' and SLICE_CNT /= "1111" then
-				SLICE_CNT <= SLICE_CNT + '1'; -- Bus error: count up to finish the cycle.
-			-- Normal Initialization:
+			if RESET_CPU_In = '0' then
+				SLICE_CNT <= "0000"; -- Abort current bus cycle.
+        elsif ARB_STATE /= IDLE and SLICE_CNT = "0000" then -- Do not start a bus sequence when the bus is granted.
+            SLICE_CNT <= "1111";
+        elsif ARB_STATE /= IDLE and SLICE_CNT = "1111" then -- Stay until the bus is released.
+            SLICE_CNT <= "1111";
+			-- Initialization:
 			elsif RD_BUS = '0' and WR_BUS = '0' and RDWR_BUS = '0' then
-				SLICE_CNT <= "1111"; -- Init.
-			-- Inhibit Conditions:
-			elsif BUS_LOCKED = '1' then -- Do not start a bus sequence when the bus is granted.
-				null;
-			-- Normal counting:
+				SLICE_CNT <= "0000"; -- Init.
+			elsif SLICE_CNT = "0000" and HALTn = '0' then
+				SLICE_CNT <= "0000"; -- Wait in retry or halt operation until HALTn is released.
+			-- Counting:
 			elsif (RD_BUS = '1' or WR_BUS = '1') and SLICE_CNT = "0011" then
-				SLICE_CNT <= "1111"; -- Finish the read or write cycle.
-			elsif (RD_BUS = '1' or WR_BUS = '1') and WAITSTATES = '0' then
-				SLICE_CNT <= SLICE_CNT + '1'; -- Cycle active.
+				SLICE_CNT <= "0000"; -- Finish the read or write cycle.
 			elsif RDWR_BUS = '1' and SLICE_CNT = "1001" then
-				SLICE_CNT <= "1111"; -- Finish the read modify write cycle.
-			elsif RDWR_BUS = '1' and WAITSTATES = '0' then
-				SLICE_CNT <= SLICE_CNT + '1'; -- Read modify write cycle.
+				SLICE_CNT <= "0000"; -- Finish the read modify write cycle.
+			elsif (RD_BUS = '1' or WR_BUS = '1' or RDWR_BUS = '1') and WAITSTATES = '0' and HALTED = '0' then
+				SLICE_CNT <= SLICE_CNT + '1'; -- Cycle active.
 			end if;
 		end if;
 	end process SLICES;
 
-	T_SLICE <=  S0 when SLICE_CNT = "0000" and CLK = '1' else
-			    S1 when SLICE_CNT = "0000" and CLK = '0' else
+	T_SLICE <=  S0 when RD_BUS = '0' and WR_BUS = '0' and RDWR_BUS = '0' else -- IDLE Mode.
+				S0 when SLICE_CNT = "0000" and CLK = '1' else
+			    S0 when SLICE_CNT = "0000" and CLK = '0' and HALTn = '0' else -- Stay in IDLE during retry with HALTn asserted.
+				S1 when SLICE_CNT = "0000" and CLK = '0' else
 			    S2 when SLICE_CNT = "0001" and CLK = '1' else
 			    S3 when SLICE_CNT = "0001" and CLK = '0' else
 			    S4 when SLICE_CNT = "0010" and CLK = '1' else
@@ -436,7 +426,7 @@ begin
 				S16 when WAITSTATES = '1' and SLICE_CNT = "1000" and CLK = '0' else
 				S17 when WAITSTATES = '0' and SLICE_CNT = "1000" and CLK = '0' else
 			    S18 when SLICE_CNT = "1001" and CLK = '1' else
-			    S19 when SLICE_CNT = "1001" and CLK = '0' else IDLE;
+                S19 when SLICE_CNT = "1001" and CLK = '0' else S20; -- S20 is the Bus arbitration state.
 
 	-- The modelling with the two processes working on the positive and negative clock edge
 	-- is a bit complicated. But it results in rather 'clean' (glitch free) bus control
@@ -482,28 +472,6 @@ begin
 			when S14 => DATA_RDWR_EN_N <= '1';
 			when others => DATA_RDWR_EN_N <= '0';
 		end case;	
-		case T_SLICE is
-			when IDLE => ADR_INH_N <= '1';
-			when others => ADR_INH_N <= '0';
-		end case;	
-		-- The locked read modify write inhibit controls need a special logic regar-
-		-- ding the RDWR_BUS control signals. Example given for the TAS operation:
-		-- If after the FETCH_BIW phase the read modify write phase starts, the
-		-- inhibit has to be already '1'. A switch in the IDLE phase occurs too late
-		-- and the states S18, S19 ... do not appear in non locked read modify write
-		-- operations. Otherwise there would be a glitch in the ASn buc control line
-		-- at the beginning of the locked read modify write phase.
-		if RDWR_BUS = '0' or T_SLICE = S18 or T_SLICE = IDLE then
-			AS_RDWR_INH_N <= '1';
-		else
-			AS_RDWR_INH_N <= '0';
-		end if;
-		--
-		if RDWR_BUS = '0' or T_SLICE = IDLE then
-			ADR_RDWR_INH_N <= '1';
-		else
-			ADR_RDWR_INH_N <= '0';
-		end if;
 	end process N;
 
 	P: process
@@ -553,28 +521,6 @@ begin
 			when S15 | S16 | S17 => DATA_RDWR_EN_P <= '1'; -- S16 due to wait states.
 			when others => DATA_RDWR_EN_P <= '0';
 		end case;	
-		case T_SLICE is
-			when S7 => ADR_INH_P <= '1';
-			when others => ADR_INH_P <= '0';
-		end case;	
-		-- The locked read modify write inhibit controls need a special logic regar-
-		-- ding the RDWR_BUS control signals. Example given for the TAS operation:
-		-- If after the FETCH_BIW phase the read modify write phase starts, the
-		-- inhibit has to be already '1'. A switch in the IDLE phase occurs too late
-		-- and the states S18, S19 ... do not appear in non locked read modify write
-		-- operations. Otherwise there would be a glitch in the ASn buc control line
-		-- at the beginning of the locked read modify write phase.
-		if RDWR_BUS = '0' or T_SLICE = S19 or T_SLICE = IDLE then
-			AS_RDWR_INH_P <= '1';
-		else
-			AS_RDWR_INH_P <= '0';
-		end if;
-		--
-		if RDWR_BUS = '0' or T_SLICE = S19 then
-			ADR_RDWR_INH_P <= '1';
-		else
-			ADR_RDWR_INH_P <= '0';
-		end if;
 	end process P;
 
 	-- Read and write timing:
@@ -585,17 +531,18 @@ begin
 	AS_ENAB <= AS_ENAB_N or AS_ENAB_P; 					-- '1' when S2 | S3 | S4 | S5 | S6.
 	WR_ENAB <= WR_ENAB_P; 								-- '1' when S2 | S3 | S4 | S5 | S6 | S7.
 	DATA_EN <= DATA_EN_N or DATA_EN_P; 					-- '1' when S3 | S4 | S5 | S6 | S7.
-	ADR_INH <= 	ADR_INH_N or ADR_INH_P;  				-- '1' when IDLE | S0.
+	ADR_INH <= '1' when T_SLICE = S0 else '0';
 	-- Read modify write timing:
 	UDS_RDWR_EN <= UDS_RDWR_EN_N or UDS_RDWR_EN_P; 		-- '1' when S2 | S3 | S4 | S5 | S6 | S16 | S17 | S18.
 	LDS_RDWR_EN <= LDS_RDWR_EN_N or LDS_RDWR_EN_P; 		-- '1' when S2 | S3 | S4 | S5 | S6 | S16 | S17 | S18.
-	AS_RDWR_INH <= AS_RDWR_INH_N or AS_RDWR_INH_P;		-- '1' when S19 | IDLE | S0 | S1.
+	AS_RDWR_INH <= '1' when T_SLICE = S0 else '0';
 	WR_RDWR_EN <= WR_EN_RDWR_P;							-- '1' when S14 | S15 | S16 | S17 | S18 | S19.
 	DATA_RDWR_EN <= DATA_RDWR_EN_N or DATA_RDWR_EN_P;	-- '1' when  S3 | S4 | S5 | S6 | S7 | S15 | S16 | S17 | S18 | S19.
-	ADR_RDWR_INH <= ADR_RDWR_INH_N or ADR_RDWR_INH_P;	-- '1' when IDLE | S0.
+	ADR_RDWR_INH <= '1' when T_SLICE = S0 else '0';
 
 	-- Timing valid for all modes:
-	FC_ENAB <= 	'0' when T_SLICE = IDLE and HALTn = '0' else -- During halt.
+	FC_ENAB <= 	'0' when T_SLICE = S0 and HALTn = '0' else -- During halt.
+				'0' when RD_BUS = '0' and WR_BUS = '0' and RDWR_BUS = '0' and T_SLICE = S0 else -- Normal operation.
 				'0' when BGACKn = '0' else '1'; -- During arbitration.
 	
 	-- Synchronous bus timing:
@@ -617,21 +564,21 @@ begin
 			end if;
 			
 			-- E logic:
-			if TMP = x"3" then
-				E <= '0';
-			elsif TMP = x"9" then
+            if TMP = x"0" then
 				E <= '1';
+            elsif TMP = x"4" then
+				E <= '0';
 			end if;
 
 			-- VMA logic:
-			if VPAn = '0' and TMP = x"7" then
+            if VPAn = '0' and TMP >= x"4" then -- Switch, when E is low.
 				VMA_In <= '0';
 			elsif T_SLICE = S7 then
 				VMA_In <= '1';
 			end if;
 			
 			-- SYNCn logic (wait states controlling):
-			if VPAn = '0' and VMA_In = '0' and TMP = x"2" then
+            if VPAn = '0' and VMA_In = '0' and TMP = x"0" then -- Switch, when E is just high.
 				SYNCn <= '0';
 			elsif VPAn = '1' or VMA_In = '1' then
 				SYNCn <= '1';
@@ -661,7 +608,7 @@ begin
 			when IDLE =>
 				if RDWR_BUS = '1' then
 					NEXT_ARB_STATE <= IDLE; -- No bus arbitration during read modify write cycle.
-				elsif BRn = '0' and T_SLICE /= S1 then
+                elsif BRn = '0' and T_SLICE /= S1 then
 					NEXT_ARB_STATE <= GRANT; -- Bus grant delayed in case of S1, otherwise immediately.
 				else
 					NEXT_ARB_STATE <= IDLE;
@@ -674,7 +621,7 @@ begin
 				else
 					NEXT_ARB_STATE <= GRANT;
 				end if;
-			when WAIT_RELEASE_2WIRE =>
+            when WAIT_RELEASE_2WIRE =>
 				-- In the case of a 2 wire bus arbitration, no re-entry for another
 				-- device is possible.
 				if BGACKn = '1' and BRn = '1' then
@@ -697,11 +644,6 @@ begin
 
 	BGn <= 	'0' when ARB_STATE = GRANT else -- 3 wire and 2 wire arbitration.
 			'0' when ARB_STATE = WAIT_RELEASE_2WIRE else '1'; -- 2 wire arbitration.
-
-	BUS_LOCKED <= 	'1' when ARB_STATE = GRANT and T_SLICE = IDLE else
-					 -- S6 locking due to special case:
-					'1' when ARB_STATE = WAIT_RELEASE_2WIRE and T_SLICE /= S6 else
-					'1' when ARB_STATE = WAIT_RELEASE_3WIRE else '0';
 
 	-- RESET logic:
 	RESET_FILTER: process(RESETn, CLK)

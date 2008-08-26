@@ -17,30 +17,24 @@
 ---- Author(s):                                                   ----
 ---- - Wolfgang Foerster, wf@experiment-s.de; wf@inventronik.de   ----
 ----                                                              ----
-----------------------------------------------------------------------
-----                                                              ----
----- Copyright (C) 2006 Wolfgang Foerster                         ----
-----                                                              ----
----- This source file may be used and distributed without         ----
----- restriction provided that this copyright statement is not    ----
----- removed from the file and that any derivative work contains  ----
----- the original copyright notice and the associated disclaimer. ----
+---- Copyright (C) 2006 - 2008 Wolfgang Foerster                  ----
 ----                                                              ----
 ---- This source file is free software; you can redistribute it   ----
----- and/or modify it under the terms of the GNU Lesser General   ----
----- Public License as published by the Free Software Foundation; ----
----- either version 2.1 of the License, or (at your option) any   ----
----- later version.                                               ----
+---- and/or modify it under the terms of the GNU General Public   ----
+---- License as published by the Free Software Foundation; either ----
+---- version 2 of the License, or (at your option) any later      ----
+---- version.                                                     ----
 ----                                                              ----
----- This source is distributed in the hope that it will be       ----
+---- This program is distributed in the hope that it will be      ----
 ---- useful, but WITHOUT ANY WARRANTY; without even the implied   ----
 ---- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR      ----
----- PURPOSE. See the GNU Lesser General Public License for more  ----
+---- PURPOSE.  See the GNU General Public License for more        ----
 ---- details.                                                     ----
 ----                                                              ----
----- You should have received a copy of the GNU Lesser General    ----
----- Public License along with this source; if not, download it   ----
----- from http://www.gnu.org/licenses/lgpl.html                   ----
+---- You should have received a copy of the GNU General Public    ----
+---- License along with this program; if not, write to the Free   ----
+---- Software Foundation, Inc., 51 Franklin Street, Fifth Floor,  ----
+---- Boston, MA 02110-1301, USA.                                  ----
 ----                                                              ----
 ----------------------------------------------------------------------
 -- 
@@ -50,7 +44,8 @@
 --   Initial Release.
 -- Revision 2K7A  2007/05/31 WF
 --   Updated all modules.
---   CPU is now working.
+-- Revision 2K8A  2008/07/14 WF
+--   See the 68K00 top level file.
 -- 
 
 library ieee;
@@ -67,7 +62,7 @@ type OP_68K00 is (ABCD, ADD, ADDA, ADDI, ADDQ, ADDX, AND_B, ANDI, ANDI_TO_CCR, A
                   EORI_TO_SR, EXG, EXTW, ILLEGAL, JMP, JSR, LEA, LINK, LSL, LSR, MOVE, MOVEA, MOVE_FROM_CCR, MOVE_TO_CCR,
                   MOVE_FROM_SR, MOVE_TO_SR, MOVE_USP, MOVEM, MOVEP, MOVEQ, MULS, MULU, NBCD, NEG, NEGX, NOP, NOT_B,
                   OR_B, ORI, ORI_TO_CCR, ORI_TO_SR, PEA, RESET, ROTL, ROTR, ROXL, ROXR, RTE, RTR, RTS, SBCD, Scc, STOP,
-                  SUB, SUBA, SUBI, SUBQ, SUBX, SWAP, TAS, TRAP, TRAPV, TST, UNLK);
+                  SUB, SUBA, SUBI, SUBQ, SUBX, SWAP, TAS, TRAP, TRAPV, TST, UNLK, RESERVED, UNIMPLEMENTED);
 
 component WF68K00IP_CONTROL
 	port (
@@ -81,9 +76,10 @@ component WF68K00IP_CONTROL
 		DATA_VALID		: in bit;
 		BUS_CYC_RDY		: in bit;
 		CTRL_RDY		: out bit;
-		CLR_T			: in bit;
-		SET_S			: in bit;
+		INIT_STATUS		: in bit;
 		PRESET_IRQ_MASK	: in bit;
+        IRQ				: in std_logic_vector(2 downto 0);
+        IRQ_SAVE        : in bit;
 		XNZVC_IN		: in std_logic_vector(4 downto 0);
 		STATUS_REG_OUT	: out std_logic_vector(15 downto 0);
 		FORCE_BIW2		: in bit;
@@ -110,10 +106,10 @@ component WF68K00IP_CONTROL
 		SEL_BUFF_B_HI	: out bit;
 		FC_OUT			: out std_logic_vector(2 downto 0);
 		FC_EN			: out bit;
-		PC_INIT_HI		: out bit;
-		PC_INIT_LO		: out bit;
+		PC_INIT			: out bit;
 		PC_WR			: out bit;
 		PC_INC			: out bit;
+		PC_TMP_CLR		: out bit;
 		PC_TMP_INC		: out bit;
 		PC_ADD_DISPL	: out bit;
 		USP_INC			: out bit;
@@ -130,6 +126,7 @@ component WF68K00IP_CONTROL
 		AR_DR_EXG		: out bit;
 		DR_WR			: out bit;
 		DR_DEC			: out bit;
+		SCAN_TRAPS		: out bit;
 		TRAP_PRIV		: in bit;
 		TRAP_TRACE		: out bit;
 		OP				: in OP_68K00;
@@ -194,6 +191,7 @@ component WF68K00IP_OPCODE_DECODER
 		DIV_MUL_32n64		: out bit;
 		REG_Dlq				: out std_logic_vector(2 downto 0);
 		REG_Dhr				: out std_logic_vector(2 downto 0);
+		SCAN_TRAPS			: in bit;
 		TRAP_ILLEGAL		: out bit;
 		TRAP_1010			: out bit;
 		TRAP_1111			: out bit;
@@ -239,24 +237,26 @@ component WF68K00IP_ADDRESS_REGISTERS
 		AR_DEC				: in bit;
 		SSP_INC				: in bit;
 		SSP_DEC				: in bit;
-		SSP_INIT_HI			: in bit;
-		SSP_INIT_LO			: in bit;
+		SSP_INIT			: in bit;
 		SP_ADD_DISPL		: in bit;
 		USE_SP_ADR			: in bit;
 		USE_SSP_ADR			: in bit;
 		PC_WR				: in bit;
 		PC_INC				: in bit;
+		PC_TMP_CLR			: in bit;
 		PC_TMP_INC			: in bit;
-		PC_INIT_HI			: in bit;
-		PC_INIT_LO			: in bit;
+		PC_INIT				: in bit;
 		PC_ADD_DISPL		: in bit;
 		SRC_DESTn			: in bit;
 		SBIT				: in bit;
 		OP					: in OP_68K00;
 		OP_SIZE				: in OP_SIZETYPE;
 		OP_MODE				: in std_logic_vector(4 downto 0);
+		OP_START			: in bit;
 		ADR_MODE			: in std_logic_vector(2 downto 0);
 		MOVE_D_AM			: in std_logic_vector(2 downto 0);
+        FORCE_BIW2		: in bit;
+        FORCE_BIW3		: in bit;
 		EXT_DSIZE			: in D_SIZETYPE;
 		SEL_DISPLACE_BIW	: in bit;
 		DISPLACE_BIW		: in std_logic_vector(31 downto 0);
@@ -274,17 +274,14 @@ component WF68K00IP_DATA_REGISTERS
 		CLK				: in bit;
 		RESETn			: in bit;
 		DATA_IN_A		: in std_logic_vector(31 downto 0);
-		DATA_IN_C		: in std_logic_vector(31 downto 0);
 		DATA_IN_B		: in std_logic_vector(31 downto 0);
 		REGSEL_A		: in std_logic_vector(2 downto 0);
 		REGSEL_B		: in std_logic_vector(2 downto 0);
 		REGSEL_C		: in std_logic_vector(2 downto 0);
-		REGSEL_I		: in std_logic_vector(2 downto 0);
 		DIV_MUL_32n64	: in bit;
-		DATA_OUT_C		: out std_logic_vector(31 downto 0);
-		DATA_OUT_B		: out std_logic_vector(31 downto 0);
 		DATA_OUT_A		: out std_logic_vector(31 downto 0);
-		INDEX_OUT		: out std_logic_vector(31 downto 0);
+		DATA_OUT_B		: out std_logic_vector(31 downto 0);
+		DATA_OUT_C		: out std_logic_vector(31 downto 0);
 		DR_EXG			: in bit;
 		DR_DEC			: in bit;
 		DR_WR			: in bit;
@@ -299,6 +296,7 @@ component WF68K00IP_ALU
 	port (
 		RESETn			: in bit;
 		CLK				: in bit;
+		ADR_MODE		: in std_logic_vector(2 downto 0);
 		OP_SIZE			: in OP_SIZETYPE;
 		OP				: in OP_68K00;
 		XNZVC_IN		: in std_logic_vector(4 downto 0);
@@ -340,7 +338,7 @@ component WF68K00IP_INTERRUPT_CONTROL
 		CLK					: in bit;
 		RESETn				: in bit;
 		RESET_CPUn			: in bit;
-		BERRn				: in bit;
+		BERR				: in bit;
 		HALTn				: in std_logic;
 		ADR_IN				: in std_logic_vector(31 downto 0);
 		USE_SSP_ADR			: out bit;
@@ -355,28 +353,27 @@ component WF68K00IP_INTERRUPT_CONTROL
 		FC_IN				: in std_logic_vector(2 downto 0);
 		FC_OUT				: out std_logic_vector(2 downto 0);
 		FC_EN				: out bit;
+		SEL_BUFF_A_LO		: out bit;
+		SEL_BUFF_A_HI		: out bit;
 		STATUS_REG_IN		: in std_logic_vector(15 downto 0);
 		PC					: in std_logic_vector(31 downto 0);
-		SET_S				: out bit;
-		CLR_T				: out bit;
+		INIT_STATUS			: out bit;
 		PRESET_IRQ_MASK		: out bit;
 		SSP_DEC				: out bit;
-		SSP_INIT_HI			: out bit;
-		SSP_INIT_LO			: out bit;
-		PC_INIT_HI			: out bit;
-		PC_INIT_LO			: out bit;
+		SSP_INIT			: out bit;
+		PC_INIT				: out bit;
 		BIW_0				: in std_logic_vector(15 downto 0);
 		BUS_CYC_RDY			: in bit;
-		TRAP_AERR			: in bit;
 		CTRL_RDY			: in bit;
 		CTRL_EN				: out bit;
 		EXEC_ABORT			: out bit;
 		EXEC_RESUME			: out bit;
 		IRQ					: in std_logic_vector(2 downto 0);
 		AVECn				: in bit;
-		IRQ_LVL				: out std_logic_vector(2 downto 0);
-		INT_VECT			: out std_logic_vector(9 downto 1);
+        IRQ_SAVE            : out bit;
+		INT_VECT			: out std_logic_vector(9 downto 0);
 		USE_INT_VECT		: out bit;
+		TRAP_AERR			: in bit;
 		TRAP_OP				: in bit;
 		TRAP_VECTOR			: in std_logic_vector(3 downto 0);
 		TRAP_V				: in bit;
@@ -408,6 +405,7 @@ component WF68K00IP_BUS_INTERFACE
 		SEL_BUFF_A_HI	: in bit;
 		SEL_BUFF_B_LO	: in bit;
 		SEL_BUFF_B_HI	: in bit;
+		SYS_INIT		: in bit;
 		OP_SIZE			: in OP_SIZETYPE;
 		BUFFER_A		: out std_logic_vector(31 downto 0);
 		BUFFER_B		: out std_logic_vector(31 downto 0);

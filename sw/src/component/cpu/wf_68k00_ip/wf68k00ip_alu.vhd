@@ -29,28 +29,24 @@
 ----                                                              ----
 ----------------------------------------------------------------------
 ----                                                              ----
----- Copyright (C) 2006 Wolfgang Foerster                         ----
-----                                                              ----
----- This source file may be used and distributed without         ----
----- restriction provided that this copyright statement is not    ----
----- removed from the file and that any derivative work contains  ----
----- the original copyright notice and the associated disclaimer. ----
+---- Copyright (C) 2006 - 2008 Wolfgang Foerster                  ----
 ----                                                              ----
 ---- This source file is free software; you can redistribute it   ----
----- and/or modify it under the terms of the GNU Lesser General   ----
----- Public License as published by the Free Software Foundation; ----
----- either version 2.1 of the License, or (at your option) any   ----
----- later version.                                               ----
+---- and/or modify it under the terms of the GNU General Public   ----
+---- License as published by the Free Software Foundation; either ----
+---- version 2 of the License, or (at your option) any later      ----
+---- version.                                                     ----
 ----                                                              ----
----- This source is distributed in the hope that it will be       ----
+---- This program is distributed in the hope that it will be      ----
 ---- useful, but WITHOUT ANY WARRANTY; without even the implied   ----
 ---- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR      ----
----- PURPOSE. See the GNU Lesser General Public License for more  ----
+---- PURPOSE.  See the GNU General Public License for more        ----
 ---- details.                                                     ----
 ----                                                              ----
----- You should have received a copy of the GNU Lesser General    ----
----- Public License along with this source; if not, download it   ----
----- from http://www.gnu.org/licenses/lgpl.html                   ----
+---- You should have received a copy of the GNU General Public    ----
+---- License along with this program; if not, write to the Free   ----
+---- Software Foundation, Inc., 51 Franklin Street, Fifth Floor,  ----
+---- Boston, MA 02110-1301, USA.                                  ----
 ----                                                              ----
 ----------------------------------------------------------------------
 -- 
@@ -60,8 +56,11 @@
 --   Initial Release.
 -- Revision 2K7A  2007/05/31 WF
 --   Updated all modules.
---   CPU is now working.
--- 
+-- Revision 2K7B  2007/12/24 WF
+--   See the 68K00 top level file.
+-- Revision 2K8A  2008/07/14 WF
+--   See the 68K00 top level file.
+--
 
 use work.WF68K00IP_PKG.all;
 
@@ -73,6 +72,7 @@ entity WF68K00IP_ALU is
 	port (
 		RESETn			: in bit;
 		CLK				: in bit;
+		ADR_MODE		: in std_logic_vector(2 downto 0);
 		OP_SIZE			: in OP_SIZETYPE;
 		OP				: in OP_68K00;
 		-- The Flags:
@@ -104,6 +104,7 @@ signal NEXT_MUL_STATE	: MUL_STATES;
 signal DIV_STATE		: DIV_STATES;
 signal NEXT_DIV_STATE	: DIV_STATES;
 signal OP_IN_S_SIGN		: std_logic_vector(31 downto 0);
+signal OP_IN_D_SIGN_LO	: std_logic_vector(31 downto 0);
 signal RESULT_LOGOP		: std_logic_vector(31 downto 0);
 signal RESULT_BCD		: std_logic_vector(7 downto 0);
 signal RESULT_INTOP		: std_logic_vector(31 downto 0);
@@ -143,25 +144,32 @@ begin
 	-- Use low bytes of RESULT_II and RESULT_I for word wide DIVS, DIVU:
 	RESULT_I_DIV <= RESULT_II(15 downto 0) & RESULT_I(15 downto 0) when OP_SIZE = WORD else RESULT_I;
 
-	SIGNEXT: process(OP, OP_IN_S, OP_SIZE)
-	-- This modelling provides the required sign extension
-	-- of the source data for the Operations ADDA, CMPA and SUBA.
+	SIGNEXT: process(OP, OP_IN_S, OP_IN_D_LO, OP_SIZE)
+	-- This module provides the required sign extensions.
 	begin
 		case OP_SIZE is
 			when LONG =>
 				OP_IN_S_SIGN <= OP_IN_S;
-			when others => -- WORD is valid.
+				OP_IN_D_SIGN_LO <= OP_IN_D_LO;
+			when WORD =>
 				for i in 31 downto 16 loop
 					OP_IN_S_SIGN(i) <= OP_IN_S(15);
+					OP_IN_D_SIGN_LO(i) <= OP_IN_D_LO(15);
 				end loop;
 				OP_IN_S_SIGN(15 downto 0) <= OP_IN_S(15 downto 0);
+				OP_IN_D_SIGN_LO(15 downto 0) <= OP_IN_D_LO(15 downto 0);
+			when BYTE =>
+				for i in 31 downto 8 loop
+					OP_IN_S_SIGN(i) <= OP_IN_S(7);
+					OP_IN_D_SIGN_LO(i) <= OP_IN_D_LO(7);
+				end loop;
+				OP_IN_S_SIGN(7 downto 0) <= OP_IN_S(7 downto 0);
+				OP_IN_D_SIGN_LO(7 downto 0) <= OP_IN_D_LO(7 downto 0);
 		end case;
 	end process SIGNEXT;
 
-	TRAP_CHK <= '1' when OP = CHK and TRAP_CHK_EN = '1' and OP_SIZE = LONG and OP_IN_D_LO(31) = '1' else -- Negative destination.
-				'1' when OP = CHK and TRAP_CHK_EN = '1' and OP_SIZE = WORD and OP_IN_D_LO(15) = '1' else -- Negative destination.
-				'1' when OP = CHK and TRAP_CHK_EN = '1' and OP_SIZE = LONG and signed(OP_IN_D_LO) > signed(OP_IN_S) else
-				'1' when OP = CHK and TRAP_CHK_EN = '1' and OP_SIZE = WORD and signed(OP_IN_D_LO(15 downto 0)) > signed(OP_IN_S(15 downto 0)) else '0';
+	TRAP_CHK <= '1' when TRAP_CHK_EN = '1' and OP_IN_D_SIGN_LO(31) = '1' else -- Negative destination.
+				'1' when TRAP_CHK_EN = '1' and RESULT_INTOP(31) = '0' else '0'; -- Destination > Source.
 					
 	TRAP_DIVZERO <=	'1' when OP = DIVU and DIV_STATE = DIV_IDLE and OP_START = '1' and OP_IN_S = x"00000000" else
 					'1' when OP = DIVS and DIV_STATE = DIV_IDLE and OP_START = '1' and OP_IN_S = x"00000000" else '0';
@@ -188,34 +196,39 @@ begin
 		end case;
 	end process P_LOGOP;
 
-	P_INTOP: process(OP, OP_IN_S, OP_IN_S_SIGN, OP_IN_D_LO, XNZVC_IN, OP_SIZE, RESULT_INTOP)
-	-- The integer arithmetics ADD, SUB, NEG and CMP in their different variations
-	-- are modelled here.
+	P_INTOP: process(OP, OP_IN_S, OP_IN_S_SIGN, OP_IN_D_LO, OP_IN_D_SIGN_LO, ADR_MODE, XNZVC_IN, OP_SIZE, RESULT_INTOP)
+	-- The integer arithmetics ADD, SUB, NEG and CMP in their different variations are modelled here.
 	variable X_IN_I			: Std_Logic_Vector(0 downto 0);
-	variable NULLVECTOR 	: unsigned(31 downto 0);
 	variable RESULT		 	: unsigned(31 downto 0);
 	begin
 		X_IN_I(0) := XNZVC_IN(4); -- Extended Flag.
-		NULLVECTOR := x"00000000";
 		case OP is
-			when ADD | ADDI | ADDQ =>
-				RESULT := unsigned(OP_IN_D_LO) + unsigned(OP_IN_S);
-			when ADDA => -- Sign extended source required.
-				RESULT := unsigned(OP_IN_D_LO) + unsigned(OP_IN_S_SIGN);
+            when ADDA =>
+                RESULT := unsigned(OP_IN_D_LO) + unsigned(OP_IN_S_SIGN); -- No sign extension for the destination.
+            when ADDQ =>
+                case ADR_MODE is
+                    when "001" => RESULT := unsigned(OP_IN_D_LO) + unsigned(OP_IN_S_SIGN); -- No sign extension for address destination.
+                    when others => RESULT := unsigned(OP_IN_D_SIGN_LO) + unsigned(OP_IN_S_SIGN);
+                end case;
+            when ADD | ADDI =>
+				RESULT := unsigned(OP_IN_D_SIGN_LO) + unsigned(OP_IN_S_SIGN);
 			when ADDX =>
-				RESULT := unsigned(OP_IN_D_LO) + unsigned(OP_IN_S) + unsigned(X_IN_I);
-			when SUB | SUBI | SUBQ =>
-				RESULT := unsigned(OP_IN_D_LO) - unsigned(OP_IN_S);
-			when CMPA | SUBA => -- Sign extended source required.
-				RESULT := unsigned(OP_IN_D_LO) - unsigned(OP_IN_S_SIGN);
+				RESULT := unsigned(OP_IN_D_SIGN_LO) + unsigned(OP_IN_S_SIGN) + unsigned(X_IN_I);
+            when CMPA | SUBA =>
+                RESULT := unsigned(OP_IN_D_LO) - unsigned(OP_IN_S_SIGN); -- No sign extension for the destination.
+            when SUBQ =>
+                case ADR_MODE is
+                    when "001" => RESULT := unsigned(OP_IN_D_LO) - unsigned(OP_IN_S_SIGN); -- No sign extension for address destination.
+                    when others => RESULT := unsigned(OP_IN_D_SIGN_LO) - unsigned(OP_IN_S_SIGN);
+                end case;
+            when CHK | CMP | CMPI | CMPM | SUB | SUBI =>
+				RESULT := unsigned(OP_IN_D_SIGN_LO) - unsigned(OP_IN_S_SIGN);
 			when SUBX =>
-				RESULT := unsigned(OP_IN_D_LO) - unsigned(OP_IN_S) - unsigned(X_IN_I);
-			when CMP | CMPI | CMPM =>
-				RESULT := unsigned(OP_IN_D_LO) - unsigned(OP_IN_S);
+				RESULT := unsigned(OP_IN_D_SIGN_LO) - unsigned(OP_IN_S_SIGN) - unsigned(X_IN_I);
 			when NEG =>
-				RESULT := NULLVECTOR - unsigned(OP_IN_D_LO);
+				RESULT := unsigned(OP_IN_S_SIGN) - unsigned(OP_IN_D_SIGN_LO);
 			when NEGX =>
-				RESULT := NULLVECTOR - unsigned(OP_IN_D_LO) - unsigned(X_IN_I);
+				RESULT := unsigned(OP_IN_S_SIGN) - unsigned(OP_IN_D_SIGN_LO) - unsigned(X_IN_I);
 			when CLR =>
 				RESULT := (others => '0');
 			when others =>
@@ -306,7 +319,7 @@ begin
 	end process P_BCDOP;
 
 	COND_CODES: process(OP, RESULT_BCD, CB_BCD, RESULT_LOGOP, RESULT_INTOP, OP_SIZE, XNZVC_IN, RESULT_SPECIAL,
-                        OP_IN_D_LO, OP_IN_S, OP_IN_S_SIGN, RESULT_I, RESULT_II, MUL_STATE, DIV_MUL_32n64, OV_DIV)
+						OP_IN_D_SIGN_LO, OP_IN_S_SIGN, RESULT_I, RESULT_II, MUL_STATE, DIV_MUL_32n64, OV_DIV)
 	-- In this process all the condition codes X (eXtended), N (Negative)
 	-- Z (Zero), V (oVerflow) and C (Carry / borrow) are calculated for
 	-- all integer operations. Except for the MULS, MULU, DIVS, DIVU the
@@ -319,41 +332,16 @@ begin
 	begin
 		-- Concerning Z,V,C Flags:
 		case OP is
-			when ADD | ADDI | ADDQ | ADDX | CMP | CMPI | CMPM | NEG | NEGX | SUB | SUBI | SUBQ | SUBX  =>
-				case OP_SIZE is
-					when LONG =>
-						RM := RESULT_INTOP(31);
-						SM := OP_IN_S(31);
-						DM := OP_IN_D_LO(31);
-					when WORD =>
-						RM := RESULT_INTOP(15);
-						SM := OP_IN_S(15);
-						DM := OP_IN_D_LO(15);
-					when others => -- Byte.
-						RM := RESULT_INTOP(7);
-						SM := OP_IN_S(7);
-						DM := OP_IN_D_LO(7);
-				end case;
-			when CMPA =>
+			when ADD | ADDI | ADDQ | ADDX | CMP | CMPA | CMPI | CMPM | NEG | NEGX | SUB | SUBI | SUBQ | SUBX  =>
 				RM := RESULT_INTOP(31);
 				SM := OP_IN_S_SIGN(31);
-				DM := OP_IN_D_LO(31);
+				DM := OP_IN_D_SIGN_LO(31);
 			when others =>
 				RM := '-'; SM := '-'; DM := '-';
 		end case;
 		-- Concerning Z Flag:
 		case OP is
-			when ADD | ADDI | ADDQ | ADDX | CMP | CMPI | CMPM | NEG | NEGX | SUB | SUBI | SUBQ | SUBX  =>
-				if OP_SIZE = LONG and RESULT_INTOP = x"00000000" then
-					Z := '1';
-				elsif OP_SIZE = WORD and RESULT_INTOP(15 downto 0) = x"0000" then
-					Z := '1';
-				elsif OP_SIZE = BYTE and RESULT_INTOP(7 downto 0) = x"00" then
-					Z := '1';
-				else
-					Z := '0';
-				end if;
-			when CMPA =>
+			when ADD | ADDI | ADDQ | ADDX | CMP | CMPA | CMPI | CMPM | NEG | NEGX | SUB | SUBI | SUBQ | SUBX  =>
 				if RESULT_INTOP = x"00000000" then
 					Z := '1';
 				else
@@ -469,24 +457,13 @@ begin
 			-- The ANDI_TO_CCR, ANDI_TO_SR, EORI_TO_CCR, EORI_TO_SR, ORI_TO_CCR, ORI_TO_SR
 			-- are determined in the LOGOP process.
 			when CHK =>
-				case OP_SIZE is
-					when LONG =>
-						if signed(OP_IN_D_LO) > signed(OP_IN_S) then
-							XNZVC_OUT <= XNZVC_IN(4) & '0' & "---";
-						elsif OP_IN_S(31) = '1' then -- Negative operand.
-							XNZVC_OUT <= XNZVC_IN(4) & '1' & "---";
-						else
-							XNZVC_OUT <= XNZVC_IN(4 downto 3) & "---"; -- Undefined.
-						end if;
-					when others => -- Word.
-						if signed(OP_IN_D_LO(15 downto 0)) > signed(OP_IN_S(15 downto 0)) then
-							XNZVC_OUT <= XNZVC_IN(4) & '0' & "---";
-						elsif OP_IN_S(15) = '1' then -- Negative operand.
-							XNZVC_OUT <= XNZVC_IN(4) & '1' & "---";
-						else
-							XNZVC_OUT <= XNZVC_IN(4 downto 3) & "---"; -- Undefined.
-						end if;
-				end case;
+                if OP_IN_D_SIGN_LO(31) = '1' then
+                    XNZVC_OUT <= XNZVC_IN(4) & '1' & "---";
+                elsif RESULT_INTOP(31) = '0' then
+                    XNZVC_OUT <= XNZVC_IN(4) & '0' & "---";
+                else
+                    XNZVC_OUT <= XNZVC_IN(4 downto 3) & "---";
+                end if;
 			when DIVS | DIVU =>
 				if OP_SIZE = WORD and RESULT_I(15) = '1' then
 					XNZVC_OUT <= XNZVC_IN(4) & '1' & '0' & OV_DIV & '0'; -- Negative number.
@@ -513,10 +490,10 @@ begin
 						end if;
 				end case;
 			when MOVEQ =>
-				if OP_IN_S(7 downto 0) = x"00" then
+				if OP_IN_S_SIGN(7 downto 0) = x"00" then
 					XNZVC_OUT <= XNZVC_IN(4) & "0100";
 				else
-					XNZVC_OUT <= XNZVC_IN(4) & OP_IN_S(7) & "000";
+					XNZVC_OUT <= XNZVC_IN(4) & OP_IN_S_SIGN(7) & "000";
 				end if;
 			when MULS | MULU =>
 				-- X is unaffected, C is always zero.
@@ -550,10 +527,10 @@ begin
 					XNZVC_OUT <= XNZVC_IN(4) & RESULT_SPECIAL(31) & "000";
 				end if;	
 			when TAS => -- TAS is Byte only.
-				if OP_IN_D_LO(7 downto 0) = x"00" then
+				if OP_IN_D_SIGN_LO(7 downto 0) = x"00" then
 					XNZVC_OUT <= XNZVC_IN(4) & "0100";
 				else
-					XNZVC_OUT <= XNZVC_IN(4) & OP_IN_D_LO(7) &"000";
+					XNZVC_OUT <= XNZVC_IN(4) & OP_IN_D_SIGN_LO(7) &"000";
 				end if;
 			when others => XNZVC_OUT <= "-----";
 		end case;
@@ -667,7 +644,7 @@ begin
 			elsif DIV_STATE = DIV_SIGN then
 				case OP_SIZE is
 					when LONG =>
-						if OP_SIZE = LONG and DIV_MUL_32n64 = '1' and OP = DIVS and ((OP_IN_D_HI(31) xor OP_IN_S(31)) = '1') then -- 64 bit dividend.
+						if DIV_MUL_32n64 = '1' and OP = DIVS and ((OP_IN_D_HI(31) xor OP_IN_S(31)) = '1') then -- 64 bit dividend.
 							RESULT_I <= unsigned(not(RESULT_I)) + '1'; -- Negative, change sign.
 						elsif OP = DIVS and ((OP_IN_D_LO(31) xor OP_IN_S(31)) = '1') then -- 32 bit dividend.
 							RESULT_I <= unsigned(not(RESULT_I)) + '1'; -- Negative, change sign.
