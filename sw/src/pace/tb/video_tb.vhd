@@ -66,8 +66,8 @@ architecture SYN of video_tb is
 	-- inputs
 	-- outputs
 	signal strobe : std_logic;
-	signal x : std_logic_vector(9 downto 0);
-	signal y : std_logic_vector(9 downto 0);
+	signal x : std_logic_vector(10 downto 0);
+	signal y : std_logic_vector(10 downto 0);
 	signal hblank : std_logic;
 	signal vblank : std_logic;
 	signal red : std_logic_vector(9 downto 0);
@@ -92,9 +92,10 @@ architecture SYN of video_tb is
 	signal vid_r : std_logic_vector(9 downto 0);
 	signal vid_g : std_logic_vector(9 downto 0);
 	signal vid_b : std_logic_vector(9 downto 0);
-	signal pac_rgb : RGBType;
-	signal trs_rgb : RGBType;
+	signal pac_rgb : RGB_t;
+	signal trs_rgb : RGB_t;
   signal lcm_data : std_logic_vector(9 downto 0);
+	signal vclk : std_logic;
 
 begin
 	-- Generate CLK and reset
@@ -115,26 +116,41 @@ begin
 	end process;
 
 	-- Video Controller module
-	VGAController_1 : entity work.VGAController port map (
-		clk 				=> clk,
-		reset 			=> reset,
-		strobe 			=> strobe,
-		pixel_x 		=> x,
-		pixel_y 		=> y,
-		xcentre			=> (others => '0'),
-		ycentre			=> (others => '0'),
-		hblank 			=> hblank,
-		vblank 			=> vblank,
-		r_i 				=> vid_r,
-		g_i 				=> vid_g,
-		b_i 				=> vid_b,
-		red 				=> red,
-		green 			=> green,
-		blue 				=> blue,
-		hsync 			=> hsync,
-		vsync 			=> vsync,
-		lcm_data		=> lcm_data
-	);
+	VGAController_1 : entity work.pace_video_controller 
+		generic map
+		(
+			CONFIG		=> PACE_VIDEO_CONTROLLER_TYPE,
+			H_SIZE    => PACE_VIDEO_H_SIZE,
+			V_SIZE    => PACE_VIDEO_V_SIZE,
+			H_SCALE   => 1,
+			V_SCALE   => 1
+		)
+		port map 
+		(
+			clk 				=> clk,
+			clk_ena			=> '1',
+			reset 			=> reset,
+	
+			rgb_i.r 		=> vid_r,
+			rgb_i.g 		=> vid_g,
+			rgb_i.b 		=> vid_b,
+	
+			stb 				=> strobe,
+			x 					=> x,
+			y 					=> y,
+			--xcentre			=> (others => '0'),
+			--ycentre			=> (others => '0'),
+	
+			video_o.clk					=> vclk,
+			video_o.hblank 			=> hblank,
+			video_o.vblank 			=> vblank,
+			video_o.rgb.r 				=> red,
+			video_o.rgb.g 			=> green,
+			video_o.rgb.b 				=> blue,
+			video_o.hsync 			=> hsync,
+			video_o.vsync 			=> vsync
+			--lcm_data		=> lcm_data
+		);
 
   GEN_BITMAP1 : if true generate
 
@@ -147,8 +163,8 @@ begin
       		-- video control signals		
       		hblank 			=> hblank,
       		vblank 			=> vblank,
-      		pix_x 			=> x,
-      		pix_y 			=> y,
+      		pix_x 			=> x(9 downto 0),
+      		pix_y 			=> y(9 downto 0),
           -- tilemap interface
           scroll_data => (others => '0'),
           palette_data => (others => (others => '0')),
@@ -160,28 +176,28 @@ begin
 
   end generate GEN_BITMAP1;
 
-  GEN_MAP1 : if true generate
+  GEN_MAP1 : if false generate
 
     	-- Pacman map controller
-    	mapCtl_pacman : entity work.mapCtl_1 port map (
-    		clk 				=> clk,
-    		clk_ena 		=> strobe,
-    		reset 			=> reset,
+    	--mapCtl_pacman : entity work.mapCtl_1 port map (
+    	--	clk 				=> clk,
+    	--	clk_ena 		=> strobe,
+    	--	reset 			=> reset,
     		-- video control signals		
-    		hblank 			=> hblank,
-    		vblank 			=> vblank,
-    		pix_x 			=> x,
-    		pix_y 			=> y,
+    	--	hblank 			=> hblank,
+    	--	vblank 			=> vblank,
+    	--	pix_x 			=> x,
+    	--	pix_y 			=> y,
         -- tilemap interface
-        tilemap_d   => tilemap_d,
-        tilemap_a   => tilemap_a,
-        tile_d      => tile_d,
-        tile_a      => tile_a,
-        attr_d      => (others => '0'),
-        attr_a      => attr_a,
+      --  tilemap_d   => tilemap_d,
+      --  tilemap_a   => tilemap_a,
+      --  tile_d      => tile_d,
+      --  tile_a      => tile_a,
+      --  attr_d      => (others => '0'),
+      --  attr_a      => attr_a,
     		-- RGB output (10-bits each)
-    		rgb 				=> pac_rgb
-    	);
+    	--	rgb 				=> pac_rgb
+    	--);
 
   end generate GEN_MAP1;
 
