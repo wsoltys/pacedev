@@ -407,12 +407,21 @@ begin
   end generate GEN_INTERNAL_ROM;
 
   GEN_FLASH_ROM : if INVADERS_ROM_IN_FLASH generate
-    flash_o.a <= EXT(uP_addr(12 downto 0), flash_o.a'length);
-    flash_o.d <= (others => 'Z');
-    flash_o.we <= '0';
-    flash_o.cs <= rom_cs;
-    flash_o.oe <= uPmemrd;
-    rom_datao <= flash_i.d;
+
+    process (clk_24M, reset_i, clk_2M_en)
+    begin
+      if reset_i = '1' then
+        null;
+      elsif rising_edge (clk_24M) then
+        flash_o.a <= EXT(uP_addr(12 downto 0), flash_o.a'length);
+        flash_o.d <= (others => 'Z');
+        flash_o.we <= '0';
+        flash_o.cs <= rom_cs;
+        flash_o.oe <= uPmemrd;
+        rom_datao <= flash_i.d;
+      end if;
+    end process;
+
   end generate GEN_FLASH_ROM;
   
 	GEN_ROM2 : if ROM_2_NAME /= "" generate

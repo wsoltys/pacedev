@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <stf>
-	<project ptf="C:\markm\pace\pacedev.net\sw\synth\platform\c64\p2\C1541_NIOS.ptf" target="Nios II System Library">
+	<project ptf="D:\projects\pace\pacedev.net\sw\synth\platform\c64\p2\C1541_NIOS.ptf" target="Nios II System Library">
 	</project>
 	<cpu name="cpu_0">
 	</cpu>
