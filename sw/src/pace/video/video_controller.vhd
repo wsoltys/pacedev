@@ -97,6 +97,20 @@ begin
 		if reset = '1' then
 			case CONFIG is
 
+        when PACE_VIDEO_VGA_240x320_60Hz =>
+          -- P3M
+
+        when PACE_VIDEO_VGA_640x480_60Hz =>
+          -- generic VGA, clk=25.175MHz
+          h_front_porch_r <= 16;
+          h_sync_r <= 96;
+          h_back_porch_r <= 48;
+          h_border_r <= (640-VIDEO_H_SIZE)/2;
+          v_front_porch_r <= 10;
+          v_sync_r <= 2;
+          v_back_porch_r <= 33;
+          v_border_r <= (480-VIDEO_V_SIZE)/2;
+
         when PACE_VIDEO_VGA_800x600_60Hz =>
           -- generic VGA, clk=40MHz
           h_front_porch_r <= 40;
@@ -108,8 +122,17 @@ begin
           v_back_porch_r <= 23;
           v_border_r <= (600-VIDEO_V_SIZE)/2;
 
-        when PACE_VIDEO_VGA_240x320_60Hz =>
-          -- P3M
+        when PACE_VIDEO_VGA_1024x768_60Hz =>
+          -- XVGA, clk=65MHz
+          h_front_porch_r <= 24;
+          h_sync_r <= 136;
+          h_back_porch_r <= 160;
+          h_border_r <= (1024-VIDEO_H_SIZE)/2;
+          v_front_porch_r <= 3;
+          v_sync_r <= 6;
+          v_back_porch_r <= 29;
+          v_border_r <= (768-VIDEO_V_SIZE)/2;
+
         when PACE_VIDEO_LCM_320x240_60Hz =>
           -- DE1/2
         when PACE_VIDEO_CVBS_720x288p_50Hz =>
@@ -239,7 +262,7 @@ begin
 			hblank <= not hactive_s;	-- used only by the bitmap/tilemap/sprite controllers
 			vblank <= not vactive_s;	-- used only by the bitmap/tilemap/sprite controllers
       x <= x_s;
-      y <= y_s;
+      y <= EXT(y_s(y_s'left downto V_SCALE), y'length);
       -- register video outputs
       if hactive_v = '1' and vactive_s = '1' then
         -- active video

@@ -314,8 +314,8 @@ begin
 				
 	      hblank   			=> hblank,
 	      vblank   			=> vblank,
-	      pix_x     		=> pix_x,
-	      pix_y     		=> pix_y,
+	      pix_x     		=> pix_x(9 downto 0),
+	      pix_y     		=> pix_y(9 downto 0),
 
 				scroll_data		=> extra_data,
 				palette_data	=> palette_data,

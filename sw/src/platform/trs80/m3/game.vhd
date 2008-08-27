@@ -13,23 +13,42 @@ entity Game is
   port
   (
     -- clocking and reset
-    clk							: in std_logic_vector(0 to 3);
-    reset           : in std_logic;                       
-    test_button     : in std_logic;                       
+    clk_i           : in std_logic_vector(0 to 3);
+    reset_i         : in std_logic;
 
-    -- inputs
-    ps2clk          : inout std_logic;                       
-    ps2data         : inout std_logic;                       
-    dip             : in std_logic_vector(7 downto 0);    
-		jamma						: in JAMMAInputsType;
+    -- misc I/O
+    buttons_i       : in from_BUTTONS_t;
+    switches_i      : in from_SWITCHES_t;
+    leds_o          : out to_LEDS_t;
+
+    -- controller inputs
+    inputs_i        : in from_INPUTS_t;
 		
     -- micro buses
     upaddr          : out std_logic_vector(15 downto 0);   
     updatao         : out std_logic_vector(7 downto 0);    
 
-    -- SRAM
+    -- FLASH/SRAM
+    flash_i         : in from_FLASH_t;
+    flash_o         : out to_FLASH_t;
 		sram_i					: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
+
+    -- SPI (flash)
+    spi_i           : in from_SPI_t;
+    spi_o           : out to_SPI_t;
+
+    -- serial
+    ser_i           : in from_SERIAL_t;
+    ser_o           : out to_SERIAL_t;
+
+    -- general purpose I/O
+    gp_i            : in from_GP_t;
+    gp_o            : out to_GP_t;
+    
+    --
+    --
+    --
 
     gfxextra_data   : out std_logic_vector(7 downto 0);
 		palette_data		: out ByteArrayType(15 downto 0);
@@ -65,22 +84,7 @@ entity Game is
     -- sound
     snd_rd          : out std_logic;                       
     snd_wr          : out std_logic;
-    sndif_datai     : in std_logic_vector(7 downto 0);    
-
-    -- spi interface
-    spi_clk         : out std_logic;                       
-    spi_din         : in std_logic;                       
-    spi_dout        : out std_logic;                       
-    spi_ena         : out std_logic;                       
-    spi_mode        : out std_logic;                       
-    spi_sel         : out std_logic;                       
-
-    -- serial
-    ser_rx          : in std_logic;                       
-    ser_tx          : out std_logic;                       
-
-    -- on-board leds
-    leds            : out std_logic_vector(7 downto 0)    
+    sndif_datai     : in std_logic_vector(7 downto 0)
   );
 end Game;
 
@@ -138,8 +142,8 @@ architecture SYN of Game is
     );
   end component osd_controller;
 
-	alias clk_20M					: std_logic is clk(0);
-	alias clk_40M					: std_logic is clk(1);
+	alias clk_20M					: std_logic is clk_i(0);
+	alias clk_40M					: std_logic is clk_i(1);
 	
   -- uP signals  
   signal clk_2M_en			: std_logic;
@@ -207,7 +211,7 @@ architecture SYN of Game is
 	
 begin
 
-	cpu_reset <= reset or game_reset;
+	cpu_reset <= reset_i or game_reset;
 	
   -- not used for now
   uPintvec <= (others => '0');
@@ -309,7 +313,7 @@ begin
   sprite_reg_addr <= (others => '0');
   sprite_wr <= '0';
   spriteData <= (others => '0');
-  attr_dout <= X"00" & dip;
+  attr_dout <= X"00" & switches_i(7 downto 0);
   snd_rd <= '0';
 
 	clk_en_inst : entity work.clk_div
@@ -320,7 +324,7 @@ begin
 		port map
 		(
 			clk				=> clk_20M,
-			reset			=> reset,
+			reset			=> reset_i,
 			clk_en		=> clk_2M_en
 		);
 
@@ -354,12 +358,12 @@ begin
 	  port map
 	  (
 	    clk     		=> clk_20M,
-	    reset   		=> reset,
-	    ps2clk  		=> ps2clk,
-	    ps2data 		=> ps2data,
-			jamma				=> jamma,
+	    reset   		=> reset_i,
+	    ps2clk  	=> inputs_i.ps2_kclk,
+	    ps2data 	=> inputs_i.ps2_kdat,
+			jamma			=> inputs_i.jamma_n,
 			
-	    dips				=> dip,
+	    dips				=> switches_i(7 downto 0),
 	    inputs			=> inputs
 	  );
 
@@ -460,17 +464,17 @@ begin
 		        fdc_drq_int => fdc_drq_int,   
 		        fdc_dto_int => fdc_dto_int,         
 
-		        spi_clk     => spi_clk,            
-		        spi_din     => spi_din,                                 
-		        spi_dout    => spi_dout,           
-		        spi_ena     => spi_ena,            
-		        spi_mode    => spi_mode,           
-		        spi_sel     => spi_sel,            
+		        spi_clk     => spi_o.clk,
+		        spi_din     => spi_i.din,
+		        spi_dout    => spi_o.dout,
+		        spi_ena     => spi_o.ena,            
+		        spi_mode    => spi_o.mode,           
+		        spi_sel     => spi_o.sel,            
 		                    
-		        ser_rx      => ser_rx,                                  
-		        ser_tx      => ser_tx,
+		        ser_rx      => ser_i.rxd,                                  
+		        ser_tx      => ser_o.txd,
 
-		        debug       => leds
+		        debug       => leds_o(7 downto 0)
 		      );
 		
 			end generate GEN_SPI_FDC;
@@ -484,7 +488,7 @@ begin
 			fdc_datao <= X"FF";
 			fdc_drq_int <= '0';
 			fdc_dto_int <= '0';
-			leds <= (others => '0');
+			leds_o <= (others => '0');
 					
 		end generate GEN_NO_FDC;
 
