@@ -4,6 +4,7 @@ use IEEE.std_logic_unsigned.all;
 
 library work;
 use work.pace_pkg.all;
+use work.video_controller_pkg.all;
 use work.platform_pkg.all;
 
 --
@@ -30,7 +31,7 @@ port
     bitmap_a   		: out std_logic_vector(15 downto 0);
 
 		-- RGB output (10-bits each)
-		rgb						: out rgb_t;
+		rgb						: out RGB_t;
 		bitmap_on			: out std_logic
 );
 end bitmapCtl_1;

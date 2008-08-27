@@ -2,6 +2,9 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 
+library work;
+use work.video_controller_pkg.RGB_t;
+
 package pace_pkg is
 
 	--  
@@ -39,14 +42,6 @@ package pace_pkg is
   );
 
   -- Types
-
-  type RGB_t is record
-    r : std_logic_vector(9 downto 0);
-    g : std_logic_vector(9 downto 0);
-    b : std_logic_vector(9 downto 0);
-  end record;
-
-  type RGBArrayType is array (natural range <>) of rgb_t;
 
 	type ByteArrayType is array (natural range <>) of std_logic_vector(7 downto 0);
 
@@ -127,20 +122,6 @@ package pace_pkg is
 		cs				: std_logic;
 		oe				: std_logic;
 	end record;
-
-  type from_VIDEO_t is record
-    clk       : std_logic;
-    clk_ena   : std_logic;
-  end record;
-  
-  type to_VIDEO_t is record
-    clk       : std_logic;
-    rgb       : rgb_t;
-    hsync     : std_logic;
-    vsync     : std_logic;
-    hblank    : std_logic;
-    vblank    : std_logic;
-  end record;
 
   type from_AUDIO_t is record
     clk       : std_logic;

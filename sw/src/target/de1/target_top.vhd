@@ -6,6 +6,7 @@ use ieee.std_logic_unsigned.all;
 
 library work;
 use work.pace_pkg.all;
+use work.video_controller_pkg.all;
 use work.maple_pkg.all;
 use work.gamecube_pkg.all;
 use work.project_pkg.all;

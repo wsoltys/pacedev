@@ -228,11 +228,12 @@ begin
   pace_video_controller_inst : entity work.pace_video_controller
     generic map
     (
-      CONFIG		=> PACE_VIDEO_CONTROLLER_TYPE,
-      H_SIZE    => PACE_VIDEO_H_SIZE,
-      V_SIZE    => PACE_VIDEO_V_SIZE,
-      H_SCALE   => PACE_VIDEO_H_SCALE,
-      V_SCALE   => PACE_VIDEO_V_SCALE
+      CONFIG		  => PACE_VIDEO_CONTROLLER_TYPE,
+      H_SIZE      => PACE_VIDEO_H_SIZE,
+      V_SIZE      => PACE_VIDEO_V_SIZE,
+      H_SCALE     => PACE_VIDEO_H_SCALE,
+      V_SCALE     => PACE_VIDEO_V_SCALE,
+      BORDER_RGB  => PACE_VIDEO_BORDER_RGB
     )
     port map
     (

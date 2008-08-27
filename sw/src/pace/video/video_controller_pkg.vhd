@@ -4,10 +4,6 @@ use IEEE.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 
-library work;
-use work.pace_pkg.RGB_t;
-use work.pace_pkg.to_VIDEO_t;
-
 package video_controller_pkg is
 
   type PACEVideoController_t is
@@ -19,15 +15,47 @@ package video_controller_pkg is
     PACE_VIDEO_CVBS_720x288p_50Hz     -- generic composite
   );
 
+  type RGB_t is record
+    r : std_logic_vector(9 downto 0);
+    g : std_logic_vector(9 downto 0);
+    b : std_logic_vector(9 downto 0);
+  end record;
+
+  type RGBArrayType is array (natural range <>) of RGB_t;
+
+  type from_VIDEO_t is record
+    clk       : std_logic;
+    clk_ena   : std_logic;
+  end record;
+  
+  type to_VIDEO_t is record
+    clk       : std_logic;
+    rgb       : rgb_t;
+    hsync     : std_logic;
+    vsync     : std_logic;
+    hblank    : std_logic;
+    vblank    : std_logic;
+  end record;
+
+  constant RGB_BLACK    : RGB_t := ((others=>'0'),(others=>'0'),(others=>'0'));
+  constant RGB_RED      : RGB_t := ((others=>'1'),(others=>'0'),(others=>'0'));
+  constant RGB_GREEN    : RGB_t := ((others=>'0'),(others=>'1'),(others=>'0'));
+  constant RGB_YELLOW   : RGB_t := ((others=>'1'),(others=>'1'),(others=>'0'));
+  constant RGB_BLUE     : RGB_t := ((others=>'0'),(others=>'0'),(others=>'1'));
+  constant RGB_MAGENTA  : RGB_t := ((others=>'1'),(others=>'0'),(others=>'1'));
+  constant RGB_CYAN     : RGB_t := ((others=>'0'),(others=>'1'),(others=>'1'));
+  constant RGB_WHITE    : RGB_t := ((others=>'1'),(others=>'1'),(others=>'1'));
+  
   component pace_video_controller is
     generic
     (
-      CONFIG		: PACEVideoController_t := PACE_VIDEO_NONE;
-      H_SIZE    : integer;
-      V_SIZE    : integer;
-      H_SCALE   : integer;
-      V_SCALE   : integer;
-      DELAY			: integer := 0   		-- Number of clocks to delay sync and blank signals
+      CONFIG		  : PACEVideoController_t := PACE_VIDEO_NONE;
+      H_SIZE      : integer;
+      V_SIZE      : integer;
+      H_SCALE     : integer;
+      V_SCALE     : integer;
+      BORDER_RGB  : RGB_t := RGB_BLACK;
+      DELAY			  : integer := 0   		-- Number of clocks to delay sync and blank signals
     );
     port
     (

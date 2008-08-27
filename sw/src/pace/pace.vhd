@@ -3,6 +3,7 @@ Use     IEEE.std_logic_1164.all;
 
 library work;
 use work.pace_pkg.all;
+use work.video_controller_pkg.all;
 use work.platform_pkg.all;
 use work.project_pkg.all;
 

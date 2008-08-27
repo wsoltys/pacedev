@@ -5,18 +5,18 @@ use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 
 library work;
-use work.pace_pkg.RGB_t;
-use work.pace_pkg.to_VIDEO_t;
 use work.video_controller_pkg.all;
+
 entity pace_video_controller is
   generic
   (
-		CONFIG		: PACEVideoController_t := PACE_VIDEO_NONE;
-		H_SIZE    : integer;
-		V_SIZE    : integer;
-		H_SCALE   : integer;
-		V_SCALE   : integer;
-    DELAY			: integer := 0   		-- Number of clocks to delay sync and blank signals
+		CONFIG		  : PACEVideoController_t := PACE_VIDEO_NONE;
+		H_SIZE      : integer;
+		V_SIZE      : integer;
+		H_SCALE     : integer;
+		V_SCALE     : integer;
+		BORDER_RGB  : RGB_t := RGB_BLACK;
+    DELAY			  : integer := 0   		-- Number of clocks to delay sync and blank signals
   );
   port
   (
@@ -56,14 +56,16 @@ architecture SYN of pace_video_controller is
   signal v_border_r             : reg_t := 0;
   signal v_video_r              : reg_t := 0;
 
+  signal border_rgb_r           : RGB_t := ((others=>'0'), (others=>'0'), (others=>'0'));
+  
   -- derived values
-  alias h_sync_start            : reg_t is h_front_porch_r;
+  signal h_sync_start           : reg_t := 0;
   signal h_back_porch_start     : reg_t := 0;
   signal h_left_border_start    : reg_t := 0;
   signal h_video_start          : reg_t := 0;
   signal h_right_border_start   : reg_t := 0;
   signal h_line_end             : reg_t := 0;
-  alias v_sync_start            : reg_t is v_front_porch_r;
+  signal v_sync_start           : reg_t := 0;
   signal v_back_porch_start     : reg_t := 0;
   signal v_top_border_start     : reg_t := 0;
   signal v_video_start          : reg_t := 0;
@@ -127,11 +129,13 @@ begin
     if reset = '1' then
       null;
     elsif rising_edge(clk) and clk_ena = '1' then
+      h_sync_start <= h_front_porch_r - 1;
       h_back_porch_start <= h_sync_start + h_sync_r;
       h_left_border_start <= h_back_porch_start + h_back_porch_r;
       h_video_start <= h_left_border_start + h_border_r;
       h_right_border_start <= h_video_start + h_video_r;
       h_line_end <= h_right_border_start + h_border_r;
+      v_sync_start <= v_front_porch_r - 1;
       v_back_porch_start <= v_sync_start + v_sync_r;
       v_top_border_start <= v_back_porch_start + v_back_porch_r;
       v_video_start <= v_top_border_start + v_border_r;
@@ -223,15 +227,13 @@ begin
       -- register video outputs
       if hactive_s = '1' and vactive_s = '1' then
         -- active video
-        --video_o.rgb <= rgb_i;
-        video_o.rgb.r <= (others => '1');
-        video_o.rgb.g <= (others => '0');
-        video_o.rgb.b <= (others => '0');
+        video_o.rgb <= rgb_i;
+        --video_o.rgb.r <= (others => '1');
+        --video_o.rgb.g <= (others => '0');
+        --video_o.rgb.b <= (others => '0');
       elsif hblank_s = '0' and vblank_s = '0' then
-        -- border (fix me)
-        video_o.rgb.r <= (others => '1');
-        video_o.rgb.g <= (others => '1');
-        video_o.rgb.b <= (others => '1');
+        -- border
+        video_o.rgb <= border_rgb_r;
       else
         video_o.rgb.r <= (others => '0');
         video_o.rgb.g <= (others => '0');
