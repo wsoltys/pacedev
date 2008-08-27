@@ -105,9 +105,13 @@ begin
 	reset <= '0' after 10 ns;
 
 	-- Signals
-	vid_r <= pac_rgb.r when vid_outsel = '0' else trs_rgb.r;
-	vid_g <= pac_rgb.g when vid_outsel = '0' else trs_rgb.g;
-	vid_b <= pac_rgb.b when vid_outsel = '0' else trs_rgb.b;
+	--vid_r <= pac_rgb.r when vid_outsel = '0' else trs_rgb.r;
+	--vid_g <= pac_rgb.g when vid_outsel = '0' else trs_rgb.g;
+	--vid_b <= pac_rgb.b when vid_outsel = '0' else trs_rgb.b;
+
+	vid_r <= (others => '1');
+	vid_g <= (others => '0');
+	vid_b <= (others => '0');
 
 	process(vsync)
 	begin

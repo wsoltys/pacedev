@@ -223,14 +223,17 @@ begin
       -- register video outputs
       if hactive_s = '1' and vactive_s = '1' then
         -- active video
-        video_o.rgb <= rgb_i;
+        --video_o.rgb <= rgb_i;
+        video_o.rgb.r <= (others => '1');
+        video_o.rgb.g <= (others => '0');
+        video_o.rgb.b <= (others => '0');
       elsif hblank_s = '0' and vblank_s = '0' then
         -- border (fix me)
         video_o.rgb.r <= (others => '1');
         video_o.rgb.g <= (others => '1');
         video_o.rgb.b <= (others => '1');
       else
-        video_o.rgb.r <= (others => '1');
+        video_o.rgb.r <= (others => '0');
         video_o.rgb.g <= (others => '0');
         video_o.rgb.b <= (others => '0');
       end if;
