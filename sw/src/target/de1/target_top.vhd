@@ -156,9 +156,9 @@ architecture SYN of target_top is
 	alias gpio_lcd 			: std_logic_vector(35 downto 0) is gpio_1;
 	
 	signal clk_i			  : std_logic_vector(0 to 3);
-  signal init       	: std_logic;
-  signal reset_i     	: std_logic;
-	signal reset_n			: std_logic;
+  signal init       	: std_logic := '1';
+  signal reset_i     	: std_logic := '1';
+	signal reset_n			: std_logic := '0';
 
   signal buttons_i    : from_BUTTONS_t;
   signal switches_i   : from_SWITCHES_t;
@@ -477,7 +477,7 @@ begin
     aud_data_r <= audio_o.rdata when switches_i(8) = '0' else (others => '0');
 
     -- Audio
-    audif_inst : work.audio_if
+    audif_inst : entity work.audio_if
       generic map 
       (
         REF_CLK       => 18432000,  -- Set REF clk frequency here
@@ -557,7 +557,7 @@ begin
   gpio_lcd(33) <=	lcm_scen;
   gpio_lcd(34) <= lcm_sdat;
 
-  pace_inst : work.pace                                            
+  pace_inst : entity work.pace                                            
     port map
     (
     	-- clocks and resets
@@ -634,7 +634,7 @@ begin
     signal chaseen    	: std_logic;
   begin
   
-    pchaser: work.pwm_chaser 
+    pchaser: entity work.pwm_chaser 
       generic map(nleds  => 8, nbits => 8, period => 4, hold_time => 12)
       port map (clk => clock_50, clk_en => chaseen, pwm_en => pwmen, reset => reset_i, fade => X"0F", ledout => ledg(7 downto 0));
 

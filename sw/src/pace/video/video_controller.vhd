@@ -122,7 +122,7 @@ begin
 	end process;
 
   -- register some arithmetic
-  process (reset, clk)
+  process (reset, clk, clk_ena)
   begin
     if reset = '1' then
       null;
@@ -211,9 +211,9 @@ begin
   -- for video DACs and TFT output
   video_o.clk <= clk;
   
-  process (reset, clk, clk_ena)
+  process (extended_reset, clk, clk_ena)
   begin
-    if reset = '1' then
+    if extended_reset = '1' then
       null;
     elsif rising_edge(clk) and clk_ena = '1' then
       -- register control signals

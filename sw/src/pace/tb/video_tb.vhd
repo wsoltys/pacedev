@@ -63,6 +63,9 @@ architecture SYN of video_tb is
 	signal clk			: std_logic	:= '0';
 	signal reset		: std_logic	:= '1';
 
+	signal clk_50M 	: std_logic := '0';
+	signal clk_27M 	: std_logic := '0';
+
 	-- inputs
 	-- outputs
 	signal strobe : std_logic;
@@ -104,6 +107,9 @@ begin
   clk <= not clk after 12500 ps; -- 40MHz
 	reset <= '0' after 10 ns;
 
+	clk_50M <= not clk_50M after 10000 ps;
+	clk_27M <= not clk_27M after 18518 ps;
+
 	-- Signals
 	--vid_r <= pac_rgb.r when vid_outsel = '0' else trs_rgb.r;
 	--vid_g <= pac_rgb.g when vid_outsel = '0' else trs_rgb.g;
@@ -120,42 +126,118 @@ begin
 		end if;
 	end process;
 
+	de1_inst : entity work.target_top
+	  port map
+	  (
+			clock_27      => clk_27M,
+			clock_50      => clk_50M,
+			ext_clock     => '0',
+			key           => (others => '1'),		-- active low
+			sw            => (others => '0'),
+			hex0          => open,
+			hex1          => open,
+			hex2          => open,
+			hex3          => open,
+			ledg          => open,
+			ledr          => open,
+			uart_txd      => open,
+			uart_rxd      => '0',
+			dram_dq       => open,
+			dram_addr     => open,
+			dram_ldqm     => open,
+			dram_udqm     => open,
+			dram_we_n     => open,
+			dram_cas_n    => open,
+			dram_ras_n    => open,
+			dram_cs_n     => open,
+			dram_ba_0     => open,
+			dram_ba_1     => open,
+			dram_clk      => open,
+			dram_cke      => open,
+			fl_dq         => open,
+			fl_addr       => open,
+			fl_we_n       => open,
+			fl_rst_n      => open,
+			fl_oe_n       => open,
+			fl_ce_n       => open,
+			sram_dq       => open,
+			sram_addr     => open,
+			sram_ub_n     => open,
+			sram_lb_n     => open,
+			sram_we_n     => open,
+			sram_ce_n     => open,
+			sram_oe_n     => open,
+			sd_dat        => open,
+			sd_dat3       => open,
+			sd_cmd        => open,
+			sd_clk        => open,
+			tdi           => '0',
+			tck           => '0',
+			tcs           => '0',
+		  tdo           => open,
+			i2c_sdat      => open,
+			i2c_sclk      => open,
+			ps2_dat       => '0',
+			ps2_clk       => '0',
+			vga_clk       => open,
+			vga_hs        => hsync,
+			vga_vs        => vsync,
+			vga_blank     => open,
+			vga_sync      => open,
+			vga_r         => red(3 downto 0),
+			vga_g         => green(3 downto 0),
+			vga_b         => blue(3 downto 0),
+			aud_adclrck   => open,
+			aud_adcdat    => '0',
+			aud_daclrck   => open,
+			aud_dacdat    => open,
+			aud_bclk      => open,
+			aud_xck       => open,
+			--////////////////////	GPIO	////////////////////////////
+			gpio_0        => open,
+			gpio_1        => open
+	  );
+
+		red(red'left downto 4) <= (others => '0');
+		green(green'left downto 4) <= (others => '0');
+		blue(blue'left downto 4) <= (others => '0');
+
 	-- Video Controller module
-	VGAController_1 : entity work.pace_video_controller 
-		generic map
-		(
-			CONFIG		=> PACE_VIDEO_CONTROLLER_TYPE,
-			H_SIZE    => PACE_VIDEO_H_SIZE,
-			V_SIZE    => PACE_VIDEO_V_SIZE,
-			H_SCALE   => 2,
-			V_SCALE   => 2
-		)
-		port map 
-		(
-			clk 				=> clk,
-			clk_ena			=> '1',
-			reset 			=> reset,
-	
-			rgb_i.r 		=> vid_r,
-			rgb_i.g 		=> vid_g,
-			rgb_i.b 		=> vid_b,
-	
-			stb 				=> strobe,
-			x 					=> x,
-			y 					=> y,
+	--VGAController_1 : entity work.pace_video_controller 
+	--	generic map
+	--	(
+	--		CONFIG		=> PACE_VIDEO_CONTROLLER_TYPE,
+	--		H_SIZE    => PACE_VIDEO_H_SIZE,
+	--		V_SIZE    => PACE_VIDEO_V_SIZE,
+	--		H_SCALE   => 2,
+	--		V_SCALE   => 2
+	--	)
+	--	port map 
+	--	(
+	--		clk 				=> clk,
+	--		clk_ena			=> '1',
+	--		reset 			=> reset,
+  --	
+	--		rgb_i.r 		=> vid_r,
+	--		rgb_i.g 		=> vid_g,
+	--		rgb_i.b 		=> vid_b,
+	--
+	--		stb 				=> strobe,
+	--		x 					=> x,
+	--		y 					=> y,
 			--xcentre			=> (others => '0'),
 			--ycentre			=> (others => '0'),
 	
-			video_o.clk					=> vclk,
-			video_o.hblank 			=> hblank,
-			video_o.vblank 			=> vblank,
-			video_o.rgb.r 				=> red,
-			video_o.rgb.g 			=> green,
-			video_o.rgb.b 				=> blue,
-			video_o.hsync 			=> hsync,
-			video_o.vsync 			=> vsync
+	--		video_o.clk					=> vclk,
+	--		video_o.hblank 			=> hblank,
+	--		video_o.vblank 			=> vblank,
+	--		video_o.rgb.r 				=> red,
+	--		video_o.rgb.g 			=> green,
+	--		video_o.rgb.b 				=> blue,
+	--		video_o.hsync 			=> hsync,
+	--		video_o.vsync 			=> vsync
 			--lcm_data		=> lcm_data
-		);
+	--	);
 
   GEN_BITMAP1 : if true generate
 

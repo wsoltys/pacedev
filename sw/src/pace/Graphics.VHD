@@ -171,8 +171,8 @@ architecture SYN of Graphics is
 
 	signal pix_clk_ena	: std_logic;
   signal strobe       : std_logic;
-	signal pix_x				: std_logic_vector(9 downto 0);
-	signal pix_y				: std_logic_vector(9 downto 0);
+	signal pix_x				: std_logic_vector(10 downto 0);
+	signal pix_y				: std_logic_vector(10 downto 0);
 
 	signal bitmap_rgb		: RGBArrayType(1 to 1);
 	signal bitmap_on		: std_logic_vector(1 to 1);
@@ -228,7 +228,7 @@ begin
   pace_video_controller_inst : entity work.pace_video_controller
     generic map
     (
-      CONFIG		=> PACE_VIDEO_NONE,
+      CONFIG		=> PACE_VIDEO_CONTROLLER_TYPE,
       H_SIZE    => PACE_VIDEO_H_SIZE,
       V_SIZE    => PACE_VIDEO_V_SIZE,
       H_SCALE   => PACE_VIDEO_H_SCALE,
@@ -248,8 +248,8 @@ begin
 
       -- video control signals (out)
       stb         => strobe,
-      x(9 downto 0) => pix_x,
-      y(9 downto 0) => pix_y,
+      x						=> pix_x,
+      y 					=> pix_y,
 
       -- VGA signals (out)
       video_o     => video_o_s
@@ -277,8 +277,8 @@ begin
 				
 	      hblank   			=> video_o_s.hblank,
 	      vblank   			=> video_o_s.vblank,
-	      pix_x     		=> pix_x,
-	      pix_y     		=> pix_y,
+	      pix_x     		=> pix_x(9 downto 0),
+	      pix_y     		=> pix_y(9 downto 0),
 
 				scroll_data		=> extra_data,
 				palette_data	=> palette_data,
