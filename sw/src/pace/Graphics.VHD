@@ -12,7 +12,6 @@ use work.platform_pkg.all;
 entity Graphics is
   port
   (
-    clk             : in std_logic;                       
 		reset						: in std_logic;
 
 		xcentre					: in std_logic_vector(9 downto 0);
@@ -39,16 +38,10 @@ entity Graphics is
 
 		to_osd          : in to_OSD_t; 
 		from_osd        : out from_OSD_t;
-		
-    red             : out std_logic_vector(9 downto 0);    
-    green           : out std_logic_vector(9 downto 0);    
-    blue            : out std_logic_vector(9 downto 0);
-		lcm_data				: out std_logic_vector(9 downto 0);
-		hblank					: out std_logic;
-		vblank					: out std_logic;
-    hsync           : out std_logic;                       
-    vsync           : out std_logic;
 
+		video_i					: in from_VIDEO_t;
+		video_o					: out to_VIDEO_t;
+		
     bw_cvbs         : out std_logic_vector(1 downto 0);    
     gs_cvbs         : out std_logic_vector(7 downto 0)    
   );
@@ -169,8 +162,12 @@ architecture SYN of Graphics is
 		);
 	end component;
 
+	alias clk 					: std_logic is video_i.clk;
+
 	signal pix_clk_ena	: std_logic;
   signal strobe       : std_logic;
+	signal hblank				: std_logic;
+	signal vblank				: std_logic;
 	signal pix_x				: std_logic_vector(10 downto 0);
 	signal pix_y				: std_logic_vector(10 downto 0);
 
@@ -201,29 +198,28 @@ begin
 							bitmap_rgb(1);
 
   -- dodgy OSD transparency...
-  red <=    video_o_s.rgb.r when (to_osd.en and osd_active) = '0' else 
-            osd_colour(2 downto 0) & video_o_s.rgb.r(9 downto 6) & "000";
-  green <=  video_o_s.rgb.g when (to_osd.en and osd_active) = '0' else 
-            osd_colour(5 downto 3) & video_o_s.rgb.g(9 downto 6) & "000";
-  blue <=   video_o_s.rgb.b when (to_osd.en and osd_active) = '0' else 
-            osd_colour(7 downto 6) & '0' & video_o_s.rgb.b(9 downto 6) & "000";
+	video_o.clk <= video_o_s.clk;
+  video_o.rgb.r <= 	video_o_s.rgb.r when (to_osd.en and osd_active) = '0' else 
+            				osd_colour(2 downto 0) & video_o_s.rgb.r(9 downto 6) & "000";
+  video_o.rgb.g <=  video_o_s.rgb.g when (to_osd.en and osd_active) = '0' else 
+            				osd_colour(5 downto 3) & video_o_s.rgb.g(9 downto 6) & "000";
+  video_o.rgb.b <= 	video_o_s.rgb.b when (to_osd.en and osd_active) = '0' else 
+            				osd_colour(7 downto 6) & '0' & video_o_s.rgb.b(9 downto 6) & "000";
+	video_o.hsync <= video_o_s.hsync;
+	video_o.vsync <= video_o_s.vsync;
+	video_o.hblank <= video_o_s.hblank;
+	video_o.vblank <= video_o_s.vblank;
 
 	-- it's actually more complicated than this on the NES
 	-- but it'll do for now...
 	spr0_hit <= sprite0_on;
 	
-	-- needed in a lot of games
-  hsync <= video_o_s.hsync;
-  vsync <= video_o_s.vsync;
-	hblank <= video_o_s.hblank;
-	vblank <= video_o_s.vblank;
-  
   -- assign top-level output ports
   bw_cvbs <= (others => '0');
   gs_cvbs <= (others => '0');
 
 	-- because some video controllers only strobe during active video
-  pix_clk_ena <= strobe or video_o_s.hblank;
+  pix_clk_ena <= strobe or hblank;
 
   pace_video_controller_inst : entity work.pace_video_controller
     generic map
@@ -237,7 +233,7 @@ begin
     )
     port map
     (
-      clk         => clk,
+      clk         => video_i.clk,
       clk_ena     => '1',
       reset				=> reset,
 
@@ -249,6 +245,8 @@ begin
 
       -- video control signals (out)
       stb         => strobe,
+      hblank     	=> hblank,
+      vblank			=> vblank,
       x						=> pix_x,
       y 					=> pix_y,
 
@@ -276,8 +274,8 @@ begin
 				clk_ena				=> pix_clk_ena,
 				reset					=> reset,
 				
-	      hblank   			=> video_o_s.hblank,
-	      vblank   			=> video_o_s.vblank,
+	      hblank   			=> hblank,
+	      vblank   			=> vblank,
 	      pix_x     		=> pix_x(9 downto 0),
 	      pix_y     		=> pix_y(9 downto 0),
 
@@ -314,8 +312,8 @@ begin
 				clk_ena				=> pix_clk_ena,
 				reset					=> reset,
 				
-	      hblank   			=> video_o_s.hblank,
-	      vblank   			=> video_o_s.vblank,
+	      hblank   			=> hblank,
+	      vblank   			=> vblank,
 	      pix_x     		=> pix_x,
 	      pix_y     		=> pix_y,
 
@@ -362,7 +360,7 @@ begin
 				
         bank_data   => extra_data,
 
-				hblank			=> video_o_s.hblank,
+				hblank			=> hblank,
 				xAddr				=> pix_x(7 downto 0),
 				yAddr				=> pix_y(8 downto 0),
 				dIn					=> uPdata,

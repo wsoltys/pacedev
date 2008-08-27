@@ -54,8 +54,7 @@ package video_controller_pkg is
       V_SIZE      : integer;
       H_SCALE     : integer;
       V_SCALE     : integer;
-      BORDER_RGB  : RGB_t := RGB_BLACK;
-      DELAY			  : integer := 0   		-- Number of clocks to delay sync and blank signals
+      BORDER_RGB  : RGB_t := RGB_BLACK
     );
     port
     (
@@ -68,6 +67,8 @@ package video_controller_pkg is
 
 		-- control signals (out)
     stb  	    : out std_logic;
+    hblank		: out std_logic;
+    vblank		: out std_logic;
     x 	      : out std_logic_vector(10 downto 0);
     y 	      : out std_logic_vector(10 downto 0);
 

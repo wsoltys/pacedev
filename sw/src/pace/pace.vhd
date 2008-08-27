@@ -73,13 +73,16 @@ architecture SYN of PACE is
   signal sprite_wr        : std_logic;
 	signal spr0_hit					: std_logic;
 	
-  signal vblank_s       	: std_logic;
 	signal xcentre					: std_logic_vector(9 downto 0);
 	signal ycentre					: std_logic_vector(9 downto 0);
 
   -- OSD signals
   signal to_osd           : to_OSD_t;
   signal from_osd         : from_OSD_t;
+
+	-- video signals
+	signal video_i_s				: from_VIDEO_t;
+	signal video_o_s				: to_VIDEO_t;
 
   -- sound signals
   signal snd_rd           : std_logic;
@@ -88,8 +91,6 @@ architecture SYN of PACE is
 
 begin
 
-	video_o.clk <= clk_i(1);	-- fudge
-  
   U_Game : entity work.Game                                            
     Port Map
     (
@@ -154,7 +155,7 @@ begin
 			spr0_hit				=> spr0_hit,
   
       -- graphics (control)
-      vblank					=> vblank_s,
+      vblank					=> video_o_s.vblank,
 			xcentre					=> xcentre,
 			ycentre					=> ycentre,
 			
@@ -171,7 +172,6 @@ begin
  U_Graphics : entity work.Graphics                                    
     Port Map
     (
-      clk             => clk_i(1),      -- fudge for now
       reset           => reset_i,
   
 			xcentre					=> xcentre,
@@ -200,20 +200,15 @@ begin
 			to_osd          => to_osd,
 			from_osd        => from_osd,
 
-      red             => video_o.rgb.r,
-      green           => video_o.rgb.g,
-      blue            => video_o.rgb.b,
-			lcm_data				=> open,
-			hblank					=> video_o.hblank,
-			vblank					=> vblank_s,
-      hsync           => video_o.hsync,
-      vsync           => video_o.vsync,
+			-- video (incl. clk)
+			video_i					=> video_i,
+			video_o					=> video_o_s,
 	
       bw_cvbs         => open,
       gs_cvbs         => open
     );
 
-	video_o.vblank <= vblank_s;
+	video_o <= video_o_s;
 
 	SOUND_BLOCK : block
 		signal snd_data		: std_logic_vector(7 downto 0);

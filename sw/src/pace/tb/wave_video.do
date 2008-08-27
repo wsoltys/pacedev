@@ -32,32 +32,13 @@ add wave -noupdate -format Logic /video_tb/de1_inst/video_o.hsync
 add wave -noupdate -format Logic /video_tb/de1_inst/video_o.vsync
 add wave -noupdate -format Logic /video_tb/de1_inst/video_o.hblank
 add wave -noupdate -format Logic /video_tb/de1_inst/video_o.vblank
-add wave -noupdate -divider PACE
-add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/video_o.clk
-add wave -noupdate -format Literal /video_tb/de1_inst/pace_inst/video_o.rgb.r
-add wave -noupdate -format Literal /video_tb/de1_inst/pace_inst/video_o.rgb.g
-add wave -noupdate -format Literal /video_tb/de1_inst/pace_inst/video_o.rgb.b
-add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/video_o.hsync
-add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/video_o.vsync
-add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/video_o.hblank
-add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/video_o.vblank
-add wave -noupdate -divider GRAPHICS
-add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/video_o_s.clk
-add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/reset
-add wave -noupdate -format Literal /video_tb/de1_inst/pace_inst/u_graphics/video_o_s.rgb.r
-add wave -noupdate -format Literal /video_tb/de1_inst/pace_inst/u_graphics/video_o_s.rgb.g
-add wave -noupdate -format Literal /video_tb/de1_inst/pace_inst/u_graphics/video_o_s.rgb.b
-add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/video_o_s.hsync
-add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/video_o_s.vsync
-add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/video_o_s.hblank
-add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/video_o_s.vblank
 add wave -noupdate -divider VIDEO_CONTROLLER
 add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/clk
 add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/clk_ena
 add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/reset
 add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/extended_reset
-add wave -noupdate -format Literal /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/x_count
-add wave -noupdate -format Literal /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/y_count
+add wave -noupdate -format Literal -radix decimal /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/x_count
+add wave -noupdate -format Literal -radix decimal /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/y_count
 add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/hsync_s
 add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/vsync_s
 add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/video_o.clk
@@ -68,6 +49,10 @@ add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/pace_vi
 add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/video_o.vsync
 add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/video_o.hblank
 add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/video_o.vblank
+add wave -noupdate -format Literal -radix decimal /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/x
+add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/hblank
+add wave -noupdate -format Literal /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/y
+add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/vblank
 add wave -noupdate -format Literal -radix decimal /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/h_front_porch_r
 add wave -noupdate -format Literal -radix decimal /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/h_back_porch_r
 add wave -noupdate -format Literal -radix decimal /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/h_sync_r
@@ -79,7 +64,7 @@ add wave -noupdate -format Literal -radix decimal /video_tb/de1_inst/pace_inst/u
 add wave -noupdate -format Literal -radix decimal /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/h_video_start
 add wave -noupdate -format Literal -radix decimal /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/h_right_border_start
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {173772800 ps} 0} {{Cursor 2} {5124824700 ps} 0}
+WaveRestoreCursors {{Cursor 1} {9942931700 ps} 0} {{Cursor 2} {5124824700 ps} 0}
 configure wave -namecolwidth 471
 configure wave -valuecolwidth 60
 configure wave -justifyvalue left
@@ -93,4 +78,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {0 ps} {2100 us}
+WaveRestoreZoom {3608965100 ps} {3677640600 ps}

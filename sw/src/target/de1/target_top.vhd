@@ -457,6 +457,9 @@ begin
 
   BLK_VIDEO : block
   begin
+
+		video_i.clk <= clk_i(1);	-- by convention
+
     vga_clk <= video_o.clk;
     vga_r <= video_o.rgb.r(video_o.rgb.r'left downto video_o.rgb.r'left-3);
     vga_g <= video_o.rgb.g(video_o.rgb.g'left downto video_o.rgb.g'left-3);
@@ -465,6 +468,7 @@ begin
     vga_vs <= video_o.vsync;
     vga_sync <= video_o.hsync and video_o.vsync;
     vga_blank <= '1';
+
   end block BLK_VIDEO;
 
   BLK_AUDIO : block
