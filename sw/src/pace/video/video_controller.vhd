@@ -119,7 +119,8 @@ begin
 
       h_video_r <= VIDEO_H_SIZE;
       v_video_r <= VIDEO_V_SIZE;
-
+      border_rgb_r <= BORDER_RGB;
+      
 		end if;
 	end process;
 
