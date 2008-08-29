@@ -101,7 +101,7 @@ begin
           -- P3M
 
         when PACE_VIDEO_VGA_640x480_60Hz =>
-          -- generic VGA, clk=25.175MHz
+          -- VGA, clk=25.175MHz
           h_front_porch_r <= 16;
           h_sync_r <= 96;
           h_back_porch_r <= 48;
@@ -112,7 +112,7 @@ begin
           v_border_r <= (480-VIDEO_V_SIZE)/2;
 
         when PACE_VIDEO_VGA_800x600_60Hz =>
-          -- generic VGA, clk=40MHz
+          -- SVGA, clk=40MHz
           h_front_porch_r <= 40;
           h_sync_r <= 128;
           h_back_porch_r <= 88;
@@ -248,26 +248,38 @@ begin
   
   process (extended_reset, clk, clk_ena)
     constant PIPELINE_DELAY : natural := 2;
+    variable hsync_v_r    : std_logic_vector(PIPELINE_DELAY downto 0) := (others => '0');
+    variable vsync_v_r    : std_logic_vector(PIPELINE_DELAY downto 0) := (others => '0');
     variable hactive_v_r  : std_logic_vector(PIPELINE_DELAY downto 0) := (others => '0');
+    variable vactive_v_r  : std_logic_vector(PIPELINE_DELAY downto 0) := (others => '0');
     variable hblank_v_r   : std_logic_vector(PIPELINE_DELAY downto 0) := (others => '0');
+    variable vblank_v_r   : std_logic_vector(PIPELINE_DELAY downto 0) := (others => '0');
+    alias hsync_v         : std_logic is hsync_v_r(PIPELINE_DELAY);
+    alias vsync_v         : std_logic is vsync_v_r(PIPELINE_DELAY);
     alias hactive_v       : std_logic is hactive_v_r(PIPELINE_DELAY);
+    alias vactive_v       : std_logic is vactive_v_r(PIPELINE_DELAY);
     alias hblank_v        : std_logic is hblank_v_r(PIPELINE_DELAY);
+    alias vblank_v        : std_logic is vblank_v_r(PIPELINE_DELAY);
   begin
     if extended_reset = '1' then
+      hsync_v_r := (others => '0');
+      vsync_v_r := (others => '0');
       hactive_v_r := (others => '0');
+      vactive_v_r := (others => '0');
       hblank_v_r := (others => '0');
+      vblank_v_r := (others => '0');
     elsif rising_edge(clk) and clk_ena = '1' then
-      -- register control signals
+      -- register control signals and handle scaling
       stb <= '1';
 			hblank <= not hactive_s;	-- used only by the bitmap/tilemap/sprite controllers
 			vblank <= not vactive_s;	-- used only by the bitmap/tilemap/sprite controllers
       x <= x_s;
-      y <= EXT(y_s(y_s'left downto V_SCALE), y'length);
+      y <= EXT(y_s(y_s'left downto V_SCALE-1), y'length);
       -- register video outputs
-      if hactive_v = '1' and vactive_s = '1' then
+      if hactive_v = '1' and vactive_v = '1' then
         -- active video
         video_o.rgb <= rgb_i;
-      elsif hblank_v = '0' and vblank_s = '0' then
+      elsif hblank_v = '0' and vblank_v = '0' then
         -- border
         video_o.rgb <= border_rgb_r;
       else
@@ -275,13 +287,17 @@ begin
         video_o.rgb.g <= (others => '0');
         video_o.rgb.b <= (others => '0');
       end if;
-      video_o.hsync <= not hsync_s; -- in theory we should pipeline sync as well...
-      video_o.vsync <= not vsync_s;
+      video_o.hsync <= not hsync_v;
+      video_o.vsync <= not vsync_v;
       video_o.hblank <= hblank_v;
-      video_o.vblank <= vblank_s;
+      video_o.vblank <= vblank_v;
       -- pipelined signals
+      hsync_v_r := hsync_v_r(hsync_v_r'left-1 downto 0) & hsync_s;
+      vsync_v_r := vsync_v_r(vsync_v_r'left-1 downto 0) & vsync_s;
       hactive_v_r := hactive_v_r(hactive_v_r'left-1 downto 0) & hactive_s;
+      vactive_v_r := vactive_v_r(vactive_v_r'left-1 downto 0) & vactive_s;
       hblank_v_r := hblank_v_r(hblank_v_r'left-1 downto 0) & hblank_s;
+      vblank_v_r := vblank_v_r(vblank_v_r'left-1 downto 0) & vblank_s;
     end if;
   end process;
   

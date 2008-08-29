@@ -21,6 +21,10 @@ package project_pkg is
 
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
 
+  -- * defined in platform package
+	--constant PACE_VIDEO_H_SIZE				        : integer := 512;
+	--constant PACE_VIDEO_V_SIZE				        : integer := 192;
+
   --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_640x480_60Hz;
   --constant PACE_CLK0_DIVIDE_BY              : natural := 5;
   --constant PACE_CLK0_MULTIPLY_BY            : natural := 2;   -- 50*2/5 = 20MHz
