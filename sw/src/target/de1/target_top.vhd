@@ -184,7 +184,6 @@ architecture SYN of target_top is
 	-- gamecube controller interface
 	signal gcj					: work.gamecube_pkg.joystate_type;
 			
-	signal video_clk_s	: std_logic;
   signal lcm_sclk   	: std_logic;
   signal lcm_sdat   	: std_logic;
   signal lcm_scen   	: std_logic;
@@ -627,7 +626,7 @@ begin
       I2S_SCEN => lcm_scen
     );
 
-	lcm_clk <= video_clk_s;
+	lcm_clk <= video_o.clk;
 	lcm_grst <= reset_n;
   lcm_dclk	<=	not lcm_clk;
   lcm_shdb	<=	'1';

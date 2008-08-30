@@ -260,6 +260,7 @@ begin
     alias vactive_v       : std_logic is vactive_v_r(PIPELINE_DELAY);
     alias hblank_v        : std_logic is hblank_v_r(PIPELINE_DELAY);
     alias vblank_v        : std_logic is vblank_v_r(PIPELINE_DELAY);
+    variable stb_cnt_v    : std_logic_vector(3 downto 0); -- up to 16x scaling
   begin
     if extended_reset = '1' then
       hsync_v_r := (others => '0');
@@ -268,20 +269,24 @@ begin
       vactive_v_r := (others => '0');
       hblank_v_r := (others => '0');
       vblank_v_r := (others => '0');
+      stb_cnt_v := EXT("1", stb_cnt_v'length);
     elsif rising_edge(clk) and clk_ena = '1' then
       -- register control signals and handle scaling
-      stb <= '1';
 			hblank <= not hactive_s;	-- used only by the bitmap/tilemap/sprite controllers
 			vblank <= not vactive_s;	-- used only by the bitmap/tilemap/sprite controllers
-      x <= x_s;
+			-- handle scaling
+			stb <= stb_cnt_v(H_SCALE-1);
+      x <= EXT(x_s(x_s'left downto H_SCALE-1), x'length);
       y <= EXT(y_s(y_s'left downto V_SCALE-1), y'length);
       -- register video outputs
       if hactive_v = '1' and vactive_v = '1' then
         -- active video
         video_o.rgb <= rgb_i;
+        stb_cnt_v := stb_cnt_v + 2;
       elsif hblank_v = '0' and vblank_v = '0' then
         -- border
         video_o.rgb <= border_rgb_r;
+        stb_cnt_v := EXT("1", stb_cnt_v'length);
       else
         video_o.rgb.r <= (others => '0');
         video_o.rgb.g <= (others => '0');
