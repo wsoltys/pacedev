@@ -6,6 +6,7 @@ library work;
 use work.pace_pkg.all;
 use work.project_pkg.all;
 use work.platform_pkg.all;    
+use work.video_controller_pkg.all;
 
 entity sptCtlVHDL is
 	generic
@@ -22,7 +23,7 @@ entity sptCtlVHDL is
     xAddr   : in std_logic_vector(7 downto 0);
     yAddr   : in std_logic_vector(8 downto 0);
     pixOn   : out std_logic;    
-		rgb			: out RGBType;
+		rgb			: out RGB_t;
 		    
 		bank_data	: in std_logic_vector(7 downto 0);
 		

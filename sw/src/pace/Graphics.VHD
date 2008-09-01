@@ -225,6 +225,7 @@ begin
     generic map
     (
       CONFIG		  => PACE_VIDEO_CONTROLLER_TYPE,
+      DELAY       => PACE_VIDEO_PIPELINE_DELAY,
       H_SIZE      => PACE_VIDEO_H_SIZE,
       V_SIZE      => PACE_VIDEO_V_SIZE,
       H_SCALE     => PACE_VIDEO_H_SCALE,

@@ -6,6 +6,7 @@ use IEEE.std_logic_unsigned.all;
 library work;
 use work.pace_pkg.all;
 use work.platform_pkg.all;
+use work.video_controller_pkg.all;
 
 entity sptArray is
 
@@ -26,7 +27,7 @@ entity sptArray is
 		sprite_wr		: in std_logic;
 		sprRegAddr	: in std_logic_vector(7 downto 0);
 		
-		rgb					: out RGBType;
+		rgb					: out RGB_t;
 		spr_on			: out std_logic;
 		spr_pri			: out std_logic;
 		spr0_on			: out std_logic

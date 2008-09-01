@@ -52,6 +52,7 @@ package video_controller_pkg is
     generic
     (
       CONFIG		  : PACEVideoController_t := PACE_VIDEO_NONE;
+      DELAY       : integer := 1;
       H_SIZE      : integer;
       V_SIZE      : integer;
       H_SCALE     : integer;

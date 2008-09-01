@@ -11,6 +11,7 @@ entity pace_video_controller is
   generic
   (
 		CONFIG		  : PACEVideoController_t := PACE_VIDEO_NONE;
+		DELAY       : integer := 1;
 		H_SIZE      : integer;
 		V_SIZE      : integer;
 		H_SCALE     : integer;
@@ -247,7 +248,7 @@ begin
   video_o.clk <= clk;
   
   process (extended_reset, clk, clk_ena)
-    constant PIPELINE_DELAY : natural := 2;
+    constant PIPELINE_DELAY : natural := DELAY+1;
     variable hsync_v_r    : std_logic_vector(PIPELINE_DELAY downto 0) := (others => '0');
     variable vsync_v_r    : std_logic_vector(PIPELINE_DELAY downto 0) := (others => '0');
     variable hactive_v_r  : std_logic_vector(PIPELINE_DELAY downto 0) := (others => '0');
@@ -276,17 +277,21 @@ begin
 			vblank <= not vactive_s;	-- used only by the bitmap/tilemap/sprite controllers
 			-- handle scaling
 			stb <= stb_cnt_v(H_SCALE-1);
+      if hactive_s = '1' and vactive_s = '1' then
+        stb_cnt_v := stb_cnt_v + 2;
+      elsif hblank_s = '0' and vblank_s = '0' then    
+        --stb_cnt_v := EXT("1", stb_cnt_v'length);
+        stb_cnt_v := (others => '1');
+      end if;
       x <= EXT(x_s(x_s'left downto H_SCALE-1), x'length);
       y <= EXT(y_s(y_s'left downto V_SCALE-1), y'length);
       -- register video outputs
       if hactive_v = '1' and vactive_v = '1' then
         -- active video
         video_o.rgb <= rgb_i;
-        stb_cnt_v := stb_cnt_v + 2;
       elsif hblank_v = '0' and vblank_v = '0' then
         -- border
         video_o.rgb <= border_rgb_r;
-        stb_cnt_v := EXT("1", stb_cnt_v'length);
       else
         video_o.rgb.r <= (others => '0');
         video_o.rgb.g <= (others => '0');

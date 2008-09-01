@@ -12,23 +12,38 @@ entity Game is
   port
   (
     -- clocking and reset
-    clk             : in std_logic_vector(0 to 3);
-    reset           : in std_logic;                       
-    test_button     : in std_logic;                       
+    clk_i           : in std_logic_vector(0 to 3);
+    reset_i         : in std_logic;
 
-    -- inputs
-    ps2clk          : inout std_logic;                       
-    ps2data         : inout std_logic;                       
-    dip             : in std_logic_vector(7 downto 0);    
-		jamma						: in JAMMAInputsType;
+    -- misc I/O
+    buttons_i       : in from_BUTTONS_t;
+    switches_i      : in from_SWITCHES_t;
+    leds_o          : out to_LEDS_t;
+
+    -- controller inputs
+    inputs_i        : in from_INPUTS_t;
 
     -- micro buses
     upaddr          : out std_logic_vector(15 downto 0);   
     updatao         : out std_logic_vector(7 downto 0);    
 
-    -- SRAM
+    -- FLASH/SRAM
+    flash_i         : in from_FLASH_t;
+    flash_o         : out to_FLASH_t;
 		sram_i					: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
+
+    -- SPI (flash)
+    spi_i           : in from_SPI_t;
+    spi_o           : out to_SPI_t;
+
+    -- serial
+    ser_i           : in from_SERIAL_t;
+    ser_o           : out to_SERIAL_t;
+
+    -- general purpose I/O
+    gp_i            : in from_GP_t;
+    gp_o            : out to_GP_t;
 
     gfxextra_data   : out std_logic_vector(7 downto 0);
 		palette_data		: out ByteArrayType(15 downto 0);
@@ -57,37 +72,22 @@ entity Game is
 		xcentre					: out std_logic_vector(9 downto 0);
 		ycentre					: out std_logic_vector(9 downto 0);
 		
-    -- OSD
-    to_osd          : out to_OSD_t;
-    from_osd        : in from_OSD_t;
-
     -- sound
     snd_rd          : out std_logic;                       
     snd_wr          : out std_logic;
     sndif_datai     : in std_logic_vector(7 downto 0);    
 
-    -- spi interface
-    spi_clk         : out std_logic;                       
-    spi_din         : in std_logic;                       
-    spi_dout        : out std_logic;                       
-    spi_ena         : out std_logic;                       
-    spi_mode        : out std_logic;                       
-    spi_sel         : out std_logic;                       
-
-    -- serial
-    ser_rx          : in std_logic;                       
-    ser_tx          : out std_logic;                       
-
-    -- on-board leds
-    leds            : out std_logic_vector(7 downto 0)    
+    -- OSD
+    to_osd          : out to_OSD_t;
+    from_osd        : in from_OSD_t
   );
 
 end Game;
 
 architecture SYN of Game is
 
-	alias clk_30M				  : std_logic is clk(0);
-	alias clk_40M				  : std_logic is clk(1);
+	alias clk_30M				  : std_logic is clk_i(0);
+	alias clk_40M				  : std_logic is clk_i(1);
 	
   -- uP signals  
   signal clk_3M_en			: std_logic;
@@ -178,7 +178,7 @@ begin
 							cram0_datao when (cram_cs = '1' and uP_addr(0) = '0') else
               inputs(0) when inzero_cs = '1' else
               inputs (1) when inone_cs = '1' else
-              dip when dips_cs = '1' else
+              switches_i(7 downto 0) when dips_cs = '1' else
 							(others => 'X');
 	
 	vram_wr <= uPmemwr and vram_cs;
@@ -201,13 +201,6 @@ begin
 
   -- unused outputs
 	bitmap_data <= (others => '0');
-	spi_clk <= '0';
-	spi_dout <= '0';
-	spi_ena <= '0';
-	spi_mode <= '0';
-	spi_sel <= '0';
-	ser_tx <= 'X';
-	leds <= (others => '0');
   snd_rd <= '0';
 	snd_wr <= '0';
 	
@@ -224,7 +217,7 @@ begin
 		port map
 		(
 			clk				=> clk_30M,
-			reset			=> reset,
+			reset			=> reset_i,
 			clk_en		=> clk_3M_en
 		);
 
@@ -233,7 +226,7 @@ begin
     (
       clk 		=> clk_30M,                                   
       clk_en	=> clk_3M_en,
-      reset  	=> reset,                                     
+      reset  	=> reset_i,                                     
 
       addr   	=> uP_addr,
       datai  	=> uP_datai,
@@ -354,12 +347,12 @@ begin
 	  port map
 	  (
 	    clk     		=> clk_30M,
-	    reset   		=> reset,
-	    ps2clk  		=> ps2clk,
-	    ps2data 		=> ps2data,
-			jamma				=> jamma,
+	    reset   		=> reset_i,
+	    ps2clk  		=> inputs_i.ps2_kclk,
+	    ps2data 		=> inputs_i.ps2_kdat,
+			jamma				=> inputs_i.jamma_n,
 
-	    dips				=> dip,
+	    dips				=> switches_i(7 downto 0),
 	    inputs			=> inputs
 	  );
 
@@ -367,7 +360,7 @@ begin
     port map
     (
       clk               => clk_30M,
-      reset             => reset,
+      reset             => reset_i,
   
       z80_data          => uP_datao,
       nmiena_wr         => nmiena_wr,

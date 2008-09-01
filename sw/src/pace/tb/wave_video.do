@@ -49,6 +49,9 @@ add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/pace_vi
 add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/video_o.vsync
 add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/video_o.hblank
 add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/video_o.vblank
+add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/stb
+add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/hactive_s
+add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/vactive_s
 add wave -noupdate -format Literal -radix decimal /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/x
 add wave -noupdate -format Logic /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/hblank
 add wave -noupdate -format Literal /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/y
@@ -64,8 +67,8 @@ add wave -noupdate -format Literal -radix decimal /video_tb/de1_inst/pace_inst/u
 add wave -noupdate -format Literal -radix decimal /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/h_video_start
 add wave -noupdate -format Literal -radix decimal /video_tb/de1_inst/pace_inst/u_graphics/pace_video_controller_inst/h_right_border_start
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {9942931700 ps} 0} {{Cursor 2} {5124824700 ps} 0}
-configure wave -namecolwidth 471
+WaveRestoreCursors {{Cursor 1} {2996933200 ps} 0} {{Cursor 2} {5124824700 ps} 0}
+configure wave -namecolwidth 466
 configure wave -valuecolwidth 60
 configure wave -justifyvalue left
 configure wave -signalnamewidth 0
@@ -78,4 +81,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {3608965100 ps} {3677640600 ps}
+WaveRestoreZoom {2996771600 ps} {2997337300 ps}
