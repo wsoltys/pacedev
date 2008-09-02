@@ -15,6 +15,10 @@ package target_pkg is
 	constant PACE_FPGA_VENDOR		: PACEFpgaVendor_t := PACE_FPGA_VENDOR_ALTERA;
 	constant PACE_FPGA_FAMILY		: PACEFpgaFamily_t := PACE_FPGA_FAMILY_CYCLONE2;
 
+  constant PACE_CLKIN0        : natural := 24;
+  constant PACE_CLKIN1        : natural := 24;
+  constant PACE_HAS_FLASH     : boolean := false;
+
 	-- ADV724 constants
 	constant ADV724_STD_PAL		  : std_logic := '0';
 	constant ADV724_STD_NTSC	  : std_logic := not ADV724_STD_PAL;
