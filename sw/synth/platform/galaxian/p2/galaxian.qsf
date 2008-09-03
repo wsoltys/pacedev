@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP3"
 
 # Pin & Location Assignments
 # ==========================
@@ -760,8 +760,6 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80se.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/frogger/uPse.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/vga_800x600_60Hz.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/cvbs_720x288p_50Hz.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/bitmapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/mapCtl.VHDL
 set_global_assignment -name VHDL_FILE ../../../../src/pace/flipRow.VHDL
@@ -777,6 +775,7 @@ set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/Galaxian
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/Game.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/conversion.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_upcounter.vhd

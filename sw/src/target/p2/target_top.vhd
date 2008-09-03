@@ -281,7 +281,7 @@ begin
   -- buttons - active low
   buttons_i <= EXT("0", buttons_i'length);
   -- switches - up = high
-  switches_i <= EXT('0' & sw2_1, switches_i'length);
+  switches_i <= EXT("0", switches_i'length);
   -- leds
   -- (none)
   
@@ -348,6 +348,11 @@ begin
 	inputs_i.jamma_n.tilt <= '1';
 	inputs_i.jamma_n.test <= '1';
 
+  BLK_FLASH : block
+  begin
+    flash_i.d <= (others => '0');
+  end block BLK_FLASH;
+
   -- static memory
   BLK_SRAM : block
   begin
@@ -409,6 +414,7 @@ begin
   begin
 
 		video_i.clk <= clk_i(1);	-- by convention
+    video_i.clk_ena <= '1';
 
     bd_out(20) <= video_o.rgb.r(9);
     bd_out(27) <= video_o.rgb.r(8);

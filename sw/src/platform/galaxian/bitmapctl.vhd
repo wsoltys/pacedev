@@ -15,14 +15,14 @@ entity bitmapCtl_1 is
 port               
 (
     clk         	: in std_logic;
-		clk_ena				: in std_logic;
 		reset					: in std_logic;
 
 		-- video control signals		
+		stb           : in std_logic;
     hblank      	: in std_logic;
 		vblank				: in std_logic;
-    pix_x       	: in std_logic_vector(9 downto 0);
-    pix_y       	: in std_logic_vector(9 downto 0);
+    x       	    : in std_logic_vector(10 downto 0);
+    y       	    : in std_logic_vector(10 downto 0);
 
     -- tilemap interface
 		scroll_data		: in std_logic_vector(7 downto 0);
@@ -43,11 +43,11 @@ architecture SYN of bitmapCtl_1 is
 begin
 
 	-- this is only required for pixel-doubling!!!
-	process (clk, clk_ena, reset)
+	process (clk, stb, reset)
 	begin
 		if reset = '1' then
 			clk_ena_s <= '0';
-		elsif rising_edge(clk) and clk_ena = '1' then
+		elsif rising_edge(clk) and stb = '1' then
 			clk_ena_s <= not clk_ena_s;
 		end if;
 	end process;
@@ -93,18 +93,18 @@ begin
 				--end if;
 
       	-- paranoid - check within 256x256 square
-        if (xcount(8) = '0') and (pix_y(8) = '0') then
+        if (xcount(8) = '0') and (y(8) = '0') then
 
         	-- set the star colour
           if (lfsr_reg(16) = '0') and (lfsr_reg(7 downto 0) = "11111111") then
-          	if ((xcount(0) xor pix_y(3)) = '1') then
+          	if ((xcount(0) xor y(3)) = '1') then
             	rgb.r(rgb.r'left downto rgb.r'left-1) <= not lfsr_reg(9 downto 8);
               rgb.g(rgb.g'left downto rgb.g'left-1) <= not lfsr_reg(11 downto 10);
               rgb.b(rgb.b'left downto rgb.b'left-1) <= not lfsr_reg(13 downto 12);
             end if;
           end if;
 
-          if (xcount = 0) and (pix_y = 0) then
+          if (xcount = 0) and (y = 0) then
           	-- start of screen
             if (s = '1') then
             	lfsr_reg(16 downto 0) := lfsr_reg(15 downto 0) & ((not lfsr_reg(16)) xor lfsr_reg(4));
@@ -114,7 +114,7 @@ begin
             s := not s;
           else
          		-- latch for scrolling effect
-            if (xcount = 254) and (pix_y = 254) then
+            if (xcount = 254) and (y = 254) then
             	latch_reg := lfsr_reg(15 downto 0) & ((not lfsr_reg(16)) xor lfsr_reg(4));
             end if;
 

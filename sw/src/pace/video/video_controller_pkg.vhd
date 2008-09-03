@@ -17,6 +17,14 @@ package video_controller_pkg is
     PACE_VIDEO_CVBS_720x288p_50Hz     -- generic composite
   );
 
+  type PACEVideoDisplay_t is
+  (
+    PACE_DISPLAY_NONE,
+    PACE_DISPLAY_VGA,
+    PACE_DISPLAY_CVBS,
+    PACE_DISPLAY_TFT
+  );
+
   type RGB_t is record
     r : std_logic_vector(9 downto 0);
     g : std_logic_vector(9 downto 0);

@@ -58,14 +58,14 @@ architecture SYN of Graphics is
 	port               
 	(
 	    clk         	: in std_logic;
-			clk_ena				: in std_logic;
 			reset					: in std_logic;
 			
 			-- video control signals		
+			stb           : in std_logic;
 	    hblank      	: in std_logic;
 	    vblank      	: in std_logic;
-	    pix_x       	: in std_logic_vector(9 downto 0);
-	    pix_y       	: in std_logic_vector(9 downto 0);
+	    x       	    : in std_logic_vector(10 downto 0);
+	    y       	    : in std_logic_vector(10 downto 0);
 
 			scroll_data		: in std_logic_vector(7 downto 0);
 			palette_data	: in ByteArrayType(15 downto 0);
@@ -80,18 +80,18 @@ architecture SYN of Graphics is
 	) ;
 	end component;
 
-	component mapCtl_1 is          
+	component tilemapCtl_1 is          
 	port               
 	(
 	    clk         : in std_logic;
-			clk_ena			: in std_logic;
 			reset				: in std_logic;
 			
 			-- video control signals		
+			stb         : in std_logic;
 	    hblank      : in std_logic;
 	    vblank      : in std_logic;
-	    pix_x       : in std_logic_vector(9 downto 0);
-	    pix_y       : in std_logic_vector(9 downto 0);
+	    x           : in std_logic_vector(10 downto 0);
+	    y           : in std_logic_vector(10 downto 0);
 
 			scroll_data		: in std_logic_vector(7 downto 0);
 			palette_data	: in ByteArrayType(15 downto 0);
@@ -110,18 +110,21 @@ architecture SYN of Graphics is
 	) ;
 	end component;
 
-	component mapCtl_2 is          
+	component tilemapCtl_2 is          
 	port               
 	(
 	    clk         : in std_logic;
-			clk_ena			: in std_logic;
 			reset				: in std_logic;
 			
 			-- video control signals		
+			stb         : in std_logic;
 	    hblank      : in std_logic;
 	    vblank      : in std_logic;
-	    pix_x       : in std_logic_vector(9 downto 0);
-	    pix_y       : in std_logic_vector(9 downto 0);
+	    x           : in std_logic_vector(10 downto 0);
+	    y           : in std_logic_vector(10 downto 0);
+
+			scroll_data		: in std_logic_vector(7 downto 0);
+			palette_data	: in ByteArrayType(15 downto 0);
 
 	    -- tilemap interface
 	    tilemap_d   : in std_logic_vector(15 downto 0);
@@ -272,13 +275,13 @@ begin
 	    port map
 	    (
 	      clk      			=> clk,
-				clk_ena				=> pix_clk_ena,
 				reset					=> reset,
 				
+				stb           => pix_clk_ena,
 	      hblank   			=> hblank,
 	      vblank   			=> vblank,
-	      pix_x     		=> pix_x(9 downto 0),
-	      pix_y     		=> pix_y(9 downto 0),
+	      x     		    => pix_x,
+	      y     		    => pix_y,
 
 				scroll_data		=> extra_data,
 				palette_data	=> palette_data,
@@ -306,17 +309,17 @@ begin
 	
 	GEN_TILEMAP_1 : if PACE_VIDEO_NUM_TILEMAPS > 0 generate
 	
-	  foreground_mapctl_inst : mapCtl_1
+	  foreground_mapctl_inst : tilemapCtl_1
 	    port map
 	    (
 	      clk      			=> clk,
-				clk_ena				=> pix_clk_ena,
 				reset					=> reset,
 				
+				stb				    => pix_clk_ena,
 	      hblank   			=> hblank,
 	      vblank   			=> vblank,
-	      pix_x     		=> pix_x(9 downto 0),
-	      pix_y     		=> pix_y(9 downto 0),
+	      x     		    => pix_x,
+	      y     		    => pix_y,
 
 				scroll_data		=> extra_data,
 				palette_data	=> palette_data,
@@ -346,6 +349,7 @@ begin
 		sprite_rgb.g <= (others => '0');
 		sprite_rgb.b <= (others => '0');
 		sprite_on <= '0';
+    sprite_pri <= '0';
 		sprite0_on <= '0';
 
 	end generate GEN_NO_SPRITES;

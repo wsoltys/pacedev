@@ -16,18 +16,18 @@ use work.project_pkg.all;
 --	Tile data is 1 BPP.
 --
 
-entity mapCtl_1 is          
+entity tilemapCtl_1 is          
 port               
 (
     clk         : in std_logic;
-		clk_ena			: in std_logic;
 		reset				: in std_logic;
 
 		-- video control signals		
+		stb         : in std_logic;
     hblank      : in std_logic;
     vblank      : in std_logic;
-    pix_x       : in std_logic_vector(9 downto 0);
-    pix_y       : in std_logic_vector(9 downto 0);
+    x           : in std_logic_vector(10 downto 0);
+    y           : in std_logic_vector(10 downto 0);
 
 		scroll_data		: in std_logic_vector(7 downto 0);
 		palette_data	: in ByteArrayType(15 downto 0);
@@ -44,9 +44,9 @@ port
 		rgb					: out RGB_t;
 		tilemap_on	: out std_logic
 );
-end mapCtl_1;
+end tilemapCtl_1;
 
-architecture SYN of mapCtl_1 is
+architecture SYN of tilemapCtl_1 is
 
 begin
 
@@ -57,17 +57,17 @@ begin
   attr_a <= (others => '0');
 
   -- generate pixel
-  process (clk, clk_ena, reset)
+  process (clk, reset)
 
 		variable hblank_r		: std_logic;
 		variable vcount			: std_logic_vector(8 downto 0);
-		variable pix_x_r		: std_logic_vector(8 downto 0);
+		variable x_r		    : std_logic_vector(8 downto 0);
 		variable pel 				: std_logic;
 		
   begin
 		if reset = '1' then
 			hblank_r := '0';
-  	elsif rising_edge(clk) and clk_ena = '1' then
+  	elsif rising_edge(clk) then
 
 			-- each tile is 12 rows high, rather than 16
 			if vblank = '1' then
@@ -86,9 +86,11 @@ begin
 				-- 1st stage of pipeline
 				-- - read tile from tilemap
 				-- - read attribute data
-				tilemap_a(tilemap_a'left downto 6) <= 
-					EXT(vcount(6+PACE_VIDEO_V_SCALE downto 3+PACE_VIDEO_V_SCALE), tilemap_a'left-6+1);
-				tilemap_a(5 downto 0) <= pix_x(8 downto 3);
+				if stb = '1' then
+          tilemap_a(tilemap_a'left downto 6) <= 
+            EXT(vcount(6+PACE_VIDEO_V_SCALE downto 3+PACE_VIDEO_V_SCALE), tilemap_a'left-6+1);
+          tilemap_a(5 downto 0) <= x(8 downto 3);
+        end if;
 
 				-- 2nd stage of pipeline
 				-- - read tile data from tile ROM
@@ -96,7 +98,7 @@ begin
   			tile_a(3 downto 0) <=  vcount(2+PACE_VIDEO_V_SCALE downto PACE_VIDEO_V_SCALE-1);
 
 				-- each byte contains information for 8 pixels
-				case pix_x_r(pix_x_r'left downto pix_x_r'left-2) is
+				case x_r(x_r'left downto x_r'left-2) is
 	        when "000" =>
 	          pel := tile_d(0);
 	        when "001" =>
@@ -123,8 +125,10 @@ begin
 			end if; -- hblank = '0'
 		
 			-- pipelined because of tile data loopkup
-			pix_x_r := pix_x_r(pix_x_r'left-3 downto 0) & pix_x(2 downto 0);
-			
+			if stb = '1' then
+        x_r := x_r(x_r'left-3 downto 0) & x(2 downto 0);
+      end if;
+
 			hblank_r := hblank;		
 		end if;				
 

@@ -15,15 +15,29 @@ package project_pkg is
 	
   -- Reference clock is 24MHz
 	constant PACE_HAS_PLL								      : boolean := true;
+  constant PACE_HAS_SRAM                    : boolean := false;
+  constant PACE_HAS_SDRAM                   : boolean := false;
+  constant PACE_HAS_SERIAL                  : boolean := false;
 
-  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
+	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
+  
+  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_640x480_60Hz;
   constant PACE_CLK0_DIVIDE_BY              : natural := 6;
   constant PACE_CLK0_MULTIPLY_BY            : natural := 5;   -- 24*5/6 = 20MHz
-  constant PACE_CLK1_DIVIDE_BY              : natural := 3;
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 5;  	-- 24*5/3 = 40MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 19;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 20; 	-- 24*20/19 = 25.263158MHz
 	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
 	constant PACE_VIDEO_V_SCALE       	      : integer := 2;
-	constant PACE_ENABLE_ADV724					      : std_logic := '0';
+  constant PACE_ENABLE_ADV724					      : std_logic := '0';
+
+  --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
+  --constant PACE_CLK0_DIVIDE_BY              : natural := 6;
+  --constant PACE_CLK0_MULTIPLY_BY            : natural := 5;   -- 24*5/6 = 20MHz
+  --constant PACE_CLK1_DIVIDE_BY              : natural := 3;
+  --constant PACE_CLK1_MULTIPLY_BY            : natural := 5;  	-- 24*5/3 = 40MHz
+	--constant PACE_VIDEO_H_SCALE       	      : integer := 1;
+	--constant PACE_VIDEO_V_SCALE       	      : integer := 1;
+	--constant PACE_ENABLE_ADV724					      : std_logic := '0';
 
   --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_CVBS_720x288p_50Hz;
   --constant PACE_CLK0_DIVIDE_BY              : natural := 32;
@@ -34,16 +48,14 @@ package project_pkg is
 	--constant PACE_VIDEO_V_SCALE       	      : integer := 1;
 	--constant PACE_ENABLE_ADV724					      : std_logic := '1';
 
+  constant PACE_VIDEO_PIPELINE_DELAY        : integer := 1;
+  constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_RED;
+  
   constant PACE_HAS_OSD                     : boolean := true;
   constant PACE_OSD_XPOS                    : natural := 128;
   constant PACE_OSD_YPOS                    : natural := 176;
 
 	constant PACE_ADV724_STD						      : std_logic := ADV724_STD_PAL;
-
-  -- P2-specific constants
-
-  constant P2_JAMMA_IS_MAPLE                : boolean := false;
-  constant P2_JAMMA_IS_NGC                  : boolean := true;
 
 	-- TRS-80-specific constants
 	

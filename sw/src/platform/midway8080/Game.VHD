@@ -140,7 +140,7 @@ architecture SYN of Game is
 begin
 
 	cpu_reset <= reset_i or game_reset;
-	dip_n <= switches_i(dip_n'range);
+	dip_n <= not switches_i(dip_n'range);
 	
   -- read mux
   uP_datai <= uPmem_datai when (uPmemrd = '1') else uPio_datai;
@@ -421,13 +421,17 @@ begin
       end if;
     end process;
 
-    flash_o.d <= (others => 'Z');
-    flash_o.we <= '0';
-    flash_o.cs <= '1';
-    flash_o.oe <= '1';
-
   end generate GEN_FLASH_ROM;
   
+  GEN_NO_FLASH_ROM : if not INVADERS_ROM_IN_FLASH generate
+    flash_o.a <= (others => '0');
+  end generate GEN_NO_FLASH_ROM;
+
+  flash_o.d <= (others => 'Z');
+  flash_o.we <= '0';
+  flash_o.cs <= '1';
+  flash_o.oe <= '1';
+
 	GEN_ROM2 : if ROM_2_NAME /= "" generate
 		rom2_inst : entity work.invaders_rom_2
 	    port map
@@ -437,7 +441,11 @@ begin
         q				=> rom2_datao
 	    );
 	end generate GEN_ROM2;
-		
+  
+  GEN_NO_ROM2 : if ROM_2_NAME = "" generate
+    rom2_datao <= (others => '0');
+  end generate GEN_NO_ROM2;
+
 		--
 		--	*** WARNING - the contents of the VRAM are offset!!!
 		--							- the video won't look right!!!!

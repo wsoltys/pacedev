@@ -154,7 +154,7 @@ begin
   begin
     if reset = '1' then
       null;
-    elsif rising_edge(clk) and clk_ena = '1' then
+    elsif rising_edge(clk) then
       h_sync_start <= h_front_porch_r - 1;
       h_back_porch_start <= h_sync_start + h_sync_r;
       h_left_border_start <= h_back_porch_start + h_back_porch_r;

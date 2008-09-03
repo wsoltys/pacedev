@@ -13,18 +13,18 @@ use work.video_controller_pkg.all;
 --	Tile data is 2 BPP.
 --
 
-entity mapCtl_1 is          
+entity tilemapCtl_1 is          
 port               
 (
     clk         : in std_logic;
-		clk_ena			: in std_logic;
 		reset				: in std_logic;
 
 		-- video control signals		
+		stb         : in std_logic;
     hblank      : in std_logic;
     vblank      : in std_logic;
-    pix_x       : in std_logic_vector(9 downto 0);
-    pix_y       : in std_logic_vector(9 downto 0);
+    x           : in std_logic_vector(10 downto 0);
+    y           : in std_logic_vector(10 downto 0);
 
 		scroll_data		: in std_logic_vector(7 downto 0);
 		palette_data	: in ByteArrayType(15 downto 0);
@@ -41,48 +41,50 @@ port
 		rgb					: out RGB_t;
 		tilemap_on	: out std_logic
 );
-end mapCtl_1;
+end tilemapCtl_1;
 
-architecture beh of mapCtl_1 is
+architecture beh of tilemapCtl_1 is
 begin
 
 	-- these are constant for a whole line
-	tilemap_a(15 downto 6) <= "0000" & pix_y(8 downto 3);
+	tilemap_a(15 downto 6) <= "0000" & y(8 downto 3);
   tile_a(15 downto 12) <= (others => '0');
-  tile_a(3 downto 1) <=  pix_y(2 downto 0);   	-- each row is 2 bytes
+  tile_a(3 downto 1) <=  y(2 downto 0);   	-- each row is 2 bytes
   -- generate attribute RAM address
-  attr_a <= "0000" & pix_y(7 downto 3) & '0';
+  attr_a <= "0000" & y(7 downto 3) & '0';
 
   -- generate pixel
-  process (clk, clk_ena)
+  process (clk)
 
 		variable pel : std_logic_vector(1 downto 0);
 		variable pal_entry : pal_entry_typ;
 
-		variable scroll_pix_x : std_logic_vector(8 downto 0);
+		variable scroll_x : std_logic_vector(8 downto 0);
 		-- pipelined pixel X location
-		variable pix_x_r	: std_logic_vector(5 downto 0);
+		variable x_r	: std_logic_vector(5 downto 0);
 		
   begin
-  	if rising_edge(clk) and clk_ena = '1' then
+  	if rising_edge(clk) then
 
 			if hblank = '1' then
 				-- video is clipped left and right (only 224 wide)
-				scroll_pix_x := ('0' & not(attr_d(7 downto 0))) + (256-PACE_VIDEO_H_SIZE)/2;
+				scroll_x := ('0' & not(attr_d(7 downto 0))) + (256-PACE_VIDEO_H_SIZE)/2;
 			else
 						
 				-- 1st stage of pipeline
 				-- - read tile from tilemap
 				-- - read attribute data
-				tilemap_a(5 downto 0) <= scroll_pix_x(8 downto 3);
+        if stb = '1' then
+          tilemap_a(5 downto 0) <= scroll_x(8 downto 3);
+        end if;
 
 				-- 2nd stage of pipeline
 				-- - read tile data from tile ROM
 			  tile_a(11 downto 4) <= tilemap_d(7 downto 0); -- each tile is 16 bytes
-				tile_a(0) <= pix_x_r(2);
+				tile_a(0) <= x_r(2);
 				
 				-- each byte contains information for 4 pixels
-				case pix_x_r(4 downto 3) is
+				case x_r(4 downto 3) is
 					when "00" =>
 	          pel := tile_d(6) & tile_d(7);
 					when "01" =>
@@ -108,11 +110,13 @@ begin
 				end if;
 
 			end if; -- hblank = '1'
-				
-			-- pipelined because of tile data look-up
-			pix_x_r := pix_x_r(2 downto 0) & scroll_pix_x(2 downto 0);
-			scroll_pix_x := scroll_pix_x + 1;
-			
+
+      if stb = '1' then
+        -- pipelined because of tile data look-up
+        x_r := x_r(2 downto 0) & scroll_x(2 downto 0);
+        scroll_x := scroll_x + 1;
+      end if;
+
 		end if;				
 
   end process;
