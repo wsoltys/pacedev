@@ -7,6 +7,7 @@ library work;
 use work.pace_pkg.all;
 use work.kbd_pkg.in8;
 use work.project_pkg.all;
+use work.platform_pkg.all;
 
 entity Game is
   port
@@ -209,18 +210,18 @@ begin
   --
 
 	-- generate CPU enable clock (3MHz from 27/30MHz)
-	clk_en_inst : entity work.clk_div
-		generic map
-		(
-			DIVISOR		=> GALAXIAN_CPU_CLK_ENA_DIVIDE_BY
-		)
-		port map
-		(
-			clk				=> clk_30M,
-			reset			=> reset_i,
-			clk_en		=> clk_3M_en
-		);
-
+  clk_en_inst : entity work.clk_div
+    generic map
+    (
+      DIVISOR		=> GALAXIAN_CPU_CLK_ENA_DIVIDE_BY
+    )
+    port map
+    (
+      clk				=> clk_30M,
+      reset			=> reset_i,
+      clk_en		=> clk_3M_en
+    );
+  
   U_uP : entity work.uPse                                                
     port map
     (

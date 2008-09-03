@@ -4,6 +4,7 @@ use IEEE.std_logic_unsigned.all;
 
 library work;
 use work.project_pkg.all;
+use work.platform_pkg.all;
 
 entity Galaxian_Interrupts is
   port

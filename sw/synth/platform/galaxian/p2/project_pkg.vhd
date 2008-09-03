@@ -49,11 +49,6 @@ package project_pkg is
 
 	-- Galaxian-specific constants
 			
-	constant GALAXIAN_1MHz_CLK0_COUNTS			  : natural := 
-    PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
-	constant GALAXIAN_CPU_CLK_ENA_DIVIDE_BY	  : natural := 
-    GALAXIAN_1MHz_CLK0_COUNTS / 3;
-
 	constant GALAXIAN_USE_INTERNAL_WRAM       : boolean := true;
   constant PACE_HAS_SRAM                    : boolean := GALAXIAN_USE_INTERNAL_WRAM;
 

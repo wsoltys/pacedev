@@ -48,10 +48,6 @@ package project_pkg is
 
 	-- Galaxian-specific constants
 			
-	constant GALAXIAN_CPU_CLK_ENA_DIVIDE_BY	: natural := 10;
-	constant GALAXIAN_1MHz_CLK0_COUNTS			: natural := 30;
-	--constant GALAXIAN_CPU_CLK_ENA_DIVIDE_BY	: natural := 9;
-	--constant GALAXIAN_1MHz_CLK0_COUNTS			: natural := 27;
 	constant GALAXIAN_USE_INTERNAL_WRAM     : boolean := true;
 	constant USE_VIDEO_VBLANK_INTERRUPT     : boolean := false;
 	
