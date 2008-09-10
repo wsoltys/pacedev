@@ -41,7 +41,7 @@ package project_pkg is
 	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
 	constant PACE_VIDEO_V_SCALE       	      : integer := 2;
 
-  constant PACE_VIDEO_PIPELINE_DELAY        : integer := 1;
+  constant PACE_VIDEO_PIPELINE_DELAY        : integer := 4;
   constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_RED;
 
   --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1024x768_60Hz;

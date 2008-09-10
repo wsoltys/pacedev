@@ -384,9 +384,10 @@ begin
 	tilerom_inst : entity work.sprom
 		generic map
 		(
-			init_file		=> "../../../../../src/platform/trs80/m3/roms/trstile.hex",
-			numwords_a	=> 4096,
-			widthad_a		=> 12
+			init_file		    => "../../../../../src/platform/trs80/m3/roms/trstile.hex",
+			numwords_a	    => 4096,
+			widthad_a		    => 12,
+			outdata_reg_a   => "CLOCK0"
 		)
 		port map
 		(

@@ -61,7 +61,7 @@ begin
 
 		variable hblank_r		: std_logic;
 		variable vcount			: std_logic_vector(8 downto 0);
-		variable x_r		    : std_logic_vector(8 downto 0);
+		variable x_r		    : std_logic_vector((PACE_VIDEO_PIPELINE_DELAY+0)*3-1 downto 0);
 		variable pel 				: std_logic;
 		
   begin
@@ -74,6 +74,7 @@ begin
 				vcount := (others => '0');
 
 			elsif hblank = '1' and hblank_r = '0' then
+          
 				if vcount(2+PACE_VIDEO_V_SCALE downto 0) = X"B" & 
 						std_logic_vector(conv_signed(-1,PACE_VIDEO_V_SCALE-1)) then
 					vcount := vcount + 4 * PACE_VIDEO_V_SCALE + 1;
@@ -81,21 +82,22 @@ begin
 					vcount := vcount + 1;
 				end if;
 
+        -- fixed for the line
+        tilemap_a(tilemap_a'left downto 6) <= 
+          EXT(vcount(6+PACE_VIDEO_V_SCALE downto 3+PACE_VIDEO_V_SCALE), tilemap_a'left-6+1);
+  			tile_a(3 downto 0) <=  vcount(2+PACE_VIDEO_V_SCALE downto PACE_VIDEO_V_SCALE-1);
+          
 			elsif hblank = '0' then
 						
 				-- 1st stage of pipeline
 				-- - read tile from tilemap
-				-- - read attribute data
 				if stb = '1' then
-          tilemap_a(tilemap_a'left downto 6) <= 
-            EXT(vcount(6+PACE_VIDEO_V_SCALE downto 3+PACE_VIDEO_V_SCALE), tilemap_a'left-6+1);
           tilemap_a(5 downto 0) <= x(8 downto 3);
         end if;
 
 				-- 2nd stage of pipeline
 				-- - read tile data from tile ROM
 			  tile_a(11 downto 4) <= tilemap_d(7 downto 0);
-  			tile_a(3 downto 0) <=  vcount(2+PACE_VIDEO_V_SCALE downto PACE_VIDEO_V_SCALE-1);
 
 				-- each byte contains information for 8 pixels
 				case x_r(x_r'left downto x_r'left-2) is
@@ -125,9 +127,7 @@ begin
 			end if; -- hblank = '0'
 		
 			-- pipelined because of tile data loopkup
-			if stb = '1' then
-        x_r := x_r(x_r'left-3 downto 0) & x(2 downto 0);
-      end if;
+      x_r := x_r(x_r'left-3 downto 0) & x(2 downto 0);
 
 			hblank_r := hblank;		
 		end if;				
