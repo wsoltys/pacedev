@@ -43,10 +43,10 @@ package project_pkg is
   constant PACE_CLK0_MULTIPLY_BY            : natural := 13;    -- 50*13/32 = 20.3125MHz
   constant PACE_CLK1_DIVIDE_BY              : natural := 10;
   constant PACE_CLK1_MULTIPLY_BY            : natural := 13;    -- 50*13/10 = 65MHz
-	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
+	constant PACE_VIDEO_H_SCALE       	      : integer := 2;
 	constant PACE_VIDEO_V_SCALE       	      : integer := 2;
 
-  constant PACE_VIDEO_PIPELINE_DELAY        : integer := 1;
+  constant PACE_VIDEO_PIPELINE_DELAY        : integer := 2;
   constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
   
   constant PACE_HAS_OSD                     : boolean := false;
