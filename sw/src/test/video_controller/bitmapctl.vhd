@@ -5,10 +5,11 @@ use IEEE.std_logic_unsigned.all;
 library work;
 use work.pace_pkg.all;
 use work.video_controller_pkg.all;
+use work.project_pkg.all;
 use work.platform_pkg.all;
 
 --
---	Midway 8080 Bitmap Controller
+--	Video Controller Test Bitmap Controller
 --
 
 entity bitmapCtl_1 is          
@@ -38,7 +39,7 @@ end bitmapCtl_1;
 
 architecture SYN of bitmapCtl_1 is
 
-  constant PIPELINE_EMULATION : natural := 1;
+  constant PIPELINE_EMULATION : natural := PACE_VIDEO_PIPELINE_DELAY;
 
 begin
 
@@ -54,43 +55,39 @@ begin
   begin
   	if rising_edge(clk) then
 
-			if hblank = '0' then
-						
-				-- 1st stage of pipeline
-        if stb = '1' then
-          bitmap_a(7 downto 0) <= x(7 downto 0);
-        end if;
+			-- 1st stage of pipeline
+      if stb = '1' then
+        bitmap_a(7 downto 0) <= x(7 downto 0);
+      end if;
 
-				rgb.r <= (others => '0');
-				rgb.g <= (others => '0');
-				rgb.b <= (others => '0');
+			rgb.r <= (others => '0');
+			rgb.g <= (others => '0');
+			rgb.b <= (others => '0');
 
-        case y(2 downto 0) is
-          when "000" =>
-            rgb.r(9 downto 8) <= "11";	-- red
-          when "111" =>
-            rgb.g(9 downto 8) <= "11";	-- green
-          when others =>
-            null;
-        end case;
+      case y(2 downto 0) is
+        when "000" =>
+          rgb.r(9 downto 8) <= "11";	-- red
+        when "111" =>
+          rgb.g(9 downto 8) <= "11";	-- green
+        when others =>
+          null;
+      end case;
 
-        case p_x(2 downto 0) is
-          when "000" =>
-            rgb.r(9 downto 8) <= "11";	-- red
-          when "110" =>
-            rgb.b(9 downto 8) <= "11";	-- blue
-          when "111" =>
-            rgb.g(9 downto 8) <= "11";	-- green
-          when others =>
-            null;
-        end case;
-
-			end if; -- hblank = '0'
+      case p_x(p_x'left downto p_x'left-2) is
+        when "000" =>
+          rgb.r(9 downto 8) <= "11";	-- red
+        when "110" =>
+          rgb.b(9 downto 8) <= "11";	-- blue
+        when "111" =>
+          rgb.g(9 downto 8) <= "11";	-- green
+        when others =>
+          null;
+      end case;
 
       -- pipelined X
       p_x := p_x(p_x'left-3 downto 0) & x(2 downto 0);
 
-		end if;				
+		end if; -- rising_edge(clk)
 
   end process;
 

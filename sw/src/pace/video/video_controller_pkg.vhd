@@ -33,6 +33,11 @@ package video_controller_pkg is
 
   type RGBArrayType is array (natural range <>) of RGB_t;
 
+	type VIDEO_REG_t is record
+		h_scale		: std_logic_vector(2 downto 0);
+		v_scale		: std_logic_vector(2 downto 0);
+	end record;
+
   type from_VIDEO_t is record
     clk       : std_logic;
     clk_ena   : std_logic;
@@ -63,8 +68,8 @@ package video_controller_pkg is
       DELAY       : integer := 1;
       H_SIZE      : integer;
       V_SIZE      : integer;
-      H_SCALE     : integer;
-      V_SCALE     : integer;
+      --H_SCALE     : integer;
+      --V_SCALE     : integer;
       BORDER_RGB  : RGB_t := RGB_BLACK
     );
     port
@@ -72,6 +77,9 @@ package video_controller_pkg is
     clk     	: in std_logic;
     clk_ena   : in std_logic;
     reset   	: in std_logic;
+    
+		-- register interface
+		reg_i			: in VIDEO_REG_t;
     
     -- video input data
     rgb_i     : in RGB_t;

@@ -23,6 +23,9 @@ entity pace_video_controller is
     clk     	: in std_logic;
     clk_ena   : in std_logic;
     reset   	: in std_logic;
+
+		-- register interface
+		reg_i			: in VIDEO_REG_t;
     
     -- video input data
     rgb_i     : in RGB_t;
@@ -94,6 +97,7 @@ begin
 
   -- registers
 	process (reset, clk)
+
 	begin
 		if reset = '1' then
 			case CONFIG is
@@ -229,7 +233,7 @@ begin
           hsync_s <= '1';
         elsif x_count = h_back_porch_start then
           hsync_s <= '0';
-        elsif x_count= h_video_start then
+        elsif x_count = h_video_start then
           hblank_s <= '0'; -- for 0 borders
           hactive_s <= '1';
           x_s <= (others => '0');
@@ -255,12 +259,12 @@ begin
     variable vactive_v_r  : std_logic_vector(PIPELINE_DELAY downto 0) := (others => '0');
     variable hblank_v_r   : std_logic_vector(PIPELINE_DELAY downto 0) := (others => '0');
     variable vblank_v_r   : std_logic_vector(PIPELINE_DELAY downto 0) := (others => '0');
-    alias hsync_v         : std_logic is hsync_v_r(PIPELINE_DELAY);
-    alias vsync_v         : std_logic is vsync_v_r(PIPELINE_DELAY);
-    alias hactive_v       : std_logic is hactive_v_r(PIPELINE_DELAY);
-    alias vactive_v       : std_logic is vactive_v_r(PIPELINE_DELAY);
-    alias hblank_v        : std_logic is hblank_v_r(PIPELINE_DELAY);
-    alias vblank_v        : std_logic is vblank_v_r(PIPELINE_DELAY);
+    alias hsync_v         : std_logic is hsync_v_r(hsync_v_r'left);
+    alias vsync_v         : std_logic is vsync_v_r(vsync_v_r'left);
+    alias hactive_v       : std_logic is hactive_v_r(hactive_v_r'left);
+    alias vactive_v       : std_logic is vactive_v_r(vactive_v_r'left);
+    alias hblank_v        : std_logic is hblank_v_r(hblank_v_r'left);
+    alias vblank_v        : std_logic is vblank_v_r(vblank_v_r'left);
     variable stb_cnt_v    : std_logic_vector(3 downto 0); -- up to 16x scaling
   begin
     if extended_reset = '1' then
@@ -270,8 +274,9 @@ begin
       vactive_v_r := (others => '0');
       hblank_v_r := (others => '0');
       vblank_v_r := (others => '0');
-      stb_cnt_v := EXT("1", stb_cnt_v'length);
+      stb_cnt_v := (others => '1');
     elsif rising_edge(clk) and clk_ena = '1' then
+
       -- register control signals and handle scaling
 			hblank <= not hactive_s;	-- used only by the bitmap/tilemap/sprite controllers
 			vblank <= not vactive_s;	-- used only by the bitmap/tilemap/sprite controllers
@@ -280,11 +285,11 @@ begin
       if hactive_s = '1' and vactive_s = '1' then
         stb_cnt_v := stb_cnt_v + 2;
       elsif hblank_s = '0' and vblank_s = '0' then    
-        --stb_cnt_v := EXT("1", stb_cnt_v'length);
         stb_cnt_v := (others => '1');
       end if;
       x <= EXT(x_s(x_s'left downto H_SCALE-1), x'length);
       y <= EXT(y_s(y_s'left downto V_SCALE-1), y'length);
+
       -- register video outputs
       if hactive_v = '1' and vactive_v = '1' then
         -- active video

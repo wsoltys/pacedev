@@ -237,25 +237,26 @@ begin
     )
     port map
     (
-      clk         => video_i.clk,
-      clk_ena     => '1',
-      reset				=> reset,
+      clk         		=> video_i.clk,
+      clk_ena     		=> '1',
+      reset						=> reset,
 
-      --xcentre			=> xcentre,
-      --ycentre			=> ycentre,
+			-- register interface
+			reg_i.h_scale		=> (others => '0'),
+			reg_i.v_scale 	=> (others => '0'),
 
       -- video data signals (in)
-      rgb_i		    => rgb_data,
+      rgb_i		    		=> rgb_data,
 
       -- video control signals (out)
-      stb         => strobe,
-      hblank     	=> hblank,
-      vblank			=> vblank,
-      x						=> pix_x,
-      y 					=> pix_y,
+      stb         		=> strobe,
+      hblank     			=> hblank,
+      vblank					=> vblank,
+      x								=> pix_x,
+      y 							=> pix_y,
 
       -- VGA signals (out)
-      video_o     => video_o_s
+      video_o     		=> video_o_s
     );
 
 	GEN_NO_BITMAPS : if PACE_VIDEO_NUM_BITMAPS = 0 generate

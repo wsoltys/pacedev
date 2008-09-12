@@ -61,11 +61,23 @@ entity video_tb is
 end video_tb;
 
 architecture SYN of video_tb is
-	signal clk			: std_logic	:= '0';
-	signal reset		: std_logic	:= '1';
 
-	signal clk_50M 	: std_logic := '0';
-	signal clk_27M 	: std_logic := '0';
+	signal clk				: std_logic	:= '0';
+	signal reset			: std_logic	:= '1';
+                  	
+	signal clk_20M 		: std_logic := '0';
+	signal clk_40M 		: std_logic := '0';
+
+	signal buttons_i	: from_BUTTONS_t;
+	signal switches_i	: from_SWITCHES_t;
+	signal inputs_i		: from_INPUTS_t;
+	signal flash_i		: from_FLASH_t;
+	signal sram_i			: from_SRAM_t;
+	signal video_i		: from_VIDEO_t;
+	signal audio_i		:	from_AUDIO_t;
+	signal spi_i			: from_SPI_t;
+	signal ser_i			: from_SERIAL_t;
+	signal gp_i				: from_GP_t;
 
 	-- inputs
 	-- outputs
@@ -103,13 +115,9 @@ architecture SYN of video_tb is
 
 begin
 	-- Generate CLK and reset
-	--clk <= not clk after 12500 ps;
-  --clk <= not clk after 44899 ps; -- 11.136MHz
-  clk <= not clk after 12500 ps; -- 40MHz
+  clk_20M <= not clk_20M after 25000 ps; -- 20MHz
+  clk_40M <= not clk_40M after 12500 ps; -- 40MHz
 	reset <= '0' after 10 ns;
-
-	clk_50M <= not clk_50M after 10000 ps;
-	clk_27M <= not clk_27M after 18518 ps;
 
 	-- Signals
 	--vid_r <= pac_rgb.r when vid_outsel = '0' else trs_rgb.r;
@@ -127,76 +135,51 @@ begin
 		end if;
 	end process;
 
-	de1_inst : entity work.target_top
+	video_i.clk <= clk_40M;
+
+	pace_inst : entity work.PACE
 	  port map
 	  (
-			clock_27      => clk_27M,
-			clock_50      => clk_50M,
-			ext_clock     => '0',
-			key           => (others => '1'),		-- active low
-			sw            => (others => '0'),
-			hex0          => open,
-			hex1          => open,
-			hex2          => open,
-			hex3          => open,
-			ledg          => open,
-			ledr          => open,
-			uart_txd      => open,
-			uart_rxd      => '0',
-			dram_dq       => open,
-			dram_addr     => open,
-			dram_ldqm     => open,
-			dram_udqm     => open,
-			dram_we_n     => open,
-			dram_cas_n    => open,
-			dram_ras_n    => open,
-			dram_cs_n     => open,
-			dram_ba_0     => open,
-			dram_ba_1     => open,
-			dram_clk      => open,
-			dram_cke      => open,
-			fl_dq         => open,
-			fl_addr       => open,
-			fl_we_n       => open,
-			fl_rst_n      => open,
-			fl_oe_n       => open,
-			fl_ce_n       => open,
-			sram_dq       => open,
-			sram_addr     => open,
-			sram_ub_n     => open,
-			sram_lb_n     => open,
-			sram_we_n     => open,
-			sram_ce_n     => open,
-			sram_oe_n     => open,
-			sd_dat        => open,
-			sd_dat3       => open,
-			sd_cmd        => open,
-			sd_clk        => open,
-			tdi           => '0',
-			tck           => '0',
-			tcs           => '0',
-		  tdo           => open,
-			i2c_sdat      => open,
-			i2c_sclk      => open,
-			ps2_dat       => '0',
-			ps2_clk       => '0',
-			vga_clk       => open,
-			vga_hs        => hsync,
-			vga_vs        => vsync,
-			vga_blank     => open,
-			vga_sync      => open,
-			vga_r         => red(3 downto 0),
-			vga_g         => green(3 downto 0),
-			vga_b         => blue(3 downto 0),
-			aud_adclrck   => open,
-			aud_adcdat    => '0',
-			aud_daclrck   => open,
-			aud_dacdat    => open,
-			aud_bclk      => open,
-			aud_xck       => open,
-			--////////////////////	GPIO	////////////////////////////
-			gpio_0        => open,
-			gpio_1        => open
+	  	-- clocks and resets
+	    clk_i(0)        => clk_20M,
+	    clk_i(1)        => clk_40M,
+	    clk_i(2)        => '0',
+	    clk_i(3)        => '0',
+	    reset_i         => reset,
+	
+	    -- misc I/O
+	    buttons_i       => buttons_i,
+	    switches_i      => switches_i,
+	    leds_o          => open,
+	
+	    -- controller inputs
+	    inputs_i        => inputs_i,
+	
+	    -- external ROM/RAM
+	    flash_i         => flash_i,
+	    flash_o         => open,
+	    sram_i       		=> sram_i,
+			sram_o					=> open,
+	
+	    -- video
+	    video_i         => video_i,
+	    video_o         => open,
+	
+	    -- audio
+	    audio_i         => audio_i,
+	    audio_o         => open,
+	    
+	    -- SPI (flash)
+	    spi_i           => spi_i,
+	    spi_o           => open,
+	
+	    -- serial
+	    ser_i           => ser_i,
+	    ser_o           => open,
+	    
+	    -- general purpose I/O
+	    gp_i            => gp_i,
+	    gp_o            => open
 	  );
 
 		red(red'left downto 4) <= (others => '0');
@@ -246,13 +229,13 @@ begin
     	bitmapCtl_invaders : entity work.bitmapCtl_1 
         port map (
       		clk 				=> clk,
-      		clk_ena 		=> strobe,
       		reset 			=> reset,
       		-- video control signals		
+      		stb					=> strobe,
       		hblank 			=> hblank,
       		vblank 			=> vblank,
-      		pix_x 			=> x(9 downto 0),
-      		pix_y 			=> y(9 downto 0),
+      		x 					=> x,
+      		y 					=> y,
           -- tilemap interface
           scroll_data => (others => '0'),
           palette_data => (others => (others => '0')),
