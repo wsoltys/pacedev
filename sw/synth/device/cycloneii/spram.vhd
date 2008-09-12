@@ -7,10 +7,11 @@ USE altera_mf.all;
 ENTITY spram IS
 	GENERIC
 	(
-		init_file		: string := "";
-		numwords_a	: natural;
-		widthad_a		: natural;
-		width_a			: natural := 8
+		init_file			: string := "";
+		numwords_a		: natural;
+		widthad_a			: natural;
+		width_a				: natural := 8;
+    outdata_reg_a : string := "UNREGISTERED"
 	);
 	PORT
 	(
@@ -66,7 +67,7 @@ BEGIN
 		numwords_a => numwords_a,
 		operation_mode => "SINGLE_PORT",
 		outdata_aclr_a => "NONE",
-		outdata_reg_a => "UNREGISTERED",
+		outdata_reg_a => outdata_reg_a,
 		power_up_uninitialized => "FALSE",
 		widthad_a => widthad_a,
 		width_a => width_a,

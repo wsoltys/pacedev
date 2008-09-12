@@ -143,7 +143,7 @@ architecture SYN of Game is
   end component osd_controller;
 
 	alias clk_20M					: std_logic is clk_i(0);
-	alias clk_40M					: std_logic is clk_i(1);
+	alias clk_video       : std_logic is clk_i(1);
 	
   -- uP signals  
   signal clk_2M_en			: std_logic;
@@ -386,12 +386,12 @@ begin
 		(
 			init_file		    => "../../../../../src/platform/trs80/m3/roms/trstile.hex",
 			numwords_a	    => 4096,
-			widthad_a		    => 12,
-			outdata_reg_a   => "CLOCK0"
+			widthad_a		    => 12
+			--outdata_reg_a   => "CLOCK0"
 		)
 		port map
 		(
-			clock			=> clk_20M,
+			clock			=> clk_video,
 			address		=> tileaddr(11 downto 0),
 			q					=> tileDatao
 		);
@@ -412,7 +412,7 @@ begin
 			data_b			=> uP_datao,
 			q_b					=> vram_datao,
 
-			clock_a			=> clk_40M,
+			clock_a			=> clk_video,
 			address_a		=> tilemapaddr(9 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),

@@ -88,7 +88,7 @@ end Game;
 architecture SYN of Game is
 
 	alias clk_30M				  : std_logic is clk_i(0);
-	alias clk_40M				  : std_logic is clk_i(1);
+	alias clk_video       : std_logic is clk_i(1);
 	
   -- uP signals  
   signal clk_3M_en			: std_logic;
@@ -274,7 +274,7 @@ begin
 			data_b			=> uP_datao,
 			q_b					=> vram_datao,
 
-			clock_a			=> clk_40M,
+			clock_a			=> clk_video,
 			address_a		=> vram_addr,
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
@@ -285,7 +285,7 @@ begin
 	vrammapper_inst : entity work.vramMapper
 		port map
 		(
-	    clk     => clk_40M,
+	    clk     => clk_video,
 
 	    inAddr  => tileMapAddr(12 downto 0),
 	    outAddr => vram_addr
@@ -308,7 +308,7 @@ begin
 			data_b			=> uP_datao,
 			q_b					=> cram0_datao,
 			
-			clock_a			=> clk_40M,
+			clock_a			=> clk_video,
 			address_a		=> attr_addr(7 downto 1),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
@@ -332,7 +332,7 @@ begin
 			data_b			=> uP_datao,
 			q_b					=> cram1_datao,
 			
-			clock_a			=> clk_40M,
+			clock_a			=> clk_video,
 			address_a		=> attr_addr(7 downto 1),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
@@ -384,7 +384,7 @@ begin
 		)
 		port map
 		(
-			clock										=> clk_40M,
+			clock										=> clk_video,
 			address_a								=> newTileAddr,
 			q_a											=> tileDatao,
 			

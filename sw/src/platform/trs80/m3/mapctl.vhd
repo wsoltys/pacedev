@@ -61,18 +61,19 @@ begin
 
 		variable hblank_r		: std_logic;
 		variable vcount			: std_logic_vector(8 downto 0);
-		variable x_r		    : std_logic_vector((PACE_VIDEO_PIPELINE_DELAY+0)*3-1 downto 0);
+		variable x_r		    : std_logic_vector((PACE_VIDEO_PIPELINE_DELAY-1)*3-1 downto 0);
 		variable pel 				: std_logic;
 		
   begin
 		if reset = '1' then
-			hblank_r := '0';
+			hblank_r := '1';
   	elsif rising_edge(clk) then
 
 			-- each tile is 12 rows high, rather than 16
 			if vblank = '1' then
 				vcount := (others => '0');
 
+      -- update vcount at the end of each line
 			elsif hblank = '1' and hblank_r = '0' then
           
 				if vcount(2+PACE_VIDEO_V_SCALE downto 0) = X"B" & 
@@ -87,7 +88,7 @@ begin
           EXT(vcount(6+PACE_VIDEO_V_SCALE downto 3+PACE_VIDEO_V_SCALE), tilemap_a'left-6+1);
   			tile_a(3 downto 0) <=  vcount(2+PACE_VIDEO_V_SCALE downto PACE_VIDEO_V_SCALE-1);
           
-			elsif hblank = '0' then
+			else
 						
 				-- 1st stage of pipeline
 				-- - read tile from tilemap
@@ -99,7 +100,9 @@ begin
 				-- - read tile data from tile ROM
 			  tile_a(11 downto 4) <= tilemap_d(7 downto 0);
 
-				-- each byte contains information for 8 pixels
+        -- 3rd stage of pipeline
+        -- - assign pixel colour based on tile data
+				-- (each byte contains information for 8 pixels)
 				case x_r(x_r'left downto x_r'left-2) is
 	        when "000" =>
 	          pel := tile_d(0);
@@ -124,13 +127,15 @@ begin
 				rgb.g <= (others => pel);
 				rgb.b <= (others => '0');
 				
-			end if; -- hblank = '0'
+			end if;
 		
 			-- pipelined because of tile data loopkup
       x_r := x_r(x_r'left-3 downto 0) & x(2 downto 0);
 
+      -- for edge-detect
 			hblank_r := hblank;		
-		end if;				
+		
+		end if; -- rising_edge(clk)
 
   end process;
 

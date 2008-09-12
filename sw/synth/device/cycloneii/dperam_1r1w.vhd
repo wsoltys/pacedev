@@ -7,9 +7,10 @@ USE altera_mf.all;
 ENTITY dperam_1r1w IS
 	GENERIC
 	(
-		numwords_a	: natural;
-		widthad_a		: natural;
-		width_a			: natural := 8
+		numwords_a		: natural;
+		widthad_a			: natural;
+		width_a				: natural := 8;
+    outdata_reg_b : string := "CLOCK1"
 	);
 	PORT
 	(
@@ -80,7 +81,7 @@ BEGIN
 		numwords_b => numwords_a,
 		operation_mode => "DUAL_PORT",
 		outdata_aclr_b => "NONE",
-		outdata_reg_b => "CLOCK1",
+		outdata_reg_b => outdata_reg_b,
 		power_up_uninitialized => "FALSE",
 		widthad_a => widthad_a,
 		widthad_b => widthad_a,

@@ -79,6 +79,8 @@ begin
 			-- default values
     	rgb.r <= (others => '0'); rgb.g <= (others => '0'); rgb.b <= (others => '0');
 
+      -- this isn't right - need to re-think...
+      -- also need to add pipeline delay to match longest delay
       if (vblank = '1') or (hblank = '1') then
       	xcount := (others => '0');
 			else

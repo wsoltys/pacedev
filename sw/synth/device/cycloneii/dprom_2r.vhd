@@ -7,13 +7,15 @@ USE altera_mf.all;
 ENTITY dprom_2r IS
 	GENERIC
 	(
-		INIT_FILE		: string := "";
-		NUMWORDS_A	: natural;
-		WIDTHAD_A		: natural;
-		WIDTH_A			: natural := 8;
-		NUMWORDS_B	: natural;
-		WIDTHAD_B		: natural;
-		WIDTH_B			: natural := 8
+		INIT_FILE			: string := "";
+		NUMWORDS_A		: natural;
+		WIDTHAD_A			: natural;
+		WIDTH_A				: natural := 8;
+		NUMWORDS_B		: natural;
+		WIDTHAD_B			: natural;
+		WIDTH_B				: natural := 8;
+    outdata_reg_a : string := "UNREGISTERED";
+    outdata_reg_b : string := "UNREGISTERED"
 	);
 	PORT
 	(
@@ -106,8 +108,8 @@ BEGIN
 		operation_mode => "BIDIR_DUAL_PORT",
 		outdata_aclr_a => "NONE",
 		outdata_aclr_b => "NONE",
-		outdata_reg_a => "UNREGISTERED",
-		outdata_reg_b => "UNREGISTERED",
+		outdata_reg_a => outdata_reg_a,
+		outdata_reg_b => outdata_reg_b,
 		power_up_uninitialized => "FALSE",
 		ram_block_type => "M4K",
 		widthad_a => WIDTHAD_A,
