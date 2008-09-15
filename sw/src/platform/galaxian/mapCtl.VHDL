@@ -44,7 +44,7 @@ port
 );
 end tilemapCtl_1;
 
-architecture beh of tilemapCtl_1 is
+architecture SYN of tilemapCtl_1 is
 begin
 
 	-- these are constant for a whole line
@@ -82,7 +82,7 @@ begin
       -- 2nd stage of pipeline
       -- - read tile data from tile ROM
       tile_a(11 downto 4) <= tilemap_d(7 downto 0); -- each tile is 16 bytes
-      tile_a(0) <= x_r(3+2);
+      tile_a(0) <= x_r(2*3+2);
       
       -- 3rd stage of pipeline
       -- - assign pixel colour based on tile data
@@ -122,5 +122,4 @@ begin
 
   end process;
 
-end beh;
-
+end SYN;

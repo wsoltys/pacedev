@@ -331,7 +331,7 @@ begin
   up_inst : entity work.uPse                                                
     port map
     (
-      clk			=> '0', --clk_20M,                                   
+      clk			=> clk_20M,                                   
       clk_en	=> clk_2M_en,
       reset  	=> cpu_reset,                                     
 

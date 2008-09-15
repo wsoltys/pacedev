@@ -92,6 +92,7 @@ architecture SYN of Game is
 	
   -- uP signals  
   signal clk_3M_en			: std_logic;
+  signal cpu_clk_en     : std_logic;
   signal uP_addr        : std_logic_vector(15 downto 0);
   signal uP_datai       : std_logic_vector(7 downto 0);
   signal uP_datao       : std_logic_vector(7 downto 0);
@@ -222,11 +223,14 @@ begin
       clk_en		=> clk_3M_en
     );
   
+  -- accomodate pause function
+  cpu_clk_en <= clk_3M_en and not switches_i(8);
+  
   U_uP : entity work.uPse                                                
     port map
     (
       clk 		=> clk_30M,                                   
-      clk_en	=> clk_3M_en,
+      clk_en	=> cpu_clk_en,
       reset  	=> reset_i,                                     
 
       addr   	=> uP_addr,
