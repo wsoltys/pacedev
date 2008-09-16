@@ -89,7 +89,7 @@ end Game;
 architecture SYN of Game is
 
 	alias clk_24M					: std_logic is clk_i(0);
-	alias clk_40M					: std_logic is clk_i(1);
+	alias clk_video				: std_logic is clk_i(1);
 	
   -- VRAM signals       
 	signal vram_cs				: std_logic;
@@ -142,8 +142,6 @@ begin
 	end generate GEN_PAL_DAT;
 
   -- unused outputs
-	tilemapdatao <= (others => '0');
-	tiledatao <= (others => '0');
 	upaddr <= (others => '0');
 	updatao <= (others => '0');
   sprite_reg_addr <= (others => '0');
@@ -186,9 +184,9 @@ begin
 		vram_inst : entity work.dpram
       generic map
       (
-        init_file => "",
-        numwords_a => 8192,
-        widthad_a => 13
+        init_file => "vram.hex",
+        numwords_a => 1024,
+        widthad_a => 10
       )
 	    port map
 	    (
@@ -198,11 +196,26 @@ begin
 	        q_b					=> open,
 	        wren_b			=> '0',
 
-	        clock_a     => clk_40M,
-	        address_a   => bitmap_addr(12 downto 0),
+	        clock_a     => clk_video,
+	        address_a   => tilemapaddr(9 downto 0),
       		data_a      => (others => '0'),
-	        q_a					=> bitmap_data,
+	        q_a					=> tilemapdatao(7 downto 0),
       		wren_a			=> '0'
 	    );
-
+	tilemapdatao(15 downto 8) <= (others => '0');
+	
+	gfxrom_inst : entity work.sprom
+		generic map
+		(
+			init_file		=> "vram.hex",
+			numwords_a	=> 1024,
+			widthad_a		=> 10
+		)
+		port map
+		(
+			clock			=> clk_video,
+			address		=> tileaddr(9 downto 0),
+			q					=> tiledatao
+		);
+	
 end SYN;
