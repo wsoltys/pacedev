@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP3"
+set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -761,7 +761,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/trs80
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/game.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/mapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/tilemapctl.vhd
 set_global_assignment -name VERILOG_FILE ../../../../../src/platform/midway8080/chargen.v
 set_global_assignment -name VERILOG_FILE ../../../../../src/platform/midway8080/screenbuffer.v
 set_global_assignment -name VERILOG_FILE ../../../../../src/pace/osd/oneshot.v
