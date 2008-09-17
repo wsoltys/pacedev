@@ -522,7 +522,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/trs80
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/game.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/mapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/tilemapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Graphics.VHD
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/toys/pwm_chaser.vhd
