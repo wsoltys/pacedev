@@ -142,8 +142,18 @@ begin
 
         when PACE_VIDEO_LCM_320x240_60Hz =>
           -- DE1/2
+
         when PACE_VIDEO_CVBS_720x288p_50Hz =>
-          -- generic composite
+          -- generic composite, clk=13.5MHz
+          h_front_porch_r <= (8+12);
+          h_sync_r <= 64;
+          h_back_porch_r <= (144-64-(8+12));
+          h_border_r <= (720-VIDEO_H_SIZE)/2;
+          v_front_porch_r <= 1;
+          v_sync_r <= 3;
+          v_back_porch_r <= 20;
+          v_border_r <= (288-VIDEO_V_SIZE)/2;
+
 				when others =>
 					null;
 			end case;
