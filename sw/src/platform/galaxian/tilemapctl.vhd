@@ -69,20 +69,22 @@ begin
 
 			if hblank = '1' then
 				-- video is clipped left and right (only 224 wide)
-				scroll_x := ('0' & not(attr_d(7 downto 0))) + (256-PACE_VIDEO_H_SIZE)/2 - 1;
+				-- this may need adjustment
+				scroll_x := ('0' & not(attr_d(7 downto 0))) + (256-PACE_VIDEO_H_SIZE)/2 - 2;
 			end if;
 						
       -- 1st stage of pipeline
       -- - read tile from tilemap
       -- - read attribute data
       if stb = '1' then
+				scroll_x := scroll_x + 1;
         tilemap_a(5 downto 0) <= scroll_x(8 downto 3);
       end if;
 
       -- 2nd stage of pipeline
       -- - read tile data from tile ROM
       tile_a(11 downto 4) <= tilemap_d(7 downto 0); -- each tile is 16 bytes
-      tile_a(0) <= x_r(3+2);
+      tile_a(0) <= x_r(3*1+2);
       
       -- 3rd stage of pipeline
       -- - assign pixel colour based on tile data
@@ -114,9 +116,6 @@ begin
 
       -- pipelined because of tile data look-up
       x_r := x_r(x_r'left-3 downto 0) & scroll_x(2 downto 0);
-      if stb = '1' then
-        scroll_x := scroll_x + 1;
-      end if;
 
 		end if;				
 

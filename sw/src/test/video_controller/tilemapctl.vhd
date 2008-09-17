@@ -78,14 +78,14 @@ architecture SYN of tilemapCtl_1 is
 begin
 
 	-- these are constant for a whole line
-	tilemap_a(15 downto 6) <= "0000" & y(8 downto 3);
+	tilemap_a(15 downto 6) <= (others => '0'); --"0000" & y(8 downto 3);
   tile_a(15 downto 12) <= (others => '0');
   --tile_a(3 downto 1) <=  y(2 downto 0);   	-- each row is 2 bytes
   -- generate attribute RAM address
   attr_a <= "0000" & y(7 downto 3) & '0';
 
   -- generate pixel
-  process (clk)
+  tilemapproc: process (clk)
 
 		variable pel : std_logic_vector(1 downto 0);
 		variable pal_entry : pal_entry_typ;
@@ -99,13 +99,14 @@ begin
 
 			if hblank = '1' then
 				-- video is clipped left and right (only 224 wide)
-				scroll_x := (others => '0'); --('0' & not(attr_d(7 downto 0))) + (256-PACE_VIDEO_H_SIZE)/2;
+				scroll_x := (others => '1'); --('0' & not(attr_d(7 downto 0))) + (256-PACE_VIDEO_H_SIZE)/2;
 			end if;
 						
       -- 1st stage of pipeline
       -- - read tile from tilemap
       -- - read attribute data
       if stb = '1' then
+				scroll_x := scroll_x + 1;
         tilemap_a(5 downto 0) <= scroll_x(5 downto 0) after 2 ns; --(8 downto 3);
       end if;
 
@@ -137,23 +138,22 @@ begin
       --rgb.b <= pal_entry(2) & "0000";
 
       rgb.r <= not EXT(tile_d, rgb.r'length) after 2 ns;
+			rgb.b <= (others => '0');
+			rgb.g <= (others => '0');
 
-      if 	pal_entry(0)(5 downto 4) /= "00" or
-          pal_entry(1)(5 downto 4) /= "00" or
-          pal_entry(2)(5 downto 4) /= "00" then
+      --if 	pal_entry(0)(5 downto 4) /= "00" or
+      --    pal_entry(1)(5 downto 4) /= "00" or
+      --    pal_entry(2)(5 downto 4) /= "00" then
         tilemap_on <= '1';
-      else
-        tilemap_on <= '0';
-      end if;
+      --else
+      --  tilemap_on <= '0';
+      --end if;
 
       -- pipelined because of tile data look-up
       x_r := x_r(x_r'left-3 downto 0) & scroll_x(2 downto 0);
-      if stb = '1' then
-        scroll_x := scroll_x + 1;
-      end if;
 
 		end if;				
 
-  end process;
+  end process tilemapproc;
 
 end SYN;

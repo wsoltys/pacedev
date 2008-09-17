@@ -40,7 +40,7 @@ package project_pkg is
   constant PACE_CLK1_DIVIDE_BY              : natural := 3;
   constant PACE_CLK1_MULTIPLY_BY            : natural := 5;  	-- 24*5/3 = 40MHz
   constant PACE_VIDEO_H_SCALE       	      : integer := 1;
-  constant PACE_VIDEO_V_SCALE       	      : integer := 1;
+  constant PACE_VIDEO_V_SCALE       	      : integer := 2;
   constant PACE_ENABLE_ADV724					      : std_logic := '0';
 
   --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_CVBS_720x288p_50Hz;

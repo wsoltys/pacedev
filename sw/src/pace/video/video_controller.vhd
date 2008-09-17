@@ -96,7 +96,7 @@ architecture SYN of pace_video_controller is
 begin
 
   -- registers
-	process (reset, clk)
+	reg_proc: process (reset, clk)
 
 	begin
 		if reset = '1' then
@@ -151,10 +151,10 @@ begin
       border_rgb_r <= BORDER_RGB;
       
 		end if;
-	end process;
+	end process reg_proc;
 
   -- register some arithmetic
-  process (reset, clk, clk_ena)
+  init_proc: process (reset, clk, clk_ena)
   begin
     if reset = '1' then
       null;
@@ -172,9 +172,9 @@ begin
       v_bottom_border_start <= v_video_start + v_video_r;
       v_screen_end <= v_bottom_border_start + v_border_r;
     end if;
-  end process;
+  end process init_proc;
   
-  process (reset, clk)
+  reset_proc: process (reset, clk)
     variable count_v : integer;
   begin
     if reset = '1' then
@@ -187,10 +187,10 @@ begin
         count_v := count_v - 1;
       end if;
     end if;
-  end process;
+  end process reset_proc;
 
   -- video control outputs
-  process (extended_reset, clk, clk_ena)
+  timer_proc: process (extended_reset, clk, clk_ena)
   begin
     if extended_reset = '1' then
       hblank_s <= '1';
@@ -246,19 +246,19 @@ begin
         x_count <= x_count + 1;
       end if; -- rising_edge(clk) and clk_ena = '1'
     end if;
-  end process;
+  end process timer_proc;
 
   -- for video DACs and TFT output
   video_o.clk <= clk;
   
-  process (extended_reset, clk, clk_ena)
-    constant PIPELINE_DELAY : natural := DELAY+1;
-    variable hsync_v_r    : std_logic_vector(PIPELINE_DELAY downto 0) := (others => '0');
-    variable vsync_v_r    : std_logic_vector(PIPELINE_DELAY downto 0) := (others => '0');
-    variable hactive_v_r  : std_logic_vector(PIPELINE_DELAY downto 0) := (others => '0');
-    variable vactive_v_r  : std_logic_vector(PIPELINE_DELAY downto 0) := (others => '0');
-    variable hblank_v_r   : std_logic_vector(PIPELINE_DELAY downto 0) := (others => '0');
-    variable vblank_v_r   : std_logic_vector(PIPELINE_DELAY downto 0) := (others => '0');
+  video_o_proc: process (extended_reset, clk, clk_ena)
+    constant PIPELINE_DELAY : natural := DELAY-1;
+    variable hsync_v_r    : std_logic_vector(PIPELINE_DELAY-1 downto 0) := (others => '0');
+    variable vsync_v_r    : std_logic_vector(PIPELINE_DELAY-1 downto 0) := (others => '0');
+    variable hactive_v_r  : std_logic_vector(PIPELINE_DELAY-1 downto 0) := (others => '0');
+    variable vactive_v_r  : std_logic_vector(PIPELINE_DELAY-1 downto 0) := (others => '0');
+    variable hblank_v_r   : std_logic_vector(PIPELINE_DELAY-1 downto 0) := (others => '0');
+    variable vblank_v_r   : std_logic_vector(PIPELINE_DELAY-1 downto 0) := (others => '0');
     alias hsync_v         : std_logic is hsync_v_r(hsync_v_r'left);
     alias vsync_v         : std_logic is vsync_v_r(vsync_v_r'left);
     alias hactive_v       : std_logic is hactive_v_r(hactive_v_r'left);
@@ -314,6 +314,6 @@ begin
       hblank_v_r := hblank_v_r(hblank_v_r'left-1 downto 0) & hblank_s;
       vblank_v_r := vblank_v_r(vblank_v_r'left-1 downto 0) & vblank_s;
     end if;
-  end process;
+  end process video_o_proc;
   
 end SYN;
