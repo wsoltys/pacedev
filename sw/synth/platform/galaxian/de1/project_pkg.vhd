@@ -22,13 +22,21 @@ package project_pkg is
   
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
 
+  --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_640x480_60Hz;
+  --constant PACE_CLK0_DIVIDE_BY              : natural := 5;
+  --constant PACE_CLK0_MULTIPLY_BY            : natural := 3;   -- 50*3/5 = 30MHz
+  --constant PACE_CLK1_DIVIDE_BY              : natural := 2;
+  --constant PACE_CLK1_MULTIPLY_BY            : natural := 1;  	-- 50*1/2 = 25MHz
+	--constant PACE_VIDEO_H_SCALE       	      : integer := 1;
+	--constant PACE_VIDEO_V_SCALE       	      : integer := 1;
+
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
   constant PACE_CLK0_DIVIDE_BY              : natural := 5;
   constant PACE_CLK0_MULTIPLY_BY            : natural := 3;   -- 50*3/5 = 30MHz
   constant PACE_CLK1_DIVIDE_BY              : natural := 5;
   constant PACE_CLK1_MULTIPLY_BY            : natural := 4;  	-- 50*4/5 = 40MHz
-	constant PACE_VIDEO_H_SCALE               : integer := 2;
-	constant PACE_VIDEO_V_SCALE               : integer := 2;
+	constant PACE_VIDEO_H_SCALE               : integer := 1;
+	constant PACE_VIDEO_V_SCALE               : integer := 1;
 
   --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_CVBS_720x288p_50Hz;
   --constant PACE_CLK0_DIVIDE_BY              : natural := 8;
@@ -39,7 +47,7 @@ package project_pkg is
 	--constant PACE_VIDEO_V_SCALE               : integer := 1;
 	--constant PACE_ENABLE_ADV724					      : std_logic := '1';
 
-  constant PACE_VIDEO_PIPELINE_DELAY        : integer := 6;
+  constant PACE_VIDEO_PIPELINE_DELAY        : integer := 5;
   constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_GREEN;
 
   constant PACE_HAS_OSD                     : boolean := false;

@@ -69,7 +69,7 @@ begin
 
 			if hblank = '1' then
 				-- video is clipped left and right (only 224 wide)
-				scroll_x := ('0' & not(attr_d(7 downto 0))) + (256-PACE_VIDEO_H_SIZE)/2;
+				scroll_x := ('0' & not(attr_d(7 downto 0))) + (256-PACE_VIDEO_H_SIZE)/2 - 1;
 			end if;
 						
       -- 1st stage of pipeline
