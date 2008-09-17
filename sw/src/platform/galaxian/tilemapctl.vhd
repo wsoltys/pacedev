@@ -67,16 +67,12 @@ begin
   begin
   	if rising_edge(clk) then
 
-			if hblank = '1' then
-				-- video is clipped left and right (only 224 wide)
-				-- this may need adjustment
-				scroll_x := ('0' & not(attr_d(7 downto 0))) + (256-PACE_VIDEO_H_SIZE)/2 - 2;
-			end if;
-						
       -- 1st stage of pipeline
       -- - read tile from tilemap
-      -- - read attribute data
-      if stb = '1' then
+			if hblank = '1' then
+				-- video is clipped left and right (only 224 wide)
+				scroll_x := ('0' & not(attr_d(7 downto 0))) + (256-PACE_VIDEO_H_SIZE)/2;
+      elsif stb = '1' then
 				scroll_x := scroll_x + 1;
         tilemap_a(5 downto 0) <= scroll_x(8 downto 3);
       end if;

@@ -520,7 +520,7 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80se.vh
 set_global_assignment -name VHDL_FILE ../../../../src/platform/frogger/uPse.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/bitmapctl.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/mapCtl.VHDL
+set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/tilemapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/flipRow.VHDL
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/SptReg.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/sptCtlVHDL.VHD

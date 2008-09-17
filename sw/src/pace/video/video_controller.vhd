@@ -44,6 +44,8 @@ end pace_video_controller;
 
 architecture SYN of pace_video_controller is
 
+  constant SIM_DELAY          : time := 2 ns;
+
 	constant VIDEO_H_SIZE				: integer := H_SIZE * H_SCALE;
 	constant VIDEO_V_SIZE				: integer := V_SIZE * V_SCALE;
 
@@ -252,7 +254,7 @@ begin
   video_o.clk <= clk;
   
   video_o_proc: process (extended_reset, clk, clk_ena)
-    constant PIPELINE_DELAY : natural := DELAY-1;
+    constant PIPELINE_DELAY : natural := DELAY+1;
     variable hsync_v_r    : std_logic_vector(PIPELINE_DELAY-1 downto 0) := (others => '0');
     variable vsync_v_r    : std_logic_vector(PIPELINE_DELAY-1 downto 0) := (others => '0');
     variable hactive_v_r  : std_logic_vector(PIPELINE_DELAY-1 downto 0) := (others => '0');
@@ -278,34 +280,34 @@ begin
     elsif rising_edge(clk) and clk_ena = '1' then
 
       -- register control signals and handle scaling
-			hblank <= not hactive_s;	-- used only by the bitmap/tilemap/sprite controllers
-			vblank <= not vactive_s;	-- used only by the bitmap/tilemap/sprite controllers
+			hblank <= not hactive_s after SIM_DELAY;	-- used only by the bitmap/tilemap/sprite controllers
+			vblank <= not vactive_s after SIM_DELAY;	-- used only by the bitmap/tilemap/sprite controllers
 			-- handle scaling
-			stb <= stb_cnt_v(H_SCALE-1);
+			stb <= stb_cnt_v(H_SCALE-1) after SIM_DELAY;
       if hactive_s = '1' and vactive_s = '1' then
         stb_cnt_v := stb_cnt_v + 2;
       elsif hblank_s = '0' and vblank_s = '0' then    
         stb_cnt_v := (others => '1');
       end if;
-      x <= EXT(x_s(x_s'left downto H_SCALE-1), x'length);
-      y <= EXT(y_s(y_s'left downto V_SCALE-1), y'length);
+      x <= EXT(x_s(x_s'left downto H_SCALE-1), x'length) after SIM_DELAY;
+      y <= EXT(y_s(y_s'left downto V_SCALE-1), y'length) after SIM_DELAY;
 
       -- register video outputs
       if hactive_v = '1' and vactive_v = '1' then
         -- active video
-        video_o.rgb <= rgb_i;
+        video_o.rgb <= rgb_i after SIM_DELAY;
       elsif hblank_v = '0' and vblank_v = '0' then
         -- border
-        video_o.rgb <= border_rgb_r;
+        video_o.rgb <= border_rgb_r after SIM_DELAY;
       else
-        video_o.rgb.r <= (others => '0');
-        video_o.rgb.g <= (others => '0');
-        video_o.rgb.b <= (others => '0');
+        video_o.rgb.r <= (others => '0') after SIM_DELAY;
+        video_o.rgb.g <= (others => '0') after SIM_DELAY;
+        video_o.rgb.b <= (others => '0') after SIM_DELAY;
       end if;
-      video_o.hsync <= not hsync_v;
-      video_o.vsync <= not vsync_v;
-      video_o.hblank <= hblank_v;
-      video_o.vblank <= vblank_v;
+      video_o.hsync <= not hsync_v after SIM_DELAY;
+      video_o.vsync <= not vsync_v after SIM_DELAY;
+      video_o.hblank <= hblank_v after SIM_DELAY;
+      video_o.vblank <= vblank_v after SIM_DELAY;
       -- pipelined signals
       hsync_v_r := hsync_v_r(hsync_v_r'left-1 downto 0) & hsync_s;
       vsync_v_r := vsync_v_r(vsync_v_r'left-1 downto 0) & vsync_s;
