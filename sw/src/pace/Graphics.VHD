@@ -500,12 +500,3 @@ begin
   end generate GEN_NO_OSD;
 
 end SYN;
-
---configuration cfg_graphics of Graphics is
---  for SYN
---    for pace_video_controller_inst : pace_video_controller
---      --use entity work.pace_video_controller(VGA_800X600_60HZ);
---      use entity work.pace_video_controller(CVBS_720X288P_50HZ);
---    end for;
---  end for;
---end configuration cfg_graphics;
