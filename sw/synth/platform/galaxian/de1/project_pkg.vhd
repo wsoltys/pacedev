@@ -47,7 +47,6 @@ package project_pkg is
 	--constant PACE_VIDEO_V_SCALE               : integer := 1;
 	--constant PACE_ENABLE_ADV724					      : std_logic := '1';
 
-  constant PACE_VIDEO_PIPELINE_DELAY        : integer := 5;
   constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_GREEN;
 
   constant PACE_HAS_OSD                     : boolean := false;
