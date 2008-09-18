@@ -25,14 +25,14 @@ package project_pkg is
 	--constant PACE_VIDEO_H_SIZE				        : integer := 224;
 	--constant PACE_VIDEO_V_SIZE				        : integer := 256; -- why not 240?
 
-  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_640x480_60Hz;
-  constant PACE_CLK0_DIVIDE_BY              : natural := 6;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 5;   -- 24*5/6 = 20MHz
-  constant PACE_CLK1_DIVIDE_BY              : natural := 19;
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 20; 	-- 24*20/19 = 25.263158MHz
-	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
-	constant PACE_VIDEO_V_SCALE       	      : integer := 2;
-  constant PACE_ENABLE_ADV724					      : std_logic := '0';
+  --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_640x480_60Hz;
+  --constant PACE_CLK0_DIVIDE_BY              : natural := 6;
+  --constant PACE_CLK0_MULTIPLY_BY            : natural := 5;   -- 24*5/6 = 20MHz
+  --constant PACE_CLK1_DIVIDE_BY              : natural := 19;
+  --constant PACE_CLK1_MULTIPLY_BY            : natural := 20; 	-- 24*20/19 = 25.263158MHz
+	--constant PACE_VIDEO_H_SCALE       	      : integer := 1;
+	--constant PACE_VIDEO_V_SCALE       	      : integer := 2;
+  --constant PACE_ENABLE_ADV724					      : std_logic := '0';
 
   --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
   --constant PACE_CLK0_DIVIDE_BY              : natural := 1;
@@ -42,6 +42,14 @@ package project_pkg is
   --constant PACE_VIDEO_H_SCALE       	      : integer := 1;
   --constant PACE_VIDEO_V_SCALE       	      : integer := 1;
   --constant PACE_ENABLE_ADV724					      : std_logic := '0';
+
+  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1024x768_60Hz;
+  constant PACE_CLK0_DIVIDE_BY              : natural := 32;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 13;    -- 50*13/32 = 20.3125MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 10;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 13;    -- 50*13/10 = 65MHz
+	constant PACE_VIDEO_H_SCALE       	      : integer := 2;
+	constant PACE_VIDEO_V_SCALE       	      : integer := 2;
 
   --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_CVBS_720x288p_50Hz;
   --constant PACE_CLK0_DIVIDE_BY              : natural := 32;

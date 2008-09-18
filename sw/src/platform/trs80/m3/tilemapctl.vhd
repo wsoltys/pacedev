@@ -16,6 +16,12 @@ use work.project_pkg.all;
 --	Tile data is 1 BPP.
 --
 
+-- NOTE: this is currently broken when borders = 0
+-- - eg. 1024x768 x2 
+--   because the controller comes out of hblank (pipelined) when vblank is not asserted
+--   and then vcount is incremented before the 1st line starts displaying
+--
+
 entity tilemapCtl_1 is          
 port               
 (
