@@ -54,13 +54,13 @@ use work.project_pkg.all;
 use work.video_controller_pkg.all;
 use work.platform_pkg.all;
 
-entity video_tb is
+entity tb_video is
 	port (
 		fail:				out  boolean := false
 	);
-end video_tb;
+end tb_video;
 
-architecture SYN of video_tb is
+architecture SYN of tb_video is
 
 	signal clk				: std_logic	:= '0';
 	signal reset			: std_logic	:= '1';
