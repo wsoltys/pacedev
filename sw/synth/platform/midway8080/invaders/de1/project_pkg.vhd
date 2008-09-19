@@ -56,9 +56,6 @@ package project_pkg is
 
 	-- Invaders-specific constants
 	
-	constant INVADERS_CPU_CLK_ENA_DIVIDE_BY   : natural := 10;
-	constant INVADERS_1MHz_CLK0_COUNTS		    : natural := 20;
-
   constant INVADERS_ROM_IN_FLASH            : boolean := false;
   constant PACE_HAS_FLASH                   : boolean := INVADERS_ROM_IN_FLASH;
   

@@ -6,8 +6,9 @@ use ieee.std_logic_arith.all;
 library work;
 use work.pace_pkg.all;
 use work.kbd_pkg.in8;
-use work.platform_variant_pkg.all;
 use work.project_pkg.all;
+use work.platform_pkg.all;
+use work.platform_variant_pkg.all;
 
 entity Game is
   port
@@ -90,7 +91,7 @@ end Game;
 architecture SYN of Game is
 
 	alias clk_24M					: std_logic is clk_i(0);
-	alias clk_40M					: std_logic is clk_i(1);
+	alias clk_video       : std_logic is clk_i(1);
 	
   -- uP signals  
   signal clk_2M_en			: std_logic;
@@ -356,7 +357,7 @@ begin
 			clk_en		=> clk_2M_en
 		);
 		
-  U_uP : entity work.uPse                                                
+  U_uP : entity work.Z80                                                
     port map
     (
       clk			=> clk_24M,                                   
@@ -461,7 +462,7 @@ begin
 	        q_b					=> vram_datao,
 	        wren_b			=> vram_wr,
 
-	        clock_a     => clk_40M,
+	        clock_a     => clk_video,
 	        address_a   => bitmap_addr_rotated,
       		data_a      => (others => '0'),
 	        q_a					=> bitmap_data,

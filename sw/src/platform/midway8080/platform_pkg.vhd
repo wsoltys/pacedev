@@ -23,4 +23,9 @@ package platform_pkg is
 	-- Platform-specific constants (optional)
 	--
 
+	constant INVADERS_1MHz_CLK0_COUNTS				: natural := 
+    PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
+	constant INVADERS_CPU_CLK_ENA_DIVIDE_BY		: natural := 
+    INVADERS_1MHz_CLK0_COUNTS / 2;
+
 end;
