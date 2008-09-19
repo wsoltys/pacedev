@@ -277,7 +277,7 @@ begin
       end if;
     end process;
 
-    lcd_dclk <= video_i.clk;
+    lcd_dclk <= video_i.clk_ena;
     lcd_red <= video_o.rgb.r(video_o.rgb.r'left downto video_o.rgb.r'left-5);
     lcd_green <= video_o.rgb.g(video_o.rgb.g'left downto video_o.rgb.g'left-5);
     lcd_blue <= video_o.rgb.b(video_o.rgb.b'left downto video_o.rgb.b'left-5);

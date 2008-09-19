@@ -264,8 +264,8 @@ begin
           hactive_s <= '0';
         end if;
         x_count <= x_count + 1;
-      end if; -- rising_edge(clk) and clk_ena = '1'
-    end if;
+      end if;
+    end if; -- rising_edge(clk) and clk_ena = '1'
   end process timer_proc;
 
   -- for video DACs and TFT output
