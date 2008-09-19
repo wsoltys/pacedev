@@ -512,7 +512,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_M
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_Reg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80se.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/frogger/uPse.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/Z80.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/inputmapper.vhd

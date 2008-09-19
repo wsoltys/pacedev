@@ -328,7 +328,7 @@ begin
 			clk_en		=> clk_2M_en
 		);
 
-  up_inst : entity work.uPse                                                
+  up_inst : entity work.Z80                                                
     port map
     (
       clk			=> clk_20M,                                   
