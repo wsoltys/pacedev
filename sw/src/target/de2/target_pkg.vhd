@@ -12,8 +12,13 @@ package target_pkg is
 	--
 	
 	constant PACE_TARGET 				: PACETargetType := PACE_TARGET_DE2;
+
 	constant PACE_FPGA_VENDOR		: PACEFpgaVendor_t := PACE_FPGA_VENDOR_ALTERA;
 	constant PACE_FPGA_FAMILY		: PACEFpgaFamily_t := PACE_FPGA_FAMILY_CYCLONE2;
+
+  constant PACE_CLKIN0      : natural := 50;
+  constant PACE_CLKIN1      : natural := 27;
+  constant PACE_HAS_SPI     : boolean := false;
 
 	--
 	-- DE2-specific constants

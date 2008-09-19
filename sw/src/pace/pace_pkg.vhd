@@ -61,7 +61,7 @@ package pace_pkg is
 	-- - note: all signals are active LOW
 	--
 
-	type JAMMAPlayerInputsType is record
+	type from_JAMMA_player_t is record
 		start			: std_logic;
 		up				: std_logic;
 		down			: std_logic;
@@ -70,7 +70,7 @@ package pace_pkg is
 		button		: std_logic_vector(1 to 5);
 	end record;
 
-	type JAMMAPlayerInputsArrayType is array (natural range <>) of JAMMAPlayerInputsType;
+	type from_JAMMA_player_a is array (natural range <>) of from_JAMMA_player_t;
 	
 	type from_JAMMA_t is record
 		coin_cnt	: std_logic_vector(1 to 2);
@@ -78,7 +78,7 @@ package pace_pkg is
 		tilt			: std_logic;
 		test			: std_logic;
 		coin			: std_logic_vector(1 to 2);
-		p					: JAMMAPlayerInputsArrayType(1 to 2);
+		p					: from_JAMMA_player_a(1 to 2);
 	end record;
 
   --

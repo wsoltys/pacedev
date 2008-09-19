@@ -138,21 +138,6 @@ architecture SYN of target_top is
     );
   end component;
 
- 	component gamecube_joy is
-		generic 
-		(
-			MHZ				: natural := 50
-		);
-	  port 
-		(
-			clk  	    : in std_logic;
-			reset			: in std_logic;
-			oe				: out std_logic;
-			d				  : inout std_logic;
-			joystate	: out work.gamecube_pkg.joystate_type
-		);
-	end component;
-
 	alias gpio_maple 		: std_logic_vector(35 downto 0) is gpio_0;
 	alias gpio_lcd 			: std_logic_vector(35 downto 0) is gpio_1;
 	
