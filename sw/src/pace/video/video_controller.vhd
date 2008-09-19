@@ -105,7 +105,15 @@ begin
 			case CONFIG is
 
         when PACE_VIDEO_VGA_240x320_60Hz =>
-          -- P3M
+          -- P3M, clk=11.136MHz, clk_ena=5.568MHz
+          h_front_porch_r <= 272-240;
+          h_sync_r <= 5;
+          h_back_porch_r <= 22;
+          h_border_r <= (240-VIDEO_H_SIZE)/2;
+          v_front_porch_r <= 326-320;
+          v_sync_r <= 1;
+          v_back_porch_r <= 5;
+          v_border_r <= (320-VIDEO_V_SIZE)/2;
 
         when PACE_VIDEO_VGA_640x480_60Hz =>
           -- VGA, clk=25.175MHz

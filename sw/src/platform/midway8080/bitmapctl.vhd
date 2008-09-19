@@ -15,6 +15,7 @@ entity bitmapCtl_1 is
 port               
 (
     clk         	: in std_logic;
+    clk_ena       : in std_logic;
 		reset					: in std_logic;
 
 		-- video control signals		
@@ -50,7 +51,7 @@ begin
 		variable pel : std_logic;
 		
   begin
-  	if rising_edge(clk) then
+  	if rising_edge(clk) and clk_ena = '1' then
 
       -- 1st stage of pipeline
       -- - read tile from tilemap

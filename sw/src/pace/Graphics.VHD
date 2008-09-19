@@ -58,6 +58,7 @@ architecture SYN of Graphics is
 	port               
 	(
 	    clk         	: in std_logic;
+	    clk_ena       : in std_logic;
 			reset					: in std_logic;
 			
 			-- video control signals		
@@ -238,7 +239,7 @@ begin
     port map
     (
       clk         		=> video_i.clk,
-      clk_ena     		=> '1',
+      clk_ena     		=> video_i.clk_ena,
       reset						=> reset,
 
 			-- register interface
@@ -275,7 +276,8 @@ begin
 	  bitmapctl_inst : bitmapCtl_1
 	    port map
 	    (
-	      clk      			=> clk,
+	      clk      			=> video_i.clk,
+	      clk_ena       => video_i.clk_ena,
 				reset					=> reset,
 				
 				stb           => pix_clk_ena,

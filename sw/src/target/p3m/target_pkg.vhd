@@ -13,10 +13,7 @@ package target_pkg is
 	
 	constant PACE_TARGET : PACETargetType := PACE_TARGET_P3M;
 
-	constant P3M_JAMMA_IS_MAPLE	: boolean := false;
-	alias P3M_JAMMA_IS_DREAMCAST : boolean is P3M_JAMMA_IS_MAPLE;
-
-	constant P3M_JAMMA_IS_NGC : boolean := false; --not P3M_JAMMA_IS_MAPLE;
-	alias P3M_JAMMA_IS_GAMECUBE : boolean is P3M_JAMMA_IS_NGC;
+  constant PACE_CLKIN0        : natural := 24;
+  constant PACE_CLKIN1        : natural := 0;
 
 end;
