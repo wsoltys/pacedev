@@ -14,7 +14,7 @@
 
 
 # The default values for assignments are stored in the file
-#		invaders_assignment_defaults.qdf
+#		lrescue_assignment_defaults.qdf
 # If this file doesn't exist, and for assignments not listed, see file
 #		assignment_defaults.qdf
 
@@ -258,7 +258,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/platform_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/invaders/platform_variant_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/lrescue/platform_variant_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/p3m/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/sprom.vhd
