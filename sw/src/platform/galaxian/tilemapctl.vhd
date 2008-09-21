@@ -56,7 +56,7 @@ begin
   attr_a <= "0000" & y(7 downto 3) & '0';
 
   -- generate pixel
-  process (clk)
+  process (clk, clk_ena)
 
 		variable pel : std_logic_vector(1 downto 0);
 		variable pal_entry : pal_entry_typ;
