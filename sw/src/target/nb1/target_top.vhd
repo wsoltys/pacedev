@@ -179,7 +179,7 @@ begin
   -- buttons - active low
   buttons_i <= EXT("0", buttons_i'length);
   -- switches - up = high
-  switches_i <= EXT(sw, switches_i'length);
+  switches_i <= EXT(not sw, switches_i'length);
   -- leds
   leds <= leds_o(leds'range);
 
