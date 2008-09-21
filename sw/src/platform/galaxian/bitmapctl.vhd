@@ -15,6 +15,7 @@ entity bitmapCtl_1 is
 port               
 (
     clk         	: in std_logic;
+    clk_ena       : in std_logic;
 		reset					: in std_logic;
 
 		-- video control signals		

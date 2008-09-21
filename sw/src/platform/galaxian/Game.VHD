@@ -226,7 +226,7 @@ begin
   -- accomodate pause function
   cpu_clk_en <= clk_3M_en and not switches_i(8);
   
-  U_uP : entity work.uPse                                                
+  U_uP : entity work.Z80                                                
     port map
     (
       clk 		=> clk_30M,                                   

@@ -85,6 +85,7 @@ architecture SYN of Graphics is
 	port               
 	(
 	    clk         : in std_logic;
+	    clk_ena     : in std_logic;
 			reset				: in std_logic;
 			
 			-- video control signals		
@@ -115,6 +116,7 @@ architecture SYN of Graphics is
 	port               
 	(
 	    clk         : in std_logic;
+	    clk_ena     : in std_logic;
 			reset				: in std_logic;
 			
 			-- video control signals		
@@ -315,7 +317,8 @@ begin
 	  foreground_mapctl_inst : tilemapCtl_1
 	    port map
 	    (
-	      clk      			=> clk,
+	      clk      			=> video_i.clk,
+        clk_ena     	=> video_i.clk_ena,
 				reset					=> reset,
 				
 				stb				    => pix_clk_ena,

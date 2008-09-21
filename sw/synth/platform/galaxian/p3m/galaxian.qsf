@@ -28,7 +28,7 @@ set_global_assignment -name FAMILY "Cyclone II"
 set_global_assignment -name TOP_LEVEL_ENTITY target_top
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 7.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "07:57:19  AUGUST 20, 2007"
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
 set_location_assignment PIN_E19 -to sdram_clock
 set_location_assignment PIN_L22 -to clock
 set_location_assignment PIN_N1 -to lcd_dclk
@@ -180,7 +180,7 @@ set_location_assignment PIN_R20 -to flash_we
 set_location_assignment PIN_T22 -to flash_byte
 set_location_assignment PIN_R18 -to flash_rb
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
-set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_instance_assignment -name CURRENT_STRENGTH_NEW "MINIMUM CURRENT" -to sdram_clock
 set_instance_assignment -name CURRENT_STRENGTH_NEW "MINIMUM CURRENT" -to clock
 set_instance_assignment -name CURRENT_STRENGTH_NEW "MINIMUM CURRENT" -to lcd_dclk
@@ -249,6 +249,16 @@ set_instance_assignment -name CURRENT_STRENGTH_NEW "MINIMUM CURRENT" -to lcd_led
 set_instance_assignment -name CURRENT_STRENGTH_NEW "MINIMUM CURRENT" -to lcd_dtmg
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to st1
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to st2
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to lcd_red[*]
+set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to lcd_red[*]
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to lcd_green[*]
+set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to lcd_green[*]
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to lcd_blue[*]
+set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to lcd_blue[*]
+set_instance_assignment -name REPORT_DELAY ON -from * -to lcd_red[*]
+set_instance_assignment -name REPORT_DELAY ON -from * -to lcd_green[*]
+set_instance_assignment -name REPORT_DELAY ON -from * -to lcd_blue[*]
+set_instance_assignment -name MIN_TCO_REQUIREMENT "5 ns" -from * -to lcd_dclk
 set_global_assignment -name ENABLE_SIGNALTAP OFF
 set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
 set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
@@ -274,11 +284,10 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_MCod
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_Reg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80se.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/frogger/uPse.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/Z80.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/vga_240x320_60Hz.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/bitmapctl.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/mapCtl.VHDL
+set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/tilemapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/flipRow.VHDL
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/SptReg.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/sptCtlVHDL.VHD
@@ -291,7 +300,7 @@ set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/Galaxian
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/Galaxian_vramMapper.VHDL
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/Game.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/p3m/target_top.vhd
-set_global_assignment -name SIGNALTAP_FILE stp1.stp
