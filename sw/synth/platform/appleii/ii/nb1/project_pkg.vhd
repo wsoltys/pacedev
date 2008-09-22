@@ -26,4 +26,7 @@ package project_pkg is
   constant NB1_PLL_INCLK                    : NANOBOARD_PLL_INCLK_Type := NANOBOARD_PLL_INCLK_REF;
   constant NB1_INCLK0_INPUT_FREQUENCY       : natural := 50000;   -- 20MHz
 
+	-- Apple II-specific constants      			
+  constant APPLE_II_HIRES_PAGES             : natural := 1;
+
 end;

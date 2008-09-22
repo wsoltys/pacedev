@@ -48,7 +48,7 @@ architecture SYN of tilemapCtl_1 is
 
 begin
 
-	tilemap_a(12 downto 10) <= (others => '0');
+	tilemap_a(tilemap_a'left downto 10) <= (others => '0');
   tile_a(12 downto 11) <= (others => '0');
 
 	-- these are constant for a whole line
@@ -61,88 +61,84 @@ begin
   -- generate pixel
   process (clk, clk_ena, reset)
 
-		variable pix_x_r		: std_logic_vector(5 downto 0);
-		variable pel 				: std_logic;
-		variable x_count		: std_logic_vector(8 downto 0);
+		-- pipelined pixel X location
+		variable x_r	    : std_logic_vector((PACE_VIDEO_PIPELINE_DELAY-1)*3-1 downto 0);
+		variable x_count	: std_logic_vector(8 downto 0);
+		variable pel 			: std_logic;
 		
   begin
-		if reset = '1' then
-			null;
-			
-  	elsif rising_edge(clk) and clk_ena = '1' then
+  	if rising_edge(clk) and clk_ena = '1' then
 
-			if vblank = '1' then
-				null;
+      -- 1st stage of pipeline
+      -- - read tile from tilemap
 
-			elsif hblank = '1' then
-				x_count := (others => '0');
-				
-			elsif hblank = '0' then
-						
-				-- 1st stage of pipeline
-				-- - read tile from tilemap
-				-- - read attribute data
-				tilemap_a(9 downto 0) <= (col0_addr & "000") + ("0000" & x_count(8 downto 3));
-
-				-- 2nd stage of pipeline
-				-- - read tile data from tile ROM
-			  tile_a(10 downto 3) <= tilemap_d(7 downto 0);
-
-		    -- we don't implement a separate attribute memory
-		    -- instead we need to 'feed back' bits 7:6 of the ascii code to the next pipelined stage
-		    -- so we know as we're rendering the pixels whether or not the video should be
-		    -- inverted or flashing etc
-		    attr_a <= EXT(tilemap_d(7 downto 6), attr_a'length);
-
-				-- we need to know if the characters are flashing and/or inverted
-        -- to this this we 'feed back' bits 7:6 of the ascii code via attrA
-        -- back to attrD 9:8. We also get the flash timer in attrD 10.
-
-				-- if (inverse) or (flashing and flash_on)
-        if (attr_d(9 downto 8) = "00") or ((attr_d(9 downto 8) = "01") and (attr_d(10) = '1')) then
-          --fg <= attrD(7 downto 4);
-          --bg <= attrD(3 downto 0);
+			if hblank = '1' then
+				x_count := (others => '1');
+			elsif stb = '1' then
+        if x_count(2 downto 0) = "110" then
+          x_count := x_count + 2;
         else
-          --fg <= attrD(3 downto 0);
-        	--bg <= attrD(7 downto 4);
-				end if;
+          x_count := x_count + 1;
+        end if;
+				tilemap_a(9 downto 0) <= (col0_addr & "000") + ("0000" & x_count(8 downto 3));
+      end if;
+      
+      -- 2nd stage of pipeline
+      -- - read tile data from tile ROM
+      tile_a(10 downto 3) <= tilemap_d(7 downto 0);
 
-				case pix_x_r(pix_x_r'left downto pix_x_r'left-2) is
-					when "000" =>
-						pel := '0';
-					when "001" =>
-						pel := tile_d(6);
-					when "010" =>
-						pel := tile_d(5);
-					when "011" =>
-						pel := tile_d(4);
-					when "100" =>
-						pel := tile_d(3);
-					when "101" =>
-						pel := tile_d(2);
-					when "110" =>
-						pel := tile_d(1);
-					when others =>
-						pel := tile_d(0);
-				end case;
+      -- we don't implement a separate attribute memory
+      -- instead we need to 'feed back' bits 7:6 of the ascii code to the next pipelined stage
+      -- so we know as we're rendering the pixels whether or not the video should be
+      -- inverted or flashing etc
+      attr_a <= EXT(tilemap_d(7 downto 6), attr_a'length);
+
+      -- we need to know if the characters are flashing and/or inverted
+      -- to this this we 'feed back' bits 7:6 of the ascii code via attrA
+      -- back to attrD 9:8. We also get the flash timer in attrD 10.
+
+      -- if (inverse) or (flashing and flash_on)
+      if (attr_d(9 downto 8) = "00") or ((attr_d(9 downto 8) = "01") and (attr_d(10) = '1')) then
+        --fg <= attrD(7 downto 4);
+        --bg <= attrD(3 downto 0);
+      else
+        --fg <= attrD(3 downto 0);
+        --bg <= attrD(7 downto 4);
+      end if;
+
+			-- 3rd stage of pipeline
+      -- - assign pixel colour based on tile data
+      -- (each byte contains information for 8 pixels)
+      case x_r(x_r'left downto x_r'left-2) is
+        when "000" =>
+          pel := '0';
+        when "001" =>
+          pel := tile_d(6);
+        when "010" =>
+          pel := tile_d(5);
+        when "011" =>
+          pel := tile_d(4);
+        when "100" =>
+          pel := tile_d(3);
+        when "101" =>
+          pel := tile_d(2);
+        when "110" =>
+          pel := tile_d(1);
+        when others =>
+          pel := tile_d(0);
+      end case;
 									
-	      -- green-screen display
-				rgb.r <= (others => '0');
-				rgb.g <= (others => pel);
-				rgb.b <= (others => '0');
+      -- green-screen display
+      rgb.r <= (others => '0');
+      rgb.g <= (others => pel);
+      rgb.b <= (others => '0');
 				
-			end if; -- hblank = '0'
-		
 			-- pipelined because of tile data loopkup
-			pix_x_r := pix_x_r(pix_x_r'left-3 downto 0) & x_count(2 downto 0);
-			if x_count(2 downto 0) = "110" then
-				x_count := x_count + 2;
-			else
-				x_count := x_count + 1;
-			end if;
+			x_r := x_r(x_r'left-3 downto 0) & x_count(2 downto 0);
+
 		end if;				
 
-	tilemap_on <= pel;
+    tilemap_on <= pel;
 
   end process;
 

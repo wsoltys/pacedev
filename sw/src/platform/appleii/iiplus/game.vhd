@@ -5,37 +5,57 @@ use ieee.std_logic_arith.EXT;
 
 library work;
 use work.pace_pkg.all;
-use work.target_pkg.all;
 use work.kbd_pkg.all;
+use work.project_pkg.all;
+use work.target_pkg.all;
 
 entity Game is
   port
   (
     -- clocking and reset
-    clk							: in std_logic_vector(0 to 3);                       
-    reset           : in std_logic;                       
-    test_button     : in std_logic;                       
+    clk_i           : in std_logic_vector(0 to 3);
+    reset_i         : in std_logic;
 
-    -- inputs
-    ps2clk          : inout std_logic;                       
-    ps2data         : inout std_logic;                       
-    dip             : in std_logic_vector(7 downto 0);    
-		jamma						: in JAMMAInputsType;
+    -- misc I/O
+    buttons_i       : in from_BUTTONS_t;
+    switches_i      : in from_SWITCHES_t;
+    leds_o          : out to_LEDS_t;
+
+    -- controller inputs
+    inputs_i        : in from_INPUTS_t;
 		
     -- micro buses
     upaddr          : out std_logic_vector(15 downto 0);   
     updatao         : out std_logic_vector(7 downto 0);    
 
-    -- SRAM
+    -- FLASH/SRAM
+    flash_i         : in from_FLASH_t;
+    flash_o         : out to_FLASH_t;
 		sram_i					: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
+
+    -- SPI (flash)
+    spi_i           : in from_SPI_t;
+    spi_o           : out to_SPI_t;
+
+    -- serial
+    ser_i           : in from_SERIAL_t;
+    ser_o           : out to_SERIAL_t;
+
+    -- general purpose I/O
+    gp_i            : in from_GP_t;
+    gp_o            : out to_GP_t;
+    
+    --
+    --
+    --
 
     gfxextra_data   : out std_logic_vector(7 downto 0);
 		palette_data		: out ByteArrayType(15 downto 0);
 
-      -- graphics (bitmap)
-		bitmap_addr			: in std_logic_vector(15 downto 0);
-		bitmap_data			: out std_logic_vector(7 downto 0);
+    -- graphics (bitmap)
+    bitmap_addr			: in    std_logic_vector(15 downto 0);   
+    bitmap_data			: out   std_logic_vector(7 downto 0);    
 
     -- graphics (tilemap)
     tileaddr        : in std_logic_vector(15 downto 0);   
@@ -49,8 +69,8 @@ entity Game is
     sprite_reg_addr : out std_logic_vector(7 downto 0);    
     sprite_wr       : out std_logic;                       
     spriteaddr      : in std_logic_vector(15 downto 0);   
-    spritedata      : out std_logic_vector(31 downto 0);
-		spr0_hit				: in std_logic;
+    spritedata      : out std_logic_vector(31 downto 0);   
+    spr0_hit        : in std_logic;
 
     -- graphics (control)
     vblank          : in std_logic;    
@@ -64,29 +84,14 @@ entity Game is
     -- sound
     snd_rd          : out std_logic;                       
     snd_wr          : out std_logic;
-    sndif_datai     : in std_logic_vector(7 downto 0);    
-
-    -- spi interface
-    spi_clk         : out std_logic;                       
-    spi_din         : in std_logic;                       
-    spi_dout        : out std_logic;                       
-    spi_ena         : out std_logic;                       
-    spi_mode        : out std_logic;                       
-    spi_sel         : out std_logic;                       
-
-    -- serial
-    ser_rx          : in std_logic;                       
-    ser_tx          : out std_logic;                       
-
-    -- on-board leds
-    leds            : out std_logic_vector(7 downto 0)    
+    sndif_datai     : in std_logic_vector(7 downto 0)
   );
 end Game;
 
 architecture SYN of Game is
 
-	alias clk_30M					: std_logic is clk(0);
-	alias clk_40M					: std_logic is clk(1);
+	alias clk_30M					: std_logic is clk_i(0);
+	alias clk_video       : std_logic is clk_i(1);
 	
 	signal reset_n				: std_logic;
 	
@@ -135,7 +140,7 @@ architecture SYN of Game is
 	
 begin
 
-	reset_n <= not reset;
+	reset_n <= not reset_i;
 	
 	GEN_PAL_DAT : for i in palette_data'range generate
 		palette_data(i) <= (others => '0');
@@ -195,11 +200,11 @@ begin
   vram_wr <= not up_rw_n and vram_cs;
 	hgr_wr <= not up_rw_n and (hgr1_cs or hgr0_cs);
 	
-  process (clk_30M, reset)
+  process (clk_30M, reset_i)
   	-- 'softswitch' latches (2 bytes)
   	variable a2var_r    	: std_logic_vector(15 downto 0);
  	begin
-		if reset = '1' then
+		if reset_i = '1' then
     	a2var_r := X"0100"; -- text mode
   	elsif rising_edge (clk_30M) then
 			-- write to C00X sets the LSB bits of a2_var
@@ -246,13 +251,7 @@ begin
   snd_rd <= '0';
   sprite_reg_addr <= (others => '0');
 	sprite_wr <= '0';
-	spi_clk <= '0';
-	spi_dout <= '0';
-	spi_ena <= '0';
-	spi_mode <= '0';
-	spi_sel <= '0';
-	ser_tx <= 'X';
-	leds <= inputs(0);
+	leds_o <= EXT(inputs(0), leds_o'length);
 	
   --
   -- COMPONENT INSTANTIATION
@@ -267,7 +266,7 @@ begin
 		port map
 		(
 			clk				=> clk_30M,
-			reset			=> reset,
+			reset			=> reset_i,
 			clk_en		=> clk_1M_en
 		);
 
@@ -305,10 +304,10 @@ begin
 	  port map
 	  (
 	    clk     		=> clk_30M,
-	    reset   		=> reset,
-	    ps2clk  		=> ps2clk,
-	    ps2data 		=> ps2data,
-			jamma				=> jamma,
+	    reset   		=> reset_i,
+	    ps2clk  		=> inputs_i.ps2_kclk,
+	    ps2data 		=> inputs_i.ps2_kdat,
+			jamma				=> inputs_i.jamma_n,
 
 			dips(7 downto 1)	=> (others =>'0'),
 	    dips(0)			=> keybd_clr,
@@ -319,7 +318,7 @@ begin
 		port map
 		(
 	    clk       	=> clk_30M,
-	    reset     	=> reset,
+	    reset     	=> reset_i,
 
 	    -- inputs
 	    --vsync_n   : in     std_logic;
@@ -368,12 +367,12 @@ begin
 		)
 		port map
 		(
-			clock			=> clk_30M,
+			clock			=> clk_video,
 			address		=> tileaddr(10 downto 0),
 			q					=> tileDatao
 		);
 	
-	GEN_ONLY_1_HIRES_PAGE : if PACE_TARGET = PACE_TARGET_NANOBOARD_NB1 generate
+	GEN_ONLY_1_HIRES_PAGE : if APPLE_II_HIRES_PAGES = 1 generate
 
 		-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 		hgrram_inst : entity work.dpram
@@ -393,7 +392,7 @@ begin
 				q_b					=> open,				-- 6502 reads from SRAM rather than DPRAM
 				
 				-- graphics interface
-				clock_a			=> clk_40M,
+				clock_a			=> clk_video,
 				address_a		=> hgr_addr(12 downto 0),
 				wren_a			=> '0',
 				data_a			=> (others => 'X'),
@@ -402,7 +401,7 @@ begin
 
 	end generate GEN_ONLY_1_HIRES_PAGE;
 	
-	GEN_2_HIRES_PAGES : if PACE_TARGET /= PACE_TARGET_NANOBOARD_NB1 generate
+	GEN_2_HIRES_PAGES : if APPLE_II_HIRES_PAGES > 1 generate
 
 		-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 		hgrram_inst : entity work.dpram
@@ -422,7 +421,7 @@ begin
 				q_b					=> open,				-- 6502 reads from SRAM rather than DPRAM
 				
 				-- graphics interface
-				clock_a			=> clk_40M,
+				clock_a			=> clk_video,
 				address_a		=> hgr_addr(13 downto 0),
 				wren_a			=> '0',
 				data_a			=> (others => 'X'),
@@ -449,7 +448,7 @@ begin
 			q_b					=> vram_datao,
 			
 			-- graphics interface
-			clock_a			=> clk_40M,
+			clock_a			=> clk_video,
 			address_a		=> tilemapaddr(9 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),

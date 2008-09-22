@@ -90,7 +90,7 @@ end Game;
 architecture SYN of Game is
 
 	alias clk_30M					: std_logic is clk_i(0);
-	alias clk_40M					: std_logic is clk_i(1);
+	alias clk_video				: std_logic is clk_i(1);
 	
 	signal reset_n				: std_logic;
 	
@@ -347,12 +347,12 @@ begin
 		)
 		port map
 		(
-			clock			=> clk_30M,
+			clock			=> clk_video,
 			address		=> tileaddr(10 downto 0),
 			q					=> tileDatao
 		);
 	
-	GEN_ONLY_1_HIRES_PAGE : if PACE_TARGET = PACE_TARGET_NANOBOARD_NB1 generate
+	GEN_ONLY_1_HIRES_PAGE : if APPLE_II_HIRES_PAGES = 1 generate
 
 		-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 		hgrram_inst : entity work.dpram
@@ -372,7 +372,7 @@ begin
 				q_b					=> open,				-- 6502 reads from SRAM rather than DPRAM
 				
 				-- graphics interface
-				clock_a			=> clk_40M,
+				clock_a			=> clk_video,
 				address_a		=> hgr_addr(12 downto 0),
 				wren_a			=> '0',
 				data_a			=> (others => 'X'),
@@ -381,7 +381,7 @@ begin
 
 	end generate GEN_ONLY_1_HIRES_PAGE;
 	
-	GEN_2_HIRES_PAGES : if PACE_TARGET /= PACE_TARGET_NANOBOARD_NB1 generate
+	GEN_2_HIRES_PAGES : if APPLE_II_HIRES_PAGES > 1 generate
 
 		-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 		hgrram_inst : entity work.dpram
@@ -401,7 +401,7 @@ begin
 				q_b					=> open,				-- 6502 reads from SRAM rather than DPRAM
 				
 				-- graphics interface
-				clock_a			=> clk_40M,
+				clock_a			=> clk_video,
 				address_a		=> hgr_addr(13 downto 0),
 				wren_a			=> '0',
 				data_a			=> (others => 'X'),
@@ -428,7 +428,7 @@ begin
 			q_b					=> vram_datao,
 			
 			-- graphics interface
-			clock_a			=> clk_40M,
+			clock_a			=> clk_video,
 			address_a		=> tilemapaddr(9 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
