@@ -348,7 +348,7 @@ begin
 		)
 		port map
 		(
-			clock			=> clk_20M,
+			clock			=> clk_video,
 			address		=> tileaddr(11 downto 0),
 			q					=> tileDatao
 		);

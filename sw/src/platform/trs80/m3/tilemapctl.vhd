@@ -26,6 +26,7 @@ entity tilemapCtl_1 is
 port               
 (
     clk         : in std_logic;
+    clk_ena     : in std_logic;
 		reset				: in std_logic;
 
 		-- video control signals		
@@ -63,7 +64,7 @@ begin
   attr_a <= (others => '0');
 
   -- generate pixel
-  process (clk, reset)
+  process (clk, clk_ena, reset)
 
 		variable hblank_r		: std_logic_vector(PACE_VIDEO_PIPELINE_DELAY-1 downto 0);
 		alias hblank_prev		: std_logic is hblank_r(hblank_r'left);
@@ -75,7 +76,7 @@ begin
   begin
 		if reset = '1' then
 			hblank_r := (others => '1');
-  	elsif rising_edge(clk) then
+  	elsif rising_edge(clk) and clk_ena = '1' then
 
 			-- each tile is 12 rows high, rather than 16
 			if vblank = '1' then
