@@ -14,7 +14,7 @@
 
 
 # The default values for assignments are stored in the file
-#		trs80_m3_assignment_defaults.qdf
+#		trs80_m1_assignment_defaults.qdf
 # If this file doesn't exist, and for assignments not listed, see file
 #		assignment_defaults.qdf
 
@@ -505,7 +505,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/de2/target_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/platform_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m1/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/clk_div.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_Pack.vhd
@@ -519,7 +519,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd_pk
 set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/inputmapper.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Inputs.VHD
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/trs80_interrupts.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m1/trs80_interrupts.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/dpram.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/dpram_1r1w.vhd
@@ -531,7 +531,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/fdc_regs
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/fdc_spi.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/fdc_ctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/FDC_1793.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/game.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m1/game.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/tilemapctl.vhd
