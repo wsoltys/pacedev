@@ -29,7 +29,7 @@ set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name INCREMENTAL_COMPILATION FULL_INCREMENTAL_COMPILATION
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "19:21:54  AUGUST 25, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -207,7 +207,7 @@ set_global_assignment -name EDA_OUTPUT_DATA_FORMAT NONE -section_id eda_simulati
 set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id Top
 set_instance_assignment -name CLOCK_SETTINGS clk_ref -to clk_ref
 set_instance_assignment -name CLOCK_SETTINGS clk_brd -to clk_brd
-set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
@@ -215,7 +215,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m1/platform_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/target/nanoboard/target_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/target/nb1/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cyclone/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/clk_div.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_Pack.vhd
@@ -224,7 +224,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_M
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_Reg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80se.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/frogger/uPse.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/Z80.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/inputmapper.vhd
@@ -244,9 +244,10 @@ set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/FDC_1793
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m1/game.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/vga_800x600_60Hz.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/mapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/tilemapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Graphics.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
-set_global_assignment -name VQM_FILE ../../../../../src/target/nanoboard/ep1c12/MAX1104_DAC.VQM
-set_global_assignment -name VHDL_FILE ../../../../../src/target/nanoboard/target_top.vhd
+set_global_assignment -name VQM_FILE ../../../../../src/target/nb1/ep1c12/MAX1104_DAC.VQM
+set_global_assignment -name VHDL_FILE ../../../../../src/component/io/maple/maple_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/io/gamecube/gamecube_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/target/nb1/target_top.vhd

@@ -13,10 +13,6 @@ package project_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 	
-	--  
-	-- PACE constants which *MUST* be defined
-	--
-	
   -- Reference clock is 24MHz
 	constant PACE_HAS_PLL								      : boolean := true;
   constant PACE_HAS_SRAM                    : boolean := true;
