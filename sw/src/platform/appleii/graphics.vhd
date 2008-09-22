@@ -5,18 +5,19 @@ use ieee.numeric_std.STD_MATCH;
 
 library work;
 use work.pace_pkg.all;
+use work.video_controller_pkg.all;
+use work.project_pkg.all;
 use work.platform_pkg.all;
 
 entity Graphics is
   port
   (
-    clk             : in std_logic;                       
 		reset						: in std_logic;
 
 		xcentre					: in std_logic_vector(9 downto 0);
 		ycentre					: in std_logic_vector(9 downto 0);
-
-		extra_data			: in std_logic_vector(7 downto 0);
+		
+    extra_data      : in std_logic_vector(7 downto 0);
 		palette_data		: in ByteArrayType(15 downto 0);
 						
     bitmapa        	: out std_logic_vector(15 downto 0);   
@@ -37,17 +38,10 @@ entity Graphics is
 
 		to_osd          : in to_OSD_t; 
 		from_osd        : out from_OSD_t;
+
+		video_i					: in from_VIDEO_t;
+		video_o					: out to_VIDEO_t;
 		
-    red             : out std_logic_vector(9 downto 0);    
-    green           : out std_logic_vector(9 downto 0);    
-    blue            : out std_logic_vector(9 downto 0);
-		lcm_data				: out std_logic_vector(9 downto 0);
-    hsync           : out std_logic;                       
-    vsync           : out std_logic;
-
-		hblank					: out std_logic;
-		vblank					: out std_logic;
-
     bw_cvbs         : out std_logic_vector(1 downto 0);    
     gs_cvbs         : out std_logic_vector(7 downto 0)    
   );
@@ -58,27 +52,23 @@ architecture SYN of Graphics is
 
 	signal pix_clk_ena	: std_logic;
   signal strobe       : std_logic;
-	signal pix_x				: std_logic_vector(9 downto 0);
-	signal pix_y				: std_logic_vector(9 downto 0);
+	signal pix_x				: std_logic_vector(10 downto 0);
+	signal pix_y				: std_logic_vector(10 downto 0);
   signal hblank_s     : std_logic;
   signal vblank_s     : std_logic;
 
-	signal bitmap_rgb		: RGBType;
+	signal bitmap_rgb		: RGB_t;
 	--signal bitmap_on		: std_logic;
-	signal tilemap_rgb	: RGBType;
+	signal tilemap_rgb	: RGB_t;
 	--signal tilemap_on		: std_logic;
 	
-	signal rgb_data			: RGBType;
+	signal rgb_data			: RGB_t;
 
 	alias a2var					: std_logic_vector(15 downto 0) is spritedata(15 downto 0);
 	alias gfxmode				: std_logic_vector(3 downto 0) is a2var(11 downto 8);
 					
 begin
 
-	-- needed in a lot of games
-	hblank <= hblank_s;
-	vblank <= vblank_s;
-	
   -- assign top-level output ports
   bw_cvbs <= (others => '0');
   gs_cvbs <= (others => '0');
@@ -105,76 +95,83 @@ begin
 	spriteaddr <= (others => '0');
 	spr0_hit <= '0';
 				
-  vgacontroller_inst : entity work.pace_video_controller
+  pace_video_controller_inst : entity work.pace_video_controller
+    generic map
+    (
+      CONFIG		  => PACE_VIDEO_CONTROLLER_TYPE,
+      DELAY       => PACE_VIDEO_PIPELINE_DELAY,
+      H_SIZE      => PACE_VIDEO_H_SIZE,
+      V_SIZE      => PACE_VIDEO_V_SIZE,
+      H_SCALE     => PACE_VIDEO_H_SCALE,
+      V_SCALE     => PACE_VIDEO_V_SCALE,
+      BORDER_RGB  => PACE_VIDEO_BORDER_RGB
+    )
     port map
     (
-      clk         => clk,
-			reset				=> reset,
+      clk         		=> video_i.clk,
+      clk_ena     		=> video_i.clk_ena,
+      reset						=> reset,
 
-			xcentre			=> xcentre,
-			ycentre			=> ycentre,
-			
-			-- video control signals (out)
-      strobe      => strobe,
-			pixel_x			=> pix_x,
-			pixel_y			=> pix_y,
-      hblank      => hblank_s,
-      vblank      => vblank_s,
+			-- register interface
+			reg_i.h_scale		=> (others => '0'),
+			reg_i.v_scale 	=> (others => '0'),
 
-			-- video data signals (in)
-			r_i					=> rgb_data.r,
-			g_i					=> rgb_data.g,
-			b_i					=> rgb_data.b,
+      -- video data signals (in)
+      rgb_i		    		=> rgb_data,
 
-			-- VGA signals (out)
-      red         => red,
-      green       => green,
-      blue        => blue,
-			lcm_data		=> lcm_data,
-      hsync       => hsync,
-      vsync       => vsync
+      -- video control signals (out)
+      stb         		=> strobe,
+      hblank     			=> hblank_s,
+      vblank					=> vblank_s,
+      x								=> pix_x,
+      y 							=> pix_y,
+
+      -- VGA signals (out)
+      video_o     		=> video_o
     );
 
-  bitmap_mapctl_inst : entity work.bitmapCtl_1
+  bitmapctl_inst : entity work.bitmapCtl_1
     port map
     (
-      clk      		=> clk,
-			clk_ena			=> pix_clk_ena,
-			reset				=> reset,
-			
-      hblank   		=> hblank_s,
-      vblank   		=> vblank_s,
-      pix_x     	=> pix_x,
-      pix_y     	=> pix_y,
+      clk      			=> video_i.clk,
+      clk_ena       => video_i.clk_ena,
+      reset					=> reset,
+      
+      stb           => pix_clk_ena,
+      hblank   			=> hblank_s,
+      vblank   			=> vblank_s,
+      x     		    => pix_x,
+      y     		    => pix_y,
 
-      bitmap_a 		=> bitmapa,
-      bitmap_d		=> bitmapd,
+      bitmap_a 			=> bitmapa,
+      bitmap_d 			=> bitmapd,
 
-			rgb					=> bitmap_rgb,
-			bitmap_on		=> open --bitmap_on
+      rgb						=> bitmap_rgb,
+      bitmap_on			=> open
     );
 
-  text_mapctl_inst : entity work.mapCtl_1
+  text_mapctl_inst : entity work.tilemapCtl_1
     port map
     (
-      clk      		=> clk,
-			clk_ena			=> pix_clk_ena,
-			reset				=> reset,
-			
-      hblank   		=> hblank_s,
-      vblank   		=> vblank_s,
-      pix_x     	=> pix_x,
-      pix_y     	=> pix_y,
+      clk      			=> video_i.clk,
+      clk_ena     	=> video_i.clk_ena,
+      reset					=> reset,
+      
+      stb				    => pix_clk_ena,
+      hblank   			=> hblank_s,
+      vblank   			=> vblank_s,
+      x     		    => pix_x,
+      y     		    => pix_y,
 
-      tilemap_a 	=> tilemapa,
-      tilemap_d 	=> tilemapd,
-      tile_a    	=> tilea,
-      tile_d    	=> tiled,
-      attr_a    	=> attra,
-      attr_d    	=> attrd,
+      tilemap_a 		=> tilemapa,
+      tilemap_d 		=> tilemapd,
+      tile_a    		=> tilea,
+      tile_d    		=> tiled,
+      attr_a    		=> attra,
+      attr_d    		=> attrd,
 
-			rgb					=> tilemap_rgb,
-			tilemap_on	=> open --tilemap_on
+      rgb						=> tilemap_rgb,
+      tilemap_on		=> open
     );
 
 end SYN;

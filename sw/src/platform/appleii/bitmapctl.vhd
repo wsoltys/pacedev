@@ -5,6 +5,7 @@ use ieee.std_logic_arith.EXT;
 
 library work;
 use work.pace_pkg.all;
+use work.video_controller_pkg.all;
 use work.platform_pkg.all;
 
 --
@@ -18,18 +19,19 @@ port
 		clk_ena			: in std_logic;
 		reset				: in std_logic;
 
-		-- video control signals		
+		-- video control signals
+		stb         : in std_logic;		
     hblank      : in std_logic;
     vblank      : in std_logic;
-    pix_x       : in std_logic_vector(9 downto 0);
-    pix_y       : in std_logic_vector(9 downto 0);
+    x           : in std_logic_vector(10 downto 0);
+    y           : in std_logic_vector(10 downto 0);
 
     -- tilemap interface
     bitmap_d   	: in std_logic_vector(7 downto 0);
     bitmap_a   	: out std_logic_vector(15 downto 0);
 
 		-- RGB output (10-bits each)
-		rgb					: out RGBType;
+		rgb					: out RGB_t;
 		bitmap_on		: out std_logic
 );
 end bitmapCtl_1;
@@ -48,9 +50,9 @@ begin
   -- calculate what we can w/o maths operations
   -- we want: a = ((y&7)<<10)|((y&0x38)<<4)|(((y>>3)&0x18)*5+x)
   -- this is: ((y&7)<<10)|((y&0x38)<<4)
-  aaa <= pix_y(2 downto 0) & pix_y(5 downto 3) & "0000000";
+  aaa <= y(2 downto 0) & y(5 downto 3) & "0000000";
   -- and this is ((y>>3)&0x18)*5
-  bbb <= EXT(pix_y(7 downto 6) & pix_y(7 downto 6) & "000", bbb'length);
+  bbb <= EXT(y(7 downto 6) & y(7 downto 6) & "000", bbb'length);
   -- so we just need (aaa | (bbb+x))
 
   -- generate pixel

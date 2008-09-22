@@ -12,7 +12,7 @@ use work.platform_pkg.all;
 --	Apple II Tilemap Controller
 --
 
-entity mapCtl_1 is          
+entity tilemapCtl_1 is          
 port               
 (
     clk         : in std_logic;
@@ -20,10 +20,11 @@ port
 		reset				: in std_logic;
 
 		-- video control signals		
+		stb         : in std_logic;
     hblank      : in std_logic;
     vblank      : in std_logic;
-    pix_x       : in std_logic_vector(9 downto 0);
-    pix_y       : in std_logic_vector(9 downto 0);
+    x           : in std_logic_vector(10 downto 0);
+    y           : in std_logic_vector(10 downto 0);
 
     -- tilemap interface
     tilemap_d   : in std_logic_vector(15 downto 0);
@@ -37,11 +38,11 @@ port
 		rgb					: out RGB_t;
 		tilemap_on	: out std_logic
 );
-end mapCtl_1;
+end tilemapCtl_1;
 
-architecture SYN of mapCtl_1 is
+architecture SYN of tilemapCtl_1 is
 
-  alias texty 			: std_logic_vector(5 downto 0) is pix_y(8 downto 3);
+  alias texty 			: std_logic_vector(5 downto 0) is y(8 downto 3);
 
   signal col0_addr 	: std_logic_vector(9 downto 3);
 
@@ -51,7 +52,7 @@ begin
   tile_a(12 downto 11) <= (others => '0');
 
 	-- these are constant for a whole line
-  tile_a(2 downto 0) <=  pix_y(2 downto 0);
+  tile_a(2 downto 0) <=  y(2 downto 0);
 
    -- the apple video screen is interlaced
    -- the following line gives the start address of each text row
