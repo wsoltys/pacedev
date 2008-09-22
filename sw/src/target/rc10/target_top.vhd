@@ -6,6 +6,7 @@ use ieee.std_logic_unsigned.all;
 
 library work;
 use work.pace_pkg.all;
+use work.video_controller_pkg.all;
 use work.project_pkg.all;
 use work.platform_pkg.all;
 use work.target_pkg.all;
@@ -130,54 +131,103 @@ end target_top;
 
 architecture SYN of target_top is
 
-	-- so we don't have to include the pll component in the project
-	-- if there is no 'pace pll'
-	component pll is
-	  generic
-	  (
-	    -- INCLK
-	    INCLK0_INPUT_FREQUENCY  : natural;
+	signal clk_i			  : std_logic_vector(0 to 3);
+  signal init       	: std_logic := '1';
+  signal reset_i     	: std_logic := '1';
+	signal reset_n			: std_logic := '0';
 
-	    -- CLK0
-	    CLK0_DIVIDE_BY      : real := 2.0;
-	    CLK0_DUTY_CYCLE     : natural := 50;
-	    CLK0_PHASE_SHIFT    : string := "0";
-
-	    -- CLK1
-	    CLK1_DIVIDE_BY      : natural := 1;
-	    CLK1_DUTY_CYCLE     : natural := 50;
-	    CLK1_MULTIPLY_BY    : natural := 1;
-	    CLK1_PHASE_SHIFT    : string := "0"
-	  );
-		port
-		(
-			inclk0							: in std_logic  := '0';
-			c0		    					: out std_logic ;
-			c1		    					: out std_logic 
-		);
-	end component;
-
-  signal clk          : std_logic_vector(0 to 3);
-  signal init        	: std_logic;
-	signal reset				: std_logic;
-	
-	signal red_s				: std_logic_vector(9 downto 0);
-	signal blue_s				: std_logic_vector(9 downto 0);
-	signal green_s			: std_logic_vector(9 downto 0);
-
-  signal snd_data_l   : std_logic_vector(15 downto 0);
-  signal snd_data_r   : std_logic_vector(15 downto 0);
+  signal buttons_i    : from_BUTTONS_t;
+  signal switches_i   : from_SWITCHES_t;
+  signal leds_o       : to_LEDS_t;
+  signal inputs_i     : from_INPUTS_t;
+  signal flash_i      : from_FLASH_t;
+  signal flash_o      : to_FLASH_t;
+	signal sram_i			  : from_SRAM_t;
+	signal sram_o			  : to_SRAM_t;	
+	signal video_i      : from_VIDEO_t;
+  signal video_o      : to_VIDEO_t;
+  signal audio_i      : from_AUDIO_t;
+  signal audio_o      : to_AUDIO_t;
+  signal ser_i        : from_SERIAL_t;
+  signal ser_o        : to_SERIAL_t;
   
-	signal jamma_s			: JAMMAInputsType;
-		
 begin
 
+  BLK_CLOCKING : block
+
+    -- so we don't have to include the pll component in the project
+    -- if there is no 'pace pll'
+    component pll is
+      generic
+      (
+        -- INCLK
+        INCLK0_INPUT_FREQUENCY  : natural;
+  
+        -- CLK0
+        CLK0_DIVIDE_BY      : real := 2.0;
+        CLK0_DUTY_CYCLE     : natural := 50;
+        CLK0_PHASE_SHIFT    : string := "0";
+  
+        -- CLK1
+        CLK1_DIVIDE_BY      : natural := 1;
+        CLK1_DUTY_CYCLE     : natural := 50;
+        CLK1_MULTIPLY_BY    : natural := 1;
+        CLK1_PHASE_SHIFT    : string := "0"
+      );
+      port
+      (
+        inclk0							: in std_logic  := '0';
+        c0		    					: out std_logic ;
+        c1		    					: out std_logic 
+      );
+    end component;
+  
+  begin
+  
+    GEN_PLL : if PACE_HAS_PLL generate
+    
+      pll_inst : pll
+        generic map
+        (
+          -- INCLK0
+          INCLK0_INPUT_FREQUENCY  => 20, -- period 20.833ns
+  
+          -- CLK0
+          CLK0_DIVIDE_BY          => real(PACE_CLK0_DIVIDE_BY),
+      
+          -- CLK1
+          CLK1_DIVIDE_BY          => PACE_CLK1_DIVIDE_BY,
+          CLK1_MULTIPLY_BY        => PACE_CLK1_MULTIPLY_BY
+        )
+        port map
+        (
+          inclk0  => clk_48M,
+          c0      => clk_i(0),
+          c1      => clk_i(1)
+        );
+    
+    end generate GEN_PLL;
+    
+    GEN_NO_PLL : if not PACE_HAS_PLL generate
+  
+      -- feed input clocks into PACE core
+      clk_i(0) <= clk_48M;
+      clk_i(1) <= exp_clk0;
+        
+    end generate GEN_NO_PLL;
+    
+    -- unused clocks on P2
+    clk_i(2) <= exp_clk0;
+    clk_i(3) <= exp_clk1;
+  
+  end block BLK_CLOCKING;
+  
 	-- FPGA STARTUP
 	-- should extend power-on reset if registers init to '0'
-	process (clk(1))
+	process (clk_i(1))
 		variable count : std_logic_vector (7 downto 0) := X"00";
 	begin
-		if rising_edge(clk(1)) then
+		if rising_edge(clk_i(1)) then
 			if count = X"FF" then
 				init <= '0';
 			else
@@ -187,160 +237,160 @@ begin
 		end if;
 	end process;
 
-	reset <= init;
+	reset_i <= init;
 		
-  -- unused clocks on P2
-  clk(2) <= exp_clk0;
-  clk(3) <= exp_clk1;
-
-	GEN_PLL : if PACE_HAS_PLL generate
-	
-	  pll_inst : pll
-	    generic map
-	    (
-        -- INCLK0
-        INCLK0_INPUT_FREQUENCY  => 20, -- period 20.833ns
-
-	      -- CLK0
-	      CLK0_DIVIDE_BY          => PACE_CLK0_DIVIDE_BY,
-	  
-	      -- CLK1
-	      CLK1_DIVIDE_BY          => PACE_CLK1_DIVIDE_BY,
-	      CLK1_MULTIPLY_BY        => PACE_CLK1_MULTIPLY_BY
-	    )
-	    port map
-	    (
-	      inclk0  => clk_48M,
-	      c0      => clk(0),
-	      c1      => clk(1)
-	    );
+  -- buttons - active low
+  buttons_i <= EXT("0", buttons_i'length);
+  -- switches - up = high
+  switches_i <= EXT("0", switches_i'length);
+  -- leds
+  led <= leds_o(led'range);
   
-	end generate GEN_PLL;
-	
-	GEN_NO_PLL : if not PACE_HAS_PLL generate
+	-- inputs (swapped?!?)
+  inputs_i.ps2_kclk <= mouse_clk;
+  inputs_i.ps2_kdat <= mouse_data;
+	inputs_i.ps2_mclk <= keybd_clk;
+	inputs_i.ps2_mdat <= keybd_data;
 
-		-- feed input clocks into PACE core
-		clk(0) <= clk_48M;
-		clk(1) <= exp_clk0;
-			
-	end generate GEN_NO_PLL;
-	
-	assert (not (P2_JAMMA_IS_MAPLE and P2_JAMMA_IS_GAMECUBE))
-		report "Cannot choose both MAPLE and GAMECUBE interfaces"
-		severity error;
-	
-  jamma_s.coin(1) <= '1';
-  jamma_s.p(1).start <= '1';
-  jamma_s.p(1).up <= not joy_up;
-  jamma_s.p(1).down <= not joy_down;
-  jamma_s.p(1).left <= not joy_right; -- is the manual wrong?
-  jamma_s.p(1).right <= not joy_left; -- is the manual wrong?
-  jamma_s.p(1).button(1) <= not joy_fire;
-  jamma_s.p(1).button(2 to 5) <= (others => '1');
+  -- JAMMA wired to on-board joystick
+  inputs_i.jamma_n.coin(1) <= '1';
+  inputs_i.jamma_n.p(1).start <= '1';
+  inputs_i.jamma_n.p(1).up <= not joy_up;
+  inputs_i.jamma_n.p(1).down <= not joy_down;
+  inputs_i.jamma_n.p(1).left <= not joy_right; -- is the manual wrong?
+  inputs_i.jamma_n.p(1).right <= not joy_left; -- is the manual wrong?
+  inputs_i.jamma_n.p(1).button(1) <= not joy_fire;
+  inputs_i.jamma_n.p(1).button(2 to 5) <= (others => '1');
 
-	jamma_s.coin_cnt <= (others => '1');
-	jamma_s.service <= '1';
-	jamma_s.tilt <= '1';
-	jamma_s.test <= '1';
-	
-	-- no player 2
-	jamma_s.coin(2) <= '1';
-	jamma_s.p(2).start <= '1';
-	jamma_s.p(2).up <= '1';
-	jamma_s.p(2).down <= '1';
-	jamma_s.p(2).left <= '1';
-	jamma_s.p(2).right <= '1';
-	jamma_s.p(2).button <= (others => '1');
-	
-	PACE_INST : entity work.PACE
-	  port map
-	  (
-	     -- clocks and resets
-			clk								=> clk,
-			test_button      	=> '0',
-	    reset            	=> reset,
+	-- not currently wired to any inputs
+	inputs_i.jamma_n.coin_cnt <= (others => '1');
+	inputs_i.jamma_n.coin(2) <= '1';
+	inputs_i.jamma_n.p(2).start <= '1';
+  inputs_i.jamma_n.p(2).up <= '1';
+  inputs_i.jamma_n.p(2).down <= '1';
+	inputs_i.jamma_n.p(2).left <= '1';
+	inputs_i.jamma_n.p(2).right <= '1';
+	inputs_i.jamma_n.p(2).button <= (others => '1');
+	inputs_i.jamma_n.service <= '1';
+	inputs_i.jamma_n.tilt <= '1';
+	inputs_i.jamma_n.test <= '1';
 
-	    -- game I/O
-	    ps2clk           	=> mouse_clk,
-	    ps2data          	=> mouse_data,
-	    dip              	=> (others => '0'),
-			jamma							=> jamma_s,
-			
-	    -- external RAM
-	    sram_i.d       		=> (others => '0'),
-	    sram_o        		=> open,
-
-	    -- VGA video
-	    red              	=> red_s,
-	    green            	=> green_s,
-	    blue             	=> blue_s,
-	    hsync            	=> hsync,
-	    vsync            	=> vsync,
-
-	    -- composite video
-	    BW_CVBS          	=> open,
-	    GS_CVBS          	=> open,
-
-	    -- sound
-	    snd_clk          	=> open,
-	    snd_data_l       	=> snd_data_l,
-      snd_data_r        => snd_data_r,
-
-	    -- SPI (flash)
-	    spi_clk          	=> open,
-	    spi_mode         	=> open,
-	    spi_sel          	=> open,
-	    spi_din          	=> '0',
-	    spi_dout         	=> open,
-
-	    -- serial
-	    ser_tx           	=> rs232_tx,
-	    ser_rx           	=> rs232_rx,
-
-	    -- debug
-	    leds             	=> led
-	  );
-
-  red <= red_s(9 downto 3);
-  green <= green_s(9 downto 3);
-  blue <= blue_s(9 downto 3);
-
-  -- audio PWM
-  -- clock is 48Mhz, sample rate 48kHz
-  process (clk(1), reset)
-    variable count : integer range 0 to 1023;
-    variable audio_sample_l : std_logic_vector(9 downto 0);
-    variable audio_sample_r : std_logic_vector(9 downto 0);
+  BLK_FLASH : block
   begin
-    if reset = '1' then
-      count := 0;
-    elsif rising_edge(clk(1)) then
-      if count = 1023 then
-        -- 48kHz tick - latch a sample (only 10 bits or 1024 steps)
-        audio_sample_l := snd_data_l(snd_data_l'left downto snd_data_l'left-9);
-        audio_sample_r := snd_data_r(snd_data_r'left downto snd_data_l'left-9);
+    flash_i.d <= (others => '0');
+  end block BLK_FLASH;
+
+  -- static memory
+  BLK_SRAM : block
+  begin
+    sram_i.d <= (others => '1');
+  end block BLK_SRAM;
+
+  BLK_SDRAM : block
+  begin
+  end block BLK_SDRAM;
+
+  BLK_VIDEO : block
+  begin
+
+		video_i.clk <= clk_i(1);	-- by convention
+    video_i.clk_ena <= '1';
+
+    red <= video_o.rgb.r(video_o.rgb.r'left downto video_o.rgb.r'left-6);
+    green <= video_o.rgb.g(video_o.rgb.g'left downto video_o.rgb.g'left-6);
+    blue <= video_o.rgb.b(video_o.rgb.b'left downto video_o.rgb.b'left-6);
+    hsync <= video_o.hsync;
+    vsync <= video_o.vsync;
+    
+  end block BLK_VIDEO;
+  
+  BLK_AUDIO : block
+
+    signal snd_data_l   : std_logic_vector(15 downto 0);
+    signal snd_data_r   : std_logic_vector(15 downto 0);
+  
+  begin
+  
+    -- audio PWM
+    -- clock is 48Mhz, sample rate 48kHz
+    process (clk_i(1), reset_i)
+      variable count : integer range 0 to 1023;
+      variable audio_sample_l : std_logic_vector(9 downto 0);
+      variable audio_sample_r : std_logic_vector(9 downto 0);
+    begin
+      if reset_i = '1' then
         count := 0;
-      else
-        audio_left <= '0';  -- default
-        audio_right <= '0'; -- default
-        if audio_sample_l > count then
-          audio_left <= '1';
+      elsif rising_edge(clk_i(1)) then
+        if count = 1023 then
+          -- 48kHz tick - latch a sample (only 10 bits or 1024 steps)
+          audio_sample_l := snd_data_l(snd_data_l'left downto snd_data_l'left-9);
+          audio_sample_r := snd_data_r(snd_data_r'left downto snd_data_l'left-9);
+          count := 0;
+        else
+          audio_left <= '0';  -- default
+          audio_right <= '0'; -- default
+          if audio_sample_l > count then
+            audio_left <= '1';
+          end if;
+          if audio_sample_r > count then
+            audio_right <= '1';
+          end if;
+          count := count + 1;
         end if;
-        if audio_sample_r > count then
-          audio_right <= '1';
-        end if;
-        count := count + 1;
       end if;
-    end if;
-  end process;
+    end process;
+
+  end block BLK_AUDIO;
+  
+  pace_inst : entity work.pace                                            
+    port map
+    (
+    	-- clocks and resets
+	  	clk_i							=> clk_i,
+      reset_i          	=> reset_i,
+
+      -- misc inputs and outputs
+      buttons_i         => buttons_i,
+      switches_i        => switches_i,
+      leds_o            => leds_o,
+      
+      -- controller inputs
+      inputs_i          => inputs_i,
+
+     	-- external ROM/RAM
+     	flash_i           => flash_i,
+      flash_o           => flash_o,
+      sram_i        		=> sram_i,
+      sram_o        		=> sram_o,
+  
+      -- VGA video
+      video_i           => video_i,
+      video_o           => video_o,
+      
+      -- sound
+      audio_i           => audio_i,
+      audio_o           => audio_o,
+
+      -- SPI (flash)
+      spi_i.din         => '0',
+      spi_o             => open,
+  
+      -- serial
+      ser_i             => ser_i,
+      ser_o             => ser_o,
+      
+      -- general purpose
+      gp_i              => (others => '0'),
+      gp_o              => open
+    );
   
 	-- flash the led so we know it's alive
-	process (clk(0), reset)
+	process (clk_i(0), reset_i)
 		variable count : std_logic_vector(21 downto 0);
 	begin
-		if reset = '1' then
+		if reset_i = '1' then
 			count := (others => '0');
-		elsif rising_edge(clk(0)) then
+		elsif rising_edge(clk_i(0)) then
 			count := count + 1;
 		end if;
 		seven_seg0_dp <= count(count'left);

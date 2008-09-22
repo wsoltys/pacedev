@@ -15,10 +15,10 @@ package target_pkg is
 	constant PACE_FPGA_VENDOR		: PACEFpgaVendor_t := PACE_FPGA_VENDOR_XILINX;
 	constant PACE_FPGA_FAMILY		: PACEFpgaFamily_t := PACE_FPGA_FAMILY_SPARTAN3;
 
-	constant P2_JAMMA_IS_MAPLE	: boolean := false;
-	alias P2_JAMMA_IS_DREAMCAST : boolean is P2_JAMMA_IS_MAPLE;
-
-	constant P2_JAMMA_IS_NGC : boolean := false;
-	alias P2_JAMMA_IS_GAMECUBE : boolean is P2_JAMMA_IS_NGC;
-
+  constant PACE_CLKIN0        : natural := 24;
+  constant PACE_CLKIN1        : natural := 0;   -- no available
+  constant PACE_HAS_SRAM      : boolean := false;
+  constant PACE_HAS_SPI       : boolean := false;
+  constant PACE_HAS_FLASH     : boolean := false;
+  
 end;
