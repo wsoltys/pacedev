@@ -5,6 +5,7 @@ use ieee.std_logic_arith.EXT;
 
 library work;
 use work.pace_pkg.all;
+use work.video_controller_pkg.all;
 use work.platform_pkg.all;
 
 --
@@ -33,7 +34,7 @@ port
     attr_a      : out std_logic_vector(9 downto 0);
 
 		-- RGB output (10-bits each)
-		rgb					: out RGBType;
+		rgb					: out RGB_t;
 		tilemap_on	: out std_logic
 );
 end mapCtl_1;
