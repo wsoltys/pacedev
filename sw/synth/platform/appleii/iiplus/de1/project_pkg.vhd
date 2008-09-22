@@ -27,8 +27,8 @@ package project_pkg is
   constant PACE_CLK0_MULTIPLY_BY            : natural := 3;   -- 50*3/5 = 30MHz
   constant PACE_CLK1_DIVIDE_BY              : natural := 2;
   constant PACE_CLK1_MULTIPLY_BY            : natural := 1;  	-- 50*1/2 = 25MHz
-	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
-	constant PACE_VIDEO_V_SCALE       	      : integer := 1;
+	constant PACE_VIDEO_H_SCALE       	      : integer := 2;
+	constant PACE_VIDEO_V_SCALE       	      : integer := 2;
 
   --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
   --constant PACE_CLK0_DIVIDE_BY        			: natural := 5;
@@ -44,7 +44,7 @@ package project_pkg is
 
 	-- Apple II-specific constants      			
 
-  constant APPLE_II_HIRES_PAGES             : natural := 1;
+  constant APPLE_IIPLUS_HIRES_PAGES         : natural := 1;
 	constant USE_VIDEO_VBLANK_INTERRUPT 			: boolean := false;
 	
 end;

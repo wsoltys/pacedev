@@ -29,7 +29,7 @@ set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "19:21:54  AUGUST 25, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -259,7 +259,7 @@ set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/target/nanoboard/target_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/target/nb1/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/ii/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cyclone/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/clk_div.vhd
@@ -271,9 +271,8 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t65/T65_M
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t65/T65.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cyclone/dpram_1r1w.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/vga_800x600_60Hz.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/bitmapctl.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/mapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/tilemapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/graphics.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/inputmapper.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Inputs.VHD
@@ -283,6 +282,6 @@ set_global_assignment -name VHDL_FILE ../../../../device/cyclone/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cyclone/dpram.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/appleii/ii/Game.VHD
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
-set_global_assignment -name VQM_FILE ../../../../../src/target/nanoboard/ep1c12/MAX1104_DAC.VQM
-set_global_assignment -name VHDL_FILE ../../../../../src/target/nanoboard/target_top.vhd
+set_global_assignment -name VQM_FILE ../../../../../src/target/nb1/ep1c12/MAX1104_DAC.VQM
+set_global_assignment -name VHDL_FILE ../../../../../src/target/nb1/target_top.vhd
 set_global_assignment -name SIGNALTAP_FILE stp1.stp

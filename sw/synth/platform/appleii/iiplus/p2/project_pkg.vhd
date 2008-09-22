@@ -33,7 +33,7 @@ package project_pkg is
                                      			
 	-- Apple II-specific constants      			
 	                                    			
-  constant APPLE_II_HIRES_PAGES             : natural := 2;
+  constant APPLE_IIPLUS_HIRES_PAGES         : natural := 2;
 	constant USE_VIDEO_VBLANK_INTERRUPT 			: boolean := false;
 	
 end;

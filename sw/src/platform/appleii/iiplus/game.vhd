@@ -372,7 +372,7 @@ begin
 			q					=> tileDatao
 		);
 	
-	GEN_ONLY_1_HIRES_PAGE : if APPLE_II_HIRES_PAGES = 1 generate
+	GEN_ONLY_1_HIRES_PAGE : if APPLE_IIPLUS_HIRES_PAGES = 1 generate
 
 		-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 		hgrram_inst : entity work.dpram
@@ -401,7 +401,7 @@ begin
 
 	end generate GEN_ONLY_1_HIRES_PAGE;
 	
-	GEN_2_HIRES_PAGES : if APPLE_II_HIRES_PAGES > 1 generate
+	GEN_2_HIRES_PAGES : if APPLE_IIPLUS_HIRES_PAGES > 1 generate
 
 		-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 		hgrram_inst : entity work.dpram

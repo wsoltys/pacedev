@@ -5,8 +5,9 @@ use ieee.std_logic_arith.EXT;
 
 library work;
 use work.pace_pkg.all;
-use work.target_pkg.all;
 use work.kbd_pkg.all;
+use work.project_pkg.all;
+use work.target_pkg.all;
 
 entity Game is
   port
