@@ -15,31 +15,50 @@ entity Game is
   port
   (
     -- clocking and reset
-    clk							: in std_logic_vector(0 to 3);
-    reset           : in std_logic;                       
-    test_button     : in std_logic;                       
+    clk_i           : in std_logic_vector(0 to 3);
+    reset_i         : in std_logic;
 
-    -- inputs
-    ps2clk          : inout std_logic;                       
-    ps2data         : inout std_logic;                       
-    dip             : in std_logic_vector(7 downto 0);    
-		jamma						: in JAMMAInputsType;
-		
+    -- misc I/O
+    buttons_i       : in from_BUTTONS_t;
+    switches_i      : in from_SWITCHES_t;
+    leds_o          : out to_LEDS_t;
+
+    -- controller inputs
+    inputs_i        : in from_INPUTS_t;
+
     -- micro buses
     upaddr          : out std_logic_vector(15 downto 0);   
     updatao         : out std_logic_vector(7 downto 0);    
 
-    -- SRAM
-    sram_i          : in from_SRAM_t;
-    sram_o          : out to_SRAM_t;
+    -- FLASH/SRAM
+    flash_i         : in from_FLASH_t;
+    flash_o         : out to_FLASH_t;
+		sram_i					: in from_SRAM_t;
+		sram_o					: out to_SRAM_t;
+
+    -- SPI (flash)
+    spi_i           : in from_SPI_t;
+    spi_o           : out to_SPI_t;
+
+    -- serial
+    ser_i           : in from_SERIAL_t;
+    ser_o           : out to_SERIAL_t;
+
+    -- general purpose I/O
+    gp_i            : in from_GP_t;
+    gp_o            : out to_GP_t;
+    
+    --
+    --
+    --
 
     gfxextra_data   : out std_logic_vector(7 downto 0);
 		palette_data		: out ByteArrayType(15 downto 0);
-		
-    -- graphics (bitmap)
-    bitmap_addr			: in    std_logic_vector(15 downto 0);   
-    bitmap_data			: out   std_logic_vector(7 downto 0);    
 
+    -- graphics (bitmap)
+		bitmap_addr			: in std_logic_vector(15 downto 0);
+		bitmap_data			: out std_logic_vector(7 downto 0);
+		
     -- graphics (tilemap)
     tileaddr        : in std_logic_vector(15 downto 0);   
     tiledatao       : out std_logic_vector(7 downto 0);    
@@ -53,36 +72,20 @@ entity Game is
     sprite_wr       : out std_logic;                       
     spriteaddr      : in std_logic_vector(15 downto 0);   
     spritedata      : out std_logic_vector(31 downto 0);   
-    spr0_hit        : in std_logic;
-
+		spr0_hit				: in std_logic;
+		
     -- graphics (control)
-    vblank          : in std_logic;    
+    vblank					: in std_logic;    
 		xcentre					: out std_logic_vector(9 downto 0);
 		ycentre					: out std_logic_vector(9 downto 0);
-		
+
+    snd_rd          : out std_logic;
+    snd_wr          : out std_logic;
+    sndif_datai     : in std_logic_vector(7 downto 0);
+
     -- OSD
     to_osd          : out to_OSD_t;
-    from_osd        : in from_OSD_t;
-
-    -- sound
-    snd_rd          : out std_logic;                       
-    snd_wr          : out std_logic;
-    sndif_datai     : in std_logic_vector(7 downto 0);    
-
-    -- spi interface
-    spi_clk         : out std_logic;                       
-    spi_din         : in std_logic;                       
-    spi_dout        : out std_logic;                       
-    spi_ena         : out std_logic;                       
-    spi_mode        : out std_logic;                       
-    spi_sel         : out std_logic;                       
-
-    -- serial
-    ser_rx          : in std_logic;                       
-    ser_tx          : out std_logic;                       
-
-    -- on-board leds
-    leds            : out std_logic_vector(7 downto 0)    
+    from_osd        : in from_OSD_t
   );
 end Game;
 
@@ -90,8 +93,8 @@ architecture SYN of Game is
 
 	constant TUTANKHAM_VRAM_SIZE		: integer := 2**TUTANKHAM_VRAM_WIDTHAD;
 
-	alias clk_30M					: std_logic is clk(0);
-	alias clk_40M					: std_logic is clk(1);
+	alias clk_30M					: std_logic is clk_i(0);
+	alias clk_video       : std_logic is clk_i(1);
 	signal cpu_reset			: std_logic;
 
 	-- video counter (scanline) sent by "tilemap controller" via attr_addr
@@ -157,7 +160,7 @@ begin
 	clk_1M5_en_n <= not clk_1M5_en;
 
 	-- add game reset later
-	cpu_reset <= reset or game_reset;
+	cpu_reset <= reset_i or game_reset;
 	
   -- SRAM signals (may or may not be used)
   sram_o.a <= -- Graphics ROM starts at $10000 in 4KB banks - mapped to $9000
@@ -241,9 +244,9 @@ begin
 	end process;
 	
 	-- implementation of scroll register
-	process (clk_30M, clk_1M5_en)
+	process (clk_30M, clk_1M5_en, reset_i)
 	begin
-		if reset = '1' then
+		if reset_i = '1' then
 			gfxextra_data <= (others => '0');
 		elsif rising_edge(clk_30M) and clk_1M5_en = '1' then
 			if cpu_rw = '0' and STD_MATCH(cpu_addr, X"8100") then
@@ -282,7 +285,7 @@ begin
 	end process;
 	
 	-- vblank interrupt at 30Hz
-	process (clk_30M, clk_1M5_en, vblank, reset)
+	process (clk_30M, clk_1M5_en, vblank, reset_i)
 		variable toggle_v 	: std_logic := '0';
 		variable vblank_r		: std_logic_vector(2 downto 0) := (others => '0');
 		alias vblank_prev 	: std_logic is vblank_r(vblank_r'left);
@@ -290,7 +293,7 @@ begin
 		subtype count_t is integer range 0 to 7;
 		variable count			: count_t;
 	begin
-		if reset = '1' then
+		if reset_i = '1' then
 			toggle_v := '0';
 			vblank_r := (others => '0');
 			cpu_irq <= '0';
@@ -328,19 +331,13 @@ begin
 	updatao <= cpu_data_o;
 	tilemapdatao <= (others => '0');
 	tiledatao <= (others => '0');
-  attr_dout <= X"00" & dip;
+  attr_dout <= X"00" & switches_i(7 downto 0);
   sprite_reg_addr <= (others => '0');
   sprite_wr <= '0';
   spriteData <= (others => '0');
   snd_rd <= '0';
   snd_wr <= '0';
-	spi_clk <= '0';
-	spi_dout <= '0';
-	spi_ena <= '0';
-	spi_mode <= '0';
-	spi_sel <= '0';
-	ser_tx <= 'X';
-	leds <= (others => '0');
+	leds_o <= (others => '0');
 
 	clk_en_inst : entity work.clk_div
 		generic map
@@ -350,7 +347,7 @@ begin
 		port map
 		(
 			clk				=> clk_30M,
-			reset			=> reset,
+			reset			=> reset_i,
 			clk_en		=> clk_1M5_en
 		);
 		
@@ -380,12 +377,12 @@ begin
 	  port map
 	  (
 	    clk     		=> clk_30M,
-	    reset   		=> reset,
-	    ps2clk  		=> ps2clk,
-	    ps2data 		=> ps2data,
-			jamma				=> jamma,
+	    reset   		=> reset_i,
+	    ps2clk  		=> inputs_i.ps2_kclk,
+	    ps2data 		=> inputs_i.ps2_kdat,
+			jamma				=> inputs_i.jamma_n,
 
-	    dips				=> dip,
+	    dips				=> switches_i(7 downto 0),
 	    inputs			=> inputs
 	  );
 
@@ -459,7 +456,7 @@ begin
 			data_b			=> cpu_data_o,
 			q_b					=> vram0_data,
 
-			clock_a			=> clk_40M,
+			clock_a			=> clk_video,
 			address_a		=> bitmap_addr(TUTANKHAM_VRAM_WIDTHAD-1 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
