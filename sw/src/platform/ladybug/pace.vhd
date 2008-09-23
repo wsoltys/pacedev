@@ -57,6 +57,7 @@ use ieee.std_logic_arith.EXT;
 library work;
 use work.pace_pkg.all;
 use work.kbd_pkg.all;
+use work.video_controller_pkg.all;
 use work.project_pkg.all;
 use work.platform_pkg.all;
 use work.platform_variant_pkg.all;
@@ -67,54 +68,44 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk             : in std_logic_vector(0 to 3);
-    test_button     : in std_logic;
-    reset           : in std_logic;
+    clk_i           : in std_logic_vector(0 to 3);
+    reset_i         : in std_logic;
 
-    -- game I/O
-    ps2clk          : inout std_logic;
-    ps2data         : inout std_logic;
-    dip             : in std_logic_vector(7 downto 0);
-		jamma						: in JAMMAInputsType;
+    -- misc I/O
+    buttons_i       : in from_BUTTONS_t;
+    switches_i      : in from_SWITCHES_t;
+    leds_o          : out to_LEDS_t;
 
-    -- external RAM
-    sram_i          : in from_SRAM_t;
-    sram_o          : out to_SRAM_t;
+    -- controller inputs
+    inputs_i        : in from_INPUTS_t;
 
-    -- VGA video
-		vga_clk					: out std_logic;
-    red             : out std_logic_vector(9 downto 0);
-    green           : out std_logic_vector(9 downto 0);
-    blue            : out std_logic_vector(9 downto 0);
-		lcm_data				:	out std_logic_vector(9 downto 0);
-    hsync           : out std_logic;
-    vsync           : out std_logic;
+    -- external ROM/RAM
+    flash_i         : in from_FLASH_t;
+    flash_o         : out to_flash_t;
+    sram_i       		: in from_SRAM_t;
+		sram_o					: out to_SRAM_t;
 
-    -- composite video
-    BW_CVBS         : out std_logic_vector(1 downto 0);
-    GS_CVBS         : out std_logic_vector(7 downto 0);
+    -- video
+    video_i         : in from_VIDEO_t;
+    video_o         : out to_VIDEO_t;
 
-    -- sound
-    snd_clk         : out std_logic;
-    snd_data_l      : out std_logic_vector(15 downto 0);
-    snd_data_r      : out std_logic_vector(15 downto 0);
-
+    -- audio
+    audio_i         : in from_AUDIO_t;
+    audio_o         : out to_AUDIO_t;
+    
     -- SPI (flash)
-    spi_clk         : out std_logic;
-    spi_mode        : out std_logic;
-    spi_sel         : out std_logic;
-    spi_din         : in std_logic;
-    spi_dout        : out std_logic;
+    spi_i           : in from_SPI_t;
+    spi_o           : out to_SPI_t;
 
     -- serial
-    ser_tx          : out std_logic;
-    ser_rx          : in std_logic;
-
-    -- debug
-    leds            : out std_logic_vector(7 downto 0)
+    ser_i           : in from_SERIAL_t;
+    ser_o           : out to_SERIAL_t;
+    
+    -- general purpose I/O
+    gp_i            : in from_GP_t;
+    gp_o            : out to_GP_t
   );
-
-end PACE;
+end entity PACE;
 
 architecture SYN of PACE is
 
@@ -167,7 +158,7 @@ architecture SYN of PACE is
 	
 begin
 
-	reset_n <= not reset;
+	reset_n <= not reset_i;
 
 	-- SRAM interface	
 	sram_oe_n <= '0' when (sram_cs_n = '0' and sram_we_n = '1') else '1';
@@ -180,19 +171,14 @@ begin
 		
 	-- map inputs
 	
-	clk_20mhz_s <= clk(0);
-	vga_clk <= clk(1);	-- fudge
+	clk_20mhz_s <= clk_i(0);
+	video_o.clk <= clk_i(1);	-- by convention
 
 	-- all inputs are achtive LOW except coin chutes
 	coin_left_s <= not inputs(2)(2);
 	coin_right_s <= not inputs(2)(3);
 
-  spi_clk <= 'Z';
-  spi_dout <= 'Z';
-  spi_mode <= 'Z';
-  spi_sel <= 'Z';
-  
-	leds <= inputs(0) or inputs(1) or inputs(2);
+	leds_o <= EXT(inputs(0) or inputs(1) or inputs(2), leds_o'length);
 
 	inputs_inst : entity work.Inputs
 		generic map
@@ -203,10 +189,10 @@ begin
 	  port map
 	  (
 	    clk     				=> clk_20mhz_s,
-	    reset   				=> reset,
-	    ps2clk  				=> ps2clk,
-	    ps2data 				=> ps2data,
-			jamma						=> jamma,
+	    reset   				=> reset_i,
+	    ps2clk  				=> inputs_i.ps2_kclk,
+	    ps2data 				=> inputs_i.ps2_kdat,
+			jamma						=> inputs_i.jamma_n,
 			
 			dips						=> (others => '0'),
 			inputs					=> inputs
@@ -289,10 +275,10 @@ begin
     -- Convert signed audio data of Lady Bug Machine (range 127 to -128) to
     -- simple unsigned value.
     -----------------------------------------------------------------------------
-    snd_data_l(15 downto 8) <= std_logic_vector(unsigned(signed_audio_s + 128));
-    snd_data_l(7 downto 0) <= (others => '0');
-    snd_data_r(15 downto 8) <= std_logic_vector(unsigned(signed_audio_s + 128));
-    snd_data_r(7 downto 0) <= (others => '0');
+    audio_o.ldata(15 downto 8) <= std_logic_vector(unsigned(signed_audio_s + 128));
+    audio_o.ldata(7 downto 0) <= (others => '0');
+    audio_o.rdata(15 downto 8) <= std_logic_vector(unsigned(signed_audio_s + 128));
+    audio_o.rdata(7 downto 0) <= (others => '0');
       
 		-- mapped to $0000-$5FFF (24K)
 		cpu_rom0_inst : entity work.sprom
@@ -382,11 +368,11 @@ begin
 			);
 
 	GEN_CVBS : if LADYBUG_VIDEO_CVBS = '1' generate
-		red(9 downto 7) <= rgb_r_s;
-		green(9 downto 7) <= rgb_g_s;
-		blue(9 downto 8) <= rgb_b_s;
-		hsync <= rgb_hsync_n_s;
-		vsync <= rgb_vsync_n_s;
+		video_o.rgb.r(9 downto 7) <= rgb_r_s;
+		video_o.rgb.g(9 downto 7) <= rgb_g_s;
+		video_o.rgb.b(9 downto 8) <= rgb_b_s;
+		video_o.hsync <= rgb_hsync_n_s;
+		video_o.vsync <= rgb_vsync_n_s;
 	end generate GEN_CVBS;
 	
 	GEN_VGA : if LADYBUG_VIDEO_VGA = '1' generate
@@ -404,8 +390,8 @@ begin
 	      R_OUT      => vga_r_s,
 	      G_OUT      => vga_g_s,
 	      B_OUT      => vga_b_s,
-	      HSYNC_OUT  => hsync,
-	      VSYNC_OUT  => vsync,
+	      HSYNC_OUT  => video_o.hsync,
+	      VSYNC_OUT  => video_o.vsync,
 	      BLANK_OUT  => blank_s,
 	      CLK_6      => clk_20mhz_s,
 	      CLK_EN_6M  => clk_en_5mhz_s,
@@ -414,16 +400,16 @@ begin
 	    );
 
 		-- wire the vga signals - gated with hblank
-		red(9 downto 7) <= vga_r_s when blank_s = '0' else (others => '0');
-		green(9 downto 7) <= vga_g_s when blank_s = '0' else (others => '0');
-		blue(9 downto 8) <= vga_b_s when blank_s = '0' else (others => '0');
+		video_o.rgb.r(9 downto 7) <= vga_r_s when blank_s = '0' else (others => '0');
+		video_o.rgb.g(9 downto 7) <= vga_g_s when blank_s = '0' else (others => '0');
+		video_o.rgb.b(9 downto 8) <= vga_b_s when blank_s = '0' else (others => '0');
 	
 	end generate GEN_VGA;
 
 	-- unused video colour resolution
-	red(6 downto 0) <= (others => '0');
-	green(6 downto 0) <= (others => '0');
-	blue(7 downto 0) <= (others => '0');
+	video_o.rgb.r(6 downto 0) <= (others => '0');
+	video_o.rgb.g(6 downto 0) <= (others => '0');
+	video_o.rgb.b(7 downto 0) <= (others => '0');
 	
 	-- unused SRAM signals
 	sram_o.a(23 downto 12) <= (others => '0');
