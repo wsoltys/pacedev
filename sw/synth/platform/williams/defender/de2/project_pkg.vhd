@@ -12,15 +12,32 @@ package project_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 	
-	constant PACE_HAS_PLL								      : boolean := true;
+	constant PACE_HAS_PLL								      : boolean := true;	
+  constant PACE_HAS_FLASH                   : boolean := false;
+  constant PACE_HAS_SRAM                    : boolean := true;
+  constant PACE_HAS_SDRAM                   : boolean := false;
+  constant PACE_HAS_SERIAL                  : boolean := false;
+  
+	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
+  
+  --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_LCM_320x240_60Hz;
+  --constant PACE_CLK0_DIVIDE_BY              : natural := 5;
+  --constant PACE_CLK0_MULTIPLY_BY            : natural := 2;   -- 50*2/5 = 20MHz
+  --constant PACE_CLK1_DIVIDE_BY              : natural := 5;
+  --constant PACE_CLK1_MULTIPLY_BY            : natural := 4;   -- 50*9/25 = 18MHz
+	--constant PACE_VIDEO_H_SCALE               : integer := 1;
+	--constant PACE_VIDEO_V_SCALE               : integer := 1;
 
-  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_LCM_320x240_60Hz;
+  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_640x480_60Hz;
   constant PACE_CLK0_DIVIDE_BY              : natural := 5;
   constant PACE_CLK0_MULTIPLY_BY            : natural := 2;   -- 50*2/5 = 20MHz
-  constant PACE_CLK1_DIVIDE_BY              : natural := 5;
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 4;   -- 50*9/25 = 18MHz
-	constant PACE_VIDEO_H_SCALE               : integer := 1;
-	constant PACE_VIDEO_V_SCALE               : integer := 1;
+  constant PACE_CLK1_DIVIDE_BY              : natural := 2;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 1;  	-- 50*1/2 = 25MHz
+	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
+	constant PACE_VIDEO_V_SCALE       	      : integer := 1;
+
+  constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
+  --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
 
   constant PACE_HAS_OSD                     : boolean := false;
   constant PACE_OSD_XPOS                    : natural := 0;
@@ -28,12 +45,9 @@ package project_pkg is
 
 	-- DE2 constants which *MUST* be defined
 	
-	constant DE2_JAMMA_IS_MAPLE	              : boolean := false;
-	constant DE2_JAMMA_IS_NGC                 : boolean := false;
-	
-	constant DE2_LCD_LINE2							      : string := "  DEFENDER-LCD  ";
+	constant DE2_LCD_LINE2							      : string := " DEFENDER (VGA) ";
 		
-	-- Defender constants
+	-- Defender-specific constants
 	
 	constant DEFENDER_ROMS_IN_SRAM			      : boolean := true;	
 	constant DEFENDER_VRAM_WIDTHAD			      : integer := 15;	-- 32kB

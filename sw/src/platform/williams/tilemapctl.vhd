@@ -4,6 +4,7 @@ use IEEE.std_logic_unsigned.all;
 
 library work;
 use work.pace_pkg.all;
+use work.video_controller_pkg.all;
 use work.platform_pkg.all;
 
 --
@@ -12,7 +13,7 @@ use work.platform_pkg.all;
 --	Used ONLY for video counter
 --
 
-entity mapCtl_1 is          
+entity tilemapCtl_1 is          
 port               
 (
     clk         : in std_logic;
@@ -20,10 +21,11 @@ port
 		reset				: in std_logic;
 		
 		-- video control signals		
+		stb         : in std_logic;
     hblank      : in std_logic;
     vblank      : in std_logic;
-    pix_x       : in std_logic_vector(9 downto 0);
-    pix_y       : in std_logic_vector(9 downto 0);
+    x           : in std_logic_vector(10 downto 0);
+    y           : in std_logic_vector(10 downto 0);
 
 		scroll_data		: in std_logic_vector(7 downto 0);
 		palette_data	: in ByteArrayType(15 downto 0);
@@ -37,17 +39,17 @@ port
     attr_a      : out std_logic_vector(9 downto 0);
 
 		-- RGB output (10-bits each)
-		rgb					: out RGBType;
+		rgb					: out RGB_t;
 		tilemap_on	: out std_logic
 ) ;
-end mapCtl_1;
+end tilemapCtl_1;
 
-architecture SYN of mapCtl_1 is
+architecture FOREGROUND of tilemapCtl_1 is
 
 begin
 
 	-- output the scanline to the game via attr_a
-	attr_a <= pix_y;
+	attr_a <= y(attr_a'range);
 
 	-- not used
 	tilemap_a <= (others => '0');
@@ -59,4 +61,4 @@ begin
 	rgb.b <= (others => '0');	
 	tilemap_on <= '0';
 	
-end SYN;
+end architecture FOREGROUND;
