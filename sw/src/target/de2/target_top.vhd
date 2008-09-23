@@ -503,7 +503,8 @@ begin
   begin
 
 		video_i.clk <= clk_i(1);	-- by convention
-
+    video_i.clk_ena <= '1';
+    
     vga_clk <= video_o.clk;
     vga_r <= video_o.rgb.r(video_o.rgb.r'left downto video_o.rgb.r'left-9);
     vga_g <= video_o.rgb.g(video_o.rgb.g'left downto video_o.rgb.g'left-9);
