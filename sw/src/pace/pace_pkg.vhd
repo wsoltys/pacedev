@@ -3,7 +3,6 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 
 library work;
-use work.video_controller_pkg.RGB_t;
 
 package pace_pkg is
 
