@@ -4,6 +4,7 @@ Use     IEEE.std_logic_1164.all;
 library work;
 use work.pace_pkg.all;
 use work.video_controller_pkg.all;
+use work.sprite_pkg.all;
 use work.platform_pkg.all;
 use work.project_pkg.all;
 
@@ -57,6 +58,7 @@ architecture SYN of PACE is
   signal uPdatao          : std_logic_vector(7 downto 0);
 
   -- graphics signals
+  signal to_sprite_reg    : to_SPRITE_REG_t;
   signal gfxextra_data    : std_logic_vector(7 downto 0);
 	signal palette_data			: ByteArrayType(15 downto 0);
   signal bitmap_addr     	: std_logic_vector(15 downto 0);
@@ -69,8 +71,6 @@ architecture SYN of PACE is
   signal attr_data        : std_logic_vector(15 downto 0);
   signal sprite_addr      : std_logic_vector(15 downto 0);
   signal sprite_data      : std_logic_vector(31 downto 0);
-  signal spritereg_addr   : std_logic_vector(7 downto 0);
-  signal sprite_wr        : std_logic;
 	signal spr0_hit					: std_logic;
 	
 	signal xcentre					: std_logic_vector(9 downto 0);
@@ -106,10 +106,6 @@ begin
       -- controller inputs
       inputs_i        => inputs_i,
 
-      -- micro buses
-      upaddr          => uPaddr,
-      updatao         => uPdatao,
-  
       -- FLASH/SRAM
       flash_i         => flash_i,
       flash_o         => flash_o,
@@ -132,6 +128,10 @@ begin
       --
       --
       
+      -- micro buses
+      upaddr          => uPaddr,
+      updatao         => uPdatao,
+  
       gfxextra_data   => gfxextra_data,
 			palette_data		=> palette_data,
 			
@@ -148,8 +148,7 @@ begin
       attr_dout       => attr_data,
   
       -- graphics (sprite)
-      sprite_reg_addr => spritereg_addr,
-      sprite_wr       => sprite_wr,
+      to_sprite_reg   => to_sprite_reg,
       spriteaddr      => sprite_addr,
       spritedata      => sprite_data,
 			spr0_hit				=> spr0_hit,
@@ -174,6 +173,8 @@ begin
     (
       reset           => reset_i,
   
+      sprite_reg_i    => to_sprite_reg,
+      
 			xcentre					=> xcentre,
 			ycentre					=> ycentre,
 
@@ -191,9 +192,6 @@ begin
   
       spriteaddr      => sprite_addr,
       spritedata      => sprite_data,
-      sprite_reg_addr => spritereg_addr,
-      updata          => uPdatao,
-      sprite_wr       => sprite_wr,
 			spr0_hit				=> spr0_hit,
   
 			-- OSD
@@ -202,10 +200,7 @@ begin
 
 			-- video (incl. clk)
 			video_i					=> video_i,
-			video_o					=> video_o_s,
-	
-      bw_cvbs         => open,
-      gs_cvbs         => open
+			video_o					=> video_o_s
     );
 
 	video_o <= video_o_s;

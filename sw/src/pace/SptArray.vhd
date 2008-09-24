@@ -5,13 +5,16 @@ use IEEE.std_logic_unsigned.all;
 
 library work;
 use work.pace_pkg.all;
-use work.platform_pkg.all;
 use work.video_controller_pkg.all;
+use work.sprite_pkg.all;
+use work.platform_pkg.all;
 
 entity sptArray is
 
 	port
 	(
+    reg_i       : to_SPRITE_REG_t;
+		
 		clk					: in std_logic;
 		clk_ena			: in std_logic;
 		reset				: in std_logic;
@@ -21,12 +24,9 @@ entity sptArray is
 		hblank			: in std_logic;
 		xAddr				: in std_logic_vector(7 downto 0);
 		yAddr				: in std_logic_vector(8 downto 0);
-		dIn					: in std_logic_vector(7 downto 0);
 		spriteAddr	: out std_logic_vector(15 downto 0);
 		spriteData	: in std_logic_vector(31 downto 0);
-		sprite_wr		: in std_logic;
-		sprRegAddr	: in std_logic_vector(7 downto 0);
-		
+
 		rgb					: out RGB_t;
 		spr_on			: out std_logic;
 		spr_pri			: out std_logic;
@@ -38,8 +38,8 @@ end sptArray;
 architecture SYN of sptArray is
 
 	type regWrTyp is array(natural range <>) of std_logic;
-	type sptXTyp is array(natural range <>) of std_logic_vector(7 downto 0);
-	type sptYTyp is array(natural range <>) of std_logic_vector(8 downto 0);
+	type sptXTyp is array(natural range <>) of std_logic_vector(10 downto 0);
+	type sptYTyp is array(natural range <>) of std_logic_vector(10 downto 0);
 	type sptFlagsTyp is array(natural range <>) of std_logic_vector(7 downto 0);
 	type sptColourTyp is array(natural range <>) of std_logic_vector(7 downto 0);
 	type sptNumTyp is array(natural range <>) of std_logic_vector(11 downto 0);
@@ -61,12 +61,6 @@ architecture SYN of sptArray is
 	
 begin
 
-	-- Generate sprite register write signals	
-	GEN_REG_WR : for i in 0 to PACE_VIDEO_NUM_SPRITES-1 generate
-		-- WARNING: should be log2(NUM_SPRITES)
-		regWr(i) <= sprite_wr when sprRegAddr(7 downto 2) = conv_std_logic_vector(i, 6) else '0';
-	end generate GEN_REG_WR;
-	
 	-- Sprite Data Load Arbiter
 	-- - enables each sprite controller during hblank
 	--   to allow loading of sprite row data into row buffer
@@ -129,17 +123,15 @@ begin
 			)
 			port map
 			(
-				clk				=> clk,				-- this should be uP clk domain!
-				wr				=> regWr(i),
-				din				=> dIn,
-				addr			=> sprRegAddr(1 downto 0),
+        reg_i           => reg_i,
 				
-				sptX			=> sptX(i),
-				sptY			=> sptY(i),
-				sptFlags	=> sptFlags(i),
-				sptColour	=> sptColour(i),
-				sptNum 		=> sptNum(i),
-				sptPri		=> sptPri(i)
+				reg_o.n         => sptNum(i),
+				reg_o.x         => sptX(i),
+				reg_o.y         => sptY(i),
+				reg_o.xflip     => sptFlags(i)(0),
+				reg_o.yflip     => sptFlags(i)(1),
+				reg_o.colour    => sptColour(i),
+				reg_o.pri       => sptPri(i)
 			);
 
 		sptCtl_inst : entity work.sptCtlVHDL
@@ -161,8 +153,8 @@ begin
         bank_data => bank_data,
 						    
 		    num     	=> sptNum(i),
-		    xLoc    	=> sptX(i),
-		    yLoc    	=> sptY(i),
+		    xLoc    	=> sptX(i)(7 downto 0),
+		    yLoc    	=> sptY(i)(8 downto 0),
 		    colour		=> sptColour(i),
 		    flags   	=> sptFlags(i),
 

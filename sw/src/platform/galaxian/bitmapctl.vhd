@@ -14,17 +14,11 @@ use work.video_controller_pkg.all;
 entity bitmapCtl_1 is          
 port               
 (
-    clk         	: in std_logic;
-    clk_ena       : in std_logic;
 		reset					: in std_logic;
 
 		-- video control signals		
-		stb           : in std_logic;
-    hblank      	: in std_logic;
-		vblank				: in std_logic;
-    x       	    : in std_logic_vector(10 downto 0);
-    y       	    : in std_logic_vector(10 downto 0);
-
+    video_ctl     : in from_VIDEO_CTL_t;
+    
     -- tilemap interface
 		scroll_data		: in std_logic_vector(7 downto 0);
 		palette_data	: in ByteArrayType(15 downto 0);
@@ -39,6 +33,14 @@ end bitmapCtl_1;
 
 architecture SYN of bitmapCtl_1 is
 
+  alias clk       : std_logic is video_ctl.clk;
+  alias clk_ena   : std_logic is video_ctl.clk_ena;
+  alias stb       : std_logic is video_ctl.stb;
+  alias hblank    : std_logic is video_ctl.hblank;
+  alias vblank    : std_logic is video_ctl.hblank;
+  alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
+  alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
+  
 	signal clk_ena_s : std_logic;
 	
 begin

@@ -6,6 +6,7 @@ use ieee.std_logic_arith.EXT;
 library work;
 use work.pace_pkg.all;
 use work.kbd_pkg.in8;
+use work.sprite_pkg.all;
 use work.project_pkg.all;
 use work.platform_pkg.all;
 
@@ -23,10 +24,6 @@ entity Game is
 
     -- controller inputs
     inputs_i        : in from_INPUTS_t;
-
-    -- micro buses
-    upaddr          : out std_logic_vector(15 downto 0);   
-    updatao         : out std_logic_vector(7 downto 0);    
 
     -- FLASH/SRAM
     flash_i         : in from_FLASH_t;
@@ -46,6 +43,10 @@ entity Game is
     gp_i            : in from_GP_t;
     gp_o            : out to_GP_t;
 
+    -- micro buses
+    upaddr          : out std_logic_vector(15 downto 0);   
+    updatao         : out std_logic_vector(7 downto 0);    
+
     gfxextra_data   : out std_logic_vector(7 downto 0);
 		palette_data		: out ByteArrayType(15 downto 0);
 
@@ -62,8 +63,7 @@ entity Game is
     attr_dout       : out std_logic_vector(15 downto 0);   
 
     -- graphics (sprite)
-    sprite_reg_addr : out std_logic_vector(7 downto 0);    
-    sprite_wr       : out std_logic;                       
+    to_sprite_reg   : out to_SPRITE_REG_t;
     spriteaddr      : in std_logic_vector(15 downto 0);   
     spritedata      : out std_logic_vector(31 downto 0);   
     spr0_hit        : in std_logic;
@@ -187,11 +187,16 @@ begin
 	cram_wr <= cram_cs and uPmemwr;
 	wram_wr <= wram_cs and uPmemwr;
   nmiena_wr <= uPmemwr when (uP_addr(15 downto 12) = "0111" and uP_addr(2 downto 0) = "001") else '0';
-  sprite_wr <= uPmemwr when (uP_addr(15 downto 10) = "010110" and uP_addr(7 downto 6) = "01") else '0';
-		
+
 	upaddr <= uP_addr;
 	updatao <= uP_datao;
-  sprite_reg_addr <= uP_addr(7 downto 0);
+
+  -- sprite registers
+  to_sprite_reg.clk <= clk_30M;
+  to_sprite_reg.clk_ena <= cpu_clk_en;
+  to_sprite_reg.a <= uP_addr(7 downto 0);
+  to_sprite_reg.d <= uP_datao;
+  to_sprite_reg.wr <= uPmemwr when (uP_addr(15 downto 10) = "010110" and uP_addr(7 downto 6) = "01") else '0';
 
 	-- mangle tile address according to sprite layout
 	newTileAddr <= tileAddr(11 downto 6) & tileAddr(4 downto 1) & not tileAddr(5) & tileAddr(0);

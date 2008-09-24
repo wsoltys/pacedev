@@ -20,25 +20,20 @@ entity pace_video_controller is
   );
   port
   (
-    clk     	: in std_logic;
-    clk_ena   : in std_logic;
-    reset   	: in std_logic;
+    -- clocking etc
+    video_i       : in from_VIDEO_t;
 
 		-- register interface
-		reg_i			: in VIDEO_REG_t;
+		reg_i			    : in VIDEO_REG_t;
     
     -- video input data
-    rgb_i     : in RGB_t;
+    rgb_i         : in RGB_t;
 
 		-- control signals (out)
-    stb  	    : out std_logic;
-    hblank		: out std_logic;
-    vblank		: out std_logic;
-    x 	      : out std_logic_vector(10 downto 0);
-    y 	      : out std_logic_vector(10 downto 0);
+		video_ctl_o   : out from_VIDEO_CTL_t;
 
     -- video output control & data
-    video_o   : out to_VIDEO_t
+    video_o       : out to_VIDEO_t
   );
 end pace_video_controller;
 
@@ -51,6 +46,10 @@ architecture SYN of pace_video_controller is
 
   subtype reg_t is integer range 0 to 2047;
 
+  alias clk       : std_logic is video_i.clk;
+  alias clk_ena   : std_logic is video_i.clk_ena;
+  alias reset     : std_logic is video_i.reset;
+  
   -- registers
   signal h_front_porch_r        : reg_t := 0;
   signal h_sync_r               : reg_t := 0;
@@ -276,6 +275,10 @@ begin
     end if; -- rising_edge(clk) and clk_ena = '1'
   end process timer_proc;
 
+  -- pass-through for tile/bitmap & sprite controllers
+  video_ctl_o.clk <= clk;
+  video_ctl_o.clk_ena <= clk_ena;
+  
   -- for video DACs and TFT output
   video_o.clk <= clk;
   
@@ -306,17 +309,17 @@ begin
     elsif rising_edge(clk) and clk_ena = '1' then
 
       -- register control signals and handle scaling
-			hblank <= not hactive_s after SIM_DELAY;	-- used only by the bitmap/tilemap/sprite controllers
-			vblank <= not vactive_s after SIM_DELAY;	-- used only by the bitmap/tilemap/sprite controllers
+			video_ctl_o.hblank <= not hactive_s after SIM_DELAY;	-- used only by the bitmap/tilemap/sprite controllers
+			video_ctl_o.vblank <= not vactive_s after SIM_DELAY;	-- used only by the bitmap/tilemap/sprite controllers
 			-- handle scaling
-			stb <= stb_cnt_v(H_SCALE-1) after SIM_DELAY;
+			video_ctl_o.stb <= stb_cnt_v(H_SCALE-1) after SIM_DELAY;
       if hactive_s = '1' and vactive_s = '1' then
         stb_cnt_v := stb_cnt_v + 2;
       elsif hblank_s = '0' and vblank_s = '0' then    
         stb_cnt_v := (others => '1');
       end if;
-      x <= EXT(x_s(x_s'left downto H_SCALE-1), x'length) after SIM_DELAY;
-      y <= EXT(y_s(y_s'left downto V_SCALE-1), y'length) after SIM_DELAY;
+      video_ctl_o.x <= EXT(x_s(x_s'left downto H_SCALE-1), video_ctl_o.x'length) after SIM_DELAY;
+      video_ctl_o.y <= EXT(y_s(y_s'left downto V_SCALE-1), video_ctl_o.y'length) after SIM_DELAY;
 
       -- register video outputs
       if hactive_v = '1' and vactive_v = '1' then

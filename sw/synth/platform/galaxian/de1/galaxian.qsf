@@ -501,6 +501,7 @@ set_global_assignment -name STRATIX_CONFIGURATION_DEVICE EPCS4
 set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS INPUT TRI-STATED"
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/de1/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/platform_pkg.vhd
@@ -524,8 +525,8 @@ set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controlle
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/bitmapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/tilemapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/flipRow.VHDL
-set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/SptReg.VHD
-set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/sptCtlVHDL.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/sprite_reg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/spritectl.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/SptArray.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Graphics.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/pia8255.vhd

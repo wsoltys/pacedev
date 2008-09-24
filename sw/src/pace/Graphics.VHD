@@ -6,6 +6,7 @@ use ieee.std_logic_arith.all;
 library work;
 use work.pace_pkg.all;
 use work.video_controller_pkg.all;
+use work.sprite_pkg.all;
 use work.project_pkg.all;
 use work.platform_pkg.all;
 
@@ -14,6 +15,8 @@ entity Graphics is
   (
 		reset						: in std_logic;
 
+    sprite_reg_i    : to_SPRITE_REG_t;
+    
 		xcentre					: in std_logic_vector(9 downto 0);
 		ycentre					: in std_logic_vector(9 downto 0);
 		
@@ -31,19 +34,13 @@ entity Graphics is
 
     spriteaddr      : out std_logic_vector(15 downto 0);   
     spritedata      : in std_logic_vector(31 downto 0);   
-    sprite_reg_addr : in std_logic_vector(7 downto 0);    
-    updata          : in std_logic_vector(7 downto 0);    
-    sprite_wr       : in std_logic;
 		spr0_hit				: out std_logic;
 
 		to_osd          : in to_OSD_t; 
 		from_osd        : out from_OSD_t;
 
 		video_i					: in from_VIDEO_t;
-		video_o					: out to_VIDEO_t;
-		
-    bw_cvbs         : out std_logic_vector(1 downto 0);    
-    gs_cvbs         : out std_logic_vector(7 downto 0)    
+		video_o					: out to_VIDEO_t
   );
 
 end Graphics;
@@ -57,16 +54,10 @@ architecture SYN of Graphics is
 	component bitmapCtl_1 is          
 	port               
 	(
-	    clk         	: in std_logic;
-	    clk_ena       : in std_logic;
 			reset					: in std_logic;
 			
 			-- video control signals		
-			stb           : in std_logic;
-	    hblank      	: in std_logic;
-	    vblank      	: in std_logic;
-	    x       	    : in std_logic_vector(10 downto 0);
-	    y       	    : in std_logic_vector(10 downto 0);
+			video_ctl     : in from_VIDEO_CTL_t;
 
 			scroll_data		: in std_logic_vector(7 downto 0);
 			palette_data	: in ByteArrayType(15 downto 0);
@@ -84,16 +75,10 @@ architecture SYN of Graphics is
 	component tilemapCtl_1 is          
 	port               
 	(
-	    clk         : in std_logic;
-	    clk_ena     : in std_logic;
 			reset				: in std_logic;
 			
 			-- video control signals		
-			stb         : in std_logic;
-	    hblank      : in std_logic;
-	    vblank      : in std_logic;
-	    x           : in std_logic_vector(10 downto 0);
-	    y           : in std_logic_vector(10 downto 0);
+			video_ctl     : in from_VIDEO_CTL_t;
 
 			scroll_data		: in std_logic_vector(7 downto 0);
 			palette_data	: in ByteArrayType(15 downto 0);
@@ -115,16 +100,10 @@ architecture SYN of Graphics is
 	component tilemapCtl_2 is          
 	port               
 	(
-	    clk         : in std_logic;
-	    clk_ena     : in std_logic;
 			reset				: in std_logic;
 			
 			-- video control signals		
-			stb         : in std_logic;
-	    hblank      : in std_logic;
-	    vblank      : in std_logic;
-	    x           : in std_logic_vector(10 downto 0);
-	    y           : in std_logic_vector(10 downto 0);
+			video_ctl     : in from_VIDEO_CTL_t;
 
 			scroll_data		: in std_logic_vector(7 downto 0);
 			palette_data	: in ByteArrayType(15 downto 0);
@@ -146,6 +125,8 @@ architecture SYN of Graphics is
 	component sptArray is
 		port
 		(
+      reg_i       : to_SPRITE_REG_t;
+      
 			clk					: in std_logic;
 			clk_ena			: in std_logic;
 			reset				: in std_logic;
@@ -155,11 +136,8 @@ architecture SYN of Graphics is
 			hblank			: in std_logic;
 			xAddr				: in std_logic_vector(7 downto 0);
 			yAddr				: in std_logic_vector(8 downto 0);
-			dIn					: in std_logic_vector(7 downto 0);
 			spriteAddr	: out std_logic_vector(15 downto 0);
 			spriteData	: in std_logic_vector(31 downto 0);
-			sprite_wr		: in std_logic;
-			sprRegAddr	: in std_logic_vector(7 downto 0);
 			
 			rgb					: out RGB_t;
 			spr_on			: out std_logic;
@@ -168,15 +146,10 @@ architecture SYN of Graphics is
 		);
 	end component;
 
-	alias clk 					: std_logic is video_i.clk;
+	alias clk 					    : std_logic is video_i.clk;
 
-	signal pix_clk_ena	: std_logic;
-  signal strobe       : std_logic;
-	signal hblank				: std_logic;
-	signal vblank				: std_logic;
-	signal pix_x				: std_logic_vector(10 downto 0);
-	signal pix_y				: std_logic_vector(10 downto 0);
-
+  signal from_video_ctl   : from_VIDEO_CTL_t;
+  
 	signal bitmap_rgb		: RGBArrayType(1 to 1);
 	signal bitmap_on		: std_logic_vector(1 to 1);
 	
@@ -220,13 +193,6 @@ begin
 	-- but it'll do for now...
 	spr0_hit <= sprite0_on;
 	
-  -- assign top-level output ports
-  bw_cvbs <= (others => '0');
-  gs_cvbs <= (others => '0');
-
-	-- because some video controllers only strobe during active video
-  pix_clk_ena <= strobe or hblank;
-
   pace_video_controller_inst : entity work.pace_video_controller
     generic map
     (
@@ -240,10 +206,9 @@ begin
     )
     port map
     (
-      clk         		=> video_i.clk,
-      clk_ena     		=> video_i.clk_ena,
-      reset						=> reset,
-
+      -- clocking etc
+      video_i         => video_i,
+      
 			-- register interface
 			reg_i.h_scale		=> (others => '0'),
 			reg_i.v_scale 	=> (others => '0'),
@@ -252,11 +217,7 @@ begin
       rgb_i		    		=> rgb_data,
 
       -- video control signals (out)
-      stb         		=> strobe,
-      hblank     			=> hblank,
-      vblank					=> vblank,
-      x								=> pix_x,
-      y 							=> pix_y,
+      video_ctl_o     => from_video_ctl,
 
       -- VGA signals (out)
       video_o     		=> video_o_s
@@ -278,15 +239,9 @@ begin
 	  bitmapctl_inst : bitmapCtl_1
 	    port map
 	    (
-	      clk      			=> video_i.clk,
-	      clk_ena       => video_i.clk_ena,
 				reset					=> reset,
 				
-				stb           => pix_clk_ena,
-	      hblank   			=> hblank,
-	      vblank   			=> vblank,
-	      x     		    => pix_x,
-	      y     		    => pix_y,
+				video_ctl     => from_video_ctl,
 
 				scroll_data		=> extra_data,
 				palette_data	=> palette_data,
@@ -317,15 +272,9 @@ begin
 	  foreground_mapctl_inst : tilemapCtl_1
 	    port map
 	    (
-	      clk      			=> video_i.clk,
-        clk_ena     	=> video_i.clk_ena,
 				reset					=> reset,
 				
-				stb				    => pix_clk_ena,
-	      hblank   			=> hblank,
-	      vblank   			=> vblank,
-	      x     		    => pix_x,
-	      y     		    => pix_y,
+				video_ctl     => from_video_ctl,
 
 				scroll_data		=> extra_data,
 				palette_data	=> palette_data,
@@ -365,20 +314,19 @@ begin
 		sprites_inst : sptArray
 			port map
 			(
-				clk					=> clk,
-				clk_ena			=> pix_clk_ena,
-				reset				=> reset,
+        reg_i         => sprite_reg_i,
+        
+        clk           => video_i.clk,
+        clk_ena       => video_i.clk_ena,
+				reset				  => reset,
 				
         bank_data   => extra_data,
 
-				hblank			=> hblank,
-				xAddr				=> pix_x(7 downto 0),
-				yAddr				=> pix_y(8 downto 0),
-				dIn					=> uPdata,
+				hblank			=> from_video_ctl.hblank,
+				xAddr				=> from_video_ctl.x(7 downto 0),
+				yAddr				=> from_video_ctl.y(8 downto 0),
 				spriteAddr	=> spriteAddr,
 				spriteData	=> spriteData,
-				sprite_wr		=> sprite_wr,
-				sprRegAddr	=> sprite_reg_addr,
 				
 				rgb					=> sprite_rgb,
 				spr_on			=> sprite_on,
@@ -448,7 +396,7 @@ begin
         );
 
       -- active low line 128
-      osd_vsync <= '0' when conv_integer(pix_y) = PACE_OSD_YPOS else '1';
+      osd_vsync <= '0' when conv_integer(from_video_ctl.y) = PACE_OSD_YPOS else '1';
 
       process (clk)
         variable osd_xdelaybuf : std_logic;

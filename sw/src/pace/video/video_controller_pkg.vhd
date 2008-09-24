@@ -41,6 +41,7 @@ package video_controller_pkg is
   type from_VIDEO_t is record
     clk       : std_logic;
     clk_ena   : std_logic;
+    reset     : std_logic;
   end record;
   
   type to_VIDEO_t is record
@@ -52,6 +53,16 @@ package video_controller_pkg is
     vblank    : std_logic;
   end record;
 
+  type from_VIDEO_CTL_t is record
+    clk       : std_logic;
+    clk_ena   : std_logic;
+    stb       : std_logic;
+    hblank    : std_logic;
+    vblank    : std_logic;
+    x         : std_logic_vector(10 downto 0);
+    y         : std_logic_vector(10 downto 0);
+  end record;
+  
   constant RGB_BLACK    : RGB_t := ((others=>'0'),(others=>'0'),(others=>'0'));
   constant RGB_RED      : RGB_t := ((others=>'1'),(others=>'0'),(others=>'0'));
   constant RGB_GREEN    : RGB_t := ((others=>'0'),(others=>'1'),(others=>'0'));
@@ -74,25 +85,20 @@ package video_controller_pkg is
     );
     port
     (
-    clk     	: in std_logic;
-    clk_ena   : in std_logic;
-    reset   	: in std_logic;
-    
-		-- register interface
-		reg_i			: in VIDEO_REG_t;
-    
-    -- video input data
-    rgb_i     : in RGB_t;
+      -- clocking etc
+      video_i       : in from_VIDEO_t;
+      
+      -- register interface
+      reg_i			    : in VIDEO_REG_t;
+      
+      -- video input data
+      rgb_i         : in RGB_t;
 
-		-- control signals (out)
-    stb  	    : out std_logic;
-    hblank		: out std_logic;
-    vblank		: out std_logic;
-    x 	      : out std_logic_vector(10 downto 0);
-    y 	      : out std_logic_vector(10 downto 0);
-
-    -- Outputs to video
-    video_o   : out to_VIDEO_t
+      -- control signals (out)
+      video_ctl_o   : from_VIDEO_CTL_t;
+      
+      -- Outputs to video
+      video_o       : out to_VIDEO_t
     );
   end component pace_video_controller;
 

@@ -6,6 +6,7 @@ use ieee.std_logic_arith.all;
 library work;
 use work.pace_pkg.all;
 use work.kbd_pkg.in8;
+use work.sprite_pkg.all;
 use work.project_pkg.all;
 use work.platform_pkg.all;
 use work.platform_variant_pkg.all;
@@ -67,8 +68,7 @@ entity Game is
     attr_dout       : out std_logic_vector(15 downto 0);   
 
     -- graphics (sprite)
-    sprite_reg_addr : out std_logic_vector(7 downto 0);    
-    sprite_wr       : out std_logic;                       
+    to_sprite_reg   : out to_SPRITE_REG_t;
     spriteaddr      : in std_logic_vector(15 downto 0);   
     spritedata      : out std_logic_vector(31 downto 0);   
 		spr0_hit				: in std_logic;
@@ -337,8 +337,7 @@ begin
 	tiledatao <= (others => '0');
 	upaddr <= uP_addr;
 	updatao <= uP_datao;
-  sprite_reg_addr <= (others => '0');
-  sprite_wr <= '0';
+  to_sprite_reg <= ('0', '0', '0', (others => '0'), (others => '0'));
   spriteData <= (others => '0');
   attr_dout <= X"00" & dip_n;
 
