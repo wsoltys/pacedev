@@ -496,7 +496,6 @@ set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS INPUT TRI-
 set_global_assignment -name SEED 1
 
 set_parameter -name CYCLONEII_SAFE_WRITE VERIFIED_SAFE
-set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
@@ -566,3 +565,26 @@ set_global_assignment -name SMART_RECOMPILE ON
 set_global_assignment -name CYCLONEII_OPTIMIZATION_TECHNIQUE SPEED
 set_global_assignment -name MUX_RESTRUCTURE OFF
 set_global_assignment -name OPTIMIZE_POWER_DURING_SYNTHESIS OFF
+set_instance_assignment -name TPD_REQUIREMENT "11 ns" -from * -to dram_addr[*]
+set_instance_assignment -name TPD_REQUIREMENT "11 ns" -from * -to dram_ldqm
+set_instance_assignment -name TPD_REQUIREMENT "11 ns" -from * -to dram_udqm
+set_instance_assignment -name TPD_REQUIREMENT "11 ns" -from * -to dram_ba_0
+set_instance_assignment -name TPD_REQUIREMENT "11 ns" -from * -to dram_ba_1
+set_instance_assignment -name TPD_REQUIREMENT "11 ns" -from * -to dram_cs_n
+set_instance_assignment -name TPD_REQUIREMENT "11 ns" -from * -to dram_cas_n
+set_instance_assignment -name TPD_REQUIREMENT "11 ns" -from * -to dram_ras_n
+set_instance_assignment -name TPD_REQUIREMENT "11 ns" -from * -to dram_we_n
+set_instance_assignment -name TPD_REQUIREMENT "11 ns" -from * -to dram_dq[*]
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to dram*
+set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to dram_dq[*]
+set_instance_assignment -name FAST_INPUT_REGISTER ON -to dram*
+set_instance_assignment -name REPORT_DELAY ON -from * -to dram_addr[*]
+set_instance_assignment -name REPORT_DELAY ON -from * -to dram_ldqm
+set_instance_assignment -name REPORT_DELAY ON -from * -to dram_udqm
+set_instance_assignment -name REPORT_DELAY ON -from * -to dram_ba_0
+set_instance_assignment -name REPORT_DELAY ON -from * -to dram_ba_1
+set_instance_assignment -name REPORT_DELAY ON -from * -to dram_cs_n
+set_instance_assignment -name REPORT_DELAY ON -from * -to dram_cas_n
+set_instance_assignment -name REPORT_DELAY ON -from * -to dram_ras_n
+set_instance_assignment -name REPORT_DELAY ON -from * -to dram_we_n
+set_instance_assignment -name REPORT_DELAY ON -from * -to dram_dq[*]
