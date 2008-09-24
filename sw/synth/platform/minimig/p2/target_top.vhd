@@ -173,7 +173,7 @@ architecture SYN of target_top is
 
 	signal bd_out				: std_logic_vector(31 downto 0);
 
-	signal jamma_s			: JAMMAInputsType;
+	signal jamma_s			: from_JAMMA_t;
 	-- gamecube controller interface
 	signal gcj					: work.gamecube_pkg.joystate_type;
 	alias gcj_data			: std_logic is bd(4);

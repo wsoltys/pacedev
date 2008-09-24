@@ -160,7 +160,7 @@ architecture SYN of target_top is
   signal ps2_mclk     : std_logic;
   signal ps2_mdat     : std_logic;
 
-	signal jamma				: JAMMAInputsType;
+	signal jamma				: from_JAMMA_t;
 
 	-- maple/dreamcast controller interface
 	signal maple_sense	: std_logic;
