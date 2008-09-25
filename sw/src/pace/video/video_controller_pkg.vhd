@@ -31,8 +31,17 @@ package video_controller_pkg is
     b : std_logic_vector(9 downto 0);
   end record;
 
-  type RGBArrayType is array (natural range <>) of RGB_t;
+  function NULL_RGB return RGB_t;
 
+  constant RGB_BLACK    : RGB_t := ((others=>'0'),(others=>'0'),(others=>'0'));
+  constant RGB_RED      : RGB_t := ((others=>'1'),(others=>'0'),(others=>'0'));
+  constant RGB_GREEN    : RGB_t := ((others=>'0'),(others=>'1'),(others=>'0'));
+  constant RGB_YELLOW   : RGB_t := ((others=>'1'),(others=>'1'),(others=>'0'));
+  constant RGB_BLUE     : RGB_t := ((others=>'0'),(others=>'0'),(others=>'1'));
+  constant RGB_MAGENTA  : RGB_t := ((others=>'1'),(others=>'0'),(others=>'1'));
+  constant RGB_CYAN     : RGB_t := ((others=>'0'),(others=>'1'),(others=>'1'));
+  constant RGB_WHITE    : RGB_t := ((others=>'1'),(others=>'1'),(others=>'1'));
+  
 	type VIDEO_REG_t is record
 		h_scale		: std_logic_vector(2 downto 0);
 		v_scale		: std_logic_vector(2 downto 0);
@@ -63,14 +72,54 @@ package video_controller_pkg is
     y         : std_logic_vector(10 downto 0);
   end record;
   
-  constant RGB_BLACK    : RGB_t := ((others=>'0'),(others=>'0'),(others=>'0'));
-  constant RGB_RED      : RGB_t := ((others=>'1'),(others=>'0'),(others=>'0'));
-  constant RGB_GREEN    : RGB_t := ((others=>'0'),(others=>'1'),(others=>'0'));
-  constant RGB_YELLOW   : RGB_t := ((others=>'1'),(others=>'1'),(others=>'0'));
-  constant RGB_BLUE     : RGB_t := ((others=>'0'),(others=>'0'),(others=>'1'));
-  constant RGB_MAGENTA  : RGB_t := ((others=>'1'),(others=>'0'),(others=>'1'));
-  constant RGB_CYAN     : RGB_t := ((others=>'0'),(others=>'1'),(others=>'1'));
-  constant RGB_WHITE    : RGB_t := ((others=>'1'),(others=>'1'),(others=>'1'));
+  subtype BITMAP_D_t is std_logic_vector(7 downto 0);
+  subtype BITMAP_A_t is std_logic_vector(15 downto 0);
+  
+  type to_BITMAP_CTL_t is record
+    d         : BITMAP_D_t;
+  end record;
+  
+  function NULL_TO_BITMAP_CTL return to_BITMAP_CTL_t;
+
+  type from_BITMAP_CTL_t is record
+    a         : BITMAP_A_t;
+    rgb       : RGB_t;
+    set       : std_logic;
+  end record;
+
+  subtype TILEMAP_D_t is std_logic_vector(15 downto 0);
+  subtype TILEMAP_A_t is std_logic_vector(15 downto 0);
+  subtype TILE_A_t is std_logic_vector(15 downto 0);
+  subtype TILE_D_t is std_logic_vector(7 downto 0);
+  subtype ATTR_A_t is std_logic_vector(9 downto 0);
+  subtype ATTR_D_t is std_logic_vector(15 downto 0);
+  
+  type to_TILEMAP_CTL_t is record
+    map_d     : TILEMAP_D_t;
+    tile_d    : TILE_D_t;
+    attr_d    : ATTR_D_t;
+  end record;
+  
+  function NULL_TO_TILEMAP_CTL return to_TILEMAP_CTL_t;
+
+  type from_TILEMAP_CTL_t is record
+    map_a     : TILEMAP_A_t;
+    tile_a    : TILE_A_t;
+    attr_a    : ATTR_A_t;
+    rgb       : RGB_t;
+    set       : std_logic;
+  end record;
+
+  subtype PAL_ENTRY_t is std_logic_vector(7 downto 0);
+  type PAL_A_t is array (natural range <>) of PAL_ENTRY_t;
+  
+  type to_GRAPHICS_t is record
+    pal       : PAL_A_t(15 downto 0);
+    -- for various uses
+    bit8_1    : std_logic_vector(7 downto 0);
+  end record;
+
+  function NULL_TO_GRAPHICS return to_GRAPHICS_t;
   
   component pace_video_controller is
     generic

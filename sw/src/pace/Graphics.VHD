@@ -14,28 +14,22 @@ entity Graphics is
   port
   (
 		reset						: in std_logic;
-
-    sprite_reg_i    : to_SPRITE_REG_t;
     
+    bitmap_ctl_i    : in to_BITMAP_CTL_t;
+    bitmap_ctl_o    : out from_BITMAP_CTL_t;
+    tilemap_ctl_i   : in to_TILEMAP_CTL_t;
+    tilemap_ctl_o   : out from_TILEMAP_CTL_t;
+
+    sprite_reg_i    : in to_SPRITE_REG_t;
+    sprite_ctl_i    : in to_SPRITE_CTL_t;
+    sprite_ctl_o    : out from_SPRITE_CTL_t;
+		spr0_hit				: out std_logic;
+    
+    graphics_i      : in to_GRAPHICS_t;
+
 		xcentre					: in std_logic_vector(9 downto 0);
 		ycentre					: in std_logic_vector(9 downto 0);
 		
-    extra_data      : in std_logic_vector(7 downto 0);
-		palette_data		: in ByteArrayType(15 downto 0);
-						
-    bitmapa        	: out std_logic_vector(15 downto 0);   
-    bitmapd        	: in std_logic_vector(7 downto 0);    
-    tilemapa        : out std_logic_vector(15 downto 0);   
-    tilemapd        : in std_logic_vector(15 downto 0);    
-    tilea           : out std_logic_vector(15 downto 0);   
-    tiled           : in std_logic_vector(7 downto 0);    
-    attra           : out std_logic_vector(9 downto 0);    
-    attrd           : in std_logic_vector(15 downto 0);   
-
-    spriteaddr      : out std_logic_vector(15 downto 0);   
-    spritedata      : in std_logic_vector(31 downto 0);   
-		spr0_hit				: out std_logic;
-
 		to_osd          : in to_OSD_t; 
 		from_osd        : out from_OSD_t;
 
@@ -54,127 +48,73 @@ architecture SYN of Graphics is
 	component bitmapCtl_1 is          
 	port               
 	(
-			reset					: in std_logic;
+    reset					: in std_logic;
 			
-			-- video control signals		
-			video_ctl     : in from_VIDEO_CTL_t;
+		-- video control signals		
+		video_ctl     : in from_VIDEO_CTL_t;
 
-			scroll_data		: in std_logic_vector(7 downto 0);
-			palette_data	: in ByteArrayType(15 downto 0);
-			
-	    -- bitmap interface
-	    bitmap_d   		: in std_logic_vector(7 downto 0);
-	    bitmap_a   		: out std_logic_vector(15 downto 0);
-
-			-- RGB output (10-bits each)
-			rgb						: out RGB_t;
-			bitmap_on			: out std_logic
-	) ;
+    -- bitmap controller signals
+    ctl_i         : in to_BITMAP_CTL_t;
+    ctl_o         : out from_BITMAP_CTL_t;
+    
+    graphics_i    : in to_GRAPHICS_t
+	);
 	end component;
 
 	component tilemapCtl_1 is          
 	port               
 	(
-			reset				: in std_logic;
+		reset				  : in std_logic;
 			
-			-- video control signals		
-			video_ctl     : in from_VIDEO_CTL_t;
+		-- video control signals		
+		video_ctl     : in from_VIDEO_CTL_t;
 
-			scroll_data		: in std_logic_vector(7 downto 0);
-			palette_data	: in ByteArrayType(15 downto 0);
-
-	    -- tilemap interface
-	    tilemap_d   : in std_logic_vector(15 downto 0);
-	    tilemap_a   : out std_logic_vector(15 downto 0);
-	    tile_d      : in std_logic_vector(7 downto 0);
-	    tile_a      : out std_logic_vector(15 downto 0);
-	    attr_d      : in std_logic_vector(15 downto 0);
-	    attr_a      : out std_logic_vector(9 downto 0);
-
-			-- RGB output (10-bits each)
-			rgb					: out RGB_t;
-			tilemap_on	: out std_logic
-	) ;
+    -- tilemap controller signals
+    ctl_i         : in to_TILEMAP_CTL_t;
+    ctl_o         : out from_TILEMAP_CTL_t;
+    
+    graphics_i    : in to_GRAPHICS_t
+	);
 	end component;
 
 	component tilemapCtl_2 is          
 	port               
 	(
-			reset				: in std_logic;
+		reset				  : in std_logic;
 			
-			-- video control signals		
-			video_ctl     : in from_VIDEO_CTL_t;
+		-- video control signals		
+    video_ctl     : in from_VIDEO_CTL_t;
 
-			scroll_data		: in std_logic_vector(7 downto 0);
-			palette_data	: in ByteArrayType(15 downto 0);
-
-	    -- tilemap interface
-	    tilemap_d   : in std_logic_vector(15 downto 0);
-	    tilemap_a   : out std_logic_vector(15 downto 0);
-	    tile_d      : in std_logic_vector(7 downto 0);
-	    tile_a      : out std_logic_vector(15 downto 0);
-	    attr_d      : in std_logic_vector(15 downto 0);
-	    attr_a      : out std_logic_vector(9 downto 0);
-
-			-- RGB output (10-bits each)
-			rgb					: out RGB_t;
-			tilemap_on	: out std_logic
-	) ;
-	end component;
-
-	component sptArray is
-		port
-		(
-      reg_i       : to_SPRITE_REG_t;
-      
-			clk					: in std_logic;
-			clk_ena			: in std_logic;
-			reset				: in std_logic;
-
-      bank_data   : in std_logic_vector(7 downto 0);
-			
-			hblank			: in std_logic;
-			xAddr				: in std_logic_vector(7 downto 0);
-			yAddr				: in std_logic_vector(8 downto 0);
-			spriteAddr	: out std_logic_vector(15 downto 0);
-			spriteData	: in std_logic_vector(31 downto 0);
-			
-			rgb					: out RGB_t;
-			spr_on			: out std_logic;
-			spr_pri			: out std_logic;
-			spr0_on			: out std_logic
-		);
+    -- tilemap controller signals
+    ctl_i         : in to_TILEMAP_CTL_t;
+    ctl_o         : out from_TILEMAP_CTL_t;
+    
+    graphics_i    : in to_GRAPHICS_t
+	);
 	end component;
 
 	alias clk 					    : std_logic is video_i.clk;
 
   signal from_video_ctl   : from_VIDEO_CTL_t;
+  signal bitmap_ctl_o_s   : from_BITMAP_CTL_t;
+  signal tilemap_ctl_o_s  : from_TILEMAP_CTL_t;
+  signal sprite_ctl_o_s   : from_SPRITE_CTL_t;
+  signal sprite_pri       : std_logic;
   
-	signal bitmap_rgb		: RGBArrayType(1 to 1);
-	signal bitmap_on		: std_logic_vector(1 to 1);
-	
-	signal tilemap_rgb	: RGBArrayType(1 to 1);
-	signal tilemap_on		: std_logic_vector(1 to 1);
-	
-	signal sprite_rgb		: RGB_t;
-	signal sprite_on		: std_logic;
-	signal sprite_pri		: std_logic;
-	signal sprite0_on		: std_logic;
+  signal osd_active       : std_logic;
+  signal osd_colour       : std_logic_vector(7 downto 0);
 
-  signal osd_active   : std_logic;
-  signal osd_colour   : std_logic_vector(7 downto 0);
-
-	signal rgb_data			: RGB_t;
+	signal rgb_data			    : RGB_t;
   -- before OSD is mixed in
-  signal video_o_s    : to_VIDEO_t;
+  signal video_o_s        : to_VIDEO_t;
   
 begin
 
 	-- generate final RGB signal
-	rgb_data <= sprite_rgb when sprite_on = '1' and sprite_pri = '1' else
-							tilemap_rgb(1) when tilemap_on(1) = '1' else
-							sprite_rgb when sprite_on = '1' else
-							bitmap_rgb(1);
+	rgb_data <= sprite_ctl_o_s.rgb when sprite_ctl_o_s.set = '1' and sprite_pri = '1' else
+							tilemap_ctl_o_s.rgb when tilemap_ctl_o_s.set = '1' else
+							sprite_ctl_o_s.rgb when sprite_ctl_o_s.set = '1' else
+							bitmap_ctl_o_s.rgb;
 
   -- dodgy OSD transparency...
 	video_o.clk <= video_o_s.clk;
@@ -189,10 +129,6 @@ begin
 	video_o.hblank <= video_o_s.hblank;
 	video_o.vblank <= video_o_s.vblank;
 
-	-- it's actually more complicated than this on the NES
-	-- but it'll do for now...
-	spr0_hit <= sprite0_on;
-	
   pace_video_controller_inst : entity work.pace_video_controller
     generic map
     (
@@ -224,14 +160,7 @@ begin
     );
 
 	GEN_NO_BITMAPS : if PACE_VIDEO_NUM_BITMAPS = 0 generate
-	
-		bitmapa <= (others => '0');
-
-		bitmap_rgb(1).r <= (others => '0');
-		bitmap_rgb(1).g <= (others => '0');
-		bitmap_rgb(1).b <= (others => '0');
-		bitmap_on(1) <= '0';
-	
+    bitmap_ctl_o_s <= ((others => '0'), (others => (others => '0')), '0');
 	end generate GEN_NO_BITMAPS;
 	
 	GEN_BITMAP_1 : if PACE_VIDEO_NUM_BITMAPS > 0 generate
@@ -243,28 +172,18 @@ begin
 				
 				video_ctl     => from_video_ctl,
 
-				scroll_data		=> extra_data,
-				palette_data	=> palette_data,
-	      bitmap_a 			=> bitmapa,
-	      bitmap_d 			=> bitmapd,
+	      ctl_i         => bitmap_ctl_i,
+	      ctl_o         => bitmap_ctl_o_s,
 
-				rgb						=> bitmap_rgb(1),
-				bitmap_on			=> bitmap_on(1)
+        graphics_i    => graphics_i
 	    );
-
 		end generate GEN_BITMAP_1;
 
+  bitmap_ctl_o <= bitmap_ctl_o_s;
+    
 	GEN_NO_TILEMAPS : if PACE_VIDEO_NUM_TILEMAPS = 0 generate
-	
-		tilemapa <= (others => '0');
-		tilea <= (others => '0');
-		attra <= (others => '0');
-
-		tilemap_rgb(1).r <= (others => '0');
-		tilemap_rgb(1).g <= (others => '0');
-		tilemap_rgb(1).b <= (others => '0');
-		tilemap_on(1) <= '0';
-	
+    tilemap_ctl_o_s <= ((others => '0'), (others => '0'), (others => '0'), 
+                        (others => (others => '0')), '0');
 	end generate GEN_NO_TILEMAPS;
 	
 	GEN_TILEMAP_1 : if PACE_VIDEO_NUM_TILEMAPS > 0 generate
@@ -276,65 +195,48 @@ begin
 				
 				video_ctl     => from_video_ctl,
 
-				scroll_data		=> extra_data,
-				palette_data	=> palette_data,
-				
-	      tilemap_a 		=> tilemapa,
-	      tilemap_d 		=> tilemapd,
-	      tile_a    		=> tilea,
-	      tile_d    		=> tiled,
-	      attr_a    		=> attra,
-	      attr_d    		=> attrd,
+				ctl_i         => tilemap_ctl_i,
+				ctl_o         => tilemap_ctl_o_s,
 
-				rgb						=> tilemap_rgb(1),
-				tilemap_on		=> tilemap_on(1)
+        graphics_i    => graphics_i
 	    );
 
 		end generate GEN_TILEMAP_1;
 
+  tilemap_ctl_o <= tilemap_ctl_o_s;
+
 	GEN_NO_SPRITES : if PACE_VIDEO_NUM_SPRITES = 0 generate
-
-		spriteaddr <= (others => '0');
-		sprite_rgb.r <= (others => '0');
-		sprite_rgb.g <= (others => '0');
-		sprite_rgb.b <= (others => '0');
-		sprite_on <= '0';
-		
-		sprite_rgb.r <= (others => '0');
-		sprite_rgb.g <= (others => '0');
-		sprite_rgb.b <= (others => '0');
-		sprite_on <= '0';
-    sprite_pri <= '0';
-		sprite0_on <= '0';
-
+    sprite_ctl_o_s <= ((others => '0'), (others => (others => '0')), '0');
+    spr0_hit <= '0';
 	end generate GEN_NO_SPRITES;
 	
 	GEN_SPRITES : if PACE_VIDEO_NUM_SPRITES > 0 generate
 	
-		sprites_inst : sptArray
+		sprites_inst : sprite_array
 			port map
 			(
-        reg_i         => sprite_reg_i,
-        
-        clk           => video_i.clk,
-        clk_ena       => video_i.clk_ena,
 				reset				  => reset,
-				
-        bank_data   => extra_data,
+  
+        -- register interface
+        reg_i         => sprite_reg_i,
 
-				hblank			=> from_video_ctl.hblank,
-				xAddr				=> from_video_ctl.x(7 downto 0),
-				yAddr				=> from_video_ctl.y(8 downto 0),
-				spriteAddr	=> spriteAddr,
-				spriteData	=> spriteData,
+        -- video control signals
+        video_ctl     => from_video_ctl,
+
+        graphics_i    => graphics_i,
+
+				row_a         => sprite_ctl_o_s.a,
+				row_d         => sprite_ctl_i.d,
 				
-				rgb					=> sprite_rgb,
-				spr_on			=> sprite_on,
-				spr_pri			=> sprite_pri,
-				spr0_on			=> sprite0_on
+				rgb					  => sprite_ctl_o_s.rgb,
+				set           => sprite_ctl_o_s.set,
+				pri           => sprite_pri,
+				spr0_set	    => spr0_hit
 			);
 
 	end generate GEN_SPRITES;
+
+  sprite_ctl_o <= sprite_ctl_o_s;
 
   GEN_OSD : if PACE_HAS_OSD generate
 
@@ -447,9 +349,8 @@ begin
   end generate GEN_OSD;
 
   GEN_NO_OSD : if not PACE_HAS_OSD generate
-
     osd_active <= '0';
-
+    from_osd <= NULL_FROM_OSD;
   end generate GEN_NO_OSD;
 
 end SYN;

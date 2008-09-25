@@ -6,6 +6,7 @@ use ieee.std_logic_arith.EXT;
 library work;
 use work.pace_pkg.all;
 use work.kbd_pkg.in8;
+use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
 use work.project_pkg.all;
 use work.platform_pkg.all;
@@ -31,6 +32,22 @@ entity Game is
 		sram_i					: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
 
+    -- graphics
+    
+    bitmap_i        : in from_BITMAP_CTL_t;
+    bitmap_o        : out to_BITMAP_CTL_t;
+    
+    tilemap_i       : in from_TILEMAP_CTL_t;
+    tilemap_o       : out to_TILEMAP_CTL_t;
+
+    sprite_reg_o    : out to_SPRITE_REG_t;
+    sprite_i        : in from_SPRITE_CTL_t;
+    sprite_o        : out to_SPRITE_CTL_t;
+		spr0_hit				: in std_logic;
+
+    -- various graphics information
+    graphics_o      : out to_GRAPHICS_t;
+    
     -- SPI (flash)
     spi_i           : in from_SPI_t;
     spi_o           : out to_SPI_t;
@@ -46,27 +63,6 @@ entity Game is
     -- micro buses
     upaddr          : out std_logic_vector(15 downto 0);   
     updatao         : out std_logic_vector(7 downto 0);    
-
-    gfxextra_data   : out std_logic_vector(7 downto 0);
-		palette_data		: out ByteArrayType(15 downto 0);
-
-    -- graphics (bitmap)
-		bitmap_addr			: in std_logic_vector(15 downto 0);
-		bitmap_data			: out std_logic_vector(7 downto 0);
-		
-    -- graphics (tilemap)
-    tileaddr        : in std_logic_vector(15 downto 0);   
-    tiledatao       : out std_logic_vector(7 downto 0);    
-    tilemapaddr     : in std_logic_vector(15 downto 0);   
-    tilemapdatao    : out std_logic_vector(15 downto 0);    
-    attr_addr       : in std_logic_vector(9 downto 0);    
-    attr_dout       : out std_logic_vector(15 downto 0);   
-
-    -- graphics (sprite)
-    to_sprite_reg   : out to_SPRITE_REG_t;
-    spriteaddr      : in std_logic_vector(15 downto 0);   
-    spritedata      : out std_logic_vector(31 downto 0);   
-    spr0_hit        : in std_logic;
 
     -- graphics (control)
     vblank          : in std_logic;    
@@ -153,14 +149,7 @@ begin
 	end generate GEN_EXTERNAL_WRAM;
 
 	GEN_NO_SRAM : if GALAXIAN_USE_INTERNAL_WRAM generate
-
-		sram_o.a <= (others => 'X');
-		sram_o.d <= (others => 'X');
-		sram_o.be <= (others => '0');
-		sram_o.cs <= '0';
-		sram_o.oe <= '0';
-		sram_o.we <= '0';
-			
+    sram_o <= NULL_TO_SRAM;
 	end generate GEN_NO_SRAM;
 	
   -- chip select logic
@@ -192,22 +181,30 @@ begin
 	updatao <= uP_datao;
 
   -- sprite registers
-  to_sprite_reg.clk <= clk_30M;
-  to_sprite_reg.clk_ena <= cpu_clk_en;
-  to_sprite_reg.a <= uP_addr(7 downto 0);
-  to_sprite_reg.d <= uP_datao;
-  to_sprite_reg.wr <= uPmemwr when (uP_addr(15 downto 10) = "010110" and uP_addr(7 downto 6) = "01") else '0';
+  sprite_reg_o.clk <= clk_30M;
+  sprite_reg_o.clk_ena <= cpu_clk_en;
+  sprite_reg_o.a <= uP_addr(7 downto 0);
+  sprite_reg_o.d <= uP_datao;
+  sprite_reg_o.wr <=  uPmemwr when (uP_addr(15 downto 10) = "010110" and uP_addr(7 downto 6) = "01") 
+                      else '0';
 
 	-- mangle tile address according to sprite layout
-	newTileAddr <= tileAddr(11 downto 6) & tileAddr(4 downto 1) & not tileAddr(5) & tileAddr(0);
-
-  gfxextra_data <= (others => '0');
-	GEN_PAL_DAT : for i in palette_data'range generate
-		palette_data(i) <= (others => '0');
-	end generate GEN_PAL_DAT;
+	newTileAddr <=  tilemap_i.tile_a(11 downto 6) & tilemap_i.tile_a(4 downto 1) & 
+                  not tilemap_i.tile_a(5) & tilemap_i.tile_a(0);
 
   -- unused outputs
-	bitmap_data <= (others => '0');
+
+  bitmap_o <= NULL_TO_BITMAP_CTL;
+  graphics_o <= NULL_TO_GRAPHICS;
+  sprite_o.ld <= '0';
+  
+  leds_o <= (others => '0');
+  flash_o <= ((others => '0'), (others => '0'), '0', '0', '0');
+  spi_o <= ('0', '0', '0', '0', '0');
+  ser_o <= (others => '0');
+  gp_o <= (others => '0');
+  to_osd <= ('0', (others => '0'), (others => '0'), '0');
+  
   snd_rd <= '0';
 	snd_wr <= '0';
 	
@@ -287,16 +284,16 @@ begin
 			address_a		=> vram_addr,
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tileMapDatao(7 downto 0)
+			q_a					=> tilemap_o.map_d(7 downto 0)
 		);
-  tileMapDatao(15 downto 8) <= (others => '0');
+  tilemap_o.map_d(15 downto 8) <= (others => '0');
 
 	vrammapper_inst : entity work.vramMapper
 		port map
 		(
 	    clk     => clk_video,
 
-	    inAddr  => tileMapAddr(12 downto 0),
+	    inAddr  => tilemap_i.map_a(12 downto 0),
 	    outAddr => vram_addr
 		);
 
@@ -318,10 +315,10 @@ begin
 			q_b					=> cram0_datao,
 			
 			clock_a			=> clk_video,
-			address_a		=> attr_addr(7 downto 1),
+			address_a		=> tilemap_i.attr_a(7 downto 1),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> attr_dout(7 downto 0)
+			q_a					=> tilemap_o.attr_d(7 downto 0)
 		);
 
 	cram1_wr <= cram_wr and uP_addr(0);
@@ -342,10 +339,10 @@ begin
 			q_b					=> cram1_datao,
 			
 			clock_a			=> clk_video,
-			address_a		=> attr_addr(7 downto 1),
+			address_a		=> tilemap_i.attr_a(7 downto 1),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> attr_dout(15 downto 8)
+			q_a					=> tilemap_o.attr_d(15 downto 8)
 		);
 
 	inputs_inst : entity work.Inputs
@@ -395,13 +392,13 @@ begin
 		(
 			clock										=> clk_video,
 			address_a								=> newTileAddr,
-			q_a											=> tileDatao,
+			q_a											=> tilemap_o.tile_d,
 			
-			address_b								=> spriteAddr(9 downto 0),
-			q_b(31 downto 24)				=> spriteData(7 downto 0),
-			q_b(23 downto 16)				=> spriteData(15 downto 8),
-			q_b(15 downto 8)				=> spriteData(23 downto 16),
-			q_b(7 downto 0)					=> spriteData(31 downto 24)
+			address_b								=> sprite_i.a(9 downto 0),
+			q_b(31 downto 24)				=> sprite_o.d(7 downto 0),
+			q_b(23 downto 16)				=> sprite_o.d(15 downto 8),
+			q_b(15 downto 8)				=> sprite_o.d(23 downto 16),
+			q_b(7 downto 0)					=> sprite_o.d(31 downto 24)
 		);
 
 		GEN_INTERNAL_WRAM : if GALAXIAN_USE_INTERNAL_WRAM generate

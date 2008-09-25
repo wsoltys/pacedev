@@ -58,20 +58,19 @@ architecture SYN of PACE is
   signal uPdatao          : std_logic_vector(7 downto 0);
 
   -- graphics signals
+
+  signal to_tilemap_ctl   : to_TILEMAP_CTL_t;
+  signal from_tilemap_ctl : from_TILEMAP_CTL_t;
+
+  signal to_bitmap_ctl    : to_BITMAP_CTL_t;
+  signal from_bitmap_ctl  : from_BITMAP_CTL_t;
+
   signal to_sprite_reg    : to_SPRITE_REG_t;
-  signal gfxextra_data    : std_logic_vector(7 downto 0);
-	signal palette_data			: ByteArrayType(15 downto 0);
-  signal bitmap_addr     	: std_logic_vector(15 downto 0);
-  signal bitmap_data     	: std_logic_vector(7 downto 0);
-  signal tilemap_addr     : std_logic_vector(15 downto 0);
-  signal tilemap_data     : std_logic_vector(15 downto 0);
-  signal tile_addr        : std_logic_vector(15 downto 0);
-  signal tile_data        : std_logic_vector(7 downto 0);
-  signal attr_addr        : std_logic_vector(9 downto 0);
-  signal attr_data        : std_logic_vector(15 downto 0);
-  signal sprite_addr      : std_logic_vector(15 downto 0);
-  signal sprite_data      : std_logic_vector(31 downto 0);
+  signal to_sprite_ctl    : to_SPRITE_CTL_t;
+  signal from_sprite_ctl  : from_SPRITE_CTL_t;
 	signal spr0_hit					: std_logic;
+
+  signal to_graphics      : to_GRAPHICS_t;
 	
 	signal xcentre					: std_logic_vector(9 downto 0);
 	signal ycentre					: std_logic_vector(9 downto 0);
@@ -112,6 +111,21 @@ begin
 			sram_i					=> sram_i,
 			sram_o					=> sram_o,
   
+      -- graphics
+      
+      bitmap_i        => from_bitmap_ctl,
+      bitmap_o        => to_bitmap_ctl,
+      
+      tilemap_i       => from_tilemap_ctl,
+      tilemap_o       => to_tilemap_ctl,
+      
+      sprite_reg_o    => to_sprite_reg,
+      sprite_i        => from_sprite_ctl,
+      sprite_o        => to_sprite_ctl,
+			spr0_hit				=> spr0_hit,
+      
+      graphics_o      => to_graphics,
+      
       -- spi interface
       spi_i           => spi_i,
       spi_o           => spi_o,
@@ -131,27 +145,6 @@ begin
       -- micro buses
       upaddr          => uPaddr,
       updatao         => uPdatao,
-  
-      gfxextra_data   => gfxextra_data,
-			palette_data		=> palette_data,
-			
-      -- graphics (bitmap)
-			bitmap_addr			=> bitmap_addr,
-			bitmap_data			=> bitmap_data,
-
-      -- graphics (tilemap)
-      tileaddr        => tile_addr,
-      tiledatao       => tile_data,
-      tilemapaddr     => tilemap_addr,
-      tilemapdatao    => tilemap_data,
-      attr_addr       => attr_addr,
-      attr_dout       => attr_data,
-  
-      -- graphics (sprite)
-      to_sprite_reg   => to_sprite_reg,
-      spriteaddr      => sprite_addr,
-      spritedata      => sprite_data,
-			spr0_hit				=> spr0_hit,
   
       -- graphics (control)
       vblank					=> video_o_s.vblank,
@@ -173,27 +166,22 @@ begin
     (
       reset           => reset_i,
   
+      bitmap_ctl_i    => to_bitmap_ctl,
+      bitmap_ctl_o    => from_bitmap_ctl,
+
+      tilemap_ctl_i   => to_tilemap_ctl,
+      tilemap_ctl_o   => from_tilemap_ctl,
+
       sprite_reg_i    => to_sprite_reg,
+      sprite_ctl_i    => to_sprite_ctl,
+      sprite_ctl_o    => from_sprite_ctl,
+      spr0_hit				=> spr0_hit,
       
+      graphics_i      => to_graphics,
+
 			xcentre					=> xcentre,
 			ycentre					=> ycentre,
 
-      extra_data      => gfxextra_data,
-			palette_data		=> palette_data,
-			
-			bitmapa					=> bitmap_addr,
-			bitmapd					=> bitmap_data,			
-      tilemapa        => tilemap_addr,
-      tilemapd        => tilemap_data,
-      tilea           => tile_addr,
-      tiled           => tile_data,
-      attra           => attr_addr,
-      attrd           => attr_data,
-  
-      spriteaddr      => sprite_addr,
-      spritedata      => sprite_data,
-			spr0_hit				=> spr0_hit,
-  
 			-- OSD
 			to_osd          => to_osd,
 			from_osd        => from_osd,

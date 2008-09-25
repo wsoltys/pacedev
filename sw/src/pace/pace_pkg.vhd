@@ -106,6 +106,8 @@ package pace_pkg is
 		oe				: std_logic;
 		we				: std_logic;
 	end record;
+
+  function NULL_TO_SRAM return to_SRAM_t;
 	
 	--
 	-- FLASH interface data structure
@@ -144,10 +146,14 @@ package pace_pkg is
     dout      : std_logic;
   end record;
   
+  function NULL_TO_SPI return to_SPI_t;
+
   type to_SERIAL_t is record
     txd       : std_logic;
   end record;
   
+  function NULL_TO_SERIAL return to_SERIAL_t;
+
   type from_SERIAL_t is record
     rxd       : std_logic;
   end record;
@@ -157,6 +163,8 @@ package pace_pkg is
   constant PACE_NUM_GPO : natural := 32;
   subtype to_GP_t is std_logic_vector(PACE_NUM_GPO-1 downto 0);
 
+  function NULL_TO_GP return to_GP_t;
+  
  	--
   -- OSD interface data structure
   --
@@ -164,12 +172,16 @@ package pace_pkg is
     d         : std_logic_vector(7 downto 0);
   end record;
 
+  function NULL_FROM_OSD return from_OSD_t;
+
   type to_OSD_t is record
     en        : std_logic;
     a         : std_logic_vector(7 downto 0);
     d         : std_logic_vector(7 downto 0);
     we        : std_logic;
   end record;
+
+  function NULL_TO_OSD return to_OSD_t;
 
 	-- create a constant that automatically determines 
 	-- whether this is simulation or synthesis

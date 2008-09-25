@@ -31,13 +31,13 @@ package project_pkg is
 	--constant PACE_VIDEO_H_SCALE       	      : integer := 1;
 	--constant PACE_VIDEO_V_SCALE       	      : integer := 1;
 
-  --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
-  --constant PACE_CLK0_DIVIDE_BY              : natural := 5;
-  --constant PACE_CLK0_MULTIPLY_BY            : natural := 2;   -- 50*2/5 = 20MHz
-  --constant PACE_CLK1_DIVIDE_BY              : natural := 5;
-  --constant PACE_CLK1_MULTIPLY_BY            : natural := 4;   -- 50*4/5 = 40MHz
-	--constant PACE_VIDEO_H_SCALE               : integer := 2;
-	--constant PACE_VIDEO_V_SCALE               : integer := 2;
+  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
+  constant PACE_CLK0_DIVIDE_BY              : natural := 5;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 2;   -- 50*2/5 = 20MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 5;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 4;   -- 50*4/5 = 40MHz
+	constant PACE_VIDEO_H_SCALE               : integer := 2;
+	constant PACE_VIDEO_V_SCALE               : integer := 2;
 
   --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1024x768_60Hz;
   --constant PACE_CLK0_DIVIDE_BY              : natural := 32;
@@ -47,13 +47,13 @@ package project_pkg is
 	--constant PACE_VIDEO_H_SCALE       	      : integer := 2;
 	--constant PACE_VIDEO_V_SCALE       	      : integer := 2;
 
-  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_LCM_320x240_60Hz;
-  constant PACE_CLK0_DIVIDE_BY              : natural := 5;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 2;   -- 50*2/5 = 20MHz
-  constant PACE_CLK1_DIVIDE_BY              : natural := 5;
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 4;   -- 50*9/25 = 18MHz
-	constant PACE_VIDEO_H_SCALE               : integer := 1;
-	constant PACE_VIDEO_V_SCALE               : integer := 1;
+  --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_LCM_320x240_60Hz;
+  --constant PACE_CLK0_DIVIDE_BY              : natural := 5;
+  --constant PACE_CLK0_MULTIPLY_BY            : natural := 2;   -- 50*2/5 = 20MHz
+  --constant PACE_CLK1_DIVIDE_BY              : natural := 5;
+  --constant PACE_CLK1_MULTIPLY_BY            : natural := 4;   -- 50*9/25 = 18MHz
+	--constant PACE_VIDEO_H_SCALE               : integer := 1;
+	--constant PACE_VIDEO_V_SCALE               : integer := 1;
 
   constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
   --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;

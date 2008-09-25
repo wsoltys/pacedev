@@ -5,7 +5,7 @@ use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 
 library work;
-use work.video_controller_pkg.RGB_t;
+use work.video_controller_pkg.all;
 
 package sprite_pkg is
 
@@ -30,5 +30,56 @@ package sprite_pkg is
     a         : SPRITE_A_t;
     d         : SPRITE_D_t;
   end record;
+
+  function NULL_TO_SPRITE_REG return to_SPRITE_REG_t;
+  
+  subtype SPRITE_ROW_D_t is std_logic_vector(31 downto 0);
+  subtype SPRITE_ROW_A_t is std_logic_vector(15 downto 0);
+  
+  type to_SPRITE_CTL_t is record
+    ld        : std_logic;
+    d         : SPRITE_ROW_D_t;
+  end record;
+  
+  type from_SPRITE_CTL_t is record
+    a         : SPRITE_ROW_A_t;
+    rgb       : RGB_t;
+    set       : std_logic;
+  end record;
+
+  function NULL_TO_SPRITE_CTL return to_SPRITE_CTL_t;
+
+  component sprite_array is
+    port
+    (
+      reset				: in std_logic;
+
+      -- register interface
+      reg_i       : in to_SPRITE_REG_t;
+
+      -- video control signals
+      video_ctl   : in from_VIDEO_CTL_t;
+
+      -- extra data
+      graphics_i  : in to_GRAPHICS_t;
+
+      -- sprite data
+      row_a       : out SPRITE_ROW_A_t;
+      row_d       : in SPRITE_ROW_D_t;
+
+      -- video data
+      rgb         : out RGB_t;
+      set         : out std_logic;
+      pri         : out std_logic;
+      spr0_set    : out std_logic
+    );
+  end component sprite_array;
+
+  function flip_row
+  (
+    row_in      : SPRITE_ROW_D_t;
+    flip        : std_logic
+  )
+  return SPRITE_ROW_D_t;
 
 end package sprite_pkg;

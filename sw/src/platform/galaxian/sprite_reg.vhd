@@ -20,13 +20,17 @@ entity sptReg is
 end sptReg;
 
 architecture SYN of sptReg is
+
+  alias clk       : std_logic is reg_i.clk;
+  alias clk_ena   : std_logic is reg_i.clk_ena;
+
 begin
 
 	GEN_SPRITE_REG : if INDEX < 8 generate
 	
-    process (reg_i.clk, reg_i.clk_ena)
+    process (clk, clk_ena)
     begin
-      if rising_edge(reg_i.clk) and reg_i.clk_ena = '1' then
+      if rising_edge(clk) and clk_ena = '1' then
         if reg_i.a(5 downto 2) = conv_std_logic_vector(INDEX, 4) then
           if reg_i.wr = '1' then
             case reg_i.a(1 downto 0) is
@@ -51,9 +55,9 @@ begin
 	GEN_BULLET_REG : if INDEX > 7 generate
 	--GEN_BULLET_REG : if false generate
 	
-    process (reg_i.clk, reg_i.clk_ena)
+    process (clk, clk_ena)
     begin
-      if rising_edge(reg_i.clk) and reg_i.clk_ena = '1' then
+      if rising_edge(clk) and clk_ena = '1' then
         if reg_i.a(5 downto 2) = conv_std_logic_vector(INDEX, 4) then
           if reg_i.wr = '1' then
             case reg_i.a(1 downto 0) is
