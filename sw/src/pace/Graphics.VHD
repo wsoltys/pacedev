@@ -207,6 +207,7 @@ begin
 
 	GEN_NO_SPRITES : if PACE_VIDEO_NUM_SPRITES = 0 generate
     sprite_ctl_o_s <= ((others => '0'), (others => (others => '0')), '0');
+    sprite_pri <= '0';
     spr0_hit <= '0';
 	end generate GEN_NO_SPRITES;
 	

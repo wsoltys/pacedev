@@ -3,8 +3,10 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.EXT;
 
 library work;
-use work.kbd_pkg.in8;
 use work.pace_pkg.all;
+use work.kbd_pkg.in8;
+use work.video_controller_pkg.all;
+use work.sprite_pkg.all;
 use work.project_pkg.all;
 use work.platform_pkg.all;
 use work.target_pkg.all;
@@ -34,6 +36,22 @@ entity Game is
 		sram_i					: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
 
+    -- graphics
+    
+    bitmap_i        : in from_BITMAP_CTL_t;
+    bitmap_o        : out to_BITMAP_CTL_t;
+    
+    tilemap_i       : in from_TILEMAP_CTL_t;
+    tilemap_o       : out to_TILEMAP_CTL_t;
+
+    sprite_reg_o    : out to_SPRITE_REG_t;
+    sprite_i        : in from_SPRITE_CTL_t;
+    sprite_o        : out to_SPRITE_CTL_t;
+		spr0_hit				: in std_logic;
+
+    -- various graphics information
+    graphics_o      : out to_GRAPHICS_t;
+    
     -- SPI (flash)
     spi_i           : in from_SPI_t;
     spi_o           : out to_SPI_t;
@@ -49,28 +67,6 @@ entity Game is
     --
     --
     --
-
-    gfxextra_data   : out std_logic_vector(7 downto 0);
-		palette_data		: out ByteArrayType(15 downto 0);
-
-    -- graphics (bitmap)
-    bitmap_addr			: in    std_logic_vector(15 downto 0);   
-    bitmap_data			: out   std_logic_vector(7 downto 0);    
-
-    -- graphics (tilemap)
-    tileaddr        : in std_logic_vector(15 downto 0);   
-    tiledatao       : out std_logic_vector(7 downto 0);    
-    tilemapaddr     : in std_logic_vector(15 downto 0);   
-    tilemapdatao    : out std_logic_vector(15 downto 0);    
-    attr_addr       : in std_logic_vector(9 downto 0);    
-    attr_dout       : out std_logic_vector(15 downto 0);   
-
-    -- graphics (sprite)
-    sprite_reg_addr : out std_logic_vector(7 downto 0);    
-    sprite_wr       : out std_logic;                       
-    spriteaddr      : in std_logic_vector(15 downto 0);   
-    spritedata      : out std_logic_vector(31 downto 0);   
-    spr0_hit        : in std_logic;
 
     -- graphics (control)
     vblank          : in std_logic;    
@@ -301,20 +297,18 @@ begin
 	xcentre <= (others => '0');
 	ycentre <= (others => '0');
 	
-  gfxextra_data <= (others => '0');
-	GEN_PAL_DAT : for i in palette_data'range generate
-		palette_data(i) <= (others => '0');
-	end generate GEN_PAL_DAT;
-
-    -- unused outputs
 	upaddr <= uP_addr;
 	updatao <= uP_datao;
-	bitmap_data <= (others => '0');
-  sprite_reg_addr <= (others => '0');
-  sprite_wr <= '0';
-  spriteData <= (others => '0');
-  attr_dout <= X"00" & switches_i(7 downto 0);
+
+  -- unused outputs
+	graphics_o <= NULL_TO_GRAPHICS;
+	bitmap_o <= NULL_TO_BITMAP_CTL;
+	sprite_reg_o <= NULL_TO_SPRITE_REG;
+	sprite_o <= NULL_TO_SPRITE_CTL;
+  tilemap_o.attr_d <= X"00" & switches_i(7 downto 0);
   snd_rd <= '0';
+  spi_o <= NULL_TO_SPI;
+  gp_o <= NULL_TO_GP;
 
 	clk_en_inst : entity work.clk_div
 		generic map
@@ -392,8 +386,8 @@ begin
 		port map
 		(
 			clock			=> clk_video,
-			address		=> tileaddr(11 downto 0),
-			q					=> tileDatao
+			address		=> tilemap_i.tile_a(11 downto 0),
+			q					=> tilemap_o.tile_d
 		);
 	
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
@@ -413,85 +407,86 @@ begin
 			q_b					=> vram_datao,
 
 			clock_a			=> clk_video,
-			address_a		=> tilemapaddr(9 downto 0),
+			address_a		=> tilemap_i.map_a(9 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tileMapDatao(7 downto 0)
+			q_a					=> tilemap_o.map_d(7 downto 0)
 		);
+	tilemap_o.map_d(tilemap_o.map_d'left downto 8) <= (others => '0');
 
-    interrupts_inst : entity work.TRS80_Interrupts                    
-      port map
-      (
-        clk           => clk_20M,
-        reset         => cpu_reset,
+  interrupts_inst : entity work.TRS80_Interrupts                    
+    port map
+    (
+      clk           => clk_20M,
+      reset         => cpu_reset,
 
-        -- enable inputs                    
-        z80_data      => uP_datao,
-        intena_wr     => intena_wr,                  
-        nmiena_wr     => nmiena_wr,
-                    
-        -- IRQ inputs
-        reset_btn_int => '0',
-        fdc_drq_int   => fdc_drq_int,                    
-        fdc_dto_int   => fdc_dto_int,
+      -- enable inputs                    
+      z80_data      => uP_datao,
+      intena_wr     => intena_wr,                  
+      nmiena_wr     => nmiena_wr,
+                  
+      -- IRQ inputs
+      reset_btn_int => '0',
+      fdc_drq_int   => fdc_drq_int,                    
+      fdc_dto_int   => fdc_dto_int,
 
-        -- IRQ/status outputs
-        int_status    => int_status,
-        int_req       => uPintreq,
-        nmi_status    => nmi_status,
-        nmi_req       => uPnmireq,
+      -- IRQ/status outputs
+      int_status    => int_status,
+      int_req       => uPintreq,
+      nmi_status    => nmi_status,
+      nmi_req       => uPnmireq,
 
-        -- interrupt clear inputs
-        rtc_reset     => rtc_intrst,
-        nmi_reset     => nmirst
-      );
+      -- interrupt clear inputs
+      rtc_reset     => rtc_intrst,
+      nmi_reset     => nmirst
+    );
 
-		GEN_FDC : if INCLUDE_FDC_SUPPORT generate
-		
-			GEN_SPI_FDC : if PACE_TARGET = PACE_TARGET_NANOBOARD_NB1 generate
-			
-		    fdc_inst : FDC_1793                                    
-		      port map
-		      (
-		        clk         => clk_20M,
-		        upclk       => clk_2M_en,
-		        reset       => cpu_reset,
-		                    
-		        fdcaddr     => uP_addr(2 downto 0),          
-		        fdcdatai    => uP_datao,
-		        fdcdatao    => fdc_datao,
-		        fdc_rd      => fdc_rd,                      
-		        fdc_wr      => fdc_wr,                      
-		        fdc_drq_int => fdc_drq_int,   
-		        fdc_dto_int => fdc_dto_int,         
+  GEN_FDC : if INCLUDE_FDC_SUPPORT generate
+  
+    GEN_SPI_FDC : if PACE_TARGET = PACE_TARGET_NANOBOARD_NB1 generate
+    
+      fdc_inst : FDC_1793                                    
+        port map
+        (
+          clk         => clk_20M,
+          upclk       => clk_2M_en,
+          reset       => cpu_reset,
+                      
+          fdcaddr     => uP_addr(2 downto 0),          
+          fdcdatai    => uP_datao,
+          fdcdatao    => fdc_datao,
+          fdc_rd      => fdc_rd,                      
+          fdc_wr      => fdc_wr,                      
+          fdc_drq_int => fdc_drq_int,   
+          fdc_dto_int => fdc_dto_int,         
 
-		        spi_clk     => spi_o.clk,
-		        spi_din     => spi_i.din,
-		        spi_dout    => spi_o.dout,
-		        spi_ena     => spi_o.ena,            
-		        spi_mode    => spi_o.mode,           
-		        spi_sel     => spi_o.sel,            
-		                    
-		        ser_rx      => ser_i.rxd,                                  
-		        ser_tx      => ser_o.txd,
+          spi_clk     => spi_o.clk,
+          spi_din     => spi_i.din,
+          spi_dout    => spi_o.dout,
+          spi_ena     => spi_o.ena,            
+          spi_mode    => spi_o.mode,           
+          spi_sel     => spi_o.sel,            
+                      
+          ser_rx      => ser_i.rxd,                                  
+          ser_tx      => ser_o.txd,
 
-		        debug       => leds_o(7 downto 0)
-		      );
-		
-			end generate GEN_SPI_FDC;
-		
-		end generate GEN_FDC;
+          debug       => leds_o(7 downto 0)
+        );
+  
+    end generate GEN_SPI_FDC;
+  
+  end generate GEN_FDC;
 
-		GEN_NO_FDC : 	if 	not INCLUDE_FDC_SUPPORT or 
-											PACE_TARGET /= PACE_TARGET_NANOBOARD_NB1 
-									generate
-									
-			fdc_datao <= X"FF";
-			fdc_drq_int <= '0';
-			fdc_dto_int <= '0';
-			leds_o <= (others => '0');
-					
-		end generate GEN_NO_FDC;
+  GEN_NO_FDC : 	if 	not INCLUDE_FDC_SUPPORT or 
+                    PACE_TARGET /= PACE_TARGET_NANOBOARD_NB1 
+                generate
+                
+    fdc_datao <= X"FF";
+    fdc_drq_int <= '0';
+    fdc_dto_int <= '0';
+    leds_o <= (others => '0');
+        
+  end generate GEN_NO_FDC;
 
   -- wire some keys to the osd module
   gpio_to_osd(0) <= inputs(6)(3); -- UP
