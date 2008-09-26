@@ -12,20 +12,24 @@ use work.video_controller_pkg.all;
 --
 
 entity bitmapCtl_1 is          
-port               
-(
-  reset					: in std_logic;
+  generic
+  (
+    DELAY         : integer
+  );
+  port               
+  (
+    reset					: in std_logic;
 
-  -- video control signals		
-  video_ctl     : in from_VIDEO_CTL_t;
+    -- video control signals		
+    video_ctl     : in from_VIDEO_CTL_t;
 
-  -- bitmap controller signals
-  ctl_i         : in to_BITMAP_CTL_t;
-  ctl_o         : out from_BITMAP_CTL_t;
+    -- bitmap controller signals
+    ctl_i         : in to_BITMAP_CTL_t;
+    ctl_o         : out from_BITMAP_CTL_t;
 
-  graphics_i    : in to_GRAPHICS_t
-);
-end bitmapCtl_1;
+    graphics_i    : in to_GRAPHICS_t
+  );
+end entity bitmapCtl_1;
 
 architecture SYN of bitmapCtl_1 is
 
@@ -142,5 +146,4 @@ begin
 	ctl_o.a <= (others => '0');
 	ctl_o.set <= '1';
 	
-end SYN;
-
+end architecture SYN;

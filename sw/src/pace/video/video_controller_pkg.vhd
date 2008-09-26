@@ -120,7 +120,11 @@ package video_controller_pkg is
   end record;
 
   function NULL_TO_GRAPHICS return to_GRAPHICS_t;
-  
+
+  type from_GRAPHICS_t is record
+    vblank    : std_logic;
+  end record;
+
   component pace_video_controller is
     generic
     (

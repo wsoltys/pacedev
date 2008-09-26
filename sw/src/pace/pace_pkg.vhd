@@ -124,6 +124,8 @@ package pace_pkg is
 		oe				: std_logic;
 	end record;
 
+  function NULL_TO_FLASH return to_FLASH_t;
+  
   type from_AUDIO_t is record
     clk       : std_logic;
   end record;
@@ -164,6 +166,22 @@ package pace_pkg is
   subtype to_GP_t is std_logic_vector(PACE_NUM_GPO-1 downto 0);
 
   function NULL_TO_GP return to_GP_t;
+  
+  subtype SND_A_t is std_logic_vector(7 downto 0);
+  subtype SND_D_t is std_logic_vector(7 downto 0);
+  
+  type to_SOUND_t is record
+    a         : SND_A_t;
+    d         : SND_D_t;
+    rd        : std_logic;
+    wr        : std_logic;
+  end record;
+  
+  type from_SOUND_t is record
+    d         : SND_D_t;
+  end record;
+
+  function NULL_TO_SOUND return to_SOUND_t;
   
  	--
   -- OSD interface data structure

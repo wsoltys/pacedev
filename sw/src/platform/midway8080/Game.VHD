@@ -51,7 +51,16 @@ entity Game is
 		spr0_hit				: in std_logic;
 
     -- various graphics information
+    graphics_i      : in from_GRAPHICS_t;
     graphics_o      : out to_GRAPHICS_t;
+
+    -- OSD
+    osd_i           : in from_OSD_t;
+    osd_o           : out to_OSD_t;
+
+    -- sound
+    snd_i           : in from_SOUND_t;
+    snd_o           : out to_SOUND_t;
     
     -- SPI (flash)
     spi_i           : in from_SPI_t;
@@ -63,24 +72,7 @@ entity Game is
 
     -- general purpose I/O
     gp_i            : in from_GP_t;
-    gp_o            : out to_GP_t;
-    
-    --
-    --
-    --
-
-    -- graphics (control)
-    vblank					: in std_logic;    
-		xcentre					: out std_logic_vector(9 downto 0);
-		ycentre					: out std_logic_vector(9 downto 0);
-
-    snd_rd          : out std_logic;
-    snd_wr          : out std_logic;
-    sndif_datai     : in std_logic_vector(7 downto 0);
-
-    -- OSD
-    to_osd          : out to_OSD_t;
-    from_osd        : in from_OSD_t
+    gp_o            : out to_GP_t
   );
 end Game;
 
@@ -194,9 +186,11 @@ begin
 	port_wr(5) <= port_cs(5) and uPiowr;
 
 	-- sound interface
-	snd_rd <= (port_cs(3) or port_cs(5)) and uPiord; -- not used
-	snd_wr <= (port_cs(3) or port_cs(5)) and uPiowr;
-			
+	snd_o.rd <= (port_cs(3) or port_cs(5)) and uPiord; -- not used
+	snd_o.wr <= (port_cs(3) or port_cs(5)) and uPiowr;
+  snd_o.d <= up_datao;
+  snd_o.a <= up_addr(snd_o.a'range);
+  
 	-- memory read mux
 	uPmem_datai <= 	rom_datao when rom_cs = '1' else
 									wram_datao when wram_cs = '1' else
@@ -305,7 +299,7 @@ begin
       end if;
       osd_key_r := inputs(2)(1);
     end if;
-    to_osd.en <= osd_en_v;
+    osd_o.en <= osd_en_v;
   end process;
 
 	-- old vram mapper logic
@@ -313,11 +307,8 @@ begin
   bitmap_addr_rotated(12 downto 5) <= bitmap_i.a(7 downto 0) + 32;
 
 	-- this will probably require adjustment
-	xcentre <= std_logic_vector(conv_unsigned(0, xcentre'length));
-	ycentre <= std_logic_vector(conv_unsigned(198, ycentre'length));
-
-	upaddr <= uP_addr;
-	updatao <= uP_datao;
+	--xcentre <= std_logic_vector(conv_unsigned(0, xcentre'length));
+	--ycentre <= std_logic_vector(conv_unsigned(198, ycentre'length));
 
   -- unused outputs
 

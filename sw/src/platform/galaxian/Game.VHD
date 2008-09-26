@@ -46,7 +46,16 @@ entity Game is
 		spr0_hit				: in std_logic;
 
     -- various graphics information
+    graphics_i      : in from_GRAPHICS_t;
     graphics_o      : out to_GRAPHICS_t;
+    
+    -- OSD
+    osd_i           : in from_OSD_t;
+    osd_o           : out to_OSD_t;
+
+    -- sound
+    snd_i           : in from_SOUND_t;
+    snd_o           : out to_SOUND_t;
     
     -- SPI (flash)
     spi_i           : in from_SPI_t;
@@ -58,25 +67,7 @@ entity Game is
 
     -- general purpose I/O
     gp_i            : in from_GP_t;
-    gp_o            : out to_GP_t;
-
-    -- micro buses
-    upaddr          : out std_logic_vector(15 downto 0);   
-    updatao         : out std_logic_vector(7 downto 0);    
-
-    -- graphics (control)
-    vblank          : in std_logic;    
-		xcentre					: out std_logic_vector(9 downto 0);
-		ycentre					: out std_logic_vector(9 downto 0);
-		
-    -- sound
-    snd_rd          : out std_logic;                       
-    snd_wr          : out std_logic;
-    sndif_datai     : in std_logic_vector(7 downto 0);    
-
-    -- OSD
-    to_osd          : out to_OSD_t;
-    from_osd        : in from_OSD_t
+    gp_o            : out to_GP_t
   );
 
 end Game;
@@ -132,9 +123,6 @@ architecture SYN of Game is
 	
 begin
 
-	xcentre <= (others => '0');
-	ycentre <= (others => '0');
-	
 	GEN_EXTERNAL_WRAM : if not GALAXIAN_USE_INTERNAL_WRAM generate
 	
 	  -- SRAM signals (may or may not be used)
@@ -177,9 +165,6 @@ begin
 	wram_wr <= wram_cs and uPmemwr;
   nmiena_wr <= uPmemwr when (uP_addr(15 downto 12) = "0111" and uP_addr(2 downto 0) = "001") else '0';
 
-	upaddr <= uP_addr;
-	updatao <= uP_datao;
-
   -- sprite registers
   sprite_reg_o.clk <= clk_30M;
   sprite_reg_o.clk_ena <= cpu_clk_en;
@@ -194,20 +179,17 @@ begin
 
   -- unused outputs
 
+  flash_o <= NULL_TO_FLASH;
   bitmap_o <= NULL_TO_BITMAP_CTL;
-  graphics_o <= NULL_TO_GRAPHICS;
   sprite_o.ld <= '0';
-  
+  graphics_o <= NULL_TO_GRAPHICS;
+  osd_o <= NULL_TO_OSD;
+  snd_o <= NULL_TO_SOUND;
+  spi_o <= NULL_TO_SPI;
+  ser_o <= NULL_TO_SERIAL;
   leds_o <= (others => '0');
-  flash_o <= ((others => '0'), (others => '0'), '0', '0', '0');
-  spi_o <= ('0', '0', '0', '0', '0');
-  ser_o <= (others => '0');
-  gp_o <= (others => '0');
-  to_osd <= ('0', (others => '0'), (others => '0'), '0');
+  gp_o <= NULL_TO_GP;
   
-  snd_rd <= '0';
-	snd_wr <= '0';
-	
   --
   -- COMPONENT INSTANTIATION
   --
@@ -372,7 +354,7 @@ begin
       z80_data          => uP_datao,
       nmiena_wr         => nmiena_wr,
   
-			vblank						=> vblank,
+			vblank						=> graphics_i.vblank,
 			
       -- interrupt status & request lines
       nmi_req           => uPnmireq

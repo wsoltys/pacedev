@@ -50,6 +50,11 @@ package sprite_pkg is
   function NULL_TO_SPRITE_CTL return to_SPRITE_CTL_t;
 
   component sprite_array is
+    generic
+    (
+      N_SPRITES   : integer;
+      DELAY       : integer
+    );
     port
     (
       reset				: in std_logic;

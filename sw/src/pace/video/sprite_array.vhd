@@ -10,6 +10,11 @@ use work.sprite_pkg.all;
 use work.platform_pkg.all;
 
 entity sprite_array is
+  generic
+  (
+    N_SPRITES   : integer;
+    DELAY       : integer
+  );
 	port
 	(
 		reset				: in std_logic;
@@ -44,34 +49,38 @@ architecture SYN of sprite_array is
 	alias clk       : std_logic is video_ctl.clk;
 	alias clk_ena   : std_logic is video_ctl.clk_ena;
 	
-	signal reg_o    : reg_a_t(0 to PACE_VIDEO_NUM_SPRITES-1);
-  signal ctl_i    : ctl_i_a_t(0 to PACE_VIDEO_NUM_SPRITES-1);
-  signal ctl_o    : ctl_o_a_t(0 to PACE_VIDEO_NUM_SPRITES-1);
+	signal reg_o    : reg_a_t(0 to N_SPRITES-1);
+  signal ctl_i    : ctl_i_a_t(0 to N_SPRITES-1);
+  signal ctl_o    : ctl_o_a_t(0 to N_SPRITES-1);
 	
 begin
 
 	-- Sprite Data Load Arbiter
 	-- - enables each sprite controller during hblank
 	--   to allow loading of sprite row data into row buffer
-	process (clk, clk_ena, reset, ctl_o, row_d)
-		variable i : integer range 0 to PACE_VIDEO_NUM_SPRITES-1;
-		variable ena_s : std_logic_vector(PACE_VIDEO_NUM_SPRITES-1 downto 0);
+	process (clk, clk_ena, reset)
+		variable i : integer range 0 to N_SPRITES-1;
 	begin
 		if reset = '1' then
 			-- enable must be 1 clock behind address to latch data after fetch
-			ena_s := (PACE_VIDEO_NUM_SPRITES-1 => '1', others => '0');
 			i := 0;
 		elsif rising_edge(clk) and clk_ena = '1' then
-			ena_s := ena_s(ena_s'left-1 downto 0) & ena_s(ena_s'left);
+			for n in 0 to N_SPRITES-1 loop
+        ctl_i(i).ld <= '0';
+        if n = i then
+          row_a <= ctl_o(i).a;
+          ctl_i(i).ld <= '1';
+        end if;
+			end loop;
 			i := i + 1;
-		end if;
-		row_a <= ctl_o(i).a;
-		GEN_ENA : for j in 0 to PACE_VIDEO_NUM_SPRITES-1 loop
-      ctl_i(j).ld <= ena_s(j);
-      ctl_i(j).d <= row_d;
-    end loop GEN_ENA;
+    end if;
 	end process;
 
+  -- sprite row data fan-out
+  GEN_ROW_D : for i in 0 to N_SPRITES-1 generate
+    ctl_i(i).d <= row_d;
+  end generate GEN_ROW_D;
+  
 	-- Sprite Priority Encoder
 	-- - determines which sprite pixel (if any) is to be displayed
 	-- We can use a clocked process here because the tilemap
@@ -83,7 +92,7 @@ begin
 		if rising_edge(clk) and clk_ena = '1' then
 			spr_on_v := '0';
 			spr_pri_v := '0';
-			for i in 0 to PACE_VIDEO_NUM_SPRITES-1 loop
+			for i in 0 to N_SPRITES-1 loop
 				-- if highest priority = 0 and pixel on
 				if spr_pri_v = '0' and ctl_o(i).set = '1' then
 					-- if no sprite on or this priority = 1
@@ -108,7 +117,7 @@ begin
 	-- Component Instantiation
 	--
 	
-	GEN_REGS : for i in 0 to PACE_VIDEO_NUM_SPRITES-1 generate
+	GEN_REGS : for i in 0 to N_SPRITES-1 generate
 	
 		sptReg_inst : entity work.sptReg
 			generic map
@@ -124,7 +133,8 @@ begin
 		sptCtl_inst : entity work.spritectl
 			generic map
 			(
-				INDEX			=> i
+				INDEX			=> i,
+				DELAY     => DELAY
 			)
 			port map
 			(

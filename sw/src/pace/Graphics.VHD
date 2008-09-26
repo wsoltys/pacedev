@@ -26,10 +26,8 @@ entity Graphics is
 		spr0_hit				: out std_logic;
     
     graphics_i      : in to_GRAPHICS_t;
-
-		xcentre					: in std_logic_vector(9 downto 0);
-		ycentre					: in std_logic_vector(9 downto 0);
-		
+    graphics_o      : out from_GRAPHICS_t;
+    
 		to_osd          : in to_OSD_t; 
 		from_osd        : out from_OSD_t;
 
@@ -45,52 +43,64 @@ architecture SYN of Graphics is
 	-- but prevents having dummy components
 	-- *** some other way to fix???
 	
-	component bitmapCtl_1 is          
-	port               
-	(
-    reset					: in std_logic;
-			
-		-- video control signals		
-		video_ctl     : in from_VIDEO_CTL_t;
+	component bitmapCtl_1 is
+    generic
+    (
+      DELAY         : integer
+    );          
+    port               
+    (
+      reset					: in std_logic;
+        
+      -- video control signals		
+      video_ctl     : in from_VIDEO_CTL_t;
 
-    -- bitmap controller signals
-    ctl_i         : in to_BITMAP_CTL_t;
-    ctl_o         : out from_BITMAP_CTL_t;
-    
-    graphics_i    : in to_GRAPHICS_t
-	);
+      -- bitmap controller signals
+      ctl_i         : in to_BITMAP_CTL_t;
+      ctl_o         : out from_BITMAP_CTL_t;
+      
+      graphics_i    : in to_GRAPHICS_t
+    );
 	end component;
 
 	component tilemapCtl_1 is          
-	port               
-	(
-		reset				  : in std_logic;
-			
-		-- video control signals		
-		video_ctl     : in from_VIDEO_CTL_t;
+    generic
+    (
+      DELAY         : integer
+    );          
+    port               
+    (
+      reset				  : in std_logic;
+        
+      -- video control signals		
+      video_ctl     : in from_VIDEO_CTL_t;
 
-    -- tilemap controller signals
-    ctl_i         : in to_TILEMAP_CTL_t;
-    ctl_o         : out from_TILEMAP_CTL_t;
-    
-    graphics_i    : in to_GRAPHICS_t
-	);
+      -- tilemap controller signals
+      ctl_i         : in to_TILEMAP_CTL_t;
+      ctl_o         : out from_TILEMAP_CTL_t;
+      
+      graphics_i    : in to_GRAPHICS_t
+    );
 	end component;
 
 	component tilemapCtl_2 is          
-	port               
-	(
-		reset				  : in std_logic;
-			
-		-- video control signals		
-    video_ctl     : in from_VIDEO_CTL_t;
+    generic
+    (
+      DELAY         : integer
+    );
+    port               
+    (
+      reset				  : in std_logic;
+        
+      -- video control signals		
+      video_ctl     : in from_VIDEO_CTL_t;
 
-    -- tilemap controller signals
-    ctl_i         : in to_TILEMAP_CTL_t;
-    ctl_o         : out from_TILEMAP_CTL_t;
-    
-    graphics_i    : in to_GRAPHICS_t
-	);
+      -- tilemap controller signals
+      ctl_i         : in to_TILEMAP_CTL_t;
+      ctl_o         : out from_TILEMAP_CTL_t;
+      
+      graphics_i    : in to_GRAPHICS_t
+    );
 	end component;
 
 	alias clk 					    : std_logic is video_i.clk;
@@ -129,6 +139,11 @@ begin
 	video_o.hblank <= video_o_s.hblank;
 	video_o.vblank <= video_o_s.vblank;
 
+  -- should this be the 'real' vblank or the 'active' vblank?
+  -- - use the real for now
+  graphics_o.vblank <= video_o_s.vblank;
+  --graphics_o.vblank <= from_video_ctl.vblank;
+    
   pace_video_controller_inst : entity work.pace_video_controller
     generic map
     (
@@ -166,6 +181,10 @@ begin
 	GEN_BITMAP_1 : if PACE_VIDEO_NUM_BITMAPS > 0 generate
 	
 	  bitmapctl_inst : bitmapCtl_1
+      generic map
+      (
+        DELAY         => PACE_VIDEO_PIPELINE_DELAY
+      )
 	    port map
 	    (
 				reset					=> reset,
@@ -189,6 +208,10 @@ begin
 	GEN_TILEMAP_1 : if PACE_VIDEO_NUM_TILEMAPS > 0 generate
 	
 	  foreground_mapctl_inst : tilemapCtl_1
+      generic map
+      (
+        DELAY         => PACE_VIDEO_PIPELINE_DELAY
+      )
 	    port map
 	    (
 				reset					=> reset,
@@ -214,6 +237,11 @@ begin
 	GEN_SPRITES : if PACE_VIDEO_NUM_SPRITES > 0 generate
 	
 		sprites_inst : sprite_array
+      generic map
+      (
+        N_SPRITES     => PACE_VIDEO_NUM_SPRITES,
+        DELAY         => PACE_VIDEO_PIPELINE_DELAY
+      )
 			port map
 			(
 				reset				  => reset,

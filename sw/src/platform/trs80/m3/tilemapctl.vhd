@@ -23,19 +23,23 @@ use work.project_pkg.all;
 --
 
 entity tilemapCtl_1 is          
-port               
-(
-  reset				: in std_logic;
+  generic
+  (
+    DELAY       : integer
+  );          
+  port               
+  (
+    reset				: in std_logic;
 
-  -- video control signals		
-  video_ctl   : in from_VIDEO_CTL_t;
+    -- video control signals		
+    video_ctl   : in from_VIDEO_CTL_t;
 
-  -- tilemap controller signals
-  ctl_i       : in to_TILEMAP_CTL_t;
-  ctl_o       : out from_TILEMAP_CTL_t;
+    -- tilemap controller signals
+    ctl_i       : in to_TILEMAP_CTL_t;
+    ctl_o       : out from_TILEMAP_CTL_t;
 
-  graphics_i  : in to_GRAPHICS_t
-);
+    graphics_i  : in to_GRAPHICS_t
+  );
 end tilemapCtl_1;
 
 architecture SYN of tilemapCtl_1 is
@@ -59,11 +63,11 @@ begin
   -- generate pixel
   process (clk, clk_ena, reset)
 
-		variable hblank_r		: std_logic_vector(PACE_VIDEO_PIPELINE_DELAY-1 downto 0);
+		variable hblank_r		: std_logic_vector(DELAY-1 downto 0);
 		alias hblank_prev		: std_logic is hblank_r(hblank_r'left);
 		alias hblank_v			: std_logic is hblank_r(hblank_r'left-1);
 		variable vcount			: std_logic_vector(8 downto 0);
-		variable x_r		    : std_logic_vector((PACE_VIDEO_PIPELINE_DELAY-1)*3-1 downto 0);
+		variable x_r		    : std_logic_vector((DELAY-1)*3-1 downto 0);
 		variable pel 				: std_logic;
 		
   begin

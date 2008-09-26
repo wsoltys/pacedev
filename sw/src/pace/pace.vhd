@@ -53,12 +53,6 @@ end entity PACE;
 
 architecture SYN of PACE is
 
-  -- uP signals
-  signal uPaddr           : std_logic_vector(15 downto 0);
-  signal uPdatao          : std_logic_vector(7 downto 0);
-
-  -- graphics signals
-
   signal to_tilemap_ctl   : to_TILEMAP_CTL_t;
   signal from_tilemap_ctl : from_TILEMAP_CTL_t;
 
@@ -71,22 +65,13 @@ architecture SYN of PACE is
 	signal spr0_hit					: std_logic;
 
   signal to_graphics      : to_GRAPHICS_t;
+	signal from_graphics    : from_GRAPHICS_t;
 	
-	signal xcentre					: std_logic_vector(9 downto 0);
-	signal ycentre					: std_logic_vector(9 downto 0);
-
-  -- OSD signals
+	signal to_sound         : to_SOUND_t;
+	signal from_sound       : from_sound_t;
+	
   signal to_osd           : to_OSD_t;
   signal from_osd         : from_OSD_t;
-
-	-- video signals
-	signal video_i_s				: from_VIDEO_t;
-	signal video_o_s				: to_VIDEO_t;
-
-  -- sound signals
-  signal snd_rd           : std_logic;
-  signal snd_wr           : std_logic;
-  signal sndif_data       : std_logic_vector(7 downto 0);
 
 begin
 
@@ -124,8 +109,17 @@ begin
       sprite_o        => to_sprite_ctl,
 			spr0_hit				=> spr0_hit,
       
+      graphics_i      => from_graphics,
       graphics_o      => to_graphics,
       
+      -- sound
+      snd_i           => from_sound,
+      snd_o           => to_sound,
+      
+			-- OSD
+			osd_i           => from_osd,
+			osd_o           => to_osd,
+
       -- spi interface
       spi_i           => spi_i,
       spi_o           => spi_o,
@@ -136,29 +130,7 @@ begin
 
       -- general purpose I/O
       gp_i            => gp_i,
-      gp_o            => gp_o,
-
-      --
-      --
-      --
-      
-      -- micro buses
-      upaddr          => uPaddr,
-      updatao         => uPdatao,
-  
-      -- graphics (control)
-      vblank					=> video_o_s.vblank,
-			xcentre					=> xcentre,
-			ycentre					=> ycentre,
-			
-      -- sound
-      snd_rd          => snd_rd,
-      snd_wr          => snd_wr,
-      sndif_datai     => sndif_data,
-      
-			-- OSD
-			to_osd          => to_osd,
-			from_osd        => from_osd
+      gp_o            => gp_o
     );
 
  U_Graphics : entity work.Graphics                                    
@@ -178,20 +150,16 @@ begin
       spr0_hit				=> spr0_hit,
       
       graphics_i      => to_graphics,
-
-			xcentre					=> xcentre,
-			ycentre					=> ycentre,
-
+      graphics_o      => from_graphics,
+      
 			-- OSD
 			to_osd          => to_osd,
 			from_osd        => from_osd,
 
 			-- video (incl. clk)
 			video_i					=> video_i,
-			video_o					=> video_o_s
+			video_o					=> video_o
     );
-
-	video_o <= video_o_s;
 
 	SOUND_BLOCK : block
 		signal snd_data		: std_logic_vector(7 downto 0);
@@ -203,14 +171,15 @@ begin
 	      sysclk      => clk_i(0),    -- fudge for now
 	      reset       => reset_i,
 
-	      sndif_rd    => snd_rd,              
-	      sndif_wr    => snd_wr,              
-	      sndif_addr  => uPaddr,
-	      sndif_datai => uPdatao,
+	      sndif_rd    => to_sound.rd,              
+	      sndif_wr    => to_sound.wr,              
+	      sndif_addr(15 downto 8) => (others => '0'),
+	      sndif_addr(7 downto 0) => to_sound.a,
+	      sndif_datai => to_sound.d,
 
 	      snd_clk     => audio_o.clk,
 	      snd_data    => snd_data,           
-	      sndif_datao => sndif_data
+	      sndif_datao => from_sound.d
 	    );
 
 		-- route audio to both channels

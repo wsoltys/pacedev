@@ -2,6 +2,11 @@ library work;
 
 package body pace_pkg is
 
+  function NULL_TO_FLASH return to_FLASH_t is
+  begin
+    return ((others => '0'), (others => '0'), '0', '0', '0');
+  end NULL_TO_FLASH;
+  
   function NULL_TO_SRAM return to_SRAM_t is
   begin
     return ((others => '0'), (others => '0'), (others => '0'), '0', '0', '0');
@@ -17,6 +22,11 @@ package body pace_pkg is
     return (others => '0');
   end NULL_TO_SERIAL;
 
+  function NULL_TO_SOUND return to_SOUND_t is
+  begin
+    return ((others => '0'), (others => '0'), '0', '0');
+  end NULL_TO_SOUND;
+  
   function NULL_FROM_OSD return from_OSD_t is
   begin
     return (others => (others => '0'));

@@ -12,7 +12,8 @@ use work.platform_pkg.all;
 entity spritectl is
 	generic
 	(
-		INDEX		: natural
+		INDEX		: natural;
+		DELAY   : integer
 	);
 	port               
 	(
