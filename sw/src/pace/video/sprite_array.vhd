@@ -53,6 +53,8 @@ architecture SYN of sprite_array is
   signal ctl_i    : ctl_i_a_t(0 to N_SPRITES-1);
   signal ctl_o    : ctl_o_a_t(0 to N_SPRITES-1);
 	
+	signal ld_r     : std_logic_vector(N_SPRITES-1 downto 0);
+	
 begin
 
 	-- Sprite Data Load Arbiter
@@ -63,21 +65,18 @@ begin
 	begin
 		if reset = '1' then
 			-- enable must be 1 clock behind address to latch data after fetch
+			ld_r <= (N_SPRITES-1 => '1', others => '0');
 			i := 0;
 		elsif rising_edge(clk) and clk_ena = '1' then
-			for n in 0 to N_SPRITES-1 loop
-        ctl_i(i).ld <= '0';
-        if n = i then
-          row_a <= ctl_o(i).a;
-          ctl_i(i).ld <= '1';
-        end if;
-			end loop;
+			ld_r <= ld_r(ld_r'left-1 downto 0) & ld_r(ld_r'left);
 			i := i + 1;
-    end if;
+      row_a <= ctl_o(i).a;
+		end if;
 	end process;
 
   -- sprite row data fan-out
   GEN_ROW_D : for i in 0 to N_SPRITES-1 generate
+    ctl_i(i).ld <= ld_r(i);
     ctl_i(i).d <= row_d;
   end generate GEN_ROW_D;
   
