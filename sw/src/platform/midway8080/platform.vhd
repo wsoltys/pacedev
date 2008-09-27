@@ -12,7 +12,7 @@ use work.project_pkg.all;
 use work.platform_pkg.all;
 use work.platform_variant_pkg.all;
 
-entity Game is
+entity platform is
   port
   (
     -- clocking and reset
@@ -26,10 +26,6 @@ entity Game is
 
     -- controller inputs
     inputs_i        : in from_INPUTS_t;
-
-    -- micro buses
-    upaddr          : out std_logic_vector(15 downto 0);   
-    updatao         : out std_logic_vector(7 downto 0);    
 
     -- FLASH/SRAM
     flash_i         : in from_FLASH_t;
@@ -74,9 +70,9 @@ entity Game is
     gp_i            : in from_GP_t;
     gp_o            : out to_GP_t
   );
-end Game;
+end entity platform;
 
-architecture SYN of Game is
+architecture SYN of platform is
 
 	alias clk_24M					: std_logic is clk_i(0);
 	alias clk_video       : std_logic is clk_i(1);

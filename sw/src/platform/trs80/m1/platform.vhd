@@ -5,9 +5,11 @@ use ieee.std_logic_arith.EXT;
 library work;
 use work.pace_pkg.all;
 use work.kbd_pkg.in8;
+use work.video_controller_pkg.all;
+use work.sprite_pkg.all;
 use work.platform_pkg.all;
 
-entity Game is
+entity platform is
   port
   (
     -- clocking and reset
@@ -22,15 +24,36 @@ entity Game is
     -- controller inputs
     inputs_i        : in from_INPUTS_t;
 		
-    -- micro buses
-    upaddr          : out std_logic_vector(15 downto 0);   
-    updatao         : out std_logic_vector(7 downto 0);    
-
     -- FLASH/SRAM
     flash_i         : in from_FLASH_t;
     flash_o         : out to_FLASH_t;
 		sram_i					: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
+
+    -- graphics
+    
+    bitmap_i        : in from_BITMAP_CTL_t;
+    bitmap_o        : out to_BITMAP_CTL_t;
+    
+    tilemap_i       : in from_TILEMAP_CTL_t;
+    tilemap_o       : out to_TILEMAP_CTL_t;
+
+    sprite_reg_o    : out to_SPRITE_REG_t;
+    sprite_i        : in from_SPRITE_CTL_t;
+    sprite_o        : out to_SPRITE_CTL_t;
+		spr0_hit				: in std_logic;
+
+    -- various graphics information
+    graphics_i      : in from_GRAPHICS_t;
+    graphics_o      : out to_GRAPHICS_t;
+    
+    -- OSD
+    osd_i           : in from_OSD_t;
+    osd_o           : out to_OSD_t;
+
+    -- sound
+    snd_i           : in from_SOUND_t;
+    snd_o           : out to_SOUND_t;
 
     -- SPI (flash)
     spi_i           : in from_SPI_t;
@@ -42,51 +65,11 @@ entity Game is
 
     -- general purpose I/O
     gp_i            : in from_GP_t;
-    gp_o            : out to_GP_t;
-    
-    --
-    --
-    --
-
-    gfxextra_data   : out std_logic_vector(7 downto 0);
-		palette_data		: out ByteArrayType(15 downto 0);
-
-    -- graphics (bitmap)
-    bitmap_addr			: in    std_logic_vector(15 downto 0);   
-    bitmap_data			: out   std_logic_vector(7 downto 0);    
-
-    -- graphics (tilemap)
-    tileaddr        : in std_logic_vector(15 downto 0);   
-    tiledatao       : out std_logic_vector(7 downto 0);    
-    tilemapaddr     : in std_logic_vector(15 downto 0);   
-    tilemapdatao    : out std_logic_vector(15 downto 0);    
-    attr_addr       : in std_logic_vector(9 downto 0);    
-    attr_dout       : out std_logic_vector(15 downto 0);   
-
-    -- graphics (sprite)
-    sprite_reg_addr : out std_logic_vector(7 downto 0);    
-    sprite_wr       : out std_logic;                       
-    spriteaddr      : in std_logic_vector(15 downto 0);   
-    spritedata      : out std_logic_vector(31 downto 0);   
-    spr0_hit        : in std_logic;
-
-    -- graphics (control)
-    vblank          : in std_logic;    
-		xcentre					: out std_logic_vector(9 downto 0);
-		ycentre					: out std_logic_vector(9 downto 0);
-
-    -- OSD
-    to_osd          : out to_OSD_t;
-    from_osd        : in from_OSD_t;
-
-    -- sound
-    snd_rd          : out std_logic;                       
-    snd_wr          : out std_logic;
-    sndif_datai     : in std_logic_vector(7 downto 0)
+    gp_o            : out to_GP_t
   );
-end Game;
+end entity platform;
 
-architecture SYN of Game is
+architecture SYN of platform is
 
 	-- need this for projects that don't have it!
 	component FDC_1793 is 
@@ -229,7 +212,10 @@ begin
 	
 	-- io write enables
 	-- SOUND OUTPUT $FC-FF (Model I is $FF only)
-  snd_wr <= snd_cs and uPiowr;
+	snd_o.a <= uP_addr(snd_o.a'range);
+	snd_o.d <= uP_datao;
+	snd_o.rd <= '0';
+  snd_o.wr <= snd_cs and uPiowr;
 		
 	-- memory read mux
 	uPmem_datai <= 	rom_datao when rom_cs = '1' else
@@ -256,23 +242,15 @@ begin
 		kbd_data <= kbd_data_v;
   end process KBD_MUX;
 
-	xcentre <= (others => '0');
-	ycentre <= (others => '0');
-
-  gfxextra_data <= (others => '0');
-	GEN_PAL_DAT : for i in palette_data'range generate
-		palette_data(i) <= (others => '0');
-	end generate GEN_PAL_DAT;
-
-    -- unused outputs
-	bitmap_data <= (others => '0');
-	upaddr <= uP_addr;
-	updatao <= uP_datao;
-  sprite_reg_addr <= (others => '0');
-  sprite_wr <= '0';
-  spriteData <= (others => '0');
-  attr_dout <= X"00" & switches_i(7 downto 0);
-  snd_rd <= '0';
+  -- unused outputs
+	bitmap_o <= NULL_TO_BITMAP_CTL;
+	sprite_reg_o <= NULL_TO_SPRITE_REG;
+	sprite_o <= NULL_TO_SPRITE_CTL;
+  tilemap_o.attr_d <= EXT(switches_i(7 downto 0), tilemap_o.attr_d'length);
+	graphics_o <= NULL_TO_GRAPHICS;
+	ser_o <= NULL_TO_SERIAL;
+  spi_o <= NULL_TO_SPI;
+  gp_o <= NULL_TO_GP;
 
 	clk_en_inst : entity work.clk_div
 		generic map
@@ -349,8 +327,8 @@ begin
 		port map
 		(
 			clock			=> clk_video,
-			address		=> tileaddr(11 downto 0),
-			q					=> tileDatao
+			address		=> tilemap_i.tile_a(11 downto 0),
+			q					=> tilemap_o.tile_d
 		);
 	
   -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
@@ -370,12 +348,13 @@ begin
 			q_b					=> vram_datao,
 	
 		  clock_a			=> clk_video,
-			address_a		=> tilemapaddr(9 downto 0),
+			address_a		=> tilemap_i.map_a(9 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tileMapDatao(7 downto 0)
+			q_a					=> tilemap_o.map_d(7 downto 0)
 		);
-
+    tilemap_o.map_d(tilemap_o.map_d'left downto 8) <= (others => '0');
+    
     interrupts_inst : entity work.TRS80_Interrupts                    
       port map
       (
@@ -437,4 +416,4 @@ begin
 					
 		end generate GEN_NO_FDC;
 					
-end SYN;
+end architecture SYN;

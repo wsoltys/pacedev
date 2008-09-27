@@ -40,7 +40,7 @@ architecture SYN of tilemapCtl_1 is
   alias clk_ena   : std_logic is video_ctl.clk_ena;
   alias stb       : std_logic is video_ctl.stb;
   alias hblank    : std_logic is video_ctl.hblank;
-  alias vblank    : std_logic is video_ctl.hblank;
+  alias vblank    : std_logic is video_ctl.vblank;
   alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
   alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
   

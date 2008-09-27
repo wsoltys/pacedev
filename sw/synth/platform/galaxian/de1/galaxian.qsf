@@ -536,7 +536,7 @@ set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/InputMap
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/Galaxian_Interrupts.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/Galaxian_vramMapper.VHDL
-set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/Game.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwm_chaser.vhd

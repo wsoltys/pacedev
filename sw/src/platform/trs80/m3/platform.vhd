@@ -11,7 +11,7 @@ use work.project_pkg.all;
 use work.platform_pkg.all;
 use work.target_pkg.all;
 
-entity Game is
+entity platform is
   port
   (
     -- clocking and reset
@@ -26,10 +26,6 @@ entity Game is
     -- controller inputs
     inputs_i        : in from_INPUTS_t;
 		
-    -- micro buses
-    upaddr          : out std_logic_vector(15 downto 0);   
-    updatao         : out std_logic_vector(7 downto 0);    
-
     -- FLASH/SRAM
     flash_i         : in from_FLASH_t;
     flash_o         : out to_FLASH_t;
@@ -50,8 +46,17 @@ entity Game is
 		spr0_hit				: in std_logic;
 
     -- various graphics information
+    graphics_i      : in from_GRAPHICS_t;
     graphics_o      : out to_GRAPHICS_t;
     
+    -- OSD
+    osd_i           : in from_OSD_t;
+    osd_o           : out to_OSD_t;
+
+    -- sound
+    snd_i           : in from_SOUND_t;
+    snd_o           : out to_SOUND_t;
+
     -- SPI (flash)
     spi_i           : in from_SPI_t;
     spi_o           : out to_SPI_t;
@@ -62,29 +67,11 @@ entity Game is
 
     -- general purpose I/O
     gp_i            : in from_GP_t;
-    gp_o            : out to_GP_t;
-    
-    --
-    --
-    --
-
-    -- graphics (control)
-    vblank          : in std_logic;    
-		xcentre					: out std_logic_vector(9 downto 0);
-		ycentre					: out std_logic_vector(9 downto 0);
-
-    -- OSD
-    to_osd          : out to_OSD_t;
-    from_osd        : in from_OSD_t;
-
-    -- sound
-    snd_rd          : out std_logic;                       
-    snd_wr          : out std_logic;
-    sndif_datai     : in std_logic_vector(7 downto 0)
+    gp_o            : out to_GP_t
   );
-end Game;
+end entity platform;
 
-architecture SYN of Game is
+architecture SYN of platform is
 
 	-- need this for projects that don't have it!
 	component FDC_1793 is 
@@ -263,7 +250,10 @@ begin
   -- FDC $F0-$F7
   fdc_wr <= fdc_cs and uPiowr;
 	-- SOUND OUTPUT $FC-FF (Model I is $FF only)
-  snd_wr <= snd_cs and uPiowr;
+	snd_o.a <= uP_addr(snd_o.a'range);
+	snd_o.d <= uP_datao;
+	snd_o.rd <= '0';
+  snd_o.wr <= snd_cs and uPiowr;
 		
 	-- memory read mux
 	uPmem_datai <= 	rom_datao when rom_cs = '1' else
@@ -294,19 +284,13 @@ begin
 
   end process KBD_MUX;
 
-	xcentre <= (others => '0');
-	ycentre <= (others => '0');
-	
-	upaddr <= uP_addr;
-	updatao <= uP_datao;
-
   -- unused outputs
-	graphics_o <= NULL_TO_GRAPHICS;
 	bitmap_o <= NULL_TO_BITMAP_CTL;
 	sprite_reg_o <= NULL_TO_SPRITE_REG;
 	sprite_o <= NULL_TO_SPRITE_CTL;
-  tilemap_o.attr_d <= X"00" & switches_i(7 downto 0);
-  snd_rd <= '0';
+  tilemap_o.attr_d <= EXT(switches_i(7 downto 0), tilemap_o.attr_d'length);
+	graphics_o <= NULL_TO_GRAPHICS;
+	ser_o <= NULL_TO_SERIAL;
   spi_o <= NULL_TO_SPI;
   gp_o <= NULL_TO_GP;
 
@@ -511,8 +495,8 @@ begin
 
         osd_key     => inputs(8)(1),
 
-        to_osd      => to_osd,
-        from_osd    => from_osd,
+        to_osd      => osd_o,
+        from_osd    => osd_i,
 
         gpio_i      => gpio_to_osd,
         gpio_o      => gpio_from_osd
@@ -520,5 +504,4 @@ begin
 
   end generate GEN_OSD;
   
-end SYN;
-
+end architecture SYN;

@@ -11,7 +11,7 @@ use work.sprite_pkg.all;
 use work.project_pkg.all;
 use work.platform_pkg.all;
 
-entity Game is
+entity platform is
   port
   (
     -- clocking and reset
@@ -70,9 +70,9 @@ entity Game is
     gp_o            : out to_GP_t
   );
 
-end Game;
+end platform;
 
-architecture SYN of Game is
+architecture SYN of platform is
 
 	alias clk_30M				  : std_logic is clk_i(0);
 	alias clk_video       : std_logic is clk_i(1);

@@ -75,7 +75,7 @@ architecture SYN of PACE is
 
 begin
 
-  U_Game : entity work.Game                                            
+  platform_inst : entity work.platform
     Port Map
     (
       -- clocking and reset
@@ -133,7 +133,7 @@ begin
       gp_o            => gp_o
     );
 
- U_Graphics : entity work.Graphics                                    
+  graphics_inst : entity work.Graphics                                    
     Port Map
     (
       reset           => reset_i,
@@ -165,7 +165,7 @@ begin
 		signal snd_data		: std_logic_vector(7 downto 0);
 	begin
 	
-	  U_Sound : entity work.Sound                                          
+	  sound_inst : entity work.Sound                                          
 	    Port Map
 	    (
 	      sysclk      => clk_i(0),    -- fudge for now
