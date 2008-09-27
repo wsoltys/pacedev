@@ -5,7 +5,6 @@ use ieee.std_logic_arith.EXT;
 
 library work;
 use work.pace_pkg.all;
-use work.kbd_pkg.in8;
 use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
 use work.project_pkg.all;
@@ -24,7 +23,7 @@ entity platform is
     leds_o          : out to_LEDS_t;
 
     -- controller inputs
-    inputs_i        : in from_INPUTS_t;
+    inputs_i        : in from_MAPPED_INPUTS_t;
 
     -- FLASH/SRAM
     flash_i         : in from_FLASH_t;
@@ -118,7 +117,6 @@ architecture SYN of platform is
   signal inZero_cs      : std_logic;
   signal inOne_cs       : std_logic;
   signal dips_cs        : std_logic;
-	signal inputs					: in8(0 to 1);  
 	signal newTileAddr		: std_logic_vector(11 downto 0);
 	
 begin
@@ -155,8 +153,8 @@ begin
 							vram_datao when vram_cs = '1' else
 							cram1_datao when (cram_cs = '1' and uP_addr(0) = '1') else
 							cram0_datao when (cram_cs = '1' and uP_addr(0) = '0') else
-              inputs(0) when inzero_cs = '1' else
-              inputs (1) when inone_cs = '1' else
+              inputs_i(0).d when inzero_cs = '1' else
+              inputs_i(1).d when inone_cs = '1' else
               switches_i(7 downto 0) when dips_cs = '1' else
 							(others => 'X');
 	
@@ -326,24 +324,6 @@ begin
 			data_a			=> (others => 'X'),
 			q_a					=> tilemap_o.attr_d(15 downto 8)
 		);
-
-	inputs_inst : entity work.Inputs
-		generic map
-		(
-			NUM_INPUTS	=> 2,
-			CLK_1US_DIV	=> GALAXIAN_1MHz_CLK0_COUNTS
-		)
-	  port map
-	  (
-	    clk     		=> clk_30M,
-	    reset   		=> reset_i,
-	    ps2clk  		=> inputs_i.ps2_kclk,
-	    ps2data 		=> inputs_i.ps2_kdat,
-			jamma				=> inputs_i.jamma_n,
-
-	    dips				=> switches_i(7 downto 0),
-	    inputs			=> inputs
-	  );
 
   interrupts_inst : entity work.Galaxian_Interrupts
     port map

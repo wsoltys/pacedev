@@ -7,6 +7,7 @@ use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
 use work.platform_pkg.all;
 use work.project_pkg.all;
+use work.target_pkg.all;
 
 entity PACE is
   port
@@ -53,6 +54,11 @@ end entity PACE;
 
 architecture SYN of PACE is
 
+	constant CLK_1US_COUNTS : integer := 
+    integer(PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY);
+
+	signal mapped_inputs		: from_MAPPED_INPUTS_t(0 to PACE_NUM_INPUT_BYTES-1);
+
   signal to_tilemap_ctl   : to_TILEMAP_CTL_t;
   signal from_tilemap_ctl : from_TILEMAP_CTL_t;
 
@@ -75,6 +81,25 @@ architecture SYN of PACE is
 
 begin
 
+	inputs_inst : entity work.inputs
+		generic map
+		(
+      NUM_DIPS        => PACE_NUM_SWITCHES,
+			NUM_INPUTS	    => PACE_NUM_INPUT_BYTES,
+			CLK_1US_DIV	    => CLK_1US_COUNTS
+		)
+	  port map
+	  (
+	    clk     	      => clk_i(0),
+	    reset   	      => reset_i,
+	    ps2clk  	      => inputs_i.ps2_kclk,
+	    ps2data 	      => inputs_i.ps2_kdat,
+			jamma			      => inputs_i.jamma_n,
+	
+	    dips     	      => switches_i,
+	    inputs		      => mapped_inputs
+	  );
+
   platform_inst : entity work.platform
     Port Map
     (
@@ -88,7 +113,7 @@ begin
       leds_o          => leds_o,
       
       -- controller inputs
-      inputs_i        => inputs_i,
+      inputs_i        => mapped_inputs,
 
       -- FLASH/SRAM
       flash_i         => flash_i,

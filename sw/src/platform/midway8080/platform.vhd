@@ -5,7 +5,6 @@ use ieee.std_logic_arith.all;
 
 library work;
 use work.pace_pkg.all;
-use work.kbd_pkg.in8;
 use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
 use work.project_pkg.all;
@@ -25,7 +24,7 @@ entity platform is
     leds_o          : out to_LEDS_t;
 
     -- controller inputs
-    inputs_i        : in from_INPUTS_t;
+    inputs_i        : in from_MAPPED_INPUTS_t(0 to PACE_NUM_INPUT_BYTES-1);
 
     -- FLASH/SRAM
     flash_i         : in from_FLASH_t;
@@ -110,9 +109,7 @@ architecture SYN of platform is
 	-- IO signals
 	signal port_cs				: std_logic_vector(5 downto 0);
 	signal port_wr				: std_logic_vector(5 downto 2);
-	signal inputs					: in8(0 to 2);
-	alias game_reset			: std_logic is inputs(2)(0);
-	signal dip_n					: std_logic_vector(7 downto 0);
+	alias game_reset			: std_logic is inputs_i(2).d(0);
 	signal shift_dout			: std_logic_vector(7 downto 0);
 
   -- other signals      
@@ -125,7 +122,6 @@ architecture SYN of platform is
 begin
 
 	cpu_reset <= reset_i or game_reset;
-	dip_n <= not switches_i(dip_n'range);
 	
   -- read mux
   uP_datai <= uPmem_datai when (uPmemrd = '1') else uPio_datai;
@@ -196,8 +192,8 @@ begin
 	
 	-- io read mux
 	uPio_datai <= X"40" when port_cs(0) = '1' else
-								inputs(0) when port_cs(1) = '1' else
-								inputs(1) when port_cs(2) = '1' else
+								inputs_i(0).d when port_cs(1) = '1' else
+								inputs_i(1).d when port_cs(2) = '1' else
 								shift_dout when port_cs(3) = '1' else
 								X"00";
 
@@ -290,10 +286,10 @@ begin
       osd_key_r := '0';
     elsif rising_edge(clk_24M) then
       -- toggle on OSD KEY PRESS
-      if inputs(2)(1) = '1' and osd_key_r = '0' then
+      if inputs_i(2).d(1) = '1' and osd_key_r = '0' then
         osd_en_v := not osd_en_v;
       end if;
-      osd_key_r := inputs(2)(1);
+      osd_key_r := inputs_i(2).d(1);
     end if;
     osd_o.en <= osd_en_v;
   end process;
@@ -309,9 +305,7 @@ begin
   -- unused outputs
 
   graphics_o <= NULL_TO_GRAPHICS;
-  tilemap_o.map_d <= (others => '0');
-  tilemap_o.tile_d <= (others => '0');
-  tilemap_o.attr_d <= X"00" & dip_n;
+  tilemap_o <= NULL_TO_TILEMAP_CTL;
   sprite_reg_o <= NULL_TO_SPRITE_REG;
   sprite_o <= NULL_TO_SPRITE_CTL;
   spi_o <= NULL_TO_SPI;
@@ -324,7 +318,7 @@ begin
 	clk_en_inst : entity work.clk_div
 		generic map
 		(
-			DIVISOR		=> INVADERS_CPU_CLK_ENA_DIVIDE_BY
+			DIVISOR		=> integer(INVADERS_CPU_CLK_ENA_DIVIDE_BY)
 		)
 		port map
 		(
@@ -354,24 +348,6 @@ begin
       intack 	=> uPintack,
       nmi    	=> '0'
     );
-
-	inputs_inst : entity work.Inputs
-		generic map
-		(
-			NUM_INPUTS	=> 3,
-			CLK_1US_DIV	=> INVADERS_1MHz_CLK0_COUNTS
-		)
-	  port map
-	  (
-	    clk     	=> clk_24M,
-	    reset   	=> reset_i,
-	    ps2clk  	=> inputs_i.ps2_kclk,
-	    ps2data 	=> inputs_i.ps2_kdat,
-			jamma			=> inputs_i.jamma_n,
-	
-	    dips     	=> dip_n,
-	    inputs		=> inputs
-	  );
 
   GEN_INTERNAL_ROM : if not INVADERS_ROM_IN_FLASH generate
     rom_inst : entity work.invaders_rom

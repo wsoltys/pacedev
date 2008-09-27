@@ -5,26 +5,27 @@ library work;
 use work.pace_pkg.all;
 use work.kbd_pkg.all;
 
-entity Inputs is
+entity inputs is
 	generic
 	(
-		NUM_INPUTS 			: positive := 2;
+    NUM_DIPS        : integer := 8;
+		NUM_INPUTS 			: integer := 2;
 		CLK_1US_DIV			: natural := 30
 	);
   port
   (
-    clk     : in std_logic;                               
-    reset   : in std_logic;                               
-    ps2clk  : in std_logic;                               
-    ps2data : in std_logic;                               
-		jamma		: in from_JAMMA_t;
+    clk             : in std_logic;                               
+    reset           : in std_logic;                               
+    ps2clk          : in std_logic;                               
+    ps2data         : in std_logic;                               
+		jamma		        : in from_JAMMA_t;
 		
-		dips		: in		std_logic_vector(7 downto 0);
-		inputs	: out		in8(0 to NUM_INPUTS-1)
+		dips		        : in std_logic_vector(NUM_DIPS-1 downto 0);
+		inputs	        : out from_MAPPED_INPUTS_t(0 to NUM_INPUTS-1)
   );
-end Inputs;
+end entity inputs;
 
-architecture SYN of Inputs is
+architecture SYN of inputs is
 
   component ps2kbd                                          
     port
@@ -74,6 +75,7 @@ begin
   inputmapper_inst : entity work.inputmapper
 		generic map
 		(
+      NUM_DIPS    => NUM_DIPS,
 			NUM_INPUTS	=> NUM_INPUTS
 		)
     port map
@@ -107,4 +109,4 @@ begin
       end if;
     end process;
     
-end SYN;
+end architecture SYN;

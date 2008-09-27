@@ -98,7 +98,4 @@ package kbd_pkg is
   type kbd_row is array (natural range <>) of std_logic_vector(7 downto 0);
   type kbd_col is array (natural range <>) of std_logic_vector(7 downto 0);
 
-  -- for multi-inputs
-  type in8 is array (natural range <>) of std_logic_vector(7 downto 0);
-
 end;

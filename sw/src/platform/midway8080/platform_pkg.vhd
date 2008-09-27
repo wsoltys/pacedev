@@ -19,13 +19,16 @@ package platform_pkg is
 	constant PACE_VIDEO_V_SIZE				    : integer := 256; -- why not 240?
   constant PACE_VIDEO_PIPELINE_DELAY    : integer := 3;
 	
+  constant PACE_NUM_INPUT_BYTES         : integer := 3;
+
 	--
 	-- Platform-specific constants (optional)
 	--
 
-	constant INVADERS_1MHz_CLK0_COUNTS				: natural := 
+	constant CLK0_FREQ_MHz		            : natural := 
     PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
-	constant INVADERS_CPU_CLK_ENA_DIVIDE_BY		: natural := 
-    INVADERS_1MHz_CLK0_COUNTS / 2;
+  constant CPU_FREQ_MHz                 : natural := 2;
+  
+	constant INVADERS_CPU_CLK_ENA_DIVIDE_BY   : natural := CLK0_FREQ_MHz / CPU_FREQ_MHz;
 
 end;

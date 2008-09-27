@@ -4,7 +4,6 @@ use ieee.std_logic_arith.EXT;
 
 library work;
 use work.pace_pkg.all;
-use work.kbd_pkg.in8;
 use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
 use work.project_pkg.all;
@@ -24,7 +23,7 @@ entity platform is
     leds_o          : out to_LEDS_t;
 
     -- controller inputs
-    inputs_i        : in from_INPUTS_t;
+    inputs_i        : in from_MAPPED_INPUTS_t(0 to PACE_NUM_INPUT_BYTES-1);
 		
     -- FLASH/SRAM
     flash_i         : in from_FLASH_t;
@@ -183,8 +182,7 @@ architecture SYN of platform is
   signal fdc_dto_int    : std_logic;
                         
   -- other signals      
-	signal inputs					: in8(0 to 8);  
-	alias game_reset			: std_logic is inputs(8)(0);
+	alias game_reset			: std_logic is inputs_i(PACE_NUM_INPUT_BYTES-1).d(0);
 	signal cpu_reset			: std_logic;  
 	signal alpha_joy_cs		: std_logic;
 	signal rtc_cs					: std_logic;
@@ -268,14 +266,14 @@ begin
 								fdc_datao when fdc_cs = '1' else
 								X"FF";
 		
-	KBD_MUX : process (uP_addr, inputs)
+	KBD_MUX : process (uP_addr, inputs_i)
   	variable kbd_data_v : std_logic_vector(7 downto 0);
 	begin
     
   	kbd_data_v := X"00";
 		for i in 0 to 7 loop
 	 		if uP_addr(i) = '1' then
-			  kbd_data_v := kbd_data_v or inputs(i);
+			  kbd_data_v := kbd_data_v or inputs_i(i).d;
 		  end if;
 		end loop;
 
@@ -327,23 +325,6 @@ begin
       intack 	=> uPintack,
       nmi    	=> uPnmireq
     );
-
-	inputs_inst : entity work.Inputs
-		generic map
-		(
-			NUM_INPUTS	=> inputs'length
-		)
-	  port map
-	  (
-	    clk     		=> clk_20M,
-	    reset   		=> reset_i,
-	    ps2clk  	=> inputs_i.ps2_kclk,
-	    ps2data 	=> inputs_i.ps2_kdat,
-			jamma			=> inputs_i.jamma_n,
-			
-	    dips				=> switches_i(7 downto 0),
-	    inputs			=> inputs
-	  );
 
 	rom_inst : entity work.sprom
 		generic map
@@ -473,11 +454,11 @@ begin
   end generate GEN_NO_FDC;
 
   -- wire some keys to the osd module
-  gpio_to_osd(0) <= inputs(6)(3); -- UP
-  gpio_to_osd(1) <= inputs(6)(4); -- DOWN
-  gpio_to_osd(2) <= inputs(6)(5); -- LEFT
-  gpio_to_osd(3) <= inputs(6)(6); -- RIGHT
-  gpio_to_osd(4) <= inputs(6)(0); -- ENTER
+  gpio_to_osd(0) <= inputs_i(6).d(3); -- UP
+  gpio_to_osd(1) <= inputs_i(6).d(4); -- DOWN
+  gpio_to_osd(2) <= inputs_i(6).d(5); -- LEFT
+  gpio_to_osd(3) <= inputs_i(6).d(6); -- RIGHT
+  gpio_to_osd(4) <= inputs_i(6).d(0); -- ENTER
   gpio_to_osd(7 downto 5) <= (others => '0');
 
   GEN_OSD : if PACE_HAS_OSD generate
@@ -493,7 +474,7 @@ begin
         clk_en      => '1',
         reset       => cpu_reset,
 
-        osd_key     => inputs(8)(1),
+        osd_key     => inputs_i(8).d(1),
 
         to_osd      => osd_o,
         from_osd    => osd_i,

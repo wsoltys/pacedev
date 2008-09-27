@@ -59,7 +59,6 @@ begin
 
       -- 1st stage of pipeline
       -- - read tile from tilemap
-      -- - read attribute data
       if stb = '1' then
         ctl_o.a(7 downto 0) <= x(7 downto 0);
       end if;

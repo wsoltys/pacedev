@@ -90,6 +90,12 @@ package pace_pkg is
     ps2_mdat  : std_logic;
     jamma_n   : from_JAMMA_t;
   end record;
+
+  type in8_t is record
+    d         : std_logic_vector(7 downto 0);
+  end record;
+  
+  type from_MAPPED_INPUTS_t is array (natural range <>) of in8_t;
   
 	--
 	-- SRAM interface data structure

@@ -508,7 +508,6 @@ set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/pla
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/invaders/platform_variant_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/de1/target_pkg.vhd
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/I2S_LCM_Config.v
-set_global_assignment -name VHDL_FILE ../../../../../src/target/de1/target_top.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/spram.vhd
@@ -553,3 +552,4 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/toys/led_chas
 set_global_assignment -name VHDL_FILE ../../../../../src/target/de2/audio_if.vhd
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/seg7_lut.v
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/i2s_controller.v
+set_global_assignment -name VHDL_FILE ../../../../../src/target/de1/target_top.vhd

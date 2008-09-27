@@ -4,7 +4,6 @@ use ieee.std_logic_arith.EXT;
 
 library work;
 use work.pace_pkg.all;
-use work.kbd_pkg.in8;
 use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
 use work.platform_pkg.all;
@@ -22,7 +21,7 @@ entity platform is
     leds_o          : out to_LEDS_t;
 
     -- controller inputs
-    inputs_i        : in from_INPUTS_t;
+    inputs_i        : in from_MAPPED_INPUTS_t;
 		
     -- FLASH/SRAM
     flash_i         : in from_FLASH_t;
@@ -150,8 +149,7 @@ architecture SYN of platform is
 	signal fdc_addr				: std_logic_vector(2 downto 0);
 	                        
   -- other signals      
-	signal inputs					: in8(0 to 8);  
-	alias game_reset			: std_logic is inputs(8)(0);
+	alias game_reset			: std_logic is inputs_i(8).d(0);
 	signal cpu_reset			: std_logic;  
 	signal alpha_joy_cs		: std_logic;
 	signal snd_cs					: std_logic;
@@ -229,13 +227,13 @@ begin
 	uPio_datai <= X"FF" when alpha_joy_cs = '1' else
 								X"FF";
 		
-	KBD_MUX : process (uP_addr, inputs)
+	KBD_MUX : process (uP_addr, inputs_i)
   	variable kbd_data_v : std_logic_vector(7 downto 0);
 	begin
   	kbd_data_v := X"00";
 		for i in 0 to 7 loop
 	 		if uP_addr(i) = '1' then
-			  kbd_data_v := kbd_data_v or inputs(i);
+			  kbd_data_v := kbd_data_v or inputs_i(i).d;
 		  end if;
 		end loop;
   	-- assign the output
@@ -285,23 +283,6 @@ begin
       intack 	=> uPintack,
       nmi    	=> uPnmireq
     );
-
-	inputs_inst : entity work.Inputs
-		generic map
-		(
-			NUM_INPUTS	=> inputs'length
-		)
-	  port map
-	  (
-	    clk     	=> clk_20M,
-	    reset   	=> reset_i,
-	    ps2clk  	=> inputs_i.ps2_kclk,
-	    ps2data 	=> inputs_i.ps2_kdat,
-			jamma			=> inputs_i.jamma_n,
-
-	    dips			=> switches_i(7 downto 0),
-	    inputs		=> inputs
-	  );
 
 	rom_inst : entity work.sprom
 		generic map
