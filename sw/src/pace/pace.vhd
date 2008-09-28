@@ -57,7 +57,7 @@ architecture SYN of PACE is
 	constant CLK_1US_COUNTS : integer := 
     integer(PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY);
 
-	signal mapped_inputs		: from_MAPPED_INPUTS_t(0 to PACE_NUM_INPUT_BYTES-1);
+	signal mapped_inputs		: from_MAPPED_INPUTS_t(0 to PACE_INPUTS_NUM_BYTES-1);
 
   signal to_tilemap_ctl   : to_TILEMAP_CTL_t;
   signal from_tilemap_ctl : from_TILEMAP_CTL_t;
@@ -85,7 +85,7 @@ begin
 		generic map
 		(
       NUM_DIPS        => PACE_NUM_SWITCHES,
-			NUM_INPUTS	    => PACE_NUM_INPUT_BYTES,
+			NUM_INPUTS	    => PACE_INPUTS_NUM_BYTES,
 			CLK_1US_DIV	    => CLK_1US_COUNTS
 		)
 	  port map
@@ -101,6 +101,10 @@ begin
 	  );
 
   platform_inst : entity work.platform
+    generic map
+    (
+      NUM_INPUT_BYTES => PACE_INPUTS_NUM_BYTES
+    )
     Port Map
     (
       -- clocking and reset

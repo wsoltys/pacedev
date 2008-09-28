@@ -12,6 +12,10 @@ use work.platform_pkg.all;
 use work.platform_variant_pkg.all;
 
 entity platform is
+  generic
+  (
+    NUM_INPUT_BYTES   : integer
+  );
   port
   (
     -- clocking and reset
@@ -24,7 +28,7 @@ entity platform is
     leds_o          : out to_LEDS_t;
 
     -- controller inputs
-    inputs_i        : in from_MAPPED_INPUTS_t(0 to PACE_NUM_INPUT_BYTES-1);
+    inputs_i        : in from_MAPPED_INPUTS_t(0 to NUM_INPUT_BYTES-1);
 
     -- FLASH/SRAM
     flash_i         : in from_FLASH_t;

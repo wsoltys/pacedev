@@ -9,6 +9,10 @@ use work.sprite_pkg.all;
 use work.platform_pkg.all;
 
 entity platform is
+  generic
+  (
+    NUM_INPUT_BYTES   : integer
+  );
   port
   (
     -- clocking and reset
@@ -21,7 +25,7 @@ entity platform is
     leds_o          : out to_LEDS_t;
 
     -- controller inputs
-    inputs_i        : in from_MAPPED_INPUTS_t;
+    inputs_i        : in from_MAPPED_INPUTS_t(0 to NUM_INPUT_BYTES-1);
 		
     -- FLASH/SRAM
     flash_i         : in from_FLASH_t;
@@ -149,7 +153,7 @@ architecture SYN of platform is
 	signal fdc_addr				: std_logic_vector(2 downto 0);
 	                        
   -- other signals      
-	alias game_reset			: std_logic is inputs_i(8).d(0);
+	alias game_reset			: std_logic is inputs_i(NUM_INPUT_BYTES-1).d(0);
 	signal cpu_reset			: std_logic;  
 	signal alpha_joy_cs		: std_logic;
 	signal snd_cs					: std_logic;
