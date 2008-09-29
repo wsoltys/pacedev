@@ -71,16 +71,14 @@ begin
 
 		if rising_edge(clk) and clk_ena = '1' then
 
-			-- different offsets for sprites & bullets/bombs
-      --x := reg_o.x;
+			-- video is clipped left and right (only 224 wide)
 			x := reg_o.x - (256-PACE_VIDEO_H_SIZE)/2;
+			-- different offsets for sprites & bullets/bombs
 			if INDEX < 8 then
-	  		y := reg_o.y + 1;
+        y := reg_o.y;
 			else
-				--xLocAdj := reg_o.x(7 downto 0) + 1;
 		  	y := reg_o.y - 5;
 			end if;
-			-- video is clipped left and right (only 224 wide)
 			
 			if video_ctl.hblank = '1' then
 
@@ -106,7 +104,7 @@ begin
 						else
 							-- bullet/bomb sprite
 							if rowCount(rowCount'left downto rowCount'left-4) < 4 then
-								rowStore := (31=>'0', 30=>'0', 29=>'1', 28=>'1', others => '0');
+								rowStore := ('0', '0', '1', '1', others => '0');
 							else
 								rowStore := (others => '0');
 							end if;
@@ -116,47 +114,49 @@ begin
 					end if;
 				end if;
 						
-			else
+			end if;
 			
-				if video_ctl.x = x then
-					-- count up at left edge of sprite
-					rowCount := rowCount + 1;
-					-- start of sprite
-					if video_ctl.x /= 0 and video_ctl.x < 240 then
-						xMat := true;
-					end if;
-				end if;
-				
-				if video_ctl.stb = '1' and xMat then
-					-- shift in next pixel
-					pel := rowStore(rowStore'left downto rowStore'left-pel'length+1);
-					rowStore := rowStore(rowStore'left-2 downto 0) & "00";
-				end if;
+      if video_ctl.stb = '1' then
+    
+        if video_ctl.x = x then
+          -- count up at left edge of sprite
+          rowCount := rowCount + 1;
+          -- start of sprite
+          if video_ctl.x /= 0 and video_ctl.x < 240 then
+            xMat := true;
+          end if;
+        end if;
+        
+        if xMat then
+          -- shift in next pixel
+          pel := rowStore(rowStore'left downto rowStore'left-pel'length+1);
+          rowStore := rowStore(rowStore'left-2 downto 0) & "00";
+        end if;
 
         -- shift the pipeline
         rgb_r(rgb_r'left downto 1) := rgb_r(rgb_r'left-1 downto 0);
         set_r(set_r'left downto 1) := set_r(set_r'left-1 downto 0);
         
-				-- extract R,G,B from colour palette
-				-- apparently only 3 bits of colour info (aside from pel)
-				pal_entry := pal(conv_integer(reg_o.colour(2 downto 0) & pel));
-				rgb_r(0).r(rgb_r(0).r'left downto rgb_r(0).r'left-5) := pal_entry(0);
-				rgb_r(0).r(rgb_r(0).r'left-6 downto 0) := (others => '0');
-				rgb_r(0).g(rgb_r(0).g'left downto rgb_r(0).g'left-5) := pal_entry(1);
-				rgb_r(0).g(rgb_r(0).g'left-6 downto 0) := (others => '0');
-				rgb_r(0).b(rgb_r(0).b'left downto rgb_r(0).b'left-5) := pal_entry(2);
-				rgb_r(0).b(rgb_r(0).b'left-6 downto 0) := (others => '0');
+        -- extract R,G,B from colour palette
+        -- apparently only 3 bits of colour info (aside from pel)
+        pal_entry := pal(conv_integer(reg_o.colour(2 downto 0) & pel));
+        rgb_r(0).r(rgb_r(0).r'left downto rgb_r(0).r'left-5) := pal_entry(0);
+        rgb_r(0).r(rgb_r(0).r'left-6 downto 0) := (others => '0');
+        rgb_r(0).g(rgb_r(0).g'left downto rgb_r(0).g'left-5) := pal_entry(1);
+        rgb_r(0).g(rgb_r(0).g'left-6 downto 0) := (others => '0');
+        rgb_r(0).b(rgb_r(0).b'left downto rgb_r(0).b'left-5) := pal_entry(2);
+        rgb_r(0).b(rgb_r(0).b'left-6 downto 0) := (others => '0');
 
-			  -- set pixel transparency based on match
-				set_r(0) := '0';
-				--if xMat and pel /= "00" then
-				if xMat and yMat and (pal_entry(0)(5 downto 4) /= "00" or
-															pal_entry(1)(5 downto 4) /= "00" or
-															pal_entry(2)(5 downto 4) /= "00") then
-			  	set_r(0) := '1';
-				end if;
+        -- set pixel transparency based on match
+        set_r(0) := '0';
+        --if xMat and pel /= "00" then
+        if xMat and yMat and (pal_entry(0)(5 downto 4) /= "00" or
+                              pal_entry(1)(5 downto 4) /= "00" or
+                              pal_entry(2)(5 downto 4) /= "00") then
+          set_r(0) := '1';
+        end if;
 
-			end if;
+      end if;
 
 		end if;
 
