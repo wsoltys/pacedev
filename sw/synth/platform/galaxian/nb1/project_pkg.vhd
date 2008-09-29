@@ -13,6 +13,12 @@ package project_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 	
+	constant PACE_HAS_PLL								      : boolean := true;	
+  constant PACE_HAS_SRAM                    : boolean := true;
+  constant PACE_HAS_SDRAM                   : boolean := false;
+  constant PACE_HAS_SERIAL                  : boolean := false;
+	constant PACE_HAS_SPI								      : boolean := false;	
+ 	
   -- Reference clock is 20MHz
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
   constant PACE_CLK0_DIVIDE_BY              : natural := 2;
@@ -26,17 +32,17 @@ package project_pkg is
   constant PACE_OSD_XPOS                    : natural := 0;
   constant PACE_OSD_YPOS                    : natural := 0;
 
+  --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
+  constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
+
   -- NB1-specific constants that must be defined
   constant NB1_PLL_INCLK                    : NANOBOARD_PLL_INCLK_Type := NANOBOARD_PLL_INCLK_REF;
   constant NB1_INCLK0_INPUT_FREQUENCY       : natural := 50000;   -- 20MHz
+	constant PACE_CLKIN0											: natural := PACE_CLKIN0_REF;
 
-	-- Frogger-specific constants
+	-- Galaxian-specific constants
 			
-	constant GALAXIAN_CPU_CLK_ENA_DIVIDE_BY	  : natural := 10;
-	constant GALAXIAN_1MHz_CLK0_COUNTS				: natural := 30;
-	
 	constant GALAXIAN_USE_INTERNAL_WRAM			  : boolean := true;
-	
 	constant USE_VIDEO_VBLANK_INTERRUPT       : boolean := true;
 	
 end;
