@@ -58,7 +58,8 @@ package project_pkg is
   -- NB1-specific constants that must be defined
   constant NB1_PLL_INCLK                    : NANOBOARD_PLL_INCLK_Type := NANOBOARD_PLL_INCLK_REF;
   constant NB1_INCLK0_INPUT_FREQUENCY       : natural := 50000;   -- 20MHz
-
+  constant PACE_CLKIN0                      : natural := PACE_CLKIN0_REF;
+  
 	constant USE_VIDEO_VBLANK_INTERRUPT       : boolean := false;
 	
 end;

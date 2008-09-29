@@ -500,7 +500,11 @@ set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg_body.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/lrescue/platform_variant_pkg.vhd
@@ -526,7 +530,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd_pk
 set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/InputMapper.VHDL
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Inputs.VHD
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/Game.VHD
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/invaders/invaders_audio.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/Sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd

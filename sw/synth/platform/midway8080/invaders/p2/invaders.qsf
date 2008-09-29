@@ -737,7 +737,11 @@ set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to 
 set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
 set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg_body.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/invaders/platform_variant_pkg.vhd
@@ -760,7 +764,7 @@ set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/dpram.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/dpram_1r1w.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/altera_mem.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/Game.VHD
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/invaders/invaders_audio.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/Sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd
