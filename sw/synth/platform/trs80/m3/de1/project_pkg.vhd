@@ -61,6 +61,8 @@ package project_pkg is
   constant TRS80_M3_ROM_IN_FLASH            : boolean := false;
   constant PACE_HAS_FLASH                   : boolean := TRS80_M3_ROM_IN_FLASH;
 
-	constant USE_VIDEO_VBLANK_INTERRUPT       : boolean := false;
+	constant TRS80_M3_FDC_SUPPORT			        : boolean := true;
+
+	--constant USE_VIDEO_VBLANK_INTERRUPT       : boolean := false;
 	
 end;

@@ -25,6 +25,4 @@ package platform_pkg is
 	-- Platform-specific constants (optional)
 	--
 
-	constant INCLUDE_FDC_SUPPORT			: boolean := false;
-
 end;

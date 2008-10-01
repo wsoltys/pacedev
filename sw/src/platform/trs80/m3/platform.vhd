@@ -76,36 +76,6 @@ end entity platform;
 
 architecture SYN of platform is
 
-	-- need this for projects that don't have it!
-	component FDC_1793 is 
-		port
-	   (
-	     clk            : in    std_logic;
-	     uPclk          : in    std_logic;
-	     reset          : in    std_logic;
-
-	     fdcaddr        : in    std_logic_vector(2 downto 0);
-	     fdcdatai       : in    std_logic_vector(7 downto 0);
-	     fdcdatao       : out   std_logic_vector(7 downto 0);
-	     fdc_rd         : in    std_logic;
-	     fdc_wr         : in    std_logic;
-	     fdc_drq_int    : out   std_logic;
-	     fdc_dto_int		: out   std_logic;
-
-	     spi_clk        : out   std_logic;
-	     spi_ena        : out   std_logic;
-	     spi_mode       : out   std_logic;
-	     spi_sel        : out   std_logic;
-	     spi_din        : in    std_logic;
-	     spi_dout       : out   std_logic;
-
-	     ser_rx         : in    std_logic;
-	     ser_tx         : out   std_logic;
-
-	     debug          : out   std_logic_vector(7 downto 0)
-	   );
-	end component;
-
   component osd_controller is
     generic
     (
@@ -178,12 +148,12 @@ architecture SYN of platform is
   signal gpio_from_osd  : std_logic_vector(7 downto 0);
 
   -- fdc signals
-	signal fdc_cs					: std_logic;
-  signal fdc_rd         : std_logic;
-  signal fdc_wr         : std_logic;
-  signal fdc_datao      : std_logic_vector(7 downto 0);
-  signal fdc_drq_int    : std_logic;
-  signal fdc_dto_int    : std_logic;
+	signal fdc_cs_n			  : std_logic;
+	signal fdc_re_n       : std_logic;
+	signal fdc_we_n       : std_logic;
+  signal fdc_dat_o      : std_logic_vector(7 downto 0);
+  signal fdc_drq        : std_logic;
+  signal fdc_irq        : std_logic;
                         
   -- other signals      
 	alias game_reset			: std_logic is inputs_i(NUM_INPUT_BYTES-1).d(0);
@@ -235,22 +205,22 @@ begin
   -- reset RTC any read $EC-EF
   rtc_cs <= '1' when io_addr(7 downto 2) = "111011" else '0';
 	-- FDC $F0-$F7
-	fdc_cs <= '1' when io_addr(7 downto 3) = "11110" else '0';
+	fdc_cs_n <= '0' when io_addr(7 downto 3) = "11110" else '1';
   -- SOUND $FC-FF (Model I is $FF only)
 	snd_cs <= '1' when io_addr(7 downto 2) = "111111" else '0';
 	
 	-- io read strobes
-	fdc_rd <= fdc_cs and uPiord;
 	nmirst <= nmi_cs and uPiord;
 	rtc_intrst <= rtc_cs and uPiord;
-	
+  fdc_re_n <= not uPiord;
+  
 	-- io write enables
 	-- WRINTMASKREQ $E0-E3
   intena_wr <= int_cs and uPiowr;
   -- NMIMASKREQ $E4
   nmiena_wr <= nmi_cs and uPiowr;
   -- FDC $F0-$F7
-  fdc_wr <= fdc_cs and uPiowr;
+  fdc_we_n <= not uPiowr;
 	-- SOUND OUTPUT $FC-FF (Model I is $FF only)
 	snd_o.a <= uP_addr(snd_o.a'range);
 	snd_o.d <= uP_datao;
@@ -267,7 +237,7 @@ begin
 	uPio_datai <= X"FF" when alpha_joy_cs = '1' else
 								(not int_status) when int_cs = '1' else
 								(not nmi_status) when nmi_cs = '1' else
-								fdc_datao when fdc_cs = '1' else
+								fdc_dat_o when fdc_cs_n = '0' else
 								X"FF";
 		
 	KBD_MUX : process (uP_addr, inputs_i)
@@ -396,8 +366,8 @@ begin
                   
       -- IRQ inputs
       reset_btn_int => '0',
-      fdc_drq_int   => fdc_drq_int,                    
-      fdc_dto_int   => fdc_dto_int,
+      fdc_drq_int   => fdc_drq,                    
+      fdc_dto_int   => fdc_irq,
 
       -- IRQ/status outputs
       int_status    => int_status,
@@ -410,49 +380,58 @@ begin
       nmi_reset     => nmirst
     );
 
-  GEN_FDC : if INCLUDE_FDC_SUPPORT generate
+  GEN_FDC : if TRS80_M3_FDC_SUPPORT generate
   
-    GEN_SPI_FDC : if PACE_TARGET = PACE_TARGET_NANOBOARD_NB1 generate
-    
-      fdc_inst : FDC_1793                                    
-        port map
-        (
-          clk         => clk_20M,
-          upclk       => clk_2M_en,
-          reset       => cpu_reset,
-                      
-          fdcaddr     => uP_addr(2 downto 0),          
-          fdcdatai    => uP_datao,
-          fdcdatao    => fdc_datao,
-          fdc_rd      => fdc_rd,                      
-          fdc_wr      => fdc_wr,                      
-          fdc_drq_int => fdc_drq_int,   
-          fdc_dto_int => fdc_dto_int,         
+    wd179x_inst : entity work.wd179x
+      port map
+      (
+        clk           => clk_20M,
+        clk_ena       => '1',
+        reset         => reset_i,
+        
+        -- micro bus interface
+        mr_n          => '1',
+        we_n          => fdc_we_n,
+        cs_n          => fdc_cs_n,
+        re_n          => fdc_re_n,
+        a             => up_addr(1 downto 0),
+        dal_i         => uP_datao,
+        dal_o         => fdc_dat_o,
+        clk_1mhz_en   => '1',
+        drq           => fdc_drq,
+        intrq         => fdc_irq,
+        
+        -- drive interface
+        step          => open,
+        dirc          => open,
+        early         => open,
+        late          => open,
+        test_n        => '1',
+        hlt           => '1',
+        rg            => open,
+        sso           => open,
+        rclk          => '1',
+        raw_read_n    => '0',
+        hld           => open,
+        tg43          => open,
+        wg            => open,
+        wd            => open,
+        ready         => '1',
+        wf_n_i        => '0',
+        vfoe_n_o      => open,
+        tr00_n        => '0',
+        ip_n          => '0',
+        wprt_n        => '1',
+        dden_n        => '1'
+      );
 
-          spi_clk     => spi_o.clk,
-          spi_din     => spi_i.din,
-          spi_dout    => spi_o.dout,
-          spi_ena     => spi_o.ena,            
-          spi_mode    => spi_o.mode,           
-          spi_sel     => spi_o.sel,            
-                      
-          ser_rx      => ser_i.rxd,                                  
-          ser_tx      => ser_o.txd,
-
-          debug       => leds_o(7 downto 0)
-        );
-  
-    end generate GEN_SPI_FDC;
-  
   end generate GEN_FDC;
 
-  GEN_NO_FDC : 	if 	not INCLUDE_FDC_SUPPORT or 
-                    PACE_TARGET /= PACE_TARGET_NANOBOARD_NB1 
-                generate
+  GEN_NO_FDC : 	if 	not TRS80_M3_FDC_SUPPORT generate
                 
-    fdc_datao <= X"FF";
-    fdc_drq_int <= '0';
-    fdc_dto_int <= '0';
+    fdc_dat_o <= X"FF";
+    fdc_drq <= '0';
+    fdc_irq <= '0';
     leds_o <= (others => '0');
         
   end generate GEN_NO_FDC;
