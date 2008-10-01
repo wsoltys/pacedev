@@ -64,21 +64,23 @@ begin
 
     -- delay pipeline to match tilemap delay
     type RGB_a_t is array (natural range <>) of RGB_t;
-    variable rgb_r      : RGB_a_t(DELAY-3 downto 0);
-    variable set_r      : std_logic_vector(DELAY-3 downto 0);
+    variable rgb_r      : RGB_a_t(DELAY-4 downto 0);
+    variable set_r      : std_logic_vector(DELAY-4 downto 0);
 
   begin
 
 		if rising_edge(clk) and clk_ena = '1' then
 
-			-- video is clipped left and right (only 224 wide)
-			x := reg_o.x - (256-PACE_VIDEO_H_SIZE)/2;
 			-- different offsets for sprites & bullets/bombs
 			if INDEX < 8 then
+        x := reg_o.x;
         y := reg_o.y;
 			else
+        x := reg_o.x + 1;
 		  	y := reg_o.y - 5;
 			end if;
+			-- video is clipped left and right (only 224 wide)
+			x := x - (256-PACE_VIDEO_H_SIZE)/2;
 			
 			if video_ctl.hblank = '1' then
 
@@ -133,29 +135,29 @@ begin
           rowStore := rowStore(rowStore'left-2 downto 0) & "00";
         end if;
 
-        -- shift the pipeline
-        rgb_r(rgb_r'left downto 1) := rgb_r(rgb_r'left-1 downto 0);
-        set_r(set_r'left downto 1) := set_r(set_r'left-1 downto 0);
-        
-        -- extract R,G,B from colour palette
-        -- apparently only 3 bits of colour info (aside from pel)
-        pal_entry := pal(conv_integer(reg_o.colour(2 downto 0) & pel));
-        rgb_r(0).r(rgb_r(0).r'left downto rgb_r(0).r'left-5) := pal_entry(0);
-        rgb_r(0).r(rgb_r(0).r'left-6 downto 0) := (others => '0');
-        rgb_r(0).g(rgb_r(0).g'left downto rgb_r(0).g'left-5) := pal_entry(1);
-        rgb_r(0).g(rgb_r(0).g'left-6 downto 0) := (others => '0');
-        rgb_r(0).b(rgb_r(0).b'left downto rgb_r(0).b'left-5) := pal_entry(2);
-        rgb_r(0).b(rgb_r(0).b'left-6 downto 0) := (others => '0');
+      end if;
 
-        -- set pixel transparency based on match
-        set_r(0) := '0';
-        --if xMat and pel /= "00" then
-        if xMat and yMat and (pal_entry(0)(5 downto 4) /= "00" or
-                              pal_entry(1)(5 downto 4) /= "00" or
-                              pal_entry(2)(5 downto 4) /= "00") then
-          set_r(0) := '1';
-        end if;
+      -- shift the pipeline
+      rgb_r(rgb_r'left downto 1) := rgb_r(rgb_r'left-1 downto 0);
+      set_r(set_r'left downto 1) := set_r(set_r'left-1 downto 0);
+      
+      -- extract R,G,B from colour palette
+      -- apparently only 3 bits of colour info (aside from pel)
+      pal_entry := pal(conv_integer(reg_o.colour(2 downto 0) & pel));
+      rgb_r(0).r(rgb_r(0).r'left downto rgb_r(0).r'left-5) := pal_entry(0);
+      rgb_r(0).r(rgb_r(0).r'left-6 downto 0) := (others => '0');
+      rgb_r(0).g(rgb_r(0).g'left downto rgb_r(0).g'left-5) := pal_entry(1);
+      rgb_r(0).g(rgb_r(0).g'left-6 downto 0) := (others => '0');
+      rgb_r(0).b(rgb_r(0).b'left downto rgb_r(0).b'left-5) := pal_entry(2);
+      rgb_r(0).b(rgb_r(0).b'left-6 downto 0) := (others => '0');
 
+      -- set pixel transparency based on match
+      set_r(0) := '0';
+      --if xMat and pel /= "00" then
+      if xMat and yMat and (pal_entry(0)(5 downto 4) /= "00" or
+                            pal_entry(1)(5 downto 4) /= "00" or
+                            pal_entry(2)(5 downto 4) /= "00") then
+        set_r(0) := '1';
       end if;
 
 		end if;
