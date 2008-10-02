@@ -59,7 +59,7 @@ package project_pkg is
 	-- TRS-80-specific constants
 	
   constant TRS80_M3_ROM_IN_FLASH            : boolean := false;
-  constant PACE_HAS_FLASH                   : boolean := TRS80_M3_ROM_IN_FLASH;
+  constant PACE_HAS_FLASH                   : boolean := true;
 
 	constant TRS80_M3_FDC_SUPPORT			        : boolean := true;
 

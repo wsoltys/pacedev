@@ -382,49 +382,83 @@ begin
 
   GEN_FDC : if TRS80_M3_FDC_SUPPORT generate
   
-    wd179x_inst : entity work.wd179x
-      port map
-      (
-        clk           => clk_20M,
-        clk_ena       => '1',
-        reset         => reset_i,
-        
-        -- micro bus interface
-        mr_n          => '1',
-        we_n          => fdc_we_n,
-        cs_n          => fdc_cs_n,
-        re_n          => fdc_re_n,
-        a             => up_addr(1 downto 0),
-        dal_i         => uP_datao,
-        dal_o         => fdc_dat_o,
-        clk_1mhz_en   => '1',
-        drq           => fdc_drq,
-        intrq         => fdc_irq,
-        
-        -- drive interface
-        step          => open,
-        dirc          => open,
-        early         => open,
-        late          => open,
-        test_n        => '1',
-        hlt           => '1',
-        rg            => open,
-        sso           => open,
-        rclk          => '1',
-        raw_read_n    => '0',
-        hld           => open,
-        tg43          => open,
-        wg            => open,
-        wd            => open,
-        ready         => '1',
-        wf_n_i        => '0',
-        vfoe_n_o      => open,
-        tr00_n        => '0',
-        ip_n          => '0',
-        wprt_n        => '1',
-        dden_n        => '1'
-      );
+    BLK_FDC : block
+    
+      signal step         : std_logic := '0';
+      signal dirc         : std_logic := '0';
+      signal rclk         : std_logic := '0';
+      signal raw_read_n   : std_logic := '0';
+      signal tr00_n       : std_logic := '0';
+      signal ip_n         : std_logic := '0';
+      
+    begin
 
+      wd179x_inst : entity work.wd179x
+        port map
+        (
+          clk           => clk_20M,
+          clk_ena       => '1',
+          reset         => reset_i,
+          
+          -- micro bus interface
+          mr_n          => '1',
+          we_n          => fdc_we_n,
+          cs_n          => fdc_cs_n,
+          re_n          => fdc_re_n,
+          a             => up_addr(1 downto 0),
+          dal_i         => uP_datao,
+          dal_o         => fdc_dat_o,
+          clk_1mhz_en   => '1',
+          drq           => fdc_drq,
+          intrq         => fdc_irq,
+          
+          -- drive interface
+          step          => step,
+          dirc          => dirc,
+          early         => open,    -- not used atm
+          late          => open,    -- not used atm
+          test_n        => '1',     -- not used
+          hlt           => '1',     -- head always engaged atm
+          rg            => open,
+          sso           => open,
+          rclk          => rclk,
+          raw_read_n    => raw_read_n,
+          hld           => open,    -- not used atm
+          tg43          => open,    -- not used on TRS-80 designs
+          wg            => open,
+          wd            => open,    -- 200ns (MFM) or 500ns (FM) pulse
+          ready         => '1',     -- always read atm
+          wf_n_i        => '1',     -- no write faults atm
+          vfoe_n_o      => open,    -- not used in TRS-80 designs?
+          tr00_n        => tr00_n,
+          ip_n          => ip_n,
+          wprt_n        => '1',     -- never write-protected atm
+          dden_n        => '1'      -- single density only atm
+        );
+
+      flash_floppy_inst : entity work.floppy(FLASH)
+        port map
+        (
+          clk           => clk_20M,
+          clk_20M_ena   => '1',
+          reset         => reset_i,
+          
+          step          => step,
+          dirc          => dirc,
+          rclk          => rclk,
+          raw_read_n    => raw_read_n,
+          tr00_n        => tr00_n,
+          ip_n          => ip_n,
+          
+          mem_a         => flash_o.a(19 downto 0),
+          mem_d_i       => flash_i.d,
+          mem_d_o       => flash_o.d,
+          mem_we        => open
+        );
+      flash_o.a(flash_o.a'left downto 20) <= (others => '0');
+        
+    end block BLK_FDC;
+    
   end generate GEN_FDC;
 
   GEN_NO_FDC : 	if 	not TRS80_M3_FDC_SUPPORT generate
