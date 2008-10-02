@@ -59,18 +59,26 @@ int main (int argc, char *argv[])
     fread (buf, 1, datalen, fp_dmk);
 
     // show some track data
-    printf ("Track: %02d\n", n_trks);
-    dump (buf, 0, datalen);
-    printf ("\n");
+    #if 0
+      printf ("Track: %02d\n", n_trks);
+      dump (buf, 0, datalen);
+      printf ("\n");
+    #endif
 
+    fprintf (stderr, "Track: %02d - ", n_trks);
     unsigned short *p_idam = (unsigned short *)trk_hdr;
     int n_idams;
     for (n_idams=0; n_idams<DMK_TKHDR_SIZE/sizeof(unsigned short int); n_idams++)
     {
-      if (*(p_idam++) == 0)
+      if (*p_idam == 0)
         break;
+
+      int offset = (*p_idam & 0x3FFF) - DMK_TKHDR_SIZE;
+      fprintf (stderr, "%02d ", *(buf+offset+3));
+
+      p_idam++;
     }
-    fprintf (stderr, "track %d: n_idams = %d\n", n_trks, n_idams);
+    fprintf (stderr, "(#%d)\n", n_idams);
 
     // save raw track data (padded) to RTF file
     unsigned char *zero = (unsigned char *)"\0";
