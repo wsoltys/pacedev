@@ -161,7 +161,8 @@ begin
 		  tHD_min  		=>  0 ns,
 		  tHZWE_max		=> 20 ns, -- no spec
 		  tLZWE_min		=> 10 ns, -- no spec
-			download_filename => "newdos80.dat"
+			download_filename => "newdos80.dat",
+			download_on_power_up => true
 		)
 		port map
 		(
@@ -188,7 +189,30 @@ begin
 		fdc_cs_n <= '1';
 		fdc_we_n <= '1';
 
-		wait for 1 ms;
+		-- select sector 5
+		wait for 30 ms;
+		fdc_a <= "10";			-- sector register
+		fdc_dat_i <= X"05";	-- sector 5
+		fdc_cs_n <= '0';
+		fdc_we_n <= '0';
+		wait until rising_edge(clk_20M);
+		wait for 2 ns;
+		fdc_cs_n <= '1';
+		fdc_we_n <= '1';
+
+		wait until rising_edge(clk_20M);
+		wait for 2 ns;
+
+		fdc_a <= "00";			-- command register
+		fdc_dat_i <= X"80";	-- read sector
+		fdc_cs_n <= '0';
+		fdc_we_n <= '0';
+		wait until rising_edge(clk_20M);
+		wait for 2 ns;
+		fdc_cs_n <= '1';
+		fdc_we_n <= '1';
+
+		wait for 1000 ms;
 		fdc_dat_i <= X"50";	-- step in, update track
 		fdc_cs_n <= '0';
 		fdc_we_n <= '0';

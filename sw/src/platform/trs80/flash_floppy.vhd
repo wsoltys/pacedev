@@ -83,6 +83,7 @@ begin
 
   -- track 0 indicator
   tr00_n <= '0' when track_r = 0 else '1';
+	-- each track is encoded in 8KiB
   mem_a(19 downto 13) <= track_r(6 downto 0);
   
   BLK_READ : block

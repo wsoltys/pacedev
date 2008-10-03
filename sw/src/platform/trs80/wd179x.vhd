@@ -69,6 +69,12 @@ architecture SYN of wd179x is
   signal data_i_r       	: std_logic_vector(7 downto 0) := (others => '0');
   signal data_o_r       	: std_logic_vector(7 downto 0) := (others => '0');
 
+	-- values read from the IDAM
+	signal idam_track				: std_logic_vector(track_r'range);
+	signal idam_side				: std_logic_vector(7 downto 0);
+	signal idam_sector			: std_logic_vector(sector_r'range);
+	signal idam_seclen			: std_logic_vector(7 downto 0);
+
 	-- data from the disc read logic
 	signal read_data_r					: std_logic_vector(7 downto 0) := (others => '0');
 	signal id_addr_mark_rdy			: std_logic := '0';
@@ -93,7 +99,9 @@ architecture SYN of wd179x is
 	signal type_i_stb				: std_logic := '0';
 	signal type_i_ack				: std_logic := '0';
 	signal type_ii_stb			: std_logic := '0';
+	signal type_ii_ack			: std_logic := '0';
 	signal type_iii_stb			: std_logic := '0';
+	signal type_iii_ack			: std_logic := '0';
                       		
   signal step_in_s    		: std_logic := '0';
   signal hld_s        		: std_logic := '0';
@@ -163,6 +171,7 @@ begin
 			if reset = '1' then
 			elsif rising_edge(clk) and clk_20M_ena = '1' then
 				type_i_stb <= '0';
+				type_ii_stb <= '0';
 				if cmd_wr_stb = '1' and STD_MATCH(cmd, CMD_FORCE_INTERRUPT) then
 					-- interrupt state machine
 				else
@@ -173,10 +182,14 @@ begin
 									-- RESTORE, SEEK, STEP, STEP_IN, STEP_OUT
 									type_i_stb <= '1';
 									state <= WAIT_FOR_CMD;
+								elsif command_r(7 downto 6) = "10" then
+									-- READ/WRITE SECTOR
+									type_ii_stb <= '1';
+									state <= WAIT_FOR_CMD;
 								end if;
 							end if;
 						when WAIT_FOR_CMD =>
-							if type_i_ack = '1' then
+							if (type_i_ack or type_ii_ack) = '1' then
 								state <= IDLE;
 							end if;
 						when others =>
@@ -308,19 +321,76 @@ begin
 
 	end block BLK_TYPE_I;
 
+	BLK_TYPE_II : block
+
+		type STATE_t is ( IDLE, WAIT_IDAM, WAIT_DAM, READ_SECTOR, DONE );
+		signal state : STATE_t;
+
+	begin
+
+		process (clk, clk_20M_ena, reset)
+			subtype count_t is integer range 0 to 256;
+			variable count		: count_t;
+		begin
+			if reset = '1' then
+				state <= IDLE;
+			elsif rising_edge(clk) and clk_20M_ena = '1' then
+				type_ii_ack <= '0';
+				case state is
+					when IDLE =>
+						if sec_wr_stb = '1' then
+							-- cpu writes directly to sector register
+							sector_r <= dal_i;
+						elsif type_ii_stb = '1' then
+							if STD_MATCH(cmd, CMD_READ_SECTOR) then
+								state <= WAIT_IDAM;
+							end if;
+						end if;
+					when WAIT_IDAM =>
+						if id_addr_mark_rdy = '1' then
+							if idam_sector = sector_r then
+								state <= WAIT_DAM;
+							end if;
+						end if;
+					when WAIT_DAM =>
+						if data_addr_mark_rdy = '1' then
+							count := 0;
+							state <= READ_SECTOR;
+						end if;
+					when READ_SECTOR =>
+						if sector_data_rdy = '1' then
+							if count = 255 then
+								state <= DONE;
+							else
+								count := count + 1;
+							end if;
+						end if;
+					when DONE =>
+						type_ii_ack <= '1';
+						state <= IDLE;
+					when others =>
+						state <= IDLE;
+				end case;
+			end if;
+		end process;
+
+	end block BLK_TYPE_II;
+
 	BLK_READ : block
 
 		alias raw_data_r			: std_logic_vector(read_data_r'range) is read_data_r;
 
 		type STATE_t is 
 		(
-			UNKNOWN, TRACK, TRK_FILLER, SECTOR, SEC_FILLER, CRC_1, FILLER_FF, FILLER_00, DAM, USER_DATA, CRC_2 
+			UNKNOWN, 
+			GAP2_4E, GAP2_00, GAP2_A1, 
+			ID_ADDR_MARK, TRACK, SIDE, SECTOR, SEC_LEN, CRC_1,
+			GAP3_4E, GAP3_00, GAP3_A1,
+			DAM, USER_DATA, CRC_2
 		);
 		signal state					: STATE_t;
 
 		-- values read from the disk
-		signal rd_track				: std_logic_vector(track_r'range);
-		signal rd_sector			: std_logic_vector(sector_r'range);
 		signal crc						: std_logic_vector(15 downto 0);
 		signal rd_dam					: std_logic_vector(7 downto 0);
 
@@ -363,7 +433,7 @@ begin
 		end process PROC_RAW_READ;
 
 		-- reads address mark and flags start of sector
-		process (clk, clk_20M_ena, reset)
+		PROC_I_DAM: process (clk, clk_20M_ena, reset)
 			variable count : integer range 0 to 511 := 0;
 		begin
 			if reset = '1' then
@@ -375,74 +445,121 @@ begin
 				if raw_data_rdy = '1' then
 					case state is
 						when UNKNOWN =>
+							count := 0;
+							state <= GAP2_4E;
+						when GAP2_4E =>
+							-- at least 22 bytes of $4E
+							if raw_data_r = X"4E" then
+								count := count + 1;
+							elsif raw_data_r = X"00" and count >= 22 then
+								count := 1;
+								state <= GAP2_00;
+							else
+								state <= UNKNOWN;
+							end if;
+						when GAP2_00 =>
+							-- exactly 12 bytes of $00
+							if raw_data_r = X"00" then
+								count := count + 1;
+								if count = 12 then
+									count := 0;
+									state <= GAP2_A1;
+								end if;
+							else
+								state <= UNKNOWN;
+							end if;
+						when GAP2_A1 =>
+							-- exactly 3 bytes of $A1
+							if raw_data_r = X"A1" then
+								count := count + 1;
+								if count = 3 then
+									state <= ID_ADDR_MARK;
+								end if;
+							else
+								state <= UNKNOWN;
+							end if;
+						when ID_ADDR_MARK =>
 							if raw_data_r = X"FE" then
 								state <= TRACK;
+							else
+								state <= UNKNOWN;
 							end if;
 						when TRACK =>
-							rd_track <= raw_data_r;
-							state <= TRK_FILLER;
-						when TRK_FILLER =>
-							if raw_data_r /= X"00" then
-								state <= UNKNOWN;
-							else
-								state <= SECTOR;
-							end if;
+							idam_track <= raw_data_r;
+							state <= SIDE;
+						when SIDE =>
+							idam_side <= raw_data_r;
+							state <= SECTOR;
 						when SECTOR =>
-							rd_sector <= raw_data_r;
-							state <= SEC_FILLER;
-						when SEC_FILLER =>
-							if raw_data_r /= X"01" then
-								state <= UNKNOWN;
-							else
-								state <= CRC_1;
-								count := 2;
-							end if;
+							idam_sector <= raw_data_r;
+							state <= SEC_LEN;
+						when SEC_LEN =>
+							idam_seclen <= raw_data_r;
+							count := 0;
+							state <= CRC_1;
 						when CRC_1 =>
 							crc <= crc(7 downto 0) & raw_data_r;
-							if count = 0 then
+							count := count + 1;
+							if count = 2 then
 								-- really need to check CRC here first
 								id_addr_mark_rdy <= '1';
-								count := 12;
-								state <= FILLER_FF;
+								count := 0;
+								state <= GAP3_4E;
 							end if;
-						when FILLER_FF =>
-							if count = 0 then
-								count := 6;
-								state <= FILLER_00;
+						when GAP3_4E =>
+							if raw_data_r = X"4E" then
+								count := count + 1;
+							elsif raw_data_r = X"00" and count >= 22 then		-- 24?
+								count := 1;
+								state <= GAP3_00;
+							else
+								state <= UNKNOWN;
 							end if;
-						when FILLER_00 =>
-							if count = 0 then
-								state <= DAM;
+						when GAP3_00 =>
+							if raw_data_r = X"00" then
+								count := count + 1;
+							elsif raw_data_r = X"A1" and count >= 8 then
+								count := 1;
+								state <= GAP3_A1;
+							else
+								state <= UNKNOWN;
+							end if;
+						when GAP3_A1 =>
+							if raw_data_r = X"A1" then
+								count := count + 1;
+								if count = 3 then
+									state <= DAM;
+								end if;
+							else
+								state <= UNKNOWN;
 							end if;
 						when DAM =>
 							rd_dam <= raw_data_r;
 							data_addr_mark_rdy <= '1';
-							count := 256;
+							count := 0;
 							state <= USER_DATA;
 						when USER_DATA =>
 							-- reading user sector data
-							if rd_sector = sector_r then
+							count := count + 1;
+							if idam_sector = sector_r then
 								sector_data_rdy <= '1';
 							end if;
-							if count = 0 then
-								count := 2;
+							if count = 256 then
+								count := 0;
 								state <= CRC_2;
 							end if;
 						when CRC_2 =>
 							crc <= crc(7 downto 0) & raw_data_r;
-							if count = 0 then
+							count := count + 1;
+							if count = 2 then
 								state <= UNKNOWN;
 							end if;
 						when others =>
 							state <= UNKNOWN;
 					end case;
-					-- always
-					if count /= 0 then
-						count := count - 1;
-					end if;
 				end if;
 			end if;
-		end process;
+		end process PROC_I_DAM;
 
 	end block BLK_READ;
 

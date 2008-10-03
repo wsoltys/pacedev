@@ -203,7 +203,7 @@ architecture SIM of sram_512Kx8 is
                                      -- start of simulation
                                      -- Clearing of RAM is carried out
                                      -- before download takes place
---  constant download_on_power_up    : boolean := false;  -- if TRUE, RAM is
+--  constant download_on_power_up    : boolean := TRUE;  -- if TRUE, RAM is
                                      -- downloaded at start of simulation
   constant trace_ram_load          : boolean := false;  -- Echoes the data
                                      -- downloaded to the RAM on the screen

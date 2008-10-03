@@ -25,14 +25,18 @@ int main (int argc, char *argv[])
 {
   char fname_dmk[128];
   char fname_rtf[128];
+  char fname_dat[128];
 
   sprintf (fname_dmk, "%s.dmk", argv[1]);
   sprintf (fname_rtf, "%s.rtf", argv[1]);
+  sprintf (fname_dat, "%s.dat", argv[1]);
 
   FILE *fp_dmk = fopen (fname_dmk, "rb");
   if (!fp_dmk) exit (0);
   FILE *fp_rtf = fopen (fname_rtf, "wb");
   if (!fp_rtf) exit (0);
+  FILE *fp_dat = fopen (fname_dat, "wt");
+  if (!fp_dat) exit (0);
 
   fread (&hdr, sizeof(dmk_header_t), 1, fp_dmk);
   fprintf (stderr, "writeprot = %d\n", (hdr.writeprot ? 1 : 0));
@@ -86,11 +90,21 @@ int main (int argc, char *argv[])
     for (int i=0; i<8192-datalen; i++)
       fwrite (zero, 1, 1, fp_rtf);
 
+		// save sram model data file
+		for (int i=0; i<datalen; i++)
+		{
+			fprintf (fp_dat, "%ld ", n_trks*8192+i);
+			for (int j=(1<<7); j; j>>=1)
+				fprintf (fp_dat, "%c", ((*(buf+i))&j ? '1' : '0'));
+			fprintf (fp_dat, " $%08X $%02X\n", n_trks*8192+i, *(buf+i));
+		}
+
     n_trks++;
   }
 
+  fclose (fp_dat);
   fclose (fp_rtf);
   fclose (fp_dmk);
 
-  fprintf (stderr, "Done %d tracks!\n", n_trks);
+  fprintf (stderr, "Done (DAT,RTF) %d tracks!\n", n_trks);
 }
