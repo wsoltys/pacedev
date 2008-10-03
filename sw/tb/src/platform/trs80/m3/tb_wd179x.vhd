@@ -73,7 +73,7 @@ begin
   clk_20M <= not clk_20M after 25000 ps; -- 20MHz
 	reset <= '0' after 10 ns;
 
-	mem_d <= mem(conv_integer(mem_a));
+	--mem_d <= mem(conv_integer(mem_a));
 
   wd179x_inst : entity work.wd179x
     port map
@@ -138,6 +138,43 @@ begin
 	    mem_d_o       => open,
 	    mem_we        => open
 	  );
+
+	sram_inst : entity work.sram_512Kx8
+		generic map
+		(
+	 		-- aggressive timing validation based on spec
+		  tAA_max  		=> 55 ns,
+		  tOHA_min 		=>  2 ns,
+		  tACE_max 		=> 55 ns,
+		  tDOE_max 		=> 30 ns,
+		  tLZOE_min		=> 30 ns,
+		  tHZOE_max		=> 25 ns,
+		  tLZCE_min		=> 55 ns,
+		  tHZCE_max		=> 25 ns,
+		  tWC_min  		=> 55 ns,
+		  tSCE_min 		=> 50 ns,
+		  tAW_min  		=> 50 ns,
+		  tHA_min  		=>  0 ns,
+		  tSA_min  		=>  0 ns,
+		  tPWE_min 		=> 50 ns,
+		  tSD_min  		=> 30 ns,
+		  tHD_min  		=>  0 ns,
+		  tHZWE_max		=> 20 ns, -- no spec
+		  tLZWE_min		=> 10 ns, -- no spec
+			download_filename => "newdos80.dat"
+		)
+		port map
+		(
+		  A          => mem_a(18 downto 0),
+		  D          => mem_d,
+		  NOE        => '0',
+		  NCE1       => '0',
+		  CE2        => '1',
+		  NWE        => '1',
+		  NBHE       => '0',
+		  NBLE       => '0',
+		  NBYTE      => '1'
+		);
 
 	process
 	begin
