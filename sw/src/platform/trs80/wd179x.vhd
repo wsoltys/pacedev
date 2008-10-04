@@ -43,7 +43,9 @@ entity wd179x is
     tr00_n        : in std_logic;
     ip_n          : in std_logic;
     wprt_n        : in std_logic;
-    dden_n        : in std_logic
+    dden_n        : in std_logic;
+    
+    debug         : out std_logic_vector(15 downto 0)
   );
 end entity wd179x;
 
@@ -67,6 +69,7 @@ architecture SYN of wd179x is
   signal track_r      		: std_logic_vector(7 downto 0) := (others => '0');
   signal track_i_r      	: std_logic_vector(7 downto 0) := (others => '0');
   signal sector_r     		: std_logic_vector(7 downto 0) := (others => '0');
+  signal sector_i_r     	: std_logic_vector(7 downto 0) := (others => '0');
   signal data_i_r       	: std_logic_vector(7 downto 0) := (others => '0');
   signal data_o_r       	: std_logic_vector(7 downto 0) := (others => '0');
 
@@ -163,6 +166,7 @@ begin
             track_i_r <= dal_i;
             trk_wr_stb <= '1';
           when "10" =>
+            sector_i_r <= dal_i;
             sec_wr_stb <= '1';
           when others =>
 						data_i_r <= dal_i;
@@ -436,7 +440,7 @@ begin
   					when IDLE =>
   						if sec_wr_stb = '1' then
   							-- cpu writes directly to sector register
-  							sector_r <= dal_i;
+  							sector_r <= sector_i_r;
   						elsif type_ii_stb = '1' then
   							if STD_MATCH(cmd, CMD_READ_SECTOR) then
   								state <= WAIT_IDAM;
@@ -731,5 +735,7 @@ begin
   
   -- assign outputs
   hld <= hld_s;
+
+  debug <= track_r & sector_r;
   
 end architecture SYN;

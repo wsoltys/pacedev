@@ -264,7 +264,7 @@ begin
 	graphics_o <= NULL_TO_GRAPHICS;
 	ser_o <= NULL_TO_SERIAL;
   spi_o <= NULL_TO_SPI;
-  gp_o <= NULL_TO_GP;
+  gp_o(gp_o'left downto 16) <= (others => '0');
 
 	clk_en_inst : entity work.clk_div
 		generic map
@@ -390,6 +390,9 @@ begin
       signal raw_read_n   : std_logic := '0';
       signal tr00_n       : std_logic := '0';
       signal ip_n         : std_logic := '0';
+
+      signal floppy_dbg   : std_logic_vector(15 downto 0) := (others => '0');
+      signal wd179x_dbg   : std_logic_vector(15 downto 0) := (others => '0');
       
     begin
 
@@ -433,7 +436,9 @@ begin
           tr00_n        => tr00_n,
           ip_n          => ip_n,
           wprt_n        => '1',     -- never write-protected atm
-          dden_n        => '1'      -- single density only atm
+          dden_n        => '1',     -- single density only atm
+          
+          debug         => wd179x_dbg
         );
 
       flash_floppy_inst : entity work.floppy(FLASH)
@@ -453,10 +458,18 @@ begin
           mem_a         => flash_o.a(19 downto 0),
           mem_d_i       => flash_i.d,
           mem_d_o       => flash_o.d,
-          mem_we        => open
+          mem_we        => open,
+          
+          debug         => floppy_dbg
         );
       flash_o.a(flash_o.a'left downto 20) <= (others => '0');
-        
+
+      gp_o(15 downto 0) <= floppy_dbg when switches_i(0) = '0' else wd179x_dbg;
+
+      leds_o(9) <= not tr00_n;
+      leds_o(8) <= step;
+      leds_o(7) <= not ip_n;
+
     end block BLK_FDC;
     
   end generate GEN_FDC;

@@ -160,6 +160,7 @@ architecture SYN of target_top is
   signal audio_o      : to_AUDIO_t;
   signal ser_i        : from_SERIAL_t;
   signal ser_o        : to_SERIAL_t;
+  signal gp_o         : to_GP_t;
   
 	-- maple/dreamcast controller interface
 	signal maple_sense	: std_logic;
@@ -503,12 +504,6 @@ begin
     end generate GEN_NO_SERIAL;
   end block BLK_SERIAL;
   
-  -- turn off LEDs
-  hex0 <= (others => '1');
-  hex1 <= (others => '1');
-  hex2 <= (others => '1');
-  hex3 <= (others => '1');
-	
   -- disable SD card
   sd_clk <= '0';
   sd_dat <= 'Z';
@@ -518,11 +513,6 @@ begin
   -- disable JTAG
   tdo <= 'Z';
   
-  -- Display funkalicious pacman sprite y offset on 7seg display
-  -- Why?  Because we can
-  -- seg7_0: SEG7_LUT port map (iDIG => yoffs(7 downto 4), oSEG => hex7);
-  -- seg7_1: SEG7_LUT port map (iDIG => yoffs(3 downto 0), oSEG => hex6);
-
   -- *MUST* be high to use 27MHz clock as input
   -- td_reset <= '1';
 
@@ -587,7 +577,7 @@ begin
       
       -- general purpose
       gp_i              => (others => '0'),
-      gp_o              => open
+      gp_o              => gp_o
     );
 
 	av_init : I2C_AV_Config
@@ -656,6 +646,24 @@ begin
     end process;
     
   end block BLK_CHASER;
-	    
+
+  BLK_7_SEG : block
+  
+    component SEG7_LUT is
+      port 
+      (
+        iDIG : in std_logic_vector(3 downto 0); 
+        oSEG : out std_logic_vector(6 downto 0)
+      );
+    end component SEG7_LUT;
+
+  begin
+    -- from left to right on the PCB
+    seg7_3: SEG7_LUT port map (iDIG => gp_o(15 downto 12), oSEG => hex3);
+    seg7_2: SEG7_LUT port map (iDIG => gp_o(11 downto 8), oSEG => hex2);
+    seg7_1: SEG7_LUT port map (iDIG => gp_o(7 downto 4), oSEG => hex1);
+    seg7_0: SEG7_LUT port map (iDIG => gp_o(3 downto 0), oSEG => hex0);
+  end block BLK_7_SEG;
+  
 end SYN;
 

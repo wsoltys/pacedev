@@ -26,7 +26,9 @@ entity floppy is
     mem_a         : out std_logic_vector(19 downto 0);
     mem_d_i       : in std_logic_vector(7 downto 0);
     mem_d_o       : out std_logic_vector(7 downto 0);
-    mem_we        : out std_logic
+    mem_we        : out std_logic;
+    
+    debug         : out std_logic_vector(15 downto 0)
   );
 end entity floppy;
 
@@ -132,5 +134,9 @@ begin
     end process;
   
   end block BLK_READ;
+
+  -- output the track to debug
+  debug(15 downto 8) <= track_r;
+  debug(7 downto 0) <= (others => '0');
   
 end architecture FLASH;
