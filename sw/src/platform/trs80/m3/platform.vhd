@@ -397,7 +397,7 @@ begin
         port map
         (
           clk           => clk_20M,
-          clk_ena       => '1',
+          clk_20M_ena   => '1',
           reset         => reset_i,
           
           -- micro bus interface

@@ -24,6 +24,8 @@ architecture SYN of tb_wd179x is
   signal fdc_a				: std_logic_vector(1 downto 0) := (others => '0');
   signal fdc_dat_i		: std_logic_vector(7 downto 0) := (others => '0');
   signal fdc_dat_o		: std_logic_vector(7 downto 0) := (others => '0');
+  signal intrq        : std_logic := '0';
+  signal drq          : std_logic := '0';
 
   signal step         : std_logic := '0';
   signal dirc         : std_logic := '0';
@@ -91,8 +93,8 @@ begin
       dal_i         => fdc_dat_i,
       dal_o         => fdc_dat_o,
       clk_1mhz_en   => '1',
-      drq           => open,
-      intrq         => open,
+      drq           => drq,
+      intrq         => intrq,
       
       -- drive interface
       step          => step,
@@ -179,6 +181,8 @@ begin
 
 	process
 	begin
+    fdc_re_n <= '1';
+
 		wait for 4 ms;
 		fdc_a <= "00";
 		fdc_dat_i <= X"00";
@@ -189,10 +193,10 @@ begin
 		fdc_cs_n <= '1';
 		fdc_we_n <= '1';
 
-		-- select sector 5
+		-- select sector 16
 		wait for 30 ms;
 		fdc_a <= "10";			-- sector register
-		fdc_dat_i <= X"05";	-- sector 5
+		fdc_dat_i <= X"10";	-- sector 16
 		fdc_cs_n <= '0';
 		fdc_we_n <= '0';
 		wait until rising_edge(clk_20M);
@@ -212,7 +216,29 @@ begin
 		fdc_cs_n <= '1';
 		fdc_we_n <= '1';
 
-		wait for 1000 ms;
+    fdc_a <= "11";      -- data register
+    for i in 0 to 255 loop
+      wait until drq = '1';
+      -- read data register
+  		fdc_cs_n <= '0';
+  		fdc_re_n <= '0';
+  		wait until rising_edge(clk_20M);
+  		wait for 2 ns;
+  		fdc_cs_n <= '1';
+  		fdc_re_n <= '1';
+    end loop;
+
+    wait until intrq = '1';
+
+    fdc_a <= "00";      -- status register
+		fdc_cs_n <= '0';
+		fdc_re_n <= '0';
+		wait until rising_edge(clk_20M);
+		wait for 2 ns;
+		fdc_cs_n <= '1';
+		fdc_re_n <= '1';
+
+		wait for 1 ms;
 		fdc_dat_i <= X"50";	-- step in, update track
 		fdc_cs_n <= '0';
 		fdc_we_n <= '0';
@@ -220,6 +246,16 @@ begin
 		wait for 2 ns;
 		fdc_cs_n <= '1';
 		fdc_we_n <= '1';
+
+    wait until intrq = '1';
+
+    fdc_a <= "00";      -- status register
+		fdc_cs_n <= '0';
+		fdc_re_n <= '0';
+		wait until rising_edge(clk_20M);
+		wait for 2 ns;
+		fdc_cs_n <= '1';
+		fdc_re_n <= '1';
 
 		wait for 100 ms;		
 	end process;
