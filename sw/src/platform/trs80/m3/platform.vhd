@@ -463,6 +463,9 @@ begin
           debug         => floppy_dbg
         );
       flash_o.a(flash_o.a'left downto 20) <= (others => '0');
+      flash_o.cs <= '1';
+      flash_o.oe <= '1';
+      flash_o.we <= '0';
 
       gp_o(15 downto 0) <= floppy_dbg when switches_i(0) = '0' else wd179x_dbg;
 

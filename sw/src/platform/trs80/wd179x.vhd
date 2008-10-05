@@ -130,48 +130,56 @@ begin
   begin
     if reset = '1' then
       irq_clr <= '0';
+      drq_clr <= '0';
       re_n_r := '1';
       we_n_r := '1';
     elsif rising_edge(clk) and clk_20M_ena = '1' then
       -- default values
       irq_clr <= '0';
+      drq_clr <= '0';
       data_wr_stb <= '0';
       cmd_wr_stb <= '0';
       trk_wr_stb <= '0';
       sec_wr_stb <= '0';
       if mr_n = '0' then
         -- master reset
-      elsif re_n_r = '1' and re_n = '0' then
-        -- leading edge read
-        case a is
-          when "00" =>
-            dal_o <= status_r;
-            irq_clr <= '1';
-          when "01" =>
-            dal_o <= track_r;
-          when "10" =>
-            dal_o <= sector_r;
-          when others =>
-            dal_o <= data_o_r;
-            drq_clr <= '1';
-        end case;
-      elsif we_n_r = '1' and we_n = '0' then
-        -- leading edge write
-        case a is
-          when "00" =>
-            command_r <= dal_i;
-            irq_clr <= '1';
-            cmd_wr_stb <= '1';
-          when "01" =>
-            track_i_r <= dal_i;
-            trk_wr_stb <= '1';
-          when "10" =>
-            sector_i_r <= dal_i;
-            sec_wr_stb <= '1';
-          when others =>
-						data_i_r <= dal_i;
-            data_wr_stb <= '1';
-        end case;
+      else
+        if re_n_r = '1' and re_n = '0' then
+          -- leading edge read
+          case a is
+            when "00" =>
+              dal_o <= status_r;
+              irq_clr <= '1';
+            when "01" =>
+              dal_o <= track_r;
+            when "10" =>
+              dal_o <= sector_r;
+            when others =>
+              dal_o <= data_o_r;
+              drq_clr <= '1';
+          end case;
+        elsif we_n_r = '1' and we_n = '0' then
+          -- leading edge write
+          case a is
+            when "00" =>
+              command_r <= dal_i;
+              irq_clr <= '1';
+              cmd_wr_stb <= '1';
+            when "01" =>
+              track_i_r <= dal_i;
+              trk_wr_stb <= '1';
+            when "10" =>
+              sector_i_r <= dal_i;
+              sec_wr_stb <= '1';
+            when others =>
+  						data_i_r <= dal_i;
+              data_wr_stb <= '1';
+          end case;
+        end if;
+        -- need a delayed IRQ_CLR for FORCE_INTERRUPT command
+        if type_iv_stb = '1' then
+          irq_clr <= '1';
+        end if;
       end if;
       re_n_r := re_n;
       we_n_r := we_n;
@@ -306,7 +314,7 @@ begin
 
 	begin
 
-		process (clk, clk_20M_ena, reset)
+		PROC_TYPE_I: process (clk, clk_20M_ena, reset)
 			variable dirc_v		: std_logic := '0';
 			subtype count_t is integer range 0 to 30*20-1;
 			variable count		: count_t;
@@ -414,7 +422,7 @@ begin
 			end if;
 			-- drive DIRC output
 			dirc <= dirc_v;
-		end process;
+		end process PROC_TYPE_I;
 
 	end block BLK_TYPE_I;
 
@@ -698,7 +706,7 @@ begin
     -- type I commands
     s7_not_ready <= not (ready or mr_n);
     s6_protected <= not wprt_n;
-    s5_head_loaded <= hld_s and hlt;
+    s5_head_loaded <= '1'; --hld_s and hlt;
     s2_track_00 <= not tr00_n;
     s1_index <= not ip_n;
     
@@ -736,6 +744,7 @@ begin
   -- assign outputs
   hld <= hld_s;
 
-  debug <= track_r & sector_r;
+  --debug <= track_r & sector_r;
+  debug <= idam_track & idam_sector;
   
 end architecture SYN;

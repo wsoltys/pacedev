@@ -180,82 +180,99 @@ begin
 		);
 
 	process
-	begin
-    fdc_re_n <= '1';
 
-		wait for 4 ms;
-		fdc_a <= "00";
-		fdc_dat_i <= X"00";
-		fdc_cs_n <= '0';
-		fdc_we_n <= '0';
-		wait until rising_edge(clk_20M);
-		wait for 2 ns;
-		fdc_cs_n <= '1';
-		fdc_we_n <= '1';
-
-		-- select sector 16
-		wait for 30 ms;
-		fdc_a <= "10";			-- sector register
-		fdc_dat_i <= X"10";	-- sector 16
-		fdc_cs_n <= '0';
-		fdc_we_n <= '0';
-		wait until rising_edge(clk_20M);
-		wait for 2 ns;
-		fdc_cs_n <= '1';
-		fdc_we_n <= '1';
-
-		wait until rising_edge(clk_20M);
-		wait for 2 ns;
-
-		fdc_a <= "00";			-- command register
-		fdc_dat_i <= X"80";	-- read sector
-		fdc_cs_n <= '0';
-		fdc_we_n <= '0';
-		wait until rising_edge(clk_20M);
-		wait for 2 ns;
-		fdc_cs_n <= '1';
-		fdc_we_n <= '1';
-
-    fdc_a <= "11";      -- data register
-    for i in 0 to 255 loop
-      wait until drq = '1';
-      -- read data register
+    procedure rd is
+    begin
   		fdc_cs_n <= '0';
   		fdc_re_n <= '0';
   		wait until rising_edge(clk_20M);
   		wait for 2 ns;
   		fdc_cs_n <= '1';
   		fdc_re_n <= '1';
+    end;
+
+    procedure rd_sts is
+    begin
+      fdc_a <= "00";      -- status register
+      rd;
+    end;
+
+    procedure wr is
+    begin
+  		fdc_cs_n <= '0';
+  		fdc_we_n <= '0';
+  		wait until rising_edge(clk_20M);
+  		wait for 2 ns;
+  		fdc_cs_n <= '1';
+  		fdc_we_n <= '1';
+    end;
+
+    procedure wr_cmd is
+    begin
+		  fdc_a <= "00";      -- command register
+      wr;
+    end;
+
+	begin
+
+		fdc_dat_i <= X"00"; -- restore
+    wr_cmd;
+    wait until intrq = '1';
+    rd_sts;
+
+		fdc_dat_i <= X"20"; -- step
+    wr_cmd;
+    wait until intrq = '1';
+    rd_sts;
+
+		fdc_a <= "10";			-- sector register
+		fdc_dat_i <= X"00";	-- sector 00
+    wr;
+    wait for 2 us;
+		fdc_dat_i <= X"81"; -- read sector
+    wr_cmd;
+    wait until intrq = '1';
+    rd_sts;
+
+		--fdc_dat_i <= X"D8"; -- force interrupt (immediate)
+    --wr_cmd;
+
+    wait for 4 ms;
+		fdc_dat_i <= X"D0"; -- force interrupt (none)
+    wr_cmd;
+
+    wait for 4 ms;
+		fdc_dat_i <= X"00"; -- RESTORE
+    wr_cmd;
+
+    wait until intrq = '1';
+    rd_sts;
+
+		-- select sector 16
+		wait for 4 ms;
+		fdc_a <= "10";			-- sector register
+		fdc_dat_i <= X"10";	-- sector 16
+    wr;
+
+		fdc_dat_i <= X"80";	-- read sector
+    wr_cmd;
+
+    fdc_a <= "11";      -- data register
+    for i in 0 to 255 loop
+      wait until drq = '1';
+      rd;
     end loop;
 
     wait until intrq = '1';
 
-    fdc_a <= "00";      -- status register
-		fdc_cs_n <= '0';
-		fdc_re_n <= '0';
-		wait until rising_edge(clk_20M);
-		wait for 2 ns;
-		fdc_cs_n <= '1';
-		fdc_re_n <= '1';
+    rd_sts;
 
 		wait for 1 ms;
 		fdc_dat_i <= X"50";	-- step in, update track
-		fdc_cs_n <= '0';
-		fdc_we_n <= '0';
-		wait until rising_edge(clk_20M);
-		wait for 2 ns;
-		fdc_cs_n <= '1';
-		fdc_we_n <= '1';
+    wr_cmd;
 
     wait until intrq = '1';
-
-    fdc_a <= "00";      -- status register
-		fdc_cs_n <= '0';
-		fdc_re_n <= '0';
-		wait until rising_edge(clk_20M);
-		wait for 2 ns;
-		fdc_cs_n <= '1';
-		fdc_re_n <= '1';
+    rd_sts;
 
 		wait for 100 ms;		
 	end process;

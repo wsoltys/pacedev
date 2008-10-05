@@ -63,6 +63,7 @@ begin
     variable step_r : std_logic := '0';
   begin
     if reset = '1' then
+      step_r := '0';
       track_r <= (others => '0');
     elsif rising_edge(clk) and clk_20M_ena = '1' then
       -- leading edge of step
@@ -91,12 +92,12 @@ begin
   BLK_READ : block
   begin
   
-    -- we'll start with 8us per bit, 3125 bytes/track = 200ms per track
-    process (clk, clk_1M_ena, reset)
+    -- we'll start with 4us per bit, 6272 bytes/track = 200ms per track
+    PROC_RD: process (clk, clk_1M_ena, reset)
       variable count : std_logic_vector(17 downto 0) := (others => '0');
-      alias phase : std_logic_vector(2 downto 0) is count(2 downto 0);
-      alias bbit  : std_logic_vector(2 downto 0) is count(5 downto 3);
-      alias byte  : std_logic_vector(11 downto 0) is count (17 downto 6);
+      alias phase : std_logic_vector(1 downto 0) is count(1 downto 0);
+      alias bbit  : std_logic_vector(2 downto 0) is count(4 downto 2);
+      alias byte  : std_logic_vector(12 downto 0) is count (17 downto 5);
       variable read_data_r : std_logic_vector(7 downto 0) := (others => '0');
     begin
       if reset = '1' then
@@ -107,20 +108,20 @@ begin
       elsif rising_edge(clk) and clk_1M_ena = '1' then
         raw_read_n <= '1'; -- default
         -- memory address
-        if phase = "000" and bbit = "000" then
-          mem_a(12 downto 0) <= '0' & byte;
+        if phase = "00" and bbit = "000" then
+          mem_a(12 downto 0) <= byte;
         end if;
         -- rclk
-        if phase = "001" then
+        if phase = "01" then
           rclk <= '1';
-        elsif phase = "101" then
+        elsif phase = "11" then
           rclk <= '0';
         end if;
         -- data latch (1us memory assumed)
-        if phase = "001" and bbit = "000" then
+        if phase = "01" and bbit = "000" then
           read_data_r := mem_d_i;
         end if;
-        if phase = "010" then
+        if phase = "10" then
           raw_read_n <= not read_data_r(read_data_r'left);
           read_data_r := read_data_r(read_data_r'left-1 downto 0) & '0';
         end if;
@@ -129,9 +130,13 @@ begin
         if count < 16 then
           ip_n <= '0';
         end if;
-        count := count + 1;
+        if count = 6272*8*4-1 then
+          count := (others => '0');
+        else
+          count := count + 1;
+        end if;
       end if;
-    end process;
+    end process PROC_RD;
   
   end block BLK_READ;
 
