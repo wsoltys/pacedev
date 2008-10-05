@@ -384,6 +384,8 @@ begin
   
     BLK_FDC : block
     
+      signal sync_reset   : std_logic := '1';
+      
       signal step         : std_logic := '0';
       signal dirc         : std_logic := '0';
       signal rclk         : std_logic := '0';
@@ -391,17 +393,28 @@ begin
       signal tr00_n       : std_logic := '0';
       signal ip_n         : std_logic := '0';
 
-      signal floppy_dbg   : std_logic_vector(15 downto 0) := (others => '0');
-      signal wd179x_dbg   : std_logic_vector(15 downto 0) := (others => '0');
+      signal floppy_dbg   : std_logic_vector(31 downto 0) := (others => '0');
+      signal wd179x_dbg   : std_logic_vector(31 downto 0) := (others => '0');
       
     begin
 
+      process (clk_20M, reset_i)
+        variable reset_r : std_logic_vector(3 downto 0) := (others => '0');
+      begin
+        if reset_i = '1' then
+          reset_r := (others => '1');
+        elsif rising_edge(clk_20M) then
+          reset_r := reset_r(reset_r'left-1 downto 0) & reset_i;
+        end if;
+        sync_reset <= reset_r(reset_r'left);
+      end process;
+      
       wd179x_inst : entity work.wd179x
         port map
         (
           clk           => clk_20M,
           clk_20M_ena   => '1',
-          reset         => reset_i,
+          reset         => sync_reset,
           
           -- micro bus interface
           mr_n          => '1',
@@ -442,11 +455,16 @@ begin
         );
 
       flash_floppy_inst : entity work.floppy(FLASH)
+        generic map
+        (
+          NUM_TRACKS      => 40,
+          DOUBLE_DENSITY  => true
+        )
         port map
         (
           clk           => clk_20M,
           clk_20M_ena   => '1',
-          reset         => reset_i,
+          reset         => sync_reset,
           
           step          => step,
           dirc          => dirc,
@@ -467,7 +485,10 @@ begin
       flash_o.oe <= '1';
       flash_o.we <= '0';
 
-      gp_o(15 downto 0) <= floppy_dbg when switches_i(0) = '0' else wd179x_dbg;
+      gp_o(15 downto 0) <= floppy_dbg(31 downto 16) when switches_i(1 downto 0) = "11" else 
+                           floppy_dbg(15 downto 0) when switches_i(1 downto 0) = "10" else
+                           wd179x_dbg(31 downto 16) when switches_i(1 downto 0) = "01" else
+                           wd179x_dbg(15 downto 0);
 
       leds_o(9) <= not tr00_n;
       leds_o(8) <= step;

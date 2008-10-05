@@ -28,14 +28,15 @@ entity floppy is
     mem_d_o       : out std_logic_vector(7 downto 0);
     mem_we        : out std_logic;
     
-    debug         : out std_logic_vector(15 downto 0)
+    debug         : out std_logic_vector(31 downto 0)
   );
 end entity floppy;
 
 architecture FLASH of floppy is
 
   signal clk_1M_ena   : std_logic := '0';
-  
+
+  signal mem_a_s      : std_logic_vector(mem_a'range) := (others => '0');
   signal track_r      : std_logic_vector(7 downto 0) := (others => '0');
 
 begin
@@ -87,7 +88,7 @@ begin
   -- track 0 indicator
   tr00_n <= '0' when track_r = 0 else '1';
 	-- each track is encoded in 8KiB
-  mem_a(19 downto 13) <= track_r(6 downto 0);
+  mem_a_s(19 downto 13) <= track_r(6 downto 0);
   
   BLK_READ : block
   begin
@@ -109,7 +110,7 @@ begin
         raw_read_n <= '1'; -- default
         -- memory address
         if phase = "00" and bbit = "000" then
-          mem_a(12 downto 0) <= byte;
+          mem_a_s(12 downto 0) <= byte;
         end if;
         -- rclk
         if phase = "01" then
@@ -141,7 +142,11 @@ begin
   end block BLK_READ;
 
   -- output the track to debug
+  debug(31 downto 16) <= mem_a_s(15 downto 0);
   debug(15 downto 8) <= track_r;
-  debug(7 downto 0) <= (others => '0');
+  debug(7 downto 0) <= mem_d_i;
+  
+  mem_a <= mem_a_s;
+  mem_d_o <= (others => 'Z');
   
 end architecture FLASH;

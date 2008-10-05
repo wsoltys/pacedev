@@ -45,7 +45,7 @@ entity wd179x is
     wprt_n        : in std_logic;
     dden_n        : in std_logic;
     
-    debug         : out std_logic_vector(15 downto 0)
+    debug         : out std_logic_vector(31 downto 0)
   );
 end entity wd179x;
 
@@ -744,7 +744,6 @@ begin
   -- assign outputs
   hld <= hld_s;
 
-  --debug <= track_r & sector_r;
-  debug <= idam_track & idam_sector;
+  debug <= track_r & sector_r & idam_track & idam_sector;
   
 end architecture SYN;

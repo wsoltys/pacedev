@@ -231,6 +231,12 @@ begin
     wait for 2 us;
 		fdc_dat_i <= X"81"; -- read sector
     wr_cmd;
+
+    fdc_a <= "11";      -- data register
+    for i in 0 to 255 loop
+      wait until drq = '1';
+      rd;
+    end loop;
     wait until intrq = '1';
     rd_sts;
 
