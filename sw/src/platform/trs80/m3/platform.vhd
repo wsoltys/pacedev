@@ -204,8 +204,8 @@ begin
 	nmi_cs <= '1' when io_addr = X"E4" else '0';
   -- reset RTC any read $EC-EF
   rtc_cs <= '1' when io_addr(7 downto 2) = "111011" else '0';
-	-- FDC $F0-$F7
-	fdc_cs_n <= '0' when io_addr(7 downto 3) = "11110" else '1';
+	-- FDC $F0-$F3
+	fdc_cs_n <= '0' when io_addr(7 downto 2) = "111100" else '1';
   -- SOUND $FC-FF (Model I is $FF only)
 	snd_cs <= '1' when io_addr(7 downto 2) = "111111" else '0';
 	
@@ -219,7 +219,7 @@ begin
   intena_wr <= int_cs and uPiowr;
   -- NMIMASKREQ $E4
   nmiena_wr <= nmi_cs and uPiowr;
-  -- FDC $F0-$F7
+  -- FDC $F0-$F3
   fdc_we_n <= not uPiowr;
 	-- SOUND OUTPUT $FC-FF (Model I is $FF only)
 	snd_o.a <= uP_addr(snd_o.a'range);
@@ -425,8 +425,8 @@ begin
           dal_i         => uP_datao,
           dal_o         => fdc_dat_o,
           clk_1mhz_en   => '1',
-          drq           => fdc_drq,
-          intrq         => fdc_irq,
+          drq           => open,
+          intrq         => fdc_drq,
           
           -- drive interface
           step          => step,
@@ -453,7 +453,8 @@ begin
           
           debug         => wd179x_dbg
         );
-
+        fdc_irq <= '0'; -- DTO
+        
       flash_floppy_inst : entity work.floppy(FLASH)
         generic map
         (

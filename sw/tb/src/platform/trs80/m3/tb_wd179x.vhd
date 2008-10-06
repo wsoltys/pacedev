@@ -215,18 +215,18 @@ begin
 
 	begin
 
-		fdc_dat_i <= X"00"; -- restore
+    wait for 4 ms;
+		fdc_dat_i <= X"D0"; -- force interrupt (none)
     wr_cmd;
-    wait until intrq = '1';
-    rd_sts;
+    wait for 1 ms;
 
-		fdc_dat_i <= X"20"; -- step
+		fdc_dat_i <= X"0B"; -- restore
     wr_cmd;
     wait until intrq = '1';
     rd_sts;
 
 		fdc_a <= "10";			-- sector register
-		fdc_dat_i <= X"00";	-- sector 00
+		fdc_dat_i <= X"01";	-- sector 01
     wr;
     wait for 2 us;
 		fdc_dat_i <= X"81"; -- read sector
@@ -237,6 +237,11 @@ begin
       wait until drq = '1';
       rd;
     end loop;
+    wait until intrq = '1';
+    rd_sts;
+
+		fdc_dat_i <= X"20"; -- step
+    wr_cmd;
     wait until intrq = '1';
     rd_sts;
 

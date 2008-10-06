@@ -128,7 +128,7 @@ begin
         end if;
         -- generate index pulse (min 10us)
         ip_n <= '1'; -- default
-        if count < 16 then
+        if count < 1000 then
           ip_n <= '0';
         end if;
         if count = 6272*8*4-1 then

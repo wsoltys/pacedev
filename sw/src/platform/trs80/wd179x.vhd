@@ -144,8 +144,8 @@ begin
       if mr_n = '0' then
         -- master reset
       else
-        if re_n_r = '1' and re_n = '0' then
-          -- leading edge read
+        if cs_n = '0' and re_n_r = '1' and re_n = '0' then
+          -- reading (leading edge)
           case a is
             when "00" =>
               dal_o <= status_r;
@@ -158,7 +158,7 @@ begin
               dal_o <= data_o_r;
               drq_clr <= '1';
           end case;
-        elsif we_n_r = '1' and we_n = '0' then
+        elsif cs_n = '0' and we_n_r = '1' and we_n = '0' then
           -- leading edge write
           case a is
             when "00" =>
@@ -181,7 +181,6 @@ begin
           irq_clr <= '1';
         end if;
       end if;
-      re_n_r := re_n;
       we_n_r := we_n;
     end if;
   end process;
@@ -320,6 +319,7 @@ begin
 			variable count		: count_t;
 		begin
 			if reset = '1' then
+				track_r <= (others => '0');
 				state <= IDLE;
 				dirc_v := DIRC_OUT;
 			elsif rising_edge(clk) and clk_20M_ena = '1' then
@@ -438,9 +438,12 @@ begin
 			variable count		: count_t;
 		begin
 			if reset = '1' then
+        drq_set <= '0';
+				sector_r <= (others => '0');
 				state <= IDLE;
 			elsif rising_edge(clk) and clk_20M_ena = '1' then
-				type_ii_ack <= '0';
+        drq_set <= '0';       -- default
+				type_ii_ack <= '0';   -- default
         if type_iv_stb = '1' then
           state <= IDLE;
         else
@@ -467,6 +470,7 @@ begin
   						end if;
   					when READ_SECTOR =>
   						if sector_data_rdy = '1' then
+                drq_set <= '1';
   							if count = 255 then
   								state <= DONE;
   							else
@@ -474,8 +478,11 @@ begin
   							end if;
   						end if;
   					when DONE =>
-  						type_ii_ack <= '1';
-  						state <= IDLE;
+              -- don't believe this is right, but...
+              if drq_clr = '1' then
+                type_ii_ack <= '1';
+                state <= IDLE;
+              end if;
   					when others =>
   						state <= IDLE;
   				end case;
@@ -545,10 +552,8 @@ begin
 			variable count : integer range 0 to 511 := 0;
 		begin
 			if reset = '1' then
-        drq_set <= '0';
 				state <= UNKNOWN;
 			elsif rising_edge(clk) and clk_20M_ena = '1' then
-        drq_set <= '0';
 				id_addr_mark_rdy <= '0'; 		-- default
 				data_addr_mark_rdy <= '0';	-- default
 				sector_data_rdy <= '0'; 		-- default
@@ -653,7 +658,6 @@ begin
 							count := count + 1;
 							if idam_sector = sector_r then
                 data_o_r <= raw_data_r;
-                drq_set <= '1';
 								sector_data_rdy <= '1';
 							end if;
 							if count = 256 then
@@ -707,6 +711,7 @@ begin
     s7_not_ready <= not (ready or mr_n);
     s6_protected <= not wprt_n;
     s5_head_loaded <= '1'; --hld_s and hlt;
+    s3_crc_error <= '0';
     s2_track_00 <= not tr00_n;
     s1_index <= not ip_n;
     
