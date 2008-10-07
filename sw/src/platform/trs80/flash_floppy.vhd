@@ -15,6 +15,8 @@ entity floppy is
     clk_20M_ena   : in std_logic;
     reset         : in std_logic;
     
+    drvsel        : in std_logic_vector(4 downto 1);
+    
     step          : in std_logic;
     dirc          : in std_logic;
     rclk          : out std_logic;
@@ -87,8 +89,15 @@ begin
 
   -- track 0 indicator
   tr00_n <= '0' when track_r = 0 else '1';
+
 	-- each track is encoded in 8KiB
-  mem_a_s(19 downto 13) <= track_r(6 downto 0);
+	-- - 40 tracks is 320(512) KiB
+  mem_a_s(18 downto 13) <= track_r(5 downto 0);
+
+  -- support 2 drives in flash for now
+  mem_a_s(19) <= '0' when drvsel(1) = '1' else
+                 '1' when drvsel(2) = '1' else
+                 '0';
   
   BLK_READ : block
   begin

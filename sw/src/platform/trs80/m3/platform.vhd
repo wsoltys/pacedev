@@ -507,6 +507,9 @@ begin
           clk_20M_ena   => '1',
           reset         => sync_reset,
           
+          -- drive select lines
+          drvsel        => ds,
+          
           step          => step,
           dirc          => dirc,
           rclk          => rclk,
@@ -534,7 +537,12 @@ begin
       leds_o(9) <= not tr00_n;
       leds_o(8) <= step;
       leds_o(7) <= not ip_n;
-
+      
+      leds_o(3) <= ds(4);
+      leds_o(2) <= ds(3);
+      leds_o(1) <= ds(2);
+      leds_o(0) <= ds(1);
+      
     end block BLK_FDC;
     
   end generate GEN_FDC;

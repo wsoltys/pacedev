@@ -95,7 +95,7 @@ architecture SYN of wd179x is
 	signal id_addr_mark_rdy			: std_logic := '0';
 	signal data_addr_mark_rdy		: std_logic := '0';
 	signal raw_data_rdy					: std_logic := '0';
-	signal sector_data_rdy			: std_logic := '0';
+	signal user_data_rdy			  : std_logic := '0';
                         	
   alias cmd           		: std_logic_vector(7 downto 4) is command_r(7 downto 4);
   alias TRK_UPD_F     		: std_logic is command_r(4);
@@ -234,6 +234,20 @@ begin
 
   BLK_DRQ : block
   begin
+  
+    PROC_DRQ_SET : process (clk, clk_20M_ena, reset)
+    begin
+      if reset = '1' then
+        drq_set <= '0';
+      elsif rising_edge(clk) and clk_20M_ena = '1' then
+        drq_set <= '0';   -- default
+        if user_data_rdy = '1' and idam_sector = sector_r or
+            addr_data_rdy = '1' then
+          drq_set <= '1';
+        end if;
+      end if;
+    end process PROC_DRQ_SET;
+    
     -- DRQ output is open-drain
     PROC_DRQ : process (clk, clk_20M_ena, reset)
     begin
@@ -286,10 +300,14 @@ begin
 									-- TYPE II - READ/WRITE SECTOR
 									type_ii_stb <= '1';
 									state <= WAIT_FOR_CMD;
+								elsif command_r(7 downto 6) = "11" then
+                  -- type III - READ ADDRESS, READ/WRITE TRACK
+                  type_iii_stb <= '1';
+                  state <= WAIT_FOR_CMD;
 								end if;
 							end if;
 						when WAIT_FOR_CMD =>
-							if (type_i_ack or type_ii_ack) = '1' then
+							if (type_i_ack or type_ii_ack or type_iii_ack) = '1' then
 								state <= IDLE;
 							end if;
 						when others =>
@@ -438,7 +456,6 @@ begin
 			variable count		: count_t;
 		begin
 			if reset = '1' then
-        drq_set <= '0';
 				sector_r <= (others => '0');
 				state <= IDLE;
 			elsif rising_edge(clk) and clk_20M_ena = '1' then
@@ -469,20 +486,19 @@ begin
   							state <= READ_SECTOR;
   						end if;
   					when READ_SECTOR =>
-  						if sector_data_rdy = '1' then
-                drq_set <= '1';
-  							if count = 255 then
-  								state <= DONE;
-  							else
-  								count := count + 1;
-  							end if;
+              if user_data_rdy = '1' then
+                if idam_sector = sector_r then
+                -- this is the sector we're interested in
+                  if count = 255 then
+                    state <= DONE;
+                  else
+                    count := count + 1;
+                  end if;
+                end if;
   						end if;
   					when DONE =>
-              -- don't believe this is right, but...
-              if drq_clr = '1' then
-                type_ii_ack <= '1';
-                state <= IDLE;
-              end if;
+              type_ii_ack <= '1';
+              state <= IDLE;
   					when others =>
   						state <= IDLE;
   				end case;
@@ -491,6 +507,35 @@ begin
 		end process;
 
 	end block BLK_TYPE_II;
+
+	BLK_TYPE_III : block
+
+		type STATE_t is ( IDLE, READ_ADDR, DONE );
+		signal state : STATE_t;
+
+	begin
+
+		PROC_TYPE_III: process (clk, clk_20M_ena, reset)
+		begin
+			if reset = '1' then
+				state <= IDLE;
+			elsif rising_edge(clk) and clk_20M_ena = '1' then
+        if type_iv_stb = '1' then
+          state <= IDLE;
+        else
+          case state is
+            when IDLE =>
+            when READ_ADDR =>
+            when DONE =>
+              type_iii_ack <= '1';
+              state <= IDLE;
+            when others =>
+              state <= IDLE;
+          end case;
+        end if;
+    end process PROC_TYPE_III;
+    
+  end block BLK_TYPE_III;
 
 	BLK_READ : block
 
@@ -556,7 +601,8 @@ begin
 			elsif rising_edge(clk) and clk_20M_ena = '1' then
 				id_addr_mark_rdy <= '0'; 		-- default
 				data_addr_mark_rdy <= '0';	-- default
-				sector_data_rdy <= '0'; 		-- default
+				addr_data_rdy <= '0';       -- default
+				user_data_rdy <= '0'; 		  -- default
 				if raw_data_rdy = '1' then
 					case state is
 						when UNKNOWN =>
@@ -601,19 +647,29 @@ begin
 							end if;
 						when TRACK =>
 							idam_track <= raw_data_r;
+							data_o_r <= raw_data_r;
+							addr_data_rdy <= '1';
 							state <= SIDE;
 						when SIDE =>
 							idam_side <= raw_data_r;
+							data_o_r <= raw_data_r;
+							addr_data_rdy <= '1';
 							state <= SECTOR;
 						when SECTOR =>
 							idam_sector <= raw_data_r;
+							data_o_r <= raw_data_r;
+							addr_data_rdy <= '1';
 							state <= SEC_LEN;
 						when SEC_LEN =>
 							idam_seclen <= raw_data_r;
+							data_o_r <= raw_data_r;
+							addr_data_rdy <= '1';
 							count := 0;
 							state <= CRC_1;
 						when CRC_1 =>
 							crc <= crc(7 downto 0) & raw_data_r;
+							data_o_r <= raw_data_r;
+							addr_data_rdy <= '1';
 							count := count + 1;
 							if count = 2 then
 								-- really need to check CRC here first
@@ -656,10 +712,8 @@ begin
 						when USER_DATA =>
 							-- reading user sector data
 							count := count + 1;
-							if idam_sector = sector_r then
-                data_o_r <= raw_data_r;
-								sector_data_rdy <= '1';
-							end if;
+              data_o_r <= raw_data_r;
+              user_data_rdy <= '1';
 							if count = 256 then
 								count := 0;
 								state <= CRC_2;
