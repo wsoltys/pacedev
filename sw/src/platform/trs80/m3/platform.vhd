@@ -102,7 +102,7 @@ architecture SYN of platform is
 	alias clk_video       : std_logic is clk_i(1);
 	
   -- uP signals  
-  signal clk_2M_en			: std_logic;
+  signal clk_2M_ena			: std_logic;
   signal uP_addr        : std_logic_vector(15 downto 0);
   signal uP_datai       : std_logic_vector(7 downto 0);
   signal uP_datao       : std_logic_vector(7 downto 0);
@@ -134,6 +134,7 @@ architecture SYN of platform is
   alias ram_datao      	: std_logic_vector(7 downto 0) is sram_i.d(7 downto 0);
 
   -- interrupt signals
+  signal z80_wait_n     : std_logic := '1';
 	signal int_cs					: std_logic;
   signal intena_wr      : std_logic;
   signal int_status     : std_logic_vector(7 downto 0);
@@ -154,7 +155,15 @@ architecture SYN of platform is
   signal fdc_dat_o      : std_logic_vector(7 downto 0);
   signal fdc_drq        : std_logic;
   signal fdc_irq        : std_logic;
-                        
+
+  signal drvsel_cs      : std_logic := '0';
+  signal drvsel_r       : std_logic_vector(7 downto 0) := (others => '0');
+  alias mfm_fm_n        : std_logic is drvsel_r(7);
+  alias wsgen           : std_logic is drvsel_r(6);
+  alias precomp         : std_logic is drvsel_r(5);
+  alias sdsel           : std_logic is drvsel_r(4);
+  alias ds              : std_logic_vector(4 downto 1) is drvsel_r(3 downto 0);
+  
   -- other signals      
 	alias game_reset			: std_logic is inputs_i(NUM_INPUT_BYTES-1).d(0);
 	signal cpu_reset			: std_logic;  
@@ -206,6 +215,8 @@ begin
   rtc_cs <= '1' when io_addr(7 downto 2) = "111011" else '0';
 	-- FDC $F0-$F3
 	fdc_cs_n <= '0' when io_addr(7 downto 2) = "111100" else '1';
+	-- DRVSEL $F4
+  drvsel_cs <= '1' when io_addr(7 downto 0) = X"F4" else '0';
   -- SOUND $FC-FF (Model I is $FF only)
 	snd_cs <= '1' when io_addr(7 downto 2) = "111111" else '0';
 	
@@ -256,6 +267,31 @@ begin
 
   end process KBD_MUX;
 
+  PROC_DRVSEL : process (clk_20M, clk_2M_ena, reset_i)
+    subtype count_t is integer range 0 to 1999;
+    variable count : count_t := count_t'high;
+  begin
+    if reset_i = '1' then
+      drvsel_r <= (others => '0');
+      count := count_t'high;
+      z80_wait_n <= '1';
+    elsif rising_edge(clk_20M) then
+      if clk_2M_ena = '1' then
+        if drvsel_cs = '1' and upiowr = '1' then
+          drvsel_r <= up_datao;
+          z80_wait_n <= not up_datao(6);
+          count := 0;
+        elsif count /= count_t'high then
+          count := count + 1;
+        end if;
+      end if;
+      -- 'async' reset on reset, irq, drq or 2ms timeout
+      if (cpu_reset or fdc_irq or fdc_drq) = '1' or (count = count_t'high) then
+        z80_wait_n <= '1';
+      end if;
+    end if;
+  end process PROC_DRVSEL;
+  
   -- unused outputs
 	bitmap_o <= NULL_TO_BITMAP_CTL;
 	sprite_reg_o <= NULL_TO_SPRITE_REG;
@@ -275,31 +311,36 @@ begin
 		(
 			clk				=> clk_20M,
 			reset			=> reset_i,
-			clk_en		=> clk_2M_en
+			clk_en		=> clk_2M_ena
 		);
 
-  up_inst : entity work.Z80                                                
-    port map
-    (
-      clk			=> clk_20M,                                   
-      clk_en	=> clk_2M_en,
-      reset  	=> cpu_reset,                                     
+  BLK_Z80 : block
+  begin
+  
+    up_inst : entity work.Z80                                                
+      port map
+      (
+        clk			=> clk_20M,                                   
+        clk_en	=> clk_2M_ena,
+        reset  	=> cpu_reset,                                     
 
-      addr   	=> uP_addr,
-      datai  	=> uP_datai,
-      datao  	=> uP_datao,
+        addr   	=> uP_addr,
+        datai  	=> uP_datai,
+        datao  	=> uP_datao,
 
-      mem_rd 	=> uPmemrd,
-      mem_wr 	=> uPmemwr,
-      io_rd  	=> uPiord,
-      io_wr  	=> uPiowr,
+        mem_rd 	=> uPmemrd,
+        mem_wr 	=> uPmemwr,
+        io_rd  	=> uPiord,
+        io_wr  	=> uPiowr,
 
-      intreq 	=> uPintreq,
-      intvec 	=> uPintvec,
-      intack 	=> uPintack,
-      nmi    	=> uPnmireq
-    );
-
+        wait_n  => z80_wait_n,
+        intreq 	=> uPintreq,
+        intvec 	=> uPintvec,
+        intack 	=> uPintack,
+        nmi    	=> uPnmireq
+      );
+  end block BLK_Z80;
+  
 	rom_inst : entity work.sprom
 		generic map
 		(
@@ -366,8 +407,8 @@ begin
                   
       -- IRQ inputs
       reset_btn_int => '0',
-      fdc_drq_int   => fdc_drq,                    
-      fdc_dto_int   => fdc_irq,
+      fdc_drq_int   => fdc_irq,                    
+      fdc_dto_int   => '0',
 
       -- IRQ/status outputs
       int_status    => int_status,
@@ -425,8 +466,8 @@ begin
           dal_i         => uP_datao,
           dal_o         => fdc_dat_o,
           clk_1mhz_en   => '1',
-          drq           => open,
-          intrq         => fdc_drq,
+          drq           => fdc_drq,
+          intrq         => fdc_irq,
           
           -- drive interface
           step          => step,
@@ -453,7 +494,6 @@ begin
           
           debug         => wd179x_dbg
         );
-        fdc_irq <= '0'; -- DTO
         
       flash_floppy_inst : entity work.floppy(FLASH)
         generic map
