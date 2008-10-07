@@ -80,7 +80,6 @@ architecture SYN of wd179x is
 
   -- data request
   signal drq_s            : std_logic := '0';
-  signal drq_set          : std_logic := '0';
   signal drq_clr          : std_logic := '0';
 
 	-- values read from the IDAM
@@ -95,6 +94,7 @@ architecture SYN of wd179x is
 	signal id_addr_mark_rdy			: std_logic := '0';
 	signal data_addr_mark_rdy		: std_logic := '0';
 	signal raw_data_rdy					: std_logic := '0';
+	signal addr_data_rdy        : std_logic := '0';
 	signal user_data_rdy			  : std_logic := '0';
                         	
   alias cmd           		: std_logic_vector(7 downto 4) is command_r(7 downto 4);
@@ -113,8 +113,10 @@ architecture SYN of wd179x is
 	signal type_i_stb				: std_logic := '0';
 	signal type_i_ack				: std_logic := '0';
 	signal type_ii_stb			: std_logic := '0';
+	signal type_ii_drq      : std_logic := '0';
 	signal type_ii_ack			: std_logic := '0';
 	signal type_iii_stb			: std_logic := '0';
+	signal type_iii_drq     : std_logic := '0';
 	signal type_iii_ack			: std_logic := '0';
 	signal type_iv_stb			: std_logic := '0';
                       		
@@ -144,19 +146,26 @@ begin
       if mr_n = '0' then
         -- master reset
       else
+        -- drive read data
+        case a is
+          when "00" =>
+            dal_o <= status_r;
+          when "01" =>
+            dal_o <= track_r;
+          when "10" =>
+            dal_o <= sector_r;
+          when others =>
+            dal_o <= data_o_r;
+        end case;
         if cs_n = '0' and re_n_r = '1' and re_n = '0' then
           -- reading (leading edge)
           case a is
             when "00" =>
-              dal_o <= status_r;
               irq_clr <= '1';
-            when "01" =>
-              dal_o <= track_r;
-            when "10" =>
-              dal_o <= sector_r;
-            when others =>
-              dal_o <= data_o_r;
+            when "11" =>
               drq_clr <= '1';
+            when others =>
+              null;
           end case;
         elsif cs_n = '0' and we_n_r = '1' and we_n = '0' then
           -- leading edge write
@@ -221,7 +230,7 @@ begin
           -- not ready to ready transition
           (ready_r = '0' and ready = '1' and irq_mask(0) = '1') or
           -- end of command
-          (type_i_ack = '1' or type_ii_ack = '1') then
+          ((type_i_ack or type_ii_ack or type_iii_ack) = '1') then
           irq_set <= '1';
         end if;
         -- pipeline
@@ -233,28 +242,16 @@ begin
   end block BLK_IRQ;
 
   BLK_DRQ : block
+
   begin
   
-    PROC_DRQ_SET : process (clk, clk_20M_ena, reset)
-    begin
-      if reset = '1' then
-        drq_set <= '0';
-      elsif rising_edge(clk) and clk_20M_ena = '1' then
-        drq_set <= '0';   -- default
-        if user_data_rdy = '1' and idam_sector = sector_r or
-            addr_data_rdy = '1' then
-          drq_set <= '1';
-        end if;
-      end if;
-    end process PROC_DRQ_SET;
-    
     -- DRQ output is open-drain
     PROC_DRQ : process (clk, clk_20M_ena, reset)
     begin
       if reset = '1' then
         drq_s <= '0';
       elsif rising_edge(clk) and clk_20M_ena = '1' then
-        if drq_set = '1' then
+        if (type_ii_drq or type_iii_drq) = '1' then
           drq_s <= '1';
         elsif drq_clr = '1' then
           drq_s <= '0';
@@ -311,6 +308,7 @@ begin
 								state <= IDLE;
 							end if;
 						when others =>
+              state <= IDLE;
 					end case;
 				end if;
 			end if;
@@ -452,14 +450,16 @@ begin
 	begin
 
 		process (clk, clk_20M_ena, reset)
-			subtype count_t is integer range 0 to 256;
+			subtype count_t is integer range 0 to 255;
 			variable count		: count_t;
 		begin
 			if reset = '1' then
 				sector_r <= (others => '0');
+				type_ii_drq <= '0';
+				type_ii_ack <= '0';
 				state <= IDLE;
 			elsif rising_edge(clk) and clk_20M_ena = '1' then
-        drq_set <= '0';       -- default
+        type_ii_drq <= '0';   -- default
 				type_ii_ack <= '0';   -- default
         if type_iv_stb = '1' then
           state <= IDLE;
@@ -488,7 +488,8 @@ begin
   					when READ_SECTOR =>
               if user_data_rdy = '1' then
                 if idam_sector = sector_r then
-                -- this is the sector we're interested in
+                  -- this is the sector we're interested in
+                  type_ii_drq <= '1';
                   if count = 255 then
                     state <= DONE;
                   else
@@ -510,7 +511,7 @@ begin
 
 	BLK_TYPE_III : block
 
-		type STATE_t is ( IDLE, READ_ADDR, DONE );
+		type STATE_t is ( IDLE, READ_ADDR_WAIT, READ_ADDR, DONE );
 		signal state : STATE_t;
 
 	begin
@@ -518,14 +519,33 @@ begin
 		PROC_TYPE_III: process (clk, clk_20M_ena, reset)
 		begin
 			if reset = '1' then
+				type_iii_drq <= '0';
+				type_iii_ack <= '0';
 				state <= IDLE;
 			elsif rising_edge(clk) and clk_20M_ena = '1' then
+        type_iii_drq <= '0';  -- default
+        type_iii_ack <= '0';  -- default
         if type_iv_stb = '1' then
           state <= IDLE;
         else
           case state is
             when IDLE =>
+              if type_iii_stb = '1' then
+                if STD_MATCH(cmd, CMD_READ_ADDRESS) then
+                  state <= READ_ADDR_WAIT;
+                end if;
+              end if;
+            when READ_ADDR_WAIT =>
+              if id_addr_mark_rdy = '1' then
+                state <= READ_ADDR;
+              end if;
             when READ_ADDR =>
+              if addr_data_rdy = '1' then
+                type_iii_drq <= '1';
+              end if;
+              if id_addr_mark_rdy = '1' then
+                state <= DONE;
+              end if;
             when DONE =>
               type_iii_ack <= '1';
               state <= IDLE;
@@ -533,6 +553,7 @@ begin
               state <= IDLE;
           end case;
         end if;
+      end if;
     end process PROC_TYPE_III;
     
   end block BLK_TYPE_III;

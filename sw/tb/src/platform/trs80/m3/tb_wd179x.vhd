@@ -27,6 +27,7 @@ architecture SYN of tb_wd179x is
   signal intrq        : std_logic := '0';
   signal drq          : std_logic := '0';
 
+  signal ds           : std_logic_vector(4 downto 1) := (others => '0');
   signal step         : std_logic := '0';
   signal dirc         : std_logic := '0';
   signal rclk         : std_logic := '0';
@@ -126,6 +127,8 @@ begin
 	    clk           => clk_20M,
 	    clk_20M_ena   => '1',
 	    reset         => reset,
+
+      drvsel        => ds,
 	    
 	    step          => step,
 	    dirc          => dirc,
@@ -215,6 +218,8 @@ begin
 
 	begin
 
+    ds <= "0001";
+
     wait for 4 ms;
 		fdc_dat_i <= X"D0"; -- force interrupt (none)
     wr_cmd;
@@ -222,6 +227,17 @@ begin
 
 		fdc_dat_i <= X"0B"; -- restore
     wr_cmd;
+    wait until intrq = '1';
+    rd_sts;
+
+    wait for 1 ms;
+		fdc_dat_i <= X"C0"; -- read address
+    wr_cmd;
+    fdc_a <= "11";      -- data register
+    for i in 0 to 5 loop
+      wait until drq = '1';
+      rd;
+    end loop;
     wait until intrq = '1';
     rd_sts;
 
