@@ -164,6 +164,8 @@ architecture SYN of platform is
   alias sdsel           : std_logic is drvsel_r(4);
   alias ds              : std_logic_vector(4 downto 1) is drvsel_r(3 downto 0);
   
+	signal port_ec        : std_logic_vector(7 downto 0);
+
   -- other signals      
 	alias platform_reset	: std_logic is inputs_i(NUM_INPUT_BYTES-1).d(0);
 	signal cpu_reset			: std_logic;  
@@ -292,12 +294,26 @@ begin
     end if;
   end process PROC_DRVSEL;
   
+  -- PORT $EC (various)
+  process (clk_20M, clk_2M_ena, reset_i)
+  begin
+    if reset_i = '1' then
+      port_ec <= (others => '0');
+    elsif rising_edge(clk_20M) and clk_2M_ena = '1' then
+      if io_addr(7 downto 0) = X"EC" then
+        if upiowr = '1' then
+          port_ec <= up_datao;
+        end if;
+      end if;
+    end if;
+  end process;
+  
   -- unused outputs
 	bitmap_o <= NULL_TO_BITMAP_CTL;
 	sprite_reg_o <= NULL_TO_SPRITE_REG;
 	sprite_o <= NULL_TO_SPRITE_CTL;
   tilemap_o.attr_d <= EXT(switches_i(7 downto 0), tilemap_o.attr_d'length);
-	graphics_o <= NULL_TO_GRAPHICS;
+	graphics_o <= ((others => (others => '0')), port_ec);
 	ser_o <= NULL_TO_SERIAL;
   spi_o <= NULL_TO_SPI;
   gp_o(gp_o'left downto 16) <= (others => '0');

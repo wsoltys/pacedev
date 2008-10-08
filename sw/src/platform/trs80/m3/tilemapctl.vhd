@@ -52,6 +52,9 @@ architecture SYN of tilemapCtl_1 is
   alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
   alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
   
+  alias alt_char  : std_logic is graphics_i.bit8_1(3);
+  alias dbl_width : std_logic is graphics_i.bit8_1(2);
+  
 begin
 
 	-- these are constant for a whole line
@@ -67,7 +70,8 @@ begin
 		alias hblank_prev		: std_logic is hblank_r(hblank_r'left);
 		alias hblank_v			: std_logic is hblank_r(hblank_r'left-1);
 		variable vcount			: std_logic_vector(8 downto 0);
-		variable x_r		    : std_logic_vector((DELAY-1)*3-1 downto 0);
+		variable x_r		    : std_logic_vector((DELAY-1)*4-1 downto 0);
+		variable xc         : std_logic_vector(2 downto 0);
 		variable pel 				: std_logic;
 		
   begin
@@ -99,7 +103,8 @@ begin
       -- 1st stage of pipeline
       -- - read tile from tilemap
       if stb = '1' then
-        ctl_o.map_a(5 downto 0) <= x(8 downto 3);
+        ctl_o.map_a(5 downto 1) <= x(8 downto 4);
+        ctl_o.map_a(0) <= x(3) and not dbl_width;
       end if;
 
       -- 2nd stage of pipeline
@@ -109,7 +114,12 @@ begin
       -- 3rd stage of pipeline
       -- - assign pixel colour based on tile data
       -- (each byte contains information for 8 pixels)
-      case x_r(x_r'left downto x_r'left-2) is
+      if dbl_width = '0' then
+        xc := x_r(x_r'left-1 downto x_r'left-3);
+      else
+        xc := x_r(x_r'left downto x_r'left-2);
+      end if;
+      case xc is
         when "000" =>
           pel := ctl_i.tile_d(0);
         when "001" =>
@@ -134,7 +144,7 @@ begin
       ctl_o.rgb.b <= (others => '0');
       
 			-- pipelined because of tile data loopkup
-      x_r := x_r(x_r'left-3 downto 0) & x(2 downto 0);
+      x_r := x_r(x_r'left-4 downto 0) & x(3 downto 0);
 
       -- for end-of-line detection
 			hblank_r := hblank_r(hblank_r'left-1 downto 0) & hblank;
