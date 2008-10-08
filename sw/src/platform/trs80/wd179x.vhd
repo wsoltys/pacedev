@@ -682,27 +682,34 @@ begin
 
 		-- reads address mark and flags start of sector
 		PROC_I_DAM: process (clk, clk_20M_ena, reset)
+      constant MIN_GAP2_4E  : integer := 15;
+      constant MIN_GAP2_00  : integer := 8;
 			variable count : integer range 0 to 511 := 0;
 		begin
 			if reset = '1' then
+				idam_track <= (others => '0');
+				idam_side <= (others => '0');
+				idam_sector <= (others => '0');
+				idam_seclen <= (others => '0');
+				idam_dam <= (others => '0');
 				state <= UNKNOWN;
 			elsif rising_edge(clk) and clk_20M_ena = '1' then
 				id_addr_mark_rdy <= '0'; 		-- default
 				data_addr_mark_rdy <= '0';	-- default
 				addr_data_rdy <= '0';       -- default
 				user_data_rdy <= '0'; 		  -- default
-				if raw_data_rdy = '1' then
+        if state = UNKNOWN then
+          count := 0;
+          state <= GAP2_4E;
+        elsif raw_data_rdy = '1' then
 					case state is
-						when UNKNOWN =>
-							count := 0;
-							state <= GAP2_4E;
 						when GAP2_4E =>
-							-- at least 22 bytes of $4E
+							-- at least 22? bytes of $4E
 							if raw_data_r = X"4E" then
-								if count < 22 then
+								if count < MIN_GAP2_4E then
 									count := count + 1;
 								end if;
-							elsif raw_data_r = X"00" and count = 22 then
+							elsif raw_data_r = X"00" and count = MIN_GAP2_4E then
 								count := 1;
 								state <= GAP2_00;
 							else
@@ -710,12 +717,14 @@ begin
 							end if;
 						when GAP2_00 =>
 							-- exactly 12 bytes of $00
+							-- - actually changed to MINIMUM of xx bytes
 							if raw_data_r = X"00" then
-								count := count + 1;
-								if count = 12 then
-									count := 0;
-									state <= GAP2_A1;
-								end if;
+                if count < MIN_GAP2_00 then
+                  count := count + 1;
+                end if;
+							elsif raw_data_r = X"A1" and count = MIN_GAP2_00 then
+                count := 1;
+                state <= GAP2_A1;
 							else
 								state <= UNKNOWN;
 							end if;
