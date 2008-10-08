@@ -165,7 +165,7 @@ architecture SYN of platform is
   alias ds              : std_logic_vector(4 downto 1) is drvsel_r(3 downto 0);
   
   -- other signals      
-	alias game_reset			: std_logic is inputs_i(NUM_INPUT_BYTES-1).d(0);
+	alias platform_reset	: std_logic is inputs_i(NUM_INPUT_BYTES-1).d(0);
 	signal cpu_reset			: std_logic;  
 	signal alpha_joy_cs		: std_logic;
 	signal rtc_cs					: std_logic;
@@ -175,7 +175,7 @@ architecture SYN of platform is
 	
 begin
 
-	cpu_reset <= reset_i or game_reset;
+	cpu_reset <= reset_i or platform_reset;
 	
   -- not used for now
   uPintvec <= (others => '0');
@@ -268,7 +268,7 @@ begin
   end process KBD_MUX;
 
   PROC_DRVSEL : process (clk_20M, clk_2M_ena, reset_i)
-    subtype count_t is integer range 0 to 1999;
+    subtype count_t is integer range 0 to 3999; -- 2ms watchdog
     variable count : count_t := count_t'high;
   begin
     if reset_i = '1' then
@@ -434,6 +434,7 @@ begin
       signal tr00_n       : std_logic := '0';
       signal ip_n         : std_logic := '0';
 
+      signal ds_s         : std_logic_vector(ds'range);
       signal floppy_dbg   : std_logic_vector(31 downto 0) := (others => '0');
       signal wd179x_dbg   : std_logic_vector(31 downto 0) := (others => '0');
       
@@ -445,7 +446,7 @@ begin
         if reset_i = '1' then
           reset_r := (others => '1');
         elsif rising_edge(clk_20M) then
-          reset_r := reset_r(reset_r'left-1 downto 0) & reset_i;
+          reset_r := reset_r(reset_r'left-1 downto 0) & platform_reset;
         end if;
         sync_reset <= reset_r(reset_r'left);
       end process;
@@ -508,7 +509,7 @@ begin
           reset         => sync_reset,
           
           -- drive select lines
-          drvsel        => ds,
+          drvsel        => ds_s,
           
           step          => step,
           dirc          => dirc,
@@ -529,6 +530,10 @@ begin
       flash_o.oe <= '1';
       flash_o.we <= '0';
 
+      -- switch drives 1&2 depending on switch
+      ds_s(1) <= ds(1) when switches_i(2) = '0' else ds(2);
+      ds_s(2) <= ds(2) when switches_i(2) = '0' else ds(1);
+      
       gp_o(15 downto 0) <= floppy_dbg(31 downto 16) when switches_i(1 downto 0) = "11" else 
                            floppy_dbg(15 downto 0) when switches_i(1 downto 0) = "10" else
                            wd179x_dbg(31 downto 16) when switches_i(1 downto 0) = "01" else

@@ -1,6 +1,8 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
+use std.textio.all;
+use ieee.std_logic_textio.all;
 
 library work;
 use work.pace_pkg.all;
@@ -12,6 +14,12 @@ entity tb_wd179x is
 end tb_wd179x;
 
 architecture SYN of tb_wd179x is
+
+	constant A_CMD			: std_logic_vector(1 downto 0) := "00";
+	constant A_STS			: std_logic_vector(1 downto 0) := A_CMD;
+	constant A_TRK			: std_logic_vector(1 downto 0) := "01";
+	constant A_SEC			: std_logic_vector(1 downto 0) := "10";
+	constant A_DAT			: std_logic_vector(1 downto 0) := "11";
 
 	signal clk					: std_logic	:= '0';
 	signal reset				: std_logic	:= '1';
@@ -184,8 +192,49 @@ begin
 
 	process
 
-    procedure rd is
+		-- converts a std_logic_vector into a hex string.
+		function hstr(slv: std_logic_vector) return string is
+			variable hexlen: integer;
+			variable longslv : std_logic_vector(67 downto 0) := (others => '0');
+			variable hex : string(1 to 16);
+			variable fourbit : std_logic_vector(3 downto 0);
+		begin
+			hexlen := (slv'left+1)/4;
+			if (slv'left+1) mod 4 /= 0 then
+				hexlen := hexlen + 1;
+			end if;
+			longslv(slv'left downto 0) := slv;
+			for i in (hexlen -1) downto 0 loop
+				fourbit := longslv(((i*4)+3) downto (i*4));
+				case fourbit is
+					when "0000" => hex(hexlen -I) := '0';
+					when "0001" => hex(hexlen -I) := '1';
+					when "0010" => hex(hexlen -I) := '2';
+					when "0011" => hex(hexlen -I) := '3';
+					when "0100" => hex(hexlen -I) := '4';
+					when "0101" => hex(hexlen -I) := '5';
+					when "0110" => hex(hexlen -I) := '6';
+					when "0111" => hex(hexlen -I) := '7';
+					when "1000" => hex(hexlen -I) := '8';
+					when "1001" => hex(hexlen -I) := '9';
+					when "1010" => hex(hexlen -I) := 'A';
+					when "1011" => hex(hexlen -I) := 'B';
+					when "1100" => hex(hexlen -I) := 'C';
+					when "1101" => hex(hexlen -I) := 'D';
+					when "1110" => hex(hexlen -I) := 'E';
+					when "1111" => hex(hexlen -I) := 'F';
+					when "ZZZZ" => hex(hexlen -I) := 'z';
+					when "UUUU" => hex(hexlen -I) := 'u';
+					when "XXXX" => hex(hexlen -I) := 'x';
+					when others => hex(hexlen -I) := '?';
+				end case;
+			end loop;
+			return hex(1 to hexlen);
+		end hstr; 
+
+    procedure rd (addr : in std_logic_vector(1 downto 0)) is
     begin
+			fdc_a <= addr;
   		fdc_cs_n <= '0';
   		fdc_re_n <= '0';
   		wait until rising_edge(clk_20M);
@@ -194,14 +243,22 @@ begin
   		fdc_re_n <= '1';
     end;
 
-    procedure rd_sts is
+    procedure rd_sts (display : in boolean) is
+			variable debug_l : line;
     begin
-      fdc_a <= "00";      -- status register
-      rd;
+      rd (A_STS);
+			-- and show the result
+			if display then
+				write(debug_l, string'("STATUS = $") & hstr(fdc_dat_o));
+				writeline(OUTPUT, debug_l);
+			end if;
     end;
 
-    procedure wr is
+    procedure wr (addr : in std_logic_vector(1 downto 0);
+									data : in std_logic_vector(7 downto 0)) is
     begin
+			fdc_a <= addr;
+			fdc_dat_i <= data;
   		fdc_cs_n <= '0';
   		fdc_we_n <= '0';
   		wait until rising_edge(clk_20M);
@@ -210,96 +267,147 @@ begin
   		fdc_we_n <= '1';
     end;
 
-    procedure wr_cmd is
+    procedure wr_cmd (data : in std_logic_vector(7 downto 0)) is
     begin
-		  fdc_a <= "00";      -- command register
-      wr;
+      wr (A_CMD, data);
     end;
+
+		procedure rd_addr is
+			variable data 		: std_logic_vector(7 downto 0);
+			variable debug_l 	: line;
+		begin
+			data := X"C0"; -- read address
+			write(debug_l, string'("READ_ADDR: ($") & hstr(data) & string'(")"));
+			writeline(OUTPUT, debug_l);
+	    wr_cmd (data);
+	    for i in 0 to 5 loop
+	      wait until drq = '1';
+	      rd (A_DAT);
+				write(debug_l, hstr(fdc_dat_o));
+				write(debug_l, string'(" "));
+	    end loop;
+			writeline(OUTPUT, debug_l);
+	    wait until intrq = '1';
+	    rd_sts (true);
+			rd (A_SEC);
+			write(debug_l, string'("TRACK=($") & hstr(fdc_dat_o) & string'(")"));
+			writeline(OUTPUT, debug_l);
+		end;
+
+		variable data			: std_logic_vector(7 downto 0);
+		variable debug_l 	: line;
 
 	begin
 
+		-- select drive 0
     ds <= "0001";
 
     wait for 4 ms;
-		fdc_dat_i <= X"D0"; -- force interrupt (none)
-    wr_cmd;
+		data := X"D0"; -- force interrupt (none)
+		write(debug_l, string'("FORCE_INTERRUPT ($") & hstr(data) & string'(")"));
+		writeline(OUTPUT, debug_l);
+    wr_cmd (data);
     wait for 1 ms;
 
-		fdc_dat_i <= X"0B"; -- restore
-    wr_cmd;
+		--fdc_dat_i <= X"0B"; -- restore
+		data := X"0F"; -- restore (with verify)
+		write(debug_l, string'("RESTORE/v ($") & hstr(data) & string'(")"));
+		writeline(OUTPUT, debug_l);
+    wr_cmd (data);
     wait until intrq = '1';
-    rd_sts;
+    rd_sts (true);
 
     wait for 1 ms;
-		fdc_dat_i <= X"C0"; -- read address
-    wr_cmd;
-    fdc_a <= "11";      -- data register
-    for i in 0 to 5 loop
-      wait until drq = '1';
-      rd;
-    end loop;
-    wait until intrq = '1';
-    rd_sts;
+		rd_addr;
 
-		fdc_a <= "10";			-- sector register
-		fdc_dat_i <= X"01";	-- sector 01
-    wr;
+		wait for 1 ms;
+		data := X"54";	-- step in, update track, verify
+		write(debug_l, string'("STEP_IN/t/v: ($") & hstr(data) & string'(")"));
+		writeline(OUTPUT, debug_l);
+    wr_cmd (data);
+    wait until intrq = '1';
+    rd_sts (true);
+
+    wait for 1 ms;
+		rd_addr;
+
+		wait for 1 ms;
+		wr (A_DAT, X"00");
+		wait for 4 us;
+		data := X"1C";	-- seek track 0
+		write(debug_l, string'("SEEK/v: ($") & hstr(data) & string'(")"));
+		writeline(OUTPUT, debug_l);
+    wr_cmd (data);
+    wait until intrq = '1';
+    rd_sts (true);
+
+    wait for 1 ms;
+		rd_addr;
+
+		wait for 1 ms;
+		wr (A_DAT, X"05");
+		wait for 4 us;
+		data := X"1C";	-- seek track 5
+		write(debug_l, string'("SEEK/v: ($") & hstr(data) & string'(")"));
+		writeline(OUTPUT, debug_l);
+    wr_cmd (data);
+    wait until intrq = '1';
+    rd_sts (true);
+
+    wr (A_SEC, X"01");
     wait for 2 us;
-		fdc_dat_i <= X"81"; -- read sector
-    wr_cmd;
+		data := X"81"; 				-- read sector
+    wr_cmd (data);
 
-    fdc_a <= "11";      -- data register
     for i in 0 to 255 loop
       wait until drq = '1';
-      rd;
+      rd (A_DAT);
     end loop;
     wait until intrq = '1';
-    rd_sts;
+    rd_sts (false);
 
-		fdc_dat_i <= X"20"; -- step
-    wr_cmd;
+		data := X"20"; -- step
+    wr_cmd (data);
     wait until intrq = '1';
-    rd_sts;
+    rd_sts (false);
 
 		--fdc_dat_i <= X"D8"; -- force interrupt (immediate)
     --wr_cmd;
 
     wait for 4 ms;
-		fdc_dat_i <= X"D0"; -- force interrupt (none)
-    wr_cmd;
+		data := X"D0"; -- force interrupt (none)
+    wr_cmd (data);
 
     wait for 4 ms;
-		fdc_dat_i <= X"00"; -- RESTORE
-    wr_cmd;
+		data := X"00"; -- RESTORE
+    wr_cmd (data);
 
     wait until intrq = '1';
-    rd_sts;
+    rd_sts (false);
 
 		-- select sector 16
 		wait for 4 ms;
-		fdc_a <= "10";			-- sector register
-		fdc_dat_i <= X"10";	-- sector 16
-    wr;
+		fdc_a <= A_SEC;
+    wr (A_SEC, X"10");	-- sector 16
 
-		fdc_dat_i <= X"80";	-- read sector
-    wr_cmd;
+		data := X"80";	-- read sector
+    wr_cmd (data);
 
-    fdc_a <= "11";      -- data register
     for i in 0 to 255 loop
       wait until drq = '1';
-      rd;
+      rd (A_DAT);
     end loop;
 
     wait until intrq = '1';
 
-    rd_sts;
+    rd_sts (false);
 
 		wait for 1 ms;
-		fdc_dat_i <= X"50";	-- step in, update track
-    wr_cmd;
+		data := X"50";	-- step in, update track
+    wr_cmd (data);
 
     wait until intrq = '1';
-    rd_sts;
+    rd_sts (false);
 
 		wait for 100 ms;		
 	end process;

@@ -73,6 +73,17 @@ architecture SYN of wd179x is
   signal data_i_r       	: std_logic_vector(7 downto 0) := (others => '0');
   signal data_o_r       	: std_logic_vector(7 downto 0) := (others => '0');
 
+  alias TRK_UPD_F     		: std_logic is command_r(4);
+	alias MULTI_REC_F				: std_logic is command_r(4);
+  alias HD_LOAD_F     		: std_logic is command_r(3);
+	alias SIDE_CMP_F				: std_logic is command_r(3);
+	alias VERIFY_F					: std_logic is command_r(2);
+	alias DELAY_15ms_F			: std_logic is command_r(2);
+	alias SIDE_CMP_EN_F			: std_logic is command_r(1);
+	alias DAM_F							: std_logic is command_r(0);
+	alias STEP_RATE					: std_logic_vector(1 downto 0) is command_r(1 downto 0);
+  alias cmd           		: std_logic_vector(7 downto 4) is command_r(7 downto 4);
+
   -- interrupts
   signal irq_mask         : std_logic_vector(3 downto 0) := (others => '0');
   signal irq_set          : std_logic := '0';
@@ -81,6 +92,10 @@ architecture SYN of wd179x is
   -- data request
   signal drq_s            : std_logic := '0';
   signal drq_clr          : std_logic := '0';
+
+	-- index pulse
+	signal ip_cnt						: std_logic_vector(3 downto 0) := (others => '0');
+	signal ip_cnt_clr				: std_logic := '0';
 
 	-- values read from the IDAM
 	signal idam_track				: std_logic_vector(track_r'range);
@@ -97,10 +112,6 @@ architecture SYN of wd179x is
 	signal addr_data_rdy        : std_logic := '0';
 	signal user_data_rdy			  : std_logic := '0';
                         	
-  alias cmd           		: std_logic_vector(7 downto 4) is command_r(7 downto 4);
-  alias TRK_UPD_F     		: std_logic is command_r(4);
-  alias HD_LOAD_F     		: std_logic is command_r(3);
-
 	signal cmd_busy					: std_logic := '0';
 
   -- register access strobes
@@ -119,8 +130,11 @@ architecture SYN of wd179x is
 	signal type_iii_drq     : std_logic := '0';
 	signal type_iii_ack			: std_logic := '0';
 	signal type_iv_stb			: std_logic := '0';
+
+	signal seek_error				: std_logic := '0';
+	signal rnf_error				: std_logic := '0';
                       		
-  signal step_in_s    		: std_logic := '0';
+  signal step_s           : std_logic := '0';
   signal hld_s        		: std_logic := '0';
   
 begin
@@ -264,6 +278,27 @@ begin
 
   end block BLK_DRQ;
 
+	BLK_IP : block
+	begin
+
+		-- count index pulses
+		PROC_IP : process (clk, clk_20M_ena, reset)
+			variable ip_r : std_logic := '0';
+		begin
+			if reset = '1' then
+			elsif rising_edge(clk) and clk_20M_ena = '1' then
+				if ip_cnt_clr = '1' then
+					ip_cnt <= (others => '0');
+				-- leading edge IPn
+				elsif ip_r = '0' and ip_n = '0' then
+					ip_cnt <= ip_cnt + 1;
+				end if;
+				ip_r := not ip_n;
+			end if;
+		end process PROC_IP;
+
+	end block BLK_IP;
+
 	-- process command
 	BLK_COMMAND : block
 
@@ -324,37 +359,46 @@ begin
 		constant DIRC_OUT		: std_logic := '0';
 		constant DIRC_IN		: std_logic := '1';
 
-		type STATE_t is ( IDLE, RESTORE, SEEK, STEPIO, STEP_WAIT, UPDATE, VERIFY, DONE );
+		type STATE_t is ( IDLE, RESTORE, SEEK, STEPIO, STEP_WAIT, UPDATE, VERIFY, VERIFY_WAIT_IDAM, VERIFY_IDAM, DONE );
 		signal state : STATE_t;
 
 	begin
 
 		PROC_TYPE_I: process (clk, clk_20M_ena, reset)
-			variable dirc_v		: std_logic := '0';
+			variable curr_track	: std_logic_vector(track_r'range) := (others => '0');
+			variable dirc_v			: std_logic := '0';
 			subtype count_t is integer range 0 to 30*20-1;
-			variable count		: count_t;
+			variable count			: count_t;
 		begin
 			if reset = '1' then
+				curr_track := (others => '0');
 				track_r <= (others => '0');
+				seek_error <= '0';
+				rnf_error <= '0';
 				state <= IDLE;
 				dirc_v := DIRC_OUT;
 			elsif rising_edge(clk) and clk_20M_ena = '1' then
-				step <= '0';
-				type_i_ack <= '0';
+				step_s <= '0';				-- default
+				ip_cnt_clr <= '0';		-- default
+				type_i_ack <= '0';		-- default
+				if trk_wr_stb = '1' then
+					-- cpu writes directly to track register
+					track_r <= track_i_r;
+				end if;
         if type_iv_stb = '1' then
           state <= IDLE;
         else
   				case state is
   					when IDLE =>
-  						if trk_wr_stb = '1' then
-  							-- cpu writes directly to track register
-  							track_r <= track_i_r;
-  						elsif type_i_stb = '1' then
+  						if type_i_stb = '1' then
+								curr_track := track_r;
+								seek_error <= '0';
+								rnf_error <= '0';
   							if STD_MATCH(cmd, CMD_RESTORE) then
   								dirc_v := DIRC_OUT;
   								state <= RESTORE;
   							elsif STD_MATCH(cmd, CMD_SEEK) then
-  								if track_r < data_i_r then
+  								if curr_track < data_i_r then
   									dirc_v := DIRC_IN;
   								else
   									dirc_v := DIRC_OUT;
@@ -372,21 +416,31 @@ begin
   						end if;
   					when RESTORE =>
   						if tr00_n = '0' then
+								curr_track := X"00";
   							-- always update track on RESTORE command
-  							track_r <= X"00";
-  							state <= DONE;
+  							track_r <= curr_track;
+  							state <= VERIFY;
   						else
   							state <= STEPIO;
   						end if;
   					when SEEK =>
-  						if track_r /= data_i_r then
+							-- NOTE: do we update track_r here while seeking?
+							-- what happens when seek is aborted by FORCE_INTERRUPT?
+  						if curr_track /= data_i_r then
   							state <= STEPIO;
   						else
-  							state <= VERIFY;
+								-- NOTE: update flag always set in SEEK command
+  							state <= UPDATE;
   						end if;
   					when STEPIO =>
-  						step <= '1';
-  						case command_r(1 downto 0) is
+  						step_s <= '1';
+							-- update current track
+							if dirc_v = DIRC_IN then
+								curr_track := curr_track + 1;
+							elsif curr_track /= 0 then
+                curr_track := curr_track - 1;
+							end if;
+  						case STEP_RATE is
   							when "00" =>
   								count := 6*20-1;		-- 6ms
   							when "01" =>        	
@@ -402,11 +456,6 @@ begin
   							if STD_MATCH(cmd, CMD_RESTORE) then
   								state <= RESTORE;
   							elsif STD_MATCH(cmd, CMD_SEEK) then
-  								if dirc_v = DIRC_IN then
-  									track_r <= track_r + 1;
-  								else
-  									track_r <= track_r - 1;
-  								end if;
   								state <= SEEK;
   							else
   								state <= UPDATE;
@@ -415,19 +464,34 @@ begin
   							count := count - 1;
   						end if;
   					when UPDATE =>
-  						if command_r(4) = '1' then
-  							if dirc_v = DIRC_IN then
-  								track_r <= track_r + 1;
-  							else
-  								if track_r /= 0 then
-  									track_r <= track_r - 1;
-  								end if;
-  							end if;
+  						if TRK_UPD_F = '1' then
+								track_r <= curr_track;
   						end if;
   						state <= VERIFY;
   					when VERIFY =>
-  						-- no verify atm
-  						state <= DONE;
+							ip_cnt_clr <= '1';
+							state <= VERIFY_WAIT_IDAM;
+  					when VERIFY_WAIT_IDAM =>
+							if ip_cnt = 5 then
+								seek_error <= '1';
+								state <= DONE;
+							elsif VERIFY_F = '1' then
+								if id_addr_mark_rdy = '1' then
+									state <= VERIFY_IDAM;
+								end if;
+							else
+								state <= DONE;
+							end if;
+						when VERIFY_IDAM =>
+							-- wait until next IDAM read
+							if ip_cnt = 5 then
+								seek_error <= '1';
+								state <= DONE;
+							elsif id_addr_mark_rdy = '1' then
+								if curr_track = idam_track then
+  								state <= DONE;
+								end if;
+							end if;
   					when DONE =>
   						type_i_ack <= '1';
   						state <= IDLE;
@@ -454,7 +518,6 @@ begin
 			variable count		: count_t;
 		begin
 			if reset = '1' then
-				sector_r <= (others => '0');
 				type_ii_drq <= '0';
 				type_ii_ack <= '0';
 				state <= IDLE;
@@ -466,10 +529,7 @@ begin
         else
   				case state is
   					when IDLE =>
-  						if sec_wr_stb = '1' then
-  							-- cpu writes directly to sector register
-  							sector_r <= sector_i_r;
-  						elsif type_ii_stb = '1' then
+  						if type_ii_stb = '1' then
   							if STD_MATCH(cmd, CMD_READ_SECTOR) then
   								state <= WAIT_IDAM;
   							end if;
@@ -519,12 +579,17 @@ begin
 		PROC_TYPE_III: process (clk, clk_20M_ena, reset)
 		begin
 			if reset = '1' then
+				sector_r <= (others => '0');
 				type_iii_drq <= '0';
 				type_iii_ack <= '0';
 				state <= IDLE;
 			elsif rising_edge(clk) and clk_20M_ena = '1' then
         type_iii_drq <= '0';  -- default
         type_iii_ack <= '0';  -- default
+				if sec_wr_stb = '1' then
+					-- cpu writes directly to sector register
+					sector_r <= sector_i_r;
+				end if;
         if type_iv_stb = '1' then
           state <= IDLE;
         else
@@ -544,6 +609,8 @@ begin
                 type_iii_drq <= '1';
               end if;
               if id_addr_mark_rdy = '1' then
+								-- TRACK gets written to SECTOR register according to datasheet
+								sector_r <= idam_track;
                 state <= DONE;
               end if;
             when DONE =>
@@ -632,8 +699,10 @@ begin
 						when GAP2_4E =>
 							-- at least 22 bytes of $4E
 							if raw_data_r = X"4E" then
-								count := count + 1;
-							elsif raw_data_r = X"00" and count >= 22 then
+								if count < 22 then
+									count := count + 1;
+								end if;
+							elsif raw_data_r = X"00" and count = 22 then
 								count := 1;
 								state <= GAP2_00;
 							else
@@ -700,8 +769,10 @@ begin
 							end if;
 						when GAP3_4E =>
 							if raw_data_r = X"4E" then
-								count := count + 1;
-							elsif raw_data_r = X"00" and count >= 22 then		-- 24?
+								if count < 22 then
+									count := count + 1;
+								end if;
+							elsif raw_data_r = X"00" and count = 22 then		-- 24?
 								count := 1;
 								state <= GAP3_00;
 							else
@@ -709,8 +780,10 @@ begin
 							end if;
 						when GAP3_00 =>
 							if raw_data_r = X"00" then
-								count := count + 1;
-							elsif raw_data_r = X"A1" and count >= 8 then
+								if count < 8 then
+									count := count + 1;
+								end if;
+							elsif raw_data_r = X"A1" and count = 8 then
 								count := 1;
 								state <= GAP3_A1;
 							else
@@ -767,7 +840,7 @@ begin
     signal s7_not_ready   		: std_logic := '0';
     signal s6_protected   		: std_logic := '0';
     signal s5_head_loaded 		: std_logic := '0';
-    signal s4_seek_error  		: std_logic := '0';
+    alias s4_seek_error  			: std_logic is seek_error;
     signal s3_crc_error   		: std_logic := '0';
     signal s2_track_00    		: std_logic := '0';
     signal s1_index       		: std_logic := '0';
@@ -776,7 +849,7 @@ begin
     -- type II/III commands
     signal s5_record_type     : std_logic := '0';
     alias s5_write_fault      : std_logic is s5_record_type;
-    signal s4_rnf             : std_logic := '0';
+    alias s4_rnf             	: std_logic is rnf_error;
     signal s2_lost_data       : std_logic := '0';
     signal s1_data_request    : std_logic := '0';
 
@@ -824,6 +897,27 @@ begin
   -- assign outputs
   hld <= hld_s;
 
+  -- extend step pulse
+  -- - min 2/4 us
+  process (clk, clk_20M_ena, reset)
+    subtype count_t is integer range 0 to 7; -- 4us
+    variable count : count_t := 0;
+  begin
+    if reset = '1' then
+      count := 0;
+      step <= '0';
+    elsif rising_edge(clk) and clk_20M_ena = '1' then
+      if step_s = '1' then
+        count := count_t'high;
+        step <= '1';
+      elsif count = 0 then
+        step <= '0';
+      else
+        count := count - 1;
+      end if;
+    end if;
+  end process;
+  
   debug <= track_r & sector_r & idam_track & idam_sector;
   
 end architecture SYN;

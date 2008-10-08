@@ -39,9 +39,18 @@ architecture FLASH of floppy is
   signal clk_1M_ena   : std_logic := '0';
 
   signal mem_a_s      : std_logic_vector(mem_a'range) := (others => '0');
-  signal track_r      : std_logic_vector(7 downto 0) := (others => '0');
+	type track_a is array (natural range <>) of std_logic_vector(7 downto 0);
+  signal track_r      : track_a(4 downto 0);
+
+	signal drv					: integer range 0 to 4;
 
 begin
+
+	drv <= 	1 when drvsel(1) = '1' else
+					2 when drvsel(2) = '1' else
+					3 when drvsel(3) = '1' else
+					4 when drvsel(4) = '1' else
+					0;
 
   -- 1MHz clock (enable) generate
   process (clk, clk_20M_ena, reset)
@@ -67,19 +76,19 @@ begin
   begin
     if reset = '1' then
       step_r := '0';
-      track_r <= (others => '0');
+      track_r <= (others => (others => '0'));
     elsif rising_edge(clk) and clk_20M_ena = '1' then
       -- leading edge of step
       if step_r = '0' and step = '1' then
         if dirc = '0' then
           -- step out (decrement track)
-          if track_r /= 0 then
-            track_r <= track_r - 1;
+          if track_r(drv) /= 0 then
+            track_r(drv) <= track_r(drv) - 1;
           end if;
         else
           -- step in (increment track)
-          if track_r < NUM_TRACKS-1 then
-            track_r <= track_r + 1;
+          if track_r(drv) < NUM_TRACKS-1 then
+            track_r(drv) <= track_r(drv) + 1;
           end if;
         end if;
       end if;
@@ -88,11 +97,11 @@ begin
   end process;
 
   -- track 0 indicator
-  tr00_n <= '0' when track_r = 0 else '1';
+  tr00_n <= '0' when track_r(drv) = 0 else '1';
 
 	-- each track is encoded in 8KiB
 	-- - 40 tracks is 320(512) KiB
-  mem_a_s(18 downto 13) <= track_r(5 downto 0);
+  mem_a_s(18 downto 13) <= track_r(drv)(5 downto 0);
 
   -- support 2 drives in flash for now
   mem_a_s(19) <= '0' when drvsel(1) = '1' else
@@ -152,7 +161,7 @@ begin
 
   -- output the track to debug
   debug(31 downto 16) <= mem_a_s(15 downto 0);
-  debug(15 downto 8) <= track_r;
+  debug(15 downto 8) <= track_r(drv);
   debug(7 downto 0) <= mem_d_i;
   
   mem_a <= mem_a_s;
