@@ -15,7 +15,8 @@ entity floppy is
     clk_20M_ena   : in std_logic;
     reset         : in std_logic;
     
-    drvsel        : in std_logic_vector(4 downto 1);
+    drv_ena       : in std_logic_vector(4 downto 1);
+    drv_sel       : in std_logic_vector(4 downto 1);
     
     step          : in std_logic;
     dirc          : in std_logic;
@@ -42,14 +43,21 @@ architecture FLASH of floppy is
 	type track_a is array (natural range <>) of std_logic_vector(7 downto 0);
   signal track_r      : track_a(4 downto 0);
 
-	signal drv					: integer range 0 to 4;
+  signal ena          : std_logic := '0';
+	signal drv					: integer range 0 to 4 := 0;
 
 begin
 
-	drv <= 	1 when drvsel(1) = '1' else
-					2 when drvsel(2) = '1' else
-					3 when drvsel(3) = '1' else
-					4 when drvsel(4) = '1' else
+	ena <= 	drv_ena(1) when drv_sel(1) = '1' else
+					drv_ena(2) when drv_sel(2) = '1' else
+					drv_ena(3) when drv_sel(3) = '1' else
+					drv_ena(4) when drv_sel(4) = '1' else
+					'0';
+					
+	drv <= 	1 when drv_sel(1) = '1' else
+					2 when drv_sel(2) = '1' else
+					3 when drv_sel(3) = '1' else
+					4 when drv_sel(4) = '1' else
 					0;
 
   -- 1MHz clock (enable) generate
@@ -78,17 +86,19 @@ begin
       step_r := '0';
       track_r <= (others => (others => '0'));
     elsif rising_edge(clk) and clk_20M_ena = '1' then
-      -- leading edge of step
-      if step_r = '0' and step = '1' then
-        if dirc = '0' then
-          -- step out (decrement track)
-          if track_r(drv) /= 0 then
-            track_r(drv) <= track_r(drv) - 1;
-          end if;
-        else
-          -- step in (increment track)
-          if track_r(drv) < NUM_TRACKS-1 then
-            track_r(drv) <= track_r(drv) + 1;
+      if ena = '1' then
+        -- leading edge of step
+        if step_r = '0' and step = '1' then
+          if dirc = '0' then
+            -- step out (decrement track)
+            if track_r(drv) /= 0 then
+              track_r(drv) <= track_r(drv) - 1;
+            end if;
+          else
+            -- step in (increment track)
+            if track_r(drv) < NUM_TRACKS-1 then
+              track_r(drv) <= track_r(drv) + 1;
+            end if;
           end if;
         end if;
       end if;
@@ -97,15 +107,15 @@ begin
   end process;
 
   -- track 0 indicator
-  tr00_n <= '0' when track_r(drv) = 0 else '1';
+  tr00_n <= '0' when (ena = '1' and track_r(drv) = 0) else '1';
 
 	-- each track is encoded in 8KiB
 	-- - 40 tracks is 320(512) KiB
   mem_a_s(18 downto 13) <= track_r(drv)(5 downto 0);
 
   -- support 2 drives in flash for now
-  mem_a_s(19) <= '0' when drvsel(1) = '1' else
-                 '1' when drvsel(2) = '1' else
+  mem_a_s(19) <= '0' when drv_sel(1) = '1' else
+                 '1' when drv_sel(2) = '1' else
                  '0';
   
   BLK_READ : block
@@ -141,13 +151,13 @@ begin
           read_data_r := mem_d_i;
         end if;
         if phase = "10" then
-          raw_read_n <= not read_data_r(read_data_r'left);
+          raw_read_n <= ena and not read_data_r(read_data_r'left);
           read_data_r := read_data_r(read_data_r'left-1 downto 0) & '0';
         end if;
         -- generate index pulse (min 10us)
         ip_n <= '1'; -- default
         if count < 1000 then
-          ip_n <= '0';
+          ip_n <= not ena;
         end if;
         if count = 6272*8*4-1 then
           count := (others => '0');

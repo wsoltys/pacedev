@@ -450,6 +450,7 @@ begin
       signal tr00_n       : std_logic := '0';
       signal ip_n         : std_logic := '0';
 
+      signal de_s         : std_logic_vector(4 downto 1);
       signal ds_s         : std_logic_vector(ds'range);
       signal floppy_dbg   : std_logic_vector(31 downto 0) := (others => '0');
       signal wd179x_dbg   : std_logic_vector(31 downto 0) := (others => '0');
@@ -525,7 +526,8 @@ begin
           reset         => sync_reset,
           
           -- drive select lines
-          drvsel        => ds_s,
+          drv_ena       => de_s,
+          drv_sel       => ds_s,
           
           step          => step,
           dirc          => dirc,
@@ -546,13 +548,21 @@ begin
       flash_o.oe <= '1';
       flash_o.we <= '0';
 
-      -- switch drives 1&2 depending on switch
-      ds_s(1) <= ds(1) when switches_i(2) = '0' else ds(2);
-      ds_s(2) <= ds(2) when switches_i(2) = '0' else ds(1);
+      -- drive enable switches
+      de_s <= not switches_i(3 downto 0);
       
-      gp_o(15 downto 0) <= floppy_dbg(31 downto 16) when switches_i(1 downto 0) = "11" else 
-                           floppy_dbg(15 downto 0) when switches_i(1 downto 0) = "10" else
-                           wd179x_dbg(31 downto 16) when switches_i(1 downto 0) = "01" else
+      -- switch drives 1&2 depending on switch
+      --ds_s(1) <= ds(1) when switches_i(2) = '0' else ds(2);
+      --ds_s(2) <= ds(2) when switches_i(2) = '0' else ds(1);
+      ds_s <= ds;
+      
+      gp_o(15 downto 0) <= -- memory address
+                           floppy_dbg(31 downto 16) when switches_i(5 downto 4) = "11" else 
+                           -- track & data byte
+                           floppy_dbg(15 downto 0) when switches_i(5 downto 4) = "10" else
+                           -- idam track and sector
+                           wd179x_dbg(31 downto 16) when switches_i(5 downto 4) = "01" else
+                           -- track & sector registers
                            wd179x_dbg(15 downto 0);
 
       leds_o(9) <= not tr00_n;

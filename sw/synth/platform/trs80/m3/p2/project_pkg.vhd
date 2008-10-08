@@ -58,6 +58,6 @@ package project_pkg is
 
 	-- TRS-80-specific constants
 	
-	constant USE_VIDEO_VBLANK_INTERRUPT       : boolean := false;
+	constant TRS80_M3_FDC_SUPPORT			        : boolean := true;
 	
 end;

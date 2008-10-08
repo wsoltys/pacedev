@@ -927,6 +927,6 @@ begin
     end if;
   end process;
   
-  debug <= track_r & sector_r & idam_track & idam_sector;
+  debug <= idam_track & idam_sector & track_r & sector_r;
   
 end architecture SYN;
