@@ -402,7 +402,7 @@ begin
   GEN_HIRES: if TRS80_M3_HIRES_SUPPORT generate
 
     BLK_HIRES : block
-      signal hires_a  : std_logic_vector(13 downto 0) := (others => '0');
+      signal hires_a  : std_logic_vector(14 downto 0) := (others => '0');   -- Max 32KiB
       alias x_r       : std_logic_vector(5 downto 0) is hires_a(5 downto 0);
       alias y_r       : std_logic_vector(7 downto 0) is hires_a(13 downto 6);
       signal data_r   : std_logic_vector(7 downto 0) := (others => '0');
@@ -467,19 +467,19 @@ begin
         generic map
         (
           init_file		=> "", --"../../../../../src/platform/trs80/m3/roms/trsvram.hex",
-          numwords_a	=> 4096,
-          widthad_a		=> 12
+          numwords_a	=> 2**TRS80_M3_HIRES_WIDTHA,
+          widthad_a		=> TRS80_M3_HIRES_WIDTHA
         )
         port map
         (
           clock_b			=> clk_20M,
-          address_b		=> hires_a(11 downto 0),
+          address_b		=> hires_a(TRS80_M3_HIRES_WIDTHA-1 downto 0),
           wren_b			=> hires_dat_wr,
           data_b			=> data_r,
           q_b					=> hires_dat_o,
 
           clock_a			=> clk_video,
-          address_a		=> bitmap_i.a(11 downto 0),
+          address_a		=> bitmap_i.a(TRS80_M3_HIRES_WIDTHA-1 downto 0),
           wren_a			=> '0',
           data_a			=> (others => 'X'),
           q_a					=> bitmap_o.d(7 downto 0)

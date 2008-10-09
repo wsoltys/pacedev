@@ -62,6 +62,7 @@ package project_pkg is
   constant PACE_HAS_FLASH                   : boolean := true;
 
   constant TRS80_M3_HIRES_SUPPORT           : boolean := true;
+	constant TRS80_M3_HIRES_WIDTHA            : integer := 12;    -- 4KiB only
 	constant TRS80_M3_FDC_SUPPORT			        : boolean := true;
 
 	--constant USE_VIDEO_VBLANK_INTERRUPT       : boolean := false;

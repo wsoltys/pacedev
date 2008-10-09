@@ -58,6 +58,8 @@ package project_pkg is
 
 	-- TRS-80-specific constants
 	
+	constant TRS80_M3_HIRES_SUPPORT			      : boolean := true;
+	constant TRS80_M3_HIRES_WIDTHA            : integer := 14;    -- 16KiB
 	constant TRS80_M3_FDC_SUPPORT			        : boolean := true;
 	
 end;
