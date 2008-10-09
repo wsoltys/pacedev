@@ -261,6 +261,10 @@ begin
 		for i in 0 to 7 loop
 	 		if uP_addr(i) = '1' then
 			  kbd_data_v := kbd_data_v or inputs_i(i).d;
+			  -- hack - 2nd button is also <BREAK>
+			  if i = 6 then
+          kbd_data_v(2) := kbd_data_v(2) or buttons_i(1);
+        end if;
 		  end if;
 		end loop;
 
@@ -452,6 +456,12 @@ begin
 
       signal de_s         : std_logic_vector(4 downto 1);
       signal ds_s         : std_logic_vector(ds'range);
+
+      -- floppy data
+      signal track        : std_logic_vector(7 downto 0) := (others => '0');
+      signal offset       : std_logic_vector(12 downto 0) := (others => '0');
+      signal rd_data      : std_logic_vector(7 downto 0) := (others => '0');
+      
       signal floppy_dbg   : std_logic_vector(31 downto 0) := (others => '0');
       signal wd179x_dbg   : std_logic_vector(31 downto 0) := (others => '0');
       
@@ -513,11 +523,10 @@ begin
           debug         => wd179x_dbg
         );
         
-      flash_floppy_inst : entity work.floppy(FLASH)
+      floppy_if_inst : entity work.floppy_if
         generic map
         (
-          NUM_TRACKS      => 40,
-          DOUBLE_DENSITY  => true
+          NUM_TRACKS      => 40
         )
         port map
         (
@@ -536,18 +545,40 @@ begin
           tr00_n        => tr00_n,
           ip_n          => ip_n,
           
-          mem_a         => flash_o.a(19 downto 0),
-          mem_d_i       => flash_i.d,
-          mem_d_o       => flash_o.d,
-          mem_we        => open,
+          -- media interface
+
+          track         => track,
+          dat_i         => rd_data,
+          dat_o         => open,
+          -- random-access control
+          offset        => offset,
+          -- fifo control
+          rd            => open,
+          wr            => open,
+          flush         => open,
           
           debug         => floppy_dbg
         );
-      flash_o.a(flash_o.a'left downto 20) <= (others => '0');
-      flash_o.cs <= '1';
-      flash_o.oe <= '1';
-      flash_o.we <= '0';
+      
+      BLK_FLASH_FLOPPY : block
+      begin  
 
+        flash_o.a(flash_o.a'left downto 20) <= (others => '0');
+        -- support 2 drives in flash for now
+        flash_o.a(19) <=  '0' when ds_s(1) = '1' else
+                          '1' when ds_s(2) = '1' else
+                          '0';
+        -- each track is encoded in 8KiB
+        -- - 40 tracks is 320(512) KiB
+        flash_o.a(18 downto 13) <= track(5 downto 0);
+        flash_o.a(12 downto 0) <= offset;
+        rd_data <= flash_i.d;
+        flash_o.cs <= '1';
+        flash_o.oe <= '1';
+        flash_o.we <= '0';
+
+      end block BLK_FLASH_FLOPPY;
+      
       -- drive enable switches
       de_s <= not switches_i(3 downto 0);
       
@@ -566,7 +597,29 @@ begin
                            wd179x_dbg(15 downto 0);
 
       leds_o(9) <= not tr00_n;
-      leds_o(8) <= step;
+
+      -- extend the step signal so we can see it on the LED
+      process (clk_20M, clk_2M_ena)
+        subtype count_t is integer range 0 to 199999;  -- 100ms
+        variable count : count_t := 0;
+        variable step_r : std_logic := '0';
+      begin
+        if rising_edge(clk_20M) then
+          -- leading edge step
+          if step_r = '0' and step = '1' then
+            count := count_t'high;
+            leds_o(8) <= '1';
+          elsif clk_2M_ena = '1' then
+            if count /= 0 then
+              count := count - 1;
+            else
+              leds_o(8) <= '0';
+            end if;
+          end if;
+          step_r := step;
+        end if;
+      end process;
+
       leds_o(7) <= not ip_n;
       
       leds_o(3) <= ds(4);
