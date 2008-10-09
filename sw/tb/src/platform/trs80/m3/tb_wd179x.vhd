@@ -32,51 +32,12 @@ architecture SYN of tb_wd179x is
   signal fdc_a				: std_logic_vector(1 downto 0) := (others => '0');
   signal fdc_dat_i		: std_logic_vector(7 downto 0) := (others => '0');
   signal fdc_dat_o		: std_logic_vector(7 downto 0) := (others => '0');
+	signal ds						: std_logic_vector(4 downto 1) := (others => '0');
   signal intrq        : std_logic := '0';
   signal drq          : std_logic := '0';
 
-  signal ds           : std_logic_vector(4 downto 1) := (others => '0');
-  signal step         : std_logic := '0';
-  signal dirc         : std_logic := '0';
-  signal rclk         : std_logic := '0';
-  signal raw_read_n   : std_logic := '0';
-  signal tr00_n       : std_logic := '0';
-  signal ip_n         : std_logic := '0';
-
-	signal mem_a				: std_logic_vector(19 downto 0) := (others => '1');
+	signal mem_a				: std_logic_vector(21 downto 0) := (others => '1');
 	signal mem_d				: std_logic_vector(7 downto 0);
-
-	type MEM_t is array (natural range <>) of std_logic_vector(7 downto 0);
-	constant mem : MEM_t(0 to 305) := 
-	(
-		X"FF", X"FF", X"FF", X"FF",
-		X"FE",
-		X"00", X"00", 	-- track=0
-		X"00", X"01",		-- sector=0
-		X"12", X"34",		-- CRC
-		X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", 
-		X"00", X"00", X"00", X"00", X"00", X"00", 
-		X"FB",					-- DAM
-		X"00", X"01", X"02", X"03", X"04", X"05", X"06", X"07", X"08", X"09", X"0A", X"0B", X"0C", X"0D", X"0E", X"0F",
-		X"00", X"01", X"02", X"03", X"04", X"05", X"06", X"07", X"08", X"09", X"0A", X"0B", X"0C", X"0D", X"0E", X"0F",
-		X"00", X"01", X"02", X"03", X"04", X"05", X"06", X"07", X"08", X"09", X"0A", X"0B", X"0C", X"0D", X"0E", X"0F",
-		X"00", X"01", X"02", X"03", X"04", X"05", X"06", X"07", X"08", X"09", X"0A", X"0B", X"0C", X"0D", X"0E", X"0F",
-		X"00", X"01", X"02", X"03", X"04", X"05", X"06", X"07", X"08", X"09", X"0A", X"0B", X"0C", X"0D", X"0E", X"0F",
-		X"00", X"01", X"02", X"03", X"04", X"05", X"06", X"07", X"08", X"09", X"0A", X"0B", X"0C", X"0D", X"0E", X"0F",
-		X"00", X"01", X"02", X"03", X"04", X"05", X"06", X"07", X"08", X"09", X"0A", X"0B", X"0C", X"0D", X"0E", X"0F",
-		X"00", X"01", X"02", X"03", X"04", X"05", X"06", X"07", X"08", X"09", X"0A", X"0B", X"0C", X"0D", X"0E", X"0F",
-		X"00", X"01", X"02", X"03", X"04", X"05", X"06", X"07", X"08", X"09", X"0A", X"0B", X"0C", X"0D", X"0E", X"0F",
-		X"00", X"01", X"02", X"03", X"04", X"05", X"06", X"07", X"08", X"09", X"0A", X"0B", X"0C", X"0D", X"0E", X"0F",
-		X"00", X"01", X"02", X"03", X"04", X"05", X"06", X"07", X"08", X"09", X"0A", X"0B", X"0C", X"0D", X"0E", X"0F",
-		X"00", X"01", X"02", X"03", X"04", X"05", X"06", X"07", X"08", X"09", X"0A", X"0B", X"0C", X"0D", X"0E", X"0F",
-		X"00", X"01", X"02", X"03", X"04", X"05", X"06", X"07", X"08", X"09", X"0A", X"0B", X"0C", X"0D", X"0E", X"0F",
-		X"00", X"01", X"02", X"03", X"04", X"05", X"06", X"07", X"08", X"09", X"0A", X"0B", X"0C", X"0D", X"0E", X"0F",
-		X"00", X"01", X"02", X"03", X"04", X"05", X"06", X"07", X"08", X"09", X"0A", X"0B", X"0C", X"0D", X"0E", X"0F",
-		X"00", X"01", X"02", X"03", X"04", X"05", X"06", X"07", X"08", X"09", X"0A", X"0B", X"0C", X"0D", X"0E", X"0F",
-		X"56", X"78",
-		X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", 
-		X"00", X"00", X"00", X"00", X"00", X"00"
-	);
 
 begin
 
@@ -86,71 +47,223 @@ begin
 
 	--mem_d <= mem(conv_integer(mem_a));
 
-  wd179x_inst : entity work.wd179x
-    port map
-    (
-      clk           => clk_20M,
-      clk_20M_ena   => '1',
-      reset         => reset,
-      
-      -- micro bus interface
-      mr_n          => '1',
-      we_n          => fdc_we_n,
-      cs_n          => fdc_cs_n,
-      re_n          => fdc_re_n,
-      a             => fdc_a(1 downto 0),
-      dal_i         => fdc_dat_i,
-      dal_o         => fdc_dat_o,
-      clk_1mhz_en   => '1',
-      drq           => drq,
-      intrq         => intrq,
-      
-      -- drive interface
-      step          => step,
-      dirc          => dirc,
-      early         => open,    -- not used atm
-      late          => open,    -- not used atm
-      test_n        => '1',     -- not used
-      hlt           => '1',     -- head always engaged atm
-      rg            => open,
-      sso           => open,
-      rclk          => rclk,
-      raw_read_n    => raw_read_n,
-      hld           => open,    -- not used atm
-      tg43          => open,    -- not used on TRS-80 designs
-      wg            => open,
-      wd            => open,    -- 200ns (MFM) or 500ns (FM) pulse
-      ready         => '1',     -- always read atm
-      wf_n_i        => '1',     -- no write faults atm
-      vfoe_n_o      => open,    -- not used in TRS-80 designs?
-      tr00_n        => tr00_n,
-      ip_n          => ip_n,
-      wprt_n        => '1',     -- never write-protected atm
-      dden_n        => '1'      -- single density only atm
-    );
+    BLK_FDC : block
 
-	floppy_inst : entity work.floppy
-	  port map
-	  (
-	    clk           => clk_20M,
-	    clk_20M_ena   => '1',
-	    reset         => reset,
+      constant FDC_USE_FIFO : boolean := true;
+      
+			alias reset_i				: std_logic is reset;
+			alias platform_reset	: std_logic is reset;
 
-      drvsel        => ds,
-	    
-	    step          => step,
-	    dirc          => dirc,
-	    rclk          => rclk,
-	    raw_read_n    => raw_read_n,
-	    tr00_n        => tr00_n,
-	    ip_n          => ip_n,
-	
-	    -- memory interface
-	    mem_a         => mem_a,
-	    mem_d_i       => mem_d,
-	    mem_d_o       => open,
-	    mem_we        => open
-	  );
+      signal sync_reset   : std_logic := '1';
+      
+      signal step         : std_logic := '0';
+      signal dirc         : std_logic := '0';
+      signal rclk         : std_logic := '0';
+      signal raw_read_n   : std_logic := '0';
+      signal tr00_n       : std_logic := '0';
+      signal ip_n         : std_logic := '0';
+
+      signal de_s         : std_logic_vector(4 downto 1);
+      signal ds_s         : std_logic_vector(ds'range);
+
+      -- floppy data
+      signal track              : std_logic_vector(7 downto 0) := (others => '0');
+      signal offset             : std_logic_vector(12 downto 0) := (others => '0');
+      signal rd_data_from_media : std_logic_vector(7 downto 0) := (others => '0');
+      signal rd_data_from_fifo  : std_logic_vector(7 downto 0) := (others => '0');
+      
+      signal fifo_rd      : std_logic := '0';
+      signal fifo_wr      : std_logic := '0';
+      signal fifo_flush   : std_logic := '0';
+
+      signal floppy_dbg   : std_logic_vector(31 downto 0) := (others => '0');
+      signal wd179x_dbg   : std_logic_vector(31 downto 0) := (others => '0');
+      
+    begin
+
+      process (clk_20M, reset_i)
+        variable reset_r : std_logic_vector(3 downto 0) := (others => '0');
+      begin
+        if reset_i = '1' then
+          reset_r := (others => '1');
+        elsif rising_edge(clk_20M) then
+          reset_r := reset_r(reset_r'left-1 downto 0) & platform_reset;
+        end if;
+        sync_reset <= reset_r(reset_r'left);
+      end process;
+      
+      wd179x_inst : entity work.wd179x
+        port map
+        (
+          clk           => clk_20M,
+          clk_20M_ena   => '1',
+          reset         => sync_reset,
+          
+          -- micro bus interface
+          mr_n          => '1',
+          we_n          => fdc_we_n,
+          cs_n          => fdc_cs_n,
+          re_n          => fdc_re_n,
+          a             => fdc_a,
+          dal_i         => fdc_dat_i,
+          dal_o         => fdc_dat_o,
+          clk_1mhz_en   => '1',
+          drq           => drq,
+          intrq         => intrq,
+          
+          -- drive interface
+          step          => step,
+          dirc          => dirc,
+          early         => open,    -- not used atm
+          late          => open,    -- not used atm
+          test_n        => '1',     -- not used
+          hlt           => '1',     -- head always engaged atm
+          rg            => open,
+          sso           => open,
+          rclk          => rclk,
+          raw_read_n    => raw_read_n,
+          hld           => open,    -- not used atm
+          tg43          => open,    -- not used on TRS-80 designs
+          wg            => open,
+          wd            => open,    -- 200ns (MFM) or 500ns (FM) pulse
+          ready         => '1',     -- always read atm
+          wf_n_i        => '1',     -- no write faults atm
+          vfoe_n_o      => open,    -- not used in TRS-80 designs?
+          tr00_n        => tr00_n,
+          ip_n          => ip_n,
+          wprt_n        => '1',     -- never write-protected atm
+          dden_n        => '1',     -- single density only atm
+          
+          debug         => wd179x_dbg
+        );
+        
+      floppy_if_inst : entity work.floppy_if
+        generic map
+        (
+          NUM_TRACKS      => 40
+        )
+        port map
+        (
+          clk           => clk_20M,
+          clk_20M_ena   => '1',
+          reset         => sync_reset,
+          
+          -- drive select lines
+          drv_ena       => de_s,
+          drv_sel       => ds_s,
+          
+          step          => step,
+          dirc          => dirc,
+          rclk          => rclk,
+          raw_read_n    => raw_read_n,
+          tr00_n        => tr00_n,
+          ip_n          => ip_n,
+          
+          -- media interface
+
+          track         => track,
+          dat_i         => rd_data_from_fifo,
+          dat_o         => open,
+          -- random-access control
+          offset        => offset,
+          -- fifo control
+          rd            => fifo_rd,
+          wr            => open,
+          flush         => fifo_flush,
+          
+          debug         => floppy_dbg
+        );
+
+      GEN_FLOPPY_FIFO : if FDC_USE_FIFO generate
+        BLK_FIFO : block
+					signal fifo_rd_pulse	: std_logic := '0';
+          signal fifo_empty   	: std_logic := '0';
+          signal fifo_full    	: std_logic := '0';
+        begin
+          fifo_inst : ENTITY work.floppy_fifo
+            PORT map
+            (
+              rdclk		  => clk_20M,
+              q		      => rd_data_from_fifo,
+              rdreq		  => fifo_rd_pulse,
+              rdempty		=> fifo_empty,
+
+              wrclk		  => clk_20M,
+              data		  => rd_data_from_media,
+              wrreq		  => fifo_wr,
+              wrfull		=> fifo_full,
+              aclr      => fifo_flush
+            );
+
+          process (clk_20M, sync_reset)
+            subtype count_t is integer range 0 to 7;
+            variable count    	: count_t := 0;
+            variable offset_v 	: std_logic_vector(12 downto 0) := (others => '0');
+						variable fifo_rd_r	: std_logic := '0';
+          begin
+            if sync_reset = '1' then
+              count := 0;
+              offset_v := (others => '0');
+            elsif rising_edge(clk_20M) then
+
+							fifo_rd_pulse <= '0';	-- default
+							if fifo_rd = '1' and fifo_rd_r = '0' then
+								fifo_rd_pulse <= '1';
+							end if;
+							fifo_rd_r := fifo_rd;
+
+              fifo_wr <= '0';   -- default
+              if count = count_t'high then
+                if fifo_full = '0' then
+                  fifo_wr <= '1';
+                  if offset_v = 6272-1 then
+                    offset_v := (others => '0');
+                  else
+                    offset_v := offset_v + 1;
+                  end if;
+                end if;
+                count := 0;
+              else
+            		mem_a(12 downto 0) <= offset_v;
+                count := count + 1;
+              end if;
+            end if;
+          end process;
+
+        end block BLK_FIFO;
+        
+      end generate GEN_FLOPPY_FIFO;
+      
+      GEN_FLOPPY_NO_FIFO : if not FDC_USE_FIFO generate
+        -- each track is encoded in 8KiB
+        -- - 40 tracks is 320(512) KiB
+        mem_a(12 downto 0) <= offset;
+        rd_data_from_fifo <= rd_data_from_media;
+      end generate GEN_FLOPPY_NO_FIFO;
+      
+      BLK_FLASH_FLOPPY : block
+      begin  
+
+        mem_a(mem_a'left downto 20) <= (others => '0');
+        -- support 2 drives in flash for now
+        mem_a(19) <=  '0' when ds_s(1) = '1' else
+                      '1' when ds_s(2) = '1' else
+                      '0';
+        mem_a(18 downto 13) <= track(5 downto 0);
+
+        rd_data_from_media <= mem_d;
+
+      end block BLK_FLASH_FLOPPY;
+      
+      -- drive enable switches
+      de_s <= "1111";
+      
+      -- switch drives 1&2 depending on switch
+      --ds_s(1) <= ds(1) when switches_i(2) = '0' else ds(2);
+      --ds_s(2) <= ds(2) when switches_i(2) = '0' else ds(1);
+      ds_s <= ds;
+      
+    end block BLK_FDC;
 
 	sram_inst : entity work.sram_512Kx8
 		generic map

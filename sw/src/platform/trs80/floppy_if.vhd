@@ -91,6 +91,7 @@ begin
       step_r := '0';
       track_r <= (others => (others => '0'));
     elsif rising_edge(clk) and clk_20M_ena = '1' then
+      flush <= '0';
       if ena = '1' then
         -- leading edge of step
         if step_r = '0' and step = '1' then
@@ -105,6 +106,7 @@ begin
               track_r(drv) <= track_r(drv) + 1;
             end if;
           end if;
+          flush <= '1'; -- flush FIFO
         end if;
       end if;
       step_r := step;
@@ -129,10 +131,12 @@ begin
       if reset = '1' then
         count := (others => '0');
 				rclk <= '0';
+				rd <= '0';
 				raw_read_n <= '1';
 				ip_n <= '1';
       elsif rising_edge(clk) and clk_1M_ena = '1' then
-        raw_read_n <= '1'; -- default
+        rd <= '0';          -- default
+        raw_read_n <= '1';  -- default
         -- memory address
         if phase = "00" and bbit = "000" then
           offset_s <= byte;
@@ -146,6 +150,7 @@ begin
         -- data latch (1us memory assumed)
         if phase = "01" and bbit = "000" then
           read_data_r := dat_i;
+          rd <= '1';
         end if;
         if phase = "10" then
           raw_read_n <= ena and not read_data_r(read_data_r'left);
@@ -178,8 +183,6 @@ begin
 
   -- not used
   dat_o <= (others => '0');
-  rd <= '0';
   wr <= '0';
-  flush <= '0';
   
 end architecture SYN;

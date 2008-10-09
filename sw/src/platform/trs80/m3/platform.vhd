@@ -1,6 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_arith.EXT;
+use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -186,9 +187,9 @@ begin
   uP_datai <= uPmem_datai when (uPmemrd = '1') else uPio_datai;
 
   -- SRAM signals (may or may not be used)
-  sram_o.a <= EXT(uP_addr, sram_o.a'length);
-  sram_o.d <= EXT(uP_datao, sram_o.d'length);
-	sram_o.be <= EXT("1", sram_o.be'length);
+  sram_o.a <= std_logic_vector(RESIZE(unsigned(uP_addr), sram_o.a'length));
+  sram_o.d <= std_logic_vector(RESIZE(unsigned(uP_datao), sram_o.d'length));
+	sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
   sram_o.cs <= '1';
   sram_o.oe <= not ram_wr;
   sram_o.we <= ram_wr;
@@ -316,7 +317,7 @@ begin
 	bitmap_o <= NULL_TO_BITMAP_CTL;
 	sprite_reg_o <= NULL_TO_SPRITE_REG;
 	sprite_o <= NULL_TO_SPRITE_CTL;
-  tilemap_o.attr_d <= EXT(switches_i(7 downto 0), tilemap_o.attr_d'length);
+  tilemap_o.attr_d <= std_logic_vector(RESIZE(unsigned(switches_i(7 downto 0)), tilemap_o.attr_d'length));
 	graphics_o <= ((others => (others => '0')), port_ec);
 	ser_o <= NULL_TO_SERIAL;
   spi_o <= NULL_TO_SPI;
@@ -444,7 +445,9 @@ begin
   GEN_FDC : if TRS80_M3_FDC_SUPPORT generate
   
     BLK_FDC : block
-    
+
+      constant FDC_USE_FIFO : boolean := true;
+      
       signal sync_reset   : std_logic := '1';
       
       signal step         : std_logic := '0';
@@ -458,10 +461,15 @@ begin
       signal ds_s         : std_logic_vector(ds'range);
 
       -- floppy data
-      signal track        : std_logic_vector(7 downto 0) := (others => '0');
-      signal offset       : std_logic_vector(12 downto 0) := (others => '0');
-      signal rd_data      : std_logic_vector(7 downto 0) := (others => '0');
+      signal track              : std_logic_vector(7 downto 0) := (others => '0');
+      signal offset             : std_logic_vector(12 downto 0) := (others => '0');
+      signal rd_data_from_media : std_logic_vector(7 downto 0) := (others => '0');
+      signal rd_data_from_fifo  : std_logic_vector(7 downto 0) := (others => '0');
       
+      signal fifo_rd      : std_logic := '0';
+      signal fifo_wr      : std_logic := '0';
+      signal fifo_flush   : std_logic := '0';
+
       signal floppy_dbg   : std_logic_vector(31 downto 0) := (others => '0');
       signal wd179x_dbg   : std_logic_vector(31 downto 0) := (others => '0');
       
@@ -548,17 +556,86 @@ begin
           -- media interface
 
           track         => track,
-          dat_i         => rd_data,
+          dat_i         => rd_data_from_fifo,
           dat_o         => open,
           -- random-access control
           offset        => offset,
           -- fifo control
-          rd            => open,
+          rd            => fifo_rd,
           wr            => open,
-          flush         => open,
+          flush         => fifo_flush,
           
           debug         => floppy_dbg
         );
+
+      GEN_FLOPPY_FIFO : if FDC_USE_FIFO generate
+        BLK_FIFO : block
+					signal fifo_rd_pulse	: std_logic := '0';
+          signal fifo_empty     : std_logic := '0';
+          signal fifo_full      : std_logic := '0';
+        begin
+          fifo_inst : ENTITY work.floppy_fifo
+            PORT map
+            (
+              rdclk		  => clk_20M,
+              q		      => rd_data_from_fifo,
+              rdreq		  => fifo_rd_pulse,
+              rdempty		=> fifo_empty,
+
+              wrclk		  => clk_20M,
+              data		  => rd_data_from_media,
+              wrreq		  => fifo_wr,
+              wrfull		=> fifo_full,
+              aclr      => fifo_flush
+            );
+
+          process (clk_20M, sync_reset)
+            subtype count_t is integer range 0 to 7;
+            variable count      : count_t := 0;
+            variable offset_v   : std_logic_vector(12 downto 0) := (others => '0');
+						variable fifo_rd_r	: std_logic := '0';
+          begin
+            if sync_reset = '1' then
+              count := 0;
+              offset_v := (others => '0');
+            elsif rising_edge(clk_20M) then
+
+              -- fifo read pulse is too wide - edge-detect
+							fifo_rd_pulse <= '0';	-- default
+							if fifo_rd = '1' and fifo_rd_r = '0' then
+								fifo_rd_pulse <= '1';
+							end if;
+							fifo_rd_r := fifo_rd;
+
+              fifo_wr <= '0';   -- default
+              if count = count_t'high then
+                if fifo_full = '0' then
+                  fifo_wr <= '1';
+                  if offset_v = 6272-1 then
+                    offset_v := (others => '0');
+                  else
+                    offset_v := offset_v + 1;
+                  end if;
+                end if;
+                count := 0;
+              else
+                count := count + 1;
+                -- don't update when writing to FIFO
+                flash_o.a(12 downto 0) <= offset_v;
+              end if;
+            end if;
+          end process;
+
+        end block BLK_FIFO;
+        
+      end generate GEN_FLOPPY_FIFO;
+      
+      GEN_FLOPPY_NO_FIFO : if not FDC_USE_FIFO generate
+        -- each track is encoded in 8KiB
+        -- - 40 tracks is 320(512) KiB
+        flash_o.a(12 downto 0) <= offset;
+        rd_data_from_fifo <= rd_data_from_media;
+      end generate GEN_FLOPPY_NO_FIFO;
       
       BLK_FLASH_FLOPPY : block
       begin  
@@ -568,14 +645,12 @@ begin
         flash_o.a(19) <=  '0' when ds_s(1) = '1' else
                           '1' when ds_s(2) = '1' else
                           '0';
-        -- each track is encoded in 8KiB
-        -- - 40 tracks is 320(512) KiB
         flash_o.a(18 downto 13) <= track(5 downto 0);
-        flash_o.a(12 downto 0) <= offset;
-        rd_data <= flash_i.d;
         flash_o.cs <= '1';
         flash_o.oe <= '1';
         flash_o.we <= '0';
+
+        rd_data_from_media <= flash_i.d;
 
       end block BLK_FLASH_FLOPPY;
       
