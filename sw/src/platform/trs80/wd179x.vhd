@@ -412,6 +412,8 @@ begin
   							elsif STD_MATCH(cmd, CMD_STEP_OUT) then
   								dirc_v := DIRC_OUT;
   								state <= STEPIO;
+                else
+                  state <= DONE;
   							end if;
   						end if;
   					when RESTORE =>
@@ -496,7 +498,7 @@ begin
   						type_i_ack <= '1';
   						state <= IDLE;
   					when others =>
-  						state <= IDLE;
+  						state <= DONE;
   				end case;
         end if;
 			end if;
@@ -508,7 +510,7 @@ begin
 
 	BLK_TYPE_II : block
 
-		type STATE_t is ( IDLE, WAIT_IDAM, WAIT_DAM, READ_SECTOR, DONE );
+		type STATE_t is ( IDLE, WAIT_IDAM, WAIT_DAM, READ_SECTOR, WRITE_SECTOR, DONE );
 		signal state : STATE_t;
 
 	begin
@@ -530,9 +532,7 @@ begin
   				case state is
   					when IDLE =>
   						if type_ii_stb = '1' then
-  							if STD_MATCH(cmd, CMD_READ_SECTOR) then
-  								state <= WAIT_IDAM;
-  							end if;
+                state <= WAIT_IDAM;
   						end if;
   					when WAIT_IDAM =>
   						if id_addr_mark_rdy = '1' then
@@ -543,7 +543,13 @@ begin
   					when WAIT_DAM =>
   						if data_addr_mark_rdy = '1' then
   							count := 0;
-  							state <= READ_SECTOR;
+  							if STD_MATCH(cmd, CMD_READ_SECTOR) then
+                  state <= READ_SECTOR;
+                elsif STD_MATCH(cmd, CMD_WRITE_SECTOR) then
+                  state <= WRITE_SECTOR;
+                else
+                  state <= DONE;
+  							end if;
   						end if;
   					when READ_SECTOR =>
               if user_data_rdy = '1' then
@@ -557,11 +563,13 @@ begin
                   end if;
                 end if;
   						end if;
+            when WRITE_SECTOR =>
+              state <= DONE;
   					when DONE =>
               type_ii_ack <= '1';
               state <= IDLE;
   					when others =>
-  						state <= IDLE;
+  						state <= DONE;
   				end case;
         end if;
 			end if;
@@ -598,6 +606,8 @@ begin
               if type_iii_stb = '1' then
                 if STD_MATCH(cmd, CMD_READ_ADDRESS) then
                   state <= READ_ADDR_WAIT;
+                else
+                  state <= DONE;
                 end if;
               end if;
             when READ_ADDR_WAIT =>
@@ -617,7 +627,7 @@ begin
               type_iii_ack <= '1';
               state <= IDLE;
             when others =>
-              state <= IDLE;
+              state <= DONE;
           end case;
         end if;
       end if;

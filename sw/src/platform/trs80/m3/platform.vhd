@@ -456,7 +456,8 @@ begin
       signal raw_read_n   : std_logic := '0';
       signal tr00_n       : std_logic := '0';
       signal ip_n         : std_logic := '0';
-
+      signal wprt_n       : std_logic := '1';
+      
       signal de_s         : std_logic_vector(4 downto 1);
       signal ds_s         : std_logic_vector(ds'range);
 
@@ -525,7 +526,7 @@ begin
           vfoe_n_o      => open,    -- not used in TRS-80 designs?
           tr00_n        => tr00_n,
           ip_n          => ip_n,
-          wprt_n        => '1',     -- never write-protected atm
+          wprt_n        => wprt_n,
           dden_n        => '1',     -- single density only atm
           
           debug         => wd179x_dbg
@@ -652,6 +653,8 @@ begin
 
         rd_data_from_media <= flash_i.d;
 
+        wprt_n <= '0';  -- always write-protected
+        
       end block BLK_FLASH_FLOPPY;
       
       -- drive enable switches
