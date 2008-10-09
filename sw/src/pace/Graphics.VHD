@@ -120,12 +120,6 @@ architecture SYN of Graphics is
   
 begin
 
-	-- generate final RGB signal
-	rgb_data <= sprite_ctl_o_s.rgb when sprite_ctl_o_s.set = '1' and sprite_pri = '1' else
-							tilemap_ctl_o_s.rgb when tilemap_ctl_o_s.set = '1' else
-							sprite_ctl_o_s.rgb when sprite_ctl_o_s.set = '1' else
-							bitmap_ctl_o_s.rgb;
-
   -- dodgy OSD transparency...
 	video_o.clk <= video_o_s.clk;
   video_o.rgb.r <= 	video_o_s.rgb.r when (to_osd.en and osd_active) = '0' else 
@@ -174,6 +168,21 @@ begin
       video_o     		=> video_o_s
     );
 
+  pace_video_mixer_inst : entity work.pace_video_mixer
+    port map
+    (
+        bitmap_rgb    => bitmap_ctl_o_s.rgb,
+        bitmap_set    => bitmap_ctl_o_s.set,
+        tilemap_rgb   => tilemap_ctl_o_s.rgb,
+        tilemap_set   => tilemap_ctl_o_s.set,
+        sprite_rgb    => sprite_ctl_o_s.rgb,
+        sprite_set    => sprite_ctl_o_s.set,
+        sprite_pri    => sprite_pri,
+        
+        graphics_i    => graphics_i,
+        rgb_o         => rgb_data
+    );
+    
 	GEN_NO_BITMAPS : if PACE_VIDEO_NUM_BITMAPS = 0 generate
     bitmap_ctl_o_s <= ((others => '0'), (others => (others => '0')), '0');
 	end generate GEN_NO_BITMAPS;

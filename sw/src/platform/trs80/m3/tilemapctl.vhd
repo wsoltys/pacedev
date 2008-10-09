@@ -149,11 +149,11 @@ begin
       -- for end-of-line detection
 			hblank_r := hblank_r(hblank_r'left-1 downto 0) & hblank;
 		
+      ctl_o.set <= pel;
+
 		end if; -- rising_edge(clk)
 
   end process;
-
-	ctl_o.set <= '1';
 
 end SYN;
 
