@@ -65,6 +65,7 @@ package project_pkg is
 	constant TRS80_M3_HIRES_WIDTHA            : integer := 12;    -- 4KiB only
 	constant TRS80_M3_FDC_SUPPORT			        : boolean := true;
 
-	--constant USE_VIDEO_VBLANK_INTERRUPT       : boolean := false;
-	
+  -- *** WARNING: enabling this option won't work on a stock DE1
+  constant TRS80_M3_SYSMEM_IN_BURCHED_SRAM  : boolean := true;
+  
 end;

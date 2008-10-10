@@ -131,9 +131,9 @@ architecture SYN of platform is
   signal vram_datao     : std_logic_vector(7 downto 0);
 
   -- hires signals
-  signal hires_dat_cs   : std_logic := '0';
-	signal hires_dat_wr   : std_logic := '0';
-	signal hires_dat_o    : std_logic_vector(7 downto 0) := (others => '0');
+  signal ulabs_en       : std_logic := '0';
+	signal ulabs_wr       : std_logic := '0';
+	signal ulabs_dat_o    : std_logic_vector(7 downto 0) := (others => '0');
 	
   -- RAM signals        
   signal ram_wr         : std_logic;
@@ -191,30 +191,39 @@ begin
   -- read mux
   uP_datai <= uPmem_datai when (uPmemrd = '1') else uPio_datai;
 
-  -- SRAM signals (may or may not be used)
-  --ram_datao <= sram_i.d(ram_datao'range);
-  sram_o.a <= std_logic_vector(RESIZE(unsigned(uP_addr), sram_o.a'length));
-  sram_o.d <= std_logic_vector(RESIZE(unsigned(uP_datao), sram_o.d'length));
-	sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
-  sram_o.cs <= '1';
-  sram_o.oe <= not ram_wr;
-  sram_o.we <= ram_wr;
+  BLK_SYSMEM : block
+  begin
 
-  GEN_BURCHED_SRAM: if true generate
-    -- hook up Burched SRAM module
-    GEN_D: for i in 0 to 7 generate
-      ram_datao(i) <= gp_i(35-i);
-      gp_o(35-i) <= up_datao(i);
-      gp_o(27-i) <= 'Z';
-    end generate;
-    GEN_A: for i in 0 to 15 generate
-      gp_o(17-i) <= up_addr(i);
-    end generate;
-    gp_o(1) <= '0';           -- A16
-    gp_o(0) <= '0';           -- CEAn
-    gp_o(18) <= '1';          -- upper byte WEn
-    gp_o(19) <= not ram_wr;   -- lower byte WEn
-  end generate GEN_BURCHED_SRAM;
+    GEN_DFLT_SYSMEM: if not TRS80_M3_SYSMEM_IN_BURCHED_SRAM generate
+      ram_datao <= sram_i.d(ram_datao'range);
+      sram_o.a <= std_logic_vector(RESIZE(unsigned(uP_addr), sram_o.a'length));
+      sram_o.d <= std_logic_vector(RESIZE(unsigned(uP_datao), sram_o.d'length));
+      sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
+      sram_o.cs <= '1';
+      sram_o.oe <= not ram_wr;
+      sram_o.we <= ram_wr;
+    end generate GEN_DFLT_SYSMEM;
+    
+    GEN_BURCHED_SYSMEM: if TRS80_M3_SYSMEM_IN_BURCHED_SRAM generate
+      assert false
+        report "TRS80_M3_SYSMEM_IN_BURCHED_SRAM option won't work on stock DE1 hardware"
+          severity warning;
+      -- hook up Burched SRAM module
+      GEN_D: for i in 0 to 7 generate
+        ram_datao(i) <= gp_i(35-i);
+        gp_o(35-i) <= up_datao(i);
+        gp_o(27-i) <= 'Z';
+      end generate;
+      GEN_A: for i in 0 to 15 generate
+        gp_o(17-i) <= up_addr(i);
+      end generate;
+      gp_o(1) <= '0';           -- A16
+      gp_o(0) <= '0';           -- CEAn
+      gp_o(18) <= '1';          -- upper byte WEn
+      gp_o(19) <= not ram_wr;   -- lower byte WEn
+    end generate GEN_BURCHED_SYSMEM;
+
+  end block BLK_SYSMEM;
   
 	-- memory chip selects
 	-- ROM $0000-$37FF
@@ -225,15 +234,15 @@ begin
 	vram_cs <= '1' when uP_addr(15 downto 10) = (X"3" & "11") else '0';
 	
 	-- memory write enables
-	vram_wr <= vram_cs and uPmemwr;
+	vram_wr <= vram_cs and not ulabs_en and uPmemwr;
+	-- microlabs hires graphics (mapped to normal video ram)
+	ulabs_wr <= vram_cs and ulabs_en and uPmemwr;
 	-- always write thru to RAM
 	ram_wr <= uPmemwr;
 
 	-- I/O chip selects
 	-- Alpha Joystick $00 (active low)
 	alpha_joy_cs <= '1' when io_addr = X"00" else '0';
-	-- MicroLabs Hires Data port
-  hires_dat_cs <= '1' when io_addr = X"82" else '0';
 	-- RDINTSTATUS $E0-E3 (active low)
 	int_cs <= '1' when io_addr(7 downto 2) = "111000" else '0';
 	-- NMI STATUS $E4
@@ -268,12 +277,12 @@ begin
 	-- memory read mux
 	uPmem_datai <= 	rom_datao when rom_cs = '1' else
 									kbd_data when kbd_cs = '1' else
-									vram_datao when vram_cs = '1' else
+									vram_datao when vram_cs = '1' and ulabs_en = '0' else
+									ulabs_dat_o when vram_cs = '1' and ulabs_en = '1' else
 									ram_datao;
 	
 	-- io read mux
 	uPio_datai <= X"FF" when alpha_joy_cs = '1' else
-                hires_dat_o when hires_dat_cs = '1' else
 								(not int_status) when int_cs = '1' else
 								(not nmi_status) when nmi_cs = '1' else
 								fdc_dat_o when fdc_cs_n = '0' else
@@ -418,65 +427,34 @@ begin
   GEN_HIRES: if TRS80_M3_HIRES_SUPPORT generate
 
     BLK_HIRES : block
-      signal hires_a  : std_logic_vector(14 downto 0) := (others => '0');   -- Max 32KiB
-      alias x_r       : std_logic_vector(5 downto 0) is hires_a(5 downto 0);
-      alias y_r       : std_logic_vector(7 downto 0) is hires_a(13 downto 6);
-      signal data_r   : std_logic_vector(7 downto 0) := (others => '0');
+      signal hires_a  : std_logic_vector(13 downto 0) := (others => '0');   -- Max 16KiB
       signal mode_r   : std_logic_vector(7 downto 0) := (others => '0');
     begin
 
       process (clk_20M, cpu_reset)
-        variable rd_r   : std_logic := '0';
         variable wr_r   : std_logic := '0';
       begin
         if cpu_reset = '1' then
-          x_r <= (others => '0');
-          y_r <= (others => '0');
-          data_r <= (others => '0');
           mode_r <= (others => '0');
+          ulabs_en <= '0';
           wr_r := '0';
         elsif rising_edge(clk_20M) then
-          hires_dat_wr <= '0';
-          if io_addr(7 downto 2) = "100000" then
-            -- write to a graphics register
+          if io_addr = X"FF" then
+            -- write to the mode register
             if wr_r = '0' and upiowr = '1' then
               -- leading-edge write
-              case io_addr(1 downto 0) is
-                when "00" =>
-                  x_r <= up_datao(x_r'range);
-                when "01" =>
-                  y_r <= up_datao(y_r'range);
-                when "10" =>
-                  data_r <= up_datao;
-                  hires_dat_wr <= '1';
-                when others =>
-                  mode_r <= up_datao;
-              end case;
-            elsif io_addr(1 downto 0) = "10" then
-              -- write to data register
-              if  (rd_r = '1' and upiord = '0' and mode_r(5) = '0') or
-                  (wr_r = '1' and upiowr = '0' and mode_r(7) = '0') then
-                -- trailing-edge read or write & y clock
-                if mode_r(3) = '0' then
-                  y_r <= y_r + 1;
-                else
-                  y_r <= y_r - 1;
-                end if;
-              elsif (rd_r = '1' and upiord = '0' and mode_r(4) = '0') or
-                    (wr_r = '1' and upiowr = '0' and mode_r(6) = '0') then
-                -- trailing-edge read or write & x clock
-                if mode_r(2) = '0' then
-                  x_r <= x_r + 1;
-                else
-                  x_r <= x_r - 1;
-                end if;
+              if up_datao(5) = '1' then
+                mode_r <= up_datao;
               end if;
             end if;
           end if;
-          rd_r := upiord;
           wr_r := upiowr;
         end if;
+        ulabs_en <= mode_r(7);
       end process;
+
+      hires_a(13 downto 10) <= mode_r(4 downto 1);
+      hires_a(9 downto 0) <= up_addr(9 downto 0);
 
       -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
       hires_ram_inst : entity work.dpram
@@ -490,9 +468,9 @@ begin
         (
           clock_b			=> clk_20M,
           address_b		=> hires_a(TRS80_M3_HIRES_WIDTHA-1 downto 0),
-          wren_b			=> hires_dat_wr,
-          data_b			=> data_r,
-          q_b					=> hires_dat_o,
+          wren_b			=> ulabs_wr,
+          data_b			=> up_datao,
+          q_b					=> ulabs_dat_o,
 
           clock_a			=> clk_video,
           address_a		=> bitmap_i.a(TRS80_M3_HIRES_WIDTHA-1 downto 0),
@@ -501,7 +479,7 @@ begin
           q_a					=> bitmap_o.d(7 downto 0)
         );
 
-      graphics_o.bit8_1(1 downto 0) <= mode_r(1 downto 0);
+      graphics_o.bit8_1(1 downto 0) <= '0' & mode_r(6);
 
     end block BLK_HIRES;
   end generate GEN_HIRES;

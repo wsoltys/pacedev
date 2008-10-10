@@ -1,11 +1,14 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_unsigned.all;
+use ieee.std_logic_arith.CONV_SIGNED;
+use ieee.std_logic_arith.EXT;
 
 library work;
 use work.pace_pkg.all;
 use work.video_controller_pkg.all;
 use work.platform_pkg.all;
+use work.project_pkg.all;
 
 --
 --	TRS-80 Microlabs Model III Hires Graphics Bitmap Controller
@@ -45,20 +48,43 @@ architecture SYN of bitmapCtl_1 is
   
 begin
 
-	-- these are constant for a whole line
-	ctl_o.a(ctl_o.a'left downto 14) <= (others => '0');
-  ctl_o.a(13 downto 6) <= y(7 downto 0);
-
   -- generate pixel
   process (clk)
 
-		variable x_r	  : std_logic_vector(2*3-1 downto 0);
-		variable pel_r  : std_logic_vector(DELAY-1-2 downto 0); -- 2 from above
-		alias pel       : std_logic is pel_r(pel_r'right);
+		variable hblank_r		: std_logic_vector(DELAY-1 downto 0);
+		alias hblank_prev		: std_logic is hblank_r(hblank_r'left);
+		alias hblank_v			: std_logic is hblank_r(hblank_r'left-1);
+		variable vcount			: std_logic_vector(8 downto 0);
+		variable x_r	      : std_logic_vector(2*3-1 downto 0);
+		variable pel_r      : std_logic_vector(DELAY-1-2 downto 0); -- 2 from above
+		alias pel           : std_logic is pel_r(pel_r'right);
 		
   begin
   	if rising_edge(clk) and clk_ena = '1' then
 
+      if vblank = '1' then
+        vcount := (others => '0');
+
+      -- update vcount at the end of each line
+			elsif hblank_v = '1' and hblank_prev = '0' then
+
+        -- in effect we have vcount / 12 and vcount % 12
+				if vcount(2+PACE_VIDEO_V_SCALE downto 0) = X"B" & 
+						std_logic_vector(conv_signed(-1,PACE_VIDEO_V_SCALE-1)) then
+					vcount := vcount + 4 * PACE_VIDEO_V_SCALE + 1;
+				else
+					vcount := vcount + 1;
+				end if;
+
+        -- fixed for the line
+        -- VCOUNT%12*1KiB
+        ctl_o.a(13 downto 10) <= 
+          EXT(vcount(2+PACE_VIDEO_V_SCALE downto -1+PACE_VIDEO_V_SCALE), 4);
+        -- VCOUNT/12*64
+  			ctl_o.a(9 downto 6) <= vcount(6+PACE_VIDEO_V_SCALE downto 3+PACE_VIDEO_V_SCALE);
+          
+			end if;
+        
       -- 1st stage of pipeline
       -- - read tile from tilemap
       if stb = '1' then
@@ -71,21 +97,21 @@ begin
       -- each byte contains information for 8 pixels
       case x_r(x_r'left downto x_r'left-2) is
         when "000" =>
-          pel := ctl_i.d(7);
-        when "001" =>
-          pel := ctl_i.d(6);
-        when "010" =>
-          pel := ctl_i.d(5);
-        when "011" =>
-          pel := ctl_i.d(4);
-        when "100" =>
-          pel := ctl_i.d(3);
-        when "101" =>
-          pel := ctl_i.d(2);
-        when "110" =>
-          pel := ctl_i.d(1);
-        when others =>
           pel := ctl_i.d(0);
+        when "001" =>
+          pel := ctl_i.d(1);
+        when "010" =>
+          pel := ctl_i.d(2);
+        when "011" =>
+          pel := ctl_i.d(3);
+        when "100" =>
+          pel := ctl_i.d(4);
+        when "101" =>
+          pel := ctl_i.d(5);
+        when "110" =>
+          pel := ctl_i.d(6);
+        when others =>
+          pel := ctl_i.d(7);
       end case;
 
       -- green-screen display
@@ -96,6 +122,9 @@ begin
 			-- pipelined because of tile data loopkup
       x_r := x_r(x_r'left-3 downto 0) & x(2 downto 0);
 
+      -- for end-of-line detection
+			hblank_r := hblank_r(hblank_r'left-1 downto 0) & hblank;
+		
       ctl_o.set <= pel_r(pel_r'left);
 
 		end if; -- rising_edge(clk)

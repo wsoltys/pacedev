@@ -25,17 +25,15 @@ entity pace_video_mixer is
 end entity pace_video_mixer;
   
 architecture SYN of pace_video_mixer is
-  alias mode : std_logic_vector(1 downto 0) is graphics_i.bit8_1(1 downto 0);
+  -- MicroLabs Model III hires board
+  alias mode : std_logic is graphics_i.bit8_1(0);
 begin
 
-	rgb_o.r <=  tilemap_rgb.r when mode = "00" else
-              bitmap_rgb.r when mode = "11" else
+	rgb_o.r <=  tilemap_rgb.r when mode = '0' else
               tilemap_rgb.r xor bitmap_rgb.r;
-	rgb_o.g <=  tilemap_rgb.g when mode = "00" else
-              bitmap_rgb.g when mode = "11" else
+	rgb_o.g <=  tilemap_rgb.g when mode = '0' else
               tilemap_rgb.g xor bitmap_rgb.g;
-	rgb_o.b <=  tilemap_rgb.b when mode = "00" else
-              bitmap_rgb.b when mode = "11" else
+	rgb_o.b <=  tilemap_rgb.b when mode = '0' else
               tilemap_rgb.b xor bitmap_rgb.b;
 
 end architecture SYN;
