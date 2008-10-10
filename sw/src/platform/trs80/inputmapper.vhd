@@ -34,144 +34,162 @@ end inputmapper;
 architecture SYN of inputmapper is
 
   alias keymap  : std_logic is dips(dips'left);
+  alias jamma_n : from_JAMMA_t is jamma;
   
 begin
 
   PROC_LATCH: process (clk, rst_n)
 
-    variable ctrl		: std_logic;
-    variable esc		: std_logic;
-    variable shift  : std_logic;
+    variable jamma_v	: from_MAPPED_INPUTS_t(0 to NUM_INPUTS-1);
+    variable keybd_v 	: from_MAPPED_INPUTS_t(0 to NUM_INPUTS-1);
+    variable ctrl		  : std_logic;
+    variable esc		  : std_logic;
+    variable shift    : std_logic;
 			
   begin
      -- note: all inputs are active HIGH
     if rst_n = '0' then
+
       ctrl := '0';
       esc := '0';
       shift := '0';
       for i in 0 to NUM_INPUTS-1 loop
-        inputs(i).d <= (others => '0');
+        jamma_v(i).d := (others => '1');  -- b/c active low
+        keybd_v(i).d := (others => '0');
       end loop;
+
     elsif rising_edge (clk) then
+    
+      -- handle JAMMA inputs
+      jamma_v(4).d(1) := jamma_n.p(1).start;        -- <1>
+      jamma_v(6).d(3) := jamma_n.p(1).up;           -- <UP>
+      jamma_v(6).d(4) := jamma_n.p(1).down;         -- <DOWN>
+      jamma_v(6).d(5) := jamma_n.p(1).left;         -- <LEFT>
+      jamma_v(6).d(6) := jamma_n.p(1).right;        -- <RIGHT>
+      jamma_v(6).d(7) := jamma_n.p(1).button(1);    -- <SPACE>
+      jamma_v(6).d(0) := jamma_n.p(1).button(2);    -- <ENTER>
+      jamma_v(6).d(1) := jamma_n.p(1).button(3);    -- <CLEAR>
+      jamma_v(6).d(2) := jamma_n.p(1).button(4);    -- <BREAK>
+    
       if (press or release) = '1' then
         case data(7 downto 0) is
           -- row 0
           when SCANCODE_BACKQUOTE =>			-- TRS(@)
-            inputs(0).d(0) <= press;
+            keybd_v(0).d(0) := press;
           when SCANCODE_A =>
-            inputs(0).d(1) <= press;
+            keybd_v(0).d(1) := press;
           when SCANCODE_B =>
-            inputs(0).d(2) <= press;
+            keybd_v(0).d(2) := press;
           when SCANCODE_C =>
-            inputs(0).d(3) <= press;
+            keybd_v(0).d(3) := press;
           when SCANCODE_D =>
-            inputs(0).d(4) <= press;
+            keybd_v(0).d(4) := press;
           when SCANCODE_E =>
-            inputs(0).d(5) <= press;
+            keybd_v(0).d(5) := press;
           when SCANCODE_F =>
-            inputs(0).d(6) <= press;
+            keybd_v(0).d(6) := press;
           when SCANCODE_G =>
-            inputs(0).d(7) <= press;
+            keybd_v(0).d(7) := press;
           -- row 1
           when SCANCODE_H =>
-            inputs(1).d(0) <= press;
+            keybd_v(1).d(0) := press;
           when SCANCODE_I =>
-            inputs(1).d(1) <= press;
+            keybd_v(1).d(1) := press;
           when SCANCODE_J =>
-            inputs(1).d(2) <= press;
+            keybd_v(1).d(2) := press;
           when SCANCODE_K =>
-            inputs(1).d(3) <= press;
+            keybd_v(1).d(3) := press;
           when SCANCODE_L =>
-            inputs(1).d(4) <= press;
+            keybd_v(1).d(4) := press;
           when SCANCODE_M =>
-            inputs(1).d(5) <= press;
+            keybd_v(1).d(5) := press;
           when SCANCODE_N =>
-            inputs(1).d(6) <= press;
+            keybd_v(1).d(6) := press;
           when SCANCODE_O =>
-            inputs(1).d(7) <= press;
+            keybd_v(1).d(7) := press;
           -- row 2
           when SCANCODE_P =>
-            inputs(2).d(0) <= press;
+            keybd_v(2).d(0) := press;
           when SCANCODE_Q =>
-            inputs(2).d(1) <= press;
+            keybd_v(2).d(1) := press;
           when SCANCODE_R =>
-            inputs(2).d(2) <= press;
+            keybd_v(2).d(2) := press;
           when SCANCODE_S =>
-            inputs(2).d(3) <= press;
+            keybd_v(2).d(3) := press;
           when SCANCODE_T =>
-            inputs(2).d(4) <= press;
+            keybd_v(2).d(4) := press;
           when SCANCODE_U =>
-            inputs(2).d(5) <= press;
+            keybd_v(2).d(5) := press;
           when SCANCODE_V =>
-            inputs(2).d(6) <= press;
+            keybd_v(2).d(6) := press;
           when SCANCODE_W =>
-            inputs(2).d(7) <= press;
+            keybd_v(2).d(7) := press;
           -- row 3
           when SCANCODE_X =>
-            inputs(3).d(0) <= press;
+            keybd_v(3).d(0) := press;
           when SCANCODE_Y =>
-            inputs(3).d(1) <= press;
+            keybd_v(3).d(1) := press;
           when SCANCODE_Z =>
-            inputs(3).d(2) <= press;
+            keybd_v(3).d(2) := press;
           -- row 4
           when SCANCODE_0 =>
-            inputs(4).d(0) <= press;
+            keybd_v(4).d(0) := press;
           when SCANCODE_1 =>
-            inputs(4).d(1) <= press;
+            keybd_v(4).d(1) := press;
           when SCANCODE_2 =>
-            inputs(4).d(2) <= press;
+            keybd_v(4).d(2) := press;
           when SCANCODE_3 =>
-            inputs(4).d(3) <= press;
+            keybd_v(4).d(3) := press;
           when SCANCODE_4 =>
-            inputs(4).d(4) <= press;
+            keybd_v(4).d(4) := press;
           when SCANCODE_5 =>
-            inputs(4).d(5) <= press;
+            keybd_v(4).d(5) := press;
           when SCANCODE_6 =>
-            inputs(4).d(6) <= press;
+            keybd_v(4).d(6) := press;
           when SCANCODE_7 =>
-            inputs(4).d(7) <= press;
+            keybd_v(4).d(7) := press;
           -- row 5
           when SCANCODE_8 =>
-            inputs(5).d(0) <= press;
+            keybd_v(5).d(0) := press;
           when SCANCODE_9 =>
-            inputs(5).d(1) <= press;
+            keybd_v(5).d(1) := press;
           when SCANCODE_QUOTE =>					-- TRS(:)
-            inputs(5).d(2) <= press;
+            keybd_v(5).d(2) := press;
           when SCANCODE_SEMICOLON =>
-            inputs(5).d(3) <= press;
+            keybd_v(5).d(3) := press;
           when SCANCODE_COMMA =>
-            inputs(5).d(4) <= press;
+            keybd_v(5).d(4) := press;
           when SCANCODE_MINUS =>        	-- TRS(_)
-            inputs(5).d(5) <= press;
+            keybd_v(5).d(5) := press;
           when SCANCODE_PERIOD =>
-            inputs(5).d(6) <= press;
+            keybd_v(5).d(6) := press;
           when SCANCODE_SLASH =>
-            inputs(5).d(7) <= press;
+            keybd_v(5).d(7) := press;
           -- row 6
           when SCANCODE_ENTER =>
-            inputs(6).d(0) <= press;
+            keybd_v(6).d(0) := press;
           when SCANCODE_HOME =>						-- (EX)TRS(CLR)
-            inputs(6).d(1) <= press;
+            keybd_v(6).d(1) := press;
           when SCANCODE_INS =>           	-- (EX)TRS(BREAK)
-            inputs(6).d(2) <= press;
+            keybd_v(6).d(2) := press;
           when SCANCODE_UP =>
-            inputs(6).d(3) <= press;
+            keybd_v(6).d(3) := press;
           when SCANCODE_DOWN =>
-            inputs(6).d(4) <= press;
+            keybd_v(6).d(4) := press;
           when SCANCODE_LEFT =>
-            inputs(6).d(5) <= press;
+            keybd_v(6).d(5) := press;
           when SCANCODE_BACKSPACE =>
-            inputs(6).d(5) <= press;
+            keybd_v(6).d(5) := press;
           when SCANCODE_RIGHT =>
-            inputs(6).d(6) <= press;
+            keybd_v(6).d(6) := press;
           when SCANCODE_SPACE =>
-            inputs(6).d(7) <= press;
+            keybd_v(6).d(7) := press;
           -- row 7
           when SCANCODE_LSHIFT =>
-            inputs(7).d(0) <= press;
+            keybd_v(7).d(0) := press;
             shift := press;
           when SCANCODE_RSHIFT =>
-            inputs(7).d(1) <= press;
+            keybd_v(7).d(1) := press;
             shift := press;
           -- special keys
           when SCANCODE_LCTRL =>
@@ -179,19 +197,27 @@ begin
           when SCANCODE_ESC =>
             esc := press;
           when SCANCODE_TAB =>
-            inputs(8).d(1) <= press;
+            keybd_v(8).d(1) := press;
           when others =>
         end case;
       end if; -- press or release
+      
+      -- special keys
+      keybd_v(8).d(0) := ctrl and esc;		-- platform reset
+
+      -- this is PS/2 reset only
       if (reset = '1') then
         for i in 0 to NUM_INPUTS-1 loop
-          inputs(i).d <= (others => '0');
+          keybd_v(i).d := (others => '0');
         end loop;
       end if;
-      -- special keys
-      inputs(8).d(0) <= ctrl and esc;		-- game reset
     end if; -- rising_edge (clk)
     
+    -- assign outputs
+    for i in 0 to NUM_INPUTS-1 loop
+      inputs(i).d <= not jamma_v(i).d or keybd_v(i).d;
+    end loop;
+
   end process PROC_LATCH;
 
 end architecture SYN;

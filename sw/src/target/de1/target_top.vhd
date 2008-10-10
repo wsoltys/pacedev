@@ -106,37 +106,10 @@ end target_top;
 
 architecture SYN of target_top is
 
-	component I2C_AV_Config
-		port
-		(
-			-- 	Host Side
-			iCLK					: in std_logic;
-			iRST_N				: in std_logic;
-			--	I2C Side
-			I2C_SCLK			: out std_logic;
-			I2C_SDAT			: inout std_logic
-		);
-	end component I2C_AV_Config;
-
-  component I2S_LCM_Config 
-    port
-    (   --  Host Side
-      iCLK      : in std_logic;
-      iRST_N    : in std_logic;
-      --    I2C Side
-      I2S_SCLK  : out std_logic;
-      I2S_SDAT  : out std_logic;
-      I2S_SCEN  : out std_logic
-    );
-  end component I2S_LCM_Config;
-
-  component SEG7_LUT is
-    port 
-    (
-      iDIG : in std_logic_vector(3 downto 0); 
-      oSEG : out std_logic_vector(6 downto 0)
-    );
-  end component;
+  constant DE1_TEST_BURCHED_LEDS    : boolean := false;
+  constant DE1_TEST_BURCHED_DIPS    : boolean := false;
+  constant DE1_TEST_BURCHED_7SEG    : boolean := false;
+  constant DE1_BURCHED_SRAM         : boolean := true;
 
 	alias gpio_maple 		: std_logic_vector(35 downto 0) is gpio_0;
 	alias gpio_lcd 			: std_logic_vector(35 downto 0) is gpio_1;
@@ -160,6 +133,7 @@ architecture SYN of target_top is
   signal audio_o      : to_AUDIO_t;
   signal ser_i        : from_SERIAL_t;
   signal ser_o        : to_SERIAL_t;
+  signal gp_i         : from_GP_t;
   signal gp_o         : to_GP_t;
   
 	-- maple/dreamcast controller interface
@@ -318,7 +292,7 @@ begin
   			clk 				=> clock_50,
 				reset 			=> reset_i,
 				--oe 					=> gc_oe,
-				d 					=> gpio_0(25),
+				d 					=> gpio_maple(25),
 				joystate 		=> gcj
 			);
 
@@ -517,8 +491,58 @@ begin
   -- td_reset <= '1';
 
   -- GPIO
-  gpio_0 <= (others => 'Z');
-  gpio_1 <= (others => 'Z');
+
+  GEN_TEST_BURCHED_LEDS : if DE1_TEST_BURCHED_LEDS generate
+  
+    assert (PACE_JAMMA = PACE_JAMMA_NONE and
+            PACE_VIDEO_CONTROLLER_TYPE /= PACE_VIDEO_LCM_320x240_60Hz and
+            not DE1_TEST_BURCHED_DIPS and
+            not DE1_TEST_BURCHED_7SEG and
+            not DE1_BURCHED_SRAM)
+      report "DE1_TEST_BURCHED_LEDS not compatible with other DE1 options"
+        severity failure;
+
+    process (clock_27, reset_i)
+      variable r : std_logic_vector(15 downto 0);
+      variable count : std_logic_vector(21 downto 0);
+    begin
+      if reset_i = '1' then
+        r := (0=>'1', others => '0');
+        count := (others => '0');
+      elsif rising_edge(clock_27) then
+        count := count + 1;
+        if count = 0 then
+          r := r(0) & r(r'left downto 1);
+        end if;
+      end if;
+      gpio_0(17 downto 2) <= r;
+      gpio_0(35 downto 20) <= not r;
+    end process;
+    
+  end generate GEN_TEST_BURCHED_LEDS;
+  
+  GEN_BURCHED_SRAM : if DE1_BURCHED_SRAM generate
+  
+    assert (PACE_JAMMA = PACE_JAMMA_NONE and
+            PACE_VIDEO_CONTROLLER_TYPE /= PACE_VIDEO_LCM_320x240_60Hz and
+            not DE1_TEST_BURCHED_LEDS and
+            not DE1_TEST_BURCHED_DIPS and
+            not DE1_TEST_BURCHED_7SEG)
+      report "GEN_BURCHED_SRAM not compatible with other DE1 options"
+        severity failure;
+      
+    -- D0-7
+    gp_i(35 downto 28) <= gpio_0(35 downto 28);
+    gpio_0(35 downto 28) <= gp_o(35 downto 28) when gp_o(19) = '0' else (others => 'Z');
+    -- D8-15
+    gp_i(27 downto 20) <= gpio_0(27 downto 20);
+    gpio_0(27 downto 20) <= gp_o(27 downto 20) when gp_o(18) = '0' else (others => 'Z');
+    -- A & CEn & WEn
+    gpio_0(19 downto 0) <= gp_o(19 downto 0);
+
+  end generate GEN_BURCHED_SRAM;
+  
+  --gpio_1 <= (others => 'Z');
     
   -- LCM signals
   gpio_lcd(19) <= lcm_data(7);
@@ -576,40 +600,68 @@ begin
       ser_o             => ser_o,
       
       -- general purpose
-      gp_i              => (others => '0'),
+      gp_i              => gp_i,
       gp_o              => gp_o
     );
 
-	av_init : I2C_AV_Config
-		port map
-		(
-			--	Host Side
-			iCLK							=> clock_50,
-			iRST_N						=> reset_n,
-			
-			--	I2C Side
-			I2C_SCLK					=> I2C_SCLK,
-			I2C_SDAT					=> I2C_SDAT
-		);
+  BLK_AV : block
+    component I2C_AV_Config
+      port
+      (
+        -- 	Host Side
+        iCLK					: in std_logic;
+        iRST_N				: in std_logic;
+        --	I2C Side
+        I2C_SCLK			: out std_logic;
+        I2C_SDAT			: inout std_logic
+      );
+    end component I2C_AV_Config;
+  begin
+    av_init : I2C_AV_Config
+      port map
+      (
+        --	Host Side
+        iCLK							=> clock_50,
+        iRST_N						=> reset_n,
+        
+        --	I2C Side
+        I2C_SCLK					=> I2C_SCLK,
+        I2C_SDAT					=> I2C_SDAT
+      );
+  end block BLK_AV;
 
-  lcmc: I2S_LCM_Config
-    port map
-    (   --  Host Side
-      iCLK => clock_50,
-      iRST_N => reset_n, --lcm_grst_n,
-      --    I2C Side
-      I2S_SCLK => lcm_sclk,
-      I2S_SDAT => lcm_sdat,
-      I2S_SCEN => lcm_scen
-    );
+  BLK_LCM : block
+    component I2S_LCM_Config 
+      port
+      (   --  Host Side
+        iCLK      : in std_logic;
+        iRST_N    : in std_logic;
+        --    I2C Side
+        I2S_SCLK  : out std_logic;
+        I2S_SDAT  : out std_logic;
+        I2S_SCEN  : out std_logic
+      );
+    end component I2S_LCM_Config;
+  begin
+    lcmc: I2S_LCM_Config
+      port map
+      (   --  Host Side
+        iCLK => clock_50,
+        iRST_N => reset_n, --lcm_grst_n,
+        --    I2C Side
+        I2S_SCLK => lcm_sclk,
+        I2S_SDAT => lcm_sdat,
+        I2S_SCEN => lcm_scen
+      );
 
-	lcm_clk <= video_o.clk;
-	lcm_grst <= reset_n;
-  lcm_dclk	<=	not lcm_clk;
-  lcm_shdb	<=	'1';
-	lcm_hsync <= video_o.hsync;
-	lcm_vsync <= video_o.vsync;
-
+    lcm_clk <= video_o.clk;
+    lcm_grst <= reset_n;
+    lcm_dclk	<=	not lcm_clk;
+    lcm_shdb	<=	'1';
+    lcm_hsync <= video_o.hsync;
+    lcm_vsync <= video_o.vsync;
+  end block BLK_LCM;
+  
   BLK_CHASER : block
     signal pwmen      	: std_logic;
     signal chaseen    	: std_logic;
@@ -659,11 +711,10 @@ begin
 
   begin
     -- from left to right on the PCB
-    seg7_3: SEG7_LUT port map (iDIG => gp_o(15 downto 12), oSEG => hex3);
-    seg7_2: SEG7_LUT port map (iDIG => gp_o(11 downto 8), oSEG => hex2);
-    seg7_1: SEG7_LUT port map (iDIG => gp_o(7 downto 4), oSEG => hex1);
-    seg7_0: SEG7_LUT port map (iDIG => gp_o(3 downto 0), oSEG => hex0);
+    seg7_3: SEG7_LUT port map (iDIG => gp_o(51 downto 48), oSEG => hex3);
+    seg7_2: SEG7_LUT port map (iDIG => gp_o(47 downto 44), oSEG => hex2);
+    seg7_1: SEG7_LUT port map (iDIG => gp_o(43 downto 40), oSEG => hex1);
+    seg7_0: SEG7_LUT port map (iDIG => gp_o(39 downto 36), oSEG => hex0);
   end block BLK_7_SEG;
   
 end SYN;
-

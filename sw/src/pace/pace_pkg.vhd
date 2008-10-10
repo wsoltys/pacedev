@@ -166,9 +166,9 @@ package pace_pkg is
     rxd       : std_logic;
   end record;
   
-  constant PACE_NUM_GPI : natural := 32;
+  constant PACE_NUM_GPI : natural := 72;
   subtype from_GP_t is std_logic_vector(PACE_NUM_GPI-1 downto 0);
-  constant PACE_NUM_GPO : natural := 32;
+  constant PACE_NUM_GPO : natural := 72;
   subtype to_GP_t is std_logic_vector(PACE_NUM_GPO-1 downto 0);
 
   function NULL_TO_GP return to_GP_t;

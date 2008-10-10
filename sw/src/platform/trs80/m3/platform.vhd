@@ -137,7 +137,7 @@ architecture SYN of platform is
 	
   -- RAM signals        
   signal ram_wr         : std_logic;
-  alias ram_datao      	: std_logic_vector(7 downto 0) is sram_i.d(7 downto 0);
+  signal ram_datao      : std_logic_vector(7 downto 0);
 
   -- interrupt signals
   signal z80_wait_n     : std_logic := '1';
@@ -192,6 +192,7 @@ begin
   uP_datai <= uPmem_datai when (uPmemrd = '1') else uPio_datai;
 
   -- SRAM signals (may or may not be used)
+  --ram_datao <= sram_i.d(ram_datao'range);
   sram_o.a <= std_logic_vector(RESIZE(unsigned(uP_addr), sram_o.a'length));
   sram_o.d <= std_logic_vector(RESIZE(unsigned(uP_datao), sram_o.d'length));
 	sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
@@ -199,6 +200,22 @@ begin
   sram_o.oe <= not ram_wr;
   sram_o.we <= ram_wr;
 
+  GEN_BURCHED_SRAM: if true generate
+    -- hook up Burched SRAM module
+    GEN_D: for i in 0 to 7 generate
+      ram_datao(i) <= gp_i(35-i);
+      gp_o(35-i) <= up_datao(i);
+      gp_o(27-i) <= 'Z';
+    end generate;
+    GEN_A: for i in 0 to 15 generate
+      gp_o(17-i) <= up_addr(i);
+    end generate;
+    gp_o(1) <= '0';           -- A16
+    gp_o(0) <= '0';           -- CEAn
+    gp_o(18) <= '1';          -- upper byte WEn
+    gp_o(19) <= not ram_wr;   -- lower byte WEn
+  end generate GEN_BURCHED_SRAM;
+  
 	-- memory chip selects
 	-- ROM $0000-$37FF
 	rom_cs <= '1' when uP_addr(15 downto 14) = "00" and uP_addr(13 downto 11) /= "111" else '0';
@@ -329,7 +346,7 @@ begin
 	graphics_o.pal <= (others => (others => '0'));
 	ser_o <= NULL_TO_SERIAL;
   spi_o <= NULL_TO_SPI;
-  gp_o(gp_o'left downto 16) <= (others => '0');
+  gp_o(gp_o'left downto 52) <= (others => '0');
 
 	clk_en_inst : entity work.clk_div
 		generic map
@@ -390,7 +407,6 @@ begin
 			init_file		    => "../../../../../src/platform/trs80/m3/roms/trstile.hex",
 			numwords_a	    => 4096,
 			widthad_a		    => 12
-			--outdata_reg_a   => "CLOCK0"
 		)
 		port map
 		(
@@ -409,11 +425,11 @@ begin
       signal mode_r   : std_logic_vector(7 downto 0) := (others => '0');
     begin
 
-      process (clk_20M, platform_reset)
+      process (clk_20M, cpu_reset)
         variable rd_r   : std_logic := '0';
         variable wr_r   : std_logic := '0';
       begin
-        if platform_reset = '1' then
+        if cpu_reset = '1' then
           x_r <= (others => '0');
           y_r <= (others => '0');
           data_r <= (others => '0');
@@ -769,7 +785,7 @@ begin
       --ds_s(2) <= ds(2) when switches_i(2) = '0' else ds(1);
       ds_s <= ds;
       
-      gp_o(15 downto 0) <= -- memory address
+      gp_o(51 downto 36) <= -- memory address
                            floppy_dbg(31 downto 16) when switches_i(5 downto 4) = "11" else 
                            -- track & data byte
                            floppy_dbg(15 downto 0) when switches_i(5 downto 4) = "10" else

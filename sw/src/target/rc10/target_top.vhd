@@ -295,6 +295,7 @@ begin
 
 		video_i.clk <= clk_i(1);	-- by convention
     video_i.clk_ena <= '1';
+		video_i.reset <= reset_i;
 
     red <= video_o.rgb.r(video_o.rgb.r'left downto video_o.rgb.r'left-6);
     green <= video_o.rgb.g(video_o.rgb.g'left downto video_o.rgb.g'left-6);

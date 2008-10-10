@@ -415,6 +415,7 @@ begin
 
 		video_i.clk <= clk_i(1);	-- by convention
     video_i.clk_ena <= '1';
+    video_i.reset <= reset_i;
 
     bd_out(20) <= video_o.rgb.r(9);
     bd_out(27) <= video_o.rgb.r(8);
