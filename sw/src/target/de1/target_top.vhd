@@ -492,6 +492,9 @@ begin
 
   -- GPIO
 
+  gp_i(71 downto 36) <= gpio_0;
+  gp_i(35 downto 0) <= gpio_0;
+  
   GEN_TEST_BURCHED_LEDS : if DE1_TEST_BURCHED_LEDS generate
   
     assert (PACE_JAMMA = PACE_JAMMA_NONE and
@@ -532,10 +535,10 @@ begin
         severity failure;
       
     -- D0-7
-    gp_i(35 downto 28) <= gpio_0(35 downto 28);
+    --gp_i(35 downto 28) <= gpio_0(35 downto 28);
     gpio_0(35 downto 28) <= gp_o(35 downto 28) when gp_o(19) = '0' else (others => 'Z');
     -- D8-15
-    gp_i(27 downto 20) <= gpio_0(27 downto 20);
+    --gp_i(27 downto 20) <= gpio_0(27 downto 20);
     gpio_0(27 downto 20) <= gp_o(27 downto 20) when gp_o(18) = '0' else (others => 'Z');
     -- A & CEn & WEn
     gpio_0(19 downto 0) <= gp_o(19 downto 0);

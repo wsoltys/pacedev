@@ -62,4 +62,8 @@ package project_pkg is
 	constant TRS80_M3_HIRES_WIDTHA            : integer := 14;    -- 16KiB
 	constant TRS80_M3_FDC_SUPPORT			        : boolean := true;
 	
+  -- *** WARNING: enabling this option won't work on a stock DE1
+  -- *** NOT APPLICABLE ON P2
+  constant TRS80_M3_SYSMEM_IN_BURCHED_SRAM  : boolean := false;
+
 end;

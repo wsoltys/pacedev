@@ -544,7 +544,7 @@ begin
   
     BLK_FDC : block
 
-      constant FDC_USE_FIFO : boolean := true;
+      constant FDC_USE_FIFO : boolean := false;
       
       signal sync_reset   : std_logic := '1';
       
@@ -563,6 +563,8 @@ begin
       signal track              : std_logic_vector(7 downto 0) := (others => '0');
       signal offset             : std_logic_vector(12 downto 0) := (others => '0');
       signal rd_data_from_media : std_logic_vector(7 downto 0) := (others => '0');
+      signal rd_data_from_flash_media : std_logic_vector(rd_data_from_media'range) := (others => '0');
+      signal rd_data_from_sram_media  : std_logic_vector(rd_data_from_media'range) := (others => '0');
       signal rd_data_from_fifo  : std_logic_vector(7 downto 0) := (others => '0');
       
       signal fifo_rd      : std_logic := '0';
@@ -749,12 +751,35 @@ begin
         flash_o.oe <= '1';
         flash_o.we <= '0';
 
-        rd_data_from_media <= flash_i.d;
+        rd_data_from_flash_media <= flash_i.d;
 
         wprt_n <= '0';  -- always write-protected
         
       end block BLK_FLASH_FLOPPY;
       
+      BLK_SRAM_FLOPPY : block
+      begin
+
+        sram_o.a(sram_o.a'left downto 19) <= (others => '0');
+        -- support 2 drives in sram for now
+        sram_o.a(18) <=  '0' when ds_s(3) = '1' else
+                         '1' when ds_s(4) = '1' else
+                         '0';
+        sram_o.a(17 downto 12) <= track(5 downto 0);
+        sram_o.a(11 downto 0) <= offset(12 downto 1);
+        sram_o.be <= "00" & offset(0) & not offset(0);
+        sram_o.cs <= '1';
+        sram_o.oe <= '1';
+        sram_o.we <= '0';
+
+        rd_data_from_sram_media <=  sram_i.d(15 downto 8) when offset(0) = '1' else
+                                    sram_i.d(7 downto 0);
+
+      end block BLK_SRAM_FLOPPY;
+      
+      rd_data_from_media <= rd_data_from_flash_media when (ds(1) or ds(2)) = '1' else
+                            rd_data_from_sram_media;
+                              
       -- drive enable switches
       de_s <= not switches_i(3 downto 0);
       

@@ -1,8 +1,7 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_unsigned.all;
-use ieee.std_logic_arith.CONV_SIGNED;
-use ieee.std_logic_arith.EXT;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -70,11 +69,16 @@ begin
 		alias hblank_prev		: std_logic is hblank_r(hblank_r'left);
 		alias hblank_v			: std_logic is hblank_r(hblank_r'left-1);
 		variable vcount			: std_logic_vector(8 downto 0);
-		variable x_r		    : std_logic_vector((DELAY-1)*4-1 downto 0);
+		constant X_PIPELINE_BITS  : integer := 4;
+		variable x_r		    : std_logic_vector((DELAY-1)*X_PIPELINE_BITS-1 downto 0);
 		variable xc         : std_logic_vector(2 downto 0);
 		variable pel 				: std_logic;
 		
   begin
+  
+    -- not used
+    ctl_o.map_a(ctl_o.map_a'left downto 10) <= (others => '0');
+
 		if reset = '1' then
 			hblank_r := (others => '1');
   	elsif rising_edge(clk) and clk_ena = '1' then
@@ -87,16 +91,16 @@ begin
 			elsif hblank_v = '1' and hblank_prev = '0' then
           
 				if vcount(2+PACE_VIDEO_V_SCALE downto 0) = X"B" & 
-						std_logic_vector(conv_signed(-1,PACE_VIDEO_V_SCALE-1)) then
+						std_logic_vector(to_signed(-1,PACE_VIDEO_V_SCALE-1)) then
 					vcount := vcount + 4 * PACE_VIDEO_V_SCALE + 1;
 				else
 					vcount := vcount + 1;
 				end if;
 
         -- fixed for the line
-        ctl_o.map_a(ctl_o.map_a'left downto 6) <= 
-          EXT(vcount(6+PACE_VIDEO_V_SCALE downto 3+PACE_VIDEO_V_SCALE), ctl_o.map_a'left-6+1);
-  			ctl_o.tile_a(3 downto 0) <=  vcount(2+PACE_VIDEO_V_SCALE downto PACE_VIDEO_V_SCALE-1);
+        ctl_o.map_a(9 downto 6) <= 
+          vcount(6+PACE_VIDEO_V_SCALE downto 3+PACE_VIDEO_V_SCALE);
+  			ctl_o.tile_a(3 downto 0) <=  vcount(2+PACE_VIDEO_V_SCALE downto -1+PACE_VIDEO_V_SCALE);
           
 			end if;
 						
@@ -144,7 +148,7 @@ begin
       ctl_o.rgb.b <= (others => '0');
       
 			-- pipelined because of tile data loopkup
-      x_r := x_r(x_r'left-4 downto 0) & x(3 downto 0);
+      x_r := x_r(x_r'left-X_PIPELINE_BITS downto 0) & x(X_PIPELINE_BITS-1 downto 0);
 
       -- for end-of-line detection
 			hblank_r := hblank_r(hblank_r'left-1 downto 0) & hblank;
