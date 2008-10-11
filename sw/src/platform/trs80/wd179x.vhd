@@ -579,14 +579,16 @@ begin
 
 	BLK_TYPE_III : block
 
-		type STATE_t is ( IDLE, READ_ADDR_WAIT, READ_ADDR, DONE );
+		type STATE_t is ( IDLE, READ_ADDR_WAIT, READ_ADDR, WAIT_TRACK, READ_TRACK, WRITE_TRACK, DONE );
 		signal state : STATE_t;
 
 	begin
 
 		PROC_TYPE_III: process (clk, clk_20M_ena, reset)
+      variable ip_r : std_logic := '0';
 		begin
 			if reset = '1' then
+				ip_r := '0';
 				sector_r <= (others => '0');
 				type_iii_drq <= '0';
 				type_iii_ack <= '0';
@@ -606,6 +608,9 @@ begin
               if type_iii_stb = '1' then
                 if STD_MATCH(cmd, CMD_READ_ADDRESS) then
                   state <= READ_ADDR_WAIT;
+                elsif STD_MATCH(cmd, CMD_READ_TRACK) or 
+                      STD_MATCH(cmd, CMD_WRITE_TRACK) then
+                  state <= WAIT_TRACK;
                 else
                   state <= DONE;
                 end if;
@@ -623,6 +628,24 @@ begin
 								sector_r <= idam_track;
                 state <= DONE;
               end if;
+            when WAIT_TRACK =>
+              if ip_r = '0' and ip_n = '0' then
+                -- rising edge IPn (start of pulse)
+                if STD_MATCH(cmd, CMD_READ_TRACK) then
+                  state <= READ_TRACK;
+                else
+                  state <= WRITE_TRACK;
+                end if;
+              end if;
+            when READ_TRACK =>
+              if ip_r = '0' and ip_n = '0' then
+                -- falling edge of IPn (start of next pulse)
+                state <= done;
+              elsif raw_data_rdy = '1' then
+                type_iii_drq <= '1';
+              end if;
+            when WRITE_TRACK =>
+              state <= done;
             when DONE =>
               type_iii_ack <= '1';
               state <= IDLE;
@@ -630,6 +653,7 @@ begin
               state <= DONE;
           end case;
         end if;
+        ip_r := not ip_n;
       end if;
     end process PROC_TYPE_III;
     
@@ -712,6 +736,8 @@ begin
           count := 0;
           state <= GAP2_4E;
         elsif raw_data_rdy = '1' then
+          -- transfer to data register
+          data_o_r <= raw_data_r;
 					case state is
 						when GAP2_4E =>
 							-- at least 22? bytes of $4E
@@ -756,28 +782,23 @@ begin
 							end if;
 						when TRACK =>
 							idam_track <= raw_data_r;
-							data_o_r <= raw_data_r;
 							addr_data_rdy <= '1';
 							state <= SIDE;
 						when SIDE =>
 							idam_side <= raw_data_r;
-							data_o_r <= raw_data_r;
 							addr_data_rdy <= '1';
 							state <= SECTOR;
 						when SECTOR =>
 							idam_sector <= raw_data_r;
-							data_o_r <= raw_data_r;
 							addr_data_rdy <= '1';
 							state <= SEC_LEN;
 						when SEC_LEN =>
 							idam_seclen <= raw_data_r;
-							data_o_r <= raw_data_r;
 							addr_data_rdy <= '1';
 							count := 0;
 							state <= CRC_1;
 						when CRC_1 =>
 							crc <= crc(7 downto 0) & raw_data_r;
-							data_o_r <= raw_data_r;
 							addr_data_rdy <= '1';
 							count := count + 1;
 							if count = 2 then
@@ -825,7 +846,6 @@ begin
 						when USER_DATA =>
 							-- reading user sector data
 							count := count + 1;
-              data_o_r <= raw_data_r;
               user_data_rdy <= '1';
 							if count = 256 then
 								count := 0;
@@ -915,7 +935,8 @@ begin
   
   -- assign outputs
   hld <= hld_s;
-
+  wg <= '0';
+  
   -- extend step pulse
   -- - min 2/4 us
   process (clk, clk_20M_ena, reset)

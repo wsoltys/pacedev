@@ -19,8 +19,11 @@ entity floppy_if is
     
     step          : in std_logic;
     dirc          : in std_logic;
+    rg            : in std_logic;
     rclk          : out std_logic;
     raw_read_n    : out std_logic;
+    wg            : in std_logic;
+    wd            : in std_logic;
     tr00_n        : out std_logic;
     ip_n          : out std_logic;
 
@@ -29,11 +32,11 @@ entity floppy_if is
     track         : out std_logic_vector(7 downto 0);
     dat_i         : in std_logic_vector(7 downto 0);
     dat_o         : out std_logic_vector(7 downto 0);
+    wr            : out std_logic;
     -- random-access control
     offset        : out std_logic_vector(12 downto 0);
     -- fifo control
     rd            : out std_logic;
-    wr            : out std_logic;
     flush         : out std_logic;
     
     debug         : out std_logic_vector(31 downto 0)

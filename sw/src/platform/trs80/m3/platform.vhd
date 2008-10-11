@@ -550,8 +550,11 @@ begin
       
       signal step         : std_logic := '0';
       signal dirc         : std_logic := '0';
+      signal rg           : std_logic := '0';
       signal rclk         : std_logic := '0';
       signal raw_read_n   : std_logic := '0';
+      signal wg           : std_logic := '0';
+      signal wd           : std_logic := '0';
       signal tr00_n       : std_logic := '0';
       signal ip_n         : std_logic := '0';
       signal wprt_n       : std_logic := '1';
@@ -566,6 +569,8 @@ begin
       signal rd_data_from_flash_media : std_logic_vector(rd_data_from_media'range) := (others => '0');
       signal rd_data_from_sram_media  : std_logic_vector(rd_data_from_media'range) := (others => '0');
       signal rd_data_from_fifo  : std_logic_vector(7 downto 0) := (others => '0');
+      signal wr_data_to_media   : std_logic_vector(7 downto 0) := (others => '0');
+      signal media_wr           : std_logic := '0';
       
       signal fifo_rd      : std_logic := '0';
       signal fifo_wr      : std_logic := '0';
@@ -613,21 +618,21 @@ begin
           late          => open,    -- not used atm
           test_n        => '1',     -- not used
           hlt           => '1',     -- head always engaged atm
-          rg            => open,
+          rg            => rg,
           sso           => open,
           rclk          => rclk,
           raw_read_n    => raw_read_n,
           hld           => open,    -- not used atm
           tg43          => open,    -- not used on TRS-80 designs
-          wg            => open,
-          wd            => open,    -- 200ns (MFM) or 500ns (FM) pulse
+          wg            => wg,
+          wd            => wd,    -- 200ns (MFM) or 500ns (FM) pulse
           ready         => '1',     -- always read atm
           wf_n_i        => '1',     -- no write faults atm
           vfoe_n_o      => open,    -- not used in TRS-80 designs?
           tr00_n        => tr00_n,
           ip_n          => ip_n,
           wprt_n        => wprt_n,
-          dden_n        => '1',     -- single density only atm
+          dden_n        => '0',     -- double density only atm
           
           debug         => wd179x_dbg
         );
@@ -649,8 +654,11 @@ begin
           
           step          => step,
           dirc          => dirc,
+          rg            => rg,
           rclk          => rclk,
           raw_read_n    => raw_read_n,
+          wg            => wg,
+          wd            => wd,
           tr00_n        => tr00_n,
           ip_n          => ip_n,
           
@@ -659,11 +667,11 @@ begin
           track         => track,
           dat_i         => rd_data_from_fifo,
           dat_o         => open,
+          wr            => media_wr,
           -- random-access control
           offset        => offset,
           -- fifo control
           rd            => fifo_rd,
-          wr            => open,
           flush         => fifo_flush,
           
           debug         => floppy_dbg
@@ -770,10 +778,14 @@ begin
         sram_o.be <= "00" & offset(0) & not offset(0);
         sram_o.cs <= '1';
         sram_o.oe <= '1';
-        sram_o.we <= '0';
+        sram_o.we <= media_wr;
 
         rd_data_from_sram_media <=  sram_i.d(15 downto 8) when offset(0) = '1' else
                                     sram_i.d(7 downto 0);
+
+        sram_o.d(sram_o.d'left downto 16) <= (others => '0');
+        -- only 1 of these will be enabled
+        sram_o.d(15 downto 0) <= wr_data_to_media & wr_data_to_media;
 
       end block BLK_SRAM_FLOPPY;
       
