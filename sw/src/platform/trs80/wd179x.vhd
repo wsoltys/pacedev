@@ -645,7 +645,12 @@ begin
                 type_iii_drq <= '1';
               end if;
             when WRITE_TRACK =>
-              state <= done;
+              if ip_r = '0' and ip_n = '0' then
+                -- falling edge of IPn (start of next pulse)
+                state <= done;
+              elsif data_wr_stb = '1' then
+                -- start a write operation
+              end if;
             when DONE =>
               type_iii_ack <= '1';
               state <= IDLE;
@@ -865,6 +870,82 @@ begin
 		end process PROC_I_DAM;
 
 	end block BLK_READ;
+
+  BLK_WRITE : block
+
+    signal clk_1M_ena   : std_logic := '0';
+    signal wclk         : std_logic := '0';
+
+  begin
+  
+    -- 1MHz clock (enable) generate
+    process (clk, clk_20M_ena, reset)
+      subtype count_t is integer range 0 to 19;
+      variable count_v : count_t := 0;
+    begin
+      if reset = '1' then
+        count_v := 0;
+      elsif rising_edge(clk) and clk_20M_ena = '1' then
+        clk_1M_ena <= '0';
+        if count_v = count_t'high then
+          clk_1M_ena <= '1';
+          count_v := 0;
+        else
+          count_v := count_v + 1;
+        end if;
+      end if;
+    end process;
+  
+    -- we'll start with 4us per bit, 6272 bytes/track = 200ms per track
+    PROC_WR: process (clk, clk_1M_ena, reset)
+      variable count : std_logic_vector(17 downto 0) := (others => '0');
+      alias phase : std_logic_vector(1 downto 0) is count(1 downto 0);
+      alias bbit  : std_logic_vector(2 downto 0) is count(4 downto 2);
+      alias byte  : std_logic_vector(12 downto 0) is count (17 downto 5);
+      variable write_data_r : std_logic_vector(7 downto 0) := (others => '0');
+    begin
+      if reset = '1' then
+        count := (others => '0');
+				wclk <= '0';
+				--rd <= '0';
+				--raw_read_n <= '1';
+        wd <= '0';
+      elsif rising_edge(clk) and clk_1M_ena = '1' then
+        --rd <= '0';          -- default
+        --raw_read_n <= '1';  -- default
+        -- memory address
+        if phase = "00" and bbit = "000" then
+          --offset_s <= byte;
+        end if;
+        -- wclk
+        if phase = "01" then
+          wclk <= '1';
+        elsif phase = "11" then
+          wclk <= '0';
+        end if;
+        -- data latch (1us memory assumed)
+        if phase = "01" and bbit = "000" then
+          --read_data_r := dat_i;
+          --rd <= '1';
+          write_data_r := X"55"; --data_i_r;
+        end if;
+        if phase = "10" then
+          --raw_read_n <= ena and not read_data_r(read_data_r'left);
+          --read_data_r := read_data_r(read_data_r'left-1 downto 0) & '0';
+          wd <= write_data_r(write_data_r'left);
+          write_data_r := write_data_r(write_data_r'left-1 downto 0) & '0';
+        end if;
+        if count = 6272*8*4-1 then
+          count := (others => '0');
+        else
+          count := count + 1;
+        end if;
+      end if;
+    end process PROC_WR;
+  
+    --wd <= wclk;
+
+  end block BLK_WRITE;
 
   BLK_STATUS : block
 

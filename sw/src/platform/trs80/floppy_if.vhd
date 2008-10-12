@@ -156,6 +156,7 @@ begin
           rd <= '1';
         end if;
         if phase = "10" then
+          -- handle reads (from the media)
           raw_read_n <= ena and not read_data_r(read_data_r'left);
           read_data_r := read_data_r(read_data_r'left-1 downto 0) & '0';
         end if;
@@ -174,6 +175,54 @@ begin
     end process PROC_RD;
   
   end block BLK_READ;
+
+  BLK_WRITE : block
+
+    signal raw_data_rdy   : std_logic := '0';
+    signal write_data_r   : std_logic_vector(7 downto 0) := (others => '0');
+
+    -- fudge
+    alias wclk            : std_logic is wd;
+
+  begin
+
+		-- reads raw data from drive continuously
+		-- note that there is no bit/byte synchronisation atm
+		-- so drive emulation must be 'in sync'
+		PROC_RAW_WRITE: process (clk, clk_20M_ena, reset)
+			variable wclk_r : std_logic := '0';
+			variable count 	: std_logic_vector(2 downto 0) := (others => '0');
+			variable data_v	: std_logic_vector(7 downto 0) := (others => '0');
+		begin
+			if reset = '1' then
+				wclk_r := '0';
+				count := (others => '0');
+				data_v := (others => '0');
+			elsif rising_edge(clk) and clk_20M_ena = '1' then
+				raw_data_rdy <= '0'; -- default
+				-- leading edge WCLK
+				if wclk_r = '0' and wclk = '1' then
+					data_v := data_v(data_v'left-1 downto 0) & '0';
+				-- trailing edge rclk
+				elsif wclk_r = '1' and wclk = '0' then
+					if count = "111" then
+						-- finished a byte
+						write_data_r <= data_v;
+						raw_data_rdy <= '1';
+					end if;
+					count := count + 1;
+				end if;
+				-- sample RAW_DATA_n during WCLK high
+				if wclk = '1' then
+					if wd = '0' then
+						data_v(0) := '1';
+					end if;
+				end if;
+				wclk_r := wclk;
+			end if;
+		end process PROC_RAW_WRITE;
+
+  end block BLK_WRITE;
 
   -- assign outputs
   track <= track_r(drv);

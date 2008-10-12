@@ -560,7 +560,6 @@ begin
       signal wprt_n       : std_logic := '1';
       
       signal de_s         : std_logic_vector(4 downto 1);
-      signal ds_s         : std_logic_vector(ds'range);
 
       -- floppy data
       signal track              : std_logic_vector(7 downto 0) := (others => '0');
@@ -650,7 +649,7 @@ begin
           
           -- drive select lines
           drv_ena       => de_s,
-          drv_sel       => ds_s,
+          drv_sel       => ds,
           
           step          => step,
           dirc          => dirc,
@@ -751,8 +750,8 @@ begin
 
         flash_o.a(flash_o.a'left downto 20) <= (others => '0');
         -- support 2 drives in flash for now
-        flash_o.a(19) <=  '0' when ds_s(1) = '1' else
-                          '1' when ds_s(2) = '1' else
+        flash_o.a(19) <=  '0' when ds(1) = '1' else
+                          '1' when ds(2) = '1' else
                           '0';
         flash_o.a(18 downto 13) <= track(5 downto 0);
         flash_o.cs <= '1';
@@ -768,24 +767,32 @@ begin
       BLK_SRAM_FLOPPY : block
       begin
 
-        sram_o.a(sram_o.a'left downto 19) <= (others => '0');
-        -- support 2 drives in sram for now
-        sram_o.a(18) <=  '0' when ds_s(3) = '1' else
-                         '1' when ds_s(4) = '1' else
-                         '0';
-        sram_o.a(17 downto 12) <= track(5 downto 0);
-        sram_o.a(11 downto 0) <= offset(12 downto 1);
-        sram_o.be <= "00" & offset(0) & not offset(0);
-        sram_o.cs <= '1';
-        sram_o.oe <= '1';
-        sram_o.we <= media_wr;
+        GEN_SRAM_FLOPPY : if TRS80_M3_SYSMEM_IN_BURCHED_SRAM generate
 
-        rd_data_from_sram_media <=  sram_i.d(15 downto 8) when offset(0) = '1' else
-                                    sram_i.d(7 downto 0);
+          sram_o.a(sram_o.a'left downto 19) <= (others => '0');
+          -- support 2 drives in sram for now
+          sram_o.a(18) <=  '0' when ds(3) = '1' else
+                           '1' when ds(4) = '1' else
+                           '0';
+          sram_o.a(17 downto 12) <= track(5 downto 0);
+          sram_o.a(11 downto 0) <= offset(12 downto 1);
+          sram_o.be <= "00" & offset(0) & not offset(0);
+          sram_o.cs <= '1';
+          sram_o.oe <= '1';
+          sram_o.we <= media_wr;
 
-        sram_o.d(sram_o.d'left downto 16) <= (others => '0');
-        -- only 1 of these will be enabled
-        sram_o.d(15 downto 0) <= wr_data_to_media & wr_data_to_media;
+          rd_data_from_sram_media <=  sram_i.d(15 downto 8) when offset(0) = '1' else
+                                      sram_i.d(7 downto 0);
+
+          sram_o.d(sram_o.d'left downto 16) <= (others => '0');
+          -- only 1 of these will be enabled
+          sram_o.d(15 downto 0) <= wr_data_to_media & wr_data_to_media;
+
+        end generate GEN_SRAM_FLOPPY;
+        
+        GEN_NO_SRAM_FLOPPY : if not TRS80_M3_SYSMEM_IN_BURCHED_SRAM generate
+          rd_data_from_sram_media <= (others => '1');
+        end generate GEN_NO_SRAM_FLOPPY;
 
       end block BLK_SRAM_FLOPPY;
       
@@ -794,11 +801,6 @@ begin
                               
       -- drive enable switches
       de_s <= not switches_i(3 downto 0);
-      
-      -- switch drives 1&2 depending on switch
-      --ds_s(1) <= ds(1) when switches_i(2) = '0' else ds(2);
-      --ds_s(2) <= ds(2) when switches_i(2) = '0' else ds(1);
-      ds_s <= ds;
       
       gp_o(51 downto 36) <= -- memory address
                            floppy_dbg(31 downto 16) when switches_i(5 downto 4) = "11" else 

@@ -58,8 +58,11 @@ begin
       
       signal step         : std_logic := '0';
       signal dirc         : std_logic := '0';
+      signal rg           : std_logic := '0';
       signal rclk         : std_logic := '0';
       signal raw_read_n   : std_logic := '0';
+      signal wg           : std_logic := '0';
+      signal wd           : std_logic := '0';
       signal tr00_n       : std_logic := '0';
       signal ip_n         : std_logic := '0';
 
@@ -118,14 +121,14 @@ begin
           late          => open,    -- not used atm
           test_n        => '1',     -- not used
           hlt           => '1',     -- head always engaged atm
-          rg            => open,
+          rg            => rg,
           sso           => open,
           rclk          => rclk,
           raw_read_n    => raw_read_n,
           hld           => open,    -- not used atm
           tg43          => open,    -- not used on TRS-80 designs
-          wg            => open,
-          wd            => open,    -- 200ns (MFM) or 500ns (FM) pulse
+          wg            => wg,
+          wd            => wd,      -- 200ns (MFM) or 500ns (FM) pulse
           ready         => '1',     -- always read atm
           wf_n_i        => '1',     -- no write faults atm
           vfoe_n_o      => open,    -- not used in TRS-80 designs?
@@ -135,6 +138,22 @@ begin
           dden_n        => '1',     -- single density only atm
           
           debug         => wd179x_dbg
+        );
+        
+      wd9216_inst : entity work.wd9216
+        port map
+        (
+          clk           => clk_20M,
+          clk_20M_ena   => '1',
+          reset         => sync_reset,
+        
+          dskd_n        => '0',
+          sepclk        => open,
+          refclk        => '0',
+          cd            => "00",
+          sepd_n        => open,
+      
+          debug         => open
         );
         
       floppy_if_inst : entity work.floppy_if
@@ -154,8 +173,11 @@ begin
           
           step          => step,
           dirc          => dirc,
+          rg            => rg,
           rclk          => rclk,
           raw_read_n    => raw_read_n,
+          wg            => wg,
+          wd            => wd,
           tr00_n        => tr00_n,
           ip_n          => ip_n,
           

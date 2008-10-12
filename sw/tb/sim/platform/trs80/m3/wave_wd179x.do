@@ -50,6 +50,13 @@ add wave -noupdate -format Literal /tb_wd179x/blk_fdc/wd179x_inst/blk_read/raw_d
 add wave -noupdate -format Literal /tb_wd179x/blk_fdc/wd179x_inst/blk_read/state
 add wave -noupdate -format Literal -radix decimal /tb_wd179x/blk_fdc/wd179x_inst/blk_read/proc_i_dam/count
 add wave -noupdate -format Logic /tb_wd179x/blk_fdc/wd179x_inst/raw_data_rdy
+add wave -noupdate -divider {write block}
+add wave -noupdate -format Literal /tb_wd179x/blk_fdc/wd179x_inst/blk_write/proc_wr/count
+add wave -noupdate -format Literal /tb_wd179x/blk_fdc/wd179x_inst/blk_write/proc_wr/phase
+add wave -noupdate -format Literal /tb_wd179x/blk_fdc/wd179x_inst/blk_write/proc_wr/bbit
+add wave -noupdate -format Literal /tb_wd179x/blk_fdc/wd179x_inst/blk_write/proc_wr/byte
+add wave -noupdate -format Logic /tb_wd179x/blk_fdc/wd179x_inst/blk_write/wclk
+add wave -noupdate -format Logic /tb_wd179x/blk_fdc/wd179x_inst/wd
 add wave -noupdate -divider FLOPPY
 add wave -noupdate -format Logic /tb_wd179x/blk_fdc/floppy_if_inst/clk_1m_ena
 add wave -noupdate -format Logic /tb_wd179x/blk_fdc/floppy_if_inst/step
@@ -64,8 +71,15 @@ add wave -noupdate -format Literal /tb_wd179x/blk_fdc/floppy_if_inst/blk_read/pr
 add wave -noupdate -format Literal /tb_wd179x/blk_fdc/floppy_if_inst/blk_read/proc_rd/bbit
 add wave -noupdate -format Literal /tb_wd179x/blk_fdc/floppy_if_inst/blk_read/proc_rd/byte
 add wave -noupdate -format Literal /tb_wd179x/blk_fdc/floppy_if_inst/blk_read/proc_rd/read_data_r
+add wave -noupdate -divider BLK_WRITE
+add wave -noupdate -format Logic /tb_wd179x/blk_fdc/floppy_if_inst/blk_write/raw_data_rdy
+add wave -noupdate -format Literal -radix hexadecimal /tb_wd179x/blk_fdc/floppy_if_inst/blk_write/write_data_r
+add wave -noupdate -format Logic /tb_wd179x/blk_fdc/floppy_if_inst/blk_write/wclk
+add wave -noupdate -format Logic /tb_wd179x/blk_fdc/wd179x_inst/wd
+add wave -noupdate -format Literal /tb_wd179x/blk_fdc/floppy_if_inst/blk_write/proc_raw_write/count
+add wave -noupdate -format Literal /tb_wd179x/blk_fdc/floppy_if_inst/blk_write/proc_raw_write/data_v
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {6175 ns} 0} {{Cursor 2} {11365 ns} 0}
+WaveRestoreCursors {{Cursor 1} {6175 ns} 0} {{Cursor 2} {2690 ns} 0}
 configure wave -namecolwidth 150
 configure wave -valuecolwidth 64
 configure wave -justifyvalue left
@@ -79,4 +93,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {99670729 ns} {100017331 ns}
+WaveRestoreZoom {0 ns} {82896 ns}
