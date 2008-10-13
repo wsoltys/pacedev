@@ -74,6 +74,7 @@ begin
       signal offset             : std_logic_vector(12 downto 0) := (others => '0');
       signal rd_data_from_media : std_logic_vector(7 downto 0) := (others => '0');
       signal rd_data_from_fifo  : std_logic_vector(7 downto 0) := (others => '0');
+      signal wr_data_to_media		: std_logic_vector(7 downto 0) := (others => '0');
       
       signal fifo_rd      : std_logic := '0';
       signal fifo_wr      : std_logic := '0';
@@ -136,6 +137,9 @@ begin
           ip_n          => ip_n,
           wprt_n        => '1',     -- never write-protected atm
           dden_n        => '1',     -- single density only atm
+
+					-- temp fudge
+					wr_dat_o			=> wr_data_to_media,
           
           debug         => wd179x_dbg
         );
@@ -402,8 +406,11 @@ begin
   		fdc_we_n <= '1';
     end;
 
-    procedure wr_cmd (data : in std_logic_vector(7 downto 0)) is
+    procedure wr_cmd (str : in string; data : in std_logic_vector(7 downto 0)) is
+			variable debug_l	: line;
     begin
+			write(debug_l, str & string'(" (") & hstr(data) & string'(")"));
+			writeline(OUTPUT, debug_l);
       wr (A_CMD, data);
     end;
 
@@ -411,10 +418,7 @@ begin
 			variable data 		: std_logic_vector(7 downto 0);
 			variable debug_l 	: line;
 		begin
-			data := X"C0"; -- read address
-			write(debug_l, string'("READ_ADDR: ($") & hstr(data) & string'(")"));
-			writeline(OUTPUT, debug_l);
-	    wr_cmd (data);
+	    wr_cmd ("READ_ADDR", X"C0");
 	    for i in 0 to 5 loop
 	      wait until drq = '1';
 	      rd (A_DAT);
@@ -431,6 +435,7 @@ begin
 
 		variable data			: std_logic_vector(7 downto 0);
 		variable debug_l 	: line;
+		variable count 		: std_logic_vector(7 downto 0) := (others => '0');
 
 	begin
 
@@ -438,17 +443,24 @@ begin
     ds <= "0001";
 
     wait for 4 ms;
-		data := X"D0"; -- force interrupt (none)
-		write(debug_l, string'("FORCE_INTERRUPT ($") & hstr(data) & string'(")"));
-		writeline(OUTPUT, debug_l);
-    wr_cmd (data);
+    wr_cmd ("FORCE_INTERRUPT(none)", X"D0");
     wait for 1 ms;
 
+		-- write track
+		if true then
+			count := (others => '0');
+			wr_cmd ("WRITE_TRACK", X"F0");
+			for i in 0 to 6271 loop
+				wait until drq = '1';
+				wr (A_DAT, count);
+				wait until drq = '0';
+				count := count + 1;
+			end loop;
+			wait until intrq = '1';
+		end if;
+
 		--fdc_dat_i <= X"0B"; -- restore
-		data := X"0F"; -- restore (with verify)
-		write(debug_l, string'("RESTORE/v ($") & hstr(data) & string'(")"));
-		writeline(OUTPUT, debug_l);
-    wr_cmd (data);
+    wr_cmd ("RESTORE/v", X"0F");
     wait until intrq = '1';
     rd_sts (true);
 
@@ -456,10 +468,7 @@ begin
 		rd_addr;
 
 		wait for 1 ms;
-		data := X"54";	-- step in, update track, verify
-		write(debug_l, string'("STEP_IN/t/v: ($") & hstr(data) & string'(")"));
-		writeline(OUTPUT, debug_l);
-    wr_cmd (data);
+    wr_cmd ("STEP_IN/t/v", X"54");	-- step in, update track, verify
     wait until intrq = '1';
     rd_sts (true);
 
@@ -469,10 +478,7 @@ begin
 		wait for 1 ms;
 		wr (A_DAT, X"00");
 		wait for 4 us;
-		data := X"1C";	-- seek track 0
-		write(debug_l, string'("SEEK/v: ($") & hstr(data) & string'(")"));
-		writeline(OUTPUT, debug_l);
-    wr_cmd (data);
+    wr_cmd ("SEEK/v", X"1C");
     wait until intrq = '1';
     rd_sts (true);
 
@@ -482,17 +488,13 @@ begin
 		wait for 1 ms;
 		wr (A_DAT, X"05");
 		wait for 4 us;
-		data := X"1C";	-- seek track 5
-		write(debug_l, string'("SEEK/v: ($") & hstr(data) & string'(")"));
-		writeline(OUTPUT, debug_l);
-    wr_cmd (data);
+    wr_cmd ("SEEK/v", X"1C");
     wait until intrq = '1';
     rd_sts (true);
 
     wr (A_SEC, X"01");
     wait for 2 us;
-		data := X"81"; 				-- read sector
-    wr_cmd (data);
+    wr_cmd ("READ_SECTOR", X"81");
 
     for i in 0 to 255 loop
       wait until drq = '1';
@@ -501,8 +503,7 @@ begin
     wait until intrq = '1';
     rd_sts (false);
 
-		data := X"20"; -- step
-    wr_cmd (data);
+    wr_cmd ("STEP", X"20");
     wait until intrq = '1';
     rd_sts (false);
 
@@ -510,12 +511,10 @@ begin
     --wr_cmd;
 
     wait for 4 ms;
-		data := X"D0"; -- force interrupt (none)
-    wr_cmd (data);
+    wr_cmd ("FORCE_INTERRUPT(none)", X"D0");
 
     wait for 4 ms;
-		data := X"00"; -- RESTORE
-    wr_cmd (data);
+    wr_cmd ("RESTORE", X"00");
 
     wait until intrq = '1';
     rd_sts (false);
@@ -525,8 +524,7 @@ begin
 		fdc_a <= A_SEC;
     wr (A_SEC, X"10");	-- sector 16
 
-		data := X"80";	-- read sector
-    wr_cmd (data);
+    wr_cmd ("READ_SECTOR", X"80");
 
     for i in 0 to 255 loop
       wait until drq = '1';
@@ -538,8 +536,7 @@ begin
     rd_sts (false);
 
 		wait for 1 ms;
-		data := X"50";	-- step in, update track
-    wr_cmd (data);
+    wr_cmd ("STEP_IN/t", X"50");
 
     wait until intrq = '1';
     rd_sts (false);

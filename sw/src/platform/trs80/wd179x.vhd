@@ -44,6 +44,9 @@ entity wd179x is
     ip_n          : in std_logic;
     wprt_n        : in std_logic;
     dden_n        : in std_logic;
+
+		-- temp fudge!!!
+		wr_dat_o			: out std_logic_vector(7 downto 0);
     
     debug         : out std_logic_vector(31 downto 0)
   );
@@ -111,6 +114,9 @@ architecture SYN of wd179x is
 	signal raw_data_rdy					: std_logic := '0';
 	signal addr_data_rdy        : std_logic := '0';
 	signal user_data_rdy			  : std_logic := '0';
+
+	-- data to the disk write logic
+	signal write_data_written		: std_logic := '0';
                         	
 	signal cmd_busy					: std_logic := '0';
 
@@ -136,6 +142,7 @@ architecture SYN of wd179x is
                       		
   signal step_s           : std_logic := '0';
   signal hld_s        		: std_logic := '0';
+	signal wg_s							: std_logic := '0';
   
 begin
 
@@ -196,6 +203,7 @@ begin
               sec_wr_stb <= '1';
             when others =>
   						data_i_r <= dal_i;
+							drq_clr <= '1';
               data_wr_stb <= '1';
           end case;
         end if;
@@ -608,8 +616,10 @@ begin
               if type_iii_stb = '1' then
                 if STD_MATCH(cmd, CMD_READ_ADDRESS) then
                   state <= READ_ADDR_WAIT;
-                elsif STD_MATCH(cmd, CMD_READ_TRACK) or 
-                      STD_MATCH(cmd, CMD_WRITE_TRACK) then
+                elsif STD_MATCH(cmd, CMD_READ_TRACK) then
+                  state <= WAIT_TRACK;
+                elsif STD_MATCH(cmd, CMD_WRITE_TRACK) then
+									type_iii_drq <= '1';
                   state <= WAIT_TRACK;
                 else
                   state <= DONE;
@@ -634,6 +644,7 @@ begin
                 if STD_MATCH(cmd, CMD_READ_TRACK) then
                   state <= READ_TRACK;
                 else
+									wg_s <= '1';
                   state <= WRITE_TRACK;
                 end if;
               end if;
@@ -647,9 +658,11 @@ begin
             when WRITE_TRACK =>
               if ip_r = '0' and ip_n = '0' then
                 -- falling edge of IPn (start of next pulse)
+								wg_s <= '0';
                 state <= done;
-              elsif data_wr_stb = '1' then
-                -- start a write operation
+              elsif write_data_written = '1' then
+                -- data register empty
+								type_iii_drq <= '1';
               end if;
             when DONE =>
               type_iii_ack <= '1';
@@ -910,9 +923,11 @@ begin
 				--rd <= '0';
 				--raw_read_n <= '1';
         wd <= '0';
+				write_data_written <= '0';
       elsif rising_edge(clk) and clk_1M_ena = '1' then
-        --rd <= '0';          -- default
-        --raw_read_n <= '1';  -- default
+        --rd <= '0';          				-- default
+        --raw_read_n <= '1';  				-- default
+				write_data_written <= '0';	-- default
         -- memory address
         if phase = "00" and bbit = "000" then
           --offset_s <= byte;
@@ -927,12 +942,16 @@ begin
         if phase = "01" and bbit = "000" then
           --read_data_r := dat_i;
           --rd <= '1';
-          write_data_r := X"55"; --data_i_r;
+          --write_data_r := X"55"; --data_i_r;
+					wr_dat_o <= data_i_r;
+					if wg_s = '1' then					
+						write_data_written <= '1';
+					end if;
         end if;
         if phase = "10" then
           --raw_read_n <= ena and not read_data_r(read_data_r'left);
           --read_data_r := read_data_r(read_data_r'left-1 downto 0) & '0';
-          wd <= write_data_r(write_data_r'left);
+          --wd <= write_data_r(write_data_r'left);
           write_data_r := write_data_r(write_data_r'left-1 downto 0) & '0';
         end if;
         if count = 6272*8*4-1 then
@@ -943,7 +962,7 @@ begin
       end if;
     end process PROC_WR;
   
-    --wd <= wclk;
+    wd <= wclk;
 
   end block BLK_WRITE;
 
@@ -1016,7 +1035,7 @@ begin
   
   -- assign outputs
   hld <= hld_s;
-  wg <= '0';
+  wg <= wg_s;
   
   -- extend step pulse
   -- - min 2/4 us
