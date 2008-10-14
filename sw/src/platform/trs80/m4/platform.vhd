@@ -194,7 +194,7 @@ begin
   BLK_SYSMEM : block
   begin
 
-    GEN_DFLT_SYSMEM: if not TRS80_M3_SYSMEM_IN_BURCHED_SRAM generate
+    GEN_DFLT_SYSMEM: if not TRS80_M4_SYSMEM_IN_BURCHED_SRAM generate
       ram_datao <= sram_i.d(ram_datao'range);
       sram_o.a <= std_logic_vector(RESIZE(unsigned(uP_addr), sram_o.a'length));
       sram_o.d <= std_logic_vector(RESIZE(unsigned(uP_datao), sram_o.d'length));
@@ -204,9 +204,9 @@ begin
       sram_o.we <= ram_wr;
     end generate GEN_DFLT_SYSMEM;
     
-    GEN_BURCHED_SYSMEM: if TRS80_M3_SYSMEM_IN_BURCHED_SRAM generate
+    GEN_BURCHED_SYSMEM: if TRS80_M4_SYSMEM_IN_BURCHED_SRAM generate
       assert false
-        report "TRS80_M3_SYSMEM_IN_BURCHED_SRAM option won't work on stock DE1 hardware"
+        report "TRS80_M4_SYSMEM_IN_BURCHED_SRAM option won't work on stock DE1 hardware"
           severity warning;
       -- hook up Burched SRAM module
       GEN_D: for i in 0 to 7 generate
@@ -424,7 +424,7 @@ begin
 			q					=> tilemap_o.tile_d
 		);
 
-  GEN_HIRES: if TRS80_M3_HIRES_SUPPORT generate
+  GEN_HIRES: if TRS80_M4_HIRES_SUPPORT generate
 
     BLK_HIRES : block
       signal hires_a  : std_logic_vector(14 downto 0) := (others => '0');   -- Max 32KiB
@@ -492,19 +492,19 @@ begin
         generic map
         (
           init_file		=> "", --"../../../../../src/platform/trs80/m3/roms/trsvram.hex",
-          numwords_a	=> 2**TRS80_M3_HIRES_WIDTHA,
-          widthad_a		=> TRS80_M3_HIRES_WIDTHA
+          numwords_a	=> 2**TRS80_M4_HIRES_WIDTHA,
+          widthad_a		=> TRS80_M4_HIRES_WIDTHA
         )
         port map
         (
           clock_b			=> clk_20M,
-          address_b		=> hires_a(TRS80_M3_HIRES_WIDTHA-1 downto 0),
+          address_b		=> hires_a(TRS80_M4_HIRES_WIDTHA-1 downto 0),
           wren_b			=> hires_dat_wr,
           data_b			=> data_r,
           q_b					=> hires_dat_o,
 
           clock_a			=> clk_video,
-          address_a		=> bitmap_i.a(TRS80_M3_HIRES_WIDTHA-1 downto 0),
+          address_a		=> bitmap_i.a(TRS80_M4_HIRES_WIDTHA-1 downto 0),
           wren_a			=> '0',
           data_a			=> (others => 'X'),
           q_a					=> bitmap_o.d(7 downto 0)
@@ -515,7 +515,7 @@ begin
     end block BLK_HIRES;
   end generate GEN_HIRES;
     
-  GEN_NO_HIRES : if not TRS80_M3_HIRES_SUPPORT generate
+  GEN_NO_HIRES : if not TRS80_M4_HIRES_SUPPORT generate
     bitmap_o <= NULL_TO_BITMAP_CTL;
     graphics_o.bit8_1(1 downto 0) <= "00";
   end generate GEN_NO_HIRES;
@@ -571,7 +571,7 @@ begin
       nmi_reset     => nmirst
     );
 
-  GEN_FDC : if TRS80_M3_FDC_SUPPORT generate
+  GEN_FDC : if TRS80_M4_FDC_SUPPORT generate
   
     BLK_FDC : block
 
@@ -581,20 +581,26 @@ begin
       
       signal step         : std_logic := '0';
       signal dirc         : std_logic := '0';
+      signal rg           : std_logic := '0';
       signal rclk         : std_logic := '0';
       signal raw_read_n   : std_logic := '0';
+      signal wg           : std_logic := '0';
+      signal wd           : std_logic := '0';
       signal tr00_n       : std_logic := '0';
       signal ip_n         : std_logic := '0';
       signal wprt_n       : std_logic := '1';
       
       signal de_s         : std_logic_vector(4 downto 1);
-      signal ds_s         : std_logic_vector(ds'range);
 
       -- floppy data
       signal track              : std_logic_vector(7 downto 0) := (others => '0');
       signal offset             : std_logic_vector(12 downto 0) := (others => '0');
       signal rd_data_from_media : std_logic_vector(7 downto 0) := (others => '0');
+      signal rd_data_from_flash_media : std_logic_vector(rd_data_from_media'range) := (others => '0');
+      signal rd_data_from_sram_media  : std_logic_vector(rd_data_from_media'range) := (others => '0');
       signal rd_data_from_fifo  : std_logic_vector(7 downto 0) := (others => '0');
+      signal wr_data_to_media   : std_logic_vector(7 downto 0) := (others => '0');
+      signal media_wr           : std_logic := '0';
       
       signal fifo_rd      : std_logic := '0';
       signal fifo_wr      : std_logic := '0';
@@ -642,14 +648,14 @@ begin
           late          => open,    -- not used atm
           test_n        => '1',     -- not used
           hlt           => '1',     -- head always engaged atm
-          rg            => open,
+          rg            => rg,
           sso           => open,
           rclk          => rclk,
           raw_read_n    => raw_read_n,
           hld           => open,    -- not used atm
           tg43          => open,    -- not used on TRS-80 designs
-          wg            => open,
-          wd            => open,    -- 200ns (MFM) or 500ns (FM) pulse
+          wg            => wg,
+          wd            => wd,      -- 200ns (MFM) or 500ns (FM) pulse
           ready         => '1',     -- always read atm
           wf_n_i        => '1',     -- no write faults atm
           vfoe_n_o      => open,    -- not used in TRS-80 designs?
@@ -674,12 +680,15 @@ begin
           
           -- drive select lines
           drv_ena       => de_s,
-          drv_sel       => ds_s,
+          drv_sel       => ds,
           
           step          => step,
           dirc          => dirc,
+          rg            => rg,
           rclk          => rclk,
           raw_read_n    => raw_read_n,
+          wg            => wg,
+          wd            => wd,
           tr00_n        => tr00_n,
           ip_n          => ip_n,
           
@@ -688,11 +697,11 @@ begin
           track         => track,
           dat_i         => rd_data_from_fifo,
           dat_o         => open,
+          wr            => media_wr,
           -- random-access control
           offset        => offset,
           -- fifo control
           rd            => fifo_rd,
-          wr            => open,
           flush         => fifo_flush,
           
           debug         => floppy_dbg
@@ -772,27 +781,57 @@ begin
 
         flash_o.a(flash_o.a'left downto 20) <= (others => '0');
         -- support 2 drives in flash for now
-        flash_o.a(19) <=  '0' when ds_s(1) = '1' else
-                          '1' when ds_s(2) = '1' else
+        flash_o.a(19) <=  '0' when ds(1) = '1' else
+                          '1' when ds(2) = '1' else
                           '0';
         flash_o.a(18 downto 13) <= track(5 downto 0);
         flash_o.cs <= '1';
         flash_o.oe <= '1';
         flash_o.we <= '0';
 
-        rd_data_from_media <= flash_i.d;
+        rd_data_from_flash_media <= flash_i.d;
 
         wprt_n <= '0';  -- always write-protected
         
       end block BLK_FLASH_FLOPPY;
       
+      BLK_SRAM_FLOPPY : block
+      begin
+
+        GEN_SRAM_FLOPPY : if TRS80_M4_SYSMEM_IN_BURCHED_SRAM generate
+
+          sram_o.a(sram_o.a'left downto 19) <= (others => '0');
+          -- support 2 drives in sram for now
+          sram_o.a(18) <=  '0' when ds(3) = '1' else
+                           '1' when ds(4) = '1' else
+                           '0';
+          sram_o.a(17 downto 12) <= track(5 downto 0);
+          sram_o.a(11 downto 0) <= offset(12 downto 1);
+          sram_o.be <= "00" & offset(0) & not offset(0);
+          sram_o.cs <= '1';
+          sram_o.oe <= '1';
+          sram_o.we <= media_wr;
+
+          rd_data_from_sram_media <=  sram_i.d(15 downto 8) when offset(0) = '1' else
+                                      sram_i.d(7 downto 0);
+
+          sram_o.d(sram_o.d'left downto 16) <= (others => '0');
+          -- only 1 of these will be enabled
+          sram_o.d(15 downto 0) <= wr_data_to_media & wr_data_to_media;
+
+        end generate GEN_SRAM_FLOPPY;
+        
+        GEN_NO_SRAM_FLOPPY : if not TRS80_M4_SYSMEM_IN_BURCHED_SRAM generate
+          rd_data_from_sram_media <= (others => '1');
+        end generate GEN_NO_SRAM_FLOPPY;
+
+      end block BLK_SRAM_FLOPPY;
+      
+      rd_data_from_media <= rd_data_from_flash_media when (ds(1) or ds(2)) = '1' else
+                            rd_data_from_sram_media;
+                              
       -- drive enable switches
       de_s <= not switches_i(3 downto 0);
-      
-      -- switch drives 1&2 depending on switch
-      --ds_s(1) <= ds(1) when switches_i(2) = '0' else ds(2);
-      --ds_s(2) <= ds(2) when switches_i(2) = '0' else ds(1);
-      ds_s <= ds;
       
       gp_o(51 downto 36) <= -- memory address
                            floppy_dbg(31 downto 16) when switches_i(5 downto 4) = "11" else 
@@ -838,7 +877,7 @@ begin
     
   end generate GEN_FDC;
 
-  GEN_NO_FDC : 	if 	not TRS80_M3_FDC_SUPPORT generate
+  GEN_NO_FDC : 	if 	not TRS80_M4_FDC_SUPPORT generate
                 
     fdc_dat_o <= X"FF";
     fdc_drq <= '0';

@@ -593,10 +593,12 @@ begin
 	begin
 
 		PROC_TYPE_III: process (clk, clk_20M_ena, reset)
-      variable ip_r : std_logic := '0';
+      variable ip_r   : std_logic := '0';
+      variable wdw_r  : std_logic := '0';
 		begin
 			if reset = '1' then
 				ip_r := '0';
+        wdw_r := '0';
 				sector_r <= (others => '0');
 				type_iii_drq <= '0';
 				type_iii_ack <= '0';
@@ -660,7 +662,7 @@ begin
                 -- falling edge of IPn (start of next pulse)
 								wg_s <= '0';
                 state <= done;
-              elsif write_data_written = '1' then
+              elsif wdw_r = '0' and write_data_written = '1' then
                 -- data register empty
 								type_iii_drq <= '1';
               end if;
@@ -672,6 +674,7 @@ begin
           end case;
         end if;
         ip_r := not ip_n;
+        wdw_r := write_data_written;
       end if;
     end process PROC_TYPE_III;
     
@@ -962,8 +965,6 @@ begin
       end if;
     end process PROC_WR;
   
-    wd <= wclk;
-
   end block BLK_WRITE;
 
   BLK_STATUS : block

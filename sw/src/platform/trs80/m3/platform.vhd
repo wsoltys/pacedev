@@ -633,6 +633,8 @@ begin
           wprt_n        => wprt_n,
           dden_n        => '0',     -- double density only atm
           
+          wr_dat_o      => wr_data_to_media,
+
           debug         => wd179x_dbg
         );
         
