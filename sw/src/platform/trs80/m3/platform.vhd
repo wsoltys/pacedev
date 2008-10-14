@@ -762,8 +762,6 @@ begin
 
         rd_data_from_flash_media <= flash_i.d;
 
-        wprt_n <= '0';  -- always write-protected
-        
       end block BLK_FLASH_FLOPPY;
       
       BLK_SRAM_FLOPPY : block
@@ -779,8 +777,8 @@ begin
           sram_o.a(17 downto 12) <= track(5 downto 0);
           sram_o.a(11 downto 0) <= offset(12 downto 1);
           sram_o.be <= "00" & offset(0) & not offset(0);
-          sram_o.cs <= '1';
-          sram_o.oe <= '1';
+          sram_o.cs <= ds(3) or ds(4);
+          sram_o.oe <= wg;
           sram_o.we <= media_wr;
 
           rd_data_from_sram_media <=  sram_i.d(15 downto 8) when offset(0) = '1' else
@@ -803,7 +801,10 @@ begin
                               
       -- drive enable switches
       de_s <= not switches_i(3 downto 0);
-      
+
+      -- write-protect the two flash drives
+      wprt_n <= '0' when (ds(1) or ds(2)) = '1' else '1';
+        
       gp_o(51 downto 36) <= -- memory address
                            floppy_dbg(31 downto 16) when switches_i(5 downto 4) = "11" else 
                            -- track & data byte

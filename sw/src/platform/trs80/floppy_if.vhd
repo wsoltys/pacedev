@@ -195,11 +195,13 @@ begin
 			variable data_v	: std_logic_vector(7 downto 0) := (others => '0');
 		begin
 			if reset = '1' then
+				wr <= '0';
 				wclk_r := '0';
 				count := (others => '0');
 				data_v := (others => '0');
 			elsif rising_edge(clk) and clk_20M_ena = '1' then
-				raw_data_rdy <= '0'; -- default
+				raw_data_rdy <= '0'; 	-- default
+				wr <= '0';						-- default
 				-- leading edge WCLK
 				if wclk_r = '0' and wclk = '1' then
 					data_v := data_v(data_v'left-1 downto 0) & '0';
@@ -209,6 +211,7 @@ begin
 						-- finished a byte
 						write_data_r <= data_v;
 						raw_data_rdy <= '1';
+						wr <= wg;
 					end if;
 					count := count + 1;
 				end if;
@@ -235,6 +238,5 @@ begin
 
   -- not used
   dat_o <= (others => '0');
-  wr <= '0';
   
 end architecture SYN;

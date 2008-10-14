@@ -61,7 +61,7 @@ package project_pkg is
   constant TRS80_M3_ROM_IN_FLASH            : boolean := false;
   constant PACE_HAS_FLASH                   : boolean := true;
 
-  constant TRS80_M3_HIRES_SUPPORT           : boolean := true;
+  constant TRS80_M3_HIRES_SUPPORT           : boolean := false;
 	constant TRS80_M3_HIRES_WIDTHA            : integer := 12;    -- 4KiB only (Max 16KiB)
 	constant TRS80_M3_FDC_SUPPORT			        : boolean := true;
 

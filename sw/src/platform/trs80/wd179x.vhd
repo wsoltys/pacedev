@@ -587,7 +587,12 @@ begin
 
 	BLK_TYPE_III : block
 
-		type STATE_t is ( IDLE, READ_ADDR_WAIT, READ_ADDR, WAIT_TRACK, READ_TRACK, WRITE_TRACK, DONE );
+		type STATE_t is ( IDLE, 
+                      READ_ADDR_WAIT, READ_ADDR, 
+                      WAIT_WRITE, WAIT_TRACK, 
+                      READ_TRACK, 
+                      WRITE_TRACK, 
+                      DONE );
 		signal state : STATE_t;
 
 	begin
@@ -621,8 +626,12 @@ begin
                 elsif STD_MATCH(cmd, CMD_READ_TRACK) then
                   state <= WAIT_TRACK;
                 elsif STD_MATCH(cmd, CMD_WRITE_TRACK) then
-									type_iii_drq <= '1';
-                  state <= WAIT_TRACK;
+                  if wprt_n = '0' then
+                    state <= DONE;
+                  else
+                    type_iii_drq <= '1';
+                    state <= WAIT_WRITE;
+                  end if;
                 else
                   state <= DONE;
                 end if;
@@ -640,12 +649,17 @@ begin
 								sector_r <= idam_track;
                 state <= DONE;
               end if;
+            when WAIT_WRITE =>
+              if drq_s = '0' then
+                state <= WAIT_TRACK;
+              end if;
             when WAIT_TRACK =>
               if ip_r = '0' and ip_n = '0' then
                 -- rising edge IPn (start of pulse)
                 if STD_MATCH(cmd, CMD_READ_TRACK) then
                   state <= READ_TRACK;
                 else
+                  type_iii_drq <= '1';    -- set it again
 									wg_s <= '1';
                   state <= WRITE_TRACK;
                 end if;
@@ -925,7 +939,6 @@ begin
 				wclk <= '0';
 				--rd <= '0';
 				--raw_read_n <= '1';
-        wd <= '0';
 				write_data_written <= '0';
       elsif rising_edge(clk) and clk_1M_ena = '1' then
         --rd <= '0';          				-- default
@@ -964,6 +977,8 @@ begin
         end if;
       end if;
     end process PROC_WR;
+
+		wd <= wclk;
   
   end block BLK_WRITE;
 

@@ -38,6 +38,8 @@ architecture SYN of tb_wd179x is
 
 	signal mem_a				: std_logic_vector(21 downto 0) := (others => '1');
 	signal mem_d				: std_logic_vector(7 downto 0);
+	signal mem_we_n			: std_logic := '1';
+	signal mem_oe_n			: std_logic := '1';
 
 begin
 
@@ -67,7 +69,6 @@ begin
       signal ip_n         : std_logic := '0';
 
       signal de_s         : std_logic_vector(4 downto 1);
-      signal ds_s         : std_logic_vector(ds'range);
 
       -- floppy data
       signal track              : std_logic_vector(7 downto 0) := (others => '0');
@@ -75,7 +76,8 @@ begin
       signal rd_data_from_media : std_logic_vector(7 downto 0) := (others => '0');
       signal rd_data_from_fifo  : std_logic_vector(7 downto 0) := (others => '0');
       signal wr_data_to_media		: std_logic_vector(7 downto 0) := (others => '0');
-      
+     	signal media_wr						: std_logic := '0';
+
       signal fifo_rd      : std_logic := '0';
       signal fifo_wr      : std_logic := '0';
       signal fifo_flush   : std_logic := '0';
@@ -173,7 +175,7 @@ begin
           
           -- drive select lines
           drv_ena       => de_s,
-          drv_sel       => ds_s,
+          drv_sel       => ds,
           
           step          => step,
           dirc          => dirc,
@@ -194,7 +196,7 @@ begin
           offset        => offset,
           -- fifo control
           rd            => fifo_rd,
-          wr            => open,
+          wr            => media_wr,
           flush         => fifo_flush,
           
           debug         => floppy_dbg
@@ -272,22 +274,22 @@ begin
 
         mem_a(mem_a'left downto 20) <= (others => '0');
         -- support 2 drives in flash for now
-        mem_a(19) <=  '0' when ds_s(1) = '1' else
-                      '1' when ds_s(2) = '1' else
+        mem_a(19) <=  '0' when ds(1) = '1' else
+                      '1' when ds(2) = '1' else
                       '0';
         mem_a(18 downto 13) <= track(5 downto 0);
 
         rd_data_from_media <= mem_d;
 
+				-- write logic
+				mem_d <= wr_data_to_media when wg = '1' else (others => 'Z');
+				mem_oe_n <= wg;
+				mem_we_n <= not media_wr;
+
       end block BLK_FLASH_FLOPPY;
       
       -- drive enable switches
       de_s <= "1111";
-      
-      -- switch drives 1&2 depending on switch
-      --ds_s(1) <= ds(1) when switches_i(2) = '0' else ds(2);
-      --ds_s(2) <= ds(2) when switches_i(2) = '0' else ds(1);
-      ds_s <= ds;
       
     end block BLK_FDC;
 
@@ -320,10 +322,10 @@ begin
 		(
 		  A          => mem_a(18 downto 0),
 		  D          => mem_d,
-		  NOE        => '0',
+		  NOE        => mem_oe_n,
 		  NCE1       => '0',
 		  CE2        => '1',
-		  NWE        => '1',
+		  NWE        => mem_we_n,
 		  NBHE       => '0',
 		  NBLE       => '0',
 		  NBYTE      => '1'
