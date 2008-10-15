@@ -23,6 +23,18 @@ unsigned short int crc16 (unsigned short int d, unsigned short int crc)
   return (tmp);
 }
 
+/* Slow way, not using table */
+unsigned short CALC_CRC1a(unsigned short crc, unsigned char byte)
+{
+  int i = 8;
+  unsigned short b = byte << 8;
+  while (i--) {
+    crc = (crc << 1) ^ (((crc ^ b) & 0x8000) ? 0x1021 : 0);
+    b <<= 1;
+  }
+  return crc;
+}
+
 typedef unsigned short int UINT16;
 typedef unsigned char UINT8;
 
@@ -48,6 +60,9 @@ static void calc_crc(UINT16 * crc, UINT8 value)
 	*crc = *crc ^ l;
 }
 
+#define BITOF(d,n)  ((d)&BIT(n))
+#define BITSOF(d,n) (BITOF(d,n)>>n)
+
 int main(int argc, char *argv)
 {
   unsigned short int crc;
@@ -55,6 +70,7 @@ int main(int argc, char *argv)
   #define N_BYTES (sizeof(data)/sizeof(unsigned char))
   #define START 0
 
+  printf ("Serial (PACE)\n");
   crc = 0xFFFF;
   for (int i=START; i<N_BYTES; i++)
   {
@@ -70,10 +86,27 @@ int main(int argc, char *argv)
   }
   printf ("\n");
 
+  printf ("JV2DMK (slow)\n");
   crc = 0xFFFF;
   for (int i=START; i<N_BYTES; i++)
   {
-    calc_crc (&crc, data[i]);    
+    unsigned char d = data[i];
+
+    crc = CALC_CRC1a (crc, d);    
+    printf ("%04X\n", crc);
+  }
+  printf ("\n");
+
+  printf ("MESS\n");
+  crc = 0xFFFF;
+  for (int i=START; i<N_BYTES; i++)
+  {
+    unsigned char d = data[i];
+
+    // reverse the bits
+    //d=(BITSOF(d,7)<<0)|(BITSOF(d,6)<<1)|(BITSOF(d,5)<<2)|(BITSOF(d,4)<<3)|
+    //  (BITSOF(d,3)<<4)|(BITSOF(d,2)<<5)|(BITSOF(d,1)<<6)|(BITSOF(d,0)<<7);
+    calc_crc (&crc, d);    
     printf ("%04X\n", crc);
   }
 }
