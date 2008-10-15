@@ -778,7 +778,7 @@ begin
           sram_o.a(11 downto 0) <= offset(12 downto 1);
           sram_o.be <= "00" & offset(0) & not offset(0);
           sram_o.cs <= ds(3) or ds(4);
-          sram_o.oe <= wg;
+          sram_o.oe <= not wg;
           sram_o.we <= media_wr;
 
           rd_data_from_sram_media <=  sram_i.d(15 downto 8) when offset(0) = '1' else
@@ -839,6 +839,7 @@ begin
       end process;
 
       leds_o(7) <= not ip_n;
+      leds_o(6) <= wg;
       
       leds_o(3) <= ds(4);
       leds_o(2) <= ds(3);

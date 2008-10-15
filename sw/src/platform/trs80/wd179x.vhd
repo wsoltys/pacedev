@@ -97,8 +97,8 @@ architecture SYN of wd179x is
   signal drq_clr          : std_logic := '0';
 
 	-- index pulse
-	signal ip_cnt						: std_logic_vector(3 downto 0) := (others => '0');
-	signal ip_cnt_clr				: std_logic := '0';
+	signal type_i_ip_clr		: std_logic := '0';
+	signal type_ii_ip_clr		: std_logic := '0';
 
 	-- values read from the IDAM
 	signal idam_track				: std_logic_vector(track_r'range);
@@ -110,6 +110,7 @@ architecture SYN of wd179x is
 	-- data from the disc read logic
 	signal read_data_r					: std_logic_vector(7 downto 0) := (others => '0');
 	signal id_addr_mark_rdy			: std_logic := '0';
+	signal data_addr_mark_nxt		: std_logic := '0';
 	signal data_addr_mark_rdy		: std_logic := '0';
 	signal raw_data_rdy					: std_logic := '0';
 	signal addr_data_rdy        : std_logic := '0';
@@ -119,7 +120,8 @@ architecture SYN of wd179x is
 	signal write_data_written		: std_logic := '0';
                         	
 	signal cmd_busy					: std_logic := '0';
-
+  signal latch_status     : std_logic := '0';
+  
   -- register access strobes
   signal data_wr_stb  		: std_logic := '0';
   signal cmd_wr_stb   		: std_logic := '0';
@@ -142,7 +144,11 @@ architecture SYN of wd179x is
                       		
   signal step_s           : std_logic := '0';
   signal hld_s        		: std_logic := '0';
-	signal wg_s							: std_logic := '0';
+	signal type_ii_wg				: std_logic := '0';
+	signal type_iii_wg			: std_logic := '0';
+
+  signal trk_dat_o        : std_logic_vector(7 downto 0) := (others => '0');
+  signal sec_dat_o        : std_logic_vector(7 downto 0) := (others => '0');
   
 begin
 
@@ -287,6 +293,7 @@ begin
   end block BLK_DRQ;
 
 	BLK_IP : block
+    signal ip_cnt   : std_logic_vector(3 downto 0) := (others => '0');
 	begin
 
 		-- count index pulses
@@ -294,8 +301,9 @@ begin
 			variable ip_r : std_logic := '0';
 		begin
 			if reset = '1' then
+        ip_cnt <= (others => '0');
 			elsif rising_edge(clk) and clk_20M_ena = '1' then
-				if ip_cnt_clr = '1' then
+				if (type_i_ip_clr or type_ii_ip_clr) = '1' then
 					ip_cnt <= (others => '0');
 				-- leading edge IPn
 				elsif ip_r = '0' and ip_n = '0' then
@@ -304,6 +312,9 @@ begin
 				ip_r := not ip_n;
 			end if;
 		end process PROC_IP;
+
+    -- only valid for read address, read/write sector
+    rnf_error <= '0' when ip_cnt < 5 else '1';
 
 	end block BLK_IP;
 
@@ -319,10 +330,11 @@ begin
 		begin
 			if reset = '1' then
 			elsif rising_edge(clk) and clk_20M_ena = '1' then
-				type_i_stb <= '0';
-				type_ii_stb <= '0';
-				type_iii_stb <= '0';
-			  type_iv_stb <= '0';
+				type_i_stb <= '0';    -- default
+				type_ii_stb <= '0';   -- default
+				type_iii_stb <= '0';  -- default
+			  type_iv_stb <= '0';   -- default
+			  latch_status <= '0';  -- default
 				if cmd_wr_stb = '1' and STD_MATCH(cmd, CMD_FORCE_INTERRUPT) then
 					-- TYPE IV - FORCE_INTERRUPT
           irq_mask <= command_r(3 downto 0);
@@ -348,6 +360,7 @@ begin
 							end if;
 						when WAIT_FOR_CMD =>
 							if (type_i_ack or type_ii_ack or type_iii_ack) = '1' then
+                latch_status <= '1';
 								state <= IDLE;
 							end if;
 						when others =>
@@ -382,13 +395,12 @@ begin
 				curr_track := (others => '0');
 				track_r <= (others => '0');
 				seek_error <= '0';
-				rnf_error <= '0';
 				state <= IDLE;
 				dirc_v := DIRC_OUT;
 			elsif rising_edge(clk) and clk_20M_ena = '1' then
-				step_s <= '0';				-- default
-				ip_cnt_clr <= '0';		-- default
-				type_i_ack <= '0';		-- default
+				step_s <= '0';				  -- default
+				type_i_ip_clr <= '0';	  -- default
+				type_i_ack <= '0';		  -- default
 				if trk_wr_stb = '1' then
 					-- cpu writes directly to track register
 					track_r <= track_i_r;
@@ -401,7 +413,6 @@ begin
   						if type_i_stb = '1' then
 								curr_track := track_r;
 								seek_error <= '0';
-								rnf_error <= '0';
   							if STD_MATCH(cmd, CMD_RESTORE) then
   								dirc_v := DIRC_OUT;
   								state <= RESTORE;
@@ -479,10 +490,10 @@ begin
   						end if;
   						state <= VERIFY;
   					when VERIFY =>
-							ip_cnt_clr <= '1';
+							type_i_ip_clr <= '1';
 							state <= VERIFY_WAIT_IDAM;
   					when VERIFY_WAIT_IDAM =>
-							if ip_cnt = 5 then
+							if rnf_error = '1' then
 								seek_error <= '1';
 								state <= DONE;
 							elsif VERIFY_F = '1' then
@@ -494,7 +505,7 @@ begin
 							end if;
 						when VERIFY_IDAM =>
 							-- wait until next IDAM read
-							if ip_cnt = 5 then
+							if rnf_error = '1' then
 								seek_error <= '1';
 								state <= DONE;
 							elsif id_addr_mark_rdy = '1' then
@@ -518,7 +529,11 @@ begin
 
 	BLK_TYPE_II : block
 
-		type STATE_t is ( IDLE, WAIT_IDAM, WAIT_DAM, READ_SECTOR, WRITE_SECTOR, DONE );
+		type STATE_t is ( IDLE, 
+                      WAIT_IDAM, WAIT_DAM, 
+                      READ_SECTOR, 
+                      WRITE_SECTOR_DAM, WRITE_SECTOR_DATA, 
+                      DONE );
 		signal state : STATE_t;
 
 	begin
@@ -526,60 +541,85 @@ begin
 		process (clk, clk_20M_ena, reset)
 			subtype count_t is integer range 0 to 255;
 			variable count		: count_t;
+			variable wdw_r    : std_logic := '0';
 		begin
 			if reset = '1' then
 				type_ii_drq <= '0';
 				type_ii_ack <= '0';
+				type_ii_ip_clr <= '0';
+				type_ii_wg <= '0';
+				wdw_r := '0';
 				state <= IDLE;
 			elsif rising_edge(clk) and clk_20M_ena = '1' then
-        type_ii_drq <= '0';   -- default
-				type_ii_ack <= '0';   -- default
+        type_ii_drq <= '0';     -- default
+				type_ii_ack <= '0';     -- default
+				type_ii_ip_clr <= '0';  -- default
         if type_iv_stb = '1' then
           state <= IDLE;
         else
   				case state is
   					when IDLE =>
   						if type_ii_stb = '1' then
+                type_ii_ip_clr <= '1';
                 state <= WAIT_IDAM;
   						end if;
   					when WAIT_IDAM =>
-  						if id_addr_mark_rdy = '1' then
+              if rnf_error = '1' then
+                state <= DONE;
+  						elsif id_addr_mark_rdy = '1' then
   							if idam_sector = sector_r then
+                  if STD_MATCH(cmd, CMD_WRITE_SECTOR) then
+                    type_ii_drq <= '1';
+                  end if;
   								state <= WAIT_DAM;
   							end if;
   						end if;
   					when WAIT_DAM =>
-  						if data_addr_mark_rdy = '1' then
-  							count := 0;
-  							if STD_MATCH(cmd, CMD_READ_SECTOR) then
-                  state <= READ_SECTOR;
-                elsif STD_MATCH(cmd, CMD_WRITE_SECTOR) then
-                  state <= WRITE_SECTOR;
-                else
-                  state <= DONE;
-  							end if;
-  						end if;
+              count := 0;
+              if rnf_error = '1' then
+                state <= DONE;
+              elsif data_addr_mark_nxt = '1' and STD_MATCH(cmd, CMD_WRITE_SECTOR) then
+                type_ii_wg <= '1';
+                state <= WRITE_SECTOR_DAM;
+              elsif data_addr_mark_rdy = '1' and STD_MATCH(cmd, CMD_READ_SECTOR) then
+                state <= READ_SECTOR;
+              end if;
   					when READ_SECTOR =>
               if user_data_rdy = '1' then
-                if idam_sector = sector_r then
-                  -- this is the sector we're interested in
-                  type_ii_drq <= '1';
-                  if count = 255 then
-                    state <= DONE;
-                  else
-                    count := count + 1;
-                  end if;
+                -- this is the sector we're interested in
+                type_ii_drq <= '1';
+                if count = 255 then
+                  state <= DONE;
+                else
+                  count := count + 1;
                 end if;
   						end if;
-            when WRITE_SECTOR =>
-              state <= DONE;
+            when WRITE_SECTOR_DAM =>
+              -- calculate DAM to write
+              sec_dat_o <= "111110" & not data_i_r(0) & not data_i_r(0);
+              if wdw_r = '0' and write_data_written = '1' then
+                state <= WRITE_SECTOR_DATA;
+              end if;
+            when WRITE_SECTOR_DATA =>
+              sec_dat_o <= data_i_r;
+              if wdw_r = '0' and write_data_written = '1' then
+                if count = 255 then
+                  state <= DONE;
+                else
+                  -- data register empty
+                  type_ii_drq <= '1';
+                  count := count + 1;
+                end if;
+              end if;
   					when DONE =>
+              type_ii_wg <= '0';
               type_ii_ack <= '1';
               state <= IDLE;
   					when others =>
   						state <= DONE;
   				end case;
         end if;
+        wdw_r := write_data_written;
 			end if;
 		end process;
 
@@ -600,10 +640,12 @@ begin
 		PROC_TYPE_III: process (clk, clk_20M_ena, reset)
       variable ip_r   : std_logic := '0';
       variable wdw_r  : std_logic := '0';
+      variable is_crc : std_logic := '0';
 		begin
 			if reset = '1' then
 				ip_r := '0';
         wdw_r := '0';
+        is_crc := '0';
 				sector_r <= (others => '0');
 				type_iii_drq <= '0';
 				type_iii_ack <= '0';
@@ -660,7 +702,7 @@ begin
                   state <= READ_TRACK;
                 else
                   type_iii_drq <= '1';    -- set it again
-									wg_s <= '1';
+									type_iii_wg <= '1';
                   state <= WRITE_TRACK;
                 end if;
               end if;
@@ -672,15 +714,32 @@ begin
                 type_iii_drq <= '1';
               end if;
             when WRITE_TRACK =>
+              case data_i_r is
+                when X"F5" =>
+                  trk_dat_o <= X"A1";
+                  is_crc := '0';
+                when X"F6" =>
+                  trk_dat_o <= X"C2";
+                  is_crc := '0';
+                when X"F7" =>
+                  -- generates 2 bytes!
+                  trk_dat_o <= X"00";
+                  is_crc := not is_crc;
+                when others =>
+                  trk_dat_o <= data_i_r;
+                  is_crc := '0';
+              end case;
               if ip_r = '0' and ip_n = '0' then
                 -- falling edge of IPn (start of next pulse)
-								wg_s <= '0';
                 state <= done;
               elsif wdw_r = '0' and write_data_written = '1' then
-                -- data register empty
-								type_iii_drq <= '1';
+                -- don't assert DRQ mid-CRC
+                if is_crc = '0' then
+                  type_iii_drq <= '1';
+                end if;
               end if;
             when DONE =>
+              type_iii_wg <= '0';
               type_iii_ack <= '1';
               state <= IDLE;
             when others =>
@@ -765,6 +824,7 @@ begin
 			elsif rising_edge(clk) and clk_20M_ena = '1' then
 				id_addr_mark_rdy <= '0'; 		-- default
 				data_addr_mark_rdy <= '0';	-- default
+				data_addr_mark_nxt <= '0';	-- default
 				addr_data_rdy <= '0';       -- default
 				user_data_rdy <= '0'; 		  -- default
         if state = UNKNOWN then
@@ -868,6 +928,7 @@ begin
 							if raw_data_r = X"A1" then
 								count := count + 1;
 								if count = 3 then
+                  data_addr_mark_nxt <= '1';
 									state <= DAM;
 								end if;
 							else
@@ -959,10 +1020,7 @@ begin
           --read_data_r := dat_i;
           --rd <= '1';
           --write_data_r := X"55"; --data_i_r;
-					wr_dat_o <= data_i_r;
-					if wg_s = '1' then					
-						write_data_written <= '1';
-					end if;
+          write_data_written <= type_ii_wg or type_iii_wg;
         end if;
         if phase = "10" then
           --raw_read_n <= ena and not read_data_r(read_data_r'left);
@@ -984,18 +1042,18 @@ begin
 
   BLK_STATUS : block
 
-    signal sts_type1      		: std_logic_vector(7 downto 0) := (others => '0');
-    signal sts_rdaddr     		: std_logic_vector(7 downto 0) := (others => '0');
-    signal sts_rdsect     		: std_logic_vector(7 downto 0) := (others => '0');
-    signal sts_rdtrk      		: std_logic_vector(7 downto 0) := (others => '0');
-    signal sts_wrsect     		: std_logic_vector(7 downto 0) := (others => '0');
-    signal sts_wrtrk      		: std_logic_vector(7 downto 0) := (others => '0');
-                          		
+    signal sts_type1          : std_logic_vector(7 downto 0) := (others => '0');
+    signal sts_rdaddr         : std_logic_vector(7 downto 0) := (others => '0');
+    signal sts_rdsect         : std_logic_vector(7 downto 0) := (others => '0');
+    signal sts_rdtrk          : std_logic_vector(7 downto 0) := (others => '0');
+    signal sts_wrsect         : std_logic_vector(7 downto 0) := (others => '0');
+    signal sts_wrtrk          : std_logic_vector(7 downto 0) := (others => '0');
+
     -- type I commands    		
     signal s7_not_ready   		: std_logic := '0';
     signal s6_protected   		: std_logic := '0';
     signal s5_head_loaded 		: std_logic := '0';
-    alias s4_seek_error  			: std_logic is seek_error;
+    signal s4_seek_error  		: std_logic := '0';
     signal s3_crc_error   		: std_logic := '0';
     signal s2_track_00    		: std_logic := '0';
     signal s1_index       		: std_logic := '0';
@@ -1004,7 +1062,7 @@ begin
     -- type II/III commands
     signal s5_record_type     : std_logic := '0';
     alias s5_write_fault      : std_logic is s5_record_type;
-    alias s4_rnf             	: std_logic is rnf_error;
+    signal s4_rnf             : std_logic := '0';
     signal s2_lost_data       : std_logic := '0';
     signal s1_data_request    : std_logic := '0';
 
@@ -1014,20 +1072,32 @@ begin
     s7_not_ready <= not (ready or mr_n);
     s6_protected <= not wprt_n;
     s5_head_loaded <= '1'; --hld_s and hlt;
-    s3_crc_error <= '0';
     s2_track_00 <= not tr00_n;
     s1_index <= not ip_n;
     
     -- type II/III commands
-    -- Data address mark
-    -- - $FB = data, $F8 = deleted
-    -- - bit set in status = DELETED
-    s5_record_type <= not (idam_dam(1) or idam_dam(0));
     s1_data_request <= drq_s;
     
 		s0_busy <= cmd_busy;
-    
-    -- wire up status register
+
+    -- some status needs to be latched at the completion of the command
+    process (clk, clk_20M_ena, reset)
+    begin
+      if reset = '1' then
+        null;
+      elsif rising_edge(clk) and clk_20M_ena = '1' then
+        if latch_status = '1' then
+          -- Data address mark
+          -- - $FB = data, $F8 = deleted
+          -- - bit set in status = DELETED
+          s5_record_type <= not (idam_dam(1) or idam_dam(0));
+          s4_seek_error <= seek_error;
+          s4_rnf <= rnf_error;
+          s3_crc_error <= '0';
+        end if;
+      end if;
+    end process;
+
     sts_type1 <=    s7_not_ready & s6_protected & s5_head_loaded & s4_seek_error & 
                     s3_crc_error & s2_track_00 & s1_index & s0_busy;
     sts_rdaddr <=   s7_not_ready & "00" & s4_rnf & 
@@ -1040,19 +1110,22 @@ begin
     sts_wrtrk <=    s7_not_ready & s6_protected & s5_write_fault & "00" & 
                     s2_lost_data & s1_data_request & s0_busy;
 
-    status_r <= sts_rdsect when STD_MATCH(cmd, CMD_READ_SECTOR) else
-                sts_wrsect when STD_MATCH(cmd, CMD_WRITE_SECTOR) else
-                sts_rdaddr when STD_MATCH(cmd, CMD_READ_ADDRESS) else
-                sts_rdtrk when STD_MATCH(cmd, CMD_READ_TRACK) else
-                sts_wrtrk when STD_MATCH(cmd, CMD_WRITE_TRACK) else
-                sts_type1;
+  status_r <= sts_rdsect when STD_MATCH(cmd, CMD_READ_SECTOR) else
+              sts_wrsect when STD_MATCH(cmd, CMD_WRITE_SECTOR) else
+              sts_rdaddr when STD_MATCH(cmd, CMD_READ_ADDRESS) else
+              sts_rdtrk when STD_MATCH(cmd, CMD_READ_TRACK) else
+              sts_wrtrk when STD_MATCH(cmd, CMD_WRITE_TRACK) else
+              sts_type1;
 
   end block BLK_STATUS;
   
   -- assign outputs
   hld <= hld_s;
-  wg <= wg_s;
-  
+  wg <= type_ii_wg or type_iii_wg;
+  -- 1 bit is enough to differentiate between write track and write sector
+  wr_dat_o <= trk_dat_o when command_r(6) = '1' else 
+              sec_dat_o;
+              
   -- extend step pulse
   -- - min 2/4 us
   process (clk, clk_20M_ena, reset)
@@ -1077,3 +1150,8 @@ begin
   debug <= idam_track & idam_sector & track_r & sector_r;
   
 end architecture SYN;
+
+-- Data CRC generator polynomial x^16 + x^12 + x^5 + 1
+--dc(i) := dc(i)(14) & dc(i)(13) & dc(i)(12) & (dc(i)(11) xor dc(i)(15) xor dc_in(i))
+--& dc(i)(10)     & dc(i)(9) & dc(i)(8) & dc(i)(7) & dc(i)(6) & (dc(i)(4) xor dc(i)(15) xor dc_in(i))
+--& dc(i)(4) & dc(i)(3) & dc(i)(2) & dc(i)(1) & dc(i)(0) & (dc(i)(15) xor dc_in(i));
