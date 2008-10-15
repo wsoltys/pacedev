@@ -596,7 +596,7 @@ begin
   						end if;
             when WRITE_SECTOR_DAM =>
               -- calculate DAM to write
-              sec_dat_o <= "111110" & not data_i_r(0) & not data_i_r(0);
+              sec_dat_o <= "111110" & not command_r(0) & not command_r(0);
               if wdw_r = '0' and write_data_written = '1' then
                 state <= WRITE_SECTOR_DATA;
               end if;
@@ -629,9 +629,9 @@ begin
 
 		type STATE_t is ( IDLE, 
                       READ_ADDR_WAIT, READ_ADDR, 
-                      WAIT_WRITE, WAIT_TRACK, 
+                      WAIT_TRACK, 
                       READ_TRACK, 
-                      WRITE_TRACK, 
+                      WRITE_TRACK, WRITE_BYTE,
                       DONE );
 		signal state : STATE_t;
 
@@ -641,6 +641,7 @@ begin
       variable ip_r   : std_logic := '0';
       variable wdw_r  : std_logic := '0';
       variable is_crc : std_logic := '0';
+      variable count  : integer range 0 to 31;
 		begin
 			if reset = '1' then
 				ip_r := '0';
@@ -672,7 +673,7 @@ begin
                     state <= DONE;
                   else
                     type_iii_drq <= '1';
-                    state <= WAIT_WRITE;
+                    state <= WAIT_TRACK;
                   end if;
                 else
                   state <= DONE;
@@ -691,18 +692,14 @@ begin
 								sector_r <= idam_track;
                 state <= DONE;
               end if;
-            when WAIT_WRITE =>
-              if drq_s = '0' then
-                state <= WAIT_TRACK;
-              end if;
             when WAIT_TRACK =>
               if ip_r = '0' and ip_n = '0' then
                 -- rising edge IPn (start of pulse)
                 if STD_MATCH(cmd, CMD_READ_TRACK) then
                   state <= READ_TRACK;
                 else
-                  type_iii_drq <= '1';    -- set it again
 									type_iii_wg <= '1';
+									is_crc := '0';
                   state <= WRITE_TRACK;
                 end if;
               end if;
@@ -714,29 +711,35 @@ begin
                 type_iii_drq <= '1';
               end if;
             when WRITE_TRACK =>
-              case data_i_r is
-                when X"F5" =>
-                  trk_dat_o <= X"A1";
-                  is_crc := '0';
-                when X"F6" =>
-                  trk_dat_o <= X"C2";
-                  is_crc := '0';
-                when X"F7" =>
-                  -- generates 2 bytes!
-                  trk_dat_o <= X"00";
-                  is_crc := not is_crc;
-                when others =>
-                  trk_dat_o <= data_i_r;
-                  is_crc := '0';
-              end case;
               if ip_r = '0' and ip_n = '0' then
                 -- falling edge of IPn (start of next pulse)
-                state <= done;
-              elsif wdw_r = '0' and write_data_written = '1' then
-                -- don't assert DRQ mid-CRC
-                if is_crc = '0' then
-                  type_iii_drq <= '1';
+                state <= DONE;
+              else
+                case data_i_r is
+                  when X"F5" =>
+                    trk_dat_o <= X"A1";
+                  when X"F6" =>
+                    trk_dat_o <= X"C2";
+                  when X"F7" =>
+                    -- generates 2 bytes!
+                    trk_dat_o <= X"00";
+                  when others =>
+                    trk_dat_o <= data_i_r;
+                end case;
+                if data_i_r = X"F7" then
+                  is_crc := not is_crc;
+                else
+                  is_crc := '0';
                 end if;
+                -- don't assert DRQ mid-CRC
+                type_iii_drq <= not is_crc;
+                state <= WRITE_BYTE;
+              end if;
+            when WRITE_BYTE =>
+              if ip_r = '0' and ip_n = '0' then
+                state <= DONE;
+              elsif wdw_r = '0' and write_data_written = '1' then
+                state <= WRITE_TRACK;
               end if;
             when DONE =>
               type_iii_wg <= '0';
@@ -1020,13 +1023,15 @@ begin
           --read_data_r := dat_i;
           --rd <= '1';
           --write_data_r := X"55"; --data_i_r;
-          write_data_written <= type_ii_wg or type_iii_wg;
         end if;
         if phase = "10" then
           --raw_read_n <= ena and not read_data_r(read_data_r'left);
           --read_data_r := read_data_r(read_data_r'left-1 downto 0) & '0';
           --wd <= write_data_r(write_data_r'left);
           write_data_r := write_data_r(write_data_r'left-1 downto 0) & '0';
+        end if;
+        if phase = "11" and bbit = "111" then
+          write_data_written <= type_ii_wg or type_iii_wg;
         end if;
         if count = 6272*8*4-1 then
           count := (others => '0');

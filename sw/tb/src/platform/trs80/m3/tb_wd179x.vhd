@@ -448,13 +448,11 @@ begin
     wr_cmd ("FORCE_INTERRUPT(none)", X"D0");
     wait for 1 ms;
 
-		-- write sector
+		-- write track
 		if true then
-			wr (A_SEC, X"0A");	-- sector 10
-			wait for 1 ms;
 			count := (others => '0');
-			wr_cmd ("WRITE_SECTOR", X"A0");
-			for i in 0 to 255 loop
+			wr_cmd ("WRITE_TRACK", X"F0");
+			for i in 0 to 6271 loop
 				wait until drq = '1';
 				wr (A_DAT, count);
 				wait until drq = '0';
@@ -463,11 +461,13 @@ begin
 			wait until intrq = '1';
 		end if;
 
-		-- write track
+		-- write sector
 		if false then
+			wr (A_SEC, X"0A");	-- sector 10
+			wait for 1 ms;
 			count := (others => '0');
-			wr_cmd ("WRITE_TRACK", X"F0");
-			for i in 0 to 6271 loop
+			wr_cmd ("WRITE_SECTOR", X"A0");
+			for i in 0 to 255 loop
 				wait until drq = '1';
 				wr (A_DAT, count);
 				wait until drq = '0';
