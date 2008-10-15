@@ -159,6 +159,8 @@ begin
           -- handle reads (from the media)
           raw_read_n <= ena and not read_data_r(read_data_r'left);
           read_data_r := read_data_r(read_data_r'left-1 downto 0) & '0';
+          --raw_read_n <= ena and not read_data_r(read_data_r'right);
+          --read_data_r := '0' & read_data_r(read_data_r'left downto 1);
         end if;
         -- generate index pulse (min 10us)
         ip_n <= '1'; -- default

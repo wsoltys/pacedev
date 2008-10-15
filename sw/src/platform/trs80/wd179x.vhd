@@ -87,6 +87,14 @@ architecture SYN of wd179x is
 	alias STEP_RATE					: std_logic_vector(1 downto 0) is command_r(1 downto 0);
   alias cmd           		: std_logic_vector(7 downto 4) is command_r(7 downto 4);
 
+  function crc16 (dat_i : in std_logic; 
+                  crc_i : in std_logic_vector(15 downto 0)) 
+            return std_logic_vector is
+  begin
+    return crc_i(14 downto 12) & (dat_i xor crc_i(11) xor crc_i(15)) & crc_i(10 downto 5) &
+            (dat_i xor crc_i(4) xor crc_i(15)) & crc_i(3 downto 0) & (dat_i xor crc_i(15));
+  end;
+
   -- interrupts
   signal irq_mask         : std_logic_vector(3 downto 0) := (others => '0');
   signal irq_set          : std_logic := '0';
@@ -106,6 +114,10 @@ architecture SYN of wd179x is
 	signal idam_sector			: std_logic_vector(sector_r'range);
 	signal idam_seclen			: std_logic_vector(7 downto 0);
 	signal idam_dam					: std_logic_vector(7 downto 0);
+  -- read from both idam & dam
+  signal am_crc           : std_logic_vector(15 downto 0);
+  -- calculated and latched
+  signal calc_crc         : std_logic_vector(15 downto 0);
 
 	-- data from the disc read logic
 	signal read_data_r					: std_logic_vector(7 downto 0) := (others => '0');
@@ -121,7 +133,7 @@ architecture SYN of wd179x is
                         	
 	signal cmd_busy					: std_logic := '0';
   signal latch_status     : std_logic := '0';
-  
+
   -- register access strobes
   signal data_wr_stb  		: std_logic := '0';
   signal cmd_wr_stb   		: std_logic := '0';
@@ -141,7 +153,8 @@ architecture SYN of wd179x is
 
 	signal seek_error				: std_logic := '0';
 	signal rnf_error				: std_logic := '0';
-                      		
+	signal crc_error				: std_logic := '0';
+                        		
   signal step_s           : std_logic := '0';
   signal hld_s        		: std_logic := '0';
 	signal type_ii_wg				: std_logic := '0';
@@ -771,7 +784,9 @@ begin
 		signal state					: STATE_t;
 
 		-- values read from the disk
-		signal crc						: std_logic_vector(15 downto 0);
+		signal crc						: std_logic_vector(15 downto 0) := (others => '0');
+    signal crc_preset     : std_logic := '0';
+    signal crc_latch      : std_logic := '0';
 
 	begin
 
@@ -787,6 +802,7 @@ begin
 				rclk_r := '0';
 				count := (others => '0');
 				data_v := (others => '0');
+        crc <= (others => '1');
 			elsif rising_edge(clk) and clk_20M_ena = '1' then
 				raw_data_rdy <= '0'; -- default
 				-- leading edge RCLK
@@ -794,9 +810,11 @@ begin
 					data_v := data_v(data_v'left-1 downto 0) & '0';
 				-- trailing edge rclk
 				elsif rclk_r = '1' and rclk = '0' then
+          crc <= crc16(data_v(0), crc);
 					if count = "111" then
 						-- finished a byte
 						read_data_r <= data_v;
+						--read_data_r <= data_v(0) & data_v(1) & data_v(2) & data_v(3) & data_v(4) & data_v(5) & data_v(6) & data_v(7);
 						raw_data_rdy <= '1';
 					end if;
 					count := count + 1;
@@ -807,6 +825,12 @@ begin
 						data_v(0) := '1';
 					end if;
 				end if;
+        -- this should never happen on trailing edge CLK
+        if crc_preset = '1' then
+          crc <= (others => '1');
+        elsif crc_latch = '1' then
+          calc_crc <= crc;
+        end if;
 				rclk_r := rclk;
 			end if;
 		end process PROC_RAW_READ;
@@ -815,7 +839,7 @@ begin
 		PROC_I_DAM: process (clk, clk_20M_ena, reset)
       constant MIN_GAP2_4E  : integer := 15;
       constant MIN_GAP2_00  : integer := 8;
-			variable count : integer range 0 to 511 := 0;
+			variable count        : integer range 0 to 511 := 0;
 		begin
 			if reset = '1' then
 				idam_track <= (others => '0');
@@ -823,6 +847,7 @@ begin
 				idam_sector <= (others => '0');
 				idam_seclen <= (others => '0');
 				idam_dam <= (others => '0');
+        crc_preset <= '0';
 				state <= UNKNOWN;
 			elsif rising_edge(clk) and clk_20M_ena = '1' then
 				id_addr_mark_rdy <= '0'; 		-- default
@@ -830,6 +855,8 @@ begin
 				data_addr_mark_nxt <= '0';	-- default
 				addr_data_rdy <= '0';       -- default
 				user_data_rdy <= '0'; 		  -- default
+        crc_preset <= '0';          -- default
+        crc_latch <= '0';           -- default
         if state = UNKNOWN then
           count := 0;
           state <= GAP2_4E;
@@ -856,6 +883,7 @@ begin
                 if count < MIN_GAP2_00 then
                   count := count + 1;
                 end if;
+                crc_preset <= '1';
 							elsif raw_data_r = X"A1" and count = MIN_GAP2_00 then
                 count := 1;
                 state <= GAP2_A1;
@@ -893,14 +921,17 @@ begin
 						when SEC_LEN =>
 							idam_seclen <= raw_data_r;
 							addr_data_rdy <= '1';
+              crc_latch <= '1';
 							count := 0;
 							state <= CRC_1;
 						when CRC_1 =>
-							crc <= crc(7 downto 0) & raw_data_r;
+							am_crc <= am_crc(7 downto 0) & raw_data_r;
 							addr_data_rdy <= '1';
 							count := count + 1;
 							if count = 2 then
-								-- really need to check CRC here first
+								if am_crc /= calc_crc then
+                  state <= UNKNOWN;
+                end if;
 								id_addr_mark_rdy <= '1';
 								count := 0;
 								state <= GAP3_4E;
@@ -951,7 +982,7 @@ begin
 								state <= CRC_2;
 							end if;
 						when CRC_2 =>
-							crc <= crc(7 downto 0) & raw_data_r;
+							am_crc <= am_crc(7 downto 0) & raw_data_r;
 							count := count + 1;
 							if count = 2 then
 								state <= UNKNOWN;
@@ -1098,7 +1129,7 @@ begin
           s5_record_type <= not (idam_dam(1) or idam_dam(0));
           s4_seek_error <= seek_error;
           s4_rnf <= rnf_error;
-          s3_crc_error <= '0';
+          s3_crc_error <= crc_error;
         end if;
       end if;
     end process;
@@ -1157,6 +1188,8 @@ begin
 end architecture SYN;
 
 -- Data CRC generator polynomial x^16 + x^12 + x^5 + 1
---dc(i) := dc(i)(14) & dc(i)(13) & dc(i)(12) & (dc(i)(11) xor dc(i)(15) xor dc_in(i))
---& dc(i)(10)     & dc(i)(9) & dc(i)(8) & dc(i)(7) & dc(i)(6) & (dc(i)(4) xor dc(i)(15) xor dc_in(i))
---& dc(i)(4) & dc(i)(3) & dc(i)(2) & dc(i)(1) & dc(i)(0) & (dc(i)(15) xor dc_in(i));
+--dc := dc(14) & dc(13) & dc(12) & (dc(11) xor dc(15) xor dc_in)
+--      & dc(10) & dc(9) & dc(8) & dc(7) & dc(6) & dc(5) & (dc(4) xor dc(15) xor dc_in)
+--      & dc(3) & dc(2) & dc(1) & dc(0) & (dc(15) xor dc_in);
+
+

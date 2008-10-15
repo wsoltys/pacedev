@@ -449,7 +449,7 @@ begin
     wait for 1 ms;
 
 		-- write track
-		if true then
+		if false then
 			count := (others => '0');
 			wr_cmd ("WRITE_TRACK", X"F0");
 			for i in 0 to 6271 loop
@@ -476,40 +476,44 @@ begin
 			wait until intrq = '1';
 		end if;
 
-		--fdc_dat_i <= X"0B"; -- restore
-    wr_cmd ("RESTORE/v", X"0F");
-    wait until intrq = '1';
-    rd_sts (true);
+    if false then
 
-    wait for 1 ms;
-		rd_addr;
+  		--fdc_dat_i <= X"0B"; -- restore
+      wr_cmd ("RESTORE/v", X"0F");
+      wait until intrq = '1';
+      rd_sts (true);
+  
+      wait for 1 ms;
+  		rd_addr;
+  
+  		wait for 1 ms;
+      wr_cmd ("STEP_IN/t/v", X"54");	-- step in, update track, verify
+      wait until intrq = '1';
+      rd_sts (true);
+  
+      wait for 1 ms;
+  		rd_addr;
+  
+  		wait for 1 ms;
+  		wr (A_DAT, X"00");
+  		wait for 4 us;
+      wr_cmd ("SEEK/v", X"1C");
+      wait until intrq = '1';
+      rd_sts (true);
+  
+      wait for 1 ms;
+  		rd_addr;
+  
+  		wait for 1 ms;
+  		wr (A_DAT, X"05");
+  		wait for 4 us;
+      wr_cmd ("SEEK/v", X"1C");
+      wait until intrq = '1';
+      rd_sts (true);
 
-		wait for 1 ms;
-    wr_cmd ("STEP_IN/t/v", X"54");	-- step in, update track, verify
-    wait until intrq = '1';
-    rd_sts (true);
+    end if;
 
-    wait for 1 ms;
-		rd_addr;
-
-		wait for 1 ms;
-		wr (A_DAT, X"00");
-		wait for 4 us;
-    wr_cmd ("SEEK/v", X"1C");
-    wait until intrq = '1';
-    rd_sts (true);
-
-    wait for 1 ms;
-		rd_addr;
-
-		wait for 1 ms;
-		wr (A_DAT, X"05");
-		wait for 4 us;
-    wr_cmd ("SEEK/v", X"1C");
-    wait until intrq = '1';
-    rd_sts (true);
-
-    wr (A_SEC, X"01");
+    wr (A_SEC, X"0A");
     wait for 2 us;
     wr_cmd ("READ_SECTOR", X"81");
 

@@ -3,10 +3,8 @@ quietly WaveActivateNextPane {} 0
 add wave -noupdate -format Logic /tb_wd179x/clk_20m
 add wave -noupdate -format Logic /tb_wd179x/blk_fdc/floppy_if_inst/reset
 add wave -noupdate -format Logic /tb_wd179x/blk_fdc/fifo_rd
-add wave -noupdate -format Logic /tb_wd179x/blk_fdc/gen_floppy_fifo/blk_fifo/fifo_rd_pulse
 add wave -noupdate -format Logic /tb_wd179x/blk_fdc/fifo_wr
 add wave -noupdate -format Logic /tb_wd179x/blk_fdc/fifo_flush
-add wave -noupdate -format Logic /tb_wd179x/blk_fdc/gen_floppy_fifo/blk_fifo/fifo_full
 add wave -noupdate -format Literal /tb_wd179x/blk_fdc/rd_data_from_media
 add wave -noupdate -format Literal /tb_wd179x/blk_fdc/rd_data_from_fifo
 add wave -noupdate -divider WD1793
@@ -50,6 +48,11 @@ add wave -noupdate -format Literal /tb_wd179x/blk_fdc/wd179x_inst/blk_read/raw_d
 add wave -noupdate -format Literal /tb_wd179x/blk_fdc/wd179x_inst/blk_read/state
 add wave -noupdate -format Literal -radix decimal /tb_wd179x/blk_fdc/wd179x_inst/blk_read/proc_i_dam/count
 add wave -noupdate -format Logic /tb_wd179x/blk_fdc/wd179x_inst/raw_data_rdy
+add wave -noupdate -format Literal /tb_wd179x/blk_fdc/wd179x_inst/blk_read/crc
+add wave -noupdate -format Literal /tb_wd179x/blk_fdc/wd179x_inst/am_crc
+add wave -noupdate -format Literal /tb_wd179x/blk_fdc/wd179x_inst/calc_crc
+add wave -noupdate -format Logic /tb_wd179x/blk_fdc/wd179x_inst/addr_data_rdy
+add wave -noupdate -format Literal /tb_wd179x/blk_fdc/wd179x_inst/blk_read/proc_raw_read/data_v
 add wave -noupdate -divider {write block}
 add wave -noupdate -format Literal /tb_wd179x/blk_fdc/wd179x_inst/blk_write/proc_wr/count
 add wave -noupdate -format Literal /tb_wd179x/blk_fdc/wd179x_inst/blk_write/proc_wr/phase
@@ -89,7 +92,7 @@ add wave -noupdate -format Literal /tb_wd179x/mem_a
 add wave -noupdate -format Literal /tb_wd179x/mem_d
 add wave -noupdate -format Logic /tb_wd179x/mem_we_n
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {200729060 ns} 0} {{Cursor 2} {5001187 ns} 0}
+WaveRestoreCursors {{Cursor 1} {12676705 ns} 0} {{Cursor 2} {5001187 ns} 0}
 configure wave -namecolwidth 150
 configure wave -valuecolwidth 64
 configure wave -justifyvalue left
@@ -103,4 +106,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {200630500 ns} {200827620 ns}
+WaveRestoreZoom {12615545 ns} {12744185 ns}
