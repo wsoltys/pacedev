@@ -9,7 +9,8 @@ use work.kbd_pkg.all;
 entity inputmapper is
 	generic
 	(
-			NUM_INPUTS	: positive := 2
+    NUM_DIPS    : integer := 8;
+		NUM_INPUTS	: integer := 2
 	);
 	port
 	(
@@ -25,8 +26,8 @@ entity inputmapper is
 			jamma			: in from_JAMMA_t;
 
 	    -- user outputs
-			dips			: in std_logic_vector(7 downto 0);
-			inputs		: out in8(0 to NUM_INPUTS-1)
+			dips			: in std_logic_vector(NUM_DIPS-1 downto 0);
+			inputs		: out from_MAPPED_INPUTS_t(0 to NUM_INPUTS-1)
 	);
 end inputmapper;
 
@@ -60,7 +61,7 @@ begin
 				key_waiting := '0';
 				key_code := (others => '0');
 				for i in 0 to NUM_INPUTS-1 loop
-					inputs(i) <= (others => '0');
+					inputs(i).d <= (others => '0');
 				end loop;
       end if;
 
@@ -275,7 +276,7 @@ begin
     end if;       -- reset, rising_edge(clk)
 
     -- combine the keywaiting latch and the keycode
-    inputs(0) <= key_waiting & key_code(6 downto 0);
+    inputs(0).d <= key_waiting & key_code(6 downto 0);
 
   end process latchInputs;
 

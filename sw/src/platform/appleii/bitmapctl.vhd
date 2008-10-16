@@ -13,37 +13,43 @@ use work.platform_pkg.all;
 --
 
 entity bitmapCtl_1 is          
-port               
-(
-    clk         : in std_logic;
-		clk_ena			: in std_logic;
-		reset				: in std_logic;
+  generic
+  (
+    DELAY         : integer
+  );
+  port               
+  (
+    reset					: in std_logic;
 
-		-- video control signals
-		stb         : in std_logic;		
-    hblank      : in std_logic;
-    vblank      : in std_logic;
-    x           : in std_logic_vector(10 downto 0);
-    y           : in std_logic_vector(10 downto 0);
+    -- video control signals		
+    video_ctl     : in from_VIDEO_CTL_t;
 
-    -- tilemap interface
-    bitmap_d   	: in std_logic_vector(7 downto 0);
-    bitmap_a   	: out std_logic_vector(15 downto 0);
+    -- bitmap controller signals
+    ctl_i         : in to_BITMAP_CTL_t;
+    ctl_o         : out from_BITMAP_CTL_t;
 
-		-- RGB output (10-bits each)
-		rgb					: out RGB_t;
-		bitmap_on		: out std_logic
-);
+    graphics_i    : in to_GRAPHICS_t
+  );
 end bitmapCtl_1;
 
 architecture SYN of bitmapCtl_1 is
 
+  alias clk       : std_logic is video_ctl.clk;
+  alias clk_ena   : std_logic is video_ctl.clk_ena;
+  alias stb       : std_logic is video_ctl.stb;
+  alias hblank    : std_logic is video_ctl.hblank;
+  alias vblank    : std_logic is video_ctl.vblank;
+  alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
+  alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
+  
+  alias rgb       : RGB_t is ctl_o.rgb;
+  
   signal aaa : std_logic_vector(12 downto 0); -- 1st part of addr calc
   signal bbb : std_logic_vector(12 downto 0); -- 2nd part of addr calc
 
 begin
 
-	bitmap_a(15 downto 13) <= (others => '0');
+	ctl_o.a(15 downto 13) <= (others => '0');
 	
 	-- these are constant for a whole line
   -- the apple video screen is interlaced
@@ -79,25 +85,25 @@ begin
 				-- 1st stage of pipeline
 				-- - read tile from tilemap
 				-- - read attribute data
-        bitmap_a(12 downto 0) <= aaa or (bbb + (EXT(x_count(8 downto 3), bbb'length)));
+        ctl_o.a(12 downto 0) <= aaa or (bbb + (EXT(x_count(8 downto 3), bbb'length)));
 
 				case pix_x_r is
 					when "000" =>
-						pel := bitmap_d(0);
+						pel := ctl_i.d(0);
 					when "001" =>
-						pel := bitmap_d(1);
+						pel := ctl_i.d(1);
 					when "010" =>
-						pel := bitmap_d(2);
+						pel := ctl_i.d(2);
 					when "011" =>
-						pel := bitmap_d(3);
+						pel := ctl_i.d(3);
 					when "100" =>
-						pel := bitmap_d(4);
+						pel := ctl_i.d(4);
 					when "101" =>
-						pel := bitmap_d(5);
+						pel := ctl_i.d(5);
 					when "110" =>
-						pel := bitmap_d(6);
+						pel := ctl_i.d(6);
 					when others =>
-						pel := '0'; --bitmap_d(7);
+						pel := '0'; --ctl_i.d(7);
 				end case;
 									
 	      -- green-screen display
@@ -117,7 +123,7 @@ begin
 			
 		end if;				
 
-	bitmap_on <= pel;
+	ctl_o.set <= pel;
 
   end process;
 

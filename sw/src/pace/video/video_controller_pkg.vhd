@@ -117,6 +117,7 @@ package video_controller_pkg is
     pal       : PAL_A_t(15 downto 0);
     -- for various uses
     bit8_1    : std_logic_vector(7 downto 0);
+    bit16_1   : std_logic_vector(15 downto 0);
   end record;
 
   function NULL_TO_GRAPHICS return to_GRAPHICS_t;

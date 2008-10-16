@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_unsigned.all;
-use ieee.std_logic_arith.EXT;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -13,46 +13,46 @@ use work.platform_pkg.all;
 --
 
 entity tilemapCtl_1 is          
-port               
-(
-    clk         : in std_logic;
-		clk_ena			: in std_logic;
-		reset				: in std_logic;
+  generic
+  (
+    DELAY         : integer
+  );
+  port               
+  (
+    reset				: in std_logic;
 
-		-- video control signals		
-		stb         : in std_logic;
-    hblank      : in std_logic;
-    vblank      : in std_logic;
-    x           : in std_logic_vector(10 downto 0);
-    y           : in std_logic_vector(10 downto 0);
+    -- video control signals		
+    video_ctl   : in from_VIDEO_CTL_t;
 
-    -- tilemap interface
-    tilemap_d   : in std_logic_vector(15 downto 0);
-    tilemap_a   : out std_logic_vector(15 downto 0);
-    tile_d      : in std_logic_vector(7 downto 0);
-    tile_a      : out std_logic_vector(15 downto 0);
-    attr_d      : in std_logic_vector(15 downto 0);
-    attr_a      : out std_logic_vector(9 downto 0);
+    -- tilemap controller signals
+    ctl_i       : in to_TILEMAP_CTL_t;
+    ctl_o       : out from_TILEMAP_CTL_t;
 
-		-- RGB output (10-bits each)
-		rgb					: out RGB_t;
-		tilemap_on	: out std_logic
-);
+    graphics_i  : in to_GRAPHICS_t
+  );
 end tilemapCtl_1;
 
 architecture SYN of tilemapCtl_1 is
 
+  alias clk       : std_logic is video_ctl.clk;
+  alias clk_ena   : std_logic is video_ctl.clk_ena;
+  alias stb       : std_logic is video_ctl.stb;
+  alias hblank    : std_logic is video_ctl.hblank;
+  alias vblank    : std_logic is video_ctl.vblank;
+  alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
+  alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
+  
   alias texty 			: std_logic_vector(5 downto 0) is y(8 downto 3);
 
   signal col0_addr 	: std_logic_vector(9 downto 3);
 
 begin
 
-	tilemap_a(tilemap_a'left downto 10) <= (others => '0');
-  tile_a(12 downto 11) <= (others => '0');
+	ctl_o.map_a(ctl_o.map_a'left downto 10) <= (others => '0');
+  ctl_o.tile_a(ctl_o.tile_a'left downto 11) <= (others => '0');
 
 	-- these are constant for a whole line
-  tile_a(2 downto 0) <=  y(2 downto 0);
+  ctl_o.tile_a(2 downto 0) <=  y(2 downto 0);
 
    -- the apple video screen is interlaced
    -- the following line gives the start address of each text row
@@ -80,25 +80,26 @@ begin
         else
           x_count := x_count + 1;
         end if;
-				tilemap_a(9 downto 0) <= (col0_addr & "000") + ("0000" & x_count(8 downto 3));
+				ctl_o.map_a(9 downto 0) <= (col0_addr & "000") + ("0000" & x_count(8 downto 3));
       end if;
       
       -- 2nd stage of pipeline
       -- - read tile data from tile ROM
-      tile_a(10 downto 3) <= tilemap_d(7 downto 0);
+      ctl_o.tile_a(10 downto 3) <= ctl_i.map_d(7 downto 0);
 
       -- we don't implement a separate attribute memory
       -- instead we need to 'feed back' bits 7:6 of the ascii code to the next pipelined stage
       -- so we know as we're rendering the pixels whether or not the video should be
       -- inverted or flashing etc
-      attr_a <= EXT(tilemap_d(7 downto 6), attr_a'length);
+      ctl_o.attr_a <= std_logic_vector(RESIZE(unsigned(ctl_i.map_d(7 downto 6)), ctl_o.attr_a'length));
 
       -- we need to know if the characters are flashing and/or inverted
       -- to this this we 'feed back' bits 7:6 of the ascii code via attrA
       -- back to attrD 9:8. We also get the flash timer in attrD 10.
 
       -- if (inverse) or (flashing and flash_on)
-      if (attr_d(9 downto 8) = "00") or ((attr_d(9 downto 8) = "01") and (attr_d(10) = '1')) then
+      if (ctl_i.attr_d(9 downto 8) = "00") or ((ctl_i.attr_d(9 downto 8) = "01") and 
+          (ctl_i.attr_d(10) = '1')) then
         --fg <= attrD(7 downto 4);
         --bg <= attrD(3 downto 0);
       else
@@ -113,32 +114,32 @@ begin
         when "000" =>
           pel := '0';
         when "001" =>
-          pel := tile_d(6);
+          pel := ctl_i.tile_d(6);
         when "010" =>
-          pel := tile_d(5);
+          pel := ctl_i.tile_d(5);
         when "011" =>
-          pel := tile_d(4);
+          pel := ctl_i.tile_d(4);
         when "100" =>
-          pel := tile_d(3);
+          pel := ctl_i.tile_d(3);
         when "101" =>
-          pel := tile_d(2);
+          pel := ctl_i.tile_d(2);
         when "110" =>
-          pel := tile_d(1);
+          pel := ctl_i.tile_d(1);
         when others =>
-          pel := tile_d(0);
+          pel := ctl_i.tile_d(0);
       end case;
 									
       -- green-screen display
-      rgb.r <= (others => '0');
-      rgb.g <= (others => pel);
-      rgb.b <= (others => '0');
+      ctl_o.rgb.r <= (others => '0');
+      ctl_o.rgb.g <= (others => pel);
+      ctl_o.rgb.b <= (others => '0');
 				
 			-- pipelined because of tile data loopkup
 			x_r := x_r(x_r'left-3 downto 0) & x_count(2 downto 0);
 
 		end if;				
 
-    tilemap_on <= pel;
+    ctl_o.set <= pel;
 
   end process;
 
