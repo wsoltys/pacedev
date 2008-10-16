@@ -41,6 +41,8 @@ architecture SYN of tb_wd179x is
 	signal mem_we_n			: std_logic := '1';
 	signal mem_oe_n			: std_logic := '1';
 
+	type buf_a is array (natural range <>) of std_logic_vector(7 downto 0);
+
 begin
 
 	-- Generate CLK and reset
@@ -439,6 +441,16 @@ begin
 		variable debug_l 	: line;
 		variable count 		: std_logic_vector(7 downto 0) := (others => '0');
 
+		--constant trk_buf : buf_a(0 to 7) := ( X"A1", X"A1", X"A1", X"FE", X"00", X"00", X"0A", X"01" );
+		constant trk_buf : buf_a(0 to 52) := 
+		(
+			X"4E", X"4E", X"4E", X"4E", X"4E", X"4E", X"4E", X"4E", X"4E", X"4E", X"4E", X"4E", X"4E", X"4E", X"4E", X"4E",
+			X"4E", X"4E", X"4E", X"4E", X"4E", X"4E", X"4E", X"4E", X"4E", X"4E", X"4E", X"4E", X"4E", X"4E", X"4E", X"4E",
+			X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"F5", X"F5", X"F5", X"FE", 
+			X"00", X"00", X"04", X"01", X"F7"
+			-- CRC = $05F9
+		);
+
 	begin
 
 		-- select drive 0
@@ -449,12 +461,16 @@ begin
     wait for 1 ms;
 
 		-- write track
-		if false then
+		if true then
 			count := (others => '0');
 			wr_cmd ("WRITE_TRACK", X"F0");
 			for i in 0 to 6271 loop
 				wait until drq = '1';
-				wr (A_DAT, count);
+				if i < 53 then
+					wr (A_DAT, trk_buf(i));
+				else
+					wr (A_DAT, count);
+				end if;
 				wait until drq = '0';
 				count := count + 1;
 			end loop;
@@ -469,7 +485,11 @@ begin
 			wr_cmd ("WRITE_SECTOR", X"A0");
 			for i in 0 to 255 loop
 				wait until drq = '1';
-				wr (A_DAT, count);
+				if i < 8 then
+					wr (A_DAT, trk_buf(i));
+				else
+					wr (A_DAT, count);
+				end if;
 				wait until drq = '0';
 				count := count + 1;
 			end loop;

@@ -54,6 +54,9 @@ end entity wd179x;
 
 architecture SYN of wd179x is
 
+  -- build options
+  constant ENABLE_CRC           : boolean := true;
+  
   constant CMD_RESTORE          : std_logic_vector(7 downto 4) := "0000";
   constant CMD_SEEK             : std_logic_vector(7 downto 4) := "0001";
   constant CMD_STEP             : std_logic_vector(7 downto 4) := "001-";
@@ -91,6 +94,7 @@ architecture SYN of wd179x is
                   crc_i : in std_logic_vector(15 downto 0)) 
             return std_logic_vector is
   begin
+    -- CRC(x) = x^16 + x^12 + x^5 + 1
     return crc_i(14 downto 12) & (dat_i xor crc_i(11) xor crc_i(15)) & crc_i(10 downto 5) &
             (dat_i xor crc_i(4) xor crc_i(15)) & crc_i(3 downto 0) & (dat_i xor crc_i(15));
   end;
@@ -114,10 +118,11 @@ architecture SYN of wd179x is
 	signal idam_sector			: std_logic_vector(sector_r'range);
 	signal idam_seclen			: std_logic_vector(7 downto 0);
 	signal idam_dam					: std_logic_vector(7 downto 0);
-  -- read from both idam & dam
-  signal am_crc           : std_logic_vector(15 downto 0);
   -- calculated and latched
-  signal calc_crc         : std_logic_vector(15 downto 0);
+  signal rd_crc         	: std_logic_vector(15 downto 0);
+  signal wr_crc         	: std_logic_vector(15 downto 0);
+  signal type_ii_wr_crc_preset		: std_logic;
+  signal type_iii_wr_crc_preset		: std_logic;
 
 	-- data from the disc read logic
 	signal read_data_r					: std_logic_vector(7 downto 0) := (others => '0');
@@ -127,6 +132,7 @@ architecture SYN of wd179x is
 	signal raw_data_rdy					: std_logic := '0';
 	signal addr_data_rdy        : std_logic := '0';
 	signal user_data_rdy			  : std_logic := '0';
+	signal user_crc_rdy			    : std_logic := '0';
 
 	-- data to the disk write logic
 	signal write_data_written		: std_logic := '0';
@@ -160,8 +166,9 @@ architecture SYN of wd179x is
 	signal type_ii_wg				: std_logic := '0';
 	signal type_iii_wg			: std_logic := '0';
 
-  signal trk_dat_o        : std_logic_vector(7 downto 0) := (others => '0');
-  signal sec_dat_o        : std_logic_vector(7 downto 0) := (others => '0');
+  signal wr_dat_s        	: std_logic_vector(7 downto 0) := (others => '0');
+  signal trk_dat_o        : std_logic_vector(wr_dat_s'range) := (others => '0');
+  signal sec_dat_o        : std_logic_vector(wr_dat_s'range) := (others => '0');
   
 begin
 
@@ -544,7 +551,7 @@ begin
 
 		type STATE_t is ( IDLE, 
                       WAIT_IDAM, WAIT_DAM, 
-                      READ_SECTOR, 
+                      READ_SECTOR, WAIT_CRC,
                       WRITE_SECTOR_DAM, WRITE_SECTOR_DATA, 
                       DONE );
 		signal state : STATE_t;
@@ -557,6 +564,7 @@ begin
 			variable wdw_r    : std_logic := '0';
 		begin
 			if reset = '1' then
+				type_ii_wr_crc_preset <= '0';
 				type_ii_drq <= '0';
 				type_ii_ack <= '0';
 				type_ii_ip_clr <= '0';
@@ -564,9 +572,10 @@ begin
 				wdw_r := '0';
 				state <= IDLE;
 			elsif rising_edge(clk) and clk_20M_ena = '1' then
-        type_ii_drq <= '0';     -- default
-				type_ii_ack <= '0';     -- default
-				type_ii_ip_clr <= '0';  -- default
+				type_ii_wr_crc_preset <= '0';		-- default
+        type_ii_drq <= '0';     				-- default
+				type_ii_ack <= '0';     				-- default
+				type_ii_ip_clr <= '0';  				-- default
         if type_iv_stb = '1' then
           state <= IDLE;
         else
@@ -599,14 +608,17 @@ begin
               end if;
   					when READ_SECTOR =>
               if user_data_rdy = '1' then
-                -- this is the sector we're interested in
                 type_ii_drq <= '1';
                 if count = 255 then
-                  state <= DONE;
+                  state <= WAIT_CRC;
                 else
                   count := count + 1;
                 end if;
   						end if;
+  					when WAIT_CRC =>
+              if user_crc_rdy <= '1' then
+                state <= DONE;
+              end if;
             when WRITE_SECTOR_DAM =>
               -- calculate DAM to write
               sec_dat_o <= "111110" & not command_r(0) & not command_r(0);
@@ -651,22 +663,26 @@ begin
 	begin
 
 		PROC_TYPE_III: process (clk, clk_20M_ena, reset)
-      variable ip_r   : std_logic := '0';
-      variable wdw_r  : std_logic := '0';
-      variable is_crc : std_logic := '0';
-      variable count  : integer range 0 to 31;
+      variable ip_r   				: std_logic := '0';
+      variable wdw_r  				: std_logic := '0';
+      variable is_crc 				: std_logic := '0';
+      variable is_crc_preset	: std_logic := '0';
+      variable wr_crc_latched	: std_logic_vector(15 downto 0) := (others => '1');
+      variable count  				: integer range 0 to 31;
 		begin
 			if reset = '1' then
 				ip_r := '0';
         wdw_r := '0';
         is_crc := '0';
 				sector_r <= (others => '0');
+				type_iii_wr_crc_preset <= '0';
 				type_iii_drq <= '0';
 				type_iii_ack <= '0';
 				state <= IDLE;
 			elsif rising_edge(clk) and clk_20M_ena = '1' then
-        type_iii_drq <= '0';  -- default
-        type_iii_ack <= '0';  -- default
+				type_iii_wr_crc_preset <= '0';	-- default;
+        type_iii_drq <= '0';  					-- default
+        type_iii_ack <= '0';  					-- default
 				if sec_wr_stb = '1' then
 					-- cpu writes directly to sector register
 					sector_r <= sector_i_r;
@@ -730,18 +746,28 @@ begin
               else
                 case data_i_r is
                   when X"F5" =>
+										if is_crc_preset = '0' then
+											type_iii_wr_crc_preset <= '1';
+											is_crc_preset := '1';
+										end if;
                     trk_dat_o <= X"A1";
                   when X"F6" =>
                     trk_dat_o <= X"C2";
                   when X"F7" =>
                     -- generates 2 bytes!
-                    trk_dat_o <= X"00";
+										if is_crc = '0' then
+											wr_crc_latched := wr_crc;
+										end if;
+										is_crc := not is_crc;
+										trk_dat_o <= wr_crc_latched(15 downto 8);
+                  	wr_crc_latched := wr_crc_latched(7 downto 0) & X"00";
                   when others =>
                     trk_dat_o <= data_i_r;
                 end case;
-                if data_i_r = X"F7" then
-                  is_crc := not is_crc;
-                else
+								if data_i_r /= X"F5" then
+									is_crc_preset := '0';
+								end if;
+								if data_i_r /= X"F7" then
                   is_crc := '0';
                 end if;
                 -- don't assert DRQ mid-CRC
@@ -829,7 +855,7 @@ begin
         if crc_preset = '1' then
           crc <= (others => '1');
         elsif crc_latch = '1' then
-          calc_crc <= crc;
+          rd_crc <= crc;
         end if;
 				rclk_r := rclk;
 			end if;
@@ -839,6 +865,7 @@ begin
 		PROC_I_DAM: process (clk, clk_20M_ena, reset)
       constant MIN_GAP2_4E  : integer := 15;
       constant MIN_GAP2_00  : integer := 8;
+      variable am_crc       : std_logic_vector(15 downto 0) := (others => '1');
 			variable count        : integer range 0 to 511 := 0;
 		begin
 			if reset = '1' then
@@ -848,6 +875,7 @@ begin
 				idam_seclen <= (others => '0');
 				idam_dam <= (others => '0');
         crc_preset <= '0';
+        crc_latch <= '0';
 				state <= UNKNOWN;
 			elsif rising_edge(clk) and clk_20M_ena = '1' then
 				id_addr_mark_rdy <= '0'; 		-- default
@@ -855,6 +883,7 @@ begin
 				data_addr_mark_nxt <= '0';	-- default
 				addr_data_rdy <= '0';       -- default
 				user_data_rdy <= '0'; 		  -- default
+				user_crc_rdy <= '0'; 		    -- default
         crc_preset <= '0';          -- default
         crc_latch <= '0';           -- default
         if state = UNKNOWN then
@@ -922,19 +951,22 @@ begin
 							idam_seclen <= raw_data_r;
 							addr_data_rdy <= '1';
               crc_latch <= '1';
+              crc_error <= '0';
 							count := 0;
 							state <= CRC_1;
 						when CRC_1 =>
-							am_crc <= am_crc(7 downto 0) & raw_data_r;
+							am_crc := am_crc(7 downto 0) & raw_data_r;
 							addr_data_rdy <= '1';
 							count := count + 1;
 							if count = 2 then
-								if am_crc /= calc_crc then
+								if ENABLE_CRC and am_crc /= rd_crc then
+                  crc_error <= '1';
                   state <= UNKNOWN;
+                else
+                  id_addr_mark_rdy <= '1';
+                  count := 0;
+                  state <= GAP3_4E;
                 end if;
-								id_addr_mark_rdy <= '1';
-								count := 0;
-								state <= GAP3_4E;
 							end if;
 						when GAP3_4E =>
 							if raw_data_r = X"4E" then
@@ -978,14 +1010,20 @@ begin
 							count := count + 1;
               user_data_rdy <= '1';
 							if count = 256 then
+                crc_latch <= '1';
+                crc_error <= '0';
 								count := 0;
 								state <= CRC_2;
 							end if;
 						when CRC_2 =>
-							am_crc <= am_crc(7 downto 0) & raw_data_r;
+							am_crc := am_crc(7 downto 0) & raw_data_r;
 							count := count + 1;
 							if count = 2 then
-								state <= UNKNOWN;
+                if ENABLE_CRC and am_crc /= rd_crc then
+                  crc_error <= '1';
+                end if;
+								user_crc_rdy <= '1';
+                state <= UNKNOWN;
 							end if;
 						when others =>
 							state <= UNKNOWN;
@@ -1022,7 +1060,7 @@ begin
     end process;
   
     -- we'll start with 4us per bit, 6272 bytes/track = 200ms per track
-    PROC_WR: process (clk, clk_1M_ena, reset)
+    PROC_WR: process (clk, clk_20M_ena, clk_1M_ena, reset)
       variable count : std_logic_vector(17 downto 0) := (others => '0');
       alias phase : std_logic_vector(1 downto 0) is count(1 downto 0);
       alias bbit  : std_logic_vector(2 downto 0) is count(4 downto 2);
@@ -1031,44 +1069,50 @@ begin
     begin
       if reset = '1' then
         count := (others => '0');
+				wr_crc <= (others => '1');
 				wclk <= '0';
 				--rd <= '0';
 				--raw_read_n <= '1';
 				write_data_written <= '0';
-      elsif rising_edge(clk) and clk_1M_ena = '1' then
-        --rd <= '0';          				-- default
-        --raw_read_n <= '1';  				-- default
-				write_data_written <= '0';	-- default
-        -- memory address
-        if phase = "00" and bbit = "000" then
-          --offset_s <= byte;
-        end if;
-        -- wclk
-        if phase = "01" then
-          wclk <= '1';
-        elsif phase = "11" then
-          wclk <= '0';
-        end if;
-        -- data latch (1us memory assumed)
-        if phase = "01" and bbit = "000" then
-          --read_data_r := dat_i;
-          --rd <= '1';
-          --write_data_r := X"55"; --data_i_r;
-        end if;
-        if phase = "10" then
-          --raw_read_n <= ena and not read_data_r(read_data_r'left);
-          --read_data_r := read_data_r(read_data_r'left-1 downto 0) & '0';
-          --wd <= write_data_r(write_data_r'left);
-          write_data_r := write_data_r(write_data_r'left-1 downto 0) & '0';
-        end if;
-        if phase = "11" and bbit = "111" then
-          write_data_written <= type_ii_wg or type_iii_wg;
-        end if;
-        if count = 6272*8*4-1 then
-          count := (others => '0');
-        else
-          count := count + 1;
-        end if;
+      elsif rising_edge(clk) then
+				if clk_1M_ena = '1' then
+	        --rd <= '0';          				-- default
+	        --raw_read_n <= '1';  				-- default
+					write_data_written <= '0';	-- default
+	        -- memory address
+	        if phase = "00" and bbit = "000" then
+	          --offset_s <= byte;
+	        end if;
+	        -- wclk
+	        if phase = "01" then
+	          wclk <= '1';
+	        elsif phase = "11" then
+	          wclk <= '0';
+	        end if;
+	        -- data latch (1us memory assumed)
+	        if phase = "01" and bbit = "000" then
+	          write_data_r := wr_dat_s;
+	        end if;
+	        if phase = "10" then
+	          --raw_read_n <= ena and not read_data_r(read_data_r'left);
+	          --read_data_r := read_data_r(read_data_r'left-1 downto 0) & '0';
+	          wr_crc <= crc16(write_data_r(write_data_r'left), wr_crc);
+	          write_data_r := write_data_r(write_data_r'left-1 downto 0) & '0';
+	        end if;
+	        if phase = "11" and bbit = "111" then
+	          write_data_written <= type_ii_wg or type_iii_wg;
+	        end if;
+	        if count = 6272*8*4-1 then
+	          count := (others => '0');
+	        else
+	          count := count + 1;
+	        end if;
+				end if;
+				if clk_20M_ena = '1' then
+					if (type_ii_wr_crc_preset or type_iii_wr_crc_preset) = '1' then
+						wr_crc <= (others => '1');
+					end if;
+				end if;
       end if;
     end process PROC_WR;
 
@@ -1158,9 +1202,11 @@ begin
   -- assign outputs
   hld <= hld_s;
   wg <= type_ii_wg or type_iii_wg;
+
   -- 1 bit is enough to differentiate between write track and write sector
-  wr_dat_o <= trk_dat_o when command_r(6) = '1' else 
+  wr_dat_s <= trk_dat_o when command_r(6) = '1' else 
               sec_dat_o;
+	wr_dat_o <= wr_dat_s;
               
   -- extend step pulse
   -- - min 2/4 us
@@ -1183,13 +1229,7 @@ begin
     end if;
   end process;
   
-  debug <= idam_track & idam_sector & track_r & sector_r;
+  --debug <= idam_track & idam_sector & track_r & sector_r;
+  debug <= command_r & status_r & command_r & status_r;
   
 end architecture SYN;
-
--- Data CRC generator polynomial x^16 + x^12 + x^5 + 1
---dc := dc(14) & dc(13) & dc(12) & (dc(11) xor dc(15) xor dc_in)
---      & dc(10) & dc(9) & dc(8) & dc(7) & dc(6) & dc(5) & (dc(4) xor dc(15) xor dc_in)
---      & dc(3) & dc(2) & dc(1) & dc(0) & (dc(15) xor dc_in);
-
-
