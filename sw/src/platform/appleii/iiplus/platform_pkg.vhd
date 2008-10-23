@@ -19,7 +19,9 @@ package platform_pkg is
 	constant PACE_VIDEO_V_SIZE				    : integer := 192;
   constant PACE_VIDEO_PIPELINE_DELAY    : integer := 5;
 	
-	--
+	constant PACE_INPUTS_NUM_BYTES        : integer := 1;
+
+		--
 	-- Platform-specific constants (optional)
 	--
 

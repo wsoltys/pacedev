@@ -6,10 +6,16 @@ use ieee.std_logic_arith.EXT;
 library work;
 use work.pace_pkg.all;
 use work.kbd_pkg.all;
+use work.video_controller_pkg.all;
+use work.sprite_pkg.all;
 use work.project_pkg.all;
 use work.target_pkg.all;
 
-entity Game is
+entity platform is
+  generic
+  (
+    NUM_INPUT_BYTES   : integer
+  );
   port
   (
     -- clocking and reset
@@ -22,17 +28,38 @@ entity Game is
     leds_o          : out to_LEDS_t;
 
     -- controller inputs
-    inputs_i        : in from_INPUTS_t;
+    inputs_i        : in from_MAPPED_INPUTS_t(0 to NUM_INPUT_BYTES-1);
 		
-    -- micro buses
-    upaddr          : out std_logic_vector(15 downto 0);   
-    updatao         : out std_logic_vector(7 downto 0);    
-
     -- FLASH/SRAM
     flash_i         : in from_FLASH_t;
     flash_o         : out to_FLASH_t;
 		sram_i					: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
+
+    -- graphics
+    
+    bitmap_i        : in from_BITMAP_CTL_t;
+    bitmap_o        : out to_BITMAP_CTL_t;
+    
+    tilemap_i       : in from_TILEMAP_CTL_t;
+    tilemap_o       : out to_TILEMAP_CTL_t;
+
+    sprite_reg_o    : out to_SPRITE_REG_t;
+    sprite_i        : in from_SPRITE_CTL_t;
+    sprite_o        : out to_SPRITE_CTL_t;
+		spr0_hit				: in std_logic;
+
+    -- various graphics information
+    graphics_i      : in from_GRAPHICS_t;
+    graphics_o      : out to_GRAPHICS_t;
+    
+    -- OSD
+    osd_i           : in from_OSD_t;
+    osd_o           : out to_OSD_t;
+
+    -- sound
+    snd_i           : in from_SOUND_t;
+    snd_o           : out to_SOUND_t;
 
     -- SPI (flash)
     spi_i           : in from_SPI_t;
@@ -44,51 +71,11 @@ entity Game is
 
     -- general purpose I/O
     gp_i            : in from_GP_t;
-    gp_o            : out to_GP_t;
-    
-    --
-    --
-    --
-
-    gfxextra_data   : out std_logic_vector(7 downto 0);
-		palette_data		: out ByteArrayType(15 downto 0);
-
-    -- graphics (bitmap)
-    bitmap_addr			: in    std_logic_vector(15 downto 0);   
-    bitmap_data			: out   std_logic_vector(7 downto 0);    
-
-    -- graphics (tilemap)
-    tileaddr        : in std_logic_vector(15 downto 0);   
-    tiledatao       : out std_logic_vector(7 downto 0);    
-    tilemapaddr     : in std_logic_vector(15 downto 0);   
-    tilemapdatao    : out std_logic_vector(15 downto 0);    
-    attr_addr       : in std_logic_vector(9 downto 0);    
-    attr_dout       : out std_logic_vector(15 downto 0);   
-
-    -- graphics (sprite)
-    sprite_reg_addr : out std_logic_vector(7 downto 0);    
-    sprite_wr       : out std_logic;                       
-    spriteaddr      : in std_logic_vector(15 downto 0);   
-    spritedata      : out std_logic_vector(31 downto 0);   
-    spr0_hit        : in std_logic;
-
-    -- graphics (control)
-    vblank          : in std_logic;    
-		xcentre					: out std_logic_vector(9 downto 0);
-		ycentre					: out std_logic_vector(9 downto 0);
-
-    -- OSD
-    to_osd          : out to_OSD_t;
-    from_osd        : in from_OSD_t;
-
-    -- sound
-    snd_rd          : out std_logic;                       
-    snd_wr          : out std_logic;
-    sndif_datai     : in std_logic_vector(7 downto 0)
+    gp_o            : out to_GP_t
   );
-end Game;
+end platform;
 
-architecture SYN of Game is
+architecture SYN of platform is
 
 	alias clk_30M					: std_logic is clk_i(0);
 	alias clk_video       : std_logic is clk_i(1);
@@ -123,7 +110,7 @@ architecture SYN of Game is
 	signal hgr1_cs				: std_logic;
 	signal hgr0_cs				: std_logic;
 	signal hgr_wr					: std_logic;
-	alias hgr_data				: std_logic_vector(7 downto 0) is bitmap_data;
+	alias hgr_data				: std_logic_vector(7 downto 0) is bitmap_o.d;
 	signal hgr_addr				: std_logic_vector(13 downto 0);
 		                        
   -- RAM signals        
@@ -134,20 +121,13 @@ architecture SYN of Game is
   alias wram_datao     	: std_logic_vector(7 downto 0) is sram_i.d(7 downto 0);
 
   -- other signals      
-	signal inputs					: in8(0 to 0);
+	signal inputs					: from_MAPPED_INPUTS_t(0 to 0);
 	signal a2var					: std_logic_vector(15 downto 0);	-- soft switches
 	signal flash					: std_logic;
 	
 begin
 
 	reset_n <= not reset_i;
-	
-	GEN_PAL_DAT : for i in palette_data'range generate
-		palette_data(i) <= (others => '0');
-	end generate GEN_PAL_DAT;
-	
-	xcentre <= (others => '0');
-	ycentre <= (others => '0');
 	
 	-- ROM $E000-FFFF
 	rom_e_cs <= 	'1' when STD_MATCH(addr_bus, "111-------------") else '0';
@@ -173,7 +153,7 @@ begin
 	-- memory read mux
 	uP_datai <=	rom_e_data when rom_e_cs = '1' else
 							rom_d_data when rom_d_cs = '1' else
-							inputs(0) when keybd_cs = '1' else
+							inputs(0).d when keybd_cs = '1' else
 							wram_datao when ram8_cs = '1' else
 							wram_datao when ram6_cs = '1' else
 							wram_datao when hgr1_cs = '1' else
@@ -182,8 +162,8 @@ begin
 							wram_datao when ram0_cs = '1' else
 							-- C01X routintes
               -- reads bits from a2_var
-							'0' & inputs(0)(6 downto 0) when addr_bus = X"C010" else
-							(not vblank) & "0000000" when addr_bus = X"C019" else
+							'0' & inputs(0).d(6 downto 0) when addr_bus = X"C010" else
+							(not graphics_i.vblank) & "0000000" when addr_bus = X"C019" else
               a2var(8) & "0000000" when addr_bus = X"C01A" else
               a2var(9) & "0000000" when addr_bus = X"C01B" else
               a2var(10) & "0000000" when addr_bus = X"C01C" else
@@ -194,7 +174,7 @@ begin
   keybd_clr <= up_rw_n when STD_MATCH(addr_bus, "110000000001----") else '0';
 
 	-- writes to $C03X toggle speaker output
-	snd_wr <= '1' when addr_bus(15 downto 4) = X"C03" else '0';
+	snd_o.wr <= '1' when addr_bus(15 downto 4) = X"C03" else '0';
 
 	-- vram $0400-07FF
   vram_wr <= not up_rw_n and vram_cs;
@@ -225,14 +205,16 @@ begin
 
 	-- flash is the character flash timer
 	-- attr_addr(1 downto 0) is flashing/inverse bits
-	attr_dout <= EXT(flash & attr_addr(1 downto 0) & X"00", attr_dout'length);
+	tilemap_o.attr_d <= EXT(flash & tilemap_i.attr_a(1 downto 0) & X"00", tilemap_o.attr_d'length);
 
 	-- HGR $2000-$5FFF has two (2) 8KB pages of hires graphics
 	-- page (a2var(10)) is inverted because hgr memory starts on 8K boundary
-	hgr_addr <= not a2var(10) & bitmap_addr(hgr_addr'left-1 downto 0);
+	hgr_addr <= not a2var(10) & bitmap_I.a(hgr_addr'left-1 downto 0);
 
 	-- use spritedata to expose the softswitches to the graphics core	
-	spritedata <= EXT(a2var, spritedata'length);
+	graphics_o.pal <= (others => (others => '0'));
+	graphics_o.bit8_1 <= (others => '0');
+	graphics_o.bit16_1 <= EXT(a2var, graphics_o.bit16_1'length);
 
   -- SRAM signals (may or may not be used)
   sram_o.a <= EXT(addr_bus, sram_o.a'length);
@@ -242,16 +224,16 @@ begin
   sram_o.oe <= wram_cs and up_rw_n;
   sram_o.we <= wram_cs and not up_rw_n;
 	
-	upaddr <= up_addr(upaddr'range);
-	updatao <= up_datao;
-
-  gfxextra_data <= (others => '0');
+	--upaddr <= up_addr(upaddr'range);
+	--updatao <= up_datao;
 
   -- unused outputs
-  snd_rd <= '0';
-  sprite_reg_addr <= (others => '0');
-	sprite_wr <= '0';
-	leds_o <= EXT(inputs(0), leds_o'length);
+  flash_o <= NULL_TO_FLASH;
+  sprite_reg_o <= NULL_TO_SPRITE_REG;
+  sprite_o <= NULL_TO_SPRITE_CTL;
+  snd_o.rd <= '0';
+  spi_o <= NULL_TO_SPI;
+	leds_o <= EXT(inputs(0).d, leds_o'length);
 	
   --
   -- COMPONENT INSTANTIATION
@@ -295,24 +277,6 @@ begin
 			DI      		=> up_datai,
 			DO      		=> up_datao
 		);
-
-	inputs_inst : entity work.Inputs
-		generic map
-		(
-			NUM_INPUTS	=> 1
-		)
-	  port map
-	  (
-	    clk     		=> clk_30M,
-	    reset   		=> reset_i,
-	    ps2clk  		=> inputs_i.ps2_kclk,
-	    ps2data 		=> inputs_i.ps2_kdat,
-			jamma				=> inputs_i.jamma_n,
-
-			dips(7 downto 1)	=> (others =>'0'),
-	    dips(0)			=> keybd_clr,
-	    inputs			=> inputs
-	  );
 
 	intgen_inst : entity work.intGen
 		port map
@@ -368,8 +332,8 @@ begin
 		port map
 		(
 			clock			=> clk_video,
-			address		=> tileaddr(10 downto 0),
-			q					=> tileDatao
+			address		=> tilemap_i.tile_a(10 downto 0),
+			q					=> tilemap_o.tile_d
 		);
 	
 	GEN_ONLY_1_HIRES_PAGE : if APPLE_IIPLUS_HIRES_PAGES = 1 generate
@@ -449,11 +413,11 @@ begin
 			
 			-- graphics interface
 			clock_a			=> clk_video,
-			address_a		=> tilemapaddr(9 downto 0),
+			address_a		=> tilemap_i.map_a(9 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tileMapDatao(7 downto 0)
+			q_a					=> tilemap_o.map_d(7 downto 0)
 		);
-  tileMapDatao(15 downto 8) <= (others => '0');
+  tilemap_o.map_d(tilemap_o.map_d'left downto 8) <= (others => '0');
 
 end SYN;

@@ -41,6 +41,10 @@ package project_pkg is
   constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
   --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
 
+  constant PACE_HAS_OSD                     : boolean := false;
+  constant PACE_OSD_XPOS                    : natural := 128;
+  constant PACE_OSD_YPOS                    : natural := 176;
+
 	-- Apple II-specific constants      			
 	                                    			
   constant APPLE_II_HIRES_PAGES             : natural := 2;

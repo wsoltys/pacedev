@@ -19,17 +19,24 @@ entity pace_video_mixer is
       sprite_set    : in std_logic;
       sprite_pri    : in std_logic;
       
+      video_ctl_i   : in from_VIDEO_CTL_t;
       graphics_i    : in to_GRAPHICS_t;
       rgb_o         : out RGB_t
   );
 end entity pace_video_mixer;
   
 architecture SYN of pace_video_mixer is
+
+  alias a2var					: std_logic_vector(15 downto 0) is graphics_i.bit16_1;
+	alias gfxmode				: std_logic_vector(3 downto 0) is a2var(11 downto 8);
+					
 begin
 
-	rgb_o <=  sprite_rgb when sprite_set = '1' and sprite_pri = '1' else
-            tilemap_rgb when tilemap_set = '1' else
-						sprite_rgb when sprite_set = '1' else
-						bitmap_rgb;
+	rgb_o <=  -- mixed-mode graphics & text
+            bitmap_rgb 	when STD_MATCH(gfxmode, "1-10") and video_ctl_i.y < 160 else
+            -- full-screen graphics
+            bitmap_rgb 	when STD_MATCH(gfxmode, "1-00") else
+            -- everything else
+            tilemap_rgb;
 
 end architecture SYN;

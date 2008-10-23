@@ -179,6 +179,7 @@ begin
         sprite_set    => sprite_ctl_o_s.set,
         sprite_pri    => sprite_pri,
         
+        video_ctl_i   => from_video_ctl,
         graphics_i    => graphics_i,
         rgb_o         => rgb_data
     );
