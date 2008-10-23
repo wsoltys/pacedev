@@ -1,8 +1,7 @@
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use ieee.std_logic_arith.EXT;
-use IEEE.std_logic_unsigned.ALL;
-use IEEE.numeric_std.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 
 library work;
 use work.platform_pkg.all;

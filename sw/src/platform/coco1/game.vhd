@@ -2,7 +2,6 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use	ieee.numeric_std.all;
-use ieee.std_logic_arith.EXT;
 
 library work;
 use work.pace_pkg.all;
@@ -296,10 +295,10 @@ begin
               X"FF";
 
   -- SRAM signals
-  sram_o.a <= EXT(mpu_addr, sram_o.a'length);
+  sram_o.a <= std_logic_vector(resize(unsigned(mpu_addr), sram_o.a'length));
   --sram_data <= uP_datao when (uPvma = '1' and ram_cs = '1' and uPrdwr = '0' and vdg_sram_cs = '0') 
-  sram_o.d <= EXT(uP_datao, sram_o.d'length);
-	sram_o.be <= EXT("1", sram_o.be'length);
+  sram_o.d <= std_logic_vector(resize(unsigned(uP_datao), sram_o.d'length));
+	sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
   sram_o.cs <= (uPvma and ram_cs) or vdg_sram_cs;
 	sram_o.oe <= uPrdwr or vdg_sram_cs;
 	sram_o.we <= sys_write and not uPrdwr;

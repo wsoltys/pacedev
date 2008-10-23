@@ -64,7 +64,6 @@ Library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_unsigned.all;
 use IEEE.numeric_std.all;
-use ieee.std_logic_arith.EXT;
 
 library work;
 use work.pace_pkg.all;
@@ -447,8 +446,8 @@ begin
 
 	-- use external SRAM for video ram
 	sram_o.we <= vram_we_s;
-	sram_o.a <= EXT(vram_a_s, sram_o.a'length);
-	sram_o.d <= EXT(vram_d_from_cv_s, sram_o.d'length) when vram_we_s = '1' else (others => 'Z');
+	sram_o.a <= std_logic_vector(resize(unsigned(vram_a_s), sram_o.a'length));
+	sram_o.d <= std_logic_vector(resize(unsigned(vram_d_from_cv_s), sram_o.d'length)) when vram_we_s = '1' else (others => 'Z');
 	vram_d_to_cv_s <= sram_i.d(vram_d_to_cv_s'range);
 	sram_o.oe <= not vram_we_s;
 	sram_o.cs <= '1';

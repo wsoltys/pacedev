@@ -1,6 +1,6 @@
 Library IEEE;
 use IEEE.std_logic_1164.all;
-use ieee.std_logic_arith.EXT;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -292,7 +292,7 @@ begin
 		-- hook up external sram for the ROM
 		sram_o.a(18 downto 0) <= rom_addr;
 		sram_o.d(7 downto 0) <= rom_data;
-		sram_o.be <= EXT("1", sram_o.be'length);
+		sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
 		sram_o.cs <= not rom_cs_n;
 		sram_o.oe <= not rom_oe_n;
 

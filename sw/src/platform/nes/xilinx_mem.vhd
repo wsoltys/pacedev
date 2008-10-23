@@ -124,8 +124,6 @@ end SYN;
 
 library IEEE;
 use IEEE.std_logic_1164.all;
-use ieee.numeric_std.STD_MATCH;
-use ieee.std_logic_arith.EXT;
 
 library UNISIM;
 use UNISIM.VComponents.all;

@@ -1,6 +1,6 @@
 Library IEEE;
 use IEEE.std_logic_1164.all;
-use ieee.std_logic_arith.EXT;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -204,11 +204,11 @@ begin
 				end if;
 			end process;
 
-			sram_o.a <= EXT(ram_address, sram_o.a'length) when state = IDLE else
-									EXT(rmw_a, sram_o.a'length);
+			sram_o.a <= std_logic_vector(resize(unsigned(ram_address), sram_o.a'length)) when state = IDLE else
+									std_logic_vector(resize(unsigned(rmw_a), sram_o.a'length));
 			sram_o.d(31 downto 16) <= (others => '0');
 			ram0_di <= sram_i.d(ram0_di'range);
-			sram_o.be <=  EXT("11", sram_o.be'length);
+			sram_o.be <=  std_logic_vector(resize(unsigned("11"), sram_o.be'length));
 			sram_o.cs <= not ram0_cs_n when state = IDLE else '1';
 			sram_o.oe <= not ram_oe_n when state = IDLE else rmw_oe;
 			sram_o.we <= '0' when state = IDLE else rmw_we;
@@ -219,10 +219,10 @@ begin
 
 	GEN_EXPERIMENTAL : if PACE_TARGET = PACE_TARGET_P2 generate
 	
-		sram_o.a <= EXT(ram_address, sram_o.a'length);
-		sram_o.d <= EXT(ram0_do, sram_o.d'length);
+		sram_o.a <= std_logic_vector(resize(unsigned(ram_address), sram_o.a'length));
+		sram_o.d <= std_logic_vector(resize(unsigned(ram0_do), sram_o.d'length));
 		ram0_di <= sram_i.d(7 downto 0) & sram_i.d(7 downto 0);
-		sram_o.be <= EXT(not ram0_be_n, sram_o.be'length);
+		sram_o.be <= std_logic_vector(resize(unsigned(not ram0_be_n), sram_o.be'length));
 		sram_o.cs <= not ram0_cs_n;
 		sram_o.oe <= not ram_oe_n;
 		sram_o.we <= not ram_rw_n;
@@ -231,10 +231,10 @@ begin
 		
 	GEN_SRAM : if PACE_TARGET	= PACE_TARGET_DE2 generate
 
-		sram_o.a <= EXT(ram_address, sram_o.a'length);
-		sram_o.d <= EXT(ram0_do, sram_o.d'length);
+		sram_o.a <= std_logic_vector(resize(unsigned(ram_address), sram_o.a'length));
+		sram_o.d <= std_logic_vector(resize(unsigned(ram0_do), sram_o.d'length));
 		ram0_di <= sram_i.d(ram0_di'range);
-		sram_o.be <= EXT(not ram0_be_n, sram_o.be'length);
+		sram_o.be <= std_logic_vector(resize(unsigned(not ram0_be_n), sram_o.be'length));
 		sram_o.cs <= not ram0_cs_n;
 		sram_o.oe <= not ram_oe_n;
 		sram_o.we <= not ram_rw_n;

@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_unsigned.all;
-use ieee.std_logic_arith.EXT;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -58,7 +58,7 @@ begin
   -- this is: ((y&7)<<10)|((y&0x38)<<4)
   aaa <= y(2 downto 0) & y(5 downto 3) & "0000000";
   -- and this is ((y>>3)&0x18)*5
-  bbb <= EXT(y(7 downto 6) & y(7 downto 6) & "000", bbb'length);
+  bbb <= "000000" & y(7 downto 6) & y(7 downto 6) & "000";
   -- so we just need (aaa | (bbb+x))
 
   -- generate pixel
@@ -85,7 +85,7 @@ begin
 				-- 1st stage of pipeline
 				-- - read tile from tilemap
 				-- - read attribute data
-        ctl_o.a(12 downto 0) <= aaa or (bbb + (EXT(x_count(8 downto 3), bbb'length)));
+        ctl_o.a(12 downto 0) <= aaa or (bbb + (std_logic_vector(resize(unsigned(x_count(8 downto 3)), bbb'length))));
 
 				case pix_x_r is
 					when "000" =>

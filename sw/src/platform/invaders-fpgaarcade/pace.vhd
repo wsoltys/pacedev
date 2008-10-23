@@ -59,7 +59,6 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
-use ieee.std_logic_arith.EXT;
 
 library work;
 use work.pace_pkg.all;
@@ -302,15 +301,15 @@ begin
 	process (Clk)
 	begin
 		if rising_edge(Clk) then
-			sram_o.a <= EXT(RAB, sram_o.a'length);
+			sram_o.a <= std_logic_vector(resize(unsigned(RAB), sram_o.a'length));
 			sram_o.cs <= '1';
 			sram_o.oe <= RWE_n;
-      sram_o.be <= EXT("1", sram_o.be'length);
+      sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
 			sram_o.we <= not RWE_n;
 		end if;
 	end process;
 
-	sram_o.d <= EXT(RWD, sram_o.d'length) when RWE_n = '0' else (others => 'Z');
+	sram_o.d <= std_logic_vector(resize(unsigned(RWD), sram_o.d'length)) when RWE_n = '0' else (others => 'Z');
 	RDB <= sram_i.d(RDB'range);
 		
 	--

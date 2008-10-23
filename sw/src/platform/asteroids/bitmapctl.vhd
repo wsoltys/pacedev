@@ -5,7 +5,6 @@ use IEEE.std_logic_unsigned.all;
 library work;
 use work.pace_pkg.all;
 use work.platform_pkg.all;
-use ieee.std_logic_arith.EXT;
 
 --
 --	Asteroids Bitmap Controller

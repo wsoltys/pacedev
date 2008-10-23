@@ -1,7 +1,6 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
-use ieee.numeric_std.STD_MATCH;
-use ieee.std_logic_arith.EXT;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -205,7 +204,7 @@ begin
 
 	-- flash is the character flash timer
 	-- attr_addr(1 downto 0) is flashing/inverse bits
-	tilemap_o.attr_d <= EXT(flash & tilemap_i.attr_a(1 downto 0) & X"00", tilemap_o.attr_d'length);
+	tilemap_o.attr_d(1+2+8-1 downto 0) <= flash & tilemap_i.attr_a(1 downto 0) & X"00";
 
 	-- HGR $2000-$5FFF has two (2) 8KB pages of hires graphics
 	-- page (a2var(10)) is inverted because hgr memory starts on 8K boundary
@@ -214,12 +213,12 @@ begin
 	-- use spritedata to expose the softswitches to the graphics core	
 	graphics_o.pal <= (others => (others => '0'));
 	graphics_o.bit8_1 <= (others => '0');
-	graphics_o.bit16_1 <= EXT(a2var, graphics_o.bit16_1'length);
+	graphics_o.bit16_1 <= std_logic_vector(resize(unsigned(a2var), graphics_o.bit16_1'length));
 
   -- SRAM signals (may or may not be used)
-  sram_o.a <= EXT(addr_bus, sram_o.a'length);
-  sram_o.d <= EXT(up_datao, sram_o.d'length);
-	sram_o.be <= EXT("1", sram_o.be'length);
+  sram_o.a <= std_logic_vector(resize(unsigned(addr_bus), sram_o.a'length));
+  sram_o.d <= std_logic_vector(resize(unsigned(up_datao), sram_o.d'length));
+	sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
   sram_o.cs <= '1';
   sram_o.oe <= wram_cs and up_rw_n;
   sram_o.we <= wram_cs and not up_rw_n;
@@ -233,7 +232,7 @@ begin
   sprite_o <= NULL_TO_SPRITE_CTL;
   snd_o.rd <= '0';
   spi_o <= NULL_TO_SPI;
-	leds_o <= EXT(inputs(0).d, leds_o'length);
+	leds_o <= std_logic_vector(resize(unsigned(inputs(0).d), leds_o'length));
 	
   --
   -- COMPONENT INSTANTIATION

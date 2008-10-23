@@ -52,7 +52,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-use ieee.std_logic_arith.EXT;
 
 library work;
 use work.pace_pkg.all;
@@ -162,9 +161,9 @@ begin
 
 	-- SRAM interface	
 	sram_oe_n <= '0' when (sram_cs_n = '0' and sram_we_n = '1') else '1';
-	sram_o.d <= EXT(cpu_data_o, sram_o.d'length) when (sram_cs_n = '0' and sram_we_n = '0') else 
-								(others => 'Z');
-  sram_o.be <= EXT("1", sram_o.be'length);
+	sram_o.d <= std_logic_vector(resize(unsigned(cpu_data_o), sram_o.d'length)) 
+                when (sram_cs_n = '0' and sram_we_n = '0') else (others => 'Z');
+  sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
 	sram_o.cs <= not sram_cs_n;
 	sram_o.oe <= not sram_oe_n;
 	sram_o.we <= not sram_we_n;
@@ -178,7 +177,7 @@ begin
 	coin_left_s <= not inputs(2)(2);
 	coin_right_s <= not inputs(2)(3);
 
-	leds_o <= EXT(inputs(0) or inputs(1) or inputs(2), leds_o'length);
+	leds_o <= std_logic_vector(resize(unsigned(inputs(0) or inputs(1) or inputs(2)), leds_o'length));
 
 	inputs_inst : entity work.Inputs
 		generic map

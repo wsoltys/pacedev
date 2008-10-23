@@ -1,5 +1,6 @@
-Library IEEE;
-Use     IEEE.std_logic_1164.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -195,7 +196,7 @@ begin
     signal snd_a      : std_logic_vector(15 downto 0);
 	begin
 
-    snd_a <= EXT(to_sound.a, snd_a'length);
+    snd_a <= std_logic_vector(resize(unsigned(to_sound.a), snd_a'length));
     
 	  sound_inst : entity work.Sound                                          
 	    Port Map

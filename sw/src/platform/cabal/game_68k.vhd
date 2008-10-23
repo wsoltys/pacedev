@@ -1,8 +1,7 @@
 library IEEE;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
-use ieee.numeric_std.STD_MATCH;
-use ieee.std_logic_arith.EXT;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -237,8 +236,8 @@ begin
 	reset_n <= not (reset or game_reset);
 	
   -- SRAM signals (may or may not be used)
-  sram_o.a <= EXT(up_addr, sram_o.a'length);
-  sram_o.d <= EXT(up_datao, sram_o.d'length);
+  sram_o.a <= std_logic_vector(resize(unsigned(up_addr), sram_o.a'length));
+  sram_o.d <= std_logic_vector(resize(unsigned(up_datao), sram_o.d'length));
 	sram_o.be(3 downto 2) <= (others => '0');
 	sram_o.be(1) <= '1' when (udsn_en = '1' and udsn = '0') else '0';
 	sram_o.be(0) <= '1' when (ldsn_en = '1' and ldsn = '0') else '0';

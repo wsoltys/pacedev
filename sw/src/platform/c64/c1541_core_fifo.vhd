@@ -1,8 +1,7 @@
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use ieee.std_logic_arith.EXT;
-use IEEE.std_logic_unsigned.ALL;
-use IEEE.numeric_std.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 
 library work;
 use work.platform_pkg.all;
@@ -193,14 +192,16 @@ architecture SYN of c1541_core is
 		-- - just needs to be detected on rising edge of cpu enable
 		--   so that the internal OV flag is set
 		process (clk_32M, reset)
-			variable count : integer range 0 to 32+16;
+			--variable count : integer range 0 to 32+16;
+			variable count : integer range 0 to 32*13;
 		begin
 			if reset = '1' then
 				count := 0;
 				byte_n_s <= '1';
 			elsif rising_edge(clk_32M) then
 				if fifo_rdreq = '1' then
-					count := 32+16; -- 1.5us wide
+					--count := 32+16; -- 1.5us wide
+					count := 32*13; -- 13us wide
 					byte_n_s <= '0';
 				elsif count = 0 then
 					byte_n_s <= '1';

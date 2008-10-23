@@ -1,7 +1,7 @@
 library IEEE;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
-use ieee.std_logic_arith.EXT;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -153,9 +153,10 @@ begin
 	ycentre <= (others => '0');
 	
   -- SRAM signals (may or may not be used)
-  sram_o.a <= EXT(uP_addr(13 downto 0), sram_o.a'length);
-  sram_o.d <= EXT(uP_datao, sram_o.d'length) when (wram_cs = '1' and uPmemwr = '1') else (others => 'Z');
-  sram_o.be <= EXT("1", sram_o.be'length);
+  sram_o.a <= std_logic_vector(resize(unsigned(uP_addr(13 downto 0)), sram_o.a'length));
+  sram_o.d <= std_logic_vector(resize(unsigned(uP_datao), sram_o.d'length)) 
+                when (wram_cs = '1' and uPmemwr = '1') else (others => 'Z');
+  sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
   sram_o.cs <= '1';
   sram_o.oe <= wram_cs and not uPmemwr;
   sram_o.we <= wram_cs and uPmemwr;

@@ -2,7 +2,6 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use	ieee.numeric_std.all;
-use ieee.std_logic_arith.EXT;
 
 library work;
 use work.pace_pkg.all;
@@ -1012,12 +1011,12 @@ begin
         end if;
         -- mask off high bit for 16K machines
         ram_a := (ram_a(14) and BBC_RAM_32K) & ram_a(13 downto 0);
-        sram_o.a <= EXT(ram_a, sram_o.a'length);
+        sram_o.a <= std_logic_vector(resize(unsigned(ram_a), sram_o.a'length));
       end if;
     end process;
 
-    sram_o.d <= EXT(cpu_d_o, sram_o.d'length);
-    sram_o.be <= EXT("1", sram_o.be'length);
+    sram_o.d <= std_logic_vector(resize(unsigned(cpu_d_o), sram_o.d'length));
+    sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
 
   end generate GEN_EXTERNAL_RAM;
 

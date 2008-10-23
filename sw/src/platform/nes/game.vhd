@@ -1,8 +1,7 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_unsigned.all;
-use ieee.numeric_std.STD_MATCH;
-use ieee.std_logic_arith.EXT;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -179,9 +178,9 @@ begin
 	game_reset_n <= not game_reset;
 
 	-- SRAM signals always driven		
-  sram_o.a <= EXT(wram_addr, sram_o.a'length);
-  sram_o.d <= EXT(up_datao, sram_o.d'length);
-	sram_o.be <= EXT("1", sram_o.be'length);
+  sram_o.a <= std_logic_vector(resize(unsigned(wram_addr), sram_o.a'length));
+  sram_o.d <= std_logic_vector(resize(unsigned(up_datao), sram_o.d'length));
+	sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
 
 	-- WRAM $0000-$1FFF (mirrored 4 times)
 	wram_cs <= 	'1' when STD_MATCH(addr_bus, "000-------------") else '0';

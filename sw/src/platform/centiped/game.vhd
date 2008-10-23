@@ -1,7 +1,6 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
-use ieee.numeric_std.STD_MATCH;
-use ieee.std_logic_arith.EXT;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -210,9 +209,9 @@ begin
 	newTileAddr <= tileAddr(11 downto 5) & tileAddr(3 downto 1) & tileAddr(4) & tileAddr(0);
 
   -- SRAM signals (may or may not be used)
-  sram_o.a <= EXT(addr_bus, sram_o.a'length);
-  sram_o.d <= EXT(up_datao, sram_o.d'length);
-	sram_o.be <= EXT("1", sram_o.be'length);
+  sram_o.a <= std_logic_vector(resize(unsigned(addr_bus), sram_o.a'length));
+  sram_o.d <= std_logic_vector(resize(unsigned(up_datao), sram_o.d'length));
+	sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
   sram_o.cs <= '1';
   sram_o.oe <= wram_cs and up_rw_n;
   sram_o.we <= wram_cs and not up_rw_n;

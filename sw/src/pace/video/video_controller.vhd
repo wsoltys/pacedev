@@ -1,8 +1,7 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
---use IEEE.numeric_std.all;
-use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
+use IEEE.numeric_std.all;
 
 library work;
 use work.video_controller_pkg.all;
@@ -318,8 +317,8 @@ begin
       elsif hblank_s = '0' and vblank_s = '0' then    
         stb_cnt_v := (others => '1');
       end if;
-      video_ctl_o.x <= EXT(x_s(x_s'left downto H_SCALE-1), video_ctl_o.x'length) after SIM_DELAY;
-      video_ctl_o.y <= EXT(y_s(y_s'left downto V_SCALE-1), video_ctl_o.y'length) after SIM_DELAY;
+      video_ctl_o.x <= std_logic_vector(resize(unsigned(x_s(x_s'left downto H_SCALE-1)), video_ctl_o.x'length)) after SIM_DELAY;
+      video_ctl_o.y <= std_logic_vector(resize(unsigned(y_s(y_s'left downto V_SCALE-1)), video_ctl_o.y'length)) after SIM_DELAY;
 
       -- register video outputs
       if hactive_v = '1' and vactive_v = '1' then

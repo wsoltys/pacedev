@@ -2,7 +2,6 @@ library IEEE;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 --use ieee.std_logic_unsigned.all;
-use ieee.std_logic_arith.EXT;
 
 library work;
 use work.pace_pkg.all;
@@ -145,10 +144,10 @@ begin
 	GEN_EXTERNAL_WRAM : if not PACMAN_USE_INTERNAL_WRAM generate
 	
 	  -- SRAM signals (may or may not be used)
-	  sram_o.a <= EXT(uP_addr, sram_o.a'length);
+	  sram_o.a <= std_logic_vector(resize(unsigned(uP_addr), sram_o.a'length));
 		wram_datao <= sram_i.d(wram_datao'range);
-	  sram_o.d <= EXT(uP_datao, sram_o.d'length);
-		sram_o.be <= EXT("1", sram_o.be'length);
+	  sram_o.d <= std_logic_vector(resize(unsigned(uP_datao), sram_o.d'length));
+		sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
 	  sram_o.cs <= '1';
 	  sram_o.oe <= wram_cs and not uPmemwr;
 	  sram_o.we <= wram_wr;
@@ -210,7 +209,7 @@ begin
   -- only use 5 bits of cram data
   -- because the pengo/pacman tilemap controller
   -- expects banking bits in (6 downto 5)
-  attr_dout <= EXT(cram_data(4 downto 0), attr_dout'length);
+  attr_dout <= std_logic_vector(resize(unsigned(cram_data(4 downto 0)), attr_dout'length));
 	
   gfxextra_data <= (others => '0');
 	GEN_PAL_DAT : for i in palette_data'range generate
