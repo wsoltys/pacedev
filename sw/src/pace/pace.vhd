@@ -192,8 +192,11 @@ begin
 
 	SOUND_BLOCK : block
 		signal snd_data		: std_logic_vector(7 downto 0);
+    signal snd_a      : std_logic_vector(15 downto 0);
 	begin
-	
+
+    snd_a <= EXT(to_sound.a, snd_a'length);
+    
 	  sound_inst : entity work.Sound                                          
 	    Port Map
 	    (
@@ -202,8 +205,7 @@ begin
 
 	      sndif_rd    => to_sound.rd,              
 	      sndif_wr    => to_sound.wr,              
-	      sndif_addr(15 downto 8) => (others => '0'),
-	      sndif_addr(7 downto 0) => to_sound.a,
+	      sndif_addr  => snd_a,
 	      sndif_datai => to_sound.d,
 
 	      snd_clk     => audio_o.clk,
