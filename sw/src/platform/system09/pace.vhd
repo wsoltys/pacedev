@@ -4,6 +4,7 @@ use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
+use work.video_controller_pkg.all;
 use work.project_pkg.all;
 use work.platform_pkg.all;
 
@@ -11,69 +12,65 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk             : in std_logic_vector(0 to 3);
-    test_button     : in std_logic;
-    reset           : in std_logic;
+    clk_i           : in std_logic_vector(0 to 3);
+    reset_i         : in std_logic;
 
-    -- game I/O
-    ps2clk          : inout std_logic;
-    ps2data         : inout std_logic;
-    dip             : in std_logic_vector(7 downto 0);
-		jamma						: in JAMMAInputsType;
+    -- misc I/O
+    buttons_i       : in from_BUTTONS_t;
+    switches_i      : in from_SWITCHES_t;
+    leds_o          : out to_LEDS_t;
 
-    -- external RAM
-    sram_i          : in from_SRAM_t;
-    sram_o          : out to_SRAM_t;
+    -- controller inputs
+    inputs_i        : in from_INPUTS_t;
 
-    -- VGA video
-		vga_clk					: out std_logic;
-    red             : out std_logic_vector(9 downto 0);
-    green           : out std_logic_vector(9 downto 0);
-    blue            : out std_logic_vector(9 downto 0);
-		lcm_data				:	out std_logic_vector(9 downto 0);
-    hsync           : out std_logic;
-    vsync           : out std_logic;
+    -- external ROM/RAM
+    flash_i         : in from_FLASH_t;
+    flash_o         : out to_flash_t;
+    sram_i       		: in from_SRAM_t;
+		sram_o					: out to_SRAM_t;
 
-    -- composite video
-    BW_CVBS         : out std_logic_vector(1 downto 0);
-    GS_CVBS         : out std_logic_vector(7 downto 0);
+    -- video
+    video_i         : in from_VIDEO_t;
+    video_o         : out to_VIDEO_t;
 
-    -- sound
-    snd_clk         : out std_logic;
-    snd_data_l      : out std_logic_vector(15 downto 0);
-    snd_data_r      : out std_logic_vector(15 downto 0);
-
+    -- audio
+    audio_i         : in from_AUDIO_t;
+    audio_o         : out to_AUDIO_t;
+    
     -- SPI (flash)
-    spi_clk         : out std_logic;
-    spi_mode        : out std_logic;
-    spi_sel         : out std_logic;
-    spi_din         : in std_logic;
-    spi_dout        : out std_logic;
+    spi_i           : in from_SPI_t;
+    spi_o           : out to_SPI_t;
 
     -- serial
-    ser_tx          : out std_logic;
-    ser_rx          : in std_logic;
-
-    -- debug
-    leds            : out std_logic_vector(7 downto 0)
+    ser_i           : in from_SERIAL_t;
+    ser_o           : out to_SERIAL_t;
+    
+    -- general purpose I/O
+    gp_i            : in from_GP_t;
+    gp_o            : out to_GP_t
   );
-
-end PACE;
+end entity PACE;
 
 architecture SYN of PACE is
 
-	alias clk_50M						: std_logic is clk(0);
+	alias clk_50M						: std_logic is clk_i(0);
 	
 	signal reset_n					: std_logic;
 
+  signal ps2_kclk         : std_logic;
+  signal ps2_kdat         : std_logic;
+  
   signal ram_data         : std_logic_vector(7 downto 0);
 	signal ram_csn					: std_logic;	
 	signal ram_wrln					: std_logic;
 
 begin
 
-	reset_n <= not reset;
+	reset_n <= not reset_i;
 
+  ps2_kclk <= inputs_i.ps2_kclk;
+  ps2_kdat <= inputs_i.ps2_kdat;
+  
 	-- SRAM interface	
 	sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
 	sram_o.cs <= not ram_csn;
@@ -84,12 +81,9 @@ begin
 
 	-- map inputs
 	
-	vga_clk <= clk(1);	-- fudge
+	video_o.clk <= clk_i(1);	-- by convention
 
-  spi_clk <= 'Z';
-  spi_dout <= 'Z';
-  spi_mode <= 'Z';
-  spi_sel <= 'Z';
+  spi_o <= NULL_TO_SPI;
 
 	system09_inst : entity work.My_System09
 	  port map
@@ -111,28 +105,28 @@ begin
 			-- Stuff on the peripheral board
 
 	 	 	-- PS/2 Keyboard
-		 	kb_clock    => ps2clk,
-		 	kb_data     => ps2data,
+		 	kb_clock    => ps2_kclk,
+		 	kb_data     => ps2_kdat,
 
 	 		-- PS/2 Mouse interface
 --	 mouse_clock : in  Std_Logic;
 --	 mouse_data  : in  Std_Logic;
 
 	 		-- Uart Interface
-    	rxbit       => ser_rx,
-	 		txbit       => ser_tx,
+    	rxbit       => ser_i.rxd,
+	 		txbit       => ser_o.txd,
     	rts_n       => open,
     	cts_n       => '0',
 
 	 		-- CRTC output signals
-	 		v_drive     => vsync,
-    	h_drive     => hsync,
-    	blue_lo     => blue(8),
-    	blue_hi     => blue(9),
-    	green_lo    => green(8),
-    	green_hi    => green(9),
-    	red_lo      => red(8),
-    	red_hi      => red(9),
+	 		v_drive     => video_o.vsync,
+    	h_drive     => video_o.hsync,
+    	blue_lo     => video_o.rgb.b(8),
+    	blue_hi     => video_o.rgb.b(9),
+    	green_lo    => video_o.rgb.g(8),
+    	green_hi    => video_o.rgb.g(9),
+    	red_lo      => video_o.rgb.r(8),
+    	red_hi      => video_o.rgb.r(9),
 --	   buzzer      : out std_logic;
 
 			-- Compact Flash
@@ -162,9 +156,9 @@ begin
 	 );
   
 	-- unused video colour resolution
-	red(7 downto 0) <= (others => '0');
-	green(7 downto 0) <= (others => '0');
-	blue(7 downto 0) <= (others => '0');
+	video_o.rgb.r(video_o.rgb.r'left-2 downto 0) <= (others => '0');
+	video_o.rgb.g(video_o.rgb.g'left-2 downto 0) <= (others => '0');
+	video_o.rgb.b(video_o.rgb.b'left-2 downto 0) <= (others => '0');
 	
 	-- unused SRAM signals
 	sram_o.a(23 downto 17) <= (others => '0');
