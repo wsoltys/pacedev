@@ -1,7 +1,7 @@
-Library IEEE;
-use IEEE.std_logic_1164.all;
+library ieee;
+use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
-use ieee.std_logic_arith.EXT;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -102,9 +102,9 @@ begin
 	reset_n <= not reset;
 
 	-- external memory logic
-	sram_o.a <= EXT(address, sram_o.a'length);
+	sram_o.a <= std_logic_vector(resize(unsigned(address), sram_o.a'length));
 	sram_o.d(data'range) <= data when (ram_cs_n = '0' and we_n = '0') else (others => 'Z');
-	sram_o.be <= EXT("1", sram_o.be'length);
+	sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
 	sram_o.cs <= not ram_cs_n;
 	sram_o.oe <= not oe_n;
 	sram_o.we <= not we_n;

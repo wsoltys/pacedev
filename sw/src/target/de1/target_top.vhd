@@ -1,8 +1,7 @@
-library IEEE;
-use IEEE.std_logic_1164.all;
---use IEEE.numeric_std.all;
-use ieee.std_logic_arith.all;
+library ieee;
+use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -237,9 +236,9 @@ begin
 	reset_n <= not reset_i;
 	
   -- buttons - active low
-  buttons_i <= EXT(not key, buttons_i'length);
+  buttons_i <= std_logic_vector(resize(unsigned(not key), buttons_i'length));
   -- switches - up = high
-  switches_i <= EXT(sw, switches_i'length);
+  switches_i <= std_logic_vector(resize(unsigned(sw), switches_i'length));
   -- leds
   ledr <= leds_o(ledr'range);
   
@@ -380,7 +379,7 @@ begin
   
     GEN_SRAM : if PACE_HAS_SRAM generate
       sram_addr <= sram_o.a(sram_addr'range);
-      sram_i.d <= EXT(sram_dq, sram_i.d'length);
+      sram_i.d <= std_logic_vector(resize(unsigned(sram_dq), sram_i.d'length));
       sram_dq <= sram_o.d(sram_dq'range) when (sram_o.cs = '1' and sram_o.we = '1') else (others => 'Z');
       sram_ub_n <= not sram_o.be(1);
       sram_lb_n <= not sram_o.be(0);
@@ -688,11 +687,11 @@ begin
         ccount := (others => '0');
       elsif rising_edge(clock_50) then
         pwmen_r := '0';
-        if pcount = std_logic_vector(conv_unsigned(0, pcount'length)) then
+        if pcount = std_logic_vector(to_unsigned(0, pcount'length)) then
           pwmen_r := '1';
         end if;
         chaseen_r := '0';
-        if ccount = std_logic_vector(conv_unsigned(0, ccount'length)) then
+        if ccount = std_logic_vector(to_unsigned(0, ccount'length)) then
           chaseen_r := '1';
         end if;
         pcount := pcount + 1;

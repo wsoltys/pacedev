@@ -1,7 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-use ieee.std_logic_arith.EXT;
 
 library work;
 use work.pace_pkg.all;
@@ -76,11 +75,12 @@ begin
 	reset_n <= not reset;
 
 	-- SRAM interface	
-	sram_o.be <= EXT("1", sram_o.be'length);
+	sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
 	sram_o.cs <= not ram_csn;
 	sram_o.oe <= ram_wrln;
 	sram_o.we <= not ram_wrln;
-  sram_o.d <= EXT(ram_data, sram_o.d'length) when ram_wrln = '0' else (others => 'Z');
+  sram_o.d <= std_logic_vector(resize(unsigned(ram_data), sram_o.d'length)) 
+								when ram_wrln = '0' else (others => 'Z');
 
 	-- map inputs
 	

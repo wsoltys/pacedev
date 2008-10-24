@@ -1,8 +1,8 @@
 library ieee;
 library work;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -199,9 +199,9 @@ begin
 	reset_i <= init;
 		
   -- buttons - active low
-  buttons_i <= EXT("0", buttons_i'length);
+  buttons_i <= std_logic_vector(to_unsigned(0, buttons_i'length));
   -- switches - up = high
-  switches_i <= EXT("0", switches_i'length);
+  switches_i <= std_logic_vector(to_unsigned(0, switches_i'length));
   -- leds
   -- (none)
 

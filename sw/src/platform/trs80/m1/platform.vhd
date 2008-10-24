@@ -1,6 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_arith.EXT;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -171,9 +171,9 @@ begin
   uP_datai <= uPmem_datai when (uPmemrd = '1') else uPio_datai;
 
   -- SRAM signals (may or may not be used)
-  sram_o.a <= EXT(uP_addr, sram_o.a'length);
-  sram_o.d <= EXT(uP_datao, sram_o.d'length);
-	sram_o.be <= EXT("1", sram_o.be'length);
+  sram_o.a <= std_logic_vector(resize(unsigned(uP_addr), sram_o.a'length));
+  sram_o.d <= std_logic_vector(resize(unsigned(uP_datao), sram_o.d'length));
+	sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
   sram_o.cs <= '1';
   sram_o.oe <= not ram_wr;
   sram_o.we <= ram_wr;
@@ -248,7 +248,7 @@ begin
 	bitmap_o <= NULL_TO_BITMAP_CTL;
 	sprite_reg_o <= NULL_TO_SPRITE_REG;
 	sprite_o <= NULL_TO_SPRITE_CTL;
-  tilemap_o.attr_d <= EXT(switches_i(7 downto 0), tilemap_o.attr_d'length);
+  tilemap_o.attr_d <= std_logic_vector(resize(unsigned(switches_i(7 downto 0)), tilemap_o.attr_d'length));
 	graphics_o <= NULL_TO_GRAPHICS;
 	ser_o <= NULL_TO_SERIAL;
   spi_o <= NULL_TO_SPI;

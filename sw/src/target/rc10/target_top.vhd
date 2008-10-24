@@ -1,8 +1,8 @@
 library ieee;
 library work;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -216,7 +216,7 @@ begin
         
     end generate GEN_NO_PLL;
     
-    -- unused clocks on P2
+    -- unused clocks on RC10
     clk_i(2) <= exp_clk0;
     clk_i(3) <= exp_clk1;
   
@@ -239,10 +239,10 @@ begin
 
 	reset_i <= init;
 		
-  -- buttons - active low
-  buttons_i <= EXT("0", buttons_i'length);
+  -- buttons
+  buttons_i <= std_logic_vector(to_unsigned(0, buttons_i'length));
   -- switches - up = high
-  switches_i <= EXT("0", switches_i'length);
+  switches_i <= std_logic_vector(to_unsigned(0, switches_i'length));
   -- leds
   led <= leds_o(led'range);
   

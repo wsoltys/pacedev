@@ -1,8 +1,7 @@
-library IEEE;
-use IEEE.std_logic_1164.all;
---use IEEE.numeric_std.all;
+library ieee;
+use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
-use ieee.std_logic_arith.EXT;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -177,9 +176,9 @@ begin
 	reset_i <= init or not test_button;
 
   -- buttons - active low
-  buttons_i <= EXT("0", buttons_i'length);
+  buttons_i <= std_logic_vector(to_unsigned(0, buttons_i'length));
   -- switches - up = high
-  switches_i <= EXT(not sw, switches_i'length);
+  switches_i <= std_logic_vector(resize(unsigned(not sw), switches_i'length));
   -- leds
   leds <= leds_o(leds'range);
 
@@ -221,7 +220,7 @@ begin
   
     GEN_SRAM : if PACE_HAS_SRAM generate
       ram_addr <= sram_o.a(ram_addr'range);
-      sram_i.d <= EXT(ram0_data, sram_i.d'length);
+      sram_i.d <= std_logic_vector(resize(unsigned(ram0_data), sram_i.d'length));
       ram0_data <= sram_o.d(ram0_data'range) when (sram_o.cs = '1' and sram_o.we = '1') else 
         (others => 'Z');
       ram_cs <= not sram_o.cs;  -- active low

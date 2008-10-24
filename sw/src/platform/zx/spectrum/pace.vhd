@@ -1,6 +1,6 @@
-Library IEEE;
-Use IEEE.std_logic_1164.all;
-use ieee.std_logic_arith.EXT;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -91,9 +91,10 @@ begin
 	sram_o.cs <= not ram_cs_n;
 	sram_o.oe <= not oe_n;
 	sram_o.we <= not we_n;
-	sram_o.be <= EXT("1", sram_o.be'length);
+	sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
 	sram_o.a(address'range) <= address;
-	sram_o.d <= EXT(data, sram_o.d'length) when (ram_cs_n = '0' and we_n = '0') else (others => 'Z');
+	sram_o.d <= std_logic_vector(resize(unsigned(data), sram_o.d'length)) 
+								when (ram_cs_n = '0' and we_n = '0') else (others => 'Z');
 	data <= rom_data when (rom_cs_n = '0' and oe_n = '0') else
 					sram_i.d(data'range) when (ram_cs_n = '0' and oe_n = '0') else 
 					(others => 'Z');

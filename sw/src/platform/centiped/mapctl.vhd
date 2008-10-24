@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_unsigned.all;
-use ieee.std_logic_arith.EXT;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -48,7 +48,8 @@ architecture SYN of mapCtl_1 is
 begin
 
 	-- these are constant for a whole line
-	tilemap_a(tilemap_a'left downto 6) <= EXT(not pix_y(8 downto 3), tilemap_a'left-6+1);
+	tilemap_a(tilemap_a'left downto 12) <= (others => '0');
+	tilemap_a(11 downto 6) <= not pix_y(8 downto 3);
   tile_a(12) <= '0';
   tile_a(3 downto 1) <=  pix_y(2 downto 0);   	-- each row is 2 bytes
   -- generate attribute RAM address

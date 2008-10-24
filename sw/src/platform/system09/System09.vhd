@@ -812,7 +812,7 @@ begin
 	 ram_addr(11 downto 0) <= cpu_addr(11 downto 0);
 
    --if ram_wrl = '1' then
-     ram_data_o <= EXT(cpu_data_out, ram_data_o'length);
+     ram_data_o <= std_logic_vector(resize(unsigned(cpu_data_out), ram_data_o'length));
 	 --else
    --  ram_data(7 downto 0)  <= "ZZZZZZZZ";
 	 --end if;

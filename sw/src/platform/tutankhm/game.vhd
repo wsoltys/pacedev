@@ -1,8 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
-use ieee.numeric_std.STD_MATCH;
-use ieee.std_logic_arith.EXT;
+use ieee.numeric_std.all;
 
 library work;
 use work.kbd_pkg.in8;
@@ -165,9 +164,9 @@ begin
   -- SRAM signals (may or may not be used)
   sram_o.a <= -- Graphics ROM starts at $10000 in 4KB banks - mapped to $9000
 						EXT('1' & bank_r & cpu_addr(11 downto 0), sram_o.a'length) when data_9_cs = '1' else
-						EXT(cpu_addr, sram_o.a'length);
-  sram_o.d <= EXT(cpu_data_o, sram_o.d'length);
-  sram_o.be <= EXT("1", sram_o.be'length);
+						std_logic_vector(resize(unsigned(cpu_addr), sram_o.a'length));
+  sram_o.d <= std_logic_vector(resize(unsigned(cpu_data_o), sram_o.d'length));
+  sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
   sram_o.cs <= '1';
   sram_o.oe <= not wram_wr;
   sram_o.we <= wram_wr;
