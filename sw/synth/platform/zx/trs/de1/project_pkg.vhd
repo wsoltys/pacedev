@@ -4,17 +4,29 @@ use ieee.std_logic_unsigned.all;
 
 library work;
 use work.pace_pkg.all;
+use work.video_controller_pkg.all;
 
 package project_pkg is
 
-  -- borrowed from P2 target_pkg
-	constant ADV724_STD_PAL		  : std_logic := '0';
-	constant ADV724_STD_NTSC	  : std_logic := not ADV724_STD_PAL;
-
-		--  
+	--  
 	-- PACE constants which *MUST* be defined
 	--
 	
+	constant PACE_HAS_PLL								      : boolean := true;
+  constant PACE_HAS_FLASH                   : boolean := false;
+  constant PACE_HAS_SRAM                    : boolean := true;
+  constant PACE_HAS_SDRAM                   : boolean := false;
+  constant PACE_HAS_SERIAL                  : boolean := false;
+
+	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
+
+  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_NONE;
+	-- ADV724 constants borrowed from P2
+	constant ADV724_STD_PAL		                : std_logic := '0';
+	constant ADV724_STD_NTSC	                : std_logic := not ADV724_STD_PAL;
+	-- - use to select either PAl or NTSC builds
+  constant PACE_ADV724_STD                  : std_logic := ADV724_STD_NTSC;
+  
   -- Reference clock is 50MHz
 	-- PAL
   --constant PACE_CLK0_DIVIDE_BY        : natural := 16;
@@ -22,17 +34,12 @@ package project_pkg is
   --constant PACE_CLK1_DIVIDE_BY        : natural := 8;
   --constant PACE_CLK1_MULTIPLY_BY      : natural := 7;  		-- 24*7/8 = 21MHz (used for scan doubler)
 	-- NTSC
-	constant PACE_HAS_PLL								: boolean := true;
   constant PACE_CLK0_DIVIDE_BY        : natural := 14;
   constant PACE_CLK0_MULTIPLY_BY      : natural := 3;   	 	-- 50*3/14 = 10.714MHz (10.64448MHz)
   constant PACE_CLK1_DIVIDE_BY        : natural := 7;
   constant PACE_CLK1_MULTIPLY_BY      : natural := 3;  			-- 50*3/7 = 21.428MHz (used for scan doubler)
-	constant PACE_ADV724_STD						: std_logic := ADV724_STD_NTSC;
 
-	-- DE1-TRS-80-specific constants
-
-	constant DE1_JAMMA_IS_MAPLE	        : boolean := false;
-	constant DE1_JAMMA_IS_NGC           : boolean := false;
+	-- DE1-specific constants which *MUST* be defined
 
 	--constant DE1_LCD_LINE2							: string := " TRS-80 LEVEL 1 ";		-- 16 chars exactly
 	constant DE1_LCD_LINE2							: string := " TRS-80 LEVEL 2 ";		-- 16 chars exactly

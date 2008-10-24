@@ -5,6 +5,7 @@ use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
+use work.video_controller_pkg.all;
 use work.target_pkg.all;
 use work.project_pkg.all;
 use work.platform_pkg.all;
@@ -13,59 +14,49 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk             : in std_logic_vector(0 to 3);
-    test_button     : in std_logic;
-    reset           : in std_logic;
+    clk_i           : in std_logic_vector(0 to 3);
+    reset_i         : in std_logic;
 
-    -- game I/O
-    ps2clk          : inout std_logic;
-    ps2data         : inout std_logic;
-    dip             : in std_logic_vector(7 downto 0);
-		jamma						: in JAMMAInputsType;
+    -- misc I/O
+    buttons_i       : in from_BUTTONS_t;
+    switches_i      : in from_SWITCHES_t;
+    leds_o          : out to_LEDS_t;
 
-    -- external RAM
+    -- controller inputs
+    inputs_i        : in from_INPUTS_t;
+
+    -- external ROM/RAM
+    flash_i         : in from_FLASH_t;
+    flash_o         : out to_flash_t;
     sram_i       		: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
 
-    -- VGA video
-		vga_clk					: out std_logic;
-    red             : out std_logic_vector(9 downto 0);
-    green           : out std_logic_vector(9 downto 0);
-    blue            : out std_logic_vector(9 downto 0);
-		lcm_data				:	out std_logic_vector(9 downto 0);
-    hsync           : out std_logic;
-    vsync           : out std_logic;
+    -- video
+    video_i         : in from_VIDEO_t;
+    video_o         : out to_VIDEO_t;
 
-    -- composite video
-    BW_CVBS         : out std_logic_vector(1 downto 0);
-    GS_CVBS         : out std_logic_vector(7 downto 0);
-
-    -- sound
-    snd_clk         : out std_logic;
-    snd_data_l      : out std_logic_vector(15 downto 0);
-    snd_data_r      : out std_logic_vector(15 downto 0);
-
+    -- audio
+    audio_i         : in from_AUDIO_t;
+    audio_o         : out to_AUDIO_t;
+    
     -- SPI (flash)
-    spi_clk         : out std_logic;
-    spi_mode        : out std_logic;
-    spi_sel         : out std_logic;
-    spi_din         : in std_logic;
-    spi_dout        : out std_logic;
+    spi_i           : in from_SPI_t;
+    spi_o           : out to_SPI_t;
 
     -- serial
-    ser_tx          : out std_logic;
-    ser_rx          : in std_logic;
-
-    -- debug
-    leds            : out std_logic_vector(7 downto 0)
+    ser_i           : in from_SERIAL_t;
+    ser_o           : out to_SERIAL_t;
+    
+    -- general purpose I/O
+    gp_i            : in from_GP_t;
+    gp_o            : out to_GP_t
   );
-
-end PACE;
+end entity PACE;
 
 architecture SYN of PACE is
 
-	alias clk_10M4832				: std_logic is clk(0);
-	alias clk_20mhz_s				: std_logic is clk(1);
+	alias clk_10M4832				: std_logic is clk_i(0);
+	alias clk_20mhz_s				: std_logic is clk_i(1);
 	
 	signal reset_n					: std_logic;
 	signal address					: std_logic_vector(16 downto 0);
@@ -99,10 +90,11 @@ architecture SYN of PACE is
 	
 begin
 
-	reset_n <= not reset;
+	reset_n <= not reset_i;
 
 	-- external memory logic
 	sram_o.a <= std_logic_vector(resize(unsigned(address), sram_o.a'length));
+	sram_o.d(sram_o.d'left downto data'length) <= (others => '0');
 	sram_o.d(data'range) <= data when (ram_cs_n = '0' and we_n = '0') else (others => 'Z');
 	sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
 	sram_o.cs <= not ram_cs_n;
@@ -112,7 +104,7 @@ begin
 					sram_i.d(data'range) when (ram_cs_n = '0' and oe_n = '0') else 
 					(others => 'Z');
 
-	vga_clk <= clk(1);	-- fudge
+	video_o.clk <= clk_i(1);	-- by convention
 
 	assert (not (TRS_LEVEL1_INTERNAL and TRS_EXTERNAL_ROM_RAM))
 		report "Cannot choose both internal and external configurations"
@@ -128,8 +120,8 @@ begin
 				Rst_n			=> reset_n,
 				Clk				=> clk_10M4832,
 				Eur				=> europe,
-				PS2_Clk		=> ps2clk,
-				PS2_Data	=> ps2data,
+				PS2_Clk		=> inputs_i.ps2_kclk,
+				PS2_Data	=> inputs_i.ps2_kdat,
 				CVBS			=> open,
 				Video			=> video(video'left),
 				HSync			=> hsync_n_s,
@@ -150,8 +142,8 @@ begin
 			Rst_n				=> reset_n,
 			Clk					=> clk_10M4832,
 			Eur					=> europe,
-			PS2_Clk			=> ps2clk,
-			PS2_Data		=> ps2data,
+			PS2_Clk			=> inputs_i.ps2_kclk,
+			PS2_Data		=> inputs_i.ps2_kdat,
 			CVBS				=> open,
 			Video				=> video(video'left),
 			HSync				=> hsync_n_s,
@@ -178,11 +170,11 @@ begin
 	
 	GEN_CVBS : if TRS_VIDEO_CVBS = '1' generate
 
-		red <= (others => video(video'left));
-		green <= (others => video(video'left));
-		blue <= (others => video(video'left));
-		vsync <= '1';
-		hsync <= csync_s;
+		video_o.rgb.r <= (others => video(video'left));
+		video_o.rgb.g <= (others => video(video'left));
+		video_o.rgb.b <= (others => video(video'left));
+		video_o.vsync <= '1';
+		video_o.hsync <= csync_s;
 		
 	end generate GEN_CVBS;
 	
@@ -212,20 +204,19 @@ begin
 			);
 
 		-- wire the vga signals - gated with hblank
-		red <= rgb_out(rgb_out'left) & "000000000";
-		green <= rgb_out(rgb_out'left) & "000000000";
-		blue <= rgb_out(rgb_out'left) & "000000000";
-		hsync <= not hsync_out_n;
-		vsync <= not vsync_out_n;
+		video_o.rgb.r <= rgb_out(rgb_out'left) & "000000000";
+		video_o.rgb.g <= rgb_out(rgb_out'left) & "000000000";
+		video_o.rgb.b <= rgb_out(rgb_out'left) & "000000000";
+		video_o.hsync <= not hsync_out_n;
+		video_o.vsync <= not vsync_out_n;
 		
 	end generate GEN_VGA;
 
-  spi_clk <= 'Z';
-  spi_dout <= 'Z';
-  spi_mode <= 'Z';
-  spi_sel <= 'Z';
+  flash_o <= NULL_TO_FLASH;
+  audio_o <= NULL_TO_AUDIO;
+  spi_o <= NULL_TO_SPI;
+  gp_o <= (others => '0');
   
-	leds <= leds_s;
+	leds_o <= std_logic_vector(resize(unsigned(leds_s), leds_o'length));
 
 end SYN;
-

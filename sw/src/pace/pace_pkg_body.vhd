@@ -12,6 +12,11 @@ package body pace_pkg is
     return ((others => '0'), (others => '0'), (others => '0'), '0', '0', '0');
   end NULL_TO_SRAM;
 
+  function NULL_TO_AUDIO return to_AUDIO_t is
+  begin
+    return ('0', (others => '0'), (others => '0'));
+  end NULL_TO_AUDIO;
+
   function NULL_TO_SPI return to_SPI_t is
   begin
     return (others => '0');

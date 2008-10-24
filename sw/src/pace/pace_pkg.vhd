@@ -142,6 +142,8 @@ package pace_pkg is
     rdata     : std_logic_vector(15 downto 0);
   end record;
   
+  function NULL_TO_AUDIO return to_AUDIO_t;
+
   type from_SPI_t is record
     din       : std_logic;
   end record;
