@@ -514,7 +514,7 @@ set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/da
 set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/rxunit3.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/txunit3.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/miniUART3.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/ps2_keyboard.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/ps2_keyboard.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/key_slice.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/keyboard.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/system09/unzip/vdu8.vhd

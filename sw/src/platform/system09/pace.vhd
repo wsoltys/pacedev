@@ -83,14 +83,12 @@ begin
 	
 	video_o.clk <= clk_i(1);	-- by convention
 
-  spi_o <= NULL_TO_SPI;
-
 	system09_inst : entity work.My_System09
 	  port map
 		(
     	SysClk      => clk_50M,
 	 		Reset_n     => reset_n,
-    	LED         => open,
+    	LED         => leds_o(0),
 
 	    -- Memory Interface signals
 	    ram_csn     => ram_csn,
@@ -155,12 +153,17 @@ begin
     	timer_out    => open
 	 );
   
+  flash_o <= NULL_TO_FLASH;
+	sram_o.a(23 downto 17) <= (others => '0');
+  audio_o <= NULL_TO_AUDIO;
+  spi_o <= NULL_TO_SPI;
+  
 	-- unused video colour resolution
 	video_o.rgb.r(video_o.rgb.r'left-2 downto 0) <= (others => '0');
 	video_o.rgb.g(video_o.rgb.g'left-2 downto 0) <= (others => '0');
 	video_o.rgb.b(video_o.rgb.b'left-2 downto 0) <= (others => '0');
 	
-	-- unused SRAM signals
-	sram_o.a(23 downto 17) <= (others => '0');
-	
+  leds_o(leds_o'left downto 1) <= (others => '0');
+  gp_o <= (others => '0');
+  
 end SYN;

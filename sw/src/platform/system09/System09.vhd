@@ -805,6 +805,7 @@ begin
 	 ram_wrln <= not (ram_wrl);
     --ram_wru  <= cpu_addr(0) and (not cpu_rw) and cpu_clk;
 	 --ram_wrun <= not (ram_wru);
+   ram_wrun <= '1';
 	 --ram_addr(16 downto 11) <= dat_addr(5 downto 0);
 	 --ram_addr(10 downto 0) <= cpu_addr(11 downto 1);
 	 ram_addr(16 downto 12) <= dat_addr(4 downto 0);
@@ -821,7 +822,7 @@ begin
 	 --else
    --   ram_data(15 downto 8)  <= "ZZZZZZZZ";
    -- end if;
-
+  
 	 --if cpu_addr(0) = '1' then
    --   ram_data_out <= ram_data(15 downto 8);
 	 --else
@@ -866,6 +867,7 @@ begin
 	 cpu_nmi  <= trap_irq;
 	 cpu_firq <= timer_irq;
 	 cpu_halt <= '0';
+	 cpu_hold <= '0';
 end process;
 
 --
