@@ -1,97 +1,88 @@
-library IEEE;
+library ieee;
 use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
---use ieee.std_logic_unsigned.all;
 
 library work;
 use work.pace_pkg.all;
-use work.kbd_pkg.in8;
+use work.video_controller_pkg.all;
+use work.sprite_pkg.all;
 use work.project_pkg.all;
+use work.platform_pkg.all;
 
-entity Game is
+entity platform is
+  generic
+  (
+    NUM_INPUT_BYTES   : integer
+  );
   port
   (
     -- clocking and reset
-    clk							: in std_logic_vector(0 to 3);
-    reset           : in std_logic;                       
-    test_button     : in std_logic;                       
+    clk_i           : in std_logic_vector(0 to 3);
+    reset_i         : in std_logic;
 
-    -- inputs
-    ps2clk          : inout std_logic;                       
-    ps2data         : inout std_logic;                       
-    dip             : in std_logic_vector(7 downto 0);    
-		jamma						: in JAMMAInputsType;
+    -- misc I/O
+    buttons_i       : in from_BUTTONS_t;
+    switches_i      : in from_SWITCHES_t;
+    leds_o          : out to_LEDS_t;
 
-    -- micro buses
-    upaddr          : out std_logic_vector(15 downto 0);   
-    updatao         : out std_logic_vector(7 downto 0);    
+    -- controller inputs
+    inputs_i        : in from_MAPPED_INPUTS_t(0 to NUM_INPUT_BYTES-1);
 
-    -- SRAM
+    -- FLASH/SRAM
+    flash_i         : in from_FLASH_t;
+    flash_o         : out to_FLASH_t;
 		sram_i					: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
 
-    gfxextra_data   : out std_logic_vector(7 downto 0);
-		palette_data		: out ByteArrayType(15 downto 0);
+    -- graphics
+    
+    bitmap_i        : in from_BITMAP_CTL_t;
+    bitmap_o        : out to_BITMAP_CTL_t;
+    
+    tilemap_i       : in from_TILEMAP_CTL_t;
+    tilemap_o       : out to_TILEMAP_CTL_t;
 
-    -- graphics (bitmap)
-    bitmap_addr			: in    std_logic_vector(15 downto 0);   
-    bitmap_data			: out   std_logic_vector(7 downto 0);    
-
-    -- graphics (tilemap)
-    tileaddr        : in std_logic_vector(15 downto 0);   
-    tiledatao       : out std_logic_vector(7 downto 0);    
-    tilemapaddr     : in std_logic_vector(15 downto 0);   
-    tilemapdatao    : out std_logic_vector(15 downto 0);    
-    attr_addr       : in std_logic_vector(9 downto 0);    
-    attr_dout       : out std_logic_vector(15 downto 0);   
-
-    -- graphics (sprite)
-    sprite_reg_addr : out std_logic_vector(7 downto 0);    
-    sprite_wr       : out std_logic;                       
-    spriteaddr      : in std_logic_vector(15 downto 0);   
-    spritedata      : out std_logic_vector(31 downto 0);   
+    sprite_reg_o    : out to_SPRITE_REG_t;
+    sprite_i        : in from_SPRITE_CTL_t;
+    sprite_o        : out to_SPRITE_CTL_t;
 		spr0_hit				: in std_logic;
 
-    -- graphics (control)
-    vblank					: in std_logic;    
-		xcentre					: out	std_logic_vector(9 downto 0);
-		ycentre					: out	std_logic_vector(9 downto 0);
-
+    -- various graphics information
+    graphics_i      : in from_GRAPHICS_t;
+    graphics_o      : out to_GRAPHICS_t;
+    
     -- OSD
-    to_osd          : out to_OSD_t;
-    from_osd        : in from_OSD_t;
+    osd_i           : in from_OSD_t;
+    osd_o           : out to_OSD_t;
 
     -- sound
-    snd_rd          : out std_logic;                       
-    snd_wr          : out std_logic;
-    sndif_datai     : in std_logic_vector(7 downto 0);    
-
-    -- spi interface
-    spi_clk         : out std_logic;                       
-    spi_din         : in std_logic;                       
-    spi_dout        : out std_logic;                       
-    spi_ena         : out std_logic;                       
-    spi_mode        : out std_logic;                       
-    spi_sel         : out std_logic;                       
+    snd_i           : in from_SOUND_t;
+    snd_o           : out to_SOUND_t;
+    
+    -- SPI (flash)
+    spi_i           : in from_SPI_t;
+    spi_o           : out to_SPI_t;
 
     -- serial
-    ser_rx          : in std_logic;                       
-    ser_tx          : out std_logic;                       
+    ser_i           : in from_SERIAL_t;
+    ser_o           : out to_SERIAL_t;
 
-    -- on-board leds
-    leds            : out std_logic_vector(7 downto 0)    
+    -- general purpose I/O
+    gp_i            : in from_GP_t;
+    gp_o            : out to_GP_t
   );
 
-end Game;
+end platform;
 
-architecture SYN of Game is
+architecture SYN of platform is
 
-	alias clk_30M					: std_logic is clk(0);
-	alias clk_40M					: std_logic is clk(1);
+	alias clk_30M					: std_logic is clk_i(0);
+	alias clk_video       : std_logic is clk_i(1);
 	signal cpu_reset      : std_logic;
 
   -- uP signals  
-  signal clk_3M_en			: std_logic;
+  signal clk_3M_ena			: std_logic;
   signal uP_addr        : std_logic_vector(15 downto 0);
   signal uP_datai       : std_logic_vector(7 downto 0);
   signal uP_datao       : std_logic_vector(7 downto 0);
@@ -122,7 +113,6 @@ architecture SYN of Game is
   signal cram_cs        : std_logic;
   signal cram_wr        : std_logic;
 	signal cram_up_data 	: std_logic_vector(7 downto 0);
-	signal cram_data 	    : std_logic_vector(7 downto 0);
 	
   -- interrupt signals
   signal intena_wr      : std_logic;
@@ -131,15 +121,14 @@ architecture SYN of Game is
   signal inZero_cs      : std_logic;
   signal inOne_cs       : std_logic;
   signal dips_cs        : std_logic;
-	signal inputs					: in8(0 to 2);
-  alias game_reset      : std_logic is inputs(inputs'high)(0);
+  alias game_reset      : std_logic is inputs_i(inputs_i'high).d(0);
 	signal newTileAddr		: std_logic_vector(11 downto 0);
   signal sprite_4_wr    : std_logic;
   --signal wdog_wr        : std_logic;
 	
 begin
 
-  cpu_reset <= reset or game_reset;
+  cpu_reset <= reset_i or game_reset;
 
 	GEN_EXTERNAL_WRAM : if not PACMAN_USE_INTERNAL_WRAM generate
 	
@@ -155,14 +144,7 @@ begin
 	end generate GEN_EXTERNAL_WRAM;
 
 	GEN_NO_SRAM : if PACMAN_USE_INTERNAL_WRAM generate
-
-		sram_o.a <= (others => 'X');
-		sram_o.d <= (others => 'X');
-		sram_o.be <= (others => '0');
-		sram_o.cs <= '0';
-		sram_o.oe <= '0';
-		sram_o.we <= '0';
-			
+    sram_o <= NULL_TO_SRAM;
 	end generate GEN_NO_SRAM;
 	
   -- chip select logic
@@ -183,12 +165,13 @@ begin
 							wram_datao when wram_cs = '1' else
 							vram_datao when vram_cs = '1' else
 							cram_up_data when cram_cs = '1' else
-              inputs(0) when inzero_cs = '1' else
-              inputs(1) when inone_cs = '1' else
-              not dip when dips_cs = '1' else
+              inputs_i(0).d when inzero_cs = '1' else
+              inputs_i(1).d when inone_cs = '1' else
+              not switches_i(uP_datai'range) when dips_cs = '1' else
 							(others => 'X');
 	
-	vram_wr <= uPmemwr and vram_cs;
+	-- ram write enables
+	vram_wr <= vram_cs and uPmemwr;
 	cram_wr <= cram_cs and uPmemwr;
 	wram_wr <= wram_cs and uPmemwr;
 
@@ -196,45 +179,31 @@ begin
   intena_wr <= uPmemwr when (uP_addr = X"5000") else '0';
   -- SPRITE $5060-507F
   sprite_4_wr <= uPmemwr when (uP_addr(9 downto 4) = "111111" and wram_cs = '1') else '0';
-  sprite_wr <= uPmemwr when (sprite_4_wr = '1' or uP_addr(15 downto 5) = X"50"&"011" ) else '0';
+  sprite_reg_o.wr <= uPmemwr when (sprite_4_wr = '1' or uP_addr(15 downto 5) = X"50"&"011" ) else '0';
   -- SOUND $5040-$505F
-	snd_wr <= uPmemwr when (uP_addr(15 downto 5) = X"50"&"010") else '0';
+	snd_o.wr <= uPmemwr when (uP_addr(15 downto 5) = X"50"&"010") else '0';
   -- WATCHDOG $50C0-$50FF
   --wdog_wr <= '1' when (uP_addr(15 downto 6) = X"50"&"11") else '0';
-  		
-	upaddr <= uP_addr;
-	updatao <= uP_datao;
-  sprite_reg_addr <= "000" & uP_addr(3 downto 1) & sprite_4_wr & uP_addr(0);
 
-  -- only use 5 bits of cram data
-  -- because the pengo/pacman tilemap controller
-  -- expects banking bits in (6 downto 5)
-  attr_dout <= std_logic_vector(resize(unsigned(cram_data(4 downto 0)), attr_dout'length));
-	
-  gfxextra_data <= (others => '0');
-	GEN_PAL_DAT : for i in palette_data'range generate
-		palette_data(i) <= (others => '0');
-	end generate GEN_PAL_DAT;
-
-  -- unused outputs
-	bitmap_data <= (others => '0');
-	spi_clk <= '0';
-	spi_dout <= '0';
-	spi_ena <= '0';
-	spi_mode <= '0';
-	spi_sel <= '0';
-	ser_tx <= 'X';
-  snd_rd <= '0';
+  -- sprite registers
+  sprite_reg_o.clk <= clk_30M;
+  sprite_reg_o.clk_ena <= clk_3M_ena;
+  sprite_reg_o.a(sprite_reg_o.a'left downto 5) <= (others => '0');
+  sprite_reg_o.a(4 downto 0) <= uP_addr(3 downto 1) & sprite_4_wr & uP_addr(0);
+  sprite_reg_o.d <= up_datao;
+  
+	snd_o.a <= uP_addr(snd_o.a'range);
+	snd_o.d <= uP_datao;
 
 	-- Snooping stuff
-	process (clk_30M, clk_3M_en, reset)
+	process (clk_30M, clk_3M_ena, reset_i)
 		variable eaten_pill : std_logic;
     variable player_y_i : integer range 0 to 1023;
 		variable player_y		: std_logic_vector(9 downto 0);
 	begin
-		if reset = '1' then
+		if reset_i = '1' then
 			eaten_pill := '0';
-		elsif rising_edge(clk_30M) and clk_3M_en = '1' then
+		elsif rising_edge(clk_30M) and clk_3M_ena = '1' then
 			-- $4DA6:0 determines is player has eaten pill or not
 			if uP_addr = X"4DA6" and uPmemwr = '1' then
 				eaten_pill := uP_datao(0);
@@ -246,12 +215,19 @@ begin
 		end if;
 		-- show on leds
     player_y := std_logic_vector(to_unsigned(player_y_i, 10));
-		leds <= player_y(7 downto 0);
-		ycentre <= player_y;
+		leds_o(7 downto 0) <= player_y(7 downto 0);
+		--ycentre <= player_y;
 	end process;
-	xcentre <= (others => '0');
-
 	
+  -- unused outputs
+  flash_o <= NULL_TO_FLASH;
+	bitmap_o <= NULL_TO_BITMAP_CTL;
+	graphics_o <= NULL_TO_GRAPHICS;
+	spi_o <= NULL_TO_SPI;
+  ser_o <= NULL_TO_SERIAL;
+  leds_o(leds_o'left downto 8) <= (others => '0');
+  gp_o <= (others => '0');
+  
   --
   -- COMPONENT INSTANTIATION
   --
@@ -264,21 +240,22 @@ begin
 		port map
 		(
 			clk				=> clk_30M,
-			reset			=> reset,
-			clk_en		=> clk_3M_en
+			reset			=> reset_i,
+			clk_en		=> clk_3M_ena
 		);
 
-  U_uP : entity work.uPse                                                
+  U_uP : entity work.Z80                                                
     port map
     (
       clk 		=> clk_30M,                                   
-      clk_en	=> clk_3M_en,
+      clk_en	=> clk_3M_ena,
       reset  	=> cpu_reset,                                     
 
       addr   	=> uP_addr,
       datai  	=> uP_datai,
       datao  	=> uP_datao,
 
+      m1      => open,
       mem_rd 	=> open,
       mem_wr 	=> uPmemwr,
       io_rd  	=> open,
@@ -308,20 +285,20 @@ begin
 			q_b					=> vram_datao,
 			
 			-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-			clock_a			=> clk_40M,
+			clock_a			=> clk_video,
 			address_a		=> vram_addr,
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tileMapDatao(7 downto 0)
+			q_a					=> tilemap_o.map_d(7 downto 0)
 		);
-  tilemapdatao(tilemapdatao'left downto 8) <= (others => '0');
+  tilemap_o.map_d(tilemap_o.map_d'left downto 8) <= (others => '0');
 
 	vrammapper_inst : entity work.vramMapper
 		port map
 		(
-	    clk     => clk_40M,
+	    clk     => clk_video,
 
-	    inAddr  => tileMapAddr(11 downto 0),
+	    inAddr  => tilemap_i.map_a(11 downto 0),
 	    outAddr => vram_addr
 		);
 
@@ -335,35 +312,19 @@ begin
 			data_b			=> uP_datao,
 			q_b					=> cram_up_data,
 			
-			clock_a			=> clk_40M,
+			clock_a			=> clk_video,
 			address_a		=> vram_addr(9 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> cram_data
+			q_a					=> tilemap_o.attr_d(7 downto 0)
 		);
-
-	inputs_inst : entity work.Inputs
-		generic map
-		(
-			NUM_INPUTS	=> inputs'length,
-			CLK_1US_DIV	=> PACMAN_1MHz_CLK0_COUNTS
-		)
-	  port map
-	  (
-	    clk     		=> clk_30M,
-	    reset   		=> reset,
-	    ps2clk  		=> ps2clk,
-	    ps2data 		=> ps2data,
-			jamma				=> jamma,
-			
-	    dips				=> dip,
-	    inputs			=> inputs
-	  );
-
+  tilemap_o.attr_d(tilemap_o.attr_d'left downto 8) <= (others => '0');
+  
   interrupts_inst : entity work.Pacman_Interrupts
 	  port map
 	  (
 	    clk               => clk_30M,
+	    clk_ena           => clk_3M_ena,
 	    reset             => cpu_reset,
 
 	    z80_data          => uP_datao,
@@ -371,7 +332,7 @@ begin
 			io_wr							=> uPiowr,
 	    intena_wr         => intena_wr,
 
-			vblank						=> vblank,
+			vblank						=> graphics_i.vblank,
 			
 	    -- interrupt status & request lines
 			int_ack						=> uPintack,
@@ -382,17 +343,17 @@ begin
 	tilerom_inst : entity work.tile_rom
 		port map
 		(
-			clock			=> clk_40M,
-			address		=> tileAddr(11 downto 0),
-			q					=> tiledatao
+			clock			=> clk_video,
+			address		=> tilemap_i.tile_a(11 downto 0),
+			q					=> tilemap_o.tile_d
 		);
 	
 	spriterom_inst : entity work.sprite_rom
 		port map
 		(
-			clock			=> clk_40M,
-			address		=> SpriteAddr(9 downto 0),
-			q					=> spriteData
+			clock			=> clk_video,
+			address		=> sprite_i.a(9 downto 0),
+			q					=> sprite_o.d
 		);
 	
 	GEN_INTERNAL_WRAM : if PACMAN_USE_INTERNAL_WRAM generate

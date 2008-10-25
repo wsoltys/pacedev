@@ -4,11 +4,13 @@ use IEEE.std_logic_unsigned.all;
 
 library work;
 use work.project_pkg.all;
+use work.platform_pkg.all;
 
 entity Pacman_Interrupts is
   port
   (
     clk               : in std_logic;	-- 30MHz
+    clk_ena           : in std_logic;
     reset             : in std_logic;
 
     z80_data          : in std_logic_vector(7 downto 0);
@@ -34,11 +36,11 @@ architecture SYN of Pacman_Interrupts is
 begin
 
   -- latch interrupt enables
-  process (clk, reset)
+  process (clk, clk_ena, reset)
   begin
     if reset = '1' then
       intena_s <= '0';
-    elsif rising_edge (clk) then
+    elsif rising_edge (clk) and clk_ena = '1' then
       if intena_wr = '1' then
         intena_s <= z80_data(0);
       end if;
@@ -46,18 +48,18 @@ begin
   end process;
 
 	-- latch interrupt vector
-	process (clk, reset)
+	process (clk, clk_ena, reset)
 	begin
 		if reset = '1' then
 			int_vec <= (others => '0');
-		elsif rising_edge(clk) then
+		elsif rising_edge(clk) and clk_ena = '1' then
 			if io_wr = '1' and z80_addr(1 downto 0) = "00" then
 				int_vec <= z80_data;
 			end if;
 		end if;
 	end process;
 
-	GEN_FAKE_VBLANK_INT : if not USE_VIDEO_VBLANK_INTERRUPT generate
+	GEN_FAKE_VBLANK_INT : if not PACMAN_USE_VIDEO_VBLANK_INTERRUPT generate
     FAKE_VBLANK_BLOCK : block
 
       signal slow_clk_ena   : std_logic; -- 1MHz
@@ -107,7 +109,7 @@ begin
     end block FAKE_VBLANK_BLOCK;
 	end generate GEN_FAKE_VBLANK_INT;
 	
-	GEN_REAL_VBLANK_INT : if USE_VIDEO_VBLANK_INTERRUPT generate
+	GEN_REAL_VBLANK_INT : if PACMAN_USE_VIDEO_VBLANK_INTERRUPT generate
 	
 		process (clk, reset)
 			variable vblank_v : std_logic_vector(3 downto 0);
@@ -138,4 +140,3 @@ begin
   int_req <= '1' when (vblank_int and intena_s) /= '0' else '0';
   
 end SYN;
-

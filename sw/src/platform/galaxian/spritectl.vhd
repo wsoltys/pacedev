@@ -1,6 +1,6 @@
-library IEEE;
-use IEEE.std_logic_1164.all;
-use IEEE.std_logic_unsigned.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
 
 library work;
 use work.pace_pkg.all;
@@ -18,7 +18,7 @@ entity spritectl is
 	port               
 	(
     -- sprite registers
-    reg_o       : in from_SPRITE_REG_t;
+    reg_i       : in from_SPRITE_REG_t;
     
     -- video control signals
     video_ctl   : in from_VIDEO_CTL_t;
@@ -43,7 +43,7 @@ architecture SYN of spritectl is
   
 begin
 
-  flipData <= flip_row (ctl_i.d, reg_o.xflip);
+  flipData <= flip_row (ctl_i.d, reg_i.xflip);
   
 	process (clk, clk_ena)
 
@@ -73,11 +73,11 @@ begin
 
 			-- different offsets for sprites & bullets/bombs
 			if INDEX < 8 then
-        x := reg_o.x;
-        y := reg_o.y;
+        x := reg_i.x;
+        y := reg_i.y;
 			else
-        x := reg_o.x + 1;
-		  	y := reg_o.y - 5;
+        x := reg_i.x + 1;
+		  	y := reg_i.y - 5;
 			end if;
 			-- video is clipped left and right (only 224 wide)
 			x := x - (256-PACE_VIDEO_H_SIZE)/2;
@@ -143,7 +143,7 @@ begin
       
       -- extract R,G,B from colour palette
       -- apparently only 3 bits of colour info (aside from pel)
-      pal_entry := pal(conv_integer(reg_o.colour(2 downto 0) & pel));
+      pal_entry := pal(conv_integer(reg_i.colour(2 downto 0) & pel));
       rgb_r(0).r(rgb_r(0).r'left downto rgb_r(0).r'left-5) := pal_entry(0);
       rgb_r(0).r(rgb_r(0).r'left-6 downto 0) := (others => '0');
       rgb_r(0).g(rgb_r(0).g'left downto rgb_r(0).g'left-5) := pal_entry(1);
@@ -163,8 +163,8 @@ begin
 		end if;
 
     -- generate sprite data address
-    ctl_o.a(15 downto 4) <= reg_o.n;
-    if reg_o.yflip = '1' then
+    ctl_o.a(15 downto 4) <= reg_i.n;
+    if reg_i.yflip = '1' then
       ctl_o.a(3 downto 0) <=  not rowCount(rowCount'left-1 downto rowCount'left-4);
     else
       ctl_o.a(3 downto 0) <= rowCount(rowCount'left-1 downto rowCount'left-4);

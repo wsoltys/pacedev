@@ -12,15 +12,24 @@ package platform_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 
-	constant PACE_VIDEO_NUM_BITMAPS 	: natural := 0;
-	constant PACE_VIDEO_NUM_TILEMAPS 	: natural := 1;
-	constant PACE_VIDEO_NUM_SPRITES 	: natural := 8;
-	constant PACE_VIDEO_H_SIZE				: integer := 224;
-	constant PACE_VIDEO_V_SIZE				: integer := 288;
+	constant PACE_VIDEO_NUM_BITMAPS 	    : natural := 0;
+	constant PACE_VIDEO_NUM_TILEMAPS 	    : natural := 1;
+	constant PACE_VIDEO_NUM_SPRITES 	    : natural := 8;
+	constant PACE_VIDEO_H_SIZE				    : integer := 224;
+	constant PACE_VIDEO_V_SIZE				    : integer := 288;
+  constant PACE_VIDEO_PIPELINE_DELAY    : integer := 5;
+	
+	constant PACE_INPUTS_NUM_BYTES        : integer := 3;
 	
 	--
 	-- Platform-specific constants (optional)
 	--
+
+	constant PACMAN_1MHz_CLK0_COUNTS			  : natural := 
+    PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
+
+	constant PACMAN_CPU_CLK_ENA_DIVIDE_BY	  : natural := 
+    PACMAN_1MHz_CLK0_COUNTS / 3;
 
 	-- Palette : Table of RGB entries	
 

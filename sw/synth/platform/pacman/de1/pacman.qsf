@@ -498,7 +498,11 @@ set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/de1/target_pkg.vhd
@@ -515,24 +519,21 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_MCod
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_Reg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80se.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/Z80.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/altera_mem.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/frogger/uPse.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/mapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/vga_800x600_60Hz.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/cvbs_720x288p_50Hz.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/SptReg.VHD
-set_global_assignment -name VHDL_FILE ../../../../src/pace/flipRow.VHDL
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/tilemapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/spritereg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/spritectl.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/SptArray.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_array.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_mixer.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Graphics.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/InputMapper.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/Pacman_Interrupts.VHD
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/sound.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/pacsnd.Vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/Pacman_vramMapper.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/Game.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/platform.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/de1/target_top.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwm_chaser.vhd
@@ -555,3 +556,4 @@ set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2C_AV_Confi
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/seg7_lut.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2S_LCM_Config.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/i2s_controller.v
+set_global_assignment -name AUTO_SHIFT_REGISTER_RECOGNITION OFF

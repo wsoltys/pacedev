@@ -138,7 +138,7 @@ begin
 			port map
 			(
         -- sprite registers
-        reg_o       => reg_o(i),
+        reg_i       => reg_o(i),
         
         -- video control signals
         video_ctl   => video_ctl,

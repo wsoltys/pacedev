@@ -5,21 +5,24 @@ use work.T80_Pack.all;
 
 entity Z80 is port
    (
-     reset        : in    std_logic;
      clk        	: in    std_logic;
      clk_en				: in    std_logic;
-     intreq       : in    std_logic;
-     nmi          : in    std_logic;
-     intack       : out   std_logic;
-     datai        : in    std_logic_vector(7 downto 0);
+     reset        : in    std_logic;
+
      addr         : out   std_logic_vector(15 downto 0);
+     datai        : in    std_logic_vector(7 downto 0);
+     datao        : out   std_logic_vector(7 downto 0);
+
+     m1           : out   std_logic;
      mem_rd       : out   std_logic;
      mem_wr       : out   std_logic;
      io_rd        : out   std_logic;
      io_wr        : out   std_logic;
-     datao        : out   std_logic_vector(7 downto 0);
+
+     intreq       : in    std_logic;
      intvec       : in    std_logic_vector(7 downto 0);
-     m1           : out   std_logic
+     intack       : out   std_logic;
+     nmi          : in    std_logic
    );
 end Z80;
 
