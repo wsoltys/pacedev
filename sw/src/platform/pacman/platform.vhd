@@ -123,7 +123,8 @@ architecture SYN of platform is
   signal dips_cs        : std_logic;
   alias game_reset      : std_logic is inputs_i(inputs_i'high).d(0);
 	signal newTileAddr		: std_logic_vector(11 downto 0);
-  signal sprite_4_wr    : std_logic;
+  signal sprite_4_cs    : std_logic;
+  signal sprite_5_cs    : std_logic;
   --signal wdog_wr        : std_logic;
 	
 begin
@@ -159,6 +160,9 @@ begin
   inZero_cs <= '1' when uP_addr(15 downto 12) = "0101" and uP_addr(7 downto 6) = "00" else '0';
   inOne_cs <= '1' when uP_addr(15 downto 12) = "0101" and uP_addr(7 downto 6) = "01" else '0';
   dips_cs <= '1' when uP_addr(15 downto 12) = "0101" and uP_addr(7 downto 6) = "10" else '0';
+  -- SPRITE $4FF0-$4FFF,$5060-507F
+  sprite_4_cs <= '1' when STD_MATCH(uP_addr, X"4FF"&"----") else '0';
+  sprite_5_cs <= '1' when STD_MATCH(uP_addr, X"50"&"011-----") else '0';
 
 	-- memory read mux
 	uP_datai <= rom_datao when rom_cs = '1' else
@@ -177,9 +181,6 @@ begin
 
   -- NMI EN $5000
   intena_wr <= uPmemwr when (uP_addr = X"5000") else '0';
-  -- SPRITE $5060-507F
-  sprite_4_wr <= uPmemwr when (uP_addr(9 downto 4) = "111111" and wram_cs = '1') else '0';
-  sprite_reg_o.wr <= uPmemwr when (sprite_4_wr = '1' or uP_addr(15 downto 5) = X"50"&"011" ) else '0';
   -- SOUND $5040-$505F
 	snd_o.wr <= uPmemwr when (uP_addr(15 downto 5) = X"50"&"010") else '0';
   -- WATCHDOG $50C0-$50FF
@@ -189,8 +190,9 @@ begin
   sprite_reg_o.clk <= clk_30M;
   sprite_reg_o.clk_ena <= clk_3M_ena;
   sprite_reg_o.a(sprite_reg_o.a'left downto 5) <= (others => '0');
-  sprite_reg_o.a(4 downto 0) <= uP_addr(3 downto 1) & sprite_4_wr & uP_addr(0);
+  sprite_reg_o.a(4 downto 0) <= uP_addr(3 downto 1) & sprite_4_cs & uP_addr(0);
   sprite_reg_o.d <= up_datao;
+  sprite_reg_o.wr <= uPmemwr and (sprite_4_cs or sprite_5_cs);
   
 	snd_o.a <= uP_addr(snd_o.a'range);
 	snd_o.d <= uP_datao;

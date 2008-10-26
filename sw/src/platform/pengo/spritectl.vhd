@@ -76,7 +76,7 @@ begin
       end if;
       y := reg_i.y + 16;    -- offset adjustment for sprites
       -- video is clipped left and right (only 224 wide)
-      x := x + (256-PACE_VIDEO_H_SIZE)/2;
+      x := x - (256-PACE_VIDEO_H_SIZE)/2;
       
 			if video_ctl.hblank = '1' then
 
@@ -101,8 +101,6 @@ begin
 					else
 						rowStore := (others => '0');
 					end if;
-        else
-          rowStore := (others => '0');
 				end if;
 						
 			end if;
