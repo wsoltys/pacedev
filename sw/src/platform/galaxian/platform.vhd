@@ -268,8 +268,9 @@ begin
 			address_a		=> vram_addr,
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o.map_d(7 downto 0)
+			q_a					=> open --tilemap_o.map_d(7 downto 0)
 		);
+	tilemap_o.map_d(7 downto 0) <= X"34";
   tilemap_o.map_d(15 downto 8) <= (others => '0');
 
 	vrammapper_inst : entity work.vramMapper

@@ -38,8 +38,7 @@ architecture SYN of spritectl is
   
   signal flipData : std_logic_vector(31 downto 0);   -- flipped row data
    
-  signal rgb      : RGB_t;
-  signal set      : std_logic;
+  alias rgb       : RGB_t is ctl_o.rgb;
   
 begin
 
@@ -48,8 +47,8 @@ begin
 	process (clk, clk_ena)
 
    	variable rowStore : std_logic_vector(31 downto 0);  -- saved row of spt to show during visibile period
-		--alias pel         : std_logic_vector(1 downto 0) is rowStore(rowStore'left downto rowStore'left-1);
-		variable pel      : std_logic_vector(1 downto 0);
+    variable pel_r    : std_logic_vector((DELAY-3)*2-1 downto 0);
+		alias pel         : std_logic_vector(1 downto 0) is pel_r(pel_r'left downto pel_r'left-1);
     variable x        : std_logic_vector(video_ctl.x'range);
     variable y        : std_logic_vector(video_ctl.y'range);
     variable yMat     : boolean;      -- raster is between first and last line of sprite
@@ -61,11 +60,6 @@ begin
   	variable rowCount : std_logic_vector(3+PACE_VIDEO_V_SCALE downto 0);
 
 		variable pal_entry  : pal_entry_typ;
-
-    -- delay pipeline to match tilemap delay
-    type RGB_a_t is array (natural range <>) of RGB_t;
-    variable rgb_r      : RGB_a_t(DELAY-4 downto 0);
-    variable set_r      : std_logic_vector(DELAY-4 downto 0);
 
   begin
 
@@ -106,7 +100,7 @@ begin
 						else
 							-- bullet/bomb sprite
 							if rowCount(rowCount'left downto rowCount'left-4) < 4 then
-								rowStore := ('0', '0', '1', '1', others => '0');
+								rowStore := ('1', '1', others => '0');
 							else
 								rowStore := (others => '0');
 							end if;
@@ -131,33 +125,30 @@ begin
         
         if xMat then
           -- shift in next pixel
-          pel := rowStore(rowStore'left downto rowStore'left-pel'length+1);
+          -- pel is pipelined to match the delay in the tilemap controller
+          pel_r := pel_r(pel_r'left-2 downto 0) & rowStore(rowStore'left downto rowStore'left-1);
           rowStore := rowStore(rowStore'left-2 downto 0) & "00";
         end if;
 
       end if;
 
-      -- shift the pipeline
-      rgb_r(rgb_r'left downto 1) := rgb_r(rgb_r'left-1 downto 0);
-      set_r(set_r'left downto 1) := set_r(set_r'left-1 downto 0);
-      
       -- extract R,G,B from colour palette
       -- apparently only 3 bits of colour info (aside from pel)
       pal_entry := pal(conv_integer(reg_i.colour(2 downto 0) & pel));
-      rgb_r(0).r(rgb_r(0).r'left downto rgb_r(0).r'left-5) := pal_entry(0);
-      rgb_r(0).r(rgb_r(0).r'left-6 downto 0) := (others => '0');
-      rgb_r(0).g(rgb_r(0).g'left downto rgb_r(0).g'left-5) := pal_entry(1);
-      rgb_r(0).g(rgb_r(0).g'left-6 downto 0) := (others => '0');
-      rgb_r(0).b(rgb_r(0).b'left downto rgb_r(0).b'left-5) := pal_entry(2);
-      rgb_r(0).b(rgb_r(0).b'left-6 downto 0) := (others => '0');
+      rgb.r(rgb.r'left downto rgb.r'left-5) <= pal_entry(0);
+      rgb.r(rgb.r'left-6 downto 0) <= (others => '0');
+      rgb.g(rgb.g'left downto rgb.g'left-5) <= pal_entry(1);
+      rgb.g(rgb.g'left-6 downto 0) <= (others => '0');
+      rgb.b(rgb.b'left downto rgb.b'left-5) <= pal_entry(2);
+      rgb.b(rgb.b'left-6 downto 0) <= (others => '0');
 
       -- set pixel transparency based on match
-      set_r(0) := '0';
+      ctl_o.set <= '0';
       --if xMat and pel /= "00" then
       if xMat and yMat and (pal_entry(0)(5 downto 4) /= "00" or
                             pal_entry(1)(5 downto 4) /= "00" or
                             pal_entry(2)(5 downto 4) /= "00") then
-        set_r(0) := '1';
+        ctl_o.set <= '1';
       end if;
 
 		end if;
@@ -170,10 +161,6 @@ begin
       ctl_o.a(3 downto 0) <= rowCount(rowCount'left-1 downto rowCount'left-4);
     end if;
 
-    -- assign pipelined output
-    ctl_o.rgb <= rgb_r(rgb_r'left);
-    ctl_o.set <= set_r(set_r'left);
-    
   end process;
 
 end architecture SYN;
