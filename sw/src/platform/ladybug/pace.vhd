@@ -110,7 +110,7 @@ architecture SYN of PACE is
 
 	signal reset_n					: std_logic;
 	
-	signal inputs						: in8(0 to 3);
+	signal inputs						: from_MAPPED_INPUTS_t(0 to 3);
 		
 	signal cpu_rom0_data		: std_logic_vector(7 downto 0);
 	signal cpu_rom1_data		: std_logic_vector(7 downto 0);
@@ -173,11 +173,12 @@ begin
 	clk_20mhz_s <= clk_i(0);
 	video_o.clk <= clk_i(1);	-- by convention
 
-	-- all inputs are achtive LOW except coin chutes
-	coin_left_s <= not inputs(2)(2);
-	coin_right_s <= not inputs(2)(3);
+	-- all inputs are active LOW except coin chutes
+	coin_left_s <= not inputs(2).d(2);
+	coin_right_s <= not inputs(2).d(3);
 
-	leds_o <= std_logic_vector(resize(unsigned(inputs(0) or inputs(1) or inputs(2)), leds_o'length));
+	leds_o <= std_logic_vector(resize(unsigned(inputs(0).d or inputs(1).d or inputs(2).d), 
+                                              leds_o'length));
 
 	inputs_inst : entity work.Inputs
 		generic map
@@ -227,20 +228,20 @@ begin
       clk_en_5mhz_o     => clk_en_5mhz_s,
       por_n_o           => por_n_s,
       tilt_n_i          => '1',
-      player_select_n_i(0) => inputs(2)(0),
-      player_select_n_i(1) => inputs(2)(1),
-      player_fire_n_i(0)   => inputs(0)(4),
-      player_fire_n_i(1)   => inputs(1)(4),
-      player_up_n_i(0)     => inputs(0)(0),
-      player_up_n_i(1)     => inputs(1)(0),
-      player_right_n_i(0)  => inputs(0)(3),
-      player_right_n_i(1)  => inputs(1)(3),
-      player_down_n_i(0)   => inputs(0)(1),
-      player_down_n_i(1)   => inputs(1)(1),
-      player_left_n_i(0)   => inputs(0)(2),
-      player_left_n_i(1)   => inputs(1)(2),
-      player_bomb_n_i(0)   => inputs(0)(5),
-      player_bomb_n_i(1)   => inputs(1)(5),
+      player_select_n_i(0) => inputs(2).d(0),
+      player_select_n_i(1) => inputs(2).d(1),
+      player_fire_n_i(0)   => inputs(0).d(4),
+      player_fire_n_i(1)   => inputs(1).d(4),
+      player_up_n_i(0)     => inputs(0).d(0),
+      player_up_n_i(1)     => inputs(1).d(0),
+      player_right_n_i(0)  => inputs(0).d(3),
+      player_right_n_i(1)  => inputs(1).d(3),
+      player_down_n_i(0)   => inputs(0).d(1),
+      player_down_n_i(1)   => inputs(1).d(1),
+      player_left_n_i(0)   => inputs(0).d(2),
+      player_left_n_i(1)   => inputs(1).d(2),
+      player_bomb_n_i(0)   => inputs(0).d(5),
+      player_bomb_n_i(1)   => inputs(1).d(5),
       right_chute_i     => coin_right_s,
       left_chute_i      => coin_left_s,
       dip_block_1_i     => dip_block_1_s,
@@ -278,37 +279,52 @@ begin
     audio_o.ldata(7 downto 0) <= (others => '0');
     audio_o.rdata(15 downto 8) <= std_logic_vector(unsigned(signed_audio_s + 128));
     audio_o.rdata(7 downto 0) <= (others => '0');
-      
-		-- mapped to $0000-$5FFF (24K)
-		cpu_rom0_inst : entity work.sprom
-			generic map
-			(
-				init_file					=> "../../../../../src/platform/ladybug/" & GAME_NAME & "/roms/cpu_rom0.hex",
-				numwords_a				=> 16384,
-				widthad_a					=> 14
-			)
-			port map
-			(
-				clock							=> clk_20mhz_s,
-				address						=> rom_cpu_a_s(13 downto 0),
-				q									=> cpu_rom0_data
-			);
-		cpu_rom1_inst : entity work.sprom
-			generic map
-			(
-				init_file					=> "../../../../../src/platform/ladybug/" & GAME_NAME & "/roms/cpu_rom1.hex",
-				numwords_a				=> 8192,
-				widthad_a					=> 13
-			)
-			port map
-			(
-				clock							=> clk_20mhz_s,
-				address						=> rom_cpu_a_s(12 downto 0),
-				q									=> cpu_rom1_data
-			);
 
-		rom_cpu_d_s <=	cpu_rom0_data when rom_cpu_a_s(14) = '0' else
-										cpu_rom1_data;
+    GEN_INTERNAL_ROM : if not LADYBUG_EXTERNAL_ROM generate
+
+      -- mapped to $0000-$5FFF (24K)
+      cpu_rom0_inst : entity work.sprom
+        generic map
+        (
+          init_file					=> "../../../../../src/platform/ladybug/" & GAME_NAME & "/roms/cpu_rom0.hex",
+          numwords_a				=> 16384,
+          widthad_a					=> 14
+        )
+        port map
+        (
+          clock							=> clk_20mhz_s,
+          address						=> rom_cpu_a_s(13 downto 0),
+          q									=> cpu_rom0_data
+        );
+      cpu_rom1_inst : entity work.sprom
+        generic map
+        (
+          init_file					=> "../../../../../src/platform/ladybug/" & GAME_NAME & "/roms/cpu_rom1.hex",
+          numwords_a				=> 8192,
+          widthad_a					=> 13
+        )
+        port map
+        (
+          clock							=> clk_20mhz_s,
+          address						=> rom_cpu_a_s(12 downto 0),
+          q									=> cpu_rom1_data
+        );
+
+      rom_cpu_d_s <=	cpu_rom0_data when rom_cpu_a_s(14) = '0' else
+                      cpu_rom1_data;
+
+    end generate GEN_INTERNAL_ROM;
+    
+    GEN_EXTERNAL_ROM : if LADYBUG_EXTERNAL_ROM generate
+
+      rom_cpu_d_s <= flash_i.d(rom_cpu_d_s'range);
+      flash_o.a <= std_logic_vector(resize(unsigned(rom_cpu_a_s(14 downto 0)), flash_o.a'length));
+      flash_o.d <= (others => '0');
+      flash_o.cs <= '1';
+      flash_o.oe <= '1';
+      flash_o.we <= '0';
+      
+    end generate GEN_EXTERNAL_ROM;
 											
 		char_rom_u_inst : entity work.sprom
 			generic map
