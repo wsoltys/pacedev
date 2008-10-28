@@ -91,15 +91,16 @@ architecture SYN of pace_video_controller is
   signal x_s                    : std_logic_vector(10 downto 0) := (others => '0');
   signal y_s                    : std_logic_vector(10 downto 0) := (others => '0');
   
-  signal extended_reset         : std_logic := '1';
-
+  --signal extended_reset         : std_logic := '1';
+  alias extended_reset          : std_logic is video_i.reset;
+  
 begin
 
   -- registers
 	reg_proc: process (reset, clk)
 
 	begin
-		if reset = '1' then
+		--if reset = '1' then
 			case CONFIG is
 
         when PACE_VIDEO_VGA_240x320_60Hz =>
@@ -176,7 +177,7 @@ begin
       v_video_r <= VIDEO_V_SIZE;
       border_rgb_r <= BORDER_RGB;
       
-		end if;
+		--end if;
 	end process reg_proc;
 
   -- register some arithmetic
@@ -204,11 +205,11 @@ begin
     variable count_v : integer;
   begin
     if reset = '1' then
-      extended_reset <= '1';
+      --extended_reset <= '1';
       count_v := 7;
     elsif rising_edge(clk) then
       if count_v = 0 then
-        extended_reset <= '0';
+        --extended_reset <= '0';
       else
         count_v := count_v - 1;
       end if;
