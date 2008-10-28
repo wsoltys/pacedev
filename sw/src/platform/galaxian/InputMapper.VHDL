@@ -14,20 +14,20 @@ entity inputmapper is
 	);
 	port
 	(
-	    clk       : in std_logic;
-	    rst_n     : in std_logic;
+    clk       : in std_logic;
+    rst_n     : in std_logic;
 
-	    -- inputs from keyboard controller
-	    reset     : in std_logic;
-	    press     : in std_logic;
-	    release   : in std_logic;
-	    data      : in std_logic_vector(7 downto 0);
-			-- inputs from jamma connector
-			jamma			: in from_JAMMA_t;
+    -- inputs from keyboard controller
+    reset     : in std_logic;
+    press     : in std_logic;
+    release   : in std_logic;
+    data      : in std_logic_vector(7 downto 0);
+    -- inputs from jamma connector
+    jamma			: in from_JAMMA_t;
 
-	    -- user outputs
-	    dips			: in	std_logic_vector(NUM_DIPS-1 downto 0);
-	    inputs		: out from_MAPPED_INPUTS_t(0 to NUM_INPUTS-1)
+    -- user outputs
+    dips			: in	std_logic_vector(NUM_DIPS-1 downto 0);
+    inputs		: out from_MAPPED_INPUTS_t(0 to NUM_INPUTS-1)
 	);
 end inputmapper;
 
