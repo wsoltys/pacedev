@@ -82,7 +82,7 @@ architecture SYN of platform is
 	signal cpu_reset			: std_logic;
 	
   -- uP signals  
-  signal clk_3M_en			: std_logic;
+  signal clk_3M_ena			: std_logic;
   signal uP_addr        : std_logic_vector(15 downto 0);
   signal uP_datai       : std_logic_vector(7 downto 0);
   signal uP_datao       : std_logic_vector(7 downto 0);
@@ -183,6 +183,8 @@ begin
 	vram_wr <= uPmemwr and vram_cs and not uP_addr(10);
 	cram_wr <= uPmemwr and cram_cs;
 
+  sprite_reg_o.clk <= clk_30M;
+  sprite_reg_o.clk_ena <= clk_3M_ena;
   sprite_reg_o.a <= up_addr(7 downto 0);
   sprite_reg_o.d <= up_datao;
   sprite_reg_o.wr <= upmemwr and sprite_reg_cs;
@@ -233,12 +235,14 @@ begin
 	newSpriteAddr(3 downto 0) <= sprite_i.a(3 downto 0);
 	
   -- unused outputs
+  flash_o <= NULL_TO_FLASH;
   bitmap_o <= NULL_TO_BITMAP_CTL;
   graphics_o <= NULL_TO_GRAPHICS;
   spi_o <= NULL_TO_SPI;
   ser_o <= NULL_TO_SERIAL;
   leds_o <= (others => '0');
   snd_o <= NULL_TO_SOUND;
+  gp_o <= (others => '0');
   
   --
   -- COMPONENT INSTANTIATION
@@ -254,14 +258,14 @@ begin
 		(
 			clk				=> clk_30M,
 			reset			=> reset_i,
-			clk_en		=> clk_3M_en
+			clk_en		=> clk_3M_ena
 		);
 	
   U_uP : entity work.Z80
     port map
     (
       clk 		=> clk_30M,                                   
-      clk_en	=> clk_3M_en,
+      clk_en	=> clk_3M_ena,
       reset  	=> cpu_reset,                                     
 
       addr   	=> uP_addr,
@@ -414,4 +418,3 @@ begin
     );
 
 end SYN;
-
