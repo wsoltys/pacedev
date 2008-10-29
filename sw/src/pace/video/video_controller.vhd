@@ -281,70 +281,81 @@ begin
   
   -- for video DACs and TFT output
   video_o.clk <= clk;
-  
-  video_o_proc: process (extended_reset, clk, clk_ena)
+
+  BLK_VIDEO_O : block
+
     constant PIPELINE_DELAY : natural := DELAY+1;
-    variable hsync_v_r    : std_logic_vector(PIPELINE_DELAY-1 downto 0) := (others => '0');
-    variable vsync_v_r    : std_logic_vector(PIPELINE_DELAY-1 downto 0) := (others => '0');
-    variable hactive_v_r  : std_logic_vector(PIPELINE_DELAY-1 downto 0) := (others => '0');
-    variable vactive_v_r  : std_logic_vector(PIPELINE_DELAY-1 downto 0) := (others => '0');
-    variable hblank_v_r   : std_logic_vector(PIPELINE_DELAY-1 downto 0) := (others => '0');
-    variable vblank_v_r   : std_logic_vector(PIPELINE_DELAY-1 downto 0) := (others => '0');
-    alias hsync_v         : std_logic is hsync_v_r(hsync_v_r'left);
-    alias vsync_v         : std_logic is vsync_v_r(vsync_v_r'left);
-    alias hactive_v       : std_logic is hactive_v_r(hactive_v_r'left);
-    alias vactive_v       : std_logic is vactive_v_r(vactive_v_r'left);
-    alias hblank_v        : std_logic is hblank_v_r(hblank_v_r'left);
-    alias vblank_v        : std_logic is vblank_v_r(vblank_v_r'left);
-    variable stb_cnt_v    : std_logic_vector(3 downto 0); -- up to 16x scaling
+
+    -- won't synthesize correctly under ISE if these are variables
+    signal hactive_v_r  : std_logic_vector(PIPELINE_DELAY-1 downto 0) := (others => '0');
+    signal vactive_v_r  : std_logic_vector(PIPELINE_DELAY-1 downto 0) := (others => '0');
+
   begin
-    if extended_reset = '1' then
-      hsync_v_r := (others => '0');
-      vsync_v_r := (others => '0');
-      hactive_v_r := (others => '0');
-      vactive_v_r := (others => '0');
-      hblank_v_r := (others => '0');
-      vblank_v_r := (others => '0');
-      stb_cnt_v := (others => '1');
-    elsif rising_edge(clk) and clk_ena = '1' then
-
-      -- register control signals and handle scaling
-			video_ctl_o.hblank <= not hactive_s after SIM_DELAY;	-- used only by the bitmap/tilemap/sprite controllers
-			video_ctl_o.vblank <= not vactive_s after SIM_DELAY;	-- used only by the bitmap/tilemap/sprite controllers
-			-- handle scaling
-			video_ctl_o.stb <= stb_cnt_v(H_SCALE-1) after SIM_DELAY;
-      if hactive_s = '1' and vactive_s = '1' then
-        stb_cnt_v := stb_cnt_v + 2;
-      elsif hblank_s = '0' and vblank_s = '0' then    
+  
+    video_o_proc: process (extended_reset, clk, clk_ena)
+      variable hsync_v_r    : std_logic_vector(PIPELINE_DELAY-1 downto 0) := (others => '0');
+      variable vsync_v_r    : std_logic_vector(PIPELINE_DELAY-1 downto 0) := (others => '0');
+      --variable hactive_v_r  : std_logic_vector(PIPELINE_DELAY-1 downto 0) := (others => '0');
+      --variable vactive_v_r  : std_logic_vector(PIPELINE_DELAY-1 downto 0) := (others => '0');
+      variable hblank_v_r   : std_logic_vector(PIPELINE_DELAY-1 downto 0) := (others => '0');
+      variable vblank_v_r   : std_logic_vector(PIPELINE_DELAY-1 downto 0) := (others => '0');
+      alias hsync_v         : std_logic is hsync_v_r(hsync_v_r'left);
+      alias vsync_v         : std_logic is vsync_v_r(vsync_v_r'left);
+      alias hactive_v       : std_logic is hactive_v_r(hactive_v_r'left);
+      alias vactive_v       : std_logic is vactive_v_r(vactive_v_r'left);
+      alias hblank_v        : std_logic is hblank_v_r(hblank_v_r'left);
+      alias vblank_v        : std_logic is vblank_v_r(vblank_v_r'left);
+      variable stb_cnt_v    : std_logic_vector(3 downto 0); -- up to 16x scaling
+    begin
+      if extended_reset = '1' then
+        hsync_v_r := (others => '0');
+        vsync_v_r := (others => '0');
+        hactive_v_r <= (others => '0');
+        vactive_v_r <= (others => '0');
+        hblank_v_r := (others => '0');
+        vblank_v_r := (others => '0');
         stb_cnt_v := (others => '1');
+      elsif rising_edge(clk) and clk_ena = '1' then
+  
+        -- register control signals and handle scaling
+        video_ctl_o.hblank <= not hactive_s after SIM_DELAY;	-- used only by the bitmap/tilemap/sprite controllers
+        video_ctl_o.vblank <= not vactive_s after SIM_DELAY;	-- used only by the bitmap/tilemap/sprite controllers
+        -- handle scaling
+        video_ctl_o.stb <= stb_cnt_v(H_SCALE-1) after SIM_DELAY;
+        if hactive_s = '1' and vactive_s = '1' then
+          stb_cnt_v := stb_cnt_v + 2;
+        elsif hblank_s = '0' and vblank_s = '0' then    
+          stb_cnt_v := (others => '1');
+        end if;
+        video_ctl_o.x <= std_logic_vector(resize(unsigned(x_s(x_s'left downto H_SCALE-1)), video_ctl_o.x'length)) after SIM_DELAY;
+        video_ctl_o.y <= std_logic_vector(resize(unsigned(y_s(y_s'left downto V_SCALE-1)), video_ctl_o.y'length)) after SIM_DELAY;
+  
+        -- register video outputs
+        if hactive_v = '1' and vactive_v = '1' then
+          -- active video
+          video_o.rgb <= rgb_i after SIM_DELAY;
+        elsif hblank_v = '0' and vblank_v = '0' then
+          -- border
+          video_o.rgb <= border_rgb_r after SIM_DELAY;
+        else
+          video_o.rgb.r <= (others => '0') after SIM_DELAY;
+          video_o.rgb.g <= (others => '0') after SIM_DELAY;
+          video_o.rgb.b <= (others => '0') after SIM_DELAY;
+        end if;
+        video_o.hsync <= not hsync_v after SIM_DELAY;
+        video_o.vsync <= not vsync_v after SIM_DELAY;
+        video_o.hblank <= hblank_v after SIM_DELAY;
+        video_o.vblank <= vblank_v after SIM_DELAY;
+        -- pipelined signals
+        hsync_v_r := hsync_v_r(hsync_v_r'left-1 downto 0) & hsync_s;
+        vsync_v_r := vsync_v_r(vsync_v_r'left-1 downto 0) & vsync_s;
+        hactive_v_r <= hactive_v_r(hactive_v_r'left-1 downto 0) & hactive_s;
+        vactive_v_r <= vactive_v_r(vactive_v_r'left-1 downto 0) & vactive_s;
+        hblank_v_r := hblank_v_r(hblank_v_r'left-1 downto 0) & hblank_s;
+        vblank_v_r := vblank_v_r(vblank_v_r'left-1 downto 0) & vblank_s;
       end if;
-      video_ctl_o.x <= std_logic_vector(resize(unsigned(x_s(x_s'left downto H_SCALE-1)), video_ctl_o.x'length)) after SIM_DELAY;
-      video_ctl_o.y <= std_logic_vector(resize(unsigned(y_s(y_s'left downto V_SCALE-1)), video_ctl_o.y'length)) after SIM_DELAY;
+    end process video_o_proc;
 
-      -- register video outputs
-      if hactive_v = '1' and vactive_v = '1' then
-        -- active video
-        video_o.rgb <= rgb_i after SIM_DELAY;
-      elsif hblank_v = '0' and vblank_v = '0' then
-        -- border
-        video_o.rgb <= border_rgb_r after SIM_DELAY;
-      else
-        video_o.rgb.r <= (others => '0') after SIM_DELAY;
-        video_o.rgb.g <= (others => '0') after SIM_DELAY;
-        video_o.rgb.b <= (others => '0') after SIM_DELAY;
-      end if;
-      video_o.hsync <= not hsync_v after SIM_DELAY;
-      video_o.vsync <= not vsync_v after SIM_DELAY;
-      video_o.hblank <= hblank_v after SIM_DELAY;
-      video_o.vblank <= vblank_v after SIM_DELAY;
-      -- pipelined signals
-      hsync_v_r := hsync_v_r(hsync_v_r'left-1 downto 0) & hsync_s;
-      vsync_v_r := vsync_v_r(vsync_v_r'left-1 downto 0) & vsync_s;
-      hactive_v_r := hactive_v_r(hactive_v_r'left-1 downto 0) & hactive_s;
-      vactive_v_r := vactive_v_r(vactive_v_r'left-1 downto 0) & vactive_s;
-      hblank_v_r := hblank_v_r(hblank_v_r'left-1 downto 0) & hblank_s;
-      vblank_v_r := vblank_v_r(vblank_v_r'left-1 downto 0) & vblank_s;
-    end if;
-  end process video_o_proc;
+  end block BLK_VIDEO_O;
   
 end SYN;
