@@ -1,96 +1,87 @@
-library IEEE;
+library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
-use work.kbd_pkg.in8;
+use work.video_controller_pkg.all;
+use work.sprite_pkg.all;
 use work.project_pkg.all;
+use work.platform_pkg.all;
 
-entity Game is
+entity platform is
+  generic
+  (
+    NUM_INPUT_BYTES   : integer
+  );
   port
   (
     -- clocking and reset
-		clk							: in std_logic_vector(0 to 3);
-    reset           : in std_logic;                       
-    test_button     : in std_logic;                       
+    clk_i           : in std_logic_vector(0 to 3);
+    reset_i         : in std_logic;
 
-    -- inputs
-    ps2clk          : inout std_logic;                       
-    ps2data         : inout std_logic;                       
-    dip             : in std_logic_vector(7 downto 0);    
-		jamma						: in JAMMAInputsType;
+    -- misc I/O
+    buttons_i       : in from_BUTTONS_t;
+    switches_i      : in from_SWITCHES_t;
+    leds_o          : out to_LEDS_t;
 
-    -- micro buses
-    upaddr          : out std_logic_vector(15 downto 0);   
-    updatao         : out std_logic_vector(7 downto 0);    
+    -- controller inputs
+    inputs_i        : in from_MAPPED_INPUTS_t(0 to NUM_INPUT_BYTES-1);
 
-    -- SRAM
-    sram_i          : in from_SRAM_t;
-    sram_o          : out to_SRAM_t;
+    -- FLASH/SRAM
+    flash_i         : in from_FLASH_t;
+    flash_o         : out to_FLASH_t;
+		sram_i					: in from_SRAM_t;
+		sram_o					: out to_SRAM_t;
 
-    gfxextra_data   : out std_logic_vector(7 downto 0);
-		palette_data		: out ByteArrayType(15 downto 0);
+    -- graphics
+    
+    bitmap_i        : in from_BITMAP_CTL_t;
+    bitmap_o        : out to_BITMAP_CTL_t;
+    
+    tilemap_i       : in from_TILEMAP_CTL_t;
+    tilemap_o       : out to_TILEMAP_CTL_t;
 
-    -- graphics (bitmap)
-		bitmap_addr			: in std_logic_vector(15 downto 0);
-		bitmap_data			: out std_logic_vector(7 downto 0);
-		
-    -- graphics (tilemap)
-    tileaddr        : in std_logic_vector(15 downto 0);   
-    tiledatao       : out std_logic_vector(7 downto 0);    
-    tilemapaddr     : in std_logic_vector(15 downto 0);   
-    tilemapdatao    : out std_logic_vector(15 downto 0);    
-    attr_addr       : in std_logic_vector(9 downto 0);    
-    attr_dout       : out std_logic_vector(15 downto 0);   
+    sprite_reg_o    : out to_SPRITE_REG_t;
+    sprite_i        : in from_SPRITE_CTL_t;
+    sprite_o        : out to_SPRITE_CTL_t;
+		spr0_hit				: in std_logic;
 
-    -- graphics (sprite)
-    sprite_reg_addr : out std_logic_vector(7 downto 0);    
-    sprite_wr       : out std_logic;                       
-    spriteaddr      : in std_logic_vector(15 downto 0);   
-    spritedata      : out std_logic_vector(31 downto 0);   
-    spr0_hit        : in std_logic;
-
-    -- graphics (control)
-    vblank          : in std_logic;    
-		xcentre					: out std_logic_vector(9 downto 0);
-		ycentre					: out std_logic_vector(9 downto 0);
-		
+    -- various graphics information
+    graphics_i      : in from_GRAPHICS_t;
+    graphics_o      : out to_GRAPHICS_t;
+    
     -- OSD
-    to_osd          : out to_OSD_t;
-    from_osd        : in from_OSD_t;
+    osd_i           : in from_OSD_t;
+    osd_o           : out to_OSD_t;
 
     -- sound
-    snd_rd          : out std_logic;                       
-    snd_wr          : out std_logic;
-    sndif_datai     : in std_logic_vector(7 downto 0);    
-
-    -- spi interface
-    spi_clk         : out std_logic;                       
-    spi_din         : in std_logic;                       
-    spi_dout        : out std_logic;                       
-    spi_ena         : out std_logic;                       
-    spi_mode        : out std_logic;                       
-    spi_sel         : out std_logic;                       
+    snd_i           : in from_SOUND_t;
+    snd_o           : out to_SOUND_t;
+    
+    -- SPI (flash)
+    spi_i           : in from_SPI_t;
+    spi_o           : out to_SPI_t;
 
     -- serial
-    ser_rx          : in std_logic;                       
-    ser_tx          : out std_logic;                       
+    ser_i           : in from_SERIAL_t;
+    ser_o           : out to_SERIAL_t;
 
-    -- on-board leds
-    leds            : out std_logic_vector(7 downto 0)    
+    -- general purpose I/O
+    gp_i            : in from_GP_t;
+    gp_o            : out to_GP_t
   );
 
-end Game;
+end platform;
 
-architecture SYN of Game is
+architecture SYN of platform is
 
-	alias clk_30M					: std_logic is clk(0);
-	alias clk_40M					: std_logic is clk(1);
+	alias clk_30M					: std_logic is clk_i(0);
+	alias clk_video       : std_logic is clk_i(1);
 	
   -- uP signals  
-  signal clk_3M_en			: std_logic;
+  signal clk_3M_ena			: std_logic;
   signal uP_addr        : std_logic_vector(15 downto 0);
   signal uP_datai       : std_logic_vector(7 downto 0);
   signal uP_datao       : std_logic_vector(7 downto 0);
@@ -134,24 +125,19 @@ architecture SYN of Game is
   signal inZero_cs      : std_logic;
   signal inOne_cs       : std_logic;
   signal dips_cs        : std_logic;
+  signal sprite_cs      : std_logic;
 	signal bank_wr				: std_logic;
-	signal inputs					: in8(0 to 1);  
 	signal newTileAddr		: std_logic_vector(12 downto 0);
-	signal tile0datao			: std_logic_vector(tiledatao'range);
-	signal tile1datao			: std_logic_vector(tiledatao'range);
-	signal sprite0data 		: std_logic_vector(spritedata'range);
-	signal sprite1data 		: std_logic_vector(spritedata'range);
+	signal tile0datao			: std_logic_vector(tilemap_o.tile_d'range);
+	signal tile1datao			: std_logic_vector(tilemap_o.tile_d'range);
+	signal sprite0data 		: std_logic_vector(sprite_o.d'range);
+	signal sprite1data 		: std_logic_vector(sprite_o.d'range);
 
 	signal decoded_tileaddr		: std_logic_vector(12 downto 0);
 	signal decoded_spriteaddr	: std_logic_vector(10 downto 0);
 		
 begin
 
-	-- generate CPU clock (3MHz from 30MHz)
-	
-	xcentre <= (others => '0');
-	ycentre <= (others => '0');
-	
   -- SRAM signals (may or may not be used)
   sram_o.a <= std_logic_vector(resize(unsigned(uP_addr(13 downto 0)), sram_o.a'length));
   sram_o.d <= std_logic_vector(resize(unsigned(uP_datao), sram_o.d'length)) 
@@ -191,9 +177,9 @@ begin
 							vram_datao when vram_cs = '1' else
 							cram1_datao when (cram_cs = '1' and uP_addr(0) = '1') else
 							cram0_datao when (cram_cs = '1' and uP_addr(0) = '0') else
-              inputs(0) when inzero_cs = '1' else
-              inputs(1) when inone_cs = '1' else
-              dip when dips_cs = '1' else
+              inputs_i(0).d when inzero_cs = '1' else
+              inputs_i(1).d when inone_cs = '1' else
+              switches_i(7 downto 0) when dips_cs = '1' else
 							rom1_datao when rom1_cs = '1' else
 							prot_datao when prot_cs = '1' else
 							(others => 'X');
@@ -205,32 +191,29 @@ begin
 	-- BANK $6002-$6006 (decode $600X)
 	bank_wr <= uPmemwr when uP_addr(15 downto 4) = X"600" else '0';
 	-- Sprites $5040-$507F
-  sprite_wr <= uPmemwr when uP_addr(15 downto 6) = X"50"&"01" else '0';
-  sprite_reg_addr <= uP_addr(7 downto 0);
+  sprite_cs <= '1' when uP_addr(15 downto 6) = X"50"&"01" else '0';
 
 	-- Sound $5800,$5900
-	snd_wr <= uPmemwr when (uP_addr(15 downto 9) = X"5"&"100" and uP_addr(7 downto 0) = X"00") else '0';
-		
-	upaddr <= uP_addr;
-	updatao <= uP_datao;
+	snd_o.wr <= uPmemwr when (uP_addr(15 downto 9) = X"5"&"100" and uP_addr(7 downto 0) = X"00") else '0';
 
+  -- sprites
+  sprite_reg_o.clk <= clk_30M;
+  sprite_reg_o.clk_ena <= clk_3M_ena;
+  sprite_reg_o.a <= uP_addr(7 downto 0);
+  sprite_reg_o.d <= up_datao;
+  sprite_reg_o.wr <= sprite_cs and upmemwr;
+  
 	-- mangle tile address according to sprite layout
 	-- WIP - can re-arrange sprites to fix
 	newtileaddr <= decoded_tileAddr(12 downto 6) & decoded_tileAddr(4 downto 1) & 
 									not decoded_tileAddr(5) & decoded_tileAddr(0);
 
-  gfxextra_data <= (others => '0');
-
   -- unused outputs
-	bitmap_data <= (others => '0');
-	spi_clk <= '0';
-	spi_dout <= '0';
-	spi_ena <= '0';
-	spi_mode <= '0';
-	spi_sel <= '0';
-	ser_tx <= 'X';
-	leds <= (others => '0');
-  snd_rd <= '0';
+	bitmap_o <= NULL_TO_BITMAP_CTL;
+	spi_o <= NULL_TO_SPI;
+	ser_o <= NULL_TO_SERIAL;
+	leds_o <= (others => '0');
+	gp_o <= (others => '0');
 	
   --
   -- COMPONENT INSTANTIATION
@@ -245,16 +228,16 @@ begin
 		port map
 		(
 			clk				=> clk_30M,
-			reset			=> reset,
-			clk_en		=> clk_3M_en
+			reset			=> reset_i,
+			clk_en		=> clk_3M_ena
 		);
 
-    up_inst : entity work.uPse
+    up_inst : entity work.Z80
       port map
       (
       	clk 		=> clk_30M,                                   
-      	clk_en	=> clk_3M_en,
-        reset  	=> reset,                                     
+      	clk_en	=> clk_3M_ena,
+        reset  	=> reset_i,                                     
 
         addr   	=> uP_addr,
         datai  	=> uP_datai,
@@ -277,34 +260,54 @@ begin
 			addri				=> uP_addr(11 downto 0),
 			datao				=> prot_datao
 		);
-		
-	rom0_inst : entity work.sprom
-		generic map
-		(
-			init_file		=> "../../../../src/platform/jumpbug/roms/jbugrom0.hex",
-			numwords_a	=> 16384,
-			widthad_a		=> 14
-		)
-		port map
-		(
-			clock			=> clk_30M,
-			address		=> up_addr(13 downto 0),
-			q					=> rom0_datao
-		);
-	
-	rom1_inst : entity work.sprom
-		generic map
-		(
-			init_file		=> "../../../../src/platform/jumpbug/roms/jbugrom1.hex",
-			numwords_a	=> 16384,
-			widthad_a		=> 14
-		)
-		port map
-		(
-			clock			=> clk_30M,
-			address		=> up_addr(13 downto 0),
-			q					=> rom1_datao
-		);
+
+  GEN_INTERNAL_ROMS : if not JUMPBUG_ROMS_IN_FLASH generate
+
+    rom0_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> "../../../../src/platform/jumpbug/roms/jbugrom0.hex",
+        numwords_a	=> 16384,
+        widthad_a		=> 14
+      )
+      port map
+      (
+        clock			=> clk_30M,
+        address		=> up_addr(13 downto 0),
+        q					=> rom0_datao
+      );
+    
+    rom1_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> "../../../../src/platform/jumpbug/roms/jbugrom1.hex",
+        numwords_a	=> 16384,
+        widthad_a		=> 14
+      )
+      port map
+      (
+        clock			=> clk_30M,
+        address		=> up_addr(13 downto 0),
+        q					=> rom1_datao
+      );
+
+    flash_o <= NULL_TO_FLASH;
+
+  end generate GEN_INTERNAL_ROMS;
+  
+  GEN_FLASH_ROMS : if JUMPBUG_ROMS_IN_FLASH generate
+
+    flash_o.a(flash_o.a'left downto 15) <= (others => '0');
+    flash_o.a(14 downto 0) <= rom1_cs & up_addr(13 downto 0);
+    flash_o.d <= (others => '0'); -- not used
+    flash_o.cs <= rom0_cs or rom1_cs;
+    flash_o.oe <= '1';
+    flash_o.we <= '0';
+
+    rom0_datao <= flash_i.d;
+    rom1_datao <= flash_i.d;
+    
+  end generate GEN_FLASH_ROMS;
 	
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 	vram_inst : entity work.dpram
@@ -322,20 +325,20 @@ begin
 			data_b			=> uP_datao,
 			q_b					=> vram_datao,
 
-			clock_a			=> clk_40M,
+			clock_a			=> clk_video,
 			address_a		=> vram_addr,
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tileMapDatao(7 downto 0)
+			q_a					=> tilemap_o.map_d(7 downto 0)
 		);
-  tileMapDatao(15 downto 8) <= (others => '0');
+  tilemap_o.map_d(15 downto 8) <= (others => '0');
 
 	vrammapper_inst : entity work.vramMapper
 		port map
 		(
-	    clk     => clk_40M,
+	    clk     => clk_video,
 
-	    inAddr  => tileMapAddr(12 downto 0),
+	    inAddr  => tilemap_i.map_a(12 downto 0),
 	    outAddr => vram_addr
 		);
 
@@ -356,11 +359,11 @@ begin
 			data_b			=> uP_datao,
 			q_b					=> cram0_datao,
 			
-			clock_a			=> clk_40M,
-			address_a		=> attr_addr(7 downto 1),
+			clock_a			=> clk_video,
+			address_a		=> tilemap_i.attr_a(7 downto 1),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> attr_dout(7 downto 0)
+			q_a					=> tilemap_o.attr_d(7 downto 0)
 		);
 
 	cram1_wr <= cram_wr and uP_addr(0);
@@ -380,41 +383,23 @@ begin
 			data_b			=> uP_datao,
 			q_b					=> cram1_datao,
 			
-			clock_a			=> clk_40M,
-			address_a		=> attr_addr(7 downto 1),
+			clock_a			=> clk_video,
+			address_a		=> tilemap_i.attr_a(7 downto 1),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> attr_dout(15 downto 8)
+			q_a					=> tilemap_o.attr_d(15 downto 8)
 		);
-
-	inputs_inst : entity work.Inputs
-		generic map
-		(
-			NUM_INPUTS	=> 2,
-      CLK_1US_DIV => JUMPBUG_1MHz_CLK0_COUNTS
-		)
-	  port map
-	  (
-	    clk     		=> clk_30M,
-	    reset   		=> reset,
-	    ps2clk  		=> ps2clk,
-	    ps2data 		=> ps2data,
-      jamma       => jamma,
-
-	    dips				=> dip,
-	    inputs			=> inputs
-	  );
 
   interrupts_inst : entity work.Galaxian_Interrupts
     port map
     (
       clk               => clk_30M,
-      reset             => reset,
+      reset             => reset_i,
   
       z80_data          => uP_datao,
       nmiena_wr         => nmiena_wr,
   
-			vblank						=> vblank,
+			vblank						=> graphics_i.vblank,
 			
       -- interrupt status & request lines
       nmi_req           => uPnmireq
@@ -432,11 +417,11 @@ begin
 		)
 		port map
 		(
-			clock										=> clk_40M,
+			clock										=> clk_video,
 			address_a								=> newTileAddr(12 downto 0),
 			q_a											=> tile0Datao,
 			
-			address_b								=> spriteAddr(10 downto 0),
+			address_b								=> sprite_i.a(10 downto 0),
 			q_b(31 downto 24)				=> sprite0Data(7 downto 0),
 			q_b(23 downto 16)				=> sprite0Data(15 downto 8),
 			q_b(15 downto 8)				=> sprite0Data(23 downto 16),
@@ -455,11 +440,11 @@ begin
 		)
 		port map
 		(
-			clock										=> clk_40M,
+			clock										=> clk_video,
 			address_a								=> newTileAddr(11 downto 0),
 			q_a											=> tile1Datao,
 			
-			address_b								=> spriteAddr(9 downto 0),
+			address_b								=> sprite_i.a(9 downto 0),
 			q_b(31 downto 24)				=> sprite1Data(7 downto 0),
 			q_b(23 downto 16)				=> sprite1Data(15 downto 8),
 			q_b(15 downto 8)				=> sprite1Data(23 downto 16),
@@ -470,7 +455,7 @@ begin
 		port map
 		(
 	    clk              				=> clk_30M,
-	    reset            				=> reset,
+	    reset            				=> reset_i,
 
 	    -- bank control
 	    bank_addr        				=> uP_addr(3 downto 0),
@@ -478,18 +463,18 @@ begin
 	    bank_wr          				=> bank_wr,
 
 	    -- tile address and mux
-	    tile_addr_in     				=> tileaddr(12 downto 0),
+	    tile_addr_in     				=> tilemap_i.tile_a(12 downto 0),
 	    tile_addr_out    				=> decoded_tileaddr,
 	    tile0_data       				=> tile0datao,
 	    tile1_data       				=> tile1datao,
-	    tile_data_out    				=> tiledatao,
+	    tile_data_out    				=> tilemap_o.tile_d,
 
 	    -- sprite address and mux
-	    sprite_addr_in   				=> spriteaddr,
+	    sprite_addr_in   				=> sprite_i.a,
 	    sprite_addr_out  				=> decoded_spriteaddr,
 	    sprite0_data     				=> sprite0data,
 	    sprite1_data     				=> sprite1data,
-	    sprite_data_out  				=> spritedata
+	    sprite_data_out  				=> sprite_o.d
 		);
 
 end SYN;
