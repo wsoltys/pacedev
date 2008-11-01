@@ -7,6 +7,10 @@ use work.project_pkg.all;
 use work.platform_pkg.all;
 
 entity Pacman_Interrupts is
+  generic
+  (
+    USE_VIDEO_VBLANK    : boolean := true
+  );
   port
   (
     clk               : in std_logic;	-- 30MHz
@@ -59,7 +63,7 @@ begin
 		end if;
 	end process;
 
-	GEN_FAKE_VBLANK_INT : if not PACMAN_USE_VIDEO_VBLANK_INTERRUPT generate
+	GEN_FAKE_VBLANK_INT : if not USE_VIDEO_VBLANK generate
     FAKE_VBLANK_BLOCK : block
 
       signal slow_clk_ena   : std_logic; -- 1MHz
@@ -109,7 +113,7 @@ begin
     end block FAKE_VBLANK_BLOCK;
 	end generate GEN_FAKE_VBLANK_INT;
 	
-	GEN_REAL_VBLANK_INT : if PACMAN_USE_VIDEO_VBLANK_INTERRUPT generate
+	GEN_REAL_VBLANK_INT : if USE_VIDEO_VBLANK generate
 	
 		process (clk, reset)
 			variable vblank_v : std_logic_vector(3 downto 0);

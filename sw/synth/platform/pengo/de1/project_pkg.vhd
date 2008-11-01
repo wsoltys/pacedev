@@ -17,7 +17,7 @@ package project_pkg is
 	constant PACE_HAS_PLL								      : boolean := true;
   --constant PACE_HAS_SRAM                    : boolean := true;
   constant PACE_HAS_SDRAM                   : boolean := false;
-  constant PACE_HAS_FLASH                   : boolean := false;
+  --constant PACE_HAS_FLASH                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := false;
   
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
@@ -37,9 +37,13 @@ package project_pkg is
   constant PACE_OSD_YPOS                    : natural := 0;
 
 	-- Pacman-specific constants
-			
-	constant PACMAN_USE_VIDEO_VBLANK_INTERRUPT  : boolean := true;
-	constant PACMAN_USE_INTERNAL_WRAM				    : boolean := false;
-  constant PACE_HAS_SRAM                      : boolean := not PACMAN_USE_INTERNAL_WRAM;
-	
+
+  constant PENGO_ROMS_IN_FLASH              : boolean := true;
+	constant PENGO_USE_VIDEO_VBLANK           : boolean := true;
+	constant PENGO_USE_INTERNAL_WRAM				  : boolean := false;
+
+  -- derived
+  constant PACE_HAS_FLASH                   : boolean := PENGO_ROMS_IN_FLASH;
+  constant PACE_HAS_SRAM                    : boolean := not PENGO_USE_INTERNAL_WRAM;
+
 end;
