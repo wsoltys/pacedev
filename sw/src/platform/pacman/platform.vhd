@@ -323,6 +323,10 @@ begin
   tilemap_o.attr_d(tilemap_o.attr_d'left downto 8) <= (others => '0');
   
   interrupts_inst : entity work.Pacman_Interrupts
+    generic map
+    (
+      USE_VIDEO_VBLANK => PACMAN_USE_VIDEO_VBLANK
+    )
 	  port map
 	  (
 	    clk               => clk_30M,
