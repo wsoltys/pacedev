@@ -9,7 +9,7 @@ use work.platform_pkg.all;
 entity Galaxian_Interrupts is
   generic
   (
-    USE_VIDEO_VLBANK  : in boolean := true
+    USE_VIDEO_VBLANK  : in boolean := true
   );
   port
   (

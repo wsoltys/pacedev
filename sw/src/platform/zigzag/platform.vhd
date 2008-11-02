@@ -342,6 +342,10 @@ begin
 		);
 
   interrupts_inst : entity work.Galaxian_Interrupts
+    generic map
+    (
+      USE_VIDEO_VBLANK  => ZIGZAG_USE_VIDEO_VBLANK
+    )
     port map
     (
       clk               => clk_30M,

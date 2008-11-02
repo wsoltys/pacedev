@@ -39,6 +39,6 @@ package project_pkg is
 	-- Zigzag-specific constants
 			
 	constant ZIGZAG_USE_INTERNAL_WRAM				  : boolean := false;
-	constant USE_VIDEO_VBLANK                 : boolean := true;
+	constant ZIGZAG_USE_VIDEO_VBLANK          : boolean := true;
 	
 end;
