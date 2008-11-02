@@ -14,7 +14,13 @@ package project_pkg is
 	--
 	
   -- Reference clock is 50MHz
-	constant PACE_HAS_PLL										  : boolean := true;
+	constant PACE_HAS_PLL								      : boolean := true;
+  constant PACE_HAS_SRAM                    : boolean := true;
+  constant PACE_HAS_SDRAM                   : boolean := false;
+  constant PACE_HAS_FLASH                   : boolean := false;
+  constant PACE_HAS_SERIAL                  : boolean := false;
+  
+	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
 
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
   constant PACE_CLK0_DIVIDE_BY        		  : natural := 5;
@@ -24,21 +30,15 @@ package project_pkg is
 	constant PACE_VIDEO_H_SCALE         		  : integer := 2;
 	constant PACE_VIDEO_V_SCALE         		  : integer := 2;
 
+  constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_GREEN;
+
   constant PACE_HAS_OSD                     : boolean := false;
   constant PACE_OSD_XPOS                    : natural := 0;
   constant PACE_OSD_YPOS                    : natural := 0;
 
-  -- DE1-specific constants
-  constant DE1_JAMMA_IS_MAPLE               : boolean := false;
-  constant DE1_JAMMA_IS_NGC                 : boolean := false;
-
 	-- Zigzag-specific constants
 			
-	constant ZIGZAG_CPU_CLK_ENA_DIVIDE_BY	    : natural := 10;
-	constant ZIGZAG_1MHz_CLK0_COUNTS				  : natural := 30;
-	alias  GALAXIAN_1MHz_CLK0_COUNTS          : natural is ZIGZAG_1MHz_CLK0_COUNTS;
-	
 	constant ZIGZAG_USE_INTERNAL_WRAM				  : boolean := false;
-	constant USE_VIDEO_VBLANK_INTERRUPT 		  : boolean := true;
+	constant USE_VIDEO_VBLANK                 : boolean := true;
 	
 end;

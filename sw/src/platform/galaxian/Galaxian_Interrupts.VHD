@@ -7,18 +7,22 @@ use work.project_pkg.all;
 use work.platform_pkg.all;
 
 entity Galaxian_Interrupts is
+  generic
+  (
+    USE_VIDEO_VLBANK  : in boolean := true
+  );
   port
   (
-    clk               : in    std_logic;
-    reset             : in    std_logic;
+    clk               : in std_logic;
+    reset             : in std_logic;
 
-    z80_data          : in    std_logic_vector(7 downto 0);
-    nmiena_wr         : in    std_logic;
+    z80_data          : in std_logic_vector(7 downto 0);
+    nmiena_wr         : in std_logic;
 
 		vblank						: in std_logic;
 		
     -- interrupt status & request lines
-    nmi_req           : out   std_logic
+    nmi_req           : out std_logic
   );
 
 end Galaxian_Interrupts;
@@ -61,7 +65,7 @@ begin
     end if;
   end process;
 
-	GEN_FAKE_VBLANK_INT : if not USE_VIDEO_VBLANK_INTERRUPT generate
+	GEN_FAKE_VBLANK_INT : if not USE_VIDEO_VBLANK generate
 		
   -- VBLANK interrupt
   process (clk, slow_clk_ena, reset)
@@ -85,7 +89,7 @@ begin
 
 	end generate GEN_FAKE_VBLANK_INT;
 	
-	GEN_REAL_VBLANK_INT : if USE_VIDEO_VBLANK_INTERRUPT generate
+	GEN_REAL_VBLANK_INT : if USE_VIDEO_VBLANK generate
 	
 		process (clk, slow_clk_ena, reset)
 			variable vblank_v : std_logic_vector(3 downto 0);

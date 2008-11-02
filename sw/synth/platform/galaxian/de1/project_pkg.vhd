@@ -56,6 +56,6 @@ package project_pkg is
 	-- Galaxian-specific constants
 			
 	constant GALAXIAN_USE_INTERNAL_WRAM     : boolean := true;
-	constant USE_VIDEO_VBLANK_INTERRUPT     : boolean := false;
+	constant USE_VIDEO_VBLANK               : boolean := false;
 	
 end;
