@@ -5,69 +5,65 @@ use IEEE.std_logic_unsigned.all;
 library work;
 use work.pace_pkg.all;
 use work.platform_pkg.all;
+use work.video_controller_pkg.all;
 
 --
 --	Frogger Background Generator
 --
 
 entity bitmapCtl_1 is          
-	port               
-	(
-	    clk         	: in std_logic;
-			clk_ena				: in std_logic;
-			reset					: in std_logic;
+  generic
+  (
+    DELAY         : integer
+  );
+  port               
+  (
+    reset					: in std_logic;
 
-			-- video control signals		
-	    hblank      	: in std_logic;
-			vblank				: in std_logic;
-	    pix_x       	: in std_logic_vector(9 downto 0);
-	    pix_y       	: in std_logic_vector(9 downto 0);
+    -- video control signals		
+    video_ctl     : in from_VIDEO_CTL_t;
 
-	    -- tilemap interface
-			scroll_data		: in std_logic_vector(7 downto 0);
-			palette_data	: in ByteArrayType(15 downto 0);
-	    bitmap_d    	: in std_logic_vector(7 downto 0);
-	    bitmap_a    	: out std_logic_vector(15 downto 0);
+    -- bitmap controller signals
+    ctl_i         : in to_BITMAP_CTL_t;
+    ctl_o         : out from_BITMAP_CTL_t;
 
-			-- RGB output (10-bits each)
-			rgb						: out RGBType;
-			bitmap_on	  	: out std_logic
-	);
-end bitmapCtl_1;
+    graphics_i    : in to_GRAPHICS_t
+  );
+end entity bitmapCtl_1;
 
 architecture SYN of bitmapCtl_1 is
 
+  alias clk       : std_logic is video_ctl.clk;
+  alias clk_ena   : std_logic is video_ctl.clk_ena;
+  alias stb       : std_logic is video_ctl.stb;
+  alias hblank    : std_logic is video_ctl.hblank;
+  alias vblank    : std_logic is video_ctl.vblank;
+
+  alias rgb       : RGB_t is ctl_o.rgb;
+  
 	signal clk_ena_s : std_logic;
 	
 begin
 
-  process (clk)
-
-		variable pix_x_adj : std_logic_vector(pix_x'range);
-		
+  process (clk, reset)
   begin
 
-		pix_x_adj := pix_x + (256-PACE_VIDEO_H_SIZE)/2;
-		
-    if rising_edge (clk) then
-      if reset = '0' then
+    if reset = '1' then
+      null;
+    elsif rising_edge (clk) then
+      rgb.r <= (others => '0'); rgb.g <= (others => '0'); rgb.b <= (others => '0');
 
-        rgb.r <= (others => '0'); rgb.g <= (others => '0'); rgb.b <= (others => '0');
-
-        if (vblank = '1') or (hblank = '1') then
-            null;
-        else
-					if (pix_y(7) = '0') then
-          	rgb.b(rgb.b'left downto rgb.b'left-1) <= "01";
-          end if;
-        end if; -- hblank = '1'
-      end if; -- reset = '0'
+      if (vblank /= '1') and (hblank /= '1') then
+        if (video_ctl.y(7) = '0') then
+          rgb.b(rgb.b'left downto rgb.b'left-1) <= "01";
+        end if;
+      end if; -- hblank = '1'
     end if; -- rising_edge(clk)
 
   end process;
 
-	bitmap_a <= (others => '0');
-	bitmap_on <= '1';
+	ctl_o.a <= (others => '0');
+	ctl_o.set <= '1';
 	
 end SYN;
 
