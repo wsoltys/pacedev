@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE ON
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION 7.2
+set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -733,11 +733,15 @@ set_parameter -name CYCLONEII_SAFE_WRITE "\"VERIFIED_SAFE\""
 
 
 
-set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name USER_LIBRARIES "C:\\markm\\pace2\\sw\\src\\platform\\scramble-fpgaarcade\\UNISIM"
 set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE "../../../../src/platform/scramble-fpgaarcade/platform_pkg.vhd"
 set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_pkg.vhd
@@ -745,7 +749,6 @@ set_global_assignment -name VHDL_FILE "../../../../src/platform/scramble-fpgaarc
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE "../../../../src/platform/scramble-fpgaarcade/wrappers.vhd"
 set_global_assignment -name VHDL_FILE "../../../../src/platform/scramble-fpgaarcade/unzip/source/T80_Pack.vhd"
 set_global_assignment -name VHDL_FILE "../../../../src/platform/scramble-fpgaarcade/unzip/source/T80_Reg.vhd"
@@ -775,6 +778,7 @@ set_global_assignment -name VHDL_FILE "../../../../src/platform/scramble-fpgaarc
 set_global_assignment -name VHDL_FILE "../../../../src/platform/scramble-fpgaarcade/unzip/source/scramble_audio.vhd"
 set_global_assignment -name VHDL_FILE "../../../../src/platform/scramble-fpgaarcade/unzip/source/dac.vhd"
 set_global_assignment -name VHDL_FILE "../../../../src/platform/scramble-fpgaarcade/unzip/source/scramble_debounce.vhd"
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_upcounter.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/conversion.vhd
