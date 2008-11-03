@@ -1,60 +1,57 @@
-library IEEE;
-use IEEE.std_logic_1164.all;
-use IEEE.std_logic_unsigned.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
 
 library work;
 use work.pace_pkg.all;
+use work.video_controller_pkg.all;
+use work.sprite_pkg.all;
 use work.project_pkg.all;
 use work.platform_pkg.all;    
 
-entity sptCtlVHDL is
+entity spritectl is
 	generic
 	(
-		INDEX		: natural
+		INDEX		: natural;
+		DELAY   : integer
 	);
 	port               
 	(
-    clk     : in std_logic;
-    clk_ena : in std_logic;
+    -- sprite registers
+    reg_i       : in from_SPRITE_REG_t;
+    
+    -- video control signals
+    video_ctl   : in from_VIDEO_CTL_t;
 
-    -- VGA I/F
-    HBlank  : in std_logic;       
-    xAddr   : in std_logic_vector(7 downto 0);
-    yAddr   : in std_logic_vector(8 downto 0);
-    pixOn   : out std_logic;    
-		rgb			: out RGBType;
-		    
-		bank_data	: in std_logic_vector(7 downto 0);
-		
-    -- Sprite I/F, sprite is 16 x 8 2 bit per pixel
-    num     : in    std_logic_vector(11 downto 0);   -- which sprite in table to show for this controller
-    xLoc    : in    std_logic_vector(7 downto 0);   -- X location
-    yLoc    : in    std_logic_vector(8 downto 0);   -- Y location (line)
-    colour	: in    std_logic_vector(7 downto 0);   -- colour base for PEL.
-    flags   : in    std_logic_vector(7 downto 0);   -- flags to operate on sprites
-
-    ena     : in    std_logic;                      -- this sprite can load row data
-    rowData : in    std_logic_vector(31 downto 0);  -- 8 x 2 bpp row of sprite data
-    rowAddr : out   std_logic_vector(15 downto 0)   -- (8 rows of sprite data and 16 sprites ) full vector to allow expansion
+    -- sprite control signals
+    ctl_i       : in to_SPRITE_CTL_t;
+    ctl_o       : out from_SPRITE_CTL_t;
+    
+		graphics_i  : in to_GRAPHICS_t
 	);
-end sptCtlVHDL;
+end entity spritectl;
 
-architecture beh of sptCtlVHDL is
+architecture SYN of spritectl is
 
-   signal flipData : std_logic_vector(31 downto 0);   -- flipped row data
+  alias clk       : std_logic is video_ctl.clk;
+  alias clk_ena   : std_logic is video_ctl.clk_ena;
+  
+  signal flipData : std_logic_vector(31 downto 0);   -- flipped row data
+   
+  alias rgb       : RGB_t is ctl_o.rgb;
+  
 begin
 
-  -- call up the flipper
-  FLA : entity work.flipRow port map (rowIn => rowData, flip => flags(0), rowOut => flipData);
+  flipData <= flip_row (ctl_i.d, reg_i.xflip);
 
-	process (clk, clk_ena)
+	process (clk)
 
    	variable rowStore : std_logic_vector(31 downto 0);  -- saved row of spt to show during visibile period
 		alias pel : std_logic_vector(1 downto 0) is rowStore(31 downto 30);
     variable yMat  : boolean;                         	-- raster is between first and last line of sprite
     variable xMat  : boolean;                         	-- raster in between left edge and end of line
-    variable xLocAdj : std_logic_vector(7 downto 0);
-    variable yLocAdj : std_logic_vector(8 downto 0);
+    variable x : std_logic_vector(video_ctl.x'range);
+    variable y : std_logic_vector(video_ctl.y'range);
 
 		-- centipede sprites are only 8 pixels high!
 		-- the width of rowCount determines the scanline multipler
@@ -69,18 +66,18 @@ begin
 
 		if rising_edge(clk) and clk_ena = '1' then
 
-			xLocAdj := xLoc;
-  		yLocAdj := yLoc - 17;
+			x := reg_i.x;
+  		y := reg_i.y - 17;
 			
-			if hblank = '1' then
+			if video_ctl.hblank = '1' then
 
 				xMat := false;
 				-- stop sprites wrapping from bottom of screen
-				if yAddr = 0 then
+				if video_ctl.y = 0 then
 					yMat := false;
 				end if;
 				
-				if yLocAdj = yAddr then
+				if y = video_ctl.y then
 					-- start counting sprite row
 					rowCount := (others => '0');
 					yMat := true;
@@ -89,8 +86,8 @@ begin
 				end if;
 
 				-- sprites not visible before row 16				
-				if ena = '1' then
-					if yMat and yLocAdj > 16 then
+				if ctl_i.ld = '1' then
+					if yMat and y > 16 then
 						rowStore := flipData;			-- load sprite data
 					else
 						rowStore := (others => '0');
@@ -99,11 +96,11 @@ begin
 						
 			else
 			
-				if xAddr = xLocAdj then
+				if video_ctl.x = x then
 					-- count up at left edge of sprite
 					rowCount := rowCount + 1;
 					-- start of sprite
-					if xAddr /= 0 and xAddr < 240 then
+					if video_ctl.x /= 0 and video_ctl.x < 240 then
 						xMat := true;
 					end if;
 				end if;
@@ -117,12 +114,12 @@ begin
 				rgb.b <= pal_entry(2) & "0000";
 
 			  -- set pixel transparency based on match
-				pixOn <= '0';
+				ctl_o.set <= '0';
 				--if xMat and pel /= "00" then
 				if xMat and yMat and (pal_entry(0)(5 downto 4) /= "00" or
 															pal_entry(1)(5 downto 4) /= "00" or
 															pal_entry(2)(5 downto 4) /= "00") then
-			  	pixOn <= '1';
+			  	ctl_o.set <= '1';
 				end if;
 
 				if xMat then
@@ -135,15 +132,15 @@ begin
 		end if;
 
 		-- again, centipede sprites only 8 pixels high!
-	  rowAddr(15 downto 3) <= '0' & num;
-	  if flags(1) = '1' then
-	  	rowAddr(2 downto 0) <= not rowCount(rowCount'left-1 downto rowCount'left-3);		-- flip Y
+	  ctl_o.a(15 downto 3) <= '0' & reg_i.n;
+	  if reg_i.yflip = '1' then
+	  	ctl_o.a(2 downto 0) <= not rowCount(rowCount'left-1 downto rowCount'left-3);		-- flip Y
 	  else
-	  	rowAddr(2 downto 0) <= rowCount(rowCount'left-1 downto rowCount'left-3);
+	  	ctl_o.a(2 downto 0) <= rowCount(rowCount'left-1 downto rowCount'left-3);
 	  end if;
 
   end process;
 
-end beh;
+end SYN;
 
 

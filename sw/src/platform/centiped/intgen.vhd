@@ -5,16 +5,16 @@ use IEEE.std_logic_unsigned.all;
 entity intGen is
 	port
 	(
-    clk       : in     std_logic;
-    reset     : in     std_logic;
+    clk       : in std_logic;
+    reset     : in std_logic;
 
     -- inputs
-    vsync_n   : in     std_logic;
-    intack    : in     std_logic;
+    vsync_n   : in std_logic;
+    intack    : in std_logic;
 
     -- outputs
-    vblank    : out    std_logic;
-    irq_n     : out    std_logic
+    vblank    : out std_logic;
+    irq_n     : out std_logic
 	);
 end intGen;
 
