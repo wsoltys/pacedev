@@ -137,11 +137,11 @@ begin
 		(
       NUM_DIPS        => PACE_NUM_SWITCHES,
 			NUM_INPUTS	    => 4,
-			CLK_1US_DIV	    => 20
+			CLK_1US_DIV	    => 25
 		)
 	  port map
 	  (
-	    clk     	      => clk_i(0),
+	    clk     	      => clk_i(1),
 	    reset   	      => reset_i,
 	    ps2clk  	      => inputs_i.ps2_kclk,
 	    ps2data 	      => inputs_i.ps2_kdat,
@@ -194,9 +194,41 @@ begin
 			O_VGA_V_SYNCn				=> video_o.vsync
 		);
 
-	GEN_INTERNAL_ROM : if DKONG_INTERNAL_ROM generate
+  -- CPU ROM mapped to $0000-$3FFF (16K)
+
+  assert (not (DKONG_ROM_IN_FLASH and DKONG_ROM_IN_SRAM))
+    report "Cannot choose *BOTH* ROM_IN_FLASH and ROM_IN_SRAM"
+      severity failure;
+
+	GEN_FLASH_ROM : if DKONG_ROM_IN_FLASH generate
 	
-		-- mapped to $0000-$3FFF (16K)
+		-- hook up external sram for the ROM
+		flash_o.a <= std_logic_vector(resize(unsigned(rom_addr(13 downto 0)), flash_o.a'length));
+		flash_o.d(7 downto 0) <= rom_data;
+		flash_o.cs <= not rom_cs_n;
+		flash_o.oe <= not rom_oe_n;
+    flash_o.we <= '0';
+
+    cpu_rom_data <= flash_i.d(cpu_rom_data'range);
+
+	end generate GEN_FLASH_ROM;
+
+	GEN_SRAM_ROM : if DKONG_ROM_IN_SRAM generate
+	
+		-- hook up external sram for the ROM
+		sram_o.a <= std_logic_vector(resize(unsigned(rom_addr(13 downto 0)), sram_o.a'length));
+		sram_o.d(7 downto 0) <= rom_data;
+		sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
+		sram_o.cs <= not rom_cs_n;
+		sram_o.oe <= not rom_oe_n;
+    sram_o.we <= '0';
+
+    cpu_rom_data <= sram_i.d(cpu_rom_data'range);
+
+	end generate GEN_SRAM_ROM;
+
+	GEN_INTERNAL_ROM : if not (DKONG_ROM_IN_FLASH or DKONG_ROM_IN_SRAM) generate
+	
 		cpu_rom_inst : entity work.sprom
 			generic map
 			(
@@ -211,86 +243,70 @@ begin
 				q									=> cpu_rom_data
 			);
 
-		-- mapped to $6000 (2K) and $7000 (2K)
-		-- bits 15:12 = 0110,0111
-		-- - use           0,   1
-		vid_rom_addr <= rom_addr(12) & rom_addr(10 downto 0);
-					
-		video_rom_inst : entity work.sprom
-			generic map
-			(
-				init_file					=> "../../../../src/platform/dkong/roms/dkong_vid.hex",
-				numwords_a				=> 4096,
-				widthad_a					=> 12
-			)
-			port map
-			(
-				clock							=> clk_i(1),
-				address						=> vid_rom_addr,
-				q									=> vid_rom_data
-			);
-
-		-- mapped to $A000,$B000,$C000,$D000 (each 2K)
-		-- - bits 15:12 = 1010,1011,1100,1101
-		-- - use           0 0, 0 1, 1 0, 1 1
-		obj_rom_addr <= rom_addr(14) & rom_addr(12) & rom_addr(10 downto 0);
-					
-		object_rom_inst : entity work.sprom
-			generic map
-			(
-				init_file					=> "../../../../src/platform/dkong/roms/dkong_obj.hex",
-				numwords_a				=> 8192,
-				widthad_a					=> 13
-			)
-			port map
-			(
-				clock							=> clk_i(1),
-				address						=> obj_rom_addr,
-				q									=> obj_rom_data
-			);
-
-		-- mapped to $F000
-					
-		colour_rom_inst : entity work.sprom
-			generic map
-			(
-				init_file					=> "../../../../src/platform/dkong/roms/dkong_col.hex",
-				numwords_a				=> 4096,
-				widthad_a					=> 12
-			)
-			port map
-			(
-				clock							=> clk_i(1),
-				address						=> rom_addr(11 downto 0),
-				q									=> col_rom_data
-			);
-
-		rom_data <= cpu_rom_data when rom_addr(15 downto 14) = "00" else
-								vid_rom_data when rom_addr(15 downto 13) = "011" else
-								col_rom_data when rom_addr(15 downto 12) = X"F" else
-								obj_rom_data;
-			
 	end generate GEN_INTERNAL_ROM;
 	
-	GEN_EXTERNAL_ROM : if not DKONG_INTERNAL_ROM generate
-	
-		-- hook up external sram for the ROM
-		sram_o.a(18 downto 0) <= rom_addr;
-		sram_o.d(7 downto 0) <= rom_data;
-		sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
-		sram_o.cs <= not rom_cs_n;
-		sram_o.oe <= not rom_oe_n;
+  -- mapped to $6000 (2K) and $7000 (2K)
+  -- bits 15:12 = 0110,0111
+  -- - use           0,   1
+  vid_rom_addr <= rom_addr(12) & rom_addr(10 downto 0);
+        
+  video_rom_inst : entity work.sprom
+    generic map
+    (
+      init_file					=> "../../../../src/platform/dkong/roms/dkong_vid.hex",
+      numwords_a				=> 4096,
+      widthad_a					=> 12
+    )
+    port map
+    (
+      clock							=> clk_i(1),
+      address						=> vid_rom_addr,
+      q									=> vid_rom_data
+    );
 
-	end generate GEN_EXTERNAL_ROM;
+  -- mapped to $A000,$B000,$C000,$D000 (each 2K)
+  -- - bits 15:12 = 1010,1011,1100,1101
+  -- - use           0 0, 0 1, 1 0, 1 1
+  obj_rom_addr <= rom_addr(14) & rom_addr(12) & rom_addr(10 downto 0);
+        
+  object_rom_inst : entity work.sprom
+    generic map
+    (
+      init_file					=> "../../../../src/platform/dkong/roms/dkong_obj.hex",
+      numwords_a				=> 8192,
+      widthad_a					=> 13
+    )
+    port map
+    (
+      clock							=> clk_i(1),
+      address						=> obj_rom_addr,
+      q									=> obj_rom_data
+    );
 
+  -- mapped to $F000
+        
+  colour_rom_inst : entity work.sprom
+    generic map
+    (
+      init_file					=> "../../../../src/platform/dkong/roms/dkong_col.hex",
+      numwords_a				=> 4096,
+      widthad_a					=> 12
+    )
+    port map
+    (
+      clock							=> clk_i(1),
+      address						=> rom_addr(11 downto 0),
+      q									=> col_rom_data
+    );
+
+  rom_data <= cpu_rom_data when rom_addr(15 downto 14) = "00" else
+              vid_rom_data when rom_addr(15 downto 13) = "011" else
+              col_rom_data when rom_addr(15 downto 12) = X"F" else
+              obj_rom_data;
+			
 	-- used video colour resolution
 	video_o.rgb.r(6 downto 0) <= (others => '0');
 	video_o.rgb.g(6 downto 0) <= (others => '0');
 	video_o.rgb.b(6 downto 0) <= (others => '0');
-	
-	
-	-- unused SRAM signals
-	sram_o.a(23 downto 19) <= (others => '0');
-	sram_o.we <= '0';
 	
 end SYN;
