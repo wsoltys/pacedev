@@ -1,65 +1,56 @@
-Library IEEE;
-use IEEE.std_logic_1164.all;
+library ieee;
+use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
-use work.kbd_pkg.all;
-use work.project_pkg.all;
+use work.video_controller_pkg.all;
 use work.platform_pkg.all;
+use work.project_pkg.all;
+use work.target_pkg.all;
 
 entity PACE is
   port
   (
   	-- clocks and resets
-    clk             : in std_logic_vector(0 to 3);
-    test_button     : in std_logic;
-    reset           : in std_logic;
+    clk_i           : in std_logic_vector(0 to 3);
+    reset_i         : in std_logic;
 
-    -- game I/O
-    ps2clk          : inout std_logic;
-    ps2data         : inout std_logic;
-    dip             : in std_logic_vector(7 downto 0);
-		jamma						: in JAMMAInputsType;
+    -- misc I/O
+    buttons_i       : in from_BUTTONS_t;
+    switches_i      : in from_SWITCHES_t;
+    leds_o          : out to_LEDS_t;
 
-    -- external RAM
-    sram_i          : in from_SRAM_t;
-    sram_o          : out to_SRAM_t;
+    -- controller inputs
+    inputs_i        : in from_INPUTS_t;
 
-    -- VGA video
-		vga_clk					: out std_logic;
-    red             : out std_logic_vector(9 downto 0);
-    green           : out std_logic_vector(9 downto 0);
-    blue            : out std_logic_vector(9 downto 0);
-		lcm_data				:	out std_logic_vector(9 downto 0);
-    hsync           : out std_logic;
-    vsync           : out std_logic;
+    -- external ROM/RAM
+    flash_i         : in from_FLASH_t;
+    flash_o         : out to_flash_t;
+    sram_i       		: in from_SRAM_t;
+		sram_o					: out to_SRAM_t;
 
-    -- composite video
-    BW_CVBS         : out std_logic_vector(1 downto 0);
-    GS_CVBS         : out std_logic_vector(7 downto 0);
+    -- video
+    video_i         : in from_VIDEO_t;
+    video_o         : out to_VIDEO_t;
 
-    -- sound
-    snd_clk         : out std_logic;
-    snd_data_l      : out std_logic_vector(15 downto 0);
-    snd_data_r      : out std_logic_vector(15 downto 0);
-
+    -- audio
+    audio_i         : in from_AUDIO_t;
+    audio_o         : out to_AUDIO_t;
+    
     -- SPI (flash)
-    spi_clk         : out std_logic;
-    spi_mode        : out std_logic;
-    spi_sel         : out std_logic;
-    spi_din         : in std_logic;
-    spi_dout        : out std_logic;
+    spi_i           : in from_SPI_t;
+    spi_o           : out to_SPI_t;
 
     -- serial
-    ser_tx          : out std_logic;
-    ser_rx          : in std_logic;
-
-    -- debug
-    leds            : out std_logic_vector(7 downto 0)
+    ser_i           : in from_SERIAL_t;
+    ser_o           : out to_SERIAL_t;
+    
+    -- general purpose I/O
+    gp_i            : in from_GP_t;
+    gp_o            : out to_GP_t
   );
-
-end PACE;
+end entity PACE;
 
 architecture SYN of PACE is
 
@@ -109,7 +100,7 @@ architecture SYN of PACE is
 
 	signal reset_n					: std_logic;
 	
-	signal inputs						: in8(0 to 3);
+	signal mapped_inputs		: from_MAPPED_INPUTS_t(0 to 4-1);
 		
 	signal rom_addr					: std_logic_vector(18 downto 0);
 	signal rom_data					: std_logic_vector(7 downto 0);
@@ -135,42 +126,36 @@ architecture SYN of PACE is
 	
 begin
 
-	reset_n <= not reset;
+	reset_n <= not reset_i;
 
 	-- map inputs
 	
-	vga_clk <= clk(1);	-- fudge
+	leds_o <= std_logic_vector(resize(unsigned(leds_s), leds_o'length));
 
-  spi_clk <= spi_clk_s when (spi_ena = '1') else 'Z';
-  spi_dout <= spi_dout_s when (spi_ena = '1') else 'Z';
-  spi_mode <= spi_mode_s when (spi_ena = '1') else 'Z';
-  spi_sel <= spi_sel_s when (spi_ena = '1') else 'Z';
-  
-	leds <= leds_s;
-
-	inputs_inst : entity work.Inputs
+	inputs_inst : entity work.inputs
 		generic map
 		(
-			NUM_INPUTS 			=> 4,
-			CLK_1US_DIV			=> 20
+      NUM_DIPS        => PACE_NUM_SWITCHES,
+			NUM_INPUTS	    => 4,
+			CLK_1US_DIV	    => 20
 		)
 	  port map
 	  (
-	    clk     				=> clk(0),
-	    reset   				=> reset,
-	    ps2clk  				=> ps2clk,
-	    ps2data 				=> ps2data,
-			jamma						=> jamma,
-			
-			dips						=> (others => '0'),
-			inputs					=> inputs
+	    clk     	      => clk_i(0),
+	    reset   	      => reset_i,
+	    ps2clk  	      => inputs_i.ps2_kclk,
+	    ps2data 	      => inputs_i.ps2_kdat,
+			jamma			      => inputs_i.jamma_n,
+	
+	    dips     	      => switches_i,
+	    inputs		      => mapped_inputs
 	  );
 
 	dkong_top_inst : dkong_top
 		port map
 		(
 			--    FPGA_USE
-			I_CLK_24576M				=> clk(1),
+			I_CLK_24576M				=> clk_i(1),
 			I_RESETn						=> reset_n,
 
 			--    ROM IF
@@ -182,19 +167,19 @@ begin
 
 			--    INPORT SW IF
 			--I_PSW,
-			I_U1								=> inputs(0)(0),
-			I_D1								=> inputs(0)(1),
-			I_L1								=> inputs(0)(2),
-			I_R1								=> inputs(0)(3),
-			I_J1								=> inputs(0)(4),
-			I_U2								=> inputs(1)(0),
-			I_D2								=> inputs(1)(1),
-			I_L2								=> inputs(1)(2),
-			I_R2								=> inputs(1)(3),
-			I_J2								=> inputs(1)(4),
-			I_S1								=> inputs(2)(0),
-			I_S2								=> inputs(2)(1),
-			I_C1								=> inputs(2)(2),
+			I_U1								=> mapped_inputs(0).d(0),
+			I_D1								=> mapped_inputs(0).d(1),
+			I_L1								=> mapped_inputs(0).d(2),
+			I_R1								=> mapped_inputs(0).d(3),
+			I_J1								=> mapped_inputs(0).d(4),
+			I_U2								=> mapped_inputs(1).d(0),
+			I_D2								=> mapped_inputs(1).d(1),
+			I_L2								=> mapped_inputs(1).d(2),
+			I_R2								=> mapped_inputs(1).d(3),
+			I_J2								=> mapped_inputs(1).d(4),
+			I_S1								=> mapped_inputs(2).d(0),
+			I_S2								=> mapped_inputs(2).d(1),
+			I_C1								=> mapped_inputs(2).d(2),
 
 			O_DAT								=> open,
 			--    SOUND IF
@@ -202,11 +187,11 @@ begin
 			O_SOUND_OUT_R				=> open,
 
 			--    VGA (VIDEO) IF
-			O_VGA_R							=> red(9 downto 7),
-			O_VGA_G							=> green(9 downto 7),
-			O_VGA_B							=> blue(9 downto 8),
-			O_VGA_H_SYNCn				=> hsync,
-			O_VGA_V_SYNCn				=> vsync
+			O_VGA_R							=> video_o.rgb.r(9 downto 7),
+			O_VGA_G							=> video_o.rgb.g(9 downto 7),
+			O_VGA_B							=> video_o.rgb.b(9 downto 8),
+			O_VGA_H_SYNCn				=> video_o.hsync,
+			O_VGA_V_SYNCn				=> video_o.vsync
 		);
 
 	GEN_INTERNAL_ROM : if DKONG_INTERNAL_ROM generate
@@ -221,7 +206,7 @@ begin
 			)
 			port map
 			(
-				clock							=> clk(1),
+				clock							=> clk_i(1),
 				address						=> rom_addr(13 downto 0),
 				q									=> cpu_rom_data
 			);
@@ -240,7 +225,7 @@ begin
 			)
 			port map
 			(
-				clock							=> clk(1),
+				clock							=> clk_i(1),
 				address						=> vid_rom_addr,
 				q									=> vid_rom_data
 			);
@@ -259,7 +244,7 @@ begin
 			)
 			port map
 			(
-				clock							=> clk(1),
+				clock							=> clk_i(1),
 				address						=> obj_rom_addr,
 				q									=> obj_rom_data
 			);
@@ -275,7 +260,7 @@ begin
 			)
 			port map
 			(
-				clock							=> clk(1),
+				clock							=> clk_i(1),
 				address						=> rom_addr(11 downto 0),
 				q									=> col_rom_data
 			);
@@ -299,9 +284,9 @@ begin
 	end generate GEN_EXTERNAL_ROM;
 
 	-- used video colour resolution
-	red(6 downto 0) <= (others => '0');
-	green(6 downto 0) <= (others => '0');
-	blue(6 downto 0) <= (others => '0');
+	video_o.rgb.r(6 downto 0) <= (others => '0');
+	video_o.rgb.g(6 downto 0) <= (others => '0');
+	video_o.rgb.b(6 downto 0) <= (others => '0');
 	
 	
 	-- unused SRAM signals
@@ -309,4 +294,3 @@ begin
 	sram_o.we <= '0';
 	
 end SYN;
-
