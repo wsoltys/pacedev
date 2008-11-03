@@ -43,11 +43,6 @@ package project_pkg is
   constant PACE_HAS_OSD                     : boolean := false;
   constant PACE_OSD_XPOS                    : natural := 0;
   constant PACE_OSD_YPOS                    : natural := 0;
-
-	-- DE2 constants which *MUST* be defined
-	
-	constant DE2_LCD_LINE2							      : string := " TUTANKHAM-VGA  ";
-	constant DE2_USE_EXT_CPU									: boolean := false;
 		
 	-- Tutankham-specific constants
 

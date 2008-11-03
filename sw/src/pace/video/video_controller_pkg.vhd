@@ -123,6 +123,7 @@ package video_controller_pkg is
   function NULL_TO_GRAPHICS return to_GRAPHICS_t;
 
   type from_GRAPHICS_t is record
+    y         : std_logic_vector(10 downto 0);
     vblank    : std_logic;
   end record;
 
