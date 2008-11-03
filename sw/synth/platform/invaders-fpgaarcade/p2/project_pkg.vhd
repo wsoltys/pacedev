@@ -12,19 +12,21 @@ package project_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 	
+	constant PACE_HAS_PLL								      : boolean := true;
+  constant PACE_HAS_FLASH                   : boolean := false;
+  constant PACE_HAS_SRAM                    : boolean := false;
+  constant PACE_HAS_SDRAM                   : boolean := false;
+  constant PACE_HAS_SERIAL                  : boolean := false;
+
   -- Reference clock is 24MHz
-  constant PACE_HAS_PLL                 : boolean := true;
-  constant PACE_CLK0_DIVIDE_BY          : natural := 12;
-  constant PACE_CLK0_MULTIPLY_BY        : natural := 5;  		-- 24*5/12 = 10MHz
-  constant PACE_CLK1_DIVIDE_BY          : natural := 6;
-  constant PACE_CLK1_MULTIPLY_BY        : natural := 5;  		-- 24*5/6 = 20MHz
+  constant PACE_CLK0_DIVIDE_BY              : natural := 12;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 5;  		-- 24*5/12 = 10MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 6;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 5;  		-- 24*5/6 = 20MHz
 
-	constant PACE_ENABLE_ADV724					  : std_logic := '0';
-	constant PACE_ADV724_STD						  : std_logic := ADV724_STD_PAL;
+	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
 
-  -- P2 constants which *MUST* be defined
-
-	constant P2_JAMMA_IS_MAPLE	          : boolean := false;
-	constant P2_JAMMA_IS_NGC              : boolean := true;
+	constant PACE_ENABLE_ADV724					      : std_logic := '0';
+	constant PACE_ADV724_STD						      : std_logic := ADV724_STD_PAL;
 
 end;

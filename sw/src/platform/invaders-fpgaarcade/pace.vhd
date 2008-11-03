@@ -62,61 +62,54 @@ use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
-use work.project_pkg.all;
+use work.video_controller_pkg.from_VIDEO_t;
+use work.video_controller_pkg.to_VIDEO_t;
 use work.platform_pkg.all;
+use work.project_pkg.all;
+use work.target_pkg.all;
 
 entity PACE is
   port
   (
   	-- clocks and resets
-    clk             : in std_logic_vector(0 to 3);
-    test_button     : in std_logic;
-    reset           : in std_logic;
+    clk_i           : in std_logic_vector(0 to 3);
+    reset_i         : in std_logic;
 
-    -- game I/O
-    ps2clk          : inout std_logic;
-    ps2data         : inout std_logic;
-    dip             : in std_logic_vector(7 downto 0);
-		jamma						: in JAMMAInputsType;
+    -- misc I/O
+    buttons_i       : in from_BUTTONS_t;
+    switches_i      : in from_SWITCHES_t;
+    leds_o          : out to_LEDS_t;
 
-    -- external RAM
-    sram_i          : in from_SRAM_t;
-    sram_o          : out to_SRAM_t;
+    -- controller inputs
+    inputs_i        : in from_INPUTS_t;
 
-    -- VGA video
-		vga_clk					: out std_logic;
-    red             : out std_logic_vector(9 downto 0);
-    green           : out std_logic_vector(9 downto 0);
-    blue            : out std_logic_vector(9 downto 0);
-		lcm_data				:	out std_logic_vector(9 downto 0);
-    hsync           : out std_logic;
-    vsync           : out std_logic;
+    -- external ROM/RAM
+    flash_i         : in from_FLASH_t;
+    flash_o         : out to_flash_t;
+    sram_i       		: in from_SRAM_t;
+		sram_o					: out to_SRAM_t;
 
-    -- composite video
-    BW_CVBS         : out std_logic_vector(1 downto 0);
-    GS_CVBS         : out std_logic_vector(7 downto 0);
+    -- video
+    video_i         : in from_VIDEO_t;
+    video_o         : out to_VIDEO_t;
 
-    -- sound
-    snd_clk         : out std_logic;
-    snd_data_l      : out std_logic_vector(15 downto 0);
-    snd_data_r      : out std_logic_vector(15 downto 0);
-
+    -- audio
+    audio_i         : in from_AUDIO_t;
+    audio_o         : out to_AUDIO_t;
+    
     -- SPI (flash)
-    spi_clk         : out std_logic;
-    spi_mode        : out std_logic;
-    spi_sel         : out std_logic;
-    spi_din         : in std_logic;
-    spi_dout        : out std_logic;
+    spi_i           : in from_SPI_t;
+    spi_o           : out to_SPI_t;
 
     -- serial
-    ser_tx          : out std_logic;
-    ser_rx          : in std_logic;
-
-    -- debug
-    leds            : out std_logic_vector(7 downto 0)
+    ser_i           : in from_SERIAL_t;
+    ser_o           : out to_SERIAL_t;
+    
+    -- general purpose I/O
+    gp_i            : in from_GP_t;
+    gp_o            : out to_GP_t
   );
-
-end PACE;
+end entity PACE;
 
 architecture SYN of PACE is
 
@@ -173,17 +166,17 @@ architecture SYN of PACE is
 	signal AudioPWM        : std_logic;
 
 	-- for PACE compatibility
-	alias I_RESET					: std_logic is reset;
-	alias Clk_X1					: std_logic is clk(0);	-- 10MHz
-	alias Clk_X2					: std_logic is clk(1);	-- 20MHz
-	alias I_PS2_CLK				: std_logic is ps2clk;
-	alias I_PS2_DATA			: std_logic is ps2data;
+	alias I_RESET					: std_logic is reset_i;
+	alias Clk_X1					: std_logic is clk_i(0);	-- 10MHz
+	alias Clk_X2					: std_logic is clk_i(1);	-- 20MHz
+	alias I_PS2_CLK				: std_logic is inputs_i.ps2_kclk;
+	alias I_PS2_DATA			: std_logic is inputs_i.ps2_kdat;
 
 	signal O_VIDEO_R			: std_logic;
 	signal O_VIDEO_G			: std_logic;
 	signal O_VIDEO_B			: std_logic;
-	alias O_HSYNC					: std_logic is hsync;
-	alias O_VSYNC					: std_logic is vsync;
+	alias O_HSYNC					: std_logic is video_o.hsync;
+	alias O_VSYNC					: std_logic is video_o.vsync;
 
 	signal O_AUDIO_L			: std_logic;
 	signal O_AUDIO_R			: std_logic;
@@ -273,12 +266,12 @@ begin
 	begin
 	  IB <= (others => '0');
 	  case AD(12 downto 11) is
-		when "00" => IB <= rom_data_0;
-		when "01" => IB <= rom_data_1;
-		when "10" => IB <= rom_data_2;
-		when "11" => IB <= rom_data_3;
+      when "00" => IB <= rom_data_0;
+      when "01" => IB <= rom_data_1;
+      when "10" => IB <= rom_data_2;
+      when "11" => IB <= rom_data_3;
 		when others => null;
-	  end case;
+      end case;
 	end process;
 	
 	--
@@ -331,6 +324,7 @@ begin
 			end if;
 		end if;
 	end process;
+
 	--
 	-- Keyboard decoder
 	--
@@ -470,6 +464,7 @@ begin
   O_VIDEO_B <= VideoRGB_X2(0);
   O_HSYNC   <= not HSync_X2;
   O_VSYNC   <= not VSync_X2;
+
   --
   -- Audio
   --
@@ -497,23 +492,21 @@ begin
 
 	end block BLOCK_MAIN;
 	
+	video_o.clk <= clk_i(1); -- by convention
+	
 	-- hook up the video to the output
 	GEN_VIDEO : for i in 9 downto 0 generate
-		red(i) <= O_VIDEO_R;
-		green(i) <= O_VIDEO_G;
-		blue(i) <= O_VIDEO_B;
+		video_o.rgb.r(i) <= O_VIDEO_R;
+		video_o.rgb.g(i) <= O_VIDEO_G;
+		video_o.rgb.b(i) <= O_VIDEO_B;
 	end generate GEN_VIDEO;
 	
   -- not used
-	
-	vga_clk <= clk(1);	-- fudge
 
-  spi_clk <= 'Z';
-  spi_dout <= 'Z';
-  spi_mode <= 'Z';
-  spi_sel <= 'Z';
-  
-	leds <= (others => 'Z');
+  flash_o <= NULL_TO_FLASH;
+  spi_o <= NULL_TO_SPI;
+  ser_o <= NULL_TO_SERIAL;
+	leds_o <= (others => 'Z');
+	gp_o <= (others => '0');
 
 end SYN;
-
