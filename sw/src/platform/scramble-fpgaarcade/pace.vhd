@@ -311,21 +311,47 @@ begin
   button_in(7 downto 4) <= I_SW(3 downto 0);
   button_in(3 downto 0) <= I_BUTTON(3 downto 0);
 
-  u_debounce : entity work.SCRAMBLE_DEBOUNCE
-  generic map (
-    G_WIDTH => 8
-    )
-  port map (
-    I_BUTTON => button_in,
-    O_BUTTON => button_debounced,
-    CLK      => clk_s
-    );
+  --u_debounce : entity work.SCRAMBLE_DEBOUNCE
+  --generic map (
+  --  G_WIDTH => 8
+  --  )
+  --port map (
+  --  I_BUTTON => button_in,
+  --  O_BUTTON => button_debounced,
+  --  CLK      => clk_s
+  --  );
 
+  BLK_INPUTS : block
+    signal mapped_inputs		: from_MAPPED_INPUTS_t(0 to 0);
+  begin
+
+    inputs_inst : entity work.inputs
+      generic map
+      (
+        NUM_INPUTS	    => 1,
+        CLK_1US_DIV	    => 50
+      )
+      port map
+      (
+        clk     	      => clk_i(0),
+        reset   	      => reset_i,
+        ps2clk  	      => inputs_i.ps2_kclk,
+        ps2data 	      => inputs_i.ps2_kdat,
+        jamma			      => inputs_i.jamma_n,
+    
+        dips     	      => (others => '0'),
+        inputs		      => mapped_inputs
+      );
+
+    button_debounced <= mapped_inputs(0).d;
+    
+  end block BLK_INPUTS;
+  
   -- assign inputs
   -- start, shoot1, shoot2, left,right,up,down
   ip_1p(6) <= not button_debounced(6); -- start
   ip_1p(5) <= not button_debounced(5); -- shoot1
-  ip_1p(4) <= not button_debounced(5); -- shoot2
+  ip_1p(4) <= not button_debounced(4); -- shoot2
   ip_1p(3) <= not button_debounced(2); -- p1 left
   ip_1p(2) <= not button_debounced(3); -- p1 right
   ip_1p(1) <= not button_debounced(0); -- p1 up

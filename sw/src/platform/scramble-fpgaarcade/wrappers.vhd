@@ -124,22 +124,26 @@ begin
 	-- - port B is the read-only port
 	-- - ENA inputs hard-wired ON
 	
+	-- *** only used for sprite ram in this project
+	-- *** and only 256 bytes are used!
+	-- *** cut it down to fit into EP2C20 (DE1)
+	
 	dpram_inst : entity work.dpram
 		generic map
 		(
-			numwords_a	=> 2048,
-			widthad_a		=> 11
+			numwords_a	=> 256, --2048,
+			widthad_a		=> 8    --11
 		)
 		port map
 		(
 			clock_a			=> CLKB,
-			address_a		=> ADDRB,
+			address_a		=> ADDRB(7 downto 0),
 			data_a			=> DIB,
 			wren_a			=> WEB,
 			q_a					=> DOB,
 
 			clock_b			=> CLKA,
-			address_b		=> ADDRA,
+			address_b		=> ADDRA(7 downto 0),
 			data_b			=> DIA,
 			wren_b			=> WEA,
 			q_b					=> DOA
