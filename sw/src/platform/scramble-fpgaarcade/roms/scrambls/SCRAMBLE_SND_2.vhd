@@ -4,6 +4,9 @@ library ieee;
   use ieee.std_logic_unsigned.all;
   use ieee.numeric_std.all;
 
+library UNISIM;
+  use UNISIM.Vcomponents.all;
+
 entity SCRAMBLE_SND_2 is
   port (
     CLK         : in    std_logic;
@@ -15,362 +18,274 @@ end;
 
 architecture RTL of SCRAMBLE_SND_2 is
 
-  function romgen_str2bv (str : string) return bit_vector is
-    variable result : bit_vector (str'length*4-1 downto 0);
-  begin
-    for i in 0 to str'length-1 loop
-      case str(str'high-i) is
-        when '0'       => result(i*4+3 downto i*4) := x"0";
-        when '1'       => result(i*4+3 downto i*4) := x"1";
-        when '2'       => result(i*4+3 downto i*4) := x"2";
-        when '3'       => result(i*4+3 downto i*4) := x"3";
-        when '4'       => result(i*4+3 downto i*4) := x"4";
-        when '5'       => result(i*4+3 downto i*4) := x"5";
-        when '6'       => result(i*4+3 downto i*4) := x"6";
-        when '7'       => result(i*4+3 downto i*4) := x"7";
-        when '8'       => result(i*4+3 downto i*4) := x"8";
-        when '9'       => result(i*4+3 downto i*4) := x"9";
-        when 'A'       => result(i*4+3 downto i*4) := x"A";
-        when 'B'       => result(i*4+3 downto i*4) := x"B";
-        when 'C'       => result(i*4+3 downto i*4) := x"C";
-        when 'D'       => result(i*4+3 downto i*4) := x"D";
-        when 'E'       => result(i*4+3 downto i*4) := x"E";
-        when 'F'       => result(i*4+3 downto i*4) := x"F";
-        when others    => null;
-      end case;
-    end loop;
-    return result;
-  end romgen_str2bv;
 
-  attribute INITP_00 : string;
-  attribute INITP_01 : string;
-  attribute INITP_02 : string;
-  attribute INITP_03 : string;
-  attribute INITP_04 : string;
-  attribute INITP_05 : string;
-  attribute INITP_06 : string;
-  attribute INITP_07 : string;
-
-  attribute INIT_00 : string;
-  attribute INIT_01 : string;
-  attribute INIT_02 : string;
-  attribute INIT_03 : string;
-  attribute INIT_04 : string;
-  attribute INIT_05 : string;
-  attribute INIT_06 : string;
-  attribute INIT_07 : string;
-  attribute INIT_08 : string;
-  attribute INIT_09 : string;
-  attribute INIT_0A : string;
-  attribute INIT_0B : string;
-  attribute INIT_0C : string;
-  attribute INIT_0D : string;
-  attribute INIT_0E : string;
-  attribute INIT_0F : string;
-  attribute INIT_10 : string;
-  attribute INIT_11 : string;
-  attribute INIT_12 : string;
-  attribute INIT_13 : string;
-  attribute INIT_14 : string;
-  attribute INIT_15 : string;
-  attribute INIT_16 : string;
-  attribute INIT_17 : string;
-  attribute INIT_18 : string;
-  attribute INIT_19 : string;
-  attribute INIT_1A : string;
-  attribute INIT_1B : string;
-  attribute INIT_1C : string;
-  attribute INIT_1D : string;
-  attribute INIT_1E : string;
-  attribute INIT_1F : string;
-  attribute INIT_20 : string;
-  attribute INIT_21 : string;
-  attribute INIT_22 : string;
-  attribute INIT_23 : string;
-  attribute INIT_24 : string;
-  attribute INIT_25 : string;
-  attribute INIT_26 : string;
-  attribute INIT_27 : string;
-  attribute INIT_28 : string;
-  attribute INIT_29 : string;
-  attribute INIT_2A : string;
-  attribute INIT_2B : string;
-  attribute INIT_2C : string;
-  attribute INIT_2D : string;
-  attribute INIT_2E : string;
-  attribute INIT_2F : string;
-  attribute INIT_30 : string;
-  attribute INIT_31 : string;
-  attribute INIT_32 : string;
-  attribute INIT_33 : string;
-  attribute INIT_34 : string;
-  attribute INIT_35 : string;
-  attribute INIT_36 : string;
-  attribute INIT_37 : string;
-  attribute INIT_38 : string;
-  attribute INIT_39 : string;
-  attribute INIT_3A : string;
-  attribute INIT_3B : string;
-  attribute INIT_3C : string;
-  attribute INIT_3D : string;
-  attribute INIT_3E : string;
-  attribute INIT_3F : string;
-
-  component RAMB16_S9
-    --pragma translate_off
-    generic (
-      INITP_00 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INITP_01 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INITP_02 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INITP_03 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INITP_04 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INITP_05 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INITP_06 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INITP_07 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-
-      INIT_00 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_01 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_02 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_03 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_04 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_05 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_06 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_07 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_08 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_09 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_0A : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_0B : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_0C : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_0D : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_0E : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_0F : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_10 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_11 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_12 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_13 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_14 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_15 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_16 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_17 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_18 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_19 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_1A : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_1B : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_1C : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_1D : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_1E : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_1F : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_20 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_21 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_22 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_23 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_24 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_25 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_26 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_27 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_28 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_29 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_2A : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_2B : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_2C : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_2D : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_2E : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_2F : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_30 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_31 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_32 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_33 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_34 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_35 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_36 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_37 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_38 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_39 : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_3A : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_3B : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_3C : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_3D : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_3E : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000";
-      INIT_3F : bit_vector (255 downto 0) := x"0000000000000000000000000000000000000000000000000000000000000000"
-      );
-    --pragma translate_on
-    port (
-      DO    : out std_logic_vector (7 downto 0);
-      DOP   : out std_logic_vector (0 downto 0);
-      ADDR  : in  std_logic_vector (10 downto 0);
-      CLK   : in  std_logic;
-      DI    : in  std_logic_vector (7 downto 0);
-      DIP   : in  std_logic_vector (0 downto 0);
-      EN    : in  std_logic;
-      SSR   : in  std_logic;
-      WE    : in  std_logic 
-      );
-  end component;
-
-  signal rom_addr : std_logic_vector(10 downto 0);
+  type ROM_ARRAY is array(0 to 2047) of std_logic_vector(7 downto 0);
+  constant ROM : ROM_ARRAY := (
+    x"88",x"8C",x"8F",x"8C",x"88",x"8C",x"88",x"8C", -- 0x0000
+    x"8F",x"8C",x"88",x"AF",x"FF",x"1F",x"0A",x"5F", -- 0x0008
+    x"09",x"A8",x"80",x"68",x"68",x"A8",x"80",x"68", -- 0x0010
+    x"68",x"88",x"83",x"88",x"8C",x"88",x"83",x"88", -- 0x0018
+    x"83",x"88",x"8C",x"88",x"83",x"88",x"83",x"88", -- 0x0020
+    x"8C",x"88",x"83",x"AC",x"FF",x"FF",x"CD",x"C7", -- 0x0028
+    x"06",x"3E",x"01",x"32",x"73",x"80",x"CD",x"0D", -- 0x0030
+    x"05",x"C3",x"8E",x"0F",x"CD",x"C7",x"06",x"CD", -- 0x0038
+    x"0D",x"05",x"C9",x"CD",x"C7",x"06",x"CD",x"0D", -- 0x0040
+    x"05",x"C9",x"DD",x"21",x"50",x"80",x"C3",x"DA", -- 0x0048
+    x"0D",x"DD",x"21",x"58",x"80",x"C3",x"DA",x"0D", -- 0x0050
+    x"DD",x"21",x"60",x"80",x"C3",x"DA",x"0D",x"1F", -- 0x0058
+    x"0A",x"3F",x"0E",x"5F",x"08",x"85",x"85",x"85", -- 0x0060
+    x"8A",x"8A",x"8A",x"8A",x"91",x"91",x"91",x"91", -- 0x0068
+    x"8F",x"8F",x"D6",x"93",x"8F",x"93",x"B6",x"93", -- 0x0070
+    x"8F",x"93",x"B6",x"FF",x"1F",x"0A",x"5F",x"08", -- 0x0078
+    x"85",x"85",x"85",x"85",x"85",x"85",x"85",x"8E", -- 0x0080
+    x"8E",x"8E",x"8E",x"8C",x"8C",x"D3",x"8F",x"8C", -- 0x0088
+    x"8F",x"B3",x"8F",x"8C",x"8F",x"B3",x"FF",x"1F", -- 0x0090
+    x"0A",x"5F",x"08",x"91",x"91",x"91",x"8A",x"8A", -- 0x0098
+    x"8A",x"8A",x"96",x"96",x"96",x"96",x"94",x"94", -- 0x00A0
+    x"D6",x"93",x"8F",x"93",x"B6",x"93",x"8F",x"93", -- 0x00A8
+    x"B6",x"FF",x"CD",x"C7",x"06",x"3E",x"02",x"32", -- 0x00B0
+    x"73",x"80",x"CD",x"0D",x"05",x"C3",x"8E",x"0F", -- 0x00B8
+    x"CD",x"C7",x"06",x"CD",x"0D",x"05",x"C9",x"DD", -- 0x00C0
+    x"21",x"50",x"80",x"C3",x"DA",x"0D",x"DD",x"21", -- 0x00C8
+    x"58",x"80",x"C3",x"DA",x"0D",x"1F",x"0A",x"3F", -- 0x00D0
+    x"0A",x"5F",x"09",x"8D",x"8F",x"91",x"8F",x"91", -- 0x00D8
+    x"94",x"91",x"8F",x"8D",x"8F",x"91",x"8D",x"8F", -- 0x00E0
+    x"8C",x"AD",x"FF",x"1F",x"0A",x"5F",x"09",x"8A", -- 0x00E8
+    x"8C",x"8D",x"8C",x"8D",x"8F",x"8D",x"8C",x"8A", -- 0x00F0
+    x"8C",x"8D",x"8A",x"8C",x"88",x"AA",x"FF",x"FF", -- 0x00F8
+    x"CD",x"BC",x"07",x"21",x"00",x"03",x"22",x"83", -- 0x0100
+    x"80",x"21",x"80",x"80",x"36",x"01",x"21",x"00", -- 0x0108
+    x"08",x"22",x"81",x"80",x"CD",x"C6",x"04",x"CD", -- 0x0110
+    x"0D",x"05",x"06",x"0B",x"CD",x"FE",x"05",x"C9", -- 0x0118
+    x"2A",x"83",x"80",x"2B",x"22",x"83",x"80",x"7D", -- 0x0120
+    x"B4",x"28",x"52",x"3A",x"80",x"80",x"FE",x"00", -- 0x0128
+    x"28",x"1E",x"FE",x"01",x"28",x"0E",x"FE",x"02", -- 0x0130
+    x"28",x"05",x"21",x"00",x"0A",x"18",x"08",x"21", -- 0x0138
+    x"00",x"06",x"18",x"03",x"21",x"00",x"08",x"22", -- 0x0140
+    x"81",x"80",x"CD",x"C6",x"04",x"AF",x"18",x"28", -- 0x0148
+    x"2A",x"81",x"80",x"11",x"20",x"00",x"ED",x"52", -- 0x0150
+    x"22",x"81",x"80",x"7C",x"FE",x"00",x"28",x"06", -- 0x0158
+    x"CD",x"C6",x"04",x"AF",x"18",x"12",x"CD",x"C6", -- 0x0160
+    x"04",x"3A",x"80",x"80",x"3C",x"32",x"80",x"80", -- 0x0168
+    x"FE",x"04",x"28",x"02",x"AF",x"C9",x"3E",x"01", -- 0x0170
+    x"32",x"80",x"80",x"AF",x"C9",x"3E",x"FF",x"C9", -- 0x0178
+    x"CD",x"BC",x"07",x"3E",x"01",x"32",x"86",x"80", -- 0x0180
+    x"3E",x"20",x"32",x"87",x"80",x"3E",x"06",x"32", -- 0x0188
+    x"88",x"80",x"AF",x"32",x"89",x"80",x"32",x"8A", -- 0x0190
+    x"80",x"21",x"00",x"03",x"22",x"8D",x"80",x"21", -- 0x0198
+    x"00",x"04",x"22",x"8B",x"80",x"CD",x"C6",x"04", -- 0x01A0
+    x"CD",x"0D",x"05",x"06",x"0B",x"CD",x"FE",x"05", -- 0x01A8
+    x"C9",x"2A",x"8D",x"80",x"2B",x"7C",x"B5",x"28", -- 0x01B0
+    x"5D",x"22",x"8D",x"80",x"3A",x"89",x"80",x"FE", -- 0x01B8
+    x"00",x"28",x"06",x"FE",x"01",x"28",x"24",x"AF", -- 0x01C0
+    x"C9",x"21",x"86",x"80",x"35",x"20",x"F8",x"36", -- 0x01C8
+    x"01",x"CD",x"80",x"06",x"B7",x"11",x"08",x"00", -- 0x01D0
+    x"ED",x"52",x"CD",x"C6",x"04",x"21",x"87",x"80", -- 0x01D8
+    x"35",x"20",x"E4",x"36",x"20",x"21",x"89",x"80", -- 0x01E0
+    x"34",x"18",x"DC",x"2A",x"8B",x"80",x"11",x"30", -- 0x01E8
+    x"00",x"3A",x"8A",x"80",x"E6",x"01",x"20",x"1B", -- 0x01F0
+    x"B7",x"ED",x"52",x"22",x"8B",x"80",x"CD",x"C6", -- 0x01F8
+    x"04",x"21",x"88",x"80",x"35",x"20",x"06",x"36", -- 0x0200
+    x"06",x"21",x"8A",x"80",x"34",x"21",x"89",x"80", -- 0x0208
+    x"35",x"18",x"B4",x"19",x"18",x"E5",x"3E",x"FF", -- 0x0210
+    x"C9",x"C9",x"3E",x"FF",x"C9",x"CD",x"82",x"07", -- 0x0218
+    x"3E",x"01",x"32",x"A0",x"80",x"3E",x"20",x"32", -- 0x0220
+    x"A1",x"80",x"3E",x"10",x"32",x"A2",x"80",x"AF", -- 0x0228
+    x"32",x"A5",x"80",x"32",x"A6",x"80",x"21",x"00", -- 0x0230
+    x"01",x"22",x"A3",x"80",x"21",x"00",x"05",x"22", -- 0x0238
+    x"A7",x"80",x"CD",x"C6",x"04",x"CD",x"0D",x"05", -- 0x0240
+    x"06",x"0D",x"CD",x"FE",x"05",x"C9",x"2A",x"A3", -- 0x0248
+    x"80",x"2B",x"7C",x"B5",x"28",x"5D",x"22",x"A3", -- 0x0250
+    x"80",x"3A",x"A5",x"80",x"FE",x"00",x"28",x"06", -- 0x0258
+    x"FE",x"01",x"28",x"24",x"AF",x"C9",x"21",x"A0", -- 0x0260
+    x"80",x"35",x"20",x"F8",x"36",x"01",x"CD",x"80", -- 0x0268
+    x"06",x"B7",x"11",x"04",x"00",x"ED",x"52",x"CD", -- 0x0270
+    x"C6",x"04",x"21",x"A1",x"80",x"35",x"20",x"E4", -- 0x0278
+    x"36",x"20",x"21",x"A5",x"80",x"34",x"18",x"DC", -- 0x0280
+    x"2A",x"A7",x"80",x"11",x"50",x"00",x"3A",x"A6", -- 0x0288
+    x"80",x"E6",x"01",x"20",x"1B",x"B7",x"ED",x"52", -- 0x0290
+    x"22",x"A7",x"80",x"CD",x"C6",x"04",x"21",x"A2", -- 0x0298
+    x"80",x"35",x"20",x"06",x"36",x"10",x"21",x"A6", -- 0x02A0
+    x"80",x"34",x"21",x"A5",x"80",x"35",x"18",x"B4", -- 0x02A8
+    x"19",x"18",x"E5",x"3E",x"FF",x"C9",x"CD",x"C7", -- 0x02B0
+    x"06",x"3E",x"18",x"32",x"B0",x"80",x"21",x"00", -- 0x02B8
+    x"01",x"22",x"B1",x"80",x"AF",x"32",x"B3",x"80", -- 0x02C0
+    x"21",x"00",x"02",x"22",x"B4",x"80",x"16",x"06", -- 0x02C8
+    x"1E",x"00",x"CD",x"4C",x"05",x"CD",x"80",x"05", -- 0x02D0
+    x"06",x"03",x"CD",x"FE",x"05",x"C9",x"2A",x"B4", -- 0x02D8
+    x"80",x"2B",x"7C",x"B5",x"28",x"4B",x"22",x"B4", -- 0x02E0
+    x"80",x"3A",x"B3",x"80",x"FE",x"00",x"28",x"1B", -- 0x02E8
+    x"2A",x"B1",x"80",x"2B",x"7C",x"B5",x"20",x"34", -- 0x02F0
+    x"21",x"00",x"01",x"22",x"B1",x"80",x"16",x"06", -- 0x02F8
+    x"1E",x"00",x"CD",x"4C",x"05",x"AF",x"32",x"B3", -- 0x0300
+    x"80",x"AF",x"C9",x"21",x"B0",x"80",x"35",x"20", -- 0x0308
+    x"F8",x"36",x"18",x"16",x"06",x"CD",x"35",x"06", -- 0x0310
+    x"1C",x"7B",x"FE",x"08",x"28",x"05",x"CD",x"4C", -- 0x0318
+    x"05",x"18",x"E6",x"CD",x"4C",x"05",x"21",x"B3", -- 0x0320
+    x"80",x"34",x"18",x"DD",x"22",x"B1",x"80",x"18", -- 0x0328
+    x"D8",x"3E",x"FF",x"C9",x"CD",x"BC",x"07",x"3E", -- 0x0330
+    x"01",x"32",x"C0",x"80",x"21",x"00",x"08",x"22", -- 0x0338
+    x"C3",x"80",x"AF",x"32",x"C5",x"80",x"21",x"00", -- 0x0340
+    x"02",x"22",x"C6",x"80",x"21",x"00",x"05",x"CD", -- 0x0348
+    x"C6",x"04",x"CD",x"0D",x"05",x"06",x"08",x"CD", -- 0x0350
+    x"FE",x"05",x"C9",x"2A",x"C6",x"80",x"2B",x"7C", -- 0x0358
+    x"B5",x"28",x"43",x"22",x"C6",x"80",x"21",x"C0", -- 0x0360
+    x"80",x"35",x"20",x"2C",x"36",x"01",x"CD",x"80", -- 0x0368
+    x"06",x"11",x"08",x"00",x"19",x"ED",x"5B",x"C3", -- 0x0370
+    x"80",x"7C",x"BA",x"20",x"18",x"7D",x"BB",x"20", -- 0x0378
+    x"14",x"3A",x"C5",x"80",x"B7",x"20",x"13",x"21", -- 0x0380
+    x"00",x"0B",x"22",x"C3",x"80",x"3E",x"FF",x"32", -- 0x0388
+    x"C5",x"80",x"21",x"00",x"05",x"CD",x"C6",x"04", -- 0x0390
+    x"AF",x"C9",x"21",x"00",x"08",x"22",x"C3",x"80", -- 0x0398
+    x"AF",x"32",x"C5",x"80",x"18",x"EC",x"3E",x"FF", -- 0x03A0
+    x"C9",x"CD",x"48",x"07",x"3E",x"08",x"32",x"D0", -- 0x03A8
+    x"80",x"3E",x"05",x"32",x"D1",x"80",x"3E",x"0C", -- 0x03B0
+    x"32",x"D2",x"80",x"AF",x"32",x"D3",x"80",x"21", -- 0x03B8
+    x"50",x"00",x"CD",x"C6",x"04",x"CD",x"0D",x"05", -- 0x03C0
+    x"06",x"00",x"CD",x"FE",x"05",x"C9",x"3A",x"D3", -- 0x03C8
+    x"80",x"FE",x"00",x"28",x"18",x"FE",x"01",x"28", -- 0x03D0
+    x"26",x"FE",x"02",x"28",x"27",x"FE",x"03",x"28", -- 0x03D8
+    x"33",x"21",x"D2",x"80",x"35",x"28",x"32",x"AF", -- 0x03E0
+    x"32",x"D3",x"80",x"AF",x"C9",x"CD",x"4B",x"06", -- 0x03E8
+    x"3C",x"FE",x"0A",x"20",x"04",x"21",x"D3",x"80", -- 0x03F0
+    x"34",x"47",x"CD",x"FE",x"05",x"18",x"EC",x"CD", -- 0x03F8
+    x"1C",x"14",x"18",x"E7",x"CD",x"4B",x"06",x"3D", -- 0x0400
+    x"20",x"04",x"21",x"D3",x"80",x"34",x"47",x"CD", -- 0x0408
+    x"FE",x"05",x"18",x"D7",x"CD",x"29",x"14",x"18", -- 0x0410
+    x"D2",x"3E",x"FF",x"C9",x"21",x"D0",x"80",x"35", -- 0x0418
+    x"C0",x"3E",x"08",x"77",x"21",x"D3",x"80",x"34", -- 0x0420
+    x"C9",x"21",x"D1",x"80",x"35",x"C0",x"3E",x"05", -- 0x0428
+    x"77",x"21",x"D3",x"80",x"34",x"C9",x"FF",x"FF", -- 0x0430
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0438
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0440
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0448
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0450
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0458
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0460
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0468
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0470
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0478
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0480
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0488
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0490
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0498
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x04A0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x04A8
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x04B0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x04B8
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x04C0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x04C8
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x04D0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x04D8
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x04E0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x04E8
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x04F0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x04F8
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0500
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0508
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0510
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0518
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0520
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0528
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0530
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0538
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0540
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0548
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0550
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0558
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0560
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0568
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0570
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0578
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0580
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0588
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0590
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0598
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x05A0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x05A8
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x05B0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x05B8
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x05C0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x05C8
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x05D0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x05D8
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x05E0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x05E8
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x05F0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x05F8
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0600
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0608
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0610
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0618
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0620
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0628
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0630
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0638
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0640
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0648
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0650
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0658
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0660
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0668
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0670
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0678
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0680
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0688
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0690
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0698
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x06A0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x06A8
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x06B0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x06B8
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x06C0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x06C8
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x06D0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x06D8
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x06E0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x06E8
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x06F0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x06F8
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0700
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0708
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0710
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0718
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0720
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0728
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0730
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0738
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0740
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0748
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0750
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0758
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0760
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0768
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0770
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0778
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0780
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0788
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0790
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x0798
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x07A0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x07A8
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x07B0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x07B8
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x07C0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x07C8
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x07D0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x07D8
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x07E0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x07E8
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF", -- 0x07F0
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF"  -- 0x07F8
+  );
 
 begin
 
-  p_addr : process(ADDR)
+  p_rom : process
   begin
-     rom_addr <= (others => '0');
-     rom_addr(10 downto 0) <= ADDR;
+    wait until rising_edge(CLK);
+    if (ENA = '1') then
+       DATA <= ROM(to_integer(unsigned(ADDR)));
+    end if;
   end process;
-
-  rom0 : if true generate
-    attribute INIT_00 of inst : label is "8883888C888388686880A8686880A8095F0A1FFFAF888C8F8C888C888C8F8C88";
-    attribute INIT_01 of inst : label is "CD06C7CD0F8EC3050DCD807332013E06C7CDFFFFAC83888C88838883888C8883";
-    attribute INIT_02 of inst : label is "1F0DDAC3806021DD0DDAC3805821DD0DDAC3805021DDC9050DCD06C7CDC9050D";
-    attribute INIT_03 of inst : label is "085F0A1FFFB6938F93B6938F93D68F8F919191918A8A8A8A858585085F0E3F0A";
-    attribute INIT_04 of inst : label is "8A8A919191085F0A1FFFB38F8C8FB38F8C8FD38C8C8E8E8E8E85858585858585";
-    attribute INIT_05 of inst : label is "0F8EC3050DCD807332023E06C7CDFFB6938F93B6938F93D69494969696968A8A";
-    attribute INIT_06 of inst : label is "918F918F8D095F0A3F0A1F0DDAC3805821DD0DDAC3805021DDC9050DCD06C7CD";
-    attribute INIT_07 of inst : label is "FFFFAA888C8A8D8C8A8C8D8F8D8C8D8C8A095F0A1FFFAD8C8F8D918F8D8F9194";
-    attribute INIT_08 of inst : label is "C905FECD0B06050DCD04C6CD808122080021013680802180832203002107BCCD";
-    attribute INIT_09 of inst : label is "2108180A0021052802FE0E2801FE1E2800FE80803A5228B47D8083222B80832A";
-    attribute INIT_0A of inst : label is "062800FE7C80812252ED00201180812A2818AF04C6CD80812208002103180600";
-    attribute INIT_0B of inst : label is "C9FF3EC9AF808032013EC9AF022804FE8080323C80803A04C6CD1218AF04C6CD";
-    attribute INIT_0C of inst : label is "21808D22030021808A32808932AF808832063E808732203E808632013E07BCCD";
-    attribute INIT_0D of inst : label is "FE80893A808D225D28B57C2B808D2AC905FECD0B06050DCD04C6CD808B220400";
-    attribute INIT_0E of inst : label is "80872104C6CD52ED000811B70680CD0136F82035808621C9AF242801FE062800";
-    attribute INIT_0F of inst : label is "C6CD808B2252EDB71B2001E6808A3A003011808B2ADC18348089212036E42035";
-    attribute INIT_10 of inst : label is "0782CDC9FF3EC9C9FF3EE51819B4183580892134808A21063606203580882104";
-    attribute INIT_11 of inst : label is "2205002180A32201002180A63280A532AF80A232103E80A132203E80A032013E";
-    attribute INIT_12 of inst : label is "062800FE80A53A80A3225D28B57C2B80A32AC905FECD0D06050DCD04C6CD80A7";
-    attribute INIT_13 of inst : label is "E4203580A12104C6CD52ED000411B70680CD0136F8203580A021C9AF242801FE";
-    attribute INIT_14 of inst : label is "A22104C6CD80A72252EDB71B2001E680A63A00501180A72ADC183480A5212036";
-    attribute INIT_15 of inst : label is "002180B032183E06C7CDC9FF3EE51819B4183580A5213480A621103606203580";
-    attribute INIT_16 of inst : label is "B42AC905FECD03060580CD054CCD001E061680B42202002180B332AF80B12201";
-    attribute INIT_17 of inst : label is "061680B1220100213420B57C2B80B12A1B2800FE80B33A80B4224B28B57C2B80";
-    attribute INIT_18 of inst : label is "4CCD052808FE7B1C0635CD06161836F8203580B021C9AF80B332AF054CCD001E";
-    attribute INIT_19 of inst : label is "2208002180C032013E07BCCDC9FF3ED81880B122DD183480B321054CCDE61805";
-    attribute INIT_1A of inst : label is "7C2B80C62AC905FECD0806050DCD04C6CD05002180C62202002180C532AF80C3";
-    attribute INIT_1B of inst : label is "20BB7D1820BA7C80C35BED190008110680CD01362C203580C02180C6224328B5";
-    attribute INIT_1C of inst : label is "80C322080021C9AF04C6CD05002180C532FF3E80C3220B00211320B780C53A14";
-    attribute INIT_1D of inst : label is "2180D332AF80D2320C3E80D132053E80D032083E0748CDC9FF3EEC1880C532AF";
-    attribute INIT_1E of inst : label is "2803FE272802FE262801FE182800FE80D33AC905FECD0006050DCD04C6CD0050";
-    attribute INIT_1F of inst : label is "CDEC1805FECD473480D32104200AFE3C064BCDC9AF80D332AF32283580D22133";
-    attribute INIT_20 of inst : label is "3580D021C9FF3ED2181429CDD71805FECD473480D32104203D064BCDE718141C";
-    attribute INIT_21 of inst : label is "FFFFFFFFFFFFFFFFFFFFC93480D32177053EC03580D121C93480D32177083EC0";
-    attribute INIT_22 of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_23 of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_24 of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_25 of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_26 of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_27 of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_28 of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_29 of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_2A of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_2B of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_2C of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_2D of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_2E of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_2F of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_30 of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_31 of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_32 of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_33 of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_34 of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_35 of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_36 of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_37 of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_38 of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_39 of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_3A of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_3B of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_3C of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_3D of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_3E of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    attribute INIT_3F of inst : label is "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-  begin
-  inst : RAMB16_S9
-      --pragma translate_off
-      generic map (
-        INITP_00 => x"0000000000000000000000000000000000000000000000000000000000000000",
-        INITP_01 => x"0000000000000000000000000000000000000000000000000000000000000000",
-        INITP_02 => x"0000000000000000000000000000000000000000000000000000000000000000",
-        INITP_03 => x"0000000000000000000000000000000000000000000000000000000000000000",
-        INITP_04 => x"0000000000000000000000000000000000000000000000000000000000000000",
-        INITP_05 => x"0000000000000000000000000000000000000000000000000000000000000000",
-        INITP_06 => x"0000000000000000000000000000000000000000000000000000000000000000",
-        INITP_07 => x"0000000000000000000000000000000000000000000000000000000000000000",
-
-        INIT_00 => romgen_str2bv(inst'INIT_00),
-        INIT_01 => romgen_str2bv(inst'INIT_01),
-        INIT_02 => romgen_str2bv(inst'INIT_02),
-        INIT_03 => romgen_str2bv(inst'INIT_03),
-        INIT_04 => romgen_str2bv(inst'INIT_04),
-        INIT_05 => romgen_str2bv(inst'INIT_05),
-        INIT_06 => romgen_str2bv(inst'INIT_06),
-        INIT_07 => romgen_str2bv(inst'INIT_07),
-        INIT_08 => romgen_str2bv(inst'INIT_08),
-        INIT_09 => romgen_str2bv(inst'INIT_09),
-        INIT_0A => romgen_str2bv(inst'INIT_0A),
-        INIT_0B => romgen_str2bv(inst'INIT_0B),
-        INIT_0C => romgen_str2bv(inst'INIT_0C),
-        INIT_0D => romgen_str2bv(inst'INIT_0D),
-        INIT_0E => romgen_str2bv(inst'INIT_0E),
-        INIT_0F => romgen_str2bv(inst'INIT_0F),
-        INIT_10 => romgen_str2bv(inst'INIT_10),
-        INIT_11 => romgen_str2bv(inst'INIT_11),
-        INIT_12 => romgen_str2bv(inst'INIT_12),
-        INIT_13 => romgen_str2bv(inst'INIT_13),
-        INIT_14 => romgen_str2bv(inst'INIT_14),
-        INIT_15 => romgen_str2bv(inst'INIT_15),
-        INIT_16 => romgen_str2bv(inst'INIT_16),
-        INIT_17 => romgen_str2bv(inst'INIT_17),
-        INIT_18 => romgen_str2bv(inst'INIT_18),
-        INIT_19 => romgen_str2bv(inst'INIT_19),
-        INIT_1A => romgen_str2bv(inst'INIT_1A),
-        INIT_1B => romgen_str2bv(inst'INIT_1B),
-        INIT_1C => romgen_str2bv(inst'INIT_1C),
-        INIT_1D => romgen_str2bv(inst'INIT_1D),
-        INIT_1E => romgen_str2bv(inst'INIT_1E),
-        INIT_1F => romgen_str2bv(inst'INIT_1F),
-        INIT_20 => romgen_str2bv(inst'INIT_20),
-        INIT_21 => romgen_str2bv(inst'INIT_21),
-        INIT_22 => romgen_str2bv(inst'INIT_22),
-        INIT_23 => romgen_str2bv(inst'INIT_23),
-        INIT_24 => romgen_str2bv(inst'INIT_24),
-        INIT_25 => romgen_str2bv(inst'INIT_25),
-        INIT_26 => romgen_str2bv(inst'INIT_26),
-        INIT_27 => romgen_str2bv(inst'INIT_27),
-        INIT_28 => romgen_str2bv(inst'INIT_28),
-        INIT_29 => romgen_str2bv(inst'INIT_29),
-        INIT_2A => romgen_str2bv(inst'INIT_2A),
-        INIT_2B => romgen_str2bv(inst'INIT_2B),
-        INIT_2C => romgen_str2bv(inst'INIT_2C),
-        INIT_2D => romgen_str2bv(inst'INIT_2D),
-        INIT_2E => romgen_str2bv(inst'INIT_2E),
-        INIT_2F => romgen_str2bv(inst'INIT_2F),
-        INIT_30 => romgen_str2bv(inst'INIT_30),
-        INIT_31 => romgen_str2bv(inst'INIT_31),
-        INIT_32 => romgen_str2bv(inst'INIT_32),
-        INIT_33 => romgen_str2bv(inst'INIT_33),
-        INIT_34 => romgen_str2bv(inst'INIT_34),
-        INIT_35 => romgen_str2bv(inst'INIT_35),
-        INIT_36 => romgen_str2bv(inst'INIT_36),
-        INIT_37 => romgen_str2bv(inst'INIT_37),
-        INIT_38 => romgen_str2bv(inst'INIT_38),
-        INIT_39 => romgen_str2bv(inst'INIT_39),
-        INIT_3A => romgen_str2bv(inst'INIT_3A),
-        INIT_3B => romgen_str2bv(inst'INIT_3B),
-        INIT_3C => romgen_str2bv(inst'INIT_3C),
-        INIT_3D => romgen_str2bv(inst'INIT_3D),
-        INIT_3E => romgen_str2bv(inst'INIT_3E),
-        INIT_3F => romgen_str2bv(inst'INIT_3F)
-        )
-      --pragma translate_on
-      port map (
-        DO   => DATA(7 downto 0),
-        DOP  => open,
-        ADDR => rom_addr,
-        CLK  => CLK,
-        DI   => "00000000",
-        DIP  => "0",
-        EN   => ENA,
-        SSR  => '0',
-        WE   => '0'
-        );
-  end generate;
 end RTL;

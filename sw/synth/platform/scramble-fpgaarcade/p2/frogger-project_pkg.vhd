@@ -30,7 +30,7 @@ package project_pkg is
 	-- Scramble/Frogger-specific constants
 	--
 	
-	constant SCRAMBLE_BUILD_SCRAMBLE		: boolean := true;
+	constant SCRAMBLE_BUILD_SCRAMBLE		: boolean := false;
 	constant SCRAMBLE_BUILD_FROGGER			: boolean := not SCRAMBLE_BUILD_SCRAMBLE;
 	
 	constant SCRAMBLE_VIDEO_CVBS				: std_logic := '0';
