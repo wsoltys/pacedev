@@ -3,74 +3,66 @@
 --	The original source can be downloaded from <http://www.fpgaarcade.com>
 --
 
-Library IEEE;
-use IEEE.std_logic_1164.all;
-use IEEE.std_logic_unsigned.all;
-use IEEE.numeric_std.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
-use work.kbd_pkg.all;
-use work.project_pkg.all;
+use work.video_controller_pkg.all;
+use work.sprite_pkg.all;
 use work.platform_pkg.all;
+use work.project_pkg.all;
+use work.target_pkg.all;
 
 entity PACE is
   port
   (
   	-- clocks and resets
-    clk             : in std_logic_vector(0 to 3);
-    test_button     : in std_logic;
-    reset           : in std_logic;
+    clk_i           : in std_logic_vector(0 to 3);
+    reset_i         : in std_logic;
 
-    -- game I/O
-    ps2clk          : inout std_logic;
-    ps2data         : inout std_logic;
-    dip             : in std_logic_vector(7 downto 0);
-		jamma						: in JAMMAInputsType;
+    -- misc I/O
+    buttons_i       : in from_BUTTONS_t;
+    switches_i      : in from_SWITCHES_t;
+    leds_o          : out to_LEDS_t;
 
-    -- external RAM
-		sram_i					: in from_SRAM_t; 
+    -- controller inputs
+    inputs_i        : in from_INPUTS_t;
+
+    -- external ROM/RAM
+    flash_i         : in from_FLASH_t;
+    flash_o         : out to_flash_t;
+    sram_i       		: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
-		
-    -- VGA video
-		vga_clk					: out std_logic;
-    red             : out std_logic_vector(9 downto 0);
-    green           : out std_logic_vector(9 downto 0);
-    blue            : out std_logic_vector(9 downto 0);
-		lcm_data				:	out std_logic_vector(9 downto 0);
-    hsync           : out std_logic;
-    vsync           : out std_logic;
 
-    -- composite video
-    BW_CVBS         : out std_logic_vector(1 downto 0);
-    GS_CVBS         : out std_logic_vector(7 downto 0);
+    -- video
+    video_i         : in from_VIDEO_t;
+    video_o         : out to_VIDEO_t;
 
-    -- sound
-    snd_clk         : out std_logic;
-    snd_data_l      : out std_logic_vector(15 downto 0);
-    snd_data_r      : out std_logic_vector(15 downto 0);
-
+    -- audio
+    audio_i         : in from_AUDIO_t;
+    audio_o         : out to_AUDIO_t;
+    
     -- SPI (flash)
-    spi_clk         : out std_logic;
-    spi_mode        : out std_logic;
-    spi_sel         : out std_logic;
-    spi_din         : in std_logic;
-    spi_dout        : out std_logic;
+    spi_i           : in from_SPI_t;
+    spi_o           : out to_SPI_t;
 
     -- serial
-    ser_tx          : out std_logic;
-    ser_rx          : in std_logic;
-
-    -- debug
-    leds            : out std_logic_vector(7 downto 0)
+    ser_i           : in from_SERIAL_t;
+    ser_o           : out to_SERIAL_t;
+    
+    -- general purpose I/O
+    gp_i            : in from_GP_t;
+    gp_o            : out to_GP_t
   );
-
-end PACE;
+end entity PACE;
 
 architecture SYN of PACE is
 
-	alias clk_24M								: std_logic is clk(0);
-	alias clk_40M								: std_logic is clk(1);
+	alias clk_24M								: std_logic is clk_i(0);
+	alias clk_40M								: std_logic is clk_i(1);
 	signal reset_n							: std_logic;
 	alias reset_6_l							: std_logic is reset_n;
 	
@@ -95,9 +87,9 @@ architecture SYN of PACE is
 	signal vram_q								: std_logic_vector(7 downto 0);
 	signal pixel_data						: std_logic_vector(7 downto 0);
 
-	signal inputs								: in8(0 to 1);
-	alias game_reset						: std_logic is inputs(1)(0);				
-	alias toggle_erase					: std_logic is inputs(1)(1);
+	signal mapped_inputs				: from_MAPPED_INPUTS_t(0 to 1);
+	alias game_reset						: std_logic is mapped_inputs(1).d(0);				
+	alias toggle_erase					: std_logic is mapped_inputs(1).d(1);
 	signal cpu_reset						: std_logic;
 	signal erase								: std_logic;
 
@@ -107,14 +99,13 @@ begin
 
 	-- map inputs
 	
-	vga_clk <= clk(1);	-- fudge
-	reset_n <= not reset;
+	reset_n <= not reset_i;
 
 	-- PLL can't produce a 6M clock
-	process (clk_24M, reset)
+	process (clk_24M, reset_i)
 		variable count : std_logic_vector(1 downto 0) := (others => '0');
 	begin
-		if reset = '1' then
+		if reset_i = '1' then
       count := (others => '0');
 			clk_6 <= '0';
 		elsif rising_edge(clk_24M) then
@@ -124,10 +115,10 @@ begin
 	end process;
 		
 	-- process to toggle erase with <F4>
-	process (clk_24M, reset)
+	process (clk_24M, reset_i)
 		variable f4_r : std_logic := '0';
 	begin
-		if reset = '1' then
+		if reset_i = '1' then
 			erase <= '1';
 		elsif rising_edge(clk_24M) then
 			if f4_r = '0' and toggle_erase = '1' then
@@ -223,7 +214,7 @@ begin
 	asteroids_inst : entity work.ASTEROIDS
 	  port map
 		(
-	    BUTTON            => inputs(0),
+	    BUTTON            => mapped_inputs(0).d,
 	    --
 	    AUDIO_OUT         => audio_s,
 	    --
@@ -263,85 +254,88 @@ begin
 			q_b								=> vram_q
 		);
 
-inputs_inst : entity work.Inputs
-	generic map
-	(
-		NUM_INPUTS 			=> 2,
-		CLK_1US_DIV			=> 24
-	)
-  port map
-  (
-    clk     				=> clk_24M,
-    reset   				=> reset,
-    ps2clk  				=> ps2clk,
-    ps2data 				=> ps2data,
-		jamma						=> jamma,
-		
-		dips						=> (others => '0'),
-		inputs					=> inputs
-  );
+	inputs_inst : entity work.inputs
+		generic map
+		(
+			NUM_INPUTS	    => PACE_INPUTS_NUM_BYTES,
+			CLK_1US_DIV	    => 24
+		)
+	  port map
+	  (
+	    clk     	      => clk_i(0),
+	    reset   	      => reset_i,
+	    ps2clk  	      => inputs_i.ps2_kclk,
+	    ps2data 	      => inputs_i.ps2_kdat,
+			jamma			      => inputs_i.jamma_n,
+	
+	    dips     	      => switches_i(7 downto 0),
+	    inputs		      => mapped_inputs
+	  );
 
-graphics_inst : entity work.Graphics
-  port map
-  (
-    clk             		=> clk_40M,
-		reset								=> reset,
+  BLK_GRAPHICS : block
 
-		xcentre							=> (others => '0'),
-		ycentre							=> (others => '0'),
+    signal to_tilemap_ctl   : to_TILEMAP_CTL_t;
+    signal from_tilemap_ctl : from_TILEMAP_CTL_t;
 
-    extra_data       		=> (others => 'X'),
-		palette_data				=> (others => (others => '0')),
-						
-    bitmapa        			=> vid_addr,
-    bitmapd        			=> vid_q,
-    tilemapa        		=> open,
-    tilemapd        		=> (others => 'X'),
-    tilea           		=> open,
-    tiled           		=> (others => 'X'),
-    attra           		=> open,
-    attrd           		=> (others => 'X'),
+    signal to_bitmap_ctl    : to_BITMAP_CTL_t;
+    signal from_bitmap_ctl  : from_BITMAP_CTL_t;
 
-    spriteaddr      		=> open,
-    spritedata      		=> (others => 'X'),
-    sprite_reg_addr 		=> (others => 'X'),
-    updata          		=> (others => 'X'),
-    sprite_wr       		=> 'X',
+    signal to_sprite_reg    : to_SPRITE_REG_t;
+    signal to_sprite_ctl    : to_SPRITE_CTL_t;
+    signal from_sprite_ctl  : from_SPRITE_CTL_t;
+    signal spr0_hit					: std_logic;
 
-    to_osd              => to_osd,
+    signal to_graphics      : to_GRAPHICS_t;
+    signal from_graphics    : from_GRAPHICS_t;
 
-    red             		=> red,
-    green           		=> green,
-    blue            		=> blue,
-		lcm_data						=> open,
-    hsync           		=> hsync,
-    vsync           		=> vsync,
+    signal to_osd           : to_OSD_t;
+    signal from_osd         : from_OSD_t;
 
-		vblank							=> open,
+  begin
+  
+    from_bitmap_ctl.a <= vid_addr;
+    to_bitmap_ctl.d <= vid_q;
+    
+    graphics_inst : entity work.Graphics                                    
+      Port Map
+      (
+        reset           => reset_i,
+    
+        bitmap_ctl_i    => to_bitmap_ctl,
+        bitmap_ctl_o    => from_bitmap_ctl,
 
-    bw_cvbs         		=> open,
-    gs_cvbs         		=> open
-  );
+        tilemap_ctl_i   => to_tilemap_ctl,
+        tilemap_ctl_o   => from_tilemap_ctl,
 
+        sprite_reg_i    => to_sprite_reg,
+        sprite_ctl_i    => to_sprite_ctl,
+        sprite_ctl_o    => from_sprite_ctl,
+        spr0_hit				=> spr0_hit,
+        
+        graphics_i      => to_graphics,
+        graphics_o      => from_graphics,
+        
+        -- OSD
+        to_osd          => to_osd,
+        from_osd        => from_osd,
+
+        -- video (incl. clk)
+        video_i					=> video_i,
+        video_o					=> video_o
+      );
+
+  end block BLK_GRAPHICS;
+  
   -- hook up sound
-  snd_data_l(15 downto 8) <= audio_s;
-  snd_data_l(7 downto 0) <= (others => '0');
-  snd_data_r(15 downto 8) <= audio_s;
-  snd_data_r(7 downto 0) <= (others => '0');
+  audio_o.ldata(15 downto 8) <= audio_s;
+  audio_o.ldata(7 downto 0) <= (others => '0');
+  audio_o.rdata(15 downto 8) <= audio_s;
+  audio_o.rdata(7 downto 0) <= (others => '0');
 
 	-- no SRAM required
-	sram_o.d <= (others => 'X');
-	sram_o.be <= (others => '0');
-	sram_o.cs <= '0';
-	sram_o.oe <= '0';
-	sram_o.we <= '0';
-	
-  spi_clk <= 'Z';
-  spi_dout <= 'Z';
-  spi_mode <= 'Z';
-  spi_sel <= 'Z';
-  
-	leds <= (others => '0');
+	sram_o <= NULL_TO_SRAM;
+  spi_o <= NULL_TO_SPI;
+	leds_o <= (others => '0');
 
 end SYN;
 

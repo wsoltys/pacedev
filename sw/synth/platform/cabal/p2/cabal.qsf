@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP3"
+set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -738,7 +738,11 @@ set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT -secti
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/cabal/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/cabal/platform_pkg_body.vhd
@@ -764,14 +768,15 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/wf_68k00_ip/
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/wf_68k00_ip/wf68k00ip_top_soc.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/wf_68k00_ip/pace_wf68k00ip_top_soc.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/vga_800x600_60Hz.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/cabal/mapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_mixer.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Graphics.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/platform/cabal/inputmapper.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
-set_global_assignment -name VHDL_FILE ../../../../src/platform/cabal/Game.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/cabal/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/conversion.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_upcounter.vhd
