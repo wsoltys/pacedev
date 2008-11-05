@@ -314,6 +314,7 @@ begin
   sprite_reg_o <= NULL_TO_SPRITE_REG;
   sprite_o <= NULL_TO_SPRITE_CTL;
   graphics_o.bit16_1 <= (others => '0');
+  osd_o <= NULL_TO_OSD;
   snd_o <= NULL_TO_SOUND;
   spi_o <= NULL_TO_SPI;
   ser_o <= NULL_TO_SERIAL;

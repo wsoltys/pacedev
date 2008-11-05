@@ -39,6 +39,6 @@ package project_pkg is
 
 	-- Moon Cresta-specific constants
 			
-	constant USE_VIDEO_VBLANK_INTERRUPT : boolean := false;
+	constant MOONCRES_USE_VIDEO_VBLANK        : boolean := false;
 	
 end;

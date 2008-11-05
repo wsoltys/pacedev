@@ -36,6 +36,7 @@ package project_pkg is
 
 	-- Ladybug-specific constants
 
+	constant LADYBUG_EXTERNAL_ROM				: boolean := false;
 	constant LADYBUG_EXTERNAL_RAM				: integer := 0;
 
 	constant LADYBUG_VIDEO_CVBS					: std_logic := '0';

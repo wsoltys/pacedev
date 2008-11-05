@@ -313,6 +313,8 @@ begin
       rom_cpu_d_s <=	cpu_rom0_data when rom_cpu_a_s(14) = '0' else
                       cpu_rom1_data;
 
+      flash_o <= NULL_TO_FLASH;
+
     end generate GEN_INTERNAL_ROM;
     
     GEN_EXTERNAL_ROM : if LADYBUG_EXTERNAL_ROM generate
@@ -428,5 +430,9 @@ begin
 	
 	-- unused SRAM signals
 	sram_o.a(23 downto 12) <= (others => '0');
-	
+
+  spi_o <= NULL_TO_SPI;
+  ser_o <= NULL_TO_SERIAL;
+  gp_o <= (others => '0');
+  
 end SYN;

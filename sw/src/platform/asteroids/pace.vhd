@@ -293,7 +293,7 @@ begin
 
   begin
   
-    from_bitmap_ctl.a <= vid_addr;
+    vid_addr <= from_bitmap_ctl.a;
     to_bitmap_ctl.d <= vid_q;
     
     graphics_inst : entity work.Graphics                                    

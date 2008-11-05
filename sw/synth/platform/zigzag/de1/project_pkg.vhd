@@ -15,7 +15,7 @@ package project_pkg is
 	
   -- Reference clock is 50MHz
 	constant PACE_HAS_PLL								      : boolean := true;
-  constant PACE_HAS_SRAM                    : boolean := true;
+  --constant PACE_HAS_SRAM                    : boolean := true;
   constant PACE_HAS_SDRAM                   : boolean := false;
   constant PACE_HAS_FLASH                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := false;
@@ -40,5 +40,8 @@ package project_pkg is
 			
 	constant ZIGZAG_USE_INTERNAL_WRAM				  : boolean := false;
 	constant ZIGZAG_USE_VIDEO_VBLANK          : boolean := true;
+	
+  -- (derived)
+  constant PACE_HAS_SRAM                    : boolean := not ZIGZAG_USE_INTERNAL_WRAM;
 	
 end;

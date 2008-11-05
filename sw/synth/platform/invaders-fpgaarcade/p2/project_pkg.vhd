@@ -14,7 +14,7 @@ package project_pkg is
 	
 	constant PACE_HAS_PLL								      : boolean := true;
   constant PACE_HAS_FLASH                   : boolean := false;
-  constant PACE_HAS_SRAM                    : boolean := false;
+  constant PACE_HAS_SRAM                    : boolean := true;
   constant PACE_HAS_SDRAM                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := false;
 

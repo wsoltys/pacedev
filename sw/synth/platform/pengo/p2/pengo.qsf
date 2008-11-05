@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE ON
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -731,19 +731,23 @@ set_instance_assignment -name REPORT_DELAY ON -from * -to ncs_s
 set_parameter -name CYCLONEII_SAFE_WRITE "\"VERIFIED_SAFE\""
 
 
-set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/p2/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/clk_div.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
@@ -753,24 +757,24 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_MCod
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_Reg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80se.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/frogger/uPse.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/mapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/Z80.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/altera_mem.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/vga_800x600_60Hz.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/SptReg.VHD
-set_global_assignment -name VHDL_FILE ../../../../src/pace/flipRow.VHDL
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/tilemapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/spritereg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/spritectl.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/SptArray.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_array.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_mixer.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Graphics.VHD
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/inputmapper.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/InputMapper.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/Pacman_Interrupts.VHD
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/sound.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/pacsnd.Vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/Pacman_vramMapper.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/altera_mem.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/Game.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/romdecrypt.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/platform.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/conversion.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_upcounter.vhd

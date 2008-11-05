@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE ON
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -732,43 +732,47 @@ set_instance_assignment -name REPORT_DELAY ON -from * -to ncs_s
 set_parameter -name CYCLONEII_SAFE_WRITE "\"VERIFIED_SAFE\""
 
 
-set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/centiped/platform_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/target/p2/target_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram_1r1w.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dprom_2r.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/clk_div.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_Pack.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_ALU.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_MCode.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/vga_800x600_60Hz.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/centiped/mapctl.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/centiped/sptreg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/flipRow.VHDL
+set_global_assignment -name VHDL_FILE ../../../../src/platform/centiped/tilemapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/centiped/spritereg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/centiped/spritectl.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/SptArray.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_array.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_mixer.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Graphics.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/centiped/inputmapper.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/platform/centiped/intgen.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/sound/pokey/asteroids_pokey.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/centiped/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/Galaxian_vramMapper.VHDL
-set_global_assignment -name VHDL_FILE ../../../../src/platform/centiped/Game.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/platform/centiped/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/conversion.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_upcounter.vhd
