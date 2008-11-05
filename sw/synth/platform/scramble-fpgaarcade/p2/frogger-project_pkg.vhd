@@ -19,10 +19,11 @@ package project_pkg is
   constant PACE_HAS_SERIAL                  : boolean := false;
 		
   -- Reference clock is 24MHz
+  -- - these settings aren't used, but are for reference only
   constant PACE_CLK0_DIVIDE_BY              : natural := 12;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 5;  		-- 24*5/12 = 10MHz
-  constant PACE_CLK1_DIVIDE_BY              : natural := 6;
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 5;  		-- 24*5/6 = 20MHz
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 25;  		-- 24*25/12 = 50MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 14;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 25;  		-- 24*25/24 = 25MHz
 
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
   

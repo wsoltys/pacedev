@@ -778,11 +778,15 @@ set_global_assignment -name VHDL_FILE "../../../../src/platform/scramble-fpgaarc
 set_global_assignment -name VHDL_FILE "../../../../src/platform/scramble-fpgaarcade/unzip/source/scramble_audio.vhd"
 set_global_assignment -name VHDL_FILE "../../../../src/platform/scramble-fpgaarcade/unzip/source/dac.vhd"
 set_global_assignment -name VHDL_FILE "../../../../src/platform/scramble-fpgaarcade/unzip/source/scramble_debounce.vhd"
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
+set_global_assignment -name VHDL_FILE "../../../../src/platform/scramble-fpgaarcade/inputmapper.vhd"
+set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
+set_global_assignment -name VHDL_FILE "../../../../src/platform/scramble-fpgaarcade/pace.vhd"
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_upcounter.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/conversion.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gc_tx_bit.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_joy.vhd
-set_global_assignment -name VHDL_FILE "../../../../src/platform/scramble-fpgaarcade/pace.vhd"
 set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_top.vhd
