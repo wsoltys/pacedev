@@ -37,6 +37,8 @@ package project_pkg is
 	constant SCRAMBLE_VIDEO_CVBS				: std_logic := '0';
 	constant SCRAMBLE_VIDEO_VGA					: std_logic := not SCRAMBLE_VIDEO_CVBS;
 
+  constant PLATFORM_HAS_SOUND         : boolean := true;
+  
   -- (derived)
 	constant PACE_ENABLE_ADV724					: std_logic := SCRAMBLE_VIDEO_CVBS;
 	constant PACE_ADV724_STD						: std_logic := ADV724_STD_PAL;

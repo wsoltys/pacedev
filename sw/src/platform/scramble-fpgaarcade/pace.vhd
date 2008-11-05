@@ -292,21 +292,31 @@ begin
       CLK                => clk_s
       );
 
+  GEN_SOUND : if PLATFORM_HAS_SOUND generate
+
+    audio_o.clk <= clk_s;
+    audio_o.ldata(audio_o.ldata'left downto audio_o.ldata'left+1-audio'length) <= audio;
+    audio_o.ldata(audio_o.ldata'left-audio'length downto 0) <= (others => '0');
+    audio_o.rdata(audio_o.rdata'left downto audio_o.rdata'left+1-audio'length) <= audio;
+    audio_o.rdata(audio_o.rdata'left-audio'length downto 0) <= (others => '0');
+
+  end generate GEN_SOUND;
+  
   --
   -- Audio DAC
   --
-  u_dac : entity work.dac
-    generic map(
-      msbi_g => 9
-    )
-    port  map(
-      clk_i   => clk_ref,
-      res_n_i => I_RESET_L,
-      dac_i   => audio,
-      dac_o   => audio_pwm
-    );
-  O_AUDIO_L <= audio_pwm;
-  O_AUDIO_R <= audio_pwm;
+  --u_dac : entity work.dac
+  --  generic map(
+  --    msbi_g => 9
+  --  )
+  --  port  map(
+  --    clk_i   => clk_ref,
+  --    res_n_i => I_RESET_L,
+  --    dac_i   => audio,
+  --    dac_o   => audio_pwm
+  --  );
+  --O_AUDIO_L <= audio_pwm;
+  --O_AUDIO_R <= audio_pwm;
 
   button_in(7 downto 4) <= I_SW(3 downto 0);
   button_in(3 downto 0) <= I_BUTTON(3 downto 0);

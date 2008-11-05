@@ -37,7 +37,10 @@ package project_pkg is
 	
 	constant SCRAMBLE_BUILD_SCRAMBLE		: boolean := true;
 	constant SCRAMBLE_BUILD_FROGGER			: boolean := not SCRAMBLE_BUILD_SCRAMBLE;
-	
+
+  -- not enough memory in the EP2C20 for sound - gets optimised out
+  constant PLATFORM_HAS_SOUND         : boolean := false;
+
 	constant SCRAMBLE_VIDEO_CVBS				: std_logic := '0';
 	constant SCRAMBLE_VIDEO_VGA					: std_logic := not SCRAMBLE_VIDEO_CVBS;
 
