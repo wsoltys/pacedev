@@ -238,6 +238,7 @@ begin
   flash_o <= NULL_TO_FLASH;
   bitmap_o <= NULL_TO_BITMAP_CTL;
   graphics_o <= NULL_TO_GRAPHICS;
+  osd_o <= NULL_TO_OSD;
   spi_o <= NULL_TO_SPI;
   ser_o <= NULL_TO_SERIAL;
   leds_o <= (others => '0');

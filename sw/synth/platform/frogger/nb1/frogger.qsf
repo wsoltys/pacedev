@@ -29,7 +29,7 @@ set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "19:21:54  AUGUST 25, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -259,9 +259,13 @@ set_global_assignment -name EDA_OUTPUT_DATA_FORMAT NONE -section_id eda_simulati
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/target/nanoboard/target_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/nb1/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/frogger/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cyclone/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cyclone/sprom.vhd
@@ -272,29 +276,28 @@ set_global_assignment -name VHDL_FILE ../../../device/cyclone/dprom_2r.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/clk_div.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_Pack.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_ALU.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_MCode.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_Reg.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80se.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/frogger/uPse.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/frogger/bitmapctl.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/mapCtl.VHDL
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_Pack.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_ALU.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_MCode.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_Reg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80se.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/Z80.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/vga_800x600_60Hz.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/frogger/SptReg.VHD
-set_global_assignment -name VHDL_FILE ../../../../src/pace/flipRow.VHDL
-set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/sptCtlVHDL.VHD
-set_global_assignment -name VHDL_FILE ../../../../src/pace/SptArray.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/frogger/bitmapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/tilemapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/frogger/spritereg.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/spritectl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_array.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_mixer.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Graphics.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/pia8255.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/frogger/InputMapper.VHDL
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/Galaxian_Interrupts.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/Galaxian_vramMapper.VHDL
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/pia8255.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/frogger/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/frogger/Game.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
-set_global_assignment -name VQM_FILE ../../../../src/target/nanoboard/ep1c12/MAX1104_DAC.VQM
-set_global_assignment -name VHDL_FILE ../../../../src/target/nanoboard/target_top.vhd
+set_global_assignment -name VQM_FILE ../../../../src/target/nb1/ep1c12/MAX1104_DAC.VQM
+set_global_assignment -name VHDL_FILE ../../../../src/target/nb1/target_top.vhd

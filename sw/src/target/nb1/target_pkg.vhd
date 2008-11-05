@@ -23,5 +23,6 @@ package target_pkg is
   constant PACE_CLKIN0_REF      : natural := 20;
   
   constant PACE_HAS_FLASH     : boolean := false;
+  constant PACE_HAS_SDRAM     : boolean := false;
 																		
 end;

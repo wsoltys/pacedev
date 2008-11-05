@@ -15,7 +15,6 @@ package project_pkg is
 	
 	constant PACE_HAS_PLL								      : boolean := true;	
   constant PACE_HAS_SRAM                    : boolean := true;
-  constant PACE_HAS_SDRAM                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := false;
 	constant PACE_HAS_SPI								      : boolean := false;	
  	
@@ -28,12 +27,12 @@ package project_pkg is
 	constant PACE_VIDEO_H_SCALE               : integer := 2;
 	constant PACE_VIDEO_V_SCALE               : integer := 2;
 
+  --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
+  constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
+
   constant PACE_HAS_OSD                     : boolean := false;
   constant PACE_OSD_XPOS                    : natural := 0;
   constant PACE_OSD_YPOS                    : natural := 0;
-
-  --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
-  constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
 
   -- NB1-specific constants that must be defined
   constant NB1_PLL_INCLK                    : NANOBOARD_PLL_INCLK_Type := NANOBOARD_PLL_INCLK_REF;
@@ -42,7 +41,7 @@ package project_pkg is
 
 	-- Galaxian-specific constants
 			
-	constant GALAXIAN_USE_INTERNAL_WRAM			  : boolean := true;
-	constant USE_VIDEO_VBLANK_INTERRUPT       : boolean := true;
+	constant GALAXIAN_USE_INTERNAL_WRAM			  : boolean := false;
+	constant GALAXIAN_USE_VIDEO_VBLANK        : boolean := true;
 	
 end;
