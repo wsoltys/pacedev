@@ -12,8 +12,8 @@ package project_pkg is
 	--
 
 	constant PACE_HAS_PLL								      : boolean := true;
-  constant PACE_HAS_FLASH                   : boolean := false;
-  constant PACE_HAS_SRAM                    : boolean := true;
+  --constant PACE_HAS_FLASH                   : boolean := false;
+  --constant PACE_HAS_SRAM                    : boolean := true;
   constant PACE_HAS_SDRAM                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := false;
 	
@@ -30,9 +30,14 @@ package project_pkg is
 		
 	-- Ladybug-specific constants
 
+	constant LADYBUG_EXTERNAL_ROM				      : boolean := false;
 	constant LADYBUG_EXTERNAL_RAM				      : integer := 0;
 				
 	constant LADYBUG_VIDEO_CVBS					      : std_logic := '0';
 	constant LADYBUG_VIDEO_VGA					      : std_logic := not LADYBUG_VIDEO_CVBS;
+
+  -- (derived)
+  constant PACE_HAS_FLASH                   : boolean := LADYBUG_EXTERNAL_ROM;
+  constant PACE_HAS_SRAM                    : boolean := (LADYBUG_EXTERNAL_RAM = 1);
 
 end;

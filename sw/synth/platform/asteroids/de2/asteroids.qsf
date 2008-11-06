@@ -25,7 +25,7 @@
 
 # Project-Wide Assignments
 # ========================
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -503,7 +503,11 @@ set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/de2/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/platform_pkg.vhd
@@ -524,11 +528,11 @@ set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/unzip/s
 set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/unzip/source/asteroids_pokey.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/unzip/source/asteroids_vg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/unzip/source/asteroids.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/vga_800x600_60Hz.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/bitmapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/inputmapper.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_mixer.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Graphics.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/pace.vhd
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/LCD_Controller.v
@@ -539,8 +543,8 @@ set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/I2C_Contr
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/I2C_AV_Config.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/SEG7_LUT.v
 set_global_assignment -name VHDL_FILE ../../../../src/target/de2/audio_if.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_upcounter.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/conversion.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_read2.vhd

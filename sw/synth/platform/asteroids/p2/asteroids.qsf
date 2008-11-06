@@ -750,11 +750,11 @@ set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/unzip/source/T65_Pack.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/unzip/source/T65_MCode.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/unzip/source/T65_ALU.vhd

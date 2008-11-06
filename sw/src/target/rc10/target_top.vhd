@@ -247,11 +247,15 @@ begin
   led <= leds_o(led'range);
   
 	-- inputs (swapped?!?)
-  inputs_i.ps2_kclk <= mouse_clk;
-  inputs_i.ps2_kdat <= mouse_data;
-	inputs_i.ps2_mclk <= keybd_clk;
-	inputs_i.ps2_mdat <= keybd_data;
-
+  inputs_i.ps2_kclk <= mouse_clk when joy_fire = '0' else keybd_clk;
+  mouse_clk <= 'Z';
+  inputs_i.ps2_kdat <= mouse_data when joy_fire = '0' else keybd_data;
+  mouse_data <= 'Z';
+	inputs_i.ps2_mclk <= keybd_clk when joy_fire = '0' else mouse_clk;
+  keybd_clk <= 'Z';
+	inputs_i.ps2_mdat <= keybd_data when joy_fire = '0' else mouse_data;
+  keybd_data <= 'Z';
+  
   -- JAMMA wired to on-board joystick
   inputs_i.jamma_n.coin(1) <= '1';
   inputs_i.jamma_n.p(1).start <= '1';
