@@ -4,13 +4,17 @@ use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
 library work;
-use work.kbd_pkg.in8;
 use work.pace_pkg.all;
+use work.video_controller_pkg.all;
+use work.sprite_pkg.all;
 use work.project_pkg.all;
 use work.platform_pkg.all;
-use work.target_pkg.all;
 
-entity Game is
+entity platform is
+  generic
+  (
+    NUM_INPUT_BYTES   : integer
+  );
   port
   (
     -- clocking and reset
@@ -23,11 +27,7 @@ entity Game is
     leds_o          : out to_LEDS_t;
 
     -- controller inputs
-    inputs_i        : in from_INPUTS_t;
-
-    -- micro buses
-    upaddr          : out std_logic_vector(15 downto 0);   
-    updatao         : out std_logic_vector(7 downto 0);    
+    inputs_i        : in from_MAPPED_INPUTS_t(0 to NUM_INPUT_BYTES-1);
 
     -- FLASH/SRAM
     flash_i         : in from_FLASH_t;
@@ -35,6 +35,31 @@ entity Game is
 		sram_i					: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
 
+    -- graphics
+    
+    bitmap_i        : in from_BITMAP_CTL_t;
+    bitmap_o        : out to_BITMAP_CTL_t;
+    
+    tilemap_i       : in from_TILEMAP_CTL_t;
+    tilemap_o       : out to_TILEMAP_CTL_t;
+
+    sprite_reg_o    : out to_SPRITE_REG_t;
+    sprite_i        : in from_SPRITE_CTL_t;
+    sprite_o        : out to_SPRITE_CTL_t;
+		spr0_hit				: in std_logic;
+
+    -- various graphics information
+    graphics_i      : in from_GRAPHICS_t;
+    graphics_o      : out to_GRAPHICS_t;
+    
+    -- OSD
+    osd_i           : in from_OSD_t;
+    osd_o           : out to_OSD_t;
+
+    -- sound
+    snd_i           : in from_SOUND_t;
+    snd_o           : out to_SOUND_t;
+    
     -- SPI (flash)
     spi_i           : in from_SPI_t;
     spi_o           : out to_SPI_t;
@@ -45,50 +70,12 @@ entity Game is
 
     -- general purpose I/O
     gp_i            : in from_GP_t;
-    gp_o            : out to_GP_t;
-    
-    --
-    --
-    --
-
-    gfxextra_data   : out std_logic_vector(7 downto 0);
-		palette_data		: out ByteArrayType(15 downto 0);
-
-    -- graphics (bitmap)
-		bitmap_addr			: in std_logic_vector(15 downto 0);
-		bitmap_data			: out std_logic_vector(7 downto 0);
-		
-    -- graphics (tilemap)
-    tileaddr        : in std_logic_vector(15 downto 0);   
-    tiledatao       : out std_logic_vector(7 downto 0);    
-    tilemapaddr     : in std_logic_vector(15 downto 0);   
-    tilemapdatao    : out std_logic_vector(15 downto 0);    
-    attr_addr       : in std_logic_vector(9 downto 0);    
-    attr_dout       : out std_logic_vector(15 downto 0);   
-
-    -- graphics (sprite)
-    sprite_reg_addr : out std_logic_vector(7 downto 0);    
-    sprite_wr       : out std_logic;                       
-    spriteaddr      : in std_logic_vector(15 downto 0);   
-    spritedata      : out std_logic_vector(31 downto 0);   
-		spr0_hit				: in std_logic;
-		
-    -- graphics (control)
-    vblank					: in std_logic;    
-		xcentre					: out std_logic_vector(9 downto 0);
-		ycentre					: out std_logic_vector(9 downto 0);
-
-    snd_rd          : out std_logic;
-    snd_wr          : out std_logic;
-    sndif_datai     : in std_logic_vector(7 downto 0);
-
-    -- OSD
-    to_osd          : out to_OSD_t;
-    from_osd        : in from_OSD_t
+    gp_o            : out to_GP_t
   );
-end Game;
 
-architecture SYN of Game is
+end platform;
+
+architecture SYN of platform is
 
 	constant DEFENDER_VRAM_SIZE		: integer := 2**DEFENDER_VRAM_WIDTHAD;
 
@@ -96,9 +83,6 @@ architecture SYN of Game is
 	alias clk_video				: std_logic is clk_i(1);
 	signal cpu_reset			: std_logic;
 
-	-- video counter (scanline) sent by "tilemap controller" via attr_addr
-	alias video_counter		: std_logic_vector(7 downto 0) is attr_addr(7 downto 0);
-		
   -- uP signals  
   signal clk_1M_en			: std_logic;
 	signal clk_1M_en_n		: std_logic;
@@ -158,11 +142,10 @@ architecture SYN of Game is
 
 	signal palette_cs			: std_logic;
 	signal palette_wr			: std_logic;
-	signal palette_r			: ByteArrayType(15 downto 0);
+	signal palette_r			: PAL_A_t(15 downto 0);
 	
   -- other signals      
-	signal inputs					: in8(0 to 3);  
-	alias game_reset			: std_logic is inputs(3)(0);
+	alias game_reset			: std_logic is inputs_i(3).d(0);
 	signal pia0_cs				: std_logic;
 	signal pia1_cs				: std_logic;
 	signal pia0_data			: std_logic_vector(7 downto 0);
@@ -181,8 +164,9 @@ begin
 	cpu_reset <= reset_i or game_reset;
 	
   -- SRAM signals (may or may not be used)
-  sram_o.a	<= 	EXT(sram_addr_hi & cpu_addr(11 downto 0), sram_o.a'length) when data_c_cs = '1' else
-								EXT(cpu_addr, sram_o.a'length);
+  sram_o.a(sram_o.a'left downto 17) <= (others => '0');
+  sram_o.a(16 downto 0)	<= 	sram_addr_hi & cpu_addr(11 downto 0) when data_c_cs = '1' else
+								std_logic_vector(resize(unsigned(cpu_addr), 17));
   sram_o.d <= std_logic_vector(resize(unsigned(cpu_data_o), sram_o.d'length)) 
 								when (wram_wr = '1') else (others => 'Z');
   sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
@@ -219,7 +203,7 @@ begin
 	-- I/O bank
 	io_data <=		pia0_data when pia0_cs = '1' else
 								pia1_data when pia1_cs = '1' else
-								video_counter(7 downto 2) & "00" when video_counter_cs = '1' else
+								graphics_i.y(7 downto 2) & "00" when video_counter_cs = '1' else
 								nvram_data when nvram_cs = '1' else
 								(others => '0');
 								
@@ -293,11 +277,11 @@ begin
 				palette_r(offset) <= cpu_data_o;
 			end if;
 		end if;
-		palette_data <= palette_r;
+		graphics_o.pal <= palette_r;
 	end process;
 	
-	bitmap_data <= 	bitmap0_data when bitmap_addr(15) = '0' else
-									bitmap8_data when bitmap_addr(15 downto 12) = X"8" else
+	bitmap_o.d <= 	bitmap0_data when bitmap_i.a(15) = '0' else
+									bitmap8_data when bitmap_i.a(15 downto 12) = X"8" else
 									bitmap9_data;
 
 	-- irqa interrupt at scanline 240
@@ -306,41 +290,37 @@ begin
 		if reset_i = '1' then
 			count240 <= '0';
 		elsif rising_edge(clk_20M) then
-			if video_counter = 0 then
+			if graphics_i.y = 0 then
 				count240 <= '0';
 			-- check for 240
 			--elsif video_counter = 240 then
-			elsif video_counter = 239 then
+			elsif graphics_i.y = 239 then
 				count240 <= '1';
 			end if;
 		end if;
 	end process;
 
 	-- irqb every 16 scanlines
-	va11 <= video_counter(5);
+	va11 <= graphics_i.y(5);
 
 	-- cpu interrupts
 	cpu_irq <= pia1_irqa or pia1_irqb;
 	cpu_firq <= '0';
 	cpu_nmi <= '0';
 
-	xcentre <= (others => '0');
-	ycentre <= (others => '0');
-	
-  gfxextra_data <= (others => '0');
-
-    -- unused outputs
-	upaddr <= cpu_addr;
-	updatao <= cpu_data_o;
-	tilemapdatao <= (others => '0');
-	tiledatao <= (others => '0');
-  attr_dout <= X"00" & switches_i(7 downto 0);
-  sprite_reg_addr <= (others => '0');
-  sprite_wr <= '0';
-  spriteData <= (others => '0');
-  snd_rd <= '0';
-  snd_wr <= '0';
+  -- unused outputs
+  flash_o <= NULL_TO_FLASH;
+  sprite_reg_o <= NULL_TO_SPRITE_REG;
+  sprite_o <= NULL_TO_SPRITE_CTL;
+  tilemap_o <= NULL_TO_TILEMAP_CTL;
+  graphics_o.bit8_1 <= (others => '0');
+  graphics_o.bit16_1 <= (others => '0');
+  osd_o <= NULL_TO_OSD;
+  snd_o <= NULL_TO_SOUND;
+  ser_o <= NULL_TO_SERIAL;
+  spi_o <= NULL_TO_SPI;
 	leds_o <= (others => '0');
+	gp_o <= (others => '0');
 
 	clk_en_inst : entity work.clk_div
 		generic map
@@ -370,24 +350,6 @@ begin
 			firq			=> cpu_firq,
 			nmi				=> cpu_nmi
 		);
-
-	inputs_inst : entity work.Inputs
-		generic map
-		(
-			NUM_INPUTS	=> inputs'length,
-			CLK_1US_DIV	=> 20
-		)
-	  port map
-	  (
-	    clk     		=> clk_20M,
-	    reset   		=> reset_i,
-	    ps2clk  		=> inputs_i.ps2_kclk,
-	    ps2data 		=> inputs_i.ps2_kdat,
-			jamma				=> inputs_i.jamma_n,
-
-	    dips				=> switches_i(7 downto 0),
-	    inputs			=> inputs
-	  );
 
 	-- Battery-backed CMOS RAM
 	nvram_inst : entity work.spram
@@ -522,7 +484,7 @@ begin
 			q_b					=> vram0_data,
 
 			clock_a			=> clk_video,
-			address_a		=> bitmap_addr(DEFENDER_VRAM_WIDTHAD-1 downto 0),
+			address_a		=> bitmap_i.a(DEFENDER_VRAM_WIDTHAD-1 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
 			q_a					=> bitmap0_data
@@ -544,7 +506,7 @@ begin
 			q_b					=> vram8_data,
 
 			clock_a			=> clk_video,
-			address_a		=> bitmap_addr(11 downto 0),
+			address_a		=> bitmap_i.a(11 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
 			q_a					=> bitmap8_data
@@ -566,7 +528,7 @@ begin
 			q_b					=> vram9_data,
 
 			clock_a			=> clk_video,
-			address_a		=> bitmap_addr(10 downto 0),
+			address_a		=> bitmap_i.a(10 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
 			q_a					=> bitmap9_data
@@ -584,14 +546,14 @@ begin
 		 	data_out  	=> pia0_data,
 		 	irqa      	=> open,
 		 	irqb      	=> open,
-		 	pa_i       	=> inputs(0),
+		 	pa_i       	=> inputs_i(0).d,
       pa_o        => open,
       pa_oe       => open,
 		 	ca1       	=> '0',
 		 	ca2_i      	=> '0',
       ca2_o       => open,
       ca2_oe      => open,
-		 	pb_i      	=> inputs(1),
+		 	pb_i      	=> inputs_i(1).d,
       pb_o        => open,
       pb_oe       => open,
 		 	cb1       	=> '0',
@@ -612,7 +574,7 @@ begin
 		 	data_out  	=> pia1_data,
 		 	irqa      	=> pia1_irqa,
 		 	irqb      	=> pia1_irqb,
-		 	pa_i      	=> inputs(2),
+		 	pa_i      	=> inputs_i(2).d,
       pa_o        => open,
       pa_oe       => open,
 		 	ca1       	=> count240,

@@ -1,49 +1,52 @@
-library ieee;
-use ieee.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
+library IEEE;
+use IEEE.std_logic_1164.all;
+use IEEE.std_logic_unsigned.all;
 
 library work;
 use work.pace_pkg.all;
-use work.video_controller_pkg.all;
 use work.platform_pkg.all;
+use work.video_controller_pkg.all;
 
 --
 --	Williams Defender Bitmap Controller
 --
 
 entity bitmapCtl_1 is          
-port               
-(
-    clk         	: in std_logic;
-		clk_ena				: in std_logic;
-		reset					: in std_logic;
+  generic
+  (
+    DELAY         : integer
+  );
+  port               
+  (
+    reset					: in std_logic;
 
-		-- video control signals		
-		stb           : in std_logic;
-    hblank      	: in std_logic;
-    vblank      	: in std_logic;
-    x       	    : in std_logic_vector(10 downto 0);
-    y       	    : in std_logic_vector(10 downto 0);
+    -- video control signals		
+    video_ctl     : in from_VIDEO_CTL_t;
 
-		scroll_data		: in std_logic_vector(7 downto 0);
-		palette_data	: in ByteArrayType(15 downto 0);
-		
-    -- tilemap interface
-    bitmap_d   		: in std_logic_vector(7 downto 0);
-    bitmap_a   		: out std_logic_vector(15 downto 0);
+    -- bitmap controller signals
+    ctl_i         : in to_BITMAP_CTL_t;
+    ctl_o         : out from_BITMAP_CTL_t;
 
-		-- RGB output (10-bits each)
-		rgb						: out RGB_t;
-		bitmap_on			: out std_logic
-);
-end bitmapCtl_1;
+    graphics_i    : in to_GRAPHICS_t
+  );
+end entity bitmapCtl_1;
 
 architecture SYN of bitmapCtl_1 is
 
+  alias clk       : std_logic is video_ctl.clk;
+  alias clk_ena   : std_logic is video_ctl.clk_ena;
+  alias stb       : std_logic is video_ctl.stb;
+  alias hblank    : std_logic is video_ctl.hblank;
+  alias vblank    : std_logic is video_ctl.vblank;
+  alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
+  alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
+
+  alias rgb       : RGB_t is ctl_o.rgb;
+  
 begin
 
 	-- constant for a whole line
-	bitmap_a(7 downto 0) <= y(7 downto 0);	
+	ctl_o.a(7 downto 0) <= y(7 downto 0);	
 
   -- generate pixel
   process (clk, clk_ena, reset)
@@ -57,21 +60,21 @@ begin
 
       -- 1st stage of pipeline
       -- - read data from bitmap
-      if stb = '1' then
-        bitmap_a(15 downto 8) <= x(8 downto 1);
+      if video_ctl.stb = '1' then
+        ctl_o.a(15 downto 8) <= x(8 downto 1);
       end if;
       
       -- 2nd stage of pipeline
       -- - set pixel colour from bitmap data
       case x_r(1) is
         when '0' =>
-          pel := bitmap_d(7 downto 4);
+          pel := ctl_i.d(7 downto 4);
         when others =>
-          pel := bitmap_d(3 downto 0);
+          pel := ctl_i.d(3 downto 0);
       end case;
                 
       -- extract R,G,B from colour palette
-      pal_entry := palette_data(conv_integer(pel));
+      pal_entry := graphics_i.pal(conv_integer(pel));
       rgb.r <= pal_entry(2 downto 0) & "0000000";
       rgb.g <= pal_entry(5 downto 3) & "0000000";
       rgb.b <= pal_entry(7 downto 6) & "00000000";
@@ -81,7 +84,7 @@ begin
 			
 		end if;				
 
-    bitmap_on <= '1';
+    ctl_o.set <= '1';
 
   end process;
 
