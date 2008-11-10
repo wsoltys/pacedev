@@ -60,14 +60,16 @@
 --
 -------------------------------------------------------------------------------
 
-Library IEEE;
-use IEEE.std_logic_1164.all;
-use IEEE.std_logic_unsigned.all;
-use IEEE.numeric_std.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
 use work.kbd_pkg.all;
+use work.video_controller_pkg.all;
+use work.sprite_pkg.all;
 use work.project_pkg.all;
 use work.platform_pkg.all;
 use work.cv_keys_pack.all;
@@ -77,54 +79,44 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk             : in std_logic_vector(0 to 3);
-    test_button     : in std_logic;
-    reset           : in std_logic;
+    clk_i           : in std_logic_vector(0 to 3);
+    reset_i         : in std_logic;
 
-    -- game I/O
-    ps2clk          : inout std_logic;
-    ps2data         : inout std_logic;
-    dip             : in std_logic_vector(7 downto 0);
-		jamma						: in JAMMAInputsType;
+    -- misc I/O
+    buttons_i       : in from_BUTTONS_t;
+    switches_i      : in from_SWITCHES_t;
+    leds_o          : out to_LEDS_t;
 
-    -- external RAM
-    sram_i          : in from_SRAM_t;
-    sram_o          : out to_SRAM_t;
+    -- controller inputs
+    inputs_i        : in from_INPUTS_t;
 
-    -- VGA video
-		vga_clk					: out std_logic;
-    red             : out std_logic_vector(9 downto 0);
-    green           : out std_logic_vector(9 downto 0);
-    blue            : out std_logic_vector(9 downto 0);
-		lcm_data				:	out std_logic_vector(9 downto 0);
-    hsync           : out std_logic;
-    vsync           : out std_logic;
+    -- external ROM/RAM
+    flash_i         : in from_FLASH_t;
+    flash_o         : out to_flash_t;
+    sram_i       		: in from_SRAM_t;
+		sram_o					: out to_SRAM_t;
 
-    -- composite video
-    BW_CVBS         : out std_logic_vector(1 downto 0);
-    GS_CVBS         : out std_logic_vector(7 downto 0);
+    -- video
+    video_i         : in from_VIDEO_t;
+    video_o         : out to_VIDEO_t;
 
-    -- sound
-    snd_clk         : out std_logic;
-    snd_data_l      : out std_logic_vector(15 downto 0);
-    snd_data_r      : out std_logic_vector(15 downto 0);
-
+    -- audio
+    audio_i         : in from_AUDIO_t;
+    audio_o         : out to_AUDIO_t;
+    
     -- SPI (flash)
-    spi_clk         : out std_logic;
-    spi_mode        : out std_logic;
-    spi_sel         : out std_logic;
-    spi_din         : in std_logic;
-    spi_dout        : out std_logic;
+    spi_i           : in from_SPI_t;
+    spi_o           : out to_SPI_t;
 
     -- serial
-    ser_tx          : out std_logic;
-    ser_rx          : in std_logic;
-
-    -- debug
-    leds            : out std_logic_vector(7 downto 0)
+    ser_i           : in from_SERIAL_t;
+    ser_o           : out to_SERIAL_t;
+    
+    -- general purpose I/O
+    gp_i            : in from_GP_t;
+    gp_o            : out to_GP_t
   );
-
-end PACE;
+end entity PACE;
 
 architecture SYN of PACE is
 
@@ -221,51 +213,51 @@ architecture SYN of PACE is
   signal gnd_8_s             : std_logic_vector( 7 downto 0);
 
 	-- changes for PACE
-	alias clk_20M								: std_logic is clk(0);
-  alias ext_clk_i            : std_logic is clk(2);
-  signal clk_cnt_q           : unsigned(1 downto 0);
-	signal clk_en_5m37_q			 : std_logic;
-	alias clk_21m3_s					 : std_logic is clk_s;
+	alias clk_20M							  : std_logic is clk_i(0);
+  alias ext_clk_i             : std_logic is clk_i(2);
+  signal clk_cnt_q            : unsigned(1 downto 0);
+	signal clk_en_5m37_q			  : std_logic;
+	alias clk_21m3_s					  : std_logic is clk_s;
 
-  signal rgb_col_s           : std_logic_vector( 3 downto 0);
+  signal rgb_col_s            : std_logic_vector(3 downto 0);
   signal rgb_hsync_n_s,
-         rgb_vsync_n_s       : std_logic;
+         rgb_vsync_n_s        : std_logic;
   signal rgb_hsync_s,
-         rgb_vsync_s         : std_logic;
+         rgb_vsync_s          : std_logic;
 
-  signal vga_col_s           : std_logic_vector( 3 downto 0);
+  signal vga_col_s            : std_logic_vector(3 downto 0);
   signal vga_hsync_s,
-         vga_vsync_s         : std_logic;
+         vga_vsync_s          : std_logic;
 
-	alias vid_hsync						 : std_logic is hsync;
-	alias vid_vsync						 : std_logic is vsync;
+	alias vid_hsync						  : std_logic is video_o.hsync;
+	alias vid_vsync						  : std_logic is video_o.vsync;
 	
 	signal vid_r,
 				 vid_g,
-				 vid_b							 : std_logic_vector(7 downto 0);
-	
-	alias audio_o							 : std_logic_vector(7 downto 0) is snd_data_l(15 downto 8);
-				
-	signal ps2_keys_s				   : std_logic_vector(15 downto 0);
-	signal ps2_joy_s				   : std_logic_vector(15 downto 0);
+				 vid_b							  : std_logic_vector(7 downto 0);
+
+  signal ps2_kclk             : std_logic;
+  signal ps2_kdat             : std_logic;
+  
+	signal ps2_keys_s				    : std_logic_vector(15 downto 0);
+	signal ps2_joy_s				    : std_logic_vector(15 downto 0);
 	
 begin
 
 	-- map inputs
-	
-	vga_clk <= clk(1);	-- fudge
-
-  spi_clk <= 'Z';
-  spi_dout <= 'Z';
-  spi_mode <= 'Z';
-  spi_sel <= 'Z';
+  ps2_kclk <= inputs_i.ps2_kclk;
+  ps2_kdat <= inputs_i.ps2_kdat;
   
-	leds <= (others => '0');
+  flash_o <= NULL_TO_FLASH;
+  spi_o <= NULL_TO_SPI;
+  ser_o <= NULL_TO_SERIAL;
+	leds_o <= (others => '0');
+	gp_o <= (others => '0');
 
   -- assign PACE outputs
-  red <= vid_r & "00";
-  green <= vid_g & "00";
-  blue <= vid_b & "00";
+  video_o.rgb.r <= vid_r & "00";
+  video_o.rgb.g <= vid_g & "00";
+  video_o.rgb.b <= vid_b & "00";
 
 	-- produce a 5MHz clock for the audio DAC
 	process (clk_20M)
@@ -273,13 +265,13 @@ begin
 	begin
 		if rising_edge(clk_20M) then
 			count := count + 1;
-			snd_clk <= count(1);
+			audio_o.clk <= count(1);
 		end if;
 	end process;
 
   gnd_8_s   <= (others => '0');
 
-	reset_n_s <= not reset;
+	reset_n_s <= not reset_i;
 
   -----------------------------------------------------------------------------
   -- The PLL	24MHz -> 21.333MHz
@@ -449,6 +441,7 @@ begin
 	sram_o.a <= std_logic_vector(resize(unsigned(vram_a_s), sram_o.a'length));
 	sram_o.d <= std_logic_vector(resize(unsigned(vram_d_from_cv_s), sram_o.d'length)) when vram_we_s = '1' else (others => 'Z');
 	vram_d_to_cv_s <= sram_i.d(vram_d_to_cv_s'range);
+	sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
 	sram_o.oe <= not vram_we_s;
 	sram_o.cs <= '1';
 
@@ -508,11 +501,11 @@ begin
 	port map
 	(
     clk       	=> clk_20M,
-    reset     	=> reset,
+    reset     	=> reset_i,
 
 		-- inputs from PS/2 port
-    ps2_clk  		=> ps2clk,
-    ps2_data 		=> ps2data,
+    ps2_clk  		=> ps2_kclk,
+    ps2_data 		=> ps2_kdat,
 
     -- user outputs
 		keys				=> ps2_keys_s,
@@ -663,10 +656,10 @@ begin
   -- simple unsigned value.
   -----------------------------------------------------------------------------
   dac_audio_s <= std_logic_vector(unsigned(signed_audio_s + 128));
-  snd_data_l(15 downto 8) <= dac_audio_s;
-  snd_data_l(7 downto 0) <= (others => '0');
-  snd_data_r(15 downto 8) <= dac_audio_s;
-  snd_data_r(7 downto 0) <= (others => '0');
+  audio_o.ldata(15 downto 8) <= dac_audio_s;
+  audio_o.ldata(7 downto 0) <= (others => '0');
+  audio_o.rdata(15 downto 8) <= dac_audio_s;
+  audio_o.rdata(7 downto 0) <= (others => '0');
 	
 end SYN;
 

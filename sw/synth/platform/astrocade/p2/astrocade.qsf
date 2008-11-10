@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -736,7 +736,12 @@ set_global_assignment -name PARTITION_NETLIST_TYPE POST_FIT -section_id "PACE_WF
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT -section_id "PACE_WF68K00IP_TOP_SOC:cpu_inst"
 set_global_assignment -name USER_LIBRARIES ..\\..\\..\\..\\sw\\src\\platform\\astrocade\\unisim
-set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg_body.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/astrocade/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/astrocade/unisim/VComponents_pkg.vhd
@@ -768,6 +773,7 @@ set_global_assignment -name VHDL_FILE ../../../../src/platform/astrocade/unzip/s
 set_global_assignment -name VHDL_FILE ../../../../src/platform/astrocade/unzip/source/bally_dblscan.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/astrocade/unzip/source/dac.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/astrocade/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/conversion.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_upcounter.vhd

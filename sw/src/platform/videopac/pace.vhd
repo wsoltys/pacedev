@@ -58,6 +58,8 @@ use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
+use work.video_controller_pkg.all;
+use work.sprite_pkg.all;
 use work.kbd_pkg.all;
 use work.project_pkg.all;
 use work.platform_pkg.all;
@@ -71,54 +73,44 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk             : in std_logic_vector(0 to 3);
-    test_button     : in std_logic;
-    reset           : in std_logic;
+    clk_i           : in std_logic_vector(0 to 3);
+    reset_i         : in std_logic;
 
-    -- game I/O
-    ps2clk          : inout std_logic;
-    ps2data         : inout std_logic;
-    dip             : in std_logic_vector(7 downto 0);
-		jamma						: in JAMMAInputsType;
+    -- misc I/O
+    buttons_i       : in from_BUTTONS_t;
+    switches_i      : in from_SWITCHES_t;
+    leds_o          : out to_LEDS_t;
 
-    -- external RAM
-    sram_i          : in from_SRAM_t;
-    sram_o          : out to_SRAM_t;
+    -- controller inputs
+    inputs_i        : in from_INPUTS_t;
 
-    -- VGA video
-		vga_clk					: out std_logic;
-    red             : out std_logic_vector(9 downto 0);
-    green           : out std_logic_vector(9 downto 0);
-    blue            : out std_logic_vector(9 downto 0);
-		lcm_data				:	out std_logic_vector(9 downto 0);
-    hsync           : out std_logic;
-    vsync           : out std_logic;
+    -- external ROM/RAM
+    flash_i         : in from_FLASH_t;
+    flash_o         : out to_flash_t;
+    sram_i       		: in from_SRAM_t;
+		sram_o					: out to_SRAM_t;
 
-    -- composite video
-    BW_CVBS         : out std_logic_vector(1 downto 0);
-    GS_CVBS         : out std_logic_vector(7 downto 0);
+    -- video
+    video_i         : in from_VIDEO_t;
+    video_o         : out to_VIDEO_t;
 
-    -- sound
-    snd_clk         : out std_logic;
-    snd_data_l      : out std_logic_vector(15 downto 0);
-    snd_data_r      : out std_logic_vector(15 downto 0);
-
+    -- audio
+    audio_i         : in from_AUDIO_t;
+    audio_o         : out to_AUDIO_t;
+    
     -- SPI (flash)
-    spi_clk         : out std_logic;
-    spi_mode        : out std_logic;
-    spi_sel         : out std_logic;
-    spi_din         : in std_logic;
-    spi_dout        : out std_logic;
+    spi_i           : in from_SPI_t;
+    spi_o           : out to_SPI_t;
 
     -- serial
-    ser_tx          : out std_logic;
-    ser_rx          : in std_logic;
-
-    -- debug
-    leds            : out std_logic_vector(7 downto 0)
+    ser_i           : in from_SERIAL_t;
+    ser_o           : out to_SERIAL_t;
+    
+    -- general purpose I/O
+    gp_i            : in from_GP_t;
+    gp_o            : out to_GP_t
   );
-
-end PACE;
+end entity PACE;
 
 architecture SYN of PACE is
 
@@ -221,29 +213,34 @@ architecture SYN of PACE is
   signal gnd_s          : std_logic;
 
 	-- aliases for PACE
-	alias ext_clk_i				: std_logic is clk(0);
-	alias rgb_r_o					: std_logic_vector(2 downto 0) is red(9 downto 7);
-	alias rgb_g_o					: std_logic_vector(2 downto 0) is green(9 downto 7);
-	alias rgb_b_o					: std_logic_vector(2 downto 0) is blue(9 downto 7);
-	alias txd_o						: std_logic is ser_tx;
-	alias rxd_i						: std_logic is ser_rx;
+	alias ext_clk_i				: std_logic is clk_i(0);
+	alias rgb_r_o					: std_logic_vector(2 downto 0) is video_o.rgb.r(9 downto 7);
+	alias rgb_g_o					: std_logic_vector(2 downto 0) is video_o.rgb.g(9 downto 7);
+	alias rgb_b_o					: std_logic_vector(2 downto 0) is video_o.rgb.b(9 downto 7);
+	alias txd_o						: std_logic is ser_o.txd;
+	alias rxd_i						: std_logic is ser_i.rxd;
 	
 	-- signals for PACE
 	--signal comp_sync_n_o	: std_logic;
   signal audio_r_o			: std_logic;
   signal audio_l_o 			: std_logic;
-  signal audio_o   			: std_logic_vector(dac_audio_s'range);
+  --signal audio_o   			: std_logic_vector(dac_audio_s'range);
 	signal rts_o					: std_logic;
 	signal cts_i					: std_logic;
 	signal keys_s					: std_logic_vector(15 downto 0);
 	signal joy_s					: std_logic_vector(15 downto 0);
-	
+
+  signal ps2_kclk       : std_logic;
+  signal ps2_kdat       : std_logic;
+  
 begin
 
   vdd_s <= '1';
   gnd_s <= '0';
 
-
+  ps2_kclk <= inputs_i.ps2_kclk;
+  ps2_kdat <= inputs_i.ps2_kdat;
+  
   por_b : vp_por
     generic map (
        delay_g     => 4,
@@ -362,8 +359,8 @@ begin
   end process rgb;
   --
   --comp_sync_n_o <= hsync_n_s and vsync_n_s;
-	hsync <= hsync_n_s;
-	vsync <= vsync_n_s;
+	video_o.hsync <= hsync_n_s;
+	video_o.vsync <= vsync_n_s;
 	
   -----------------------------------------------------------------------------
   -- The cartridge ROM
@@ -463,11 +460,11 @@ begin
 	port map
 	(
 	    clk       	=> clk_s,
-	    reset     	=> reset,
+	    reset     	=> reset_i,
 
 			-- inputs from PS/2 port
-	    ps2_clk  		=> ps2clk,
-	    ps2_data 		=> ps2data,
+	    ps2_clk  		=> ps2_kclk,
+	    ps2_data 		=> ps2_kdat,
 
 	    -- user outputs
 			keys				=> keys_s,
@@ -524,8 +521,9 @@ begin
   --
   audio_r_o <= audio_s;
   audio_l_o <= audio_s;
-  audio_o   <= dac_audio_s;
-
+  audio_o.clk <= clk_s;
+  audio_o.ldata   <= dac_audio_s & X"00";
+  audio_o.rdata   <= dac_audio_s & X"00";
 
   -----------------------------------------------------------------------------
   -- JOP pin defaults
@@ -555,29 +553,14 @@ begin
   --fl_cs2_n_o  <= '1';
 
 	-- not used by videopac
-	sram_o.a <= (others => 'Z');
-	sram_o.d <= (others => 'Z');
-	sram_o.be <= (others => 'Z');
-	sram_o.cs <= '0';
-	sram_o.we <= '0';
-	sram_o.oe <= '0';
-	vga_clk <= 'Z';
-	red(red'left-rgb_r_o'length downto 0) <= (others => '0');
-	green(green'left-rgb_g_o'length downto 0) <= (others => '0');
-	blue(blue'left-rgb_b_o'length downto 0) <= (others => '0');
-	lcm_data <= (others => 'X');
-	bw_cvbs <= (others => 'X');
-	gs_cvbs <= (others => 'X');
-	spi_clk <= 'Z';
-	spi_mode <= 'Z';
-	spi_sel <= 'Z';
-	spi_dout <= 'Z';
-	leds<= (others => '1');
-	
-	-- TBD
-	snd_clk <= 'Z';
-	snd_data_l <= (others => 'X');
-	snd_data_r <= (others => 'X');
-	
+	flash_o <= NULL_TO_FLASH;
+	sram_o <= NULL_TO_SRAM;
+	video_o.rgb.r(video_o.rgb.r'left-rgb_r_o'length downto 0) <= (others => '0');
+	video_o.rgb.g(video_o.rgb.g'left-rgb_g_o'length downto 0) <= (others => '0');
+	video_o.rgb.b(video_o.rgb.b'left-rgb_b_o'length downto 0) <= (others => '0');
+	spi_o <= NULL_TO_SPI;
+	leds_o <= (others => '0');
+  gp_o <= (others => '0');
+  
 end SYN;
 

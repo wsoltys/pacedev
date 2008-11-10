@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE ON
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -709,7 +709,6 @@ set_global_assignment -name FLOW_ENABLE_TIMING_CONSTRAINT_CHECK OFF
 set_global_assignment -name DO_COMBINED_ANALYSIS ON
 set_global_assignment -name ENABLE_CLOCK_LATENCY ON
 set_global_assignment -name REPORT_IO_PATHS_SEPARATELY ON
-set_instance_assignment -name GLOBAL_SIGNAL "GLOBAL CLOCK" -to "meb_pll:MEB_PLL_0|altpll:altpll_component|_clk1"
 set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_ASYNCHRONOUS_SIGNAL_PIPELINING ON
@@ -734,7 +733,12 @@ set_parameter -name CYCLONEII_SAFE_WRITE "\"VERIFIED_SAFE\""
 
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
-set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg_body.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/adventurevision/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_pkg.vhd
@@ -819,6 +823,7 @@ set_global_assignment -name VHDL_FILE "../../../../src/platform/adventurevision/
 set_global_assignment -name VHDL_FILE ../../../../src/platform/adventurevision/unzip/src/board/misc/dblscan.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/adventurevision/keyboard.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/adventurevision/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/conversion.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_upcounter.vhd
