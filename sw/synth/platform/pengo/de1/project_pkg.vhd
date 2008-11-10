@@ -36,7 +36,7 @@ package project_pkg is
   constant PACE_OSD_XPOS                    : natural := 0;
   constant PACE_OSD_YPOS                    : natural := 0;
 
-	-- Pacman-specific constants
+	-- Pengo-specific constants
 
   constant PENGO_ROMS_IN_FLASH              : boolean := true;
 	constant PENGO_USE_VIDEO_VBLANK           : boolean := true;

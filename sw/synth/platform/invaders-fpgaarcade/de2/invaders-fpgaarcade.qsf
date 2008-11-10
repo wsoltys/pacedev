@@ -14,7 +14,7 @@
 
 
 # The default values for assignments are stored in the file
-#		pengo_assignment_defaults.qdf
+#		invaders-fpgaarcade_assignment_defaults.qdf
 # If this file doesn't exist, and for assignments not listed, see file
 #		assignment_defaults.qdf
 
@@ -505,41 +505,27 @@ set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/platform_pkg.vhd
+set_global_assignment -name VHDL_FILE "../../../../src/platform/invaders-fpgaarcade/platform_pkg.vhd"
 set_global_assignment -name VHDL_FILE ../../../../src/target/de2/target_pkg.vhd
+set_global_assignment -name VHDL_FILE "../../../../src/platform/invaders-fpgaarcade/UNISIM/VComponents_pkg.vhd"
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/clk_div.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_Pack.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_ALU.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_MCode.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_Reg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80se.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/Z80.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/altera_mem.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/tilemapctl.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/spritereg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/spritectl.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_array.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_mixer.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/Graphics.VHD
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/InputMapper.VHD
-set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/Pacman_Interrupts.VHD
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/Pacman_vramMapper.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/romdecrypt.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/platform.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
+set_global_assignment -name VHDL_FILE "../../../../src/platform/invaders-fpgaarcade/wrappers.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/invaders-fpgaarcade/unzip/source/T80_Pack.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/invaders-fpgaarcade/unzip/source/T80_Reg.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/invaders-fpgaarcade/unzip/source/T80_MCode.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/invaders-fpgaarcade/unzip/source/T80_ALU.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/invaders-fpgaarcade/unzip/source/T80.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/invaders-fpgaarcade/unzip/source/T8080se.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/invaders-fpgaarcade/unzip/source/mw8080.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/invaders-fpgaarcade/unzip/source/invaders.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/invaders-fpgaarcade/unzip/source/ps2kbd.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/invaders-fpgaarcade/unzip/source/dblscan.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/invaders-fpgaarcade/unzip/source/invaders_audio.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/invaders-fpgaarcade/unzip/source/dac.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/invaders-fpgaarcade/pace.vhd"
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/LCD_Controller.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/LCD_TEST.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2S_Controller.v
