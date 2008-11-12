@@ -1,58 +1,52 @@
-library IEEE;
-use IEEE.std_logic_1164.all;
-use IEEE.std_logic_unsigned.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
 
 library work;
 use work.pace_pkg.all;
+use work.video_controller_pkg.all;
+use work.sprite_pkg.all;
 use work.project_pkg.all;
 use work.platform_pkg.all;    
 
-entity sptCtlVHDL is
+entity spritectl is
 	generic
 	(
-		INDEX		: natural
+		INDEX		: natural;
+		DELAY   : integer
 	);
 	port               
 	(
-    clk     : in std_logic;
-    clk_ena : in std_logic;
+    -- sprite registers
+    reg_i       : in from_SPRITE_REG_t;
+    
+    -- video control signals
+    video_ctl   : in from_VIDEO_CTL_t;
 
-    -- VGA I/F
-    HBlank  : in std_logic;       
-    xAddr   : in std_logic_vector(7 downto 0);
-    yAddr   : in std_logic_vector(8 downto 0);
-    pixOn   : out std_logic;    
-		rgb			: out RGBType;
-		    
-		bank_data	: in std_logic_vector(7 downto 0);
-		
-    -- Sprite I/F, sprite is 16 x 8 2 bit per pixel
-    num     : in    std_logic_vector(11 downto 0);   -- which sprite in table to show for this controller
-    xLoc    : in    std_logic_vector(7 downto 0);   -- X location
-    yLoc    : in    std_logic_vector(8 downto 0);   -- Y location (line)
-    colour	: in    std_logic_vector(7 downto 0);   -- colour base for PEL.
-    flags   : in    std_logic_vector(7 downto 0);   -- flags to operate on sprites
-
-    ena     : in    std_logic;                      -- this sprite can load row data
-    rowData : in    std_logic_vector(31 downto 0);  -- 8 x 2 bpp row of sprite data
-    rowAddr : out   std_logic_vector(15 downto 0)   -- (8 rows of sprite data and 16 sprites ) full vector to allow expansion
+    -- sprite control signals
+    ctl_i       : in to_SPRITE_CTL_t;
+    ctl_o       : out from_SPRITE_CTL_t;
+    
+		graphics_i  : in to_GRAPHICS_t
 	);
-end sptCtlVHDL;
+end entity spritectl;
 
-architecture beh of sptCtlVHDL is
+architecture SYN of spritectl is
 
-	alias flipx		: std_logic is flags(0);
-	alias flipy		: std_logic is flags(1);
-	alias bg			: std_logic is flags(2);
-	
+  alias clk       : std_logic is video_ctl.clk;
+  alias clk_ena   : std_logic is video_ctl.clk_ena;
+  
   signal flipData : std_logic_vector(31 downto 0);   -- flipped row data
-
+   
+  alias rgb       : RGB_t is ctl_o.rgb;
+  
+	--alias flipx		: std_logic is flags(0);
+	--alias flipy		: std_logic is flags(1);
+	--alias bg			: std_logic is flags(2);
+	
 begin
 
-  -- call up the flipper
-  FLA : entity work.flipRow 
-		generic map (16)
-		port map (rowIn => rowData(31 downto 16), flip => flipx, rowOut => flipData(31 downto 16));
+  flipData <= flip_row (ctl_i.d(31 downto 16) & ctl_i.d(31 downto 0), reg_i.xflip);
 
 	process (clk, clk_ena)
 
@@ -77,18 +71,18 @@ begin
 
 		if rising_edge(clk) and clk_ena = '1' then
 
-			xLocAdj := xLoc;
-  		yLocAdj := yLoc;
+			xLocAdj := reg_i.x;
+  		yLocAdj := reg_i.y;
 			
-			if hblank = '1' then
+			if video_ctl.hblank = '1' then
 
 				xMat := false;
 				-- stop sprites wrapping from bottom of screen
-				if yAddr = 0 then
+				if video_ctl.y = 0 then
 					yMat := false;
 				end if;
 				
-				if yLocAdj = yAddr then
+				if yLocAdj = video_ctl.y then
 					-- start counting sprite row
 					rowCount := (others => '0');
 					yMat := true;
@@ -97,7 +91,7 @@ begin
 					yMat := false;				
 				end if;
 
-				if ena = '1' then
+				if ctl_i.ld = '1' then
 					if yMat then
 						rowStore := flipData;			-- load sprite data
 					else
@@ -107,7 +101,7 @@ begin
 						
 			else
 			
-				if xAddr = xLocAdj then
+				if video_ctl.x = xLocAdj then
 					-- count up at left edge of sprite
 					rowCount := rowCount + 1;
 					-- start of sprite
@@ -118,7 +112,7 @@ begin
 				-- normally the CLUT is read from palette RAM
 				-- - but too hard to shoe-horn into PACE architecture
 				--   so we'll cheat and used a fixed CLUT dumped from a running game
-				clut_entry := clut(conv_integer('1' & colour(1 downto 0) & pel(0) & pel(1)));
+				clut_entry := clut(conv_integer('1' & reg_i.colour(1 downto 0) & pel(0) & pel(1)));
 				pal_entry := pal(conv_integer(clut_entry(5 downto 0)));
 				rgb.r <= pal_entry(0) & "0000";
 				rgb.g <= pal_entry(1) & "0000";
@@ -127,9 +121,9 @@ begin
 			  -- set pixel transparency based on match
 				--if xMat and yMat and not (colour(1 downto 0) = "00" and pel = "00") then 
 				if xMat and yMat and not (pel = "00") then 
-			  	pixOn <= '1';
+			  	ctl_o.set <= '1';
 				else
-					pixOn <= '0';
+					ctl_o.set <= '0';
 				end if;
 
 				if xMat then
@@ -144,15 +138,15 @@ begin
 		-- NES sprites only 8x8 (16 bytes) and 16-bits wide
 		-- - the sprite port is also 16-bits wide (not 32)
 		-- - rowAddr(12) is actually set by $2004.3
-	  rowAddr(15 downto 3) <= '0' & num;
-	  if flipy = '1' then
-	  	rowAddr(2 downto 0) <= not rowCount(rowCount'left-1 downto rowCount'left-3);
+	  ctl_o.a(15 downto 3) <= '0' & reg_i.n;
+	  if reg_i.yflip = '1' then
+	  	ctl_o.a(2 downto 0) <= not rowCount(rowCount'left-1 downto rowCount'left-3);
 	  else
-	  	rowAddr(2 downto 0) <= rowCount(rowCount'left-1 downto rowCount'left-3);
+	  	ctl_o.a(2 downto 0) <= rowCount(rowCount'left-1 downto rowCount'left-3);
 	  end if;
 
   end process;
 
-end beh;
+end SYN;
 
 

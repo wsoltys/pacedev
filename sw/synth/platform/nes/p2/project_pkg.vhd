@@ -14,7 +14,13 @@ package project_pkg is
 	--
 	
   -- Reference clock is 24MHz
-	constant PACE_HAS_PLL										  : boolean := true;
+	constant PACE_HAS_PLL								      : boolean := true;
+  constant PACE_HAS_SDRAM                   : boolean := false;
+  constant PACE_HAS_SERIAL                  : boolean := false;
+
+	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
+  
+  -- Reference clock is 24MHz
 	-- PAL 	1.773447MHz x 12 = 21.281364
 	-- NTSC	1.7897725MHz x 12 = 21.47727
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
@@ -32,13 +38,9 @@ package project_pkg is
 
 	constant PACE_ADV724_STD						      : std_logic := ADV724_STD_PAL;
 
-  -- P2-specific constants
-  constant P2_JAMMA_IS_MAPLE                : boolean := false;
-  constant P2_JAMMA_IS_NGC                  : boolean := true;
-
 	-- NES-specific constants
 
-	constant USE_VIDEO_VBLANK_INTERRUPT       : boolean := true;
+	constant NES_USE_VIDEO_VBLANK							: boolean := true;
 	constant NES_USE_INTERNAL_WRAM					  : boolean := true;
 	
 	--constant NES_CART_NAME									  : string := "tennis";
