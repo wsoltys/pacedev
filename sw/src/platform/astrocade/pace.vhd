@@ -204,7 +204,8 @@ begin
   reset_l <= not reset_s;
 
   u_bally : entity work.BALLY
-    port map (
+    port map 
+    (
       O_AUDIO        => audio,
       --
       O_VIDEO_R      => video_r,
@@ -239,11 +240,11 @@ begin
       I_RESET_L      => reset_l,
       ENA            => ena,
       CLK            => clk_14
-      );
+    );
 
   u_ps2 : entity work.BALLY_PS2_IF
-    port map (
-
+    port map 
+    (
       I_PS2_CLK         => I_PS2_CLK,
       I_PS2_DATA        => I_PS2_DATA,
 
@@ -253,7 +254,7 @@ begin
       I_RESET_L         => reset_l,
       I_1MHZ_ENA        => ps2_1mhz_ena,
       CLK               => clk_14
-      );
+    );
 
   --u_check_cart : entity work.BALLY_CHECK_CART
     --port map (
@@ -283,7 +284,8 @@ begin
   -- scan doubler
   --
   u_dblscan : entity work.BALLY_DBLSCAN
-    port map (
+    port map 
+    (
       I_R               => video_r,
       I_G               => video_g,
       I_B               => video_b,
@@ -382,24 +384,40 @@ begin
   --end process;
 
 	GEN_CART : if ASTROCADE_HAS_CART generate
-	
-		cart_inst : entity work.sprom
-			generic map
-			(
-				INIT_FILE 	=> ASTROCADE_SRC_DIR & "/carts/" & ASTROCADE_CART_NAME & ".hex",
-				NUMWORDS_A 	=> 8192,
-				WIDTHAD_A 	=> 13
-			)
-			port map
-			(
-				clock				=> clk_14,
-				address			=> cas_addr(12 downto 0),
-				q						=> cas_data
-			);
+
+    GEN_INTERNAL_CART : if not ASTROCADE_CART_IN_FLASH generate
+
+      cart_inst : entity work.sprom
+        generic map
+        (
+          INIT_FILE 	=> ASTROCADE_SRC_DIR & "/carts/" & ASTROCADE_CART_NAME & ".hex",
+          NUMWORDS_A 	=> 8192,
+          WIDTHAD_A 	=> 13
+        )
+        port map
+        (
+          clock				=> clk_14,
+          address			=> cas_addr(12 downto 0),
+          q						=> cas_data
+        );
+
+      flash_o <= NULL_TO_FLASH;
+
+    end generate GEN_INTERNAL_CART;
+
+    GEN_FLASH_CART : if ASTROCADE_CART_IN_FLASH generate
+
+      flash_o.a <= std_logic_vector(resize(unsigned(cas_addr(12 downto 0)), flash_o.a'length));
+      flash_o.d <= (others => '0');
+      flash_o.cs <= '1';
+      flash_o.oe <= '1';
+      flash_o.we <= '0';
+      cas_data <= flash_i.d(cas_data'range);
+      
+    end generate GEN_FLASH_CART;
 	
 	end generate GEN_CART;
 
-  flash_o <= NULL_TO_FLASH;
   sram_o <= NULL_TO_SRAM;
   spi_o <= NULL_TO_SPI;
   ser_o <= NULL_TO_SERIAL;

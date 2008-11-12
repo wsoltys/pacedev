@@ -15,6 +15,7 @@ package project_pkg is
 	
   -- Reference clock is 24MHz
 	constant PACE_HAS_PLL								      : boolean := true;
+  --constant PACE_HAS_SRAM                    : boolean := true;
   constant PACE_HAS_SDRAM                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := false;
 
@@ -32,6 +33,8 @@ package project_pkg is
 	constant PACE_VIDEO_V_SCALE               : integer := 2;
 	constant PACE_ENABLE_ADV724					      : std_logic := '0';
 
+  constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_RED;
+  
   constant PACE_HAS_OSD                     : boolean := false;
   constant PACE_OSD_XPOS                    : natural := 0;
   constant PACE_OSD_YPOS                    : natural := 0;
@@ -50,5 +53,8 @@ package project_pkg is
 	-- VERTICAL MIRRORING is the "normal" option
 	constant NES_MIRROR_VERTICAL						  : boolean := true;
 	constant NES_MIRROR_HORIZONTAL					  : boolean := not NES_MIRROR_VERTICAL;
-	
+
+  -- (derived)
+  constant PACE_HAS_SRAM                    : boolean := not NES_USE_INTERNAL_WRAM;
+
 end;

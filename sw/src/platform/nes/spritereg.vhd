@@ -1,6 +1,9 @@
 Library ieee;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_arith.all;
+use ieee.numeric_std.all;
+
+library work;
+use work.sprite_pkg.all;
 
 entity sptReg is
 
@@ -10,51 +13,40 @@ entity sptReg is
 	);
 	port
 	(
-		clk				: in std_logic;
-		wr				: in std_logic;
-		din				: in std_logic_vector(7 downto 0);
-		addr			: in std_logic_vector(1 downto 0);
-		
-		sptX			: out std_logic_vector(7 downto 0);
-		sptY			: out std_logic_vector(8 downto 0);
-		sptFlags	: out std_logic_vector(7 downto 0);
-		sptColour	: out std_logic_vector(7 downto 0);
-		sptNum 		: out std_logic_vector(11 downto 0);
-		sptPri		: out std_logic
+    reg_i     : in to_SPRITE_REG_t;
+    reg_o     : out from_SPRITE_REG_t
 	);
 
 end sptReg;
 
 architecture SYN of sptReg is
 
-	signal xFlip		: std_logic;
-	signal yFlip		: std_logic;
-	signal bg				: std_logic;
-	
+  alias clk       : std_logic is reg_i.clk;
+  alias clk_ena   : std_logic is reg_i.clk_ena;
+
 begin
 
 	process (clk)
 	begin
-		if rising_edge(clk) then
-			if wr = '1' then
-				case addr is
-					when "00" =>
-						sptY <= '0' & din;
-					when "01" =>
-						sptNum <= "0000" & din;
-					when "10" =>
-						yFlip <= din(7);
-						xFlip <= din(6);
-						bg <= din(5);
-						SptColour <= "000000" & din(1 downto 0);
-					when others =>
-						sptX <= din;
-				end case;
-			end if;
+		if rising_edge(clk) and clk_ena = '1' then
+      if reg_i.a(7 downto 2) = std_logic_vector(to_unsigned(INDEX, 6)) then
+        if reg_i.wr = '1' then
+          case reg_i.a(1 downto 0) is
+            when "00" =>
+              reg_o.y <= "000" & reg_i.d;
+            when "01" =>
+              reg_o.n <= "0000" & reg_i.d;
+            when "10" =>
+              reg_o.yflip <= reg_i.d(7);
+              reg_o.xflip <= reg_i.d(6);
+              reg_o.pri <= not reg_i.d(5);
+              reg_o.colour <= "000000" & reg_i.d(1 downto 0);
+            when others =>
+              reg_o.x <= "000" & reg_i.d;
+          end case;
+        end if;
+      end if;
 		end if;
 	end process;
-	
-	sptFlags <= "00000" & bg & yFlip & xFlip;
-	sptPri <= not bg;
 
 end SYN;

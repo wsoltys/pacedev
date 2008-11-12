@@ -76,7 +76,7 @@ begin
 		adj_y <= video_ctl.y;
 	end generate GEN_Y_HSCROLL;
 		
-	ctl_o.tile_a(15 downto 13) <= (others => '0');
+	ctl_o.tile_a(ctl_o.tile_a'left downto 13) <= (others => '0');
 	
 	-- these are constant for a whole line
 	ctl_o.map_a(ctl_o.map_a'left downto 11) <= (others => '0');
@@ -95,81 +95,77 @@ begin
 		variable clut_entry		: std_logic_vector(7 downto 0);
 		
 		-- pipelined pixel X location
-		type pix_x_pipe is array (natural range <>) of std_logic_vector(4 downto 0);
-		variable pix_x_r	: pix_x_pipe(1 downto 0);
+		type x_pipe_t is array (natural range <>) of std_logic_vector(4 downto 0);
+		variable x_r	: x_pipe_t(DELAY-2 downto 0);
 				
   begin
+  
   	if rising_edge(clk) and clk_ena = '1' then
 
-			if hblank = '1' then
-				null;
-			else
+      -- 1st stage of pipeline
+      -- - read tile from tilemap
+      -- - read attribute data
+      if stb = '1' then
+        if NES_MIRROR_VERTICAL then
+          -- fudge - $2000 passed in via attr_d(15..8)
+          -- - $2004.(1..0) selects name table address
+          ctl_o.map_a(10) <= tile_x(5) xor ctl_i.attr_d(8);
+          ctl_o.attr_a(6) <= tile_x(5) xor ctl_i.attr_d(8);
+        end if;
+        ctl_o.map_a(4 downto 0) <= tile_x(4 downto 0);
+        -- generate attribute RAM address
+        -- each attribute controls a 4x4 tile square
+        -- addr = (y/4)*8 + (x/4)
+        ctl_o.attr_a(5 downto 0) <= tile_y(4 downto 2) & tile_x(4 downto 2);
+      end if;
 
-				-- 1st stage of pipeline
-				-- - read tile from tilemap
-				-- - read attribute data
-				if NES_MIRROR_VERTICAL then
-					-- fudge - $2000 passed in via attr_d(15..8)
-					-- - $2004.(1..0) selects name table address
-					ctl_o.map_a(10) <= tile_x(5) xor ctl_i.attr_d(8);
-					ctl_o.attr_a(6) <= tile_x(5) xor ctl_i.attr_d(8);
-				end if;
-				ctl_o.map_a(4 downto 0) <= tile_x(4 downto 0);
-			  -- generate attribute RAM address
-				-- each attribute controls a 4x4 tile square
-				-- addr = (y/4)*8 + (x/4)
-			  ctl_o.attr_a(5 downto 0) <= tile_y(4 downto 2) & tile_x(4 downto 2);
+      -- 2nd stage of pipeline
+      -- - read tile data from tile ROM
+      ctl_o.tile_a(11 downto 4) <= ctl_i.map_d(7 downto 0); -- each tile is 16 bytes
+      ctl_o.tile_a(0) <= x_r(1)(2);
+      
+      -- calculate which bits of the attribute bytes we need
+      -- each pair of bits controls a 2x2 quadrant of the square
+      attr_b := tile_y(1) & x_r(x_r'left)(4);
+      case attr_b is
+        when "00" =>
+          attr <= ctl_i.attr_d(1 downto 0);
+        when "01" =>
+          attr <= ctl_i.attr_d(3 downto 2);					
+        when "10" =>
+          attr <= ctl_i.attr_d(5 downto 4);
+        when others =>
+          attr <= ctl_i.attr_d(7 downto 6);
+      end case;
+            
+      -- each byte contains information for 4 pixels
+      case x_r(x_r'left)(1 downto 0) is
+        when "00" =>
+          pel := ctl_i.tile_d(6) & ctl_i.tile_d(7);
+        when "01" =>
+          pel := ctl_i.tile_d(4) & ctl_i.tile_d(5);
+        when "10" =>
+          pel := ctl_i.tile_d(2) & ctl_i.tile_d(3);
+        when others =>
+          pel := ctl_i.tile_d(0) & ctl_i.tile_d(1);
+      end case;
 
-				-- 2nd stage of pipeline
-				-- - read tile data from tile ROM
-			  ctl_o.tile_a(11 downto 4) <= ctl_i.map_d(7 downto 0); -- each tile is 16 bytes
-				ctl_o.tile_a(0) <= pix_x_r(0)(2);
-				
-				-- calculate which bits of the attribute bytes we need
-				-- each pair of bits controls a 2x2 quadrant of the square
-				attr_b := tile_y(1) & pix_x_r(0)(4);
-				case attr_b is
-					when "00" =>
-						attr <= ctl_i.attr_d(1 downto 0);
-					when "01" =>
-						attr <= ctl_i.attr_d(3 downto 2);					
-					when "10" =>
-						attr <= ctl_i.attr_d(5 downto 4);
-					when others =>
-						attr <= ctl_i.attr_d(7 downto 6);
-				end case;
-							
-				-- each byte contains information for 4 pixels
-				case pix_x_r(1)(1 downto 0) is
-					when "00" =>
-	          pel := ctl_i.tile_d(6) & ctl_i.tile_d(7);
-					when "01" =>
-	          pel := ctl_i.tile_d(4) & ctl_i.tile_d(5);
-					when "10" =>
-	          pel := ctl_i.tile_d(2) & ctl_i.tile_d(3);
-					when others =>
-	        	pel := ctl_i.tile_d(0) & ctl_i.tile_d(1);
-				end case;
+      -- extract R,G,B from colour palette
+      clut_entry := graphics_i.pal(conv_integer(attr & pel(1) & pel(0)));
+      pal_entry := pal(conv_integer(clut_entry(5 downto 0)));
+      ctl_o.rgb.r <= pal_entry(0) & "0000";
+      ctl_o.rgb.g <= pal_entry(1) & "0000";
+      ctl_o.rgb.b <= pal_entry(2) & "0000";
 
-				-- extract R,G,B from colour palette
-				clut_entry := graphics_i.pal(conv_integer(attr & pel(1) & pel(0)));
-				pal_entry := pal(conv_integer(clut_entry(5 downto 0)));
-				ctl_o.rgb.r <= pal_entry(0) & "0000";
-				ctl_o.rgb.g <= pal_entry(1) & "0000";
-				ctl_o.rgb.b <= pal_entry(2) & "0000";
+      --if not (attr = "00" and pel = "00") then
+      if pel /= "00" then
+        ctl_o.set <= '1';
+      else
+        ctl_o.set <= '0';
+      end if;
 
-				--if not (attr = "00" and pel = "00") then
-				if pel /= "00" then
-					ctl_o.set <= '1';
-				else
-					ctl_o.set <= '0';
-				end if;
-
-			end if; -- hblank = '1'
-				
 			-- pipelined because of tile data look-up
-			pix_x_r(1) := pix_x_r(0);
-			pix_x_r(0) := adj_x(pix_x_r(0)'range);
+			x_r := x_r(x_r'left-1 downto 0) & adj_x(x_r(0)'range);
 			
 		end if;				
 

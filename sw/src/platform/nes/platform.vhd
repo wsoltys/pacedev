@@ -1,92 +1,84 @@
-library IEEE;
-use IEEE.std_logic_1164.all;
-use IEEE.std_logic_unsigned.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
-use work.kbd_pkg.all;
+use work.video_controller_pkg.all;
+use work.sprite_pkg.all;
 use work.project_pkg.all;
+use work.platform_pkg.all;
 
-entity Game is
+entity platform is
+  generic
+  (
+    NUM_INPUT_BYTES   : integer
+  );
   port
   (
     -- clocking and reset
-    clk							: in std_logic_vector(0 to 3);                       
-    reset           : in std_logic;                       
-    test_button     : in std_logic;                       
+    clk_i           : in std_logic_vector(0 to 3);
+    reset_i         : in std_logic;
 
-    -- inputs
-    ps2clk          : inout std_logic;                       
-    ps2data         : inout std_logic;                       
-    dip             : in std_logic_vector(7 downto 0);    
-		jamma						: in JAMMAInputsType;
-		
-    -- micro buses
-    upaddr          : out std_logic_vector(15 downto 0);   
-    updatao         : out std_logic_vector(7 downto 0);    
+    -- misc I/O
+    buttons_i       : in from_BUTTONS_t;
+    switches_i      : in from_SWITCHES_t;
+    leds_o          : out to_LEDS_t;
 
-    -- SRAM
+    -- controller inputs
+    inputs_i        : in from_MAPPED_INPUTS_t(0 to NUM_INPUT_BYTES-1);
+
+    -- FLASH/SRAM
+    flash_i         : in from_FLASH_t;
+    flash_o         : out to_FLASH_t;
 		sram_i					: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
 
-    gfxextra_data   : out std_logic_vector(7 downto 0);
-		palette_data		: out ByteArrayType(15 downto 0);
+    -- graphics
+    
+    bitmap_i        : in from_BITMAP_CTL_t;
+    bitmap_o        : out to_BITMAP_CTL_t;
+    
+    tilemap_i       : in from_TILEMAP_CTL_t;
+    tilemap_o       : out to_TILEMAP_CTL_t;
 
-    -- graphics (bitmap)
-    bitmap_addr			: in std_logic_vector(15 downto 0);   
-    bitmap_data			: out std_logic_vector(7 downto 0);    
+    sprite_reg_o    : out to_SPRITE_REG_t;
+    sprite_i        : in from_SPRITE_CTL_t;
+    sprite_o        : out to_SPRITE_CTL_t;
+		spr0_hit				: in std_logic;
 
-    -- graphics (tilemap)
-    tileaddr        : in std_logic_vector(15 downto 0);   
-    tiledatao       : out std_logic_vector(7 downto 0);    
-    tilemapaddr     : in std_logic_vector(15 downto 0);   
-    tilemapdatao    : out std_logic_vector(15 downto 0);    
-    attr_addr       : in std_logic_vector(9 downto 0);    
-    attr_dout       : out std_logic_vector(15 downto 0);   
-
-    -- graphics (sprite)
-    sprite_reg_addr : out std_logic_vector(7 downto 0);    
-    sprite_wr       : out std_logic;                       
-    spriteaddr      : in std_logic_vector(15 downto 0);   
-    spritedata      : out std_logic_vector(31 downto 0);
-		spr0_hit				: in std_logic; 
-
-    -- graphics (control)
-    vblank          : in std_logic;    
-		xcentre					: out std_logic_vector(9 downto 0);
-		ycentre					: out std_logic_vector(9 downto 0);
-
+    -- various graphics information
+    graphics_i      : in from_GRAPHICS_t;
+    graphics_o      : out to_GRAPHICS_t;
+    
     -- OSD
-    to_osd          : out to_OSD_t;
-    from_osd        : in from_OSD_t;
+    osd_i           : in from_OSD_t;
+    osd_o           : out to_OSD_t;
 
     -- sound
-    snd_rd          : out std_logic;                       
-    snd_wr          : out std_logic;
-    sndif_datai     : in std_logic_vector(7 downto 0);    
-
-    -- spi interface
-    spi_clk         : out std_logic;                       
-    spi_din         : in std_logic;                       
-    spi_dout        : out std_logic;                       
-    spi_ena         : out std_logic;                       
-    spi_mode        : out std_logic;                       
-    spi_sel         : out std_logic;                       
+    snd_i           : in from_SOUND_t;
+    snd_o           : out to_SOUND_t;
+    
+    -- SPI (flash)
+    spi_i           : in from_SPI_t;
+    spi_o           : out to_SPI_t;
 
     -- serial
-    ser_rx          : in std_logic;                       
-    ser_tx          : out std_logic;                       
+    ser_i           : in from_SERIAL_t;
+    ser_o           : out to_SERIAL_t;
 
-    -- on-board leds
-    leds            : out std_logic_vector(7 downto 0)    
+    -- general purpose I/O
+    gp_i            : in from_GP_t;
+    gp_o            : out to_GP_t
   );
-end Game;
 
-architecture SYN of Game is
+end platform;
 
-	alias clk_21M28				: std_logic is clk(0);
-	alias clk_40M					: std_logic is clk(1);
+architecture SYN of platform is
+
+	alias clk_21M28				: std_logic is clk_i(0);
+	alias clk_video				: std_logic is clk_i(1);
 	
 	signal reset_n				: std_logic;
 	
@@ -140,11 +132,10 @@ architecture SYN of Game is
 	signal dmc_datao			: std_logic_vector(7 downto 0);
 							
   -- keyboard signals
-	signal inputs					: in8(0 to 6);
 	signal joypad1				: std_logic_vector(23 downto 0);
 	signal joypad2				: std_logic_vector(23 downto 0);
-	alias cpu_reset				: std_logic is inputs(6)(0);
-	alias cpu_pause				: std_logic is inputs(6)(1);
+	alias cpu_reset				: std_logic is inputs_i(6).d(0);
+	alias cpu_pause				: std_logic is inputs_i(6).d(1);
 
 	signal game_reset			: std_logic;
 	signal game_reset_n		: std_logic;
@@ -173,8 +164,8 @@ architecture SYN of Game is
 	
 begin
 
-	reset_n <= not reset;
-	game_reset <= reset or cpu_reset;
+	reset_n <= not reset_i;
+	game_reset <= reset_i or cpu_reset;
 	game_reset_n <= not game_reset;
 
 	-- SRAM signals always driven		
@@ -218,7 +209,7 @@ begin
 	up_nmi_n <= (not in_vblank) when ppu_ctl1(7) = '1' else '1';
 
 	-- PPU registers
-	process (clk_21M28, clk_1M77_en, reset)
+	process (clk_21M28, clk_1M77_en, reset_i)
 		variable state_2005 	: std_logic;
 		variable state_2006 	: std_logic;
 		variable vram_buffer	: std_logic_vector(7 downto 0);
@@ -228,7 +219,7 @@ begin
 		variable spr0_hit_r		: std_logic;
 		
 	begin
-		if reset = '1' then
+		if reset_i = '1' then
 			in_vblank <= '0';
 			vram_wr <= '0';
 			aram_wr <= '0';
@@ -341,23 +332,26 @@ begin
 					end if;
 				end if;
 			end if; -- clk_1M77_en = '1'
-			vblank_r := vblank_r(vblank_r'left-1 downto 0) & vblank;
+			vblank_r := vblank_r(vblank_r'left-1 downto 0) & graphics_i.vblank;
 		end if; -- rising_edge()
 	end process;
 
+  sprite_reg_o.clk <= clk_21M28;
+  sprite_reg_o.clk_ena <= clk_1M77_en;
+  
 	-- (sprite) DMA
-	process (clk_21M28, clk_1M77_en, reset)
+	process (clk_21M28, clk_1M77_en, reset_i)
 		variable dip			: std_logic := '0';
 		variable state		: std_logic := '0';
 		variable dma_data	: std_logic_vector(7 downto 0) := (others => '0');
 	begin
-		if reset = '1' then
+		if reset_i = '1' then
 			dip := '0';
 			state := '0';
 		elsif rising_edge(clk_21M28) then
 			if clk_1M77_en = '1' then
 				-- defaults
-				sprite_wr <= '0';
+				sprite_reg_o.wr <= '0';
 				if dip = '0' then
 					if dma_wr = '1' then
 						dma_addr(15 downto 8) <= up_datao;
@@ -372,9 +366,9 @@ begin
 						dma_data := wram_datao;
 					else
 						-- external sprite registers
-						sprite_reg_addr <= dma_count;
-						updatao <= dma_data;
-						sprite_wr <= '1';
+						sprite_reg_o.a <= dma_count;
+						sprite_reg_o.d <= dma_data;
+						sprite_reg_o.wr <= '1';
 						if dma_count = X"FF" then
 							dip := '0';
 						else
@@ -390,10 +384,10 @@ begin
 	end process;
 
 	-- controller inputs
-	process (clk_21M28, clk_1M77_en, reset)
+	process (clk_21M28, clk_1M77_en, reset_i)
 		variable joy_reset : std_logic;
 	begin
-		if reset = '1' then
+		if reset_i = '1' then
 			joy_reset := '0';
 		elsif rising_edge(clk_21M28) then
 			if clk_1M77_en = '1' then
@@ -412,8 +406,8 @@ begin
 						if up_addr(0) = '0' then
 							-- latch joypad values on 1->0 transition of bit 0
 							if joy_reset = '1' and up_datao(0) = '0' then
-								joypad1 <= inputs(2) & inputs(1) & inputs(0);
-								joypad2 <= inputs(5) & inputs(4) & inputs(3);
+								joypad1 <= inputs_i(2).d & inputs_i(1).d & inputs_i(0).d;
+								joypad2 <= inputs_i(5).d & inputs_i(4).d & inputs_i(3).d;
 							end if;
 							joy_reset := up_datao(0);
 						end if; -- $4016
@@ -427,13 +421,13 @@ begin
 	joy_data(0) <= joypad1(0) when up_addr(0) = '0' else joypad2(0);
 
 	-- DMC
-	process (clk_21M28, clk_1M77_en, reset)
+	process (clk_21M28, clk_1M77_en, reset_i)
 		variable length_cnt : std_logic_vector(7 downto 0) := (others => '0');
 		variable dmc_mode		: std_logic_vector(1 downto 0) := "00";
 		variable dmc_en			: std_logic := '0';
 		variable dmc_irq		: std_logic := '0';
 	begin
-		if reset = '1' then
+		if reset_i = '1' then
 			dmc_en := '0';
 			dmc_irq := '0';
 		elsif rising_edge(clk_21M28) then
@@ -486,7 +480,7 @@ begin
 	
 	GEN_PAL : for i in 15 downto 0 generate
 		-- only do tile palette for now
-		palette_data(i) <= ppu_pal(i);
+		graphics_o.pal(i) <= ppu_pal(i);
 	end generate GEN_PAL;
 	
   --
@@ -502,7 +496,7 @@ begin
 		port map
 		(
 			clk				=> clk_21M28,
-			reset			=> reset,
+			reset			=> reset_i,
 			clk_en		=> clk_1M77_en
 		);
 
@@ -531,23 +525,6 @@ begin
 			DI      		=> up_datai,
 			DO      		=> up_datao
 		);
-
-	inputs_inst : entity work.Inputs
-		generic map
-		(
-			NUM_INPUTS	=> inputs'length
-		)
-	  port map
-	  (
-	    clk     		=> clk_21M28,
-	    reset   		=> reset,
-	    ps2clk  		=> ps2clk,
-	    ps2data 		=> ps2data,
-			jamma				=> jamma,
-
-	    dips				=> dip,
-	    inputs			=> inputs
-	  );
 
 	GEN_INTERNAL_WRAM : if NES_USE_INTERNAL_WRAM generate
 
@@ -600,13 +577,13 @@ begin
 			data_b			=> vram_datai,
 			q_b					=> vram_datao,
 
-			clock_a			=> clk_40M,
-			address_a		=> tilemapaddr(10 downto 0),
+			clock_a			=> clk_video,
+			address_a		=> tilemap_i.map_a(10 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tilemapdatao(7 downto 0)
+			q_a					=> tilemap_o.map_d(7 downto 0)
 		);
-	tilemapdatao(15 downto 8) <= (others => '0');
+	tilemap_o.map_d(15 downto 8) <= (others => '0');
 	--
 	-- *** this actually depends on the cart wiring
 	--
@@ -614,14 +591,14 @@ begin
 		-- eg. Super Mario Bros.
 		mirrored_vram_addr_10 <= vram_addr(10);
 		-- only valid for horizontally scrolling games
-  	gfxextra_data <= hscroll;
+  	graphics_o.bit8_1 <= hscroll;
 	end generate GEN_VERTICAL_MIRRORING;
 	
 	GEN_HORIZONTAL_MIRRORING : if NES_MIRROR_HORIZONTAL generate
 		-- eg. Wrecking Crew
 		mirrored_vram_addr_10 <= vram_addr(11);
 		-- only valid for vertically scrolling games
-  	gfxextra_data <= vscroll;
+  	graphics_o.bit8_1 <= vscroll;
 	end generate GEN_HORIZONTAL_MIRRORING;
 
 	-- this one block contains attribute RAM for *both* internal tables		
@@ -642,15 +619,15 @@ begin
 			data_b								=> vram_datai,
 			q_b										=> open,
 
-			clock_a								=> clk_40M,
-			address_a(6)					=> attr_addr(6),
-			address_a(5 downto 0)	=> attr_addr(5 downto 0),
+			clock_a								=> clk_video,
+			address_a(6)					=> tilemap_i.attr_a(6),
+			address_a(5 downto 0)	=> tilemap_i.attr_a(5 downto 0),
 			wren_a								=> '0',
 			data_a								=> (others => 'X'),
-			q_a										=> attr_dout(7 downto 0)
+			q_a										=> tilemap_o.attr_d(7 downto 0)
 		);
 	-- fudge - pass PPU CTL1 register value to MAPCTL
-	attr_dout(15 downto 8) <= ppu_ctl1;
+	tilemap_o.attr_d(15 downto 8) <= ppu_ctl1;
 		
 	prg_rom_inst : entity work.sprom
 		generic map
@@ -678,38 +655,29 @@ begin
 		)
 		port map
 		(
-			clock				=> clk_40M,
+			clock				=> clk_video,
 			
 			-- tilemap i/f
-			address_a		=> tileaddr(12 downto 0),
-			q_a					=> tiledatao,
+			address_a		=> tilemap_i.tile_a(12 downto 0),
+			q_a					=> tilemap_o.tile_d,
 			
 			-- sprite i/f
-			address_b		=> spriteaddr(11 downto 0),
-			q_b(15 downto 8)	=> spritedata(23 downto 16),
-			q_b(7 downto 0)		=> spritedata(31 downto 24)
+			address_b		=> sprite_i.a(11 downto 0),
+			q_b(15 downto 8)	=> sprite_o.d(23 downto 16),
+			q_b(7 downto 0)		=> sprite_o.d(31 downto 24)
 		);
 	-- fudge 8-pixel wide sprite
-	--spritedata <= X"FFFF0000";
-	spritedata(15 downto 0) <= (others => '0');
+	sprite_o.d(15 downto 0) <= (others => '0');
 
   -- unused outputs
-
-	xcentre <= (others => '0');
-	ycentre <= (others => '0');
-	
-	upaddr <= up_addr(upaddr'range);
-
-	snd_rd <= '0';
-	snd_wr <= '0';
-
-	bitmap_data <= (others => '0');
-	spi_clk <= '0';
-	spi_dout <= '0';
-	spi_ena <= '0';
-	spi_mode <= '0';
-	spi_sel <= '0';
-	ser_tx <= 'X';
-	leds <= inputs(0);
+  flash_o <= NULL_TO_FLASH;
+	bitmap_o.d <= (others => '0');
+	graphics_o.bit16_1 <= (others => '0');
+	osd_o <= NULL_TO_OSD;
+  snd_o <= NULL_TO_SOUND;
+	spi_o <= NULL_TO_SPI;
+	ser_o <= NULL_TO_SERIAL;
+	leds_o <= std_logic_vector(resize(unsigned(inputs_i(0).d),leds_o'length));
+	gp_o <= (others => '0');
 	
 end SYN;

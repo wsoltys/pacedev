@@ -46,16 +46,16 @@ architecture SYN of spritectl is
 	
 begin
 
-  flipData <= flip_row (ctl_i.d(31 downto 16) & ctl_i.d(31 downto 0), reg_i.xflip);
+  flipData <= flip_row (ctl_i.d(31 downto 16) & ctl_i.d(31 downto 16), reg_i.xflip);
 
 	process (clk, clk_ena)
 
    	variable rowStore : std_logic_vector(31 downto 0);  -- saved row of spt to show during visibile period
 		alias pel : std_logic_vector(1 downto 0) is rowStore(31 downto 30);
-    variable yMat  : boolean;                         	-- raster is between first and last line of sprite
-    variable xMat  : boolean;                         	-- raster in between left edge and end of line
-    variable xLocAdj : std_logic_vector(7 downto 0);
-    variable yLocAdj : std_logic_vector(8 downto 0);
+    variable yMat : boolean;                         	-- raster is between first and last line of sprite
+    variable xMat : boolean;                         	-- raster in between left edge and end of line
+    variable x    : std_logic_vector(video_ctl.x'range);
+    variable y    : std_logic_vector(video_ctl.y'range);
 
 		-- nes sprites are only 8x8/16 pixels
 		-- the width of rowCount determines the scanline multipler
@@ -71,8 +71,8 @@ begin
 
 		if rising_edge(clk) and clk_ena = '1' then
 
-			xLocAdj := reg_i.x;
-  		yLocAdj := reg_i.y;
+			x := reg_i.x;
+  		y := reg_i.y;
 			
 			if video_ctl.hblank = '1' then
 
@@ -82,7 +82,7 @@ begin
 					yMat := false;
 				end if;
 				
-				if yLocAdj = video_ctl.y then
+				if y = video_ctl.y then
 					-- start counting sprite row
 					rowCount := (others => '0');
 					yMat := true;
@@ -93,15 +93,17 @@ begin
 
 				if ctl_i.ld = '1' then
 					if yMat then
-						rowStore := flipData;			-- load sprite data
+						rowStore := flipData(31 downto 16) & X"0000";			-- load sprite data
 					else
 						rowStore := (others => '0');
 					end if;
 				end if;
 						
-			else
+			end if;
 			
-				if video_ctl.x = xLocAdj then
+			if video_ctl.stb = '1' then
+			
+				if video_ctl.x = x then
 					-- count up at left edge of sprite
 					rowCount := rowCount + 1;
 					-- start of sprite
@@ -118,17 +120,16 @@ begin
 				rgb.g <= pal_entry(1) & "0000";
 				rgb.b <= pal_entry(2) & "0000";
 
-			  -- set pixel transparency based on match
-				--if xMat and yMat and not (colour(1 downto 0) = "00" and pel = "00") then 
-				if xMat and yMat and not (pel = "00") then 
-			  	ctl_o.set <= '1';
-				else
-					ctl_o.set <= '0';
-				end if;
-
 				if xMat then
 					-- shift in next pixel
 					rowStore := rowStore(29 downto 0) & "00";
+				end if;
+
+			  -- set pixel transparency based on match
+				--if xMat and yMat and not (colour(1 downto 0) = "00" and pel = "00") then 
+        ctl_o.set <= '0';
+				if xMat and yMat and not (pel = "00") then 
+			  	ctl_o.set <= '1';
 				end if;
 
 			end if;
