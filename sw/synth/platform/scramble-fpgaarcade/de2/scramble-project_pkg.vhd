@@ -33,13 +33,13 @@ package project_pkg is
   
   -- DE2 constants which *MUST* be defined
   
-	constant DE2_LCD_LINE2							      : string := " FROGGER (VGA)  ";
+	constant DE2_LCD_LINE2							      : string := " SCRAMBLE (VGA) ";
 
 	--
 	-- Scramble/Frogger-specific constants
 	--
 	
-	constant SCRAMBLE_BUILD_SCRAMBLE		: boolean := false;
+	constant SCRAMBLE_BUILD_SCRAMBLE		: boolean := true;
 	constant SCRAMBLE_BUILD_FROGGER			: boolean := not SCRAMBLE_BUILD_SCRAMBLE;
 
   -- not enough memory in the EP2C20 for sound - gets optimised out
