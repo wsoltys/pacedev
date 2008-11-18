@@ -126,6 +126,8 @@ architecture SYN of target_top is
   signal flash_o      : to_FLASH_t;
 	signal sram_i			  : from_SRAM_t;
 	signal sram_o			  : to_SRAM_t;	
+	signal sdram_i      : from_SDRAM_t;
+	signal sdram_o      : to_SDRAM_t;
 	signal video_i      : from_VIDEO_t;
   signal video_o      : to_VIDEO_t;
   signal audio_i      : from_AUDIO_t;
@@ -403,6 +405,7 @@ begin
 
   BLK_SDRAM : block
   begin
+
     GEN_NO_SDRAM : if not PACE_HAS_SDRAM generate
       dram_addr <= (others => 'Z');
       dram_we_n <= '1';
@@ -411,6 +414,22 @@ begin
       dram_cke <= '0';
     end generate GEN_NO_SDRAM;
   
+    GEN_SDRAM : if PACE_HAS_SDRAM generate
+      sdram_i.d <= std_logic_vector(resize(unsigned(dram_dq), sdram_i.d'length));
+      dram_dq <= sdram_o.d(dram_dq'range) when sdram_o.we_n = '0' else (others => 'Z');
+      dram_addr <= sdram_o.a(dram_addr'range);
+      dram_ldqm <= sdram_o.ldqm;
+      dram_udqm <= sdram_o.udqm;
+      dram_we_n <= sdram_o.we_n;
+      dram_cas_n <= sdram_o.cas_n;
+      dram_ras_n <= sdram_o.ras_n;
+      dram_cs_n <= sdram_o.cs_n;
+      dram_ba_0 <= sdram_o.ba(0);
+      dram_ba_1 <= sdram_o.ba(1);
+      dram_clk <= sdram_o.clk;
+      dram_cke <= sdram_o.cke;
+    end generate GEN_SDRAM;
+
   end block BLK_SDRAM;
 
   BLK_VIDEO : block
@@ -584,6 +603,8 @@ begin
       flash_o           => flash_o,
       sram_i        		=> sram_i,
       sram_o        		=> sram_o,
+     	sdram_i           => sdram_i,
+     	sdram_o           => sdram_o,
   
       -- VGA video
       video_i           => video_i,

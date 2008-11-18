@@ -30,6 +30,8 @@ entity PACE is
     flash_o         : out to_flash_t;
     sram_i       		: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
+    sdram_i         : in from_SDRAM_t;
+    sdram_o         : out to_SDRAM_t;
 
     -- video
     video_i         : in from_VIDEO_t;

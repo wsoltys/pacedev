@@ -126,6 +126,8 @@ architecture SYN of target_top is
   signal flash_o      : to_FLASH_t;
 	signal sram_i			  : from_SRAM_t;
 	signal sram_o			  : to_SRAM_t;	
+	signal sdram_i      : from_SDRAM_t;
+	signal sdram_o      : to_SDRAM_t;
 	signal video_i      : from_VIDEO_t;
   signal video_o      : to_VIDEO_t;
   signal audio_i      : from_AUDIO_t;
@@ -248,19 +250,39 @@ begin
     sram_i.d <= (others => '1');
   end generate GEN_NO_SRAM;
 
-  GEN_NO_SDRAM : if true generate
-    sdram_clock <= '1';
-    sdram_addr <= (others => 'Z');
-    sdram_ba <= (others => 'Z');
-    sdram_ncas <= 'Z';
-    sdram_cke <= 'Z';
-    sdram_ncs <= 'Z';
-    sdram_dq <= (others => 'Z');
-    sdram_dqm <= (others => 'Z');
-    sdram_nras <= 'Z';
-    sdram_nwe <= '1';
-  end generate GEN_NO_SDRAM;
+  BLK_SDRAM : block
+  begin
+  
+    GEN_NO_SDRAM : if not PACE_HAS_SDRAM generate
+      sdram_clock <= '1';
+      sdram_addr <= (others => 'Z');
+      sdram_ba <= (others => 'Z');
+      sdram_ncas <= 'Z';
+      sdram_cke <= 'Z';
+      sdram_ncs <= 'Z';
+      sdram_dq <= (others => 'Z');
+      sdram_dqm <= (others => 'Z');
+      sdram_nras <= 'Z';
+      sdram_nwe <= '1';
+    end generate GEN_NO_SDRAM;
 	
+    GEN_SDRAM : if PACE_HAS_SDRAM generate
+      sdram_i.d <= std_logic_vector(resize(unsigned(sdram_dq), sdram_i.d'length));
+      sdram_dq <= sdram_o.d(sdram_dq'range) when sdram_o.we_n = '0' else (others => 'Z');
+      sdram_addr <= sdram_o.a(sdram_addr'range);
+      sdram_dqm(1) <= sdram_o.ldqm;
+      sdram_dqm(0) <= sdram_o.udqm;
+      sdram_nwe <= sdram_o.we_n;
+      sdram_ncas <= sdram_o.cas_n;
+      sdram_nras <= sdram_o.ras_n;
+      sdram_ncs <= sdram_o.cs_n;
+      sdram_ba <= sdram_o.ba;
+      sdram_clock <= sdram_o.clk;
+      sdram_cke <= sdram_o.cke;
+    end generate GEN_SDRAM;
+
+  end block BLK_SDRAM;
+  
   BLK_VIDEO : block
   begin
 
@@ -333,6 +355,8 @@ begin
       flash_o           => flash_o,
       sram_i        		=> sram_i,
       sram_o        		=> sram_o,
+     	sdram_i           => sdram_i,
+     	sdram_o           => sdram_o,
   
       -- VGA video
       video_i           => video_i,

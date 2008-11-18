@@ -312,11 +312,11 @@ begin
   tilemap_o <= NULL_TO_TILEMAP_CTL;
   sprite_reg_o <= NULL_TO_SPRITE_REG;
   sprite_o <= NULL_TO_SPRITE_CTL;
+  --osd_o <= NULL_TO_OSD;
   spi_o <= NULL_TO_SPI;
   ser_o <= NULL_TO_SERIAL;
 	leds_o <= (others => '0');
   gp_o <= NULL_TO_GP;
-  --to_osd <= NULL_TO_OSD;
   
 	-- generate CPU clock (2MHz from 20MHz)
 	clk_en_inst : entity work.clk_div

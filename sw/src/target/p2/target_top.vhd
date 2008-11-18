@@ -167,6 +167,8 @@ architecture SYN of target_top is
   signal flash_o      : to_FLASH_t;
 	signal sram_i			  : from_SRAM_t;
 	signal sram_o			  : to_SRAM_t;	
+	signal sdram_i      : from_SDRAM_t;
+	signal sdram_o      : to_SDRAM_t;
 	signal video_i      : from_VIDEO_t;
   signal video_o      : to_VIDEO_t;
   signal audio_i      : from_AUDIO_t;
@@ -405,6 +407,21 @@ begin
 
     end generate GEN_NO_SDRAM;
 
+    GEN_SDRAM : if PACE_HAS_SDRAM generate
+      sdram_i.d <= d_dr1;
+      d_dr1 <= sdram_o.d when sdram_o.we_n = '0' else (others => 'Z');
+      a_dr1 <= sdram_o.a;
+      dqm_dr1(0) <= sdram_o.ldqm;
+      dqm_dr1(1) <= sdram_o.udqm;
+      nwe_dr1 <= sdram_o.we_n;
+      ncas_dr1 <= sdram_o.cas_n;
+      nras_dr1 <= sdram_o.ras_n;
+      ncs_dr1 <= sdram_o.cs_n;
+      ba_dr1 <= sdram_o.ba;
+      clk_dr1 <= sdram_o.clk;
+      cke_dr1 <= sdram_o.cke;
+    end generate GEN_SDRAM;
+
   end block BLK_SDRAM;
 
   BLK_VIDEO : block
@@ -591,6 +608,8 @@ begin
       flash_o           => flash_o,
       sram_i        		=> sram_i,
       sram_o        		=> sram_o,
+     	sdram_i           => sdram_i,
+     	sdram_o           => sdram_o,
   
       -- VGA video
       video_i           => video_i,
