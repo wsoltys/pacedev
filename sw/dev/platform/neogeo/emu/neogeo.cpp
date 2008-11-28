@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "starcpu.h"
 
@@ -21,6 +22,11 @@ static unsigned char *battery_sram;     // $D00000-$D0FFFF (64kB)
 // - $3A001X (odd) = set
 static unsigned char sc[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
+static unsigned read_300000_byte (unsigned a, unsigned d);
+static unsigned read_300000_word (unsigned a, unsigned d);
+static unsigned write_300000_byte (unsigned a, unsigned d);
+static unsigned write_300000_word (unsigned a, unsigned d);
+
 struct STARSCREAM_PROGRAMREGION neogeo_programfetch[] = 
 {
   { 0x000000, 0x00007F, (unsigned)vectors - 0x000000 },
@@ -37,27 +43,29 @@ struct STARSCREAM_DATAREGION neogeo_readbyte[] =
   { 0x000000, 0x0FFFFF, NULL, rom_bank_1 },   // overlapping
   { 0x100000, 0x10FFFF, NULL, ram_bank },
   { 0x200000, 0x2FFFFF, NULL, rom_bank_2 },
-  //{ 0x300000, 0x3FFFFF, read_300000, 0 },
+  { 0x300000, 0x3FFFFF, (void *)read_300000_byte, 0 },
   { 0x400000, 0x401FFF, NULL, palette_ram },
   { 0x800000, 0x800FFF, NULL, memcard_ram },
   { 0xC00000, 0xC1FFFF, NULL, system_bios },
   { 0xD00000, 0xD0FFFF, NULL, battery_sram },
   { (unsigned int)-1, (unsigned int)-1, NULL }
 };
+#define NUM_READBYTE (sizeof(neogeo_readbyte)/sizeof(STARSCREAM_DATAREGION))
 
-struct STARSCREAM_DATAREGION *neogeo_readword = neogeo_readbyte;
+struct STARSCREAM_DATAREGION neogeo_readword[NUM_READBYTE];
 
 struct STARSCREAM_DATAREGION neogeo_writebyte[] = 
 {
   { 0x100000, 0x10FFFF, NULL, ram_bank },
-  //{ 0x300000, 0x3FFFFF, write_300000, 0 },
+  { 0x300000, 0x3FFFFF, (void *)write_300000_byte, 0 },
   { 0x400000, 0x401FFF, NULL, palette_ram },
   { 0x800000, 0x800FFF, NULL, memcard_ram },
   { 0xD00000, 0xD0FFFF, NULL, battery_sram },
   { (unsigned int)-1, (unsigned int)-1, NULL }
 };
+#define NUM_WRITEBYTE (sizeof(neogeo_writebyte)/sizeof(STARSCREAM_DATAREGION))
 
-struct STARSCREAM_DATAREGION *neogeo_writeword = neogeo_writebyte;
+struct STARSCREAM_DATAREGION neogeo_writeword[NUM_WRITEBYTE];
 
 int cpu_hw_init (void)
 {
@@ -94,11 +102,17 @@ int cpu_hw_init (void)
   neogeo_readbyte[i++].userdata = system_bios;
   neogeo_readbyte[i++].userdata = battery_sram;
 
+  memcpy (neogeo_readword, neogeo_readbyte, sizeof(neogeo_readbyte));
+  neogeo_readword[4].memorycall = (void *)read_300000_word;
+
   i = 0;
   neogeo_writebyte[i++].userdata = ram_bank;
   neogeo_writebyte[i++].userdata = palette_ram;
   neogeo_writebyte[i++].userdata = memcard_ram;
   neogeo_writebyte[i++].userdata = battery_sram;
+
+  memcpy (neogeo_writeword, neogeo_writebyte, sizeof(neogeo_writebyte));
+  neogeo_writeword[1].memorycall = (void *)write_300000_word;
 
   s68000init ();
 
@@ -134,6 +148,34 @@ int cpu_hw_deinit (void)
 #define EXEC_OUT_OF_RANGE   0x80000001
 #define EXEC_DOUBLE_FAULT   0xFFFFFFFF
 
+unsigned read_300000_byte (unsigned a, unsigned d)
+{
+  printf ("%s($%X,$%X)\n", __FUNCTION__, a, d);
+
+  return (0);
+}
+
+unsigned read_300000_word (unsigned a, unsigned d)
+{
+  printf ("%s($%X,$%X)\n", __FUNCTION__, a, d);
+
+  return (0);
+}
+
+unsigned write_300000_byte (unsigned a, unsigned d)
+{
+  printf ("%s($%X,$%X)\n", __FUNCTION__, a, d);
+
+  return (0);
+}
+
+unsigned write_300000_word (unsigned a, unsigned d)
+{
+  printf ("%s($%X,$%X)\n", __FUNCTION__, a, d);
+
+  return (0);
+}
+
 int main(int argc, char *argv[])
 {
   cpu_hw_init ();
@@ -150,8 +192,8 @@ int main(int argc, char *argv[])
 
   unsigned uret;
   int i;
-  //for (i=0; i<20; i++)
-  while (1)
+  for (i=0; i<20; i++)
+  //while (1)
   {
     uret = s68000exec(1);
     if (uret != EXEC_SUCCESS)
