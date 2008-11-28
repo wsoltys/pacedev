@@ -4,6 +4,9 @@
 
 #include "starcpu.h"
 
+#define VERBOSE_HW_REGS
+//#define VERBOSE_ALL
+
 /*
  *  "Starscream 680x0 emulation library by Neill Corlett (corlett@elwha.nrrc.ncsu.edu)"
  */
@@ -17,15 +20,33 @@ static unsigned char *memcard_ram;      // $800000-$800FFF (4kB)
 static unsigned char *system_bios;      // $C00000-$C1FFFF (128kB)
 static unsigned char *battery_sram;     // $D00000-$D0FFFF (64kB)
 
-// System control register $3A0000-$3A001F
-// - $3A000X (odd) = reset
-// - $3A001X (odd) = set
-static unsigned char sc[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+typedef struct
+{
+  unsigned char   hblank_cnt;
+  unsigned char   swpbios_rom;
+  unsigned char   sramlock_ulock;
+
+} REGS_T, *PREGS_T;
+
+static REGS_T   regs;
 
 static unsigned read_300000_byte (unsigned a, unsigned d);
 static unsigned read_300000_word (unsigned a, unsigned d);
 static unsigned write_300000_byte (unsigned a, unsigned d);
 static unsigned write_300000_word (unsigned a, unsigned d);
+
+static unsigned read_380000_byte (unsigned a, unsigned d);
+static unsigned read_380000_word (unsigned a, unsigned d);
+static unsigned write_380000_byte (unsigned a, unsigned d);
+static unsigned write_380000_word (unsigned a, unsigned d);
+
+static unsigned write_3A0000_byte (unsigned a, unsigned d);
+static unsigned write_3A0000_word (unsigned a, unsigned d);
+
+static unsigned read_3C0000_byte (unsigned a, unsigned d);
+static unsigned read_3C0000_word (unsigned a, unsigned d);
+static unsigned write_3C0000_byte (unsigned a, unsigned d);
+static unsigned write_3C0000_word (unsigned a, unsigned d);
 
 struct STARSCREAM_PROGRAMREGION neogeo_programfetch[] = 
 {
@@ -43,7 +64,9 @@ struct STARSCREAM_DATAREGION neogeo_readbyte[] =
   { 0x000000, 0x0FFFFF, NULL, rom_bank_1 },   // overlapping
   { 0x100000, 0x10FFFF, NULL, ram_bank },
   { 0x200000, 0x2FFFFF, NULL, rom_bank_2 },
-  { 0x300000, 0x3FFFFF, (void *)read_300000_byte, 0 },
+  { 0x300000, 0x31FFFF, (void *)read_300000_byte, 0 },
+  { 0x380000, 0x39FFFF, (void *)read_380000_byte, 0 },
+  { 0x3C0000, 0x3DFFFF, (void *)read_3C0000_byte, 0 },
   { 0x400000, 0x401FFF, NULL, palette_ram },
   { 0x800000, 0x800FFF, NULL, memcard_ram },
   { 0xC00000, 0xC1FFFF, NULL, system_bios },
@@ -57,7 +80,10 @@ struct STARSCREAM_DATAREGION neogeo_readword[NUM_READBYTE];
 struct STARSCREAM_DATAREGION neogeo_writebyte[] = 
 {
   { 0x100000, 0x10FFFF, NULL, ram_bank },
-  { 0x300000, 0x3FFFFF, (void *)write_300000_byte, 0 },
+  { 0x300000, 0x31FFFF, (void *)write_300000_byte, 0 },
+  { 0x380000, 0x39FFFF, (void *)write_380000_byte, 0 },
+  { 0x3A0000, 0x3AFFFF, (void *)write_3A0000_byte, 0 },
+  { 0x3C0000, 0x3DFFFF, (void *)write_3C0000_byte, 0 },
   { 0x400000, 0x401FFF, NULL, palette_ram },
   { 0x800000, 0x800FFF, NULL, memcard_ram },
   { 0xD00000, 0xD0FFFF, NULL, battery_sram },
@@ -82,7 +108,8 @@ int cpu_hw_init (void)
   if (!rom_bank_1 || !ram_bank || !rom_bank_2 || !palette_ram || !memcard_ram || !system_bios || !battery_sram)
     exit (0);
 
-  vectors = (sc[1] == 0 ? system_bios : rom_bank_1);
+  regs.swpbios_rom = 0;
+  vectors = (regs.swpbios_rom == 0 ? system_bios : rom_bank_1);
 
   // set the offsets in program fetch
   int i = 0;
@@ -97,6 +124,7 @@ int cpu_hw_init (void)
   neogeo_readbyte[i++].userdata = rom_bank_1;
   neogeo_readbyte[i++].userdata = ram_bank;
   neogeo_readbyte[i++].userdata = rom_bank_2;
+  i += 3;
   neogeo_readbyte[i++].userdata = palette_ram;
   neogeo_readbyte[i++].userdata = memcard_ram;
   neogeo_readbyte[i++].userdata = system_bios;
@@ -104,15 +132,21 @@ int cpu_hw_init (void)
 
   memcpy (neogeo_readword, neogeo_readbyte, sizeof(neogeo_readbyte));
   neogeo_readword[4].memorycall = (void *)read_300000_word;
+  neogeo_readword[5].memorycall = (void *)read_380000_word;
+  neogeo_readword[6].memorycall = (void *)read_3C0000_word;
 
   i = 0;
   neogeo_writebyte[i++].userdata = ram_bank;
+  i += 4;
   neogeo_writebyte[i++].userdata = palette_ram;
   neogeo_writebyte[i++].userdata = memcard_ram;
   neogeo_writebyte[i++].userdata = battery_sram;
 
   memcpy (neogeo_writeword, neogeo_writebyte, sizeof(neogeo_writebyte));
   neogeo_writeword[1].memorycall = (void *)write_300000_word;
+  neogeo_writeword[2].memorycall = (void *)write_380000_word;
+  neogeo_writeword[3].memorycall = (void *)write_3A0000_word;
+  neogeo_writeword[4].memorycall = (void *)write_3C0000_word;
 
   s68000init ();
 
@@ -150,34 +184,217 @@ int cpu_hw_deinit (void)
 
 unsigned read_300000_byte (unsigned a, unsigned d)
 {
-  printf ("%s($%X,$%X)\n", __FUNCTION__, a, d);
+  unsigned offset = a & 0x01FFFF;
+  unsigned val = 0;
 
-  return (0);
+  switch(offset & 0x80)
+  {
+    case 0x00:
+      val = 0xFE;   // test mode!!!
+      #ifdef VERBOSE_HW_REGS
+        printf ("reg_dipsw($%02X)\n", val);
+      #endif
+      break;
+    case 0x80:
+      break;
+    default:
+      printf ("%s($%X,$%X) - UNKNOWN!\n", __FUNCTION__, a, d);
+      break;
+  }
+
+  return (val);
 }
 
 unsigned read_300000_word (unsigned a, unsigned d)
 {
-  printf ("%s($%X,$%X)\n", __FUNCTION__, a, d);
+  unsigned offset = a & 0x01FFFF;
+  printf ("%s($%X,$%X)\n", __FUNCTION__, offset, d);
 
   return (0);
 }
 
 unsigned write_300000_byte (unsigned a, unsigned d)
 {
-  printf ("%s($%X,$%X)\n", __FUNCTION__, a, d);
+  unsigned offset = a & 0x01FFFF;
+  if (offset & (1<<0))
+  {
+    #ifdef VERBOSE_ALL
+      printf ("kick watchdog\n");
+    #endif
+  }
+  else
+    printf ("%s($%X,$%X) - UNKNOWN!\n", __FUNCTION__, offset, d);
 
   return (0);
 }
 
 unsigned write_300000_word (unsigned a, unsigned d)
 {
-  printf ("%s($%X,$%X)\n", __FUNCTION__, a, d);
+  unsigned offset = a & 0x01FFFF;
+  printf ("%s($%X,$%X)\n", __FUNCTION__, offset, d);
+
+  return (0);
+}
+
+unsigned read_380000_byte (unsigned a, unsigned d)
+{
+  unsigned offset = a & 0x01FFFF;
+  printf ("%s($%X,$%X)\n", __FUNCTION__, offset, d);
+
+  return (0);
+}
+
+unsigned read_380000_word (unsigned a, unsigned d)
+{
+  unsigned offset = a & 0x01FFFF;
+  printf ("%s($%X,$%X)\n", __FUNCTION__, offset, d);
+
+  return (0);
+}
+
+unsigned write_380000_byte (unsigned a, unsigned d)
+{
+  unsigned offset = a & 0x7E;
+  switch (offset)
+  {
+    case 0x30 :
+      #ifdef VERBOSE_ALL
+        printf ("led latch($%X)\n", d);
+      #endif
+      break;
+    case 0x40 :
+      #ifdef VERBOSE_ALL
+        printf ("led send($%X)\n", d);
+      #endif
+      break;
+    case 0x64 : case 0x66 :
+      #ifdef VERBOSE_ALL
+        printf ("coin lockout($%X)\n", d);
+      #endif
+      break;
+    default :
+      printf ("%s($%X,$%X) - UNKNOWN!\n", __FUNCTION__, a, d);
+      break;
+  }
+
+  return (0);
+}
+
+unsigned write_380000_word (unsigned a, unsigned d)
+{
+  unsigned offset = a & 0x01FFFF;
+  printf ("%s($%X,$%X)\n", __FUNCTION__, offset, d);
+
+  return (0);
+}
+
+unsigned write_3A0000_byte (unsigned a, unsigned d)
+{
+  unsigned offset = a & 0x1F;
+  switch (offset)
+  {
+    case 0x03 :
+      regs.swpbios_rom = 0;
+      vectors = system_bios;
+      neogeo_programfetch[0].offset = (unsigned)vectors - neogeo_programfetch[0].lowaddr;
+      neogeo_readbyte[0].userdata = vectors;
+      neogeo_readword[0].userdata = vectors;
+      #ifdef VERBOSE_HW_REGS
+        printf ("reg_swpbios\n");
+      #endif
+      break;
+    case 0x0A : case 0x0B :
+      #ifdef VERBOSE_HW_REGS
+        printf ("reg_brdfix\n");
+      #endif
+      break;
+    case 0x13 :
+      regs.swpbios_rom = 1;
+      vectors = rom_bank_1;
+      neogeo_programfetch[0].offset = (unsigned)vectors - neogeo_programfetch[0].lowaddr;
+      neogeo_readbyte[0].userdata = vectors;
+      neogeo_readword[0].userdata = vectors;
+      #ifdef VERBOSE_HW_REGS
+        printf ("reg_swprom\n");
+      #endif
+      break;
+    case 0x1C : case 0x1D :
+      regs.sramlock_ulock = 1; // unlock
+      #ifdef VERBOSE_HW_REGS
+        printf ("reg_sramulock\n");
+      #endif
+      break;
+    default :
+      printf ("%s($%X,$%X) - UNKNOWN!\n", __FUNCTION__, a, d);
+      break;
+  }
+
+  return (0);
+}
+
+unsigned write_3A0000_word (unsigned a, unsigned d)
+{
+  unsigned offset = a & 0x00FFFF;
+  printf ("%s($%X,$%X)\n", __FUNCTION__, offset, d);
+
+  return (0);
+}
+
+unsigned read_3C0000_byte (unsigned a, unsigned d)
+{
+  unsigned offset = a & 0x01FFFF;
+  printf ("%s($%X,$%X)\n", __FUNCTION__, offset, d);
+
+  return (0);
+}
+
+unsigned read_3C0000_word (unsigned a, unsigned d)
+{
+  unsigned offset = a & 0x01FFFF;
+  printf ("%s($%X,$%X)\n", __FUNCTION__, offset, d);
+
+  return (0);
+}
+
+unsigned write_3C0000_byte (unsigned a, unsigned d)
+{
+  unsigned offset = a & 0x01FFFF;
+  printf ("%s($%X,$%X)\n", __FUNCTION__, offset, d);
+
+  return (0);
+}
+
+unsigned write_3C0000_word (unsigned a, unsigned d)
+{
+  unsigned offset = a & 0x01FFFF;
+  switch (offset)
+  {
+    case 0x000006 :
+      regs.hblank_cnt = (unsigned char)d;
+      #ifdef VERBOSE_HW_REGS
+        printf ("reg_hblank_cnt($%X)\n", d);
+      #endif
+      break;
+    case 0x00000C :
+      #ifdef VERBOSE_HW_REGS
+        printf ("reg_irqack($%X)\n", d);
+      #endif
+      break;
+    default :
+      printf ("%s($%X,$%X) - UNKNOWN!\n", __FUNCTION__, offset, d);
+      break;
+  }
 
   return (0);
 }
 
 int main(int argc, char *argv[])
 {
+  unsigned long int cycles = 0;
+
+  if (--argc)
+    cycles = atol(argv[1]);
+
   cpu_hw_init ();
 
   // read system bios
@@ -191,14 +408,15 @@ int main(int argc, char *argv[])
   printf ("A7=$%X, PC=$%X\n", s68000context.areg[7], s68000context.pc);
 
   unsigned uret;
-  int i;
-  for (i=0; i<20; i++)
-  //while (1)
+  unsigned long int i;
+  while (cycles == 0 || i < cycles)
   {
     uret = s68000exec(1);
     if (uret != EXEC_SUCCESS)
       printf ("s68000exec() failed with $%X\n", uret);
-    printf ("%d: PC=$%X\n", i, s68000context.pc);
+    //printf ("%d: PC=$%X\n", i, s68000context.pc);
+
+    i++;
   }
 
   cpu_hw_deinit ();
