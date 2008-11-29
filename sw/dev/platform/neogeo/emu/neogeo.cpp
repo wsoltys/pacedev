@@ -22,9 +22,15 @@ static unsigned char *battery_sram;     // $D00000-$D0FFFF (64kB)
 
 typedef struct
 {
-  unsigned char   hblank_cnt;
-  unsigned char   swpbios_rom;
-  unsigned char   sramlock_ulock;
+  unsigned char       swpbios_rom;
+  unsigned char       sramlock_ulock;
+  unsigned char       palbank;
+
+  // video
+  unsigned short int  vramad;
+  unsigned short int  vramrw;
+  unsigned short int  vraminc;
+  unsigned short int  hblank_cnt;
 
 } REGS_T, *PREGS_T;
 
@@ -308,6 +314,18 @@ unsigned write_3A0000_byte (unsigned a, unsigned d)
         printf ("reg_brdfix\n");
       #endif
       break;
+    case 0x0C : case 0x0D :
+      regs.sramlock_ulock = 0; // lock
+      #ifdef VERBOSE_HW_REGS
+        printf ("reg_sramlock\n");
+      #endif
+      break;
+    case 0x0E : case 0x0F :
+      regs.palbank = 1;
+      #ifdef VERBOSE_HW_REGS
+        printf ("reg_palbank1\n");
+      #endif
+      break;
     case 0x13 :
       regs.swpbios_rom = 1;
       vectors = rom_bank_1;
@@ -322,6 +340,12 @@ unsigned write_3A0000_byte (unsigned a, unsigned d)
       regs.sramlock_ulock = 1; // unlock
       #ifdef VERBOSE_HW_REGS
         printf ("reg_sramulock\n");
+      #endif
+      break;
+    case 0x1E : case 0x1F :
+      regs.palbank = 0;
+      #ifdef VERBOSE_HW_REGS
+        printf ("reg_palbank0\n");
       #endif
       break;
     default :
@@ -351,7 +375,6 @@ unsigned read_3C0000_byte (unsigned a, unsigned d)
 unsigned read_3C0000_word (unsigned a, unsigned d)
 {
   unsigned offset = a & 0x01FFFF;
-  printf ("%s($%X,$%X)\n", __FUNCTION__, offset, d);
 
   return (0);
 }
@@ -366,22 +389,40 @@ unsigned write_3C0000_byte (unsigned a, unsigned d)
 
 unsigned write_3C0000_word (unsigned a, unsigned d)
 {
-  unsigned offset = a & 0x01FFFF;
+  unsigned offset = a & 0x0F;
   switch (offset)
   {
-    case 0x000006 :
-      regs.hblank_cnt = (unsigned char)d;
+    case 0x00 :
+      regs.vramad = (unsigned short int)d;
+      #ifdef VERBOSE_HW_REGS
+        printf ("reg_vramad($%X)\n", d);
+      #endif
+      break;
+    case 0x02 :
+      regs.vramrw = (unsigned short int)d;;
+      #ifdef VERBOSE_HW_REGS
+        printf ("reg_vramrw($%X)\n", d);
+      #endif
+      break;
+    case 0x04 :
+      regs.vraminc = (unsigned short int)d;;
+      #ifdef VERBOSE_HW_REGS
+        printf ("reg_vraminc($%X)\n", d);
+      #endif
+      break;
+    case 0x06 :
+      regs.hblank_cnt = (unsigned short int)d;
       #ifdef VERBOSE_HW_REGS
         printf ("reg_hblank_cnt($%X)\n", d);
       #endif
       break;
-    case 0x00000C :
+    case 0x0C :
       #ifdef VERBOSE_HW_REGS
         printf ("reg_irqack($%X)\n", d);
       #endif
       break;
     default :
-      printf ("%s($%X,$%X) - UNKNOWN!\n", __FUNCTION__, offset, d);
+      printf ("%s($%X,$%X) - UNKNOWN!\n", __FUNCTION__, a, d);
       break;
   }
 
