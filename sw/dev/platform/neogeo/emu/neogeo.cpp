@@ -553,18 +553,11 @@ void show_sfix_tile (int x, int y, unsigned short int c)
   for (int yy=0; yy<8; yy++)
     for (int xx=0; xx<8; xx++)
     {
-      switch (xx&7)
-      {
-        case 0 : pel = *(data+0x10+yy) & 0xF;         break;
-        case 1 : pel = (*(data+0x10+yy) >> 4) & 0xF;  break;
-        case 2 : pel = *(data+0x18+yy) & 0xF;         break;
-        case 3 : pel = (*(data+0x18+yy) >> 4) & 0xF;  break;
-        case 4 : pel = *(data+0x00+yy) & 0xF;         break;
-        case 5 : pel = (*(data+0x00+yy) >> 4) & 0xF;  break;
-        case 6 : pel = *(data+0x08+yy) & 0xF;         break;
-        default: pel = (*(data+0x08+yy) >> 4) & 0xF;  break;
-      }
-      putpixel (screen, x+xx, y+yy, pel);
+      if ((xx&1) == 0)
+        pel = (*(data + (((xx&6)^4)<<2) + yy)) & 0x0F;
+      else
+        pel = (*(data + (((xx&6)^4)<<2) + yy)) >> 4;
+      putpixel (screen, x+xx, y+yy, (pel&1) ? 1 : 0);
     }
 }
 
@@ -632,6 +625,15 @@ int main(int argc, char *argv[])
   fp = fopen ("sfix.sfx", "rb");
   fread (sfix, 1, 0x20000, fp);
   fclose (fp);
+  #if 0
+  fp = fopen ("sfix.x2", "wb");
+  for (int i=0; i<0x20000; i++)
+  {
+    fwrite((sfix+i), 1, 1, fp);
+    fwrite((sfix+i), 1, 1, fp);
+  }
+  fclose (fp);
+  #endif
 
   patch_bios ();
 
@@ -695,11 +697,20 @@ int main(int argc, char *argv[])
   while (!key[KEY_ESC]);
   while (key[KEY_ESC]);	  
 
+  fclose (LOGOUT);
+
+  #if 0
+    fp = fopen ("vram1.bin", "wb");
+    fwrite (vram_w+0x7000, 2, 1024, fp);
+    fclose (fp);
+    fp = fopen ("vram2.bin", "wb");
+    fwrite (vram_w+0x7400, 2, 256, fp);
+    fclose (fp);
+  #endif
+
   cpu_hw_deinit ();
 
   printf ("Done!\n");
-
-  fclose (LOGOUT);
 
   allegro_exit ();
 }
