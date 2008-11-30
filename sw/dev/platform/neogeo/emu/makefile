@@ -8,7 +8,8 @@ TARGET = neogeo
 
 CFLAGS = -Wall -g
 
-LDFLAGS = -mwindows -lalleg
+#LDFLAGS = -mwindows -lalleg
+LDFLAGS = -lalleg
 
 NEOGEO_OBJS = \
 	neogeo.o
