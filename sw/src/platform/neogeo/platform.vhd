@@ -34,7 +34,9 @@ entity platform is
     flash_o         : out to_FLASH_t;
 		sram_i					: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
-
+    sdram_i         : in from_SDRAM_t;
+    sdram_o         : out to_SDRAM_t;
+    
     -- graphics
     
     bitmap_i        : in from_BITMAP_CTL_t;
@@ -86,6 +88,7 @@ architecture SYN of platform is
 	alias a               : std_logic_vector(23 downto 1) is a_ext(23 downto 1);
   signal d_i            : std_logic_vector(15 downto 0) := (others => '0');
   signal d_o            : std_logic_vector(15 downto 0) := (others => '0');
+  signal dtackn         : std_logic := '0';
   signal asn            : std_logic := '0';
   signal udsn           : std_logic := '0';
   signal ldsn           : std_logic := '0';
@@ -286,12 +289,21 @@ begin
   --
   -- system bios in flash atm
   --
+
+  BLK_SDRAM : block
+  begin
   
-  flash_o.a <= std_logic_vector(resize(unsigned(a(16 downto 1)), flash_o.a'length));
-  flash_o.cs <= bios_cs;
-  flash_o.oe <= '1';
-  flash_o.we <= '0';
-  bios_d_o <= X"00" & flash_i.d;
+    sdram_o.a <= a(22 downto 1);
+    sdram_o.d <= d_o;
+    dtackn <= sdram_i.waitrequest;
+    sdram_o.cs <= bios_cs;
+    sdram_o.be_n <= udsn & ldsn;
+    sdram_o.rd_n <= not rwn;
+    sdram_o.wr_n <= rwn;
+    bios_d_o <= sdram_i.d;
+    --sdram_i.valid;
+
+  end block BLK_SDRAM;
   
   --
   -- battery-backed sram also stored in burched sram
@@ -316,23 +328,78 @@ begin
   -- COMPONENT INSTANTIATION
   --
 
-  tg68_inst : entity work.TG68
-  port map
-  (        
-    clk           => clk_100M,
-    reset         => reset_n, -- active low
-    clkena_in     => clk_12M_ena,
-    data_in       => d_i,
-    IPL           => "111",
-    dtack         => '0',
-    addr          => a_ext,
-    data_out      => d_o,
-    as            => asn,
-    uds           => udsn,
-    lds           => ldsn,
-    rw            => rwn
-  );
+  BLK_TEST : block
 
+    signal dtackn       : std_logic;
+    signal wr_p         : std_logic;
+    
+    signal testram_be   : std_logic_vector(1 downto 0);
+    signal testram_wr   : std_logic;
+    signal testram_d_o  : std_logic_vector(15 downto 0);
+  
+  begin
+
+    tg68_inst : entity work.TG68
+      port map
+      (        
+        clk           => clk_100M,
+        reset         => reset_n, -- active low
+        clkena_in     => clk_12M_ena,
+        data_in       => testram_d_o,
+        IPL           => "111",
+        dtack         => dtackn,
+        addr          => a_ext,
+        data_out      => d_o,
+        as            => asn,
+        uds           => udsn,
+        lds           => ldsn,
+        rw            => rwn
+      );
+
+    -- fudge dtack, generate write pulse
+    process (clk_100M)
+      variable wr_r : std_logic := '0';
+    begin
+      if rising_edge(clk_100M) and clk_12M_ena = '1' then
+        dtackn <= asn;
+        wr_p <= '0'; -- default
+        if wr_r = '0' and asn = '0' and rwn = '0' then
+          -- pulse write on leading edge only
+          wr_p <= '1';
+        end if;
+        wr_r := not (asn or rwn);
+      end if;
+    end process;
+    
+    testram_wr <= wr_p when a(23 downto 12) = "000000000000" else '0';
+    testram_be <= not udsn & not ldsn;
+    
+    -- testram.hex
+    testram_inst : entity work.testram
+      port map
+      (
+        clock		    => clk_100M,
+        address		  => a(11 downto 1),
+        data		    => d_o,
+        byteena     => testram_be,
+        wren		    => testram_wr,
+        q		        => testram_d_o
+      );
+
+    -- latch leds above 2KiW
+    process (clk_100M)
+    begin
+      if rising_edge(clk_100M) and clk_12M_ena = '1' then
+        if asn = '0' and rwn = '0' then
+          if a(12) = '1' then
+            leds_o(15 downto 0) <= d_o;
+          end if;
+        end if;
+      end if;
+    end process;
+    
+  end block BLK_TEST;
+  
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 	vram1_inst : entity work.dpram
 		generic map
@@ -418,6 +485,6 @@ begin
   snd_o <= NULL_TO_SOUND;
   spi_o <= NULL_TO_SPI;
   ser_o <= NULL_TO_SERIAL;
-  leds_o <= (others => '0');
+  --leds_o <= (others => '0');
 
 end SYN;
