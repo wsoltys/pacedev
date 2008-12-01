@@ -545,19 +545,41 @@ unsigned write_3C0000_word (unsigned a, unsigned d)
   return (0);
 }
 
-void show_sfix_tile (int x, int y, unsigned short int c)
+#define SWAP(x) (((x)<<8)&0xFF00)|(((x)>>8)&0x00FF)
+
+void show_sfix_tile (int x, int y, unsigned short int pi, unsigned short int c)
 {
   unsigned char *data = sfix + (c<<5);
-  int pel;
+	// there are 256 16-colour palettes - the index is which one to use for this tile
+	unsigned short int *pPal = ((unsigned short *)palette_ram) + (pi<<4);
+	unsigned short int pal_entry;
 
   for (int yy=0; yy<8; yy++)
     for (int xx=0; xx<8; xx++)
     {
+		  int pel;
+
       if ((xx&1) == 0)
         pel = (*(data + (((xx&6)^4)<<2) + yy)) & 0x0F;
       else
         pel = (*(data + (((xx&6)^4)<<2) + yy)) >> 4;
-      putpixel (screen, x+xx, y+yy, (pel&1) ? 1 : 0);
+
+			pal_entry = *(pPal+pel);
+			//pal_entry = SWAP(pal_entry);
+
+			/*
+			 MSB             LSB
+			 s--- ---- ---- ---- : Global color component bit 0
+			 -r-- rrrr ---- ---- : Red color component bits 1, then 5,4,3,2
+			 --g- ---- gggg ---- : Green color component bits 1, then 5,4,3,2
+			 ---b ---- ---- bbbb : Blue color component bits 1, then 5,4,3,2
+			*/
+
+			unsigned short int r = ((pal_entry&0x0F00)>>6)|((pal_entry&0x4000)>>13)|((pal_entry&0x8000)>>15);
+			unsigned short int g = ((pal_entry&0x00F0)>>2)|((pal_entry&0x2000)>>12)|((pal_entry&0x8000)>>15);
+			unsigned short int b = ((pal_entry&0x000F)<<2)|((pal_entry&0x1000)>>11)|((pal_entry&0x8000)>>15);
+
+      putpixel (screen, x+xx, y+yy, makecol15(r<<3, g<<3, b<<3));
     }
 }
 
@@ -568,17 +590,15 @@ int show_sfix (void)
     for (int x=0; x<40; x++)
     {
       int a = y+(x<<5);
-      int c = vram_w[0x7000+a] & 0xFFF;
+      int c = vram_w[0x7000+a];
 
-      show_sfix_tile (x*8, y*8, c&0xff);
+      show_sfix_tile (x*8, y*8, c>>12, c&0xfff);
     }
   }
   return (0);
 }
 
-//#define SWAP(x) (((x)<<8)&0xFF00)|(((x)>>8)&0x00FF)
-#define SWAP(x) (x)
-#define NOP     SWAP(0x4E71)
+#define NOP     (0x4E71)
 
 void patch_bios (void)
 {
@@ -645,7 +665,7 @@ int main(int argc, char *argv[])
 	allegro_init ();
 	install_keyboard ();
 
-	set_color_depth (8);
+	set_color_depth (15);
 	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 320, 224, 0, 0);
 
   #if 0
@@ -707,6 +727,17 @@ int main(int argc, char *argv[])
     fwrite (vram_w+0x7400, 2, 256, fp);
     fclose (fp);
   #endif
+
+	#if 1
+    fp = fopen ("palram.bin", "wb");
+		unsigned short int *pal_w = (unsigned short int *)palette_ram;
+		for (int i=0; i<16*16; i++)
+		{
+			unsigned short int p = SWAP(*(pal_w+i));
+    	fwrite (&p, sizeof(unsigned short int), 1, fp);
+		}
+    fclose (fp);
+	#endif
 
   cpu_hw_deinit ();
 
