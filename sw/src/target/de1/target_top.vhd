@@ -404,6 +404,36 @@ begin
   end block BLK_SRAM;
 
   BLK_SDRAM : block
+
+    component sdram_0 is 
+      port 
+      (
+        -- inputs:
+        signal az_addr : IN STD_LOGIC_VECTOR (21 DOWNTO 0);
+        signal az_be_n : IN STD_LOGIC_VECTOR (1 DOWNTO 0);
+        signal az_cs : IN STD_LOGIC;
+        signal az_data : IN STD_LOGIC_VECTOR (15 DOWNTO 0);
+        signal az_rd_n : IN STD_LOGIC;
+        signal az_wr_n : IN STD_LOGIC;
+        signal clk : IN STD_LOGIC;
+        signal reset_n : IN STD_LOGIC;
+
+        -- outputs:
+        signal za_data : OUT STD_LOGIC_VECTOR (15 DOWNTO 0);
+        signal za_valid : OUT STD_LOGIC;
+        signal za_waitrequest : OUT STD_LOGIC;
+        signal zs_addr : OUT STD_LOGIC_VECTOR (11 DOWNTO 0);
+        signal zs_ba : OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
+        signal zs_cas_n : OUT STD_LOGIC;
+        signal zs_cke : OUT STD_LOGIC;
+        signal zs_cs_n : OUT STD_LOGIC;
+        signal zs_dq : INOUT STD_LOGIC_VECTOR (15 DOWNTO 0);
+        signal zs_dqm : OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
+        signal zs_ras_n : OUT STD_LOGIC;
+        signal zs_we_n : OUT STD_LOGIC
+      );
+    end component sdram_0;
+
   begin
 
     GEN_NO_SDRAM : if not PACE_HAS_SDRAM generate
@@ -415,19 +445,36 @@ begin
     end generate GEN_NO_SDRAM;
   
     GEN_SDRAM : if PACE_HAS_SDRAM generate
-      sdram_i.d <= std_logic_vector(resize(unsigned(dram_dq), sdram_i.d'length));
-      dram_dq <= sdram_o.d(dram_dq'range) when sdram_o.we_n = '0' else (others => 'Z');
-      dram_addr <= sdram_o.a(dram_addr'range);
-      dram_ldqm <= sdram_o.ldqm;
-      dram_udqm <= sdram_o.udqm;
-      dram_we_n <= sdram_o.we_n;
-      dram_cas_n <= sdram_o.cas_n;
-      dram_ras_n <= sdram_o.ras_n;
-      dram_cs_n <= sdram_o.cs_n;
-      dram_ba_0 <= sdram_o.ba(0);
-      dram_ba_1 <= sdram_o.ba(1);
-      dram_clk <= sdram_o.clk;
-      dram_cke <= sdram_o.cke;
+      sdram_inst : sdram_0
+        port map
+        (
+          clk             => clk_i(0),
+          reset_n         => reset_n,
+
+          -- fpga bus interface
+          az_addr         => sdram_o.a,
+          az_data         => sdram_o.d,
+          za_waitrequest  => sdram_i.waitrequest,
+          az_cs           => sdram_o.cs,
+          az_be_n         => sdram_o.be_n,
+          az_rd_n         => sdram_o.rd_n,
+          az_wr_n         => sdram_o.wr_n,
+          za_data         => sdram_i.d,
+          za_valid        => sdram_i.valid,
+
+          -- sdram physical interface
+          zs_dq           => dram_dq,
+          zs_addr         => dram_addr,
+          zs_dqm(1)       => dram_udqm,
+          zs_dqm(0)       => dram_ldqm,
+          zs_we_n         => dram_we_n,
+          zs_cas_n        => dram_cas_n,
+          zs_ras_n        => dram_ras_n,
+          zs_cs_n         => dram_cs_n,
+          zs_ba(1)        => dram_ba_1,
+          zs_ba(0)        => dram_ba_0,
+          zs_cke          => dram_cke
+        );
     end generate GEN_SDRAM;
 
   end block BLK_SDRAM;
