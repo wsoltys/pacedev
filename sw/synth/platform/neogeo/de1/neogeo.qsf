@@ -501,8 +501,8 @@ set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
-set_global_assignment -name USE_CONFIGURATION_DEVICE ON
 set_global_assignment -name STRATIX_CONFIGURATION_DEVICE EPCS4
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS INPUT TRI-STATED"
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
@@ -518,7 +518,6 @@ set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dprom_2r.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/clk_div.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
@@ -527,6 +526,9 @@ set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_mixer.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Graphics.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/neogeo/inputmapper.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/tg68/TG68_fast.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/tg68/TG68.vhd
+set_global_assignment -name QIP_FILE palram.qip
 set_global_assignment -name VHDL_FILE ../../../../src/platform/neogeo/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
@@ -550,6 +552,5 @@ set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2C_AV_Confi
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/seg7_lut.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2S_LCM_Config.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/i2s_controller.v
-set_global_assignment -name VHDL_FILE ../../../../src/target/de1/target_top.vhd
-set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS INPUT TRI-STATED"
-set_global_assignment -name QIP_FILE palram.qip
+set_global_assignment -name QIP_FILE neogeo_pll.qip
+set_global_assignment -name VHDL_FILE target_top.vhd
