@@ -4,7 +4,7 @@
 -- MODULE: altpll 
 
 -- ============================================================
--- File Name: pll.vhd
+-- File Name: neogeo_pll.vhd
 -- Megafunction Name(s):
 -- 			altpll
 --
@@ -156,11 +156,11 @@ BEGIN
 		clk2_divide_by => 1,
 		clk2_duty_cycle => 50,
 		clk2_multiply_by => 2,
-		clk2_phase_shift => "0",
+		clk2_phase_shift => "3000",
 		compensate_clock => "CLK2",
 		inclk0_input_frequency => 20000,
 		intended_device_family => "Cyclone II",
-		lpm_hint => "CBX_MODULE_PREFIX=pll",
+		lpm_hint => "CBX_MODULE_PREFIX=neogeo_pll",
 		lpm_type => "altpll",
 		operation_mode => "NORMAL",
 		port_activeclock => "PORT_UNUSED",
@@ -283,11 +283,11 @@ END SYN;
 -- Retrieval info: PRIVATE: PHASE_RECONFIG_INPUTS_CHECK STRING "0"
 -- Retrieval info: PRIVATE: PHASE_SHIFT0 STRING "0.00000000"
 -- Retrieval info: PRIVATE: PHASE_SHIFT1 STRING "0.00000000"
--- Retrieval info: PRIVATE: PHASE_SHIFT2 STRING "0.00000000"
+-- Retrieval info: PRIVATE: PHASE_SHIFT2 STRING "3.00000000"
 -- Retrieval info: PRIVATE: PHASE_SHIFT_STEP_ENABLED_CHECK STRING "0"
 -- Retrieval info: PRIVATE: PHASE_SHIFT_UNIT0 STRING "deg"
 -- Retrieval info: PRIVATE: PHASE_SHIFT_UNIT1 STRING "deg"
--- Retrieval info: PRIVATE: PHASE_SHIFT_UNIT2 STRING "deg"
+-- Retrieval info: PRIVATE: PHASE_SHIFT_UNIT2 STRING "ns"
 -- Retrieval info: PRIVATE: PLL_ADVANCED_PARAM_CHECK STRING "0"
 -- Retrieval info: PRIVATE: PLL_ARESET_CHECK STRING "0"
 -- Retrieval info: PRIVATE: PLL_AUTOPLL_CHECK NUMERIC "1"
@@ -336,7 +336,7 @@ END SYN;
 -- Retrieval info: CONSTANT: CLK2_DIVIDE_BY NUMERIC "1"
 -- Retrieval info: CONSTANT: CLK2_DUTY_CYCLE NUMERIC "50"
 -- Retrieval info: CONSTANT: CLK2_MULTIPLY_BY NUMERIC "2"
--- Retrieval info: CONSTANT: CLK2_PHASE_SHIFT STRING "0"
+-- Retrieval info: CONSTANT: CLK2_PHASE_SHIFT STRING "3000"
 -- Retrieval info: CONSTANT: COMPENSATE_CLOCK STRING "CLK2"
 -- Retrieval info: CONSTANT: INCLK0_INPUT_FREQUENCY NUMERIC "20000"
 -- Retrieval info: CONSTANT: INTENDED_DEVICE_FAMILY STRING "Cyclone II"
@@ -395,13 +395,13 @@ END SYN;
 -- Retrieval info: CONNECT: c1 0 0 0 0 @clk 0 0 1 1
 -- Retrieval info: CONNECT: c2 0 0 0 0 @clk 0 0 1 2
 -- Retrieval info: CONNECT: @inclk 0 0 1 1 GND 0 0 0 0
--- Retrieval info: GEN_FILE: TYPE_NORMAL pll.vhd TRUE FALSE
--- Retrieval info: GEN_FILE: TYPE_NORMAL pll.ppf TRUE FALSE
--- Retrieval info: GEN_FILE: TYPE_NORMAL pll.inc FALSE FALSE
--- Retrieval info: GEN_FILE: TYPE_NORMAL pll.cmp FALSE FALSE
--- Retrieval info: GEN_FILE: TYPE_NORMAL pll.bsf FALSE FALSE
--- Retrieval info: GEN_FILE: TYPE_NORMAL pll_inst.vhd FALSE FALSE
--- Retrieval info: GEN_FILE: TYPE_NORMAL pll_waveforms.html FALSE FALSE
--- Retrieval info: GEN_FILE: TYPE_NORMAL pll_wave*.jpg FALSE FALSE
+-- Retrieval info: GEN_FILE: TYPE_NORMAL neogeo_pll.vhd TRUE FALSE
+-- Retrieval info: GEN_FILE: TYPE_NORMAL neogeo_pll.ppf TRUE FALSE
+-- Retrieval info: GEN_FILE: TYPE_NORMAL neogeo_pll.inc FALSE FALSE
+-- Retrieval info: GEN_FILE: TYPE_NORMAL neogeo_pll.cmp FALSE FALSE
+-- Retrieval info: GEN_FILE: TYPE_NORMAL neogeo_pll.bsf TRUE
+-- Retrieval info: GEN_FILE: TYPE_NORMAL neogeo_pll_inst.vhd FALSE FALSE
+-- Retrieval info: GEN_FILE: TYPE_NORMAL neogeo_pll_waveforms.html FALSE FALSE
+-- Retrieval info: GEN_FILE: TYPE_NORMAL neogeo_pll_wave*.jpg FALSE FALSE
 -- Retrieval info: LIB_FILE: altera_mf
 -- Retrieval info: CBX_MODULE_PREFIX: ON
