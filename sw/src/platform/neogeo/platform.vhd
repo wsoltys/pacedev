@@ -77,65 +77,261 @@ end platform;
 
 architecture SYN of platform is
 
-	alias clk_50M				  : std_logic is clk_i(0);
+	alias clk_100M        : std_logic is clk_i(0);
 	alias clk_video       : std_logic is clk_i(1);
+	signal clk_12M_ena    : std_logic := '0';
 	
-	signal a              : std_logic_vector(15 downto 0) := (others => '0');
+	signal reset_n        : std_logic := '1';
+	signal a_ext          : std_logic_vector(31 downto 0) := (others => '0');
+	alias a               : std_logic_vector(23 downto 1) is a_ext(23 downto 1);
+  signal d_i            : std_logic_vector(15 downto 0) := (others => '0');
   signal d_o            : std_logic_vector(15 downto 0) := (others => '0');
+  signal asn            : std_logic := '0';
+  signal udsn           : std_logic := '0';
+  signal ldsn           : std_logic := '0';
+  signal rwn            : std_logic := '0';
   
-  signal wram_cs        : std_logic := '0';
-  signal wram_d_o       : std_logic_vector(d_o'range) := (others => '0');
-  signal wram_wr        : std_logic := '0';
+  -- cpu vector table
+  signal vector_cs      : std_logic := '0';
+  signal vector_d_o     : std_logic_vector(d_i'range) := (others => '0');
+  
+  -- cartridge rom
+  signal rom1_cs        : std_logic := '0';
+  signal rom1_d_o       : std_logic_vector(d_i'range) := (others => '0');
+
+  -- cpu work ram
+  signal ram_cs         : std_logic := '0';
+  signal ram_d_o        : std_logic_vector(d_i'range) := (others => '0');
+  signal ram_wr         : std_logic := '0';
+
+  -- hardware registers
+  signal reg_cs         : std_logic := '0';
+  signal reg_d_o        : std_logic_vector(d_i'range) := (others => '0');
+  signal reg_30_cs      : std_logic := '0';
+  signal reg_32_cs      : std_logic := '0';
+  signal reg_34_cs      : std_logic := '0';
+  signal reg_38_cs      : std_logic := '0';
+  signal reg_3A_cs      : std_logic := '0';
+  signal reg_3C_cs      : std_logic := '0';
+  
+  -- palette ram
+  signal palram_cs      : std_logic := '0';
+  signal palram_wr      : std_logic := '0';
+  signal palram_d_o     : std_logic_vector(d_i'range) := (others => '0');
+  signal palette        : std_logic_vector(255 downto 0) := (others => '0');
+
+  -- memory card
+  signal memcard_cs     : std_logic := '0';
+  signal memcard_d_o    : std_logic_vector(d_i'range) := (others => '0');
+
+  -- system bios
+  signal bios_cs        : std_logic := '0';
+  signal bios_d_o       : std_logic_vector(d_i'range) := (others => '0');
+
+  -- battery-back sram
+  signal sram_cs        : std_logic := '0';
+  signal sram_d_o       : std_logic_vector(d_i'range) := (others => '0');
 
   signal vram_a         : std_logic_vector(15 downto 0) := (others => '0');
-  signal vram1_d_o      : std_logic_vector(d_o'range) := (others => '0');
+  signal vram_d_i       : std_logic_vector(d_o'range) := (others => '0');
+  signal vram1_d_o      : std_logic_vector(d_i'range) := (others => '0');
   signal vram1_wr       : std_logic := '0';
   signal map1_d         : std_logic_vector(15 downto 0) := (others => '0');
-  signal vram2_d_o      : std_logic_vector(d_o'range) := (others => '0');
+  signal vram2_d_o      : std_logic_vector(d_i'range) := (others => '0');
   signal vram2_wr       : std_logic := '0';
   signal map2_d         : std_logic_vector(15 downto 0) := (others => '0');
-
-  signal palram_wr      : std_logic := '0';
-  signal palram_d_o     : std_logic_vector(15 downto 0) := (others => '0');
-  signal palette        : std_logic_vector(255 downto 0) := (others => '0');
   
 begin
 
-  -- SRAM signals (may or may not be used)
+  reset_n <= not reset_i;
+  
+  --
+  -- clocking
+  --
+  
+  process (clk_100M, reset_i)
+    variable count : std_logic_vector(1 downto 0) := (others => '0');
+  begin
+    if reset_i = '1' then
+      count := (others => '0');
+    elsif rising_edge(clk_100M) then
+      clk_12M_ena <= '0'; -- default
+      if count = "00" then
+        clk_12M_ena <= '1';
+      end if;
+      count := count + 1;
+    end if;
+  end process;
+  
+  --
+  -- address decode logic
+  --
+  
+  -- vectors 128 bytes
+  vector_cs   <= '1' when STD_MATCH(a, X"0000" & "0------") else '0';
+  -- rombank_1 $000000-$0FFFFF (1MiB)
+  rom1_cs     <= '1' when STD_MATCH(a, X"0" & "-------------------") else '0';
+  -- rambank $100000-$10FFFF (64KiB)
+  ram_cs      <= '1' when STD_MATCH(a, X"10" & "---------------") else '0';
+  -- hardware registers $300000-$3FFFFF
+  reg_cs      <= '1' when STD_MATCH(a, X"3" & "-------------------") else '0';
+  reg_30_cs   <= reg_cs when a(19 downto 17) = "000" else '0';
+  reg_32_cs   <= reg_cs when a(19 downto 17) = "001" else '0';
+  reg_34_cs   <= reg_cs when a(19 downto 17) = "010" else '0';
+  reg_38_cs   <= reg_cs when a(19 downto 17) = "100" else '0';
+  reg_3A_cs   <= reg_cs when a(19 downto 17) = "101" else '0';
+  reg_3C_cs   <= reg_cs when a(19 downto 17) = "110" else '0';
+  -- palette ram $400000-$401FFF (8KiB)
+  palram_cs   <= '1' when STD_MATCH(a, X"40" & "000------------") else '0';
+  -- memcard ram $800000-$800FFF (4KiB)
+  memcard_cs  <= '1' when STD_MATCH(a, X"800" & "-----------") else '0';
+  -- system_bios $C00000-$C1FFFF (128kiB)
+  bios_cs     <= '1' when STD_MATCH(a, X"C" & "000----------------") else '0';
+  -- battery-backed sram $D00000-$D0FFFF (64kB)
+  sram_cs     <= '1' when STD_MATCH(a, X"D0" & "---------------") else '0';
+
+  --
+  -- read muxes
+  --
+  
+  d_i <=  vector_d_o when vector_cs = '1' else
+          rom1_d_o when rom1_cs = '1' else
+          ram_d_o when ram_cs = '1' else
+          reg_d_o when reg_cs = '1' else
+          palram_d_o when palram_cs = '1' else
+          memcard_d_o when memcard_cs = '1' else
+          bios_d_o when bios_cs = '1' else
+          sram_d_o when sram_cs = '1' else
+          (others => '1');
+
+  reg_d_o <=  vram1_d_o when (reg_3C_cs = '1' and vram_a(10) = '0') else
+              vram2_d_o when (reg_3C_cs = '1' and vram_a(10) = '1') else
+              (others => '1');
+
+  --
+  --  vectors
+  --
+  
+  vector_d_o <= bios_d_o;
+
+  --
+  -- cpu work ram (in burched sram atm)
+  --
+  
+  assert false
+    report "this won't work on stock DE1 hardware"
+      severity warning;
+  -- hook up Burched SRAM module
+  GEN_D: for i in 0 to 15 generate
+    ram_d_o(i) <= gp_i(35-i);
+    gp_o.d(35-i) <= d_o(i);
+  end generate;
+  GEN_A: for i in 0 to 14 generate
+    gp_o.d(17-i) <= a(1+i);
+  end generate;
+  gp_o.d(2) <= sram_cs;
+  gp_o.d(1) <= '0';                     -- A16
+  gp_o.d(0) <= not (ram_cs or sram_cs); -- CEAn
+  gp_o.d(18) <= not (udsn or rwn);      -- upper byte WEn
+  gp_o.d(19) <= not (ldsn or rwn);      -- lower byte WEn
+
+  --
+  -- hardware registers
+  --
+
+  -- vram process
+  process (clk_100M, reset_i)
+    variable rwn_r    : std_logic := '0';
+    variable vram_inc : std_logic_vector(vram_a'range) := (others => '0');
+  begin
+    if reset_i = '1' then
+      rwn_r := '0';
+      vram_inc := (others => '0');
+    elsif rising_edge(clk_100M) and clk_12M_ena = '1' then
+      vram1_wr <= '0'; -- default
+      vram2_wr <= '0'; -- default
+      if reg_3C_cs = '1' then
+        if rwn_r = '1' and rwn = '0' then
+          -- leading edge write
+          case a(7 downto 1) is
+            when "0000000" =>
+              -- write vram address register
+              vram_a <= d_o;
+            when "0000001" =>
+              -- write vram data register
+              -- $7000-$74FF fixed tile layer
+              if vram_a(15 downto 11) = "01110" and
+                  (vram_a(10) = '0' or vram_a(10 downto 8) = "100") then
+                vram_d_i <= d_o;
+                vram1_wr <= not vram_a(10);
+                vram2_wr <= vram_a(10);
+              end if;
+            when "0000010" =>
+              -- write vram inc register
+              vram_inc := d_o;
+            when others =>
+              null;
+          end case;
+        elsif rwn_r = '0' and rwn = '1' then
+          -- trailing edge write
+          if a(7 downto 1) = "0000001" then
+            vram_a <= vram_a + vram_inc;
+          end if;
+        end if;
+      end if;
+      rwn_r := rwn;
+    end if;
+  end process;
+
+  --
+  -- system bios in flash atm
+  --
+  
+  flash_o.a <= std_logic_vector(resize(unsigned(a(16 downto 1)), flash_o.a'length));
+  flash_o.cs <= bios_cs;
+  flash_o.oe <= '1';
+  flash_o.we <= '0';
+  bios_d_o <= X"00" & flash_i.d;
+  
+  --
+  -- battery-backed sram also stored in burched sram
+  --
+  sram_d_o <= ram_d_o;
+
+  -- tile data in sram
+  -- - emulate synchronous clocked internal ram for timing in tilemap controller
   process (clk_video)
   begin
     if rising_edge(clk_video) then
       sram_o.a <= std_logic_vector(resize(unsigned(tilemap_i.tile_a(16 downto 0)), sram_o.a'length));
-      --sram_o.d <= (others => '0');
     end if;
   end process;
-  --tilemap_o.tile_d <= sram_i.d(15 downto 8) when tilemap_i.tile_a(0) = '1' else sram_i.d(7 downto 0);
   tilemap_o.tile_d <= sram_i.d(7 downto 0);
   sram_o.be <= std_logic_vector(to_unsigned(3, sram_o.be'length));
   sram_o.cs <= '1';
   sram_o.oe <= '1';
   sram_o.we <= '0';
-
-  vram1_wr <= '0';
-  vram2_wr <= '0';
-  
-  -- unused outputs
-
-  flash_o <= NULL_TO_FLASH;
-  bitmap_o <= NULL_TO_BITMAP_CTL;
-  sprite_o.ld <= '0';
-  graphics_o.bit8_1 <= (others => '0');
-  graphics_o.bit16_1 <= (others => '0');
-  osd_o <= NULL_TO_OSD;
-  snd_o <= NULL_TO_SOUND;
-  spi_o <= NULL_TO_SPI;
-  ser_o <= NULL_TO_SERIAL;
-  leds_o <= (others => '0');
-  gp_o <= NULL_TO_GP;
   
   --
   -- COMPONENT INSTANTIATION
   --
+
+  tg68_inst : entity work.TG68
+  port map
+  (        
+    clk           => clk_100M,
+    reset         => reset_n, -- active low
+    clkena_in     => clk_12M_ena,
+    data_in       => d_i,
+    IPL           => "111",
+    dtack         => '0',
+    addr          => a_ext,
+    data_out      => d_o,
+    as            => asn,
+    uds           => udsn,
+    lds           => ldsn,
+    rw            => rwn
+  );
 
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 	vram1_inst : entity work.dpram
@@ -148,10 +344,10 @@ begin
 		)
 		port map
 		(
-			clock_b			=> clk_50M,
+			clock_b			=> clk_100M,
 			address_b		=> vram_a(9 downto 0),
 			wren_b			=> vram1_wr,
-			data_b			=> d_o,
+			data_b			=> vram_d_i,
 			q_b					=> vram1_d_o,
 
 			clock_a			=> clk_video,
@@ -172,10 +368,10 @@ begin
 		)
 		port map
 		(
-			clock_b			=> clk_50M,
+			clock_b			=> clk_100M,
 			address_b		=> vram_a(7 downto 0),
 			wren_b			=> vram2_wr,
-			data_b			=> d_o,
+			data_b			=> vram_d_i,
 			q_b					=> vram2_d_o,
 
 			clock_a			=> clk_video,
@@ -193,8 +389,8 @@ begin
   palram_inst : entity work.palram
     port map
     (
-      clock_b		  => clk_50M,
-      address_b		=> a(7 downto 0),
+      clock_b		  => clk_100M,
+      address_b		=> a(8 downto 1),
       data_b		  => d_o,
       wren_b		  => palram_wr,
       q_b		      => palram_d_o,
@@ -209,5 +405,19 @@ begin
   GEN_PAL_DATA : for i in 0 to 15 generate
     graphics_o.pal(i) <= palette(i*16+15 downto i*16);
   end generate GEN_PAL_DATA;
+
+  --
+  -- unused outputs
+  --
   
+  bitmap_o <= NULL_TO_BITMAP_CTL;
+  sprite_o.ld <= '0';
+  graphics_o.bit8_1 <= (others => '0');
+  graphics_o.bit16_1 <= (others => '0');
+  osd_o <= NULL_TO_OSD;
+  snd_o <= NULL_TO_SOUND;
+  spi_o <= NULL_TO_SPI;
+  ser_o <= NULL_TO_SERIAL;
+  leds_o <= (others => '0');
+
 end SYN;
