@@ -728,7 +728,7 @@ int main(int argc, char *argv[])
     fclose (fp);
   #endif
 
-	#if 1
+	#if 0
     fp = fopen ("palram.bin", "wb");
 		unsigned short int *pal_w = (unsigned short int *)palette_ram;
 		for (int i=0; i<16*16; i++)
