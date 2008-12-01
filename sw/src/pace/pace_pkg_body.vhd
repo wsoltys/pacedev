@@ -54,7 +54,7 @@ package body pace_pkg is
 
   function NULL_TO_GP return to_GP_t is
   begin
-    return (others => '0');
+    return ((others => '0'), (others => '0'));
   end NULL_TO_GP;
 
 end package body pace_pkg;

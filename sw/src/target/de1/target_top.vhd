@@ -554,12 +554,12 @@ begin
       
     -- D0-7
     --gp_i(35 downto 28) <= gpio_0(35 downto 28);
-    gpio_0(35 downto 28) <= gp_o(35 downto 28) when gp_o(19) = '0' else (others => 'Z');
+    gpio_0(35 downto 28) <= gp_o.d(35 downto 28) when gp_o.d(19) = '0' else (others => 'Z');
     -- D8-15
     --gp_i(27 downto 20) <= gpio_0(27 downto 20);
-    gpio_0(27 downto 20) <= gp_o(27 downto 20) when gp_o(18) = '0' else (others => 'Z');
+    gpio_0(27 downto 20) <= gp_o.d(27 downto 20) when gp_o.d(18) = '0' else (others => 'Z');
     -- A & CEn & WEn
-    gpio_0(19 downto 0) <= gp_o(19 downto 0);
+    gpio_0(19 downto 0) <= gp_o.d(19 downto 0);
 
   end generate GEN_BURCHED_SRAM;
   
@@ -734,10 +734,10 @@ begin
 
   begin
     -- from left to right on the PCB
-    seg7_3: SEG7_LUT port map (iDIG => gp_o(51 downto 48), oSEG => hex3);
-    seg7_2: SEG7_LUT port map (iDIG => gp_o(47 downto 44), oSEG => hex2);
-    seg7_1: SEG7_LUT port map (iDIG => gp_o(43 downto 40), oSEG => hex1);
-    seg7_0: SEG7_LUT port map (iDIG => gp_o(39 downto 36), oSEG => hex0);
+    seg7_3: SEG7_LUT port map (iDIG => gp_o.d(51 downto 48), oSEG => hex3);
+    seg7_2: SEG7_LUT port map (iDIG => gp_o.d(47 downto 44), oSEG => hex2);
+    seg7_1: SEG7_LUT port map (iDIG => gp_o.d(43 downto 40), oSEG => hex1);
+    seg7_0: SEG7_LUT port map (iDIG => gp_o.d(39 downto 36), oSEG => hex0);
   end block BLK_7_SEG;
   
 end SYN;

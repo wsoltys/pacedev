@@ -51,13 +51,13 @@ begin
   ctl_o.map_a(4 downto 0) <= y(7 downto 3);
   ctl_o.tile_a(2 downto 0) <= y(2 downto 0);
   -- generate attribute RAM address
-  ctl_o.attr_a <= (others => '0');
+  ctl_o.attr_a(ctl_o.attr_a'left downto 4) <= (others => '0');
 
   -- generate pixel
   process (clk, clk_ena)
 
 		variable pel : std_logic_vector(3 downto 0);
-		variable pal_entry : pal_entry_typ;
+		variable pal_entry : PAL_ENTRY_t;
 
 		-- pipelined pixel X location
 		constant PIPELINE_BITS  : natural := 3;
@@ -77,6 +77,8 @@ begin
       ctl_o.tile_a(16 downto 5) <= ctl_i.map_d(11 downto 0); -- each tile is 32 bytes
       ctl_o.tile_a(4) <= not x_r(PIPELINE_BITS*1+2);
       ctl_o.tile_a(3) <= x_r(PIPELINE_BITS*1+1);
+      -- - set palette index
+      ctl_o.attr_a(3 downto 0) <= ctl_i.map_d(15 downto 12);
       
       -- 3rd stage of pipeline
       -- - assign pixel colour based on tile data
@@ -89,9 +91,10 @@ begin
       end case;
 
       -- extract R,G,B from colour palette
-      ctl_o.rgb.r <= pel(0) & pel(0) & pel(0) & pel(0) & "000000";
-      ctl_o.rgb.g <= pel(0) & pel(0) & pel(0) & pel(0) & "000000";
-      ctl_o.rgb.b <= pel(0) & pel(0) & pel(0) & pel(0) & "000000";
+      pal_entry := graphics_i.pal(conv_integer(pel));
+      ctl_o.rgb.r <= pal_entry(11 downto 8) & pal_entry(14) & pal_entry(15) & "0000";
+      ctl_o.rgb.g <= pal_entry(7 downto 4) & pal_entry(13) & pal_entry(15) & "0000";
+      ctl_o.rgb.b <= pal_entry(3 downto 0) & pal_entry(12) & pal_entry(15) & "0000";
 
       -- pipelined because of tile data look-up
       x_r := x_r(x_r'left-PIPELINE_BITS downto 0) & x(PIPELINE_BITS-1 downto 0);

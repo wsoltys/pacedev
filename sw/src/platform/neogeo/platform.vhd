@@ -94,6 +94,10 @@ architecture SYN of platform is
   signal vram2_d_o      : std_logic_vector(d_o'range) := (others => '0');
   signal vram2_wr       : std_logic := '0';
   signal map2_d         : std_logic_vector(15 downto 0) := (others => '0');
+
+  signal palram_wr      : std_logic := '0';
+  signal palram_d_o     : std_logic_vector(15 downto 0) := (others => '0');
+  signal palette        : std_logic_vector(255 downto 0) := (others => '0');
   
 begin
 
@@ -120,7 +124,8 @@ begin
   flash_o <= NULL_TO_FLASH;
   bitmap_o <= NULL_TO_BITMAP_CTL;
   sprite_o.ld <= '0';
-  graphics_o <= NULL_TO_GRAPHICS;
+  graphics_o.bit8_1 <= (others => '0');
+  graphics_o.bit16_1 <= (others => '0');
   osd_o <= NULL_TO_OSD;
   snd_o <= NULL_TO_SOUND;
   spi_o <= NULL_TO_SPI;
@@ -183,5 +188,26 @@ begin
   tilemap_o.map_d <=  map1_d(7 downto 0) & map1_d(15 downto 8)
                         when tilemap_i.map_a(10) = '0' else 
                       map2_d(7 downto 0) & map2_d(15 downto 8);
+  
+	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+  palram_inst : entity work.palram
+    port map
+    (
+      clock_b		  => clk_50M,
+      address_b		=> a(7 downto 0),
+      data_b		  => d_o,
+      wren_b		  => palram_wr,
+      q_b		      => palram_d_o,
+
+      clock_a		  => clk_video,
+      address_a		=> tilemap_i.attr_a(3 downto 0),
+      data_a		  => (others => '0'),
+      wren_a		  => '0',
+      q_a		      => palette
+    );
+
+  GEN_PAL_DATA : for i in 0 to 15 generate
+    graphics_o.pal(i) <= palette(i*16+15 downto i*16);
+  end generate GEN_PAL_DATA;
   
 end SYN;
