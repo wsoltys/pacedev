@@ -21,12 +21,15 @@
 ------------------------------------------------------------------------------
 ------------------------------------------------------------------------------
 --
+-- Revision 1.01 2007/11/28
+-- add MOVEP
+-- Bugfix Interrupt in MOVEQ
+--
 -- Revision 1.0 2007/11/05
 -- Clean up code and first release
 --
 -- known bugs/todo:
 -- Add CHK INSTRUCTION
--- Add MOVEP INSTRUCTION
 -- full decode ILLEGAL INSTRUCTIONS
 -- Add FDC Output
 -- add odd Address test
@@ -93,13 +96,16 @@ ARCHITECTURE logic OF TG68 IS
    SIGNAL lds_in	  : std_logic;
    SIGNAL state       : std_logic_vector(1 downto 0);
    SIGNAL clkena	  : std_logic;
+   SIGNAL n_clk		  : std_logic;
 
 
 BEGIN  
 
+	n_clk <= NOT clk;
+
 TG68_fast_inst: TG68_fast
 	PORT MAP (
-		clk => not clk, 		-- : in std_logic;
+		clk => n_clk, 			-- : in std_logic;
         reset => reset, 		-- : in std_logic;
         clkena_in => clkena, 	-- : in std_logic;
         data_in => data_in, 	-- : in std_logic_vector(15 downto 0);
@@ -117,7 +123,7 @@ TG68_fast_inst: TG68_fast
 --	clkena <= '1' WHEN clkena_in='1' AND ((clkena_e OR decode)='1')
 --				  ELSE '0';
 
-	
+		
 	PROCESS (clk)
 	BEGIN
 		IF rising_edge(clk) THEN
@@ -159,10 +165,10 @@ PROCESS (clk, reset, state, as_s, as_e, rw_s, rw_e, uds_s, uds_e, lds_s, lds_e)
 				CASE S_state IS
 					WHEN "00" => as_s <= '0';
 								 rw_s <= wr;
-								 IF wr='1' THEN
+--								 IF wr='1' THEN
 									 uds_s <= uds_in;
 									 lds_s <= lds_in;
-								 END IF;
+--								 END IF;
 									S_state <= "01";
 					WHEN "01" => as_s <= '0';
 								 rw_s <= wr;
@@ -176,6 +182,7 @@ PROCESS (clk, reset, state, as_s, as_e, rw_s, rw_e, uds_s, uds_e, lds_s, lds_e)
 								 END IF;
 					WHEN "11" =>
 								 S_state <= "00";
+					WHEN OTHERS => null;			
 				END CASE;
 								 END IF;
 			END IF;
@@ -206,7 +213,7 @@ PROCESS (clk, reset, state, as_s, as_e, rw_s, rw_e, uds_s, uds_e, lds_s, lds_e)
 									 clkena_e <= NOT dtack;
 									 waitm <= dtack;
 								 END IF;
-					WHEN "11" =>
+					WHEN OTHERS => null;			
 				END CASE;
 			END IF;
 		END IF;	

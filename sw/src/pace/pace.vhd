@@ -122,14 +122,15 @@ begin
       -- controller inputs
       inputs_i        => mapped_inputs,
 
-      -- FLASH/SRAM
+      -- FLASH/SRAM/SDRAM
       flash_i         => flash_i,
       flash_o         => flash_o,
 			sram_i					=> sram_i,
 			sram_o					=> sram_o,
-  
-      -- graphics
+      sdram_i         => sdram_i,
+      sdram_o         => sdram_o,
       
+      -- graphics
       bitmap_i        => from_bitmap_ctl,
       bitmap_o        => to_bitmap_ctl,
       
