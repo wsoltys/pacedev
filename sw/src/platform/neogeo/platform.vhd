@@ -428,9 +428,8 @@ begin
 			q_a					=> map2_d
 		);
 
-  tilemap_o.map_d <=  map1_d(7 downto 0) & map1_d(15 downto 8)
-                        when tilemap_i.map_a(10) = '0' else 
-                      map2_d(7 downto 0) & map2_d(15 downto 8);
+  tilemap_o.map_d <=  map1_d(15 downto 0) when tilemap_i.map_a(10) = '0' else 
+                      map2_d(15 downto 0);
   
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
   palram_inst : entity work.palram
