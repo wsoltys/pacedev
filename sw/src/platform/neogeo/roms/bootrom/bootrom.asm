@@ -34,16 +34,15 @@ start:
 	move.l #$3c0004,a0
 	move.w #$0020,(a0)		; inc=32 (1 col)
 	move.l #$3c0002,a0
-	move.w #$4800,(a0)
-	move.w #$4900,(a0)
-	move.w #$2000,(a0)
-	move.w #$4300,(a0)
-	move.w #$4800,(a0)
-	move.w #$5200,(a0)
-	move.w #$4900,(a0)
-	move.w #$5300,(a0)
+	move.w #$0048,(a0)
+	move.w #$0049,(a0)
+	move.w #$0020,(a0)
+	move.w #$0043,(a0)
+	move.w #$0048,(a0)
+	move.w #$0052,(a0)
+	move.w #$0049,(a0)
+	move.w #$0053,(a0)
 
 done:
 	bra done
-
 	
