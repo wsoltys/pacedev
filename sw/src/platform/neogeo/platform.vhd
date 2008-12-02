@@ -79,8 +79,9 @@ end platform;
 
 architecture SYN of platform is
 
-	alias clk_100M        : std_logic is clk_i(0);
+	alias clk_100M        : std_logic is clk_i(1);  -- actually 25MHz
 	alias clk_video       : std_logic is clk_i(1);
+	alias clk_27M         : std_logic is clk_i(3);
 	signal clk_12M_ena    : std_logic := '0';
 	
 	signal reset_n        : std_logic := '1';
@@ -93,6 +94,12 @@ architecture SYN of platform is
   signal udsn           : std_logic := '0';
   signal ldsn           : std_logic := '0';
   signal rwn            : std_logic := '0';
+  -- write pulse (100MHz) - "fixed" from TG68 core
+  signal wr_p           : std_logic;
+
+  -- boor rom signals
+  signal bootrom_cs     : std_logic := '0';
+  signal bootrom_d_o    : std_logic_vector(d_i'range) := (others => '0');
   
   -- cpu vector table
   signal vector_cs      : std_logic := '0';
@@ -153,13 +160,15 @@ begin
   --
   
   process (clk_100M, reset_i)
-    variable count : std_logic_vector(1 downto 0) := (others => '0');
+    variable count : std_logic_vector(2 downto 0) := (others => '0');
   begin
     if reset_i = '1' then
       count := (others => '0');
     elsif rising_edge(clk_100M) then
       clk_12M_ena <= '0'; -- default
-      if count = "00" then
+      --if count = "000" then
+      -- clk_100M is actually 25MHz, so 25/2=12.5MHz
+      if count(0) = '0' then
         clk_12M_ena <= '1';
       end if;
       count := count + 1;
@@ -192,6 +201,28 @@ begin
   bios_cs     <= '1' when STD_MATCH(a, X"C" & "000----------------") else '0';
   -- battery-backed sram $D00000-$D0FFFF (64kB)
   sram_cs     <= '1' when STD_MATCH(a, X"D0" & "---------------") else '0';
+  -- boot rom $F00000-$FFFFFF (1MiB)
+  bootrom_cs  <= '1' when STD_MATCH(a, X"F" & "-------------------") else '0';
+
+  --
+  -- wr_p and dtack logic
+  --
+  
+  process (clk_100M)
+    variable wr_r : std_logic;
+  begin
+    if rising_edge(clk_100M) then
+      dtackn <= asn;
+      wr_p <= '0'; -- default
+      if clk_12M_ena = '1' then
+        -- leading edge write cycle
+        if wr_r = '0' and asn = '0' and rwn = '0' then
+          wr_p <= '1';
+        end if;
+        wr_r := not (asn or rwn);
+      end if;
+    end if;
+  end process;
 
   --
   -- read muxes
@@ -205,6 +236,7 @@ begin
           memcard_d_o when memcard_cs = '1' else
           bios_d_o when bios_cs = '1' else
           sram_d_o when sram_cs = '1' else
+          bootrom_d_o when bootrom_cs = '1' else
           (others => '1');
 
   reg_d_o <=  vram1_d_o when (reg_3C_cs = '1' and vram_a(10) = '0') else
@@ -215,7 +247,8 @@ begin
   --  vectors
   --
   
-  vector_d_o <= bios_d_o;
+  -- to be changed!
+  vector_d_o <= bootrom_d_o;
 
   --
   -- cpu work ram (in burched sram atm)
@@ -232,11 +265,11 @@ begin
   GEN_A: for i in 0 to 14 generate
     gp_o.d(17-i) <= a(1+i);
   end generate;
-  gp_o.d(2) <= sram_cs;
+  gp_o.d(2) <= sram_cs;                 -- A15
   gp_o.d(1) <= '0';                     -- A16
   gp_o.d(0) <= not (ram_cs or sram_cs); -- CEAn
-  gp_o.d(18) <= not (udsn or rwn);      -- upper byte WEn
-  gp_o.d(19) <= not (ldsn or rwn);      -- lower byte WEn
+  gp_o.d(18) <= udsn or not wr_p;       -- upper byte WEn
+  gp_o.d(19) <= ldsn or not wr_p;       -- lower byte WEn
 
   --
   -- hardware registers
@@ -250,11 +283,12 @@ begin
     if reset_i = '1' then
       rwn_r := '0';
       vram_inc := (others => '0');
-    elsif rising_edge(clk_100M) and clk_12M_ena = '1' then
+    elsif rising_edge(clk_100M) then --and clk_12M_ena = '1' then
       vram1_wr <= '0'; -- default
       vram2_wr <= '0'; -- default
       if reg_3C_cs = '1' then
-        if rwn_r = '1' and rwn = '0' then
+        --if rwn_r = '1' and rwn = '0' then
+        if wr_p = '1' then
           -- leading edge write
           case a(7 downto 1) is
             when "0000000" =>
@@ -275,14 +309,15 @@ begin
             when others =>
               null;
           end case;
-        elsif rwn_r = '0' and rwn = '1' then
+        --elsif rwn_r = '0' and rwn = '1' then
+        elsif rwn_r = '1' and wr_p = '0' then
           -- trailing edge write
           if a(7 downto 1) = "0000001" then
             vram_a <= vram_a + vram_inc;
           end if;
         end if;
       end if;
-      rwn_r := rwn;
+      rwn_r := wr_p; --rwn;
     end if;
   end process;
 
@@ -295,7 +330,7 @@ begin
   
     sdram_o.a <= a(22 downto 1);
     sdram_o.d <= d_o;
-    dtackn <= sdram_i.waitrequest;
+    --dtackn <= sdram_i.waitrequest;
     sdram_o.cs <= bios_cs;
     sdram_o.be_n <= udsn & ldsn;
     sdram_o.rd_n <= not rwn;
@@ -328,78 +363,23 @@ begin
   -- COMPONENT INSTANTIATION
   --
 
-  BLK_TEST : block
+  tg68_inst : entity work.TG68
+    port map
+    (        
+      clk           => clk_100M,
+      reset         => reset_n, -- active low
+      clkena_in     => clk_12M_ena,
+      data_in       => d_i,
+      IPL           => "111",
+      dtack         => dtackn,
+      addr          => a_ext,
+      data_out      => d_o,
+      as            => asn,
+      uds           => udsn,
+      lds           => ldsn,
+      rw            => rwn
+    );
 
-    signal dtackn       : std_logic;
-    signal wr_p         : std_logic;
-    
-    signal testram_be   : std_logic_vector(1 downto 0);
-    signal testram_wr   : std_logic;
-    signal testram_d_o  : std_logic_vector(15 downto 0);
-  
-  begin
-
-    tg68_inst : entity work.TG68
-      port map
-      (        
-        clk           => clk_100M,
-        reset         => reset_n, -- active low
-        clkena_in     => clk_12M_ena,
-        data_in       => testram_d_o,
-        IPL           => "111",
-        dtack         => dtackn,
-        addr          => a_ext,
-        data_out      => d_o,
-        as            => asn,
-        uds           => udsn,
-        lds           => ldsn,
-        rw            => rwn
-      );
-
-    -- fudge dtack, generate write pulse
-    process (clk_100M)
-      variable wr_r : std_logic := '0';
-    begin
-      if rising_edge(clk_100M) and clk_12M_ena = '1' then
-        dtackn <= asn;
-        wr_p <= '0'; -- default
-        if wr_r = '0' and asn = '0' and rwn = '0' then
-          -- pulse write on leading edge only
-          wr_p <= '1';
-        end if;
-        wr_r := not (asn or rwn);
-      end if;
-    end process;
-    
-    testram_wr <= wr_p when a(23 downto 12) = "000000000000" else '0';
-    testram_be <= not udsn & not ldsn;
-    
-    -- testram.hex
-    testram_inst : entity work.testram
-      port map
-      (
-        clock		    => clk_100M,
-        address		  => a(11 downto 1),
-        data		    => d_o,
-        byteena     => testram_be,
-        wren		    => testram_wr,
-        q		        => testram_d_o
-      );
-
-    -- latch leds above 2KiW
-    process (clk_100M)
-    begin
-      if rising_edge(clk_100M) and clk_12M_ena = '1' then
-        if asn = '0' and rwn = '0' then
-          if a(12) = '1' then
-            leds_o(15 downto 0) <= d_o;
-          end if;
-        end if;
-      end if;
-    end process;
-    
-  end block BLK_TEST;
-  
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 	vram1_inst : entity work.dpram
 		generic map
@@ -472,6 +452,28 @@ begin
   GEN_PAL_DATA : for i in 0 to 15 generate
     graphics_o.pal(i) <= palette(i*16+15 downto i*16);
   end generate GEN_PAL_DATA;
+
+  -- bootrom.hex
+  bootrom_inst : entity work.testram
+    port map
+    (
+      clock		    => clk_100M,
+      address		  => a(11 downto 1),
+      data		    => d_o,
+      byteena     => "11",
+      wren		    => '0',
+      q		        => bootrom_d_o
+    );
+
+  -- for now, writes to $1000 are latched on the leds
+  process (clk_100M)
+  begin
+    if rising_edge(clk_100M) then
+      if wr_p = '1' and a(12) = '1' then
+        leds_o(15 downto 0) <= d_o;
+      end if;
+    end if;
+  end process;
 
   --
   -- unused outputs
