@@ -97,9 +97,13 @@ architecture SYN of platform is
   -- write pulse (100MHz) - "fixed" from TG68 core
   signal wr_p           : std_logic;
 
-  -- boor rom signals
+  -- boot rom signals
   signal bootrom_cs     : std_logic := '0';
   signal bootrom_d_o    : std_logic_vector(d_i'range) := (others => '0');
+
+  -- boot data storage (eg. DE1 flash) signals
+  signal bootdata_cs    : std_logic := '0';
+  signal bootdata_d_o   : std_logic_vector(d_i'range) := (others => '0');
   
   -- cpu vector table
   signal vector_cs      : std_logic := '0';
@@ -201,6 +205,8 @@ begin
   bios_cs     <= '1' when STD_MATCH(a, X"C" & "000----------------") else '0';
   -- battery-backed sram $D00000-$D0FFFF (64kB)
   sram_cs     <= '1' when STD_MATCH(a, X"D0" & "---------------") else '0';
+  -- bootdata $E00000-$EFFFFF (1MiB)
+  bootdata_cs <= '1' when STD_MATCH(a, X"E" & "-------------------") else '0';
   -- boot rom $F00000-$FFFFFF (1MiB)
   bootrom_cs  <= '1' when STD_MATCH(a, X"F" & "-------------------") else '0';
 
@@ -236,6 +242,7 @@ begin
           memcard_d_o when memcard_cs = '1' else
           bios_d_o when bios_cs = '1' else
           sram_d_o when sram_cs = '1' else
+          bootdata_d_o when bootdata_cs = '1' else
           bootrom_d_o when bootrom_cs = '1' else
           (others => '1');
 
@@ -320,6 +327,19 @@ begin
       rwn_r := wr_p; --rwn;
     end if;
   end process;
+
+  BLK_BOOTDATA : block
+  begin
+
+    -- need to add banking registers eventually
+    flash_o.a <= std_logic_vector(resize(unsigned(a(19 downto 1)),flash_o.a'length));
+    flash_o.d <= (others => '0');
+    flash_o.cs <= bootdata_cs;
+    flash_o.oe <= '1';
+    flash_o.we <= '0';
+    bootdata_d_o <= X"00" & flash_i.d;
+    
+  end block BLK_BOOTDATA;
 
   --
   -- system bios in flash atm

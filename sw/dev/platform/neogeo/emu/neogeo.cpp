@@ -25,6 +25,7 @@ static unsigned char *palette_ram;      // $400000-$401FFF (8kB)
 static unsigned char *memcard_ram;      // $800000-$800FFF (4kB)
 static unsigned char *system_bios;      // $C00000-$C1FFFF (128kB)
 static unsigned char *battery_sram;     // $D00000-$D0FFFF (64kB)
+static unsigned char *bootdata;         // $E00000-$EFFFFF (1MB windows into 8MB)
 static unsigned char *bootrom;          // $F00000-$F0FFFF (64kB)
 
 static unsigned char *vram;             // 128kB not mapped into CPU address space
@@ -76,6 +77,9 @@ static unsigned read_3C0000_word (unsigned a, unsigned d);
 static unsigned write_3C0000_byte (unsigned a, unsigned d);
 static unsigned write_3C0000_word (unsigned a, unsigned d);
 
+static unsigned read_E00000_byte (unsigned a, unsigned d);
+static unsigned read_E00000_word (unsigned a, unsigned d);
+
 struct STARSCREAM_PROGRAMREGION neogeo_programfetch[] = 
 {
   { 0x000000, 0x00007F, (unsigned)vectors - 0x000000 },
@@ -102,6 +106,7 @@ struct STARSCREAM_DATAREGION neogeo_readbyte[] =
   { 0x800000, 0x800FFF, NULL, memcard_ram },
   { 0xC00000, 0xC1FFFF, NULL, system_bios },
   { 0xD00000, 0xD0FFFF, NULL, battery_sram },
+  { 0xE00000, 0xEFFFFF, (void *)read_E00000_byte, 0 },
   { 0xF00000, 0xF0FFFF, NULL, bootrom },
   { (unsigned int)-1, (unsigned int)-1, NULL }
 };
@@ -135,9 +140,12 @@ int cpu_hw_init (void)
   memcard_ram = (unsigned char *)malloc(0x001000);    // $800000-$800FFF (4kB)
   system_bios = (unsigned char *)malloc(0x020000);    // $C00000-$C1FFFF (128kB)
   battery_sram = (unsigned char *)malloc(0x010000);   // $D00000-$D0FFFF (64kB)
+  bootdata = (unsigned char *)malloc(0x0800000);      // $E00000-$EFFFFF (1MB->8MB)
   bootrom = (unsigned char *)malloc(0x010000);        // $F00000-$F0FFFF (64kB)
 
   if (!rom_bank_1 || !ram_bank || !rom_bank_2 || !palette_ram || !memcard_ram || !system_bios || !battery_sram)
+    exit (0);
+  if (!bootdata || !bootrom)
     exit (0);
 
   vram = (unsigned char *)malloc(0x20000);            // 128kB video ram
@@ -174,6 +182,7 @@ int cpu_hw_init (void)
   neogeo_readbyte[i++].userdata = memcard_ram;
   neogeo_readbyte[i++].userdata = system_bios;
   neogeo_readbyte[i++].userdata = battery_sram;
+  i++;
   neogeo_readbyte[i++].userdata = bootrom;
 
   memcpy (neogeo_readword, neogeo_readbyte, sizeof(neogeo_readbyte));
@@ -182,6 +191,7 @@ int cpu_hw_init (void)
   neogeo_readword[6].memorycall = (void *)read_340000_word;
   neogeo_readword[7].memorycall = (void *)read_380000_word;
   neogeo_readword[8].memorycall = (void *)read_3C0000_word;
+  neogeo_readword[13].memorycall = (void *)read_E00000_word;
 
   i = 0;
   neogeo_writebyte[i++].userdata = ram_bank;
@@ -261,7 +271,7 @@ unsigned read_300000_byte (unsigned a, unsigned d)
 
 unsigned read_300000_word (unsigned a, unsigned d)
 {
-  unsigned offset = a & 0x01FFFF;
+  //unsigned offset = a & 0x01FFFF;
   unsigned val = 0;
 
   printf ("%s($%X,$%X) - UNKNOWN!\n", __FUNCTION__, a, d);
@@ -310,7 +320,7 @@ unsigned read_320000_byte (unsigned a, unsigned d)
 
 unsigned read_320000_word (unsigned a, unsigned d)
 {
-  unsigned offset = a & 0x01FFFF;
+  //unsigned offset = a & 0x01FFFF;
   printf ("%s($%X,$%X)\n", __FUNCTION__, a, d);
 
   return (0);
@@ -558,6 +568,24 @@ unsigned write_3C0000_word (unsigned a, unsigned d)
   return (0);
 }
 
+unsigned read_E00000_byte (unsigned a, unsigned d)
+{
+  // on the DE1/2 bootdata store is only 8 bits wide
+
+  unsigned offset = a & 0x0FFFFF;
+
+  return ((a&1) ? 0 : *(bootrom+(offset>>1)));
+}
+
+unsigned read_E00000_word (unsigned a, unsigned d)
+{
+  // on the DE1/2 bootdata store is only 8 bits wide
+
+  unsigned offset = a & 0x0FFFFE;
+
+  return ((unsigned)*(bootrom+(offset>>1)));
+}
+
 #define SWAP(x) (((x)<<8)&0xFF00)|(((x)>>8)&0x00FF)
 
 void show_sfix_tile (int x, int y, unsigned short int pi, unsigned short int c)
@@ -654,16 +682,17 @@ int main(int argc, char *argv[])
   }
   fclose (fp);
 
-  // read system bios
+  // read system bios into bootdata store at offset 128kB
   fp = fopen ("sp-s2.sp1", "rb");
-  fread (system_bios, 1, 0x20000, fp);
+  //fread (system_bios, 1, 0x20000, fp);
+  fread (bootdata+0x20000, 1, 0x20000, fp);
   fclose (fp);
   #if 0
   fp = fopen ("bios.bin", "wb");
   for (int i=0; i<0x20000; i+=2)
   {
-    fwrite (system_bios+i+1, 1, 1, fp);
-    fwrite (system_bios+i+0, 1, 1, fp);
+    fwrite (bootdata+0x20000+i+1, 1, 1, fp);
+    fwrite (bootdata+0x20000+i+0, 1, 1, fp);
   }
   fclose (fp);
   #endif
