@@ -1,6 +1,6 @@
 	cpu 68000
 
-ram_start equ $000800
+ram_start equ $d00000
 ram_end   equ $000fff
 rom_start equ $000000
 rom_end   equ $0007ff
@@ -17,11 +17,14 @@ reset_pc  dc.l	start
 start:
 	nop
 	
-	clr.b d0
-	movea.w #$55, d0
-	movea.l #io_start,a0
+	move.w #$55, d0
+	move.l #io_start,a0
+	move.w d0,(a0)
 
-	movea.w d0,(a0)
+	move.w #$1234,d0
+	move.l #$0810,a0
+	move.w d0,(a0)
+	move.w (a0),d0
 
 myhalt:
 	bra myhalt
