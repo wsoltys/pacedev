@@ -7,6 +7,8 @@
 
 #include "starcpu.h"
 
+#define BOOT_FROM_BOOTROM
+
 //#define VERBOSE_HW_REGS
 //#define VERBOSE_VRAM_D
 //#define VERBOSE_ALL
@@ -23,6 +25,7 @@ static unsigned char *palette_ram;      // $400000-$401FFF (8kB)
 static unsigned char *memcard_ram;      // $800000-$800FFF (4kB)
 static unsigned char *system_bios;      // $C00000-$C1FFFF (128kB)
 static unsigned char *battery_sram;     // $D00000-$D0FFFF (64kB)
+static unsigned char *bootrom;          // $F00000-$F0FFFF (64kB)
 
 static unsigned char *vram;             // 128kB not mapped into CPU address space
 static unsigned short int *vram_w;      // pointer to previous
@@ -80,6 +83,7 @@ struct STARSCREAM_PROGRAMREGION neogeo_programfetch[] =
   { 0x100000, 0x10FFFF, (unsigned)ram_bank - 0x100000 },
   { 0x200000, 0x2FFFEF, (unsigned)rom_bank_2 - 0x200000 },
   { 0xC00000, 0xC1FFFF, (unsigned)system_bios - 0xC00000 },
+  { 0xF00000, 0xF0FFFF, (unsigned)bootrom - 0xF00000 },
   { (unsigned int)-1, (unsigned int)-1, 0 }
 };
 
@@ -98,6 +102,7 @@ struct STARSCREAM_DATAREGION neogeo_readbyte[] =
   { 0x800000, 0x800FFF, NULL, memcard_ram },
   { 0xC00000, 0xC1FFFF, NULL, system_bios },
   { 0xD00000, 0xD0FFFF, NULL, battery_sram },
+  { 0xF00000, 0xF0FFFF, NULL, bootrom },
   { (unsigned int)-1, (unsigned int)-1, NULL }
 };
 #define NUM_READBYTE (sizeof(neogeo_readbyte)/sizeof(STARSCREAM_DATAREGION))
@@ -130,6 +135,7 @@ int cpu_hw_init (void)
   memcard_ram = (unsigned char *)malloc(0x001000);    // $800000-$800FFF (4kB)
   system_bios = (unsigned char *)malloc(0x020000);    // $C00000-$C1FFFF (128kB)
   battery_sram = (unsigned char *)malloc(0x010000);   // $D00000-$D0FFFF (64kB)
+  bootrom = (unsigned char *)malloc(0x010000);        // $F00000-$F0FFFF (64kB)
 
   if (!rom_bank_1 || !ram_bank || !rom_bank_2 || !palette_ram || !memcard_ram || !system_bios || !battery_sram)
     exit (0);
@@ -141,7 +147,11 @@ int cpu_hw_init (void)
     exit (0);
 
   regs.swpbios_rom = 0;
-  vectors = (regs.swpbios_rom == 0 ? system_bios : rom_bank_1);
+  #ifdef BOOT_FROM_BOOTROM
+    vectors = bootrom;
+  #else
+    vectors = (regs.swpbios_rom == 0 ? system_bios : rom_bank_1);
+  #endif
 
   regs.sysstat_b = 0xFF;
 
@@ -152,6 +162,7 @@ int cpu_hw_init (void)
   neogeo_programfetch[i].offset = (unsigned)ram_bank - neogeo_programfetch[i].lowaddr; i++;
   neogeo_programfetch[i].offset = (unsigned)rom_bank_2 - neogeo_programfetch[i].lowaddr; i++;
   neogeo_programfetch[i].offset = (unsigned)system_bios - neogeo_programfetch[i].lowaddr; i++;
+  neogeo_programfetch[i].offset = (unsigned)bootrom - neogeo_programfetch[i].lowaddr; i++;
 
   i = 0;
   neogeo_readbyte[i++].userdata = vectors;
@@ -163,6 +174,7 @@ int cpu_hw_init (void)
   neogeo_readbyte[i++].userdata = memcard_ram;
   neogeo_readbyte[i++].userdata = system_bios;
   neogeo_readbyte[i++].userdata = battery_sram;
+  neogeo_readbyte[i++].userdata = bootrom;
 
   memcpy (neogeo_readword, neogeo_readbyte, sizeof(neogeo_readbyte));
   neogeo_readword[4].memorycall = (void *)read_300000_word;
@@ -211,6 +223,7 @@ int cpu_hw_deinit (void)
   free (memcard_ram);
   free (system_bios);
   free (battery_sram);
+  free (bootrom);
 
   free (vram);
 
@@ -592,6 +605,7 @@ int show_sfix (void)
       int a = y+(x<<5);
       int c = vram_w[0x7000+a];
 
+      //c = SWAP(c);
       show_sfix_tile (x*8, y*8, c>>12, c&0xfff);
     }
   }
@@ -629,8 +643,19 @@ int main(int argc, char *argv[])
 
   cpu_hw_init ();
 
+  // read bootrom
+  FILE *fp = fopen ("bootrom.bin", "rb");
+  unsigned short int *pw = (unsigned short int *)bootrom;
+  while (!feof (fp))
+  {
+    fread (pw, sizeof(unsigned short int), 1, fp);
+    *pw = SWAP(*pw);
+    pw++;
+  }
+  fclose (fp);
+
   // read system bios
-  FILE *fp = fopen ("sp-s2.sp1", "rb");
+  fp = fopen ("sp-s2.sp1", "rb");
   fread (system_bios, 1, 0x20000, fp);
   fclose (fp);
   #if 0
@@ -657,6 +682,14 @@ int main(int argc, char *argv[])
 
   patch_bios ();
 
+  // put some colours into the palettes
+  pw = (unsigned short int *)palette_ram;
+  for (int i=0; i<16; i++)
+  {
+    for (int j=0; j<16; j++)
+      pw[i*16+j] = (j&1 ? 0xFFFF : 0);      
+  }
+
   int sret = s68000reset ();
   if (sret != 0) printf ("s68000reset() failed with %d\n", sret);
 
@@ -671,7 +704,7 @@ int main(int argc, char *argv[])
   #if 0
   for (int t=0; t<4096; t++)
   {
-    show_sfix_tile ((t%40)*8, (((t/40)%32)*8), t);
+    show_sfix_tile ((t%40)*8, (((t/40)%32)*8), 0, t);
     if (t%(40*32) == 40*32-1)
     {
       while (!key[KEY_ESC]);
