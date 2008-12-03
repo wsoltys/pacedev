@@ -124,6 +124,7 @@ struct STARSCREAM_DATAREGION neogeo_writebyte[] =
   { 0x3C0000, 0x3DFFFF, (void *)write_3C0000_byte, 0 },
   { 0x400000, 0x401FFF, NULL, palette_ram },
   { 0x800000, 0x800FFF, NULL, memcard_ram },
+  { 0xC00000, 0xC1FFFF, NULL, system_bios },
   { 0xD00000, 0xD0FFFF, NULL, battery_sram },
   { (unsigned int)-1, (unsigned int)-1, NULL }
 };
@@ -198,6 +199,7 @@ int cpu_hw_init (void)
   i += 5;
   neogeo_writebyte[i++].userdata = palette_ram;
   neogeo_writebyte[i++].userdata = memcard_ram;
+  neogeo_writebyte[i++].userdata = system_bios;
   neogeo_writebyte[i++].userdata = battery_sram;
 
   memcpy (neogeo_writeword, neogeo_writebyte, sizeof(neogeo_writebyte));
@@ -574,7 +576,9 @@ unsigned read_E00000_byte (unsigned a, unsigned d)
 
   unsigned offset = a & 0x0FFFFF;
 
-  return ((a&1) ? 0 : *(bootrom+(offset>>1)));
+	//printf ("$%X = $%X\n", a, *(bootdata+offset));
+
+  return (*(bootdata+offset));
 }
 
 unsigned read_E00000_word (unsigned a, unsigned d)
@@ -583,7 +587,7 @@ unsigned read_E00000_word (unsigned a, unsigned d)
 
   unsigned offset = a & 0x0FFFFE;
 
-  return ((unsigned)*(bootrom+(offset>>1)));
+  return ((unsigned)*(bootdata+(offset>>1)));
 }
 
 #define SWAP(x) (((x)<<8)&0xFF00)|(((x)>>8)&0x00FF)
@@ -749,7 +753,10 @@ int main(int argc, char *argv[])
   {
     uret = s68000exec(200000);
     if (uret != EXEC_SUCCESS)
+		{
       printf ("s68000exec() failed with $%X\n", uret);
+      printf ("%d: PC=$%X\n", i, s68000context.pc);
+		}
     #ifdef VERBOSE_PC
       printf ("%d: PC=$%X\n", i, s68000context.pc);
     #endif
@@ -780,6 +787,12 @@ int main(int argc, char *argv[])
   while (key[KEY_ESC]);	  
 
   fclose (LOGOUT);
+
+	#if 1
+		fp = fopen ("bios.bin", "wb");
+		fwrite (system_bios, 0x20000, 1, fp);
+		fclose (fp);
+	#endif
 
   #if 0
     fp = fopen ("vram1.bin", "wb");
