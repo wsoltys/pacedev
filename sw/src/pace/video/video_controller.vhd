@@ -114,6 +114,19 @@ begin
           v_back_porch_r <= 5;
           v_border_r <= (320-VIDEO_V_SIZE)/2;
 
+        when PACE_VIDEO_VGA_320x480_60Hz =>
+          -- VGA, clk=12.588MHz
+          --# 320x240 @ 60 Hz, 31.5 kHz hsync, 4:3 aspect ratio
+          --Modeline "320x240"    12.588    320  336  384  400    240  245  246  262 Doublescan
+          h_front_porch_r <= 16;
+          h_sync_r <= 48;
+          h_back_porch_r <= 16;
+          h_border_r <= (320-VIDEO_H_SIZE)/2;
+          v_front_porch_r <= (5*2);
+          v_sync_r <= (1*2);
+          v_back_porch_r <= (16*2);
+          v_border_r <= (480-VIDEO_V_SIZE)/2;
+
         when PACE_VIDEO_VGA_640x480_60Hz =>
           -- VGA, clk=25.175MHz
           h_front_porch_r <= 16;

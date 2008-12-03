@@ -155,6 +155,9 @@ architecture SYN of platform is
   signal vram2_wr       : std_logic := '0';
   signal map2_d         : std_logic_vector(15 downto 0) := (others => '0');
   
+  signal magic_r        : std_logic_vector(15 downto 0) := (others => '0');
+  alias boot_f          : std_logic is magic_r(0);
+  
 begin
 
   reset_n <= not reset_i;
@@ -171,8 +174,8 @@ begin
     elsif rising_edge(clk_100M) then
       clk_12M_ena <= '0'; -- default
       --if count = "000" then
-      -- clk_100M is actually 25MHz, so 25/2=12.5MHz
       if count(0) = '0' then
+        -- clk_100M is actually 25MHz
         clk_12M_ena <= '1';
       end if;
       count := count + 1;
@@ -258,30 +261,89 @@ begin
   vector_d_o <= bootrom_d_o;
 
   --
-  -- cpu work ram (in burched sram atm)
+  -- on-board SRAM
+  -- system bios, cpu work ram, sram, memcard
+  --
+
+  sram_o.a(sram_o.a'left downto 19) <= (others => '0');
+  sram_o.a(18 downto 16) <= "00" & a(17) when bios_cs = '1' else
+                            "010" when ram_cs = '1' else
+                            "011" when sram_cs = '1' else
+                            "100" when memcard_cs = '1';
+  sram_o.a(15 downto 0) <= a(16 downto 1);
+  sram_o.d <= std_logic_vector(resize(unsigned(d_o), sram_o.d'length));
+  sram_o.be <= "00" & not udsn & not ldsn;
+  sram_o.cs <= bios_cs or ram_cs or sram_cs or memcard_cs;
+  sram_o.oe <= rwn;
+  sram_o.we <= wr_p;
+
+  bios_d_o <= sram_i.d(ram_d_o'range);
+  ram_d_o <= sram_i.d(ram_d_o'range);
+  sram_d_o <= sram_i.d(ram_d_o'range);
+  memcard_d_o <= sram_i.d(ram_d_o'range);
+
+  --
+  -- on-board flash
+  -- mapped into 68k address space for boot rom
+  -- then mapped out for tile rom
   --
   
-  assert false
-    report "this won't work on stock DE1 hardware"
-      severity warning;
-  -- hook up Burched SRAM module
-  GEN_D: for i in 0 to 15 generate
-    ram_d_o(i) <= gp_i(35-i);
-    gp_o.d(35-i) <= d_o(i);
-  end generate;
-  GEN_A: for i in 0 to 14 generate
-    gp_o.d(17-i) <= a(1+i);
-  end generate;
-  gp_o.d(2) <= sram_cs;                 -- A15
-  gp_o.d(1) <= '0';                     -- A16
-  gp_o.d(0) <= not (ram_cs or sram_cs); -- CEAn
-  gp_o.d(18) <= udsn or not wr_p;       -- upper byte WEn
-  gp_o.d(19) <= ldsn or not wr_p;       -- lower byte WEn
+  -- emulate synchronous clocked internal ram for timing in tilemap controller
+  process (clk_video)
+  begin
+    if rising_edge(clk_video) then
+      if boot_f = '1' then
+        flash_o.a <= "00" & a(19 downto 1) & ldsn;
+      else
+        flash_o.a <= std_logic_vector(resize(unsigned(tilemap_i.tile_a(16 downto 0)), flash_o.a'length));
+      end if;
+    end if;
+  end process;
+  flash_o.d <= (others => '0');
+  flash_o.cs <= '1';
+  flash_o.oe <= '1';
+  flash_o.we <= '0';
 
+  bootdata_d_o <= X"00" & flash_i.d(7 downto 0);
+  tilemap_o.tile_d <= flash_i.d(7 downto 0);
+
+  GEN_NOT : if false generate
+    assert false
+      report "this won't work on stock DE1 hardware"
+        severity warning;
+    -- hook up Burched SRAM module
+    GEN_D: for i in 0 to 15 generate
+      --ram_d_o(i) <= gp_i(35-i);
+      gp_o.d(35-i) <= d_o(i);
+    end generate;
+    GEN_A: for i in 0 to 14 generate
+      gp_o.d(17-i) <= a(1+i);
+    end generate;
+    gp_o.d(2) <= sram_cs;                 -- A15
+    gp_o.d(1) <= '0';                     -- A16
+    gp_o.d(0) <= not (ram_cs or sram_cs); -- CEAn
+    gp_o.d(18) <= udsn or not wr_p;       -- upper byte WEn
+    gp_o.d(19) <= ldsn or not wr_p;       -- lower byte WEn
+  end generate GEN_NOT;
+  
   --
   -- hardware registers
   --
 
+  -- magic register
+  process (clk_100M, reset_i)
+  begin
+    if reset_i = '1' then
+      boot_f <= '1';
+    elsif rising_edge(clk_100M) then
+      if bootrom_cs = '1' then
+        if wr_p = '1' then
+          magic_r <= d_o;
+        end if;
+      end if;
+    end if;
+  end process;
+  
   -- vram process
   process (clk_100M, reset_i)
     variable rwn_r    : std_logic := '0';
@@ -328,19 +390,6 @@ begin
     end if;
   end process;
 
-  BLK_BOOTDATA : block
-  begin
-
-    -- need to add banking registers eventually
-    flash_o.a <= std_logic_vector(resize(unsigned(a(19 downto 1)),flash_o.a'length));
-    flash_o.d <= (others => '0');
-    flash_o.cs <= bootdata_cs;
-    flash_o.oe <= '1';
-    flash_o.we <= '0';
-    bootdata_d_o <= X"00" & flash_i.d;
-    
-  end block BLK_BOOTDATA;
-
   --
   -- system bios in flash atm
   --
@@ -355,7 +404,7 @@ begin
     sdram_o.be_n <= udsn & ldsn;
     sdram_o.rd_n <= not rwn;
     sdram_o.wr_n <= rwn;
-    bios_d_o <= sdram_i.d;
+    --bios_d_o <= sdram_i.d;
     --sdram_i.valid;
 
   end block BLK_SDRAM;
@@ -365,20 +414,6 @@ begin
   --
   sram_d_o <= ram_d_o;
 
-  -- tile data in sram
-  -- - emulate synchronous clocked internal ram for timing in tilemap controller
-  process (clk_video)
-  begin
-    if rising_edge(clk_video) then
-      sram_o.a <= std_logic_vector(resize(unsigned(tilemap_i.tile_a(16 downto 0)), sram_o.a'length));
-    end if;
-  end process;
-  tilemap_o.tile_d <= sram_i.d(7 downto 0);
-  sram_o.be <= std_logic_vector(to_unsigned(3, sram_o.be'length));
-  sram_o.cs <= '1';
-  sram_o.oe <= '1';
-  sram_o.we <= '0';
-  
   --
   -- COMPONENT INSTANTIATION
   --
@@ -467,7 +502,8 @@ begin
       wren_a		  => '0',
       q_a		      => palette
     );
-
+  tilemap_o.attr_d <= (others => '0');
+  
   GEN_PAL_DATA : for i in 0 to 15 generate
     graphics_o.pal(i) <= palette(i*16+15 downto i*16);
   end generate GEN_PAL_DATA;

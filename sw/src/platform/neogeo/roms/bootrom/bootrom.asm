@@ -34,11 +34,16 @@ cpybios:
 	addq.l #1,a0
 	move.b (a0),d0				; 2nd byte
 	addq.l #1,a0
-	rol.w #8,d0						; byte swap
+	;rol.w #8,d0						; byte swap
+  move.w #$1234,d0
 	move.w d0,(a1)				; write to bios area
 	addq.l #2,a1
 	cmpi.l #$c20000,a1		; done?
 	bne cpybios						; no, loop
+
+; swap out the bootdata and restore tile data
+	lea.l $f00000,a0			; magic register
+	move.l #$1,(a0)				; *bang*
 
 ; clear screen and display banner
 	jsr clear_fixed_layer
@@ -46,9 +51,6 @@ cpybios:
 	move.w #$7020,d0
 	jsr prints						; print banner
 
-; swap out the bootdata and restore tile data
-	lea.l $f00000,a0			; magic register
-	move.l #$1,(a0)				; *bang*
 done:
 	bra done
 
@@ -68,7 +70,7 @@ prints_loop:
 	rts
 
 ; string table
-s_banner	dc.b	"P.A.C.E. NEOGEO Boot ROM v0.1"
+s_banner	dc.b	"P.A.C.E. NEOGEO Boot ROM v0.3"
 					dc.b	0
 
 ; write/read burched sram

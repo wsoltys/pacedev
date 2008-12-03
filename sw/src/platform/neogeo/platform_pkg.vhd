@@ -25,11 +25,8 @@ package platform_pkg is
 	-- Platform-specific constants (optional)
 	--
 
-	constant GALAXIAN_1MHz_CLK0_COUNTS			  : natural := 
+	constant NEOGEO_1MHz_CLK0_COUNTS			    : natural := 
     PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
-
-	constant GALAXIAN_CPU_CLK_ENA_DIVIDE_BY	  : natural := 
-    GALAXIAN_1MHz_CLK0_COUNTS / 3;
 
 	-- Palette : Table of RGB entries	
 

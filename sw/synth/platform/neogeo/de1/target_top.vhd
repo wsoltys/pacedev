@@ -167,7 +167,7 @@ begin
       port map
       (
         inclk0		=> clock_50,
-        c0		    => clk_i(1),    -- 25MHz
+        c0		    => clk_i(1),    -- 12.5MHz
         c1		    => clk_i(0),    -- 100MHz
         c2		    => dram_clk
       );
@@ -432,7 +432,14 @@ begin
   begin
 
 		video_i.clk <= clk_i(1);	-- by convention
-		video_i.clk_ena <= '1';
+		process (clk_i(1))
+    begin
+      if reset_i = '1' then
+        video_i.clk_ena <= '0';
+      elsif rising_edge(clk_i(1)) then
+        video_i.clk_ena <= not video_i.clk_ena;
+      end if;
+    end process;
     video_i.reset <= reset_i;
     
     vga_clk <= video_o.clk;
