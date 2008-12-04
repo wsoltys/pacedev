@@ -4,21 +4,25 @@ use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
 entity uPD4990A is
+  generic
+  (
+    CLK_32M768_COUNT  : natural
+  );
   port
   (
-      clk_i       : in std_logic;
-      clk_ena     : in std_logic;
-      reset       : in std_logic;
-      
-      data_in     : in std_logic;
-      clk         : in std_logic;
-      c           : in std_logic_vector(2 downto 0);
-      stb         : in std_logic;
-      cs          : in std_logic;
-      out_enabl   : in std_logic;
-      
-      data_out    : out std_logic;
-      tp          : out std_logic
+    clk_i             : in std_logic;
+    clk_ena           : in std_logic;
+    reset             : in std_logic;
+    
+    data_in           : in std_logic;
+    clk               : in std_logic;
+    c                 : in std_logic_vector(2 downto 0);
+    stb               : in std_logic;
+    cs                : in std_logic;
+    out_enabl         : in std_logic;
+    
+    data_out          : out std_logic;
+    tp                : out std_logic
   );
 end entity uPD4990A;
 
@@ -41,9 +45,92 @@ architecture SYN of uPD4990A is
 
   signal mode       : std_logic_vector(3 downto 0) := (others => '0');
   
+  signal clk_32M768 : std_logic := '0';
+  signal clk_4096   : std_logic := '0';
+  signal clk_2048   : std_logic := '0';
+  signal clk_256    : std_logic := '0';
+  signal clk_64     : std_logic := '0';
+  signal clk_1s     : std_logic := '0';
+  
+  signal pulse_1s   : std_logic := '0';
+  
 begin
 
-  process (clk_i)
+  process (clk_i, reset)
+    subtype count_t is integer range 0 to CLK_32M768_COUNT-1;
+    variable count      : count_t;
+    variable tp_count   : std_logic_vector(14 downto 0) := (others => '0');
+  begin
+    if reset = '1' then
+      count := 0;
+      tp_count  := (others => '0');
+    elsif rising_edge (clk_i) and clk_ena = '1' then
+      pulse_1s <= '0';    -- default
+      clk_32M768 <= '0';  -- default
+      if count = count_t'high then
+        clk_32M768 <= '1';
+        count := 0;
+      else
+        count := count + 1;
+      end if;
+      -- timing pulses
+      clk_4096 <= tp_count(2);
+      clk_2048 <= tp_count(3);
+      clk_256 <= tp_count(6);
+      clk_64 <= tp_count(8);
+      clk_1s <= tp_count(14);
+      if clk_32M768 = '1' then
+        tp_count  := tp_count + 1;
+        -- fixme!!!
+        if tp_count = 0 then
+          pulse_1s <= '1';
+        end if;
+      end if;
+    end if;
+  end process;
+
+  -- drive TP output
+  tp <= clk_64 when mode = "100" else
+        clk_256 when mode = "101" else
+        clk_2048 when mode = "110" else
+        '0'; -- TBD
+  
+  -- rtc (clock/calendar)
+  process (clk_i, reset)
+  begin
+    if reset = '1' then
+    elsif rising_edge(clk_i) and clk_ena = '1' then
+      if pulse_1s = '1' then
+        if sec_units = 9 then
+          sec_units <= (others => '0');
+          if sec_tens = 5 then
+            sec_tens <= (others => '0');
+            if min_units = 9 then
+              min_units <= (others => '0');
+              if min_tens = 5 then
+                min_tens <= (others => '0');
+                if hr_units = 9 then
+                  hr_units <= (others => '0');
+                else
+                  hr_units <= hr_units + 1;
+                end if;
+              else
+                min_tens <= min_tens + 1;
+              end if;
+            else
+              min_units <= min_units + 1;
+            end if;
+          else
+            sec_tens <= sec_tens + 1;
+          end if;
+        else
+          sec_units <= sec_units + 1;
+        end if;
+      end if;
+    end if;
+  end process;
+  
+  process (clk_i, reset)
   begin
     if reset = '1' then
       mode <= (others => '0');
@@ -55,14 +142,10 @@ begin
           when "001" =>
           when "010" =>
           when "011" =>
-          when "100" =>
-            -- TP = 64Hz
-          when "101" =>
-            -- TP = 256Hz
-          when "110" =>
-            -- TP = 2048Hz
-          when others =>
+          when "111" =>
             -- serial transfer mode
+          when others =>
+            null;
         end case;
         -- latch the current operating mode
         mode <= c;
