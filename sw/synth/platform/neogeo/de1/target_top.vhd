@@ -432,7 +432,7 @@ begin
   begin
 
 		video_i.clk <= clk_i(1);	-- by convention
-		process (clk_i(1))
+		process (clk_i(1), reset_i)
     begin
       if reset_i = '1' then
         video_i.clk_ena <= '0';

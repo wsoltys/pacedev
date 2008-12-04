@@ -155,9 +155,11 @@ architecture SYN of platform is
   signal vram2_wr       : std_logic := '0';
   signal map2_d         : std_logic_vector(15 downto 0) := (others => '0');
   
+  -- "magic" register
   signal magic_r        : std_logic_vector(15 downto 0) := (others => '0');
-  alias boot_f          : std_logic is magic_r(0);
-  
+  alias boot_f          : std_logic is magic_r(0);    -- booting
+  alias bootdata_f      : std_logic is magic_r(1);    -- bootdata store enabled
+
 begin
 
   reset_n <= not reset_i;
@@ -249,7 +251,11 @@ begin
           bootrom_d_o when bootrom_cs = '1' else
           (others => '1');
 
-  reg_d_o <=  vram1_d_o when (reg_3C_cs = '1' and vram_a(10) = '0') else
+  reg_d_o <=  X"00" & inputs_i(0).d when (reg_30_cs = '1' and ldsn = '0') else
+              X"00" & inputs_i(1).d when (reg_34_cs = '1' and ldsn = '0') else
+              X"00" & inputs_i(2).d when (reg_32_cs = '1' and ldsn = '1') else
+              X"00" & inputs_i(3).d when (reg_38_cs = '1' and ldsn = '0') else
+              vram1_d_o when (reg_3C_cs = '1' and vram_a(10) = '0') else
               vram2_d_o when (reg_3C_cs = '1' and vram_a(10) = '1') else
               (others => '1');
 
@@ -269,7 +275,8 @@ begin
   sram_o.a(18 downto 16) <= "00" & a(17) when bios_cs = '1' else
                             "010" when ram_cs = '1' else
                             "011" when sram_cs = '1' else
-                            "100" when memcard_cs = '1';
+                            "100" when memcard_cs = '1' else
+                            "111";
   sram_o.a(15 downto 0) <= a(16 downto 1);
   sram_o.d <= std_logic_vector(resize(unsigned(d_o), sram_o.d'length));
   sram_o.be <= "00" & not udsn & not ldsn;
@@ -292,7 +299,7 @@ begin
   process (clk_video)
   begin
     if rising_edge(clk_video) then
-      if boot_f = '1' then
+      if bootdata_f = '1' then
         flash_o.a <= "00" & a(19 downto 1) & ldsn;
       else
         flash_o.a <= std_logic_vector(resize(unsigned(tilemap_i.tile_a(16 downto 0)), flash_o.a'length));
@@ -335,10 +342,15 @@ begin
   begin
     if reset_i = '1' then
       boot_f <= '1';
+      bootdata_f <= '1';
     elsif rising_edge(clk_100M) then
       if bootrom_cs = '1' then
         if wr_p = '1' then
-          magic_r <= d_o;
+					-- write a '1' to reset the boot flags
+					-- - boot flags can never be set (again)
+          magic_r(1 downto 0) <= magic_r(1 downto 0) and not d_o(1 downto 0);
+          -- - other bits can be set or reset as required
+          magic_r(magic_r'left downto 2) <= d_o(d_o'left downto 2);
         end if;
       end if;
     end if;
@@ -535,7 +547,8 @@ begin
   --
   
   bitmap_o <= NULL_TO_BITMAP_CTL;
-  sprite_o.ld <= '0';
+  sprite_reg_o <= NULL_TO_SPRITE_REG;
+  sprite_o <= NULL_TO_SPRITE_CTL;
   graphics_o.bit8_1 <= (others => '0');
   graphics_o.bit16_1 <= (others => '0');
   osd_o <= NULL_TO_OSD;
@@ -543,5 +556,6 @@ begin
   spi_o <= NULL_TO_SPI;
   ser_o <= NULL_TO_SERIAL;
   --leds_o <= (others => '0');
-
+  gp_o <= NULL_TO_GP;
+  
 end SYN;
