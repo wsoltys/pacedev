@@ -30,8 +30,10 @@ entity platform is
     -- FLASH/SRAM
     flash_i         : in from_FLASH_t;
     flash_o         : out to_FLASH_t;
-		sram_i					: in from_SRAM_t;
-		sram_o					: out to_SRAM_t;
+    sram_i	    : in from_SRAM_t;
+    sram_o	    : out to_SRAM_t;
+    sdram_i	    : in from_SDRAM_t;
+    sdram_o	    : out to_SDRAM_t;
 
     -- graphics
     
@@ -44,7 +46,7 @@ entity platform is
     sprite_reg_o    : out to_SPRITE_REG_t;
     sprite_i        : in from_SPRITE_CTL_t;
     sprite_o        : out to_SPRITE_CTL_t;
-		spr0_hit				: in std_logic;
+	spr0_hit	: in std_logic;
 
     -- various graphics information
     graphics_i      : in from_GRAPHICS_t;
@@ -125,6 +127,7 @@ architecture SYN of platform is
   -- ROM signals        
 	signal rom_cs					: std_logic;
   signal rom_datao      : std_logic_vector(7 downto 0);
+   signal Rom_addr        : std_logic_vector(13 downto 0);
                         
   -- keyboard signals
 	signal kbd_cs					: std_logic;
@@ -179,8 +182,13 @@ begin
   sram_o.we <= ram_wr;
 
 	-- memory chip selects
-	-- ROM $0000-$2FFF
+	-- ROM $0000-$2FFF (Level2) , $3000-$3FFF holds Level1
 	rom_cs <= '1' when uP_addr(15 downto 14) = "00" and uP_addr(13 downto 12) /= "11" else '0';
+	--Switch 0 "ON" selects level 1 basic
+	Rom_Addr(13 downto 0) <= ("11" & uP_addr(11 downto 0)) when switches_i(0) = '1' else uP_addr(13 downto 0);
+	-- ROM $0000-$2FFF
+	--rom_cs <= '1' when uP_addr(15 downto 14) = "00" and uP_addr(13 downto 12) /= "11" else '0';
+
 	-- RDINTSTATUS $37E0-$37E3 (active high)
 	int_cs <= '1' when uP_addr(15 downto 2) = (X"37E" & "00") else '0';
 	-- FDC $37EC-$37EF
@@ -291,14 +299,14 @@ begin
 	rom_inst : entity work.sprom
 		generic map
 		(
-			init_file		=> "../../../../../src/platform/trs80/m1/roms/l2rom.hex",
+			init_file		=> "../../../../../src/platform/trs80/m1/roms/Lvl2_Lvl1.hex",
 			numwords_a	=> 16384,
 			widthad_a		=> 14
 		)
 		port map
 		(
 			clock			=> clk_20M,
-			address		=> up_addr(13 downto 0),
+			address		=> Rom_Addr(13 downto 0),
 			q					=> rom_datao
 		);
 	
