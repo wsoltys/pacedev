@@ -35,6 +35,9 @@ entity platform is
     flash_o         : out to_FLASH_t;
 		sram_i					: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
+     sdram_i         : in from_SDRAM_t;
+      sdram_o        : out to_SDRAM_t;
+
 
     -- graphics
     

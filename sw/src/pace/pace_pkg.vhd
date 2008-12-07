@@ -17,7 +17,9 @@ package pace_pkg is
     PACE_TARGET_P2,
     PACE_TARGET_P3M,
     PACE_TARGET_DE1,
-    PACE_TARGET_RC10
+    PACE_TARGET_RC10,
+    PACE_TARGET_NX2_12
+
   );
 
 	type PACEFpgaVendor_t is
@@ -30,7 +32,8 @@ package pace_pkg is
 	(
 		PACE_FPGA_FAMILY_CYCLONE1,
 		PACE_FPGA_FAMILY_CYCLONE2,
-		PACE_FPGA_FAMILY_SPARTAN3
+		PACE_FPGA_FAMILY_SPARTAN3,
+		PACE_FPGA_FAMILY_SPARTAN3E
 	);
 
   type PACEJamma_t is
