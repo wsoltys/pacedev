@@ -79,91 +79,90 @@ end platform;
 
 architecture SYN of platform is
 
-	alias clk_100M        : std_logic is clk_i(1);  -- actually 25MHz
-	alias clk_video       : std_logic is clk_i(1);
-	alias clk_27M         : std_logic is clk_i(3);
-	signal clk_12M_ena    : std_logic := '0';
+	alias clk_100M          : std_logic is clk_i(1);  -- actually 25MHz
+	alias clk_video         : std_logic is clk_i(1);
+	alias clk_27M           : std_logic is clk_i(3);
+	signal clk_12M_ena      : std_logic := '0';
 	
-	signal reset_n        : std_logic := '1';
-	signal a_ext          : std_logic_vector(31 downto 0) := (others => '0');
-	alias a               : std_logic_vector(23 downto 1) is a_ext(23 downto 1);
-  signal d_i            : std_logic_vector(15 downto 0) := (others => '0');
-  signal d_o            : std_logic_vector(15 downto 0) := (others => '0');
-  signal dtackn         : std_logic := '0';
-  signal asn            : std_logic := '0';
-  signal udsn           : std_logic := '0';
-  signal ldsn           : std_logic := '0';
-  signal rwn            : std_logic := '0';
+	signal reset_neogeo_n   : std_logic := '1';
+	signal a_ext            : std_logic_vector(31 downto 0) := (others => '0');
+	alias a                 : std_logic_vector(23 downto 1) is a_ext(23 downto 1);
+  signal d_i              : std_logic_vector(15 downto 0) := (others => '0');
+  signal d_o              : std_logic_vector(15 downto 0) := (others => '0');
+  signal dtackn           : std_logic := '0';
+  signal asn              : std_logic := '0';
+  signal udsn             : std_logic := '0';
+  signal ldsn             : std_logic := '0';
+  signal rwn              : std_logic := '0';
+  signal ipln             : std_logic_vector(2 downto 0) := (others => '1');
   -- write pulse (100MHz) - "fixed" from TG68 core
-  signal wr_p           : std_logic;
+  signal wr_p             : std_logic;
 
   -- boot rom signals
-  signal bootrom_cs     : std_logic := '0';
-  signal bootrom_d_o    : std_logic_vector(d_i'range) := (others => '0');
+  signal bootrom_cs       : std_logic := '0';
+  signal bootrom_d_o      : std_logic_vector(d_i'range) := (others => '0');
 
   -- boot data storage (eg. DE1 flash) signals
-  signal bootdata_cs    : std_logic := '0';
-  signal bootdata_d_o   : std_logic_vector(d_i'range) := (others => '0');
+  signal bootdata_cs      : std_logic := '0';
+  signal bootdata_d_o     : std_logic_vector(d_i'range) := (others => '0');
   
   -- cpu vector table
-  signal vector_cs      : std_logic := '0';
-  signal vector_d_o     : std_logic_vector(d_i'range) := (others => '0');
+  signal vector_cs        : std_logic := '0';
+  signal vector_d_o       : std_logic_vector(d_i'range) := (others => '0');
   
   -- cartridge rom
-  signal rom1_cs        : std_logic := '0';
-  signal rom1_d_o       : std_logic_vector(d_i'range) := (others => '0');
+  signal rom1_cs          : std_logic := '0';
+  signal rom1_d_o         : std_logic_vector(d_i'range) := (others => '0');
 
   -- cpu work ram
-  signal ram_cs         : std_logic := '0';
-  signal ram_d_o        : std_logic_vector(d_i'range) := (others => '0');
-  signal ram_wr         : std_logic := '0';
+  signal ram_cs           : std_logic := '0';
+  signal ram_d_o          : std_logic_vector(d_i'range) := (others => '0');
+  signal ram_wr           : std_logic := '0';
 
   -- hardware registers
-  signal reg_cs         : std_logic := '0';
-  signal reg_d_o        : std_logic_vector(d_i'range) := (others => '0');
-  signal reg_30_cs      : std_logic := '0';
-  signal reg_32_cs      : std_logic := '0';
-  signal reg_34_cs      : std_logic := '0';
-  signal reg_38_cs      : std_logic := '0';
-  signal reg_3A_cs      : std_logic := '0';
-  signal reg_3C_cs      : std_logic := '0';
+  signal reg_cs           : std_logic := '0';
+  signal reg_d_o          : std_logic_vector(d_i'range) := (others => '0');
+  signal reg_30_cs        : std_logic := '0';
+  signal reg_32_cs        : std_logic := '0';
+  signal reg_34_cs        : std_logic := '0';
+  signal reg_38_cs        : std_logic := '0';
+  signal reg_3A_cs        : std_logic := '0';
+  signal reg_3C_cs        : std_logic := '0';
   
   -- palette ram
-  signal palram_cs      : std_logic := '0';
-  signal palram_wr      : std_logic := '0';
-  signal palram_d_o     : std_logic_vector(d_i'range) := (others => '0');
-  signal palette        : std_logic_vector(255 downto 0) := (others => '0');
+  signal palram_cs        : std_logic := '0';
+  signal palram_wr        : std_logic := '0';
+  signal palram_d_o       : std_logic_vector(d_i'range) := (others => '0');
+  signal palette          : std_logic_vector(255 downto 0) := (others => '0');
 
   -- memory card
-  signal memcard_cs     : std_logic := '0';
-  signal memcard_d_o    : std_logic_vector(d_i'range) := (others => '0');
+  signal memcard_cs       : std_logic := '0';
+  signal memcard_d_o      : std_logic_vector(d_i'range) := (others => '0');
 
   -- system bios
-  signal bios_cs        : std_logic := '0';
-  signal bios_d_o       : std_logic_vector(d_i'range) := (others => '0');
+  signal bios_cs          : std_logic := '0';
+  signal bios_d_o         : std_logic_vector(d_i'range) := (others => '0');
 
   -- battery-back sram
-  signal sram_cs        : std_logic := '0';
-  signal sram_d_o       : std_logic_vector(d_i'range) := (others => '0');
+  signal sram_cs          : std_logic := '0';
+  signal sram_d_o         : std_logic_vector(d_i'range) := (others => '0');
 
-  signal vram_a         : std_logic_vector(15 downto 0) := (others => '0');
-  signal vram_d_i       : std_logic_vector(d_o'range) := (others => '0');
-  signal vram1_d_o      : std_logic_vector(d_i'range) := (others => '0');
-  signal vram1_wr       : std_logic := '0';
-  signal map1_d         : std_logic_vector(15 downto 0) := (others => '0');
-  signal vram2_d_o      : std_logic_vector(d_i'range) := (others => '0');
-  signal vram2_wr       : std_logic := '0';
-  signal map2_d         : std_logic_vector(15 downto 0) := (others => '0');
+  signal vram_a           : std_logic_vector(15 downto 0) := (others => '0');
+  signal vram_d_i         : std_logic_vector(d_o'range) := (others => '0');
+  signal vram1_d_o        : std_logic_vector(d_i'range) := (others => '0');
+  signal vram1_wr         : std_logic := '0';
+  signal map1_d           : std_logic_vector(15 downto 0) := (others => '0');
+  signal vram2_d_o        : std_logic_vector(d_i'range) := (others => '0');
+  signal vram2_wr         : std_logic := '0';
+  signal map2_d           : std_logic_vector(15 downto 0) := (others => '0');
   
   -- "magic" register
-  signal magic_r        : std_logic_vector(15 downto 0) := (others => '0');
-  alias boot_f          : std_logic is magic_r(0);    -- booting
-  alias bootdata_f      : std_logic is magic_r(1);    -- bootdata store enabled
+  signal magic_r          : std_logic_vector(15 downto 0) := (others => '0');
+  alias boot_f            : std_logic is magic_r(0);    -- booting
+  alias bootdata_f        : std_logic is magic_r(1);    -- bootdata store enabled
 
 begin
 
-  reset_n <= not reset_i;
-  
   --
   -- clocking
   --
@@ -215,15 +214,41 @@ begin
   -- boot rom $F00000-$FFFFFF (1MiB)
   bootrom_cs  <= '1' when STD_MATCH(a, X"F" & "-------------------") else '0';
 
+  -- writes
+  palram_wr <= wr_p when (palram_cs = '1' and a(12 downto 9) = "0000") else '0';
+
   --
-  -- wr_p and dtack logic
+  -- dtack logic
+  --
+  
+  process (clk_100M)
+    variable asn_r : std_logic_vector(10 downto 0) := (others => '1');
+  begin
+    if reset_neogeo_n = '0' then
+      asn_r := (others => '1');
+    elsif rising_edge(clk_100M) and clk_12M_ena = '1' then
+      if bootdata_f = '1' and bootdata_cs = '1' then
+        dtackn <= asn_r(2);
+      else
+        dtackn <= asn;
+      end if;
+      -- de-assertion immediately clears the pipeline
+      if asn = '1' then
+        asn_r := (others => '1');
+      else
+        asn_r := asn_r(asn_r'left-1 downto 0) & asn;
+      end if;
+    end if;
+  end process;
+
+  --
+  -- wr_p logic
   --
   
   process (clk_100M)
     variable wr_r : std_logic;
   begin
     if rising_edge(clk_100M) then
-      dtackn <= asn;
       wr_p <= '0'; -- default
       if clk_12M_ena = '1' then
         -- leading edge write cycle
@@ -251,10 +276,10 @@ begin
           bootrom_d_o when bootrom_cs = '1' else
           (others => '1');
 
-  reg_d_o <=  X"00" & inputs_i(0).d when (reg_30_cs = '1' and ldsn = '0') else
-              X"00" & inputs_i(1).d when (reg_34_cs = '1' and ldsn = '0') else
-              X"00" & inputs_i(2).d when (reg_32_cs = '1' and ldsn = '1') else
-              X"00" & inputs_i(3).d when (reg_38_cs = '1' and ldsn = '0') else
+  reg_d_o <=  inputs_i(0).d & switches_i(7 downto 0) when reg_30_cs = '1' else
+              inputs_i(1).d & inputs_i(1).d when reg_34_cs = '1' else
+              inputs_i(2).d & inputs_i(2).d when reg_32_cs = '1' else
+              inputs_i(3).d & inputs_i(3).d when reg_38_cs = '1' else
               vram1_d_o when (reg_3C_cs = '1' and vram_a(10) = '0') else
               vram2_d_o when (reg_3C_cs = '1' and vram_a(10) = '1') else
               (others => '1');
@@ -263,8 +288,9 @@ begin
   --  vectors
   --
   
-  -- to be changed!
-  vector_d_o <= bootrom_d_o;
+  -- need to add support for cart switch
+  vector_d_o <= bootrom_d_o when boot_f = '1' else
+                bios_d_o;
 
   --
   -- on-board SRAM
@@ -272,7 +298,8 @@ begin
   --
 
   sram_o.a(sram_o.a'left downto 19) <= (others => '0');
-  sram_o.a(18 downto 16) <= "00" & a(17) when bios_cs = '1' else
+  sram_o.a(18 downto 16) <= "000" when vector_cs = '1' else
+                            "00" & a(17) when bios_cs = '1' else
                             "010" when ram_cs = '1' else
                             "011" when sram_cs = '1' else
                             "100" when memcard_cs = '1' else
@@ -280,7 +307,7 @@ begin
   sram_o.a(15 downto 0) <= a(16 downto 1);
   sram_o.d <= std_logic_vector(resize(unsigned(d_o), sram_o.d'length));
   sram_o.be <= "00" & not udsn & not ldsn;
-  sram_o.cs <= bios_cs or ram_cs or sram_cs or memcard_cs;
+  sram_o.cs <= vector_cs or bios_cs or ram_cs or sram_cs or memcard_cs;
   sram_o.oe <= rwn;
   sram_o.we <= wr_p;
 
@@ -311,7 +338,7 @@ begin
   flash_o.oe <= '1';
   flash_o.we <= '0';
 
-  bootdata_d_o <= X"00" & flash_i.d(7 downto 0);
+  bootdata_d_o <= flash_i.d(7 downto 0) & flash_i.d(7 downto 0);
   tilemap_o.tile_d <= flash_i.d(7 downto 0);
 
   GEN_NOT : if false generate
@@ -339,8 +366,11 @@ begin
 
   -- magic register
   process (clk_100M, reset_i)
+    variable ng_reset_cnt : integer range 0 to 4 := 0;
   begin
     if reset_i = '1' then
+      reset_neogeo_n <= '0';
+      ng_reset_cnt := 0;
       boot_f <= '1';
       bootdata_f <= '1';
     elsif rising_edge(clk_100M) then
@@ -351,7 +381,18 @@ begin
           magic_r(1 downto 0) <= magic_r(1 downto 0) and not d_o(1 downto 0);
           -- - other bits can be set or reset as required
           magic_r(magic_r'left downto 2) <= d_o(d_o'left downto 2);
+          -- handle write to reset bit
+          if d_o(0) = '1' then
+            -- drive neogeo reset
+            ng_reset_cnt := ng_reset_cnt'high;
+          end if;
         end if;
+      end if;
+      if ng_reset_cnt = 0 then
+        reset_neogeo_n <= '1';
+      else
+        reset_neogeo_n <= '0';
+        ng_reset_cnt := ng_reset_cnt - 1;
       end if;
     end if;
   end process;
@@ -361,7 +402,7 @@ begin
     variable rwn_r    : std_logic := '0';
     variable vram_inc : std_logic_vector(vram_a'range) := (others => '0');
   begin
-    if reset_i = '1' then
+    if reset_neogeo_n = '0' then
       rwn_r := '0';
       vram_inc := (others => '0');
     elsif rising_edge(clk_100M) then --and clk_12M_ena = '1' then
@@ -403,6 +444,40 @@ begin
   end process;
 
   --
+  -- interrupts
+  --
+  process (clk_100M, reset_i)
+    variable vblank_r : std_logic := '0';
+    variable irq_r    : std_logic_vector(1 to 3) := (others => '0');
+  begin
+    if reset_i = '1' then
+      vblank_r := '0';
+    elsif rising_edge(clk_100M) then
+      if wr_p = '1' then
+        if reg_3C_cs = '1' and a(7 downto 1) = "1100000" then
+          -- IRQACK - write a '1' to ACK
+          irq_r := irq_r and not (d_o(0) & d_o(1) & d_o(2));
+        end if;
+      end if;
+      -- latch interrupt on rising edge vblank
+      if vblank_r = '0' and graphics_i.vblank = '1' then
+        irq_r(1) := '1';
+      end if;
+      vblank_r := graphics_i.vblank;
+    end if;
+    -- priority-encoded interrupts
+    if irq_r(3) = '1' then
+      ipln <= not "011";      -- vblank
+    elsif irq_r(2) = '1' then
+      ipln <= not "010";      -- display position
+    elsif irq_r(1) = '1' then
+      ipln <= not "001";      -- cold boot
+    else
+      ipln <= not "000";
+    end if;
+  end process;
+  
+  --
   -- system bios in flash atm
   --
 
@@ -422,11 +497,6 @@ begin
   end block BLK_SDRAM;
   
   --
-  -- battery-backed sram also stored in burched sram
-  --
-  sram_d_o <= ram_d_o;
-
-  --
   -- COMPONENT INSTANTIATION
   --
 
@@ -434,10 +504,10 @@ begin
     port map
     (        
       clk           => clk_100M,
-      reset         => reset_n, -- active low
+      reset         => reset_neogeo_n, -- active low
       clkena_in     => clk_12M_ena,
       data_in       => d_i,
-      IPL           => "111",
+      IPL           => ipln,
       dtack         => dtackn,
       addr          => a_ext,
       data_out      => d_o,

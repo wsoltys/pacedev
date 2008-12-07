@@ -97,6 +97,9 @@ begin
   
   -- rtc (clock/calendar)
   process (clk_i, reset)
+    type dim_t is array (natural range <>) of std_logic_vector(7 downto 0);
+    --constant dim : dim_t(1 to 12) :=
+    --  { X"30", X"27", X"30", X"29", X"30", X"29", X"30", X"30", X"29", X"30", X"29", X"30" };
   begin
     if reset = '1' then
     elsif rising_edge(clk_i) and clk_ena = '1' then
@@ -111,6 +114,16 @@ begin
                 min_tens <= (others => '0');
                 if hr_units = 9 then
                   hr_units <= (others => '0');
+                  hr_tens <= hr_tens + 1;
+                elsif hr_units = 3 and hr_tens = 2 then
+                  hr_units <= (others => '0');
+                  if day_units = 9 then
+                    day_units <= (others => '0');
+                    day_tens <= day_tens + 1;
+                  --elsif day_units = dim(month)(3 downto 0) and 
+                  else
+                    day_units <= day_units + 1;
+                  end if;
                 else
                   hr_units <= hr_units + 1;
                 end if;

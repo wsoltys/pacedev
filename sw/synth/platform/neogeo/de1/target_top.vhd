@@ -167,7 +167,7 @@ begin
       port map
       (
         inclk0		=> clock_50,
-        c0		    => clk_i(1),    -- 12.5MHz
+        c0		    => clk_i(1),    -- 25MHz
         c1		    => clk_i(0),    -- 100MHz
         c2		    => dram_clk
       );
