@@ -454,9 +454,9 @@ begin
       vblank_r := '0';
     elsif rising_edge(clk_100M) then
       if wr_p = '1' then
-        if reg_3C_cs = '1' and a(7 downto 1) = "1100000" then
+        if reg_3C_cs = '1' and a(7 downto 1) = "0000110" then
           -- IRQACK - write a '1' to ACK
-          irq_r := irq_r and not (d_o(0) & d_o(1) & d_o(2));
+          irq_r := irq_r and not (d_o(2) & d_o(1) & d_o(0));
         end if;
       end if;
       -- latch interrupt on rising edge vblank
@@ -467,11 +467,11 @@ begin
     end if;
     -- priority-encoded interrupts
     if irq_r(3) = '1' then
-      ipln <= not "011";      -- vblank
+      ipln <= not "011";      -- cold boot
     elsif irq_r(2) = '1' then
       ipln <= not "010";      -- display position
     elsif irq_r(1) = '1' then
-      ipln <= not "001";      -- cold boot
+      ipln <= not "001";      -- vblank
     else
       ipln <= not "000";
     end if;
