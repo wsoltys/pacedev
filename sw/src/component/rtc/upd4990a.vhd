@@ -170,6 +170,8 @@ begin
   PROC_TIME : process (clk_i, reset)
   begin
     if reset = '1' then
+      -- 9:54:28am
+      counter_r(23 downto 0) <= X"095428";
     elsif rising_edge(clk_i) and clk_ena = '1' then
 			pulse_1d <= '0'; -- default
 			if pulse_timeset = '1' then
@@ -218,6 +220,8 @@ begin
 	begin
 		m := to_integer(unsigned(month));
 		if reset = '1' then
+      -- Tue 9th December 2008
+      counter_r(47 downto 24) <= X"08C309";
 		elsif rising_edge(clk_i) and clk_ena = '1' then
 			if pulse_timeset = '1' then
 				-- set the date from the data input
@@ -285,8 +289,9 @@ begin
 			stb_r := '0';
 		elsif rising_edge(clk_i) and clk_ena = '1' then
 			pulse_timeset <= '0';         -- default
-			pulse_resetoutput <= '0';     -- default
+			pulse_timerd <= '0';          -- default
 			pulse_restartinterval <= '0'; -- default
+			pulse_resetoutput <= '0';     -- default
 			if cs = '1' then
         if stb_r = '0' and stb = '1' then
           -- latch tp_mode on leading edge STB
