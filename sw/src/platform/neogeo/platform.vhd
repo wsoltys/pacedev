@@ -147,6 +147,7 @@ architecture SYN of platform is
   signal sram_cs          : std_logic := '0';
   signal sram_d_o         : std_logic_vector(d_i'range) := (others => '0');
 
+  -- vram
   signal vram_a           : std_logic_vector(15 downto 0) := (others => '0');
   signal vram_d_i         : std_logic_vector(d_o'range) := (others => '0');
   signal vram1_d_o        : std_logic_vector(d_i'range) := (others => '0');
@@ -155,6 +156,10 @@ architecture SYN of platform is
   signal vram2_d_o        : std_logic_vector(d_i'range) := (others => '0');
   signal vram2_wr         : std_logic := '0';
   signal map2_d           : std_logic_vector(15 downto 0) := (others => '0');
+
+  -- uPD4990A RTC chip
+  signal upd4990a_cs      : std_logic := '0';
+  signal upd4990a_d_o     : std_logic_vector(7 downto 6) := (others => '0');
   
   -- "magic" register
   signal magic_r          : std_logic_vector(15 downto 0) := (others => '0');
@@ -199,6 +204,7 @@ begin
   reg_32_cs   <= reg_cs when a(19 downto 17) = "001" else '0';
   reg_34_cs   <= reg_cs when a(19 downto 17) = "010" else '0';
   reg_38_cs   <= reg_cs when a(19 downto 17) = "100" else '0';
+  upd4990a_cs <= reg_38_cs when a(7 downto 4) = X"5" else '0';
   reg_3A_cs   <= reg_cs when a(19 downto 17) = "101" else '0';
   reg_3C_cs   <= reg_cs when a(19 downto 17) = "110" else '0';
   -- palette ram $400000-$401FFF (8KiB)
@@ -276,13 +282,23 @@ begin
           bootrom_d_o when bootrom_cs = '1' else
           (others => '1');
 
-  reg_d_o <=  inputs_i(0).d & switches_i(7 downto 0) when reg_30_cs = '1' else
-              inputs_i(1).d & inputs_i(1).d when reg_34_cs = '1' else
-              inputs_i(2).d & inputs_i(2).d when reg_32_cs = '1' else
-              inputs_i(3).d & inputs_i(3).d when reg_38_cs = '1' else
-              vram1_d_o when (reg_3C_cs = '1' and vram_a(10) = '0') else
-              vram2_d_o when (reg_3C_cs = '1' and vram_a(10) = '1') else
-              (others => '1');
+  BLK_REG_MUX : block
+    signal sysstat_a  : std_logic_vector(7 downto 0) := (others => '0');
+    signal sysstat_b  : std_logic_vector(7 downto 0) := (others => '0');
+  begin
+  
+    sysstat_a <= upd4990a_d_o(7 downto 6) & "11" & inputs_i(2).d(3 downto 0);
+    sysstat_b <= "1111" & inputs_i(3).d(3 downto 0);
+    
+    reg_d_o <=  inputs_i(0).d & switches_i(7 downto 0) when reg_30_cs = '1' else
+                inputs_i(1).d & inputs_i(1).d when reg_34_cs = '1' else
+                sysstat_a & sysstat_a when reg_32_cs = '1' else
+                sysstat_b & sysstat_b when reg_38_cs = '1' else
+                vram1_d_o when (reg_3C_cs = '1' and vram_a(10) = '0') else
+                vram2_d_o when (reg_3C_cs = '1' and vram_a(10) = '1') else
+                (others => '1');
+                
+  end block BLK_REG_MUX;
 
   --
   --  vectors
@@ -600,6 +616,28 @@ begin
       byteena     => "11",
       wren		    => '0',
       q		        => bootrom_d_o
+    );
+
+  upd4990a_inst : entity work.uPD4990A
+    generic map
+    (
+      CLK_32K768_COUNT  => 25000000/32768
+    )
+    port map
+    (
+      clk_i             => clk_100M,    -- 25MHz
+      clk_ena           => '1',
+      reset             => reset_i,
+      
+      data_in           => d_o(0),
+      clk               => d_o(1),
+      c                 => "111",
+      stb               => d_o(2),
+      cs                => upd4990a_cs,
+      out_enabl         => '1',
+      
+      data_out          => upd4990a_d_o(7),
+      tp                => upd4990a_d_o(6)
     );
 
   -- for now, writes to $1000 are latched on the leds

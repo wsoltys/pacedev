@@ -48,6 +48,7 @@ architecture SYN of uPD4990A is
   signal time_r    	: std_logic_vector(51 downto 0) := (others => '0');
 
   signal mode       : std_logic_vector(3 downto 0) := (others => '0');
+  signal tp_mode    : std_logic_vector(3 downto 0) := (others => '0');
   
   signal clk_32K768 : std_logic := '0';
   signal clk_4096   : std_logic := '0';
@@ -214,13 +215,14 @@ begin
 		variable stb_r : std_logic := '0';
 	begin
 		if reset = '1' then
+      mode <= (others => '0');
 			stb_r := '0';
 		elsif rising_edge(clk_i) and clk_ena = '1' then
 			pulse_timeset <= '0'; -- default
 			if cs = '1' and stb_r = '0' and stb = '1' then
 				-- latch command on leading edge STB
-				mode <= din_r(51 downto 48);
-				case din_r(51 downto 48) is
+				mode <= din_r(din_r'left downto din_r'left-3);
+				case din_r(din_r'left downto din_r'left-3) is
 					when "0000" =>		-- register hold mode
 					when "0001" =>		-- register shift mode
 					when "0010" =>		-- time set and counter hold mode
@@ -229,7 +231,9 @@ begin
 						pulse_timerd <= '1';
 					when "0100" | "0101" | "0110" | "0111" =>
 						-- 64Hz/256Hz/2048Hz/4096Hz handled elsewhere
-						null;
+						tp_mode <= din_r(51 downto 48);
+					when "1000"=> -- fudge
+            tp_mode <= "0100";
 					when others =>
 						-- interval modes TBD
 						null;
@@ -240,10 +244,10 @@ begin
 	end process;
 
   -- drive TP output
-  tp <= clk_64 when mode = "0100" else
-        clk_256 when mode = "0101" else
-        clk_2048 when mode = "0110" else
-        clk_4096 when mode = "0111" else
+  tp <= clk_64 when tp_mode = "0100" else
+        clk_256 when tp_mode = "0101" else
+        clk_2048 when tp_mode = "0110" else
+        clk_4096 when tp_mode = "0111" else
         '0';
 
 end architecture SYN;
