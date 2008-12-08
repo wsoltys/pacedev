@@ -62,8 +62,8 @@ cpybios:
   move.l d0,($c11b66).l   ; test vram (2nd part)
   ;move.l d0,($c11be0).l   ; wait for time pulse
   ;move.l d0,($c11bf6).l   ; wait for time pulse
-  move.l d0,($c11c14).l   ; calendar test
-  move.l d0,($c11c1c).l   ; calendar test
+  ;move.l d0,($c11c14).l   ; calendar test
+  ;move.l d0,($c11c1c).l   ; calendar test
   move.l d0,($c11c62).l   ; system rom error
   ;move.w d0,($c1871a).l   ; wait for vblank
   move.w #$600c,d0        ; bra...

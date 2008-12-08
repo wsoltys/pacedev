@@ -47,59 +47,125 @@ architecture SYN of uPD4990A is
   signal dout_r    	: std_logic_vector(51 downto 0) := (others => '0');
   signal time_r    	: std_logic_vector(51 downto 0) := (others => '0');
 
-  signal mode       : std_logic_vector(3 downto 0) := (others => '0');
   signal tp_mode    : std_logic_vector(3 downto 0) := (others => '0');
   
-  signal clk_32K768 : std_logic := '0';
-  signal clk_4096   : std_logic := '0';
-  signal clk_2048   : std_logic := '0';
-  signal clk_256    : std_logic := '0';
-  signal clk_64     : std_logic := '0';
-  signal clk_1s     : std_logic := '0';
-  
-	signal pulse_timeset	: std_logic := '0';
-	signal pulse_timerd		: std_logic := '0';
-  signal pulse_1s   		: std_logic := '0';
- 	signal pulse_1d				: std_logic := '0';
+	signal enable_interval        : std_logic := '0';
+	signal pulse_resetoutput      : std_logic := '0';
+	signal pulse_restartinterval  : std_logic := '0';
+  signal pulse_1s   		        : std_logic := '0';
+ 	signal pulse_1d				        : std_logic := '0';
+	signal pulse_timeset	        : std_logic := '0';
+	signal pulse_timerd		        : std_logic := '0';
 
 begin
 
-  PROC_TP : process (clk_i, reset)
+  BLK_TP : block
+  
     subtype count_t is integer range 0 to CLK_32K768_COUNT-1;
-    variable count      : count_t;
-    variable tp_count   : std_logic_vector(14 downto 0) := (others => '0');
-  begin
-    if reset = '1' then
-      count := 0;
-      tp_count  := (others => '0');
-    elsif rising_edge (clk_i) and clk_ena = '1' then
-      pulse_1s <= '0';    -- default
-      clk_32K768 <= '0';  -- default
-      if count = count_t'high then
-        clk_32K768 <= '1';
-        count := 0;
-      else
-        count := count + 1;
-      end if;
-      -- timing pulses
-      clk_4096 <= tp_count(2);
-      clk_2048 <= tp_count(3);
-      clk_256 <= tp_count(6);
-      clk_64 <= tp_count(8);
-      clk_1s <= tp_count(14);
-      if clk_32K768 = '1' then
-        tp_count := tp_count + 1;
-        if tp_count = 0 then
-          pulse_1s <= '1';
-				elsif tp_count = 1 then
-					-- latch the current time
-					-- after allowing enough time for ripple counters
-					time_r <= counter_r;
-        end if;
-      end if;
-    end if;
-  end process PROC_TP;
 
+    signal clk_4096         : std_logic := '0';
+    signal clk_2048         : std_logic := '0';
+    signal clk_256          : std_logic := '0';
+    signal clk_64           : std_logic := '0';
+    signal clk_1s           : std_logic := '0';
+
+    signal interval_state   : std_logic := '0';
+  
+  begin
+  
+    PROC_TP : process (clk_i, reset)
+      variable count      : count_t;
+      variable tp_count   : std_logic_vector(14 downto 0) := (others => '0');
+    begin
+      if reset = '1' then
+        count := 0;
+        tp_count  := (others => '0');
+      elsif rising_edge (clk_i) and clk_ena = '1' then
+        pulse_1s <= '0';    -- default
+        if count = count_t'high then
+          tp_count := tp_count + 1;
+          if tp_count = 0 then
+            pulse_1s <= '1';
+          elsif tp_count = 1 then
+            -- latch the current time
+            -- after allowing enough time for ripple counters
+            time_r <= counter_r;
+          end if;
+          count := 0;
+        else
+          count := count + 1;
+        end if;
+        -- timing pulses
+        clk_4096 <= tp_count(2);
+        clk_2048 <= tp_count(3);
+        clk_256 <= tp_count(6);
+        clk_64 <= tp_count(8);
+        clk_1s <= tp_count(14);
+      end if;
+    end process PROC_TP;
+
+    PROC_INTERVAL : process (clk_i, reset)
+      -- sub 1s variables
+      variable count          : count_t;
+      variable s_count        : std_logic_vector(14 downto 0) := (others => '0');
+      -- interval variables
+      subtype half_cnt_t is integer range 0 to 64;
+      type half_cnt_a is array (natural range <>) of half_cnt_t;
+      constant half_cnt_limit : half_cnt_a(0 to 3) := (0, 9, 29, 59);
+      variable half_cnt       : half_cnt_t;
+      variable half_state     : std_logic := '0';
+    begin
+      if reset = '1' then
+        count := 0;
+        s_count := (others => '0');
+        half_state := '0';
+      elsif rising_edge(clk_i) and clk_ena = '1' then
+
+        -- resets output state until next cycle
+        if pulse_resetoutput = '1' then
+          interval_state <= '1';
+        end if;
+
+        -- 1s counter
+        if enable_interval = '1' then
+          if pulse_restartinterval = '1' then
+            count := 0;
+            s_count := (others => '0');
+            half_cnt := 0;
+            half_state := '0';  -- start low
+          else
+            if count = count_t'high then
+              count := 0;
+              s_count := s_count + 1;
+            else
+              count := count + 1;
+            end if;
+          end if;
+
+          -- 50% duty cycle
+          if s_count(s_count'left) = '1' then
+            s_count := (others => '0');
+            if half_cnt = half_cnt_limit(to_integer(unsigned(tp_mode(1 downto 0)))) then
+              half_state := not half_state;
+              interval_state <= half_state;
+              half_cnt := 0;
+            else
+              half_cnt := half_cnt + 1;
+            end if;
+          end if;
+        end if; -- enable interval
+      end if;
+    end process PROC_INTERVAL;
+
+    -- drive TP output
+    tp <= clk_64 when tp_mode = "0100" else
+          clk_256 when tp_mode = "0101" else
+          clk_2048 when tp_mode = "0110" else
+          clk_4096 when tp_mode = "0111" else
+          interval_state;
+
+  end block BLK_TP;
+  
   -- rtc (clock/calendar)
   PROC_TIME : process (clk_i, reset)
   begin
@@ -203,8 +269,9 @@ begin
 					-- shift register
 					dout_r <= '0' & dout_r(dout_r'left downto 1);
 				end if;
+				-- store last clock state when cs=1
+        clk_r := clk;
 			end if;
-			clk_r := clk;
 		end if;
 	end process PROC_SER;
 
@@ -215,39 +282,44 @@ begin
 		variable stb_r : std_logic := '0';
 	begin
 		if reset = '1' then
-      mode <= (others => '0');
 			stb_r := '0';
 		elsif rising_edge(clk_i) and clk_ena = '1' then
-			pulse_timeset <= '0'; -- default
-			if cs = '1' and stb_r = '0' and stb = '1' then
-				-- latch command on leading edge STB
-				mode <= din_r(din_r'left downto din_r'left-3);
-				case din_r(din_r'left downto din_r'left-3) is
-					when "0000" =>		-- register hold mode
-					when "0001" =>		-- register shift mode
-					when "0010" =>		-- time set and counter hold mode
-						pulse_timeset <= '1';
-					when "0011" =>		-- time read mode
-						pulse_timerd <= '1';
-					when "0100" | "0101" | "0110" | "0111" =>
-						-- 64Hz/256Hz/2048Hz/4096Hz handled elsewhere
-						tp_mode <= din_r(51 downto 48);
-					when "1000"=> -- fudge
-            tp_mode <= "0100";
-					when others =>
-						-- interval modes TBD
-						null;
-				end case;
-			end if;
-			stb_r := stb;
+			pulse_timeset <= '0';         -- default
+			pulse_resetoutput <= '0';     -- default
+			pulse_restartinterval <= '0'; -- default
+			if cs = '1' then
+        if stb_r = '0' and stb = '1' then
+          -- latch tp_mode on leading edge STB
+          case din_r(din_r'left downto din_r'left-3) is
+            when "0000" =>		-- register hold mode
+            when "0001" =>		-- register shift mode
+            when "0010" =>		-- time set and counter hold mode
+              pulse_timeset <= '1';
+            when "0011" =>		-- time read mode
+              pulse_timerd <= '1';
+            when "0100" | "0101" | "0110" | "0111" =>
+              -- 64Hz/256Hz/2048Hz/4096Hz handled elsewhere
+              tp_mode <= din_r(51 downto 48);
+            when "1000" | "1001" | "1010" | "1011" =>
+              -- 1s/10s/30s/60s
+              tp_mode <= din_r(51 downto 48);
+              enable_interval <= '1';
+              pulse_restartinterval <= '1';
+            when "1100" =>    -- interval output flag reset 
+              pulse_resetoutput <= '1';
+            when "1101" =>    -- interval timer clock run
+              enable_interval <= '1';
+              pulse_restartinterval <= '1';
+            when "1110" =>    -- interval timer clock stop
+              enable_interval <= '0';
+            when others =>
+              null;
+          end case;
+        end if;
+        -- latch previous stb if cs=1
+        stb_r := stb;
+      end if;
 		end if;
 	end process;
-
-  -- drive TP output
-  tp <= clk_64 when tp_mode = "0100" else
-        clk_256 when tp_mode = "0101" else
-        clk_2048 when tp_mode = "0110" else
-        clk_4096 when tp_mode = "0111" else
-        '0';
 
 end architecture SYN;
