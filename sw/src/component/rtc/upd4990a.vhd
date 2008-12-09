@@ -44,7 +44,9 @@ architecture SYN of uPD4990A is
   alias sec_units   : std_logic_vector(3 downto 0) is counter_r(3 downto 0);
 
   signal din_r    	: std_logic_vector(51 downto 0) := (others => '0');
+  alias din_cmd     : std_logic_vector(3 downto 0) is din_r(din_r'left downto din_r'left-3);
   signal dout_r    	: std_logic_vector(51 downto 0) := (others => '0');
+  alias dout_cmd    : std_logic_vector(3 downto 0) is dout_r(dout_r'left downto dout_r'left-3);
   signal time_r    	: std_logic_vector(51 downto 0) := (others => '0');
 
   signal tp_mode    : std_logic_vector(3 downto 0) := (others => '0');
@@ -56,7 +58,8 @@ architecture SYN of uPD4990A is
  	signal pulse_1d				        : std_logic := '0';
 	signal pulse_timeset	        : std_logic := '0';
 	signal pulse_timerd		        : std_logic := '0';
-
+  signal shift_en               : std_logic := '0';
+  
 begin
 
   BLK_TP : block
@@ -271,7 +274,9 @@ begin
 					-- clock data on rising edge
 					din_r <= data_in & din_r(din_r'left downto 1);
 					-- shift register
-					dout_r <= '0' & dout_r(dout_r'left downto 1);
+					if shift_en = '1' then
+            dout_r <= '0' & dout_r(dout_r'left downto 1);
+          end if;
 				end if;
 				-- store last clock state when cs=1
         clk_r := clk;
@@ -287,6 +292,7 @@ begin
 	begin
 		if reset = '1' then
 			stb_r := '0';
+      shift_en <= '0';
 		elsif rising_edge(clk_i) and clk_ena = '1' then
 			pulse_timeset <= '0';         -- default
 			pulse_timerd <= '0';          -- default
@@ -295,19 +301,23 @@ begin
 			if cs = '1' then
         if stb_r = '0' and stb = '1' then
           -- latch tp_mode on leading edge STB
-          case din_r(din_r'left downto din_r'left-3) is
+          case din_cmd is
             when "0000" =>		-- register hold mode
+              shift_en <= '0';
             when "0001" =>		-- register shift mode
+              shift_en <= '1';
             when "0010" =>		-- time set and counter hold mode
               pulse_timeset <= '1';
+              shift_en <= '0';
             when "0011" =>		-- time read mode
               pulse_timerd <= '1';
+              shift_en <= '0';
             when "0100" | "0101" | "0110" | "0111" =>
               -- 64Hz/256Hz/2048Hz/4096Hz handled elsewhere
-              tp_mode <= din_r(51 downto 48);
+              tp_mode <= din_cmd;
             when "1000" | "1001" | "1010" | "1011" =>
               -- 1s/10s/30s/60s
-              tp_mode <= din_r(51 downto 48);
+              tp_mode <= din_cmd;
               enable_interval <= '1';
               pulse_restartinterval <= '1';
             when "1100" =>    -- interval output flag reset 
