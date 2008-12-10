@@ -33,7 +33,7 @@ architecture SYN of uPD4990A is
   alias year_tens   : std_logic_vector(3 downto 0) is counter_r(47 downto 44);
   alias year_units  : std_logic_vector(3 downto 0) is counter_r(43 downto 40);
   alias month       : std_logic_vector(3 downto 0) is counter_r(39 downto 36);
-  alias dow         : std_logic_vector(3 downto 0) is counter_r(35 downto 32);
+  alias dow         : std_logic_vector(3 downto 0) is counter_r(35 downto 32);  -- Mon=1
   alias day_tens    : std_logic_vector(3 downto 0) is counter_r(31 downto 28);
   alias day_units   : std_logic_vector(3 downto 0) is counter_r(27 downto 24);
   alias hr_tens     : std_logic_vector(3 downto 0) is counter_r(23 downto 20);
@@ -224,7 +224,7 @@ begin
 		m := to_integer(unsigned(month));
 		if reset = '1' then
       -- Tue 9th December 2008
-      counter_r(47 downto 24) <= X"08C309";
+      counter_r(47 downto 24) <= X"08C209";
 		elsif rising_edge(clk_i) and clk_ena = '1' then
 			if pulse_timeset = '1' then
 				-- set the date from the data input
