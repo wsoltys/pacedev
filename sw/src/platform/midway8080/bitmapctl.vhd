@@ -90,32 +90,32 @@ begin
       if pel = '1' then
         if y(7 downto 3) < "00100" then
           -- white
-          rgb.r(9 downto 8) <= "11";
-          rgb.g(9 downto 8) <= "11";
-          rgb.b(9 downto 8) <= "11";
+          rgb.r(9 downto 0) <= (others => '1');
+          rgb.g(9 downto 0) <= (others => '1');
+          rgb.b(9 downto 0) <= (others => '1');
         elsif y(7 downto 3) < "01000" then
-          rgb.r(9 downto 8) <= "11";	-- red
+          rgb.r(9 downto 0) <= (others => '1');	-- red
         elsif y(7 downto 3) < "10111" then
           -- white
-          rgb.r(9 downto 8) <= "11";
-          rgb.g(9 downto 8) <= "11";
-          rgb.b(9 downto 8) <= "11";
+          rgb.r(9 downto 0) <= (others => '1');
+          rgb.g(9 downto 0) <= (others => '1');
+          rgb.b(9 downto 0) <= (others => '1');
         elsif y(7 downto 3) < "11110" then
-          rgb.g(9 downto 8) <= "11";	-- green
+          rgb.g(9 downto 0) <= (others => '1');	-- green
         else
           -- pix_count(7..3) is the character X position
           if x(7 downto 3) < 2 then
             -- white
-            rgb.r(9 downto 8) <= "11";
-            rgb.g(9 downto 8) <= "11";
-            rgb.b(9 downto 8) <= "11";
+            rgb.r(9 downto 0) <= (others => '1');
+            rgb.g(9 downto 0) <= (others => '1');
+            rgb.b(9 downto 0) <= (others => '1');
           elsif x(7 downto 3) < 17 then
-            rgb.g(9 downto 8) <= "11";	-- green
+            rgb.g(9 downto 0) <= (others => '1');	-- green
           else
             -- white
-            rgb.r(9 downto 8) <= "11";
-            rgb.g(9 downto 8) <= "11";
-            rgb.b(9 downto 8) <= "11";
+            rgb.r(9 downto 0) <= (others => '1');
+            rgb.g(9 downto 0) <= (others => '1');
+            rgb.b(9 downto 0) <= (others => '1');
           end if;
         end if;
       else
