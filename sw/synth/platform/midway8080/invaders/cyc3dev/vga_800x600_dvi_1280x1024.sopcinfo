@@ -3,7 +3,7 @@
   kind="com_altera_sopcmodel_ensemble_Ensemble"
   version="8.1">
   <!-- Format version 8.1 163 (Future versions may contain additional information.) -->
-  <!-- 2008.12.11.16:54:57 -->
+  <!-- 2008.12.11.23:35:44 -->
   <!-- A collection of modules and connections -->
   <parameter name="deviceFamily">
     <type>com.altera.entityinterfaces.moduleext.IDeviceFamily$EDeviceFamily</type>
@@ -47,7 +47,7 @@
   </parameter>
   <parameter name="systemHash">
     <type>long</type>
-    <value>-12008567161</value>
+    <value>-13023075249</value>
     <derived>false</derived>
     <enabled>true</enabled>
     <visible>true</visible>
@@ -55,7 +55,7 @@
   </parameter>
   <parameter name="timeStamp">
     <type>long</type>
-    <value>1228974882048</value>
+    <value>1228998906483</value>
     <derived>false</derived>
     <enabled>true</enabled>
     <visible>true</visible>
@@ -193,7 +193,7 @@ the requested settings for a module instance. -->
     </parameter>
     <parameter name="BPS">
       <type>java.lang.Integer</type>
-      <value>8</value>
+      <value>4</value>
       <derived>false</derived>
       <enabled>true</enabled>
       <visible>true</visible>
@@ -319,7 +319,7 @@ parameters are a RESULT of the module parameters. -->
       <port>
         <name>vid_data</name>
         <direction>Input</direction>
-        <width>24</width>
+        <width>12</width>
         <role>export</role>
       </port>
     </interface>
@@ -432,7 +432,7 @@ particular module parameters. Connection points and their
 parameters are a RESULT of the module parameters. -->
       <parameter name="dataBitsPerSymbol">
         <type>int</type>
-        <value>8</value>
+        <value>4</value>
         <derived>false</derived>
         <enabled>true</enabled>
         <visible>true</visible>
@@ -483,7 +483,7 @@ parameters are a RESULT of the module parameters. -->
       <port>
         <name>is_data</name>
         <direction>Output</direction>
-        <width>24</width>
+        <width>12</width>
         <role>data</role>
       </port>
       <port>
@@ -533,7 +533,7 @@ the requested settings for a module instance. -->
     </parameter>
     <parameter name="PARAMETERISATION">
       <type>java.lang.String</type>
-      <value>&lt;scalerParams&gt;&lt;SCL_NAME&gt;scaler&lt;/SCL_NAME&gt;&lt;SCL_RUNTIME_CONTROL&gt;0&lt;/SCL_RUNTIME_CONTROL&gt;&lt;SCL_IN_WIDTH&gt;800&lt;/SCL_IN_WIDTH&gt;&lt;SCL_IN_HEIGHT&gt;600&lt;/SCL_IN_HEIGHT&gt;&lt;SCL_OUT_WIDTH&gt;1280&lt;/SCL_OUT_WIDTH&gt;&lt;SCL_OUT_HEIGHT&gt;1024&lt;/SCL_OUT_HEIGHT&gt;&lt;SCL_BPS&gt;8&lt;/SCL_BPS&gt;&lt;SCL_CHANNELS_IN_SEQ&gt;1&lt;/SCL_CHANNELS_IN_SEQ&gt;&lt;SCL_CHANNELS_IN_PAR&gt;3&lt;/SCL_CHANNELS_IN_PAR&gt;&lt;SCL_ALGORITHM&gt;&lt;NAME&gt;NEAREST_NEIGHBOUR&lt;/NAME&gt;&lt;V&gt;&lt;TAPS&gt;4&lt;/TAPS&gt;&lt;PHASES&gt;16&lt;/PHASES&gt;&lt;/V&gt;&lt;H&gt;&lt;TAPS&gt;4&lt;/TAPS&gt;&lt;PHASES&gt;16&lt;/PHASES&gt;&lt;/H&gt;&lt;/SCL_ALGORITHM&gt;&lt;SCL_PRECISION&gt;&lt;V&gt;&lt;SIGNED&gt;true&lt;/SIGNED&gt;&lt;INTEGER_BITS&gt;1&lt;/INTEGER_BITS&gt;&lt;FRACTION_BITS&gt;7&lt;/FRACTION_BITS&gt;&lt;/V&gt;&lt;H&gt;&lt;SIGNED&gt;true&lt;/SIGNED&gt;&lt;INTEGER_BITS&gt;1&lt;/INTEGER_BITS&gt;&lt;FRACTION_BITS&gt;7&lt;/FRACTION_BITS&gt;&lt;KERNEL_BITS&gt;9&lt;/KERNEL_BITS&gt;&lt;/H&gt;&lt;/SCL_PRECISION&gt;&lt;SCL_COEFFICIENTS&gt;&lt;LOAD_AT_RUNTIME&gt;false&lt;/LOAD_AT_RUNTIME&gt;&lt;ARE_IDENTICAL&gt;0&lt;/ARE_IDENTICAL&gt;&lt;V&gt;&lt;BANKS&gt;2&lt;/BANKS&gt;&lt;FUNCTION&gt;LANCZOS_2&lt;/FUNCTION&gt;&lt;SYMMETRIC&gt;0&lt;/SYMMETRIC&gt;&lt;FILENAME /&gt;&lt;/V&gt;&lt;H&gt;&lt;BANKS&gt;2&lt;/BANKS&gt;&lt;FUNCTION&gt;LANCZOS_2&lt;/FUNCTION&gt;&lt;SYMMETRIC&gt;0&lt;/SYMMETRIC&gt;&lt;FILENAME /&gt;&lt;/H&gt;&lt;/SCL_COEFFICIENTS&gt;&lt;/scalerParams&gt;</value>
+      <value>&lt;scalerParams&gt;&lt;SCL_NAME&gt;scaler&lt;/SCL_NAME&gt;&lt;SCL_RUNTIME_CONTROL&gt;0&lt;/SCL_RUNTIME_CONTROL&gt;&lt;SCL_IN_WIDTH&gt;800&lt;/SCL_IN_WIDTH&gt;&lt;SCL_IN_HEIGHT&gt;600&lt;/SCL_IN_HEIGHT&gt;&lt;SCL_OUT_WIDTH&gt;1280&lt;/SCL_OUT_WIDTH&gt;&lt;SCL_OUT_HEIGHT&gt;1024&lt;/SCL_OUT_HEIGHT&gt;&lt;SCL_BPS&gt;4&lt;/SCL_BPS&gt;&lt;SCL_CHANNELS_IN_SEQ&gt;1&lt;/SCL_CHANNELS_IN_SEQ&gt;&lt;SCL_CHANNELS_IN_PAR&gt;3&lt;/SCL_CHANNELS_IN_PAR&gt;&lt;SCL_ALGORITHM&gt;&lt;NAME&gt;NEAREST_NEIGHBOUR&lt;/NAME&gt;&lt;V&gt;&lt;TAPS&gt;4&lt;/TAPS&gt;&lt;PHASES&gt;16&lt;/PHASES&gt;&lt;/V&gt;&lt;H&gt;&lt;TAPS&gt;4&lt;/TAPS&gt;&lt;PHASES&gt;16&lt;/PHASES&gt;&lt;/H&gt;&lt;/SCL_ALGORITHM&gt;&lt;SCL_PRECISION&gt;&lt;V&gt;&lt;SIGNED&gt;true&lt;/SIGNED&gt;&lt;INTEGER_BITS&gt;1&lt;/INTEGER_BITS&gt;&lt;FRACTION_BITS&gt;7&lt;/FRACTION_BITS&gt;&lt;/V&gt;&lt;H&gt;&lt;SIGNED&gt;true&lt;/SIGNED&gt;&lt;INTEGER_BITS&gt;1&lt;/INTEGER_BITS&gt;&lt;FRACTION_BITS&gt;7&lt;/FRACTION_BITS&gt;&lt;KERNEL_BITS&gt;9&lt;/KERNEL_BITS&gt;&lt;/H&gt;&lt;/SCL_PRECISION&gt;&lt;SCL_COEFFICIENTS&gt;&lt;LOAD_AT_RUNTIME&gt;false&lt;/LOAD_AT_RUNTIME&gt;&lt;ARE_IDENTICAL&gt;0&lt;/ARE_IDENTICAL&gt;&lt;V&gt;&lt;BANKS&gt;2&lt;/BANKS&gt;&lt;FUNCTION&gt;LANCZOS_2&lt;/FUNCTION&gt;&lt;SYMMETRIC&gt;0&lt;/SYMMETRIC&gt;&lt;FILENAME /&gt;&lt;/V&gt;&lt;H&gt;&lt;BANKS&gt;2&lt;/BANKS&gt;&lt;FUNCTION&gt;LANCZOS_2&lt;/FUNCTION&gt;&lt;SYMMETRIC&gt;0&lt;/SYMMETRIC&gt;&lt;FILENAME /&gt;&lt;/H&gt;&lt;/SCL_COEFFICIENTS&gt;&lt;/scalerParams&gt;</value>
       <derived>false</derived>
       <enabled>true</enabled>
       <visible>false</visible>
@@ -596,7 +596,7 @@ particular module parameters. Connection points and their
 parameters are a RESULT of the module parameters. -->
       <parameter name="dataBitsPerSymbol">
         <type>int</type>
-        <value>8</value>
+        <value>4</value>
         <derived>false</derived>
         <enabled>true</enabled>
         <visible>true</visible>
@@ -659,7 +659,7 @@ parameters are a RESULT of the module parameters. -->
       <port>
         <name>din_data</name>
         <direction>Input</direction>
-        <width>24</width>
+        <width>12</width>
         <role>data</role>
       </port>
       <port>
@@ -681,7 +681,7 @@ particular module parameters. Connection points and their
 parameters are a RESULT of the module parameters. -->
       <parameter name="dataBitsPerSymbol">
         <type>int</type>
-        <value>8</value>
+        <value>4</value>
         <derived>false</derived>
         <enabled>true</enabled>
         <visible>true</visible>
@@ -744,7 +744,7 @@ parameters are a RESULT of the module parameters. -->
       <port>
         <name>dout_data</name>
         <direction>Output</direction>
-        <width>24</width>
+        <width>12</width>
         <role>data</role>
       </port>
       <port>
@@ -822,7 +822,7 @@ the requested settings for a module instance. -->
     </parameter>
     <parameter name="BPS">
       <type>java.lang.Integer</type>
-      <value>8</value>
+      <value>4</value>
       <derived>false</derived>
       <enabled>true</enabled>
       <visible>true</visible>
@@ -1070,7 +1070,7 @@ parameters are a RESULT of the module parameters. -->
       <port>
         <name>vid_data</name>
         <direction>Output</direction>
-        <width>24</width>
+        <width>12</width>
         <role>export</role>
       </port>
     </interface>
@@ -1170,7 +1170,7 @@ particular module parameters. Connection points and their
 parameters are a RESULT of the module parameters. -->
       <parameter name="dataBitsPerSymbol">
         <type>int</type>
-        <value>8</value>
+        <value>4</value>
         <derived>false</derived>
         <enabled>true</enabled>
         <visible>true</visible>
@@ -1221,7 +1221,7 @@ parameters are a RESULT of the module parameters. -->
       <port>
         <name>is_data</name>
         <direction>Input</direction>
-        <width>24</width>
+        <width>12</width>
         <role>data</role>
       </port>
       <port>
@@ -1335,7 +1335,7 @@ the requested settings for a module instance. -->
     </parameter>
     <parameter name="PARAMETERISATION">
       <type>java.lang.String</type>
-      <value>&lt;frameBufferParams&gt;&lt;VFB_NAME&gt;MyFrameBuffer&lt;/VFB_NAME&gt;&lt;VFB_MAX_WIDTH&gt;1280&lt;/VFB_MAX_WIDTH&gt;&lt;VFB_MAX_HEIGHT&gt;1024&lt;/VFB_MAX_HEIGHT&gt;&lt;VFB_BPS&gt;8&lt;/VFB_BPS&gt;&lt;VFB_CHANNELS_IN_SEQ&gt;1&lt;/VFB_CHANNELS_IN_SEQ&gt;&lt;VFB_CHANNELS_IN_PAR&gt;3&lt;/VFB_CHANNELS_IN_PAR&gt;&lt;VFB_WRITER_RUNTIME_CONTROL&gt;0&lt;/VFB_WRITER_RUNTIME_CONTROL&gt;&lt;VFB_DROP_FRAMES&gt;1&lt;/VFB_DROP_FRAMES&gt;&lt;VFB_READER_RUNTIME_CONTROL&gt;0&lt;/VFB_READER_RUNTIME_CONTROL&gt;&lt;VFB_REPEAT_FRAMES&gt;1&lt;/VFB_REPEAT_FRAMES&gt;&lt;VFB_FRAMEBUFFERS_ADDR&gt;00000000&lt;/VFB_FRAMEBUFFERS_ADDR&gt;&lt;VFB_MEM_PORT_WIDTH&gt;64&lt;/VFB_MEM_PORT_WIDTH&gt;&lt;VFB_MEM_MASTERS_USE_SEPARATE_CLOCK&gt;true&lt;/VFB_MEM_MASTERS_USE_SEPARATE_CLOCK&gt;&lt;VFB_RDATA_FIFO_DEPTH&gt;1024&lt;/VFB_RDATA_FIFO_DEPTH&gt;&lt;VFB_RDATA_BURST_TARGET&gt;256&lt;/VFB_RDATA_BURST_TARGET&gt;&lt;VFB_WDATA_FIFO_DEPTH&gt;1024&lt;/VFB_WDATA_FIFO_DEPTH&gt;&lt;VFB_WDATA_BURST_TARGET&gt;256&lt;/VFB_WDATA_BURST_TARGET&gt;&lt;VFB_MAX_NUMBER_PACKETS&gt;5&lt;/VFB_MAX_NUMBER_PACKETS&gt;&lt;VFB_MAX_SYMBOLS_IN_PACKET&gt;10&lt;/VFB_MAX_SYMBOLS_IN_PACKET&gt;&lt;/frameBufferParams&gt;</value>
+      <value>&lt;frameBufferParams&gt;&lt;VFB_NAME&gt;MyFrameBuffer&lt;/VFB_NAME&gt;&lt;VFB_MAX_WIDTH&gt;1280&lt;/VFB_MAX_WIDTH&gt;&lt;VFB_MAX_HEIGHT&gt;1024&lt;/VFB_MAX_HEIGHT&gt;&lt;VFB_BPS&gt;4&lt;/VFB_BPS&gt;&lt;VFB_CHANNELS_IN_SEQ&gt;1&lt;/VFB_CHANNELS_IN_SEQ&gt;&lt;VFB_CHANNELS_IN_PAR&gt;3&lt;/VFB_CHANNELS_IN_PAR&gt;&lt;VFB_WRITER_RUNTIME_CONTROL&gt;0&lt;/VFB_WRITER_RUNTIME_CONTROL&gt;&lt;VFB_DROP_FRAMES&gt;1&lt;/VFB_DROP_FRAMES&gt;&lt;VFB_READER_RUNTIME_CONTROL&gt;0&lt;/VFB_READER_RUNTIME_CONTROL&gt;&lt;VFB_REPEAT_FRAMES&gt;1&lt;/VFB_REPEAT_FRAMES&gt;&lt;VFB_FRAMEBUFFERS_ADDR&gt;00000000&lt;/VFB_FRAMEBUFFERS_ADDR&gt;&lt;VFB_MEM_PORT_WIDTH&gt;64&lt;/VFB_MEM_PORT_WIDTH&gt;&lt;VFB_MEM_MASTERS_USE_SEPARATE_CLOCK&gt;true&lt;/VFB_MEM_MASTERS_USE_SEPARATE_CLOCK&gt;&lt;VFB_RDATA_FIFO_DEPTH&gt;1024&lt;/VFB_RDATA_FIFO_DEPTH&gt;&lt;VFB_RDATA_BURST_TARGET&gt;256&lt;/VFB_RDATA_BURST_TARGET&gt;&lt;VFB_WDATA_FIFO_DEPTH&gt;1024&lt;/VFB_WDATA_FIFO_DEPTH&gt;&lt;VFB_WDATA_BURST_TARGET&gt;256&lt;/VFB_WDATA_BURST_TARGET&gt;&lt;VFB_MAX_NUMBER_PACKETS&gt;5&lt;/VFB_MAX_NUMBER_PACKETS&gt;&lt;VFB_MAX_SYMBOLS_IN_PACKET&gt;10&lt;/VFB_MAX_SYMBOLS_IN_PACKET&gt;&lt;/frameBufferParams&gt;</value>
       <derived>false</derived>
       <enabled>true</enabled>
       <visible>false</visible>
@@ -1398,7 +1398,7 @@ particular module parameters. Connection points and their
 parameters are a RESULT of the module parameters. -->
       <parameter name="dataBitsPerSymbol">
         <type>int</type>
-        <value>8</value>
+        <value>4</value>
         <derived>false</derived>
         <enabled>true</enabled>
         <visible>true</visible>
@@ -1461,7 +1461,7 @@ parameters are a RESULT of the module parameters. -->
       <port>
         <name>din_data</name>
         <direction>Input</direction>
-        <width>24</width>
+        <width>12</width>
         <role>data</role>
       </port>
       <port>
@@ -1483,7 +1483,7 @@ particular module parameters. Connection points and their
 parameters are a RESULT of the module parameters. -->
       <parameter name="dataBitsPerSymbol">
         <type>int</type>
-        <value>8</value>
+        <value>4</value>
         <derived>false</derived>
         <enabled>true</enabled>
         <visible>true</visible>
@@ -1546,7 +1546,7 @@ parameters are a RESULT of the module parameters. -->
       <port>
         <name>dout_data</name>
         <direction>Output</direction>
-        <width>24</width>
+        <width>12</width>
         <role>data</role>
       </port>
       <port>
@@ -4497,11 +4497,19 @@ parameters are a RESULT of the module parameters. -->
     <endConnectionPoint>write_master_av_clock</endConnectionPoint>
   </connection>
   <plugin>
-    <instanceCount>3</instanceCount>
-    <name>avalon_streaming_source</name>
+    <instanceCount>1</instanceCount>
+    <name>clock_sink</name>
     <type>com.altera.entityinterfaces.IElementClass</type>
     <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-    <displayName>Avalon Streaming Source</displayName>
+    <displayName>Clock Input</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>1</instanceCount>
+    <name>alt_vip_cti</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IModule</subtype>
+    <displayName>Clocked Video Input</displayName>
     <version>8.1</version>
   </plugin>
   <plugin>
@@ -4514,50 +4522,10 @@ parameters are a RESULT of the module parameters. -->
   </plugin>
   <plugin>
     <instanceCount>1</instanceCount>
-    <name>alt_vip_scl</name>
+    <name>alt_vip_vfb</name>
     <type>com.altera.entityinterfaces.IElementClass</type>
     <subtype>com.altera.entityinterfaces.IModule</subtype>
-    <displayName>Scaler</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>2</instanceCount>
-    <name>avalon_master</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-    <displayName>Avalon Memory Mapped Master</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>8</instanceCount>
-    <name>clock</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IConnection</subtype>
-    <displayName>Clock Connection</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>7</instanceCount>
-    <name>clock_sink</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-    <displayName>Clock Input</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>1</instanceCount>
-    <name>avalon_slave</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-    <displayName>Avalon Memory Mapped Slave</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>1</instanceCount>
-    <name>altmemddr2</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IModule</subtype>
-    <displayName>DDR2 SDRAM High Performance Controller</displayName>
+    <displayName>Frame Buffer</displayName>
     <version>8.1</version>
   </plugin>
   <plugin>
@@ -4569,27 +4537,11 @@ parameters are a RESULT of the module parameters. -->
     <version>8.1</version>
   </plugin>
   <plugin>
-    <instanceCount>1</instanceCount>
-    <name>avalon_slave</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-    <displayName>Avalon Memory Mapped Slave</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>1</instanceCount>
-    <name>alt_vip_cti</name>
+    <instanceCount>2</instanceCount>
+    <name>clock_source</name>
     <type>com.altera.entityinterfaces.IElementClass</type>
     <subtype>com.altera.entityinterfaces.IModule</subtype>
-    <displayName>Clocked Video Input</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>3</instanceCount>
-    <name>avalon_streaming_sink</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-    <displayName>Avalon Streaming Sink</displayName>
+    <displayName>Clock Source</displayName>
     <version>8.1</version>
   </plugin>
   <plugin>
@@ -4602,10 +4554,34 @@ parameters are a RESULT of the module parameters. -->
   </plugin>
   <plugin>
     <instanceCount>1</instanceCount>
-    <name>clock_sink</name>
+    <name>alt_vip_itc</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IModule</subtype>
+    <displayName>Clocked Video Output</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>3</instanceCount>
+    <name>clock_source</name>
     <type>com.altera.entityinterfaces.IElementClass</type>
     <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-    <displayName>Clock Input</displayName>
+    <displayName>Clock Output</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>3</instanceCount>
+    <name>avalon_streaming_source</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+    <displayName>Avalon Streaming Source</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>2</instanceCount>
+    <name>avalon_master</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+    <displayName>Avalon Memory Mapped Master</displayName>
     <version>8.1</version>
   </plugin>
   <plugin>
@@ -4617,27 +4593,11 @@ parameters are a RESULT of the module parameters. -->
     <version>8.1</version>
   </plugin>
   <plugin>
-    <instanceCount>1</instanceCount>
-    <name>alt_vip_vfb</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IModule</subtype>
-    <displayName>Frame Buffer</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>3</instanceCount>
-    <name>clock_source</name>
+    <instanceCount>7</instanceCount>
+    <name>clock_sink</name>
     <type>com.altera.entityinterfaces.IElementClass</type>
     <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-    <displayName>Clock Output</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>1</instanceCount>
-    <name>alt_vip_itc</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IModule</subtype>
-    <displayName>Clocked Video Output</displayName>
+    <displayName>Clock Input</displayName>
     <version>8.1</version>
   </plugin>
   <plugin>
@@ -4649,11 +4609,43 @@ parameters are a RESULT of the module parameters. -->
     <version>8.1</version>
   </plugin>
   <plugin>
-    <instanceCount>2</instanceCount>
-    <name>clock_source</name>
+    <instanceCount>8</instanceCount>
+    <name>clock</name>
     <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IModule</subtype>
-    <displayName>Clock Source</displayName>
+    <subtype>com.altera.entityinterfaces.IConnection</subtype>
+    <displayName>Clock Connection</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>3</instanceCount>
+    <name>avalon_streaming</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IConnection</subtype>
+    <displayName>Avalon Streaming Connection</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>1</instanceCount>
+    <name>avalon_slave</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+    <displayName>Avalon Memory Mapped Slave</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>3</instanceCount>
+    <name>avalon_streaming_sink</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+    <displayName>Avalon Streaming Sink</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>1</instanceCount>
+    <name>avalon_slave</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+    <displayName>Avalon Memory Mapped Slave</displayName>
     <version>8.1</version>
   </plugin>
   <plugin>
@@ -4665,13 +4657,21 @@ parameters are a RESULT of the module parameters. -->
     <version>8.1</version>
   </plugin>
   <plugin>
-    <instanceCount>3</instanceCount>
-    <name>avalon_streaming</name>
+    <instanceCount>1</instanceCount>
+    <name>altmemddr2</name>
     <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IConnection</subtype>
-    <displayName>Avalon Streaming Connection</displayName>
+    <subtype>com.altera.entityinterfaces.IModule</subtype>
+    <displayName>DDR2 SDRAM High Performance Controller</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>1</instanceCount>
+    <name>alt_vip_scl</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IModule</subtype>
+    <displayName>Scaler</displayName>
     <version>8.1</version>
   </plugin>
   <reportVersion>8.1 163</reportVersion>
-  <uniqueIdentifier>005056C000080000011E2497B656</uniqueIdentifier>
+  <uniqueIdentifier>005056C000080000011E2609D5CD</uniqueIdentifier>
 </EnsembleReport>
