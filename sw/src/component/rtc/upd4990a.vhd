@@ -104,6 +104,12 @@ begin
         clk_256 <= tp_count(6);
         clk_64 <= tp_count(8);
         clk_1s <= tp_count(14);
+        -- timeset overrides internal tick
+        -- tbd: fix this, it's yucky!!!
+        if pulse_timeset = '1' then
+          -- set the time from the input data
+          time_r <= din_r;
+        end if;
       end if;
     end process PROC_TP;
 
