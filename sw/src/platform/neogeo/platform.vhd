@@ -79,7 +79,8 @@ end platform;
 
 architecture SYN of platform is
 
-	alias clk_100M          : std_logic is clk_i(1);  -- actually 25MHz
+  alias clk_sdram         : std_logic is clk_i(0);
+	alias clk_25M           : std_logic is clk_i(1);  -- actually 25MHz
 	alias clk_video         : std_logic is clk_i(1);
 	alias clk_27M           : std_logic is clk_i(3);
 	signal clk_12M_ena      : std_logic := '0';
@@ -160,28 +161,33 @@ architecture SYN of platform is
   -- uPD4990A RTC chip
   signal upd4990a_cs      : std_logic := '0';
   signal upd4990a_d_o     : std_logic_vector(7 downto 6) := (others => '0');
+
+  -- hardware registers
+  signal reg_swp          : std_logic := '0'; -- bios/cart vectors
+  signal reg_fix          : std_logic := '0'; -- brd/cart fix layer
   
   -- "magic" register
   signal magic_r          : std_logic_vector(15 downto 0) := (others => '0');
   alias boot_f            : std_logic is magic_r(0);    -- booting
   alias bootdata_f        : std_logic is magic_r(1);    -- bootdata store enabled
 
+  signal sdram_dtackn     : std_logic := '1';
+  
 begin
 
   --
   -- clocking
   --
   
-  process (clk_100M, reset_i)
+  process (clk_25M, reset_i)
     variable count : std_logic_vector(2 downto 0) := (others => '0');
   begin
     if reset_i = '1' then
       count := (others => '0');
-    elsif rising_edge(clk_100M) then
+    elsif rising_edge(clk_25M) then
       clk_12M_ena <= '0'; -- default
       --if count = "000" then
       if count(0) = '0' then
-        -- clk_100M is actually 25MHz
         clk_12M_ena <= '1';
       end if;
       count := count + 1;
@@ -227,12 +233,12 @@ begin
   -- dtack logic
   --
   
-  process (clk_100M)
+  process (clk_25M)
     variable asn_r : std_logic_vector(10 downto 0) := (others => '1');
   begin
     if reset_neogeo_n = '0' then
       asn_r := (others => '1');
-    elsif rising_edge(clk_100M) and clk_12M_ena = '1' then
+    elsif rising_edge(clk_25M) and clk_12M_ena = '1' then
       if bootdata_f = '1' and bootdata_cs = '1' then
         dtackn <= asn_r(2);
       else
@@ -251,10 +257,10 @@ begin
   -- wr_p logic
   --
   
-  process (clk_100M)
+  process (clk_25M)
     variable wr_r : std_logic;
   begin
-    if rising_edge(clk_100M) then
+    if rising_edge(clk_25M) then
       wr_p <= '0'; -- default
       if clk_12M_ena = '1' then
         -- leading edge write cycle
@@ -304,9 +310,9 @@ begin
   --  vectors
   --
   
-  -- need to add support for cart switch
   vector_d_o <= bootrom_d_o when boot_f = '1' else
-                bios_d_o;
+                bios_d_o when reg_swp = '0' else
+                rom1_d_o;
 
   --
   -- on-board SRAM
@@ -323,11 +329,12 @@ begin
   sram_o.a(15 downto 0) <= a(16 downto 1);
   sram_o.d <= std_logic_vector(resize(unsigned(d_o), sram_o.d'length));
   sram_o.be <= "00" & not udsn & not ldsn;
-  sram_o.cs <= vector_cs or bios_cs or ram_cs or sram_cs or memcard_cs;
+  --sram_o.cs <= vector_cs or bios_cs or ram_cs or sram_cs or memcard_cs;
+  sram_o.cs <= vector_cs or ram_cs or sram_cs or memcard_cs;
   sram_o.oe <= rwn;
   sram_o.we <= wr_p;
 
-  bios_d_o <= sram_i.d(ram_d_o'range);
+  --bios_d_o <= sram_i.d(ram_d_o'range);
   ram_d_o <= sram_i.d(ram_d_o'range);
   sram_d_o <= sram_i.d(ram_d_o'range);
   memcard_d_o <= sram_i.d(ram_d_o'range);
@@ -381,7 +388,7 @@ begin
   --
 
   -- magic register
-  process (clk_100M, reset_i)
+  process (clk_25M, reset_i)
     variable ng_reset_cnt : integer range 0 to 4 := 0;
   begin
     if reset_i = '1' then
@@ -389,7 +396,7 @@ begin
       ng_reset_cnt := 0;
       boot_f <= '1';
       bootdata_f <= '1';
-    elsif rising_edge(clk_100M) then
+    elsif rising_edge(clk_25M) then
       if bootrom_cs = '1' then
         if wr_p = '1' then
 					-- write a '1' to reset the boot flags
@@ -413,15 +420,37 @@ begin
     end if;
   end process;
   
+  -- $3A hardware registers process
+  process (clk_25M, reset_i)
+  begin
+    if reset_i = '1' then
+      reg_swp <= '0'; -- bios
+      reg_fix <= '0'; -- brd
+    elsif rising_edge(clk_25M) then
+      if reg_3A_cs = '1' then
+        if wr_p = '1' then
+          case a(3 downto 1) is
+            when "001" => -- 00x3
+              reg_swp <= a(4);
+            when "101" => -- 00xA
+              reg_fix <= a(4);
+            when others =>
+              null;
+          end case;
+        end if;
+      end if;
+    end if;
+  end process;
+  
   -- vram process
-  process (clk_100M, reset_i)
+  process (clk_25M, reset_i)
     variable rwn_r    : std_logic := '0';
     variable vram_inc : std_logic_vector(vram_a'range) := (others => '0');
   begin
     if reset_neogeo_n = '0' then
       rwn_r := '0';
       vram_inc := (others => '0');
-    elsif rising_edge(clk_100M) then --and clk_12M_ena = '1' then
+    elsif rising_edge(clk_25M) then --and clk_12M_ena = '1' then
       vram1_wr <= '0'; -- default
       vram2_wr <= '0'; -- default
       if reg_3C_cs = '1' then
@@ -462,13 +491,13 @@ begin
   --
   -- interrupts
   --
-  process (clk_100M, reset_i)
+  process (clk_25M, reset_i)
     variable vblank_r : std_logic := '0';
     variable irq_r    : std_logic_vector(1 to 3) := (others => '0');
   begin
     if reset_i = '1' then
       vblank_r := '0';
-    elsif rising_edge(clk_100M) then
+    elsif rising_edge(clk_25M) then
       if wr_p = '1' then
         if reg_3C_cs = '1' and a(7 downto 1) = "0000110" then
           -- IRQACK - write a '1' to ACK
@@ -494,22 +523,54 @@ begin
   end process;
   
   --
-  -- system bios in flash atm
+  -- system bios in sdram atm
   --
 
   BLK_SDRAM : block
   begin
-  
-    sdram_o.a <= a(22 downto 1);
+
+    -- we really should unmeta sdram_dtackn in the 25MHz clock domain
+    -- - argghh this is yuckky...
+    process (clk_sdram, reset_i)
+      -- sdram 100MHz, cpu 12.5MHz
+      -- - need to assert for at least 9x 100MHz clocks...
+      subtype dtack_cnt_t is integer range 0 to 9;
+      variable dtack_cnt  : dtack_cnt_t := 0;
+    begin
+      if reset_i = '1' then
+        dtack_cnt := 0;
+      elsif rising_edge(clk_sdram) then
+        -- assert dtackn if valid and not waitrequest
+        if sdram_i.waitrequest = '0' and sdram_i.valid = '1' then
+          dtack_cnt := dtack_cnt_t'high;
+        elsif dtack_cnt /= 0 then
+          dtack_cnt := dtack_cnt - 1;
+        end if;
+        -- assert dtackn if count != 0 and until waitrequest
+        if dtack_cnt /= 0 then
+          sdram_dtackn <= '0';
+        else
+          sdram_dtackn <= '1';
+        end if;
+      end if;
+    end process;
+    
+    -- map 128KB BIOS into 1st 1MB
+    -- map 1MB ROM1 (P1) into 2nd 1MB
+    sdram_o.a(sdram_o.a'left downto 20) <= (others => '0');
+    sdram_o.a(19 downto 0) <= '0' & "00" & a(17 downto 1) when bios_cs = '1' else
+                              '1' & a(19 downto 1) when rom1_cs = '1' else
+                              (others => '0');
     sdram_o.d <= d_o;
-    --dtackn <= sdram_i.waitrequest;
-    sdram_o.cs <= bios_cs;
+    sdram_o.cs <= bios_cs or rom1_cs;
     sdram_o.be_n <= udsn & ldsn;
     sdram_o.rd_n <= not rwn;
-    sdram_o.wr_n <= rwn;
-    --bios_d_o <= sdram_i.d;
-    --sdram_i.valid;
+    -- might need to drive wr_p with some smarter logic???
+    sdram_o.wr_n <= wr_p; --rwn;
 
+    bios_d_o <= sdram_i.d(ram_d_o'range);
+    rom1_d_o <= sdram_i.d(ram_d_o'range);
+    
   end block BLK_SDRAM;
   
   --
@@ -519,7 +580,7 @@ begin
   tg68_inst : entity work.TG68
     port map
     (        
-      clk           => clk_100M,
+      clk           => clk_25M,
       reset         => reset_neogeo_n, -- active low
       clkena_in     => clk_12M_ena,
       data_in       => d_i,
@@ -544,7 +605,7 @@ begin
 		)
 		port map
 		(
-			clock_b			=> clk_100M,
+			clock_b			=> clk_25M,
 			address_b		=> vram_a(9 downto 0),
 			wren_b			=> vram1_wr,
 			data_b			=> vram_d_i,
@@ -568,7 +629,7 @@ begin
 		)
 		port map
 		(
-			clock_b			=> clk_100M,
+			clock_b			=> clk_25M,
 			address_b		=> vram_a(7 downto 0),
 			wren_b			=> vram2_wr,
 			data_b			=> vram_d_i,
@@ -588,7 +649,7 @@ begin
   palram_inst : entity work.palram
     port map
     (
-      clock_b		  => clk_100M,
+      clock_b		  => clk_25M,
       address_b		=> a(8 downto 1),
       data_b		  => d_o,
       wren_b		  => palram_wr,
@@ -610,7 +671,7 @@ begin
   bootrom_inst : entity work.testram
     port map
     (
-      clock		    => clk_100M,
+      clock		    => clk_25M,
       address		  => a(11 downto 1),
       data		    => d_o,
       byteena     => "11",
@@ -625,7 +686,7 @@ begin
     )
     port map
     (
-      clk_i             => clk_100M,    -- 25MHz
+      clk_i             => clk_25M,
       clk_ena           => '1',
       reset             => reset_i,
       
@@ -641,9 +702,9 @@ begin
     );
 
   -- for now, writes to $1000 are latched on the leds
-  process (clk_100M)
+  process (clk_25M)
   begin
-    if rising_edge(clk_100M) then
+    if rising_edge(clk_25M) then
       if wr_p = '1' and a(12) = '1' then
         leds_o(15 downto 0) <= d_o;
       end if;
