@@ -99,6 +99,7 @@ begin
 
       -- each byte contains information for 4 pixels
       case x_r(x_r'left-1 downto x_r'left-2) is
+      --case x_r(10 downto 9) is
         when "00" =>
           pel := ctl_i.tile_d(6) & ctl_i.tile_d(7);
         when "01" =>

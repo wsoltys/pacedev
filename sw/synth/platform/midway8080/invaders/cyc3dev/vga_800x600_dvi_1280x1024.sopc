@@ -1,33 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?><system name="vga_800x600_dvi_1280x1024">
   <parameter name="bonusData">bonusData 
 {
-   element clk_125M
+   element vga_800x600_dvi_1280x1024
    {
-      datum _sortIndex
-      {
-         value = "7";
-         type = "int";
-      }
    }
-   element alt_vip_scl_0
+   element alt_vip_itc_0
    {
       datum _sortIndex
       {
-         value = "1";
+         value = "3";
          type = "int";
       }
       datum megawizard_uipreferences
       {
          value = "{}";
          type = "String";
-      }
-   }
-   element clk_121M
-   {
-      datum _sortIndex
-      {
-         value = "4";
-         type = "int";
       }
    }
    element altmemddr_0
@@ -43,11 +30,11 @@
          type = "String";
       }
    }
-   element alt_vip_vfb_0
+   element pipeline_bridge_0
    {
       datum _sortIndex
       {
-         value = "2";
+         value = "5";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -56,14 +43,27 @@
          type = "String";
       }
    }
-   element vga_800x600_dvi_1280x1024
-   {
-   }
-   element pipeline_bridge_0
+   element clk_125M
    {
       datum _sortIndex
       {
-         value = "5";
+         value = "7";
+         type = "int";
+      }
+   }
+   element clk_121M
+   {
+      datum _sortIndex
+      {
+         value = "4";
+         type = "int";
+      }
+   }
+   element alt_vip_scl_0
+   {
+      datum _sortIndex
+      {
+         value = "1";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -85,11 +85,11 @@
          type = "String";
       }
    }
-   element alt_vip_itc_0
+   element alt_vip_vfb_0
    {
       datum _sortIndex
       {
-         value = "3";
+         value = "2";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -105,8 +105,8 @@
   <parameter name="hardcopyCompatible" value="false" />
   <parameter name="hdlLanguage" value="VHDL" />
   <parameter name="projectName" value="invaders.qpf" />
-  <parameter name="systemHash" value="-13023075249" />
-  <parameter name="timeStamp" value="1228998906483" />
+  <parameter name="systemHash" value="-6914432027" />
+  <parameter name="timeStamp" value="1229047415811" />
   <module name="clk_121M" kind="clock_source" version="8.1" enabled="1">
     <parameter name="clockFrequency" value="121000000" />
     <parameter name="clockFrequencyKnown" value="true" />
@@ -116,7 +116,7 @@
     <parameter name="USE_EMBEDDED_SYNCS" value="0" />
     <parameter name="H_ACTIVE_PIXELS_F1" value="32" />
     <parameter name="CLOCKS_ARE_SAME" value="0" />
-    <parameter name="BPS" value="4" />
+    <parameter name="BPS" value="8" />
     <parameter name="SYNC_TO" value="0" />
     <parameter name="INTERLACED" value="0" />
     <parameter name="ACCEPT_COLOURS_IN_SEQ" value="0" />
@@ -129,7 +129,7 @@
   </module>
   <module name="alt_vip_scl_0" kind="alt_vip_scl" version="8.1" enabled="1">
     <parameter name="CONTROL_DEPTH" value="0" />
-    <parameter name="PARAMETERISATION">&lt;scalerParams&gt;&lt;SCL_NAME&gt;scaler&lt;/SCL_NAME&gt;&lt;SCL_RUNTIME_CONTROL&gt;0&lt;/SCL_RUNTIME_CONTROL&gt;&lt;SCL_IN_WIDTH&gt;800&lt;/SCL_IN_WIDTH&gt;&lt;SCL_IN_HEIGHT&gt;600&lt;/SCL_IN_HEIGHT&gt;&lt;SCL_OUT_WIDTH&gt;1280&lt;/SCL_OUT_WIDTH&gt;&lt;SCL_OUT_HEIGHT&gt;1024&lt;/SCL_OUT_HEIGHT&gt;&lt;SCL_BPS&gt;4&lt;/SCL_BPS&gt;&lt;SCL_CHANNELS_IN_SEQ&gt;1&lt;/SCL_CHANNELS_IN_SEQ&gt;&lt;SCL_CHANNELS_IN_PAR&gt;3&lt;/SCL_CHANNELS_IN_PAR&gt;&lt;SCL_ALGORITHM&gt;&lt;NAME&gt;NEAREST_NEIGHBOUR&lt;/NAME&gt;&lt;V&gt;&lt;TAPS&gt;4&lt;/TAPS&gt;&lt;PHASES&gt;16&lt;/PHASES&gt;&lt;/V&gt;&lt;H&gt;&lt;TAPS&gt;4&lt;/TAPS&gt;&lt;PHASES&gt;16&lt;/PHASES&gt;&lt;/H&gt;&lt;/SCL_ALGORITHM&gt;&lt;SCL_PRECISION&gt;&lt;V&gt;&lt;SIGNED&gt;true&lt;/SIGNED&gt;&lt;INTEGER_BITS&gt;1&lt;/INTEGER_BITS&gt;&lt;FRACTION_BITS&gt;7&lt;/FRACTION_BITS&gt;&lt;/V&gt;&lt;H&gt;&lt;SIGNED&gt;true&lt;/SIGNED&gt;&lt;INTEGER_BITS&gt;1&lt;/INTEGER_BITS&gt;&lt;FRACTION_BITS&gt;7&lt;/FRACTION_BITS&gt;&lt;KERNEL_BITS&gt;9&lt;/KERNEL_BITS&gt;&lt;/H&gt;&lt;/SCL_PRECISION&gt;&lt;SCL_COEFFICIENTS&gt;&lt;LOAD_AT_RUNTIME&gt;false&lt;/LOAD_AT_RUNTIME&gt;&lt;ARE_IDENTICAL&gt;0&lt;/ARE_IDENTICAL&gt;&lt;V&gt;&lt;BANKS&gt;2&lt;/BANKS&gt;&lt;FUNCTION&gt;LANCZOS_2&lt;/FUNCTION&gt;&lt;SYMMETRIC&gt;0&lt;/SYMMETRIC&gt;&lt;FILENAME /&gt;&lt;/V&gt;&lt;H&gt;&lt;BANKS&gt;2&lt;/BANKS&gt;&lt;FUNCTION&gt;LANCZOS_2&lt;/FUNCTION&gt;&lt;SYMMETRIC&gt;0&lt;/SYMMETRIC&gt;&lt;FILENAME /&gt;&lt;/H&gt;&lt;/SCL_COEFFICIENTS&gt;&lt;/scalerParams&gt;</parameter>
+    <parameter name="PARAMETERISATION">&lt;scalerParams&gt;&lt;SCL_NAME&gt;scaler&lt;/SCL_NAME&gt;&lt;SCL_RUNTIME_CONTROL&gt;0&lt;/SCL_RUNTIME_CONTROL&gt;&lt;SCL_IN_WIDTH&gt;800&lt;/SCL_IN_WIDTH&gt;&lt;SCL_IN_HEIGHT&gt;600&lt;/SCL_IN_HEIGHT&gt;&lt;SCL_OUT_WIDTH&gt;1280&lt;/SCL_OUT_WIDTH&gt;&lt;SCL_OUT_HEIGHT&gt;1024&lt;/SCL_OUT_HEIGHT&gt;&lt;SCL_BPS&gt;8&lt;/SCL_BPS&gt;&lt;SCL_CHANNELS_IN_SEQ&gt;1&lt;/SCL_CHANNELS_IN_SEQ&gt;&lt;SCL_CHANNELS_IN_PAR&gt;3&lt;/SCL_CHANNELS_IN_PAR&gt;&lt;SCL_ALGORITHM&gt;&lt;NAME&gt;NEAREST_NEIGHBOUR&lt;/NAME&gt;&lt;V&gt;&lt;TAPS&gt;4&lt;/TAPS&gt;&lt;PHASES&gt;16&lt;/PHASES&gt;&lt;/V&gt;&lt;H&gt;&lt;TAPS&gt;4&lt;/TAPS&gt;&lt;PHASES&gt;16&lt;/PHASES&gt;&lt;/H&gt;&lt;/SCL_ALGORITHM&gt;&lt;SCL_PRECISION&gt;&lt;V&gt;&lt;SIGNED&gt;true&lt;/SIGNED&gt;&lt;INTEGER_BITS&gt;1&lt;/INTEGER_BITS&gt;&lt;FRACTION_BITS&gt;7&lt;/FRACTION_BITS&gt;&lt;/V&gt;&lt;H&gt;&lt;SIGNED&gt;true&lt;/SIGNED&gt;&lt;INTEGER_BITS&gt;1&lt;/INTEGER_BITS&gt;&lt;FRACTION_BITS&gt;7&lt;/FRACTION_BITS&gt;&lt;KERNEL_BITS&gt;9&lt;/KERNEL_BITS&gt;&lt;/H&gt;&lt;/SCL_PRECISION&gt;&lt;SCL_COEFFICIENTS&gt;&lt;LOAD_AT_RUNTIME&gt;false&lt;/LOAD_AT_RUNTIME&gt;&lt;ARE_IDENTICAL&gt;0&lt;/ARE_IDENTICAL&gt;&lt;V&gt;&lt;BANKS&gt;2&lt;/BANKS&gt;&lt;FUNCTION&gt;LANCZOS_2&lt;/FUNCTION&gt;&lt;SYMMETRIC&gt;0&lt;/SYMMETRIC&gt;&lt;FILENAME /&gt;&lt;/V&gt;&lt;H&gt;&lt;BANKS&gt;2&lt;/BANKS&gt;&lt;FUNCTION&gt;LANCZOS_2&lt;/FUNCTION&gt;&lt;SYMMETRIC&gt;0&lt;/SYMMETRIC&gt;&lt;FILENAME /&gt;&lt;/H&gt;&lt;/SCL_COEFFICIENTS&gt;&lt;/scalerParams&gt;</parameter>
   </module>
   <module name="alt_vip_itc_0" kind="alt_vip_itc" version="8.1" enabled="1">
     <parameter name="USE_EMBEDDED_SYNCS" value="0" />
@@ -139,7 +139,7 @@
     <parameter name="V_ACTIVE_LINES" value="1024" />
     <parameter name="CLOCKS_ARE_SAME" value="0" />
     <parameter name="FIELD0_V_SYNC_LENGTH" value="0" />
-    <parameter name="BPS" value="4" />
+    <parameter name="BPS" value="8" />
     <parameter name="AP_LINE" value="0" />
     <parameter name="FIELD0_V_BLANK" value="0" />
     <parameter name="V_SYNC_LENGTH" value="3" />
@@ -163,7 +163,7 @@
     <parameter name="FIFO_DEPTH" value="4096" />
   </module>
   <module name="alt_vip_vfb_0" kind="alt_vip_vfb" version="8.1" enabled="1">
-    <parameter name="PARAMETERISATION">&lt;frameBufferParams&gt;&lt;VFB_NAME&gt;MyFrameBuffer&lt;/VFB_NAME&gt;&lt;VFB_MAX_WIDTH&gt;1280&lt;/VFB_MAX_WIDTH&gt;&lt;VFB_MAX_HEIGHT&gt;1024&lt;/VFB_MAX_HEIGHT&gt;&lt;VFB_BPS&gt;4&lt;/VFB_BPS&gt;&lt;VFB_CHANNELS_IN_SEQ&gt;1&lt;/VFB_CHANNELS_IN_SEQ&gt;&lt;VFB_CHANNELS_IN_PAR&gt;3&lt;/VFB_CHANNELS_IN_PAR&gt;&lt;VFB_WRITER_RUNTIME_CONTROL&gt;0&lt;/VFB_WRITER_RUNTIME_CONTROL&gt;&lt;VFB_DROP_FRAMES&gt;1&lt;/VFB_DROP_FRAMES&gt;&lt;VFB_READER_RUNTIME_CONTROL&gt;0&lt;/VFB_READER_RUNTIME_CONTROL&gt;&lt;VFB_REPEAT_FRAMES&gt;1&lt;/VFB_REPEAT_FRAMES&gt;&lt;VFB_FRAMEBUFFERS_ADDR&gt;00000000&lt;/VFB_FRAMEBUFFERS_ADDR&gt;&lt;VFB_MEM_PORT_WIDTH&gt;64&lt;/VFB_MEM_PORT_WIDTH&gt;&lt;VFB_MEM_MASTERS_USE_SEPARATE_CLOCK&gt;true&lt;/VFB_MEM_MASTERS_USE_SEPARATE_CLOCK&gt;&lt;VFB_RDATA_FIFO_DEPTH&gt;1024&lt;/VFB_RDATA_FIFO_DEPTH&gt;&lt;VFB_RDATA_BURST_TARGET&gt;256&lt;/VFB_RDATA_BURST_TARGET&gt;&lt;VFB_WDATA_FIFO_DEPTH&gt;1024&lt;/VFB_WDATA_FIFO_DEPTH&gt;&lt;VFB_WDATA_BURST_TARGET&gt;256&lt;/VFB_WDATA_BURST_TARGET&gt;&lt;VFB_MAX_NUMBER_PACKETS&gt;5&lt;/VFB_MAX_NUMBER_PACKETS&gt;&lt;VFB_MAX_SYMBOLS_IN_PACKET&gt;10&lt;/VFB_MAX_SYMBOLS_IN_PACKET&gt;&lt;/frameBufferParams&gt;</parameter>
+    <parameter name="PARAMETERISATION">&lt;frameBufferParams&gt;&lt;VFB_NAME&gt;MyFrameBuffer&lt;/VFB_NAME&gt;&lt;VFB_MAX_WIDTH&gt;1280&lt;/VFB_MAX_WIDTH&gt;&lt;VFB_MAX_HEIGHT&gt;1024&lt;/VFB_MAX_HEIGHT&gt;&lt;VFB_BPS&gt;8&lt;/VFB_BPS&gt;&lt;VFB_CHANNELS_IN_SEQ&gt;1&lt;/VFB_CHANNELS_IN_SEQ&gt;&lt;VFB_CHANNELS_IN_PAR&gt;3&lt;/VFB_CHANNELS_IN_PAR&gt;&lt;VFB_WRITER_RUNTIME_CONTROL&gt;0&lt;/VFB_WRITER_RUNTIME_CONTROL&gt;&lt;VFB_DROP_FRAMES&gt;1&lt;/VFB_DROP_FRAMES&gt;&lt;VFB_READER_RUNTIME_CONTROL&gt;0&lt;/VFB_READER_RUNTIME_CONTROL&gt;&lt;VFB_REPEAT_FRAMES&gt;1&lt;/VFB_REPEAT_FRAMES&gt;&lt;VFB_FRAMEBUFFERS_ADDR&gt;00000000&lt;/VFB_FRAMEBUFFERS_ADDR&gt;&lt;VFB_MEM_PORT_WIDTH&gt;64&lt;/VFB_MEM_PORT_WIDTH&gt;&lt;VFB_MEM_MASTERS_USE_SEPARATE_CLOCK&gt;true&lt;/VFB_MEM_MASTERS_USE_SEPARATE_CLOCK&gt;&lt;VFB_RDATA_FIFO_DEPTH&gt;1024&lt;/VFB_RDATA_FIFO_DEPTH&gt;&lt;VFB_RDATA_BURST_TARGET&gt;256&lt;/VFB_RDATA_BURST_TARGET&gt;&lt;VFB_WDATA_FIFO_DEPTH&gt;1024&lt;/VFB_WDATA_FIFO_DEPTH&gt;&lt;VFB_WDATA_BURST_TARGET&gt;256&lt;/VFB_WDATA_BURST_TARGET&gt;&lt;VFB_MAX_NUMBER_PACKETS&gt;5&lt;/VFB_MAX_NUMBER_PACKETS&gt;&lt;VFB_MAX_SYMBOLS_IN_PACKET&gt;10&lt;/VFB_MAX_SYMBOLS_IN_PACKET&gt;&lt;/frameBufferParams&gt;</parameter>
   </module>
   <module name="altmemddr_0" kind="altmemddr2" version="8.1" enabled="1">
     <parameter name="pipeline_commands" value="false" />
@@ -287,11 +287,11 @@
       kind="altera_avalon_pipeline_bridge"
       version="8.1"
       enabled="1">
-    <parameter name="burstEnable" value="false" />
+    <parameter name="burstEnable" value="true" />
     <parameter name="dataWidth" value="64" />
     <parameter name="downstreamPipeline" value="true" />
     <parameter name="enableArbiterlock" value="false" />
-    <parameter name="maxBurstSize" value="2" />
+    <parameter name="maxBurstSize" value="256" />
     <parameter name="upstreamPipeline" value="true" />
     <parameter name="waitrequestPipeline" value="false" />
   </module>

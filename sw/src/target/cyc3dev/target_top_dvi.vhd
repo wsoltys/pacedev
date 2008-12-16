@@ -178,9 +178,9 @@ begin
         -- the_alt_vip_cti_0
         overflow_from_the_alt_vip_cti_0 => user_led(1),
         vid_clk_to_the_alt_vip_cti_0 => video_o.clk,
-        vid_data_to_the_alt_vip_cti_0(11 downto 8) => video_o.rgb.r(9 downto 6),
-        vid_data_to_the_alt_vip_cti_0(7 downto 4) => video_o.rgb.g(9 downto 6),
-        vid_data_to_the_alt_vip_cti_0(3 downto 0) => video_o.rgb.b(9 downto 6),
+        vid_data_to_the_alt_vip_cti_0(23 downto 16) => video_o.rgb.r(9 downto 2),
+        vid_data_to_the_alt_vip_cti_0(15 downto 8) => video_o.rgb.g(9 downto 2),
+        vid_data_to_the_alt_vip_cti_0(7 downto 0) => video_o.rgb.b(9 downto 2),
         vid_datavalid_to_the_alt_vip_cti_0 => vga_valid,
         vid_f_to_the_alt_vip_cti_0 => '0',
         vid_h_sync_to_the_alt_vip_cti_0 => vga_hs,
@@ -190,7 +190,7 @@ begin
         -- the_alt_vip_itc_0
         underflow_from_the_alt_vip_itc_0 => user_led(2),
         vid_clk_to_the_alt_vip_itc_0 => clk_110M,
-        vid_data_from_the_alt_vip_itc_0 => dvi_4bpp_data,
+        vid_data_from_the_alt_vip_itc_0 => BITEC_DVI_IO_OUT,
         vid_datavalid_from_the_alt_vip_itc_0 => BITEC_DVI_IO_OUT_DE,
         vid_f_from_the_alt_vip_itc_0 => open,
         vid_h_from_the_alt_vip_itc_0 => open,
@@ -220,9 +220,9 @@ begin
      );
 
     -- expand 12 to 24-bit colour
-    BITEC_DVI_IO_OUT <= dvi_4bpp_data(11 downto 8) & "0000" &
-                        dvi_4bpp_data(7 downto 4) & "0000" &
-                        dvi_4bpp_data(3 downto 0) & "0000";
+    --BITEC_DVI_IO_OUT <= dvi_4bpp_data(11 downto 8) & "0000" &
+    --                    dvi_4bpp_data(7 downto 4) & "0000" &
+    --                    dvi_4bpp_data(3 downto 0) & "0000";
 
     BITEC_QV_RESETB <= reset_n;
     BITEC_DVI_IO_OUT_IDCKp <= clk_110M;

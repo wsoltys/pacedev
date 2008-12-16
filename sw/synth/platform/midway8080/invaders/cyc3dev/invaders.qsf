@@ -1018,4 +1018,5 @@ set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/pla
 set_global_assignment -name QIP_FILE ../../../../../src/target/cyc3dev/dvi_out_pll.qip
 set_global_assignment -name QIP_FILE vga_800x600_dvi_1280x1024.qip
 set_global_assignment -name VHDL_FILE vga_800x600_dvi_1280x1024.vhd
+set_global_assignment -name MISC_FILE "E:/markm/pace/pacedev.net/sw/synth/platform/midway8080/invaders/cyc3dev/invaders.dpf"
 set_global_assignment -name SEARCH_PATH ip/altera_avalon_i2c
