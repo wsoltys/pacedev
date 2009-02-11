@@ -326,9 +326,19 @@ begin
 	-- ALU control
 	alu_in: process(ir, ir_page)
 	begin
+		-- ALU_ADD <== "1---10-1" || "11--0011" || "01--1100"
+		--ALU_SUB <== "1---0001" || $10 & "10--0011" || $11 & "10--1100" || $11 & "10--0011" || "1---1100" || 
+		--						$10 & "10--1100" ||"01--1010" || "1---00-0" || "10--0011"
+		--ALU_OR <== "00011010" || "1---1010"
+		--ALU_AND <== "00011100" || "1---010-"
+		--ALU_EOR <== "1---1000"
+		--ALU_ROL <== "01--100-"
+		--ALU_ROR <== "01--011-" || "01--0100"
+
 		alu_op <= alu_idle;
 		-- Addition "1XXX0011" | "1XXX1011" | "01XX1100"
 		if ((ir and X"8F") = X"83") or ((ir and X"8F") = X"8B") or ((ir and X"CF") = X"4C") then
+		--if ((STD_MATCH(ir, "1---10-1") or STD_MATCH(ir, "11--0011") or STD_MATCH(ir, "01--1100")) then
 			alu_op <= alu_add;
 		end if;
 		-- Subtraction "1XXX0001" | "XXXX0000" | "10XX0011" | "01XX1101" | "1XXX0010"
