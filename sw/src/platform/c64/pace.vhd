@@ -5,6 +5,8 @@ use IEEE.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
+use work.video_controller_pkg.all;
+use work.sprite_pkg.all;
 use work.platform_pkg.all;
 use work.project_pkg.all;
 
@@ -12,52 +14,44 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk             : in std_logic_vector(0 to 3);
-    test_button     : in std_logic;
-    reset           : in std_logic;
+    clk_i           : in std_logic_vector(0 to 3);
+    reset_i         : in std_logic;
 
-    -- game I/O
-    ps2clk          : inout std_logic;
-    ps2data         : inout std_logic;
-    dip             : in std_logic_vector(7 downto 0);
-		jamma						: in JAMMAInputsType;
+    -- misc I/O
+    buttons_i       : in from_BUTTONS_t;
+    switches_i      : in from_SWITCHES_t;
+    leds_o          : out to_LEDS_t;
 
-    -- external RAM
-    sram_addr       : out std_logic_vector(23 downto 0);
-    sram_dq_i     	: in std_logic_vector(31 downto 0);
-    sram_dq_o     	: out std_logic_vector(31 downto 0);
-    sram_cs_n       : out std_logic;
-    sram_oe_n       : out std_logic;
-    sram_we_n       : out std_logic;
+    -- controller inputs
+    inputs_i        : in from_INPUTS_t;
 
-    -- VGA video
-		vga_clk					: out std_logic;
-    red             : out std_logic_vector(9 downto 0);
-    green           : out std_logic_vector(9 downto 0);
-    blue            : out std_logic_vector(9 downto 0);
-		lcm_data				:	out std_logic_vector(9 downto 0);
-    hsync           : out std_logic;
-    vsync           : out std_logic;
+    -- external ROM/RAM
+    flash_i         : in from_FLASH_t;
+    flash_o         : out to_flash_t;
+    sram_i       		: in from_SRAM_t;
+		sram_o					: out to_SRAM_t;
+    sdram_i         : in from_SDRAM_t;
+    sdram_o         : out to_SDRAM_t;
 
-    -- composite video
-    BW_CVBS         : out std_logic_vector(1 downto 0);
-    GS_CVBS         : out std_logic_vector(7 downto 0);
+    -- video
+    video_i         : in from_VIDEO_t;
+    video_o         : out to_VIDEO_t;
 
-    -- sound
-    snd_clk         : out std_logic;
-    snd_data_l      : out std_logic_vector(15 downto 0);
-    snd_data_r      : out std_logic_vector(15 downto 0);
-
+    -- audio
+    audio_i         : in from_AUDIO_t;
+    audio_o         : out to_AUDIO_t;
+    
     -- SPI (flash)
-    spi_clk         : out std_logic;
-    spi_mode        : out std_logic;
-    spi_sel         : out std_logic;
-    spi_din         : in std_logic;
-    spi_dout        : out std_logic;
+    spi_i           : in from_SPI_t;
+    spi_o           : out to_SPI_t;
 
     -- serial
-    ser_tx          : out std_logic;
-    ser_rx          : in std_logic;
+    ser_i           : in from_SERIAL_t;
+    ser_o           : out to_SERIAL_t;
+    
+    -- general purpose I/O
+    gp_i            : in from_GP_t;
+    gp_o            : out to_GP_t;
 
 		-- SB (IEC) port
 		ext_sb_data_in	: in std_logic;
@@ -70,13 +64,9 @@ entity PACE is
 		-- generic drive mechanism i/o ports
 		mech_in					: in std_logic_vector(63 downto 0);
 		mech_out				: out std_logic_vector(63 downto 0);
-		mech_io					: inout std_logic_vector(63 downto 0);
-
-    -- debug
-    leds            : out std_logic_vector(7 downto 0)
+		mech_io					: inout std_logic_vector(63 downto 0)
   );
-
-end PACE;
+end entity PACE;
 
 architecture SYN of PACE is
 
@@ -109,13 +99,16 @@ architecture SYN of PACE is
     );
   end component c1541_top;
 
-	alias clk_32M								: std_logic is clk(0);
+	alias clk_32M								: std_logic is clk_i(0);
 		
 	signal sram_addr_s					: unsigned(16 downto 0);
+	signal sram_cs_n            : std_logic;
+	signal sram_oe_n            : std_logic;
+	signal sram_we_n            : std_logic;
 	signal r_s									: unsigned(7 downto 0);
 	signal g_s									: unsigned(7 downto 0);
 	signal b_s									: unsigned(7 downto 0);
-	signal leds_s								: unsigned(leds'range);
+	signal leds_s								: unsigned(leds_o'range);
 	signal snd_data_s						: std_logic_vector(17 downto 0);
 
 	signal c64_sb_data_oe				: std_logic;
@@ -138,41 +131,44 @@ architecture SYN of PACE is
 	
 begin
 
-	sram_addr <= "0000000" & std_logic_vector(sram_addr_s);
-	sram_dq_o(c64_ramdata_o'range) <= std_logic_vector(c64_ramdata_o);
-
-	vga_clk <= clk_32M; -- for DE2
-	red <= std_logic_vector(r_s) & "00";
-	green <= std_logic_vector(g_s) & "00";
-	blue <= std_logic_vector(b_s) & "00";
+	sram_o.a <= "0000000" & std_logic_vector(sram_addr_s);
+	sram_o.d(c64_ramdata_o'range) <= std_logic_vector(c64_ramdata_o);
+  sram_o.cs <= not sram_cs_n;
+  sram_o.oe <= not sram_oe_n;
+  sram_o.we <= not sram_we_n;
+  
+	video_o.clk <= clk_32M; -- for DE2
+	video_o.rgb.r <= std_logic_vector(r_s) & "00";
+	video_o.rgb.g <= std_logic_vector(g_s) & "00";
+	video_o.rgb.b <= std_logic_vector(b_s) & "00";
 	
-	leds <= std_logic_vector(leds_s(7 downto 1)) & c1541_activity_led;
+	leds_o <= std_logic_vector(leds_s(leds_s'left downto 1)) & c1541_activity_led;
 
 	-- generate DAC clock
-	process (clk_32M, reset)
+	process (clk_32M, reset_i)
 		-- 32MHz/8 = 4MHz
 		variable count : std_logic_vector(2 downto 0);
 	begin
-		if reset = '1' then
+		if reset_i = '1' then
 			count := (others => '0');
 		elsif rising_edge(clk_32M) then
 			count := count + 1;
 		end if;
-		snd_clk <= count(count'left);
+		audio_o.clk <= count(count'left);
 	end process;
 	
-	snd_data_l <= snd_data_s(snd_data_s'left downto snd_data_s'left+1-snd_data_l'length);
-	snd_data_r <= snd_data_s(snd_data_s'left downto snd_data_s'left+1-snd_data_r'length);
+	audio_o.ldata <= snd_data_s(snd_data_s'left downto snd_data_s'left+1-audio_o.ldata'length);
+	audio_o.rdata <= snd_data_s(snd_data_s'left downto snd_data_s'left+1-audio_o.rdata'length);
 
 	GEN_C64 : if C64_HAS_C64 generate
 		
 		-- active high
 		joyA_s(5) <= '0';
-		joyA_s(4) <= not jamma.p(1).button(1);
-		joyA_s(3) <= not jamma.p(1).right;
-		joyA_s(2) <= not jamma.p(1).left;
-		joyA_s(1) <= not jamma.p(1).down;
-		joyA_s(0) <= not jamma.p(1).up;
+		joyA_s(4) <= not inputs_i.jamma_n.p(1).button(1);
+		joyA_s(3) <= not inputs_i.jamma_n.p(1).right;
+		joyA_s(2) <= not inputs_i.jamma_n.p(1).left;
+		joyA_s(1) <= not inputs_i.jamma_n.p(1).down;
+		joyA_s(0) <= not inputs_i.jamma_n.p(1).up;
 		
 		fpga64_pace_inst : entity work.fpga64_pace
 			generic map
@@ -183,17 +179,17 @@ begin
 			(
 				clk50					=> '0',		-- not used
 				clk32					=> clk_32M,
-				reset_button	=> reset,
+				reset_button	=> reset_i,
 
 				-- keyboard interface (use any ordinairy PS2 keyboard)
-				kbd_clk				=> ps2clk,
-				kbd_dat				=> ps2data,
+				kbd_clk				=> inputs_i.ps2_kclk,
+				kbd_dat				=> inputs_i.ps2_kdat,
 
 				video_select	=> '0',
 
 				-- external memory, since the 64K RAM is relatively big to implement in a FPGA
 				ramAddr				=> sram_addr_s,
-				ramData_i			=> unsigned(sram_dq_i(work.fpga64_pace.ramData_i'range)),
+				ramData_i			=> unsigned(sram_i.d(work.fpga64_pace.ramData_i'range)),
 				ramData_o			=> c64_ramdata_o,
 				ramData_oe		=> open,
 				
@@ -201,8 +197,8 @@ begin
 				ramWe					=> sram_we_n,
 				ramOe					=> sram_oe_n,
 				
-				hsync					=> hsync,
-				vsync					=> vsync,
+				hsync					=> video_o.hsync,
+				vsync					=> video_o.vsync,
 				r 						=> r_s,
 				g 						=> g_s,
 				b 						=> b_s,
@@ -215,7 +211,7 @@ begin
 	    	serioclk		  => open,
 	    	ces		        => open,
 
-				leds					=> leds_s,
+				leds					=> leds_s(7 downto 0),
 				
 				-- video-out connect the FPGA to your PAL-monitor, using the CVBS-input
 				cvbsOutput		=> open,
@@ -259,7 +255,7 @@ begin
 			port map
 			(
 				clk_32M					=> clk_32M,
-				reset						=> reset,
+				reset						=> reset_i,
 
 				-- serial bus
 				sb_data_oe			=> c1541_sb_data_oe,
@@ -270,7 +266,7 @@ begin
 				sb_atn_in				=> int_sb_atn,
 
 				-- drive-side interface				
-				ds							=> dip(1 downto 0),
+				ds							=> switches_i(1 downto 0),
 				act							=> c1541_activity_led,
 
 				-- generic drive mechanism i/o ports
@@ -305,9 +301,9 @@ begin
 			
 		begin
 	
-			process (clk_32M, reset)
+			process (clk_32M, reset_i)
 			begin
-				if reset = '1' then
+				if reset_i = '1' then
 					um_sb_data_in <= (others => '1');
 					um_sb_clk_in <= (others => '1');
 					um_sb_atn_in <= (others => '1');
@@ -343,14 +339,8 @@ begin
 	ext_sb_atn_oe <= c64_sb_atn_oe or c1541_sb_atn_oe;
 
 	-- unused
-	lcm_data <= (others => '0');
-	bw_cvbs <= (others => '0');
-	gs_cvbs <= (others => '0');
-	spi_clk <= '0';
-	spi_mode <= '0';
-	spi_sel <= '0';
-	spi_dout <= '0';
-	ser_tx <= '0';
+	spi_o <= NULL_TO_SPI;
+	ser_o <= NULL_TO_SERIAL;
 
 end SYN;
 

@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE ON
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 8.1
 
 # Pin & Location Assignments
 # ==========================
@@ -720,7 +720,7 @@ set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to clk_ee
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to data_ee
 set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to d_dr1[*]
 
-set_global_assignment -name OPTIMIZE_FAST_CORNER_TIMING ON
+set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
 
 set_global_assignment -name OPTIMIZE_POWER_DURING_SYNTHESIS OFF
 set_instance_assignment -name REPORT_DELAY ON -from * -to noe_ns
@@ -736,6 +736,11 @@ set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_pkg.vhd
