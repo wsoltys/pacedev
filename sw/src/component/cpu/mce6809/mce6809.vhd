@@ -343,27 +343,56 @@ begin
 
 	-- ALU
 	alu_pr: process(alu_ctrl, cc, left, right)
-		variable C_in			: std_logic;
+		variable alu_res	: std_logic_vector(8 downto 0);
+		variable C_in		: std_logic;
 		variable C_out		: std_logic;
 	begin
-		C_in <= '0';
-		C_out <= '0';
+		C_in := '0';
+		C_out := '0';
 		case alu_ctrl is
-		when alu_add	=>		C_out & alu_out <= '0' & left + '0' & right + C_in;
-		when alu_sub	=>		C_out & alu_out <= '0' & left - '0' & right - C_in;
-		when alu_and	=>		alu_out <= left and right;
-		when alu_or		=>		alu_out <= left or right;
-		when alu_eor	=>		alu_out <= left xor right;
-		when alu_rol	=>		C_out & alu_out(7 downto 0) <= left(7 downto 0) & C_in;
-		when alu_ror	=>		alu_out(7 downto 0) & C_out <= C_in & left(7 downto 0);
-		when others =>		alu_out <= X"00"; --(others => 'X');
+		when alu_add	=>		
+			alu_res := ('0' & left) + ('0' & right) + C_in;
+			C_out := alu_res(8);
+
+		when alu_sub	=>		
+			alu_res := ('0' & left) - ('0' & right) - C_in;
+			C_out := alu_res(8);
+
+		when alu_and	=>		
+			alu_res := '0' & (left and right);
+
+		when alu_or		=>		
+			alu_res := '0' & (left or right);
+
+		when alu_eor	=>		
+			alu_res := '0' & (left xor right);
+
+		when alu_rol	=>		
+			alu_res := left(7 downto 0) & C_in;
+			C_out := alu_res(8);
+
+		when alu_ror	=>		
+			alu_res := C_in & left(7 downto 0);
+			C_out := alu_res(0);
+			alu_res := '0' & alu_res(8 downto 1);	-- Normalise so result is in (7 downto 0)
+
+		when others =>		
+			alu_res := (others => '0');
+
 		end case;
 
-		cc_out(Flag_Z) <= '1' when alu_out = X"00" else '0';
+		alu_out <= alu_res(7 downto 0);
+
+		-- Calculate flags
+		if alu_res(7 downto 0) = X"00" then
+			cc_out(Flag_Z) <= '1';
+		else
+			cc_out(Flag_Z) <= '0';
+		end if;
 		cc_out(Flag_C) <= C_out;
-		cc_out(Flag_N) <= alu_out(alu_out'LEFT);
+		cc_out(Flag_N) <= alu_res(7);
 		cc_out(Flag_V) <= '0';	-- LATER
-		cc_out(Flag_H) 
+--		cc_out(Flag_H) 
 	end process;
 
 end architecture;

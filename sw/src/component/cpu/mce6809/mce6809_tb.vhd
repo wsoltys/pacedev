@@ -52,7 +52,7 @@ begin
 	mem_read <= beh_read;
 	mem_addr <= beh_addr;
 
-	mem : process(mem_read, mem_addr)
+	beh_mem : process(beh_read, beh_addr)
 		constant mem_delay : time := 12 ns;
 		constant mem : Mem_type := (
 			0				=>	X"9B",
