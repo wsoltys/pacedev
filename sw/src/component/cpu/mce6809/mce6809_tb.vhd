@@ -47,39 +47,39 @@ begin
 	clk <= not clk after 20 ns;
 	reset <= '0' after 101 ns;
 
-	--mem_read <= syn_read;
-	--mem_addr <= syn_addr;
-	mem_read <= beh_read;
-	mem_addr <= beh_addr;
+	mem_read <= syn_read;
+	mem_addr <= syn_addr;
+	--mem_read <= beh_read;
+	--mem_addr <= beh_addr;
 
-	beh_mem : process(beh_read, beh_addr)
+	beh_mem : process(mem_read, mem_addr)
 		constant mem_delay : time := 12 ns;
 		constant mem : Mem_type := (
-			0				=>	X"9B",
-			1				=>	X"10",
-			2				=>	X"9B",
-			3				=>	X"11",
-			4				=>	X"12",
-			5				=>	X"12",
-			6				=>	X"12",
-			7				=>	X"12",
-			8				=>	X"4C",
-			9				=>	X"5C",
-			10			=>	X"9B",
-			11			=>	X"FF",
-			12			=>	X"AA",
-			13			=>	X"AA",
-			14			=>	X"AA",
-			15			=>	X"AA",
-			16			=>	X"EA",
-			17			=>	X"12",
-			18			=>	X"AA",
-			19			=>	X"AA",
+			0				=>	X"9B",	-- ADDA 10h
+			1				=>	X"10",	--
+			2				=>	X"9B",	-- ADDA 11h
+			3				=>	X"11",	--
+			4				=>	X"12",	-- NOP
+			5				=>	X"12",	-- NOP
+			6				=>	X"12",	-- NOP
+			7				=>	X"12",	-- NOP
+			8				=>	X"4C",	-- INCA
+			9				=>	X"5C",	-- INCB
+			10			=>	X"9B",		-- ADDA -1
+			11			=>	X"FF",		--
+			12			=>	X"AA",		-- ORA #AAh
+			13			=>	X"AA",		--
+			14			=>	X"AA",		-- ORA #AAh
+			15			=>	X"AA",		--
+			16			=>	X"EA",		-- ORB #12h
+			17			=>	X"12",		--
+			18			=>	X"AA",		-- ORA #AAh
+			19			=>	X"AA",		-- ...
 			20			=>	X"AA",
 			21			=>	X"AA",
 			22			=>	X"AA",
 			23			=>	X"AA",
-			others	=>	"XXXXXXXX"
+			others	=>	X"12"
 		);
 	begin
 		mem_data <= mem(conv_integer(mem_addr)) after mem_delay;

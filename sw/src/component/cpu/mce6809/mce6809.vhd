@@ -98,6 +98,7 @@ begin
 		ir_page				=> ir_page,
 		mc_addr				=> mc_addr,
 		dbus					=> dbus,
+		rpost					=> post,
 
 		-- Microcode controls
 		mc_jump				=> mc_jump,
@@ -112,19 +113,20 @@ begin
 		pc_ctrl				=> pc_ctrl,
 		ir_ctrl				=> ir_ctrl,
 		s_ctrl				=> s_ctrl,
-		lda						=> lda,
-		ldb						=> ldb,
-		ldxl					=> ldxl,
-		ldxh					=> ldxh,
-		ldyl					=> ldyl,
-		ldyh					=> ldyh,
-		ldul					=> ldul,
-		lduh					=> lduh,
-		ldeal					=> ldeal,
-		ldeah					=> ldeah,
-		lddp					=> lddp,
-		ldpost				=> ldpost,
-		ldcc					=> ldcc,
+		ld						=> lda & ldb & ldxl & ldxh & ldyl & ldyh & ldul & lduh & ldeal & ldeah & lddp & ldpost & ldcc,
+--		lda						=> lda,
+--		ldb						=> ldb,
+--		ldxl					=> ldxl,
+--		ldxh					=> ldxh,
+--		ldyl					=> ldyl,
+--		ldyh					=> ldyh,
+--		ldul					=> ldul,
+--		lduh					=> lduh,
+--		ldeal					=> ldeal,
+--		ldeah					=> ldeah,
+--		lddp					=> lddp,
+--		ldpost				=> ldpost,
+--		ldcc					=> ldcc,
 	
 		-- Mux controls
 		dbus_ctrl			=> dbus_ctrl,
@@ -151,7 +153,9 @@ begin
 					when mc_exec0	 => mc_addr <= mc_exec1;
 					when mc_exec1	 => mc_addr <= mc_exec2;
 					when mc_exec2	 => mc_addr <= mc_exec3;
-					when mc_exec3	 => mc_addr <= mc_fetch0;
+					when mc_exec3	 => mc_addr <= mc_exec4;
+					when mc_exec4	 => mc_addr <= mc_exec5;
+					when mc_exec5	 => mc_addr <= mc_fetch0;
 					when others =>
 						mc_addr <= mc_fetch0;
 					end case;
@@ -301,7 +305,7 @@ begin
 		when dbus_eal		=>		dbus <= ea(7 downto 0);		
 		when dbus_cc		=>		dbus <= cc;		
 		when dbus_dp		=>		dbus <= dp;
-		when dbus_post	=>		dbus <= post;
+--		when dbus_post	=>		dbus <= post;
 		when dbus_alu 	=>		dbus <= alu_out;
 		end case;
 	end process;
@@ -384,6 +388,7 @@ begin
 		alu_out <= alu_res(7 downto 0);
 
 		-- Calculate flags
+		cc_out <= (others => '0');
 		if alu_res(7 downto 0) = X"00" then
 			cc_out(Flag_Z) <= '1';
 		else

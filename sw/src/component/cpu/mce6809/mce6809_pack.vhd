@@ -13,12 +13,13 @@ package mce6809_pack is
 	constant Flag_E : integer := 7;		-- Entire Flag
 
 	-- Microcode state (address)
-	type mc_state_type is (mc_fetch0, mc_fetch1, mc_exec0, mc_exec1, mc_exec2, mc_exec3, mc_exec4);
+	type mc_state_type is (mc_fetch0, mc_fetch1, mc_exec0, mc_exec1, mc_exec2, mc_exec3, mc_exec4, mc_exec5);
 
 	-- Bus mux select types
 	type dbus_type is (dbus_mem, dbus_a, dbus_b, dbus_pcl, dbus_pch, dbus_ul, dbus_uh,
 		dbus_sl, dbus_sh, dbus_yl, dbus_yh, dbus_xl, dbus_xh, 
-		dbus_eal, dbus_eah, dbus_cc, dbus_dp, dbus_post, dbus_alu);
+		dbus_eal, dbus_eah, dbus_cc, dbus_dp, --dbus_post, 
+		dbus_alu);
 	type abus_type is (abus_d, abus_pc, abus_u, abus_s, abus_y, abus_x, abus_ea);
 	type left_type is (left_a, left_b, left_eal, left_eah);
 	type right_type is (right_dbus, right_c0, right_c1, right_c2);
@@ -61,6 +62,7 @@ package mce6809_pack is
 			ir_page				: in ir_page_type;
 			mc_addr				: in mc_state_type;
 			dbus					: in std_logic_vector(7 downto 0);
+			rpost					: in std_logic_vector(7 downto 0);
 	
 			-- Microcode controls
 			mc_jump				: out std_logic;
@@ -75,19 +77,20 @@ package mce6809_pack is
 			pc_ctrl				: out pc_type;
 			ir_ctrl				: out ir_type;
 			s_ctrl				: out s_type;
-			lda						: out std_logic;
-			ldb						: out std_logic;
-			ldxl					: out std_logic;
-			ldxh					: out std_logic;
-			ldyl					: out std_logic;
-			ldyh					: out std_logic;
-			ldul					: out std_logic;
-			lduh					: out std_logic;
-			ldeal					: out std_logic;
-			ldeah					: out std_logic;
-			lddp					: out std_logic;
-			ldpost				: out std_logic;
-			ldcc					: out std_logic;
+			ld						: out std_logic_vector(0 to 12);
+--			lda						: out std_logic;
+--			ldb						: out std_logic;
+--			ldxl					: out std_logic;
+--			ldxh					: out std_logic;
+--			ldyl					: out std_logic;
+--			ldyh					: out std_logic;
+--			ldul					: out std_logic;
+--			lduh					: out std_logic;
+--			ldeal					: out std_logic;
+--			ldeah					: out std_logic;
+--			lddp					: out std_logic;
+--			ldpost				: out std_logic;
+--			ldcc					: out std_logic;
 		
 			-- Mux controls
 			dbus_ctrl			: out dbus_type;

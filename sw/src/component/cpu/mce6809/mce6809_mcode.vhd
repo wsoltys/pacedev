@@ -134,6 +134,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 use work.mce6809_pack.all;
 
 entity mce6809_mcode is
@@ -145,6 +146,7 @@ entity mce6809_mcode is
 		ir_page				: in ir_page_type;
 		mc_addr				: in mc_state_type;
 		dbus					: in std_logic_vector(7 downto 0);
+		rpost					: in std_logic_vector(7 downto 0);
 
 		-- Microcode controls
 		mc_jump				: out std_logic;
@@ -159,19 +161,20 @@ entity mce6809_mcode is
 		pc_ctrl				: out pc_type;
 		ir_ctrl				: out ir_type;
 		s_ctrl				: out s_type;
-		lda						: out std_logic;
-		ldb						: out std_logic;
-		ldxl					: out std_logic;
-		ldxh					: out std_logic;
-		ldyl					: out std_logic;
-		ldyh					: out std_logic;
-		ldul					: out std_logic;
-		lduh					: out std_logic;
-		ldeal					: out std_logic;
-		ldeah					: out std_logic;
-		lddp					: out std_logic;
-		ldpost				: out std_logic;
-		ldcc					: out std_logic;
+		ld						: out std_logic_vector(0 to 12);
+--		lda						: out std_logic;
+--		ldb						: out std_logic;
+--		ldxl					: out std_logic;
+--		ldxh					: out std_logic;
+--		ldyl					: out std_logic;
+--		ldyh					: out std_logic;
+--		ldul					: out std_logic;
+--		lduh					: out std_logic;
+--		ldeal					: out std_logic;
+--		ldeah					: out std_logic;
+--		lddp					: out std_logic;
+--		ldpost				: out std_logic;
+--		ldcc					: out std_logic;
 	
 		-- Mux controls
 		dbus_ctrl			: out dbus_type;
@@ -183,10 +186,44 @@ entity mce6809_mcode is
 end;
 
 architecture SYN of mce6809_mcode is
+	subtype Ld_idx is integer range 0 to 17;
+	type Exg_Ld_Type is array(0 to 15) of Ld_idx;
+	type Exg_Dbus_Type is array(0 to 15) of dbus_type;
+
+	-- Index into ld vector
+	constant NOREG: Ld_idx := 0;
+	constant A		: Ld_idx := 1;
+	constant B		: Ld_idx := 2;
+	constant Xl		: Ld_idx := 3;
+	constant Xh		: Ld_idx := 4;
+	constant Yl		: Ld_idx := 5;
+	constant Yh		: Ld_idx := 6;
+	constant Ul		: Ld_idx := 7;
+	constant Uh		: Ld_idx := 8;
+	constant Sl		: Ld_idx := 9;
+	constant Sh		: Ld_idx := 10;
+	constant PCl	: Ld_idx := 11;
+	constant PCh	: Ld_idx := 12;
+	constant EAl	: Ld_idx := 13;
+	constant EAh	: Ld_idx := 14;
+	constant DP		: Ld_idx := 15;
+	constant POST	: Ld_idx := 16;
+	constant CC		: Ld_idx := 17;
+
+	constant dbus_def : dbus_type := dbus_mem;
+	constant exg_dbus_hi : Exg_Dbus_Type := (dbus_a, dbus_xh, dbus_yh, dbus_uh, dbus_sh, dbus_pch, dbus_def, dbus_def, 
+		dbus_a, dbus_b, dbus_cc, dbus_dp, dbus_def, dbus_def, dbus_def, dbus_def );
+	constant exg_dbus_lo : Exg_Dbus_type := (dbus_b, dbus_xl, dbus_yl, dbus_ul, dbus_sl, dbus_pcl, dbus_def, dbus_def, 
+		dbus_def, dbus_def, dbus_def, dbus_def, dbus_def, dbus_def, dbus_def, dbus_def );
+	constant exg_ld_hi : Exg_Ld_Type := (A, Xh, Yh, Uh, Sh, PCh, NOREG, NOREG, A, B, CC, DP, NOREG, NOREG, NOREG, NOREG);
+	constant exg_ld_lo : Exg_Ld_Type := (B, Xl, Yl, Ul, Sl, PCl, NOREG, NOREG, NOREG, NOREG, NOREG, NOREG, NOREG, NOREG, NOREG, NOREG);
+
 	signal alu_op			:	alu_type;
 begin
 	-- CPU microcode
 	mc_table: process(ir, ir_page, mc_addr, alu_op, dbus)
+		variable rpost_hi_nib : integer;
+		variable rpost_lo_nib : integer;
 	begin
 		-- Defaults
 		mc_jump				<= '0';
@@ -197,31 +234,37 @@ begin
 		pc_ctrl				<= latch_pc;
 		ir_ctrl				<= latch_ir;
 		s_ctrl				<= latch_s;
-		lda						<= '0';
-		ldb						<= '0';
-		ldxl					<= '0';
-		ldxh					<= '0';
-		ldyl					<= '0';
-		ldyh					<= '0';
-		ldul					<= '0';
-		lduh					<= '0';
-		ldeal					<= '0';
-		ldeah					<= '0';
-		lddp					<= '0';
-		ldpost				<= '0';
-		ldcc					<= '0';
-		dbus_ctrl			<= dbus_mem;
+		ld						<= (others => '0');
+--		lda						<= '0';
+--		ldb						<= '0';
+--		ldxl					<= '0';
+--		ldxh					<= '0';
+--		ldyl					<= '0';
+--		ldyh					<= '0';
+--		ldul					<= '0';
+--		lduh					<= '0';
+--		ldeal					<= '0';
+--		ldeah					<= '0';
+--		lddp					<= '0';
+--		ldpost				<= '0';
+--		ldcc					<= '0';
+		dbus_ctrl			<= dbus_def;
 		abus_ctrl			<= abus_pc;
 		--abusl_ctrl		<= abus_pc;
+
+		rpost_hi_nib := to_integer(unsigned(rpost(7 downto 4)));
+		rpost_lo_nib := to_integer(unsigned(rpost(3 downto 0)));
 
 		-- Instruction fetch
 		if mc_addr = mc_fetch0 then
 			pc_ctrl <= incr_pc;
 			ir_ctrl <= load_1st_ir;
+			dbus_ctrl <= dbus_mem;
 
 		elsif mc_addr = mc_fetch1 then
 			ir_ctrl <= load_2nd_ir;
-			ldpost <= '1';
+			dbus_ctrl <= dbus_mem;
+			ld(POST) <= '1';
 			if (ir_page /= ir_page0) or (ir(7 downto 4) >= X"6") then
 				pc_ctrl <= incr_pc;
 			else
@@ -251,6 +294,211 @@ begin
 				when X"D" =>		-- SEX
 
 				when X"E" =>		-- EXG
+						case mc_addr is
+						when mc_fetch1 =>
+							ld(POST) <= '1';
+						when mc_exec0 =>	-- Copy high byte R0 -> EA
+							dbus_ctrl <= exg_dbus_hi(rpost_lo_nib);
+							ld(EAh) <= '1';
+--							case post(3 downto 0) is
+--							when X"0" =>	-- D
+--							when X"8" =>	-- A
+--								dbus_ctrl => dbus_a;
+--							when X"9" =>	-- B
+--								dbus_ctrl => dbus_b;
+--							when X"1" =>	-- X
+--								dbus_ctrl => dbus_xh;
+--							when X"2" =>	-- Y
+--								dbus_ctrl => dbus_yh;
+--							when X"3" =>	-- U
+--								dbus_ctrl => dbus_uh;
+--							when X"4" =>	-- S
+--								dbus_ctrl => dbus_sh;
+--							when X"5" =>	-- PC
+--								dbus_ctrl => dbus_pch;
+--							when X"A" =>	-- CC
+--								dbus_ctrl => dbus_cc;
+--							when X"B" =>	-- DP
+--								dbus_ctrl => dbus_dp;
+--							when others =>
+--							end case;
+						when mc_exec1 =>	-- Copy low byte R0 -> EA
+							dbus_ctrl <= exg_dbus_lo(rpost_lo_nib);
+							ld(EAl) <= '1';
+--							case post(3 downto 0) is
+--							when X"0" =>	-- D
+--								dbus_ctrl => dbus_b;
+--							when X"1" =>	-- X
+--								dbus_ctrl => dbus_xl;
+--							when X"2" =>	-- Y
+--								dbus_ctrl => dbus_yl;
+--							when X"3" =>	-- U
+--								dbus_ctrl => dbus_ul;
+--							when X"4" =>	-- S
+--								dbus_ctrl => dbus_sl;
+--							when X"5" =>	-- PC
+--								dbus_ctrl => dbus_pcl;
+--							when others =>
+--							end case;
+						when mc_exec2 =>	-- Copy high byte R1 -> R0
+							dbus_ctrl <= exg_dbus_hi(rpost_hi_nib);
+							case exg_ld_hi(rpost_lo_nib) is
+							when NOREG | Sl | PCl =>
+							when Sh =>
+								s_ctrl <= loadhi_s;
+							when PCh =>
+								pc_ctrl <= loadhi_pc;
+							when others =>
+								ld(exg_ld_hi(rpost_lo_nib)) <= '1';
+							end case;
+--							case post(7 downto 4) is
+--							when X"0" =>	-- D
+--							when X"8" =>	-- A
+--								dbus_ctrl => dbus_a;
+--							when X"9" =>	-- B
+--								dbus_ctrl => dbus_b;
+--							when X"1" =>	-- X
+--								dbus_ctrl => dbus_xh;
+--							when X"2" =>	-- Y
+--								dbus_ctrl => dbus_yh;
+--							when X"3" =>	-- U
+--								dbus_ctrl => dbus_uh;
+--							when X"4" =>	-- S
+--								dbus_ctrl => dbus_sh;
+--							when X"5" =>	-- PC
+--								dbus_ctrl => dbus_pch;
+--							when X"A" =>	-- CC
+--								dbus_ctrl => dbus_cc;
+--							when X"B" =>	-- DP
+--								dbus_ctrl => dbus_dp;
+--							when others =>
+--							end case;
+--							case post(3 downto 0) is
+--							when X"0" =>	-- D
+--							when X"8" =>	-- A
+--								ld(A) <= '1';
+--							when X"9" =>	-- B
+--								ld(B) <= '1';
+--							when X"1" =>	-- X
+--								ld(Xh) <= '1';
+--							when X"2" =>	-- Y
+--								ld(Yh) <= '1';
+--							when X"3" =>	-- U
+--								ld(Uh) <= '1';
+--							when X"4" =>	-- S
+--								s_ctrl <= loadhi_s;
+--							when X"5" =>	-- PC
+--								pc_ctrl <= loadhi_pc;
+--							when X"A" =>	-- CC
+--								ld(CC) <= '1';
+--							when X"B" =>	-- DP
+--								ld(DP) <= '1';
+--							when others =>
+--							end case;
+						when mc_exec3 =>	-- Copy low byte R1 -> R0
+							dbus_ctrl <= exg_dbus_lo(rpost_hi_nib);
+							case exg_ld_lo(rpost_lo_nib) is
+							when NOREG | Sh | PCh =>
+							when Sl =>
+								s_ctrl <= loadlo_s;
+							when PCl =>
+								pc_ctrl <= loadlo_pc;
+							when others =>
+								ld(exg_ld_hi(rpost_lo_nib)) <= '1';
+							end case;
+--							case post(7 downto 4) is
+--							when X"0" =>	-- D
+--								dbus_ctrl => dbus_a;
+--							when X"1" =>	-- X
+--								dbus_ctrl => dbus_xl;
+--							when X"2" =>	-- Y
+--								dbus_ctrl => dbus_yl;
+--							when X"3" =>	-- U
+--								dbus_ctrl => dbus_ul;
+--							when X"4" =>	-- S
+--								dbus_ctrl => dbus_sl;
+--							when X"5" =>	-- PC
+--								dbus_ctrl => dbus_pcl;
+--							when others =>
+--							end case;
+--							case post(3 downto 0) is
+--							when X"0" =>	-- D
+--								ldb <= '1';
+--							when X"1" =>	-- X
+--								ldxl <= '1';
+--							when X"2" =>	-- Y
+--								ldyl <= '1';
+--							when X"3" =>	-- U
+--								ldul <= '1';
+--							when X"4" =>	-- S
+--								s_ctrl <= loadlo_s;
+--							when X"5" =>	-- PC
+--								pc_ctrl <= loadlo_pc;
+--							when others =>
+--							end case;
+						when mc_exec4 =>	-- Copy high byte EA -> R1
+							case exg_ld_hi(rpost_hi_nib) is
+							when NOREG | Sl | PCl =>
+							when Sh =>
+								s_ctrl <= loadhi_s;
+							when PCh =>
+								pc_ctrl <= loadhi_pc;
+							when others =>
+								ld(exg_ld_hi(rpost_lo_nib)) <= '1';
+							end case;
+							dbus_ctrl <= dbus_eah;
+--							case post(7 downto 4) is
+--							when X"0" =>	-- D
+--							when X"8" =>	-- A
+--								lda <= '1';
+--							when X"9" =>	-- B
+--								ldb <= '1';
+--							when X"1" =>	-- X
+--								ldxh <= '1';
+--							when X"2" =>	-- Y
+--								ldyh <= '1';
+--							when X"3" =>	-- U
+--								lduh <= '1';
+--							when X"4" =>	-- S
+--								s_ctrl <= loadhi_s;
+--							when X"5" =>	-- PC
+--								pc_ctrl <= loadhi_pc;
+--							when X"A" =>	-- CC
+--								ldcc <= '1';
+--							when X"B" =>	-- DP
+--								lddp <= '1';
+--							when others =>
+--							end case;
+						when mc_exec5 =>	-- Copy low byte EA -> R1
+--							case post(7 downto 4) is
+--							when X"0" =>	-- D
+--								ldb <= '1';
+--							when X"1" =>	-- X
+--								ldxl <= '1';
+--							when X"2" =>	-- Y
+--								ldyl <= '1';
+--							when X"3" =>	-- U
+--								ldul <= '1';
+--							when X"4" =>	-- S
+--								s_ctrl <= loadlo_s;
+--							when X"5" =>	-- PC
+--								pc_ctrl <= loadlo_pc;
+--							when others =>
+--							end case;
+							case exg_ld_lo(rpost_hi_nib) is
+							when NOREG | Sh | PCh =>
+							when Sl =>
+								s_ctrl <= loadlo_s;
+							when PCl =>
+								pc_ctrl <= loadlo_pc;
+							when others =>
+								ld(exg_ld_hi(rpost_lo_nib)) <= '1';
+							end case;
+							dbus_ctrl <= dbus_eal;
+							mc_jump				<= '1';
+							mc_jump_addr	<= mc_fetch0;
+						when others =>
+						end case;
 
 				when X"F" =>		-- TFR
 
@@ -269,9 +517,9 @@ begin
 					alu_ctrl <= alu_op;
 					dbus_ctrl <= dbus_mem;
 					if ir(7 downto 4) = X"8" then
-						lda <= '1';
+						ld(A) <= '1';
 					else
-						ldb <= '1';
+						ld(B) <= '1';
 					end if;
 				when others =>
 				end case;
@@ -282,10 +530,10 @@ begin
 					case mc_addr is
 					when mc_fetch1 =>
 						--pc_ctrl <= incr_pc;
-						ldeal <= '1';
+						ld(EAl) <= '1';
 					when mc_exec0 =>
 						dbus_ctrl <= dbus_dp;
-						ldeah <= '1';
+						ld(EAh) <= '1';
 						drive_vma	<= '0';
 					when mc_exec1 =>
 						mc_jump				<= '1';
@@ -294,9 +542,9 @@ begin
 						dbus_ctrl			<= dbus_mem;
 						abus_ctrl			<= abus_ea;
 						if ir(7 downto 4) = X"9" then
-							lda <= '1';
+							ld(A) <= '1';
 						else
-							ldb <= '1';
+							ld(B)	<= '1';
 						end if;
 					when others =>
 					end case;
@@ -312,9 +560,9 @@ begin
 					alu_ctrl <= alu_op;
 					dbus_ctrl <= dbus_alu;
 					if ir(7 downto 4) = X"4" then
-						lda <= '1';
+						ld(A) <= '1';
 					else
-						ldb <= '1';
+						ld(B) <= '1';
 					end if;
 				when others =>
 				end case;
@@ -326,7 +574,7 @@ begin
 	-- ALU control
 	alu_in: process(ir, ir_page)
 	begin
-		-- ALU_ADD <== "1---10-1" || "11--0011" || "01--1100"
+		-- ALU_ADD <== "1---10-1" || "11--0011" || "01--1100" || "00001100"
 		--ALU_SUB <== "1---0001" || $10 & "10--0011" || $11 & "10--1100" || $11 & "10--0011" || "1---1100" || 
 		--						$10 & "10--1100" ||"01--1010" || "1---00-0" || "10--0011"
 		--ALU_OR <== "00011010" || "1---1010"
@@ -337,8 +585,8 @@ begin
 
 		alu_op <= alu_idle;
 		-- Addition "1XXX0011" | "1XXX1011" | "01XX1100"
-		if ((ir and X"8F") = X"83") or ((ir and X"8F") = X"8B") or ((ir and X"CF") = X"4C") then
-		--if ((STD_MATCH(ir, "1---10-1") or STD_MATCH(ir, "11--0011") or STD_MATCH(ir, "01--1100")) then
+		--if ((ir and X"8F") = X"83") or ((ir and X"8F") = X"8B") or ((ir and X"CF") = X"4C") then
+		if STD_MATCH(ir, "1---10-1") or STD_MATCH(ir, "11--0011") or STD_MATCH(ir, "01--1100") or (ir = X"0C") then
 			alu_op <= alu_add;
 		end if;
 		-- Subtraction "1XXX0001" | "XXXX0000" | "10XX0011" | "01XX1101" | "1XXX0010"

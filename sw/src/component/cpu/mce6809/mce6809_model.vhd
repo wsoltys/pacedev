@@ -193,6 +193,8 @@ begin
 					when others =>
 					end case;
 
+				when X"1E" =>		-- EXG
+
 
 				when others =>
 					case mc_cycle is
