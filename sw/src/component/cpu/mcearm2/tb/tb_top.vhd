@@ -100,16 +100,18 @@ begin
 	mem_addr <= syn_a(mem_addr'left+2 downto 2);
 	--mem_read <= beh_read;
 	--mem_addr <= beh_addr;
+  syn_d_i <= mem_data;
 
 	beh_mem : process(mem_read, mem_addr)
 		constant mem_delay : time := 12 ns;
 		constant mem : Mem_type := (
 			0				=>	X"FFFFFFFF",	  -- NOP
+			1				=>	X"E4000042",	  -- AL,LD/STR=$042
 			others	=>	X"FFFFFFFF"     -- NOP
 		);
 	begin
 		mem_data <= mem(to_integer(unsigned(mem_addr))) after mem_delay;
-		if mem_addr = X"0004" then
+		if mem_addr = X"0080" then
 			assert false report "End of simulation" severity Failure;  
 		end if;
 	end process;

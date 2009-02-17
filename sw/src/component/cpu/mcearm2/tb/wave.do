@@ -7,8 +7,13 @@ add wave -noupdate -format Logic /tb_top/ph2_ena
 add wave -noupdate -format Logic /tb_top/syn_reset
 add wave -noupdate -divider ARM2
 add wave -noupdate -format Logic /tb_top/reset
+add wave -noupdate -format Literal /tb_top/syn_cpu/a
+add wave -noupdate -format Literal /tb_top/syn_cpu/d_i
 add wave -noupdate -format Literal -radix hexadecimal /tb_top/syn_cpu/pc
 add wave -noupdate -format Literal /tb_top/syn_cpu/m
+add wave -noupdate -divider FETCH
+add wave -noupdate -format Literal /tb_top/syn_cpu/din
+add wave -noupdate -format Literal /tb_top/syn_cpu/ar
 TreeUpdate [SetDefaultTree]
 WaveRestoreCursors {{Cursor 1} {0 ps} 0}
 configure wave -namecolwidth 150

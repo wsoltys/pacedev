@@ -116,6 +116,10 @@ architecture SYN of mce_arm2 is
   constant INSTR_COPROC_REG_XFER_4  : std_logic_vector(4 downto 4) := "1";
   constant INSTR_SW_INT             : std_logic_vector(27 downto 24) := "1111";
 
+  -- internal logic
+  signal din        : std_logic_vector(31 downto 0) := (others => '0');
+  signal ar         : std_logic_vector(25 downto 0) := (others => '0');
+
 begin
 
   process (clk_i, reset_i)
@@ -135,11 +139,74 @@ begin
         f_f <= '1';       -- disable FIQ
         pc <= VEC_RESET;
       elsif ph1_ena = '1' then
-        null;
+        pc <= std_logic_vector(unsigned(pc) + 1);
       elsif ph2_ena = '1' then
         null;
       end if;
       reset_r := reset;
+    end if;
+  end process;
+
+  --
+  -- FETCH
+  --
+
+  process (clk_i, reset_i)
+  begin
+    if reset_i = '1' then
+    elsif reset = '1' then
+    elsif rising_edge(clk_i) and ph1_ena = '1' then
+      -- assume fetch always OK
+      rn_w <= '0';
+      din <= d_i;
+      a <= pc & "00";
+    end if;
+  end process;
+
+  --
+  -- DECODE
+  --
+
+  process (clk_i, reset_i)
+  begin
+    if reset_i = '1' then
+    elsif reset = '1' then
+    elsif rising_edge(clk_i) and ph1_ena = '1' then
+      -- assume decode always OK
+      -- - may be able to re-arrange order to optimize performance
+      if din(27 downto 22) = INSTR_MULTIPLY then
+      elsif din(27 downto 24) = INSTR_COPROC_DATA_OP then
+      elsif din(27 downto 24) = INSTR_COPROC_REG_XFER then
+      elsif din(27 downto 24) = INSTR_SW_INT then
+      elsif din(27 downto 25) = INSTR_BLOCK_XFER then
+      elsif din(27 downto 25) = INSTR_BRANCH then
+      elsif din(27 downto 25) = INSTR_COPROC_DATA_XFER then
+      elsif din(27 downto 26) = INSTR_DATA_PROC then
+      elsif din(27 downto 26) = INSTR_SINGLE_DATA_XFER then
+        ar <= "00000000000000" & din(11 downto 0);
+        if din(20) = '0' then
+        else
+        end if;
+      else
+        -- undefined
+      end if;
+    end if;
+  end process;
+
+  --
+  -- EXECUTE
+  --
+
+  process (clk_i, reset_i)
+  begin
+    if reset_i = '1' then
+    elsif reset = '1' then
+    elsif rising_edge(clk_i) and ph1_ena = '1' then
+      -- assume execute always OK
+      case din(31 downto 28) is
+        when COND_NV =>
+        when others =>
+      end case;
     end if;
   end process;
 
