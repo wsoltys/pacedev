@@ -143,7 +143,6 @@ architecture SYN of mce_arm2 is
 	end function Nop;
 
 	function Satisfied (Status : std_logic_vector(5 downto 0); CondCode : std_logic_vector(3 downto 0)) return boolean is
-		variable retval : boolean := false;
 		alias N : std_logic is Status(5);
 		alias Z : std_logic is Status(4);
 		alias C : std_logic is Status(3);
@@ -309,6 +308,7 @@ begin
 	begin
 
 	  PROC_FETCH : process (clk_i, reset_i)
+
 			variable FetchOK				: boolean := false;
 			variable FetchInstr 		: std_logic_vector(31 downto 0) := (others => '0');
 
@@ -319,11 +319,18 @@ begin
 
 	    if reset_i = '1' then
 	    elsif reset = '1' then
+        FetchedInstr <= X"FFFFFFFF";      -- NOP
+        PrevFetchedInstr <= X"FFFFFFFF";  -- NOP
 	    elsif rising_edge(clk_i) and ph1_ena = '1' then
+
+        --
+        --  Rule: Fetch
+        --
 	      if FetchOK then
 					FetchedInstr <= FetchInstr;
 					PrevFetchedInstr <= FetchedInstr;
 				end if;
+
 	    end if;
 	  end process PROC_FETCH;
 
@@ -347,8 +354,7 @@ begin
 
 	  begin
 
-			-- quick hack
-			DecodeOK := Satisfied (Status, CondCode (ExecuteInstr)) or LastStep (ExecuteInstr, ExecuteMode);
+			DecodeOK := not Satisfied (Status, CondCode (ExecuteInstr)) or LastStep (ExecuteInstr, ExecuteMode);
 			if ExecuteMode = first_step or ExecuteMode = refill2 then
 				DecodeInstr := FetchedInstr;
 			else
@@ -357,8 +363,12 @@ begin
 
 	    if reset_i = '1' then
 	    elsif reset = '1' then
+        ExecuteInstr <= X"FFFFFFFF";  -- NOP
 	    elsif rising_edge(clk_i) and ph1_ena = '1' then
 
+        --
+        --  Rule: Decode
+        --
 				if DecodeOK then
 					ExecuteInstr <= DecodeInstr;
 					if not Nop (DecodeInstr) then
@@ -404,7 +414,7 @@ begin
 				--
 
 				if ExecuteOK then
-					if true then --cc or writes pc
+					if not Satisfies (Status, CondCode(ExecuteInstr)) or not WritesPC (ExecuteInstr) then
 						pc <= std_logic_vector(unsigned(pc) + 1);
 					end if;
 				end if;
@@ -414,12 +424,12 @@ begin
 				--
 
 				if ExecuteMode = first_step and AluInstr(ExecuteInstr) and not AluRegShift(ExecuteInstr) then
-					if true then -- CC
+					if Satisfies (Status, CondCode(ExecuteInstr)) then
 						if WriteResult (ExecuteInstr) then
 							-- do it
 						end if;
 						if SetCondCode (ExecuteInstr) then
-							-- do it
+							Status <= (others => '0'); -- update status
 						end if;
 					end if;
 					if WritesPC (ExecuteInstr) then
@@ -434,7 +444,7 @@ begin
 				--
 
 				if ExecuteMode = first_step and AluRegShift (ExecuteInstr) then
-					if true then -- CC
+					if Satisfies (Status, CondCode(ExecuteInstr)) then
 						aop <= r(AopReg (ExecuteInstr));
 						ExecuteMode <= alu_shift;
 					end if;
@@ -459,7 +469,7 @@ begin
 				--
 
 				if SingleLoadInstr (ExecuteInstr) then
-					if ExecuteMode = first_step and true then
+					if ExecuteMode = first_step and Satisfies (Status, CondCode(ExecuteInstr)) then
 						--
 						ExecuteMode <= load_read_memory;
 						Bop <= FinalOffset(ExecuteInstr);
