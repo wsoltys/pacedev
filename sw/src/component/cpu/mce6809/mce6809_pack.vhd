@@ -2,6 +2,8 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 
 package mce6809_pack is
+	subtype ld_idx is integer range 0 to 17;
+	subtype ld_type is std_logic_vector(12 downto 0);
 
 	constant Flag_C : integer := 0;		-- Carry
 	constant Flag_V : integer := 1;		-- Overflow
@@ -11,6 +13,27 @@ package mce6809_pack is
 	constant Flag_H : integer := 5;		-- Half Carry
 	constant Flag_F : integer := 6;		-- FIRQ Mask
 	constant Flag_E : integer := 7;		-- Entire Flag
+
+	-- Index into ld vector
+	constant IA			: ld_idx := 0;
+	constant IB			: ld_idx := 1;
+	constant IXl		: ld_idx := 2;
+	constant IXh		: ld_idx := 3;
+	constant IYl		: ld_idx := 4;
+	constant IYh		: ld_idx := 5;
+	constant IUl		: ld_idx := 6;
+	constant IUh		: ld_idx := 7;
+	constant IEAl		: ld_idx := 8;
+	constant IEAh		: ld_idx := 9;
+	constant IDP		: ld_idx := 10;
+	constant IPOST	: ld_idx := 11;
+	constant ICC		: ld_idx := 12;
+	-- Past this point is for mcode-internal use only
+	constant ISl		: ld_idx := 13;
+	constant ISh		: ld_idx := 14;
+	constant IPCl		: ld_idx := 15;
+	constant IPCh		: ld_idx := 16;
+	constant INOREG	: ld_idx := 17;
 
 	-- Microcode state (address)
 	type mc_state_type is (mc_fetch0, mc_fetch1, mc_exec0, mc_exec1, mc_exec2, mc_exec3, mc_exec4, mc_exec5);
@@ -77,20 +100,8 @@ package mce6809_pack is
 			pc_ctrl				: out pc_type;
 			ir_ctrl				: out ir_type;
 			s_ctrl				: out s_type;
-			ld						: out std_logic_vector(0 to 12);
---			lda						: out std_logic;
---			ldb						: out std_logic;
---			ldxl					: out std_logic;
---			ldxh					: out std_logic;
---			ldyl					: out std_logic;
---			ldyh					: out std_logic;
---			ldul					: out std_logic;
---			lduh					: out std_logic;
---			ldeal					: out std_logic;
---			ldeah					: out std_logic;
---			lddp					: out std_logic;
---			ldpost				: out std_logic;
---			ldcc					: out std_logic;
+			ld						: out ld_type;
+			ab_fromalu		: out std_logic;
 		
 			-- Mux controls
 			dbus_ctrl			: out dbus_type;

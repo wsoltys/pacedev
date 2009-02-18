@@ -63,6 +63,7 @@ architecture SYN of mce6809 is
 	signal		pc_ctrl				: pc_type;
 	signal		ir_ctrl				: ir_type;
 	signal		s_ctrl				: s_type;
+	signal		ld						: ld_type;
 	signal		lda						: std_logic;
 	signal		ldb						: std_logic;
 	signal		ldxl					: std_logic;
@@ -76,6 +77,7 @@ architecture SYN of mce6809 is
 	signal		lddp					: std_logic;
 	signal		ldpost				: std_logic;
 	signal		ldcc					: std_logic;
+	signal		ab_fromalu		: std_logic;		-- Use ALU as input to A,B and CC regs
 
 	-- Mux controls
 	signal		dbus_ctrl			: dbus_type;
@@ -113,20 +115,8 @@ begin
 		pc_ctrl				=> pc_ctrl,
 		ir_ctrl				=> ir_ctrl,
 		s_ctrl				=> s_ctrl,
-		ld						=> lda & ldb & ldxl & ldxh & ldyl & ldyh & ldul & lduh & ldeal & ldeah & lddp & ldpost & ldcc,
---		lda						=> lda,
---		ldb						=> ldb,
---		ldxl					=> ldxl,
---		ldxh					=> ldxh,
---		ldyl					=> ldyl,
---		ldyh					=> ldyh,
---		ldul					=> ldul,
---		lduh					=> lduh,
---		ldeal					=> ldeal,
---		ldeah					=> ldeah,
---		lddp					=> lddp,
---		ldpost				=> ldpost,
---		ldcc					=> ldcc,
+		ld						=> ld,
+		ab_fromalu		=> ab_fromalu,
 	
 		-- Mux controls
 		dbus_ctrl			=> dbus_ctrl,
@@ -135,6 +125,20 @@ begin
 		left_ctrl			=> left_ctrl,
 		right_ctrl		=> right_ctrl
 	);
+
+	lda		<= ld(IA);
+	ldb		<= ld(IB);
+	ldxl	<= ld(IXl);
+	ldxh	<= ld(IXh);
+	ldyl	<= ld(IYl);
+	ldyh	<= ld(IYh);
+	ldul	<= ld(IUl);
+	lduh	<= ld(IUh);
+	ldeal <= ld(IEAl);
+	ldeah <= ld(IEAh);
+	lddp	<= ld(IDP);
+	ldpost	<= ld(IPOST);
+	ldcc	<= ld(ICC);
 
 	-- Microcode address
 	ma_reg: process(clk, clken, reset)
@@ -224,14 +228,20 @@ begin
 
 				-- A
 				if lda = '1' then
-					--acca <= dbus;
-					acca <= alu_out;
+					if ab_fromalu = '1' then
+						acca <= alu_out;
+					else
+						acca <= dbus;
+					end if;
 				end if;
 
 				-- B
 				if ldb = '1' then
-					--accb <= dbus;
-					accb <= alu_out;
+					if ab_fromalu = '1' then
+						accb <= alu_out;
+					else
+						accb <= dbus;
+					end if;
 				end if;
 
 				-- X
@@ -265,7 +275,11 @@ begin
 
 				-- CC
 				if ldcc = '1' then
-					cc <= cc_out;
+					if ab_fromalu = '1' then
+						cc <= cc_out;
+					else
+						cc <= dbus;
+					end if;
 				end if;
 
 				-- EA
@@ -285,7 +299,7 @@ begin
 	end process;
 
 	-- D bus mux
-	dbus_pr: process(dbus_ctrl, data_i, alu_out)
+	dbus_pr: process(dbus_ctrl, data_i, alu_out, acca, accb, pc, u, s, y, x, ea, cc, dp)
 	begin
 		case dbus_ctrl is
 		when dbus_mem 	=>		dbus <= data_i;
@@ -333,9 +347,8 @@ begin
 		end case;
 	end process;
 
-	-- ALU right
-	-- ALU left mux
-	aluright_pr : process(left_ctrl, dbus)
+	-- ALU right mux
+	aluright_pr : process(right_ctrl, dbus)
 	begin
 		case right_ctrl is
 		when right_dbus	=> right <= dbus;

@@ -61,30 +61,51 @@ begin
 			3				=>	X"11",	--
 			4				=>	X"12",	-- NOP
 			5				=>	X"12",	-- NOP
-			6				=>	X"12",	-- NOP
-			7				=>	X"12",	-- NOP
+			6				=>	X"1E",	-- EXG D,X
+			7				=>	X"01",	-- 
 			8				=>	X"4C",	-- INCA
 			9				=>	X"5C",	-- INCB
-			10			=>	X"9B",		-- ADDA -1
-			11			=>	X"FF",		--
-			12			=>	X"AA",		-- ORA #AAh
-			13			=>	X"AA",		--
-			14			=>	X"AA",		-- ORA #AAh
-			15			=>	X"AA",		--
-			16			=>	X"EA",		-- ORB #12h
-			17			=>	X"12",		--
-			18			=>	X"AA",		-- ORA #AAh
-			19			=>	X"AA",		-- ...
-			20			=>	X"AA",
-			21			=>	X"AA",
-			22			=>	X"AA",
-			23			=>	X"AA",
+			10			=>	X"1E",	-- EXG X,U
+			11			=>	X"13",	--
+			12			=>	X"1E",	-- EXG S,U
+			13			=>	X"43",	--
+			14			=>	X"1E",	-- EXG A,CC
+			15			=>	X"8A",	--
+			16			=>	X"1E",	-- EXG B,DP
+			17			=>	X"9B",	--
+			18			=>	X"1E",	-- EXG D,PC
+			19			=>	X"05",	--
+			20			=>	X"9B",		-- ADDA -1
+			21			=>	X"FF",		--
+			22			=>	X"AA",		-- ORA #AAh
+			23			=>	X"AA",		--
+			24			=>	X"AA",		-- ORA #AAh
+			25			=>	X"AA",		--
+			26			=>	X"EA",		-- ORB #12h
+			27			=>	X"12",		--
+			28			=>	X"AA",		-- ORA #AAh
+			29			=>	X"AA",		-- ...
+			30			=>	X"AA",
+			31			=>	X"AA",
+			32			=>	X"AA",
+			33			=>	X"AA",
 			others	=>	X"12"
 		);
 	begin
 		mem_data <= mem(conv_integer(mem_addr)) after mem_delay;
-		if mem_addr > 254 then
+		if mem_addr = 65535 then
 			assert false report "End of simulation" severity Failure;  
 		end if;
-	end process;
+	end process beh_mem;
+
+	fail_check : process(clk, reset, match_ext)
+	begin
+		if rising_edge(clk) and reset = '0' then
+			if match_ext = '0' then
+				fail <= true;
+			else
+				fail <= false;
+			end if;
+		end if;
+	end process fail_check;
 end SYN;
