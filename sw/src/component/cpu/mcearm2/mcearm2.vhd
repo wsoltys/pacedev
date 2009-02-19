@@ -142,7 +142,7 @@ architecture SYN of mce_arm2 is
 		return instr(31 downto 28) = COND_NV;
 	end function Nop;
 
-	function Satisfied (Status : std_logic_vector(5 downto 0); CondCode : std_logic_vector(3 downto 0)) return boolean is
+	function Satisfies (Status : std_logic_vector(5 downto 0); CondCode : std_logic_vector(3 downto 0)) return boolean is
 		alias N : std_logic is Status(5);
 		alias Z : std_logic is Status(4);
 		alias C : std_logic is Status(3);
@@ -167,7 +167,7 @@ architecture SYN of mce_arm2 is
 			(CondCode = COND_GT and Z = '0' and ((N = '1' and V = '1') or (N = '0' and V = '0'))) or
 			(CondCode = COND_LE and Z = '1' and ((N = '1' and V = '0') or (N = '0' and V = '1'))) or
 			CondCode = COND_AL;
-	end function Satisfied;
+	end function Satisfies;
 
 	function CondCode (instr : std_logic_vector(31 downto 0)) return std_logic_vector is
 	begin
@@ -354,7 +354,7 @@ begin
 
 	  begin
 
-			DecodeOK := not Satisfied (Status, CondCode (ExecuteInstr)) or LastStep (ExecuteInstr, ExecuteMode);
+			DecodeOK := not Satisfies (Status, CondCode (ExecuteInstr)) or LastStep (ExecuteInstr, ExecuteMode);
 			if ExecuteMode = first_step or ExecuteMode = refill2 then
 				DecodeInstr := FetchedInstr;
 			else
