@@ -115,6 +115,30 @@ architecture SYN of mce_arm2 is
   constant INSTR_COPROC_REG_XFER    : std_logic_vector(27 downto 0) := "1110-------------------1----";
   constant INSTR_SW_INT             : std_logic_vector(27 downto 0) := "1111------------------------";
 
+  -- ALU operations
+  constant ALU_OP_AND               : std_logic_vector(3 downto 0) := "0000";
+  constant ALU_OP_XOR               : std_logic_vector(3 downto 0) := "0001";
+  constant ALU_OP_SUB               : std_logic_vector(3 downto 0) := "0010";
+  constant ALU_OP_RSB               : std_logic_vector(3 downto 0) := "0011";
+  constant ALU_OP_ADD               : std_logic_vector(3 downto 0) := "0100";
+  constant ALU_OP_ADC               : std_logic_vector(3 downto 0) := "0101";
+  constant ALU_OP_SBC               : std_logic_vector(3 downto 0) := "0110";
+  constant ALU_OP_RSC               : std_logic_vector(3 downto 0) := "0111";
+  constant ALU_OP_TST               : std_logic_vector(3 downto 0) := "1000";
+  constant ALU_OP_TEQ               : std_logic_vector(3 downto 0) := "1001";
+  constant ALU_OP_CMP               : std_logic_vector(3 downto 0) := "1010";
+  constant ALU_OP_CMN               : std_logic_vector(3 downto 0) := "1011";
+  constant ALU_OP_ORR               : std_logic_vector(3 downto 0) := "1100";
+  constant ALU_OP_MOV               : std_logic_vector(3 downto 0) := "1101";
+  constant ALU_OP_BIC               : std_logic_vector(3 downto 0) := "1110";
+  constant ALU_OP_MVN               : std_logic_vector(3 downto 0) := "1111";
+
+  -- shift types
+  constant SHIFT_TYPE_LL            : std_logic_vector(1 downto 0) := "00";
+  constant SHIFT_TYPE_LR            : std_logic_vector(1 downto 0) := "01";
+  constant SHIFT_TYPE_AR            : std_logic_vector(1 downto 0) := "10";
+  constant SHIFT_TYPE_RR            : std_logic_vector(1 downto 0) := "01";
+
   -- internal logic
   signal din        : std_logic_vector(31 downto 0) := (others => '0');
   signal ar         : std_logic_vector(25 downto 0) := (others => '0');
@@ -305,18 +329,30 @@ architecture SYN of mce_arm2 is
 		Carry		: std_logic
 	) return std_logic_vector is
 	begin
-		if Op = X"0" or Op = X"8"			then return Aop and Bop;
-		elsif Op = X"1" or Op = X"9"	then return Aop xor Bop;
-		elsif Op = X"2" or Op = X"A"	then return std_logic_vector(unsigned(Aop) - unsigned(Bop));
-		elsif Op = X"3" or Op = X"B"	then return std_logic_vector(unsigned(Bop) - unsigned(Aop));
-		elsif Op = X"4" 							then return std_logic_vector(unsigned(Aop) + unsigned(Bop));
-		elsif Op = X"5" 							then return std_logic_vector(unsigned(Aop) + unsigned(Bop));		-- + carry
-		elsif Op = X"6" 							then return std_logic_vector(unsigned(Aop) - unsigned(Bop));		-- + carry
-		elsif Op = X"7" 							then return std_logic_vector(unsigned(Bop) - unsigned(Aop));		-- + carry
-		elsif Op = X"C" 							then return Aop or Bop;
-		elsif Op = X"D" 							then return Bop;	-- ??? MOV
-		elsif Op = X"E" 							then return Aop and not Bop;
-		elsif Op = X"D" 							then return not Bop; -- ??? MVN
+		if Op = ALU_OP_AND or Op = ALU_OP_TST then 
+      return Aop and Bop;
+		elsif Op = ALU_OP_XOR or Op = ALU_OP_TEQ then 
+      return Aop xor Bop;
+		elsif Op = ALU_OP_SUB or Op = ALU_OP_CMP then 
+      return std_logic_vector(unsigned(Aop) - unsigned(Bop));
+		elsif Op = ALU_OP_RSB or Op =ALU_OP_CMN then 
+      return std_logic_vector(unsigned(Bop) - unsigned(Aop));
+		elsif Op = ALU_OP_ADD then 
+      return std_logic_vector(unsigned(Aop) + unsigned(Bop));
+		elsif Op = ALU_OP_ADC then 
+      return std_logic_vector(unsigned(Aop) + unsigned(Bop));		-- + carry
+		elsif Op = ALU_OP_SBC then 
+      return std_logic_vector(unsigned(Aop) - unsigned(Bop));		-- + carry
+		elsif Op = ALU_OP_RSC then 
+      return std_logic_vector(unsigned(Bop) - unsigned(Aop));		-- + carry
+		elsif Op = ALU_OP_ORR then 
+      return Aop or Bop;
+		elsif Op = ALU_OP_MOV then 
+      return Bop;	-- ??? MOV
+		elsif Op = ALU_OP_BIC then 
+      return Aop and not Bop;
+		elsif Op = ALU_OP_MVN then 
+      return not Bop; -- ??? MVN
 		end if;
 	end function ALU;
 
@@ -329,18 +365,30 @@ architecture SYN of mce_arm2 is
 		Carry		: std_logic
 	) return std_logic_vector is
 	begin
-		if Op = X"0" or Op = X"8"			then return Status;
-		elsif Op = X"1" or Op = X"9"	then return Status;
-		elsif Op = X"2" or Op = X"A"	then return Status;
-		elsif Op = X"3" or Op = X"B"	then return Status;
-		elsif Op = X"4" 							then return Status;
-		elsif Op = X"5" 							then return Status;
-		elsif Op = X"6" 							then return Status;
-		elsif Op = X"7" 							then return Status;
-		elsif Op = X"C" 							then return Status;
-		elsif Op = X"D" 							then return Status;
-		elsif Op = X"E" 							then return Status;
-		elsif Op = X"D" 							then return Status;
+		if Op = ALU_OP_AND or Op = ALU_OP_TST then 
+      return Status;
+		elsif Op = ALU_OP_XOR or Op = ALU_OP_TEQ then 
+      return Status;
+		elsif Op = ALU_OP_SUB or Op = ALU_OP_CMP then 
+      return Status;
+		elsif Op = ALU_OP_RSB or Op =ALU_OP_CMN then 
+      return Status;
+		elsif Op = ALU_OP_ADD then 
+      return Status;
+		elsif Op = ALU_OP_ADC then 
+      return Status;
+		elsif Op = ALU_OP_SBC then 
+      return Status;
+		elsif Op = ALU_OP_RSC then 
+      return Status;
+		elsif Op = ALU_OP_ORR then 
+      return Status;
+		elsif Op = ALU_OP_MOV then 
+      return Status;
+		elsif Op = ALU_OP_BIC then 
+      return Status;
+		elsif Op = ALU_OP_MVN then 
+      return Status;
 		end if;
 	end function UpdateStatus;
 
@@ -370,7 +418,14 @@ architecture SYN of mce_arm2 is
 		Carry				: std_logic
 	) return std_logic_vector is
 	begin
-		return SourceVal;
+    if ShiftType = SHIFT_TYPE_LL then
+		  return SourceVal;
+    elsif ShiftType = SHIFT_TYPE_LR then
+		  return SourceVal;
+    elsif ShiftType = SHIFT_TYPE_AR then
+		  return SourceVal;
+    elsif ShiftType = SHIFT_TYPE_RR then
+		  return SourceVal;
 	end function Shift;
 
 begin
