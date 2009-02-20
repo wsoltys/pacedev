@@ -177,7 +177,7 @@ architecture SYN of mce_arm2 is
 	function LastStep (instr : std_logic_vector(31 downto 0); ExecuteMode : ExecuteMode_t) return boolean is
 	begin
 		-- quick fudge
-		return true;
+		return (ExecuteMode = first_step) or (ExecuteMode = refill1) or (ExecuteMode = refill2);
 	end function LastStep;
 
 	function DestOp (cc_instr : std_logic_vector(31 downto 0)) return integer is
@@ -214,6 +214,18 @@ architecture SYN of mce_arm2 is
 			return 0;
 		end if;
 	end function AopReg;
+
+	function BopReg (cc_instr : std_logic_vector(31 downto 0)) return integer is
+		alias instr : std_logic_vector(27 downto 0) is cc_instr(27 downto 0);
+	begin
+		if STD_MATCH(instr, INSTR_DATA_PROC_SI) or STD_MATCH(instr, INSTR_DATA_PROC_SR) then
+			return to_integer(unsigned(instr(15 downto 12)));
+		elsif false then
+			-- how to handle MULT???
+		else
+			return 0;
+		end if;
+	end function BopReg;
 
 	function AluInstr (cc_instr : std_logic_vector(31 downto 0)) return boolean is
 		alias instr : std_logic_vector(27 downto 0) is cc_instr(27 downto 0);
@@ -274,6 +286,92 @@ architecture SYN of mce_arm2 is
 			(STD_MATCH(instr, INSTR_SINGLE_DATA_XFER) and instr(21) = '1') or
 			(STD_MATCH(instr, INSTR_BLOCK_XFER) and instr(21) = '1');
 	end function WriteBack;
+
+	function Op (cc_instr : std_logic_vector(31 downto 0)) return std_logic_vector is
+		alias instr : std_logic_vector(27 downto 0) is cc_instr(27 downto 0);
+	begin
+		return instr(24 downto 21); 
+	end function Op;
+
+	function Carry (Status : std_logic_vector(5 downto 0)) return std_logic is
+	begin
+		return (Status(3));
+	end function Carry;
+	function ALU 
+	(
+		Op 			: std_logic_vector(3 downto 0);
+		Aop 		: std_logic_vector(31 downto 0);
+		Bop			: std_logic_vector(31 downto 0);
+		Carry		: std_logic
+	) return std_logic_vector is
+	begin
+		if Op = X"0" or Op = X"8"			then return Aop and Bop;
+		elsif Op = X"1" or Op = X"9"	then return Aop xor Bop;
+		elsif Op = X"2" or Op = X"A"	then return std_logic_vector(unsigned(Aop) - unsigned(Bop));
+		elsif Op = X"3" or Op = X"B"	then return std_logic_vector(unsigned(Bop) - unsigned(Aop));
+		elsif Op = X"4" 							then return std_logic_vector(unsigned(Aop) + unsigned(Bop));
+		elsif Op = X"5" 							then return std_logic_vector(unsigned(Aop) + unsigned(Bop));		-- + carry
+		elsif Op = X"6" 							then return std_logic_vector(unsigned(Aop) - unsigned(Bop));		-- + carry
+		elsif Op = X"7" 							then return std_logic_vector(unsigned(Bop) - unsigned(Aop));		-- + carry
+		elsif Op = X"C" 							then return Aop or Bop;
+		elsif Op = X"D" 							then return Bop;	-- ??? MOV
+		elsif Op = X"E" 							then return Aop and not Bop;
+		elsif Op = X"D" 							then return not Bop; -- ??? MVN
+		end if;
+	end function ALU;
+
+	function UpdateStatus 
+	(
+		Status	: std_logic_vector(5 downto 0);
+		Op 			: std_logic_vector(3 downto 0);
+		Aop 		: std_logic_vector(31 downto 0);
+		Bop			: std_logic_vector(31 downto 0);
+		Carry		: std_logic
+	) return std_logic_vector is
+	begin
+		if Op = X"0" or Op = X"8"			then return Status;
+		elsif Op = X"1" or Op = X"9"	then return Status;
+		elsif Op = X"2" or Op = X"A"	then return Status;
+		elsif Op = X"3" or Op = X"B"	then return Status;
+		elsif Op = X"4" 							then return Status;
+		elsif Op = X"5" 							then return Status;
+		elsif Op = X"6" 							then return Status;
+		elsif Op = X"7" 							then return Status;
+		elsif Op = X"C" 							then return Status;
+		elsif Op = X"D" 							then return Status;
+		elsif Op = X"E" 							then return Status;
+		elsif Op = X"D" 							then return Status;
+		end if;
+	end function UpdateStatus;
+
+	function ImmBop (cc_instr : std_logic_vector(31 downto 0)) return boolean is
+		alias instr : std_logic_vector(27 downto 0) is cc_instr(27 downto 0);
+	begin
+		return STD_MATCH(instr, INSTR_DATA_PROC_SI);
+	end function ImmBop;
+
+	function ImmediateVal (cc_instr : std_logic_vector(31 downto 0)) return std_logic_vector is
+		alias instr : std_logic_vector(27 downto 0) is cc_instr(27 downto 0);
+	begin
+		return instr(7 downto 0);
+	end function ImmediateVal;
+
+	function ShiftType (cc_instr : std_logic_vector(31 downto 0)) return std_logic_vector is
+		alias instr : std_logic_vector(27 downto 0) is cc_instr(27 downto 0);
+	begin
+		return instr(6 downto 5);
+	end function ShiftType;
+
+	function Shift 
+	(
+		SourceVal		: std_logic_vector(31 downto 0);
+		ShiftType		: std_logic_vector(1 downto 0);
+		ShiftAmt		: integer;
+		Carry				: std_logic
+	) return std_logic_vector is
+	begin
+		return SourceVal;
+	end function Shift;
 
 begin
 
@@ -351,6 +449,8 @@ begin
 
 			variable DecodeOK 			: boolean := false;
 			variable DecodeInstr		: std_logic_vector(31 downto 0) := (others => '0');
+			variable SourceVal			: std_logic_vector(31 downto 0) := (others => '0');
+			variable ShiftAmt				: integer := 0;
 
 	  begin
 
@@ -359,6 +459,11 @@ begin
 				DecodeInstr := FetchedInstr;
 			else
 				DecodeInstr := PrevFetchedInstr;
+			end if;
+			if ImmBop (DecodeInstr) then
+				SourceVal := ImmediateVal (DecodeInstr);
+			else
+				SourceVal := r(BopReg (DecodeInstr));
 			end if;
 
 	    if reset_i = '1' then
@@ -376,7 +481,7 @@ begin
 						if not AluRegShift (DecodeInstr) then
 							aop <= r(AopReg (DecodeInstr));
 						end if;
-						Bop <= (others => '0'); -- hack
+						Bop <= Shift (SourceVal, ShiftType (DecodeInstr), ShiftAmt, Carry (Status));
 						ShiftCarryOp <= '0';    -- hack
 					end if;
 				end if;
@@ -426,10 +531,10 @@ begin
 				if ExecuteMode = first_step and AluInstr(ExecuteInstr) and not AluRegShift(ExecuteInstr) then
 					if Satisfies (Status, CondCode(ExecuteInstr)) then
 						if WriteResult (ExecuteInstr) then
-							-- do it
+							r(DestReg) <= ALU (Op (ExecuteInstr), Aop, Bop, Carry (Status));
 						end if;
 						if SetCondCode (ExecuteInstr) then
-							Status <= (others => '0'); -- update status
+							Status <= UpdateStatus (Status, Op (ExecuteInstr), Aop, Bop, '0');
 						end if;
 					end if;
 					if WritesPC (ExecuteInstr) then
@@ -444,7 +549,7 @@ begin
 				--
 
 				if ExecuteMode = first_step and AluRegShift (ExecuteInstr) then
-					if Satisfies (Status, CondCode(ExecuteInstr)) then
+					if Satisfies (Status, CondCode (ExecuteInstr)) then
 						aop <= r(AopReg (ExecuteInstr));
 						ExecuteMode <= alu_shift;
 					end if;
@@ -452,10 +557,10 @@ begin
 
 				if ExecuteMode = alu_shift then
 					if WriteResult (ExecuteInstr) then
-						r(DestReg) <= (others => '1'); -- ALU
+						r(DestReg) <= ALU (Op (ExecuteInstr), Aop, Bop, '0');
 					end if;
 					if SetCondCode (ExecuteInstr) then
-						Status <= (others => '0'); -- updatestatus
+						Status <= UpdateStatus (Status, Op (ExecuteInstr), Aop, Bop, '0');
 					end if;
 					if WritesPC (ExecuteInstr) then
 						ExecuteMode <= refill1;
