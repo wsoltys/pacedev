@@ -426,6 +426,7 @@ architecture SYN of mce_arm2 is
 		  return SourceVal;
     elsif ShiftType = SHIFT_TYPE_RR then
 		  return SourceVal;
+		end if;
 	end function Shift;
 
 begin
