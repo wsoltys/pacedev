@@ -124,6 +124,8 @@ architecture SYN of PACE is
 	alias clk_50M 		  : std_logic is clk_i(0);
 	
   signal ram_address  : std_logic_vector(17 downto 0);
+	signal ram1_di		  : std_logic_vector(15 downto 0);
+	signal ram1_do		  : std_logic_vector(15 downto 0);
 	signal ram0_di		  : std_logic_vector(15 downto 0);
 	signal ram0_do		  : std_logic_vector(15 downto 0);
 	signal ram_rw_n		  : std_logic;
@@ -229,10 +231,11 @@ begin
 	GEN_SRAM : if PACE_TARGET = PACE_TARGET_P2A or PACE_TARGET	= PACE_TARGET_DE2 generate
 
 		sram_o.a <= std_logic_vector(resize(unsigned(ram_address), sram_o.a'length));
-		sram_o.d <= std_logic_vector(resize(unsigned(ram0_do), sram_o.d'length));
-		ram0_di <= sram_i.d(ram0_di'range);
-		sram_o.be <= std_logic_vector(resize(unsigned(not ram0_be_n), sram_o.be'length));
-		sram_o.cs <= not ram0_cs_n;
+		sram_o.d <= ram1_do & ram0_do;
+		ram1_di <= sram_i.d(31 downto 16);
+		ram0_di <= sram_i.d(15 downto 0);
+		sram_o.be <= not (ram1_be_n & ram0_be_n);
+		sram_o.cs <= ram1_cs_n nand ram0_cs_n;
 		sram_o.oe <= not ram_oe_n;
 		sram_o.we <= not ram_rw_n;
 	
@@ -246,8 +249,8 @@ begin
 			-- RAM, ROM, and Peripherials
 			RAM_DATA0_I		=> ram0_di,
 			RAM_DATA0_O		=> ram0_do,
-			RAM_DATA1_I	  => X"AA55",
-      RAM_DATA1_O   => open,
+			RAM_DATA1_I	  => ram1_di,
+      RAM_DATA1_O   => ram1_do,
 			RAM_ADDRESS		=> ram_address,
 			RAM_RW_N			=> ram_rw_n,
 			RAM0_CS_N			=> ram0_cs_n,
