@@ -228,7 +228,7 @@ begin
 	
 	end generate GEN_EXPERIMENTAL;
 		
-	GEN_SRAM : if PACE_TARGET = PACE_TARGET_P2A or PACE_TARGET	= PACE_TARGET_DE2 generate
+	GEN_SRAM_DE2 : if PACE_TARGET = PACE_TARGET_DE2 generate
 
 		sram_o.a <= std_logic_vector(resize(unsigned(ram_address), sram_o.a'length));
 		sram_o.d <= ram1_do & ram0_do;
@@ -239,7 +239,46 @@ begin
 		sram_o.oe <= not ram_oe_n;
 		sram_o.we <= not ram_rw_n;
 	
-	end generate GEN_SRAM;
+	end generate GEN_SRAM_DE2;
+	
+	GEN_SRAM_P2A : if PACE_TARGET = PACE_TARGET_P2A generate
+
+		sram_o.a <= std_logic_vector(resize(unsigned(ram_address), sram_o.a'length));
+		sram_o.d <= ram1_do & ram0_do;
+		ram1_di <= sram_i.d(31 downto 16);
+		ram0_di <= sram_i.d(15 downto 0);
+		sram_o.be <= ((ram1_cs_n & ram1_cs_n) nor ram1_be_n) & ((ram0_cs_n & ram0_cs_n) nor ram0_be_n);
+		sram_o.cs <= ram1_cs_n nand ram0_cs_n;
+		sram_o.oe <= not ram_oe_n;
+		sram_o.we <= not ram_rw_n;
+	
+	end generate GEN_SRAM_P2A;
+	
+	GEN_SRAM_2 : if PACE_TARGET = PACE_TARGET_DE1 generate
+
+    -- hook up Burched SRAM module
+    GEN_D: for i in 0 to 7 generate
+      ram1_di(8+i) <= gp_i(35-i);
+      ram1_di(i) <= gp_i(35-i);
+      gp_o.d(35-i) <= ram1_do(i);
+      gp_o.d(27-i) <= 'Z';
+    end generate;
+    GEN_A: for i in 0 to 16 generate
+      gp_o.d(17-i) <= ram_address(i);
+    end generate;
+    gp_o.d(0) <= ram1_cs_n;                   -- CEAn
+    gp_o.d(18) <= '1';                        -- upper byte WEn
+    gp_o.d(19) <= ram_rw_n or ram1_be_n(0);   -- lower byte WEn
+
+		sram_o.a <= std_logic_vector(resize(unsigned(ram_address), sram_o.a'length));
+		sram_o.d <= ram1_do & ram0_do;
+		ram0_di <= sram_i.d(15 downto 0);
+		sram_o.be <= "00" & not ram0_be_n;
+		sram_o.cs <= not ram0_cs_n;
+		sram_o.oe <= not ram_oe_n;
+		sram_o.we <= not ram_rw_n;
+	
+	end generate GEN_SRAM_2;
 	
 	coco_inst : coco3fpga
 		port map
