@@ -4,6 +4,8 @@ use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
+use work.video_controller_pkg.all;
+use work.sprite_pkg.all;
 use work.platform_pkg.all;
 use work.target_pkg.all;
 use work.project_pkg.all;
@@ -12,53 +14,44 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk             : in std_logic_vector(0 to 3);
-    test_button     : in std_logic;
-    reset           : in std_logic;
+    clk_i           : in std_logic_vector(0 to 3);
+    reset_i         : in std_logic;
 
-    -- game I/O
-    ps2clk          : inout std_logic;
-    ps2data         : inout std_logic;
-    dip             : in std_logic_vector(7 downto 0);
-		jamma						: in JAMMAInputsType;
+    -- misc I/O
+    buttons_i       : in from_BUTTONS_t;
+    switches_i      : in from_SWITCHES_t;
+    leds_o          : out to_LEDS_t;
 
-    -- external RAM
+    -- controller inputs
+    inputs_i        : in from_INPUTS_t;
+
+    -- external ROM/RAM
+    flash_i         : in from_FLASH_t;
+    flash_o         : out to_flash_t;
     sram_i       		: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
+    sdram_i         : in from_SDRAM_t;
+    sdram_o         : out to_SDRAM_t;
 
-    -- VGA video
-		vga_clk					: out std_logic;
-    red             : out std_logic_vector(9 downto 0);
-    green           : out std_logic_vector(9 downto 0);
-    blue            : out std_logic_vector(9 downto 0);
-		lcm_data				:	out std_logic_vector(9 downto 0);
-		hblank					: out std_logic;
-		vblank					: out std_logic;
-    hsync           : out std_logic;
-    vsync           : out std_logic;
+    -- video
+    video_i         : in from_VIDEO_t;
+    video_o         : out to_VIDEO_t;
 
-    -- composite video
-    BW_CVBS         : out std_logic_vector(1 downto 0);
-    GS_CVBS         : out std_logic_vector(7 downto 0);
-
-    -- sound
-    snd_clk         : out std_logic;
-    snd_data_l      : out std_logic_vector(15 downto 0);
-    snd_data_r      : out std_logic_vector(15 downto 0);
-
+    -- audio
+    audio_i         : in from_AUDIO_t;
+    audio_o         : out to_AUDIO_t;
+    
     -- SPI (flash)
-    spi_clk         : out std_logic;
-    spi_mode        : out std_logic;
-    spi_sel         : out std_logic;
-    spi_din         : in std_logic;
-    spi_dout        : out std_logic;
+    spi_i           : in from_SPI_t;
+    spi_o           : out to_SPI_t;
 
     -- serial
-    ser_tx          : out std_logic;
-    ser_rx          : in std_logic;
-
-    -- debug
-    leds            : out std_logic_vector(7 downto 0)
+    ser_i           : in from_SERIAL_t;
+    ser_o           : out to_SERIAL_t;
+    
+    -- general purpose I/O
+    gp_i            : in from_GP_t;
+    gp_o            : out to_GP_t
   );
 
 end PACE;
@@ -104,6 +97,10 @@ architecture SYN of PACE is
 			RXD1					: in std_logic;
 			TXD2					: out std_logic;
 			RXD2					: in std_logic;
+			TXD3					: out std_logic;
+			RXD3					: in std_logic;
+      RTS3          : out std_logic;
+      CTS3          : in std_logic;
 			
 			-- Display
 			DIGIT_N				: out std_logic_vector(3 downto 0);
@@ -113,18 +110,18 @@ architecture SYN of PACE is
 			LED						: out std_logic_vector(7 downto 0);
 			
 			-- CoCo Perpherial
-			SPEAKER				: out std_logic;
-			PADDLE				: in std_logic_vector(7 downto 0);
+			SPEAKER				: out std_logic_vector(1 downto 0);
+			PADDLE				: in std_logic_vector(3 downto 0);
+			PADDLE_RST    : out std_logic_vector(3 downto 0);
 			P_SWITCH			: in std_logic_vector(3 downto 0);
 			
 			-- Extra Buttons and Switches
 			SWITCH				: in std_logic_vector(7 downto 0);
-			BUTTON				: in std_logic_vector(3 downto 0);
-			PH_2					: out std_logic
+			BUTTON				: in std_logic_vector(3 downto 0)
 		);
 	end component;
 
-	alias clk_50M 		  : std_logic is clk(0);
+	alias clk_50M 		  : std_logic is clk_i(0);
 	
   signal ram_address  : std_logic_vector(17 downto 0);
 	signal ram0_di		  : std_logic_vector(15 downto 0);
@@ -154,12 +151,12 @@ begin
 			
 		begin
 
-			process (clk_50M, reset)
+			process (clk_50M, reset_i)
 				variable rmw_di			: std_logic_vector(15 downto 0);
 				variable rmw_do			: std_logic_vector(15 downto 0);
 				variable rmw_be			: std_logic_vector(ram0_be_n'range);
 			begin
-				if reset = '1' then
+				if reset_i = '1' then
 					state <= IDLE after DELAY;
 				elsif rising_edge(clk_50M) then
 					case state is
@@ -208,7 +205,7 @@ begin
 									std_logic_vector(resize(unsigned(rmw_a), sram_o.a'length));
 			sram_o.d(31 downto 16) <= (others => '0');
 			ram0_di <= sram_i.d(ram0_di'range);
-			sram_o.be <=  std_logic_vector(resize(unsigned("11"), sram_o.be'length));
+			--sram_o.be <=  std_logic_vector(resize(unsigned("11"), sram_o.be'length));
 			sram_o.cs <= not ram0_cs_n when state = IDLE else '1';
 			sram_o.oe <= not ram_oe_n when state = IDLE else rmw_oe;
 			sram_o.we <= '0' when state = IDLE else rmw_we;
@@ -229,7 +226,7 @@ begin
 	
 	end generate GEN_EXPERIMENTAL;
 		
-	GEN_SRAM : if PACE_TARGET	= PACE_TARGET_DE2 generate
+	GEN_SRAM : if PACE_TARGET = PACE_TARGET_P2A or PACE_TARGET	= PACE_TARGET_DE2 generate
 
 		sram_o.a <= std_logic_vector(resize(unsigned(ram_address), sram_o.a'length));
 		sram_o.d <= std_logic_vector(resize(unsigned(ram0_do), sram_o.d'length));
@@ -262,55 +259,56 @@ begin
 			RAM_OE_N			=> ram_oe_n,
 			
 			-- VGA
-			RED1					=> red(9),
-			GREEN1				=> green(9),
-			BLUE1					=> blue(9),
-			RED0					=> red(8),
-			GREEN0				=> green(8),
-			BLUE0					=> blue(8),
-			H_SYNC				=> hsync,
-			V_SYNC				=> vsync,
+			RED1					=> video_o.rgb.r(9),
+			GREEN1				=> video_o.rgb.g(9),
+			BLUE1					=> video_o.rgb.b(9),
+			RED0					=> video_o.rgb.r(8),
+			GREEN0				=> video_o.rgb.g(8),
+			BLUE0					=> video_o.rgb.b(8),
+			H_SYNC				=> video_o.hsync,
+			V_SYNC				=> video_o.vsync,
 			
 			-- PS/2
-			ps2_clk				=> ps2clk,
-			ps2_data			=> ps2data,
+			ps2_clk				=> inputs_i.ps2_kclk,
+			ps2_data			=> inputs_i.ps2_kdat,
 			
 			--Serial Ports
-			TXD1					=> ser_tx,
-			RXD1					=> ser_rx,
+			TXD1					=> ser_o.txd,
+			RXD1					=> ser_i.rxd,
 			TXD2					=> open,
 			RXD2					=> '0',
-			
+			TXD3					=> open,
+			RXD3					=> '0',
+      RTS3          => open,
+      CTS3          => '0',
+      
 			-- Display
 			DIGIT_N				=> open,
 			SEGMENT_N			=> open,
 			
 			-- LEDs
-			LED						=> leds,
+			LED						=> leds_o(7 downto 0),
 			
 			-- CoCo Perpherial
 			SPEAKER				=> open,
 			PADDLE				=> (others => '0'),
+			PADDLE_RST    => open,
 			P_SWITCH			=> (others => '0'),
 			
 			-- Extra Buttons and Switches
 			SWITCH				=> (others => '0'), -- fast=1.78MHz
-			BUTTON(3)			=> reset,
-			BUTTON(2 downto 0) => "000",
-			PH_2					=> open
+			BUTTON(3)			=> reset_i,
+			BUTTON(2 downto 0) => "000"
 		);
 
-	vga_clk <= clk_50M;
+	video_o.clk <= clk_50M;
 
 	-- unused
-	red(7 downto 0) <= (others => '0');
-	green(7 downto 0) <= (others => '0');
-	blue(7 downto 0) <= (others => '0');
-	
-  spi_clk <= 'Z';
-  spi_dout <= 'Z';
-  spi_mode <= 'Z';
-  spi_sel <= 'Z';
+	video_o.rgb.r(7 downto 0) <= (others => '0');
+	video_o.rgb.g(7 downto 0) <= (others => '0');
+	video_o.rgb.b(7 downto 0) <= (others => '0');
+
+  spi_o <= NULL_TO_SPI;
   
 end SYN;
 

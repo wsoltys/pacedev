@@ -1,24 +1,83 @@
 `timescale 1ns / 1ps
 ////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer:
-//
-// Create Date:    08:51:54 11/08/06
-// Project Name:   CoCo3FPGA
+// Project Name:	CoCo3FPGA Version 1.1
+// File Name:		coco3fpga.v
 //
 // CoCo3 in an FPGA
 // Based on the Spartan 3 Starter board by Digilent Inc.
+// with the 1000K gate upgrade
 //
-// Revision: 0.99 13:37:34 08/17/07
+// Revision: 1.0 08/31/08
+//           1.1 10/22/08
 ////////////////////////////////////////////////////////////////////////////////
+//
+// CPU section copyrighted by John Kent
+//
+////////////////////////////////////////////////////////////////////////////////
+//
+// Color Computer 3 compatible system on a chip
+//
+// Version : 1.1
+//
+// Copyright (c) 2008 Gary Becker (gary_l_becker@yahoo.com)
+//
+// All rights reserved
+//
+// Redistribution and use in source and synthezised forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// Redistributions of source code must retain the above copyright notice,
+// this list of conditions and the following disclaimer.
+//
+// Redistributions in synthesized form must reproduce the above copyright
+// notice, this list of conditions and the following disclaimer in the
+// documentation and/or other materials provided with the distribution.
+//
+// Neither the name of the author nor the names of other contributors may
+// be used to endorse or promote products derived from this software without
+// specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+// PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
+// Please report bugs to the author, but before you do so, please
+// make sure that this is not a derivative work and that
+// you have the latest version of this file.
+//
+// The latest version of this file can be found at:
+//      http://groups.yahoo.com/group/CoCo3FPGA
+//
+// File history :
+//
+//  1.0		Full release
+//  1.1		Full Release
+//			Included Disk from Software version 1.01
+//			Fixed Joystick
+//			Added Orchastra-90 CC Stereo Music Synthesizer
+//
+////////////////////////////////////////////////////////////////////////////////
+// Gary Becker
+// gary_L_becker@yahoo.com
+////////////////////////////////////////////////////////////////////////////////
+
+`define SIX_BIT_COLOR
 
 module coco3fpga(
 CLK50MHZ,
 // RAM, ROM, and Peripherials
 RAM_DATA0_I,				// 16 bit data bus to RAM 0
-RAM_DATA0_O,
+RAM_DATA0_O,				// 16 bit data bus to RAM 0
 RAM_DATA1_I,				// 16 bit data bus to RAM 1
-RAM_DATA1_O,
+RAM_DATA1_O,				// 16 bit data bus to RAM 1
 RAM_ADDRESS,			// Common address
 RAM_RW_N,				// Common RW
 RAM0_CS_N,				// Chip Select for RAM 0
@@ -45,6 +104,10 @@ TXD1,
 RXD1,
 TXD2,
 RXD2,
+TXD3,
+RXD3,
+RTS3,
+CTS3,
 // Display
 DIGIT_N,
 SEGMENT_N,
@@ -53,11 +116,12 @@ LED,
 // CoCo Perpherial
 SPEAKER,
 PADDLE,
+PADDLE_RST,
 P_SWITCH,
+
 // Extra Buttons and Switches
 SWITCH,
-BUTTON,
-PH_2
+BUTTON
 );
 
 input				CLK50MHZ;
@@ -69,8 +133,7 @@ reg				RAM_RW_N;
 
 // Main RAM bank 0
 input	[15:0]	RAM_DATA0_I;
-output [15:0] RAM_DATA0_O;
-wire [15:0] RAM_DATA0_O;
+output	[15:0]	RAM_DATA0_O;
 output			RAM0_CS_N;
 output			RAM0_BE0_N;
 output			RAM0_BE1_N;
@@ -78,9 +141,7 @@ output			RAM_OE_N;
 
 // Main RAM bank 1
 input	[15:0]	RAM_DATA1_I;
-output [15:0]	RAM_DATA1_O;
-wire [15:0] RAM_DATA1_O;
-// output	[15:0]	RAM_DATA1;			// Testing only
+output	[15:0]	RAM_DATA1_O;
 output			RAM1_CS_N;
 output			RAM1_BE0_N;
 output			RAM1_BE1_N;
@@ -94,7 +155,13 @@ output			GREEN0;
 output			BLUE0;
 output			H_SYNC;
 output			V_SYNC;
-
+wire				REDX1;
+wire				GREENX1;
+wire				BLUEX1;
+wire				REDX0;
+wire				GREENX0;
+wire				BLUEX0;
+			
 // PS/2
 input 			ps2_clk;
 input				ps2_data;
@@ -105,6 +172,10 @@ input				RXD1;
 output			TXD2;
 reg				TXD2;
 input				RXD2;
+output			TXD3;
+input				RXD3;
+output			RTS3;
+input				CTS3;
 
 // Display
 output [3:0]	DIGIT_N;
@@ -113,41 +184,41 @@ output [7:0]	SEGMENT_N;
 
 // LEDs
 output [7:0]	LED;
-// reg		[7:0]	LED;
 
 // CoCo Perpherial
-output			SPEAKER;
-input		[7:0]	PADDLE;
+output	[1:0]	SPEAKER;
+input		[3:0]	PADDLE;
+output	[3:0]	PADDLE_RST;
+reg		[3:0]	PADDLE_RST;
 input		[3:0]	P_SWITCH;
-wire				JSTICK;
 
 // Extra Buttons and Switches
-input [7:0]		SWITCH;				//  7 LED
-											//  6 LED
-											//  5 Single step
-											//  4 single step
+input [7:0]		SWITCH;				//  7 Special Boink Speed
+											//  6 Disk speed 25 / 12.5
+											//  5 Swap Left and Right Joystick
+											//  4 CART INT Disable
 											//  3 MPI [1]
 											//  2 MPI [0]
 											//  1 CPU_SPEED[1]
 											//  0 CPU_SPEED[0]
 
 input [3:0]		BUTTON;				//  3 RESET
-											//  2 Not used
-											//  1 Closed Apple
-											//  0 Open Apple 
+											//  2 PAUSE
+											//  1 MPI Status / CoCo
+											//  0 Easter Egg
 
-output			PH_2;
 reg				PH_2;
-
 reg				RESET_N;
-reg	[15:0]	RESET_CLK;
+reg				CPU_RESET;
+wire				RESET;
+wire				RESET_P;
+reg	[13:0]		RESET_SM;
 wire	[15:0]	ADDRESS;
 wire	[6:0]		BLOCK_ADDRESS;
 wire				RW_N;
 wire	[7:0]		DATA_IN;
 wire	[7:0]		DATA_OUT;
 wire				VMA;
-
 reg	[5:0]		CLK;
 
 // Gime Regs
@@ -225,70 +296,105 @@ reg			CD_POL;
 reg			CAS_MTR;
 reg			SOUND_EN;
 wire [17:0]	VIDEO_ADDRESS;
+reg	[5:0]	PIXEL;
 wire			READMEM;
 wire			ROM_RW;
+
 wire	[7:0]	DOA_F8;
 wire			DOP_F8;
 wire			ENA_F8;
+
 wire	[7:0]	DOA_F0;
 wire			DOP_F0;
 wire			ENA_F0;
+
 wire	[7:0]	DOA_E8;
 wire			DOP_E8;
 wire			ENA_E8;
+
 wire	[7:0]	DOA_E0;
 wire			DOP_E0;
 wire			ENA_E0;
+
 wire	[7:0]	DOA_D8;
 wire			DOP_D8;
 wire			ENA_D8;
+
 wire	[7:0]	DOA_D0;
 wire			DOP_D0;
 wire			ENA_D0;
+
 wire	[7:0]	DOA_C8;
 wire			DOP_C8;
 wire			ENA_C8;
+
 wire	[7:0]	DOA_C0;
 wire			DOP_C0;
 wire			ENA_C0;
+
 wire	[7:0]	DOA_B8;
 wire			DOP_B8;
 wire			ENA_B8;
+
 wire	[7:0]	DOA_B0;
 wire			DOP_B0;
 wire			ENA_B0;
+
 wire	[7:0]	DOA_A8;
 wire			DOP_A8;
 wire			ENA_A8;
+
 wire	[7:0]	DOA_A0;
 wire			DOP_A0;
 wire			ENA_A0;
+
 wire	[7:0]	DOA_98;
 wire			DOP_98;
 wire			ENA_98;
+
 wire	[7:0]	DOA_90;
 wire			DOP_90;
 wire			ENA_90;
+
 wire	[7:0]	DOA_88;
 wire			DOP_88;
 wire			ENA_88;
+
 wire	[7:0]	DOA_80;
 wire			DOP_80;
 wire			ENA_80;
+
 wire	[7:0]	DOA_DD8;
 wire			DOP_DD8;
 wire			ENA_DSKD8;
+
 wire	[7:0]	DOA_DD0;
 wire			DOP_DD0;
 wire			ENA_DSKD0;
+
 wire	[7:0]	DOA_DC8;
 wire			DOP_DC8;
 wire			ENA_DSKC8;
+
 wire	[7:0]	DOA_DC0;
 wire			DOP_DC0;
 wire			ENA_DSKC0;
+
+wire	[7:0]	DOA_RC0;
+wire			DOP_RC0;
+wire			ENA_RS232C0;
+
+wire	[7:0]	DOA_RC8;
+wire			DOP_RC8;
+wire			ENA_RS232C8;
+
+wire	[7:0]	DOA_C0_S2;
+wire			DOP_C0_S2;
+wire			ENA_C0_S2;
+
 reg	[1:0]	MPI_SCS;				// IO select
 reg	[1:0]	MPI_CTS;				// ROM select
+reg	[1:0]	W_PROT;
 reg			SBS;
 reg	[7:0]	SAM00;
 reg	[7:0]	SAM01;
@@ -306,14 +412,9 @@ reg	[7:0]	SAM14;
 reg	[7:0]	SAM15;
 reg	[7:0]	SAM16;
 reg	[7:0]	SAM17;
-reg	[4:0]	KB_CLK;
-reg			CAPS_CLK;
-reg	[63:0] KEY;
-reg			F1;
-reg			F2;
-wire	[7:0]	SCAN;
-wire			PRESS;
-wire			EXTENDED;
+wire	[55:0] KEY;
+wire			SHIFT_OVERRIDE;
+wire			SHIFT;
 wire	[7:0]	KEYBOARD_IN;
 reg			DDR1;
 reg			DDR2;
@@ -329,11 +430,17 @@ reg	[7:0]	DD_REG3;
 reg	[7:0]	DD_REG4;
 wire			ROM_SEL;
 reg	[5:0]	DTOA_CODE;
-reg	[6:0]	DTOA_LATCH;
-reg	[6:0]	DIG_STATE;
-reg			DIG_SOUND;
+wire	[7:0]	SOUND;
+wire	[8:0]	DAC_LEFT;
+wire	[8:0]	DAC_RIGHT;
+reg	[9:0]	PWM_LEFT;
+reg	[9:0]	PWM_RIGHT;
+reg	[7:0]	ORCH_LEFT;
+reg	[7:0]	ORCH_RIGHT;
 reg	[1:0]	B_SWITCH;
 wire 			H_FLAG;
+
+// wire	[7:0]	STATE;
 
 //reg	[15:0]	MEM_DISPLAY;
 //reg	[15:0]	CPU_DISPLAY;
@@ -345,39 +452,39 @@ reg	[2:0]		SWITCH_L;
 wire				KEY_INT_RAW;
 
 reg				HS_INT;
-reg	[2:0]		HS_INT_SM;
+reg	[1:0]		HS_INT_SM;
 reg				VS_INT;
-reg	[2:0]		VS_INT_SM;
+reg	[1:0]		VS_INT_SM;
 reg				CD1_INT;
-reg	[2:0]		CD1_INT_SM;
+reg	[1:0]		CD1_INT_SM;
 reg				CART1_INT;
-reg	[2:0]		CART1_INT_SM;
+reg	[1:0]		CART1_INT_SM;
 
 reg				TMR_INT;
-reg	[2:0]		TMR_INT_SM;
+reg	[1:0]		TMR_INT_SM;
 reg				HBORD_INT;
-reg	[2:0]		HBORD_INT_SM;
+reg	[1:0]		HBORD_INT_SM;
 reg				VBORD_INT;
-reg	[2:0]		VBORD_INT_SM;
+reg	[1:0]		VBORD_INT_SM;
 reg				CD3_INT;
-reg	[2:0]		CD3_INT_SM;
+reg	[1:0]		CD3_INT_SM;
 reg				KEY_INT;
-reg	[2:0]		KEY_INT_SM;
+reg	[1:0]		KEY_INT_SM;
 reg				CAR_INT;
-reg	[2:0]		CAR_INT_SM;
+reg	[1:0]		CAR_INT_SM;
 
 reg				TMR_FINT;
-reg	[2:0]		TMR_FINT_SM;
+reg	[1:0]		TMR_FINT_SM;
 reg				HBORD_FINT;
-reg	[2:0]		HBORD_FINT_SM;
+reg	[1:0]		HBORD_FINT_SM;
 reg				VBORD_FINT;
-reg	[2:0]		VBORD_FINT_SM;
+reg	[1:0]		VBORD_FINT_SM;
 reg				CD3_FINT;
-reg	[2:0]		CD3_FINT_SM;
+reg	[1:0]		CD3_FINT_SM;
 reg				KEY_FINT;
-reg	[2:0]		KEY_FINT_SM;
+reg	[1:0]		KEY_FINT_SM;
 reg				CAR_FINT;
-reg	[2:0]		CAR_FINT_SM;
+reg	[1:0]		CAR_FINT_SM;
 
 wire				CPU_IRQ;
 wire				CPU_FIRQ;
@@ -386,14 +493,22 @@ reg	[2:0]		DIV_7;
 reg	[11:0]	TIMER;
 wire				TMR_CLK;
 wire				CD_IRQ;
+wire				DISK_IRQ;
 wire				SER_IRQ;
 reg				CART_IRQ;
 reg	[4:0]		COM1_CLOCK;
 wire	[7:0]		DATA_COM1;
 wire				COM1_EN;
+wire				COM2_EN;
 wire				RTS1;
+wire				DTR3;
 reg	[1:0]		XSTATE;
 reg	[7:0]		XART;
+reg	[4:0]		CLK_6551;
+wire				RX_CLK2;
+wire	[7:0]		DATA_COM2;
+reg	[3:0]		ROM_BANK;
+wire				SLOT3_HW;
 
 // Clock
 //FFCO CCYY  Century / Year
@@ -401,6 +516,7 @@ reg	[7:0]		XART;
 //FFC4 WWHH  Day of week / Hour
 //FFC6 MMSS  Minute / Second
 reg	[4:0]		CENT;
+// reg				FLAG;
 reg	[6:0]		YEAR;
 reg	[3:0]		MNTH;
 reg	[4:0]		DMTH;
@@ -411,7 +527,28 @@ reg	[5:0]		SEC;
 reg	[5:0]		CLICK;
 reg				TICK;
 
-assign LED =	8'h00;
+// Joystick
+reg	[8:0]		JOY_CLK;
+reg	[7:0]		JOY1_MEM;
+reg	[7:0]		JOY2_MEM;
+reg	[7:0]		JOY3_MEM;
+reg	[7:0]		JOY4_MEM;
+reg	[5:0]		JOY1_COUNT;
+reg	[5:0]		JOY2_COUNT;
+reg	[5:0]		JOY3_COUNT;
+reg	[5:0]		JOY4_COUNT;
+reg	[3:0]		JOY_STATUS;
+reg	[7:0]		JOY_STATE;
+wire				JSTICK;
+wire				JOY1;
+wire				JOY2;
+wire				JOY3;
+wire				JOY4;
+
+assign LED =	{MPI_SCS, CPU_IRQ, CAR_INT, CART_IRQ, IRQ_CART,	CAR_INT_SM};
+
+//assign LED =	(~BUTTON[1])	?	{COM1_EN, ROM_SEL & MPI_CTS[1] & ~MPI_CTS[0], SLOT3_HW, COM2_EN, GIME_IRQ, GIME_FIRQ, CPU_NMI, RW_N}:
+//											{2'b00, MPI_CTS, W_PROT, MPI_SCS};
 
 always @ (posedge H_SYNC)					// Anything > 200 HZ
  case(DIGIT_N)
@@ -421,10 +558,10 @@ always @ (posedge H_SYNC)					// Anything > 200 HZ
   default:  DIGIT_N <= 4'b1110;
  endcase
 
-assign SEGMENT_N =	(DIGIT_N == 4'b1110) ?	{RESET_N, 7'b0100011}:	//o
-							(DIGIT_N == 4'b1101) ?	{RESET_N, 7'b1000110}:	//C
-							(DIGIT_N == 4'b1011) ?	{RESET_N, 7'b0100011}:	//o
-															{RESET_N, 7'b1000110};	//C
+assign SEGMENT_N =	(DIGIT_N == 4'b1110) ?	{~RESET_N, 7'b1100010}:	//o
+							(DIGIT_N == 4'b1101) ?	{~RESET_N, 7'b0110001}:	//C
+							(DIGIT_N == 4'b1011) ?	{~RESET_N, 7'b1100010}:	//o
+															{~RESET_N, 7'b0110001};	//C
 
 /*****************************************************************************
 * RAM signals
@@ -432,47 +569,49 @@ assign SEGMENT_N =	(DIGIT_N == 4'b1110) ?	{RESET_N, 7'b0100011}:	//o
 assign	RAM_ADDRESS =	({PH_2, READMEM} == 2'b01)	?	{VIDEO_ADDRESS}:
 																		{BLOCK_ADDRESS[5:0], ADDRESS[12:1]};
 
-assign	BLOCK_ADDRESS =	({VEC_PAG_RAM, ADDRESS[15:8]} == 9'h1FE)		?	7'h3F:			// FE00-FEFF Vector page is RAM
-									({MMU_EN, MMU_TR, ADDRESS[15:13]} == 5'h10)	?	SAM00[6:0]:		// 10 000X	0000-1FFF
-									({MMU_EN, MMU_TR, ADDRESS[15:13]} == 5'h11)	?	SAM01[6:0]:		// 10 001X	2000-3FFF
-									({MMU_EN, MMU_TR, ADDRESS[15:13]} == 5'h12)	?	SAM02[6:0]:		// 10 010X	4000-5FFF
-									({MMU_EN, MMU_TR, ADDRESS[15:13]} == 5'h13)	?	SAM03[6:0]:		// 10 011X	6000-7FFF
-						({ROM_SEL, MMU_EN, MMU_TR, ADDRESS[15:13]} == 6'h14)	?	SAM04[6:0]:		// 10 100X	8000-9FFF
-						({ROM_SEL, MMU_EN, MMU_TR, ADDRESS[15:13]} == 6'h15)	?	SAM05[6:0]:		// 10 101X	A000-BFFF
-						({ROM_SEL, MMU_EN, MMU_TR, ADDRESS[15:13]} == 6'h16)	?	SAM06[6:0]:		// 10 110X	C000-DFFF
-						({ROM_SEL, MMU_EN, MMU_TR, ADDRESS[15:13]} == 6'h17)	?	SAM07[6:0]:		// 10 111X	E000-FEFF
-									({MMU_EN, MMU_TR, ADDRESS[15:13]} == 5'h18)	?	SAM10[6:0]:		// 11 000X
-									({MMU_EN, MMU_TR, ADDRESS[15:13]} == 5'h19)	?	SAM11[6:0]:		// 11 001X
-									({MMU_EN, MMU_TR, ADDRESS[15:13]} == 5'h1A)	?	SAM12[6:0]:		// 11 010X
-									({MMU_EN, MMU_TR, ADDRESS[15:13]} == 5'h1B)	?	SAM13[6:0]:		// 11 011X
-						({ROM_SEL, MMU_EN, MMU_TR, ADDRESS[15:13]} == 6'h1C)	?	SAM14[6:0]:		// 11 100X
-						({ROM_SEL, MMU_EN, MMU_TR, ADDRESS[15:13]} == 6'h1D)	?	SAM15[6:0]:		// 11 101X
-						({ROM_SEL, MMU_EN, MMU_TR, ADDRESS[15:13]} == 6'h1E)	?	SAM16[6:0]:		// 11 110X
-						({ROM_SEL, MMU_EN, MMU_TR, ADDRESS[15:13]} == 6'h1F)	?	SAM17[6:0]:		// 11 111X
-						({ROM_SEL, MPI_CTS, ADDRESS[15:13]} == 6'b101100)		?  7'h40:			// Slot 2 ROM 8000-9FFF
-						({ROM_SEL, MPI_CTS, ADDRESS[15:13]} == 6'b101101)		?  7'h41:			// Slot 2 ROM A000-BFFF
-						({ROM_SEL, MPI_CTS, ADDRESS[15:13]} == 6'b101110)		?  7'h42:			// Slot 2 ROM C000-DFFF
-						({ROM_SEL, MPI_CTS, ADDRESS[15:13]} == 6'b101111)		?  7'h43:			// Slot 2 ROM E000-FEFF
-						({ROM_SEL, MPI_CTS, ADDRESS[15:13]} == 6'b110100)		?  7'h44:			// Slot 3 ROM 8000-9FFF
-						({ROM_SEL, MPI_CTS, ADDRESS[15:13]} == 6'b110101)		?  7'h45:			// Slot 3 ROM A000-BFFF
-						({ROM_SEL, MPI_CTS, ADDRESS[15:13]} == 6'b110110)		?  7'h46:			// Slot 3 ROM C000-DFFF
-						({ROM_SEL, MPI_CTS, ADDRESS[15:13]} == 6'b110111)		?  7'h47:			// Slot 3 ROM E000-FEFF
-// Disable slot 0
-//									({ROM_SEL, MPI_CTS, ADDRESS[15:13]} == 6'b100100)?  7'h48:				// Slot 4 ROM 8000-9FFF
-//									({ROM_SEL, MPI_CTS, ADDRESS[15:13]} == 6'b100101)?  7'h49:				// Slot 4 ROM A000-BFFF
-//									({ROM_SEL, MPI_CTS, ADDRESS[15:13]} == 6'b100110)?  7'h4A:				// Slot 4 ROM C000-DFFF
-//									({ROM_SEL, MPI_CTS, ADDRESS[15:13]} == 6'b100111)?  7'h4B:				// Slot 4 ROM E000-FEFF
-																									{4'b0111,ADDRESS[15:13]};
+assign	BLOCK_ADDRESS =		({MMU_EN, MMU_TR, ADDRESS[15:13]} ==  5'b10000)			?	SAM00[6:0]:		// 10 000X	0000-1FFF
+										({MMU_EN, MMU_TR, ADDRESS[15:13]} ==  5'b10001)			?	SAM01[6:0]:		// 10 001X	2000-3FFF
+										({MMU_EN, MMU_TR, ADDRESS[15:13]} ==  5'b10010)			?	SAM02[6:0]:		// 10 010X	4000-5FFF
+										({MMU_EN, MMU_TR, ADDRESS[15:13]} ==  5'b10011)			?	SAM03[6:0]:		// 10 011X	6000-7FFF
+							({ROM_SEL, MMU_EN, MMU_TR, ADDRESS[15:13]} == 6'b010100)			?	SAM04[6:0]:		//010 100X	8000-9FFF
+							({ROM_SEL, MMU_EN, MMU_TR, ADDRESS[15:13]} == 6'b010101)			?	SAM05[6:0]:		//010 101X	A000-BFFF
+							({ROM_SEL, MMU_EN, MMU_TR, ADDRESS[15:13]} == 6'b010110)			?	SAM06[6:0]:		//010 110X	C000-DFFF
+							({ROM_SEL, MMU_EN, MMU_TR, ADDRESS[15:12]} == 7'b0101110)		?	SAM07[6:0]:		//010 1110 X		E000-EFFF
+							({ROM_SEL, MMU_EN, MMU_TR, ADDRESS[15:11]} == 8'b01011110)		?	SAM07[6:0]:		//010 1111 0X		F000-F7FF
+							({ROM_SEL, MMU_EN, MMU_TR, ADDRESS[15:10]} == 9'b010111110)		?	SAM07[6:0]:		//010 1111 10X		F800-FBFF
+							({ROM_SEL, MMU_EN, MMU_TR, ADDRESS[15:9]} == 10'b0101111110)	?	SAM07[6:0]:		//010 1111 110X	FC00-FDFF
+					  ({VEC_PAG_RAM, MMU_EN, MMU_TR, ADDRESS[15:8]} == 11'b01011111110)	?	SAM07[6:0]:		//010 1111 1110 X	FE00-FEFF Vector page as RAM
 
-// assign RAM_RW_N = ({PH_2, RW_N} == 2'b10)	?	1'b0:
-//															1'b1;
-assign	RAM0_CS_N =  	({READMEM, ROM_SEL}== 2'b01)								?	1'b1:		// Any external ROM
+										({MMU_EN, MMU_TR, ADDRESS[15:13]} ==  5'b11000)			?	SAM10[6:0]:		// 11 000X
+										({MMU_EN, MMU_TR, ADDRESS[15:13]} ==  5'b11001)			?	SAM11[6:0]:		// 11 001X
+										({MMU_EN, MMU_TR, ADDRESS[15:13]} ==  5'b11010)			?	SAM12[6:0]:		// 11 010X
+										({MMU_EN, MMU_TR, ADDRESS[15:13]} ==  5'b11011)			?	SAM13[6:0]:		//011 011X
+							({ROM_SEL, MMU_EN, MMU_TR, ADDRESS[15:13]} == 6'b011100)			?	SAM14[6:0]:		//011 100X
+							({ROM_SEL, MMU_EN, MMU_TR, ADDRESS[15:13]} == 6'b011101)			?	SAM15[6:0]:		//011 101X
+							({ROM_SEL, MMU_EN, MMU_TR, ADDRESS[15:13]} == 6'b011110)			?	SAM16[6:0]:		//011 110X
+							({ROM_SEL, MMU_EN, MMU_TR, ADDRESS[15:12]} == 7'b0111110)		?	SAM17[6:0]:		//011 1110 X		E000-EFFF
+							({ROM_SEL, MMU_EN, MMU_TR, ADDRESS[15:11]} == 8'b01111110)		?	SAM17[6:0]:		//011 1111 0X		F000-F7FF
+							({ROM_SEL, MMU_EN, MMU_TR, ADDRESS[15:10]} == 9'b011111110)		?	SAM17[6:0]:		//011 1111 10X		F800-FBFF
+							({ROM_SEL, MMU_EN, MMU_TR, ADDRESS[15:9]} == 10'b0111111110)	?	SAM17[6:0]:		//011 1111 110X	FC00-FDFF
+					  ({VEC_PAG_RAM, MMU_EN, MMU_TR, ADDRESS[15:8]} == 11'b01111111110)	?	SAM17[6:0]:		//011 1111 1110 X	FE00-FEFF Vector page as RAM
+
+							({ROM_SEL, MPI_CTS, ADDRESS[15:13]} == 6'b110100)					?  {2'b11, ROM_BANK, 1'b0}:	// Slot 3 ROM 8000-9FFF
+							({ROM_SEL, MPI_CTS, ADDRESS[15:13]} == 6'b110101)					?  {2'b11, ROM_BANK, 1'b1}:	// Slot 3 ROM A000-BFFF
+							({ROM_SEL, MPI_CTS, ADDRESS[15:13]} == 6'b110110)					?  {2'b11, ROM_BANK, 1'b0}:	// Slot 3 ROM C000-DFFF Mirror Image of 8000-9FFF
+							({ROM_SEL, MPI_CTS, ADDRESS[15:13]} == 6'b110111)					?  {2'b11, ROM_BANK, 1'b1}:	// Slot 3 ROM E000-FDFF Mirror Image of A000-BDFF
+																													{4'b0111,ADDRESS[15:13]};
+
+assign	RAM0_CS_N =		({READMEM, ROM_SEL}== 2'b01)								?	1'b1:		// Any slot
+//							  	({READMEM, ROM_SEL, MPI_CTS}== 4'b0100)				?	1'b1:		// Slot 1 ROM (RS232)
+//								({READMEM, ROM_SEL, MPI_CTS}== 4'b0101)				?	1'b1:		// Slot 2 ROM (CART Loader)
+//								({READMEM, ROM_SEL, MPI_CTS}== 4'b0111)				?	1'b1:		// Slot 4 ROM (Disk)
 								({READMEM, RAM, ADDRESS[15:14]} == 4'b0010)			?	1'b1:		// ROM (8000-BFFF)
 								({READMEM, RAM, ADDRESS[15:13]} == 5'b00110)			?	1'b1:		// ROM (C000-DFFF)
 								({READMEM, RAM, ADDRESS[15:12]} == 6'b001110)		?	1'b1:		// ROM (E000-EFFF)
-								({READMEM, RAM, ADDRESS[15:11]} == 7'b0011110)		?	1'b1:		// ROM (F000-F7FF)
+								({READMEM, RAM, ADDRESS[15:11]} == 7'b0011110)		?	1'b1:		// ROM (F000-F8FF)
 								({READMEM, RAM, ADDRESS[15:10]} == 8'b00111110)		?	1'b1:		// ROM (F800-FBFF)
 								({READMEM, RAM, ADDRESS[15:9]}  == 9'b001111110)	?	1'b1:		// ROM (FC00-FDFF)
+// FE00-FEFF enabled unless turned off by BLOCK_ADDRESS[6]=1
 								({READMEM, ADDRESS[15:8]}== 9'h0FF)						?	1'b1:		// Hardware (FF00-FFFF)
 								({READMEM, BLOCK_ADDRESS[6]} == 2'b01)					?	1'b1:		// 512K - 1M
 																										1'b0;		//   0K - 512K
@@ -483,15 +622,19 @@ assign	RAM0_BE0_N =  	({PH_2, READMEM} == 2'b01)									?	1'b0:
 assign	RAM0_BE1_N =  	({PH_2, READMEM} == 2'b01)									?	1'b0:
 																										~ADDRESS[0];	// This is backwards
 
-assign	RAM1_CS_N =	//		({ROM_SEL, MPI_CTS} == 3'b100)						?	1'b1:		// Slot 1 ROM (EMPTY) Turned off in ROM_SEL
-								({READMEM, ROM_SEL, MPI_CTS} == 4'b0111)				?	1'b1:		// Slot 4 ROM (DISK)
-								({READMEM, RAM, ADDRESS[15:14]} == 4'b0010)			?	1'b1:		// Internal ROM (8000-BFFF)
-								({READMEM, RAM, ADDRESS[15:13]} == 5'b00110)			?	1'b1:		// Internal ROM (C000-DFFF)
-								({READMEM, RAM, ADDRESS[15:12]} == 6'b001110)		?	1'b1:		// Internal ROM (E000-EFFF)
-								({READMEM, RAM, ADDRESS[15:11]} == 7'b0011110)		?	1'b1:		// Internal ROM (F000-F7FF)
-								({READMEM, RAM, ADDRESS[15:10]} == 8'b00111110)		?	1'b1:		// Internal ROM (F800-FBFF)
-								({READMEM, RAM, ADDRESS[15:9]}  == 9'b001111110)	?	1'b1:		// Internal ROM (FC00-FDFF)
-								({READMEM, ADDRESS[15:8]}==9'h0FF)						?	1'b1:		// Top 256 Bytes
+assign	RAM1_CS_N =		({READMEM, ROM_SEL, MPI_CTS} == 4'b0100)							?	1'b1:		// Slot 1 ROM (RS232)
+								({READMEM, ROM_SEL, MPI_CTS} == 4'b0101)							?	1'b1:		// Slot 2 ROM (Cart)
+								({READMEM, ROM_SEL, MPI_CTS} == 4'b0111)							?	1'b1:		// Slot 4 ROM (DISK)
+//								({READMEM, ROM_SEL, RAM, ADDRESS[15:14]} == 5'b00010)			?	1'b1:		// ROM (8000-BFFF)
+//								({READMEM, ROM_SEL, RAM, ADDRESS[15:13]} == 6'b000110)		?	1'b1:		// ROM (C000-DFFF)
+//								({READMEM, ROM_SEL, RAM, ADDRESS[15:12]} == 7'b0001110)		?	1'b1:		// ROM (E000-EFFF)
+//								({READMEM, ROM_SEL, RAM, ADDRESS[15:11]} == 8'b00011110)		?	1'b1:		// ROM (F000-F8FF)
+//								({READMEM, ROM_SEL, RAM, ADDRESS[15:10]} == 9'b000111110)	?	1'b1:		// ROM (F800-FBFF)
+//								({READMEM, ROM_SEL, RAM, ADDRESS[15:9]}  ==10'b0001111110)	?	1'b1:		// ROM (FC00-FDFF)
+// FE00-FEFF enabled unless turned off by BLOCK_ADDRESS[6]=0
+
+								({READMEM, ROM_SEL, RAM, ADDRESS[15]} == 4'b0001)	?	1'b1:		// Internal ROM (8000-FFFF)
+								({READMEM, ADDRESS[15:8]}==9'h0FF)						?	1'b1:		// Hardware (FF00-FFFF)
 								({READMEM, BLOCK_ADDRESS[6]} == 2'b00)					?	1'b1:		// 0K - 512K
 																										1'b0;		// RAM
 
@@ -501,7 +644,16 @@ assign	RAM1_BE0_N =  	({PH_2, READMEM} == 2'b01)									?	1'b0:
 assign	RAM1_BE1_N =  	({PH_2, READMEM} == 2'b01)									?	1'b0:
 																										~ADDRESS[0];	// This is backwards
 
-assign	RAM_OE_N = ~(READMEM | RW_N);
+assign	RAM_OE_N = ~((~PH_2 & READMEM) | RW_N);
+// PH_2	READMEM	RW_N	RAM_OE_N
+//	0		0			0		1
+//	0		0			1		0
+//	0		1			0		0
+//	0		1			1		0
+//	1		0			0		1
+//	1		0			1		0
+//	1		1			0		1
+//	1		1			1		0
 
 //assign	RAM_DATA0[15:0] = (({READMEM, RW_N}) == 2'b00)	?	{DATA_OUT, DATA_OUT}:
 //																				16'bZZZZZZZZZZZZZZZZ;
@@ -514,18 +666,25 @@ assign	RAM_DATA1_O[15:0] = {DATA_OUT, DATA_OUT};
 /*****************************************************************************
 * ROM signals
 ******************************************************************************/
-// assign	MPI = SWITCH[3:2] ;
 
-// ROM_SEL is 1 when the system is accessing any cartridge "ROM" including the
-// Last 3 slots of the MPI, this is two ROM slots and the Disk Controller ROM,
-// slot 0 is empty so we can boot without a ROM
-assign	ROM_SEL =	(			 ADDRESS[15:8] 	== 8'b11111110)?	1'b0:	// Top 256 bytes (Hardware and Vectors)
-							(							RAM	== 1'b1)			?	1'b0:	// All RAM Mode
-							( ROM 							== 2'b10)		?	1'b0:	// All Internal
-							( MPI_CTS						== 2'b00)		?	1'b0:	// ROM Slot 0 (Empty)
-							({ROM[1], ADDRESS[15:14]}	== 3'b010)		?	1'b0: // 16 Internal+16 external Lower
-							(			 ADDRESS[15]		== 1'b0)			?	1'b0:	// Lower 32K
-																						1'b1;
+// ROM_SEL is 1 when the system is accessing any cartridge "ROM" meaning the
+// 4 slots of the MPI, this is:
+//		Slot 1 	RS232 ROM
+//		Slot 2	Cart loader ROM
+//		Slot 3	Cart slot
+//		Slot 4	Disk Controller ROM
+assign	ROM_SEL =( RAM								== 1'b1)		?	1'b0:	// All RAM Mode
+						( ROM 							== 2'b10)	?	1'b0:	// All Internal
+						({ROM[1], ADDRESS[15:14]}	== 3'b010)	?	1'b0: // Lower (Internal) 16 Internal+16 external
+						(			 ADDRESS[15]		== 1'b0)		?	1'b0:	// Lower 32K
+						(			 ADDRESS[15:8]		== 8'hFE)	?	1'b0:	// Vector space
+						(			 ADDRESS[15:8]		== 8'hFF)	?	1'b0:	// Hardware space
+																				1'b1;
+//ROM
+//00		16 Internal + 16 External
+//01		16 Internal + 16 External
+//10		32 Internal
+//11		32 External
 
 assign	ENA_F8 =	({RAM, ROM, ADDRESS[15:8]} == 11'b01011111000)	?	1'b1:	// Internal ROM F800-F8FF
 						({RAM, ROM, ADDRESS[15:8]} == 11'b01011111001)	?	1'b1: // Internal ROM F900-F9FF
@@ -533,9 +692,8 @@ assign	ENA_F8 =	({RAM, ROM, ADDRESS[15:8]} == 11'b01011111000)	?	1'b1:	// Intern
 						({RAM, ROM, ADDRESS[15:8]} == 11'b01011111011)	?	1'b1: // Internal ROM FB00-FBFF
 						({RAM, ROM, ADDRESS[15:8]} == 11'b01011111100)	?	1'b1: // Internal ROM FC00-FCFF
 						({RAM, ROM, ADDRESS[15:8]} == 11'b01011111101)	?	1'b1: // Internal ROM FD00-FDFF
-//						({RAM, ROM, ADDRESS[15:8]} == 11'b01011111110)	?	1'b1: // Internal ROM FE00-FEFF (Vectors)
-//						({RAM, ROM, ADDRESS[15:8]} == 11'b01011111111)	?	1'b1: // Internal ROM FF00-FFFF (Hardware)
-						({ADDRESS[15:4]} == 12'b111111111111)				?	1'b1:
+//						({RAM, ROM, ADDRESS[15:8]} == 11'b01011111110)	?	1'b1: // Internal ROM FE00-FEFF
+						({ADDRESS[15:4]} == 12'b111111111111)				?	1'b1:	// Vectors
 																							1'b0;
 
 assign	ENA_F0 =	({RAM, ROM,   ADDRESS[15:11]} == 8'b01011110)	?	1'b1:	// Internal 32K ROM F000-F7FF
@@ -584,8 +742,20 @@ assign	ENA_DSKC8 = ({ROM_SEL, MPI_CTS, ADDRESS[15:11]} == 8'b11111001)	?	1'b1:	/
 																										1'b0;
 assign	ENA_DSKC0 = ({ROM_SEL, MPI_CTS, ADDRESS[15:11]} == 8'b11111000)	?	1'b1:	// Disk C000-C7FF
 																										1'b0;
+assign	ENA_RS232C8 = ({ROM_SEL, MPI_CTS, ADDRESS[15:11]} == 8'b10011001)	?	1'b1:	// RS232 C800-CFFF
+																										1'b0;
+assign	ENA_RS232C0 = ({ROM_SEL, MPI_CTS, ADDRESS[15:11]} == 8'b10011000)	?	1'b1:	// RS232 C000-C7FF
+																										1'b0;
+assign	ENA_C0_S2 =   ({ROM_SEL, MPI_CTS, ADDRESS[15:11]} == 8'b10111000)	?	1'b1:	// CART C000-C7FF
+																										1'b0;
 
-assign	ROM_RW = 1'b0;
+assign	COM1_EN = ({MPI_SCS, ADDRESS[15:1]} == 17'b11111111110101000)		?	1'b1:			//FF50-FF51 with MPI switch = 4
+																										1'b0;
+assign	COM2_EN = (ADDRESS[15:2] == 14'b11111111011010)							?	1'b1:			//FF68-FF6B
+																										1'b0;
+
+// If W_PROT[1] = 1 then ROM_RW is 0, else ROM_RW = ~RW_N
+assign	ROM_RW = ~(W_PROT[1] | RW_N);
 
 assign	DATA_IN =	({RAM0_CS_N, RAM0_BE0_N}==2'b00)	?	RAM_DATA0_I[7:0]:
 							({RAM0_CS_N, RAM0_BE1_N}==2'b00)	?	RAM_DATA0_I[15:8]:
@@ -611,14 +781,17 @@ assign	DATA_IN =	({RAM0_CS_N, RAM0_BE0_N}==2'b00)	?	RAM_DATA0_I[7:0]:
 														ENA_DSKD0	?	DOA_DD0:
 														ENA_DSKC8	?	DOA_DC8:
 														ENA_DSKC0	?	DOA_DC0:
+														ENA_RS232C0	?	DOA_RC0:
+														ENA_RS232C8	?	DOA_RC8:
+														ENA_C0_S2	?	DOA_C0_S2:
 // FF00, FF04, FF08, FF0C, FF10, FF14, FF18, FF1C
 ({ADDRESS[15:5], ADDRESS[1:0]} == 13'b1111111100000)	?	DATA_REG1:
 // FF01, FF05, FF09, FF0D, FF11, FF15, FF19, FF1D
-({ADDRESS[15:5], ADDRESS[1:0]} == 13'b1111111100001)	?	{~HS_INT, 3'd7, SEL[1], DDR1, HSYNC_POL, HSYNC_INT}:
+({ADDRESS[15:5], ADDRESS[1:0]} == 13'b1111111100001)	?	{~HS_INT, 3'd7, SEL[0], DDR1, HSYNC_POL, HSYNC_INT}:
 // FF02, FF06, FF0A, FF0E, FF12, FF16, FF1A, FF1E
 ({ADDRESS[15:5], ADDRESS[1:0]} == 13'b1111111100010)	?	DATA_REG2:
 // FF03, FF07, FF0B, FF0F, FF13, FF17, FF1B, FF1F
-({ADDRESS[15:5], ADDRESS[1:0]} == 16'b1111111100011)	?	{~VS_INT, 3'd7, SEL[0], DDR2, VSYNC_POL, VSYNC_INT}:
+({ADDRESS[15:5], ADDRESS[1:0]} == 16'b1111111100011)	?	{~VS_INT, 3'd7, SEL[1], DDR2, VSYNC_POL, VSYNC_INT}:
 // FF20, FF24, FF28, FF2C, FF30, FF34, FF38, FF3C
 ({ADDRESS[15:5], ADDRESS[1:0]} == 16'b1111111100100)	?	DATA_REG3:
 // FF21, FF25, FF29, FF2D, FF31, FF35, FF39, FF3D
@@ -628,8 +801,10 @@ assign	DATA_IN =	({RAM0_CS_N, RAM0_BE0_N}==2'b00)	?	RAM_DATA0_I[7:0]:
 // FF23, FF27, FF2B, FF2F, FF33, FF37, FF3B, FF3F
 ({ADDRESS[15:5], ADDRESS[1:0]} == 16'b1111111100111)	?	{~CART1_INT, 3'd7, SOUND_EN, DDR4, CART_POL, CART_INT}:
 														COM1_EN		?	DATA_COM1:
-									(ADDRESS == 16'hFF52)		?	{XART}:
-									(ADDRESS == 16'hFF7F)		?	{2'b11, MPI_CTS, 2'b11, MPI_SCS}:
+														COM2_EN		?	DATA_COM2:
+					({MPI_SCS, ADDRESS} == 18'h3FF52)		?	XART:
+													SLOT3_HW			?	{4'b0000, ROM_BANK}:
+									(ADDRESS == 16'hFF7F)		?	{2'b11, MPI_CTS, W_PROT, MPI_SCS}:
 									(ADDRESS == 16'hFF90)		?	{COCO1, MMU_EN, GIME_IRQ, GIME_FIRQ, VEC_PAG_RAM, ST_SCS, ROM}:
 									(ADDRESS == 16'hFF91)		?	{2'b00, TIMER_INS, 4'b0000, MMU_TR}:
 									(ADDRESS == 16'hFF92)		?	{2'b00, ~TMR_INT,  ~HBORD_INT,  ~VBORD_INT,  ~CD3_INT,  ~KEY_INT,  ~CAR_INT}:
@@ -698,7 +873,6 @@ assign	DATA_REG3	= ~DDR3	?	DD_REG3:
 assign	DATA_REG4	= ~DDR4	?	DD_REG4:
 											{VDG_CONTROL, 1'b0, KEY_COLUMN[6], SBS, RXD2};
 
-
 always @(posedge CLK50MHZ or negedge RESET_N)
 begin
 	if(~RESET_N)
@@ -720,15 +894,13 @@ begin
 	end
 end
 
-initial
-	PH_2 <= 1'b0;
 always @(posedge CLK50MHZ or negedge RESET_N)
 begin
 	if(~RESET_N)
 	begin
 		CLK <= 6'h00;
 		SWITCH_L <= 3'b000;
-		PH_2 <= ~PH_2;
+		PH_2 <= 1'b1;
 		RAM_RW_N <= 1'b1;
 		B_SWITCH <= 2'b00;
 	end
@@ -738,11 +910,16 @@ begin
 		6'h00:
 		begin
 			B_SWITCH <= SWITCH[1:0];
-			if(XART != 8'h00)
-				SWITCH_L <= 3'b111;										// Fast speed for Disk
+			if((XART != 8'h00) & ~SWITCH[6])
+				SWITCH_L <= 3'b111;									//  High speed for Disk
 			else
-				SWITCH_L <= {B_SWITCH, RATE};
-			if(READMEM)													// Video memory about to be read (first 50 MHz clock of read cycle)
+			begin
+				if((XART != 8'h00) & SWITCH[6])
+					SWITCH_L <= 3'b101;								//  Lower speed for Disk
+				else
+					SWITCH_L <= {B_SWITCH, RATE};					// Normal speed
+			end
+			if(READMEM | BUTTON[2])													// Video memory about to be read (first 50 MHz clock of read cycle)
 			begin															// Wait
 				CLK <= 6'h00;
 				PH_2 <= 1'b0;
@@ -752,7 +929,10 @@ begin
 			begin															// Video memory not being read
 				CLK <= 6'h01;											// Continue on
 				PH_2 <= 1'b1;
-				RAM_RW_N <= RW_N;
+//								Normal
+				RAM_RW_N <= RW_N
+//								Protected	and	ROM		and	Slot 3							and	Address >= 8000
+							| (~W_PROT[1]	&		ROM_SEL	&		MPI_CTS[1] & ~MPI_CTS[0]	&		ADDRESS[15]);
 			end
 		end
 		6'h01:										// 50/2 = 25
@@ -778,6 +958,15 @@ begin
 			else
 				CLK <= 6'h0C;
 		end
+		6'h19:										// 50/24 =  2.083 Test for boink
+		begin											// 16.4% overclock
+			if(SWITCH[7])
+				CLK <= 6'h00;
+			else
+				CLK <= 6'h1A;
+		end
+
+
 		6'h1B:										// 50/28 = 1.786
 		begin
 			if(SWITCH_L == 3'b001)
@@ -798,36 +987,37 @@ begin
 		endcase
 	end
 end
-
-//assign RESET_N = ~BUTTON[3];
-
-always @(posedge CLK50MHZ or posedge BUTTON[3])
+assign RESET_P = BUTTON[3] | RESET;
+always @ (negedge PIXEL[5] or posedge RESET_P)
 begin
-	if(BUTTON[3])
+	if(RESET_P)
 	begin
-		RESET_CLK <= 16'h0000;
+		RESET_SM <= 14'h0000;
+		CPU_RESET <= 1'b1;
 		RESET_N <= 1'b0;
 	end
 	else
-	begin
-		case (RESET_CLK)
-		16'hFFFF:
+		case (RESET_SM)
+		14'h3800:
 		begin
-			RESET_CLK <= 16'hFFFF;
 			RESET_N <= 1'b1;
+			CPU_RESET <= 1'b1;
+			RESET_SM <= 14'h3801;
+		end
+		14'h3FFF:
+		begin
+			RESET_N <= 1'b1;
+			CPU_RESET <= 1'b0;
+			RESET_SM <= 14'h3FFF;
 		end
 		default:
-		begin
-			RESET_CLK <= RESET_CLK + 1'b1;
-			RESET_N <= 1'b0;
-		end
+			RESET_SM <= RESET_SM + 1'b1;
 		endcase
-	end
 end
 
 CPU09 GLBCPU09(
 	.clk(PH_2),
-	.rst(~RESET_N),
+	.rst(CPU_RESET),
 	.rw(RW_N),
 	.vma(VMA),
 	.address(ADDRESS),
@@ -840,6 +1030,7 @@ CPU09 GLBCPU09(
 	.nmi(CPU_NMI)
 );
 
+
 // Interrupt source for CART signal
 always @(posedge PH_2 or negedge RESET_N)
 begin
@@ -849,30 +1040,22 @@ begin
 	end
 	else
 	begin
-		case (MPI_CTS)
+		case (MPI_SCS)
 		2'b00:
-			CART_IRQ <= 1'b1;
+			CART_IRQ <= SER_IRQ | SWITCH[4];
 		2'b01:
-			CART_IRQ <= ~CART_IRQ;
+			CART_IRQ <= ~CART_IRQ | SWITCH[4];
 		2'b10:
-			CART_IRQ <= ~CART_IRQ;
+			CART_IRQ <= ~CART_IRQ | SWITCH[4];
 		2'b11:
-			CART_IRQ <= SER_IRQ;
+			CART_IRQ <= (DISK_IRQ & SER_IRQ) | SWITCH[4];
 		endcase
 	end
 end
 
 // INT for COCO1
-always @ (negedge PH_2 or negedge RESET_N)
+always @ (negedge PH_2)
 begin
-	if(~RESET_N)
-	begin
-		HS_INT <= 1'b1;
-		HS_INT_SM <= 2'b00;
-	end
-	else
-	begin
-
 // H_SYNC int for COCO1
 // output	HS_INT
 // State		HS_INT_SM
@@ -884,14 +1067,16 @@ begin
 		if(HSYNC_INT == 1'b0)		// disabled
 		begin
 			HS_INT <= 1'b1;			// no int
-			HS_INT_SM <= 2'b00;
+// Start SM at last step to makse sure you see a deasserted trigger
+// before triggering the first time
+			HS_INT_SM <= 2'b10;
 		end
 		else								// enabled
 		begin
 			case (HS_INT_SM)
 			2'b00:
 			begin
-				if((H_SYNC | H_FLAG) ^ ~HSYNC_POL)		// 1 = int
+				if((~H_SYNC ^ HSYNC_POL) & H_FLAG)		// 1 = int
 				begin
 					HS_INT <= 1'b0;
 					HS_INT_SM <= 2'b01;
@@ -912,7 +1097,7 @@ begin
 			end
 			2'b10:
 			begin
-				if(~((H_SYNC | H_FLAG) ^ ~HSYNC_POL))
+				if(~((~H_SYNC ^ HSYNC_POL) & H_FLAG))
 				begin
 					HS_INT <= 1'b1;
 					HS_INT_SM <= 2'b00;
@@ -920,38 +1105,31 @@ begin
 			end
 			endcase
 		end
-	end
 end
 
-always @ (negedge PH_2 or negedge RESET_N)
+always @ (negedge PH_2) //  or negedge RESET_N)
 begin
-	if(~RESET_N)
-	begin
-		VS_INT <= 1'b1;
-		VS_INT_SM <= 2'b00;
-	end
-	else
-	begin
-
 // V_SYNC int for COCO1
 // output	VS_INT
 // State		VS_INT_SM
 // input		V_SYNC
 // switch	VSYNC_INT @ FF03
 // pol		VSYNC_POL
-// clear    FF00
+// clear    FF02
 
 		if(VSYNC_INT == 1'b0)		// disabled
 		begin
 			VS_INT <= 1'b1;			// no int
-			VS_INT_SM <= 2'b00;
+// Start SM at last step to makse sure you see a deasserted trigger
+// before triggering the first time
+			VS_INT_SM <= 2'b10;
 		end
 		else								// enabled
 		begin
 			case (VS_INT_SM)
 			2'b00:
 			begin
-				if(V_SYNC ^ ~VSYNC_POL)		// 1 = int
+				if(~V_SYNC ^ VSYNC_POL)		// 1 = int
 				begin
 					VS_INT <= 1'b0;
 					VS_INT_SM <= 2'b01;
@@ -972,7 +1150,7 @@ begin
 			end
 			2'b10:
 			begin
-				if(~(V_SYNC ^ ~VSYNC_POL))
+				if(~(~V_SYNC ^ VSYNC_POL))
 				begin
 					VS_INT <= 1'b1;
 					VS_INT_SM <= 2'b00;
@@ -980,21 +1158,12 @@ begin
 			end
 			endcase
 		end
-	end
 end
 
 assign CD_IRQ = 1'b1;
 
-always @ (negedge PH_2 or negedge RESET_N)
+always @ (negedge PH_2) //  or negedge RESET_N)
 begin
-	if(~RESET_N)
-	begin
-		CD1_INT <= 1'b1;
-		CD1_INT_SM <= 2'b00;
-	end
-	else
-	begin
-
 // CD (BitBang) int for COCO1
 // output	CD1_INT
 // State		CD1_INT_SM
@@ -1006,14 +1175,14 @@ begin
 		if(CD_INT == 1'b0)		// disabled
 		begin
 			CD1_INT <= 1'b1;			// no int
-			CD1_INT_SM <= 2'b00;
+			CD1_INT_SM <= 2'b10;
 		end
 		else								// enabled
 		begin
 			case (CD1_INT_SM)
 			2'b00:
 			begin
-				if(CD_IRQ ^ ~CD_POL)
+				if(~CD_IRQ ^ CD_POL)
 				begin
 					CD1_INT <= 1'b0;
 					CD1_INT_SM <= 2'b01;
@@ -1034,7 +1203,7 @@ begin
 			end
 			2'b10:
 			begin
-				if(~(CD_IRQ ^ ~CD_POL))
+				if(~(~CD_IRQ ^ CD_POL))
 				begin
 					CD1_INT <= 1'b1;
 					CD1_INT_SM <= 2'b00;
@@ -1042,19 +1211,10 @@ begin
 			end
 			endcase
 		end
-	end
 end
 
-always @ (negedge PH_2 or negedge RESET_N)
+always @ (negedge PH_2) //  or negedge RESET_N)
 begin
-	if(~RESET_N)
-	begin
-		CART1_INT <= 1'b1;
-		CART1_INT_SM <= 2'b00;
-	end
-	else
-	begin
-
 // Cart int for COCO1
 // output	CART1_INT
 // State		CART1_INT_SM
@@ -1066,7 +1226,7 @@ begin
 		if(CART_INT == 1'b0)		// disabled
 		begin
 			CART1_INT <= 1'b1;			// no int
-			CART1_INT_SM <= 2'b00;
+			CART1_INT_SM <= 2'b10;
 		end
 		else								// enabled
 		begin
@@ -1102,20 +1262,12 @@ begin
 			end
 			endcase
 		end
-	end
 end
 
 // INT for COCO3
-always @ (negedge PH_2 or negedge RESET_N)
-begin
-	if(~RESET_N)
-	begin
-		TMR_INT <= 1'b1;
-		TMR_INT_SM <= 2'b00;
-	end
-	else
-	begin
 
+always @ (negedge PH_2) //  or negedge RESET_N)
+begin
 // TIMER int for COCO3
 // output	TMR_INT
 // State		TMR_INT_SM
@@ -1125,7 +1277,7 @@ begin
 		if(IRQ_TMR == 1'b0)		// disabled
 		begin
 			TMR_INT <= 1'b1;			// no int
-			TMR_INT_SM <= 2'b00;
+			TMR_INT_SM <= 2'b10;
 		end
 		else								// enabled
 		begin
@@ -1161,19 +1313,10 @@ begin
 			end
 			endcase
 		end
-	end
 end
 
-always @ (negedge PH_2 or negedge RESET_N)
+always @ (negedge PH_2) //  or negedge RESET_N)
 begin
-	if(~RESET_N)
-	begin
-		HBORD_INT <= 1'b1;
-		HBORD_INT_SM <= 2'b00;
-	end
-	else
-	begin
-
 // H_SYNC int for COCO3
 // output	HBORD_INT
 // State		HBORD_INT_SM
@@ -1183,14 +1326,14 @@ begin
 		if(IRQ_HBORD == 1'b0)		// disabled
 		begin
 			HBORD_INT <= 1'b1;			// no int
-			HBORD_INT_SM <= 2'b00;
+			HBORD_INT_SM <= 2'b10;
 		end
 		else								// enabled
 		begin
 			case (HBORD_INT_SM)
 			2'b00:
 			begin
-				if(~(H_SYNC | H_FLAG))		// 1 = int
+				if(~H_SYNC & H_FLAG)		// 1 = int
 				begin
 					HBORD_INT <= 1'b0;
 					HBORD_INT_SM <= 2'b01;
@@ -1211,7 +1354,7 @@ begin
 			end
 			2'b10:
 			begin
-				if(H_SYNC | H_FLAG)
+				if(~(~H_SYNC & H_FLAG))
 				begin
 					HBORD_INT <= 1'b1;
 					HBORD_INT_SM <= 2'b00;
@@ -1219,18 +1362,9 @@ begin
 			end
 			endcase
 		end
-	end
 end
-always @ (negedge PH_2 or negedge RESET_N)
+always @ (negedge PH_2) //  or negedge RESET_N)
 begin
-	if(~RESET_N)
-	begin
-		VBORD_INT <= 1'b1;
-		VBORD_INT_SM <= 2'b00;
-	end
-	else
-	begin
-
 // V_SYNC int for COCO3
 // output	VBORD_INT
 // State		VBORD_INT_SM
@@ -1240,7 +1374,7 @@ begin
 		if(IRQ_VBORD == 1'b0)		// disabled
 		begin
 			VBORD_INT <= 1'b1;			// no int
-			VBORD_INT_SM <= 2'b00;
+			VBORD_INT_SM <= 2'b10;
 		end
 		else								// enabled
 		begin
@@ -1276,19 +1410,10 @@ begin
 			end
 			endcase
 		end
-	end
 end
 
-always @ (negedge PH_2 or negedge RESET_N)
+always @ (negedge PH_2) //  or negedge RESET_N)
 begin
-	if(~RESET_N)
-	begin
-		CD3_INT <= 1'b1;
-		CD3_INT_SM <= 2'b00;
-	end
-	else
-	begin
-
 // CD (BitBang) int for COCO3
 // output	CD3_INT
 // State		CD3_INT_SM
@@ -1298,7 +1423,7 @@ begin
 		if(IRQ_SERIAL == 1'b0)		// disabled
 		begin
 			CD3_INT <= 1'b1;			// no int
-			CD3_INT_SM <= 2'b00;
+			CD3_INT_SM <= 2'b10;
 		end
 		else								// enabled
 		begin
@@ -1334,19 +1459,10 @@ begin
 			end
 			endcase
 		end
-	end
 end
 
-always @ (negedge PH_2 or negedge RESET_N)
+always @ (negedge PH_2) //  or negedge RESET_N)
 begin
-	if(~RESET_N)
-	begin
-		KEY_INT <= 1'b1;
-		KEY_INT_SM <= 2'b00;
-	end
-	else
-	begin
-
 // Keyboard int for COCO3
 // output	KEY_INT
 // State		KEY_INT_SM
@@ -1356,7 +1472,7 @@ begin
 		if(IRQ_KEY == 1'b0)		// disabled
 		begin
 			KEY_INT <= 1'b1;			// no int
-			KEY_INT_SM <= 2'b00;
+			KEY_INT_SM <= 2'b10;
 		end
 		else								// enabled
 		begin
@@ -1392,43 +1508,33 @@ begin
 			end
 			endcase
 		end
-	end
 end
 
-always @ (negedge PH_2 or negedge RESET_N)
+always @ (negedge PH_2) //  or negedge RESET_N)
 begin
-	if(~RESET_N)
-	begin
-		CAR_INT <= 1'b1;
-		CAR_INT_SM <= 2'b00;
-	end
-	else
-	begin
-
 // CART (Serial HDD) int for COCO3
 // output	CAR_INT
 // State		CAR_INT_SM
 // input		CART_IRQ
 // switch	IRQ_CART
-
 		if(IRQ_CART == 1'b0)		// disabled
 		begin
 			CAR_INT <= 1'b1;			// no int
-			CAR_INT_SM <= 2'b00;
+			CAR_INT_SM <= 2'b10;
 		end
 		else								// enabled
 		begin
 			case (CAR_INT_SM)
-			2'b00:
+			2'b00:							// Wait for int
 			begin
-				if(~CART_IRQ)
-				begin
+				if(~CART_IRQ)				// Int in?
+				begin							// Yes
 					CAR_INT <= 1'b0;
 					CAR_INT_SM <= 2'b01;
 				end
 				else
 				begin
-					CAR_INT <= 1'b1;			// no int
+					CAR_INT <= 1'b1;			// No int
 					CAR_INT_SM <= 2'b00;
 				end
 			end
@@ -1450,20 +1556,11 @@ begin
 			end
 			endcase
 		end
-	end
 end
 
 // FINT for COCO3
-always @ (negedge PH_2 or negedge RESET_N)
+always @ (negedge PH_2) //  or negedge RESET_N)
 begin
-	if(~RESET_N)
-	begin
-		TMR_FINT <= 1'b1;
-		TMR_FINT_SM <= 2'b00;
-	end
-	else
-	begin
-
 // TIMER fint for COCO3
 // output	TMR_FINT
 // State		TMR_FINT_SM
@@ -1473,7 +1570,7 @@ begin
 		if(FIRQ_TMR == 1'b0)		// disabled
 		begin
 			TMR_FINT <= 1'b1;			// no int
-			TMR_FINT_SM <= 2'b00;
+			TMR_FINT_SM <= 2'b10;
 		end
 		else								// enabled
 		begin
@@ -1509,19 +1606,10 @@ begin
 			end
 			endcase
 		end
-	end
 end
 
-always @ (negedge PH_2 or negedge RESET_N)
+always @ (negedge PH_2) //  or negedge RESET_N)
 begin
-	if(~RESET_N)
-	begin
-		HBORD_FINT <= 1'b1;
-		HBORD_FINT_SM <= 2'b00;
-	end
-	else
-	begin
-
 // H_SYNC fint for COCO3
 // output	HBORD_FINT
 // State		HBORD_FINT_SM
@@ -1531,14 +1619,14 @@ begin
 		if(FIRQ_HBORD == 1'b0)		// disabled
 		begin
 			HBORD_FINT <= 1'b1;			// no int
-			HBORD_FINT_SM <= 2'b00;
+			HBORD_FINT_SM <= 2'b10;
 		end
 		else								// enabled
 		begin
 			case (HBORD_FINT_SM)
 			2'b00:
 			begin
-				if(~(H_SYNC | H_FLAG))		// 1 = int
+				if(~H_SYNC & H_FLAG)		// 1 = int
 				begin
 					HBORD_FINT <= 1'b0;
 					HBORD_FINT_SM <= 2'b01;
@@ -1559,7 +1647,7 @@ begin
 			end
 			2'b10:
 			begin
-				if(H_SYNC | H_FLAG)
+				if((H_SYNC & H_FLAG))
 				begin
 					HBORD_FINT <= 1'b1;
 					HBORD_FINT_SM <= 2'b00;
@@ -1567,19 +1655,10 @@ begin
 			end
 			endcase
 		end
-	end
 end
 
-always @ (negedge PH_2 or negedge RESET_N)
+always @ (negedge PH_2) //  or negedge RESET_N)
 begin
-	if(~RESET_N)
-	begin
-		VBORD_FINT <= 1'b1;
-		VBORD_FINT_SM <= 2'b00;
-	end
-	else
-	begin
-
 // V_SYNC int for COCO3
 // output	VBORD_FINT
 // State		VBORD_FINT_SM
@@ -1589,7 +1668,7 @@ begin
 		if(FIRQ_VBORD == 1'b0)		// disabled
 		begin
 			VBORD_FINT <= 1'b1;			// no int
-			VBORD_FINT_SM <= 2'b00;
+			VBORD_FINT_SM <= 2'b10;
 		end
 		else								// enabled
 		begin
@@ -1625,19 +1704,10 @@ begin
 			end
 			endcase
 		end
-	end
 end
 
-always @ (negedge PH_2 or negedge RESET_N)
+always @ (negedge PH_2) //  or negedge RESET_N)
 begin
-	if(~RESET_N)
-	begin
-		CD3_FINT <= 1'b1;
-		CD3_FINT_SM <= 2'b00;
-	end
-	else
-	begin
-
 // CD (BitBang) int for COCO3
 // output	CD3_FINT
 // State		CD3_FINT_SM
@@ -1647,7 +1717,7 @@ begin
 		if(FIRQ_SERIAL == 1'b0)		// disabled
 		begin
 			CD3_FINT <= 1'b1;			// no int
-			CD3_FINT_SM <= 2'b00;
+			CD3_FINT_SM <= 2'b10;
 		end
 		else								// enabled
 		begin
@@ -1683,19 +1753,10 @@ begin
 			end
 			endcase
 		end
-	end
 end
 
-always @ (negedge PH_2 or negedge RESET_N)
+always @ (negedge PH_2) //  or negedge RESET_N)
 begin
-	if(~RESET_N)
-	begin
-		KEY_FINT <= 1'b1;
-		KEY_FINT_SM <= 2'b00;
-	end
-	else
-	begin
-
 // Keyboard int for COCO3
 // output	KEY_FINT
 // State		KEY_FINT_SM
@@ -1705,7 +1766,7 @@ begin
 		if(FIRQ_KEY == 1'b0)		// disabled
 		begin
 			KEY_FINT <= 1'b1;			// no int
-			KEY_FINT_SM <= 2'b00;
+			KEY_FINT_SM <= 2'b10;
 		end
 		else								// enabled
 		begin
@@ -1741,19 +1802,10 @@ begin
 			end
 			endcase
 		end
-	end
 end
 
-always @ (negedge PH_2 or negedge RESET_N)
+always @ (negedge PH_2) //  or negedge RESET_N)
 begin
-	if(~RESET_N)
-	begin
-		CAR_FINT <= 1'b1;
-		CAR_FINT_SM <= 2'b00;
-	end
-	else
-	begin
-
 // CART (Serial HDD) int for COCO3
 // output	CAR_FINT
 // State		CAR_FINT_SM
@@ -1763,7 +1815,7 @@ begin
 		if(FIRQ_CART == 1'b0)		// disabled
 		begin
 			CAR_FINT <= 1'b1;			// no int
-			CAR_FINT_SM <= 2'b00;
+			CAR_FINT_SM <= 2'b10;
 		end
 		else								// enabled
 		begin
@@ -1799,7 +1851,6 @@ begin
 			end
 			endcase
 		end
-	end
 end
 
 assign KEY_INT_RAW = (KEYBOARD_IN == 8'hFF)			?	1'b1:
@@ -1821,10 +1872,11 @@ begin
 	endcase
 end
 
+// The Cart interrupts had to be modified because they are not self clearing
 assign CPU_IRQ =  (HS_INT & VS_INT)
-					&	(~GIME_IRQ  | (TMR_INT  & HBORD_INT  & VBORD_INT  & CD3_INT  & KEY_INT  & CAR_INT));
+					&	(~GIME_IRQ  | (TMR_INT  & HBORD_INT  & VBORD_INT  & CD3_INT  & KEY_INT  & (!IRQ_CART | CART_IRQ)));
 assign CPU_FIRQ = (CD1_INT & CART1_INT)
-					&	(~GIME_FIRQ | (TMR_FINT & HBORD_FINT & VBORD_FINT & CD3_FINT & KEY_FINT & CAR_FINT));
+					&	(~GIME_FIRQ | (TMR_FINT & HBORD_FINT & VBORD_FINT & CD3_FINT & KEY_FINT & (!FIRQ_CART | CART_IRQ)));
 
 always @(posedge TMR_CLK)
 begin
@@ -1845,9 +1897,6 @@ begin
 		endcase
 end
 
-assign COM1_EN = ({PH_2, ADDRESS[15:1]} == 16'b1111111110101000)	?	1'b1:			//FF50-FF51
-					 																		1'b0;
-
 always @ (negedge PH_2 or negedge RESET_N)
 begin
 	if(~RESET_N)
@@ -1858,7 +1907,7 @@ begin
 		HSYNC_INT <= 1'b0;
 		HSYNC_POL <= 1'b0;
 		DDR1 <= 1'b0;
-		SEL[1] <= 1'b0;
+		SEL[0] <= 1'b0;
 // FF02
 		DD_REG2 <= 8'h00;
 		KEY_COLUMN <= 8'h00;
@@ -1866,7 +1915,7 @@ begin
 		VSYNC_INT <= 1'b0;
 		VSYNC_POL <= 1'b0;
 		DDR2 <= 1'b0;
-		SEL[0] <= 1'b0;
+		SEL[1] <= 1'b0;
 // FF20
 		DD_REG3 <= 8'h00;
 		DTOA_CODE <= 6'b000000;
@@ -1886,7 +1935,12 @@ begin
 		CART_POL <= 1'b0;
 		DDR4 <= 1'b0;
 		SOUND_EN <= 1'b0;
+// FF7A
+		ORCH_LEFT <= 8'b10000000;
+// FF7B
+		ORCH_RIGHT <= 8'b10000000;
 // FF7F
+		W_PROT <= 2'b11;
 		MPI_SCS <= SWITCH[3:2];
 		MPI_CTS <= SWITCH[3:2];
 // FF90
@@ -2045,7 +2099,7 @@ begin
 					HSYNC_INT <= DATA_OUT[0];
 					HSYNC_POL <= DATA_OUT[1];
 					DDR1 <= DATA_OUT[2];
-					SEL[1] <= DATA_OUT[3];
+					SEL[0] <= DATA_OUT[3];
 			end
 			16'hFF02:
 			begin
@@ -2059,7 +2113,7 @@ begin
 				VSYNC_INT <= DATA_OUT[0];
 				VSYNC_POL <= DATA_OUT[1];
 				DDR2 <= DATA_OUT[2];
-				SEL[0] <= DATA_OUT[3];
+				SEL[1] <= DATA_OUT[3];
 			end
 			16'hFF04:
 			begin
@@ -2071,7 +2125,7 @@ begin
 					HSYNC_INT <= DATA_OUT[0];
 					HSYNC_POL <= DATA_OUT[1];
 					DDR1 <= DATA_OUT[2];
-					SEL[1] <= DATA_OUT[3];
+					SEL[0] <= DATA_OUT[3];
 			end
 			16'hFF06:
 			begin
@@ -2085,7 +2139,7 @@ begin
 				VSYNC_INT <= DATA_OUT[0];
 				VSYNC_POL <= DATA_OUT[1];
 				DDR2 <= DATA_OUT[2];
-				SEL[0] <= DATA_OUT[3];
+				SEL[1] <= DATA_OUT[3];
 			end
 			16'hFF08:
 			begin
@@ -2097,7 +2151,7 @@ begin
 					HSYNC_INT <= DATA_OUT[0];
 					HSYNC_POL <= DATA_OUT[1];
 					DDR1 <= DATA_OUT[2];
-					SEL[1] <= DATA_OUT[3];
+					SEL[0] <= DATA_OUT[3];
 			end
 			16'hFF0A:
 			begin
@@ -2111,7 +2165,7 @@ begin
 				VSYNC_INT <= DATA_OUT[0];
 				VSYNC_POL <= DATA_OUT[1];
 				DDR2 <= DATA_OUT[2];
-				SEL[0] <= DATA_OUT[3];
+				SEL[1] <= DATA_OUT[3];
 			end
 			16'hFF0C:
 			begin
@@ -2123,7 +2177,7 @@ begin
 					HSYNC_INT <= DATA_OUT[0];
 					HSYNC_POL <= DATA_OUT[1];
 					DDR1 <= DATA_OUT[2];
-					SEL[1] <= DATA_OUT[3];
+					SEL[0] <= DATA_OUT[3];
 			end
 			16'hFF0E:
 			begin
@@ -2137,7 +2191,7 @@ begin
 				VSYNC_INT <= DATA_OUT[0];
 				VSYNC_POL <= DATA_OUT[1];
 				DDR2 <= DATA_OUT[2];
-				SEL[0] <= DATA_OUT[3];
+				SEL[1] <= DATA_OUT[3];
 			end
 			16'hFF10:
 			begin
@@ -2149,7 +2203,7 @@ begin
 					HSYNC_INT <= DATA_OUT[0];
 					HSYNC_POL <= DATA_OUT[1];
 					DDR1 <= DATA_OUT[2];
-					SEL[1] <= DATA_OUT[3];
+					SEL[0] <= DATA_OUT[3];
 			end
 			16'hFF12:
 			begin
@@ -2163,7 +2217,7 @@ begin
 				VSYNC_INT <= DATA_OUT[0];
 				VSYNC_POL <= DATA_OUT[1];
 				DDR2 <= DATA_OUT[2];
-				SEL[0] <= DATA_OUT[3];
+				SEL[1] <= DATA_OUT[3];
 			end
 			16'hFF14:
 			begin
@@ -2175,7 +2229,7 @@ begin
 					HSYNC_INT <= DATA_OUT[0];
 					HSYNC_POL <= DATA_OUT[1];
 					DDR1 <= DATA_OUT[2];
-					SEL[1] <= DATA_OUT[3];
+					SEL[0] <= DATA_OUT[3];
 			end
 			16'hFF16:
 			begin
@@ -2189,7 +2243,7 @@ begin
 				VSYNC_INT <= DATA_OUT[0];
 				VSYNC_POL <= DATA_OUT[1];
 				DDR2 <= DATA_OUT[2];
-				SEL[0] <= DATA_OUT[3];
+				SEL[1] <= DATA_OUT[3];
 			end
 			16'hFF18:
 			begin
@@ -2201,7 +2255,7 @@ begin
 					HSYNC_INT <= DATA_OUT[0];
 					HSYNC_POL <= DATA_OUT[1];
 					DDR1 <= DATA_OUT[2];
-					SEL[1] <= DATA_OUT[3];
+					SEL[0] <= DATA_OUT[3];
 			end
 			16'hFF1A:
 			begin
@@ -2215,7 +2269,7 @@ begin
 				VSYNC_INT <= DATA_OUT[0];
 				VSYNC_POL <= DATA_OUT[1];
 				DDR2 <= DATA_OUT[2];
-				SEL[0] <= DATA_OUT[3];
+				SEL[1] <= DATA_OUT[3];
 			end
 			16'hFF1C:
 			begin
@@ -2227,7 +2281,7 @@ begin
 					HSYNC_INT <= DATA_OUT[0];
 					HSYNC_POL <= DATA_OUT[1];
 					DDR1 <= DATA_OUT[2];
-					SEL[1] <= DATA_OUT[3];
+					SEL[0] <= DATA_OUT[3];
 			end
 			16'hFF1E:
 			begin
@@ -2241,7 +2295,7 @@ begin
 				VSYNC_INT <= DATA_OUT[0];
 				VSYNC_POL <= DATA_OUT[1];
 				DDR2 <= DATA_OUT[2];
-				SEL[0] <= DATA_OUT[3];
+				SEL[1] <= DATA_OUT[3];
 			end
 			16'hFF20:
 			begin
@@ -2491,8 +2545,14 @@ begin
 				DDR4 <= DATA_OUT[2];
 				SOUND_EN <= DATA_OUT[3];
 			end
+			16'hFF7A:
+				ORCH_LEFT <= DATA_OUT;
+			16'hFF7B:
+				ORCH_RIGHT <= DATA_OUT;
 			16'hFF7F:
 			begin
+				W_PROT[0] <=  DATA_OUT[2] | ~DATA_OUT[3];
+				W_PROT[1] <= ~DATA_OUT[2] |  DATA_OUT[3] | W_PROT[0];
 				MPI_SCS <= DATA_OUT[1:0];
 				MPI_CTS <= DATA_OUT[5:4];
 			end
@@ -2805,511 +2865,324 @@ begin
 	end
 end
 
-assign SPEAKER =	(SOUND_EN==1'b0)					?	SBS:
-						({SOUND_EN, SEL} == 3'b100)	?	DIG_SOUND:
-																	1'b0;
+assign SLOT3_HW = ({MPI_SCS, ADDRESS[15:5]} == 13'b1011111111010)	?	1'b1:
+																							1'b0;
 
-always @(posedge KB_CLK[2] or negedge RESET_N)
+always @(negedge PH_2 or negedge RESET_N)
 begin
 	if(~RESET_N)
-	begin
-		DIG_SOUND <= 1'b0;
-		DTOA_LATCH <= 7'b0000000;
-		DIG_STATE  <= 7'b0000000;
-	end
+		ROM_BANK <= 4'b0000;
 	else
-	begin
-		case(DIG_STATE)
-		7'b0000000:
-		begin
-			DIG_STATE <= 7'b0000001;
-			DIG_SOUND <= 1'b0;
-			DTOA_LATCH[6] <= SBS;
-			if({SOUND_EN, SEL} == 3'b100)
-				DTOA_LATCH[5:0] <= DTOA_CODE;
-		end
-		7'b0000001:
-		begin
-			DIG_STATE <= 7'b0000010;
-			if(DTOA_LATCH[6:1] == 6'b000000)
-				DIG_SOUND <= 1'b1;
-			else
-				DIG_SOUND <= 1'b0;
-		end
-		7'b1111111:
-		begin
-			DIG_SOUND <= 1'b1;
-			DIG_STATE <= 6'b000000;
-		end
-		default:
-		begin
-			DIG_STATE <= DIG_STATE + 1'b1;
-			if(DIG_STATE == DTOA_LATCH)
-				DIG_SOUND <= 1'b1;
-		end
-		endcase
-	end
+		if({SLOT3_HW, RW_N} == 2'b10)
+			ROM_BANK <= DATA_OUT[3:0];
 end
 
-`include "CC3_80_NODSK.v"
-`include "CC3_88_NODSK.v"
-`include "CC3_90_NODSK.v"
-`include "CC3_98_NODSK.v"
-`include "CC3_A0_NODSK.v"
-`include "CC3_A8_NODSK.v"
-`include "CC3_B0_NODSK.v"
-`include "CC3_B8_NODSK.v"
-`include "CC3_C0_NODSK.v"
-`include "CC3_C8_NODSK.v"
-`include "CC3_D0_NODSK.v"
-`include "CC3_D8_NODSK.v"
-`include "CC3_E0_NODSK.v"
-`include "CC3_E8_NODSK.v"
-`include "CC3_F0_NODSK.v"
-`include "CC3_F8_NODSK.v"
+assign SPEAKER[0] =	PWM_LEFT[9];
+
+assign SPEAKER[1] =	PWM_RIGHT[9];
+
+// Internal Sound generation
+assign SOUND		=	({SOUND_EN, SEL} == 3'b100)	?	{1'b0, SBS, 6'b000000} + {1'b0, DTOA_CODE, 1'b0}:
+																		{1'b0, SBS, 6'b000000};
+
+assign DAC_LEFT	=	ORCH_LEFT	+ SOUND;
+assign DAC_RIGHT	=	ORCH_RIGHT	+ SOUND;
+
+always @(posedge PIXEL[3])												// Clock = 50/16 = 3.125 MHz
+begin
+	PWM_LEFT		<= PWM_LEFT[8:0]	+ DAC_LEFT;
+	PWM_RIGHT	<= PWM_RIGHT[8:0]	+ DAC_RIGHT;
+end
+
+// ROMS
+`include "CC3_80.v"
+`include "CC3_88.v"
+`include "CC3_90.v"
+`include "CC3_98.v"
+`include "CC3_A0.v"
+`include "CC3_A8.v"
+`include "CC3_B0.v"
+`include "CC3_B8.v"
+`include "CC3_C0.v"
+`include "CC3_C8.v"
+`include "CC3_D0.v"
+`include "CC3_D8.v"
+`include "CC3_E0.v"
+`include "CC3_E8.v"
+`include "CC3_F0.v"
+`include "CC3_F8.v"
 `include "DSK_C0.v"
 `include "DSK_C8.v"
 `include "DSK_D0.v"
 `include "DSK_D8.v"
-/*****************************************************************************
-* Digital Joystick to CoCo compatable
-* 000000 0
-* 010000	16
-* 100000 32
-* 110000 48
-* 111111 63
-* left right signal  digtal code
-* 10                 000000-001111 0-15
-* 11                 010000-101111 16-47
-* 01                 110000-111111 48-63
-******************************************************************************/
-
-assign JSTICK =	({SEL, PADDLE[1:0], DTOA_CODE[5:3]}	== 7'b1101000)		?	1'b1:	// 0-7
-						({SEL, PADDLE[1:0], DTOA_CODE[5]}	== 5'b11110)		?	1'b1: // 0-31
-						({SEL, PADDLE[1:0], DTOA_CODE[5]}	== 5'b11100)		?	1'b1: // 0-31
-						({SEL, PADDLE[1:0], DTOA_CODE[5:4]}	== 6'b111010)		?	1'b1: // 32-47
-						({SEL, PADDLE[1:0], DTOA_CODE[5:3]}	== 7'b1110110)		?	1'b1: // 48-55
-
-						({SEL, PADDLE[3:2], DTOA_CODE[5:3]}	== 7'b1001000)		?	1'b1:	// 0-7
-						({SEL, PADDLE[3:2], DTOA_CODE[5]}	== 5'b10110)		?	1'b1: // 0-31
-						({SEL, PADDLE[3:2], DTOA_CODE[5]}	== 5'b10100)		?	1'b1: // 0-31
-						({SEL, PADDLE[3:2], DTOA_CODE[5:4]}	== 6'b101010)		?	1'b1: // 32-47
-						({SEL, PADDLE[3:2], DTOA_CODE[5:3]}	== 7'b1010110)		?	1'b1: // 48-55
-
-						({SEL, PADDLE[5:4], DTOA_CODE[5:3]}	== 7'b0101000)		?	1'b1:	// 0-7
-						({SEL, PADDLE[5:4], DTOA_CODE[5]}	== 5'b01110)		?	1'b1: // 0-31
-						({SEL, PADDLE[5:4], DTOA_CODE[5]}	== 5'b01100)		?	1'b1: // 0-31
-						({SEL, PADDLE[5:4], DTOA_CODE[5:4]}	== 6'b011010)		?	1'b1: // 32-47
-						({SEL, PADDLE[5:4], DTOA_CODE[5:3]}	== 7'b0110110)		?	1'b1: // 48-55
-
-						({SEL, PADDLE[7:6], DTOA_CODE[5:3]}	== 7'b0001000)		?	1'b1:	// 0-7
-						({SEL, PADDLE[7:6], DTOA_CODE[5]}	== 5'b00110)		?	1'b1: // 0-31
-						({SEL, PADDLE[7:6], DTOA_CODE[5]}	== 5'b00100)		?	1'b1: // 0-31
-						({SEL, PADDLE[7:6], DTOA_CODE[5:4]}	== 6'b001010)		?	1'b1: // 32-47
-						({SEL, PADDLE[7:6], DTOA_CODE[5:3]}	== 7'b0010110)		?	1'b1: // 48-55
-
-																									1'b0;
+`include "RS232_C0.v"
+`include "RS232_C8.v"
+`include "CART_C0.v"
 
 /*****************************************************************************
-* Convert PS/2 keyboard to ASCII keyboard
+* Joystick to CoCo compatable
 ******************************************************************************/
-// Changes from CoCo keyboard
-// Shift 2 on PS2 becomes unshifted @
-// also unused ` ~ key becomes shifted and unshifted @
-assign KEYBOARD_IN[0] =  ~((~KEY_COLUMN[0] & KEY[62] & (KEY[1] | KEY[2]))	// KEY[62] is PS2 2 @
-								 | (~KEY_COLUMN[0] & KEY[49])								// KEY[49] is PS2 ` ~
-								 | (~KEY_COLUMN[1] & KEY[14])		// A
-								 | (~KEY_COLUMN[2] & KEY[20])		// B
-								 | (~KEY_COLUMN[3] & KEY[22])		// C
-								 | (~KEY_COLUMN[4] & KEY[30])		// D
-								 | (~KEY_COLUMN[5] & KEY[38])		// E
-								 | (~KEY_COLUMN[6] & KEY[29])		// F
-								 | (~KEY_COLUMN[7] & KEY[28])		// G
-								 | (~P_SWITCH[0]));
-
-assign KEYBOARD_IN[1] =	 ~((~KEY_COLUMN[0] & KEY[27])		// H
-								 | (~KEY_COLUMN[1] & KEY[33])		// I
-								 | (~KEY_COLUMN[2] & KEY[26])		// J
-								 | (~KEY_COLUMN[3] & KEY[25])		// K
-								 | (~KEY_COLUMN[4] & KEY[46])		// L
-								 | (~KEY_COLUMN[5] & KEY[18])		// M
-								 | (~KEY_COLUMN[6] & KEY[19])		// N
-								 | (~KEY_COLUMN[7] & KEY[45])		// O
-								 | (~P_SWITCH[1]));
-
-assign KEYBOARD_IN[2] =	 ~((~KEY_COLUMN[0] & KEY[9])		// P
-								 | (~KEY_COLUMN[1] & KEY[15])		// Q
-								 | (~KEY_COLUMN[2] & KEY[37])		// R
-								 | (~KEY_COLUMN[3] & KEY[31])		// S
-								 | (~KEY_COLUMN[4] & KEY[36])		// T
-								 | (~KEY_COLUMN[5] & KEY[34])		// U
-								 | (~KEY_COLUMN[6] & KEY[21])		// V
-								 | (~KEY_COLUMN[7] & KEY[39])		// W
-								 | (~P_SWITCH[2]));
-
-assign KEYBOARD_IN[3] =	 ~((~KEY_COLUMN[0] & KEY[23])		// X
-								 | (~KEY_COLUMN[1] & KEY[35])		// Y
-								 | (~KEY_COLUMN[2] & KEY[13])		// Z
-								 | (~KEY_COLUMN[3] & KEY[32])		// up
-								 | (~KEY_COLUMN[4] & KEY[8])		// down
-								 | (~KEY_COLUMN[5] & KEY[16])		// left
-								 | (~KEY_COLUMN[5] & KEY[50])		// Backspace
-								 | (~KEY_COLUMN[6] & KEY[24])		// right
-								 | (~KEY_COLUMN[7] & KEY[12])		// space
-								 | (~P_SWITCH[3]));
-
-// Changes from CoCo keyboard
-// Caps Lock on PS2 becomes shifted 0
-// Shifted ' on PS2 becomes shifted 2(")
-// Shifted 7 on PS2 becomes shifted 6(&)
-// Shifted 6 on PS2 is also shifted 6(&) since ^ is not used
-// Unshifted ' on PS2 becomes shifted 7(')
-assign KEYBOARD_IN[4] =	 ~((~KEY_COLUMN[0] & KEY[53] & ~(KEY[1] | KEY[2]))		// KEY[53] is PS2 0 )
-								 | (~KEY_COLUMN[0] & CAPS_CLK)								// Caps Lock
-								 | (~KEY_COLUMN[1] & KEY[63])									// KEY[63] is PS2 1 !
-								 | (~KEY_COLUMN[2] & KEY[62] & ~(KEY[1] | KEY[2]))		// KEY[62] is PS2 2 @
-								 | (~KEY_COLUMN[2] & KEY[40] &  (KEY[1] | KEY[2]))		// KEY[40] is PS2 ' "
-								 | (~KEY_COLUMN[3] & KEY[61])		// 3
-								 | (~KEY_COLUMN[4] & KEY[60])		// 4
-								 | (~KEY_COLUMN[5] & KEY[59])		// 5
-								 | (~KEY_COLUMN[6] & KEY[58])		// 6
-								 | (~KEY_COLUMN[6] & KEY[57] &  (KEY[1] | KEY[2]))		// KEY[57] is PS2 7 &
-								 | (~KEY_COLUMN[7] & KEY[57] & ~(KEY[1] | KEY[2]))
-								 | (~KEY_COLUMN[7] & KEY[40] & ~(KEY[1] | KEY[2])));	// KEY[49] is PS2 ' "
-
-// Changes from CoCo keyboard
-// Shifted 9 on PS2 becomes Shifted 8(()
-// Shifted 0 on PS2 becomes shifted 9())
-// Shifted ; on PS2 becomes unshifted :
-// Shifted 8 on PS2 becomes shift :(*)
-// Shifted = on PS2 becomes shifted ;(+)
-// Unshifted = on PS2 becomes shifted -(=)
-assign KEYBOARD_IN[5] =	 ~((~KEY_COLUMN[0] & KEY[55] & ~(KEY[1] | KEY[2]))		// KEY[55] is PS2 8 *
-								 | (~KEY_COLUMN[0] & KEY[54] &  (KEY[1] | KEY[2]))		// KEY[54] is PS2 9 (
-								 | (~KEY_COLUMN[1] & KEY[54] & ~(KEY[1] | KEY[2]))
-								 | (~KEY_COLUMN[1] & KEY[53] &  (KEY[1] | KEY[2]))		// KEY[53] is PS2 0 )
-								 | (~KEY_COLUMN[2] & KEY[10] &  (KEY[1] | KEY[2]))		// KEY[10] is PS2 ; :
-								 | (~KEY_COLUMN[2] & KEY[55] &  (KEY[1] | KEY[2]))
-								 | (~KEY_COLUMN[3] & KEY[10] & ~(KEY[1] | KEY[2]))
-								 | (~KEY_COLUMN[3] & KEY[51] &  (KEY[1] | KEY[2]))		// KEY[51] is PS2 = +
-								 | (~KEY_COLUMN[4] & KEY[17])		// , <
-								 | (~KEY_COLUMN[5] & KEY[52] & ~(KEY[1] | KEY[2]))		// KEY[52] is PS2 - _
-								 | (~KEY_COLUMN[5] & KEY[51] & ~(KEY[1] | KEY[2]))
-								 | (~KEY_COLUMN[6] & KEY[47])		// . >
-								 | (~KEY_COLUMN[7] & KEY[11]));	// / ?
-
-assign KEYBOARD_IN[6] =	 ~((~KEY_COLUMN[0] & KEY[43])		// CR
-								 | (~KEY_COLUMN[1] & KEY[56])		// TAB
-								 | (~KEY_COLUMN[2] & KEY[5])		// esc
-								 | (~KEY_COLUMN[3] & KEY[7])		// Left ALT
-								 | (~KEY_COLUMN[3] & KEY[44])		// Right ALT
-								 | (~KEY_COLUMN[3] & BUTTON[2])	// Button 2 for Easter Egg
-								 | (~KEY_COLUMN[4] & KEY[6])		// Ctrl
-								 | (~KEY_COLUMN[4] & BUTTON[2])	// Button 2 for Easter Egg
-								 | (~KEY_COLUMN[5] & F1)
-								 | (~KEY_COLUMN[6] & F2)
-								 | (~KEY_COLUMN[7] & KEY[2] & ~KEY[62] & ~KEY[10])		// NEVER Shift PS2 2 @ and ; :
-								 | (~KEY_COLUMN[7] & KEY[1] & ~KEY[62] & ~KEY[10])
-								 | (~KEY_COLUMN[7] & CAPS_CLK)								// Always shift Caps Lock
-								 | (~KEY_COLUMN[7] & KEY[51])									// Always shift PS2 = +
-								 | (~KEY_COLUMN[7] & KEY[40]));								// Always shift PS2 ' "
-					
-
-
-
-assign KEYBOARD_IN[7] =	 JSTICK;									// Joystick input
-
-always @(posedge KB_CLK[4] or negedge RESET_N)
+always @(posedge CLK50MHZ or negedge RESET_N)
 begin
 	if(~RESET_N)
 	begin
-		KEY <= 64'h0;
-		CAPS_CLK <= 1'b0;
+		JOY_CLK <= 9'h000;
+	end
+	else
+		case(JOY_CLK)
+		9'd288:
+		begin
+			JOY_CLK <= 9'd000;
+		end
+		default:
+			JOY_CLK <= JOY_CLK + 1'b1;			//  JOY_CLK = 50MHz/288 = 173,611.1 Hz
+		endcase
+end
+
+always @(posedge JOY_CLK[8] or negedge RESET_N)
+begin
+	if(~RESET_N)
+	begin
+		PADDLE_RST <= 4'b0000;				// Reset all Joysticks
+		JOY1_MEM <= 8'h00;
+		JOY2_MEM <= 8'h00;
+		JOY3_MEM <= 8'h00;
+		JOY4_MEM <= 8'h00;
+		JOY_STATE <= 8'h00;
+		JOY_STATUS <= 4'b0000;
 	end
 	else
 	begin
-		case(SCAN)
-		8'h16:
+		JOY_STATUS <= PADDLE;
+		case(JOY_STATE)
+		8'h00:
 		begin
-			KEY[63] <= PRESS;	// 1 !
+			JOY_STATE <= 8'h01;
+			PADDLE_RST <= 4'b1111;
+			if(!PADDLE[0])
+				JOY1_MEM <= 8'h00;
+			if(!PADDLE[1])
+				JOY2_MEM <= 8'h00;
+			if(!PADDLE[2])
+				JOY3_MEM <= 8'h00;
+			if(!PADDLE[3])
+				JOY4_MEM <= 8'h00;
 		end
-		8'h1E:
+		8'hFC:
 		begin
-			KEY[62] <= PRESS;	// 2 @
+			JOY_STATE <= 8'hFD;
+			if({JOY_STATUS[0],PADDLE[0]} != 2'b00)
+				JOY1_MEM <= 8'hFF;
+			if({JOY_STATUS[1],PADDLE[1]} != 2'b00)
+				JOY2_MEM <= 8'hFF;
+			if({JOY_STATUS[2],PADDLE[2]} != 2'b00)
+				JOY3_MEM <= 8'hFF;
+			if({JOY_STATUS[3],PADDLE[3]} != 2'b00)
+				JOY4_MEM <= 8'hFF;
 		end
-		8'h26:
+		8'hFD:
 		begin
-			KEY[61] <= PRESS;	// 3 #
+			JOY1_COUNT <= JOY1_MEM[7:2];
+			JOY2_COUNT <= JOY2_MEM[7:2];
+			JOY3_COUNT <= JOY3_MEM[7:2];
+			JOY4_COUNT <= JOY4_MEM[7:2];
+			if(CLICK[3])						// Wait here until DEB_COUNTER[3] goes high
+			begin
+				JOY_STATE <= 8'hFE;
+			end
 		end
-		8'h25:
+		8'hFE:
 		begin
-			KEY[60] <= PRESS;	// 4 $
+			if(!CLICK[3])						// Wait here until DEB_COUNTER[3] goes low
+			begin
+				JOY_STATE <= 8'hFF;
+				PADDLE_RST <= 4'b0000;
+			end
 		end
-		8'h2E:
+		8'hFF:
 		begin
-			KEY[59] <= PRESS;	// 5 %
+			JOY_STATE <= 8'h00;
+			PADDLE_RST <= 4'b1111;
 		end
-		8'h36:
+		default:
 		begin
-			KEY[58] <= PRESS;	// 6 ^
+			JOY_STATE <= JOY_STATE + 1'b1;
+
+			if({JOY_STATUS[0],PADDLE[0]} == 2'b10)		//Edge detect falling edge
+			begin
+				JOY1_MEM <= JOY_STATE;
+			end
+
+			if({JOY_STATUS[1],PADDLE[1]} == 2'b10)		//Edge detect falling edge
+			begin
+				JOY2_MEM <= JOY_STATE;
+			end
+
+			if({JOY_STATUS[2],PADDLE[2]} == 2'b10)		//Edge detect falling edge
+			begin
+				JOY3_MEM <= JOY_STATE;
+			end
+
+			if({JOY_STATUS[3],PADDLE[3]} == 2'b10)		//Edge detect falling edge
+			begin
+				JOY4_MEM <= JOY_STATE;
+			end
+
 		end
-		8'h3D:
-		begin
-			KEY[57] <= PRESS;	// 7 &
-		end
-		8'h0D:
-		begin
-			KEY[56] <= PRESS;	// TAB
-		end
-		8'h3E:
-		begin
-			KEY[55] <= PRESS;	// 8 *
-		end
-		8'h46:
-		begin
-			KEY[54] <= PRESS;	// 9 (
-		end
-		8'h45:
-		begin
-			KEY[53] <= PRESS;	// 0 )
-		end
-		8'h4E:
-		begin
-			KEY[52] <= PRESS;	// - _
-		end
-		8'h55:
-		begin
-			KEY[51] <= PRESS;	// = +
-		end
-		8'h66:
-		begin
-			KEY[50] <= PRESS;	// backspace
-		end
-		8'h0E:
-		begin
-			KEY[49] <= PRESS;	// ` ~
-		end
-		8'h5D:
-		begin
-			KEY[48] <= PRESS;	// \ |
-		end
-		8'h49:
-		begin
-			KEY[47] <= PRESS;	// . >
-		end
-		8'h4b:
-		begin
-			KEY[46] <= PRESS;	// L
-		end
-		8'h44:
-		begin
-			KEY[45] <= PRESS;	// O
-		end
-//		8'h11			KEY[44] <= PRESS; // line feed (really right ALT (Extended) see below
-		8'h5A:
-		begin
-			KEY[43] <= PRESS;	// CR
-		end
-		8'h54:
-		begin
-			KEY[42] <= PRESS;	// [ {
-		end
-		8'h5B:
-		begin
-			KEY[41] <= PRESS;	// ] }
-		end
-		8'h52:
-		begin
-			KEY[40] <= PRESS;	// ' "
-		end
-		8'h1D:
-		begin
-			KEY[39] <= PRESS;	// W
-		end
-		8'h24:
-		begin
-			KEY[38] <= PRESS;	// E
-		end
-		8'h2D:
-		begin
-			KEY[37] <= PRESS;	// R
-		end
-		8'h2C:
-		begin
-			KEY[36] <= PRESS;	// T
-		end
-		8'h35:
-		begin
-			KEY[35] <= PRESS;	// Y
-		end
-		8'h3C:
-		begin
-			KEY[34] <= PRESS;	// U
-		end
-		8'h43:
-		begin
-			KEY[33] <= PRESS;	// I
-		end
-		8'h75:
-		begin
-			KEY[32] <= PRESS;	// up
-		end
-		8'h1B:
-		begin
-			KEY[31] <= PRESS;	// S
-		end
-		8'h23:
-		begin
-			KEY[30] <= PRESS;	// D
-		end
-		8'h2B:
-		begin
-			KEY[29] <= PRESS;	// F
-		end
-		8'h34:
-		begin
-			KEY[28] <= PRESS;	// G
-		end
-		8'h33:
-		begin
-			KEY[27] <= PRESS;	// H
-		end
-		8'h3B:
-		begin
-			KEY[26] <= PRESS;	// J
-		end
-		8'h42:
-		begin
-			KEY[25] <= PRESS;	// K
-		end
-		8'h74:
-		begin
-			KEY[24] <= PRESS;	// right
-		end
-		8'h22:
-		begin
-			KEY[23] <= PRESS;	// X
-		end
-		8'h21:
-		begin
-			KEY[22] <= PRESS;	// C
-		end
-		8'h2a:
-		begin
-			KEY[21] <= PRESS;	// V
-		end
-		8'h32:
-		begin
-			KEY[20] <= PRESS;	// B
-		end
-		8'h31:
-		begin
-			KEY[19] <= PRESS;	// N
-		end
-		8'h3a:
-		begin
-			KEY[18] <= PRESS;	// M
-		end
-		8'h41:
-		begin
-			KEY[17] <= PRESS;	// , <
-		end
-		8'h6B:
-		begin
-			KEY[16] <= PRESS;	// left
-		end
-		8'h15:
-		begin
-			KEY[15] <= PRESS;	// Q
-		end
-		8'h1C:
-		begin
-			KEY[14] <= PRESS;	// A
-		end
-		8'h1A:
-		begin
-			KEY[13] <= PRESS;	// Z
-		end
-		8'h29:
-		begin
-			KEY[12] <= PRESS;	// Space
-		end
-		8'h4A:
-		begin
-			KEY[11] <= PRESS;	// / ?
-		end
-		8'h4C:
-		begin
-			KEY[10] <= PRESS;	// ; :
-		end
-		8'h4D:
-		begin
-			KEY[9] <= PRESS;	// P
-		end
-		8'h72:
-		begin
-			KEY[8] <= PRESS;	// down
-		end
-		8'h11:
-		begin
-			if(~EXTENDED)
-						KEY[7] <= PRESS;	// Repeat really left ALT
-			else
-						KEY[44] <= PRESS;	// LF really right ALT
-		end
-		8'h14:		KEY[6] <= PRESS;	// Ctrl either left or right
-		8'h76:
-		begin
-			KEY[5] <= PRESS;	// Esc
-		end
-//		8'h2C:		KEY[4] <= PRESS;	// na
-//		8'h35:		KEY[3] <= PRESS;	// na
-		8'h12:		KEY[2] <= PRESS;	// L-Shift
-		8'h59:		KEY[1] <= PRESS;	// R-Shift
-		8'h58:		CAPS_CLK <= PRESS;	// Caps
-		8'h05:		F1	<= PRESS;
-		8'h06:		F2	<= PRESS;
 		endcase
 	end
 end
 
-//always @(posedge CAPS_CLK or negedge RESET_N)
-//begin
-//	if(~RESET_N)
-//		CAPS <= 1'b1;
-//	else
-//		CAPS <= ~CAPS;
-//end
+assign JSTICK =	({SWITCH[5], SEL} == 3'b011)		?	JOY4:			// Left Y
+						({SWITCH[5], SEL} == 3'b010)		?	JOY3:			// Left X
+						({SWITCH[5], SEL} == 3'b001)		?	JOY2:			// Right Y
+						({SWITCH[5], SEL} == 3'b000)		?	JOY1:			// Right X
+						({SWITCH[5], SEL} == 3'b111)		?	JOY2:			// Right Y
+						({SWITCH[5], SEL} == 3'b110)		?	JOY1:			// Right X
+						({SWITCH[5], SEL} == 3'b101)		?	JOY4:			// Left Y
+																		JOY3;			// Left X
 
-initial
-	KB_CLK <= 0;
-always @ (posedge CLK50MHZ)				//50 MHz
-	KB_CLK <= KB_CLK + 1'b1;				//50/32 = 1.5625 MHz
+assign JOY1 = (JOY1_COUNT >= DTOA_CODE)	?	1'b1:
+															1'b0;
 
-wire [2:0] ps2_keyboard_test;
-ps2_keyboard KEYBOARD(
+assign JOY2 = (JOY2_COUNT >= DTOA_CODE)	?	1'b1:
+															1'b0;
+
+assign JOY3 = (JOY3_COUNT >= DTOA_CODE)	?	1'b1:
+															1'b0;
+
+assign JOY4 = (JOY4_COUNT >= DTOA_CODE)	?	1'b1:
+															1'b0;
+
+/*****************************************************************************
+* Convert PS/2 keyboard to ASCII keyboard
+******************************************************************************/
+assign KEYBOARD_IN[0] =  ~((~KEY_COLUMN[0] & KEY[0])				// @
+								 | (~KEY_COLUMN[1] & KEY[1])				// A
+								 | (~KEY_COLUMN[2] & KEY[2])				// B
+								 | (~KEY_COLUMN[3] & KEY[3])				// C
+								 | (~KEY_COLUMN[4] & KEY[4])				// D
+								 | (~KEY_COLUMN[5] & KEY[5])				// E
+								 | (~KEY_COLUMN[6] & KEY[6])				// F
+								 | (~KEY_COLUMN[7] & KEY[7])				// G
+								 | (~SWITCH[5]     & ~P_SWITCH[0])		// Right Joystick Switch 1
+								 | ( SWITCH[5]     & ~P_SWITCH[2]));	// Left Joystick Switch 1
+
+assign KEYBOARD_IN[1] =	 ~((~KEY_COLUMN[0] & KEY[8])				// H
+								 | (~KEY_COLUMN[1] & KEY[9])				// I
+								 | (~KEY_COLUMN[2] & KEY[10])				// J
+								 | (~KEY_COLUMN[3] & KEY[11])				// K
+								 | (~KEY_COLUMN[4] & KEY[12])				// L
+								 | (~KEY_COLUMN[5] & KEY[13])				// M
+								 | (~KEY_COLUMN[6] & KEY[14])				// N
+								 | (~KEY_COLUMN[7] & KEY[15])				// O
+								 | (~SWITCH[5]     & ~P_SWITCH[2])		// Left Joystick Switch 1
+								 | ( SWITCH[5]     & ~P_SWITCH[0]));	// Right Joystick Switch 1
+
+assign KEYBOARD_IN[2] =	 ~((~KEY_COLUMN[0] & KEY[16])				// P
+								 | (~KEY_COLUMN[1] & KEY[17])				// Q
+								 | (~KEY_COLUMN[2] & KEY[18])				// R
+								 | (~KEY_COLUMN[3] & KEY[19])				// S
+								 | (~KEY_COLUMN[4] & KEY[20])				// T
+								 | (~KEY_COLUMN[5] & KEY[21])				// U
+								 | (~KEY_COLUMN[6] & KEY[22])				// V
+								 | (~KEY_COLUMN[7] & KEY[23])				// W
+								 | (~SWITCH[5]     & ~P_SWITCH[1])		// Left Joystick Switch 2
+								 | ( SWITCH[5]     & ~P_SWITCH[3]));	// Right Joystick Switch 2
+
+assign KEYBOARD_IN[3] =	 ~((~KEY_COLUMN[0] & KEY[24])				// X
+								 | (~KEY_COLUMN[1] & KEY[25])				// Y
+								 | (~KEY_COLUMN[2] & KEY[26])				// Z
+								 | (~KEY_COLUMN[3] & KEY[27])				// up
+								 | (~KEY_COLUMN[4] & KEY[28])				// down
+								 | (~KEY_COLUMN[5] & KEY[29])				// Backspace & left
+								 | (~KEY_COLUMN[6] & KEY[30])				// right
+								 | (~KEY_COLUMN[7] & KEY[31])				// space
+								 | (~SWITCH[5]     & ~P_SWITCH[3])		// Right Joystick Switch 2
+								 | ( SWITCH[5]     & ~P_SWITCH[1]));	// Left Joystick Switch 2
+
+assign KEYBOARD_IN[4] =	 ~((~KEY_COLUMN[0] & KEY[32])		// 0
+								 | (~KEY_COLUMN[1] & KEY[33])		// 1
+								 | (~KEY_COLUMN[2] & KEY[34])		// 2
+								 | (~KEY_COLUMN[3] & KEY[35])		// 3
+								 | (~KEY_COLUMN[4] & KEY[36])		// 4
+								 | (~KEY_COLUMN[5] & KEY[37])		// 5
+								 | (~KEY_COLUMN[6] & KEY[38])		// 6
+								 | (~KEY_COLUMN[7] & KEY[39]));	// 7
+
+assign KEYBOARD_IN[5] =	 ~((~KEY_COLUMN[0] & KEY[40])		// 8
+								 | (~KEY_COLUMN[1] & KEY[41])		// 9
+								 | (~KEY_COLUMN[2] & KEY[42])		// :
+								 | (~KEY_COLUMN[3] & KEY[43])		// ;
+								 | (~KEY_COLUMN[4] & KEY[44])		// ,
+								 | (~KEY_COLUMN[5] & KEY[45])		// -
+								 | (~KEY_COLUMN[6] & KEY[46])		// .
+								 | (~KEY_COLUMN[7] & KEY[47]));	// /
+
+assign KEYBOARD_IN[6] =	 ~((~KEY_COLUMN[0] & KEY[48])		// CR
+								 | (~KEY_COLUMN[1] & KEY[49])		// TAB
+								 | (~KEY_COLUMN[2] & KEY[50])		// ESC
+								 | (~KEY_COLUMN[3] & KEY[51])		// ALT
+								 | (~KEY_COLUMN[4] & KEY[52])		// CTRL
+								 | (~KEY_COLUMN[5] & KEY[53])		// F1
+								 | (~KEY_COLUMN[6] & KEY[54])		// F2
+								 | (~KEY_COLUMN[7] & KEY[55] & !SHIFT_OVERRIDE)	// shift
+								 |	(~KEY_COLUMN[7] & SHIFT));		// Forced Shift
+
+assign KEYBOARD_IN[7] =	 JSTICK;									// Joystick input
+
+COCOKEY coco_keyboard(
 		.RESET_N(RESET_N),
-		.CLK(KB_CLK[4]),
+		.CLK50MHZ(CLK50MHZ),
 		.PS2_CLK(ps2_clk),
 		.PS2_DATA(ps2_data),
-		.RX_SCAN(SCAN),
-		.RX_PRESSED(PRESS),
-		.RX_EXTENDED(EXTENDED),
-    .test(ps2_keyboard_test)
+		.KEY(KEY),
+		.SHIFT(SHIFT),
+		.SHIFT_OVERRIDE(SHIFT_OVERRIDE),
+		.RESET(RESET)
 );
+
 /*****************************************************************************
 * Video
 ******************************************************************************/
+`ifdef SIX_BIT_COLOR
+	assign RED1 = REDX1;
+	assign RED0 = REDX0;
+	assign GREEN1 = GREENX1;
+	assign GREEN0 = GREENX0;
+	assign BLUE1 = BLUEX1;
+	assign BLUE0 = BLUEX0;
+`else
+
+//	X1	X0
+// 0	0		Not asserted
+//	0	1		asserted in fourth quarter of pixel
+//	1	0		asserted in second half of pixel
+//	1	1		asserted in last 3/4 of pixel clock
+
+	assign RED1		= (REDX1 & PIXEL[0])						// 1/2 of the pixel clock
+						| (REDX0 & (~PIXEL[0] & CLK50MHZ));	// 1/4 of the pixel clock
+	assign RED0		= 1'b0;											// not connected
+	assign GREEN1	= (GREENX1 & PIXEL[0])						// 1/2 of the pixel clock
+						| (GREENX0 & (~PIXEL[0] & CLK50MHZ));	// 1/4 of the pixel clock
+	assign GREEN0	= 1'b0;											// not connected
+	assign BLUE1	= (BLUEX1 & PIXEL[0])						// 1/2 of the pixel clock
+						| (BLUEX0 & (~PIXEL[0] & CLK50MHZ));	// 1/4 of the pixel clock
+	assign BLUE0	= 1'b0;											// not connected
+`endif
+
+always @(posedge CLK50MHZ)
+	PIXEL <= PIXEL + 1'b1;
 
 COCO3VIDEO COCOVID(
-	.PIX_CLK(KB_CLK[0]),
+	.PIX_CLK(PIXEL[0]),
 	.RESET_N(RESET_N),
-	.RED1(RED1),
-	.GREEN1(GREEN1),
-	.BLUE1(BLUE1),
-	.RED0(RED0),
-	.GREEN0(GREEN0),
-	.BLUE0(BLUE0),
+	.RED1(REDX1),
+	.GREEN1(GREENX1),
+	.BLUE1(BLUEX1),
+	.RED0(REDX0),
+	.GREEN0(GREENX0),
+	.BLUE0(BLUEX0),
 	.HSYNC(H_SYNC),
 	.SYNC_FLAG(H_FLAG),
 	.VSYNC(V_SYNC),
@@ -3351,6 +3224,7 @@ COCO3VIDEO COCOVID(
 	.PALETTEE(PALETTEE),
 	.PALETTEF(PALETTEF)
 );
+
 /*****************************************************************************
 * UART timer to kill DOS after an error
 ******************************************************************************/
@@ -3368,7 +3242,7 @@ begin
 	end
 	else
 	begin
-		if({RW_N, ADDRESS} == 17'H0FF52)
+		if({MPI_SCS, RW_N, ADDRESS} == 19'b1101111111101010010)
 		begin
 			XART <= DATA_OUT;
 			XSTATE <= 2'b00;
@@ -3409,13 +3283,47 @@ glb6850 COM1(
 .DO(DATA_COM1),
 .CS(COM1_EN),
 .RW_N(RW_N),
-.IRQ(SER_IRQ),
+.IRQ(DISK_IRQ),
 .RS(ADDRESS[0]),
 .TXDATA(TXD1),
 .RXDATA(RXD1),
 .RTS(RTS1),
 .CTS(RTS1),
 .DCD(RTS1)
+);
+
+always @(posedge CLK50MHZ or negedge RESET_N)
+begin
+	if(~RESET_N)
+		CLK_6551 <= 5'd0;
+	else
+		case(CLK_6551)
+		5'd26:
+			CLK_6551 <= 5'd0;
+		default:
+			CLK_6551 <= CLK_6551 + 1'b1;
+		endcase
+end
+
+glb6551 COM2(
+.RESET_N(RESET_N),
+.RX_CLK(RX_CLK2),
+.RX_CLK_IN(CLK_6551[4]),
+.XTAL_CLK_IN(CLK_6551[4]),
+.PH_2(PH_2),
+.DI(DATA_OUT),
+.DO(DATA_COM2),
+.IRQ(SER_IRQ),
+.CS({1'b0, COM2_EN}),
+.RW_N(RW_N),
+.RS(ADDRESS[1:0]),
+.TXDATA_OUT(TXD3),
+.RXDATA_IN(RXD3),
+.RTS(RTS3),
+.CTS(CTS3),
+.DCD(DTR3),
+.DTR(DTR3),
+.DSR(DTR3)
 );
 
 /*****************************************************************************
@@ -3440,6 +3348,7 @@ begin
 		17'h0FFC0:
 		begin
 			CENT <= DATA_OUT[4:0];
+//			FLAG <= ~FLAG;
 		end
 		17'h0FFC1:
 		begin
@@ -3484,17 +3393,7 @@ begin
 						if(MIN == 6'd59)
 						begin
 							MIN <= 6'd0;
-							if(HOUR == 5'd23)
-							begin
-								HOUR <= 5'd0;
-								DMTH <= DMTH + 1'b1;
-								if(DWK == 3'd6)
-									DWK <= 3'd0;
-								else
-									DWK <= DWK + 1'b1;
-							end
-							else
-								HOUR <= HOUR + 1'b1;
+							HOUR <= HOUR + 1'b1;
 						end
 						else
 							MIN <= MIN + 1'b1;

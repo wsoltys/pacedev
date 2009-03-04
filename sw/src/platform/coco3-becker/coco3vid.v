@@ -1,4 +1,74 @@
 `timescale 1ns / 1ps
+////////////////////////////////////////////////////////////////////////////////
+// Project Name:	CoCo3FPGA Version 1.1
+// File Name:	coco3vid.v
+//
+// CoCo3 in an FPGA
+// Based on the Spartan 3 Starter board by Digilent Inc.
+// with the 1000K gate upgrade
+//
+// Revision: 1.0 08/31/08
+//           1.1 10/22/08
+////////////////////////////////////////////////////////////////////////////////
+//
+// CPU section copyrighted by John Kent
+//
+////////////////////////////////////////////////////////////////////////////////
+//
+// Color Computer 3 compatible system on a chip
+//
+// Version : 1.1
+//
+// Copyright (c) 2008 Gary Becker (gary_l_becker@yahoo.com)
+//
+// All rights reserved
+//
+// Redistribution and use in source and synthezised forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// Redistributions of source code must retain the above copyright notice,
+// this list of conditions and the following disclaimer.
+//
+// Redistributions in synthesized form must reproduce the above copyright
+// notice, this list of conditions and the following disclaimer in the
+// documentation and/or other materials provided with the distribution.
+//
+// Neither the name of the author nor the names of other contributors may
+// be used to endorse or promote products derived from this software without
+// specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+// PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
+// Please report bugs to the author, but before you do so, please
+// make sure that this is not a derivative work and that
+// you have the latest version of this file.
+//
+// The latest version of this file can be found at:
+//      http://groups.yahoo.com/group/CoCo3FPGA
+//
+// File history :
+//
+//  1.0		Full release
+//  1.1		Full Release
+//			Included Disk from Software version 1.01
+//			Fixed Joystick
+//			Added Orchastra-90 CC Stereo Music Synthesizer
+//
+////////////////////////////////////////////////////////////////////////////////
+// Gary Becker
+// gary_L_becker@yahoo.com
+////////////////////////////////////////////////////////////////////////////////
+
 module COCO3VIDEO(
 PIX_CLK,
 RESET_N,
@@ -111,7 +181,6 @@ input					BLINK;
 
 reg		[9:0]		LINE;
 reg		[4:0]		VLPR;
-reg		[7:0]		VADD;
 reg		[9:0]		PIXEL_COUNT;
 reg		[7:0]		CHAR_LATCH;
 reg		[7:0]		CHAR_LATCH3;
@@ -135,6 +204,7 @@ wire					BLINK;
 wire		[10:0]	ROM_ADDRESS;
 wire		[7:0]		ROM_DATA1;
 wire		[2:0]		LINES_ROW;
+reg		[2:0]		NUM_ROW;
 reg					SIX;
 wire					RED1X;
 wire					GREEN1X;
@@ -165,7 +235,9 @@ reg		[15:0]	GREEN0S;
 reg		[15:0]	BLUE1S;
 reg		[15:0]	BLUE0S;
 reg		[18:0]	ROW_ADD;
-wire		[18:0]	START_ADD;
+wire		[18:0]	ROW_START;
+wire		[6:0]		ROW_OFFSET;
+wire		[18:0]	SCREEN_OFF;
 reg					VBORDER;
 reg					HBORDER;
 wire		[5:0]		BORDER;
@@ -183,58 +255,27 @@ wire		[5:0]		BORDER;
 /*****************************************************************************
 * Read RAM
 ******************************************************************************/
-assign RAM_ADDRESS =
+assign RAM_ADDRESS = ROW_ADD[18:1] + ROW_OFFSET;
+
+assign ROW_OFFSET =
 // CoCo1 low res graphics (64 pixels / 2 bytes)
-({COCO,V[0]} == 2'b11)						?	ROW_ADD[18:1] + PIXEL_COUNT[9:6]:
+({COCO,V[0]} == 2'b11)						?	{3'b000, PIXEL_COUNT[9:6]}:
 //	HR Text
-({COCO,BP,HRES[2],CRES[0]}==4'b0000)	?	ROW_ADD[18:1] + PIXEL_COUNT[9:5]:	//32 / 40
-({COCO,BP,HRES[2],CRES[0]}==4'b0001)	?	ROW_ADD[18:1] + PIXEL_COUNT[9:4]:	//64 / 80
-({COCO,BP,HRES[2],CRES[0]}==4'b0010)	?	ROW_ADD[18:1] + PIXEL_COUNT[9:4]:	//64 / 80
-({COCO,BP,HRES[2],CRES[0]}==4'b0011)	?	ROW_ADD[18:1] + PIXEL_COUNT[9:3]:	//128 /160
+({COCO,BP,HRES[2],CRES[0]}==4'b0000)	?	HOR_OFFSET + PIXEL_COUNT[9:5]:	//32 / 40
+({COCO,BP,HRES[2],CRES[0]}==4'b0001)	?	HOR_OFFSET + PIXEL_COUNT[9:4]:	//64 / 80
+({COCO,BP,HRES[2],CRES[0]}==4'b0010)	?	HOR_OFFSET + PIXEL_COUNT[9:4]:	//64 / 80
+({COCO,BP,HRES[2],CRES[0]}==4'b0011)	?	HOR_OFFSET + PIXEL_COUNT[9:3]:	//128 /160
 //	HR Graphics
-							({COCO,BP,HRES}==5'b01000)	?	ROW_ADD[18:1] + PIXEL_COUNT[9:6]:	//16
-							({COCO,BP,HRES}==5'b01001)	?	ROW_ADD[18:1] + PIXEL_COUNT[9:6]:	//20
-							({COCO,BP,HRES}==5'b01010)	?	ROW_ADD[18:1] + PIXEL_COUNT[9:5]:	//32
-							({COCO,BP,HRES}==5'b01011)	?	ROW_ADD[18:1] + PIXEL_COUNT[9:5]:	//40
-							({COCO,BP,HRES}==5'b01100)	?	ROW_ADD[18:1] + PIXEL_COUNT[9:4]:	//64
-							({COCO,BP,HRES}==5'b01101)	?	ROW_ADD[18:1] + PIXEL_COUNT[9:4]:	//80
-							({COCO,BP,HRES}==5'b01110)	?	ROW_ADD[18:1] + PIXEL_COUNT[9:3]:	//128
-							({COCO,BP,HRES}==5'b01111)	?	ROW_ADD[18:1] + PIXEL_COUNT[9:3]:	//160
+				({COCO,BP,HRES}==5'b01000)	?	HOR_OFFSET + PIXEL_COUNT[9:6]:	//16
+				({COCO,BP,HRES}==5'b01001)	?	HOR_OFFSET + PIXEL_COUNT[9:6]:	//20
+				({COCO,BP,HRES}==5'b01010)	?	HOR_OFFSET + PIXEL_COUNT[9:5]:	//32
+				({COCO,BP,HRES}==5'b01011)	?	HOR_OFFSET + PIXEL_COUNT[9:5]:	//40
+				({COCO,BP,HRES}==5'b01100)	?	HOR_OFFSET + PIXEL_COUNT[9:4]:	//64
+				({COCO,BP,HRES}==5'b01101)	?	HOR_OFFSET + PIXEL_COUNT[9:4]:	//80
+				({COCO,BP,HRES}==5'b01110)	?	HOR_OFFSET + PIXEL_COUNT[9:3]:	//128
+				({COCO,BP,HRES}==5'b01111)	?	HOR_OFFSET + PIXEL_COUNT[9:3]:	//160
 // CoCo1 Text
-																	ROW_ADD[18:1] + PIXEL_COUNT[9:5];	//32
-
-//HVEN,
-//HOR_OFFSET,
-//input		[7:0]		SCRN_START_MSB;
-//input		[7:0]		SCRN_START_LSB;
-assign START_ADD =
-// CoCo1 low res graphics (64 pixels / 2 bytes)
-({COCO,V[0]} == 2'b11)										?	ROW_ADD + 9'd16:
-// HR Text
-({HVEN,COCO} == 2'b10)										?  ROW_ADD + 9'd256:
-({HVEN,COCO,BP,HRES[2],CRES[0],HRES[0]}==6'b000000)?	ROW_ADD + 9'd32:
-({HVEN,COCO,BP,HRES[2],CRES[0],HRES[0]}==6'b000001)?	ROW_ADD + 9'd40:
-({HVEN,COCO,BP,HRES[2],CRES[0],HRES[0]}==6'b000010)?	ROW_ADD + 9'd64:
-({HVEN,COCO,BP,HRES[2],CRES[0],HRES[0]}==6'b000011)?	ROW_ADD + 9'd80:
-({HVEN,COCO,BP,HRES[2],CRES[0],HRES[0]}==6'b000100)?	ROW_ADD + 9'd64:
-({HVEN,COCO,BP,HRES[2],CRES[0],HRES[0]}==6'b000101)?	ROW_ADD + 9'd80:
-({HVEN,COCO,BP,HRES[2],CRES[0],HRES[0]}==6'b000110)?	ROW_ADD + 9'd128:
-({HVEN,COCO,BP,HRES[2],CRES[0],HRES[0]}==6'b000111)?	ROW_ADD + 9'd160:
-//	HR Graphics
-						({HVEN,COCO,BP,HRES}==6'b001000)	?	ROW_ADD + 9'd16:
-						({HVEN,COCO,BP,HRES}==6'b001001)	?	ROW_ADD + 9'd20:
-						({HVEN,COCO,BP,HRES}==6'b001010)	?	ROW_ADD + 9'd32:
-						({HVEN,COCO,BP,HRES}==6'b001011)	?	ROW_ADD + 9'd40:
-						({HVEN,COCO,BP,HRES}==6'b001100)	?	ROW_ADD + 9'd64:
-						({HVEN,COCO,BP,HRES}==6'b001101)	?	ROW_ADD + 9'd80:
-						({HVEN,COCO,BP,HRES}==6'b001110)	?	ROW_ADD + 9'd128:
-						({HVEN,COCO,BP,HRES}==6'b001111)	?	ROW_ADD + 9'd160:
-// CoCo1 Text
-																		ROW_ADD + 9'd32;
-
-//assign READMEM =	(PIXEL_COUNT[2:0] == 3'b000)									?	1'b1:
-//						(PIXEL_COUNT[2:0] == 3'b001)									?	1'b1:
-//			 																						1'b0;
+														{2'b00, PIXEL_COUNT[9:5]};	//32
 
 /*****************************************************************************
 * Read Character ROM
@@ -252,18 +293,6 @@ assign ROM_ADDRESS =	({COCO,PIXEL_COUNT[2],VID_CONT[0]} == 3'b100)							?	{~CHA
 							({COCO,PIXEL_COUNT[2]} == 2'b00)												?	{CHAR_LATCH[6:0], VLPR[4:1]}:		// COCO3 Text 1
 																														{ATRIB_LATCH[6:0], VLPR[4:1]};		// COCO3 Text 2
 
-assign READROM1 =	(PIXEL_COUNT[2:0] == 3'b010)			?	1'b1:
-																			1'b0;
-
-always @(negedge READROM1)
-begin
-	if({COCO,BP,CRES[0],ATRIB_LATCH[6],ROW,SIX} == 6'b001111)
-		CHARACTER <=	8'hFF;
-	else
-		CHARACTER <=	ROM_DATA1;
-
-		CHARACTER3 <=	CHARACTER1;
-end
 
 assign CHARACTER1 =	({COCO,BP,CRES[0],ATRIB_LATCH[7],BLINK} == 5'b00111)	?	8'h00:			// Hires Text blink
 							({COCO, VID_CONT[1:0], CHAR_LATCH[6:5]} == 5'b10000)	?	~CHARACTER:		// Lowres  0-31 Normal UC only (Inverse)
@@ -276,9 +305,6 @@ assign CHARACTER1 =	({COCO,BP,CRES[0],ATRIB_LATCH[7],BLINK} == 5'b00111)	?	8'h00
 							({COCO, VID_CONT[1:0], CHAR_LATCH[6:5]} == 5'b11111)	?	~CHARACTER:		// Lowres 96-128 Inverse
 																										 CHARACTER;		// Normal Video
 
-assign READROM2 =	(PIXEL_COUNT[2:0] == 3'b110)			?	1'b1:
-																			1'b0;
-
 assign CHARACTER4 =	({COCO, VID_CONT[1:0], ATRIB_LATCH[6:5]} == 5'b10000)	?	~CHARACTER2:		// Lowres  0-31 Normal UC only (Inverse)
 							({COCO, VID_CONT[1:0], ATRIB_LATCH[6:5]} == 5'b10001)	?	~CHARACTER2:		// Lowres 32-64 Normal UC only (Inverse)
 							({COCO, VID_CONT[1:0], ATRIB_LATCH[6:5]} == 5'b10101)	?	~CHARACTER2:		// Lowres 32-64 LC but UC part (Inverse)
@@ -289,20 +315,13 @@ assign CHARACTER4 =	({COCO, VID_CONT[1:0], ATRIB_LATCH[6:5]} == 5'b10000)	?	~CHA
 							({COCO, VID_CONT[1:0], ATRIB_LATCH[6:5]} == 5'b11111)	?	~CHARACTER2:		// Lowres 96-128 Inverse
 																										 CHARACTER2;		// Normal Video
 
-always @(negedge READROM2)
-begin
-	CHARACTER2 <=	ROM_DATA1;
-end
 
 assign	COCO_GR	=	(V == 3'b000)		?	1'b0:
-//							(COCO == 1'b0)		?	1'b0:
 														1'b1;
 assign PIXEL0 =
 //CoCo1 Text (2 bytes is 2-8 pixel characters) First byte
 			({COCO,V,CHAR_LATCH[7],CHARACTER1[0]} == 6'b100001)			?	PALETTEC:
 			({COCO,V,CHAR_LATCH[7],CHARACTER1[0]} == 6'b100000)			?	PALETTED:
-//			({COCO,V,CHAR_LATCH[7,6],CHARACTER1[0]} == 7'b1000010)			?	PALETTED:
-//			({COCO,V,CHAR_LATCH[7,6],CHARACTER1[0]} == 7'b1000011)			?	PALETTEC:
 // HR Text 80 (2 bytes is 1-8 pixel character)
 // HR Text 40 (2 bytes is 1-8 pixel character)
 			({COCO,BP,CRES[0],CHARACTER1[0],ATRIB_LATCH[5:3]}==7'b0011000)	?	PALETTE8:
@@ -1563,19 +1582,8 @@ assign LINES_ROW	=	(~COCO)	?	LPR:
 * Count pixels across each line
 * 32 and 40 character modes use double wide pixels
 ******************************************************************************/
-always @ (posedge PIX_CLK or negedge RESET_N)
+always @ (posedge PIX_CLK)
 begin
-	if(~RESET_N)
-	begin
-		PIXEL_COUNT <= 10'd000;
-		HBLANKING <= 1'b1;
-		HSYNC <= 1'b1;
-		SYNC_FLAG <= 1'b0;
-		HBORDER <= 1'b1;
-		READMEM <= 1'b0;
-	end
-	else
-	begin
 		case (PIXEL_COUNT[2:0])
 		3'b000:
 		begin
@@ -1593,13 +1601,28 @@ begin
 				ATRIB_LATCH <= RAM_DATA[31:24];
 			end
 		end
+		3'b010:
+		begin
+// Underline
+			if({COCO,BP,CRES[0],ATRIB_LATCH[6],ROW} == 5'b00110)
+				CHARACTER <=	8'hFF;
+			else
+// Not Underline
+				CHARACTER <=	ROM_DATA1;
+
+				CHARACTER3 <=	CHARACTER1;
+		end
+		3'b110:
+		begin
+			CHARACTER2 <=	ROM_DATA1;
+		end
 		3'b111:
 		      READMEM <= 1'b1;
 		default:
 		      READMEM <= 1'b0;
 		endcase
 
-		case (PIXEL_COUNT)
+		case(PIXEL_COUNT)
 		10'd013:				// First character read
 		begin
 			PIXEL_COUNT <= 10'd014;
@@ -1639,7 +1662,8 @@ begin
 			HBLANKING <= 1'b1;
 			HBORDER <= 1'b0;
 			HSYNC <= 1'b1;
-			PIXEL_COUNT <= 10'd658;
+// added 6 to make total = 794 instead of 800
+			PIXEL_COUNT <= 10'd664;
 		end
 		10'd671:											// 648 + 24 - 1
 		begin
@@ -1666,39 +1690,58 @@ begin
 		begin
 			PIXEL_COUNT <= 10'd000;
 			HSYNC <= 1'b1;
-			SYNC_FLAG <= ~SYNC_FLAG;
+			SYNC_FLAG <= LINE[0];					// Every other line with the first visable line has sync
+//			~SYNC_FLAG;
 		end
 		default:
 		begin
 			PIXEL_COUNT <= PIXEL_COUNT + 1'b1;
 		end
 		endcase
-	end
+//	end
 end
 
 /*****************************************************************************
-* Keeps track of how many rows are in each field.
+* Calculates the starting address of the row
 ******************************************************************************/
-always @ (negedge ROW or posedge VBLANKING)
+always @ (posedge ROW or posedge VBLANKING)
 begin
 	if(VBLANKING)
-	begin
-		VADD <= 8'h00;							// modify this to calculate the starting address
 		if(COCO)
 		begin
 			ROW_ADD <= {SCRN_START_MSB[7:5],VERT,SCRN_START_LSB[5:0],3'h0};
 		end
 		else
 		begin
-			ROW_ADD <= {SCRN_START_MSB,SCRN_START_LSB,3'h0} + {HOR_OFFSET, 1'b0};
+			ROW_ADD <= {SCRN_START_MSB,SCRN_START_LSB,3'h0};
 		end
-	end
 	else
-	begin
-		VADD <= VADD + 1'b1;					// modify this to add the line increment.
-		ROW_ADD <= START_ADD;
-	end
+		ROW_ADD <= SCREEN_OFF;
 end
+
+assign SCREEN_OFF =
+// CoCo1 low res graphics (64 pixels / 2 bytes)
+({COCO,V[0]} == 2'b11)										?	ROW_ADD + 9'd16:
+// HR Text
+({HVEN,COCO} == 2'b10)										?  ROW_ADD + 9'd256:
+({HVEN,COCO,BP,HRES[2],CRES[0],HRES[0]}==6'b000000)?	ROW_ADD + 9'd32:
+({HVEN,COCO,BP,HRES[2],CRES[0],HRES[0]}==6'b000001)?	ROW_ADD + 9'd40:
+({HVEN,COCO,BP,HRES[2],CRES[0],HRES[0]}==6'b000010)?	ROW_ADD + 9'd64:
+({HVEN,COCO,BP,HRES[2],CRES[0],HRES[0]}==6'b000011)?	ROW_ADD + 9'd80:
+({HVEN,COCO,BP,HRES[2],CRES[0],HRES[0]}==6'b000100)?	ROW_ADD + 9'd64:
+({HVEN,COCO,BP,HRES[2],CRES[0],HRES[0]}==6'b000101)?	ROW_ADD + 9'd80:
+({HVEN,COCO,BP,HRES[2],CRES[0],HRES[0]}==6'b000110)?	ROW_ADD + 9'd128:
+({HVEN,COCO,BP,HRES[2],CRES[0],HRES[0]}==6'b000111)?	ROW_ADD + 9'd160:
+//	HR Graphics						({HVEN,COCO,BP,HRES}==6'b001000)	?	RAW_ADD + 19'd16:
+						({HVEN,COCO,BP,HRES}==6'b001001)	?	ROW_ADD + 9'd20:
+						({HVEN,COCO,BP,HRES}==6'b001010)	?	ROW_ADD + 9'd32:
+						({HVEN,COCO,BP,HRES}==6'b001011)	?	ROW_ADD + 9'd40:
+						({HVEN,COCO,BP,HRES}==6'b001100)	?	ROW_ADD + 9'd64:
+						({HVEN,COCO,BP,HRES}==6'b001101)	?	ROW_ADD + 9'd80:
+						({HVEN,COCO,BP,HRES}==6'b001110)	?	ROW_ADD + 9'd128:
+						({HVEN,COCO,BP,HRES}==6'b001111)	?	ROW_ADD + 9'd160:
+// CoCo1 Text
+																		ROW_ADD + 9'd32;
 
 /*****************************************************************************
 * Keeps track of how many lines are in each row.
@@ -1712,7 +1755,7 @@ begin
 			VLPR <= {VERT_FIN_SCRL, 1'b0};
 		else
 			VLPR <= 5'd0;
-		ROW <= 1'b0;
+		ROW <= 1'b1;
 		SIX <= 1'b0;
 	end
 	else
@@ -1720,51 +1763,66 @@ begin
 		case (VLPR)
 		5'd0:										//Pixel Row 0
 		begin
+			SIX <= 1'b0;
 			VLPR <= 5'd01;
-			if(LINES_ROW == 3'b000)			// 1
-				ROW <= 1'b1;
-			else
+			if(LINES_ROW == 3'b000)
 				ROW <= 1'b0;
+//			else
+//				ROW <= 1'b1;
+			NUM_ROW <= LINES_ROW;
 		end
 		5'd1:										//Pixel Row 0
 		begin
-			ROW <= 1'b0;
-			if(LINES_ROW == 3'b000)			// 1
-				VLPR <= 5'd0;
+			if(NUM_ROW == 3'b001)				// 2
+				ROW <= 1'b0;
+			else
+				ROW <= 1'b1;
+			if((NUM_ROW == 3'b000) || ({BP, NUM_ROW} == 4'b1111))			// 1
+				VLPR <= 5'd0;						// infinate graphics mode
 			else
 				VLPR <= 5'd2;
 		end
-		5'd2:										//Pixel Row 1
-		begin
-			VLPR <= 5'd3;
-			if(LINES_ROW == 3'b001)				// 2
-				ROW <= 1'b1;
-			else
-				ROW <= 1'b0;
-		end
+//		5'd2:										//Pixel Row 1
+//		begin
+//			VLPR <= 5'd3;
+//			if(NUM_ROW == 3'b001)				// 2
+//				ROW <= 1'b0;
+//			else
+//				ROW <= 1'b1;
+//		end
 		5'd3:										//Pixel Row 1
 		begin
-			ROW <= 1'b0;
-			if(LINES_ROW == 3'b001)				// 2
+			if(NUM_ROW == 3'b001)									// 2
+			begin
 				VLPR <= 5'd0;
-			else
-				VLPR <= 5'd4;
-		end
-		5'd4:										//Pixel Row 2
-		begin
-			VLPR <= 5'd5;
-			if(LINES_ROW == 3'b010)				// 3
 				ROW <= 1'b1;
+			end
 			else
-				ROW <= 1'b0;
+			begin
+				VLPR <= 5'd4;
+				if(NUM_ROW == 3'b010)
+					ROW <= 1'b0;
+			end
 		end
+//		5'd4:										//Pixel Row 2
+//		begin
+//			VLPR <= 5'd5;
+//			if(LINES_ROW == 3'b010)				// 3
+//				ROW <= 1'b1;
+//			else
+//				ROW <= 1'b0;
+//		end
 		5'd5:										//Pixel Row 2
 		begin
-			ROW <= 1'b0;
-			if(LINES_ROW == 3'b010)				// 3
+			if(NUM_ROW == 3'b010)				// 3
+			begin
 				VLPR <= 5'd0;
+				ROW <= 1'b1;
+			end
 			else
+			begin
 				VLPR <= 5'd6;
+			end
 		end
 		5'd11:									//Pixel Row 5
 		begin
@@ -1775,51 +1833,47 @@ begin
 		begin
 			VLPR <= 5'd14;
 			if(LINES_ROW == 3'b011)			// 8
-				ROW <= 1'b1;
-			else
 				ROW <= 1'b0;
+//			else
+//				ROW <= 1'b1;
 		end
 		5'd15:									// Pixel Row 7
 		begin
-			if(LINES_ROW == 3'b011)			// 8
+			if(NUM_ROW == 3'b011)			// 8
 			begin
-				ROW <= 1'b0;
 				SIX <= 1'b0;
+				ROW <= 1'b1;
 				VLPR <= 5'd0;
 			end
 			else
 			begin
 				VLPR <= 5'd16;
-				if(LINES_ROW == 3'b100)			// 9
-					ROW <= 1'b1;
-				else
+				if(NUM_ROW == 3'b100)
 					ROW <= 1'b0;
 			end
 		end
 		5'd17:
 		begin
-			if(LINES_ROW == 3'b100)				// 9
+			if(NUM_ROW == 3'b100)				// 9
 			begin
-				ROW <= 1'b0;
 				SIX <= 1'b0;
+				ROW <= 1'b1;
 				VLPR <= 5'd0;
 			end
 			else
 			begin
 				VLPR <= 5'd18;
-				if(LINES_ROW == 3'b101)			// 10
-					ROW <= 1'b1;
-				else
+				if(NUM_ROW == 3'b101)
 					ROW <= 1'b0;
 			end
 		end
 		5'd19:
 		begin
-			if(LINES_ROW == 3'b101)		// 10
+			if(NUM_ROW == 3'b101)		// 10
 			begin
-				ROW <= 1'b0;
-				VLPR <= 5'd0;
 				SIX <= 1'b0;
+				ROW <= 1'b1;
+				VLPR <= 5'd0;
 			end
 			else
 				VLPR <= 5'd20;
@@ -1827,33 +1881,31 @@ begin
 		5'd21:
 		begin
 			VLPR <= 5'd22;
-			if(LINES_ROW == 3'b110)				// 12
-				ROW <= 1'b1;
-			else
+			if(LINES_ROW == 3'b110)				// 1/0
 				ROW <= 1'b0;
 		end
-		5'd23:						// 12 *2 -1 = 23 = 0x17
+		5'd23:										// 12 stop here
 		begin
-			ROW <= 1'b0;
 			SIX <= 1'b0;
-			if(LINES_ROW == 3'b110)		// 12
+			ROW <= 1'b1;
+			if(LINES_ROW == 3'b110)				// 1/0
 				VLPR <= 5'd0;
 			else
 				VLPR <= 5'd24;
 		end
-//		5'd30:						// 12 *2 -1 = 23 = 0x17
-//		begin
-//			ROW <= 1'b1;
-//			VLPR <= 5'd31;
-//		end
-		5'd31:						// 16 *2 -1 = 31 = 0x1F
+		5'd24:
 		begin
-			if(LINES_ROW == 3'b111)				// 1/0
-				VLPR <= 5'd31;
-			else
-			begin
+			VLPR <= 5'd25;
+			if(LINES_ROW != 3'b111)				// 1/0
+				ROW <= 1'b0;
+		end
+		5'd25:
+		begin
+			ROW <= 1'b1;
+			if(LINES_ROW != 3'b111)				// 1/0
 				VLPR <= 5'd0;
-			end
+			else
+				VLPR <= 5'd24;
 		end
 		default:
 			VLPR <= VLPR + 1'b1;
@@ -1882,11 +1934,10 @@ begin
 	end
 	else
 	case (LINE)
+// Video
 	10'd383:								// End of 192 line display
 	begin
 		LINE <= 10'd384;
-		VSYNC <= 1'b1;
-		VBORDER <= 1'b1;
 		if((LPF == 2'b00) || (COCO == 1'b1))		// Standard COCO modes are always 192
 		begin
 			VBLANKING <= 1'b1;
@@ -1895,8 +1946,6 @@ begin
 	10'd399:								// End of 200 line display
 	begin
 		LINE <= 10'd400;
-		VSYNC <= 1'b1;
-		VBORDER <= 1'b1;
 		if(LPF == 2'b01)
 		begin
 			VBLANKING <= 1'b1;
@@ -1905,8 +1954,6 @@ begin
 	10'd419:								// End of 210 line display
 	begin
 		LINE <= 10'd420;
-		VSYNC <= 1'b1;
-		VBORDER <= 1'b1;
 		if(LPF == 2'b10)
 		begin
 			VBLANKING <= 1'b1;
@@ -1915,44 +1962,37 @@ begin
 	10'd449:								// End of 225 line display
 	begin
 		LINE <= 10'd450;
-		VSYNC <= 1'b1;
 		VBLANKING <= 1'b1;
-		VBORDER <= 1'b1;
 	end
-	10'd457:
+//End of Border, start of porch
+	10'd467:
 	begin
 		VBORDER <= 1'b0;
-		LINE <= 10'd458;
+		LINE <= 10'd468;
 	end
-// 10'd432:	Start Clock
-// 10'd439:	Stop Clock and end border color
-	10'd469:
+// End of Porch, start of sync
+	10'd473:
 	begin
-		LINE <= 10'd470;
+		LINE <= 10'd474;
 		VSYNC <= 1'b0;					// Sync on
-		VBLANKING <= 1'b1;
-		VBORDER <= 1'b0;
 	end
-	10'd471:
+// End of sync, start of blanking and porch
+	10'd479:
 	begin
-		LINE <= 10'd472;
+		LINE <= 10'd480;
 		VSYNC <= 1'b1;					// Sync off
-		VBLANKING <= 1'b1;
-		VBORDER <= 1'b0;
 	end
-	10'd512:
+// End of porch, start of border
+	10'd505:
 	begin
-		LINE <= 10'd513;
-		VBLANKING <= 1'b1;
+		LINE <= 10'd506;
 		VBORDER <= 1'b1;
-		VSYNC <= 1'b1;
 	end
-	10'd520:							// -1
+// End of border, start of video, restart state machine
+	10'd523:                   // -1
 	begin
 		LINE <= 10'd000;
 		VBLANKING <= 1'b0;
-		VBORDER <= 1'b1;
-		VSYNC <= 1'b1;
 	end
 	default:
 	begin
