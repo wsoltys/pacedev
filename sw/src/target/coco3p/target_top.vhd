@@ -20,10 +20,6 @@ entity target_top is
     reset_btn       : in std_logic;
     chan_sw         : in std_logic;
 
-    --
-    -- connectors
-    --
-
     -- joystick (serial protocol)
     joy_clk         : out std_logic_vector(0 to 1);
     joy_dat         : in std_logic_vector(0 to 1);
@@ -52,17 +48,13 @@ entity target_top is
     ps2_mclk        : in std_logic;
     ps2_mdat        : in std_logic;
 
-    -- coco keyboard
-    keybd_col       : in std_logic_vector(7 downto 0);
-    keybd_row       : out std_logic_vector(6 downto 0);
-    
     -- video
     vid_r           : out std_logic_vector(5 downto 0);
     vid_g           : out std_logic_vector(5 downto 0);
     vid_b           : out std_logic_vector(5 downto 0);
     vid_hsync       : out std_logic;
     vid_vsync       : out std_logic;
-    vid_fsel        : out std_logic;
+    vid_fsel        : out std_logic;    -- pal/ntsc crystal select for ADV724
 
     -- cartridge
     cart_halt_n     : in std_logic;
@@ -80,31 +72,34 @@ entity target_top is
     cart_slenb_n    : in std_logic;
     
     -- IDE
-    --ide_reset_n     : out std_logic;
-    --ide_dd          : inout std_logic_vector(15 downto 0);
-    --ide_iow_n       : out std_logic;
-    --ide_ior_n       : out std_logic;
-    --ide_io_ch_rdy   : in std_logic;
-    --ide_ale         : out std_logic;
-    --ide_irqr        : in std_logic;
-    --ide_iocs16_n    : out std_logic;
-    --ide_da          : out std_logic_vector(2 downto 0);
-    --ide_ide_cs      : out std_logic_vector(1 downto 0);
-    --ide_active_n    : out std_logic;
+    ide_reset_n     : out std_logic;
+    ide_dd          : inout std_logic_vector(15 downto 0);
+    ide_iow_n       : out std_logic;
+    ide_ior_n       : out std_logic;
+    ide_io_ch_rdy   : in std_logic;
+    ide_ale         : out std_logic;
+    ide_irqr        : in std_logic;
+    ide_iocs16_n    : out std_logic;
+    ide_da          : out std_logic_vector(2 downto 0);
+    ide_ide_cs      : out std_logic_vector(1 downto 0);
+    ide_active_n    : out std_logic;
 
     -- memory bus
-    sram_a          : out std_logic_vector(19 downto 0);
-    sram_d          : inout std_logic_vector(15 downto 0);
-    sram_be_n       : out std_logic_vector(1 downto 0);
-    sram_cs_n       : out std_logic;
+    sram_a          : out std_logic_vector(18 downto 0);    -- 512Kix8 devices
+    sram_d          : inout std_logic_vector(15 downto 0);  -- 2x devices wide
+    sram_cs_n       : out std_logic_vector(3 downto 0);     -- total of 2MiB
     sram_oe_n       : out std_logic;
     sram_we_n       : out std_logic;
     
     -- SSP to ARM
     ssp_sclk        : out std_logic;
     ssp_mosi1       : in std_logic;
-    ssp_miso1       : out std_logic
+    ssp_miso1       : out std_logic;
     --ssp_ss_n        : out std_logic;  -- always slave
+    
+    -- serial pass-thru to ARM (for programming)
+    arm_ser_tx      : in std_logic;
+    arm_ser_rx      : out std_logic
   );
 end target_top;
 
