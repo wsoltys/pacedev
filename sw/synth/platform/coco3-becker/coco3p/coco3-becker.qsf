@@ -24,11 +24,11 @@
 
 
 set_global_assignment -name FAMILY "Cyclone III"
-set_global_assignment -name DEVICE EP3C25Q240C8
+set_global_assignment -name DEVICE EP3C16Q240C8
 set_global_assignment -name TOP_LEVEL_ENTITY target_top
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION "8.0 SP1"
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "23:06:45  MARCH 09, 2009"
-set_global_assignment -name LAST_QUARTUS_VERSION 8.1
+set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
 set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id eda_palace
 set_global_assignment -name CYCLONEII_OPTIMIZATION_TECHNIQUE SPEED
 set_global_assignment -name DEVICE_FILTER_PACKAGE "ANY QFP"
@@ -44,13 +44,31 @@ set_global_assignment -name USE_CONFIGURATION_DEVICE OFF
 set_global_assignment -name CYCLONEIII_CONFIGURATION_SCHEME "PASSIVE SERIAL"
 set_global_assignment -name FORCE_CONFIGURATION_VCCIO ON
 set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"
-set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/target/coco3p/target_pkg.vhd
-set_global_assignment -name VHDL_FILE project_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/target/coco3p/target_top.vhd
-set_global_assignment -name QIP_FILE pll1.qip
 set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_global_assignment -name USE_TIMEQUEST_TIMING_ANALYZER OFF
-set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
-set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/coco3p/target_pkg.vhd
+set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/platform_pkg.vhd"
+set_global_assignment -name VHDL_FILE project_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneiii/sprom.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneiii/spram.vhd
+set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/wrappers.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/unzip/CoCo3FPGAV1.1/cpu09.vhd"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/CoCo3FPGAV1.1/cocokey.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/coco3vid.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6850/6850RX.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6850/6850TX.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6850/uart_6850.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6551/6551rx.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6551/6551tx.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6551/uart_6551.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/CoCo3FPGAV1.1/ps2_keyboard_glb.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/coco3fpga.v"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/pace.vhd"
+set_global_assignment -name VHDL_FILE ../../../../src/target/coco3p/target_top.vhd
+set_global_assignment -name QIP_FILE pll1.qip

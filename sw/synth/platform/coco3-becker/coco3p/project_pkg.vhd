@@ -15,7 +15,6 @@ package project_pkg is
   -- Reference clock is 24MHz
 	constant PACE_HAS_PLL								      : boolean := true;
   constant PACE_HAS_SRAM                    : boolean := true;
-  constant PACE_HAS_SDRAM                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := true;
 	
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
