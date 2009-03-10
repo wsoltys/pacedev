@@ -185,6 +185,7 @@ begin
       sram_a <= sram_o.a(sram_a'range);
       sram_i.d <= std_logic_vector(resize(unsigned(sram_d), sram_i.d'length));
       sram_d <= sram_o.d(sram_d'range) when (sram_o.cs = '1' and sram_o.we = '1') else (others => 'Z');
+      -- this is completely wrong, but who cares atm
       sram_cs_n(3) <= not sram_o.cs;
       sram_cs_n(2) <= not sram_o.cs;
       sram_cs_n(1) <= not sram_o.cs;
@@ -204,6 +205,66 @@ begin
     
   end block BLK_SRAM;
 
+  BLK_VIDEO : block
+  begin
+
+		video_i.clk <= clk_i(1);	-- by convention
+		video_i.clk_ena <= '1';
+    video_i.reset <= reset_i;
+    
+    vid_r <= video_o.rgb.r(video_o.rgb.r'left downto video_o.rgb.r'left-5);
+    vid_g <= video_o.rgb.g(video_o.rgb.g'left downto video_o.rgb.g'left-5);
+    vid_b <= video_o.rgb.b(video_o.rgb.b'left downto video_o.rgb.b'left-5);
+    vid_hsync <= video_o.hsync;
+    vid_vsync <= video_o.vsync;
+
+  end block BLK_VIDEO;
+
+  BLK_AUDIO : block
+  
+    alias clk_24M : std_logic is clk_50M;
+  
+  begin
+
+    -- audio PWM
+    -- clock is 24Mhz, sample rate 24kHz
+    process (clk_24M, reset_i)
+      variable count : integer range 0 to 1023;
+      variable audio_sample_l : std_logic_vector(9 downto 0);
+      variable audio_sample_r : std_logic_vector(9 downto 0);
+    begin
+      if reset_i = '1' then
+        count := 0;
+      elsif rising_edge(clk_24M) then
+        if count = 1023 then
+          -- 24kHz tick - latch a sample (only 10 bits or 1024 steps)
+          audio_sample_l := audio_o.ldata(audio_o.ldata'left downto audio_o.ldata'left-9);
+          audio_sample_r := audio_o.rdata(audio_o.rdata'left downto audio_o.rdata'left-9);
+          count := 0;
+        else
+          audio_l <= '0';  -- default
+          audio_r <= '0'; -- default
+          if unsigned(audio_sample_l) > count then
+            audio_l <= '1';
+          end if;
+          if unsigned(audio_sample_r) > count then
+            audio_r <= '1';
+          end if;
+          count := count + 1;
+        end if;
+      end if;
+    end process;
+    
+  end block BLK_AUDIO;
+
+  BLK_SERIAL : block
+  begin
+    GEN_SERIAL : if PACE_HAS_SERIAL generate
+      ser_tx <= ser_o.txd;
+      ser_i.rxd <= ser_rx;
+    end generate GEN_SERIAL;
+  end block BLK_SERIAL;
+  
   pace_inst : entity work.pace                                            
     port map
     (

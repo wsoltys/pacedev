@@ -280,6 +280,19 @@ begin
 	
 	end generate GEN_SRAM_2;
 	
+	GEN_SRAM_COCO3PLUS : if PACE_TARGET = PACE_TARGET_COCO3PLUS generate
+
+		sram_o.a <= std_logic_vector(resize(unsigned(ram_address), sram_o.a'length));
+		sram_o.d <= ram1_do & ram0_do;
+		ram1_di <= sram_i.d(31 downto 16);
+		ram0_di <= sram_i.d(15 downto 0);
+		sram_o.be <= ((ram1_cs_n & ram1_cs_n) nor ram1_be_n) & ((ram0_cs_n & ram0_cs_n) nor ram0_be_n);
+		sram_o.cs <= ram1_cs_n nand ram0_cs_n;
+		sram_o.oe <= not ram_oe_n;
+		sram_o.we <= not ram_rw_n;
+	
+	end generate GEN_SRAM_COCO3PLUS;
+	
 	coco_inst : coco3fpga
 		port map
 		(

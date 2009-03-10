@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION 8.1
+set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -751,16 +751,16 @@ set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
 set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/wrappers.vhd"
-set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/unzip/cpu09.vhd"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/cocokey.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/ps2_keyboard_glb.v"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/unzip/CoCo3FPGAV1.1/cpu09.vhd"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/CoCo3FPGAV1.1/cocokey.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/CoCo3FPGAV1.1/ps2_keyboard_glb.v"
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/coco3vid.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/6850TX.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/6850RX.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6850.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/6551tx.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/6551rx.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/uart_6551.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6850/6850RX.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6850/6850TX.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6850/uart_6850.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6551/6551rx.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6551/6551tx.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6551/uart_6551.v"
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/coco3fpga.v"
 set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/pace.vhd"
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_pkg.vhd
