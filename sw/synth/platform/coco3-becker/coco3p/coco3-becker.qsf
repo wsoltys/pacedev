@@ -24,11 +24,11 @@
 
 
 set_global_assignment -name FAMILY "Cyclone III"
-set_global_assignment -name DEVICE EP3C16Q240C8
+set_global_assignment -name DEVICE EP3C25Q240C8
 set_global_assignment -name TOP_LEVEL_ENTITY target_top
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION "8.0 SP1"
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "23:06:45  MARCH 09, 2009"
-set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 8.1
 set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id eda_palace
 set_global_assignment -name CYCLONEII_OPTIMIZATION_TECHNIQUE SPEED
 set_global_assignment -name DEVICE_FILTER_PACKAGE "ANY QFP"
@@ -41,7 +41,6 @@ set_global_assignment -name PARTITION_COLOR 14622752 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name USE_CONFIGURATION_DEVICE OFF
-set_global_assignment -name DEVICE_MIGRATION_LIST EP3C16Q240C8
 set_global_assignment -name CYCLONEIII_CONFIGURATION_SCHEME "PASSIVE SERIAL"
 set_global_assignment -name FORCE_CONFIGURATION_VCCIO ON
 set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"
@@ -51,7 +50,7 @@ set_global_assignment -name VHDL_FILE ../../../../src/target/coco3p/target_pkg.v
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/coco3p/target_top.vhd
 set_global_assignment -name QIP_FILE pll1.qip
-set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
-set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_global_assignment -name USE_TIMEQUEST_TIMING_ANALYZER OFF
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
