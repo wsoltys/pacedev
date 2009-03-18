@@ -364,10 +364,10 @@ begin
       ba_ns <= sram_o.a(ba_ns'range);
       sram_i.d <= std_logic_vector(resize(unsigned(bd_ns), sram_i.d'length));
       bd_ns <= sram_o.d(bd_ns'range) when (sram_o.cs = '1' and sram_o.we = '1') else (others => 'Z');
-      nuub_s <= sram_o.be(3);
-      nulb_s <= sram_o.be(2);
-      nlub_s <= sram_o.be(1);
-      nllb_s <= sram_o.be(0);
+      nuub_s <= not sram_o.be(3);
+      nulb_s <= not sram_o.be(2);
+      nlub_s <= not sram_o.be(1);
+      nllb_s <= not sram_o.be(0);
       ncs_s <= not sram_o.cs;
       noe_ns <= not sram_o.oe;
       nwe_s <= not sram_o.we;

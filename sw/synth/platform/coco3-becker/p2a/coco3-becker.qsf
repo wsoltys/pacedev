@@ -349,7 +349,7 @@ set_global_assignment -name STRATIX_DEVICE_IO_STANDARD LVTTL
 # SignalTap II Assignments
 # ========================
 set_global_assignment -name ENABLE_SIGNALTAP OFF
-set_global_assignment -name USE_SIGNALTAP_FILE signaltap.stp
+set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
 
 # ----------------------------
 # start CLOCK(ethernet_clocks)
@@ -770,3 +770,4 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_up
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gc_tx_bit.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_joy.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/p2a/target_top.vhd
+set_global_assignment -name SIGNALTAP_FILE stp1.stp
