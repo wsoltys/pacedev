@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 8.1
 
 # Pin & Location Assignments
 # ==========================
@@ -410,8 +410,6 @@ set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to *dr1*
 set_instance_assignment -name CUT ON -from reset_shift_n[0] -to *
 set_instance_assignment -name CLOCK_SETTINGS ethernet_clocks -to RXCLK_enet
 set_instance_assignment -name CLOCK_SETTINGS ethernet_clocks -to TXCLK_enet
-set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to scl
-set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to sda
 
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to BD*
 set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to NROMSOE
@@ -425,7 +423,6 @@ set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to ncs_dr*
 set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to nwe_dr*
 set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to ba_dr*
 set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to clk_dr*
-set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to cke_dr*
 set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to dqm_dr1*
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to dqm_dr2*
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to BD_NS*
@@ -708,7 +705,7 @@ set_global_assignment -name PHYSICAL_SYNTHESIS_ASYNCHRONOUS_SIGNAL_PIPELINING ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
 
 set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED WITH WEAK PULL-UP"
-set_global_assignment -name DEVICE_MIGRATION_LIST "EP2C35F484C6,EP2C20F484C6"
+set_global_assignment -name DEVICE_MIGRATION_LIST EP2C35F484C6
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to clk_ee
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to data_ee
 set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to d_dr1[*]
@@ -785,3 +782,22 @@ set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to nllb_s
 set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to nlub_s
 set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to nulb_s
 set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to nuub_s
+set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to nllb_s
+set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to nlub_s
+set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to nulb_s
+set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to nuub_s
+set_instance_assignment -name OUTPUT_PIN_LOAD 12 -to nllb_s
+set_instance_assignment -name OUTPUT_PIN_LOAD 12 -to nlub_s
+set_instance_assignment -name OUTPUT_PIN_LOAD 12 -to nulb_s
+set_instance_assignment -name OUTPUT_PIN_LOAD 12 -to nuub_s
+set_global_assignment -name MISC_FILE "E:/markm/pace/pacedev.net/sw/synth/platform/midway8080/invaders/p2a/invaders.dpf"
+set_global_assignment -name USE_CONFIGURATION_DEVICE ON
+set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to ba_ns
+set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to bd_ns
+set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to nwe_s
+set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to ncs_s
+set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to nce_n
+set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to nllb_s
+set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to nlub_s
+set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to nulb_s
+set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to nuub_s

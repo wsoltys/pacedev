@@ -35,8 +35,8 @@ entity platform is
     flash_o         : out to_FLASH_t;
 		sram_i					: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
-     sdram_i         : in from_SDRAM_t;
-      sdram_o        : out to_SDRAM_t;
+    sdram_i         : in from_SDRAM_t;
+    sdram_o        : out to_SDRAM_t;
 
 
     -- graphics
@@ -138,7 +138,7 @@ begin
 	  -- SRAM signals (may or may not be used)
 	  sram_o.a <= std_logic_vector(resize(unsigned(uP_addr), sram_o.a'length));
 	  sram_o.d <= std_logic_vector(resize(unsigned(uP_datao), sram_o.d'length));
-		sram_o.be <= "1111"; --std_logic_vector(to_unsigned(1, sram_o.be'length));
+		sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
 	  sram_o.cs <= wram_cs;
 	  sram_o.oe <= not wram_wr;
 	  sram_o.we <= wram_wr;

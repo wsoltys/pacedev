@@ -361,7 +361,8 @@ begin
   begin
   
     GEN_SRAM : if PACE_HAS_SRAM generate
-      ba_ns <= sram_o.a(ba_ns'range);
+      ba_ns(ba_ns'left downto 1) <= sram_o.a(ba_ns'left-1 downto 0);
+      ba_ns(0) <= '0'; -- not connected to SRAM
       sram_i.d <= std_logic_vector(resize(unsigned(bd_ns), sram_i.d'length));
       bd_ns <= sram_o.d(bd_ns'range) when (sram_o.cs = '1' and sram_o.we = '1') else (others => 'Z');
       nuub_s <= not sram_o.be(3);
@@ -539,7 +540,7 @@ begin
 	
 	nromsoe <= 'Z';
 	nmebwait <= 'Z';
-	nce_n <= 'Z';
+	nce_n <= '1';
 	bd_out(18) <= 'Z';
 	bd_out(25) <= 'Z';
 					
