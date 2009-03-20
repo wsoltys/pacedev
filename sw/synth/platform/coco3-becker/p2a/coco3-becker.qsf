@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 8.1
 
 # Pin & Location Assignments
 # ==========================
@@ -753,7 +753,7 @@ set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
 set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/wrappers.vhd"
 set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/unzip/CoCo3FPGAV1.1/cpu09.vhd"
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/CoCo3FPGAV1.1/cocokey.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/CoCo3FPGAV1.1/ps2_keyboard_glb.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/ps2_keyboard_glb.v"
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/coco3vid.v"
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6850/6850RX.v"
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6850/6850TX.v"
