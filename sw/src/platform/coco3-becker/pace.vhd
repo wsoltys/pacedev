@@ -134,7 +134,8 @@ architecture SYN of PACE is
 	signal ram0_be_n	  : std_logic_vector(1 downto 0);
 	signal ram1_be_n	  : std_logic_vector(1 downto 0);
 	signal ram_oe_n		  : std_logic;
-
+  signal digit_n      : std_logic_vector(3 downto 0);
+  
 begin
 
 	--GEN_RMW_SRAM : if PACE_TARGET = PACE_TARGET_P2 generate
@@ -241,7 +242,8 @@ begin
 	
 	end generate GEN_SRAM_DE2;
 	
-	GEN_SRAM_P2A : if PACE_TARGET = PACE_TARGET_P2A generate
+	GEN_SRAM_P2A : if PACE_TARGET = PACE_TARGET_P2A or
+                    PACE_TARGET = PACE_TARGET_DE1 generate
 
     -- this is for 32-bit wide memory
 		--sram_o.a <= std_logic_vector(resize(unsigned(ram_address), sram_o.a'length));
@@ -266,7 +268,8 @@ begin
 	
 	end generate GEN_SRAM_P2A;
 	
-	GEN_SRAM_2 : if PACE_TARGET = PACE_TARGET_DE1 generate
+	--GEN_SRAM_2 : if PACE_TARGET = PACE_TARGET_DE1 generate
+	GEN_SRAM_2 : if false generate
 
     -- hook up Burched SRAM module
     GEN_D: for i in 0 to 7 generate
@@ -350,7 +353,7 @@ begin
       CTS3          => '0',
       
 			-- Display
-			DIGIT_N				=> open,
+			DIGIT_N				=> digit_n,
 			SEGMENT_N			=> open,
 			
 			-- LEDs
@@ -363,11 +366,31 @@ begin
 			P_SWITCH			=> (others => '1'),
 			
 			-- Extra Buttons and Switches
-			SWITCH				=> (others => '0'), -- fast=1.78MHz
+			--SWITCH				=> (others => '0'), -- fast=1.78MHz
+			SWITCH				=> switches_i(7 downto 0),
 			BUTTON(3)			=> reset_i,
-			BUTTON(2 downto 0) => "000"
+			--BUTTON(2 downto 0) => "000"
+			BUTTON(2 downto 0) => buttons_i(3 downto 1)
 		);
 
+  -- 7-segment display
+  process (clk_50M, reset_i)
+  begin
+    if reset_i = '1' then
+      null;
+    elsif rising_edge(clk_50M) then
+      if digit_n = "1101" then
+        gp_o.d(39 downto 36) <= X"0";
+      elsif digit_n = "1011" then
+        gp_o.d(43 downto 40) <= X"C";
+      elsif digit_n = "0111" then
+        gp_o.d(47 downto 44) <= X"0";
+      else
+        gp_o.d(51 downto 48) <= X"C";
+      end if;
+    end if;
+  end process;
+  
 	video_o.clk <= clk_50M;
 
 	-- unused

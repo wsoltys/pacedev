@@ -25,7 +25,7 @@
 
 # Project-Wide Assignments
 # ========================
-set_global_assignment -name LAST_QUARTUS_VERSION 7.2
+set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -496,9 +496,14 @@ set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS INPUT TRI-
 set_global_assignment -name SEED 1
 
 set_parameter -name CYCLONEII_SAFE_WRITE VERIFIED_SAFE
-set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/platform_pkg.vhd"
 set_global_assignment -name VHDL_FILE ../../../../src/target/de2/target_pkg.vhd
@@ -506,12 +511,16 @@ set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
 set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/wrappers.vhd"
-set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/unzip/cpu09.vhd"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/ps2_keyboard_glb.v"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/unzip/CoCo3FPGAV1.1/cpu09.vhd"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/CoCo3FPGAV1.1/cocokey.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/ps2_keyboard_glb.v"
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/coco3vid.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/6850TX.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/6850RX.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6850.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6850/6850RX.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6850/6850TX.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6850/uart_6850.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6551/6551rx.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6551/6551tx.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6551/uart_6551.v"
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/coco3fpga.v"
 set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/pace.vhd"
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/LCD_Controller.v
