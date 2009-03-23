@@ -127,7 +127,7 @@ BUTTON
 input				CLK50MHZ;
 
 // Main RAM Common
-output [17:0]	RAM_ADDRESS;
+output [18:0]	RAM_ADDRESS;
 output			RAM_RW_N;
 reg				RAM_RW_N;
 
@@ -566,8 +566,8 @@ assign SEGMENT_N =	(DIGIT_N == 4'b1110) ?	{~RESET_N, 7'b1100010}:	//o
 /*****************************************************************************
 * RAM signals
 ******************************************************************************/
-assign	RAM_ADDRESS =	({PH_2, READMEM} == 2'b01)	?	{VIDEO_ADDRESS}:
-																		{BLOCK_ADDRESS[5:0], ADDRESS[12:1]};
+assign	RAM_ADDRESS =	({PH_2, READMEM} == 2'b01)	?	{VBANK, VIDEO_ADDRESS}:
+																		{~RAM1_CS_N, BLOCK_ADDRESS[5:0], ADDRESS[12:1]};
 
 assign	BLOCK_ADDRESS =		({MMU_EN, MMU_TR, ADDRESS[15:13]} ==  5'b10000)			?	SAM00[6:0]:		// 10 000X	0000-1FFF
 										({MMU_EN, MMU_TR, ADDRESS[15:13]} ==  5'b10001)			?	SAM01[6:0]:		// 10 001X	2000-3FFF

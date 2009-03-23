@@ -1590,16 +1590,16 @@ begin
 	      READMEM <= 1'b0;
 			CHAR_LATCH3 <= CHAR_LATCH;
 			ATRIB_LATCH3 <= ATRIB_LATCH;
-			if(VBANK==1'b0)
-			begin
+			//if(VBANK==1'b0)
+			//begin
 				CHAR_LATCH <= RAM_DATA[7:0];
 				ATRIB_LATCH <= RAM_DATA[15:8];
-			end
-			else
-			begin
-				CHAR_LATCH <= RAM_DATA[23:16];
-				ATRIB_LATCH <= RAM_DATA[31:24];
-			end
+			//end
+			//else
+			//begin
+			//	CHAR_LATCH <= RAM_DATA[23:16];
+			//	ATRIB_LATCH <= RAM_DATA[31:24];
+			//end
 		end
 		3'b010:
 		begin

@@ -68,7 +68,7 @@ architecture SYN of PACE is
 			RAM_DATA0_O		: out std_logic_vector(15 downto 0);		-- 16 bit data bus to RAM 0
 			RAM_DATA1_I	  : in std_logic_vector(15 downto 0);	    -- 16 bit data bus from RAM 1
 			RAM_DATA1_O		: out std_logic_vector(15 downto 0);	  -- 16 bit data bus to RAM 1
-			RAM_ADDRESS		: out std_logic_vector(17 downto 0);		-- Common address
+			RAM_ADDRESS		: out std_logic_vector(18 downto 0);		-- Common address
 			RAM_RW_N			: out std_logic;												-- Common RW
 			RAM0_CS_N			: out std_logic;												-- Chip Select for RAM 0
 			RAM1_CS_N			: out std_logic;												-- Chip Select for RAM 1
@@ -123,7 +123,7 @@ architecture SYN of PACE is
 
 	alias clk_50M 		  : std_logic is clk_i(0);
 	
-  signal ram_address  : std_logic_vector(17 downto 0);
+  signal ram_address  : std_logic_vector(18 downto 0);
 	signal ram1_di		  : std_logic_vector(15 downto 0);
 	signal ram1_do		  : std_logic_vector(15 downto 0);
 	signal ram0_di		  : std_logic_vector(15 downto 0);
@@ -243,11 +243,23 @@ begin
 	
 	GEN_SRAM_P2A : if PACE_TARGET = PACE_TARGET_P2A generate
 
+    -- this is for 32-bit wide memory
+		--sram_o.a <= std_logic_vector(resize(unsigned(ram_address), sram_o.a'length));
+		--sram_o.d <= ram1_do & ram0_do;
+		--ram1_di <= sram_i.d(31 downto 16);
+		--ram0_di <= sram_i.d(15 downto 0);
+		--sram_o.be <= ((ram1_cs_n & ram1_cs_n) nor ram1_be_n) & ((ram0_cs_n & ram0_cs_n) nor ram0_be_n);
+		--sram_o.cs <= ram1_cs_n nand ram0_cs_n;
+		--sram_o.oe <= not ram_oe_n;
+		--sram_o.we <= not ram_rw_n;
+
+    -- this is for 16-bit wide memory
 		sram_o.a <= std_logic_vector(resize(unsigned(ram_address), sram_o.a'length));
-		sram_o.d <= ram1_do & ram0_do;
-		ram1_di <= sram_i.d(31 downto 16);
+		sram_o.d(31 downto 16) <= (others => '0');
+		sram_o.d(15 downto 0) <= ram1_do when ram1_cs_n = '0' else ram0_do;
+		ram1_di <= sram_i.d(15 downto 0);
 		ram0_di <= sram_i.d(15 downto 0);
-		sram_o.be <= ((ram1_cs_n & ram1_cs_n) nor ram1_be_n) & ((ram0_cs_n & ram0_cs_n) nor ram0_be_n);
+		sram_o.be <= "00" & (ram1_be_n(1) nand ram0_be_n(1)) & (ram1_be_n(1) nand ram0_be_n(1));
 		sram_o.cs <= ram1_cs_n nand ram0_cs_n;
 		sram_o.oe <= not ram_oe_n;
 		sram_o.we <= not ram_rw_n;
@@ -348,7 +360,7 @@ begin
 			SPEAKER				=> open,
 			PADDLE				=> (others => '0'),
 			PADDLE_RST    => open,
-			P_SWITCH			=> (others => '0'),
+			P_SWITCH			=> (others => '1'),
 			
 			-- Extra Buttons and Switches
 			SWITCH				=> (others => '0'), -- fast=1.78MHz

@@ -214,13 +214,13 @@ begin
 		begin
 			if(KB_CLK)
 			begin
-				//if(PARITY_DATA == PARITY)
+				if(PARITY_DATA == PARITY)
 					STATE				<= 8'h06;
-				//else
-				//begin
-					//parerr <= !parerr;
-					//STATE				<= 8'h00;
-				//end
+				else
+				begin
+					parerr <= !parerr;
+					STATE				<= 8'h00;
+				end
 			end
 		end
 		8'h06:
