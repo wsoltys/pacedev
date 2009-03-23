@@ -259,7 +259,7 @@ begin
 		sram_o.d(15 downto 0) <= ram1_do when ram1_cs_n = '0' else ram0_do;
 		ram1_di <= sram_i.d(15 downto 0);
 		ram0_di <= sram_i.d(15 downto 0);
-		sram_o.be <= "00" & (ram1_be_n(1) nand ram0_be_n(1)) & (ram1_be_n(1) nand ram0_be_n(1));
+		sram_o.be <= "00" & (ram1_be_n(1) nand ram0_be_n(1)) & (ram1_be_n(0) nand ram0_be_n(0));
 		sram_o.cs <= ram1_cs_n nand ram0_cs_n;
 		sram_o.oe <= not ram_oe_n;
 		sram_o.we <= not ram_rw_n;
