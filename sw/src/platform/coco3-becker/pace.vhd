@@ -138,112 +138,9 @@ architecture SYN of PACE is
   
 begin
 
-	--GEN_RMW_SRAM : if PACE_TARGET = PACE_TARGET_P2 generate
-	GEN_RMW_SRAM : if false generate
-	
-		BLK_SRAM : block
-
-			signal rmw_a    : std_logic_vector(ram_address'range);
-	    signal rmw_oe   : std_logic;
-	    signal rmw_we   : std_logic;
-
-			constant DELAY	: time := 2 ns;
-
-			type state_t 		is (IDLE, READ, WRITE1, WRITE2);
-			signal state		: state_t;
-			
-		begin
-
-			process (clk_50M, reset_i)
-				variable rmw_di			: std_logic_vector(15 downto 0);
-				variable rmw_do			: std_logic_vector(15 downto 0);
-				variable rmw_be			: std_logic_vector(ram0_be_n'range);
-			begin
-				if reset_i = '1' then
-					state <= IDLE after DELAY;
-				elsif rising_edge(clk_50M) then
-					case state is
-						when IDLE =>
-							if ram0_cs_n = '0' and ram_rw_n = '0' then
-								-- start read-write-modify cycle
-								rmw_a <= ram_address;
-								rmw_do := ram0_do;
-								rmw_be := not ram0_be_n;
-								rmw_oe <= '1' after DELAY;
-								rmw_we <= '0' after DELAY;
-								state <= READ after DELAY;
-							end if;
-							
-						when READ =>
-							-- wait 20ns
-							state <= WRITE1 after DELAY;
-
-						when WRITE1 =>
-							-- OR-in the value and write back
-							rmw_di := sram_i.d(15 downto 0);
-							if rmw_be(1) = '1' then
-								sram_o.d(15 downto 8) <= rmw_do(15 downto 8) after DELAY;
-							else
-								sram_o.d(15 downto 8) <= rmw_di(15 downto 8) after DELAY;
-							end if;
-							if rmw_be(0) = '1' then
-								sram_o.d(7 downto 0) <= rmw_do(7 downto 0) after DELAY;
-							else
-								sram_o.d(7 downto 0) <= rmw_di(7 downto 0) after DELAY;
-							end if;
-							rmw_oe <= '0' after DELAY;
-							rmw_we <= '1' after DELAY;
-							state <= WRITE2 after DELAY;
-							
-						when WRITE2 =>
-							state <= IDLE after DELAY;
-							
-						when others =>
-							state <= IDLE after DELAY;
-					end case;
-				end if;
-			end process;
-
-			sram_o.a <= std_logic_vector(resize(unsigned(ram_address), sram_o.a'length)) when state = IDLE else
-									std_logic_vector(resize(unsigned(rmw_a), sram_o.a'length));
-			sram_o.d(31 downto 16) <= (others => '0');
-			ram0_di <= sram_i.d(ram0_di'range);
-			--sram_o.be <=  std_logic_vector(resize(unsigned("11"), sram_o.be'length));
-			sram_o.cs <= not ram0_cs_n when state = IDLE else '1';
-			sram_o.oe <= not ram_oe_n when state = IDLE else rmw_oe;
-			sram_o.we <= '0' when state = IDLE else rmw_we;
-			
-		end block BLK_SRAM;
-
-	end generate GEN_RMW_SRAM;
-
-	GEN_EXPERIMENTAL : if PACE_TARGET = PACE_TARGET_P2 generate
-	
-		sram_o.a <= std_logic_vector(resize(unsigned(ram_address), sram_o.a'length));
-		sram_o.d <= std_logic_vector(resize(unsigned(ram0_do), sram_o.d'length));
-		ram0_di <= sram_i.d(7 downto 0) & sram_i.d(7 downto 0);
-		sram_o.be <= std_logic_vector(resize(unsigned(not ram0_be_n), sram_o.be'length));
-		sram_o.cs <= not ram0_cs_n;
-		sram_o.oe <= not ram_oe_n;
-		sram_o.we <= not ram_rw_n;
-	
-	end generate GEN_EXPERIMENTAL;
-		
-	GEN_SRAM_DE2 : if PACE_TARGET = PACE_TARGET_DE2 generate
-
-		sram_o.a <= std_logic_vector(resize(unsigned(ram_address), sram_o.a'length));
-		sram_o.d <= ram1_do & ram0_do;
-		ram1_di <= sram_i.d(31 downto 16);
-		ram0_di <= sram_i.d(15 downto 0);
-		sram_o.be <= not (ram1_be_n & ram0_be_n);
-		sram_o.cs <= ram1_cs_n nand ram0_cs_n;
-		sram_o.oe <= not ram_oe_n;
-		sram_o.we <= not ram_rw_n;
-	
-	end generate GEN_SRAM_DE2;
-	
-	GEN_SRAM_P2A : if PACE_TARGET = PACE_TARGET_P2A or
-                    PACE_TARGET = PACE_TARGET_DE1 generate
+	GEN_SRAM_16 : if  PACE_TARGET = PACE_TARGET_P2A or
+                    PACE_TARGET = PACE_TARGET_DE1 or
+                    PACE_TARGET = PACE_TARGET_DE2 generate
 
     -- this is for 32-bit wide memory
 		--sram_o.a <= std_logic_vector(resize(unsigned(ram_address), sram_o.a'length));
@@ -266,7 +163,7 @@ begin
 		sram_o.oe <= not ram_oe_n;
 		sram_o.we <= not ram_rw_n;
 	
-	end generate GEN_SRAM_P2A;
+	end generate GEN_SRAM_16;
 	
 	--GEN_SRAM_2 : if PACE_TARGET = PACE_TARGET_DE1 generate
 	GEN_SRAM_2 : if false generate
@@ -308,71 +205,86 @@ begin
 	
 	end generate GEN_SRAM_COCO3PLUS;
 	
-	coco_inst : coco3fpga
-		port map
-		(
-			CLK50MHZ			=> clk_50M,
-			
-			-- RAM, ROM, and Peripherials
-			RAM_DATA0_I		=> ram0_di,
-			RAM_DATA0_O		=> ram0_do,
-			RAM_DATA1_I	  => ram1_di,
-      RAM_DATA1_O   => ram1_do,
-			RAM_ADDRESS		=> ram_address,
-			RAM_RW_N			=> ram_rw_n,
-			RAM0_CS_N			=> ram0_cs_n,
-			RAM1_CS_N			=> ram1_cs_n,
-			RAM0_BE0_N		=> ram0_be_n(0),
-			RAM0_BE1_N		=> ram0_be_n(1),
-			RAM1_BE0_N		=> ram1_be_n(0),
-			RAM1_BE1_N		=> ram1_be_n(1),
-			RAM_OE_N			=> ram_oe_n,
-			
-			-- VGA
-			RED1					=> video_o.rgb.r(9),
-			GREEN1				=> video_o.rgb.g(9),
-			BLUE1					=> video_o.rgb.b(9),
-			RED0					=> video_o.rgb.r(8),
-			GREEN0				=> video_o.rgb.g(8),
-			BLUE0					=> video_o.rgb.b(8),
-			H_SYNC				=> video_o.hsync,
-			V_SYNC				=> video_o.vsync,
-			
-			-- PS/2
-			ps2_clk				=> inputs_i.ps2_kclk,
-			ps2_data			=> inputs_i.ps2_kdat,
-			
-			--Serial Ports
-			TXD1					=> ser_o.txd,
-			RXD1					=> ser_i.rxd,
-			TXD2					=> open,
-			RXD2					=> '0',
-			TXD3					=> open,
-			RXD3					=> '0',
-      RTS3          => open,
-      CTS3          => '0',
-      
-			-- Display
-			DIGIT_N				=> digit_n,
-			SEGMENT_N			=> open,
-			
-			-- LEDs
-			LED						=> leds_o(7 downto 0),
-			
-			-- CoCo Perpherial
-			SPEAKER				=> open,
-			PADDLE				=> (others => '0'),
-			PADDLE_RST    => open,
-			P_SWITCH			=> (others => '1'),
-			
-			-- Extra Buttons and Switches
-			--SWITCH				=> (others => '0'), -- fast=1.78MHz
-			SWITCH				=> switches_i(7 downto 0),
-			BUTTON(3)			=> reset_i,
-			--BUTTON(2 downto 0) => "000"
-			BUTTON(2 downto 0) => buttons_i(3 downto 1)
-		);
+	BLK_COCO3 : block
+    signal coco_switches : std_logic_vector(7 downto 0);
+	begin
+	
+    GEN_DE2_SWITCHES : if PACE_TARGET = PACE_TARGET_DE2 generate
+      coco_switches <= switches_i(coco_switches'range);
+    end generate GEN_DE2_SWITCHES;
+    
+    GEN_DEFAULT_SWITCHES : if PACE_TARGET = PACE_TARGET_P2A generate
+      -- Normal speed, select MPI slot 4 (disk controller)
+      coco_switches <= "00001100";
+    end generate GEN_DEFAULT_SWITCHES;
+    
+    coco_inst : coco3fpga
+      port map
+      (
+        CLK50MHZ			=> clk_50M,
+        
+        -- RAM, ROM, and Peripherials
+        RAM_DATA0_I		=> ram0_di,
+        RAM_DATA0_O		=> ram0_do,
+        RAM_DATA1_I	  => ram1_di,
+        RAM_DATA1_O   => ram1_do,
+        RAM_ADDRESS		=> ram_address,
+        RAM_RW_N			=> ram_rw_n,
+        RAM0_CS_N			=> ram0_cs_n,
+        RAM1_CS_N			=> ram1_cs_n,
+        RAM0_BE0_N		=> ram0_be_n(0),
+        RAM0_BE1_N		=> ram0_be_n(1),
+        RAM1_BE0_N		=> ram1_be_n(0),
+        RAM1_BE1_N		=> ram1_be_n(1),
+        RAM_OE_N			=> ram_oe_n,
+        
+        -- VGA
+        RED1					=> video_o.rgb.r(9),
+        GREEN1				=> video_o.rgb.g(9),
+        BLUE1					=> video_o.rgb.b(9),
+        RED0					=> video_o.rgb.r(8),
+        GREEN0				=> video_o.rgb.g(8),
+        BLUE0					=> video_o.rgb.b(8),
+        H_SYNC				=> video_o.hsync,
+        V_SYNC				=> video_o.vsync,
+        
+        -- PS/2
+        ps2_clk				=> inputs_i.ps2_kclk,
+        ps2_data			=> inputs_i.ps2_kdat,
+        
+        --Serial Ports
+        TXD1					=> ser_o.txd,
+        RXD1					=> ser_i.rxd,
+        TXD2					=> open,
+        RXD2					=> '0',
+        TXD3					=> open,
+        RXD3					=> '0',
+        RTS3          => open,
+        CTS3          => '0',
+        
+        -- Display
+        DIGIT_N				=> digit_n,
+        SEGMENT_N			=> open,
+        
+        -- LEDs
+        LED						=> leds_o(7 downto 0),
+        
+        -- CoCo Perpherial
+        SPEAKER				=> open,
+        PADDLE				=> (others => '0'),
+        PADDLE_RST    => open,
+        P_SWITCH			=> (others => '1'),
+        
+        -- Extra Buttons and Switches
+        --SWITCH				=> (others => '0'), -- fast=1.78MHz
+        SWITCH				=> coco_switches,
+        BUTTON(3)			=> reset_i,
+        --BUTTON(2 downto 0) => "000"
+        BUTTON(2 downto 0) => buttons_i(3 downto 1)
+      );
 
+  end block BLK_COCO3;
+  
   -- 7-segment display
   process (clk_50M, reset_i)
   begin

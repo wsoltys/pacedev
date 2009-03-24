@@ -24,6 +24,6 @@ package target_pkg is
 	-- DE2-specific constants
 	--
 	
-	constant DE2_LCD_LINE1							: string := "   PACE  2008   ";		-- 16 chars exactly
+	constant DE2_LCD_LINE1							: string := "   PACE  2009   ";		-- 16 chars exactly
 	
 end;

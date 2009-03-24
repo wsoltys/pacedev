@@ -503,6 +503,10 @@ begin
 
   BLK_SERIAL : block
   begin
+    GEN_SERIAL : if PACE_HAS_SERIAL generate
+      gat_txd <= ser_o.txd;
+      ser_i.rxd <= gat_rxd;
+    end generate GEN_SERIAL;
     GEN_NO_SERIAL : if not PACE_HAS_SERIAL generate
       gat_txd <='0';
       ser_i.rxd <= '0';
