@@ -115,8 +115,12 @@ SEGMENT_N,
 LED,
 // CoCo Perpherial
 SPEAKER,
-PADDLE,
-PADDLE_RST,
+//PADDLE,
+//PADDLE_RST,
+PADDLE1,
+PADDLE2,
+PADDLE3,
+PADDLE4,
 P_SWITCH,
 
 // Extra Buttons and Switches
@@ -187,9 +191,13 @@ output [7:0]	LED;
 
 // CoCo Perpherial
 output	[1:0]	SPEAKER;
-input		[3:0]	PADDLE;
-output	[3:0]	PADDLE_RST;
-reg		[3:0]	PADDLE_RST;
+//input		[3:0]	PADDLE;
+//output	[3:0]	PADDLE_RST;
+//reg		[3:0]	PADDLE_RST;
+input [7:2] PADDLE1;
+input [7:2] PADDLE2;
+input [7:2] PADDLE3;
+input [7:2] PADDLE4;
 input		[3:0]	P_SWITCH;
 
 // Extra Buttons and Switches
@@ -2939,6 +2947,8 @@ begin
 		endcase
 end
 
+`ifdef NOT_USED
+
 always @(posedge JOY_CLK[8] or negedge RESET_N)
 begin
 	if(~RESET_N)
@@ -3033,6 +3043,8 @@ begin
 	end
 end
 
+`endif
+
 assign JSTICK =	({SWITCH[5], SEL} == 3'b011)		?	JOY4:			// Left Y
 						({SWITCH[5], SEL} == 3'b010)		?	JOY3:			// Left X
 						({SWITCH[5], SEL} == 3'b001)		?	JOY2:			// Right Y
@@ -3042,16 +3054,16 @@ assign JSTICK =	({SWITCH[5], SEL} == 3'b011)		?	JOY4:			// Left Y
 						({SWITCH[5], SEL} == 3'b101)		?	JOY4:			// Left Y
 																		JOY3;			// Left X
 
-assign JOY1 = (JOY1_COUNT >= DTOA_CODE)	?	1'b1:
+assign JOY1 = (PADDLE1 >= DTOA_CODE)	?	1'b1:
 															1'b0;
 
-assign JOY2 = (JOY2_COUNT >= DTOA_CODE)	?	1'b1:
+assign JOY2 = (PADDLE2 >= DTOA_CODE)	?	1'b1:
 															1'b0;
 
-assign JOY3 = (JOY3_COUNT >= DTOA_CODE)	?	1'b1:
+assign JOY3 = (PADDLE3 >= DTOA_CODE)	?	1'b1:
 															1'b0;
 
-assign JOY4 = (JOY4_COUNT >= DTOA_CODE)	?	1'b1:
+assign JOY4 = (PADDLE4 >= DTOA_CODE)	?	1'b1:
 															1'b0;
 
 /*****************************************************************************

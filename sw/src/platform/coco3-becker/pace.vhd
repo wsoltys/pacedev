@@ -111,8 +111,12 @@ architecture SYN of PACE is
 			
 			-- CoCo Perpherial
 			SPEAKER				: out std_logic_vector(1 downto 0);
-			PADDLE				: in std_logic_vector(3 downto 0);
-			PADDLE_RST    : out std_logic_vector(3 downto 0);
+			--PADDLE				: in std_logic_vector(3 downto 0);
+			--PADDLE_RST    : out std_logic_vector(3 downto 0);
+			PADDLE1			  : in std_logic_vector(7 downto 2);
+			PADDLE2			  : in std_logic_vector(7 downto 2);
+			PADDLE3			  : in std_logic_vector(7 downto 2);
+			PADDLE4			  : in std_logic_vector(7 downto 2);
 			P_SWITCH			: in std_logic_vector(3 downto 0);
 			
 			-- Extra Buttons and Switches
@@ -271,9 +275,19 @@ begin
         
         -- CoCo Perpherial
         SPEAKER				=> open,
-        PADDLE				=> (others => '0'),
-        PADDLE_RST    => open,
-        P_SWITCH			=> (others => '1'),
+        --PADDLE				=> (others => '0'),
+        --PADDLE_RST    => open,
+        --PADDLE1       => inputs_i.analogue(3)(9 downto 4),
+        --PADDLE2       => inputs_i.analogue(4)(9 downto 4),
+        PADDLE1       => inputs_i.analogue(1)(9 downto 4),
+        PADDLE2       => inputs_i.analogue(2)(9 downto 4),
+        PADDLE3       => inputs_i.analogue(1)(9 downto 4),  -- Left X
+        PADDLE4       => inputs_i.analogue(2)(9 downto 4),  -- Left Y
+        -- paddle switches are active low (like jamma)
+        P_SWITCH(3)		=> inputs_i.jamma_n.p(2).button(2),   -- Right 1
+        P_SWITCH(2)		=> inputs_i.jamma_n.p(1).button(1),   -- Left 2
+        P_SWITCH(1)		=> inputs_i.jamma_n.p(1).button(2),   -- Left 1
+        P_SWITCH(0)		=> inputs_i.jamma_n.p(2).button(1),   -- Right 2
         
         -- Extra Buttons and Switches
         --SWITCH				=> (others => '0'), -- fast=1.78MHz

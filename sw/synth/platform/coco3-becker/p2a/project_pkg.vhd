@@ -18,7 +18,7 @@ package project_pkg is
   constant PACE_HAS_SDRAM                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := true;
 	
-	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
+	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NGC;
   
   constant PACE_CLK0_DIVIDE_BY        		  : natural := 12;
   constant PACE_CLK0_MULTIPLY_BY      		  : natural := 25;  	-- 24*25/12 = 50MHz

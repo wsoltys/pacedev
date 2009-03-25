@@ -316,15 +316,33 @@ begin
 		-- map gamecube controller to jamma inputs
 		inputs_i.jamma_n.coin(1) <= not gcj.l;
 		inputs_i.jamma_n.p(1).start <= not gcj.start;
-		inputs_i.jamma_n.p(1).up <= not (gcj.d_up or (gcj.jy(7) and gcj.jy(6)));
-		inputs_i.jamma_n.p(1).down <= not (gcj.d_down or not (gcj.jy(7) or gcj.jy(6)));
-		inputs_i.jamma_n.p(1).left <= not (gcj.d_left or not (gcj.jx(7) or gcj.jx(6)));
-		inputs_i.jamma_n.p(1).right <= not (gcj.d_right or (gcj.jx(7) and gcj.jx(6)));
+		inputs_i.jamma_n.p(1).up <= not gcj.d_up;
+		inputs_i.jamma_n.p(1).down <= not gcj.d_down;
+		inputs_i.jamma_n.p(1).left <= not gcj.d_left;
+		inputs_i.jamma_n.p(1).right <= not gcj.d_right;
 		inputs_i.jamma_n.p(1).button(1) <= not gcj.a;
 		inputs_i.jamma_n.p(1).button(2) <= not gcj.b;
 		inputs_i.jamma_n.p(1).button(3) <= not gcj.x;
 		inputs_i.jamma_n.p(1).button(4) <= not gcj.y;
 		inputs_i.jamma_n.p(1).button(5)	<= not gcj.z;
+
+    -- old version mapped analogue inputs as well
+		--inputs_i.jamma_n.p(1).up <= not (gcj.d_up or (gcj.jy(7) and gcj.jy(6)));
+		--inputs_i.jamma_n.p(1).down <= not (gcj.d_down or not (gcj.jy(7) or gcj.jy(6)));
+		--inputs_i.jamma_n.p(1).left <= not (gcj.d_left or not (gcj.jx(7) or gcj.jx(6)));
+		--inputs_i.jamma_n.p(1).right <= not (gcj.d_right or (gcj.jx(7) and gcj.jx(6)));
+
+    -- analogue mappings
+    inputs_i.analogue(1)(9 downto 2) <= X"00" when gcj.jx(7 downto 4) = "0000" else 
+                                        X"FF" when gcj.jx(7 downto 4) = "1111" else
+                                        gcj.jx;
+    inputs_i.analogue(1)(1 downto 0) <= (others => '0');
+    inputs_i.analogue(2)(9 downto 2) <= X"FF" when gcj.jy(7 downto 4) = "0000" else 
+                                        X"00" when gcj.jy(7 downto 4) = "1111" else
+                                        not gcj.jy;
+    inputs_i.analogue(2)(1 downto 0) <= (others => '0');
+    inputs_i.analogue(3) <= (others => '0');
+    inputs_i.analogue(4) <= (others => '0');
 		
   end generate GEN_GAMECUBE;
 

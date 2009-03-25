@@ -89,12 +89,17 @@ package pace_pkg is
   --
   -- INPUTS
   --
+  subtype analogue_in_t is std_logic_vector(9 downto 0);
+  type analogue_in_a is array (natural range <>) of analogue_in_t;
+  
 	type from_INPUTS_t is record
     ps2_kclk  : std_logic;
     ps2_kdat  : std_logic;
     ps2_mclk  : std_logic;
     ps2_mdat  : std_logic;
     jamma_n   : from_JAMMA_t;
+    -- up to 4 10-bit analgue inputs
+    analogue  : analogue_in_a(1 to 4);
   end record;
 
   type in8_t is record
