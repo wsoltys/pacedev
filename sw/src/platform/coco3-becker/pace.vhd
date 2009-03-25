@@ -210,7 +210,9 @@ begin
 	end generate GEN_SRAM_COCO3PLUS;
 	
 	BLK_COCO3 : block
-    signal coco_switches : std_logic_vector(7 downto 0);
+    signal coco_switches  : std_logic_vector(7 downto 0);
+    signal joystk_x       : std_logic_vector(7 downto 0);
+    signal joystk_y       : std_logic_vector(7 downto 0);
 	begin
 	
     GEN_DE2_SWITCHES : if PACE_TARGET = PACE_TARGET_DE2 generate
@@ -221,6 +223,15 @@ begin
       -- Normal speed, select MPI slot 4 (disk controller)
       coco_switches <= "00001100";
     end generate GEN_DEFAULT_SWITCHES;
+
+    -- extend to extremeties and invert Y axis
+    
+    joystk_x <= X"00" when inputs_i.analogue(1)(7 downto 4) = "0000" else 
+                X"FF" when inputs_i.analogue(1)(7 downto 4) = "1111" else
+                inputs_i.analogue(1)(9 downto 2);
+    joystk_y <= not X"00" when inputs_i.analogue(2)(7 downto 4) = "0000" else 
+                not X"FF" when inputs_i.analogue(2)(7 downto 4) = "1111" else
+                not inputs_i.analogue(2)(9 downto 2);
     
     coco_inst : coco3fpga
       port map
@@ -279,10 +290,10 @@ begin
         --PADDLE_RST    => open,
         --PADDLE1       => inputs_i.analogue(3)(9 downto 4),
         --PADDLE2       => inputs_i.analogue(4)(9 downto 4),
-        PADDLE1       => inputs_i.analogue(1)(9 downto 4),
-        PADDLE2       => inputs_i.analogue(2)(9 downto 4),
-        PADDLE3       => inputs_i.analogue(1)(9 downto 4),  -- Left X
-        PADDLE4       => inputs_i.analogue(2)(9 downto 4),  -- Left Y
+        PADDLE1       => joystk_x(7 downto 2),
+        PADDLE2       => joystk_y(7 downto 2),
+        PADDLE3       => joystk_x(7 downto 2),  -- Left X
+        PADDLE4       => joystk_y(7 downto 2),  -- Left Y
         -- paddle switches are active low (like jamma)
         P_SWITCH(3)		=> inputs_i.jamma_n.p(2).button(2),   -- Right 1
         P_SWITCH(2)		=> inputs_i.jamma_n.p(1).button(1),   -- Left 2

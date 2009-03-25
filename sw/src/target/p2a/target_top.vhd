@@ -333,17 +333,11 @@ begin
 		--inputs_i.jamma_n.p(1).right <= not (gcj.d_right or (gcj.jx(7) and gcj.jx(6)));
 
     -- analogue mappings
-    inputs_i.analogue(1)(9 downto 2) <= X"00" when gcj.jx(7 downto 4) = "0000" else 
-                                        X"FF" when gcj.jx(7 downto 4) = "1111" else
-                                        gcj.jx;
-    inputs_i.analogue(1)(1 downto 0) <= (others => '0');
-    inputs_i.analogue(2)(9 downto 2) <= X"FF" when gcj.jy(7 downto 4) = "0000" else 
-                                        X"00" when gcj.jy(7 downto 4) = "1111" else
-                                        not gcj.jy;
-    inputs_i.analogue(2)(1 downto 0) <= (others => '0');
+    inputs_i.analogue(1) <= gcj.jx & "00";
+    inputs_i.analogue(2) <= gcj.jy & "00";
     inputs_i.analogue(3) <= (others => '0');
     inputs_i.analogue(4) <= (others => '0');
-		
+    
   end generate GEN_GAMECUBE;
 
 	GEN_NO_JAMMA : if PACE_JAMMA = PACE_JAMMA_NONE generate
