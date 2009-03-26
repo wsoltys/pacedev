@@ -226,11 +226,11 @@ begin
 
     -- extend to extremeties and invert Y axis
     
-    joystk_x <= X"00" when inputs_i.analogue(1)(7 downto 4) = "0000" else 
-                X"FF" when inputs_i.analogue(1)(7 downto 4) = "1111" else
+    joystk_x <= X"00" when inputs_i.analogue(1)(9 downto 8) = "00" else 
+                X"FF" when inputs_i.analogue(1)(9 downto 8) = "11" else
                 inputs_i.analogue(1)(9 downto 2);
-    joystk_y <= not X"00" when inputs_i.analogue(2)(7 downto 4) = "0000" else 
-                not X"FF" when inputs_i.analogue(2)(7 downto 4) = "1111" else
+    joystk_y <= not X"00" when inputs_i.analogue(2)(9 downto 8) = "00" else 
+                not X"FF" when inputs_i.analogue(2)(9 downto 8) = "11" else
                 not inputs_i.analogue(2)(9 downto 2);
     
     coco_inst : coco3fpga
@@ -295,10 +295,10 @@ begin
         PADDLE3       => joystk_x(7 downto 2),  -- Left X
         PADDLE4       => joystk_y(7 downto 2),  -- Left Y
         -- paddle switches are active low (like jamma)
-        P_SWITCH(3)		=> inputs_i.jamma_n.p(2).button(2),   -- Right 1
+        P_SWITCH(3)		=> inputs_i.jamma_n.p(1).button(3),   -- Right 1
         P_SWITCH(2)		=> inputs_i.jamma_n.p(1).button(1),   -- Left 2
         P_SWITCH(1)		=> inputs_i.jamma_n.p(1).button(2),   -- Left 1
-        P_SWITCH(0)		=> inputs_i.jamma_n.p(2).button(1),   -- Right 2
+        P_SWITCH(0)		=> inputs_i.jamma_n.p(1).button(4),   -- Right 2
         
         -- Extra Buttons and Switches
         --SWITCH				=> (others => '0'), -- fast=1.78MHz
