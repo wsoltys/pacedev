@@ -53,11 +53,13 @@ architecture SYN of tilemapCtl_1 is
   
 begin
 
-	-- these are constant for a whole line
+  -- not used
   ctl_o.map_a(ctl_o.map_a'left downto 10) <= (others => '0');
-  ctl_o.map_a(9 downto 6) <= y(6+PACE_VIDEO_V_SCALE downto 3+PACE_VIDEO_V_SCALE);
-  ctl_o.tile_a(ctl_o.tile_a'left downto 12) <= (others => '0');
-  ctl_o.tile_a(3 downto 0) <= y(2+PACE_VIDEO_V_SCALE downto -1+PACE_VIDEO_V_SCALE);
+  ctl_o.tile_a(ctl_o.tile_a'left downto 11) <= (others => '0');
+
+	-- these are constant for a whole line
+  ctl_o.map_a(9 downto 6) <= y(6 downto 3);
+  ctl_o.tile_a(3 downto 0) <= '0' & y(2 downto 0);
 
   -- generate attribute RAM address (not used)
   ctl_o.attr_a <= (others => '0');
@@ -65,7 +67,7 @@ begin
   -- generate pixel
   process (clk, clk_ena, reset)
 
-		constant X_PIPELINE_BITS  : integer := 4;
+		constant X_PIPELINE_BITS  : integer := 3;
 		variable x_r		    : std_logic_vector((DELAY-1)*X_PIPELINE_BITS-1 downto 0);
 		variable pel 				: std_logic;
 		
@@ -78,34 +80,33 @@ begin
       -- 1st stage of pipeline
       -- - read tile from tilemap
       if stb = '1' then
-        ctl_o.map_a(5 downto 1) <= x(8 downto 4);
-        ctl_o.map_a(0) <= x(3);
+        ctl_o.map_a(5 downto 0) <= x(8 downto 3);
       end if;
 
       -- 2nd stage of pipeline
       -- - read tile data from tile ROM
-      ctl_o.tile_a(11 downto 4) <= ctl_i.map_d(7 downto 0);
+      ctl_o.tile_a(10 downto 4) <= ctl_i.map_d(6 downto 0);
 
       -- 3rd stage of pipeline
       -- - assign pixel colour based on tile data
       -- (each byte contains information for 8 pixels)
-      case x_r(x_r'left-1 downto x_r'left-3) is
+      case x_r(x_r'left downto x_r'left-2) is
         when "000" =>
-          pel := ctl_i.tile_d(0);
-        when "001" =>
-          pel := ctl_i.tile_d(1);
-        when "010" =>
-          pel := ctl_i.tile_d(2);
-        when "011" =>
-          pel := ctl_i.tile_d(3);
-        when "100" =>
-          pel := ctl_i.tile_d(4);
-        when "101" =>
-          pel := ctl_i.tile_d(5);
-        when "110" =>
-          pel := ctl_i.tile_d(6);
-        when others =>
           pel := ctl_i.tile_d(7);
+        when "001" =>
+          pel := ctl_i.tile_d(6);
+        when "010" =>
+          pel := ctl_i.tile_d(5);
+        when "011" =>
+          pel := ctl_i.tile_d(4);
+        when "100" =>
+          pel := ctl_i.tile_d(3);
+        when "101" =>
+          pel := ctl_i.tile_d(2);
+        when "110" =>
+          pel := ctl_i.tile_d(1);
+        when others =>
+          pel := ctl_i.tile_d(0);
       end case;
 
       -- green-screen display

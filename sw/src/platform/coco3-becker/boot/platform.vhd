@@ -88,22 +88,20 @@ begin
 		(
 			init_file		=> "../../../../../src/platform/coco3-becker/roms/coco3gen.hex",
 			numwords_a	=> 2048,
-			width_a     => 16,
-			widthad_a		=> 12
+			widthad_a		=> 11
 		)
 		port map
 		(
-			clock			      => clk_video,
-			address		      => tilemap_i.tile_a(11 downto 0),
-			q(15 downto 8)  => tilemap_o.attr_d(7 downto 0),
-			q(7 downto 0)   => tilemap_o.tile_d
+			clock			  => clk_video,
+			address		  => tilemap_i.tile_a(10 downto 0),
+			q           => tilemap_o.tile_d
 		);
 	
   -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 	vram_inst : entity work.dpram
 		generic map
 		(
-			init_file		=> "../../../../../src/platform/trs80/m3/roms/trsvram.hex",
+			init_file		=> "../../../../../src/platform/coco3-becker/boot/roms/vram.hex",
 			numwords_a	=> 1024,
 			widthad_a		=> 10
 		)
