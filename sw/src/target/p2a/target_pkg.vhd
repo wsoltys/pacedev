@@ -23,4 +23,10 @@ package target_pkg is
 	constant ADV724_STD_PAL		  : std_logic := '0';
 	constant ADV724_STD_NTSC	  : std_logic := not ADV724_STD_PAL;
 
+  -- Euro-connector interboard SPI channel
+  constant P2A_EUROSPI_CLK    : natural := 0;
+  constant P2A_EUROSPI_MISO   : natural := 1;
+  constant P2A_EUROSPI_MOSI   : natural := 2;
+  constant P2A_EUROSPI_SS     : natural := 3;
+  
 end;

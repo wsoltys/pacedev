@@ -7,6 +7,7 @@ use work.pace_pkg.all;
 use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
 use work.platform_pkg.all;
+use work.target_pkg.all;
 
 entity platform is
   generic
@@ -30,10 +31,10 @@ entity platform is
     -- FLASH/SRAM
     flash_i         : in from_FLASH_t;
     flash_o         : out to_FLASH_t;
-    sram_i	    : in from_SRAM_t;
-    sram_o	    : out to_SRAM_t;
-    sdram_i	    : in from_SDRAM_t;
-    sdram_o	    : out to_SDRAM_t;
+    sram_i	        : in from_SRAM_t;
+    sram_o	        : out to_SRAM_t;
+    sdram_i	        : in from_SDRAM_t;
+    sdram_o	        : out to_SDRAM_t;
 
     -- graphics
     
@@ -46,7 +47,7 @@ entity platform is
     sprite_reg_o    : out to_SPRITE_REG_t;
     sprite_i        : in from_SPRITE_CTL_t;
     sprite_o        : out to_SPRITE_CTL_t;
-	spr0_hit	: in std_logic;
+    spr0_hit	      : in std_logic;
 
     -- various graphics information
     graphics_i      : in from_GRAPHICS_t;
@@ -80,6 +81,10 @@ architecture SYN of platform is
 	alias clk_video       : std_logic is clk_i(1);
 	signal clk_2M_en			: std_logic;
 	
+  alias eurospi_clk     : std_logic is gp_i(P2A_EUROSPI_CLK);
+  alias eurospi_miso    : std_logic is gp_o.d(P2A_EUROSPI_MISO);
+  alias eurospi_mosi    : std_logic is gp_i(P2A_EUROSPI_MOSI);
+  alias eurospi_ss      : std_logic is gp_i(P2A_EUROSPI_SS);
   
 begin
 
@@ -120,7 +125,14 @@ begin
 			q_a					=> tilemap_o.map_d(7 downto 0)
 		);
     tilemap_o.map_d(tilemap_o.map_d'left downto 8) <= (others => '0');
-    
+
+  -- interboard spi
+  -- - always the slave
+  gp_o.oe(P2A_EUROSPI_CLK) <= '0';
+  gp_o.oe(P2A_EUROSPI_MISO) <= '1';
+  gp_o.oe(P2A_EUROSPI_MOSI) <= '0';
+  gp_o.oe(P2A_EUROSPI_SS) <= '0';
+  
   -- unused outputs
 	bitmap_o <= NULL_TO_BITMAP_CTL;
 	sprite_reg_o <= NULL_TO_SPRITE_REG;
@@ -129,6 +141,5 @@ begin
 	graphics_o <= NULL_TO_GRAPHICS;
 	ser_o <= NULL_TO_SERIAL;
   spi_o <= NULL_TO_SPI;
-  gp_o <= NULL_TO_GP;
 
 end architecture SYN;

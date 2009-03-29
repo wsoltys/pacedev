@@ -1,7 +1,6 @@
 library ieee;
 library work;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
 library work;
@@ -154,6 +153,13 @@ architecture SYN of target_top is
   alias sd_clk        : std_logic is bd(15);
   alias sd_dat        : std_logic is bd(7);
 
+  -- inter-board SPI communcations
+  -- - this target is always the slave
+  alias eurospi_clk   : std_logic is bd(0);
+  alias eurospi_miso  : std_logic is bd(2);
+  alias eurospi_mosi  : std_logic is bd(3);
+  alias eurospi_ss    : std_logic is bd(5);
+  
 	signal clk_i			  : std_logic_vector(0 to 3);
   signal init       	: std_logic := '1';
   signal reset_i     	: std_logic := '1';
@@ -175,6 +181,8 @@ architecture SYN of target_top is
   signal audio_o      : to_AUDIO_t;
   signal ser_i        : from_SERIAL_t;
   signal ser_o        : to_SERIAL_t;
+  signal gp_i         : from_GP_t;
+  signal gp_o         : to_GP_t;
   
 	-- maple/dreamcast controller interface
 	signal maple_sense	: std_logic;
@@ -266,7 +274,7 @@ begin
 			if count = X"FF" then
 				init <= '0';
 			else
-				count := count + 1;
+				count := std_logic_vector(unsigned(count) + 1);
 				init <= '1';
 			end if;
 		end if;
@@ -500,10 +508,10 @@ begin
         else
           audio_left <= '0';  -- default
           audio_right <= '0'; -- default
-          if audio_sample_l > count then
+          if unsigned(audio_sample_l) > count then
             audio_left <= '1';
           end if;
-          if audio_sample_r > count then
+          if unsigned(audio_sample_r) > count then
             audio_right <= '1';
           end if;
           count := count + 1;
@@ -553,6 +561,23 @@ begin
 		clk_ee <= 'Z';
 		data_ee <= 'Z';
 	end generate GEN_NO_I2C;
+
+  BLK_EUROSPI : block
+  begin
+
+    -- eurospi drivers
+    eurospi_clk <= gp_o.d(P2A_EUROSPI_CLK) when gp_o.oe(P2A_EUROSPI_CLK) = '1' else 'Z';
+    eurospi_miso <= gp_o.d(P2A_EUROSPI_MISO) when gp_o.oe(P2A_EUROSPI_MISO) = '1' else 'Z';
+    eurospi_mosi <= gp_o.d(P2A_EUROSPI_MOSI) when gp_o.oe(P2A_EUROSPI_MOSI) = '1' else 'Z';
+    eurospi_ss <= gp_o.d(P2A_EUROSPI_SS) when gp_o.oe(P2A_EUROSPI_SS) = '1' else 'Z';
+    
+    -- eurospi inputs
+    gp_i(P2A_EUROSPI_CLK) <= eurospi_clk;
+    gp_i(P2A_EUROSPI_MISO) <= eurospi_miso;
+    gp_i(P2A_EUROSPI_MOSI) <= eurospi_mosi;
+    gp_i(P2A_EUROSPI_SS) <= eurospi_ss;
+    
+  end block BLK_EUROSPI;
 	
 	nromsoe <= 'Z';
 	nmebwait <= 'Z';
@@ -648,8 +673,8 @@ begin
       ser_o             => ser_o,
       
       -- general purpose
-      gp_i              => (others => '0'),
-      gp_o              => open
+      gp_i              => gp_i,
+      gp_o              => gp_o
     );
 
   BLK_CHASER : block
@@ -661,7 +686,7 @@ begin
       if reset_i = '1' then
         count := (others => '0');
       elsif rising_edge(clk_24M) then
-        count := count + 1;
+        count := std_logic_vector(unsigned(count) + 1);
       end if;
       led <= count(count'left);
     end process;
