@@ -397,7 +397,7 @@ begin
       --a_dr1 <= sdram_o.a;
       --dqm_dr1(0) <= sdram_o.ldqm;
       --dqm_dr1(1) <= sdram_o.udqm;
-      --nwe_dr1 <= sdram_o.we_n;
+      nwe_dr1 <= '1'; --sdram_o.we_n;
       --ncas_dr1 <= sdram_o.cas_n;
       --nras_dr1 <= sdram_o.ras_n;
       --ncs_dr1 <= sdram_o.cs_n;
@@ -611,6 +611,88 @@ begin
 --        gp_o              => gp_o
 --      );
   end generate GEN_PACE;
+
+  BLK_NIOS : block
+  
+    signal nios_clk         : std_logic;
+    signal nios_sdram_clk   : std_logic;
+    
+    signal fpgacfg_i        : std_logic_vector(7 downto 0);
+    signal fpgacfg_o        : std_logic_vector(7 downto 0);
+    signal eurospi_i        : std_logic_vector(7 downto 0);
+    signal eurospi_o        : std_logic_vector(7 downto 0);
+    
+  begin
+  
+    NIOS_PLL_0 : entity work.nios_pll 
+      PORT MAP 
+      (
+        inclk0	 => clock0,
+   -- 		c0	 => meb_clk ,
+        c1	 => nios_clk ,
+        c2	 => nios_sdram_clk
+      );
+
+    reset_n <= not reset_i;
+    
+    nios_system : entity work.NIOS_SYSTEM
+      port map
+      (
+        -- 1) global signals:
+        clk                             => nios_clk,
+        reset_n                         => reset_n,
+
+        -- the_PIO_IN
+        in_port_to_the_PIO_IN           => (others => '0'),
+
+        -- the_PIO_ISR
+        in_port_to_the_PIO_ISR          => (others => '0'),
+
+        -- the_PIO_OUT
+        out_port_from_the_PIO_OUT       => open,
+
+        -- the_pio_fpgacfg
+        in_port_to_the_pio_fpgacfg      => fpgacfg_i,
+        out_port_from_the_pio_fpgacfg   => fpgacfg_o,
+
+        -- the_pio_spi
+        in_port_to_the_pio_spi          => eurospi_i,
+        out_port_from_the_pio_spi       => eurospi_o,
+
+        -- the_sdram_cpu
+        zs_addr_from_the_sdram_cpu      => a_dr2,
+        zs_ba_from_the_sdram_cpu        => ba_dr2,
+        zs_cas_n_from_the_sdram_cpu     => ncas_dr2,
+        zs_cke_from_the_sdram_cpu       => open,
+        zs_cs_n_from_the_sdram_cpu      => ncs_dr2,
+        zs_dq_to_and_from_the_sdram_cpu => d_dr2,
+        zs_dqm_from_the_sdram_cpu       => dqm_dr2,
+        zs_ras_n_from_the_sdram_cpu     => nras_dr2,
+        zs_we_n_from_the_sdram_cpu      => nwe_dr2
+      );
+
+    -- eurospi mappings
+    eurospi_i(0) <= gp_i(P2A_EUROSPI_CLK);
+    gp_o.d(P2A_EUROSPI_CLK) <= eurospi_o(0);
+    gp_o.oe(P2A_EUROSPI_CLK) <= '1';
+    eurospi_i(1) <= gp_i(P2A_EUROSPI_MISO);
+    gp_o.d(P2A_EUROSPI_MISO) <= eurospi_o(1);
+    gp_o.oe(P2A_EUROSPI_MISO) <= '0';
+    eurospi_i(2) <= gp_i(P2A_EUROSPI_MOSI);
+    gp_o.d(P2A_EUROSPI_MOSI) <= eurospi_o(2);
+    gp_o.oe(P2A_EUROSPI_MOSI) <= '1';
+    eurospi_i(3) <= gp_i(P2A_EUROSPI_SS);
+    gp_o.d(P2A_EUROSPI_SS) <= eurospi_o(3);
+    gp_o.oe(P2A_EUROSPI_SS) <= '1';
+    
+    -- fpgacfg mappings
+    fpga_config_n <= fpgacfg_o(0);
+    fpga_dclk <= fpgacfg_o(1);
+    fpga_data0 <= fpgacfg_o(2);
+    fpgacfg_i(3) <= fpga_confdone;
+    fpgacfg_i(4) <= fpga_status_n;
+    
+  end block BLK_NIOS;
   
   BLK_CHASER : block
   begin

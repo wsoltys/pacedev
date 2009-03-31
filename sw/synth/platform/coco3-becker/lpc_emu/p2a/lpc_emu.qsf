@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION 8.1
+set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -748,11 +748,13 @@ set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg_b
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE "../../../../../src/platform/coco3-becker/lpc_emu/platform_pkg.vhd"
 set_global_assignment -name VHDL_FILE ../../../../../src/target/p2a/target_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/spram.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/dpram.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/io/maple/maple_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/io/gamecube/gamecube_pkg.vhd
+set_global_assignment -name VHDL_FILE mega/nios_pll.vhd
+set_global_assignment -name VHDL_FILE NIOS_SYSTEM.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/p2a/stacked_top.vhd
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
+set_global_assignment -name QIP_FILE NIOS_SYSTEM.qip
