@@ -145,58 +145,64 @@ end target_top;
 
 architecture SYN of target_top is
 
-  alias clk_24M       : std_logic is clock8;
-	alias ps2_mclk      : std_logic is bd(14);
-	alias ps2_mdat      : std_logic is bd(10);
-  alias sd_cmd        : std_logic is bd(1);
-  alias sd_dat3       : std_logic is bd(9);
-  alias sd_clk        : std_logic is bd(15);
-  alias sd_dat        : std_logic is bd(7);
+  alias clk_24M       	: std_logic is clock8;
+	alias ps2_mclk      	: std_logic is bd(14);
+	alias ps2_mdat      	: std_logic is bd(10);
+  alias sd_cmd        	: std_logic is bd(1);
+  alias sd_dat3       	: std_logic is bd(9);
+  alias sd_clk        	: std_logic is bd(15);
+  alias sd_dat        	: std_logic is bd(7);
 
   -- inter-board SPI communcations
   -- - this target is always the slave
-  alias eurospi_clk   : std_logic is bd(0);
-  alias eurospi_miso  : std_logic is bd(2);
-  alias eurospi_mosi  : std_logic is bd(3);
-  alias eurospi_ss    : std_logic is bd(5);
+  alias eurospi_clk   	: std_logic is bd(0);
+  alias eurospi_miso  	: std_logic is bd(2);
+  alias eurospi_mosi  	: std_logic is bd(3);
+  alias eurospi_ss    	: std_logic is bd(5);
   
-	signal clk_i			  : std_logic_vector(0 to 3);
-  signal init       	: std_logic := '1';
-  signal reset_i     	: std_logic := '1';
-	signal reset_n			: std_logic := '0';
-
-  signal buttons_i    : from_BUTTONS_t;
-  signal switches_i   : from_SWITCHES_t;
-  signal leds_o       : to_LEDS_t;
-  signal inputs_i     : from_INPUTS_t;
-  signal flash_i      : from_FLASH_t;
-  signal flash_o      : to_FLASH_t;
-	signal sram_i			  : from_SRAM_t;
-	signal sram_o			  : to_SRAM_t;	
-	signal sdram_i      : from_SDRAM_t;
-	signal sdram_o      : to_SDRAM_t;
-	signal video_i      : from_VIDEO_t;
-  signal video_o      : to_VIDEO_t;
-  signal audio_i      : from_AUDIO_t;
-  signal audio_o      : to_AUDIO_t;
-  signal ser_i        : from_SERIAL_t;
-  signal ser_o        : to_SERIAL_t;
-  signal gp_i         : from_GP_t;
-  signal gp_o         : to_GP_t;
+	alias fpga_config_n		: std_logic is bd(17);
+	alias fpga_dclk				: std_logic is bd(18);
+	alias fpga_data0			: std_logic is bd(19);
+	alias fpga_confdone		: std_logic is bd(21);
+	alias fpga_status_n		: std_logic is bd(25);
+                      	
+	signal clk_i			  	: std_logic_vector(0 to 3);
+  signal init       		: std_logic := '1';
+  signal reset_i     		: std_logic := '1';
+	signal reset_n				: std_logic := '0';
+                      	
+  signal buttons_i    	: from_BUTTONS_t;
+  signal switches_i   	: from_SWITCHES_t;
+  signal leds_o       	: to_LEDS_t;
+  signal inputs_i     	: from_INPUTS_t;
+  signal flash_i      	: from_FLASH_t;
+  signal flash_o      	: to_FLASH_t;
+	signal sram_i			  	: from_SRAM_t;
+	signal sram_o			  	: to_SRAM_t;	
+	signal sdram_i      	: from_SDRAM_t;
+	signal sdram_o      	: to_SDRAM_t;
+	signal video_i      	: from_VIDEO_t;
+  signal video_o      	: to_VIDEO_t;
+  signal audio_i      	: from_AUDIO_t;
+  signal audio_o      	: to_AUDIO_t;
+  signal ser_i        	: from_SERIAL_t;
+  signal ser_o        	: to_SERIAL_t;
+  signal gp_i         	: from_GP_t;
+  signal gp_o         	: to_GP_t;
   
 	-- maple/dreamcast controller interface
-	signal maple_sense	: std_logic;
-	signal maple_oe			: std_logic;
-	signal mpj				  : work.maple_pkg.joystate_type;
+	signal maple_sense		: std_logic;
+	signal maple_oe				: std_logic;
+	signal mpj				  	: work.maple_pkg.joystate_type;
 
 	-- gamecube controller interface
-	signal gcj					: work.gamecube_pkg.joystate_type;
-
-	signal bd_out				: std_logic_vector(31 downto 0);
-		
-	signal gpio_i				: std_logic_vector(9 downto 2);
-	signal gpio_o				: std_logic_vector(gpio_i'range);
-	signal gpio_oe			: std_logic_vector(gpio_i'range);
+	signal gcj						: work.gamecube_pkg.joystate_type;
+                      	
+	signal bd_out					: std_logic_vector(31 downto 0);
+		                  	
+	signal gpio_i					: std_logic_vector(9 downto 2);
+	signal gpio_o					: std_logic_vector(gpio_i'range);
+	signal gpio_oe				: std_logic_vector(gpio_i'range);
 	
 begin
 
@@ -486,6 +492,13 @@ begin
 		data_ee <= 'Z';
 	end generate GEN_NO_I2C;
 
+	BLK_FPGACFG : block
+	begin
+    -- drivers
+    fpga_confdone <= 'Z';
+    fpga_status_n <= 'Z';
+	end block BLK_FPGACFG;
+	
   BLK_EUROSPI : block
   begin
 
@@ -537,15 +550,15 @@ begin
 	bd(12) <= 'Z';
 	bd(13) <= 'Z';
 	bd(16) <= 'Z'; --bd_out(16);
-	bd(17) <= 'Z';
-	bd(18) <= 'Z'; --bd_out(18);
-	bd(19) <= 'Z';
+	--bd(17) <= 'Z';
+	--bd(18) <= 'Z'; --bd_out(18);
+	--bd(19) <= 'Z';
 	bd(20) <= 'Z'; --bd_out(20);
-	bd(21) <= 'Z';
+	--bd(21) <= 'Z';
 	bd(22) <= 'Z'; --bd_out(22);
 	bd(23) <= 'Z'; --bd_out(23);
 	bd(24) <= 'Z'; --bd_out(24);
-	bd(25) <= 'Z'; --bd_out(25);
+	--bd(25) <= 'Z'; --bd_out(25);
 	bd(26) <= 'Z'; --bd_out(26);
 	bd(27) <= 'Z'; --bd_out(27);
 	bd(28) <= 'Z'; --bd_out(28);
