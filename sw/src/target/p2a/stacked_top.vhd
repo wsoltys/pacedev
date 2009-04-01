@@ -651,13 +651,19 @@ begin
         -- the_PIO_OUT
         out_port_from_the_PIO_OUT       => open,
 
+        -- the_lpc_spi_0
+        spi_clk_from_the_lpc_spi_0      => eurospi_o(0),
+        spi_miso_to_the_lpc_spi_0       => '0',
+        spi_mosi_from_the_lpc_spi_0     => eurospi_o(2),
+        spi_ss_from_the_lpc_spi_0       => eurospi_o(3),
+
         -- the_pio_fpgacfg
         in_port_to_the_pio_fpgacfg      => fpgacfg_i,
         out_port_from_the_pio_fpgacfg   => fpgacfg_o,
 
         -- the_pio_spi
         in_port_to_the_pio_spi          => eurospi_i,
-        out_port_from_the_pio_spi       => eurospi_o,
+        out_port_from_the_pio_spi       => open, --eurospi_o,
 
         -- the_sdram_cpu
         zs_addr_from_the_sdram_cpu      => a_dr2,

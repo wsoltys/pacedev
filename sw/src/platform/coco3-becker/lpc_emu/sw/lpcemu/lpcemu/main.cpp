@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "altera_avalon_pio_regs.h"
 #include "altera_avalon_timer_regs.h"
@@ -38,10 +39,51 @@ static void batterylow_interrupt(void *context, alt_u32 id)
 #define FPGACFG_CONFDONE		(1<<3)
 #define FPGACFG_STATUSn			(1<<4)
 
-void spi_send8 (alt_u8 data)
-{
-	alt_u8 spi_out = 0;		// SSEL low
+#ifdef LPC_SPI_0_NAME
 
+#define aSSPRC0   (0<<2)
+#define aSSPCR1   (1<<2)
+#define aSSPDR    (2<<2)
+#define aSSPSR    (3<<2)
+#define aSSPCPSR  (4<<2)
+#define aSSPIMSC  (5<<2)
+#define aSSPRIS   (6<<2)
+#define aSSPMIS   (7<<2)
+#define aSSPICR   (8<<2)
+
+// SSPCR1
+#define BIT_SSE   (1<<1)
+
+#define LPC_RD32(addr)            \
+  IORD_32DIRECT (((1<<31)|LPC_SPI_0_BASE), (addr))
+#define LPC_WR32(addr, data)      \
+  IOWR_32DIRECT (((1<<31)|LPC_SPI_0_BASE), (addr), (data))
+
+void spi_enable (bool enable)
+{
+  if (enable)
+    LPC_WR32 (aSSPCR1, BIT_SSE);
+  else
+    LPC_WR32 (aSSPCR1, 0);
+}
+   
+alt_u8 spi_send8 (alt_u8 data)
+{
+  LPC_WR32 (aSSPDR, (alt_u32)data);
+  return (0);
+}
+
+#else
+
+void spi_enable (bool enable)
+{
+}
+   
+alt_u8 spi_send8 (alt_u8 data)
+{
+  alt_u8 spi_in = 0;
+	alt_u8 spi_out = 0;		// SSEL low
+  
 	for (int i=0; i<8; i++)
 	{
 		//setup data, clock hi
@@ -55,11 +97,20 @@ void spi_send8 (alt_u8 data)
 		// clock transition low
 		spi_out &= ~SPI_CLK;
 		IOWR_ALTERA_AVALON_PIO_DATA (PIO_SPI_BASE, spi_out);
+    
+    // read data in
+    spi_in <<= 1;
+    alt_u8 spi_sts = IORD_ALTERA_AVALON_PIO_DATA (PIO_SPI_BASE);
+    if (spi_sts & SPI_MISO)
+      spi_in |= 1;
+      
 		usleep (1);
 
 		data <<= 1;
 	}
+  return (spi_in);
 }
+#endif
 
 int main (int argc, char* argv[], char* envp[])
 {
@@ -79,7 +130,7 @@ int main (int argc, char* argv[], char* envp[])
 		(ALTERA_AVALON_PIO_DIRECTION_OUTPUT << 1) |
 		(ALTERA_AVALON_PIO_DIRECTION_OUTPUT << 0));
 
-	// initialis SSEL de-asserted
+	// initialise SSEL de-asserted
 	IOWR_ALTERA_AVALON_PIO_DATA (PIO_SPI_BASE, SPI_SSn);
 
 #if 0
@@ -97,16 +148,50 @@ int main (int argc, char* argv[], char* envp[])
   IOWR_ALTERA_AVALON_PIO_IRQ_MASK (USER_POWERFAIL_BL_BASE, (1<<0));
 #endif
 
-	// do a video transfer to the FPGA
-	// - 1 line
-	// assert SSEL
-	IOWR_ALTERA_AVALON_PIO_DATA (PIO_SPI_BASE, 0);
-	// video packet
-	spi_send8 (0x01);
-	for (int i=0; i<64; i++)
-	{
-		spi_send8 (0x30+i);
-	}
-	// de-assert SSEL
-	IOWR_ALTERA_AVALON_PIO_DATA (PIO_SPI_BASE, SPI_SSn);
+  static char buf[1024];
+  //sprintf (buf, "--- Welcome to PACE CoCo3+ (Built: %s %s) ---", __DATE__, __TIME__);
+  sprintf (buf, "ABC");
+
+  alt_u8 ps2_keys = 0;
+
+  spi_enable (true);
+
+  alt_u32 spi_sts;
+  spi_sts = LPC_RD32 (aSSPSR); printf ("pre %08X\n", spi_sts); 
+  usleep (1000000);
+    
+  while (1)
+  {
+    alt_u8 spi_in;
+    int i;
+
+  	// do a video transfer to the FPGA
+  	// assert SSEL
+  	IOWR_ALTERA_AVALON_PIO_DATA (PIO_SPI_BASE, 0);
+    spi_sts = LPC_RD32 (aSSPSR); printf ("%08X\n", spi_sts); 
+  	spi_send8 (0x01);
+    spi_sts = LPC_RD32 (aSSPSR); printf ("%08X\n", spi_sts); 
+  	for (i=0; i<(int)strlen(buf); i++)
+  		spi_send8 (buf[i]);
+    //for (; i<1024; i++)
+    //  spi_send8 (' ');
+  	// de-assert SSEL
+  	IOWR_ALTERA_AVALON_PIO_DATA (PIO_SPI_BASE, SPI_SSn);
+  
+    // do a keyboard transfer from the FPGA
+    IOWR_ALTERA_AVALON_PIO_DATA (PIO_SPI_BASE, 0);
+    // keybpard packet
+    spi_send8 (0x02);
+    spi_in = spi_send8 (0x00);    // dummy data to read
+    IOWR_ALTERA_AVALON_PIO_DATA (PIO_SPI_BASE, SPI_SSn);
+
+    if (spi_in != ps2_keys)
+    {
+      ps2_keys = spi_in;  
+      printf ("ps2_keys = $%02X\n", ps2_keys);
+    }
+  
+    usleep (1000000);
+  }
+   
 }

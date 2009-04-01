@@ -1,3 +1,5 @@
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) E:/markm/pace/pacedev.net/sw/src/platform/coco3-becker/lpc_emu/ip/lpc_spi/lpc_spi.vhd]
+set_global_assignment -name TCL_FILE [file join $::quartus(qip_path) E:/markm/pace/pacedev.net/sw/src/platform/coco3-becker/lpc_emu/ip/lpc_spi/lpc_spi_hw.tcl]
 set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) cpu.sdc]
-set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID 005056C00008000001205EE5F136 
+set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID 005056C000080000012061DC5B63 
  

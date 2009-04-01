@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?><system name="NIOS_SYSTEM">
   <parameter name="bonusData">bonusData 
 {
-   element timer_100Hz
+   element cpu.jtag_debug_module
+   {
+      datum baseAddress
+      {
+         value = "150999040";
+         type = "long";
+      }
+   }
+   element lpc_spi_0
    {
       datum _sortIndex
       {
-         value = "10";
+         value = "14";
          type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
       }
       datum sopceditor_expanded
       {
@@ -19,19 +22,11 @@
          type = "boolean";
       }
    }
-   element clk.clk
-   {
-      datum clock_domain
-      {
-         value = "clk";
-         type = "String";
-      }
-   }
-   element PIO_IN.s1
+   element pipeline_bridge.s1
    {
       datum baseAddress
       {
-         value = "80";
+         value = "134217728";
          type = "long";
       }
    }
@@ -46,51 +41,6 @@
       {
          value = "0";
          type = "boolean";
-      }
-   }
-   element pio_spi.s1
-   {
-      datum baseAddress
-      {
-         value = "128";
-         type = "long";
-      }
-   }
-   element sysid
-   {
-      datum _sortIndex
-      {
-         value = "6";
-         type = "int";
-      }
-      datum sopceditor_expanded
-      {
-         value = "0";
-         type = "boolean";
-      }
-   }
-   element sdram_cpu.s1
-   {
-      datum baseAddress
-      {
-         value = "67108864";
-         type = "long";
-      }
-   }
-   element PIO_ISR.s1
-   {
-      datum baseAddress
-      {
-         value = "96";
-         type = "long";
-      }
-   }
-   element jtag_uart.avalon_jtag_slave
-   {
-      datum baseAddress
-      {
-         value = "144";
-         type = "long";
       }
    }
    element pio_spi
@@ -111,94 +61,23 @@
          type = "boolean";
       }
    }
-   element sys_clock_timer
+   element descriptor_memory
    {
       datum _sortIndex
       {
-         value = "4";
+         value = "2";
          type = "int";
       }
-      datum sopceditor_expanded
+      datum megawizard_uipreferences
       {
-         value = "0";
-         type = "boolean";
-      }
-   }
-   element pio_fpgacfg.s1
-   {
-      datum baseAddress
-      {
-         value = "112";
-         type = "long";
+         value = "{memorySize=Bytes}";
+         type = "String";
       }
    }
    element NIOS_SYSTEM
    {
    }
-   element sysid.control_slave
-   {
-      datum baseAddress
-      {
-         value = "152";
-         type = "long";
-      }
-   }
-   element pipeline_bridge.s1
-   {
-      datum baseAddress
-      {
-         value = "134217728";
-         type = "long";
-      }
-   }
-   element PIO_OUT
-   {
-      datum _sortIndex
-      {
-         value = "7";
-         type = "int";
-      }
-      datum sopceditor_expanded
-      {
-         value = "0";
-         type = "boolean";
-      }
-   }
-   element sdram_cpu
-   {
-      datum _sortIndex
-      {
-         value = "0";
-         type = "int";
-      }
-   }
-   element PIO_OUT.s1
-   {
-      datum baseAddress
-      {
-         value = "64";
-         type = "long";
-      }
-   }
-   element cpu
-   {
-      datum _sortIndex
-      {
-         value = "1";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
-      }
-      datum sopceditor_expanded
-      {
-         value = "1";
-         type = "boolean";
-      }
-   }
-   element sys_clock_timer.s1
+   element lpc_spi_0.avalon_slave_0
    {
       datum baseAddress
       {
@@ -224,33 +103,30 @@
          type = "boolean";
       }
    }
-   element timer_100Hz.s1
-   {
-      datum baseAddress
-      {
-         value = "32";
-         type = "long";
-      }
-   }
-   element cpu.jtag_debug_module
-   {
-      datum baseAddress
-      {
-         value = "150999040";
-         type = "long";
-      }
-   }
-   element PIO_IN
+   element cpu
    {
       datum _sortIndex
       {
-         value = "8";
+         value = "1";
          type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
       }
       datum sopceditor_expanded
       {
-         value = "0";
+         value = "1";
          type = "boolean";
+      }
+   }
+   element jtag_uart.avalon_jtag_slave
+   {
+      datum baseAddress
+      {
+         value = "208";
+         type = "long";
       }
    }
    element jtag_uart
@@ -266,24 +142,43 @@
          type = "boolean";
       }
    }
-   element descriptor_memory
-   {
-      datum _sortIndex
-      {
-         value = "2";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{memorySize=Bytes}";
-         type = "String";
-      }
-   }
-   element descriptor_memory.s1
+   element sys_clock_timer.s1
    {
       datum baseAddress
       {
-         value = "150996992";
+         value = "64";
+         type = "long";
+      }
+   }
+   element sdram_cpu
+   {
+      datum _sortIndex
+      {
+         value = "0";
+         type = "int";
+      }
+   }
+   element sysid.control_slave
+   {
+      datum baseAddress
+      {
+         value = "216";
+         type = "long";
+      }
+   }
+   element PIO_OUT.s1
+   {
+      datum baseAddress
+      {
+         value = "128";
+         type = "long";
+      }
+   }
+   element pio_fpgacfg.s1
+   {
+      datum baseAddress
+      {
+         value = "176";
          type = "long";
       }
    }
@@ -305,12 +200,138 @@
          type = "boolean";
       }
    }
+   element sysid
+   {
+      datum _sortIndex
+      {
+         value = "6";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element descriptor_memory.s1
+   {
+      datum baseAddress
+      {
+         value = "150996992";
+         type = "long";
+      }
+   }
+   element PIO_OUT
+   {
+      datum _sortIndex
+      {
+         value = "7";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element timer_100Hz.s1
+   {
+      datum baseAddress
+      {
+         value = "96";
+         type = "long";
+      }
+   }
+   element pio_spi.s1
+   {
+      datum baseAddress
+      {
+         value = "192";
+         type = "long";
+      }
+   }
+   element PIO_ISR.s1
+   {
+      datum baseAddress
+      {
+         value = "160";
+         type = "long";
+      }
+   }
    element clk
    {
       datum _sortIndex
       {
          value = "11";
          type = "int";
+      }
+   }
+   element clk.clk
+   {
+      datum clock_domain
+      {
+         value = "clk";
+         type = "String";
+      }
+   }
+   element PIO_IN
+   {
+      datum _sortIndex
+      {
+         value = "8";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element sys_clock_timer
+   {
+      datum _sortIndex
+      {
+         value = "4";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element sdram_cpu.s1
+   {
+      datum baseAddress
+      {
+         value = "67108864";
+         type = "long";
+      }
+   }
+   element timer_100Hz
+   {
+      datum _sortIndex
+      {
+         value = "10";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element PIO_IN.s1
+   {
+      datum baseAddress
+      {
+         value = "144";
+         type = "long";
       }
    }
 }
@@ -320,8 +341,8 @@
   <parameter name="hardcopyCompatible" value="false" />
   <parameter name="hdlLanguage" value="VHDL" />
   <parameter name="projectName" value="lpc_emu.qpf" />
-  <parameter name="systemHash" value="76013015971" />
-  <parameter name="timeStamp" value="1238542694062" />
+  <parameter name="systemHash" value="78249628158" />
+  <parameter name="timeStamp" value="1238592400127" />
   <module name="clk" kind="clock_source" version="8.1" enabled="1">
     <parameter name="clockFrequency" value="66000000" />
     <parameter name="clockFrequencyKnown" value="true" />
@@ -568,6 +589,7 @@
     <parameter name="simDrivenValue" value="0" />
     <parameter name="width" value="8" />
   </module>
+  <module name="lpc_spi_0" kind="lpc_spi" version="1.0" enabled="1" />
   <connection kind="clock" version="8.1" start="clk.clk" end="sdram_cpu.clk" />
   <connection kind="clock" version="8.1" start="clk.clk" end="cpu.clk" />
   <connection kind="clock" version="8.1" start="clk.clk" end="sys_clock_timer.clk" />
@@ -644,7 +666,7 @@
       start="pipeline_bridge.m1"
       end="sys_clock_timer.s1">
     <parameter name="arbitrationPriority" value="1" />
-    <parameter name="baseAddress" value="0x0000" />
+    <parameter name="baseAddress" value="0x0040" />
   </connection>
   <connection
       kind="avalon"
@@ -652,7 +674,7 @@
       start="pipeline_bridge.m1"
       end="jtag_uart.avalon_jtag_slave">
     <parameter name="arbitrationPriority" value="1" />
-    <parameter name="baseAddress" value="0x0090" />
+    <parameter name="baseAddress" value="0x00d0" />
   </connection>
   <connection
       kind="avalon"
@@ -660,7 +682,7 @@
       start="pipeline_bridge.m1"
       end="sysid.control_slave">
     <parameter name="arbitrationPriority" value="1" />
-    <parameter name="baseAddress" value="0x0098" />
+    <parameter name="baseAddress" value="0x00d8" />
   </connection>
   <connection
       kind="avalon"
@@ -668,7 +690,7 @@
       start="pipeline_bridge.m1"
       end="PIO_OUT.s1">
     <parameter name="arbitrationPriority" value="1" />
-    <parameter name="baseAddress" value="0x0040" />
+    <parameter name="baseAddress" value="0x0080" />
   </connection>
   <connection
       kind="avalon"
@@ -676,7 +698,7 @@
       start="pipeline_bridge.m1"
       end="PIO_IN.s1">
     <parameter name="arbitrationPriority" value="1" />
-    <parameter name="baseAddress" value="0x0050" />
+    <parameter name="baseAddress" value="0x0090" />
   </connection>
   <connection
       kind="avalon"
@@ -684,7 +706,7 @@
       start="pipeline_bridge.m1"
       end="PIO_ISR.s1">
     <parameter name="arbitrationPriority" value="1" />
-    <parameter name="baseAddress" value="0x0060" />
+    <parameter name="baseAddress" value="0x00a0" />
   </connection>
   <connection
       kind="avalon"
@@ -692,7 +714,7 @@
       start="pipeline_bridge.m1"
       end="timer_100Hz.s1">
     <parameter name="arbitrationPriority" value="1" />
-    <parameter name="baseAddress" value="0x0020" />
+    <parameter name="baseAddress" value="0x0060" />
   </connection>
   <connection
       kind="clock"
@@ -715,7 +737,7 @@
       start="pipeline_bridge.m1"
       end="pio_fpgacfg.s1">
     <parameter name="arbitrationPriority" value="1" />
-    <parameter name="baseAddress" value="0x0070" />
+    <parameter name="baseAddress" value="0x00b0" />
   </connection>
   <connection
       kind="avalon"
@@ -723,6 +745,19 @@
       start="pipeline_bridge.m1"
       end="pio_spi.s1">
     <parameter name="arbitrationPriority" value="1" />
-    <parameter name="baseAddress" value="0x0080" />
+    <parameter name="baseAddress" value="0x00c0" />
+  </connection>
+  <connection
+      kind="clock"
+      version="8.1"
+      start="clk.clk"
+      end="lpc_spi_0.clock_reset" />
+  <connection
+      kind="avalon"
+      version="6.1"
+      start="pipeline_bridge.m1"
+      end="lpc_spi_0.avalon_slave_0">
+    <parameter name="arbitrationPriority" value="1" />
+    <parameter name="baseAddress" value="0x0000" />
   </connection>
 </system>

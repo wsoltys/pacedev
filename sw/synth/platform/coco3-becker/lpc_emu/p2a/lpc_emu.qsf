@@ -758,3 +758,4 @@ set_global_assignment -name VHDL_FILE NIOS_SYSTEM.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/p2a/stacked_top.vhd
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
 set_global_assignment -name QIP_FILE NIOS_SYSTEM.qip
+set_global_assignment -name QIP_FILE ../../boot/p2a/lpc_spi_fifo.qip
