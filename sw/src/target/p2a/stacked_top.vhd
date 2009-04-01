@@ -628,13 +628,13 @@ begin
       PORT MAP 
       (
         inclk0	 => clock0,
-   -- 		c0	 => meb_clk ,
-        c1	 => nios_clk ,
+    		c0	 => open,
+        c1	 => nios_clk,
         c2	 => nios_sdram_clk
       );
 
     reset_n <= not reset_i;
-    
+
     nios_system : entity work.NIOS_SYSTEM
       port map
       (
@@ -671,6 +671,9 @@ begin
         zs_we_n_from_the_sdram_cpu      => nwe_dr2
       );
 
+    -- sdram clock
+    clk_dr2 <= nios_sdram_clk;
+    
     -- eurospi mappings
     eurospi_i(0) <= gp_i(P2A_EUROSPI_CLK);
     gp_o.d(P2A_EUROSPI_CLK) <= eurospi_o(0);

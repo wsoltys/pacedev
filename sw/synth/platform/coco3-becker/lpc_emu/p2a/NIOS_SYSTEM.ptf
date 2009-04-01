@@ -1,7 +1,7 @@
 SYSTEM NIOS_SYSTEM
 {
-   System_Wizard_Version = "8.00";
-   System_Wizard_Build = "231";
+   System_Wizard_Version = "8.10";
+   System_Wizard_Build = "163";
    Builder_Application = "sopc_builder_ca";
    WIZARD_SCRIPT_ARGUMENTS 
    {
@@ -15,7 +15,7 @@ SYSTEM NIOS_SYSTEM
       {
          CLOCK clk
          {
-            frequency = "50000000";
+            frequency = "66000000";
             source = "External";
             Is_Clock_Source = "0";
             display_name = "clk";
@@ -23,8 +23,8 @@ SYSTEM NIOS_SYSTEM
             clock_module_connection_point_for_c2h = "clk.clk";
          }
       }
-      clock_freq = "50000000";
-      clock_freq = "50000000";
+      clock_freq = "66000000";
+      clock_freq = "66000000";
       board_class = "";
       view_master_columns = "1";
       view_master_priorities = "0";
@@ -608,7 +608,7 @@ SYSTEM NIOS_SYSTEM
          }
       }
       class = "altera_avalon_new_sdram_controller";
-      class_version = "7.081";
+      class_version = "7.08";
       HDL_INFO 
       {
          Precompiled_Simulation_Library_Files = "";
@@ -1179,9 +1179,11 @@ SYSTEM NIOS_SYSTEM
          oci_data_trace = "0";
          include_third_party_debug_port = "0";
          oci_trace_addr_width = "7";
-         oci_trigger_arming = "1";
          oci_debugreq_signals = "0";
+         oci_trigger_arming = "1";
          oci_embedded_pll = "0";
+         oci_assign_jtag_instance_id = "0";
+         oci_jtag_instance_id = "0";
          oci_num_pm = "0";
          oci_pm_width = "32";
          performance_counters_present = "0";
@@ -1357,14 +1359,14 @@ SYSTEM NIOS_SYSTEM
                comment = "Log2 size in bytes of each dcache line";
             }
          }
-         license_status = "ocp";
+         license_status = "encrypted";
          mainmem_slave = "descriptor_memory/s1";
          datamem_slave = "descriptor_memory/s1";
          maincomm_slave = "";
          germs_monitor_id = "";
       }
       class = "altera_nios2";
-      class_version = "7.081";
+      class_version = "7.08";
       SYSTEM_BUILDER_INFO 
       {
          Is_Enabled = "1";
@@ -1373,7 +1375,7 @@ SYSTEM NIOS_SYSTEM
          Parameters_Signature = "";
          Is_CPU = "1";
          Instantiate_In_System_Module = "1";
-         Required_Device_Family = "STRATIX,STRATIXGX,STRATIXII,STRATIXIIGX,STRATIXIIGXLITE,STRATIXIII,STRATIXIV,CYCLONE,CYCLONEII,CYCLONEIII";
+         Required_Device_Family = "STRATIX,STRATIXGX,STRATIXII,STRATIXIIGX,STRATIXIIGXLITE,STRATIXIII,STRATIXIV,CYCLONE,CYCLONEII,CYCLONEIII,HARDCOPYIII,ARRIAII,TARPON";
          Default_Module_Name = "cpu";
          Top_Level_Ports_Are_Enumerated = "1";
          View 
@@ -1394,7 +1396,7 @@ SYSTEM NIOS_SYSTEM
          PLI_Files = "";
          Precompiled_Simulation_Library_Files = "";
          Simulation_HDL_Files = "";
-         Synthesis_HDL_Files = "__PROJECT_DIRECTORY__/cpu_test_bench.vhd, __PROJECT_DIRECTORY__/cpu_mult_cell.vhd, __PROJECT_DIRECTORY__/cpu_jtag_debug_module_tck.vhd, __PROJECT_DIRECTORY__/cpu_jtag_debug_module_sysclk.vhd, __PROJECT_DIRECTORY__/cpu_jtag_debug_module_wrapper.vhd, __PROJECT_DIRECTORY__/cpu.vhd";
+         Synthesis_HDL_Files = "__PROJECT_DIRECTORY__/cpu_test_bench.vhd, __PROJECT_DIRECTORY__/cpu_mult_cell.vhd, __PROJECT_DIRECTORY__/cpu_oci_test_bench.vhd, __PROJECT_DIRECTORY__/cpu_jtag_debug_module_tck.vhd, __PROJECT_DIRECTORY__/cpu_jtag_debug_module_sysclk.vhd, __PROJECT_DIRECTORY__/cpu_jtag_debug_module_wrapper.vhd, __PROJECT_DIRECTORY__/cpu.vhd";
          Synthesis_Only_Files = "";
       }
       MASTER tightly_coupled_instruction_master_0
@@ -2107,7 +2109,7 @@ SYSTEM NIOS_SYSTEM
          }
       }
       class = "altera_avalon_timer";
-      class_version = "7.081";
+      class_version = "7.08";
       iss_model_name = "altera_avalon_timer";
       SYSTEM_BUILDER_INFO 
       {
@@ -2134,7 +2136,7 @@ SYSTEM NIOS_SYSTEM
          period_units = "ms";
          reset_output = "0";
          timeout_pulse_output = "0";
-         load_value = "49999";
+         load_value = "65999";
          counter_size = "32";
          mult = "0.0010";
          ticks_per_sec = "1000";
@@ -2295,7 +2297,7 @@ SYSTEM NIOS_SYSTEM
          }
       }
       class = "altera_avalon_jtag_uart";
-      class_version = "7.081";
+      class_version = "7.08";
       iss_model_name = "altera_avalon_jtag_uart";
       WIZARD_SCRIPT_ARGUMENTS 
       {
@@ -2480,7 +2482,7 @@ SYSTEM NIOS_SYSTEM
          }
       }
       class = "altera_avalon_sysid";
-      class_version = "7.081";
+      class_version = "7.08";
       SYSTEM_BUILDER_INFO 
       {
          Date_Modified = "";
@@ -2492,7 +2494,7 @@ SYSTEM NIOS_SYSTEM
          Has_Clock = "1";
          View 
          {
-            Settings_Summary = "System ID (at last Generate):<br> <b>2019499C</b>    (unique ID tag) <br> <b>49D28DF7</b> (timestamp: Wed Apr 1, 2009 @7:41 AM)";
+            Settings_Summary = "System ID (at last Generate):<br> <b>32BA93C6</b>    (unique ID tag) <br> <b>49D2A966</b> (timestamp: Wed Apr 1, 2009 @9:38 AM)";
             MESSAGES 
             {
             }
@@ -2500,8 +2502,8 @@ SYSTEM NIOS_SYSTEM
       }
       WIZARD_SCRIPT_ARGUMENTS 
       {
-         id = "538528156u";
-         timestamp = "1238535671u";
+         id = "851088326u";
+         timestamp = "1238542694u";
          regenerate_values = "0";
          MAKE 
          {
@@ -2510,7 +2512,7 @@ SYSTEM NIOS_SYSTEM
                verifysysid 
                {
                   All_Depends_On = "0";
-                  Command = "nios2-download $(JTAG_CABLE)                                --sidp=0x08000098 --id=538528156 --timestamp=1238535671";
+                  Command = "nios2-download $(JTAG_CABLE)                                --sidp=0x08000098 --id=851088326 --timestamp=1238542694";
                   Is_Phony = "1";
                   Target_File = "dummy_verifysysid_file";
                }
@@ -2575,6 +2577,13 @@ SYSTEM NIOS_SYSTEM
                width = "1";
                direction = "input";
                Is_Enabled = "1";
+            }
+            PORT readdata
+            {
+               Is_Enabled = "1";
+               direction = "output";
+               type = "readdata";
+               width = "8";
             }
          }
          SYSTEM_BUILDER_INFO 
@@ -2641,7 +2650,7 @@ SYSTEM NIOS_SYSTEM
          }
       }
       class = "altera_avalon_pio";
-      class_version = "7.081";
+      class_version = "7.08";
       SYSTEM_BUILDER_INFO 
       {
          Is_Enabled = "1";
@@ -2783,7 +2792,7 @@ SYSTEM NIOS_SYSTEM
          }
       }
       class = "altera_avalon_pio";
-      class_version = "7.081";
+      class_version = "7.08";
       SYSTEM_BUILDER_INFO 
       {
          Is_Enabled = "1";
@@ -2957,7 +2966,7 @@ SYSTEM NIOS_SYSTEM
          }
       }
       class = "altera_avalon_pio";
-      class_version = "7.081";
+      class_version = "7.08";
       SYSTEM_BUILDER_INFO 
       {
          Is_Enabled = "1";
@@ -3107,7 +3116,7 @@ SYSTEM NIOS_SYSTEM
          }
       }
       class = "altera_avalon_timer";
-      class_version = "7.081";
+      class_version = "7.08";
       iss_model_name = "altera_avalon_timer";
       SYSTEM_BUILDER_INFO 
       {
@@ -3134,7 +3143,7 @@ SYSTEM NIOS_SYSTEM
          period_units = "ms";
          reset_output = "0";
          timeout_pulse_output = "0";
-         load_value = "499999";
+         load_value = "659999";
          counter_size = "32";
          mult = "0.0010";
          ticks_per_sec = "100";
@@ -3554,7 +3563,7 @@ SYSTEM NIOS_SYSTEM
          Enable_Arbiterlock = "0";
       }
       class = "altera_avalon_pipeline_bridge";
-      class_version = "7.081";
+      class_version = "7.08";
       SYSTEM_BUILDER_INFO 
       {
          Is_Enabled = "1";
@@ -3763,7 +3772,7 @@ SYSTEM NIOS_SYSTEM
                }
             }
          }
-         contents_info = "QUARTUS_PROJECT_DIR/descriptor_memory.hex 1238535891 ";
+         contents_info = "QUARTUS_PROJECT_DIR/descriptor_memory.hex 1238542946 ";
       }
       SIMULATION 
       {
@@ -3820,7 +3829,7 @@ SYSTEM NIOS_SYSTEM
          }
       }
       class = "altera_avalon_onchip_memory2";
-      class_version = "7.081";
+      class_version = "7.08";
       HDL_INFO 
       {
          Precompiled_Simulation_Library_Files = "";
@@ -3976,7 +3985,7 @@ SYSTEM NIOS_SYSTEM
          }
       }
       class = "altera_avalon_pio";
-      class_version = "7.081";
+      class_version = "7.08";
       SYSTEM_BUILDER_INFO 
       {
          Is_Enabled = "1";
@@ -4140,7 +4149,7 @@ SYSTEM NIOS_SYSTEM
          }
       }
       class = "altera_avalon_pio";
-      class_version = "7.081";
+      class_version = "7.08";
       SYSTEM_BUILDER_INFO 
       {
          Is_Enabled = "1";
