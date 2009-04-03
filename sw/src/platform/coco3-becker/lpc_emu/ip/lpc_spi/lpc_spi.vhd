@@ -26,7 +26,7 @@ end entity lpc_spi_controller;
 architecture SYN of lpc_spi_controller is
 
   -- register addresses
-  constant aSSPRC0  : std_logic_vector(3 downto 0) := X"0";
+  constant aSSPCR0  : std_logic_vector(3 downto 0) := X"0";
   constant aSSPCR1  : std_logic_vector(3 downto 0) := X"1";
   constant aSSPDR   : std_logic_vector(3 downto 0) := X"2";
   constant aSSPSR   : std_logic_vector(3 downto 0) := X"3";
@@ -39,14 +39,28 @@ architecture SYN of lpc_spi_controller is
   -- registers
   signal rSSPCR0    : std_logic_vector(15 downto 0) := (others => '0');
   signal rSSPCR1    : std_logic_vector(7 downto 0) := (others => '0');
-  alias SSE : std_logic is rSSPCR1(1);
+  alias SSE         : std_logic is rSSPCR1(1);
   signal rSSPDR     : std_logic_vector(15 downto 0) := (others => '0');
   signal rSSPSR     : std_logic_vector(7 downto 0) := (others => '0');
   signal rSSPCPSR   : std_logic_vector(7 downto 0) := (others => '0');
   signal rSSPIMSC   : std_logic_vector(7 downto 0) := (others => '0');
+  alias TXIM        : std_logic is rSSPIMSC(3);
+  alias RXIM        : std_logic is rSSPIMSC(2);
+  alias RTIM        : std_logic is rSSPIMSC(1);
+  alias RORIM       : std_logic is rSSPIMSC(0);
   signal rSSPRIS    : std_logic_vector(7 downto 0) := (others => '0');
+  alias TXRIS       : std_logic is rSSPRIS(3);
+  alias RXRIS       : std_logic is rSSPRIS(2);
+  alias RTRIS       : std_logic is rSSPRIS(1);
+  alias RORRIS      : std_logic is rSSPRIS(0);
   signal rSSPMIS    : std_logic_vector(7 downto 0) := (others => '0');
-  --signal rSSPICR    : std_logic_vector(7 downto 0) := (others => '0');
+  alias TXMIS       : std_logic is rSSPMIS(3);
+  alias RXMIS       : std_logic is rSSPMIS(2);
+  alias RTMIS       : std_logic is rSSPMIS(1);
+  alias RORMIS      : std_logic is rSSPMIS(0);
+  signal rSSPICR    : std_logic_vector(7 downto 0) := (others => '0');
+  alias RTIC        : std_logic is rSSPICR(1);
+  alias RORIC       : std_logic is rSSPICR(0);
 
   -- send FIFO signals
   signal send_fifo_wr     : std_logic := '0';
@@ -81,19 +95,35 @@ begin
         if rd_r = '0' and rd = '1' then
           -- leading-edge read
           case a is
+            when aSSPCR0 =>
+              do <= X"0000" & rSSPCR0;
+            when aSSPCR1 =>
+              do <= X"000000" & rSSPCR1;
             when aSSPSR =>
               do <= X"CAFEBA" & 
                     "000" & not send_fifo_empty & '0' & '0' & not send_fifo_full & send_fifo_empty;
+            when aSSPCPSR =>
+              do <= X"000000" & rSSPCPSR;
+            when aSSPIMSC =>
+              do <= X"000000" & rSSPIMSC;
+            when aSSPRIS  =>
+              do <= X"000000" & rSSPRIS;
+            when aSSPMIS  =>
+              do <= X"000000" & rSSPMIS;
             when others =>
               null;
           end case;
         elsif wr_r = '0' and wr = '1' then
           -- leading-edge write
           case a is
+            when aSSPCR0 =>
             when aSSPCR1 =>
               rSSPCR1 <= di(rSSPCR1'range);
             when aSSPDR =>
               send_fifo_wr <= '1';
+            when aSSPCPSR =>
+            when aSSPIMSC =>
+            when aSSPICR  =>
             when others =>
               null;
           end case;

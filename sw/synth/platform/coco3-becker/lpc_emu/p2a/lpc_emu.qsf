@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION 8.1
+set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -713,7 +713,7 @@ set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to clk_ee
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to data_ee
 set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to d_dr1[*]
 
-set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
+#set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
 
 set_global_assignment -name OPTIMIZE_POWER_DURING_SYNTHESIS OFF
 set_instance_assignment -name REPORT_DELAY ON -from * -to noe_ns
@@ -757,5 +757,5 @@ set_global_assignment -name VHDL_FILE mega/nios_pll.vhd
 set_global_assignment -name VHDL_FILE NIOS_SYSTEM.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/p2a/stacked_top.vhd
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
+set_global_assignment -name QIP_FILE mega/lpc_spi_fifo.qip
 set_global_assignment -name QIP_FILE NIOS_SYSTEM.qip
-set_global_assignment -name QIP_FILE ../../boot/p2a/lpc_spi_fifo.qip

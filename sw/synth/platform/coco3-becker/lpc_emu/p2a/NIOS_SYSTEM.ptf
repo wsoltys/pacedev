@@ -1,7 +1,7 @@
 SYSTEM NIOS_SYSTEM
 {
-   System_Wizard_Version = "8.10";
-   System_Wizard_Build = "163";
+   System_Wizard_Version = "8.00";
+   System_Wizard_Build = "231";
    Builder_Application = "sopc_builder_ca";
    WIZARD_SCRIPT_ARGUMENTS 
    {
@@ -608,7 +608,7 @@ SYSTEM NIOS_SYSTEM
          }
       }
       class = "altera_avalon_new_sdram_controller";
-      class_version = "7.08";
+      class_version = "7.081";
       HDL_INFO 
       {
          Precompiled_Simulation_Library_Files = "";
@@ -1185,11 +1185,9 @@ SYSTEM NIOS_SYSTEM
          oci_data_trace = "0";
          include_third_party_debug_port = "0";
          oci_trace_addr_width = "7";
-         oci_debugreq_signals = "0";
          oci_trigger_arming = "1";
+         oci_debugreq_signals = "0";
          oci_embedded_pll = "0";
-         oci_assign_jtag_instance_id = "0";
-         oci_jtag_instance_id = "0";
          oci_num_pm = "0";
          oci_pm_width = "32";
          performance_counters_present = "0";
@@ -1365,14 +1363,14 @@ SYSTEM NIOS_SYSTEM
                comment = "Log2 size in bytes of each dcache line";
             }
          }
-         license_status = "encrypted";
+         license_status = "ocp";
          mainmem_slave = "descriptor_memory/s1";
          datamem_slave = "descriptor_memory/s1";
          maincomm_slave = "";
          germs_monitor_id = "";
       }
       class = "altera_nios2";
-      class_version = "7.08";
+      class_version = "7.081";
       SYSTEM_BUILDER_INFO 
       {
          Is_Enabled = "1";
@@ -1381,7 +1379,7 @@ SYSTEM NIOS_SYSTEM
          Parameters_Signature = "";
          Is_CPU = "1";
          Instantiate_In_System_Module = "1";
-         Required_Device_Family = "STRATIX,STRATIXGX,STRATIXII,STRATIXIIGX,STRATIXIIGXLITE,STRATIXIII,STRATIXIV,CYCLONE,CYCLONEII,CYCLONEIII,HARDCOPYIII,ARRIAII,TARPON";
+         Required_Device_Family = "STRATIX,STRATIXGX,STRATIXII,STRATIXIIGX,STRATIXIIGXLITE,STRATIXIII,STRATIXIV,CYCLONE,CYCLONEII,CYCLONEIII";
          Default_Module_Name = "cpu";
          Top_Level_Ports_Are_Enumerated = "1";
          View 
@@ -1402,7 +1400,7 @@ SYSTEM NIOS_SYSTEM
          PLI_Files = "";
          Precompiled_Simulation_Library_Files = "";
          Simulation_HDL_Files = "";
-         Synthesis_HDL_Files = "__PROJECT_DIRECTORY__/cpu_test_bench.vhd, __PROJECT_DIRECTORY__/cpu_mult_cell.vhd, __PROJECT_DIRECTORY__/cpu_oci_test_bench.vhd, __PROJECT_DIRECTORY__/cpu_jtag_debug_module_tck.vhd, __PROJECT_DIRECTORY__/cpu_jtag_debug_module_sysclk.vhd, __PROJECT_DIRECTORY__/cpu_jtag_debug_module_wrapper.vhd, __PROJECT_DIRECTORY__/cpu.vhd";
+         Synthesis_HDL_Files = "__PROJECT_DIRECTORY__/cpu_test_bench.vhd, __PROJECT_DIRECTORY__/cpu_mult_cell.vhd, __PROJECT_DIRECTORY__/cpu_jtag_debug_module_tck.vhd, __PROJECT_DIRECTORY__/cpu_jtag_debug_module_sysclk.vhd, __PROJECT_DIRECTORY__/cpu_jtag_debug_module_wrapper.vhd, __PROJECT_DIRECTORY__/cpu.vhd";
          Synthesis_Only_Files = "";
       }
       MASTER tightly_coupled_instruction_master_0
@@ -2115,7 +2113,7 @@ SYSTEM NIOS_SYSTEM
          }
       }
       class = "altera_avalon_timer";
-      class_version = "7.08";
+      class_version = "7.081";
       iss_model_name = "altera_avalon_timer";
       SYSTEM_BUILDER_INFO 
       {
@@ -2303,7 +2301,7 @@ SYSTEM NIOS_SYSTEM
          }
       }
       class = "altera_avalon_jtag_uart";
-      class_version = "7.08";
+      class_version = "7.081";
       iss_model_name = "altera_avalon_jtag_uart";
       WIZARD_SCRIPT_ARGUMENTS 
       {
@@ -2488,7 +2486,7 @@ SYSTEM NIOS_SYSTEM
          }
       }
       class = "altera_avalon_sysid";
-      class_version = "7.08";
+      class_version = "7.081";
       SYSTEM_BUILDER_INFO 
       {
          Date_Modified = "";
@@ -2500,7 +2498,7 @@ SYSTEM NIOS_SYSTEM
          Has_Clock = "1";
          View 
          {
-            Settings_Summary = "System ID (at last Generate):<br> <b>380A9222</b>    (unique ID tag) <br> <b>49D36B90</b> (timestamp: Wed Apr 1, 2009 @11:26 PM)";
+            Settings_Summary = "System ID (at last Generate):<br> <b>7139DDDE</b>    (unique ID tag) <br> <b>49D600B4</b> (timestamp: Fri Apr 3, 2009 @10:27 PM)";
             MESSAGES 
             {
             }
@@ -2508,8 +2506,8 @@ SYSTEM NIOS_SYSTEM
       }
       WIZARD_SCRIPT_ARGUMENTS 
       {
-         id = "940216866u";
-         timestamp = "1238592400u";
+         id = "1899617758u";
+         timestamp = "1238761652u";
          regenerate_values = "0";
          MAKE 
          {
@@ -2518,7 +2516,7 @@ SYSTEM NIOS_SYSTEM
                verifysysid 
                {
                   All_Depends_On = "0";
-                  Command = "nios2-download $(JTAG_CABLE)                                --sidp=0x080000d8 --id=940216866 --timestamp=1238592400";
+                  Command = "nios2-download $(JTAG_CABLE)                                --sidp=0x080000d8 --id=1899617758 --timestamp=1238761652";
                   Is_Phony = "1";
                   Target_File = "dummy_verifysysid_file";
                }
@@ -2583,13 +2581,6 @@ SYSTEM NIOS_SYSTEM
                width = "1";
                direction = "input";
                Is_Enabled = "1";
-            }
-            PORT readdata
-            {
-               Is_Enabled = "1";
-               direction = "output";
-               type = "readdata";
-               width = "8";
             }
          }
          SYSTEM_BUILDER_INFO 
@@ -2656,7 +2647,7 @@ SYSTEM NIOS_SYSTEM
          }
       }
       class = "altera_avalon_pio";
-      class_version = "7.08";
+      class_version = "7.081";
       SYSTEM_BUILDER_INFO 
       {
          Is_Enabled = "1";
@@ -2798,7 +2789,7 @@ SYSTEM NIOS_SYSTEM
          }
       }
       class = "altera_avalon_pio";
-      class_version = "7.08";
+      class_version = "7.081";
       SYSTEM_BUILDER_INFO 
       {
          Is_Enabled = "1";
@@ -2972,7 +2963,7 @@ SYSTEM NIOS_SYSTEM
          }
       }
       class = "altera_avalon_pio";
-      class_version = "7.08";
+      class_version = "7.081";
       SYSTEM_BUILDER_INFO 
       {
          Is_Enabled = "1";
@@ -3122,7 +3113,7 @@ SYSTEM NIOS_SYSTEM
          }
       }
       class = "altera_avalon_timer";
-      class_version = "7.08";
+      class_version = "7.081";
       iss_model_name = "altera_avalon_timer";
       SYSTEM_BUILDER_INFO 
       {
@@ -3575,7 +3566,7 @@ SYSTEM NIOS_SYSTEM
          Enable_Arbiterlock = "0";
       }
       class = "altera_avalon_pipeline_bridge";
-      class_version = "7.08";
+      class_version = "7.081";
       SYSTEM_BUILDER_INFO 
       {
          Is_Enabled = "1";
@@ -3841,7 +3832,7 @@ SYSTEM NIOS_SYSTEM
          }
       }
       class = "altera_avalon_onchip_memory2";
-      class_version = "7.08";
+      class_version = "7.081";
       HDL_INFO 
       {
          Precompiled_Simulation_Library_Files = "";
@@ -3997,7 +3988,7 @@ SYSTEM NIOS_SYSTEM
          }
       }
       class = "altera_avalon_pio";
-      class_version = "7.08";
+      class_version = "7.081";
       SYSTEM_BUILDER_INFO 
       {
          Is_Enabled = "1";
@@ -4161,7 +4152,7 @@ SYSTEM NIOS_SYSTEM
          }
       }
       class = "altera_avalon_pio";
-      class_version = "7.08";
+      class_version = "7.081";
       SYSTEM_BUILDER_INFO 
       {
          Is_Enabled = "1";
@@ -4315,13 +4306,6 @@ SYSTEM NIOS_SYSTEM
       }
       PORT_WIRING 
       {
-         PORT spi_clk
-         {
-            type = "export";
-            width = "1";
-            direction = "output";
-            Is_Enabled = "1";
-         }
          PORT spi_miso
          {
             type = "export";
@@ -4343,16 +4327,22 @@ SYSTEM NIOS_SYSTEM
             direction = "output";
             Is_Enabled = "1";
          }
+         PORT spi_clk
+         {
+            type = "export";
+            width = "1";
+            direction = "output";
+            Is_Enabled = "1";
+         }
       }
       class = "no_legacy_module";
-      class_version = "7.08";
+      class_version = "7.081";
       gtf_class_name = "lpc_spi";
       gtf_class_version = "1.0";
       SYSTEM_BUILDER_INFO 
       {
          Do_Not_Generate = "1";
          Instantiate_In_System_Module = "1";
-         Is_Bridge = "0";
          Is_Enabled = "1";
          Clock_Source = "clk";
          Has_Clock = "1";
@@ -4365,7 +4355,7 @@ SYSTEM NIOS_SYSTEM
       }
       HDL_INFO 
       {
-         Simulation_HDL_Files = "__PROJECT_DIRECTORY__/lpc_spi_0.vhd,E:/markm/pace/pacedev.net/sw/src/platform/coco3-becker/lpc_emu/ip/lpc_spi/lpc_spi.vhd";
+         Simulation_HDL_Files = "__PROJECT_DIRECTORY__/lpc_spi_0.vhd,D:/projects/pace/pacedev.net/sw/src/platform/coco3-becker/lpc_emu/ip/lpc_spi/lpc_spi.vhd";
       }
       WIZARD_SCRIPT_ARGUMENTS 
       {
