@@ -7,7 +7,7 @@ entity OSD is
   (
     OSD_X           : natural := 320;
     OSD_Y           : natural := 200;
-    OSD_WIDTH       : natural := 256;
+    OSD_WIDTH       : natural := 512;
     OSD_HEIGHT      : natural := 128
   );
   port
@@ -288,15 +288,14 @@ begin
   begin
 
     -- constant for a whole line
-    vid_a(9) <= '0';
-    vid_a(8 downto 5) <= vid_y(6 downto 3);
+    vid_a(9 downto 6) <= vid_y(6 downto 3);
     chr_a(3 downto 0) <= '0' & vid_y(2 downto 0);
   
     process (vid_clk, reset)
     begin
       if reset = '1' then
       elsif rising_edge(vid_clk) then
-        vid_a(4 downto 0) <= vid_x(7 downto 3);
+        vid_a(5 downto 0) <= vid_x(8 downto 3);
         chr_a(10 downto 4) <= vid_d(6 downto 0);
         case vid_x(2 downto 0) is
           when "000" =>   pel <= chr_d(2);
