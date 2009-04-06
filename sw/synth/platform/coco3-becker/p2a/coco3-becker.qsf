@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION 8.1
+set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -738,39 +738,6 @@ set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to nllb_s
 set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to nlub_s
 set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to nulb_s
 set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to nuub_s
-set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
-set_global_assignment -name VHDL_FILE project_pkg.vhd
-set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/platform_pkg.vhd"
-set_global_assignment -name VHDL_FILE ../../../../src/target/p2a/target_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
-set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/wrappers.vhd"
-set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/unzip/CoCo3FPGAV1.1/cpu09.vhd"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/CoCo3FPGAV1.1/cocokey.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/ps2_keyboard_glb.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/coco3vid.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6850/6850RX.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6850/6850TX.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6850/uart_6850.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6551/6551rx.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6551/6551tx.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6551/uart_6551.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/coco3fpga.v"
-set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/pace.vhd"
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/conversion.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_upcounter.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gc_tx_bit.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_joy.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/target/p2a/target_top.vhd
-set_global_assignment -name SIGNALTAP_FILE stp1.stp
 set_instance_assignment -name PARTITION_HIERARCHY glbcp_10b46318c477d1060642da4795f331 -to "PACE:pace_inst|coco3fpga:\\BLK_COCO3:coco_inst|cpu09:GLBCPU09" -section_id "cpu09:GLBCPU09"
 set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id "cpu09:GLBCPU09"
 set_global_assignment -name PARTITION_COLOR 39423 -section_id "cpu09:GLBCPU09"
@@ -841,3 +808,38 @@ set_global_assignment -name LL_HEIGHT 1 -section_id "COCO3VIDEO:COCOVID"
 set_global_assignment -name LL_WIDTH 1 -section_id "COCO3VIDEO:COCOVID"
 set_global_assignment -name LL_ORIGIN X1_Y1 -section_id "COCO3VIDEO:COCOVID"
 set_instance_assignment -name LL_MEMBER_OF "COCO3VIDEO:COCOVID" -to "PACE:pace_inst|coco3fpga:\\BLK_COCO3:coco_inst|COCO3VIDEO:COCOVID" -section_id "COCO3VIDEO:COCOVID"
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
+set_global_assignment -name VHDL_FILE project_pkg.vhd
+set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/platform_pkg.vhd"
+set_global_assignment -name VHDL_FILE ../../../../src/target/p2a/target_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram.vhd
+set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/wrappers.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/unzip/CoCo3FPGAV1.1/cpu09.vhd"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/CoCo3FPGAV1.1/cocokey.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/ps2_keyboard_glb.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/coco3vid.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6850/6850RX.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6850/6850TX.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6850/uart_6850.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6551/6551rx.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6551/6551tx.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/unzip/UART_6551/uart_6551.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/coco3-becker/coco3fpga.v"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/boot/osd.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/pace.vhd"
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/conversion.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_upcounter.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gc_tx_bit.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_joy.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/p2a/target_top.vhd
+set_global_assignment -name SIGNALTAP_FILE stp1.stp

@@ -140,6 +140,8 @@ architecture SYN of PACE is
 	signal ram_oe_n		  : std_logic;
   signal digit_n      : std_logic_vector(3 downto 0);
   
+  signal video_o_s    : to_VIDEO_t;
+  
 begin
 
 	GEN_SRAM_16 : if  PACE_TARGET = PACE_TARGET_P2A or
@@ -254,14 +256,14 @@ begin
         RAM_OE_N			=> ram_oe_n,
         
         -- VGA
-        RED1					=> video_o.rgb.r(9),
-        GREEN1				=> video_o.rgb.g(9),
-        BLUE1					=> video_o.rgb.b(9),
-        RED0					=> video_o.rgb.r(8),
-        GREEN0				=> video_o.rgb.g(8),
-        BLUE0					=> video_o.rgb.b(8),
-        H_SYNC				=> video_o.hsync,
-        V_SYNC				=> video_o.vsync,
+        RED1					=> video_o_s.rgb.r(9),
+        GREEN1				=> video_o_s.rgb.g(9),
+        BLUE1					=> video_o_s.rgb.b(9),
+        RED0					=> video_o_s.rgb.r(8),
+        GREEN0				=> video_o_s.rgb.g(8),
+        BLUE0					=> video_o_s.rgb.b(8),
+        H_SYNC				=> video_o_s.hsync,
+        V_SYNC				=> video_o_s.vsync,
         
         -- PS/2
         ps2_clk				=> inputs_i.ps2_kclk,
@@ -328,12 +330,77 @@ begin
     end if;
   end process;
   
-	video_o.clk <= clk_50M;
+  BLK_OSD : block
+  
+    signal chr_a    : std_logic_vector(10 downto 0) := (others => '0');
+    signal chr_d    : std_logic_vector(7 downto 0) := (others => '0');
+    
+  begin
+  
+    osd_inst : entity work.OSD
+      port map
+      (
+        clk             => clk_50M,
+        clk_20M_ena     => '1',
+        reset           => reset_i,
 
+        osd_keys        => (others => '0'),
+        
+        vid_clk         => video_o_s.clk,
+        vid_hsync       => video_o_s.hsync,
+        vid_vsync       => video_o_s.vsync,
+        vid_r_i         => video_o_s.rgb.r,
+        vid_g_i         => video_o_s.rgb.g,
+        vid_b_i         => video_o_s.rgb.b,
+        
+        chr_a           => chr_a,
+        chr_d           => chr_d,
+        
+        vid_r_o         => video_o.rgb.r,
+        vid_g_o         => video_o.rgb.g,
+        vid_b_o         => video_o.rgb.b,
+        
+        -- SPI ports
+        eurospi_clk     => gp_i(P2A_EUROSPI_CLK),
+        eurospi_miso    => gp_o.d(P2A_EUROSPI_MISO),
+        eurospi_mosi    => gp_i(P2A_EUROSPI_MOSI),
+        eurospi_ss      => gp_i(P2A_EUROSPI_SS)
+      );
+
+      tilerom_inst : entity work.sprom
+        generic map
+        (
+          init_file		=> "../../../../../src/platform/coco3-becker/roms/coco3gen.hex",
+          numwords_a	=> 2048,
+          widthad_a		=> 11
+        )
+        port map
+        (
+          clock			  => video_o_s.clk,
+          address		  => chr_a,
+          q           => chr_d
+        );
+
+  end block BLK_OSD;
+  
+  -- interboard spi
+  -- - always the slave
+  gp_o.oe(P2A_EUROSPI_CLK) <= '0';
+  gp_o.oe(P2A_EUROSPI_MISO) <= '1';
+  gp_o.oe(P2A_EUROSPI_MOSI) <= '0';
+  gp_o.oe(P2A_EUROSPI_SS) <= '0';
+  
 	-- unused
-	video_o.rgb.r(7 downto 0) <= (others => '0');
-	video_o.rgb.g(7 downto 0) <= (others => '0');
-	video_o.rgb.b(7 downto 0) <= (others => '0');
+	video_o_s.clk <= clk_50M;
+	video_o_s.rgb.r(7 downto 0) <= (others => '0');
+	video_o_s.rgb.g(7 downto 0) <= (others => '0');
+	video_o_s.rgb.b(7 downto 0) <= (others => '0');
+
+	video_o.clk <= video_o_s.clk;
+	video_o.hsync <= video_o_s.hsync;
+	video_o.vsync <= video_o_s.vsync;
+	video_o.hblank <= video_o_s.hblank;
+	video_o.vblank <= video_o_s.vblank;
 
   spi_o <= NULL_TO_SPI;
   
