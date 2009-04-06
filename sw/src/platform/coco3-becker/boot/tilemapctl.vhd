@@ -54,11 +54,11 @@ architecture SYN of tilemapCtl_1 is
 begin
 
   -- not used
-  ctl_o.map_a(ctl_o.map_a'left downto 10) <= (others => '0');
+  ctl_o.map_a(ctl_o.map_a'left downto 9) <= (others => '0');
   ctl_o.tile_a(ctl_o.tile_a'left downto 11) <= (others => '0');
 
 	-- these are constant for a whole line
-  ctl_o.map_a(9 downto 6) <= y(6 downto 3);
+  ctl_o.map_a(8 downto 5) <= y(6 downto 3);
   ctl_o.tile_a(3 downto 0) <= '0' & y(2 downto 0);
 
   -- generate attribute RAM address (not used)
@@ -80,7 +80,7 @@ begin
       -- 1st stage of pipeline
       -- - read tile from tilemap
       if stb = '1' then
-        ctl_o.map_a(5 downto 0) <= x(8 downto 3);
+        ctl_o.map_a(4 downto 0) <= x(7 downto 3);
       end if;
 
       -- 2nd stage of pipeline
@@ -111,13 +111,13 @@ begin
 
       -- green-screen display
       ctl_o.rgb.r <= (others => '0');
-      ctl_o.rgb.g <= (others => pel);
+      ctl_o.rgb.g <= (others => not pel);
       ctl_o.rgb.b <= (others => '0');
       
 			-- pipelined because of tile data loopkup
       x_r := x_r(x_r'left-X_PIPELINE_BITS downto 0) & x(X_PIPELINE_BITS-1 downto 0);
 
-      ctl_o.set <= pel;
+      ctl_o.set <= '1';
 
 		end if; -- rising_edge(clk)
 

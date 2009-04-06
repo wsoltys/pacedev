@@ -15,7 +15,7 @@ package platform_pkg is
 	constant PACE_VIDEO_NUM_BITMAPS 	    : natural := 0;
 	constant PACE_VIDEO_NUM_TILEMAPS 	    : natural := 1;
 	constant PACE_VIDEO_NUM_SPRITES 	    : natural := 0;
-	constant PACE_VIDEO_H_SIZE				    : integer := 512;
+	constant PACE_VIDEO_H_SIZE				    : integer := 256;
 	constant PACE_VIDEO_V_SIZE				    : integer := 128;
   constant PACE_VIDEO_PIPELINE_DELAY    : integer := 5;
 
