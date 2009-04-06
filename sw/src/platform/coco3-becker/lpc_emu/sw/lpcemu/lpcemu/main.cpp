@@ -149,15 +149,15 @@ int main (int argc, char* argv[], char* envp[])
 #endif
 
   static char buf[1024];
-  //sprintf (buf, "--- Welcome to PACE CoCo3+ (Built: %s %s) ---", __DATE__, __TIME__);
-  sprintf (buf, "ABC");
+  sprintf (buf, "--- Welcome to PACE CoCo3+ (Built: %s %s) ---", __DATE__, __TIME__);
+  int l = strlen(buf);
+  memset (buf+l, ' ', 1024-l);
 
   alt_u8 ps2_keys = 0;
 
   spi_enable (true);
 
   alt_u32 spi_sts;
-  spi_sts = LPC_RD32 (aSSPSR); printf ("pre %08X\n", spi_sts); 
   usleep (1000000);
     
   while (1)
@@ -166,32 +166,48 @@ int main (int argc, char* argv[], char* envp[])
     int i;
 
   	// do a video transfer to the FPGA
-  	// assert SSEL
-  	IOWR_ALTERA_AVALON_PIO_DATA (PIO_SPI_BASE, 0);
-    spi_sts = LPC_RD32 (aSSPSR); printf ("%08X\n", spi_sts); 
   	spi_send8 (0x01);
-    spi_sts = LPC_RD32 (aSSPSR); printf ("%08X\n", spi_sts); 
-  	for (i=0; i<(int)strlen(buf); i++)
-  		spi_send8 (buf[i]);
-    //for (; i<1024; i++)
-    //  spi_send8 (' ');
-  	// de-assert SSEL
-  	IOWR_ALTERA_AVALON_PIO_DATA (PIO_SPI_BASE, SPI_SSn);
-  
+    for (i=0; i<1024;)
+    {
+      spi_sts = LPC_RD32 (aSSPRIS);
+      if (spi_sts & (1<<3))   // half empty
+        for (int j=0; j<8; j++)
+          spi_send8 (buf[i++]);
+    }
+
+    // wait for not BUSY, so SSEL is de-asserted
+    do
+    {
+      spi_sts = LPC_RD32 (aSSPSR);
+      
+    } while ((spi_sts & (1<<4)) != 0);
+    
+    // flush the rx fifo
+    for (i=0; i<16; i++)
+      LPC_RD32 (aSSPDR);
+      
     // do a keyboard transfer from the FPGA
-    IOWR_ALTERA_AVALON_PIO_DATA (PIO_SPI_BASE, 0);
-    // keybpard packet
+    // keyboard packet
     spi_send8 (0x02);
     spi_in = spi_send8 (0x00);    // dummy data to read
-    IOWR_ALTERA_AVALON_PIO_DATA (PIO_SPI_BASE, SPI_SSn);
+    
+    // wait for not BUSY, so SSEL is de-asserted
+    do
+    {
+      spi_sts = LPC_RD32 (aSSPSR);
+      
+    } while ((spi_sts & (1<<4)) != 0);
 
+    // read the 2nd byte in the FIFO
+    spi_in = LPC_RD32 (aSSPDR);
+    spi_in = LPC_RD32 (aSSPDR);
+    
     if (spi_in != ps2_keys)
     {
       ps2_keys = spi_in;  
       printf ("ps2_keys = $%02X\n", ps2_keys);
     }
-  
-    usleep (1000000);
+    //usleep (1000000);
   }
    
 }

@@ -5,26 +5,43 @@ use ieee.numeric_std.all;
 entity lpc_spi_controller is
 	port
 	(
-		clk							: in std_logic;
-		reset						: in std_logic;
+		csi_clockreset_clk		: in std_logic;
+		csi_clockreset_reset	: in std_logic;
                 	
-		chipselect			: in std_logic;
-		a               : in std_logic_vector(3 downto 0);
-		di							: in std_logic_vector(31 downto 0);
-		do							: out std_logic_vector(31 downto 0);
-		rd							: in std_logic;
-		wr							: in std_logic;
-		waitrequest_n		: out std_logic;
+		avs_s1_chipselect			: in std_logic;
+		avs_s1_address        : in std_logic_vector(3 downto 0);
+		avs_s1_writedata			: in std_logic_vector(31 downto 0);
+		avs_s1_readdata  			: out std_logic_vector(31 downto 0);
+		avs_s1_read					  : in std_logic;
+		avs_s1_write					: in std_logic;
+		avs_s1_waitrequest_n  : out std_logic;
+		ins_irq0_irq          : out std_logic;
 		
-		spi_clk         : out std_logic;
-		spi_miso        : in std_logic;
-		spi_mosi        : out std_logic;
-		spi_ss          : out std_logic
+		coe_spi_clk           : out std_logic;
+		coe_spi_miso          : in std_logic;
+		coe_spi_mosi          : out std_logic;
+		coe_spi_ss            : out std_logic
 	);
 end entity lpc_spi_controller;
 
 architecture SYN of lpc_spi_controller is
 
+  -- alias crappy SOPC names
+  alias clk           : std_logic is csi_clockreset_clk;
+  alias reset         : std_logic is csi_clockreset_reset;
+  alias chipselect    : std_logic is avs_s1_chipselect;
+  alias a             : std_logic_vector(3 downto 0) is avs_s1_address;
+  alias di            : std_logic_vector(31 downto 0) is avs_s1_writedata;
+  alias do            : std_logic_vector(31 downto 0) is avs_s1_readdata;
+  alias rd            : std_logic is avs_s1_read;
+  alias wr            : std_logic is avs_s1_write;
+  alias waitrequest_n : std_logic is avs_s1_waitrequest_n;
+  alias irq           : std_logic is ins_irq0_irq;
+  alias spi_clk       : std_logic is coe_spi_clk;
+  alias spi_miso      : std_logic is coe_spi_miso;
+  alias spi_mosi      : std_logic is coe_spi_mosi;
+  alias spi_ss        : std_logic is coe_spi_ss;
+  
   -- register addresses
   constant aSSPCR0  : std_logic_vector(3 downto 0) := X"0";
   constant aSSPCR1  : std_logic_vector(3 downto 0) := X"1";
@@ -62,18 +79,30 @@ architecture SYN of lpc_spi_controller is
   alias RTIC        : std_logic is rSSPICR(1);
   alias RORIC       : std_logic is rSSPICR(0);
 
+  signal busy       : std_logic := '0';
+  
   -- send FIFO signals
-  signal send_fifo_wr     : std_logic := '0';
-  signal send_fifo_rd     : std_logic := '0';
-  signal send_fifo_q      : std_logic_vector(7 downto 0) := (others => '0');
-  signal send_fifo_empty  : std_logic := '0';
-  signal send_fifo_full   : std_logic := '0';
-  signal send_fifo_used   : std_logic_vector(3 downto 0) := (others => '0');
+  signal send_fifo_wr         : std_logic := '0';
+  signal send_fifo_rd         : std_logic := '0';
+  signal send_fifo_q          : std_logic_vector(7 downto 0) := (others => '0');
+  signal send_fifo_empty      : std_logic := '0';
+  signal send_fifo_full       : std_logic := '0';
+  signal send_fifo_used       : std_logic_vector(3 downto 0) := (others => '0');
+
+  -- receive FIFO signals
+  signal receive_fifo_wr      : std_logic := '0';
+  signal receive_fifo_rd      : std_logic := '0';
+  signal receive_fifo_data    : std_logic_vector(7 downto 0) := (others => '0');
+  signal receive_fifo_q       : std_logic_vector(7 downto 0) := (others => '0');
+  signal receive_fifo_empty   : std_logic := '0';
+  signal receive_fifo_full    : std_logic := '0';
+  signal receive_fifo_used    : std_logic_vector(3 downto 0) := (others => '0');
 
   -- internal spi signals
-  signal spi_clk_s        : std_logic := '0';
-  signal spi_mosi_s       : std_logic := '0';
-  signal spi_ss_s         : std_logic := '0';
+  signal spi_clk_s            : std_logic := '0';
+  signal spi_miso_s           : std_logic := '0';
+  signal spi_mosi_s           : std_logic := '0';
+  signal spi_ss_s             : std_logic := '1';
   
 begin
 
@@ -89,8 +118,10 @@ begin
       rSSPCR1 <= X"0" & '0' & '0' & '0' & '0';
 			rd_r := '0';
 			wr_r := '0';
+			waitrequest_n <= '1';
 		elsif rising_edge(clk) then
-      send_fifo_wr <= '0';  -- default
+      send_fifo_wr <= '0';      -- default
+      receive_fifo_rd <= '0';   -- default
 			if chipselect = '1' then
         if rd_r = '0' and rd = '1' then
           -- leading-edge read
@@ -99,9 +130,14 @@ begin
               do <= X"0000" & rSSPCR0;
             when aSSPCR1 =>
               do <= X"000000" & rSSPCR1;
+            when aSSPDR =>
+              do <= X"000000" & receive_fifo_q;
+              receive_fifo_rd <= '1';
             when aSSPSR =>
-              do <= X"CAFEBA" & 
-                    "000" & not send_fifo_empty & '0' & '0' & not send_fifo_full & send_fifo_empty;
+              do <= X"000000" & 
+                    "000" & (busy or not send_fifo_empty) & 
+                    not receive_fifo_empty & receive_fifo_full &
+                    not send_fifo_full & send_fifo_empty;
             when aSSPCPSR =>
               do <= X"000000" & rSSPCPSR;
             when aSSPIMSC =>
@@ -135,6 +171,20 @@ begin
 		end if;
 	end process;
 
+  --
+  -- interrupt/register logic
+  --
+  
+  -- raw interrupt status register
+  RXRIS <= receive_fifo_used(receive_fifo_used'left);   -- half full
+  TXRIS <= not send_fifo_used(send_fifo_used'left);     -- half empty
+
+  -- masked interrupt status register
+  RXMIS <= RXIM and RXRIS;
+  TXMIS <= TXIM and TXRIS;
+
+  irq <= RXMIS or TXMIS;
+  
   -- generate the spi clk
   process (clk, reset)
     -- 66/32 = 2.065MHz SPI clock
@@ -148,14 +198,14 @@ begin
     end if;
   end process;
   
-  BLK_SEND : block
+  BLK_SEND_RECV : block
   
     type state_t is (IDLE, SOW, WAIT_SETUP, WAIT_BIT);
     signal state : state_t;
     signal spi_d_o  : std_logic_vector(7 downto 0) := (others => '0');
     
   begin
-    process (clk, reset)
+    PROC_SEND_RECV : process (clk, reset)
       variable spi_clk_r : std_logic := '0';
       variable count : integer range 0 to 7 := 0;
     begin
@@ -163,20 +213,23 @@ begin
         spi_clk_r := '0';
         state <= IDLE;
       elsif rising_edge(clk) then
-        send_fifo_rd <= '0';  -- default
+        busy <= '1';              -- default
+        send_fifo_rd <= '0';      -- default
+        receive_fifo_wr <= '0';   -- default
         case state is
           when IDLE =>
+            busy <= '0';
             spi_ss_s <= '1';  -- default
             -- only if enabled
-            --if SSE = '1' then
+            if SSE = '1' then
               -- wait for falling edge of spi_clk
               if spi_clk_r = '1' and spi_clk_s = '0' then
-                if send_fifo_empty /= '0' then
+                if send_fifo_empty = '0' then
                   spi_ss_s <= '0';
                   state <= SOW;
                 end if;
               end if;
-            --end if;
+            end if;
           when SOW =>
             count := 0;
             -- latch FIFO data, drive SS low
@@ -194,8 +247,12 @@ begin
           when WAIT_BIT =>
             -- wait for falling edge of spi_clk
             if spi_clk_r = '1' and spi_clk_s = '0' then
+              -- latch input bit
+              receive_fifo_data <= receive_fifo_data(receive_fifo_data'left-1 downto 0) & spi_miso_s;
               if count = 7 then
-                if send_fifo_empty /= '0' then
+                -- latch received byte in FIFO
+                receive_fifo_wr <= '1';
+                if send_fifo_empty = '0' then
                   state <= SOW;
                 else
                   spi_ss_s <= '1';
@@ -209,11 +266,11 @@ begin
           when others =>
             state <= IDLE;
         end case;
+      	spi_clk_r := spi_clk_s;
       end if;
-      spi_clk_r := spi_clk_s;
-    end process;
+    end process PROC_SEND_RECV;
     
-  end block BLK_SEND;
+  end block BLK_SEND_RECV;
 
   BLK_FIFO : block
 
@@ -251,6 +308,35 @@ begin
         usedw		=> send_fifo_used
       );
 
+    lpc_receive_fifo : lpc_spi_fifo
+      port map
+      (
+        clock		=> clk,
+        sclr		=> reset,
+
+        data		=> receive_fifo_data,
+        wrreq		=> receive_fifo_wr,
+
+        q		    => receive_fifo_q,
+        rdreq		=> receive_fifo_rd,
+
+        empty		=> receive_fifo_empty,
+        full		=> receive_fifo_full,
+        usedw		=> receive_fifo_used
+      );
+
+  process (clk, reset)
+    variable miso_r : std_logic_vector(1 downto 0) := (others => '0');
+    alias miso_unmeta : std_logic is miso_r(miso_r'left);
+  begin
+    if reset = '1' then
+      miso_r := (others => '0');
+    elsif rising_edge(clk) then
+      spi_miso_s <= miso_unmeta;
+      miso_r := miso_r(miso_r'left-1 downto 0) & spi_miso;
+    end if;
+  end process;
+  
   end block BLK_FIFO;
   
   -- drive spi signals

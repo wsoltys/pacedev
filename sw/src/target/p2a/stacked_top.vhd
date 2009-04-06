@@ -652,10 +652,10 @@ begin
         out_port_from_the_PIO_OUT       => open,
 
         -- the_lpc_spi_0
-        spi_clk_from_the_lpc_spi_0      => eurospi_o(0),
-        spi_miso_to_the_lpc_spi_0       => '0',
-        spi_mosi_from_the_lpc_spi_0     => eurospi_o(2),
-        spi_ss_from_the_lpc_spi_0       => eurospi_o(3),
+        coe_spi_clk_from_the_lpc_spi_0  => eurospi_o(0),
+        coe_spi_miso_to_the_lpc_spi_0   => eurospi_i(1),
+        coe_spi_mosi_from_the_lpc_spi_0 => eurospi_o(2),
+        coe_spi_ss_from_the_lpc_spi_0   => eurospi_o(3),
 
         -- the_pio_fpgacfg
         in_port_to_the_pio_fpgacfg      => fpgacfg_i,
