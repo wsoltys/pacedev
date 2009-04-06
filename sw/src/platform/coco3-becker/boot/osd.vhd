@@ -5,7 +5,10 @@ use ieee.numeric_std.all;
 entity OSD is
   generic
   (
-    DUMMY           : std_logic := '0'
+    OSD_X           : natural := 320;
+    OSD_Y           : natural := 200;
+    OSD_WIDTH       : natural := 256;
+    OSD_HEIGHT      : natural := 128
   );
   port
   (
@@ -22,6 +25,10 @@ entity OSD is
     vid_r_i         : in std_logic_vector(9 downto 0);
     vid_g_i         : in std_logic_vector(9 downto 0);
     vid_b_i         : in std_logic_vector(9 downto 0);
+    
+    -- osd character rom
+    chr_a           : out std_logic_vector(10 downto 0);
+    chr_d           : in std_logic_vector(7 downto 0);
     
     -- video out
     vid_r_o         : out std_logic_vector(9 downto 0);
@@ -266,70 +273,131 @@ begin
 
   end block BLK_EUROSPI;
   
-  -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-	vram_inst : entity work.dpram
-		generic map
-		(
-			init_file		=> "../../../../../src/platform/coco3-becker/boot/roms/vram.hex",
-			numwords_a	=> 1024,
-			widthad_a		=> 10
-		)
-		port map
-		(
-			clock_b			=> clk,
-			address_b		=> vram_a,
-			wren_b			=> vram_wr,
-			data_b			=> vram_d_i,
-			q_b					=> open,
-	
-		  clock_a			=> '0', --clk_video,
-			address_a		=> (others => '0'), --tilemap_i.map_a(9 downto 0),
-			wren_a			=> '0',
-			data_a			=> (others => '0'),
-			q_a					=> open --tilemap_o.map_d(7 downto 0)
-		);
-
   BLK_VIDEO : block
   
     signal vid_y  : std_logic_vector(11 downto 0) := (others => '0');
     signal vid_x  : std_logic_vector(11 downto 0) := (others => '0');
+    signal val_x  : boolean := false;
+    signal val_y  : boolean := false;
+    
+    signal vid_a  : std_logic_vector(9 downto 0) := (others => '0');
+    signal vid_d  : std_logic_vector(7 downto 0) := (others => '0');
+    
+    signal pel    : std_logic := '0';
     
   begin
+
+    -- constant for a whole line
+    vid_a(9) <= '0';
+    vid_a(8 downto 5) <= vid_y(6 downto 3);
+    chr_a(3 downto 0) <= '0' & vid_y(2 downto 0);
   
     process (vid_clk, reset)
     begin
       if reset = '1' then
-        vid_x <= (others => '0');
-        vid_y <= (others => '0');
       elsif rising_edge(vid_clk) then
-        if vid_vsync = '1' then
-          vid_y <= (others => '0');
-        elsif vid_hsync = '1' then
-          vid_x <= (others => '0');
-          vid_y <= std_logic_vector(unsigned(vid_y) + 1);
+        vid_a(4 downto 0) <= vid_x(7 downto 3);
+        chr_a(10 downto 4) <= vid_d(6 downto 0);
+        case vid_x(2 downto 0) is
+          when "000" =>   pel <= chr_d(2);
+          when "001" =>   pel <= chr_d(1);
+          when "010" =>   pel <= chr_d(0);
+          when "011" =>   pel <= chr_d(7);
+          when "100" =>   pel <= chr_d(6);
+          when "101" =>   pel <= chr_d(5);
+          when "110" =>   pel <= chr_d(4);
+          when others =>  pel <= chr_d(3);
+        end case;
+      end if;
+    end process;
+    
+    process (vid_clk, reset)
+      variable x        : integer range 0 to 2047 := 0;
+      variable y        : integer range 0 to 2047 := 0;
+      variable hsync_r  : std_logic := '1';
+      variable vsync_r  : std_logic := '1';
+    begin
+      if reset = '1' then
+        hsync_r := '1';
+        vsync_r := '1';
+        val_x <= false;
+        val_y <= false;
+      elsif rising_edge(vid_clk) then
+        if vsync_r = '1' and vid_vsync = '0' then
+          y := 2047;
+        elsif hsync_r = '1' and vid_hsync = '0' then
+          x := 0;
+          vid_y <= std_logic_vector(unsigned(vid_y) + 1); -- default
+          if y = OSD_Y then
+            val_y <= true;
+            vid_y <= (others => '0');
+          elsif y = OSD_Y+OSD_HEIGHT then
+            val_y <= false;
+          end if;
+          y := y + 1;
         else
-          vid_x <= std_logic_vector(unsigned(vid_x) + 1);
+          vid_x <= std_logic_vector(unsigned(vid_x) + 1); -- default
+          if x = OSD_X then
+            val_x <= true;
+            vid_x <= (others => '0');
+          elsif x = OSD_X+OSD_WIDTH then
+            val_x <= false;
+          end if;
+          x := x + 1;
         end if;
+        hsync_r := vid_hsync;
+        vsync_r := vid_vsync;
       end if;
     end process;
 
     process (vid_clk, reset)
+      type val_x_a is array (natural range <>) of boolean;
+      variable val_x_r : val_x_a(2 downto 0) := (others => false);
     begin
       if reset = '1' then
       elsif rising_edge(vid_clk) then
-        if  unsigned(vid_y) > 100 and unsigned(vid_y) < 200 and 
-            unsigned(vid_x) > 100 and unsigned(vid_x) < 200 then
-          vid_r_o <= (others => '0');
-          vid_b_o <= (others => '0');
-          vid_g_o <= (others => '0');
+        if val_x_r(val_x_r'left) and val_y then
+          if pel = '1' then
+            vid_r_o <= (others => '1');
+            vid_g_o <= (others => '1');
+            vid_b_o <= (others => '1');
+          else
+            vid_r_o <= '0' & vid_r_i(vid_r_i'left downto 1);
+            vid_g_o <= '0' & vid_g_i(vid_g_i'left downto 1);
+            vid_b_o <= '1' & vid_b_i(vid_b_i'left downto 1);
+          end if;
         else
-          vid_r_o <= (others => '1'); --vid_r_i;
-          vid_b_o <= vid_b_i;
+          vid_r_o <= vid_r_i;
           vid_g_o <= vid_g_i;
+          vid_b_o <= vid_b_i;
         end if;
+        val_x_r := val_x_r(val_x_r'left-1 downto 0) & val_x;
       end if;
     end process;
     
+    -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+    vram_inst : entity work.dpram
+      generic map
+      (
+        init_file		=> "../../../../../src/platform/coco3-becker/boot/roms/vram.hex",
+        numwords_a	=> 1024,
+        widthad_a		=> 10
+      )
+      port map
+      (
+        clock_b			=> clk,
+        address_b		=> vram_a,
+        wren_b			=> '0', --vram_wr,
+        data_b			=> vram_d_i,
+        q_b					=> open,
+    
+        clock_a			=> vid_clk,
+        address_a		=> vid_a,
+        wren_a			=> '0',
+        data_a			=> (others => '0'),
+        q_a					=> vid_d
+      );
+
   end block BLK_VIDEO;
   
 end architecture SYN;

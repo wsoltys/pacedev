@@ -224,34 +224,60 @@ begin
 		audio_o.rdata <= snd_data & "00000000";
 	
 	end block SOUND_BLOCK;
+  
+  BLK_OSD : block
+  
+    signal chr_a    : std_logic_vector(10 downto 0) := (others => '0');
+    signal chr_d    : std_logic_vector(7 downto 0) := (others => '0');
+    
+  begin
+  
+    osd_inst : entity work.OSD
+      port map
+      (
+        clk             => clk_i(0),
+        clk_20M_ena     => '1',
+        reset           => reset_i,
 
-  osd_inst : entity work.OSD
-    port map
-    (
-      clk             => clk_i(0),
-      clk_20M_ena     => '1',
-      reset           => reset_i,
+        osd_keys        => (others => '0'),
+        
+        vid_clk         => video_o_s.clk,
+        vid_hsync       => video_o_s.hsync,
+        vid_vsync       => video_o_s.vsync,
+        vid_r_i         => video_o_s.rgb.r,
+        vid_g_i         => video_o_s.rgb.g,
+        vid_b_i         => video_o_s.rgb.b,
+        
+        chr_a           => chr_a,
+        chr_d           => chr_d,
+        
+        vid_r_o         => video_o.rgb.r,
+        vid_g_o         => video_o.rgb.g,
+        vid_b_o         => video_o.rgb.b,
+        
+        -- SPI ports
+        eurospi_clk     => gp_i(P2A_EUROSPI_CLK),
+        eurospi_miso    => gp_o.d(P2A_EUROSPI_MISO),
+        eurospi_mosi    => gp_i(P2A_EUROSPI_MOSI),
+        eurospi_ss      => gp_i(P2A_EUROSPI_SS)
+      );
 
-      osd_keys        => (others => '0'),
-      
-      vid_clk         => video_o_s.clk,
-      vid_hsync       => video_o_s.hsync,
-      vid_vsync       => video_o_s.vsync,
-      vid_r_i         => video_o_s.rgb.r,
-      vid_g_i         => video_o_s.rgb.g,
-      vid_b_i         => video_o_s.rgb.b,
-      
-      vid_r_o         => video_o.rgb.r,
-      vid_g_o         => video_o.rgb.g,
-      vid_b_o         => video_o.rgb.b,
-      
-      -- SPI ports
-      eurospi_clk     => gp_i(P2A_EUROSPI_CLK),
-      eurospi_miso    => gp_o.d(P2A_EUROSPI_MISO),
-      eurospi_mosi    => gp_i(P2A_EUROSPI_MOSI),
-      eurospi_ss      => gp_i(P2A_EUROSPI_SS)
-    );
-		
+      tilerom_inst : entity work.sprom
+        generic map
+        (
+          init_file		=> "../../../../../src/platform/coco3-becker/roms/coco3gen.hex",
+          numwords_a	=> 2048,
+          widthad_a		=> 11
+        )
+        port map
+        (
+          clock			  => video_o_s.clk,
+          address		  => chr_a,
+          q           => chr_d
+        );
+
+  end block BLK_OSD;
+  
 	video_o.clk <= video_o_s.clk;
 	video_o.hsync <= video_o_s.hsync;
 	video_o.vsync <= video_o_s.vsync;
