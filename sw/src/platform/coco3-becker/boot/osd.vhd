@@ -13,7 +13,7 @@ entity OSD is
   port
   (
     clk             : in std_logic;
-    clk_20M_ena     : in std_logic;
+    clk_ena         : in std_logic;
     reset           : in std_logic;
 
     osd_keys        : in std_logic_vector(7 downto 0);
@@ -94,7 +94,7 @@ begin
       begin
         if reset = '1' then
           state <= IDLE;
-        elsif rising_edge(clk) and clk_20M_ena = '1' then
+        elsif rising_edge(clk) and clk_ena = '1' then
           if eop_s = '1' then
             state <= IDLE;
           else
@@ -130,7 +130,7 @@ begin
           vram_a <= (others => '0');
           vram_d_i <= (others => '0');
           vram_wr <= '0';
-        elsif rising_edge(clk) and clk_20M_ena = '1' then
+        elsif rising_edge(clk) and clk_ena = '1' then
           vram_wr <= '0';   -- default
           if eop_s = '1' then
             state <= IDLE;
@@ -169,7 +169,7 @@ begin
       begin
         if reset = '1' then
           osd_video_s <= '0';
-        elsif rising_edge(clk) and clk_20M_ena = '1' then
+        elsif rising_edge(clk) and clk_ena = '1' then
           osd_video_s <= '0';   -- default
           if sop_s = '1' then
             state <= WAIT_WORD;
@@ -211,7 +211,7 @@ begin
           sop_s <= '0';
           eop_s <= '0';
           eow_s <= '0';
-        elsif rising_edge(clk) and clk_20M_ena = '1' then
+        elsif rising_edge(clk) and clk_ena = '1' then
           sop_s <= '0';   -- default
           eop_s <= '0';   -- default
           eow_s <= '0';   -- default
@@ -264,7 +264,7 @@ begin
         spi_clk_r <= (others => '0');
         spi_mosi_r <= (others => '0');
         spi_ss_r <= (others => '1');
-      elsif rising_edge(clk) and clk_20M_ena = '1' then
+      elsif rising_edge(clk) and clk_ena = '1' then
         spi_clk_r <= spi_clk_r(spi_clk_r'left-1 downto 0) & eurospi_clk;
         spi_mosi_r <= spi_mosi_r(spi_mosi_r'left-1 downto 0) & eurospi_mosi;
         spi_ss_r <= spi_ss_r(spi_ss_r'left-1 downto 0) & eurospi_ss;
@@ -386,7 +386,7 @@ begin
       (
         clock_b			=> clk,
         address_b		=> vram_a,
-        wren_b			=> '0', --vram_wr,
+        wren_b			=> vram_wr,
         data_b			=> vram_d_i,
         q_b					=> open,
     

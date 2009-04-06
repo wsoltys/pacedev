@@ -341,7 +341,7 @@ begin
       port map
       (
         clk             => clk_50M,
-        clk_20M_ena     => '1',
+        clk_ena         => '1',
         reset           => reset_i,
 
         osd_keys        => (others => '0'),
