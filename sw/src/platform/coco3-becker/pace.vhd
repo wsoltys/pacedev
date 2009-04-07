@@ -143,9 +143,10 @@ architecture SYN of PACE is
   signal ps2_kclk     : std_logic;
   signal ps2_kdat     : std_logic;
   signal video_o_s    : to_VIDEO_t;
-  signal osd_ctrl     : std_logic_vector(7 downto 0);
-  alias OSD_ENABLE    : std_logic is osd_ctrl(7);
-  alias OSD_RESET     : std_logic is osd_ctrl(6);   -- F3
+  signal osd_ctrl     : std_logic_vector(15 downto 0);
+  alias OSD_ENABLE    : std_logic is osd_ctrl(osd_ctrl'left);
+  alias OSD_BUTTON    : std_logic_vector(3 downto 0) is osd_ctrl(11 downto 8);
+  alias OSD_SWITCH    : std_logic_vector(7 downto 0) is osd_ctrl(7 downto 0);
   
 begin
 
@@ -224,7 +225,7 @@ begin
 	begin
 
     -- can use F3 to reset coco
-    coco_reset <= reset_i or OSD_RESET;
+    coco_reset <= reset_i or OSD_BUTTON(3);  -- F3
     
     GEN_DE2_SWITCHES : if PACE_TARGET = PACE_TARGET_DE2 generate
       coco_switches <= switches_i(coco_switches'range);
@@ -313,10 +314,10 @@ begin
         
         -- Extra Buttons and Switches
         --SWITCH				=> (others => '0'), -- fast=1.78MHz
-        SWITCH				=> coco_switches,
+        SWITCH				=> OSD_SWITCH,
         BUTTON(3)			=> coco_reset,
         --BUTTON(2 downto 0) => "000"
-        BUTTON(2 downto 0) => buttons_i(3 downto 1)
+        BUTTON(2 downto 0) => OSD_BUTTON(2 downto 0)
       );
 
   end block BLK_COCO3;

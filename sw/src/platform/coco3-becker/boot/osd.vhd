@@ -35,7 +35,7 @@ entity OSD is
     vid_b_i         : in std_logic_vector(9 downto 0);
 
     -- OSD control output
-    osd_ctrl_o      : out std_logic_vector(7 downto 0);
+    osd_ctrl_o      : out std_logic_vector(15 downto 0);
     
     -- osd character rom
     chr_a           : out std_logic_vector(10 downto 0);
@@ -56,9 +56,8 @@ end entity OSD;
 
 architecture SYN of OSD is
 
-  signal osd_ctrl       : std_logic_vector(7 downto 0) := (others => '0');
-  alias OSD_ENABLE      : std_logic is osd_ctrl(7);
-  alias OSD_RESET       : std_logic is osd_ctrl(6);
+  signal osd_ctrl       : std_logic_vector(15 downto 0) := (others => '0');
+  alias OSD_ENABLE      : std_logic is osd_ctrl(osd_ctrl'left);
   
   signal osd_keys       : std_logic_vector(7 downto 0) := (others => '0');
     
@@ -111,10 +110,13 @@ begin
       process (clk, reset)
       begin
         if reset = '1' then
-          osd_ctrl <= (others => '0');
+          -- Normal speed, select MPI slot 4 (disk controller)
+          osd_ctrl <= X"00" & "00001100";
           state <= IDLE;
         elsif rising_edge(clk) and clk_ena = '1' then
           if eop_s = '1' then
+            -- export at end of packet
+            osd_ctrl_o <= osd_ctrl;
             state <= IDLE;
           else
             case state is
@@ -126,7 +128,7 @@ begin
                 if eow_s = '1' then
                   -- latch control byte
                   -- - spin here for further bytes
-                  osd_ctrl <= spi_d_i;
+                  osd_ctrl <= osd_ctrl(7 downto 0) & spi_d_i;
                 end if;
               when others =>
                 state <= IDLE;
@@ -134,9 +136,6 @@ begin
           end if;
         end if;
       end process;
-      
-      -- export
-      osd_ctrl_o <= osd_ctrl;
       
     end block BLK_OSD_CTRL;
     
