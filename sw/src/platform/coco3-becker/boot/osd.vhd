@@ -2,11 +2,15 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+library work;
+use work.kbd_pkg.all;
+
 entity OSD is
   generic
   (
+    CLK_MHz         : integer := 50;
     OSD_X           : natural := 320;
-    OSD_Y           : natural := 200;
+    OSD_Y           : natural := 320;
     OSD_WIDTH       : natural := 512;
     OSD_HEIGHT      : natural := 128
   );
@@ -16,7 +20,11 @@ entity OSD is
     clk_ena         : in std_logic;
     reset           : in std_logic;
 
-    osd_keys        : in std_logic_vector(7 downto 0);
+    -- PS/2 key pass-thru
+    ps2_kclk_i      : in std_logic;
+    ps2_kdat_i      : in std_logic;
+    ps2_kclk_o      : out std_logic;
+    ps2_kdat_o      : out std_logic;
 
     -- video in
     vid_clk         : in std_logic;
@@ -25,6 +33,9 @@ entity OSD is
     vid_r_i         : in std_logic_vector(9 downto 0);
     vid_g_i         : in std_logic_vector(9 downto 0);
     vid_b_i         : in std_logic_vector(9 downto 0);
+
+    -- OSD control output
+    osd_ctrl_o      : out std_logic_vector(7 downto 0);
     
     -- osd character rom
     chr_a           : out std_logic_vector(10 downto 0);
@@ -45,6 +56,12 @@ end entity OSD;
 
 architecture SYN of OSD is
 
+  signal osd_ctrl       : std_logic_vector(7 downto 0) := (others => '0');
+  alias OSD_ENABLE      : std_logic is osd_ctrl(7);
+  alias OSD_RESET       : std_logic is osd_ctrl(6);
+  
+  signal osd_keys       : std_logic_vector(7 downto 0) := (others => '0');
+    
   signal vram_a         : std_logic_vector(9 downto 0) := (others => '0');
   signal vram_d_i       : std_logic_vector(7 downto 0) := (others => '0');
   signal vram_wr        : std_logic := '0';
@@ -81,18 +98,20 @@ begin
     signal spi_d_o      : std_logic_vector(SPI_W_SIZE-1 downto 0) := (others => '0');
     
     -- packet process semaphores
+    signal osd_ctrl_s   : std_logic := '0';
     signal osd_video_s  : std_logic := '0';
     signal ps2_keys_s   : std_logic := '0';
-    
+
   begin
-  
-    BLK_PS2_KEYS : block
-      type state_t is (IDLE, SET_BYTE, WAIT_WORD);
+
+    BLK_OSD_CTRL : block
+      type state_t is (IDLE, WAIT_WORD);
       signal state : state_t;
     begin
       process (clk, reset)
       begin
         if reset = '1' then
+          osd_ctrl <= (others => '0');
           state <= IDLE;
         elsif rising_edge(clk) and clk_ena = '1' then
           if eop_s = '1' then
@@ -100,16 +119,14 @@ begin
           else
             case state is
               when IDLE =>
-                if ps2_keys_s = '1' then
+                if osd_ctrl_s = '1' then
                   state <= WAIT_WORD;
                 end if;
-              when SET_BYTE =>
-                -- row six of the TRS-80 keyboard
-                spi_d_o <= osd_keys;
-                state <= WAIT_WORD;
               when WAIT_WORD =>
                 if eow_s = '1' then
-                  state <= SET_BYTE;
+                  -- latch control byte
+                  -- - spin here for further bytes
+                  osd_ctrl <= spi_d_i;
                 end if;
               when others =>
                 state <= IDLE;
@@ -117,7 +134,11 @@ begin
           end if;
         end if;
       end process;
-    end block BLK_PS2_KEYS;
+      
+      -- export
+      osd_ctrl_o <= osd_ctrl;
+      
+    end block BLK_OSD_CTRL;
     
     BLK_OSD_VIDEO : block
       type state_t is (IDLE, WAIT_WORD, WR_CHAR);
@@ -160,6 +181,38 @@ begin
       end process;
     end block BLK_OSD_VIDEO;
     
+    BLK_OSD_KEYS : block
+      type state_t is (IDLE, WAIT_WORD);
+      signal state : state_t;
+    begin
+      process (clk, reset)
+      begin
+        if reset = '1' then
+          state <= IDLE;
+        elsif rising_edge(clk) and clk_ena = '1' then
+          if eop_s = '1' then
+            state <= IDLE;
+          else
+            case state is
+              when IDLE =>
+                if ps2_keys_s = '1' then
+                  -- set data to go out on next word
+                  spi_d_o <= osd_keys;
+                  state <= WAIT_WORD;
+                end if;
+              when WAIT_WORD =>
+                if eow_s = '1' then
+                  -- same again until end of packet
+                  spi_d_o <= osd_keys;
+                end if;
+              when others =>
+                state <= IDLE;
+            end case;
+          end if;
+        end if;
+      end process;
+    end block BLK_OSD_KEYS;
+    
     BLK_PKT : block
       type state_t is (IDLE, WAIT_WORD, WAIT_EOP);
       signal state : state_t;
@@ -168,9 +221,13 @@ begin
       process (clk, reset)
       begin
         if reset = '1' then
+          osd_ctrl_s <= '0';
           osd_video_s <= '0';
+          ps2_keys_s <= '0';
         elsif rising_edge(clk) and clk_ena = '1' then
+          osd_ctrl_s <= '0';    -- default
           osd_video_s <= '0';   -- default
+          ps2_keys_s <= '0';    -- default
           if sop_s = '1' then
             state <= WAIT_WORD;
           else
@@ -178,8 +235,10 @@ begin
               when WAIT_WORD =>
                 if eow_s = '1' then
                   if spi_d_i(3 downto 0) = X"1" then
-                    osd_video_s <= '1';
+                    osd_ctrl_s <= '1';
                   elsif spi_d_i(3 downto 0) = X"2" then
+                    osd_video_s <= '1';
+                  elsif spi_d_i(3 downto 0) = X"3" then
                     ps2_keys_s <= '1';
                   end if;
                   state <= WAIT_EOP;
@@ -272,6 +331,91 @@ begin
     end process;
 
   end block BLK_EUROSPI;
+
+  BLK_PS2_PASSTHRU : block
+  
+    signal reset_n        : std_logic := '0';
+
+    signal tick_1us       : std_logic := '0';
+    
+    signal ps2_reset      : std_logic := '0';
+    signal ps2_press      : std_logic := '0';
+    signal ps2_release    : std_logic := '0';
+    signal ps2_scancode   : std_logic_vector(7 downto 0) := (others => '0');
+    
+  begin
+  
+    reset_n <= not reset;
+
+    -- block PS/2 input to the core when OSD enabled
+    ps2_kclk_o <= ps2_kclk_i when OSD_ENABLE = '0' else '1';
+    ps2_kdat_o <= ps2_kdat_i when OSD_ENABLE = '0' else '1';
+  
+    process (clk, reset)
+    begin
+      if reset = '1' then
+        osd_keys <= (others => '0');
+      elsif rising_edge(clk) then
+        if ps2_reset = '1' then
+          osd_keys <= (others => '0');
+        elsif (ps2_press or ps2_release) = '1' then
+          case ps2_scancode is
+            when SCANCODE_ESC =>
+              osd_keys(0) <= ps2_press;
+            when SCANCODE_ENTER =>
+              osd_keys(1) <= ps2_press;
+            when SCANCODE_UP =>
+              osd_keys(2) <= ps2_press;
+            when SCANCODE_DOWN =>
+              osd_keys(3) <= ps2_press;
+            when SCANCODE_LEFT =>
+              osd_keys(4) <= ps2_press;
+            when SCANCODE_RIGHT =>
+              osd_keys(5) <= ps2_press;
+            when SCANCODE_F3 =>
+              osd_keys(6) <= ps2_press;
+            -- use F11 for now as F12 produces '@'
+            when SCANCODE_F11 =>
+              osd_keys(7) <= ps2_press;
+            when others =>
+              null;
+          end case;
+        end if;
+      end if;
+    end process;
+    
+    ps2kbd_inst : entity work.ps2kbd                                        
+      port map
+      (
+        clk      => clk,                                     
+        rst_n    => reset_n,
+        tick1us  => tick_1us,
+        ps2_clk  => ps2_kclk_i,
+        ps2_data => ps2_kdat_i,
+        
+        reset    => ps2_reset,
+        press    => ps2_press,
+        release  => ps2_release,
+        scancode => ps2_scancode
+      );
+
+    process (clk, reset)
+      variable count : integer range 0 to CLK_MHz := 0;
+    begin
+      if reset = '1' then
+        count := 0;
+        tick_1us <= '0';
+      elsif rising_edge(clk) then
+        tick_1us <= '0';
+        count := count + 1;
+        if count = CLK_MHz then
+          count := 0;
+          tick_1us <= '1';
+         end if;
+      end if;
+    end process;
+
+  end block BLK_PS2_PASSTHRU;
   
   BLK_VIDEO : block
   
@@ -355,7 +499,7 @@ begin
     begin
       if reset = '1' then
       elsif rising_edge(vid_clk) then
-        if val_x_r(val_x_r'left) and val_y then
+        if OSD_ENABLE = '1' and val_x_r(val_x_r'left) and val_y then
           if pel = '1' then
             vid_r_o <= (others => '1');
             vid_g_o <= (others => '1');

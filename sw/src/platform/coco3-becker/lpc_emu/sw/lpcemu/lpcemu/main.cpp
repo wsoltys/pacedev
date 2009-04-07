@@ -28,6 +28,26 @@ static void batterylow_interrupt(void *context, alt_u32 id)
 #endif
 }
 
+// OSD packet types
+#define PKT_OSD_CTRL        0x01
+#define PKT_OSD_VIDEO       0x02
+#define PKT_PS2_KEYS        0x03
+
+// OSD control word to the FPGA
+#define OSD_CTRL_OSD_ENABLE (1<<7)
+#define OSD_CTRL_RESET      (1<<6)
+
+// OSD keys from the FPGA
+#define OSD_KEY_F11         (1<<7)
+#define OSD_KEY_F3          (1<<6)
+#define OSD_KEY_RIGHT       (1<<5)
+#define OSD_KEY_LEFT        (1<<4)
+#define OSD_KEY_DOWN        (1<<3)
+#define OSD_KEY_UP          (1<<2)
+#define OSD_KEY_ENTER       (1<<1)
+#define OSD_KEY_ESC         (1<<0)
+
+
 #define SPI_CLK							(1<<0)
 #define SPI_MISO						(1<<1)
 #define SPI_MOSI						(1<<2)
@@ -72,6 +92,18 @@ alt_u8 spi_send8 (alt_u8 data)
   LPC_WR32 (aSSPDR, (alt_u32)data);
   return (0);
 }
+
+void spi_wait (void)
+{
+  alt_u8 spi_sts;
+  
+  // wait for not BUSY, so SSEL is de-asserted
+  do
+  {
+    spi_sts = LPC_RD32 (aSSPSR);
+    
+  } while ((spi_sts & (1<<4)) != 0);
+}    
 
 #else
 
@@ -130,9 +162,6 @@ int main (int argc, char* argv[], char* envp[])
 		(ALTERA_AVALON_PIO_DIRECTION_OUTPUT << 1) |
 		(ALTERA_AVALON_PIO_DIRECTION_OUTPUT << 0));
 
-	// initialise SSEL de-asserted
-	IOWR_ALTERA_AVALON_PIO_DATA (PIO_SPI_BASE, SPI_SSn);
-
 #if 0
 	// register and enable the 100Hz timer interrupt handler
   alt_irq_register(TIMER_100HZ_IRQ, 0, timer_100Hz_interrupt);
@@ -149,10 +178,11 @@ int main (int argc, char* argv[], char* envp[])
 #endif
 
   static char buf[1024];
-  sprintf (buf, "--- Welcome to PACE CoCo3+ (Built: %s %s) ---", __DATE__, __TIME__);
+  sprintf (buf, "   --- PACE CoCo3+ OSD Menu (Built: %s %s) ---", __DATE__, __TIME__);
   int l = strlen(buf);
   memset (buf+l, ' ', 1024-l);
 
+  alt_u8 osd_ctrl = 0;
   alt_u8 ps2_keys = 0;
 
   spi_enable (true);
@@ -165,8 +195,13 @@ int main (int argc, char* argv[], char* envp[])
     alt_u8 spi_in;
     int i;
 
+    // do a control packet transfer
+    spi_send8 (PKT_OSD_CTRL);
+    spi_send8 (osd_ctrl);
+    spi_wait ();
+    
   	// do a video transfer to the FPGA
-  	spi_send8 (0x01);
+  	spi_send8 (PKT_OSD_VIDEO);
     for (i=0; i<1024;)
     {
       spi_sts = LPC_RD32 (aSSPRIS);
@@ -174,40 +209,35 @@ int main (int argc, char* argv[], char* envp[])
         for (int j=0; j<8; j++)
           spi_send8 (buf[i++]);
     }
+    spi_wait ();
 
-    // wait for not BUSY, so SSEL is de-asserted
-    do
-    {
-      spi_sts = LPC_RD32 (aSSPSR);
-      
-    } while ((spi_sts & (1<<4)) != 0);
-    
     // flush the rx fifo
     for (i=0; i<16; i++)
       LPC_RD32 (aSSPDR);
       
     // do a keyboard transfer from the FPGA
     // keyboard packet
-    spi_send8 (0x02);
+    spi_send8 (PKT_PS2_KEYS);
     spi_in = spi_send8 (0x00);    // dummy data to read
+    spi_wait ();
     
-    // wait for not BUSY, so SSEL is de-asserted
-    do
-    {
-      spi_sts = LPC_RD32 (aSSPSR);
-      
-    } while ((spi_sts & (1<<4)) != 0);
-
     // read the 2nd byte in the FIFO
     spi_in = LPC_RD32 (aSSPDR);
     spi_in = LPC_RD32 (aSSPDR);
-    
+
+    // toggle OSD_ENABLE on F11 keypress
+    if ((spi_in & OSD_KEY_F11) != (ps2_keys & OSD_KEY_F11))
+      if ((spi_in & OSD_KEY_F11) != 0)
+        osd_ctrl ^= OSD_CTRL_OSD_ENABLE;
+    osd_ctrl &= ~(OSD_CTRL_RESET);
+    if ((osd_ctrl & OSD_CTRL_OSD_ENABLE) && (spi_in & OSD_KEY_F3))
+      osd_ctrl |= OSD_CTRL_RESET;
+
+#if 0              
     if (spi_in != ps2_keys)
-    {
-      ps2_keys = spi_in;  
       printf ("ps2_keys = $%02X\n", ps2_keys);
-    }
-    //usleep (1000000);
+#endif
+    ps2_keys = spi_in;  
   }
    
 }

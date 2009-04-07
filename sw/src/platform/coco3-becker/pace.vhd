@@ -140,7 +140,12 @@ architecture SYN of PACE is
 	signal ram_oe_n		  : std_logic;
   signal digit_n      : std_logic_vector(3 downto 0);
   
+  signal ps2_kclk     : std_logic;
+  signal ps2_kdat     : std_logic;
   signal video_o_s    : to_VIDEO_t;
+  signal osd_ctrl     : std_logic_vector(7 downto 0);
+  alias OSD_ENABLE    : std_logic is osd_ctrl(7);
+  alias OSD_RESET     : std_logic is osd_ctrl(6);   -- F3
   
 begin
 
@@ -212,11 +217,15 @@ begin
 	end generate GEN_SRAM_COCO3PLUS;
 	
 	BLK_COCO3 : block
+    signal coco_reset     : std_logic := '0';
     signal coco_switches  : std_logic_vector(7 downto 0);
     signal joystk_x       : std_logic_vector(7 downto 0);
     signal joystk_y       : std_logic_vector(7 downto 0);
 	begin
-	
+
+    -- can use F3 to reset coco
+    coco_reset <= reset_i or OSD_RESET;
+    
     GEN_DE2_SWITCHES : if PACE_TARGET = PACE_TARGET_DE2 generate
       coco_switches <= switches_i(coco_switches'range);
     end generate GEN_DE2_SWITCHES;
@@ -266,8 +275,8 @@ begin
         V_SYNC				=> video_o_s.vsync,
         
         -- PS/2
-        ps2_clk				=> inputs_i.ps2_kclk,
-        ps2_data			=> inputs_i.ps2_kdat,
+        ps2_clk				=> ps2_kclk,
+        ps2_data			=> ps2_kdat,
         
         --Serial Ports
         TXD1					=> ser_o.txd,
@@ -305,7 +314,7 @@ begin
         -- Extra Buttons and Switches
         --SWITCH				=> (others => '0'), -- fast=1.78MHz
         SWITCH				=> coco_switches,
-        BUTTON(3)			=> reset_i,
+        BUTTON(3)			=> coco_reset,
         --BUTTON(2 downto 0) => "000"
         BUTTON(2 downto 0) => buttons_i(3 downto 1)
       );
@@ -344,7 +353,10 @@ begin
         clk_ena         => '1',
         reset           => reset_i,
 
-        osd_keys        => (others => '0'),
+        ps2_kclk_i      => inputs_i.ps2_kclk,
+        ps2_kdat_i      => inputs_i.ps2_kdat,
+        ps2_kclk_o      => ps2_kclk,
+        ps2_kdat_o      => ps2_kdat,
         
         vid_clk         => video_o_s.clk,
         vid_hsync       => video_o_s.hsync,
@@ -352,6 +364,8 @@ begin
         vid_r_i         => video_o_s.rgb.r,
         vid_g_i         => video_o_s.rgb.g,
         vid_b_i         => video_o_s.rgb.b,
+        
+        osd_ctrl_o      => osd_ctrl,
         
         chr_a           => chr_a,
         chr_d           => chr_d,
