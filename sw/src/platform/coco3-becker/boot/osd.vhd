@@ -112,10 +112,11 @@ begin
         if reset = '1' then
           -- Normal speed, select MPI slot 4 (disk controller)
           osd_ctrl <= X"00" & "00001100";
+          osd_ctrl_o <= X"00" & "00001100";
           state <= IDLE;
         elsif rising_edge(clk) and clk_ena = '1' then
           if eop_s = '1' then
-            -- export at end of packet
+            -- export at end of (every) packet
             osd_ctrl_o <= osd_ctrl;
             state <= IDLE;
           else
