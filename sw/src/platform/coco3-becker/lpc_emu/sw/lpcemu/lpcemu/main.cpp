@@ -7,59 +7,24 @@
 #include "altera_avalon_timer_regs.h"
 #include "system.h"
 
-static void timer_100Hz_interrupt(void *context, alt_u32 id)
-{
-  // acknowledge timer interrupt
-  IOWR (TIMER_100HZ_BASE, 0, 0);
+#define LPC_RD32(addr)            \
+  IORD_32DIRECT (((1<<31)|LPC_SPI_0_BASE), (addr))
+#define LPC_WR32(addr, data)      \
+  IOWR_32DIRECT (((1<<31)|LPC_SPI_0_BASE), (addr), (data))
 
-	// update uC/OS timer chain
-	//OSTmrSignal ();
-}
-
-static void batterylow_interrupt(void *context, alt_u32 id)
-{
 #if 0
-  // acknowledge interrupt (clear edge bit)
-	IOWR_ALTERA_AVALON_PIO_EDGE_CAP(USER_POWERFAIL_BL_BASE, 0);
-
-	unsigned char bl_n = IORD_ALTERA_AVALON_PIO_DATA (USER_POWERFAIL_BL_BASE);
-	if ((bl_n & (1<<0)) == 0)
-		bl_irq = 1;
+// bit-bash SPI - not used any more
+#define SPI_CLK							    (1<<0)
+#define SPI_MISO						    (1<<1)
+#define SPI_MOSI						    (1<<2)
+#define SPI_SSn							    (1<<3)
 #endif
-}
 
-// OSD packet types
-#define PKT_OSD_CTRL        0x01
-#define PKT_OSD_VIDEO       0x02
-#define PKT_PS2_KEYS        0x03
-
-// OSD control word to the FPGA
-#define OSD_CTRL_OSD_ENABLE (1<<7)
-#define OSD_CTRL_RESET      (1<<6)
-
-// OSD keys from the FPGA
-#define OSD_KEY_F11         (1<<7)
-#define OSD_KEY_F3          (1<<6)
-#define OSD_KEY_RIGHT       (1<<5)
-#define OSD_KEY_LEFT        (1<<4)
-#define OSD_KEY_DOWN        (1<<3)
-#define OSD_KEY_UP          (1<<2)
-#define OSD_KEY_ENTER       (1<<1)
-#define OSD_KEY_ESC         (1<<0)
-
-
-#define SPI_CLK							(1<<0)
-#define SPI_MISO						(1<<1)
-#define SPI_MOSI						(1<<2)
-#define SPI_SSn							(1<<3)
-
-#define FPGACFG_CONFIGn			(1<<0)
-#define FPGACFG_DCLK				(1<<1)
-#define FPGACFG_DATA0				(1<<2)
-#define FPGACFG_CONFDONE		(1<<3)
-#define FPGACFG_STATUSn			(1<<4)
-
-#ifdef LPC_SPI_0_NAME
+#define FPGACFG_CONFIGn			    (1<<0)
+#define FPGACFG_DCLK				    (1<<1)
+#define FPGACFG_DATA0			      (1<<2)
+#define FPGACFG_CONFDONE		    (1<<3)
+#define FPGACFG_STATUSn			    (1<<4)
 
 #define aSSPRC0   (0<<2)
 #define aSSPCR1   (1<<2)
@@ -73,11 +38,77 @@ static void batterylow_interrupt(void *context, alt_u32 id)
 
 // SSPCR1
 #define BIT_SSE   (1<<1)
+// SSPSR
+#define BIT_BSY   (1<<4)
+// SSPRIS
+#define BIT_TXRIS (1<<3)
 
-#define LPC_RD32(addr)            \
-  IORD_32DIRECT (((1<<31)|LPC_SPI_0_BASE), (addr))
-#define LPC_WR32(addr, data)      \
-  IOWR_32DIRECT (((1<<31)|LPC_SPI_0_BASE), (addr), (data))
+// OSD packet types
+#define PKT_OSD_CTRL            0x01
+#define PKT_OSD_VIDEO           0x02
+#define PKT_PS2_KEYS            0x03
+
+// OSD control word to the FPGA
+#define OSD_CTRL_OSD_ENABLE     (1<<15)
+#define OSD_CTRL_BTN_RESET      (1<<11)
+#define OSD_CTRL_BTN_PAUSE      (1<<10)
+#define OSD_CTRL_BTN_MPISTS     (1<<9)
+#define OSD_CTRL_BTN_EASTEREGG  (1<<8)
+#define OSD_CTRL_SW_BOINK       (1<<7)
+#define OSD_CTRL_SW_DSKSPD      (1<<6)
+#define OSD_CTRL_SW_JOYSTK      (1<<5)
+#define OSD_CTRL_SW_CARTINT     (1<<4)
+#define OSD_CTRL_SW_MPI1        (1<<3)
+#define OSD_CTRL_SW_MPI0        (1<<2)
+#define OSD_CTRL_SW_CPUSPD1     (1<<1)
+#define OSD_CTRL_SW_CPUSPD0     (1<<0)
+
+#define OSD_CTRL_MSK_MPI        (OSD_CTRL_SW_MPI1|OSD_CTRL_SW_MPI0)
+#define OSD_CTRL_MPI_SLOT1      (0)
+#define OSD_CTRL_MPI_SLOT2      (OSD_CTRL_SW_MPI0)
+#define OSD_CTRL_MPI_SLOT3      (OSD_CTRL_SW_MPI1)
+#define OSD_CTRL_MPI_SLOT4      (OSD_CTRL_SW_MPI1|OSD_CTRL_SW_MPI0)
+
+#define OSD_CTRL_MSK_CPUSPD     (OSD_CTRL_SW_CPUSPD1|OSD_CTRL_SW_CPUSPD0)
+#define OSD_CTRL_CPUSPD_1M78    (0)
+#define OSD_CTRL_CPUSPD_4M17    (OSD_CTRL_SW_CPUSPD0)
+#define OSD_CTRL_CPUSPD_12M5    (OSD_CTRL_SW_CPUSPD1)
+#define OSD_CTRL_CPUSPD_25M0    (OSD_CTRL_SW_CPUSPD1|OSD_CTRL_SW_CPUSPD0)
+
+// OSD keys from the FPGA
+#define OSD_KEY_F11             (1<<7)
+#define OSD_KEY_F3              (1<<6)
+#define OSD_KEY_RIGHT           (1<<5)
+#define OSD_KEY_LEFT            (1<<4)
+#define OSD_KEY_DOWN            (1<<3)
+#define OSD_KEY_UP              (1<<2)
+#define OSD_KEY_ENTER           (1<<1)
+#define OSD_KEY_ESC             (1<<0)
+
+#define OSD_NAV_KEY_MASK        (OSD_KEY_RIGHT|OSD_KEY_LEFT|OSD_KEY_DOWN|OSD_KEY_UP)
+
+static unsigned char vram[1024];
+
+static void timer_100Hz_interrupt(void *context, alt_u32 id)
+{
+  // acknowledge timer interrupt
+  IOWR (TIMER_100HZ_BASE, 0, 0);
+
+  // update uC/OS timer chain
+  //OSTmrSignal ();
+}
+
+static void batterylow_interrupt(void *context, alt_u32 id)
+{
+#if 0
+  // acknowledge interrupt (clear edge bit)
+  IOWR_ALTERA_AVALON_PIO_EDGE_CAP(USER_POWERFAIL_BL_BASE, 0);
+
+  unsigned char bl_n = IORD_ALTERA_AVALON_PIO_DATA (USER_POWERFAIL_BL_BASE);
+  if ((bl_n & (1<<0)) == 0)
+    bl_irq = 1;
+#endif
+}
 
 void spi_enable (bool enable)
 {
@@ -87,13 +118,10 @@ void spi_enable (bool enable)
     LPC_WR32 (aSSPCR1, 0);
 }
    
-alt_u8 spi_send8 (alt_u8 data)
-{
-  LPC_WR32 (aSSPDR, (alt_u32)data);
-  return (0);
-}
+#define spi_send8(x)    LPC_WR32 (aSSPDR, (alt_u32)(x))
+#define spi_rd8(x)      (alt_u8)LPC_RD32 (aSSPDR)
 
-void spi_wait (void)
+void spi_wait_not_busy (void)
 {
   alt_u8 spi_sts;
   
@@ -102,47 +130,105 @@ void spi_wait (void)
   {
     spi_sts = LPC_RD32 (aSSPSR);
     
-  } while ((spi_sts & (1<<4)) != 0);
+  } while ((spi_sts & BIT_BSY) != 0);
 }    
 
-#else
+unsigned char *v = vram;
 
-void spi_enable (bool enable)
+void vp (char *str, bool use_inverse=true)
 {
-}
-   
-alt_u8 spi_send8 (alt_u8 data)
-{
-  alt_u8 spi_in = 0;
-	alt_u8 spi_out = 0;		// SSEL low
+  static unsigned char inverse = 0x00;
   
-	for (int i=0; i<8; i++)
-	{
-		//setup data, clock hi
-		spi_out |= SPI_CLK;
-		spi_out &= ~SPI_MOSI;
-		if (data & 0x80)
-			spi_out |= SPI_MOSI;		
-		IOWR_ALTERA_AVALON_PIO_DATA (PIO_SPI_BASE, spi_out);
-		usleep (1);
-
-		// clock transition low
-		spi_out &= ~SPI_CLK;
-		IOWR_ALTERA_AVALON_PIO_DATA (PIO_SPI_BASE, spi_out);
-    
-    // read data in
-    spi_in <<= 1;
-    alt_u8 spi_sts = IORD_ALTERA_AVALON_PIO_DATA (PIO_SPI_BASE);
-    if (spi_sts & SPI_MISO)
-      spi_in |= 1;
-      
-		usleep (1);
-
-		data <<= 1;
-	}
-  return (spi_in);
+  for (; *str; str++)
+  {
+    if (*str == '_')
+    {
+      if (use_inverse)
+        inverse ^= 0x80;
+    }
+    else
+      *(v++) = inverse | *str;
+  }
 }
-#endif
+
+void vpat (int x, int y, char *str, bool use_inverse=true)
+{
+  v = vram + (y << 6) + x;
+  vp (str, use_inverse);
+}
+
+void vp2 (int sel, char *zero, char *one)
+{
+  vp (zero, sel==0); 
+  vp (" "); 
+  vp (one, sel==1); 
+}
+
+void vp4 (int sel, char *zero, char *one, char *two, char *three)
+{
+  vp2 (sel, zero, one);
+  vp (" ");
+  vp2 (sel^(1<<1), two, three); 
+}
+
+void show_menu (unsigned short osd_ctrl, int sel=0)
+{
+  int l = 3;
+  int x = 16;
+  vpat (x, l++, "   _Boink Speed_ : ", sel==0);
+  vp2 ((osd_ctrl & OSD_CTRL_SW_BOINK) >> 7, "_OFF_", "_ON_");
+  vpat (x, l++, "    _Disk Speed_ : ", sel==1);
+  vp2 ((osd_ctrl & OSD_CTRL_SW_DSKSPD) >> 6, "_OFF_", "_ON_");
+  vpat (x, l++, "_Swap Joysticks_ : ", sel==2);
+  vp2 ((osd_ctrl & OSD_CTRL_SW_JOYSTK) >> 5, "_OFF_", "_ON_");
+  vpat (x, l++, "      _Cart INT_ : ", sel==3);
+  vp2 ((osd_ctrl & OSD_CTRL_SW_CARTINT) >> 4, "_OFF_", "_ON_");
+  vpat (x, l++, "      _MPI Slot_ : ", sel==4);
+  vp4 ((osd_ctrl & OSD_CTRL_MSK_MPI) >> 2, "_1_", "_2_", "_3_", "_4_");
+  vpat (x, l++, "     _CPU Speed_ : ", sel==5);
+  vp4 ((osd_ctrl & OSD_CTRL_MSK_CPUSPD) >> 0, "_1.78_", "_4.17_", "_12.5_", "_25.0_");
+}
+
+void handle_menu_sel (alt_u16 &osd_ctrl, int &sel, alt_u8 key)
+{
+  int mask[] = 
+  {
+    OSD_CTRL_SW_BOINK, OSD_CTRL_SW_DSKSPD, OSD_CTRL_SW_JOYSTK, OSD_CTRL_SW_CARTINT,
+    OSD_CTRL_MSK_MPI, OSD_CTRL_MSK_CPUSPD
+  };
+  int shift[] = { 7, 6, 5, 4, 2, 0 };
+
+  int entry = (osd_ctrl & mask[sel]) >> shift[sel];
+  int n = (mask[sel] >> shift[sel]);
+
+  if (key & OSD_KEY_UP)
+    if (sel != 0)
+      sel--;
+      
+  if (key & OSD_KEY_DOWN)
+    if (sel < 5)
+      sel++;
+
+  if ((key & (OSD_KEY_LEFT|OSD_KEY_RIGHT)) == 0)
+    return;
+        
+  if (key & OSD_KEY_LEFT)
+    if (entry == 0)
+      return;
+    else
+      entry--;
+  else 
+  if (key & OSD_KEY_RIGHT)
+    if (entry == n)
+      return;
+    else
+      entry++;
+
+  osd_ctrl &= ~mask[sel];
+  osd_ctrl |= (entry << shift[sel]); 
+    
+  return;
+}
 
 int main (int argc, char* argv[], char* envp[])
 {
@@ -177,66 +263,100 @@ int main (int argc, char* argv[], char* envp[])
   IOWR_ALTERA_AVALON_PIO_IRQ_MASK (USER_POWERFAIL_BL_BASE, (1<<0));
 #endif
 
-  static char buf[1024];
-  sprintf (buf, "   --- PACE CoCo3+ OSD Menu (Built: %s %s) ---", __DATE__, __TIME__);
-  int l = strlen(buf);
-  memset (buf+l, ' ', 1024-l);
+  sprintf ((char *)vram, "   --- PACE CoCo3+ OSD Menu (Built: %s %s) ---", __DATE__, __TIME__);
+  int l = strlen((char *)vram);
+  memset (vram+l, ' ', 1024-l);
 
-  alt_u8 osd_ctrl = 0;
+  alt_u16 osd_ctrl = OSD_CTRL_MPI_SLOT4 | OSD_CTRL_CPUSPD_1M78;
+  alt_u16 osd_ctrl_t = osd_ctrl;
   alt_u8 ps2_keys = 0;
-
-  spi_enable (true);
-
-  alt_u32 spi_sts;
-  usleep (1000000);
+  alt_u16 osd_ctrl_i = 0;
     
+
+  int menu_sel = 0;
+  
+  show_menu (osd_ctrl, menu_sel);
+  
+  spi_enable (true);
   while (1)
   {
-    alt_u8 spi_in;
+    alt_u16 spi_in;
     int i;
 
     // do a control packet transfer
     spi_send8 (PKT_OSD_CTRL);
-    spi_send8 (osd_ctrl);
-    spi_wait ();
+    spi_send8 (osd_ctrl>>8);
+    spi_send8 (osd_ctrl&0xFF);
+    spi_wait_not_busy ();
+
+    spi_rd8 ();
+    spi_in = spi_rd8 ();
+    spi_in = (spi_in << 8) | spi_rd8 ();
+    #if 0
+      if (spi_in != osd_ctrl_i)
+        printf ("osd_ctrl_i = $%04X\n", spi_in);
+    #endif
+    osd_ctrl_i = spi_in;
     
   	// do a video transfer to the FPGA
   	spi_send8 (PKT_OSD_VIDEO);
     for (i=0; i<1024;)
     {
-      spi_sts = LPC_RD32 (aSSPRIS);
-      if (spi_sts & (1<<3))   // half empty
+      if (LPC_RD32 (aSSPRIS) & BIT_TXRIS)  // half empty
         for (int j=0; j<8; j++)
-          spi_send8 (buf[i++]);
+          spi_send8 (vram[i++]);
     }
-    spi_wait ();
+    spi_wait_not_busy ();
 
     // flush the rx fifo
     for (i=0; i<16; i++)
-      LPC_RD32 (aSSPDR);
-      
+      spi_rd8 ();
+
     // do a keyboard transfer from the FPGA
     // keyboard packet
     spi_send8 (PKT_PS2_KEYS);
-    spi_in = spi_send8 (0x00);    // dummy data to read
-    spi_wait ();
+    spi_send8 (0x00);         // dummy data for read
+    spi_wait_not_busy ();
     
-    // read the 2nd byte in the FIFO
-    spi_in = LPC_RD32 (aSSPDR);
-    spi_in = LPC_RD32 (aSSPDR);
+    // keys are in the 2nd byte in the FIFO
+    spi_in = spi_rd8 ();
+    spi_in = spi_rd8 ();
 
     // toggle OSD_ENABLE on F11 keypress
-    if ((spi_in & OSD_KEY_F11) != (ps2_keys & OSD_KEY_F11))
-      if ((spi_in & OSD_KEY_F11) != 0)
-        osd_ctrl ^= OSD_CTRL_OSD_ENABLE;
-    osd_ctrl &= ~(OSD_CTRL_RESET);
-    if ((osd_ctrl & OSD_CTRL_OSD_ENABLE) && (spi_in & OSD_KEY_F3))
-      osd_ctrl |= OSD_CTRL_RESET;
+    if ((spi_in & OSD_KEY_F11) != 0 && (ps2_keys & OSD_KEY_F11) == 0)
+    {
+      osd_ctrl ^= OSD_CTRL_OSD_ENABLE;
+      // latch a temp copy to play with 
+      osd_ctrl_t = osd_ctrl;
+    }
 
-#if 0              
+    // handle menu navigation, settings    
+    alt_u8 press = (spi_in & ~ps2_keys) & OSD_NAV_KEY_MASK; 
+    if (press != 0)
+      handle_menu_sel (osd_ctrl_t, menu_sel, press);
+
+#if 0
+    // on ENTER, when OSD enabled, save changes
+    if ((spi_in & OSD_KEY_ENTER) != 0 && (ps2_keys & OSD_KEY_ENTER) == 0)
+      if (osd_ctrl & OSD_CTRL_OSD_ENABLE)
+#endif      
+        osd_ctrl = osd_ctrl_t;
+    
+    // handle reset button on F3 keypress
+    osd_ctrl &= ~(OSD_CTRL_BTN_RESET);
+    if ((osd_ctrl & OSD_CTRL_OSD_ENABLE) && (spi_in & OSD_KEY_F3))
+    {
+      // also disable OSD
+      //osd_ctrl &= ~OSD_CTRL_OSD_ENABLE;
+      osd_ctrl |= OSD_CTRL_BTN_RESET;
+    }
+
     if (spi_in != ps2_keys)
-      printf ("ps2_keys = $%02X\n", ps2_keys);
-#endif
+    {
+      //printf ("ps2_keys = $%02X\n", ps2_keys);
+      show_menu (osd_ctrl_t, menu_sel);
+    }
+
     ps2_keys = spi_in;  
   }
    

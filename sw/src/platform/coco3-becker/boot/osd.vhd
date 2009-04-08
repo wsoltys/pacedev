@@ -34,7 +34,8 @@ entity OSD is
     vid_g_i         : in std_logic_vector(9 downto 0);
     vid_b_i         : in std_logic_vector(9 downto 0);
 
-    -- OSD control output
+    -- OSD control input/output
+    osd_ctrl_i      : in std_logic_vector(15 downto 0);
     osd_ctrl_o      : out std_logic_vector(15 downto 0);
     
     -- osd character rom
@@ -101,6 +102,11 @@ begin
     signal osd_video_s  : std_logic := '0';
     signal ps2_keys_s   : std_logic := '0';
 
+    -- spi output mux select latches
+    signal osd_ctrl_spi_d_o   : std_logic_vector(15 downto 0) := (others => '0');
+    signal osd_video_spi_d_o  : std_logic_vector(7 downto 0) := (others => '0');
+    signal ps2_keys_spi_d_o   : std_logic_vector(7 downto 0) := (others => '0');
+    
   begin
 
     BLK_OSD_CTRL : block
@@ -108,28 +114,32 @@ begin
       signal state : state_t;
     begin
       process (clk, reset)
+        variable osd_ctrl_o_v : std_logic_vector(15 downto 0) := (others => '0');
       begin
         if reset = '1' then
           -- Normal speed, select MPI slot 4 (disk controller)
-          osd_ctrl <= X"00" & "00001100";
-          osd_ctrl_o <= X"00" & "00001100";
+          osd_ctrl <= (others => '0');
+          osd_ctrl_spi_d_o <= (others => '0');
           state <= IDLE;
         elsif rising_edge(clk) and clk_ena = '1' then
           if eop_s = '1' then
-            -- export at end of (every) packet
-            osd_ctrl_o <= osd_ctrl;
+            -- latch at end of (every) packet
+            osd_ctrl <= osd_ctrl_o_v;
             state <= IDLE;
           else
             case state is
               when IDLE =>
                 if osd_ctrl_s = '1' then
+                  -- latch outgoing control bytes
+                  osd_ctrl_spi_d_o <= osd_ctrl_i;
                   state <= WAIT_WORD;
                 end if;
               when WAIT_WORD =>
                 if eow_s = '1' then
-                  -- latch control byte
-                  -- - spin here for further bytes
-                  osd_ctrl <= osd_ctrl(7 downto 0) & spi_d_i;
+                  -- shift next outgoing byte
+                  osd_ctrl_spi_d_o <= osd_ctrl_spi_d_o(7 downto 0) & X"00";
+                  -- shift control byte into latch
+                  osd_ctrl_o_v := osd_ctrl_o_v(7 downto 0) & spi_d_i(7 downto 0);
                 end if;
               when others =>
                 state <= IDLE;
@@ -137,6 +147,9 @@ begin
           end if;
         end if;
       end process;
+      
+      -- export
+      osd_ctrl_o <= osd_ctrl;
       
     end block BLK_OSD_CTRL;
     
@@ -147,10 +160,10 @@ begin
       process (clk, reset)
       begin
         if reset = '1' then
-          state <= IDLE;
           vram_a <= (others => '0');
           vram_d_i <= (others => '0');
           vram_wr <= '0';
+          state <= IDLE;
         elsif rising_edge(clk) and clk_ena = '1' then
           vram_wr <= '0';   -- default
           if eop_s = '1' then
@@ -197,13 +210,13 @@ begin
               when IDLE =>
                 if ps2_keys_s = '1' then
                   -- set data to go out on next word
-                  spi_d_o <= osd_keys;
+                  ps2_keys_spi_d_o <= osd_keys;
                   state <= WAIT_WORD;
                 end if;
               when WAIT_WORD =>
                 if eow_s = '1' then
                   -- same again until end of packet
-                  spi_d_o <= osd_keys;
+                  ps2_keys_spi_d_o <= osd_keys;
                 end if;
               when others =>
                 state <= IDLE;
@@ -225,9 +238,6 @@ begin
           osd_video_s <= '0';
           ps2_keys_s <= '0';
         elsif rising_edge(clk) and clk_ena = '1' then
-          osd_ctrl_s <= '0';    -- default
-          osd_video_s <= '0';   -- default
-          ps2_keys_s <= '0';    -- default
           if sop_s = '1' then
             state <= WAIT_WORD;
           else
@@ -244,9 +254,12 @@ begin
                   state <= WAIT_EOP;
                 end if;
               when WAIT_EOP =>
-                -- don't need to do anything here,
-                -- as SM is reset on start-of-pkt
-                null;
+                if eop_s = '1' then
+                  osd_ctrl_s <= '0';
+                  osd_video_s <= '0';
+                  ps2_keys_s <= '0';
+                  -- spin here
+                end if;
               when others =>
                 state <= IDLE;
             end case;
@@ -255,14 +268,22 @@ begin
       end process;
     
     end block BLK_PKT;
+
+    spi_d_o <=  osd_ctrl_spi_d_o(osd_ctrl_spi_d_o'left downto osd_ctrl_spi_d_o'left-7)
+                  when osd_ctrl_s = '1' else
+                osd_video_spi_d_o(osd_video_spi_d_o'left downto osd_video_spi_d_o'left-7)
+                  when osd_video_s = '1' else
+                ps2_keys_spi_d_o(ps2_keys_spi_d_o'left downto ps2_keys_spi_d_o'left-7)
+                  when ps2_keys_s = '1' else
+                (others => '0');
     
     BLK_BIT : block
-      type state_t is (IDLE, SOW, WAIT_SETUP, WAIT_BIT);
-      signal state    : state_t;
-      signal spi_d_r  : std_logic_vector(spi_d_o'range) := (others => '0');
+      type state_t is (IDLE, SOW, LATCH, WAIT_SETUP, WAIT_BIT);
+      signal state      : state_t;
     begin
       -- bit-send-and-receive process
       process (clk, reset)
+        variable spi_d_r    : std_logic_vector(spi_d_o'range) := (others => '0');
         variable count      : integer range 0 to 7 := 0;
       begin
         if reset = '1' then
@@ -286,14 +307,22 @@ begin
             case state is
               when SOW =>
                 count := 0;
-                -- latch output data
-                spi_d_r <= spi_d_o;
-                state <= WAIT_SETUP;
+                state <= LATCH;
+              when LATCH =>
+                -- delay for 2 clocks to allow data
+                -- to propogate into spi_d_o
+                if count = 1 then
+                  spi_d_r := spi_d_o;
+                  count := 0;
+                  state <= WAIT_SETUP;
+                else
+                  count := count + 1;
+                end if;
               when WAIT_SETUP =>
                 -- rising edge clk, setup data
                 if spi_clk_prev = '0' and spi_clk = '1' then
                   spi_miso <= spi_d_r(spi_d_r'left);
-                  spi_d_r <= spi_d_r(spi_d_r'left-1 downto 0) & '0';
+                  spi_d_r := spi_d_r(spi_d_r'left-1 downto 0) & '0';
                   state <= WAIT_BIT;
                 end if;
               when WAIT_BIT =>
@@ -442,14 +471,14 @@ begin
         vid_a(5 downto 0) <= vid_x(8 downto 3);
         chr_a(10 downto 4) <= vid_d(6 downto 0);
         case vid_x(2 downto 0) is
-          when "000" =>   pel <= chr_d(2);
-          when "001" =>   pel <= chr_d(1);
-          when "010" =>   pel <= chr_d(0);
-          when "011" =>   pel <= chr_d(7);
-          when "100" =>   pel <= chr_d(6);
-          when "101" =>   pel <= chr_d(5);
-          when "110" =>   pel <= chr_d(4);
-          when others =>  pel <= chr_d(3);
+          when "000" =>   pel <= vid_d(7) xor chr_d(2);
+          when "001" =>   pel <= vid_d(7) xor chr_d(1);
+          when "010" =>   pel <= vid_d(7) xor chr_d(0);
+          when "011" =>   pel <= vid_d(7) xor chr_d(7);
+          when "100" =>   pel <= vid_d(7) xor chr_d(6);
+          when "101" =>   pel <= vid_d(7) xor chr_d(5);
+          when "110" =>   pel <= vid_d(7) xor chr_d(4);
+          when others =>  pel <= vid_d(7) xor chr_d(3);
         end case;
       end if;
     end process;

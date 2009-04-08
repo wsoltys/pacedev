@@ -200,7 +200,7 @@ begin
   
   BLK_SEND_RECV : block
   
-    type state_t is (IDLE, SOW, WAIT_SETUP, WAIT_BIT);
+    type state_t is (IDLE, SOW, WAIT_SETUP, WAIT_BIT, WAIT_DONE);
     signal state : state_t;
     signal spi_d_o  : std_logic_vector(7 downto 0) := (others => '0');
     
@@ -255,13 +255,18 @@ begin
                 if send_fifo_empty = '0' then
                   state <= SOW;
                 else
-                  spi_ss_s <= '1';
-                  state <= IDLE;
+                  state <= WAIT_DONE;
                 end if;
               else
                 count := count + 1;
                 state <= WAIT_SETUP;
               end if;
+            end if;
+          when WAIT_DONE =>
+            -- wait for rising edge of spi_clk
+            if spi_clk_r = '0' and spi_clk_s = '1' then
+              -- IDLE state will de-assert SSEL
+              state <= IDLE;
             end if;
           when others =>
             state <= IDLE;

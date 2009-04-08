@@ -128,7 +128,7 @@ begin
       flash_i         => flash_i,
       flash_o         => flash_o,
 			sram_i					=> sram_i,
-			sram_o					=> sram_o,
+			sram_o					=> open, --sram_o,
       sdram_i         => sdram_i,
       sdram_o         => sdram_o,
       
@@ -227,19 +227,29 @@ begin
   
   BLK_OSD : block
   
-    signal chr_a    : std_logic_vector(10 downto 0) := (others => '0');
-    signal chr_d    : std_logic_vector(7 downto 0) := (others => '0');
+    signal chr_a        : std_logic_vector(10 downto 0) := (others => '0');
+    signal chr_d        : std_logic_vector(7 downto 0) := (others => '0');
+    
+    signal osd_ctrl_i   : std_logic_vector(15 downto 0) := (others => '0');
+    signal osd_ctrl_o   : std_logic_vector(15 downto 0) := (others => '0');
     
   begin
   
     osd_inst : entity work.OSD
+      generic map
+      (
+        CLK_MHz         => 20
+      )
       port map
       (
         clk             => clk_i(0),
-        clk_20M_ena     => '1',
+        clk_ena         => '1',
         reset           => reset_i,
 
-        osd_keys        => (others => '0'),
+        ps2_kclk_i      => inputs_i.ps2_kclk,
+        ps2_kdat_i      => inputs_i.ps2_kdat,
+        ps2_kclk_o      => open,
+        ps2_kdat_o      => open,
         
         vid_clk         => video_o_s.clk,
         vid_hsync       => video_o_s.hsync,
@@ -247,6 +257,9 @@ begin
         vid_r_i         => video_o_s.rgb.r,
         vid_g_i         => video_o_s.rgb.g,
         vid_b_i         => video_o_s.rgb.b,
+        
+        osd_ctrl_i      => osd_ctrl_i,
+        osd_ctrl_o      => osd_ctrl_o,
         
         chr_a           => chr_a,
         chr_d           => chr_d,
@@ -276,6 +289,17 @@ begin
           q           => chr_d
         );
 
+    -- normally driven in platform
+    gp_o.oe(P2A_EUROSPI_CLK) <= '0';
+    gp_o.oe(P2A_EUROSPI_MISO) <= '1';
+    gp_o.oe(P2A_EUROSPI_MOSI) <= '0';
+    gp_o.oe(P2A_EUROSPI_SS) <= '0';
+
+    osd_ctrl_i <= X"1234";
+    sram_o.a(15 downto 0) <= osd_ctrl_o;
+    sram_o.we <= '0';
+    sram_o.cs <= '0';
+    
   end block BLK_OSD;
   
 	video_o.clk <= video_o_s.clk;

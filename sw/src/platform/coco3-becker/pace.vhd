@@ -143,10 +143,11 @@ architecture SYN of PACE is
   signal ps2_kclk     : std_logic;
   signal ps2_kdat     : std_logic;
   signal video_o_s    : to_VIDEO_t;
-  signal osd_ctrl     : std_logic_vector(15 downto 0);
-  alias OSD_ENABLE    : std_logic is osd_ctrl(osd_ctrl'left);
-  alias OSD_BUTTON    : std_logic_vector(3 downto 0) is osd_ctrl(11 downto 8);
-  alias OSD_SWITCH    : std_logic_vector(7 downto 0) is osd_ctrl(7 downto 0);
+  signal osd_ctrl_i   : std_logic_vector(15 downto 0);
+  signal osd_ctrl_o   : std_logic_vector(15 downto 0);
+  alias OSD_ENABLE    : std_logic is osd_ctrl_o(osd_ctrl_o'left);
+  alias OSD_BUTTON    : std_logic_vector(3 downto 0) is osd_ctrl_o(11 downto 8);
+  alias OSD_SWITCH    : std_logic_vector(7 downto 0) is osd_ctrl_o(7 downto 0);
   
 begin
 
@@ -294,7 +295,7 @@ begin
         SEGMENT_N			=> open,
         
         -- LEDs
-        LED						=> leds_o(7 downto 0),
+        LED						=> osd_ctrl_i(7 downto 0),
         
         -- CoCo Perpherial
         SPEAKER				=> open,
@@ -347,6 +348,8 @@ begin
     
   begin
   
+    osd_ctrl_i(15 downto 8) <= (others => '0');
+    
     osd_inst : entity work.OSD
       port map
       (
@@ -365,8 +368,9 @@ begin
         vid_r_i         => video_o_s.rgb.r,
         vid_g_i         => video_o_s.rgb.g,
         vid_b_i         => video_o_s.rgb.b,
-        
-        osd_ctrl_o      => osd_ctrl,
+
+        osd_ctrl_i      => osd_ctrl_i,
+        osd_ctrl_o      => osd_ctrl_o,
         
         chr_a           => chr_a,
         chr_d           => chr_d,

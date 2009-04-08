@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 8.1
 
 # Pin & Location Assignments
 # ==========================
@@ -348,7 +348,7 @@ set_global_assignment -name STRATIX_DEVICE_IO_STANDARD LVTTL
 
 # SignalTap II Assignments
 # ========================
-set_global_assignment -name ENABLE_SIGNALTAP OFF
+set_global_assignment -name ENABLE_SIGNALTAP ON
 set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
 
 # ----------------------------
@@ -769,3 +769,159 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/io/maple/mapl
 set_global_assignment -name VHDL_FILE ../../../../../src/component/io/gamecube/gamecube_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/p2a/target_top.vhd
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
+set_global_assignment -name SLD_NODE_CREATOR_ID 110 -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_ENTITY_NAME sld_signaltap -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to "PACE:pace_inst|platform:platform_inst|clk_i[0]" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_INFO=805334528" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_POWER_UP_TRIGGER=0" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STORAGE_QUALIFIER_INVERSION_MASK_LENGTH=0" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ATTRIBUTE_MEM_MODE=OFF" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_FLOW_USE_GENERATED=0" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_BITS=11" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_BUFFER_FULL_STOP=1" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_CURRENT_RESOURCE_WIDTH=1" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL=1" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_IN_ENABLED=0" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ADVANCED_TRIGGER_ENTITY=basic,1," -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL_PIPELINE=1" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ENABLE_ADVANCED_TRIGGER=0" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=4096" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=4096" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[0] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:BLK_BIT:spi_d_r[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[1] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:BLK_BIT:spi_d_r[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[2] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:BLK_BIT:spi_d_r[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[3] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:BLK_BIT:spi_d_r[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[4] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:BLK_BIT:spi_d_r[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[5] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:BLK_BIT:spi_d_r[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[6] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:BLK_BIT:spi_d_r[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[7] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:BLK_BIT:spi_d_r[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[8] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:eop_s" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[9] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:eow_s" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[10] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:osd_ctrl_s" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[0] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:BLK_BIT:spi_d_r[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[1] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:BLK_BIT:spi_d_r[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[2] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:BLK_BIT:spi_d_r[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[3] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:BLK_BIT:spi_d_r[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[4] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:BLK_BIT:spi_d_r[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[5] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:BLK_BIT:spi_d_r[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[6] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:BLK_BIT:spi_d_r[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[7] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:BLK_BIT:spi_d_r[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[8] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:eop_s" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[9] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:eow_s" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[10] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:osd_ctrl_s" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[11] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:osd_ctrl_spi_d_o[10]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[12] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:osd_ctrl_spi_d_o[11]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[13] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:osd_ctrl_spi_d_o[12]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[14] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:osd_ctrl_spi_d_o[13]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[15] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:osd_ctrl_spi_d_o[14]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[16] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:osd_ctrl_spi_d_o[15]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[17] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:osd_ctrl_spi_d_o[8]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[18] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:osd_ctrl_spi_d_o[9]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[19] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:osd_video_s" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[20] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:ps2_keys_s" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[21] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:ps2_keys_spi_d_o[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[22] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:ps2_keys_spi_d_o[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[23] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:ps2_keys_spi_d_o[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[24] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:ps2_keys_spi_d_o[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[25] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:ps2_keys_spi_d_o[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[26] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:ps2_keys_spi_d_o[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[27] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:ps2_keys_spi_d_o[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[28] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:ps2_keys_spi_d_o[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[29] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:sop_s" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[30] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:spi_clk_r[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[31] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:spi_d_o[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[32] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:spi_d_o[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[33] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:spi_d_o[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[34] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:spi_d_o[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[35] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:spi_d_o[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[36] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:spi_d_o[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[37] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:spi_d_o[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[38] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:spi_d_o[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[39] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:spi_mosi_r[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[40] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:spi_ss_r[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[41] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|eurospi_miso" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[42] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[43] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[10]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[44] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[11]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[45] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[12]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[46] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[13]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[47] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[14]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[48] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[15]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[49] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[50] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[51] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[52] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[53] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[54] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[55] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[56] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[8]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[57] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[9]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[58] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_keys[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[59] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_keys[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[60] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_keys[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[61] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_keys[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[62] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_keys[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[63] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_keys[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[64] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_keys[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[65] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_keys[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[11] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:osd_ctrl_spi_d_o[10]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[12] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:osd_ctrl_spi_d_o[11]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[13] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:osd_ctrl_spi_d_o[12]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[14] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:osd_ctrl_spi_d_o[13]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[15] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:osd_ctrl_spi_d_o[14]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[16] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:osd_ctrl_spi_d_o[15]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[17] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:osd_ctrl_spi_d_o[8]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[18] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:osd_ctrl_spi_d_o[9]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[19] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:osd_video_s" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[20] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:ps2_keys_s" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[21] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:ps2_keys_spi_d_o[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[22] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:ps2_keys_spi_d_o[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[23] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:ps2_keys_spi_d_o[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[24] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:ps2_keys_spi_d_o[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[25] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:ps2_keys_spi_d_o[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[26] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:ps2_keys_spi_d_o[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[27] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:ps2_keys_spi_d_o[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[28] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:ps2_keys_spi_d_o[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[29] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:sop_s" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[30] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:spi_clk_r[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[31] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:spi_d_o[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[32] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:spi_d_o[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[33] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:spi_d_o[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[34] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:spi_d_o[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[35] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:spi_d_o[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[36] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:spi_d_o[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[37] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:spi_d_o[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[38] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:spi_d_o[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[39] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:spi_mosi_r[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[40] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|\\BLK_EUROSPI:spi_ss_r[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[41] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|eurospi_miso" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[42] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[43] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[10]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[44] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[11]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[45] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[12]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[46] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[13]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[47] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[14]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[48] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[15]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[49] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[50] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[51] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[52] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[53] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[54] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[55] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[56] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[8]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[57] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_ctrl[9]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[58] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_keys[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[59] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_keys[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[60] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_keys[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[61] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_keys[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[62] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_keys[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[63] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_keys[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[64] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_keys[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[65] -to "PACE:pace_inst|OSD:\\BLK_OSD:osd_inst|osd_keys[7]" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=66" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=66" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=224" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=59364" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=65120" -section_id auto_signaltap_0
