@@ -20,12 +20,6 @@
 #define SPI_SSn							    (1<<3)
 #endif
 
-#define FPGACFG_CONFIGn			    (1<<0)
-#define FPGACFG_DCLK				    (1<<1)
-#define FPGACFG_DATA0			      (1<<2)
-#define FPGACFG_CONFDONE		    (1<<3)
-#define FPGACFG_STATUSn			    (1<<4)
-
 #define aSSPRC0   (0<<2)
 #define aSSPCR1   (1<<2)
 #define aSSPDR    (2<<2)
@@ -230,10 +224,58 @@ void handle_menu_sel (alt_u16 &osd_ctrl, int &sel, alt_u8 key)
   return;
 }
 
+#include "../inc/rbfdat.c"
+
+#define FPGACFG_CONFIGn         (1<<0)
+#define FPGACFG_DCLK            (1<<1)
+#define FPGACFG_DATA0           (1<<2)
+#define FPGACFG_CONFDONE        (1<<3)
+#define FPGACFG_STATUSn         (1<<4)
+
+static void ConfigureFPGA (void)
+{
+  alt_u8 *pRbfdat = (alt_u8 *)rbfdat;
+  alt_u8 data = 0;
+  
+  // pull nCONFIG  low for tCFG=2us min.
+  data &= ~FPGACFG_CONFIGn;
+  IOWR_ALTERA_AVALON_PIO_DATA (PIO_FPGACFG_BASE, data);
+  usleep (2);
+  data |= FPGACFG_CONFIGn;
+  IOWR_ALTERA_AVALON_PIO_DATA (PIO_FPGACFG_BASE, data);
+  usleep (2);
+
+  // send the bitstream
+  for (unsigned i=0; i<RBFDAT_BYTES; i++, pRbfdat++)
+  {
+    for (int b=0; b<8; b++)
+    {
+      // DCLK low, data setup
+      data &= ~(FPGACFG_DATA0|FPGACFG_DCLK);
+      if (*pRbfdat & (1<<b))
+        data |= FPGACFG_DATA0;
+      IOWR_ALTERA_AVALON_PIO_DATA (PIO_FPGACFG_BASE, data);
+      //usleep (1);
+      // DCLK high, clock in data
+      data |= FPGACFG_DCLK;
+      IOWR_ALTERA_AVALON_PIO_DATA (PIO_FPGACFG_BASE, data);
+      //usleep (1);
+    }
+  }
+  // DCLK low for the final time
+  data &= ~FPGACFG_DCLK;
+  IOWR_ALTERA_AVALON_PIO_DATA (PIO_FPGACFG_BASE, data);
+
+  // check CONFDONE
+  data = IORD_ALTERA_AVALON_PIO_DATA (PIO_FPGACFG_BASE);
+
+  printf ("CONFDONE|STATUSn = %02X\n", data & (FPGACFG_CONFDONE|FPGACFG_STATUSn));
+}
+
 int main (int argc, char* argv[], char* envp[])
 {
   printf ("PACE LPC2103 Emulator v0.1\n");
-
+  
 	// set DDR for SPI, FPGACFG PIO blocks
 	IOWR_ALTERA_AVALON_PIO_DIRECTION (PIO_SPI_BASE,
 		(ALTERA_AVALON_PIO_DIRECTION_OUTPUT << 3) |
@@ -248,6 +290,11 @@ int main (int argc, char* argv[], char* envp[])
 		(ALTERA_AVALON_PIO_DIRECTION_OUTPUT << 1) |
 		(ALTERA_AVALON_PIO_DIRECTION_OUTPUT << 0));
 
+  // configure FPGA
+  printf ("Programming FPGA...\n");
+  ConfigureFPGA ();
+  printf ("Done!\n");
+  
 #if 0
 	// register and enable the 100Hz timer interrupt handler
   alt_irq_register(TIMER_100HZ_IRQ, 0, timer_100Hz_interrupt);
