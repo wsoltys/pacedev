@@ -34,6 +34,8 @@ entity platform is
     flash_o         : out to_FLASH_t;
 		sram_i					: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
+    sdram_i         : in from_SDRAM_t;
+    sdram_o         : out to_SDRAM_t;
 
     -- graphics
     
@@ -239,7 +241,7 @@ begin
   spi_o <= NULL_TO_SPI;
   ser_o <= NULL_TO_SERIAL;
 	leds_o <= (others => '0');
-  gp_o <= (others => '0');
+  gp_o <= NULL_TO_GP;
 	
   --
   -- COMPONENT INSTANTIATION
