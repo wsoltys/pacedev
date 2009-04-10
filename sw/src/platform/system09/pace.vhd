@@ -28,6 +28,8 @@ entity PACE is
     flash_o         : out to_flash_t;
     sram_i       		: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
+    sdram_i         : in from_SDRAM_t;
+    sdram_o         : out to_SDRAM_t;
 
     -- video
     video_i         : in from_VIDEO_t;
@@ -164,6 +166,6 @@ begin
 	video_o.rgb.b(video_o.rgb.b'left-2 downto 0) <= (others => '0');
 	
   leds_o(leds_o'left downto 1) <= (others => '0');
-  gp_o <= (others => '0');
+  gp_o <= NULL_TO_GP;
   
 end SYN;
