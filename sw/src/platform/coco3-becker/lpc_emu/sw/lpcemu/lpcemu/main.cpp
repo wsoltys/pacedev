@@ -7,6 +7,8 @@
 #include "altera_avalon_timer_regs.h"
 #include "system.h"
 
+#include "ide.h"
+
 #define LPC_RD32(addr)            \
   IORD_32DIRECT (((1<<31)|LPC_SPI_0_BASE), (addr))
 #define LPC_WR32(addr, data)      \
@@ -102,6 +104,16 @@ static void batterylow_interrupt(void *context, alt_u32 id)
   if ((bl_n & (1<<0)) == 0)
     bl_irq = 1;
 #endif
+}
+
+extern "C" void ocide_set_cf_non (alt_u8 flag)
+{
+  IOWR_ALTERA_AVALON_PIO_DATA (PIO_OUT_BASE, (flag & (1<<0)));
+}
+
+extern "C" alt_u8 ocide_get_cf_cd (void)
+{
+  return (IORD_ALTERA_AVALON_PIO_DATA (PIO_IN_BASE) & (1<<0));
 }
 
 void spi_enable (bool enable)
@@ -308,6 +320,28 @@ int main (int argc, char* argv[], char* envp[])
   // clear and then enable the interrupt bit in the PIO control
 	IOWR_ALTERA_AVALON_PIO_EDGE_CAP(USER_POWERFAIL_BL_BASE, 0);
   IOWR_ALTERA_AVALON_PIO_IRQ_MASK (USER_POWERFAIL_BL_BASE, (1<<0));
+#endif
+
+#if 1
+  // test CF
+  if (!init_cf (250000))
+  {
+    printf ("** CF not detected\n");
+    exit (0);
+  }
+  printf (" Compact Flash Media Detected!\n");
+  usleep (4000);
+
+  // enable PIO, IORDY, ensure ping-pong is ON
+  if (init_controller_ex (0x0092, 0, 0, 0) < 0)
+  {
+    printf ("** init_controller_ex() failed!\n" );
+    exit (0);
+  }
+  usleep (4000);
+
+  identify_device (1);
+  usleep (4000);
 #endif
 
   sprintf ((char *)vram, "   --- PACE CoCo3+ OSD Menu (Built: %s %s) ---", __DATE__, __TIME__);
