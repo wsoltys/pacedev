@@ -236,7 +236,12 @@ void handle_menu_sel (alt_u16 &osd_ctrl, int &sel, alt_u8 key)
   return;
 }
 
-#include "../inc/rbfdat.c"
+#if 0
+  #include "../inc/rbfdat.c"
+#else
+  alt_u8 rbfdat[] = { 0 };
+  #define RBFDAT_BYTES  1
+#endif
 
 #define FPGACFG_CONFIGn         (1<<0)
 #define FPGACFG_DCLK            (1<<1)
@@ -302,10 +307,12 @@ int main (int argc, char* argv[], char* envp[])
 		(ALTERA_AVALON_PIO_DIRECTION_OUTPUT << 1) |
 		(ALTERA_AVALON_PIO_DIRECTION_OUTPUT << 0));
 
+#if 0
   // configure FPGA
   printf ("Programming FPGA...\n");
   ConfigureFPGA ();
   printf ("Done!\n");
+#endif
   
 #if 0
 	// register and enable the 100Hz timer interrupt handler
@@ -327,7 +334,7 @@ int main (int argc, char* argv[], char* envp[])
   if (!init_cf (250000))
   {
     printf ("** CF not detected\n");
-    exit (0);
+    while (1);
   }
   printf (" Compact Flash Media Detected!\n");
   usleep (4000);
@@ -336,12 +343,13 @@ int main (int argc, char* argv[], char* envp[])
   if (init_controller_ex (0x0092, 0, 0, 0) < 0)
   {
     printf ("** init_controller_ex() failed!\n" );
-    exit (0);
+    while (1);
   }
   usleep (4000);
 
   identify_device (1);
   usleep (4000);
+  
 #endif
 
   sprintf ((char *)vram, "   --- PACE CoCo3+ OSD Menu (Built: %s %s) ---", __DATE__, __TIME__);

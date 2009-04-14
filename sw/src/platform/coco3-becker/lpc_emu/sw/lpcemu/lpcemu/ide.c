@@ -23,7 +23,7 @@
 
 #include "ide.h"
 
-//#define VERBOSE
+#define VERBOSE
 #ifdef VERBOSE
   #define MORE_VERBOSE
 #endif
@@ -108,11 +108,6 @@
   IORD_32DIRECT (((1<<31)|AVALON_ATAHOST_TOP_0_S1_BASE), (addr))
 #define ATA_WR32(addr, data)      \
   IOWR_32DIRECT (((1<<31)|AVALON_ATAHOST_TOP_0_S1_BASE), (addr), (data))
-
-#define MEB_RD32(addr)            \
-  IORD_32DIRECT (MEB_IF_BASE, (addr))
-#define MEB_WR32(addr, data)      \
-  IOWR_32DIRECT (MEB_IF_BASE, (addr), (data))
 
 alt_u32 wait_on_busy (void)
 {
@@ -333,8 +328,10 @@ int init_controller_ex (alt_u32 ctrl, int slow_pio_mode, int fast_pio_mode, int 
   wait_for_device_ready ();
   
   status = ATA_RD32 (ATA_REG_STATUS);
-  //DISPLAY ("init_controller() - ATA_REG_STATUS = %p" EOL, (void *)status);
-
+  #ifdef VERBOSE
+    DISPLAY ("init_controller() - ATA_REG_STATUS = %p" EOL, (void *)status);
+  #endif
+  
   return (OK);
 }
 
