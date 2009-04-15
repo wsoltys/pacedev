@@ -711,7 +711,7 @@ SYSTEM NIOS_SYSTEM
             }
             Entry cpu/jtag_debug_module
             {
-               address = "0x09001000";
+               address = "0x09000800";
                span = "0x00000800";
                is_bridge = "0";
             }
@@ -855,14 +855,14 @@ SYSTEM NIOS_SYSTEM
             MASTERED_BY cpu/instruction_master
             {
                priority = "1";
-               Offset_Address = "0x09001000";
+               Offset_Address = "0x09000800";
             }
             MASTERED_BY cpu/data_master
             {
                priority = "1";
-               Offset_Address = "0x09001000";
+               Offset_Address = "0x09000800";
             }
-            Base_Address = "0x09001000";
+            Base_Address = "0x09000800";
             Is_Readable = "1";
             Is_Writeable = "1";
             Uses_Tri_State_Data_Bus = "0";
@@ -1076,7 +1076,7 @@ SYSTEM NIOS_SYSTEM
             }
             Entry cpu/jtag_debug_module
             {
-               address = "0x09001000";
+               address = "0x09000800";
                span = "0x00000800";
                is_bridge = "0";
             }
@@ -1088,62 +1088,74 @@ SYSTEM NIOS_SYSTEM
             }
             Entry sys_clock_timer/s1
             {
-               address = "0x08000040";
+               address = "0x08000000";
                span = "0x00000020";
                is_bridge = "0";
             }
             Entry jtag_uart/avalon_jtag_slave
             {
-               address = "0x080000d0";
+               address = "0x08000090";
                span = "0x00000008";
                is_bridge = "0";
             }
             Entry sysid/control_slave
             {
-               address = "0x080000d8";
+               address = "0x08000098";
                span = "0x00000008";
                is_bridge = "0";
             }
             Entry PIO_OUT/s1
             {
-               address = "0x08000080";
+               address = "0x08000040";
                span = "0x00000010";
                is_bridge = "0";
             }
             Entry PIO_IN/s1
             {
-               address = "0x08000090";
+               address = "0x08000050";
                span = "0x00000010";
                is_bridge = "0";
             }
             Entry PIO_ISR/s1
             {
-               address = "0x080000a0";
+               address = "0x08000060";
                span = "0x00000010";
                is_bridge = "0";
             }
             Entry timer_100Hz/s1
             {
-               address = "0x08000060";
+               address = "0x08000020";
                span = "0x00000020";
                is_bridge = "0";
             }
             Entry pio_fpgacfg/s1
             {
-               address = "0x080000b0";
+               address = "0x08000070";
                span = "0x00000010";
                is_bridge = "0";
             }
             Entry pio_spi/s1
             {
-               address = "0x080000c0";
+               address = "0x08000080";
                span = "0x00000010";
                is_bridge = "0";
             }
             Entry lpc_spi_0/s1
             {
-               address = "0x00000000";
+               address = "0x09001080";
                span = "0x00000040";
+               is_bridge = "0";
+            }
+            Entry avalon_atahost_top_0/s1
+            {
+               address = "0x09001000";
+               span = "0x00000080";
+               is_bridge = "0";
+            }
+            Entry avalon_atahost_top_0/s2
+            {
+               address = "0x090010c0";
+               span = "0x00000004";
                is_bridge = "0";
             }
          }
@@ -2102,9 +2114,9 @@ SYSTEM NIOS_SYSTEM
             MASTERED_BY pipeline_bridge/m1
             {
                priority = "1";
-               Offset_Address = "0x00000040";
+               Offset_Address = "0x00000000";
             }
-            Base_Address = "0x08000040";
+            Base_Address = "0x08000000";
             Address_Group = "0";
          }
       }
@@ -2290,9 +2302,9 @@ SYSTEM NIOS_SYSTEM
             MASTERED_BY pipeline_bridge/m1
             {
                priority = "1";
-               Offset_Address = "0x000000d0";
+               Offset_Address = "0x00000090";
             }
-            Base_Address = "0x080000d0";
+            Base_Address = "0x08000090";
             Address_Group = "0";
          }
       }
@@ -2474,9 +2486,9 @@ SYSTEM NIOS_SYSTEM
             MASTERED_BY pipeline_bridge/m1
             {
                priority = "1";
-               Offset_Address = "0x000000d8";
+               Offset_Address = "0x00000098";
             }
-            Base_Address = "0x080000d8";
+            Base_Address = "0x08000098";
             Has_IRQ = "0";
             Address_Group = "0";
          }
@@ -2494,7 +2506,7 @@ SYSTEM NIOS_SYSTEM
          Has_Clock = "1";
          View 
          {
-            Settings_Summary = "System ID (at last Generate):<br> <b>48AE7D2D</b>    (unique ID tag) <br> <b>49D96ED6</b> (timestamp: Mon Apr 6, 2009 @12:54 AM)";
+            Settings_Summary = "System ID (at last Generate):<br> <b>54F184FD</b>    (unique ID tag) <br> <b>49E3FCF7</b> (timestamp: Tue Apr 14, 2009 @1:03 PM)";
             MESSAGES 
             {
             }
@@ -2502,8 +2514,8 @@ SYSTEM NIOS_SYSTEM
       }
       WIZARD_SCRIPT_ARGUMENTS 
       {
-         id = "1219394861u";
-         timestamp = "1238986454u";
+         id = "1425114365u";
+         timestamp = "1239678199u";
          regenerate_values = "0";
          MAKE 
          {
@@ -2512,7 +2524,7 @@ SYSTEM NIOS_SYSTEM
                verifysysid 
                {
                   All_Depends_On = "0";
-                  Command = "nios2-download $(JTAG_CABLE)                                --sidp=0x080000d8 --id=1219394861 --timestamp=1238986454";
+                  Command = "nios2-download $(JTAG_CABLE)                                --sidp=0x08000098 --id=1425114365 --timestamp=1239678199";
                   Is_Phony = "1";
                   Target_File = "dummy_verifysysid_file";
                }
@@ -2618,9 +2630,9 @@ SYSTEM NIOS_SYSTEM
             MASTERED_BY pipeline_bridge/m1
             {
                priority = "1";
-               Offset_Address = "0x00000080";
+               Offset_Address = "0x00000040";
             }
-            Base_Address = "0x08000080";
+            Base_Address = "0x08000040";
             Has_IRQ = "0";
             Address_Group = "0";
             Is_Readable = "0";
@@ -2760,9 +2772,9 @@ SYSTEM NIOS_SYSTEM
             MASTERED_BY pipeline_bridge/m1
             {
                priority = "1";
-               Offset_Address = "0x00000090";
+               Offset_Address = "0x00000050";
             }
-            Base_Address = "0x08000090";
+            Base_Address = "0x08000050";
             Has_IRQ = "0";
             Address_Group = "0";
             Is_Readable = "1";
@@ -2935,9 +2947,9 @@ SYSTEM NIOS_SYSTEM
             MASTERED_BY pipeline_bridge/m1
             {
                priority = "1";
-               Offset_Address = "0x000000a0";
+               Offset_Address = "0x00000060";
             }
-            Base_Address = "0x080000a0";
+            Base_Address = "0x08000060";
             Address_Group = "0";
             Is_Readable = "1";
             Is_Writable = "1";
@@ -3109,9 +3121,9 @@ SYSTEM NIOS_SYSTEM
             MASTERED_BY pipeline_bridge/m1
             {
                priority = "1";
-               Offset_Address = "0x00000060";
+               Offset_Address = "0x00000020";
             }
-            Base_Address = "0x08000060";
+            Base_Address = "0x08000020";
             Address_Group = "0";
          }
       }
@@ -3501,55 +3513,55 @@ SYSTEM NIOS_SYSTEM
          {
             Entry sys_clock_timer/s1
             {
-               address = "0x00000040";
+               address = "0x00000000";
                span = "0x00000020";
                is_bridge = "0";
             }
             Entry jtag_uart/avalon_jtag_slave
             {
-               address = "0x000000d0";
+               address = "0x00000090";
                span = "0x00000008";
                is_bridge = "0";
             }
             Entry sysid/control_slave
             {
-               address = "0x000000d8";
+               address = "0x00000098";
                span = "0x00000008";
                is_bridge = "0";
             }
             Entry PIO_OUT/s1
             {
-               address = "0x00000080";
+               address = "0x00000040";
                span = "0x00000010";
                is_bridge = "0";
             }
             Entry PIO_IN/s1
             {
-               address = "0x00000090";
+               address = "0x00000050";
                span = "0x00000010";
                is_bridge = "0";
             }
             Entry PIO_ISR/s1
             {
-               address = "0x000000a0";
+               address = "0x00000060";
                span = "0x00000010";
                is_bridge = "0";
             }
             Entry timer_100Hz/s1
             {
-               address = "0x00000060";
+               address = "0x00000020";
                span = "0x00000020";
                is_bridge = "0";
             }
             Entry pio_fpgacfg/s1
             {
-               address = "0x000000b0";
+               address = "0x00000070";
                span = "0x00000010";
                is_bridge = "0";
             }
             Entry pio_spi/s1
             {
-               address = "0x000000c0";
+               address = "0x00000080";
                span = "0x00000010";
                is_bridge = "0";
             }
@@ -3678,9 +3690,9 @@ SYSTEM NIOS_SYSTEM
             MASTERED_BY pipeline_bridge/m1
             {
                priority = "1";
-               Offset_Address = "0x000000b0";
+               Offset_Address = "0x00000070";
             }
-            Base_Address = "0x080000b0";
+            Base_Address = "0x08000070";
             Has_IRQ = "0";
             Address_Group = "0";
             Is_Readable = "1";
@@ -3842,9 +3854,9 @@ SYSTEM NIOS_SYSTEM
             MASTERED_BY pipeline_bridge/m1
             {
                priority = "1";
-               Offset_Address = "0x000000c0";
+               Offset_Address = "0x00000080";
             }
-            Base_Address = "0x080000c0";
+            Base_Address = "0x08000080";
             Has_IRQ = "0";
             Address_Group = "0";
             Is_Readable = "1";
@@ -4033,9 +4045,9 @@ SYSTEM NIOS_SYSTEM
             MASTERED_BY cpu/data_master
             {
                priority = "1";
-               Offset_Address = "0x00000000";
+               Offset_Address = "0x09001080";
             }
-            Base_Address = "0x00000000";
+            Base_Address = "0x09001080";
             Address_Group = "0";
          }
       }
@@ -4092,6 +4104,362 @@ SYSTEM NIOS_SYSTEM
       HDL_INFO 
       {
          Simulation_HDL_Files = "__PROJECT_DIRECTORY__/lpc_spi_0.vhd,E:/markm/pace/pacedev.net/sw/src/platform/coco3-becker/lpc_emu/ip/lpc_spi/lpc_spi.vhd";
+      }
+      WIZARD_SCRIPT_ARGUMENTS 
+      {
+         terminated_ports 
+         {
+         }
+      }
+   }
+   MODULE avalon_atahost_top_0
+   {
+      SLAVE s1
+      {
+         PORT_WIRING 
+         {
+            PORT csi_clockreset_clk
+            {
+               type = "clk";
+               width = "1";
+               direction = "input";
+               Is_Enabled = "1";
+            }
+            PORT csi_clockreset_reset
+            {
+               type = "reset";
+               width = "1";
+               direction = "input";
+               Is_Enabled = "1";
+            }
+            PORT ins_irq1_irq
+            {
+               type = "irq";
+               width = "1";
+               direction = "output";
+               Is_Enabled = "1";
+            }
+            PORT avs_s1_chipselect
+            {
+               type = "chipselect";
+               width = "1";
+               direction = "input";
+               Is_Enabled = "1";
+            }
+            PORT avs_s1_waitrequest_n
+            {
+               type = "waitrequest_n";
+               width = "1";
+               direction = "output";
+               Is_Enabled = "1";
+            }
+            PORT avs_s1_address
+            {
+               type = "address";
+               width = "5";
+               direction = "input";
+               Is_Enabled = "1";
+            }
+            PORT avs_s1_writedata
+            {
+               type = "writedata";
+               width = "32";
+               direction = "input";
+               Is_Enabled = "1";
+            }
+            PORT avs_s1_readdata
+            {
+               type = "readdata";
+               width = "32";
+               direction = "output";
+               Is_Enabled = "1";
+            }
+            PORT avs_s1_byteenable
+            {
+               type = "byteenable";
+               width = "4";
+               direction = "input";
+               Is_Enabled = "1";
+            }
+            PORT avs_s1_write
+            {
+               type = "write";
+               width = "1";
+               direction = "input";
+               Is_Enabled = "1";
+            }
+         }
+         SYSTEM_BUILDER_INFO 
+         {
+            Has_IRQ = "1";
+            Bus_Type = "avalon";
+            Read_Wait_States = "peripheral_controlled";
+            Write_Wait_States = "peripheral_controlled";
+            Hold_Time = "0cycles";
+            Setup_Time = "0cycles";
+            Is_Printable_Device = "0";
+            Address_Alignment = "dynamic";
+            Well_Behaved_Waitrequest = "0";
+            Is_Nonvolatile_Storage = "0";
+            Address_Span = "128";
+            Read_Latency = "0";
+            Is_Memory_Device = "0";
+            Maximum_Pending_Read_Transactions = "0";
+            Minimum_Uninterrupted_Run_Length = "1";
+            Accepts_Internal_Connections = "1";
+            Write_Latency = "0";
+            Is_Flash = "0";
+            Data_Width = "32";
+            Address_Width = "5";
+            Maximum_Burst_Size = "1";
+            Register_Incoming_Signals = "0";
+            Register_Outgoing_Signals = "0";
+            Interleave_Bursts = "0";
+            Linewrap_Bursts = "0";
+            Burst_On_Burst_Boundaries_Only = "0";
+            Always_Burst_Max_Burst = "0";
+            Is_Big_Endian = "0";
+            Is_Enabled = "1";
+            IRQ_MASTER cpu/data_master
+            {
+               IRQ_Number = "1";
+            }
+            MASTERED_BY cpu/data_master
+            {
+               priority = "1";
+               Offset_Address = "0x09001000";
+            }
+            Base_Address = "0x09001000";
+            Address_Group = "0";
+         }
+      }
+      PORT_WIRING 
+      {
+         PORT coe_ata_resetn
+         {
+            type = "export";
+            width = "1";
+            direction = "output";
+            Is_Enabled = "1";
+         }
+         PORT coe_ata_dd_i
+         {
+            type = "export";
+            width = "16";
+            direction = "input";
+            Is_Enabled = "1";
+         }
+         PORT coe_ata_dd_o
+         {
+            type = "export";
+            width = "16";
+            direction = "output";
+            Is_Enabled = "1";
+         }
+         PORT coe_ata_dd_oe
+         {
+            type = "export";
+            width = "1";
+            direction = "output";
+            Is_Enabled = "1";
+         }
+         PORT coe_ata_da
+         {
+            type = "export";
+            width = "3";
+            direction = "output";
+            Is_Enabled = "1";
+         }
+         PORT coe_ata_cs0n
+         {
+            type = "export";
+            width = "1";
+            direction = "output";
+            Is_Enabled = "1";
+         }
+         PORT coe_ata_cs1n
+         {
+            type = "export";
+            width = "1";
+            direction = "output";
+            Is_Enabled = "1";
+         }
+         PORT coe_ata_diorn
+         {
+            type = "export";
+            width = "1";
+            direction = "output";
+            Is_Enabled = "1";
+         }
+         PORT coe_ata_diown
+         {
+            type = "export";
+            width = "1";
+            direction = "output";
+            Is_Enabled = "1";
+         }
+         PORT coe_ata_iordy
+         {
+            type = "export";
+            width = "1";
+            direction = "input";
+            Is_Enabled = "1";
+         }
+         PORT coe_ata_intrq
+         {
+            type = "export";
+            width = "1";
+            direction = "input";
+            Is_Enabled = "1";
+         }
+         PORT coe_ata_dmarq
+         {
+            type = "export";
+            width = "1";
+            direction = "input";
+            Is_Enabled = "1";
+         }
+         PORT coe_ata_dmackn
+         {
+            type = "export";
+            width = "1";
+            direction = "output";
+            Is_Enabled = "1";
+         }
+         PORT coe_dma_req
+         {
+            type = "export";
+            width = "1";
+            direction = "output";
+            Is_Enabled = "1";
+         }
+         PORT coe_dma_done
+         {
+            type = "export";
+            width = "1";
+            direction = "input";
+            Is_Enabled = "1";
+         }
+         PORT coe_arst_arst
+         {
+            type = "export";
+            width = "1";
+            direction = "input";
+            Is_Enabled = "1";
+         }
+      }
+      SLAVE s2
+      {
+         SYSTEM_BUILDER_INFO 
+         {
+            Bus_Type = "avalon";
+            Read_Wait_States = "peripheral_controlled";
+            Write_Wait_States = "peripheral_controlled";
+            Hold_Time = "0cycles";
+            Setup_Time = "0cycles";
+            Is_Printable_Device = "0";
+            Address_Alignment = "dynamic";
+            Well_Behaved_Waitrequest = "0";
+            Is_Nonvolatile_Storage = "0";
+            Address_Span = "4";
+            Read_Latency = "0";
+            Is_Memory_Device = "0";
+            Maximum_Pending_Read_Transactions = "0";
+            Minimum_Uninterrupted_Run_Length = "1";
+            Accepts_Internal_Connections = "1";
+            Write_Latency = "0";
+            Is_Flash = "0";
+            Data_Width = "32";
+            Address_Width = "0";
+            Maximum_Burst_Size = "1";
+            Register_Incoming_Signals = "0";
+            Register_Outgoing_Signals = "0";
+            Interleave_Bursts = "0";
+            Linewrap_Bursts = "0";
+            Burst_On_Burst_Boundaries_Only = "0";
+            Always_Burst_Max_Burst = "0";
+            Is_Big_Endian = "0";
+            Is_Enabled = "1";
+            MASTERED_BY cpu/data_master
+            {
+               priority = "1";
+               Offset_Address = "0x090010c0";
+            }
+            Base_Address = "0x090010c0";
+            Address_Group = "1";
+            IRQ_MASTER cpu/data_master
+            {
+               IRQ_Number = "NC";
+            }
+         }
+         PORT_WIRING 
+         {
+            PORT avs_s2_chipselect
+            {
+               type = "chipselect";
+               width = "1";
+               direction = "input";
+               Is_Enabled = "1";
+            }
+            PORT avs_s2_waitrequest_n
+            {
+               type = "waitrequest_n";
+               width = "1";
+               direction = "output";
+               Is_Enabled = "1";
+            }
+            PORT avs_s2_writedata
+            {
+               type = "writedata";
+               width = "32";
+               direction = "input";
+               Is_Enabled = "1";
+            }
+            PORT avs_s2_readdata
+            {
+               type = "readdata";
+               width = "32";
+               direction = "output";
+               Is_Enabled = "1";
+            }
+            PORT avs_s2_byteenable
+            {
+               type = "byteenable";
+               width = "4";
+               direction = "input";
+               Is_Enabled = "1";
+            }
+            PORT avs_s2_write
+            {
+               type = "write";
+               width = "1";
+               direction = "input";
+               Is_Enabled = "1";
+            }
+         }
+      }
+      class = "no_legacy_module";
+      class_version = "7.08";
+      gtf_class_name = "avalon_atahost_top";
+      gtf_class_version = "1.0";
+      SYSTEM_BUILDER_INFO 
+      {
+         Do_Not_Generate = "1";
+         Instantiate_In_System_Module = "1";
+         Is_Bridge = "0";
+         Is_Enabled = "1";
+         Clock_Source = "clk";
+         Has_Clock = "1";
+         View 
+         {
+            MESSAGES 
+            {
+            }
+         }
+      }
+      HDL_INFO 
+      {
+         Simulation_HDL_Files = "__PROJECT_DIRECTORY__/avalon_atahost_top_0.vhd,E:/markm/pace/pacedev.net/sw/src/platform/coco3-becker/lpc_emu/ip/ocide3/ATAHOST_CONTROLLER.vhd,E:/markm/pace/pacedev.net/sw/src/platform/coco3-becker/lpc_emu/ip/ocide3/ATAHOST_DMA.vhd,E:/markm/pace/pacedev.net/sw/src/platform/coco3-becker/lpc_emu/ip/ocide3/ATAHOST_FIFO_RX.vhd,E:/markm/pace/pacedev.net/sw/src/platform/coco3-becker/lpc_emu/ip/ocide3/ATAHOST_FIFO_TX.vhd,E:/markm/pace/pacedev.net/sw/src/platform/coco3-becker/lpc_emu/ip/ocide3/atahost_pio_actrl.vhd,E:/markm/pace/pacedev.net/sw/src/platform/coco3-becker/lpc_emu/ip/ocide3/atahost_pio_controller.vhd,E:/markm/pace/pacedev.net/sw/src/platform/coco3-becker/lpc_emu/ip/ocide3/atahost_pio_tctrl.vhd,E:/markm/pace/pacedev.net/sw/src/platform/coco3-becker/lpc_emu/ip/ocide3/atahost_reg_buf.vhd,E:/markm/pace/pacedev.net/sw/src/platform/coco3-becker/lpc_emu/ip/ocide3/atahost_top.vhd,E:/markm/pace/pacedev.net/sw/src/platform/coco3-becker/lpc_emu/ip/ocide3/atahost_wb_slave.vhd,E:/markm/pace/pacedev.net/sw/src/platform/coco3-becker/lpc_emu/ip/ocide3/avalon_atahost_top.vhd,E:/markm/pace/pacedev.net/sw/src/platform/coco3-becker/lpc_emu/ip/ocide3/ro_cnt.vhd,E:/markm/pace/pacedev.net/sw/src/platform/coco3-becker/lpc_emu/ip/ocide3/ud_cnt.vhd";
       }
       WIZARD_SCRIPT_ARGUMENTS 
       {

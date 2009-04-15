@@ -170,8 +170,8 @@ begin
 		(
 			-- WISHBONE SYSCON signals
 			wb_clk_i 				=> csi_clockreset_clk,
-			arst_i   				=> csi_clockreset_reset,
-			wb_rst_i 				=> coe_arst_arst,
+			wb_rst_i 				=> csi_clockreset_reset,
+			arst_i   				=> coe_arst_arst,
 	
 			-- WISHBONE SLAVE registers and PIO signals
 			wb_cyc_i 				=> avs_s1_chipselect,

@@ -476,7 +476,7 @@ begin
 		mac_addr <= 'Z';
 	end generate GEN_NO_SSN;
 	
-	GEN_NO_CF : if true generate
+	GEN_NO_CF : if false generate
 		a_cf <= (others => 'Z');
 		d_cf <= (others => 'Z');
 		nce_cf <= (others => 'Z');
@@ -621,6 +621,13 @@ begin
     signal fpgacfg_o        : std_logic_vector(7 downto 0);
     signal eurospi_i        : std_logic_vector(7 downto 0);
     signal eurospi_o        : std_logic_vector(7 downto 0);
+
+    signal nios_pio_i       : std_logic_vector(7 downto 0);
+    signal nios_pio_o       : std_logic_vector(7 downto 0);
+    
+    signal d_cf_i           : std_logic_vector(15 downto 0);
+    signal d_cf_o           : std_logic_vector(15 downto 0);
+    signal d_cf_oe          : std_logic;
     
   begin
   
@@ -643,13 +650,31 @@ begin
         reset_n                         => reset_n,
 
         -- the_PIO_IN
-        in_port_to_the_PIO_IN           => (others => '0'),
+        in_port_to_the_PIO_IN           => nios_pio_i,
 
         -- the_PIO_ISR
         in_port_to_the_PIO_ISR          => (others => '0'),
 
         -- the_PIO_OUT
-        out_port_from_the_PIO_OUT       => open,
+        out_port_from_the_PIO_OUT       => nios_pio_o,
+
+        -- the_avalon_atahost_top_0
+        coe_arst_arst_to_the_avalon_atahost_top_0     => '1',
+        coe_ata_cs0n_from_the_avalon_atahost_top_0    => nce_cf(1),
+        coe_ata_cs1n_from_the_avalon_atahost_top_0    => nce_cf(2),
+        coe_ata_da_from_the_avalon_atahost_top_0      => a_cf,
+        coe_ata_dd_i_to_the_avalon_atahost_top_0      => d_cf_i,
+        coe_ata_dd_o_from_the_avalon_atahost_top_0    => d_cf_o,
+        coe_ata_dd_oe_from_the_avalon_atahost_top_0   => d_cf_oe,
+        coe_ata_diorn_from_the_avalon_atahost_top_0   => nior0_cf,
+        coe_ata_diown_from_the_avalon_atahost_top_0   => niow0_cf,
+        coe_ata_dmackn_from_the_avalon_atahost_top_0  => ndmack_cf,
+        coe_ata_dmarq_to_the_avalon_atahost_top_0     => dmarq_cf,
+        coe_ata_intrq_to_the_avalon_atahost_top_0     => rdy_irq_cf,
+        coe_ata_iordy_to_the_avalon_atahost_top_0     => iordy0_cf,
+        coe_ata_resetn_from_the_avalon_atahost_top_0  => reset_cf,
+        coe_dma_done_to_the_avalon_atahost_top_0      => '0',
+        coe_dma_req_from_the_avalon_atahost_top_0     => open,
 
         -- the_lpc_spi_0
         coe_spi_clk_from_the_lpc_spi_0  => eurospi_o(0),
@@ -679,7 +704,7 @@ begin
 
     -- sdram clock
     clk_dr2 <= nios_sdram_clk;
-    
+
     -- eurospi mappings
     eurospi_i(0) <= gp_i(P2A_EUROSPI_CLK);
     gp_o.d(P2A_EUROSPI_CLK) <= eurospi_o(0);
@@ -700,6 +725,14 @@ begin
     fpga_data0 <= fpgacfg_o(2);
     fpgacfg_i(3) <= fpga_confdone;
     fpgacfg_i(4) <= fpga_status_n;
+
+    -- compact flash presence-detect
+    nios_pio_i <= "0000000" & cd_cf;
+    -- compact flash power
+    non_cf <= nios_pio_o(0);
+    -- compact flash data bus drivers
+    d_cf_i <= d_cf;
+    d_cf <= d_cf_o when d_cf_oe = '1' else (others => 'Z');
     
   end block BLK_NIOS;
   

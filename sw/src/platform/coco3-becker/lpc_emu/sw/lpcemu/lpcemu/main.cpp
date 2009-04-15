@@ -8,6 +8,12 @@
 #include "system.h"
 
 #include "ide.h"
+extern "C"
+{
+#include "integer.h"
+#include "ff.h"
+#include "diskio.h"
+};
 
 #define LPC_RD32(addr)            \
   IORD_32DIRECT (((1<<31)|LPC_SPI_0_BASE), (addr))
@@ -82,6 +88,9 @@
 #define OSD_KEY_ESC             (1<<0)
 
 #define OSD_NAV_KEY_MASK        (OSD_KEY_RIGHT|OSD_KEY_LEFT|OSD_KEY_DOWN|OSD_KEY_UP)
+
+#define RBF_FILENAME            "COCO3.RBF"
+//#define RBF_FILENAME            "INVADERS.RBF"
 
 static unsigned char vram[1024];
 
@@ -238,9 +247,6 @@ void handle_menu_sel (alt_u16 &osd_ctrl, int &sel, alt_u8 key)
 
 #if 0
   #include "../inc/rbfdat.c"
-#else
-  alt_u8 rbfdat[] = { 0 };
-  #define RBFDAT_BYTES  1
 #endif
 
 #define FPGACFG_CONFIGn         (1<<0)
@@ -249,9 +255,8 @@ void handle_menu_sel (alt_u16 &osd_ctrl, int &sel, alt_u8 key)
 #define FPGACFG_CONFDONE        (1<<3)
 #define FPGACFG_STATUSn         (1<<4)
 
-static void ConfigureFPGA (void)
+static void ConfigureFPGA (alt_u8 *pRbfdat, alt_u32 bytes)
 {
-  alt_u8 *pRbfdat = (alt_u8 *)rbfdat;
   alt_u8 data = 0;
   
   // pull nCONFIG  low for tCFG=2us min.
@@ -263,7 +268,7 @@ static void ConfigureFPGA (void)
   usleep (2);
 
   // send the bitstream
-  for (unsigned i=0; i<RBFDAT_BYTES; i++, pRbfdat++)
+  for (unsigned i=0; i<bytes; i++, pRbfdat++)
   {
     for (int b=0; b<8; b++)
     {
@@ -289,6 +294,39 @@ static void ConfigureFPGA (void)
   printf ("CONFDONE|STATUSn = %02X\n", data & (FPGACFG_CONFDONE|FPGACFG_STATUSn));
 }
 
+FRESULT load_file (char *fname, alt_u8 *mem)
+{
+  FIL       fil;
+  FRESULT   fresult;
+  WORD      BytesRead;
+  
+  printf ("Loading \"%s\"...\n", fname);
+
+  if ((fresult = f_open(&fil, fname, FA_READ|FA_OPEN_EXISTING)) != FR_OK)
+  {
+    printf ("f_open(%s) failed with %d\n", fname, fresult);
+    return (fresult);
+  }
+
+  while (1)
+  {
+    BYTE buffer[1024];
+    int i;
+
+    fresult = f_read (&fil, (void *)buffer, 1024, &BytesRead);
+    if (fresult != FR_OK)
+      return (fresult);
+    if (BytesRead == 0)
+      break;
+    for (i=0; i<BytesRead; i++)
+      *(mem++) = buffer[i];
+  }
+
+  printf ("Done!\n");
+  
+  return (f_close (&fil));
+}
+
 int main (int argc, char* argv[], char* envp[])
 {
   printf ("PACE LPC2103 Emulator v0.1\n");
@@ -310,7 +348,7 @@ int main (int argc, char* argv[], char* envp[])
 #if 0
   // configure FPGA
   printf ("Programming FPGA...\n");
-  ConfigureFPGA ();
+  ConfigureFPGA (rbfdat, RBFDAT_BYTES);
   printf ("Done!\n");
 #endif
   
@@ -329,7 +367,7 @@ int main (int argc, char* argv[], char* envp[])
   IOWR_ALTERA_AVALON_PIO_IRQ_MASK (USER_POWERFAIL_BL_BASE, (1<<0));
 #endif
 
-#if 1
+#if 0
   // test CF
   if (!init_cf (250000))
   {
@@ -351,6 +389,47 @@ int main (int argc, char* argv[], char* envp[])
   usleep (4000);
   
 #endif
+
+  // file-system code
+  while (1)
+  {
+    static FATFS  fatfs;
+    DIR           dir;
+    FILINFO       finfo;
+    FRESULT       fresult;
+
+    // enable FatFs module
+    if (f_mount (0, &fatfs) != FR_OK)
+    {
+      printf ("f_mount(0) failed!\n");
+      break;
+    }
+
+#if 0
+    if ((fresult = f_opendir (&dir, "/")) != FR_OK)
+    {
+      printf ("f_opendir() returned %d\n", fresult);
+      break;
+    }
+
+    while (f_readdir (&dir, &finfo) == FR_OK && finfo.fname[0])
+    {
+      printf ("%s, %ld\n", finfo.fname, finfo.fsize);
+    }
+#endif
+    if (f_stat (RBF_FILENAME, &finfo) != FR_OK)
+      break;
+    printf ("%s, %ld\n", finfo.fname, finfo.fsize);
+
+    alt_u8 *rbfdat = (alt_u8 *)malloc (finfo.fsize);
+    load_file (RBF_FILENAME, rbfdat);
+
+    printf ("Programming FPGA...\n");
+    ConfigureFPGA (rbfdat, finfo.fsize);
+    printf ("Done!\n");
+
+    break;
+  }
 
   sprintf ((char *)vram, "   --- PACE CoCo3+ OSD Menu (Built: %s %s) ---", __DATE__, __TIME__);
   int l = strlen((char *)vram);
