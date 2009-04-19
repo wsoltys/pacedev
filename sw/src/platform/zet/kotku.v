@@ -67,6 +67,9 @@ module kotku (
     output       tft_lcd_hsync_,
     output       tft_lcd_vsync_,
 
+    input         uart_rxd_,
+    output        uart_txd_,
+    
     // PS2 signals
     inout         ps2_clk_,
     inout         ps2_data_
@@ -129,6 +132,13 @@ module kotku (
   wire        vdu_io_arena;
   wire        vdu_arena;
 
+  wire        com1_stb;
+  wire [ 7:0] com1_dat_o;
+  wire        com1_ack_o;
+  wire        com1_irq_o;
+  wire        com1_io_arena;
+  wire        com1_arena;
+  
   wire [ 7:0] keyb_dat_o;
   wire        keyb_io_arena;
   wire        keyb_io_status;
@@ -282,6 +292,35 @@ module kotku (
     .vert_sync   (tft_lcd_vsync_)
   );
 
+  com1 uart_top	(
+    .wb_clk_i (clk), 
+    // Wishbone signals
+    .wb_rst_i (rst), 
+    .wb_adr_i (adr[3:1]), 
+    .wb_dat_i (dat_i[7:0]), 
+    .wb_dat_o (com1_dat_o), 
+    .wb_we_i  (we), 
+    .wb_stb_i (com1_stb), 
+    .wb_cyc_i (cyc), 
+    .wb_ack_o (com1_ack_o), 
+    .wb_sel_i (sel),
+    .int_o    (com1_irq), // interrupt request
+
+    // UART	signals
+    // serial input/output
+    .stx_pad_o  (uart_txd_), 
+    .srx_pad_i  (uart_rxd_),
+
+    // modem signals
+    //.rts_pad_o, 
+    .cts_pad_i  (1'b1), 
+    //.dtr_pad_o, 
+    .dsr_pad_i  (1'b1), 
+    .ri_pad_i   (1'b0), 
+    .dcd_pad_i  (1'b0)
+    //, baud_o
+	);
+
   ps2_keyb #(
     .TIMER_60USEC_VALUE_PP (750),
     .TIMER_60USEC_BITS_PP  (10),
@@ -392,13 +431,19 @@ module kotku (
   assign vdu_arena       = (tga & vdu_io_arena);
   assign vdu_stb         = vdu_arena & stb & cyc;
 
+  // com1
+  assign com1_io_arena   = (adr[15:8]==2'h3f && adr[7]==1'b1);
+  assign com1_arena      = (tga & com1_io_arena);
+  assign com1_stb        = com1_arena & stb & cyc;
+  
   // MS-DOS is reading IO address 0x64 to check the inhibit bit
   assign keyb_io_status  = (adr[15:1]==15'h0032 && !we);
   assign keyb_io_arena   = (adr[15:1]==15'h0030 && !we);
   assign keyb_arena      = (tga & keyb_io_arena);
 
   assign ack             = tga ? (flash_io_arena ? flash_ack
-                               : (vdu_io_arena ? vdu_ack_o : (stb & cyc)))
+                               : (vdu_io_arena ? vdu_ack_o 
+                               : (com1_io_arena ? com1_ack_o : (stb & cyc))))
                          : (flash_mem_arena ? flash_ack
                          : (sram_mem_arena ? sram_ack : sdram_ack));
   assign rst_lck         = !lock;
@@ -406,8 +451,9 @@ module kotku (
 
   assign io_dat_i  = flash_io_arena ? flash_dat_o
                    : (vdu_io_arena ? vdu_dat_o
+                   : (com1_io_arena ? com1_dat_o
                    : (keyb_io_arena ? keyb_dat_o
-                   : (keyb_io_status ? 16'h10 : 16'h0)));
+                   : (keyb_io_status ? 16'h10 : 16'h0))));
 
   assign dat_i     = inta ? { 15'b0000_0000_0000_100, iid }
                    : (tga ? io_dat_i
