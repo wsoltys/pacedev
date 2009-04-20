@@ -10,5 +10,5 @@ module char_rom (
   assign q = rom[addr];
 
   // Behaviour
-  initial $readmemh("../../../cores/vga/rtl/char_rom.dat", rom);
+  initial $readmemh("../../../../src/platform/zet/unzip/cores/vga/rtl/char_rom.dat", rom);
 endmodule

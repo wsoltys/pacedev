@@ -1738,7 +1738,7 @@ module micro_rom (
   assign q = rom[addr];
 
   // Behaviour
-  initial $readmemb("../../../cores/zet/rtl/micro_rom.dat", rom);
+  initial $readmemb("../../../../src/platform/zet/unzip/cores/zet/rtl/micro_rom.dat", rom);
 endmodule
 
 module seq_rom (
@@ -1753,5 +1753,5 @@ module seq_rom (
   assign q = rom[addr];
 
   // Behaviour
-  initial $readmemb("../../../cores/zet/rtl/seq_rom.dat", rom);
+  initial $readmemb("../../../../src/platform/zet/unzip/cores/zet/rtl/seq_rom.dat", rom);
 endmodule
