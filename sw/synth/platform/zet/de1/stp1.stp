@@ -1,0 +1,291 @@
+<session jtag_chain="USB-Blaster [USB-0]" jtag_device="@1: EP2C15/20 (0x020B30DD)" sof_file="kotku.sof" top_level_entity="kotku">
+  <display_tree gui_logging_enabled="0">
+    <display_branch instance="auto_signaltap_0" signal_set="USE_GLOBAL_TEMP" trigger="USE_GLOBAL_TEMP"/>
+  </display_tree>
+  <instance entity_name="sld_signaltap" is_auto_node="yes" is_expanded="true" name="auto_signaltap_0" source_file="sld_signaltap.vhd">
+    <node_ip_info instance_id="0" mfg_id="110" node_id="0" version="6"/>
+    <position_info>
+      <single attribute="active tab" value="1"/>
+      <single attribute="data horizontal scroll position" value="121"/>
+      <single attribute="data vertical scroll position" value="0"/>
+      <single attribute="zoom level denominator" value="1"/>
+      <single attribute="zoom level numerator" value="4"/>
+      <single attribute="zoom offset denominator" value="1"/>
+      <single attribute="zoom offset numerator" value="32736"/>
+    </position_info>
+    <signal_set global_temp="1" name="signal_set: 2009/04/21 09:47:41  #0">
+      <clock name="uart_top:com1|wb_clk_i" polarity="posedge" tap_mode="classic"/>
+      <config ram_type="M4K" reserved_data_nodes="0" reserved_trigger_nodes="0" sample_depth="1024" trigger_in_enable="no" trigger_out_enable="no"/>
+      <top_entity/>
+      <signal_vec>
+        <trigger_input_vec>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[9]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_sel_o[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_sel_o[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|uart_regs:regs|lcr[0]" tap_mode="classic" type="register"/>
+          <wire name="uart_top:com1|uart_regs:regs|lcr[1]" tap_mode="classic" type="register"/>
+          <wire name="uart_top:com1|uart_regs:regs|lcr[2]" tap_mode="classic" type="register"/>
+          <wire name="uart_top:com1|uart_regs:regs|lcr[3]" tap_mode="classic" type="register"/>
+          <wire name="uart_top:com1|uart_regs:regs|lcr[4]" tap_mode="classic" type="register"/>
+          <wire name="uart_top:com1|uart_regs:regs|lcr[5]" tap_mode="classic" type="register"/>
+          <wire name="uart_top:com1|uart_regs:regs|lcr[6]" tap_mode="classic" type="register"/>
+          <wire name="uart_top:com1|uart_regs:regs|lcr[7]" tap_mode="classic" type="register"/>
+          <wire name="uart_top:com1|wb_ack_o" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_adr_i[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_adr_i[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_adr_i[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_cyc_i" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_i[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_i[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_i[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_i[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_i[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_i[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_i[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_i[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_o[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_o[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_o[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_o[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_o[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_o[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_o[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_o[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_sel_i[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_sel_i[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_sel_i[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_sel_i[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_stb_i" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_we_i" tap_mode="classic" type="combinatorial"/>
+        </trigger_input_vec>
+        <data_input_vec>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_master:wm0|wb_dat_o[9]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_sel_o[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="cpu:zet_proc|wb_sel_o[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|uart_regs:regs|lcr[0]" tap_mode="classic" type="register"/>
+          <wire name="uart_top:com1|uart_regs:regs|lcr[1]" tap_mode="classic" type="register"/>
+          <wire name="uart_top:com1|uart_regs:regs|lcr[2]" tap_mode="classic" type="register"/>
+          <wire name="uart_top:com1|uart_regs:regs|lcr[3]" tap_mode="classic" type="register"/>
+          <wire name="uart_top:com1|uart_regs:regs|lcr[4]" tap_mode="classic" type="register"/>
+          <wire name="uart_top:com1|uart_regs:regs|lcr[5]" tap_mode="classic" type="register"/>
+          <wire name="uart_top:com1|uart_regs:regs|lcr[6]" tap_mode="classic" type="register"/>
+          <wire name="uart_top:com1|uart_regs:regs|lcr[7]" tap_mode="classic" type="register"/>
+          <wire name="uart_top:com1|wb_ack_o" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_adr_i[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_adr_i[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_adr_i[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_cyc_i" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_i[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_i[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_i[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_i[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_i[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_i[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_i[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_i[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_o[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_o[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_o[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_o[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_o[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_o[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_o[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_dat_o[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_sel_i[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_sel_i[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_sel_i[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_sel_i[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_stb_i" tap_mode="classic" type="combinatorial"/>
+          <wire name="uart_top:com1|wb_we_i" tap_mode="classic" type="combinatorial"/>
+        </data_input_vec>
+      </signal_vec>
+      <presentation>
+        <data_view>
+          <net is_signal_inverted="no" name="uart_top:com1|wb_cyc_i"/>
+          <net is_signal_inverted="no" name="uart_top:com1|wb_stb_i"/>
+          <bus is_signal_inverted="no" link="all" name="uart_top:com1|wb_adr_i" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="uart_top:com1|wb_adr_i[0]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_adr_i[1]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_adr_i[2]"/>
+          </bus>
+          <net is_signal_inverted="no" name="uart_top:com1|wb_we_i"/>
+          <bus is_signal_inverted="no" link="all" name="uart_top:com1|wb_sel_i" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="uart_top:com1|wb_sel_i[0]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_sel_i[1]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_sel_i[2]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_sel_i[3]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="uart_top:com1|wb_dat_i" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_i[0]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_i[1]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_i[2]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_i[3]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_i[4]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_i[5]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_i[6]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_i[7]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="uart_top:com1|wb_dat_o" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_o[0]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_o[1]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_o[2]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_o[3]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_o[4]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_o[5]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_o[6]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_o[7]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="cpu:zet_proc|wb_sel_o" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_sel_o[0]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_sel_o[1]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="uart_top:com1|uart_regs:regs|lcr" order="lsb_to_msb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="uart_top:com1|uart_regs:regs|lcr[0]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|uart_regs:regs|lcr[1]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|uart_regs:regs|lcr[2]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|uart_regs:regs|lcr[3]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|uart_regs:regs|lcr[4]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|uart_regs:regs|lcr[5]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|uart_regs:regs|lcr[6]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|uart_regs:regs|lcr[7]"/>
+          </bus>
+          <net is_signal_inverted="no" name="uart_top:com1|wb_ack_o"/>
+          <bus is_signal_inverted="no" link="all" name="cpu:zet_proc|wb_master:wm0|wb_dat_o" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[0]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[1]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[2]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[3]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[4]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[5]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[6]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[7]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[8]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[9]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[10]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[11]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[12]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[13]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[14]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[15]"/>
+          </bus>
+        </data_view>
+        <setup_view>
+          <net is_signal_inverted="no" name="uart_top:com1|wb_cyc_i"/>
+          <net is_signal_inverted="no" name="uart_top:com1|wb_stb_i"/>
+          <bus is_signal_inverted="no" link="all" name="uart_top:com1|wb_adr_i" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="uart_top:com1|wb_adr_i[0]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_adr_i[1]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_adr_i[2]"/>
+          </bus>
+          <net is_signal_inverted="no" name="uart_top:com1|wb_we_i"/>
+          <bus is_signal_inverted="no" link="all" name="uart_top:com1|wb_sel_i" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="uart_top:com1|wb_sel_i[0]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_sel_i[1]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_sel_i[2]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_sel_i[3]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="uart_top:com1|wb_dat_i" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_i[0]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_i[1]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_i[2]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_i[3]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_i[4]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_i[5]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_i[6]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_i[7]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="uart_top:com1|wb_dat_o" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_o[0]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_o[1]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_o[2]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_o[3]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_o[4]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_o[5]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_o[6]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|wb_dat_o[7]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="cpu:zet_proc|wb_sel_o" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_sel_o[0]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_sel_o[1]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="uart_top:com1|uart_regs:regs|lcr" order="lsb_to_msb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="uart_top:com1|uart_regs:regs|lcr[0]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|uart_regs:regs|lcr[1]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|uart_regs:regs|lcr[2]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|uart_regs:regs|lcr[3]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|uart_regs:regs|lcr[4]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|uart_regs:regs|lcr[5]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|uart_regs:regs|lcr[6]"/>
+            <net is_signal_inverted="no" name="uart_top:com1|uart_regs:regs|lcr[7]"/>
+          </bus>
+          <net is_signal_inverted="no" name="uart_top:com1|wb_ack_o"/>
+          <bus is_signal_inverted="no" link="all" name="cpu:zet_proc|wb_master:wm0|wb_dat_o" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[0]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[1]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[2]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[3]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[4]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[5]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[6]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[7]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[8]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[9]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[10]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[11]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[12]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[13]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[14]"/>
+            <net is_signal_inverted="no" name="cpu:zet_proc|wb_master:wm0|wb_dat_o[15]"/>
+          </bus>
+        </setup_view>
+      </presentation>
+      <trigger attribute_mem_mode="false" global_temp="1" name="trigger: 2009/04/21 09:47:41  #1" position="pre" power_up_trigger_mode="false" segment_size="1" trigger_in="dont_care" trigger_out="active high" trigger_type="circular">
+        <power_up_trigger position="pre" trigger_in="dont_care" trigger_out="active high"/>
+        <events use_custom_flow_control="no">
+          <level enabled="yes" name="condition1" type="basic">'uart_top:com1|wb_stb_i' == rising edge
+            <power_up enabled="yes">
+            </power_up>
+            <op_node/>
+          </level>
+        </events>
+      </trigger>
+    </signal_set>
+  </instance>
+  <mnemonics/>
+  <static_plugin_mnemonics/>
+  <global_info>
+    <single attribute="active instance" value="0"/>
+    <single attribute="lock mode" value="36110"/>
+    <multi attribute="window position" size="9" value="1280,938,398,124,356,50,124,0,0"/>
+  </global_info>
+</session>
