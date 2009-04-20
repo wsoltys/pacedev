@@ -133,11 +133,13 @@ module kotku (
   wire        vdu_arena;
 
   wire        com1_stb;
+  wire [ 7:0] com1_dat_i;
   wire [ 7:0] com1_dat_o;
   wire        com1_ack_o;
   wire        com1_irq_o;
   wire        com1_io_arena;
   wire        com1_arena;
+  wire        com1_irq;
   
   wire [ 7:0] keyb_dat_o;
   wire        keyb_io_arena;
@@ -292,18 +294,18 @@ module kotku (
     .vert_sync   (tft_lcd_vsync_)
   );
 
-  com1 uart_top	(
+  uart_top com1	(
     .wb_clk_i (clk), 
     // Wishbone signals
     .wb_rst_i (rst), 
-    .wb_adr_i (adr[3:1]), 
-    .wb_dat_i (dat_i[7:0]), 
+    .wb_adr_i ({adr[2:1],~sel[0]}), 
+    .wb_dat_i (com1_dat_i), 
     .wb_dat_o (com1_dat_o), 
     .wb_we_i  (we), 
     .wb_stb_i (com1_stb), 
     .wb_cyc_i (cyc), 
     .wb_ack_o (com1_ack_o), 
-    .wb_sel_i (sel),
+    .wb_sel_i (4'b0),
     .int_o    (com1_irq), // interrupt request
 
     // UART	signals
@@ -432,9 +434,10 @@ module kotku (
   assign vdu_stb         = vdu_arena & stb & cyc;
 
   // com1
-  assign com1_io_arena   = (adr[15:8]==2'h3f && adr[7]==1'b1);
+  assign com1_io_arena   = (adr[15:4]==12'h03f && adr[3]==1'b1);
   assign com1_arena      = (tga & com1_io_arena);
   assign com1_stb        = com1_arena & stb & cyc;
+  assign com1_dat_i      = dat_o[7:0];
   
   // MS-DOS is reading IO address 0x64 to check the inhibit bit
   assign keyb_io_status  = (adr[15:1]==15'h0032 && !we);
@@ -451,7 +454,7 @@ module kotku (
 
   assign io_dat_i  = flash_io_arena ? flash_dat_o
                    : (vdu_io_arena ? vdu_dat_o
-                   : (com1_io_arena ? com1_dat_o
+                   : (com1_io_arena ? {com1_dat_o, com1_dat_o}
                    : (keyb_io_arena ? keyb_dat_o
                    : (keyb_io_status ? 16'h10 : 16'h0))));
 
