@@ -26,6 +26,7 @@ module kotku (
     input        clk_50_,
     output [9:0] ledr_,
     output [7:0] ledg_,
+    input  [3:0] key_,
     input  [9:0] sw_,
     output [6:0] hex0_,
     output [6:0] hex1_,
@@ -437,7 +438,7 @@ module kotku (
   assign com1_io_arena   = (adr[15:4]==12'h03f && adr[3]==1'b1);
   assign com1_arena      = (tga & com1_io_arena);
   assign com1_stb        = com1_arena & stb & cyc;
-  assign com1_dat_i      = dat_o[7:0];
+  assign com1_dat_i      = (sel[0] == 1 ? dat_o[7:0] : dat_o[15:8]);
   
   // MS-DOS is reading IO address 0x64 to check the inhibit bit
   assign keyb_io_status  = (adr[15:1]==15'h0032 && !we);
@@ -472,7 +473,7 @@ module kotku (
   assign { ledr_,ledg_ } = { io_reg[13:0], pc[3:0] };
 `else
   assign clk = sys_clk;
-  assign rst = rst_lck;
+  assign rst = rst_lck | ~key_[0];
   assign { ledr_,ledg_ } = { 2'b00, io_reg };
 `endif
 

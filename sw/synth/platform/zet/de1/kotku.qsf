@@ -41,7 +41,7 @@ set_global_assignment -name DEVICE EP2C20F484C7
 set_global_assignment -name TOP_LEVEL_ENTITY kotku
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 9.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "11:09:38  MARCH 18, 2009"
-set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 8.1
 set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id eda_blast_fpga
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
@@ -254,7 +254,6 @@ set_location_assignment PIN_D4 -to hex3_[6]
 set_location_assignment PIN_H15 -to ps2_clk_
 set_location_assignment PIN_J14 -to ps2_data_
 set_global_assignment -name INCREMENTAL_COMPILATION OFF
-set_global_assignment -name SEARCH_PATH ..\\..\\..\\..\\src\\platform\\zet\\unzip\\cores\\zet\\rtl
 set_location_assignment PIN_AB15 -to flash_ce_n_
 set_location_assignment PIN_F14 -to uart_rxd_
 set_location_assignment PIN_G12 -to uart_txd_
@@ -277,52 +276,6 @@ set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL_PIP
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ENABLE_ADVANCED_TRIGGER=0" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=1024" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=1024" -section_id auto_signaltap_0
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/timer/rtl/timer.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/pic/rtl/simple_pic.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/keyb/rtl/ps2_keyb.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/debug/rtl/send_serial.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/debug/rtl/pc_trace.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/debug/rtl/send_addr.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/debug/rtl/clk_uart.v
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/rfifo.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/tfifo.vhd
-set_global_assignment -name VERILOG_FILE ../../../../src/component/io/16550/raminfr.v
-set_global_assignment -name VERILOG_FILE ../../../../src/component/io/16550/uart_debug_if.v
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/16550/uart_pkg.vhd
-set_global_assignment -name VERILOG_FILE ../../../../src/component/io/16550/uart_receiver.v
-set_global_assignment -name VERILOG_FILE ../../../../src/component/io/16550/uart_regs.v
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/16550/uart_rfifo_altera.vhd
-set_global_assignment -name VERILOG_FILE ../../../../src/component/io/16550/uart_sync_flops.v
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/16550/uart_tfifo_altera.vhd
-set_global_assignment -name VERILOG_FILE ../../../../src/component/io/16550/uart_transmitter.v
-set_global_assignment -name VERILOG_FILE ../../../../src/component/io/16550/uart_wb.v
-set_global_assignment -name VERILOG_FILE ../../../../src/component/io/16550/uart_top.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/gpio/rtl/hex_display.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/gpio/rtl/seg_7.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/sram/rtl/wb_dpsram.v
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/zet/unzip/cores/vga/rtl/vdu-new.v"
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/char_rom.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/yadmc/rtl/yadmc_dpram.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/yadmc/rtl/yadmc_sync.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/yadmc/rtl/yadmc_sdram16.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/yadmc/rtl/yadmc_spram.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/yadmc/rtl/yadmc.v
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/zet/unzip/boards/altera-de1/rtl/pll.v"
-set_global_assignment -name VERILOG_FILE "../../../../src/platform/zet/unzip/boards/altera-de1/rtl/flash.v"
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/zet/rtl/util/signmul17.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/zet/rtl/util/primitives.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/zet/rtl/util/div_uu.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/zet/rtl/util/div_su.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/zet/rtl/rotate.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/zet/rtl/cpu.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/zet/rtl/exec.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/fetch.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/zet/rtl/jmp_cond.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/zet/rtl/regfile.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/zet/rtl/rom_def.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/zet/rtl/alu.v
-set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/kotku.v
-set_global_assignment -name SIGNALTAP_FILE stp1.stp
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[0] -to "cpu:zet_proc|wb_master:wm0|wb_dat_o[0]" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[1] -to "cpu:zet_proc|wb_master:wm0|wb_dat_o[10]" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[2] -to "cpu:zet_proc|wb_master:wm0|wb_dat_o[11]" -section_id auto_signaltap_0
@@ -435,3 +388,57 @@ set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=00
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=183" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=11141" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=36023" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STORAGE_QUALIFIER_INVERSION_MASK_LENGTH=0" -section_id auto_signaltap_0
+set_global_assignment -name MISC_FILE "E:/markm/pace/pacedev.net/sw/synth/platform/zet/de1/kotku.dpf"
+set_location_assignment PIN_R22 -to key_[0]
+set_location_assignment PIN_R21 -to key_[1]
+set_location_assignment PIN_T22 -to key_[2]
+set_location_assignment PIN_T21 -to key_[3]
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/timer/rtl/timer.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/pic/rtl/simple_pic.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/keyb/rtl/ps2_keyb.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/debug/rtl/send_serial.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/debug/rtl/pc_trace.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/debug/rtl/send_addr.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/debug/rtl/clk_uart.v
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/rfifo.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/tfifo.vhd
+set_global_assignment -name VERILOG_FILE ../../../../src/component/io/16550/raminfr.v
+set_global_assignment -name VERILOG_FILE ../../../../src/component/io/16550/uart_debug_if.v
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/16550/uart_pkg.vhd
+set_global_assignment -name VERILOG_FILE ../../../../src/component/io/16550/uart_receiver.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/uart_regs.v
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/16550/uart_rfifo_altera.vhd
+set_global_assignment -name VERILOG_FILE ../../../../src/component/io/16550/uart_sync_flops.v
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/16550/uart_tfifo_altera.vhd
+set_global_assignment -name VERILOG_FILE ../../../../src/component/io/16550/uart_transmitter.v
+set_global_assignment -name VERILOG_FILE ../../../../src/component/io/16550/uart_wb.v
+set_global_assignment -name VERILOG_FILE ../../../../src/component/io/16550/uart_top.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/gpio/rtl/hex_display.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/gpio/rtl/seg_7.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/sram/rtl/wb_dpsram.v
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/zet/unzip/cores/vga/rtl/vdu-new.v"
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/char_rom.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/yadmc/rtl/yadmc_dpram.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/yadmc/rtl/yadmc_sync.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/yadmc/rtl/yadmc_sdram16.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/yadmc/rtl/yadmc_spram.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/yadmc/rtl/yadmc.v
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/zet/unzip/boards/altera-de1/rtl/pll.v"
+set_global_assignment -name VERILOG_FILE "../../../../src/platform/zet/unzip/boards/altera-de1/rtl/flash.v"
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/zet/rtl/util/signmul17.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/zet/rtl/util/primitives.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/zet/rtl/util/div_uu.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/zet/rtl/util/div_su.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/zet/rtl/rotate.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/zet/rtl/cpu.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/zet/rtl/exec.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/fetch.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/zet/rtl/jmp_cond.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/zet/rtl/regfile.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/zet/rtl/rom_def.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/unzip/cores/zet/rtl/alu.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/zet/kotku.v
+set_global_assignment -name SIGNALTAP_FILE stp1.stp
+set_global_assignment -name SEARCH_PATH ..\\..\\..\\..\\src\\component\\io\\16550
+set_global_assignment -name SEARCH_PATH ..\\..\\..\\..\\src\\platform\\zet\\unzip\\cores\\zet\\rtl
