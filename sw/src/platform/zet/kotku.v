@@ -137,18 +137,16 @@ module kotku (
   wire [ 7:0] com1_dat_i;
   wire [ 7:0] com1_dat_o;
   wire        com1_ack_o;
-  wire        com1_irq_o;
   wire        com1_io_arena;
   wire        com1_arena;
-  wire        com1_irq;
   
   wire [ 7:0] keyb_dat_o;
   wire        keyb_io_arena;
   wire        keyb_io_status;
   wire        keyb_arena;
 
-  wire [ 1:0] intv;
-  wire        iid;
+  wire [ 7:0] intv;
+  wire [ 2:0] iid;
   wire        intr;
   wire        inta;
 
@@ -307,7 +305,7 @@ module kotku (
     .wb_cyc_i (cyc), 
     .wb_ack_o (com1_ack_o), 
     .wb_sel_i (4'b0),
-    .int_o    (com1_irq), // interrupt request
+    .int_o    (intv[4]), // interrupt request
 
     // UART	signals
     // serial input/output
@@ -459,7 +457,7 @@ module kotku (
                    : (keyb_io_arena ? keyb_dat_o
                    : (keyb_io_status ? 16'h10 : 16'h0))));
 
-  assign dat_i     = inta ? { 15'b0000_0000_0000_100, iid }
+  assign dat_i     = inta ? { 13'b0000_0000_0000_1, iid }
                    : (tga ? io_dat_i
                    : (flash_mem_arena ? flash_dat_o
                    : (sram_mem_arena ? sram_dat_o
