@@ -2,12 +2,31 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <conio.h>
+
+static char *ops[] =
+{
+  "NULL", "CONFIG_FILE", "CONFIG_SCRIPT", "GOTO_MENU"
+};
+#define NUM_OPS (sizeof(ops)/sizeof(char *))
+
+int get_oper (char *oper)
+{
+  for (int i=0; i<NUM_OPS; i++)
+    if (!strcmp (oper, ops[i]))
+      return (i);
+  return (-1);
+}
 
 typedef struct _MENTRY
 {
 	char	name[64];
-	char	oper[64];
+  char szOper[64];  // debug
+	int   oper;
 	char	arg1[64];
+
+  // quick-links
+  int   to_menu;
 
 } MENTRY, *PMENTRY;
 
@@ -20,7 +39,16 @@ typedef struct _MENU
 
 } MENU, *PMENU;
 
-MENU menus[16];
+static MENU menus[16];
+static int nMenus = -1;
+
+int get_menu (char *tag)
+{
+  for (int i=0; i<nMenus; i++)
+    if (!strcmp (tag, menus[i].tag))
+      return (i);
+  return (-1);
+}
 
 typedef enum
 {
@@ -29,7 +57,7 @@ typedef enum
 
 } eKEY;
 
-int dump_menu (int nMenus)
+int dump_menu (PMENU menus, int nMenus)
 {
 	printf ("- menu: (%d)\n"
 					"  title: \"%s\"\n"
@@ -37,10 +65,26 @@ int dump_menu (int nMenus)
 					"  entries: (%d)\n", 
 					nMenus+1, menus[nMenus].title, menus[nMenus].tag, menus[nMenus].nEntries);
 	for (int i=0; i<menus[nMenus].nEntries; i++)
+  {
 		printf ("  - name: \"%s\"\n"
-						"    oper: %s\n"
-						"    arg1: %s\n",
-						menus[nMenus].entries[i].name, menus[nMenus].entries[i].oper, menus[nMenus].entries[i].arg1);
+						"    oper: %s\n",
+						menus[nMenus].entries[i].name, 
+            (menus[nMenus].entries[i].oper == -1 ? "(UNKNOWN)" : ops[menus[nMenus].entries[i].oper]));
+    if (*menus[nMenus].entries[i].arg1)
+      printf ("    arg1: %s (%d)\n", 
+              menus[nMenus].entries[i].arg1,
+              menus[nMenus].entries[i].to_menu+1);
+  }
+  
+}
+
+void dump_all_menus (PMENU menu, int n)
+{
+  for (int m=0; m<n; m++)
+  {
+    dump_menu (menu, m);
+    printf ("\n");
+  }
 }
 
 int parse_menu_yml (char *yml_name, bool verbose=false)
@@ -49,7 +93,6 @@ int parse_menu_yml (char *yml_name, bool verbose=false)
 	if (!fp)
 		return (-1);
 
-	int nMenus = -1;
 	eKEY key;
 
 	while (!feof (fp))
@@ -69,7 +112,7 @@ int parse_menu_yml (char *yml_name, bool verbose=false)
 			if (nMenus != -1)
 			{
 				if (verbose)
-					dump_menu (nMenus);
+					dump_menu (menus, nMenus);
 			}
 
 			p += 2;
@@ -122,13 +165,15 @@ int parse_menu_yml (char *yml_name, bool verbose=false)
 					p = strchr (p, '"') + 1;
 					strcpy (menus[nMenus].entries[menus[nMenus].nEntries-1].name, p);
 					if (p = strchr (menus[nMenus].entries[menus[nMenus].nEntries-1].name, '"')) *p = '\0';
-					*menus[nMenus].entries[menus[nMenus].nEntries-1].oper = '\0';
+					menus[nMenus].entries[menus[nMenus].nEntries-1].oper = -1;
 					*menus[nMenus].entries[menus[nMenus].nEntries-1].arg1 = '\0';
 				}
 				else if (!strncmp (p, "oper:", 5))
 				{
 					for (p+=5; isspace(*p); p++);
-					strcpy (menus[nMenus].entries[menus[nMenus].nEntries-1].oper, p);
+          char *q; for (q=p; *q && !isspace(*q); q++); *q = '\0';
+					strcpy (menus[nMenus].entries[menus[nMenus].nEntries-1].szOper, p);
+          menus[nMenus].entries[menus[nMenus].nEntries-1].oper = get_oper (p);
 				}
 				else if (!strncmp (p, "arg1:", 5))
 				{
@@ -144,11 +189,47 @@ int parse_menu_yml (char *yml_name, bool verbose=false)
 	}
 
 	if (verbose)
-		dump_menu (nMenus);
+		dump_menu (menus, nMenus);
+  nMenus++;
 
 	fclose (fp);
 
 	return (0);
+}
+
+int check_all_menus (PMENU menu, int n)
+{
+  for (int m=0; m<n; m++)
+  {
+    for (int e=0; e<menus[m].nEntries; e++)
+    {
+      menus[m].entries[e].to_menu = -1;
+      if (menus[m].entries[e].oper == -1)
+      {
+        fprintf (stderr, "%s() : menu[%d].entry[%d].oper(%s) not found\n", 
+                 __FUNCTION__, m, e, menus[m].entries[e].szOper);
+        return (-1);
+      }
+      if (menus[m].entries[e].oper == 3)
+        if ((menus[m].entries[e].to_menu = get_menu (menus[m].entries[e].arg1)) < 0)
+        {
+          fprintf (stderr, "%s() : menu[%d].entry[%d].GOTO_MENU(%s) not found\n", 
+                    __FUNCTION__, m, e, menus[m].entries[e].arg1);
+          return (-1);
+        }
+    }
+  }
+  return (0);
+}
+
+void display_menu (PMENU menu, int i)
+{
+  PMENU m = &menu[i];
+
+  for (i=0; i<m->nEntries; i++)
+  {
+    printf ("%s\n", m->entries[i].name);
+  }
 }
 
 void usage (char *argv0)
@@ -190,5 +271,48 @@ int main (int argc, char *argv[])
 		strcat (yml_name, ".yml");
 
 	if (parse_menu_yml (yml_name, verbose) < 0)
+  {
 		fprintf (stderr, "error parsing file \"%s\"\n", yml_name);
+    exit (0);
+  }
+
+  if (check_all_menus (menus, nMenus) < 0)
+  {
+		fprintf (stderr, "error validating menus\n");
+    exit (0);
+  }
+
+  int cm = 0;
+  while (1)
+  {
+    int c;
+
+    //dump_all_menus (menus, nMenus);
+    display_menu (menus, cm);
+    printf ("\n");
+
+    while (1)
+    {
+      c = getch();
+      if (tolower(c) == 'x')
+        break;
+
+      if (c < '1' || c > '9')
+        continue;
+
+      int i = c - '1';
+      if (i >= menus[cm].nEntries)
+        continue;
+
+      if (menus[cm].entries[i].oper != 3)
+        continue;
+
+      // change menu
+      cm = menus[cm].entries[i].to_menu;
+      break;
+    }
+
+    if (tolower(c) == 'x')
+      break;
+  }
 }
