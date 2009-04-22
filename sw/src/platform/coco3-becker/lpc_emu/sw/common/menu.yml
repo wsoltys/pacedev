@@ -1,0 +1,25 @@
+- menu:
+	title: "Main Menu"
+	tag: MAIN_MENU
+	entries:
+	- name: "Configure FPGA"
+		oper: CONFIG_FILE
+	- name: "Run Configuration Script"
+		oper: CONFIG_SCRIPT
+	- name: "Goto Run Menu"
+		oper: GOTO_MENU
+		arg1: RUN_MENU
+
+- menu:
+	title: "Run Menu"
+	tag: RUN_MENU
+	entries:
+	- name: "Soft Switches"
+		oper: NULL
+	- name: "Floppy Drive 0"
+		oper: NULL
+	- name: "Reset"
+		oper: NULL
+	- name: "Retun to Main Menu"
+		oper: GOTO_MENU
+		arg1: MAIN_MENU
