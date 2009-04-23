@@ -461,7 +461,7 @@ module kotku (
   assign com1_io_arena   = (adr[15:4]==12'h03f && adr[3]==1'b1);
   assign com1_arena      = (tga & com1_io_arena);
   assign com1_stb        = com1_arena & stb & cyc;
-  assign com1_dat_i      = (sel[0] == 1 ? dat_o[7:0] : dat_o[15:8]);
+  assign com1_dat_i      = (sel[0] ? dat_o[7:0] : dat_o[15:8]);
   
   // ems (map to I/O $208-$20F for now)
   assign ems_io_arena   = {adr[15:4]==12'h020 && adr[3]==1'b1};
