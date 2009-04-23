@@ -1,5 +1,5 @@
 module ems #(
-	parameter ems_version = 32
+	parameter ems_version = 3_2
 ) (
 	/* WISHBONE interface */
 	input wb_clk,
@@ -22,7 +22,7 @@ module ems #(
 initial begin
 	// synthesis translate_off
 	$display("=== EMS parameters ===");
-	$display("ems_version\t\t\t%d", ems_version);
+	$display("ems_version\t\t\t%1d.%1d", ems_version/10, ems_version%10);
 	// synthesis translate_on
 end
 
@@ -35,7 +35,7 @@ end
   reg [19:16] umb_base_adr;
   // x4 page address registers for 16KB memory blocks [22:14]
   // - assumes 8MB is the largest we can address
-  reg [22:14] page_adr [3:0];
+  reg [22:14] page_adr [0:3];
 
   // supports 8-bit I/O only atm...
   wire [8:0] dat_i = (wb_sel_i[0] ? wb_dat_i[7:0] : wb_dat_i[15:8]);
@@ -51,8 +51,10 @@ end
     begin
       ems_enable <= 1'b0;
       umb_base_adr <= 4'h0;
-      { page_adr[0], page_adr[1], page_adr[2], page_adr[3] } 
-          <= { 8'h00, 8'h01, 8'h02, 8'h03 };
+      page_adr[0] <= 8'h00;
+      page_adr[1] <= 8'h00;
+      page_adr[2] <= 8'h00;
+      page_adr[3] <= 8'h00;
     end
     else if (wb_cyc_i && wb_stb_i && wb_we_i)
       if (~wb_adr_i[2])
