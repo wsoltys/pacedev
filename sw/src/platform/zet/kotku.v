@@ -140,6 +140,13 @@ module kotku (
   wire        com1_io_arena;
   wire        com1_arena;
   
+  wire        ems_stb;
+  wire [15:0] ems_dat_o;
+  wire        ems_ack_o;
+  wire        ems_io_arena;
+  wire        ems_arena;
+  wire [31:0] ems_sdram_adr;
+  
   wire [ 7:0] keyb_dat_o;
   wire        keyb_io_arena;
   wire        keyb_io_status;
@@ -206,7 +213,7 @@ module kotku (
 `endif
     .sys_clk  (clk),
     .sys_rst  (rst),
-    .wb_adr_i ({11'h0,adr,2'b00}),
+    .wb_adr_i (ems_sdram_adr),
     .wb_dat_i ({16'h0,dat_o}),
     .wb_dat_o (sdram_dat_o),
     .wb_sel_i ({2'b00,sel}),
@@ -321,6 +328,24 @@ module kotku (
     .dcd_pad_i  (1'b0)
     //, baud_o
 	);
+
+  ems ems_hw (
+    .wb_clk (clk),
+    .wb_rst (rst),
+    
+    .wb_adr_i (adr[2:1]),
+    .wb_dat_i (dat_o),
+    .wb_dat_o (ems_dat_o),
+    .wb_sel_i (sel),
+    .wb_cyc_i (cyc),
+    .wb_stb_i (ems_stb),
+    .wb_we_i (we),
+    .wb_ack_o (ems_ack_o),
+
+    /* address interface */
+    .sdram_adr_i (adr),
+    .sdram_adr_o (ems_sdram_adr)
+  );
 
   ps2_keyb #(
     .TIMER_60USEC_VALUE_PP (750),
@@ -438,6 +463,11 @@ module kotku (
   assign com1_stb        = com1_arena & stb & cyc;
   assign com1_dat_i      = (sel[0] == 1 ? dat_o[7:0] : dat_o[15:8]);
   
+  // ems (map to I/O $208-$20F for now)
+  assign ems_io_arena   = {adr[15:4]==12'h020 && adr[3]==1'b1};
+  assign ems_arena      = (tga & ems_io_arena);
+  assign ems_stb        = ems_arena & stb & cyc;
+  
   // MS-DOS is reading IO address 0x64 to check the inhibit bit
   assign keyb_io_status  = (adr[15:1]==15'h0032 && !we);
   assign keyb_io_arena   = (adr[15:1]==15'h0030 && !we);
@@ -454,8 +484,9 @@ module kotku (
   assign io_dat_i  = flash_io_arena ? flash_dat_o
                    : (vdu_io_arena ? vdu_dat_o
                    : (com1_io_arena ? {com1_dat_o, com1_dat_o}
+                   : (ems_io_arena ? ems_dat_o
                    : (keyb_io_arena ? keyb_dat_o
-                   : (keyb_io_status ? 16'h10 : 16'h0))));
+                   : (keyb_io_status ? 16'h10 : 16'h0)))));
 
   assign dat_i     = inta ? { 13'b0000_0000_0000_1, iid }
                    : (tga ? io_dat_i
