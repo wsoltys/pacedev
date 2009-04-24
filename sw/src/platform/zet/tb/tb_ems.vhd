@@ -33,7 +33,7 @@ architecture SYN of tb_ems is
 	signal clk						: std_logic := '0';
 	signal reset					: std_logic	:= '1';
 
-  signal wb_adr_i       : std_logic_vector(2 downto 1) := (others => '0');
+  signal wb_adr_i       : std_logic_vector(15 downto 1) := (others => '0');
   signal wb_dat_i       : std_logic_vector(15 downto 0) := (others => '0');
   signal wb_dat_o       : std_logic_vector(15 downto 0) := (others => '0');
   signal wb_sel_i       : std_logic_vector(1 downto 0) := (others => '0');
@@ -41,6 +41,7 @@ architecture SYN of tb_ems is
   signal wb_stb_i       : std_logic := '0';
   signal wb_we_i        : std_logic := '0';
   signal wb_ack_o       : std_logic := '0';
+	signal ems_io_arena		: std_logic := '0';
   signal sdram_adr_i    : std_logic_vector(19 downto 1) := (others => '0');
   signal sdram_adr_o    : std_logic_vector(31 downto 0) := (others => '0');
 
@@ -58,10 +59,10 @@ begin
                       dat : in std_logic_vector(7 downto 0)) is
     begin
       wait until falling_edge(clk);
-      wb_adr_i <= adr(2 downto 1);
+      wb_adr_i(2 downto 1) <= adr(2 downto 1);
       wb_sel_i(0) <= adr(0);
       wb_cyc_i <= '1';
-      wb_stb_i <= '1';
+      wb_stb_i <= ems_io_arena;
       wb_we_i <= '1';
       wb_dat_i <= dat & dat;
       wait until falling_edge(clk);
@@ -70,6 +71,7 @@ begin
       wb_we_i <= '0';
     end procedure wb_wr;
   begin
+		wb_adr_i(15 downto 3) <= X"020" & '1';
     sdram_adr_i(3 downto 1) <= (others => '0');
     wait until reset = '0';
 
@@ -129,6 +131,10 @@ begin
   end process;
 
   ems_hw : entity work.ems
+		generic map
+		(
+			io_addr				=> 16#0208#
+		)
     port map
     (
     	wb_clk        => clk,
@@ -142,6 +148,7 @@ begin
     	wb_stb_i      => wb_stb_i,
     	wb_we_i       => wb_we_i,
     	wb_ack_o      => wb_ack_o,
+			ems_io_area		=> ems_io_arena,
     
     	sdram_adr_i   => sdram_adr_i,
     	sdram_adr_o   => sdram_adr_o

@@ -1,11 +1,12 @@
 module ems #(
-	parameter ems_version = 3_2
+	parameter ems_version = 3_2,
+	parameter io_addr = 16'h0208
 ) (
 	/* WISHBONE interface */
 	input wb_clk,
 	input wb_rst,
 	
-	input [2:1] wb_adr_i,
+	input [15:1] wb_adr_i,
 	input [15:0] wb_dat_i,
 	output [15:0] wb_dat_o,
 	input [1:0] wb_sel_i,
@@ -13,6 +14,7 @@ module ems #(
 	input wb_stb_i,
 	input wb_we_i,
 	output reg wb_ack_o,
+	output ems_io_area,
 
 	/* address interface */
 	input [19:1] sdram_adr_i,
@@ -23,13 +25,17 @@ initial begin
 	// synthesis translate_off
 	$display("=== EMS parameters ===");
 	$display("ems_version\t\t\t%1d.%1d", ems_version/10, ems_version%10);
+	$display("io_addr\t\t\t$%h", io_addr);
 	// synthesis translate_on
 end
 
   //
   // register interface
   //
-  
+
+	// register bank select
+  assign ems_io_area = { wb_adr_i[15:3] == io_addr[15:3] };
+
   reg ems_enable;
   // base address of 64KB block in UMB [19:16]
   reg [19:16] umb_base_adr;
