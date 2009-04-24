@@ -128,12 +128,16 @@ begin
     sdram_seg_i <= X"C000";
     wb_wr ("100", X"0C");
 
+		-- attempt to re-enable outside register space
+		wb_adr_i(15 downto 3) <= X"022" & '1';
+    wb_wr ("100", X"8C");
+
   end process;
 
   ems_hw : entity work.ems
 		generic map
 		(
-			io_addr				=> 16#0208#
+			IO_BASE_ADDR	=> 16#0208#
 		)
     port map
     (

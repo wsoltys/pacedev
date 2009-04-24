@@ -329,11 +329,13 @@ module kotku (
     //, baud_o
 	);
 
-  ems ems_hw (
+  ems #(
+    .IO_BASE_ADDR (16'h0208)
+  ) ems_card (
     .wb_clk (clk),
     .wb_rst (rst),
     
-    .wb_adr_i (adr[2:1]),
+    .wb_adr_i (adr[15:1]),
     .wb_dat_i (dat_o),
     .wb_dat_o (ems_dat_o),
     .wb_sel_i (sel),
@@ -341,6 +343,7 @@ module kotku (
     .wb_stb_i (ems_stb),
     .wb_we_i (we),
     .wb_ack_o (ems_ack_o),
+    .ems_io_area (ems_io_arena),
 
     /* address interface */
     .sdram_adr_i (adr),
@@ -463,8 +466,8 @@ module kotku (
   assign com1_stb        = com1_arena & stb & cyc;
   assign com1_dat_i      = (sel[0] ? dat_o[7:0] : dat_o[15:8]);
   
-  // ems (map to I/O $208-$20F for now)
-  assign ems_io_arena   = {adr[15:4]==12'h020 && adr[3]==1'b1};
+  // EMS gets its I/O address from "dipswitches" (parameter) on the EMS module
+  //assign ems_io_arena   = {adr[15:4]==12'h020 && adr[3]==1'b1};
   assign ems_arena      = (tga & ems_io_arena);
   assign ems_stb        = ems_arena & stb & cyc;
   

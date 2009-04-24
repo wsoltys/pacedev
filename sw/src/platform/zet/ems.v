@@ -1,6 +1,6 @@
 module ems #(
-	parameter ems_version = 3_2,
-	parameter io_addr = 16'h0208
+	parameter EMS_VERSION = 3_2,
+	parameter IO_BASE_ADDR = 16'h0208
 ) (
 	/* WISHBONE interface */
 	input wb_clk,
@@ -24,8 +24,8 @@ module ems #(
 initial begin
 	// synthesis translate_off
 	$display("=== EMS parameters ===");
-	$display("ems_version\t\t\t%1d.%1d", ems_version/10, ems_version%10);
-	$display("io_addr\t\t\t$%h", io_addr);
+	$display("ems_version\t\t\t%1d.%1d", EMS_VERSION/10, EMS_VERSION%10);
+	$display("io_base_addr\t\t\t$%h", IO_BASE_ADDR);
 	// synthesis translate_on
 end
 
@@ -34,7 +34,7 @@ end
   //
 
 	// register bank select
-  assign ems_io_area = { wb_adr_i[15:3] == io_addr[15:3] };
+  assign ems_io_area = { wb_adr_i[15:3] == IO_BASE_ADDR[15:3] };
 
   reg ems_enable;
   // base address of 64KB block in UMB [19:16]
@@ -48,8 +48,9 @@ end
   wire [1:0] page_reg = { wb_adr_i[1], wb_sel_i[0] };
   
   // register read logic
-  assign wb_dat_o = ~wb_adr_i[2]  ? page_adr[page_reg] 
-                                  : { ems_enable, 3'b0, umb_base_adr };
+  wire [7:0] dat_o = ~wb_adr_i[2] ? page_adr[page_reg] 
+                              		: { ems_enable, 3'b0, umb_base_adr };
+	assign wb_dat_o = { dat_o, dat_o };
 
   // register write logic
   always @(posedge wb_clk)
@@ -71,7 +72,7 @@ end
         { ems_enable, umb_base_adr } <= { dat_i[7], dat_i[3:0] };
     
   always @(posedge wb_clk)
-    wb_ack_o = wb_rst ? 1'b0 : (wb_cyc_i && wb_stb_i);
+  	wb_ack_o <= wb_rst ? 1'b0 : (wb_cyc_i && wb_stb_i);
 
   //
   // sdram interface
