@@ -14,7 +14,7 @@ module ems #(
 	input wb_stb_i,
 	input wb_we_i,
 	output reg wb_ack_o,
-	output ems_io_area,
+	output ems_io_arena,
 
 	/* address interface */
 	input [19:1] sdram_adr_i,
@@ -34,7 +34,7 @@ end
   //
 
 	// register bank select
-  assign ems_io_area = { wb_adr_i[15:3] == IO_BASE_ADDR[15:3] };
+  assign ems_io_arena = { wb_adr_i[15:3] == IO_BASE_ADDR[15:3] };
 
   reg ems_enable;
   // base address of 64KB block in UMB [19:16]
