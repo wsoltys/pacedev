@@ -1,23 +1,73 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #define SWAP(x) (((x)>>8)|((x&0xFF)<<8))
 
+void usage (char *argv0)
+{
+  fprintf (stderr, "usage: %s [-s] [-o] <filename>\n", argv0);
+  fprintf (stderr, "  options:\n");
+  fprintf (stderr, "    -o    offset (default=0)\n");
+  fprintf (stderr, "    -s    byte-swap input\n");
+
+  exit (0);
+}
+
 int main (int argc, char *argv[])
 {
-	if (--argc == 0)
-		exit (0);
+  long offset = 0;
+  char *filename = 0;
+  bool swap = false;
+
+	while(--argc)
+  {
+    switch (argv[argc][0])
+    {
+      case '/' :
+      case '-' :
+        switch (tolower(argv[argc][1]))
+        {
+          case 'o' :
+            offset = atol(&argv[argc][2]);
+            break;
+          case 's' :
+            swap = true;
+            break;
+          default :
+            usage (argv[0]);
+            break;
+        }
+        break;
+      default :
+        filename = argv[argc];
+        break;
+    }
+  }
+
+  fprintf (stderr, "filename=\"%s\"\n", filename);
+  fprintf (stderr, "swap=%d\n", (swap ? 1 : 0));
+  fprintf (stderr, "offset=%d\n", offset);
+
+  if (!filename)
+    usage (argv[0]);
 
 	unsigned short int a = 0;
 	
-	FILE *fp = fopen (argv[1], "rb");
+	FILE *fp = fopen (filename, "rb");
+  if (!fp)
+    exit (0);
+
+  fseek (fp, offset, SEEK_SET);
+
 	while (!feof (fp))
 	{
 		unsigned short int d;
 		unsigned char cs;
 
 		fread (&d, 1, 2, fp);
-		d = SWAP(d);
+		if (swap)
+      d = SWAP(d);
 
 		cs = 0;
 		cs += 2;
