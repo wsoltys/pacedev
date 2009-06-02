@@ -40,8 +40,11 @@ architecture SYN of sound_blaster_16 is
   constant REG_FM_REG_ADR2      : std_logic_vector(4 downto 0) := REG_FM_STS2;
   constant REG_FM_DAT2          : std_logic_vector(4 downto 0) := '0' & X"9";
 
+  -- audio block signals
   signal dsp_audio_l            : std_logic_vector(15 downto 0) := (others => '0');
   signal dsp_audio_r            : std_logic_vector(15 downto 0) := (others => '0');
+  signal mxr_audio_l            : std_logic_vector(15 downto 0) := (others => '0');
+  signal mxr_audio_r            : std_logic_vector(15 downto 0) := (others => '0');
   
 begin
 
@@ -56,9 +59,9 @@ begin
   -- register interface - ack immediately
   wb_ack_o <= wb_cyc_i and wb_stb_i;
 
-  -- this will eventually mix all the sound sub-systems
-  audio_l <= dsp_audio_l;
-  audio_r <= dsp_audio_r;
+  -- assign the outputs
+  audio_l <= mxr_audio_l;
+  audio_r <= mxr_audio_r;
   
   --
   --  Mixer implementation
@@ -69,14 +72,16 @@ begin
     constant REG_MXR_ADR          : std_logic_vector(4 downto 0) := '0' & X"4";
     constant REG_MXR_DAT          : std_logic_vector(4 downto 0) := '0' & X"5";
 
-    signal mxr_adr        : std_logic_vector(7 downto 0) := (others => '0');
+    subtype mxr_adr_t is integer range 0 to 31;
+    signal mxr_adr        : mxr_adr_t := 0;
     
     -- actually, there's only 24 of these
-    -- - and the mapping is a bit odd
-    -- - registers $30-$3F -> $10-$1F
-    -- - registers $40-$47 -> $00-$07
+    -- - registers $30-$47 -> $00-$17
     type mxr_reg_a is array (natural range <>) of std_logic_vector(7 downto 0);
     signal mxr_reg        : mxr_reg_a(0 to 31);
+    
+    alias VOICE_VOL_L   : std_logic_vector(7 downto 4) is mxr_reg(16#02#)(7 downto 3);
+    alias VOICE_VOL_R   : std_logic_vector(7 downto 4) is mxr_reg(16#03#)(7 downto 3);
     
   begin
 
@@ -86,7 +91,7 @@ begin
       variable cyc_wr_r : std_logic := '0';
     begin
       if wb_rst_i = '1' then
-        mxr_adr <= (others => '0');
+        mxr_adr <= 0;
         cyc_rd_r := '0';
         cyc_wr_r := '0';
       elsif rising_edge(wb_clk_i) then
@@ -95,7 +100,7 @@ begin
           if cyc_rd_r = '0'and wb_cyc_i = '1' and wb_stb_i = '1' then
             case wb_adr_i(4 downto 0) is
               when REG_MXR_DAT =>
-                wb_dat_o <= X"00" & mxr_reg(to_integer(unsigned(mxr_adr(4 downto 0))));
+                wb_dat_o <= X"00" & mxr_reg(mxr_adr);
               when others =>
                 null;
             end case;
@@ -105,25 +110,33 @@ begin
           if cyc_wr_r = '0' and wb_cyc_i = '1' and wb_stb_i = '1' then
             case wb_adr_i(4 downto 0) is
               when REG_MXR_ADR =>
-                mxr_adr <= wb_dat_i(mxr_adr'range);
+                -- mangle the mixer address to we can use it
+                mxr_adr <= to_integer(unsigned(not wb_dat_i(4) & wb_dat_i(3 downto 0)));
               when REG_MXR_DAT =>
                 case wb_dat_i(7 downto 0) is
-                  -- need to handle old addresses here ($00-$2F)!!!
+                  -- handle legacy mixer registers
                   when X"04" =>
-                    -- Voice Volume L?R
-                    mxr_reg(16#12#) <= wb_dat_i(7 downto 4) & "0000";
-                    mxr_reg(16#13#) <= wb_dat_i(3 downto 0) & "0000";
+                    -- Voice Volume L/R
+                    mxr_reg(16#02#) <= wb_dat_i(7 downto 4) & "0000";
+                    mxr_reg(16#03#) <= wb_dat_i(3 downto 0) & "0000";
                   when X"0A" =>
                     -- Mic Volume
+                    mxr_reg(16#0A#) <= wb_dat_i(2 downto 0) & "00000";
                   when X"22" =>
                     -- Master Volume L/R
+                    mxr_reg(16#00#) <= wb_dat_i(7 downto 4) & "0000";
+                    mxr_reg(16#01#) <= wb_dat_i(3 downto 0) & "0000";
                   when X"26" =>
                     -- CD Volume L/R
+                    mxr_reg(16#06#) <= wb_dat_i(7 downto 4) & "0000";
+                    mxr_reg(16#07#) <= wb_dat_i(3 downto 0) & "0000";
                   when X"28" =>
                     -- Line Volume L/R
                   when X"2E" =>
+                    mxr_reg(16#08#) <= wb_dat_i(7 downto 4) & "0000";
+                    mxr_reg(16#09#) <= wb_dat_i(3 downto 0) & "0000";
                   when others =>
-                    mxr_reg(to_integer(unsigned(mxr_adr(4 downto 0)))) <= wb_dat_i(7 downto 0);
+                    mxr_reg(mxr_adr) <= wb_dat_i(7 downto 0);
                 end case;
               when others =>
                 null;
@@ -135,6 +148,10 @@ begin
         cyc_wr_r := wb_cyc_i and wb_stb_i and wb_we_i;
       end if;
     end process;
+
+    -- do the mixing
+    mxr_audio_l <= dsp_audio_l;
+    mxr_audio_r <= dsp_audio_r;
 
   end block BLK_MIXER;
   
@@ -305,7 +322,9 @@ begin
               end if;
             when PRG_8_DIR =>
               if dsp_wr_sts = '1' then
-                -- parameter is the direct output byte
+                -- 8-bit mono unsigned audio data
+                dsp_audio_l <= dsp_wr_dat & X"00";
+                dsp_audio_r <= dsp_wr_dat & X"00";
                 state <= DONE;
               end if;
             when GET_DSP_VER =>
