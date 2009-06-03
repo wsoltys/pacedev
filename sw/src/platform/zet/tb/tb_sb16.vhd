@@ -45,6 +45,10 @@ architecture SYN of tb_sb16 is
   signal audio_l    		: std_logic_vector(15 downto 0) := (others => '0');
   signal audio_r    		: std_logic_vector(15 downto 0) := (others => '0');
 
+	signal avs_adr 				: std_logic_vector(4 downto 0) := (others => '0');
+	signal avs_dat_i 			: std_logic_vector(31 downto 0) := (others => '0');
+	signal avs_dat_o 			: std_logic_vector(31 downto 0) := (others => '0');
+
 begin
 
 	-- Generate CLK and reset
@@ -143,29 +147,52 @@ begin
 
   end process TEST_P;
 
-  sb16_hw : entity work.sound_blaster_16
-		generic map
-		(
-			IO_BASE_ADDR	=> X"0220"
-		)
-    port map
-    (
-    	wb_clk_i      => clk,
-    	wb_rst_i      => reset,
-    	
-    	wb_adr_i      => wb_adr_i,
-    	wb_dat_i      => wb_dat_i,
-    	wb_dat_o      => wb_dat_o,
-    	wb_sel_i      => wb_sel_i,
-    	wb_cyc_i      => wb_cyc_i,
-    	wb_stb_i      => wb_stb_i,
-    	wb_we_i       => wb_we_i,
-    	wb_ack_o      => wb_ack_o,
+  --sb16_hw : entity work.sound_blaster_16
+	--	generic map
+	--	(
+	--		IO_BASE_ADDR	=> X"0220"
+	--	)
+  --  port map
+  --  (
+  --  	wb_clk_i      => clk,
+  --  	wb_rst_i      => reset,
+  --  	
+  --  	wb_adr_i      => wb_adr_i,
+  --  	wb_dat_i      => wb_dat_i,
+  --  	wb_dat_o      => wb_dat_o,
+  --  	wb_sel_i      => wb_sel_i,
+  --  	wb_cyc_i      => wb_cyc_i,
+  --  	wb_stb_i      => wb_stb_i,
+  --  	wb_we_i       => wb_we_i,
+  --  	wb_ack_o      => wb_ack_o,
+	--
+	--		sb16_io_arena	=> sb16_io_arena,
+  --  
+  --  	audio_l				=> audio_l,
+  --  	audio_r				=> audio_r
+  --  );
 
-			sb16_io_arena	=> sb16_io_arena,
-    
-    	audio_l				=> audio_l,
-    	audio_r				=> audio_r
-    );
+	avs_adr <= wb_adr_i(4 downto 1) & not wb_sel_i(0);
+	avs_dat_i <= X"0000" & wb_dat_i;
+	wb_dat_o <= avs_dat_o(15 downto 0);
+
+	sb16_hw : entity work.sb16_avalon_wrapper
+		port map
+		(
+			csi_clockreset_clk						=> clk,
+			csi_clockreset_reset					=> reset,
+	                	        				
+			avs_s1_chipselect							=> wb_cyc_i,
+			avs_s1_address        				=> avs_adr,
+			avs_s1_writedata							=> avs_dat_i,
+			avs_s1_readdata								=> avs_dat_o,
+			avs_s1_read					  				=> '0',
+			avs_s1_write									=> wb_we_i,
+			avs_s1_waitrequest_n  				=> wb_ack_o,
+			ins_irq0_irq          				=> open,
+	                          				
+	    coe_audio_l         					=> audio_l,
+	    coe_audio_r         					=> audio_r
+		);
 
 end architecture SYN;
