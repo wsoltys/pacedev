@@ -41,6 +41,7 @@ architecture SYN of sound_blaster_16 is
   constant REG_FM_DAT2          : std_logic_vector(4 downto 0) := '0' & X"9";
 
 	signal wb_adr									: std_logic_vector(4 downto 0) := (others => '0');
+	signal dat_i                  : std_logic_vector(7 downto 0) := (others => '0');
 	signal mxr_stb								: std_logic := '0';
 	signal mxr_dat_o							: std_logic_vector(15 downto 0) := (others => '0');
 	signal dsp_stb								: std_logic := '0';
@@ -64,16 +65,17 @@ begin
 
 	-- construct byte-address from bus address and sel signals
 	wb_adr <= wb_adr_i(4 downto 1) & not wb_sel_i(0);
+  dat_i <= wb_dat_i(7 downto 0) when wb_sel_i(0) = '1' else wb_dat_i(15 downto 8);
 
 	-- strobe signals
 	-- - mixer $04-$05
-	mxr_stb <= '1' when wb_adr(4 downto 1) = "0010" else '0';
+	mxr_stb <= wb_stb_i when wb_adr(4 downto 1) = "0010" else '0';
   -- - DSP everything else
-	dsp_stb <= not mxr_stb;
+	dsp_stb <= wb_stb_i and not mxr_stb;
 
 	-- read mux
-	wb_dat_o <= mxr_dat_o when mxr_stb = '1' else
-							dsp_dat_o;
+	wb_dat_o <= (mxr_dat_o(7 downto 0) & mxr_dat_o(7 downto 0)) when mxr_stb = '1' else
+							(dsp_dat_o(7 downto 0) & dsp_dat_o(7 downto 0));
 
   -- register interface - ack immediately
 	process (wb_clk_i, wb_rst_i)
@@ -98,7 +100,7 @@ begin
     constant REG_MXR_ADR          : std_logic_vector(4 downto 0) := '0' & X"4";
     constant REG_MXR_DAT          : std_logic_vector(4 downto 0) := '0' & X"5";
 
-    subtype mxr_adr_t is integer range 0 to 31;
+    subtype mxr_adr_t is integer range 0 to 16#47#;
     signal mxr_adr        : mxr_adr_t := 0;
     
     -- actually, there's only 24 of these
@@ -137,32 +139,32 @@ begin
             case wb_adr(4 downto 0) is
               when REG_MXR_ADR =>
                 -- mangle the mixer address to we can use it
-                mxr_adr <= to_integer(unsigned(not wb_dat_i(4) & wb_dat_i(3 downto 0)));
+                mxr_adr <= to_integer(unsigned(not dat_i(4) & dat_i(3 downto 0)));
               when REG_MXR_DAT =>
-                case wb_dat_i(7 downto 0) is
+                case mxr_adr is
                   -- handle legacy mixer registers
-                  when X"04" =>
+                  when 16#04# =>
                     -- Voice Volume L/R
-                    mxr_reg(16#02#) <= wb_dat_i(7 downto 4) & "0000";
-                    mxr_reg(16#03#) <= wb_dat_i(3 downto 0) & "0000";
-                  when X"0A" =>
+                    mxr_reg(16#02#) <= dat_i(7 downto 4) & "0000";
+                    mxr_reg(16#03#) <= dat_i(3 downto 0) & "0000";
+                  when 16#0A# =>
                     -- Mic Volume
-                    mxr_reg(16#0A#) <= wb_dat_i(2 downto 0) & "00000";
-                  when X"22" =>
+                    mxr_reg(16#0A#) <= dat_i(2 downto 0) & "00000";
+                  when 16#22# =>
                     -- Master Volume L/R
-                    mxr_reg(16#00#) <= wb_dat_i(7 downto 4) & "0000";
-                    mxr_reg(16#01#) <= wb_dat_i(3 downto 0) & "0000";
-                  when X"26" =>
+                    mxr_reg(16#00#) <= dat_i(7 downto 4) & "0000";
+                    mxr_reg(16#01#) <= dat_i(3 downto 0) & "0000";
+                  when 16#26# =>
                     -- CD Volume L/R
-                    mxr_reg(16#06#) <= wb_dat_i(7 downto 4) & "0000";
-                    mxr_reg(16#07#) <= wb_dat_i(3 downto 0) & "0000";
-                  when X"28" =>
+                    mxr_reg(16#06#) <= dat_i(7 downto 4) & "0000";
+                    mxr_reg(16#07#) <= dat_i(3 downto 0) & "0000";
+                  when 16#28# =>
                     -- Line Volume L/R
-                  when X"2E" =>
-                    mxr_reg(16#08#) <= wb_dat_i(7 downto 4) & "0000";
-                    mxr_reg(16#09#) <= wb_dat_i(3 downto 0) & "0000";
+                  when 16#2E# =>
+                    mxr_reg(16#08#) <= dat_i(7 downto 4) & "0000";
+                    mxr_reg(16#09#) <= dat_i(3 downto 0) & "0000";
                   when others =>
-                    mxr_reg(mxr_adr) <= wb_dat_i(7 downto 0);
+                    mxr_reg(mxr_adr) <= dat_i(7 downto 0);
                 end case;
               when others =>
                 null;
@@ -276,9 +278,9 @@ begin
           if cyc_wr_r = '0' and wb_cyc_i = '1' and dsp_stb = '1' then
             case wb_adr(4 downto 0) is
               when REG_DSP_RST =>
-                dsp_rst <= wb_dat_i(0);
+                dsp_rst <= dat_i(0);
               when REG_DSP_WR_CMD_DAT =>
-                dsp_wr_dat <= wb_dat_i;
+                dsp_wr_dat <= X"00" & dat_i;
                 set_dsp_wr_sts <= '1';
               when others =>
                 null;
@@ -346,7 +348,7 @@ begin
             when IN_RESET =>
               if dsp_rst = '0' then
                 -- DSP_RD_STS=1, DSP_WR_STS=0
-                dsp_rd_dat <= X"AAAA";
+                dsp_rd_dat <= X"00AA";
                 set_dsp_rd_sts <= '1';
                 state <= DONE;
               end if;
