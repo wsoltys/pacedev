@@ -12,7 +12,7 @@ entity sound_blaster_16 is
   (
     wb_clk_i        : in std_logic;
     wb_rst_i        : in std_logic;
-    wb_adr_i        : in std_logic_vector(15 downto 0);
+    wb_adr_i        : in std_logic_vector(15 downto 1);
     wb_dat_i        : in std_logic_vector(15 downto 0);
     wb_dat_o        : out std_logic_vector(15 downto 0);
     wb_sel_i        : in std_logic_vector(1 downto 0);
@@ -40,6 +40,12 @@ architecture SYN of sound_blaster_16 is
   constant REG_FM_REG_ADR2      : std_logic_vector(4 downto 0) := REG_FM_STS2;
   constant REG_FM_DAT2          : std_logic_vector(4 downto 0) := '0' & X"9";
 
+	signal wb_adr									: std_logic_vector(4 downto 0) := (others => '0');
+	signal mxr_stb								: std_logic := '0';
+	signal mxr_dat_o							: std_logic_vector(15 downto 0) := (others => '0');
+	signal dsp_stb								: std_logic := '0';
+	signal dsp_dat_o							: std_logic_vector(15 downto 0) := (others => '0');
+
   -- audio block signals
   signal dsp_audio_l            : std_logic_vector(15 downto 0) := (others => '0');
   signal dsp_audio_r            : std_logic_vector(15 downto 0) := (others => '0');
@@ -49,13 +55,26 @@ architecture SYN of sound_blaster_16 is
 begin
 
   -- base address must be $02XX and 32-byte aligned
-  assert (IO_BASE_ADDR(15 downto 8) = X"02" and IO_BASE_ADDR(5 downto 0) = "00000")
+  assert (IO_BASE_ADDR(15 downto 8) = X"02" and IO_BASE_ADDR(4 downto 0) = "00000")
     report "Unsupported I/O base address"
       severity failure;
 
   -- 32 bytes of IO address space
   sb16_io_arena <= '1' when wb_adr_i(15 downto 5) = IO_BASE_ADDR(15 downto 5) else '0';
-  
+
+	-- construct byte-address from bus address and sel signals
+	wb_adr <= wb_adr_i(4 downto 1) & not wb_sel_i(0);
+
+	-- strobe signals
+	-- - mixer $04-$05
+	mxr_stb <= '1' when wb_adr(4 downto 1) = "0010" else '0';
+  -- - DSP everything else
+	dsp_stb <= not mxr_stb;
+
+	-- read mux
+	wb_dat_o <= mxr_dat_o when mxr_stb = '1' else
+							dsp_dat_o;
+
   -- register interface - ack immediately
   wb_ack_o <= wb_cyc_i and wb_stb_i;
 
@@ -80,8 +99,8 @@ begin
     type mxr_reg_a is array (natural range <>) of std_logic_vector(7 downto 0);
     signal mxr_reg        : mxr_reg_a(0 to 31);
     
-    alias VOICE_VOL_L   : std_logic_vector(7 downto 4) is mxr_reg(16#02#)(7 downto 3);
-    alias VOICE_VOL_R   : std_logic_vector(7 downto 4) is mxr_reg(16#03#)(7 downto 3);
+    alias VOICE_VOL_L   : std_logic_vector(7 downto 3) is mxr_reg(16#02#)(7 downto 3);
+    alias VOICE_VOL_R   : std_logic_vector(7 downto 3) is mxr_reg(16#03#)(7 downto 3);
     
   begin
 
@@ -97,10 +116,10 @@ begin
       elsif rising_edge(wb_clk_i) then
         if wb_we_i = '0' then
           -- register READ
-          if cyc_rd_r = '0'and wb_cyc_i = '1' and wb_stb_i = '1' then
-            case wb_adr_i(4 downto 0) is
+          if cyc_rd_r = '0'and wb_cyc_i = '1' and mxr_stb = '1' then
+            case wb_adr(4 downto 0) is
               when REG_MXR_DAT =>
-                wb_dat_o <= X"00" & mxr_reg(mxr_adr);
+                mxr_dat_o <= X"00" & mxr_reg(mxr_adr);
               when others =>
                 null;
             end case;
@@ -108,7 +127,7 @@ begin
         else
           -- register WRITE
           if cyc_wr_r = '0' and wb_cyc_i = '1' and wb_stb_i = '1' then
-            case wb_adr_i(4 downto 0) is
+            case wb_adr(4 downto 0) is
               when REG_MXR_ADR =>
                 -- mangle the mixer address to we can use it
                 mxr_adr <= to_integer(unsigned(not wb_dat_i(4) & wb_dat_i(3 downto 0)));
@@ -144,8 +163,8 @@ begin
           end if;
         end if;
         -- latch wb cycle type
-        cyc_rd_r := wb_cyc_i and wb_stb_i and not wb_we_i;
-        cyc_wr_r := wb_cyc_i and wb_stb_i and wb_we_i;
+        cyc_rd_r := wb_cyc_i and mxr_stb and not wb_we_i;
+        cyc_wr_r := wb_cyc_i and mxr_stb and wb_we_i;
       end if;
     end process;
 
@@ -206,7 +225,7 @@ begin
     signal set_dsp_wr_sts   : std_logic := '0';
     signal clr_dsp_wr_sts   : std_logic := '0';
 
-    signal dsp_rd_dat       : std_logic_vector(wb_dat_o'range) := (others => '0');
+    signal dsp_rd_dat       : std_logic_vector(dsp_dat_o'range) := (others => '0');
     signal dsp_wr_dat       : std_logic_vector(wb_dat_i'range) := (others => '0');
     
   begin
@@ -231,15 +250,15 @@ begin
         set_dsp_wr_sts <= '0';  -- default
         if wb_we_i = '0' then
           -- register READ
-          if cyc_rd_r = '0'and wb_cyc_i = '1' and wb_stb_i = '1' then
-            case wb_adr_i(4 downto 0) is
+          if cyc_rd_r = '0'and wb_cyc_i = '1' and dsp_stb = '1' then
+            case wb_adr(4 downto 0) is
               when REG_DSP_RD_DAT =>
-                wb_dat_o <= dsp_rd_dat;
+                dsp_dat_o <= dsp_rd_dat;
                 clr_dsp_rd_sts <= '1';
               when REG_DSP_WR_BUF_STS =>
-                wb_dat_o <= X"00" & dsp_wr_sts & "0000000";
+                dsp_dat_o <= X"00" & dsp_wr_sts & "0000000";
               when REG_DSP_RD_BUF_STS =>
-                wb_dat_o <= X"00" & dsp_rd_sts & "0000000";
+                dsp_dat_o <= X"00" & dsp_rd_sts & "0000000";
               when REG_DSP_INTACK =>
               when others =>
                 null;
@@ -247,8 +266,8 @@ begin
           end if;
         else
           -- register WRITE
-          if cyc_wr_r = '0' and wb_cyc_i = '1' and wb_stb_i = '1' then
-            case wb_adr_i(4 downto 0) is
+          if cyc_wr_r = '0' and wb_cyc_i = '1' and dsp_stb = '1' then
+            case wb_adr(4 downto 0) is
               when REG_DSP_RST =>
                 dsp_rst <= wb_dat_i(0);
               when REG_DSP_WR_CMD_DAT =>
@@ -260,8 +279,8 @@ begin
           end if;
         end if;
         -- latch wb cycle type
-        cyc_rd_r := wb_cyc_i and wb_stb_i and not wb_we_i;
-        cyc_wr_r := wb_cyc_i and wb_stb_i and wb_we_i;
+        cyc_rd_r := wb_cyc_i and dsp_stb and not wb_we_i;
+        cyc_wr_r := wb_cyc_i and dsp_stb and wb_we_i;
       end if;
     end process;
 
@@ -287,9 +306,11 @@ begin
     
     -- DSP STATE MACHINE
     DSP_SM_P : process (wb_clk_i, wb_rst_i)
+			variable dsp_wr_sts_r : std_logic := '0';
     begin
       if wb_rst_i = '1' then
         set_dsp_rd_sts <= '0';
+				dsp_wr_sts_r := '0';
       elsif rising_edge(wb_clk_i) then
         set_dsp_rd_sts <= '0';  -- default
         clr_dsp_wr_sts <= '0';  -- default
@@ -321,10 +342,11 @@ begin
                 state <= DONE;
               end if;
             when PRG_8_DIR =>
-              if dsp_wr_sts = '1' then
+							-- wait for rising edge of dsp_wr_sts
+              if dsp_wr_sts_r = '0' and dsp_wr_sts = '1' then
                 -- 8-bit mono unsigned audio data
-                dsp_audio_l <= dsp_wr_dat & X"00";
-                dsp_audio_r <= dsp_wr_dat & X"00";
+                dsp_audio_l <= dsp_wr_dat(7 downto 0) & X"00";
+                dsp_audio_r <= dsp_wr_dat(7 downto 0) & X"00";
                 state <= DONE;
               end if;
             when GET_DSP_VER =>
@@ -339,6 +361,7 @@ begin
               state <= IDLE;
           end case;
         end if;
+				dsp_wr_sts_r := dsp_wr_sts;
       end if;
     end process DSP_SM_P;
     
