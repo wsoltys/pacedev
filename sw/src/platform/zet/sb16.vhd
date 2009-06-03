@@ -76,7 +76,14 @@ begin
 							dsp_dat_o;
 
   -- register interface - ack immediately
-  wb_ack_o <= wb_cyc_i and wb_stb_i;
+	process (wb_clk_i, wb_rst_i)
+	begin
+		if wb_rst_i = '1' then
+			wb_ack_o <= '0';
+		elsif rising_edge(wb_clk_i) then
+  		wb_ack_o <= wb_cyc_i and wb_stb_i;
+		end if;
+	end process;
 
   -- assign the outputs
   audio_l <= mxr_audio_l;
@@ -213,7 +220,7 @@ begin
       IDLE, IN_RESET, 
       PRG_8_DIR, 
       GET_DSP_VER,
-      DONE 
+      DONE, DONE_WAIT 
     );
     signal state            : state_t := IDLE;
     
@@ -306,11 +313,13 @@ begin
     
     -- DSP STATE MACHINE
     DSP_SM_P : process (wb_clk_i, wb_rst_i)
-			variable dsp_wr_sts_r : std_logic := '0';
+      variable dsp_rd_sts_r : std_logic := '0';
+      variable dsp_wr_sts_r : std_logic := '0';
     begin
       if wb_rst_i = '1' then
         set_dsp_rd_sts <= '0';
-				dsp_wr_sts_r := '0';
+        dsp_rd_sts_r := '0';
+        dsp_wr_sts_r := '0';
       elsif rising_edge(wb_clk_i) then
         set_dsp_rd_sts <= '0';  -- default
         clr_dsp_wr_sts <= '0';  -- default
@@ -342,7 +351,6 @@ begin
                 state <= DONE;
               end if;
             when PRG_8_DIR =>
-							-- wait for rising edge of dsp_wr_sts
               if dsp_wr_sts_r = '0' and dsp_wr_sts = '1' then
                 -- 8-bit mono unsigned audio data
                 dsp_audio_l <= dsp_wr_dat(7 downto 0) & X"00";
@@ -350,18 +358,22 @@ begin
                 state <= DONE;
               end if;
             when GET_DSP_VER =>
-              if dsp_rd_sts = '0' then
+              if dsp_rd_sts_r = '1' and dsp_rd_sts = '0' then
                 dsp_rd_dat <= X"00" & DSP_MINOR_VER;
                 set_dsp_rd_sts <= '1';
                 state <= DONE;
               end if;
-            when others =>
-              -- includes DONE state
+            when DONE =>
               clr_dsp_wr_sts <= '1';
+              state <= DONE_WAIT;
+            when others =>
+              -- includes DONE_WAIT state
               state <= IDLE;
           end case;
         end if;
-				dsp_wr_sts_r := dsp_wr_sts;
+        -- latches for edge-detect
+        dsp_rd_sts_r := dsp_rd_sts;
+        dsp_wr_sts_r := dsp_wr_sts;
       end if;
     end process DSP_SM_P;
     
