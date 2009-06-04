@@ -1,0 +1,6 @@
+set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) cpu.sdc]
+set_global_assignment -name TCL_FILE [file join $::quartus(qip_path) E:/markm/pace/pacedev.net/sw/src/platform/zet/tb/sb16_avalon_wrapper_hw.tcl]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) E:/markm/pace/pacedev.net/sw/src/platform/zet/sb16.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) E:/markm/pace/pacedev.net/sw/src/platform/zet/tb/sb16_avalon_wrapper.vhd]
+set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID 005056C0000800000121A5D34183 
+ 
