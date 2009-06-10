@@ -106,6 +106,9 @@ architecture SYN of target_top is
   signal clk_nios     : std_logic := '0';
   signal clk_sdram    : std_logic := '0';
   
+  signal nios_pio_o   : std_logic_vector(7 downto 0) := (others => '0');
+  
+  signal pc_speaker   : std_logic := '0';
   signal audio_l      : std_logic_vector(15 downto 0) := (others => '0');
   signal audio_r      : std_logic_vector(15 downto 0) := (others => '0');
   
@@ -129,6 +132,9 @@ begin
   reset_i <= init or not key(0);
 	reset_n <= not reset_i;
 
+  -- drive speaker input from NIOS
+  pc_speaker <= nios_pio_o(0);
+  
   pll_inst : entity work.nios_pll
     port map
     (
@@ -152,11 +158,12 @@ begin
       in_port_to_the_PIO_ISR                      => (others => '0'),
 
       -- the_PIO_OUT
-      out_port_from_the_PIO_OUT                   => open,
+      out_port_from_the_PIO_OUT                   => nios_pio_o,
 
       -- the_sb16_avalon_wrapper_0
       coe_audio_l_from_the_sb16_avalon_wrapper_0  => audio_l,
       coe_audio_r_from_the_sb16_avalon_wrapper_0  => audio_r,
+      coe_pc_speaker_to_the_sb16_avalon_wrapper_0 => pc_speaker,
 
       -- the_sdram_cpu
       zs_addr_from_the_sdram_cpu                  => dram_addr,

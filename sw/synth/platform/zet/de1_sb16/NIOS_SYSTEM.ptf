@@ -2482,7 +2482,7 @@ SYSTEM NIOS_SYSTEM
          Has_Clock = "1";
          View 
          {
-            Settings_Summary = "System ID (at last Generate):<br> <b>5DBF5ADF</b>    (unique ID tag) <br> <b>4A265AED</b> (timestamp: Wed Jun 3, 2009 @9:13 PM)";
+            Settings_Summary = "System ID (at last Generate):<br> <b>5DBF5ADF</b>    (unique ID tag) <br> <b>4A2FD096</b> (timestamp: Thu Jun 11, 2009 @1:26 AM)";
             MESSAGES 
             {
             }
@@ -2491,7 +2491,7 @@ SYSTEM NIOS_SYSTEM
       WIZARD_SCRIPT_ARGUMENTS 
       {
          id = "1572821727u";
-         timestamp = "1244027629u";
+         timestamp = "1244647574u";
          regenerate_values = "0";
          MAKE 
          {
@@ -2500,7 +2500,7 @@ SYSTEM NIOS_SYSTEM
                verifysysid 
                {
                   All_Depends_On = "0";
-                  Command = "nios2-download $(JTAG_CABLE)                                --sidp=0x08000098 --id=1572821727 --timestamp=1244027629";
+                  Command = "nios2-download $(JTAG_CABLE)                                --sidp=0x08000098 --id=1572821727 --timestamp=1244647574";
                   Is_Phony = "1";
                   Target_File = "dummy_verifysysid_file";
                }
@@ -3689,6 +3689,13 @@ SYSTEM NIOS_SYSTEM
       }
       PORT_WIRING 
       {
+         PORT coe_pc_speaker
+         {
+            type = "export";
+            width = "1";
+            direction = "input";
+            Is_Enabled = "1";
+         }
          PORT coe_audio_l
          {
             type = "export";
@@ -3725,7 +3732,7 @@ SYSTEM NIOS_SYSTEM
       }
       HDL_INFO 
       {
-         Simulation_HDL_Files = "__PROJECT_DIRECTORY__/sb16_avalon_wrapper_0.vhd,E:/markm/pace/pacedev.net/sw/src/platform/zet/tb/sb16_avalon_wrapper.vhd,E:/markm/pace/pacedev.net/sw/src/platform/zet/sb16.vhd";
+         Simulation_HDL_Files = "__PROJECT_DIRECTORY__/sb16_avalon_wrapper_0.vhd,D:/markm/pace/pacedev.net/sw/src/component/sound/sb16/addsubu8.vhd,D:/markm/pace/pacedev.net/sw/src/component/sound/sb16/addsubu9.vhd,D:/markm/pace/pacedev.net/sw/src/component/sound/sb16/mix_2_8.vhd,D:/markm/pace/pacedev.net/sw/src/component/sound/sb16/mult9.vhd,D:/markm/pace/pacedev.net/sw/src/component/sound/sb16/sb16.vhd,D:/markm/pace/pacedev.net/sw/src/component/sound/sb16/sb16_avalon_wrapper.vhd";
       }
       WIZARD_SCRIPT_ARGUMENTS 
       {

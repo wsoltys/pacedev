@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><system name="NIOS_SYSTEM">
   <parameter name="bonusData">bonusData 
 {
-   element clk
-   {
-      datum _sortIndex
-      {
-         value = "11";
-         type = "int";
-      }
-   }
    element sysid.control_slave
    {
       datum baseAddress
@@ -17,8 +9,45 @@
          type = "long";
       }
    }
-   element NIOS_SYSTEM
+   element pipeline_bridge.s1
    {
+      datum baseAddress
+      {
+         value = "134217728";
+         type = "long";
+      }
+   }
+   element PIO_OUT.s1
+   {
+      datum baseAddress
+      {
+         value = "64";
+         type = "long";
+      }
+   }
+   element sb16_avalon_wrapper_0
+   {
+      datum _sortIndex
+      {
+         value = "2";
+         type = "int";
+      }
+   }
+   element PIO_ISR.s1
+   {
+      datum baseAddress
+      {
+         value = "96";
+         type = "long";
+      }
+   }
+   element clk
+   {
+      datum _sortIndex
+      {
+         value = "11";
+         type = "int";
+      }
    }
    element timer_8kHz
    {
@@ -38,43 +67,24 @@
          type = "boolean";
       }
    }
-   element PIO_IN.s1
-   {
-      datum baseAddress
-      {
-         value = "80";
-         type = "long";
-      }
-   }
-   element clk.clk
-   {
-      datum clock_domain
-      {
-         value = "clk";
-         type = "String";
-      }
-   }
-   element PIO_OUT.s1
-   {
-      datum baseAddress
-      {
-         value = "64";
-         type = "long";
-      }
-   }
-   element sdram_cpu.s1
-   {
-      datum baseAddress
-      {
-         value = "67108864";
-         type = "long";
-      }
-   }
-   element cpu
+   element jtag_uart
    {
       datum _sortIndex
       {
-         value = "1";
+         value = "5";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element pipeline_bridge
+   {
+      datum _sortIndex
+      {
+         value = "3";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -86,6 +96,14 @@
       {
          value = "1";
          type = "boolean";
+      }
+   }
+   element PIO_IN.s1
+   {
+      datum baseAddress
+      {
+         value = "80";
+         type = "long";
       }
    }
    element PIO_ISR
@@ -101,20 +119,17 @@
          type = "boolean";
       }
    }
-   element pipeline_bridge.s1
+   element sys_clock_timer
    {
-      datum baseAddress
+      datum _sortIndex
       {
-         value = "134217728";
-         type = "long";
+         value = "4";
+         type = "int";
       }
-   }
-   element sb16_avalon_wrapper_0.s1
-   {
-      datum baseAddress
+      datum sopceditor_expanded
       {
-         value = "8704";
-         type = "long";
+         value = "0";
+         type = "boolean";
       }
    }
    element jtag_uart.avalon_jtag_slave
@@ -125,11 +140,11 @@
          type = "long";
       }
    }
-   element PIO_OUT
+   element sysid
    {
       datum _sortIndex
       {
-         value = "7";
+         value = "6";
          type = "int";
       }
       datum sopceditor_expanded
@@ -138,27 +153,32 @@
          type = "boolean";
       }
    }
-   element timer_8kHz.s1
+   element sys_clock_timer.s1
    {
       datum baseAddress
       {
-         value = "32";
+         value = "0";
          type = "long";
       }
    }
-   element cpu.jtag_debug_module
-   {
-      datum baseAddress
-      {
-         value = "150996992";
-         type = "long";
-      }
-   }
-   element pipeline_bridge
+   element PIO_IN
    {
       datum _sortIndex
       {
-         value = "3";
+         value = "8";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element cpu
+   {
+      datum _sortIndex
+      {
+         value = "1";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -185,11 +205,11 @@
          type = "String";
       }
    }
-   element sysid
+   element PIO_OUT
    {
       datum _sortIndex
       {
-         value = "6";
+         value = "7";
          type = "int";
       }
       datum sopceditor_expanded
@@ -198,67 +218,39 @@
          type = "boolean";
       }
    }
-   element jtag_uart
-   {
-      datum _sortIndex
-      {
-         value = "5";
-         type = "int";
-      }
-      datum sopceditor_expanded
-      {
-         value = "0";
-         type = "boolean";
-      }
-   }
-   element PIO_ISR.s1
+   element cpu.jtag_debug_module
    {
       datum baseAddress
       {
-         value = "96";
+         value = "150996992";
          type = "long";
       }
    }
-   element PIO_IN
-   {
-      datum _sortIndex
-      {
-         value = "8";
-         type = "int";
-      }
-      datum sopceditor_expanded
-      {
-         value = "0";
-         type = "boolean";
-      }
-   }
-   element sys_clock_timer
-   {
-      datum _sortIndex
-      {
-         value = "4";
-         type = "int";
-      }
-      datum sopceditor_expanded
-      {
-         value = "0";
-         type = "boolean";
-      }
-   }
-   element sys_clock_timer.s1
+   element timer_8kHz.s1
    {
       datum baseAddress
       {
-         value = "0";
+         value = "32";
          type = "long";
       }
    }
-   element sb16_avalon_wrapper_0
+   element clk.clk
    {
-      datum _sortIndex
+      datum clock_domain
       {
-         value = "2";
-         type = "int";
+         value = "clk";
+         type = "String";
+      }
+   }
+   element NIOS_SYSTEM
+   {
+   }
+   element sdram_cpu.s1
+   {
+      datum baseAddress
+      {
+         value = "67108864";
+         type = "long";
       }
    }
 }
@@ -269,7 +261,7 @@
   <parameter name="hdlLanguage" value="VHDL" />
   <parameter name="projectName" value="sb16.qpf" />
   <parameter name="systemHash" value="59554880196" />
-  <parameter name="timeStamp" value="1244027628661" />
+  <parameter name="timeStamp" value="1244646612813" />
   <module name="clk" kind="clock_source" version="8.1" enabled="1">
     <parameter name="clockFrequency" value="66000000" />
     <parameter name="clockFrequencyKnown" value="true" />
