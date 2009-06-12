@@ -42,6 +42,7 @@ architecture SYN of tb_sb16 is
   signal wb_we_i        : std_logic := '0';
   signal wb_ack_o       : std_logic := '0';
 	signal sb16_io_arena	: std_logic := '0';
+	signal pc_speaker     : std_logic := '0';
   signal audio_l    		: std_logic_vector(15 downto 0) := (others => '0');
   signal audio_r    		: std_logic_vector(15 downto 0) := (others => '0');
 
@@ -111,10 +112,15 @@ begin
 		variable dat : std_logic_vector(15 downto 0) := (others => '0');
 
   begin
+    pc_speaker <= '0';
 		-- $022X
 		wb_adr_i(15 downto 5) <= X"02" & "001";
     wait until reset = '0';
 
+    -- reset mixer
+    wb_wr ("00100", X"00");
+    wb_wr ("00101", X"00");
+    
     -- reset dsp
     wb_wr ("00110", X"01");
 		wait for 100 ns;
@@ -141,10 +147,26 @@ begin
 		wait_dsp_wr;
     wb_wr ("01100", X"22");
 		wait_dsp_wr;
+    wait for 200 ns;
+    pc_speaker <= '1';
+    wait for 200 ns;
     wb_wr ("01100", X"10");
 		wait_dsp_wr;
     wb_wr ("01100", X"33");
 
+    -- turn down speaker volume
+    wb_wr ("00100", X"3B");
+    wb_wr ("00101", X"80");
+    wait for 200 ns;
+    wb_wr ("00100", X"3B");
+    wb_wr ("00101", X"40");
+    wait for 200 ns;
+    wb_wr ("00100", X"3B");
+    wb_wr ("00101", X"00");
+
+    wait for 1000 ns;
+    wait;
+    
   end process TEST_P;
 
   --sb16_hw : entity work.sound_blaster_16
@@ -190,7 +212,8 @@ begin
 			avs_s1_write									=> wb_we_i,
 			avs_s1_waitrequest_n  				=> wb_ack_o,
 			ins_irq0_irq          				=> open,
-	                          				
+
+      coe_pc_speaker	              => pc_speaker,
 	    coe_audio_l         					=> audio_l,
 	    coe_audio_r         					=> audio_r
 		);
