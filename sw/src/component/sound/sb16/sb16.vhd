@@ -103,9 +103,10 @@ begin
     constant REG_MXR_ADR          : std_logic_vector(4 downto 0) := '0' & X"4";
     constant REG_MXR_DAT          : std_logic_vector(4 downto 0) := '0' & X"5";
 
-    subtype mxr_adr_t is integer range 0 to 16#47#;
-    signal mxr_adr        : mxr_adr_t := 0;
-    
+    subtype mxr_adr_t is integer range 0 to 16#63#;
+    signal mxr_adr        : mxr_adr_t;
+    signal mxr_reg_adr    : mxr_adr_t;    -- used to index registers
+            
     -- actually, there's only 24 of these
     -- - registers $30-$47 -> $00-$17
     type mxr_reg_a is array (natural range <>) of std_logic_vector(7 downto 0);
@@ -119,13 +120,15 @@ begin
 
     -- MIXER registers
     process (wb_clk_i, wb_rst_i)
-      variable cyc_rd_r : std_logic := '0';
-      variable cyc_wr_r : std_logic := '0';
+      variable cyc_rd_r   : std_logic := '0';
+      variable cyc_wr_r   : std_logic := '0';
     begin
       if wb_rst_i = '1' then
         mxr_adr <= 0;
+        mxr_reg_adr <= 0;
         cyc_rd_r := '0';
         cyc_wr_r := '0';
+        PC_SPKR_VOL <= "11";    -- for Zet only
       elsif rising_edge(wb_clk_i) then
         if wb_we_i = '0' then
           -- register READ
@@ -142,39 +145,48 @@ begin
           if cyc_wr_r = '0' and wb_cyc_i = '1' and wb_stb_i = '1' then
             case wb_adr(4 downto 0) is
               when REG_MXR_ADR =>
+                mxr_adr <= to_integer(unsigned(dat_i(5 downto 0)));
                 -- mangle the mixer address to we can use it
-                mxr_adr <= to_integer(unsigned(not dat_i(4) & dat_i(3 downto 0)));
+                mxr_reg_adr <= to_integer(unsigned(not dat_i(4) & dat_i(3 downto 0)));
               when REG_MXR_DAT =>
-                case mxr_adr is
+                if mxr_adr < 16#30# then
                   -- handle legacy mixer registers
-                  when 16#00# =>
-                    -- mixer reset
-                    -- real SB16 defaults to 0, but make Zet default to 3 (max)
-                    PC_SPKR_VOL <= "11";
-                    -- tbd. other defaults
-                  when 16#04# =>
-                    -- Voice Volume L/R
-                    mxr_reg(16#02#) <= dat_i(7 downto 4) & "0000";
-                    mxr_reg(16#03#) <= dat_i(3 downto 0) & "0000";
-                  when 16#0A# =>
-                    -- Mic Volume
-                    mxr_reg(16#0A#) <= dat_i(2 downto 0) & "00000";
-                  when 16#22# =>
-                    -- Master Volume L/R
-                    mxr_reg(16#00#) <= dat_i(7 downto 4) & "0000";
-                    mxr_reg(16#01#) <= dat_i(3 downto 0) & "0000";
-                  when 16#26# =>
-                    -- CD Volume L/R
-                    mxr_reg(16#06#) <= dat_i(7 downto 4) & "0000";
-                    mxr_reg(16#07#) <= dat_i(3 downto 0) & "0000";
-                  when 16#28# =>
-                    -- Line Volume L/R
-                  when 16#2E# =>
-                    mxr_reg(16#08#) <= dat_i(7 downto 4) & "0000";
-                    mxr_reg(16#09#) <= dat_i(3 downto 0) & "0000";
-                  when others =>
-                    mxr_reg(mxr_adr) <= dat_i(7 downto 0);
-                end case;
+                  case mxr_adr is
+                    when 16#00# =>
+                      -- mixer reset
+                      -- real SB16 defaults to 0, but make Zet default to 3 (max)
+                      PC_SPKR_VOL <= "11";
+                      -- tbd. other defaults
+                    when 16#04# =>
+                      -- Voice Volume L/R
+                      mxr_reg(16#02#) <= dat_i(7 downto 4) & "0000";
+                      mxr_reg(16#03#) <= dat_i(3 downto 0) & "0000";
+                    when 16#0A# =>
+                      -- Mic Volume
+                      mxr_reg(16#0A#) <= dat_i(2 downto 0) & "00000";
+                    when 16#22# =>
+                      -- Master Volume L/R
+                      mxr_reg(16#00#) <= dat_i(7 downto 4) & "0000";
+                      mxr_reg(16#01#) <= dat_i(3 downto 0) & "0000";
+                    when 16#26# =>
+                      -- CD Volume L/R
+                      mxr_reg(16#06#) <= dat_i(7 downto 4) & "0000";
+                      mxr_reg(16#07#) <= dat_i(3 downto 0) & "0000";
+                    when 16#28# =>
+                      -- Line Volume L/R
+                    when 16#2E# =>
+                      mxr_reg(16#08#) <= dat_i(7 downto 4) & "0000";
+                      mxr_reg(16#09#) <= dat_i(3 downto 0) & "0000";
+                    when others =>
+                      null;
+                  end case;
+                else
+                  -- register bank $30-$47
+                  case mxr_reg_adr is
+                    when others =>
+                      mxr_reg(mxr_reg_adr) <= dat_i(7 downto 0);
+                  end case;
+                end if;
               when others =>
                 null;
             end case;
