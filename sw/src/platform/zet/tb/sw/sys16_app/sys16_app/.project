@@ -3,7 +3,7 @@
 	<name>sys16_app</name>
 	<comment></comment>
 	<projects>
-		<project>sb16_syslib</project>
+		<project>sys16_syslib</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -39,15 +39,15 @@
 					<value></value>
 				</dictionary>
 				<dictionary>
-					<key>org.eclipse.cdt.make.core.useDefaultBuildCmd</key>
-					<value>true</value>
-				</dictionary>
-				<dictionary>
 					<key>org.eclipse.cdt.make.core.environment</key>
 					<value></value>
 				</dictionary>
 				<dictionary>
-					<key>org.eclipse.cdt.make.core.enableFullBuild</key>
+					<key>org.eclipse.cdt.make.core.useDefaultBuildCmd</key>
+					<value>true</value>
+				</dictionary>
+				<dictionary>
+					<key>org.eclipse.cdt.make.core.enableAutoBuild</key>
 					<value>false</value>
 				</dictionary>
 				<dictionary>
@@ -55,7 +55,7 @@
 					<value>all</value>
 				</dictionary>
 				<dictionary>
-					<key>org.eclipse.cdt.make.core.enableAutoBuild</key>
+					<key>org.eclipse.cdt.make.core.enableFullBuild</key>
 					<value>false</value>
 				</dictionary>
 				<dictionary>

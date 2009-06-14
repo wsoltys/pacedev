@@ -48,13 +48,33 @@ static void timer_8kHz_interrupt(void *context, alt_u32 id)
 
   static int i = 0;
   static unsigned char *p = dat;
-  
+  static unsigned int spkr_count = 0;
+  static unsigned char spkr_data = 0;
+  static int spkr_vol = 0xC0;
+
+#if 1
+  if (i==0)
+  {
+    SB16_WR32 (REG(0x04), 0x3B);
+    SB16_WR32 (REG(0x05), spkr_vol<<8);
+    spkr_vol += (1<<6);
+  }
+#endif
+
   wait_dsp_wr ();
   SB16_WR32 (REG(0x0C), 0x10);
   wait_dsp_wr ();
   SB16_WR32 (REG(0x0C), dat[i]);
   if (++i == DAT_BYTES)
     i = 0;
+
+  // pc speaker
+  if (++spkr_count == 4)
+  {
+    IOWR_ALTERA_AVALON_PIO_DATA (PIO_OUT_BASE, spkr_data);
+    spkr_data ^= (1<<0);
+    spkr_count = 0;
+  }
 }
 
 int main (int argc, char* argv[], char* envp[])
@@ -83,6 +103,10 @@ int main (int argc, char* argv[], char* envp[])
   // pre-calculate sin table
   for (double a=0.0; a<2*3.141592654; a+=0.1)
     sinA[nSin++] = (unsigned int)(128.0 + sin(a)*90.0);
+
+  // reset mixer
+  SB16_WR32 (REG(0x04), 0x00);
+  SB16_WR32 (REG(0x05), 0x00);
 
   // register and enable the 100Hz timer interrupt handler
   alt_irq_register(TIMER_8KHZ_IRQ, 0, timer_8kHz_interrupt);
