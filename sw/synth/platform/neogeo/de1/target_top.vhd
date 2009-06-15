@@ -8,6 +8,7 @@ use work.pace_pkg.all;
 use work.video_controller_pkg.all;
 use work.maple_pkg.all;
 use work.gamecube_pkg.all;
+use work.sdram_pkg.all;
 use work.project_pkg.all;
 use work.target_pkg.all;
 
@@ -136,6 +137,8 @@ architecture SYN of target_top is
   signal ser_o        : to_SERIAL_t;
   signal gp_i         : from_GP_t;
   signal gp_o         : to_GP_t;
+
+  signal dram_clk_s   : std_logic;
   
 	-- maple/dreamcast controller interface
 	signal maple_sense	: std_logic;
@@ -169,9 +172,9 @@ begin
         inclk0		=> clock_50,
         c0		    => clk_i(1),    -- 25MHz
         c1		    => clk_i(0),    -- 100MHz
-        c2		    => dram_clk
+        c2		    => dram_clk_s
       );
-
+    dram_clk <= dram_clk_s;
       
     pll_27_inst : entity work.pll
       generic map
@@ -381,6 +384,56 @@ begin
   end block BLK_SRAM;
 
   BLK_SDRAM : block
+  
+    component yadmc
+      generic
+      (
+        sdram_depth         : natural := 25;
+        sdram_columndepth   : natural := 9;
+        sdram_adrwires      : natural := 13;
+        sdram_bytes_depth   : natural := 1;
+        cache_depth         : natural := 10;
+        --sdram_bits          : natural := (8 << sdram_bytes_depth);
+        sdram_bits          : natural := 16;
+        --cache_linedepth     : natural := sdram_bytes_depth + 1;
+        cache_linedepth     : natural := 2;
+        --cache_linelength    : natural := (4 << cache_linedepth);
+        cache_linelength    : natural := 16;
+        --cache_tagdepth      : natural := sdram_depth - cache_depth - cache_linedepth - 2
+        cache_tagdepth      : natural := 11
+      );
+      port
+      (
+        -- debug
+        state         : out std_logic_vector(1 downto 0);
+        statey        : out std_logic_vector(4 downto 0);
+        
+        -- WISHBONE interface
+        sys_clk       : in std_logic;
+        sys_rst       : in std_logic;
+        wb_adr_i      : in std_logic_vector(31 downto 0);
+        wb_dat_i      : in std_logic_vector(31 downto 0);
+        wb_dat_o      : out std_logic_vector(31 downto 0);
+        wb_sel_i      : in std_logic_vector(3 downto 0);
+        wb_cyc_i      : in std_logic;
+        wb_stb_i      : in std_logic;
+        wb_we_i       : in std_logic;
+        wb_ack_o      : out std_logic;
+
+        -- SDRAM interface
+        sdram_clk     : in std_logic;
+        sdram_cke     : out std_logic;
+        sdram_cs_n    : out std_logic;
+        sdram_we_n    : out std_logic;
+        sdram_cas_n   : out std_logic;
+        sdram_ras_n   : out std_logic;
+        sdram_dqm     : out std_logic_vector((sdram_bits/8)-1 downto 0);
+        sdram_adr     : out std_logic_vector(sdram_adrwires-1 downto 0);
+        sdram_ba      : out std_logic_vector(1 downto 0);
+        sdram_dq      : inout std_logic_vector(sdram_bits-1 downto 0)
+      );
+    end component yadmc;
+    
   begin
 
     GEN_NO_SDRAM : if not PACE_HAS_SDRAM generate
@@ -393,35 +446,41 @@ begin
   
     GEN_SDRAM : if PACE_HAS_SDRAM generate
 
-      sdram_inst : entity work.sdram_0
+      sdram_inst : yadmc
+        generic map
+        (
+          sdram_depth         => 23,
+          sdram_columndepth   => 8,
+          sdram_adrwires      => 12,
+          cache_depth         => 4
+        )
         port map
         (
-          clk             => clk_i(0),
-          reset_n         => reset_n,
+          -- Wishbone slave interface
+          sys_clk       => sdram_o.clk,
+          sys_rst       => sdram_o.rst,
+          wb_adr_i      => sdram_o.a,
+          wb_dat_i      => sdram_o.d,
+          wb_dat_o      => sdram_i.d,
+          wb_sel_i      => sdram_o.sel,
+          wb_cyc_i      => sdram_o.cyc,
+          wb_stb_i      => sdram_o.stb,
+          wb_we_i       => sdram_o.we,
+          wb_ack_o      => sdram_i.ack,
 
-          -- fpga bus interface
-          az_addr         => sdram_o.a,
-          az_data         => sdram_o.d,
-          za_waitrequest  => sdram_i.waitrequest,
-          az_cs           => sdram_o.cs,
-          az_be_n         => sdram_o.be_n,
-          az_rd_n         => sdram_o.rd_n,
-          az_wr_n         => sdram_o.wr_n,
-          za_data         => sdram_i.d,
-          za_valid        => sdram_i.valid,
-
-          -- sdram physical interface
-          zs_dq           => dram_dq,
-          zs_addr         => dram_addr,
-          zs_dqm(1)       => dram_udqm,
-          zs_dqm(0)       => dram_ldqm,
-          zs_we_n         => dram_we_n,
-          zs_cas_n        => dram_cas_n,
-          zs_ras_n        => dram_ras_n,
-          zs_cs_n         => dram_cs_n,
-          zs_ba(1)        => dram_ba_1,
-          zs_ba(0)        => dram_ba_0,
-          zs_cke          => dram_cke
+          -- SDRAM interface
+          sdram_clk     => dram_clk_s,
+          sdram_cke     => dram_cke,
+          sdram_cs_n    => dram_cs_n,
+          sdram_we_n    => dram_we_n,
+          sdram_cas_n   => dram_cas_n,
+          sdram_ras_n   => dram_ras_n,
+          sdram_dqm(1)  => dram_udqm,
+          sdram_dqm(0)  => dram_ldqm,
+          sdram_adr     => dram_addr,
+          sdram_ba(1)   => dram_ba_1,
+          sdram_ba(0)   => dram_ba_0,
+          sdram_dq      => dram_dq
         );
 
     end generate GEN_SDRAM;

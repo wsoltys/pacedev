@@ -143,28 +143,6 @@ package pace_pkg is
 
   function NULL_TO_FLASH return to_FLASH_t;
 
-  --
-  -- SDRAM interface data structure
-  --
-  type from_SDRAM_t is record
-    waitrequest : std_logic;
-    d           : std_logic_vector(15 downto 0);
-    valid       : std_logic;
-  end record;
-  
-  function NULL_FROM_SDRAM return from_SDRAM_t;
-  
-  type to_SDRAM_t is record
-		a         : std_logic_vector(21 downto 0);
-		d         : std_logic_vector(15 downto 0);
-		cs        : std_logic;
-		be_n      : std_logic_vector(1 downto 0);
-		rd_n      : std_logic;
-		wr_n      : std_logic;
-  end record;
-
-  function NULL_TO_SDRAM return to_SDRAM_t;
-  
   type from_AUDIO_t is record
     clk       : std_logic;
   end record;

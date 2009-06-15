@@ -7,6 +7,7 @@ library work;
 use work.pace_pkg.all;
 use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
+use work.sdram_pkg.all;
 use work.project_pkg.all;
 use work.platform_pkg.all;
 
@@ -537,22 +538,22 @@ begin
       subtype dtack_cnt_t is integer range 0 to 9;
       variable dtack_cnt  : dtack_cnt_t := 0;
     begin
-      if reset_i = '1' then
-        dtack_cnt := 0;
-      elsif rising_edge(clk_sdram) then
+      --if reset_i = '1' then
+      --  dtack_cnt := 0;
+      --elsif rising_edge(clk_sdram) then
         -- assert dtackn if valid and not waitrequest
-        if sdram_i.waitrequest = '0' and sdram_i.valid = '1' then
-          dtack_cnt := dtack_cnt_t'high;
-        elsif dtack_cnt /= 0 then
-          dtack_cnt := dtack_cnt - 1;
-        end if;
+      --  if sdram_i.waitrequest = '0' and sdram_i.valid = '1' then
+      --    dtack_cnt := dtack_cnt_t'high;
+      --  elsif dtack_cnt /= 0 then
+      --    dtack_cnt := dtack_cnt - 1;
+      --  end if;
         -- assert dtackn if count != 0 and until waitrequest
-        if dtack_cnt /= 0 then
-          sdram_dtackn <= '0';
-        else
-          sdram_dtackn <= '1';
-        end if;
-      end if;
+      --  if dtack_cnt /= 0 then
+      --    sdram_dtackn <= '0';
+      --  else
+      --    sdram_dtackn <= '1';
+      --  end if;
+      --end if;
     end process;
     
     -- map 128KB BIOS into 1st 1MB
@@ -561,12 +562,12 @@ begin
     sdram_o.a(19 downto 0) <= '0' & "00" & a(17 downto 1) when bios_cs = '1' else
                               '1' & a(19 downto 1) when rom1_cs = '1' else
                               (others => '0');
-    sdram_o.d <= d_o;
-    sdram_o.cs <= bios_cs or rom1_cs;
-    sdram_o.be_n <= udsn & ldsn;
-    sdram_o.rd_n <= not rwn;
+    sdram_o.d <= X"0000" & d_o;
+    --sdram_o.cs <= bios_cs or rom1_cs;
+    --sdram_o.be_n <= udsn & ldsn;
+    --sdram_o.rd_n <= not rwn;
     -- might need to drive wr_p with some smarter logic???
-    sdram_o.wr_n <= wr_p; --rwn;
+    --sdram_o.wr_n <= wr_p; --rwn;
 
     bios_d_o <= sdram_i.d(ram_d_o'range);
     rom1_d_o <= sdram_i.d(ram_d_o'range);

@@ -25,7 +25,7 @@
 
 # project-wide assignments
 # ========================
-set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 8.1
 
 # pin & location assignments
 # ==========================
@@ -510,61 +510,6 @@ set_global_assignment -name ENABLE_SIGNALTAP ON
 set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
 set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_global_assignment -name SAVE_DISK_SPACE OFF
-set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
-set_global_assignment -name VHDL_FILE project_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/target/de1/target_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/neogeo/platform_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram_1r1w.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dprom_2r.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/neogeo/tilemapctl.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_mixer.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/Graphics.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/neogeo/inputmapper.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/tg68/TG68_fast.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/tg68/TG68.vhd
-set_global_assignment -name QIP_FILE palram.qip
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gc_tx_bit.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/rtc/upd4990a.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/neogeo/platform.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwm_chaser.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwmout.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_upcounter.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/conversion.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/mfifo.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_read2.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_write.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_bus.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_joy.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_joy.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/toys/led_chaser.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/target/de2/audio_if.vhd
-set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2C_Controller.v
-set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2C_AV_Config.v
-set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/seg7_lut.v
-set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2S_LCM_Config.v
-set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/i2s_controller.v
-set_global_assignment -name QIP_FILE neogeo_pll.qip
-set_global_assignment -name VHDL_FILE target_top.vhd
-set_global_assignment -name VHDL_FILE sdram_0.vhd
-set_global_assignment -name SIGNALTAP_FILE stp1.stp
-set_global_assignment -name QIP_FILE testram.qip
 set_global_assignment -name SLD_NODE_CREATOR_ID 110 -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_ENTITY_NAME sld_signaltap -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_INFO=805334528" -section_id auto_signaltap_0
@@ -694,3 +639,64 @@ set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=00
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=183" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=46850" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=36023" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STORAGE_QUALIFIER_INVERSION_MASK_LENGTH=0" -section_id auto_signaltap_0
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
+set_global_assignment -name VHDL_FILE project_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/de1/target_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/neogeo/platform_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram_1r1w.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dprom_2r.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/memory/yadmc/rtl/sdram_pkg.vhd
+set_global_assignment -name VERILOG_FILE ../../../../src/component/memory/yadmc/rtl/yadmc_sync.v
+set_global_assignment -name VERILOG_FILE ../../../../src/component/memory/yadmc/rtl/yadmc.v
+set_global_assignment -name VERILOG_FILE ../../../../src/component/memory/yadmc/rtl/yadmc_dpram.v
+set_global_assignment -name VERILOG_FILE ../../../../src/component/memory/yadmc/rtl/yadmc_sdram16.v
+set_global_assignment -name VERILOG_FILE ../../../../src/component/memory/yadmc/rtl/yadmc_spram.v
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/neogeo/tilemapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_mixer.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/Graphics.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/neogeo/inputmapper.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/tg68/TG68_fast.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/tg68/TG68.vhd
+set_global_assignment -name QIP_FILE palram.qip
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gc_tx_bit.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/rtc/upd4990a.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/neogeo/platform.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwm_chaser.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwmout.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_upcounter.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/conversion.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/mfifo.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_read2.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_write.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_bus.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_joy.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_joy.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/toys/led_chaser.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/de2/audio_if.vhd
+set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2C_Controller.v
+set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2C_AV_Config.v
+set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/seg7_lut.v
+set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2S_LCM_Config.v
+set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/i2s_controller.v
+set_global_assignment -name QIP_FILE neogeo_pll.qip
+set_global_assignment -name VHDL_FILE target_top.vhd
+set_global_assignment -name SIGNALTAP_FILE stp1.stp
+set_global_assignment -name QIP_FILE testram.qip
