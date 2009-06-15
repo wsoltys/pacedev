@@ -1,10 +1,10 @@
-set_global_assignment -name TCL_FILE [file join $::quartus(qip_path) D:/markm/pace/pacedev.net/sw/src/component/sound/sb16/sb16_avalon_wrapper_hw.tcl]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) D:/projects/pace/pacedev.net/sw/src/component/sound/sb16/addsubu9.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) D:/projects/pace/pacedev.net/sw/src/component/sound/sb16/mult9.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) D:/projects/pace/pacedev.net/sw/src/component/sound/sb16/sb16.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) D:/projects/pace/pacedev.net/sw/src/component/sound/sb16/sb16_avalon_wrapper.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) D:/projects/pace/pacedev.net/sw/src/component/sound/sb16/addsubu8.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) D:/projects/pace/pacedev.net/sw/src/component/sound/sb16/mix_2_8.vhd]
+set_global_assignment -name TCL_FILE [file join $::quartus(qip_path) D:/projects/pace/pacedev.net/sw/src/component/sound/sb16/sb16_avalon_wrapper_hw.tcl]
 set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) cpu.sdc]
-set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) D:/markm/pace/pacedev.net/sw/src/component/sound/sb16/addsubu9.vhd]
-set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) D:/markm/pace/pacedev.net/sw/src/component/sound/sb16/mix_2_8.vhd]
-set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) D:/markm/pace/pacedev.net/sw/src/component/sound/sb16/sb16.vhd]
-set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) D:/markm/pace/pacedev.net/sw/src/component/sound/sb16/sb16_avalon_wrapper.vhd]
-set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) D:/markm/pace/pacedev.net/sw/src/component/sound/sb16/mult9.vhd]
-set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) D:/markm/pace/pacedev.net/sw/src/component/sound/sb16/addsubu8.vhd]
-set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID 001485074F6000000121CAC6E567 
+set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID 00112FDFF87F00000121D491DA2A 
  
