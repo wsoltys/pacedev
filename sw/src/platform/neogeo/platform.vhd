@@ -172,6 +172,7 @@ architecture SYN of platform is
   alias boot_f            : std_logic is magic_r(0);    -- booting
   alias bootdata_f        : std_logic is magic_r(1);    -- bootdata store enabled
 
+  signal fake_dtackn      : std_logic := '1';
   signal sdram_dtackn     : std_logic := '1';
   
 begin
@@ -241,9 +242,9 @@ begin
       asn_r := (others => '1');
     elsif rising_edge(clk_25M) and clk_12M_ena = '1' then
       if bootdata_f = '1' and bootdata_cs = '1' then
-        dtackn <= asn_r(2);
+        fake_dtackn <= asn_r(2);
       else
-        dtackn <= asn;
+        fake_dtackn <= asn;
       end if;
       -- de-assertion immediately clears the pipeline
       if asn = '1' then
@@ -254,6 +255,10 @@ begin
     end if;
   end process;
 
+  -- DTACK# mux
+  dtackn <= sdram_dtackn when (bios_cs = '1' or rom1_cs = '1') else
+            fake_dtackn;
+            
   --
   -- wr_p logic
   --
@@ -530,31 +535,8 @@ begin
   BLK_SDRAM : block
   begin
 
-    -- we really should unmeta sdram_dtackn in the 25MHz clock domain
-    -- - argghh this is yuckky...
-    process (clk_sdram, reset_i)
-      -- sdram 100MHz, cpu 12.5MHz
-      -- - need to assert for at least 9x 100MHz clocks...
-      subtype dtack_cnt_t is integer range 0 to 9;
-      variable dtack_cnt  : dtack_cnt_t := 0;
-    begin
-      --if reset_i = '1' then
-      --  dtack_cnt := 0;
-      --elsif rising_edge(clk_sdram) then
-        -- assert dtackn if valid and not waitrequest
-      --  if sdram_i.waitrequest = '0' and sdram_i.valid = '1' then
-      --    dtack_cnt := dtack_cnt_t'high;
-      --  elsif dtack_cnt /= 0 then
-      --    dtack_cnt := dtack_cnt - 1;
-      --  end if;
-        -- assert dtackn if count != 0 and until waitrequest
-      --  if dtack_cnt /= 0 then
-      --    sdram_dtackn <= '0';
-      --  else
-      --    sdram_dtackn <= '1';
-      --  end if;
-      --end if;
-    end process;
+    sdram_o.clk <= clk_25M;
+    sdram_o.rst <= reset_i;
     
     -- map 128KB BIOS into 1st 1MB
     -- map 1MB ROM1 (P1) into 2nd 1MB
@@ -563,12 +545,13 @@ begin
                               '1' & a(19 downto 1) when rom1_cs = '1' else
                               (others => '0');
     sdram_o.d <= X"0000" & d_o;
-    --sdram_o.cs <= bios_cs or rom1_cs;
-    --sdram_o.be_n <= udsn & ldsn;
-    --sdram_o.rd_n <= not rwn;
-    -- might need to drive wr_p with some smarter logic???
-    --sdram_o.wr_n <= wr_p; --rwn;
+    sdram_o.cyc <= bios_cs or rom1_cs;
+    sdram_o.stb <= bios_cs or rom1_cs;
+    sdram_o.sel <= "00" & udsn & ldsn;
+    sdram_o.we <= not rwn;
 
+    sdram_dtackn <= not sdram_i.ack;
+    
     bios_d_o <= sdram_i.d(ram_d_o'range);
     rom1_d_o <= sdram_i.d(ram_d_o'range);
     
