@@ -80,7 +80,6 @@ end platform;
 
 architecture SYN of platform is
 
-  alias clk_sdram         : std_logic is clk_i(0);
 	alias clk_25M           : std_logic is clk_i(1);
 	alias clk_video         : std_logic is clk_i(1);
 	alias clk_27M           : std_logic is clk_i(3);
@@ -119,7 +118,6 @@ architecture SYN of platform is
   -- cpu work ram
   signal ram_cs           : std_logic := '0';
   signal ram_d_o          : std_logic_vector(d_i'range) := (others => '0');
-  signal ram_wr           : std_logic := '0';
 
   -- hardware registers
   signal reg_cs           : std_logic := '0';
@@ -343,8 +341,8 @@ begin
 
   --bios_d_o <= sram_i.d(ram_d_o'range);
   ram_d_o <= sram_i.d(ram_d_o'range);
-  sram_d_o <= sram_i.d(ram_d_o'range);
-  memcard_d_o <= sram_i.d(ram_d_o'range);
+  sram_d_o <= sram_i.d(sram_d_o'range);
+  memcard_d_o <= sram_i.d(memcard_d_o'range);
 
   --
   -- on-board flash
@@ -543,8 +541,8 @@ begin
       
       -- map 128KB BIOS into 1st 1MB
       -- map 1MB ROM1 (P1) into 2nd 1MB
-      sdram_o.a(sdram_o.a'left downto 20) <= (others => '0');
-      sdram_o.a(19 downto 0) <= '0' & "00" & a(17 downto 1) when bios_cs = '1' else
+      sdram_o.a(sdram_o.a'left downto 22) <= (others => '0');
+      sdram_o.a(21 downto 2) <= '0' & "00" & a(17 downto 1) when bios_cs = '1' else
                                 '1' & a(19 downto 1) when rom1_cs = '1' else
                                 (others => '0');
       sdram_o.d <= X"0000" & d_o;
@@ -552,21 +550,32 @@ begin
       sdram_o.we <= not rwn;
 
       process (clk_25M, reset_i)
+        variable cyc_r : std_logic := '0';
       begin
         if reset_i = '1' then
+          cyc_r := '0';
         elsif rising_edge(clk_25M) then
-          if clk_12M_ena = '1' then
-            -- drop cyc,stb one clock after ACK
-            sdram_o.cyc <= (bios_cs or rom1_cs) and not sdram_i.ack;
-            sdram_o.stb <= (bios_cs or rom1_cs) and not sdram_i.ack;
+          -- assert WB cyc,stb on rising edge of 68k cycle
+          if cyc_r = '0' and ((bios_cs or rom1_cs) = '1') and asn = '0' then
+            sdram_o.cyc <= '1';
+            sdram_o.stb <= '1';
+          -- de-assert WB cyc,stb immediately on ACK from sdram controller
+          elsif sdram_i.ack = '1' then
+            sdram_o.cyc <= '0';
+            sdram_o.stb <= '0';
           end if;
-          -- 68k DTACK
-          sdram_dtackn <= not sdram_i.ack;
+          -- Ensure that ~12MHz 68k sees DTACKn asserted
+          if sdram_i.ack = '1' then
+            sdram_dtackn <= '0';
+          elsif clk_12M_ena = '1' then
+            sdram_dtackn <= '1';
+          end if;
+          cyc_r := not asn;
         end if;
       end process;
       
-      bios_d_o <= sdram_i.d(ram_d_o'range) when switches_i(9) = '1' else sram_i.d(bios_d_o'range);
-      rom1_d_o <= sdram_i.d(ram_d_o'range);
+      bios_d_o <= sdram_i.d(bios_d_o'range) when switches_i(9) = '1' else sram_i.d(bios_d_o'range);
+      rom1_d_o <= sdram_i.d(rom1_d_o'range);
 
     end generate GEN_SDRAM;
 
