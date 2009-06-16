@@ -81,7 +81,7 @@ end platform;
 architecture SYN of platform is
 
   alias clk_sdram         : std_logic is clk_i(0);
-	alias clk_25M           : std_logic is clk_i(1);  -- actually 25MHz
+	alias clk_25M           : std_logic is clk_i(1);
 	alias clk_video         : std_logic is clk_i(1);
 	alias clk_27M           : std_logic is clk_i(3);
 	signal clk_12M_ena      : std_logic := '0';
@@ -188,7 +188,6 @@ begin
       count := (others => '0');
     elsif rising_edge(clk_25M) then
       clk_12M_ena <= '0'; -- default
-      --if count = "000" then
       if count(0) = '0' then
         clk_12M_ena <= '1';
       end if;
@@ -256,7 +255,8 @@ begin
   end process;
 
   -- DTACK# mux
-  dtackn <= sdram_dtackn when switches_i(9) = '1' and (bios_cs = '1' or rom1_cs = '1') else
+  dtackn <= sdram_dtackn when PACE_HAS_SDRAM = true and switches_i(9) = '1' and 
+                                (bios_cs = '1' or rom1_cs = '1') else
             fake_dtackn;
             
   --
@@ -335,7 +335,9 @@ begin
   sram_o.a(15 downto 0) <= a(16 downto 1);
   sram_o.d <= std_logic_vector(resize(unsigned(d_o), sram_o.d'length));
   sram_o.be <= "00" & not udsn & not ldsn;
-  sram_o.cs <= vector_cs or (not switches_i(9) and bios_cs) or ram_cs or sram_cs or memcard_cs;
+  sram_o.cs <=  vector_cs or bios_cs or ram_cs or sram_cs or memcard_cs 
+                  when PACE_HAS_SDRAM = false else
+                vector_cs or (not switches_i(9) and bios_cs) or ram_cs or sram_cs or memcard_cs;
   sram_o.oe <= rwn;
   sram_o.we <= wr_p;
 
@@ -534,35 +536,45 @@ begin
   BLK_SDRAM : block
   begin
 
-    sdram_o.clk <= clk_25M;
-    sdram_o.rst <= reset_i;
-    
-    -- map 128KB BIOS into 1st 1MB
-    -- map 1MB ROM1 (P1) into 2nd 1MB
-    sdram_o.a(sdram_o.a'left downto 20) <= (others => '0');
-    sdram_o.a(19 downto 0) <= '0' & "00" & a(17 downto 1) when bios_cs = '1' else
-                              '1' & a(19 downto 1) when rom1_cs = '1' else
-                              (others => '0');
-    sdram_o.d <= X"0000" & d_o;
-    sdram_o.sel <= "00" & not (udsn & ldsn);
-    sdram_o.we <= not rwn;
+    GEN_SDRAM : if PACE_HAS_SDRAM generate
+  
+      sdram_o.clk <= clk_25M;
+      sdram_o.rst <= reset_i;
+      
+      -- map 128KB BIOS into 1st 1MB
+      -- map 1MB ROM1 (P1) into 2nd 1MB
+      sdram_o.a(sdram_o.a'left downto 20) <= (others => '0');
+      sdram_o.a(19 downto 0) <= '0' & "00" & a(17 downto 1) when bios_cs = '1' else
+                                '1' & a(19 downto 1) when rom1_cs = '1' else
+                                (others => '0');
+      sdram_o.d <= X"0000" & d_o;
+      sdram_o.sel <= "00" & not (udsn & ldsn);
+      sdram_o.we <= not rwn;
 
-    process (clk_25M, reset_i)
-    begin
-      if reset_i = '1' then
-      elsif rising_edge(clk_25M) then
-        if clk_12M_ena = '1' then
-          -- drop cyc,stb one clock after ACK
-          sdram_o.cyc <= (bios_cs or rom1_cs) and not sdram_i.ack;
-          sdram_o.stb <= (bios_cs or rom1_cs) and not sdram_i.ack;
+      process (clk_25M, reset_i)
+      begin
+        if reset_i = '1' then
+        elsif rising_edge(clk_25M) then
+          if clk_12M_ena = '1' then
+            -- drop cyc,stb one clock after ACK
+            sdram_o.cyc <= (bios_cs or rom1_cs) and not sdram_i.ack;
+            sdram_o.stb <= (bios_cs or rom1_cs) and not sdram_i.ack;
+          end if;
+          -- 68k DTACK
+          sdram_dtackn <= not sdram_i.ack;
         end if;
-        -- 68k DTACK
-        sdram_dtackn <= not sdram_i.ack;
-      end if;
-    end process;
-    
-    bios_d_o <= sdram_i.d(ram_d_o'range) when switches_i(9) = '1' else sram_i.d(bios_d_o'range);
-    rom1_d_o <= sdram_i.d(ram_d_o'range);
+      end process;
+      
+      bios_d_o <= sdram_i.d(ram_d_o'range) when switches_i(9) = '1' else sram_i.d(bios_d_o'range);
+      rom1_d_o <= sdram_i.d(ram_d_o'range);
+
+    end generate GEN_SDRAM;
+
+    -- BIOS from SRAM, ROM1 not supported
+    GEN_NO_SDRAM : if not PACE_HAS_SDRAM generate
+      bios_d_o <= sram_i.d(bios_d_o'range);
+      rom1_d_o <= (others => '0');
+    end generate GEN_NO_SDRAM;
     
   end block BLK_SDRAM;
   

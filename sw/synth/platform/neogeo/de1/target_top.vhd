@@ -174,7 +174,6 @@ begin
         c1		    => clk_i(0),    -- 100MHz
         c2		    => dram_clk_s
       );
-    dram_clk <= dram_clk_s;
       
     pll_27_inst : entity work.pll
       generic map
@@ -396,6 +395,8 @@ begin
     end generate GEN_NO_SDRAM;
   
     GEN_SDRAM : if PACE_HAS_SDRAM generate
+
+      dram_clk <= dram_clk_s;
 
       sdram_inst : yadmc
         generic map
