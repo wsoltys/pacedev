@@ -15,13 +15,13 @@ package sdram_pkg is
       sdram_bytes_depth   : natural := 1;
       cache_depth         : natural := 10;
       --sdram_bits          : natural := (8 << sdram_bytes_depth);
-      sdram_bits          : natural := 16;
+      sdram_bits          : natural;
       --cache_linedepth     : natural := sdram_bytes_depth + 1;
-      cache_linedepth     : natural := 2;
+      cache_linedepth     : natural;
       --cache_linelength    : natural := (4 << cache_linedepth);
-      cache_linelength    : natural := 16;
+      cache_linelength    : natural;
       --cache_tagdepth      : natural := sdram_depth - cache_depth - cache_linedepth - 2
-      cache_tagdepth      : natural := 11
+      cache_tagdepth      : natural
     );
     port
     (

@@ -404,7 +404,15 @@ begin
           sdram_depth         => 23,
           sdram_columndepth   => 8,
           sdram_adrwires      => 12,
+          sdram_bytes_depth   => 1,
           cache_depth         => 4,
+          --sdram_bits          : natural := (8 << sdram_bytes_depth);
+          sdram_bits          => 16,
+          --cache_linedepth     : natural := sdram_bytes_depth + 1;
+          cache_linedepth     => 2,
+          --cache_linelength    : natural := (4 << cache_linedepth);
+          cache_linelength    => 16,
+          --cache_tagdepth      : natural := sdram_depth - cache_depth - cache_linedepth - 2
           cache_tagdepth      => 15
         )
         port map
