@@ -14,15 +14,13 @@ clear_fixed_layer		equ $c1835e
 
 reset_ssp	dc.l	$107fff
 reset_pc  dc.l	start
-	
+
 	org $f00400
 	
 start:
 	nop
 
-  move.b #$1, d2
-  move.l err_f, a2
-  move.b d0,(a2)        ; default - flag an error
+  move.b #1,d2          ; flag an error
   	
 ; set LED0
 	move.w #$01, d0
@@ -60,17 +58,13 @@ vfybios:
 	cmpi.l #$c20000,a1		; done?
 	bne vfybios						; no, loop
 
-  move.b #$0, d0
-  move.l err_f, a0
-  move.b d0,(a0)        ; flag OK
+  move.b #0,d2          ; flag OK
   
 vfydone:  
 ; swap out the bootdata and restore tile data
 	lea.l $f00000,a0			; magic register
 	move.b #$2,(a0)				; *bang*
 
-  move.b #$1, d2
-  move.b (a2),d2        ; check error flag
   cmpi.b #0,d2	
   bne skipclr;
     
@@ -170,12 +164,9 @@ s_abcd    dc.b	"Press A/B/C/D to boot NEOGEO"
 s_boot    dc.b  "Booting NEOGEO..."
           dc.b  0
 
-err_f     dc.b  0
-
 ; write/read burched sram
 	move.l #$d00100,a0
 	move.w #$1234,d0
 	move.w d0,(a0)
 	move.w (a0),d0
-
 	

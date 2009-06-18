@@ -11,6 +11,12 @@ use work.sdram_pkg.all;
 use work.project_pkg.all;
 use work.platform_pkg.all;
 
+--
+--  Since I've already forgotten this once (and wasted a few hours "debugging")
+--  - SW(0)=ON
+--  - Use <1> to toggle through BIOS screens
+--
+
 entity platform is
   generic
   (
@@ -324,6 +330,7 @@ begin
   --
 
   sram_o.a(sram_o.a'left downto 19) <= (others => '0');
+  -- note that ROM1 is not supported in SRAM, so vectors not handled correctly here
   sram_o.a(18 downto 16) <= "000" when vector_cs = '1' else
                             "00" & a(17) when bios_cs = '1' else
                             "010" when ram_cs = '1' else
@@ -542,7 +549,8 @@ begin
       -- map 128KB BIOS into 1st 1MB
       -- map 1MB ROM1 (P1) into 2nd 1MB
       sdram_o.a(sdram_o.a'left downto 22) <= (others => '0');
-      sdram_o.a(21 downto 2) <= '0' & "00" & a(17 downto 1) when bios_cs = '1' else
+      sdram_o.a(21 downto 2) <= reg_swp & "0" & X"000" & a(6 downto 1) when vector_cs = '1' else
+                                '0' & "00" & a(17 downto 1) when bios_cs = '1' else
                                 '1' & a(19 downto 1) when rom1_cs = '1' else
                                 (others => '0');
       sdram_o.d <= X"0000" & d_o;

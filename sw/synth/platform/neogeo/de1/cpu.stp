@@ -1,0 +1,730 @@
+<session jtag_chain="USB-Blaster [USB-0]" jtag_device="@1: EP2C15/20 (0x020B30DD)" sof_file="neogeo.sof" top_level_entity="target_top">
+  <display_tree gui_logging_enabled="0">
+    <display_branch instance="auto_signaltap_0" signal_set="USE_GLOBAL_TEMP" trigger="USE_GLOBAL_TEMP"/>
+  </display_tree>
+  <global_info>
+    <single attribute="active instance" value="0"/>
+    <single attribute="lock mode" value="36110"/>
+    <multi attribute="window position" size="9" value="1280,938,398,124,356,50,124,0,0"/>
+  </global_info>
+  <instance entity_name="sld_signaltap" is_auto_node="yes" name="auto_signaltap_0" source_file="sld_signaltap.vhd">
+    <node_ip_info instance_id="0" mfg_id="110" node_id="0" version="6"/>
+    <position_info>
+      <single attribute="active tab" value="1"/>
+      <single attribute="setup vertical scroll position" value="0"/>
+      <single attribute="setup horizontal scroll position" value="0"/>
+      <single attribute="data vertical scroll position" value="0"/>
+      <single attribute="data horizontal scroll position" value="30"/>
+      <single attribute="zoom level numerator" value="8"/>
+      <single attribute="zoom level denominator" value="1"/>
+      <single attribute="zoom offset numerator" value="16256"/>
+      <single attribute="zoom offset denominator" value="1"/>
+    </position_info>
+    <signal_set global_temp="1" name="signal_set: 2009/06/19 01:11:51  #0">
+      <clock name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|clk" polarity="posedge" tap_mode="classic"/>
+      <config ram_type="M4K" reserved_data_nodes="0" reserved_storage_qualifier_nodes="0" reserved_trigger_nodes="0" sample_depth="512" trigger_in_enable="no" trigger_out_enable="no"/>
+      <top_entity/>
+      <signal_vec>
+        <trigger_input_vec>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[16]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[17]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[18]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[19]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[20]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[21]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[22]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[23]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[9]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|as" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|clkena" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[9]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[9]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|dtack" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|rw" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_ack_o" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[16]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[17]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[18]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[19]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[20]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[21]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[22]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[23]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[24]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[25]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[26]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[27]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[28]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[29]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[30]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[31]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[9]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_cyc_i" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[9]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[9]" tap_mode="classic" type="combinatorial"/>
+        </trigger_input_vec>
+        <data_input_vec>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[16]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[17]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[18]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[19]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[20]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[21]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[22]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[23]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[9]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|as" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|clkena" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[9]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[9]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|dtack" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|rw" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_ack_o" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[16]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[17]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[18]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[19]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[20]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[21]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[22]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[23]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[24]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[25]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[26]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[27]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[28]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[29]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[30]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[31]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[9]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_cyc_i" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[9]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[9]" tap_mode="classic" type="combinatorial"/>
+        </data_input_vec>
+        <storage_qualifier_input_vec>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[16]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[17]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[18]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[19]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[20]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[21]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[22]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[23]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[9]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|as" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|clkena" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[9]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[9]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|dtack" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|rw" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_ack_o" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[16]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[17]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[18]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[19]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[20]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[21]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[22]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[23]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[24]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[25]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[26]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[27]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[28]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[29]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[30]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[31]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[9]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_cyc_i" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[9]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[9]" tap_mode="classic" type="combinatorial"/>
+        </storage_qualifier_input_vec>
+      </signal_vec>
+      <presentation>
+        <data_view>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|clkena"/>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[0]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[8]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[9]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[10]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[11]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[12]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[13]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[14]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[15]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[16]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[17]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[18]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[19]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[20]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[21]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[22]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[23]"/>
+          </bus>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|as"/>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[0]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[8]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[9]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[10]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[11]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[12]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[13]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[14]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[15]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[0]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[8]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[9]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[10]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[11]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[12]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[13]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[14]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[15]"/>
+          </bus>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|dtack"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|rw"/>
+          <bus is_signal_inverted="no" link="all" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[0]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[1]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[2]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[3]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[4]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[5]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[6]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[7]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[8]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[9]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[10]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[11]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[12]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[13]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[14]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[15]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[16]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[17]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[18]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[19]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[20]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[21]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[22]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[23]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[24]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[25]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[26]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[27]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[28]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[29]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[30]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[31]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[0]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[1]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[2]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[3]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[4]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[5]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[6]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[7]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[8]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[9]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[10]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[11]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[12]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[13]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[14]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[15]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[0]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[1]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[2]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[3]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[4]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[5]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[6]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[7]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[8]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[9]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[10]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[11]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[12]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[13]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[14]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[15]"/>
+          </bus>
+          <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_cyc_i"/>
+          <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_ack_o"/>
+        </data_view>
+        <setup_view>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|clkena"/>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[0]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[8]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[9]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[10]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[11]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[12]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[13]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[14]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[15]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[16]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[17]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[18]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[19]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[20]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[21]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[22]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|addr[23]"/>
+          </bus>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|as"/>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[0]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[8]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[9]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[10]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[11]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[12]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[13]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[14]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_in[15]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[0]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[8]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[9]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[10]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[11]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[12]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[13]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[14]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|data_out[15]"/>
+          </bus>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|dtack"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|TG68:tg68_inst|rw"/>
+          <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_ack_o"/>
+          <bus is_signal_inverted="no" link="all" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[0]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[1]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[2]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[3]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[4]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[5]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[6]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[7]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[8]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[9]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[10]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[11]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[12]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[13]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[14]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[15]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[16]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[17]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[18]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[19]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[20]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[21]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[22]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[23]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[24]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[25]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[26]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[27]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[28]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[29]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[30]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_adr_i[31]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[0]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[1]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[2]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[3]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[4]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[5]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[6]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[7]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[8]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[9]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[10]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[11]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[12]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[13]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[14]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_i[15]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[0]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[1]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[2]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[3]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[4]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[5]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[6]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[7]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[8]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[9]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[10]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[11]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[12]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[13]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[14]"/>
+            <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_dat_o[15]"/>
+          </bus>
+          <net is_signal_inverted="no" name="yadmc:\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_cyc_i"/>
+        </setup_view>
+      </presentation>
+      <trigger attribute_mem_mode="false" gap_record="true" global_temp="1" name="trigger: 2009/06/19 01:11:51  #1" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="1" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="true" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_in="dont_care" trigger_out="active high" trigger_type="circular">
+        <power_up_trigger position="pre" storage_qualifier_disabled="no" trigger_in="dont_care" trigger_out="active high"/>
+        <events use_custom_flow_control="no">
+          <level enabled="yes" name="condition1" type="basic">'yadmc:\\BLK_SDRAM:GEN_SDRAM:sdram_inst|wb_cyc_i' == rising edge
+            <power_up enabled="yes">
+            </power_up>
+            <op_node/>
+          </level>
+        </events>
+        <storage_qualifier_events>
+          <transitional>000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+            <pwr_up_transitional>000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+            </pwr_up_transitional>
+          </transitional>
+          <storage_qualifier_level type="basic">
+            <power_up>
+            </power_up>
+            <op_node/>
+          </storage_qualifier_level>
+          <storage_qualifier_level type="basic">
+            <power_up>
+            </power_up>
+            <op_node/>
+          </storage_qualifier_level>
+          <storage_qualifier_level type="basic">
+            <power_up>
+            </power_up>
+            <op_node/>
+          </storage_qualifier_level>
+        </storage_qualifier_events>
+      </trigger>
+    </signal_set>
+  </instance>
+  <mnemonics/>
+  <static_plugin_mnemonics/>
+</session>
