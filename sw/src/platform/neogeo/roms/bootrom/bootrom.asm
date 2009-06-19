@@ -2,20 +2,20 @@
 
 ram_start 					equ $100000
 ram_end   					equ $10ffff
-rom_start 					equ $f00000
-rom_end   					equ $f00fff
+rom_start 					equ $ff0000
+rom_end   					equ $ff0fff
           					
 leds								equ $001000
 
 ; bios routines
 clear_fixed_layer		equ $c1835e
 
-	org $f00000
+	org $ff0000
 
 reset_ssp	dc.l	$107fff
 reset_pc  dc.l	start
 
-	org $f00400
+	org $ff0400
 	
 start:
 	nop
@@ -42,6 +42,21 @@ cpybios:
 	cmpi.l #$c20000,a1		; done?
 	bne cpybios						; no, loop
 
+; copy rom1 to s(d)ram
+	lea.l $e40000,a0			; start of rom1 image in bootdata
+	lea.l $000000,a1			; start of bios (in sdram)
+cpyrom1:
+	move.b (a0),d0				; 1st byte
+	lsl.w #8,d0						; shift into next byte
+	addq.l #1,a0
+	move.b (a0),d0				; 2nd byte
+	addq.l #1,a0
+	;rol.w #8,d0						; byte swap
+	;move.w d0,(a1)				; write to bios area
+	addq.l #2,a1
+	cmpi.l #$020000,a1		; done? *** change me
+	bne cpyrom1						; no, loop
+
 ; verify contents of s(d)ram
 	lea.l $e20000,a0			; start of bios image in bootdata
 	lea.l $c00000,a1			; start of bios (in s(d)ram)
@@ -62,7 +77,7 @@ vfybios:
   
 vfydone:  
 ; swap out the bootdata and restore tile data
-	lea.l $f00000,a0			; magic register
+	lea.l rom_start,a0		; magic register
 	move.b #$2,(a0)				; *bang*
 
   cmpi.b #0,d2	
@@ -106,8 +121,12 @@ skipclr:
 	move.w #$7024,d0
 	jsr prints
 
+	lea.l s_rom1,a0
+	move.w #$7025,d0
+	jsr prints
+
 	lea.l s_abcd,a0
-	move.w #$7026,d0
+	move.w #$7027,d0
 	jsr prints
 
 wait_abcd:
@@ -117,11 +136,11 @@ wait_abcd:
   beq wait_abcd;
 
 	lea.l s_boot,a0
-	move.w #$7027,d0
+	move.w #$7028,d0
 	jsr prints
 
 ; boot the neogeo
-	lea.l $f00000,a0			; magic register
+	lea.l rom_start,a0		; magic register
 	move.b #$1,(a0)				; *bang*
 
 hang:
@@ -149,7 +168,7 @@ prints_loop:
 	rts
 
 ; string table
-s_banner	dc.b	"P.A.C.E. NEOGEO Boot ROM v0.2"
+s_banner	dc.b	"P.A.C.E. NEOGEO Boot ROM v0.3"
 					dc.b	0
 s_bios	  dc.b	"System BIOS copied"
 					dc.b	0
@@ -158,6 +177,8 @@ s_verify	dc.b	"System BIOS verified"
 s_vfyerr	dc.b	"System BIOS verify error!"
 					dc.b	0
 s_patch	  dc.b	"System BIOS patched"
+					dc.b	0
+s_rom1	  dc.b	"ROM1 copied"
 					dc.b	0
 s_abcd    dc.b	"Press A/B/C/D to boot NEOGEO"
 					dc.b	0

@@ -16,6 +16,11 @@ use work.platform_pkg.all;
 --  - SW(0)=ON
 --  - Use <1> to toggle through BIOS screens
 --
+-- Flash memory map
+-- $000000 - sfix.sfx (fixed tilemap graphics) 128KB
+-- $020000 - sp-s2.sp1 (BIOS code) 128KB
+-- $040000 - ...
+--
 
 entity platform is
   generic
@@ -224,12 +229,12 @@ begin
   memcard_cs  <= '1' when STD_MATCH(a, X"800" & "-----------") else '0';
   -- system_bios $C00000-$C1FFFF (128kiB)
   bios_cs     <= '1' when STD_MATCH(a, X"C" & "000----------------") else '0';
-  -- battery-backed sram $D00000-$D0FFFF (64kB)
+  -- battery-backed sram $D00000-$D0FFFF (64kiB)
   sram_cs     <= '1' when STD_MATCH(a, X"D0" & "---------------") else '0';
-  -- bootdata $E00000-$EFFFFF (1MiB)
-  bootdata_cs <= '1' when STD_MATCH(a, X"E" & "-------------------") else '0';
-  -- boot rom $F00000-$FFFFFF (1MiB)
-  bootrom_cs  <= '1' when STD_MATCH(a, X"F" & "-------------------") else '0';
+  -- bootdata $E00000-$FEFFFF (2MiB-64kiB)
+  bootdata_cs <= not bootrom_cs when STD_MATCH(a, "111--------------------") else '0';
+  -- boot rom $FF0000-$FFFFFF (64kiB)
+  bootrom_cs  <= '1' when STD_MATCH(a, X"FF" & "---------------") else '0';
 
   -- writes
   palram_wr <= wr_p when (palram_cs = '1' and a(12 downto 9) = "0000") else '0';
