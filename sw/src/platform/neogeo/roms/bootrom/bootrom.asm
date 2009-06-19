@@ -1,26 +1,41 @@
 	cpu 68000
 
 ram_start 					equ $100000
-ram_end   					equ $10ffff
+ram_end   					equ ram_start+$ffff
 rom_start 					equ $ff0000
-rom_end   					equ $ff0fff
-          					
+rom_end   					equ rom_start+$fff
+
 leds								equ $001000
+
+; NEOGEO/68K memory space
+rom1_start          equ $000000
+rom1_end            equ rom1_start+$fffff
+buttons             equ $300000
+vramrw              equ $3c0002
+bios_start          equ $c00000
+bios_end            equ bios_start+$1ffff
+magic               equ rom_start
+
+; boot data (flash) memory space
+boot_data           equ $e00000
+tile_image          equ boot_data           ; 128KiB
+bios_image          equ boot_data+$20000    ; 128KiB
+rom1_image          equ boot_data+$40000    ; 1MiB
 
 ; bios routines
 clear_fixed_layer		equ $c1835e
 
-	org $ff0000
+	org rom_start
 
 reset_ssp	dc.l	$107fff
 reset_pc  dc.l	start
 
-	org $ff0400
+	org rom_start+$400
 	
 start:
 	nop
 
-  move.b #1,d2          ; flag an error
+  move.b #1,d2              ; flag an error
   	
 ; set LED0
 	move.w #$01, d0
@@ -28,58 +43,58 @@ start:
 	move.w d0,(a0)
 
 ; copy system bios to s(d)ram
-	lea.l $e20000,a0			; start of bios image in bootdata
-	lea.l $c00000,a1			; start of bios (in s(d)ram)
-cpybios:
-	move.b (a0),d0				; 1st byte
-	lsl.w #8,d0						; shift into next byte
-	addq.l #1,a0
-	move.b (a0),d0				; 2nd byte
-	addq.l #1,a0
-	;rol.w #8,d0						; byte swap
-	move.w d0,(a1)				; write to bios area
-	addq.l #2,a1
-	cmpi.l #$c20000,a1		; done?
-	bne cpybios						; no, loop
-
-; copy rom1 to s(d)ram
-	lea.l $e40000,a0			; start of rom1 image in bootdata
-	lea.l $000000,a1			; start of bios (in sdram)
-cpyrom1:
-	move.b (a0),d0				; 1st byte
-	lsl.w #8,d0						; shift into next byte
-	addq.l #1,a0
-	move.b (a0),d0				; 2nd byte
-	addq.l #1,a0
-	;rol.w #8,d0						; byte swap
-	;move.w d0,(a1)				; write to bios area
-	addq.l #2,a1
-	cmpi.l #$020000,a1		; done? *** change me
-	bne cpyrom1						; no, loop
+	lea.l bios_image,a0		    ; start of bios image in bootdata
+	lea.l bios_start,a1		    ; start of bios (in s(d)ram)
+cpybios:                    
+	move.b (a0),d0				    ; 1st byte
+	lsl.w #8,d0						    ; shift into next byte
+	addq.l #1,a0              
+	move.b (a0),d0				    ; 2nd byte
+	addq.l #1,a0              
+	;rol.w #8,d0					    	; byte swap
+	move.w d0,(a1)				    ; write to bios area
+	addq.l #2,a1              
+	cmpi.l #bios_end+1,a1     ; done?
+	bne cpybios						    ; no, loop
+                            
+; copy rom1 to s(d)ram      
+	lea.l rom1_image,a0		    ; start of rom1 image in bootdata
+	lea.l rom1_start,a1		    ; start of rom1 (in sdram)
+cpyrom1:                    
+	move.b (a0),d0				    ; 1st byte
+	lsl.w #8,d0						    ; shift into next byte
+	addq.l #1,a0              
+	move.b (a0),d0				    ; 2nd byte
+	addq.l #1,a0              
+	;rol.w #8,d0					    	; byte swap
+	;move.w d0,(a1)				    ; write to rom1 area
+	addq.l #2,a1              
+	cmpi.l #rom1_end+1,a1	    ; done? *** change me
+	bne cpyrom1						    ; no, loop
 
 ; verify contents of s(d)ram
-	lea.l $e20000,a0			; start of bios image in bootdata
-	lea.l $c00000,a1			; start of bios (in s(d)ram)
-vfybios:
-	move.b (a0),d0				; 1st byte
-	lsl.w #8,d0						; shift into next byte
-	addq.l #1,a0
-	move.b (a0),d0				; 2nd byte
-	addq.l #1,a0
-  move.w (a1),d1        ; get from s(d)ram
-  cmp.w d0,d1
-  bne vfydone           ; no good
-	addq.l #2,a1
-	cmpi.l #$c20000,a1		; done?
-	bne vfybios						; no, loop
-
-  move.b #0,d2          ; flag OK
+	lea.l bios_image,a0		    ; start of bios image in bootdata
+	lea.l bios_start,a1		    ; start of bios (in s(d)ram)
+vfybios:                    
+	move.b (a0),d0				    ; 1st byte
+	lsl.w #8,d0						    ; shift into next byte
+	addq.l #1,a0              
+	move.b (a0),d0				    ; 2nd byte
+	addq.l #1,a0              
+  move.w (a1),d1            ; get from s(d)ram
+  cmp.w d0,d1               
+  bne vfydone               ; no good
+	addq.l #2,a1              
+	cmpi.l #bios_end+1,a1	    ; done?
+	bne vfybios						    ; no, loop
+                            
+  move.b #0,d2              ; flag OK
   
 vfydone:  
 ; swap out the bootdata and restore tile data
-	lea.l rom_start,a0		; magic register
-	move.b #$2,(a0)				; *bang*
-
+	lea.l magic,a0		        ; magic register
+	move.b #$2,(a0)				    ; *bang*
+                            
   cmpi.b #0,d2	
   bne skipclr;
     
@@ -130,7 +145,7 @@ skipclr:
 	jsr prints
 
 wait_abcd:
-  move.w ($300000).l,d0
+  move.w (buttons).l,d0
   not d0
   and.w #$f000,d0
   beq wait_abcd;
@@ -140,7 +155,7 @@ wait_abcd:
 	jsr prints
 
 ; boot the neogeo
-	lea.l rom_start,a0		; magic register
+	lea.l magic,a0		    ; magic register
 	move.b #$1,(a0)				; *bang*
 
 hang:
@@ -155,7 +170,7 @@ vfyerr:
 ; a0 = pointer to null-terminated string
 ; d0 = vram address
 prints:
-	lea.l $3c0002,a1			; vramrw
+	lea.l vramrw,a1			  ; vramrw
 	move.w d0,-2(a1)			; vramad
 	move.w #$0020,2(a1)		; vraminc=32 (1 col)
 	clr.w d0
@@ -178,7 +193,7 @@ s_vfyerr	dc.b	"System BIOS verify error!"
 					dc.b	0
 s_patch	  dc.b	"System BIOS patched"
 					dc.b	0
-s_rom1	  dc.b	"ROM1 copied"
+s_rom1	  dc.b	"Cart ROM1 copied"
 					dc.b	0
 s_abcd    dc.b	"Press A/B/C/D to boot NEOGEO"
 					dc.b	0
