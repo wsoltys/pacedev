@@ -82,7 +82,7 @@ begin
       
       -- 3rd stage of pipeline
       -- - assign pixel colour based on tile data
-      -- (each byte contains information for 4 pixels)
+      -- (each byte contains information for 2 pixels)
       case x_r(x_r'left-(PIPELINE_BITS-1)) is
         when '0' =>
           pel := ctl_i.tile_d(3 downto 0);

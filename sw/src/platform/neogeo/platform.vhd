@@ -14,12 +14,13 @@ use work.platform_pkg.all;
 --
 --  Since I've already forgotten this once (and wasted a few hours "debugging")
 --  - SW(0)=ON
---  - Use <1> to toggle through BIOS screens
---
+--    - Menu system. Use <1> to toggle through BIOS screens
+--  - SW(7..0) = 01000100 (play a game on freeplay)
 -- Flash memory map
--- $000000 - sfix.sfx (fixed tilemap graphics) 128KB
--- $020000 - sp-s2.sp1 (BIOS code) 128KB
--- $040000 - ...
+-- $000000 - sfix.sfx (bios fixed tilemap graphics) 128KiB
+-- $020000 - 021-s1.bin (cart fixed tilemap graphics) 128KiB
+-- $040000 - sp-s2.sp1 (BIOS code) 128KiB
+-- $060000 - 021-p1.bin (cart code) up to 1MiB
 --
 
 entity platform is
@@ -264,8 +265,7 @@ begin
   end process;
 
   -- DTACK# mux
-  dtackn <= sdram_dtackn when PACE_HAS_SDRAM = true and switches_i(9) = '1' and 
-                                (bios_cs = '1' or rom1_cs = '1') else
+  dtackn <= sdram_dtackn when PACE_HAS_SDRAM = true and (bios_cs = '1' or rom1_cs = '1') else
             fake_dtackn;
             
   --
@@ -311,7 +311,7 @@ begin
     sysstat_a <= upd4990a_d_o(7 downto 6) & "11" & inputs_i(2).d(3 downto 0);
     sysstat_b <= "1111" & inputs_i(3).d(3 downto 0);
     
-    reg_d_o <=  inputs_i(0).d & switches_i(7 downto 0) when reg_30_cs = '1' else
+    reg_d_o <=  inputs_i(0).d & not switches_i(7 downto 0) when reg_30_cs = '1' else
                 inputs_i(1).d & inputs_i(1).d when reg_34_cs = '1' else
                 sysstat_a & sysstat_a when reg_32_cs = '1' else
                 sysstat_b & sysstat_b when reg_38_cs = '1' else
@@ -326,8 +326,9 @@ begin
   --
   
   vector_d_o <= bootrom_d_o when boot_f = '1' else
-                bios_d_o when reg_swp = '0' else
-                rom1_d_o;
+                -- bios_d_o & rom_d_o come from the same source
+                -- so it doesn't matter which we use
+                bios_d_o;
 
   --
   -- on-board SRAM
@@ -347,7 +348,7 @@ begin
   sram_o.be <= "00" & not udsn & not ldsn;
   sram_o.cs <=  vector_cs or bios_cs or ram_cs or sram_cs or memcard_cs 
                   when PACE_HAS_SDRAM = false else
-                vector_cs or (not switches_i(9) and bios_cs) or ram_cs or sram_cs or memcard_cs;
+                vector_cs or ram_cs or sram_cs or memcard_cs;
   sram_o.oe <= rwn;
   sram_o.we <= wr_p;
 
@@ -369,7 +370,9 @@ begin
       if bootdata_f = '1' then
         flash_o.a <= "00" & a(19 downto 1) & ldsn;
       else
-        flash_o.a <= std_logic_vector(resize(unsigned(tilemap_i.tile_a(16 downto 0)), flash_o.a'length));
+        flash_o.a(flash_o.a'left downto 18) <= (others => '0');
+        flash_o.a(17) <= reg_fix;
+        flash_o.a(16 downto 0) <= tilemap_i.tile_a(16 downto 0);
       end if;
     end if;
   end process;
@@ -553,10 +556,13 @@ begin
       
       -- map 128KB BIOS into 1st 1MB
       -- map 1MB ROM1 (P1) into 2nd 1MB
-      sdram_o.a(sdram_o.a'left downto 22) <= (others => '0');
-      sdram_o.a(21 downto 2) <= reg_swp & "0" & X"000" & a(6 downto 1) when vector_cs = '1' else
-                                '0' & "00" & a(17 downto 1) when bios_cs = '1' else
-                                '1' & a(19 downto 1) when rom1_cs = '1' else
+      sdram_o.a(sdram_o.a'left downto 23) <= (others => '0');
+      sdram_o.a(22 downto 2) <= '0' & reg_swp & "0" & X"000" & a(6 downto 1) when vector_cs = '1' else
+                                "00" & 00" & a(17 downto 1) when bios_cs = '1' else
+                                "01" & a(19 downto 1) when rom1_cs = '1' else
+                                --"010" when ram_cs = '1' else
+                                --"011" when sram_cs = '1' else
+                                --"100" when memcard_cs = '1' else
                                 (others => '0');
       sdram_o.d <= X"0000" & d_o;
       sdram_o.sel <= "00" & not (udsn & ldsn);
@@ -587,7 +593,7 @@ begin
         end if;
       end process;
       
-      bios_d_o <= sdram_i.d(bios_d_o'range) when switches_i(9) = '1' else sram_i.d(bios_d_o'range);
+      bios_d_o <= sdram_i.d(bios_d_o'range);
       rom1_d_o <= sdram_i.d(rom1_d_o'range);
 
     end generate GEN_SDRAM;

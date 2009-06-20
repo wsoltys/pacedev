@@ -584,7 +584,7 @@ set_global_assignment -name AUTO_PACKED_REGISTERS_MAXII NORMAL
 set_global_assignment -name AUTO_PACKED_REGISTERS_CYCLONE NORMAL
 set_global_assignment -name AUTO_PACKED_REGISTERS NORMAL
 set_global_assignment -name AUTO_PACKED_REGISTERS_STRATIX NORMAL
-set_global_assignment -name ENABLE_DRC_SETTINGS ON
+set_global_assignment -name ENABLE_DRC_SETTINGS OFF
 set_global_assignment -name ENABLE_CLOCK_LATENCY ON
 set_instance_assignment -name GLOBAL_SIGNAL ON -from clock_27 -to *
 set_global_assignment -name SIGNALTAP_FILE cpu.stp

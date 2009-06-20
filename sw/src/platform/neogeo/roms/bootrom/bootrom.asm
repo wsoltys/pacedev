@@ -20,9 +20,10 @@ magic               equ rom_start
 
 ; boot data (flash) memory space
 boot_data           equ $e00000
-tile_image          equ boot_data           ; 128KiB
-bios_image          equ boot_data+$20000    ; 128KiB
-rom1_image          equ boot_data+$40000    ; 1MiB
+bfix_image          equ boot_data           ; bios fixed layer (tile) data 128KiB
+cfix_image          equ boot_data+$20000    ; cart fixed layer (tile) data 128KiB
+bios_image          equ boot_data+$40000    ; bios program code 128KiB
+rom1_image          equ boot_data+$60000    ; cart program code up to 1MiB
 
 ; bios routines
 clear_fixed_layer		equ $c1835e
@@ -214,7 +215,7 @@ prints_loop:
 	rts
 
 ; string table
-s_banner	dc.b	"P.A.C.E. NEOGEO Boot ROM v0.3"
+s_banner	dc.b	"P.A.C.E. NEOGEO Boot ROM v0.4"
 					dc.b	0
 s_bios	  dc.b	"System BIOS copied"
 					dc.b	0
