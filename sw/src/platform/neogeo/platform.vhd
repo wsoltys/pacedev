@@ -264,10 +264,12 @@ begin
     end if;
   end process;
 
-  -- DTACK# mux
-  dtackn <= sdram_dtackn when PACE_HAS_SDRAM = true and (bios_cs = '1' or rom1_cs = '1') else
-            fake_dtackn;
-            
+  -- when this starts working again,
+  -- move this inside the process and use asn for the default case...
+    dtackn <= fake_dtackn when bootdata_f = '1' and vector_cs = '1' else
+              sdram_dtackn when (bios_cs or ram_cs or sram_cs or memcard_cs or rom1_cs) = '1' else
+              fake_dtackn;
+
   --
   -- wr_p logic
   --
@@ -330,59 +332,116 @@ begin
                 -- so it doesn't matter which we use
                 bios_d_o;
 
-  --
-  -- on-board SRAM
-  -- system bios, cpu work ram, sram, memcard
-  --
+  GEN_CRAP : if false generate
+    --
+    -- on-board SRAM
+    -- system bios, cpu work ram, sram, memcard
+    --
 
-  sram_o.a(sram_o.a'left downto 19) <= (others => '0');
-  -- note that ROM1 is not supported in SRAM, so vectors not handled correctly here
-  sram_o.a(18 downto 16) <= "000" when vector_cs = '1' else
-                            "00" & a(17) when bios_cs = '1' else
-                            "010" when ram_cs = '1' else
-                            "011" when sram_cs = '1' else
-                            "100" when memcard_cs = '1' else
-                            "111";
-  sram_o.a(15 downto 0) <= a(16 downto 1);
-  sram_o.d <= std_logic_vector(resize(unsigned(d_o), sram_o.d'length));
-  sram_o.be <= "00" & not udsn & not ldsn;
-  sram_o.cs <=  vector_cs or bios_cs or ram_cs or sram_cs or memcard_cs 
-                  when PACE_HAS_SDRAM = false else
-                vector_cs or ram_cs or sram_cs or memcard_cs;
-  sram_o.oe <= rwn;
-  sram_o.we <= wr_p;
+    sram_o.a(sram_o.a'left downto 19) <= (others => '0');
+    -- note that ROM1 is not supported in SRAM, so vectors not handled correctly here
+    sram_o.a(18 downto 16) <= "000" when vector_cs = '1' else
+                              "00" & a(17) when bios_cs = '1' else
+                              "010" when ram_cs = '1' else
+                              "011" when sram_cs = '1' else
+                              "100" when memcard_cs = '1' else
+                              "111";
+    sram_o.a(15 downto 0) <= a(16 downto 1);
+    sram_o.d <= std_logic_vector(resize(unsigned(d_o), sram_o.d'length));
+    sram_o.be <= "00" & not udsn & not ldsn;
+    sram_o.cs <=  vector_cs or bios_cs or ram_cs or sram_cs or memcard_cs 
+                    when PACE_HAS_SDRAM = false else
+                  vector_cs or ram_cs or sram_cs or memcard_cs;
+    sram_o.oe <= rwn;
+    sram_o.we <= wr_p;
+  end generate GEN_CRAP;
 
-  --bios_d_o <= sram_i.d(ram_d_o'range);
-  ram_d_o <= sram_i.d(ram_d_o'range);
-  sram_d_o <= sram_i.d(sram_d_o'range);
-  memcard_d_o <= sram_i.d(memcard_d_o'range);
-
-  --
-  -- on-board flash
-  -- mapped into 68k address space for boot rom
-  -- then mapped out for tile rom
-  --
-  
-  -- emulate synchronous clocked internal ram for timing in tilemap controller
-  process (clk_video)
+  BLK_FLASH : block
   begin
-    if rising_edge(clk_video) then
-      if bootdata_f = '1' then
-        flash_o.a <= "00" & a(19 downto 1) & ldsn;
-      else
-        flash_o.a(flash_o.a'left downto 18) <= (others => '0');
-        flash_o.a(17) <= reg_fix;
-        flash_o.a(16 downto 0) <= tilemap_i.tile_a(16 downto 0);
-      end if;
-    end if;
-  end process;
-  flash_o.d <= (others => '0');
-  flash_o.cs <= '1';
-  flash_o.oe <= '1';
-  flash_o.we <= '0';
 
-  bootdata_d_o <= flash_i.d(7 downto 0) & flash_i.d(7 downto 0);
-  tilemap_o.tile_d <= flash_i.d(7 downto 0);
+    --
+    -- on-board flash
+    -- mapped into 68k address space for boot rom
+    -- then mapped out for tile rom
+    --
+    
+    -- emulate synchronous clocked internal ram for timing in tilemap controller
+    process (clk_video)
+    begin
+      if rising_edge(clk_video) then
+        if bootdata_f = '1' then
+          flash_o.a <= "00" & a(19 downto 1) & ldsn;
+        else
+          flash_o.a(flash_o.a'left downto 18) <= (others => '0');
+          flash_o.a(17) <= reg_fix;
+          flash_o.a(16 downto 0) <= tilemap_i.tile_a(16 downto 0);
+        end if;
+      end if;
+    end process;
+    flash_o.d <= (others => '0');
+    flash_o.cs <= '1';
+    flash_o.oe <= '1';
+    flash_o.we <= '0';
+
+    bootdata_d_o <= flash_i.d(7 downto 0) & flash_i.d(7 downto 0);
+    tilemap_o.tile_d <= flash_i.d(7 downto 0);
+
+  end block BLK_FLASH;
+  
+  BLK_SDRAM : block
+  begin
+
+    sdram_o.clk <= clk_25M;
+    sdram_o.rst <= reset_i;
+    
+    -- map 128KB BIOS, 64KiB RAM, 64KiB SRAM, 4KiB MEMCARD into 1st MiB
+    -- map 1MB ROM1 (P1) into 2nd MiB
+    sdram_o.a(sdram_o.a'left downto 22) <= (others => '0');
+    sdram_o.a(21 downto 18) <= reg_swp & '0' & "00" when vector_cs = '1' else
+                              "0000" when bios_cs = '1' else
+                              "0010" when ram_cs = '1' else
+                              "0011" when sram_cs = '1' else
+                              "0100" when memcard_cs = '1' else
+                              '1' & a(19 downto 17) when rom1_cs = '1' else
+                              (others => '1');
+    sdram_o.a(17 downto 2) <= a(16 downto 1);
+    sdram_o.d <= X"0000" & d_o;
+    sdram_o.sel <= "00" & not (udsn & ldsn);
+    sdram_o.we <= not rwn;
+
+    process (clk_25M, reset_i)
+      variable cyc_r : std_logic := '0';
+    begin
+      if reset_i = '1' then
+        cyc_r := '0';
+      elsif rising_edge(clk_25M) then
+        -- assert WB cyc,stb on rising edge of 68k cycle
+        if cyc_r = '0' and ((bios_cs or ram_cs or sram_cs or memcard_cs or rom1_cs) = '1') and 
+            asn = '0' then
+          sdram_o.cyc <= '1';
+          sdram_o.stb <= '1';
+        -- de-assert WB cyc,stb immediately on ACK from sdram controller
+        elsif sdram_i.ack = '1' then
+          sdram_o.cyc <= '0';
+          sdram_o.stb <= '0';
+        end if;
+        -- Ensure that ~12MHz 68k sees DTACKn asserted
+        if sdram_i.ack = '1' then
+          sdram_dtackn <= '0';
+        elsif clk_12M_ena = '1' then
+          sdram_dtackn <= '1';
+        end if;
+        cyc_r := not asn;
+      end if;
+    end process;
+    
+    bios_d_o <= sdram_i.d(bios_d_o'range);
+    ram_d_o <= sram_i.d(ram_d_o'range);
+    sram_d_o <= sram_i.d(sram_d_o'range);
+    memcard_d_o <= sram_i.d(memcard_d_o'range);
+    rom1_d_o <= sdram_i.d(rom1_d_o'range);
+
+  end block BLK_SDRAM;
 
   GEN_NOT : if false generate
     assert false
@@ -541,70 +600,6 @@ begin
       ipln <= not "000";
     end if;
   end process;
-  
-  --
-  -- system bios in sdram atm
-  --
-
-  BLK_SDRAM : block
-  begin
-
-    GEN_SDRAM : if PACE_HAS_SDRAM generate
-  
-      sdram_o.clk <= clk_25M;
-      sdram_o.rst <= reset_i;
-      
-      -- map 128KB BIOS into 1st 1MB
-      -- map 1MB ROM1 (P1) into 2nd 1MB
-      sdram_o.a(sdram_o.a'left downto 23) <= (others => '0');
-      sdram_o.a(22 downto 2) <= '0' & reg_swp & "0" & X"000" & a(6 downto 1) when vector_cs = '1' else
-                                "00" & 00" & a(17 downto 1) when bios_cs = '1' else
-                                "01" & a(19 downto 1) when rom1_cs = '1' else
-                                --"010" when ram_cs = '1' else
-                                --"011" when sram_cs = '1' else
-                                --"100" when memcard_cs = '1' else
-                                (others => '0');
-      sdram_o.d <= X"0000" & d_o;
-      sdram_o.sel <= "00" & not (udsn & ldsn);
-      sdram_o.we <= not rwn;
-
-      process (clk_25M, reset_i)
-        variable cyc_r : std_logic := '0';
-      begin
-        if reset_i = '1' then
-          cyc_r := '0';
-        elsif rising_edge(clk_25M) then
-          -- assert WB cyc,stb on rising edge of 68k cycle
-          if cyc_r = '0' and ((bios_cs or rom1_cs) = '1') and asn = '0' then
-            sdram_o.cyc <= '1';
-            sdram_o.stb <= '1';
-          -- de-assert WB cyc,stb immediately on ACK from sdram controller
-          elsif sdram_i.ack = '1' then
-            sdram_o.cyc <= '0';
-            sdram_o.stb <= '0';
-          end if;
-          -- Ensure that ~12MHz 68k sees DTACKn asserted
-          if sdram_i.ack = '1' then
-            sdram_dtackn <= '0';
-          elsif clk_12M_ena = '1' then
-            sdram_dtackn <= '1';
-          end if;
-          cyc_r := not asn;
-        end if;
-      end process;
-      
-      bios_d_o <= sdram_i.d(bios_d_o'range);
-      rom1_d_o <= sdram_i.d(rom1_d_o'range);
-
-    end generate GEN_SDRAM;
-
-    -- BIOS from SRAM, ROM1 not supported
-    GEN_NO_SDRAM : if not PACE_HAS_SDRAM generate
-      bios_d_o <= sram_i.d(bios_d_o'range);
-      rom1_d_o <= (others => '0');
-    end generate GEN_NO_SDRAM;
-    
-  end block BLK_SDRAM;
   
   --
   -- COMPONENT INSTANTIATION
