@@ -2,8 +2,8 @@
 
 ram_start 					equ $100000
 ram_end   					equ ram_start+$ffff
-rom_start 					equ $ff0000
-rom_end   					equ rom_start+$fff
+bootrom_start 			equ $ff0000
+bootrom_end   			equ bootrom_start+$fff
 
 leds								equ $001000
 
@@ -16,7 +16,7 @@ reg_swprom          equ $3a0013
 vramrw              equ $3c0002
 bios_start          equ $c00000
 bios_end            equ bios_start+$1ffff
-magic               equ rom_start
+magic               equ bootrom_start
 
 ; boot data (flash) memory space
 boot_data           equ $e00000
@@ -28,12 +28,12 @@ rom1_image          equ boot_data+$60000    ; cart program code up to 1MiB
 ; bios routines
 clear_fixed_layer		equ $c1835e
 
-	org rom_start
+	org bootrom_start
 
 reset_ssp	dc.l	$107fff
 reset_pc  dc.l	start
 
-	org rom_start+$400
+	org bootrom_start+$400
 	
 start:
 	nop
@@ -62,6 +62,8 @@ cpybios:
 	addq.l #2,a1              
 	cmpi.l #bios_end+1,a1     ; done?
 	bne cpybios						    ; no, loop
+
+  ;bra skip_rom_cpy
                             
 ; ensure we're writing to ROM vectors for the copy
   lea.l reg_swprom,a0
@@ -81,6 +83,8 @@ cpyrom1:
 	cmpi.l #rom1_end+1,a1	    ; done? *** change me
 	bne cpyrom1						    ; no, loop
 
+skip_rom_cpy:
+
 ; verify contents of s(d)ram
 	lea.l bios_image,a0		    ; start of bios image in bootdata
 	lea.l bios_start,a1		    ; start of bios (in s(d)ram)
@@ -97,6 +101,8 @@ vfybios:
 	cmpi.l #bios_end+1,a1	    ; done?
 	bne vfybios						    ; no, loop
 
+  ;bra skip_rom_vfy
+
 	lea.l rom1_image+$80,a0		; start of rom1 image in bootdata (skip vectors)
 	lea.l rom1_start+$80,a1		; start of rom1 (in s(d)ram)
 vfyrom1:                    
@@ -111,6 +117,8 @@ vfyrom1:
 	addq.l #2,a1              
 	cmpi.l #rom1_end+1,a1	    ; done?
 	bne vfyrom1						    ; no, loop
+
+skip_rom_vfy:
                             
   move.b #0,d2              ; flag OK
   
