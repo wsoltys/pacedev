@@ -182,7 +182,7 @@ architecture SYN of platform is
   alias boot_f            : std_logic is magic_r(0);    -- booting
   alias bootdata_f        : std_logic is magic_r(1);    -- bootdata store enabled
 
-  signal fake_dtackn      : std_logic := '1';
+  signal delayed_dtackn   : std_logic := '1';
   signal sdram_dtackn     : std_logic := '1';
   
 begin
@@ -250,11 +250,7 @@ begin
     if reset_neogeo_n = '0' then
       asn_r := (others => '1');
     elsif rising_edge(clk_25M) and clk_12M_ena = '1' then
-      if bootdata_f = '1' and bootdata_cs = '1' then
-        fake_dtackn <= asn_r(2);
-      else
-        fake_dtackn <= asn;
-      end if;
+      delayed_dtackn <= asn_r(2);
       -- de-assertion immediately clears the pipeline
       if asn = '1' then
         asn_r := (others => '1');
@@ -264,11 +260,9 @@ begin
     end if;
   end process;
 
-  -- when this starts working again,
-  -- move this inside the process and use asn for the default case...
-    dtackn <= fake_dtackn when bootdata_f = '1' and vector_cs = '1' else
-              sdram_dtackn when (bios_cs or ram_cs or sram_cs or memcard_cs or rom1_cs) = '1' else
-              fake_dtackn;
+  dtackn <= delayed_dtackn when bootdata_f = '1' and bootdata_cs = '1' else
+            sdram_dtackn when (bios_cs or ram_cs or sram_cs or memcard_cs or rom1_cs) = '1' else
+            asn;
 
   --
   -- wr_p logic
@@ -436,9 +430,9 @@ begin
     end process;
     
     bios_d_o <= sdram_i.d(bios_d_o'range);
-    ram_d_o <= sram_i.d(ram_d_o'range);
-    sram_d_o <= sram_i.d(sram_d_o'range);
-    memcard_d_o <= sram_i.d(memcard_d_o'range);
+    ram_d_o <= sdram_i.d(ram_d_o'range);
+    sram_d_o <= sdram_i.d(sram_d_o'range);
+    memcard_d_o <= sdram_i.d(memcard_d_o'range);
     rom1_d_o <= sdram_i.d(rom1_d_o'range);
 
   end block BLK_SDRAM;
