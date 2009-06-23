@@ -518,8 +518,6 @@ set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/dpram_1r1w.vh
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/altera_mem.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/clk_div.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/de2/audio_if.vhd
-set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/I2C_Controller.v
-set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/I2C_AV_Config.v
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_Pack.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_ALU.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_MCode.vhd

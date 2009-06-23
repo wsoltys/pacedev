@@ -21,7 +21,8 @@ package pace_pkg is
     PACE_TARGET_RC10,
     PACE_TARGET_NX2_12,
     PACE_TARGET_CYC3DEV,
-    PACE_TARGET_COCO3PLUS
+    PACE_TARGET_COCO3PLUS,
+    PACE_TARGET_S5A
   );
 
 	type PACEFpgaVendor_t is

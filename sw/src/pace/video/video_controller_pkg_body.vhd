@@ -1,5 +1,5 @@
 library work;
-use work.pace_pkg.all;
+--use work.pace_pkg.all;
 
 package body video_controller_pkg is
 

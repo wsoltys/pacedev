@@ -322,6 +322,12 @@ begin
 	leds_o <= (others => '0');
   gp_o <= NULL_TO_GP;
   
+  assert false
+    report  "CLK0_FREQ_MHz=" & integer'image(CLK0_FREQ_MHz) &
+            " CPU_FREQ_MHz=" &  integer'image(CPU_FREQ_MHz) &
+            " CPU_CLK_ENA_DIV=" & integer'image(INVADERS_CPU_CLK_ENA_DIVIDE_BY)
+      severity note;
+
 	-- generate CPU clock (2MHz from 20MHz)
 	clk_en_inst : entity work.clk_div
 		generic map

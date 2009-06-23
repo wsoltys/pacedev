@@ -160,6 +160,17 @@ begin
           v_back_porch_r <= 29;
           v_border_r <= (768-VIDEO_V_SIZE)/2;
 
+        when PACE_VIDEO_VGA_1280x1024_60Hz =>
+          -- SXGA, clk=108MHz
+          h_front_porch_r <= 48;
+          h_sync_r <= 112;
+          h_back_porch_r <= 248;
+          h_border_r <= (1280-VIDEO_H_SIZE)/2;
+          v_front_porch_r <= 1;
+          v_sync_r <= 3;
+          v_back_porch_r <= 38;
+          v_border_r <= (1024-VIDEO_V_SIZE)/2;
+
         when PACE_VIDEO_CVBS_720x288p_50Hz =>
           -- generic composite, clk=13.5MHz
           h_front_porch_r <= (8+12);
