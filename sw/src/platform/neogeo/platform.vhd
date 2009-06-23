@@ -20,7 +20,8 @@ use work.platform_pkg.all;
 -- $000000 - sfix.sfx (bios fixed tilemap graphics) 128KiB
 -- $020000 - 021-s1.bin (cart fixed tilemap graphics) 128KiB
 -- $040000 - sp-s2.sp1 (BIOS code) 128KiB
--- $060000 - 021-p1.bin (cart code) up to 1MiB
+-- $100000 - 021-p1.bin (cart code) up to 1MiB
+-- $200000 - 021-c1.bin (sprite data) up to 1MiB
 --
 
 entity platform is
@@ -181,7 +182,7 @@ architecture SYN of platform is
   signal magic_r          : std_logic_vector(15 downto 0) := (others => '0');
   alias boot_f            : std_logic is magic_r(0);    -- booting
   alias bootdata_f        : std_logic is magic_r(1);    -- bootdata store enabled
-
+  alias bootbank          : std_logic_vector(21 downto 20) is magic_r(3 downto 2);
   signal delayed_dtackn   : std_logic := '1';
   signal sdram_dtackn     : std_logic := '1';
   
@@ -364,7 +365,7 @@ begin
     begin
       if rising_edge(clk_video) then
         if bootdata_f = '1' then
-          flash_o.a <= "00" & a(19 downto 1) & ldsn;
+          flash_o.a <= bootbank & a(19 downto 1) & ldsn;
         else
           flash_o.a(flash_o.a'left downto 18) <= (others => '0');
           flash_o.a(17) <= reg_fix;
