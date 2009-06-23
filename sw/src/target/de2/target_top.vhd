@@ -5,6 +5,7 @@ use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
+use work.sdram_pkg.all;
 use work.video_controller_pkg.all;
 use work.maple_pkg.all;
 use work.gamecube_pkg.all;
@@ -530,36 +531,6 @@ begin
     end generate GEN_NO_SDRAM;
   
     GEN_SDRAM : if PACE_HAS_SDRAM generate
-      sdram_inst : sdram_0
-        port map
-        (
-          clk             => clk_i(0),
-          reset_n         => reset_n,
-
-          -- fpga bus interface
-          az_addr         => sdram_o.a,
-          az_data         => sdram_o.d,
-          za_waitrequest  => sdram_i.waitrequest,
-          az_cs           => sdram_o.cs,
-          az_be_n         => sdram_o.be_n,
-          az_rd_n         => sdram_o.rd_n,
-          az_wr_n         => sdram_o.wr_n,
-          za_data         => sdram_i.d,
-          za_valid        => sdram_i.valid,
-
-          -- sdram physical interface
-          zs_dq           => dram_dq,
-          zs_addr         => dram_addr,
-          zs_dqm(1)       => dram_udqm,
-          zs_dqm(0)       => dram_ldqm,
-          zs_we_n         => dram_we_n,
-          zs_cas_n        => dram_cas_n,
-          zs_ras_n        => dram_ras_n,
-          zs_cs_n         => dram_cs_n,
-          zs_ba(1)        => dram_ba_1,
-          zs_ba(0)        => dram_ba_0,
-          zs_cke          => dram_cke
-        );
     end generate GEN_SDRAM;
 
   end block BLK_SDRAM;
