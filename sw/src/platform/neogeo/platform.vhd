@@ -112,14 +112,6 @@ architecture SYN of platform is
   -- write pulse (100MHz) - "fixed" from TG68 core
   signal wr_p             : std_logic;
 
-  -- boot rom signals
-  signal bootrom_cs       : std_logic := '0';
-  signal bootrom_d_o      : std_logic_vector(d_i'range) := (others => '0');
-
-  -- boot data storage (eg. DE1 flash) signals
-  signal bootdata_cs      : std_logic := '0';
-  signal bootdata_d_o     : std_logic_vector(d_i'range) := (others => '0');
-  
   -- cpu vector table
   signal vector_cs        : std_logic := '0';
   signal vector_d_o       : std_logic_vector(d_i'range) := (others => '0');
@@ -173,6 +165,18 @@ architecture SYN of platform is
   -- uPD4990A RTC chip
   signal upd4990a_cs      : std_logic := '0';
   signal upd4990a_d_o     : std_logic_vector(7 downto 6) := (others => '0');
+
+  -- boot data storage (eg. DE1 flash) signals
+  signal bootdata_cs      : std_logic := '0';
+  signal bootdata_d_o     : std_logic_vector(d_i'range) := (others => '0');
+  
+  -- sprite data (used during boot) signals
+  signal sprdat_cs        : std_logic := '0';
+  signal sprdat_d_o       : std_logic_vector(d_i'range) := (others => '0');
+  
+  -- boot rom signals
+  signal bootrom_cs       : std_logic := '0';
+  signal bootrom_d_o      : std_logic_vector(d_i'range) := (others => '0');
 
   -- hardware registers
   signal reg_swp          : std_logic := '0'; -- bios/cart vectors
@@ -233,8 +237,10 @@ begin
   bios_cs     <= '1' when STD_MATCH(a, X"C" & "000----------------") else '0';
   -- battery-backed sram $D00000-$D0FFFF (64kiB)
   sram_cs     <= '1' when STD_MATCH(a, X"D0" & "---------------") else '0';
-  -- bootdata $E00000-$FEFFFF (2MiB-64kiB)
-  bootdata_cs <= not bootrom_cs when STD_MATCH(a, "111--------------------") else '0';
+  -- bootdata $E00000-$EFFFFF (1MiB)
+  bootdata_cs <= '1' when STD_MATCH(a, X"E" & "-------------------") else '0';
+  -- sprite data $F00000-$F7FFFF (512kiB)
+  sprdat_cs   <= '1' when STD_MATCH(a, X"F" & "0------------------") else '0';
   -- boot rom $FF0000-$FFFFFF (64kiB)
   bootrom_cs  <= '1' when STD_MATCH(a, X"FF" & "---------------") else '0';
 
@@ -297,6 +303,7 @@ begin
           bios_d_o when bios_cs = '1' else
           sram_d_o when sram_cs = '1' else
           bootdata_d_o when bootdata_cs = '1' else
+          sprdat_d_o when sprdat_cs = '1' else
           bootrom_d_o when bootrom_cs = '1' else
           (others => '1');
 
@@ -326,30 +333,6 @@ begin
                 -- bios_d_o & rom_d_o come from the same source
                 -- so it doesn't matter which we use
                 bios_d_o;
-
-  GEN_CRAP : if false generate
-    --
-    -- on-board SRAM
-    -- system bios, cpu work ram, sram, memcard
-    --
-
-    sram_o.a(sram_o.a'left downto 19) <= (others => '0');
-    -- note that ROM1 is not supported in SRAM, so vectors not handled correctly here
-    sram_o.a(18 downto 16) <= "000" when vector_cs = '1' else
-                              "00" & a(17) when bios_cs = '1' else
-                              "010" when ram_cs = '1' else
-                              "011" when sram_cs = '1' else
-                              "100" when memcard_cs = '1' else
-                              "111";
-    sram_o.a(15 downto 0) <= a(16 downto 1);
-    sram_o.d <= std_logic_vector(resize(unsigned(d_o), sram_o.d'length));
-    sram_o.be <= "00" & not udsn & not ldsn;
-    sram_o.cs <=  vector_cs or bios_cs or ram_cs or sram_cs or memcard_cs 
-                    when PACE_HAS_SDRAM = false else
-                  vector_cs or ram_cs or sram_cs or memcard_cs;
-    sram_o.oe <= rwn;
-    sram_o.we <= wr_p;
-  end generate GEN_CRAP;
 
   BLK_FLASH : block
   begin
@@ -383,6 +366,24 @@ begin
 
   end block BLK_FLASH;
   
+  BLK_SRAM : block
+  begin
+  
+    --
+    -- on-board SRAM
+    -- sprite data
+    --
+    sram_o.a <= std_logic_vector(resize(unsigned(a(18 downto 1)), sram_o.a'length));
+    sram_o.d <= std_logic_vector(resize(unsigned(d_o), sram_o.d'length));
+    sram_o.be <= "00" & not udsn & not ldsn;
+    sram_o.cs <=  sprdat_cs;
+    sram_o.oe <= rwn;
+    sram_o.we <= wr_p;
+
+    sprdat_d_o <= sram_i.d(sprdat_d_o'range);
+    
+  end block BLK_SRAM;
+
   BLK_SDRAM : block
   begin
 
@@ -724,11 +725,11 @@ begin
       tp                => upd4990a_d_o(6)
     );
 
-  -- for now, writes to $1000 are latched on the leds
+  -- for now, writes to $20000 are latched on the leds
   process (clk_25M)
   begin
     if rising_edge(clk_25M) then
-      if wr_p = '1' and a(12) = '1' then
+      if wr_p = '1' and a(23 downto 20) = X"2" then
         leds_o(15 downto 0) <= d_o;
       end if;
     end if;
