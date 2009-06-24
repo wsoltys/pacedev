@@ -153,15 +153,8 @@ architecture SYN of platform is
   signal sram_d_o         : std_logic_vector(d_i'range) := (others => '0');
 
   -- vram
-  signal vram_a           : std_logic_vector(15 downto 0) := (others => '0');
-  signal vram_d_i         : std_logic_vector(d_o'range) := (others => '0');
-  signal vram1_d_o        : std_logic_vector(d_i'range) := (others => '0');
-  signal vram1_wr         : std_logic := '0';
-  signal map1_d           : std_logic_vector(15 downto 0) := (others => '0');
-  signal vram2_d_o        : std_logic_vector(d_i'range) := (others => '0');
-  signal vram2_wr         : std_logic := '0';
-  signal map2_d           : std_logic_vector(15 downto 0) := (others => '0');
-
+  signal vram_d_o         : std_logic_vector(15 downto 0) := (others => '0');
+  
   -- uPD4990A RTC chip
   signal upd4990a_cs      : std_logic := '0';
   signal upd4990a_d_o     : std_logic_vector(7 downto 6) := (others => '0');
@@ -248,6 +241,25 @@ begin
   palram_wr <= wr_p when (palram_cs = '1' and a(12 downto 9) = "0000") else '0';
 
   --
+  -- wr_p logic
+  --
+  
+  process (clk_25M)
+    variable wr_r : std_logic;
+  begin
+    if rising_edge(clk_25M) then
+      wr_p <= '0'; -- default
+      if clk_12M_ena = '1' then
+        -- leading edge write cycle
+        if wr_r = '0' and asn = '0' and rwn = '0' then
+          wr_p <= '1';
+        end if;
+        wr_r := not (asn or rwn);
+      end if;
+    end if;
+  end process;
+
+  --
   -- dtack logic
   --
   
@@ -272,69 +284,47 @@ begin
             asn;
 
   --
-  -- wr_p logic
-  --
-  
-  process (clk_25M)
-    variable wr_r : std_logic;
-  begin
-    if rising_edge(clk_25M) then
-      wr_p <= '0'; -- default
-      if clk_12M_ena = '1' then
-        -- leading edge write cycle
-        if wr_r = '0' and asn = '0' and rwn = '0' then
-          wr_p <= '1';
-        end if;
-        wr_r := not (asn or rwn);
-      end if;
-    end if;
-  end process;
-
-  --
   -- read muxes
   --
   
-  d_i <=  vector_d_o when vector_cs = '1' else
-          rom1_d_o when rom1_cs = '1' else
-          ram_d_o when ram_cs = '1' else
-          reg_d_o when reg_cs = '1' else
-          palram_d_o when palram_cs = '1' else
-          memcard_d_o when memcard_cs = '1' else
-          bios_d_o when bios_cs = '1' else
-          sram_d_o when sram_cs = '1' else
-          bootdata_d_o when bootdata_cs = '1' else
-          sprdat_d_o when sprdat_cs = '1' else
-          bootrom_d_o when bootrom_cs = '1' else
-          (others => '1');
-
-  BLK_REG_MUX : block
+  BLK_READ_MUX : block
     signal sysstat_a  : std_logic_vector(7 downto 0) := (others => '0');
     signal sysstat_b  : std_logic_vector(7 downto 0) := (others => '0');
   begin
   
-    sysstat_a <= upd4990a_d_o(7 downto 6) & "11" & inputs_i(2).d(3 downto 0);
-    sysstat_b <= "1111" & inputs_i(3).d(3 downto 0);
-    
+    d_i <=  vector_d_o when vector_cs = '1' else
+            rom1_d_o when rom1_cs = '1' else
+            ram_d_o when ram_cs = '1' else
+            reg_d_o when reg_cs = '1' else
+            palram_d_o when palram_cs = '1' else
+            memcard_d_o when memcard_cs = '1' else
+            bios_d_o when bios_cs = '1' else
+            sram_d_o when sram_cs = '1' else
+            bootdata_d_o when bootdata_cs = '1' else
+            sprdat_d_o when sprdat_cs = '1' else
+            bootrom_d_o when bootrom_cs = '1' else
+            (others => '1');
+
+    vector_d_o <= bootrom_d_o when boot_f = '1' else
+                  -- bios_d_o & rom_d_o come from the same source
+                  -- so it doesn't matter which we use
+                  bios_d_o;
+
     reg_d_o <=  inputs_i(0).d & not switches_i(7 downto 0) when reg_30_cs = '1' else
                 inputs_i(1).d & inputs_i(1).d when reg_34_cs = '1' else
                 sysstat_a & sysstat_a when reg_32_cs = '1' else
                 sysstat_b & sysstat_b when reg_38_cs = '1' else
-                vram1_d_o when (reg_3C_cs = '1' and vram_a(10) = '0') else
-                vram2_d_o when (reg_3C_cs = '1' and vram_a(10) = '1') else
+                vram_d_o when reg_3C_cs = '1' else
                 (others => '1');
                 
-  end block BLK_REG_MUX;
-
-  --
-  --  vectors
-  --
-  
-  vector_d_o <= bootrom_d_o when boot_f = '1' else
-                -- bios_d_o & rom_d_o come from the same source
-                -- so it doesn't matter which we use
-                bios_d_o;
+    sysstat_a <= upd4990a_d_o(7 downto 6) & "11" & inputs_i(2).d(3 downto 0);
+    sysstat_b <= "1111" & inputs_i(3).d(3 downto 0);
+    
+  end block BLK_READ_MUX;
 
   BLK_FLASH : block
+    signal tile_a_r : std_logic_vector(17 downto 0) := (others => '0');
+    signal tile_a_rr : std_logic_vector(17 downto 0) := (others => '0');
   begin
 
     --
@@ -347,15 +337,14 @@ begin
     process (clk_video)
     begin
       if rising_edge(clk_video) then
-        if bootdata_f = '1' then
-          flash_o.a <= bootbank & a(19 downto 1) & ldsn;
-        else
-          flash_o.a(flash_o.a'left downto 18) <= (others => '0');
-          flash_o.a(17) <= reg_fix;
-          flash_o.a(16 downto 0) <= tilemap_i.tile_a(16 downto 0);
-        end if;
+        tile_a_rr <= tile_a_r;
+        tile_a_r(17) <= reg_fix;
+        tile_a_r(16 downto 0) <= tilemap_i.tile_a(16 downto 0);
       end if;
     end process;
+    
+    flash_o.a <=  bootbank & a(19 downto 1) & ldsn when bootdata_f = '1' else
+                  std_logic_vector(resize(unsigned(tile_a_r),flash_o.a'length));
     flash_o.d <= (others => '0');
     flash_o.cs <= '1';
     flash_o.oe <= '1';
@@ -517,52 +506,6 @@ begin
     end if;
   end process;
   
-  -- vram process
-  process (clk_25M, reset_i)
-    variable rwn_r    : std_logic := '0';
-    variable vram_inc : std_logic_vector(vram_a'range) := (others => '0');
-  begin
-    if reset_neogeo_n = '0' then
-      rwn_r := '0';
-      vram_inc := (others => '0');
-    elsif rising_edge(clk_25M) then --and clk_12M_ena = '1' then
-      vram1_wr <= '0'; -- default
-      vram2_wr <= '0'; -- default
-      if reg_3C_cs = '1' then
-        --if rwn_r = '1' and rwn = '0' then
-        if wr_p = '1' then
-          -- leading edge write
-          case a(7 downto 1) is
-            when "0000000" =>
-              -- write vram address register
-              vram_a <= d_o;
-            when "0000001" =>
-              -- write vram data register
-              -- $7000-$74FF fixed tile layer
-              if vram_a(15 downto 11) = "01110" and
-                  (vram_a(10) = '0' or vram_a(10 downto 8) = "100") then
-                vram_d_i <= d_o;
-                vram1_wr <= not vram_a(10);
-                vram2_wr <= vram_a(10);
-              end if;
-            when "0000010" =>
-              -- write vram inc register
-              vram_inc := d_o;
-            when others =>
-              null;
-          end case;
-        --elsif rwn_r = '0' and rwn = '1' then
-        elsif rwn_r = '1' and wr_p = '0' then
-          -- trailing edge write
-          if a(7 downto 1) = "0000001" then
-            vram_a <= vram_a + vram_inc;
-          end if;
-        end if;
-      end if;
-      rwn_r := wr_p; --rwn;
-    end if;
-  end process;
-
   --
   -- interrupts
   --
@@ -618,56 +561,255 @@ begin
       rw            => rwn
     );
 
-	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-	vram1_inst : entity work.dpram
-		generic map
-		(
-			init_file		=> "../../../../src/platform/neogeo/roms/vram1.hex",
-			numwords_a	=> 1024,
-			widthad_a		=> 10,
-			width_a     => 16
-		)
-		port map
-		(
-			clock_b			=> clk_25M,
-			address_b		=> vram_a(9 downto 0),
-			wren_b			=> vram1_wr,
-			data_b			=> vram_d_i,
-			q_b					=> vram1_d_o,
+  BLK_VRAM : block
 
-			clock_a			=> clk_video,
-			address_a		=> tilemap_i.map_a(9 downto 0),
-			wren_a			=> '0',
-			data_a			=> (others => 'X'),
-			q_a					=> map1_d
-		);
-		
-	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-	vram2_inst : entity work.dpram
-		generic map
-		(
-			init_file		=> "../../../../src/platform/neogeo/roms/vram2.hex",
-			numwords_a	=> 256,
-			widthad_a		=> 8,
-			width_a     => 16
-		)
-		port map
-		(
-			clock_b			=> clk_25M,
-			address_b		=> vram_a(7 downto 0),
-			wren_b			=> vram2_wr,
-			data_b			=> vram_d_i,
-			q_b					=> vram2_d_o,
+    signal vram_a         : std_logic_vector(15 downto 0) := (others => '0');
+    signal vram_d_i       : std_logic_vector(15 downto 0) := (others => '0');
+    signal vram_wr        : std_logic := '0';
 
-			clock_a			=> clk_video,
-			address_a		=> tilemap_i.map_a(7 downto 0),
-			wren_a			=> '0',
-			data_a			=> (others => 'X'),
-			q_a					=> map2_d
-		);
+    signal scb1_cs        : std_logic := '0';
+    signal vram_scb1_d_o  : std_logic_vector(15 downto 0) := (others => '0');
+    signal scb3_cs        : std_logic := '0';
+    signal vram_scb3_d_o  : std_logic_vector(15 downto 0) := (others => '0');
+    signal scb4_cs        : std_logic := '0';
+    signal vram_scb4_d_o  : std_logic_vector(15 downto 0) := (others => '0');
 
-  tilemap_o.map_d <=  map1_d(15 downto 0) when tilemap_i.map_a(10) = '0' else 
-                      map2_d(15 downto 0);
+    signal fix1_cs        : std_logic := '0';
+    signal vram_fix1_d_o  : std_logic_vector(15 downto 0) := (others => '0');
+    signal fix2_cs        : std_logic := '0';
+    signal vram_fix2_d_o  : std_logic_vector(15 downto 0) := (others => '0');
+
+  begin
+  
+    -- vram process
+    process (clk_25M, reset_i)
+      variable rwn_r    : std_logic := '0';
+      variable vram_mod : std_logic_vector(15 downto 0) := (others => '0');
+    begin
+      if reset_neogeo_n = '0' then
+        rwn_r := '0';
+        vram_mod := (others => '0');
+      elsif rising_edge(clk_25M) then --and clk_12M_ena = '1' then
+        vram_wr <= '0'; -- default
+        if reg_3C_cs = '1' then
+          --if rwn_r = '1' and rwn = '0' then
+          if wr_p = '1' then
+            -- leading edge write
+            case a(7 downto 1) is
+              when "0000000" =>
+                -- write vram address register
+                vram_a <= d_o;
+              when "0000001" =>
+                -- write vram data register
+                -- $7000-$74FF fixed tile layer
+                if vram_a(15 downto 11) = "01110" and
+                    (vram_a(10) = '0' or vram_a(10 downto 8) = "100") then
+                  vram_d_i <= d_o;
+                  vram_wr <= '1';
+                end if;
+              when "0000010" =>
+                -- write vram inc register
+                vram_mod := d_o;
+              when others =>
+                null;
+            end case;
+          --elsif rwn_r = '0' and rwn = '1' then
+          elsif rwn_r = '1' and wr_p = '0' then
+            -- trailing edge write
+            if a(7 downto 1) = "0000001" then
+              -- bit 15 is not used for auto-inc/dec
+              vram_a(14 downto 0) <= vram_a(14 downto 0) + vram_mod(14 downto 0);
+            end if;
+          end if;
+        end if;
+        rwn_r := wr_p; --rwn;
+      end if;
+    end process;
+
+    vram_d_o <= vram_scb1_d_o when scb1_cs = '1' else
+                vram_fix1_d_o when fix1_cs = '1' else
+                vram_fix2_d_o when fix2_cs = '1' else
+                vram_scb3_d_o when scb3_cs = '1' else
+                vram_scb4_d_o when scb4_cs = '1' else
+                (others => '0');
+
+    BLK_SPRITES : block
+    
+      signal vram_scb1_wr   : std_logic := '0';
+      signal scb1_d_o       : std_logic_vector(15 downto 0) := (others => '0');
+      
+      signal vram_scb3_wr   : std_logic := '0';
+      signal scb3_d_o       : std_logic_vector(15 downto 0) := (others => '0');
+      
+      signal vram_scb4_wr   : std_logic := '0';
+      signal scb4_d_o       : std_logic_vector(15 downto 0) := (others => '0');
+      
+    begin
+
+      -- $0000-$6FFF ($0000-$03FF for now)
+      scb1_cs <= '1' when STD_MATCH(vram_a, X"0" & "00----------") else '0';
+      -- $8200-$83FF ($8200-$821F for now)
+      scb3_cs <= '1' when STD_MATCH(vram_a, X"82" & "000-----") else '0';
+      -- $8400-$85FF ($8400-$841F for now)
+      scb4_cs <= '1' when STD_MATCH(vram_a, X"84" & "000-----") else '0';
+
+      vram_scb1_wr <= vram_wr and scb1_cs;
+      vram_scb3_wr <= vram_wr and scb3_cs;
+      vram_scb4_wr <= vram_wr and scb4_cs;
+
+      -- Sprite Control Block 1 (name tables) $0000-$7FFF
+      -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+      scb1_inst : entity work.dpram
+        generic map
+        (
+          --init_file		=> "../../../../src/platform/neogeo/roms/vram1.hex",
+          numwords_a	=> 32*32, -- only 32 sprites for now
+          widthad_a		=> 10,
+          width_a     => 16
+        )
+        port map
+        (
+          clock_b			=> clk_25M,
+          address_b		=> vram_a(9 downto 0),
+          wren_b			=> vram_scb1_wr,
+          data_b			=> vram_d_i,
+          q_b					=> vram_scb1_d_o,
+
+          clock_a		  => clk_video,
+          address_a		=> sprite_i.a(9 downto 0),
+          data_a		  => (others => '0'),
+          wren_a		  => '0',
+          q_a		      => scb1_d_o
+        );
+
+      -- Sprite Control Block 3 (Y) $8200-$83FF
+      -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+      scb3_inst : entity work.dpram
+        generic map
+        (
+          --init_file		=> "../../../../src/platform/neogeo/roms/vram1.hex",
+          numwords_a	=> 32,  -- only 32 sprites for now
+          widthad_a		=> 5,
+          width_a     => 16
+        )
+        port map
+        (
+          clock_b			=> clk_25M,
+          address_b		=> vram_a(4 downto 0),
+          wren_b			=> vram_scb3_wr,
+          data_b			=> vram_d_i,
+          q_b					=> vram_scb3_d_o,
+
+          clock_a		  => clk_video,
+          address_a		=> sprite_i.a(4 downto 0),
+          data_a		  => (others => '0'),
+          wren_a		  => '0',
+          q_a		      => scb3_d_o
+        );
+        
+      -- Sprite Control Block 4 (X) $8400-$85FF
+      -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+      scb4_inst : entity work.dpram
+        generic map
+        (
+          --init_file		=> "../../../../src/platform/neogeo/roms/vram1.hex",
+          numwords_a	=> 32,  -- only 32 sprites for now
+          widthad_a		=> 5,
+          width_a     => 16
+        )
+        port map
+        (
+          clock_b			=> clk_25M,
+          address_b		=> vram_a(4 downto 0),
+          wren_b			=> vram_scb4_wr,
+          data_b			=> vram_d_i,
+          q_b					=> vram_scb4_d_o,
+
+          clock_a		  => clk_video,
+          address_a		=> sprite_i.a(4 downto 0),
+          data_a		  => (others => '0'),
+          wren_a		  => '0',
+          q_a		      => scb4_d_o
+        );
+        
+    end block BLK_SPRITES;
+    
+    BLK_FIXED : block
+    
+      signal vram_fix1_wr   : std_logic := '0';
+      signal fix1_d_o       : std_logic_vector(15 downto 0) := (others => '0');
+      signal map1_d_o       : std_logic_vector(15 downto 0) := (others => '0');
+      
+      signal vram_fix2_wr   : std_logic := '0';
+      signal fix2_d_o       : std_logic_vector(15 downto 0) := (others => '0');
+      signal map2_d_o       : std_logic_vector(15 downto 0) := (others => '0');
+    
+    begin
+
+      -- $7000-$7400
+      fix1_cs <= '1' when STD_MATCH(vram_a, X"7" & "00----------") else '0';
+      -- $7400-$74FF
+      fix2_cs <= '1' when STD_MATCH(vram_a, X"74" & "--------") else '0';
+
+      vram_fix1_wr <= vram_wr and fix1_cs;
+      vram_fix2_wr <= vram_wr and fix2_cs;
+
+      -- fixed layer graphics (part1) $7000-$7400
+      -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+      fix1_inst : entity work.dpram
+        generic map
+        (
+          init_file		=> "../../../../src/platform/neogeo/rams/fix1.hex",
+          numwords_a	=> 1024,
+          widthad_a		=> 10,
+          width_a     => 16
+        )
+        port map
+        (
+          clock_b			=> clk_25M,
+          address_b		=> vram_a(9 downto 0),
+          wren_b			=> vram_fix1_wr,
+          data_b			=> vram_d_i,
+          q_b					=> vram_fix1_d_o,
+
+          clock_a			=> clk_video,
+          address_a		=> tilemap_i.map_a(9 downto 0),
+          wren_a			=> '0',
+          data_a			=> (others => 'X'),
+          q_a					=> map1_d_o
+        );
+        
+      -- fixed layer graphics (part2) $7400-$74FF
+      -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+      fix2_inst : entity work.dpram
+        generic map
+        (
+          init_file		=> "../../../../src/platform/neogeo/rams/fix2.hex",
+          numwords_a	=> 256,
+          widthad_a		=> 8,
+          width_a     => 16
+        )
+        port map
+        (
+          clock_b			=> clk_25M,
+          address_b		=> vram_a(7 downto 0),
+          wren_b			=> vram_fix2_wr,
+          data_b			=> vram_d_i,
+          q_b					=> vram_fix2_d_o,
+
+          clock_a			=> clk_video,
+          address_a		=> tilemap_i.map_a(7 downto 0),
+          wren_a			=> '0',
+          data_a			=> (others => 'X'),
+          q_a					=> map2_d_o
+        );
+
+      tilemap_o.map_d <=  map1_d_o(15 downto 0) when tilemap_i.map_a(10) = '0' else 
+                          map2_d_o(15 downto 0);
+
+    end block BLK_FIXED;
+
+  end block BLK_VRAM;
   
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
   palram_inst : entity work.palram
