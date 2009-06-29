@@ -431,7 +431,7 @@ void main (int argc, char *argv[])
   while (key[KEY_ESC]);	  
 #endif
 
-#if 1
+#if 0
   #define SPL (WIDTH_PIXELS/16)
   #define LPS (HEIGHT_PIXELS/16)  
   // display the sprites
@@ -453,6 +453,36 @@ void main (int argc, char *argv[])
 		}
 		if (t == SPL*LPS-1)
 		  break;
+  }
+  while (!key[KEY_ESC]);	  
+  while (key[KEY_ESC]);	  
+#endif
+
+#if 1
+  static int tm[] =
+  {
+     0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 59, 
+    14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
+    29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43,
+    44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58,
+  };
+  #define TM_N (sizeof(tm)/sizeof(int))
+  clear_bitmap (screen);
+  for (int t=0; t<TM_N; t++)
+  {
+    int sprite_addr = tm[t]*16/2*16;
+    int x = t % 15;
+    int y = t / 15;
+
+		for (int ty=0; ty<16; ty++)
+		{
+			for (int tx=0; tx<16; tx++)
+			{
+			  BYTE pel = sprite_decoded[sprite_addr+ty*16/2+tx/2];
+				pel = (pel >> (((tx^1)&1)<<2)) & 0x0f;
+				putpixel (screen, x*16+tx, y*16+ty, SPRITE_COLOUR(pel));
+			}
+		}
   }
   while (!key[KEY_ESC]);	  
   while (key[KEY_ESC]);	  
