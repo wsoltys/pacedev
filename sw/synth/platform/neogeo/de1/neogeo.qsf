@@ -542,6 +542,7 @@ set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dprom_2r.vhd
+set_global_assignment -name VHDL_FILE ram1Kx16.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/memory/yadmc/rtl/sdram_pkg.vhd
 set_global_assignment -name VERILOG_FILE ../../../../src/component/memory/yadmc/rtl/yadmc_sync.v
 set_global_assignment -name VERILOG_FILE ../../../../src/component/memory/yadmc/rtl/yadmc.v
@@ -589,3 +590,4 @@ set_global_assignment -name VHDL_FILE target_top.vhd
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
 set_global_assignment -name QIP_FILE testram.qip
 set_global_assignment -name SIGNALTAP_FILE cpu.stp
+set_global_assignment -name VHDL_FILE ram32x16.vhd

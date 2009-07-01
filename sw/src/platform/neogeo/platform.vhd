@@ -93,6 +93,9 @@ end platform;
 
 architecture SYN of platform is
 
+  -- build options
+  constant BUILD_INSYS_SPRITE_RAM   : boolean := false;
+  
 	alias clk_25M           : std_logic is clk_i(1);
 	alias clk_video         : std_logic is clk_i(1);
 	alias clk_27M           : std_logic is clk_i(3);
@@ -604,11 +607,11 @@ begin
               when "0000001" =>
                 -- write vram data register
                 -- $7000-$74FF fixed tile layer
-                if vram_a(15 downto 11) = "01110" and
-                    (vram_a(10) = '0' or vram_a(10 downto 8) = "100") then
+                --if vram_a(15 downto 11) = "01110" and
+                --    (vram_a(10) = '0' or vram_a(10 downto 8) = "100") then
                   vram_d_i <= d_o;
                   vram_wr <= '1';
-                end if;
+                --end if;
               when "0000010" =>
                 -- write vram inc register
                 vram_mod := d_o;
@@ -669,101 +672,165 @@ begin
       -- - odd DWORD contains palette number, flip bits etc
       -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 
-      scb1a_inst : entity work.dpram
-        generic map
-        (
-          --init_file		=> "../../../../src/platform/neogeo/roms/vram1.hex",
-          numwords_a	=> 32*32, -- only 32 sprites for now
-          widthad_a		=> 10,
-          width_a     => 16
-        )
-        port map
-        (
-          clock_b			=> clk_25M,
-          address_b		=> vram_a(10 downto 1),
-          wren_b			=> vram_scb1a_wr,
-          data_b			=> vram_d_i,
-          q_b					=> vram_scb1a_d_o,
+      GEN_2PORT_SCB : if not BUILD_INSYS_SPRITE_RAM generate
 
-          clock_a		  => clk_video,
-          address_a		=> sprite_i.a(10 downto 1),
-          data_a		  => (others => '0'),
-          wren_a		  => '0',
-          q_a		      => scb1a_d_o
-        );
+        scb1a_inst : entity work.dpram
+          generic map
+          (
+            --init_file		=> "../../../../src/platform/neogeo/roms/vram1.hex",
+            numwords_a	=> 32*32, -- only 32 sprites for now
+            widthad_a		=> 10,
+            width_a     => 16
+          )
+          port map
+          (
+            clock_b			=> clk_25M,
+            address_b		=> vram_a(10 downto 1),
+            wren_b			=> vram_scb1a_wr,
+            data_b			=> vram_d_i,
+            q_b					=> vram_scb1a_d_o,
 
-      scb1b_inst : entity work.dpram
-        generic map
-        (
-          --init_file		=> "../../../../src/platform/neogeo/roms/vram1.hex",
-          numwords_a	=> 32*32, -- only 32 sprites for now
-          widthad_a		=> 10,
-          width_a     => 16
-        )
-        port map
-        (
-          clock_b			=> clk_25M,
-          address_b		=> vram_a(10 downto 1),
-          wren_b			=> vram_scb1b_wr,
-          data_b			=> vram_d_i,
-          q_b					=> vram_scb1b_d_o,
+            clock_a		  => clk_video,
+            address_a		=> sprite_i.a(10 downto 1),
+            data_a		  => (others => '0'),
+            wren_a		  => '0',
+            q_a		      => scb1a_d_o
+          );
+      
+        scb1b_inst : entity work.dpram
+          generic map
+          (
+            --init_file		=> "../../../../src/platform/neogeo/roms/vram1.hex",
+            numwords_a	=> 32*32, -- only 32 sprites for now
+            widthad_a		=> 10,
+            width_a     => 16
+          )
+          port map
+          (
+            clock_b			=> clk_25M,
+            address_b		=> vram_a(10 downto 1),
+            wren_b			=> vram_scb1b_wr,
+            data_b			=> vram_d_i,
+            q_b					=> vram_scb1b_d_o,
 
-          clock_a		  => clk_video,
-          address_a		=> sprite_i.a(10 downto 1),
-          data_a		  => (others => '0'),
-          wren_a		  => '0',
-          q_a		      => scb1b_d_o
-        );
+            clock_a		  => clk_video,
+            address_a		=> sprite_i.a(10 downto 1),
+            data_a		  => (others => '0'),
+            wren_a		  => '0',
+            q_a		      => scb1b_d_o
+          );
 
-      -- Sprite Control Block 3 (Y) $8200-$83FF
-      -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-      scb3_inst : entity work.dpram
-        generic map
-        (
-          --init_file		=> "../../../../src/platform/neogeo/roms/vram1.hex",
-          numwords_a	=> 32,  -- only 32 sprites for now
-          widthad_a		=> 5,
-          width_a     => 16
-        )
-        port map
-        (
-          clock_b			=> clk_25M,
-          address_b		=> vram_a(4 downto 0),
-          wren_b			=> vram_scb3_wr,
-          data_b			=> vram_d_i,
-          q_b					=> vram_scb3_d_o,
+        -- Sprite Control Block 3 (Y) $8200-$83FF
+        -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+        scb3_inst : entity work.dpram
+          generic map
+          (
+            --init_file		=> "../../../../src/platform/neogeo/roms/vram1.hex",
+            numwords_a	=> 32,  -- only 32 sprites for now
+            widthad_a		=> 5,
+            width_a     => 16
+          )
+          port map
+          (
+            clock_b			=> clk_25M,
+            address_b		=> vram_a(4 downto 0),
+            wren_b			=> vram_scb3_wr,
+            data_b			=> vram_d_i,
+            q_b					=> vram_scb3_d_o,
 
-          clock_a		  => clk_video,
-          address_a		=> sprite_i.a(4 downto 0),
-          data_a		  => (others => '0'),
-          wren_a		  => '0',
-          q_a		      => scb3_d_o
-        );
-        
-      -- Sprite Control Block 4 (X) $8400-$85FF
-      -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-      scb4_inst : entity work.dpram
-        generic map
-        (
-          --init_file		=> "../../../../src/platform/neogeo/roms/vram1.hex",
-          numwords_a	=> 32,  -- only 32 sprites for now
-          widthad_a		=> 5,
-          width_a     => 16
-        )
-        port map
-        (
-          clock_b			=> clk_25M,
-          address_b		=> vram_a(4 downto 0),
-          wren_b			=> vram_scb4_wr,
-          data_b			=> vram_d_i,
-          q_b					=> vram_scb4_d_o,
+            clock_a		  => clk_video,
+            address_a		=> sprite_i.a(4 downto 0),
+            data_a		  => (others => '0'),
+            wren_a		  => '0',
+            q_a		      => scb3_d_o
+          );
+          
+        -- Sprite Control Block 4 (X) $8400-$85FF
+        -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+        scb4_inst : entity work.dpram
+          generic map
+          (
+            --init_file		=> "../../../../src/platform/neogeo/roms/vram1.hex",
+            numwords_a	=> 32,  -- only 32 sprites for now
+            widthad_a		=> 5,
+            width_a     => 16
+          )
+          port map
+          (
+            clock_b			=> clk_25M,
+            address_b		=> vram_a(4 downto 0),
+            wren_b			=> vram_scb4_wr,
+            data_b			=> vram_d_i,
+            q_b					=> vram_scb4_d_o,
 
-          clock_a		  => clk_video,
-          address_a		=> sprite_i.a(4 downto 0),
-          data_a		  => (others => '0'),
-          wren_a		  => '0',
-          q_a		      => scb4_d_o
-        );
+            clock_a		  => clk_video,
+            address_a		=> sprite_i.a(4 downto 0),
+            data_a		  => (others => '0'),
+            wren_a		  => '0',
+            q_a		      => scb4_d_o
+          );
+
+      end generate GEN_2PORT_SCB;
+
+      GEN_1PORT_SCB : if BUILD_INSYS_SPRITE_RAM generate
+
+        scb1a_inst : entity work.ram1Kx16
+          generic map
+          (
+            name        => "SC1A"
+          )
+          port map
+          (
+            clock		    => clk_25M,
+            address		  => vram_a(10 downto 1),
+            wren		    => vram_scb1a_wr,
+            data		    => vram_d_i,
+            q		        => vram_scb1a_d_o
+          );
+
+        scb1b_inst : entity work.ram1Kx16
+          generic map
+          (
+            name        => "SC1B"
+          )
+          port map
+          (
+            clock		    => clk_25M,
+            address		  => vram_a(10 downto 1),
+            wren		    => vram_scb1b_wr,
+            data		    => vram_d_i,
+            q		        => vram_scb1b_d_o
+          );
+
+        scb3_inst : entity work.ram32x16
+          generic map
+          (
+            name        => "SCB3"
+          )
+          port map
+          (
+            clock			  => clk_25M,
+            address		  => vram_a(4 downto 0),
+            wren			  => vram_scb3_wr,
+            data			  => vram_d_i,
+            q					  => vram_scb3_d_o
+          );
+          
+        scb4_inst : entity work.ram32x16
+          generic map
+          (
+            name        => "SCB4"
+          )
+          port map
+          (
+            clock			  => clk_25M,
+            address		  => vram_a(4 downto 0),
+            wren			  => vram_scb4_wr,
+            data			  => vram_d_i,
+            q					  => vram_scb4_d_o
+          );
+
+      end generate GEN_1PORT_SCB;
         
     end block BLK_SPRITES;
     
