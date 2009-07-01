@@ -72,13 +72,13 @@ begin
 
       -- generate 1MHz (1us) clock enable
       process (clk, reset)
-        variable count_v      : natural range 0 to PACMAN_1MHz_CLK0_COUNTS-1;
+        variable count_v      : natural range 0 to CLK0_FREQ_MHz-1;
       begin
         if reset = '1' then
           count_v := 0;
           slow_clk_ena <= '0';
         elsif rising_edge(clk) then
-          if count_v = PACMAN_1MHz_CLK0_COUNTS-1 then
+          if count_v = CLK0_FREQ_MHz-1 then
             count_v := 0;
             slow_clk_ena <= '1';
           else

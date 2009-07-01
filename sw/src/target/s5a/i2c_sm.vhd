@@ -33,10 +33,12 @@ entity i2c_sm is
 
     -- interface to i2c_sm		
 		is_idle     : out std_logic;
-		ready       : out std_logic;
+		is_ready    : out std_logic;
 		last_byte   : in std_logic;
 		do_tx       : in std_logic;
 		txbyte      : in std_logic_vector(7 downto 0);
+		do_rx       : in std_logic;
+		rxbyte      : out std_logic_vector(7 downto 0);
 
     -- I2C physical interface
 		vo_scl			: inout std_logic;
@@ -76,11 +78,6 @@ architecture SYN of i2c_sm is
 
   constant SIM_DELAY    : time := 2 ns;
   
-	constant DEV_ADDR_RD	: std_logic_vector(7 downto 0) := X"71";
-	constant DEV_ADDR_WR	: std_logic_vector(7 downto 0) := X"70";
-
-	constant TFP410_CTL_1_MODE	: std_logic_vector(7 downto 0) := X"08";
-
 	constant I2C_PRERlo		: std_logic_vector(2 downto 0) := "000";
 	constant I2C_PRERhi		: std_logic_vector(2 downto 0) := "001";
 	constant I2C_CTR			: std_logic_vector(2 downto 0) := "010";
@@ -96,7 +93,7 @@ architecture SYN of i2c_sm is
 	constant CR_STO				: integer := 6;		-- Generate stop bit
 	constant CR_RD				: integer := 5;		-- Perform read
 	constant CR_WR				: integer := 4;		-- Perform write
-	constant CR_ACK				: integer := 3;		-- Generate ACK
+	constant CR_NACK			: integer := 3;		-- Generate ACK
 	constant CR_IACK			: integer := 0;		-- Acknowledge interrupt
 
 	constant prer_int			: integer := clock_speed / i2c_speed - 1;
@@ -109,199 +106,204 @@ architecture SYN of i2c_sm is
 	signal sda_pad_o     	: std_logic;                -- i2c data line output
 	signal sda_padoen_o  	: std_logic;                -- i2c data line output enable, active low
 
-	signal i2addr					: std_logic_vector(2 downto 0);
-	signal i2addr_r				: std_logic_vector(2 downto 0);
-	signal i2dat_i				: std_logic_vector(7 downto 0);
-	signal i2dat_i_r			: std_logic_vector(7 downto 0);
-	signal i2dat_o				: std_logic_vector(7 downto 0);
-	signal i2dat_o_r			: std_logic_vector(7 downto 0);
-	signal i2we						: std_logic;
-	signal i2stb					: std_logic;
-	signal i2cyc					: std_logic;
-	signal i2ack					: std_logic;
-	signal i2int					: std_logic;
+  signal i2c_timeout      : std_logic := '0';
 
-	--signal is_idle				: std_logic;	-- I2C state machine is idle (ready for command)
-	--signal ready					: std_logic;	-- Ready to tx/rx next byte
+	signal tx_first				  : std_logic;
 
-	--signal last_byte			: std_logic;	-- Last byte to tx/rx
-	--signal do_tx					: std_logic;	-- Initiate a tx
-	signal tx_first				: std_logic;	-- First byte of transmit
-	--signal txbyte					: std_logic_vector(7 downto 0);
-
+  signal wb_cyc     : std_logic := '0';
+  signal wb_stb     : std_logic := '0';
+  signal wb_adr     : std_logic_vector(2 downto 0) := (others => '0');
+  signal wb_dat_i   : std_logic_vector(7 downto 0) := (others => '0');
+  signal wb_dat_o   : std_logic_vector(7 downto 0) := (others => '0');
+  signal wb_we      : std_logic := '0';
+  signal wb_ack     : std_logic := '0';
+                    
 begin
 
-	i2c_sm : block
-		type i2_state_t is (i2_init, i2_clklo, i2_clkhi, i2_ctl, i2_idle, i2_setreg, i2_getreg, i2_tx, i2_txcmd, i2_txwait, i2_txcheck, i2_fault);
-
-		signal state : i2_state_t;
-	begin
-
-		-- I2C wishbone state machine combinatorial
-		loadi2c_comb : process(state, txbyte, tx_first, last_byte, i2dat_i_r)
-		begin
-			i2addr <= (others => 'X');
-			i2dat_o <= (others => 'X');
-			is_idle <= '0';
-			ready <= '0';
-			i2stb <= '0';
-			i2cyc <= '0';
-			i2we <= '1';
-			timeout_err <= '0';
-
-			case state is
-			when i2_init =>
-
-			when i2_clklo =>		-- Set I2C clock prescalar low
-				i2addr <= I2C_PRERlo after SIM_DELAY;
-				i2dat_o <= prer(7 downto 0) after SIM_DELAY;
-
-			when i2_clkhi =>		-- Set I2C clock prescalar high
-				i2addr <= I2C_PRERhi after SIM_DELAY;
-				i2dat_o <= prer(15 downto 8) after SIM_DELAY;
-
-			when i2_ctl =>			-- Set I2C control reg
-				i2addr <= I2C_CTR after SIM_DELAY;
-				i2dat_o <= X"80" after SIM_DELAY;
-
-			when i2_idle =>			-- Wait for I2C transfer
-				is_idle	<= '1' after SIM_DELAY;
-				ready <= '1' after SIM_DELAY;
-
-			when i2_tx =>				-- Load I2C tx byte
-				i2addr <= I2C_TXR after SIM_DELAY;
-				i2dat_o <= txbyte after SIM_DELAY;
-
-			when i2_txcmd =>		-- Set command to send byte
-				i2addr <= I2C_CR after SIM_DELAY;
-				i2dat_o <= (CR_STA => tx_first, CR_STO => last_byte, CR_WR => '1', others => '0') after SIM_DELAY;
-
-			when i2_txwait =>		-- Read status to see if TX is complete
-				i2addr <= I2C_SR after SIM_DELAY;
-
-			when i2_txcheck =>	-- Check status to see if TX is complete
-				if i2dat_i_r(SR_TIP) = '0' and i2dat_i_r(SR_RxACK) = '0' then
-					ready <= '1' after SIM_DELAY;
-				end if;
-
-			when i2_setreg =>		-- Set I2C core register
-				i2stb <= '1' after SIM_DELAY;
-				i2cyc <= '1' after SIM_DELAY;
-
-			when i2_getreg =>		-- Get I2C core register
-				i2stb <= '1' after SIM_DELAY;
-				i2cyc <= '1' after SIM_DELAY;
-				i2we <= '0' after SIM_DELAY;
-
-			when i2_fault =>
-				timeout_err <= '1' after SIM_DELAY;
-			end case;
-		end process loadi2c_comb;
-
-		-- I2C wishbone state machine registers
-		loadi2c_reg : process(clk, reset)
-			variable next_state : i2_state_t;
-			variable ok_state : i2_state_t;
-			variable timeout : integer := 0;
-		begin
-			if reset = '1' then
-				state <= i2_init;
-				tx_first <= '1';
-				i2dat_i_r <= (others => '0');
-				timeout := 255;
-
-			elsif rising_edge(clk) then
-				next_state := state;
-				if state /= i2_setreg and state /= i2_getreg then
-					i2addr_r <= i2addr;
-					i2dat_o_r <= i2dat_o;
-				end if;
-
-				case state is
-				when i2_init =>
-					next_state := i2_clklo;
-
-				when i2_clklo =>
-					next_state := i2_setreg;
-					ok_state := i2_clkhi;
-
-				when i2_clkhi =>
-					next_state := i2_setreg;
-					ok_state := i2_ctl;
-
-				when i2_ctl =>
-					next_state := i2_setreg;
-					ok_state := i2_idle;
-
-				when i2_idle =>
-					tx_first <= '1';
-					if do_tx = '1' then
-						next_state := i2_tx;
-					end if;
-
-				when i2_tx =>
-					next_state := i2_setreg;
-					ok_state := i2_txcmd;
-
-				when i2_txcmd =>
-					next_state := i2_setreg;
-					ok_state := i2_txwait;
-
-				when i2_txwait =>
-					next_state := i2_getreg;
-					ok_state := i2_txcheck;
-
-				when i2_txcheck =>
-					tx_first <= '0';
-					if i2dat_i_r(SR_TIP) = '1' then
-						next_state := i2_txwait;
-					else
-						if i2dat_i_r(SR_RxACK) = '0' then
-							if do_tx = '1' then
-								next_state := i2_tx;
-							else
-								next_state := i2_idle;
-							end if;
-						else
-							next_state := i2_fault;
-						end if;
-					end if;
-
-				when i2_fault =>
-
-				when i2_setreg =>
-					if i2ack = '1' then
-						next_state := ok_state;
-					elsif timeout = 0 then
-						next_state := i2_fault;
-					end if;
-
-				when i2_getreg =>
-					if i2ack = '1' then
-						i2dat_i_r <= i2dat_i;		-- Latch read data
-						next_state := ok_state;
-					elsif timeout = 0 then
-						next_state := i2_fault;
-					end if;
-
-				end case;
-
-				if (state /= i2_setreg and next_state = i2_setreg) or (state /= i2_getreg and next_state = i2_getreg) then
-					timeout := 255;
-				elsif timeout > 0 then
-					timeout := timeout - 1;
-				end if;
-
-				state <= next_state;
-			end if;
-		end process loadi2c_reg;
-
-	end block i2c_sm;
-
-  --
-  --  COMPONENT INSTANTIATION
-  --
+  BLK_SM : block
   
+    type state_t is ( init, init_1, init_2,
+                      idle, ready,
+                      tx_byte_go, wait_tx_byte_1, wait_tx_byte_2, tx_byte_done,
+                      rx_byte_go, wait_rx_byte_1, wait_rx_byte_2, rx_byte_done,
+                      wait_tip_go, wait_tip_ack_go, wait_tip_ack_1, wait_tip_ack_2, tip_ack_fault, tip_ack_timeout,
+                      wb_wr_go, wb_rd_go, wb_wait_ack,
+                      done );
+    signal state        : state_t := idle;
+    signal ok_state     : state_t := idle;
+    signal ok_state_r   : state_t := idle;
+    
+  begin
+    
+    process (clk, reset)
+      subtype timeout_t is integer range 0 to 255;
+      variable timeout : timeout_t := timeout_t'low;
+      variable last_byte_v : std_logic := '0';
+    begin
+      if reset = '1' then
+        last_byte_v := '0';
+        state <= init;
+        is_idle <= '0';
+        is_ready <= '0';
+        i2c_timeout <= '0';
+      elsif rising_edge(clk) then
+
+        -- assign defaults
+        is_idle <= '0';
+        is_ready <= '0';
+        
+        case state is
+
+          --
+          -- INIT
+          --
+          
+          when init =>
+            wb_adr <= I2C_PRERlo;
+            wb_dat_i <= prer(7 downto 0);
+            ok_state <= init_1;
+            state <= wb_wr_go;
+          when init_1 =>
+            wb_adr <= I2C_PRERhi;
+            wb_dat_i <= prer(15 downto 8);
+            ok_state <= init_2;
+            state <= wb_wr_go;
+          when init_2 =>
+            wb_adr <= I2C_CTR;
+            wb_dat_i <= X"80";
+            ok_state <= idle;
+            state <= wb_wr_go;
+                    
+          when idle =>
+            is_idle <= '1';
+            is_ready <= '1';
+            tx_first <= '1';
+            last_byte_v := last_byte;
+            if do_tx = '1' then
+              state <= tx_byte_go;
+            elsif do_rx = '1' then
+              state <= rx_byte_go;            
+            end if;
+
+          when ready =>
+            is_ready <= '1';
+            tx_first <= '0';
+            last_byte_v := last_byte;
+            if do_tx = '1' then
+              state <= tx_byte_go;
+            elsif do_rx = '1' then
+              state <= rx_byte_go;            
+            end if;
+            
+          --        
+          -- TX BYTE
+          --
+          
+          when tx_byte_go =>
+            wb_adr <= I2C_TXR;
+            wb_dat_i <= txbyte;
+            ok_state <= wait_tx_byte_1;
+            state <= wb_wr_go;
+          when wait_tx_byte_1 =>
+            wb_adr <= I2C_CR;
+            wb_dat_i <= (CR_STA => tx_first, CR_STO => last_byte_v, CR_WR => '1', others => '0');
+            ok_state <= wait_tx_byte_2;
+            state <= wb_wr_go;
+          when wait_tx_byte_2 =>
+            ok_state <= tx_byte_done;
+            state <= wait_tip_ack_go;
+          when tx_byte_done =>
+            if last_byte_v = '1' then
+              state <= idle;
+            else
+              state <= ready;
+            end if;
+                        
+          --        
+          -- RX BYTE
+          --
+          
+          when rx_byte_go =>
+            wb_adr <= I2C_CR;
+            wb_dat_i <= (CR_STO => last_byte_v, CR_RD => '1', CR_NACK => last_byte_v, others => '0');
+            ok_state <= wait_rx_byte_1;
+            state <= wb_wr_go;
+          when wait_rx_byte_1 =>
+            ok_state <= wait_rx_byte_2;
+            state <= wait_tip_go;
+          when wait_rx_byte_2 =>
+            wb_adr <= I2C_RXR;
+            ok_state <= rx_byte_done;
+            state <= wb_rd_go;
+          when rx_byte_done =>
+            rxbyte <= wb_dat_o;
+            if last_byte_v = '1' then
+              state <= idle;
+            else
+              state <= ready;
+            end if;
+                        
+          --        
+          -- WAIT TIP AND ACK
+          --
+          
+          when wait_tip_go | wait_tip_ack_go =>
+            timeout := timeout_t'high;
+            i2c_timeout <= '0';
+            ok_state_r <= ok_state;
+            state <= wait_tip_ack_1;
+          when wait_tip_ack_1 =>
+            if timeout = 0 then
+              state <= tip_ack_timeout;
+            else
+              --timeout := timeout - 1;
+              wb_adr <= I2C_SR;
+              ok_state <= wait_tip_ack_2;
+              state <= wb_rd_go;
+            end if;
+          when wait_tip_ack_2 =>
+            if wb_dat_o(SR_TIP) = '1' then
+              state <= wait_tip_ack_1;
+            -- if expecting and ACK, and don't get it
+            elsif wb_dat_i(CR_NACK) /= '1' and wb_dat_o(SR_RxACK) /= '0' then
+              state <= tip_ack_fault;
+            else
+              state <= ok_state_r;
+            end if;
+          when tip_ack_fault | tip_ack_timeout =>
+            i2c_timeout <= '1';
+            state <= idle;
+
+          --
+          -- WISHBONE
+          --
+          
+          when wb_wr_go =>
+            wb_cyc <= '1';
+            wb_stb <= '1';
+            wb_we <= '1';
+            state <= wb_wait_ack;
+          when wb_rd_go =>
+            wb_cyc <= '1';
+            wb_stb <= '1';
+            wb_we <= '0';
+            state <= wb_wait_ack;
+          when wb_wait_ack =>
+            if wb_ack = '1' then
+              wb_cyc <= '0';
+              wb_stb <= '0';
+              wb_we <= '0';
+              state <= ok_state;
+            end if;
+                                                    
+          when others =>
+            state <= idle;
+        end case;
+      end if;
+    end process;
+  
+  end block BLK_SM;
+
 	i2c_master : i2c_master_top
 		generic map (
 			ARST_LVL => '1'
@@ -310,14 +312,14 @@ begin
 			wb_clk_i  => clk,
 			wb_rst_i  => '0',
 			arst_i    => reset,
-			wb_adr_i  => i2addr_r,
-			wb_dat_i  => i2dat_o_r,
-			wb_dat_o  => i2dat_i,
-			wb_we_i   => i2we,
-			wb_stb_i  => i2stb,
-			wb_cyc_i  => i2cyc,
-			wb_ack_o  => i2ack,
-			wb_inta_o => i2int,
+			wb_adr_i  => wb_adr,
+			wb_dat_i  => wb_dat_i,
+			wb_dat_o  => wb_dat_o,
+			wb_we_i   => wb_we,
+			wb_stb_i  => wb_stb,
+			wb_cyc_i  => wb_cyc,
+			wb_ack_o  => wb_ack,
+			wb_inta_o => open,
 
 			-- i2c lines
 			scl_pad_i     => scl_pad_i,

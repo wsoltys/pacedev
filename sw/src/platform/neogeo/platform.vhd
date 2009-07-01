@@ -567,8 +567,10 @@ begin
     signal vram_d_i       : std_logic_vector(15 downto 0) := (others => '0');
     signal vram_wr        : std_logic := '0';
 
-    signal scb1_cs        : std_logic := '0';
-    signal vram_scb1_d_o  : std_logic_vector(15 downto 0) := (others => '0');
+    signal scb1a_cs       : std_logic := '0';
+    signal vram_scb1a_d_o : std_logic_vector(15 downto 0) := (others => '0');
+    signal scb1b_cs       : std_logic := '0';
+    signal vram_scb1b_d_o : std_logic_vector(15 downto 0) := (others => '0');
     signal scb3_cs        : std_logic := '0';
     signal vram_scb3_d_o  : std_logic_vector(15 downto 0) := (others => '0');
     signal scb4_cs        : std_logic := '0';
@@ -626,7 +628,8 @@ begin
       end if;
     end process;
 
-    vram_d_o <= vram_scb1_d_o when scb1_cs = '1' else
+    vram_d_o <= vram_scb1a_d_o when scb1a_cs = '1' else
+                vram_scb1b_d_o when scb1b_cs = '1' else
                 vram_fix1_d_o when fix1_cs = '1' else
                 vram_fix2_d_o when fix2_cs = '1' else
                 vram_scb3_d_o when scb3_cs = '1' else
@@ -635,8 +638,10 @@ begin
 
     BLK_SPRITES : block
     
-      signal vram_scb1_wr   : std_logic := '0';
-      signal scb1_d_o       : std_logic_vector(15 downto 0) := (others => '0');
+      signal vram_scb1a_wr  : std_logic := '0';
+      signal scb1a_d_o      : std_logic_vector(15 downto 0) := (others => '0');
+      signal vram_scb1b_wr  : std_logic := '0';
+      signal scb1b_d_o      : std_logic_vector(15 downto 0) := (others => '0');
       
       signal vram_scb3_wr   : std_logic := '0';
       signal scb3_d_o       : std_logic_vector(15 downto 0) := (others => '0');
@@ -646,20 +651,25 @@ begin
       
     begin
 
-      -- $0000-$6FFF ($0000-$03FF for now)
-      scb1_cs <= '1' when STD_MATCH(vram_a, X"0" & "00----------") else '0';
+      -- $0000-$6FFF ($0000-$07FF for now)
+      scb1a_cs <= '1' when STD_MATCH(vram_a, X"0" & "0----------0") else '0';
+      scb1b_cs <= '1' when STD_MATCH(vram_a, X"0" & "0----------1") else '0';
       -- $8200-$83FF ($8200-$821F for now)
-      scb3_cs <= '1' when STD_MATCH(vram_a, X"82" & "000-----") else '0';
+      scb3_cs <=  '1' when STD_MATCH(vram_a, X"82" & "000-----") else '0';
       -- $8400-$85FF ($8400-$841F for now)
-      scb4_cs <= '1' when STD_MATCH(vram_a, X"84" & "000-----") else '0';
+      scb4_cs <=  '1' when STD_MATCH(vram_a, X"84" & "000-----") else '0';
 
-      vram_scb1_wr <= vram_wr and scb1_cs;
+      vram_scb1a_wr <= vram_wr and scb1a_cs;
+      vram_scb1b_wr <= vram_wr and scb1b_cs;
       vram_scb3_wr <= vram_wr and scb3_cs;
       vram_scb4_wr <= vram_wr and scb4_cs;
 
       -- Sprite Control Block 1 (name tables) $0000-$7FFF
+      -- - even DWORD contains "character" names (sprite codes)
+      -- - odd DWORD contains palette number, flip bits etc
       -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-      scb1_inst : entity work.dpram
+
+      scb1a_inst : entity work.dpram
         generic map
         (
           --init_file		=> "../../../../src/platform/neogeo/roms/vram1.hex",
@@ -670,16 +680,39 @@ begin
         port map
         (
           clock_b			=> clk_25M,
-          address_b		=> vram_a(9 downto 0),
-          wren_b			=> vram_scb1_wr,
+          address_b		=> vram_a(10 downto 1),
+          wren_b			=> vram_scb1a_wr,
           data_b			=> vram_d_i,
-          q_b					=> vram_scb1_d_o,
+          q_b					=> vram_scb1a_d_o,
 
           clock_a		  => clk_video,
-          address_a		=> sprite_i.a(9 downto 0),
+          address_a		=> sprite_i.a(10 downto 1),
           data_a		  => (others => '0'),
           wren_a		  => '0',
-          q_a		      => scb1_d_o
+          q_a		      => scb1a_d_o
+        );
+
+      scb1b_inst : entity work.dpram
+        generic map
+        (
+          --init_file		=> "../../../../src/platform/neogeo/roms/vram1.hex",
+          numwords_a	=> 32*32, -- only 32 sprites for now
+          widthad_a		=> 10,
+          width_a     => 16
+        )
+        port map
+        (
+          clock_b			=> clk_25M,
+          address_b		=> vram_a(10 downto 1),
+          wren_b			=> vram_scb1b_wr,
+          data_b			=> vram_d_i,
+          q_b					=> vram_scb1b_d_o,
+
+          clock_a		  => clk_video,
+          address_a		=> sprite_i.a(10 downto 1),
+          data_a		  => (others => '0'),
+          wren_a		  => '0',
+          q_a		      => scb1b_d_o
         );
 
       -- Sprite Control Block 3 (Y) $8200-$83FF

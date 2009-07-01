@@ -237,11 +237,11 @@ begin
   -- COMPONENT INSTANTIATION
   --
   
-  --assert false
-  --  report  "CLK0_FREQ_MHz = " & integer'image(CLK0_FREQ_MHz) & "\n" &
-  --          "CPU_FREQ_MHz = " &  integer'image(CPU_FREQ_MHz) & "\n" &
-  --          "CPU_CLK_ENA_DIV = " & integer'image(PACMAN_CPU_CLK_ENA_DIVIDE_BY)
-  --    severity note;
+  assert false
+    report  "CLK0_FREQ_MHz = " & integer'image(CLK0_FREQ_MHz) & "\n" &
+            "CPU_FREQ_MHz = " &  integer'image(CPU_FREQ_MHz) & "\n" &
+            "CPU_CLK_ENA_DIV = " & integer'image(PACMAN_CPU_CLK_ENA_DIVIDE_BY)
+      severity note;
       
 	clk_en_inst : entity work.clk_div
 		generic map

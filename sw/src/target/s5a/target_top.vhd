@@ -294,9 +294,14 @@ begin
   begin
   
     dvo_sm : entity work.i2c_sm_controller
+      generic map
+      (
+        clock_speed => 66000000
+      )
       port map
       (
         clk					=> clk_25_a,
+        clk_ena     => '1',
         reset				=> reset_i,
 
         -- I2C physical interface
