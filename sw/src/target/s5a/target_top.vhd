@@ -43,6 +43,7 @@ entity target_top is
     -- ISEL=high (I2C enabled)
     -- CTL(3:1) is hard-wired I2C address
 		vo_idck	  	: out std_logic;
+		vo_idck_n   : out std_logic;
 		vo_red			: out std_logic_vector(7 downto 0);
 		vo_green		: out std_logic_vector(7 downto 0);
 		vo_blue			: out std_logic_vector(7 downto 0);
@@ -167,12 +168,6 @@ architecture SYN of target_top is
 
 begin
 
-	-- Loop back serial pins for testing
-	pt_ts_tx		<= pt_pc_rx;
-	pt_pc_tx		<= pt_ts_rx;
-	mx_ts_rx		<= mx_ts_tx;
-	mx_pc_rx		<= mx_pc_tx;
-
 	PROC_RESET : process(clk_25_a)
 		variable reset_cnt : integer := 999999;
 	begin
@@ -244,6 +239,8 @@ begin
           c2      => clk_i(0)
         );
     
+        vo_idck_n <= '0';
+        
     end generate GEN_PLL;
 	
     GEN_NO_PLL : if not PACE_HAS_PLL generate
@@ -296,7 +293,8 @@ begin
     dvo_sm : entity work.i2c_sm_controller
       generic map
       (
-        clock_speed => 66000000
+        clock_speed => 25000000,
+        dsel        => '0'          -- single-ended output clock
       )
       port map
       (
@@ -353,6 +351,28 @@ begin
     
   end block BLK_VIDEO;
 
+  BLK_SERIAL : block
+  
+    constant BUILD_SERIAL_LOOPBACK  : boolean := true;
+  
+  begin
+    GEN_SERIAL_LOOPBACK : if BUILD_SERIAL_LOOPBACK generate
+      -- Loop back serial pins for testing
+      pt_ts_tx		<= pt_ts_rx;
+      pt_pc_tx		<= pt_pc_rx;
+      mx_ts_rx		<= mx_ts_tx;
+      mx_pc_rx		<= mx_pc_tx;
+    end generate GEN_SERIAL_LOOPBACK;
+    
+    GEN_SERIAL_PASSTHRU : if not BUILD_SERIAL_LOOPBACK generate
+      -- pass thru serial pins for end-to-end testing
+      pt_ts_tx		<= mx_ts_tx;
+      pt_pc_tx		<= mx_pc_tx;
+      mx_ts_rx    <= pt_ts_rx;
+      mx_pc_rx    <= pt_pc_rx;
+    end generate GEN_SERIAL_PASSTHRU;
+  end block BLK_SERIAL;
+  
   pace_inst : entity work.pace                                            
     port map
     (

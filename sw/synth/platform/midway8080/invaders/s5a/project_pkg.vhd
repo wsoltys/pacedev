@@ -61,8 +61,8 @@ package project_pkg is
   constant PACE_VIDEO_V_SCALE       	      : integer := 2;
   constant PACE_ENABLE_ADV724					      : std_logic := '0';
 
-  constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
-  --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
+  --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
+  constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
   
   constant PACE_HAS_OSD                     : boolean := false;
   constant PACE_OSD_XPOS                    : natural := 0;

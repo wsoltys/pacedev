@@ -14,8 +14,9 @@ use ieee.numeric_std.all;
 entity i2c_sm_controller is
   generic
   (
-    clock_speed	: integer;	          -- Input clock speed (Hz)
-    i2c_speed		: integer := 400000		-- I2C toggle rate (Hz)
+    clock_speed	  : integer;	            -- Input clock speed (Hz)
+    i2c_speed		  : integer := 400000;	  -- I2C toggle rate (Hz)
+    dsel          : std_logic := '1'      -- differential/single-ended output clock
   );
 	port
 	(
@@ -131,8 +132,8 @@ begin
     				do_tx <= '1';
     
     			when cfg_tx1d1 =>
-            -- TDIS=0(PD#),VEN=1(orig),HEN=1(orig),DSEL=1,BSEL=1(24-bit),EDGE=1(rising),PD#=1(normal)
-    				txbyte <= X"3F";
+            -- TDIS=0(PD#),VEN=1(orig),HEN=1(orig),DSEL=[1],BSEL=1(24-bit),EDGE=1(rising),PD#=1(normal)
+    				txbyte <= X"3" & dsel & "111";
     				last_byte <= '1';
     				do_tx <= '1';
     
