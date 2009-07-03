@@ -52,6 +52,7 @@ use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
+use work.sdram_pkg.all;
 use work.video_controller_pkg.all;
 use work.platform_pkg.all;
 use work.project_pkg.all;
@@ -453,7 +454,7 @@ begin
   spi_o <= NULL_TO_SPI;		
   ser_o <= NULL_TO_SERIAL;  
 	leds_o <= (others => '0');
-  gp_o <= (others => '0');
+  gp_o <= NULL_TO_GP;
 
 end SYN;
 
