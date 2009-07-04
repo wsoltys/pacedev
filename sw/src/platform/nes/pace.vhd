@@ -4,6 +4,8 @@ use ieee.std_logic_unsigned.all;
 
 library work;
 use work.pace_pkg.all;
+use work.sdram_pkg.all;
+use work.video_controller_pkg.all;
 use work.platform_pkg.all;
 use work.project_pkg.all;
 use work.nes_cart_pkg.all;
@@ -12,60 +14,50 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk             : in std_logic_vector(0 to 3);
-    test_button     : in std_logic;
-    reset           : in std_logic;
+    clk_i           : in std_logic_vector(0 to 3);
+    reset_i         : in std_logic;
 
-    -- game I/O
-    ps2clk          : inout std_logic;
-    ps2data         : inout std_logic;
-    dip             : in std_logic_vector(7 downto 0);
-		jamma						: in JAMMAInputsType;
+    -- misc I/O
+    buttons_i       : in from_BUTTONS_t;
+    switches_i      : in from_SWITCHES_t;
+    leds_o          : out to_LEDS_t;
 
-    -- external RAM
+    -- controller inputs
+    inputs_i        : in from_INPUTS_t;
+
+    -- external ROM/RAM
+    flash_i         : in from_FLASH_t;
+    flash_o         : out to_flash_t;
     sram_i       		: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
+    sdram_i         : in from_SDRAM_t;
+    sdram_o         : out to_SDRAM_t;
 
-    -- VGA video
-		vga_clk					: out std_logic;
-    red             : out std_logic_vector(9 downto 0);
-    green           : out std_logic_vector(9 downto 0);
-    blue            : out std_logic_vector(9 downto 0);
-		lcm_data				:	out std_logic_vector(9 downto 0);
-		hblank					: out std_logic;
-		vblank					: out std_logic;
-    hsync           : out std_logic;
-    vsync           : out std_logic;
+    -- video
+    video_i         : in from_VIDEO_t;
+    video_o         : out to_VIDEO_t;
 
-    -- composite video
-    BW_CVBS         : out std_logic_vector(1 downto 0);
-    GS_CVBS         : out std_logic_vector(7 downto 0);
-
-    -- sound
-    snd_clk         : out std_logic;
-    snd_data_l      : out std_logic_vector(15 downto 0);
-    snd_data_r      : out std_logic_vector(15 downto 0);
-
+    -- audio
+    audio_i         : in from_AUDIO_t;
+    audio_o         : out to_AUDIO_t;
+    
     -- SPI (flash)
-    spi_clk         : out std_logic;
-    spi_mode        : out std_logic;
-    spi_sel         : out std_logic;
-    spi_din         : in std_logic;
-    spi_dout        : out std_logic;
+    spi_i           : in from_SPI_t;
+    spi_o           : out to_SPI_t;
 
     -- serial
-    ser_tx          : out std_logic;
-    ser_rx          : in std_logic;
-
-    -- debug
-    leds            : out std_logic_vector(7 downto 0)
+    ser_i           : in from_SERIAL_t;
+    ser_o           : out to_SERIAL_t;
+    
+    -- general purpose I/O
+    gp_i            : in from_GP_t;
+    gp_o            : out to_GP_t
   );
-
-end PACE;
+end entity PACE;
 
 architecture SYN of PACE is
 
-	alias clk_21M						: std_logic is clk(1);
+	alias clk_21M						: std_logic is clk_i(1);
 	
 	signal ppu_r						: std_logic_vector(5 downto 0) := (others => '0');
 	signal ppu_g						: std_logic_vector(5 downto 0) := (others => '0');
@@ -106,7 +98,7 @@ begin
 	  (
 	    clk         		=> clk_21M,
 	    clk_21M_en  		=> '1',
-	    reset       		=> reset,
+	    reset       		=> reset_i,
 
 			prg_a						=> prg_a,
 			prg_d_i					=> prg_d,
@@ -151,7 +143,7 @@ begin
 	  port map
 	  (
 	    clk         		=> clk_21M,
-	    reset       		=> reset,
+	    reset       		=> reset_i,
 
 			prg_a						=> prg_a,
 			prg_d_i					=> (others => '0'),
@@ -180,10 +172,10 @@ begin
 		
 	begin
 	
-		process (clk_21M, reset)
+		process (clk_21M, reset_i)
 			variable count : integer range 0 to 20 := 0;
 		begin
-			if reset = '1' then
+			if reset_i = '1' then
 				count := 0;
 			elsif rising_edge(clk_21M) then
 				clk_1M_en <= '0'; -- default
@@ -201,10 +193,10 @@ begin
 		  (
 		    clk     				=> clk_21M,
 				clk_1M_en				=> clk_1M_en,
-		    reset   				=> reset,
+		    reset   				=> reset_i,
 
-		    ps2clk  				=> ps2clk,
-		    ps2data 				=> ps2data,
+		    ps2clk  				=> inputs_i.ps2_kclk,
+		    ps2data 				=> inputs_i.ps2_kdat,
 
 				joypad_rst			=> joypad_rst,
 				joypad_rd				=> joypad_rd,
@@ -217,9 +209,9 @@ begin
 	  port map
 	  (
 	    clk     				=> clk_21M,
-	    reset   				=> reset,
+	    reset   				=> reset_i,
 
-			jamma						=> jamma,
+			jamma						=> inputs_i.jamma_n,
 
 			joypad_rst			=> joypad_rst,
 			joypad_rd				=> joypad_rd,
@@ -231,13 +223,17 @@ begin
 	
 	GEN_COMPOSITE : if PACE_ENABLE_ADV724 = '1' generate
 	
-		red <= ppu_r & "0000";
-		green <= ppu_g & "0000";
-		blue <= ppu_b & "0000";
-		hsync <= ppu_hsync;
-		vsync <= ppu_vsync;
+		video_o.rgb.r <= ppu_r & "0000";
+		video_o.rgb.g <= ppu_g & "0000";
+		video_o.rgb.b <= ppu_b & "0000";
+		video_o.hsync <= ppu_hsync;
+		video_o.vsync <= ppu_vsync;
 		
 	end generate GEN_COMPOSITE;
+
+	video_o.clk <= clk_21M;
+	video_o.hblank <= '0';
+	video_o.vblank <= '0';
 
 	GEN_VGA : if PACE_ENABLE_ADV724 = '0' generate
 
@@ -255,9 +251,9 @@ begin
 
 		begin
 
-			process (clk_21M, reset)
+			process (clk_21M, reset_i)
 			begin
-				if reset = '1' then
+				if reset_i = '1' then
 					clk_10M <= '0';
 				elsif rising_edge(clk_21M) then
 					clk_10M <= not clk_10M;
@@ -288,11 +284,11 @@ begin
 					CLK_X2        => clk_21M
 				);
 
-			red <= vga_rgb(17 downto 12) & "0000";
-			green <= vga_rgb(11 downto 6) & "0000";
-			blue <= vga_rgb(5 downto 0) & "0000";
-			hsync <= not vga_hsync;
-			vsync <= not vga_vsync;
+			video_o.rgb.r <= vga_rgb(17 downto 12) & "0000";
+			video_o.rgb.g <= vga_rgb(11 downto 6) & "0000";
+			video_o.rgb.b <= vga_rgb(5 downto 0) & "0000";
+			video_o.hsync <= not vga_hsync;
+			video_o.vsync <= not vga_vsync;
 
 		end block BLK_SCANDBL;
 	
@@ -303,41 +299,27 @@ begin
 	SND_BLK : block
 		signal count : std_logic_vector(1 downto 0);
 	begin
-		process (clk_21M, reset)
+		process (clk_21M, reset_i)
 		begin
-			if reset = '1' then
+			if reset_i = '1' then
 				count <= (others => '0');
 			elsif rising_edge(clk_21M) then
 				count <= count + 1;
 			end if;
 		end process;
-		snd_data_l <= snd1;
-		snd_data_r <= snd2;
+		audio_o.ldata <= snd1;
+		audio_o.rdata <= snd2;
 		-- approx 5MHz
-		snd_clk <= count(1);
+		audio_o.clk <= count(1);
 	end block SND_BLK;
 	
 	-- UNUSED
 	
-	vga_clk <= clk_21M;
-	lcm_data <= (others => '0');
-	hblank <= '0';
-	vblank <= '0';
-	bw_cvbs <= (others => '0');
-	gs_cvbs <= (others => '0');
-	ser_tx <= '0';
-  spi_clk <= 'Z';
-  spi_dout <= 'Z';
-  spi_mode <= 'Z';
-  spi_sel <= 'Z';
+	ser_o <= NULL_TO_SERIAL;
+	spi_o <= NULL_TO_SPI;
   
-	leds <= (others => '0');
-	sram_o.a <= (others => '0');
-	sram_o.d <= (others => '0');
-	sram_o.be <= (others => '0');
-	sram_o.cs <= '0';
-	sram_o.oe <= '0';
-	sram_o.we <= '0';
+	leds_o <= (others => '0');
+	sram_o <= NULL_TO_SRAM;
 	  
 end SYN;
 

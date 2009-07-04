@@ -54,7 +54,7 @@ begin
   process (clk, reset)
 
 		variable pel 				: std_logic_vector(3 downto 0);
-		variable pal_entry 	: std_logic_vector(7 downto 0);
+		variable pal_entry 	: std_logic_vector(15 downto 0);
 		
   begin
   	if rising_edge(clk) and clk_ena = '1' then

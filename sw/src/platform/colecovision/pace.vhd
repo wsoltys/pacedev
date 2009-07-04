@@ -67,6 +67,7 @@ use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
+use work.sdram_pkg.all;
 use work.kbd_pkg.all;
 use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
@@ -95,7 +96,9 @@ entity PACE is
     flash_o         : out to_flash_t;
     sram_i       		: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
-
+    sdram_i         : in from_SDRAM_t;
+    sdram_o         : out to_SDRAM_t;
+    
     -- video
     video_i         : in from_VIDEO_t;
     video_o         : out to_VIDEO_t;
@@ -252,7 +255,7 @@ begin
   spi_o <= NULL_TO_SPI;
   ser_o <= NULL_TO_SERIAL;
 	leds_o <= (others => '0');
-	gp_o <= (others => '0');
+	gp_o <= NULL_TO_GP;
 
   -- assign PACE outputs
   video_o.rgb.r <= vid_r & "00";

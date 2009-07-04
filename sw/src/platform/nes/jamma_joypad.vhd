@@ -10,7 +10,7 @@ entity jamma_joypad is
     clk     		: in std_logic;
     reset   		: in std_logic;                               
 
-		jamma				: in JAMMAInputsType;
+		jamma				: in from_JAMMA_t;
 
 		joypad_rst	: in std_logic;
 		joypad_rd		: in std_logic_vector(1 to 2);

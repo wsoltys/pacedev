@@ -5,6 +5,7 @@ use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
+use work.sdram_pkg.all;
 use work.video_controller_pkg.all;
 use work.target_pkg.all;
 use work.project_pkg.all;
@@ -30,7 +31,9 @@ entity PACE is
     flash_o         : out to_flash_t;
     sram_i       		: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
-
+    sdram_i         : in from_SDRAM_t;
+    sdram_o         : out to_SDRAM_t;
+    
     -- video
     video_i         : in from_VIDEO_t;
     video_o         : out to_VIDEO_t;
@@ -215,7 +218,7 @@ begin
   flash_o <= NULL_TO_FLASH;
   audio_o <= NULL_TO_AUDIO;
   spi_o <= NULL_TO_SPI;
-  gp_o <= (others => '0');
+  gp_o <= NULL_TO_GP;
   
 	leds_o <= std_logic_vector(resize(unsigned(leds_s), leds_o'length));
 

@@ -11,8 +11,8 @@ entity ps2_joypad is
 		clk_1M_en		: in std_logic;
     reset   		: in std_logic;                               
 
-    ps2clk  		: inout std_logic;                               
-    ps2data 		: inout std_logic;                               
+    ps2clk  		: in std_logic;                               
+    ps2data 		: in std_logic;                               
 
 		joypad_rst	: in std_logic;
 		joypad_rd		: in std_logic_vector(1 to 2);

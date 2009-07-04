@@ -109,7 +109,7 @@ architecture SYN of target_top is
   constant DE1_TEST_BURCHED_LEDS    : boolean := false;
   constant DE1_TEST_BURCHED_DIPS    : boolean := false;
   constant DE1_TEST_BURCHED_7SEG    : boolean := false;
-  constant DE1_BURCHED_SRAM         : boolean := true;
+  constant DE1_BURCHED_SRAM         : boolean := false;
 
 	alias gpio_maple 		: std_logic_vector(35 downto 0) is gpio_0;
 	alias gpio_lcd 			: std_logic_vector(35 downto 0) is gpio_1;

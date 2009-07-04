@@ -19,6 +19,7 @@ entity pace_video_mixer is
       sprite_set    : in std_logic;
       sprite_pri    : in std_logic;
       
+      video_ctl_i   : in from_VIDEO_CTL_t;
       graphics_i    : in to_GRAPHICS_t;
       rgb_o         : out RGB_t
   );

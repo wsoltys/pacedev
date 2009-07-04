@@ -5,6 +5,7 @@ use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
+use work.sdram_pkg.all;
 use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
 use work.project_pkg.all;
@@ -35,6 +36,8 @@ entity platform is
     flash_o         : out to_FLASH_t;
 		sram_i					: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
+		sdram_i         : in from_SDRAM_t;
+		sdram_o         : out to_SDRAM_t;
 
     -- graphics
     
@@ -211,16 +214,16 @@ begin
       -- hook up Burched SRAM module
       GEN_D: for i in 0 to 7 generate
         ram_datao(i) <= gp_i(35-i);
-        gp_o(35-i) <= up_datao(i);
-        gp_o(27-i) <= 'Z';
+        gp_o.d(35-i) <= up_datao(i);
+        gp_o.d(27-i) <= 'Z';
       end generate;
       GEN_A: for i in 0 to 15 generate
-        gp_o(17-i) <= up_addr(i);
+        gp_o.d(17-i) <= up_addr(i);
       end generate;
-      gp_o(1) <= '0';           -- A16
-      gp_o(0) <= '0';           -- CEAn
-      gp_o(18) <= '1';          -- upper byte WEn
-      gp_o(19) <= not ram_wr;   -- lower byte WEn
+      gp_o.d(1) <= '0';           -- A16
+      gp_o.d(0) <= '0';           -- CEAn
+      gp_o.d(18) <= '1';          -- upper byte WEn
+      gp_o.d(19) <= not ram_wr;   -- lower byte WEn
     end generate GEN_BURCHED_SYSMEM;
 
   end block BLK_SYSMEM;
@@ -355,7 +358,7 @@ begin
 	graphics_o.pal <= (others => (others => '0'));
 	ser_o <= NULL_TO_SERIAL;
   spi_o <= NULL_TO_SPI;
-  gp_o(gp_o'left downto 52) <= (others => '0');
+  gp_o.d(gp_o.d'left downto 52) <= (others => '0');
 
 	clk_en_inst : entity work.clk_div
 		generic map
@@ -833,7 +836,7 @@ begin
       -- drive enable switches
       de_s <= not switches_i(3 downto 0);
       
-      gp_o(51 downto 36) <= -- memory address
+      gp_o.d(51 downto 36) <= -- memory address
                            floppy_dbg(31 downto 16) when switches_i(5 downto 4) = "11" else 
                            -- track & data byte
                            floppy_dbg(15 downto 0) when switches_i(5 downto 4) = "10" else
