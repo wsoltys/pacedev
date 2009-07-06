@@ -109,7 +109,7 @@ begin
     (
       NUM_INPUT_BYTES => PACE_INPUTS_NUM_BYTES
     )
-    Port Map
+    port map
     (
       -- clocking and reset
       clk_i           => clk_i,

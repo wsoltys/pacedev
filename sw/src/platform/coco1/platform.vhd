@@ -5,69 +5,67 @@ use	ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
+use work.sdram_pkg.all;
 use work.kbd_pkg.all;
 use work.platform_pkg.all;
 
-entity Game is
+entity platform is
+  generic
+  (
+    NUM_INPUT_BYTES   : integer
+  );
   port
   (
     -- clocking and reset
-    clk         		: in std_logic_vector(0 to 3);
-    reset           : in    std_logic;                       
-    test_button     : in    std_logic;                       
+    clk_i             : in std_logic_vector(0 to 3);
+    reset_i           : in std_logic;
 
-    -- inputs
-    ps2clk          : inout std_logic;                       
-    ps2data         : inout std_logic;                       
-    dip             : in    std_logic_vector(7 downto 0);    
+    -- misc I/O
+    buttons_i         : in from_BUTTONS_t;
+    switches_i        : in from_SWITCHES_t;
+    leds_o            : out to_LEDS_t;
 
-    -- micro buses
-    upaddr          : out   std_logic_vector(15 downto 0);   
-    updatao         : out   std_logic_vector(7 downto 0);    
+    -- controller inputs
+    inputs_i          : in from_MAPPED_INPUTS_t(0 to NUM_INPUT_BYTES-1);
 
-    -- SRAM
-		sram_i					: in from_SRAM_t;
-		sram_o					: out to_SRAM_t;
-
-    gfxextra_data   : out std_logic_vector(7 downto 0);
+    -- FLASH/SRAM
+    flash_i           : in from_FLASH_t;
+    flash_o           : out to_FLASH_t;
+		sram_i					  : in from_SRAM_t;
+		sram_o					  : out to_SRAM_t;
+    sdram_i           : in from_SDRAM_t;
+    sdram_o           : out to_SDRAM_t;
 
     -- graphics (control)
-    red							: out		std_logic_vector(7 downto 0);
-		green						: out		std_logic_vector(7 downto 0);
-		blue						: out		std_logic_vector(7 downto 0);
-		hsync						: out		std_logic;
-		vsync						: out		std_logic;
+    red							  : out		std_logic_vector(7 downto 0);
+		green						  : out		std_logic_vector(7 downto 0);
+		blue						  : out		std_logic_vector(7 downto 0);
+		hsync						  : out		std_logic;
+		vsync						  : out		std_logic;
 
-    cvbs            : out   std_logic_vector(7 downto 0);
-			  
     -- OSD
-    to_osd          : out to_OSD_t;
-    from_osd        : in from_OSD_t;
+    osd_i             : in from_OSD_t;
+    osd_o             : out to_OSD_t;
 
     -- sound
-    snd_rd          : out   std_logic;                       
-    snd_wr          : out   std_logic;
-    sndif_datai     : in    std_logic_vector(7 downto 0);    
-
-    -- spi interface
-    spi_clk         : out   std_logic;                       
-    spi_din         : in    std_logic;                       
-    spi_dout        : out   std_logic;                       
-    spi_ena         : out   std_logic;                       
-    spi_mode        : out   std_logic;                       
-    spi_sel         : out   std_logic;                       
+    snd_i             : in from_SOUND_t;
+    snd_o             : out to_SOUND_t;
+    
+    -- SPI (flash)
+    spi_i             : in from_SPI_t;
+    spi_o             : out to_SPI_t;
 
     -- serial
-    ser_rx          : in    std_logic;                       
-    ser_tx          : out   std_logic;                       
+    ser_i             : in from_SERIAL_t;
+    ser_o             : out to_SERIAL_t;
 
-    -- on-board leds
-    leds            : out   std_logic_vector(7 downto 0)    
+    -- general purpose I/O
+    gp_i              : in from_GP_t;
+    gp_o              : out to_GP_t
   );
+end entity platform;
 
-end Game;
-
-architecture SYN of Game is
+architecture SYN of platform is
 
 	component palx4_clk IS
 	PORT
@@ -77,8 +75,8 @@ architecture SYN of Game is
 		);
 	END component;
 
-	alias clk_20M					: std_logic is clk(0);
-	alias clk_57M272			: std_logic is clk(1);
+	alias clk_20M					: std_logic is clk_i(0);
+	alias clk_57M272			: std_logic is clk_i(1);
 	
 	-- clocks
 	signal sys_clk				: std_logic;			-- 14M318
@@ -118,9 +116,9 @@ architecture SYN of Game is
   signal uPnmireq       : std_logic;
 
   -- keyboard signals
-	signal jamma_s				: JAMMAInputsType;
-  signal kbd_matrix			: in8(0 to 8);
-	alias game_reset			: std_logic is kbd_matrix(8)(0);
+	signal jamma_s				: from_JAMMA_t;
+  signal kbd_matrix			: from_MAPPED_INPUTS_t(0 to 8);
+	alias game_reset			: std_logic is kbd_matrix(8).d(0);
 	
   -- PIA signals
   signal pia_datao  		: std_logic_vector(7 downto 0);
@@ -173,17 +171,17 @@ architecture SYN of Game is
 	
 begin
 
-	cpu_reset <= reset or game_reset;
+	cpu_reset <= reset_i or game_reset;
 	
   --
   --  Clocking
   --
 
 	-- produce a PAL clock (sys_clk) from the PLL output
-	process (clk_57M272, reset)
+	process (clk_57M272, reset_i)
 		variable count : std_logic_vector(1 downto 0);
 	begin
-		if reset = '1' then
+		if reset_i = '1' then
 			count := (others => '0');
 		elsif rising_edge(clk_57M272) then
 			sys_clk <= count(1);
@@ -192,11 +190,11 @@ begin
 	end process;
 
 	-- generate clock helpers
-	process (sys_clk, reset, clk_e, clk_q)
+	process (sys_clk, reset_i, clk_e, clk_q)
 		variable old_q	: std_logic;
 		variable old_e	: std_logic;
 	begin
-		if reset = '1' then
+		if reset_i = '1' then
 			old_q := '0';
 			old_e := '0';
 		elsif falling_edge (sys_clk) then
@@ -217,12 +215,12 @@ begin
 	end process;
 
   -- need to sync reset to VDG with Q
-  process (clk_q, reset)
+  process (clk_q, reset_i)
   begin
-    if reset = '1' then
+    if reset_i = '1' then
       vdg_reset <= '1';
     elsif falling_edge (clk_q) then
-      if reset = '0' then
+      if reset_i = '0' then
         vdg_reset <= '0';
       end if;
     end if;
@@ -316,49 +314,42 @@ begin
 	--pia_pb <= (others => '0');
 	
 	-- keyboard matrix
-	process (clk_20M, reset)
+	process (clk_20M, reset_i)
 	  variable keys : std_logic_vector(7 downto 0);
 	begin
-	  if reset = '1' then
+	  if reset_i = '1' then
   		keys := (others => '0');
 	  elsif rising_edge (clk_20M) then
   		keys := (others => '0');
   		-- note that row select is active low
   		if pia_pb(0) = '0' then
-  			keys := keys or kbd_matrix(0);
+  			keys := keys or kbd_matrix(0).d;
   		end if;
   		if pia_pb(1) = '0' then
-  			keys := keys or kbd_matrix(1);
+  			keys := keys or kbd_matrix(1).d;
   		end if;
   		if pia_pb(2) = '0' then
-  			keys := keys or kbd_matrix(2);
+  			keys := keys or kbd_matrix(2).d;
   		end if;
   		if pia_pb(3) = '0' then
-  			keys := keys or kbd_matrix(3);
+  			keys := keys or kbd_matrix(3).d;
   		end if;
   		if pia_pb(4) = '0' then
-  			keys := keys or kbd_matrix(4);
+  			keys := keys or kbd_matrix(4).d;
   		end if;
   		if pia_pb(5) = '0' then
-  			keys := keys or kbd_matrix(5);
+  			keys := keys or kbd_matrix(5).d;
   		end if;
   		if pia_pb(6) = '0' then
-  			keys := keys or kbd_matrix(6);
+  			keys := keys or kbd_matrix(6).d;
   		end if;
   		if pia_pb(7) = '0' then
-  			keys := keys or kbd_matrix(7);
+  			keys := keys or kbd_matrix(7).d;
   		end if;
 	  end if;
 	  -- key inputs are active low
 	  pia_pa <= not keys;
 	end process;
-
-  gfxextra_data <= (others => '0');
-
-  -- unused outputs
-	upaddr <= uP_addr;
-	updatao <= uP_datao;
-  snd_rd <= '0';
 
   --
   --  COMPONENT INSTANTIATION
@@ -387,7 +378,7 @@ begin
 		port map
 		(
 			clk				=> sys_clk,
-			reset			=> reset,
+			reset			=> reset_i,
 
 			-- input
 			a					=> uP_addr,
@@ -451,7 +442,7 @@ begin
 			hsync		=> hsync,
 			vsync		=> vsync,
 
-      cvbs    => cvbs
+      cvbs    => open --cvbs
     );
 
   -- PIA (keyboard)
@@ -459,7 +450,7 @@ begin
   	port map
   	(	
   	 	clk       	=> uPclk,
-      rst       	=> reset,
+      rst       	=> reset_i,
       cs        	=> pia_cs,
       rw        	=> uPrdwr,
       addr      	=> uP_addr(1 downto 0),
@@ -482,24 +473,6 @@ begin
 			cb2_o				=> open,
 			cb2_oe			=> open
   	);
-
- kbd_inst : entity work.inputs
-	generic map
-	(
-		NUM_INPUTS	=> kbd_matrix'length,
-		CLK_1US_DIV	=> 20
-	)
-	port map
-  (
-	    clk     		=> clk_20M,
-	    reset   		=> reset,
-	    ps2clk  		=> ps2clk,
-	    ps2data 		=> ps2data,
-			jamma				=> jamma_s,
-
-	    dips				=> dip,
-	    inputs			=> kbd_matrix
-	);
 
   -- COLOR BASIC ROM
   basrom_inst : entity work.sprom
@@ -550,7 +523,7 @@ begin
     --	(
     --		--clk			  => vga_clk_s,
     --		clk			  => sys_clk,
-    --		reset		  => reset
+    --		reset		  => reset_i
    -- 
    --     -- output
    --     --hsync     => hsync,
@@ -563,4 +536,4 @@ begin
 
 	end generate GEN_TEST_VGA;
 		
-end SYN;
+end architecture SYN;

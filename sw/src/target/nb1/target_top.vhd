@@ -5,6 +5,7 @@ use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
+use work.sdram_pkg.all;
 use work.video_controller_pkg.all;
 use work.project_pkg.all;
 use work.target_pkg.all;
@@ -242,7 +243,8 @@ begin
   end block BLK_SRAM;
 
   GEN_NO_SDRAM : if true generate
-    sdram_i <= NULL_FROM_SDRAM;
+    sdram_i.d <= (others => '0');
+    sdram_i.ack <= '0';
   end generate GEN_NO_SDRAM;
   
   BLK_VIDEO : block

@@ -11,7 +11,13 @@ package project_pkg is
 	--  
 	-- PACE constants which *MUST* be defined
 	--
-	
+	constant PACE_HAS_PLL                     : boolean := true;
+	constant PACE_HAS_SRAM                    : boolean := false;
+	constant PACE_HAS_FLASH                   : boolean := false;
+	constant PACE_HAS_SDRAM                   : boolean := false;
+  constant PACE_HAS_SPI                     : boolean := false;
+  constant PACE_HAS_SERIAL                  : boolean := false;
+  
   -- Reference clock is 20MHz
 	-- NTSC (x16)
   constant PACE_CLK0_DIVIDE_BY              : natural := 1;
@@ -31,5 +37,6 @@ package project_pkg is
   -- NB1-specific constants that must be defined
   constant NB1_PLL_INCLK              			: NANOBOARD_PLL_INCLK_Type := NANOBOARD_PLL_INCLK_REF;
   constant NB1_INCLK0_INPUT_FREQUENCY 			: natural := 50000;   -- 20MHz
+  constant PACE_CLKIN0                      : natural := PACE_CLKIN0_REF;
 
 end;
