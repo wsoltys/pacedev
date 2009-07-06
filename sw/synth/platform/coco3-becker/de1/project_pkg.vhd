@@ -15,6 +15,7 @@ package project_pkg is
 	
   -- Reference clock is 50MHz
 	constant PACE_HAS_PLL								      : boolean := true;
+	constant PACE_HAS_FLASH                   : boolean := false;
   constant PACE_HAS_SRAM                    : boolean := true;
   constant PACE_HAS_SDRAM                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := true;
@@ -32,5 +33,12 @@ package project_pkg is
   constant PACE_HAS_OSD                     : boolean := false;
   constant PACE_OSD_XPOS                    : natural := 128;
   constant PACE_OSD_YPOS                    : natural := 176;
+
+  -- these really shouldn't be used - or defined - here
+  -- - but worry about it later
+  constant P2A_EUROSPI_CLK    : natural := 0;
+  constant P2A_EUROSPI_MISO   : natural := 1;
+  constant P2A_EUROSPI_MOSI   : natural := 2;
+  constant P2A_EUROSPI_SS     : natural := 3;
 
 end;

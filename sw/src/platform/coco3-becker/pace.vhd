@@ -4,6 +4,7 @@ use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
+use work.sdram_pkg.all;
 use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
 use work.platform_pkg.all;
@@ -340,67 +341,127 @@ begin
       end if;
     end if;
   end process;
-  
-  BLK_OSD : block
-  
-    signal chr_a    : std_logic_vector(10 downto 0) := (others => '0');
-    signal chr_d    : std_logic_vector(7 downto 0) := (others => '0');
+
+  GEN_OSD : if PACE_HAS_OSD generate
+    BLK_OSD : block
     
-  begin
-  
-    osd_ctrl_i(15 downto 8) <= (others => '0');
-    
-    osd_inst : entity work.OSD
-      port map
-      (
-        clk             => clk_50M,
-        clk_ena         => '1',
-        reset           => reset_i,
-
-        ps2_kclk_i      => inputs_i.ps2_kclk,
-        ps2_kdat_i      => inputs_i.ps2_kdat,
-        ps2_kclk_o      => ps2_kclk,
-        ps2_kdat_o      => ps2_kdat,
-        
-        vid_clk         => video_o_s.clk,
-        vid_hsync       => video_o_s.hsync,
-        vid_vsync       => video_o_s.vsync,
-        vid_r_i         => video_o_s.rgb.r,
-        vid_g_i         => video_o_s.rgb.g,
-        vid_b_i         => video_o_s.rgb.b,
-
-        osd_ctrl_i      => osd_ctrl_i,
-        osd_ctrl_o      => osd_ctrl_o,
-        
-        chr_a           => chr_a,
-        chr_d           => chr_d,
-        
-        vid_r_o         => video_o.rgb.r,
-        vid_g_o         => video_o.rgb.g,
-        vid_b_o         => video_o.rgb.b,
-        
-        -- SPI ports
-        eurospi_clk     => gp_i(P2A_EUROSPI_CLK),
-        eurospi_miso    => gp_o.d(P2A_EUROSPI_MISO),
-        eurospi_mosi    => gp_i(P2A_EUROSPI_MOSI),
-        eurospi_ss      => gp_i(P2A_EUROSPI_SS)
-      );
-
-      tilerom_inst : entity work.sprom
-        generic map
+      component OSD is
+        generic
         (
-          init_file		=> "../../../../../src/platform/coco3-becker/roms/coco3gen.hex",
-          numwords_a	=> 2048,
-          widthad_a		=> 11
-        )
+          CLK_MHz         : integer := 50;
+          OSD_X           : natural := 320;
+          OSD_Y           : natural := 320;
+          OSD_WIDTH       : natural := 512;
+          OSD_HEIGHT      : natural := 128
+        );
+        port
+        (
+          clk             : in std_logic;
+          clk_ena         : in std_logic;
+          reset           : in std_logic;
+
+          -- PS/2 key pass-thru
+          ps2_kclk_i      : in std_logic;
+          ps2_kdat_i      : in std_logic;
+          ps2_kclk_o      : out std_logic;
+          ps2_kdat_o      : out std_logic;
+
+          -- video in
+          vid_clk         : in std_logic;
+          vid_hsync       : in std_logic;
+          vid_vsync       : in std_logic;
+          vid_r_i         : in std_logic_vector(9 downto 0);
+          vid_g_i         : in std_logic_vector(9 downto 0);
+          vid_b_i         : in std_logic_vector(9 downto 0);
+
+          -- OSD control input/output
+          osd_ctrl_i      : in std_logic_vector(15 downto 0);
+          osd_ctrl_o      : out std_logic_vector(15 downto 0);
+          
+          -- osd character rom
+          chr_a           : out std_logic_vector(10 downto 0);
+          chr_d           : in std_logic_vector(7 downto 0);
+          
+          -- video out
+          vid_r_o         : out std_logic_vector(9 downto 0);
+          vid_g_o         : out std_logic_vector(9 downto 0);
+          vid_b_o         : out std_logic_vector(9 downto 0);
+          
+          -- SPI ports
+          eurospi_clk     : in std_logic;
+          eurospi_miso    : out std_logic;
+          eurospi_mosi    : in std_logic;
+          eurospi_ss      : in std_logic
+        );
+      end component OSD;
+      
+      signal chr_a    : std_logic_vector(10 downto 0) := (others => '0');
+      signal chr_d    : std_logic_vector(7 downto 0) := (others => '0');
+      
+    begin
+    
+      osd_ctrl_i(15 downto 8) <= (others => '0');
+      
+      osd_inst : OSD
         port map
         (
-          clock			  => video_o_s.clk,
-          address		  => chr_a,
-          q           => chr_d
+          clk             => clk_50M,
+          clk_ena         => '1',
+          reset           => reset_i,
+
+          ps2_kclk_i      => inputs_i.ps2_kclk,
+          ps2_kdat_i      => inputs_i.ps2_kdat,
+          ps2_kclk_o      => ps2_kclk,
+          ps2_kdat_o      => ps2_kdat,
+          
+          vid_clk         => video_o_s.clk,
+          vid_hsync       => video_o_s.hsync,
+          vid_vsync       => video_o_s.vsync,
+          vid_r_i         => video_o_s.rgb.r,
+          vid_g_i         => video_o_s.rgb.g,
+          vid_b_i         => video_o_s.rgb.b,
+
+          osd_ctrl_i      => osd_ctrl_i,
+          osd_ctrl_o      => osd_ctrl_o,
+          
+          chr_a           => chr_a,
+          chr_d           => chr_d,
+          
+          vid_r_o         => video_o.rgb.r,
+          vid_g_o         => video_o.rgb.g,
+          vid_b_o         => video_o.rgb.b,
+          
+          -- SPI ports
+          eurospi_clk     => gp_i(P2A_EUROSPI_CLK),
+          eurospi_miso    => gp_o.d(P2A_EUROSPI_MISO),
+          eurospi_mosi    => gp_i(P2A_EUROSPI_MOSI),
+          eurospi_ss      => gp_i(P2A_EUROSPI_SS)
         );
 
-  end block BLK_OSD;
+        tilerom_inst : entity work.sprom
+          generic map
+          (
+            init_file		=> "../../../../../src/platform/coco3-becker/roms/coco3gen.hex",
+            numwords_a	=> 2048,
+            widthad_a		=> 11
+          )
+          port map
+          (
+            clock			  => video_o_s.clk,
+            address		  => chr_a,
+            q           => chr_d
+          );
+
+    end block BLK_OSD;
+  end generate GEN_OSD;
+
+  GEN_NO_OSD : if not PACE_HAS_OSD generate
+    ps2_kclk <= inputs_i.ps2_kclk;
+    ps2_kdat <= inputs_i.ps2_kdat;
+    video_o.rgb.r <= video_o_s.rgb.r;
+    video_o.rgb.g <= video_o_s.rgb.g;
+    video_o.rgb.b <= video_o_s.rgb.b;
+  end generate GEN_NO_OSD;
   
   -- interboard spi
   -- - always the slave

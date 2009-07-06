@@ -5,6 +5,7 @@ use IEEE.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
+use work.sdram_pkg.all;
 use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
 use work.platform_pkg.all;
