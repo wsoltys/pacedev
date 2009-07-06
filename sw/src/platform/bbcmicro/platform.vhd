@@ -5,71 +5,60 @@ use	ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
+use work.sdram_pkg.all;
 use work.kbd_pkg.all;
 use work.platform_pkg.all;
 use work.project_pkg.all;
 
-entity Game is
+entity platform is
+  generic
+  (
+    NUM_INPUT_BYTES   : integer
+  );
   port
   (
     -- clocking and reset
-    clk         		: in std_logic_vector(0 to 3);
-    reset           : in    std_logic;                       
-    test_button     : in    std_logic;                       
+    clk_i           : in std_logic_vector(0 to 3);
+    reset_i         : in std_logic;
 
-    -- inputs
-    ps2clk          : inout std_logic;                       
-    ps2data         : inout std_logic;                       
-    dip             : in    std_logic_vector(7 downto 0);    
-		jamma						: in JAMMAInputsType;
+    -- misc I/O
+    buttons_i       : in from_BUTTONS_t;
+    switches_i      : in from_SWITCHES_t;
+    leds_o          : out to_LEDS_t;
 
-    -- micro buses
-    upaddr          : out   std_logic_vector(15 downto 0);   
-    updatao         : out   std_logic_vector(7 downto 0);    
+    -- controller inputs
+    inputs_i        : in from_MAPPED_INPUTS_t(0 to NUM_INPUT_BYTES-1);
 
-    -- SRAM
+    -- FLASH/SRAM
+    flash_i         : in from_FLASH_t;
+    flash_o         : out to_FLASH_t;
 		sram_i					: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
-
-    gfxextra_data   : out std_logic_vector(7 downto 0);
+    sdram_i         : in from_SDRAM_t;
+    sdram_o         : out to_SDRAM_t;
 
     -- graphics (control)
-    red							: out		std_logic_vector(9 downto 0);
-		green						: out		std_logic_vector(9 downto 0);
-		blue						: out		std_logic_vector(9 downto 0);
-		hsync						: out		std_logic;
-		vsync						: out		std_logic;
+    red							: out std_logic_vector(9 downto 0);
+		green						: out std_logic_vector(9 downto 0);
+		blue						: out std_logic_vector(9 downto 0);
+		hsync						: out std_logic;
+		vsync						: out std_logic;
 
-    cvbs            : out   std_logic_vector(7 downto 0);
-			  
     -- OSD
-    to_osd          : out to_OSD_t;
-    from_osd        : in from_OSD_t;
+    --osd_i           : in from_OSD_t;
+    --osd_o           : out to_OSD_t;
 
     -- sound
-    snd_clk         : out   std_logic;
-    snd_data_l      : out   std_logic_vector(15 downto 0);
-    snd_data_r      : out   std_logic_vector(15 downto 0);
-
-    -- spi interface
-    spi_clk         : out   std_logic;                       
-    spi_din         : in    std_logic;                       
-    spi_dout        : out   std_logic;                       
-    spi_ena         : out   std_logic;                       
-    spi_mode        : out   std_logic;                       
-    spi_sel         : out   std_logic;                       
-
+    audio_i         : in from_AUDIO_t;
+    audio_o         : out to_AUDIO_t;
+    
     -- serial
-    ser_rx          : in    std_logic;                       
-    ser_tx          : out   std_logic;                       
-
-    -- on-board leds
-    leds            : out   std_logic_vector(7 downto 0)    
+    ser_i           : in from_SERIAL_t;
+    ser_o           : out to_SERIAL_t
   );
+end entity platform;
 
-end Game;
-
-architecture SYN of Game is
+architecture SYN of platform is
 
   --
   -- COMPONENTS
@@ -102,7 +91,7 @@ architecture SYN of Game is
 
   signal reset_n            : std_logic;
 
-  alias clk_32M             : std_logic is clk(0);
+  alias clk_32M             : std_logic is clk_i(0);
   signal sys_cycle          : std_logic_vector(4 downto 0);
   signal clk_16M_en         : std_logic;
   signal clk_8M_en          : std_logic;
@@ -211,15 +200,20 @@ architecture SYN of Game is
   alias sound_we            : std_logic is addressable_latch(0);
 
   -- other signals
-  signal kbd					      : in8(0 to 16);  
-  alias game_reset			    : std_logic is kbd(16)(0);
+  alias game_reset			    : std_logic is inputs_i(16).d(0);
 
 begin
 
+  assert false
+    report  "CLK0_FREQ_MHz = " & integer'image(CLK0_FREQ_MHz) & "\n" &
+            "CPU_FREQ_MHz = " &  integer'image(CPU_FREQ_MHz) & "\n" &
+            "CPU_CLK_ENA_DIV = " & integer'image(BBCMICRO_CPU_CLK_ENA_DIVIDE_BY)
+      severity note;
+      
   -- clock generation - phase-aligned
-  process (clk_32M, reset)
+  process (clk_32M, reset_i)
   begin
-    if reset = '1' then
+    if reset_i = '1' then
       sys_cycle <= (others => '0');
       via6522_p2 <= '1';
       via6522_clk4 <= '0';
@@ -269,8 +263,8 @@ begin
   cpu_clk_en <= clk_1M_en;
 
   -- some simple inversions
-  reset_n <= not reset;
-  cpu_reset_n <= not (reset or game_reset);
+  reset_n <= not reset_i;
+  cpu_reset_n <= not (reset_i or game_reset);
   cpu_we <= not cpu_rw_n;
 
   -- main chip-select logic
@@ -423,13 +417,13 @@ begin
             col := conv_integer(auto_col);
             auto_col := auto_col + 1;
           end if;
-          if kbd(col)(7 downto 1) /= "0000000" then
+          if inputs_i(col).d(7 downto 1) /= "0000000" then
             -- generate interrupt? via CA2 of the system VIA
             kbd_int <= '1';
           end if;
         end if;
       end if;
-      kbd_bit <= kbd(col)(conv_integer(kbd_row));
+      kbd_bit <= inputs_i(col).d(conv_integer(kbd_row));
     end process;
 
     -- the remainder of the bits *MUST* reflect the output
@@ -438,43 +432,44 @@ begin
     sysvia_inst : entity work.M6522
       port map
       (
-        RS              => cpu_a(3 downto 0),
-        DATA_IN         => cpu_d_o,
-        DATA_OUT        => sysvia_d,
-        DATA_OUT_OE_L   => sysvia_oe_n,
+        I_RS              => cpu_a(3 downto 0),
+        I_DATA            => cpu_d_o,
+        O_DATA            => sysvia_d,
+        O_DATA_OE_L       => sysvia_oe_n,
 
-        RW_L            => cpu_rw_n,
-        CS1             => sysvia_cs,
-        CS2_L           => '0',
+        I_RW_L            => cpu_rw_n,
+        I_CS1             => sysvia_cs,
+        I_CS2_L           => '0',
 
-        IRQ_L           => sysvia_irq_n,
+        O_IRQ_L           => sysvia_irq_n,
 
         -- port a
-        CA1_IN          => vsync_int,
-        CA2_IN          => kbd_int,
-        CA2_OUT         => open,
-        CA2_OUT_OE_L    => open,
+        I_CA1             => vsync_int,
+        I_CA2             => kbd_int,
+        O_CA2             => open,
+        O_CA2_OE_L        => open,
 
-        PA_IN           => slow_databus_i,  -- incl. keyboard
-        PA_OUT          => slow_databus_o,
-        PA_OUT_OE_L     => sysvia_pa_oe_n,
+        I_PA              => slow_databus_i,  -- incl. keyboard
+        O_PA              => slow_databus_o,
+        O_PA_OE_L         => sysvia_pa_oe_n,
 
         -- port b
-        CB1_IN          => '0', -- ADC end-of-conversion
-        CB1_OUT         => open,
-        CB1_OUT_OE_L    => open,
+        I_CB1             => '0', -- ADC end-of-conversion
+        O_CB1             => open,
+        O_CB1_OE_L        => open,
 
-        CB2_IN          => '1', -- light-pen strobe
-        CB2_OUT         => open,
-        CB2_OUT_OE_L    => open,
+        I_CB2             => '1', -- light-pen strobe
+        O_CB2             => open,
+        O_CB2_OE_L        => open,
 
-        PB_IN           => "11111111",      -- speech, joystick fire (active low)
-        PB_OUT          => sysvia_pb_o,     -- system latch
-        PB_OUT_OE_L     => sysvia_pb_oe_n,
+        I_PB              => "11111111",      -- speech, joystick fire (active low)
+        O_PB              => sysvia_pb_o,     -- system latch
+        O_PB_OE_L         => sysvia_pb_oe_n,
 
-        RESET_L         => cpu_reset_n,
-        P2_H            => via6522_p2,      -- high for phase 2 clock  ____----__
-        CLK_4           => via6522_clk4     -- 4x system clock (4HZ)   _-_-_-_-_-
+        I_P2_H            => via6522_p2,      -- high for phase 2 clock   ____----__
+        RESET_L           => cpu_reset_n,
+        ENA_4             => via6522_clk4,    -- 4x system clock (4MHZ)   _-_-_-_-_-
+        CLK               => clk_32M
       );
 
     -- 74LS259 addressable latch (IC32)
@@ -501,7 +496,7 @@ begin
     (
       clk					=> clk_32M,
       clk_en			=> clk_4M_en,
-      reset				=> reset,
+      reset				=> reset_i,
                   
       d						=> slow_databus_o,
       ready				=> open,            -- tied to GND on schematic
@@ -512,22 +507,14 @@ begin
     );
 
     -- hook up sound to output
-    snd_clk <= clk_4M_en;
-    snd_data_l <= audio_d;
-    snd_data_r <= audio_d;
+    audio_o.clk <= clk_4M_en;
+    audio_o.ldata <= audio_d;
+    audio_o.rdata <= audio_d;
 
   end block BLK_SHEILA;
 
-  -- unused outputs
-  gfxextra_data <= (others => '0');
-  cvbs <= (others => '0');
-  spi_clk <= '0';
-  spi_dout <= '0';
-  spi_ena <= '0';
-  spi_mode <= '0';
-  spi_sel <= '0';
-  ser_tx <= '0';
-  leds <= (others => '0');
+  ser_o <= NULL_TO_SERIAL;
+  leds_o <= (others => '0');
 
   --
   --  COMPONENT INSTANTIATION
@@ -682,7 +669,7 @@ begin
       crtc6845_clk <= clk_1M_90_en when clk_rate_r = '0' else clk_2M_180_en;
 
 			-- graphics data serialiser
-			process (clk_32M, reset)
+			process (clk_32M, reset_i)
 				variable video_byte 	: std_logic_vector(7 downto 0) := (others => '0');
         variable v_mode       : std_logic_vector(2 downto 0);
         variable log_clr      : std_logic_vector(3 downto 0);
@@ -691,7 +678,7 @@ begin
 			
         v_mode := clk_rate_r & cpl_r;
 
-				if reset = '1' then
+				if reset_i = '1' then
 					video_byte := (others => '0');
 				elsif rising_edge(clk_32M) then
           
@@ -760,11 +747,11 @@ begin
 
     -- enable output of the video ULA
     -- pipeline delay because of clock phasing
-    process (clk_32M, reset)
+    process (clk_32M, reset_i)
       variable de_r : std_logic_vector(7 downto 0);
       variable ra3_r : std_logic_vector(7 downto 0);
     begin
-      if reset = '1' then
+      if reset_i = '1' then
         de_r := (others => '0');
       elsif rising_edge(clk_32M) then
         de_r := de_r(de_r'left-1 downto 0) & crtc6845_disptmg;
@@ -867,10 +854,10 @@ begin
 
     -- generate 6M clock for SAA5050
 		-- fudge for now - use 2 out of every 3 8M clocks
-    process (clk_32M, reset)
+    process (clk_32M, reset_i)
       variable timing_chain : std_logic_vector(7 downto 0);
     begin
-      if reset = '1' then
+      if reset_i = '1' then
         timing_chain := "10101000";
       elsif rising_edge(clk_32M) then
 				clk_6M_en <= timing_chain(timing_chain'left);
@@ -885,7 +872,7 @@ begin
       port map
       (
         clk				=> clk_32M,
-        reset			=> reset,
+        reset			=> reset_i,
 
         si_i_n		=> '0',               -- tied low on schematic
         si_o			=> open,              -- not used
@@ -918,24 +905,6 @@ begin
     blue <= video_b when video_de = '1' else (others => '0');
 
   end block BLK_VIDEO;
-
-	inputs_inst : entity work.inputs
-		generic map
-		(
-			NUM_INPUTS	=> kbd'length,
-			CLK_1US_DIV	=> BBC_1MHz_CLK0_COUNTS
-		)
-	  port map
-	  (
-	    clk     		=> clk_32M,
-	    reset   		=> reset,
-	    ps2clk  		=> ps2clk,
-	    ps2data 		=> ps2data,
-			jamma				=> jamma,
-
-	    dips				=> (others => '0'),
-	    inputs			=> kbd
-	  );
 
   --
   --  MEMORIES
@@ -988,10 +957,10 @@ begin
 
   GEN_EXTERNAL_RAM : if not BBC_USE_INTERNAL_RAM generate
 
-    process (clk_32M, reset)
+    process (clk_32M, reset_i)
       variable ram_a  : std_logic_vector(14 downto 0);
     begin
-      if reset = '1' then
+      if reset_i = '1' then
         null;
       elsif rising_edge(clk_32M) then
         if sys_cycle = X"4" then
