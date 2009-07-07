@@ -60,6 +60,11 @@ package project_pkg is
   constant NB1_INCLK0_INPUT_FREQUENCY       : natural := 50000;   -- 20MHz
   constant PACE_CLKIN0                      : natural := PACE_CLKIN0_REF;
   
+  constant TRS80_M3_HIRES_SUPPORT           : boolean := false;
+	constant TRS80_M3_HIRES_WIDTHA            : integer := 12;    -- 4KiB only (Max 16KiB)
+	constant TRS80_M3_FDC_SUPPORT			        : boolean := false;
+  constant TRS80_M3_SYSMEM_IN_BURCHED_SRAM  : boolean := false;
+  
 	constant USE_VIDEO_VBLANK_INTERRUPT       : boolean := false;
 	
 end;

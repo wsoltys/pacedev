@@ -29,7 +29,7 @@ set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "19:21:54  AUGUST 25, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 8.1
 
 # Pin & Location Assignments
 # ==========================
@@ -253,9 +253,15 @@ set_global_assignment -name ALLOW_ANY_ROM_SIZE_FOR_RECOGNITION ON
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sdram_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/platform_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/target/nanoboard/target_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/nb1/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cyclone/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/cpu65xx_e.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/cpu65xx_fast.vhd
@@ -282,5 +288,5 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/sound/sid/sid658
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/fpga64_pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/m6522.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/pace.vhd
-set_global_assignment -name VQM_FILE ../../../../src/target/nanoboard/ep1c12/MAX1104_DAC.VQM
+set_global_assignment -name VQM_FILE ../../../../src/target/nb1/ep1c12/MAX1104_DAC.VQM
 set_global_assignment -name VHDL_FILE target_top.vhd

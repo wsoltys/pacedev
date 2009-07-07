@@ -229,7 +229,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_M
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_Reg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80se.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/Z80.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/Z80.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/inputmapper.vhd
@@ -249,6 +249,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/FDC_1793
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/bitmapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/tilemapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_mixer.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Graphics.vhd

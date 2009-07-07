@@ -547,6 +547,110 @@ begin
   
     BLK_FDC : block
 
+      component wd179x is
+        port
+        (
+          clk           : in std_logic;
+          clk_20M_ena   : in std_logic;
+          reset         : in std_logic;
+          
+          -- micro bus interface
+          mr_n          : in std_logic;
+          we_n          : in std_logic;
+          cs_n          : in std_logic;
+          re_n          : in std_logic;
+          a             : in std_logic_vector(1 downto 0);
+          dal_i         : in std_logic_vector(7 downto 0);
+          dal_o         : out std_logic_vector(7 downto 0);
+          clk_1mhz_en   : in std_logic;
+          drq           : out std_logic;
+          intrq         : out std_logic;
+          
+          -- drive interface
+          step          : out std_logic;
+          dirc          : out std_logic; -- 1=in, 0=out
+          early         : out std_logic;
+          late          : out std_logic;
+          test_n        : in std_logic;
+          hlt           : in std_logic;
+          rg            : out std_logic;
+          sso           : out std_logic;
+          rclk          : in std_logic;
+          raw_read_n    : in std_logic;
+          hld           : out std_logic;
+          tg43          : out std_Logic;
+          wg            : out std_logic;
+          wd            : out std_logic;
+          ready         : in std_logic;
+          wf_n_i        : in std_logic;
+          vfoe_n_o      : out std_logic;
+          tr00_n        : in std_logic;
+          ip_n          : in std_logic;
+          wprt_n        : in std_logic;
+          dden_n        : in std_logic;
+
+          -- temp fudge!!!
+          wr_dat_o			: out std_logic_vector(7 downto 0);
+          
+          debug         : out std_logic_vector(31 downto 0)
+        );
+      end component wd179x;
+      
+      component floppy_if is
+        generic
+        (
+          NUM_TRACKS      : integer := 35
+        );
+        port
+        (
+          clk           : in std_logic;
+          clk_20M_ena   : in std_logic;
+          reset         : in std_logic;
+          
+          drv_ena       : in std_logic_vector(4 downto 1);
+          drv_sel       : in std_logic_vector(4 downto 1);
+          
+          step          : in std_logic;
+          dirc          : in std_logic;
+          rg            : in std_logic;
+          rclk          : out std_logic;
+          raw_read_n    : out std_logic;
+          wg            : in std_logic;
+          wd            : in std_logic;
+          tr00_n        : out std_logic;
+          ip_n          : out std_logic;
+
+          -- media interface
+
+          track         : out std_logic_vector(7 downto 0);
+          dat_i         : in std_logic_vector(7 downto 0);
+          dat_o         : out std_logic_vector(7 downto 0);
+          wr            : out std_logic;
+          -- random-access control
+          offset        : out std_logic_vector(12 downto 0);
+          -- fifo control
+          rd            : out std_logic;
+          flush         : out std_logic;
+          
+          debug         : out std_logic_vector(31 downto 0)
+        );
+      end component floppy_if;
+      
+      component floppy_fifo is
+        port
+        (
+          aclr		: IN STD_LOGIC  := '0';
+          data		: IN STD_LOGIC_VECTOR (7 DOWNTO 0);
+          rdclk		: IN STD_LOGIC ;
+          rdreq		: IN STD_LOGIC ;
+          wrclk		: IN STD_LOGIC ;
+          wrreq		: IN STD_LOGIC ;
+          q		: OUT STD_LOGIC_VECTOR (7 DOWNTO 0);
+          rdempty		: OUT STD_LOGIC ;
+          wrfull		: OUT STD_LOGIC 
+        );
+      end component floppy_fifo;
+      
       constant FDC_USE_FIFO : boolean := false;
       
       signal sync_reset   : std_logic := '1';
@@ -594,7 +698,7 @@ begin
         sync_reset <= reset_r(reset_r'left);
       end process;
       
-      wd179x_inst : entity work.wd179x
+      wd179x_inst : wd179x
         port map
         (
           clk           => clk_20M,
@@ -641,7 +745,7 @@ begin
           debug         => wd179x_dbg
         );
         
-      floppy_if_inst : entity work.floppy_if
+      floppy_if_inst : floppy_if
         generic map
         (
           NUM_TRACKS      => 40
@@ -687,7 +791,7 @@ begin
           signal fifo_empty     : std_logic := '0';
           signal fifo_full      : std_logic := '0';
         begin
-          fifo_inst : ENTITY work.floppy_fifo
+          fifo_inst : floppy_fifo
             PORT map
             (
               rdclk		  => clk_20M,

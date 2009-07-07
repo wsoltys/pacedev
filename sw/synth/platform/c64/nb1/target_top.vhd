@@ -6,9 +6,11 @@ use ieee.std_logic_unsigned.all;
 
 library work;
 use work.pace_pkg.all;
-use work.project_pkg.all;
-use work.platform_pkg.all;
+use work.sdram_pkg.all;
+use work.video_controller_pkg.all;
 use work.target_pkg.all;
+use work.platform_pkg.all;
+use work.project_pkg.all;
 
 entity target_top is
   port
@@ -126,48 +128,52 @@ architecture SYN of target_top is
   end component;
 
   -- signals
+
+	signal clk_i			  : std_logic_vector(0 to 3);
+  signal init       	: std_logic := '1';
+  signal reset_i     	: std_logic := '1';
+	signal reset_n			: std_logic := '0';
+
+  signal buttons_i    : from_BUTTONS_t;
+  signal switches_i   : from_SWITCHES_t;
+  signal leds_o       : to_LEDS_t;
+  signal inputs_i     : from_INPUTS_t;
+  signal flash_i      : from_FLASH_t;
+  signal flash_o      : to_FLASH_t;
+	signal sram_i			  : from_SRAM_t;
+	signal sram_o			  : to_SRAM_t;	
+	signal sdram_i      : from_SDRAM_t;
+	signal sdram_o      : to_SDRAM_t;
+	signal video_i      : from_VIDEO_t;
+  signal video_o      : to_VIDEO_t;
+  signal audio_i      : from_AUDIO_t;
+  signal audio_o      : to_AUDIO_t;
+  signal ser_i        : from_SERIAL_t;
+  signal ser_o        : to_SERIAL_t;
+  signal gp_i         : from_GP_t;
+  signal gp_o         : to_GP_t;
   
-  signal clk            : std_logic_vector(0 to 3);
 	signal pll_inclk			: std_logic;
 	
-	-- SRAM active-high signals
-	signal sram_i				  : from_SRAM_t;
-	signal sram_o				  : to_SRAM_t;
-	
-  signal test_button_p  : std_logic;
-  signal init           : std_logic;
-  signal reset          : std_logic;
   signal bw_cvbs        : std_logic_vector(1 downto 0);
   signal gs_cvbs        : std_logic_vector(7 downto 0);
   signal snd_clk        : std_logic;
   signal snd_data       : std_logic_vector(15 downto 0);
 
-	signal jamma_s				: JAMMAInputsType;
-
-  -- spi signals
-  signal spi_clk_s        : std_logic;
-  signal spi_dout_s       : std_logic;
-  signal spi_mode_s       : std_logic;
-  signal spi_sel_s        : std_logic;
-  
 	signal osc_inv					: std_logic;
 
-	signal gpio_i						: std_logic_vector(9 downto 2);
-	signal gpio_o						: std_logic_vector(gpio_i'range);
-	signal gpio_oe					: std_logic_vector(gpio_i'range);
-	
 	-- these might change
-	alias ext_sb_data_in		: std_logic is gpio_i(2);
-	alias ext_sb_clk_in			: std_logic is gpio_i(3);
-	alias ext_sb_atn_in			: std_logic is gpio_i(4);
+	alias ext_sb_data_in		: std_logic is gp_i(2);
+	alias ext_sb_clk_in			: std_logic is gp_i(3);
+	alias ext_sb_atn_in			: std_logic is gp_i(4);
 
-	alias ext_sb_data_out		: std_logic is gpio_o(5);
-	alias ext_sb_clk_out		: std_logic is gpio_o(6);
-	alias ext_sb_atn_out		: std_logic is gpio_o(7);
+	alias ext_sb_data_out		: std_logic is gp_o.d(5);
+	alias ext_sb_clk_out		: std_logic is gp_o.d(6);
+	alias ext_sb_atn_out		: std_logic is gp_o.d(7);
 		
-	alias ext_sb_data_oe		: std_logic is gpio_oe(5);
-	alias ext_sb_clk_oe			: std_logic is gpio_oe(6);
-	alias ext_sb_atn_oe			: std_logic is gpio_oe(7);
+	alias ext_sb_data_oe		: std_logic is gp_o.oe(5);
+	alias ext_sb_clk_oe			: std_logic is gp_o.oe(6);
+	alias ext_sb_atn_oe			: std_logic is gp_o.oe(7);
 
 	signal d_cf_i						: std_logic_vector(15 downto 0);
 	signal d_cf_o						: std_logic_vector(15 downto 0);
@@ -186,35 +192,30 @@ begin
 	end generate GEN_PLL_INCLK_BRD;
 	
   -- unused clocks on Nanoboard
-  clk(2) <= '0';
-  clk(3) <= '0';
+  clk_i(2) <= '0';
+  clk_i(3) <= '0';
 
 	-- JAMMA signals are all active LOW
-	jamma_s.coin_cnt <= (others => '1');
-	jamma_s.service <= '1';
-	jamma_s.tilt <= '1';
-	jamma_s.test <= '1';
-	jamma_s.coin <= (others => '1');
+	inputs_i.jamma_n.coin_cnt <= (others => '1');
+	inputs_i.jamma_n.service <= '1';
+	inputs_i.jamma_n.tilt <= '1';
+	inputs_i.jamma_n.test <= '1';
+	inputs_i.jamma_n.coin <= (others => '1');
 	GEN_JAMMA_P : for i in 1 to 2 generate
-		jamma_s.p(i).start <= '1';
-		jamma_s.p(i).up <= '1';
-		jamma_s.p(i).down <= '1';
-		jamma_s.p(i).left <= '1';
-		jamma_s.p(i).right <= '1';
-		jamma_s.p(i).button <= (others => '1');
+		inputs_i.jamma_n.p(i).start <= '1';
+		inputs_i.jamma_n.p(i).up <= '1';
+		inputs_i.jamma_n.p(i).down <= '1';
+		inputs_i.jamma_n.p(i).left <= '1';
+		inputs_i.jamma_n.p(i).right <= '1';
+		inputs_i.jamma_n.p(i).button <= (others => '1');
 	end generate GEN_JAMMA_P;
 	
-  spi_clk <= spi_clk_s;
-  spi_dout <= spi_dout_s;
-  spi_mode <= spi_mode_s;
-  spi_sel <= spi_sel_s;
-  
 	rs_rts <= 'Z';
 	ha11 <= 'Z';
 	
   -- reset logic
-  test_button_p <= not test_button;
-  reset <= init or test_button_p;
+  switches_i(0) <= not test_button;
+  reset_i <= init or switches_i(0);
     
 	-- attach sram
 	ram_addr <= sram_o.a(ram_addr'range);
@@ -274,8 +275,8 @@ begin
     port map
     (
       inclk0  => pll_inclk,
-      c0      => clk(0),
-      c1      => clk(1)
+      c0      => clk_i(0),
+      c1      => clk_i(1)
     );
   
   dac_inst : MAX1104_DAC                                  
@@ -283,109 +284,69 @@ begin
     (
       CLK      => snd_clk,
       DATA     => snd_data(15 downto 8),
-      RST      => reset,
+      RST      => reset_i,
       SPI_CS   => audio_spics,
       SPI_DIN  => audio_dout,
       SPI_DOUT => audio_din,
       SPI_SCLK => audio_sclk
     );
 
-	PACE_INST : entity work.PACE
-	  port map
-	  (
-	     -- clocks and resets
-			clk								=> clk,
-			test_button      	=> test_button_p,
-	    reset            	=> reset,
+  pace_inst : entity work.pace                                            
+    port map
+    (
+    	-- clocks and resets
+	  	clk_i							=> clk_i,
+      reset_i          	=> reset_i,
 
-	    -- game I/O
-	    ps2clk           	=> ps2b_clk,
-	    ps2data          	=> ps2b_data,
-	    dip              	=> (others => '0'),
-			jamma							=> jamma_s,
-			
-	    -- external RAM
-	    sram_addr        	=> sram_addr_s,
-	    sram_dq_i        	=> sram_dq_i,
-	    sram_dq_o        	=> sram_dq_o,
-	    sram_cs_n        	=> sram_cs_n,
-	    sram_oe_n        	=> noe_ns,
-	    sram_we_n        	=> sram_we_n,
+      -- misc inputs and outputs
+      buttons_i         => buttons_i,
+      switches_i        => switches_i,
+      leds_o            => leds_o,
+      
+      -- controller inputs
+      inputs_i          => inputs_i,
 
-	    -- VGA video
-	    red              	=> red_s,
-	    green            	=> green_s,
-	    blue             	=> blue_s,
-	    hsync            	=> ba22,
-	    vsync            	=> nromsdis,
+     	-- external ROM/RAM
+     	flash_i           => flash_i,
+      flash_o           => flash_o,
+      sram_i        		=> sram_i,
+      sram_o        		=> sram_o,
+     	sdram_i           => sdram_i,
+     	sdram_o           => sdram_o,
+  
+      -- VGA video
+      video_i           => video_i,
+      video_o           => video_o,
+      
+      -- sound
+      audio_i           => audio_i,
+      audio_o           => audio_o,
 
-	    -- composite video
-	    BW_CVBS          	=> open,
-	    GS_CVBS          	=> open,
+      -- SPI (flash)
+      spi_i.din         => '0',
+      spi_o             => open,
+  
+      -- serial
+      ser_i             => ser_i,
+      ser_o             => ser_o,
+      
+      -- general purpose
+      gp_i              => gp_i,
+      gp_o              => gp_o,
 
-	    -- sound
-	    snd_clk          	=> open,
-	    snd_data_l       	=> open,
-	    snd_data_r       	=> open,
+      -- SB (IEC) port
+      ext_sb_data_in	  => '0',
+      ext_sb_data_oe	  => open,
+      ext_sb_clk_in		  => '0',
+      ext_sb_clk_oe		  => open,
+      ext_sb_atn_in		  => '0',
+      ext_sb_atn_oe		  => open,
 
-	    -- SPI (flash)
-	    spi_clk          	=> open,
-	    spi_mode         	=> open,
-	    spi_sel          	=> open,
-	    spi_din          	=> '0',
-	    spi_dout         	=> open,
-
-	    -- serial
-	    ser_tx           	=> gat_txd,
-	    ser_rx           	=> gat_rxd,
-
-			-- SB (IEC) port
-			ext_sb_data_in		=> ext_sb_data_in,
-			ext_sb_data_oe		=> ext_sb_data_oe,
-			ext_sb_clk_in			=> ext_sb_clk_in,
-			ext_sb_clk_oe			=> ext_sb_clk_oe,
-			ext_sb_atn_in			=> ext_sb_atn_in,
-			ext_sb_atn_oe			=> ext_sb_atn_oe,
-
-			-- generic drive mechanism i/o ports
-			
-			-- SDRAM
-			mech_in(0)							=> clk(1),						-- clk_nios
-			mech_in(31 downto 1)		=> (others => '0'),
-			mech_out(12 downto 0)		=> a_dr2,
-			mech_out(14 downto 13)	=> ba_dr2,
-			mech_out(15)						=> ncas_dr2,
-			mech_out(16)						=> cke_dr2,
-			mech_out(17)						=> ncs_dr2,
-			mech_out(21 downto 18)	=> dqm_dr2,
-			mech_out(22)						=> nras_dr2,
-			mech_out(23)						=> nwe_dr2,
-			mech_io(31 downto 0)		=> d_dr2,
-
-			-- OCIDE controller
-			mech_in(32)							=> iordy0_cf,
-			mech_in(33)							=> rdy_irq_cf,
-			mech_in(34)							=> cd_cf,
-			mech_out(34 downto 32)	=> a_cf,
-			mech_out(35)						=> nce_cf(2),
-			mech_out(36)						=> nce_cf(1),
-			mech_in(50 downto 35)		=> d_cf_i,
-			mech_out(52 downto 37)	=> d_cf_o,
-			mech_out(53)						=> d_cf_oe,
-			mech_out(54)						=> nior0_cf,
-			mech_out(55)						=> niow0_cf,
-			mech_out(56)						=> non_cf,
-			mech_out(57)						=> reset_cf,
-			mech_out(58)						=> ndmack_cf,
-			mech_in(51)							=> dmarq_cf,
-			
-	    -- debug
-	    leds             				=> leds_s
-	  );
-
-	-- hook up sram signals
-	ncs_s <= sram_cs_n;
-	nwe_s <= sram_we_n;
+      -- generic drive mechanism i/o ports
+      mech_in					  => (others => '0'),
+      mech_out				  => open,
+      mech_io					  => open
+    );
 
 	-- only drive '0'
 	ext_sb_data_out <= '0';
@@ -393,22 +354,22 @@ begin
 	ext_sb_atn_out <= '0';
 
 	-- unused gpio
-	gpio_oe(9 downto 8) <= (others => '0');
-	gpio_oe(4 downto 2) <= (others => '0');
+	gp_o.oe(9 downto 8) <= (others => '0');
+	gp_o.oe(4 downto 2) <= (others => '0');
 	
 	-- flash the led so we know it's alive
-	process (clk(0), reset)
+	process (clk_i(0), reset_i)
 		variable count : std_logic_vector(21 downto 0);
 	begin
-		if reset = '1' then
+		if reset_i = '1' then
 			count := (others => '0');
-		elsif rising_edge(clk(0)) then
+		elsif rising_edge(clk_i(0)) then
 			count := count + 1;
 		end if;
 		--led <= count(count'left);
 	end process;
 
 	-- C1541 activity led
-	led <= not leds_s(0);
+	leds_o(0) <= not leds_s(0);
 	
 end SYN;
