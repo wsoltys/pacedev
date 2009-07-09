@@ -20,17 +20,19 @@ package project_pkg is
 
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
 
-  constant PACE_CLK0_DIVIDE_BY        		: natural := 1; -- not used
-  constant PACE_CLK0_MULTIPLY_BY      		: natural := 1; -- not used
-  constant PACE_CLK1_DIVIDE_BY        		: natural := 1; -- not used
-  constant PACE_CLK1_MULTIPLY_BY      		: natural := 1; -- not used
+  constant PACE_CLK0_DIVIDE_BY        		  : natural := 1; -- not used
+  constant PACE_CLK0_MULTIPLY_BY      		  : natural := 1; -- not used
+  constant PACE_CLK1_DIVIDE_BY        		  : natural := 1; -- not used
+  constant PACE_CLK1_MULTIPLY_BY      		  : natural := 1; -- not used
 
-	constant PACE_ENABLE_ADV724							: std_logic := '0';
-	constant PACE_ADV724_STD								: std_logic := ADV724_STD_PAL;
+	constant PACE_ENABLE_ADV724							  : std_logic := '0';
+	constant PACE_ADV724_STD								  : std_logic := ADV724_STD_PAL;
 
 	-- Astrocade-specific constants
-	constant ASTROCADE_HAS_CART							: boolean := true;
-	constant ASTROCADE_CART_NAME						: string := "muncher";
-	--constant ASTROCADE_CART_NAME						: string := "treasure";
+	constant ASTROCADE_HAS_CART							  : boolean := true;
+	constant ASTROCADE_CART_NAME						  : string := "muncher";
+	--constant ASTROCADE_CART_NAME						  : string := "treasure";
+
+  constant ASTROCADE_CART_IN_FLASH          : boolean := PACE_HAS_FLASH;
 	
 end;

@@ -13,6 +13,11 @@ package project_pkg is
 	--
 	
 	constant PACE_HAS_PLL										  : boolean := true;
+  constant PACE_HAS_SRAM                    : boolean := false;
+  constant PACE_HAS_SDRAM                   : boolean := false;
+  constant PACE_HAS_SERIAL                  : boolean := false;
+
+	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
 	
   -- Reference clock is 24MHz
   constant PACE_CLK0_DIVIDE_BY        		  : natural := 12;
@@ -20,12 +25,10 @@ package project_pkg is
   constant PACE_CLK1_DIVIDE_BY        		  : natural := 12;
   constant PACE_CLK1_MULTIPLY_BY      		  : natural := 25;  	-- 24*25/12 = 50MHz
 
+  -- P2-specific constants
+
 	constant PACE_ENABLE_ADV724							  : std_logic := '0';
 	constant PACE_ADV724_STD								  : std_logic := ADV724_STD_PAL;
-
-  -- P2-specific constants
-  constant P2_JAMMA_IS_MAPLE                : boolean := false;
-  constant P2_JAMMA_IS_NGC                  : boolean := true;
 
 	-- AppleII-specific constants
 

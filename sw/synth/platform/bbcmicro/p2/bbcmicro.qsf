@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 8.1
 
 # Pin & Location Assignments
 # ==========================
@@ -749,42 +749,6 @@ set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ADVANCED_TRIGGER_
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL_PIPELINE=1" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ENABLE_ADVANCED_TRIGGER=0" -section_id auto_signaltap_0
 set_global_assignment -name INCREMENTAL_COMPILATION OFF
-set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
-set_global_assignment -name VHDL_FILE project_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/bbcmicro/platform_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/clk_div.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_Pack.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_ALU.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_MCode.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/65xx/cpu65xx_e.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/65xx/cpu65xx_fast.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/bbcmicro/inputmapper.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/inputs.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/m6522.vhd
-set_global_assignment -name VERILOG_FILE ../../../../src/component/video/crtc6845s.v
-set_global_assignment -name VHDL_FILE ../../../../src/component/video/cursor.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/video/oc_crtc6845.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/video/saa505x.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/sound/sn76489/sn76489.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/bbcmicro/altera_mem.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/bbcmicro/game.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/conversion.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_upcounter.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gc_tx_bit.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_joy.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/bbcmicro/pace.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_top.vhd
-set_global_assignment -name SIGNALTAP_FILE stp1.stp
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to "PACE:PACE_INST|Game:U_Game|clk_2M_en" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[0] -to "PACE:PACE_INST|Game:U_Game|sn76489:\\BLK_SHEILA:sn76489_inst|audio_d" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[0] -to "PACE:PACE_INST|Game:U_Game|sn76489:\\BLK_SHEILA:sn76489_inst|audio_d" -section_id auto_signaltap_0
@@ -840,3 +804,46 @@ set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=4096
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=39894" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=38963" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=4096" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STORAGE_QUALIFIER_INVERSION_MASK_LENGTH=0" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ATTRIBUTE_MEM_MODE=OFF" -section_id auto_signaltap_0
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sdram_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE project_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/bbcmicro/platform_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/clk_div.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_Pack.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_ALU.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_MCode.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/65xx/cpu65xx_e.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/65xx/cpu65xx_fast.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/bbcmicro/inputmapper.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/inputs.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/m6522.vhd
+set_global_assignment -name VERILOG_FILE ../../../../src/component/video/crtc6845s.v
+set_global_assignment -name VHDL_FILE ../../../../src/component/video/cursor.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/video/oc_crtc6845.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/video/saa505x.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/sound/sn76489/sn76489.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/bbcmicro/altera_mem.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/bbcmicro/platform.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/conversion.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_upcounter.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gc_tx_bit.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_joy.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/bbcmicro/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_top.vhd
+set_global_assignment -name SIGNALTAP_FILE stp1.stp

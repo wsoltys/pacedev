@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION 7.2
+set_global_assignment -name LAST_QUARTUS_VERSION 8.1
 
 # Pin & Location Assignments
 # ==========================
@@ -742,7 +742,13 @@ set_instance_assignment -name TPD_REQUIREMENT "6.6 ns" -from * -to bd_ns[*]
 set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to noe_ns
 set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to nwe_s
 set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to ncs_s
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sdram_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE "../../../../src/platform/coco3-becker/platform_pkg.vhd"
 set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_pkg.vhd
@@ -761,6 +767,7 @@ set_global_assignment -name VERILOG_FILE "../../../../src/platform/appleii-becke
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/appleii-becker/unzip/apple_video.v"
 set_global_assignment -name VERILOG_FILE "../../../../src/platform/appleii-becker/AppleFPGA.v"
 set_global_assignment -name VHDL_FILE "../../../../src/platform/appleii-becker/pace.vhd"
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/conversion.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_upcounter.vhd
@@ -769,5 +776,3 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/game
 set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_top.vhd
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
 set_global_assignment -name SIGNALTAP_FILE ../../../../src/target/p2/stp1.stp
-set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
-set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"

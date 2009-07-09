@@ -4,6 +4,8 @@ use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
+use work.sdram_pkg.all;
+use work.video_controller_pkg.all;
 use work.platform_pkg.all;
 use work.target_pkg.all;
 use work.project_pkg.all;
@@ -12,53 +14,44 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk             : in std_logic_vector(0 to 3);
-    test_button     : in std_logic;
-    reset           : in std_logic;
+    clk_i           : in std_logic_vector(0 to 3);
+    reset_i         : in std_logic;
 
-    -- game I/O
-    ps2clk          : inout std_logic;
-    ps2data         : inout std_logic;
-    dip             : in std_logic_vector(7 downto 0);
-		jamma						: in JAMMAInputsType;
+    -- misc I/O
+    buttons_i       : in from_BUTTONS_t;
+    switches_i      : in from_SWITCHES_t;
+    leds_o          : out to_LEDS_t;
 
-    -- external RAM
+    -- controller inputs
+    inputs_i        : in from_INPUTS_t;
+
+    -- external ROM/RAM
+    flash_i         : in from_FLASH_t;
+    flash_o         : out to_flash_t;
     sram_i       		: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
+    sdram_i         : in from_SDRAM_t;
+    sdram_o         : out to_SDRAM_t;
 
-    -- VGA video
-		vga_clk					: out std_logic;
-    red             : out std_logic_vector(9 downto 0);
-    green           : out std_logic_vector(9 downto 0);
-    blue            : out std_logic_vector(9 downto 0);
-		lcm_data				:	out std_logic_vector(9 downto 0);
-		hblank					: out std_logic;
-		vblank					: out std_logic;
-    hsync           : out std_logic;
-    vsync           : out std_logic;
+    -- video
+    video_i         : in from_VIDEO_t;
+    video_o         : out to_VIDEO_t;
 
-    -- composite video
-    BW_CVBS         : out std_logic_vector(1 downto 0);
-    GS_CVBS         : out std_logic_vector(7 downto 0);
-
-    -- sound
-    snd_clk         : out std_logic;
-    snd_data_l      : out std_logic_vector(15 downto 0);
-    snd_data_r      : out std_logic_vector(15 downto 0);
-
+    -- audio
+    audio_i         : in from_AUDIO_t;
+    audio_o         : out to_AUDIO_t;
+    
     -- SPI (flash)
-    spi_clk         : out std_logic;
-    spi_mode        : out std_logic;
-    spi_sel         : out std_logic;
-    spi_din         : in std_logic;
-    spi_dout        : out std_logic;
+    spi_i           : in from_SPI_t;
+    spi_o           : out to_SPI_t;
 
     -- serial
-    ser_tx          : out std_logic;
-    ser_rx          : in std_logic;
-
-    -- debug
-    leds            : out std_logic_vector(7 downto 0)
+    ser_i           : in from_SERIAL_t;
+    ser_o           : out to_SERIAL_t;
+    
+    -- general purpose I/O
+    gp_i            : in from_GP_t;
+    gp_o            : out to_GP_t
   );
 
 end PACE;
@@ -119,7 +112,7 @@ architecture SYN of PACE is
 		);
 	end component;
 
-	alias clk_50M 		  : std_logic is clk(0);
+	alias clk_50M 		  : std_logic is clk_i(0);
 
 	signal red_s				: std_logic;
 	signal green_s			: std_logic;
@@ -154,12 +147,12 @@ begin
 			
 		begin
 
-			process (clk_50M, reset)
+			process (clk_50M, reset_i)
 				variable rmw_di			: std_logic_vector(15 downto 0);
 				variable rmw_do			: std_logic_vector(15 downto 0);
 				variable rmw_be			: std_logic_vector(ram0_be_n'range);
 			begin
-				if reset = '1' then
+				if reset_i = '1' then
 					state <= IDLE after DELAY;
 				elsif rising_edge(clk_50M) then
 					case state is
@@ -234,10 +227,10 @@ begin
 
 	end generate GEN_SRAM_DE2;
 
-	vga_clk <= clk_50M;
-	red <= (others => red_s);
-	green <= (others => green_s);
-	blue <= (others => blue_s);
+	video_o.clk <= clk_50M;
+	video_o.rgb.r <= (others => red_s);
+	video_o.rgb.g <= (others => green_s);
+	video_o.rgb.b <= (others => blue_s);
 	
 	apple_inst : applefpga
 		port map
@@ -263,23 +256,23 @@ begin
 			RED						=> red_s,
 			GREEN					=> green_s,
 			BLUE					=> blue_s,
-			H_SYNC				=> hsync,
-			V_SYNC				=> vsync,
+			H_SYNC				=> video_o.hsync,
+			V_SYNC				=> video_o.vsync,
 			
 			-- PS/2
-			ps2_clk				=> ps2clk,
-			ps2_data			=> ps2data,
+			ps2_clk				=> inputs_i.ps2_kclk,
+			ps2_data			=> inputs_i.ps2_kdat,
 			
 			--Serial Ports
-			TXD1					=> ser_tx,
-			RXD1					=> ser_rx,
+			TXD1					=> ser_o.txd,
+			RXD1					=> ser_i.rxd,
 			
 			-- Display
 			DIGIT_N				=> open,
 			SEGMENT_N			=> open,
 			
 			-- LEDs
-			LED						=> leds,
+			LED						=> leds_o(7 downto 0),
 			
 			-- Apple Perpherial
 			SPEAKER				=> open,
@@ -289,23 +282,13 @@ begin
 			
 			-- Extra Buttons and Switches
 			SWITCH				=> "00000000",
-			BUTTON(3)			=> reset,
+			BUTTON(3)			=> reset_i,
 			BUTTON(2 downto 0) => "000"
 		);
 
 	-- unused
-	lcm_data <= (others => '0');
-	hblank <= '0';
-	vblank <= '0';
-	bw_cvbs <= (others => '0');
-	gs_cvbs <= (others => '0');
-	snd_clk <= '0';
-	snd_data_l <= (others => '0');
-	snd_data_r <= (others => '0');
-  spi_clk <= 'Z';
-  spi_dout <= 'Z';
-  spi_mode <= 'Z';
-  spi_sel <= 'Z';
+  audio_o <= NULL_TO_AUDIO;
+  spi_o <= NULL_TO_SPI;
   
 end SYN;
 
