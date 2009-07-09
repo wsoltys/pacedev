@@ -53,6 +53,8 @@ use IEEE.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
+use work.sdram_pkg.all;
+use work.video_controller_pkg.all;
 use work.platform_pkg.all;
 use work.project_pkg.all;
 
@@ -63,53 +65,45 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk             : in std_logic_vector(0 to 3);
-    test_button     : in std_logic;
-    reset           : in std_logic;
+    clk_i           : in std_logic_vector(0 to 3);
+    reset_i         : in std_logic;
 
-    -- game I/O
-    ps2clk          : inout std_logic;
-    ps2data         : inout std_logic;
-    dip             : in std_logic_vector(7 downto 0);
-		jamma						: in JAMMAInputsType;
+    -- misc I/O
+    buttons_i       : in from_BUTTONS_t;
+    switches_i      : in from_SWITCHES_t;
+    leds_o          : out to_LEDS_t;
 
-    -- external RAM
-    sram_i          : in from_SRAM_t;
-    sram_o          : out to_SRAM_t;
+    -- controller inputs
+    inputs_i        : in from_INPUTS_t;
 
-    -- VGA video
-		vga_clk					: out std_logic;
-    red             : out std_logic_vector(9 downto 0);
-    green           : out std_logic_vector(9 downto 0);
-    blue            : out std_logic_vector(9 downto 0);
-		lcm_data				:	out std_logic_vector(9 downto 0);
-    hsync           : out std_logic;
-    vsync           : out std_logic;
+    -- external ROM/RAM
+    flash_i         : in from_FLASH_t;
+    flash_o         : out to_flash_t;
+    sram_i       		: in from_SRAM_t;
+		sram_o					: out to_SRAM_t;
+    sdram_i         : in from_SDRAM_t;
+    sdram_o         : out to_SDRAM_t;
 
-    -- composite video
-    BW_CVBS         : out std_logic_vector(1 downto 0);
-    GS_CVBS         : out std_logic_vector(7 downto 0);
+    -- video
+    video_i         : in from_VIDEO_t;
+    video_o         : out to_VIDEO_t;
 
-    -- sound
-    snd_clk         : out std_logic;
-    snd_data_l      : out std_logic_vector(15 downto 0);
-    snd_data_r      : out std_logic_vector(15 downto 0);
-
+    -- audio
+    audio_i         : in from_AUDIO_t;
+    audio_o         : out to_AUDIO_t;
+    
     -- SPI (flash)
-    spi_clk         : out std_logic;
-    spi_mode        : out std_logic;
-    spi_sel         : out std_logic;
-    spi_din         : in std_logic;
-    spi_dout        : out std_logic;
+    spi_i           : in from_SPI_t;
+    spi_o           : out to_SPI_t;
 
     -- serial
-    ser_tx          : out std_logic;
-    ser_rx          : in std_logic;
-
-    -- debug
-    leds            : out std_logic_vector(7 downto 0)
+    ser_i           : in from_SERIAL_t;
+    ser_o           : out to_SERIAL_t;
+    
+    -- general purpose I/O
+    gp_i            : in from_GP_t;
+    gp_o            : out to_GP_t
   );
-
 end PACE;
 
 architecture SYN of PACE is
@@ -216,22 +210,22 @@ architecture SYN of PACE is
 
 	-- aliases etc for PACE compatibility
 
-	alias CLK_40								: std_logic is clk(0);
+	alias CLK_40								: std_logic is clk_i(0);
 	signal RESET_L							: std_logic;
-	alias VIDEO_R_OUT						: std_logic_vector(3 downto 0) is red(9 downto 6);
-	alias VIDEO_G_OUT						: std_logic_vector(3 downto 0) is green(9 downto 6);
-	alias VIDEO_B_OUT						: std_logic_vector(3 downto 0) is blue(9 downto 6);
-	alias HSYNC_OUT							: std_logic is hsync;	
-	alias VSYNC_OUT							: std_logic is vsync;	
+	alias VIDEO_R_OUT						: std_logic_vector(3 downto 0) is video_o.rgb.r(9 downto 6);
+	alias VIDEO_G_OUT						: std_logic_vector(3 downto 0) is video_o.rgb.g(9 downto 6);
+	alias VIDEO_B_OUT						: std_logic_vector(3 downto 0) is video_o.rgb.b(9 downto 6);
+	alias HSYNC_OUT							: std_logic is video_o.hsync;	
+	alias VSYNC_OUT							: std_logic is video_o.vsync;	
 	signal COMP_SYNC_L_OUT			: std_logic;
-	alias AUDIO_OUT							: std_logic_vector(3 downto 0) is snd_data_l(15 downto 12);
-	alias PS2_CLK								: std_logic is ps2clk;
-	alias PS2_DATA							: std_logic is ps2data;
+	alias AUDIO_OUT							: std_logic_vector(3 downto 0) is audio_o.ldata(15 downto 12);
+	alias PS2_CLK								: std_logic is inputs_i.ps2_kclk;
+	alias PS2_DATA							: std_logic is inputs_i.ps2_kdat;
 	
 begin
 
 	-- PACE compatibility
-	RESET_L <= not reset;
+	RESET_L <= not reset_i;
 	
   --
   -- IO connect these to the outside world if you wish ...
@@ -375,7 +369,7 @@ begin
       CLK_4           => clk_4
       );
   AUDIO_OUT(3 downto 0) <= vic_audio;
-  snd_data_r(15 downto 12) <= vic_audio;
+  audio_o.rdata(15 downto 12) <= vic_audio;
 
   via1 : M6522
     port map (
@@ -769,26 +763,15 @@ begin
   --end process;
 	
 	-- other
-	vga_clk <= CLK_40;
+	video_o.clk <= CLK_40;
 	
 	-- unused
-	red(5 downto 0) <= (others => '0');
-	green(5 downto 0) <= (others => '0');
-	blue(5 downto 0) <= (others => '0');
-	lcm_data <= (others => '0');
-	bw_cvbs <= (others => '0');
-	gs_cvbs <= (others => '0');
-	sram_o.a <= (others => '0');
-	sram_o.d <= (others => 'Z');
-	sram_o.be <= (others => 'Z');
-	sram_o.cs <= '0';
-	sram_o.oe <= '0';
-	sram_o.we <= '0';
-	spi_clk <= '0';
-	spi_mode <= '0';
-	spi_sel <= '0';
-	spi_dout <= '0';
-	ser_tx <= '0';
+	video_o.rgb.r(5 downto 0) <= (others => '0');
+	video_o.rgb.g(5 downto 0) <= (others => '0');
+	video_o.rgb.b(5 downto 0) <= (others => '0');
+	sram_o <= NULL_TO_SRAM;
+	spi_o <= NULL_TO_SPI;
+	ser_o <= NULL_TO_SERIAL;
 
 end SYN;
 
