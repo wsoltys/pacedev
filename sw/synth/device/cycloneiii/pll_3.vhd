@@ -45,7 +45,8 @@ ENTITY pll_3 IS
 		inclk0		: IN STD_LOGIC  := '0';
 		c0		: OUT STD_LOGIC ;
 		c1		: OUT STD_LOGIC ;
-		c2		: OUT STD_LOGIC 
+		c2		: OUT STD_LOGIC ;
+		locked		: OUT STD_LOGIC 
 	);
 END pll_3;
 
@@ -57,9 +58,10 @@ ARCHITECTURE SYN OF pll_3 IS
 	SIGNAL sub_wire2	: STD_LOGIC ;
 	SIGNAL sub_wire3	: STD_LOGIC ;
 	SIGNAL sub_wire4	: STD_LOGIC ;
-	SIGNAL sub_wire5	: STD_LOGIC_VECTOR (1 DOWNTO 0);
-	SIGNAL sub_wire6_bv	: BIT_VECTOR (0 DOWNTO 0);
-	SIGNAL sub_wire6	: STD_LOGIC_VECTOR (0 DOWNTO 0);
+	SIGNAL sub_wire5	: STD_LOGIC ;
+	SIGNAL sub_wire6	: STD_LOGIC_VECTOR (1 DOWNTO 0);
+	SIGNAL sub_wire7_bv	: BIT_VECTOR (0 DOWNTO 0);
+	SIGNAL sub_wire7	: STD_LOGIC_VECTOR (0 DOWNTO 0);
 
 
 
@@ -126,25 +128,28 @@ ARCHITECTURE SYN OF pll_3 IS
 		port_extclk1		: STRING;
 		port_extclk2		: STRING;
 		port_extclk3		: STRING;
+		self_reset_on_loss_lock		: STRING;
 		width_clock		: NATURAL
 	);
 	PORT (
 			inclk	: IN STD_LOGIC_VECTOR (1 DOWNTO 0);
+			locked	: OUT STD_LOGIC ;
 			clk	: OUT STD_LOGIC_VECTOR (4 DOWNTO 0)
 	);
 	END COMPONENT;
 
 BEGIN
-	sub_wire6_bv(0 DOWNTO 0) <= "0";
-	sub_wire6    <= To_stdlogicvector(sub_wire6_bv);
+	sub_wire7_bv(0 DOWNTO 0) <= "0";
+	sub_wire7    <= To_stdlogicvector(sub_wire7_bv);
 	sub_wire3    <= sub_wire0(2);
 	sub_wire2    <= sub_wire0(1);
 	sub_wire1    <= sub_wire0(0);
 	c0    <= sub_wire1;
 	c1    <= sub_wire2;
 	c2    <= sub_wire3;
-	sub_wire4    <= inclk0;
-	sub_wire5    <= sub_wire6(0 DOWNTO 0) & sub_wire4;
+	locked    <= sub_wire4;
+	sub_wire5    <= inclk0;
+	sub_wire6    <= sub_wire7(0 DOWNTO 0) & sub_wire5;
 
 	altpll_component : altpll
 	GENERIC MAP (
@@ -178,7 +183,7 @@ BEGIN
 		port_fbin => "PORT_UNUSED",
 		port_inclk0 => "PORT_USED",
 		port_inclk1 => "PORT_UNUSED",
-		port_locked => "PORT_UNUSED",
+		port_locked => "PORT_USED",
 		port_pfdena => "PORT_UNUSED",
 		port_phasecounterselect => "PORT_UNUSED",
 		port_phasedone => "PORT_UNUSED",
@@ -209,11 +214,13 @@ BEGIN
 		port_extclk1 => "PORT_UNUSED",
 		port_extclk2 => "PORT_UNUSED",
 		port_extclk3 => "PORT_UNUSED",
+		self_reset_on_loss_lock => "OFF",
 		width_clock => 5
 	)
 	PORT MAP (
-		inclk => sub_wire5,
-		clk => sub_wire0
+		inclk => sub_wire6,
+		clk => sub_wire0,
+		locked => sub_wire4
 	);
 
 
@@ -260,7 +267,7 @@ END SYN;
 -- Retrieval info: PRIVATE: INCLK1_FREQ_UNIT_COMBO STRING "MHz"
 -- Retrieval info: PRIVATE: INTENDED_DEVICE_FAMILY STRING "Cyclone III"
 -- Retrieval info: PRIVATE: INT_FEEDBACK__MODE_RADIO STRING "1"
--- Retrieval info: PRIVATE: LOCKED_OUTPUT_CHECK STRING "0"
+-- Retrieval info: PRIVATE: LOCKED_OUTPUT_CHECK STRING "1"
 -- Retrieval info: PRIVATE: LONG_SCAN_RADIO STRING "1"
 -- Retrieval info: PRIVATE: LVDS_MODE_DATA_RATE STRING "300.000"
 -- Retrieval info: PRIVATE: LVDS_MODE_DATA_RATE_DIRTY NUMERIC "0"
@@ -358,7 +365,7 @@ END SYN;
 -- Retrieval info: CONSTANT: PORT_FBIN STRING "PORT_UNUSED"
 -- Retrieval info: CONSTANT: PORT_INCLK0 STRING "PORT_USED"
 -- Retrieval info: CONSTANT: PORT_INCLK1 STRING "PORT_UNUSED"
--- Retrieval info: CONSTANT: PORT_LOCKED STRING "PORT_UNUSED"
+-- Retrieval info: CONSTANT: PORT_LOCKED STRING "PORT_USED"
 -- Retrieval info: CONSTANT: PORT_PFDENA STRING "PORT_UNUSED"
 -- Retrieval info: CONSTANT: PORT_PHASECOUNTERSELECT STRING "PORT_UNUSED"
 -- Retrieval info: CONSTANT: PORT_PHASEDONE STRING "PORT_UNUSED"
@@ -389,6 +396,7 @@ END SYN;
 -- Retrieval info: CONSTANT: PORT_extclk1 STRING "PORT_UNUSED"
 -- Retrieval info: CONSTANT: PORT_extclk2 STRING "PORT_UNUSED"
 -- Retrieval info: CONSTANT: PORT_extclk3 STRING "PORT_UNUSED"
+-- Retrieval info: CONSTANT: SELF_RESET_ON_LOSS_LOCK STRING "OFF"
 -- Retrieval info: CONSTANT: WIDTH_CLOCK NUMERIC "5"
 -- Retrieval info: USED_PORT: @clk 0 0 5 0 OUTPUT_CLK_EXT VCC "@clk[4..0]"
 -- Retrieval info: USED_PORT: @inclk 0 0 2 0 INPUT_CLK_EXT VCC "@inclk[1..0]"
@@ -396,6 +404,8 @@ END SYN;
 -- Retrieval info: USED_PORT: c1 0 0 0 0 OUTPUT_CLK_EXT VCC "c1"
 -- Retrieval info: USED_PORT: c2 0 0 0 0 OUTPUT_CLK_EXT VCC "c2"
 -- Retrieval info: USED_PORT: inclk0 0 0 0 0 INPUT_CLK_EXT GND "inclk0"
+-- Retrieval info: USED_PORT: locked 0 0 0 0 OUTPUT GND "locked"
+-- Retrieval info: CONNECT: locked 0 0 0 0 @locked 0 0 0 0
 -- Retrieval info: CONNECT: @inclk 0 0 1 0 inclk0 0 0 0 0
 -- Retrieval info: CONNECT: c0 0 0 0 0 @clk 0 0 1 0
 -- Retrieval info: CONNECT: c1 0 0 0 0 @clk 0 0 1 1

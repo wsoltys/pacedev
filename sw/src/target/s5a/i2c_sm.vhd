@@ -21,8 +21,8 @@ use ieee.numeric_std.all;
 entity i2c_sm is
 	generic
 	(
-		clock_speed	: integer := 33333333;	-- Input clock speed (Hz)
-		i2c_speed		: integer := 2000000			-- I2C toggle rate (Hz)
+		clock_speed	: integer;
+		i2c_speed		: integer := 400000   -- I2C toggle rate (400kHz)
 	);
 	port
 	(
@@ -41,8 +41,12 @@ entity i2c_sm is
 		rxbyte      : out std_logic_vector(7 downto 0);
 
     -- I2C physical interface
-		vo_scl			: inout std_logic;
-		vo_sda			: inout std_logic
+		scl_i  	    : in std_logic;
+		scl_o  	    : out std_logic;
+		scl_oe_n    : out std_logic;
+		sda_i  	    : in std_logic;
+		sda_o  	    : out std_logic;
+		sda_oe_n    : out std_logic
 	);
 end entity i2c_sm;
 
@@ -96,15 +100,8 @@ architecture SYN of i2c_sm is
 	constant CR_NACK			: integer := 3;		-- Generate ACK
 	constant CR_IACK			: integer := 0;		-- Acknowledge interrupt
 
-	constant prer_int			: integer := clock_speed / i2c_speed - 1;
+	constant prer_int			: integer := clock_speed / (5 * i2c_speed) - 1;
 	constant prer					: std_logic_vector(15 downto 0) := std_logic_vector(to_unsigned(prer_int, 16));
-
-	signal scl_pad_i     	: std_logic;                -- i2c clock line input
-	signal scl_pad_o     	: std_logic;                -- i2c clock line output
-	signal scl_padoen_o  	: std_logic;                -- i2c clock line output enable, active low
-	signal sda_pad_i     	: std_logic;                -- i2c data line input
-	signal sda_pad_o     	: std_logic;                -- i2c data line output
-	signal sda_padoen_o  	: std_logic;                -- i2c data line output enable, active low
 
   signal i2c_timeout      : std_logic := '0';
 
@@ -322,17 +319,12 @@ begin
 			wb_inta_o => open,
 
 			-- i2c lines
-			scl_pad_i     => scl_pad_i,
-			scl_pad_o     => scl_pad_o,
-			scl_padoen_o  => scl_padoen_o,
-			sda_pad_i     => sda_pad_i,
-			sda_pad_o     => sda_pad_o,
-			sda_padoen_o  => sda_padoen_o
+			scl_pad_i     => scl_i,
+			scl_pad_o     => scl_o,
+			scl_padoen_o  => scl_oe_n,
+			sda_pad_i     => sda_i,
+			sda_pad_o     => sda_o,
+			sda_padoen_o  => sda_oe_n
 		);
 
-	vo_scl <= scl_pad_o when scl_padoen_o = '0' else 'Z';
-	scl_pad_i <= to_x01(vo_scl);
-	vo_sda <= sda_pad_o when sda_padoen_o = '0' else 'Z';
-	sda_pad_i <= to_x01(vo_sda);
-  
 end SYN;

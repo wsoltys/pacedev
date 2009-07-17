@@ -11,7 +11,7 @@ use ieee.numeric_std.all;
 --library altera;
 --use altera.altera_syn_attributes.all;
 
-entity i2c_sm_controller is
+entity dvo_init_i2c_sm_controller is
   generic
   (
     clock_speed	  : integer;	            -- Input clock speed (Hz)
@@ -25,13 +25,17 @@ entity i2c_sm_controller is
 		reset				: in std_logic;
 
     -- I2C physical interface
-		i2c_scl			: inout std_logic;
-		i2c_sda			: inout std_logic
+		scl_i  	    : in std_logic;
+		scl_o  	    : out std_logic;
+		scl_oe_n    : out std_logic;
+		sda_i  	    : in std_logic;
+		sda_o  	    : out std_logic;
+		sda_oe_n    : out std_logic
 	);
 
-end i2c_sm_controller;
+end dvo_init_i2c_sm_controller;
 
-architecture SYN of i2c_sm_controller is
+architecture SYN of dvo_init_i2c_sm_controller is
 
   component i2c_sm is
   	generic
@@ -56,8 +60,12 @@ architecture SYN of i2c_sm_controller is
 		  rxbyte      : out std_logic_vector(7 downto 0);
 
       -- I2C physical interface
-  		vo_scl			: inout std_logic;
-  		vo_sda			: inout std_logic
+      scl_i  	    : in std_logic;
+      scl_o  	    : out std_logic;
+      scl_oe_n    : out std_logic;
+      sda_i  	    : in std_logic;
+      sda_o  	    : out std_logic;
+      sda_oe_n    : out std_logic
   	);
   end component i2c_sm;
 
@@ -67,6 +75,7 @@ architecture SYN of i2c_sm_controller is
 	constant DEV_ADDR_WR	: std_logic_vector(7 downto 0) := DEV_ADDR(7 downto 1) & '0';
 
 	constant TFP410_CTL_1_MODE	: std_logic_vector(7 downto 0) := X"08";
+	constant TFP410_CTL_2_MODE	: std_logic_vector(7 downto 0) := X"09";
 
 	signal is_idle				: std_logic;	-- I2C state machine is idle (ready for command)
 	signal ready					: std_logic;	-- Ready to tx/rx next byte
@@ -84,16 +93,18 @@ begin
 		(
 		  init, wait_rdy,
 		  cfg_tx1a, cfg_tx1d0, cfg_tx1d1,
+		  cfg_tx2a, cfg_tx2d0, cfg_tx2d1,
 		  cfg_done
 		);
 
 		signal state : state_t;
 		
 		type state_a_t is array (natural range <>) of state_t;
-		constant next_state : state_a_t(0 to 4) := 
+		constant next_state : state_a_t(0 to 7) := 
 		( 
 		  init,
 		  cfg_tx1a, cfg_tx1d0, cfg_tx1d1,
+		  cfg_tx2a, cfg_tx2d0, cfg_tx2d1,
 		  cfg_done
 	  );
     
@@ -134,6 +145,21 @@ begin
     			when cfg_tx1d1 =>
             -- TDIS=0(PD#),VEN=1(orig),HEN=1(orig),DSEL=[1],BSEL=1(24-bit),EDGE=1(rising),PD#=1(normal)
     				txbyte <= X"3" & dsel & "111";
+    				last_byte <= '1';
+    				do_tx <= '1';
+    
+    			when cfg_tx2a =>
+    				txbyte <= DEV_ADDR_WR;
+    				do_tx <= '1';
+                
+    			when cfg_tx2d0 =>
+            -- setup - Ref=Vdd, int.clk, unipolar, no RST
+    				txbyte <= TFP410_CTL_2_MODE;
+    				do_tx <= '1';
+    
+    			when cfg_tx2d1 =>
+            -- All default except MSEL=011(hotplug)
+    				txbyte <= "00110000";
     				last_byte <= '1';
     				do_tx <= '1';
     
@@ -178,8 +204,13 @@ begin
   		txbyte        => txbyte,
       do_rx         => do_rx,
       rxbyte        => rxbyte,
-  		vo_scl			  => i2c_scl,
-  		vo_sda			  => i2c_sda
+
+  		scl_i  	      => scl_i,
+  		scl_o  	      => scl_o,
+  		scl_oe_n      => scl_oe_n,
+  		sda_i  	      => sda_i,
+  		sda_o  	      => sda_o,
+  		sda_oe_n      => sda_oe_n
   	);
 
 end SYN;

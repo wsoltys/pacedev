@@ -9,6 +9,7 @@ library work;
 use work.pace_pkg.all;
 use work.sdram_pkg.all;
 use work.video_controller_pkg.all;
+use work.lpc_pkg.all;
 use work.project_pkg.all;
 
 entity target_top is
@@ -53,7 +54,7 @@ entity target_top is
 		-- 3.3V only below
 		vo_scl			: inout std_logic;
 		vo_sda			: inout std_logic;
-		vo_po1			: out std_logic;
+		vo_po1			: in std_logic;
 		vo_rstn			: out std_logic;
 
 		-- I2C on the DVI output connector
@@ -65,6 +66,7 @@ entity target_top is
 		mix_reset		: in std_logic;
 		mix_framen	: in std_logic;
 		mix_a				: inout std_logic_vector(3 downto 0);
+		mix_a_dir   : out std_logic;
 		mix_spa			: inout std_logic;
 		mix_spb			: inout std_logic;
 		mix_spc			: inout std_logic;
@@ -91,7 +93,7 @@ entity target_top is
 		
 --		clk_test		: in std_logic;					-- Clock on test points
 
-		sp2v5				: inout std_logic_vector(2 downto 1);
+		--sp2v5				: inout std_logic_vector(2 downto 1);
 
 		fa_odt : out std_logic_vector(0 downto 0);
 		fa_clk : inout std_logic_vector(1 downto 0);
@@ -128,22 +130,13 @@ end entity target_top;
 
 architecture SYN of target_top is
 
-  component dvo_pll IS
-    PORT
-    (
-      areset			: IN STD_LOGIC  := '0';
-      inclk0			: IN STD_LOGIC  := '0';
-      c0					: OUT STD_LOGIC ;
-      c1					: OUT STD_LOGIC ;
-      locked			: OUT STD_LOGIC 
-    );
-  end component dvo_pll;
-
 	signal clk_i			  	: std_logic_vector(0 to 3);
   signal init       		: std_logic := '1';
   signal reset_i     		: std_logic := '1';
 	signal reset_n				: std_logic := '0';
 
+  signal pll_locked     : std_logic := '0';
+    
   signal buttons_i    	: from_BUTTONS_t;
   signal switches_i   	: from_SWITCHES_t;
   signal leds_o       	: to_LEDS_t;
@@ -168,10 +161,10 @@ architecture SYN of target_top is
 
 begin
 
-	PROC_RESET : process(clk_25_a)
+	PROC_RESET : process(clk_25_c)
 		variable reset_cnt : integer := 999999;
 	begin
-		if rising_edge(clk_25_a) then
+		if rising_edge(clk_25_c) then
 			if reset_cnt > 0 then
 				init <= '1';
 				reset_cnt := reset_cnt - 1;
@@ -209,7 +202,8 @@ begin
         inclk0							: in std_logic := '0';
         c0		    					: out std_logic;
         c1		    					: out std_logic; 
-        c2		    					: out std_logic 
+        c2		    					: out std_logic;
+        locked		    			: out std_logic 
       );
     end component pll_3;
 
@@ -234,9 +228,10 @@ begin
         port map
         (
           inclk0  => clk_25_c,
-          c0      => vo_idck,
-          c1      => clk_i(1),
-          c2      => clk_i(0)
+          c0      => vo_idck,   -- 108MHz
+          c1      => clk_i(1),  -- 108MHz
+          c2      => clk_i(0),  -- 40MHz
+          locked  => pll_locked
         );
     
         vo_idck_n <= '0';
@@ -246,8 +241,8 @@ begin
     GEN_NO_PLL : if not PACE_HAS_PLL generate
 
       -- feed input clocks into PACE core
-      clk_i(0) <= clk_25_a;
-      clk_i(1) <= clk_25_b;
+      clk_i(0) <= clk_25_c;
+      clk_i(1) <= clk_25_c;
         
     end generate GEN_NO_PLL;
 	
@@ -266,23 +261,115 @@ begin
   inputs_i.ps2_mclk <= '1';
   inputs_i.ps2_mdat <= '1';
 
-  GEN_JAMMA : for i in 1 to 2 generate
-    inputs_i.jamma_n.coin(i) <= '1';
-    inputs_i.jamma_n.p(i).start <= '1';
-    inputs_i.jamma_n.p(i).up <= '1';
-    inputs_i.jamma_n.p(i).down <= '1';
-    inputs_i.jamma_n.p(i).left <= '1';
-    inputs_i.jamma_n.p(i).right <= '1';
-    inputs_i.jamma_n.p(i).button <= (others => '1');
-  end generate GEN_JAMMA;
+  BLK_MIXER_BUS : block
 
-	inputs_i.jamma_n.coin_cnt <= (others => '1');
-	inputs_i.jamma_n.service <= '1';
-	inputs_i.jamma_n.tilt <= '1';
-	inputs_i.jamma_n.test <= '1';
-  
+    signal wb_adr       : std_logic_vector(31 downto 0) := (others => '0');
+    signal wb_dat_o     : std_logic_vector(31 downto 0) := (others => '0');
+    signal wb_dat_i     : std_logic_vector(31 downto 0) := (others => '0');
+    signal wb_sel       : std_logic_vector(3 downto 0) := (others => '0');
+    signal wb_tga       : std_logic_vector(1 downto 0) := (others => '0');
+    signal wb_we        : std_logic := '0';
+    signal wb_stb       : std_logic := '0';
+    signal wb_cyc       : std_logic := '0';
+    signal wb_ack       : std_logic := '0';
+    
+    signal lpc_clk      : std_logic := '0';
+    signal lpc_reset_n  : std_logic := '1';
+    signal lpc_frame    : std_logic := '0';
+    signal lpc_ad_i     : std_logic_vector(3 downto 0) := (others => '0');
+    signal lpc_ad_o     : std_logic_vector(3 downto 0) := (others => '0');
+    signal lpc_ad_oe    : std_logic := '0';
+
+    type lpc_reg_a is array (natural range <>) of std_logic_vector(7 downto 0);
+    signal lpc_reg      : lpc_reg_a(0 to 3) := (others => (others => '1'));
+    
+  begin
+
+    lpc_clk <= mix_ckp_a;
+    lpc_reset_n <= not mix_reset;
+    lpc_frame <= not mix_framen;
+    
+    lpc_periph_inst : wb_lpc_periph
+      port map
+      (
+        clk_i       => lpc_clk,
+        nrst_i      => lpc_reset_n,
+        wbm_adr_o   => wb_adr,
+        wbm_dat_o   => wb_dat_o,
+        wbm_dat_i   => wb_dat_i,
+        wbm_sel_o   => wb_sel,
+        wbm_tga_o   => wb_tga,
+        wbm_we_o    => wb_we,
+        wbm_stb_o   => wb_stb,
+        wbm_cyc_o   => wb_cyc,
+        wbm_ack_i   => wb_ack,
+        wbm_err_i   => '0',
+        dma_chan_o  => open,
+        dma_tc_o    => open,
+        
+        lframe_i    => lpc_frame,
+        lad_i       => lpc_ad_i,
+        lad_o       => lpc_ad_o,
+        lad_oe      => lpc_ad_oe
+      );
+
+    process (lpc_clk, lpc_reset_n)
+      variable adr : integer range 0 to 3;
+      variable wb_cyc_r : std_logic := '0';
+    begin
+      if lpc_reset_n = '0' then
+        lpc_reg <= (others => (others => '1'));
+        wb_cyc_r := '0';
+      elsif rising_edge(lpc_clk) then
+        adr := to_integer(unsigned(wb_adr(1 downto 0)));
+        if wb_cyc = '1' and wb_stb = '1' and wb_cyc_r = '0' then
+          if wb_we = '0' then
+            -- reads
+            null;
+          else
+            lpc_reg(adr) <= wb_dat_o(lpc_reg(adr)'range);
+          end if;
+        end if;
+        wb_cyc_r := wb_cyc and wb_stb;
+        -- drive ack
+        wb_ack <= wb_cyc and wb_stb;
+      end if;
+    end process;
+    
+    -- lpc drivers
+    lpc_ad_i <= mix_a;
+    mix_a <= lpc_ad_o when lpc_ad_oe = '1' else (others => 'Z');
+    -- drives ST2G3236 level converters
+    -- - '0' is output (from mixer), '1' is input (from carrier)
+    mix_a_dir <= not lpc_ad_oe;
+    
+    GEN_JAMMA : for i in 1 to 2 generate
+      inputs_i.jamma_n.coin(i) <= lpc_reg((i-1)*2)(0);
+      inputs_i.jamma_n.p(i).start <= lpc_reg((i-1)*2)(1);
+      inputs_i.jamma_n.p(i).up <= lpc_reg((i-1)*2)(2);
+      inputs_i.jamma_n.p(i).down <= lpc_reg((i-1)*2)(3);
+      inputs_i.jamma_n.p(i).left <= lpc_reg((i-1)*2)(4);
+      inputs_i.jamma_n.p(i).right <= lpc_reg((i-1)*2)(5);
+      inputs_i.jamma_n.p(i).button <= lpc_reg((i-1)*2+1)(4 downto 0);
+    end generate GEN_JAMMA;
+
+    inputs_i.jamma_n.coin_cnt <= (others => '1');
+    inputs_i.jamma_n.service <= '1';
+    inputs_i.jamma_n.tilt <= '1';
+    inputs_i.jamma_n.test <= '1';
+    
+  end block BLK_MIXER_BUS;
+
   BLK_VIDEO : block
   
+    -- VO I2C (INIT) signals
+    signal vo_scl_i     : std_logic := '0';
+    signal vo_scl_o     : std_logic := '0';
+    signal vo_scl_oe_n  : std_logic := '0';
+    signal vo_sda_i     : std_logic := '0';
+    signal vo_sda_o     : std_logic := '0';
+    signal vo_sda_oe_n  : std_logic := '0';
+
     --signal video_i  : from_VIDEO_t;
     signal reg_i    : VIDEO_REG_t;
     signal rgb_i    : RGB_t;
@@ -290,7 +377,7 @@ begin
     
   begin
   
-    dvo_sm : entity work.i2c_sm_controller
+    dvo_sm : entity work.dvo_init_i2c_sm_controller
       generic map
       (
         clock_speed => 25000000,
@@ -298,14 +385,24 @@ begin
       )
       port map
       (
-        clk					=> clk_25_a,
+        clk					=> clk_25_c,
         clk_ena     => '1',
         reset				=> reset_i,
 
         -- I2C physical interface
-        i2c_scl			=> vo_scl,
-        i2c_sda			=> vo_sda
+        scl_i  	    => vo_scl_i,
+        scl_o  	    => vo_scl_o,
+        scl_oe_n    => vo_scl_oe_n,
+        sda_i  	    => vo_sda_i,
+        sda_o  	    => vo_sda_o,
+        sda_oe_n    => vo_sda_oe_n
       );
+
+    -- VO I2C (init) drivers
+    vo_scl_i <= vo_scl;
+    vo_scl <= vo_scl_o when vo_scl_oe_n = '0' else 'Z';
+    vo_sda_i <= vo_sda;
+    vo_sda <= vo_sda_o when vo_sda_oe_n = '0' else 'Z';
 
     video_i.clk <= clk_i(1);
     video_i.clk_ena <= '1';
@@ -418,15 +515,21 @@ begin
     );
 
   -- blink a led
-  process (clk_25_a, reset_i)
+  process (clk_25_c, reset_i)
     variable count : unsigned(22 downto 0) := (others => '0');
   begin
     if reset_i = '1' then
       count := (others => '0');
-    elsif rising_edge(clk_25_a) then
+    elsif rising_edge(clk_25_c) then
       count := count + 1;
     end if;
-    ledout <= count(count'left);
+    ledout <= pll_locked and count(count'left);
   end process;
+  
+  vi_pdn <= '1';
+  dvi_hotplug <= '1';
+  mix_spa <= 'Z';
+  mix_spb <= 'Z';
+  mix_spc <= 'Z';
   
 end architecture SYN;
