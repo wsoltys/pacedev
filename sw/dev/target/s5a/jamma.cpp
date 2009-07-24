@@ -1,6 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
+
+//#define USE_WIN32API
+
+#ifdef USE_WIN32API
+  #include <winbase.h>
+#else
+  #define DEVICE_NAME   "\\\\.\\S5LpcIo"  
+  //#define DEVICE_NAME   "\\DosDevices\\S5LpcIo"  
+#endif
 
 #include <allegro.h>
 
@@ -15,6 +28,26 @@
 
 void main (int argc, char *argv[])
 {
+  printf ("JAMMA v0.1\n");
+  
+#ifdef USE_WIN32API
+  printf ("(WIN32API build)\n");
+  HANDLE hPortIo = CreateFile("\\\\.\\S5LpcIo",
+                GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ, 
+                NULL, OPEN_EXISTING, 0, NULL);
+  if (hPortIo == INVALID_HANDLE_VALUE)
+#else
+  printf ("(unistd build)\n");
+  int fd = open (DEVICE_NAME, _O_RDWR|_O_BINARY);
+  if (fd == -1)
+#endif
+  {
+    printf ("error: unable to open device (%d)\n", errno);
+    exit (0);
+  }
+
+  printf ("Initialising allegro...\n");
+  
 	allegro_init ();
 	install_keyboard ();
 
@@ -58,6 +91,12 @@ void main (int argc, char *argv[])
 
     memcpy (jamma_n_r, jamma_n, 4);
   }
+  
+#ifdef USE_WIN32API
+  CloseHandle (hPortIo);
+#else
+  close (fd);
+#endif
 }
 
 END_OF_MAIN();
