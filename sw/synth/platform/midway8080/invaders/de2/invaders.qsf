@@ -551,7 +551,9 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/io/maple/mapl
 set_global_assignment -name VHDL_FILE ../../../../../src/component/toys/led_chaser.vhd
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/LCD_TEST.v
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/SEG7_LUT.v
+set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/I2C_AV_Config.v
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/I2S_Controller.v
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/I2S_LCM_Config.v
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/LCD_Controller.v
 set_global_assignment -name VHDL_FILE ../../../../../src/target/de2/target_top.vhd
+set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/I2C_Controller.v

@@ -50,6 +50,22 @@ architecture SYN of bitmapCtl_1 is
 begin
 
 	ctl_o.a(15 downto 13) <= (others => '0');
+
+  --
+  --Fundamentally what you are doing is to start with a byte like this:
+  --
+  --76543210
+  --aabbbccc                l
+  --
+  --and turn it into a 16-bit number which is organised like this:
+  --
+  -- FEDCBA9876543210
+  -- 000ccc0000000000       (l%8)*1024
+  --+000000bbb0000000       ((l%64)/8)*128
+  --+000000000aa00000       (l/64)*32
+  --+00000000000aa000       (l/64)*8
+  --=000cccbbbaaaa000
+  --
 	
 	-- these are constant for a whole line
   -- the apple video screen is interlaced
