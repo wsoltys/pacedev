@@ -216,8 +216,8 @@ architecture SYN of PACE is
   signal gnd_8_s             : std_logic_vector( 7 downto 0);
 
 	-- changes for PACE
-	alias clk_20M							  : std_logic is clk_i(0);
-  alias ext_clk_i             : std_logic is clk_i(2);
+	alias clk_20M							  : std_logic is clk_i(1);
+  alias ext_clk_i             : std_logic is clk_i(0);
   signal clk_cnt_q            : unsigned(1 downto 0);
 	signal clk_en_5m37_q			  : std_logic;
 	alias clk_21m3_s					  : std_logic is clk_s;
