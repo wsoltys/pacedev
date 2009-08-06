@@ -3,7 +3,7 @@
   kind="com_altera_sopcmodel_ensemble_Ensemble"
   version="8.1">
   <!-- Format version 8.1 163 (Future versions may contain additional information.) -->
-  <!-- 2008.12.12.13:03:43 -->
+  <!-- 2009.08.06.15:06:24 -->
   <!-- A collection of modules and connections -->
   <parameter name="deviceFamily">
     <type>com.altera.entityinterfaces.moduleext.IDeviceFamily$EDeviceFamily</type>
@@ -55,7 +55,7 @@
   </parameter>
   <parameter name="timeStamp">
     <type>long</type>
-    <value>1229047415811</value>
+    <value>1249535151632</value>
     <derived>false</derived>
     <enabled>true</enabled>
     <visible>true</visible>
@@ -4497,155 +4497,11 @@ parameters are a RESULT of the module parameters. -->
     <endConnectionPoint>write_master_av_clock</endConnectionPoint>
   </connection>
   <plugin>
-    <instanceCount>1</instanceCount>
-    <name>avalon_slave</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-    <displayName>Avalon Memory Mapped Slave</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>2</instanceCount>
-    <name>avalon_master</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-    <displayName>Avalon Memory Mapped Master</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>1</instanceCount>
-    <name>avalon_master</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-    <displayName>Avalon Memory Mapped Master</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>7</instanceCount>
-    <name>clock_sink</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-    <displayName>Clock Input</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>2</instanceCount>
-    <name>clock_source</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-    <displayName>Clock Output</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>3</instanceCount>
-    <name>avalon_streaming_sink</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-    <displayName>Avalon Streaming Sink</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>3</instanceCount>
-    <name>avalon_streaming</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IConnection</subtype>
-    <displayName>Avalon Streaming Connection</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>8</instanceCount>
-    <name>conduit_end</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-    <displayName>Conduit</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>1</instanceCount>
-    <name>altera_avalon_pipeline_bridge</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IModule</subtype>
-    <displayName>Avalon-MM Pipeline Bridge</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
     <instanceCount>3</instanceCount>
     <name>avalon_streaming_source</name>
     <type>com.altera.entityinterfaces.IElementClass</type>
     <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
     <displayName>Avalon Streaming Source</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>1</instanceCount>
-    <name>avalon_slave</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-    <displayName>Avalon Memory Mapped Slave</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>10</instanceCount>
-    <name>conduit_start</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-    <displayName>Conduit Output</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>1</instanceCount>
-    <name>alt_vip_vfb</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IModule</subtype>
-    <displayName>Frame Buffer</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>1</instanceCount>
-    <name>clock_sink</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-    <displayName>Clock Input</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>8</instanceCount>
-    <name>clock</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IConnection</subtype>
-    <displayName>Clock Connection</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>1</instanceCount>
-    <name>altmemddr2</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IModule</subtype>
-    <displayName>DDR2 SDRAM High Performance Controller</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>3</instanceCount>
-    <name>avalon</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IConnection</subtype>
-    <displayName>Avalon Memory Mapped Connection</displayName>
-    <version>6.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>1</instanceCount>
-    <name>alt_vip_cti</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IModule</subtype>
-    <displayName>Clocked Video Input</displayName>
-    <version>8.1</version>
-  </plugin>
-  <plugin>
-    <instanceCount>1</instanceCount>
-    <name>alt_vip_itc</name>
-    <type>com.altera.entityinterfaces.IElementClass</type>
-    <subtype>com.altera.entityinterfaces.IModule</subtype>
-    <displayName>Clocked Video Output</displayName>
     <version>8.1</version>
   </plugin>
   <plugin>
@@ -4666,12 +4522,156 @@ parameters are a RESULT of the module parameters. -->
   </plugin>
   <plugin>
     <instanceCount>1</instanceCount>
+    <name>altera_avalon_pipeline_bridge</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IModule</subtype>
+    <displayName>Avalon-MM Pipeline Bridge</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>3</instanceCount>
+    <name>avalon_streaming_sink</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+    <displayName>Avalon Streaming Sink</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>8</instanceCount>
+    <name>clock</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IConnection</subtype>
+    <displayName>Clock Connection</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>7</instanceCount>
+    <name>clock_sink</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+    <displayName>Clock Input</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>3</instanceCount>
+    <name>avalon_streaming</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IConnection</subtype>
+    <displayName>Avalon Streaming Connection</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>1</instanceCount>
     <name>alt_vip_scl</name>
     <type>com.altera.entityinterfaces.IElementClass</type>
     <subtype>com.altera.entityinterfaces.IModule</subtype>
     <displayName>Scaler</displayName>
     <version>8.1</version>
   </plugin>
+  <plugin>
+    <instanceCount>2</instanceCount>
+    <name>avalon_master</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+    <displayName>Avalon Memory Mapped Master</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>1</instanceCount>
+    <name>avalon_master</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+    <displayName>Avalon Memory Mapped Master</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>3</instanceCount>
+    <name>avalon</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IConnection</subtype>
+    <displayName>Avalon Memory Mapped Connection</displayName>
+    <version>6.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>1</instanceCount>
+    <name>avalon_slave</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+    <displayName>Avalon Memory Mapped Slave</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>1</instanceCount>
+    <name>avalon_slave</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+    <displayName>Avalon Memory Mapped Slave</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>10</instanceCount>
+    <name>conduit_start</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+    <displayName>Conduit Output</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>2</instanceCount>
+    <name>clock_source</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+    <displayName>Clock Output</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>1</instanceCount>
+    <name>clock_sink</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+    <displayName>Clock Input</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>8</instanceCount>
+    <name>conduit_end</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+    <displayName>Conduit</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>1</instanceCount>
+    <name>alt_vip_cti</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IModule</subtype>
+    <displayName>Clocked Video Input</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>1</instanceCount>
+    <name>altmemddr2</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IModule</subtype>
+    <displayName>DDR2 SDRAM High Performance Controller</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>1</instanceCount>
+    <name>alt_vip_itc</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IModule</subtype>
+    <displayName>Clocked Video Output</displayName>
+    <version>8.1</version>
+  </plugin>
+  <plugin>
+    <instanceCount>1</instanceCount>
+    <name>alt_vip_vfb</name>
+    <type>com.altera.entityinterfaces.IElementClass</type>
+    <subtype>com.altera.entityinterfaces.IModule</subtype>
+    <displayName>Frame Buffer</displayName>
+    <version>8.1</version>
+  </plugin>
   <reportVersion>8.1 163</reportVersion>
-  <uniqueIdentifier>005056C000080000011E28E6A73D</uniqueIdentifier>
+  <uniqueIdentifier>001485074F6000000122EE190454</uniqueIdentifier>
 </EnsembleReport>

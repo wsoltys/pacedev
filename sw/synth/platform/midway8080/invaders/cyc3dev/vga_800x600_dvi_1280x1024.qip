@@ -1,0 +1,10 @@
+set_global_assignment -name SOURCE_FILE [file join $::quartus(qip_path) C:/altera/81/ip/altera/clocked_video_output/lib/ip_toolbench/clocked_video_output.jar]
+set_global_assignment -name CUSP_FILE [file join $::quartus(qip_path) C:/altera/81/ip/altera/scaler/lib/alt_vip_scl.cpp]
+ set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) alt_vip_scl_0.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) alt_vip_itc_0.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) alt_vip_vfb_0.vhd]
+set_global_assignment -name CUSP_FILE [file join $::quartus(qip_path) C:/altera/81/ip/altera/frame_buffer/lib/alt_vip_vfb.cpp]
+ set_global_assignment -name SOURCE_FILE [file join $::quartus(qip_path) C:/altera/81/ip/altera/clocked_video_input/lib/ip_toolbench/clocked_video_input.jar]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) alt_vip_cti_0.vhd]
+set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID 001485074F6000000122EE19CD71 
+ 
