@@ -7,8 +7,8 @@
 #define SHOW_PALETTE
 #define SHOW_CLUTS
 #define SHOW_CHARS
-//#define SHOW_TILES
-//#define SHOW_SPRITES
+#define SHOW_TILES
+#define SHOW_SPRITES
 
 #define ALLEGRO_FULL_VERSION  ((ALLEGRO_VERSION << 4)|(ALLEGRO_SUB_VERSION))
 #if ALLEGRO_FULL_VERSION < 0x42
@@ -19,8 +19,8 @@
     textout_centre_ex(s, f, str, w, h, c, 0);
 #endif
 
-#define GALAGA
-//#define XEVIOUS
+//#define GALAGA
+#define XEVIOUS
 
 #ifdef GALAGA
 #define SET_NAME                  "GALAGA"
@@ -426,7 +426,7 @@ void main (int argc, char *argv[])
 	PALETTE pal;
 	for (int c=0; c<NUM_COLOURS ;c++)
 	{
-		int bit0,bit1,bit2;
+		int bit0,bit1,bit2,bit3;
 
 #ifdef GALAGA
 		bit0 = ((rgb_prom[c]) >> 0) & 0x01;
