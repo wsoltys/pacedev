@@ -65,7 +65,7 @@ end entity PACE;
 architecture SYN of PACE is
 
 	alias clk_24M								: std_logic is clk_i(0);
-	alias clk_40M								: std_logic is clk_i(1);
+	alias clk_video						  : std_logic is clk_i(1);
 	signal reset_n							: std_logic;
 	alias reset_6_l							: std_logic is reset_n;
 	
@@ -243,7 +243,7 @@ begin
 		port map
 		(
 			-- video interface
-			clock_a						=> clk_40M,
+			clock_a						=> clk_video,
 			address_a					=> vid_addr(14 downto 0),
 			wren_a						=> '0',
 			data_a						=> (others => 'X'),
