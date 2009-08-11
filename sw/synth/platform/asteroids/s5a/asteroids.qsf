@@ -931,7 +931,7 @@ set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a/target_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneiii/pll_3.vhd
+set_global_assignment -name VHDL_FILE pll_3.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneiii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneiii/spram.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneiii/dpram.vhd
