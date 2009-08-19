@@ -37,12 +37,13 @@ package project_pkg is
 
 	-- DE2 constants which *MUST* be defined
 	
-	constant DE2_LCD_LINE2							      : string := "   PACMAN-LCD   ";
+	--constant DE2_LCD_LINE2							      : string := "   PACMAN-LCD   ";
+	constant DE2_LCD_LINE2							      : string := "   PACMAN-VGA   ";
 		
 	-- Pacman-specific constants
 			
 	constant PACMAN_USE_VIDEO_VBLANK          : boolean := true;
-	constant PACMAN_USE_INTERNAL_WRAM				  : boolean := false;
+	constant PACMAN_USE_INTERNAL_WRAM				  : boolean := true;
 	
 	-- derived
   constant PACE_HAS_SRAM                    : boolean := not PACMAN_USE_INTERNAL_WRAM;
