@@ -14,6 +14,7 @@ package pace_pkg is
   (
     PACE_TARGET_NANOBOARD_NB1,
     PACE_TARGET_DE2,
+    PACE_TARGET_DE2_70,
     PACE_TARGET_P2,       -- A02 build
     PACE_TARGET_P2A,      -- A04/A build (SRAM byte selects)
     PACE_TARGET_P3M,
