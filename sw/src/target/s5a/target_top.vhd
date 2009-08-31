@@ -179,24 +179,24 @@ begin
 
   BLK_CLOCKING : block
 
-    component pll_3 is
-      --generic
-      --(
+    component pll is
+      generic
+      (
         -- INCLK
-        --INCLK0_INPUT_FREQUENCY  : natural;
+        INCLK0_INPUT_FREQUENCY  : natural;
 
         -- CLK0
-        --CLK0_DIVIDE_BY      : natural := 1;
-        --CLK0_DUTY_CYCLE     : natural := 50;
-        --CLK0_MULTIPLY_BY    : natural := 1;
-        --CLK0_PHASE_SHIFT    : string := "0";
+        CLK0_DIVIDE_BY      : natural := 1;
+        CLK0_DUTY_CYCLE     : natural := 50;
+        CLK0_MULTIPLY_BY    : natural := 1;
+        CLK0_PHASE_SHIFT    : string := "0";
 
         -- CLK1
-        --CLK1_DIVIDE_BY      : natural := 1;
-        --CLK1_DUTY_CYCLE     : natural := 50;
-        --CLK1_MULTIPLY_BY    : natural := 1;
-        --CLK1_PHASE_SHIFT    : string := "0"
-      --);
+        CLK1_DIVIDE_BY      : natural := 1;
+        CLK1_DUTY_CYCLE     : natural := 50;
+        CLK1_MULTIPLY_BY    : natural := 1;
+        CLK1_PHASE_SHIFT    : string := "0"
+      );
       port
       (
         inclk0							: in std_logic := '0';
@@ -205,29 +205,29 @@ begin
         c2		    					: out std_logic;
         locked		    			: out std_logic 
       );
-    end component pll_3;
+    end component pll;
 
   begin
 
     GEN_PLL : if PACE_HAS_PLL generate
     
-      pll_inst : pll_3
-        --generic map
-        --(
+      pll_inst : pll
+        generic map
+        (
           -- INCLK0
-          --INCLK0_INPUT_FREQUENCY  => 40000,
+          INCLK0_INPUT_FREQUENCY  => 40960,
 
           -- CLK0
-          --CLK0_DIVIDE_BY          => PACE_CLK0_DIVIDE_BY,
-          --CLK0_MULTIPLY_BY        => PACE_CLK0_MULTIPLY_BY,
+          CLK0_DIVIDE_BY          => PACE_CLK0_DIVIDE_BY,
+          CLK0_MULTIPLY_BY        => PACE_CLK0_MULTIPLY_BY,
       
           -- CLK1
-          --CLK1_DIVIDE_BY          => PACE_CLK1_DIVIDE_BY,
-          --CLK1_MULTIPLY_BY        => PACE_CLK1_MULTIPLY_BY
-        --)
+          CLK1_DIVIDE_BY          => PACE_CLK1_DIVIDE_BY,
+          CLK1_MULTIPLY_BY        => PACE_CLK1_MULTIPLY_BY
+        )
         port map
         (
-          inclk0  => clk_25_c,
+          inclk0  => mix_ckp_b,
           c0      => vo_idck,   -- 108MHz
           c1      => clk_i(1),  -- 108MHz
           c2      => clk_i(0),  -- 40MHz

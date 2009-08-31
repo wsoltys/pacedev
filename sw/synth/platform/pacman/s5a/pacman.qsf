@@ -921,9 +921,12 @@ set_location_assignment PIN_AA3 -to pt_pc_rx
 set_global_assignment -name SEARCH_PATH .
 set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
 set_global_assignment -name TIMEQUEST_DO_CCPP_REMOVAL ON
+set_location_assignment PIN_AF23 -to vo_idck_n
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sdram_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/lpc/lpc_pkg.vhd
+set_global_assignment -name VERILOG_FILE ../../../../src/component/io/lpc/wb_lpc_periph.v
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
@@ -931,7 +934,7 @@ set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../device/cycloneiii/pll_3.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneiii/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneiii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneiii/spram.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneiii/dpram.vhd
@@ -966,4 +969,3 @@ set_global_assignment -name VHDL_FILE ../../../../src/target/s5a/i2c_sm.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a/dvo_sm.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a/target_top.vhd
-set_location_assignment PIN_AF23 -to vo_idck_n

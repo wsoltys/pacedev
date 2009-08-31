@@ -30,10 +30,10 @@ package project_pkg is
 	--constant PACE_ENABLE_ADV724							  : std_logic := '0';
 
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1280x1024_60Hz;
-  constant PACE_CLK0_DIVIDE_BY              : natural := 5;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 8;     -- 25*8/5 = 40MHz
-  constant PACE_CLK1_DIVIDE_BY              : natural := 25;
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 108;  	-- 25*108/25 = 108MHz
+  constant PACE_CLK0_DIVIDE_BY              : natural := 96;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 157;     -- 24.675*157/96 = 40.192MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 11;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 48;  	  -- 24.576*48/11 = 107.24MHz
   constant PACE_VIDEO_H_SCALE       	      : integer := 2;
   constant PACE_VIDEO_V_SCALE       	      : integer := 2;
   constant PACE_ENABLE_ADV724					      : std_logic := '0';
