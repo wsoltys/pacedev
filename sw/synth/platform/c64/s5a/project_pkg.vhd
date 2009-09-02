@@ -13,25 +13,31 @@ package project_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 	
-  -- Reference clock is 50MHz
+  -- Reference clock is 24.576MHz
 	constant PACE_HAS_PLL								      : boolean := true;
   constant PACE_HAS_FLASH                   : boolean := false;
-  constant PACE_HAS_SRAM                    : boolean := true;
+  constant PACE_HAS_SRAM                    : boolean := false;
   constant PACE_HAS_SDRAM                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := false;
 
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
   
-  -- Reference clock is 50MHz
+  -- Reference clock is 24.576MHz
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_NONE;
-  constant PACE_CLK0_DIVIDE_BY              : natural := 25;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 16;  		-- 50*16/25 = 32MHz
-  constant PACE_CLK1_DIVIDE_BY              : natural := 1;
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 1;  			-- 50*1/1 = 96Mhz
+  constant PACE_CLK0_DIVIDE_BY              : natural := 96;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 125;  		-- 24.576*125/96 = 32MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 96;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 125;  		-- 24.576*125/96 = 32Mhz
 
-	constant PACE_ENABLE_ADV724					      : std_logic := '0';
-	--constant PACE_ADV724_STD						    : std_logic := ADV724_STD_PAL;
-
+  -- S5A-specific constants
+  constant S5A_DE_GEN                       : std_logic := '1';
+  constant S5A_VS_POL                       : std_logic := '0';
+  constant S5A_HS_POL                       : std_logic := '0';
+  constant S5A_DE_DLY                       : std_logic_vector(11 downto 0) := X"008";  -- 8
+  constant S5A_DE_TOP                       : std_logic_vector(7 downto 0) := X"28";    -- 40
+  constant S5A_DE_CNT                       : std_logic_vector(11 downto 0) := X"2E8";  -- 744
+  constant S5A_DE_LIN                       : std_logic_vector(11 downto 0) := X"270";  -- 312*2=624???
+  
 	-- C64-specific constants
 
 	constant C64_HAS_C64								      : boolean := true;

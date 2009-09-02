@@ -913,8 +913,8 @@ set_location_assignment PIN_J2 -to vi_odck
 set_location_assignment PIN_Y3 -to pt_pc_tx
 set_location_assignment PIN_U5 -to mx_ts_rx
 
-set_global_assignment -name ENABLE_SIGNALTAP ON
-set_global_assignment -name USE_SIGNALTAP_FILE dvo_i2c.stp
+set_global_assignment -name ENABLE_SIGNALTAP OFF
+set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
 set_instance_assignment -name MAX_FANOUT 2 -to "ddr64:\\TEST_DDRA1:ddra_inst|ddr64_controller_phy:ddr64_controller_phy_inst|ddr64_phy:alt_mem_phy_inst|ddr64_phy_alt_mem_phy:ddr64_phy_alt_mem_phy_inst|ddr64_phy_alt_mem_phy_sequencer_wrapper:seq|alt_mem_phy_sequencer:alt_mem_phy_sequencer_inst|alt_mem_phy_tdwu:alt_mem_phy_tdwu_instance1|alt_mem_phy_counter:\\memory_controller_avalon_interface_true:alt_mem_phy_counter_instance3|count_internal[*]"
 set_instance_assignment -name SYNTH_CRITICAL_CLOCK ON -from "ddr64:\\TEST_DDRA1:ddra_inst|ddr64_controller_phy:ddr64_controller_phy_inst|ddr64_phy:alt_mem_phy_inst|ddr64_phy_alt_mem_phy:ddr64_phy_alt_mem_phy_inst|ddr64_phy_alt_mem_phy_clk_reset:clk|ddr64_phy_alt_mem_phy_pll:pll|altpll:altpll_component|altpll_e8r2:auto_generated|pll1~CLK1" -to *
 set_location_assignment PIN_AA3 -to pt_pc_rx
@@ -924,6 +924,8 @@ set_global_assignment -name TIMEQUEST_DO_CCPP_REMOVAL ON
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sdram_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/lpc/lpc_pkg.vhd
+set_global_assignment -name VERILOG_FILE ../../../../src/component/io/lpc/wb_lpc_periph.v
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
@@ -931,11 +933,10 @@ set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../device/cycloneiii/pll_3.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneiii/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneiii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneiii/spram.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneiii/dpram.vhd
-set_global_assignment -name VHDL_FILE c64_pll.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/cpu65xx_e.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/cpu65xx_fast.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/video_vicII_656x_e.vhdl
@@ -971,3 +972,4 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/io/i2c/oci2c/i2c
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a/i2c_sm.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a/dvo_sm.vhd
 set_global_assignment -name VHDL_FILE target_top.vhd
+set_global_assignment -name SIGNALTAP_FILE stp1.stp

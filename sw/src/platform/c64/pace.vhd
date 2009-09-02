@@ -115,6 +115,7 @@ architecture SYN of PACE is
 	signal c64_sb_data_oe				: std_logic;
 	signal c64_sb_clk_oe				: std_logic;
 	signal c64_sb_atn_oe				: std_logic;
+	signal c64_ramdata_i        : unsigned(7 downto 0);
 	signal c64_ramdata_o				: unsigned(7 downto 0);
 
 	signal c1541_sb_data_oe			: std_logic;
@@ -132,17 +133,51 @@ architecture SYN of PACE is
 	
 begin
 
-	sram_o.a <= "0000000" & std_logic_vector(sram_addr_s);
-	sram_o.d(c64_ramdata_o'range) <= std_logic_vector(c64_ramdata_o);
-  sram_o.cs <= not sram_cs_n;
-  sram_o.oe <= not sram_oe_n;
-  sram_o.we <= not sram_we_n;
+  GEN_SRAM : if PACE_HAS_SRAM generate
+    sram_o.a <= "0000000" & std_logic_vector(sram_addr_s);
+    sram_o.d(c64_ramdata_o'range) <= std_logic_vector(c64_ramdata_o);
+    sram_o.cs <= not sram_cs_n;
+    sram_o.oe <= not sram_oe_n;
+    sram_o.we <= not sram_we_n;
+    c64_ramdata_i <= unsigned(sram_i.d(c64_ramData_i'range));
+  end generate GEN_SRAM;
   
+  GEN_NO_SRAM : if not PACE_HAS_SRAM generate
+
+    BLK_NO_SRAM : block
+      signal c64_ramdata_i_s  : std_logic_vector(c64_ramdata_i'range) := (others => '0');
+    begin
+  
+      c64_ram_inst : entity work.spram
+        generic map
+        (
+          --init_file		=> "../../../../../src/platform/trs80/m3/roms/trsvram.hex",
+          numwords_a	=> 128*1024,
+          widthad_a		=> 17
+        )
+        port map
+        (
+          clock			=> clk_32M,
+          address		=> std_logic_vector(sram_addr_s),
+          wren			=> not sram_we_n,
+          data			=> std_logic_vector(c64_ramdata_o),
+          q					=> c64_ramdata_i_s
+        );
+
+      c64_ramdata_i <= unsigned(c64_ramdata_i_s);
+    
+    end block BLK_NO_SRAM;
+  
+  end generate GEN_NO_SRAM;
+    
 	video_o.clk <= clk_32M; -- for DE2
 	video_o.rgb.r <= std_logic_vector(r_s) & "00";
 	video_o.rgb.g <= std_logic_vector(g_s) & "00";
 	video_o.rgb.b <= std_logic_vector(b_s) & "00";
-	
+	-- not used, need to generate DE manually
+  video_o.hblank <= '0';
+  video_o.vblank <= '0';
+  
 	leds_o <= std_logic_vector(leds_s(leds_s'left downto 1)) & c1541_activity_led;
 
 	-- generate DAC clock
@@ -190,7 +225,7 @@ begin
 
 				-- external memory, since the 64K RAM is relatively big to implement in a FPGA
 				ramAddr				=> sram_addr_s,
-				ramData_i			=> unsigned(sram_i.d(work.fpga64_pace.ramData_i'range)),
+				ramData_i			=> c64_ramdata_i,
 				ramData_o			=> c64_ramdata_o,
 				ramData_oe		=> open,
 				
