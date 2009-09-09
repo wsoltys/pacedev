@@ -567,7 +567,9 @@ begin
 	-- Video modes
 	process(clk32)
 	begin
-		if rising_edge(clk32) then
+    if reset_button = '1' then
+      ntscMode <= '0';
+		elsif rising_edge(clk32) then
 			if videoKey = '1' then
 				ntscMode <= not ntscMode;
 				if ntscMode = '1' then
@@ -588,7 +590,7 @@ begin
 		end if;
 	end process;
 
-  GEN_VIDEO_CONFIG : if false generate
+  GEN_VIDEO_CONFIG : if true generate
 	
   	displayVideoConfig: entity work.fpga64_hexy_vmode
   		generic map (
@@ -606,7 +608,7 @@ begin
   		);
 
   end generate GEN_VIDEO_CONFIG;
-
+  
 	-- XXX CN modified this for split data in/out without testing
 	GEN_ORIGINAL_CONE : if false generate
 	

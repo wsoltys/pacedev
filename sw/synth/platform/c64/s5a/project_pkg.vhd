@@ -33,9 +33,11 @@ package project_pkg is
   constant S5A_DE_GEN                       : std_logic := '1';
   constant S5A_VS_POL                       : std_logic := '0';
   constant S5A_HS_POL                       : std_logic := '0';
-  constant S5A_DE_DLY                       : std_logic_vector(11 downto 0) := X"008";  -- 8
+  --constant S5A_DE_DLY                       : std_logic_vector(11 downto 0) := X"063";  -- 99
+  constant S5A_DE_DLY                       : std_logic_vector(11 downto 0) := X"0D5";  -- 213
   constant S5A_DE_TOP                       : std_logic_vector(7 downto 0) := X"28";    -- 40
-  constant S5A_DE_CNT                       : std_logic_vector(11 downto 0) := X"2E8";  -- 744
+  --constant S5A_DE_CNT                       : std_logic_vector(11 downto 0) := X"350";  -- 848
+  constant S5A_DE_CNT                       : std_logic_vector(11 downto 0) := X"280";  -- 640
   constant S5A_DE_LIN                       : std_logic_vector(11 downto 0) := X"270";  -- 312*2=624???
   
 	-- C64-specific constants

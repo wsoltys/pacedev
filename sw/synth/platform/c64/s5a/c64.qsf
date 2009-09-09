@@ -45,11 +45,10 @@ set_instance_assignment -name IO_STANDARD LVDS -to lvds_a[1]
 set_instance_assignment -name IO_STANDARD LVDS -to lvds_a[2]
 set_instance_assignment -name IO_STANDARD LVDS -to lvds_a[3]
 set_global_assignment -name SAVE_DISK_SPACE OFF
-set_global_assignment -name EDA_SIMULATION_TOOL "ModelSim-Altera (VHDL)"
-set_global_assignment -name EDA_OUTPUT_DATA_FORMAT VHDL -section_id eda_simulation
-set_global_assignment -name EDA_BOARD_DESIGN_SIGNAL_INTEGRITY_TOOL "IBIS (Signal Integrity)"
-set_global_assignment -name EDA_OUTPUT_DATA_FORMAT IBIS -section_id eda_board_design_signal_integrity
-set_global_assignment -name EDA_IBIS_MODEL_SELECTOR ON -section_id eda_board_design_signal_integrity
+set_global_assignment -name EDA_SIMULATION_TOOL "<None>"
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT NONE -section_id eda_simulation
+set_global_assignment -name EDA_BOARD_DESIGN_SIGNAL_INTEGRITY_TOOL "<None>"
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT NONE -section_id eda_board_design_signal_integrity
 set_global_assignment -name ADV_NETLIST_OPT_SYNTH_GATE_RETIME ON
 set_global_assignment -name ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP ON
 set_global_assignment -name AUTO_PACKED_REGISTERS NORMAL
