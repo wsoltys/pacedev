@@ -155,16 +155,23 @@ architecture SYN of target_top is
   signal ser_o        	: to_SERIAL_t;
   signal gp_i         	: from_GP_t;
   signal gp_o         	: to_GP_t;
-  
+
+  alias clk_24M576      : std_logic is mix_ckp_b;
 	signal vo_pll_clk			: std_logic;
 	signal vo_clk					: std_logic;
 
+  -- PS/2 fifo signals
+  signal ps2_fifo_data  : std_logic_vector(7 downto 0) := (others => '0');
+  signal ps2_fifo_wrreq : std_logic := '0';
+  signal ps2_fifo_full  : std_logic := '0';
+  signal ps2_fifo_usedw : std_logic_vector(7 downto 0) := (others => '0');
+
 begin
 
-	PROC_RESET : process(clk_25_c)
+	PROC_RESET : process(clk_24M576)
 		variable reset_cnt : integer := 999999;
 	begin
-		if rising_edge(clk_25_c) then
+		if rising_edge(clk_24M576) then
 			if reset_cnt > 0 then
 				init <= '1';
 				reset_cnt := reset_cnt - 1;
@@ -255,11 +262,35 @@ begin
   -- leds
   --ledout <= leds_o(0);
 
-	-- inputs
-	inputs_i.ps2_kclk <= '1';
-	inputs_i.ps2_kdat <= '1';
-  inputs_i.ps2_mclk <= '1';
-  inputs_i.ps2_mdat <= '1';
+  BLK_PS2 : block
+  begin
+  
+    ps2_host_inst : entity work.ps2_host
+      generic map
+      (
+        CLK_HZ          => 24576000
+      )
+      port map
+      (
+        clk             => clk_24M576,
+        reset           => reset_i,
+
+        -- FIFO interface
+        fifo_data       => ps2_fifo_data,
+        fifo_wrreq      => ps2_fifo_wrreq,
+        fifo_full       => ps2_fifo_full,
+        fifo_usedw      => ps2_fifo_usedw,
+            
+        -- PS/2 lines
+        ps2_kclk        => inputs_i.ps2_kclk,
+        ps2_kdat        => inputs_i.ps2_kdat
+      );
+
+    -- inputs
+    inputs_i.ps2_mclk <= '1';
+    inputs_i.ps2_mdat <= '1';
+
+  end block BLK_PS2;
 
   BLK_MIXER_BUS : block
 
@@ -321,13 +352,28 @@ begin
         lpc_reg <= (others => (others => '1'));
         wb_cyc_r := '0';
       elsif rising_edge(lpc_clk) then
+        ps2_fifo_wrreq <= '0';  -- default
         adr := to_integer(unsigned(wb_adr(1 downto 0)));
         if wb_cyc = '1' and wb_stb = '1' and wb_cyc_r = '0' then
           if wb_we = '0' then
             -- reads
-            null;
+            case wb_adr(7 downto 6) is
+              when "11" =>
+                wb_dat_i(ps2_fifo_usedw'range) <= ps2_fifo_usedw;
+              when "10" =>
+                wb_dat_i(7 downto 0) <= "0000000" & ps2_fifo_full;
+              when others =>
+                wb_dat_i(7 downto 0) <= (others => '0');
+            end case;
           else
-            lpc_reg(adr) <= wb_dat_o(lpc_reg(adr)'range);
+            -- writes
+            case wb_adr(7 downto 6) is
+              when "11" =>
+                ps2_fifo_data <= wb_dat_o(ps2_fifo_data'range);
+                ps2_fifo_wrreq <= '1';
+              when others =>
+                lpc_reg(adr) <= wb_dat_o(lpc_reg(adr)'range);
+            end case;
           end if;
         end if;
         wb_cyc_r := wb_cyc and wb_stb;
