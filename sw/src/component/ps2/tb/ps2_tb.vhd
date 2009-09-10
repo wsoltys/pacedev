@@ -1,7 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use IEEE.numeric_std.all;
-use work.ext.all;
+use ieee.numeric_std.all;
 
 entity ps2_tb is
 	port (
@@ -40,10 +39,26 @@ begin
     wait until reset = '0';
     wait until rising_edge(clk_24M576);
 
+    -- MAKE 'Q'
+
     wait until rising_edge(clk_24M576);
-    fifo_data <= X"1C";
+    fifo_data <= X"15"; -- 'Q'
     fifo_wrreq <= '1';
-    wait until falling_edge(clk_24M576);
+    wait until rising_edge(clk_24M576);
+    fifo_wrreq <= '0';
+
+    -- BREAK 'Q'
+    
+    wait until rising_edge(clk_24M576);
+    fifo_data <= X"F0"; -- (break)
+    fifo_wrreq <= '1';
+    wait until rising_edge(clk_24M576);
+    fifo_wrreq <= '0';
+
+    wait until rising_edge(clk_24M576);
+    fifo_data <= X"15"; -- 'Q'
+    fifo_wrreq <= '1';
+    wait until rising_edge(clk_24M576);
     fifo_wrreq <= '0';
 
 		wait for 1000 ms;
@@ -56,7 +71,7 @@ begin
     generic map
     (
       CLK_HZ          => 24576000
-    );
+    )
     port map
     (
       clk             => clk_24M576,
@@ -75,18 +90,19 @@ begin
 
   -- generate clk_1M_ena
   process (clk_32M, reset)
-    variable count := 0 to 31;
+    variable count : integer range 0 to 31;
   begin
     if reset = '1' then
       count := 0;
     elsif rising_edge(clk_32M) then
-      clk_1M_ena <= '0';  -- default
+      clk_1M_en <= '0';  -- default
       if count = 31 then
         clk_1M_en <= '1';
         count := 0;
       else
         count := count + 1;
       end if;
+    end if;
   end process;
   
   device_inst : entity work.ps2kbd

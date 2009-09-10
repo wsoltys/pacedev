@@ -1,5 +1,6 @@
 library ieee;
-use ieee.std_logic_1164.all;
+use IEEE.std_logic_1164.all;
+use IEEE.numeric_std.all;
 
 entity ps2_host is
   generic
@@ -35,14 +36,14 @@ architecture SYN of ps2_host is
   signal fifo_rdreq       : std_logic := '0';
   signal fifo_empty       : std_logic := '0';
   
-  type state_t is ( IDLE, SEND1, SEND2, SEND3, SEND4 );
+  type state_t is ( IDLE, SEND1, SEND2, SEND3, SEND4, SEND_DONE );
   signal state            : state_t;
   
 begin
 
   -- generate 66.667kHz clock enable
   process (clk, reset)
-    type count_t is integer range 0 to CLK_66k667_div-1;
+    subtype count_t is integer range 0 to CLK_66k667_div-1;
     variable count : count_t := 0;
   begin
     if reset = '1' then
@@ -67,50 +68,62 @@ begin
   begin
     if reset = '1' then
       state <= IDLE;
-      ps2_kclk <= '0';
-      ps2_kdat <= '0';
+      ps2_kclk <= '1';
+      ps2_kdat <= '1';
       fifo_rdreq <= '0';
-    elsif rising_edge(clk) and clk_66k667_en = '1' then
+    elsif rising_edge(clk) then
       fifo_rdreq <= '0';  -- default
-      case state is
-        when IDLE =>
-          ps2_kclk <= '0';
-          ps2_kdat <= '0';
-          if fifo_empty = '0' then
-            -- reverse order (since LSB first)
-            ps2_data_r <= '1' & parity & fifo_q & '0';
-            fifo_rdreq <= '1';
-            count := ps2_data_r'left;
-            state <= SEND1;
-          end if;
-        when SEND1 =>
-          ps2_kclk <= '1';
-          state <= SEND2;
-        when SEND2 =>
-          ps2_kclk <= '1';
-          ps2_kdat <= ps2_data_r(0);
-          state <= SEND3;
-        when SEND3 =>
-          ps2_kclk <= '0';
-          state <= SEND4;
-        when SEND4 =>
-          ps2k_clk <= '0';
-          -- shift data register
-          ps2_data_r <= '0' & ps2_data_r(ps2_data_r'left downto 1);
-          if count = 0 then
+      if state = IDLE then
+        ps2_kclk <= '1';
+        ps2_kdat <= '1';
+        if fifo_empty = '0' then
+          -- reverse order (since LSB first)
+          ps2_data_r <= '1' & parity & fifo_q & '0';
+          fifo_rdreq <= '1';
+          count := ps2_data_r'left;
+          state <= SEND1;
+        end if;
+      elsif clk_66k667_en = '1' then
+        case state is
+          when SEND1 =>
+            ps2_kclk <= '1';
+            state <= SEND2;
+          when SEND2 =>
+            ps2_kclk <= '1';
+            ps2_kdat <= ps2_data_r(0);
+            state <= SEND3;
+          when SEND3 =>
+            ps2_kclk <= '0';
+            state <= SEND4;
+          when SEND4 =>
+            ps2_kclk <= '0';
+            -- shift data register
+            ps2_data_r <= '0' & ps2_data_r(ps2_data_r'left downto 1);
+            if count = 0 then
+              count := 4;
+              state <= SEND_DONE;
+            else
+              count := count - 1;
+              state <= SEND1;
+            end if;
+          when SEND_DONE =>
+            if count = 0 then
+              state <= IDLE;
+            else
+              ps2_kclk <= '1';
+              ps2_kdat <= '1';
+              count := count - 1;
+              state <= SEND_DONE;
+            end if;
+          when others =>
             state <= IDLE;
-          else
-            count := count - 1;
-            state <= SEND1;
-          end if;
-        when others =>
-          state <= IDLE;
-       end case;
+         end case;
+      end if;
     end if;
   end process;
 
   fifo_inst : entity work.ps2_fifo
-  	PORT
+  	port map
   	(
   		clock		=> clk,
 
@@ -124,4 +137,4 @@ begin
   		empty		=> fifo_empty
   	);
 
-end architecture ps2_host;
+end architecture SYN;
