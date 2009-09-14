@@ -80,7 +80,7 @@ end entity platform;
 
 architecture SYN of platform is
 
-	alias clk_24M					: std_logic is clk_i(0);
+	alias clk_sys					: std_logic is clk_i(0);
 	alias clk_video       : std_logic is clk_i(1);
 	
   -- uP signals  
@@ -205,7 +205,7 @@ begin
 								X"00";
 
 	-- shifter block
-	process (clk_24M, reset_i)
+	process (clk_sys, reset_i)
 		variable shift_din	: std_logic_vector(15 downto 0);
 		variable shift_amt 	: std_logic_vector(2 downto 0);
 		variable wr2_r 			: std_logic := '0';
@@ -214,7 +214,7 @@ begin
 		if reset_i = '1' then
 			wr2_r := '0';
 			wr4_r := '0';
-		elsif rising_edge(clk_24M) then
+		elsif rising_edge(clk_sys) then
 			-- latch on rising edge of WR to port 2 (shift_amt)
 			if port_wr(2) = '1' and wr2_r = '0' then
 				shift_amt := uP_datao(2 downto 0);
@@ -256,15 +256,14 @@ begin
 	
 	begin
 
-		process (clk_24M, cpu_reset)
-			-- based on 24MHz input clock
-			subtype count_60Hz_t is integer range 0 to 399999;
+		process (clk_sys, cpu_reset)
+			subtype count_60Hz_t is integer range 0 to CLK0_FREQ_MHz * 1000000 / 60 - 1;
 			variable count : count_60Hz_t;
 		begin
 			if cpu_reset = '1' then
 				uPintreq <= '0';
 				count := 0;
-			elsif rising_edge(clk_24M) then
+			elsif rising_edge(clk_sys) then
 				-- generate interrupt
 				count := count + 1;
 				if count = count_60Hz_t'high/2 then
@@ -284,14 +283,14 @@ begin
 	end block INT_BLOCK;	
 
   -- osd toggle (TAB)
-  process (clk_24M, reset_i)
+  process (clk_sys, reset_i)
     variable osd_key_r  : std_logic;
     variable osd_en_v   : std_logic;
   begin
     if reset_i = '1' then
       osd_en_v := '0';
       osd_key_r := '0';
-    elsif rising_edge(clk_24M) then
+    elsif rising_edge(clk_sys) then
       -- toggle on OSD KEY PRESS
       if inputs_i(2).d(1) = '1' and osd_key_r = '0' then
         osd_en_v := not osd_en_v;
@@ -335,7 +334,7 @@ begin
 		)
 		port map
 		(
-			clk				=> clk_24M,
+			clk				=> clk_sys,
 			reset			=> reset_i,
 			clk_en		=> clk_2M_en
 		);
@@ -343,7 +342,7 @@ begin
   U_uP : entity work.Z80                                                
     port map
     (
-      clk			=> clk_24M,                                   
+      clk			=> clk_sys,                                   
       clk_en	=> clk_2M_en,
       reset  	=> cpu_reset,                                     
 
@@ -366,7 +365,7 @@ begin
     rom_inst : entity work.invaders_rom
       port map
       (
-        clock		=> clk_24M,
+        clock		=> clk_sys,
         address => uP_addr(12 downto 0),
         q				=> rom_datao
       );
@@ -374,11 +373,11 @@ begin
 
   GEN_FLASH_ROM : if INVADERS_ROM_IN_FLASH generate
 
-    process (clk_24M, reset_i, clk_2M_en)
+    process (clk_sys, reset_i, clk_2M_en)
     begin
       if reset_i = '1' then
         null;
-      elsif rising_edge (clk_24M) then
+      elsif rising_edge (clk_sys) then
         -- 70ns flash - update address and latch every 500ns
         if clk_2M_en = '1' then
           flash_o.a <= std_logic_vector(resize(unsigned(uP_addr(12 downto 0)), flash_o.a'length));
@@ -402,7 +401,7 @@ begin
 		rom2_inst : entity work.invaders_rom_2
 	    port map
 	    (
-        clock		=> clk_24M,
+        clock		=> clk_sys,
         address => uP_addr(11 downto 0),
         q				=> rom2_datao
 	    );
@@ -421,7 +420,7 @@ begin
 		vram_inst : entity work.vram
 	    port map
 	    (
-	        clock_b   	=> clk_24M,
+	        clock_b   	=> clk_sys,
 	        address_b   => uP_addr(12 downto 0),
 	        data_b      => uP_datao,
 	        q_b					=> vram_datao,
@@ -439,7 +438,7 @@ begin
 			wram_inst : entity work.wram
 				port map
 				(
-					clock				=> clk_24M,
+					clock				=> clk_sys,
 					address			=> uP_addr(9 downto 0),
 					data				=> up_datao,
 					wren				=> wram_wr,
