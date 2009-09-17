@@ -1,0 +1,973 @@
+# Copyright (C) 1991-2008 Altera Corporation
+# Your use of Altera Corporation's design tools, logic functions 
+# and other software and tools, and its AMPP partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Altera Program License 
+# Subscription Agreement, Altera MegaCore Function License 
+# Agreement, or other applicable license agreement, including, 
+# without limitation, that your use is for the sole purpose of 
+# programming logic devices manufactured by Altera and sold by 
+# Altera or its authorized distributors.  Please refer to the 
+# applicable agreement for further details.
+
+
+# The default values for assignments are stored in the file
+#		invaders_assignment_defaults.qdf
+# If this file doesn't exist, and for assignments not listed, see file
+#		assignment_defaults.qdf
+
+# Altera recommends that you do not modify this file. This
+# file is updated automatically by the Quartus II software
+# and any changes you make may be lost or overwritten.
+
+
+set_global_assignment -name FAMILY "Cyclone III"
+set_global_assignment -name DEVICE EP3C55F780C6
+set_global_assignment -name TOP_LEVEL_ENTITY target_top
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION "8.0 SP1"
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "13:48:09  NOVEMBER 05, 2008"
+set_global_assignment -name LAST_QUARTUS_VERSION 8.1
+set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id eda_palace
+set_global_assignment -name ENABLE_ADVANCED_IO_TIMING ON
+set_global_assignment -name CYCLONEIII_CONFIGURATION_SCHEME "PASSIVE SERIAL"
+set_global_assignment -name FORCE_CONFIGURATION_VCCIO ON
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.3-V LVCMOS"
+set_global_assignment -name NOMINAL_CORE_SUPPLY_VOLTAGE 1.2V
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_COLOR 14622752 -section_id Top
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_instance_assignment -name IO_STANDARD LVDS -to lvds_a[0]
+set_instance_assignment -name IO_STANDARD LVDS -to lvds_a[1]
+set_instance_assignment -name IO_STANDARD LVDS -to lvds_a[2]
+set_instance_assignment -name IO_STANDARD LVDS -to lvds_a[3]
+set_global_assignment -name SAVE_DISK_SPACE OFF
+set_global_assignment -name EDA_SIMULATION_TOOL "ModelSim-Altera (VHDL)"
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT VHDL -section_id eda_simulation
+set_global_assignment -name EDA_BOARD_DESIGN_SIGNAL_INTEGRITY_TOOL "IBIS (Signal Integrity)"
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT IBIS -section_id eda_board_design_signal_integrity
+set_global_assignment -name EDA_IBIS_MODEL_SELECTOR ON -section_id eda_board_design_signal_integrity
+set_global_assignment -name ADV_NETLIST_OPT_SYNTH_GATE_RETIME ON
+set_global_assignment -name ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP ON
+set_global_assignment -name AUTO_PACKED_REGISTERS NORMAL
+set_global_assignment -name AUTO_PACKED_REGISTERS_CYCLONE NORMAL
+set_global_assignment -name AUTO_PACKED_REGISTERS_MAXII NORMAL
+set_global_assignment -name AUTO_PACKED_REGISTERS_STRATIX NORMAL
+set_global_assignment -name AUTO_PACKED_REGISTERS_STRATIXII NORMAL
+set_global_assignment -name DEVICE_MIGRATION_LIST "EP3C55F780C6,EP3C80F780C6"
+set_global_assignment -name DO_COMBINED_ANALYSIS ON
+set_global_assignment -name EDA_DESIGN_INSTANCE_NAME DUT -section_id "System Test Bench"
+set_global_assignment -name EDA_GENERATE_FUNCTIONAL_NETLIST OFF -section_id eda_simulation
+set_global_assignment -name EDA_NATIVELINK_SIMULATION_TEST_BENCH "System Test Bench" -section_id eda_simulation
+set_global_assignment -name EDA_TEST_BENCH_ENABLE_STATUS TEST_BENCH_MODE -section_id eda_simulation
+set_global_assignment -name EDA_TEST_BENCH_FILE "testbench/hynix/DDR2_32Mx16_HY5PS121621(L)F_ModelSim/HY5PS121621F.vhd" -section_id "System Test Bench"
+set_global_assignment -name EDA_TEST_BENCH_FILE "testbench/hynix/DDR2_32Mx16_HY5PS121621(L)F_ModelSim/HY5PS121621F_PACK.vhd" -section_id "System Test Bench"
+set_global_assignment -name EDA_TEST_BENCH_FILE testbench/S5A_mixer_tb.vhd -section_id "System Test Bench"
+set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME S5A_mixer_tb -section_id "System Test Bench"
+set_global_assignment -name EDA_TEST_BENCH_NAME "System Test Bench" -section_id eda_simulation
+set_global_assignment -name ENABLE_BENEFICIAL_SKEW_OPTIMIZATION ON
+set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
+set_global_assignment -name IGNORE_LCELL_BUFFERS ON
+set_global_assignment -name INCREMENTAL_COMPILATION OFF
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MISC_FILE "/home/chris/work/vl/s5a/S5A-sw-MFP@2/S5A_mixer.dpf"
+set_global_assignment -name MISC_FILE "/home/chris/work/vl/s5a_trunk/S5A-sw-MFP/S5A_mixer.dpf"
+set_global_assignment -name MISC_FILE "D:/work/vl/s5a_trunk/S5A-sw-MFP/S5A_mixer.dpf"
+set_global_assignment -name MISC_FILE "E:/work/S5A/sw/S5A-sw-MFP@2/S5A_mixer.dpf"
+set_global_assignment -name MISC_FILE "G:/work/S5A-sw-MFP/S5A_mixer.dpf"
+set_global_assignment -name NUM_PARALLEL_PROCESSORS ALL
+set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_EFFORT EXTRA
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "NO HEAT SINK WITH 100 LFPM AIRFLOW"
+set_global_assignment -name POWER_USE_INPUT_FILES OFF
+set_global_assignment -name PRE_MAPPING_RESYNTHESIS ON
+set_global_assignment -name ROUTER_EFFORT_MULTIPLIER 2.0
+set_global_assignment -name ROUTER_TIMING_OPTIMIZATION_LEVEL MAXIMUM
+set_global_assignment -name SEED 2
+set_location_assignment PIN_A11 -to fa_dq[44]
+set_location_assignment PIN_A12 -to fa_dq[41]
+set_location_assignment PIN_A14 -to clk_25_sp[0]
+set_location_assignment PIN_A15 -to mix_ckn_a
+set_location_assignment PIN_B12 -to fa_a[3]
+set_location_assignment PIN_A19 -to fa_dq[56]
+set_location_assignment PIN_C26 -to fa_a[0]
+set_location_assignment PIN_A25 -to fa_clk[1]
+set_location_assignment PIN_A26 -to fa_clk_n[1]
+set_location_assignment PIN_A3 -to fa_dq[38]
+set_location_assignment PIN_A4 -to fa_dq[33]
+set_location_assignment PIN_A7 -to fa_dq[51]
+set_location_assignment PIN_A8 -to fa_dm[6]
+set_location_assignment PIN_AA10 -to fa_dq[23]
+set_location_assignment PIN_AA16 -to vo_green[1]
+set_location_assignment PIN_AA17 -to vo_blue[4]
+set_location_assignment PIN_AA26 -to fb_dq[22]
+set_location_assignment PIN_AA4 -to mix_a_dir
+set_location_assignment PIN_AA8 -to vo_green[0]
+set_location_assignment PIN_AB1 -to pt_ts_rx
+set_location_assignment PIN_AB16 -to fa_dq[27]
+set_location_assignment PIN_AB17 -to vo_blue[2]
+set_location_assignment PIN_AB2 -to mix_spc
+set_location_assignment PIN_AB24 -to fb_dm[2]
+set_location_assignment PIN_AB26 -to fb_dq[17]
+set_location_assignment PIN_AB28 -to fb_dm[3]
+set_location_assignment PIN_AB3 -to mix_framen
+set_location_assignment PIN_AB4 -to mix_irqn
+# 3C80 set_location_assignment PIN_AB5 -to pt_ts_cts
+# 3C80 set_location_assignment PIN_AB6 -to pt_ts_rts
+set_location_assignment PIN_AB7 -to ledout
+set_location_assignment PIN_AB9 -to fa_dm[2]
+set_location_assignment PIN_AC1 -to sp2v5[1]
+set_location_assignment PIN_AC15 -to fa_dm[3]
+set_location_assignment PIN_AC17 -to vo_blue[0]
+set_location_assignment PIN_AC2 -to mix_spa
+set_location_assignment PIN_AC24 -to fb_clk[0]
+set_location_assignment PIN_AC25 -to fb_clk_n[0]
+set_location_assignment PIN_AC26 -to fb_cs_n[0]
+set_location_assignment PIN_AC27 -to fb_dq[23]
+set_location_assignment PIN_AC28 -to fb_dq[20]
+set_location_assignment PIN_AC3 -to mix_spb
+# 3C80 set_location_assignment PIN_AC4 -to pt_pc_cts
+# 3C80 set_location_assignment PIN_AC5 -to pt_pc_rts
+set_location_assignment PIN_AC7 -to vo_green[2]
+set_location_assignment PIN_AC8 -to fa_dq[22]
+set_location_assignment PIN_AD1 -to pt_ts_tx
+set_location_assignment PIN_AD10 -to fa_dq[21]
+set_location_assignment PIN_AD15 -to vo_blue[1]
+set_location_assignment PIN_AD17 -to vo_green[3]
+set_location_assignment PIN_AD18 -to fb_a[13]
+set_location_assignment PIN_AD2 -to mix_reset
+set_location_assignment PIN_AD26 -to fb_dq[18]
+set_location_assignment PIN_AD27 -to fb_dq[21]
+set_location_assignment PIN_AD28 -to fb_dq[19]
+set_location_assignment PIN_AD3 -to lvds_mode
+set_location_assignment PIN_AD7 -to fa_dqs[0]
+set_location_assignment PIN_AD8 -to fa_dq[6]
+set_location_assignment PIN_AE1 -to vo_scl
+set_location_assignment PIN_AE10 -to fa_dqs[2]
+set_location_assignment PIN_AE11 -to fa_dq[15]
+set_location_assignment PIN_AE12 -to fa_dq[9]
+set_location_assignment PIN_AE13 -to fa_dq[14]
+set_location_assignment PIN_AE15 -to fb_a[14]
+set_location_assignment PIN_AE16 -to vo_blue[5]
+set_location_assignment PIN_AE17 -to fa_dq[31]
+set_location_assignment PIN_AE18 -to vo_blue[7]
+set_location_assignment PIN_AE19 -to vo_blue[3]
+set_location_assignment PIN_AE2 -to vo_rstn
+set_location_assignment PIN_AE21 -to fa_clk[0]
+set_location_assignment PIN_AE23 -to vo_idck
+set_location_assignment PIN_AE24 -to vo_red[3]
+set_location_assignment PIN_AE25 -to vo_red[6]
+set_location_assignment PIN_AE28 -to fb_odt
+set_location_assignment PIN_AE3 -to vo_po1
+set_location_assignment PIN_AE5 -to vo_de
+set_location_assignment PIN_AE6 -to fa_dm[0]
+set_location_assignment PIN_AE9 -to fa_dq[10]
+set_location_assignment PIN_AF10 -to fa_dq[11]
+set_location_assignment PIN_AF11 -to fa_dqs[1]
+set_location_assignment PIN_AF15 -to fa_dq[28]
+set_location_assignment PIN_AF16 -to fa_dq[25]
+set_location_assignment PIN_AF17 -to fa_dqs[3]
+set_location_assignment PIN_AF18 -to vo_green[4]
+set_location_assignment PIN_AF19 -to vo_green[5]
+set_location_assignment PIN_AF2 -to vo_sda
+set_location_assignment PIN_AF20 -to vo_hsync
+set_location_assignment PIN_AF21 -to fa_clk_n[0]
+set_location_assignment PIN_AF24 -to vo_red[2]
+set_location_assignment PIN_AF26 -to vo_red[7]
+set_location_assignment PIN_AF27 -to fb_dqs[2]
+set_location_assignment PIN_AF4 -to fa_dq[2]
+set_location_assignment PIN_AF6 -to fa_dq[1]
+set_location_assignment PIN_AF7 -to fa_dq[20]
+set_location_assignment PIN_AF8 -to fa_dm[1]
+set_location_assignment PIN_AF9 -to fa_dq[17]
+set_location_assignment PIN_AG10 -to vo_blue[6]
+set_location_assignment PIN_AG11 -to fa_dq[13]
+set_location_assignment PIN_AG12 -to fa_dq[12]
+set_location_assignment PIN_AG14 -to tp_clk
+set_location_assignment PIN_AG15 -to clk_25_c
+set_location_assignment PIN_AG17 -to fa_dq[30]
+set_location_assignment PIN_AG18 -to fa_dq[24]
+set_location_assignment PIN_AG19 -to vo_green[6]
+set_location_assignment PIN_AG21 -to vo_green[7]
+set_location_assignment PIN_AG22 -to vo_red[0]
+set_location_assignment PIN_AG26 -to vo_red[5]
+set_location_assignment PIN_AG3 -to fa_dq[5]
+set_location_assignment PIN_AG6 -to fa_dq[4]
+set_location_assignment PIN_AG8 -to fa_dq[18]
+set_location_assignment PIN_AH11 -to fa_dq[8]
+set_location_assignment PIN_AH12 -to vo_vsync
+set_location_assignment PIN_AH17 -to fa_dq[26]
+set_location_assignment PIN_AH18 -to fa_dq[29]
+set_location_assignment PIN_AH22 -to vo_red[1]
+set_location_assignment PIN_AH25 -to vo_red[4]
+set_location_assignment PIN_AH3 -to fa_dq[0]
+set_location_assignment PIN_AH4 -to fa_dq[7]
+set_location_assignment PIN_AH6 -to fa_dq[3]
+set_location_assignment PIN_AH7 -to fa_dq[19]
+set_location_assignment PIN_AH8 -to fa_dq[16]
+set_location_assignment PIN_B10 -to fa_dm[5]
+set_location_assignment PIN_B11 -to fa_dq[43]
+set_location_assignment PIN_A17 -to fa_a[7]
+set_location_assignment PIN_B14 -to clk_25_a
+set_location_assignment PIN_B15 -to mix_ckp_a
+set_location_assignment PIN_B17 -to fa_dqs[7]
+set_location_assignment PIN_B18 -to fa_dq[58]
+set_location_assignment PIN_B19 -to fa_dq[63]
+set_location_assignment PIN_B21 -to fa_ba[2]
+set_location_assignment PIN_C24 -to fa_a[4]
+set_location_assignment PIN_B23 -to fa_ba[1]
+set_location_assignment PIN_D18 -to fa_ba[0]
+set_location_assignment PIN_B26 -to fa_cs_n[0]
+set_location_assignment PIN_C21 -to fa_a[10]
+set_location_assignment PIN_B4 -to fa_dqs[4]
+set_location_assignment PIN_B6 -to fa_dq[53]
+set_location_assignment PIN_B7 -to fa_dq[48]
+set_location_assignment PIN_E4 -to fa_a[11]
+set_location_assignment PIN_C10 -to fa_dq[52]
+set_location_assignment PIN_C11 -to fa_dq[55]
+set_location_assignment PIN_C12 -to fa_dq[42]
+set_location_assignment PIN_C13 -to fa_dq[45]
+set_location_assignment PIN_C14 -to fa_dq[47]
+set_location_assignment PIN_C16 -to fa_dq[61]
+set_location_assignment PIN_C17 -to fa_dq[62]
+set_location_assignment PIN_C19 -to fa_dq[59]
+set_location_assignment PIN_C2 -to vi_blue[0]
+set_location_assignment PIN_D23 -to fa_ras_n
+set_location_assignment PIN_C22 -to fa_cke[0]
+set_location_assignment PIN_B22 -to fa_a[8]
+set_location_assignment PIN_A22 -to fa_a[13]
+set_location_assignment PIN_C27 -to fb_dqs[0]
+set_location_assignment PIN_C4 -to fa_dq[36]
+set_location_assignment PIN_C6 -to fa_dq[34]
+set_location_assignment PIN_C7 -to fa_dq[35]
+set_location_assignment PIN_C8 -to fa_dq[39]
+set_location_assignment PIN_C9 -to fa_dq[50]
+set_location_assignment PIN_D1 -to vi_blue[1]
+set_location_assignment PIN_D10 -to fa_dq[49]
+set_location_assignment PIN_D12 -to fa_dqs[5]
+set_location_assignment PIN_D13 -to fa_dq[46]
+set_location_assignment PIN_B3 -to fa_a[12]
+set_location_assignment PIN_D2 -to vi_blue[4]
+set_location_assignment PIN_D20 -to fa_dq[57]
+set_location_assignment PIN_F21 -to fa_a[9]
+set_location_assignment PIN_D26 -to fb_we_n
+set_location_assignment PIN_D27 -to fb_dq[5]
+set_location_assignment PIN_D28 -to fb_ras_n
+set_location_assignment PIN_D3 -to vi_blue[2]
+set_location_assignment PIN_D4 -to fa_dm[4]
+set_location_assignment PIN_D6 -to fa_dq[37]
+set_location_assignment PIN_D9 -to fa_a[2]
+set_location_assignment PIN_D8 -to fa_dq[32]
+set_location_assignment PIN_D7 -to fa_a[14]
+set_location_assignment PIN_E1 -to vi_blue[3]
+set_location_assignment PIN_E11 -to fa_dq[54]
+set_location_assignment PIN_E12 -to fa_dqs[6]
+set_location_assignment PIN_E14 -to fa_dq[40]
+set_location_assignment PIN_E15 -to fa_dm[7]
+set_location_assignment PIN_E17 -to fa_dq[60]
+set_location_assignment PIN_E18 -to fa_we_n
+set_location_assignment PIN_E19 -to fa_odt
+set_location_assignment PIN_E2 -to ~ALTERA_FLASH_nCE_nCSO~
+set_location_assignment PIN_F18 -to fa_a[1]
+set_location_assignment PIN_E27 -to fb_dq[0]
+set_location_assignment PIN_E28 -to fb_dq[2]
+set_location_assignment PIN_E3 -to vi_blue[6]
+set_location_assignment PIN_B8 -to fa_a[6]
+set_location_assignment PIN_F1 -to vi_green[2]
+set_location_assignment PIN_B25 -to fa_cas_n
+set_location_assignment PIN_F19 -to fb_ba[2]
+set_location_assignment PIN_F2 -to vi_green[4]
+set_location_assignment PIN_E21 -to fa_a[5]
+set_location_assignment PIN_F26 -to fb_dq[3]
+set_location_assignment PIN_F27 -to fb_a[5]
+set_location_assignment PIN_F28 -to fb_dq[7]
+set_location_assignment PIN_F3 -to vi_green[0]
+set_location_assignment PIN_F4 -to ~ALTERA_ASDO_DATA1~
+set_location_assignment PIN_F5 -to dvi_sda
+set_location_assignment PIN_G1 -to dvi_scl
+set_location_assignment PIN_G2 -to vi_red[3]
+set_location_assignment PIN_G27 -to fb_dq[1]
+set_location_assignment PIN_G28 -to fb_dq[4]
+set_location_assignment PIN_G3 -to vi_red[1]
+set_location_assignment PIN_G4 -to vi_red[7]
+set_location_assignment PIN_G5 -to dvo_sda
+set_location_assignment PIN_G6 -to dvo_scl
+set_location_assignment PIN_H24 -to fb_a[8]
+set_location_assignment PIN_H26 -to fb_a[4]
+set_location_assignment PIN_H3 -to vi_red[5]
+set_location_assignment PIN_H4 -to vi_blue[7]
+set_location_assignment PIN_H5 -to vi_green[3]
+set_location_assignment PIN_H6 -to vi_green[5]
+set_location_assignment PIN_H7 -to dvi_hotplug
+set_location_assignment PIN_J1 -to mix_ckn_b
+set_location_assignment PIN_J25 -to fb_a[0]
+set_location_assignment PIN_J26 -to fb_a[1]
+set_location_assignment PIN_J27 -to mix_ckp_b
+set_location_assignment PIN_J3 -to vi_blue[5]
+set_location_assignment PIN_J4 -to vi_green[1]
+set_location_assignment PIN_K1 -to vi_hsync
+set_location_assignment PIN_K2 -to vi_vsync
+set_location_assignment PIN_K25 -to fb_a[9]
+set_location_assignment PIN_K26 -to fb_dq[6]
+set_location_assignment PIN_K27 -to fb_dq[12]
+set_location_assignment PIN_K28 -to fb_dq[11]
+set_location_assignment PIN_K3 -to sp3v3[1]
+set_location_assignment PIN_K4 -to sp3v3[0]
+set_location_assignment PIN_L1 -to vi_de
+set_location_assignment PIN_L23 -to fb_cas_n
+set_location_assignment PIN_L24 -to fb_dq[15]
+set_location_assignment PIN_L25 -to fb_ba[1]
+set_location_assignment PIN_L26 -to fb_dm[0]
+set_location_assignment PIN_L27 -to fb_dq[9]
+set_location_assignment PIN_L28 -to fb_dq[14]
+set_location_assignment PIN_L5 -to vi_red[6]
+set_location_assignment PIN_M1 -to vi_red[0]
+set_location_assignment PIN_M2 -to vi_red[2]
+set_location_assignment PIN_M25 -to fb_cke[0]
+set_location_assignment PIN_M28 -to fb_dq[13]
+set_location_assignment PIN_M27 -to fb_dq[8]
+set_location_assignment PIN_M26 -to fb_dq[10]
+set_location_assignment PIN_M5 -to vi_red[4]
+set_location_assignment PIN_N25 -to fb_a[2]
+set_location_assignment PIN_N26 -to fb_dqs[1]
+set_location_assignment PIN_N7 -to ~ALTERA_DATA0~
+set_location_assignment PIN_P1 -to vi_green[6]
+set_location_assignment PIN_P2 -to vi_green[7]
+set_location_assignment PIN_P25 -to fb_a[11]
+set_location_assignment PIN_P27 -to fb_a[6]
+set_location_assignment PIN_P28 -to ~ALTERA_nCEO~
+set_location_assignment PIN_P3 -to ~ALTERA_DCLK~
+set_location_assignment PIN_R2 -to lvds_a[0]
+set_location_assignment PIN_R25 -to fb_a[3]
+set_location_assignment PIN_R26 -to fb_dq[31]
+set_location_assignment PIN_R27 -to fb_a[10]
+set_location_assignment PIN_R28 -to fb_dm[1]
+set_location_assignment PIN_R3 -to lvds_a[2]
+set_location_assignment PIN_T22 -to fb_a[7]
+set_location_assignment PIN_T25 -to fb_dqs[3]
+set_location_assignment PIN_T4 -to lvds_a[3]
+set_location_assignment PIN_T8 -to mix_a[1]
+set_location_assignment PIN_U27 -to fb_ba[0]
+set_location_assignment PIN_U28 -to fb_dq[26]
+set_location_assignment PIN_U3 -to lvds_a[1]
+set_location_assignment PIN_U6 -to mix_a[2]
+set_location_assignment PIN_U7 -to mix_a[3]
+set_location_assignment PIN_U8 -to mix_a[0]
+set_location_assignment PIN_V1 -to vi_pdn
+set_location_assignment PIN_V2 -to vi_scdt
+set_location_assignment PIN_V25 -to fb_dq[24]
+set_location_assignment PIN_V27 -to fb_a[12]
+set_location_assignment PIN_V28 -to fb_dq[29]
+set_location_assignment PIN_V3 -to mx_pc_rx
+set_location_assignment PIN_V4 -to mx_ts_tx
+set_location_assignment PIN_W1 -to lvds_detect
+set_location_assignment PIN_W2 -to mx_pc_tx
+set_location_assignment PIN_W26 -to fb_dq[30]
+set_location_assignment PIN_W27 -to fb_dq[25]
+set_location_assignment PIN_Y26 -to fb_dq[27]
+# 3C80 set_location_assignment PIN_W3 -to sp2v5[2]
+set_location_assignment PIN_Y2 -to lvds_clk
+set_location_assignment PIN_Y24 -to fb_dq[16]
+set_location_assignment PIN_W28 -to fb_dq[28]
+set_location_assignment PIN_Y27 -to clk_25_b
+set_location_assignment PIN_Y4 -to v18_pgood
+set_instance_assignment -name AUTO_GLOBAL_CLOCK ON -to *
+set_instance_assignment -name CKN_CK_PAIR ON -from fa_clk_n[0] -to fa_clk[0]
+set_instance_assignment -name CKN_CK_PAIR ON -from fa_clk_n[1] -to fa_clk[1]
+set_instance_assignment -name CKN_CK_PAIR ON -from fb_clk_n[0] -to fb_clk[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_a[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_a[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_a[10]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_a[11]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_a[12]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_a[13]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_a[14]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_a[15]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_a[2]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_a[3]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_a[4]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_a[5]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_a[6]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_a[7]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_a[8]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_a[9]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_ba[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_ba[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_ba[2]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_cas_n
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_cke[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_cs_n[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_odt[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_ras_n
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fa_we_n
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_a[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_a[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_a[10]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_a[11]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_a[12]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_a[13]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_a[14]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_a[15]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_a[2]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_a[3]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_a[4]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_a[5]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_a[6]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_a[7]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_a[8]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_a[9]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_ba[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_ba[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_ba[2]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_cas_n
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_cke[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_cs_n[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_odt[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_ras_n
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to fb_we_n
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_clk[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_clk[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_clk_n[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_clk_n[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dm[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dm[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dm[2]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dm[3]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dm[4]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dm[5]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dm[6]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dm[7]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[10]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[11]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[12]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[13]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[14]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[15]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[16]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[17]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[18]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[19]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[2]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[20]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[21]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[22]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[23]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[24]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[25]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[26]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[27]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[28]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[29]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[3]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[30]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[31]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[32]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[33]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[34]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[35]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[36]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[37]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[38]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[39]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[4]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[40]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[41]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[42]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[43]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[44]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[45]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[46]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[47]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[48]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[49]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[5]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[50]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[51]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[52]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[53]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[54]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[55]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[56]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[57]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[58]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[59]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[6]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[60]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[61]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[62]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[63]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[7]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[8]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dq[9]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dqs[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dqs[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dqs[2]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dqs[3]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dqs[4]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dqs[5]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dqs[6]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fa_dqs[7]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_clk[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_clk_n[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dm[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dm[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dm[2]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dm[3]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[10]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[11]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[12]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[13]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[14]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[15]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[16]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[17]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[18]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[19]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[2]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[20]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[21]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[22]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[23]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[24]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[25]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[26]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[27]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[28]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[29]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[3]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[30]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[31]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[4]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[5]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[6]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[7]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[8]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dq[9]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dqs[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dqs[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dqs[2]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fb_dqs[3]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to ledout
+set_instance_assignment -name FAST_INPUT_REGISTER ON -to vi_blue
+set_instance_assignment -name FAST_INPUT_REGISTER ON -to vi_de
+set_instance_assignment -name FAST_INPUT_REGISTER ON -to vi_green
+set_instance_assignment -name FAST_INPUT_REGISTER ON -to vi_hsync
+set_instance_assignment -name FAST_INPUT_REGISTER ON -to vi_red
+set_instance_assignment -name FAST_INPUT_REGISTER ON -to vi_vsync
+set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to vo_de
+set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to vo_green
+set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to vo_hsync
+set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to vo_red
+set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to vo_vsync
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to vo_blue
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to vo_de
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to vo_green
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to vo_hsync
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to vo_red
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to vo_vsync
+set_instance_assignment -name GLOBAL_SIGNAL OFF -to vi_odck
+set_instance_assignment -name IO_STANDARD "1.8 V" -to clk_25_a
+set_instance_assignment -name IO_STANDARD "1.8 V" -to clk_25_b
+set_instance_assignment -name IO_STANDARD "1.8 V" -to mix_ckp_a
+set_instance_assignment -name IO_STANDARD "1.8 V" -to mix_ckn_a
+set_instance_assignment -name IO_STANDARD "1.8 V" -to mix_ckp_b
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to mix_ckn_b
+set_instance_assignment -name IO_STANDARD "1.8 V" -to clk_25_sp[0]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to clk_25_sp[2]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to clk_25_c
+set_instance_assignment -name IO_STANDARD "1.8 V" -to ledout
+set_instance_assignment -name IO_STANDARD "2.5 V" -to mix*
+set_instance_assignment -name IO_STANDARD "2.5 V" -to lvds_detect
+set_instance_assignment -name IO_STANDARD "2.5 V" -to lvds_mode
+set_instance_assignment -name IO_STANDARD "2.5 V" -to mx_pc_rx
+set_instance_assignment -name IO_STANDARD "2.5 V" -to mx_pc_tx
+set_instance_assignment -name IO_STANDARD "2.5 V" -to mx_ts_rx
+set_instance_assignment -name IO_STANDARD "2.5 V" -to mx_ts_tx
+set_instance_assignment -name IO_STANDARD "2.5 V" -to pt_pc_rx
+set_instance_assignment -name IO_STANDARD "2.5 V" -to pt_pc_tx
+set_instance_assignment -name IO_STANDARD "2.5 V" -to pt_ts_rx
+set_instance_assignment -name IO_STANDARD "2.5 V" -to pt_ts_tx
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sp2v5*
+set_instance_assignment -name IO_STANDARD "2.5 V" -to vi_pdn
+set_instance_assignment -name IO_STANDARD "2.5 V" -to vi_scdt
+set_instance_assignment -name IO_STANDARD "2.5 V" -to vo_po1
+set_instance_assignment -name IO_STANDARD "2.5 V" -to vo_rstn
+set_instance_assignment -name IO_STANDARD "2.5 V" -to vo_scl
+set_instance_assignment -name IO_STANDARD "2.5 V" -to vo_sda
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vi_*
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to dvo_scl
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to dvo_sda
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.8-V SSTL CLASS I" -to vo_idck
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_a[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_a[1]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_a[10]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_a[11]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_a[12]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_a[13]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_a[14]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_a[15]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_a[2]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_a[3]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_a[4]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_a[5]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_a[6]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_a[7]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_a[8]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_a[9]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_ba[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_ba[1]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_ba[2]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_cas_n
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_cke[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_clk[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_clk[1]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_clk_n[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_clk_n[1]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_cs_n[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dm[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dm[1]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dm[2]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dm[3]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dm[4]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dm[5]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dm[6]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dm[7]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[1]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[10]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[11]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[12]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[13]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[14]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[15]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[16]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[17]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[18]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[19]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[2]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[20]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[21]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[22]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[23]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[24]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[25]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[26]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[27]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[28]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[29]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[3]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[30]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[31]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[32]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[33]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[34]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[35]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[36]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[37]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[38]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[39]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[4]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[40]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[41]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[42]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[43]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[44]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[45]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[46]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[47]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[48]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[49]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[5]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[50]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[51]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[52]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[53]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[54]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[55]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[56]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[57]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[58]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[59]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[6]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[60]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[61]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[62]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[63]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[7]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[8]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dq[9]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dqs[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dqs[1]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dqs[2]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dqs[3]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dqs[4]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dqs[5]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dqs[6]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_dqs[7]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_odt[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_ras_n
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fa_we_n
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_a[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_a[1]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_a[10]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_a[11]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_a[12]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_a[13]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_a[14]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_a[15]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_a[2]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_a[3]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_a[4]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_a[5]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_a[6]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_a[7]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_a[8]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_a[9]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_ba[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_ba[1]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_ba[2]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_cas_n
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_cke[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_clk[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_clk_n[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_cs_n[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dm[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dm[1]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dm[2]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dm[3]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[1]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[10]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[11]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[12]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[13]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[14]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[15]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[16]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[17]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[18]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[19]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[2]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[20]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[21]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[22]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[23]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[24]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[25]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[26]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[27]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[28]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[29]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[3]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[30]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[31]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[4]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[5]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[6]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[7]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[8]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dq[9]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dqs[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dqs[1]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dqs[2]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_dqs[3]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_odt[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_ras_n
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to fb_we_n
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to vo_*
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dm[0]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dm[1]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dm[2]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dm[3]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[0]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[1]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[10]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[11]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[12]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[13]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[14]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[15]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[16]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[17]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[18]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[19]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[2]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[20]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[21]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[22]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[23]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[24]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[25]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[26]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[27]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[28]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[29]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[3]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[30]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[31]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[4]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[5]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[6]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[7]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[8]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[9]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dqs[0]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dqs[1]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dqs[2]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dqs[3]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dm[0]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dm[1]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dm[2]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dm[3]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[0]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[1]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[10]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[11]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[12]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[13]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[14]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[15]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[16]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[17]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[18]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[19]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[2]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[20]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[21]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[22]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[23]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[24]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[25]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[26]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[27]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[28]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[29]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[3]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[30]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[31]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[4]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[5]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[6]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[7]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[8]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dq[9]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dqs[0]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dqs[1]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dqs[2]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 534656 -to fb_dqs[3]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dm[4]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dm[5]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dm[6]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dm[7]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[32]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[33]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[34]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[35]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[36]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[37]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[38]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[39]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[40]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[41]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[42]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[43]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[44]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[45]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[46]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[47]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[48]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[49]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[50]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[51]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[52]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[53]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[54]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[55]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[56]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[57]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[58]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[59]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[60]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[61]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[62]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dq[63]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dqs[4]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dqs[5]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dqs[6]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3078783 -to fa_dqs[7]
+
+set_instance_assignment -name IO_STANDARD LVDS -to lvds_clk
+set_location_assignment PIN_J2 -to vi_odck
+set_location_assignment PIN_Y3 -to pt_pc_tx
+set_location_assignment PIN_U5 -to mx_ts_rx
+
+set_global_assignment -name ENABLE_SIGNALTAP ON
+set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
+set_instance_assignment -name MAX_FANOUT 2 -to "ddr64:\\TEST_DDRA1:ddra_inst|ddr64_controller_phy:ddr64_controller_phy_inst|ddr64_phy:alt_mem_phy_inst|ddr64_phy_alt_mem_phy:ddr64_phy_alt_mem_phy_inst|ddr64_phy_alt_mem_phy_sequencer_wrapper:seq|alt_mem_phy_sequencer:alt_mem_phy_sequencer_inst|alt_mem_phy_tdwu:alt_mem_phy_tdwu_instance1|alt_mem_phy_counter:\\memory_controller_avalon_interface_true:alt_mem_phy_counter_instance3|count_internal[*]"
+set_instance_assignment -name SYNTH_CRITICAL_CLOCK ON -from "ddr64:\\TEST_DDRA1:ddra_inst|ddr64_controller_phy:ddr64_controller_phy_inst|ddr64_phy:alt_mem_phy_inst|ddr64_phy_alt_mem_phy:ddr64_phy_alt_mem_phy_inst|ddr64_phy_alt_mem_phy_clk_reset:clk|ddr64_phy_alt_mem_phy_pll:pll|altpll:altpll_component|altpll_e8r2:auto_generated|pll1~CLK1" -to *
+set_location_assignment PIN_AA3 -to pt_pc_rx
+set_global_assignment -name SEARCH_PATH .
+set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
+set_global_assignment -name TIMEQUEST_DO_CCPP_REMOVAL ON
+set_global_assignment -name MISC_FILE "D:/markm/pace/pacedev.net/sw/synth/platform/midway8080/invaders/s5a/invaders.dpf"
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sdram_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a/target_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/platform_pkg.vhd
+set_global_assignment -name VHDL_FILE project_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/cycloneiii/pll.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/cycloneiii/sprom.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/cycloneiii/spram.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/cycloneiii/dpram.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/clk_div.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_Pack.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_ALU.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_MCode.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_Reg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80se.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/Z80.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/inputmapper.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/Inputs.VHD
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/trs80_interrupts.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/wd179x.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/floppy_if.vhd
+set_global_assignment -name VHDL_FILE floppy_fifo.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/platform.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/sound.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/bitmapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/tilemapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/video_mixer.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/Graphics.VHD
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/io/i2c/oci2c/i2c_master_top.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/io/i2c/oci2c/i2c_master_bit_ctrl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/io/i2c/oci2c/i2c_master_byte_ctrl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a/i2c_sm.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a/dvo_sm.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/cycloneiii/ps2_fifo.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2host.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/io/lpc/lpc_pkg.vhd
+set_global_assignment -name VERILOG_FILE ../../../../../src/component/io/lpc/wb_lpc_periph.v
+set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a/target_top.vhd
+set_global_assignment -name SIGNALTAP_FILE stp1.stp
