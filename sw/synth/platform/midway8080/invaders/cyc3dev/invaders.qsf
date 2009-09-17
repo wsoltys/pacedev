@@ -981,6 +981,8 @@ set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dqs[3]
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to reset_n
 set_global_assignment -name MISC_FILE "E:/markm/pace/pacedev.net/sw/synth/platform/midway8080/invaders/cyc3dev/invaders.dpf"
 set_global_assignment -name SEARCH_PATH ip/altera_avalon_i2c
+set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
+set_global_assignment -name TIMEQUEST_DO_CCPP_REMOVAL ON
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sdram_pkg.vhd
@@ -1018,8 +1020,3 @@ set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/Sou
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/cyc3dev/target_top_dvi.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/platform_pkg.vhd
-set_global_assignment -name QIP_FILE ../../../../../src/target/cyc3dev/dvi_out_pll.qip
-set_global_assignment -name QIP_FILE vga_800x600_dvi_1280x1024.qip
-set_global_assignment -name VHDL_FILE vga_800x600_dvi_1280x1024.vhd
-set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
-set_global_assignment -name TIMEQUEST_DO_CCPP_REMOVAL ON
