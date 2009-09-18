@@ -13,7 +13,7 @@ package project_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 	
-  -- Reference clock is 25MHz
+  -- Reference clock is 24.576MHz
 	constant PACE_HAS_PLL								      : boolean := true;
   --constant PACE_HAS_SRAM                    : boolean := false;
   constant PACE_HAS_SDRAM                   : boolean := false;
@@ -26,10 +26,10 @@ package project_pkg is
 	--constant PACE_VIDEO_V_SIZE				        : integer := 192;
 
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_640x480_60Hz;
-  constant PACE_CLK0_DIVIDE_BY              : natural := 5;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 2;   -- 50*2/5 = 20MHz
-  constant PACE_CLK1_DIVIDE_BY              : natural := 2;
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 1;  	-- 50*1/2 = 25MHz
+  constant PACE_CLK0_DIVIDE_BY              : natural := 75;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 61;    -- 24.576*61/75 = 19.988480MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 60;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 61;  	-- 24.576*61/60 = 24.985600MHz
 	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
 	constant PACE_VIDEO_V_SCALE       	      : integer := 2;
 
@@ -56,6 +56,12 @@ package project_pkg is
   constant PACE_OSD_XPOS                    : natural := 128;
   constant PACE_OSD_YPOS                    : natural := 176;
 
+  -- S5A-specific constants
+
+  constant S5A_EMULATE_SRAM                 : boolean := true;
+  constant S5A_EMULATED_SRAM_WIDTH_AD       : natural := 16;
+  constant S5A_EMULATED_SRAM_WIDTH          : natural := 8;
+  
 	-- TRS-80-specific constants
 	
   constant TRS80_M3_ROM_IN_FLASH            : boolean := PACE_HAS_FLASH;
@@ -65,6 +71,6 @@ package project_pkg is
 	constant TRS80_M3_FDC_SUPPORT			        : boolean := false;
 
   -- *** WARNING: enabling this option won't work on a stock DE1
-  constant TRS80_M3_SYSMEM_IN_BURCHED_SRAM  : boolean := true;
+  constant TRS80_M3_SYSMEM_IN_BURCHED_SRAM  : boolean := false;
   
 end;

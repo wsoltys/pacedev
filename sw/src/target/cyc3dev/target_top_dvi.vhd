@@ -188,70 +188,70 @@ begin
     
     GEN_VIP : if false generate
 
-      dvi_out_pll_inst : entity work.dvi_out_pll
-        port map
-        (
-          inclk0	=> clock50,
-          c0		  => clk_110M,
-          c1		  => clk_121M
-        );
+      --dvi_out_pll_inst : entity work.dvi_out_pll
+      --  port map
+      --  (
+      --    inclk0	=> clock50,
+      --    c0		  => clk_110M,
+      --    c1		  => clk_121M
+      --  );
 
-      vga_2_dvi_inst : entity work.vga_800x600_dvi_1280x1024
-        port map
-        (
+      --vga_2_dvi_inst : entity work.vga_800x600_dvi_1280x1024
+      --  port map
+      --  (
           -- 1) global signals:
-          altmemddr_0_aux_full_rate_clk_out => open,
-          altmemddr_0_aux_half_rate_clk_out => open,
-          altmemddr_0_phy_clk_out => open,
-          clk_121M => clk_121M,
-          clk_125M => clock_source,
-          reset_n => reset_n,
+      --    altmemddr_0_aux_full_rate_clk_out => open,
+      --    altmemddr_0_aux_half_rate_clk_out => open,
+      --    altmemddr_0_phy_clk_out => open,
+      --    clk_121M => clk_121M,
+      --    clk_125M => clock_source,
+      --    reset_n => reset_n,
 
           -- the_alt_vip_cti_0
-          overflow_from_the_alt_vip_cti_0 => user_led(1),
-          vid_clk_to_the_alt_vip_cti_0 => video_o.clk,
-          vid_data_to_the_alt_vip_cti_0(23 downto 16) => video_o.rgb.r(9 downto 2),
-          vid_data_to_the_alt_vip_cti_0(15 downto 8) => video_o.rgb.g(9 downto 2),
-          vid_data_to_the_alt_vip_cti_0(7 downto 0) => video_o.rgb.b(9 downto 2),
-          vid_datavalid_to_the_alt_vip_cti_0 => vga_valid,
-          vid_f_to_the_alt_vip_cti_0 => '0',
-          vid_h_sync_to_the_alt_vip_cti_0 => vga_hs,
-          vid_locked_to_the_alt_vip_cti_0 => '1',
-          vid_v_sync_to_the_alt_vip_cti_0 => vga_vs,
+      --    overflow_from_the_alt_vip_cti_0 => user_led(1),
+      --    vid_clk_to_the_alt_vip_cti_0 => video_o.clk,
+      --    vid_data_to_the_alt_vip_cti_0(23 downto 16) => video_o.rgb.r(9 downto 2),
+      --    vid_data_to_the_alt_vip_cti_0(15 downto 8) => video_o.rgb.g(9 downto 2),
+      --    vid_data_to_the_alt_vip_cti_0(7 downto 0) => video_o.rgb.b(9 downto 2),
+      --    vid_datavalid_to_the_alt_vip_cti_0 => vga_valid,
+      --    vid_f_to_the_alt_vip_cti_0 => '0',
+      --    vid_h_sync_to_the_alt_vip_cti_0 => vga_hs,
+      --    vid_locked_to_the_alt_vip_cti_0 => '1',
+      --    vid_v_sync_to_the_alt_vip_cti_0 => vga_vs,
 
           -- the_alt_vip_itc_0
-          underflow_from_the_alt_vip_itc_0 => user_led(2),
-          vid_clk_to_the_alt_vip_itc_0 => clk_110M,
-          vid_data_from_the_alt_vip_itc_0 => BITEC_DVI_IO_OUT,
-          vid_datavalid_from_the_alt_vip_itc_0 => BITEC_DVI_IO_OUT_DE,
-          vid_f_from_the_alt_vip_itc_0 => open,
-          vid_h_from_the_alt_vip_itc_0 => open,
-          vid_h_sync_from_the_alt_vip_itc_0 => BITEC_DVI_IO_OUT_HSYNC,
-          vid_v_from_the_alt_vip_itc_0 => open,
-          vid_v_sync_from_the_alt_vip_itc_0 => BITEC_DVI_IO_OUT_VSYNC,
+      --    underflow_from_the_alt_vip_itc_0 => user_led(2),
+      --    vid_clk_to_the_alt_vip_itc_0 => clk_110M,
+      --    vid_data_from_the_alt_vip_itc_0 => BITEC_DVI_IO_OUT,
+      --    vid_datavalid_from_the_alt_vip_itc_0 => BITEC_DVI_IO_OUT_DE,
+      --    vid_f_from_the_alt_vip_itc_0 => open,
+      --    vid_h_from_the_alt_vip_itc_0 => open,
+      --    vid_h_sync_from_the_alt_vip_itc_0 => BITEC_DVI_IO_OUT_HSYNC,
+      --    vid_v_from_the_alt_vip_itc_0 => open,
+      --    vid_v_sync_from_the_alt_vip_itc_0 => BITEC_DVI_IO_OUT_VSYNC,
 
           -- the_altmemddr_0
-          global_reset_n_to_the_altmemddr_0 => reset_n,
-          local_init_done_from_the_altmemddr_0 => open,
-          local_refresh_ack_from_the_altmemddr_0 => open,
-          local_wdata_req_from_the_altmemddr_0 => open,
-          mem_addr_from_the_altmemddr_0 => memtop_addr,
-          mem_ba_from_the_altmemddr_0 => memtop_ba,
-          mem_cas_n_from_the_altmemddr_0 => memtop_cas_n,
-          mem_cke_from_the_altmemddr_0 => memtop_cke(0),
-          mem_clk_n_to_and_from_the_altmemddr_0 => memtop_clk_n(0),
-          mem_clk_to_and_from_the_altmemddr_0 => memtop_clk(0),
-          mem_cs_n_from_the_altmemddr_0 => memtop_cs_n(0),
-          mem_dm_from_the_altmemddr_0 => memtop_dm,
-          mem_dq_to_and_from_the_altmemddr_0 => memtop_dq,
-          mem_dqs_to_and_from_the_altmemddr_0 => memtop_dqs,
-          mem_odt_from_the_altmemddr_0 => memtop_odt(0),
-          mem_ras_n_from_the_altmemddr_0 => memtop_ras_n,
-          mem_we_n_from_the_altmemddr_0 => memtop_we_n,
-          reset_phy_clk_n_from_the_altmemddr_0 => open
-       );
+      --    global_reset_n_to_the_altmemddr_0 => reset_n,
+      --    local_init_done_from_the_altmemddr_0 => open,
+      --    local_refresh_ack_from_the_altmemddr_0 => open,
+      --    local_wdata_req_from_the_altmemddr_0 => open,
+      --    mem_addr_from_the_altmemddr_0 => memtop_addr,
+      --    mem_ba_from_the_altmemddr_0 => memtop_ba,
+      --    mem_cas_n_from_the_altmemddr_0 => memtop_cas_n,
+      --    mem_cke_from_the_altmemddr_0 => memtop_cke(0),
+      --    mem_clk_n_to_and_from_the_altmemddr_0 => memtop_clk_n(0),
+      --    mem_clk_to_and_from_the_altmemddr_0 => memtop_clk(0),
+      --    mem_cs_n_from_the_altmemddr_0 => memtop_cs_n(0),
+      --    mem_dm_from_the_altmemddr_0 => memtop_dm,
+      --    mem_dq_to_and_from_the_altmemddr_0 => memtop_dq,
+      --    mem_dqs_to_and_from_the_altmemddr_0 => memtop_dqs,
+      --    mem_odt_from_the_altmemddr_0 => memtop_odt(0),
+      --    mem_ras_n_from_the_altmemddr_0 => memtop_ras_n,
+      --    mem_we_n_from_the_altmemddr_0 => memtop_we_n,
+      --    reset_phy_clk_n_from_the_altmemddr_0 => open
+      -- );
 
-      BITEC_DVI_IO_OUT_IDCKp <= clk_110M;
+      --BITEC_DVI_IO_OUT_IDCKp <= clk_110M;
 
     end generate GEN_VIP;
     

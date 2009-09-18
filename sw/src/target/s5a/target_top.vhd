@@ -404,6 +404,8 @@ begin
     inputs_i.jamma_n.tilt <= '1';
     inputs_i.jamma_n.test <= '1';
     
+    inputs_i.analogue <= (others => (others => '0'));
+    
   end block BLK_MIXER_BUS;
 
   BLK_VIDEO : block
@@ -560,6 +562,31 @@ begin
       gp_o              => gp_o
     );
 
+  -- emulate some SRAM
+  GEN_SRAM : if S5A_EMULATE_SRAM generate
+    BLK_SRAM : block
+      signal wren : std_logic := '0';
+    begin
+      wren <= sram_o.cs and sram_o.we;
+      sram_inst : entity work.spram
+        generic map
+        (
+          numwords_a		=> 2**S5A_EMULATED_SRAM_WIDTH_AD,
+          widthad_a			=> S5A_EMULATED_SRAM_WIDTH_AD,
+          width_a				=> S5A_EMULATED_SRAM_WIDTH
+        )
+        port map
+        (
+          clock		      => clk_i(0),
+          address		    => sram_o.a(S5A_EMULATED_SRAM_WIDTH_AD-1 downto 0),
+          data		      => sram_o.d(S5A_EMULATED_SRAM_WIDTH-1 downto 0),
+          wren		      => wren,
+          q		          => sram_i.d(S5A_EMULATED_SRAM_WIDTH-1 downto 0)
+        );
+      sram_i.d(sram_i.d'left downto S5A_EMULATED_SRAM_WIDTH) <= (others => '0');
+    end block BLK_SRAM;
+  end generate GEN_SRAM;
+  
   -- blink a led
   process (clk_25_c, reset_i)
     variable count : unsigned(22 downto 0) := (others => '0');

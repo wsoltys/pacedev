@@ -54,9 +54,15 @@ package project_pkg is
   constant PACE_OSD_XPOS                    : natural := 0;
   constant PACE_OSD_YPOS                    : natural := 0;
 
+  -- S5A-specific constants
+
+  constant S5A_EMULATE_SRAM                 : boolean := false;
+  constant S5A_EMULATED_SRAM_WIDTH_AD       : natural := 16;
+  constant S5A_EMULATED_SRAM_WIDTH          : natural := 8;
+  
 	-- Pacman-specific constants
 			
 	constant PACMAN_USE_VIDEO_VBLANK            : boolean := true;
-	constant PACMAN_USE_INTERNAL_WRAM				    : boolean := not PACE_HAS_SRAM;
+	constant PACMAN_USE_INTERNAL_WRAM				    : boolean := not (PACE_HAS_SRAM or S5A_EMULATE_SRAM);
 	
 end;
