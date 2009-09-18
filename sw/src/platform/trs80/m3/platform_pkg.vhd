@@ -25,4 +25,28 @@ package platform_pkg is
 	-- Platform-specific constants (optional)
 	--
 
+  type from_PLATFORM_IO_t is record
+  
+    floppy_fifo_clk     : std_logic;
+    floppy_fifo_data    : std_logic_vector(7 downto 0);
+    floppy_fifo_wr      : std_logic;
+    floppy_fifo_flush   : std_logic;
+    
+    d                   : std_logic_vector(63 downto 0);
+    
+  end record;
+
+  type to_PLATFORM_IO_t is record
+  
+    floppy_track        : std_logic_vector(7 downto 0);
+    floppy_offset       : std_logic_vector(12 downto 0);
+    floppy_fifo_full    : std_logic;
+    
+    d                   : std_logic_vector(63 downto 0);
+    oe                  : std_logic_vector(63 downto 0);
+    
+  end record;
+
+  --function NULL_TO_PLATFORM_IO return to_PLATFORM_IO_t;
+  
 end;

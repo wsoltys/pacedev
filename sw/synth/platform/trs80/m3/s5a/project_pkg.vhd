@@ -66,11 +66,22 @@ package project_pkg is
 	
   constant TRS80_M3_ROM_IN_FLASH            : boolean := PACE_HAS_FLASH;
 
-  constant TRS80_M3_HIRES_SUPPORT           : boolean := false;
-	constant TRS80_M3_HIRES_WIDTHA            : integer := 12;    -- 4KiB only (Max 16KiB)
-	constant TRS80_M3_FDC_SUPPORT			        : boolean := false;
+  constant TRS80_M3_HIRES_SUPPORT           : boolean := true;
+	constant TRS80_M3_HIRES_WIDTHA            : integer := 14;    -- 16KiB (Max 16KiB)
+
+	constant TRS80_M3_FDC_SUPPORT			        : boolean := true;
 
   -- *** WARNING: enabling this option won't work on a stock DE1
   constant TRS80_M3_SYSMEM_IN_BURCHED_SRAM  : boolean := false;
+
+  type from_PROJECT_IO_t is record
+    dummy     : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    dummy     : std_logic;
+  end record;
+
+  --function NULL_TO_PROJECT_IO return to_PROJECT_IO_t;
   
 end;

@@ -50,9 +50,14 @@ entity PACE is
     ser_i           : in from_SERIAL_t;
     ser_o           : out to_SERIAL_t;
     
-    -- general purpose I/O
-    gp_i            : in from_GP_t;
-    gp_o            : out to_GP_t
+    project_i       : in from_PROJECT_IO_t;
+    project_o       : out to_PROJECT_IO_t;
+    
+    platform_i      : in from_PLATFORM_IO_t;
+    platform_o      : out to_PLATFORM_IO_t;
+    
+    target_i        : in from_TARGET_IO_t;
+    target_o        : out to_TARGET_IO_t
   );
 end entity PACE;
 
@@ -162,9 +167,13 @@ begin
       ser_i           => ser_i,
       ser_o           => ser_o,
 
-      -- general purpose I/O
-      gp_i            => gp_i,
-      gp_o            => gp_o
+      -- custom i/o
+      project_i       => project_i,
+      project_o       => project_o,
+      platform_i      => platform_i,
+      platform_o      => platform_o,
+      target_i        => target_i,
+      target_o        => target_o
     );
 
   graphics_inst : entity work.Graphics                                    

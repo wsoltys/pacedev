@@ -10,6 +10,8 @@ use work.pace_pkg.all;
 use work.sdram_pkg.all;
 use work.video_controller_pkg.all;
 use work.lpc_pkg.all;
+use work.platform_pkg.all;
+use work.target_pkg.all;
 use work.project_pkg.all;
 
 entity target_top is
@@ -153,8 +155,12 @@ architecture SYN of target_top is
   signal audio_o      	: to_AUDIO_t;
   signal ser_i        	: from_SERIAL_t;
   signal ser_o        	: to_SERIAL_t;
-  signal gp_i         	: from_GP_t;
-  signal gp_o         	: to_GP_t;
+  signal project_i      : from_PROJECT_IO_t;
+  signal project_o      : to_PROJECT_IO_t;
+  signal platform_i     : from_PLATFORM_IO_t;
+  signal platform_o     : to_PLATFORM_IO_t;
+  signal target_i       : from_TARGET_IO_t;
+  signal target_o       : to_TARGET_IO_t;
 
   alias clk_24M576      : std_logic is mix_ckp_b;
 	signal vo_pll_clk			: std_logic;
@@ -556,10 +562,14 @@ begin
       -- serial
       ser_i             => ser_i,
       ser_o             => ser_o,
-      
-      -- general purpose
-      gp_i              => gp_i,
-      gp_o              => gp_o
+
+      -- custom i/o
+      project_i         => project_i,
+      project_o         => project_o,
+      platform_i        => platform_i,
+      platform_o        => platform_o,
+      target_i          => target_i,
+      target_o          => target_o
     );
 
   -- emulate some SRAM

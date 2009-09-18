@@ -72,9 +72,13 @@ entity platform is
     ser_i           : in from_SERIAL_t;
     ser_o           : out to_SERIAL_t;
 
-    -- general purpose I/O
-    gp_i            : in from_GP_t;
-    gp_o            : out to_GP_t
+    -- custom i/o
+    project_i       : in from_PROJECT_IO_t;
+    project_o       : out to_PROJECT_IO_t;
+    platform_i      : in from_PLATFORM_IO_t;
+    platform_o      : out to_PLATFORM_IO_t;
+    target_i        : in from_TARGET_IO_t;
+    target_o        : out to_TARGET_IO_t
   );
 end entity platform;
 
@@ -213,17 +217,17 @@ begin
           severity warning;
       -- hook up Burched SRAM module
       GEN_D: for i in 0 to 7 generate
-        ram_datao(i) <= gp_i(35-i);
-        gp_o.d(35-i) <= up_datao(i);
-        gp_o.d(27-i) <= 'Z';
+        ram_datao(i) <= platform_i.d(35-i);
+        platform_o.d(35-i) <= up_datao(i);
+        platform_o.d(27-i) <= 'Z';
       end generate;
       GEN_A: for i in 0 to 15 generate
-        gp_o.d(17-i) <= up_addr(i);
+        platform_o.d(17-i) <= up_addr(i);
       end generate;
-      gp_o.d(1) <= '0';           -- A16
-      gp_o.d(0) <= '0';           -- CEAn
-      gp_o.d(18) <= '1';          -- upper byte WEn
-      gp_o.d(19) <= not ram_wr;   -- lower byte WEn
+      platform_o.d(1) <= '0';           -- A16
+      platform_o.d(0) <= '0';           -- CEAn
+      platform_o.d(18) <= '1';          -- upper byte WEn
+      platform_o.d(19) <= not ram_wr;   -- lower byte WEn
     end generate GEN_BURCHED_SYSMEM;
 
   end block BLK_SYSMEM;
@@ -358,7 +362,7 @@ begin
 	graphics_o.pal <= (others => (others => '0'));
 	ser_o <= NULL_TO_SERIAL;
   spi_o <= NULL_TO_SPI;
-  gp_o.d(gp_o.d'left downto 52) <= (others => '0');
+  platform_o.d(platform_o.d'left downto 52) <= (others => '0');
 
 	clk_en_inst : entity work.clk_div
 		generic map
@@ -651,7 +655,9 @@ begin
         );
       end component floppy_fifo;
       
-      constant FDC_USE_FIFO : boolean := false;
+      constant FLOPPY_USE_FIFO  : boolean := true;
+      constant FLOPPY_USE_FLASH : boolean := false;
+      constant FLOPPY_USE_SRAM  : boolean := false;
       
       signal sync_reset   : std_logic := '1';
       
@@ -686,6 +692,11 @@ begin
       signal wd179x_dbg   : std_logic_vector(31 downto 0) := (others => '0');
       
     begin
+
+      assert not FLOPPY_USE_FIFO or
+              not (FLOPPY_USE_FLASH or FLOPPY_USE_SRAM)
+        report "choose FLOPPY_USE_FIFO -or- FLOPPY_USE_FLASH and/or FLOPPY_USE_SRAM"
+          severity error;
 
       process (clk_20M, reset_i)
         variable reset_r : std_logic_vector(3 downto 0) := (others => '0');
@@ -785,7 +796,7 @@ begin
           debug         => floppy_dbg
         );
 
-      GEN_FLOPPY_FIFO : if FDC_USE_FIFO generate
+      GEN_FLOPPY_FIFO : if FLOPPY_USE_FIFO generate
         BLK_FIFO : block
 					signal fifo_rd_pulse	: std_logic := '0';
           signal fifo_empty     : std_logic := '0';
@@ -799,11 +810,11 @@ begin
               rdreq		  => fifo_rd_pulse,
               rdempty		=> fifo_empty,
 
-              wrclk		  => clk_20M,
-              data		  => rd_data_from_media,
-              wrreq		  => fifo_wr,
-              wrfull		=> fifo_full,
-              aclr      => fifo_flush
+              wrclk		  => platform_i.floppy_fifo_clk,
+              data		  => platform_i.floppy_fifo_data,
+              wrreq		  => platform_i.floppy_fifo_wr,
+              wrfull		=> platform_o.floppy_fifo_full,
+              aclr      => platform_i.floppy_fifo_flush
             );
 
           process (clk_20M, sync_reset)
@@ -824,30 +835,33 @@ begin
 							end if;
 							fifo_rd_r := fifo_rd;
 
-              fifo_wr <= '0';   -- default
-              if count = count_t'high then
-                if fifo_full = '0' then
-                  fifo_wr <= '1';
-                  if offset_v = 6272-1 then
-                    offset_v := (others => '0');
-                  else
-                    offset_v := offset_v + 1;
-                  end if;
-                end if;
-                count := 0;
-              else
-                count := count + 1;
-                -- don't update when writing to FIFO
-                flash_o.a(12 downto 0) <= offset_v;
-              end if;
+              --fifo_wr <= '0';   -- default
+              --if count = count_t'high then
+              --  if fifo_full = '0' then
+              --    fifo_wr <= '1';
+              --    if offset_v = 6272-1 then
+              --      offset_v := (others => '0');
+              --    else
+              --      offset_v := offset_v + 1;
+              --    end if;
+              --  end if;
+              --  count := 0;
+              --else
+              --  count := count + 1;
+              --  -- don't update when writing to FIFO
+              --  flash_o.a(12 downto 0) <= offset_v;
+              --end if;
             end if;
           end process;
 
         end block BLK_FIFO;
+
+        platform_o.floppy_track <= track;
+        platform_o.floppy_offset <= offset;
         
       end generate GEN_FLOPPY_FIFO;
       
-      GEN_FLOPPY_NO_FIFO : if not FDC_USE_FIFO generate
+      GEN_FLOPPY_NO_FIFO : if not FLOPPY_USE_FIFO generate
         -- each track is encoded in 8KiB
         -- - 40 tracks is 320(512) KiB
         flash_o.a(12 downto 0) <= offset;
@@ -856,25 +870,25 @@ begin
       
       BLK_FLASH_FLOPPY : block
       begin  
+        GEN_FLASH_FLOPPY : if FLOPPY_USE_FLASH generate
+          flash_o.a(flash_o.a'left downto 20) <= (others => '0');
+          -- support 2 drives in flash for now
+          flash_o.a(19) <=  '0' when ds(1) = '1' else
+                            '1' when ds(2) = '1' else
+                            '0';
+          flash_o.a(18 downto 13) <= track(5 downto 0);
+          flash_o.cs <= '1';
+          flash_o.oe <= '1';
+          flash_o.we <= '0';
 
-        flash_o.a(flash_o.a'left downto 20) <= (others => '0');
-        -- support 2 drives in flash for now
-        flash_o.a(19) <=  '0' when ds(1) = '1' else
-                          '1' when ds(2) = '1' else
-                          '0';
-        flash_o.a(18 downto 13) <= track(5 downto 0);
-        flash_o.cs <= '1';
-        flash_o.oe <= '1';
-        flash_o.we <= '0';
-
-        rd_data_from_flash_media <= flash_i.d;
-
+          rd_data_from_flash_media <= flash_i.d;
+        end generate GEN_FLASH_FLOPPY;
       end block BLK_FLASH_FLOPPY;
       
       BLK_SRAM_FLOPPY : block
       begin
 
-        GEN_SRAM_FLOPPY : if TRS80_M3_SYSMEM_IN_BURCHED_SRAM generate
+        GEN_SRAM_FLOPPY : if FLOPPY_USE_SRAM and TRS80_M3_SYSMEM_IN_BURCHED_SRAM generate
 
           sram_o.a(sram_o.a'left downto 19) <= (others => '0');
           -- support 2 drives in sram for now
@@ -902,7 +916,7 @@ begin
         end generate GEN_NO_SRAM_FLOPPY;
 
       end block BLK_SRAM_FLOPPY;
-      
+
       rd_data_from_media <= rd_data_from_flash_media when (ds(1) or ds(2)) = '1' else
                             rd_data_from_sram_media;
                               
@@ -912,7 +926,7 @@ begin
       -- write-protect the two flash drives
       wprt_n <= '0' when (ds(1) or ds(2)) = '1' else '1';
         
-      gp_o.d(51 downto 36) <= -- memory address
+      platform_o.d(51 downto 36) <= -- memory address
                            floppy_dbg(31 downto 16) when switches_i(5 downto 4) = "11" else 
                            -- track & data byte
                            floppy_dbg(15 downto 0) when switches_i(5 downto 4) = "10" else

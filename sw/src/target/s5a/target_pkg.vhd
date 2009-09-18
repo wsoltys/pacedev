@@ -20,4 +20,14 @@ package target_pkg is
   constant PACE_HAS_FLASH     : boolean := false;
   constant PACE_HAS_SRAM      : boolean := false;
 
+  type from_TARGET_IO_t is record
+    dummy     : std_logic;
+  end record;
+
+  type to_TARGET_IO_t is record
+    dummy     : std_logic;
+  end record;
+
+  --function NULL_TO_TARGET_IO return to_TARGET_IO_t;
+  
 end;
