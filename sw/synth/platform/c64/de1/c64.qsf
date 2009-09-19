@@ -561,3 +561,4 @@ set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/seg7_lut.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2S_LCM_Config.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/i2s_controller.v
 set_global_assignment -name VHDL_FILE target_top.vhd
+set_global_assignment -name INCREMENTAL_COMPILATION OFF

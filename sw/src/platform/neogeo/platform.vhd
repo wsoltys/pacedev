@@ -8,8 +8,9 @@ use work.pace_pkg.all;
 use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
 use work.sdram_pkg.all;
-use work.project_pkg.all;
+use work.target_pkg.all;
 use work.platform_pkg.all;
+use work.project_pkg.all;
 
 --
 --  Since I've already forgotten this once (and wasted a few hours "debugging")
@@ -84,9 +85,13 @@ entity platform is
     ser_i           : in from_SERIAL_t;
     ser_o           : out to_SERIAL_t;
 
-    -- general purpose I/O
-    gp_i            : in from_GP_t;
-    gp_o            : out to_GP_t
+    -- custom i/o
+    project_i       : in from_PROJECT_IO_t;
+    project_o       : out to_PROJECT_IO_t;
+    platform_i      : in from_PLATFORM_IO_t;
+    platform_o      : out to_PLATFORM_IO_t;
+    target_i        : in from_TARGET_IO_t;
+    target_o        : out to_TARGET_IO_t
   );
 
 end platform;
@@ -431,24 +436,24 @@ begin
 
   end block BLK_SDRAM;
 
-  GEN_NOT : if false generate
-    assert false
-      report "this won't work on stock DE1 hardware"
-        severity warning;
-    -- hook up Burched SRAM module
-    GEN_D: for i in 0 to 15 generate
-      --ram_d_o(i) <= gp_i(35-i);
-      gp_o.d(35-i) <= d_o(i);
-    end generate;
-    GEN_A: for i in 0 to 14 generate
-      gp_o.d(17-i) <= a(1+i);
-    end generate;
-    gp_o.d(2) <= sram_cs;                 -- A15
-    gp_o.d(1) <= '0';                     -- A16
-    gp_o.d(0) <= not (ram_cs or sram_cs); -- CEAn
-    gp_o.d(18) <= udsn or not wr_p;       -- upper byte WEn
-    gp_o.d(19) <= ldsn or not wr_p;       -- lower byte WEn
-  end generate GEN_NOT;
+  --GEN_NOT : if false generate
+  --  assert false
+  --    report "this won't work on stock DE1 hardware"
+  --      severity warning;
+  --  -- hook up Burched SRAM module
+  --  GEN_D: for i in 0 to 15 generate
+  --    --ram_d_o(i) <= gp_i(35-i);
+  --    gp_o.d(35-i) <= d_o(i);
+  --  end generate;
+  --  GEN_A: for i in 0 to 14 generate
+  --    gp_o.d(17-i) <= a(1+i);
+  --  end generate;
+  --  gp_o.d(2) <= sram_cs;                 -- A15
+  --  gp_o.d(1) <= '0';                     -- A16
+  --  gp_o.d(0) <= not (ram_cs or sram_cs); -- CEAn
+  --  gp_o.d(18) <= udsn or not wr_p;       -- upper byte WEn
+  --  gp_o.d(19) <= ldsn or not wr_p;       -- lower byte WEn
+  --end generate GEN_NOT;
   
   --
   -- hardware registers
@@ -991,6 +996,5 @@ begin
   spi_o <= NULL_TO_SPI;
   ser_o <= NULL_TO_SERIAL;
   --leds_o <= (others => '0');
-  gp_o <= NULL_TO_GP;
   
 end SYN;

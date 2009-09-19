@@ -38,4 +38,12 @@ package project_pkg is
 	constant LADYBUG_VIDEO_CVBS					: std_logic := '0';
 	constant LADYBUG_VIDEO_VGA					: std_logic := not LADYBUG_VIDEO_CVBS;
 
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

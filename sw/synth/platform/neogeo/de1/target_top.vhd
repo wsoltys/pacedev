@@ -9,8 +9,9 @@ use work.video_controller_pkg.all;
 use work.maple_pkg.all;
 use work.gamecube_pkg.all;
 use work.sdram_pkg.all;
-use work.project_pkg.all;
 use work.target_pkg.all;
+use work.platform_pkg.all;
+use work.project_pkg.all;
 
 entity target_top is
   port
@@ -135,8 +136,12 @@ architecture SYN of target_top is
   signal audio_o      : to_AUDIO_t;
   signal ser_i        : from_SERIAL_t;
   signal ser_o        : to_SERIAL_t;
-  signal gp_i         : from_GP_t;
-  signal gp_o         : to_GP_t;
+  signal project_i      : from_PROJECT_IO_t;
+  signal project_o      : to_PROJECT_IO_t;
+  signal platform_i     : from_PLATFORM_IO_t;
+  signal platform_o     : to_PLATFORM_IO_t;
+  signal target_i       : from_TARGET_IO_t;
+  signal target_o       : to_TARGET_IO_t;
 
   signal dram_clk_s   : std_logic;
   
@@ -533,8 +538,8 @@ begin
 
   -- GPIO
 
-  gp_i(71 downto 36) <= gpio_0;
-  gp_i(35 downto 0) <= gpio_0;
+  --gp_i(71 downto 36) <= gpio_0;
+  --gp_i(35 downto 0) <= gpio_0;
   
   GEN_TEST_BURCHED_LEDS : if DE1_TEST_BURCHED_LEDS generate
   
@@ -577,12 +582,12 @@ begin
       
     -- D0-7
     --gp_i(35 downto 28) <= gpio_0(35 downto 28);
-    gpio_0(35 downto 28) <= gp_o.d(35 downto 28) when gp_o.d(19) = '0' else (others => 'Z');
+    --gpio_0(35 downto 28) <= gp_o.d(35 downto 28) when gp_o.d(19) = '0' else (others => 'Z');
     -- D8-15
     --gp_i(27 downto 20) <= gpio_0(27 downto 20);
-    gpio_0(27 downto 20) <= gp_o.d(27 downto 20) when gp_o.d(18) = '0' else (others => 'Z');
+    --gpio_0(27 downto 20) <= gp_o.d(27 downto 20) when gp_o.d(18) = '0' else (others => 'Z');
     -- A & CEn & WEn
-    gpio_0(19 downto 0) <= gp_o.d(19 downto 0);
+    --gpio_0(19 downto 0) <= gp_o.d(19 downto 0);
 
   end generate GEN_BURCHED_SRAM;
   
@@ -645,9 +650,13 @@ begin
       ser_i             => ser_i,
       ser_o             => ser_o,
       
-      -- general purpose
-      gp_i              => gp_i,
-      gp_o              => gp_o
+      -- custom i/o
+      project_i         => project_i,
+      project_o         => project_o,
+      platform_i        => platform_i,
+      platform_o        => platform_o,
+      target_i          => target_i,
+      target_o          => target_o
     );
 
   BLK_AV : block
@@ -757,10 +766,10 @@ begin
 
   begin
     -- from left to right on the PCB
-    seg7_3: SEG7_LUT port map (iDIG => gp_o.d(51 downto 48), oSEG => hex3);
-    seg7_2: SEG7_LUT port map (iDIG => gp_o.d(47 downto 44), oSEG => hex2);
-    seg7_1: SEG7_LUT port map (iDIG => gp_o.d(43 downto 40), oSEG => hex1);
-    seg7_0: SEG7_LUT port map (iDIG => gp_o.d(39 downto 36), oSEG => hex0);
+    --seg7_3: SEG7_LUT port map (iDIG => gp_o.d(51 downto 48), oSEG => hex3);
+    --seg7_2: SEG7_LUT port map (iDIG => gp_o.d(47 downto 44), oSEG => hex2);
+    --seg7_1: SEG7_LUT port map (iDIG => gp_o.d(43 downto 40), oSEG => hex1);
+    --seg7_0: SEG7_LUT port map (iDIG => gp_o.d(39 downto 36), oSEG => hex0);
   end block BLK_7_SEG;
   
 end SYN;
