@@ -91,4 +91,12 @@ package platform_pkg is
 	constant XOFFSETHACK 						: natural := 1;
 	constant SOUND_ROM_INIT_FILE		: string := "../../../../src/platform/pacman/roms/pacsnd.hex";
 
+  type from_PLATFORM_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PLATFORM_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

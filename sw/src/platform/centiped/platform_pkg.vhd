@@ -41,4 +41,12 @@ package platform_pkg is
 		others => (others => (others => '0'))
 	);
 
+  type from_PLATFORM_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PLATFORM_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;
