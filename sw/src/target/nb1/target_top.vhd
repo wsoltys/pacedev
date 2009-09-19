@@ -376,7 +376,6 @@ begin
       -- serial
       ser_i             => ser_i,
       ser_o             => ser_o,
-      
 
       -- custom i/o
       project_i         => project_i,
