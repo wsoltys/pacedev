@@ -9,8 +9,9 @@ use work.sdram_pkg.all;
 use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
 use work.target_pkg.all;
-use work.platform_pkg.all;
+use work.target_pkg.all;
 use work.project_pkg.all;
+use work.platform_pkg.all;
 
 entity platform is
   generic

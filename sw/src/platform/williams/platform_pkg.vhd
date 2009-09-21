@@ -31,4 +31,12 @@ package platform_pkg is
 	constant DEFENDER_CPU_CLK_ENA_DIVIDE_BY	  : natural := 
     DEFENDER_1MHz_CLK0_COUNTS / 3;
 
+  type from_PLATFORM_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PLATFORM_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

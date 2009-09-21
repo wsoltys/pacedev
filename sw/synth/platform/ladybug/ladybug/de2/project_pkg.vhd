@@ -40,4 +40,12 @@ package project_pkg is
   constant PACE_HAS_FLASH                   : boolean := LADYBUG_EXTERNAL_ROM;
   constant PACE_HAS_SRAM                    : boolean := (LADYBUG_EXTERNAL_RAM = 1);
 
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

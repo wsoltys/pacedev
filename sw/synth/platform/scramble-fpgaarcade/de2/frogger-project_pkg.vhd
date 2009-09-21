@@ -48,4 +48,12 @@ package project_pkg is
 	constant SCRAMBLE_VIDEO_CVBS				: std_logic := '0';
 	constant SCRAMBLE_VIDEO_VGA					: std_logic := not SCRAMBLE_VIDEO_CVBS;
 
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

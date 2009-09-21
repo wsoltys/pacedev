@@ -49,4 +49,12 @@ package project_pkg is
   constant PACE_HAS_FLASH                   : boolean := PENGO_ROMS_IN_FLASH;
   constant PACE_HAS_SRAM                    : boolean := not PENGO_USE_INTERNAL_WRAM;
 
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

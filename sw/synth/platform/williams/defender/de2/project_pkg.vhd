@@ -52,4 +52,12 @@ package project_pkg is
 	constant DEFENDER_ROMS_IN_SRAM			      : boolean := true;	
 	constant DEFENDER_VRAM_WIDTHAD			      : integer := 15;	-- 32kB
 	
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

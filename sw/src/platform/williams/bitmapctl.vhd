@@ -74,7 +74,7 @@ begin
       end case;
                 
       -- extract R,G,B from colour palette
-      pal_entry := graphics_i.pal(conv_integer(pel));
+      pal_entry := graphics_i.pal(conv_integer(pel))(pal_entry'range);
       rgb.r <= pal_entry(2 downto 0) & "0000000";
       rgb.g <= pal_entry(5 downto 3) & "0000000";
       rgb.b <= pal_entry(7 downto 6) & "00000000";
