@@ -6,6 +6,7 @@ use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
+use work.sdram_pkg.all;
 use work.video_controller_pkg.all;
 use work.gamecube_pkg.all;
 use work.project_pkg.all;
@@ -134,6 +135,12 @@ architecture SYN of target_top is
   signal audio_o      : to_AUDIO_t;
   signal ser_i        : from_SERIAL_t;
   signal ser_o        : to_SERIAL_t;
+  signal project_i      : from_PROJECT_IO_t;
+  signal project_o      : to_PROJECT_IO_t;
+  signal platform_i     : from_PLATFORM_IO_t;
+  signal platform_o     : to_PLATFORM_IO_t;
+  signal target_i       : from_TARGET_IO_t;
+  signal target_o       : to_TARGET_IO_t;
   
 begin
 
@@ -267,18 +274,18 @@ begin
     end generate GEN_NO_SDRAM;
 	
     GEN_SDRAM : if PACE_HAS_SDRAM generate
-      sdram_i.d <= std_logic_vector(resize(unsigned(sdram_dq), sdram_i.d'length));
-      sdram_dq <= sdram_o.d(sdram_dq'range) when sdram_o.we_n = '0' else (others => 'Z');
-      sdram_addr <= sdram_o.a(sdram_addr'range);
-      sdram_dqm(1) <= sdram_o.ldqm;
-      sdram_dqm(0) <= sdram_o.udqm;
-      sdram_nwe <= sdram_o.we_n;
-      sdram_ncas <= sdram_o.cas_n;
-      sdram_nras <= sdram_o.ras_n;
-      sdram_ncs <= sdram_o.cs_n;
-      sdram_ba <= sdram_o.ba;
-      sdram_clock <= sdram_o.clk;
-      sdram_cke <= sdram_o.cke;
+      --sdram_i.d <= std_logic_vector(resize(unsigned(sdram_dq), sdram_i.d'length));
+      --sdram_dq <= sdram_o.d(sdram_dq'range) when sdram_o.we_n = '0' else (others => 'Z');
+      --sdram_addr <= sdram_o.a(sdram_addr'range);
+      --sdram_dqm(1) <= sdram_o.ldqm;
+      --sdram_dqm(0) <= sdram_o.udqm;
+      --sdram_nwe <= sdram_o.we_n;
+      --sdram_ncas <= sdram_o.cas_n;
+      --sdram_nras <= sdram_o.ras_n;
+      --sdram_ncs <= sdram_o.cs_n;
+      --sdram_ba <= sdram_o.ba;
+      --sdram_clock <= sdram_o.clk;
+      --sdram_cke <= sdram_o.cke;
     end generate GEN_SDRAM;
 
   end block BLK_SDRAM;
@@ -374,9 +381,13 @@ begin
       ser_i             => ser_i,
       ser_o             => ser_o,
       
-      -- general purpose
-      gp_i              => (others => '0'),
-      gp_o              => open
+      -- custom i/o
+      project_i         => project_i,
+      project_o         => project_o,
+      platform_i        => platform_i,
+      platform_o        => platform_o,
+      target_i          => target_i,
+      target_o          => target_o
     );
 
 end SYN;

@@ -17,7 +17,6 @@ package project_pkg is
 	--
 	
 	constant PACE_HAS_PLL								      : boolean := true;	
-  constant PACE_HAS_SRAM                    : boolean := true;
   constant PACE_HAS_SDRAM                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := false;
   
@@ -45,6 +44,14 @@ package project_pkg is
 	-- Galaxian-specific constants
 			
 	constant GALAXIAN_USE_INTERNAL_WRAM			  : boolean := true;
-	constant USE_VIDEO_VBLANK_INTERRUPT 		  : boolean := false;
+	constant GALAXIAN_USE_VIDEO_VBLANK        : boolean := false;
 	
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

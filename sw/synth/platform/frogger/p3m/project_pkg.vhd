@@ -14,7 +14,13 @@ package project_pkg is
 	
   -- Reference clock is 24.576MHz
 	constant PACE_HAS_PLL										  : boolean := true;
+  --constant PACE_HAS_SRAM                    : boolean := false;
+  constant PACE_HAS_SDRAM                   : boolean := false;
+  constant PACE_HAS_FLASH                   : boolean := false;
+  constant PACE_HAS_SERIAL                  : boolean := false;
 	
+	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
+
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_240x320_60Hz;
   constant PACE_CLK0_DIVIDE_BY        		  : natural := 22;
   constant PACE_CLK0_MULTIPLY_BY      		  : natural := 27;  -- 24.576*27/22 = 30.161455MHz
@@ -23,18 +29,25 @@ package project_pkg is
 	constant PACE_VIDEO_H_SCALE         		  : integer := 1;
 	constant PACE_VIDEO_V_SCALE         		  : integer := 1;
 
+  constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
+  --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
+  
   constant PACE_HAS_OSD                     : boolean := false;
   constant PACE_OSD_XPOS                    : natural := 0;
   constant PACE_OSD_YPOS                    : natural := 0;
 
 	-- Frogger-specific constants
 			
-	constant FROGGER_CPU_CLK_ENA_DIVIDE_BY	  : natural := 10;
-	constant FROGGER_1MHz_CLK0_COUNTS				  : natural := 30;
-	-- needed by Galaxian_Interrupts
-	constant GALAXIAN_1MHz_CLK0_COUNTS			  : natural := FROGGER_1MHz_CLK0_COUNTS;
-	
+  constant FROGGER_HAS_SOUND                : boolean := false;
 	constant FROGGER_USE_INTERNAL_WRAM			  : boolean := true;
-	constant USE_VIDEO_VBLANK_INTERRUPT 		  : boolean := true;
+	constant FROGGER_USE_VIDEO_VBLANK 			  : boolean := true;
 	
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;
