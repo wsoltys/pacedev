@@ -68,6 +68,12 @@ package project_pkg is
   constant PACE_OSD_XPOS                    : natural := 0;
   constant PACE_OSD_YPOS                    : natural := 0;
 
+  -- S5A-specific constants
+
+  constant S5A_EMULATE_SRAM                 : boolean := false;
+  constant S5A_EMULATED_SRAM_WIDTH_AD       : natural := 16;
+  constant S5A_EMULATED_SRAM_WIDTH          : natural := 8;
+  
   --
 	-- Space Invaders-specific constants
 	--
@@ -77,4 +83,12 @@ package project_pkg is
 
 	constant USE_VIDEO_VBLANK_INTERRUPT 			: boolean := false;
 	
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

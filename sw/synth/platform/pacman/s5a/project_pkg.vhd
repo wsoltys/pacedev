@@ -65,4 +65,12 @@ package project_pkg is
 	constant PACMAN_USE_VIDEO_VBLANK            : boolean := true;
 	constant PACMAN_USE_INTERNAL_WRAM				    : boolean := not (PACE_HAS_SRAM or S5A_EMULATE_SRAM);
 	
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

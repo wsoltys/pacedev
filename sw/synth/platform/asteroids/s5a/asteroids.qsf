@@ -931,7 +931,7 @@ set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a/target_pkg.vhd
-set_global_assignment -name VHDL_FILE pll_3.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneiii/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneiii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneiii/spram.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneiii/dpram.vhd
@@ -956,6 +956,8 @@ set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/inputma
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_mixer.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Graphics.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/platform/asteroids/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2host.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneiii/ps2_fifo.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/i2c/oci2c/i2c_master_top.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/i2c/oci2c/i2c_master_bit_ctrl.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/i2c/oci2c/i2c_master_byte_ctrl.vhd

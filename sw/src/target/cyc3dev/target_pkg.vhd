@@ -26,4 +26,12 @@ package target_pkg is
 	--
 
     
+  type from_TARGET_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_TARGET_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;
