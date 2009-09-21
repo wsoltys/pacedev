@@ -29,4 +29,12 @@ package project_pkg is
 	constant PACE_ENABLE_ADV724					      : std_logic := '0';
 	constant PACE_ADV724_STD						      : std_logic := ADV724_STD_PAL;
 
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

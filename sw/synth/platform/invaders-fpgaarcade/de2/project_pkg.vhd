@@ -34,4 +34,12 @@ package project_pkg is
 	
 	constant DE2_LCD_LINE2							      : string := " INVADERS (VGA) ";
 
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

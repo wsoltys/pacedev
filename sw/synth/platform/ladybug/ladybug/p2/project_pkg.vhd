@@ -44,4 +44,12 @@ package project_pkg is
 
 	constant PACE_ENABLE_ADV724					: std_logic := LADYBUG_VIDEO_CVBS;
 				
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

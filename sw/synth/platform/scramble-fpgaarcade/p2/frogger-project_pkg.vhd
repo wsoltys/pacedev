@@ -34,11 +34,21 @@ package project_pkg is
 	constant SCRAMBLE_BUILD_SCRAMBLE		: boolean := false;
 	constant SCRAMBLE_BUILD_FROGGER			: boolean := not SCRAMBLE_BUILD_SCRAMBLE;
 	
+  constant PLATFORM_HAS_SOUND         : boolean := true;
+  
 	constant SCRAMBLE_VIDEO_CVBS				: std_logic := '0';
 	constant SCRAMBLE_VIDEO_VGA					: std_logic := not SCRAMBLE_VIDEO_CVBS;
 
   -- (derived)
 	constant PACE_ENABLE_ADV724					: std_logic := SCRAMBLE_VIDEO_CVBS;
 	constant PACE_ADV724_STD						: std_logic := ADV724_STD_PAL;
+
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
 
 end;

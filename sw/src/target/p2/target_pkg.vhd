@@ -23,4 +23,12 @@ package target_pkg is
 	constant ADV724_STD_PAL		  : std_logic := '0';
 	constant ADV724_STD_NTSC	  : std_logic := not ADV724_STD_PAL;
 
+  type from_TARGET_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_TARGET_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

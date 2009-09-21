@@ -32,6 +32,15 @@ package project_pkg is
 	constant PACE_ADV724_STD						      : std_logic := ADV724_STD_PAL;
 
 	-- Donkey Kong-specific constants
-	constant DKONG_INTERNAL_ROM					      : boolean := true;
-				
+  constant DKONG_ROM_IN_FLASH				        : boolean := PACE_HAS_FLASH;
+  constant DKONG_ROM_IN_SRAM                : boolean := false;
+  
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

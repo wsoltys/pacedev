@@ -44,4 +44,12 @@ package project_pkg is
 	constant TUTANKHAM_VRAM_WIDTHAD						: natural := 15;
 	constant TUTANKHAM_ROMS_IN_SRAM						: boolean := true;			
 	
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

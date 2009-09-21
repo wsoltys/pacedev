@@ -9,8 +9,9 @@ use work.sdram_pkg.all;
 use work.video_controller_pkg.all;
 use work.maple_pkg.all;
 use work.gamecube_pkg.all;
-use work.project_pkg.all;
 use work.target_pkg.all;
+use work.project_pkg.all;
+use work.platform_pkg.all;
 
 entity target_top is
  port
@@ -254,49 +255,55 @@ architecture SYN of target_top is
    );
  end component LCD_TEST;
 
- alias gpio_maple  : std_logic_vector(35 downto 0) is gpio_0;
- alias gpio_lcd  : std_logic_vector(35 downto 0) is gpio_1;
- signal clk_i : std_logic_vector(0 to 3);
- signal init  :  std_logic := '1';
- signal reset_i  :  std_logic := '1';
- signal reset_n : std_logic := '0';
- signal buttons_i  : from_BUTTONS_t;
- signal switches_i  : from_SWITCHES_t;
- signal leds_o  : to_LEDS_t;
- signal inputs_i   : from_INPUTS_t;
- signal flash_i : from_FLASH_t;
- signal flash_o : to_FLASH_t;
- signal sram_i : from_SRAM_t;
- signal sram_o : to_SRAM_t; 
- signal sdram_i : from_SDRAM_t;
- signal sdram_o : to_SDRAM_t;
- signal video_i : from_VIDEO_t;
- signal video_o : to_VIDEO_t;
- signal audio_i : from_AUDIO_t;
- signal audio_o : to_AUDIO_t;
- signal ser_i : from_SERIAL_t;
- signal ser_o : to_SERIAL_t;
+  alias gpio_maple  : std_logic_vector(35 downto 0) is gpio_0;
+  alias gpio_lcd  : std_logic_vector(35 downto 0) is gpio_1;
+  signal clk_i : std_logic_vector(0 to 3);
+  signal init  :  std_logic := '1';
+  signal reset_i  :  std_logic := '1';
+  signal reset_n : std_logic := '0';
+  signal buttons_i  : from_BUTTONS_t;
+  signal switches_i  : from_SWITCHES_t;
+  signal leds_o  : to_LEDS_t;
+  signal inputs_i   : from_INPUTS_t;
+  signal flash_i : from_FLASH_t;
+  signal flash_o : to_FLASH_t;
+  signal sram_i : from_SRAM_t;
+  signal sram_o : to_SRAM_t; 
+  signal sdram_i : from_SDRAM_t;
+  signal sdram_o : to_SDRAM_t;
+  signal video_i : from_VIDEO_t;
+  signal video_o : to_VIDEO_t;
+  signal audio_i : from_AUDIO_t;
+  signal audio_o : to_AUDIO_t;
+  signal ser_i : from_SERIAL_t;
+  signal ser_o : to_SERIAL_t;
+  signal project_i      : from_PROJECT_IO_t;
+  signal project_o      : to_PROJECT_IO_t;
+  signal platform_i     : from_PLATFORM_IO_t;
+  signal platform_o     : to_PLATFORM_IO_t;
+  signal target_i       : from_TARGET_IO_t;
+  signal target_o       : to_TARGET_IO_t;
  
- --maple/dreamcast controller interface
- signal maple_sense : std_logic;
- signal maple_oe : std_logic;
- signal mpj : work.maple_pkg.joystate_type;
+  --maple/dreamcast controller interface
+  signal maple_sense : std_logic;
+  signal maple_oe : std_logic;
+  signal mpj : work.maple_pkg.joystate_type;
 
---gamecube controller interface
- signal gcj : work.gamecube_pkg.joystate_type;  
- signal lcm_sclk   : std_logic;
- signal lcm_sdat   : std_logic;
- signal lcm_scen   : std_logic;
- signal lcm_data   : std_logic_vector(7 downto 0);
- signal lcm_grst  : std_logic;
- signal lcm_hsync  : std_logic;
- signal lcm_vsync  : std_logic;
- signal lcm_dclk  : std_logic;
- signal lcm_shdb  : std_logic;
- signal lcm_clk : std_logic;
- signal yoffs :  std_logic_vector(7 downto 0);
- signal pwmen :  std_logic;
- signal chaseen :  std_logic;
+  --gamecube controller interface
+  signal gcj : work.gamecube_pkg.joystate_type;  
+  signal lcm_sclk   : std_logic;
+  signal lcm_sdat   : std_logic;
+  signal lcm_scen   : std_logic;
+  signal lcm_data   : std_logic_vector(7 downto 0);
+  signal lcm_grst  : std_logic;
+  signal lcm_hsync  : std_logic;
+  signal lcm_vsync  : std_logic;
+  signal lcm_dclk  : std_logic;
+  signal lcm_shdb  : std_logic;
+  signal lcm_clk : std_logic;
+  signal yoffs :  std_logic_vector(7 downto 0);
+  signal pwmen :  std_logic;
+  signal chaseen :  std_logic;
  
 begin
 
@@ -737,8 +744,8 @@ begin
 
  --Display funkalicious pacman sprite y offset on 7seg display
  --Why? Because we can
- seg7_0: SEG7_LUT port map (iDIG => yoffs(7 downto 4), oSEG => oHEX7_D);
- seg7_1: SEG7_LUT port map (iDIG => yoffs(3 downto 0), oSEG => oHEX6_D);
+ --seg7_0: SEG7_LUT port map (iDIG => yoffs(7 downto 4), oSEG => oHEX7_D);
+ --seg7_1: SEG7_LUT port map (iDIG => yoffs(3 downto 0), oSEG => oHEX6_D);
 
  --GPIO
  gpio_0 <= (others => 'Z');
@@ -783,45 +790,49 @@ begin
  pace_inst : entity work.pace                      
   port map
   (
-   --clocks and resets
-   clk_i       => clk_i,
-   reset_i      => reset_i,
+    --clocks and resets
+    clk_i       => clk_i,
+    reset_i      => reset_i,
 
-   --misc inputs and outputs
-   buttons_i     => buttons_i,
-   switches_i    => switches_i,
-   leds_o      => leds_o,
-   
-   --controller inputs
-   inputs_i     => inputs_i,
+    --misc inputs and outputs
+    buttons_i     => buttons_i,
+    switches_i    => switches_i,
+    leds_o      => leds_o,
 
-   --external ROM/RAM
-   flash_i      => flash_i,
-   flash_o      => flash_o,
-   sram_i      => sram_i,
-   sram_o      => sram_o,
-   sdram_i      => sdram_i,
-   sdram_o      => sdram_o,
- 
-   --VGA video
-   video_i      => video_i,
-   video_o      => video_o,
-   
-   --sound
-   audio_i      => audio_i,
-   audio_o      => audio_o,
+    --controller inputs
+    inputs_i     => inputs_i,
 
-   --SPI (flash)
-   spi_i.din     => '0',
-   spi_o       => open,
- 
-   --serial
-   ser_i       => ser_i,
-   ser_o       => ser_o,
+    --external ROM/RAM
+    flash_i      => flash_i,
+    flash_o      => flash_o,
+    sram_i      => sram_i,
+    sram_o      => sram_o,
+    sdram_i      => sdram_i,
+    sdram_o      => sdram_o,
+
+    --VGA video
+    video_i      => video_i,
+    video_o      => video_o,
+
+    --sound
+    audio_i      => audio_i,
+    audio_o      => audio_o,
+
+    --SPI (flash)
+    spi_i.din     => '0',
+    spi_o       => open,
+
+    --serial
+    ser_i       => ser_i,
+    ser_o       => ser_o,
    
-   --general purpose
-   gp_i       => (others => '0'),
-   gp_o       => open
+    -- custom i/o
+    project_i         => project_i,
+    project_o         => project_o,
+    platform_i        => platform_i,
+    platform_o        => platform_o,
+    target_i          => target_i,
+    target_o          => target_o
   );
 
  av_init : I2C_AV_Config

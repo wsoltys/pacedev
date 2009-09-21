@@ -5,6 +5,7 @@ use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
+use work.sdram_pkg.all;
 use work.video_controller_pkg.all;
 use work.maple_pkg.all;
 use work.gamecube_pkg.all;
@@ -187,8 +188,12 @@ architecture SYN of target_top is
   signal audio_o      	: to_AUDIO_t;
   signal ser_i        	: from_SERIAL_t;
   signal ser_o        	: to_SERIAL_t;
-  signal gp_i         	: from_GP_t;
-  signal gp_o         	: to_GP_t;
+  signal project_i      : from_PROJECT_IO_t;
+  signal project_o      : to_PROJECT_IO_t;
+  signal platform_i     : from_PLATFORM_IO_t;
+  signal platform_o     : to_PLATFORM_IO_t;
+  signal target_i       : from_TARGET_IO_t;
+  signal target_o       : to_TARGET_IO_t;
   
 	-- maple/dreamcast controller interface
 	signal maple_sense		: std_logic;
@@ -581,16 +586,16 @@ begin
   begin
 
     -- eurospi drivers
-    eurospi_clk <= gp_o.d(P2A_EUROSPI_CLK) when gp_o.oe(P2A_EUROSPI_CLK) = '1' else 'Z';
-    eurospi_miso <= gp_o.d(P2A_EUROSPI_MISO) when gp_o.oe(P2A_EUROSPI_MISO) = '1' else 'Z';
-    eurospi_mosi <= gp_o.d(P2A_EUROSPI_MOSI) when gp_o.oe(P2A_EUROSPI_MOSI) = '1' else 'Z';
-    eurospi_ss <= gp_o.d(P2A_EUROSPI_SS) when gp_o.oe(P2A_EUROSPI_SS) = '1' else 'Z';
+    --eurospi_clk <= gp_o.d(P2A_EUROSPI_CLK) when gp_o.oe(P2A_EUROSPI_CLK) = '1' else 'Z';
+    --eurospi_miso <= gp_o.d(P2A_EUROSPI_MISO) when gp_o.oe(P2A_EUROSPI_MISO) = '1' else 'Z';
+    --eurospi_mosi <= gp_o.d(P2A_EUROSPI_MOSI) when gp_o.oe(P2A_EUROSPI_MOSI) = '1' else 'Z';
+    --eurospi_ss <= gp_o.d(P2A_EUROSPI_SS) when gp_o.oe(P2A_EUROSPI_SS) = '1' else 'Z';
     
     -- eurospi inputs
-    gp_i(P2A_EUROSPI_CLK) <= eurospi_clk;
-    gp_i(P2A_EUROSPI_MISO) <= eurospi_miso;
-    gp_i(P2A_EUROSPI_MOSI) <= eurospi_mosi;
-    gp_i(P2A_EUROSPI_SS) <= eurospi_ss;
+    --gp_i(P2A_EUROSPI_CLK) <= eurospi_clk;
+    --gp_i(P2A_EUROSPI_MISO) <= eurospi_miso;
+    --gp_i(P2A_EUROSPI_MOSI) <= eurospi_mosi;
+    --gp_i(P2A_EUROSPI_SS) <= eurospi_ss;
     
   end block BLK_EUROSPI;
 	
@@ -687,9 +692,13 @@ begin
       ser_i             => ser_i,
       ser_o             => ser_o,
       
-      -- general purpose
-      gp_i              => gp_i,
-      gp_o              => gp_o
+      -- custom i/o
+      project_i         => project_i,
+      project_o         => project_o,
+      platform_i        => platform_i,
+      platform_o        => platform_o,
+      target_i          => target_i,
+      target_o          => target_o
     );
 
   BLK_CHASER : block

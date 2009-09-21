@@ -176,6 +176,12 @@ architecture SYN of target_top is
   signal audio_o      : to_AUDIO_t;
   signal ser_i        : from_SERIAL_t;
   signal ser_o        : to_SERIAL_t;
+  signal project_i      : from_PROJECT_IO_t;
+  signal project_o      : to_PROJECT_IO_t;
+  signal platform_i     : from_PLATFORM_IO_t;
+  signal platform_o     : to_PLATFORM_IO_t;
+  signal target_i       : from_TARGET_IO_t;
+  signal target_o       : to_TARGET_IO_t;
   
 	-- maple/dreamcast controller interface
 	signal maple_sense	: std_logic;
@@ -628,9 +634,13 @@ begin
       ser_i             => ser_i,
       ser_o             => ser_o,
       
-      -- general purpose
-      gp_i              => (others => '0'),
-      gp_o              => open
+      -- custom i/o
+      project_i         => project_i,
+      project_o         => project_o,
+      platform_i        => platform_i,
+      platform_o        => platform_o,
+      target_i          => target_i,
+      target_o          => target_o
     );
 
   BLK_CHASER : block
