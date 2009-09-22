@@ -968,3 +968,4 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/io/lpc/lpc_pk
 set_global_assignment -name VERILOG_FILE ../../../../../src/component/io/lpc/wb_lpc_periph.v
 set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a/target_top.vhd
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
+set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a/custom_io.vhd
