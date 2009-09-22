@@ -50,4 +50,12 @@ package project_pkg is
 	--constant C64_1541_ROM_NAME					      : string := "25196801";
 	constant C64_1541_ROM_NAME					      : string := "25196802";
 
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

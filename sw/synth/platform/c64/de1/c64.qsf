@@ -497,6 +497,7 @@ set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sdram_pkg.vhd
@@ -508,7 +509,6 @@ set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/de1/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
-set_global_assignment -name VHDL_FILE c64_pll.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/cpu65xx_e.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/cpu65xx_fast.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/video_vicII_656x_e.vhdl
@@ -560,5 +560,5 @@ set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2C_AV_Confi
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/seg7_lut.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2S_LCM_Config.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/i2s_controller.v
-set_global_assignment -name VHDL_FILE target_top.vhd
-set_global_assignment -name INCREMENTAL_COMPILATION OFF
+set_global_assignment -name VHDL_FILE ../../../../src/target/de1/custom_io.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/de1/target_top.vhd

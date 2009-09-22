@@ -8,6 +8,7 @@ use work.pace_pkg.all;
 use work.sdram_pkg.all;
 use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
+use work.target_pkg.all;
 use work.platform_pkg.all;
 use work.project_pkg.all;
 
@@ -50,22 +51,13 @@ entity PACE is
     ser_i           : in from_SERIAL_t;
     ser_o           : out to_SERIAL_t;
     
-    -- general purpose I/O
-    gp_i            : in from_GP_t;
-    gp_o            : out to_GP_t;
-
-		-- SB (IEC) port
-		ext_sb_data_in	: in std_logic;
-		ext_sb_data_oe	: out std_logic;
-		ext_sb_clk_in		: in std_logic;
-		ext_sb_clk_oe		: out std_logic;
-		ext_sb_atn_in		: in std_logic;
-		ext_sb_atn_oe		: out std_logic;
-
-		-- generic drive mechanism i/o ports
-		mech_in					: in std_logic_vector(63 downto 0);
-		mech_out				: out std_logic_vector(63 downto 0);
-		mech_io					: inout std_logic_vector(63 downto 0)
+    -- custom i/o
+    project_i       : in from_PROJECT_IO_t;
+    project_o       : out to_PROJECT_IO_t;
+    platform_i      : in from_PLATFORM_IO_t;
+    platform_o      : out to_PLATFORM_IO_t;
+    target_i        : in from_TARGET_IO_t;
+    target_o        : out to_TARGET_IO_t
   );
 end entity PACE;
 
@@ -136,6 +128,7 @@ begin
   GEN_SRAM : if PACE_HAS_SRAM generate
     sram_o.a <= "0000000" & std_logic_vector(sram_addr_s);
     sram_o.d(c64_ramdata_o'range) <= std_logic_vector(c64_ramdata_o);
+    sram_o.be <= "0001";
     sram_o.cs <= not sram_cs_n;
     sram_o.oe <= not sram_oe_n;
     sram_o.we <= not sram_we_n;
@@ -306,9 +299,9 @@ begin
 				act							=> c1541_activity_led,
 
 				-- generic drive mechanism i/o ports
-				mech_in					=> mech_in,
-				mech_out				=> mech_out,
-				mech_io					=> mech_io
+				mech_in					=> platform_i.mech_in,
+				mech_out				=> platform_o.mech_out,
+				mech_io					=> open --mech_io
 			);
 
 	end generate GEN_1541;
@@ -331,31 +324,34 @@ begin
 		
 			constant UNMETA_STAGES : natural := 2;
 			
-			signal um_sb_data_in 	: std_logic_vector(UNMETA_STAGES-1 downto 0);
-			signal um_sb_clk_in 	: std_logic_vector(UNMETA_STAGES-1 downto 0);
-			signal um_sb_atn_in 	: std_logic_vector(UNMETA_STAGES-1 downto 0);
+			signal sb_data_in_r 	: std_logic_vector(UNMETA_STAGES-1 downto 0);
+			alias sb_data_in_um   : std_logic is sb_data_in_r(sb_data_in_r'left);
+			signal sb_clk_in_r 	  : std_logic_vector(UNMETA_STAGES-1 downto 0);
+			alias sb_clk_in_um    : std_logic is sb_clk_in_r(sb_clk_in_r'left);
+			signal sb_atn_in_r 	  : std_logic_vector(UNMETA_STAGES-1 downto 0);
+			alias sb_atn_in_um    : std_logic is sb_atn_in_r(sb_atn_in_r'left);
 			
 		begin
 	
 			process (clk_32M, reset_i)
 			begin
 				if reset_i = '1' then
-					um_sb_data_in <= (others => '1');
-					um_sb_clk_in <= (others => '1');
-					um_sb_atn_in <= (others => '1');
+					sb_data_in_r <= (others => '1');
+					sb_clk_in_r <= (others => '1');
+					sb_atn_in_r <= (others => '1');
 				elsif rising_edge(clk_32M) then
-					um_sb_data_in <= um_sb_data_in(um_sb_data_in'left-1 downto 0) & ext_sb_data_in;
-					um_sb_clk_in <= um_sb_clk_in(um_sb_clk_in'left-1 downto 0) & ext_sb_clk_in;
-					um_sb_atn_in <= um_sb_atn_in(um_sb_atn_in'left-1 downto 0) & ext_sb_atn_in;
+					sb_data_in_r <= sb_data_in_r(sb_data_in_r'left-1 downto 0) & platform_i.sb_data_in;
+					sb_clk_in_r <= sb_clk_in_r(sb_clk_in_r'left-1 downto 0) & platform_i.sb_clk_in;
+					sb_atn_in_r <= sb_atn_in_r(sb_atn_in_r'left-1 downto 0) & platform_i.sb_atn_in;
 				end if;
 			end process;
 					
 			int_sb_data <= 	'0' when (c64_sb_data_oe = '1' or c1541_sb_data_oe = '1') else
-											um_sb_data_in(um_sb_data_in'left);
+											sb_data_in_um;
 			int_sb_clk <= 	'0' when (c64_sb_clk_oe = '1' or c1541_sb_clk_oe = '1') else
-											um_sb_clk_in(um_sb_clk_in'left);
+											sb_clk_in_um;
 			int_sb_atn <= 	'0' when (c64_sb_atn_oe = '1' or c1541_sb_atn_oe = '1') else
-											um_sb_atn_in(um_sb_atn_in'left);
+											sb_atn_in_um;
 
 		end block BLK_EXT_SB;
 	
@@ -370,9 +366,9 @@ begin
 	end generate GEN_NO_EXT_SB;
 
 	-- doesn't matter if no external bus is connected
-	ext_sb_data_oe <= c64_sb_data_oe or c1541_sb_data_oe;
-	ext_sb_clk_oe <= c64_sb_clk_oe or c1541_sb_clk_oe;
-	ext_sb_atn_oe <= c64_sb_atn_oe or c1541_sb_atn_oe;
+	platform_o.sb_data_oe <= c64_sb_data_oe or c1541_sb_data_oe;
+	platform_o.sb_clk_oe <= c64_sb_clk_oe or c1541_sb_clk_oe;
+	platform_o.sb_atn_oe <= c64_sb_atn_oe or c1541_sb_atn_oe;
 
 	-- unused
 	spi_o <= NULL_TO_SPI;

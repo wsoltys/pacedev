@@ -142,6 +142,12 @@ architecture SYN of target_top is
   signal platform_o     : to_PLATFORM_IO_t;
   signal target_i       : from_TARGET_IO_t;
   signal target_o       : to_TARGET_IO_t;
+
+  -- gpio drivers from custom logic
+  signal custom_gpio_0_o    : std_logic_vector(35 downto 0);
+  signal custom_gpio_0_oe   : std_logic_vector(35 downto 0);
+  signal custom_gpio_1_o    : std_logic_vector(35 downto 0);
+  signal custom_gpio_1_oe   : std_logic_vector(35 downto 0);
   
 	-- maple/dreamcast controller interface
 	signal maple_sense	: std_logic;
@@ -270,8 +276,10 @@ begin
 				b					=> gpio_maple(13),
 				joystate	=> mpj
 			);
-		gpio_maple(12) <= maple_oe;
-		gpio_maple(11) <= not maple_oe;
+    gpio_0(12) <= custom_gpio_0_o(12) when custom_gpio_0_oe(12) = '1' else
+                  maple_oe;
+		gpio_0(11) <= custom_gpio_0_o(11) when custom_gpio_0_oe(11) = '1' else
+                  not maple_oe;
 		maple_sense <= gpio_maple(17); -- and sw(0);
 
 		-- map maple bus to jamma inputs
@@ -533,14 +541,8 @@ begin
   -- disable JTAG
   tdo <= 'Z';
   
-  -- *MUST* be high to use 27MHz clock as input
-  -- td_reset <= '1';
-
   -- GPIO
 
-  --gp_i(71 downto 36) <= gpio_0;
-  --gp_i(35 downto 0) <= gpio_0;
-  
   GEN_TEST_BURCHED_LEDS : if DE1_TEST_BURCHED_LEDS generate
   
     assert (PACE_JAMMA = PACE_JAMMA_NONE and
@@ -581,13 +583,15 @@ begin
         severity failure;
       
     -- D0-7
-    --gp_i(35 downto 28) <= gpio_0(35 downto 28);
-    --gpio_0(35 downto 28) <= gp_o.d(35 downto 28) when gp_o.d(19) = '0' else (others => 'Z');
+    --custom_gpio_0_i(35 downto 28) <= gpio_0(35 downto 28);
+    gpio_0(35 downto 28) <= custom_gpio_0_o(35 downto 28) when custom_gpio_0_oe(19) = '0' else 
+                            (others => 'Z');
     -- D8-15
-    --gp_i(27 downto 20) <= gpio_0(27 downto 20);
-    --gpio_0(27 downto 20) <= gp_o.d(27 downto 20) when gp_o.d(18) = '0' else (others => 'Z');
+    --custom_gpio_0_i(27 downto 20) <= gpio_0(27 downto 20);
+    gpio_0(27 downto 20) <= custom_gpio_0_o(27 downto 20) when custom_gpio_0_oe(18) = '0' else 
+                            (others => 'Z');
     -- A & CEn & WEn
-    --gpio_0(19 downto 0) <= gp_o.d(19 downto 0);
+    gpio_0(19 downto 0) <= custom_gpio_0_o(19 downto 0);
 
   end generate GEN_BURCHED_SRAM;
   
@@ -659,6 +663,27 @@ begin
       target_o          => target_o
     );
 
+  custom_io_inst : entity work.custom_io
+    port map
+    (
+      gpio_0_i          => gpio_0,
+      gpio_0_o          => custom_gpio_0_o,
+      gpio_0_oe         => custom_gpio_0_oe,
+      
+      -- GPIO 1 connector
+      gpio_1_i          => gpio_1,
+      gpio_1_o          => custom_gpio_1_o,
+      gpio_1_oe         => custom_gpio_1_oe,
+
+      -- custom i/o
+      project_i         => project_i,
+      project_o         => project_o,
+      platform_i        => platform_i,
+      platform_o        => platform_o,
+      target_i          => target_i,
+      target_o          => target_o
+    );
+  
   BLK_AV : block
     component I2C_AV_Config
       port

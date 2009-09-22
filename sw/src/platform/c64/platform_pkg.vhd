@@ -52,4 +52,22 @@ package platform_pkg is
       dbg_synchole : std_logic;
     end record;
 
+  type from_PLATFORM_IO_t is record
+		-- IEC
+		sb_data_in			: std_logic;
+		sb_clk_in				: std_logic;
+		sb_atn_in				: std_logic;
+		-- generic drive mechanism i/o ports
+		mech_in					: std_logic_vector(63 downto 0);
+  end record;
+
+  type to_PLATFORM_IO_t is record
+		-- IEC
+		sb_data_oe			: std_logic;
+		sb_clk_oe				: std_logic;
+		sb_atn_oe				: std_logic;
+		-- generic drive mechanism i/o ports
+		mech_out				: std_logic_vector(63 downto 0);
+  end record;
+
 end;
