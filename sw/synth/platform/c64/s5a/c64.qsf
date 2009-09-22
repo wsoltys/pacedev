@@ -964,6 +964,9 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_MCod
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_ALU.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/m6522.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/c1541_fifo.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/c1541_logic.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/c1541_core_fifo.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/i2c/oci2c/i2c_master_top.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/i2c/oci2c/i2c_master_bit_ctrl.vhd
@@ -972,5 +975,6 @@ set_global_assignment -name VHDL_FILE ../../../../src/target/s5a/i2c_sm.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a/dvo_sm.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneiii/ps2_fifo.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2host.vhd
-set_global_assignment -name VHDL_FILE target_top.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/s5a/target_top.vhd
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
+set_global_assignment -name VHDL_FILE custom_io.vhd

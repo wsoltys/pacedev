@@ -27,10 +27,7 @@ package project_pkg is
   constant PACE_CLK0_DIVIDE_BY              : natural := 25;
   constant PACE_CLK0_MULTIPLY_BY            : natural := 16;  		-- 50*16/25 = 32MHz
   constant PACE_CLK1_DIVIDE_BY              : natural := 1;
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 1;  			-- 50*1/1 = 96Mhz
-
-	constant PACE_ENABLE_ADV724					      : std_logic := '0';
-	--constant PACE_ADV724_STD						    : std_logic := ADV724_STD_PAL;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 1;  			-- 50*1/1 = 50Mhz
 
 	-- C64-specific constants
 

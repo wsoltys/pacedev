@@ -167,10 +167,10 @@ architecture SYN of target_top is
 	signal vo_clk					: std_logic;
 
   -- PS/2 fifo signals
-  signal ps2_fifo_data  : std_logic_vector(7 downto 0) := (others => '0');
-  signal ps2_fifo_wrreq : std_logic := '0';
-  signal ps2_fifo_full  : std_logic := '0';
-  signal ps2_fifo_usedw : std_logic_vector(7 downto 0) := (others => '0');
+  signal ps2_fifo_data    : std_logic_vector(7 downto 0) := (others => '0');
+  signal ps2_fifo_wrreq   : std_logic := '0';
+  signal ps2_fifo_full    : std_logic := '0';
+  signal ps2_fifo_usedw   : std_logic_vector(7 downto 0) := (others => '0');
 
 begin
 
@@ -300,22 +300,31 @@ begin
 
   BLK_MIXER_BUS : block
 
-    signal wb_adr       : std_logic_vector(31 downto 0) := (others => '0');
-    signal wb_dat_o     : std_logic_vector(31 downto 0) := (others => '0');
-    signal wb_dat_i     : std_logic_vector(31 downto 0) := (others => '0');
-    signal wb_sel       : std_logic_vector(3 downto 0) := (others => '0');
-    signal wb_tga       : std_logic_vector(1 downto 0) := (others => '0');
-    signal wb_we        : std_logic := '0';
-    signal wb_stb       : std_logic := '0';
-    signal wb_cyc       : std_logic := '0';
-    signal wb_ack       : std_logic := '0';
+    signal lpc_clk          : std_logic := '0';
+    signal lpc_reset_n      : std_logic := '1';
+    signal lpc_frame        : std_logic := '0';
+    signal lpc_ad_i         : std_logic_vector(3 downto 0) := (others => '0');
+    signal lpc_ad_o         : std_logic_vector(3 downto 0) := (others => '0');
+    signal lpc_ad_oe        : std_logic := '0';
+
+    signal wb_adr           : std_logic_vector(31 downto 0) := (others => '0');
+    signal wb_dat_o         : std_logic_vector(31 downto 0) := (others => '0');
+    signal wb_dat_i         : std_logic_vector(31 downto 0) := (others => '0');
+    signal wb_sel           : std_logic_vector(3 downto 0) := (others => '0');
+    signal wb_tga           : std_logic_vector(1 downto 0) := (others => '0');
+    signal wb_we            : std_logic := '0';
+    signal wb_stb           : std_logic := '0';
+    signal wb_cyc           : std_logic := '0';
+    signal wb_ack           : std_logic := '0';
     
-    signal lpc_clk      : std_logic := '0';
-    signal lpc_reset_n  : std_logic := '1';
-    signal lpc_frame    : std_logic := '0';
-    signal lpc_ad_i     : std_logic_vector(3 downto 0) := (others => '0');
-    signal lpc_ad_o     : std_logic_vector(3 downto 0) := (others => '0');
-    signal lpc_ad_oe    : std_logic := '0';
+    signal ps2_jamma_stb    : std_logic := '0';
+    signal ps2_jamma_ack    : std_logic := '0';
+    signal ps2_jamma_dat_o  : std_logic_vector(7 downto 0) := (others => '0');
+    
+    -- custom i/o signals
+    signal custom_io_stb    : std_logic := '0';
+    signal custom_io_ack    : std_logic := '0';
+    signal custom_io_dat_o  : std_logic_vector(7 downto 0) := (others => '0');
 
     type lpc_reg_a is array (natural range <>) of std_logic_vector(7 downto 0);
     signal lpc_reg      : lpc_reg_a(0 to 3) := (others => (others => '1'));
@@ -350,6 +359,29 @@ begin
         lad_oe      => lpc_ad_oe
       );
 
+    -- address decodes
+    --
+    -- $C0-$CF  - custom i/o
+    -- $E0-$EF  - PS/2 & JAMMA
+    --  $E0-$E3 -                       (W) JAMMA inputs
+    --  $E8     - (R) PS/2 FIFO_WRFULL
+    --  $EC     - (R) PS/2 FIFO_USEDW   (W) PS/2 FIFO
+    --
+    custom_io_stb <= '1' when wb_adr(7 downto 4) = "1100" else '0';
+    ps2_jamma_stb <= '1' when wb_adr(7 downto 4) = "1110" else '0';
+    --berr <= not (custom_io_stb or ps2_jamma_stb);
+
+    -- read mux
+    wb_dat_i(31 downto 8) <= (others => '0');
+    wb_dat_i(7 downto 0) <= custom_io_dat_o when custom_io_stb = '1' else
+                            ps2_jamma_dat_o when ps2_jamma_stb = '1' else
+                            (others => '0');
+               
+    -- ack mux
+    wb_ack <= custom_io_ack when custom_io_stb = '1' else
+              ps2_jamma_ack when ps2_jamma_stb = '1' else
+              (wb_cyc and wb_stb);  -- berr
+              
     process (lpc_clk, lpc_reset_n)
       variable adr : integer range 0 to 3;
       variable wb_cyc_r : std_logic := '0';
@@ -360,20 +392,20 @@ begin
       elsif rising_edge(lpc_clk) then
         ps2_fifo_wrreq <= '0';  -- default
         adr := to_integer(unsigned(wb_adr(1 downto 0)));
-        if wb_cyc = '1' and wb_stb = '1' and wb_cyc_r = '0' then
+        if wb_cyc = '1' and ps2_jamma_stb = '1' and wb_cyc_r = '0' then
           if wb_we = '0' then
             -- reads
-            case wb_adr(7 downto 6) is
+            case wb_adr(3 downto 2) is
               when "11" =>
-                wb_dat_i(ps2_fifo_usedw'range) <= ps2_fifo_usedw;
+                ps2_jamma_dat_o <= ps2_fifo_usedw;
               when "10" =>
-                wb_dat_i(7 downto 0) <= "0000000" & ps2_fifo_full;
+                ps2_jamma_dat_o <= "0000000" & ps2_fifo_full;
               when others =>
-                wb_dat_i(7 downto 0) <= (others => '0');
+                ps2_jamma_dat_o <= (others => '0');
             end case;
           else
             -- writes
-            case wb_adr(7 downto 6) is
+            case wb_adr(3 downto 2) is
               when "11" =>
                 ps2_fifo_data <= wb_dat_o(ps2_fifo_data'range);
                 ps2_fifo_wrreq <= '1';
@@ -382,9 +414,9 @@ begin
             end case;
           end if;
         end if;
-        wb_cyc_r := wb_cyc and wb_stb;
+        wb_cyc_r := wb_cyc and ps2_jamma_stb;
         -- drive ack
-        wb_ack <= wb_cyc and wb_stb;
+        ps2_jamma_ack <= wb_cyc and ps2_jamma_stb;
       end if;
     end process;
     
@@ -412,6 +444,28 @@ begin
     
     inputs_i.analogue <= (others => (others => '0'));
     
+    custom_io_inst : entity work.custom_io
+      port map
+      (
+        -- wishbone (LPC) interface
+        wb_clk          => lpc_clk,
+        wb_rst          => mix_reset,
+        wb_cyc          => wb_cyc,
+        wb_stb          => custom_io_stb,
+        wb_adr          => wb_adr(7 downto 0),
+        wb_dat_i        => wb_dat_o(7 downto 0),
+        wb_dat_o        => custom_io_dat_o,
+        wb_we           => wb_we,
+        wb_ack          => custom_io_ack,
+        
+        project_i       => project_i,
+        project_o       => project_o,
+        platform_i      => platform_i,
+        platform_o      => platform_o,
+        target_i        => target_i,
+        target_o        => target_o
+      );
+
   end block BLK_MIXER_BUS;
 
   BLK_VIDEO : block
@@ -435,7 +489,16 @@ begin
       generic map
       (
         clock_speed => 25000000,
-        dsel        => '0'          -- single-ended output clock
+        dsel        => '0',         -- single-ended output clock
+
+        -- DE generation
+        DE_GEN      => S5A_DE_GEN,
+        VS_POL      => S5A_VS_POL,
+        HS_POL      => S5A_HS_POL,
+        DE_DLY      => S5A_DE_DLY,
+        DE_TOP      => S5A_DE_TOP,
+        DE_CNT      => S5A_DE_CNT,
+        DE_LIN      => S5A_DE_LIN
       )
       port map
       (
@@ -472,32 +535,32 @@ begin
     vo_rstn <= reset_n;
 
     GEN_TEST_VIDEO : if false generate
-      reg_i.h_scale <= "001";
-      reg_i.v_scale <= "001";
+      --reg_i.h_scale <= "001";
+      --reg_i.v_scale <= "001";
       
-      rgb_i.r <= (others => '1');
-      rgb_i.g <= (others => '0');
-      rgb_i.b <= (others => '0');
+      --rgb_i.r <= (others => '1');
+      --rgb_i.g <= (others => '0');
+      --rgb_i.b <= (others => '0');
 
-      video_inst : entity work.pace_video_controller
-        generic map
-        (
-          CONFIG		  => PACE_VIDEO_VGA_1280x1024_60Hz,
-          DELAY       => 3,
-          H_SIZE      => 240,
-          V_SIZE      => 256,
-          H_SCALE     => 1,
-          V_SCALE     => 1,
-          BORDER_RGB  => RGB_BLUE
-        )
-        port map
-        (
-          video_i       => video_i,
-          reg_i			    => reg_i,
-          rgb_i         => rgb_i,
-          video_ctl_o   => open,
-          video_o       => video_o
-        );
+      --video_inst : entity work.pace_video_controller
+      --  generic map
+      --  (
+      --    CONFIG		  => PACE_VIDEO_VGA_1280x1024_60Hz,
+      --    DELAY       => 3,
+      --    H_SIZE      => 240,
+      --    V_SIZE      => 256,
+      --    H_SCALE     => 1,
+      --    V_SCALE     => 1,
+      --    BORDER_RGB  => RGB_BLUE
+      --  )
+      --  port map
+      --  (
+      --    video_i       => video_i,
+      --    reg_i			    => reg_i,
+      --    rgb_i         => rgb_i,
+      --    video_ctl_o   => open,
+      --    video_o       => video_o
+      --  );
     end generate GEN_TEST_VIDEO;
     
   end block BLK_VIDEO;

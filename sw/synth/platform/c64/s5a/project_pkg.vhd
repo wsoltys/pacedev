@@ -16,7 +16,7 @@ package project_pkg is
   -- Reference clock is 24.576MHz
 	constant PACE_HAS_PLL								      : boolean := true;
   constant PACE_HAS_FLASH                   : boolean := false;
-  constant PACE_HAS_SRAM                    : boolean := false;
+  --constant PACE_HAS_SRAM                    : boolean := false;
   constant PACE_HAS_SDRAM                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := false;
 
@@ -39,11 +39,17 @@ package project_pkg is
   --constant S5A_DE_CNT                       : std_logic_vector(11 downto 0) := X"350";  -- 848
   constant S5A_DE_CNT                       : std_logic_vector(11 downto 0) := X"280";  -- 640
   constant S5A_DE_LIN                       : std_logic_vector(11 downto 0) := X"270";  -- 312*2=624???
+
+  constant S5A_EMULATE_SRAM                 : boolean := false;
+  constant S5A_EMULATED_SRAM_WIDTH          : natural := 8;
+  constant S5A_EMULATED_SRAM_WIDTH_AD       : natural := 17;
+
+  constant PACE_HAS_SRAM                    : boolean := S5A_EMULATE_SRAM;
   
 	-- C64-specific constants
 
 	constant C64_HAS_C64								      : boolean := true;
-	constant C64_HAS_1541								      : boolean := false;
+	constant C64_HAS_1541								      : boolean := true;
 	constant C64_HAS_EXT_SB							      : boolean := false;
 	constant C64_RESET_CYCLES						      : natural := 4095;
 

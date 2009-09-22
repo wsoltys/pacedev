@@ -57,8 +57,12 @@ package platform_pkg is
 		sb_data_in			: std_logic;
 		sb_clk_in				: std_logic;
 		sb_atn_in				: std_logic;
-		-- generic drive mechanism i/o ports
-		mech_in					: std_logic_vector(63 downto 0);
+    -- drive mech signals
+		wps_n						: std_logic;
+		tr00_sense_n		: std_logic;
+    fifo_wrclk      : std_logic;
+    fifo_data       : std_logic_vector(7 downto 0);
+    fifo_wrreq      : std_logic;
   end record;
 
   type to_PLATFORM_IO_t is record
@@ -66,8 +70,11 @@ package platform_pkg is
 		sb_data_oe			: std_logic;
 		sb_clk_oe				: std_logic;
 		sb_atn_oe				: std_logic;
-		-- generic drive mechanism i/o ports
-		mech_out				: std_logic_vector(63 downto 0);
+    -- drive mech signals
+		stp_in					: std_logic;
+		stp_out					: std_logic;
+    fifo_wrfull     : std_logic;
+    fifo_wrusedw    : std_logic_vector(7 downto 0);
   end record;
 
 end;

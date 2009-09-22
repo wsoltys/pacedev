@@ -539,6 +539,9 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/m6522.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/c1541_logic.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/c1541_fifo.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/c1541_core_fifo.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwm_chaser.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwmout.vhd

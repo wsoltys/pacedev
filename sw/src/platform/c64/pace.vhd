@@ -63,7 +63,7 @@ end entity PACE;
 
 architecture SYN of PACE is
 
-  component c1541_top is
+  component c1541_core is
     generic
     (
       DEVICE_SELECT		: std_logic_vector(1 downto 0)
@@ -85,12 +85,20 @@ architecture SYN of PACE is
       ds							: in std_logic_vector(1 downto 0);		-- device select
       act							: out std_logic;											-- activity LED
 
-      -- generic drive mechanism i/o ports
-      mech_in					: in std_logic_vector(63 downto 0);
-      mech_out				: out std_logic_vector(63 downto 0);
-      mech_io					: inout std_logic_vector(63 downto 0)
+      -- mechanism interface signals				
+      wps_n						: in std_logic;
+      tr00_sense_n		: in std_logic;
+      stp_in					: out std_logic;
+      stp_out					: out std_logic;
+
+      -- fifo signals
+      fifo_wrclk      : in std_logic;
+      fifo_data       : in std_logic_vector(7 downto 0);
+      fifo_wrreq      : in std_logic;
+      fifo_wrfull     : out std_logic;
+      fifo_wrusedw    : out std_logic_vector(7 downto 0)
     );
-  end component c1541_top;
+  end component c1541_core;
 
 	alias clk_32M								: std_logic is clk_i(0);
 		
@@ -276,7 +284,7 @@ begin
 	
 	GEN_1541 : if C64_HAS_1541 generate
 
-		c1541_inst : c1541_top
+		c1541_inst : c1541_core
 			generic map
 			(
 				DEVICE_SELECT		=> C64_1541_DEVICE_SELECT(1 downto 0)
@@ -298,10 +306,18 @@ begin
 				ds							=> switches_i(1 downto 0),
 				act							=> c1541_activity_led,
 
-				-- generic drive mechanism i/o ports
-				mech_in					=> platform_i.mech_in,
-				mech_out				=> platform_o.mech_out,
-				mech_io					=> open --mech_io
+        -- mechanism interface signals				
+        wps_n						=> platform_i.wps_n,
+        tr00_sense_n		=> platform_i.tr00_sense_n,
+        stp_in					=> platform_o.stp_in,
+        stp_out					=> platform_o.stp_out,
+
+        -- fifo signals
+        fifo_wrclk      => platform_i.fifo_wrclk,
+        fifo_data       => platform_i.fifo_data,
+        fifo_wrreq      => platform_i.fifo_wrreq,
+        fifo_wrfull     => platform_o.fifo_wrfull,
+        fifo_wrusedw    => platform_o.fifo_wrusedw
 			);
 
 	end generate GEN_1541;
