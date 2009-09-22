@@ -31,4 +31,12 @@ package project_pkg is
 	-- Videopac-specific constants            
 	constant VIDEOPAC_CART_NAME					      : string := "kcmunch.hex";
 					
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

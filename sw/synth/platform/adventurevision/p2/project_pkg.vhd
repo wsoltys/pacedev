@@ -31,4 +31,12 @@ package project_pkg is
 	-- AdventureVision-specific constants
 	constant AV_CART_NAME								      : string := "defend.hex";
 						
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

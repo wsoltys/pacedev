@@ -42,4 +42,12 @@ package project_pkg is
 	constant NES_MIRROR_VERTICAL						  : boolean := true;
 	constant NES_MIRROR_HORIZONTAL					  : boolean := not NES_MIRROR_VERTICAL;
 	
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

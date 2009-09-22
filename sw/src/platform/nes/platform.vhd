@@ -5,10 +5,12 @@ use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
+use work.sdram_pkg.all;
 use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
-use work.project_pkg.all;
+use work.target_pkg.all;
 use work.platform_pkg.all;
+use work.project_pkg.all;
 
 entity platform is
   generic
@@ -34,7 +36,9 @@ entity platform is
     flash_o         : out to_FLASH_t;
 		sram_i					: in from_SRAM_t;
 		sram_o					: out to_SRAM_t;
-
+    sdram_i         : in from_SDRAM_t;
+    sdram_o         : out to_SDRAM_t;
+    
     -- graphics
     
     bitmap_i        : in from_BITMAP_CTL_t;
@@ -68,9 +72,13 @@ entity platform is
     ser_i           : in from_SERIAL_t;
     ser_o           : out to_SERIAL_t;
 
-    -- general purpose I/O
-    gp_i            : in from_GP_t;
-    gp_o            : out to_GP_t
+    -- custom i/o
+    project_i       : in from_PROJECT_IO_t;
+    project_o       : out to_PROJECT_IO_t;
+    platform_i      : in from_PLATFORM_IO_t;
+    platform_o      : out to_PLATFORM_IO_t;
+    target_i        : in from_TARGET_IO_t;
+    target_o        : out to_TARGET_IO_t
   );
 
 end platform;
@@ -480,7 +488,7 @@ begin
 	
 	GEN_PAL : for i in 15 downto 0 generate
 		-- only do tile palette for now
-		graphics_o.pal(i) <= ppu_pal(i);
+		graphics_o.pal(i) <= std_logic_vector(resize(unsigned(ppu_pal(i)),graphics_o.pal(i)'length));
 	end generate GEN_PAL;
 	
   --
@@ -678,6 +686,5 @@ begin
 	spi_o <= NULL_TO_SPI;
 	ser_o <= NULL_TO_SERIAL;
 	leds_o <= std_logic_vector(resize(unsigned(inputs_i(0).d),leds_o'length));
-	gp_o <= (others => '0');
 	
 end SYN;

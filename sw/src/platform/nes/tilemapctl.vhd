@@ -151,7 +151,7 @@ begin
       end case;
 
       -- extract R,G,B from colour palette
-      clut_entry := graphics_i.pal(conv_integer(attr & pel(1) & pel(0)));
+      clut_entry := graphics_i.pal(conv_integer(attr & pel(1) & pel(0)))(clut_entry'range);
       pal_entry := pal(conv_integer(clut_entry(5 downto 0)));
       ctl_o.rgb.r <= pal_entry(0) & "0000";
       ctl_o.rgb.g <= pal_entry(1) & "0000";

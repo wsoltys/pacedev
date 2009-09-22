@@ -24,4 +24,12 @@ package platform_pkg is
 
   constant VIDEOPAC_SOURCE_ROOT_DIR  	: string := "../../../../../src/platform/videopac/";
 
+  type from_PLATFORM_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PLATFORM_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

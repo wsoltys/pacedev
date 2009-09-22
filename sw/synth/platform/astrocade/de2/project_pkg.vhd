@@ -12,6 +12,13 @@ package project_pkg is
 	--
 
 	constant PACE_HAS_PLL								      : boolean := false;	
+  --constant PACE_HAS_FLASH                   : boolean := false;
+  constant PACE_HAS_SRAM                    : boolean := true;
+  constant PACE_HAS_SDRAM                   : boolean := false;
+  constant PACE_HAS_SERIAL                  : boolean := false;
+
+	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
+
   constant PACE_CLK0_DIVIDE_BY              : natural := 1;
   constant PACE_CLK0_MULTIPLY_BY            : natural := 1;
   constant PACE_CLK1_DIVIDE_BY              : natural := 1;
@@ -29,4 +36,15 @@ package project_pkg is
 	constant ASTROCADE_CART_NAME						  : string := "muncher";
 	--constant ASTROCADE_CART_NAME						  : string := "treasure";
 			
+  constant ASTROCADE_CART_IN_FLASH          : boolean := false;
+  constant PACE_HAS_FLASH                   : boolean := ASTROCADE_CART_IN_FLASH;
+
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

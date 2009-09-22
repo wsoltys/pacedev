@@ -35,4 +35,12 @@ package project_pkg is
 	--constant CV_CART_NAME								      : string := "frogger.hex";
 	--constant CV_CART_NAME								      : string := "smurf.hex";
 					
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

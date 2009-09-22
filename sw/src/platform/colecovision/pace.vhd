@@ -71,8 +71,9 @@ use work.sdram_pkg.all;
 use work.kbd_pkg.all;
 use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
-use work.project_pkg.all;
+use work.target_pkg.all;
 use work.platform_pkg.all;
+use work.project_pkg.all;
 use work.cv_keys_pack.all;
 use work.vdp18_col_pack.all;
 
@@ -115,9 +116,13 @@ entity PACE is
     ser_i           : in from_SERIAL_t;
     ser_o           : out to_SERIAL_t;
     
-    -- general purpose I/O
-    gp_i            : in from_GP_t;
-    gp_o            : out to_GP_t
+    -- custom i/o
+    project_i       : in from_PROJECT_IO_t;
+    project_o       : out to_PROJECT_IO_t;
+    platform_i      : in from_PLATFORM_IO_t;
+    platform_o      : out to_PLATFORM_IO_t;
+    target_i        : in from_TARGET_IO_t;
+    target_o        : out to_TARGET_IO_t
   );
 end entity PACE;
 
@@ -255,7 +260,6 @@ begin
   spi_o <= NULL_TO_SPI;
   ser_o <= NULL_TO_SERIAL;
 	leds_o <= (others => '0');
-	gp_o <= NULL_TO_GP;
 
   -- assign PACE outputs
   video_o.rgb.r <= vid_r & "00";

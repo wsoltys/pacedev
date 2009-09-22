@@ -35,4 +35,12 @@ package project_pkg is
 
   constant ASTROCADE_CART_IN_FLASH          : boolean := PACE_HAS_FLASH;
 	
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;
