@@ -197,6 +197,9 @@ begin
 	audio_o.ldata <= snd_data_s(snd_data_s'left downto snd_data_s'left+1-audio_o.ldata'length);
 	audio_o.rdata <= snd_data_s(snd_data_s'left downto snd_data_s'left+1-audio_o.rdata'length);
 
+  -- pipe it up to custom i/o as well
+  platform_o.snd_data <= snd_data_s;
+  
 	GEN_C64 : if C64_HAS_C64 generate
 		
 		-- active high

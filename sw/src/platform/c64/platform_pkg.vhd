@@ -75,6 +75,8 @@ package platform_pkg is
 		stp_out					: std_logic;
     fifo_wrfull     : std_logic;
     fifo_wrusedw    : std_logic_vector(7 downto 0);
+    -- sound data
+    snd_data        : std_logic_vector(17 downto 0);
   end record;
 
 end;
