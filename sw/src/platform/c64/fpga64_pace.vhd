@@ -610,7 +610,7 @@ begin
   end generate GEN_VIDEO_CONFIG;
   
 	-- XXX CN modified this for split data in/out without testing
-	GEN_ORIGINAL_CONE : if false generate
+	GEN_ORIGINAL_CONE : if true generate
 	
 		mainMemoryBus: process(cs_ram, systemWe, pulseWrRam, systemAddr)
 		begin
@@ -657,21 +657,24 @@ begin
 
 	end generate GEN_ORIGINAL_CONE;
 	
-	mainMemoryBus: process (cs_ram, systemWe, pulseWrRam, cpuDo, systemAddr)
-  begin
-  	if systemWe = '1' then
-    	ramdata_o_s <= cpudo;
-			ramdata_oe_s <= '1';
-    else
-      ramdata_o_s <= (others => '0');
-			ramdata_oe_s <= '0';
-    end if;
-		ramOE <= (not cs_ram) or systemWe;
-    ramCE <= not cs_ram;
-    ramWE <= not (cs_ram and pulseWrRam);
-    ramAddr <= systemAddr;
+	GEN_MYSTERY_CODE : if false generate
 
-  end process;
+  	mainMemoryBus: process (cs_ram, systemWe, pulseWrRam, cpuDo, systemAddr)
+    begin
+    	if systemWe = '1' then
+      	ramdata_o_s <= cpudo;
+  			ramdata_oe_s <= '1';
+      else
+        ramdata_o_s <= (others => '0');
+  			ramdata_oe_s <= '0';
+      end if;
+  		ramOE <= (not cs_ram) or systemWe;
+      ramCE <= not cs_ram;
+      ramWE <= not (cs_ram and pulseWrRam);
+      ramAddr <= systemAddr;
+    end process;
+
+  end generate GEN_MYSTERY_CODE;
 
 	serialBus: process(sb_data_in, sb_clk_in, cia2_pao)
 	begin

@@ -224,6 +224,12 @@ architecture SYN of target_top is
   signal target_i       : from_TARGET_IO_t;
   signal target_o       : to_TARGET_IO_t;
   
+  -- gpio drivers from custom logic
+  signal custom_gpio_0_o    : std_logic_vector(35 downto 0);
+  signal custom_gpio_0_oe   : std_logic_vector(35 downto 0);
+  signal custom_gpio_1_o    : std_logic_vector(35 downto 0);
+  signal custom_gpio_1_oe   : std_logic_vector(35 downto 0);
+  
 	-- maple/dreamcast controller interface
 	signal maple_sense	: std_logic;
 	signal maple_oe			: std_logic;
@@ -775,6 +781,27 @@ begin
       target_o          => target_o
     );
 
+  custom_io_inst : entity work.custom_io
+    port map
+    (
+      gpio_0_i          => gpio_0,
+      gpio_0_o          => custom_gpio_0_o,
+      gpio_0_oe         => custom_gpio_0_oe,
+      
+      -- GPIO 1 connector
+      gpio_1_i          => gpio_1,
+      gpio_1_o          => custom_gpio_1_o,
+      gpio_1_oe         => custom_gpio_1_oe,
+
+      -- custom i/o
+      project_i         => project_i,
+      project_o         => project_o,
+      platform_i        => platform_i,
+      platform_o        => platform_o,
+      target_i          => target_i,
+      target_o          => target_o
+    );
+  
 	av_init : I2C_AV_Config
 		port map
 		(

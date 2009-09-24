@@ -40,7 +40,7 @@ package project_pkg is
   constant S5A_DE_CNT                       : std_logic_vector(11 downto 0) := X"280";  -- 640
   constant S5A_DE_LIN                       : std_logic_vector(11 downto 0) := X"270";  -- 312*2=624???
 
-  constant S5A_EMULATE_SRAM                 : boolean := false;
+  constant S5A_EMULATE_SRAM                 : boolean := true;
   constant S5A_EMULATED_SRAM_WIDTH          : natural := 8;
   constant S5A_EMULATED_SRAM_WIDTH_AD       : natural := 17;
 

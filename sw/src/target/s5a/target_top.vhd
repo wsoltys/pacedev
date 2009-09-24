@@ -132,6 +132,9 @@ end entity target_top;
 
 architecture SYN of target_top is
 
+  alias clk_24M576_a    : std_logic is mix_ckp_a;
+  alias clk_24M576_b    : std_logic is mix_ckp_b;
+  
 	signal clk_i			  	: std_logic_vector(0 to 3);
   signal init       		: std_logic := '1';
   signal reset_i     		: std_logic := '1';
@@ -162,10 +165,6 @@ architecture SYN of target_top is
   signal target_i       : from_TARGET_IO_t;
   signal target_o       : to_TARGET_IO_t;
 
-  alias clk_24M576      : std_logic is mix_ckp_b;
-	signal vo_pll_clk			: std_logic;
-	signal vo_clk					: std_logic;
-
   -- PS/2 fifo signals
   signal ps2_fifo_data    : std_logic_vector(7 downto 0) := (others => '0');
   signal ps2_fifo_wrreq   : std_logic := '0';
@@ -174,10 +173,10 @@ architecture SYN of target_top is
 
 begin
 
-	PROC_RESET : process(clk_24M576)
+	PROC_RESET : process(clk_24M576_a)
 		variable reset_cnt : integer := 999999;
 	begin
-		if rising_edge(clk_24M576) then
+		if rising_edge(clk_24M576_a) then
 			if reset_cnt > 0 then
 				init <= '1';
 				reset_cnt := reset_cnt - 1;
@@ -187,7 +186,7 @@ begin
 		end if;
 	end process PROC_RESET;
 
-  reset_i <= init;
+  reset_i <= init or mix_reset;
 	reset_n <= not reset_i;
 
   BLK_CLOCKING : block
@@ -240,7 +239,7 @@ begin
         )
         port map
         (
-          inclk0  => clk_24M576,
+          inclk0  => clk_24M576_a,
           c0      => vo_idck,   -- 108MHz
           c1      => clk_i(1),  -- 108MHz
           c2      => clk_i(0),  -- 40MHz
@@ -254,8 +253,8 @@ begin
     GEN_NO_PLL : if not PACE_HAS_PLL generate
 
       -- feed input clocks into PACE core
-      clk_i(0) <= clk_24M576;
-      clk_i(1) <= clk_25_c;
+      clk_i(0) <= clk_24M576_a;
+      clk_i(1) <= clk_24M576_b;
         
     end generate GEN_NO_PLL;
 	
@@ -278,7 +277,7 @@ begin
       )
       port map
       (
-        clk             => clk_24M576,
+        clk             => clk_24M576_a,
         reset           => reset_i,
 
         -- FIFO interface
@@ -331,8 +330,8 @@ begin
     
   begin
 
-    lpc_clk <= mix_ckp_a;
-    lpc_reset_n <= not mix_reset;
+    lpc_clk <= clk_24M576_a;
+    lpc_reset_n <= reset_n;
     lpc_frame <= not mix_framen;
     
     lpc_periph_inst : wb_lpc_periph
@@ -449,7 +448,7 @@ begin
       (
         -- wishbone (LPC) interface
         wb_clk          => lpc_clk,
-        wb_rst          => mix_reset,
+        wb_rst          => reset_i,
         wb_cyc          => wb_cyc,
         wb_stb          => custom_io_stb,
         wb_adr          => wb_adr(7 downto 0),
@@ -488,7 +487,7 @@ begin
     dvo_sm : entity work.dvo_init_i2c_sm_controller
       generic map
       (
-        clock_speed => 25000000,
+        clock_speed => 24576000,
         dsel        => '0',         -- single-ended output clock
 
         -- DE generation
@@ -502,7 +501,7 @@ begin
       )
       port map
       (
-        clk					=> clk_25_c,
+        clk					=> clk_24M576_a,
         clk_ena     => '1',
         reset				=> reset_i,
 
@@ -661,12 +660,12 @@ begin
   end generate GEN_SRAM;
   
   -- blink a led
-  process (clk_25_c, reset_i)
+  process (clk_24M576_a, reset_i)
     variable count : unsigned(22 downto 0) := (others => '0');
   begin
     if reset_i = '1' then
       count := (others => '0');
-    elsif rising_edge(clk_25_c) then
+    elsif rising_edge(clk_24M576_a) then
       count := count + 1;
     end if;
     ledout <= pll_locked and count(count'left);

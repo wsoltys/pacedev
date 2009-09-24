@@ -147,20 +147,23 @@ begin
 
     BLK_NO_SRAM : block
       signal c64_ramdata_i_s  : std_logic_vector(c64_ramdata_i'range) := (others => '0');
+      signal wren             : std_logic := '0';
     begin
-  
+
+      wren <= not (sram_cs_n or sram_we_n);
+      
       c64_ram_inst : entity work.spram
         generic map
         (
-          --init_file		=> "../../../../../src/platform/trs80/m3/roms/trsvram.hex",
-          numwords_a	=> 128*1024,
-          widthad_a		=> 17
+          widthad_a		    => 17,
+          numwords_a	    => 2**17          -- 128KB
+          --outdata_reg_a   => "CLOCK0"
         )
         port map
         (
           clock			=> clk_32M,
           address		=> std_logic_vector(sram_addr_s),
-          wren			=> not sram_we_n,
+          wren			=> wren,
           data			=> std_logic_vector(c64_ramdata_o),
           q					=> c64_ramdata_i_s
         );
