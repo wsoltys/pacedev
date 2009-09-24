@@ -147,74 +147,25 @@ end target_top;
 
 architecture SYN of target_top is
 
-	component I2C_AV_Config
-		port
-		(
-			-- 	Host Side
-			iCLK					: in std_logic;
-			iRST_N				: in std_logic;
-			--	I2C Side
-			I2C_SCLK			: out std_logic;
-			I2C_SDAT			: inout std_logic
-		);
-	end component I2C_AV_Config;
+	signal clk_i			    : std_logic_vector(0 to 3);
+  signal init       	  : std_logic := '1';
+  signal reset_i     	  : std_logic := '1';
+	signal reset_n			  : std_logic := '0';
 
-  component I2S_LCM_Config 
-    port
-    (   --  Host Side
-            iCLK      : in std_logic;
-      iRST_N    : in std_logic;
-      --    I2C Side
-      I2S_SCLK  : out std_logic;
-      I2S_SDAT  : out std_logic;
-      I2S_SCEN  : out std_logic
-    );
-  end component I2S_LCM_Config;
-
-  component SEG7_LUT is
-    port (
-      iDIG : in std_logic_vector(3 downto 0); 
-      oSEG : out std_logic_vector(6 downto 0)
-    );
-  end component;
-
-  component LCD_TEST 
-    port
-    (	--	Host Side
-			iCLK          : in std_logic;
-      iRST_N        : in std_logic;
-			iLINE1				: in std_logic_vector(127 downto 0);
-			iLINE2				: in std_logic_vector(127 downto 0);
-			--	LCD Side
-			LCD_DATA      : out std_logic_vector(7 downto 0);
-      LCD_RW        : out std_logic;
-      LCD_EN        : out std_logic;
-      LCD_RS        : out std_logic
-   	);
-  end component LCD_TEST;
-
-	alias gpio_maple 		: std_logic_vector(35 downto 0) is gpio_0;
-	alias gpio_lcd 			: std_logic_vector(35 downto 0) is gpio_1;
-	
-	signal clk_i			  : std_logic_vector(0 to 3);
-  signal init       	: std_logic := '1';
-  signal reset_i     	: std_logic := '1';
-	signal reset_n			: std_logic := '0';
-
-  signal buttons_i    : from_BUTTONS_t;
-  signal switches_i   : from_SWITCHES_t;
-  signal leds_o       : to_LEDS_t;
-  signal inputs_i     : from_INPUTS_t;
-  signal flash_i      : from_FLASH_t;
-  signal flash_o      : to_FLASH_t;
-	signal sram_i			  : from_SRAM_t;
-	signal sram_o			  : to_SRAM_t;	
-	signal sdram_i      : from_SDRAM_t;
-	signal sdram_o      : to_SDRAM_t;
-	signal video_i      : from_VIDEO_t;
-  signal video_o      : to_VIDEO_t;
-  signal audio_i      : from_AUDIO_t;
-  signal audio_o      : to_AUDIO_t;
+  signal buttons_i      : from_BUTTONS_t;
+  signal switches_i     : from_SWITCHES_t;
+  signal leds_o         : to_LEDS_t;
+  signal inputs_i       : from_INPUTS_t;
+  signal flash_i        : from_FLASH_t;
+  signal flash_o        : to_FLASH_t;
+	signal sram_i			    : from_SRAM_t;
+	signal sram_o			    : to_SRAM_t;	
+	signal sdram_i        : from_SDRAM_t;
+	signal sdram_o        : to_SDRAM_t;
+	signal video_i        : from_VIDEO_t;
+  signal video_o        : to_VIDEO_t;
+  signal audio_i        : from_AUDIO_t;
+  signal audio_o        : to_AUDIO_t;
   signal ser_i          : from_SERIAL_t;
   signal ser_o          : to_SERIAL_t;
   signal project_i      : from_PROJECT_IO_t;
@@ -224,35 +175,9 @@ architecture SYN of target_top is
   signal target_i       : from_TARGET_IO_t;
   signal target_o       : to_TARGET_IO_t;
   
-  -- gpio drivers from custom logic
-  signal custom_gpio_0_o    : std_logic_vector(35 downto 0);
-  signal custom_gpio_0_oe   : std_logic_vector(35 downto 0);
-  signal custom_gpio_1_o    : std_logic_vector(35 downto 0);
-  signal custom_gpio_1_oe   : std_logic_vector(35 downto 0);
-  
-	-- maple/dreamcast controller interface
-	signal maple_sense	: std_logic;
-	signal maple_oe			: std_logic;
-	signal mpj					: work.maple_pkg.joystate_type;
-
-	-- gamecube controller interface
-	signal gcj						: work.gamecube_pkg.joystate_type;
-			
-  signal lcm_sclk   	: std_logic;
-  signal lcm_sdat   	: std_logic;
-  signal lcm_scen   	: std_logic;
-  signal lcm_data   	: std_logic_vector(7 downto 0);
-  signal lcm_grst  		: std_logic;
-  signal lcm_hsync  	: std_logic;
-  signal lcm_vsync  	: std_logic;
-	signal lcm_dclk  		: std_logic;
-	signal lcm_shdb  		: std_logic;
-	signal lcm_clk			: std_logic;
-
-  signal yoffs      	: std_logic_vector(7 downto 0);
-
-  signal pwmen      	: std_logic;
-  signal chaseen    	: std_logic;
+  -- gpio drivers from default logic
+  signal default_gpio_0_o   : std_logic_vector(gpio_0'range);
+  signal default_gpio_1_o   : std_logic_vector(gpio_1'range);
 	
 begin
 
@@ -347,40 +272,60 @@ begin
   inputs_i.ps2_mdat <= '0';
 
 	GEN_MAPLE : if PACE_JAMMA = PACE_JAMMA_MAPLE generate
-	
-		-- Dreamcast MapleBus joystick interface
-		MAPLE_JOY_inst : maple_joy
-			port map
-			(
-				clk				=> clock_50,
-				reset			=> reset_i,
-				sense			=> maple_sense,
-				oe				=> maple_oe,
-				a					=> gpio_maple(14),
-				b					=> gpio_maple(13),
-				joystate	=> mpj
-			);
-		gpio_maple(12) <= maple_oe;
-		gpio_maple(11) <= not maple_oe;
-		maple_sense <= gpio_maple(17); -- and sw(0);
 
-		-- map maple bus to jamma inputs
-		-- - same mappings as default mappings for MAMED (DCMAME)
-		inputs_i.jamma_n.coin(1) 				  <= mpj.lv(7);		-- MSB of right analogue trigger (0-255)
-		inputs_i.jamma_n.p(1).start 			<= mpj.start;
-		inputs_i.jamma_n.p(1).up 				  <= mpj.d_up;
-		inputs_i.jamma_n.p(1).down 			  <= mpj.d_down;
-		inputs_i.jamma_n.p(1).left	 			<= mpj.d_left;
-		inputs_i.jamma_n.p(1).right 			<= mpj.d_right;
-		inputs_i.jamma_n.p(1).button(1) 	<= mpj.a;
-		inputs_i.jamma_n.p(1).button(2) 	<= mpj.x;
-		inputs_i.jamma_n.p(1).button(3) 	<= mpj.b;
-		inputs_i.jamma_n.p(1).button(4) 	<= mpj.y;
-		inputs_i.jamma_n.p(1).button(5)	  <= '1';
+    -- all this is so we can easily switch GPIO ports for maple bus!
+    alias gpio_maple_i  : std_logic_vector(17 downto 11) is gpio_0;
+    alias gpio_maple_o  : std_logic_vector(14 downto 11) is default_gpio_0_o;
+
+    signal maple_sense	: std_logic;
+    signal maple_oe			: std_logic;
+    signal mpj					: work.maple_pkg.joystate_type;
+    signal a            : std_logic;
+    signal b            : std_logic;
+
+  begin
+
+    -- Dreamcast MapleBus joystick interface
+    MAPLE_JOY_inst : maple_joy
+      port map
+      (
+        clk				=> clock_50,
+        reset			=> reset_i,
+        sense			=> maple_sense,
+        oe				=> maple_oe,
+        a					=> a, --gpio_maple(14), ***needs fixing
+        b					=> b, --gpio_maple(13), ***needs fixing
+        joystate	=> mpj
+      );
+      
+    -- insert drivers for a, b here
+      
+    gpio_maple_o(12) <= maple_oe;
+    gpio_maple_o(11) <= not maple_oe;
+    maple_sense <= gpio_maple_i(17); -- and sw(0);
+
+    -- map maple bus to jamma inputs
+    -- - same mappings as default mappings for MAMED (DCMAME)
+    inputs_i.jamma_n.coin(1) 				  <= mpj.lv(7);		-- MSB of right analogue trigger (0-255)
+    inputs_i.jamma_n.p(1).start 			<= mpj.start;
+    inputs_i.jamma_n.p(1).up 				  <= mpj.d_up;
+    inputs_i.jamma_n.p(1).down 			  <= mpj.d_down;
+    inputs_i.jamma_n.p(1).left	 			<= mpj.d_left;
+    inputs_i.jamma_n.p(1).right 			<= mpj.d_right;
+    inputs_i.jamma_n.p(1).button(1) 	<= mpj.a;
+    inputs_i.jamma_n.p(1).button(2) 	<= mpj.x;
+    inputs_i.jamma_n.p(1).button(3) 	<= mpj.b;
+    inputs_i.jamma_n.p(1).button(4) 	<= mpj.y;
+    inputs_i.jamma_n.p(1).button(5)	  <= '1';
 
 	end generate GEN_MAPLE;
 
 	GEN_GAMECUBE : if PACE_JAMMA = PACE_JAMMA_NGC generate
+	
+    signal gcj  : work.gamecube_pkg.joystate_type;
+    signal d    : std_logic := '0';
+	
+	begin
 	
 		GC_JOY: gamecube_joy
 			generic map( MHZ => 50 )
@@ -389,9 +334,11 @@ begin
   			clk 				=> clock_50,
 				reset 			=> reset_i,
 				--oe 					=> gc_oe,
-				d 					=> gpio_0(25),
+				d 					=> d, --gpio_0(25), **needs fixing
 				joystate 		=> gcj
 			);
+
+    -- insert drivers for d here...
 
 		-- map gamecube controller to jamma inputs
 		inputs_i.jamma_n.coin(1) <= not gcj.l;
@@ -549,6 +496,19 @@ begin
   end block BLK_SDRAM;
 
   BLK_VIDEO : block
+
+    component I2C_AV_Config
+      port
+      (
+        -- 	Host Side
+        iCLK					: in std_logic;
+        iRST_N				: in std_logic;
+        --	I2C Side
+        I2C_SCLK			: out std_logic;
+        I2C_SDAT			: inout std_logic
+      );
+    end component I2C_AV_Config;
+
   begin
 
 		video_i.clk <= clk_i(1);	-- by convention
@@ -564,8 +524,86 @@ begin
     vga_sync <= video_o.hsync and video_o.vsync;
     vga_blank <= '1';
 
+    av_init : I2C_AV_Config
+      port map
+      (
+        --	Host Side
+        iCLK							=> clock_50,
+        iRST_N						=> reset_n,
+        
+        --	I2C Side
+        I2C_SCLK					=> I2C_SCLK,
+        I2C_SDAT					=> I2C_SDAT
+      );
+
   end block BLK_VIDEO;
 
+  BLK_LCM : block
+
+    component I2S_LCM_Config 
+      port
+      (   --  Host Side
+              iCLK      : in std_logic;
+        iRST_N    : in std_logic;
+        --    I2C Side
+        I2S_SCLK  : out std_logic;
+        I2S_SDAT  : out std_logic;
+        I2S_SCEN  : out std_logic
+      );
+    end component I2S_LCM_Config;
+
+    alias gpio_lcd_o 		: std_logic_vector(35 downto 18) is default_gpio_1_o(35 downto 18);
+    
+    signal lcm_sclk   	: std_logic;
+    signal lcm_sdat   	: std_logic;
+    signal lcm_scen   	: std_logic;
+    signal lcm_data   	: std_logic_vector(7 downto 0);
+    signal lcm_grst  		: std_logic;
+    signal lcm_hsync  	: std_logic;
+    signal lcm_vsync  	: std_logic;
+    signal lcm_dclk  		: std_logic;
+    signal lcm_shdb  		: std_logic;
+    signal lcm_clk			: std_logic;
+
+  begin
+  
+    lcmc: I2S_LCM_Config
+      port map
+      (   --  Host Side
+        iCLK => clock_50,
+        iRST_N => reset_n, --lcm_grst_n,
+        --    I2C Side
+        I2S_SCLK => lcm_sclk,
+        I2S_SDAT => lcm_sdat,
+        I2S_SCEN => lcm_scen
+      );
+
+    lcm_clk <= video_o.clk;
+    lcm_grst <= reset_n;
+    lcm_dclk	<=	not lcm_clk;
+    lcm_shdb	<=	'1';
+    lcm_hsync <= video_o.hsync;
+    lcm_vsync <= video_o.vsync;
+
+    gpio_lcd_o(19) <= lcm_data(7);
+    gpio_lcd_o(18) <= lcm_data(6);
+    gpio_lcd_o(21) <= lcm_data(5);
+    gpio_lcd_o(20) <= lcm_data(4);
+    gpio_lcd_o(23) <= lcm_data(3);
+    gpio_lcd_o(22) <= lcm_data(2);
+    gpio_lcd_o(25) <= lcm_data(1);
+    gpio_lcd_o(24) <= lcm_data(0);
+    gpio_lcd_o(30) <= lcm_grst;
+    gpio_lcd_o(26) <= lcm_vsync;
+    gpio_lcd_o(35) <= lcm_hsync;
+    gpio_lcd_o(29) <= lcm_dclk;
+    gpio_lcd_o(31) <= lcm_shdb;
+    gpio_lcd_o(28) <= lcm_sclk;
+    gpio_lcd_o(33) <= lcm_scen;
+    gpio_lcd_o(34) <= lcm_sdat;
+
+  end block BLK_LCM;
+  
   BLK_AUDIO : block
     alias aud_clk    		: std_logic is clk_i(2);
     signal aud_data_l  	: std_logic_vector(audio_o.ldata'range);
@@ -649,8 +687,25 @@ begin
   otg_rst_n <= '1';
 
 	BLK_LCD_TEST : block
+
+    component LCD_TEST 
+      port
+      (	--	Host Side
+        iCLK          : in std_logic;
+        iRST_N        : in std_logic;
+        iLINE1				: in std_logic_vector(127 downto 0);
+        iLINE2				: in std_logic_vector(127 downto 0);
+        --	LCD Side
+        LCD_DATA      : out std_logic_vector(7 downto 0);
+        LCD_RW        : out std_logic;
+        LCD_EN        : out std_logic;
+        LCD_RS        : out std_logic
+      );
+    end component LCD_TEST;
+
 		signal iline1 : std_logic_vector(127 downto 0);
 		signal iline2 : std_logic_vector(127 downto 0);
+
 	begin
 
 		GEN_LINES : for i in 0 to 15 generate
@@ -685,54 +740,28 @@ begin
   enet_rst_n <= '0';
   enet_clk <= '0';
 
-  -- Display funkalicious pacman sprite y offset on 7seg display
-  -- Why?  Because we can
-  seg7_0: SEG7_LUT port map (iDIG => yoffs(7 downto 4), oSEG => hex7);
-  seg7_1: SEG7_LUT port map (iDIG => yoffs(3 downto 0), oSEG => hex6);
+  BLK_7_SEG : block
 
+    component SEG7_LUT is
+      port 
+      (
+        iDIG : in std_logic_vector(3 downto 0); 
+        oSEG : out std_logic_vector(6 downto 0)
+      );
+    end component;
+
+    signal yoffs      	      : std_logic_vector(7 downto 0);
+
+  begin
+    -- Display funkalicious pacman sprite y offset on 7seg display
+    -- Why?  Because we can
+    seg7_0: SEG7_LUT port map (iDIG => yoffs(7 downto 4), oSEG => hex7);
+    seg7_1: SEG7_LUT port map (iDIG => yoffs(3 downto 0), oSEG => hex6);
+  end block BLK_7_SEG;
+  
   -- *MUST* be high to use 27MHz clock as input
   td_reset <= '1';
 
-  -- GPIO
-  gpio_0 <= (others => 'Z');
-  gpio_1 <= (others => 'Z');
-    
-  -- LCM signals
-  gpio_lcd(19) <= lcm_data(7);
-  gpio_lcd(18) <= lcm_data(6);
-  gpio_lcd(21) <= lcm_data(5);
-  gpio_lcd(20) <= lcm_data(4);
-  gpio_lcd(23) <= lcm_data(3);
-  gpio_lcd(22) <= lcm_data(2);
-  gpio_lcd(25) <= lcm_data(1);
-  gpio_lcd(24) <= lcm_data(0);
-  gpio_lcd(30) <=	lcm_grst;
-  gpio_lcd(26) <= lcm_vsync;
-  gpio_lcd(35) <= lcm_hsync;
-	gpio_lcd(29) <= lcm_dclk;
-	gpio_lcd(31) <= lcm_shdb;
-  gpio_lcd(28) <=	lcm_sclk;
-  gpio_lcd(33) <=	lcm_scen;
-  gpio_lcd(34) <= lcm_sdat;
-
-  lcmc: I2S_LCM_Config
-    port map
-    (   --  Host Side
-      iCLK => clock_50,
-      iRST_N => reset_n, --lcm_grst_n,
-      --    I2C Side
-      I2S_SCLK => lcm_sclk,
-      I2S_SDAT => lcm_sdat,
-      I2S_SCEN => lcm_scen
-    );
-
-	lcm_clk <= video_o.clk;
-	lcm_grst <= reset_n;
-  lcm_dclk	<=	not lcm_clk;
-  lcm_shdb	<=	'1';
-	lcm_hsync <= video_o.hsync;
-	lcm_vsync <= video_o.vsync;
-	
   pace_inst : entity work.pace                                            
     port map
     (
@@ -781,69 +810,93 @@ begin
       target_o          => target_o
     );
 
-  custom_io_inst : entity work.custom_io
-    port map
-    (
-      gpio_0_i          => gpio_0,
-      gpio_0_o          => custom_gpio_0_o,
-      gpio_0_oe         => custom_gpio_0_oe,
-      
-      -- GPIO 1 connector
-      gpio_1_i          => gpio_1,
-      gpio_1_o          => custom_gpio_1_o,
-      gpio_1_oe         => custom_gpio_1_oe,
-
-      -- custom i/o
-      project_i         => project_i,
-      project_o         => project_o,
-      platform_i        => platform_i,
-      platform_o        => platform_o,
-      target_i          => target_i,
-      target_o          => target_o
-    );
+  BLK_CUSTOM_IO : block
   
-	av_init : I2C_AV_Config
-		port map
-		(
-			--	Host Side
-			iCLK							=> clock_50,
-			iRST_N						=> reset_n,
-			
-			--	I2C Side
-			I2C_SCLK					=> I2C_SCLK,
-			I2C_SDAT					=> I2C_SDAT
-		);
+    signal custom_gpio_0_o    : std_logic_vector(gpio_0'range);
+    signal custom_gpio_0_oe   : std_logic_vector(gpio_0'range);
+    signal gpio_0_is_custom   : std_logic_vector(gpio_0'range);
+    signal custom_gpio_1_o    : std_logic_vector(gpio_1'range);
+    signal custom_gpio_1_oe   : std_logic_vector(gpio_1'range);
+    signal gpio_1_is_custom   : std_logic_vector(gpio_1'range);
 
-  pchaser: work.pwm_chaser 
-	  generic map(nleds  => 8, nbits => 8, period => 4, hold_time => 12)
-    port map (clk => clock_50, clk_en => chaseen, pwm_en => pwmen, reset => reset_i, fade => X"0F", ledout => ledg(7 downto 0));
-
-  -- Generate pwmen pulse every 1024 clocks, chase pulse every 512k clocks
-  process(clock_50, reset_i)
-    variable pcount     : std_logic_vector(9 downto 0);
-    variable pwmen_r    : std_logic;
-    variable ccount     : std_logic_vector(18 downto 0);
-    variable chaseen_r  : std_logic;
   begin
-    pwmen <= pwmen_r;
-    chaseen <= chaseen_r;
-    if reset_i = '1' then
-      pcount := (others => '0');
-      ccount := (others => '0');
-    elsif rising_edge(clock_50) then
-      pwmen_r := '0';
-      if pcount = std_logic_vector(to_unsigned(0, pcount'length)) then
-        pwmen_r := '1';
-      end if;
-      chaseen_r := '0';
-      if ccount = std_logic_vector(to_unsigned(0, ccount'length)) then
-        chaseen_r := '1';
-      end if;
-      pcount := pcount + 1;
-      ccount := ccount + 1;
-    end if;
-  end process;
+  
+    custom_io_inst : entity work.custom_io
+      port map
+      (
+        -- GPIO 0 connector
+        gpio_0_i          => gpio_0,
+        gpio_0_o          => custom_gpio_0_o,
+        gpio_0_oe         => custom_gpio_0_oe,
+        gpio_0_is_custom  => gpio_0_is_custom,
+        
+        -- GPIO 1 connector
+        gpio_1_i          => gpio_1,
+        gpio_1_o          => custom_gpio_1_o,
+        gpio_1_oe         => custom_gpio_1_oe,
+        gpio_1_is_custom  => gpio_1_is_custom,
 
+        -- custom i/o
+        project_i         => project_i,
+        project_o         => project_o,
+        platform_i        => platform_i,
+        platform_o        => platform_o,
+        target_i          => target_i,
+        target_o          => target_o
+      );
+
+    GEN_GPIO_0_O : for i in gpio_0'range generate
+      gpio_0(i) <=  custom_gpio_0_o(i) when 
+                      (gpio_0_is_custom(i) = '1' and custom_gpio_0_oe(i) = '1') else
+                    default_gpio_0_o(i) when gpio_0_is_custom(i) = '0' else
+                    'Z';
+    end generate GEN_GPIO_0_O;
+    
+    GEN_GPIO_1_O : for i in gpio_1'range generate
+      gpio_1(i) <=  custom_gpio_1_o(i) when 
+                      (gpio_1_is_custom(i) = '1' and custom_gpio_1_oe(i) = '1') else
+                    default_gpio_1_o(i) when gpio_1_is_custom(i) = '0' else
+                    'Z';
+    end generate GEN_GPIO_1_O;
+
+  end block BLK_CUSTOM_IO;
+  
+  BLK_CHASER : block
+    signal pwmen      : std_logic;
+    signal chaseen    : std_logic;
+  begin
+    pchaser: work.pwm_chaser 
+      generic map(nleds  => 8, nbits => 8, period => 4, hold_time => 12)
+      port map (clk => clock_50, clk_en => chaseen, pwm_en => pwmen, reset => reset_i, fade => X"0F", ledout => ledg(7 downto 0));
+
+    -- Generate pwmen pulse every 1024 clocks, chase pulse every 512k clocks
+    process(clock_50, reset_i)
+      variable pcount     : std_logic_vector(9 downto 0);
+      variable pwmen_r    : std_logic;
+      variable ccount     : std_logic_vector(18 downto 0);
+      variable chaseen_r  : std_logic;
+    begin
+      pwmen <= pwmen_r;
+      chaseen <= chaseen_r;
+      if reset_i = '1' then
+        pcount := (others => '0');
+        ccount := (others => '0');
+      elsif rising_edge(clock_50) then
+        pwmen_r := '0';
+        if pcount = std_logic_vector(to_unsigned(0, pcount'length)) then
+          pwmen_r := '1';
+        end if;
+        chaseen_r := '0';
+        if ccount = std_logic_vector(to_unsigned(0, ccount'length)) then
+          chaseen_r := '1';
+        end if;
+        pcount := pcount + 1;
+        ccount := ccount + 1;
+      end if;
+    end process;
+
+  end block BLK_CHASER;
+  
   -- LED chaser
 --  process (clock_50, reset)
 --    variable count : integer range 0 to 4999999;

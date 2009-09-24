@@ -57,6 +57,7 @@ package platform_pkg is
 		sb_data_in			: std_logic;
 		sb_clk_in				: std_logic;
 		sb_atn_in				: std_logic;
+		sb_rst_in       : std_logic;
     -- drive mech signals
 		wps_n						: std_logic;
 		tr00_sense_n		: std_logic;
@@ -70,6 +71,7 @@ package platform_pkg is
 		sb_data_oe			: std_logic;
 		sb_clk_oe				: std_logic;
 		sb_atn_oe				: std_logic;
+		sb_rst_oe       : std_logic;
     -- drive mech signals
 		stp_in					: std_logic;
 		stp_out					: std_logic;

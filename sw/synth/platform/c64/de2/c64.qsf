@@ -576,9 +576,10 @@ set_global_assignment -name VHDL_FILE ../../../device/cycloneii/spram.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/m6522.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/c1541_fifo.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/c1541_logic.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/c1541_core_fifo.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/pace.vhd
+set_global_assignment -name VHDL_FILE custom_io.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/de2/target_top.vhd
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
 set_global_assignment -name SIGNALTAP_FILE c1541_diskif.stp
 set_global_assignment -name SIGNALTAP_FILE c64.stp
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/c1541_core_fifo.vhd
