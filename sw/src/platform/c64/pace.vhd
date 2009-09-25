@@ -101,6 +101,7 @@ architecture SYN of PACE is
   end component c1541_core;
 
 	alias clk_32M								: std_logic is clk_i(0);
+	alias clk_50M								: std_logic is clk_i(1);
 		
 	signal sram_addr_s					: unsigned(16 downto 0);
 	signal sram_cs_n            : std_logic;
@@ -138,7 +139,7 @@ begin
     sram_o.d(c64_ramdata_o'range) <= std_logic_vector(c64_ramdata_o);
     sram_o.be <= "0001";
     sram_o.cs <= not sram_cs_n;
-    sram_o.oe <= not sram_oe_n;
+    sram_o.oe <= sram_we_n; --not sram_oe_n;
     sram_o.we <= not sram_we_n;
     c64_ramdata_i <= unsigned(sram_i.d(c64_ramData_i'range));
   end generate GEN_SRAM;
@@ -220,31 +221,41 @@ begin
 			)
 			port map
 			(
-				clk50					=> '0',		-- not used
+				sysclk			  => clk_50M,		  -- for carts
 				clk32					=> clk_32M,
-				reset_button	=> reset_i,
+				reset_n	      => not reset_i,
 
 				-- keyboard interface (use any ordinairy PS2 keyboard)
 				kbd_clk				=> inputs_i.ps2_kclk,
 				kbd_dat				=> inputs_i.ps2_kdat,
 
-				video_select	=> '0',
+				--video_select	=> '0',
 
 				-- external memory, since the 64K RAM is relatively big to implement in a FPGA
 				ramAddr				=> sram_addr_s,
 				ramData_i			=> c64_ramdata_i,
 				ramData_o			=> c64_ramdata_o,
-				ramData_oe		=> open,
+				--ramData_oe		=> open,
 				
 				ramCE					=> sram_cs_n,
 				ramWe					=> sram_we_n,
-				ramOe					=> sram_oe_n,
+				--ramOe					=> sram_oe_n,
 				
 				hsync					=> video_o.hsync,
 				vsync					=> video_o.vsync,
 				r 						=> r_s,
 				g 						=> g_s,
 				b 						=> b_s,
+
+        -- cartridge port
+        game          => '0',
+        exrom         => '0',
+        irq_n         => '1',
+        nmi_n         => '1',
+        dma_n         => '1',
+        ba            => open,
+        dot_clk       => open,
+        cpu_clk       => open,
 
 				-- joystick interface
 				joyA					=> joyA_s,
@@ -254,24 +265,24 @@ begin
 	    	serioclk		  => open,
 	    	ces		        => open,
 
-				leds					=> leds_s(7 downto 0),
+				--leds					=> leds_s(7 downto 0),
 				
 				-- video-out connect the FPGA to your PAL-monitor, using the CVBS-input
-				cvbsOutput		=> open,
+				--cvbsOutput		=> open,
 				
 				-- (internal) SID connections
-				sid_pot_x				=> open,
-				sid_pot_y				=> open,
-				sid_audio_out		=> open,
-				sid_audio_data	=> snd_data_s,
+				--sid_pot_x				=> open,
+				--sid_pot_y				=> open,
+				--sid_audio_out		=> open,
+				--sid_audio_data	=> snd_data_s,
 			
 				-- IEC
-				sb_data_oe			=> c64_sb_data_oe,
-				sb_data_in			=> int_sb_data,
-				sb_clk_oe				=> c64_sb_clk_oe,
-				sb_clk_in				=> int_sb_clk,
-				sb_atn_oe				=> c64_sb_atn_oe,
-				sb_atn_in				=> int_sb_atn,
+				--sb_data_oe			=> c64_sb_data_oe,
+				--sb_data_in			=> int_sb_data,
+				--sb_clk_oe				=> c64_sb_clk_oe,
+				--sb_clk_in				=> int_sb_clk,
+				--sb_atn_oe				=> c64_sb_atn_oe,
+				--sb_atn_in				=> int_sb_atn,
 					
 				--Connector to the SID
 				SIDclk					=> open,
