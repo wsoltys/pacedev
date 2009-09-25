@@ -43,8 +43,8 @@ begin
   
   GEN_EXT_SB : if C64_HAS_EXT_SB generate
 
-    gpio_1_is_custom(gpio_1_is_custom'left downto 16) <= (others => '0');
-    gpio_1_is_custom(15 downto 10) <= (others => '1');
+    gpio_1_is_custom(gpio_1_is_custom'left downto 18) <= (others => '0');
+    gpio_1_is_custom(17 downto 10) <= (others => '1');
     gpio_1_is_custom(9 downto 0) <= (others => '0');
 
     --alias ext_sb_data_in_n	: std_logic is gpio_1(14);
@@ -78,8 +78,8 @@ begin
     -- not yet implemented
     gpio_1_o(17) <= '0';
 
-    -- all SB I/O is push-pull
-    gpio_1_oe(15 downto 10) <= (others => '1');
+    -- all SB output is push-pull
+    gpio_1_oe(17 downto 10) <= "10101010";
 
   end generate GEN_EXT_SB;
   
