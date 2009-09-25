@@ -19,14 +19,16 @@ package project_pkg is
   
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
 
+  -- Reference clock is 50MHz
   constant PACE_CLK0_DIVIDE_BY              : natural := 25;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 16;   -- 50*16/25 = 32MHz
-  constant PACE_CLK1_DIVIDE_BY              : natural := 25;
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 16;   -- 50*16/25 = 32MHz
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 16;  -- 50*16/25 = 32MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 1;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 1;   -- 50*1/1 = 50MHz
 
 	-- DE2 constants which *MUST* be defined
 
-	constant DE2_LCD_LINE2							      : string := "  Commodore 64  ";		-- 16 chars exactly
+	--constant DE2_LCD_LINE2							      : string := "  Commodore 64  ";		-- 16 chars exactly
+	constant DE2_LCD_LINE2							      : string := "  C64 w/EXT_SB  ";		-- 16 chars exactly
 	--constant DE2_LCD_LINE2							      : string := "     C1541C     ";		-- 16 chars exactly
 	--constant DE2_LCD_LINE2							      : string := "   C64 w/1541   ";		-- 16 chars exactly
 
@@ -42,8 +44,12 @@ package project_pkg is
 	-- C64_HAS_1541 configuration
 	-- bits (1:0) XOR'd with DIPSWITCHES
 	constant C64_1541_DEVICE_SELECT			      : std_logic_vector(3 downto 0) := X"8";
-	constant C64_1541_ROM_NAME					      : string := "25196801";
+
+		-- 1541 early firmware
 	--constant C64_1541_ROM_NAME					      : string := "325302-1_901229-03";
+	-- 1541C firmware (track 0 sensor enabled)
+	--constant C64_1541_ROM_NAME					      : string := "25196801";
+	constant C64_1541_ROM_NAME					      : string := "25196802";
 				
   type from_PROJECT_IO_t is record
     not_used  : std_logic;

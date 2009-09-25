@@ -500,7 +500,7 @@ set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to 
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name ENABLE_SIGNALTAP ON
 set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
-set_global_assignment -name MAX_PROCESSORS_USED_FOR_MULTITHREADING 2
+set_global_assignment -name NUM_PARALLEL_PROCESSORS 2
 set_global_assignment -name SMART_RECOMPILE OFF
 set_instance_assignment -name PARTITION_HIERARCHY c1541_63c6ab44be41fedc7e4dc9a25171f74b1 -to "PACE:pace_inst|c1541_top:\\GEN_1541:c1541_inst|c1541_diskif:c1541_diskif_inst" -section_id "c1541_diskif:c1541_diskif_inst"
 set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id "c1541_diskif:c1541_diskif_inst"
@@ -520,7 +520,6 @@ set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/de2/target_pkg.vhd
-set_global_assignment -name VHDL_FILE c64_pll.vhd
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/LCD_Controller.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/LCD_TEST.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2S_Controller.v
@@ -544,25 +543,25 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/toys/led_chaser.
 set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwm_chaser.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwmout.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/fpga64_keyboard_matrix.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/cpu65xx_e.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/cpu65xx_fast.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/video_vicII_656x_e.vhdl
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/video_vicII_656x_a.vhdl
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/cpu_6510.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/fpga64_singleram.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/fpga64_rwram.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/fpga64_hexy.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/fpga64_hexy_vmode.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/fpga64_scandoubler.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/io_ps2_keyboard.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/cia6526.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/c64rom_basic.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/c64rom_chargen.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/c64rom_kernal.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/fpga64_buslogic_roms.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/fpga64_bustiming.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/vhdl/fpga64_rgbcolor.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/cpu65xx_e.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/cpu65xx_fast.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/video_vicII_656x_e.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/video_vicII_656x_a.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/cpu_6510.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/gen_ram.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/gen_rwram.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/fpga64_hexy.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/fpga64_hexy_vmode.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/fpga64_cone_scanconverter.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/io_ps2_keyboard.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/cia6526.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/roms/rom_c64_basic.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/roms/rom_c64_chargen.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/roms/rom_c64_kernal.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/fpga64_keyboard_matrix_joyemu.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/fpga64_buslogic_roms_fixed.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/fpga64_bustiming.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/fpga64_rgbcolor.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/sound/sid/sid_components.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/sound/sid/sid_voice.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/sound/sid/sid6581.vhd

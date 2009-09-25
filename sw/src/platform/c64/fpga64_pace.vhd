@@ -28,7 +28,9 @@ use work.project_pkg.all;
 
 entity fpga64_pace is
 	generic (
-		resetCycles: integer := 4095
+		ENABLE_VIDEO_CFG_OSD  : boolean := false;
+		ENABLE_OSD            : boolean := false;
+		resetCycles           : integer := 4095
 	);
 	port(
 		sysclk : in std_logic;
@@ -236,7 +238,7 @@ signal ntscMode : std_logic;
 signal videoConfigVideo : std_logic;
 signal videoConfigDim : std_logic;
 signal videoConfigShow : std_logic;
-signal videoConfigTimeout : unsigned(19 downto 0);
+signal videoConfigTimeout : unsigned(21 downto 0);
 
 -- added PACE
 
@@ -416,17 +418,21 @@ begin
 			r <= vgaR;
 			g <= vgaG;
 			b <= vgaB;
---			if videoConfigShow = '1' and videoConfigDim = '1' then
---			if videoConfigDim = '1' then
---				r <= videoConfigVideo & vgaR(7 downto 1);
---				g <= videoConfigVideo & vgaG(7 downto 1);
---				b <= videoConfigVideo & vgaB(7 downto 1);
---			end if;
---			if vgaDebugDim = '1' then
---				r <= vgaDebug & vgaR(7 downto 1);
---				g <= vgaDebug & vgaG(7 downto 1);
---				b <= vgaDebug & vgaB(7 downto 1);
---			end if;				
+			if ENABLE_OSD then
+        if ENABLE_VIDEO_CFG_OSD then
+          if videoConfigShow = '1' and videoConfigDim = '1' then
+          --if videoConfigDim = '1' then
+            r <= videoConfigVideo & vgaR(7 downto 1);
+            g <= videoConfigVideo & vgaG(7 downto 1);
+            b <= videoConfigVideo & vgaB(7 downto 1);
+          end if;
+        end if;
+        if DebuggerOn = '1' and vgaDebugDim = '1' then
+          r <= vgaDebug & vgaR(7 downto 1);
+          g <= vgaDebug & vgaG(7 downto 1);
+          b <= vgaDebug & vgaB(7 downto 1);
+        end if;				
+      end if;
 		end if;
 	end process;
 	hSync <= vgaHSync;
@@ -725,30 +731,34 @@ calcReset: process(clk32)
 	-- Video modes
 	process(clk32)
 	begin
-		if rising_edge(clk32) then
+    if reset_n = '0' then
+      ntscMode <= '1';
+		elsif rising_edge(clk32) then
 			if videoKey = '1' then
 				ntscMode <= not ntscMode;
 			end if;
 		end if;
 	end process;
 	
-	-- Video config display (disabled)
---	process(clk32)
---	begin
---		if rising_edge(clk32) then
---			if videoKey = '1' then
---				videoConfigTimeout <= (others => '1');
---			end if;
---			if endOfCycle = '1' then
---				videoConfigShow <= '0';
---				if videoConfigTimeout /= 0 then
---					videoConfigTimeout <= videoConfigTimeout - 1;
---					videoConfigShow <= '1';
---				end if;
---			end if;				
---		end if;
---	end process;
-
+	GEN_VIDEO_CFG_OSD : if ENABLE_VIDEO_CFG_OSD generate
+    -- Video config display (disabled)
+    process(clk32)
+    begin
+      if rising_edge(clk32) then
+        if videoKey = '1' then
+          videoConfigTimeout <= (others => '1');
+        end if;
+        if cycleRestart = '1' then
+          videoConfigShow <= '0';
+          if videoConfigTimeout /= 0 then
+            videoConfigTimeout <= videoConfigTimeout - 1;
+            videoConfigShow <= '1';
+          end if;
+        end if;				
+      end if;
+    end process;
+  end generate GEN_VIDEO_CFG_OSD;
+  
 	displayVideoConfig: entity work.fpga64_hexy_vmode
 		generic map (
 			xoffset => 200

@@ -30,15 +30,19 @@ package project_pkg is
   constant PACE_CLK1_MULTIPLY_BY            : natural := 125;  		-- 24.576*125/96 = 32Mhz
 
   -- S5A-specific constants
+  
+  -- Need to manually generate DE on this platform
+  -- - note that only NTSC (60Hz) mode is available on most monitors
+  -- - so use constants for NTSC mode
   constant S5A_DE_GEN                       : std_logic := '1';
   constant S5A_VS_POL                       : std_logic := '0';
   constant S5A_HS_POL                       : std_logic := '0';
   --constant S5A_DE_DLY                       : std_logic_vector(11 downto 0) := X"063";  -- 99
-  constant S5A_DE_DLY                       : std_logic_vector(11 downto 0) := X"0D5";  -- 213
+  constant S5A_DE_DLY                       : std_logic_vector(11 downto 0) := X"0FF";  -- 255
   constant S5A_DE_TOP                       : std_logic_vector(7 downto 0) := X"28";    -- 40
   --constant S5A_DE_CNT                       : std_logic_vector(11 downto 0) := X"350";  -- 848
   constant S5A_DE_CNT                       : std_logic_vector(11 downto 0) := X"280";  -- 640
-  constant S5A_DE_LIN                       : std_logic_vector(11 downto 0) := X"270";  -- 312*2=624???
+  constant S5A_DE_LIN                       : std_logic_vector(11 downto 0) := X"20C";  -- 262*2=524
 
   constant S5A_EMULATE_SRAM                 : boolean := true;
   constant S5A_EMULATED_SRAM_WIDTH          : natural := 8;

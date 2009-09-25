@@ -217,7 +217,9 @@ begin
 		fpga64_pace_inst : entity work.fpga64_pace
 			generic map
 			(
-				resetCycles => C64_RESET_CYCLES
+        ENABLE_VIDEO_CFG_OSD  => true,
+        ENABLE_OSD            => true,
+				resetCycles           => C64_RESET_CYCLES
 			)
 			port map
 			(
