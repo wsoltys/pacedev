@@ -248,7 +248,7 @@ begin
 				b 						=> b_s,
 
         -- cartridge port
-        game          => '0',
+        game          => '1',
         exrom         => '0',
         irq_n         => '1',
         nmi_n         => '1',
@@ -271,18 +271,18 @@ begin
 				--cvbsOutput		=> open,
 				
 				-- (internal) SID connections
-				--sid_pot_x				=> open,
-				--sid_pot_y				=> open,
-				--sid_audio_out		=> open,
-				--sid_audio_data	=> snd_data_s,
+				sid_pot_x				=> open,
+				sid_pot_y				=> open,
+				sid_audio_out		=> open,
+				sid_audio_data	=> snd_data_s,
 			
 				-- IEC
-				--sb_data_oe			=> c64_sb_data_oe,
-				--sb_data_in			=> int_sb_data,
-				--sb_clk_oe				=> c64_sb_clk_oe,
-				--sb_clk_in				=> int_sb_clk,
-				--sb_atn_oe				=> c64_sb_atn_oe,
-				--sb_atn_in				=> int_sb_atn,
+				sb_data_oe			=> c64_sb_data_oe,
+				sb_data_in			=> int_sb_data,
+				sb_clk_oe				=> c64_sb_clk_oe,
+				sb_clk_in				=> int_sb_clk,
+				sb_atn_oe				=> c64_sb_atn_oe,
+				sb_atn_in				=> int_sb_atn,
 					
 				--Connector to the SID
 				SIDclk					=> open,

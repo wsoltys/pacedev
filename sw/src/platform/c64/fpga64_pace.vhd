@@ -21,6 +21,9 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.std_logic_unsigned.ALL;
 use IEEE.numeric_std.all;
 
+library work;
+use work.project_pkg.all;
+
 -- -----------------------------------------------------------------------
 
 entity fpga64_pace is
@@ -69,6 +72,20 @@ entity fpga64_pace is
 		serioclk : out std_logic;
 		ces : out std_logic_vector(3 downto 0);
 
+		-- (internal) SID connections
+		sid_pot_x				: inout std_logic;
+		sid_pot_y				: inout std_logic;
+		sid_audio_out		: out std_logic;
+		sid_audio_data	: out std_logic_vector(17 downto 0);
+
+		-- IEC
+		sb_data_oe			: out std_logic;
+		sb_data_in			: in std_logic;
+		sb_clk_oe				: out std_logic;
+		sb_clk_in				: in std_logic;
+		sb_atn_oe				: out std_logic;
+		sb_atn_in				: in std_logic;
+				
 		--Connector to the SID
 		SIDclk: out std_logic;
 		still: out unsigned(15 downto 0)
@@ -226,6 +243,7 @@ signal videoConfigTimeout : unsigned(19 downto 0);
 signal ramdata_o_s      : unsigned(7 downto 0);
 signal ramdata_oe_s     : std_logic;
 signal ramdata_to_bus   : unsigned(7 downto 0);
+signal sidData          : unsigned(7 downto 0);
 	
 begin
 -- -----------------------------------------------------------------------
@@ -460,8 +478,7 @@ begin
 			cpuData => cpuDo,
 			vicAddr => vicAddr,
 			vicData => vicData,
---			sidData => sidData,
-			sidData => (others => '0'),
+			sidData => sidData,
 			colorData => colorData,
 			cia1Data => cia1Do,
 			cia2Data => cia2Do,
@@ -776,9 +793,14 @@ calcReset: process(clk32)
 --				end loop;
 --			end if;
 		elsif sysCycle >= CYCLE_IEC0 and sysCycle <= CYCLE_IEC3 then --IEC write
+      -- IEC writes to ram not used but benign on PACE
 			ramdata_o_s(5)<= cia2_pao(5);
 			ramdata_o_s(4)<= cia2_pao(4);
 			ramdata_o_s(3)<= cia2_pao(3);
+			-- added for PACE to replace above
+      sb_data_oe <= cia2_pao(5);
+      sb_clk_oe <= cia2_pao(4);
+      sb_atn_oe <= cia2_pao(3);
 			ramdata_o_s(2)<= '0';   --lptstrobe
 			ramdata_oe_s <= '1';
 		end if;
@@ -835,12 +857,13 @@ calcReset: process(clk32)
 		end if;
 		if rising_edge(clk32) then
 			if sysCycle = CYCLE_IEC1 then
-				cia2_pai(7) <= ramdata_to_bus(7);
-				cia2_pai(6) <= ramdata_to_bus(6);
+        -- modified for PACE
+				cia2_pai(7) <= sb_data_in;  --ramdata_to_bus(7);
+				cia2_pai(6) <= sb_clk_in;   --ramdata_to_bus(6);
 			end if;	
 		end if;
 	end process;
-		
+
 --	debugBasicScreen: process(systemWe, cpuHasBus, systemData, systemAddr)
 --	begin
 --		if (pulseWrRam = '1') and (cpuHasBus = '1') and (systemAddr(15 downto 11)="00000") then
@@ -915,10 +938,67 @@ calcReset: process(clk32)
 -- -----------------------------------------------------------------------
 	still <= X"4000";
 
+-- -----------------------------------------------------------------------
+--  Added to PACE
+-- -----------------------------------------------------------------------
+
   -- ram bus arbiter
 	ramdata_to_bus <= ramdata_o_s when ramdata_oe_s = '1' else
                     ramdata_i;
   ramdata_o <= ramdata_o_s;
+
+	GEN_SID : if C64_HAS_SID generate
+		
+    signal sidData_s 	: std_logic_vector(sidData'range);
+    signal sidWr      : std_logic;
+    
+  begin
+  
+    sidWr <= pulseWrRam and phi0_cpu;
+    
+    sid_inst : entity work.sid6581
+      port map
+      (
+        clk32				=> clk32,
+        clk_DAC			=> clk32,
+        reset				=> reset,
+        cs					=> cs_sid,
+        we					=> sidWr,
+
+        addr				=> cpuAddr(4 downto 0),
+        di					=> std_logic_vector(cpudo),
+        do					=> sidData_s,
+
+        pot_x				=> sid_pot_x,
+        pot_y				=> sid_pot_y,
+        audio_out		=> sid_audio_out,
+        audio_data	=> sid_audio_data
+      );
+    sidData <= unsigned(sidData_s);
+
+	end generate GEN_SID;
+
+	GEN_NO_SID : if not C64_HAS_SID generate
+
+    signal sidRandom : unsigned(7 downto 0);
+
+  begin
+		-- Emulate reading SID register $1B
+		process(clk32)
+		begin
+			if rising_edge(clk32) then
+				if cpuAddr(4 downto 0) = "11011" then
+					sidData <= sidRandom;
+				else
+					sidData <= (others => '0');
+				end if;
+				if enableCpu = '1' then
+					sidRandom <= sidRandom + 17; -- Emulate RND number
+				end if;
+			end if;
+		end process;
+
+	end generate GEN_NO_SID;
 	
 end architecture;
 
