@@ -24,8 +24,10 @@ package project_pkg is
   
   -- Reference clock is 50MHz
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_NONE;
-  constant PACE_CLK0_DIVIDE_BY              : natural := 25;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 16;  		-- 50*16/25 = 32MHz
+  --constant PACE_CLK0_DIVIDE_BY              : natural := 25;
+  --constant PACE_CLK0_MULTIPLY_BY            : natural := 16;  		-- 50*16/25 = 32MHz
+  constant PACE_CLK0_DIVIDE_BY              : natural := 28;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 19;  		-- 50*19/28 = 33.928571MHz
   constant PACE_CLK1_DIVIDE_BY              : natural := 1;
   constant PACE_CLK1_MULTIPLY_BY            : natural := 1;  			-- 50*1/1 = 50Mhz
 
