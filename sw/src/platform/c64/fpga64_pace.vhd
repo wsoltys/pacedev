@@ -238,7 +238,7 @@ signal ntscMode : std_logic;
 signal videoConfigVideo : std_logic;
 signal videoConfigDim : std_logic;
 signal videoConfigShow : std_logic;
-signal videoConfigTimeout : unsigned(21 downto 0);
+signal videoConfigTimeout : unsigned(20 downto 0);
 
 -- added PACE
 

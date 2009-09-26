@@ -269,7 +269,9 @@ begin
 	cs_color <= cs_colorReg;
 	cs_cia1 <= cs_cia1Reg;
 	cs_cia2 <= cs_cia2Reg;
-
+  cs_romL <= cs_romLReg;
+  cs_romH <= cs_romHReg;
+  
 	process(ramData, charData, vicCharReg)
 	begin
 		if vicCharReg = '1' then

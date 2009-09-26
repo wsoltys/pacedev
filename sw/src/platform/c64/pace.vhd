@@ -251,7 +251,7 @@ begin
 
         -- cartridge port
         game          => '1',
-        exrom         => '0',
+        exrom         => '1',
         irq_n         => '1',
         nmi_n         => '1',
         dma_n         => '1',
