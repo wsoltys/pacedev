@@ -4,6 +4,7 @@ use ieee.std_logic_unsigned.all;
 
 library work;
 use work.pace_pkg.all;
+use work.platform_pkg.all;
 
 package project_pkg is
 
@@ -38,6 +39,10 @@ package project_pkg is
 	constant C64_HAS_EXT_SB							      : boolean := true;
 	constant C64_RESET_CYCLES						      : natural := 4095;
 
+  -- inital video mode
+  --constant INITIAL_NTSCMODE                 : std_logic := NTSCMODE_PAL;
+  constant INITIAL_NTSCMODE                 : std_logic := NTSCMODE_NTSC;
+  
 	-- C64_HAS_C64 configuration
 	constant C64_HAS_SID								      : boolean := true;
 
