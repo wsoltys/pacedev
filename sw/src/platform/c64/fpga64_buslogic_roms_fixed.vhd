@@ -41,6 +41,7 @@ entity fpga64_buslogic is
 		colorData: in unsigned(3 downto 0);
 		cia1Data: in unsigned(7 downto 0);
 		cia2Data: in unsigned(7 downto 0);
+		romData: in unsigned(7 downto 0);
 		lastVicData : in unsigned(7 downto 0);
 
 		systemWe: out std_logic;
@@ -124,7 +125,9 @@ begin
 		);
 	
 	--
-	process(ramData, vicData, sidData, colorData, cia1Data, cia2Data, cs_ramReg, cs_vicReg, cs_sidReg, cs_colorReg, cs_cia1Reg, cs_cia2Reg, lastVicData)
+	process(ramData, vicData, sidData, colorData, cia1Data, cia2Data, cs_ramReg, 
+          cs_vicReg, cs_sidReg, cs_colorReg, cs_cia1Reg, cs_cia2Reg, cs_romLReg, cs_romHReg, 
+          lastVicData)
 	begin
 		-- If no hardware is addressed the bus is floating.
 		-- It will contain the last data read by the VIC. (if a C64 is shielded correctly)
@@ -147,6 +150,8 @@ begin
 			dataToCpu <= cia1Data;
 		elsif cs_cia2Reg = '1' then
 			dataToCpu <= cia2Data;
+    elsif cs_romLReg = '1' or cs_romHReg = '1' then
+      dataToCpu <= romData;
 		end if;
 	end process;
 	process(clk)

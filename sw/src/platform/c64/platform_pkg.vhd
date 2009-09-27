@@ -13,6 +13,9 @@ package platform_pkg is
 
   constant PLATFORM_SRC_DIR : string := "../../../../../src/platform/c64";
   constant ROMS_DIR         : string := PLATFORM_SRC_DIR & "/roms";
+
+  constant NTSCMODE_PAL     : std_logic := '0';
+  constant NTSCMODE_NTSC    : std_logic := '1';
   
   -- Number of tracks on disk
   constant num_tracks : integer := 84; 

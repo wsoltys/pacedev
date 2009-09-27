@@ -118,7 +118,8 @@ architecture SYN of PACE is
 	signal c64_sb_atn_oe				: std_logic;
 	signal c64_ramdata_i        : unsigned(7 downto 0);
 	signal c64_ramdata_o				: unsigned(7 downto 0);
-
+  signal c64_romdata_i        : unsigned(7 downto 0);
+  
 	signal c1541_sb_data_oe			: std_logic;
 	signal c1541_sb_clk_oe			: std_logic;
 	signal c1541_sb_atn_oe			: std_logic;
@@ -174,7 +175,22 @@ begin
     end block BLK_NO_SRAM;
   
   end generate GEN_NO_SRAM;
+
+  GEN_FLASH : if PACE_HAS_FLASH generate
+  
+		flash_o.a(flash_o.a'left downto 20) <= (others => '0');
+		-- switches define 16KB bank in flash
+		flash_o.a(19 downto 14) <= switches_i(9 downto 4);
+		flash_o.a(13 downto 0) <= std_logic_vector(sram_addr_s(13 downto 0));
+		flash_o.d <= (others => '0');
+		flash_o.we <= '0';
+		flash_o.cs <= '1';
+		flash_o.oe <= '1';
+  
+    c64_romdata_i <= unsigned(flash_i.d(7 downto 0));
     
+  end generate GEN_FLASH;
+  
 	video_o.clk <= clk_32M; -- for DE2
 	video_o.rgb.r <= std_logic_vector(r_s) & "00";
 	video_o.rgb.g <= std_logic_vector(g_s) & "00";
@@ -237,11 +253,10 @@ begin
 				ramAddr				=> sram_addr_s,
 				ramData_i			=> c64_ramdata_i,
 				ramData_o			=> c64_ramdata_o,
-				--ramData_oe		=> open,
+        romData_i     => c64_romdata_i,
 				
 				ramCE					=> sram_cs_n,
 				ramWe					=> sram_we_n,
-				--ramOe					=> sram_oe_n,
 				
 				hsync					=> video_o.hsync,
 				vsync					=> video_o.vsync,
@@ -250,8 +265,8 @@ begin
 				b 						=> b_s,
 
         -- cartridge port
-        game          => '1',
-        exrom         => '1',
+        game          => not switches_i(2),
+        exrom         => not switches_i(3),
         irq_n         => '1',
         nmi_n         => '1',
         dma_n         => '1',

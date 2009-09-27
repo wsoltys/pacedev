@@ -565,3 +565,7 @@ set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2S_LCM_Conf
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/i2s_controller.v
 set_global_assignment -name VHDL_FILE ../../../../src/target/de1/custom_io.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/de1/target_top.vhd
+set_global_assignment -name SIGNALTAP_FILE stp1.stp
+set_global_assignment -name ENABLE_SIGNALTAP OFF
+set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
+set_location_assignment PIN_AB15 -to fl_ce_n

@@ -22,9 +22,18 @@ use IEEE.std_logic_unsigned.ALL;
 use IEEE.numeric_std.all;
 
 library work;
+use work.platform_pkg.all;
 use work.project_pkg.all;
 
 -- -----------------------------------------------------------------------
+
+-- switches
+--
+-- 9..4   flash (16KB) cartridge bank == A(19..14)
+-- 3      exrom (0=de-asserted)
+-- 2      game (0=de-asserted)
+-- 1..0   C1541 device address (00=8)
+--
 
 entity fpga64_pace is
 	generic (
@@ -45,6 +54,7 @@ entity fpga64_pace is
 		ramAddr: out unsigned(16 downto 0);
 		ramData_i: in unsigned(7 downto 0);
 		ramData_o: out unsigned(7 downto 0);
+    romData_i : in unsigned(7 downto 0);
 
 		ramCE: out std_logic;
 		ramWe: out std_logic;
@@ -488,6 +498,7 @@ begin
 			colorData => colorData,
 			cia1Data => cia1Do,
 			cia2Data => cia2Do,
+			romData => romData_i,
 			lastVicData => lastVicDi,
 
 			systemWe => systemWe,
@@ -732,7 +743,7 @@ calcReset: process(clk32)
 	process(clk32)
 	begin
     if reset_n = '0' then
-      ntscMode <= '1';
+      ntscMode <= INITIAL_NTSCMODE;
 		elsif rising_edge(clk32) then
 			if videoKey = '1' then
 				ntscMode <= not ntscMode;

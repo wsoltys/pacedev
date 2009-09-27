@@ -6,6 +6,7 @@ library work;
 use work.pace_pkg.all;
 use work.video_controller_pkg.all;
 use work.target_pkg.all;
+use work.platform_pkg.all;
 
 package project_pkg is
 
@@ -15,7 +16,7 @@ package project_pkg is
 	
   -- Reference clock is 50MHz
 	constant PACE_HAS_PLL								      : boolean := true;
-  constant PACE_HAS_FLASH                   : boolean := false;
+  constant PACE_HAS_FLASH                   : boolean := true;
   constant PACE_HAS_SRAM                    : boolean := true;
   constant PACE_HAS_SDRAM                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := false;
@@ -38,6 +39,10 @@ package project_pkg is
 	constant C64_HAS_EXT_SB							      : boolean := false;
 	constant C64_RESET_CYCLES						      : natural := 4095;
 
+  -- inital video mode
+  --constant INITIAL_NTSCMODE                 : std_logic := NTSCMODE_PAL;
+  constant INITIAL_NTSCMODE                 : std_logic := NTSCMODE_NTSC;
+  
 	-- C64_HAS_C64 configuration
 	constant C64_HAS_SID								      : boolean := true;
 
