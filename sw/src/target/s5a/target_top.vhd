@@ -636,28 +636,45 @@ begin
 
   -- emulate some SRAM
   GEN_SRAM : if S5A_EMULATE_SRAM generate
-    BLK_SRAM : block
-      signal wren : std_logic := '0';
-    begin
-      wren <= sram_o.cs and sram_o.we;
-      sram_inst : entity work.spram
-        generic map
-        (
-          numwords_a		=> 2**S5A_EMULATED_SRAM_WIDTH_AD,
-          widthad_a			=> S5A_EMULATED_SRAM_WIDTH_AD,
-          width_a				=> S5A_EMULATED_SRAM_WIDTH
-        )
-        port map
-        (
-          clock		      => clk_i(0),
-          address		    => sram_o.a(S5A_EMULATED_SRAM_WIDTH_AD-1 downto 0),
-          data		      => sram_o.d(S5A_EMULATED_SRAM_WIDTH-1 downto 0),
-          wren		      => wren,
-          q		          => sram_i.d(S5A_EMULATED_SRAM_WIDTH-1 downto 0)
-        );
-      sram_i.d(sram_i.d'left downto S5A_EMULATED_SRAM_WIDTH) <= (others => '0');
-    end block BLK_SRAM;
+    signal wren : std_logic := '0';
+  begin
+    wren <= sram_o.cs and sram_o.we;
+    sram_inst : entity work.spram
+      generic map
+      (
+        numwords_a		=> 2**S5A_EMULATED_SRAM_WIDTH_AD,
+        widthad_a			=> S5A_EMULATED_SRAM_WIDTH_AD,
+        width_a				=> S5A_EMULATED_SRAM_WIDTH
+      )
+      port map
+      (
+        clock		      => clk_i(0),
+        address		    => sram_o.a(S5A_EMULATED_SRAM_WIDTH_AD-1 downto 0),
+        data		      => sram_o.d(S5A_EMULATED_SRAM_WIDTH-1 downto 0),
+        wren		      => wren,
+        q		          => sram_i.d(S5A_EMULATED_SRAM_WIDTH-1 downto 0)
+      );
+    sram_i.d(sram_i.d'left downto S5A_EMULATED_SRAM_WIDTH) <= (others => '0');
   end generate GEN_SRAM;
+  
+  -- emulate some FLASH
+  GEN_FLASH : if S5A_EMULATE_FLASH generate
+    flash_inst : entity work.sprom
+      generic map
+      (
+        init_file     => S5A_EMULATED_FLASH_INIT_FILE,
+        numwords_a		=> 2**S5A_EMULATED_FLASH_WIDTH_AD,
+        widthad_a			=> S5A_EMULATED_FLASH_WIDTH_AD,
+        width_a				=> S5A_EMULATED_FLASH_WIDTH
+      )
+      port map
+      (
+        clock		      => clk_i(0),
+        address		    => flash_o.a(S5A_EMULATED_FLASH_WIDTH_AD-1 downto 0),
+        q		          => flash_i.d(S5A_EMULATED_FLASH_WIDTH-1 downto 0)
+      );
+    flash_i.d(flash_i.d'left downto S5A_EMULATED_FLASH_WIDTH) <= (others => '0');
+  end generate GEN_FLASH;
   
   -- blink a led
   process (clk_24M576_a, reset_i)

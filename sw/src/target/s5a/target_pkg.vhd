@@ -17,7 +17,7 @@ package target_pkg is
 
   constant PACE_CLKIN0        : natural := 25;
   constant PACE_CLKIN1        : natural := 25;
-  constant PACE_HAS_FLASH     : boolean := false;
+  --constant PACE_HAS_FLASH     : boolean := false; -- can be emulated
   --constant PACE_HAS_SRAM      : boolean := false; -- can be emulated
 
   type from_TARGET_IO_t is record

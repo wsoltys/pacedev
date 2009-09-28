@@ -6,6 +6,7 @@ library work;
 use work.pace_pkg.all;
 use work.video_controller_pkg.all;
 use work.target_pkg.all;
+use work.platform_pkg.all;
 
 package project_pkg is
 
@@ -15,7 +16,7 @@ package project_pkg is
 	
   -- Reference clock is 24.576MHz
 	constant PACE_HAS_PLL								      : boolean := true;
-  constant PACE_HAS_FLASH                   : boolean := false;
+  --constant PACE_HAS_FLASH                   : boolean := false;
   --constant PACE_HAS_SRAM                    : boolean := false;
   constant PACE_HAS_SDRAM                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := false;
@@ -24,10 +25,10 @@ package project_pkg is
   
   -- Reference clock is 24.576MHz
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_NONE;
-  constant PACE_CLK0_DIVIDE_BY              : natural := 96;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 125;  		-- 24.576*125/96 = 32MHz
-  constant PACE_CLK1_DIVIDE_BY              : natural := 96;
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 125;  		-- 24.576*125/96 = 32Mhz
+  constant PACE_CLK0_DIVIDE_BY              : natural := 45;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 62;  		-- 24.576*62/45 = 33.860267MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 28;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 57;  		-- 24.576*57/28 = 50.029714Mhz
 
   -- S5A-specific constants
   
@@ -46,9 +47,15 @@ package project_pkg is
 
   constant S5A_EMULATE_SRAM                 : boolean := true;
   constant S5A_EMULATED_SRAM_WIDTH          : natural := 8;
-  constant S5A_EMULATED_SRAM_WIDTH_AD       : natural := 17;
+  constant S5A_EMULATED_SRAM_WIDTH_AD       : natural := 16;
+
+  constant S5A_EMULATE_FLASH                : boolean := true;
+  constant S5A_EMULATED_FLASH_INIT_FILE     : string := "emulated_flash_init_file.hex";
+  constant S5A_EMULATED_FLASH_WIDTH         : natural := 8;
+  constant S5A_EMULATED_FLASH_WIDTH_AD      : natural := 16;
 
   constant PACE_HAS_SRAM                    : boolean := S5A_EMULATE_SRAM;
+  constant PACE_HAS_FLASH                   : boolean := S5A_EMULATE_FLASH;
   
 	-- C64-specific constants
 
@@ -57,6 +64,10 @@ package project_pkg is
 	constant C64_HAS_EXT_SB							      : boolean := false;
 	constant C64_RESET_CYCLES						      : natural := 4095;
 
+  -- inital video mode
+  --constant INITIAL_NTSCMODE                 : std_logic := NTSCMODE_PAL;
+  constant INITIAL_NTSCMODE                 : std_logic := NTSCMODE_NTSC;
+  
 	-- C64_HAS_C64 configuration
 	constant C64_HAS_SID								      : boolean := true;
 
