@@ -3,6 +3,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 
 library work;
+use work.pace_pkg.all;
 use work.project_pkg.all;
 use work.target_pkg.all;
 
@@ -27,23 +28,22 @@ package platform_pkg is
 
   type from_PLATFORM_IO_t is record
   
+    sram_i              : from_SRAM_t;
+    
     floppy_fifo_clk     : std_logic;
     floppy_fifo_data    : std_logic_vector(7 downto 0);
     floppy_fifo_wr      : std_logic;
     floppy_fifo_flush   : std_logic;
     
-    d                   : std_logic_vector(63 downto 0);
-    
   end record;
 
   type to_PLATFORM_IO_t is record
   
+    sram_o              : to_SRAM_t;
+    
     floppy_track        : std_logic_vector(7 downto 0);
     floppy_offset       : std_logic_vector(12 downto 0);
     floppy_fifo_full    : std_logic;
-    
-    d                   : std_logic_vector(63 downto 0);
-    oe                  : std_logic_vector(63 downto 0);
     
   end record;
 

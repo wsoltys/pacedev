@@ -59,13 +59,21 @@ package project_pkg is
 	-- TRS-80-specific constants
 	
   constant TRS80_M3_ROM_IN_FLASH            : boolean := false;
-  constant PACE_HAS_FLASH                   : boolean := true;
 
   constant TRS80_M3_HIRES_SUPPORT           : boolean := false;
 	constant TRS80_M3_HIRES_WIDTHA            : integer := 12;    -- 4KiB only (Max 16KiB)
-	constant TRS80_M3_FDC_SUPPORT			        : boolean := true;
+	constant TRS80_M3_FDC_SUPPORT			        : boolean := false;
+  constant PACE_HAS_FLASH                   : boolean := TRS80_M3_FDC_SUPPORT;
 
   -- *** WARNING: enabling this option won't work on a stock DE1
   constant TRS80_M3_SYSMEM_IN_BURCHED_SRAM  : boolean := true;
   
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

@@ -143,20 +143,6 @@ architecture SYN of target_top is
   signal target_i       : from_TARGET_IO_t;
   signal target_o       : to_TARGET_IO_t;
 
-  -- gpio drivers from custom logic
-  signal custom_gpio_0_o    : std_logic_vector(35 downto 0);
-  signal custom_gpio_0_oe   : std_logic_vector(35 downto 0);
-  signal custom_gpio_1_o    : std_logic_vector(35 downto 0);
-  signal custom_gpio_1_oe   : std_logic_vector(35 downto 0);
-  
-	-- maple/dreamcast controller interface
-	signal maple_sense	: std_logic;
-	signal maple_oe			: std_logic;
-	signal mpj				  : work.maple_pkg.joystate_type;
-
-	-- gamecube controller interface
-	signal gcj					: work.gamecube_pkg.joystate_type;
-			
   signal lcm_sclk   	: std_logic;
   signal lcm_sdat   	: std_logic;
   signal lcm_scen   	: std_logic;
@@ -170,6 +156,10 @@ architecture SYN of target_top is
 
   signal yoffs      	: std_logic_vector(7 downto 0);
 
+  -- gpio drivers from default logic
+  signal default_gpio_0_o   : std_logic_vector(gpio_0'range);
+  signal default_gpio_1_o   : std_logic_vector(gpio_1'range);
+	
 begin
 
   BLK_CLOCKING : block
@@ -264,6 +254,18 @@ begin
 
 	GEN_MAPLE : if PACE_JAMMA = PACE_JAMMA_MAPLE generate
 	
+    -- all this is so we can easily switch GPIO ports for maple bus!
+    alias gpio_maple_i  : std_logic_vector(17 downto 11) is gpio_0;
+    alias gpio_maple_o  : std_logic_vector(14 downto 11) is default_gpio_0_o;
+
+    signal maple_sense	: std_logic;
+    signal maple_oe			: std_logic;
+    signal mpj					: work.maple_pkg.joystate_type;
+    signal a            : std_logic;
+    signal b            : std_logic;
+
+  begin
+  
 		-- Dreamcast MapleBus joystick interface
 		MAPLE_JOY : entity work.maple_joy
 			port map
@@ -272,15 +274,16 @@ begin
 				reset			=> reset_i,
 				sense			=> maple_sense,
 				oe				=> maple_oe,
-				a					=> gpio_maple(14),
-				b					=> gpio_maple(13),
+				a					=> a, --gpio_maple(14),
+				b					=> b, --gpio_maple(13),
 				joystate	=> mpj
 			);
-    gpio_0(12) <= custom_gpio_0_o(12) when custom_gpio_0_oe(12) = '1' else
-                  maple_oe;
-		gpio_0(11) <= custom_gpio_0_o(11) when custom_gpio_0_oe(11) = '1' else
-                  not maple_oe;
-		maple_sense <= gpio_maple(17); -- and sw(0);
+
+    -- insert drivers for a, b here
+      
+    gpio_maple_o(12) <= maple_oe;
+    gpio_maple_o(11) <= not maple_oe;
+    maple_sense <= gpio_maple_i(17); -- and sw(0);
 
 		-- map maple bus to jamma inputs
 		-- - same mappings as default mappings for MAMED (DCMAME)
@@ -300,6 +303,11 @@ begin
 
 	GEN_GAMECUBE : if PACE_JAMMA = PACE_JAMMA_NGC generate
 	
+    signal gcj  : work.gamecube_pkg.joystate_type;
+    signal d    : std_logic := '0';
+
+  begin
+	
 		GC_JOY: gamecube_joy
 			generic map( MHZ => 50 )
   		port map
@@ -307,9 +315,11 @@ begin
   			clk 				=> clock_50,
 				reset 			=> reset_i,
 				--oe 					=> gc_oe,
-				d 					=> gpio_maple(25),
+				d 					=> d, --gpio_maple(25),
 				joystate 		=> gcj
 			);
+
+    -- insert drivers for d here...
 
 		-- map gamecube controller to jamma inputs
 		inputs_i.jamma_n.coin(1) <= not gcj.l;
@@ -486,6 +496,72 @@ begin
 
   end block BLK_VIDEO;
 
+  BLK_LCM : block
+
+    component I2S_LCM_Config 
+      port
+      (   --  Host Side
+              iCLK      : in std_logic;
+        iRST_N    : in std_logic;
+        --    I2C Side
+        I2S_SCLK  : out std_logic;
+        I2S_SDAT  : out std_logic;
+        I2S_SCEN  : out std_logic
+      );
+    end component I2S_LCM_Config;
+
+    alias gpio_lcd_o 		: std_logic_vector(35 downto 18) is default_gpio_1_o(35 downto 18);
+    
+    signal lcm_sclk   	: std_logic;
+    signal lcm_sdat   	: std_logic;
+    signal lcm_scen   	: std_logic;
+    signal lcm_data   	: std_logic_vector(7 downto 0);
+    signal lcm_grst  		: std_logic;
+    signal lcm_hsync  	: std_logic;
+    signal lcm_vsync  	: std_logic;
+    signal lcm_dclk  		: std_logic;
+    signal lcm_shdb  		: std_logic;
+    signal lcm_clk			: std_logic;
+
+  begin
+  
+    lcmc: I2S_LCM_Config
+      port map
+      (   --  Host Side
+        iCLK => clock_50,
+        iRST_N => reset_n, --lcm_grst_n,
+        --    I2C Side
+        I2S_SCLK => lcm_sclk,
+        I2S_SDAT => lcm_sdat,
+        I2S_SCEN => lcm_scen
+      );
+
+    lcm_clk <= video_o.clk;
+    lcm_grst <= reset_n;
+    lcm_dclk	<=	not lcm_clk;
+    lcm_shdb	<=	'1';
+    lcm_hsync <= video_o.hsync;
+    lcm_vsync <= video_o.vsync;
+
+    gpio_lcd_o(19) <= lcm_data(7);
+    gpio_lcd_o(18) <= lcm_data(6);
+    gpio_lcd_o(21) <= lcm_data(5);
+    gpio_lcd_o(20) <= lcm_data(4);
+    gpio_lcd_o(23) <= lcm_data(3);
+    gpio_lcd_o(22) <= lcm_data(2);
+    gpio_lcd_o(25) <= lcm_data(1);
+    gpio_lcd_o(24) <= lcm_data(0);
+    gpio_lcd_o(30) <= lcm_grst;
+    gpio_lcd_o(26) <= lcm_vsync;
+    gpio_lcd_o(35) <= lcm_hsync;
+    gpio_lcd_o(29) <= lcm_dclk;
+    gpio_lcd_o(31) <= lcm_shdb;
+    gpio_lcd_o(28) <= lcm_sclk;
+    gpio_lcd_o(33) <= lcm_scen;
+    gpio_lcd_o(34) <= lcm_sdat;
+
+  end block BLK_LCM;
+
   BLK_AUDIO : block
     alias aud_clk    		: std_logic is clk_i(2);
     signal aud_data_l  	: std_logic_vector(audio_o.ldata'range);
@@ -582,39 +658,8 @@ begin
       report "GEN_BURCHED_SRAM not compatible with other DE1 options"
         severity failure;
       
-    -- D0-7
-    --custom_gpio_0_i(35 downto 28) <= gpio_0(35 downto 28);
-    gpio_0(35 downto 28) <= custom_gpio_0_o(35 downto 28) when custom_gpio_0_oe(19) = '0' else 
-                            (others => 'Z');
-    -- D8-15
-    --custom_gpio_0_i(27 downto 20) <= gpio_0(27 downto 20);
-    gpio_0(27 downto 20) <= custom_gpio_0_o(27 downto 20) when custom_gpio_0_oe(18) = '0' else 
-                            (others => 'Z');
-    -- A & CEn & WEn
-    gpio_0(19 downto 0) <= custom_gpio_0_o(19 downto 0);
-
   end generate GEN_BURCHED_SRAM;
   
-  --gpio_1 <= (others => 'Z');
-    
-  -- LCM signals
-  gpio_lcd(19) <= lcm_data(7);
-  gpio_lcd(18) <= lcm_data(6);
-  gpio_lcd(21) <= lcm_data(5);
-  gpio_lcd(20) <= lcm_data(4);
-  gpio_lcd(23) <= lcm_data(3);
-  gpio_lcd(22) <= lcm_data(2);
-  gpio_lcd(25) <= lcm_data(1);
-  gpio_lcd(24) <= lcm_data(0);
-  gpio_lcd(30) <=	lcm_grst;
-  gpio_lcd(26) <= lcm_vsync;
-  gpio_lcd(35) <= lcm_hsync;
-  gpio_lcd(29) <= lcm_dclk;
-  gpio_lcd(31) <= lcm_shdb;
-  gpio_lcd(28) <=	lcm_sclk;
-  gpio_lcd(33) <=	lcm_scen;
-  gpio_lcd(34) <= lcm_sdat;
-
   pace_inst : entity work.pace                                            
     port map
     (
@@ -663,26 +708,56 @@ begin
       target_o          => target_o
     );
 
-  custom_io_inst : entity work.custom_io
-    port map
-    (
-      gpio_0_i          => gpio_0,
-      gpio_0_o          => custom_gpio_0_o,
-      gpio_0_oe         => custom_gpio_0_oe,
-      
-      -- GPIO 1 connector
-      gpio_1_i          => gpio_1,
-      gpio_1_o          => custom_gpio_1_o,
-      gpio_1_oe         => custom_gpio_1_oe,
+  BLK_CUSTOM_IO : block
+  
+    signal custom_gpio_0_o    : std_logic_vector(gpio_0'range);
+    signal custom_gpio_0_oe   : std_logic_vector(gpio_0'range);
+    signal gpio_0_is_custom   : std_logic_vector(gpio_0'range);
+    signal custom_gpio_1_o    : std_logic_vector(gpio_1'range);
+    signal custom_gpio_1_oe   : std_logic_vector(gpio_1'range);
+    signal gpio_1_is_custom   : std_logic_vector(gpio_1'range);
 
-      -- custom i/o
-      project_i         => project_i,
-      project_o         => project_o,
-      platform_i        => platform_i,
-      platform_o        => platform_o,
-      target_i          => target_i,
-      target_o          => target_o
-    );
+  begin
+  
+    custom_io_inst : entity work.custom_io
+      port map
+      (
+        -- GPIO 0 connector
+        gpio_0_i          => gpio_0,
+        gpio_0_o          => custom_gpio_0_o,
+        gpio_0_oe         => custom_gpio_0_oe,
+        gpio_0_is_custom  => gpio_0_is_custom,
+        
+        -- GPIO 1 connector
+        gpio_1_i          => gpio_1,
+        gpio_1_o          => custom_gpio_1_o,
+        gpio_1_oe         => custom_gpio_1_oe,
+        gpio_1_is_custom  => gpio_1_is_custom,
+
+        -- custom i/o
+        project_i         => project_i,
+        project_o         => project_o,
+        platform_i        => platform_i,
+        platform_o        => platform_o,
+        target_i          => target_i,
+        target_o          => target_o
+      );
+
+    GEN_GPIO_0_O : for i in gpio_0'range generate
+      gpio_0(i) <=  custom_gpio_0_o(i) when 
+                      (gpio_0_is_custom(i) = '1' and custom_gpio_0_oe(i) = '1') else
+                    default_gpio_0_o(i) when gpio_0_is_custom(i) = '0' else
+                    'Z';
+    end generate GEN_GPIO_0_O;
+    
+    GEN_GPIO_1_O : for i in gpio_1'range generate
+      gpio_1(i) <=  custom_gpio_1_o(i) when 
+                      (gpio_1_is_custom(i) = '1' and custom_gpio_1_oe(i) = '1') else
+                    default_gpio_1_o(i) when gpio_1_is_custom(i) = '0' else
+                    'Z';
+    end generate GEN_GPIO_1_O;
+
+  end block BLK_CUSTOM_IO;
   
   BLK_AV : block
     component I2C_AV_Config
@@ -710,38 +785,6 @@ begin
       );
   end block BLK_AV;
 
-  BLK_LCM : block
-    component I2S_LCM_Config 
-      port
-      (   --  Host Side
-        iCLK      : in std_logic;
-        iRST_N    : in std_logic;
-        --    I2C Side
-        I2S_SCLK  : out std_logic;
-        I2S_SDAT  : out std_logic;
-        I2S_SCEN  : out std_logic
-      );
-    end component I2S_LCM_Config;
-  begin
-    lcmc: I2S_LCM_Config
-      port map
-      (   --  Host Side
-        iCLK => clock_50,
-        iRST_N => reset_n, --lcm_grst_n,
-        --    I2C Side
-        I2S_SCLK => lcm_sclk,
-        I2S_SDAT => lcm_sdat,
-        I2S_SCEN => lcm_scen
-      );
-
-    lcm_clk <= video_o.clk;
-    lcm_grst <= reset_n;
-    lcm_dclk	<=	not lcm_clk;
-    lcm_shdb	<=	'1';
-    lcm_hsync <= video_o.hsync;
-    lcm_vsync <= video_o.vsync;
-  end block BLK_LCM;
-  
   BLK_CHASER : block
     signal pwmen      	: std_logic;
     signal chaseen    	: std_logic;

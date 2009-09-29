@@ -8,9 +8,9 @@ use work.pace_pkg.all;
 use work.sdram_pkg.all;
 use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
-use work.project_pkg.all;
-use work.platform_pkg.all;
 use work.target_pkg.all;
+use work.platform_pkg.all;
+use work.project_pkg.all;
 
 entity platform is
   generic
@@ -199,16 +199,23 @@ begin
   uP_datai <= uPmem_datai when (uPmemrd = '1') else uPio_datai;
 
   BLK_SYSMEM : block
+  
+    signal sram_i_s   : from_SRAM_t;
+    signal sram_o_s   : to_SRAM_t;
+  
   begin
 
+    ram_datao <= sram_i_s.d(ram_datao'range);
+    sram_o_s.a <= std_logic_vector(RESIZE(unsigned(uP_addr), sram_o_s.a'length));
+    sram_o_s.d <= std_logic_vector(RESIZE(unsigned(uP_datao), sram_o_s.d'length));
+    sram_o_s.be <= std_logic_vector(to_unsigned(1, sram_o_s.be'length));
+    sram_o_s.cs <= '1';
+    sram_o_s.oe <= not ram_wr;
+    sram_o_s.we <= ram_wr;
+
     GEN_DFLT_SYSMEM: if not TRS80_M3_SYSMEM_IN_BURCHED_SRAM generate
-      ram_datao <= sram_i.d(ram_datao'range);
-      sram_o.a <= std_logic_vector(RESIZE(unsigned(uP_addr), sram_o.a'length));
-      sram_o.d <= std_logic_vector(RESIZE(unsigned(uP_datao), sram_o.d'length));
-      sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
-      sram_o.cs <= '1';
-      sram_o.oe <= not ram_wr;
-      sram_o.we <= ram_wr;
+      sram_i_s <= sram_i;
+      sram_o <= sram_o_s;
     end generate GEN_DFLT_SYSMEM;
     
     GEN_BURCHED_SYSMEM: if TRS80_M3_SYSMEM_IN_BURCHED_SRAM generate
@@ -216,18 +223,8 @@ begin
         report "TRS80_M3_SYSMEM_IN_BURCHED_SRAM option won't work on stock DE1 hardware"
           severity warning;
       -- hook up Burched SRAM module
-      GEN_D: for i in 0 to 7 generate
-        ram_datao(i) <= platform_i.d(35-i);
-        platform_o.d(35-i) <= up_datao(i);
-        platform_o.d(27-i) <= 'Z';
-      end generate;
-      GEN_A: for i in 0 to 15 generate
-        platform_o.d(17-i) <= up_addr(i);
-      end generate;
-      platform_o.d(1) <= '0';           -- A16
-      platform_o.d(0) <= '0';           -- CEAn
-      platform_o.d(18) <= '1';          -- upper byte WEn
-      platform_o.d(19) <= not ram_wr;   -- lower byte WEn
+      sram_i_s <= platform_i.sram_i;
+      platform_o.sram_o <= sram_o_s;
     end generate GEN_BURCHED_SYSMEM;
 
   end block BLK_SYSMEM;
@@ -362,7 +359,6 @@ begin
 	graphics_o.pal <= (others => (others => '0'));
 	ser_o <= NULL_TO_SERIAL;
   spi_o <= NULL_TO_SPI;
-  platform_o.d(platform_o.d'left downto 52) <= (others => '0');
 
 	clk_en_inst : entity work.clk_div
 		generic map
@@ -926,14 +922,14 @@ begin
       -- write-protect the two flash drives
       wprt_n <= '0' when (ds(1) or ds(2)) = '1' else '1';
         
-      platform_o.d(51 downto 36) <= -- memory address
-                           floppy_dbg(31 downto 16) when switches_i(5 downto 4) = "11" else 
-                           -- track & data byte
-                           floppy_dbg(15 downto 0) when switches_i(5 downto 4) = "10" else
-                           -- idam track and sector
-                           wd179x_dbg(31 downto 16) when switches_i(5 downto 4) = "01" else
-                           -- track & sector registers
-                           wd179x_dbg(15 downto 0);
+      --platform_o.d(51 downto 36) <= -- memory address
+      --                     floppy_dbg(31 downto 16) when switches_i(5 downto 4) = "11" else 
+      --                     -- track & data byte
+      --                     floppy_dbg(15 downto 0) when switches_i(5 downto 4) = "10" else
+      --                     -- idam track and sector
+      --                     wd179x_dbg(31 downto 16) when switches_i(5 downto 4) = "01" else
+      --                     -- track & sector registers
+      --                     wd179x_dbg(15 downto 0);
 
       leds_o(9) <= not tr00_n;
 
