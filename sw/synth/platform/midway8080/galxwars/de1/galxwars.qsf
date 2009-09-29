@@ -560,3 +560,4 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/toys/led_chas
 set_global_assignment -name VHDL_FILE ../../../../../src/target/de2/audio_if.vhd
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/seg7_lut.v
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/i2s_controller.v
+set_global_assignment -name VHDL_FILE ../../../../../src/target/de1/custom_io.vhd
