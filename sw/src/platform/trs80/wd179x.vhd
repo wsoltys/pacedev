@@ -1229,7 +1229,7 @@ begin
     end if;
   end process;
   
-  --debug <= idam_track & idam_sector & track_r & sector_r;
-  debug <= command_r & status_r & command_r & status_r;
+  debug <= idam_track & idam_sector & track_r & sector_r;
+  --debug <= command_r & status_r & command_r & status_r;
   
 end architecture SYN;

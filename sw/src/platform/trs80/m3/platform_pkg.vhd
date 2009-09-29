@@ -33,7 +33,6 @@ package platform_pkg is
     floppy_fifo_clk     : std_logic;
     floppy_fifo_data    : std_logic_vector(7 downto 0);
     floppy_fifo_wr      : std_logic;
-    floppy_fifo_flush   : std_logic;
     
   end record;
 
@@ -42,8 +41,10 @@ package platform_pkg is
     sram_o              : to_SRAM_t;
     
     floppy_track        : std_logic_vector(7 downto 0);
-    floppy_offset       : std_logic_vector(12 downto 0);
+    --floppy_offset       : std_logic_vector(12 downto 0);
     floppy_fifo_full    : std_logic;
+
+    seg7                : std_logic_vector(15 downto 0);
     
   end record;
 

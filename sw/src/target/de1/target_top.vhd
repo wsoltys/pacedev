@@ -143,22 +143,10 @@ architecture SYN of target_top is
   signal target_i       : from_TARGET_IO_t;
   signal target_o       : to_TARGET_IO_t;
 
-  signal lcm_sclk   	: std_logic;
-  signal lcm_sdat   	: std_logic;
-  signal lcm_scen   	: std_logic;
-  signal lcm_data   	: std_logic_vector(7 downto 0);
-  signal lcm_grst  		: std_logic;
-  signal lcm_hsync  	: std_logic;
-  signal lcm_vsync  	: std_logic;
-	signal lcm_dclk  		: std_logic;
-	signal lcm_shdb  		: std_logic;
-	signal lcm_clk			: std_logic;
-
-  signal yoffs      	: std_logic_vector(7 downto 0);
-
   -- gpio drivers from default logic
   signal default_gpio_0_o   : std_logic_vector(gpio_0'range);
   signal default_gpio_1_o   : std_logic_vector(gpio_1'range);
+	signal seg7               : std_logic_vector(15 downto 0);
 	
 begin
 
@@ -734,6 +722,9 @@ begin
         gpio_1_oe         => custom_gpio_1_oe,
         gpio_1_is_custom  => gpio_1_is_custom,
 
+        -- 7-segment display
+        seg7              => seg7,
+        
         -- custom i/o
         project_i         => project_i,
         project_o         => project_o,
@@ -834,10 +825,10 @@ begin
 
   begin
     -- from left to right on the PCB
-    --seg7_3: SEG7_LUT port map (iDIG => gp_o.d(51 downto 48), oSEG => hex3);
-    --seg7_2: SEG7_LUT port map (iDIG => gp_o.d(47 downto 44), oSEG => hex2);
-    --seg7_1: SEG7_LUT port map (iDIG => gp_o.d(43 downto 40), oSEG => hex1);
-    --seg7_0: SEG7_LUT port map (iDIG => gp_o.d(39 downto 36), oSEG => hex0);
+    seg7_3: SEG7_LUT port map (iDIG => seg7(15 downto 12), oSEG => hex3);
+    seg7_2: SEG7_LUT port map (iDIG => seg7(11 downto 8), oSEG => hex2);
+    seg7_1: SEG7_LUT port map (iDIG => seg7(7 downto 4), oSEG => hex1);
+    seg7_0: SEG7_LUT port map (iDIG => seg7(3 downto 0), oSEG => hex0);
   end block BLK_7_SEG;
   
 end SYN;

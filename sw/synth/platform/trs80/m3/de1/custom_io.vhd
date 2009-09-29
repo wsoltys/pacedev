@@ -22,6 +22,9 @@ entity custom_io is
     gpio_1_oe         : out std_logic_vector(35 downto 0);
     gpio_1_is_custom  : out std_logic_vector(35 downto 0);
 
+    -- 7-segment display
+    seg7              : out std_logic_vector(15 downto 0);
+    
     project_i         : out from_PROJECT_IO_t;
     project_o         : in to_PROJECT_IO_t;
     platform_i        : out from_PLATFORM_IO_t;
@@ -66,4 +69,6 @@ begin
   gpio_0_is_custom <= (others => '1');
   gpio_1_is_custom <= (others => '0');
 
+  seg7 <= platform_o.seg7;
+  
 end architecture SYN;

@@ -352,14 +352,6 @@ begin
   end process;
   graphics_o.bit8_1(7 downto 2) <= port_ec(7 downto 2);
 
-  -- unused outputs
-	sprite_reg_o <= NULL_TO_SPRITE_REG;
-	sprite_o <= NULL_TO_SPRITE_CTL;
-  tilemap_o.attr_d <= std_logic_vector(RESIZE(unsigned(switches_i(7 downto 0)), tilemap_o.attr_d'length));
-	graphics_o.pal <= (others => (others => '0'));
-	ser_o <= NULL_TO_SERIAL;
-  spi_o <= NULL_TO_SPI;
-
 	clk_en_inst : entity work.clk_div
 		generic map
 		(
@@ -545,429 +537,425 @@ begin
 
   GEN_FDC : if TRS80_M3_FDC_SUPPORT generate
   
-    BLK_FDC : block
+    component wd179x is
+      port
+      (
+        clk           : in std_logic;
+        clk_20M_ena   : in std_logic;
+        reset         : in std_logic;
+        
+        -- micro bus interface
+        mr_n          : in std_logic;
+        we_n          : in std_logic;
+        cs_n          : in std_logic;
+        re_n          : in std_logic;
+        a             : in std_logic_vector(1 downto 0);
+        dal_i         : in std_logic_vector(7 downto 0);
+        dal_o         : out std_logic_vector(7 downto 0);
+        clk_1mhz_en   : in std_logic;
+        drq           : out std_logic;
+        intrq         : out std_logic;
+        
+        -- drive interface
+        step          : out std_logic;
+        dirc          : out std_logic; -- 1=in, 0=out
+        early         : out std_logic;
+        late          : out std_logic;
+        test_n        : in std_logic;
+        hlt           : in std_logic;
+        rg            : out std_logic;
+        sso           : out std_logic;
+        rclk          : in std_logic;
+        raw_read_n    : in std_logic;
+        hld           : out std_logic;
+        tg43          : out std_Logic;
+        wg            : out std_logic;
+        wd            : out std_logic;
+        ready         : in std_logic;
+        wf_n_i        : in std_logic;
+        vfoe_n_o      : out std_logic;
+        tr00_n        : in std_logic;
+        ip_n          : in std_logic;
+        wprt_n        : in std_logic;
+        dden_n        : in std_logic;
 
-      component wd179x is
-        port
-        (
-          clk           : in std_logic;
-          clk_20M_ena   : in std_logic;
-          reset         : in std_logic;
-          
-          -- micro bus interface
-          mr_n          : in std_logic;
-          we_n          : in std_logic;
-          cs_n          : in std_logic;
-          re_n          : in std_logic;
-          a             : in std_logic_vector(1 downto 0);
-          dal_i         : in std_logic_vector(7 downto 0);
-          dal_o         : out std_logic_vector(7 downto 0);
-          clk_1mhz_en   : in std_logic;
-          drq           : out std_logic;
-          intrq         : out std_logic;
-          
-          -- drive interface
-          step          : out std_logic;
-          dirc          : out std_logic; -- 1=in, 0=out
-          early         : out std_logic;
-          late          : out std_logic;
-          test_n        : in std_logic;
-          hlt           : in std_logic;
-          rg            : out std_logic;
-          sso           : out std_logic;
-          rclk          : in std_logic;
-          raw_read_n    : in std_logic;
-          hld           : out std_logic;
-          tg43          : out std_Logic;
-          wg            : out std_logic;
-          wd            : out std_logic;
-          ready         : in std_logic;
-          wf_n_i        : in std_logic;
-          vfoe_n_o      : out std_logic;
-          tr00_n        : in std_logic;
-          ip_n          : in std_logic;
-          wprt_n        : in std_logic;
-          dden_n        : in std_logic;
+        -- temp fudge!!!
+        wr_dat_o			: out std_logic_vector(7 downto 0);
+        
+        debug         : out std_logic_vector(31 downto 0)
+      );
+    end component wd179x;
+    
+    component floppy_if is
+      generic
+      (
+        NUM_TRACKS      : integer := 35
+      );
+      port
+      (
+        clk           : in std_logic;
+        clk_20M_ena   : in std_logic;
+        reset         : in std_logic;
+        
+        drv_ena       : in std_logic_vector(4 downto 1);
+        drv_sel       : in std_logic_vector(4 downto 1);
+        
+        step          : in std_logic;
+        dirc          : in std_logic;
+        rg            : in std_logic;
+        rclk          : out std_logic;
+        raw_read_n    : out std_logic;
+        wg            : in std_logic;
+        wd            : in std_logic;
+        tr00_n        : out std_logic;
+        ip_n          : out std_logic;
 
-          -- temp fudge!!!
-          wr_dat_o			: out std_logic_vector(7 downto 0);
-          
-          debug         : out std_logic_vector(31 downto 0)
-        );
-      end component wd179x;
-      
-      component floppy_if is
-        generic
-        (
-          NUM_TRACKS      : integer := 35
-        );
-        port
-        (
-          clk           : in std_logic;
-          clk_20M_ena   : in std_logic;
-          reset         : in std_logic;
-          
-          drv_ena       : in std_logic_vector(4 downto 1);
-          drv_sel       : in std_logic_vector(4 downto 1);
-          
-          step          : in std_logic;
-          dirc          : in std_logic;
-          rg            : in std_logic;
-          rclk          : out std_logic;
-          raw_read_n    : out std_logic;
-          wg            : in std_logic;
-          wd            : in std_logic;
-          tr00_n        : out std_logic;
-          ip_n          : out std_logic;
+        -- media interface
 
-          -- media interface
+        track         : out std_logic_vector(7 downto 0);
+        dat_i         : in std_logic_vector(7 downto 0);
+        dat_o         : out std_logic_vector(7 downto 0);
+        wr            : out std_logic;
+        -- random-access control
+        offset        : out std_logic_vector(12 downto 0);
+        -- fifo control
+        rd            : out std_logic;
+        flush         : out std_logic;
+        
+        debug         : out std_logic_vector(31 downto 0)
+      );
+    end component floppy_if;
+    
+    component floppy_fifo is
+      port
+      (
+        aclr		: IN STD_LOGIC  := '0';
+        data		: IN STD_LOGIC_VECTOR (7 DOWNTO 0);
+        rdclk		: IN STD_LOGIC ;
+        rdreq		: IN STD_LOGIC ;
+        wrclk		: IN STD_LOGIC ;
+        wrreq		: IN STD_LOGIC ;
+        q		: OUT STD_LOGIC_VECTOR (7 DOWNTO 0);
+        rdempty		: OUT STD_LOGIC ;
+        wrfull		: OUT STD_LOGIC 
+      );
+    end component floppy_fifo;
+    
+    constant FLOPPY_USE_FLASH : boolean := true;
+    constant FLOPPY_USE_SRAM  : boolean := true;
 
-          track         : out std_logic_vector(7 downto 0);
-          dat_i         : in std_logic_vector(7 downto 0);
-          dat_o         : out std_logic_vector(7 downto 0);
-          wr            : out std_logic;
-          -- random-access control
-          offset        : out std_logic_vector(12 downto 0);
-          -- fifo control
-          rd            : out std_logic;
-          flush         : out std_logic;
-          
-          debug         : out std_logic_vector(31 downto 0)
-        );
-      end component floppy_if;
-      
-      component floppy_fifo is
-        port
-        (
-          aclr		: IN STD_LOGIC  := '0';
-          data		: IN STD_LOGIC_VECTOR (7 DOWNTO 0);
-          rdclk		: IN STD_LOGIC ;
-          rdreq		: IN STD_LOGIC ;
-          wrclk		: IN STD_LOGIC ;
-          wrreq		: IN STD_LOGIC ;
-          q		: OUT STD_LOGIC_VECTOR (7 DOWNTO 0);
-          rdempty		: OUT STD_LOGIC ;
-          wrfull		: OUT STD_LOGIC 
-        );
-      end component floppy_fifo;
-      
-      constant FLOPPY_USE_FIFO  : boolean := true;
-      constant FLOPPY_USE_FLASH : boolean := false;
-      constant FLOPPY_USE_SRAM  : boolean := false;
-      
-      signal sync_reset   : std_logic := '1';
-      
-      signal step         : std_logic := '0';
-      signal dirc         : std_logic := '0';
-      signal rg           : std_logic := '0';
-      signal rclk         : std_logic := '0';
-      signal raw_read_n   : std_logic := '0';
-      signal wg           : std_logic := '0';
-      signal wd           : std_logic := '0';
-      signal tr00_n       : std_logic := '0';
-      signal ip_n         : std_logic := '0';
-      signal wprt_n       : std_logic := '1';
-      
-      signal de_s         : std_logic_vector(4 downto 1);
+    -- drive assignments
+    constant DS_FLASH   : natural := 1;
+    constant DS_SRAM_1  : natural := 2;
+    constant DS_SRAM_2  : natural := 3;
+    constant DS_FIFO    : natural := 4;
+    
+    signal sync_reset   : std_logic := '1';
+    
+    signal step         : std_logic := '0';
+    signal dirc         : std_logic := '0';
+    signal rg           : std_logic := '0';
+    signal rclk         : std_logic := '0';
+    signal raw_read_n   : std_logic := '0';
+    signal wg           : std_logic := '0';
+    signal wd           : std_logic := '0';
+    signal tr00_n       : std_logic := '0';
+    signal ip_n         : std_logic := '0';
+    signal wprt_n       : std_logic := '1';
+    
+    signal de_s         : std_logic_vector(4 downto 1);
 
-      -- floppy data
-      signal track              : std_logic_vector(7 downto 0) := (others => '0');
-      signal offset             : std_logic_vector(12 downto 0) := (others => '0');
-      signal rd_data_from_media : std_logic_vector(7 downto 0) := (others => '0');
-      signal rd_data_from_flash_media : std_logic_vector(rd_data_from_media'range) := (others => '0');
-      signal rd_data_from_sram_media  : std_logic_vector(rd_data_from_media'range) := (others => '0');
-      signal rd_data_from_fifo  : std_logic_vector(7 downto 0) := (others => '0');
-      signal wr_data_to_media   : std_logic_vector(7 downto 0) := (others => '0');
-      signal media_wr           : std_logic := '0';
-      
-      signal fifo_rd      : std_logic := '0';
-      signal fifo_wr      : std_logic := '0';
-      signal fifo_flush   : std_logic := '0';
+    -- floppy data
+    signal track              : std_logic_vector(7 downto 0) := (others => '0');
+    signal offset             : std_logic_vector(12 downto 0) := (others => '0');
+    signal rd_data_from_media : std_logic_vector(7 downto 0) := (others => '0');
+    signal rd_data_from_flash_media : std_logic_vector(rd_data_from_media'range) := (others => '0');
+    signal rd_data_from_sram_media  : std_logic_vector(rd_data_from_media'range) := (others => '0');
+    signal rd_data_from_fifo  : std_logic_vector(7 downto 0) := (others => '0');
+    signal wr_data_to_media   : std_logic_vector(7 downto 0) := (others => '0');
+    signal media_wr           : std_logic := '0';
+    
+    signal fifo_rd      : std_logic := '0';
+    signal fifo_wr      : std_logic := '0';
+    signal fifo_flush   : std_logic := '0';
 
-      signal floppy_dbg   : std_logic_vector(31 downto 0) := (others => '0');
-      signal wd179x_dbg   : std_logic_vector(31 downto 0) := (others => '0');
+    signal floppy_dbg   : std_logic_vector(31 downto 0) := (others => '0');
+    signal wd179x_dbg   : std_logic_vector(31 downto 0) := (others => '0');
+    
+  begin
+
+    process (clk_20M, reset_i)
+      variable reset_r : std_logic_vector(3 downto 0) := (others => '0');
+    begin
+      if reset_i = '1' then
+        reset_r := (others => '1');
+      elsif rising_edge(clk_20M) then
+        reset_r := reset_r(reset_r'left-1 downto 0) & platform_reset;
+      end if;
+      sync_reset <= reset_r(reset_r'left);
+    end process;
+    
+    wd179x_inst : wd179x
+      port map
+      (
+        clk           => clk_20M,
+        clk_20M_ena   => '1',
+        reset         => sync_reset,
+        
+        -- micro bus interface
+        mr_n          => '1',
+        we_n          => fdc_we_n,
+        cs_n          => fdc_cs_n,
+        re_n          => fdc_re_n,
+        a             => up_addr(1 downto 0),
+        dal_i         => uP_datao,
+        dal_o         => fdc_dat_o,
+        clk_1mhz_en   => '1',
+        drq           => fdc_drq,
+        intrq         => fdc_irq,
+        
+        -- drive interface
+        step          => step,
+        dirc          => dirc,
+        early         => open,    -- not used atm
+        late          => open,    -- not used atm
+        test_n        => '1',     -- not used
+        hlt           => '1',     -- head always engaged atm
+        rg            => rg,
+        sso           => open,
+        rclk          => rclk,
+        raw_read_n    => raw_read_n,
+        hld           => open,    -- not used atm
+        tg43          => open,    -- not used on TRS-80 designs
+        wg            => wg,
+        wd            => wd,      -- 200ns (MFM) or 500ns (FM) pulse
+        ready         => '1',     -- always read atm
+        wf_n_i        => '1',     -- no write faults atm
+        vfoe_n_o      => open,    -- not used in TRS-80 designs?
+        tr00_n        => tr00_n,
+        ip_n          => ip_n,
+        wprt_n        => wprt_n,
+        dden_n        => '0',     -- double density only atm
+        
+        wr_dat_o      => wr_data_to_media,
+
+        debug         => wd179x_dbg
+      );
       
+    floppy_if_inst : floppy_if
+      generic map
+      (
+        NUM_TRACKS      => 40
+      )
+      port map
+      (
+        clk           => clk_20M,
+        clk_20M_ena   => '1',
+        reset         => sync_reset,
+        
+        -- drive select lines
+        drv_ena       => de_s,
+        drv_sel       => ds,
+        
+        step          => step,
+        dirc          => dirc,
+        rg            => rg,
+        rclk          => rclk,
+        raw_read_n    => raw_read_n,
+        wg            => wg,
+        wd            => wd,
+        tr00_n        => tr00_n,
+        ip_n          => ip_n,
+        
+        -- media interface
+
+        track         => track,
+        dat_i         => rd_data_from_media,
+        dat_o         => open,
+        wr            => media_wr,
+        -- random-access control
+        offset        => offset,
+        -- fifo control
+        rd            => fifo_rd,
+        flush         => fifo_flush,
+        
+        debug         => floppy_dbg
+      );
+
+    BLK_FIFO : block
+      signal fifo_rd_pulse	: std_logic := '0';
+      signal fifo_empty     : std_logic := '0';   -- not used
+      signal fifo_full      : std_logic := '0';
     begin
 
-      assert not FLOPPY_USE_FIFO or
-              not (FLOPPY_USE_FLASH or FLOPPY_USE_SRAM)
-        report "choose FLOPPY_USE_FIFO -or- FLOPPY_USE_FLASH and/or FLOPPY_USE_SRAM"
-          severity error;
-
-      process (clk_20M, reset_i)
-        variable reset_r : std_logic_vector(3 downto 0) := (others => '0');
+      process (clk_20M, sync_reset)
+        subtype count_t is integer range 0 to 7;
+        variable count      : count_t := 0;
+        variable offset_v   : std_logic_vector(12 downto 0) := (others => '0');
+        variable fifo_rd_r	: std_logic := '0';
       begin
-        if reset_i = '1' then
-          reset_r := (others => '1');
+        if sync_reset = '1' then
+          count := 0;
+          offset_v := (others => '0');
         elsif rising_edge(clk_20M) then
-          reset_r := reset_r(reset_r'left-1 downto 0) & platform_reset;
-        end if;
-        sync_reset <= reset_r(reset_r'left);
-      end process;
-      
-      wd179x_inst : wd179x
-        port map
-        (
-          clk           => clk_20M,
-          clk_20M_ena   => '1',
-          reset         => sync_reset,
-          
-          -- micro bus interface
-          mr_n          => '1',
-          we_n          => fdc_we_n,
-          cs_n          => fdc_cs_n,
-          re_n          => fdc_re_n,
-          a             => up_addr(1 downto 0),
-          dal_i         => uP_datao,
-          dal_o         => fdc_dat_o,
-          clk_1mhz_en   => '1',
-          drq           => fdc_drq,
-          intrq         => fdc_irq,
-          
-          -- drive interface
-          step          => step,
-          dirc          => dirc,
-          early         => open,    -- not used atm
-          late          => open,    -- not used atm
-          test_n        => '1',     -- not used
-          hlt           => '1',     -- head always engaged atm
-          rg            => rg,
-          sso           => open,
-          rclk          => rclk,
-          raw_read_n    => raw_read_n,
-          hld           => open,    -- not used atm
-          tg43          => open,    -- not used on TRS-80 designs
-          wg            => wg,
-          wd            => wd,    -- 200ns (MFM) or 500ns (FM) pulse
-          ready         => '1',     -- always read atm
-          wf_n_i        => '1',     -- no write faults atm
-          vfoe_n_o      => open,    -- not used in TRS-80 designs?
-          tr00_n        => tr00_n,
-          ip_n          => ip_n,
-          wprt_n        => wprt_n,
-          dden_n        => '0',     -- double density only atm
-          
-          wr_dat_o      => wr_data_to_media,
 
-          debug         => wd179x_dbg
-        );
-        
-      floppy_if_inst : floppy_if
-        generic map
-        (
-          NUM_TRACKS      => 40
-        )
-        port map
-        (
-          clk           => clk_20M,
-          clk_20M_ena   => '1',
-          reset         => sync_reset,
-          
-          -- drive select lines
-          drv_ena       => de_s,
-          drv_sel       => ds,
-          
-          step          => step,
-          dirc          => dirc,
-          rg            => rg,
-          rclk          => rclk,
-          raw_read_n    => raw_read_n,
-          wg            => wg,
-          wd            => wd,
-          tr00_n        => tr00_n,
-          ip_n          => ip_n,
-          
-          -- media interface
-
-          track         => track,
-          dat_i         => rd_data_from_fifo,
-          dat_o         => open,
-          wr            => media_wr,
-          -- random-access control
-          offset        => offset,
-          -- fifo control
-          rd            => fifo_rd,
-          flush         => fifo_flush,
-          
-          debug         => floppy_dbg
-        );
-
-      GEN_FLOPPY_FIFO : if FLOPPY_USE_FIFO generate
-        BLK_FIFO : block
-					signal fifo_rd_pulse	: std_logic := '0';
-          signal fifo_empty     : std_logic := '0';
-          signal fifo_full      : std_logic := '0';
-        begin
-          fifo_inst : floppy_fifo
-            PORT map
-            (
-              rdclk		  => clk_20M,
-              q		      => rd_data_from_fifo,
-              rdreq		  => fifo_rd_pulse,
-              rdempty		=> fifo_empty,
-
-              wrclk		  => platform_i.floppy_fifo_clk,
-              data		  => platform_i.floppy_fifo_data,
-              wrreq		  => platform_i.floppy_fifo_wr,
-              wrfull		=> platform_o.floppy_fifo_full,
-              aclr      => platform_i.floppy_fifo_flush
-            );
-
-          process (clk_20M, sync_reset)
-            subtype count_t is integer range 0 to 7;
-            variable count      : count_t := 0;
-            variable offset_v   : std_logic_vector(12 downto 0) := (others => '0');
-						variable fifo_rd_r	: std_logic := '0';
-          begin
-            if sync_reset = '1' then
-              count := 0;
-              offset_v := (others => '0');
-            elsif rising_edge(clk_20M) then
-
-              -- fifo read pulse is too wide - edge-detect
-							fifo_rd_pulse <= '0';	-- default
-							if fifo_rd = '1' and fifo_rd_r = '0' then
-								fifo_rd_pulse <= '1';
-							end if;
-							fifo_rd_r := fifo_rd;
-
-              --fifo_wr <= '0';   -- default
-              --if count = count_t'high then
-              --  if fifo_full = '0' then
-              --    fifo_wr <= '1';
-              --    if offset_v = 6272-1 then
-              --      offset_v := (others => '0');
-              --    else
-              --      offset_v := offset_v + 1;
-              --    end if;
-              --  end if;
-              --  count := 0;
-              --else
-              --  count := count + 1;
-              --  -- don't update when writing to FIFO
-              --  flash_o.a(12 downto 0) <= offset_v;
-              --end if;
-            end if;
-          end process;
-
-        end block BLK_FIFO;
-
-        platform_o.floppy_track <= track;
-        platform_o.floppy_offset <= offset;
-        
-      end generate GEN_FLOPPY_FIFO;
-      
-      GEN_FLOPPY_NO_FIFO : if not FLOPPY_USE_FIFO generate
-        -- each track is encoded in 8KiB
-        -- - 40 tracks is 320(512) KiB
-        flash_o.a(12 downto 0) <= offset;
-        rd_data_from_fifo <= rd_data_from_media;
-      end generate GEN_FLOPPY_NO_FIFO;
-      
-      BLK_FLASH_FLOPPY : block
-      begin  
-        GEN_FLASH_FLOPPY : if FLOPPY_USE_FLASH generate
-          flash_o.a(flash_o.a'left downto 20) <= (others => '0');
-          -- support 2 drives in flash for now
-          flash_o.a(19) <=  '0' when ds(1) = '1' else
-                            '1' when ds(2) = '1' else
-                            '0';
-          flash_o.a(18 downto 13) <= track(5 downto 0);
-          flash_o.cs <= '1';
-          flash_o.oe <= '1';
-          flash_o.we <= '0';
-
-          rd_data_from_flash_media <= flash_i.d;
-        end generate GEN_FLASH_FLOPPY;
-      end block BLK_FLASH_FLOPPY;
-      
-      BLK_SRAM_FLOPPY : block
-      begin
-
-        GEN_SRAM_FLOPPY : if FLOPPY_USE_SRAM and TRS80_M3_SYSMEM_IN_BURCHED_SRAM generate
-
-          sram_o.a(sram_o.a'left downto 19) <= (others => '0');
-          -- support 2 drives in sram for now
-          sram_o.a(18) <=  '0' when ds(3) = '1' else
-                           '1' when ds(4) = '1' else
-                           '0';
-          sram_o.a(17 downto 12) <= track(5 downto 0);
-          sram_o.a(11 downto 0) <= offset(12 downto 1);
-          sram_o.be <= "00" & offset(0) & not offset(0);
-          sram_o.cs <= ds(3) or ds(4);
-          sram_o.oe <= not wg;
-          sram_o.we <= media_wr;
-
-          rd_data_from_sram_media <=  sram_i.d(15 downto 8) when offset(0) = '1' else
-                                      sram_i.d(7 downto 0);
-
-          sram_o.d(sram_o.d'left downto 16) <= (others => '0');
-          -- only 1 of these will be enabled
-          sram_o.d(15 downto 0) <= wr_data_to_media & wr_data_to_media;
-
-        end generate GEN_SRAM_FLOPPY;
-        
-        GEN_NO_SRAM_FLOPPY : if not TRS80_M3_SYSMEM_IN_BURCHED_SRAM generate
-          rd_data_from_sram_media <= (others => '1');
-        end generate GEN_NO_SRAM_FLOPPY;
-
-      end block BLK_SRAM_FLOPPY;
-
-      rd_data_from_media <= rd_data_from_flash_media when (ds(1) or ds(2)) = '1' else
-                            rd_data_from_sram_media;
-                              
-      -- drive enable switches
-      de_s <= not switches_i(3 downto 0);
-
-      -- write-protect the two flash drives
-      wprt_n <= '0' when (ds(1) or ds(2)) = '1' else '1';
-        
-      --platform_o.d(51 downto 36) <= -- memory address
-      --                     floppy_dbg(31 downto 16) when switches_i(5 downto 4) = "11" else 
-      --                     -- track & data byte
-      --                     floppy_dbg(15 downto 0) when switches_i(5 downto 4) = "10" else
-      --                     -- idam track and sector
-      --                     wd179x_dbg(31 downto 16) when switches_i(5 downto 4) = "01" else
-      --                     -- track & sector registers
-      --                     wd179x_dbg(15 downto 0);
-
-      leds_o(9) <= not tr00_n;
-
-      -- extend the step signal so we can see it on the LED
-      process (clk_20M, clk_2M_ena)
-        subtype count_t is integer range 0 to 199999;  -- 100ms
-        variable count : count_t := 0;
-        variable step_r : std_logic := '0';
-      begin
-        if rising_edge(clk_20M) then
-          -- leading edge step
-          if step_r = '0' and step = '1' then
-            count := count_t'high;
-            leds_o(8) <= '1';
-          elsif clk_2M_ena = '1' then
-            if count /= 0 then
-              count := count - 1;
-            else
-              leds_o(8) <= '0';
-            end if;
+          -- fifo read pulse is too wide - edge-detect
+          fifo_rd_pulse <= '0';	-- default
+          if fifo_rd = '1' and fifo_rd_r = '0' then
+            fifo_rd_pulse <= '1';
           end if;
-          step_r := step;
+          fifo_rd_r := fifo_rd;
+
+          --fifo_wr <= '0';   -- default
+          --if count = count_t'high then
+          --  if fifo_full = '0' then
+          --    fifo_wr <= '1';
+          --    if offset_v = 6272-1 then
+          --      offset_v := (others => '0');
+          --    else
+          --      offset_v := offset_v + 1;
+          --    end if;
+          --  end if;
+          --  count := 0;
+          --else
+          --  count := count + 1;
+          --  -- don't update when writing to FIFO
+          --  flash_o.a(12 downto 0) <= offset_v;
+          --end if;
         end if;
       end process;
 
-      leds_o(7) <= not ip_n;
-      leds_o(6) <= wg;
+      platform_o.floppy_track <= track;
+      --platform_o.floppy_offset <= offset;
       
-      leds_o(3) <= ds(4);
-      leds_o(2) <= ds(3);
-      leds_o(1) <= ds(2);
-      leds_o(0) <= ds(1);
+      fifo_inst : floppy_fifo
+        PORT map
+        (
+          rdclk		  => clk_20M,
+          q		      => rd_data_from_fifo,
+          rdreq		  => fifo_rd_pulse,
+          rdempty		=> fifo_empty,
+
+          wrclk		  => platform_i.floppy_fifo_clk,
+          data		  => platform_i.floppy_fifo_data,
+          wrreq		  => platform_i.floppy_fifo_wr,
+          wrfull		=> platform_o.floppy_fifo_full,
+          aclr      => fifo_flush
+        );
+
+    end block BLK_FIFO;
+
+    GEN_FLASH_FLOPPY : if FLOPPY_USE_FLASH generate
+      flash_o.a(flash_o.a'left downto 20) <= (others => '0');
+      -- support 1 drive in flash for now
+      flash_o.a(19) <=  '0' when ds(DS_FLASH) = '1' else
+                        --'1' when ds(2) = '1' else
+                        '0';
+      -- each track is encoded in 8KiB
+      -- - 40 tracks is 320(512) KiB
+      flash_o.a(18 downto 13) <= track(5 downto 0);
+      flash_o.a(12 downto 0) <= offset;
+      flash_o.cs <= '1';
+      flash_o.oe <= '1';
+      flash_o.we <= '0';
+
+      rd_data_from_flash_media <= flash_i.d;
+    end generate GEN_FLASH_FLOPPY;
+    
+    GEN_SRAM_FLOPPY : if FLOPPY_USE_SRAM generate
+      signal sram_i_s   : from_SRAM_t;
+      signal sram_o_s   : to_SRAM_t;
+    begin
+
+      sram_o_s.a(sram_o_s.a'left downto 19) <= (others => '0');
+      -- support 2 drives in sram for now
+      sram_o_s.a(18) <= '0' when ds(DS_SRAM_1) = '1' else
+                        '1' when ds(DS_SRAM_2) = '1' else
+                        '0';
+      sram_o_s.a(17 downto 12) <= track(5 downto 0);
+      sram_o_s.a(11 downto 0) <= offset(12 downto 1);
+      sram_o_s.be <= "00" & offset(0) & not offset(0);
+      sram_o_s.cs <= ds(DS_SRAM_1) or ds(DS_SRAM_2);
+      sram_o_s.oe <= not wg;
+      sram_o_s.we <= media_wr;
+
+      rd_data_from_sram_media <=  sram_i_s.d(15 downto 8) when offset(0) = '1' else
+                                  sram_i_s.d(7 downto 0);
+
+      sram_o_s.d(sram_o_s.d'left downto 16) <= (others => '0');
+      -- only 1 of these will be enabled
+      sram_o_s.d(15 downto 0) <= wr_data_to_media & wr_data_to_media;
+
+      GEN_DFLT_SRAM_FLOPPY : if TRS80_M3_SYSMEM_IN_BURCHED_SRAM generate
+        sram_i_s <= sram_i;
+        sram_o <= sram_o_s;
+      end generate GEN_DFLT_SRAM_FLOPPY;
       
-    end block BLK_FDC;
+      GEN_BURCHED_SRAM_FLOPPY : if not TRS80_M3_SYSMEM_IN_BURCHED_SRAM generate
+        sram_i_s <= platform_i.sram_i;
+        platform_o.sram_o <= sram_o_s;
+      end generate GEN_BURCHED_SRAM_FLOPPY;
+      
+    end generate GEN_SRAM_FLOPPY;
+
+    GEN_NO_SRAM_FLOPPY : if not FLOPPY_USE_SRAM generate
+      rd_data_from_sram_media <= (others => '1');
+    end generate GEN_NO_SRAM_FLOPPY;
+
+    rd_data_from_media <= rd_data_from_flash_media when ds(DS_FLASH) = '1' else
+                          rd_data_from_sram_media when (ds(DS_SRAM_1) or ds(DS_SRAM_2)) = '1' else
+                          rd_data_from_fifo;
+                            
+    -- drive enable switches
+    de_s <= not switches_i(3 downto 0);
+
+    -- write-protect the flash drive
+    wprt_n <= '0' when ds(DS_FLASH) = '1' else '1';
+      
+    platform_o.seg7 <=  -- memory address
+                        floppy_dbg(31 downto 16) when switches_i(5 downto 4) = "11" else 
+                        -- track & data byte
+                        floppy_dbg(15 downto 0) when switches_i(5 downto 4) = "10" else
+                        -- idam track and sector
+                        wd179x_dbg(31 downto 16) when switches_i(5 downto 4) = "01" else
+                        -- track & sector registers
+                        wd179x_dbg(15 downto 0);
+
+    leds_o(9) <= not tr00_n;
+
+    -- extend the step signal so we can see it on the LED
+    process (clk_20M, clk_2M_ena)
+      subtype count_t is integer range 0 to 199999;  -- 100ms
+      variable count : count_t := 0;
+      variable step_r : std_logic := '0';
+    begin
+      if rising_edge(clk_20M) then
+        -- leading edge step
+        if step_r = '0' and step = '1' then
+          count := count_t'high;
+          leds_o(8) <= '1';
+        elsif clk_2M_ena = '1' then
+          if count /= 0 then
+            count := count - 1;
+          else
+            leds_o(8) <= '0';
+          end if;
+        end if;
+        step_r := step;
+      end if;
+    end process;
+
+    leds_o(7) <= not ip_n;
+    leds_o(6) <= wg;
+    
+    leds_o(3) <= ds(4);
+    leds_o(2) <= ds(3);
+    leds_o(1) <= ds(2);
+    leds_o(0) <= ds(1);
     
   end generate GEN_FDC;
 
-  GEN_NO_FDC : 	if 	not TRS80_M3_FDC_SUPPORT generate
+  GEN_NO_FDC : if not TRS80_M3_FDC_SUPPORT generate
                 
     fdc_dat_o <= X"FF";
     fdc_drq <= '0';
@@ -1008,4 +996,12 @@ begin
 
   end generate GEN_OSD;
   
+  -- unused outputs
+	sprite_reg_o <= NULL_TO_SPRITE_REG;
+	sprite_o <= NULL_TO_SPRITE_CTL;
+  tilemap_o.attr_d <= std_logic_vector(RESIZE(unsigned(switches_i(7 downto 0)), tilemap_o.attr_d'length));
+	graphics_o.pal <= (others => (others => '0'));
+	ser_o <= NULL_TO_SERIAL;
+  spi_o <= NULL_TO_SPI;
+
 end architecture SYN;
