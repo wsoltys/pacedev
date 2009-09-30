@@ -646,9 +646,9 @@ begin
 
     -- drive assignments
     constant DS_FLASH   : natural := 1;
-    constant DS_SRAM_1  : natural := 2;
-    constant DS_SRAM_2  : natural := 3;
-    constant DS_FIFO    : natural := 4;
+    constant DS_SRAM    : natural := 2;
+    constant DS_FIFO_1  : natural := 3;
+    constant DS_FIFO_2  : natural := 4;
     
     signal sync_reset   : std_logic := '1';
     
@@ -868,14 +868,15 @@ begin
     begin
 
       sram_o_s.a(sram_o_s.a'left downto 19) <= (others => '0');
-      -- support 2 drives in sram for now
-      sram_o_s.a(18) <= '0' when ds(DS_SRAM_1) = '1' else
-                        '1' when ds(DS_SRAM_2) = '1' else
+      -- support 1 drive in sram for now
+      -- - DE1/DE2 SRAM doesn't have A(18)!!!
+      sram_o_s.a(18) <= '0' when ds(DS_SRAM) = '1' else
+                        --'1' when ds(DS_SRAM_2) = '1' else
                         '0';
       sram_o_s.a(17 downto 12) <= track(5 downto 0);
       sram_o_s.a(11 downto 0) <= offset(12 downto 1);
       sram_o_s.be <= "00" & offset(0) & not offset(0);
-      sram_o_s.cs <= ds(DS_SRAM_1) or ds(DS_SRAM_2);
+      sram_o_s.cs <= ds(DS_SRAM);
       sram_o_s.oe <= not wg;
       sram_o_s.we <= media_wr;
 
@@ -903,7 +904,7 @@ begin
     end generate GEN_NO_SRAM_FLOPPY;
 
     rd_data_from_media <= rd_data_from_flash_media when ds(DS_FLASH) = '1' else
-                          rd_data_from_sram_media when (ds(DS_SRAM_1) or ds(DS_SRAM_2)) = '1' else
+                          rd_data_from_sram_media when ds(DS_SRAM) = '1' else
                           rd_data_from_fifo;
                             
     -- drive enable switches

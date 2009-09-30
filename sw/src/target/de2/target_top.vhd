@@ -178,7 +178,8 @@ architecture SYN of target_top is
   -- gpio drivers from default logic
   signal default_gpio_0_o   : std_logic_vector(gpio_0'range);
   signal default_gpio_1_o   : std_logic_vector(gpio_1'range);
-	
+  signal seg7               : std_logic_vector(31 downto 0);
+  
 begin
 
   BLK_CLOCKING : block
@@ -654,15 +655,6 @@ begin
     end generate GEN_NO_SERIAL;
   end block BLK_SERIAL;
   
-  -- turn off LEDs
-  hex0 <= (others => '1');
-  hex1 <= (others => '1');
-  hex2 <= (others => '1');
-  hex3 <= (others => '1');
-  hex4 <= (others => '1');
-  hex5 <= (others => '1');
-  --hex6 <= (others => '1');
-  --hex7 <= (others => '1');
   ledg(8) <= '0';
   --ledr(17 downto 8) <= (others => '0');
 
@@ -753,10 +745,14 @@ begin
     signal yoffs      	      : std_logic_vector(7 downto 0);
 
   begin
-    -- Display funkalicious pacman sprite y offset on 7seg display
-    -- Why?  Because we can
-    seg7_0: SEG7_LUT port map (iDIG => yoffs(7 downto 4), oSEG => hex7);
-    seg7_1: SEG7_LUT port map (iDIG => yoffs(3 downto 0), oSEG => hex6);
+    seg7_0: SEG7_LUT port map (iDIG => seg7(31 downto 28), oSEG => hex7);
+    seg7_1: SEG7_LUT port map (iDIG => seg7(27 downto 24), oSEG => hex6);
+    seg7_2: SEG7_LUT port map (iDIG => seg7(23 downto 20), oSEG => hex5);
+    seg7_3: SEG7_LUT port map (iDIG => seg7(19 downto 16), oSEG => hex4);
+    seg7_4: SEG7_LUT port map (iDIG => seg7(15 downto 12), oSEG => hex3);
+    seg7_5: SEG7_LUT port map (iDIG => seg7(11 downto 8), oSEG => hex2);
+    seg7_6: SEG7_LUT port map (iDIG => seg7(7 downto 4), oSEG => hex1);
+    seg7_7: SEG7_LUT port map (iDIG => seg7(3 downto 0), oSEG => hex0);
   end block BLK_7_SEG;
   
   -- *MUST* be high to use 27MHz clock as input
@@ -836,6 +832,9 @@ begin
         gpio_1_oe         => custom_gpio_1_oe,
         gpio_1_is_custom  => gpio_1_is_custom,
 
+        -- 7-segment display
+        seg7              => seg7,
+        
         -- custom i/o
         project_i         => project_i,
         project_o         => project_o,

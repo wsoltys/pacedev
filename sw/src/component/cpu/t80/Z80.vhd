@@ -5,24 +5,26 @@ use work.T80_Pack.all;
 
 entity Z80 is port
    (
-     clk        	: in    std_logic;
-     clk_en				: in    std_logic;
-     reset        : in    std_logic;
+     clk        	: in std_logic;
+     clk_en				: in std_logic;
+     reset        : in std_logic;
 
-     addr         : out   std_logic_vector(15 downto 0);
-     datai        : in    std_logic_vector(7 downto 0);
-     datao        : out   std_logic_vector(7 downto 0);
+     addr         : out std_logic_vector(15 downto 0);
+     datai        : in std_logic_vector(7 downto 0);
+     datao        : out std_logic_vector(7 downto 0);
 
-     m1           : out   std_logic;
-     mem_rd       : out   std_logic;
-     mem_wr       : out   std_logic;
-     io_rd        : out   std_logic;
-     io_wr        : out   std_logic;
+     m1           : out std_logic;
+     mem_rd       : out std_logic;
+     mem_wr       : out std_logic;
+     io_rd        : out std_logic;
+     io_wr        : out std_logic;
 
-     intreq       : in    std_logic;
-     intvec       : in    std_logic_vector(7 downto 0);
-     intack       : out   std_logic;
-     nmi          : in    std_logic
+     wait_n       : in std_logic := '1';
+     busrq_n      : in std_logic := '1';
+     intreq       : in std_logic := '0';
+     intvec       : in std_logic_vector(7 downto 0);
+     intack       : out std_logic;
+     nmi          : in std_logic := '0'
    );
 end Z80;
 
@@ -113,18 +115,18 @@ architecture SYN of Z80 is
 	      RESET_n     => reset_n,
 	      CLK_n       => clk,
 				CLKEN				=> clk_en,
-	      WAIT_n      => '1',
+	      WAIT_n      => wait_n,
 	      INT_n       => int_n,
 	      NMI_n       => nmi_n,
-	      BUSRQ_n     => '1',
+	      BUSRQ_n     => busrq_n,
 	      M1_n        => z80_m1,
 	      MREQ_n      => z80_memreq,
 	      IORQ_n      => z80_ioreq,
 	      RD_n        => z80_rd,
 	      WR_n        => z80_wr,
-	      --RFSH_n      =>
-	      --HALT_n      =>
-	      --BUSAK_n     =>
+	      RFSH_n      => open,
+	      HALT_n      => open,
+	      BUSAK_n     => open,
 	      A           => addr,
 	      DI          => z80_datai,
 	      DO          => datao
