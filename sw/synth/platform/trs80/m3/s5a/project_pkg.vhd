@@ -16,6 +16,7 @@ package project_pkg is
   -- Reference clock is 24.576MHz
 	constant PACE_HAS_PLL								      : boolean := true;
   --constant PACE_HAS_SRAM                    : boolean := false;
+  --constant PACE_HAS_FLASH                   : boolean := false;
   constant PACE_HAS_SDRAM                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := false;
 
@@ -58,20 +59,36 @@ package project_pkg is
 
   -- S5A-specific constants
 
+  constant S5A_DE_GEN                       : std_logic := '0';
+  constant S5A_VS_POL                       : std_logic := '0';
+  constant S5A_HS_POL                       : std_logic := '0';
+  constant S5A_DE_DLY                       : std_logic_vector(11 downto 0) := X"000";
+  constant S5A_DE_TOP                       : std_logic_vector(7 downto 0) := X"00";
+  constant S5A_DE_CNT                       : std_logic_vector(11 downto 0) := X"000";
+  constant S5A_DE_LIN                       : std_logic_vector(11 downto 0) := X"000";
+
   constant S5A_EMULATE_SRAM                 : boolean := true;
-  constant S5A_EMULATED_SRAM_WIDTH_AD       : natural := 16;
   constant S5A_EMULATED_SRAM_WIDTH          : natural := 8;
+  constant S5A_EMULATED_SRAM_WIDTH_AD       : natural := 16;
+
+  constant S5A_EMULATE_FLASH                : boolean := true;
+  constant S5A_EMULATED_FLASH_INIT_FILE     : string := "emulated_flash_init_file.hex";
+  constant S5A_EMULATED_FLASH_WIDTH         : natural := 8;
+  constant S5A_EMULATED_FLASH_WIDTH_AD      : natural := 16;
+
+  constant PACE_HAS_SRAM                    : boolean := S5A_EMULATE_SRAM;
+  constant PACE_HAS_FLASH                   : boolean := S5A_EMULATE_FLASH;
   
 	-- TRS-80-specific constants
 	
-  constant TRS80_M3_ROM_IN_FLASH            : boolean := PACE_HAS_FLASH;
+  constant TRS80_M3_ROM_IN_FLASH            : boolean := false;
 
-  constant TRS80_M3_HIRES_SUPPORT           : boolean := true;
+  constant TRS80_M3_HIRES_SUPPORT           : boolean := false;
 	constant TRS80_M3_HIRES_WIDTHA            : integer := 14;    -- 16KiB (Max 16KiB)
 
-	constant TRS80_M3_FDC_SUPPORT			        : boolean := true;
+	constant TRS80_M3_FDC_SUPPORT			        : boolean := false;
 
-  -- *** WARNING: enabling this option won't work on a stock DE1
+  -- *** WARNING: must be false for S5A platform
   constant TRS80_M3_SYSMEM_IN_BURCHED_SRAM  : boolean := false;
 
   type from_PROJECT_IO_t is record

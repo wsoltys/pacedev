@@ -943,7 +943,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_M
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_Reg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80se.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/Z80.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/Z80.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/inputmapper.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Inputs.VHD
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/trs80_interrupts.vhd
@@ -971,3 +971,4 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/io/lpc/lpc_pk
 set_global_assignment -name VERILOG_FILE ../../../../../src/component/io/lpc/wb_lpc_periph.v
 set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a/target_top.vhd
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
+set_global_assignment -name VHDL_FILE custom_io.vhd
