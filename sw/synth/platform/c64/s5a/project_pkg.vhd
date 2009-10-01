@@ -40,10 +40,11 @@ package project_pkg is
   constant S5A_HS_POL                       : std_logic := '0';
   --constant S5A_DE_DLY                       : std_logic_vector(11 downto 0) := X"063";  -- 99
   constant S5A_DE_DLY                       : std_logic_vector(11 downto 0) := X"0FF";  -- 255
-  constant S5A_DE_TOP                       : std_logic_vector(7 downto 0) := X"28";    -- 40
+  constant S5A_DE_TOP                       : std_logic_vector(7 downto 0) := X"10";    -- 16
   --constant S5A_DE_CNT                       : std_logic_vector(11 downto 0) := X"350";  -- 848
   constant S5A_DE_CNT                       : std_logic_vector(11 downto 0) := X"280";  -- 640
-  constant S5A_DE_LIN                       : std_logic_vector(11 downto 0) := X"20C";  -- 262*2=524
+  --constant S5A_DE_LIN                       : std_logic_vector(11 downto 0) := X"20C";  -- 262*2=524
+  constant S5A_DE_LIN                       : std_logic_vector(11 downto 0) := X"1E0";  -- 480
 
   constant S5A_EMULATE_SRAM                 : boolean := true;
   constant S5A_EMULATED_SRAM_WIDTH          : natural := 8;

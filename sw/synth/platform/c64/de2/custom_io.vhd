@@ -86,6 +86,6 @@ begin
 
   end generate GEN_EXT_SB;
   
-  seg7 <= X"6ACE2009";
+  seg7 <= X"DACE2009";
   
 end architecture SYN;
