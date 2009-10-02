@@ -338,6 +338,48 @@ begin
       target_o          => target_o
     );
 
+  -- emulate some SRAM
+  GEN_SRAM : if CYC3DEV_EMULATE_SRAM generate
+    signal wren : std_logic := '0';
+  begin
+    wren <= sram_o.cs and sram_o.we;
+    sram_inst : entity work.spram
+      generic map
+      (
+        numwords_a		=> 2**CYC3DEV_EMULATED_SRAM_WIDTH_AD,
+        widthad_a			=> CYC3DEV_EMULATED_SRAM_WIDTH_AD,
+        width_a				=> CYC3DEV_EMULATED_SRAM_WIDTH
+      )
+      port map
+      (
+        clock		      => clk_i(0),
+        address		    => sram_o.a(CYC3DEV_EMULATED_SRAM_WIDTH_AD-1 downto 0),
+        data		      => sram_o.d(CYC3DEV_EMULATED_SRAM_WIDTH-1 downto 0),
+        wren		      => wren,
+        q		          => sram_i.d(CYC3DEV_EMULATED_SRAM_WIDTH-1 downto 0)
+      );
+    sram_i.d(sram_i.d'left downto CYC3DEV_EMULATED_SRAM_WIDTH) <= (others => '0');
+  end generate GEN_SRAM;
+  
+  -- emulate some FLASH
+  GEN_FLASH : if CYC3DEV_EMULATE_FLASH generate
+    flash_inst : entity work.sprom
+      generic map
+      (
+        init_file     => CYC3DEV_EMULATED_FLASH_INIT_FILE,
+        numwords_a		=> 2**CYC3DEV_EMULATED_FLASH_WIDTH_AD,
+        widthad_a			=> CYC3DEV_EMULATED_FLASH_WIDTH_AD,
+        width_a				=> CYC3DEV_EMULATED_FLASH_WIDTH
+      )
+      port map
+      (
+        clock		      => clk_i(0),
+        address		    => flash_o.a(CYC3DEV_EMULATED_FLASH_WIDTH_AD-1 downto 0),
+        q		          => flash_i.d(CYC3DEV_EMULATED_FLASH_WIDTH-1 downto 0)
+      );
+    flash_i.d(flash_i.d'left downto CYC3DEV_EMULATED_FLASH_WIDTH) <= (others => '0');
+  end generate GEN_FLASH;
+  
   user_led(7 downto 3) <= leds_o(6 downto 2);
 
 end SYN;

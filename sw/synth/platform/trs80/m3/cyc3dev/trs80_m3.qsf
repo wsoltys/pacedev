@@ -1,0 +1,1025 @@
+# Copyright (C) 1991-2008 Altera Corporation
+# Your use of Altera Corporation's design tools, logic functions
+# and other software and tools, and its AMPP partner logic
+# functions, and any output files from any of the foregoing
+# (including device programming or simulation files), and any
+# associated documentation or information are expressly subject
+# to the terms and conditions of the Altera Program License
+# Subscription Agreement, Altera MegaCore Function License
+# Agreement, or other applicable license agreement, including,
+# without limitation, that your use is for the sole purpose of
+# programming logic devices manufactured by Altera and sold by
+# Altera or its authorized distributors.  Please refer to the
+# applicable agreement for further details.
+
+
+# Altera recommends that you do not modify this file. This
+# file is updated automatically by the Quartus II software
+# and any changes you make may be lost or overwritten.
+
+
+# Copyright (C) 1991-2008 Altera Corporation
+# Your use of Altera Corporation's design tools, logic functions
+# and other software and tools, and its AMPP partner logic
+# functions, and any output files from any of the foregoing
+# (including device programming or simulation files), and any
+# associated documentation or information are expressly subject
+# to the terms and conditions of the Altera Program License
+# Subscription Agreement, Altera MegaCore Function License
+# Agreement, or other applicable license agreement, including,
+# without limitation, that your use is for the sole purpose of
+# programming logic devices manufactured by Altera and sold by
+# Altera or its authorized distributors.  Please refer to the
+# applicable agreement for further details.
+
+
+# The default values for assignments are stored in the file
+#		trs80_m3_assignment_defaults.qdf
+# If this file doesn't exist, and for assignments not listed, see file
+#		assignment_defaults.qdf
+
+# Altera recommends that you do not modify this file. This
+# file is updated automatically by the Quartus II software
+# and any changes you make may be lost or overwritten.
+
+
+set_global_assignment -name FAMILY "Cyclone III"
+set_global_assignment -name TOP_LEVEL_ENTITY target_top
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION "8.0 SP1"
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "12:44:54  JULY 21, 2008"
+set_global_assignment -name LAST_QUARTUS_VERSION 8.1
+
+set_global_assignment -name DEVICE EP3C120F780C7
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"
+set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
+set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
+set_global_assignment -name RESERVE_DATA0_AFTER_CONFIGURATION "USE AS REGULAR IO"
+set_global_assignment -name RESERVE_DATA1_AFTER_CONFIGURATION "USE AS REGULAR IO"
+set_global_assignment -name RESERVE_FLASH_NCE_AFTER_CONFIGURATION "USE AS REGULAR IO"
+
+set_location_assignment PIN_C2 -to BITEC_DVI_IO_OUT[0]
+set_location_assignment PIN_D3 -to BITEC_DVI_IO_OUT[1]
+set_location_assignment PIN_J5 -to BITEC_DVI_IO_OUT[10]
+set_location_assignment PIN_J6 -to BITEC_DVI_IO_OUT[11]
+set_location_assignment PIN_K1 -to BITEC_DVI_IO_OUT[12]
+set_location_assignment PIN_K2 -to BITEC_DVI_IO_OUT[13]
+set_location_assignment PIN_L1 -to BITEC_DVI_IO_OUT[14]
+set_location_assignment PIN_L2 -to BITEC_DVI_IO_OUT[15]
+set_location_assignment PIN_L3 -to BITEC_DVI_IO_OUT[16]
+set_location_assignment PIN_L4 -to BITEC_DVI_IO_OUT[17]
+set_location_assignment PIN_N3 -to BITEC_DVI_IO_OUT[18]
+set_location_assignment PIN_N4 -to BITEC_DVI_IO_OUT[19]
+set_location_assignment PIN_F3 -to BITEC_DVI_IO_OUT[2]
+set_location_assignment PIN_L6 -to BITEC_DVI_IO_OUT[20]
+set_location_assignment PIN_L7 -to BITEC_DVI_IO_OUT[21]
+set_location_assignment PIN_M1 -to BITEC_DVI_IO_OUT[22]
+set_location_assignment PIN_M2 -to BITEC_DVI_IO_OUT[23]
+set_location_assignment PIN_E3 -to BITEC_DVI_IO_OUT[3]
+set_location_assignment PIN_F1 -to BITEC_DVI_IO_OUT[4]
+set_location_assignment PIN_F2 -to BITEC_DVI_IO_OUT[5]
+set_location_assignment PIN_G3 -to BITEC_DVI_IO_OUT[6]
+set_location_assignment PIN_G4 -to BITEC_DVI_IO_OUT[7]
+set_location_assignment PIN_H3 -to BITEC_DVI_IO_OUT[8]
+set_location_assignment PIN_H4 -to BITEC_DVI_IO_OUT[9]
+set_location_assignment PIN_E1 -to BITEC_DVI_IO_OUT_DVI_CLK
+set_location_assignment PIN_G2 -to BITEC_DVI_IO_OUT_DVI_CTL1
+set_location_assignment PIN_K7 -to BITEC_DVI_IO_OUT_DVI_CTL2
+set_location_assignment PIN_J7 -to BITEC_DVI_IO_OUT_DVI_CTL3
+set_location_assignment PIN_E2 -to BITEC_DVI_IO_OUT_DVI_DAT
+set_location_assignment PIN_K3 -to BITEC_DVI_IO_OUT_DE
+set_location_assignment PIN_J4 -to BITEC_DVI_IO_OUT_HSYNC
+set_location_assignment PIN_G5 -to BITEC_DVI_IO_OUT_IDCKn
+set_location_assignment PIN_G6 -to BITEC_DVI_IO_OUT_IDCKp
+set_location_assignment PIN_F4 -to BITEC_DVI_IO_OUT_DVI_ISEL
+set_location_assignment PIN_F5 -to BITEC_DVI_IO_OUT_MSEN
+set_location_assignment PIN_G1 -to BITEC_DVI_IO_OUT_DVI_PD
+set_location_assignment PIN_J3 -to BITEC_DVI_IO_OUT_VSYNC
+set_location_assignment PIN_R1 -to BITEC_DVI_IO_OUT_DDC_CLK
+set_location_assignment PIN_R2 -to BITEC_DVI_IO_OUT_DDC_DAT
+set_location_assignment PIN_M3 -to BITEC_DVI_IO_OUT_DVI_DKEN
+set_location_assignment PIN_AE3 -to BITEC_DVI_IO_IN[0]
+set_location_assignment PIN_R7 -to BITEC_DVI_IO_IN[1]
+set_location_assignment PIN_AB2 -to BITEC_DVI_IO_IN[10]
+set_location_assignment PIN_AB1 -to BITEC_DVI_IO_IN[11]
+set_location_assignment PIN_Y4 -to BITEC_DVI_IO_IN[12]
+set_location_assignment PIN_Y3 -to BITEC_DVI_IO_IN[13]
+set_location_assignment PIN_U3 -to BITEC_DVI_IO_IN[14]
+set_location_assignment PIN_U4 -to BITEC_DVI_IO_IN[15]
+set_location_assignment PIN_W2 -to BITEC_DVI_IO_IN[16]
+set_location_assignment PIN_W1 -to BITEC_DVI_IO_IN[17]
+set_location_assignment PIN_V2 -to BITEC_DVI_IO_IN[18]
+set_location_assignment PIN_V1 -to BITEC_DVI_IO_IN[19]
+set_location_assignment PIN_R6 -to BITEC_DVI_IO_IN[2]
+set_location_assignment PIN_U2 -to BITEC_DVI_IO_IN[20]
+set_location_assignment PIN_U1 -to BITEC_DVI_IO_IN[21]
+set_location_assignment PIN_U6 -to BITEC_DVI_IO_IN[22]
+set_location_assignment PIN_U5 -to BITEC_DVI_IO_IN[23]
+set_location_assignment PIN_V4 -to BITEC_DVI_IO_IN[3]
+set_location_assignment PIN_V3 -to BITEC_DVI_IO_IN[4]
+set_location_assignment PIN_T4 -to BITEC_DVI_IO_IN[5]
+set_location_assignment PIN_T3 -to BITEC_DVI_IO_IN[6]
+set_location_assignment PIN_R3 -to BITEC_DVI_IO_IN[7]
+set_location_assignment PIN_AF2 -to BITEC_DVI_IO_IN[8]
+set_location_assignment PIN_AC5 -to BITEC_DVI_IO_IN[9]
+set_location_assignment PIN_R4 -to BITEC_DVI_IO_IN_CTL1
+set_location_assignment PIN_M8 -to BITEC_DVI_IO_IN_CTL2
+set_location_assignment PIN_M7 -to BITEC_DVI_IO_IN_CTL3
+set_location_assignment PIN_P2 -to BITEC_DVI_IO_IN_DE
+set_location_assignment PIN_M4 -to BITEC_DVI_IO_IN_HSYNC
+set_location_assignment PIN_Y2 -to BITEC_DVI_IO_IN_ODCK
+set_location_assignment PIN_AB6 -to BITEC_DVI_IO_IN_SCDT
+set_location_assignment PIN_AC3 -to BITEC_DVI_IO_IN_SCL
+set_location_assignment PIN_AC1 -to BITEC_DVI_IO_IN_SDA
+set_location_assignment PIN_P1 -to BITEC_DVI_IO_IN_VSYNC
+set_location_assignment PIN_H25 -to BITEC_QV_TVP5154_SCL
+set_location_assignment PIN_H26 -to BITEC_QV_TVP5154_SDA
+set_location_assignment PIN_N25 -to BITEC_QV_CH4_IN_FLD
+set_location_assignment PIN_K27 -to BITEC_QV_CH4_IN_VSYNC
+set_location_assignment PIN_N26 -to BITEC_QV_CH4_IN_HSYNC
+set_location_assignment PIN_K28 -to BITEC_QV_CH4_IN_AVID
+set_location_assignment PIN_R27 -to BITEC_QV_CH4_IN_INTREQ
+set_location_assignment PIN_L27 -to BITEC_QV_CH4_IN_SCLK
+set_location_assignment PIN_R28 -to BITEC_QV_CH4_IN_D[7]
+set_location_assignment PIN_L28 -to BITEC_QV_CH4_IN_D[6]
+set_location_assignment PIN_R25 -to BITEC_QV_CH4_IN_D[5]
+set_location_assignment PIN_M27 -to BITEC_QV_CH4_IN_D[4]
+set_location_assignment PIN_R26 -to BITEC_QV_CH4_IN_D[3]
+set_location_assignment PIN_M28 -to BITEC_QV_CH4_IN_D[2]
+set_location_assignment PIN_U25 -to BITEC_QV_CH4_IN_D[1]
+set_location_assignment PIN_P25 -to BITEC_QV_CH4_IN_D[0]
+set_location_assignment PIN_U26 -to BITEC_QV_CH3_IN_FLD
+set_location_assignment PIN_P26 -to BITEC_QV_CH3_IN_VSYNC
+set_location_assignment PIN_V27 -to BITEC_QV_CH3_IN_HSYNC
+set_location_assignment PIN_P27 -to BITEC_QV_CH3_IN_AVID
+set_location_assignment PIN_V28 -to BITEC_QV_CH3_IN_INTREQ
+set_location_assignment PIN_P28 -to BITEC_QV_CH3_IN_SCLK
+set_location_assignment PIN_AC26 -to BITEC_QV_IDCKp
+set_location_assignment PIN_J27 -to BITEC_QV_CH4_IN_CLK
+set_location_assignment PIN_AD26 -to BITEC_QV_IDCKn
+set_location_assignment PIN_J28 -to BITEC_QV_CH3_IN_CLK
+set_location_assignment PIN_V25 -to BITEC_QV_CH3_IN_D[7]
+set_location_assignment PIN_P21 -to BITEC_QV_CH3_IN_D[6]
+set_location_assignment PIN_V26 -to BITEC_QV_CH3_IN_D[5]
+set_location_assignment PIN_R21 -to BITEC_QV_CH3_IN_D[4]
+set_location_assignment PIN_W25 -to BITEC_QV_CH3_IN_D[3]
+set_location_assignment PIN_R22 -to BITEC_QV_CH3_IN_D[2]
+set_location_assignment PIN_W26 -to BITEC_QV_CH3_IN_D[1]
+set_location_assignment PIN_R23 -to BITEC_QV_CH3_IN_D[0]
+set_location_assignment PIN_Y25 -to BITEC_QV_CH2_IN_FLD
+set_location_assignment PIN_T25 -to BITEC_QV_CH2_IN_VSYNC
+set_location_assignment PIN_Y26 -to BITEC_QV_CH2_IN_HSYNC
+set_location_assignment PIN_T26 -to BITEC_QV_CH2_IN_AVID
+set_location_assignment PIN_AA25 -to BITEC_QV_CH2_IN_INTREQ
+set_location_assignment PIN_U27 -to BITEC_QV_CH2_IN_SCLK
+set_location_assignment PIN_AA26 -to BITEC_QV_CH2_IN_D[7]
+set_location_assignment PIN_U28 -to BITEC_QV_CH2_IN_D[6]
+set_location_assignment PIN_AB25 -to BITEC_QV_CH2_IN_D[5]
+set_location_assignment PIN_U22 -to BITEC_QV_CH2_IN_D[4]
+set_location_assignment PIN_AB26 -to BITEC_QV_CH2_IN_D[3]
+set_location_assignment PIN_V22 -to BITEC_QV_CH2_IN_D[2]
+set_location_assignment PIN_Y23 -to BITEC_QV_CH2_IN_D[1]
+set_location_assignment PIN_W28 -to BITEC_QV_CH2_IN_D[0]
+set_location_assignment PIN_Y24 -to BITEC_QV_CH1_IN_FLD
+set_location_assignment PIN_W27 -to BITEC_QV_CH1_IN_VSYNC
+set_location_assignment PIN_AE27 -to BITEC_QV_CH1_IN_HSYNC
+set_location_assignment PIN_V23 -to BITEC_QV_CH1_IN_AVID
+set_location_assignment PIN_AE28 -to BITEC_QV_CH1_IN_INTREQ
+set_location_assignment PIN_V24 -to BITEC_QV_CH1_IN_SCLK
+set_location_assignment PIN_W22 -to BITEC_QV_CH1_IN_D[7]
+set_location_assignment PIN_AB27 -to BITEC_QV_CH1_IN_D[6]
+set_location_assignment PIN_Y22 -to BITEC_QV_CH1_IN_D[5]
+set_location_assignment PIN_AB28 -to BITEC_QV_CH1_IN_D[4]
+set_location_assignment PIN_V21 -to BITEC_QV_CH1_IN_D[3]
+set_location_assignment PIN_AC27 -to BITEC_QV_CH1_IN_D[2]
+set_location_assignment PIN_W21 -to BITEC_QV_CH1_IN_D[1]
+set_location_assignment PIN_AC28 -to BITEC_QV_CH1_IN_D[0]
+set_location_assignment PIN_AD27 -to BITEC_QV_RESETB
+set_location_assignment PIN_Y27 -to BITEC_QV_CH2_IN_CLK
+set_location_assignment PIN_AD28 -to BITEC_QV_PDN
+set_location_assignment PIN_Y28 -to BITEC_QV_CH1_IN_CLK
+set_location_assignment PIN_G24 -to BITEC_QV_DVI_OUT_POUT
+set_location_assignment PIN_H23 -to BITEC_QV_DVI_OUT_D[11]
+set_location_assignment PIN_G25 -to BITEC_QV_DVI_OUT_D[10]
+set_location_assignment PIN_H24 -to BITEC_QV_DVI_OUT_D[9]
+set_location_assignment PIN_J25 -to BITEC_QV_DVI_OUT_D[8]
+set_location_assignment PIN_F27 -to BITEC_QV_DVI_OUT_D[7]
+set_location_assignment PIN_J26 -to BITEC_QV_DVI_OUT_D[6]
+set_location_assignment PIN_F28 -to BITEC_QV_DVI_OUT_D[1]
+set_location_assignment PIN_L23 -to BITEC_QV_DVI_OUT_D[4]
+set_location_assignment PIN_G27 -to BITEC_QV_DVI_OUT_D[3]
+set_location_assignment PIN_L24 -to BITEC_QV_DVI_OUT_D[2]
+set_location_assignment PIN_G28 -to BITEC_QV_DVI_OUT_D[5]
+set_location_assignment PIN_M25 -to BITEC_QV_DVI_OUT_D[0]
+set_location_assignment PIN_K25 -to BITEC_QV_DVI_OUT_DE
+set_location_assignment PIN_M26 -to BITEC_QV_DVI_OUT_HSYNC
+set_location_assignment PIN_K26 -to BITEC_QV_DVI_OUT_VSYNC
+set_location_assignment PIN_T21 -to reset_n
+set_location_assignment PIN_A14 -to clock_source
+set_instance_assignment -name IO_STANDARD "1.8 V" -to clock_source
+set_location_assignment PIN_N8 -to enet_mdc
+set_location_assignment PIN_L5 -to enet_mdio
+set_location_assignment PIN_B14 -to enet_rx_clk
+set_location_assignment PIN_AA7 -to enet_tx_en
+set_location_assignment PIN_T8 -to enet_gtx_clk
+set_location_assignment PIN_AH14 -to clkin_sma
+set_location_assignment PIN_B15 -to usb_ifclk
+set_location_assignment PIN_AA17 -to termination_blk0~_rup_pad
+set_location_assignment PIN_AB17 -to termination_blk0~_rdn_pad
+set_location_assignment PIN_F19 -to termination_blk1~_rup_pad
+set_location_assignment PIN_E19 -to termination_blk1~_rdn_pad
+set_location_assignment PIN_W8 -to enet_rxd[0]
+set_location_assignment PIN_AA6 -to enet_rxd[1]
+set_location_assignment PIN_W7 -to enet_rxd[2]
+set_location_assignment PIN_Y6 -to enet_rxd[3]
+set_location_assignment PIN_W4 -to enet_txd[0]
+set_location_assignment PIN_AA5 -to enet_txd[1]
+set_location_assignment PIN_Y5 -to enet_txd[2]
+set_location_assignment PIN_W3 -to enet_txd[3]
+set_location_assignment PIN_Y17 -to flash_oen
+set_location_assignment PIN_AA21 -to flash_wen
+set_location_assignment PIN_D23 -to max_csn
+set_location_assignment PIN_E25 -to max_oen
+set_location_assignment PIN_C15 -to max_wen
+set_location_assignment PIN_AF20 -to sram_ben[0]
+set_location_assignment PIN_AH26 -to sram_ben[1]
+set_location_assignment PIN_AE22 -to sram_ben[2]
+set_location_assignment PIN_AB21 -to sram_ben[3]
+set_location_assignment PIN_AD22 -to sram_clk
+set_location_assignment PIN_AB19 -to sram_csn
+set_location_assignment PIN_AD25 -to sram_oen
+set_location_assignment PIN_U7 -to termination_blk2~_rup_pad
+set_location_assignment PIN_U8 -to termination_blk2~_rdn_pad
+set_location_assignment PIN_AE25 -to sram_wen
+set_location_assignment PIN_AG15 -to sram_wait[0]
+set_location_assignment PIN_AH25 -to sram_wait[1]
+set_location_assignment PIN_H7 -to lcd_rstn
+set_location_assignment PIN_AC4 -to lcd_wen
+set_location_assignment PIN_V7 -to lcd_e_rdn
+set_location_assignment PIN_C27 -to usb_cmd_data
+set_location_assignment PIN_G23 -to usb_ren
+set_location_assignment PIN_E26 -to usb_wen
+set_location_assignment PIN_F25 -to usb_empty
+set_location_assignment PIN_F24 -to usb_full
+set_location_assignment PIN_AA4 -to lcd_data[0]
+set_location_assignment PIN_AD1 -to lcd_data[1]
+set_location_assignment PIN_V8 -to lcd_data[2]
+set_location_assignment PIN_AB5 -to lcd_data[3]
+set_location_assignment PIN_AE2 -to lcd_data[4]
+set_location_assignment PIN_V5 -to lcd_data[5]
+set_location_assignment PIN_V6 -to lcd_data[6]
+set_location_assignment PIN_AB3 -to lcd_data[7]
+set_location_assignment PIN_L21 -to usb_fd[0]
+set_location_assignment PIN_K22 -to usb_fd[1]
+set_location_assignment PIN_L22 -to usb_fd[2]
+set_location_assignment PIN_K21 -to usb_fd[3]
+set_location_assignment PIN_J24 -to usb_fd[4]
+set_location_assignment PIN_G26 -to usb_fd[5]
+set_location_assignment PIN_J23 -to usb_fd[6]
+set_location_assignment PIN_D26 -to usb_fd[7]
+set_location_assignment PIN_AA22 -to termination_blk3~_rup_pad
+set_location_assignment PIN_AB23 -to termination_blk3~_rdn_pad
+set_location_assignment PIN_AC24 -to lcd_en
+set_location_assignment PIN_AB24 -to lcd_csn
+set_location_assignment PIN_D27 -to lcd_d_cn
+set_location_assignment PIN_H22 -to speaker_out
+set_location_assignment PIN_AE23 -to clkout_sma
+set_location_assignment IOBANK_4 -to user_led
+set_location_assignment PIN_AD7 -to user_pb[0]
+set_location_assignment PIN_AC12 -to user_pb[1]
+set_location_assignment PIN_AH3 -to user_pb[2]
+set_location_assignment PIN_AA12 -to user_pb[3]
+set_location_assignment PIN_AD15 -to user_led[0]
+set_location_assignment PIN_AE20 -to user_led[1]
+set_location_assignment PIN_AF18 -to user_led[2]
+set_location_assignment PIN_AD19 -to user_led[3]
+set_location_assignment PIN_AE15 -to user_led[4]
+set_location_assignment PIN_AC17 -to user_led[5]
+set_location_assignment PIN_AG19 -to user_led[6]
+set_location_assignment PIN_AF19 -to user_led[7]
+set_location_assignment PIN_AD5 -to seven_seg_a
+set_location_assignment PIN_A3 -to seven_seg_b
+set_location_assignment PIN_C4 -to seven_seg_c
+set_location_assignment PIN_D4 -to seven_seg_d
+set_location_assignment PIN_E5 -to seven_seg_e
+set_location_assignment PIN_D5 -to seven_seg_f
+set_location_assignment PIN_AE6 -to seven_seg_g
+set_location_assignment PIN_AD4 -to seven_seg_dp
+set_location_assignment PIN_G19 -to seven_seg_minus
+set_location_assignment PIN_B3 -to seven_seg_sel[1]
+set_location_assignment PIN_C5 -to seven_seg_sel[2]
+set_location_assignment PIN_E4 -to seven_seg_sel[3]
+set_location_assignment PIN_C3 -to seven_seg_sel[4]
+set_location_assignment PIN_AC14 -to user_dipsw[0]
+set_location_assignment PIN_AD18 -to user_dipsw[1]
+set_location_assignment PIN_AG23 -to user_dipsw[2]
+set_location_assignment PIN_AC19 -to user_dipsw[3]
+set_location_assignment PIN_AD14 -to user_dipsw[4]
+set_location_assignment PIN_G20 -to user_dipsw[5]
+set_location_assignment PIN_AB15 -to user_dipsw[6]
+set_location_assignment PIN_AF25 -to user_dipsw[7]
+set_location_assignment EDGE_BOTTOM -to fsa
+set_location_assignment EDGE_TOP -to fsd
+set_location_assignment PIN_AB4 -to enet_rx_dv
+set_location_assignment PIN_AD2 -to enet_resetn
+set_location_assignment PIN_Y16 -to flash_cen
+set_location_assignment PIN_AG25 -to flash_rdybsyn
+set_location_assignment PIN_AB20 -to flash_resetn
+set_location_assignment PIN_B4 -to sram_psn
+set_location_assignment PIN_T21 -to user_resetn
+set_location_assignment PIN_A15 -to hsmb_clk_in0
+set_location_assignment PIN_J22 -to hsmb_clk_out0
+set_location_assignment PIN_AC11 -to fsa[0]
+set_location_assignment PIN_AH10 -to fsa[1]
+set_location_assignment PIN_AA13 -to fsa[2]
+set_location_assignment PIN_AC10 -to fsa[3]
+set_location_assignment PIN_Y15 -to fsa[4]
+set_location_assignment PIN_AF22 -to fsa[5]
+set_location_assignment PIN_AF26 -to fsa[6]
+set_location_assignment PIN_AF4 -to fsa[7]
+set_location_assignment PIN_AD8 -to fsa[8]
+set_location_assignment PIN_AG26 -to fsa[9]
+set_location_assignment PIN_AH6 -to fsa[10]
+set_location_assignment PIN_AD24 -to fsa[11]
+set_location_assignment PIN_AF9 -to fsa[12]
+set_location_assignment PIN_AA8 -to fsa[13]
+set_location_assignment PIN_AC22 -to fsa[14]
+set_location_assignment PIN_AE8 -to fsa[15]
+set_location_assignment PIN_AF13 -to fsa[16]
+set_location_assignment PIN_AB14 -to fsa[17]
+set_location_assignment PIN_AF23 -to fsa[18]
+set_location_assignment PIN_AG12 -to fsa[19]
+set_location_assignment PIN_AB18 -to fsa[20]
+set_location_assignment PIN_Y19 -to fsa[21]
+set_location_assignment PIN_AG3 -to fsa[22]
+set_location_assignment PIN_AE16 -to fsa[23]
+set_location_assignment PIN_AB7 -to fsa[24]
+set_location_assignment PIN_J14 -to fsd[0]
+set_location_assignment PIN_D6 -to fsd[1]
+set_location_assignment PIN_J17 -to fsd[2]
+set_location_assignment PIN_G7 -to fsd[3]
+set_location_assignment PIN_F18 -to fsd[4]
+set_location_assignment PIN_C6 -to fsd[5]
+set_location_assignment PIN_H17 -to fsd[6]
+set_location_assignment PIN_C18 -to fsd[7]
+set_location_assignment PIN_D18 -to fsd[8]
+set_location_assignment PIN_G16 -to fsd[9]
+set_location_assignment PIN_G22 -to fsd[10]
+set_location_assignment PIN_F12 -to fsd[11]
+set_location_assignment PIN_D11 -to fsd[12]
+set_location_assignment PIN_E24 -to fsd[13]
+set_location_assignment PIN_H21 -to fsd[14]
+set_location_assignment PIN_G9 -to fsd[15]
+set_location_assignment PIN_A4 -to fsd[16]
+set_location_assignment PIN_G13 -to fsd[17]
+set_location_assignment PIN_H14 -to fsd[18]
+set_location_assignment PIN_C8 -to fsd[19]
+set_location_assignment PIN_D9 -to fsd[20]
+set_location_assignment PIN_F7 -to fsd[21]
+set_location_assignment PIN_B11 -to fsd[22]
+set_location_assignment PIN_B22 -to fsd[23]
+set_location_assignment PIN_A18 -to fsd[24]
+set_location_assignment PIN_G8 -to fsd[25]
+set_location_assignment PIN_J12 -to fsd[26]
+set_location_assignment PIN_F11 -to fsd[27]
+set_location_assignment PIN_C9 -to fsd[28]
+set_location_assignment PIN_F10 -to fsd[29]
+set_location_assignment PIN_H10 -to fsd[30]
+set_location_assignment PIN_J10 -to fsd[31]
+set_location_assignment PIN_AA19 -to sram_advn
+set_instance_assignment -name IO_STANDARD "1.8 V" -to seven_seg_a
+set_instance_assignment -name IO_STANDARD "1.8 V" -to seven_seg_b
+set_instance_assignment -name IO_STANDARD "1.8 V" -to seven_seg_c
+set_instance_assignment -name IO_STANDARD "1.8 V" -to seven_seg_d
+set_instance_assignment -name IO_STANDARD "1.8 V" -to seven_seg_e
+set_instance_assignment -name IO_STANDARD "1.8 V" -to seven_seg_f
+set_instance_assignment -name IO_STANDARD "1.8 V" -to seven_seg_g
+set_instance_assignment -name IO_STANDARD "1.8 V" -to seven_seg_dp
+set_instance_assignment -name IO_STANDARD "1.8 V" -to seven_seg_sel
+set_instance_assignment -name IO_STANDARD "1.8 V" -to clkout_sma
+set_instance_assignment -name IO_STANDARD "1.8 V" -to flash_cen
+set_instance_assignment -name IO_STANDARD "1.8 V" -to flash_rdybsyn
+set_instance_assignment -name IO_STANDARD "1.8 V" -to flash_resetn
+set_instance_assignment -name IO_STANDARD "1.8 V" -to fsa
+set_instance_assignment -name IO_STANDARD "1.8 V" -to fsd
+set_instance_assignment -name IO_STANDARD "1.8 V" -to sram_advn
+set_instance_assignment -name IO_STANDARD "1.8 V" -to sram_psn
+set_instance_assignment -name IO_STANDARD "1.8 V" -to max_oen
+set_instance_assignment -name IO_STANDARD "1.8 V" -to max_wen
+set_instance_assignment -name IO_STANDARD "1.8 V" -to sram_csn
+set_instance_assignment -name IO_STANDARD "1.8 V" -to max_csn
+set_instance_assignment -name IO_STANDARD "1.8 V" -to sram_wait
+set_instance_assignment -name IO_STANDARD "1.8 V" -to clkin_sma
+set_instance_assignment -name IO_STANDARD "1.8 V" -to usb_ifclk
+set_instance_assignment -name IO_STANDARD "1.8 V" -to seven_seg_minus
+set_instance_assignment -name IO_STANDARD "1.8 V" -to sram_wen
+set_instance_assignment -name IO_STANDARD "1.8 V" -to enet_rx_clk
+set_instance_assignment -name IO_STANDARD "1.8 V" -to user_dipsw
+set_instance_assignment -name IO_STANDARD "1.8 V" -to user_led
+set_instance_assignment -name IO_STANDARD "1.8 V" -to user_pb
+set_instance_assignment -name IO_STANDARD "1.8 V" -to flash_oen
+set_instance_assignment -name IO_STANDARD "1.8 V" -to flash_wen
+set_instance_assignment -name IO_STANDARD "1.8 V" -to sram_ben
+set_instance_assignment -name IO_STANDARD "1.8 V" -to sram_clk
+set_instance_assignment -name IO_STANDARD "1.8 V" -to sram_oen
+set_instance_assignment -name IO_STANDARD "2.5 V" -to speaker_out
+set_instance_assignment -name IO_STANDARD "1.8 V" -to seven_seg_sel[1]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to seven_seg_sel[2]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to seven_seg_sel[3]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to seven_seg_sel[4]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to termination_blk1~_rup_pad
+set_instance_assignment -name IO_STANDARD "1.8 V" -to termination_blk1~_rdn_pad
+set_instance_assignment -name IO_STANDARD "1.8 V" -to user_dipsw[5]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to user_dipsw[1]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to user_dipsw[2]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to user_dipsw[3]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to user_dipsw[6]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to user_dipsw[7]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to sram_wait[0]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to sram_wait[1]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to termination_blk0~_rup_pad
+set_instance_assignment -name IO_STANDARD "1.8 V" -to termination_blk0~_rdn_pad
+set_instance_assignment -name IO_STANDARD "1.8 V" -to sram_ben[0]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to sram_ben[1]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to sram_ben[2]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to sram_ben[3]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to fsa[24]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to user_dipsw[0]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to user_dipsw[4]
+
+set_global_assignment -name ENABLE_ADVANCED_IO_TIMING ON
+set_global_assignment -name NOMINAL_CORE_SUPPLY_VOLTAGE 1.2V
+
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_odt[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_clk[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_clk_n[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_cs_n[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_cke
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_addr[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_addr[1]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_addr[2]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_addr[3]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_addr[4]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_addr[5]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_addr[6]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_addr[7]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_addr[8]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_addr[9]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_addr[10]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_addr[11]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_addr[12]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_ba[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_ba[1]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_ras_n
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_cas_n
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_we_n
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[1]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[2]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[3]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[4]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[5]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[6]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[7]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[8]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[9]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[10]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[11]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[12]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[13]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[14]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[15]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[16]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[17]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[18]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[19]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[20]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[21]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[22]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[23]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[24]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[25]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[26]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[27]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[28]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[29]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[30]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dq[31]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dqs[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dqs[1]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dqs[2]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dqs[3]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dm[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dm[1]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dm[2]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to membot_dm[3]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_odt[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_clk[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_clk_n[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_cs_n[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_cke[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_addr[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_addr[1]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_addr[2]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_addr[3]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_addr[4]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_addr[5]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_addr[6]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_addr[7]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_addr[8]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_addr[9]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_addr[10]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_addr[11]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_addr[12]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_ba[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_ba[1]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_ras_n
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_cas_n
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_we_n
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[1]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[2]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[3]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[4]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[5]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[6]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[7]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[8]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[9]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[10]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[11]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[12]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[13]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[14]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[15]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[16]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[17]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[18]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[19]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[20]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[21]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[22]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[23]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[24]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[25]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[26]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[27]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[28]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[29]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[30]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dq[31]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dqs[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dqs[1]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dqs[2]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dqs[3]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dm[0]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dm[1]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dm[2]
+set_instance_assignment -name IO_STANDARD "SSTL-18 CLASS I" -to memtop_dm[3]
+set_location_assignment PIN_AB22 -to membot_addr[0]
+set_location_assignment PIN_AG6 -to membot_addr[1]
+set_location_assignment PIN_Y13 -to membot_addr[2]
+set_location_assignment PIN_AE7 -to membot_addr[3]
+set_location_assignment PIN_AB12 -to membot_addr[4]
+set_location_assignment PIN_AC7 -to membot_addr[5]
+set_location_assignment PIN_AD12 -to membot_addr[6]
+set_location_assignment PIN_AB8 -to membot_addr[7]
+set_location_assignment PIN_AH12 -to membot_addr[8]
+set_location_assignment PIN_AB10 -to membot_addr[9]
+set_location_assignment PIN_AE4 -to membot_addr[10]
+set_location_assignment PIN_AF21 -to membot_addr[11]
+set_location_assignment PIN_Y12 -to membot_addr[12]
+set_location_assignment PIN_AF3 -to membot_ba[0]
+set_location_assignment PIN_AF5 -to membot_ba[1]
+set_location_assignment PIN_AD21 -to membot_cas_n
+set_location_assignment PIN_AG4 -to membot_cke
+set_location_assignment PIN_AE14 -to membot_clk[0]
+set_location_assignment PIN_AF14 -to membot_clk_n[0]
+set_location_assignment PIN_AH19 -to membot_dm[0]
+set_location_assignment PIN_AC15 -to membot_dm[1]
+set_location_assignment PIN_AF8 -to membot_dm[2]
+set_location_assignment PIN_AB9 -to membot_dm[3]
+set_location_assignment PIN_AG22 -to membot_dq[0]
+set_location_assignment PIN_AH21 -to membot_dq[1]
+set_location_assignment PIN_AH22 -to membot_dq[2]
+set_location_assignment PIN_AG21 -to membot_dq[3]
+set_location_assignment PIN_AD17 -to membot_dq[4]
+set_location_assignment PIN_AH23 -to membot_dq[5]
+set_location_assignment PIN_AE19 -to membot_dq[6]
+set_location_assignment PIN_AF24 -to membot_dq[7]
+set_location_assignment PIN_AG18 -to membot_dq[8]
+set_location_assignment PIN_AG17 -to membot_dq[9]
+set_location_assignment PIN_AH18 -to membot_dq[10]
+set_location_assignment PIN_AH17 -to membot_dq[11]
+set_location_assignment PIN_AF15 -to membot_dq[12]
+set_location_assignment PIN_AE17 -to membot_dq[13]
+set_location_assignment PIN_AF16 -to membot_dq[14]
+set_location_assignment PIN_AB16 -to membot_dq[15]
+set_location_assignment PIN_AE11 -to membot_dq[16]
+set_location_assignment PIN_AG11 -to membot_dq[17]
+set_location_assignment PIN_AG10 -to membot_dq[18]
+set_location_assignment PIN_AH11 -to membot_dq[19]
+set_location_assignment PIN_AE9 -to membot_dq[20]
+set_location_assignment PIN_AE12 -to membot_dq[21]
+set_location_assignment PIN_AF10 -to membot_dq[22]
+set_location_assignment PIN_AE13 -to membot_dq[23]
+set_location_assignment PIN_AC8 -to membot_dq[24]
+set_location_assignment PIN_AH7 -to membot_dq[25]
+set_location_assignment PIN_AG8 -to membot_dq[26]
+set_location_assignment PIN_AH8 -to membot_dq[27]
+set_location_assignment PIN_AG7 -to membot_dq[28]
+set_location_assignment PIN_AA10 -to membot_dq[29]
+set_location_assignment PIN_AF7 -to membot_dq[30]
+set_location_assignment PIN_AD10 -to membot_dq[31]
+set_location_assignment PIN_AE18 -to membot_dqs[0]
+set_location_assignment PIN_AF17 -to membot_dqs[1]
+set_location_assignment PIN_AF11 -to membot_dqs[2]
+set_location_assignment PIN_AE10 -to membot_dqs[3]
+set_location_assignment PIN_AE21 -to membot_ras_n
+set_location_assignment PIN_AE5 -to membot_we_n
+set_location_assignment PIN_J13 -to memtop_addr[0]
+set_location_assignment PIN_G18 -to memtop_addr[1]
+set_location_assignment PIN_E8 -to memtop_addr[2]
+set_location_assignment PIN_D24 -to memtop_addr[3]
+set_location_assignment PIN_D7 -to memtop_addr[4]
+set_location_assignment PIN_J15 -to memtop_addr[5]
+set_location_assignment PIN_H15 -to memtop_addr[6]
+set_location_assignment PIN_J16 -to memtop_addr[7]
+set_location_assignment PIN_H8 -to memtop_addr[8]
+set_location_assignment PIN_D16 -to memtop_addr[9]
+set_location_assignment PIN_A17 -to memtop_addr[10]
+set_location_assignment PIN_D8 -to memtop_addr[11]
+set_location_assignment PIN_D25 -to memtop_addr[12]
+set_location_assignment PIN_C23 -to memtop_ba[0]
+set_location_assignment PIN_D19 -to memtop_ba[1]
+set_location_assignment PIN_F14 -to memtop_cas_n
+set_location_assignment PIN_H12 -to memtop_clk[0]
+set_location_assignment PIN_G11 -to memtop_clk_n[0]
+set_location_assignment PIN_B10 -to memtop_dm[0]
+set_location_assignment PIN_A8 -to memtop_dm[1]
+set_location_assignment PIN_E15 -to memtop_dm[2]
+set_location_assignment PIN_C20 -to memtop_dm[3]
+set_location_assignment PIN_A12 -to memtop_dq[0]
+set_location_assignment PIN_C14 -to memtop_dq[1]
+set_location_assignment PIN_A11 -to memtop_dq[2]
+set_location_assignment PIN_C13 -to memtop_dq[3]
+set_location_assignment PIN_D15 -to memtop_dq[4]
+set_location_assignment PIN_C12 -to memtop_dq[5]
+set_location_assignment PIN_E14 -to memtop_dq[6]
+set_location_assignment PIN_D13 -to memtop_dq[7]
+set_location_assignment PIN_B7 -to memtop_dq[8]
+set_location_assignment PIN_C11 -to memtop_dq[9]
+set_location_assignment PIN_A7 -to memtop_dq[10]
+set_location_assignment PIN_C10 -to memtop_dq[11]
+set_location_assignment PIN_E11 -to memtop_dq[12]
+set_location_assignment PIN_B6 -to memtop_dq[13]
+set_location_assignment PIN_H13 -to memtop_dq[14]
+set_location_assignment PIN_D10 -to memtop_dq[15]
+set_location_assignment PIN_C17 -to memtop_dq[16]
+set_location_assignment PIN_B19 -to memtop_dq[17]
+set_location_assignment PIN_B18 -to memtop_dq[18]
+set_location_assignment PIN_C19 -to memtop_dq[19]
+set_location_assignment PIN_D20 -to memtop_dq[20]
+set_location_assignment PIN_C16 -to memtop_dq[21]
+set_location_assignment PIN_A19 -to memtop_dq[22]
+set_location_assignment PIN_E17 -to memtop_dq[23]
+set_location_assignment PIN_C21 -to memtop_dq[24]
+set_location_assignment PIN_C22 -to memtop_dq[25]
+set_location_assignment PIN_A21 -to memtop_dq[26]
+set_location_assignment PIN_A22 -to memtop_dq[27]
+set_location_assignment PIN_C24 -to memtop_dq[28]
+set_location_assignment PIN_B21 -to memtop_dq[29]
+set_location_assignment PIN_D21 -to memtop_dq[30]
+set_location_assignment PIN_E18 -to memtop_dq[31]
+set_location_assignment PIN_D12 -to memtop_dqs[0]
+set_location_assignment PIN_E12 -to memtop_dqs[1]
+set_location_assignment PIN_B17 -to memtop_dqs[2]
+set_location_assignment PIN_D17 -to memtop_dqs[3]
+set_location_assignment PIN_F8 -to memtop_ras_n
+set_location_assignment PIN_A10 -to memtop_we_n
+set_location_assignment PIN_AC21 -to membot_cs_n[0]
+set_location_assignment PIN_AE24 -to membot_odt[0]
+set_location_assignment PIN_E21 -to memtop_cke[0]
+set_location_assignment PIN_C7 -to memtop_cs_n[0]
+set_location_assignment PIN_A6 -to memtop_odt[0]
+set_global_assignment -name NUM_PARALLEL_PROCESSORS ALL
+set_global_assignment -name SMART_RECOMPILE ON
+set_location_assignment PIN_E1 -to scl
+set_location_assignment PIN_E2 -to sda
+set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_EFFORT EXTRA
+set_location_assignment PIN_AH15 -to clock50
+set_instance_assignment -name IO_STANDARD "1.8 V" -to clock50
+set_location_assignment PIN_R25 -to BITEC_DVI2_IO_IN_DE
+set_location_assignment PIN_U25 -to BITEC_DVI2_IO_IN_HSYNC
+set_location_assignment PIN_J27 -to BITEC_DVI2_IO_IN_ODCK
+set_location_assignment PIN_R26 -to BITEC_DVI2_IO_IN_VSYNC
+set_location_assignment PIN_G25 -to BITEC_DVI_IO_IN1[0]
+set_location_assignment PIN_J25 -to BITEC_DVI_IO_IN1[1]
+set_location_assignment PIN_J26 -to BITEC_DVI_IO_IN1[2]
+set_location_assignment PIN_L23 -to BITEC_DVI_IO_IN1[3]
+set_location_assignment PIN_L24 -to BITEC_DVI_IO_IN1[4]
+set_location_assignment PIN_M25 -to BITEC_DVI_IO_IN1[5]
+set_location_assignment PIN_M26 -to BITEC_DVI_IO_IN1[6]
+set_location_assignment PIN_N25 -to BITEC_DVI_IO_IN1[7]
+set_location_assignment PIN_H23 -to BITEC_DVI_IO_IN1[8]
+set_location_assignment PIN_H24 -to BITEC_DVI_IO_IN1[9]
+set_location_assignment PIN_F27 -to BITEC_DVI_IO_IN1[10]
+set_location_assignment PIN_F28 -to BITEC_DVI_IO_IN1[11]
+set_location_assignment PIN_G27 -to BITEC_DVI_IO_IN1[12]
+set_location_assignment PIN_G28 -to BITEC_DVI_IO_IN1[13]
+set_location_assignment PIN_K25 -to BITEC_DVI_IO_IN1[14]
+set_location_assignment PIN_K26 -to BITEC_DVI_IO_IN1[15]
+set_location_assignment PIN_K27 -to BITEC_DVI_IO_IN1[16]
+set_location_assignment PIN_K28 -to BITEC_DVI_IO_IN1[17]
+set_location_assignment PIN_L27 -to BITEC_DVI_IO_IN1[18]
+set_location_assignment PIN_L28 -to BITEC_DVI_IO_IN1[19]
+set_location_assignment PIN_M27 -to BITEC_DVI_IO_IN1[20]
+set_location_assignment PIN_M28 -to BITEC_DVI_IO_IN1[21]
+set_location_assignment PIN_P25 -to BITEC_DVI_IO_IN1[22]
+set_location_assignment PIN_P26 -to BITEC_DVI_IO_IN1[23]
+set_global_assignment -name ADV_NETLIST_OPT_SYNTH_GATE_RETIME OFF
+set_global_assignment -name CYCLONEII_OPTIMIZATION_TECHNIQUE SPEED
+set_global_assignment -name ADV_NETLIST_OPT_RETIME_CORE_AND_IO OFF
+#set_global_assignment -name SDC_FILE pip_top.sdc
+#set_global_assignment -name QIP_FILE system.qip
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_COLOR 14622752 -section_id Top
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_instance_assignment -name AUTO_OPEN_DRAIN_PINS ON -to BITEC_DVI_IO_OUT_DVI_CLK
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to BITEC_DVI_IO_OUT_DVI_CLK
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to BITEC_DVI_IO_OUT_DVI_DAT
+set_instance_assignment -name AUTO_OPEN_DRAIN_PINS ON -to BITEC_DVI_IO_OUT_DVI_DAT
+set_instance_assignment -name AUTO_OPEN_DRAIN_PINS ON -to BITEC_QV_TVP5154_SCL
+set_instance_assignment -name AUTO_OPEN_DRAIN_PINS ON -to BITEC_QV_TVP5154_SDA
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to BITEC_QV_TVP5154_SCL
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to BITEC_QV_TVP5154_SDA
+set_instance_assignment -name IO_MAXIMUM_TOGGLE_RATE "0 MHz" -to reset_n
+set_instance_assignment -name IO_MAXIMUM_TOGGLE_RATE "0 MHz" -to BITEC_QV_CH1_IN_INTREQ
+set_instance_assignment -name IO_MAXIMUM_TOGGLE_RATE "0 MHz" -to BITEC_QV_CH1_IN_HSYNC
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 2 -to fsd
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 3 -to lcd_data
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 5 -to usb_fd
+set_instance_assignment -name IO_MAXIMUM_TOGGLE_RATE "0 MHz" -to lcd_rstn
+set_instance_assignment -name IO_MAXIMUM_TOGGLE_RATE "0 MHz" -to sram_psn
+set_instance_assignment -name IO_MAXIMUM_TOGGLE_RATE "0 MHz" -to enet_resetn
+set_instance_assignment -name IO_MAXIMUM_TOGGLE_RATE "0 MHz" -to user_resetn
+set_instance_assignment -name IO_MAXIMUM_TOGGLE_RATE "0 MHz" -to flash_resetn
+set_instance_assignment -name IO_MAXIMUM_TOGGLE_RATE "0 MHz" -to user_dipsw
+set_instance_assignment -name IO_MAXIMUM_TOGGLE_RATE "0 MHz" -to user_pb
+set_instance_assignment -name IO_MAXIMUM_TOGGLE_RATE "0 MHz" -to enet_mdc
+set_instance_assignment -name IO_MAXIMUM_TOGGLE_RATE "0 MHz" -to enet_mdio
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_addr[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_addr[10]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_addr[11]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_addr[12]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_addr[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_addr[2]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_addr[3]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_addr[4]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_addr[5]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_addr[6]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_addr[7]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_addr[8]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_addr[9]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_ba[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_ba[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_cas_n
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_cke
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_clk[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_clk_n[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_cs_n[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dm[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dm[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dm[2]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dm[3]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[10]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[11]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[12]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[13]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[14]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[15]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[16]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[17]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[18]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[19]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[20]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[21]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[22]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[23]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[24]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[25]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[26]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[27]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[28]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[29]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[2]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[30]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[31]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[3]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[4]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[5]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[6]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[7]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[8]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dq[9]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dqs[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dqs[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dqs[2]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_dqs[3]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_odt[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_ras_n
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to membot_we_n
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_addr[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_addr[10]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_addr[11]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_addr[12]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_addr[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_addr[2]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_addr[3]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_addr[4]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_addr[5]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_addr[6]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_addr[7]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_addr[8]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_addr[9]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_ba[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_ba[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_cas_n
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_cke[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_clk[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_clk_n[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_cs_n[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dm[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dm[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dm[2]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dm[3]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[10]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[11]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[12]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[13]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[14]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[15]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[16]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[17]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[18]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[19]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[20]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[21]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[22]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[23]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[24]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[25]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[26]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[27]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[28]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[29]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[2]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[30]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[31]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[3]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[4]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[5]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[6]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[7]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[8]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dq[9]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dqs[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dqs[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dqs[2]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_dqs[3]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_odt[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_ras_n
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to memtop_we_n
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dm[0]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dm[1]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dm[2]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dm[3]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[0]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[10]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[11]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[12]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[13]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[14]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[15]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[16]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[17]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[18]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[19]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[1]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[20]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[21]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[22]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[23]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[24]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[25]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[26]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[27]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[28]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[29]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[2]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[30]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[31]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[3]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[4]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[5]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[6]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[7]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[8]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dq[9]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dqs[0]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dqs[1]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dqs[2]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1817418801 -to membot_dqs[3]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dm[0]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dm[1]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dm[2]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dm[3]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[0]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[10]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[11]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[12]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[13]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[14]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[15]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[16]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[17]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[18]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[19]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[1]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[20]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[21]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[22]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[23]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[24]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[25]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[26]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[27]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[28]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[29]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[2]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[30]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[31]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[3]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[4]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[5]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[6]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[7]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[8]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dq[9]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dqs[0]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dqs[1]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dqs[2]
+set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dqs[3]
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to reset_n
+set_global_assignment -name SEARCH_PATH ip/altera_avalon_i2c
+set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
+set_global_assignment -name TIMEQUEST_DO_CCPP_REMOVAL ON
+
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sdram_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/target/cyc3dev/target_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/platform_pkg.vhd
+set_global_assignment -name VHDL_FILE project_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/cycloneiii/pll.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/cycloneiii/sprom.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/cycloneiii/spram.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/cycloneiii/dpram.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/clk_div.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_Pack.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_ALU.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_MCode.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_Reg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80se.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/Z80.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/inputmapper.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/Inputs.VHD
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/trs80_interrupts.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/wd179x.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/floppy_if.vhd
+set_global_assignment -name VHDL_FILE ../s5a/floppy_fifo.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/platform.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/sound.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/bitmapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/tilemapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/video_mixer.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/Graphics.VHD
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
+set_global_assignment -name VHDL_FILE custom_io.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/target/cyc3dev/target_top_dvi.vhd
