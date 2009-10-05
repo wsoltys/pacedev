@@ -173,12 +173,14 @@ package pace_pkg is
 
   type to_SERIAL_t is record
     txd       : std_logic;
+    rts       : std_logic;
   end record;
   
   function NULL_TO_SERIAL return to_SERIAL_t;
 
   type from_SERIAL_t is record
     rxd       : std_logic;
+    cts       : std_logic;
   end record;
   
   constant PACE_NUM_GPI : natural := 72;

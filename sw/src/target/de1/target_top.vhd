@@ -107,10 +107,10 @@ end target_top;
 
 architecture SYN of target_top is
 
-  constant DE1_TEST_BURCHED_LEDS    : boolean := false;
-  constant DE1_TEST_BURCHED_DIPS    : boolean := false;
-  constant DE1_TEST_BURCHED_7SEG    : boolean := false;
-  constant DE1_BURCHED_SRAM         : boolean := false;
+  constant DE1_HAS_BURCHED_PERIPHERAL   : boolean := false;
+  constant DE1_TEST_BURCHED_LEDS        : boolean := false;
+  constant DE1_TEST_BURCHED_DIPS        : boolean := false;
+  constant DE1_TEST_BURCHED_7SEG        : boolean := false;
 
 	alias gpio_maple 		  : std_logic_vector(35 downto 0) is gpio_0;
 	alias gpio_lcd 			  : std_logic_vector(35 downto 0) is gpio_1;
@@ -144,8 +144,8 @@ architecture SYN of target_top is
   signal target_o       : to_TARGET_IO_t;
 
   -- gpio drivers from default logic
-  signal default_gpio_0_o   : std_logic_vector(gpio_0'range);
-  signal default_gpio_1_o   : std_logic_vector(gpio_1'range);
+  signal default_gpio_0_o   : std_logic_vector(gpio_0'range) := (others => 'Z');
+  signal default_gpio_1_o   : std_logic_vector(gpio_1'range) := (others => 'Z');
 	signal seg7               : std_logic_vector(15 downto 0);
 	
 begin
@@ -235,11 +235,40 @@ begin
   ledr <= leds_o(ledr'range);
   
 	-- inputs
-	inputs_i.ps2_kclk <= ps2_clk;
-	inputs_i.ps2_kdat <= ps2_dat;
-  inputs_i.ps2_mclk <= '0';
-  inputs_i.ps2_mdat <= '0';
 
+  GEN_NO_BURCHED_PERIPHERAL : if not DE1_HAS_BURCHED_PERIPHERAL generate
+    -- ps/2
+    inputs_i.ps2_kclk <= ps2_clk;
+    inputs_i.ps2_kdat <= ps2_dat;
+    inputs_i.ps2_mclk <= '0';
+    inputs_i.ps2_mdat <= '0';
+    -- serial
+    uart_txd <= ser_o.txd;
+    ser_i.rxd <= uart_rxd;
+  end generate GEN_NO_BURCHED_PERIPHERAL;
+  
+  GEN_BURCHED_PERIPHERAL : if DE1_HAS_BURCHED_PERIPHERAL generate
+    -- ps/2
+    inputs_i.ps2_kclk <= gpio_0(9);
+    inputs_i.ps2_kdat <= gpio_0(10);
+    inputs_i.ps2_mclk <= gpio_0(11);
+    inputs_i.ps2_mdat <= gpio_0(12);
+    -- serial
+    default_gpio_0_o(16) <= ser_o.txd;
+    ser_i.rxd <= gpio_0(15);
+    default_gpio_0_o(17) <= ser_o.rts;
+    ser_i.cts <= gpio_0(14);
+    -- video
+    default_gpio_0_o(8) <= video_o.rgb.r(video_o.rgb.r'left);
+    default_gpio_0_o(7) <= video_o.rgb.r(video_o.rgb.r'left-1);
+    default_gpio_0_o(6) <= video_o.rgb.g(video_o.rgb.g'left);
+    default_gpio_0_o(5) <= video_o.rgb.g(video_o.rgb.g'left-1);
+    default_gpio_0_o(4) <= video_o.rgb.b(video_o.rgb.b'left);
+    default_gpio_0_o(3) <= video_o.rgb.b(video_o.rgb.b'left-1);
+    default_gpio_0_o(2) <= video_o.hsync;
+    default_gpio_0_o(1) <= video_o.vsync;
+  end generate GEN_BURCHED_PERIPHERAL;
+  
 	GEN_MAPLE : if PACE_JAMMA = PACE_JAMMA_MAPLE generate
 	
     -- all this is so we can easily switch GPIO ports for maple bus!
@@ -588,14 +617,6 @@ begin
 
   end block BLK_AUDIO;
   
-  BLK_SERIAL : block
-  begin
-    GEN_NO_SERIAL : if not PACE_HAS_SERIAL generate
-      uart_txd <='0';
-      ser_i.rxd <= '0';
-    end generate GEN_NO_SERIAL;
-  end block BLK_SERIAL;
-  
   -- disable SD card
   sd_clk <= '0';
   sd_dat <= 'Z';
@@ -612,8 +633,7 @@ begin
     assert (PACE_JAMMA = PACE_JAMMA_NONE and
             PACE_VIDEO_CONTROLLER_TYPE /= PACE_VIDEO_LCM_320x240_60Hz and
             not DE1_TEST_BURCHED_DIPS and
-            not DE1_TEST_BURCHED_7SEG and
-            not DE1_BURCHED_SRAM)
+            not DE1_TEST_BURCHED_7SEG)
       report "DE1_TEST_BURCHED_LEDS not compatible with other DE1 options"
         severity failure;
 
@@ -635,18 +655,6 @@ begin
     end process;
     
   end generate GEN_TEST_BURCHED_LEDS;
-  
-  GEN_BURCHED_SRAM : if DE1_BURCHED_SRAM generate
-  
-    assert (PACE_JAMMA = PACE_JAMMA_NONE and
-            PACE_VIDEO_CONTROLLER_TYPE /= PACE_VIDEO_LCM_320x240_60Hz and
-            not DE1_TEST_BURCHED_LEDS and
-            not DE1_TEST_BURCHED_DIPS and
-            not DE1_TEST_BURCHED_7SEG)
-      report "GEN_BURCHED_SRAM not compatible with other DE1 options"
-        severity failure;
-      
-  end generate GEN_BURCHED_SRAM;
   
   pace_inst : entity work.pace                                            
     port map
@@ -735,6 +743,7 @@ begin
       );
 
     GEN_GPIO_0_O : for i in gpio_0'range generate
+      default_gpio_0_o(i) <= 'Z';
       gpio_0(i) <=  custom_gpio_0_o(i) when 
                       (gpio_0_is_custom(i) = '1' and custom_gpio_0_oe(i) = '1') else
                     default_gpio_0_o(i) when gpio_0_is_custom(i) = '0' else
@@ -742,6 +751,7 @@ begin
     end generate GEN_GPIO_0_O;
     
     GEN_GPIO_1_O : for i in gpio_1'range generate
+      default_gpio_1_o(i) <= 'Z';
       gpio_1(i) <=  custom_gpio_1_o(i) when 
                       (gpio_1_is_custom(i) = '1' and custom_gpio_1_oe(i) = '1') else
                     default_gpio_1_o(i) when gpio_1_is_custom(i) = '0' else
