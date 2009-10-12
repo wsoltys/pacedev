@@ -1,0 +1,7 @@
+run
+-ifn asteroids_top.prj
+-ifmt VHDL
+-ofn asteroids_top.ngc
+-ofmt NGC -p XCV300E-FG456-6
+-opt_mode Area
+-opt_level 2

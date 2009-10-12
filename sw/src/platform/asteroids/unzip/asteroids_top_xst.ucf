@@ -1,0 +1,139 @@
+# currently xst requires <> brackets and lower case text !
+CONFIG PART = XCV300E-FG456-6 ;
+
+NET clk_6       TNM_NET = clk_6_grp;
+TIMESPEC TS03 = PERIOD : clk_6_grp : 100.00 : PRIORITY 1;   # 10.00 MHz
+
+#NET clk_40_int       TNM_NET = clk_40_grp;
+#TIMESPEC TS02 = PERIOD : clk_40_grp : 20.00 : PRIORITY 1;   # 50 MHz
+
+NET clk_80_int       TNM_NET = clk_80_grp;
+TIMESPEC TS01 = PERIOD : clk_80_grp : 12.00 : PRIORITY 1;   # 83 MHz
+
+TIMESPEC TS11=FROM:PADS:TO:FFS : 30 ns;
+TIMESPEC TS12=FROM:FFS:TO:PADS : 30 ns;
+
+# YOU WILL NEED TO CHOOSE YOUR OWN PINOUT !
+# this file is for reference only
+
+NET reset_l                     LOC = AB12;
+NET clk_40                      LOC = W12;
+
+NET video_r_out<3>              LOC=D12;
+NET video_r_out<2>              LOC=B12;
+NET video_r_out<1>              LOC=A13;
+NET video_r_out<0>              LOC=E12;
+
+NET video_g_out<3>              LOC=C13;
+NET video_g_out<2>              LOC=D13;
+NET video_g_out<1>              LOC=A14;
+NET video_g_out<0>              LOC=B14;
+
+NET video_b_out<3>              LOC=C14;
+NET video_b_out<2>              LOC=F12;
+NET video_b_out<1>              LOC=A15;
+NET VIDEO_B_OUT<0>              LOC=E13;
+
+NET hsync_out                   LOC=B15;
+NET vsync_out                   LOC=C15;
+
+NET audio_out<7>                LOC=M18;
+NET audio_out<6>                LOC=M21;
+NET audio_out<5>                LOC=M22;
+NET audio_out<4>                LOC=L20;
+NET audio_out<3>                LOC=N22;
+NET audio_out<2>                LOC=M17;
+NET audio_out<1>                LOC=M19;
+NET audio_out<0>                LOC=M20;
+
+NET button<7>                   LOC=L3;
+NET button<6>                   LOC=L4;
+NET button<5>                   LOC=L2;
+NET button<4>                   LOC=L5;
+NET button<3>                   LOC=L1;
+NET button<2>                   LOC=L6;
+NET button<1>                   LOC=K2;
+NET button<0>                   LOC=K4;
+
+# SRAM
+NET clk_ram_fb                  LOC=Y11;
+NET clk_ram_opa                 LOC=AA11;
+NET clk_ram_opb                 LOC=U11;
+
+NET ram_we_l                    LOC=AA1;
+NET ram_adv_l                   LOC=Y2;
+NET ram_oe_l                    LOC=AA3;
+NET ram_config                  LOC=W5;
+
+NET ram_addr_a<18>              LOC=W3;
+NET ram_addr_a<17>              LOC=B16;
+NET ram_addr_a<16>              LOC=A16;
+NET ram_addr_a<15>              LOC=V11;
+NET ram_addr_a<14>              LOC=V10;
+NET ram_addr_a<13>              LOC=V9;
+NET ram_addr_a<12>              LOC=V8;
+NET ram_addr_a<11>              LOC=V7;
+NET ram_addr_a<10>              LOC=AA6;
+NET ram_addr_a<9>               LOC=W6;
+NET ram_addr_a<8>               LOC=Y6;
+NET ram_addr_a<7>               LOC=AA4;
+NET ram_addr_a<6>               LOC=AA5;
+NET ram_addr_a<5>               LOC=AB11;
+NET ram_addr_a<4>               LOC=W7;
+NET ram_addr_a<3>               LOC=W8;
+NET ram_addr_a<2>               LOC=W9;
+NET ram_addr_a<1>               LOC=W10;
+NET ram_addr_a<0>               LOC=W11;
+
+# some ram addresses duplicated to allow point to point tracking
+NET ram_addr_b<15>              LOC=V16;
+NET ram_addr_b<14>              LOC=W17;
+NET ram_addr_b<13>              LOC=V15;
+NET ram_addr_b<12>              LOC=W16;
+NET ram_addr_b<11>              LOC=V14;
+NET ram_addr_b<10>              LOC=V13;
+NET ram_addr_b<9>               LOC=W13;
+NET ram_addr_b<8>               LOC=V12;
+NET ram_addr_b<7>               LOC=Y12;
+NET ram_addr_b<6>               LOC=AA12;
+NET ram_addr_b<5>               LOC=AA17;
+NET ram_addr_b<4>               LOC=AA18;
+NET ram_addr_b<3>               LOC=AA19;
+NET ram_addr_b<2>               LOC=Y17;
+NET ram_addr_b<1>               LOC=W14;
+NET ram_addr_b<0>               LOC=W15;
+
+NET ram_dio<31>                 LOC=AB20;
+NET ram_dio<30>                 LOC=AB19;
+NET ram_dio<29>                 LOC=AB18;
+NET ram_dio<28>                 LOC=AB17;
+NET ram_dio<27>                 LOC=AB16;
+NET ram_dio<26>                 LOC=AB15;
+NET ram_dio<25>                 LOC=AB14;
+NET ram_dio<24>                 LOC=AB13;
+NET ram_dio<23>                 LOC=AA13;
+NET ram_dio<22>                 LOC=Y13;
+NET ram_dio<21>                 LOC=AA14;
+NET ram_dio<20>                 LOC=Y14;
+NET ram_dio<19>                 LOC=AA15;
+NET ram_dio<18>                 LOC=Y15;
+NET ram_dio<17>                 LOC=AA16;
+NET ram_dio<16>                 LOC=Y16;
+NET ram_dio<15>                 LOC=AB10;
+NET ram_dio<14>                 LOC=AB9;
+NET ram_dio<13>                 LOC=AB8;
+NET ram_dio<12>                 LOC=AB7;
+NET ram_dio<11>                 LOC=AB6;
+NET ram_dio<10>                 LOC=AB5;
+NET ram_dio<9>                  LOC=AB4;
+NET ram_dio<8>                  LOC=AB3;
+NET ram_dio<7>                  LOC=Y7;
+NET ram_dio<6>                  LOC=AA7;
+NET ram_dio<5>                  LOC=Y8;
+NET ram_dio<4>                  LOC=AA8;
+NET ram_dio<3>                  LOC=Y9;
+NET ram_dio<2>                  LOC=AA9;
+NET ram_dio<1>                  LOC=Y10;
+NET ram_dio<0>                  LOC=AA10;
+
+
