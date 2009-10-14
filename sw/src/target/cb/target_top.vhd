@@ -182,6 +182,34 @@ begin
 
   BLK_INPUTS : block
   begin
+
+    inputs_i.ps2_kclk <= '1';
+    inputs_i.ps2_kdat <= '1';
+    inputs_i.ps2_mclk <= '1';
+    inputs_i.ps2_mdat <= '1';
+
+		inputs_i.jamma_n.coin(1) <= '1';
+		inputs_i.jamma_n.p(1).start <= '1';
+		inputs_i.jamma_n.p(1).up <= '1';
+		inputs_i.jamma_n.p(1).down <= '1';
+		inputs_i.jamma_n.p(1).left <= '1';
+		inputs_i.jamma_n.p(1).right <= '1';
+		inputs_i.jamma_n.p(1).button <= (others => '1');
+
+  	-- not currently wired to any inputs
+  	inputs_i.jamma_n.coin_cnt <= (others => '1');
+  	inputs_i.jamma_n.coin(2) <= '1';
+  	inputs_i.jamma_n.p(2).start <= '1';
+    inputs_i.jamma_n.p(2).up <= '1';
+    inputs_i.jamma_n.p(2).down <= '1';
+  	inputs_i.jamma_n.p(2).left <= '1';
+  	inputs_i.jamma_n.p(2).right <= '1';
+  	inputs_i.jamma_n.p(2).button <= (others => '1');
+  
+  	inputs_i.jamma_n.service <= '1';
+  	inputs_i.jamma_n.tilt <= '1';
+  	inputs_i.jamma_n.test <= '1';
+
   end block BLK_INPUTS;
 
   -- no flash
