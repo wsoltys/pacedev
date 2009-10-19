@@ -1,6 +1,6 @@
 library work;
 use work.pace_pkg.all;
-use work.sprite_pkg.all;
+--use work.sprite_pkg.all;
 
 package body sprite_pkg is
 

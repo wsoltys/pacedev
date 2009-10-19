@@ -6,7 +6,7 @@ use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
---use work.sdram_pkg.all;
+use work.sdram_pkg.all;
 use work.video_controller_pkg.all;
 --use work.maple_pkg.all;
 --use work.gamecube_pkg.all;
@@ -46,7 +46,7 @@ port
     bus_sync          : in std_logic;
     bus_r_w           : in std_logic;
     bus_a             : in std_logic_vector(15 downto 0);
-    n_bus_io_sel
+    n_bus_io_sel      : in std_logic;
 
     -- boot flash interface
     prom_cs           : out std_logic;
@@ -77,10 +77,9 @@ port
     sda               : inout std_logic;
 
     -- peripheral board sp interface
-    extspi_cs_n0      : out std_logic;
-    extspi_cs_n1      : out std_logic;
-    sdio_detect       : out std_logic;
-    sdio_protect      : out std_logic;
+    extspi_cs_n       : out std_logic_vector(1 downto 0);
+    sdio_detect       : in std_logic;
+    sdio_protect      : in std_logic;
     
     -- vga interface
     clk_ext2          : out std_logic;
@@ -91,10 +90,10 @@ port
     iordy             : in std_logic;
 
     -- soft JTAG
-    tck_soft          : out std_logic;
-    tdi_soft          : out std_logic;
-    tdo_soft          : out std_logic;
-    tms_soft          : out std_logic
+    tck_soft          : in std_logic;
+    tdi_soft          : in std_logic;
+    tdo_soft          : in std_logic;
+    tms_soft          : in std_logic
   );
 end target_top;
 
@@ -176,6 +175,29 @@ begin
 
 	end block BLK_INIT;
 
+  BLK_PLL : block
+  begin
+
+    pll_inst : entity work.pll
+      generic map
+      (
+        -- CLK0
+        CLK0_DIVIDE_BY          => PACE_CLK0_DIVIDE_BY,
+        CLK0_MULTIPLY_BY        => PACE_CLK0_MULTIPLY_BY,
+    
+        -- CLK1
+        CLK1_DIVIDE_BY          => PACE_CLK1_DIVIDE_BY,
+        CLK1_MULTIPLY_BY        => PACE_CLK1_MULTIPLY_BY
+      )
+      port map
+      (
+        inclk0		=> clk_14M31818,
+        c0		    => clk_i(0),
+        c1		    => clk_i(1)
+      );
+  
+  end block BLK_PLL;
+  
   -- no buttons or switches on the CB
   buttons_i <= (others => '0');
   switches_i <= (others => '0');
@@ -216,22 +238,23 @@ begin
   flash_i.d <= (others => 'X');
 
   BLK_SRAM : block
-
+  begin
+  
     GEN_SRAM : if PACE_HAS_SRAM generate
       sram_a <= sram_o.a(sram_a'range);
       sram_d <= sram_o.d(sram_d'range) when sram_o.cs = '1' and sram_o.we = '1' else (others => 'Z');
-      sram_ncs <= not sram_o.cs;
+      sram_ncs <= not (sram_o.cs & sram_o.cs);
       sram_noe <= not sram_o.oe;
       sram_nwe <= not sram_o.we;
-      sram_i.d <= std_logic_vector(resize(sram_d),sram_i.d'length);
+      sram_i.d <= std_logic_vector(resize(unsigned(sram_d),sram_i.d'length));
     end generate GEN_SRAM;
 
     GEN_NO_SRAM : if not PACE_HAS_SRAM generate
       sram_a <= (others => 'Z');
       sram_d <= (others => 'Z');
-      sram_ncs <= '1';
+      sram_ncs <= (others => '1');
       sram_noe <= '1';
-      sram_new <= '1';
+      sram_nwe <= '1';
       sram_i.d <= (others => 'X');
     end generate GEN_NO_SRAM;
 

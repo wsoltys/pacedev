@@ -17,8 +17,9 @@ package target_pkg is
 
   constant PACE_CLKIN0        : natural := 14;
   constant PACE_CLKIN1        : natural := 14;
-  constant PACE_HAS_SDRAM     : boolean := false;
+  constant PACE_HAS_SRAM      : boolean := false;
   constant PACE_HAS_FLASH     : boolean := false;
+  constant PACE_HAS_SDRAM     : boolean := false;
 
   type from_TARGET_IO_t is record
     not_used  : std_logic;
