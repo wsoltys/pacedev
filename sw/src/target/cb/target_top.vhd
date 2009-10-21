@@ -150,6 +150,12 @@ architecture SYN of target_top is
   signal target_i       : from_TARGET_IO_t;
   signal target_o       : to_TARGET_IO_t;
 
+  signal d_C00X         : std_logic_vector(7 downto 0) := (others => '0');
+  signal d_C01X         : std_logic_vector(7 downto 0) := (others => '0');
+  alias key_strobe      : std_logic is d_C00X(7);
+  alias key_code        : std_logic_vector(6 downto 0) is d_C00X(6 downto 0);
+  alias any_key         : std_logic is d_C01X(7);
+  
 begin
 
   BLK_INIT : block
@@ -210,8 +216,40 @@ begin
     inputs_i.ps2_mclk <= '1';
     inputs_i.ps2_mdat <= '1';
 
-		inputs_i.jamma_n.coin(1) <= '1';
-		inputs_i.jamma_n.p(1).start <= '1';
+    -- fudge - extend keypress for 1 frame
+    process (clk_14M31818, reset_i)
+      subtype count_t is integer range 0 to 14318181/60;
+      variable count : count_t;
+    begin
+      if reset_i = '1' then
+        inputs_i.jamma_n.coin(1) <= '1';
+        inputs_i.jamma_n.p(1).start <= '1';
+        count := 0;
+      elsif rising_edge(clk_14M31818) then
+        if key_strobe = '1' then
+          count := count_t'high;
+          case key_code is
+            when "0110101" =>
+              inputs_i.jamma_n.coin(1) <= '0';
+            when "0110001" =>
+              inputs_i.jamma_n.p(1).start <= '0';
+            when others =>
+              null;
+          end case;
+        else
+          if count = 0 then
+            -- clear all inputs for now
+            inputs_i.jamma_n.coin(1) <= '1';
+            inputs_i.jamma_n.p(1).start <= '1';
+          else
+            count := count - 1;
+          end if;
+        end if;
+      end if;
+    end process;
+    
+		--inputs_i.jamma_n.coin(1) <= '1';
+		--inputs_i.jamma_n.p(1).start '1';
 		inputs_i.jamma_n.p(1).up <= '1';
 		inputs_i.jamma_n.p(1).down <= '1';
 		inputs_i.jamma_n.p(1).left <= '1';
@@ -243,7 +281,7 @@ begin
     GEN_SRAM : if PACE_HAS_SRAM generate
       sram_a <= sram_o.a(sram_a'range);
       sram_d <= sram_o.d(sram_d'range) when sram_o.cs = '1' and sram_o.we = '1' else (others => 'Z');
-      sram_ncs <= not (sram_o.cs & sram_o.cs);
+      sram_ncs <= '1' & not sram_o.cs;
       sram_noe <= not sram_o.oe;
       sram_nwe <= not sram_o.we;
       sram_i.d <= std_logic_vector(resize(unsigned(sram_d),sram_i.d'length));
@@ -336,4 +374,32 @@ begin
       target_o          => target_o
     );
 
+  BLK_SNOOP : block
+  begin
+    process (clk_14M31818, reset_i)
+      variable snoop_a  : std_logic_vector(15 downto 0) := (others => '0');
+      variable ph0_r    : std_logic := '0';
+    begin
+      if reset_i = '1' then
+        snoop_a := (others => '0');
+        ph0_r := '0';
+        d_C00X <= (others => '0');
+        d_C01X <= (others => '0');
+      elsif rising_edge(clk_14M31818) then
+        if ph0_r = '0' and bus_phase0 = '1' then
+          snoop_a := bus_a;
+        elsif ph0_r = '1' and bus_phase0 = '0' then
+          if snoop_a(15 downto 4) = X"C00" then
+            d_C00X <= bus_d;
+          elsif snoop_a(15 downto 4) = X"C01" then
+            d_C01X <= bus_d;
+          end if;
+        end if;
+        ph0_r := bus_phase0;
+      end if;
+    end process;
+    -- tri-state data bus
+    bus_d <= (others => 'Z');
+  end block BLK_SNOOP;
+  
 end architecture SYN;
