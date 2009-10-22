@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MODEL_1
+//#define MODEL_1
 
 #include "trs_chars.c"
 
@@ -98,6 +98,17 @@ void main (int argc, char *argv[])
   fp = fopen ("trstile.bin", "wb");
   fwrite (pace_tile_data, 1, 256*16, fp);
   fclose (fp);
+
+#if 0
+  // this is only for S5A character set!!!
+  fp = fopen ("s5atile.bin", "wb");
+  memcpy (pace_tile_data, &pace_tile_data[64*3+32], 32*16);
+  memcpy (&pace_tile_data[0], &pace_tile_data[191], 1*16);
+  memcpy (&pace_tile_data[1], &pace_tile_data[200], 2*16);
+  memcpy (&pace_tile_data[3], &pace_tile_data[196], 2*16);
+  fwrite (pace_tile_data, 1, 128*16, fp);
+  fclose (fp);
+#endif
 
 #if 0
 	for (int c=0; c<128; c++)
