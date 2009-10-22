@@ -14,6 +14,7 @@ package project_pkg is
 	--
 
 	constant PACE_HAS_PLL								      : boolean := true;
+  --constant PACE_HAS_SRAM                    : boolean := false;
 	
   -- Reference clock is 48MHz
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
@@ -36,9 +37,11 @@ package project_pkg is
 	--
 	
   constant INVADERS_ROM_IN_FLASH            : boolean := PACE_HAS_FLASH;
-	constant INVADERS_USE_INTERNAL_WRAM				: boolean := true;
+	constant INVADERS_USE_INTERNAL_WRAM				: boolean := false;
 
-	constant USE_VIDEO_VBLANK_INTERRUPT 			: boolean := false;
+  -- derived - do not edit
+  
+  constant PACE_HAS_SRAM                    : boolean := not INVADERS_USE_INTERNAL_WRAM;
 	
   type from_PROJECT_IO_t is record
     not_used  : std_logic;
