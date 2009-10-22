@@ -22,8 +22,8 @@ port
 
     -- apple ii bus interface    
 
-    bus_dmaout        : in std_logic;
-    bus_intout        : in std_logic;
+    bus_dmaout        : out std_logic;
+    bus_intout        : out std_logic;
     bus_nmi           : in std_logic;
     bus_irq           : in std_logic;
     bus_reset         : in std_logic;
@@ -410,9 +410,9 @@ begin
         if ph0_r = '0' and bus_phase0 = '1' then
           snoop_a := bus_a;
         elsif ph0_r = '1' and bus_phase0 = '0' then
-          if snoop_a(15 downto 4) = X"C00" then
+          if snoop_a(15 downto 0) = X"C000" then
             d_C00X <= bus_d;
-          elsif snoop_a(15 downto 4) = X"C01" then
+          elsif snoop_a(15 downto 0) = X"C010" then
             d_C01X <= bus_d;
           end if;
         end if;
@@ -422,5 +422,9 @@ begin
     -- tri-state data bus
     bus_d <= (others => 'Z');
   end block BLK_SNOOP;
-  
+
+  -- let's play nice with the apple bus
+  bus_dmaout <= bus_dmain;
+  bus_intout <= bus_intin;
+
 end architecture SYN;
