@@ -222,25 +222,46 @@ begin
       variable count : count_t;
     begin
       if reset_i = '1' then
-        inputs_i.jamma_n.coin(1) <= '1';
         inputs_i.jamma_n.p(1).start <= '1';
+        inputs_i.jamma_n.p(2).start <= '1';
+        inputs_i.jamma_n.coin(1) <= '1';
+        inputs_i.jamma_n.coin(2) <= '1';
+        inputs_i.jamma_n.p(1).button(1) <= '1';
+        inputs_i.jamma_n.p(1).left <= '1';
+        inputs_i.jamma_n.p(1).right <= '1';
         count := 0;
       elsif rising_edge(clk_14M31818) then
         if key_strobe = '1' then
+          -- any key releases left/right
+          inputs_i.jamma_n.p(1).left <= '1';
+          inputs_i.jamma_n.p(1).right <= '1';
           count := count_t'high;
           case key_code is
-            when "0110101" =>
-              inputs_i.jamma_n.coin(1) <= '0';
             when "0110001" =>
               inputs_i.jamma_n.p(1).start <= '0';
+            when "0110010" =>
+              inputs_i.jamma_n.p(2).start <= '0';
+            when "0110101" =>
+              inputs_i.jamma_n.coin(1) <= '0';
+            when "0110110" =>
+              inputs_i.jamma_n.coin(2) <= '0';
+            when "0100000" =>
+              inputs_i.jamma_n.p(1).button(1) <= '0';
+            when "1011010" | "1111010" =>
+              inputs_i.jamma_n.p(1).left <= '0';
+            when "1011000" | "1111000" =>
+              inputs_i.jamma_n.p(1).right <= '0';
             when others =>
               null;
           end case;
         else
           if count = 0 then
-            -- clear all inputs for now
-            inputs_i.jamma_n.coin(1) <= '1';
+            -- clear all except left/right
             inputs_i.jamma_n.p(1).start <= '1';
+            inputs_i.jamma_n.p(2).start <= '1';
+            inputs_i.jamma_n.coin(1) <= '1';
+            inputs_i.jamma_n.coin(2) <= '1';
+            inputs_i.jamma_n.p(1).button(1) <= '1';
           else
             count := count - 1;
           end if;
@@ -252,14 +273,14 @@ begin
 		--inputs_i.jamma_n.p(1).start '1';
 		inputs_i.jamma_n.p(1).up <= '1';
 		inputs_i.jamma_n.p(1).down <= '1';
-		inputs_i.jamma_n.p(1).left <= '1';
-		inputs_i.jamma_n.p(1).right <= '1';
-		inputs_i.jamma_n.p(1).button <= (others => '1');
+		--inputs_i.jamma_n.p(1).left <= '1';
+		--inputs_i.jamma_n.p(1).right <= '1';
+		inputs_i.jamma_n.p(1).button(2 to 5) <= (others => '1');
 
   	-- not currently wired to any inputs
   	inputs_i.jamma_n.coin_cnt <= (others => '1');
-  	inputs_i.jamma_n.coin(2) <= '1';
-  	inputs_i.jamma_n.p(2).start <= '1';
+  	--inputs_i.jamma_n.coin(2) <= '1';
+  	--inputs_i.jamma_n.p(2).start <= '1';
     inputs_i.jamma_n.p(2).up <= '1';
     inputs_i.jamma_n.p(2).down <= '1';
   	inputs_i.jamma_n.p(2).left <= '1';
