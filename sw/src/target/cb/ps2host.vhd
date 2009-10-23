@@ -31,6 +31,7 @@ architecture SYN of ps2_host is
   type scancode_t is array (natural range <>) of std_logic_vector(7 downto 0);
   constant ascii_2_ps2 : scancode_t(0 to 127) is
   {
+    blah
   };
     
   signal clk_66k667_en    : std_logic := '0';
