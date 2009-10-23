@@ -1,7 +1,7 @@
 ##############################################################
 #
 # Xilinx Core Generator version J.39
-# Date: Thu Oct 22 03:59:32 2009
+# Date: Thu Oct 22 22:30:47 2009
 #
 ##############################################################
 #
@@ -37,8 +37,8 @@ SELECT Single_Port_Block_Memory family Xilinx,_Inc. 6.2
 # BEGIN Parameters
 CSET active_clock_edge=Rising_Edge_Triggered
 CSET additional_output_pipe_stages=0
-CSET coefficient_file=..\..\..\..\..\src\platform\midway8080\invaders\roms\invaders0.coe
-CSET component_name=xilinx_invaders_rom
+CSET coefficient_file=..\..\..\..\..\src\platform\midway8080\lrescue\roms\lrescue0.coe
+CSET component_name=xilinx_invaders_rom_0
 CSET depth=8192
 CSET disable_warning_messages=true
 CSET enable_pin=false
@@ -60,5 +60,5 @@ CSET write_enable_polarity=Active_High
 CSET write_mode=Read_After_Write
 # END Parameters
 GENERATE
-# CRC: b570df05
+# CRC:  31d32a0
 

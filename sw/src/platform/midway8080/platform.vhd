@@ -103,10 +103,10 @@ architecture SYN of platform is
 	alias io_addr					: std_logic_vector(7 downto 0) is uP_addr(7 downto 0);
 	                        
   -- ROM signals        
-	signal rom_cs					: std_logic;
-  signal rom_datao      : std_logic_vector(7 downto 0);
-	signal rom2_cs				: std_logic;                        
-	signal rom2_datao			: std_logic_vector(7 downto 0);
+	signal rom0_cs				: std_logic;
+  signal rom0_datao     : std_logic_vector(7 downto 0);
+	signal rom1_cs				: std_logic;                        
+	signal rom1_datao			: std_logic_vector(7 downto 0);
 	
   -- VRAM signals       
 	signal vram_cs				: std_logic;
@@ -156,14 +156,14 @@ begin
 	end generate GEN_NO_SRAM;
 	
 	-- memory chip selects
-	-- ROM $0000-$1FFF
-	rom_cs <= '1' when uP_addr(14 downto 13) = "00" else '0';
+	-- ROM0 $0000-$1FFF
+	rom0_cs <= '1' when uP_addr(14 downto 13) = "00" else '0';
 	-- WRAM $2000-$23FF
 	wram_cs <= '1' when uP_addr(14 downto 10) = "01000" else '0';
 	-- VRAM $2400-$3FFF
 	vram_cs <= '1' when uP_addr(14 downto 13) = "01" and uP_addr(12 downto 10) /= "000" else '0';
-	-- ROM2 $4000-$5FFF
-	rom2_cs <= '1' when uP_addr(14 downto 13) = "10" else '0';
+	-- ROM1 $4000-$5FFF
+	rom1_cs <= '1' when uP_addr(14 downto 13) = "10" else '0';
 
 	-- memory write enables
 	vram_wr <= vram_cs and uPmemwr;
@@ -196,10 +196,10 @@ begin
   snd_o.a <= up_addr(snd_o.a'range);
   
 	-- memory read mux
-	uPmem_datai <= 	rom_datao when rom_cs = '1' else
+	uPmem_datai <= 	rom0_datao when rom0_cs = '1' else
 									wram_datao when wram_cs = '1' else
 									vram_datao when vram_cs = '1' else
-									rom2_datao when rom2_cs = '1' else
+									rom1_datao when rom1_cs = '1' else
 									(others => '1');
 	
 	-- io read mux
@@ -366,12 +366,12 @@ begin
     );
 
   GEN_INTERNAL_ROM : if not INVADERS_ROM_IN_FLASH generate
-    rom_inst : entity work.invaders_rom
+    rom0_inst : entity work.invaders_rom_0
       port map
       (
         clock		=> clk_sys,
         address => uP_addr(12 downto 0),
-        q				=> rom_datao
+        q				=> rom0_datao
       );
   end generate GEN_INTERNAL_ROM;
 
@@ -385,7 +385,7 @@ begin
         -- 70ns flash - update address and latch every 500ns
         if clk_2M_en = '1' then
           flash_o.a <= std_logic_vector(resize(unsigned(uP_addr(12 downto 0)), flash_o.a'length));
-          rom_datao <= flash_i.d;
+          rom0_datao <= flash_i.d;
         end if;
       end if;
     end process;
@@ -401,19 +401,19 @@ begin
   flash_o.cs <= '1';
   flash_o.oe <= '1';
 
-	GEN_ROM2 : if ROM_2_NAME /= "" generate
-		rom2_inst : entity work.invaders_rom_2
+	GEN_ROM1 : if ROM_1_NAME /= "" generate
+		rom1_inst : entity work.invaders_rom_1
 	    port map
 	    (
         clock		=> clk_sys,
         address => uP_addr(11 downto 0),
-        q				=> rom2_datao
+        q				=> rom1_datao
 	    );
-	end generate GEN_ROM2;
+	end generate GEN_ROM1;
   
-  GEN_NO_ROM2 : if ROM_2_NAME = "" generate
-    rom2_datao <= (others => '0');
-  end generate GEN_NO_ROM2;
+  GEN_NO_ROM1 : if ROM_1_NAME = "" generate
+    rom1_datao <= (others => '0');
+  end generate GEN_NO_ROM1;
 
 		--
 		--	*** WARNING - the contents of the VRAM are offset!!!

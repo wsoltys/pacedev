@@ -1,49 +1,64 @@
 library IEEE;
 use ieee.std_logic_1164.all;
 
-ENTITY invaders_rom IS
+ENTITY invaders_rom_0 IS
 	PORT
 	(
 		address		: IN STD_LOGIC_VECTOR (12 DOWNTO 0);
 		clock			: IN STD_LOGIC ;
 		q					: OUT STD_LOGIC_VECTOR (7 DOWNTO 0)
 	);
-END invaders_rom;
+END entity invaders_rom_0;
 
-architecture SYN of invaders_rom is
-  component xilinx_invaders_rom is
+architecture SYN of invaders_rom_0 is
+  component xilinx_invaders_rom_0 is
     port
     (
       clk   : in std_logic;
       addr  : in std_logic_vector(12 downto 0);
       dout  : out std_logic_vector(7 downto 0)
     );
-  end component xilinx_invaders_rom;
+  end component xilinx_invaders_rom_0;
 begin
-  rom_inst : xilinx_invaders_rom
+  rom_0_inst : xilinx_invaders_rom_0
     port map
     (
       clk   => clock,
       addr  => address,
       dout  => q
     );
-end SYN;
+end architecture SYN;
 
 library IEEE;
 use ieee.std_logic_1164.all;
 
-ENTITY invaders_rom_2 IS
+ENTITY invaders_rom_1 IS
 	PORT
 	(
 		address		: IN STD_LOGIC_VECTOR (11 DOWNTO 0);
 		clock			: IN STD_LOGIC ;
 		q					: OUT STD_LOGIC_VECTOR (7 DOWNTO 0)
 	);
-END invaders_rom_2;
+END entity invaders_rom_1;
 
-architecture SYN of invaders_rom_2 is
+architecture SYN of invaders_rom_1 is
+  component xilinx_invaders_rom_1 is
+    port
+    (
+      clk   : in std_logic;
+      addr  : in std_logic_vector(11 downto 0);
+      dout  : out std_logic_vector(7 downto 0)
+    );
+  end component xilinx_invaders_rom_1;
 begin
-end SYN;
+  rom_1_inst : xilinx_invaders_rom_1
+    port map
+    (
+      clk   => clock,
+      addr  => address,
+      dout  => q
+    );
+end architecture SYN;
 		
 library IEEE;
 use ieee.std_logic_1164.all;

@@ -229,12 +229,16 @@ begin
         inputs_i.jamma_n.p(1).button(1) <= '1';
         inputs_i.jamma_n.p(1).left <= '1';
         inputs_i.jamma_n.p(1).right <= '1';
+        inputs_i.jamma_n.p(1).up <= '1';
+        inputs_i.jamma_n.p(1).down <= '1';
         count := 0;
       elsif rising_edge(clk_14M31818) then
         if key_strobe = '1' then
           -- any key releases left/right
           inputs_i.jamma_n.p(1).left <= '1';
           inputs_i.jamma_n.p(1).right <= '1';
+          inputs_i.jamma_n.p(1).up <= '1';
+          inputs_i.jamma_n.p(1).down <= '1';
           count := count_t'high;
           case key_code is
             when "0110001" =>
@@ -247,16 +251,20 @@ begin
               inputs_i.jamma_n.coin(2) <= '0';
             when "0100000" =>
               inputs_i.jamma_n.p(1).button(1) <= '0';
-            when "1011010" | "1111010" =>
+            when "0001000" | "1011010" | "1111010" =>
               inputs_i.jamma_n.p(1).left <= '0';
-            when "1011000" | "1111000" =>
+            when "0010101" | "1011000" | "1111000" =>
               inputs_i.jamma_n.p(1).right <= '0';
+            when "0001011" =>
+              inputs_i.jamma_n.p(1).up <= '0';
+            when "0001010" =>
+              inputs_i.jamma_n.p(1).down <= '0';
             when others =>
               null;
           end case;
         else
           if count = 0 then
-            -- clear all except left/right
+            -- clear all except left/right/up/down
             inputs_i.jamma_n.p(1).start <= '1';
             inputs_i.jamma_n.p(2).start <= '1';
             inputs_i.jamma_n.coin(1) <= '1';
@@ -271,8 +279,8 @@ begin
     
 		--inputs_i.jamma_n.coin(1) <= '1';
 		--inputs_i.jamma_n.p(1).start '1';
-		inputs_i.jamma_n.p(1).up <= '1';
-		inputs_i.jamma_n.p(1).down <= '1';
+		--inputs_i.jamma_n.p(1).up <= '1';
+		--inputs_i.jamma_n.p(1).down <= '1';
 		--inputs_i.jamma_n.p(1).left <= '1';
 		--inputs_i.jamma_n.p(1).right <= '1';
 		inputs_i.jamma_n.p(1).button(2 to 5) <= (others => '1');
