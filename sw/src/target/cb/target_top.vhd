@@ -432,7 +432,7 @@ begin
   end block BLK_SNOOP;
 
   -- let's play nice with the apple bus
-  bus_dmaout <= bus_dmain;
-  bus_intout <= bus_intin;
+  bus_dmaout <= '0' when bus_dmain = '0' else 'Z';
+  bus_intout <= '0' when bus_intin = '0' else 'Z';
 
 end architecture SYN;
