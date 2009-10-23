@@ -392,7 +392,7 @@ begin
       rd (A_STS);
 			-- and show the result
 			if display then
-				write(debug_l, string'("STATUS = $") & hstr(fdc_dat_o));
+				write(debug_l, string'("STATUS = $") & hstr(pkt_data));
 				writeline(OUTPUT, debug_l);
 			end if;
     end;

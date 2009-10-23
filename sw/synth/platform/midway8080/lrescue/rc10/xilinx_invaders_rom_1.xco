@@ -1,7 +1,7 @@
 ##############################################################
 #
 # Xilinx Core Generator version J.39
-# Date: Fri Oct 23 00:24:33 2009
+# Date: Fri Oct 23 01:28:14 2009
 #
 ##############################################################
 #
@@ -18,13 +18,13 @@ SET asysymbol = False
 SET busformat = BusFormatAngleBracketNotRipped
 SET createndf = False
 SET designentry = VHDL
-SET device = xc3s250e
-SET devicefamily = spartan3e
+SET device = xc3s1500l
+SET devicefamily = spartan3
 SET flowvendor = Foundation_iSE
 SET formalverification = False
 SET foundationsym = False
 SET implementationfiletype = Ngc
-SET package = pq208
+SET package = fg320
 SET removerpms = False
 SET simulationfiles = Behavioral
 SET speedgrade = -4
@@ -60,5 +60,5 @@ CSET write_enable_polarity=Active_High
 CSET write_mode=Read_After_Write
 # END Parameters
 GENERATE
-# CRC: b740b938
+# CRC: 8cde8b27
 
