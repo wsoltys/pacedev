@@ -25,7 +25,7 @@
 
 # project-wide assignments
 # ========================
-set_global_assignment -name LAST_QUARTUS_VERSION 8.1
+set_global_assignment -name LAST_QUARTUS_VERSION "9.0 SP2"
 
 # pin & location assignments
 # ==========================
@@ -542,6 +542,7 @@ set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/Pacman_vra
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/de1/custom_io.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/de1/target_top.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwm_chaser.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwmout.vhd

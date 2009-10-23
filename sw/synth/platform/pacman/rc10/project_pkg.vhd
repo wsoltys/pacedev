@@ -15,6 +15,8 @@ package project_pkg is
 	
   -- Reference clock is 48MHz
 	constant PACE_HAS_PLL											: boolean := true;
+
+  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
   constant PACE_CLK0_DIVIDE_BY        			: natural := 2;		-- 48/2 = 24MHz
   constant PACE_CLK0_MULTIPLY_BY            : natural := 1;   -- (used by pacman)
   constant PACE_CLK1_DIVIDE_BY        			: natural := 6;
@@ -32,6 +34,14 @@ package project_pkg is
 	-- Pacman-specific constants
 			
 	constant PACMAN_USE_INTERNAL_WRAM				: boolean := true;
-	constant USE_VIDEO_VBLANK_INTERRUPT 		: boolean := true;
+	constant PACMAN_USE_VIDEO_VBLANK 		    : boolean := true;
 	
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

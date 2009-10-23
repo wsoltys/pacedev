@@ -1,6 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -74,22 +74,24 @@ begin
 
 		-- pipelined pixel X location
 		variable x_r	      : std_logic_vector((DELAY-1)*PIPELINED_BITS-1 downto 0);
+    alias x_r_n         : std_logic_vector(1 downto 0) is x_r(x_r'left-1 downto x_r'left-2);
+
 		variable attr_d_r	  : std_logic_vector(2*5-1 downto 0);
 
-		variable x_adj		  : std_logic_vector(x'range);
-				
+		variable x_adj		  : unsigned(x'range);
+
   begin
 
   	if rising_edge(clk) and clk_ena = '1' then
 
 			-- video is clipped left and right (only 224 wide)
-			x_adj := x + (256-PACE_VIDEO_H_SIZE)/2;
+			x_adj := unsigned(x) + (256-PACE_VIDEO_H_SIZE)/2;
 				
       -- 1st stage of pipeline
       -- - read tile from tilemap
       -- - read attribute data
       if stb = '1' then
-        ctl_o.map_a(5 downto 0) <= x_adj(8 downto 3);
+        ctl_o.map_a(5 downto 0) <= std_logic_vector(x_adj(8 downto 3));
       end if;
       
       -- 2nd stage of pipeline
@@ -98,7 +100,8 @@ begin
       ctl_o.tile_a(0) <= x_r(PIPELINED_BITS*1+2);
 
       -- each byte contains information for 4 pixels
-      case x_r(x_r'left-1 downto x_r'left-2) is
+      --case x_r(x_r'left-1 downto x_r'left-2) is
+      case x_r_n is
       --case x_r(10 downto 9) is
         when "00" =>
           pel := ctl_i.tile_d(6) & ctl_i.tile_d(7);
@@ -112,10 +115,10 @@ begin
 
       -- extract R,G,B from colour palette
       -- bit 5 of the attribute is the clut bank (pengo)
-      clut_entry := clut(conv_integer(clut_bank & attr_d_r(attr_d_r'left downto attr_d_r'left-4)));
-      pal_i := clut_entry(conv_integer(pel));
+      clut_entry := clut(to_integer(unsigned(clut_bank & attr_d_r(attr_d_r'left downto attr_d_r'left-4))));
+      pal_i := clut_entry(to_integer(unsigned(pel)));
       -- bit 6 of the attribute is the palette bank (pengo)
-      pal_entry := pal(conv_integer(palette_bank & pal_i));
+      pal_entry := pal(to_integer(unsigned(palette_bank & pal_i)));
       ctl_o.rgb.r <= pal_entry(0) & "0000";
       ctl_o.rgb.g <= pal_entry(1) & "0000";
       ctl_o.rgb.b <= pal_entry(2) & "0000";

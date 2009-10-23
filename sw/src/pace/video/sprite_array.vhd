@@ -1,7 +1,8 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
-use ieee.std_logic_arith.all;
-use IEEE.std_logic_unsigned.all;
+use ieee.numeric_std.all;
+--use ieee.std_logic_arith.all;
+--use IEEE.std_logic_unsigned.all;
 
 library work;
 use work.pace_pkg.all;
@@ -65,7 +66,10 @@ begin
 	begin
 		if reset = '1' then
 			-- enable must be 1 clock behind address to latch data after fetch
-			ld_r <= (N_SPRITES-1 => '1', others => '0');
+			--ld_r <= (N_SPRITES-1 => '1', others => '0');
+      -- make ISE 9.2.03i happy...
+			ld_r(ld_r'left) <= '1';
+			ld_r(ld_r'left-1 downto 0) <= (others => '0');
 			i := 0;
 		elsif rising_edge(clk) and clk_ena = '1' then
 			ld_r <= ld_r(ld_r'left-1 downto 0) & ld_r(ld_r'left);
