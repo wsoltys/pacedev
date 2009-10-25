@@ -4,9 +4,9 @@
 
 #include <allegro.h>
 
-//#define GALAXIAN
+#define GALAXIAN
 //#define MOONCRST
-#define ZIGZAG
+//#define ZIGZAG
 //#define JUMPBUG
 //#define FROGGER
 
@@ -148,7 +148,11 @@ void main (int argc, char *argv[])
 	
 	// read cpu memory dump	
 	fp = fopen (SUBDIR MEM_NAME, "rb");
-	if (!fp) exit (0);
+	if (!fp) 
+  {
+    printf ("unable to open \"%s\"!\n", SUBDIR MEM_NAME);
+    exit (0);
+  }
 	fread (mem, 64*1024, 1, fp);
 	fclose (fp);
 

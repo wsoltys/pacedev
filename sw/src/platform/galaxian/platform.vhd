@@ -241,13 +241,7 @@ begin
       nmi    	=> uPnmireq
     );
 
-	rom_inst : entity work.sprom
-		generic map
-		(
-			init_file		=> "../../../../src/platform/galaxian/roms/galxrom.hex",
-			numwords_a	=> 16384,
-			widthad_a		=> 14
-		)
+	rom_inst : entity work.galaxian_rom
 		port map
 		(
 			clock			=> clk_30M,
@@ -256,13 +250,7 @@ begin
 		);
 	
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-	vram_inst : entity work.dpram
-		generic map
-		(
-			init_file		=> "../../../../src/platform/galaxian/roms/galxvram.hex",
-			numwords_a	=> 1024,
-			widthad_a		=> 10
-		)
+	vram_inst : entity work.galaxian_vram
 		port map
 		(
 			clock_b			=> clk_30M,
@@ -292,12 +280,7 @@ begin
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 	cram0_wr <= cram_wr and not uP_addr(0);
 	
-	cram_inst_0 : entity work.dpram
-		generic map
-		(
-			numwords_a	=> 128,
-			widthad_a		=> 7
-		)
+	cram_inst_0 : entity work.galaxian_cram
 		port map
 		(
 			clock_b			=> clk_30M,
@@ -316,12 +299,7 @@ begin
 	cram1_wr <= cram_wr and uP_addr(0);
 
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-	cram_inst_1 : entity work.dpram
-		generic map
-		(
-			numwords_a	=> 128,
-			widthad_a		=> 7
-		)
+	cram_inst_1 : entity work.galaxian_cram
 		port map
 		(
 			clock_b			=> clk_30M,
@@ -356,16 +334,7 @@ begin
       nmi_req           => uPnmireq
     );
 
-	gfxrom_inst : entity work.dprom_2r
-		generic map
-		(
-			init_file		=> "../../../../src/platform/galaxian/roms/gfxrom.hex",
-			numwords_a	=> 4096,
-			widthad_a		=> 12,
-			numwords_b	=> 1024,
-			widthad_b		=> 10,
-			width_b			=> 32
-		)
+	gfxrom_inst : entity work.galaxian_gfxrom
 		port map
 		(
 			clock										=> clk_video,
@@ -381,12 +350,12 @@ begin
 
 		GEN_INTERNAL_WRAM : if GALAXIAN_USE_INTERNAL_WRAM generate
 		
-			wram_inst : entity work.spram
-				generic map
-				(
-					numwords_a => 2048,
-					widthad_a => 11
-				)
+			wram_inst : entity work.galaxian_wram
+				--generic map
+				--(
+				--	numwords_a => 2048,
+				--	widthad_a => 11
+				--)
 				port map
 				(
 					clock				=> clk_30M,

@@ -62,6 +62,7 @@ begin
 		variable scroll_x : std_logic_vector(8 downto 0);
 		-- pipelined pixel X location
 		variable x_r	: std_logic_vector((DELAY-1)*3-1 downto 0);
+    alias x_r_n : std_logic_vector(1 downto 0) is x_r(x_r'left-1 downto x_r'left-2);
 		
   begin
   	if rising_edge(clk) and clk_ena = '1' then
@@ -84,7 +85,8 @@ begin
       -- 3rd stage of pipeline
       -- - assign pixel colour based on tile data
       -- (each byte contains information for 4 pixels)
-      case x_r(x_r'left-1 downto x_r'left-2) is
+      --case x_r(x_r'left-1 downto x_r'left-2) is
+      case x_r_n is
         when "00" =>
           pel := ctl_i.tile_d(6) & ctl_i.tile_d(7);
         when "01" =>

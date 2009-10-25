@@ -543,6 +543,7 @@ set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/InputMap
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/Galaxian_Interrupts.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/Galaxian_vramMapper.VHDL
+set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/altera_mem.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/galaxian/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
@@ -566,4 +567,5 @@ set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2C_AV_Confi
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/seg7_lut.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2S_LCM_Config.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/i2s_controller.v
+set_global_assignment -name VHDL_FILE ../../../../src/target/de1/custom_io.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/de1/target_top.vhd

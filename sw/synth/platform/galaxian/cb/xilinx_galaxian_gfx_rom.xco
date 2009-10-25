@@ -1,7 +1,7 @@
 ##############################################################
 #
 # Xilinx Core Generator version J.39
-# Date: Fri Oct 23 08:17:15 2009
+# Date: Sun Oct 25 04:08:57 2009
 #
 ##############################################################
 #
@@ -35,14 +35,15 @@ SET vhdlsim = True
 SELECT Dual_Port_Block_Memory family Xilinx,_Inc. 6.3
 # END Select
 # BEGIN Parameters
-CSET component_name=xilinx_invaders_vram
+CSET coefficient_file=..\..\..\..\src\platform\galaxian\roms\galaxian_gfx_rom.coe
+CSET component_name=xilinx_galaxian_gfx_rom
 CSET configuration_port_a=Read_Only
-CSET configuration_port_b=Read_And_Write
-CSET depth_a=8192
-CSET depth_b=8192
+CSET configuration_port_b=Read_Only
+CSET depth_a=4096
+CSET depth_b=1024
 CSET disable_warning_messages=true
 CSET global_init_value=0
-CSET load_init_file=false
+CSET load_init_file=true
 CSET port_a_active_clock_edge=Rising_Edge_Triggered
 CSET port_a_additional_output_pipe_stages=0
 CSET port_a_enable_pin=false
@@ -51,7 +52,7 @@ CSET port_a_handshaking_pins=false
 CSET port_a_init_pin=false
 CSET port_a_init_value=0
 CSET port_a_initialization_pin_polarity=Active_High
-CSET port_a_register_inputs=false
+CSET port_a_register_inputs=true
 CSET port_a_write_enable_polarity=Active_High
 CSET port_b_active_clock_edge=Rising_Edge_Triggered
 CSET port_b_additional_output_pipe_stages=0
@@ -61,15 +62,15 @@ CSET port_b_handshaking_pins=false
 CSET port_b_init_pin=false
 CSET port_b_init_value=0
 CSET port_b_initialization_pin_polarity=Active_High
-CSET port_b_register_inputs=false
+CSET port_b_register_inputs=true
 CSET port_b_write_enable_polarity=Active_High
 CSET primitive_selection=Optimize_For_Area
 CSET select_primitive=16kx1
 CSET width_a=8
-CSET width_b=8
+CSET width_b=32
 CSET write_mode_port_a=Read_After_Write
 CSET write_mode_port_b=Read_After_Write
 # END Parameters
 GENERATE
-# CRC: 5a76af70
+# CRC: d49bea96
 
