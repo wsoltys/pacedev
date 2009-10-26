@@ -17,7 +17,7 @@ package target_pkg is
 
   constant PACE_CLKIN0        : natural := 48;
   constant PACE_CLKIN1        : natural := 0;   -- no available
-  constant PACE_HAS_SRAM      : boolean := false;
+  --constant PACE_HAS_SRAM      : boolean := false;
   constant PACE_HAS_SPI       : boolean := false;
   constant PACE_HAS_FLASH     : boolean := false;
 

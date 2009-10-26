@@ -169,19 +169,17 @@ begin
     component pll is
       generic
       (
-        -- INCLK
-        INCLK0_INPUT_FREQUENCY  : natural;
-  
         -- CLK0
-        CLK0_DIVIDE_BY      : real := 2.0;
-        CLK0_DUTY_CYCLE     : natural := 50;
-        CLK0_PHASE_SHIFT    : string := "0";
-  
+        CLK0_DIVIDE_BY          : integer := 1;
+        CLK0_MULTIPLY_BY        : natural := 1;
+        CLK0_DUTY_CYCLE         : integer := 50;
+        CLK0_PHASE_SHIFT        : string := "0";
+    
         -- CLK1
-        CLK1_DIVIDE_BY      : natural := 1;
-        CLK1_DUTY_CYCLE     : natural := 50;
-        CLK1_MULTIPLY_BY    : natural := 1;
-        CLK1_PHASE_SHIFT    : string := "0"
+        CLK1_DIVIDE_BY          : natural := 1;
+        CLK1_MULTIPLY_BY        : natural := 1;
+        CLK1_DUTY_CYCLE         : natural := 50;
+        CLK1_PHASE_SHIFT        : string := "0"
       );
       port
       (
@@ -198,11 +196,9 @@ begin
       pll_inst : pll
         generic map
         (
-          -- INCLK0
-          INCLK0_INPUT_FREQUENCY  => 20, -- period 20.833ns
-  
           -- CLK0
-          CLK0_DIVIDE_BY          => real(PACE_CLK0_DIVIDE_BY),
+          CLK0_DIVIDE_BY          => PACE_CLK0_DIVIDE_BY,
+          CLK0_MULTIPLY_BY        => PACE_CLK0_MULTIPLY_BY,
       
           -- CLK1
           CLK1_DIVIDE_BY          => PACE_CLK1_DIVIDE_BY,
@@ -294,10 +290,30 @@ begin
   end block BLK_FLASH;
 
   -- static memory
-  BLK_SRAM : block
+  GEN_SRAM : if PACE_HAS_SRAM generate
+    component emulated_sram_16K IS
+      port 
+      (
+        clk   : IN std_logic;
+        addr  : IN std_logic_VECTOR(13 downto 0);
+        we    : IN std_logic;
+        din   : IN std_logic_VECTOR(7 downto 0);
+        dout  : OUT std_logic_VECTOR(7 downto 0)
+      );
+    end component emulated_sram_16K;
+    signal we : std_logic := '0';
   begin
-    sram_i.d <= (others => '1');
-  end block BLK_SRAM;
+    we <= sram_o.cs and sram_o.we;
+    sram_inst : emulated_sram_16K
+      port map
+      (
+        clk   => clk_i(0),
+        addr  => sram_o.a(13 downto 0),
+        we    => we,
+        din   => sram_o.d(7 downto 0),
+        dout  => sram_i.d(7 downto 0)
+      );
+  end generate GEN_SRAM;
 
   BLK_SDRAM : block
   begin

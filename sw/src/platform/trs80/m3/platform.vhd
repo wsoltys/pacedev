@@ -143,7 +143,8 @@ architecture SYN of platform is
 	signal ulabs_dat_o    : std_logic_vector(7 downto 0) := (others => '0');
 	
   -- RAM signals        
-  signal ram_wr         : std_logic;
+  signal ram_cs         : std_logic := '0';
+  signal ram_wr         : std_logic := '0';
   signal ram_datao      : std_logic_vector(7 downto 0);
 
   -- interrupt signals
@@ -234,15 +235,20 @@ begin
 	rom_cs <= '1' when uP_addr(15 downto 14) = "00" and uP_addr(13 downto 11) /= "111" else '0';
 	-- KEYBOARD $3800-$38FF
 	kbd_cs <= '1' when uP_addr(15 downto 10) = (X"3" & "10") else '0';
-	-- RAM (everything else)
+	-- VRAM
 	vram_cs <= '1' when uP_addr(15 downto 10) = (X"3" & "11") else '0';
-	
+	-- RAM
+  ram_cs <= '1' when uP_addr(15 downto 14) = "01" else
+            '1' when (uP_addr(15 downto 14) = "10" and TRS80_M3_RAM_SIZE > 16) else
+            '1' when (uP_addr(15 downto 14) = "11" and TRS80_M3_RAM_SIZE > 32) else
+            '0';
+  
 	-- memory write enables
 	vram_wr <= vram_cs and not ulabs_en and uPmemwr;
 	-- microlabs hires graphics (mapped to normal video ram)
 	ulabs_wr <= vram_cs and ulabs_en and uPmemwr;
 	-- always write thru to RAM
-	ram_wr <= uPmemwr;
+	ram_wr <= ram_cs and uPmemwr;
 
 	-- I/O chip selects
 	-- Alpha Joystick $00 (active low)
@@ -283,7 +289,8 @@ begin
 									kbd_data when kbd_cs = '1' else
 									vram_datao when vram_cs = '1' and ulabs_en = '0' else
 									ulabs_dat_o when vram_cs = '1' and ulabs_en = '1' else
-									ram_datao;
+									ram_datao when ram_cs = '1' else
+                  X"FF";
 	
 	-- io read mux
 	uPio_datai <= X"FF" when alpha_joy_cs = '1' else
@@ -370,7 +377,7 @@ begin
     up_inst : entity work.Z80                                                
       port map
       (
-        clk			=> clk_20M,                                   
+        clk			=> '0', --clk_20M,                                   
         clk_en	=> clk_2M_ena,
         reset  	=> cpu_reset,                                     
 
