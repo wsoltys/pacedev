@@ -59,8 +59,9 @@ package project_pkg is
 
 	-- TRS-80-specific constants
 	
+  -- valid values are 16, 32 & 48
+  constant TRS80_M3_RAM_SIZE                : natural := 16;
   constant TRS80_M3_ROM_IN_FLASH            : boolean := false;
-
   constant TRS80_M3_HIRES_SUPPORT           : boolean := false;
 	constant TRS80_M3_HIRES_WIDTHA            : integer := 12;    -- 4KiB only (Max 16KiB)
 	constant TRS80_M3_FDC_SUPPORT			        : boolean := false;

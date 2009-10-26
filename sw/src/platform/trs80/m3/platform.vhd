@@ -377,7 +377,7 @@ begin
     up_inst : entity work.Z80                                                
       port map
       (
-        clk			=> '0', --clk_20M,                                   
+        clk			=> clk_20M,                                   
         clk_en	=> clk_2M_ena,
         reset  	=> cpu_reset,                                     
 
