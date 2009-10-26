@@ -53,6 +53,8 @@ architecture SYN of tilemapCtl_1 is
   
   alias alt_char  : std_logic is graphics_i.bit8_1(3);
   alias dbl_width : std_logic is graphics_i.bit8_1(2);
+
+  signal hblank_r : std_logic_vector(DELAY-1 downto 0) := (others => '0');
   
 begin
 
@@ -65,7 +67,7 @@ begin
   -- generate pixel
   process (clk, clk_ena, reset)
 
-		variable hblank_r		: std_logic_vector(DELAY-1 downto 0);
+		--variable hblank_r		: std_logic_vector(DELAY-1 downto 0);
 		alias hblank_prev		: std_logic is hblank_r(hblank_r'left);
 		alias hblank_v			: std_logic is hblank_r(hblank_r'left-1);
 		variable vcount			: std_logic_vector(8 downto 0);
@@ -80,7 +82,7 @@ begin
     ctl_o.map_a(ctl_o.map_a'left downto 10) <= (others => '0');
 
 		if reset = '1' then
-			hblank_r := (others => '1');
+			hblank_r <= (others => '1');
   	elsif rising_edge(clk) and clk_ena = '1' then
 
 			-- each tile is 12 rows high, rather than 16
@@ -151,7 +153,7 @@ begin
       x_r := x_r(x_r'left-X_PIPELINE_BITS downto 0) & x(X_PIPELINE_BITS-1 downto 0);
 
       -- for end-of-line detection
-			hblank_r := hblank_r(hblank_r'left-1 downto 0) & hblank;
+			hblank_r <= hblank_r(hblank_r'left-1 downto 0) & hblank;
 		
       ctl_o.set <= pel;
 

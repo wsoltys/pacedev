@@ -155,6 +155,8 @@ architecture SYN of target_top is
   alias key_strobe      : std_logic is d_C000(7);
   alias key_code        : std_logic_vector(6 downto 0) is d_C000(6 downto 0);
   alias any_key         : std_logic is d_C010(7);
+
+  signal key_f          : std_logic := '0';
   
 begin
 
@@ -217,29 +219,30 @@ begin
   begin
 
     GEN_PS2 : if PACE_JAMMA /= PACE_JAMMA_PS2 generate
+    begin
     
       inputs_i.ps2_mclk <= '1';
       inputs_i.ps2_mdat <= '1';
 
       process (clk_14M31818, reset_i)
-        variable key_strobe_r : std_logic := '0';
-        variable key_code_r   : std_logic_vector(key_code'range) := (others => '0');
+        --variable key_strobe_r : std_logic := '0';
+        --variable key_code_r   : std_logic_vector(key_code'range) := (others => '0');
       begin
         if reset_i = '1' then
           ps2_fifo_wrreq <= '0';
-          key_strobe_r := '0';
-          key_code_r := (others => '0');
+          --key_strobe_r := '0';
+          --key_code_r := (others => '0');
         elsif rising_edge(clk_14M31818) then
           ps2_fifo_wrreq <= '0';  -- default
-          -- new key on rising_edge keystrobe or new key
-          if (key_strobe_r = '0' and key_strobe = '1') or key_code /= key_code_r then
+          -- assume there's a new key each time $C000 is read by BASIC
+          if key_f = '1' and key_strobe = '1' then
             if ps2_fifo_full = '0' then
               ps2_fifo_data <= '0' & key_code;
               ps2_fifo_wrreq <= '1';
             end if;
           end if;
-          key_strobe_r := key_strobe;
-          key_code_r := key_code;
+          --key_strobe_r := key_strobe;
+          --key_code_r := key_code;
         end if;
       end process;
       
@@ -481,12 +484,16 @@ begin
         ph0_r := '0';
         d_C000 <= (others => '0');
         d_C010 <= (others => '0');
+        key_f <= '0';
       elsif rising_edge(clk_14M31818) then
+        key_f <= '0';
         if ph0_r = '0' and bus_phase0 = '1' then
           snoop_a := bus_a;
         elsif ph0_r = '1' and bus_phase0 = '0' then
           if snoop_a(15 downto 0) = X"C000" then
             d_C000 <= bus_d;
+            -- signal a new key is ready
+            key_f <= '1';
           elsif snoop_a(15 downto 0) = X"C010" then
             d_C010 <= bus_d;
           end if;
