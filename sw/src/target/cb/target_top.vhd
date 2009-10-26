@@ -150,11 +150,11 @@ architecture SYN of target_top is
   signal target_i       : from_TARGET_IO_t;
   signal target_o       : to_TARGET_IO_t;
 
-  signal d_C00X         : std_logic_vector(7 downto 0) := (others => '0');
-  signal d_C01X         : std_logic_vector(7 downto 0) := (others => '0');
-  alias key_strobe      : std_logic is d_C00X(7);
-  alias key_code        : std_logic_vector(6 downto 0) is d_C00X(6 downto 0);
-  alias any_key         : std_logic is d_C01X(7);
+  signal d_C000         : std_logic_vector(7 downto 0) := (others => '0');
+  signal d_C010         : std_logic_vector(7 downto 0) := (others => '0');
+  alias key_strobe      : std_logic is d_C000(7);
+  alias key_code        : std_logic_vector(6 downto 0) is d_C000(6 downto 0);
+  alias any_key         : std_logic is d_C010(7);
   
 begin
 
@@ -209,92 +209,160 @@ begin
   switches_i <= (others => '0');
 
   BLK_INPUTS : block
+  
+    signal ps2_fifo_data    : std_logic_vector(7 downto 0) := (others => '0');
+    signal ps2_fifo_wrreq   : std_logic := '0';
+    signal ps2_fifo_full    : std_logic := '0';
+  
   begin
 
-    inputs_i.ps2_kclk <= '1';
-    inputs_i.ps2_kdat <= '1';
-    inputs_i.ps2_mclk <= '1';
-    inputs_i.ps2_mdat <= '1';
+    GEN_PS2 : if PACE_JAMMA /= PACE_JAMMA_PS2 generate
+    
+      inputs_i.ps2_mclk <= '1';
+      inputs_i.ps2_mdat <= '1';
 
-    -- fudge - extend keypress for 1 frame
-    process (clk_14M31818, reset_i)
-      subtype count_t is integer range 0 to 14318181/60;
-      variable count : count_t;
-    begin
-      if reset_i = '1' then
-        inputs_i.jamma_n.p(1).start <= '1';
-        inputs_i.jamma_n.p(2).start <= '1';
-        inputs_i.jamma_n.coin(1) <= '1';
-        inputs_i.jamma_n.coin(2) <= '1';
-        inputs_i.jamma_n.p(1).button(1) <= '1';
-        inputs_i.jamma_n.p(1).left <= '1';
-        inputs_i.jamma_n.p(1).right <= '1';
-        inputs_i.jamma_n.p(1).up <= '1';
-        inputs_i.jamma_n.p(1).down <= '1';
-        count := 0;
-      elsif rising_edge(clk_14M31818) then
-        if key_strobe = '1' then
-          -- any key releases left/right
+      process (clk_14M31818, reset_i)
+        variable key_strobe_r : std_logic := '0';
+        variable key_code_r   : std_logic_vector(key_code'range) := (others => '0');
+      begin
+        if reset_i = '1' then
+          ps2_fifo_wrreq <= '0';
+          key_strobe_r := '0';
+          key_code_r := (others => '0');
+        elsif rising_edge(clk_14M31818) then
+          ps2_fifo_wrreq <= '0';  -- default
+          -- new key on rising_edge keystrobe or new key
+          if key_strobe_r = '0' and key_strobe = '1' or key_code != key_code_r then
+            if ps2_fifo_full = '0' then
+              ps2_fifo_data <= '0' & key_code;
+              ps2_fifo_wrreq <= '1';
+            end if;
+          end if;
+          key_strobe_r := key_strobe;
+          key_code_r := key_code;
+        end if;
+      end process;
+      
+      ps2_host_inst : entity work.apple_ii_ps2_host
+        generic map
+        (
+          CLK_HZ          => 14318181
+        )
+        port map
+        (
+          clk             => clk_14M31818,
+          reset           => reset_i,
+      
+          -- FIFO interface
+          fifo_data       => ps2_fifo_data,
+          fifo_wrreq      => ps2_fifo_wrreq,
+          fifo_full       => ps2_fifo_full,
+          fifo_usedw      => open,
+              
+          -- PS/2 lines
+          ps2_kclk        => inputs_i.ps2_kclk,
+          ps2_kdat        => inputs_i.ps2_kdat
+        );
+
+    end generate PACE_JAMMA_PS2;
+    
+    GEN_PS2_JAMMA : if PACE_JAMMA = PACE_JAMMA_PS2 generate
+    
+      -- fudge - extend keypress for 1 frame
+      process (clk_14M31818, reset_i)
+        subtype count_t is integer range 0 to 14318181/60;
+        variable count : count_t;
+      begin
+        if reset_i = '1' then
+          inputs_i.jamma_n.p(1).start <= '1';
+          inputs_i.jamma_n.p(2).start <= '1';
+          inputs_i.jamma_n.coin(1) <= '1';
+          inputs_i.jamma_n.coin(2) <= '1';
+          inputs_i.jamma_n.p(1).button(1) <= '1';
           inputs_i.jamma_n.p(1).left <= '1';
           inputs_i.jamma_n.p(1).right <= '1';
           inputs_i.jamma_n.p(1).up <= '1';
           inputs_i.jamma_n.p(1).down <= '1';
-          count := count_t'high;
-          case key_code is
-            when "0110001" =>
-              inputs_i.jamma_n.p(1).start <= '0';
-            when "0110010" =>
-              inputs_i.jamma_n.p(2).start <= '0';
-            when "0110101" =>
-              inputs_i.jamma_n.coin(1) <= '0';
-            when "0110110" =>
-              inputs_i.jamma_n.coin(2) <= '0';
-            when "0100000" =>
-              inputs_i.jamma_n.p(1).button(1) <= '0';
-            when "0001000" | "1011010" | "1111010" =>
-              inputs_i.jamma_n.p(1).left <= '0';
-            when "0010101" | "1011000" | "1111000" =>
-              inputs_i.jamma_n.p(1).right <= '0';
-            when "0001011" =>
-              inputs_i.jamma_n.p(1).up <= '0';
-            when "0001010" =>
-              inputs_i.jamma_n.p(1).down <= '0';
-            when others =>
-              null;
-          end case;
-        else
-          if count = 0 then
-            -- clear all except left/right/up/down
-            inputs_i.jamma_n.p(1).start <= '1';
-            inputs_i.jamma_n.p(2).start <= '1';
-            inputs_i.jamma_n.coin(1) <= '1';
-            inputs_i.jamma_n.coin(2) <= '1';
-            inputs_i.jamma_n.p(1).button(1) <= '1';
+          count := 0;
+        elsif rising_edge(clk_14M31818) then
+          if key_strobe = '1' then
+            -- any key releases left/right
+            inputs_i.jamma_n.p(1).left <= '1';
+            inputs_i.jamma_n.p(1).right <= '1';
+            inputs_i.jamma_n.p(1).up <= '1';
+            inputs_i.jamma_n.p(1).down <= '1';
+            count := count_t'high;
+            case key_code is
+              when "0110001" =>
+                inputs_i.jamma_n.p(1).start <= '0';
+              when "0110010" =>
+                inputs_i.jamma_n.p(2).start <= '0';
+              when "0110101" =>
+                inputs_i.jamma_n.coin(1) <= '0';
+              when "0110110" =>
+                inputs_i.jamma_n.coin(2) <= '0';
+              when "0100000" =>
+                inputs_i.jamma_n.p(1).button(1) <= '0';
+              when "0001000" | "1011010" | "1111010" =>
+                inputs_i.jamma_n.p(1).left <= '0';
+              when "0010101" | "1011000" | "1111000" =>
+                inputs_i.jamma_n.p(1).right <= '0';
+              when "0001011" =>
+                inputs_i.jamma_n.p(1).up <= '0';
+              when "0001010" =>
+                inputs_i.jamma_n.p(1).down <= '0';
+              when others =>
+                null;
+            end case;
           else
-            count := count - 1;
+            if count = 0 then
+              -- clear all except left/right/up/down
+              inputs_i.jamma_n.p(1).start <= '1';
+              inputs_i.jamma_n.p(2).start <= '1';
+              inputs_i.jamma_n.coin(1) <= '1';
+              inputs_i.jamma_n.coin(2) <= '1';
+              inputs_i.jamma_n.p(1).button(1) <= '1';
+            else
+              count := count - 1;
+            end if;
           end if;
         end if;
-      end if;
-    end process;
-    
-		--inputs_i.jamma_n.coin(1) <= '1';
-		--inputs_i.jamma_n.p(1).start '1';
-		--inputs_i.jamma_n.p(1).up <= '1';
-		--inputs_i.jamma_n.p(1).down <= '1';
-		--inputs_i.jamma_n.p(1).left <= '1';
-		--inputs_i.jamma_n.p(1).right <= '1';
-		inputs_i.jamma_n.p(1).button(2 to 5) <= (others => '1');
+      end process;
 
-  	-- not currently wired to any inputs
-  	inputs_i.jamma_n.coin_cnt <= (others => '1');
-  	--inputs_i.jamma_n.coin(2) <= '1';
-  	--inputs_i.jamma_n.p(2).start <= '1';
-    inputs_i.jamma_n.p(2).up <= '1';
-    inputs_i.jamma_n.p(2).down <= '1';
-  	inputs_i.jamma_n.p(2).left <= '1';
-  	inputs_i.jamma_n.p(2).right <= '1';
-  	inputs_i.jamma_n.p(2).button <= (others => '1');
+  		inputs_i.jamma_n.p(1).button(2 to 5) <= (others => '1');
   
+    	-- not currently wired to any inputs
+    	inputs_i.jamma_n.coin_cnt <= (others => '1');
+      inputs_i.jamma_n.p(2).up <= '1';
+      inputs_i.jamma_n.p(2).down <= '1';
+    	inputs_i.jamma_n.p(2).left <= '1';
+    	inputs_i.jamma_n.p(2).right <= '1';
+    	inputs_i.jamma_n.p(2).button <= (others => '1');
+
+    end generate GEN_PS2_JAMMA;
+
+    GEN_NO_JAMMA : if PACE_JAMMA = PACE_JAMMA_NONE generate
+            
+  		inputs_i.jamma_n.coin(1) <= '1';
+  		inputs_i.jamma_n.p(1).start '1';
+  		inputs_i.jamma_n.p(1).up <= '1';
+  		inputs_i.jamma_n.p(1).down <= '1';
+  		inputs_i.jamma_n.p(1).left <= '1';
+  		inputs_i.jamma_n.p(1).right <= '1';
+  		inputs_i.jamma_n.p(1).button <= (others => '1');
+  
+    	-- not currently wired to any inputs
+    	inputs_i.jamma_n.coin_cnt <= (others => '1');
+    	inputs_i.jamma_n.coin(2) <= '1';
+    	inputs_i.jamma_n.p(2).start <= '1';
+      inputs_i.jamma_n.p(2).up <= '1';
+      inputs_i.jamma_n.p(2).down <= '1';
+    	inputs_i.jamma_n.p(2).left <= '1';
+    	inputs_i.jamma_n.p(2).right <= '1';
+    	inputs_i.jamma_n.p(2).button <= (others => '1');
+
+    end generate GEN_NO_JAMMA;
+      
   	inputs_i.jamma_n.service <= '1';
   	inputs_i.jamma_n.tilt <= '1';
   	inputs_i.jamma_n.test <= '1';
@@ -412,16 +480,16 @@ begin
       if reset_i = '1' then
         snoop_a := (others => '0');
         ph0_r := '0';
-        d_C00X <= (others => '0');
-        d_C01X <= (others => '0');
+        d_C000 <= (others => '0');
+        d_C010 <= (others => '0');
       elsif rising_edge(clk_14M31818) then
         if ph0_r = '0' and bus_phase0 = '1' then
           snoop_a := bus_a;
         elsif ph0_r = '1' and bus_phase0 = '0' then
           if snoop_a(15 downto 0) = X"C000" then
-            d_C00X <= bus_d;
+            d_C000 <= bus_d;
           elsif snoop_a(15 downto 0) = X"C010" then
-            d_C01X <= bus_d;
+            d_C010 <= bus_d;
           end if;
         end if;
         ph0_r := bus_phase0;

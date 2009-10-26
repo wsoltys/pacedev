@@ -25,7 +25,7 @@
 
 # project-wide assignments
 # ========================
-set_global_assignment -name LAST_QUARTUS_VERSION 8.1
+set_global_assignment -name LAST_QUARTUS_VERSION "9.0 SP2"
 
 # pin & location assignments
 # ==========================
@@ -714,6 +714,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/trs80
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/wd179x.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/floppy_if.vhd
 set_global_assignment -name VHDL_FILE floppy_fifo.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/altera_mem.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd

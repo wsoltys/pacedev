@@ -158,3 +158,37 @@ begin
 			q_b                     => q_b
 		);
 end architecture SYN;
+
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+entity galaxian_wram is
+  port
+  (
+    clock     : in std_logic;
+    address   : in std_logic_vector(10 downto 0);
+    data      : in std_logic_vector(7 downto 0);
+    wren      : in std_logic;
+    q         : out std_logic_vector(7 downto 0)
+  );
+end entity galaxian_wram;
+
+architecture SYN of galaxian_wram is
+begin
+  wram_inst : entity work.spram
+    generic map
+    (
+    	numwords_a => 2048,
+    	widthad_a => 11
+    )
+    port map
+    (
+      clock				=> clock,
+      address			=> address,
+      data				=> data,
+      wren				=> wren,
+      q						=> q
+    );
+end architecture SYN;
+		

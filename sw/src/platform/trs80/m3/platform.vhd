@@ -391,13 +391,7 @@ begin
       );
   end block BLK_Z80;
   
-	rom_inst : entity work.sprom
-		generic map
-		(
-			init_file		=> "../../../../../src/platform/trs80/m3/roms/m3rom.hex",
-			numwords_a	=> 16384,
-			widthad_a		=> 14
-		)
+	rom_inst : entity work.trs80_rom
 		port map
 		(
 			clock			=> clk_20M,
@@ -405,13 +399,7 @@ begin
 			q					=> rom_datao
 		);
 	
-	tilerom_inst : entity work.sprom
-		generic map
-		(
-			init_file		    => "../../../../../src/platform/trs80/m3/roms/trstile.hex",
-			numwords_a	    => 4096,
-			widthad_a		    => 12
-		)
+	tilerom_inst : entity work.trs80_tile_rom
 		port map
 		(
 			clock			=> clk_video,
@@ -452,13 +440,7 @@ begin
       hires_a(9 downto 0) <= up_addr(9 downto 0);
 
       -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-      hires_ram_inst : entity work.dpram
-        generic map
-        (
-          init_file		=> "", --"../../../../../src/platform/trs80/m3/roms/trsvram.hex",
-          numwords_a	=> 2**TRS80_M3_HIRES_WIDTHA,
-          widthad_a		=> TRS80_M3_HIRES_WIDTHA
-        )
+      hires_ram_inst : entity work.trs80_hires_ram
         port map
         (
           clock_b			=> clk_20M,
@@ -485,13 +467,7 @@ begin
   end generate GEN_NO_HIRES;
   
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-	vram_inst : entity work.dpram
-		generic map
-		(
-			init_file		=> "../../../../../src/platform/trs80/m3/roms/trsvram.hex",
-			numwords_a	=> 1024,
-			widthad_a		=> 10
-		)
+	vram_inst : entity work.trs80_vram
 		port map
 		(
 			clock_b			=> clk_20M,
