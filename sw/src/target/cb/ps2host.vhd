@@ -31,16 +31,16 @@ architecture SYN of apple_ii_ps2_host is
   constant extended_f : std_logic_vector(0 to 127) :=
     X"00B00400000000000000000000000001";
   constant shifted_f :  std_logic_vector(0 to 127) :=
-    X"000000007EF0002B8000000300000002";
+    X"000000007EF0002BFFFFFFE300000002";
 
   type scancode_t is array (natural range <>) of std_logic_vector(7 downto 0);
-  constant ascii_2_ps2 : scancode_t(0 to 127) is
-  {
+  constant scancode : scancode_t(0 to 127) :=
+  (
     -- Note: (#)=Extended, ($)=Shifted
     -- $00 - NULL, SOH, STX, ETX, EOT, ENQ, ACK, BEL
     X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00",
     -- $08 - #BS/LEFT, #HT, #LF/DOWN, VT/UP, FF, CR, SO, SI
-    X"6B", X"0D", X"72", X"75", X"00", X"5A", X"00", X"00"
+    X"6B", X"0D", X"72", X"75", X"00", X"5A", X"00", X"00",
     -- $10 - DLE, DC1, DC2, DC3, DC4, #NAK/RIGHT, SYN, ETB
     X"00", X"00", X"00", X"00", X"00", X"74", X"00", X"00",
     -- $18 - CAN, EM, SUB, ESC, FS, GS, RS, US
@@ -53,13 +53,13 @@ architecture SYN of apple_ii_ps2_host is
     X"45", X"16", X"1E", X"26", X"25", X"2E", X"36", X"3D",
     -- $38 - 8, 9, $:, ;, $<, =, $>, $?
     X"3E", X"46", X"4C", X"4C", X"41", X"55", X"49", X"4A",
-    -- $40 - $@, A, B, C, D, E, F, G
+    -- $40 - $@, $A, $B, $C, $D, $E, $F, $G
     X"32", X"1C", X"32", X"21", X"23", X"24", X"2B", X"34",
-    -- $48 - H, I, J, K, L, M, N, O
+    -- $48 - $H, $I, $J, $K, $L, $M, $N, $O
     X"33", X"43", X"3B", X"42", X"4B", X"3A", X"31", X"44",
-    -- $50 - P, Q, R, S, T, U, V, W
+    -- $50 - $P, $Q, $R, $S, $T, $U, $V, $W
     X"4D", X"15", X"2D", X"1B", X"2C", X"3C", X"2A", X"1D",
-    -- $58 - X, Y, Z, [, \, ], $^, $_
+    -- $58 - $X, $Y, $Z, [, \, ], $^, $_
     X"22", X"35", X"1A", X"54", X"5D", X"5B", X"36", X"4E",
     -- $60 - `, a, b, c, d, e, f, g
     X"0E", X"1C", X"32", X"21", X"23", X"24", X"2B", X"34",
@@ -68,8 +68,8 @@ architecture SYN of apple_ii_ps2_host is
     -- $70 - p, q, r, s, t, u, v, w
     X"4D", X"15", X"2D", X"1B", X"2C", X"3C", X"2A", X"1D",
     -- $78 - x, y, z, {, |, }, $~, #<DEL>
-    X"22", X"35", X"1A", X"54", X"5D", X"5B", X"0E", X"71",
-  };
+    X"22", X"35", X"1A", X"54", X"5D", X"5B", X"0E", X"71"
+  );
     
   signal clk_66k667_en    : std_logic := '0';
   signal ps2_data_r       : std_logic_vector(10 downto 0) := (others => '0');
@@ -99,27 +99,27 @@ begin
     process (clk, reset)
       subtype count_t is integer range 0 to CLK_HZ/60;
       variable count  : count_t := 0;
-      variable code   : integer range 0 to 127 := 0;
+      variable ascii  : integer range 0 to 127 := 0;
     begin
       if reset = '1' then
         state <= IDLE;
         fifo_rdreq <= '0';
         ps2_go <= '0';
       elsif rising_edge(clk) then
-        code := to_integer(fifo_q(7 downto 0));
+        ascii := to_integer(unsigned(fifo_q(7 downto 0)));
         fifo_rdreq <= '0';
         ps2_go <= '0';    -- default
         if state = IDLE then
           if fifo_empty = '0' then
             -- decide what data to send
-            if extended_f(code) = '1' then
+            if extended_f(ascii) = '1' then
               ps2_send_data <= X"E0";
               state <= WAIT_EXTEND_SHIFT;
-            elsif shifted_f(code) = '1' then
+            elsif shifted_f(ascii) = '1' then
               ps2_send_data <= X"12";
               state <= WAIT_EXTEND_SHIFT;
             else
-              ps2_send_data <= fifo_q;
+              ps2_send_data <= scancode(ascii);
               state <= WAIT_DATA;
             end if;
             ps2_go <= '1';
@@ -128,7 +128,7 @@ begin
           case state is
             when WAIT_EXTEND_SHIFT =>
               if ps2_done = '1' then
-                ps2_send_data <= fifo_q;
+                ps2_send_data <= scancode(ascii);
                 ps2_go <= '1';
                 state <= WAIT_DATA;
               end if;
@@ -139,7 +139,7 @@ begin
               end if;
             when WAIT_FOR_16ms =>
               if count = 0 then
-                if extended_f(code) = '1' then
+                if extended_f(ascii) = '1' then
                   ps2_send_data <= X"E0";
                   ps2_go <= '1';
                   state <= WAIT_EXTEND_BREAK;
@@ -159,13 +159,13 @@ begin
               state <= WAIT_BREAK;
             when WAIT_BREAK =>
               if ps2_done = '1' then
-                ps2_send_data <= fifo_q;
+                ps2_send_data <= scancode(ascii);
                 ps2_go <= '1';
                 state <= WAIT_DATA_BREAK;
               end if;
             when WAIT_DATA_BREAK =>
               if ps2_done = '1' then
-                if shifted_f(code) = '1' then
+                if shifted_f(ascii) = '1' then
                   ps2_send_data <= X"F0";
                   ps2_go <= '1';
                   state <= WAIT_SHIFT_BREAK;
@@ -175,11 +175,12 @@ begin
                 end if;
               end if;
             when WAIT_SHIFT_BREAK =>
-              if ps2_done <= '1' then
+              if ps2_done = '1' then
                 ps2_send_data <= X"12";
                 ps2_go <= '1';
                 state <= WAIT_SHIFT;
-            when WAIT_SHIFT;
+              end if;
+            when WAIT_SHIFT=>
               if ps2_done <= '1' then
                 fifo_rdreq <= '1';
                 state <= SEND_DONE;
@@ -229,10 +230,8 @@ begin
         state <= IDLE;
         ps2_kclk <= '1';
         ps2_kdat <= '1';
-        fifo_rdreq <= '0';
         ps2_done <= '0';
       elsif rising_edge(clk) then
-        fifo_rdreq <= '0';  -- default
         ps2_done <= '0';    -- default
         if state = IDLE then
           ps2_kclk <= '1';
@@ -240,7 +239,6 @@ begin
           if ps2_go = '1' then
             -- reverse order (since LSB first)
             ps2_data_r <= '1' & parity & ps2_send_data & '0';
-            fifo_rdreq <= '1';
             count := ps2_data_r'left;
             state <= SEND1;
           end if;

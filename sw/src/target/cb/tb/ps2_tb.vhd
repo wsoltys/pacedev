@@ -10,7 +10,7 @@ end ps2_tb;
 
 architecture SYN of ps2_tb is
 
-	signal clk_24M576   : std_logic	:= '0';
+	signal clk_14M31818 : std_logic	:= '0';
 	signal clk_32M      : std_logic	:= '0';
 	signal clk_1M_en    : std_logic	:= '0';
 	signal reset			  : std_logic	:= '1';
@@ -28,7 +28,7 @@ architecture SYN of ps2_tb is
 begin
 
 	-- Generate CLK and reset
-	clk_24M576 <= not clk_24M576 after 20345 ps when not sim_done else '0';
+	clk_14M31818 <= not clk_14M31818 after 34921 ps when not sim_done else '0';
 	clk_32M <= not clk_32M after 15625 ps when not sim_done else '0';
 	reset <= '0' after 100 ns;
   reset_n <= not reset;
@@ -37,44 +37,44 @@ begin
 	begin
 
     wait until reset = '0';
-    wait until rising_edge(clk_24M576);
+    wait until rising_edge(clk_14M31818);
 
     -- MAKE 'Q'
 
-    wait until rising_edge(clk_24M576);
-    fifo_data <= X"15"; -- 'Q'
+    wait until rising_edge(clk_14M31818);
+    fifo_data <= X"71"; -- 'q'
     fifo_wrreq <= '1';
-    wait until rising_edge(clk_24M576);
+    wait until rising_edge(clk_14M31818);
+    fifo_wrreq <= '0';
+    wait until rising_edge(clk_14M31818);
+    fifo_data <= X"08"; -- BS(extended)
+    fifo_wrreq <= '1';
+    wait until rising_edge(clk_14M31818);
+    fifo_wrreq <= '0';
+    wait until rising_edge(clk_14M31818);
+    fifo_data <= X"41"; -- 'A'(shifted)
+    fifo_wrreq <= '1';
+    wait until rising_edge(clk_14M31818);
     fifo_wrreq <= '0';
 
-    -- BREAK 'Q'
-    
-    wait until rising_edge(clk_24M576);
-    fifo_data <= X"F0"; -- (break)
-    fifo_wrreq <= '1';
-    wait until rising_edge(clk_24M576);
-    fifo_wrreq <= '0';
+		wait for 22*3 ms;
 
-    wait until rising_edge(clk_24M576);
-    fifo_data <= X"15"; -- 'Q'
-    fifo_wrreq <= '1';
-    wait until rising_edge(clk_24M576);
-    fifo_wrreq <= '0';
-
-		wait for 1000 ms;
-
+    assert false
+      report "end of simulation"
+        severity failure;
+        
 		sim_done <= true;
 		wait;
 	end process;
 
-  host_inst : entity work.ps2_host
+  host_inst : entity work.apple_ii_ps2_host
     generic map
     (
-      CLK_HZ          => 24576000
+      CLK_HZ          => 14318181
     )
     port map
     (
-      clk             => clk_24M576,
+      clk             => clk_14M31818,
       reset           => reset,
   
       -- FIFO interface
