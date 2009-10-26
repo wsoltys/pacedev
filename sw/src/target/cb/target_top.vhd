@@ -232,7 +232,7 @@ begin
         elsif rising_edge(clk_14M31818) then
           ps2_fifo_wrreq <= '0';  -- default
           -- new key on rising_edge keystrobe or new key
-          if key_strobe_r = '0' and key_strobe = '1' or key_code != key_code_r then
+          if (key_strobe_r = '0' and key_strobe = '1') or key_code /= key_code_r then
             if ps2_fifo_full = '0' then
               ps2_fifo_data <= '0' & key_code;
               ps2_fifo_wrreq <= '1';
@@ -257,14 +257,13 @@ begin
           fifo_data       => ps2_fifo_data,
           fifo_wrreq      => ps2_fifo_wrreq,
           fifo_full       => ps2_fifo_full,
-          fifo_usedw      => open,
               
           -- PS/2 lines
           ps2_kclk        => inputs_i.ps2_kclk,
           ps2_kdat        => inputs_i.ps2_kdat
         );
 
-    end generate PACE_JAMMA_PS2;
+    end generate GEN_PS2;
     
     GEN_PS2_JAMMA : if PACE_JAMMA = PACE_JAMMA_PS2 generate
     
@@ -344,7 +343,7 @@ begin
     GEN_NO_JAMMA : if PACE_JAMMA = PACE_JAMMA_NONE generate
             
   		inputs_i.jamma_n.coin(1) <= '1';
-  		inputs_i.jamma_n.p(1).start '1';
+  		inputs_i.jamma_n.p(1).start <= '1';
   		inputs_i.jamma_n.p(1).up <= '1';
   		inputs_i.jamma_n.p(1).down <= '1';
   		inputs_i.jamma_n.p(1).left <= '1';
@@ -352,7 +351,6 @@ begin
   		inputs_i.jamma_n.p(1).button <= (others => '1');
   
     	-- not currently wired to any inputs
-    	inputs_i.jamma_n.coin_cnt <= (others => '1');
     	inputs_i.jamma_n.coin(2) <= '1';
     	inputs_i.jamma_n.p(2).start <= '1';
       inputs_i.jamma_n.p(2).up <= '1';
@@ -363,6 +361,7 @@ begin
 
     end generate GEN_NO_JAMMA;
       
+    inputs_i.jamma_n.coin_cnt <= (others => '1');
   	inputs_i.jamma_n.service <= '1';
   	inputs_i.jamma_n.tilt <= '1';
   	inputs_i.jamma_n.test <= '1';

@@ -15,6 +15,8 @@ package project_pkg is
 
 	constant PACE_HAS_PLL								      : boolean := true;
   --constant PACE_HAS_SRAM                    : boolean := false;
+
+	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
 	
   -- Reference clock is 48MHz
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
@@ -25,8 +27,8 @@ package project_pkg is
   constant PACE_VIDEO_H_SCALE       	      : integer := 2;
   constant PACE_VIDEO_V_SCALE       	      : integer := 2;
 
-  constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
-  --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
+  --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
+  constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
   
   constant PACE_HAS_OSD                     : boolean := false;
   constant PACE_OSD_XPOS                    : natural := 0;

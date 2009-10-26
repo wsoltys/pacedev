@@ -73,7 +73,7 @@ begin
                       keybd_v(0).d(1) := press;
                     when SCANCODE_1 =>
                       keybd_v(0).d(2) := press;
-                    when SCANCODE_LCTRL =>
+                    when SCANCODE_LCTRL | SCANCODE_SPACE =>
                       keybd_v(0).d(4) := press;
                       keybd_v(1).d(4) := press;
                     when SCANCODE_LEFT =>

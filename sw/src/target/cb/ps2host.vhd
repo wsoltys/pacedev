@@ -16,7 +16,6 @@ entity apple_ii_ps2_host is
     fifo_data       : in std_logic_vector(7 downto 0);
     fifo_wrreq      : in std_logic;
     fifo_full       : out std_logic;
-    fifo_usedw      : out std_logic_vector(7 downto 0);
         
     -- PS/2 lines
     ps2_kclk        : out std_logic;
@@ -284,18 +283,19 @@ begin
 
   end block BLK_PS2_SEND;
 
-  fifo_inst : entity work.ps2_fifo
+  fifo_inst : entity work.ps2_host_fifo
   	port map
   	(
-  		clock		=> clk,
-
-  		data		=> fifo_data,
-  		wrreq		=> fifo_wrreq,
+      rst     => reset,
+      
+  		wr_clk  => clk,
+  		din     => fifo_data,
+  		wr_en   => fifo_wrreq,
   		full		=> fifo_full,
-  		usedw		=> fifo_usedw,
   		
-  		q		    => fifo_q,
-  		rdreq		=> fifo_rdreq,
+  		rd_clk  => clk,
+  		dout    => fifo_q,
+  		rd_en   => fifo_rdreq,
   		empty		=> fifo_empty
   	);
 
