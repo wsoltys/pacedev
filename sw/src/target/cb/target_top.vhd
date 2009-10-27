@@ -420,6 +420,25 @@ begin
   
   BLK_AUDIO : block
   begin
+
+    dac_l_inst : entity work.sigma_delta_dac
+      port map
+      (
+        clk     => clk_i(0),
+        din     => audio_o.ldata(15 downto 8),
+        
+        dout    => audio_left
+      );
+
+    dac_r_inst : entity work.sigma_delta_dac
+      port map
+      (
+        clk     => clk_i(0),
+        din     => audio_o.rdata(15 downto 8),
+        
+        dout    => audio_right
+      );
+
   end block BLK_AUDIO;
 
   -- no serial (atm)

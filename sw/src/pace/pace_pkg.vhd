@@ -47,8 +47,8 @@ package pace_pkg is
   (
     PACE_JAMMA_NONE,
     PACE_JAMMA_MAPLE,
-    PACE_JAMMA_PS2,
-    PACE_JAMMA_NGC
+    PACE_JAMMA_NGC,
+    PACE_JAMMA_PS2
   );
 
   -- Types

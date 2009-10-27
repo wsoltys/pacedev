@@ -28,7 +28,7 @@ architecture SYN of apple_ii_ps2_host is
   constant CLK_66k667_div : natural := CLK_HZ / 66667;
 
   constant extended_f : std_logic_vector(0 to 127) :=
-    X"00B00400000000000000000000000001";
+    X"20B80400000000000000000000000001";
   constant shifted_f :  std_logic_vector(0 to 127) :=
     X"000000007EF0002BFFFFFFE300000002";
 
@@ -36,10 +36,10 @@ architecture SYN of apple_ii_ps2_host is
   constant scancode : scancode_t(0 to 127) :=
   (
     -- Note: (#)=Extended, ($)=Shifted
-    -- $00 - NULL, SOH, STX, ETX, EOT, ENQ, ACK, BEL
-    X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00",
-    -- $08 - #BS/LEFT, #HT, #LF/DOWN, VT/UP, FF, CR, SO, SI
-    X"6B", X"0D", X"72", X"75", X"00", X"5A", X"00", X"00",
+    -- $00 - NULL, SOH, #STX(INS), ETX, EOT, ENQ, ACK, BEL
+    X"00", X"00", X"70", X"00", X"00", X"00", X"00", X"00",
+    -- $08 - #BS/LEFT, HT, #LF/DOWN, #VT/UP, #FF(HOME), CR, SO, SI
+    X"6B", X"0D", X"72", X"75", X"6C", X"5A", X"00", X"00",
     -- $10 - DLE, DC1, DC2, DC3, DC4, #NAK/RIGHT, SYN, ETB
     X"00", X"00", X"00", X"00", X"00", X"74", X"00", X"00",
     -- $18 - CAN, EM, SUB, ESC, FS, GS, RS, US

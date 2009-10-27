@@ -16,7 +16,7 @@ package project_pkg is
 	constant PACE_HAS_PLL								      : boolean := true;
   --constant PACE_HAS_SRAM                    : boolean := false;
 
-	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
+	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_PS2;
 	
   -- Reference clock is 48MHz
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
