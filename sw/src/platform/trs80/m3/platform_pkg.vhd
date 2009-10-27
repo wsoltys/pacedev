@@ -26,6 +26,12 @@ package platform_pkg is
 	-- Platform-specific constants (optional)
 	--
 
+	constant CLK0_FREQ_MHz		            : natural := 
+    PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
+  constant CPU_FREQ_MHz                 : natural := 2;
+  
+	constant TRS80_M3_CPU_CLK_ENA_DIVIDE_BY : natural := CLK0_FREQ_MHz / CPU_FREQ_MHz;
+
   type from_PLATFORM_IO_t is record
   
     sram_i              : from_SRAM_t;

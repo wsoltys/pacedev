@@ -359,10 +359,16 @@ begin
   end process;
   graphics_o.bit8_1(7 downto 2) <= port_ec(7 downto 2);
 
+  assert false
+    report  "CLK0_FREQ_MHz=" & integer'image(CLK0_FREQ_MHz) &
+            " CPU_FREQ_MHz=" &  integer'image(CPU_FREQ_MHz) &
+            " CPU_CLK_ENA_DIV=" & integer'image(TRS80_M3_CPU_CLK_ENA_DIVIDE_BY)
+      severity note;
+
 	clk_en_inst : entity work.clk_div
 		generic map
 		(
-			DIVISOR		=> 10
+			DIVISOR		=> integer(TRS80_M3_CPU_CLK_ENA_DIVIDE_BY)
 		)
 		port map
 		(

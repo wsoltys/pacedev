@@ -2,6 +2,41 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+entity ps2_host_fifo is
+  port
+  (
+    rst       : in std_logic;
+    wr_clk    : in std_logic;
+    din       : in std_logic_vector(7 downto 0);
+    wr_en     : in std_logic;
+    full      : out std_logic;
+    rd_clk    : in std_logic;
+    dout      : out std_logic_vector(7 downto 0);
+    rd_en     : in std_logic;
+    empty     : out std_logic
+  );
+end entity ps2_host_fifo;
+
+architecture SYN of ps2_host_fifo is
+begin
+  fifo_inst : entity work.ps2_fifo
+  	port map
+  	(
+  		clock		=> wr_clk,
+  		data		=> din,
+  		rdreq		=> rd_en,
+  		wrreq		=> wr_en,
+  		empty		=> empty,
+  		full		=> full,
+  		q		    => dout,
+  		usedw		=> open
+  	);
+end architecture SYN;
+
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
 entity ps2_tb is
 	port (
 		fail:				out  boolean
@@ -52,7 +87,7 @@ begin
     wait until rising_edge(clk_14M31818);
     fifo_wrreq <= '0';
     wait until rising_edge(clk_14M31818);
-    fifo_data <= X"41"; -- 'A'(shifted)
+    fifo_data <= X"21"; -- '!'(shifted)
     fifo_wrreq <= '1';
     wait until rising_edge(clk_14M31818);
     fifo_wrreq <= '0';
@@ -81,7 +116,7 @@ begin
       fifo_data       => fifo_data,
       fifo_wrreq      => fifo_wrreq,
       fifo_full       => fifo_full,
-      fifo_usedw      => open,
+      --fifo_usedw      => open,
           
       -- PS/2 lines
       ps2_kclk        => ps2_kclk,

@@ -15,7 +15,7 @@ package project_pkg is
 	
   -- Reference clock is 48MHz
 	constant PACE_HAS_PLL								      : boolean := true;
-  constant PACE_HAS_SRAM                    : boolean := true;    -- emulated
+  --constant PACE_HAS_SRAM                    : boolean := true;  -- see below
 
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
 
@@ -26,7 +26,7 @@ package project_pkg is
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_640x480_60Hz;
   constant PACE_CLK0_DIVIDE_BY              : natural := 12;
   constant PACE_CLK0_MULTIPLY_BY            : natural := 5;   -- 48*5/12 = 20MHz
-  constant PACE_CLK1_DIVIDE_BY              : natural := 23;
+  constant PACE_CLK1_DIVIDE_BY              : natural := 21;
   constant PACE_CLK1_MULTIPLY_BY            : natural := 11;  -- 48*11/21 = 25.143MHz
 	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
 	constant PACE_VIDEO_V_SCALE       	      : integer := 2;
@@ -56,9 +56,11 @@ package project_pkg is
 
 	-- TRS-80-specific constants
 
-  -- valid values are 16, 32 & 48
-  constant TRS80_M3_RAM_SIZE                : natural := 16;
+  constant RC10_EMULATE_SRAM                : boolean := true;
+  constant RC10_EMULATED_SRAM_KB            : natural := 32;
   
+  -- valid values are 16, 32 & 48
+  constant TRS80_M3_RAM_SIZE                : natural := RC10_EMULATED_SRAM_KB;
   constant TRS80_M3_ROM_IN_FLASH            : boolean := false;
 
   constant TRS80_M3_HIRES_SUPPORT           : boolean := false;
@@ -67,7 +69,7 @@ package project_pkg is
 
   -- *** WARNING: enabling this option won't work on a stock DE1
   constant TRS80_M3_SYSMEM_IN_BURCHED_SRAM  : boolean := false;
-  
+
   type from_PROJECT_IO_t is record
     not_used  : std_logic;
   end record;
@@ -76,4 +78,8 @@ package project_pkg is
     not_used  : std_logic;
   end record;
 
+  -- *** derived *** - do not edit
+  
+  constant PACE_HAS_SRAM                    : boolean := RC10_EMULATE_SRAM;
+  
 end;

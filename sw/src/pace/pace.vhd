@@ -89,6 +89,11 @@ architecture SYN of PACE is
 
 begin
 
+  assert false
+    report  "CLK0_FREQ_MHz=" & integer'image(CLK0_FREQ_MHz) &
+            " CLK_1US_COUNTS=" & integer'image(CLK_1US_COUNTS)
+      severity note;
+
 	inputs_inst : entity work.inputs
 		generic map
 		(

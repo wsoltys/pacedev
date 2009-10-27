@@ -290,7 +290,8 @@ begin
   end block BLK_FLASH;
 
   -- static memory
-  GEN_SRAM : if PACE_HAS_SRAM generate
+  GEN_SRAM : if RC10_EMULATE_SRAM generate
+  
     component emulated_sram_16K IS
       port 
       (
@@ -301,18 +302,48 @@ begin
         dout  : OUT std_logic_VECTOR(7 downto 0)
       );
     end component emulated_sram_16K;
-    signal we : std_logic := '0';
-  begin
-    we <= sram_o.cs and sram_o.we;
-    sram_inst : emulated_sram_16K
-      port map
+    
+    component emulated_sram_32K IS
+      port 
       (
-        clk   => clk_i(0),
-        addr  => sram_o.a(13 downto 0),
-        we    => we,
-        din   => sram_o.d(7 downto 0),
-        dout  => sram_i.d(7 downto 0)
+        clk   : IN std_logic;
+        addr  : IN std_logic_VECTOR(14 downto 0);
+        we    : IN std_logic;
+        din   : IN std_logic_VECTOR(7 downto 0);
+        dout  : OUT std_logic_VECTOR(7 downto 0)
       );
+    end component emulated_sram_32K;
+    
+    signal we : std_logic := '0';
+    
+  begin
+  
+    we <= sram_o.cs and sram_o.we;
+    
+    GEN_16K_SRAM : if RC10_EMULATED_SRAM_KB = 16 generate
+      sram_inst : emulated_sram_16K
+        port map
+        (
+          clk   => clk_i(0),
+          addr  => sram_o.a(13 downto 0),
+          we    => we,
+          din   => sram_o.d(7 downto 0),
+          dout  => sram_i.d(7 downto 0)
+        );
+    end generate GEN_16K_SRAM;
+    
+    GEN_32K_SRAM : if RC10_EMULATED_SRAM_KB = 32 generate
+      sram_inst : emulated_sram_32K
+        port map
+        (
+          clk   => clk_i(0),
+          addr  => sram_o.a(14 downto 0),
+          we    => we,
+          din   => sram_o.d(7 downto 0),
+          dout  => sram_i.d(7 downto 0)
+        );
+    end generate GEN_32K_SRAM;
+
   end generate GEN_SRAM;
 
   BLK_SDRAM : block
