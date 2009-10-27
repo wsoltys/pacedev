@@ -85,7 +85,7 @@ end platform;
 
 architecture SYN of platform is
 
-	alias clk_30M					: std_logic is clk_i(0);
+	alias clk_sys					: std_logic is clk_i(0);
 	alias clk_video       : std_logic is clk_i(1);
 	signal cpu_reset      : std_logic;
 
@@ -195,7 +195,7 @@ begin
   --wdog_wr <= '1' when (uP_addr(15 downto 6) = X"50"&"11") else '0';
 
   -- sprite registers
-  sprite_reg_o.clk <= clk_30M;
+  sprite_reg_o.clk <= clk_sys;
   sprite_reg_o.clk_ena <= clk_3M_ena;
   sprite_reg_o.a(sprite_reg_o.a'left downto 5) <= (others => '0');
   sprite_reg_o.a(4 downto 0) <= uP_addr(3 downto 1) & sprite_4_cs & uP_addr(0);
@@ -206,14 +206,14 @@ begin
 	snd_o.d <= uP_datao;
 
 	-- Snooping stuff
-	process (clk_30M, clk_3M_ena, reset_i)
+	process (clk_sys, clk_3M_ena, reset_i)
 		variable eaten_pill : std_logic;
     variable player_y_i : integer range 0 to 1023;
 		variable player_y		: std_logic_vector(9 downto 0);
 	begin
 		if reset_i = '1' then
 			eaten_pill := '0';
-		elsif rising_edge(clk_30M) and clk_3M_ena = '1' then
+		elsif rising_edge(clk_sys) and clk_3M_ena = '1' then
 			-- $4DA6:0 determines is player has eaten pill or not
 			if uP_addr = X"4DA6" and uPmemwr = '1' then
 				eaten_pill := uP_datao(0);
@@ -254,7 +254,7 @@ begin
 		)
 		port map
 		(
-			clk				=> clk_30M,
+			clk				=> clk_sys,
 			reset			=> reset_i,
 			clk_en		=> clk_3M_ena
 		);
@@ -262,7 +262,7 @@ begin
   U_uP : entity work.Z80                                                
     port map
     (
-      clk 		=> clk_30M,                                   
+      clk 		=> '0', --clk_sys,                                   
       clk_en	=> clk_3M_ena,
       reset  	=> cpu_reset,                                     
 
@@ -285,7 +285,7 @@ begin
 	rom_inst : entity work.prg_rom
 		port map
 		(
-			clock			=> clk_30M,
+			clock			=> clk_sys,
 			address		=> up_addr(13 downto 0),
 			q					=> rom_datao
 		);
@@ -293,7 +293,7 @@ begin
 	vram_inst : entity work.vram
 		port map
 		(
-			clock_b			=> clk_30M,
+			clock_b			=> clk_sys,
 			address_b		=> uP_addr(9 downto 0),
 			wren_b			=> vram_wr,
 			data_b			=> uP_datao,
@@ -321,7 +321,7 @@ begin
 	cram_inst : entity work.cram
 		port map
 		(
-			clock_b			=> clk_30M,
+			clock_b			=> clk_sys,
 			address_b		=> uP_addr(9 downto 0),
 			wren_b			=> cram_wr,
 			data_b			=> uP_datao,
@@ -342,7 +342,7 @@ begin
     )
 	  port map
 	  (
-	    clk               => clk_30M,
+	    clk               => clk_sys,
 	    clk_ena           => clk_3M_ena,
 	    reset             => cpu_reset,
 
@@ -380,7 +380,7 @@ begin
 		wram_inst : entity work.wram
 			port map
 			(
-				clock				=> clk_30M,
+				clock				=> clk_sys,
 				address			=> uP_addr(9 downto 0),
 				data				=> up_datao,
 				wren				=> wram_wr,
