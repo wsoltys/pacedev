@@ -25,7 +25,7 @@
 
 # Project-Wide Assignments
 # ========================
-set_global_assignment -name LAST_QUARTUS_VERSION 8.1
+set_global_assignment -name LAST_QUARTUS_VERSION "9.0 SP2"
 
 # Pin & Location Assignments
 # ==========================
@@ -561,3 +561,4 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/toys/led_chaser.
 set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwm_chaser.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwmout.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/de2/target_top.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/de2/custom_io.vhd

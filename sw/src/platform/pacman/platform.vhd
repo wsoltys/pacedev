@@ -262,7 +262,7 @@ begin
   U_uP : entity work.Z80                                                
     port map
     (
-      clk 		=> '0', --clk_sys,                                   
+      clk 		=> clk_sys,                                   
       clk_en	=> clk_3M_ena,
       reset  	=> cpu_reset,                                     
 
