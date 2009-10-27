@@ -5,7 +5,12 @@
 Library IEEE;
 Use IEEE.Std_Logic_1164.all;
 
-entity Sound is port
+entity Sound is 
+  generic
+  (
+    CLK_MHz           : natural
+  );
+  port
    (
      sysClk            : in    std_logic;
      reset             : in    std_logic;
