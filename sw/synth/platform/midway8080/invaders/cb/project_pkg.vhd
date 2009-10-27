@@ -15,7 +15,8 @@ package project_pkg is
 
 	constant PACE_HAS_PLL								      : boolean := true;
   --constant PACE_HAS_SRAM                    : boolean := false;
-
+  constant PACE_HAS_AUDIO                   : boolean := true;
+  
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_PS2;
 	
   -- Reference clock is 48MHz

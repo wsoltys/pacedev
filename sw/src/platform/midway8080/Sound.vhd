@@ -1,32 +1,29 @@
---------------------------------------------------------------------------------
--- SubModule Sound
--- Created   18/08/2005 6:39:14 PM
---------------------------------------------------------------------------------
-Library IEEE;
-Use IEEE.Std_Logic_1164.all;
-Use IEEE.std_logic_unsigned.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
-entity Sound is port
-   (
-     sysClk            : in    std_logic;
-     reset             : in    std_logic;
+entity sound is 
+  generic
+  (
+    CLK_MHz           : natural
+  );
+  port
+  (
+    sysClk            : in    std_logic;
+    reset             : in    std_logic;
+    
+    sndif_rd          : in    std_logic;
+    sndif_wr          : in    std_logic;
+    sndif_datai       : in    std_logic_vector(7 downto 0);
+    sndif_addr        : in    std_logic_vector(15 downto 0);
+    
+    snd_clk           : out   std_logic;
+    snd_data          : out   std_logic_vector(7 downto 0);
+    sndif_datao       : out   std_logic_vector(7 downto 0)
+  );
+end entity sound;
 
-     sndif_rd          : in    std_logic;
-     sndif_wr          : in    std_logic;
-     sndif_datai       : in    std_logic_vector(7 downto 0);
-     sndif_addr        : in    std_logic_vector(15 downto 0);
-
-     snd_clk           : out   std_logic;
-     snd_data          : out   std_logic_vector(7 downto 0);
-     sndif_datao       : out   std_logic_vector(7 downto 0)
-   );
-end Sound;
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-architecture Structure of Sound is
-
--- Component Declarations
+architecture SYN of Sound is
 
 	component invaders_audio
 		Port 
@@ -74,28 +71,40 @@ begin
 	end process;
 	
 	-- apparently the audio module wants a 10MHz clock
-	-- which happens to be 1/2 ref_clk!
-	process (sysClk)
-		variable count : std_logic_vector(1 downto 0);
+	process (sysClk, reset)
+    subtype count_t is integer range 0 to CLK_MHz/5;
+		variable count : count_t := 0;
 	begin
-		if rising_edge(sysClk) then
-			count := count + 1;
-			clk_5M <= count(1);
-			clk_10M <= count(0);
+    if reset = '1' then
+      count := 0;
+      clk_10M <= '0';
+      clk_5M <= '0';
+		elsif rising_edge(sysClk) then
+      clk_10M <= '0';
+      clk_5M <= '0';
+      if count = count_t'high/2 then
+        clk_10M <= '1';
+        count := count + 1;
+      elsif count = count_t'high then
+        clk_10M <= '1';
+        clk_5M <= '1';
+        count := 0;
+      else
+        count := count + 1;
+      end if;
 		end if;
 	end process;
 
-	-- can use anything suitable
-	snd_clk <= clk_5M;
+  -- can use anything suitable
+  snd_clk <= clk_5M;
 		
-		audio_inst : invaders_audio
-			port map
-				(
-				  Clk => clk_10M,
-				  S1  => s1_r,
-				  S2  => s2_r,
-				  Aud => snd_data
-			  );
+  audio_inst : invaders_audio
+    port map
+      (
+        Clk => clk_10M,
+        S1  => s1_r,
+        S2  => s2_r,
+        Aud => snd_data
+      );
      
-end Structure;
---------------------------------------------------------------------------------
+end architecture SYN;

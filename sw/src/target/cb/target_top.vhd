@@ -418,9 +418,10 @@ begin
 
   end block BLK_VIDEO;
   
-  BLK_AUDIO : block
-  begin
-
+  -- check the generic in the project package
+  -- because not everyone has an audio board
+  GEN_AUDIO : if PACE_HAS_AUDIO generate
+    
     dac_l_inst : entity work.sigma_delta_dac
       port map
       (
@@ -439,7 +440,7 @@ begin
         dout    => audio_right
       );
 
-  end block BLK_AUDIO;
+  end generate GEN_AUDIO;
 
   -- no serial (atm)
   ser_i.rxd <= '0';

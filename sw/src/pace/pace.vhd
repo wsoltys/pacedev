@@ -215,8 +215,12 @@ begin
 
     snd_a <= std_logic_vector(resize(unsigned(to_sound.a), snd_a'length));
     
-	  sound_inst : entity work.Sound                                          
-	    Port Map
+	  sound_inst : entity work.Sound
+      generic map
+      (
+        CLK_MHz     => CLK0_FREQ_MHz
+      )
+	    port map
 	    (
 	      sysclk      => clk_i(0),    -- fudge for now
 	      reset       => reset_i,
