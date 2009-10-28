@@ -421,25 +421,33 @@ begin
   -- check the generic in the project package
   -- because not everyone has an audio board
   GEN_AUDIO : if PACE_HAS_AUDIO generate
-    
-    dac_l_inst : entity work.sigma_delta_dac
+    component sigma_delta_dac is
+      port
+      (
+        clk     : in std_logic;
+        din     : in std_logic_vector(7 downto 0);
+        
+        dout    : out std_logic
+      );
+    end component sigma_delta_dac;
+  begin
+    dac_l_inst : sigma_delta_dac
       port map
       (
-        clk     => clk_i(0),
+        clk     => audio_o.clk,
         din     => audio_o.ldata(15 downto 8),
         
         dout    => audio_left
       );
 
-    dac_r_inst : entity work.sigma_delta_dac
+    dac_r_inst : sigma_delta_dac
       port map
       (
-        clk     => clk_i(0),
+        clk     => audio_o.clk,
         din     => audio_o.rdata(15 downto 8),
         
         dout    => audio_right
       );
-
   end generate GEN_AUDIO;
 
   -- no serial (atm)

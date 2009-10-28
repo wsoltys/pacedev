@@ -197,25 +197,47 @@ entity galaxian_cram is
 end entity galaxian_cram;
 
 architecture SYN of galaxian_cram is
+  type data_arr is array (natural range <>) of std_logic_vector(7 downto 0);
+  signal q_a_arr    : data_arr(7 downto 0);
+  signal q_b_arr    : data_arr(7 downto 0);
+  signal wren_b_arr : std_logic_vector(0 to 7);
 begin
-	--cram_inst : entity work.dpram
-  GEN_CRAM : for i in 0 to 7 generate
-    RAM128X1D_inst : RAM128X1D
-    generic map 
-    (
-      INIT => X"00000000000000000000000000000000")
-    port map 
-    (
-      DPRA    => address_a,
-      SPO     => q_a(i),
 
-      WCLK    => clock_b,
-      A       => address_b,
-      WE      => wren_b,
-      D       => data_b(i),
-      DPO     => q_b(i)
-    );
-  end generate GEN_CRAM;
+  q_a <= q_a_arr(to_integer(unsigned(address_a(7 downto 5))));
+  q_b <= q_b_arr(to_integer(unsigned(address_b(7 downto 5))));
+    
+	--cram_inst : entity work.dpram
+  GEN_CRAM_128x8 : for i in 0 to 7 generate
+  
+    wren_b_arr(i) <= '1' when to_integer(unsigned(address_b(7 downto 5))) = i else '0';
+    
+    GEN_CRAM_16x8 : for j in 0 to 7 generate
+      RAM16X1D_inst : RAM16X1D
+        generic map 
+        (
+          INIT => X"0000"
+        )
+        port map 
+        (
+          DPO => q_a_arr(i)(j),   -- Read-only 1-bit data output for DPRA
+          SPO => q_b_arr(i)(j),   -- R/W 1-bit data output for A0-A3
+          A0 => address_b(1),     -- R/W address[0] input bit
+          A1 => address_b(2),     -- R/W address[1] input bit
+          A2 => address_b(3),     -- R/W address[2] input bit
+          A3 => address_b(4),     -- R/W ddress[3] input bit
+          D => data_b(j),         -- Write 1-bit data input
+          DPRA0 => address_a(1),  -- Read-only address[0] input bit
+          DPRA1 => address_a(2),  -- Read-only address[1] input bit
+          DPRA2 => address_a(3),  -- Read-only address[2] input bit
+          DPRA3 => address_a(4),  -- Read-only address[3] input bit
+          WCLK => clock_b,        -- Write clock input
+          WE => wren_b_arr(i)
+          -- Write enable input
+        );
+    end generate GEN_CRAM_16x8;
+    
+  end generate GEN_CRAM_128x8;
+
 end architecture SYN;
 
 library ieee;

@@ -4,21 +4,21 @@ library work;
 use work.pace_pkg.all;
 use work.platform_variant_pkg.all;
 
-ENTITY invaders_rom IS
+ENTITY invaders_rom_0 IS
 	PORT
 	(
 		address		: IN STD_LOGIC_VECTOR (12 DOWNTO 0);
 		clock			: IN STD_LOGIC ;
 		q					: OUT STD_LOGIC_VECTOR (7 DOWNTO 0)
 	);
-END invaders_rom;
+END invaders_rom_0;
 
-architecture SYN of invaders_rom is
+architecture SYN of invaders_rom_0 is
 begin
 	sprom_inst : entity work.sprom
 		generic map
 		(
-			init_file		=> ROM_1_NAME,
+			init_file		=> ROM_0_NAME,
 			numwords_a	=> 8192,
 			widthad_a		=> 13
 		)
@@ -36,21 +36,21 @@ library work;
 use work.pace_pkg.all;
 use work.platform_variant_pkg.all;
 
-ENTITY invaders_rom_2 IS
+ENTITY invaders_rom_1 IS
 	PORT
 	(
 		address		: IN STD_LOGIC_VECTOR (11 DOWNTO 0);
 		clock			: IN STD_LOGIC ;
 		q					: OUT STD_LOGIC_VECTOR (7 DOWNTO 0)
 	);
-END invaders_rom_2;
+END invaders_rom_1;
 
-architecture SYN of invaders_rom_2 is
+architecture SYN of invaders_rom_1 is
 begin
 	sprom_inst : entity work.sprom
 		generic map
 		(
-			init_file		=> ROM_2_NAME,
+			init_file		=> ROM_1_NAME,
 			numwords_a	=> 4096,
 			widthad_a		=> 12
 		)

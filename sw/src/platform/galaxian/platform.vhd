@@ -85,7 +85,7 @@ end platform;
 
 architecture SYN of platform is
 
-	alias clk_30M				  : std_logic is clk_i(0);
+	alias clk_sys				  : std_logic is clk_i(0);
 	alias clk_video       : std_logic is clk_i(1);
 	
   -- uP signals  
@@ -176,7 +176,7 @@ begin
   nmiena_wr <= uPmemwr when (uP_addr(15 downto 12) = "0111" and uP_addr(2 downto 0) = "001") else '0';
 
   -- sprite registers
-  sprite_reg_o.clk <= clk_30M;
+  sprite_reg_o.clk <= clk_sys;
   sprite_reg_o.clk_ena <= cpu_clk_en;
   sprite_reg_o.a <= uP_addr(7 downto 0);
   sprite_reg_o.d <= uP_datao;
@@ -203,6 +203,12 @@ begin
   -- COMPONENT INSTANTIATION
   --
 
+  assert false
+    report  "CLK0_FREQ_MHz = " & integer'image(CLK0_FREQ_MHz) & "\n" &
+            "CPU_FREQ_MHz = " &  integer'image(CPU_FREQ_MHz) & "\n" &
+            "CPU_CLK_ENA_DIV = " & integer'image(GALAXIAN_CPU_CLK_ENA_DIVIDE_BY)
+      severity note;
+      
 	-- generate CPU enable clock (3MHz from 27/30MHz)
   clk_en_inst : entity work.clk_div
     generic map
@@ -211,7 +217,7 @@ begin
     )
     port map
     (
-      clk				=> clk_30M,
+      clk				=> clk_sys,
       reset			=> reset_i,
       clk_en		=> clk_3M_en
     );
@@ -222,7 +228,7 @@ begin
   U_uP : entity work.Z80                                                
     port map
     (
-      clk 		=> clk_30M,                                   
+      clk 		=> clk_sys,                                   
       clk_en	=> cpu_clk_en,
       reset  	=> reset_i,                                     
 
@@ -244,7 +250,7 @@ begin
 	rom_inst : entity work.galaxian_rom
 		port map
 		(
-			clock			=> clk_30M,
+			clock			=> clk_sys,
 			address		=> up_addr(13 downto 0),
 			q					=> rom_datao
 		);
@@ -253,7 +259,7 @@ begin
 	vram_inst : entity work.galaxian_vram
 		port map
 		(
-			clock_b			=> clk_30M,
+			clock_b			=> clk_sys,
 			address_b		=> uP_addr(9 downto 0),
 			wren_b			=> vram_wr,
 			data_b			=> uP_datao,
@@ -283,7 +289,7 @@ begin
 	cram_inst_0 : entity work.galaxian_cram
 		port map
 		(
-			clock_b			=> clk_30M,
+			clock_b			=> clk_sys,
 			address_b		=> uP_addr(7 downto 1),
 			wren_b			=> cram0_wr,
 			data_b			=> uP_datao,
@@ -302,7 +308,7 @@ begin
 	cram_inst_1 : entity work.galaxian_cram
 		port map
 		(
-			clock_b			=> clk_30M,
+			clock_b			=> clk_sys,
 			address_b		=> uP_addr(7 downto 1),
 			wren_b			=> cram1_wr,
 			data_b			=> uP_datao,
@@ -322,7 +328,7 @@ begin
     )
     port map
     (
-      clk               => clk_30M,
+      clk               => clk_sys,
       reset             => reset_i,
   
       z80_data          => uP_datao,
@@ -358,7 +364,7 @@ begin
 				--)
 				port map
 				(
-					clock				=> clk_30M,
+					clock				=> clk_sys,
 					address			=> uP_addr(10 downto 0),
 					data				=> up_datao,
 					wren				=> wram_wr,
