@@ -538,7 +538,8 @@ set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/Pacman_Interrupts.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/Pacman_vramMapper.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/platform.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/pacsnd.Vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/LCD_Controller.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/LCD_TEST.v
