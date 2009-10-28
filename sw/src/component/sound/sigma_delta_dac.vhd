@@ -9,7 +9,6 @@ entity sigma_delta_dac is
     din     : in std_logic_vector(7 downto 0);
     
     dout    : out std_logic
-
   );
 end entity sigma_delta_dac;
 

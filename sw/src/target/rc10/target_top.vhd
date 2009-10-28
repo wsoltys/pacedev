@@ -366,41 +366,69 @@ begin
   end block BLK_VIDEO;
   
   BLK_AUDIO : block
-
-    signal snd_data_l   : std_logic_vector(15 downto 0);
-    signal snd_data_r   : std_logic_vector(15 downto 0);
-  
   begin
   
-    -- audio PWM
-    -- clock is 48Mhz, sample rate 48kHz
-    process (clk_i(1), reset_i)
-      variable count : integer range 0 to 1023;
-      variable audio_sample_l : std_logic_vector(9 downto 0);
-      variable audio_sample_r : std_logic_vector(9 downto 0);
-    begin
-      if reset_i = '1' then
-        count := 0;
-      elsif rising_edge(clk_i(1)) then
-        if count = 1023 then
-          -- 48kHz tick - latch a sample (only 10 bits or 1024 steps)
-          audio_sample_l := snd_data_l(snd_data_l'left downto snd_data_l'left-9);
-          audio_sample_r := snd_data_r(snd_data_r'left downto snd_data_l'left-9);
+    GEN_PWM_AUDIO : if false generate
+    
+      -- audio PWM
+      -- XX -- clock is 48MHz, sample rate 48kHz
+      -- clock is 24MHz, sample rate 24kHz
+      process (clk_48M, reset_i)
+        variable count  : integer range 0 to 1023;
+        variable audio_sample_l : std_logic_vector(9 downto 0);
+        variable audio_sample_r : std_logic_vector(9 downto 0);
+        variable tick   : std_logic := '0';
+      begin
+        if reset_i = '1' then
+          tick := '0';
           count := 0;
-        else
-          audio_left <= '0';  -- default
-          audio_right <= '0'; -- default
-          if audio_sample_l > count then
-            audio_left <= '1';
+        elsif rising_edge(clk_48M) then
+          if tick = '0' then
+            if count = 1023 then
+              -- 48kHz tick - latch a sample (only 10 bits or 1024 steps)
+              audio_sample_l := audio_o.ldata(audio_o.ldata'left downto audio_o.ldata'left-9);
+              audio_sample_r := audio_o.rdata(audio_o.rdata'left downto audio_o.rdata'left-9);
+              count := 0;
+            else
+              audio_left <= '0';  -- default
+              audio_right <= '0'; -- default
+              if audio_sample_l > count then
+                audio_left <= '1';
+              end if;
+              if audio_sample_r > count then
+                audio_right <= '1';
+              end if;
+              count := count + 1;
+            end if;
           end if;
-          if audio_sample_r > count then
-            audio_right <= '1';
-          end if;
-          count := count + 1;
+          tick := not tick;
         end if;
-      end if;
-    end process;
+      end process;
 
+    end generate GEN_PWM_AUDIO;
+    
+    GEN_SIGMA_DELTA_AUDIO : if true generate
+    
+      dac_l : entity work.sigma_delta_dac
+        port map
+        (
+          clk     => clk_48M,
+          din     => audio_o.ldata(15 downto 8),
+          
+          dout    => audio_left
+        );
+
+      dac_r : entity work.sigma_delta_dac
+        port map
+        (
+          clk     => clk_48M,
+          din     => audio_o.rdata(15 downto 8),
+          
+          dout    => audio_right
+        );
+
+    end generate GEN_SIGMA_DELTA_AUDIO;
+    
   end block BLK_AUDIO;
   
   pace_inst : entity work.pace                                            
