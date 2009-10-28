@@ -117,10 +117,7 @@ architecture SYN of platform is
   -- RAM signals        
   signal cram_cs        : std_logic;
   signal cram_wr        : std_logic;
-	signal cram0_wr				: std_logic;
-	signal cram1_wr				: std_logic;
-	signal cram0_datao		: std_logic_vector(7 downto 0);
-	signal cram1_datao		: std_logic_vector(7 downto 0);
+	signal cram_datao		  : std_logic_vector(7 downto 0);
 	
   -- interrupt signals
   signal nmiena_wr      : std_logic;
@@ -163,8 +160,7 @@ begin
 	uP_datai <= rom_datao when rom_cs = '1' else
 							wram_datao when wram_cs = '1' else
 							vram_datao when vram_cs = '1' else
-							cram1_datao when (cram_cs = '1' and uP_addr(0) = '1') else
-							cram0_datao when (cram_cs = '1' and uP_addr(0) = '0') else
+							cram_datao when cram_cs = '1' else
               inputs_i(0).d when inzero_cs = '1' else
               inputs_i(1).d when inone_cs = '1' else
               switches_i(7 downto 0) when dips_cs = '1' else
@@ -247,6 +243,25 @@ begin
       nmi    	=> uPnmireq
     );
 
+  interrupts_inst : entity work.Galaxian_Interrupts
+    generic map
+    (
+      USE_VIDEO_VBLANK  => GALAXIAN_USE_VIDEO_VBLANK
+    )
+    port map
+    (
+      clk               => clk_sys,
+      reset             => reset_i,
+  
+      z80_data          => uP_datao,
+      nmiena_wr         => nmiena_wr,
+  
+			vblank						=> graphics_i.vblank,
+			
+      -- interrupt status & request lines
+      nmi_req           => uPnmireq
+    );
+
 	rom_inst : entity work.galaxian_rom
 		port map
 		(
@@ -271,7 +286,6 @@ begin
 			data_a			=> (others => 'X'),
 			q_a					=> tilemap_o.map_d(7 downto 0)
 		);
-	--tilemap_o.map_d(7 downto 0) <= X"34"; -- debug
   tilemap_o.map_d(15 downto 8) <= (others => '0');
 
 	vrammapper_inst : entity work.vramMapper
@@ -283,62 +297,19 @@ begin
 	    outAddr => vram_addr
 		);
 
-	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-	cram0_wr <= cram_wr and not uP_addr(0);
-	
-	cram_inst_0 : entity work.galaxian_cram
+	cram_inst : entity work.galaxian_cram
 		port map
 		(
 			clock_b			=> clk_sys,
-			address_b		=> uP_addr(7 downto 1),
-			wren_b			=> cram0_wr,
+			address_b		=> uP_addr(7 downto 0),
+			wren_b			=> cram_wr,
 			data_b			=> uP_datao,
-			q_b					=> cram0_datao,
+			q_b					=> cram_datao,
 			
 			clock_a			=> clk_video,
 			address_a		=> tilemap_i.attr_a(7 downto 1),
-			wren_a			=> '0',
-			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o.attr_d(7 downto 0)
+			q_a					=> tilemap_o.attr_d(15 downto 0)
 		);
-
-	cram1_wr <= cram_wr and uP_addr(0);
-
-	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-	cram_inst_1 : entity work.galaxian_cram
-		port map
-		(
-			clock_b			=> clk_sys,
-			address_b		=> uP_addr(7 downto 1),
-			wren_b			=> cram1_wr,
-			data_b			=> uP_datao,
-			q_b					=> cram1_datao,
-			
-			clock_a			=> clk_video,
-			address_a		=> tilemap_i.attr_a(7 downto 1),
-			wren_a			=> '0',
-			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o.attr_d(15 downto 8)
-		);
-
-  interrupts_inst : entity work.Galaxian_Interrupts
-    generic map
-    (
-      USE_VIDEO_VBLANK  => GALAXIAN_USE_VIDEO_VBLANK
-    )
-    port map
-    (
-      clk               => clk_sys,
-      reset             => reset_i,
-  
-      z80_data          => uP_datao,
-      nmiena_wr         => nmiena_wr,
-  
-			vblank						=> graphics_i.vblank,
-			
-      -- interrupt status & request lines
-      nmi_req           => uPnmireq
-    );
 
 	gfxrom_inst : entity work.galaxian_gfxrom
 		port map

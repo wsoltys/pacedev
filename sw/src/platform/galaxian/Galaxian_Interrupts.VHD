@@ -30,6 +30,7 @@ end Galaxian_Interrupts;
 architecture SYN of Galaxian_Interrupts is
 
   signal slow_clk_ena   : std_logic; -- 1MHz
+  signal vblank_r       : std_logic_vector(3 downto 0);
   signal vblank_int     : std_logic;
   signal nmiena_s       : std_logic;
 
@@ -93,24 +94,19 @@ begin
 	GEN_REAL_VBLANK_INT : if USE_VIDEO_VBLANK generate
 	
 		process (clk, slow_clk_ena, reset)
-			variable vblank_v : std_logic_vector(3 downto 0);
-			alias vblank_r : std_logic is vblank_v(vblank_v'left);
-			alias vblank_s : std_logic is vblank_v(vblank_v'left-1);
+			--variable vblank_v : std_logic_vector(3 downto 0);
+			alias vblank_prev : std_logic is vblank_r(vblank_r'left);
+			alias vblank_um   : std_logic is vblank_r(vblank_r'left-1);
 		begin
 			if reset = '1' then
 				vblank_int <= '0';
-				vblank_v := (others => '0');
+				vblank_r <= (others => '0');
 			elsif rising_edge(clk) then
-				-- unmeta the vblank signal
 				if slow_clk_ena = '1' then
-					vblank_v := vblank_v(vblank_v'left-1 downto 0) & vblank;
 					-- rising edge vblank only
-					if vblank_r = '0' and vblank_s = '1' then
-						vblank_int <= '1';
-					else
-						vblank_int <= '0';
-					end if;
-					vblank_r := vblank_v(vblank_v'left);
+					vblank_int <= not vblank_prev and vblank_um;
+          -- unmeta the vblank signal
+          vblank_r <= vblank_r(vblank_r'left-1 downto 0) & vblank;
 				end if;
 			end if;
 		end process;

@@ -183,61 +183,186 @@ entity galaxian_cram is
   port
   (
     clock_b     : in std_logic;
-    address_b   : in std_logic_vector(7 downto 1);
+    address_b   : in std_logic_vector(7 downto 0);
     wren_b      : in std_logic;
     data_b      : in std_logic_vector(7 downto 0);
     q_b         : out std_logic_vector(7 downto 0);
     
     clock_a     : in std_logic;
-    address_a   : in std_logic_vector(7 downto 1);
-    wren_a      : in std_logic;
-    data_a      : in std_logic_vector(7 downto 0);
-    q_a         : out std_logic_vector(7 downto 0)
+    address_a   : in std_logic_vector(6 downto 0);
+    q_a         : out std_logic_vector(15 downto 0)
   );
 end entity galaxian_cram;
 
 architecture SYN of galaxian_cram is
-  type data_arr is array (natural range <>) of std_logic_vector(7 downto 0);
-  signal q_a_arr    : data_arr(7 downto 0);
-  signal q_b_arr    : data_arr(7 downto 0);
-  signal wren_b_arr : std_logic_vector(0 to 7);
 begin
 
-  q_a <= q_a_arr(to_integer(unsigned(address_a(7 downto 5))));
-  q_b <= q_b_arr(to_integer(unsigned(address_b(7 downto 5))));
-    
-	--cram_inst : entity work.dpram
-  GEN_CRAM_128x8 : for i in 0 to 7 generate
-  
-    wren_b_arr(i) <= '1' when to_integer(unsigned(address_b(7 downto 5))) = i else '0';
-    
-    GEN_CRAM_16x8 : for j in 0 to 7 generate
-      RAM16X1D_inst : RAM16X1D
-        generic map 
-        (
-          INIT => X"0000"
-        )
-        port map 
-        (
-          DPO => q_a_arr(i)(j),   -- Read-only 1-bit data output for DPRA
-          SPO => q_b_arr(i)(j),   -- R/W 1-bit data output for A0-A3
-          A0 => address_b(1),     -- R/W address[0] input bit
-          A1 => address_b(2),     -- R/W address[1] input bit
-          A2 => address_b(3),     -- R/W address[2] input bit
-          A3 => address_b(4),     -- R/W ddress[3] input bit
-          D => data_b(j),         -- Write 1-bit data input
-          DPRA0 => address_a(1),  -- Read-only address[0] input bit
-          DPRA1 => address_a(2),  -- Read-only address[1] input bit
-          DPRA2 => address_a(3),  -- Read-only address[2] input bit
-          DPRA3 => address_a(4),  -- Read-only address[3] input bit
-          WCLK => clock_b,        -- Write clock input
-          WE => wren_b_arr(i)
-          -- Write enable input
-        );
-    end generate GEN_CRAM_16x8;
-    
-  end generate GEN_CRAM_128x8;
+  GEN_DISTRIBUTED : if false generate
 
+    type data_arr is array (natural range <>) of std_logic_vector(7 downto 0);
+    signal q_a_arr    : data_arr(7 downto 0);
+    signal q_b_arr    : data_arr(7 downto 0);
+    signal wren_b_arr : std_logic_vector(7 downto 0);
+  
+  begin
+    --q_a <= q_a_arr(to_integer(unsigned(address_a(7 downto 5))));
+    --q_b <= q_b_arr(to_integer(unsigned(address_b(7 downto 5))));
+      
+    --cram_inst : entity work.dpram
+    GEN_CRAM_128x8 : for i in 0 to 7 generate
+    
+      wren_b_arr(i) <= '1' when to_integer(unsigned(address_b(7 downto 5))) = i else '0';
+      
+      GEN_CRAM_16x8 : for j in 0 to 7 generate
+        RAM16X1D_inst : RAM16X1D
+          generic map 
+          (
+            INIT => X"0000"
+          )
+          port map 
+          (
+            DPO => q_a_arr(i)(j),   -- Read-only 1-bit data output for DPRA
+            SPO => q_b_arr(i)(j),   -- R/W 1-bit data output for A0-A3
+            A0 => address_b(1),     -- R/W address[0] input bit
+            A1 => address_b(2),     -- R/W address[1] input bit
+            A2 => address_b(3),     -- R/W address[2] input bit
+            A3 => address_b(4),     -- R/W ddress[3] input bit
+            D => data_b(j),         -- Write 1-bit data input
+            DPRA0 => address_a(1),  -- Read-only address[0] input bit
+            DPRA1 => address_a(2),  -- Read-only address[1] input bit
+            DPRA2 => address_a(3),  -- Read-only address[2] input bit
+            DPRA3 => address_a(4),  -- Read-only address[3] input bit
+            WCLK => clock_b,        -- Write clock input
+            WE => wren_b_arr(i)     -- Write enable input
+          );
+      end generate GEN_CRAM_16x8;
+      
+    end generate GEN_CRAM_128x8;
+
+  end generate GEN_DISTRIBUTED;
+
+  GEN_BLOCK : if true generate
+  begin
+  
+   -- RAMB16_S9_S18: Virtex-II/II-Pro, Spartan-3/3E 2k/1k x 8/16 + 1/2 Parity bits Parity bits Dual-Port RAM
+   -- Xilinx HDL Language Template, version 9.2.1i
+
+   RAMB16_S9_S18_inst : RAMB16_S9_S18
+     generic map (
+        INIT_A => X"000", --  Value of output RAM registers on Port A at startup
+        INIT_B => X"00000", --  Value of output RAM registers on Port B at startup
+        SRVAL_A => X"000", --  Port A ouput value upon SSR assertion
+        SRVAL_B => X"00000", --  Port B ouput value upon SSR assertion
+        WRITE_MODE_A => "WRITE_FIRST", --  WRITE_FIRST, READ_FIRST or NO_CHANGE
+        WRITE_MODE_B => "WRITE_FIRST", --  WRITE_FIRST, READ_FIRST or NO_CHANGE
+        SIM_COLLISION_CHECK => "ALL", -- "NONE", "WARNING", "GENERATE_X_ONLY", "ALL" 
+        -- The following INIT_xx declarations specify the initial contents of the RAM
+        -- Port A Address 0 to 511, Port B Address 0 to 255
+        INIT_00 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_01 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_02 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_03 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_04 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_05 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_06 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_07 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_08 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_09 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_0A => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_0B => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_0C => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_0D => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_0E => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_0F => X"0000000000000000000000000000000000000000000000000000000000000000",
+        -- Port A Address 512 to 1023, Port B Address 256 to 511
+        INIT_10 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_11 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_12 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_13 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_14 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_15 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_16 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_17 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_18 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_19 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_1A => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_1B => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_1C => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_1D => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_1E => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_1F => X"0000000000000000000000000000000000000000000000000000000000000000",
+        -- Port A Address 1024 to 1535, Port B Address 512 to 767
+        INIT_20 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_21 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_22 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_23 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_24 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_25 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_26 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_27 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_28 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_29 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_2A => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_2B => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_2C => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_2D => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_2E => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_2F => X"0000000000000000000000000000000000000000000000000000000000000000",
+        -- Port A Address 1536 to 2047, Port B Address 768 to 1024
+        INIT_30 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_31 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_32 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_33 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_34 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_35 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_36 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_37 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_38 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_39 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_3A => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_3B => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_3C => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_3D => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_3E => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INIT_3F => X"0000000000000000000000000000000000000000000000000000000000000000",
+        -- The next set of INITP_xx are for the parity bits
+        -- Port A Address 0 to 511, Port B Address 0 to 255
+        INITP_00 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INITP_01 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        -- Port A Address 512 to 1023, Port B Address 256 to 511
+        INITP_02 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INITP_03 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        -- Port A Address 1024 to 1535, Port B Address 512 to 767
+        INITP_04 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INITP_05 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        -- Port A Address 1536 to 2047, Port B Address 768 to 1024
+        INITP_06 => X"0000000000000000000000000000000000000000000000000000000000000000",
+        INITP_07 => X"0000000000000000000000000000000000000000000000000000000000000000")
+     port map (
+        DOA => q_b,      -- Port A 8-bit Data Output
+        DOB => q_a,      -- Port B 16-bit Data Output
+        DOPA => open,    -- Port A 1-bit Parity Output
+        DOPB => open,    -- Port B 2-bit Parity Output
+        ADDRA(10 downto 8) => "000",  -- Port A 11-bit Address Input
+        ADDRA(7 downto 0) => address_b,  -- Port A 11-bit Address Input
+        ADDRB(9 downto 7) => "000",  -- Port B 10-bit Address Input
+        ADDRB(6 downto 0) => address_a,  -- Port B 10-bit Address Input
+        CLKA => clock_b,    -- Port A Clock
+        CLKB => clock_a,    -- Port B Clock
+        DIA => data_b,      -- Port A 8-bit Data Input
+        DIB => X"0000",      -- Port B 16-bit Data Input
+        DIPA => "0",    -- Port A 1-bit parity Input
+        DIPB => "00",    -- Port-B 2-bit parity Input
+        ENA => '1',      -- Port A RAM Enable Input
+        ENB => '1',      -- PortB RAM Enable Input
+        SSRA => '0',    -- Port A Synchronous Set/Reset Input
+        SSRB => '0',    -- Port B Synchronous Set/Reset Input
+        WEA => wren_b,      -- Port A Write Enable Input
+        WEB => '0'       -- Port B Write Enable Input
+     );
+
+  end generate GEN_BLOCK;
+  
 end architecture SYN;
 
 library ieee;

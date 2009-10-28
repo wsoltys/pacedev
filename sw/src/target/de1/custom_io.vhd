@@ -41,6 +41,6 @@ begin
   gpio_0_is_custom <= (others => '0');
   gpio_1_is_custom <= (others => '0');
 
-  seg7 <= X"6ACE";
+  seg7 <= X"dACE";
   
 end architecture SYN;

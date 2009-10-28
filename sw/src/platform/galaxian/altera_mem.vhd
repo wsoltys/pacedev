@@ -83,22 +83,33 @@ entity galaxian_cram is
   port
   (
     clock_b     : in std_logic;
-    address_b   : in std_logic_vector(7 downto 1);
+    address_b   : in std_logic_vector(7 downto 0);
     wren_b      : in std_logic;
     data_b      : in std_logic_vector(7 downto 0);
     q_b         : out std_logic_vector(7 downto 0);
     
     clock_a     : in std_logic;
-    address_a   : in std_logic_vector(7 downto 1);
-    wren_a      : in std_logic;
-    data_a      : in std_logic_vector(7 downto 0);
-    q_a         : out std_logic_vector(7 downto 0)
+    address_a   : in std_logic_vector(6 downto 0);
+    q_a         : out std_logic_vector(15 downto 0)
   );
 end entity galaxian_cram;
 
 architecture SYN of galaxian_cram is
+  
+  signal q0_b     : std_logic_vector(7 downto 0) := (others => '0');
+  signal q1_b     : std_logic_vector(7 downto 0) := (others => '0');
+  signal wren0_b  : std_logic := '0';
+  signal wren1_b  : std_logic := '0';
+  
 begin
-	cram_inst : entity work.dpram
+		
+  wren0_b <= wren_b when address_b(0) = '0' else '0';
+  wren1_b <= wren_b when address_b(0) = '1' else '0';
+
+  q_b <= q0_b when address_b(0) = '0' else q1_b;
+  
+	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+	cram0_inst : entity work.dpram
 		generic map
 		(
 			numwords_a	=> 128,
@@ -107,17 +118,40 @@ begin
 		port map
 		(
       clock_b			=> clock_b,
-      address_b		=> address_b,
-      wren_b			=> wren_b,
+      address_b		=> address_b(7 downto 1),
+      wren_b			=> wren0_b,
       data_b			=> data_b,
-      q_b					=> q_b,
+      q_b					=> q0_b,
 
       clock_a			=> clock_a,
       address_a		=> address_a,
-      wren_a			=> wren_a,
-      data_a			=> data_a,
-      q_a					=> q_a
+      wren_a			=> '0',
+      data_a			=> (others => 'X'),
+      q_a					=> q_a(7 downto 0)
 		);
+
+	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+	cram1_inst : entity work.dpram
+		generic map
+		(
+			numwords_a	=> 128,
+			widthad_a		=> 7
+		)
+		port map
+		(
+      clock_b			=> clock_b,
+      address_b		=> address_b(7 downto 1),
+      wren_b			=> wren1_b,
+      data_b			=> data_b,
+      q_b					=> q1_b,
+
+      clock_a			=> clock_a,
+      address_a		=> address_a,
+      wren_a			=> '0',
+      data_a			=> (others => 'X'),
+      q_a					=> q_a(15 downto 8)
+		);
+
 end architecture SYN;
 
 library ieee;
