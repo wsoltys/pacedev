@@ -1,8 +1,8 @@
 library ieee;
-library work;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
+Library UNISIM;
+use UNISIM.vcomponents.all;
 
 library work;
 use work.pace_pkg.all;
@@ -166,7 +166,7 @@ begin
     -- FPGA STARTUP
   	-- should extend power-on reset if registers init to '0'
   	process (clk_14M31818)
-	  	variable count : std_logic_vector (11 downto 0) := (others => '0');
+	  	variable count : unsigned (11 downto 0) := (others => '0');
 	  begin
   		if rising_edge(clk_14M31818) then
   			if count = X"FFF" then
@@ -421,6 +421,7 @@ begin
   -- check the generic in the project package
   -- because not everyone has an audio board
   GEN_AUDIO : if PACE_HAS_AUDIO generate
+  
     component sigma_delta_dac is
       port
       (
@@ -430,11 +431,51 @@ begin
         dout    : out std_logic
       );
     end component sigma_delta_dac;
+    
+    signal CLKIN_BUFG   : std_logic;
+    signal CLKFX        : std_logic;
+    signal dac_clk      : std_logic := '0';
+    
   begin
+  
+    -- buffer from pin to DCM clock input
+    CLKIN_BUFG_INST : BUFG
+      port map (I=>clk_14M31818, O=>CLKIN_BUFG);
+  
+    -- buffer from CLKFX output to FPGA logic
+    CLKFX_0_BUFG_INST : BUFG
+      port map (I=>CLKFX, O=>dac_clk);
+      
+    AUDIO_DCM_inst : DCM
+    generic map 
+    (
+      CLKDV_DIVIDE => 2.0, --  Divide by: 1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5
+                       --     7.0,7.5,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0 or 16.0
+      CLKFX_DIVIDE => 1,   --  Can be any interger from 1 to 32
+      CLKFX_MULTIPLY => 7, --  Can be any integer from 1 to 32
+      CLKIN_DIVIDE_BY_2 => FALSE, --  TRUE/FALSE to enable CLKIN divide by two feature
+      CLKIN_PERIOD => 69.841,          --  Specify period of input clock
+      CLKOUT_PHASE_SHIFT => "NONE", --  Specify phase shift of NONE, FIXED or VARIABLE
+      CLK_FEEDBACK => "NONE",         --  Specify clock feedback of NONE, 1X or 2X
+      DESKEW_ADJUST => "SYSTEM_SYNCHRONOUS", --  SOURCE_SYNCHRONOUS, SYSTEM_SYNCHRONOUS or
+                                         --     an integer from 0 to 15
+      DFS_FREQUENCY_MODE => "LOW",     --  HIGH or LOW frequency mode for frequency synthesis
+      DLL_FREQUENCY_MODE => "LOW",     --  HIGH or LOW frequency mode for DLL
+      DUTY_CYCLE_CORRECTION => TRUE, --  Duty cycle correction, TRUE or FALSE
+      FACTORY_JF => X"C080",          --  FACTORY JF Values
+      PHASE_SHIFT => 0,        --  Amount of fixed phase shift from -255 to 255
+      STARTUP_WAIT => FALSE --  Delay configuration DONE until DCM LOCK, TRUE/FALSE
+    )
+    port map 
+    (
+      CLKFX => CLKFX,   -- DCM CLK synthesis out (M/D)
+      CLKIN => CLKIN_BUFG   -- Clock input (from IBUFG, BUFG or DCM)
+    );
+  
     dac_l_inst : sigma_delta_dac
       port map
       (
-        clk     => audio_o.clk,
+        clk     => dac_clk,
         din     => audio_o.ldata(15 downto 8),
         
         dout    => audio_left
@@ -443,7 +484,7 @@ begin
     dac_r_inst : sigma_delta_dac
       port map
       (
-        clk     => audio_o.clk,
+        clk     => dac_clk,
         din     => audio_o.rdata(15 downto 8),
         
         dout    => audio_right

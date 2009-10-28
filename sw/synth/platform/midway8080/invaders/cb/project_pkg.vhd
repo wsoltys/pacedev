@@ -40,7 +40,7 @@ package project_pkg is
 	--
 	
   constant INVADERS_ROM_IN_FLASH            : boolean := PACE_HAS_FLASH;
-	constant INVADERS_USE_INTERNAL_WRAM				: boolean := false;
+	constant INVADERS_USE_INTERNAL_WRAM				: boolean := true;
 
   -- derived - do not edit
   
