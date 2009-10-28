@@ -1,26 +1,31 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
 use work.platform_pkg.all;
 use work.target_pkg.all;
 
-entity sound is port
- (
-   sysclk            : in    std_logic;
-   reset             : in    std_logic;
-
-   sndif_rd          : in    std_logic;
-   sndif_wr          : in    std_logic;
-   sndif_datai       : in    std_logic_vector(7 downto 0);
-   sndif_addr        : in    std_logic_vector(15 downto 0);
-
-   snd_clk           : out   std_logic;
-   snd_data          : out   std_logic_vector(7 downto 0);
-   sndif_datao       : out   std_logic_vector(7 downto 0)
- );
+entity sound is 
+  generic
+  (
+    CLK_MHz           : natural
+  );
+  port
+  (
+    sysclk            : in    std_logic;
+    reset             : in    std_logic;
+    
+    sndif_rd          : in    std_logic;
+    sndif_wr          : in    std_logic;
+    sndif_datai       : in    std_logic_vector(7 downto 0);
+    sndif_addr        : in    std_logic_vector(15 downto 0);
+    
+    snd_clk           : out   std_logic;
+    snd_data          : out   std_logic_vector(7 downto 0);
+    sndif_datao       : out   std_logic_vector(7 downto 0)
+  );
 end sound;
 
 architecture SYN of sound is
@@ -37,20 +42,22 @@ architecture SYN of sound is
 begin
 
   process (sysclk, reset)
-    variable count : integer;
-		variable clk_count : std_logic_vector(2 downto 0);
+    -- need a 96kHz pulse
+    subtype count_t is integer range 0 to CLK_MHz*1000/96-1;
+    variable count : count_t := 0;
+		variable clk_count : unsigned(2 downto 0);
   begin
     if reset = '1' then
 			count := 0;
 			clk_count := (others => '0');
     elsif rising_edge(sysclk) then
       snd_pulse <= '0';
-      if count = 0 then
+      if count = count_t'high then
         snd_pulse <= '1';
-	      count := 312;		-- 96KHz at 30MHz
-				--count := 520;		-- 96KHz at 50MHz
+	      count := 0;
+      else
+        count := count + 1;
       end if;
-      count := count - 1;
 			-- arbitrary clock, as long as it's in range of the DAC
 			clk_count := clk_count + 1;
     end if;

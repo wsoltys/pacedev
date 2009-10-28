@@ -511,6 +511,14 @@ END snd_rom;
 
 architecture SYN of snd_rom is
 begin
-  q <= (others => '0');
+  -- ultimately, this should probably be implemented using
+  -- distributed ROM (256x1)x8
+  sound_rom_inst : entity work.xilinx_pacman_sound_rom
+    port map
+    (
+      addr  => address,
+      clk   => clock,
+      dout  => q
+    );
 end SYN;
 

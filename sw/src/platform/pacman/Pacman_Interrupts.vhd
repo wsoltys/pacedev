@@ -37,6 +37,8 @@ architecture SYN of Pacman_Interrupts is
   signal vblank_int     : std_logic;
   signal intena_s       : std_logic;
 
+  signal vblank_r       : std_logic_vector(3 downto 0) := (others => '0');
+
 begin
 
   -- latch interrupt enables
@@ -116,25 +118,24 @@ begin
 	GEN_REAL_VBLANK_INT : if USE_VIDEO_VBLANK generate
 	
 		process (clk, reset)
-			variable vblank_v : std_logic_vector(3 downto 0);
-			alias vblank_r : std_logic is vblank_v(vblank_v'left);
-			alias vblank_s : std_logic is vblank_v(vblank_v'left-1);
+			--variable vblank_r : std_logic_vector(3 downto 0);
+			alias vblank_prev : std_logic is vblank_r(vblank_r'left);
+			alias vblank_um   : std_logic is vblank_r(vblank_r'left-1);
 		begin
 			if reset = '1' then
 				vblank_int <= '0';
-				vblank_v := (others => '0');
+				vblank_r <= (others => '0');
 			elsif rising_edge(clk) then
-				-- unmeta the vblank signal
-				vblank_v := vblank_v(vblank_v'left-1 downto 0) & vblank;
 				-- rising edge vblank only
-				if vblank_r = '0' and vblank_s = '1' then
+				if vblank_prev = '0' and vblank_um = '1' then
 					vblank_int <= '1';
 				end if;
 				-- priority for the ack
 				if int_ack = '1' then
 					vblank_int <= '0';
 				end if;
-				vblank_r := vblank_v(vblank_v'left);
+				-- unmeta the vblank signal
+				vblank_r <= vblank_r(vblank_r'left-1 downto 0) & vblank;
 			end if;
 		end process;
 	
