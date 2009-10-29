@@ -13,12 +13,13 @@ package pace_pkg is
   type PACETargetType is
   (
     PACE_TARGET_NANOBOARD_NB1,
+    PACE_TARGET_DE0,
+    PACE_TARGET_DE1,
     PACE_TARGET_DE2,
     PACE_TARGET_DE2_70,
     PACE_TARGET_P2,       -- A02 build
     PACE_TARGET_P2A,      -- A04/A build (SRAM byte selects)
     PACE_TARGET_P3M,
-    PACE_TARGET_DE1,
     PACE_TARGET_RC10,
     PACE_TARGET_NX2_12,
     PACE_TARGET_CYC3DEV,
@@ -31,7 +32,8 @@ package pace_pkg is
 	type PACEFpgaVendor_t is
 	(
 		PACE_FPGA_VENDOR_ALTERA,
-		PACE_FPGA_VENDOR_XILINX
+		PACE_FPGA_VENDOR_XILINX,
+		PACE_FPGA_VENDOR_LATTICE
 	);
 
 	type PACEFpgaFamily_t is
