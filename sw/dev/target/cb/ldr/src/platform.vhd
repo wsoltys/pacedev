@@ -1,6 +1,5 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
 library work;
@@ -105,7 +104,11 @@ architecture SYN of platform is
   -- ROM signals        
 	signal rom_cs					: std_logic;
   signal rom_datao      : std_logic_vector(7 downto 0);
-                        
+
+  -- special i/o signals
+  signal sio_cs         : std_logic := '0';
+  signal sio_data       : std_logic_vector(7 downto 0) := (others => '0');
+  
   -- keyboard signals
 	signal kbd_cs					: std_logic;
 	signal kbd_data				: std_logic_vector(7 downto 0);
@@ -120,16 +123,16 @@ architecture SYN of platform is
   signal ram_wr         : std_logic := '0';
   signal ram_datao      : std_logic_vector(7 downto 0);
 
+  signal guestrom_cs    : std_logic := '0';
+  signal guestrom_datao : std_logic_vector(7 downto 0) := (others => '0');
+  
+  signal sram_cs        : std_logic := '0';
+  signal sram_wr        : std_logic := '0';
+  signal sram_bank      : std_logic_vector(16 downto 14) := (others => '0');
+  signal sram_datao     : std_logic_vector(7 downto 0) := (others => '0');
+  
   -- interrupt signals
   signal z80_wait_n     : std_logic := '1';
-	signal int_cs					: std_logic;
-  signal intena_wr      : std_logic;
-  signal int_status     : std_logic_vector(7 downto 0);
-  signal rtc_intrst     : std_logic;  -- clear RTC interrupt
-	signal nmi_cs					: std_logic;
-  signal nmiena_wr      : std_logic;
-  signal nmi_status     : std_logic_vector(7 downto 0);
-  signal nmirst         : std_logic;  -- clear NMI
 
   -- other signals      
 	alias platform_reset	: std_logic is inputs_i(NUM_INPUT_BYTES-1).d(0);
@@ -147,53 +150,70 @@ begin
   -- read mux
   uP_datai <= uPmem_datai when (uPmemrd = '1') else uPio_datai;
 
-  BLK_SYSMEM : block
-  
-    signal sram_i_s   : from_SRAM_t;
-    signal sram_o_s   : to_SRAM_t;
-  
-  begin
-
-    ram_datao <= sram_i_s.d(ram_datao'range);
-    sram_o_s.a <= std_logic_vector(RESIZE(unsigned(uP_addr), sram_o_s.a'length));
-    sram_o_s.d <= std_logic_vector(RESIZE(unsigned(uP_datao), sram_o_s.d'length));
-    sram_o_s.be <= std_logic_vector(to_unsigned(1, sram_o_s.be'length));
-    sram_o_s.cs <= '1';
-    sram_o_s.oe <= not ram_wr;
-    sram_o_s.we <= ram_wr;
-    sram_i_s <= sram_i;
-    sram_o <= sram_o_s;
-
-  end block BLK_SYSMEM;
-  
+  -- sram
+  sram_datao <= sram_i.d(sram_datao'range);
+  sram_o.a(sram_o.a'left downto 17) <= (others => '0');
+  sram_o.a(16 downto 14) <= sram_bank;
+  sram_o.a(13 downto 0) <= uP_addr(13 downto 0);
+  sram_o.d <= std_logic_vector(RESIZE(unsigned(uP_datao), sram_o.d'length));
+  sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
+  sram_o.cs <= '1';
+  sram_o.oe <= not sram_wr;
+  sram_o.we <= sram_wr;
+    
 	-- memory chip selects
-	-- ROM $0000-$07FF
-	rom_cs <= '1' when uP_addr(15 downto 11) = "00000" else '0';
+	-- ROM (2KB) $0000-$07FF
+	rom_cs <=       '1' when STD_MATCH(uP_addr, "00000-----------") else '0';
+	-- RAM (2KB) $8000-$0FFF
+  ram_cs <=       '1' when STD_MATCH(uP_addr, "00001-----------") else '0';
+	-- special I/O $1000-$1FFF
+  sio_cs <=       '1' when STD_MATCH(up_addr, "0001------------") else '0';
 	-- KEYBOARD $3800-$38FF
-	kbd_cs <= '1' when uP_addr(15 downto 10) = (X"3" & "10") else '0';
-	-- VRAM
-	vram_cs <= '1' when uP_addr(15 downto 10) = (X"3" & "11") else '0';
-	-- RAM
-  ram_cs <= '1' when uP_addr(15 downto 14) = "01" else
-            '1' when (uP_addr(15 downto 14) = "10" and TRS80_M3_RAM_SIZE > 16) else
-            '1' when (uP_addr(15 downto 14) = "11" and TRS80_M3_RAM_SIZE > 32) else
-            '0';
+	kbd_cs <=       '1' when STD_MATCH(uP_addr, "00111000--------") else '0';
+	-- VRAM $3C00-$3FFF
+	vram_cs <=      '1' when STD_MATCH(uP_addr, "001111----------") else '0';
+  -- GUEST ROM (16KB) $4000-$7FFF
+  guestrom_cs <=  '1' when STD_MATCH(uP_addr, "01--------------") else '0';
+  -- SRAM (16KB) $8000-$BFFF
+  sram_cs <=      '1' when STD_MATCH(uP_addr, "10--------------") else '0';
   
 	-- memory write enables
-	vram_wr <= vram_cs and uPmemwr;
-	-- always write thru to RAM
 	ram_wr <= ram_cs and uPmemwr;
-
+	vram_wr <= vram_cs and uPmemwr;
+  sram_wr <= sram_cs and uPmemwr;
+  
 	-- memory read mux
 	uPmem_datai <= 	rom_datao when rom_cs = '1' else
+									ram_datao when ram_cs = '1' else
+									sio_data when sio_cs = '1' else
 									kbd_data when kbd_cs = '1' else
 									vram_datao when vram_cs = '1' else
-									ram_datao when ram_cs = '1' else
+									guestrom_datao when guestrom_cs = '1' else
+									sram_datao when sram_cs = '1' else
                   X"FF";
 	
 	-- io read mux
 	uPio_datai <= X"FF";
-		
+
+  BLK_SIO : block
+  begin
+    process (clk_sys)
+      variable a : integer range 0 to 7 := 0;
+    begin
+      a := to_integer(unsigned(up_addr(2 downto 0)));
+      if rising_edge(clk_sys) then
+        if up_addr(3) = '0' then
+          sio_data <= "0000" & LDR_BANK;
+        else
+          sio_data <= std_logic_vector(to_unsigned(character'pos(LDR_NAME(a+1)),8));
+        end if;
+      end if;
+    end process;
+
+    sram_bank <= LDR_BANK(2 downto 0);
+
+  end block BLK_SIO;
+  
 	KBD_MUX : process (uP_addr, inputs_i)
   	variable kbd_data_v : std_logic_vector(7 downto 0);
 	begin
@@ -267,6 +287,16 @@ begin
 			q					=> rom_datao
 		);
 	
+	ram_inst : entity work.trs80_ram
+    port map
+    (
+      clock		  => clk_sys,
+      address		=> up_addr(10 downto 0),
+      data		  => up_datao,
+      wren		  => ram_wr,
+      q		      => ram_datao
+    );
+
 	tilerom_inst : entity work.trs80_tile_rom
 		port map
 		(
@@ -292,6 +322,14 @@ begin
 			q_a					=> tilemap_o.map_d(7 downto 0)
 		);
 	tilemap_o.map_d(tilemap_o.map_d'left downto 8) <= (others => '0');
+
+  guestrom_inst : entity work.guest_rom
+    port map
+    (
+      clock			=> clk_sys,
+      address		=> up_addr(13 downto 0),
+      q					=> guestrom_datao
+    );
 
   -- unused outputs
 	sprite_reg_o <= NULL_TO_SPRITE_REG;

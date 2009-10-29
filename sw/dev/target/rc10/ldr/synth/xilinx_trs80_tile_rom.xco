@@ -1,7 +1,7 @@
 ##############################################################
 #
 # Xilinx Core Generator version J.39
-# Date: Thu Oct 29 00:14:39 2009
+# Date: Thu Oct 29 01:59:07 2009
 #
 ##############################################################
 #
@@ -18,13 +18,13 @@ SET asysymbol = False
 SET busformat = BusFormatAngleBracketNotRipped
 SET createndf = False
 SET designentry = VHDL
-SET device = xc3s250e
-SET devicefamily = spartan3e
+SET device = xc3s1500l
+SET devicefamily = spartan3
 SET flowvendor = Foundation_iSE
 SET formalverification = False
 SET foundationsym = False
 SET implementationfiletype = Ngc
-SET package = pq208
+SET package = fg320
 SET removerpms = False
 SET simulationfiles = Behavioral
 SET speedgrade = -4
@@ -37,8 +37,8 @@ SELECT Single_Port_Block_Memory family Xilinx,_Inc. 6.2
 # BEGIN Parameters
 CSET active_clock_edge=Rising_Edge_Triggered
 CSET additional_output_pipe_stages=0
-CSET coefficient_file=..\src\roms\trs80_m3_rom.coe
-CSET component_name=xilinx_trs80_rom
+CSET coefficient_file=..\..\..\cb\ldr\src\roms\trs80_tile_rom.coe
+CSET component_name=xilinx_trs80_tile_rom
 CSET depth=2048
 CSET disable_warning_messages=true
 CSET enable_pin=false
@@ -60,5 +60,5 @@ CSET write_enable_polarity=Active_High
 CSET write_mode=Read_After_Write
 # END Parameters
 GENERATE
-# CRC: b8984f43
+# CRC: 9e37ec4a
 

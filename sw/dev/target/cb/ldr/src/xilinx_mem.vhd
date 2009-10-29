@@ -204,3 +204,42 @@ begin
       WEB => wren_b       -- Port B Write Enable Input
    );
 end architecture SYN;
+
+--
+-- ************************************************************************
+--    Here are all the guest roms
+--    - only one will be instantiated in the platform
+-- ************************************************************************
+--
+
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+ENTITY pacman_rom IS
+	PORT
+	(
+		address		: IN STD_LOGIC_VECTOR (13 DOWNTO 0);
+		clock		: IN STD_LOGIC ;
+		q		: OUT STD_LOGIC_VECTOR (7 DOWNTO 0)
+	);
+END entity pacman_rom;
+
+architecture SYN of pacman_rom is
+  component xilinx_pacrom is
+    port
+    (
+      clk     : in std_logic;
+      addr    : in std_logic_vector(13 downto 0);
+      dout    : out std_logic_vector(7 downto 0)
+    );
+  end component xilinx_pacrom;
+begin
+  rom_inst : xilinx_pacrom
+    port map
+    (
+      clk     => clock,
+      addr    => address,
+      dout    => q
+    );
+end architecture SYN;
