@@ -17,13 +17,13 @@ package project_pkg is
 	constant PACE_HAS_PLL											: boolean := true;
   --constant PACE_SRAM                        : boolean := false;
   
-  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
-  constant PACE_CLK0_DIVIDE_BY        			: natural := 4;		-- 48*2/4 = 24MHz
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 2;
-  constant PACE_CLK1_DIVIDE_BY        			: natural := 6;
-  constant PACE_CLK1_MULTIPLY_BY      			: natural := 5;  	-- 48*5/6 = 40MHz
-	constant PACE_VIDEO_H_SCALE         			: integer := 2;
-	constant PACE_VIDEO_V_SCALE         			: integer := 2;
+  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_640x480_60Hz;
+  constant PACE_CLK0_DIVIDE_BY              : natural := 12;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 5;   -- 48*5/12 = 20MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 21;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 11;  -- 48*11/21 = 25.143MHz
+	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
+	constant PACE_VIDEO_V_SCALE       	      : integer := 2;
 
   constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
   --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
@@ -37,8 +37,17 @@ package project_pkg is
   constant RC10_EMULATE_SRAM                : boolean := true;
   constant RC10_EMULATED_SRAM_KB            : natural := 16;
   
-	-- Pacman-specific constants
-			
+	-- LDR-specific constants
+
+  type LDR_Platform_t is
+  (
+    PLATFORM_PACMAN
+  );
+
+  constant LDR_PLATFORM       : LDR_Platform_t := PLATFORM_PACMAN;
+  constant LDR_NAME           : string := "PACMAN  ";
+  constant LDR_BANK           : std_logic_vector(3 downto 0) := X"0";
+  
   type from_PROJECT_IO_t is record
     not_used  : std_logic;
   end record;
