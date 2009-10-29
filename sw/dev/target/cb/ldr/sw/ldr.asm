@@ -79,9 +79,12 @@ vfyloop:
 
 vfyfail:
         ld      hl,#vfmsg
-        jr      vfyprt        
+        ld      de,#vram+0x180
+        call    print_string
+        jp      loop
+
 vfyok:  ld      hl,#vokmsg
-vfyprt: ld      de,#vram+0x180
+        ld      de,#vram+0x180
         call    print_string
 
         ld      hl,#bitmsg

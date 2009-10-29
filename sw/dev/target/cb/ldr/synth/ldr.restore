@@ -792,7 +792,6 @@ proc restore { { project_dir "" } } {
       "../../../../../src/target/cb/target_pkg_250.vhd" 
       "../../../../../src/target/cb/target_top.vhd" 
       "../../../../../synth/device/3e250/pll.vhd" 
-      "../../../../../synth/platform/pacman/cb/xilinx_pacrom.xco" 
       "../src/inputmapper.vhd" 
       "../src/platform.vhd" 
       "../src/platform_pkg.vhd" 
@@ -810,11 +809,6 @@ proc restore { { project_dir "" } } {
   } "A problem occured while restoring user files."
 
   set imported_files { 
-      "../../../../../synth/platform/pacman/cb/xilinx_pacrom.ngc" 
-      "../../../../../synth/platform/pacman/cb/xilinx_pacrom.v" 
-      "../../../../../synth/platform/pacman/cb/xilinx_pacrom.veo" 
-      "../../../../../synth/platform/pacman/cb/xilinx_pacrom.vhd" 
-      "../../../../../synth/platform/pacman/cb/xilinx_pacrom.vho" 
       "ps2_host_fifo.ngc" 
       "ps2_host_fifo.v" 
       "ps2_host_fifo.veo" 
