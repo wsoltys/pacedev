@@ -791,15 +791,15 @@ proc restore { { project_dir "" } } {
       "../../../../../src/platform/midway8080/bitmapctl.vhd" 
       "../../../../../src/platform/midway8080/invaders/invaders_audio.vhd" 
       "../../../../../src/platform/midway8080/invaders/platform_variant_pkg.vhd" 
-      "../../../../../src/platform/midway8080/invaders/xilinx_mem.vhd" 
       "../../../../../src/platform/midway8080/platform.vhd" 
       "../../../../../src/platform/midway8080/platform_pkg.vhd" 
+      "../../../../../src/platform/midway8080/xilinx_mem.vhd" 
       "../../../../../src/target/rc10/target_pkg.vhd" 
       "../../../../../src/target/rc10/target_top.vhd" 
       "../../../../device/3s1500/pll.vhd" 
       "project_pkg.vhd" 
       "target_top.ucf" 
-      "xilinx_invaders_rom.xco" 
+      "xilinx_invaders_rom_0.xco" 
       "xilinx_invaders_vram.xco"}
 
   HandleException {
@@ -808,11 +808,11 @@ proc restore { { project_dir "" } } {
 
   set imported_files { 
       "target_top_guide.ncd" 
-      "xilinx_invaders_rom.ngc" 
-      "xilinx_invaders_rom.v" 
-      "xilinx_invaders_rom.veo" 
-      "xilinx_invaders_rom.vhd" 
-      "xilinx_invaders_rom.vho" 
+      "xilinx_invaders_rom_0.ngc" 
+      "xilinx_invaders_rom_0.v" 
+      "xilinx_invaders_rom_0.veo" 
+      "xilinx_invaders_rom_0.vhd" 
+      "xilinx_invaders_rom_0.vho" 
       "xilinx_invaders_vram.ngc" 
       "xilinx_invaders_vram.v" 
       "xilinx_invaders_vram.veo" 

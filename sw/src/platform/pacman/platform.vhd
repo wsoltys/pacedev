@@ -139,20 +139,21 @@ begin
 
   cpu_reset <= reset_i or game_reset;
 
-	GEN_EXTERNAL_WRAM : if not PACMAN_USE_INTERNAL_WRAM generate
-	
+	GEN_EXTERNAL_WRAM : if PACE_HAS_SRAM generate
+    
 	  -- SRAM signals (may or may not be used)
 	  sram_o.a <= std_logic_vector(resize(unsigned(uP_addr), sram_o.a'length));
 		wram_datao <= sram_i.d(wram_datao'range);
 	  sram_o.d <= std_logic_vector(resize(unsigned(uP_datao), sram_o.d'length));
 		sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
 	  sram_o.cs <= '1';
-	  sram_o.oe <= wram_cs and not uPmemwr;
+	  sram_o.oe <=  '1' when ((wram_cs = '1' or (rom_cs = '1' and PACMAN_ROM_IN_SRAM)) and uPmemwr = '0') else 
+                  '0';
 	  sram_o.we <= wram_wr;
 	
 	end generate GEN_EXTERNAL_WRAM;
 
-	GEN_NO_SRAM : if PACMAN_USE_INTERNAL_WRAM generate
+	GEN_NO_SRAM : if not PACE_HAS_SRAM generate
     sram_o <= NULL_TO_SRAM;
 	end generate GEN_NO_SRAM;
 	
@@ -282,14 +283,20 @@ begin
       nmi    	=> '0'
     );
 
-	rom_inst : entity work.prg_rom
-		port map
-		(
-			clock			=> clk_sys,
-			address		=> up_addr(13 downto 0),
-			q					=> rom_datao
-		);
-	
+  GEN_INTERNAL_ROM : if not PACMAN_ROM_IN_SRAM generate
+    rom_inst : entity work.prg_rom
+      port map
+      (
+        clock			=> clk_sys,
+        address		=> up_addr(13 downto 0),
+        q					=> rom_datao
+      );
+  end generate GEN_INTERNAL_ROM;
+
+  GEN_SRAM_ROM : if PACMAN_ROM_IN_SRAM generate
+    rom_datao <= sram_i.d(rom_datao'range);
+  end generate GEN_SRAM_ROM;
+  
 	vram_inst : entity work.vram
 		port map
 		(
