@@ -3,6 +3,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 
 library work;
+use work.pace_pkg.all;
 use work.project_pkg.all;
 use work.target_pkg.all;
 
@@ -24,7 +25,32 @@ package platform_pkg is
 	--
 	-- Platform-specific constants (optional)
 	--
+		constant CLK0_FREQ_MHz		            : natural := 
+    PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
+  constant CPU_FREQ_MHz                 : natural := 2;  -- should be a "real" for 1.77MHz
 
 	constant INCLUDE_FDC_SUPPORT			: boolean := false;
+	
+	  type from_PLATFORM_IO_t is record
+  
+    sram_i              : from_SRAM_t;
+    
+    floppy_fifo_clk     : std_logic;
+    floppy_fifo_data    : std_logic_vector(7 downto 0);
+    floppy_fifo_wr      : std_logic;
+    
+  end record;
+
+  type to_PLATFORM_IO_t is record
+  
+    sram_o              : to_SRAM_t;
+    
+    floppy_track        : std_logic_vector(7 downto 0);
+    --floppy_offset       : std_logic_vector(12 downto 0);
+    floppy_fifo_full    : std_logic;
+
+    seg7                : std_logic_vector(15 downto 0);
+    
+  end record;
 
 end;
