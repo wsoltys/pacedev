@@ -38,11 +38,13 @@ package project_pkg is
 
 	-- Pacman-specific constants
 			
-	constant PACMAN_USE_VIDEO_VBLANK          : boolean := true;
+  constant PACMAN_ROM_IN_SRAM               : boolean := true;
 	constant PACMAN_USE_INTERNAL_WRAM				  : boolean := false;
+	constant PACMAN_USE_VIDEO_VBLANK          : boolean := true;
 	
 	-- derived
-  constant PACE_HAS_SRAM                    : boolean := not PACMAN_USE_INTERNAL_WRAM;
+  constant PACE_HAS_SRAM                    : boolean := PACMAN_ROM_IN_SRAM or
+                                                          not PACMAN_USE_INTERNAL_WRAM;
 	
   type from_PROJECT_IO_t is record
     not_used  : std_logic;

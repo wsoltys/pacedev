@@ -378,12 +378,29 @@ begin
   begin
   
     GEN_SRAM : if PACE_HAS_SRAM generate
+    
       sram_a <= sram_o.a(sram_a'range);
       sram_d <= sram_o.d(sram_d'range) when sram_o.cs = '1' and sram_o.we = '1' else (others => 'Z');
       sram_ncs <= '1' & not sram_o.cs;
       sram_noe <= not sram_o.oe;
-      sram_nwe <= not sram_o.we;
+      --sram_nwe <= not sram_o.we;
       sram_i.d <= std_logic_vector(resize(unsigned(sram_d),sram_i.d'length));
+      
+      -- pulse the we
+      process (clk_i(0), reset_i)
+        variable we_r : std_logic := '0';
+      begin
+        if reset_i = '1' then
+          we_r := '0';
+        elsif rising_edge(clk_i(0)) then
+          sram_nwe <= '1';  -- default
+          if we_r = '0' and sram_o.we = '1' then
+            sram_nwe <= '0';
+          end if;
+          we_r := sram_o.we;
+        end if;
+      end process;
+      
     end generate GEN_SRAM;
 
     GEN_NO_SRAM : if not PACE_HAS_SRAM generate
