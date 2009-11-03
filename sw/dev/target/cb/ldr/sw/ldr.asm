@@ -51,6 +51,12 @@ l1:     ld      a,(hl)
         ld      de,#vram+0x100
         call    print_string
 
+        ld      a,#3
+        ld      (w_rty),a
+cpystart:
+        ld      a,#9
+        ld      (r_rty),a
+
         ;* copy ROM to SRAM
         ld      hl,#guest_rom
         ld      de,#sram
@@ -61,6 +67,7 @@ l1:     ld      a,(hl)
         ld      de,#vram+0x140
         call    print_string
 
+vfystart:
         ;* verify ROM data
         ld      hl,#guest_rom
         ld      de,#sram
@@ -78,6 +85,15 @@ vfyloop:
         jr      vfyok
 
 vfyfail:
+        ld      a,(r_rty)
+        dec     a
+        ld      (r_rty),a
+        jr      NZ,vfystart
+        ld      a,(w_rty)
+        dec     a
+        ld      (w_rty),a
+        jr      NZ,cpystart
+
         ld      hl,#vfmsg
         ld      de,#vram+0x180
         call    print_string
@@ -85,6 +101,18 @@ vfyfail:
 
 vfyok:  ld      hl,#vokmsg
         ld      de,#vram+0x180
+        ld      a,(r_rty)
+        ld      b,a
+        ld      a,#4
+        sub     a,b
+        add     a,#30
+        ld      (rcnt),a
+        ld      a,(w_rty)
+        ld      b,a
+        ld      a,#4
+        sub     a,b
+        add     a,#30
+        ld      (wcnt),a
         call    print_string
 
         ld      hl,#bitmsg
@@ -151,6 +179,10 @@ cls:
         ld      (hl),#0x20
         ldir
         ret
+
+r_rty:  .db   #0
+w_rty:  .db   #0
+
 title:
         .ascii  /Carte Blanche ROM Loader v0.1/
 		    .db		#0
@@ -164,7 +196,11 @@ vfmsg:
         .ascii  /ROM data verify failed!/
 		    .db		#0
 vokmsg:
-        .ascii  /ROM data verified!/
+        .ascii  /ROM data verified! (/
+rcnt:   .db     #0
+        .ascii  /,/
+wcnt:   .db     #0
+        .ascii  /)/
 		    .db		#0
 bitmsg:
         .ascii  /Now program the FPGA with the game bitstream.../

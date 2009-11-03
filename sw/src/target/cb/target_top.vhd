@@ -272,7 +272,7 @@ begin
     
       -- fudge - extend keypress for 1 frame
       process (clk_14M31818, reset_i)
-        subtype count_t is integer range 0 to 14318181/60;
+        subtype count_t is integer range 0 to 14318181/59;
         variable count : count_t;
       begin
         if reset_i = '1' then
@@ -309,9 +309,9 @@ begin
                 inputs_i.jamma_n.p(1).left <= '0';
               when "0010101" | "1011000" | "1111000" =>
                 inputs_i.jamma_n.p(1).right <= '0';
-              when "0001011" =>
+              when "0001011" | "1010001" | "1110001" =>
                 inputs_i.jamma_n.p(1).up <= '0';
-              when "0001010" =>
+              when "0001010" | "1000001" | "1100001" =>
                 inputs_i.jamma_n.p(1).down <= '0';
               when others =>
                 null;
@@ -383,21 +383,23 @@ begin
       sram_d <= sram_o.d(sram_d'range) when sram_o.cs = '1' and sram_o.we = '1' else (others => 'Z');
       sram_ncs <= '1' & not sram_o.cs;
       sram_noe <= not sram_o.oe;
-      --sram_nwe <= not sram_o.we;
-      sram_i.d <= std_logic_vector(resize(unsigned(sram_d),sram_i.d'length));
+      sram_nwe <= not sram_o.we;
+      --sram_i.d <= std_logic_vector(resize(unsigned(sram_d),sram_i.d'length));
       
-      -- pulse the we
+      -- pulse the we for 2 clocks
       process (clk_i(0), reset_i)
-        variable we_r : std_logic := '0';
+        variable we_r : std_logic_vector(1 downto 0) := "00";
       begin
         if reset_i = '1' then
-          we_r := '0';
+          we_r := (others => '0');
         elsif rising_edge(clk_i(0)) then
-          sram_nwe <= '1';  -- default
-          if we_r = '0' and sram_o.we = '1' then
-            sram_nwe <= '0';
+          --sram_nwe <= '1';  -- default
+          if we_r(1) = '0' and sram_o.we = '1' then
+            --sram_nwe <= '0';
           end if;
-          we_r := sram_o.we;
+          we_r := we_r(0) & sram_o.we;
+          -- latch data in
+          sram_i.d <= std_logic_vector(resize(unsigned(sram_d),sram_i.d'length));
         end if;
       end process;
       
