@@ -68,11 +68,25 @@ cpystart:
         ld      bc,#0x4000
         ldir
 
+vfystart:
         ld      hl,#vfymsg
         ld      de,#vram+0x140
         call    print_string
 
-vfystart:
+        ;* show the read,write retry count
+        ld      a,(r_rty)
+        ld      b,a
+        ld      a,#0x0A
+        sub     a,b
+        add     a,#0x30
+        ld      (#vram+0x140+20),a
+        ld      a,(w_rty)
+        ld      b,a
+        ld      a,#0x04
+        sub     a,b
+        add     a,#0x30
+        ld      (#vram+0x140+22),a
+
         ;* verify ROM data
         ld      hl,#guest_rom
         ld      de,#sram
@@ -92,18 +106,6 @@ vfyloop:
 vfyok:  ld      hl,#vokmsg
         ld      de,#vram+0x180
         call    print_string
-        ld      a,(r_rty)
-        ld      b,a
-        ld      a,#0x0A
-        sub     a,b
-        add     a,#0x30
-        ld      (#vram+0x180+20),a
-        ld      a,(w_rty)
-        ld      b,a
-        ld      a,#0x04
-        sub     a,b
-        add     a,#0x30
-        ld      (#vram+0x180+22),a
 
         ld      hl,#bitmsg
         ld      de,#vram+0x200
@@ -210,15 +212,16 @@ cpymsg:
         .ascii  /Copying ROM to SRAM/
 		    .db		#0
 vfymsg:
-        .ascii  /Verifying ROM data/
+        .ascii  /Verifying ROM data (0/
+        .db   #0x2F
+        .ascii  /0).../
+		    .db		#0
 		    .db		#0
 vfmsg:
         .ascii  /ROM data verify failed @$0000,$00!=$00/
 		    .db		#0
 vokmsg:
-        .ascii  /ROM data verified! (0/
-        .db   #0x2F
-        .ascii  /0)/
+        .ascii  /ROM data verified OK!/
 		    .db		#0
 bitmsg:
         .ascii  /Now program the FPGA with the game bitstream.../
