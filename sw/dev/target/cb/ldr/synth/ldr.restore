@@ -966,7 +966,7 @@ proc restore { { project_dir "" } } {
       "A" "" "" "" "PROP_xilxBitgCfg_TMS" "Pull Up" 
       "A" "" "" "" "PROP_xilxBitgCfg_Unused" "Pull Down" 
       "A" "" "" "" "PROP_xilxBitgReadBk_Sec" "Enable Readback and Reconfiguration" 
-      "A" "" "" "" "PROP_xilxBitgStart_Clk" "CCLK" 
+      "A" "" "" "" "PROP_xilxBitgStart_Clk" "JTAG Clock" 
       "A" "" "" "" "PROP_xilxBitgStart_Clk_Done" "Default (4)" 
       "A" "" "" "" "PROP_xilxBitgStart_Clk_DriveDone" "false" 
       "A" "" "" "" "PROP_xilxBitgStart_Clk_EnOut" "Default (5)" 

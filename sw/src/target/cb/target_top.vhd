@@ -378,7 +378,8 @@ begin
   begin
   
     GEN_SRAM : if PACE_HAS_SRAM generate
-    
+      signal we_r : std_logic_vector(1 downto 0) := "00";
+    begin
       sram_a <= sram_o.a(sram_a'range);
       sram_d <= sram_o.d(sram_d'range) when sram_o.cs = '1' and sram_o.we = '1' else (others => 'Z');
       sram_ncs <= '1' & not sram_o.cs;
@@ -388,16 +389,16 @@ begin
       
       -- pulse the we for 2 clocks
       process (clk_i(0), reset_i)
-        variable we_r : std_logic_vector(1 downto 0) := "00";
+        --variable we_r : std_logic_vector(1 downto 0) := "00";
       begin
         if reset_i = '1' then
-          we_r := (others => '0');
+          we_r <= (others => '0');
         elsif rising_edge(clk_i(0)) then
           --sram_nwe <= '1';  -- default
           if we_r(1) = '0' and sram_o.we = '1' then
             --sram_nwe <= '0';
           end if;
-          we_r := we_r(0) & sram_o.we;
+          we_r <= we_r(0) & sram_o.we;
           -- latch data in
           sram_i.d <= std_logic_vector(resize(unsigned(sram_d),sram_i.d'length));
         end if;
