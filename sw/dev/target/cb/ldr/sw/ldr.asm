@@ -7,7 +7,12 @@
         vram = 0x3c00
         guest_rom = 0x4000
         sram = 0x8000
-        
+
+        ; variables
+        r_rty = #ram
+        w_rty = #ram+1
+        rback = #ram+2
+                        
         .area   main (ABS)
 
         ;*
@@ -84,7 +89,30 @@ vfyloop:
         jr      NZ,vfyloop
         jr      vfyok
 
+vfyok:  ld      hl,#vokmsg
+        ld      de,#vram+0x180
+        call    print_string
+        ld      a,(r_rty)
+        ld      b,a
+        ld      a,#0x0A
+        sub     a,b
+        add     a,#0x30
+        ld      (#vram+0x180+20),a
+        ld      a,(w_rty)
+        ld      b,a
+        ld      a,#0x04
+        sub     a,b
+        add     a,#0x30
+        ld      (#vram+0x180+22),a
+
+        ld      hl,#bitmsg
+        ld      de,#vram+0x200
+        call    print_string
+        
+        jp      loop
+
 vfyfail:
+        ld      (rback),a         ; save read-back value
         ld      a,(r_rty)
         dec     a
         ld      (r_rty),a
@@ -94,31 +122,30 @@ vfyfail:
         ld      (w_rty),a
         jr      NZ,cpystart
 
+        exx
         ld      hl,#vfmsg
         ld      de,#vram+0x180
         call    print_string
-        jp      loop
+        exx        
 
-vfyok:  ld      hl,#vokmsg
-        ld      de,#vram+0x180
-        ld      a,(r_rty)
-        ld      b,a
-        ld      a,#4
-        sub     a,b
-        add     a,#30
-        ld      (rcnt),a
-        ld      a,(w_rty)
-        ld      b,a
-        ld      a,#4
-        sub     a,b
-        add     a,#30
-        ld      (wcnt),a
-        call    print_string
-
-        ld      hl,#bitmsg
-        ld      de,#vram+0x200
-        call    print_string
-        
+        push    hl                ; rom address        
+        push    de                ; sram address
+        ld      c,d
+        ld      de,#vram+0x180+25
+        call    show_hex          ; address high byte
+        pop     bc
+        call    show_hex          ; address low byte
+        pop     hl                ; rom address
+        ld      c,(hl)
+        inc     de
+        inc     de
+        call    show_hex          ; rom value
+        ld      a,(rback)
+        ld      c,a
+        inc     de                
+        inc     de                
+        inc     de                
+        call    show_hex          ; sram read-back value
         jp      loop
 
         ;*
@@ -162,15 +189,11 @@ sh_1:   exx
         ld      a,(hl)          ; get ascii digit
         exx
         ld      (de),a          ; store in ram
-        ld		a,e
-        sub		#0x20
-        ld		e,a
-        ret		NC
-        dec		d
+        inc     de              ; next character position
         ret
 hex_dig:
-		.db		#0x00, #0x01, #0x02, #0x03, #0x04, #0x05, #0x06, #0x07
-		.db		#0x08, #0x09, #0x11, #0x12, #0x13, #0x14, #0x15, #0x16
+		.db		#0x30, #0x31, #0x32, #0x33, #0x34, #0x35, #0x36, #0x37
+		.db		#0x38, #0x39, #0x41, #0x42, #0x43, #0x44, #0x45, #0x46
 
 cls:
         ld      hl,#vram
@@ -180,11 +203,8 @@ cls:
         ldir
         ret
 
-r_rty:  .db   #0
-w_rty:  .db   #0
-
 title:
-        .ascii  /Carte Blanche ROM Loader v0.1/
+        .ascii  /Carte Blanche ROM Loader v0.2/
 		    .db		#0
 cpymsg:
         .ascii  /Copying ROM to SRAM/
@@ -193,14 +213,12 @@ vfymsg:
         .ascii  /Verifying ROM data/
 		    .db		#0
 vfmsg:
-        .ascii  /ROM data verify failed!/
+        .ascii  /ROM data verify failed @$0000,$00!=$00/
 		    .db		#0
 vokmsg:
-        .ascii  /ROM data verified! (/
-rcnt:   .db     #0
-        .ascii  /,/
-wcnt:   .db     #0
-        .ascii  /)/
+        .ascii  /ROM data verified! (0/
+        .db   #0x2F
+        .ascii  /0)/
 		    .db		#0
 bitmsg:
         .ascii  /Now program the FPGA with the game bitstream.../
