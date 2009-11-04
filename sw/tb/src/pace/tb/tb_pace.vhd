@@ -64,6 +64,8 @@ begin
   video_i.reset <= reset_i;
 
   GEN_SRAM : if PACE_HAS_SRAM generate
+    signal we_r : std_logic_vector(1 downto 0) := "00";
+  begin
   
     sram_a <= sram_o.a(sram_a'range);
     sram_d <= sram_o.d(sram_d'range) when sram_o.cs = '1' and sram_o.we = '1' else (others => 'Z');
@@ -72,22 +74,19 @@ begin
     --sram_nwe <= not sram_o.we;
     --sram_i.d <= std_logic_vector(resize(unsigned(sram_d),sram_i.d'length));
     
-    -- pulse the we
+    -- pulse the we for 2 clocks
     process (clk_i(0), reset_i)
-      variable we_r : std_logic := '0';
+      --variable we_r : std_logic_vector(1 downto 0) := "00";
     begin
       if reset_i = '1' then
-        we_r := '0';
+        we_r <= (others => '0');
       elsif rising_edge(clk_i(0)) then
         sram_nwe <= '1';  -- default
-        if we_r = '0' and sram_o.we = '1' then
+        if we_r(1) = '0' and sram_o.we = '1' then
           sram_nwe <= '0';
         end if;
-        we_r := sram_o.we;
-        -- latch read data, because cpu latches data on falling edge MEM_RD
-        -- and A changes at the same time DI is latched
-        -- so if clock-to-input(DI) is slower than clock-to-out(A)
-        -- we could be getting corrupt reads?!?
+        we_r <= we_r(0) & sram_o.we;
+        -- latch data in
         sram_i.d <= std_logic_vector(resize(unsigned(sram_d),sram_i.d'length));
       end if;
     end process;
