@@ -142,8 +142,7 @@ entity mce6809_mcode is
 		-- Inputs
 		clk						: in  std_logic;
 		clken					: in  std_logic;
-		ir						: in std_logic_vector(7 downto 0);
-		ir_page				: in ir_page_type;
+		ir						: in std_logic_vector(11 downto 0);
 		mc_addr				: in mc_state_type;
 		dbus					: in std_logic_vector(7 downto 0);
 		rpost					: in std_logic_vector(7 downto 0);
@@ -191,7 +190,7 @@ architecture SYN of mce6809_mcode is
 	signal alu_op			:	alu_type;
 begin
 	-- CPU microcode
-	mc_table: process(ir, ir_page, mc_addr, alu_op, dbus, rpost)
+	mc_table: process(ir, mc_addr, alu_op, dbus, rpost)
 		variable rpost_hi_nib : integer;
 		variable rpost_lo_nib : integer;
 	begin
@@ -224,12 +223,12 @@ begin
 			ir_ctrl <= load_2nd_ir;
 			dbus_ctrl <= dbus_mem;
 			ld(IPOST) <= '1';
-			if (ir_page /= ir_page0) or (ir(7 downto 4) >= X"6" or ir = X"1E") then
+			if (ir(9 downto 8) /= "00") or (ir(7 downto 4) >= X"6" or ir = X"01E") then
 				pc_ctrl <= incr_pc;
 			else
 				pc_ctrl <= latch_pc;
 			end if;
-			if ir_page /= ir_page0 and (dbus = X"10" or dbus = X"11") then
+			if ir(9 downto 8) /= "00" and (dbus = X"10" or dbus = X"11") then
 				mc_jump <= '1';
 				mc_jump_addr <= mc_fetch1;
 			end if;
@@ -237,8 +236,8 @@ begin
 
 		-- Instruction decode
 		if mc_addr /= mc_fetch0 then
-			case ir(7 downto 4) is
-			when X"1" =>
+			case ir(11 downto 4) is
+			when X"01" =>
 				case ir(3 downto 0) is
 				when X"2" =>		-- NOP
 					mc_jump <= '1';
@@ -326,24 +325,26 @@ begin
 					mc_jump_addr <= mc_fetch0;	
 				end case;
 
-			when X"8" | X"C" =>
+			when X"08" | X"0C" | X"28" | X"2C" | X"38"  =>
 				case ir(3 downto 0) is 
 				when X"0" | X"1" | X"2" | X"4" | X"6" | X"8" | X"9" | X"A" | X"B" =>	-- ALUOP A,B immed
-					pc_ctrl <= incr_pc;
-					mc_jump <= '1';
-					mc_jump_addr <= mc_fetch0;
-					--pc_ctrl <= latch_pc;
-					alu_ctrl <= alu_op;
-					dbus_ctrl <= dbus_mem;
-					if ir(7 downto 4) = X"8" then
-						ld(IA) <= '1';
-					else
-						ld(IB) <= '1';
-					end if;
+					--if mc_addr = mc_fetch1 then
+						pc_ctrl <= incr_pc;
+						mc_jump <= '1';
+						mc_jump_addr <= mc_fetch0;
+						--pc_ctrl <= latch_pc;
+						alu_ctrl <= alu_op;
+						dbus_ctrl <= dbus_mem;
+						if ir(7 downto 4) = X"8" then
+							ld(IA) <= '1';
+						else
+							ld(IB) <= '1';
+						end if;
+					--end if;
 				when others =>
 				end case;
 
-			when X"9" | X"D" =>
+			when X"09" | X"0D" | X"29" | X"2D" | X"39" =>
 				case ir(3 downto 0) is 
 				when X"0" | X"1" | X"2" | X"4" | X"6" | X"8" | X"9" | X"A" | X"B" =>	-- ALUOP A,B direct
 					case mc_addr is
@@ -393,7 +394,7 @@ begin
 				when others =>
 				end case;
 
-			when X"A" | X"E" =>
+			when X"0A" | X"0E" | X"2A" | X"2E" | X"3A" =>
 				case ir(3 downto 0) is 
 				when X"0" | X"1" | X"2" | X"4" | X"6" | X"8" | X"9" | X"A" | X"B" =>	-- ALUOP A,B index
 					case mc_addr is
@@ -403,7 +404,7 @@ begin
 				when others =>
 				end case;
 
-			when X"B" | X"F" =>
+			when X"0B" | X"0F" | X"2B" | X"2F" | X"3B" =>
 				case ir(3 downto 0) is 
 				when X"0" | X"1" | X"2" | X"4" | X"6" | X"8" | X"9" | X"A" | X"B" =>	-- ALUOP A,B extended
 					case mc_addr is
@@ -430,7 +431,7 @@ begin
 				when others =>
 				end case;
 
-			when X"4" | X"5" =>
+			when X"04" | X"05" =>
 				case ir(3 downto 0) is
 				when X"3" | X"A" | X"C" =>	-- A,B inheren
 					mc_jump <= '1';
@@ -451,7 +452,7 @@ begin
 	end process;
 
 	-- ALU control
-	alu_in: process(ir, ir_page)
+	alu_in: process(ir)
 	begin
 		-- ALU_ADD <== "1---10-1" || "11--0011" || "01--1100" || "00001100"
 		--ALU_SUB <== "1---0001" || $10 & "10--0011" || $11 & "10--1100" || $11 & "10--0011" || "1---1100" || 
@@ -464,17 +465,18 @@ begin
 
 		alu_op <= alu_idle;
 		-- Addition 
-		if STD_MATCH(ir, "1---10-1") or STD_MATCH(ir, "11--0011") or STD_MATCH(ir, "01--1100") or (ir = X"0C") then
+		if std_match(ir, "----1---10-1") or std_match(ir, "----11--0011") or std_match(ir, "----01--1100") or std_match(ir, "----00001100") then
 			alu_op <= alu_add;
 		end if;
-		-- Subtraction "1XXX0001" | "XXXX0000" | "10XX0011" | "01XX1101" | "1XXX0010"
-		if ((ir and X"8F") = X"81") or ((ir and X"0F") = X"00") or ((ir and X"CF") = X"4D") or ((ir and X"8F") = X"02") then
+		if     std_match(ir, "----1---0001") or std_match(ir, "--1010--0011") or std_match(ir, "--1110--1100") 
+				or std_match(ir, "--1110--0011") or std_match(ir, "----1---1100") or std_match(ir, "--1010--1100") 
+				or std_match(ir, "----01--1010") or std_match(ir, "----1---00-0") or std_match(ir, "----10--0011") then
 			alu_op <= alu_sub;
 		end if;
 	end process;
 
 	-- ALU left input
-	left_in: process(ir, ir_page)
+	left_in: process(ir)
 	begin
 		case ir(7 downto 4) is
 		when X"8" | X"9" | X"A" | X"B" | X"4"		=> left_ctrl <= left_a;
@@ -484,7 +486,7 @@ begin
 	end process;
 
 	-- ALU right input
-	right_in: process(ir, ir_page)
+	right_in: process(ir)
 	begin
 		case ir(7 downto 4) is
 		when X"4" | X"5" | X"6" | X"7" => right_ctrl <= right_c1;

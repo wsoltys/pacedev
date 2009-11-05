@@ -53,7 +53,6 @@ package mce6809_pack is
 	type ir_type is (load_1st_ir, load_2nd_ir, latch_ir);
 	type s_type is (loadhi_s, loadlo_s, load_a_s, latch_s);
 
-	-- Instruction register page
 	type ir_page_type is (ir_page0, ir_page1, ir_page2);
 
 	-- Main CPU component
@@ -81,8 +80,7 @@ package mce6809_pack is
 			-- Inputs
 			clk						: in  std_logic;
 			clken					: in  std_logic;
-			ir						: in std_logic_vector(7 downto 0);
-			ir_page				: in ir_page_type;
+			ir						: in std_logic_vector(11 downto 0);
 			mc_addr				: in mc_state_type;
 			dbus					: in std_logic_vector(7 downto 0);
 			rpost					: in std_logic_vector(7 downto 0);

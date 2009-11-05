@@ -31,8 +31,7 @@ architecture SYN of mce6809 is
 	signal		abus					: std_logic_vector(15 downto 0);
 
 	-- CPU registers
-	signal		ir						: std_logic_vector(7 downto 0);
-	signal		ir_page				: ir_page_type;
+	signal		ir						: std_logic_vector(11 downto 0);
 	signal		pc						: std_logic_vector(15 downto 0);
 	signal		u							: std_logic_vector(15 downto 0);
 	signal		s							: std_logic_vector(15 downto 0);
@@ -66,19 +65,19 @@ architecture SYN of mce6809 is
 	signal		ir_ctrl				: ir_type;
 	signal		s_ctrl				: s_type;
 	signal		ld						: ld_type;
-	signal		lda						: std_logic;
-	signal		ldb						: std_logic;
-	signal		ldxl					: std_logic;
-	signal		ldxh					: std_logic;
-	signal		ldyl					: std_logic;
-	signal		ldyh					: std_logic;
-	signal		ldul					: std_logic;
-	signal		lduh					: std_logic;
-	signal		ldeal					: std_logic;
-	signal		ldeah					: std_logic;
-	signal		lddp					: std_logic;
-	signal		ldpost				: std_logic;
-	signal		ldcc					: std_logic;
+	alias			lda						: std_logic is ld(IA);
+	alias			ldb						: std_logic is ld(IB);
+	alias			ldxl					: std_logic is ld(IXl);
+	alias			ldxh					: std_logic is ld(IXh);
+	alias			ldyl					: std_logic is ld(IYl);
+	alias			ldyh					: std_logic is ld(IYh);
+	alias			ldul					: std_logic is ld(IUl);
+	alias			lduh					: std_logic is ld(IUh);
+	alias			ldeal					: std_logic is ld(IEAl);
+	alias			ldeah					: std_logic is ld(IEAh);
+	alias			lddp					: std_logic is ld(IDP);
+	alias			ldpost				: std_logic is ld(IPOST);
+	alias			ldcc					: std_logic is ld(ICC);
 	signal		ab_fromalu		: std_logic;		-- Use ALU as input to A,B and CC regs
 
 	-- Mux controls
@@ -97,12 +96,13 @@ begin
 	data_o	<= dbus when drive_data = '1' else (others => 'X');
 	data_oe	<= drive_data;
 
+	ir(11 downto 10) <= "00";
+
 	mcode : mce6809_mcode port map (
 		-- Inputs
 		clk						=> clk,
 		clken					=> clken,
 		ir						=> ir,
-		ir_page				=> ir_page,
 		mc_addr				=> mc_addr,
 		dbus					=> dbus,
 		rpost					=> post,
@@ -131,20 +131,6 @@ begin
 		left_ctrl			=> left_ctrl,
 		right_ctrl		=> right_ctrl
 	);
-
-	lda		<= ld(IA);
-	ldb		<= ld(IB);
-	ldxl	<= ld(IXl);
-	ldxh	<= ld(IXh);
-	ldyl	<= ld(IYl);
-	ldyh	<= ld(IYh);
-	ldul	<= ld(IUl);
-	lduh	<= ld(IUh);
-	ldeal <= ld(IEAl);
-	ldeah <= ld(IEAh);
-	lddp	<= ld(IDP);
-	ldpost	<= ld(IPOST);
-	ldcc	<= ld(ICC);
 
 	-- Microcode address
 	ma_reg: process(clk, clken, reset)
@@ -180,7 +166,6 @@ begin
 		if reset = '1' then
 			pc			<= (others => '0');
 			ir			<= (others => '0');
-			ir_page	<= ir_page0;
 			u				<= (others => '0');
 			s				<= (others => '0');
 			y				<= (others => '0');
@@ -205,23 +190,22 @@ begin
 				-- IR and IR_page
 				case ir_ctrl is
 				when load_1st_ir =>
-					ir <= dbus;
-					ir_page <= ir_page0;
+					ir(7 downto 0) <= dbus;
+					if dbus = X"10" then
+						ir(9 downto 8) <= "10";
+					elsif ir = X"11" then
+						ir(9 downto 8) <= "11";
+					else
+						ir(9 downto 8) <= "00";
+					end if;
 				when load_2nd_ir =>
-					if ir = X"10" or ir = X"11" then
-						if ir = X"10" then
-							ir_page <= ir_page1;
-						else
-							ir_page <= ir_page2;
-						end if;
-						ir <= dbus;
+					if ir(9 downto 8) /= "00" then
+						ir <= "00" & ir(9 downto 8) & dbus;
 					else
 						ir <= ir;
-						ir_page <= ir_page0;
 					end if;
 				when latch_ir =>
 					ir <= ir;
-					ir_page <= ir_page;
 				end case;
 
 				-- S
