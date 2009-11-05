@@ -95,6 +95,7 @@ package mce6809_pack is
 			alu_ctrl			:	out alu_type;
 			mem_read			: out std_logic;
 			drive_vma			: out std_logic;
+			drive_data		: out std_logic;
 		
 			-- Register controls
 			pc_ctrl				: out pc_type;

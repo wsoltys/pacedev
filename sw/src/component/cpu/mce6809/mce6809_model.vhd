@@ -13,6 +13,7 @@ entity mce6809 is
 		address:    out std_logic_vector(15 downto 0);
 		data_i: 	  in  std_logic_vector(7 downto 0);
 		data_o:		 	out std_logic_vector(7 downto 0);
+		data_oe:	 	out std_logic;
 		halt:     	in  std_logic;
 		hold:     	in  std_logic;
 		irq:      	in  std_logic;
@@ -67,6 +68,7 @@ begin
 		elsif hold = '0' then
 			mc_cycle_next <= mc_cycle + 1 after SIM_DELAY;
 			vma <= '0';
+			data_oe <= '0';
 
 			-- Instruction fetch
 			if mc_cycle = 0 then
@@ -149,6 +151,65 @@ begin
 					when others =>
 					end case;
 
+				when X"96" =>			-- LDA (direct)
+					case mc_cycle is
+					when 1 =>
+						if rising_edge(clk) and clken = '1' then
+							ea(7 downto 0) <= data_i after SIM_DELAY;
+						end if;
+					when 2 =>
+						if rising_edge(clk) and clken = '1' then
+							ea(15 downto 8) <= dp after SIM_DELAY;
+						end if;
+					when 3 =>
+						mc_cycle_next <= 0;
+						vma <= '1';
+						address_out := ea;
+						if rising_edge(clk) and clken = '1' then
+							acca <= data_i after SIM_DELAY;
+						end if;
+					when others =>
+					end case;
+
+				when X"97" =>			-- STA (direct)
+					case mc_cycle is
+					when 1 =>
+						if rising_edge(clk) and clken = '1' then
+							ea(7 downto 0) <= data_i after SIM_DELAY;
+						end if;
+					when 2 =>
+						if rising_edge(clk) and clken = '1' then
+							ea(15 downto 8) <= dp after SIM_DELAY;
+						end if;
+					when 3 =>
+						mc_cycle_next <= 0;
+						vma <= '1';
+						address_out := ea;
+						data_o <= acca;
+						data_oe <= '1';
+					when others =>
+					end case;
+	
+				when X"9A" =>			-- ORA (direct)
+					case mc_cycle is
+					when 1 =>
+						if rising_edge(clk) and clken = '1' then
+							ea(7 downto 0) <= data_i after SIM_DELAY;
+						end if;
+					when 2 =>
+						if rising_edge(clk) and clken = '1' then
+							ea(15 downto 8) <= dp after SIM_DELAY;
+						end if;
+					when 3 =>
+						mc_cycle_next <= 0;
+						vma <= '1';
+						address_out := ea;
+						if rising_edge(clk) and clken = '1' then
+							acca <= acca or data_i after SIM_DELAY;
+						end if;
+					when others =>
+					end case;
+
 				when X"9B" =>			-- ADDA (direct)
 					case mc_cycle is
 					when 1 =>
@@ -169,12 +230,63 @@ begin
 					when others =>
 					end case;
 
+				when X"AB" =>			-- ADDA (indexed)
+					case mc_cycle is
+					when 1 =>
+					when others =>
+					end case;
+
+				when X"BB" =>			-- ADDA (extended)
+					case mc_cycle is
+					when 1 =>
+						if rising_edge(clk) and clken = '1' then
+							ea(15 downto 8) <= data_i after SIM_DELAY;
+						end if;
+					when 2 =>
+						address_out := pc;
+						vma <= '1' after SIM_DELAY;
+						if rising_edge(clk) and clken = '1' then
+							pc <= pc + 1 after SIM_DELAY;
+							ea(7 downto 0) <= data_i after SIM_DELAY;
+						end if;
+					when 3 =>
+						vma <= '0' after SIM_DELAY;
+					when 4 =>
+						mc_cycle_next <= 0;
+						vma <= '1' after SIM_DELAY;
+						address_out := ea;
+						if rising_edge(clk) and clken = '1' then
+							acca <= acca + data_i after SIM_DELAY;
+						end if;
+					when others =>
+					end case;
+
 				when X"CB" =>			-- ADDB (imm)
 					case mc_cycle is
 					when 1 =>
 						mc_cycle_next <= 0 after SIM_DELAY;
 						if rising_edge(clk) and clken = '1' then
 							accb <= accb + data_i after SIM_DELAY;
+						end if;
+					when others =>
+					end case;
+
+				when X"D4" =>			-- ANDA (direct)
+					case mc_cycle is
+					when 1 =>
+						if rising_edge(clk) and clken = '1' then
+							ea(7 downto 0) <= data_i after SIM_DELAY;
+						end if;
+					when 2 =>
+						if rising_edge(clk) and clken = '1' then
+							ea(15 downto 8) <= dp after SIM_DELAY;
+						end if;
+					when 3 =>
+						mc_cycle_next <= 0;
+						vma <= '1';
+						address_out := ea;
+						if rising_edge(clk) and clken = '1' then
+							acca <= acca and data_i after SIM_DELAY;
 						end if;
 					when others =>
 					end case;

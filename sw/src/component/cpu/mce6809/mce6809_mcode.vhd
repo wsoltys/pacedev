@@ -156,6 +156,7 @@ entity mce6809_mcode is
 		alu_ctrl			:	out alu_type;
 		mem_read			: out std_logic;
 		drive_vma			: out std_logic;
+		drive_data		: out std_logic;
 	
 		-- Register controls
 		pc_ctrl				: out pc_type;
@@ -197,9 +198,10 @@ begin
 		-- Defaults
 		mc_jump				<= '0';
 		mc_jump_addr	<= mc_fetch0;
---		alu_ctrl			<= alu_idle;
+		alu_ctrl			<= alu_idle;
 		mem_read			<= '1';
 		drive_vma			<= '1';
+		drive_data		<= '1';
 		pc_ctrl				<= latch_pc;
 		ir_ctrl				<= latch_ir;
 		s_ctrl				<= latch_s;
@@ -326,7 +328,7 @@ begin
 
 			when X"8" | X"C" =>
 				case ir(3 downto 0) is 
-				when X"0" | X"1" | X"2" | X"4" | X"6" | X"8" | X"9" | X"A" | X"B" =>	-- A,B immed
+				when X"0" | X"1" | X"2" | X"4" | X"6" | X"8" | X"9" | X"A" | X"B" =>	-- ALUOP A,B immed
 					pc_ctrl <= incr_pc;
 					mc_jump <= '1';
 					mc_jump_addr <= mc_fetch0;
@@ -343,7 +345,7 @@ begin
 
 			when X"9" | X"D" =>
 				case ir(3 downto 0) is 
-				when X"0" | X"1" | X"2" | X"4" | X"6" | X"8" | X"9" | X"A" | X"B" =>	-- A,B direct
+				when X"0" | X"1" | X"2" | X"4" | X"6" | X"8" | X"9" | X"A" | X"B" =>	-- ALUOP A,B direct
 					case mc_addr is
 					when mc_fetch1 =>
 						--pc_ctrl <= incr_pc;
@@ -353,6 +355,66 @@ begin
 						ld(IEAh) <= '1';
 						drive_vma	<= '0';
 					when mc_exec1 =>
+						mc_jump				<= '1';
+						mc_jump_addr	<= mc_fetch0;
+						alu_ctrl			<= alu_op;
+						dbus_ctrl			<= dbus_mem;
+						abus_ctrl			<= abus_ea;
+						if ir(7 downto 4) = X"9" then
+							ld(IA) <= '1';
+						else
+							ld(IB) <= '1';
+						end if;
+					when others =>
+					end case;
+
+				when X"7" =>																													-- ST A,B direct
+					case mc_addr is
+					when mc_fetch1 =>
+						--pc_ctrl <= incr_pc;
+						ld(IEAl) <= '1';
+					when mc_exec0 =>
+						dbus_ctrl <= dbus_dp;
+						ld(IEAh) <= '1';
+						drive_vma	<= '0';
+					when mc_exec1 =>
+						mc_jump				<= '1';
+						mc_jump_addr	<= mc_fetch0;
+						drive_vma			<= '1';
+						if ir(7 downto 4) = X"9" then
+							dbus_ctrl		<= dbus_a;
+						else
+							dbus_ctrl		<= dbus_b;
+						end if;
+						abus_ctrl			<= abus_ea;
+					when others =>
+					end case;
+
+				when others =>
+				end case;
+
+			when X"A" | X"E" =>
+				case ir(3 downto 0) is 
+				when X"0" | X"1" | X"2" | X"4" | X"6" | X"8" | X"9" | X"A" | X"B" =>	-- ALUOP A,B index
+					case mc_addr is
+					when mc_fetch1 =>
+					when others =>
+					end case;
+				when others =>
+				end case;
+
+			when X"B" | X"F" =>
+				case ir(3 downto 0) is 
+				when X"0" | X"1" | X"2" | X"4" | X"6" | X"8" | X"9" | X"A" | X"B" =>	-- ALUOP A,B extended
+					case mc_addr is
+					when mc_fetch1 =>
+						ld(IEAh) <= '1';
+					when mc_exec0 =>
+						pc_ctrl <= incr_pc;
+						ld(IEAl) <= '1';
+					when mc_exec1 =>
+						drive_vma	<= '0';
+					when mc_exec2 =>
 						mc_jump				<= '1';
 						mc_jump_addr	<= mc_fetch0;
 						alu_ctrl			<= alu_op;

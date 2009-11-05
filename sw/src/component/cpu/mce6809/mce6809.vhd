@@ -13,6 +13,7 @@ entity mce6809 is
 		address:    out std_logic_vector(15 downto 0);
 		data_i: 	  in  std_logic_vector(7 downto 0);
 		data_o:		 	out std_logic_vector(7 downto 0);
+		data_oe:		out std_logic;
 		halt:     	in  std_logic;
 		hold:     	in  std_logic;
 		irq:      	in  std_logic;
@@ -58,6 +59,7 @@ architecture SYN of mce6809 is
 	-- Operational controls
 	signal		alu_ctrl			:	alu_type;
 	signal		drive_vma			: std_logic;
+	signal		drive_data		: std_logic;
 
 	-- Register controls
 	signal		pc_ctrl				: pc_type;
@@ -92,6 +94,9 @@ begin
 	address <= abus when drive_vma = '1' else (others => 'X');
 	vma			<= drive_vma;
 
+	data_o	<= dbus when drive_data = '1' else (others => 'X');
+	data_oe	<= drive_data;
+
 	mcode : mce6809_mcode port map (
 		-- Inputs
 		clk						=> clk,
@@ -110,6 +115,7 @@ begin
 		alu_ctrl			=> alu_ctrl,
 		mem_read			=> rw,
 		drive_vma			=> drive_vma,
+		drive_data		=> drive_data,
 	
 		-- Register controls
 		pc_ctrl				=> pc_ctrl,
@@ -361,7 +367,7 @@ begin
 	-- ALU
 	alu_pr: process(alu_ctrl, cc, left, right)
 		variable alu_res	: std_logic_vector(8 downto 0);
-		variable C_in		: std_logic;
+		variable C_in			: std_logic;
 		variable C_out		: std_logic;
 	begin
 		C_in := '0';
@@ -392,6 +398,9 @@ begin
 			alu_res := C_in & left(7 downto 0);
 			C_out := alu_res(0);
 			alu_res := '0' & alu_res(8 downto 1);	-- Normalise so result is in (7 downto 0)
+
+		when alu_idle =>
+			alu_res := '0' & right;
 
 		when others =>		
 			alu_res := (others => '0');
