@@ -38,7 +38,7 @@ package project_pkg is
 
 	-- Pacman-specific constants
 			
-  constant PACMAN_ROM_IN_SRAM               : boolean := true;
+  constant PACMAN_ROM_IN_SRAM               : boolean := false;
 	constant PACMAN_USE_INTERNAL_WRAM				  : boolean := false;
 	constant PACMAN_USE_VIDEO_VBLANK          : boolean := true;
 	
