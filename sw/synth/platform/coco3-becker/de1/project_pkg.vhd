@@ -41,4 +41,12 @@ package project_pkg is
   constant P2A_EUROSPI_MOSI   : natural := 2;
   constant P2A_EUROSPI_SS     : natural := 3;
 
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

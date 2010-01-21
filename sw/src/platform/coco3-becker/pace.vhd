@@ -50,9 +50,13 @@ entity PACE is
     ser_i           : in from_SERIAL_t;
     ser_o           : out to_SERIAL_t;
     
-    -- general purpose I/O
-    gp_i            : in from_GP_t;
-    gp_o            : out to_GP_t
+    -- custom i/o
+    project_i       : in from_PROJECT_IO_t;
+    project_o       : out to_PROJECT_IO_t;
+    platform_i      : in from_PLATFORM_IO_t;
+    platform_o      : out to_PLATFORM_IO_t;
+    target_i        : in from_TARGET_IO_t;
+    target_o        : out to_TARGET_IO_t
   );
 
 end PACE;
@@ -180,31 +184,31 @@ begin
 	end generate GEN_SRAM_16;
 	
 	--GEN_SRAM_2 : if PACE_TARGET = PACE_TARGET_DE1 generate
-	GEN_SRAM_2 : if false generate
+	--GEN_SRAM_2 : if false generate
 
     -- hook up Burched SRAM module
-    GEN_D: for i in 0 to 7 generate
-      ram1_di(8+i) <= gp_i(35-i);
-      ram1_di(i) <= gp_i(35-i);
-      gp_o.d(35-i) <= ram1_do(i);
-      gp_o.d(27-i) <= 'Z';
-    end generate;
-    GEN_A: for i in 0 to 16 generate
-      gp_o.d(17-i) <= ram_address(i);
-    end generate;
-    gp_o.d(0) <= ram1_cs_n;                   -- CEAn
-    gp_o.d(18) <= '1';                        -- upper byte WEn
-    gp_o.d(19) <= ram_rw_n or ram1_be_n(0);   -- lower byte WEn
+    --GEN_D: for i in 0 to 7 generate
+      --ram1_di(8+i) <= gp_i(35-i);
+      --ram1_di(i) <= gp_i(35-i);
+      --gp_o.d(35-i) <= ram1_do(i);
+      --gp_o.d(27-i) <= 'Z';
+    --end generate;
+    --GEN_A: for i in 0 to 16 generate
+      --gp_o.d(17-i) <= ram_address(i);
+    --end generate;
+    --gp_o.d(0) <= ram1_cs_n;                   -- CEAn
+    --gp_o.d(18) <= '1';                        -- upper byte WEn
+    --gp_o.d(19) <= ram_rw_n or ram1_be_n(0);   -- lower byte WEn
 
-		sram_o.a <= std_logic_vector(resize(unsigned(ram_address), sram_o.a'length));
-		sram_o.d <= ram1_do & ram0_do;
-		ram0_di <= sram_i.d(15 downto 0);
-		sram_o.be <= "00" & not ram0_be_n;
-		sram_o.cs <= not ram0_cs_n;
-		sram_o.oe <= not ram_oe_n;
-		sram_o.we <= not ram_rw_n;
+		--sram_o.a <= std_logic_vector(resize(unsigned(ram_address), sram_o.a'length));
+		--sram_o.d <= ram1_do & ram0_do;
+		--ram0_di <= sram_i.d(15 downto 0);
+		--sram_o.be <= "00" & not ram0_be_n;
+		--sram_o.cs <= not ram0_cs_n;
+		--sram_o.oe <= not ram_oe_n;
+		--sram_o.we <= not ram_rw_n;
 	
-	end generate GEN_SRAM_2;
+	--end generate GEN_SRAM_2;
 	
 	GEN_SRAM_COCO3PLUS : if PACE_TARGET = PACE_TARGET_COCO3PLUS generate
 
@@ -331,13 +335,13 @@ begin
       null;
     elsif rising_edge(clk_50M) then
       if digit_n = "1101" then
-        gp_o.d(39 downto 36) <= X"0";
+        --gp_o.d(39 downto 36) <= X"0";
       elsif digit_n = "1011" then
-        gp_o.d(43 downto 40) <= X"C";
+        --gp_o.d(43 downto 40) <= X"C";
       elsif digit_n = "0111" then
-        gp_o.d(47 downto 44) <= X"0";
+        --gp_o.d(47 downto 44) <= X"0";
       else
-        gp_o.d(51 downto 48) <= X"C";
+        --gp_o.d(51 downto 48) <= X"C";
       end if;
     end if;
   end process;
@@ -432,10 +436,10 @@ begin
           vid_b_o         => video_o.rgb.b,
           
           -- SPI ports
-          eurospi_clk     => gp_i(P2A_EUROSPI_CLK),
-          eurospi_miso    => gp_o.d(P2A_EUROSPI_MISO),
-          eurospi_mosi    => gp_i(P2A_EUROSPI_MOSI),
-          eurospi_ss      => gp_i(P2A_EUROSPI_SS)
+          eurospi_clk     => '0', --gp_i(P2A_EUROSPI_CLK),
+          eurospi_miso    => open, --gp_o.d(P2A_EUROSPI_MISO),
+          eurospi_mosi    => '0', --gp_i(P2A_EUROSPI_MOSI),
+          eurospi_ss      => '0' --gp_i(P2A_EUROSPI_SS)
         );
 
         tilerom_inst : entity work.sprom
@@ -465,10 +469,10 @@ begin
   
   -- interboard spi
   -- - always the slave
-  gp_o.oe(P2A_EUROSPI_CLK) <= '0';
-  gp_o.oe(P2A_EUROSPI_MISO) <= '1';
-  gp_o.oe(P2A_EUROSPI_MOSI) <= '0';
-  gp_o.oe(P2A_EUROSPI_SS) <= '0';
+  --gp_o.oe(P2A_EUROSPI_CLK) <= '0';
+  --gp_o.oe(P2A_EUROSPI_MISO) <= '1';
+  --gp_o.oe(P2A_EUROSPI_MOSI) <= '0';
+  --gp_o.oe(P2A_EUROSPI_SS) <= '0';
   
 	-- unused
 	video_o_s.clk <= clk_50M;
