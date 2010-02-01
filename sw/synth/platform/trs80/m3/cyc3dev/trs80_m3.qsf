@@ -47,7 +47,7 @@ set_global_assignment -name FAMILY "Cyclone III"
 set_global_assignment -name TOP_LEVEL_ENTITY target_top
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION "8.0 SP1"
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "12:44:54  JULY 21, 2008"
-set_global_assignment -name LAST_QUARTUS_VERSION 8.1
+set_global_assignment -name LAST_QUARTUS_VERSION "9.0 SP2"
 
 set_global_assignment -name DEVICE EP3C120F780C7
 set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"

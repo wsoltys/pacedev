@@ -15,7 +15,7 @@ package project_pkg is
 	
   -- Reference clock is 50MHz
 	constant PACE_HAS_PLL								      : boolean := true;
-	constant PACE_HAS_FLASH                   : boolean := false;
+	--constant PACE_HAS_FLASH                   : boolean := false;
   constant PACE_HAS_SRAM                    : boolean := true;
   constant PACE_HAS_SDRAM                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := true;
@@ -41,7 +41,11 @@ package project_pkg is
   constant P2A_EUROSPI_MOSI   : natural := 2;
   constant P2A_EUROSPI_SS     : natural := 3;
 
-  type from_PROJECT_IO_t is record
+  constant COCO3_ROMS_IN_FLASH              : boolean := true;
+  -- derived - do not edit
+	constant PACE_HAS_FLASH                   : boolean := COCO3_ROMS_IN_FLASH;
+
+    type from_PROJECT_IO_t is record
     not_used  : std_logic;
   end record;
 

@@ -47,7 +47,7 @@ set_global_assignment -name FAMILY "Cyclone III"
 set_global_assignment -name TOP_LEVEL_ENTITY target_top
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION "8.0 SP1"
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "12:44:54  JULY 21, 2008"
-set_global_assignment -name LAST_QUARTUS_VERSION 8.1
+set_global_assignment -name LAST_QUARTUS_VERSION "9.0 SP2"
 
 set_global_assignment -name DEVICE EP3C120F780C7
 set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"
@@ -981,8 +981,6 @@ set_instance_assignment -name OUTPUT_ENABLE_GROUP 1816554862 -to memtop_dqs[3]
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to reset_n
 set_global_assignment -name MISC_FILE "E:/markm/pace/pacedev.net/sw/synth/platform/midway8080/invaders/cyc3dev/invaders.dpf"
 set_global_assignment -name SEARCH_PATH ip/altera_avalon_i2c
-set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
-set_global_assignment -name TIMEQUEST_DO_CCPP_REMOVAL ON
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sdram_pkg.vhd

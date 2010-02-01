@@ -799,7 +799,6 @@ proc restore { { project_dir "" } } {
       "../../../../src/platform/pacman/xilinx_mem.vhd" 
       "../../../../src/platform/pengo/spritectl.vhd" 
       "../../../../src/platform/pengo/tilemapctl.vhd" 
-      "../../../../src/target/cb/ps2_host_fifo.xco" 
       "../../../../src/target/cb/ps2host.vhd" 
       "../../../../src/target/cb/target_pkg_250.vhd" 
       "../../../../src/target/cb/target_top.vhd" 
