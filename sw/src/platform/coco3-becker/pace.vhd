@@ -313,11 +313,11 @@ begin
 	begin
 
     -- can use F3 to reset coco
-    coco_reset <= reset_i or OSD_BUTTON(3);  -- F3
+    coco_reset <= reset_i or buttons_i(0) or OSD_BUTTON(3);  -- F3
     
-    GEN_DE2_SWITCHES : if PACE_TARGET = PACE_TARGET_DE1 or PACE_TARGET = PACE_TARGET_DE2 generate
+    GEN_TERASIC_SWITCHES : if PACE_TARGET = PACE_TARGET_DE1 or PACE_TARGET = PACE_TARGET_DE2 generate
       coco_switches <= switches_i(coco_switches'range);
-    end generate GEN_DE2_SWITCHES;
+    end generate GEN_TERASIC_SWITCHES;
     
     GEN_DEFAULT_SWITCHES : if PACE_TARGET = PACE_TARGET_P2A generate
       -- Normal speed, select MPI slot 4 (disk controller)
