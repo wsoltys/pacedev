@@ -313,7 +313,7 @@ begin
 	begin
 
     -- can use F3 to reset coco
-    coco_reset <= reset_i or buttons_i(0) or OSD_BUTTON(3);  -- F3
+    coco_reset <= reset_i or buttons_i(3) or OSD_BUTTON(3);  -- F3
     
     GEN_TERASIC_SWITCHES : if PACE_TARGET = PACE_TARGET_DE1 or PACE_TARGET = PACE_TARGET_DE2 generate
       coco_switches <= switches_i(coco_switches'range);
@@ -409,7 +409,8 @@ begin
         SEGMENT_N			=> open,
         
         -- LEDs
-        LED						=> osd_ctrl_i(7 downto 0),
+        --LED						=> osd_ctrl_i(7 downto 0),
+        LED						=> leds_o(7 downto 0),
         
         -- CoCo Perpherial
         SPEAKER				=> open,
@@ -429,10 +430,11 @@ begin
         
         -- Extra Buttons and Switches
         --SWITCH				=> (others => '0'), -- fast=1.78MHz
-        SWITCH				=> OSD_SWITCH,
+        SWITCH				=> coco_switches,
         BUTTON(3)			=> coco_reset,
         --BUTTON(2 downto 0) => "000"
-        BUTTON(2 downto 0) => OSD_BUTTON(2 downto 0)
+        --BUTTON(2 downto 0) => OSD_BUTTON(2 downto 0)
+        BUTTON(2 downto 0) => buttons_i(2 downto 0)
       );
 
   end block BLK_COCO3;
