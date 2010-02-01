@@ -87,7 +87,32 @@ RAM0_BE1_N,				// Byte Enable for RAM 0
 RAM1_BE0_N,				// Byte Enable for RAM 1
 RAM1_BE1_N,				// Byte Enable for RAM 1
 RAM_OE_N,
-// VGA
+ROM_A_10_0,
+ROM_DATA_I,
+ENA_F8,
+ENA_F0,
+ENA_E8,
+ENA_E0,
+ENA_D8,
+ENA_D0,
+ENA_C8,
+ENA_C0,
+ENA_B8,
+ENA_B0,
+ENA_A8,
+ENA_A0,
+ENA_98,
+ENA_90,
+ENA_88,
+ENA_80,
+ENA_DSKD8,
+ENA_DSKD0,
+ENA_DSKC8,
+ENA_DSKC0,
+ENA_RS232C0,
+ENA_RS232C8,
+ENA_C0_S2,
+//// VGA
 RED1,
 GREEN1,
 BLUE1,
@@ -149,6 +174,33 @@ output	[15:0]	RAM_DATA1_O;
 output			RAM1_CS_N;
 output			RAM1_BE0_N;
 output			RAM1_BE1_N;
+
+// ROM
+output [10:0] ROM_A_10_0;
+input [7:0] ROM_DATA_I;
+output ENA_F8;
+output ENA_F0;
+output ENA_E8;
+output ENA_E0;
+output ENA_D8;
+output ENA_D0;
+output ENA_C8;
+output ENA_C0;
+output ENA_B8;
+output ENA_B0;
+output ENA_A8;
+output ENA_A0;
+output ENA_98;
+output ENA_90;
+output ENA_88;
+output ENA_80;
+output ENA_DSKD8;
+output ENA_DSKD0;
+output ENA_DSKC8;
+output ENA_DSKC0;
+output ENA_RS232C0;
+output ENA_RS232C8;
+output ENA_C0_S2;
 
 // VGA
 output			RED1;
@@ -674,6 +726,31 @@ assign	RAM_DATA1_O[15:0] = {DATA_OUT, DATA_OUT};
 /*****************************************************************************
 * ROM signals
 ******************************************************************************/
+
+assign ROM_A_10_0 = ADDRESS[10:0];
+assign DOA_F8 = ROM_DATA_I;
+assign DOA_F0 = ROM_DATA_I;
+assign DOA_E8 = ROM_DATA_I;
+assign DOA_E0 = ROM_DATA_I;
+assign DOA_D8 = ROM_DATA_I;
+assign DOA_D0 = ROM_DATA_I;
+assign DOA_C8 = ROM_DATA_I;
+assign DOA_C0 = ROM_DATA_I;
+assign DOA_B8 = ROM_DATA_I;
+assign DOA_B0 = ROM_DATA_I;
+assign DOA_A8 = ROM_DATA_I;
+assign DOA_A0 = ROM_DATA_I;
+assign DOA_98 = ROM_DATA_I;
+assign DOA_90 = ROM_DATA_I;
+assign DOA_88 = ROM_DATA_I;
+assign DOA_80 = ROM_DATA_I;
+assign DOA_DD8 = ROM_DATA_I;
+assign DOA_DD0 = ROM_DATA_I;
+assign DOA_DC8 = ROM_DATA_I;
+assign DOA_DC0 = ROM_DATA_I;
+assign DOA_RC0 = ROM_DATA_I;
+assign DOA_RC8 = ROM_DATA_I;
+assign DOA_C0_S2 = ROM_DATA_I;
 
 // ROM_SEL is 1 when the system is accessing any cartridge "ROM" meaning the
 // 4 slots of the MPI, this is:
@@ -2903,29 +2980,29 @@ begin
 end
 
 // ROMS
-`include "CC3_80.v"
-`include "CC3_88.v"
-`include "CC3_90.v"
-`include "CC3_98.v"
-`include "CC3_A0.v"
-`include "CC3_A8.v"
-`include "CC3_B0.v"
-`include "CC3_B8.v"
-`include "CC3_C0.v"
-`include "CC3_C8.v"
-`include "CC3_D0.v"
-`include "CC3_D8.v"
-`include "CC3_E0.v"
-`include "CC3_E8.v"
-`include "CC3_F0.v"
-`include "CC3_F8.v"
-`include "DSK_C0.v"
-`include "DSK_C8.v"
-`include "DSK_D0.v"
-`include "DSK_D8.v"
-`include "RS232_C0.v"
-`include "RS232_C8.v"
-`include "CART_C0.v"
+//`include "CC3_80.v"
+//`include "CC3_88.v"
+//`include "CC3_90.v"
+//`include "CC3_98.v"
+//`include "CC3_A0.v"
+//`include "CC3_A8.v"
+//`include "CC3_B0.v"
+//`include "CC3_B8.v"
+//`include "CC3_C0.v"
+//`include "CC3_C8.v"
+//`include "CC3_D0.v"
+//`include "CC3_D8.v"
+//`include "CC3_E0.v"
+//`include "CC3_E8.v"
+//`include "CC3_F0.v"
+//`include "CC3_F8.v"
+//`include "DSK_C0.v"
+//`include "DSK_C8.v"
+//`include "DSK_D0.v"
+//`include "DSK_D8.v"
+//`include "RS232_C0.v"
+//`include "RS232_C8.v"
+//`include "CART_C0.v"
 
 /*****************************************************************************
 * Joystick to CoCo compatable

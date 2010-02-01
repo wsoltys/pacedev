@@ -82,7 +82,32 @@ architecture SYN of PACE is
 			RAM1_BE0_N		: out std_logic;												-- Byte Enable for RAM 1
 			RAM1_BE1_N		: out std_logic;												-- Byte Enable for RAM 1
 			RAM_OE_N			: out std_logic;
-			
+			-- external ROM signals
+			ROM_A_10_0    : out std_logic_vector(10 downto 0);
+			ROM_DATA_I    : in std_logic_vector(7 downto 0);
+      ENA_F8        : out std_logic;
+      ENA_F0        : out std_logic;
+      ENA_E8        : out std_logic;
+      ENA_E0        : out std_logic;
+      ENA_D8        : out std_logic;
+      ENA_D0        : out std_logic;
+      ENA_C8        : out std_logic;
+      ENA_C0        : out std_logic;
+      ENA_B8        : out std_logic;
+      ENA_B0        : out std_logic;
+      ENA_A8        : out std_logic;
+      ENA_A0        : out std_logic;
+      ENA_98        : out std_logic;
+      ENA_90        : out std_logic;
+      ENA_88        : out std_logic;
+      ENA_80        : out std_logic;
+      ENA_DSKD8     : out std_logic;
+      ENA_DSKD0     : out std_logic;
+      ENA_DSKC8     : out std_logic;
+      ENA_DSKC0     : out std_logic;
+      ENA_RS232C0   : out std_logic;
+      ENA_RS232C8   : out std_logic;
+      ENA_C0_S2     : out std_logic;
 			-- VGA
 			RED1					: out std_logic;
 			GREEN1				: out std_logic;
@@ -143,6 +168,31 @@ architecture SYN of PACE is
 	signal ram0_be_n	  : std_logic_vector(1 downto 0);
 	signal ram1_be_n	  : std_logic_vector(1 downto 0);
 	signal ram_oe_n		  : std_logic;
+
+  signal ena_f8       : std_logic;
+  signal ena_f0       : std_logic;
+  signal ena_e8       : std_logic;
+  signal ena_e0       : std_logic;
+  signal ena_d8       : std_logic;
+  signal ena_d0       : std_logic;
+  signal ena_c8       : std_logic;
+  signal ena_c0       : std_logic;
+  signal ena_b8       : std_logic;
+  signal ena_b0       : std_logic;
+  signal ena_a8       : std_logic;
+  signal ena_a0       : std_logic;
+  signal ena_98       : std_logic;
+  signal ena_90       : std_logic;
+  signal ena_88       : std_logic;
+  signal ena_80       : std_logic;
+  signal ena_dskd8    : std_logic;
+  signal ena_dskd0    : std_logic;
+  signal ena_dskc8    : std_logic;
+  signal ena_dskc0    : std_logic;
+  signal ena_rs232c0  : std_logic;
+  signal ena_rs232c8  : std_logic;
+  signal ena_c0_s2    : std_logic;
+
   signal digit_n      : std_logic_vector(3 downto 0);
   
   signal ps2_kclk     : std_logic;
@@ -222,7 +272,39 @@ begin
 		sram_o.we <= not ram_rw_n;
 	
 	end generate GEN_SRAM_COCO3PLUS;
-	
+
+  GEN_FLASH_ADDRESS : if COCO3_ROMS_IN_FLASH generate
+    flash_o.cs <= '1';
+    flash_o.oe <= '1';
+    flash_o.we <= '0';
+    flash_o.a(flash_o.a'left downto 16) <= (others => '0');
+    flash_o.a(15 downto 11) <=  
+      "00000" when ena_f8 = '1' else
+      "00001" when ena_f0 = '1' else
+      "00010" when ena_e8 = '1' else
+      "00011" when ena_e0 = '1' else
+      "00100" when ena_d8 = '1' else
+      "00101" when ena_d0 = '1' else
+      "00110" when ena_c8 = '1' else
+      "00111" when ena_c0 = '1' else
+      "01000" when ena_b8 = '1' else
+      "01001" when ena_b0 = '1' else
+      "01010" when ena_a8 = '1' else
+      "01011" when ena_a0 = '1' else
+      "01100" when ena_98 = '1' else
+      "01101" when ena_90 = '1' else
+      "01110" when ena_a8 = '1' else
+      "01111" when ena_a0 = '1' else
+      "10000" when ena_dskd8 = '1' else
+      "10001" when ena_dskd0 = '1' else
+      "10010" when ena_dskc8 = '1' else
+      "10011" when ena_dskc0 = '1' else
+      "10100" when ena_rs232c0 = '1' else
+      "10101" when ena_rs232c8 = '1' else
+      "10110" when ena_c0_s2 = '1' else
+      (others => '0');
+  end generate GEN_FLASH_ADDRESS;
+  
 	BLK_COCO3 : block
     signal coco_reset     : std_logic := '0';
     signal coco_switches  : std_logic_vector(7 downto 0);
@@ -233,7 +315,7 @@ begin
     -- can use F3 to reset coco
     coco_reset <= reset_i or OSD_BUTTON(3);  -- F3
     
-    GEN_DE2_SWITCHES : if PACE_TARGET = PACE_TARGET_DE2 generate
+    GEN_DE2_SWITCHES : if PACE_TARGET = PACE_TARGET_DE1 or PACE_TARGET = PACE_TARGET_DE2 generate
       coco_switches <= switches_i(coco_switches'range);
     end generate GEN_DE2_SWITCHES;
     
@@ -271,6 +353,33 @@ begin
         RAM1_BE1_N		=> ram1_be_n(1),
         RAM_OE_N			=> ram_oe_n,
         
+        -- ROM
+        ROM_A_10_0    => flash_o.a(10 downto 0),
+        ROM_DATA_I    => flash_i.d(7 downto 0),
+        ENA_F8        => ena_f8,
+        ENA_F0        => ena_f0,
+        ENA_E8        => ena_e8,
+        ENA_E0        => ena_e0,
+        ENA_D8        => ena_d8,
+        ENA_D0        => ena_d0,
+        ENA_C8        => ena_c8,
+        ENA_C0        => ena_c0,
+        ENA_B8        => ena_b8,
+        ENA_B0        => ena_b0,
+        ENA_A8        => ena_a8,
+        ENA_A0        => ena_a0,
+        ENA_98        => ena_98,
+        ENA_90        => ena_90,
+        ENA_88        => ena_88,
+        ENA_80        => ena_80,
+        ENA_DSKD8     => ena_dskd8,
+        ENA_DSKD0     => ena_dskd0,
+        ENA_DSKC8     => ena_dskc8,
+        ENA_DSKC0     => ena_dskc0,
+        ENA_RS232C0   => ena_rs232c0,
+        ENA_RS232C8   => ena_rs232c8,
+        ENA_C0_S2     => ena_c0_s2,
+
         -- VGA
         RED1					=> video_o_s.rgb.r(9),
         GREEN1				=> video_o_s.rgb.g(9),
@@ -460,6 +569,7 @@ begin
   end generate GEN_OSD;
 
   GEN_NO_OSD : if not PACE_HAS_OSD generate
+    osd_ctrl_o <= (others => '0');
     ps2_kclk <= inputs_i.ps2_kclk;
     ps2_kdat <= inputs_i.ps2_kdat;
     video_o.rgb.r <= video_o_s.rgb.r;
