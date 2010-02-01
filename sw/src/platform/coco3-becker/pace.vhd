@@ -293,8 +293,8 @@ begin
       "01011" when ena_a0 = '1' else
       "01100" when ena_98 = '1' else
       "01101" when ena_90 = '1' else
-      "01110" when ena_a8 = '1' else
-      "01111" when ena_a0 = '1' else
+      "01110" when ena_88 = '1' else
+      "01111" when ena_80 = '1' else
       "10000" when ena_dskd8 = '1' else
       "10001" when ena_dskd0 = '1' else
       "10010" when ena_dskc8 = '1' else

@@ -44,4 +44,4 @@ init2bin RS232_C0.V
 rename init2bin.out RS232_C0.bin
 init2bin RS232_C8.V
 rename init2bin.out RS232_C8.bin
-copy /b CART_C0.bin+CC3_80.bin+CC3_88.bin+CC3_90.bin+CC3_98.bin+CC3_A0.bin+CC3_A8.bin+CC3_B0.bin+CC3_B8.bin+CC3_C0.bin+CC3_C8.bin+CC3_D0.bin+CC3_D8.bin+CC3_E0.bin+CC3_E8.bin+CC3_F0.bin+CC3_F8.bin+DSK_C0.bin+DSK_C8.bin+DSK_D0.bin+DSK_D8.bin+RS232_C0.bin+RS232_C8.bin coco3roms.bin
+copy /b CC3_F8.bin+CC3_F0.bin+CC3_E8.bin+CC3_E0.bin+CC3_D8.bin+CC3_D0.bin+CC3_C8.bin+CC3_C0.bin+CC3_B8.bin+CC3_B0.bin+CC3_A8.bin+CC3_A0.bin+CC3_98.bin+CC3_90.bin+CC3_88.bin+CC3_80.bin+DSK_D8.bin+DSK_D0.bin+DSK_C8.bin+DSK_C0.bin+RS232_C0.bin+RS232_C8.bin+CART_C0.bin coco3roms.bin
