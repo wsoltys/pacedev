@@ -496,7 +496,6 @@ set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
-set_global_assignment -name USE_CONFIGURATION_DEVICE ON
 set_global_assignment -name STRATIX_CONFIGURATION_DEVICE EPCS4
 set_global_assignment -name ENABLE_SIGNALTAP OFF
 set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
@@ -555,3 +554,22 @@ set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/i2s_controll
 set_global_assignment -name VHDL_FILE custom_io.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/de1/target_top.vhd
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
+set_global_assignment -name MUX_RESTRUCTURE OFF
+set_global_assignment -name ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP ON
+set_global_assignment -name ADV_NETLIST_OPT_SYNTH_GATE_RETIME ON
+set_global_assignment -name IGNORE_LCELL_BUFFERS ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
+set_global_assignment -name PRE_MAPPING_RESYNTHESIS ON
+set_global_assignment -name ROUTER_TIMING_OPTIMIZATION_LEVEL MAXIMUM
+set_global_assignment -name AUTO_PACKED_REGISTERS_STRATIXII NORMAL
+set_global_assignment -name AUTO_PACKED_REGISTERS_MAXII NORMAL
+set_global_assignment -name AUTO_PACKED_REGISTERS_CYCLONE NORMAL
+set_global_assignment -name AUTO_PACKED_REGISTERS NORMAL
+set_global_assignment -name AUTO_PACKED_REGISTERS_STRATIX NORMAL
+set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
+set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
+set_global_assignment -name DO_COMBINED_ANALYSIS ON
+set_instance_assignment -name MAX_FANOUT 64 -to *
+set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON

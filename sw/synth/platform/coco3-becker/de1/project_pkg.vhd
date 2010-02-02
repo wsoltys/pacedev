@@ -45,7 +45,7 @@ package project_pkg is
   -- derived - do not edit
 	constant PACE_HAS_FLASH                   : boolean := COCO3_ROMS_IN_FLASH;
 
-    type from_PROJECT_IO_t is record
+  type from_PROJECT_IO_t is record
     not_used  : std_logic;
   end record;
 

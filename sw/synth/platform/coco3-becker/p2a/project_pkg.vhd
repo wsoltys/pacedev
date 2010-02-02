@@ -30,4 +30,15 @@ package project_pkg is
 
 	-- Coco3-specific constants
 
+  constant COCO3_ROMS_IN_FLASH              : boolean := PACE_HAS_FLASH;
+  constant PACE_HAS_OSD                     : boolean := false;
+  
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

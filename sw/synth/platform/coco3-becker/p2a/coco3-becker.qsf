@@ -810,6 +810,7 @@ set_global_assignment -name LL_ORIGIN X1_Y1 -section_id "COCO3VIDEO:COCOVID"
 set_instance_assignment -name LL_MEMBER_OF "COCO3VIDEO:COCOVID" -to "PACE:pace_inst|coco3fpga:\\BLK_COCO3:coco_inst|COCO3VIDEO:COCOVID" -section_id "COCO3VIDEO:COCOVID"
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sdram_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd

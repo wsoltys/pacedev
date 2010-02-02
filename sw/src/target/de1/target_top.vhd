@@ -83,11 +83,8 @@ entity target_top is
 		ps2_dat       : in std_logic;                         --	PS2 Data
 		ps2_clk       : in std_logic;                         --	PS2 Clock
 		--////////////////////	VGA		////////////////////////////
-		vga_clk       : out std_logic;                        --	VGA Clock
 		vga_hs        : out std_logic;                        --	VGA H_SYNC
 		vga_vs        : out std_logic;                        --	VGA V_SYNC
-		vga_blank     : out std_logic;                        --	VGA BLANK
-		vga_sync      : out std_logic;                        --	VGA SYNC
 		vga_r         : out std_logic_vector(3 downto 0);     --	VGA Red[3:0]
 		vga_g         : out std_logic_vector(3 downto 0);     --	VGA Green[3:0]
 		vga_b         : out std_logic_vector(3 downto 0);     --	VGA Blue[3:0]
@@ -502,14 +499,11 @@ begin
 		video_i.clk_ena <= '1';
     video_i.reset <= reset_i;
     
-    vga_clk <= video_o.clk;
     vga_r <= video_o.rgb.r(video_o.rgb.r'left downto video_o.rgb.r'left-3);
     vga_g <= video_o.rgb.g(video_o.rgb.g'left downto video_o.rgb.g'left-3);
     vga_b <= video_o.rgb.b(video_o.rgb.b'left downto video_o.rgb.b'left-3);
     vga_hs <= video_o.hsync;
     vga_vs <= video_o.vsync;
-    vga_sync <= video_o.hsync and video_o.vsync;
-    vga_blank <= '1';
 
   end block BLK_VIDEO;
 
