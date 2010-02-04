@@ -439,24 +439,6 @@ begin
 
   end block BLK_COCO3;
   
-  -- 7-segment display
-  process (clk_50M, reset_i)
-  begin
-    if reset_i = '1' then
-      null;
-    elsif rising_edge(clk_50M) then
-      if digit_n = "1101" then
-        --gp_o.d(39 downto 36) <= X"0";
-      elsif digit_n = "1011" then
-        --gp_o.d(43 downto 40) <= X"C";
-      elsif digit_n = "0111" then
-        --gp_o.d(47 downto 44) <= X"0";
-      else
-        --gp_o.d(51 downto 48) <= X"C";
-      end if;
-    end if;
-  end process;
-
   GEN_OSD : if PACE_HAS_OSD generate
     BLK_OSD : block
     

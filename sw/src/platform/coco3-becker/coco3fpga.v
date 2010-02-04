@@ -750,9 +750,9 @@ assign ROM_A_10_0 = ADDRESS[10:0];
   assign DOA_DD0 = ROM_DATA_I;
   assign DOA_DC8 = ROM_DATA_I;
   assign DOA_DC0 = ROM_DATA_I;
-  assign DOA_RC0 = ROM_DATA_I;
-  assign DOA_RC8 = ROM_DATA_I;
-  assign DOA_C0_S2 = ROM_DATA_I;
+  //assign DOA_RC0 = ROM_DATA_I;
+  //assign DOA_RC8 = ROM_DATA_I;
+  //assign DOA_C0_S2 = ROM_DATA_I;
 `endif
 
 // ROM_SEL is 1 when the system is accessing any cartridge "ROM" meaning the
@@ -3004,10 +3004,10 @@ end
   `include "DSK_C8.v"
   `include "DSK_D0.v"
   `include "DSK_D8.v"
+`endif
   `include "RS232_C0.v"
   `include "RS232_C8.v"
   `include "CART_C0.v"
-`endif
 
 /*****************************************************************************
 * Joystick to CoCo compatable

@@ -572,4 +572,6 @@ set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
 set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
 set_global_assignment -name DO_COMBINED_ANALYSIS ON
 set_instance_assignment -name MAX_FANOUT 64 -to *
-set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
+set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to sram*
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to sram*
+set_instance_assignment -name FAST_INPUT_REGISTER ON -to sram_dq[*]
