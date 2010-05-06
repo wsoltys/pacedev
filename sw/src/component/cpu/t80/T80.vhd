@@ -2,6 +2,9 @@
 -- T80(b) core. In an effort to merge and maintain bug fixes ....
 --
 --
+-- Ver 303 add undocumented DDCB and FDCB opcodes by TobiFlex 20.04.2010
+-- Ver 302 fixed IO cycle timing, tested thanks to Alessandro.
+-- Ver 301 parity flag is just parity for 8080, also overflow for Z80, by Sean Riddle
 -- Ver 300 started tidyup. Rmoved some auto_wait bits from 0247 which caused problems
 --
 -- MikeJ March 2005
@@ -249,6 +252,8 @@ architecture rtl of T80 is
 	signal SetEI                : std_logic;
 	signal IMode                : std_logic_vector(1 downto 0);
 	signal Halt                 : std_logic;
+	signal XYbit_undoc          : std_logic;
+
 
 begin
 
@@ -270,6 +275,7 @@ begin
 			F           => F,
 			NMICycle    => NMICycle,
 			IntCycle    => IntCycle,
+			XY_State    => XY_State,
 			MCycles     => MCycles_d,
 			TStates     => TStates,
 			Prefix      => Prefix,
@@ -315,7 +321,8 @@ begin
 			IMode       => IMode,
 			Halt        => Halt,
 			NoRead      => NoRead,
-			Write       => Write);
+			Write       => Write,
+			XYbit_undoc => XYbit_undoc);
 
 	alu : T80_ALU
 		generic map(
@@ -700,6 +707,9 @@ begin
 					F <= Save_Mux;
 				when others =>
 				end case;
+				if XYbit_undoc='1' then
+					DO <= ALU_Q;
+				end if;
 			end if;
 
 		end if;
@@ -903,6 +913,10 @@ begin
 			when others =>
 				BusB <= "--------";
 			end case;
+			if XYbit_undoc='1' then
+				BusA <= DI_Reg;
+				BusB <= DI_Reg;
+			end if;
 			end if;
 		end if;
 	end process;
