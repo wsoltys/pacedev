@@ -5,23 +5,27 @@ use IEEE.std_logic_unsigned.all;
 use work.all;
 
 entity sound is
-port
-(
-    sysclk             : in     std_logic;
-    reset              : in     std_logic;
+  generic
+  (
+    CLK_MHz : natural := 5
+  );
+  port
+  (
+      sysclk             : in     std_logic;
+      reset              : in     std_logic;
 
-    -- inputs
-    sndif_addr         : in     std_logic_vector(15 downto 0);
-    sndif_datai        : in     std_logic_vector(7 downto 0);
-    sndif_rd           : in     std_logic;
-    sndif_wr           : in     std_logic;
+      -- inputs
+      sndif_addr         : in     std_logic_vector(15 downto 0);
+      sndif_datai        : in     std_logic_vector(7 downto 0);
+      sndif_rd           : in     std_logic;
+      sndif_wr           : in     std_logic;
 
-    -- outputs
-    sndif_datao        : out    std_logic_vector(7 downto 0);
-    snd_data           : out    std_logic_vector(7 downto 0);
-    snd_clk            : out    std_logic
-);
-end sound;
+      -- outputs
+      sndif_datao        : out    std_logic_vector(7 downto 0);
+      snd_data           : out    std_logic_vector(7 downto 0);
+      snd_clk            : out    std_logic
+  );
+end entity sound;
 
 architecture SYN of sound is
 
