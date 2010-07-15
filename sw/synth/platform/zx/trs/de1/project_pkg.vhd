@@ -57,4 +57,12 @@ package project_pkg is
 	constant TRS_ROM_FILENAME						: string := "trs_rom2.hex";
 	--constant TRS_ROM_FILENAME						: string := "sys80_rom.hex";
 	
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

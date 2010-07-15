@@ -32,4 +32,16 @@ package project_pkg is
 	-- Videopac-specific constants
 	constant VIDEOPAC_CART_NAME					: string := "kcmunch.hex";
 					
+  -- flag that this project is not currently supported
+  -- - instantiate a dummy _deferred_ constant to pull in the package body
+  constant NOT_SUPPORTED                    : boolean;
+
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;
