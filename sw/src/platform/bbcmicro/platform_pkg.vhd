@@ -12,6 +12,8 @@ package platform_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 	
+  constant PACE_PLATFORM_NAME           : string := "BBC Micro";
+
   constant PACE_INPUTS_NUM_BYTES        : integer := 17;
 
 	constant CLK0_FREQ_MHz			          : natural := 
@@ -25,5 +27,13 @@ package platform_pkg is
 	--
 
 	constant BBCMICRO_SRC_DIR							: string := "../../../../src/platform/bbcmicro";
+
+  type from_PLATFORM_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PLATFORM_IO_t is record
+    not_used  : std_logic;
+  end record;
 
 end;
