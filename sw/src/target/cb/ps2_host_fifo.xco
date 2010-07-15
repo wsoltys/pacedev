@@ -1,7 +1,7 @@
 ##############################################################
 #
-# Xilinx Core Generator version J.39
-# Date: Mon Oct 26 08:11:23 2009
+# Xilinx Core Generator version 11.1
+# Date: Mon Nov 09 11:07:03 2009
 #
 ##############################################################
 #
@@ -74,4 +74,3 @@ CSET write_data_count_width=4
 # END Parameters
 GENERATE
 # CRC: a735c536
-
