@@ -12,7 +12,7 @@ package platform_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 
-  constant PACE_PROJECT_NAME            : string := "Asteroids";
+  constant PACE_PLATFORM_NAME           : string := "Asteroids";
 
 	constant PACE_VIDEO_NUM_BITMAPS 	    : natural := 1;
 	constant PACE_VIDEO_NUM_TILEMAPS 	    : natural := 0;

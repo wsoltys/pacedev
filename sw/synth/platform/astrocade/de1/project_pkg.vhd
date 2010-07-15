@@ -39,7 +39,11 @@ package project_pkg is
 
   -- (derive)
   constant PACE_HAS_FLASH                   : boolean := ASTROCADE_CART_IN_FLASH;
-	
+
+  -- flag that this project is not currently supported
+  -- - instantiate a dummy _deferred_ constant to pull in the package body
+  constant NOT_SUPPORTED                    : boolean;
+    
   type from_PROJECT_IO_t is record
     not_used  : std_logic;
   end record;

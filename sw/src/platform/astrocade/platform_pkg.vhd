@@ -11,6 +11,8 @@ package platform_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 	
+	constant PACE_PLATFORM_NAME   : string := "Astrocade";
+	
 	--
 	-- Astrocade-specific constants (optional)
 	--

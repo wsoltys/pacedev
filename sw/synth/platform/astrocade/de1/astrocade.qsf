@@ -25,7 +25,7 @@
 
 # project-wide assignments
 # ========================
-set_global_assignment -name LAST_QUARTUS_VERSION 8.1
+set_global_assignment -name LAST_QUARTUS_VERSION "9.1 SP2"
 
 # pin & location assignments
 # ==========================
@@ -492,7 +492,6 @@ set_location_assignment PIN_C9 -to vga_r[1]
 set_location_assignment PIN_A7 -to vga_r[2]
 set_location_assignment PIN_B7 -to vga_r[3]
 set_location_assignment PIN_B11 -to vga_vs
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
@@ -556,3 +555,6 @@ set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2C_AV_Confi
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/seg7_lut.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2S_LCM_Config.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/i2s_controller.v
+set_global_assignment -name VHDL_FILE ../../../../src/target/de1/custom_io.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/project_pkg_body_not_supported.vhd
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
