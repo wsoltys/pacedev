@@ -25,13 +25,11 @@ package platform_pkg is
 	-- Platform-specific constants (optional)
 	--
 
-	constant SCRAMBLE_1MHz_CLK0_COUNTS			  : natural := 
+	constant CLK0_FREQ_MHz		            : natural := 
     PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
-
-	constant SCRAMBLE_CPU_CLK_ENA_DIVIDE_BY	  : natural := 
-    SCRAMBLE_1MHz_CLK0_COUNTS / 3;
-
-	constant GALAXIAN_1MHz_CLK0_COUNTS				: natural := SCRAMBLE_1MHz_CLK0_COUNTS;
+  constant CPU_FREQ_MHz                 : natural := 3;
+  
+	constant SCRAMBLE_CPU_CLK_ENA_DIVIDE_BY   : natural := CLK0_FREQ_MHz / CPU_FREQ_MHz;
 
 	-- Palette : Table of RGB entries	
 

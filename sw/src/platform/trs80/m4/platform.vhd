@@ -72,9 +72,13 @@ entity platform is
     ser_i           : in from_SERIAL_t;
     ser_o           : out to_SERIAL_t;
 
-    -- general purpose I/O
-    gp_i            : in from_GP_t;
-    gp_o            : out to_GP_t
+    -- custom i/o
+    project_i       : in from_PROJECT_IO_t;
+    project_o       : out to_PROJECT_IO_t;
+    platform_i      : in from_PLATFORM_IO_t;
+    platform_o      : out to_PLATFORM_IO_t;
+    target_i        : in from_TARGET_IO_t;
+    target_o        : out to_TARGET_IO_t
   );
 end entity platform;
 
@@ -213,17 +217,17 @@ begin
           severity warning;
       -- hook up Burched SRAM module
       GEN_D: for i in 0 to 7 generate
-        ram_datao(i) <= gp_i(35-i);
-        gp_o.d(35-i) <= up_datao(i);
-        gp_o.d(27-i) <= 'Z';
+        --ram_datao(i) <= gp_i(35-i);
+        --gp_o.d(35-i) <= up_datao(i);
+        --gp_o.d(27-i) <= 'Z';
       end generate;
       GEN_A: for i in 0 to 15 generate
-        gp_o.d(17-i) <= up_addr(i);
+        --gp_o.d(17-i) <= up_addr(i);
       end generate;
-      gp_o.d(1) <= '0';           -- A16
-      gp_o.d(0) <= '0';           -- CEAn
-      gp_o.d(18) <= '1';          -- upper byte WEn
-      gp_o.d(19) <= not ram_wr;   -- lower byte WEn
+      --gp_o.d(1) <= '0';           -- A16
+      --gp_o.d(0) <= '0';           -- CEAn
+      --gp_o.d(18) <= '1';          -- upper byte WEn
+      --gp_o.d(19) <= not ram_wr;   -- lower byte WEn
     end generate GEN_BURCHED_SYSMEM;
 
   end block BLK_SYSMEM;
@@ -358,7 +362,7 @@ begin
 	graphics_o.pal <= (others => (others => '0'));
 	ser_o <= NULL_TO_SERIAL;
   spi_o <= NULL_TO_SPI;
-  gp_o.d(gp_o.d'left downto 52) <= (others => '0');
+  --gp_o.d(gp_o.d'left downto 52) <= (others => '0');
 
 	clk_en_inst : entity work.clk_div
 		generic map
@@ -836,14 +840,14 @@ begin
       -- drive enable switches
       de_s <= not switches_i(3 downto 0);
       
-      gp_o.d(51 downto 36) <= -- memory address
-                           floppy_dbg(31 downto 16) when switches_i(5 downto 4) = "11" else 
+      --gp_o.d(51 downto 36) <= -- memory address
+      --                     floppy_dbg(31 downto 16) when switches_i(5 downto 4) = "11" else 
                            -- track & data byte
-                           floppy_dbg(15 downto 0) when switches_i(5 downto 4) = "10" else
+      --                     floppy_dbg(15 downto 0) when switches_i(5 downto 4) = "10" else
                            -- idam track and sector
-                           wd179x_dbg(31 downto 16) when switches_i(5 downto 4) = "01" else
+      --                     wd179x_dbg(31 downto 16) when switches_i(5 downto 4) = "01" else
                            -- track & sector registers
-                           wd179x_dbg(15 downto 0);
+      --                     wd179x_dbg(15 downto 0);
 
       leds_o(9) <= not tr00_n;
 

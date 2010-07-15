@@ -25,8 +25,8 @@ package platform_pkg is
 	-- Platform-specific constants (optional)
 	--
 
-	constant NEOGEO_1MHz_CLK0_COUNTS			    : natural := 
-    PACE_CLKIN0 * PACE_CLK1_MULTIPLY_BY / PACE_CLK1_DIVIDE_BY;
+	constant CLK0_FREQ_MHz		            : natural := 
+    PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
 
   type from_PLATFORM_IO_t is record
     not_used  : std_logic;

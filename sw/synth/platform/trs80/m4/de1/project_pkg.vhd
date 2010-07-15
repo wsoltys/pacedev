@@ -68,4 +68,12 @@ package project_pkg is
   -- *** WARNING: enabling this option won't work on a stock DE1
   constant TRS80_M4_SYSMEM_IN_BURCHED_SRAM  : boolean := true;
   
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;
