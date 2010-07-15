@@ -241,7 +241,7 @@ begin
 	clk_en_inst : entity work.clk_div
 		generic map
 		(
-			DIVISOR		=> 20
+			DIVISOR		=> CENTIPED_CPU_CLK_ENA_DIVIDE_BY
 		)
 		port map
 		(

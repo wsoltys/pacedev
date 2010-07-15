@@ -7,6 +7,10 @@ library work;
 use work.project_pkg.all;
 
 entity Sound is 
+  generic
+  (
+    CLK_MHz : natural := 5
+  );
 	port
    (
      sysClk            : in    std_logic;

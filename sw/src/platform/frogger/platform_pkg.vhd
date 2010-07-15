@@ -25,14 +25,12 @@ package platform_pkg is
 	-- Platform-specific constants (optional)
 	--
 
-	constant FROGGER_1MHz_CLK0_COUNTS			    : natural := 
+	constant CLK0_FREQ_MHz		            : natural := 
     PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
+  constant CPU_FREQ_MHz                 : natural := 3;
+  
+	constant FROGGER_CPU_CLK_ENA_DIVIDE_BY   : natural := CLK0_FREQ_MHz / CPU_FREQ_MHz;
 
-	constant FROGGER_CPU_CLK_ENA_DIVIDE_BY	  : natural := 
-    FROGGER_1MHz_CLK0_COUNTS / 3;
-
-	constant GALAXIAN_1MHz_CLK0_COUNTS				: natural := FROGGER_1MHz_CLK0_COUNTS;
-	                                        	
 	-- Palette : Table of RGB entries	
 
 	type pal_entry_typ is array (0 to 2) of std_logic_vector(5 downto 0);

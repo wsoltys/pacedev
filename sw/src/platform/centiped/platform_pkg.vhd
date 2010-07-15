@@ -4,6 +4,7 @@ use ieee.std_logic_unsigned.all;
 
 library work;
 use work.project_pkg.all;
+use work.target_pkg.all;
 
 package platform_pkg is
 
@@ -40,6 +41,12 @@ package platform_pkg is
 		7 => (0=>"000000", 1=>"100101", 2=>"000000"),
 		others => (others => (others => '0'))
 	);
+
+	constant CLK0_FREQ_MHz		            : natural := 
+    PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
+  constant CPU_FREQ_MHz                 : natural := 2;
+  
+	constant CENTIPED_CPU_CLK_ENA_DIVIDE_BY   : natural := CLK0_FREQ_MHz / CPU_FREQ_MHz;
 
   type from_PLATFORM_IO_t is record
     not_used  : std_logic;

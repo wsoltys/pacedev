@@ -9,6 +9,7 @@ use work.sdram_pkg.all;
 use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
 use work.project_pkg.all;
+use work.platform_pkg.all;
 use work.target_pkg.all;
 
 entity platform is
@@ -71,9 +72,13 @@ entity platform is
     ser_i           : in from_SERIAL_t;
     ser_o           : out to_SERIAL_t;
 
-    -- general purpose I/O
-    gp_i            : in from_GP_t;
-    gp_o            : out to_GP_t
+    -- custom i/o
+    project_i       : in from_PROJECT_IO_t;
+    project_o       : out to_PROJECT_IO_t;
+    platform_i      : in from_PLATFORM_IO_t;
+    platform_o      : out to_PLATFORM_IO_t;
+    target_i        : in from_TARGET_IO_t;
+    target_o        : out to_TARGET_IO_t
   );
 end platform;
 
@@ -236,7 +241,6 @@ begin
   snd_o.rd <= '0';
   spi_o <= NULL_TO_SPI;
 	leds_o <= std_logic_vector(resize(unsigned(inputs(0).d), leds_o'length));
-	gp_o <= NULL_TO_GP;
 	
   --
   -- COMPONENT INSTANTIATION
@@ -246,7 +250,7 @@ begin
 	clk_en_inst : entity work.clk_div
 		generic map
 		(
-			DIVISOR		=> 30
+			DIVISOR		=> integer(APPLEIIPLUS_CPU_CLK_ENA_DIVIDE_BY)
 		)
 		port map
 		(
