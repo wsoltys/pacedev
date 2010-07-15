@@ -730,14 +730,14 @@ assign	RAM_DATA1_O[15:0] = {DATA_OUT, DATA_OUT};
 
 assign ROM_A_10_0 = ADDRESS[10:0];
 `ifdef COCO3_ROMS_IN_FLASH
-  assign DOA_F8 = ROM_DATA_I;
-  assign DOA_F0 = ROM_DATA_I;
-  assign DOA_E8 = ROM_DATA_I;
-  assign DOA_E0 = ROM_DATA_I;
-  assign DOA_D8 = ROM_DATA_I;
-  assign DOA_D0 = ROM_DATA_I;
-  assign DOA_C8 = ROM_DATA_I;
-  assign DOA_C0 = ROM_DATA_I;
+  //assign DOA_F8 = ROM_DATA_I;
+  //assign DOA_F0 = ROM_DATA_I;
+  //assign DOA_E8 = ROM_DATA_I;
+  //assign DOA_E0 = ROM_DATA_I;
+  //assign DOA_D8 = ROM_DATA_I;
+  //assign DOA_D0 = ROM_DATA_I;
+  //assign DOA_C8 = ROM_DATA_I;
+  //assign DOA_C0 = ROM_DATA_I;
   assign DOA_B8 = ROM_DATA_I;
   assign DOA_B0 = ROM_DATA_I;
   assign DOA_A8 = ROM_DATA_I;
@@ -746,10 +746,10 @@ assign ROM_A_10_0 = ADDRESS[10:0];
   assign DOA_90 = ROM_DATA_I;
   assign DOA_88 = ROM_DATA_I;
   assign DOA_80 = ROM_DATA_I;
-  assign DOA_DD8 = ROM_DATA_I;
-  assign DOA_DD0 = ROM_DATA_I;
-  assign DOA_DC8 = ROM_DATA_I;
-  assign DOA_DC0 = ROM_DATA_I;
+  //assign DOA_DD8 = ROM_DATA_I;
+  //assign DOA_DD0 = ROM_DATA_I;
+  //assign DOA_DC8 = ROM_DATA_I;
+  //assign DOA_DC0 = ROM_DATA_I;
   //assign DOA_RC0 = ROM_DATA_I;
   //assign DOA_RC8 = ROM_DATA_I;
   //assign DOA_C0_S2 = ROM_DATA_I;
@@ -2992,6 +2992,7 @@ end
   `include "CC3_A8.v"
   `include "CC3_B0.v"
   `include "CC3_B8.v"
+`endif
   `include "CC3_C0.v"
   `include "CC3_C8.v"
   `include "CC3_D0.v"
@@ -3004,7 +3005,6 @@ end
   `include "DSK_C8.v"
   `include "DSK_D0.v"
   `include "DSK_D8.v"
-`endif
   `include "RS232_C0.v"
   `include "RS232_C8.v"
   `include "CART_C0.v"

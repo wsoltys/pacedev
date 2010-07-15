@@ -66,7 +66,7 @@ package project_pkg is
 	--
 	
   constant INVADERS_ROM_IN_FLASH            : boolean := false;
-	constant INVADERS_USE_INTERNAL_WRAM				: boolean := false;
+	constant INVADERS_USE_INTERNAL_WRAM				: boolean := true;
   constant PACE_HAS_SRAM                    : boolean := not INVADERS_USE_INTERNAL_WRAM;
 
 	constant USE_VIDEO_VBLANK_INTERRUPT 			: boolean := false;
