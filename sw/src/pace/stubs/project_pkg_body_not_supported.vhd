@@ -10,10 +10,9 @@ package body project_pkg is
 
   function IS_SUPPORTED return boolean is
   begin
-    assert false
-      report PACE_PLATFORM_NAME & " is not currently supported on " & 
-              PACE_TARGET_NAME & " hardware"
-        severity failure;
+    report PACE_PLATFORM_NAME & " is not currently supported on " & 
+            PACE_TARGET_NAME & " hardware"
+      severity failure;
     return false;
   end function IS_SUPPORTED;
 
