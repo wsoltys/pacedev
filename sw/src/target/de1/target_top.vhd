@@ -113,12 +113,8 @@ architecture SYN of target_top is
 	alias gpio_lcd 			  : std_logic_vector(35 downto 0) is gpio_1;
 	
   signal init       	  : std_logic := '1';
-	signal async_reset	  : std_logic := '0';
-	signal async_reset_n	: std_logic := '1';
-
-	signal clk_i			    : std_logic_vector(0 to 3);
-  signal reset_i     	  : std_logic_vector(0 to 3);
-
+  
+  signal clkrst_i       : from_CLKRST_t;
   signal buttons_i      : from_BUTTONS_t;
   signal switches_i     : from_SWITCHES_t;
   signal leds_o         : to_LEDS_t;
@@ -171,8 +167,8 @@ begin
         port map
         (
           inclk0  => clock_50,
-          c0      => clk_i(0),
-          c1      => clk_i(1)
+          c0      => clkrst_i.clk(0),
+          c1      => clkrst_i.clk(1)
         );
 
     end generate GEN_PLL;
@@ -180,8 +176,8 @@ begin
     GEN_NO_PLL : if not PACE_HAS_PLL generate
 
       -- feed input clocks into PACE core
-      clk_i(0) <= clock_50;
-      clk_i(1) <= clock_27;
+      clkrst_i.clk(0) <= clock_50;
+      clkrst_i.clk(1) <= clock_27;
         
     end generate GEN_NO_PLL;
       
@@ -202,8 +198,8 @@ begin
       port map
       (
         inclk0  => clock_27,
-        c0      => clk_i(2),
-        c1      => clk_i(3)
+        c0      => clkrst_i.clk(2),
+        c1      => clkrst_i.clk(3)
       );
 
   end block BLK_CLOCKING;
@@ -223,20 +219,20 @@ begin
 		end if;
 	end process;
 
-  async_reset <= init or not key(0);
-	async_reset_n <= not async_reset;
+  clkrst_i.arst <= init or not key(0);
+	clkrst_i.arst_n <= not clkrst_i.arst;
 
   GEN_RESETS : for i in 0 to 3 generate
 
-    process (clk_i(i), async_reset)
+    process (clkrst_i.clk(i), clkrst_i.arst)
       variable rst_r : std_logic_vector(2 downto 0) := (others => '0');
     begin
-      if async_reset = '1' then
+      if clkrst_i.arst = '1' then
         rst_r := (others => '1');
-      elsif rising_edge(clk_i(i)) then
+      elsif rising_edge(clkrst_i.clk(i)) then
         rst_r := rst_r(rst_r'left-1 downto 0) & '0';
       end if;
-      reset_i(i) <= rst_r(rst_r'left);
+      clkrst_i.rst(i) <= rst_r(rst_r'left);
     end process;
 
   end generate GEN_RESETS;
@@ -302,7 +298,7 @@ begin
 			port map
 			(
 				clk				=> clock_50,
-				reset			=> async_reset,
+				reset			=> clkrst_i.arst,
 				sense			=> maple_sense,
 				oe				=> maple_oe,
 				a					=> a, --gpio_maple(14),
@@ -344,7 +340,7 @@ begin
   		port map
 		  (
   			clk 				=> clock_50,
-				reset 			=> async_reset,
+				reset 			=> clkrst_i.arst,
 				--oe 					=> gc_oe,
 				d 					=> d, --gpio_maple(25),
 				joystate 		=> gcj
@@ -512,9 +508,9 @@ begin
   BLK_VIDEO : block
   begin
 
-		video_i.clk <= clk_i(1);	-- by convention
+		video_i.clk <= clkrst_i.clk(1);	-- by convention
 		video_i.clk_ena <= '1';
-    video_i.reset <= reset_i(1);
+    video_i.reset <= clkrst_i.rst(1);
     
     vga_r <= video_o.rgb.r(video_o.rgb.r'left downto video_o.rgb.r'left-3);
     vga_g <= video_o.rgb.g(video_o.rgb.g'left downto video_o.rgb.g'left-3);
@@ -557,7 +553,7 @@ begin
       port map
       (   --  Host Side
         iCLK => clock_50,
-        iRST_N => async_reset_n, --lcm_grst_n,
+        iRST_N => clkrst_i.arst_n, --lcm_grst_n,
         --    I2C Side
         I2S_SCLK => lcm_sclk,
         I2S_SDAT => lcm_sdat,
@@ -565,7 +561,7 @@ begin
       );
 
     lcm_clk <= video_o.clk;
-    lcm_grst <= async_reset_n;
+    lcm_grst <= not video_i.reset;
     lcm_dclk	<=	not lcm_clk;
     lcm_shdb	<=	'1';
     lcm_hsync <= video_o.hsync;
@@ -591,7 +587,7 @@ begin
   end block BLK_LCM;
 
   BLK_AUDIO : block
-    alias aud_clk    		: std_logic is clk_i(2);
+    alias aud_clk    		: std_logic is clkrst_i.clk(2);
     signal aud_data_l  	: std_logic_vector(audio_o.ldata'range);
     signal aud_data_r  	: std_logic_vector(audio_o.rdata'range);
   begin
@@ -613,7 +609,7 @@ begin
       (
         -- Inputs
         clk           => aud_clk,
-        reset         => async_reset,
+        reset         => clkrst_i.arst,
         datal         => aud_data_l,
         datar         => aud_data_r,
     
@@ -648,11 +644,11 @@ begin
       report "DE1_TEST_BURCHED_LEDS not compatible with other DE1 options"
         severity failure;
 
-    process (clock_27, async_reset)
+    process (clock_27, clkrst_i.arst)
       variable r : std_logic_vector(15 downto 0);
       variable count : std_logic_vector(21 downto 0);
     begin
-      if async_reset = '1' then
+      if clkrst_i.arst = '1' then
         r := (0=>'1', others => '0');
         count := (others => '0');
       elsif rising_edge(clock_27) then
@@ -671,8 +667,8 @@ begin
     port map
     (
     	-- clocks and resets
-	  	clk_i							=> clk_i,
-      reset_i          	=> reset_i,
+	  	clk_i							=> clkrst_i.clk,
+      reset_i          	=> clkrst_i.rst,
 
       -- misc inputs and outputs
       buttons_i         => buttons_i,
@@ -789,7 +785,7 @@ begin
       (
         --	Host Side
         iCLK							=> clock_50,
-        iRST_N						=> async_reset_n,
+        iRST_N						=> clkrst_i.arst_n,
         
         --	I2C Side
         I2C_SCLK					=> I2C_SCLK,
@@ -804,10 +800,10 @@ begin
   
     pchaser: entity work.pwm_chaser 
       generic map(nleds  => 8, nbits => 8, period => 4, hold_time => 12)
-      port map (clk => clock_50, clk_en => chaseen, pwm_en => pwmen, reset => async_reset, fade => X"0F", ledout => ledg(7 downto 0));
+      port map (clk => clock_50, clk_en => chaseen, pwm_en => pwmen, reset => clkrst_i.arst, fade => X"0F", ledout => ledg(7 downto 0));
 
     -- Generate pwmen pulse every 1024 clocks, chase pulse every 512k clocks
-    process(clock_50, async_reset)
+    process(clock_50, clkrst_i.arst)
       variable pcount     : std_logic_vector(9 downto 0);
       variable pwmen_r    : std_logic;
       variable ccount     : std_logic_vector(18 downto 0);
@@ -815,7 +811,7 @@ begin
     begin
       pwmen <= pwmen_r;
       chaseen <= chaseen_r;
-      if async_reset = '1' then
+      if clkrst_i.arst = '1' then
         pcount := (others => '0');
         ccount := (others => '0');
       elsif rising_edge(clock_50) then

@@ -57,6 +57,13 @@ package pace_pkg is
 
 	type ByteArrayType is array (natural range <>) of std_logic_vector(7 downto 0);
 
+  type from_CLKRST_t is record
+    arst      : std_logic;
+    arst_n    : std_logic;
+    rst       : std_logic_vector(0 to 3);
+    clk       : std_logic_vector(0 to 3);
+  end record;
+  
   -- maximums from the DE2 target
 
   constant PACE_NUM_SWITCHES  : natural := 18;
