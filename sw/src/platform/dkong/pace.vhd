@@ -15,7 +15,7 @@ entity PACE is
   (
   	-- clocks and resets
     clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    reset_i         : in std_logic_vector(0 to 3);
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -133,7 +133,7 @@ architecture SYN of PACE is
 	
 begin
 
-	reset_n <= not reset_i;
+	reset_n <= not reset_i(0);
 
 	-- map inputs
 	
@@ -149,7 +149,7 @@ begin
 	  port map
 	  (
 	    clk     	      => clk_i(1),
-	    reset   	      => reset_i,
+	    reset   	      => reset_i(1),
 	    ps2clk  	      => inputs_i.ps2_kclk,
 	    ps2data 	      => inputs_i.ps2_kdat,
 			jamma			      => inputs_i.jamma_n,

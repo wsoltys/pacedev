@@ -112,30 +112,32 @@ architecture SYN of target_top is
   constant DE1_TEST_BURCHED_7SEG    : boolean := false;
   constant DE1_BURCHED_SRAM         : boolean := true;
 
-	alias gpio_maple 		: std_logic_vector(35 downto 0) is gpio_0;
-	alias gpio_lcd 			: std_logic_vector(35 downto 0) is gpio_1;
+	alias gpio_maple 		  : std_logic_vector(35 downto 0) is gpio_0;
+	alias gpio_lcd 			  : std_logic_vector(35 downto 0) is gpio_1;
 	
-	signal clk_i			  : std_logic_vector(0 to 3);
-  signal init       	: std_logic := '1';
-  signal reset_i     	: std_logic := '1';
-	signal reset_n			: std_logic := '0';
+  signal init       	  : std_logic := '1';
+	signal async_reset	  : std_logic := '0';
+	signal async_reset_n	: std_logic := '1';
 
-  signal buttons_i    : from_BUTTONS_t;
-  signal switches_i   : from_SWITCHES_t;
-  signal leds_o       : to_LEDS_t;
-  signal inputs_i     : from_INPUTS_t;
-  signal flash_i      : from_FLASH_t;
-  signal flash_o      : to_FLASH_t;
-	signal sram_i			  : from_SRAM_t;
-	signal sram_o			  : to_SRAM_t;	
-	signal sdram_i      : from_SDRAM_t;
-	signal sdram_o      : to_SDRAM_t;
-	signal video_i      : from_VIDEO_t;
-  signal video_o      : to_VIDEO_t;
-  signal audio_i      : from_AUDIO_t;
-  signal audio_o      : to_AUDIO_t;
-  signal ser_i        : from_SERIAL_t;
-  signal ser_o        : to_SERIAL_t;
+	signal clk_i			    : std_logic_vector(0 to 3);
+  signal reset_i     	  : std_logic_vector(0 to 3);
+
+  signal buttons_i      : from_BUTTONS_t;
+  signal switches_i     : from_SWITCHES_t;
+  signal leds_o         : to_LEDS_t;
+  signal inputs_i       : from_INPUTS_t;
+  signal flash_i        : from_FLASH_t;
+  signal flash_o        : to_FLASH_t;
+	signal sram_i			    : from_SRAM_t;
+	signal sram_o			    : to_SRAM_t;	
+	signal sdram_i        : from_SDRAM_t;
+	signal sdram_o        : to_SDRAM_t;
+	signal video_i        : from_VIDEO_t;
+  signal video_o        : to_VIDEO_t;
+  signal audio_i        : from_AUDIO_t;
+  signal audio_o        : to_AUDIO_t;
+  signal ser_i          : from_SERIAL_t;
+  signal ser_o          : to_SERIAL_t;
   signal project_i      : from_PROJECT_IO_t;
   signal project_o      : to_PROJECT_IO_t;
   signal platform_i     : from_PLATFORM_IO_t;
@@ -218,8 +220,23 @@ begin
 		end if;
 	end process;
 
-  reset_i <= init or not key(0);
-	reset_n <= not reset_i;
+  async_reset <= init or not key(0);
+	async_reset_n <= not async_reset;
+	
+  GEN_RESETS : for i in 0 to 3 generate
+
+    process (clk_i(i), async_reset)
+      variable rst_r : std_logic_vector(2 downto 0) := (others => '0');
+    begin
+      if async_reset = '1' then
+        rst_r := (others => '1');
+      elsif rising_edge(clk_i(i)) then
+        rst_r := rst_r(rst_r'left-1 downto 0) & '0';
+      end if;
+      reset_i(i) <= rst_r(rst_r'left);
+    end process;
+
+  end generate GEN_RESETS;
 	
   -- buttons - active low
   buttons_i <= std_logic_vector(resize(unsigned(not key), buttons_i'length));
@@ -241,7 +258,7 @@ begin
 			port map
 			(
 				clk				=> clock_50,
-				reset			=> reset_i,
+				reset			=> async_reset,
 				sense			=> maple_sense,
 				oe				=> maple_oe,
 				a					=> gpio_maple(14),
@@ -275,7 +292,7 @@ begin
   		port map
 		  (
   			clk 				=> clock_50,
-				reset 			=> reset_i,
+				reset 			=> async_reset,
 				--oe 					=> gc_oe,
 				d 					=> gpio_maple(25),
 				joystate 		=> gcj
@@ -457,15 +474,15 @@ begin
   begin
 
 		video_i.clk <= clk_i(1);	-- by convention
-		process (clk_i(1), reset_i)
+		process (clk_i(1), reset_i(1))
     begin
-      if reset_i = '1' then
+      if reset_i(1) = '1' then
         video_i.clk_ena <= '0';
       elsif rising_edge(clk_i(1)) then
         video_i.clk_ena <= not video_i.clk_ena;
       end if;
     end process;
-    video_i.reset <= reset_i;
+    video_i.reset <= reset_i(1);
     
     vga_clk <= video_o.clk;
     vga_r <= video_o.rgb.r(video_o.rgb.r'left downto video_o.rgb.r'left-3);
@@ -501,7 +518,7 @@ begin
       (
         -- Inputs
         clk           => aud_clk,
-        reset         => reset_i,
+        reset         => async_reset,
         datal         => aud_data_l,
         datar         => aud_data_r,
     
@@ -551,11 +568,11 @@ begin
       report "DE1_TEST_BURCHED_LEDS not compatible with other DE1 options"
         severity failure;
 
-    process (clock_27, reset_i)
+    process (clock_27, async_reset)
       variable r : std_logic_vector(15 downto 0);
       variable count : std_logic_vector(21 downto 0);
     begin
-      if reset_i = '1' then
+      if async_reset = '1' then
         r := (0=>'1', others => '0');
         count := (others => '0');
       elsif rising_edge(clock_27) then
@@ -677,7 +694,7 @@ begin
       (
         --	Host Side
         iCLK							=> clock_50,
-        iRST_N						=> reset_n,
+        iRST_N						=> async_reset_n,
         
         --	I2C Side
         I2C_SCLK					=> I2C_SCLK,
@@ -702,7 +719,7 @@ begin
       port map
       (   --  Host Side
         iCLK => clock_50,
-        iRST_N => reset_n, --lcm_grst_n,
+        iRST_N => async_reset_n, --lcm_grst_n,
         --    I2C Side
         I2S_SCLK => lcm_sclk,
         I2S_SDAT => lcm_sdat,
@@ -710,7 +727,7 @@ begin
       );
 
     lcm_clk <= video_o.clk;
-    lcm_grst <= reset_n;
+    lcm_grst <= not reset_i(1);
     lcm_dclk	<=	not lcm_clk;
     lcm_shdb	<=	'1';
     lcm_hsync <= video_o.hsync;
@@ -724,10 +741,10 @@ begin
   
     pchaser: entity work.pwm_chaser 
       generic map(nleds  => 8, nbits => 8, period => 4, hold_time => 12)
-      port map (clk => clock_50, clk_en => chaseen, pwm_en => pwmen, reset => reset_i, fade => X"0F", ledout => ledg(7 downto 0));
+      port map (clk => clock_50, clk_en => chaseen, pwm_en => pwmen, reset => async_reset, fade => X"0F", ledout => ledg(7 downto 0));
 
     -- Generate pwmen pulse every 1024 clocks, chase pulse every 512k clocks
-    process(clock_50, reset_i)
+    process(clock_50, async_reset)
       variable pcount     : std_logic_vector(9 downto 0);
       variable pwmen_r    : std_logic;
       variable ccount     : std_logic_vector(18 downto 0);
@@ -735,7 +752,7 @@ begin
     begin
       pwmen <= pwmen_r;
       chaseen <= chaseen_r;
-      if reset_i = '1' then
+      if async_reset = '1' then
         pcount := (others => '0');
         ccount := (others => '0');
       elsif rising_edge(clock_50) then

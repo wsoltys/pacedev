@@ -63,7 +63,7 @@ entity PACE is
   (
   	-- clocks and resets
     clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    reset_i         : in std_logic_vector(0 to 3);
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -157,7 +157,7 @@ architecture SYN of PACE is
   signal audio_pwm        : std_logic;
 
 	-- aliases for PACE
-	alias I_RESET						: std_logic is reset_i;
+	alias I_RESET						: std_logic is reset_i(0);
 	alias I_CLK_REF					: std_logic is clk_i(0);
 	alias O_VIDEO_R					: std_logic_vector(3 downto 0) is video_o.rgb.r(9 downto 6);
 	alias O_VIDEO_G					: std_logic_vector(3 downto 0) is video_o.rgb.g(9 downto 6);
@@ -351,7 +351,7 @@ begin
       port map
       (
         clk     	      => clk_i(0),
-        reset   	      => reset_i,
+        reset   	      => reset_i(0),
         ps2clk  	      => inputs_i.ps2_kclk,
         ps2data 	      => inputs_i.ps2_kdat,
         jamma			      => inputs_i.jamma_n,

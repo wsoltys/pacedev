@@ -16,7 +16,7 @@ entity PACE is
   (
   	-- clocks and resets
     clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    reset_i         : in std_logic_vector(0 to 3);
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -156,6 +156,7 @@ architecture SYN of PACE is
 	end component;
 
 	alias clk_50M 		  : std_logic is clk_i(0);
+	alias rst_50M       : std_logic is reset_i(0);
 	
   signal ram_address  : std_logic_vector(18 downto 0);
 	signal ram1_di		  : std_logic_vector(15 downto 0);
@@ -313,7 +314,7 @@ begin
 	begin
 
     -- can use F3 to reset coco
-    coco_reset <= reset_i or buttons_i(3) or OSD_BUTTON(3);  -- F3
+    coco_reset <= rst_50M or buttons_i(3) or OSD_BUTTON(3);  -- F3
     
     GEN_TERASIC_SWITCHES : if PACE_TARGET = PACE_TARGET_DE1 or PACE_TARGET = PACE_TARGET_DE2 generate
       coco_switches <= switches_i(coco_switches'range);
@@ -504,7 +505,7 @@ begin
         (
           clk             => clk_50M,
           clk_ena         => '1',
-          reset           => reset_i,
+          reset           => rst_50M,
 
           ps2_kclk_i      => inputs_i.ps2_kclk,
           ps2_kdat_i      => inputs_i.ps2_kdat,

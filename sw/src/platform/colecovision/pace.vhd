@@ -82,7 +82,7 @@ entity PACE is
   (
   	-- clocks and resets
     clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    reset_i         : in std_logic_vector(0 to 3);
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -278,7 +278,7 @@ begin
 
   gnd_8_s   <= (others => '0');
 
-	reset_n_s <= not reset_i;
+	reset_n_s <= not reset_i(0);
 
   -----------------------------------------------------------------------------
   -- The PLL	24MHz -> 21.333MHz
@@ -508,7 +508,7 @@ begin
 	port map
 	(
     clk       	=> clk_20M,
-    reset     	=> reset_i,
+    reset     	=> reset_i(1),
 
 		-- inputs from PS/2 port
     ps2_clk  		=> ps2_kclk,

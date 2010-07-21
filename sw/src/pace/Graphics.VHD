@@ -13,8 +13,6 @@ use work.platform_pkg.all;
 entity Graphics is
   port
   (
-		reset						: in std_logic;
-    
     bitmap_ctl_i    : in to_BITMAP_CTL_t;
     bitmap_ctl_o    : out from_BITMAP_CTL_t;
     tilemap_ctl_i   : in to_TILEMAP_CTL_t;
@@ -198,7 +196,7 @@ begin
       )
 	    port map
 	    (
-				reset					=> reset,
+				reset					=> video_i.reset,
 				
 				video_ctl     => from_video_ctl,
 
@@ -225,7 +223,7 @@ begin
       )
 	    port map
 	    (
-				reset					=> reset,
+				reset					=> video_i.reset,
 				
 				video_ctl     => from_video_ctl,
 
@@ -255,7 +253,7 @@ begin
       )
 			port map
 			(
-				reset				  => reset,
+				reset				  => video_i.reset,
   
         -- register interface
         reg_i         => sprite_reg_i,

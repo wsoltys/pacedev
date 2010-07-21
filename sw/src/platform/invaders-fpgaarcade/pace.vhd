@@ -74,7 +74,7 @@ entity PACE is
   (
   	-- clocks and resets
     clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    reset_i         : in std_logic_vector(0 to 3);
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -173,7 +173,7 @@ architecture SYN of PACE is
 	signal AudioPWM        : std_logic;
 
 	-- for PACE compatibility
-	alias I_RESET					: std_logic is reset_i;
+	alias I_RESET					: std_logic is reset_i(0);
 	alias Clk_X1					: std_logic is clk_i(0);	-- 10MHz
 	alias Clk_X2					: std_logic is clk_i(1);	-- 20MHz
 	alias I_PS2_CLK				: std_logic is inputs_i.ps2_kclk;

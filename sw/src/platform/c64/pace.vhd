@@ -17,7 +17,7 @@ entity PACE is
   (
   	-- clocks and resets
     clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    reset_i         : in std_logic_vector(0 to 3);
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -101,6 +101,7 @@ architecture SYN of PACE is
   end component c1541_core;
 
 	alias clk_32M								: std_logic is clk_i(0);
+	alias rst_32M               : std_logic is reset_i(0);
 	alias clk_50M								: std_logic is clk_i(1);
 		
 	signal sram_addr_s					: unsigned(16 downto 0);
@@ -202,11 +203,11 @@ begin
 	leds_o <= std_logic_vector(leds_s(leds_s'left downto 1)) & c1541_activity_led;
 
 	-- generate DAC clock
-	process (clk_32M, reset_i)
+	process (clk_32M, rst_32M)
 		-- 32MHz/8 = 4MHz
 		variable count : std_logic_vector(2 downto 0);
 	begin
-		if reset_i = '1' then
+		if rst_32M = '1' then
 			count := (others => '0');
 		elsif rising_edge(clk_32M) then
 			count := count + 1;
@@ -241,7 +242,7 @@ begin
 			(
 				sysclk			  => clk_50M,		  -- for carts
 				clk32					=> clk_32M,
-				reset_n	      => not reset_i,
+				reset_n	      => not rst_32M,
 
 				-- keyboard interface (use any ordinairy PS2 keyboard)
 				kbd_clk				=> inputs_i.ps2_kclk,
@@ -326,7 +327,7 @@ begin
 			port map
 			(
 				clk_32M					=> clk_32M,
-				reset						=> reset_i,
+				reset						=> rst_32M,
 
 				-- serial bus
 				sb_data_oe			=> c1541_sb_data_oe,
@@ -383,9 +384,9 @@ begin
 			
 		begin
 	
-			process (clk_32M, reset_i)
+			process (clk_32M, rst_32M)
 			begin
-				if reset_i = '1' then
+				if rst_32M = '1' then
 					sb_data_in_r <= (others => '1');
 					sb_clk_in_r <= (others => '1');
 					sb_atn_in_r <= (others => '1');

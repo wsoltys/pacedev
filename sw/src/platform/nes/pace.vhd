@@ -16,7 +16,7 @@ entity PACE is
   (
   	-- clocks and resets
     clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    reset_i         : in std_logic_vector(0 to 3);
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -63,6 +63,7 @@ end entity PACE;
 architecture SYN of PACE is
 
 	alias clk_21M						: std_logic is clk_i(1);
+	alias rst_21M           : std_logic is reset_i(1);
 	
 	signal ppu_r						: std_logic_vector(5 downto 0) := (others => '0');
 	signal ppu_g						: std_logic_vector(5 downto 0) := (others => '0');
@@ -103,7 +104,7 @@ begin
 	  (
 	    clk         		=> clk_21M,
 	    clk_21M_en  		=> '1',
-	    reset       		=> reset_i,
+	    reset       		=> rst_21M,
 
 			prg_a						=> prg_a,
 			prg_d_i					=> prg_d,
@@ -148,7 +149,7 @@ begin
 	  port map
 	  (
 	    clk         		=> clk_21M,
-	    reset       		=> reset_i,
+	    reset       		=> rst_21M,
 
 			prg_a						=> prg_a,
 			prg_d_i					=> (others => '0'),
@@ -177,10 +178,10 @@ begin
 		
 	begin
 	
-		process (clk_21M, reset_i)
+		process (clk_21M, rst_21M)
 			variable count : integer range 0 to 20 := 0;
 		begin
-			if reset_i = '1' then
+			if rst_21M = '1' then
 				count := 0;
 			elsif rising_edge(clk_21M) then
 				clk_1M_en <= '0'; -- default
@@ -198,7 +199,7 @@ begin
 		  (
 		    clk     				=> clk_21M,
 				clk_1M_en				=> clk_1M_en,
-		    reset   				=> reset_i,
+		    reset   				=> rst_21M,
 
 		    ps2clk  				=> inputs_i.ps2_kclk,
 		    ps2data 				=> inputs_i.ps2_kdat,
@@ -214,7 +215,7 @@ begin
 	  port map
 	  (
 	    clk     				=> clk_21M,
-	    reset   				=> reset_i,
+	    reset   				=> rst_21M,
 
 			jamma						=> inputs_i.jamma_n,
 
@@ -256,9 +257,9 @@ begin
 
 		begin
 
-			process (clk_21M, reset_i)
+			process (clk_21M, rst_21M)
 			begin
-				if reset_i = '1' then
+				if rst_21M = '1' then
 					clk_10M <= '0';
 				elsif rising_edge(clk_21M) then
 					clk_10M <= not clk_10M;
@@ -304,9 +305,9 @@ begin
 	SND_BLK : block
 		signal count : std_logic_vector(1 downto 0);
 	begin
-		process (clk_21M, reset_i)
+		process (clk_21M, rst_21M)
 		begin
-			if reset_i = '1' then
+			if rst_21M = '1' then
 				count <= (others => '0');
 			elsif rising_edge(clk_21M) then
 				count <= count + 1;
