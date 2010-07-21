@@ -25,11 +25,11 @@ package platform_pkg is
 	-- Platform-specific constants (optional)
 	--
 
-	constant CABAL_1MHz_CLK0_COUNTS			    : natural := 
+	constant CLK0_FREQ_MHz		            : natural := 
     PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
-
-	constant CABAL_CPU_CLK_ENA_DIVIDE_BY	  : natural := 
-    CABAL_1MHz_CLK0_COUNTS / 3;
+  constant CPU_FREQ_MHz                 : natural := 3;
+  
+	constant CABAL_CPU_CLK_ENA_DIVIDE_BY   : natural := CLK0_FREQ_MHz / CPU_FREQ_MHz;
 
   constant CABAL_SRC_DIR                  : string;
 
@@ -102,5 +102,13 @@ package platform_pkg is
 		145 => (0=>"111111", 1=>"111000", 2=>"011100"),
 		others => (others => (others => '0'))
 	);
+
+  type from_PLATFORM_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PLATFORM_IO_t is record
+    not_used  : std_logic;
+  end record;
 
 end;

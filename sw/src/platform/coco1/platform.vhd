@@ -7,7 +7,9 @@ library work;
 use work.pace_pkg.all;
 use work.sdram_pkg.all;
 use work.kbd_pkg.all;
+use work.target_pkg.all;
 use work.platform_pkg.all;
+use work.project_pkg.all;
 
 entity platform is
   generic
@@ -59,9 +61,13 @@ entity platform is
     ser_i             : in from_SERIAL_t;
     ser_o             : out to_SERIAL_t;
 
-    -- general purpose I/O
-    gp_i              : in from_GP_t;
-    gp_o              : out to_GP_t
+    -- custom i/o
+    project_i       : in from_PROJECT_IO_t;
+    project_o       : out to_PROJECT_IO_t;
+    platform_i      : in from_PLATFORM_IO_t;
+    platform_o      : out to_PLATFORM_IO_t;
+    target_i        : in from_TARGET_IO_t;
+    target_o        : out to_TARGET_IO_t
   );
 end entity platform;
 

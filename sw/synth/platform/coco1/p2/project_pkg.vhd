@@ -13,7 +13,13 @@ package project_pkg is
 	--
 	
   -- Reference clock is 24MHz
-	constant PACE_HAS_PLL								: boolean := true;
+	constant PACE_HAS_PLL								      : boolean := true;
+  constant PACE_HAS_SRAM                    : boolean := true;
+  constant PACE_HAS_SDRAM                   : boolean := false;
+  constant PACE_HAS_SERIAL                  : boolean := false;
+
+	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
+  
 	-- NTSC (x16)
   constant PACE_CLK0_DIVIDE_BY        : natural := 23;
   constant PACE_CLK0_MULTIPLY_BY      : natural := 19;   	-- 24*19/23 = ~20MHz
@@ -43,4 +49,12 @@ package project_pkg is
 
 	constant USE_VIDEO_VBLANK_INTERRUPT : boolean := true;
 	
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

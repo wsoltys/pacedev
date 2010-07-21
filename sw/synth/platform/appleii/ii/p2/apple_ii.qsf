@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE ON
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION 8.1
+set_global_assignment -name LAST_QUARTUS_VERSION "9.1 SP2"
 
 # Pin & Location Assignments
 # ==========================
@@ -709,7 +709,6 @@ set_global_assignment -name FLOW_ENABLE_TIMING_CONSTRAINT_CHECK OFF
 set_global_assignment -name DO_COMBINED_ANALYSIS ON
 set_global_assignment -name ENABLE_CLOCK_LATENCY ON
 set_global_assignment -name REPORT_IO_PATHS_SEPARATELY ON
-set_instance_assignment -name GLOBAL_SIGNAL "GLOBAL CLOCK" -to "meb_pll:MEB_PLL_0|altpll:altpll_component|_clk1"
 set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_ASYNCHRONOUS_SIGNAL_PIPELINING ON
@@ -721,7 +720,7 @@ set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to clk_ee
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to data_ee
 set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to d_dr1[*]
 
-set_global_assignment -name OPTIMIZE_FAST_CORNER_TIMING ON
+set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
 
 set_global_assignment -name OPTIMIZE_POWER_DURING_SYNTHESIS OFF
 set_instance_assignment -name REPORT_DELAY ON -from * -to noe_ns

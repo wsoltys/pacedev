@@ -46,4 +46,12 @@ package project_pkg is
   constant APPLE_IIPLUS_HIRES_PAGES         : natural := 2;
 	constant USE_VIDEO_VBLANK_INTERRUPT 			: boolean := false;
 	
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

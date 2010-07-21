@@ -32,4 +32,12 @@ package project_pkg is
 
 	-- AppleII-specific constants
 
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

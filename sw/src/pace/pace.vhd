@@ -87,6 +87,8 @@ architecture SYN of PACE is
   signal to_osd           : to_OSD_t;
   signal from_osd         : from_OSD_t;
 
+  signal sync_reset       : std_logic_vector(clk_i'range) := (others => '0');
+  
 begin
 
   assert false
@@ -94,6 +96,21 @@ begin
             " CLK_1US_COUNTS=" & integer'image(CLK_1US_COUNTS)
       severity note;
 
+  GEN_RESETS : for i in 0 to 3 generate
+
+    process (clk_i(i), reset_i)
+      variable rst_r : std_logic_vector(2 downto 0) := (others => '0');
+    begin
+      if reset_i = '1' then
+        rst_r := (others => '1');
+      elsif rising_edge(clk_i(i)) then
+        rst_r := rst_r(rst_r'left-1 downto 0) & '0';
+      end if;
+      sync_reset(i) <= rst_r(rst_r'left);
+    end process;
+
+  end generate GEN_RESETS;
+  
 	inputs_inst : entity work.inputs
 		generic map
 		(
@@ -104,7 +121,7 @@ begin
 	  port map
 	  (
 	    clk     	      => clk_i(0),
-	    reset   	      => reset_i,
+	    reset   	      => sync_reset(0),
 	    ps2clk  	      => inputs_i.ps2_kclk,
 	    ps2data 	      => inputs_i.ps2_kdat,
 			jamma			      => inputs_i.jamma_n,
@@ -122,7 +139,7 @@ begin
     (
       -- clocking and reset
       clk_i           => clk_i,
-      reset_i         => reset_i,
+      reset_i         => sync_reset(0),
       
       -- misc inputs and outputs
       buttons_i       => buttons_i,
@@ -223,7 +240,7 @@ begin
 	    port map
 	    (
 	      sysclk      => clk_i(0),    -- fudge for now
-	      reset       => reset_i,
+	      reset       => sync_reset(0),
 
 	      sndif_rd    => to_sound.rd,              
 	      sndif_wr    => to_sound.wr,              

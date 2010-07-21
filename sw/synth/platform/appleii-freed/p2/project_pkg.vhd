@@ -31,4 +31,12 @@ package project_pkg is
 
   constant APPLEII_ENABLE_MMC               : std_logic := '1';
 
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;
