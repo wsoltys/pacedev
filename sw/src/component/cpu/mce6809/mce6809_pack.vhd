@@ -5,8 +5,8 @@ package mce6809_pack is
 	subtype ld_idx is integer range 0 to 17;
 	subtype ld_type is std_logic_vector(12 downto 0);
 
-	subtype la_idx is integer range 0 to 5;
-	subtype la_type is std_logic_vector(4 downto 0);
+	subtype lea_idx is integer range 0 to 5;
+	subtype lea_type is std_logic_vector(4 downto 0);
 
 	constant Flag_C : integer := 0;		-- Carry
 	constant Flag_V : integer := 1;		-- Overflow
@@ -38,12 +38,12 @@ package mce6809_pack is
 	constant IPCh		: ld_idx := 16;
 	constant INOREG	: ld_idx := 17;
 
-	-- Index into la vector
-	constant AEA		: la_idx := 0;
-	constant AX			: la_idx := 1;
-	constant AY			: la_idx := 2;
-	constant AU			: la_idx := 3;
-	constant AS			: la_idx := 4;
+	-- Index into lea vector
+	constant EAEA		: lea_idx := 0;
+	constant EAX		: lea_idx := 1;
+	constant EAY		: lea_idx := 2;
+	constant EAU		: lea_idx := 3;
+	constant EAS		: lea_idx := 4;
 
 	-- Microcode state (address)
 	type mc_state_type is (mc_fetch0, mc_fetch1, 
@@ -53,9 +53,10 @@ package mce6809_pack is
 	-- Bus mux select types
 	type dbus_type is (dbus_mem, dbus_a, dbus_b, dbus_pcl, dbus_pch, dbus_ul, dbus_uh,
 		dbus_sl, dbus_sh, dbus_yl, dbus_yh, dbus_xl, dbus_xh, 
-		dbus_eal, dbus_eah, dbus_cc, dbus_dp, --dbus_post, 
+		dbus_eal, dbus_eah, dbus_cc, dbus_dp, dbus_post, 
 		dbus_alu);
 	type abus_type is (abus_d, abus_pc, abus_u, abus_s, abus_y, abus_x, abus_ea);
+	type eabus_type is (eabus_u, eabus_s, eabus_y, eabus_x, eabus_ea);
 	type left_type is (left_a, left_b, left_eal, left_eah);
 	type right_type is (right_dbus, right_dbus5, right_c0, right_c1, right_c2);
 	
@@ -112,12 +113,13 @@ package mce6809_pack is
 			ir_ctrl				: out ir_type;
 			s_ctrl				: out s_type;
 			ld						: out ld_type;
-			la						: out la_type;
+			lea						: out lea_type;
 			ab_fromalu		: out std_logic;
 		
 			-- Mux controls
 			dbus_ctrl			: out dbus_type;
 			abus_ctrl			: out abus_type;
+			eabus_ctrl		: out eabus_type;
 			--abusl_ctrl		: out abus_type;
 			left_ctrl			: out left_type;
 			right_ctrl		: out right_type

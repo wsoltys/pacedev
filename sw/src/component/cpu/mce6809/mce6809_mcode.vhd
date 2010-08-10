@@ -162,12 +162,13 @@ entity mce6809_mcode is
 		ir_ctrl				: out ir_type;
 		s_ctrl				: out s_type;
 		ld						: out ld_type;
-		la						: out la_type;
+		lea						: out lea_type;
 		ab_fromalu		: out std_logic;
 	
 		-- Mux controls
 		dbus_ctrl			: out dbus_type;
 		abus_ctrl			: out abus_type;
+		eabus_ctrl		: out eabus_type;
 		--abusl_ctrl		: out abus_type;
 		left_ctrl			: out left_type;
 		right_ctrl		: out right_type
@@ -191,8 +192,7 @@ architecture SYN of mce6809_mcode is
 	alias index_indirect : std_logic is rpost(4);
 	alias index_reg		: std_logic_vector(1 downto 0) is rpost(6 downto 5);
 
-	signal idxsel			: abus_type;
---	signal idxabus		: abus_type;
+	signal idxsel			: eabus_type;
 	signal alu_op			:	alu_type;
 begin
 	-- CPU microcode
@@ -211,14 +211,28 @@ begin
 		ir_ctrl				<= latch_ir;
 		s_ctrl				<= latch_s;
 		ld						<= (others => '0');
-		la						<= (others => '0');
+		lea						<= (others => '0');
 		ab_fromalu		<= '1';
 		dbus_ctrl			<= dbus_def;
 		abus_ctrl			<= abus_pc;
+		eabus_ctrl		<= eabus_ea;
 		--abusl_ctrl		<= abus_pc;
 
 		rpost_hi_nib := to_integer(unsigned(rpost(7 downto 4)));
 		rpost_lo_nib := to_integer(unsigned(rpost(3 downto 0)));
+
+		-- Default ALU left input
+		case ir(7 downto 4) is
+		when X"8" | X"9" | X"A" | X"B" | X"4"		=> left_ctrl <= left_a;
+		when X"C" | X"D" | X"E" | X"F" | X"5"		=> left_ctrl <= left_b;
+		when others => left_ctrl <= left_a;
+		end case;
+
+		-- Default ALU right input
+		case ir(7 downto 4) is
+		when X"4" | X"5" | X"6" | X"7" => right_ctrl <= right_c1;
+		when others => right_ctrl <= right_dbus;
+		end case;
 
 		-- Instruction fetch
 		if mc_addr = mc_fetch0 then
@@ -252,10 +266,10 @@ begin
 
 		-- Indexed addressing (TODO PC offset)
 		case index_reg is 
-		when "00" => idxsel <= abus_x;
-		when "01" => idxsel <= abus_y;
-		when "10" => idxsel <= abus_u;
-		when "11" => idxsel <= abus_s;
+		when "00" => idxsel <= eabus_x;
+		when "01" => idxsel <= eabus_y;
+		when "10" => idxsel <= eabus_u;
+		when "11" => idxsel <= eabus_s;
 		when others =>
 		end case;
 
@@ -267,21 +281,24 @@ begin
 
 		case mc_addr is
 		when mc_index0 =>
-			abus_ctrl <= idxsel;
-			la(AEA) <= '1';
-			drive_vma	<= '0';
+			alu_ctrl <= alu_add;
+			left_ctrl <= left_eal;
+			right_ctrl <= right_dbus5;
+			dbus_ctrl <= dbus_post;
 			if std_match(rpost, "1---0100") then	-- No offset
 				mc_jump <= '1';
 				mc_jump_addr <= mc_exec0;	
+			else
+				ld(IEAl) <= '1';
 			end if;
 		when mc_index1 =>
-			if std_match(rpost, "1---0100") then	-- No offset
-				mc_jump <= '1';
-				mc_jump_addr <= mc_fetch0;	
-			else
---				idxsel <= abus_ea;
-			end if;
+			alu_ctrl <= alu_add;
+			left_ctrl <= left_eah;
+			right_ctrl <= right_c0;
+			ld(IEAh) <= '1';
 			if std_match(rpost, "0-------") then	-- 5-bit offset
+				mc_jump <= '1';
+				mc_jump_addr <= mc_exec0;	
 			elsif std_match(rpost, "1---1000") then	-- 8-bit offset
 			elsif std_match(rpost, "1---1001") then	-- 16-bit offset
 			elsif std_match(rpost, "1---0110") then	-- A offset
@@ -465,6 +482,13 @@ begin
 					when mc_fetch1 =>
 						mc_jump				<= '1';
 						mc_jump_addr	<= mc_index0;
+						lea(EAEA)			<= '1';
+						case dbus(6 downto 5) is 
+						when "00" => eabus_ctrl <= eabus_x;
+						when "01" => eabus_ctrl <= eabus_y;
+						when "10" => eabus_ctrl <= eabus_u;
+						when others => eabus_ctrl <= eabus_s; -- "11"
+						end case;
 					when mc_exec0 =>
 						mc_jump				<= '1';
 						mc_jump_addr	<= mc_fetch0;
@@ -550,24 +574,5 @@ begin
 				or std_match(ir, "----01--1010") or std_match(ir, "----1---00-0") or std_match(ir, "----10--0011") then
 			alu_op <= alu_sub;
 		end if;
-	end process;
-
-	-- ALU left input
-	left_in: process(ir)
-	begin
-		case ir(7 downto 4) is
-		when X"8" | X"9" | X"A" | X"B" | X"4"		=> left_ctrl <= left_a;
-		when X"C" | X"D" | X"E" | X"F" | X"5"		=> left_ctrl <= left_b;
-		when others => left_ctrl <= left_a;
-		end case;
-	end process;
-
-	-- ALU right input
-	right_in: process(ir)
-	begin
-		case ir(7 downto 4) is
-		when X"4" | X"5" | X"6" | X"7" => right_ctrl <= right_c1;
-		when others => right_ctrl <= right_dbus;
-		end case;
 	end process;
 end SYN;

@@ -30,6 +30,7 @@ architecture SYN of mce6809 is
 	--signal		abush					: std_logic_vector(7 downto 0);
 	--signal		abusl					: std_logic_vector(7 downto 0);
 	signal		abus					: std_logic_vector(15 downto 0);
+	signal		eabus					: std_logic_vector(15 downto 0);
 
 	-- CPU registers
 	signal		ir						: std_logic_vector(11 downto 0);
@@ -66,7 +67,7 @@ architecture SYN of mce6809 is
 	signal		ir_ctrl				: ir_type;
 	signal		s_ctrl				: s_type;
 	signal		ld						: ld_type;
-	signal		la						: la_type;
+	signal		lea						: lea_type;
 	alias			lda						: std_logic is ld(IA);
 	alias			ldb						: std_logic is ld(IB);
 	alias			ldxl					: std_logic is ld(IXl);
@@ -85,6 +86,7 @@ architecture SYN of mce6809 is
 	-- Mux controls
 	signal		dbus_ctrl			: dbus_type;
 	signal		abus_ctrl			: abus_type;
+	signal		eabus_ctrl		: eabus_type;
 	--signal		abusl_ctrl		: abus_type;
 	signal		left_ctrl			: left_type;
 	signal		right_ctrl		: right_type;
@@ -124,12 +126,13 @@ begin
 		ir_ctrl				=> ir_ctrl,
 		s_ctrl				=> s_ctrl,
 		ld						=> ld,
-		la						=> la,
+		lea						=> lea,
 		ab_fromalu		=> ab_fromalu,
 	
 		-- Mux controls
 		dbus_ctrl			=> dbus_ctrl,
-		abus_ctrl		=> abus_ctrl,
+		abus_ctrl			=> abus_ctrl,
+		eabus_ctrl		=> eabus_ctrl,
 		--abusl_ctrl		=> abusl_ctrl,
 		left_ctrl			=> left_ctrl,
 		right_ctrl		=> right_ctrl
@@ -288,8 +291,8 @@ begin
 				end if;
 
 				-- EA
-				if la(AEA) = '1' then
-					ea <= abus;
+				if lea(EAEA) = '1' then
+					ea <= eabus;
 				else
 					if ldeah = '1' then
 						ea(15 downto 8) <= dbus;
@@ -328,7 +331,7 @@ begin
 		when dbus_eal		=>		dbus <= ea(7 downto 0);		
 		when dbus_cc		=>		dbus <= cc;		
 		when dbus_dp		=>		dbus <= dp;
---		when dbus_post	=>		dbus <= post;
+		when dbus_post	=>		dbus <= post;
 		when dbus_alu 	=>		dbus <= alu_out;
 		end case;
 	end process;
@@ -353,6 +356,24 @@ begin
 			abus <= pc;
 		end case;
 	end process;
+
+	-- EA bus mux
+	eabus_pr : process(eabus_ctrl, ea)
+	begin
+		case eabus_ctrl is
+		when eabus_u =>
+			eabus <= u;
+		when eabus_s =>
+			eabus <= s;
+		when eabus_y =>
+			eabus <= y;
+		when eabus_x =>
+			eabus <= x;
+		when others =>	-- abus_ea
+			eabus <= ea;
+		end case;
+	end process;
+
 
 	-- ALU left mux
 	aluleft_pr : process(left_ctrl, acca, accb, ea)
