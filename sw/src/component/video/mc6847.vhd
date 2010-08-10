@@ -273,7 +273,8 @@ begin
 
         -- latch data on DD pins
         if pix_count(2 downto 0) = "000" then
-          cvbs_dd <= dd;
+          --cvbs_dd <= dd;
+          cvbs_dd <= v_count(6 downto 4) & pix_count(7 downto 3);
         end if;
 				cvbs_dd_r <= cvbs_dd;
 				
@@ -415,7 +416,8 @@ begin
 	      if (vga_hblank = '0' and vga_vblank = '0') then
 	        red <= vga_data(5 downto 4) & "000000";
 	        green <= vga_data(3 downto 2) & "000000";
-	        blue <= vga_data(1 downto 0) & "000000";
+	        --blue <= vga_data(1 downto 0) & "000000";
+	        blue <= "11" & "000000";
 	      else
 	        red <= (others => '0');
 	        green <= (others => '0');
