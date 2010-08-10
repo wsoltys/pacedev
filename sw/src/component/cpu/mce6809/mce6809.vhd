@@ -66,6 +66,7 @@ architecture SYN of mce6809 is
 	signal		ir_ctrl				: ir_type;
 	signal		s_ctrl				: s_type;
 	signal		ld						: ld_type;
+	signal		la						: la_type;
 	alias			lda						: std_logic is ld(IA);
 	alias			ldb						: std_logic is ld(IB);
 	alias			ldxl					: std_logic is ld(IXl);
@@ -123,6 +124,7 @@ begin
 		ir_ctrl				=> ir_ctrl,
 		s_ctrl				=> s_ctrl,
 		ld						=> ld,
+		la						=> la,
 		ab_fromalu		=> ab_fromalu,
 	
 		-- Mux controls
@@ -286,11 +288,15 @@ begin
 				end if;
 
 				-- EA
-				if ldeah = '1' then
-					ea(15 downto 8) <= dbus;
-				end if;
-				if ldeal = '1' then
-					ea(7 downto 0) <= dbus;
+				if la(AEA) = '1' then
+					ea <= abus;
+				else
+					if ldeah = '1' then
+						ea(15 downto 8) <= dbus;
+					end if;
+					if ldeal = '1' then
+						ea(7 downto 0) <= dbus;
+					end if;
 				end if;
 
 				-- POST

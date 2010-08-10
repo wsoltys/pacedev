@@ -162,6 +162,7 @@ entity mce6809_mcode is
 		ir_ctrl				: out ir_type;
 		s_ctrl				: out s_type;
 		ld						: out ld_type;
+		la						: out la_type;
 		ab_fromalu		: out std_logic;
 	
 		-- Mux controls
@@ -191,7 +192,7 @@ architecture SYN of mce6809_mcode is
 	alias index_reg		: std_logic_vector(1 downto 0) is rpost(6 downto 5);
 
 	signal idxsel			: abus_type;
-	signal idxabus		: abus_type;
+--	signal idxabus		: abus_type;
 	signal alu_op			:	alu_type;
 begin
 	-- CPU microcode
@@ -210,6 +211,7 @@ begin
 		ir_ctrl				<= latch_ir;
 		s_ctrl				<= latch_s;
 		ld						<= (others => '0');
+		la						<= (others => '0');
 		ab_fromalu		<= '1';
 		dbus_ctrl			<= dbus_def;
 		abus_ctrl			<= abus_pc;
@@ -248,7 +250,7 @@ begin
 			end if;
 		end if;
 
-		-- Indexed addressing
+		-- Indexed addressing (TODO PC offset)
 		case index_reg is 
 		when "00" => idxsel <= abus_x;
 		when "01" => idxsel <= abus_y;
@@ -257,20 +259,27 @@ begin
 		when others =>
 		end case;
 
-		if std_match(rpost, "1---0100") then	-- No offset
-			idxabus <= idxsel;
-		else
-			idxabus <= abus_ea;
-		end if;
+--		if std_match(rpost, "1---0100") then	-- No offset
+--			idxabus <= idxsel;
+--		else
+--			idxabus <= abus_ea;
+--		end if;
 
 		case mc_addr is
 		when mc_index0 =>
-			pc_ctrl <= incr_pc;
+			abus_ctrl <= idxsel;
+			la(AEA) <= '1';
+			drive_vma	<= '0';
+			if std_match(rpost, "1---0100") then	-- No offset
+				mc_jump <= '1';
+				mc_jump_addr <= mc_exec0;	
+			end if;
+		when mc_index1 =>
 			if std_match(rpost, "1---0100") then	-- No offset
 				mc_jump <= '1';
 				mc_jump_addr <= mc_fetch0;	
 			else
-				idxsel <= abus_ea;
+--				idxsel <= abus_ea;
 			end if;
 			if std_match(rpost, "0-------") then	-- 5-bit offset
 			elsif std_match(rpost, "1---1000") then	-- 8-bit offset
@@ -454,6 +463,19 @@ begin
 				when X"0" | X"1" | X"2" | X"4" | X"6" | X"8" | X"9" | X"A" | X"B" =>	-- ALUOP A,B index
 					case mc_addr is
 					when mc_fetch1 =>
+						mc_jump				<= '1';
+						mc_jump_addr	<= mc_index0;
+					when mc_exec0 =>
+						mc_jump				<= '1';
+						mc_jump_addr	<= mc_fetch0;
+						alu_ctrl			<= alu_op;
+						dbus_ctrl			<= dbus_mem;
+						abus_ctrl			<= abus_ea;
+						if ir(7 downto 4) = X"A" then
+							ld(IA) <= '1';
+						else
+							ld(IB) <= '1';
+						end if;
 					when others =>
 					end case;
 				when others =>

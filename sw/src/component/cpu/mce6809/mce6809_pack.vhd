@@ -5,6 +5,9 @@ package mce6809_pack is
 	subtype ld_idx is integer range 0 to 17;
 	subtype ld_type is std_logic_vector(12 downto 0);
 
+	subtype la_idx is integer range 0 to 5;
+	subtype la_type is std_logic_vector(4 downto 0);
+
 	constant Flag_C : integer := 0;		-- Carry
 	constant Flag_V : integer := 1;		-- Overflow
 	constant Flag_Z : integer := 2;		-- Zero
@@ -34,6 +37,13 @@ package mce6809_pack is
 	constant IPCl		: ld_idx := 15;
 	constant IPCh		: ld_idx := 16;
 	constant INOREG	: ld_idx := 17;
+
+	-- Index into la vector
+	constant AEA		: la_idx := 0;
+	constant AX			: la_idx := 1;
+	constant AY			: la_idx := 2;
+	constant AU			: la_idx := 3;
+	constant AS			: la_idx := 4;
 
 	-- Microcode state (address)
 	type mc_state_type is (mc_fetch0, mc_fetch1, 
@@ -102,6 +112,7 @@ package mce6809_pack is
 			ir_ctrl				: out ir_type;
 			s_ctrl				: out s_type;
 			ld						: out ld_type;
+			la						: out la_type;
 			ab_fromalu		: out std_logic;
 		
 			-- Mux controls
