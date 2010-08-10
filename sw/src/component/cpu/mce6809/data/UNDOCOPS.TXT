@@ -1,0 +1,108 @@
+#FILE: $RCSfile: undocops.txt $
+#DESC: The 'Documented' Undocumented Illegal 6809 Opcodes
+#REV: $Revision: 1.1 $
+#DATE: $Date: 1995/08/18 14:39:40 $
+#AUTHOR: Graham E. Kinns
+#DISCLAIMER: All information provided as is etc.
+#ARCHIVE: This file is part of the DRGNINFO collection of Dragon info files
+#CONTACT: Comments, bugs, revisions, suggestions to Dragon@grempc.demon.co.uk
+#HISTORY: 1.0 27/01/94 - Initial results typed up
+#RCSID: $Id: undocops.txt 1.1 1995/08/18 14:39:40 Graham Exp $
+
+These results were found by direct experiment on a 6809E in my Dragon using
+Mike Kerry's DreamBug monitor on Rom.  
+
+All cycles are assumed - I don't have any way of measuring them at present.
+
+Page 1
+======
+                        
+Op Mne		Mode	~	#	Comment
+
+01 NEG		Direct	6	2	Same as op $00 (NEG <$xx)
+02 NEG/COM	Direct	6       2	If cc.c = 0 then NEG <$xx (op $00)
+					If cc.c = 1 then COM <$xx (op $03)
+					(<$xx) = not(<$xx) + not(cc.c)
+05 LSR		Direct	6	2	Same as op $04 (LSR <$xx)
+0b DEC		Direct	6	2	Same as op $0A (DEC <$xx)
+
+14 ??		} Seem to be interrupt related      
+15 ??		}
+18 ??
+1b ??
+
+38 CWAI		??	?	2	or something similar.  Doesn't
+					alter any regs except CC.
+3e RESET   Inherent  -	1	Forces internal Reset, disables 
+					interrupts.
+41 NEGA    Inherent  2       1       Same as 40
+42 COMA    Inherent  2       1       Same as 43
+45 LSRA    Inherent  2       1       Same as 44
+4b DECA    Inherent  2       1       Same as 4a
+4e CLRA    Inherent  2       1       Same as 4f
+
+51 NEGB    Inherent  2       1       Same as 50
+52 COMB    Inherent  2       1       Same as 53
+55 LSRB    Inherent  2       1       Same as 54
+5b DECB    Inherent  2       1       Same as 5a
+5e CLRB    Inherent  2       1       Same as 5f
+
+61 NEG     Indexed   6+      2+      Same as 60 - not tested
+62 COM     Indexed   6+      2+      Same as 63 - not tested
+65 LSR     Indexed   6+      2+      Same as 64 - not tested
+6b DEC     Indexed   6+      2+      Same as 6a - not tested
+
+71 NEG     Extended  7       3       Same as 70 - not tested
+72 COM     Extended  7       3       Same as 73 - not tested
+75 LSR     Extended  7       3       Same as 74 - not tested
+7b DEC     Extended  7       3       Same as 7a - not tested
+
+87 ??
+8f ??
+
+c7 ??
+cd ??
+cf ??
+
+Page 2  (10xx)
+======
+
+1000 - 100f
+1010    [Page switch 2][Page switch 2] - flowchart in data sheet suggests 
+	any page switch code after the intial one are ignored
+1011    [Page switch 2][Page switch 3] - same as [Page switch 2] 
+1012 - 101f
+1030 - 103e
+1040 - 1082
+1084 - 108b
+108d
+108f - 1092
+1094 - 109b
+109d
+10a0 - 10a2
+10a4 - 10ab
+10ad
+10b0 - 10b2
+10b4 - 10bb
+10bd
+10c0 - 10cd
+10cf - 10dd
+10e0 - 10ed
+10f0 - 10ff
+      
+Page 3  (11xx)
+======
+
+1100 - 110f
+1110    [Page switch 3][Page switch 2] - same as [Page sw 3] 
+1111    [Page switch 3][Page switch 3] - same as [Page sw 3] 
+1112 - 113e
+1140 - 1182
+1184 - 118b
+118d - 1192
+1194 - 119b
+119d - 11a2
+11a4 - 11ab
+11ad - 11b2
+11b4 - 11bb
+11bd - 11ff

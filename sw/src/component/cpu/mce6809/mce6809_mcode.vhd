@@ -140,8 +140,8 @@ use work.mce6809_pack.all;
 entity mce6809_mcode is
 	port (
 		-- Inputs
-		clk						: in  std_logic;
-		clken					: in  std_logic;
+		clk						: in std_logic;
+		clken					: in std_logic;
 		ir						: in std_logic_vector(11 downto 0);
 		mc_addr				: in mc_state_type;
 		dbus					: in std_logic_vector(7 downto 0);
@@ -187,6 +187,11 @@ architecture SYN of mce6809_mcode is
 	constant exg_ld_lo : Exg_Ld_Type := (IB, IXl, IYl, IUl, ISl, IPCl, INOREG, INOREG, INOREG, INOREG,
  		INOREG, INOREG, INOREG, INOREG, INOREG, INOREG);
 
+	alias index_indirect : std_logic is rpost(4);
+	alias index_reg		: std_logic_vector(1 downto 0) is rpost(6 downto 5);
+
+	signal idxsel			: abus_type;
+	signal idxabus		: abus_type;
 	signal alu_op			:	alu_type;
 begin
 	-- CPU microcode
@@ -223,16 +228,66 @@ begin
 			ir_ctrl <= load_2nd_ir;
 			dbus_ctrl <= dbus_mem;
 			ld(IPOST) <= '1';
+
+			case dbus(7 downto 4) is
+			when X"6" | X"A" | X"E" =>
+				mc_jump <= '1';
+				mc_jump_addr <= mc_index0;
+			when others =>
+			end case;
+
 			if (ir(9 downto 8) /= "00") or (ir(7 downto 4) >= X"6" or ir = X"01E") then
 				pc_ctrl <= incr_pc;
 			else
 				pc_ctrl <= latch_pc;
 			end if;
+
 			if ir(9 downto 8) /= "00" and (dbus = X"10" or dbus = X"11") then
 				mc_jump <= '1';
 				mc_jump_addr <= mc_fetch1;
 			end if;
 		end if;
+
+		-- Indexed addressing
+		case index_reg is 
+		when "00" => idxsel <= abus_x;
+		when "01" => idxsel <= abus_y;
+		when "10" => idxsel <= abus_u;
+		when "11" => idxsel <= abus_s;
+		when others =>
+		end case;
+
+		if std_match(rpost, "1---0100") then	-- No offset
+			idxabus <= idxsel;
+		else
+			idxabus <= abus_ea;
+		end if;
+
+		case mc_addr is
+		when mc_index0 =>
+			pc_ctrl <= incr_pc;
+			if std_match(rpost, "1---0100") then	-- No offset
+				mc_jump <= '1';
+				mc_jump_addr <= mc_fetch0;	
+			else
+				idxsel <= abus_ea;
+			end if;
+			if std_match(rpost, "0-------") then	-- 5-bit offset
+			elsif std_match(rpost, "1---1000") then	-- 8-bit offset
+			elsif std_match(rpost, "1---1001") then	-- 16-bit offset
+			elsif std_match(rpost, "1---0110") then	-- A offset
+			elsif std_match(rpost, "1---0101") then	-- B offset
+			elsif std_match(rpost, "1---1011") then	-- D offset
+			elsif std_match(rpost, "1--00000") then	-- Post inc +1 
+			elsif std_match(rpost, "1--00001") then	-- Post inc +2
+			elsif std_match(rpost, "1--00010") then	-- Post dec -1
+			elsif std_match(rpost, "1--00011") then	-- Post dec -2
+			elsif std_match(rpost, "1---1011") then	-- PC 8-bit offset
+			elsif std_match(rpost, "1---1011") then	-- PC 16-bit offset
+			elsif std_match(rpost, "1--11111") then	-- Extended indirect
+			end if;
+		when others =>
+		end case;
 
 		-- Instruction decode
 		if mc_addr /= mc_fetch0 then

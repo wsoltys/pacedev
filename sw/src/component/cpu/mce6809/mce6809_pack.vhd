@@ -36,7 +36,9 @@ package mce6809_pack is
 	constant INOREG	: ld_idx := 17;
 
 	-- Microcode state (address)
-	type mc_state_type is (mc_fetch0, mc_fetch1, mc_exec0, mc_exec1, mc_exec2, mc_exec3, mc_exec4, mc_exec5);
+	type mc_state_type is (mc_fetch0, mc_fetch1, 
+		mc_index0, mc_index1, mc_index2, mc_index3, mc_index4, mc_index5, mc_index6, mc_index7,
+		mc_exec0, mc_exec1, mc_exec2, mc_exec3, mc_exec4, mc_exec5);
 
 	-- Bus mux select types
 	type dbus_type is (dbus_mem, dbus_a, dbus_b, dbus_pcl, dbus_pch, dbus_ul, dbus_uh,
@@ -45,7 +47,7 @@ package mce6809_pack is
 		dbus_alu);
 	type abus_type is (abus_d, abus_pc, abus_u, abus_s, abus_y, abus_x, abus_ea);
 	type left_type is (left_a, left_b, left_eal, left_eah);
-	type right_type is (right_dbus, right_c0, right_c1, right_c2);
+	type right_type is (right_dbus, right_dbus5, right_c0, right_c1, right_c2);
 	
 	-- Register mux select types
 	type alu_type is (alu_idle, alu_add, alu_sub, alu_or, alu_and, alu_eor, alu_rol, alu_ror);

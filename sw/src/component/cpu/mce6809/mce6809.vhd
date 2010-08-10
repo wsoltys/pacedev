@@ -14,6 +14,7 @@ entity mce6809 is
 		data_i: 	  in  std_logic_vector(7 downto 0);
 		data_o:		 	out std_logic_vector(7 downto 0);
 		data_oe:		out std_logic;
+		lic:				out std_logic;
 		halt:     	in  std_logic;
 		hold:     	in  std_logic;
 		irq:      	in  std_logic;
@@ -152,6 +153,15 @@ begin
 					when mc_exec3	 => mc_addr <= mc_exec4;
 					when mc_exec4	 => mc_addr <= mc_exec5;
 					when mc_exec5	 => mc_addr <= mc_fetch0;
+
+					when mc_index0 => mc_addr <= mc_index1;
+					when mc_index1 => mc_addr <= mc_index2;
+					when mc_index2 => mc_addr <= mc_index3;
+					when mc_index3 => mc_addr <= mc_index4;
+					when mc_index4 => mc_addr <= mc_index5;
+					when mc_index5 => mc_addr <= mc_index6;
+					when mc_index6 => mc_addr <= mc_index7;
+					when mc_index7 => mc_addr <= mc_exec0;
 					when others =>
 						mc_addr <= mc_fetch0;
 					end case;
@@ -159,6 +169,9 @@ begin
 			end if;
 		end if;
 	end process;
+
+	-- Generate last instruction cycle signal
+	lic <= '1' when mc_jump = '1' and mc_jump_addr = mc_fetch0 else '0';
 
 	-- Registers
 	regs: process(clk, clken, reset)
@@ -320,7 +333,16 @@ begin
 		case abus_ctrl is
 		when abus_ea =>
 			abus <= ea;
-		-- abus_d, abus_u, abus_s, abus_y, abus_x
+		when abus_d =>
+			abus <= acca & accb;
+		when abus_u =>
+			abus <= u;
+		when abus_s =>
+			abus <= s;
+		when abus_y =>
+			abus <= y;
+		when abus_x =>
+			abus <= x;
 		when others =>	-- abus_pc
 			abus <= pc;
 		end case;
@@ -342,6 +364,7 @@ begin
 	begin
 		case right_ctrl is
 		when right_dbus	=> right <= dbus;
+		when right_dbus5=> right <= "000" & dbus(4 downto 0);
 		when right_c0		=> right <= X"00";
 		when right_c1		=> right <= X"01";
 		when right_c2		=> right <= X"02";

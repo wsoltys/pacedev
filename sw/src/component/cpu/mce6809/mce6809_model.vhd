@@ -14,6 +14,7 @@ entity mce6809 is
 		data_i: 	  in  std_logic_vector(7 downto 0);
 		data_o:		 	out std_logic_vector(7 downto 0);
 		data_oe:	 	out std_logic;
+		lic:	     	out std_logic;
 		halt:     	in  std_logic;
 		hold:     	in  std_logic;
 		irq:      	in  std_logic;
@@ -232,7 +233,23 @@ begin
 
 				when X"AB" =>			-- ADDA (indexed)
 					case mc_cycle is
-					when 1 =>
+					when 2 => -- Load offset
+						case post(6 downto 5) is
+						when "00" => 		ea <= x;
+						when "01" => 		ea <= y;
+						when "10" => 		ea <= u;
+						when "11" => 		ea <= s;
+						when others => 	ea <= (others => 'X');
+						end case;
+					when 3 =>
+						if post(7) ='1' and post(3 downto 0) = "0100" then	-- Register address, no offset
+							mc_cycle_next <= 0;
+							vma <= '1';
+							address_out := ea;
+							if rising_edge(clk) and clken = '1' then
+								acca <= acca + data_i after SIM_DELAY;
+							end if;
+						end if;
 					when others =>
 					end case;
 
@@ -390,6 +407,8 @@ begin
 		address <= address_out after SIM_DELAY;
 		rw <= rw_out after SIM_DELAY;
 	end process;
+		
+	lic <= '1' after SIM_DELAY when mc_cycle_next = 0 else '0' after SIM_DELAY;	
 
 	-- Microcode address
 	ma_reg: process(clk, clken, reset)

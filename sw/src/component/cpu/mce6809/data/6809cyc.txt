@@ -1,0 +1,880 @@
+MC6809 Cycle-By-Cycle Performance
+=================================
+
+This information is taken from Motorola Semiconductor Technical Data: MC6809E 8-bit microprocessing unit
+http://www.funet.fi/pub/cbm/documents/chipdata/6809/index.html (6809-21.gif - 6809-25.gif).
+
+Please mail me if you find errors, something is missign etc... (asalmi@ratol.fi)
+
+V1.0 2000-10-19        first version (there must be errors)
+V1.1 2000-11-03        tabs -> spaces, clean up, now normal text file (no MS-DOS), added LEA, stack writes
+                       and interrupts.
+V1.2 2000-11-30        fixed LBRA, LBSR cycles
+
+NOTES:
+#             is cycle nro
+NNNN          is opcode location
+VMA cycle     (Data Bus = Don't Care, Address Bus = FFFF)
+EA            Effective Address
+
+Direct adressing mode
+---------------------
+
+ASL, ASR, CLR, COM, DEC, INC, LSL, LSR, NEG, ROL, ROR
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Address Low           NNNN + 1
+3 Don't Care            FFFF
+4 Data                  EA
+5 Don't Care            FFFF
+6 Data (write)          EA
+
+TST
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Address Low           NNNN + 1
+3 Don't Care            FFFF
+4 Data                  EA
+5 Don't Care            FFFF
+6 Don't Care            FFFF
+
+JMP
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Address Low           NNNN + 1
+3 Don't Care            FFFF
+
+ADCA, ADCB, ADDA, ADDB, ANDA, ANDB, BITA, BITB, CMPA, CMPB, EORA, EORB, LDA, LDB, ORA, ORB, SBCA, SBCB, SUBA, SUBB
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Address Low           NNNN + 1
+3 Don't Care            FFFF
+4 Data                  EA
+
+STA, STB
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Address Low           NNNN + 1
+3 Don't Care            FFFF
+4 Register (write)      EA
+
+LDD, LDU, LDX
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Address Low           NNNN + 1
+3 Don't Care            FFFF
+4 Register High         EA
+5 Register Low          EA + 1
+
+LDS, LDY
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Opcode 2nd Byte       NNNN + 1
+3 Address Low           NNNN + 2
+4 Don't Care            FFFF
+5 Register High         EA
+6 Register Low          EA + 1
+
+STD, STU, STX
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Address Low           NNNN + 1
+3 Don't Care            FFFF
+4 Register High (write) EA
+5 Register Low  (write) EA + 1
+
+STS, STY
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Opcode 2nd Byte       NNNN + 1
+3 Address Low           NNNN + 2
+4 Don't Care            FFFF
+5 Register High (write) EA
+6 Register Low  (write) EA + 1
+
+ADDD, CMPX, SUBD
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Address Low           NNNN + 1
+3 Don't Care            FFFF
+4 Data High             EA
+5 Data Low              EA + 1
+6 Don't Care            FFFF
+
+CMPY, CMPD, CMPS, CMPU
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Opcode 2nd Byte       NNNN + 1
+3 Address Low           NNNN + 2
+4 Don't Care            FFFF
+5 Data High             EA
+6 Data Low              EA + 1
+7 Don't Care            FFFF
+
+JSR
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Address Low           NNNN + 1
+3 Don't Care            FFFF
+4 Don't Care            Sub Address
+5 Don't Care            FFFF
+6 PC Low  (write)       Stack
+7 PC High (write)       Stack
+
+Extended adressing mode
+-----------------------
+
+ASL, ASR, CLR, COM, DEC, INC, LSL, LSR, NEG, ROL, ROR
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Address High          NNNN + 1
+3 Address Low           NNNN + 2
+4 Don't Care            FFFF
+5 Data                  EA
+6 Don't Care            FFFF
+7 Data (write)          EA
+
+TST
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Address High          NNNN + 1
+3 Address Low           NNNN + 2
+4 Don't Care            FFFF
+5 Data                  EA
+6 Don't Care            FFFF
+7 Don't Care            FFFF
+
+JMP
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Address High          NNNN + 1
+3 Address Low           NNNN + 2
+4 Don't Care            FFFF
+
+ADCA, ADCB, ADDA, ADDB, ANDA, ANDB, BITA, BITB, CMPA, CMPB, EORA, EORB, LDA, LDB, ORA, ORB, SBCA, SBCB, SUBA, SUBB
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Address High          NNNN + 1
+3 Address Low           NNNN + 2
+4 Don't Care            FFFF
+5 Data                  EA
+
+STA, STB
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Address High          NNNN + 1
+3 Address Low           NNNN + 2
+4 Don't Care            FFFF
+5 Register (write)      EA
+
+LDD, LDU, LDX
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Address High          NNNN + 1
+3 Address Low           NNNN + 2
+4 Don't Care            FFFF
+5 Register High         EA
+6 Register Low          EA + 1
+
+LDS, LDY
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Opcode 2nd Byte       NNNN + 1
+3 Address High          NNNN + 2
+4 Address Low           NNNN + 3
+5 Don't Care            FFFF
+6 Register High         EA
+7 Register Low          EA + 1
+
+STD, STU, STX
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Address High          NNNN + 1
+3 Address Low           NNNN + 2
+4 Don't Care            FFFF
+5 Register High (write) EA
+6 Register Low  (write) EA + 1
+
+STS, STY
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Opcode 2nd Byte       NNNN + 1
+3 Address High          NNNN + 2
+4 Address Low           NNNN + 3
+5 Don't Care            FFFF
+6 Register High (write) EA
+7 Register Low  (write) EA + 1
+
+ADDD, CMPX, SUBD
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Address High          NNNN + 1
+3 Address Low           NNNN + 2
+4 Don't Care            FFFF
+5 Data High             EA
+6 Data Low              EA + 1
+7 Don't Care            FFFF
+
+CMPY, CMPD, CMPS, CMPU
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Opcode 2nd Byte       NNNN + 1
+3 Address High          NNNN + 2
+4 Address Low           NNNN + 3
+5 Don't Care            FFFF
+6 Data High             EA
+7 Data Low              EA + 1
+8 Don't Care            FFFF
+
+JSR
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Address High          NNNN + 1
+3 Address Low           NNNN + 2
+4 Don't Care            FFFF
+5 Don't Care            Sub Address
+6 Don't Care            FFFF
+7 PC Low  (write)       Stack
+8 PC High (write)       Stack
+
+Immediate addressing mode
+-------------------------
+
+ADCA, ADCB, ADDA, ADDB, ANDA, ANDB, BITA, BITB, CMPA, CMPB, EORA, EORB, LDA, LDB, ORA, ORB, SBCA, SBCB, SUBA, SUBB
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Data                  NNNN + 1
+
+LDD, LDU, LDX
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Register High         NNNN + 1
+3 Register Low          NNNN + 2
+
+LDS, LDY
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Opcode 2nd Byte       NNNN + 1
+3 Register High         NNNN + 2
+4 Register Low          NNNN + 3
+
+ADDD, CMPX, SUBD
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Data High             NNNN + 1
+3 Data Low              NNNN + 2
+4 Don't Care            FFFF
+
+CMPY, CMPD, CMPS, CMPU
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Opcode 2nd Byte       NNNN + 1
+3 Data High             NNNN + 2
+4 Data Low              NNNN + 3
+5 Don't Care            FFFF
+
+ANDCC, ORCC
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Data                  NNNN + 1
+3 Don't Care            FFFF
+
+Indexed addressing mode
+-----------------------
+
+NOTE! Datasheets assumes that additional cycles are at least one cycle. 
+
+ASL, ASR, CLR, COM, DEC, INC, LSL, LSR, NEG, ROL, ROR
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Post Byte             NNNN + 1
+----------------------------------------------
+Additional cycles for the particular variation
+----------------------------------------------
+? Data                  EA
+? Don't Care            FFFF
+? Data (write)          EA
+
+TST
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Post Byte             NNNN + 1
+----------------------------------------------
+Additional cycles for the particular variation
+----------------------------------------------
+? Data                  EA
+? Don't Care            FFFF
+? Don't Care            FFFF
+
+JMP
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Post Byte             NNNN + 1
+----------------------------------------------
+Additional cycles for the particular variation
+----------------------------------------------
+
+ADCA, ADCB, ADDA, ADDB, ANDA, ANDB, BITA, BITB, CMPA, CMPB, EORA, EORB, LDA, LDB, ORA, ORB, SBCA, SBCB, SUBA, SUBB
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Post Byte             NNNN + 1
+----------------------------------------------
+Additional cycles for the particular variation
+----------------------------------------------
+? Data                  EA
+
+STA, STB
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Post Byte             NNNN + 1
+----------------------------------------------
+Additional cycles for the particular variation
+----------------------------------------------
+? Register (write)      EA
+
+LDD, LDU, LDX
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Post Byte             NNNN + 1
+----------------------------------------------
+Additional cycles for the particular variation
+----------------------------------------------
+? Register High         EA
+? Register Low          EA + 1
+
+LDS, LDY
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Opcode 2nd Byte       NNNN + 1
+3 Post Byte             NNNN + 2
+----------------------------------------------
+Additional cycles for the particular variation (SEE NOTE)
+----------------------------------------------
+? Register High         EA
+? Register Low          EA + 1
+
+STD, STU, STX
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Post Byte             NNNN + 1
+----------------------------------------------
+Additional cycles for the particular variation
+----------------------------------------------
+? Register High (write) EA
+? Register Low  (write) EA + 1
+
+STS, STY
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Opcode 2nd Byte       NNNN + 1
+3 Post Byte             NNNN + 2
+----------------------------------------------
+Additional cycles for the particular variation (SEE NOTE)
+----------------------------------------------
+? Register High (write) EA
+? Register Low  (write) EA + 1
+
+ADDD, CMPX, SUBD
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Post Byte             NNNN + 1
+----------------------------------------------
+Additional cycles for the particular variation
+----------------------------------------------
+? Data High             EA
+? Data Low              EA + 1
+? Don't Care            FFFF
+
+CMPY, CMPD, CMPS, CMPU
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Opcode 2nd Byte       NNNN + 1
+3 Post Byte             NNNN + 2
+----------------------------------------------
+Additional cycles for the particular variation (SEE NOTE)
+----------------------------------------------
+? Data High             EA
+? Data Low              EA + 1
+? Don't Care            FFFF
+
+JSR
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Post Byte             NNNN + 1
+----------------------------------------------
+Additional cycles for the particular variation
+----------------------------------------------
+? Don't Care            Sub Address
+? Don't Care            FFFF
+? PC Low  (write)       Stack
+? PC High (write)       Stack
+
+LEAS, LEAU, LEAX, LEAY
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Post Byte             NNNN + 1
+----------------------------------------------
+Additional cycles for the particular variation
+----------------------------------------------
+? Don't Care            FFFF
+
+
+Additional cycles for the particular variation
+++++++++++++++++++++++++++++++++++++++++++++++
+
+NOTE: # value is wrong for $10xx and $11xx opcodes,
+      you need to add 1 to get correct values.
+      Address bus value in [] is for $10xx and $11xx opcodes.
+
+,R
+# Data Bus              Address Bus
+3 Don't Care            NNNN + 2[3]
+
+5n,R
+# Data Bus              Address Bus
+3 Don't Care            NNNN + 2[3]
+4 Don't Care            FFFF
+
+8n,R                                  [8n,R]
+# Data Bus              Address Bus   # Data Bus              Address Bus
+3 Offset                NNNN + 2[3]   3 Offset                NNNN + 2[3]
+4 Don't Care            FFFF          4 Don't Care            FFFF
+                                      5 Indirect High         XXXX
+                                      6 Indirect Low          XXXX + 1
+                                      7 Don't Care            FFFF
+
+16n,R                                 [16n,R]
+# Data Bus              Address Bus   # Data Bus              Address Bus
+3 Offset High           NNNN + 2[3]   3 Offset High           NNNN + 2[3]
+4 Offset Low            NNNN + 3[4]   4 Offset Low            NNNN + 3[4]
+5 Don't Care            NNNN + 4[5]   5 Don't Care            NNNN + 4[5]
+6 Don't Care            FFFF          6 Don't Care            FFFF
+7 Don't Care            FFFF          7 Don't Care            FFFF
+                                      8 Indirect High         XXXX
+                                      9 Indirect Low          XXXX + 1
+                                     10 Don't Care            FFFF
+
+A/B,R                                 [A/B,R]
+# Data Bus              Address Bus   # Data Bus              Address Bus
+3 Don't Care            NNNN + 2[3]   3 Don't Care            NNNN + 2[3]
+4 Don't Care            FFFF          4 Don't Care            FFFF
+                                      5 Indirect High         XXXX
+                                      6 Indirect Low          XXXX + 1
+                                      7 Don't Care            FFFF
+
+D,R                                   [D,R]
+# Data Bus              Address Bus   # Data Bus              Address Bus
+3 Don't Care            NNNN + 2[3]   3 Don't Care            NNNN + 2[3]
+4 Don't Care            NNNN + 3[4]   4 Don't Care            NNNN + 3[4]
+5 Don't Care            NNNN + 4[5]   5 Don't Care            NNNN + 4[5]
+6 Don't Care            FFFF          6 Don't Care            FFFF
+7 Don't Care            FFFF          7 Don't Care            FFFF
+                                      8 Indirect High         XXXX
+                                      9 Indirect Low          XXXX + 1
+                                     10 Don't Care            FFFF
+
+,R+ ,-R
+# Data Bus              Address Bus
+3 Don't Care            NNNN + 2[3]
+4 Don't Care            FFFF
+5 Don't Care            FFFF
+
+,R++ ,--R                             [,R++] [,--R]
+# Data Bus              Address Bus   # Data Bus              Address Bus
+3 Don't Care            NNNN + 2[3]   3 Don't Care            NNNN + 2[3]
+4 Don't Care            FFFF          4 Don't Care            FFFF
+5 Don't Care            FFFF          5 Don't Care            FFFF
+6 Don't Care            FFFF          6 Don't Care            FFFF
+                                      7 Indirect High         XXXX
+                                      8 Indirect Low          XXXX + 1
+                                      9 Don't Care            FFFF
+
+16n,PC                                [16n,PC]
+# Data Bus              Address Bus   # Data Bus              Address Bus
+3 Offset High           NNNN + 2[3]   3 Offset High           NNNN + 2[3]
+4 Offset Low            NNNN + 3[4]   4 Offset Low            NNNN + 3[4]
+5 Don't Care            NNNN + 4[5]   5 Don't Care            NNNN + 4[5]
+6 Don't Care            FFFF          6 Don't Care            FFFF
+7 Don't Care            FFFF          7 Don't Care            FFFF
+8 Don't Care            FFFF          8 Don't Care            FFFF
+                                      9 Indirect High         XXXX
+                                     10 Indirect Low          XXXX + 1
+                                     11 Don't Care            FFFF
+
+8n,PC                                 [8n,PC]
+# Data Bus              Address Bus   # Data Bus              Address Bus
+3 Offset                NNNN + 2[3]   3 Offset                NNNN + 2[3]
+4 Don't Care            FFFF          4 Don't Care            FFFF
+                                      5 Indirect High         XXXX
+                                      6 Indirect Low          XXXX + 1
+                                      7 Don't Care            FFFF
+
+                                      [Addr]
+                                      # Data Bus              Address Bus
+                                      3 Address High          NNNN + 2[3]
+                                      4 Address Low           NNNN + 3[4]
+                                      5 Don't Care            NNNN + 4[5]
+                                      6 Indirect High         XXXX
+                                      7 Indirect Low          XXXX + 1
+                                      8 Don't Care            FFFF
+
+Relative addressing mode
+------------------------
+
+BCC, BCS, BEQ, BGE, BGT, BHI, BHS, BLE, BLO, BLS, BLT, BMI, BNE, BPL, BRA, BRN, BVC, BVS
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Offset                NNNN + 1
+3 Don't Care            FFFF
+
+LBCC, LBCS, LBEQ, LBGE, LBGT, LBHI, LBHS, LBLE, LBLO, LBLS, LBLT, LBMI, LBNE, LBPL, LBRN, LBVC, LBVS
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Opcode 2nd Byte       NNNN + 1
+3 Offset High           NNNN + 2
+4 Offset Low            NNNN + 3
+5 Don't Care            FFFF
+6 Don't Care            FFFF (ONLY IF WE BRANCH)
+
+LBRA
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Offset High           NNNN + 1
+3 Offset Low            NNNN + 2
+4 Don't Care            FFFF
+5 Don't Care            FFFF
+
+BSR
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Offset                NNNN + 1
+3 Don't Care            FFFF
+4 Don't Care            Sub Dest. Addr
+5 Don't Care            FFFF
+6 Return Addr Low       Stack (write)
+7 Return Addr High      Stack (write)
+
+LBSR
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Offset High           NNNN + 1
+3 Offset Low            NNNN + 2
+4 Don't Care            FFFF
+5 Don't Care            FFFF
+6 Don't Care            Sub Dest. Addr
+7 Don't Care            FFFF
+8 Return Addr Low       Stack (write)
+9 Return Addr High      Stack (write)
+
+Inherent addressing mode
+------------------------
+
+ABX
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Don't Care            NNNN + 1
+3 Don't Care            FFFF
+
+RTS
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Don't Care            NNNN + 1
+3 PC High               Stack
+4 PC Low                Stack
+5 Don't Care            FFFF
+
+ASLA, ASLB, ASRA, ASRB, CLRA, CLRB, COMA, COMB, DAA, DECA, DECB, INCA, INCB, LSLA, LSLB, LSRA, LSRB, NEGA, NEGB, NOP, ROLA, ROLB, RORA, RORB, SEX, TSTA, TSTB
+
+# Data Bus              Address Bus
+1 Opcode Fetch          NNNN
+2 Don't Care            NNNN + 1
+
+MUL
+
+#  Data Bus             Address Bus
+1  Opcode Fetch         NNNN
+2  Don't Care           NNNN + 1
+3  Don't Care           FFFF
+4  Don't Care           FFFF
+5  Don't Care           FFFF
+6  Don't Care           FFFF
+7  Don't Care           FFFF
+8  Don't Care           FFFF
+9  Don't Care           FFFF
+10 Don't Care           FFFF
+11 Don't Care           FFFF
+
+SWI
+
+#  Data Bus             Address Bus
+1  Opcode Fetch         NNNN
+2  Don't Care           NNNN + 1
+3  Don't Care           FFFF
+4  PC Low               Stack (write)
+5  PC High              Stack (write)
+6  User Stack Low       Stack (write)
+7  User Stack High      Stack (write)
+8  Y  Register Low      Stack (write)
+9  Y  Register High     Stack (write)
+10 X  Register Low      Stack (write)
+11 X  Register High     Stack (write)
+12 DP Register          Stack (write)
+13 B  Register          Stack (write)
+14 A  Register          Stack (write)
+15 CC Register          Stack (write)
+16 Don't Care           FFFF
+17 Int. Vector High     FFFX
+18 Int. Vector Low      FFFX + 1
+19 Don't Care           FFFF
+
+SWI2, SWI3
+
+#  Data Bus             Address Bus
+1  Opcode Fetch         NNNN
+2  Opcode 2nd Byte      NNNN + 1
+3  Don't Care           NNNN + 2
+4  Don't Care           FFFF
+5  PC Low               Stack (write)
+6  PC High              Stack (write)
+7  User Stack Low       Stack (write)
+8  User Stack High      Stack (write)
+9  Y  Register Low      Stack (write)
+10 Y  Register High     Stack (write)
+11 X  Register Low      Stack (write)
+12 X  Register High     Stack (write)
+13 DP Register          Stack (write)
+14 B  Register          Stack (write)
+15 A  Register          Stack (write)
+16 CC Register          Stack (write)
+17 Don't Care           FFFF
+18 Int. Vector High     FFFX
+19 Int. Vector Low      FFFX + 1
+20 Don't Care           FFFF
+
+RTI
+
+#  Data Bus             Address Bus
+1  Opcode Fetch         NNNN
+2  Don't Care           NNNN + 1
+3  CCR                  Stack
+IF E = 1
+4  A  Register          Stack
+5  B  Register          Stack
+6  DP Register          Stack
+7  X  Register High     Stack
+8  X  Register Low      Stack
+9  Y  Register High     Stack
+10 Y  Register Low      Stack
+11 User Stack High      Stack
+12 User Stack Low       Stack
+13 PC High              Stack
+14 PC Low               Stack
+15 Don't Care           FFFF
+ELSE
+4  PC High              Stack
+5  PC Low               Stack
+6  Don't Care           FFFF
+ENDIF
+
+SYNC
+
+#  Data Bus             Address Bus
+1  Opcode Fetch         NNNN
+2  Don't Care           NNNN + 1
+DO
+?  Don't Care           3 State
+WHILE Interrupt Not Present
+?  Don't Care           3 State
+
+CWAI
+
+#  Data Bus             Address Bus
+1  Opcode Fetch         NNNN
+2  CC Mask              NNNN + 1
+3  Don't Care           NNNN + 2
+4  Don't Care           FFFF
+5  PC Low               Stack (write)
+6  PC High              Stack (write)
+7  User Stack Low       Stack (write)
+8  User Stack High      Stack (write)
+9  Y  Register Low      Stack (write)
+10 Y  Register High     Stack (write)
+11 X  Register Low      Stack (write)
+12 X  Register High     Stack (write)
+13 DP Register          Stack (write)
+14 B  Register          Stack (write)
+15 A  Register          Stack (write)
+16 CC Register          Stack (write)
+DO
+?? Don't Care           FFFF
+WHILE Interrupt Not Present
+?? Int. Vector High     FFFX
+?? Int. Vector Low      FFFX + 1
+?? Don't Care           FFFF
+
+TFR
+
+#  Data Bus             Address Bus
+1  Opcode Fetch         NNNN
+2  Post Byte            NNNN + 1
+3  Don't Care           FFFF
+4  Don't Care           FFFF
+5  Don't Care           FFFF
+6  Don't Care           FFFF
+
+EXG
+
+#  Data Bus             Address Bus
+1  Opcode Fetch         NNNN
+2  Post Byte            NNNN + 1
+3  Don't Care           FFFF
+4  Don't Care           FFFF
+5  Don't Care           FFFF
+6  Don't Care           FFFF
+7  Don't Care           FFFF
+8  Don't Care           FFFF
+
+PULU, PULS
+
+#  Data Bus             Address Bus
+1  Opcode Fetch         NNNN
+2  Post Byte            NNNN + 1
+3  Don't Care           FFFF
+4  Don't Care           FFFF
+----------------
+Stack operations
+----------------
+?  Don't Care           Stack
+
+PSHU, PSHS
+
+#  Data Bus             Address Bus
+1  Opcode Fetch         NNNN
+2  Post Byte            NNNN + 1
+3  Don't Care           FFFF
+4  Don't Care           FFFF
+5  Don't Care           Stack
+----------------
+Stack operations
+----------------
+
+
+Interrupts
+==========
+
+Information is taken from HD6809E, HD68A09E, HD68B09E datasheet 
+
+FIRQ
+----
+
+#  Data Bus             Address Bus
+1  ?                    PC
+2  ?                    PC
+3  Don't Care           FFFF
+4  PC Low               SP - 1
+5  PC High              SP - 2
+6  CC Register          SP - 3
+7  Don't Care           FFFF
+8  New PC High          FFF6
+9  New PC Low           FFF7
+10 Don't Care           FFFF
+
+IRQ
+---
+
+#  Data Bus             Address Bus
+1  ?                    PC
+2  ?                    PC
+3  Don't Care           FFFF
+4  PC Low               SP - 1
+5  PC High              SP - 2
+6  U  Low               SP - 3
+7  U  High              SP - 4
+8  Y  Low               SP - 5
+9  Y  High              SP - 6
+10 X  Low               SP - 7
+11 X  High              SP - 8
+12 DP register          SP - 9
+13 B  register          SP - 10
+14 A  register          SP - 11
+15 CC register          SP - 12
+16 Don't Care           FFFF
+17 New PC Low           FFF8
+18 New PC High          FFF9
+19 Don't Care           FFFF
+
+NMI
+---
+
+#  Data Bus             Address Bus
+1  ?                    PC
+2  ?                    PC
+3  Don't Care           FFFF
+4  PC Low               SP - 1
+5  PC High              SP - 2
+6  U  Low               SP - 3
+7  U  High              SP - 4
+8  Y  Low               SP - 5
+9  Y  High              SP - 6
+10 X  Low               SP - 7
+11 X  High              SP - 8
+12 DP register          SP - 9
+13 B  register          SP - 10
+14 A  register          SP - 11
+15 CC register          SP - 12
+16 Don't Care           FFFF
+17 New PC Low           FFFC
+18 New PC High          FFFD
+19 Don't Care           FFFF
+
+EOF
