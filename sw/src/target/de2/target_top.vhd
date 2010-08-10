@@ -147,11 +147,9 @@ end target_top;
 
 architecture SYN of target_top is
 
-	signal clk_i			    : std_logic_vector(0 to 3);
   signal init       	  : std_logic := '1';
-  signal reset_i     	  : std_logic := '1';
-	signal reset_n			  : std_logic := '0';
 
+  signal clkrst_i       : from_CLKRST_t;
   signal buttons_i      : from_BUTTONS_t;
   signal switches_i     : from_SWITCHES_t;
   signal leds_o         : to_LEDS_t;
@@ -204,8 +202,8 @@ begin
         port map
         (
           inclk0  => clock_50,
-          c0      => clk_i(0),
-          c1      => clk_i(1)
+          c0      => clkrst_i.clk(0),
+          c1      => clkrst_i.clk(1)
         );
 
     end generate GEN_PLL;
@@ -213,8 +211,8 @@ begin
     GEN_NO_PLL : if not PACE_HAS_PLL generate
 
       -- feed input clocks into PACE core
-      clk_i(0) <= clock_50;
-      clk_i(1) <= clock_27;
+      clkrst_i.clk(0) <= clock_50;
+      clkrst_i.clk(1) <= clock_27;
         
     end generate GEN_NO_PLL;
       
@@ -235,8 +233,8 @@ begin
       port map
       (
         inclk0  => clock_27,
-        c0      => clk_i(2),
-        c1      => clk_i(3)
+        c0      => clkrst_i.clk(2),
+        c1      => clkrst_i.clk(3)
       );
 
   end block BLK_CLOCKING;
@@ -256,8 +254,23 @@ begin
 		end if;
 	end process;
 
-  reset_i <= init or not key(0);
-	reset_n <= not reset_i;
+  clkrst_i.arst <= init or not key(0);
+	clkrst_i.arst_n <= not clkrst_i.arst;
+
+  GEN_RESETS : for i in 0 to 3 generate
+
+    process (clkrst_i.clk(i), clkrst_i.arst)
+      variable rst_r : std_logic_vector(2 downto 0) := (others => '0');
+    begin
+      if clkrst_i.arst = '1' then
+        rst_r := (others => '1');
+      elsif rising_edge(clkrst_i.clk(i)) then
+        rst_r := rst_r(rst_r'left-1 downto 0) & '0';
+      end if;
+      clkrst_i.rst(i) <= rst_r(rst_r'left);
+    end process;
+
+  end generate GEN_RESETS;
 	
   -- buttons - active low
   buttons_i <= std_logic_vector(resize(unsigned(not key), buttons_i'length));
@@ -291,7 +304,7 @@ begin
       port map
       (
         clk				=> clock_50,
-        reset			=> reset_i,
+				reset			=> clkrst_i.arst,
         sense			=> maple_sense,
         oe				=> maple_oe,
         a					=> a, --gpio_maple(14), ***needs fixing
@@ -333,7 +346,7 @@ begin
   		port map
 		  (
   			clk 				=> clock_50,
-				reset 			=> reset_i,
+				reset 			=> clkrst_i.arst,
 				--oe 					=> gc_oe,
 				d 					=> d, --gpio_0(25), **needs fixing
 				joystate 		=> gcj
@@ -512,9 +525,9 @@ begin
 
   begin
 
-		video_i.clk <= clk_i(1);	-- by convention
-    video_i.clk_ena <= '1';
-    video_i.reset <= reset_i;
+		video_i.clk <= clkrst_i.clk(1);	-- by convention
+		video_i.clk_ena <= '1';
+    video_i.reset <= clkrst_i.rst(1);
     
     vga_clk <= video_o.clk;
     vga_r <= video_o.rgb.r(video_o.rgb.r'left downto video_o.rgb.r'left-9);
@@ -530,7 +543,7 @@ begin
       (
         --	Host Side
         iCLK							=> clock_50,
-        iRST_N						=> reset_n,
+        iRST_N						=> clkrst_i.arst_n,
         
         --	I2C Side
         I2C_SCLK					=> I2C_SCLK,
@@ -572,7 +585,7 @@ begin
       port map
       (   --  Host Side
         iCLK => clock_50,
-        iRST_N => reset_n, --lcm_grst_n,
+        iRST_N => clkrst_i.arst_n, --lcm_grst_n,
         --    I2C Side
         I2S_SCLK => lcm_sclk,
         I2S_SDAT => lcm_sdat,
@@ -580,7 +593,7 @@ begin
       );
 
     lcm_clk <= video_o.clk;
-    lcm_grst <= reset_n;
+    lcm_grst <= not video_i.reset;
     lcm_dclk	<=	not lcm_clk;
     lcm_shdb	<=	'1';
     lcm_hsync <= video_o.hsync;
@@ -606,7 +619,7 @@ begin
   end block BLK_LCM;
   
   BLK_AUDIO : block
-    alias aud_clk    		: std_logic is clk_i(2);
+    alias aud_clk    		: std_logic is clkrst_i.clk(2);
     signal aud_data_l  	: std_logic_vector(audio_o.ldata'range);
     signal aud_data_r  	: std_logic_vector(audio_o.rdata'range);
   begin
@@ -628,7 +641,7 @@ begin
       (
         -- Inputs
         clk           => aud_clk,
-        reset         => reset_i,
+        reset         => clkrst_i.arst,
         datal         => aud_data_l,
         datar         => aud_data_r,
     
@@ -712,7 +725,7 @@ begin
 	    port map
 	    (	--	Host Side
 				iCLK      => clock_50,
-	      iRST_N    => reset_n,
+	      iRST_N    => clkrst_i.arst_n,
 				iLINE1		=> iline1,
 				iLINE2		=> iline2,
 				--	LCD Side
@@ -762,8 +775,8 @@ begin
     port map
     (
     	-- clocks and resets
-	  	clk_i							=> clk_i,
-      reset_i          	=> reset_i,
+	  	clk_i							=> clkrst_i.clk,
+      reset_i          	=> clkrst_i.rst,
 
       -- misc inputs and outputs
       buttons_i         => buttons_i,

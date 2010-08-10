@@ -73,14 +73,9 @@ end entity platform;
 
 architecture SYN of platform is
 
-	component palx4_clk IS
-	PORT
-		(
-			inclk0		: IN STD_LOGIC  := '0';
-			c0				: OUT STD_LOGIC 
-		);
-	END component;
-
+  -- debug build options
+  constant BUILD_TEST_VGA_ONLY    : boolean := false;
+  
 	alias clk_20M					: std_logic is clk_i(0);
 	alias clk_57M272			: std_logic is clk_i(1);
 	
