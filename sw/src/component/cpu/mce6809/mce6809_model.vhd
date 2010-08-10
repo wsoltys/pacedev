@@ -234,6 +234,8 @@ begin
 				when X"AB" =>			-- ADDA (indexed)
 					case mc_cycle is
 					when 2 => -- Load offset
+						vma <= '1' after SIM_DELAY;
+						address_out := pc;
 						case post(6 downto 5) is
 						when "00" => 		ea <= x;
 						when "01" => 		ea <= y;
@@ -242,7 +244,22 @@ begin
 						when others => 	ea <= (others => 'X');
 						end case;
 					when 3 =>
-						if post(7) ='1' and post(3 downto 0) = "0100" then	-- Register address, no offset
+						if post(7) = '0' then -- Register address, 5-bit offset
+							if rising_edge(clk) and clken = '1' then
+								ea <= ea + post(4 downto 0);
+							end if;
+						else
+							if post(3 downto 0) = "0100" then	-- Register address, no offset
+								mc_cycle_next <= 0;
+								vma <= '1';
+								address_out := ea;
+								if rising_edge(clk) and clken = '1' then
+									acca <= acca + data_i after SIM_DELAY;
+								end if;
+							end if;
+						end if;
+					when 4 =>
+						if post(7) = '0' then
 							mc_cycle_next <= 0;
 							vma <= '1';
 							address_out := ea;
