@@ -7,6 +7,7 @@ entity mc6883 is
 	port
 	(
 		clk			: in std_logic;
+		clk_ena : in std_logic;
 		reset		: in std_logic;
 		
 		-- input
@@ -101,77 +102,79 @@ begin
       cas_int <= '1';
       we_int <= '1';
     elsif falling_edge (clk) then
-      clk_7M15909 <= count(0);
-      clk_3M579545 <= count(1);
-      clk_1M769772 <= count(2);
-      clk_0M894866 <= count(3);
-      vclk_int <= not clk_3M579545;
-      case count is
-        when "0000" =>
-          -- valid VDG address (row)
-					-- z(7) is RAS1# or B(7)
-       		z_int <= b_int(7 downto 0);
-          cas_int <= '1';
-        when "0001" =>
-          ras_int(0) <= '0';
-          ras_int(1) <= '0';
-        when "0010" =>
-        when "0011" =>
-          q_int <= '1';
-          -- valid VDG address (col)
-					case m is
-						when "00" =>
-          		z_int <= "00" & b_int(11 downto 6);
-						when "01" =>
-          		z_int <= '0' & b_int(13 downto 7);
-						when others =>
-          		z_int <= b_int(15 downto 8);
-					end case;
-          cas_int <= '0';
-        when "0100" =>
-        when "0101" =>
-        when "0110" =>
-          ras_int(1) <= '1';
-          ras_int(0) <= '1';
-        when "0111" =>
-          e_int <= '1';
-          we_int <= rw_n;
-        when "1000" =>
-          -- valid MPU address (row)
-					-- z(7) is RAS1# or A(7)
-          z_int <= a(7 downto 0);
-          cas_int <= '1';
-        when "1001" =>
-          ras_int(1) <= '0';
-          ras_int(0) <= '0';
-        when "1010" =>
-        when "1011" =>
-          q_int <= '0';
-          -- valid MPU address (col)
-					case m is
-						when "00" =>
-          		z_int <= "00" & a(11 downto 6);
-						when "01" =>
-							-- z(7) is P or don't care
-         			z_int <= p & a(13 downto 7);
-						when others =>
-							if ty = '0' then
-								z_int <= p & a(14 downto 8);
-							else
-								z_int <= a(15 downto 8);
-							end if;
-					end case;
-          cas_int <= '0';
-        when "1100" =>
-        when "1101" =>
-        when "1110" =>
-          ras_int(0) <= '1';
-          ras_int(1) <= '1';
-        when others =>
-          e_int <= '0';
-          we_int <= '1';
-      end case;
-      count := count + 1;
+      if clk_ena = '1' then
+        clk_7M15909 <= count(0);
+        clk_3M579545 <= count(1);
+        clk_1M769772 <= count(2);
+        clk_0M894866 <= count(3);
+        vclk_int <= not clk_3M579545;
+        case count is
+          when "0000" =>
+            -- valid VDG address (row)
+            -- z(7) is RAS1# or B(7)
+            z_int <= b_int(7 downto 0);
+            cas_int <= '1';
+          when "0001" =>
+            ras_int(0) <= '0';
+            ras_int(1) <= '0';
+          when "0010" =>
+          when "0011" =>
+            q_int <= '1';
+            -- valid VDG address (col)
+            case m is
+              when "00" =>
+                z_int <= "00" & b_int(11 downto 6);
+              when "01" =>
+                z_int <= '0' & b_int(13 downto 7);
+              when others =>
+                z_int <= b_int(15 downto 8);
+            end case;
+            cas_int <= '0';
+          when "0100" =>
+          when "0101" =>
+          when "0110" =>
+            ras_int(1) <= '1';
+            ras_int(0) <= '1';
+          when "0111" =>
+            e_int <= '1';
+            we_int <= rw_n;
+          when "1000" =>
+            -- valid MPU address (row)
+            -- z(7) is RAS1# or A(7)
+            z_int <= a(7 downto 0);
+            cas_int <= '1';
+          when "1001" =>
+            ras_int(1) <= '0';
+            ras_int(0) <= '0';
+          when "1010" =>
+          when "1011" =>
+            q_int <= '0';
+            -- valid MPU address (col)
+            case m is
+              when "00" =>
+                z_int <= "00" & a(11 downto 6);
+              when "01" =>
+                -- z(7) is P or don't care
+                z_int <= p & a(13 downto 7);
+              when others =>
+                if ty = '0' then
+                  z_int <= p & a(14 downto 8);
+                else
+                  z_int <= a(15 downto 8);
+                end if;
+            end case;
+            cas_int <= '0';
+          when "1100" =>
+          when "1101" =>
+          when "1110" =>
+            ras_int(0) <= '1';
+            ras_int(1) <= '1';
+          when others =>
+            e_int <= '0';
+            we_int <= '1';
+        end case;
+        count := count + 1;
+     end if; -- clk_ena
     end if;
   end process;
 
@@ -194,21 +197,23 @@ begin
       old_e := '0';
       rising_edge_e <= '0';
     elsif falling_edge (clk) then
-      rising_edge_hs <= '0';
-      if old_hs = '0' and hs_n = '1' then
-        rising_edge_hs <= '1';
-      end if;
-      old_hs := hs_n;
-      rising_edge_q <= '0';
-      if old_q = '0' and q_int = '1' then
-        rising_edge_q <= '1';
-      end if;
-      old_q := q_int;
-      rising_edge_e <= '0';
-      if old_e = '0' and e_int = '1' then
-        rising_edge_e <= '1';
-      end if;
-      old_e := e_int;
+      if clk_ena = '1' then
+        rising_edge_hs <= '0';
+        if old_hs = '0' and hs_n = '1' then
+          rising_edge_hs <= '1';
+        end if;
+        old_hs := hs_n;
+        rising_edge_q <= '0';
+        if old_q = '0' and q_int = '1' then
+          rising_edge_q <= '1';
+        end if;
+        old_q := q_int;
+        rising_edge_e <= '0';
+        if old_e = '0' and e_int = '1' then
+          rising_edge_e <= '1';
+        end if;
+        old_e := e_int;
+     end if; -- clk_ena
     end if;
   end process;
 
@@ -229,37 +234,39 @@ begin
       yscale := 0;
       saved_b := (others => '0');
     elsif falling_edge (clk) then
-      -- vertical blanking - HS rises when DA0 is high
-      -- resets bits B9-15, clear B1-B8
-      if rising_edge_hs = '1' and da0 = '1' then
-        b_int(15 downto 9) <= f(6 downto 0);
-        b_int(8 downto 0) <= (others => '0');
-        yscale := y_divisor(conv_integer(v(2 downto 1)));
-        saved_b := f(6 downto 0) & "000000000";
-      -- horizontal blanking - HS low
-      -- resets bits B1-B3/4
-      elsif hs_n = '0' then
-        if v(0) = '0' then
-          b_int(4) <= '0';
-        end if;
-        b_int(3 downto 1) <= (others => '0');
-        -- coming out of HS?
-        if old_hs = '1' then
-          if yscale = y_divisor(conv_integer(v(2 downto 1))) then
-            yscale := 0;
-            saved_b := b_int;
-          else
-            yscale := yscale + 1;
-            b_int <= saved_b;
+      if clk_ena = '1' then
+        -- vertical blanking - HS rises when DA0 is high
+        -- resets bits B9-15, clear B1-B8
+        if rising_edge_hs = '1' and da0 = '1' then
+          b_int(15 downto 9) <= f(6 downto 0);
+          b_int(8 downto 0) <= (others => '0');
+          yscale := y_divisor(conv_integer(v(2 downto 1)));
+          saved_b := f(6 downto 0) & "000000000";
+        -- horizontal blanking - HS low
+        -- resets bits B1-B3/4
+        elsif hs_n = '0' then
+          if v(0) = '0' then
+            b_int(4) <= '0';
           end if;
+          b_int(3 downto 1) <= (others => '0');
+          -- coming out of HS?
+          if old_hs = '1' then
+            if yscale = y_divisor(conv_integer(v(2 downto 1))) then
+              yscale := 0;
+              saved_b := b_int;
+            else
+              yscale := yscale + 1;
+              b_int <= saved_b;
+            end if;
+          end if;
+        -- transition on da is the video clock
+        elsif da0 /= old_da0 then
+          b_int <= b_int + 1;
         end if;
-      -- transition on da is the video clock
-      elsif da0 /= old_da0 then
-        b_int <= b_int + 1;
-      end if;
-      old_hs := hs_n;
-      old_da0 := da0;
-      debug <= old_hs & old_da0;
+        old_hs := hs_n;
+        old_da0 := da0;
+        debug <= old_hs & old_da0;
+      end if; -- clk_ena
     end if;
   end process;
 
@@ -317,42 +324,44 @@ begin
 		if reset = '1' then
 			cr <= (others => '0');
 		elsif falling_edge (clk) then
-			if rising_edge_e = '1' and sel_cr = '1' and rw_n = '0' then
-				case a(4 downto 1) is
-					when "0000" =>
-						v(0) <= flag;
-					when "0001" =>
-						v(1) <= flag;
-					when "0010" =>
-						v(2) <= flag;
-					when "0011" =>
-						f(0) <= flag;
-					when "0100" =>
-						f(1) <= flag;
-					when "0101" =>
-						f(2) <= flag;
-					when "0110" =>
-						f(3) <= flag;
-					when "0111" =>
-						f(4) <= flag;
-					when "1000" =>
-						f(5) <= flag;
-					when "1001" =>
-						f(6) <= flag;
-					when "1010" =>
-						p <= flag;
-					when "1011" =>
-						r(0) <= flag;
-					when "1100" =>
-						r(1) <= flag;
-					when "1101" =>
-						m(0) <= flag;
-					when "1110" =>
-						m(1) <= flag;
-					when others =>    -- "1111"
-						ty <= flag;
-				end case;
-			end if;
+      if clk_ena = '1' then
+        if rising_edge_e = '1' and sel_cr = '1' and rw_n = '0' then
+          case a(4 downto 1) is
+            when "0000" =>
+              v(0) <= flag;
+            when "0001" =>
+              v(1) <= flag;
+            when "0010" =>
+              v(2) <= flag;
+            when "0011" =>
+              f(0) <= flag;
+            when "0100" =>
+              f(1) <= flag;
+            when "0101" =>
+              f(2) <= flag;
+            when "0110" =>
+              f(3) <= flag;
+            when "0111" =>
+              f(4) <= flag;
+            when "1000" =>
+              f(5) <= flag;
+            when "1001" =>
+              f(6) <= flag;
+            when "1010" =>
+              p <= flag;
+            when "1011" =>
+              r(0) <= flag;
+            when "1100" =>
+              r(1) <= flag;
+            when "1101" =>
+              m(0) <= flag;
+            when "1110" =>
+              m(1) <= flag;
+            when others =>    -- "1111"
+              ty <= flag;
+          end case;
+        end if;
+			end if; -- clk_ena
 		end if;
 	end process WRITE_CR;
 

@@ -7,11 +7,13 @@ use ieee.numeric_std.all;
 entity mc6847 is
 	generic
 	(
+    CVBS_NOT_VGA  : boolean := true;
 		CHAR_ROM_FILE	: string := ""
 	);
 	port
 	(
 		clk				: in std_logic;
+		clk_ena   : in std_logic;
 		reset			: in std_logic;
 
     hs_n    	: out std_logic;
@@ -35,6 +37,8 @@ end mc6847;
 
 architecture SYN of mc6847 is
 
+  constant VGA_NOT_CVBS       : boolean := not CVBS_NOT_VGA;
+  
   -- H_TOTAL_PER_LINE must be divisible by 16
   -- so that sys_count is the same on each line when
   -- the video comes out of hblank
@@ -144,7 +148,7 @@ begin
       vga_hblank <= '0';
       cvbs_pix_clk <= '0';
 
-    elsif falling_edge (vga_pix_clk) then
+    elsif rising_edge (vga_pix_clk) and clk_ena = '1' then
 
       cvbs_pix_clk <= not cvbs_pix_clk;
 
@@ -211,7 +215,7 @@ begin
       old_cvbs_hblank := '0';
       row_v := (others => '0');
 
-    elsif falling_edge (cvbs_pix_clk) then
+    elsif rising_edge (cvbs_pix_clk) then
 
       if h_count = H_TOTAL_PER_LINE then
         h_count := 0;
@@ -381,7 +385,7 @@ begin
   fs_n <= not fs_int;
   da0 <= da0_int(3);      -- fudge - divide by 8
 
-	GEN_CVBS_OUTPUT : if true generate
+	GEN_CVBS_OUTPUT : if CVBS_NOT_VGA generate
 
 		process (cvbs_pix_clk)
 		begin
@@ -403,11 +407,11 @@ begin
 		
 	end generate GEN_CVBS_OUTPUT;
 	
-	GEN_VGA_OUTPUT : if false generate
+	GEN_VGA_OUTPUT : if VGA_NOT_CVBS generate
 	
 	  process (vga_pix_clk)
 	  begin
-	    if rising_edge(vga_pix_clk) then
+	    if rising_edge(vga_pix_clk) and clk_ena = '1' then
 	      if (vga_hblank = '0' and vga_vblank = '0') then
 	        red <= vga_data(5 downto 4) & "000000";
 	        green <= vga_data(3 downto 2) & "000000";
@@ -453,7 +457,7 @@ begin
 		)                               
     port map
     (
-      clock  		  => cvbs_pix_clk,
+      clock  		  => clk,
       address 	  => char_addr,
       q 			    => char_data
     );

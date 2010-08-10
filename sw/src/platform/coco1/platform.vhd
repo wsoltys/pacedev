@@ -1,6 +1,5 @@
-library IEEE;
-use IEEE.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
+library ieee;
+use ieee.std_logic_1164.all;
 use	ieee.numeric_std.all;
 
 library work;
@@ -20,7 +19,7 @@ entity platform is
   (
     -- clocking and reset
     clk_i             : in std_logic_vector(0 to 3);
-    reset_i           : in std_logic;
+    reset_i           : in std_logic_vector(0 to 3);
 
     -- misc I/O
     buttons_i         : in from_BUTTONS_t;
@@ -77,19 +76,21 @@ architecture SYN of platform is
   constant BUILD_TEST_VGA_ONLY    : boolean := false;
   
 	alias clk_20M					: std_logic is clk_i(0);
+	alias rst_20M         : std_logic is reset_i(0);
 	alias clk_57M272			: std_logic is clk_i(1);
-	
+	alias rst_57M272      : std_logic is reset_i(1);
+
 	-- clocks
-	signal sys_clk				: std_logic;			-- 14M318
-	signal clk_q					: std_logic;
-	signal clk_e					: std_logic;
+	signal clk_14M318_ena : std_logic := '0';
+	signal clk_q_ena		  : std_logic := '0';
+	signal clk_e_ena			: std_logic := '0';
+
+  subtype cycle_t is unsigned(3 downto 0);
+  signal cycle          : cycle_t := (others => '0');
 	
 	signal cpu_reset			: std_logic;
 	
 	-- clock helpers
-	signal falling_edge_q	: std_logic;
-	signal falling_edge_e	: std_logic;
-	signal sys_count			: std_logic_vector(3 downto 0);
   signal vdgclk         : std_logic;
 
   -- system signals
@@ -106,15 +107,15 @@ architecture SYN of platform is
   signal vdg_x          : std_logic_vector(4 downto 0);
 
   -- uP signals  
-  alias uPclk          	: std_logic is clk_e;
-  signal uP_addr        : std_logic_vector(15 downto 0);
-  signal uP_datai       : std_logic_vector(7 downto 0);
-  signal uP_datao       : std_logic_vector(7 downto 0);
-  signal uPrdwr					: std_logic;
-  signal uPvma					: std_logic;
-  signal uPintreq       : std_logic;
-  signal uPfintreq			: std_logic;
-  signal uPnmireq       : std_logic;
+  alias cpu_clk         : std_logic is clk_e_ena;
+  signal cpu_a          : std_logic_vector(15 downto 0);
+  signal cpu_d_i        : std_logic_vector(7 downto 0);
+  signal cpu_d_o        : std_logic_vector(7 downto 0);
+  signal cpu_r_wn				: std_logic;
+  signal cpu_vma				: std_logic;
+  signal cpu_irq        : std_logic;
+  signal cpu_firq			  : std_logic;
+  signal cpu_nmi        : std_logic;
 
   -- keyboard signals
 	signal jamma_s				: from_JAMMA_t;
@@ -172,58 +173,53 @@ architecture SYN of platform is
 	
 begin
 
-	cpu_reset <= reset_i or game_reset;
+	cpu_reset <= rst_57M272 or game_reset;
 	
   --
   --  Clocking
   --
 
-	-- produce a PAL clock (sys_clk) from the PLL output
-	process (clk_57M272, reset_i)
-		variable count : std_logic_vector(1 downto 0);
+	-- produce a PAL clock enable
+	process (clk_57M272, rst_57M272)
+		subtype count_t is integer range 0 to 3;
+		variable count : count_t := 0;
 	begin
-		if reset_i = '1' then
-			count := (others => '0');
+		if rst_57M272 = '1' then
+			count := 0;
 		elsif rising_edge(clk_57M272) then
-			sys_clk <= count(1);
-			count := count + 1;
-		end if;
-	end process;
-
-	-- generate clock helpers
-	process (sys_clk, reset_i, clk_e, clk_q)
-		variable old_q	: std_logic;
-		variable old_e	: std_logic;
-	begin
-		if reset_i = '1' then
-			old_q := '0';
-			old_e := '0';
-		elsif falling_edge (sys_clk) then
-			falling_edge_q <= '0';
-			if old_q = '1' and clk_q = '0' then
-				falling_edge_q <= '1';
-			end if;
-			old_q := clk_q;
-			falling_edge_e <= '0';
-			if old_e = '1' and clk_e = '0' then
-				falling_edge_e <= '1';
-				sys_count <= (others => '1');
-			else
-				sys_count <= sys_count + 1;
-			end if;
-			old_e := clk_e;
-		end if;
-	end process;
-
-  -- need to sync reset to VDG with Q
-  process (clk_q, reset_i)
-  begin
-    if reset_i = '1' then
-      vdg_reset <= '1';
-    elsif falling_edge (clk_q) then
-      if reset_i = '0' then
-        vdg_reset <= '0';
+      clk_14M318_ena <= '0';  -- default
+			if count = count_t'high then
+        clk_14M318_ena <= '1';
+        count := 0;
+      else
+        count := count + 1;
       end if;
+		end if;
+	end process;
+
+  -- generate master cycle count
+	process (clk_57M272, rst_57M272)
+  begin
+    if rst_57M272 = '1' then
+      cycle <= (others => '0');
+    elsif rising_edge (clk_57M272) then
+      if (clk_14M318_ena = '1') then
+        if cycle(1 downto 0) = "00" then
+         elsif cycle(1 downto 0) = "10" then
+        end if;
+        cycle <= cycle + 1;
+      end if;
+    end if;
+  end process;
+  
+  -- need to sync reset to VDG with Q
+  -- no, we don't that can be done in the chip
+  process (clk_57M272, rst_57M272)
+  begin
+    if rst_57M272 = '1' then
+      vdg_reset <= '1';
+    elsif rising_edge(clk_57M272) then
+      vdg_reset <= '0';
     end if;
   end process;
 
@@ -237,7 +233,7 @@ begin
   rom_cs <= y(2);
 	ram_cs <= y(0) or y(7);
   -- this is yet to be implemented in the 6883/6847
-  --vram_cs <= '1' when uP_addr(15 downto 10) = "000001" else '0';
+  --vram_cs <= '1' when cpu_a(15 downto 10) = "000001" else '0';
 
   ---
   --- yucky yucky yucky
@@ -246,47 +242,51 @@ begin
   ---
 
   -- runs off PAL clk (E x 16)
-	process (sys_clk, sys_count)
+	process (clk_57M272, rst_57M272)
 	begin
-		if falling_edge (sys_clk) then
+    if rst_57M272 = '1' then
+      null;
+		elsif rising_edge (clk_57M272) then
 			-- defaults
       sys_write <= '0';
       vdg_sram_cs <= '0';
       vram_wr <= '0';
-			case sys_count is
-        when X"0" =>
-          -- latch VDG address (row)
-          vdg_addr(7 downto 0) <= ma;
-        when X"3" =>
-          -- latch VDG address (column)
-          vdg_addr(15 downto 8) <= ma;
-        when X"4" =>
-          -- read SRAM data here because we're multiplexing it with CPU
-          vdg_sram_cs <= '1';
-        when X"5" =>
-      	  vdg_data <= sram_i.d(vdg_data'range);
-				when X"6" =>
-          if hs_n = '1' and fs_n = '1' then
-            vram_wr <= '1';
-          end if;
-				when X"8" =>
-          -- latch MPU address (row)
-					mpu_addr(7 downto 0) <= ma;
-				when X"B" =>
-          -- latch MPU address (column)
-					mpu_addr(15 downto 8) <= ma;
-          -- enable bus write i/o
-          sys_write <= '1';
-				when X"C" =>
-          -- read SRAM data here because we're multiplexing it with video
-      	  ram_datao <= sram_i.d(ram_datao'range);
-				when others =>
-			end case;
+      if clk_14M318_ena = '1' then
+        case cycle is
+          when X"0" =>
+            -- latch VDG address (row)
+            vdg_addr(7 downto 0) <= ma;
+          when X"3" =>
+            -- latch VDG address (column)
+            vdg_addr(15 downto 8) <= ma;
+          when X"4" =>
+            -- read SRAM data here because we're multiplexing it with CPU
+            vdg_sram_cs <= '1';
+          when X"5" =>
+            vdg_data <= sram_i.d(vdg_data'range);
+          when X"6" =>
+            if hs_n = '1' and fs_n = '1' then
+              vram_wr <= '1';
+            end if;
+          when X"8" =>
+            -- latch MPU address (row)
+            mpu_addr(7 downto 0) <= ma;
+          when X"B" =>
+            -- latch MPU address (column)
+            mpu_addr(15 downto 8) <= ma;
+            -- enable bus write i/o
+            sys_write <= '1';
+          when X"C" =>
+            -- read SRAM data here because we're multiplexing it with video
+            ram_datao <= sram_i.d(ram_datao'range);
+          when others =>
+        end case;
+      end if; -- clk_14M318_ena
 		end if;
 	end process;
 
   -- memory read mux
-  uP_datai <= pia_datao when pia_cs = '1' else
+  cpu_d_i <= pia_datao when pia_cs = '1' else
               rom_datao when rom_cs = '1' else
               extrom_datao when extrom_cs = '1' else
               ram_datao when ram_cs = '1' else
@@ -295,17 +295,17 @@ begin
 
   -- SRAM signals
   sram_o.a <= std_logic_vector(resize(unsigned(mpu_addr), sram_o.a'length));
-  --sram_data <= uP_datao when (uPvma = '1' and ram_cs = '1' and uPrdwr = '0' and vdg_sram_cs = '0') 
-  sram_o.d <= std_logic_vector(resize(unsigned(uP_datao), sram_o.d'length));
+  --sram_data <= cpu_d_o when (cpu_vma = '1' and ram_cs = '1' and cpu_r_wn = '0' and vdg_sram_cs = '0') 
+  sram_o.d <= std_logic_vector(resize(unsigned(cpu_d_o), sram_o.d'length));
 	sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
-  sram_o.cs <= (uPvma and ram_cs) or vdg_sram_cs;
-	sram_o.oe <= uPrdwr or vdg_sram_cs;
-	sram_o.we <= sys_write and not uPrdwr;
+  sram_o.cs <= (cpu_vma and ram_cs) or vdg_sram_cs;
+	sram_o.oe <= cpu_r_wn or vdg_sram_cs;
+	sram_o.we <= sys_write and not cpu_r_wn;
 
   -- CPU interrupts	
-	uPintreq <= '0';
-	uPfintreq <= '0';
-	uPnmireq <= '0';
+	cpu_irq <= '0';
+	cpu_firq <= '0';
+	cpu_nmi <= '0';
 
 	-- PIA edge inputs
 	pia_ca1 <= '0';
@@ -315,10 +315,10 @@ begin
 	--pia_pb <= (others => '0');
 	
 	-- keyboard matrix
-	process (clk_20M, reset_i)
+	process (clk_20M, reset_i(1))
 	  variable keys : std_logic_vector(7 downto 0);
 	begin
-	  if reset_i = '1' then
+	  if reset_i(1) = '1' then
   		keys := (others => '0');
 	  elsif rising_edge (clk_20M) then
   		keys := (others => '0');
@@ -356,34 +356,33 @@ begin
   --  COMPONENT INSTANTIATION
   --
 
-	GEN_NOT_TEST_VGA : if not BUILD_TEST_VGA_ONLY generate
-	
   cpu_inst : entity work.cpu09
 	  port map
 	  (	
-			clk				=> clk_e,
+			clk				=> '0',
 			rst				=> cpu_reset,
-			rw 	    	=> uPrdwr,
-			vma 	    => uPvma,
-			address 	=> uP_addr,
-		  data_in		=> uP_datai,
-		  data_out 	=> uP_datao,
+			rw 	    	=> cpu_r_wn,
+			vma 	    => cpu_vma,
+			address 	=> cpu_a,
+		  data_in		=> cpu_d_i,
+		  data_out 	=> cpu_d_o,
 			halt     	=> '0',
 			hold     	=> '0',
-			irq      	=> uPintreq,
-			firq     	=> uPfintreq,
-			nmi      	=> uPnmireq
+			irq      	=> cpu_irq,
+			firq     	=> cpu_firq,
+			nmi      	=> cpu_nmi
 	  );
 
 	sam_inst : entity work.mc6883
 		port map
 		(
-			clk				=> sys_clk,
-			reset			=> reset_i,
+			clk				=> clk_57M272,
+			clk_ena   => clk_14M318_ena,
+			reset			=> rst_57M272,
 
 			-- input
-			a					=> uP_addr,
-			rw_n			=> uPrdwr,
+			a					=> cpu_a,
+			rw_n			=> cpu_r_wn,
 
 			-- vdg signals
 			da0				=> da0,
@@ -402,8 +401,8 @@ begin
 			--we_n		: out std_logic;
 			
 			-- clock generation
-			q					=> clk_q,
-			e					=> clk_e
+			q					=> clk_q_ena,
+			e					=> clk_e_ena
 		);
 
 	U11_inst : entity work.ttl_74ls138_p
@@ -423,12 +422,14 @@ begin
   vdg_inst : entity work.mc6847
 		generic map
 		(
-			char_rom_file => COCO1_SOURCE_ROOT_DIR & "roms/tiledata.hex"
+      CVBS_NOT_VGA  => false,
+			CHAR_ROM_FILE => COCO1_SOURCE_ROOT_DIR & "roms/tiledata.hex"
 		)
     port map
     (
       --clk     => vdgclk,
-			clk			=> sys_clk,
+			clk			=> clk_57M272,
+			clk_ena => clk_14M318_ena,
       reset   => vdg_reset,
 
       hs_n    => hs_n,
@@ -450,12 +451,12 @@ begin
   pai_ub_inst : entity work.pia6821
   	port map
   	(	
-  	 	clk       	=> uPclk,
-      rst       	=> reset_i,
+  	 	clk       	=> cpu_clk,
+      rst       	=> reset_i(0),
       cs        	=> pia_cs,
-      rw        	=> uPrdwr,
-      addr      	=> uP_addr(1 downto 0),
-      data_in   	=> uP_datao,
+      rw        	=> cpu_r_wn,
+      addr      	=> cpu_a(1 downto 0),
+      data_in   	=> cpu_d_o,
   		data_out  	=> pia_datao,
   		irqa      	=> pia_irqa,
   		irqb      	=> pia_irqb,
@@ -485,8 +486,8 @@ begin
 		)
   	port map
   	(
-  		clock		    => sys_clk,
-  		address		  => uP_addr(12 downto 0),
+  		clock		    => clk_57M272,
+  		address		  => cpu_a(12 downto 0),
   		q			      => rom_datao
   	);
 
@@ -501,40 +502,15 @@ begin
 			)
 	  	port map
 	  	(
-	  		clock		    => sys_clk,
-	  		address		  => uP_addr(12 downto 0),
+	  		clock		    => clk_57M272,
+	  		address		  => cpu_a(12 downto 0),
 	  		q			      => extrom_datao
 	  	);
 
 	end generate GEN_EXT;
 
-	end generate GEN_NOT_TEST_VGA;
+	GEN_NO_EXT : if not EXTENDED_COLOR_BASIC generate
+    extrom_datao <= (others => '0');
+	end generate GEN_NO_EXT;
 
-	GEN_TEST_VGA : if BUILD_TEST_VGA_ONLY generate
-	
-		--vga_clk_inst : vga_clk
-		--	PORT map
-		--	(
-		--		inclk0		=> ref_clk,
-		--		c0				=> vga_clk_s
-		--	);
-
-    --vga_inst : vga_controller
-    --	port map
-    --	(
-    --		--clk			  => vga_clk_s,
-    --		clk			  => sys_clk,
-    --		reset		  => reset_i
-   -- 
-   --     -- output
-   --     --hsync     => hsync,
-   --     --vsync		  => vsync,
-   -- 
-   --     --red       => red(7 downto 6),
-   --     --green     => green(7 downto 6),
-   --     --blue      => blue(7 downto 6)
-   -- 	);
-
-	end generate GEN_TEST_VGA;
-		
 end architecture SYN;

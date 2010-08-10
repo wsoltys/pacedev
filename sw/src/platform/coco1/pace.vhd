@@ -178,7 +178,7 @@ begin
 	    Port Map
 	    (
 	      sysclk      => clk_i(0),    -- fudge for now
-	      reset       => reset_i,
+	      reset       => reset_i(0),
 
 	      sndif_rd    => to_sound.rd,              
 	      sndif_wr    => to_sound.wr,              
