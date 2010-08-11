@@ -22,13 +22,14 @@ package project_pkg is
   
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
 
-  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_320x480_60Hz;
+  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_NONE;
   constant PACE_CLK0_DIVIDE_BY              : natural := 5;
   constant PACE_CLK0_MULTIPLY_BY            : natural := 2;   -- 50*2/5 = 20MHz
+  -- NTSC
   constant PACE_CLK1_DIVIDE_BY              : natural := 7;
   constant PACE_CLK1_MULTIPLY_BY            : natural := 8;  	-- 50*8/7 = 57M143Hz (57.27272)
 	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
-	constant PACE_VIDEO_V_SCALE       	      : integer := 2;
+	constant PACE_VIDEO_V_SCALE       	      : integer := 1;
 
   constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
 
@@ -38,7 +39,7 @@ package project_pkg is
 
   -- DE2 constants which *MUST* be defined
   
-	constant DE2_LCD_LINE2							      : string := " COCO1 (PAL)    ";
+	constant DE2_LCD_LINE2							      : string := "  COCO1 (NTSC)  ";
 
 	-- Coco1-specific constants
 	

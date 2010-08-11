@@ -879,10 +879,10 @@ begin
   begin
     pchaser: work.pwm_chaser 
       generic map(nleds  => 8, nbits => 8, period => 4, hold_time => 12)
-      port map (clk => clock_50, clk_en => chaseen, pwm_en => pwmen, reset => reset_i, fade => X"0F", ledout => ledg(7 downto 0));
+      port map (clk => clock_50, clk_en => chaseen, pwm_en => pwmen, reset => clkrst_i.arst, fade => X"0F", ledout => ledg(7 downto 0));
 
     -- Generate pwmen pulse every 1024 clocks, chase pulse every 512k clocks
-    process(clock_50, reset_i)
+    process(clock_50, clkrst_i.arst)
       variable pcount     : std_logic_vector(9 downto 0);
       variable pwmen_r    : std_logic;
       variable ccount     : std_logic_vector(18 downto 0);
@@ -890,7 +890,7 @@ begin
     begin
       pwmen <= pwmen_r;
       chaseen <= chaseen_r;
-      if reset_i = '1' then
+      if clkrst_i.arst = '1' then
         pcount := (others => '0');
         ccount := (others => '0');
       elsif rising_edge(clock_50) then

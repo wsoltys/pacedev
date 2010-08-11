@@ -37,7 +37,8 @@ end mc6847;
 
 architecture SYN of mc6847 is
 
-  constant VGA_NOT_CVBS       : boolean := not CVBS_NOT_VGA;
+  constant VGA_NOT_CVBS         : boolean := not CVBS_NOT_VGA;
+  constant BUILD_TEST_PATTERN   : boolean := true;
   
   -- H_TOTAL_PER_LINE must be divisible by 16
   -- so that sys_count is the same on each line when
@@ -53,13 +54,14 @@ architecture SYN of mc6847 is
   constant H_RIGHT_BORDER     : integer := H_VIDEO + 61+1-3;      -- "
   constant H_TOTAL_PER_LINE   : integer := H_RIGHT_BORDER;
 
-  constant V_FRONT_PORCH      : integer := 2-1;
-  constant V_VERTICAL_SYNC    : integer := V_FRONT_PORCH + 2;
-  constant V_BACK_PORCH       : integer := V_VERTICAL_SYNC + 25;
-  constant V_TOP_BORDER       : integer := V_BACK_PORCH + 8 + 48;
-  constant V_VIDEO            : integer := V_TOP_BORDER +  384;
-  constant V_BOTTOM_BORDER    : integer := V_VIDEO + 8 + 48;
-  constant V_TOTAL_PER_FIELD  : integer := V_BOTTOM_BORDER;
+  -- (not used)
+  --constant V_FRONT_PORCH      : integer := 2-1;
+  --constant V_VERTICAL_SYNC    : integer := V_FRONT_PORCH + 2;
+  --constant V_BACK_PORCH       : integer := V_VERTICAL_SYNC + 25;
+  --constant V_TOP_BORDER       : integer := V_BACK_PORCH + 8 + 48;
+  --constant V_VIDEO            : integer := V_TOP_BORDER +  384;
+  --constant V_BOTTOM_BORDER    : integer := V_VIDEO + 8 + 48;
+  --constant V_TOTAL_PER_FIELD  : integer := V_BOTTOM_BORDER;
 
   constant V2_FRONT_PORCH      : integer := 2;
   constant V2_VERTICAL_SYNC    : integer := V2_FRONT_PORCH + 2;
@@ -93,7 +95,7 @@ architecture SYN of mc6847 is
 
   -- VGA signals
 
-	alias vga_pix_clk						: std_logic is clk;		-- 14M31818 Hz
+	alias vga_pix_clk						: std_logic is clk;		-- PAL/NTSC*4
   signal vga_hsync            : std_logic;
   signal vga_vsync            : std_logic;
   signal vga_hblank           : std_logic;
@@ -103,14 +105,11 @@ architecture SYN of mc6847 is
 		
 	-- CVBS signals
 	
-	signal cvbs_pix_clk					: std_logic;	-- 7M15909 Hz
+	signal cvbs_pix_clk					: std_logic;	        -- PAL/NTSC*2
   signal cvbs_hsync           : std_logic;
   signal cvbs_vsync           : std_logic;
   signal cvbs_hblank          : std_logic;
   signal cvbs_vblank          : std_logic;
-	signal cvbs_red							: std_logic_vector(7 downto 0) := (others => '0');
-	signal cvbs_green						: std_logic_vector(7 downto 0) := (others => '0');
-	signal cvbs_blue						: std_logic_vector(7 downto 0) := (others => '0');
 	signal cvbs_linebuf_we			: std_logic;
 	signal cvbs_linebuf_addr		: std_logic_vector(8 downto 0);
   signal cvbs_dd              : std_logic_vector(7 downto 0); -- CVBS data in latch
@@ -200,6 +199,8 @@ begin
     variable old_cvbs_hblank : std_logic := '0';
     variable c1 : std_logic;
     --variable row_v : std_logic_vector(3 downto 0);
+    -- for debug only
+    variable active_v_count : std_logic_vector(v_count'range);
   begin
     if reset = '1' then
 
@@ -219,66 +220,68 @@ begin
 
       if h_count = H_TOTAL_PER_LINE then
         h_count := 0;
-        cvbs_red <= (others => '0');
-        cvbs_blue <= (others => '0');
         if v_count = V2_TOTAL_PER_FIELD then
           v_count := (others => '0');
-          cvbs_green <= (others => '0');
         else
-          cvbs_green <= cvbs_green + 1;
-          if v_count = V2_FRONT_PORCH then
-            cvbs_vsync <= '0';
-          elsif v_count = V2_VERTICAL_SYNC then
-            cvbs_vsync <= '1';
-          elsif v_count = V2_BACK_PORCH then
-          elsif v_count = V2_TOP_BORDER then
-            cvbs_green <= (others => '0');
-            cvbs_vblank <= '0';
-            row_v := (others => '1');
-					elsif v_count = V2_TOP_BORDER+1 then
-						vga_vblank <= '0';
-          elsif v_count = V2_VIDEO then
-            cvbs_vblank <= '1';
-					elsif v_count = V2_VIDEO+1 then
-						vga_vblank <= '1';
-          end if;
           v_count := v_count + 1;
+        end if;
+
+        -- VGA vblank is 1 line behind CVBS
+        -- - because we need to fill the line buffer
+        vga_vblank <= cvbs_vblank;
+        
+        if v_count = V2_FRONT_PORCH then
+          cvbs_vsync <= '0';
+        elsif v_count = V2_VERTICAL_SYNC then
+          cvbs_vsync <= '1';
+        elsif v_count = V2_BACK_PORCH then
+          null;
+        elsif v_count = V2_TOP_BORDER then
+          cvbs_vblank <= '0';
+          row_v := (others => '0');
+          active_v_count := (others => '0');        -- debug only
+        elsif v_count = V2_VIDEO then
+          cvbs_vblank <= '1';
+        else
           if row_v = 11 then
             row_v := (others => '0');
+            active_v_count := active_v_count + 5;   -- debug only
           else
             row_v := row_v + 1;
+            active_v_count := active_v_count + 1;   -- debug only
           end if;
         end if;
+        
       else
-        cvbs_red <= cvbs_red + 1;
-				cvbs_blue <= cvbs_blue + 1;
+        h_count := h_count + 1;
+        
         if h_count = H_FRONT_PORCH then
           cvbs_hsync <= '0';
         elsif h_count = H_HORIZ_SYNC then
           cvbs_hsync <= '1';
         elsif h_count = H_BACK_PORCH then
         elsif h_count = H_LEFT_BORDER then
-          cvbs_red <= (others => '0');
-					cvbs_blue <= cvbs_green;
           cvbs_hblank <= '0';
-          pix_count := (others => '1');
+          pix_count := (others => '0');
         elsif h_count = H_VIDEO then
           cvbs_hblank <= '1';
         elsif h_count = H_RIGHT_BORDER then
+          null;
         else
+          pix_count := pix_count + 1;
         end if;
-
-        -- only valid during active video portion
-        pix_count := pix_count + 1;
 
         -- latch data on DD pins
         if pix_count(2 downto 0) = "000" then
-          --cvbs_dd <= dd;
-          cvbs_dd <= v_count(6 downto 4) & pix_count(7 downto 3);
+          if BUILD_TEST_PATTERN then
+            cvbs_dd <= active_v_count(6 downto 4) & pix_count(7 downto 3);
+            --cvbs_dd <= X"3F";
+          else
+            cvbs_dd <= dd;
+          end if;
         end if;
 				cvbs_dd_r <= cvbs_dd;
 				
-        h_count := h_count + 1;
       end if;
 
 			-- DA0 high during FS
@@ -373,8 +376,6 @@ begin
 
   -- only write to the linebuffer during active display
   cvbs_linebuf_we <= not (cvbs_vblank or cvbs_hblank);
-  --cvbs_data <= "01" & cvbs_red(7 downto 6) & cvbs_green(7 downto 6) & cvbs_blue(7 downto 6);
-  --cvbs_data <= "01" & cvbs_dd(6 downto 5) & cvbs_dd(4 downto 3) & cvbs_dd(2 downto 1);
 
 	cvbs <= '0' & cvbs_vsync & "000000" when cvbs_vblank = '1' else
 				  '0' & cvbs_hsync & "000000" when cvbs_hblank = '1' else
@@ -416,8 +417,7 @@ begin
 	      if (vga_hblank = '0' and vga_vblank = '0') then
 	        red <= vga_data(5 downto 4) & "000000";
 	        green <= vga_data(3 downto 2) & "000000";
-	        --blue <= vga_data(1 downto 0) & "000000";
-	        blue <= "11" & "000000";
+	        blue <= vga_data(1 downto 0) & "000000";
 	      else
 	        red <= (others => '0');
 	        green <= (others => '0');

@@ -235,13 +235,9 @@ begin
   -- this is yet to be implemented in the 6883/6847
   --vram_cs <= '1' when cpu_a(15 downto 10) = "000001" else '0';
 
-  ---
-  --- yucky yucky yucky
-  --- the cpu and MC6883 are running off falling_edge
-  --- but the vram runs off rising_edge (ahh!!)
-  ---
-
-  -- runs off PAL clk (E x 16)
+  --
+  -- generate system cycles
+  --
 	process (clk_57M272, rst_57M272)
 	begin
     if rst_57M272 = '1' then
@@ -427,7 +423,6 @@ begin
 		)
     port map
     (
-      --clk     => vdgclk,
 			clk			=> clk_57M272,
 			clk_ena => clk_14M318_ena,
       reset   => vdg_reset,
