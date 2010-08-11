@@ -162,7 +162,6 @@ architecture SYN of platform is
 	signal y              : std_logic_vector(7 downto 0);
 
   -- VDG signals
-  signal vdg_reset      : std_logic;
   signal hs_n           : std_logic;
   signal fs_n           : std_logic;
   signal da0            : std_logic;
@@ -212,17 +211,6 @@ begin
     end if;
   end process;
   
-  -- need to sync reset to VDG with Q
-  -- no, we don't that can be done in the chip
-  process (clk_57M272, rst_57M272)
-  begin
-    if rst_57M272 = '1' then
-      vdg_reset <= '1';
-    elsif rising_edge(clk_57M272) then
-      vdg_reset <= '0';
-    end if;
-  end process;
-
   --	
 	-- system control
   --
@@ -425,7 +413,7 @@ begin
     (
 			clk			=> clk_57M272,
 			clk_ena => clk_14M318_ena,
-      reset   => vdg_reset,
+      reset   => rst_57M272,
 
       hs_n    => hs_n,
       fs_n    => fs_n,

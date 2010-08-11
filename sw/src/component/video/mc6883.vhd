@@ -101,7 +101,7 @@ begin
       ras_int <= (others => '1');
       cas_int <= '1';
       we_int <= '1';
-    elsif falling_edge (clk) then
+    elsif rising_edge (clk) then
       if clk_ena = '1' then
         clk_7M15909 <= count(0);
         clk_3M579545 <= count(1);
@@ -196,7 +196,7 @@ begin
       rising_edge_q <= '0';
       old_e := '0';
       rising_edge_e <= '0';
-    elsif falling_edge (clk) then
+    elsif rising_edge (clk) then
       if clk_ena = '1' then
         rising_edge_hs <= '0';
         if old_hs = '0' and hs_n = '1' then
@@ -233,7 +233,7 @@ begin
       old_da0 := '1';
       yscale := 0;
       saved_b := (others => '0');
-    elsif falling_edge (clk) then
+    elsif rising_edge (clk) then
       if clk_ena = '1' then
         -- vertical blanking - HS rises when DA0 is high
         -- resets bits B9-15, clear B1-B8

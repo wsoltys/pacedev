@@ -14,7 +14,7 @@ package project_pkg is
 	--
 	
   -- Reference clock is 50MHz
-	constant PACE_HAS_PLL								      : boolean := false;
+	constant PACE_HAS_PLL								      : boolean := true;
   constant PACE_HAS_FLASH                   : boolean := true;
   constant PACE_HAS_SRAM                    : boolean := true;
   constant PACE_HAS_SDRAM                   : boolean := true;
