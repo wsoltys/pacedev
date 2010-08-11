@@ -4,7 +4,7 @@ use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
 library work;
-use work.kbd_pkg.in8;
+use work.kbd_pkg;
 use work.pace_pkg.all;
 use work.project_pkg.all;
 use work.platform_pkg.all;

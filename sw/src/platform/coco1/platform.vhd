@@ -172,7 +172,7 @@ architecture SYN of platform is
 	
 begin
 
-	cpu_reset <= rst_57M272 or game_reset;
+	cpu_reset <= rst_57M272; -- or game_reset;
 	
   --
   --  Clocking
@@ -340,23 +340,48 @@ begin
   --  COMPONENT INSTANTIATION
   --
 
-  cpu_inst : entity work.cpu09
-	  port map
-	  (	
-			clk				=> '0',
-			rst				=> cpu_reset,
-			rw 	    	=> cpu_r_wn,
-			vma 	    => cpu_vma,
-			address 	=> cpu_a,
-		  data_in		=> cpu_d_i,
-		  data_out 	=> cpu_d_o,
-			halt     	=> '0',
-			hold     	=> '0',
-			irq      	=> cpu_irq,
-			firq     	=> cpu_firq,
-			nmi      	=> cpu_nmi
-	  );
+  GEN_CPU09 : if not COCO1_USE_REAL_6809 generate
+    cpu_inst : entity work.cpu09
+      port map
+      (	
+        clk				=> clk_e_ena,
+        rst				=> cpu_reset,
+        rw 	    	=> cpu_r_wn,
+        vma 	    => cpu_vma,
+        address 	=> cpu_a,
+        data_in		=> cpu_d_i,
+        data_out 	=> cpu_d_o,
+        halt     	=> '0',
+        hold     	=> '0',
+        irq      	=> cpu_irq,
+        firq     	=> cpu_firq,
+        nmi      	=> cpu_nmi
+      );
+  end generate GEN_CPU09;
+  
+  GEN_REAL_6809 : if COCO1_USE_REAL_6809 generate
 
+    --platform_o.arst <= clkrst_i.arst;
+    platform_o.arst <= reset_i(0);
+    --platform_o.clk_50M <= clk_rst_i.clk(0);
+    platform_o.clk_50M <= clk_i(0);
+    
+    platform_o.cpu_6809_q <= clk_e_ena;
+    platform_o.cpu_6809_e <= '0';
+    platform_o.cpu_6809_rst_n <= not rst_57M272;
+    cpu_r_wn <= platform_i.cpu_6809_r_wn;
+    cpu_vma <= platform_i.cpu_6809_vma;
+    cpu_a <= platform_i.cpu_6809_a;
+    platform_o.cpu_6809_d_i <= cpu_d_i;
+    cpu_d_o <= platform_i.cpu_6809_d_o;
+    platform_o.cpu_6809_halt_n <= '1';
+    platform_o.cpu_6809_irq_n <= not cpu_irq;
+    platform_o.cpu_6809_firq_n <= not cpu_firq;
+    platform_o.cpu_6809_nmi_n <= not cpu_nmi;
+    platform_o.cpu_6809_tsc <= '0';
+    
+  end generate GEN_REAL_6809;
+  
 	sam_inst : entity work.mc6883
 		port map
 		(

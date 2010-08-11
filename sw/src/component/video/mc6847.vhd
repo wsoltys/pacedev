@@ -38,7 +38,7 @@ end mc6847;
 architecture SYN of mc6847 is
 
   constant VGA_NOT_CVBS         : boolean := not CVBS_NOT_VGA;
-  constant BUILD_TEST_PATTERN   : boolean := true;
+  constant BUILD_TEST_PATTERN   : boolean := false;
   
   -- H_TOTAL_PER_LINE must be divisible by 16
   -- so that sys_count is the same on each line when
@@ -135,7 +135,7 @@ architecture SYN of mc6847 is
 
 begin
 
-  process (vga_pix_clk, reset)
+  PROC_VGA : process (vga_pix_clk, reset)
     variable h_count : integer range 0 to H_TOTAL_PER_LINE;
     variable pix_count : std_logic_vector(7 downto 0);
     variable old_vga_vblank : std_logic;
@@ -158,27 +158,26 @@ begin
         if h_count = H_TOTAL_PER_LINE then
           h_count := 0;
         else
-          if h_count = H_FRONT_PORCH then
-            vga_hsync <= '0';
-          elsif h_count = H_HORIZ_SYNC then
-            vga_hsync <= '1';
-          elsif h_count = H_BACK_PORCH then
-          elsif h_count = H_LEFT_BORDER then
-            vga_hblank <= '0';
-          elsif h_count = H_VIDEO then
-            vga_hblank <= '1';
-          elsif h_count = H_RIGHT_BORDER then
-          end if;
-
-          if h_count = H_LEFT_BORDER-1 then
-            pix_count := (others => '0');
-          else
-            -- only valid during active video portion
-            pix_count := pix_count + 1;
-          end if;
-
           h_count := h_count + 1;
         end if;
+                
+        if h_count = H_FRONT_PORCH then
+          vga_hsync <= '0';
+        elsif h_count = H_HORIZ_SYNC then
+          vga_hsync <= '1';
+        elsif h_count = H_BACK_PORCH then
+          null;
+        elsif h_count = H_LEFT_BORDER then
+          vga_hblank <= '0';
+          pix_count := (others => '0');
+        elsif h_count = H_VIDEO then
+          vga_hblank <= '1';
+        elsif h_count = H_RIGHT_BORDER then
+          null;
+        else
+          pix_count := pix_count + 1;
+        end if;
+
       end if;
 
       -- vertical syncs, blanks are the same
@@ -193,7 +192,7 @@ begin
     end if;
   end process;
 
-  process (cvbs_pix_clk, reset)
+  PROC_CVBS : process (cvbs_pix_clk, reset)
     variable h_count : integer range 0 to H_TOTAL_PER_LINE;
     variable pix_count : std_logic_vector(7 downto 0);
     variable old_cvbs_hblank : std_logic := '0';
@@ -265,6 +264,8 @@ begin
           pix_count := (others => '0');
         elsif h_count = H_VIDEO then
           cvbs_hblank <= '1';
+          -- only needed for debug???
+          pix_count := pix_count + 1;
         elsif h_count = H_RIGHT_BORDER then
           null;
         else
@@ -274,8 +275,9 @@ begin
         -- latch data on DD pins
         if pix_count(2 downto 0) = "000" then
           if BUILD_TEST_PATTERN then
-            cvbs_dd <= active_v_count(6 downto 4) & pix_count(7 downto 3);
-            --cvbs_dd <= X"3F";
+            --cvbs_dd <= active_v_count(6 downto 4) & pix_count(7 downto 3);
+            cvbs_dd <= active_v_count(6 downto 4) & 
+                        pix_count(7) & not pix_count(3) & pix_count(4) & not pix_count(6) & pix_count(5);
           else
             cvbs_dd <= dd;
           end if;
