@@ -13,9 +13,6 @@ package platform_pkg is
 	
 	constant PACE_INPUTS_NUM_BYTES        : integer := 9;
 	
-  -- CoCo build options
-  constant EXTENDED_COLOR_BASIC   : boolean := true;
-
   -- depends on build or simulation
   constant COCO1_SOURCE_ROOT_DIR  : string;
 

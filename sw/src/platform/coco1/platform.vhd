@@ -499,7 +499,7 @@ begin
   		q			      => rom_datao
   	);
 
-	GEN_EXT : if EXTENDED_COLOR_BASIC generate
+	GEN_EXT : if COCO1_EXTENDED_COLOR_BASIC generate
 	  -- EXTENDED COLOR BASIC ROM
 	  extbasrom_inst : entity work.sprom
 			generic map
@@ -517,7 +517,7 @@ begin
 
 	end generate GEN_EXT;
 
-	GEN_NO_EXT : if not EXTENDED_COLOR_BASIC generate
+	GEN_NO_EXT : if not COCO1_EXTENDED_COLOR_BASIC generate
     extrom_datao <= (others => '0');
 	end generate GEN_NO_EXT;
 

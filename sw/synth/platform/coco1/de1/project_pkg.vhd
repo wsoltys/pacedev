@@ -37,7 +37,10 @@ package project_pkg is
   constant PACE_OSD_YPOS                    : natural := 0;
 
 	-- Coco1-specific constants
-	
+
+  constant COCO1_USE_REAL_6809              : boolean := false;
+  constant COCO1_EXTENDED_COLOR_BASIC       : boolean := true;
+  
   type from_PROJECT_IO_t is record
     not_used  : std_logic;
   end record;
