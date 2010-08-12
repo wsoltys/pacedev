@@ -34,6 +34,7 @@ package platform_pkg is
   type to_PLATFORM_IO_t is record
     arst              : std_logic;
     clk_50M           : std_logic;
+    button            : std_logic_vector(3 downto 0);
     -- to connect to real 6809
     cpu_6809_q        : std_logic;
     cpu_6809_e        : std_logic;

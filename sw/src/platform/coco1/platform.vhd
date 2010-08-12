@@ -82,8 +82,8 @@ architecture SYN of platform is
 
 	-- clocks
 	signal clk_14M318_ena : std_logic := '0';
-	signal clk_q_ena		  : std_logic := '0';
-	signal clk_e_ena			: std_logic := '0';
+	signal clk_q          : std_logic := '0';
+	signal clk_e          : std_logic := '0';
 
   subtype cycle_t is unsigned(3 downto 0);
   signal cycle          : cycle_t := (others => '0');
@@ -107,7 +107,7 @@ architecture SYN of platform is
   signal vdg_x          : std_logic_vector(4 downto 0);
 
   -- uP signals  
-  alias cpu_clk         : std_logic is clk_e_ena;
+  alias cpu_clk         : std_logic is clk_e;
   signal cpu_a          : std_logic_vector(15 downto 0);
   signal cpu_d_i        : std_logic_vector(7 downto 0);
   signal cpu_d_o        : std_logic_vector(7 downto 0);
@@ -344,7 +344,7 @@ begin
     cpu_inst : entity work.cpu09
       port map
       (	
-        clk				=> clk_e_ena,
+        clk				=> clk_e,
         rst				=> cpu_reset,
         rw 	    	=> cpu_r_wn,
         vma 	    => cpu_vma,
@@ -366,8 +366,8 @@ begin
     --platform_o.clk_50M <= clk_rst_i.clk(0);
     platform_o.clk_50M <= clk_i(0);
     
-    platform_o.cpu_6809_q <= clk_e_ena;
-    platform_o.cpu_6809_e <= '0';
+    platform_o.cpu_6809_q <= clk_q;
+    platform_o.cpu_6809_e <= clk_e;
     platform_o.cpu_6809_rst_n <= not rst_57M272;
     cpu_r_wn <= platform_i.cpu_6809_r_wn;
     cpu_vma <= platform_i.cpu_6809_vma;
@@ -410,8 +410,8 @@ begin
 			--we_n		: out std_logic;
 			
 			-- clock generation
-			q					=> clk_q_ena,
-			e					=> clk_e_ena
+			q					=> clk_q,
+			e					=> clk_e
 		);
 
 	U11_inst : entity work.ttl_74ls138_p
