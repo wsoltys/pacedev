@@ -220,7 +220,7 @@ architecture SYN of target_top is
 	
 	signal ps2clk_s			: std_logic;
 	signal ps2dat_s			: std_logic;
-	signal jamma				: JAMMAInputsType;
+	signal jamma				: from_JAMMA_t;
 
 	signal sram_i				: from_SRAM_t;
 	signal sram_o				: to_SRAM_t;	

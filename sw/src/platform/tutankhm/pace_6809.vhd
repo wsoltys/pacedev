@@ -3,6 +3,8 @@ Use     IEEE.std_logic_1164.all;
 
 library work;
 use work.pace_pkg.all;
+use work.sprite_pkg.all;
+use work.video_controller_pkg.all;
 use work.platform_pkg.all;
 use work.project_pkg.all;
 
@@ -18,7 +20,7 @@ entity PACE is
     ps2clk          : inout std_logic;
     ps2data         : inout std_logic;
     dip             : in std_logic_vector(7 downto 0);
-		jamma						: in JAMMAInputsType;
+		jamma						: in from_JAMMA_t;
 
     -- external RAM
     sram_i       		: in from_SRAM_t;
@@ -67,6 +69,31 @@ end PACE;
 
 architecture SYN of PACE is
 
+  signal video_i          : from_VIDEO_t;
+  signal video_o          : to_VIDEO_t;
+  
+  --
+  
+  signal to_tilemap_ctl   : to_TILEMAP_CTL_t;
+  signal from_tilemap_ctl : from_TILEMAP_CTL_t;
+
+  signal to_bitmap_ctl    : to_BITMAP_CTL_t;
+  signal from_bitmap_ctl  : from_BITMAP_CTL_t;
+
+  signal to_sprite_reg    : to_SPRITE_REG_t;
+  signal to_sprite_ctl    : to_SPRITE_CTL_t;
+  signal from_sprite_ctl  : from_SPRITE_CTL_t;
+	signal spr0_hit					: std_logic;
+
+  signal to_graphics      : to_GRAPHICS_t;
+	signal from_graphics    : from_GRAPHICS_t;
+	
+	signal to_sound         : to_SOUND_t;
+	signal from_sound       : from_sound_t;
+	
+  signal to_osd           : to_OSD_t;
+  signal from_osd         : from_OSD_t;
+
   -- uP signals
   signal uPaddr           : std_logic_vector(15 downto 0);
   signal uPdatao          : std_logic_vector(7 downto 0);
@@ -86,14 +113,14 @@ architecture SYN of PACE is
   signal sprite_data      : std_logic_vector(31 downto 0);
   signal spritereg_addr   : std_logic_vector(7 downto 0);
   signal sprite_wr        : std_logic;
-	signal spr0_hit					: std_logic;
+	--signal spr0_hit					: std_logic;
 	
   signal vblank_s       	: std_logic;
 	signal xcentre					: std_logic_vector(9 downto 0);
 	signal ycentre					: std_logic_vector(9 downto 0);
 
-  signal to_osd           : to_OSD_t;
-  signal from_osd         : from_OSD_t;
+  --signal to_osd           : to_OSD_t;
+  --signal from_osd         : from_OSD_t;
 
   -- sound signals
   signal snd_rd           : std_logic;
@@ -197,49 +224,120 @@ begin
       leds            => leds_s
     );
 
- U_Graphics : entity work.Graphics                                    
+  -- hook up the graphics module
+
+  video_i.clk <= clk(1);
+  video_i.clk_ena <= '1';
+  video_i.reset <= reset;
+
+  to_graphics.bit8_1 <= gfxextra_data;
+  GEN_PAL : for i in 0 to 15 generate
+    to_graphics.pal(i) <= X"00" & palette_data(i);
+  end generate GEN_PAL;
+  
+  -- graphics (bitmap)
+  bitmap_addr <= from_bitmap_ctl.a;
+  to_bitmap_ctl.d <= bitmap_data;
+
+  -- graphics (tilemap)
+  tile_addr <= from_tilemap_ctl.tile_a(tile_addr'range);
+  to_tilemap_ctl.tile_d <= tile_data;
+  tilemap_addr <= from_tilemap_ctl.map_a;
+  to_tilemap_ctl.map_d <= tilemap_data;
+  attr_addr <= from_tilemap_ctl.attr_a;
+  to_tilemap_ctl.attr_d <= attr_data;
+
+  -- graphics (sprite)
+  spritereg_addr <= to_sprite_reg.a;
+  sprite_wr <= to_sprite_reg.wr;
+  from_sprite_ctl.a <= sprite_addr;
+  to_sprite_ctl.d <= sprite_data;
+  --spr0_hit <= spr0_hit;
+
+  -- graphics (control)
+  --vblank					=> vblank_s,
+  --xcentre					=> xcentre,
+  --ycentre					=> ycentre,
+  
+  --vga_clk <= video_o.clk;
+  red <= video_o.rgb.r;
+  green <= video_o.rgb.g;
+  blue <= video_o.rgb.b;
+  --lcm_data				:	out std_logic_vector(9 downto 0);
+  hblank <= video_o.hblank;
+  vblank_s <= video_o.vblank;
+  hsync <= video_o.hsync;
+  vsync <= video_o.vsync;
+
+  graphics_inst : entity work.Graphics                                    
     Port Map
     (
-      clk             => clk(1),      -- fudge for now
-      reset           => reset,
-  
-			xcentre					=> xcentre,
-			ycentre					=> ycentre,
+      bitmap_ctl_i    => to_bitmap_ctl,
+      bitmap_ctl_o    => from_bitmap_ctl,
 
-      extra_data      => gfxextra_data,
-			palette_data		=> palette_data,
-			
-			bitmapa					=> bitmap_addr,
-			bitmapd					=> bitmap_data,			
-      tilemapa        => tilemap_addr,
-      tilemapd        => tilemap_data,
-      tilea           => tile_addr,
-      tiled           => tile_data,
-      attra           => attr_addr,
-      attrd           => attr_data,
-  
-      spriteaddr      => sprite_addr,
-      spritedata      => sprite_data,
-      sprite_reg_addr => spritereg_addr,
-      updata          => uPdatao,
-      sprite_wr       => sprite_wr,
-			spr0_hit				=> spr0_hit,
+      tilemap_ctl_i   => to_tilemap_ctl,
+      tilemap_ctl_o   => from_tilemap_ctl,
 
-      to_osd          => to_osd,
-      from_osd        => from_osd,
+      sprite_reg_i    => to_sprite_reg,
+      sprite_ctl_i    => to_sprite_ctl,
+      sprite_ctl_o    => from_sprite_ctl,
+      spr0_hit				=> spr0_hit,
+      
+      graphics_i      => to_graphics,
+      graphics_o      => from_graphics,
+      
+			-- OSD
+			to_osd          => to_osd,
+			from_osd        => from_osd,
 
-      red             => red,
-      green           => green,
-      blue            => blue,
-			lcm_data				=> lcm_data,
-			hblank					=> hblank,
-			vblank					=> vblank_s,
-      hsync           => hsync,
-      vsync           => vsync,
-	
-      bw_cvbs         => bw_cvbs,
-      gs_cvbs         => gs_cvbs
+			-- video (incl. clk)
+			video_i					=> video_i,
+			video_o					=> video_o
     );
+
+-- U_Graphics : entity work.Graphics                                    
+--    Port Map
+--    (
+--      clk             => clk(1),      -- fudge for now
+--      reset           => reset,
+--  
+--			xcentre					=> xcentre,
+--			ycentre					=> ycentre,
+
+--      extra_data      => gfxextra_data,
+--			palette_data		=> palette_data,
+			
+--			bitmapa					=> bitmap_addr,
+--			bitmapd					=> bitmap_data,			
+--      tilemapa        => tilemap_addr,
+--      tilemapd        => tilemap_data,
+--      tilea           => tile_addr,
+--      tiled           => tile_data,
+--      attra           => attr_addr,
+--      attrd           => attr_data,
+  
+--      spriteaddr      => sprite_addr,
+--      spritedata      => sprite_data,
+--      sprite_reg_addr => spritereg_addr,
+--      updata          => uPdatao,
+--      sprite_wr       => sprite_wr,
+--			spr0_hit				=> spr0_hit,
+
+--      to_osd          => to_osd,
+--      from_osd        => from_osd,
+
+--      red             => red,
+--      green           => green,
+--      blue            => blue,
+--			lcm_data				=> lcm_data,
+--			hblank					=> hblank,
+--			vblank					=> vblank_s,
+--      hsync           => hsync,
+--      vsync           => vsync,
+	
+--      bw_cvbs         => bw_cvbs,
+--      gs_cvbs         => gs_cvbs
+--    );
 
 	vblank <= vblank_s;
 

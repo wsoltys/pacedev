@@ -1,6 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
+use ieee.std_logic_arith.EXT;
 use ieee.numeric_std.all;
 
 library work;
@@ -22,7 +23,7 @@ entity Game is
     ps2clk          : inout std_logic;                       
     ps2data         : inout std_logic;                       
     dip             : in std_logic_vector(7 downto 0);    
-		jamma						: in JAMMAInputsType;
+		jamma						: in from_JAMMA_t;
 		
     -- micro buses
     upaddr          : out std_logic_vector(15 downto 0);   
@@ -169,8 +170,8 @@ architecture SYN of Game is
 	signal in0_cs					: std_logic;
 	
   -- other signals      
-	signal inputs					: in8(0 to 3);  
-	alias game_reset			: std_logic is inputs(3)(0);
+	--signal inputs					: in8(0 to 3);  
+	--alias game_reset			: std_logic is inputs(3)(0);
 
 begin
 
@@ -187,7 +188,7 @@ begin
 	clk_1M5_en_n <= not clk_1M5_en;
 
 	-- add game reset later
-	cpu_reset <= reset or game_reset;
+	cpu_reset <= reset; -- or game_reset;
 	
   -- SRAM signals (may or may not be used)
   sram_o.a <= -- Graphics ROM starts at $10000 in 4KB banks - mapped to $9000
@@ -233,9 +234,12 @@ begin
 									data_9000 when data_9_cs = '1' else
 									wram_data when wram_cs = '1' else
 									X"ff" when dip1_cs = '1' else
-									inputs(2) when in2_cs = '1' else
-									inputs(1) when in1_cs = '1' else
-									inputs(0) when in0_cs = '1' else
+									--inputs(2) when in2_cs = '1' else
+									--inputs(1) when in1_cs = '1' else
+									--inputs(0) when in0_cs = '1' else
+									X"FF" when in2_cs = '1' else
+									X"FF" when in1_cs = '1' else
+									X"FF" when in0_cs = '1' else
 									"11011011" when dip2_cs = '1' else
 									vram0_data when vram0_cs = '1' else
 									(others => '0');
@@ -377,7 +381,8 @@ begin
 	clk_en_inst : entity work.clk_div
 		generic map
 		(
-			DIVISOR		=> TUTANKHAM_CPU_CLK_ENA_DIVIDE_BY
+			--DIVISOR		=> TUTANKHAM_CPU_CLK_ENA_DIVIDE_BY
+			DIVISOR		=> 20
 		)
 		port map
 		(
@@ -423,11 +428,14 @@ begin
   cpu_6809_d_i <= cpu_data_i;
   cpu_data_o <= cpu_6809_d_o;
 
+GEN_NO_INPUTS : if false generate
 	inputs_inst : entity work.Inputs
 		generic map
 		(
-			NUM_INPUTS	=> inputs'length,
-			CLK_1US_DIV	=> TUTANKHAM_1MHz_CLK0_COUNTS
+			--NUM_INPUTS	=> inputs'length,
+			NUM_INPUTS	=> 4,
+			--CLK_1US_DIV	=> TUTANKHAM_1MHz_CLK0_COUNTS
+			CLK_1US_DIV	=> 30
 		)
 	  port map
 	  (
@@ -437,9 +445,10 @@ begin
 	    ps2data 		=> ps2data,
 			jamma				=> jamma,
 
-	    dips				=> dip,
-	    inputs			=> inputs
+	    dips				=> dip
+	    --inputs			=> inputs
 	  );
+end generate GEN_NO_INPUTS;
 
 	GEN_SRAM_ROMS : if TUTANKHAM_ROMS_IN_SRAM generate
 

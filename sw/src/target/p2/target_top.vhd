@@ -155,27 +155,25 @@ architecture SYN of target_top is
   alias sd_clk        : std_logic is bd(15);
   alias sd_dat        : std_logic is bd(7);
 
-	signal clk_i			  : std_logic_vector(0 to 3);
   signal init       	: std_logic := '1';
-  signal reset_i     	: std_logic := '1';
-	signal reset_n			: std_logic := '0';
 
-  signal buttons_i    : from_BUTTONS_t;
-  signal switches_i   : from_SWITCHES_t;
-  signal leds_o       : to_LEDS_t;
-  signal inputs_i     : from_INPUTS_t;
-  signal flash_i      : from_FLASH_t;
-  signal flash_o      : to_FLASH_t;
-	signal sram_i			  : from_SRAM_t;
-	signal sram_o			  : to_SRAM_t;	
-	signal sdram_i      : from_SDRAM_t;
-	signal sdram_o      : to_SDRAM_t;
-	signal video_i      : from_VIDEO_t;
-  signal video_o      : to_VIDEO_t;
-  signal audio_i      : from_AUDIO_t;
-  signal audio_o      : to_AUDIO_t;
-  signal ser_i        : from_SERIAL_t;
-  signal ser_o        : to_SERIAL_t;
+  signal clkrst_i       : from_CLKRST_t;
+  signal buttons_i      : from_BUTTONS_t;
+  signal switches_i     : from_SWITCHES_t;
+  signal leds_o         : to_LEDS_t;
+  signal inputs_i       : from_INPUTS_t;
+  signal flash_i        : from_FLASH_t;
+  signal flash_o        : to_FLASH_t;
+	signal sram_i			    : from_SRAM_t;
+	signal sram_o			    : to_SRAM_t;	
+	signal sdram_i        : from_SDRAM_t;
+	signal sdram_o        : to_SDRAM_t;
+	signal video_i        : from_VIDEO_t;
+  signal video_o        : to_VIDEO_t;
+  signal audio_i        : from_AUDIO_t;
+  signal audio_o        : to_AUDIO_t;
+  signal ser_i          : from_SERIAL_t;
+  signal ser_o          : to_SERIAL_t;
   signal project_i      : from_PROJECT_IO_t;
   signal project_o      : to_PROJECT_IO_t;
   signal platform_i     : from_PLATFORM_IO_t;
@@ -248,8 +246,8 @@ begin
         port map
         (
           inclk0  => clock0,
-          c0      => clk_i(0),
-          c1      => clk_i(1)
+          c0      => clkrst_i.clk(0),
+          c1      => clkrst_i.clk(1)
         );
     
     end generate GEN_PLL;
@@ -257,11 +255,15 @@ begin
     GEN_NO_PLL : if not PACE_HAS_PLL generate
 
       -- feed input clocks into PACE core
-      clk_i(0) <= clock0;
-      clk_i(1) <= clock8;
+      clkrst_i.clk(0) <= clock0;
+      clkrst_i.clk(1) <= clock8;
         
     end generate GEN_NO_PLL;
 	
+    -- unused clocks on P2
+    clkrst_i.clk(2) <= clock0;
+    clkrst_i.clk(3) <= clock8;
+
   end block BLK_CLOCKING;
 
 	-- FPGA STARTUP
@@ -281,11 +283,23 @@ begin
 
 	-- the dipswitch must be "down" for the board to run
 	-- this is akin to an "ON" switch flicked down to turn on
-	reset_i <= init or sw2_1;
-		
-  -- unused clocks on P2
-  clk_i(2) <= clock8;
-  clk_i(3) <= '0';
+  clkrst_i.arst <= init or sw2_1;
+	clkrst_i.arst_n <= not clkrst_i.arst;
+
+  GEN_RESETS : for i in 0 to 3 generate
+
+    process (clkrst_i.clk(i), clkrst_i.arst)
+      variable rst_r : std_logic_vector(2 downto 0) := (others => '0');
+    begin
+      if clkrst_i.arst = '1' then
+        rst_r := (others => '1');
+      elsif rising_edge(clkrst_i.clk(i)) then
+        rst_r := rst_r(rst_r'left-1 downto 0) & '0';
+      end if;
+      clkrst_i.rst(i) <= rst_r(rst_r'left);
+    end process;
+
+  end generate GEN_RESETS;
 
   -- buttons
   buttons_i <= std_logic_vector(to_unsigned(0, buttons_i'length));
@@ -313,7 +327,7 @@ begin
   		port map
 		  (
   			clk 				=> clk_24M,
-				reset 			=> reset_i,
+				reset 			=> clkrst_i.arst,
 				oe 					=> open,
 				d 					=> bd(4),
 				joystate 		=> gcj
@@ -437,9 +451,9 @@ begin
 
   begin
 
-		video_i.clk <= clk_i(1);	-- by convention
+		video_i.clk <= clkrst_i.clk(1);	-- by convention
     video_i.clk_ena <= '1';
-    video_i.reset <= reset_i;
+    video_i.reset <= clkrst_i.rst(1);
 
     bd_out(20) <= video_o.rgb.r(9);
     bd_out(27) <= video_o.rgb.r(8);
@@ -475,12 +489,12 @@ begin
 
     -- audio PWM
     -- clock is 24Mhz, sample rate 24kHz
-    process (clk_24M, reset_i)
+    process (clk_24M, clkrst_i.arst)
       variable count : integer range 0 to 1023;
       variable audio_sample_l : std_logic_vector(9 downto 0);
       variable audio_sample_r : std_logic_vector(9 downto 0);
     begin
-      if reset_i = '1' then
+      if clkrst_i.arst = '1' then
         count := 0;
       elsif rising_edge(clk_24M) then
         if count = 1023 then
@@ -599,8 +613,8 @@ begin
     port map
     (
     	-- clocks and resets
-	  	clk_i							=> clk_i,
-      reset_i          	=> reset_i,
+	  	clk_i							=> clkrst_i.clk,
+      reset_i          	=> clkrst_i.rst,
 
       -- misc inputs and outputs
       buttons_i         => buttons_i,
@@ -646,10 +660,10 @@ begin
   BLK_CHASER : block
   begin
     -- flash the led so we know it's alive
-    process (clk_24M, reset_i)
+    process (clk_24M, clkrst_i.arst)
       variable count : std_logic_vector(21 downto 0);
     begin
-      if reset_i = '1' then
+      if clkrst_i.arst = '1' then
         count := (others => '0');
       elsif rising_edge(clk_24M) then
         count := count + 1;
