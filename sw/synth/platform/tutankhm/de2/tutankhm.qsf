@@ -25,7 +25,7 @@
 
 # Project-Wide Assignments
 # ========================
-set_global_assignment -name LAST_QUARTUS_VERSION 8.1
+set_global_assignment -name LAST_QUARTUS_VERSION "9.1 SP2"
 
 # Pin & Location Assignments
 # ==========================
@@ -497,7 +497,6 @@ set_global_assignment -name SEED 1
 
 set_parameter -name CYCLONEII_SAFE_WRITE VERIFIED_SAFE
 
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
@@ -545,4 +544,6 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/game
 set_global_assignment -name VHDL_FILE ../../../../src/component/toys/led_chaser.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwm_chaser.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwmout.vhd
+set_global_assignment -name VHDL_FILE custom_io.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/de2/target_top.vhd
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

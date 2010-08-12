@@ -340,22 +340,49 @@ begin
 			clk_en		=> clk_1M5_en
 		);
 		
-	cpu_inst : entity work.cpu09
-		port map
-		(	
-			clk				=> clk_1M5_en_n,
-			rst				=> cpu_reset,
-			rw				=> cpu_rw,
-			vma				=> cpu_vma,
-			address		=> cpu_addr,
-		  data_in		=> cpu_data_i,
-		  data_out	=> cpu_data_o,
-			halt			=> '0',
-			hold			=> '0',
-			irq				=> cpu_irq,
-			firq			=> cpu_firq,
-			nmi				=> cpu_nmi
-		);
+  GEN_CPU09 : if not TUTANKHAM_USE_REAL_6809 generate
+    cpu_inst : entity work.cpu09
+      port map
+      (	
+        clk				=> clk_1M5_en_n,
+        rst				=> cpu_reset,
+        rw				=> cpu_rw,
+        vma				=> cpu_vma,
+        address		=> cpu_addr,
+        data_in		=> cpu_data_i,
+        data_out	=> cpu_data_o,
+        halt			=> '0',
+        hold			=> '0',
+        irq				=> cpu_irq,
+        firq			=> cpu_firq,
+        nmi				=> cpu_nmi
+      );
+
+  end generate GEN_CPU09;
+  
+  GEN_REAL_6809 : if TUTANKHAM_USE_REAL_6809 generate
+
+    --platform_o.arst <= clkrst_i.arst;
+    platform_o.arst <= reset_i;
+    --platform_o.clk_50M <= clk_rst_i.clk(0);
+    platform_o.clk_50M <= clk_i(0);
+    platform_o.button <= buttons_i(platform_o.button'range);
+    
+    platform_o.cpu_6809_q <= clk_1M5_en_n;
+    platform_o.cpu_6809_e <= '0';
+    platform_o.cpu_6809_rst_n <= not cpu_reset;
+    cpu_rw <= platform_i.cpu_6809_r_wn;
+    cpu_vma <= platform_i.cpu_6809_vma;
+    cpu_addr <= platform_i.cpu_6809_a;
+    platform_o.cpu_6809_d_i <= cpu_data_i;
+    cpu_data_o <= platform_i.cpu_6809_d_o;
+    platform_o.cpu_6809_halt_n <= '1';
+    platform_o.cpu_6809_irq_n <= not cpu_irq;
+    platform_o.cpu_6809_firq_n <= not cpu_firq;
+    platform_o.cpu_6809_nmi_n <= not cpu_nmi;
+    platform_o.cpu_6809_tsc <= '0';
+    
+  end generate GEN_REAL_6809;
 
 	GEN_SRAM_ROMS : if TUTANKHAM_ROMS_IN_SRAM generate
 

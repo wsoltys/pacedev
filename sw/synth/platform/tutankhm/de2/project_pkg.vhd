@@ -30,15 +30,15 @@ package project_pkg is
 	--constant PACE_VIDEO_V_SCALE       	      : integer := 1;
 
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
-  constant PACE_CLK0_DIVIDE_BY              : natural := 5;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 3;   -- 50*3/5 = 30MHz
+  constant PACE_CLK0_DIVIDE_BY              : natural := 1;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 1;   -- 50*1/1 = 50MHz
   constant PACE_CLK1_DIVIDE_BY              : natural := 5;
   constant PACE_CLK1_MULTIPLY_BY            : natural := 4;  	-- 50*4/5 = 40MHz
 	constant PACE_VIDEO_H_SCALE               : integer := 2;
 	constant PACE_VIDEO_V_SCALE               : integer := 2;
 
-  constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
-  --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
+  --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
+  constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
   
   constant PACE_HAS_OSD                     : boolean := false;
   constant PACE_OSD_XPOS                    : natural := 0;
@@ -46,11 +46,13 @@ package project_pkg is
 
 	-- DE2 constants which *MUST* be defined
 	
-	constant DE2_LCD_LINE2							      : string := " TUTANKHAM-VGA  ";
+	--constant DE2_LCD_LINE2							      : string := " TUTANKHAM-VGA  ";
+	constant DE2_LCD_LINE2							      : string := " TUTANKHAM-6809 ";
 	constant DE2_USE_EXT_CPU									: boolean := false;
 		
 	-- Tutankham-specific constants
 
+  constant TUTANKHAM_USE_REAL_6809          : boolean := true;
 	constant TUTANKHAM_VRAM_WIDTHAD						: natural := 15;
 	constant TUTANKHAM_ROMS_IN_SRAM						: boolean := true;			
 
