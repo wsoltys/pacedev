@@ -58,8 +58,20 @@ architecture SYN of custom_io is
   signal m6809e_oe_reset  : std_logic;
   signal m6809e_oe_d      : std_logic;
   
+  signal clk_CPLD_ena     : std_logic;
+  
 begin
 
+  --process (platform_o.clk_50M, platform_o.arst)
+  --begin
+  --  if platform_o.arst = '1' then
+  --    clk_CPLD_ena <= '0';
+  --  elsif rising_edge(platform_o.clk_50M) then
+  --    clk_CPLD_ena <= not clk_CPLD_ena;
+  --  end if;
+  --end process;
+  clk_CPLD_ena <= platform_o.clk_50M;
+  
   -- (cpu_rw_n)
   m6809e_oe_d <= '0' when platform_o.arst = '1' else io_di(21);
   m6809e_oe_reset <= platform_o.arst or platform_o.button(1);
@@ -67,7 +79,7 @@ begin
 	-- Assign signals to IO bus
   io_di <= gpio_i(23 downto 0);
   gpio_o(23 downto 0) <= io_do;
-  gpio_o(28) <= platform_o.clk_50M;         gpio_oe(28) <= '1';
+  gpio_o(28) <= clk_CPLD_ena;               gpio_oe(28) <= '1';
   gpio_o(29) <= platform_o.cpu_6809_q;      gpio_oe(29) <= '1';
   gpio_o(30) <= platform_o.arst;            gpio_oe(30) <= '1';
   gpio_o(31) <= platform_o.cpu_6809_e;      gpio_oe(31) <= '1';
@@ -95,7 +107,7 @@ begin
 	end process;
 
 	-- Registers
-	reg : process(platform_o.arst, platform_o.clk_50M)
+	reg : process(platform_o.clk_50M, platform_o.arst)
 	begin
 		if platform_o.arst = '1' then
 			state					              <= idle;
@@ -109,30 +121,31 @@ begin
       platform_i.cpu_6809_vma     <= '0';
 
 		elsif rising_edge(platform_o.clk_50M) then
-			state <= next_state;
+      --if clk_CPLD_ena = '1' then
+        state <= next_state;
 
-			if state = rd0 then
-	      platform_i.cpu_6809_r_wn  <= io_di(21);
-        --m6809e_ba     <= io_di(20);
-        --m6809e_bs     <= io_di(19);
-        --m6809e_busy   <= io_di(18);
-        --m6809e_lic    <= io_di(17);
-        platform_i.cpu_6809_vma   <= io_di(16);
-        platform_i.cpu_6809_a     <= io_di(15 downto 0);
-        -- show the PC on the 7-segment display
-        seg7(15 downto 0) <= io_di(15 downto 0);
-			end if;
+        if state = rd0 then
+          platform_i.cpu_6809_r_wn  <= io_di(21);
+          --m6809e_ba     <= io_di(20);
+          --m6809e_bs     <= io_di(19);
+          --m6809e_busy   <= io_di(18);
+          --m6809e_lic    <= io_di(17);
+          platform_i.cpu_6809_vma   <= io_di(16);
+          platform_i.cpu_6809_a     <= io_di(15 downto 0);
+          -- show the PC on the 7-segment display
+          seg7(15 downto 0) <= io_di(15 downto 0);
+        end if;
 
-			if state = rd1 then
-	      platform_i.cpu_6809_r_wn  <= io_di(21);
-        --m6809e_ba     <= io_di(20);
-        --m6809e_bs     <= io_di(19);
-        --m6809e_busy   <= io_di(18);
-        --m6809e_lic    <= io_di(17);
-        platform_i.cpu_6809_vma   <= io_di(16);
-				platform_i.cpu_6809_d_o   <= io_di(7 downto 0);
-			end if;
-
+        if state = rd1 then
+          platform_i.cpu_6809_r_wn  <= io_di(21);
+          --m6809e_ba     <= io_di(20);
+          --m6809e_bs     <= io_di(19);
+          --m6809e_busy   <= io_di(18);
+          --m6809e_lic    <= io_di(17);
+          platform_i.cpu_6809_vma   <= io_di(16);
+          platform_i.cpu_6809_d_o   <= io_di(7 downto 0);
+        end if;
+      --end if;
 		end if;
 	end process;
 

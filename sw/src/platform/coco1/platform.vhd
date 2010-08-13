@@ -203,9 +203,6 @@ begin
       cycle <= (others => '0');
     elsif rising_edge (clk_57M272) then
       if (clk_14M318_ena = '1') then
-        if cycle(1 downto 0) = "00" then
-         elsif cycle(1 downto 0) = "10" then
-        end if;
         cycle <= cycle + 1;
       end if;
     end if;
@@ -365,6 +362,8 @@ begin
     platform_o.arst <= reset_i(0);
     --platform_o.clk_50M <= clk_rst_i.clk(0);
     platform_o.clk_50M <= clk_i(0);
+    --platform_o.clk_50M <= clk_57M272;
+    platform_o.button <= buttons_i(platform_o.button'range);
     
     platform_o.cpu_6809_q <= clk_q;
     platform_o.cpu_6809_e <= clk_e;

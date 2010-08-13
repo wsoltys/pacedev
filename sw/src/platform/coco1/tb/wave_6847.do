@@ -2,6 +2,10 @@ onerror {resume}
 quietly WaveActivateNextPane {} 0
 add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/clk_57m272
 add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/clk_14m318_ena
+add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/cycle
+add wave -noupdate -divider 6883
+add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/clk_e
+add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/clk_q
 add wave -noupdate -divider 6847
 add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/vdg_inst/vga_vsync
 add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/vdg_inst/vga_vblank
@@ -32,4 +36,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {2930830 ns} {2932226 ns}
+WaveRestoreZoom {15135 ns} {19865 ns}
