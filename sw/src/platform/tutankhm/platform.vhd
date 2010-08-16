@@ -328,19 +328,20 @@ begin
   ser_o <= NULL_TO_SERIAL;
 	leds_o <= (others => '0');
 
-	clk_en_inst : entity work.clk_div
-		generic map
-		(
-			DIVISOR		=> TUTANKHAM_CPU_CLK_ENA_DIVIDE_BY
-		)
-		port map
-		(
-			clk				=> clk_30M,
-			reset			=> reset_i,
-			clk_en		=> clk_1M5_en
-		);
-		
   GEN_CPU09 : if not TUTANKHAM_USE_REAL_6809 generate
+
+    clk_en_inst : entity work.clk_div
+      generic map
+      (
+        DIVISOR		=> TUTANKHAM_CPU_CLK_ENA_DIVIDE_BY
+      )
+      port map
+      (
+        clk				=> clk_30M,
+        reset			=> reset_i,
+        clk_en		=> clk_1M5_en
+      );
+		
     cpu_inst : entity work.cpu09
       port map
       (	
@@ -367,9 +368,11 @@ begin
     --platform_o.clk_50M <= clk_rst_i.clk(0);
     platform_o.clk_50M <= clk_i(0);
     platform_o.button <= buttons_i(platform_o.button'range);
+
+    clk_1M5_en <= platform_i.clk_1M5_en;
     
-    platform_o.cpu_6809_q <= clk_1M5_en_n;
-    platform_o.cpu_6809_e <= '0';
+    platform_o.cpu_6809_q <= '0';   -- not used
+    platform_o.cpu_6809_e <= '0';   -- not used
     platform_o.cpu_6809_rst_n <= not cpu_reset;
     cpu_rw <= platform_i.cpu_6809_r_wn;
     cpu_vma <= platform_i.cpu_6809_vma;

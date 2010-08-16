@@ -60,11 +60,11 @@ architecture SYN of custom_io is
   signal cpu_6809_clk_en  : std_logic;
   signal m6809e_oe_reset  : std_logic;
   signal m6809e_oe_d      : std_logic;
+  signal cpu_6809_r_wn    : std_logic;
   
 begin
 
-  -- (cpu_rw_n)
-  m6809e_oe_d <= '0' when platform_o.arst = '1' else io_di(21);
+  m6809e_oe_d <= '0' when platform_o.arst = '1' else cpu_6809_r_wn;
   m6809e_oe_reset <= platform_o.arst or platform_o.button(1);
   
 	-- Assign signals to IO bus
@@ -108,7 +108,7 @@ begin
 			state					              <= idle;
       platform_i.cpu_6809_d_o     <= (others => '0');
       platform_i.cpu_6809_a       <= (others => '0');
-	    platform_i.cpu_6809_r_wn    <= '0';
+	    cpu_6809_r_wn               <= '0';
       --m6809e_ba     <= '0';
       --m6809e_bs     <= '0';
       --m6809e_busy   <= '0';
@@ -119,7 +119,7 @@ begin
 			state <= next_state;
 
 			if state = rd0 then
-	      platform_i.cpu_6809_r_wn  <= io_di(21);
+	      cpu_6809_r_wn             <= io_di(21);
         --m6809e_ba     <= io_di(20);
         --m6809e_bs     <= io_di(19);
         --m6809e_busy   <= io_di(18);
@@ -131,7 +131,7 @@ begin
 			end if;
 
 			if state = rd1 then
-	      platform_i.cpu_6809_r_wn  <= io_di(21);
+	      cpu_6809_r_wn             <= io_di(21);
         --m6809e_ba     <= io_di(20);
         --m6809e_bs     <= io_di(19);
         --m6809e_busy   <= io_di(18);
@@ -142,6 +142,9 @@ begin
 
 		end if;
 	end process;
+
+  -- assign output
+  platform_i.cpu_6809_r_wn  <= cpu_6809_r_wn;
   
   -- Generate CPU Q and E
   BLK_CLK : block
@@ -155,6 +158,7 @@ begin
     cpu_6809_q <= '1' when phase = 1 or phase = 2 else '0';
     
     --ledr(2) <= cpu_6809_clk_en;
+    platform_i.clk_1M5_en <= cpu_6809_clk_en;
 
     process(clk_50M, reset)
       subtype count_t is integer range 0 to 7; -- 50/(8*4)=~1.5MHz
