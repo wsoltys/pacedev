@@ -281,7 +281,8 @@ begin
   --sram_data <= cpu_d_o when (cpu_vma = '1' and ram_cs = '1' and cpu_r_wn = '0' and vdg_sram_cs = '0') 
   sram_o.d <= std_logic_vector(resize(unsigned(cpu_d_o), sram_o.d'length));
 	sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
-  sram_o.cs <= (cpu_vma and ram_cs) or vdg_sram_cs;
+  --sram_o.cs <= (cpu_vma and ram_cs) or vdg_sram_cs;
+  sram_o.cs <= '1';
 	sram_o.oe <= cpu_r_wn or vdg_sram_cs;
 	sram_o.we <= sys_write and not cpu_r_wn;
 
@@ -363,7 +364,7 @@ begin
     --platform_o.arst <= clkrst_i.arst;
     platform_o.arst <= reset_i(0);
     --platform_o.clk_50M <= clk_rst_i.clk(0);
-    platform_o.clk_50M <= clk_57M272;
+    platform_o.clk_cpld <= clk_57M272;
     platform_o.button <= buttons_i(platform_o.button'range);
     
     platform_o.cpu_6809_q <= clk_q;

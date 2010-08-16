@@ -30,8 +30,8 @@ package project_pkg is
 	--constant PACE_VIDEO_V_SCALE       	      : integer := 1;
 
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
-  constant PACE_CLK0_DIVIDE_BY              : natural := 5;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 3;   -- 50*3/5 = 30MHz
+  constant PACE_CLK0_DIVIDE_BY              : natural := 1;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 1;   -- 50*1/1 = 50MHz
   constant PACE_CLK1_DIVIDE_BY              : natural := 5;
   constant PACE_CLK1_MULTIPLY_BY            : natural := 4;  	-- 50*4/5 = 40MHz
 	constant PACE_VIDEO_H_SCALE               : integer := 2;
@@ -46,12 +46,14 @@ package project_pkg is
 		
 	-- Tutankham-specific constants
 
-	constant TUTANKHAM_VRAM_WIDTHAD						: natural := 15;
+  constant TUTANKHAM_USE_REAL_6809          : boolean := true;
+	--constant TUTANKHAM_VRAM_WIDTHAD						: natural := 15;
+	constant TUTANKHAM_VRAM_WIDTHAD						: natural := 4;
 	constant TUTANKHAM_ROMS_IN_SRAM						: boolean := true;			
 
   -- flag that this project is not currently supported
   -- - instantiate a dummy _deferred_ constant to pull in the package body
-  constant NOT_SUPPORTED                    : boolean;
+  --constant NOT_SUPPORTED                    : boolean;
 
   type from_PROJECT_IO_t is record
     not_used  : std_logic;

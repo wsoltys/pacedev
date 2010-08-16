@@ -92,11 +92,12 @@ architecture SYN of mc6883 is
 begin
 
   -- clock generation, ras/cas generation
-  process (clk, reset, rw_n)
+  PROC_MAIN : process (clk, reset, rw_n)
     variable count : std_logic_vector(3 downto 0);
   begin
     if reset = '1' then
-      count := (others => '0');
+      --count := (others => '0');
+      count := "0001";
       z_int <= (others => '0');
       ras_int <= (others => '1');
       cas_int <= '1';
@@ -150,19 +151,20 @@ begin
           when "1011" =>
             q_int <= '0';
             -- valid MPU address (col)
-            case m is
-              when "00" =>
-                z_int <= "00" & a(11 downto 6);
-              when "01" =>
+            --case m is
+            --  when "00" =>
+            --    z_int <= "00" & a(11 downto 6);
+            --  when "01" =>
                 -- z(7) is P or don't care
-                z_int <= p & a(13 downto 7);
-              when others =>
-                if ty = '0' then
-                  z_int <= p & a(14 downto 8);
-                else
-                  z_int <= a(15 downto 8);
-                end if;
-            end case;
+            --    z_int <= p & a(13 downto 7);
+            --  when others =>
+            --    if ty = '0' then
+            --      z_int <= p & a(14 downto 8);
+            --    else
+            --      z_int <= a(15 downto 8);
+            --    end if;
+            --end case;
+            z_int <= a(15 downto 8);
             cas_int <= '0';
           when "1100" =>
           when "1101" =>
@@ -176,7 +178,7 @@ begin
         count := count + 1;
      end if; -- clk_ena
     end if;
-  end process;
+  end process PROC_MAIN;
 
   -- assign clock outputs
   q <= q_int;

@@ -6,6 +6,15 @@ add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/cycle
 add wave -noupdate -divider 6883
 add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/clk_e
 add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/clk_q
+add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/sam_inst/ty
+add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/sam_inst/m
+add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/sam_inst/r
+add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/sam_inst/p
+add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/sam_inst/f
+add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/sam_inst/v
+add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/sam_inst/flag
+add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/sam_inst/yscale
+add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/sam_inst/proc_main/count
 add wave -noupdate -divider 6847
 add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/vdg_inst/vga_vsync
 add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/vdg_inst/vga_vblank
@@ -36,4 +45,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {15135 ns} {19865 ns}
+WaveRestoreZoom {10608 ns} {12408 ns}
