@@ -153,6 +153,7 @@ entity mce6809_mcode is
 	
 		-- Operational controls
 		alu_ctrl			:	out alu_type;
+		alu_igncarry	:	out std_logic;
 		mem_read			: out std_logic;
 		drive_vma			: out std_logic;
 		drive_data		: out std_logic;
@@ -163,7 +164,7 @@ entity mce6809_mcode is
 		s_ctrl				: out s_type;
 		ld						: out ld_type;
 		lea						: out lea_type;
-		ab_fromalu		: out std_logic;
+		acc_fromalu		: out std_logic;
 	
 		-- Mux controls
 		dbus_ctrl			: out dbus_type;
@@ -204,6 +205,7 @@ begin
 		mc_jump				<= '0';
 		mc_jump_addr	<= mc_fetch0;
 		alu_ctrl			<= alu_idle;
+		alu_igncarry	<= '0';
 		mem_read			<= '1';
 		drive_vma			<= '1';
 		drive_data		<= '1';
@@ -212,7 +214,7 @@ begin
 		s_ctrl				<= latch_s;
 		ld						<= (others => '0');
 		lea						<= (others => '0');
-		ab_fromalu		<= '1';
+		acc_fromalu		<= '1';
 		dbus_ctrl			<= dbus_def;
 		abus_ctrl			<= abus_pc;
 		eabus_ctrl		<= eabus_ea;
@@ -279,39 +281,76 @@ begin
 --			idxabus <= abus_ea;
 --		end if;
 
+		ld(ICC) <= '1';
+
 		case mc_addr is
 		when mc_index0 =>
+			alu_igncarry	<= '1';
 			alu_ctrl <= alu_add;
 			left_ctrl <= left_eal;
-			right_ctrl <= right_dbus5;
-			dbus_ctrl <= dbus_post;
 			if std_match(rpost, "1---0100") then	-- No offset
 				mc_jump <= '1';
 				mc_jump_addr <= mc_exec0;	
 			else
 				ld(IEAl) <= '1';
+				if std_match(rpost, "0-------") then	-- 5-bit offset
+					right_ctrl <= right_dbus5;
+					dbus_ctrl <= dbus_post;
+				elsif std_match(rpost, "1---1-00") 			-- 8-bit offset
+				   or std_match(rpost, "1---1-01") then	-- 16-bit offset
+					pc_ctrl <= incr_pc;
+					right_ctrl <= right_dbus;
+					dbus_ctrl <= dbus_mem;
+				elsif std_match(rpost, "1---0110") then	-- A offset
+					right_ctrl <= right_dbus;
+					dbus_ctrl <= dbus_a;
+				elsif std_match(rpost, "1---0101") 			-- B offset
+					 or std_match(rpost, "1---1011") then	-- D offset
+					right_ctrl <= right_dbus;
+					dbus_ctrl <= dbus_b;
+				elsif std_match(rpost, "1--00000") 			-- Post inc +1 
+				   or std_match(rpost, "1--00001") 			-- Post inc +2
+				   or std_match(rpost, "1--00010") 			-- Post dec -1
+				   or std_match(rpost, "1--00011") then	-- Post dec -2
+					right_ctrl <= right_c0;
+				else
+					right_ctrl <= right_dbus;
+					dbus_ctrl <= dbus_mem;
+				end if;
 			end if;
 		when mc_index1 =>
 			alu_ctrl <= alu_add;
 			left_ctrl <= left_eah;
-			right_ctrl <= right_c0;
-			ld(IEAh) <= '1';
 			if std_match(rpost, "0-------") then	-- 5-bit offset
+				drive_vma	<= '0';
+				right_ctrl <= right_c0;
+			elsif std_match(rpost, "1---1-01") then	-- 16-bit offset
+				pc_ctrl <= incr_pc;
+				right_ctrl <= right_dbus;
+				dbus_ctrl <= dbus_mem;
+			elsif std_match(rpost, "1---1011") then	-- D offset
+				right_ctrl <= right_dbus;
+				dbus_ctrl <= dbus_a;
+			else
+				right_ctrl <= right_c0;
+			end if;
+			ld(IEAh) <= '1';
+--			if std_match(rpost, "0-------") then	-- 5-bit offset
 				mc_jump <= '1';
 				mc_jump_addr <= mc_exec0;	
-			elsif std_match(rpost, "1---1000") then	-- 8-bit offset
-			elsif std_match(rpost, "1---1001") then	-- 16-bit offset
-			elsif std_match(rpost, "1---0110") then	-- A offset
-			elsif std_match(rpost, "1---0101") then	-- B offset
-			elsif std_match(rpost, "1---1011") then	-- D offset
-			elsif std_match(rpost, "1--00000") then	-- Post inc +1 
-			elsif std_match(rpost, "1--00001") then	-- Post inc +2
-			elsif std_match(rpost, "1--00010") then	-- Post dec -1
-			elsif std_match(rpost, "1--00011") then	-- Post dec -2
-			elsif std_match(rpost, "1---1011") then	-- PC 8-bit offset
-			elsif std_match(rpost, "1---1011") then	-- PC 16-bit offset
-			elsif std_match(rpost, "1--11111") then	-- Extended indirect
-			end if;
+--			elsif std_match(rpost, "1---1000") then	-- 8-bit offset
+--			elsif std_match(rpost, "1---1001") then	-- 16-bit offset
+--			elsif std_match(rpost, "1---0110") then	-- A offset
+--			elsif std_match(rpost, "1---0101") then	-- B offset
+--			elsif std_match(rpost, "1---1011") then	-- D offset
+--			elsif std_match(rpost, "1--00000") then	-- Post inc +1 
+--			elsif std_match(rpost, "1--00001") then	-- Post inc +2
+--			elsif std_match(rpost, "1--00010") then	-- Post dec -1
+--			elsif std_match(rpost, "1--00011") then	-- Post dec -2
+--			elsif std_match(rpost, "1---1100") then	-- PC 8-bit offset
+--			elsif std_match(rpost, "1---1101") then	-- PC 16-bit offset
+--			elsif std_match(rpost, "1--11111") then	-- Extended indirect
+--			end if;
 		when others =>
 		end case;
 
@@ -333,7 +372,7 @@ begin
 				when X"D" =>		-- SEX
 
 				when X"E" =>		-- EXG
-					ab_fromalu <= '0';	-- XXX - Optimise later!
+					acc_fromalu <= '0';	-- XXX - Optimise later!
 
 					case mc_addr is
 					when mc_fetch1 =>
@@ -483,12 +522,16 @@ begin
 						mc_jump				<= '1';
 						mc_jump_addr	<= mc_index0;
 						lea(EAEA)			<= '1';
-						case dbus(6 downto 5) is 
-						when "00" => eabus_ctrl <= eabus_x;
-						when "01" => eabus_ctrl <= eabus_y;
-						when "10" => eabus_ctrl <= eabus_u;
-						when others => eabus_ctrl <= eabus_s; -- "11"
-						end case;
+						if not std_match(rpost, "1---110-") then	-- PC offset
+							case dbus(6 downto 5) is 
+							when "00" => eabus_ctrl <= eabus_x;
+							when "01" => eabus_ctrl <= eabus_y;
+							when "10" => eabus_ctrl <= eabus_u;
+							when others => eabus_ctrl <= eabus_s; -- "11"
+							end case;
+						else
+							eabus_ctrl <= eabus_pc;
+						end if;
 					when mc_exec0 =>
 						mc_jump				<= '1';
 						mc_jump_addr	<= mc_fetch0;

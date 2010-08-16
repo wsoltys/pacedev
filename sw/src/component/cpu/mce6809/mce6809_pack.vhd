@@ -56,7 +56,7 @@ package mce6809_pack is
 		dbus_eal, dbus_eah, dbus_cc, dbus_dp, dbus_post, 
 		dbus_alu);
 	type abus_type is (abus_d, abus_pc, abus_u, abus_s, abus_y, abus_x, abus_ea);
-	type eabus_type is (eabus_u, eabus_s, eabus_y, eabus_x, eabus_ea);
+	type eabus_type is (eabus_u, eabus_s, eabus_y, eabus_x, eabus_pc, eabus_ea);
 	type left_type is (left_a, left_b, left_eal, left_eah);
 	type right_type is (right_dbus, right_dbus5, right_c0, right_c1, right_c2);
 	
@@ -104,6 +104,7 @@ package mce6809_pack is
 		
 			-- Operational controls
 			alu_ctrl			:	out alu_type;
+			alu_igncarry	: out std_logic;
 			mem_read			: out std_logic;
 			drive_vma			: out std_logic;
 			drive_data		: out std_logic;
@@ -114,7 +115,7 @@ package mce6809_pack is
 			s_ctrl				: out s_type;
 			ld						: out ld_type;
 			lea						: out lea_type;
-			ab_fromalu		: out std_logic;
+			acc_fromalu		: out std_logic;
 		
 			-- Mux controls
 			dbus_ctrl			: out dbus_type;

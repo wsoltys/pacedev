@@ -59,6 +59,7 @@ architecture SYN of mce6809 is
 
 	-- Operational controls
 	signal		alu_ctrl			:	alu_type;
+	signal		alu_igncarry	: std_logic;
 	signal		drive_vma			: std_logic;
 	signal		drive_data		: std_logic;
 
@@ -81,7 +82,7 @@ architecture SYN of mce6809 is
 	alias			lddp					: std_logic is ld(IDP);
 	alias			ldpost				: std_logic is ld(IPOST);
 	alias			ldcc					: std_logic is ld(ICC);
-	signal		ab_fromalu		: std_logic;		-- Use ALU as input to A,B and CC regs
+	signal		acc_fromalu		: std_logic;		-- Use ALU as input to A,B and CC regs
 
 	-- Mux controls
 	signal		dbus_ctrl			: dbus_type;
@@ -117,6 +118,7 @@ begin
 	
 		-- Operational controls
 		alu_ctrl			=> alu_ctrl,
+		alu_igncarry	=> alu_igncarry,
 		mem_read			=> rw,
 		drive_vma			=> drive_vma,
 		drive_data		=> drive_data,
@@ -127,7 +129,7 @@ begin
 		s_ctrl				=> s_ctrl,
 		ld						=> ld,
 		lea						=> lea,
-		ab_fromalu		=> ab_fromalu,
+		acc_fromalu		=> acc_fromalu,
 	
 		-- Mux controls
 		dbus_ctrl			=> dbus_ctrl,
@@ -236,7 +238,7 @@ begin
 
 				-- A
 				if lda = '1' then
-					if ab_fromalu = '1' then
+					if acc_fromalu = '1' then
 						acca <= alu_out;
 					else
 						acca <= dbus;
@@ -245,7 +247,7 @@ begin
 
 				-- B
 				if ldb = '1' then
-					if ab_fromalu = '1' then
+					if acc_fromalu = '1' then
 						accb <= alu_out;
 					else
 						accb <= dbus;
@@ -283,11 +285,11 @@ begin
 
 				-- CC
 				if ldcc = '1' then
-					if ab_fromalu = '1' then
+					--if acc_fromalu = '1' then
 						cc <= cc_out;
-					else
-						cc <= dbus;
-					end if;
+					--else
+					--	cc <= dbus;
+					--end if;
 				end if;
 
 				-- EA
@@ -295,16 +297,24 @@ begin
 					ea <= eabus;
 				else
 					if ldeah = '1' then
-						ea(15 downto 8) <= dbus;
+						if acc_fromalu = '1' then
+							ea(15 downto 8) <= alu_out;
+						else
+							ea(15 downto 8) <= dbus;
+						end if;
 					end if;
 					if ldeal = '1' then
-						ea(7 downto 0) <= dbus;
+						if acc_fromalu = '1' then
+							ea(7 downto 0) <= alu_out;
+						else
+							ea(7 downto 0) <= dbus;
+						end if;
 					end if;
 				end if;
 
 				-- POST
 				if ldpost = '1' then
-					post <= dbus;
+					post <= data_i;
 				end if;
 			end if;
 		end if;
@@ -369,6 +379,8 @@ begin
 			eabus <= y;
 		when eabus_x =>
 			eabus <= x;
+		when eabus_pc =>
+			eabus <= pc;
 		when others =>	-- abus_ea
 			eabus <= ea;
 		end case;
@@ -399,12 +411,16 @@ begin
 	end process;
 
 	-- ALU
-	alu_pr: process(alu_ctrl, cc, left, right)
+	alu_pr: process(alu_ctrl, alu_igncarry, cc, left, right)
 		variable alu_res	: std_logic_vector(8 downto 0);
 		variable C_in			: std_logic;
 		variable C_out		: std_logic;
 	begin
 		C_in := '0';
+		if alu_igncarry = '0' then
+			C_in := cc(0);
+		end if;
+
 		C_out := '0';
 		case alu_ctrl is
 		when alu_add	=>		
