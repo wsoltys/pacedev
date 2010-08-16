@@ -44,7 +44,7 @@ package project_pkg is
 	-- Coco1-specific constants
 	
 	constant COCO1_USE_REAL_6809              : boolean := true;
-  constant COCO1_EXTENDED_COLOR_BASIC       : boolean := true;
+  constant COCO1_EXTENDED_COLOR_BASIC       : boolean := false;
 	
   type from_PROJECT_IO_t is record
     not_used  : std_logic;
