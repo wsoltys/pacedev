@@ -55,9 +55,6 @@ architecture SYN of custom_io is
 	signal io_do					  : std_logic_vector(23 downto 0);
 	--signal io_oe			      : std_logic;
 
-  signal cpu_6809_q       : std_logic;
-  signal cpu_6809_e       : std_logic;
-  signal cpu_6809_clk_en  : std_logic;
   signal m6809e_oe_reset  : std_logic;
   signal m6809e_oe_d      : std_logic;
   signal cpu_6809_r_wn    : std_logic;
@@ -70,10 +67,10 @@ begin
 	-- Assign signals to IO bus
   io_di <= gpio_i(23 downto 0);
   gpio_o(23 downto 0) <= io_do;
-  gpio_o(28) <= platform_o.clk_50M;         gpio_oe(28) <= '1';
-  gpio_o(29) <= cpu_6809_q;                 gpio_oe(29) <= '1';
+  gpio_o(28) <= platform_o.clk_cpld;        gpio_oe(28) <= '1';
+  gpio_o(29) <= platform_o.cpu_6809_q;      gpio_oe(29) <= '1';
   gpio_o(30) <= platform_o.arst;            gpio_oe(30) <= '1';
-  gpio_o(31) <= cpu_6809_e;                 gpio_oe(31) <= '1';
+  gpio_o(31) <= platform_o.cpu_6809_e;      gpio_oe(31) <= '1';
 
 	io_do <= "000000000" & 
             platform_o.cpu_6809_firq_n & platform_o.cpu_6809_irq_n & platform_o.cpu_6809_nmi_n & 
@@ -85,10 +82,6 @@ begin
   gpio_oe(23 downto 0) <= (others => '1') when state = wr else (others => '0');
   
   io_wr <= '0';
-
-  -- not connected
-  --m6809e_q <= cpuq;
-  --m6809e_e <= cpue;
 
 	-- State machine
 	io_sm : process(state, io_wr)
@@ -102,7 +95,7 @@ begin
 	end process;
 
 	-- Registers
-	reg : process(platform_o.arst, platform_o.clk_50M)
+	reg : process(platform_o.arst, platform_o.clk_cpld)
 	begin
 		if platform_o.arst = '1' then
 			state					              <= idle;
@@ -115,7 +108,7 @@ begin
       --m6809e_lic    <= '0';
       platform_i.cpu_6809_vma     <= '0';
 
-		elsif rising_edge(platform_o.clk_50M) then
+		elsif rising_edge(platform_o.clk_cpld) then
 			state <= next_state;
 
 			if state = rd0 then
@@ -146,48 +139,6 @@ begin
   -- assign output
   platform_i.cpu_6809_r_wn  <= cpu_6809_r_wn;
   
-  -- Generate CPU Q and E
-  BLK_CLK : block
-    signal cnt		: integer range 0 to 15;
-    signal phase	: integer range 0 to 3;
-    alias clk_50M : std_logic is platform_o.clk_50M;
-    alias reset   : std_logic is platform_o.arst;
-  begin
-    cpu_6809_clk_en <= '1' when phase = 3 and cnt = 0 else '0';
-    cpu_6809_e <= '1' when phase = 2 or phase = 3 else '0';
-    cpu_6809_q <= '1' when phase = 1 or phase = 2 else '0';
-    
-    --ledr(2) <= cpu_6809_clk_en;
-    platform_i.clk_1M5_en <= cpu_6809_clk_en;
-
-    process(clk_50M, reset)
-      subtype count_t is integer range 0 to 7; -- 50/(8*4)=~1.5MHz
-      variable c      : count_t;
-      subtype phase_t is integer range 0 to 3;
-      variable p			: phase_t;
-      --variable h			: integer range 0 to 255;
-    begin
-      if reset = '1' then 
-        c := count_t'high;
-        p := 0;
-      elsif rising_edge(clk_50M) then
-        if c = 0 then
-          c := count_t'high;
-          if p = phase_t'high then
-            p := 0;
-          else 
-            p := p + 1; 
-          end if;
-        else
-          c := c - 1;
-        end if;
-      end if;
-      
-      cnt <= c;
-      phase <= p;
-    end process;
-  end block BLK_CLK;
-
   gpio_is_custom <= (others => '1');
   gpio_is_not_used <= (others => '0');
 

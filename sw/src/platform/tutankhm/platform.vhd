@@ -128,7 +128,9 @@ architecture SYN of platform is
   -- RAM signals        
 	signal wram_cs				: std_logic;
   signal wram_wr        : std_logic;
-  alias wram_data      	: std_logic_vector(7 downto 0) is sram_i.d(7 downto 0);
+  --alias wram_data      	: std_logic_vector(7 downto 0) is sram_i.d(7 downto 0);
+  -- declare this for some debugging (for coco1)
+  signal wram_data      : std_logic_vector(7 downto 0);
 
 	signal intena_cs			: std_logic;
 	signal intena_r				: std_logic;
@@ -206,21 +208,23 @@ begin
 									vram0_data when vram0_cs = '1' else
 									(others => '0');
 	
-	vram0_wr <= vram0_cs and not cpu_rw;
+	vram0_wr <= vram0_cs and clk_1M5_en and not cpu_rw;
 	palette_wr <= palette_cs and not cpu_rw;
 
 	-- memory write enables
-	process (clk_30M, clk_1M5_en)
-	begin
-		if rising_edge(clk_30M) then
-			if clk_1M5_en = '1' then
-				-- only write thru to WRAM
-				wram_wr <= not cpu_rw and wram_cs;
-			else
-				wram_wr <= '0';
-			end if;
-		end if;
-	end process;
+	--process (clk_30M, clk_1M5_en)
+	--begin
+	--	if rising_edge(clk_30M) then
+	--		if clk_1M5_en = '1' then
+	--			-- only write thru to WRAM
+	--			wram_wr <= not cpu_rw and wram_cs;
+	--		else
+	--			wram_wr <= '0';
+	--		end if;
+	--	end if;
+	--end process;
+
+  wram_wr <= wram_cs and not cpu_rw and clk_1M5_en;
 		
 	-- implementation of the banking register
 	process (clk_30M, clk_1M5_en, cpu_reset)
@@ -362,21 +366,54 @@ begin
   end generate GEN_CPU09;
   
   GEN_REAL_6809 : if TUTANKHAM_USE_REAL_6809 generate
+  begin
 
     --platform_o.arst <= clkrst_i.arst;
     platform_o.arst <= reset_i;
     --platform_o.clk_50M <= clk_rst_i.clk(0);
-    platform_o.clk_50M <= clk_i(0);
+    platform_o.clk_cpld <= clk_i(0);
     platform_o.button <= buttons_i(platform_o.button'range);
 
-    clk_1M5_en <= platform_i.clk_1M5_en;
-    
-    platform_o.cpu_6809_q <= '0';   -- not used
-    platform_o.cpu_6809_e <= '0';   -- not used
+    process (clk_30M, reset_i)
+      variable count : std_logic_vector(4 downto 0) := (others => '0');
+    begin
+      if reset_i = '1' then
+        platform_o.cpu_6809_q <= '0';
+        platform_o.cpu_6809_e <= '0';
+        count := (others => '0');
+      elsif rising_edge(clk_30M) then
+        clk_1M5_en <= '0';  -- default
+        case count is
+          when "00111" =>
+            platform_o.cpu_6809_q <= '1';
+          when "01111" =>
+            platform_o.cpu_6809_e <= '1';
+          when "10001" =>
+            -- this is where coco1 latches cpu address LSB
+            cpu_addr(7 downto 0) <= platform_i.cpu_6809_a(7 downto 0);
+          when "10111" =>
+            platform_o.cpu_6809_q <= '0';
+            -- this is where coco1 latches cpu address MSB
+            cpu_addr(15 downto 8) <= platform_i.cpu_6809_a(15 downto 8);
+            -- this is where coco1 enables writes to SRAM
+            -- - just use clk_1M5_en in this case
+            clk_1M5_en <= '1';
+          when "11001" =>
+            -- this is where coco1 latches sram data for CPU
+            wram_data <= sram_i.d(7 downto 0);
+          when "11111" =>
+            platform_o.cpu_6809_e <= '0';
+          when others =>
+            null;
+        end case;
+        count := count + 1;
+      end if;
+    end process;
+
     platform_o.cpu_6809_rst_n <= not cpu_reset;
     cpu_rw <= platform_i.cpu_6809_r_wn;
     cpu_vma <= platform_i.cpu_6809_vma;
-    cpu_addr <= platform_i.cpu_6809_a;
+    --cpu_addr <= platform_i.cpu_6809_a;
     platform_o.cpu_6809_d_i <= cpu_data_i;
     cpu_data_o <= platform_i.cpu_6809_d_o;
     platform_o.cpu_6809_halt_n <= '1';

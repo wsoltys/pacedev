@@ -77,6 +77,8 @@ architecture SYN of platform is
   
 	alias clk_20M					: std_logic is clk_i(0);
 	alias rst_20M         : std_logic is reset_i(0);
+	--alias clk_57M272			: std_logic is clk_i(0);
+	--alias rst_57M272      : std_logic is reset_i(0);
 	alias clk_57M272			: std_logic is clk_i(1);
 	alias rst_57M272      : std_logic is reset_i(1);
 
@@ -361,8 +363,7 @@ begin
     --platform_o.arst <= clkrst_i.arst;
     platform_o.arst <= reset_i(0);
     --platform_o.clk_50M <= clk_rst_i.clk(0);
-    platform_o.clk_50M <= clk_i(0);
-    --platform_o.clk_50M <= clk_57M272;
+    platform_o.clk_50M <= clk_57M272;
     platform_o.button <= buttons_i(platform_o.button'range);
     
     platform_o.cpu_6809_q <= clk_q;
@@ -378,6 +379,12 @@ begin
     platform_o.cpu_6809_firq_n <= not cpu_firq;
     platform_o.cpu_6809_nmi_n <= not cpu_nmi;
     platform_o.cpu_6809_tsc <= '0';
+
+    -- so they don't get optimised-out
+    leds_o(0) <= platform_i.cpu_6809_r_wn;
+    leds_o(1) <= platform_i.cpu_6809_busy;
+    leds_o(2) <= platform_i.cpu_6809_lic;
+    leds_o(3) <= platform_i.cpu_6809_vma;
     
   end generate GEN_REAL_6809;
   

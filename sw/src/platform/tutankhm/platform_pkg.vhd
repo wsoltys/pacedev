@@ -37,7 +37,6 @@ package platform_pkg is
   constant TUTANKHAM_SOURCE_ROOT_DIR        : string;
 
   type from_PLATFORM_IO_t is record
-    clk_1M5_en        : std_logic;
     -- to connect to real 6809
     cpu_6809_r_wn     : std_logic;
     cpu_6809_vma      : std_logic;
@@ -47,7 +46,7 @@ package platform_pkg is
 
   type to_PLATFORM_IO_t is record
     arst              : std_logic;
-    clk_50M           : std_logic;
+    clk_cpld          : std_logic;
     button            : std_logic_vector(3 downto 0);
     -- to connect to real 6809
     cpu_6809_q        : std_logic;

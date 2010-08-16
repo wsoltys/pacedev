@@ -23,6 +23,8 @@ package platform_pkg is
   type from_PLATFORM_IO_t is record
     -- to connect to real 6809
     cpu_6809_r_wn     : std_logic;
+    cpu_6809_busy     : std_logic;
+    cpu_6809_lic      : std_logic;
     cpu_6809_vma      : std_logic;
     cpu_6809_a        : std_logic_vector(15 downto 0);
     cpu_6809_d_o      : std_logic_vector(7 downto 0);
