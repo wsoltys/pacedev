@@ -123,19 +123,13 @@ architecture SYN of platform is
 	signal jamma_s				: from_JAMMA_t;
   signal kbd_matrix			: from_MAPPED_INPUTS_t(0 to 8);
 	alias game_reset			: std_logic is kbd_matrix(8).d(0);
-	
-  -- PIA signals
-  signal pia_datao  		: std_logic_vector(7 downto 0);
-  signal pia_irqa      	: std_logic;
-  signal pia_irqb      	: std_logic;
-  signal pia_pa        	: std_logic_vector(7 downto 0);
-  signal pia_ca1       	: std_logic;
-  signal pia_ca2       	: std_logic;
-  signal pia_pb        	: std_logic_vector(7 downto 0);
-  signal pia_cb1       	: std_logic;
-  signal pia_cb2       	: std_logic;
 
-  signal pia_cs					: std_logic;
+  -- PIA-A signals
+  signal pia_0_cs				: std_logic;
+  signal pia_0_datao  	: std_logic_vector(7 downto 0);
+  -- PIA-B signals
+  signal pia_1_cs				: std_logic;
+  signal pia_1_datao  	: std_logic_vector(7 downto 0);
 
 	-- SAM signals
   signal sam_cs					: std_logic;
@@ -215,10 +209,11 @@ begin
   --
 
   -- assign chipselects from MC6883 selector output
-  pia_cs <= y(4);
+	ram_cs <= y(0) or y(7);
   extrom_cs <= y(1);
   rom_cs <= y(2);
-	ram_cs <= y(0) or y(7);
+  pia_0_cs <= y(4);
+  pia_1_cs <= y(5);
   -- this is yet to be implemented in the 6883/6847
   --vram_cs <= '1' when cpu_a(15 downto 10) = "000001" else '0';
 
@@ -269,7 +264,7 @@ begin
 	end process;
 
   -- memory read mux
-  cpu_d_i <= pia_datao when pia_cs = '1' else
+  cpu_d_i <=  pia_0_datao when pia_0_cs = '1' else
               rom_datao when rom_cs = '1' else
               extrom_datao when extrom_cs = '1' else
               ram_datao when ram_cs = '1' else
@@ -287,54 +282,7 @@ begin
 	sram_o.we <= sys_write and not cpu_r_wn;
 
   -- CPU interrupts	
-	cpu_irq <= '0';
-	cpu_firq <= '0';
 	cpu_nmi <= '0';
-
-	-- PIA edge inputs
-	pia_ca1 <= '0';
-	pia_ca2 <= '0';
-	pia_cb1 <= '0';
-	pia_cb2 <= '0';
-	--pia_pb <= (others => '0');
-	
-	-- keyboard matrix
-	process (clk_20M, reset_i(1))
-	  variable keys : std_logic_vector(7 downto 0);
-	begin
-	  if reset_i(1) = '1' then
-  		keys := (others => '0');
-	  elsif rising_edge (clk_20M) then
-  		keys := (others => '0');
-  		-- note that row select is active low
-  		if pia_pb(0) = '0' then
-  			keys := keys or kbd_matrix(0).d;
-  		end if;
-  		if pia_pb(1) = '0' then
-  			keys := keys or kbd_matrix(1).d;
-  		end if;
-  		if pia_pb(2) = '0' then
-  			keys := keys or kbd_matrix(2).d;
-  		end if;
-  		if pia_pb(3) = '0' then
-  			keys := keys or kbd_matrix(3).d;
-  		end if;
-  		if pia_pb(4) = '0' then
-  			keys := keys or kbd_matrix(4).d;
-  		end if;
-  		if pia_pb(5) = '0' then
-  			keys := keys or kbd_matrix(5).d;
-  		end if;
-  		if pia_pb(6) = '0' then
-  			keys := keys or kbd_matrix(6).d;
-  		end if;
-  		if pia_pb(7) = '0' then
-  			keys := keys or kbd_matrix(7).d;
-  		end if;
-	  end if;
-	  -- key inputs are active low
-	  pia_pa <= not keys;
-	end process;
 
   --
   --  COMPONENT INSTANTIATION
@@ -462,40 +410,155 @@ begin
       cvbs    => open --cvbs
     );
 
-  -- PIA (keyboard)
-  pai_ub_inst : entity work.pia6821
-  	port map
-  	(	
-  	 	clk       	=> cpu_clk,
-      rst       	=> reset_i(0),
-      cs        	=> pia_cs,
-      rw        	=> cpu_r_wn,
-      addr      	=> cpu_a(1 downto 0),
-      data_in   	=> cpu_d_o,
-  		data_out  	=> pia_datao,
-  		irqa      	=> pia_irqa,
-  		irqb      	=> pia_irqb,
-  		pa_i        => pia_pa,
-			pa_o				=> open,
-			pa_oe				=> open,
-  		ca1       	=> pia_ca1,
-  		ca2_i      	=> pia_ca2,
-			ca2_o				=> open,
-			ca2_oe			=> open,
-			pb_i				=> (others => 'X'),
-  		pb_o       	=> pia_pb,
-			pb_oe				=> open,
-  		cb1       	=> pia_cb1,
-  		cb2_i      	=> pia_cb2,
-			cb2_o				=> open,
-			cb2_oe			=> open
-  	);
+  BLK_PIA_0 : block
+    signal pia_irqa      	: std_logic;
+    signal pia_irqb      	: std_logic;
+    signal pia_pa         : std_logic_vector(7 downto 0);
+    signal pia_pb         : std_logic_vector(7 downto 0);
+    signal pia_ca1       	: std_logic;
+    signal pia_ca2       	: std_logic;
+    signal pia_cb1       	: std_logic;
+    signal pia_cb2       	: std_logic;
+  begin
+    -- PIA edge inputs
+    pia_ca1 <= '0';   -- HS
+    pia_ca2 <= '0';   -- SEL1
+    pia_cb1 <= '0';   -- FS
+    pia_cb2 <= '0';   -- SEL2
+    
+    -- this is ultimately correct
+    --cpu_irq <= pia_irqa or pia_irqb;
+    -- but for now...
+    cpu_irq <= '0';
+    
+    -- keyboard matrix
+    process (clk_20M, reset_i(1))
+      variable keys : std_logic_vector(7 downto 0);
+    begin
+      if reset_i(1) = '1' then
+        keys := (others => '0');
+      elsif rising_edge (clk_20M) then
+        keys := (others => '0');
+        -- note that row select is active low
+        if pia_pb(0) = '0' then
+          keys := keys or kbd_matrix(0).d;
+        end if;
+        if pia_pb(1) = '0' then
+          keys := keys or kbd_matrix(1).d;
+        end if;
+        if pia_pb(2) = '0' then
+          keys := keys or kbd_matrix(2).d;
+        end if;
+        if pia_pb(3) = '0' then
+          keys := keys or kbd_matrix(3).d;
+        end if;
+        if pia_pb(4) = '0' then
+          keys := keys or kbd_matrix(4).d;
+        end if;
+        if pia_pb(5) = '0' then
+          keys := keys or kbd_matrix(5).d;
+        end if;
+        if pia_pb(6) = '0' then
+          keys := keys or kbd_matrix(6).d;
+        end if;
+        if pia_pb(7) = '0' then
+          keys := keys or kbd_matrix(7).d;
+        end if;
+      end if;
+      -- key inputs are active low
+      -- - bit 7 is joyin (TBD)
+      pia_pa <= '1' & not keys(6 downto 0);
+    end process;
 
+    -- PIA (keyboard)
+    pia_0_inst : entity work.pia6821
+      port map
+      (	
+        clk       	=> cpu_clk,
+        rst       	=> reset_i(0),
+        cs        	=> pia_0_cs,
+        rw        	=> cpu_r_wn,
+        addr      	=> cpu_a(1 downto 0),
+        data_in   	=> cpu_d_o,
+        data_out  	=> pia_0_datao,
+        irqa      	=> pia_irqa,
+        irqb      	=> pia_irqb,
+        pa_i        => pia_pa,
+        pa_o				=> open,
+        pa_oe				=> open,
+        ca1       	=> pia_ca1,
+        ca2_i      	=> pia_ca2,
+        ca2_o				=> open,
+        ca2_oe			=> open,
+        pb_i				=> (others => 'X'),
+        pb_o       	=> pia_pb,
+        pb_oe				=> open,
+        cb1       	=> pia_cb1,
+        cb2_i      	=> pia_cb2,
+        cb2_o				=> open,
+        cb2_oe			=> open
+      );
+  end block BLK_PIA_0;
+  
+  BLK_PIA_1 : block
+    signal pia_irqa      	: std_logic;
+    signal pia_irqb      	: std_logic;
+    signal pia_pa         : std_logic_vector(7 downto 0);
+    signal pia_pb         : std_logic_vector(7 downto 0);
+    signal pia_ca1       	: std_logic;
+    signal pia_ca2       	: std_logic;
+    signal pia_cb1       	: std_logic;
+    signal pia_cb2       	: std_logic;
+  begin
+    -- PIA edge inputs
+    pia_ca1 <= '0';   -- CD
+    pia_ca2 <= '0';   -- CASSMOT
+    pia_cb1 <= '0';   -- *CART
+    pia_cb2 <= '0';   -- SNDEN
+
+    -- jumper on the PCB (RAMSZ)
+    pia_pb(2) <= COCO1_JUMPER_32K_RAM;
+    
+    -- this is ultimately correct
+    --cpu_firq <= pia_irqa or pia_irqb;
+    -- but for now...
+    cpu_firq <= '0';
+    
+    -- PIA (keyboard)
+    pia_1_inst : entity work.pia6821
+      port map
+      (	
+        clk       	=> cpu_clk,
+        rst       	=> reset_i(0),
+        cs        	=> pia_1_cs,
+        rw        	=> cpu_r_wn,
+        addr      	=> cpu_a(1 downto 0),
+        data_in   	=> cpu_d_o,
+        data_out  	=> pia_1_datao,
+        irqa      	=> pia_irqa,
+        irqb      	=> pia_irqb,
+        pa_i        => pia_pa,
+        pa_o				=> open,
+        pa_oe				=> open,
+        ca1       	=> pia_ca1,
+        ca2_i      	=> pia_ca2,
+        ca2_o				=> open,
+        ca2_oe			=> open,
+        pb_i				=> (others => 'X'),
+        pb_o       	=> pia_pb,
+        pb_oe				=> open,
+        cb1       	=> pia_cb1,
+        cb2_i      	=> pia_cb2,
+        cb2_o				=> open,
+        cb2_oe			=> open
+      );
+  end block BLK_PIA_1;
+  
   -- COLOR BASIC ROM
   basrom_inst : entity work.sprom
 		generic map
 		(
-			init_file		=> COCO1_SOURCE_ROOT_DIR & "roms/bas10.hex",
+			init_file		=> COCO1_SOURCE_ROOT_DIR & "roms/" & COCO1_BASIC_ROM,
 			numwords_a	=> 8192,
 			widthad_a		=> 13
 		)
@@ -511,7 +574,7 @@ begin
 	  extbasrom_inst : entity work.sprom
 			generic map
 			(
-				init_file		=> COCO1_SOURCE_ROOT_DIR & "roms/extbas10.hex",
+				init_file		=> COCO1_SOURCE_ROOT_DIR & "roms/" & COCO1_EXTENDED_BASIC_ROM,
 				numwords_a	=> 8192,
 				widthad_a		=> 13
 			)
