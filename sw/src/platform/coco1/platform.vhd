@@ -70,6 +70,14 @@ entity platform is
   );
 end entity platform;
 
+--
+--  Buttons
+--    0: system-wide reset
+--    1: external 6809 reset
+--  Switches
+--    9: CART#
+--
+
 architecture SYN of platform is
 
   -- debug build options
@@ -155,7 +163,6 @@ architecture SYN of platform is
 
 	-- system chipselect selector from SAM
 	signal cs_sel					: std_logic_vector(2 downto 0);
-	signal y              : std_logic_vector(7 downto 0);
 
   -- VDG signals
   signal hs_n           : std_logic;
@@ -204,19 +211,6 @@ begin
     end if;
   end process;
   
-  --	
-	-- system control
-  --
-
-  -- assign chipselects from MC6883 selector output
-	ram_cs <= y(0) or y(7);
-  extrom_cs <= y(1);
-  rom_cs <= y(2);
-  pia_0_cs <= y(4);
-  pia_1_cs <= y(5);
-  -- this is yet to be implemented in the 6883/6847
-  --vram_cs <= '1' when cpu_a(15 downto 10) = "000001" else '0';
-
   --
   -- generate system cycles
   --
@@ -265,6 +259,7 @@ begin
 
   -- memory read mux
   cpu_d_i <=  pia_0_datao when pia_0_cs = '1' else
+              pia_1_datao when pia_1_cs = '1' else
               rom_datao when rom_cs = '1' else
               extrom_datao when extrom_cs = '1' else
               ram_datao when ram_cs = '1' else
@@ -369,20 +364,38 @@ begin
 			e					=> clk_e
 		);
 
-	U11_inst : entity work.ttl_74ls138_p
-		port map
-		(
-			a			=> cs_sel(0),
-			b			=> cs_sel(1),
-			c			=> cs_sel(2),
-			
-			g1		=> '1',
-			g2a		=> '1',
-			g2b		=> '1',
+  BLK_74LS138 : block
+    signal y    : std_logic_vector(7 downto 0);
+  begin
+  
+    -- assign chipselects from MC6883 selector output
+    ram_cs <= y(0);
+    extrom_cs <= y(1);
+    rom_cs <= y(2);
+    --cart_cs <= y(3);  -- CART_CTS
+    pia_0_cs <= y(4);
+    pia_1_cs <= y(5);
+    --spare_cs <= y(6); -- CART_SCS
+    -- y(7) is NC
 
-      y     => y			
-		);
+    -- this is yet to be implemented in the 6883/6847
+    --vram_cs <= '1' when cpu_a(15 downto 10) = "000001" else '0';
 
+    U11_inst : entity work.ttl_74ls138_p
+      port map
+      (
+        a			=> cs_sel(0),
+        b			=> cs_sel(1),
+        c			=> cs_sel(2),
+        
+        g1		=> '1',   -- comes from CART_SLENB#
+        g2a		=> '1',   -- come from E NOR cs_sel(2)
+        g2b		=> '1',
+
+        y     => y			
+      );
+  end block BLK_74LS138;
+  
   vdg_inst : entity work.mc6847
 		generic map
 		(
@@ -513,7 +526,8 @@ begin
     -- PIA edge inputs
     pia_ca1 <= '0';   -- CD
     pia_ca2 <= '0';   -- CASSMOT
-    pia_cb1 <= '0';   -- *CART
+    -- #CART
+    pia_cb1 <= not switches_i(9);
     pia_cb2 <= '0';   -- SNDEN
 
     -- jumper on the PCB (RAMSZ)
