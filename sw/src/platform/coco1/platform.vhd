@@ -179,7 +179,8 @@ architecture SYN of platform is
 	
 begin
 
-	cpu_reset <= rst_57M272; -- or game_reset;
+	--cpu_reset <= rst_57M272 or game_reset;
+	cpu_reset <= rst_57M272 or buttons_i(1);
 	
   --
   --  Clocking
@@ -291,7 +292,7 @@ begin
     cpu_inst : entity work.cpu09
       port map
       (	
-        clk				=> clk_e,
+        clk				=> not clk_e,
         rst				=> cpu_reset,
         rw 	    	=> cpu_r_wn,
         vma 	    => cpu_vma,
