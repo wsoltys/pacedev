@@ -63,11 +63,11 @@ architecture SYN of custom_io is
   
 begin
 
-  process (platform_o.clk_50M, platform_o.arst)
+  process (platform_o.clk_cpld, platform_o.arst)
   begin
     if platform_o.arst = '1' then
       clk_CPLD_ena <= '0';
-    elsif rising_edge(platform_o.clk_50M) then
+    elsif rising_edge(platform_o.clk_cpld) then
       clk_CPLD_ena <= not clk_CPLD_ena;
     end if;
   end process;
@@ -107,7 +107,7 @@ begin
 	end process;
 
 	-- Registers
-	reg : process(platform_o.clk_50M, clk_CPLD_ena, platform_o.arst)
+	reg : process(platform_o.clk_cpld, clk_CPLD_ena, platform_o.arst)
 	begin
 		if platform_o.arst = '1' then
 			state					              <= idle;
