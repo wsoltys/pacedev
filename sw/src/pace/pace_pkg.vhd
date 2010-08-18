@@ -192,6 +192,7 @@ package pace_pkg is
   function NULL_TO_SERIAL return to_SERIAL_t;
 
   type from_SERIAL_t is record
+    dcd       : std_logic;
     rxd       : std_logic;
     cts       : std_logic;
   end record;

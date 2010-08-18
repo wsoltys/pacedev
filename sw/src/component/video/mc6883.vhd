@@ -22,17 +22,17 @@ entity mc6883 is
 		-- peripheral address selects		
 		s				: out std_logic_vector(2 downto 0);
 		
+		-- clock generation
+		e				: out std_logic;
+		q				: out std_logic;
+
 		-- dynamic addresses
 		z			  : out std_logic_vector(7 downto 0);
 
 		-- ram
 		ras0_n 	: out std_logic;
 		cas_n		: out std_logic;
-		we_n		: out std_logic;
-		
-		-- clock generation
-		q				: out std_logic;
-		e				: out std_logic
+		we_n		: out std_logic
 	);
 end mc6883;
 

@@ -115,6 +115,10 @@ architecture SYN of platform is
   signal vdg_data       : std_logic_vector(7 downto 0);
   signal vdg_y          : std_logic_vector(3 downto 0);						
   signal vdg_x          : std_logic_vector(4 downto 0);
+  signal vdg_css        : std_logic;
+  signal vdg_intn_ext   : std_logic;
+  signal vdg_gm         : std_logic_vector(2 downto 0);
+  signal vdg_an_g       : std_logic;
 
   -- uP signals  
   alias cpu_clk         : std_logic is clk_e;
@@ -351,17 +355,17 @@ begin
 			-- peripheral address selects		
 			s					=> cs_sel,
 			
+			-- clock generation
+			e					=> clk_e,
+			q					=> clk_q,
+
 			-- dynamic addresses
-			z				  => ma,
+			z				  => ma
 
 			-- ram
 			--ras0_n	: out std_logic;
 			--cas_n		: out std_logic;
 			--we_n		: out std_logic;
-			
-			-- clock generation
-			q					=> clk_q,
-			e					=> clk_e
 		);
 
   BLK_74LS138 : block
@@ -404,43 +408,42 @@ begin
 		)
     port map
     (
-			clk			=> clk_57M272,
-			clk_ena => clk_14M318_ena,
-      reset   => rst_57M272,
+			clk			  => clk_57M272,
+			clk_ena   => clk_14M318_ena,
+      reset     => rst_57M272,
 
-      hs_n    => hs_n,
-      fs_n    => fs_n,
-      da0     => da0,
+      da0       => da0,
 
-			dd			=> vdg_data,
+			dd			  => vdg_data,
 				
-			red			=> red,
-			green		=> green,
-			blue		=> blue,
-			hsync		=> hsync,
-			vsync		=> vsync,
+      hs_n      => hs_n,
+      fs_n      => fs_n,
 
-      cvbs    => open --cvbs
+      an_g      => vdg_an_g,
+      an_s      => '0',
+      intn_ext  => vdg_intn_ext,
+      gm        => vdg_gm,
+      css       => vdg_css,
+      inv       => '0',
+
+			red			  => red,
+			green		  => green,
+			blue		  => blue,
+			hsync		  => hsync,
+			vsync		  => vsync,
+			
+			cvbs      => open
     );
 
   BLK_PIA_0 : block
-    signal pia_irqa      	: std_logic;
-    signal pia_irqb      	: std_logic;
-    signal pia_pa         : std_logic_vector(7 downto 0);
-    signal pia_pb         : std_logic_vector(7 downto 0);
-    signal pia_ca1       	: std_logic;
-    signal pia_ca2       	: std_logic;
-    signal pia_cb1       	: std_logic;
-    signal pia_cb2       	: std_logic;
+    signal irqa      	: std_logic;
+    signal irqb      	: std_logic;
+    signal pa_i       : std_logic_vector(7 downto 0);
+    signal pb_o       : std_logic_vector(7 downto 0);
   begin
-    -- PIA edge inputs
-    pia_ca1 <= '0';   -- HS
-    pia_ca2 <= '0';   -- SEL1
-    pia_cb1 <= '0';   -- FS
-    pia_cb2 <= '0';   -- SEL2
-    
+  
     -- this is ultimately correct
-    --cpu_irq <= pia_irqa or pia_irqb;
+    --cpu_irq <= irqa or irqb;
     -- but for now...
     cpu_irq <= '0';
     
@@ -453,37 +456,36 @@ begin
       elsif rising_edge (clk_20M) then
         keys := (others => '0');
         -- note that row select is active low
-        if pia_pb(0) = '0' then
-          keys := keys or kbd_matrix(0).d;
+        if pb_o(0) = '0' then
+          keys := keys or kbd_matrix(0).d;  -- or right fire button
         end if;
-        if pia_pb(1) = '0' then
-          keys := keys or kbd_matrix(1).d;
+        if pb_o(1) = '0' then
+          keys := keys or kbd_matrix(1).d;  -- or left fire button
         end if;
-        if pia_pb(2) = '0' then
+        if pb_o(2) = '0' then
           keys := keys or kbd_matrix(2).d;
         end if;
-        if pia_pb(3) = '0' then
+        if pb_o(3) = '0' then
           keys := keys or kbd_matrix(3).d;
         end if;
-        if pia_pb(4) = '0' then
+        if pb_o(4) = '0' then
           keys := keys or kbd_matrix(4).d;
         end if;
-        if pia_pb(5) = '0' then
+        if pb_o(5) = '0' then
           keys := keys or kbd_matrix(5).d;
         end if;
-        if pia_pb(6) = '0' then
+        if pb_o(6) = '0' then
           keys := keys or kbd_matrix(6).d;
         end if;
-        if pia_pb(7) = '0' then
+        if pb_o(7) = '0' then
           keys := keys or kbd_matrix(7).d;
         end if;
       end if;
       -- key inputs are active low
       -- - bit 7 is joyin (TBD)
-      pia_pa <= '1' & not keys(6 downto 0);
+      pa_i <= '1' & not keys(6 downto 0);
     end process;
 
-    -- PIA (keyboard)
     pia_0_inst : entity work.pia6821
       port map
       (	
@@ -494,51 +496,55 @@ begin
         addr      	=> cpu_a(1 downto 0),
         data_in   	=> cpu_d_o,
         data_out  	=> pia_0_datao,
-        irqa      	=> pia_irqa,
-        irqb      	=> pia_irqb,
-        pa_i        => pia_pa,
+        irqa      	=> irqa,
+        irqb      	=> irqb,
+        pa_i        => pa_i,
         pa_o				=> open,
         pa_oe				=> open,
-        ca1       	=> pia_ca1,
-        ca2_i      	=> pia_ca2,
-        ca2_o				=> open,
+        ca1       	=> hs_n,
+        ca2_i      	=> 'X',
+        ca2_o				=> open,  -- SEL1
         ca2_oe			=> open,
         pb_i				=> (others => 'X'),
-        pb_o       	=> pia_pb,
+        pb_o       	=> pb_o,
         pb_oe				=> open,
-        cb1       	=> pia_cb1,
-        cb2_i      	=> pia_cb2,
-        cb2_o				=> open,
+        cb1       	=> fs_n,
+        cb2_i      	=> 'X',
+        cb2_o				=> open,  -- SEL2
         cb2_oe			=> open
       );
   end block BLK_PIA_0;
   
   BLK_PIA_1 : block
-    signal pia_irqa      	: std_logic;
-    signal pia_irqb      	: std_logic;
-    signal pia_pa         : std_logic_vector(7 downto 0);
-    signal pia_pb         : std_logic_vector(7 downto 0);
-    signal pia_ca1       	: std_logic;
-    signal pia_ca2       	: std_logic;
-    signal pia_cb1       	: std_logic;
-    signal pia_cb2       	: std_logic;
+    signal irqa      	: std_logic;
+    signal irqb      	: std_logic;
+    signal pa_i       : std_logic_vector(7 downto 0);
+    signal pa_o       : std_logic_vector(7 downto 0);
+    signal pb_i       : std_logic_vector(7 downto 0);
+    signal pb_o       : std_logic_vector(7 downto 0);
+    signal cart_n     : std_logic;
   begin
-    -- PIA edge inputs
-    pia_ca1 <= '0';   -- CD
-    pia_ca2 <= '0';   -- CASSMOT
-    -- #CART
-    pia_cb1 <= not switches_i(9);
-    pia_cb2 <= '0';   -- SNDEN
 
-    -- jumper on the PCB (RAMSZ)
-    pia_pb(2) <= COCO1_JUMPER_32K_RAM;
+    --pa_i(0) <= casin;
+    ser_o.txd <= pa_o(1);
+    --dac_data <= pa_o(7 downto 2);
+
+    -- #CART
+    cart_n <= not switches_i(9);
+
+    pb_i(0) <= ser_i.rxd;
+    --sndout <= pb_o(1);
+    pb_i(2) <= COCO1_JUMPER_32K_RAM;
+    vdg_css <= pb_o(3);
+    vdg_intn_ext <= pb_o(4);
+    vdg_gm <= pb_o(6 downto 4);
+    vdg_an_g <= pb_o(7);
     
     -- this is ultimately correct
-    --cpu_firq <= pia_irqa or pia_irqb;
+    --cpu_firq <= irqa or irqb;
     -- but for now...
     cpu_firq <= '0';
     
-    -- PIA (keyboard)
     pia_1_inst : entity work.pia6821
       port map
       (	
@@ -549,21 +555,21 @@ begin
         addr      	=> cpu_a(1 downto 0),
         data_in   	=> cpu_d_o,
         data_out  	=> pia_1_datao,
-        irqa      	=> pia_irqa,
-        irqb      	=> pia_irqb,
-        pa_i        => pia_pa,
-        pa_o				=> open,
+        irqa      	=> irqa,
+        irqb      	=> irqb,
+        pa_i        => pa_i,
+        pa_o				=> pa_o,
         pa_oe				=> open,
-        ca1       	=> pia_ca1,
-        ca2_i      	=> pia_ca2,
-        ca2_o				=> open,
+        ca1       	=> ser_i.dcd,
+        ca2_i      	=> 'X',
+        ca2_o				=> open,  -- CASSMOT
         ca2_oe			=> open,
-        pb_i				=> (others => 'X'),
-        pb_o       	=> pia_pb,
+        pb_i				=> pb_i,
+        pb_o       	=> pb_o,
         pb_oe				=> open,
-        cb1       	=> pia_cb1,
-        cb2_i      	=> pia_cb2,
-        cb2_o				=> open,
+        cb1       	=> cart_n,
+        cb2_i      	=> 'X',
+        cb2_o				=> open,  -- SNDEN
         cb2_oe			=> open
       );
   end block BLK_PIA_1;

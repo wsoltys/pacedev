@@ -16,22 +16,33 @@ entity mc6847 is
 		clk_ena   : in std_logic;
 		reset			: in std_logic;
 
-    hs_n    	: out std_logic;
-    fs_n    	: out std_logic;
+    -- address output lines
     da0     	: out std_logic;
 
-		-- VRAM data
+    -- data inputs
 		dd				: in std_logic_vector(7 downto 0);
-			
-    -- VGA output
-    hsync   	: out std_logic;
-    vsync			: out std_logic;
 
+    -- synchronising outputs
+    hs_n    	: out std_logic;
+    fs_n    	: out std_logic;
+
+    -- mode control lines
+    an_g      : in std_logic;
+    an_s      : in std_logic;
+    intn_ext  : in std_logic;
+    gm        : in std_logic_vector(2 downto 0);
+    css       : in std_logic;
+    inv       : in std_logic;
+
+    -- VGA output
     red     	: out std_logic_vector(7 downto 0);
     green   	: out std_logic_vector(7 downto 0);
     blue    	: out std_logic_vector(7 downto 0);
-
-    cvbs    	: out std_logic_vector(7 downto 0)
+    hsync   	: out std_logic;
+    vsync			: out std_logic;
+    
+    -- CVBS output
+    cvbs      : out std_logic_vector(7 downto 0)
 	);
 end mc6847;
 
