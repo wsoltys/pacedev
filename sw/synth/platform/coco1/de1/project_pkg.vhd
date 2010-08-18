@@ -39,9 +39,11 @@ package project_pkg is
 	-- Coco1-specific constants
 
   constant COCO1_USE_REAL_6809              : boolean := true;
-  constant COCO1_BASIC_ROM                  : string := "bas10.hex";
-  --constant COCO1_BASIC_ROM                  : string := "bas11.hex";
-  constant COCO1_EXTENDED_BASIC_ROM         : string := "extbas10.hex";
+  --constant COCO1_BASIC_ROM                  : string := "bas10.hex";
+  constant COCO1_BASIC_ROM                  : string := "bas11.hex";
+  --constant COCO1_BASIC_ROM                  : string := "bas12.hex";
+  --constant COCO1_EXTENDED_BASIC_ROM         : string := "extbas10.hex";
+  constant COCO1_EXTENDED_BASIC_ROM         : string := "extbas11.hex";
   constant COCO1_EXTENDED_COLOR_BASIC       : boolean := false;
   constant COCO1_JUMPER_32K_RAM             : std_logic := '1';
   
