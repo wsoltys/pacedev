@@ -95,23 +95,14 @@ architecture SYN of platform is
 	signal clk_q          : std_logic := '0';
 	signal clk_e          : std_logic := '0';
 
-  subtype cycle_t is unsigned(3 downto 0);
-  signal cycle          : cycle_t := (others => '0');
-	
 	signal cpu_reset			: std_logic;
 	
 	-- clock helpers
   signal vdgclk         : std_logic;
 
-  -- system signals
-  signal sys_write      : std_logic;
-	
 	-- multiplexed address
 	signal ma							: std_logic_vector(7 downto 0);
 
-	signal mpu_addr				: std_logic_vector(15 downto 0);
-
-  alias vdg_addr        : std_logic_vector(15 downto 0) is mpu_addr;
   signal vdg_data       : std_logic_vector(7 downto 0);
   signal vdg_y          : std_logic_vector(3 downto 0);						
   signal vdg_x          : std_logic_vector(4 downto 0);
@@ -145,7 +136,10 @@ architecture SYN of platform is
 
 	-- SAM signals
   signal sam_cs					: std_logic;
-  signal sam_datao			: std_logic_vector(7 downto 0);
+	signal sam_a				  : std_logic_vector(15 downto 0);
+  signal ras_n          : std_logic;
+  signal cas_n          : std_logic;
+	signal sam_we_n       : std_logic;
                         
   -- ROM signals        
   signal rom_wr					: std_logic;
@@ -204,62 +198,41 @@ begin
 		end if;
 	end process;
 
-  -- generate master cycle count
 	process (clk_57M272, rst_57M272)
-  begin
-    if rst_57M272 = '1' then
-      cycle <= (others => '0');
-    elsif rising_edge (clk_57M272) then
-      if (clk_14M318_ena = '1') then
-        cycle <= cycle + 1;
-      end if;
-    end if;
-  end process;
-  
-  --
-  -- generate system cycles
-  --
-	process (clk_57M272, rst_57M272)
+    variable ras_n_r  : std_logic := '0';
+    variable cas_n_r  : std_logic := '0';
+    variable e_r      : std_logic := '0';
+    variable q_r      : std_logic := '0';
+    variable rd       : std_logic := '0';
 	begin
     if rst_57M272 = '1' then
-      null;
+      ras_n_r := '0';
+      cas_n_r := '0';
+      e_r := '0';
+      e_r := '1';
 		elsif rising_edge (clk_57M272) then
-			-- defaults
-      sys_write <= '0';
-      vdg_sram_cs <= '0';
-      vram_wr <= '0';
       if clk_14M318_ena = '1' then
-        case cycle is
-          when X"0" =>
-            -- latch VDG address (row)
-            vdg_addr(7 downto 0) <= ma;
-          when X"3" =>
-            -- latch VDG address (column)
-            vdg_addr(15 downto 8) <= ma;
-          when X"4" =>
-            -- read SRAM data here because we're multiplexing it with CPU
-            vdg_sram_cs <= '1';
-          when X"5" =>
-            vdg_data <= sram_i.d(vdg_data'range);
-          when X"6" =>
-            if hs_n = '1' and fs_n = '1' then
-              vram_wr <= '1';
-            end if;
-          when X"8" =>
-            -- latch MPU address (row)
-            mpu_addr(7 downto 0) <= ma;
-          when X"B" =>
-            -- latch MPU address (column)
-            mpu_addr(15 downto 8) <= ma;
-            -- enable bus write i/o
-            sys_write <= '1';
-          when X"C" =>
-            -- read SRAM data here because we're multiplexing it with video
-            ram_datao <= sram_i.d(ram_datao'range);
-          when others =>
-        end case;
-      end if; -- clk_14M318_ena
+        if rd = '1' then
+          ram_datao <= sram_i.d(ram_datao'range);
+          rd := '0';
+        end if;
+        if ras_n = '0' and ras_n_r = '1' then
+          sam_a(7 downto 0) <= ma;
+        elsif cas_n = '0' and cas_n_r = '1' then
+          sam_a(15 downto 8) <= ma;
+          rd := '1';
+        end if;
+        if clk_q = '1' and e_r = '0' then
+          vdg_data <= sram_i.d(ram_datao'range);
+        end if;
+        -- for edge-detect
+        ras_n_r := ras_n;
+        cas_n_r := cas_n;
+        e_r := clk_e;
+        q_r := clk_q;
+      end if;
 		end if;
+		
 	end process;
 
   -- memory read mux
@@ -272,14 +245,14 @@ begin
               X"FF";
 
   -- SRAM signals
-  sram_o.a <= std_logic_vector(resize(unsigned(mpu_addr), sram_o.a'length));
+  sram_o.a <= std_logic_vector(resize(unsigned(sam_a), sram_o.a'length));
   --sram_data <= cpu_d_o when (cpu_vma = '1' and ram_cs = '1' and cpu_r_wn = '0' and vdg_sram_cs = '0') 
   sram_o.d <= std_logic_vector(resize(unsigned(cpu_d_o), sram_o.d'length));
 	sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
   --sram_o.cs <= (cpu_vma and ram_cs) or vdg_sram_cs;
   sram_o.cs <= '1';
-	sram_o.oe <= cpu_r_wn or vdg_sram_cs;
-	sram_o.we <= sys_write and not cpu_r_wn;
+	sram_o.oe <= sam_we_n;
+	sram_o.we <= not sam_we_n;
 
   -- CPU interrupts	
 	cpu_nmi <= '0';
@@ -361,12 +334,12 @@ begin
 			q					=> clk_q,
 
 			-- dynamic addresses
-			z				  => ma
+			z				  => ma,
 
 			-- ram
-			--ras0_n	: out std_logic;
-			--cas_n		: out std_logic;
-			--we_n		: out std_logic;
+			ras0_n	  => ras_n,
+			cas_n		  => cas_n,
+			we_n		  => sam_we_n
 		);
 
   BLK_74LS138 : block

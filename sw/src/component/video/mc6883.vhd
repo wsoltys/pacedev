@@ -50,8 +50,6 @@ architecture SYN of mc6883 is
   signal clk_3M579545   : std_logic;
   signal clk_1M769772   : std_logic;
   signal clk_0M894866   : std_logic;
-  signal q_int          : std_logic;
-  signal e_int          : std_logic;
 
   -- some rising_edge pulses
   signal rising_edge_hs : std_logic;
@@ -59,11 +57,7 @@ architecture SYN of mc6883 is
   signal rising_edge_e  : std_logic;
 
   -- internal versions of pin signals
-  signal vclk_int       : std_logic;
-  signal z_int          : std_logic_vector(7 downto 0);
-  signal cas_int        : std_logic;
-  signal ras_int        : std_logic_vector(1 downto 0);
-  signal we_int         : std_logic;
+  signal we_n_s         : std_logic;
 
   -- video counter
   signal b_int          : std_logic_vector(15 downto 0);
@@ -91,100 +85,106 @@ architecture SYN of mc6883 is
 		
 begin
 
+  --  
+  -- CPU Address is valid tAD after falling edge of E
+  -- CPU Read Data latched at falling edge of E
+  -- CPU Write Data valid tDDW after rising edge of Q, 
+  -- - until tDHW (short) after falling edge E
+  --
+
   -- clock generation, ras/cas generation
   PROC_MAIN : process (clk, reset, rw_n)
     variable count : std_logic_vector(3 downto 0);
   begin
     if reset = '1' then
       --count := (others => '0');
-      count := "0001";
-      z_int <= (others => '0');
-      ras_int <= (others => '1');
-      cas_int <= '1';
-      we_int <= '1';
+      count := "0000";
+      z <= (others => '0');
+      ras0_n <= '1';
+      cas_n <= '1';
+      we_n_s <= '1';
     elsif rising_edge (clk) then
       if clk_ena = '1' then
+        we_n_s <= '1';  -- default
         clk_7M15909 <= count(0);
         clk_3M579545 <= count(1);
         clk_1M769772 <= count(2);
         clk_0M894866 <= count(3);
-        vclk_int <= not clk_3M579545;
+        vclk <= not clk_3M579545;
         case count is
           when "0000" =>
             -- valid VDG address (row)
             -- z(7) is RAS1# or B(7)
-            z_int <= b_int(7 downto 0);
-            cas_int <= '1';
+            z <= b_int(7 downto 0);
+            ras0_n <= '0';
           when "0001" =>
-            ras_int(0) <= '0';
-            ras_int(1) <= '0';
           when "0010" =>
-          when "0011" =>
-            q_int <= '1';
             -- valid VDG address (col)
             case m is
               when "00" =>
-                z_int <= "00" & b_int(11 downto 6);
+                z <= "00" & b_int(11 downto 6);
               when "01" =>
-                z_int <= '0' & b_int(13 downto 7);
+                z <= '0' & b_int(13 downto 7);
               when others =>
-                z_int <= b_int(15 downto 8);
+                z <= b_int(15 downto 8);
             end case;
-            cas_int <= '0';
+            cas_n <= '0';
+          when "0011" =>
+            q <= '1';
           when "0100" =>
           when "0101" =>
+            ras0_n <= '1';
           when "0110" =>
-            ras_int(1) <= '1';
-            ras_int(0) <= '1';
           when "0111" =>
-            e_int <= '1';
-            we_int <= rw_n;
+            cas_n <= '1';
+            e <= '1';
           when "1000" =>
             -- valid MPU address (row)
             -- z(7) is RAS1# or A(7)
-            z_int <= a(7 downto 0);
-            cas_int <= '1';
+            z <= a(7 downto 0);
+            ras0_n <= '0';
           when "1001" =>
-            ras_int(1) <= '0';
-            ras_int(0) <= '0';
           when "1010" =>
-          when "1011" =>
-            q_int <= '0';
             -- valid MPU address (col)
+            -- no need to munge any signal with RAS/CAS
             --case m is
             --  when "00" =>
-            --    z_int <= "00" & a(11 downto 6);
+            --    z <= "00" & a(11 downto 6);
             --  when "01" =>
                 -- z(7) is P or don't care
-            --    z_int <= p & a(13 downto 7);
+            --    z <= p & a(13 downto 7);
             --  when others =>
             --    if ty = '0' then
-            --      z_int <= p & a(14 downto 8);
+            --      z <= p & a(14 downto 8);
             --    else
-            --      z_int <= a(15 downto 8);
+                  z <= a(15 downto 8);
             --    end if;
             --end case;
-            z_int <= a(15 downto 8);
-            cas_int <= '0';
+            cas_n <= '0';
+          when "1011" =>
+            q <= '0';
           when "1100" =>
           when "1101" =>
+            ras0_n <= '1';
+            -- drive WEn some time after mpu address is latched
+            -- on the falling edge of cas_n above
+            -- but in plenty of time before falling edge of E
+            we_n_s <= rw_n;
           when "1110" =>
-            ras_int(0) <= '1';
-            ras_int(1) <= '1';
+          when "1111" =>
+            cas_n <= '1';
+            e <= '0';
           when others =>
-            e_int <= '0';
-            we_int <= '1';
+            null;
         end case;
         count := count + 1;
      end if; -- clk_ena
     end if;
   end process PROC_MAIN;
 
-  -- assign clock outputs
-  q <= q_int;
-  e <= e_int;
-  vclk <= vclk_int;
-
+  -- assign outputs
+  we_n <= we_n_s;
+		
   -- rising edge pulses
   process (clk, reset)
     variable old_hs : std_logic;
@@ -205,16 +205,6 @@ begin
           rising_edge_hs <= '1';
         end if;
         old_hs := hs_n;
-        rising_edge_q <= '0';
-        if old_q = '0' and q_int = '1' then
-          rising_edge_q <= '1';
-        end if;
-        old_q := q_int;
-        rising_edge_e <= '0';
-        if old_e = '0' and e_int = '1' then
-          rising_edge_e <= '1';
-        end if;
-        old_e := e_int;
      end if; -- clk_ena
     end if;
   end process;
@@ -327,7 +317,7 @@ begin
 			cr <= (others => '0');
 		elsif falling_edge (clk) then
       if clk_ena = '1' then
-        if rising_edge_e = '1' and sel_cr = '1' and rw_n = '0' then
+        if we_n_s = '0' then
           case a(4 downto 1) is
             when "0000" =>
               v(0) <= flag;
@@ -367,11 +357,5 @@ begin
 		end if;
 	end process WRITE_CR;
 
-  -- assign outputs
-  z <= z_int;
-  ras0_n <= ras_int(0);
-  cas_n <= cas_int;
-  we_n <= we_int;
-		
 end SYN;
 
