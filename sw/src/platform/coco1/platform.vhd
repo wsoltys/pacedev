@@ -466,7 +466,7 @@ begin
     pia_0_inst : entity work.pia6821
       port map
       (	
-        clk       	=> cpu_clk,
+        clk       	=> not cpu_clk,
         rst       	=> reset_i(0),
         cs        	=> pia_0_cs,
         rw        	=> cpu_r_wn,
@@ -525,7 +525,7 @@ begin
     pia_1_inst : entity work.pia6821
       port map
       (	
-        clk       	=> cpu_clk,
+        clk       	=> not cpu_clk,
         rst       	=> reset_i(0),
         cs        	=> pia_1_cs,
         rw        	=> cpu_r_wn,
