@@ -120,14 +120,14 @@ begin
           when "0001" =>
           when "0010" =>
             -- valid VDG address (col)
-            case m is
-              when "00" =>
-                z <= "00" & b_int(11 downto 6);
-              when "01" =>
-                z <= '0' & b_int(13 downto 7);
-              when others =>
+            --case m is
+            --  when "00" =>
+            --    z <= "00" & b_int(11 downto 6);
+            --  when "01" =>
+            --    z <= '0' & b_int(13 downto 7);
+            --  when others =>
                 z <= b_int(15 downto 8);
-            end case;
+            --end case;
             cas_n <= '0';
           when "0011" =>
             q <= '1';
@@ -317,7 +317,7 @@ begin
 			cr <= (others => '0');
 		elsif falling_edge (clk) then
       if clk_ena = '1' then
-        if we_n_s = '0' then
+        if sel_cr = '1' and we_n_s = '0' then
           case a(4 downto 1) is
             when "0000" =>
               v(0) <= flag;

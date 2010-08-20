@@ -212,6 +212,8 @@ begin
       e_r := '1';
 		elsif rising_edge (clk_57M272) then
       if clk_14M318_ena = '1' then
+        -- do we even need to latch the data here?
+        -- - I don't think so for a real 6809e at least...
         if rd = '1' then
           ram_datao <= sram_i.d(ram_datao'range);
           rd := '0';
