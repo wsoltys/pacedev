@@ -215,7 +215,7 @@ begin
         -- do we even need to latch the data here?
         -- - I don't think so for a real 6809e at least...
         if rd = '1' then
-          ram_datao <= sram_i.d(ram_datao'range);
+          --ram_datao <= sram_i.d(ram_datao'range);
           rd := '0';
         end if;
         if ras_n = '0' and ras_n_r = '1' then
@@ -234,8 +234,9 @@ begin
         q_r := clk_q;
       end if;
 		end if;
-		
 	end process;
+
+  ram_datao <= sram_i.d(ram_datao'range);
 
   -- memory read mux
   cpu_d_i <=  pia_0_datao when pia_0_cs = '1' else
@@ -419,9 +420,9 @@ begin
   begin
   
     -- this is ultimately correct
-    --cpu_irq <= irqa or irqb;
+    cpu_irq <= irqa or irqb;
     -- but for now...
-    cpu_irq <= '0';
+    --cpu_irq <= '0';
     
     -- keyboard matrix
     process (clk_20M, reset_i(1))
@@ -517,9 +518,9 @@ begin
     vdg_an_g <= pb_o(7);
     
     -- this is ultimately correct
-    --cpu_firq <= irqa or irqb;
+    cpu_firq <= irqa or irqb;
     -- but for now...
-    cpu_firq <= '0';
+    --cpu_firq <= '0';
     
     pia_1_inst : entity work.pia6821
       port map
