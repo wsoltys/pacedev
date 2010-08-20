@@ -248,6 +248,21 @@ begin
 
   end block BLK_DVO_INIT;
 
+  BLK_CHASER : block
+  begin
+    -- flash the led so we know it's alive
+    process (clk_24M, reset)
+      variable count : std_logic_vector(21 downto 0);
+    begin
+      if reset = '1' then
+        count := (others => '0');
+      elsif rising_edge(clk_24M) then
+        count := std_logic_vector(unsigned(count) + 1);
+      end if;
+      dbgled <= (others => count(count'left));
+    end process;
+  end block BLK_CHASER;
+
   -- constant drivers
 	v15_s3				<= '0';
 	v15_s5				<= '0';
