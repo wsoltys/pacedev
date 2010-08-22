@@ -80,15 +80,8 @@ end entity platform;
 
 architecture SYN of platform is
 
-  -- debug build options
-  constant BUILD_TEST_VGA_ONLY    : boolean := false;
-  
-	alias clk_20M					: std_logic is clk_i(0);
-	alias rst_20M         : std_logic is reset_i(0);
-	--alias clk_57M272			: std_logic is clk_i(0);
-	--alias rst_57M272      : std_logic is reset_i(0);
-	alias clk_57M272			: std_logic is clk_i(1);
-	alias rst_57M272      : std_logic is reset_i(1);
+	alias clk_57M272			: std_logic is clk_i(0);
+	alias rst_57M272      : std_logic is reset_i(0);
 
 	-- clocks
 	signal clk_14M318_ena : std_logic := '0';
@@ -124,8 +117,7 @@ architecture SYN of platform is
 
   -- keyboard signals
 	signal jamma_s				: from_JAMMA_t;
-  signal kbd_matrix			: from_MAPPED_INPUTS_t(0 to 8);
-	alias game_reset			: std_logic is kbd_matrix(8).d(0);
+	alias game_reset			: std_logic is inputs_i(8).d(0);
 
   -- PIA-A signals
   signal pia_0_cs				: std_logic;
@@ -173,8 +165,7 @@ architecture SYN of platform is
 	
 begin
 
-	--cpu_reset <= rst_57M272 or game_reset;
-	cpu_reset <= rst_57M272 or buttons_i(1);
+	cpu_reset <= rst_57M272 or game_reset or buttons_i(1);
 	
   --
   --  Clocking
@@ -425,37 +416,37 @@ begin
     --cpu_irq <= '0';
     
     -- keyboard matrix
-    process (clk_20M, reset_i(1))
+    process (clk_57M272, rst_57M272)
       variable keys : std_logic_vector(7 downto 0);
     begin
-      if reset_i(1) = '1' then
+      if rst_57M272 = '1' then
         keys := (others => '0');
-      elsif rising_edge (clk_20M) then
+      elsif rising_edge (clk_57M272) then
         keys := (others => '0');
         -- note that row select is active low
         if pb_o(0) = '0' then
-          keys := keys or kbd_matrix(0).d;  -- or right fire button
+          keys := keys or inputs_i(0).d;  -- or right fire button
         end if;
         if pb_o(1) = '0' then
-          keys := keys or kbd_matrix(1).d;  -- or left fire button
+          keys := keys or inputs_i(1).d;  -- or left fire button
         end if;
         if pb_o(2) = '0' then
-          keys := keys or kbd_matrix(2).d;
+          keys := keys or inputs_i(2).d;
         end if;
         if pb_o(3) = '0' then
-          keys := keys or kbd_matrix(3).d;
+          keys := keys or inputs_i(3).d;
         end if;
         if pb_o(4) = '0' then
-          keys := keys or kbd_matrix(4).d;
+          keys := keys or inputs_i(4).d;
         end if;
         if pb_o(5) = '0' then
-          keys := keys or kbd_matrix(5).d;
+          keys := keys or inputs_i(5).d;
         end if;
         if pb_o(6) = '0' then
-          keys := keys or kbd_matrix(6).d;
+          keys := keys or inputs_i(6).d;
         end if;
         if pb_o(7) = '0' then
-          keys := keys or kbd_matrix(7).d;
+          keys := keys or inputs_i(7).d;
         end if;
       end if;
       -- key inputs are active low
@@ -467,7 +458,7 @@ begin
       port map
       (	
         clk       	=> not cpu_clk,
-        rst       	=> reset_i(0),
+        rst       	=> rst_57M272,
         cs        	=> pia_0_cs,
         rw        	=> cpu_r_wn,
         addr      	=> cpu_a(1 downto 0),
@@ -526,7 +517,7 @@ begin
       port map
       (	
         clk       	=> not cpu_clk,
-        rst       	=> reset_i(0),
+        rst       	=> rst_57M272,
         cs        	=> pia_1_cs,
         rw        	=> cpu_r_wn,
         addr      	=> cpu_a(1 downto 0),

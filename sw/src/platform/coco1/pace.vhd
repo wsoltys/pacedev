@@ -80,7 +80,7 @@ architecture SYN of PACE is
 begin
 
 	-- hook up VGA output
-	video_o.clk <= clk_i(1);
+	video_o.clk <= clk_i(0);
 	video_o.rgb.r <= vga_red(7 downto 0) & "00";
 	video_o.rgb.g <= vga_green(7 downto 0) & "00";
 	video_o.rgb.b <= vga_blue(7 downto 0) & "00";

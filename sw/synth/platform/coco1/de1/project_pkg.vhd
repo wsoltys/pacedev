@@ -23,8 +23,8 @@ package project_pkg is
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
 
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_320x480_60Hz;
-  constant PACE_CLK0_DIVIDE_BY              : natural := 1;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 1;   -- 50*1/1 = 50MHz
+  constant PACE_CLK0_DIVIDE_BY              : natural := 7;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 8;   -- 50*8/7 = 57M143Hz (57.27272)
   constant PACE_CLK1_DIVIDE_BY              : natural := 7;
   constant PACE_CLK1_MULTIPLY_BY            : natural := 8;  	-- 50*8/7 = 57M143Hz (57.27272)
 	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
@@ -38,7 +38,7 @@ package project_pkg is
 
 	-- Coco1-specific constants
 
-  constant COCO1_USE_REAL_6809              : boolean := false;
+  constant COCO1_USE_REAL_6809              : boolean := true;
   --constant COCO1_BASIC_ROM                  : string := "bas10.hex";
   constant COCO1_BASIC_ROM                  : string := "bas11.hex";
   --constant COCO1_BASIC_ROM                  : string := "bas12.hex";
