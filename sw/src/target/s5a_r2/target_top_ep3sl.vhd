@@ -86,6 +86,8 @@ entity target_top_ep3sl is
 		vao_red			: out std_logic_vector(9 downto 0);
 		vao_green		: out std_logic_vector(9 downto 0);
 		vao_blue		: out std_logic_vector(9 downto 0);
+		vao_hsync   : out std_logic;
+		vao_vsync   : out std_logic;
 		vao_blank_n : out std_logic;
 		vao_sync_n	: out std_logic;
 		vao_sync_t	: out std_logic;
@@ -101,7 +103,7 @@ entity target_top_ep3sl is
 		vid_irq_n				: out std_logic;
 		vid_clk					: in std_logic;
 
-		vid_spare		: in std_logic_vector(31 downto 0);
+		vid_spare		: inout std_logic_vector(31 downto 0);
 		vid_sp_clk	: in std_logic;
 
 		clk24_b			: in std_logic;
@@ -238,12 +240,15 @@ begin
   inputs_i.analogue <= (others => (others => '0'));
 
   BLK_VIDEO : block
+    type state_t is (IDLE, S1, S2, S3);
+    signal state : state_t := IDLE;
   begin
   
     video_i.clk <= clkrst_i.clk(1);
     video_i.clk_ena <= '1';
     video_i.reset <= clkrst_i.rst(1);
-    
+
+    -- DVI (digital) output
     vdo_idck <= video_o.clk;
     vdo_red <= video_o.rgb.r(9 downto 2);
     vdo_green <= video_o.rgb.g(9 downto 2);
@@ -252,6 +257,57 @@ begin
     vdo_vsync <= video_o.vsync;
     vdo_de <= not (video_o.hblank or video_o.vblank);
 
+    -- VGA (analogue) output
+		vao_clk <= video_o.clk;
+		vao_red <= video_o.rgb.r;
+		vao_green <= video_o.rgb.g;
+		vao_blue <= video_o.rgb.b;
+    vao_hsync <= video_o.hsync;
+    vao_vsync <= video_o.vsync;
+		vao_blank_n <= '1';
+		vao_sync_t <= '0';
+
+    -- configure the THS8135 video DAC
+    process (video_o.clk, reset)
+      subtype count_t is integer range 0 to 9;
+      variable count : count_t := 0;
+    begin
+      if reset = '1' then
+        state <= IDLE;
+        vao_sync_n <= '1';
+        vao_m1 <= '0';
+        vao_m2 <= '0';
+      elsif rising_edge(video_o.clk) then
+        case state is
+          when IDLE =>
+            count := 0;
+            state <= S1;
+          when S1 =>
+            vao_sync_n <= '0';
+            vao_m1 <= '0';  -- BLNK_INT (full-range)
+            vao_m2 <= '0';  -- sync insertion on 1?
+            if count = count_t'high then
+              count := 0;
+              state <= S2;
+            else
+              count := count + 1;
+            end if;
+          when S2 =>
+            vao_sync_n <= '1';
+            -- RGB mode
+            vao_m1 <= '0';
+            vao_m2 <= '0';
+            if count = count_t'high then
+              state <= S3;
+            else
+              count := count + 1;
+            end if;
+          when S3 =>
+            null;
+        end case;
+      end if;
+    end process;
+    
   end block BLK_VIDEO;
   
   pace_inst : entity work.pace                                            
@@ -302,4 +358,6 @@ begin
       target_o          => target_o
     );
 
+  vid_spare <= (others => 'Z');
+  
 end;
