@@ -49,7 +49,7 @@ architecture SYN of dvo_init_i2c_sm_controller is
   component i2c_sm is
   	generic
   	(
-  		clock_speed	: integer := clock_speed;	  -- Input clock speed (Hz)
+  		clock_speed	: integer;                  -- Input clock speed (Hz)
   		i2c_speed		: integer := i2c_speed      -- I2C toggle rate (Hz)
   	);
   	port
@@ -296,6 +296,11 @@ begin
 	end block BLK_SM;
 
   i2c_sm_inst : i2c_sm
+    generic map
+    (
+  		clock_speed	=> clock_speed,	  -- Input clock speed (Hz)
+  		i2c_speed		=> i2c_speed      -- I2C toggle rate (Hz)
+    )
   	port map
   	(
   		clk					  => clk,

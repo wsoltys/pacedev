@@ -244,7 +244,7 @@ begin
     video_i.clk_ena <= '1';
     video_i.reset <= clkrst_i.rst(1);
     
-    --vo_idck <= clk_i(1);
+    vdo_idck <= video_o.clk;
     vdo_red <= video_o.rgb.r(9 downto 2);
     vdo_green <= video_o.rgb.g(9 downto 2);
     vdo_blue <= video_o.rgb.b(9 downto 2);

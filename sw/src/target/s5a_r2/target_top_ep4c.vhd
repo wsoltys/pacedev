@@ -39,7 +39,7 @@ entity target_top_ep4c is
 		veb_a_dir   	  : out std_logic;
 		veb_irqn		    : in std_logic;
 		-- Spare I/O to carrier FPGA
-		veb_sp			    : inout std_logic_vector(8 downto 0);
+		veb_sp			    : inout std_logic_vector(4 downto 0);
 
 		veb_i2c_clk		  : inout std_logic;
 		veb_i2c_dat		  : inout std_logic;
@@ -147,7 +147,10 @@ entity target_top_ep4c is
 
 		clk24_a			    : in std_logic;		-- Buffered copy of on-board 24MHz clock
 		
-		s3_ck				    : in std_logic		-- Spare clock input from S3
+		s3_ck				    : in std_logic;		-- Spare clock input from S3
+		
+		tp_80           : in std_logic;
+		tp_84           : in std_logic
 	);
 
 end entity target_top_ep4c;
@@ -193,7 +196,7 @@ begin
 	end process reset_gen;
 
   -- can reset the whole chip from the mixer bus
-  reset <= init or veb_reset;
+  reset <= init or not tp_84; --veb_reset;
 	reset_n <= not reset;
 
     nios_pll_inst : entity work.ep4c_pll
