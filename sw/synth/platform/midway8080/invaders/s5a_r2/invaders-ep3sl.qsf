@@ -62,7 +62,6 @@ set_global_assignment -name RAPID_RECOMPILE_MODE OFF
 set_global_assignment -name SMART_RECOMPILE ON
 set_global_assignment -name MISC_FILE "G:/work/vl/mixer_test/mixer_test.dpf"
 set_location_assignment PIN_A10 -to vao_blue[9]
-set_location_assignment PIN_A11 -to vao_m[2]
 set_location_assignment PIN_A12 -to vao_blue[2]
 set_location_assignment PIN_A13 -to vao_blue[8]
 set_location_assignment PIN_A14 -to vao_clk
@@ -220,7 +219,6 @@ set_location_assignment PIN_AH6 -to ddr64_a[0]
 set_location_assignment PIN_AH7 -to ddr64_dm[1]
 set_location_assignment PIN_AH8 -to ddr64_dq[8]
 set_location_assignment PIN_AH9 -to ddr64_dq[14]
-set_location_assignment PIN_B10 -to vao_m[1]
 set_location_assignment PIN_B11 -to vao_blue[0]
 set_location_assignment PIN_B13 -to vao_blue[6]
 set_location_assignment PIN_B16 -to veb_ck_b
@@ -2170,99 +2168,10 @@ set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/pla
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2/target_top_ep3sl.vhd
 set_global_assignment -name SIGNALTAP_FILE cpu.stp
-set_global_assignment -name ENABLE_SIGNALTAP ON
+set_global_assignment -name ENABLE_SIGNALTAP OFF
 set_global_assignment -name USE_SIGNALTAP_FILE cpu.stp
-set_global_assignment -name SLD_NODE_CREATOR_ID 110 -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_ENTITY_NAME sld_signaltap -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to "ep3sl_pll:\\BLK_CLOCKING:pll_inst|c1" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[0] -to "PACE:pace_inst|clk_i[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[1] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[2] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[10]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[3] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[11]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[4] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[12]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[5] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[13]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[6] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[14]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[7] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[15]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[8] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[9] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[10] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[11] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[12] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[13] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[14] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[15] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[8]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[16] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[9]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[17] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|clk" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[18] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datai[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[19] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datai[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[20] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datai[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[21] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datai[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[22] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datai[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[23] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datai[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[24] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datai[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[25] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datai[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[26] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datao[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[27] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datao[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[28] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datao[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[29] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datao[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[30] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datao[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[31] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datao[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[32] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datao[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[33] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datao[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[0] -to "PACE:pace_inst|clk_i[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[1] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[2] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[10]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[3] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[11]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[4] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[12]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[5] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[13]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[6] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[14]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[7] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[15]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[8] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[9] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[10] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[11] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[12] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[13] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[14] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[15] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[8]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[16] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|addr[9]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[17] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|clk" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[18] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datai[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[19] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datai[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[20] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datai[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[21] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datai[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[22] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datai[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[23] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datai[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[24] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datai[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[25] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datai[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[26] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datao[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[27] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datao[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[28] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datao[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[29] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datao[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[30] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datao[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[31] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datao[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[32] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datao[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[33] -to "PACE:pace_inst|platform:platform_inst|Z80:U_uP|datao[7]" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_RAM_BLOCK_TYPE=M9K" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=34" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=34" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_INFO=805334528" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_POWER_UP_TRIGGER=0" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=123" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STORAGE_QUALIFIER_INVERSION_MASK_LENGTH=0" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=128" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ATTRIBUTE_MEM_MODE=OFF" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_FLOW_USE_GENERATED=0" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_BITS=11" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_BUFFER_FULL_STOP=1" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_CURRENT_RESOURCE_WIDTH=1" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=24733" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=27943" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL=1" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=128" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_IN_ENABLED=0" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ADVANCED_TRIGGER_ENTITY=basic,1," -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL_PIPELINE=1" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ENABLE_ADVANCED_TRIGGER=0" -section_id auto_signaltap_0
+set_location_assignment PIN_B10 -to vao_m1
+set_location_assignment PIN_A11 -to vao_m2
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_vsync
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_hsync
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

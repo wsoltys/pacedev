@@ -125,8 +125,6 @@ architecture SYN of target_top_ep3sl is
   constant ONBOARD_CLOCK_SPEED  : integer := 24576000;
 
   signal init         : std_logic := '1';
-  signal reset        : std_logic := '1';
-  signal reset_n      : std_logic := '0';
   alias clk_24M       : std_logic is clk24_d;
   
   signal clk_108M     : std_logic := '0';
@@ -175,7 +173,7 @@ begin
 	end process reset_gen;
 
   clkrst_i.arst <= init;
-	clkrst_i.arst_n <= not reset;
+	clkrst_i.arst_n <= not clkrst_i.arst;
 
   BLK_CLOCKING : block
   begin
@@ -268,11 +266,11 @@ begin
 		vao_sync_t <= '0';
 
     -- configure the THS8135 video DAC
-    process (video_o.clk, reset)
+    process (video_o.clk, clkrst_i.arst)
       subtype count_t is integer range 0 to 9;
       variable count : count_t := 0;
     begin
-      if reset = '1' then
+      if clkrst_i.arst = '1' then
         state <= IDLE;
         vao_sync_n <= '1';
         vao_m1 <= '0';
@@ -358,6 +356,24 @@ begin
       target_o          => target_o
     );
 
-  vid_spare <= (others => 'Z');
+  BLK_CHASER : block
+  begin
+    -- flash the led so we know it's alive
+    process (clk_24M, clkrst_i.arst)
+      variable count : std_logic_vector(21 downto 0);
+    begin
+      if clkrst_i.arst = '1' then
+        count := (others => '0');
+      elsif rising_edge(clk_24M) then
+        count := std_logic_vector(unsigned(count) + 1);
+      end if;
+      vid_spare(8) <= count(count'left);
+    end process;
+  end block BLK_CHASER;
+
+  vid_spare(31 downto 10) <= (others => 'Z');
+  -- route the leds to the cyclone
+  vid_spare(9) <= '1';  -- don't care
+  vid_spare(7 downto 0) <= not leds_o(7 downto 0);
   
 end;

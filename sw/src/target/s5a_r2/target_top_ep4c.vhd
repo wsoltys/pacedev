@@ -108,7 +108,7 @@ entity target_top_ep4c is
 		vid_irq_n			  : in std_logic;
 		vid_clk			    : out std_logic;
 		
-		vid_spare		    : out std_logic_vector(31 downto 0);
+		vid_spare		    : inout std_logic_vector(31 downto 0);
 		--vid_sp_clk	    : out std_logic;
 		
     -- I2C to the vid FPGA
@@ -262,10 +262,15 @@ begin
       elsif rising_edge(clk_24M) then
         count := std_logic_vector(unsigned(count) + 1);
       end if;
-      dbgled <= (others => count(count'left));
+      -- invert this only so it is out-of-phase with the EP3SL LED
+      -- if they're both configured from the EPCS64...
+      dbgled(9) <= not count(count'left);
     end process;
   end block BLK_CHASER;
 
+  -- leds from the EP3SL
+  dbgled(8 downto 0) <= vid_spare(8 downto 0);
+  
   -- constant drivers
 	v15_s3				<= '0';
 	v15_s5				<= '0';
@@ -278,5 +283,6 @@ begin
   vdo_rstn <= reset_n;
   veb_a <= (others => 'Z');
   veb_a_dir <= '1';
+  vid_spare <= (others => 'Z');
   
 end architecture SYN;
