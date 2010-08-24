@@ -70,6 +70,11 @@ void main (int argc, char *argv[])
   fwrite (tiledata, 256*16, 1, fp);
   fclose (fp);
 
+  fp = fopen ("tiledata_64.bin", "wb");
+  if (!fp) exit (0);
+  fwrite (&tiledata[64], 64*16, 1, fp);
+  fclose (fp);
+
 	allegro_init ();
 	if (install_keyboard () != 0)
 	{

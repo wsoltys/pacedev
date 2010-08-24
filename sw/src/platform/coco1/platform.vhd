@@ -206,7 +206,9 @@ begin
         -- do we even need to latch the data here?
         -- - I don't think so for a real 6809e at least...
         if rd = '1' then
-          --ram_datao <= sram_i.d(ram_datao'range);
+          if not COCO1_USE_REAL_6809 then
+            ram_datao <= sram_i.d(ram_datao'range);
+          end if;
           rd := '0';
         end if;
         if ras_n = '0' and ras_n_r = '1' then
@@ -227,7 +229,9 @@ begin
 		end if;
 	end process;
 
-  ram_datao <= sram_i.d(ram_datao'range);
+  GEN_RAM_NO_LATCH : if COCO1_USE_REAL_6809 generate
+    ram_datao <= sram_i.d(ram_datao'range);
+  end generate GEN_RAM_NO_LATCH;
 
   -- memory read mux
   cpu_d_i <=  pia_0_datao when pia_0_cs = '1' else
@@ -276,9 +280,7 @@ begin
   
   GEN_REAL_6809 : if COCO1_USE_REAL_6809 generate
 
-    --platform_o.arst <= clkrst_i.arst;
-    platform_o.arst <= reset_i(0);
-    --platform_o.clk_50M <= clk_rst_i.clk(0);
+    platform_o.arst <= rst_57M272;
     platform_o.clk_cpld <= clk_57M272;
     platform_o.button <= buttons_i(platform_o.button'range);
     
@@ -372,7 +374,7 @@ begin
 		generic map
 		(
       CVBS_NOT_VGA  => false,
-			CHAR_ROM_FILE => COCO1_SOURCE_ROOT_DIR & "roms/tiledata.hex"
+			CHAR_ROM_FILE => COCO1_SOURCE_ROOT_DIR & "roms/mc6847rom.hex"
 		)
     port map
     (
@@ -388,11 +390,11 @@ begin
       fs_n      => fs_n,
 
       an_g      => vdg_an_g,
-      an_s      => '0',
+      an_s      => vdg_data(7),
       intn_ext  => vdg_intn_ext,
       gm        => vdg_gm,
       css       => vdg_css,
-      inv       => '0',
+      inv       => vdg_data(6),
 
 			red			  => red,
 			green		  => green,

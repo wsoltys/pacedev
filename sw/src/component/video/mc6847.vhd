@@ -49,7 +49,14 @@ end mc6847;
 architecture SYN of mc6847 is
 
   constant VGA_NOT_CVBS         : boolean := not CVBS_NOT_VGA;
-  constant BUILD_TEST_PATTERN   : boolean := false;
+  
+  constant BUILD_DEBUG          : boolean := true;
+  constant DEBUG_AN_G           : std_logic := '0';
+  constant DEBUG_AN_S           : std_logic := '0';
+  constant DEBUG_INTN_EXT       : std_logic := '0';
+  constant DEBUG_GM             : std_logic_vector(2 downto 0) := (others => '0');
+  constant DEBUG_CSS            : std_logic := '1';
+  constant DEBUG_INV            : std_logic := '1';
   
   -- H_TOTAL_PER_LINE must be divisible by 16
   -- so that sys_count is the same on each line when
@@ -104,6 +111,15 @@ architecture SYN of mc6847 is
   	);
   end component;
 
+  -- internal version of control ports
+  
+  signal an_g_s                 : std_logic;
+  signal an_s_s                 : std_logic;
+  signal intn_ext_s             : std_logic;
+  signal gm_s                   : std_logic_vector(2 downto 0);
+  signal css_s                  : std_logic;
+  signal inv_s                  : std_logic;
+  
   -- VGA signals
 
 	alias vga_pix_clk						: std_logic is clk;		-- PAL/NTSC*4
@@ -131,7 +147,7 @@ architecture SYN of mc6847 is
   signal da0_int              : std_logic_vector(3 downto 0);
 
   -- character rom signals
-  signal char_addr            : std_logic_vector(11 downto 0);
+  signal char_addr            : std_logic_vector(9 downto 0);
   signal char_data            : std_logic_vector(7 downto 0);
 	signal cvbs_linebuf_we_r    : std_logic;
 	signal cvbs_linebuf_addr_r  : std_logic_vector(8 downto 0);
@@ -145,6 +161,14 @@ architecture SYN of mc6847 is
   shared variable row_v : std_logic_vector(3 downto 0);
 
 begin
+
+  -- assign control inputs for debug/release build
+  an_g_s <= DEBUG_AN_G when BUILD_DEBUG else an_g;
+  an_s_s <= DEBUG_AN_S when BUILD_DEBUG else an_s;
+  intn_ext_s <= DEBUG_INTN_EXT when BUILD_DEBUG else intn_ext;
+  gm_s <= DEBUG_GM when BUILD_DEBUG else gm;
+  css_s <= DEBUG_CSS when BUILD_DEBUG else css;
+  inv_s <= DEBUG_INV when BUILD_DEBUG else inv;
 
   PROC_VGA : process (vga_pix_clk, reset)
     variable h_count : integer range 0 to H_TOTAL_PER_LINE;
@@ -285,7 +309,7 @@ begin
 
         -- latch data on DD pins
         if pix_count(2 downto 0) = "000" then
-          if BUILD_TEST_PATTERN then
+          if BUILD_DEBUG then
             --cvbs_dd <= active_v_count(6 downto 4) & pix_count(7 downto 3);
             cvbs_dd <= active_v_count(6 downto 4) & 
                         pix_count(7) & not pix_count(3) & pix_count(4) & not pix_count(6) & pix_count(5);
@@ -309,7 +333,7 @@ begin
 			end if;
 
       -- generate character rom address
-      char_addr <= cvbs_dd & row_v(3 downto 0);
+      char_addr <= cvbs_dd(5 downto 0) & row_v(3 downto 0);
 
       -- generate pixel from character rom data
       case pix_count(2 downto 0) is
@@ -332,46 +356,64 @@ begin
         when others =>
       end case;
       
-  		if cvbs_dd_r(7 downto 6) = "00" then
-  		  -- inverse video
-  		  if c1 = '1' then
-    			cvbs_data <= "01000100"; -- dark green
-  		  else
-    			cvbs_data <= "01001100"; -- green
-  		  end if;
-  		elsif cvbs_dd_r(7) = '0' then
-        -- normal video
-  		  if c1 = '1' then
-    			cvbs_data <= "01000000"; -- black
-  		  else
-    			cvbs_data <= "01001100"; -- green
-  		  end if;
-  		else
-  	    -- semi-block graphics
-	      if c1 = '1' then
-			    case cvbs_dd_r(6 downto 4) is
-    				when "000" => -- green
-    					cvbs_data <= "01001100";
-    				when "001" => -- yellow
-    					cvbs_data <= "01111100";
-    				when "010" => -- blue
-    					cvbs_data <= "01000011";
-    				when "011" => -- red
-    					cvbs_data <= "01110000";
-    				when "100" => -- white
-    					cvbs_data <= "01111111";
-    				when "101" => -- cyan
-    					cvbs_data <= "01001111";
-    				when "110" => -- magenta
-    					cvbs_data <= "01110011";
-    				when others => -- orange
-    					cvbs_data <= "01111000";
-			    end case;
-		    else
-			    cvbs_data <= "01000000"; -- black
-		    end if;
-  		end if;
-
+      -- alpha/graphics mode
+      if an_g_s = '0' then
+        -- alphanumeric & semi-graphics mode
+        if an_s_s = '0' then
+          -- alphanumeric
+          if intn_ext_s = '0' then
+            -- internal rom
+            if inv_s = '0' then
+              -- normal video
+              if c1 = '1' then
+                cvbs_data <= "01" & css_s & css_s & "1" & not css_s & "00"; -- green/orange
+              else
+                cvbs_data <= "01000000"; -- black (dark green/orange?)
+              end if;
+            else
+              -- inverse video
+              if c1 = '1' then
+                cvbs_data <= "01000000"; -- black
+              else
+                cvbs_data <= "01" & css_s & css_s & "1" & not css_s & "00"; -- green/orange
+              end if;
+            end if; -- normal/inverse
+          else
+          end if; -- internal/external
+        else
+          -- semi-graphics
+          if intn_ext_s = '0' then
+            -- semi-4
+          else
+            -- semi-6
+            if c1 = '1' then
+              case cvbs_dd_r(6 downto 4) is
+                when "000" => -- green
+                  cvbs_data <= "01001100";
+                when "001" => -- yellow
+                  cvbs_data <= "01111100";
+                when "010" => -- blue
+                  cvbs_data <= "01000011";
+                when "011" => -- red
+                  cvbs_data <= "01110000";
+                when "100" => -- white
+                  cvbs_data <= "01111111";
+                when "101" => -- cyan
+                  cvbs_data <= "01001111";
+                when "110" => -- magenta
+                  cvbs_data <= "01110011";
+                when others => -- orange
+                  cvbs_data <= "01111000";
+              end case;
+            else
+              cvbs_data <= "01000000"; -- black
+            end if;
+          end if; -- semi-4/6
+        end if; -- alphanumeric/semi-graphics
+      else
+        -- graphics mode
+      end if; -- alpha/graphics mode
+      
       -- generate linebuffer address
       -- - alternate every line
       cvbs_linebuf_addr <= v_count(0) & pix_count;
@@ -467,8 +509,8 @@ begin
 		generic map
 		(
 			init_file				=> CHAR_ROM_FILE,
-			numwords_a			=> 4096,
-			widthad_a				=> 12
+			numwords_a			=> 1024,
+			widthad_a				=> 10
 		)                               
     port map
     (
@@ -478,4 +520,3 @@ begin
     );
 
 end SYN;
-
