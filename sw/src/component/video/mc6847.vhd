@@ -50,7 +50,7 @@ architecture SYN of mc6847 is
 
   constant VGA_NOT_CVBS         : boolean := not CVBS_NOT_VGA;
   
-  constant BUILD_DEBUG          : boolean := true;
+  constant BUILD_DEBUG          : boolean := false;
   constant DEBUG_AN_G           : std_logic := '0';
   constant DEBUG_AN_S           : std_logic := '0';
   constant DEBUG_INTN_EXT       : std_logic := '0';

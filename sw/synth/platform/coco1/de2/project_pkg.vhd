@@ -23,8 +23,8 @@ package project_pkg is
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
 
   --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_NONE;
-  constant PACE_CLK0_DIVIDE_BY              : natural := 5;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 2;   -- 50*2/5 = 20MHz
+  constant PACE_CLK0_DIVIDE_BY              : natural := 7;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 8;  	-- 50*8/7 = 57M143Hz (57.27272)
   -- NTSC
   constant PACE_CLK1_DIVIDE_BY              : natural := 7;
   constant PACE_CLK1_MULTIPLY_BY            : natural := 8;  	-- 50*8/7 = 57M143Hz (57.27272)
@@ -51,7 +51,11 @@ package project_pkg is
   constant COCO1_EXTENDED_BASIC_ROM         : string := "extbas11.hex";
   constant COCO1_EXTENDED_COLOR_BASIC       : boolean := false;
   constant COCO1_JUMPER_32K_RAM             : std_logic := '1';
+	constant COCO1_CVBS                       : boolean := false;
 	
+	-- derived - do not edit
+	constant COCO1_VGA                        : boolean := not COCO1_CVBS;
+
   type from_PROJECT_IO_t is record
     not_used  : std_logic;
   end record;

@@ -373,7 +373,7 @@ begin
   vdg_inst : entity work.mc6847
 		generic map
 		(
-      CVBS_NOT_VGA  => false,
+      CVBS_NOT_VGA  => COCO1_CVBS,
 			CHAR_ROM_FILE => COCO1_SOURCE_ROOT_DIR & "roms/mc6847rom.hex"
 		)
     port map
