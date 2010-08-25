@@ -160,6 +160,11 @@ architecture SYN of platform is
   signal da0            : std_logic;
   signal vdg_sram_cs    : std_logic;
 
+  -- cartridge signals
+  signal cart_n           : std_logic;
+  signal cart_cs          : std_logic;
+  signal cart_d_o         : std_logic_vector(7 downto 0);
+  
   -- only for test vga controller
 	signal vga_clk_s				: std_logic;
 	
@@ -236,6 +241,7 @@ begin
   -- memory read mux
   cpu_d_i <=  pia_0_datao when pia_0_cs = '1' else
               pia_1_datao when pia_1_cs = '1' else
+              cart_d_o when cart_cs = '1' else
               rom_datao when rom_cs = '1' else
               extrom_datao when extrom_cs = '1' else
               ram_datao when ram_cs = '1' else
@@ -349,7 +355,7 @@ begin
     ram_cs <= y(0);
     extrom_cs <= y(1);
     rom_cs <= y(2);
-    --cart_cs <= y(3);  -- CART_CTS
+    cart_cs <= y(3);
     pia_0_cs <= y(4);
     pia_1_cs <= y(5);
     --spare_cs <= y(6); -- CART_SCS
@@ -417,8 +423,6 @@ begin
   
     -- this is ultimately correct
     cpu_irq <= irqa or irqb;
-    -- but for now...
-    --cpu_irq <= '0';
     
     -- keyboard matrix
     process (clk_57M272, rst_57M272)
@@ -430,10 +434,10 @@ begin
         keys := (others => '0');
         -- note that row select is active low
         if pb_o(0) = '0' then
-          keys := keys or inputs_i(0).d;  -- or right fire button
+          keys := keys or inputs_i(0).d;
         end if;
         if pb_o(1) = '0' then
-          keys := keys or inputs_i(1).d;  -- or left fire button
+          keys := keys or inputs_i(1).d;
         end if;
         if pb_o(2) = '0' then
           keys := keys or inputs_i(2).d;
@@ -456,7 +460,9 @@ begin
       end if;
       -- key inputs are active low
       -- - bit 7 is joyin (TBD)
-      pa_i <= '1' & not keys(6 downto 0);
+      pa_i <= '1' & not keys(6 downto 2) & 
+                not (keys(1) or inputs_i(8).d(1)) &   -- left fire
+                not (keys(0) or inputs_i(8).d(2));    -- right fire
     end process;
 
     pia_0_inst : entity work.pia6821
@@ -495,15 +501,11 @@ begin
     signal pa_o       : std_logic_vector(7 downto 0);
     signal pb_i       : std_logic_vector(7 downto 0);
     signal pb_o       : std_logic_vector(7 downto 0);
-    signal cart_n     : std_logic;
   begin
 
     --pa_i(0) <= casin;
     ser_o.txd <= pa_o(1);
     --dac_data <= pa_o(7 downto 2);
-
-    -- #CART
-    cart_n <= not switches_i(9);
 
     pb_i(0) <= ser_i.rxd;
     --sndout <= pb_o(1);
@@ -515,8 +517,6 @@ begin
     
     -- this is ultimately correct
     cpu_firq <= irqa or irqb;
-    -- but for now...
-    --cpu_firq <= '0';
     
     pia_1_inst : entity work.pia6821
       port map
@@ -577,11 +577,29 @@ begin
 	  		address		  => cpu_a(12 downto 0),
 	  		q			      => extrom_datao
 	  	);
-
 	end generate GEN_EXT;
 
 	GEN_NO_EXT : if not COCO1_EXTENDED_COLOR_BASIC generate
     extrom_datao <= (others => '0');
 	end generate GEN_NO_EXT;
+
+	GEN_CART : if COCO1_CART_INTERNAL generate
+	  cart_inst : entity work.sprom
+			generic map
+			(
+				init_file		=> COCO1_SOURCE_ROOT_DIR & "roms/" & COCO1_CART_NAME,
+				numwords_a	=> 2**COCO1_CART_WIDTHAD,
+				widthad_a		=> COCO1_CART_WIDTHAD
+			)
+	  	port map
+	  	(
+	  		clock		    => clk_57M272,
+	  		address		  => cpu_a(COCO1_CART_WIDTHAD-1 downto 0),
+	  		q			      => cart_d_o
+	  	);
+	end generate GEN_CART;
+
+  -- CART# signal is tied to 'Q' on a real cartridge
+  cart_n <= '1' when switches_i(9) = '0' else clk_q;
 
 end architecture SYN;

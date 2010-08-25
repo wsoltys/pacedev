@@ -169,6 +169,11 @@ begin
             ctrl := press;
           when SCANCODE_ESC =>
             esc := press;
+          -- temporary implementation of fire buttons
+          when SCANCODE_F11 =>
+            inputs(8).d(1) <= press;
+          when SCANCODE_F12 =>
+            inputs(8).d(2) <= press;
           when others =>
         end case;
     end if; -- press or release

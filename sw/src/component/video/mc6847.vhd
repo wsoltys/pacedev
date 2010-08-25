@@ -52,11 +52,11 @@ architecture SYN of mc6847 is
   
   constant BUILD_DEBUG          : boolean := false;
   constant DEBUG_AN_G           : std_logic := '0';
-  constant DEBUG_AN_S           : std_logic := '0';
-  constant DEBUG_INTN_EXT       : std_logic := '0';
+  constant DEBUG_AN_S           : std_logic := '1';
+  constant DEBUG_INTN_EXT       : std_logic := '1';
   constant DEBUG_GM             : std_logic_vector(2 downto 0) := (others => '0');
   constant DEBUG_CSS            : std_logic := '1';
-  constant DEBUG_INV            : std_logic := '1';
+  constant DEBUG_INV            : std_logic := '0';
   
   -- H_TOTAL_PER_LINE must be divisible by 16
   -- so that sys_count is the same on each line when
@@ -141,6 +141,8 @@ architecture SYN of mc6847 is
 	signal cvbs_linebuf_addr		: std_logic_vector(8 downto 0);
   signal cvbs_dd              : std_logic_vector(7 downto 0); -- CVBS data in latch
 	signal cvbs_data						: std_logic_vector(7 downto 0); -- CVBS data out
+	--signal semi4_dd             : std_logic_vector(7 downto 0);
+	signal semi6_dd             : std_logic_vector(7 downto 0);
 
   alias hs_int     	          : std_logic is cvbs_hblank;
   alias fs_int     	          : std_logic is cvbs_vblank;
@@ -231,7 +233,10 @@ begin
     variable h_count : integer range 0 to H_TOTAL_PER_LINE;
     variable pix_count : std_logic_vector(7 downto 0);
     variable old_cvbs_hblank : std_logic := '0';
-    variable c1 : std_logic;
+    variable semi4_dd : std_logic_vector(7 downto 0);
+    variable semi6_dd : std_logic_vector(7 downto 0);
+    variable luma : std_logic;
+    variable chroma : std_logic_vector(2 downto 0);
     --variable row_v : std_logic_vector(3 downto 0);
     -- for debug only
     variable active_v_count : std_logic_vector(v_count'range);
@@ -313,8 +318,37 @@ begin
             --cvbs_dd <= active_v_count(6 downto 4) & pix_count(7 downto 3);
             cvbs_dd <= active_v_count(6 downto 4) & 
                         pix_count(7) & not pix_count(3) & pix_count(4) & not pix_count(6) & pix_count(5);
+            if row_v < 6 then
+              semi4_dd := pix_count(6) & pix_count(6) & pix_count(6) & pix_count(6) &
+                          pix_count(5) & pix_count(5) & pix_count(5) & pix_count(5);
+            else
+              semi4_dd := pix_count(4) & pix_count(4) & pix_count(4) & pix_count(4) &
+                          pix_count(3) & pix_count(3) & pix_count(3) & pix_count(3);
+            end if;
+            if row_v < 4 then
+              semi6_dd := active_v_count(4) & active_v_count(4) & active_v_count(4) & active_v_count(4) &
+                          pix_count(7) & pix_count(7) & pix_count(7) & pix_count(7);
+            elsif row_v < 8 then
+              semi6_dd := pix_count(6) & pix_count(6) & pix_count(6) & pix_count(6) &
+                          pix_count(5) & pix_count(5) & pix_count(5) & pix_count(5);
+            else
+              semi6_dd := pix_count(4) & pix_count(4) & pix_count(4) & pix_count(4) &
+                          pix_count(3) & pix_count(3) & pix_count(3) & pix_count(3);
+            end if;
           else
             cvbs_dd <= dd;
+            if row_v < 6 then
+              semi4_dd := dd(3) & dd(3) & dd(3) & dd(3) & dd(2) & dd(2) & dd(2) & dd(2);
+            else
+              semi4_dd := dd(1) & dd(1) & dd(1) & dd(1) & dd(0) & dd(0) & dd(0) & dd(0);
+            end if;
+            if row_v < 4 then
+              semi6_dd := dd(5) & dd(5) & dd(5) & dd(5) & dd(4) & dd(4) & dd(4) & dd(4);
+            elsif row_v < 8 then
+              semi6_dd := dd(3) & dd(3) & dd(3) & dd(3) & dd(2) & dd(2) & dd(2) & dd(2);
+            else
+              semi6_dd := dd(1) & dd(1) & dd(1) & dd(1) & dd(0) & dd(0) & dd(0) & dd(0);
+            end if;
           end if;
         end if;
 				cvbs_dd_r <= cvbs_dd;
@@ -336,23 +370,24 @@ begin
       char_addr <= cvbs_dd(5 downto 0) & row_v(3 downto 0);
 
       -- generate pixel from character rom data
+      -- *** replace this with a shift register
       case pix_count(2 downto 0) is
         when "000" =>
-          c1 := char_data(1);
+          luma := char_data(1);
         when "001" =>
-          c1 := char_data(0);
+          luma := char_data(0);
         when "010" =>
-          c1 := char_data(7);
+          luma := char_data(7);
         when "011" =>
-          c1 := char_data(6);
+          luma := char_data(6);
         when "100" =>
-          c1 := char_data(5);
+          luma := char_data(5);
         when "101" =>
-          c1 := char_data(4);
+          luma := char_data(4);
         when "110" =>
-          c1 := char_data(3);
+          luma := char_data(3);
         when "111" =>
-          c1 := char_data(2);
+          luma := char_data(2);
         when others =>
       end case;
       
@@ -365,14 +400,14 @@ begin
             -- internal rom
             if inv_s = '0' then
               -- normal video
-              if c1 = '1' then
+              if luma = '1' then
                 cvbs_data <= "01" & css_s & css_s & "1" & not css_s & "00"; -- green/orange
               else
                 cvbs_data <= "01000000"; -- black (dark green/orange?)
               end if;
             else
               -- inverse video
-              if c1 = '1' then
+              if luma = '1' then
                 cvbs_data <= "01000000"; -- black
               else
                 cvbs_data <= "01" & css_s & css_s & "1" & not css_s & "00"; -- green/orange
@@ -384,31 +419,37 @@ begin
           -- semi-graphics
           if intn_ext_s = '0' then
             -- semi-4
+            luma := semi4_dd(semi4_dd'left);
+            semi4_dd := semi4_dd(semi4_dd'left-1 downto 0) & '0';
+            chroma := cvbs_dd_r(6 downto 4);
           else
             -- semi-6
-            if c1 = '1' then
-              case cvbs_dd_r(6 downto 4) is
-                when "000" => -- green
-                  cvbs_data <= "01001100";
-                when "001" => -- yellow
-                  cvbs_data <= "01111100";
-                when "010" => -- blue
-                  cvbs_data <= "01000011";
-                when "011" => -- red
-                  cvbs_data <= "01110000";
-                when "100" => -- white
-                  cvbs_data <= "01111111";
-                when "101" => -- cyan
-                  cvbs_data <= "01001111";
-                when "110" => -- magenta
-                  cvbs_data <= "01110011";
-                when others => -- orange
-                  cvbs_data <= "01111000";
-              end case;
-            else
-              cvbs_data <= "01000000"; -- black
-            end if;
+            luma := semi6_dd(semi4_dd'left);
+            semi6_dd := semi6_dd(semi6_dd'left-1 downto 0) & '0';
+            chroma := css_s & cvbs_dd_r(7 downto 6);
           end if; -- semi-4/6
+          if luma = '1' then
+            case chroma is
+              when "000" => -- green
+                cvbs_data <= "01001100";
+              when "001" => -- yellow
+                cvbs_data <= "01111100";
+              when "010" => -- blue
+                cvbs_data <= "01000011";
+              when "011" => -- red
+                cvbs_data <= "01110000";
+              when "100" => -- white
+                cvbs_data <= "01111111";
+              when "101" => -- cyan
+                cvbs_data <= "01001111";
+              when "110" => -- magenta
+                cvbs_data <= "01110011";
+              when others => -- orange
+                cvbs_data <= "01111000";
+            end case;
+          else
+            cvbs_data <= "01000000"; -- black
+          end if;
         end if; -- alphanumeric/semi-graphics
       else
         -- graphics mode
