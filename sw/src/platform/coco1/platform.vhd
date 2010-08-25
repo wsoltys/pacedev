@@ -282,7 +282,10 @@ begin
 
     platform_o.arst <= rst_57M272;
     platform_o.clk_cpld <= clk_57M272;
-    platform_o.button <= buttons_i(platform_o.button'range);
+    platform_o.button(0) <= buttons_i(0);
+    platform_o.button(1) <= buttons_i(1) or game_reset;
+    platform_o.button(2) <= buttons_i(2);
+    platform_o.button(3) <= buttons_i(3);
     
     platform_o.cpu_6809_q <= clk_q;
     platform_o.cpu_6809_e <= clk_e;
