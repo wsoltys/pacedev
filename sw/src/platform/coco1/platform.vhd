@@ -73,9 +73,11 @@ end entity platform;
 --
 --  Buttons
 --    0: system-wide reset
---    1: external 6809 reset
+--    1: platform reset
+--    2: cpu reset
 --  Switches
---    9: CART#
+--    9:  CART#
+--    8:5 Flash 16KB bank select
 --
 
 architecture SYN of platform is
@@ -88,7 +90,9 @@ architecture SYN of platform is
 	signal clk_q          : std_logic := '0';
 	signal clk_e          : std_logic := '0';
 
-	signal cpu_reset			: std_logic;
+  signal target_rst     : std_logic := '0';
+  signal platform_rst   : std_logic := '0';
+	signal cpu_rst			: std_logic := '0';
 	
 	-- clock helpers
   signal vdgclk         : std_logic;
@@ -106,6 +110,7 @@ architecture SYN of platform is
 
   -- uP signals  
   alias cpu_clk         : std_logic is clk_e;
+  signal cpu_clk_n      : std_logic;
   signal cpu_a          : std_logic_vector(15 downto 0);
   signal cpu_d_i        : std_logic_vector(7 downto 0);
   signal cpu_d_o        : std_logic_vector(7 downto 0);
@@ -117,7 +122,6 @@ architecture SYN of platform is
 
   -- keyboard signals
 	signal jamma_s				: from_JAMMA_t;
-	alias game_reset			: std_logic is inputs_i(8).d(0);
 
   -- PIA-A signals
   signal pia_0_cs				: std_logic;
@@ -142,11 +146,6 @@ architecture SYN of platform is
   signal extrom_datao   : std_logic_vector(7 downto 0);
 	signal extrom_cs			: std_logic;
 
-  -- VRAM signals       
-  --signal vram_cs        : std_logic;
-  signal vram_wr        : std_logic;
-  --signal vram_datao     : std_logic_vector(7 downto 0);
-                        
   -- RAM signals        
   signal ram_cs         : std_logic;
   signal ram_datao      : std_logic_vector(7 downto 0);
@@ -170,18 +169,23 @@ architecture SYN of platform is
 	
 begin
 
-	cpu_reset <= rst_57M272 or game_reset or buttons_i(1);
-	
+  target_rst <= rst_57M272 or buttons_i(0);
+  platform_rst <= target_rst or buttons_i(1) or inputs_i(8).d(0);
+	cpu_rst <= platform_rst or buttons_i(2) or inputs_i(8).d(1);
+
+  -- for ModelSim only!!!
+  cpu_clk_n <= not cpu_clk;
+  	
   --
   --  Clocking
   --
 
 	-- produce a PAL clock enable
-	process (clk_57M272, rst_57M272)
+	process (clk_57M272, platform_rst)
 		subtype count_t is integer range 0 to 3;
 		variable count : count_t := 0;
 	begin
-		if rst_57M272 = '1' then
+		if platform_rst = '1' then
 			count := 0;
 		elsif rising_edge(clk_57M272) then
       clk_14M318_ena <= '0';  -- default
@@ -194,14 +198,14 @@ begin
 		end if;
 	end process;
 
-	process (clk_57M272, rst_57M272)
+	process (clk_57M272, platform_rst)
     variable ras_n_r  : std_logic := '0';
     variable cas_n_r  : std_logic := '0';
     variable e_r      : std_logic := '0';
     variable q_r      : std_logic := '0';
     variable rd       : std_logic := '0';
 	begin
-    if rst_57M272 = '1' then
+    if platform_rst = '1' then
       ras_n_r := '0';
       cas_n_r := '0';
       e_r := '0';
@@ -245,7 +249,6 @@ begin
               rom_datao when rom_cs = '1' else
               extrom_datao when extrom_cs = '1' else
               ram_datao when ram_cs = '1' else
-              --vram_datao when vram_cs = '1' else
               X"FF";
 
   -- SRAM signals
@@ -269,8 +272,8 @@ begin
     cpu_inst : entity work.cpu09
       port map
       (	
-        clk				=> not clk_e,
-        rst				=> cpu_reset,
+        clk				=> cpu_clk_n,
+        rst				=> cpu_rst,
         rw 	    	=> cpu_r_wn,
         vma 	    => cpu_vma,
         address 	=> cpu_a,
@@ -286,16 +289,12 @@ begin
   
   GEN_REAL_6809 : if COCO1_USE_REAL_6809 generate
 
-    platform_o.arst <= rst_57M272;
+    platform_o.arst <= target_rst;
     platform_o.clk_cpld <= clk_57M272;
-    platform_o.button(0) <= buttons_i(0);
-    platform_o.button(1) <= buttons_i(1) or game_reset;
-    platform_o.button(2) <= buttons_i(2);
-    platform_o.button(3) <= buttons_i(3);
     
     platform_o.cpu_6809_q <= clk_q;
     platform_o.cpu_6809_e <= clk_e;
-    platform_o.cpu_6809_rst_n <= not rst_57M272;
+    platform_o.cpu_6809_rst_n <= not cpu_rst;
     cpu_r_wn <= platform_i.cpu_6809_r_wn;
     cpu_vma <= platform_i.cpu_6809_vma;
     cpu_a <= platform_i.cpu_6809_a;
@@ -320,7 +319,7 @@ begin
 		(
 			clk				=> clk_57M272,
 			clk_ena   => clk_14M318_ena,
-			reset			=> rst_57M272,
+			reset			=> platform_rst,
 
 			-- input
 			a					=> cpu_a,
@@ -361,9 +360,6 @@ begin
     --spare_cs <= y(6); -- CART_SCS
     -- y(7) is NC
 
-    -- this is yet to be implemented in the 6883/6847
-    --vram_cs <= '1' when cpu_a(15 downto 10) = "000001" else '0';
-
     U11_inst : entity work.ttl_74ls138_p
       port map
       (
@@ -389,7 +385,7 @@ begin
     (
 			clk			  => clk_57M272,
 			clk_ena   => clk_14M318_ena,
-      reset     => rst_57M272,
+      reset     => platform_rst,
 
       da0       => da0,
 
@@ -425,10 +421,10 @@ begin
     cpu_irq <= irqa or irqb;
     
     -- keyboard matrix
-    process (clk_57M272, rst_57M272)
+    process (clk_57M272, target_rst)
       variable keys : std_logic_vector(7 downto 0);
     begin
-      if rst_57M272 = '1' then
+      if target_rst = '1' then
         keys := (others => '0');
       elsif rising_edge (clk_57M272) then
         keys := (others => '0');
@@ -461,15 +457,15 @@ begin
       -- key inputs are active low
       -- - bit 7 is joyin (TBD)
       pa_i <= '1' & not keys(6 downto 2) & 
-                not (keys(1) or inputs_i(8).d(1)) &   -- left fire
-                not (keys(0) or inputs_i(8).d(2));    -- right fire
+                not (keys(1) or inputs_i(8).d(2)) &   -- left fire
+                not (keys(0) or inputs_i(8).d(3));    -- right fire
     end process;
 
     pia_0_inst : entity work.pia6821
       port map
       (	
-        clk       	=> not cpu_clk,
-        rst       	=> rst_57M272,
+        clk       	=> clk_14M318_ena,
+        rst       	=> platform_rst,
         cs        	=> pia_0_cs,
         rw        	=> cpu_r_wn,
         addr      	=> cpu_a(1 downto 0),
@@ -521,8 +517,8 @@ begin
     pia_1_inst : entity work.pia6821
       port map
       (	
-        clk       	=> not cpu_clk,
-        rst       	=> rst_57M272,
+        clk       	=> clk_14M318_ena,
+        rst       	=> platform_rst,
         cs        	=> pia_1_cs,
         rw        	=> cpu_r_wn,
         addr      	=> cpu_a(1 downto 0),
@@ -599,6 +595,17 @@ begin
 	  	);
 	end generate GEN_CART;
 
+  GEN_NO_CART : if not COCO1_CART_INTERNAL generate
+    -- only support 16x16KB cartridges atm
+    flash_o.a(flash_o.a'left downto 18) <= (others => '0');
+    flash_o.a(17 downto 14) <= switches_i(8 downto 5);
+    flash_o.a(13 downto 0) <= cpu_a;
+    cart_d_o <= flash_i.d(cart_d_o'range);
+    flash_o.cs <= cart_cs;
+    flash_o.oe <= cpu_r_wn;
+    flash_o.we <= '0';
+  end generate GEN_NO_CART;
+  
   -- CART# signal is tied to 'Q' on a real cartridge
   cart_n <= '1' when switches_i(9) = '0' else clk_q;
 

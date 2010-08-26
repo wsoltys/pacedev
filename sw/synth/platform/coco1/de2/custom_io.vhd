@@ -74,7 +74,7 @@ begin
   --clk_CPLD_ena <= platform_o.clk_50M;
   
   m6809e_oe_d <= '0' when platform_o.arst = '1' else cpu_6809_r_wn;
-  m6809e_oe_reset <= platform_o.arst or platform_o.button(1);
+  m6809e_oe_reset <= not platform_o.cpu_6809_rst_n;
   
 	-- Assign signals to IO bus
   io_di <= gpio_i(23 downto 0);

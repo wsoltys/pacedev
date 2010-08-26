@@ -169,11 +169,13 @@ begin
             ctrl := press;
           when SCANCODE_ESC =>
             esc := press;
+          when SCANCODE_F3 =>
+            inputs(8).d(1) <= press;  -- cpu reset
           -- temporary implementation of fire buttons
           when SCANCODE_F11 =>
-            inputs(8).d(1) <= press;
-          when SCANCODE_F12 =>
             inputs(8).d(2) <= press;
+          when SCANCODE_F12 =>
+            inputs(8).d(3) <= press;
           when others =>
         end case;
     end if; -- press or release
@@ -183,7 +185,7 @@ begin
       end loop;
     end if;
     -- special keys
-    inputs(8).d(0) <= ctrl and esc;		-- game reset
+    inputs(8).d(0) <= ctrl and esc;		-- platform reset
     end if; -- rising_edge (clk)
   end process latchInputs;
 

@@ -38,10 +38,11 @@ end mc6883;
 
 architecture SYN of mc6883 is
 
-	subtype DivisorType is integer range 1 to 12;
+	subtype DivisorType is integer range 0 to 11;
 	type DivisorArrayType is array (natural range <>) of DivisorType;
 	-- Division variables for V0=0, V2..V1=sel
-	constant y_divisor		: DivisorArrayType(0 to 3) := (12, 3, 2, 1);
+	--constant y_divisor		: DivisorArrayType(0 to 3) := (12, 3, 2, 1);
+	constant y_divisor		: DivisorArrayType(0 to 3) := (11, 2, 1, 0);
 	-- Division variable for V0=1, v2..V1=sel
 	constant x_divisor		: DivisorArrayType(0 to 3) := (3, 2, 1, 1);
 	
