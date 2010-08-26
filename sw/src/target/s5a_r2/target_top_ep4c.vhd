@@ -251,7 +251,7 @@ begin
 
   end block BLK_DVO_INIT;
 
-  BLK_CHASER : block
+  BLK_FLASHER : block
   begin
     -- flash the led so we know it's alive
     process (clk_24M, reset)
@@ -266,11 +266,52 @@ begin
       -- if they're both configured from the EPCS64...
       dbgled(9) <= not count(count'left);
     end process;
-  end block BLK_CHASER;
+  end block BLK_FLASHER;
 
   -- leds from the EP3SL
-  dbgled(8 downto 0) <= vid_spare(8 downto 0);
+  dbgled(8 downto 5) <= vid_spare(8 downto 5);
   
+	BLK_CHASER : block
+
+		signal chaseen        : std_logic;
+		signal pwmen	        : std_logic;
+		signal ledout					: std_logic_vector(4 downto 0);
+
+	begin
+	  pchaser: entity work.pwm_chaser
+			generic map(nleds  => 5, nbits => 8, period => 4, hold_time => 12)
+			port map (clk => clk_24M, clk_en => chaseen, pwm_en => pwmen, reset => reset, fade => X"0F", ledout => ledout);
+			
+		-- Generate pwmen pulse every 256 clocks, chase pulse every 256k clocks
+		process(clk_24M, reset)
+			variable pcount     : std_logic_vector(7 downto 0);
+			variable pwmen_r    : std_logic;
+			variable ccount     : std_logic_vector(17 downto 0);
+			variable chaseen_r  : std_logic;
+		begin
+			pwmen <= pwmen_r;
+			chaseen <= chaseen_r;
+			if reset = '1' then
+				pcount := (others => '0');
+				ccount := (others => '0');
+			elsif rising_edge(clk_24M) then
+				pwmen_r := '0';
+				if pcount = std_logic_vector(to_unsigned(0, pcount'length)) then
+					pwmen_r := '1';
+				end if;
+				chaseen_r := '0';
+				if ccount = std_logic_vector(to_unsigned(0, ccount'length)) then
+					chaseen_r := '1';
+				end if;
+				pcount := std_logic_vector(unsigned(pcount) + 1);
+				ccount := std_logic_vector(unsigned(ccount) + 1);
+			end if;
+		end process;
+
+    dbgled(4 downto 0) <= not ledout;
+
+	end block BLK_CHASER;
+
   -- constant drivers
 	v15_s3				<= '0';
 	v15_s5				<= '0';
