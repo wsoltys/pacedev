@@ -15,7 +15,7 @@ package project_pkg is
 	
   -- Reference clock is 50MHz
 	constant PACE_HAS_PLL								      : boolean := true;
-  constant PACE_HAS_FLASH                   : boolean := true;
+  --constant PACE_HAS_FLASH                   : boolean := true;
   constant PACE_HAS_SRAM                    : boolean := true;
   constant PACE_HAS_SDRAM                   : boolean := true;
   constant PACE_HAS_SERIAL                  : boolean := false;
@@ -30,11 +30,9 @@ package project_pkg is
 	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
 	constant PACE_VIDEO_V_SCALE       	      : integer := 2;
 
-  constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
-
-  constant PACE_HAS_OSD                     : boolean := false;
-  constant PACE_OSD_XPOS                    : natural := 0;
-  constant PACE_OSD_YPOS                    : natural := 0;
+  --constant PACE_HAS_OSD                     : boolean := false;
+  --constant PACE_OSD_XPOS                    : natural := 0;
+  --constant PACE_OSD_YPOS                    : natural := 0;
 
 	-- Coco1-specific constants
 
@@ -53,13 +51,18 @@ package project_pkg is
   constant COCO1_EXTENDED_COLOR_BASIC       : boolean := false;
   
   constant COCO1_CART_INTERNAL              : boolean := true;
-  constant COCO1_CART_WIDTHAD               : integer := 12;
-  constant COCO1_CART_NAME                  : string := "galactic.hex";
-  
+  constant COCO1_CART_WIDTHAD               : integer := 13;
+  constant COCO1_CART_NAME                  : string := "clowns.hex";     -- 8KB
+  --constant COCO1_CART_NAME                  : string := "dod.hex";        -- 8KB
+  --constant COCO1_CART_NAME                  : string := "galactic.hex";   -- 4KB
+  --constant COCO1_CART_NAME                  : string := "megabug.hex";    -- 8KB
+  --constant COCO1_CART_NAME                  : string := "nebula.hex";     -- 8KB
+
   constant COCO1_JUMPER_32K_RAM             : std_logic := '1';
 	constant COCO1_CVBS                       : boolean := false;
   
 	-- derived - do not edit
+  constant PACE_HAS_FLASH                   : boolean := not COCO1_CART_INTERNAL;
 	constant COCO1_VGA                        : boolean := not COCO1_CVBS;
   
   type from_PROJECT_IO_t is record

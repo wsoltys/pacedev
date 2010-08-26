@@ -58,8 +58,12 @@ package project_pkg is
   constant COCO1_EXTENDED_COLOR_BASIC       : boolean := false;
   
   constant COCO1_CART_INTERNAL              : boolean := true;
-  constant COCO1_CART_WIDTHAD               : integer := 12;
-  constant COCO1_CART_NAME                  : string := "galactic.hex";
+  constant COCO1_CART_WIDTHAD               : integer := 13;
+  constant COCO1_CART_NAME                  : string := "clowns.hex";     -- 8KB
+  --constant COCO1_CART_NAME                  : string := "dod.hex";        -- 8KB
+  --constant COCO1_CART_NAME                  : string := "galactic.hex";   -- 4KB
+  --constant COCO1_CART_NAME                  : string := "megabug.hex";    -- 8KB
+  --constant COCO1_CART_NAME                  : string := "nebula.hex";     -- 8KB
   
   constant COCO1_JUMPER_32K_RAM             : std_logic := '1';
 	constant COCO1_CVBS                       : boolean := false;
