@@ -40,6 +40,11 @@ package project_pkg is
 
   constant COCO1_USE_REAL_6809              : boolean := true;
   
+  --constant COCO1_MC6847_ROM                 : string := "mc6847_pal.hex";
+  constant COCO1_MC6847_ROM                 : string := "mc6847_ntsc.hex";
+  --constant COCO1_MC6847_ROM                 : string := "mc6847t1_pal.hex";
+  --constant COCO1_MC6847_ROM                 : string := "mc6847t1_ntsc.hex";
+  
   --constant COCO1_BASIC_ROM                  : string := "bas10.hex";
   constant COCO1_BASIC_ROM                  : string := "bas11.hex";
   --constant COCO1_BASIC_ROM                  : string := "bas12.hex";
