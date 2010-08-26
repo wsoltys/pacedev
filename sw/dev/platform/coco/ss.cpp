@@ -17,14 +17,18 @@
 typedef unsigned char BYTE;
 
 BYTE mem[64*1024];
-BYTE coco_font_data[256][TRS_CHAR_HEIGHT];
+BYTE coco_font_data[256][16];
 
 BYTE tiledata[256][16];
 
+char filename[128];
 void main (int argc, char *argv[])
 {
 	FILE *fp;
 
+  if (--argc == 0)
+    exit (0);
+    
 	// read cpu memory dump	
 	fp = fopen (MEM_NAME, "rb");
 	if (fp)
@@ -34,9 +38,20 @@ void main (int argc, char *argv[])
   }
 
   // read font data
-  fp = fopen ("coco_font.bin", "rb");
+  sprintf (filename, "%s_uc.bin", argv[1]);
+  fp = fopen (filename, "rb");
   if (!fp) exit (0);
-  fread (coco_font_data, 256*TRS_CHAR_HEIGHT, 1, fp);
+  fread (&coco_font_data[0], 64*16, 1, fp);
+  fclose (fp);
+  sprintf (filename, "%s_lc.bin", argv[1]);
+  fp = fopen (filename, "rb");
+  if (!fp) exit (0);
+  fread (&coco_font_data[0x40], 32*16, 1, fp);
+  fclose (fp);
+  sprintf (filename, "semi.bin", argv[1]);
+  fp = fopen (filename, "rb");
+  if (!fp) exit (0);
+  fread (&coco_font_data[0x60], 80*16, 1, fp);
   fclose (fp);
 
   // for now, let's re-arrange the font data
@@ -65,15 +80,15 @@ void main (int argc, char *argv[])
       tiledata[i][j] ^= mask;
   }
 
-  fp = fopen ("tiledata.bin", "wb");
-  if (!fp) exit (0);
-  fwrite (tiledata, 256*16, 1, fp);
-  fclose (fp);
+  //fp = fopen ("tiledata.bin", "wb");
+  //if (!fp) exit (0);
+  //fwrite (tiledata, 256*16, 1, fp);
+  //fclose (fp);
 
-  fp = fopen ("tiledata_64.bin", "wb");
-  if (!fp) exit (0);
-  fwrite (&tiledata[64], 64*16, 1, fp);
-  fclose (fp);
+  //fp = fopen ("tiledata_64.bin", "wb");
+  //if (!fp) exit (0);
+  //fwrite (&tiledata[64], 64*16, 1, fp);
+  //fclose (fp);
 
 	allegro_init ();
 	if (install_keyboard () != 0)

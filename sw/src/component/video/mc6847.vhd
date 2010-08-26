@@ -7,8 +7,10 @@ use ieee.numeric_std.all;
 entity mc6847 is
 	generic
 	(
-    CVBS_NOT_VGA  : boolean := true;
-		CHAR_ROM_FILE	: string := ""
+		T1_VARIANT      : boolean := false;
+		CHAR_ROM_FILE	  : string := "";
+		
+    CVBS_NOT_VGA    : boolean := true
 	);
 	port
 	(
@@ -149,7 +151,7 @@ architecture SYN of mc6847 is
   signal da0_int              : std_logic_vector(3 downto 0);
 
   -- character rom signals
-  signal char_addr            : std_logic_vector(9 downto 0);
+  signal char_addr            : std_logic_vector(10 downto 0);
   signal char_data            : std_logic_vector(7 downto 0);
 	signal cvbs_linebuf_we_r    : std_logic;
 	signal cvbs_linebuf_addr_r  : std_logic_vector(8 downto 0);
@@ -367,7 +369,7 @@ begin
 			end if;
 
       -- generate character rom address
-      char_addr <= cvbs_dd(5 downto 0) & row_v(3 downto 0);
+      char_addr <= '0' & cvbs_dd(5 downto 0) & row_v(3 downto 0);
 
       -- generate pixel from character rom data
       -- *** replace this with a shift register
@@ -546,12 +548,13 @@ begin
 		);
 
   -- Character ROM
+  -- - technically the rom size is 1KB or 1.5KB (T1)
   charrom_inst : entity work.sprom
 		generic map
 		(
 			init_file				=> CHAR_ROM_FILE,
-			numwords_a			=> 1024,
-			widthad_a				=> 10
+			numwords_a			=> 2048,
+			widthad_a				=> 11
 		)                               
     port map
     (

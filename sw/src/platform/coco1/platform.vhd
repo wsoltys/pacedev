@@ -180,7 +180,7 @@ begin
   --  Clocking
   --
 
-	-- produce a PAL clock enable
+	-- produce a PAL/NTSC clock enable
 	process (clk_57M272, platform_rst)
 		subtype count_t is integer range 0 to 3;
 		variable count : count_t := 0;
@@ -378,8 +378,10 @@ begin
   vdg_inst : entity work.mc6847
 		generic map
 		(
-      CVBS_NOT_VGA  => COCO1_CVBS,
-			CHAR_ROM_FILE => COCO1_SOURCE_ROOT_DIR & "roms/mc6847rom.hex"
+      T1_VARIANT    => false,
+			CHAR_ROM_FILE => COCO1_SOURCE_ROOT_DIR & "roms/" & COCO1_MC6847_ROM,
+      
+      CVBS_NOT_VGA  => COCO1_CVBS
 		)
     port map
     (
