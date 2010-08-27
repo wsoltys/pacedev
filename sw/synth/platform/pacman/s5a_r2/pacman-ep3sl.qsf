@@ -2133,6 +2133,10 @@ set_instance_assignment -name D6_DELAY 4 -to ddr64_clk_n[1]
 set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_hsync
 set_global_assignment -name ENABLE_SIGNALTAP ON
 set_global_assignment -name USE_SIGNALTAP_FILE cpu.stp
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_hsync
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_vsync
+set_location_assignment PIN_B10 -to vao_m1
+set_location_assignment PIN_A11 -to vao_m2
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sdram_pkg.vhd
@@ -2143,11 +2147,11 @@ set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controlle
 set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2/target_pkg_ep3sl.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/platform_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../device/stratixiii/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../device/stratixiii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../device/stratixiii/dpram.vhd
 set_global_assignment -name VHDL_FILE ../../../device/stratixiii/spram.vhd
 set_global_assignment -name VHDL_FILE "project_pkg-ep3sl.vhd"
-set_global_assignment -name QIP_FILE ../../midway8080/invaders/s5a_r2/ep3sl_pll.qip
 set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/InputMapper.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
@@ -2174,8 +2178,4 @@ set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/platform.v
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2/target_top_ep3sl.vhd
 set_global_assignment -name SIGNALTAP_FILE cpu.stp
-set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_hsync
-set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_vsync
-set_location_assignment PIN_B10 -to vao_m1
-set_location_assignment PIN_A11 -to vao_m2
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

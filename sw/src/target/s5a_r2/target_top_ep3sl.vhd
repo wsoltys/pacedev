@@ -176,19 +176,73 @@ begin
 	clkrst_i.arst_n <= not clkrst_i.arst;
 
   BLK_CLOCKING : block
-  begin
   
-    pll_inst : entity work.ep3sl_pll
-      port map
+    component pll is
+      generic
       (
-        inclk0  => clk_24M,
-        c0      => open,              -- 108MHz
-        c1      => clkrst_i.clk(1),   -- 108MHz
-        c2      => clkrst_i.clk(0),   -- 40MHz
-        locked  => pll_locked
-      );
+        -- INCLK
+        INCLK0_INPUT_FREQUENCY  : natural;
 
-    --vo_idck_n <= '0';
+        -- CLK0
+        CLK0_DIVIDE_BY      : natural := 1;
+        CLK0_DUTY_CYCLE     : natural := 50;
+        CLK0_MULTIPLY_BY    : natural := 1;
+        CLK0_PHASE_SHIFT    : string := "0";
+
+        -- CLK1
+        CLK1_DIVIDE_BY      : natural := 1;
+        CLK1_DUTY_CYCLE     : natural := 50;
+        CLK1_MULTIPLY_BY    : natural := 1;
+        CLK1_PHASE_SHIFT    : string := "0"
+      );
+      port
+      (
+        inclk0							: in std_logic := '0';
+        c0		    					: out std_logic;
+        c1		    					: out std_logic; 
+        c2		    					: out std_logic;
+        locked		    			: out std_logic 
+      );
+    end component pll;
+
+  begin
+
+    GEN_PLL : if PACE_HAS_PLL generate
+    
+      pll_inst : pll
+        generic map
+        (
+          -- INCLK0
+          INCLK0_INPUT_FREQUENCY  => 41666,
+
+          -- CLK0
+          CLK0_DIVIDE_BY          => PACE_CLK0_DIVIDE_BY,
+          CLK0_MULTIPLY_BY        => PACE_CLK0_MULTIPLY_BY,
+      
+          -- CLK1
+          CLK1_DIVIDE_BY          => PACE_CLK1_DIVIDE_BY,
+          CLK1_MULTIPLY_BY        => PACE_CLK1_MULTIPLY_BY
+        )
+        port map
+        (
+          inclk0  => clk_24M,
+          c0      => open,              -- 108MHz
+          c1      => clkrst_i.clk(1),   -- 108MHz
+          c2      => clkrst_i.clk(0),   -- 40MHz
+          locked  => pll_locked
+        );
+    
+        --vo_idck_n <= '0';
+        
+    end generate GEN_PLL;
+	
+    GEN_NO_PLL : if not PACE_HAS_PLL generate
+
+      -- feed input clocks into PACE core
+      clkrst_i.clk(0) <= clk_24M;
+      clkrst_i.clk(1) <= clk_24M;
+        
+    end generate GEN_NO_PLL;
 
   end block BLK_CLOCKING;
 
