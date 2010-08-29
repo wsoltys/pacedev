@@ -124,7 +124,6 @@ architecture SYN of mc6847 is
   
   -- VGA signals
 
-	alias vga_pix_clk						: std_logic is clk;		-- PAL/NTSC*4
   signal vga_hsync            : std_logic;
   signal vga_vsync            : std_logic;
   signal vga_hblank           : std_logic;
@@ -134,7 +133,7 @@ architecture SYN of mc6847 is
 		
 	-- CVBS signals
 	
-	signal cvbs_pix_clk					: std_logic;	        -- PAL/NTSC*2
+	signal cvbs_clk_ena					: std_logic;	        -- PAL/NTSC*2
   signal cvbs_hsync           : std_logic;
   signal cvbs_vsync           : std_logic;
   signal cvbs_hblank          : std_logic;
@@ -145,7 +144,8 @@ architecture SYN of mc6847 is
 	signal cvbs_data						: std_logic_vector(7 downto 0); -- CVBS data out
 	--signal semi4_dd             : std_logic_vector(7 downto 0);
 	signal semi6_dd             : std_logic_vector(7 downto 0);
-
+  signal g8_dd                : std_logic_vector(7 downto 0);
+  
   alias hs_int     	          : std_logic is cvbs_hblank;
   alias fs_int     	          : std_logic is cvbs_vblank;
   signal da0_int              : std_logic_vector(3 downto 0);
@@ -174,24 +174,26 @@ begin
   css_s <= DEBUG_CSS when BUILD_DEBUG else css;
   inv_s <= DEBUG_INV when BUILD_DEBUG else inv;
 
-  PROC_VGA : process (vga_pix_clk, reset)
+  -- generate horizontal timing for VGA
+  -- generate line buffer address for reading VGA data
+  PROC_VGA : process (clk, reset)
     variable h_count : integer range 0 to H_TOTAL_PER_LINE;
     variable pix_count : std_logic_vector(7 downto 0);
-    variable old_vga_vblank : std_logic;
+    variable vga_vblank_r : std_logic;
   begin
     if reset = '1' then
       h_count := 0;
       vga_hsync <= '1';
       vga_vsync <= '1';
       vga_hblank <= '0';
-      cvbs_pix_clk <= '0';
+      cvbs_clk_ena <= '0';
 
-    elsif rising_edge (vga_pix_clk) and clk_ena = '1' then
+    elsif rising_edge (clk) and clk_ena = '1' then
 
-      cvbs_pix_clk <= not cvbs_pix_clk;
+      cvbs_clk_ena <= not cvbs_clk_ena;
 
       -- start hsync when cvbs comes out of vblank
-      if old_vga_vblank = '1' and vga_vblank = '0' then
+      if vga_vblank_r = '1' and vga_vblank = '0' then
         h_count := 0;
       else
         if h_count = H_TOTAL_PER_LINE then
@@ -226,12 +228,12 @@ begin
       -- - alternate every 2nd line
       vga_linebuf_addr <= (not v_count(0)) & pix_count;
 
-      old_vga_vblank := vga_vblank;
+      vga_vblank_r := vga_vblank;
 
     end if;
   end process;
 
-  PROC_CVBS : process (cvbs_pix_clk, reset)
+  PROC_CVBS : process (cvbs_clk_ena, reset)
     variable h_count : integer range 0 to H_TOTAL_PER_LINE;
     variable pix_count : std_logic_vector(7 downto 0);
     variable old_cvbs_hblank : std_logic := '0';
@@ -242,6 +244,10 @@ begin
     --variable row_v : std_logic_vector(3 downto 0);
     -- for debug only
     variable active_v_count : std_logic_vector(v_count'range);
+    variable an_s_r : std_logic_vector(3 downto 0);
+    alias an_s_rr : std_logic is an_s_r(an_s_r'left);
+    variable inv_r : std_logic_vector(3 downto 0);
+    alias inv_rr : std_logic is inv_r(inv_r'left);
   begin
     if reset = '1' then
 
@@ -256,8 +262,10 @@ begin
       da0_int <= (others => '0');
       old_cvbs_hblank := '0';
       row_v := (others => '0');
+      an_s_r := (others => '0');
+      inv_r := (others => '0');
 
-    elsif rising_edge (cvbs_pix_clk) then
+    elsif rising_edge (cvbs_clk_ena) then
 
       if h_count = H_TOTAL_PER_LINE then
         h_count := 0;
@@ -339,6 +347,7 @@ begin
             end if;
           else
             cvbs_dd <= dd;
+            g8_dd <= dd;
             if row_v < 6 then
               semi4_dd := dd(3) & dd(3) & dd(3) & dd(3) & dd(2) & dd(2) & dd(2) & dd(2);
             else
@@ -352,6 +361,8 @@ begin
               semi6_dd := dd(1) & dd(1) & dd(1) & dd(1) & dd(0) & dd(0) & dd(0) & dd(0);
             end if;
           end if;
+        else
+          g8_dd <= g8_dd(g8_dd'left-1 downto 0) & '0';
         end if;
 				cvbs_dd_r <= cvbs_dd;
 				
@@ -396,11 +407,11 @@ begin
       -- alpha/graphics mode
       if an_g_s = '0' then
         -- alphanumeric & semi-graphics mode
-        if an_s_s = '0' then
+        if an_s_rr = '0' then
           -- alphanumeric
           if intn_ext_s = '0' then
             -- internal rom
-            if inv_s = '0' then
+            if inv_rr = '0' then
               -- normal video
               if luma = '1' then
                 cvbs_data <= "01" & css_s & css_s & "1" & not css_s & "00"; -- green/orange
@@ -430,32 +441,41 @@ begin
             semi6_dd := semi6_dd(semi6_dd'left-1 downto 0) & '0';
             chroma := css_s & cvbs_dd_r(7 downto 6);
           end if; -- semi-4/6
-          if luma = '1' then
-            case chroma is
-              when "000" => -- green
-                cvbs_data <= "01001100";
-              when "001" => -- yellow
-                cvbs_data <= "01111100";
-              when "010" => -- blue
-                cvbs_data <= "01000011";
-              when "011" => -- red
-                cvbs_data <= "01110000";
-              when "100" => -- white
-                cvbs_data <= "01111111";
-              when "101" => -- cyan
-                cvbs_data <= "01001111";
-              when "110" => -- magenta
-                cvbs_data <= "01110011";
-              when others => -- orange
-                cvbs_data <= "01111000";
-            end case;
-          else
-            cvbs_data <= "01000000"; -- black
-          end if;
         end if; -- alphanumeric/semi-graphics
       else
         -- graphics mode
+        case gm is
+          when others =>
+            luma := g8_dd(7);
+            chroma := "100";  -- white
+        end case;
       end if; -- alpha/graphics mode
+
+      if luma = '1' then
+        case chroma is
+          when "000" => -- green
+            cvbs_data <= "01001100";
+          when "001" => -- yellow
+            cvbs_data <= "01111100";
+          when "010" => -- blue
+            cvbs_data <= "01000011";
+          when "011" => -- red
+            cvbs_data <= "01110000";
+          when "100" => -- white
+            cvbs_data <= "01111111";
+          when "101" => -- cyan
+            cvbs_data <= "01001111";
+          when "110" => -- magenta
+            cvbs_data <= "01110011";
+          when others => -- orange
+            cvbs_data <= "01111000";
+        end case;
+      else
+        cvbs_data <= "01000000"; -- black
+      end if;
+      
+      an_s_r := an_s_r(an_s_r'left-1 downto 0) & an_s_s;
+      inv_r := inv_r(inv_r'left-1 downto 0) & inv_s;
       
       -- generate linebuffer address
       -- - alternate every line
@@ -487,9 +507,9 @@ begin
 
 	GEN_CVBS_OUTPUT : if CVBS_NOT_VGA generate
 
-		process (cvbs_pix_clk)
+		process (cvbs_clk_ena)
 		begin
-			if rising_edge(cvbs_pix_clk) then
+			if rising_edge(cvbs_clk_ena) then
 				if cvbs_hblank = '0' and cvbs_vblank = '0' then				
 					red <= cvbs_data(5 downto 4) & "000000";
 					green <= cvbs_data(3 downto 2) & "000000";
@@ -509,9 +529,9 @@ begin
 	
 	GEN_VGA_OUTPUT : if VGA_NOT_CVBS generate
 	
-	  process (vga_pix_clk)
+	  process (clk)
 	  begin
-	    if rising_edge(vga_pix_clk) and clk_ena = '1' then
+	    if rising_edge(clk) and clk_ena = '1' then
 	      if (vga_hblank = '0' and vga_vblank = '0') then
 	        red <= vga_data(5 downto 4) & "000000";
 	        green <= vga_data(3 downto 2) & "000000";
@@ -537,12 +557,12 @@ begin
 		)
 		port map
 		(
-			wrclock		=> cvbs_pix_clk,
+			wrclock		=> cvbs_clk_ena,
 			wren			=> cvbs_linebuf_we_rr,
 			wraddress	=> cvbs_linebuf_addr_rr,
 			data			=> cvbs_data,
 
-			rdclock		=> vga_pix_clk,
+			rdclock		=> clk,
 			rdaddress	=> vga_linebuf_addr,
 			q					=> vga_data
 		);
