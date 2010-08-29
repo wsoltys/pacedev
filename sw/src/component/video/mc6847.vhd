@@ -144,7 +144,9 @@ architecture SYN of mc6847 is
 	signal cvbs_data						: std_logic_vector(7 downto 0); -- CVBS data out
 	--signal semi4_dd             : std_logic_vector(7 downto 0);
 	signal semi6_dd             : std_logic_vector(7 downto 0);
-  signal g8_dd                : std_logic_vector(7 downto 0);
+  signal rg123_dd             : std_logic_vector(7 downto 0);
+  signal rg6_dd               : std_logic_vector(7 downto 0);
+  signal cg236_dd             : std_logic_vector(7 downto 0);
   
   alias hs_int     	          : std_logic is cvbs_hblank;
   alias fs_int     	          : std_logic is cvbs_vblank;
@@ -323,6 +325,11 @@ begin
         end if;
 
         -- latch data on DD pins
+        if pix_count(3 downto 0) = "0000" then
+          rg123_dd <= dd;
+        elsif pix_count(0) = '1' then
+          rg123_dd <= rg123_dd(rg123_dd'left-1 downto 0) & '0';
+        end if;
         if pix_count(2 downto 0) = "000" then
           if BUILD_DEBUG then
             --cvbs_dd <= active_v_count(6 downto 4) & pix_count(7 downto 3);
@@ -347,7 +354,8 @@ begin
             end if;
           else
             cvbs_dd <= dd;
-            g8_dd <= dd;
+            rg6_dd <= dd;
+            cg236_dd <= dd;
             if row_v < 6 then
               semi4_dd := dd(3) & dd(3) & dd(3) & dd(3) & dd(2) & dd(2) & dd(2) & dd(2);
             else
@@ -362,7 +370,10 @@ begin
             end if;
           end if;
         else
-          g8_dd <= g8_dd(g8_dd'left-1 downto 0) & '0';
+          rg6_dd <= rg6_dd(rg6_dd'left-1 downto 0) & '0';
+          if pix_count(0) = '1' then
+            cg236_dd <= cg236_dd(cg236_dd'left-2 downto 0) & "00";
+          end if;
         end if;
 				cvbs_dd_r <= cvbs_dd;
 				
@@ -411,22 +422,12 @@ begin
           -- alphanumeric
           if intn_ext_s = '0' then
             -- internal rom
-            if inv_rr = '0' then
-              -- normal video
-              if luma = '1' then
-                cvbs_data <= "01" & css_s & css_s & "1" & not css_s & "00"; -- green/orange
-              else
-                cvbs_data <= "01000000"; -- black (dark green/orange?)
-              end if;
-            else
-              -- inverse video
-              if luma = '1' then
-                cvbs_data <= "01000000"; -- black
-              else
-                cvbs_data <= "01" & css_s & css_s & "1" & not css_s & "00"; -- green/orange
-              end if;
+            chroma := (others => css_s);
+            if inv_rr = '1' then
+              luma := not luma;
             end if; -- normal/inverse
           else
+            -- external ROM?!?
           end if; -- internal/external
         else
           -- semi-graphics
@@ -445,9 +446,16 @@ begin
       else
         -- graphics mode
         case gm is
-          when others =>
-            luma := g8_dd(7);
-            chroma := "100";  -- white
+          when "000" =>                     -- CG1 64x64x4
+          when "001" | "011" | "101" =>     -- RG1/2/3 128x64/96/192x2
+            luma := rg123_dd(7);
+            chroma := css_s & "00";         -- green/buff
+          when "010" | "100" | "110" =>     -- CG2/3/6 128x64/96/192x4
+            luma := '1';
+            chroma := css_s & cg236_dd(7 downto 6);
+          when others =>                    -- RG6 256x192x2
+            luma := rg6_dd(7);
+            chroma := css_s & "00";         -- green/buff
         end case;
       end if; -- alpha/graphics mode
 
@@ -471,7 +479,12 @@ begin
             cvbs_data <= "01111000";
         end case;
       else
-        cvbs_data <= "01000000"; -- black
+        -- not quite black in alpha mode
+        if an_g_s = '0' and an_s_rr = '0' then
+          cvbs_data <= "010" & css_s & "0100"; -- dark green/orange
+        else
+          cvbs_data <= "01000000"; -- black
+        end if;
       end if;
       
       an_s_r := an_s_r(an_s_r'left-1 downto 0) & an_s_s;
@@ -503,7 +516,8 @@ begin
 
   hs_n <= not hs_int;
   fs_n <= not fs_int;
-  da0 <= da0_int(3);      -- fudge - divide by 8
+  da0 <= da0_int(3); -- when an_g_s = '0' else
+         --da0_int(1) when gm = "000" else
 
 	GEN_CVBS_OUTPUT : if CVBS_NOT_VGA generate
 

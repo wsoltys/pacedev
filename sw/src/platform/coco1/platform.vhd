@@ -601,7 +601,7 @@ begin
     -- only support 16x16KB cartridges atm
     flash_o.a(flash_o.a'left downto 18) <= (others => '0');
     flash_o.a(17 downto 14) <= switches_i(8 downto 5);
-    flash_o.a(13 downto 0) <= cpu_a;
+    flash_o.a(13 downto 0) <= cpu_a(13 downto 0);
     cart_d_o <= flash_i.d(cart_d_o'range);
     flash_o.cs <= cart_cs;
     flash_o.oe <= cpu_r_wn;

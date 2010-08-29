@@ -48,9 +48,9 @@ package project_pkg is
   --constant COCO1_BASIC_ROM                  : string := "bas12.hex";
   --constant COCO1_EXTENDED_BASIC_ROM         : string := "extbas10.hex";
   constant COCO1_EXTENDED_BASIC_ROM         : string := "extbas11.hex";
-  constant COCO1_EXTENDED_COLOR_BASIC       : boolean := false;
+  constant COCO1_EXTENDED_COLOR_BASIC       : boolean := true;
   
-  constant COCO1_CART_INTERNAL              : boolean := true;
+  constant COCO1_CART_INTERNAL              : boolean := false;
   constant COCO1_CART_WIDTHAD               : integer := 13;
   constant COCO1_CART_NAME                  : string := "clowns.hex";     -- 8KB
   --constant COCO1_CART_NAME                  : string := "dod.hex";        -- 8KB
