@@ -146,11 +146,12 @@ architecture SYN of mc6847 is
 	signal semi6_dd             : std_logic_vector(7 downto 0);
   signal rg123_dd             : std_logic_vector(7 downto 0);
   signal rg6_dd               : std_logic_vector(7 downto 0);
+  signal cg1_dd               : std_logic_vector(7 downto 0);
   signal cg236_dd             : std_logic_vector(7 downto 0);
   
   alias hs_int     	          : std_logic is cvbs_hblank;
   alias fs_int     	          : std_logic is cvbs_vblank;
-  signal da0_int              : std_logic_vector(3 downto 0);
+  signal da0_int              : std_logic_vector(4 downto 0);
 
   -- character rom signals
   signal char_addr            : std_logic_vector(10 downto 0);
@@ -326,7 +327,10 @@ begin
 
         -- latch data on DD pins
         if pix_count(3 downto 0) = "0000" then
+          cg1_dd <= dd;
           rg123_dd <= dd;
+        elsif pix_count(1 downto 0) = "11" then
+          cg1_dd <= cg1_dd(cg1_dd'left-2 downto 0) & "00";
         elsif pix_count(0) = '1' then
           rg123_dd <= rg123_dd(rg123_dd'left-1 downto 0) & '0';
         end if;
@@ -385,7 +389,7 @@ begin
 			elsif cvbs_hblank = '1' then
         da0_int <= (others => '0');
       elsif old_cvbs_hblank = '1' and cvbs_hblank = '0' then
-				da0_int <= "1000";
+				da0_int <= "01000";
       else
         da0_int <= da0_int + 1;
 			end if;
@@ -445,8 +449,10 @@ begin
         end if; -- alphanumeric/semi-graphics
       else
         -- graphics mode
-        case gm is
+        case gm_s is
           when "000" =>                     -- CG1 64x64x4
+            luma := '1';
+            chroma := css_s & cg1_dd(7 downto 6);
           when "001" | "011" | "101" =>     -- RG1/2/3 128x64/96/192x2
             luma := rg123_dd(7);
             chroma := css_s & "00";         -- green/buff
@@ -516,8 +522,8 @@ begin
 
   hs_n <= not hs_int;
   fs_n <= not fs_int;
-  da0 <= da0_int(3); -- when an_g_s = '0' else
-         --da0_int(1) when gm = "000" else
+  da0 <= da0_int(4) when (gm_s = "001" or gm_s = "011" or gm_s = "101") else
+         da0_int(3);
 
 	GEN_CVBS_OUTPUT : if CVBS_NOT_VGA generate
 

@@ -42,9 +42,9 @@ architecture SYN of mc6883 is
 	type DivisorArrayType is array (natural range <>) of DivisorType;
 	-- Division variables for V0=0, V2..V1=sel
 	--constant y_divisor		: DivisorArrayType(0 to 3) := (12, 3, 2, 1);
-	constant y_divisor		: DivisorArrayType(0 to 3) := (11, 2, 1, 0);
 	-- Division variable for V0=1, v2..V1=sel
-	constant x_divisor		: DivisorArrayType(0 to 3) := (3, 2, 1, 1);
+	--constant x_divisor		: DivisorArrayType(0 to 3) := (3, 2, 1, 1);
+	constant mode_rows    : DivisorArrayType(0 to 7) := (12-1, 3-1, 3-1, 2-1, 2-1, 1-1, 1-1, 1-1);
 	
   -- clocks
   signal clk_7M15909    : std_logic;
@@ -206,7 +206,7 @@ begin
           rising_edge_hs <= '1';
         end if;
         old_hs := hs_n;
-     end if; -- clk_ena
+      end if; -- clk_ena
     end if;
   end process;
 
@@ -233,7 +233,7 @@ begin
         if rising_edge_hs = '1' and da0 = '1' then
           b_int(15 downto 9) <= f(6 downto 0);
           b_int(8 downto 0) <= (others => '0');
-          yscale := y_divisor(conv_integer(v(2 downto 1)));
+          yscale := mode_rows(conv_integer(v(2 downto 0)));
           saved_b := f(6 downto 0) & "000000000";
         -- horizontal blanking - HS low
         -- resets bits B1-B3/4
@@ -244,7 +244,7 @@ begin
           b_int(3 downto 1) <= (others => '0');
           -- coming out of HS?
           if old_hs = '1' then
-            if yscale = y_divisor(conv_integer(v(2 downto 1))) then
+            if yscale = mode_rows(conv_integer(v(2 downto 0))) then
               yscale := 0;
               saved_b := b_int;
             else
