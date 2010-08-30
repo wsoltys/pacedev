@@ -226,9 +226,9 @@ begin
         port map
         (
           inclk0  => clk_24M,
-          c0      => open,              -- 108MHz
-          c1      => clkrst_i.clk(1),   -- 108MHz
-          c2      => clkrst_i.clk(0),   -- 40MHz
+          c0      => open,
+          c1      => clkrst_i.clk(1),
+          c2      => clkrst_i.clk(0),
           locked  => pll_locked
         );
     
@@ -410,6 +410,29 @@ begin
       target_o          => target_o
     );
 
+  -- emulate some SRAM
+  GEN_SRAM : if S5AR2_EMULATE_SRAM generate
+    signal wren : std_logic := '0';
+  begin
+    wren <= sram_o.cs and sram_o.we;
+    sram_inst : entity work.spram
+      generic map
+      (
+        numwords_a		=> 2**S5AR2_EMULATED_SRAM_WIDTH_AD,
+        widthad_a			=> S5AR2_EMULATED_SRAM_WIDTH_AD,
+        width_a				=> S5AR2_EMULATED_SRAM_WIDTH
+      )
+      port map
+      (
+        clock		      => clkrst_i.clk(0),
+        address		    => sram_o.a(S5AR2_EMULATED_SRAM_WIDTH_AD-1 downto 0),
+        data		      => sram_o.d(S5AR2_EMULATED_SRAM_WIDTH-1 downto 0),
+        wren		      => wren,
+        q		          => sram_i.d(S5AR2_EMULATED_SRAM_WIDTH-1 downto 0)
+      );
+    sram_i.d(sram_i.d'left downto S5AR2_EMULATED_SRAM_WIDTH) <= (others => '0');
+  end generate GEN_SRAM;
+  
   BLK_CHASER : block
   begin
     -- flash the led so we know it's alive

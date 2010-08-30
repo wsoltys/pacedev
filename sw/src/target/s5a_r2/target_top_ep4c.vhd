@@ -5,6 +5,7 @@ library altera;
 use altera.altera_syn_attributes.all;
 
 library work;
+use work.project_pkg.all;
 
 entity target_top_ep4c is
 	port
@@ -232,7 +233,16 @@ begin
       generic map
       (
         clock_speed	=> ONBOARD_CLOCK_SPEED,
-        dsel        => '0'
+        dsel        => '0',
+
+        -- DE generation
+        DE_GEN      => S5AR2_DE_GEN,
+        VS_POL      => S5AR2_VS_POL,
+        HS_POL      => S5AR2_HS_POL,
+        DE_DLY      => S5AR2_DE_DLY,
+        DE_TOP      => S5AR2_DE_TOP,
+        DE_CNT      => S5AR2_DE_CNT,
+        DE_LIN      => S5AR2_DE_LIN
       )
       port map
       (

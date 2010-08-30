@@ -129,7 +129,7 @@ architecture SYN of platform is
   -- PIA-B signals
   signal pia_1_cs				: std_logic;
   signal pia_1_datao  	: std_logic_vector(7 downto 0);
-
+  
 	-- SAM signals
   signal sam_cs					: std_logic;
 	signal sam_a				  : std_logic_vector(15 downto 0);
@@ -160,10 +160,14 @@ architecture SYN of platform is
   signal vdg_sram_cs    : std_logic;
 
   -- cartridge signals
-  signal cart_n           : std_logic;
-  signal cart_cs          : std_logic;
-  signal cart_d_o         : std_logic_vector(7 downto 0);
-  
+  signal cart_n         : std_logic;
+  signal cart_cs        : std_logic;
+  signal cart_d_o       : std_logic_vector(7 downto 0);
+
+  -- other coco signals
+  signal dac_data       : std_logic_vector(5 downto 0);
+  signal sel            : std_logic_vector(1 downto 0);
+
   -- only for test vga controller
 	signal vga_clk_s				: std_logic;
 	
@@ -480,14 +484,14 @@ begin
         pa_oe				=> open,
         ca1       	=> hs_n,
         ca2_i      	=> 'X',
-        ca2_o				=> open,  -- SEL1
+        ca2_o				=> sel(0),
         ca2_oe			=> open,
         pb_i				=> (others => 'X'),
         pb_o       	=> pb_o,
         pb_oe				=> open,
         cb1       	=> fs_n,
         cb2_i      	=> 'X',
-        cb2_o				=> open,  -- SEL2
+        cb2_o				=> sel(1),
         cb2_oe			=> open
       );
   end block BLK_PIA_0;
@@ -503,7 +507,7 @@ begin
 
     --pa_i(0) <= casin;
     ser_o.txd <= pa_o(1);
-    --dac_data <= pa_o(7 downto 2);
+    dac_data <= pa_o(7 downto 2);
 
     pb_i(0) <= ser_i.rxd;
     --sndout <= pb_o(1);
@@ -544,6 +548,11 @@ begin
         cb2_oe			=> open
       );
   end block BLK_PIA_1;
+
+  -- handle joysticks
+  -- - get analogue value from digital source (eg. NGC controller)
+  --joy(0) <= '1' when inputs_i.analogue(1)(9 downto 4) >= dac_data else '0';
+  --joy(1) <= '1' when inputs_i.analogue(2)(9 downto 4) >= dac_data else '0';
   
   -- COLOR BASIC ROM
   basrom_inst : entity work.sprom

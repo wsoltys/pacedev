@@ -14,23 +14,27 @@ package project_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 	
-  -- Reference clock is 50MHz
+  -- Reference clock is 24MHz
 	constant PACE_HAS_PLL								      : boolean := true;
-  constant PACE_HAS_FLASH                   : boolean := true;
-  constant PACE_HAS_SRAM                    : boolean := true;
+  constant PACE_HAS_FLASH                   : boolean := false;
+  --constant PACE_HAS_SRAM                    : boolean := false;
   constant PACE_HAS_SDRAM                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := false;
 
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
   
-  -- Reference clock is 50MHz
+  -- Reference clock is 24MHz
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_NONE;
-  --constant PACE_CLK0_DIVIDE_BY              : natural := 25;
-  --constant PACE_CLK0_MULTIPLY_BY            : natural := 16;  		-- 50*16/25 = 32MHz
-  constant PACE_CLK0_DIVIDE_BY              : natural := 28;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 19;  		-- 50*19/28 = 33.928571MHz
-  constant PACE_CLK1_DIVIDE_BY              : natural := 1;
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 1;  			-- 50*1/1 = 50Mhz
+  constant PACE_CLK0_DIVIDE_BY              : natural := 3;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 4;  	    -- 24*4/3 = 32MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 12;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 25;  		-- 24*25/12 = 50Mhz
+
+  -- S5Ar2-specific constants
+
+  constant S5AR2_EMULATE_SRAM               : boolean := true;
+  constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
+  constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 16;
 
 	-- C64-specific constants
 
@@ -53,6 +57,11 @@ package project_pkg is
 	-- 1541C firmware (track 0 sensor enabled)
 	--constant C64_1541_ROM_NAME					      : string := "25196801";
 	constant C64_1541_ROM_NAME					      : string := "25196802";
+
+  --
+  -- derived - do not edit
+  --
+  constant PACE_HAS_SRAM                    : boolean := S5AR2_EMULATE_SRAM;
 
   type from_PROJECT_IO_t is record
     not_used  : std_logic;
