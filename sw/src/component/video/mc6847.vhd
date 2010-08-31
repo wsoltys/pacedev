@@ -1,7 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
-use ieee.std_logic_arith.all;
 use ieee.numeric_std.all;
 
 entity mc6847 is
@@ -91,28 +90,6 @@ architecture SYN of mc6847 is
   constant V2_BOTTOM_BORDER    : integer := V2_VIDEO + 27;
   constant V2_TOTAL_PER_FIELD  : integer := V2_BOTTOM_BORDER;
 
-	component linebuf_dpram is
-		port
-		(
-			data			: in std_logic_vector (7 downto 0);
-			wren			: in std_logic  := '1';
-			wraddress	: in std_logic_vector (8 downto 0);
-			rdaddress	: in std_logic_vector (8 downto 0);
-			wrclock		: in std_logic ;
-			rdclock		: in std_logic ;
-			q					: out std_logic_vector (7 downto 0)
-		);
-	end component;
-
-  component tiledata is
-  	port
-  	(
-  		address		: in std_logic_vector (11 downto 0);
-  		clock		  : in std_logic;
-  		q			    : out std_logic_vector (7 downto 0)
-  	);
-  end component;
-
   -- internal version of control ports
   
   signal an_g_s                 : std_logic;
@@ -124,6 +101,7 @@ architecture SYN of mc6847 is
   
   -- VGA signals
 
+	signal vga_clk_ena					: std_logic;
   signal vga_hsync            : std_logic;
   signal vga_vsync            : std_logic;
   signal vga_hblank           : std_logic;
@@ -140,27 +118,25 @@ architecture SYN of mc6847 is
   signal cvbs_vblank          : std_logic;
 	signal cvbs_linebuf_we			: std_logic;
 	signal cvbs_linebuf_addr		: std_logic_vector(8 downto 0);
-  signal cvbs_dd              : std_logic_vector(7 downto 0); -- CVBS data in latch
+
+  signal active_h_start       : std_logic := '0';	
+	signal l16_dd               : std_logic_vector(7 downto 0);
+	signal l32_dd               : std_logic_vector(7 downto 0);
+  signal dd_r                 	: std_logic_vector(7 downto 0);
+
 	signal cvbs_data						: std_logic_vector(7 downto 0); -- CVBS data out
-	--signal semi4_dd             : std_logic_vector(7 downto 0);
-	signal semi6_dd             : std_logic_vector(7 downto 0);
-  signal rg123_dd             : std_logic_vector(7 downto 0);
-  signal rg6_dd               : std_logic_vector(7 downto 0);
-  signal cg1_dd               : std_logic_vector(7 downto 0);
-  signal cg236_dd             : std_logic_vector(7 downto 0);
   
   alias hs_int     	          : std_logic is cvbs_hblank;
   alias fs_int     	          : std_logic is cvbs_vblank;
   signal da0_int              : std_logic_vector(4 downto 0);
 
   -- character rom signals
-  signal char_addr            : std_logic_vector(10 downto 0);
-  signal char_data            : std_logic_vector(7 downto 0);
+  signal char_a               : std_logic_vector(10 downto 0);
+  signal char_d_o             : std_logic_vector(7 downto 0);
 	signal cvbs_linebuf_we_r    : std_logic;
 	signal cvbs_linebuf_addr_r  : std_logic_vector(8 downto 0);
 	signal cvbs_linebuf_we_rr   : std_logic;
 	signal cvbs_linebuf_addr_rr : std_logic_vector(8 downto 0);
-	signal cvbs_dd_r						: std_logic_vector(7 downto 0);
 	
   -- used by both CVBS and VGA
   shared variable v_count : std_logic_vector(8 downto 0);
@@ -177,11 +153,28 @@ begin
   css_s <= DEBUG_CSS when BUILD_DEBUG else css;
   inv_s <= DEBUG_INV when BUILD_DEBUG else inv;
 
+  -- generate the clocks
+  PROC_CLOCKS : process (clk, reset)
+    variable toggle : std_logic := '0';
+  begin
+    if reset = '1' then
+      toggle := '0';
+      cvbs_clk_ena <= '0';
+    elsif rising_edge(clk) then
+      cvbs_clk_ena <= '0';  -- default
+      if clk_ena = '1' then
+        cvbs_clk_ena <= toggle;
+        toggle := not toggle;
+      end if;
+      vga_clk_ena <= clk_ena;
+    end if;
+  end process PROC_CLOCKS;
+  
   -- generate horizontal timing for VGA
   -- generate line buffer address for reading VGA data
   PROC_VGA : process (clk, reset)
     variable h_count : integer range 0 to H_TOTAL_PER_LINE;
-    variable pix_count : std_logic_vector(7 downto 0);
+    variable active_h_count : std_logic_vector(7 downto 0);
     variable vga_vblank_r : std_logic;
   begin
     if reset = '1' then
@@ -189,11 +182,8 @@ begin
       vga_hsync <= '1';
       vga_vsync <= '1';
       vga_hblank <= '0';
-      cvbs_clk_ena <= '0';
 
-    elsif rising_edge (clk) and clk_ena = '1' then
-
-      cvbs_clk_ena <= not cvbs_clk_ena;
+    elsif rising_edge (clk) and vga_clk_ena = '1' then
 
       -- start hsync when cvbs comes out of vblank
       if vga_vblank_r = '1' and vga_vblank = '0' then
@@ -213,13 +203,13 @@ begin
           null;
         elsif h_count = H_LEFT_BORDER then
           vga_hblank <= '0';
-          pix_count := (others => '0');
+          active_h_count := (others => '0');
         elsif h_count = H_VIDEO then
           vga_hblank <= '1';
         elsif h_count = H_RIGHT_BORDER then
           null;
         else
-          pix_count := pix_count + 1;
+          active_h_count := std_logic_vector(unsigned(active_h_count) + 1);
         end if;
 
       end if;
@@ -229,47 +219,42 @@ begin
 
       -- generate linebuffer address
       -- - alternate every 2nd line
-      vga_linebuf_addr <= (not v_count(0)) & pix_count;
+      vga_linebuf_addr <= (not v_count(0)) & active_h_count;
 
       vga_vblank_r := vga_vblank;
 
     end if;
   end process;
 
-  PROC_CVBS : process (cvbs_clk_ena, reset)
+  -- generate horizontal timing for CVBS
+  -- generate line buffer address for writing CVBS data
+  PROC_CVBS : process (clk, reset)
     variable h_count : integer range 0 to H_TOTAL_PER_LINE;
-    variable pix_count : std_logic_vector(7 downto 0);
-    variable old_cvbs_hblank : std_logic := '0';
-    variable semi4_dd : std_logic_vector(7 downto 0);
-    variable semi6_dd : std_logic_vector(7 downto 0);
-    variable luma : std_logic;
-    variable chroma : std_logic_vector(2 downto 0);
+    variable active_h_count : std_logic_vector(7 downto 0);
+    variable cvbs_hblank_r : std_logic := '0';
     --variable row_v : std_logic_vector(3 downto 0);
     -- for debug only
     variable active_v_count : std_logic_vector(v_count'range);
-    variable an_s_r : std_logic_vector(3 downto 0);
-    alias an_s_rr : std_logic is an_s_r(an_s_r'left);
-    variable inv_r : std_logic_vector(3 downto 0);
-    alias inv_rr : std_logic is inv_r(inv_r'left);
   begin
     if reset = '1' then
 
       h_count := H_TOTAL_PER_LINE;
-      v_count := conv_std_logic_vector(V2_TOTAL_PER_FIELD, 9);
-      pix_count := (others => '0');
+      v_count := std_logic_vector(to_unsigned(V2_TOTAL_PER_FIELD, v_count'length));
+      active_h_count := (others => '0');
+      active_h_start <= '0';
       cvbs_hsync <= '1';
       cvbs_vsync <= '1';
       cvbs_hblank <= '0';
       cvbs_vblank <= '1';
 			vga_vblank <= '1';
       da0_int <= (others => '0');
-      old_cvbs_hblank := '0';
+      cvbs_hblank_r := '0';
       row_v := (others => '0');
-      an_s_r := (others => '0');
-      inv_r := (others => '0');
+      
+    elsif rising_edge (clk) and cvbs_clk_ena = '1' then
 
-    elsif rising_edge (cvbs_clk_ena) then
-
+      active_h_start <= '0';      -- default
+      
       if h_count = H_TOTAL_PER_LINE then
         h_count := 0;
         if v_count = V2_TOTAL_PER_FIELD then
@@ -314,73 +299,28 @@ begin
         elsif h_count = H_BACK_PORCH then
         elsif h_count = H_LEFT_BORDER then
           cvbs_hblank <= '0';
-          pix_count := (others => '0');
+          active_h_count := (others => '0');
+          active_h_start <= '1';
         elsif h_count = H_VIDEO then
           cvbs_hblank <= '1';
           -- only needed for debug???
-          pix_count := pix_count + 1;
+          active_h_count := active_h_count + 1;
         elsif h_count = H_RIGHT_BORDER then
           null;
         else
-          pix_count := pix_count + 1;
+          active_h_count := active_h_count + 1;
         end if;
+      end if;
 
-        -- latch data on DD pins
-        if pix_count(3 downto 0) = "0000" then
-          cg1_dd <= dd;
-          rg123_dd <= dd;
-        elsif pix_count(1 downto 0) = "11" then
-          cg1_dd <= cg1_dd(cg1_dd'left-2 downto 0) & "00";
-        elsif pix_count(0) = '1' then
-          rg123_dd <= rg123_dd(rg123_dd'left-1 downto 0) & '0';
+      -- generate character rom address
+      char_a <= '0' & dd(5 downto 0) & row_v(3 downto 0);
+     
+      -- data latch/shift
+      if active_h_count(2 downto 0) = "000" then
+        l32_dd <= dd;
+        if active_h_count(3) = '0' then
+          l16_dd <= dd;
         end if;
-        if pix_count(2 downto 0) = "000" then
-          if BUILD_DEBUG then
-            --cvbs_dd <= active_v_count(6 downto 4) & pix_count(7 downto 3);
-            cvbs_dd <= active_v_count(6 downto 4) & 
-                        pix_count(7) & not pix_count(3) & pix_count(4) & not pix_count(6) & pix_count(5);
-            if row_v < 6 then
-              semi4_dd := pix_count(6) & pix_count(6) & pix_count(6) & pix_count(6) &
-                          pix_count(5) & pix_count(5) & pix_count(5) & pix_count(5);
-            else
-              semi4_dd := pix_count(4) & pix_count(4) & pix_count(4) & pix_count(4) &
-                          pix_count(3) & pix_count(3) & pix_count(3) & pix_count(3);
-            end if;
-            if row_v < 4 then
-              semi6_dd := active_v_count(4) & active_v_count(4) & active_v_count(4) & active_v_count(4) &
-                          pix_count(7) & pix_count(7) & pix_count(7) & pix_count(7);
-            elsif row_v < 8 then
-              semi6_dd := pix_count(6) & pix_count(6) & pix_count(6) & pix_count(6) &
-                          pix_count(5) & pix_count(5) & pix_count(5) & pix_count(5);
-            else
-              semi6_dd := pix_count(4) & pix_count(4) & pix_count(4) & pix_count(4) &
-                          pix_count(3) & pix_count(3) & pix_count(3) & pix_count(3);
-            end if;
-          else
-            cvbs_dd <= dd;
-            rg6_dd <= dd;
-            cg236_dd <= dd;
-            if row_v < 6 then
-              semi4_dd := dd(3) & dd(3) & dd(3) & dd(3) & dd(2) & dd(2) & dd(2) & dd(2);
-            else
-              semi4_dd := dd(1) & dd(1) & dd(1) & dd(1) & dd(0) & dd(0) & dd(0) & dd(0);
-            end if;
-            if row_v < 4 then
-              semi6_dd := dd(5) & dd(5) & dd(5) & dd(5) & dd(4) & dd(4) & dd(4) & dd(4);
-            elsif row_v < 8 then
-              semi6_dd := dd(3) & dd(3) & dd(3) & dd(3) & dd(2) & dd(2) & dd(2) & dd(2);
-            else
-              semi6_dd := dd(1) & dd(1) & dd(1) & dd(1) & dd(0) & dd(0) & dd(0) & dd(0);
-            end if;
-          end if;
-        else
-          rg6_dd <= rg6_dd(rg6_dd'left-1 downto 0) & '0';
-          if pix_count(0) = '1' then
-            cg236_dd <= cg236_dd(cg236_dd'left-2 downto 0) & "00";
-          end if;
-        end if;
-				cvbs_dd_r <= cvbs_dd;
-				
       end if;
 
 			-- DA0 high during FS
@@ -388,39 +328,104 @@ begin
 				da0_int <= (others => '1');
 			elsif cvbs_hblank = '1' then
         da0_int <= (others => '0');
-      elsif old_cvbs_hblank = '1' and cvbs_hblank = '0' then
+      elsif cvbs_hblank_r = '1' and cvbs_hblank = '0' then
 				da0_int <= "01000";
       else
         da0_int <= da0_int + 1;
 			end if;
 
-      -- generate character rom address
-      char_addr <= '0' & cvbs_dd(5 downto 0) & row_v(3 downto 0);
+      -- generate linebuffer address
+      -- - alternate every line
+      cvbs_linebuf_addr <= v_count(0) & active_h_count;
 
-      -- generate pixel from character rom data
-      -- *** replace this with a shift register
-      case pix_count(2 downto 0) is
-        when "000" =>
-          luma := char_data(1);
-        when "001" =>
-          luma := char_data(0);
-        when "010" =>
-          luma := char_data(7);
-        when "011" =>
-          luma := char_data(6);
-        when "100" =>
-          luma := char_data(5);
-        when "101" =>
-          luma := char_data(4);
-        when "110" =>
-          luma := char_data(3);
-        when "111" =>
-          luma := char_data(2);
-        when others =>
-      end case;
-      
+      -- pipeline writes to linebuf because data is delayed 1 clock as well!
+			cvbs_linebuf_we_r <= cvbs_linebuf_we;
+			cvbs_linebuf_addr_r <= cvbs_linebuf_addr;
+			cvbs_linebuf_we_rr <= cvbs_linebuf_we_r;
+			cvbs_linebuf_addr_rr <= cvbs_linebuf_addr_r;
+
+      cvbs_hblank_r := cvbs_hblank;
+
+    end if; -- cvbs_clk_ena
+  end process;
+
+  -- handle latching & shifting of character, graphics data
+  process (clk, reset)
+    variable count : std_logic_vector(3 downto 0) := (others => '0');
+  begin
+    if reset = '1' then
+      count := (others => '0');
+    elsif rising_edge(clk) and cvbs_clk_ena = '1' then
+      if active_h_start = '1' then
+        count := (others => '0');
+      end if;
+      if count = 0 then
+        if an_g_s = '0' then
+          if an_s_s = '0' then
+            dd_r <= char_d_o;                           -- alpha mode
+          else
+            if intn_ext_s = '0' then
+              if row_v < 6 then
+                dd_r <= char_d_o(3) & char_d_o(3) & char_d_o(3) & char_d_o(3) & 
+                        char_d_o(2) & char_d_o(2) & char_d_o(2) & char_d_o(2);
+              else
+                dd_r <= char_d_o(1) & char_d_o(1) & char_d_o(1) & char_d_o(1) & 
+                        char_d_o(0) & char_d_o(0) & char_d_o(0) & char_d_o(0);
+              end if;
+            else
+              if row_v < 4 then
+                dd_r <= char_d_o(5) & char_d_o(5) & char_d_o(5) & char_d_o(5) & 
+                        char_d_o(4) & char_d_o(4) & char_d_o(4) & char_d_o(4);
+              elsif row_v < 8 then
+                dd_r <= char_d_o(3) & char_d_o(3) & char_d_o(3) & char_d_o(3) &
+                        char_d_o(2) & char_d_o(2) & char_d_o(2) & char_d_o(2);
+              else
+                dd_r <= char_d_o(1) & char_d_o(1) & char_d_o(1) & char_d_o(1) & 
+                        char_d_o(0) & char_d_o(0) & char_d_o(0) & char_d_o(0);
+              end if;
+            end if;
+          end if;
+        else
+          case gm_s is
+            when "000" | "001" | "011" | "101" =>     -- CG1/RG1/RG2/RG3
+              dd_r <= l16_dd;
+            when others =>
+              dd_r <= l32_dd;
+          end case;
+        end if;
+      else
+        if an_g_s = '0' then
+          dd_r <= dd_r(dd_r'left-1 downto 0) & '0';         -- alpha/semi modes
+        else
+          case gm_s is
+            when "000" | "010" | "100" | "110" =>           -- CG modes
+              dd_r <= dd_r(dd_r'left-2 downto 0) & "00";
+            when others =>
+              dd_r <= dd_r(dd_r'left-1 downto 0) & '0';     -- RG modes
+          end case;
+        end if;
+      end if;
+      count := count + 1;
+    end if;
+  end process;
+
+  -- generate pixel data
+  process (clk, reset)
+    variable luma : std_logic;
+    variable chroma : std_logic_vector(2 downto 0);
+    -- move us
+    variable an_s_r : std_logic_vector(3 downto 0);
+    alias an_s_rr : std_logic is an_s_r(an_s_r'left);
+    variable inv_r : std_logic_vector(3 downto 0);
+    alias inv_rr : std_logic is inv_r(inv_r'left);
+  begin
+    if reset = '1' then
+      an_s_r := (others => '0');
+      inv_r := (others => '0');
+    elsif rising_edge(clk) and cvbs_clk_ena = '1' then
       -- alpha/graphics mode
       if an_g_s = '0' then
+        luma := dd_r(dd_r'left);
         -- alphanumeric & semi-graphics mode
         if an_s_rr = '0' then
           -- alphanumeric
@@ -437,14 +442,10 @@ begin
           -- semi-graphics
           if intn_ext_s = '0' then
             -- semi-4
-            luma := semi4_dd(semi4_dd'left);
-            semi4_dd := semi4_dd(semi4_dd'left-1 downto 0) & '0';
-            chroma := cvbs_dd_r(6 downto 4);
+            chroma := dd_r(6 downto 4);
           else
             -- semi-6
-            luma := semi6_dd(semi4_dd'left);
-            semi6_dd := semi6_dd(semi6_dd'left-1 downto 0) & '0';
-            chroma := css_s & cvbs_dd_r(7 downto 6);
+            chroma := css_s & dd_r(7 downto 6);
           end if; -- semi-4/6
         end if; -- alphanumeric/semi-graphics
       else
@@ -452,15 +453,15 @@ begin
         case gm_s is
           when "000" =>                     -- CG1 64x64x4
             luma := '1';
-            chroma := css_s & cg1_dd(7 downto 6);
+            chroma := css_s & dd_r(dd_r'left downto dd_r'left-1);
           when "001" | "011" | "101" =>     -- RG1/2/3 128x64/96/192x2
-            luma := rg123_dd(7);
+            luma := dd_r(dd_r'left);
             chroma := css_s & "00";         -- green/buff
           when "010" | "100" | "110" =>     -- CG2/3/6 128x64/96/192x4
             luma := '1';
-            chroma := css_s & cg236_dd(7 downto 6);
+            chroma := css_s & dd_r(dd_r'left downto dd_r'left-1);
           when others =>                    -- RG6 256x192x2
-            luma := rg6_dd(7);
+            luma := dd_r(dd_r'left);
             chroma := css_s & "00";         -- green/buff
         end case;
       end if; -- alpha/graphics mode
@@ -492,21 +493,10 @@ begin
           cvbs_data <= "01000000"; -- black
         end if;
       end if;
-      
+
+      -- move me
       an_s_r := an_s_r(an_s_r'left-1 downto 0) & an_s_s;
       inv_r := inv_r(inv_r'left-1 downto 0) & inv_s;
-      
-      -- generate linebuffer address
-      -- - alternate every line
-      cvbs_linebuf_addr <= v_count(0) & pix_count;
-
-      -- pipeline writes to linebuf because data is delayed 1 clock as well!
-			cvbs_linebuf_we_r <= cvbs_linebuf_we;
-			cvbs_linebuf_addr_r <= cvbs_linebuf_addr;
-			cvbs_linebuf_we_rr <= cvbs_linebuf_we_r;
-			cvbs_linebuf_addr_rr <= cvbs_linebuf_addr_r;
-
-      old_cvbs_hblank := cvbs_hblank;
 
     end if;
   end process;
@@ -527,9 +517,9 @@ begin
 
 	GEN_CVBS_OUTPUT : if CVBS_NOT_VGA generate
 
-		process (cvbs_clk_ena)
+		process (clk)
 		begin
-			if rising_edge(cvbs_clk_ena) then
+			if rising_edge(clk) and cvbs_clk_ena = '1' then
 				if cvbs_hblank = '0' and cvbs_vblank = '0' then				
 					red <= cvbs_data(5 downto 4) & "000000";
 					green <= cvbs_data(3 downto 2) & "000000";
@@ -551,7 +541,7 @@ begin
 	
 	  process (clk)
 	  begin
-	    if rising_edge(clk) and clk_ena = '1' then
+	    if rising_edge(clk) and vga_clk_ena = '1' then
 	      if (vga_hblank = '0' and vga_vblank = '0') then
 	        red <= vga_data(5 downto 4) & "000000";
 	        green <= vga_data(3 downto 2) & "000000";
@@ -592,15 +582,15 @@ begin
   charrom_inst : entity work.sprom
 		generic map
 		(
-			init_file				=> CHAR_ROM_FILE,
-			numwords_a			=> 2048,
-			widthad_a				=> 11
+			init_file			=> CHAR_ROM_FILE,
+			numwords_a		=> 2048,
+			widthad_a			=> 11
 		)                               
     port map
     (
-      clock  		  => clk,
-      address 	  => char_addr,
-      q 			    => char_data
+      clock  		    => clk,
+      address 	    => char_a,
+      q 			      => char_d_o
     );
 
 end SYN;

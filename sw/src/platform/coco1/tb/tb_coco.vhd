@@ -45,8 +45,8 @@ architecture SYN of tb_coco is
 begin
 
 	-- Generate CLK and reset
-  clkrst_i.clk(0) <= not clkrst_i.clk(0) after 25000 ps; -- 20MHz
-  clkrst_i.clk(1) <= not clkrst_i.clk(1) after  8730 ps; -- 57M272Hz
+  clkrst_i.clk(0) <= not clkrst_i.clk(0) after 8730 ps; -- 57M272Hz
+  clkrst_i.clk(1) <= not clkrst_i.clk(1) after 8730 ps; -- 57M272Hz
 	clkrst_i.arst <= '0' after 100 ns;
 	GEN_RST : for i in 0 to 3 generate
     process (clkrst_i.clk(0))
