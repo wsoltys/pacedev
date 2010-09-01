@@ -92,7 +92,7 @@ architecture SYN of platform is
 
   signal target_rst     : std_logic := '0';
   signal platform_rst   : std_logic := '0';
-	signal cpu_rst			: std_logic := '0';
+	signal cpu_rst			  : std_logic := '0';
 	
 	-- clock helpers
   signal vdgclk         : std_logic;
@@ -289,6 +289,10 @@ begin
         firq     	=> cpu_firq,
         nmi      	=> cpu_nmi
       );
+    
+    -- display the CPU09 address bus on the 7-segment display  
+    platform_o.seg7 <= cpu_a;
+    
   end generate GEN_CPU09;
   
   GEN_REAL_6809 : if COCO1_USE_REAL_6809 generate

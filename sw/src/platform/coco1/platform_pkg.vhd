@@ -43,6 +43,8 @@ package platform_pkg is
     cpu_6809_firq_n   : std_logic;
     cpu_6809_nmi_n    : std_logic;
     cpu_6809_tsc      : std_logic;
+    -- to display on 7-segment display
+    seg7              : std_logic_vector(15 downto 0);
   end record;
 
 end;

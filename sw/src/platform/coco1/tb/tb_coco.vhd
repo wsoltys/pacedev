@@ -56,6 +56,8 @@ begin
       end if;
     end process;
   end generate GEN_RST;
+
+  buttons_i <= (others => '0');
       
   pace_inst : entity work.PACE
     port map
