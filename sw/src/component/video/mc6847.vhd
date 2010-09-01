@@ -49,8 +49,6 @@ end mc6847;
 
 architecture SYN of mc6847 is
 
-  constant VGA_NOT_CVBS         : boolean := not CVBS_NOT_VGA;
-  
   constant BUILD_DEBUG          : boolean := false;
   constant DEBUG_AN_G           : std_logic := '0';
   constant DEBUG_AN_S           : std_logic := '1';
@@ -120,11 +118,10 @@ architecture SYN of mc6847 is
 	signal cvbs_linebuf_addr		: std_logic_vector(8 downto 0);
 
   signal active_h_start       : std_logic := '0';	
-	signal l16_dd               : std_logic_vector(7 downto 0);
-	signal l32_dd               : std_logic_vector(7 downto 0);
 	signal an_s_r               : std_logic;
   signal inv_r                : std_logic;
   signal dd_r                 : std_logic_vector(7 downto 0);
+  signal pixel_data           : std_logic_vector(7 downto 0);
 	signal cvbs_data						: std_logic_vector(7 downto 0); -- CVBS data out
   
   alias hs_int     	          : std_logic is cvbs_hblank;
@@ -144,6 +141,49 @@ architecture SYN of mc6847 is
 
   shared variable row_v : std_logic_vector(3 downto 0);
 
+  procedure map_palette ( vga_data  : in std_logic_vector(7 downto 0);
+                          r         : out std_logic_vector(7 downto 0);
+                          g         : out std_logic_vector(7 downto 0);
+                          b         : out std_logic_vector(7 downto 0)) is
+                          
+    type pal_entry_t is array (0 to 2) of std_logic_vector(1 downto 0);
+    type pal_a is array (0 to 7) of pal_entry_t;
+    constant pal : pal_a :=
+    (
+      0 => (0=>"00", 1=>"11", 2=>"00"),   -- green
+      1 => (0=>"11", 1=>"11", 2=>"00"),   -- yellow
+      2 => (0=>"00", 1=>"00", 2=>"11"),   -- blue
+      3 => (0=>"11", 1=>"00", 2=>"00"),   -- red
+      4 => (0=>"11", 1=>"11", 2=>"11"),   -- white
+      5 => (0=>"00", 1=>"11", 2=>"11"),   -- cyan
+      6 => (0=>"11", 1=>"00", 2=>"11"),   -- magenta
+      7 => (0=>"11", 1=>"10", 2=>"00")    -- orange
+      --others => (others => (others => '0'))
+    );
+    alias css_v   : std_logic is vga_data(6);
+    alias an_g_v  : std_logic is vga_data(5);
+    alias an_s_v  : std_logic is vga_data(4);
+    alias luma    : std_logic is vga_data(3);
+    alias chroma  : std_logic_vector(2 downto 0) is vga_data(2 downto 0);
+  begin
+    if luma = '1' then
+      r := pal(to_integer(unsigned(chroma)))(0) & "000000";
+      g := pal(to_integer(unsigned(chroma)))(1) & "000000";
+      b := pal(to_integer(unsigned(chroma)))(2) & "000000";
+    else
+      -- not quite black in alpha mode
+      if an_g_v = '0' and an_s_v = '0' then
+        -- dark green/orange
+        r := '0' & css_v & "000000";
+        g := "01000000";
+      else
+        r := (others => '0');
+        g := (others => '0');
+      end if;
+      b := (others => '0');
+    end if;
+  end procedure;
+  
 begin
 
   -- assign control inputs for debug/release build
@@ -316,15 +356,6 @@ begin
       -- generate character rom address
       char_a <= '0' & dd(5 downto 0) & row_v(3 downto 0);
      
-      -- data latch/shift
-      if active_h_count(2 downto 0) = "000" then
-        -- we probably don't need this
-        l32_dd <= dd;
-        if active_h_count(3) = '0' then
-          l16_dd <= dd;
-        end if;
-      end if;
-
 			-- DA0 high during FS
 			if cvbs_vblank = '1' then
 				da0_int <= (others => '1');
@@ -361,17 +392,17 @@ begin
       if active_h_start = '1' then
         count := (others => '0');
       end if;
-      if count(2 downto 0) = 0 then
-        -- handling latching
-        if an_g_s = '0' then
-          -- latch values of AnS,INV pins
+      if an_g_s = '0' then
+        -- alpha-semi modes
+        if count(2 downto 0) = 0 then
+          -- handle alpha-semi latching
           an_s_r <= an_s_s;
           inv_r <= inv_s;
           if an_s_s = '0' then
-            dd_r <= char_d_o;                           -- alpha mode
+            dd_r <= char_d_o;                               -- alpha mode
           else
             -- store luma,chroma(2..0),luma,chroma(2..0)
-            if intn_ext_s = '0' then                    -- semi-4
+            if intn_ext_s = '0' then                        -- semi-4
               if row_v < 6 then
                 dd_r <= dd(3) & dd(6) & dd(5) & dd(4) & 
                         dd(2) & dd(6) & dd(5) & dd(4);
@@ -379,7 +410,7 @@ begin
                 dd_r <= dd(1) & dd(6) & dd(5) & dd(4) & 
                         dd(0) & dd(6) & dd(5) & dd(4);
               end if;
-            else                                        -- semi-6
+            else                                            -- semi-6
               if row_v < 4 then
                 dd_r <= dd(5) & css_s & dd(7) & dd(6) & 
                         dd(4) & css_s & dd(7) & dd(6);
@@ -393,31 +424,49 @@ begin
             end if;
           end if;
         else
-          case gm_s is
-            when "000" | "001" | "011" | "101" =>     -- CG1/RG1/RG2/RG3
-              dd_r <= l16_dd;
-            when others =>
-              dd_r <= l32_dd;
-          end case;
-        end if;
-      else
-        -- handle shifting
-        if an_g_s = '0' then
+          -- handle alpha-semi shifting
           if an_s_r = '0' then
             dd_r <= dd_r(dd_r'left-1 downto 0) & '0';       -- alpha mode
           else
-            if count(1 downto 0) = "00" then
+            if count(1 downto 0) = 0 then
               dd_r <= dd_r(dd_r'left-4 downto 0) & "0000";  -- semi mode
             end if;
           end if;
-        else
-          case gm_s is
-            when "000" | "010" | "100" | "110" =>           -- CG modes
-              dd_r <= dd_r(dd_r'left-2 downto 0) & "00";
-            when others =>
-              dd_r <= dd_r(dd_r'left-1 downto 0) & '0';     -- RG modes
-          end case;
         end if;
+      else
+        -- graphics modes
+        case gm_s is
+          when "000" | "001" | "011" | "101" =>     -- CG1/RG1/RG2/RG3
+            if count(3 downto 0) = 0 then
+              -- handle graphics latching
+              dd_r <= dd;
+            else
+              -- handle graphics shifting
+              if gm_s = "000" then
+                if count(1 downto 0) = 0 then
+                  dd_r <= dd_r(dd_r'left-2 downto 0) & "00";  -- CG1
+                end if;
+              else
+                if count(0) = '0' then
+                  dd_r <= dd_r(dd_r'left-1 downto 0) & '0';   -- RG1/RG2/RG3
+                end if;
+              end if;
+            end if;
+          when others =>                            -- CG2/CG3/CG6/RG6
+            if count(2 downto 0) = 0 then
+              -- handle graphics latching
+              dd_r <= dd;
+            else
+              -- handle graphics shifting
+              if gm_s = "111" then
+                dd_r <= dd_r(dd_r'left-1 downto 0) & '0';     -- RG6
+              else
+                if count(0) = '0' then
+                  dd_r <= dd_r(dd_r'left-2 downto 0) & "00";  -- CG2/CG3/CG6
+                end if;
+              end if;
+            end if;
+        end case;
       end if;
       count := count + 1;
     end if;
@@ -466,33 +515,9 @@ begin
         end case;
       end if; -- alpha/graphics mode
 
-      if luma = '1' then
-        case chroma is
-          when "000" => -- green
-            cvbs_data <= "01001100";
-          when "001" => -- yellow
-            cvbs_data <= "01111100";
-          when "010" => -- blue
-            cvbs_data <= "01000011";
-          when "011" => -- red
-            cvbs_data <= "01110000";
-          when "100" => -- white
-            cvbs_data <= "01111111";
-          when "101" => -- cyan
-            cvbs_data <= "01001111";
-          when "110" => -- magenta
-            cvbs_data <= "01110011";
-          when others => -- orange
-            cvbs_data <= "01111000";
-        end case;
-      else
-        -- not quite black in alpha mode
-        if an_g_s = '0' and an_s_r = '0' then
-          cvbs_data <= "010" & css_s & "0100"; -- dark green/orange
-        else
-          cvbs_data <= "01000000"; -- black
-        end if;
-      end if;
+      -- pack source data into line buffer
+      -- - palette lookup on output
+      pixel_data <= "0" & css_s & an_g_s & an_s_r & luma & chroma;
 
     end if;
   end process;
@@ -510,50 +535,51 @@ begin
   fs_n <= not fs_int;
   da0 <= da0_int(4) when (gm_s = "001" or gm_s = "011" or gm_s = "101") else
          da0_int(3);
-
-	GEN_CVBS_OUTPUT : if CVBS_NOT_VGA generate
-
-		process (clk)
-		begin
-			if rising_edge(clk) and cvbs_clk_ena = '1' then
-				if cvbs_hblank = '0' and cvbs_vblank = '0' then				
-					red <= cvbs_data(5 downto 4) & "000000";
-					green <= cvbs_data(3 downto 2) & "000000";
-					blue <= cvbs_data(1 downto 0) & "000000";
-				else
-	        red <= (others => '0');
-	        green <= (others => '0');
-	        blue <= (others => '0');
-				end if;
-			end if;
-		end process;
-				
-		hsync <= cvbs_hsync;
-		vsync <= cvbs_vsync;
 		
-	end generate GEN_CVBS_OUTPUT;
-	
-	GEN_VGA_OUTPUT : if VGA_NOT_CVBS generate
-	
-	  process (clk)
-	  begin
-	    if rising_edge(clk) and vga_clk_ena = '1' then
-	      if (vga_hblank = '0' and vga_vblank = '0') then
-	        red <= vga_data(5 downto 4) & "000000";
-	        green <= vga_data(3 downto 2) & "000000";
-	        blue <= vga_data(1 downto 0) & "000000";
-	      else
-	        red <= (others => '0');
-	        green <= (others => '0');
-	        blue <= (others => '0');
-	      end if;
-	    end if;
-	  end process;
+	-- map the palette to the pixel data
+	-- -  we do that at the output so we can use a 
+	--    higher colour-resolution palette
+	--    without using memory in the line buffer
+  process (clk)
+    variable r : std_logic_vector(red'range);
+    variable g : std_logic_vector(green'range);
+    variable b : std_logic_vector(blue'range);
+  begin
+    if rising_edge(clk) then
+      if CVBS_NOT_VGA then
+        if cvbs_clk_ena = '1' then
+          if cvbs_hblank = '0' and cvbs_vblank = '0' then				
+            map_palette (vga_data, r, g, b);
+          else
+            r := (others => '0');
+            g := (others => '0');
+            b := (others => '0');
+          end if;
+        end if;
+      else
+        if vga_clk_ena = '1' then
+          if vga_hblank = '0' and vga_vblank = '0' then
+            map_palette (vga_data, r, g, b);
+          else
+            r := (others => '0');
+            g := (others => '0');
+            b := (others => '0');
+          end if;
+        end if;
+      end if; -- CVBS_NOT_VGA
+      red <= r; green <= g; blue <= b;
+    end if; -- rising_edge(clk)
+    
+    if CVBS_NOT_VGA then
+      hsync <= cvbs_hsync;
+      vsync <= cvbs_vsync;
+    else
+      hsync <= vga_hsync;
+      vsync <= vga_vsync;
+    end if;
+  end process;
 
-	  hsync <= vga_hsync;
-	  vsync <= vga_vsync;
-	
-	end generate GEN_VGA_OUTPUT;
+	-- fixme (clocking)!!!
 	
 	linebuf : entity work.dpram_1r1w
 		generic map
@@ -566,7 +592,7 @@ begin
 			wrclock		=> cvbs_clk_ena,
 			wren			=> cvbs_linebuf_we_rr,
 			wraddress	=> cvbs_linebuf_addr_rr,
-			data			=> cvbs_data,
+			data			=> pixel_data,
 
 			rdclock		=> clk,
 			rdaddress	=> vga_linebuf_addr,
