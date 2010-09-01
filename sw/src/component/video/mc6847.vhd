@@ -122,8 +122,9 @@ architecture SYN of mc6847 is
   signal active_h_start       : std_logic := '0';	
 	signal l16_dd               : std_logic_vector(7 downto 0);
 	signal l32_dd               : std_logic_vector(7 downto 0);
-  signal dd_r                 	: std_logic_vector(7 downto 0);
-
+  signal inv_r                : std_logic;
+  signal intn_ext_r           : std_logic;
+  signal dd_r                 : std_logic_vector(7 downto 0);
 	signal cvbs_data						: std_logic_vector(7 downto 0); -- CVBS data out
   
   alias hs_int     	          : std_logic is cvbs_hblank;
@@ -359,29 +360,33 @@ begin
       if active_h_start = '1' then
         count := (others => '0');
       end if;
-      if count = 0 then
+      if count(2 downto 0) = 0 then
         if an_g_s = '0' then
+          -- latch values of INV,INTnEXT pins
+          inv_r <= inv_s;
+          intn_ext_r <= intn_ext_s;
           if an_s_s = '0' then
             dd_r <= char_d_o;                           -- alpha mode
           else
-            if intn_ext_s = '0' then
+            -- store luma,chroma(2..0),luma,chroma(2..0)
+            if intn_ext_s = '0' then                    -- semi-4
               if row_v < 6 then
-                dd_r <= char_d_o(3) & char_d_o(3) & char_d_o(3) & char_d_o(3) & 
-                        char_d_o(2) & char_d_o(2) & char_d_o(2) & char_d_o(2);
+                dd_r <= char_d_o(3) & char_d_o(6) & char_d_o(5) & char_d_o(4) & 
+                        char_d_o(2) & char_d_o(6) & char_d_o(5) & char_d_o(4);
               else
-                dd_r <= char_d_o(1) & char_d_o(1) & char_d_o(1) & char_d_o(1) & 
-                        char_d_o(0) & char_d_o(0) & char_d_o(0) & char_d_o(0);
+                dd_r <= char_d_o(1) & char_d_o(6) & char_d_o(5) & char_d_o(4) & 
+                        char_d_o(0) & char_d_o(6) & char_d_o(5) & char_d_o(4);
               end if;
-            else
+            else                                        -- semi-6
               if row_v < 4 then
-                dd_r <= char_d_o(5) & char_d_o(5) & char_d_o(5) & char_d_o(5) & 
-                        char_d_o(4) & char_d_o(4) & char_d_o(4) & char_d_o(4);
+                dd_r <= char_d_o(5) & css_s & char_d_o(7) & char_d_o(6) & 
+                        char_d_o(4) & css_s & char_d_o(7) & char_d_o(6);
               elsif row_v < 8 then
-                dd_r <= char_d_o(3) & char_d_o(3) & char_d_o(3) & char_d_o(3) &
-                        char_d_o(2) & char_d_o(2) & char_d_o(2) & char_d_o(2);
+                dd_r <= char_d_o(3) & css_s & char_d_o(7) & char_d_o(6) & 
+                        char_d_o(2) & css_s & char_d_o(7) & char_d_o(6);
               else
-                dd_r <= char_d_o(1) & char_d_o(1) & char_d_o(1) & char_d_o(1) & 
-                        char_d_o(0) & char_d_o(0) & char_d_o(0) & char_d_o(0);
+                dd_r <= char_d_o(1) & css_s & char_d_o(7) & char_d_o(6) & 
+                        char_d_o(0) & css_s & char_d_o(7) & char_d_o(6);
               end if;
             end if;
           end if;
@@ -395,7 +400,13 @@ begin
         end if;
       else
         if an_g_s = '0' then
-          dd_r <= dd_r(dd_r'left-1 downto 0) & '0';         -- alpha/semi modes
+          if an_s_s = '0' then
+            dd_r <= dd_r(dd_r'left-1 downto 0) & '0';       -- alpha mode
+          else
+            if count(1 downto 0) = "11" then
+              dd_r <= dd_r(dd_r'left-4 downto 0) & "0000";  -- semi mode
+            end if;
+          end if;
         else
           case gm_s is
             when "000" | "010" | "100" | "110" =>           -- CG modes
@@ -413,40 +424,26 @@ begin
   process (clk, reset)
     variable luma : std_logic;
     variable chroma : std_logic_vector(2 downto 0);
-    -- move us
-    variable an_s_r : std_logic_vector(3 downto 0);
-    alias an_s_rr : std_logic is an_s_r(an_s_r'left);
-    variable inv_r : std_logic_vector(3 downto 0);
-    alias inv_rr : std_logic is inv_r(inv_r'left);
   begin
     if reset = '1' then
-      an_s_r := (others => '0');
-      inv_r := (others => '0');
     elsif rising_edge(clk) and cvbs_clk_ena = '1' then
       -- alpha/graphics mode
       if an_g_s = '0' then
-        luma := dd_r(dd_r'left);
         -- alphanumeric & semi-graphics mode
-        if an_s_rr = '0' then
+        luma := dd_r(dd_r'left);
+        if an_s = '0' then
           -- alphanumeric
-          if intn_ext_s = '0' then
+          if intn_ext_r = '0' then
             -- internal rom
             chroma := (others => css_s);
-            if inv_rr = '1' then
+            if inv_r = '1' then
               luma := not luma;
             end if; -- normal/inverse
           else
             -- external ROM?!?
           end if; -- internal/external
         else
-          -- semi-graphics
-          if intn_ext_s = '0' then
-            -- semi-4
-            chroma := dd_r(6 downto 4);
-          else
-            -- semi-6
-            chroma := css_s & dd_r(7 downto 6);
-          end if; -- semi-4/6
+          chroma := dd_r(dd_r'left-1 downto dd_r'left-3);
         end if; -- alphanumeric/semi-graphics
       else
         -- graphics mode
@@ -487,16 +484,12 @@ begin
         end case;
       else
         -- not quite black in alpha mode
-        if an_g_s = '0' and an_s_rr = '0' then
+        if an_g_s = '0' and an_s = '0' then
           cvbs_data <= "010" & css_s & "0100"; -- dark green/orange
         else
           cvbs_data <= "01000000"; -- black
         end if;
       end if;
-
-      -- move me
-      an_s_r := an_s_r(an_s_r'left-1 downto 0) & an_s_s;
-      inv_r := inv_r(inv_r'left-1 downto 0) & inv_s;
 
     end if;
   end process;
