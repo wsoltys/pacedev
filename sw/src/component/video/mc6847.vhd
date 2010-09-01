@@ -318,6 +318,7 @@ begin
      
       -- data latch/shift
       if active_h_count(2 downto 0) = "000" then
+        -- we probably don't need this
         l32_dd <= dd;
         if active_h_count(3) = '0' then
           l16_dd <= dd;
@@ -361,6 +362,7 @@ begin
         count := (others => '0');
       end if;
       if count(2 downto 0) = 0 then
+        -- handling latching
         if an_g_s = '0' then
           -- latch values of INV,INTnEXT pins
           inv_r <= inv_s;
@@ -371,22 +373,22 @@ begin
             -- store luma,chroma(2..0),luma,chroma(2..0)
             if intn_ext_s = '0' then                    -- semi-4
               if row_v < 6 then
-                dd_r <= char_d_o(3) & char_d_o(6) & char_d_o(5) & char_d_o(4) & 
-                        char_d_o(2) & char_d_o(6) & char_d_o(5) & char_d_o(4);
+                dd_r <= dd(3) & dd(6) & dd(5) & dd(4) & 
+                        dd(2) & dd(6) & dd(5) & dd(4);
               else
-                dd_r <= char_d_o(1) & char_d_o(6) & char_d_o(5) & char_d_o(4) & 
-                        char_d_o(0) & char_d_o(6) & char_d_o(5) & char_d_o(4);
+                dd_r <= dd(1) & dd(6) & dd(5) & dd(4) & 
+                        dd(0) & dd(6) & dd(5) & dd(4);
               end if;
             else                                        -- semi-6
               if row_v < 4 then
-                dd_r <= char_d_o(5) & css_s & char_d_o(7) & char_d_o(6) & 
-                        char_d_o(4) & css_s & char_d_o(7) & char_d_o(6);
+                dd_r <= dd(5) & css_s & dd(7) & dd(6) & 
+                        dd(4) & css_s & dd(7) & dd(6);
               elsif row_v < 8 then
-                dd_r <= char_d_o(3) & css_s & char_d_o(7) & char_d_o(6) & 
-                        char_d_o(2) & css_s & char_d_o(7) & char_d_o(6);
+                dd_r <= dd(3) & css_s & dd(7) & dd(6) & 
+                        dd(2) & css_s & dd(7) & dd(6);
               else
-                dd_r <= char_d_o(1) & css_s & char_d_o(7) & char_d_o(6) & 
-                        char_d_o(0) & css_s & char_d_o(7) & char_d_o(6);
+                dd_r <= dd(1) & css_s & dd(7) & dd(6) & 
+                        dd(0) & css_s & dd(7) & dd(6);
               end if;
             end if;
           end if;
@@ -399,11 +401,12 @@ begin
           end case;
         end if;
       else
+        -- handle shifting
         if an_g_s = '0' then
           if an_s_s = '0' then
             dd_r <= dd_r(dd_r'left-1 downto 0) & '0';       -- alpha mode
           else
-            if count(1 downto 0) = "11" then
+            if count(1 downto 0) = "00" then
               dd_r <= dd_r(dd_r'left-4 downto 0) & "0000";  -- semi mode
             end if;
           end if;
