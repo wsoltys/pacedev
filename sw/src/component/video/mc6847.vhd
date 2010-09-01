@@ -122,8 +122,8 @@ architecture SYN of mc6847 is
   signal active_h_start       : std_logic := '0';	
 	signal l16_dd               : std_logic_vector(7 downto 0);
 	signal l32_dd               : std_logic_vector(7 downto 0);
+	signal an_s_r               : std_logic;
   signal inv_r                : std_logic;
-  signal intn_ext_r           : std_logic;
   signal dd_r                 : std_logic_vector(7 downto 0);
 	signal cvbs_data						: std_logic_vector(7 downto 0); -- CVBS data out
   
@@ -364,9 +364,9 @@ begin
       if count(2 downto 0) = 0 then
         -- handling latching
         if an_g_s = '0' then
-          -- latch values of INV,INTnEXT pins
+          -- latch values of AnS,INV pins
+          an_s_r <= an_s_s;
           inv_r <= inv_s;
-          intn_ext_r <= intn_ext_s;
           if an_s_s = '0' then
             dd_r <= char_d_o;                           -- alpha mode
           else
@@ -403,7 +403,7 @@ begin
       else
         -- handle shifting
         if an_g_s = '0' then
-          if an_s_s = '0' then
+          if an_s_r = '0' then
             dd_r <= dd_r(dd_r'left-1 downto 0) & '0';       -- alpha mode
           else
             if count(1 downto 0) = "00" then
@@ -434,9 +434,9 @@ begin
       if an_g_s = '0' then
         -- alphanumeric & semi-graphics mode
         luma := dd_r(dd_r'left);
-        if an_s = '0' then
+        if an_s_r = '0' then
           -- alphanumeric
-          if intn_ext_r = '0' then
+          if intn_ext_s = '0' then
             -- internal rom
             chroma := (others => css_s);
             if inv_r = '1' then
@@ -487,7 +487,7 @@ begin
         end case;
       else
         -- not quite black in alpha mode
-        if an_g_s = '0' and an_s = '0' then
+        if an_g_s = '0' and an_s_r = '0' then
           cvbs_data <= "010" & css_s & "0100"; -- dark green/orange
         else
           cvbs_data <= "01000000"; -- black
