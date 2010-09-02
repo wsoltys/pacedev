@@ -9,6 +9,14 @@ add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/gen_cpu09/cpu_
 add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/gen_cpu09/cpu_inst/address
 add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/gen_cpu09/cpu_inst/data_in
 add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/gen_cpu09/cpu_inst/data_out
+add wave -noupdate -divider SRAM
+add wave -noupdate -format Literal /tb_coco/pace_inst/sram_i.d
+add wave -noupdate -format Literal /tb_coco/pace_inst/sram_o.a
+add wave -noupdate -format Literal /tb_coco/pace_inst/sram_o.d
+add wave -noupdate -format Literal /tb_coco/pace_inst/sram_o.be
+add wave -noupdate -format Logic /tb_coco/pace_inst/sram_o.cs
+add wave -noupdate -format Logic /tb_coco/pace_inst/sram_o.oe
+add wave -noupdate -format Logic /tb_coco/pace_inst/sram_o.we
 TreeUpdate [SetDefaultTree]
 WaveRestoreCursors {{Cursor 1} {86455 ns} 0}
 configure wave -namecolwidth 183
@@ -24,4 +32,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {9984624 ns} {10000608 ns}
+WaveRestoreZoom {0 ns} {2100 us}

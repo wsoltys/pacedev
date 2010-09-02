@@ -142,9 +142,9 @@ begin
 
       --cvbs            => GS_CVBS,
 
-      -- sound
-      snd_i           => from_sound,
-      snd_o           => to_sound,
+      -- audio
+      audio_i         => audio_i,
+      audio_o         => audio_o,
       
 			-- OSD
 			osd_i           => from_osd,
@@ -167,34 +167,5 @@ begin
       target_o        => target_o
     );
 
-	SOUND_BLOCK : block
-		signal snd_data		: std_logic_vector(7 downto 0);
-    signal snd_a      : std_logic_vector(15 downto 0);
-	begin
-
-    snd_a <= std_logic_vector(resize(unsigned(to_sound.a), snd_a'length));
-    
-	  sound_inst : entity work.Sound                                          
-	    Port Map
-	    (
-	      sysclk      => clk_i(0),    -- fudge for now
-	      reset       => reset_i(0),
-
-	      sndif_rd    => to_sound.rd,              
-	      sndif_wr    => to_sound.wr,              
-	      sndif_addr  => snd_a,
-	      sndif_datai => to_sound.d,
-
-	      snd_clk     => audio_o.clk,
-	      snd_data    => snd_data,           
-	      sndif_datao => from_sound.d
-	    );
-
-		-- route audio to both channels
-		audio_o.ldata <= snd_data & "00000000";
-		audio_o.rdata <= snd_data & "00000000";
-	
-	end block SOUND_BLOCK;
-		
 end SYN;
 

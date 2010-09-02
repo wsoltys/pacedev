@@ -544,8 +544,14 @@ begin
     variable r : std_logic_vector(red'range);
     variable g : std_logic_vector(green'range);
     variable b : std_logic_vector(blue'range);
+    -- for artifacting testing only
+    variable p_in : std_logic_vector(7 downto 0);
+    variable p_out: std_logic_vector(7 downto 0);
+    variable count : std_logic_vector(0 downto 0);
   begin
-    if rising_edge(clk) then
+    if reset = '1' then
+      count := (others => '0');
+    elsif rising_edge(clk) then
       if CVBS_NOT_VGA then
         if cvbs_clk_ena = '1' then
           if cvbs_hblank = '0' and cvbs_vblank = '0' then				
@@ -558,8 +564,30 @@ begin
         end if;
       else
         if vga_clk_ena = '1' then
+          if vga_hblank = '1' then
+            count := (others => '0');
+          end if;
           if vga_hblank = '0' and vga_vblank = '0' then
-            map_palette (vga_data, r, g, b);
+            -- artifacting test only --
+            if an_g_s = '1' and gm_s = "111" then
+              if count /= 0 then
+                p_out(p_out'left downto 4) := vga_data(p_out'left downto 4);
+                if p_in(3) = '0' and vga_data(3) = '0' then
+                  p_out(2 downto 0) := "000";
+                elsif p_in(3) = '1' and vga_data(3) = '1' then
+                  p_out(2 downto 0) := "100";
+                elsif p_in(3) = '0' and vga_data(3) = '1' then
+                  p_out(2 downto 0) := "011";
+                else
+                  p_out(2 downto 0) := "010";
+                end if;
+              end if;
+              map_palette (p_out, r, g, b);
+              p_in := vga_data;
+            else
+              map_palette (vga_data, r, g, b);
+            end if;
+            count := count + 1;
           else
             r := (others => '0');
             g := (others => '0');

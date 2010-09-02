@@ -49,8 +49,8 @@ entity platform is
     osd_o             : out to_OSD_t;
 
     -- sound
-    snd_i             : in from_SOUND_t;
-    snd_o             : out to_SOUND_t;
+    audio_i           : in from_AUDIO_t;
+    audio_o           : out to_AUDIO_t;
     
     -- SPI (flash)
     spi_i             : in from_SPI_t;
@@ -166,11 +166,10 @@ architecture SYN of platform is
 
   -- other coco signals
   signal dac_data       : std_logic_vector(5 downto 0);
-  signal sel            : std_logic_vector(1 downto 0);
-
-  -- only for test vga controller
-	signal vga_clk_s				: std_logic;
-	
+  signal snden          : std_logic := '0';
+  signal sel            : std_logic_vector(2 downto 1);
+  signal sndout         : std_logic := '0';
+  
 begin
 
   target_rst <= rst_57M272 or buttons_i(0);
@@ -420,6 +419,46 @@ begin
 			cvbs      => open
     );
 
+  BLK_SND : block
+  begin
+    process (clk_57M272, platform_rst)
+    begin
+      if platform_rst = '1' then
+        audio_o.ldata <= (others => '0');
+        audio_o.rdata <= (others => '0');
+      elsif rising_edge(clk_57M272) then
+        if snden = '1' then
+          case sel is
+            when "00" =>
+              -- 6-bit sound from the DAC
+              audio_o.ldata(audio_o.ldata'left downto audio_o.ldata'left-5) <= dac_data;
+              audio_o.ldata(audio_o.ldata'left-6 downto 0) <= (others => '0');
+              audio_o.rdata(audio_o.rdata'left downto audio_o.rdata'left-5) <= dac_data;
+              audio_o.rdata(audio_o.rdata'left-6 downto 0) <= (others => '0');
+            when "01" =>
+              -- from the cassette
+              -- - not yet supported
+              audio_o.ldata <= (others => '0');
+              audio_o.rdata <= (others => '0');
+            when "10" =>
+              -- from the cartridge connector
+              -- - not yet supported
+              audio_o.ldata <= (others => '0');
+              audio_o.rdata <= (others => '0');
+            when others =>
+              audio_o.ldata <= (others => '0');
+              audio_o.rdata <= (others => '0');
+          end case;
+        else
+          -- 1-bit sound from PIA
+          audio_o.ldata <= (audio_o.ldata'left=>sndout, others => '0');
+          audio_o.rdata <= (audio_o.rdata'left=>sndout, others => '0');
+        end if;
+      end if;
+    end process;
+    
+  end block BLK_SND;
+  
   BLK_PIA_0 : block
     signal irqa      	: std_logic;
     signal irqb      	: std_logic;
@@ -488,14 +527,14 @@ begin
         pa_oe				=> open,
         ca1       	=> hs_n,
         ca2_i      	=> 'X',
-        ca2_o				=> sel(0),
+        ca2_o				=> sel(1),
         ca2_oe			=> open,
         pb_i				=> (others => 'X'),
         pb_o       	=> pb_o,
         pb_oe				=> open,
         cb1       	=> fs_n,
         cb2_i      	=> 'X',
-        cb2_o				=> sel(1),
+        cb2_o				=> sel(2),
         cb2_oe			=> open
       );
   end block BLK_PIA_0;
@@ -514,7 +553,7 @@ begin
     dac_data <= pa_o(7 downto 2);
 
     pb_i(0) <= ser_i.rxd;
-    --sndout <= pb_o(1);
+    sndout <= pb_o(1);
     pb_i(2) <= COCO1_JUMPER_32K_RAM;
     vdg_css <= pb_o(3);
     vdg_intn_ext <= pb_o(4);
@@ -548,7 +587,7 @@ begin
         pb_oe				=> open,
         cb1       	=> cart_n,
         cb2_i      	=> 'X',
-        cb2_o				=> open,  -- SNDEN
+        cb2_o				=> snden,
         cb2_oe			=> open
       );
   end block BLK_PIA_1;
