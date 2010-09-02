@@ -77,7 +77,9 @@ end entity platform;
 --    2: cpu reset
 --  Switches
 --    9:  CART#
---    8:5 Flash 16KB bank select
+--    8   Artifacting enable
+--    4   Cassette output to speaker
+--    3:0 Flash 16KB bank select
 --
 
 architecture SYN of platform is
@@ -165,6 +167,8 @@ architecture SYN of platform is
   signal cart_d_o       : std_logic_vector(7 downto 0);
 
   -- other coco signals
+  signal casdin         : std_logic := '0';
+  signal cassmot        : std_logic := '0';
   signal dac_data       : std_logic_vector(5 downto 0);
   signal snden          : std_logic := '0';
   signal sel            : std_logic_vector(2 downto 1);
@@ -392,31 +396,36 @@ begin
 		)
     port map
     (
-			clk			  => clk_57M272,
-			clk_ena   => clk_14M318_ena,
-      reset     => platform_rst,
+			clk			        => clk_57M272,
+			clk_ena         => clk_14M318_ena,
+      reset           => platform_rst,
 
-      da0       => da0,
+      da0             => da0,
 
-			dd			  => vdg_data,
+			dd			        => vdg_data,
 				
-      hs_n      => hs_n,
-      fs_n      => fs_n,
+      hs_n            => hs_n,
+      fs_n            => fs_n,
 
-      an_g      => vdg_an_g,
-      an_s      => vdg_data(7),
-      intn_ext  => vdg_intn_ext,
-      gm        => vdg_gm,
-      css       => vdg_css,
-      inv       => vdg_data(6),
+      an_g            => vdg_an_g,
+      an_s            => vdg_data(7),
+      intn_ext        => vdg_intn_ext,
+      gm              => vdg_gm,
+      css             => vdg_css,
+      inv             => vdg_data(6),
 
-			red			  => red,
-			green		  => green,
-			blue		  => blue,
-			hsync		  => hsync,
-			vsync		  => vsync,
+			red			        => red,
+			green		        => green,
+			blue		        => blue,
+			hsync		        => hsync,
+			vsync		        => vsync,
 			
-			cvbs      => open
+      -- special inputs
+      artifact_en     => switches_i(8),
+      artifact_set    => '0',
+      artifact_phase  => '0',
+      
+			cvbs            => open
     );
 
   BLK_SND : block
@@ -427,7 +436,15 @@ begin
         audio_o.ldata <= (others => '0');
         audio_o.rdata <= (others => '0');
       elsif rising_edge(clk_57M272) then
-        if snden = '1' then
+        if switches_i(4) = '1' then
+          if cassmot = '1' then
+            -- special case, cassette goes to speaker
+            audio_o.ldata(audio_o.ldata'left downto audio_o.ldata'left-5) <= dac_data;
+            audio_o.ldata(audio_o.ldata'left-6 downto 0) <= (others => '0');
+            audio_o.rdata(audio_o.rdata'left downto audio_o.rdata'left-5) <= dac_data;
+            audio_o.rdata(audio_o.rdata'left-6 downto 0) <= (others => '0');
+          end if;
+        elsif snden = '1' then
           case sel is
             when "00" =>
               -- 6-bit sound from the DAC
@@ -458,6 +475,12 @@ begin
     end process;
     
   end block BLK_SND;
+  
+  BLK_CASSETTE : block
+  begin
+    casdin <= '0';
+    --<= cassmot;
+  end block BLK_CASSETTE;
   
   BLK_PIA_0 : block
     signal irqa      	: std_logic;
@@ -548,7 +571,7 @@ begin
     signal pb_o       : std_logic_vector(7 downto 0);
   begin
 
-    --pa_i(0) <= casin;
+    pa_i(0) <= casdin;
     ser_o.txd <= pa_o(1);
     dac_data <= pa_o(7 downto 2);
 
@@ -580,7 +603,7 @@ begin
         pa_oe				=> open,
         ca1       	=> ser_i.dcd,
         ca2_i      	=> 'X',
-        ca2_o				=> open,  -- CASSMOT
+        ca2_o				=> cassmot,
         ca2_oe			=> open,
         pb_i				=> pb_i,
         pb_o       	=> pb_o,
@@ -652,7 +675,7 @@ begin
   GEN_NO_CART : if not COCO1_CART_INTERNAL generate
     -- only support 16x16KB cartridges atm
     flash_o.a(flash_o.a'left downto 18) <= (others => '0');
-    flash_o.a(17 downto 14) <= switches_i(8 downto 5);
+    flash_o.a(17 downto 14) <= switches_i(3 downto 0);
     flash_o.a(13 downto 0) <= cpu_a(13 downto 0);
     cart_d_o <= flash_i.d(cart_d_o'range);
     flash_o.cs <= cart_cs;

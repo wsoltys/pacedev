@@ -593,8 +593,8 @@ begin
   begin
 
     -- enable each channel independantly for debugging
-    aud_data_l <= audio_o.ldata when switches_i(9) = '0' else (others => '0');
-    aud_data_r <= audio_o.rdata when switches_i(8) = '0' else (others => '0');
+    aud_data_l <= audio_o.ldata; --when switches_i(9) = '0' else (others => '0');
+    aud_data_r <= audio_o.rdata; --when switches_i(8) = '0' else (others => '0');
 
     -- Audio
     audif_inst : entity work.audio_if

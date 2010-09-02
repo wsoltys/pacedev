@@ -13,34 +13,39 @@ entity mc6847 is
 	);
 	port
 	(
-		clk				: in std_logic;
-		clk_ena   : in std_logic;
-		reset			: in std_logic;
+		clk				      : in std_logic;
+		clk_ena         : in std_logic;
+		reset			      : in std_logic;
 
     -- address output lines
-    da0     	: out std_logic;
+    da0     	      : out std_logic;
 
     -- data inputs
-		dd				: in std_logic_vector(7 downto 0);
+		dd				      : in std_logic_vector(7 downto 0);
 
     -- synchronising outputs
-    hs_n    	: out std_logic;
-    fs_n    	: out std_logic;
+    hs_n    	      : out std_logic;
+    fs_n    	      : out std_logic;
 
     -- mode control lines
-    an_g      : in std_logic;
-    an_s      : in std_logic;
-    intn_ext  : in std_logic;
-    gm        : in std_logic_vector(2 downto 0);
-    css       : in std_logic;
-    inv       : in std_logic;
+    an_g            : in std_logic;
+    an_s            : in std_logic;
+    intn_ext        : in std_logic;
+    gm              : in std_logic_vector(2 downto 0);
+    css             : in std_logic;
+    inv             : in std_logic;
 
     -- VGA output
-    red     	: out std_logic_vector(7 downto 0);
-    green   	: out std_logic_vector(7 downto 0);
-    blue    	: out std_logic_vector(7 downto 0);
-    hsync   	: out std_logic;
-    vsync			: out std_logic;
+    red     	      : out std_logic_vector(7 downto 0);
+    green   	      : out std_logic_vector(7 downto 0);
+    blue    	      : out std_logic_vector(7 downto 0);
+    hsync   	      : out std_logic;
+    vsync			      : out std_logic;
+
+    -- special inputs
+    artifact_en     : in std_logic;
+    artifact_set    : in std_logic;
+    artifact_phase  : in std_logic;
     
     -- CVBS output
     cvbs      : out std_logic_vector(7 downto 0)
@@ -573,7 +578,7 @@ begin
           end if;
           if vga_hblank = '0' and vga_vblank = '0' then
             -- artifacting test only --
-            if an_g_s = '1' and gm_s = "111" then
+            if artifact_en = '1' and an_g_s = '1' and gm_s = "111" then
               if count /= '0' then
                 p_out(p_out'left downto 4) := vga_data(p_out'left downto 4);
                 if p_in(3) = '0' and vga_data(3) = '0' then
@@ -581,11 +586,11 @@ begin
                 elsif p_in(3) = '1' and vga_data(3) = '1' then
                   p_out(3 downto 0) := "1100";
                 elsif p_in(3) = '0' and vga_data(3) = '1' then
-                  --p_out(3 downto 0) := "1011";  -- red
-                  p_out(3 downto 0) := "1101";  -- cyan
+                  p_out(3 downto 0) := "1011";  -- red
+                  --p_out(3 downto 0) := "1101";  -- cyan
                 else
-                  --p_out(3 downto 0) := "1010";  -- blue
-                  p_out(3 downto 0) := "1111";  -- orange
+                  p_out(3 downto 0) := "1010";  -- blue
+                  --p_out(3 downto 0) := "1111";  -- orange
                 end if;
               end if;
               map_palette (p_out, r, g, b);
