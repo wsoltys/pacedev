@@ -22,7 +22,17 @@ add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/vdg_inst/vga_v
 add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/vdg_inst/vga_vblank
 add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/vdg_inst/vga_hsync
 add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/vdg_inst/vga_hblank
-add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/vdg_inst/cvbs_dd
+add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/vdg_inst/dd_r
+add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/vdg_inst/pixel_data
+add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/vdg_inst/vga_data
+add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/vdg_inst/an_g_s
+add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/vdg_inst/gm_s
+add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/vdg_inst/red
+add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/vdg_inst/green
+add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/vdg_inst/blue
+add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/vdg_inst/proc_output/p_in
+add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/vdg_inst/proc_output/p_out
+add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/vdg_inst/proc_output/count
 add wave -noupdate -divider PROC_CVBS
 add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/vdg_inst/cvbs_vblank
 add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/vdg_inst/cvbs_hblank
@@ -34,7 +44,7 @@ add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/vdg_inst/pro
 add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/vdg_inst/proc_cvbs/active_h_count
 add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/vdg_inst/proc_cvbs/active_v_count
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {15744928 ns} 0} {{Cursor 2} {96174 ns} 0}
+WaveRestoreCursors {{Cursor 1} {2959680 ns} 0} {{Cursor 2} {1023392 ns} 0}
 configure wave -namecolwidth 159
 configure wave -valuecolwidth 50
 configure wave -justifyvalue left
@@ -48,4 +58,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {0 ns} {21 ms}
+WaveRestoreZoom {2894769 ns} {3237231 ns}

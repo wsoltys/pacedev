@@ -247,11 +247,11 @@ package pace_pkg is
 
 	-- create a constant that automatically determines 
 	-- whether this is simulation or synthesis
-	constant in_simulation : BOOLEAN := false
+	constant IN_SIMULATION : BOOLEAN := false
 	-- synthesis translate_off
 	or true
 	-- synthesis translate_on
 	;
-	constant in_synthesis : boolean := not in_simulation;
+	constant IN_SYNTHESIS : boolean := not IN_SIMULATION;
 	
 end;

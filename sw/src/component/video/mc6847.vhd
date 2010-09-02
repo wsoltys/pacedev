@@ -50,10 +50,10 @@ end mc6847;
 architecture SYN of mc6847 is
 
   constant BUILD_DEBUG          : boolean := false;
-  constant DEBUG_AN_G           : std_logic := '0';
+  constant DEBUG_AN_G           : std_logic := '1';
   constant DEBUG_AN_S           : std_logic := '1';
   constant DEBUG_INTN_EXT       : std_logic := '1';
-  constant DEBUG_GM             : std_logic_vector(2 downto 0) := (others => '0');
+  constant DEBUG_GM             : std_logic_vector(2 downto 0) := "111";
   constant DEBUG_CSS            : std_logic := '1';
   constant DEBUG_INV            : std_logic := '0';
   
@@ -435,6 +435,9 @@ begin
         end if;
       else
         -- graphics modes
+        --if IN_SIMULATION then
+          an_s_r <= '0';
+        --end if;
         case gm_s is
           when "000" | "001" | "011" | "101" =>     -- CG1/RG1/RG2/RG3
             if count(3 downto 0) = 0 then
@@ -517,7 +520,7 @@ begin
 
       -- pack source data into line buffer
       -- - palette lookup on output
-      pixel_data <= "0" & css_s & an_g_s & an_s_r & luma & chroma;
+      pixel_data <= '0' & css_s & an_g_s & an_s_r & luma & chroma;
 
     end if;
   end process;
@@ -540,17 +543,17 @@ begin
 	-- -  we do that at the output so we can use a 
 	--    higher colour-resolution palette
 	--    without using memory in the line buffer
-  process (clk)
+  PROC_OUTPUT : process (clk)
     variable r : std_logic_vector(red'range);
     variable g : std_logic_vector(green'range);
     variable b : std_logic_vector(blue'range);
     -- for artifacting testing only
-    variable p_in : std_logic_vector(7 downto 0);
-    variable p_out: std_logic_vector(7 downto 0);
-    variable count : std_logic_vector(0 downto 0);
+    variable p_in : std_logic_vector(vga_data'range);
+    variable p_out: std_logic_vector(vga_data'range);
+    variable count : std_logic := '0';
   begin
     if reset = '1' then
-      count := (others => '0');
+      count := '0';
     elsif rising_edge(clk) then
       if CVBS_NOT_VGA then
         if cvbs_clk_ena = '1' then
@@ -565,21 +568,24 @@ begin
       else
         if vga_clk_ena = '1' then
           if vga_hblank = '1' then
-            count := (others => '0');
+            count := '0';
+            p_in := (others => '0');
           end if;
           if vga_hblank = '0' and vga_vblank = '0' then
             -- artifacting test only --
             if an_g_s = '1' and gm_s = "111" then
-              if count /= 0 then
+              if count /= '0' then
                 p_out(p_out'left downto 4) := vga_data(p_out'left downto 4);
                 if p_in(3) = '0' and vga_data(3) = '0' then
-                  p_out(2 downto 0) := "000";
+                  p_out(3 downto 0) := "0000";
                 elsif p_in(3) = '1' and vga_data(3) = '1' then
-                  p_out(2 downto 0) := "100";
+                  p_out(3 downto 0) := "1100";
                 elsif p_in(3) = '0' and vga_data(3) = '1' then
-                  p_out(2 downto 0) := "011";
+                  --p_out(3 downto 0) := "1011";  -- red
+                  p_out(3 downto 0) := "1101";  -- cyan
                 else
-                  p_out(2 downto 0) := "010";
+                  --p_out(3 downto 0) := "1010";  -- blue
+                  p_out(3 downto 0) := "1111";  -- orange
                 end if;
               end if;
               map_palette (p_out, r, g, b);
@@ -587,7 +593,7 @@ begin
             else
               map_palette (vga_data, r, g, b);
             end if;
-            count := count + 1;
+            count := not count;
           else
             r := (others => '0');
             g := (others => '0');
@@ -605,7 +611,7 @@ begin
       hsync <= vga_hsync;
       vsync <= vga_vsync;
     end if;
-  end process;
+  end process PROC_OUTPUT;
 
 	-- fixme (clocking)!!!
 	

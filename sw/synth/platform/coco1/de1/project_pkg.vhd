@@ -36,7 +36,7 @@ package project_pkg is
 
 	-- Coco1-specific constants
 
-  constant COCO1_USE_REAL_6809              : boolean := false;
+  constant COCO1_USE_REAL_6809              : boolean := true;
   
   --constant COCO1_MC6847_ROM                 : string := "mc6847_pal.hex";
   constant COCO1_MC6847_ROM                 : string := "mc6847_ntsc.hex";
