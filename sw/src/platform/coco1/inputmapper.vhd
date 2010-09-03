@@ -176,6 +176,11 @@ begin
             inputs(8).d(2) <= press;
           when SCANCODE_F12 =>
             inputs(8).d(3) <= press;
+          -- temporary? implementation of audio level buttons
+          when SCANCODE_PADPLUS =>
+            inputs(8).d(4) <= press;
+          when SCANCODE_PADMINUS =>
+            inputs(8).d(5) <= press;
           when others =>
         end case;
     end if; -- press or release

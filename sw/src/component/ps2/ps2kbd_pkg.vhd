@@ -94,6 +94,8 @@ package kbd_pkg is
 	alias SCANCODE_PAD7           : std_logic_vector(7 downto 0) is SCANCODE_HOME;
 	alias SCANCODE_PAD8           : std_logic_vector(7 downto 0) is SCANCODE_UP;
 	alias SCANCODE_PAD9           : std_logic_vector(7 downto 0) is SCANCODE_PGUP;
+	constant SCANCODE_PADPLUS     : std_logic_vector(7 downto 0) := X"79";
+	constant SCANCODE_PADMINUS    : std_logic_vector(7 downto 0) := X"7B";
 	
   type kbd_row is array (natural range <>) of std_logic_vector(7 downto 0);
   type kbd_col is array (natural range <>) of std_logic_vector(7 downto 0);

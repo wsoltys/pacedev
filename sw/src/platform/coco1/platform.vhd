@@ -174,11 +174,18 @@ architecture SYN of platform is
   signal sel            : std_logic_vector(2 downto 1);
   signal sndout         : std_logic := '0';
   
+  alias ps2_platform_rst  : std_logic is inputs_i(8).d(0);
+  alias ps2_cpu_rst       : std_logic is inputs_i(8).d(1);
+  alias ps2_left_fire     : std_logic is inputs_i(8).d(2);
+  alias ps2_right_fire    : std_logic is inputs_i(8).d(3);
+  alias ps2_volume_up     : std_logic is inputs_i(8).d(4);
+  alias ps2_volume_dn     : std_logic is inputs_i(8).d(5);
+  
 begin
 
   target_rst <= rst_57M272 or buttons_i(0);
-  platform_rst <= target_rst or buttons_i(1) or inputs_i(8).d(0);
-	cpu_rst <= platform_rst or buttons_i(2) or inputs_i(8).d(1);
+  platform_rst <= target_rst or buttons_i(1) or ps2_platform_rst;
+	cpu_rst <= platform_rst or buttons_i(2) or ps2_cpu_rst;
 
   -- for ModelSim only!!!
   cpu_clk_n <= not cpu_clk;
@@ -429,48 +436,96 @@ begin
     );
 
   BLK_SND : block
+  
+    signal audio_data         : std_logic_vector(audio_o.ldata'range);
+    signal audio_atten        : integer range 0 to 15 := 0;
+    
   begin
-    process (clk_57M272, platform_rst)
+  
+    PROC_SND_MUX : process (clk_57M272, platform_rst)
     begin
       if platform_rst = '1' then
-        audio_o.ldata <= (others => '0');
-        audio_o.rdata <= (others => '0');
+        audio_data <= (others => '0');
       elsif rising_edge(clk_57M272) then
         if switches_i(4) = '1' then
           if cassmot = '1' then
             -- special case, cassette goes to speaker
-            audio_o.ldata(audio_o.ldata'left downto audio_o.ldata'left-5) <= dac_data;
-            audio_o.ldata(audio_o.ldata'left-6 downto 0) <= (others => '0');
-            audio_o.rdata(audio_o.rdata'left downto audio_o.rdata'left-5) <= dac_data;
-            audio_o.rdata(audio_o.rdata'left-6 downto 0) <= (others => '0');
+            audio_data(audio_data'left downto audio_data'left-1) <= (others => dac_data(5));
+            audio_data(audio_data'left-2 downto audio_data'left-3) <= (others => dac_data(4));
+            audio_data(audio_data'left-4 downto audio_data'left-5) <= (others => dac_data(3));
+            audio_data(audio_data'left-6 downto audio_data'left-7) <= (others => dac_data(2));
+            audio_data(audio_data'left-8 downto audio_data'left-9) <= (others => dac_data(1));
+            audio_data(audio_data'left-10 downto audio_data'left-11) <= (others => dac_data(0));
+            audio_data(audio_data'left-12 downto 0) <= (others => '0');
           end if;
         elsif snden = '1' then
           case sel is
             when "00" =>
               -- 6-bit sound from the DAC
-              audio_o.ldata(audio_o.ldata'left downto audio_o.ldata'left-5) <= dac_data;
-              audio_o.ldata(audio_o.ldata'left-6 downto 0) <= (others => '0');
-              audio_o.rdata(audio_o.rdata'left downto audio_o.rdata'left-5) <= dac_data;
-              audio_o.rdata(audio_o.rdata'left-6 downto 0) <= (others => '0');
+              audio_data(audio_data'left downto audio_data'left-5) <= dac_data;
+              audio_data(audio_data'left-6 downto 0) <= (others => '0');
             when "01" =>
               -- from the cassette
               -- - not yet supported
-              audio_o.ldata <= (others => '0');
-              audio_o.rdata <= (others => '0');
+              audio_data <= (others => '0');
             when "10" =>
               -- from the cartridge connector
               -- - not yet supported
-              audio_o.ldata <= (others => '0');
-              audio_o.rdata <= (others => '0');
+              audio_data <= (others => '0');
             when others =>
-              audio_o.ldata <= (others => '0');
-              audio_o.rdata <= (others => '0');
+              audio_data <= (others => '0');
           end case;
         else
           -- 1-bit sound from PIA
-          audio_o.ldata <= (audio_o.ldata'left=>sndout, others => '0');
-          audio_o.rdata <= (audio_o.rdata'left=>sndout, others => '0');
+          audio_data <= (audio_data'left=>sndout, others => '0');
         end if;
+      end if;
+    end process PROC_SND_MUX;
+
+    PROC_SND_ATTEN : process (clk_57M272, platform_rst)
+      variable audio_data_atten : std_logic_vector(audio_o.ldata'range);
+    begin
+      if platform_rst = '1' then
+        audio_data_atten := (others => '0');
+      elsif rising_edge(clk_57M272) then
+        -- the DE1 audio codec has a volume control
+        -- - but for a quick hack, we'll do it here
+        -- - and fix the implementation later
+        case audio_atten is
+          when 0 =>   audio_data_atten := audio_data;
+          when 1 =>   audio_data_atten := "0" & audio_data(15 downto 1);
+          when 2 =>   audio_data_atten := "00" & audio_data(15 downto 2);
+          when 3 =>   audio_data_atten := "000" & audio_data(15 downto 3);
+          when 4 =>   audio_data_atten := "0000" & audio_data(15 downto 4);
+          when 5 =>   audio_data_atten := "000000" & audio_data(15 downto 6);
+          when 6 =>   audio_data_atten := "00000000" & audio_data(15 downto 8);
+          when 7 =>   audio_data_atten := "0000000000" & audio_data(15 downto 10);
+          when others =>   
+                      audio_data_atten := (others => '0');
+        end case;
+        -- assign to output
+        audio_o.ldata <= audio_data_atten;
+        audio_o.rdata <= audio_data_atten;
+      end if;
+    end process;
+
+    -- edge-detect on the colume control keys
+    process (clk_57M272, target_rst)
+      variable up_r : std_logic := '0';
+      variable dn_r : std_logic := '0';
+    begin
+      if target_rst = '1' then
+        up_r := '0';
+        dn_r := '0';
+        audio_atten <= 0;
+      elsif rising_edge(clk_57M272) then
+        if ps2_volume_up = '1' and up_r = '0' and audio_atten /= 0 then
+            audio_atten <= audio_atten - 1;
+        elsif ps2_volume_dn = '1' and dn_r = '0' and audio_atten /= 15 then
+            audio_atten <= audio_atten + 1;
+        end if;
+        up_r := ps2_volume_up;
+        dn_r := ps2_volume_dn;
       end if;
     end process;
     
@@ -529,8 +584,8 @@ begin
       -- key inputs are active low
       -- - bit 7 is joyin (TBD)
       pa_i <= '1' & not keys(6 downto 2) & 
-                not (keys(1) or inputs_i(8).d(2)) &   -- left fire
-                not (keys(0) or inputs_i(8).d(3));    -- right fire
+                not (keys(1) or ps2_left_fire) &
+                not (keys(0) or ps2_right_fire);
     end process;
 
     pia_0_inst : entity work.pia6821
