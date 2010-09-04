@@ -101,6 +101,8 @@ begin
       --count := (others => '0');
       count := "0000";
       z <= (others => '0');
+      q <= '0';
+      e <= '0';
       ras0_n <= '1';
       cas_n <= '1';
       we_n_s <= '1';

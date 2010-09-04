@@ -217,30 +217,26 @@ begin
     variable cas_n_r  : std_logic := '0';
     variable e_r      : std_logic := '0';
     variable q_r      : std_logic := '0';
-    variable rd       : std_logic := '0';
 	begin
     if platform_rst = '1' then
       ras_n_r := '0';
       cas_n_r := '0';
       e_r := '0';
-      e_r := '1';
+      q_r := '0';
 		elsif rising_edge (clk_57M272) then
       if clk_14M318_ena = '1' then
-        -- do we even need to latch the data here?
-        -- - I don't think so for a real 6809e at least...
-        if rd = '1' then
-          if not COCO1_USE_REAL_6809 then
+        -- need to latch for CPU09 core
+        if not COCO1_USE_REAL_6809 then
+          if ras_n = '1' and ras_n_r = '0' and clk_e = '1' then
             ram_datao <= sram_i.d(ram_datao'range);
           end if;
-          rd := '0';
         end if;
         if ras_n = '0' and ras_n_r = '1' then
           sam_a(7 downto 0) <= ma;
         elsif cas_n = '0' and cas_n_r = '1' then
           sam_a(15 downto 8) <= ma;
-          rd := '1';
         end if;
-        if clk_q = '1' and e_r = '0' then
+        if clk_q = '1' and q_r = '0' then
           vdg_data <= sram_i.d(ram_datao'range);
         end if;
         -- for edge-detect
