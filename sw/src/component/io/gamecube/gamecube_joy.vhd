@@ -11,8 +11,9 @@ entity gamecube_joy is
   port (
   	clk      	: in std_logic;
 		reset			: in std_logic;
-		oe				: out std_logic;
-		d					: inout std_logic;
+		d_i				: in std_logic;
+		d_o       : out std_logic;
+		d_oe			: out std_logic;
 		joystate	: out joystate_type
 	);
 end gamecube_joy;
@@ -34,9 +35,12 @@ architecture SYN of gamecube_joy is
 	signal gc_tx_dnext	: std_logic;
 	signal gc_tx_pkt		: std_logic;
 begin
-	gc_d_i <= d or gc_oe;
-	d <= 'Z' when gc_oe = '0' else gc_d_o;
 
+	gc_d_i <= d_i or gc_oe;
+	--d <= 'Z' when gc_oe = '0' else gc_d_o;
+  d_o <= gc_d_o;
+  d_oe <= gc_oe;
+  
 	-- Handle gamecube data decode
 	gcube_input: process (reset, clk)
 		constant ones_10			: std_logic_vector(9 downto 0) := (others => '1');

@@ -1,3 +1,24 @@
+
+--
+--  TO DO:
+--
+--  - add joystick support (and kbd emulation of)
+--  - add volume control to output - target-specific
+--  - add support for cassette input
+--  - tidy-up 6847 code and test CVBS
+--  - more complex artifacting support
+--  - test semi-graphics and tidy-up 6883
+--  - add support for high speed poke?
+--  - add mouse support
+--  - add hires joystick support (CocoMax?)
+--  - add floppy disk support (WD177X)
+--  - add hard disk support (Glenside IDE, HDBDOS?) CF/SD?
+--  - add deluxe RS232 support
+--  - add Orchestra-90 support
+--  - add multi-pak support?
+--  - add OSD control panel
+--
+
 library ieee;
 use ieee.std_logic_1164.all;
 use	ieee.numeric_std.all;
@@ -76,9 +97,9 @@ end entity platform;
 --    1: platform reset
 --    2: cpu reset
 --  Switches
---    9:  CART#
---    8   Artifacting enable
---    4   Cassette output to speaker
+--    6   Artifacting enable
+--    5   Cassette output to speaker
+--    4:  CART#
 --    3:0 Flash 16KB bank select
 --
 
@@ -180,6 +201,11 @@ architecture SYN of platform is
   alias ps2_right_fire    : std_logic is inputs_i(8).d(3);
   alias ps2_volume_up     : std_logic is inputs_i(8).d(4);
   alias ps2_volume_dn     : std_logic is inputs_i(8).d(5);
+
+  alias sw_artifact_en    : std_logic is switches_i(6);
+  alias sw_cassette_out   : std_logic is switches_i(5);
+  alias sw_cart_n         : std_logic is switches_i(4);
+  alias sw_cart_bank      : std_logic_vector(3 downto 0) is switches_i(3 downto 0);
   
 begin
 
@@ -424,7 +450,7 @@ begin
 			vsync		        => vsync,
 			
       -- special inputs
-      artifact_en     => switches_i(8),
+      artifact_en     => sw_artifact_en,
       artifact_set    => '0',
       artifact_phase  => '0',
       
@@ -443,7 +469,7 @@ begin
       if platform_rst = '1' then
         audio_data <= (others => '0');
       elsif rising_edge(clk_57M272) then
-        if switches_i(4) = '1' then
+        if sw_cassette_out = '1' then
           if cassmot = '1' then
             -- special case, cassette goes to speaker
             audio_data(audio_data'left downto audio_data'left-1) <= (others => dac_data(5));
@@ -726,7 +752,7 @@ begin
   GEN_NO_CART : if not COCO1_CART_INTERNAL generate
     -- only support 16x16KB cartridges atm
     flash_o.a(flash_o.a'left downto 18) <= (others => '0');
-    flash_o.a(17 downto 14) <= switches_i(3 downto 0);
+    flash_o.a(17 downto 14) <= sw_cart_bank;
     flash_o.a(13 downto 0) <= cpu_a(13 downto 0);
     cart_d_o <= flash_i.d(cart_d_o'range);
     flash_o.cs <= cart_cs;
@@ -735,6 +761,7 @@ begin
   end generate GEN_NO_CART;
   
   -- CART# signal is tied to 'Q' on a real cartridge
-  cart_n <= '1' when switches_i(9) = '0' else clk_q;
+  -- - BANK0 is reserved for DOS (non-autostart)
+  cart_n <= '1' when (sw_cart_n = '0' or sw_cart_bank = "0000") else clk_q;
 
 end architecture SYN;

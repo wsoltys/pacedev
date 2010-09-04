@@ -35,8 +35,9 @@ package gamecube_pkg is
     port (
       clk      	: in std_logic;
       reset			: in std_logic;
-      oe				: out std_logic;
-      d					: inout std_logic;
+      d_i				: in std_logic;
+      d_o       : out std_logic;
+      d_oe			: out std_logic;
       joystate	: out joystate_type
     );
   end component gamecube_joy;

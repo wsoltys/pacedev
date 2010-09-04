@@ -367,6 +367,12 @@ begin
 		inputs_i.jamma_n.p(1).button(4) <= not gcj.y;
 		inputs_i.jamma_n.p(1).button(5)	<= not gcj.z;
 
+    -- analogue mappings
+    inputs_i.analogue(1) <= gcj.jx & "00";
+    inputs_i.analogue(2) <= gcj.jy & "00";
+    inputs_i.analogue(3) <= (others => '0');
+    inputs_i.analogue(4) <= (others => '0');
+    
 	end generate GEN_GAMECUBE;
 	
 	GEN_NO_JAMMA : if PACE_JAMMA = PACE_JAMMA_NONE generate

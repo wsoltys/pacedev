@@ -109,9 +109,6 @@ architecture SYN of target_top is
   constant DE1_TEST_BURCHED_DIPS        : boolean := false;
   constant DE1_TEST_BURCHED_7SEG        : boolean := false;
 
-	alias gpio_maple 		  : std_logic_vector(35 downto 0) is gpio_0;
-	alias gpio_lcd 			  : std_logic_vector(35 downto 0) is gpio_1;
-	
   signal init       	  : std_logic := '1';
   
   signal clkrst_i       : from_CLKRST_t;
@@ -140,7 +137,9 @@ architecture SYN of target_top is
 
   -- gpio drivers from default logic
   signal default_gpio_0_o   : std_logic_vector(gpio_0'range) := (others => 'Z');
+  signal default_gpio_0_oe  : std_logic_vector(gpio_0'range) := (others => 'Z');
   signal default_gpio_1_o   : std_logic_vector(gpio_1'range) := (others => 'Z');
+  signal default_gpio_1_oe  : std_logic_vector(gpio_1'range) := (others => 'Z');
 	signal seg7               : std_logic_vector(15 downto 0);
 	
 begin
@@ -277,6 +276,9 @@ begin
     default_gpio_0_o(3) <= video_o.rgb.b(video_o.rgb.b'left-1);
     default_gpio_0_o(2) <= video_o.hsync;
     default_gpio_0_o(1) <= video_o.vsync;
+    
+    default_gpio_0_oe <= "00000000110000000111111110";
+    
   end generate GEN_BURCHED_PERIPHERAL;
   
 	GEN_MAPLE : if PACE_JAMMA = PACE_JAMMA_MAPLE generate
@@ -330,8 +332,12 @@ begin
 
 	GEN_GAMECUBE : if PACE_JAMMA = PACE_JAMMA_NGC generate
 	
+    -- all this is so we can easily switch GPIO ports for NGC bus!
+    alias ngc_i   : std_logic_vector(gpio_0'range) is gpio_0;
+    alias ngc_o   : std_logic_vector(default_gpio_0_o'range) is default_gpio_0_o;
+    alias ngc_oe  : std_logic_vector(default_gpio_0_oe'range) is default_gpio_0_oe;
+
     signal gcj  : work.gamecube_pkg.joystate_type;
-    signal d    : std_logic := '0';
 
   begin
 	
@@ -341,12 +347,11 @@ begin
 		  (
   			clk 				=> clock_50,
 				reset 			=> clkrst_i.arst,
-				--oe 					=> gc_oe,
-				d 					=> d, --gpio_maple(25),
+				d_i 				=> ngc_i(25),
+				d_o         => ngc_o(25),
+				d_oe 				=> ngc_oe(25),
 				joystate 		=> gcj
 			);
-
-    -- insert drivers for d here...
 
 		-- map gamecube controller to jamma inputs
 		inputs_i.jamma_n.coin(1) <= not gcj.l;
@@ -361,6 +366,12 @@ begin
 		inputs_i.jamma_n.p(1).button(4) <= not gcj.y;
 		inputs_i.jamma_n.p(1).button(5)	<= not gcj.z;
 
+    -- analogue mappings
+    inputs_i.analogue(1) <= gcj.jx & "00";
+    inputs_i.analogue(2) <= gcj.jy & "00";
+    inputs_i.analogue(3) <= (others => '0');
+    inputs_i.analogue(4) <= (others => '0');
+    
 	end generate GEN_GAMECUBE;
 	
 	GEN_NO_JAMMA : if PACE_JAMMA = PACE_JAMMA_NONE generate
@@ -535,6 +546,7 @@ begin
     end component I2S_LCM_Config;
 
     alias gpio_lcd_o 		: std_logic_vector(35 downto 18) is default_gpio_1_o(35 downto 18);
+    alias gpio_lcd_oe		: std_logic_vector(35 downto 18) is default_gpio_1_oe(35 downto 18);
     
     signal lcm_sclk   	: std_logic;
     signal lcm_sdat   	: std_logic;
@@ -584,6 +596,8 @@ begin
     gpio_lcd_o(33) <= lcm_scen;
     gpio_lcd_o(34) <= lcm_sdat;
 
+    gpio_lcd_oe <= (27=>'0', 32=>'0', others => '1');
+    
   end block BLK_LCM;
 
   BLK_AUDIO : block
@@ -753,7 +767,8 @@ begin
       default_gpio_0_o(i) <= 'Z';
       gpio_0(i) <=  custom_gpio_0_o(i) when 
                       (gpio_0_is_custom(i) = '1' and custom_gpio_0_oe(i) = '1') else
-                    default_gpio_0_o(i) when gpio_0_is_custom(i) = '0' else
+                    default_gpio_0_o(i) when 
+                      (gpio_0_is_custom(i) = '0' and default_gpio_0_oe(i) = '1') else
                     'Z';
     end generate GEN_GPIO_0_O;
     
@@ -761,7 +776,8 @@ begin
       default_gpio_1_o(i) <= 'Z';
       gpio_1(i) <=  custom_gpio_1_o(i) when 
                       (gpio_1_is_custom(i) = '1' and custom_gpio_1_oe(i) = '1') else
-                    default_gpio_1_o(i) when gpio_1_is_custom(i) = '0' else
+                    default_gpio_1_o(i) when 
+                      (gpio_1_is_custom(i) = '0' and default_gpio_1_oe(i) = '1') else
                     'Z';
     end generate GEN_GPIO_1_O;
 
