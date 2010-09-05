@@ -167,11 +167,9 @@ architecture SYN of target_top is
 	alias fpga_confdone		: std_logic is bd(21);
 	alias fpga_status_n		: std_logic is bd(25);
                       	
-	signal clk_i			  	: std_logic_vector(0 to 3);
   signal init       		: std_logic := '1';
-  signal reset_i     		: std_logic := '1';
-	signal reset_n				: std_logic := '0';
                       	
+  signal clkrst_i       : from_CLKRST_t;
   signal buttons_i    	: from_BUTTONS_t;
   signal switches_i   	: from_SWITCHES_t;
   signal leds_o       	: to_LEDS_t;
@@ -269,8 +267,8 @@ begin
         port map
         (
           inclk0  => clock0,
-          c0      => clk_i(0),
-          c1      => clk_i(1)
+          c0      => clkrst_i.clk(0),
+          c1      => clkrst_i.clk(1)
         );
     
     end generate GEN_PLL;
@@ -278,11 +276,15 @@ begin
     GEN_NO_PLL : if not PACE_HAS_PLL generate
 
       -- feed input clocks into PACE core
-      clk_i(0) <= clock0;
-      clk_i(1) <= clock8;
+      clkrst_i.clk(0) <= clock0;
+      clkrst_i.clk(1) <= clock8;
         
     end generate GEN_NO_PLL;
 	
+    -- unused clocks on P2
+    clkrst_i.clk(2) <= clock8;
+    clkrst_i.clk(3) <= '0';
+
   end block BLK_CLOCKING;
 
 	-- FPGA STARTUP
@@ -303,11 +305,23 @@ begin
 	-- the dipswitch must be "down" for the board to run
 	-- this is akin to an "ON" switch flicked down to turn on
 	-- - *** not loaded on some A(04) boards, so invert
-	reset_i <= init or not sw2_1_ext_enable;
+  clkrst_i.arst <= init or not sw2_1_ext_enable;
+	clkrst_i.arst_n <= not clkrst_i.arst;
 		
-  -- unused clocks on P2
-  clk_i(2) <= clock8;
-  clk_i(3) <= '0';
+  GEN_RESETS : for i in 0 to 3 generate
+
+    process (clkrst_i.clk(i), clkrst_i.arst)
+      variable rst_r : std_logic_vector(2 downto 0) := (others => '0');
+    begin
+      if clkrst_i.arst = '1' then
+        rst_r := (others => '1');
+      elsif rising_edge(clkrst_i.clk(i)) then
+        rst_r := rst_r(rst_r'left-1 downto 0) & '0';
+      end if;
+      clkrst_i.rst(i) <= rst_r(rst_r'left);
+    end process;
+
+  end generate GEN_RESETS;
 
   -- buttons
   buttons_i <= std_logic_vector(to_unsigned(0, buttons_i'length));
@@ -335,9 +349,10 @@ begin
   		port map
 		  (
   			clk 				=> clk_24M,
-				reset 			=> reset_i,
-				oe 					=> open,
-				d 					=> bd(4),
+				reset 			=> clkrst_i.arst,
+				d_i				  => bd(4),
+				d_o         => open,
+				d_oe				=> open,
 				joystate 		=> gcj
 			);
 
@@ -474,9 +489,9 @@ begin
 
   begin
 
-		video_i.clk <= clk_i(1);	-- by convention
+		video_i.clk <= clkrst_i.clk(1);	-- by convention
     video_i.clk_ena <= '1';
-    video_i.reset <= reset_i;
+    video_i.reset <= clkrst_i.rst(1);
 
     bd_out(20) <= video_o.rgb.r(9);
     bd_out(27) <= video_o.rgb.r(8);
@@ -512,12 +527,12 @@ begin
 
     -- audio PWM
     -- clock is 24Mhz, sample rate 24kHz
-    process (clk_24M, reset_i)
+    process (clk_24M, clkrst_i.arst)
       variable count : integer range 0 to 1023;
       variable audio_sample_l : std_logic_vector(9 downto 0);
       variable audio_sample_r : std_logic_vector(9 downto 0);
     begin
-      if reset_i = '1' then
+      if clkrst_i.arst = '1' then
         count := 0;
       elsif rising_edge(clk_24M) then
         if count = 1023 then
@@ -657,8 +672,8 @@ begin
     port map
     (
     	-- clocks and resets
-	  	clk_i							=> clk_i,
-      reset_i          	=> reset_i,
+	  	clk_i							=> clkrst_i.clk,
+      reset_i          	=> clkrst_i.rst,
 
       -- misc inputs and outputs
       buttons_i         => buttons_i,
@@ -704,10 +719,10 @@ begin
   BLK_CHASER : block
   begin
     -- flash the led so we know it's alive
-    process (clk_24M, reset_i)
+    process (clk_24M, clkrst_i.arst)
       variable count : std_logic_vector(21 downto 0);
     begin
-      if reset_i = '1' then
+      if clkrst_i.arst = '1' then
         count := (others => '0');
       elsif rising_edge(clk_24M) then
         count := std_logic_vector(unsigned(count) + 1);

@@ -328,8 +328,9 @@ begin
 		  (
   			clk 				=> clk_24M,
 				reset 			=> clkrst_i.arst,
-				oe 					=> open,
-				d 					=> bd(4),
+				d_oe 				=> open,
+				d_i 			  => bd(4),
+				d_o         => open,
 				joystate 		=> gcj
 			);
 

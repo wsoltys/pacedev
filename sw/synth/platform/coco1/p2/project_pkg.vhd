@@ -19,6 +19,7 @@ package project_pkg is
 	constant PACE_HAS_PLL								      : boolean := true;
   constant PACE_HAS_SRAM                    : boolean := true;
   constant PACE_HAS_SDRAM                   : boolean := false;
+  constant PACE_HAS_FLASH                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := false;
 
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
@@ -45,22 +46,33 @@ package project_pkg is
 
 	constant PACE_ADV724_STD						: std_logic := ADV724_STD_PAL;
 
-  -- P2-specific constants
-  constant P2_JAMMA_IS_MAPLE          : boolean := false;
-  constant P2_JAMMA_IS_NGC            : boolean := true;
+	-- Coco1-specific constants
 
-  -- Coco1-specific constants
-
-  constant COCO1_USE_REAL_6809              : boolean := true;
+  constant COCO1_USE_REAL_6809              : boolean := false;
+  
+  --constant COCO1_MC6847_ROM                 : string := "mc6847_pal.hex";
+  constant COCO1_MC6847_ROM                 : string := "mc6847_ntsc.hex";
+  --constant COCO1_MC6847_ROM                 : string := "mc6847t1_pal.hex";
+  --constant COCO1_MC6847_ROM                 : string := "mc6847t1_ntsc.hex";
+  
   --constant COCO1_BASIC_ROM                  : string := "bas10.hex";
   constant COCO1_BASIC_ROM                  : string := "bas11.hex";
   --constant COCO1_BASIC_ROM                  : string := "bas12.hex";
   --constant COCO1_EXTENDED_BASIC_ROM         : string := "extbas10.hex";
   constant COCO1_EXTENDED_BASIC_ROM         : string := "extbas11.hex";
-  constant COCO1_EXTENDED_COLOR_BASIC       : boolean := false;
+  constant COCO1_EXTENDED_COLOR_BASIC       : boolean := true;
+  
+  constant COCO1_CART_INTERNAL              : boolean := false;
+  constant COCO1_CART_WIDTHAD               : integer := 13;
+  constant COCO1_CART_NAME                  : string := "clowns.hex";     -- 8KB
+  --constant COCO1_CART_NAME                  : string := "dod.hex";        -- 8KB
+  --constant COCO1_CART_NAME                  : string := "galactic.hex";   -- 4KB
+  --constant COCO1_CART_NAME                  : string := "megabug.hex";    -- 8KB
+  --constant COCO1_CART_NAME                  : string := "nebula.hex";     -- 8KB
+
   constant COCO1_JUMPER_32K_RAM             : std_logic := '1';
-	constant COCO1_CVBS                       : boolean := true;
-	
+	constant COCO1_CVBS                       : boolean := false;
+  
 	-- derived - do not edit
 	constant COCO1_VGA                        : boolean := not COCO1_CVBS;
 	constant PACE_ENABLE_ADV724					      : std_logic := to_std_logic(COCO1_CVBS);
