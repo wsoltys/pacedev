@@ -73,6 +73,8 @@ package project_pkg is
   constant COCO1_JUMPER_32K_RAM             : std_logic := '1';
 	constant COCO1_CVBS                       : boolean := false;
   
+  constant COCO1_HAS_IDE                    : boolean := true;
+  
 	-- derived - do not edit
 	constant COCO1_VGA                        : boolean := not COCO1_CVBS;
 	constant PACE_ENABLE_ADV724					      : std_logic := to_std_logic(COCO1_CVBS);

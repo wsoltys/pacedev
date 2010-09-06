@@ -4,7 +4,7 @@
 --
 --  - add volume control to output - target-specific
 --  - add support for cassette input
---  - tidy-up 6847 code, add borders and test CVBS
+--  - tidy-up 6847 code, and test CVBS
 --  - more complex artifacting support
 --  - test semi-graphics and tidy-up 6883
 --  - add support for high speed poke?
@@ -782,7 +782,7 @@ begin
   -- - BANK0 is reserved for DOS (non-autostart)
   cart_n <= '1' when (sw_cart_n = '0' or sw_cart_bank = "0000") else clk_q;
 
-  GEN_IDE : if COCO_HAS_IDE generate
+  GEN_IDE : if COCO1_HAS_IDE generate
   begin
 
     -- IDE registers
@@ -806,6 +806,6 @@ begin
     -- $FF78-$FF79,$FF7C RTC registers
     --
     
-  end generate COCO_HAS_IDE;
+  end generate GEN_IDE;
   
 end architecture SYN;

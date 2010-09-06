@@ -34,7 +34,10 @@ package target_pkg is
   end record;
 
   type to_TARGET_IO_t is record
-    not_used  : std_logic;
+    -- to the OCIDE core
+    wb_clk      : std_logic;
+    wb_arst_n   : std_logic;
+    wb_rst      : std_logic;
   end record;
 
 end;

@@ -113,6 +113,8 @@ architecture SYN of mc6847 is
   signal vga_vblank           : std_logic;
 	signal vga_linebuf_addr			: std_logic_vector(8 downto 0);
 	signal vga_data							: std_logic_vector(7 downto 0);
+	signal vga_hborder          : std_logic;
+	signal vga_vborder          : std_logic;
 		
 	-- CVBS signals
 	
@@ -121,9 +123,11 @@ architecture SYN of mc6847 is
   signal cvbs_vsync           : std_logic;
   signal cvbs_hblank          : std_logic;
   signal cvbs_vblank          : std_logic;
+  signal cvbs_hborder         : std_logic;
+  signal cvbs_vborder         : std_logic;
 	signal cvbs_linebuf_we			: std_logic;
 	signal cvbs_linebuf_addr		: std_logic_vector(8 downto 0);
-
+  
   signal active_h_start       : std_logic := '0';	
 	signal an_s_r               : std_logic;
   signal inv_r                : std_logic;
@@ -239,6 +243,7 @@ begin
       else
         if h_count = H_TOTAL_PER_LINE then
           h_count := 0;
+          vga_hborder <= '0';
         else
           h_count := h_count + 1;
         end if;
@@ -248,14 +253,14 @@ begin
         elsif h_count = H_HORIZ_SYNC then
           vga_hsync <= '1';
         elsif h_count = H_BACK_PORCH then
-          null;
+          vga_hborder <= '1';
         elsif h_count = H_LEFT_BORDER then
           vga_hblank <= '0';
           active_h_count := (others => '0');
         elsif h_count = H_VIDEO then
           vga_hblank <= '1';
         elsif h_count = H_RIGHT_BORDER then
-          null;
+          vga_hborder <= '0';
         else
           active_h_count := std_logic_vector(unsigned(active_h_count) + 1);
         end if;
@@ -320,13 +325,15 @@ begin
         elsif v_count = V2_VERTICAL_SYNC then
           cvbs_vsync <= '1';
         elsif v_count = V2_BACK_PORCH then
-          null;
+          cvbs_vborder <= '1';
         elsif v_count = V2_TOP_BORDER then
           cvbs_vblank <= '0';
           row_v := (others => '0');
           active_v_count := (others => '0');        -- debug only
         elsif v_count = V2_VIDEO then
           cvbs_vblank <= '1';
+        elsif v_count = V2_BOTTOM_BORDER then
+          cvbs_vborder <= '0';
         else
           if row_v = 11 then
             row_v := (others => '0');
@@ -601,6 +608,9 @@ begin
               map_palette (vga_data, r, g, b);
             end if;
             count := not count;
+          elsif an_g_s = '1' and vga_hborder = '1' and cvbs_vborder = '1' then
+            -- graphics mode, either green or buff (white)
+            map_palette ("00001" & css_s & "00", r, g, b);
           else
             r := (others => '0');
             g := (others => '0');

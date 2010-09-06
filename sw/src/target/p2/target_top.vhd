@@ -546,17 +546,6 @@ begin
 		mac_addr <= 'Z';
 	end generate GEN_NO_SSN;
 	
-	GEN_NO_CF : if true generate
-		a_cf <= (others => 'Z');
-		d_cf <= (others => 'Z');
-		nce_cf <= (others => 'Z');
-		nior0_cf <= 'Z';
-		niow0_cf <= 'Z';
-		non_cf <= '1';
-		reset_cf <= 'Z';
-		ndmack_cf <= 'Z';
-	end generate GEN_NO_CF;
-
 	GEN_NO_I2C : if true generate
 		clk_ee <= 'Z';
 		data_ee <= 'Z';
@@ -664,6 +653,36 @@ begin
       target_o          => target_o
     );
 
+  BLK_CUSTOM_IO : block
+  begin
+
+    custom_io_inst : entity work.custom_io
+      port map
+      (
+        -- compact flash
+        iordy0_cf         => iordy0_cf,
+        rdy_irq_cf        => rdy_irq_cf,
+        cd_cf             => cd_cf,
+        a_cf              => a_cf,
+        nce_cf            => nce_cf,
+        d_cf              => d_cf,
+        nior0_cf          => nior0_cf,
+        niow0_cf          => niow0_cf,
+        non_cf            => non_cf,
+        reset_cf          => reset_cf,
+        ndmack_cf         => ndmack_cf,
+        dmarq_cf          => dmarq_cf,
+        
+        project_i         => project_i,
+        project_o         => project_o,
+        platform_i        => platform_i,
+        platform_o        => platform_o,
+        target_i          => target_i,
+        target_o          => target_o
+      );
+
+  end block BLK_CUSTOM_IO;
+  
   BLK_CHASER : block
   begin
     -- flash the led so we know it's alive

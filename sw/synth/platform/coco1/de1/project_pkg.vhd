@@ -20,9 +20,9 @@ package project_pkg is
   constant PACE_HAS_SDRAM                   : boolean := true;
   constant PACE_HAS_SERIAL                  : boolean := false;
   
-	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
+	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NGC;
 
-  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_320x480_60Hz;
+  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_NONE;
   constant PACE_CLK0_DIVIDE_BY              : natural := 7;
   constant PACE_CLK0_MULTIPLY_BY            : natural := 8;   -- 50*8/7 = 57M143Hz (57.27272)
   constant PACE_CLK1_DIVIDE_BY              : natural := 7;
@@ -60,6 +60,8 @@ package project_pkg is
 
   constant COCO1_JUMPER_32K_RAM             : std_logic := '1';
 	constant COCO1_CVBS                       : boolean := false;
+  
+  constant COCO_HAS_IDE                     : boolean := true;
   
 	-- derived - do not edit
   constant PACE_HAS_FLASH                   : boolean := not COCO1_CART_INTERNAL;

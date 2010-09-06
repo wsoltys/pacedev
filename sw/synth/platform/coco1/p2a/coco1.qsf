@@ -754,6 +754,7 @@ set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to nllb_s
 set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to nlub_s
 set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to nulb_s
 set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to nuub_s
+
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sdram_pkg.vhd
@@ -788,4 +789,12 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/convers
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_upcounter.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gc_tx_bit.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_joy.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/ud_cnt.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/ro_cnt.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/atahost_pio_tctrl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/atahost_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/atahost_wb_slave.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/atahost_top.vhd
+set_global_assignment -name VHDL_FILE custom_io.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/p2a/target_top.vhd
+set_global_assignment -name NUM_PARALLEL_PROCESSORS ALL
