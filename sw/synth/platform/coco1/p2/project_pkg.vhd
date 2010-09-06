@@ -22,7 +22,7 @@ package project_pkg is
   constant PACE_HAS_FLASH                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := false;
 
-	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
+	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NGC;
   
 	-- NTSC (x16)
   constant PACE_CLK0_DIVIDE_BY              : natural := 13;
@@ -72,6 +72,8 @@ package project_pkg is
 
   constant COCO1_JUMPER_32K_RAM             : std_logic := '1';
 	constant COCO1_CVBS                       : boolean := false;
+  
+  constant COCO_HAS_IDE                     : boolean := true;
   
 	-- derived - do not edit
 	constant COCO1_VGA                        : boolean := not COCO1_CVBS;

@@ -782,4 +782,30 @@ begin
   -- - BANK0 is reserved for DOS (non-autostart)
   cart_n <= '1' when (sw_cart_n = '0' or sw_cart_bank = "0000") else clk_q;
 
+  GEN_IDE : if COCO_HAS_IDE generate
+  begin
+
+    -- IDE registers
+    --
+    -- 0 - Data
+    -- 1 - Error(rd)/Features(wr)
+    -- 2 - Sector count
+    -- 3 - Sector number
+    -- 4 - Cylinder low byte
+    -- 5 - Cylinder high byte
+    -- 6 - Device/head
+    -- 7 - Command
+    -- 8 - Latch
+    -- -
+    -- 9 - Flash Bank Select (bit7=wr,bit1:0=bank)
+    --
+    -- Setting the base address
+    -- $FF50-$FF59 is the default
+    -- $FF4X,$FF5X,$FF6X,$FF7X available
+    --
+    -- $FF78-$FF79,$FF7C RTC registers
+    --
+    
+  end generate COCO_HAS_IDE;
+  
 end architecture SYN;
