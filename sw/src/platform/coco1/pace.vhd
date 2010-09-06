@@ -79,14 +79,6 @@ architecture SYN of PACE is
 
 begin
 
-	-- hook up VGA output
-	video_o.clk <= clk_i(0);
-	video_o.rgb.r <= vga_red(7 downto 0) & "00";
-	video_o.rgb.g <= vga_green(7 downto 0) & "00";
-	video_o.rgb.b <= vga_blue(7 downto 0) & "00";
-	video_o.hsync <= vga_hsync;
-	video_o.vsync <= vga_vsync;
-	    
   kbd_inst : entity work.inputs
     generic map
     (
@@ -124,6 +116,8 @@ begin
       
       -- controller inputs
       inputs_i        => mapped_inputs,
+      jamma_i         => inputs_i.jamma_n,
+      analogue_i      => inputs_i.analogue,
 
       -- FLASH/SRAM/SDRAM
       flash_i         => flash_i,
@@ -134,11 +128,7 @@ begin
       sdram_o         => sdram_o,
       
       -- graphics (control)
-	    red     				=> vga_red,
-	    green   				=> vga_green,
-	    blue    				=> vga_blue,
-  	  hsync   				=> vga_hsync,
-	    vsync						=> vga_vsync,
+      video_o         => video_o,
 
       --cvbs            => GS_CVBS,
 

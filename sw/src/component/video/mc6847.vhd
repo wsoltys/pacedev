@@ -41,6 +41,8 @@ entity mc6847 is
     blue    	      : out std_logic_vector(7 downto 0);
     hsync   	      : out std_logic;
     vsync			      : out std_logic;
+    hblank          : out std_logic;
+    vblank          : out std_logic;
 
     -- special inputs
     artifact_en     : in std_logic;
@@ -612,9 +614,13 @@ begin
     if CVBS_NOT_VGA then
       hsync <= cvbs_hsync;
       vsync <= cvbs_vsync;
+      hblank <= cvbs_hblank;
+      vblank <= cvbs_vblank;
     else
       hsync <= vga_hsync;
       vsync <= vga_vsync;
+      hblank <= vga_hblank;
+      vblank <= vga_vblank;
     end if;
   end process PROC_OUTPUT;
 

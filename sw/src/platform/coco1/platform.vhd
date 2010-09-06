@@ -2,10 +2,9 @@
 --
 --  TO DO:
 --
---  - add joystick support (and kbd emulation of)
 --  - add volume control to output - target-specific
 --  - add support for cassette input
---  - tidy-up 6847 code and test CVBS
+--  - tidy-up 6847 code, add borders and test CVBS
 --  - more complex artifacting support
 --  - test semi-graphics and tidy-up 6883
 --  - add support for high speed poke?
@@ -27,6 +26,7 @@ library work;
 use work.pace_pkg.all;
 use work.sdram_pkg.all;
 use work.kbd_pkg.all;
+use work.video_controller_pkg.to_VIDEO_t;
 use work.target_pkg.all;
 use work.platform_pkg.all;
 use work.project_pkg.all;
@@ -49,7 +49,9 @@ entity platform is
 
     -- controller inputs
     inputs_i          : in from_MAPPED_INPUTS_t(0 to NUM_INPUT_BYTES-1);
-
+    jamma_i           : in from_JAMMA_t;
+    analogue_i        : in analogue_in_a(1 to 4);
+    
     -- FLASH/SRAM
     flash_i           : in from_FLASH_t;
     flash_o           : out to_FLASH_t;
@@ -59,11 +61,7 @@ entity platform is
     sdram_o           : out to_SDRAM_t;
 
     -- graphics (control)
-    red							  : out		std_logic_vector(7 downto 0);
-		green						  : out		std_logic_vector(7 downto 0);
-		blue						  : out		std_logic_vector(7 downto 0);
-		hsync						  : out		std_logic;
-		vsync						  : out		std_logic;
+    video_o           : out to_VIDEO_t;
 
     -- OSD
     osd_i             : in from_OSD_t;
@@ -97,6 +95,7 @@ end entity platform;
 --    1: platform reset
 --    2: cpu reset
 --  Switches
+--    7   Swap joytick left/right
 --    6   Artifacting enable
 --    5   Cassette output to speaker
 --    4:  CART#
@@ -105,95 +104,93 @@ end entity platform;
 
 architecture SYN of platform is
 
-	alias clk_57M272			: std_logic is clk_i(0);
-	alias rst_57M272      : std_logic is reset_i(0);
+	alias clk_57M272			  : std_logic is clk_i(0);
+	alias rst_57M272        : std_logic is reset_i(0);
 
 	-- clocks
-	signal clk_14M318_ena : std_logic := '0';
-	signal clk_q          : std_logic := '0';
-	signal clk_e          : std_logic := '0';
+	signal clk_14M318_ena   : std_logic := '0';
+	signal clk_q            : std_logic := '0';
+	signal clk_e            : std_logic := '0';
 
-  signal target_rst     : std_logic := '0';
-  signal platform_rst   : std_logic := '0';
-	signal cpu_rst			  : std_logic := '0';
+  signal target_rst       : std_logic := '0';
+  signal platform_rst     : std_logic := '0';
+	signal cpu_rst			    : std_logic := '0';
 	
 	-- clock helpers
-  signal vdgclk         : std_logic;
+  signal vdgclk           : std_logic;
 
 	-- multiplexed address
-	signal ma							: std_logic_vector(7 downto 0);
+	signal ma							  : std_logic_vector(7 downto 0);
 
-  signal vdg_data       : std_logic_vector(7 downto 0);
-  signal vdg_y          : std_logic_vector(3 downto 0);						
-  signal vdg_x          : std_logic_vector(4 downto 0);
-  signal vdg_css        : std_logic;
-  signal vdg_intn_ext   : std_logic;
-  signal vdg_gm         : std_logic_vector(2 downto 0);
-  signal vdg_an_g       : std_logic;
+  signal vdg_data         : std_logic_vector(7 downto 0);
+  signal vdg_y            : std_logic_vector(3 downto 0);						
+  signal vdg_x            : std_logic_vector(4 downto 0);
+  signal vdg_css          : std_logic;
+  signal vdg_intn_ext     : std_logic;
+  signal vdg_gm           : std_logic_vector(2 downto 0);
+  signal vdg_an_g         : std_logic;
 
   -- uP signals  
-  alias cpu_clk         : std_logic is clk_e;
-  signal cpu_clk_n      : std_logic;
-  signal cpu_a          : std_logic_vector(15 downto 0);
-  signal cpu_d_i        : std_logic_vector(7 downto 0);
-  signal cpu_d_o        : std_logic_vector(7 downto 0);
-  signal cpu_r_wn				: std_logic;
-  signal cpu_vma				: std_logic;
-  signal cpu_irq        : std_logic;
-  signal cpu_firq			  : std_logic;
-  signal cpu_nmi        : std_logic;
-
-  -- keyboard signals
-	signal jamma_s				: from_JAMMA_t;
+  alias cpu_clk           : std_logic is clk_e;
+  signal cpu_clk_n        : std_logic;
+  signal cpu_a            : std_logic_vector(15 downto 0);
+  signal cpu_d_i          : std_logic_vector(7 downto 0);
+  signal cpu_d_o          : std_logic_vector(7 downto 0);
+  signal cpu_r_wn				  : std_logic;
+  signal cpu_vma				  : std_logic;
+  signal cpu_irq          : std_logic;
+  signal cpu_firq			    : std_logic;
+  signal cpu_nmi          : std_logic;
 
   -- PIA-A signals
-  signal pia_0_cs				: std_logic;
-  signal pia_0_datao  	: std_logic_vector(7 downto 0);
+  signal pia_0_cs				  : std_logic;
+  signal pia_0_datao  	  : std_logic_vector(7 downto 0);
   -- PIA-B signals
-  signal pia_1_cs				: std_logic;
-  signal pia_1_datao  	: std_logic_vector(7 downto 0);
+  signal pia_1_cs				  : std_logic;
+  signal pia_1_datao  	  : std_logic_vector(7 downto 0);
   
 	-- SAM signals
-  signal sam_cs					: std_logic;
-	signal sam_a				  : std_logic_vector(15 downto 0);
-  signal ras_n          : std_logic;
-  signal cas_n          : std_logic;
-	signal sam_we_n       : std_logic;
+  signal sam_cs					  : std_logic;
+	signal sam_a				    : std_logic_vector(15 downto 0);
+  signal ras_n            : std_logic;
+  signal cas_n            : std_logic;
+	signal sam_we_n         : std_logic;
                         
   -- ROM signals        
-  signal rom_wr					: std_logic;
-  signal rom_datao      : std_logic_vector(7 downto 0);
-	signal rom_cs					: std_logic;
+  signal rom_wr					  : std_logic;
+  signal rom_datao        : std_logic_vector(7 downto 0);
+	signal rom_cs					  : std_logic;
 
   -- EXTROM signals	                        
-  signal extrom_datao   : std_logic_vector(7 downto 0);
-	signal extrom_cs			: std_logic;
+  signal extrom_datao     : std_logic_vector(7 downto 0);
+	signal extrom_cs			  : std_logic;
 
   -- RAM signals        
-  signal ram_cs         : std_logic;
-  signal ram_datao      : std_logic_vector(7 downto 0);
+  signal ram_cs           : std_logic;
+  signal ram_datao        : std_logic_vector(7 downto 0);
 
 	-- system chipselect selector from SAM
-	signal cs_sel					: std_logic_vector(2 downto 0);
+	signal cs_sel					  : std_logic_vector(2 downto 0);
 
   -- VDG signals
-  signal hs_n           : std_logic;
-  signal fs_n           : std_logic;
-  signal da0            : std_logic;
-  signal vdg_sram_cs    : std_logic;
+  signal hs_n             : std_logic;
+  signal fs_n             : std_logic;
+  signal da0              : std_logic;
+  signal vdg_sram_cs      : std_logic;
 
   -- cartridge signals
-  signal cart_n         : std_logic;
-  signal cart_cs        : std_logic;
-  signal cart_d_o       : std_logic_vector(7 downto 0);
+  signal cart_n           : std_logic;
+  signal cart_cs          : std_logic;
+  signal cart_d_o         : std_logic_vector(7 downto 0);
 
   -- other coco signals
-  signal casdin         : std_logic := '0';
-  signal cassmot        : std_logic := '0';
-  signal dac_data       : std_logic_vector(5 downto 0);
-  signal snden          : std_logic := '0';
-  signal sel            : std_logic_vector(2 downto 1);
-  signal sndout         : std_logic := '0';
+  signal casdin           : std_logic := '0';
+  signal cassmot          : std_logic := '0';
+  signal dac_data         : std_logic_vector(5 downto 0);
+  signal snden            : std_logic := '0';
+  signal sel              : std_logic_vector(2 downto 1);
+  signal sndout           : std_logic := '0';
+  signal joyin            : std_logic := '0';
   
   alias ps2_platform_rst  : std_logic is inputs_i(8).d(0);
   alias ps2_cpu_rst       : std_logic is inputs_i(8).d(1);
@@ -202,10 +199,14 @@ architecture SYN of platform is
   alias ps2_volume_up     : std_logic is inputs_i(8).d(4);
   alias ps2_volume_dn     : std_logic is inputs_i(8).d(5);
 
+  alias sw_joystick       : std_logic is switches_i(7);
   alias sw_artifact_en    : std_logic is switches_i(6);
   alias sw_cassette_out   : std_logic is switches_i(5);
   alias sw_cart_n         : std_logic is switches_i(4);
   alias sw_cart_bank      : std_logic_vector(3 downto 0) is switches_i(3 downto 0);
+
+  alias jamma_left_fire   : std_logic is jamma_i.p(1).button(1);
+  alias jamma_right_fire  : std_logic is jamma_i.p(1).button(2);
   
 begin
 
@@ -281,7 +282,7 @@ begin
   -- memory read mux
   cpu_d_i <=  pia_0_datao when pia_0_cs = '1' else
               pia_1_datao when pia_1_cs = '1' else
-              cart_d_o when cart_cs = '1' else
+              cart_d_o when (cart_cs = '1' and sw_cart_n = '1') else
               rom_datao when rom_cs = '1' else
               extrom_datao when extrom_cs = '1' else
               ram_datao when ram_cs = '1' else
@@ -443,11 +444,14 @@ begin
       css             => vdg_css,
       inv             => vdg_data(6),
 
-			red			        => red,
-			green		        => green,
-			blue		        => blue,
-			hsync		        => hsync,
-			vsync		        => vsync,
+			red			        => video_o.rgb.r(9 downto 2),
+			green		        => video_o.rgb.g(9 downto 2),
+			blue		        => video_o.rgb.b(9 downto 2),
+			hsync		        => video_o.hsync,
+			vsync		        => video_o.vsync,
+			-- needed for digital video
+			hblank          => video_o.hblank,
+			vblank          => video_o.vblank,
 			
       -- special inputs
       artifact_en     => sw_artifact_en,
@@ -457,6 +461,11 @@ begin
 			cvbs            => open
     );
 
+  video_o.clk <= clk_57M272;
+  video_o.rgb.r(1 downto 0) <= (others => '0');
+  video_o.rgb.g(1 downto 0) <= (others => '0');
+  video_o.rgb.b(1 downto 0) <= (others => '0');
+  
   BLK_SND : block
   
     signal audio_data         : std_logic_vector(audio_o.ldata'range);
@@ -564,6 +573,7 @@ begin
     signal irqb      	: std_logic;
     signal pa_i       : std_logic_vector(7 downto 0);
     signal pb_o       : std_logic_vector(7 downto 0);
+    signal joy        : std_logic_vector(1 to 4) := (others => '0');
   begin
   
     -- this is ultimately correct
@@ -603,12 +613,25 @@ begin
           keys := keys or inputs_i(7).d;
         end if;
       end if;
+      
       -- key inputs are active low
       -- - bit 7 is joyin (TBD)
-      pa_i <= '1' & not keys(6 downto 2) & 
-                not (keys(1) or ps2_left_fire) &
-                not (keys(0) or ps2_right_fire);
+      pa_i <= joyin & not keys(6 downto 2) & 
+                (not (keys(1) or ps2_left_fire) and jamma_left_fire) &
+                (not (keys(0) or ps2_right_fire) and jamma_right_fire);
     end process;
+
+    GEN_JOY_SAMPLES : for i in joy'range generate
+      joy(i) <= '1' when analogue_i(i)(9 downto 4) >= dac_data else '0';
+    end generate GEN_JOY_SAMPLES;
+    joyin <=  joy(1) when sel = "00" and sw_joystick = '0' else   -- right X
+              joy(2) when sel = "01" and sw_joystick = '0' else   -- right Y
+              joy(3) when sel = "10" and sw_joystick = '0' else   -- left X
+              joy(4) when sel = "11" and sw_joystick = '0' else   -- left Y
+              joy(3) when sel = "00" and sw_joystick = '1' else
+              joy(4) when sel = "01" and sw_joystick = '1' else
+              joy(1) when sel = "10" and sw_joystick = '1' else
+              joy(2);
 
     pia_0_inst : entity work.pia6821
       port map
@@ -692,11 +715,6 @@ begin
       );
   end block BLK_PIA_1;
 
-  -- handle joysticks
-  -- - get analogue value from digital source (eg. NGC controller)
-  --joy(0) <= '1' when inputs_i.analogue(1)(9 downto 4) >= dac_data else '0';
-  --joy(1) <= '1' when inputs_i.analogue(2)(9 downto 4) >= dac_data else '0';
-  
   -- COLOR BASIC ROM
   basrom_inst : entity work.sprom
 		generic map

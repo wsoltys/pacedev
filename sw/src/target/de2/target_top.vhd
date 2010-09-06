@@ -175,7 +175,9 @@ architecture SYN of target_top is
   
   -- gpio drivers from default logic
   signal default_gpio_0_o   : std_logic_vector(gpio_0'range);
+  signal default_gpio_0_oe  : std_logic_vector(gpio_0'range);
   signal default_gpio_1_o   : std_logic_vector(gpio_1'range);
+  signal default_gpio_1_oe  : std_logic_vector(gpio_1'range);
   signal seg7               : std_logic_vector(31 downto 0);
   
 begin
@@ -337,9 +339,8 @@ begin
 	GEN_GAMECUBE : if PACE_JAMMA = PACE_JAMMA_NGC generate
 	
     signal gcj  : work.gamecube_pkg.joystate_type;
-    signal d    : std_logic := '0';
 	
-	begin
+  begin
 	
 		GC_JOY: gamecube_joy
 			generic map( MHZ => 50 )
@@ -347,12 +348,11 @@ begin
 		  (
   			clk 				=> clock_50,
 				reset 			=> clkrst_i.arst,
-				--oe 					=> gc_oe,
-				d 					=> d, --gpio_0(25), **needs fixing
+				d_i 				=> gpio_0(25),
+				d_o         => default_gpio_0_o(25),
+				d_oe 				=> default_gpio_0_oe(25),
 				joystate 		=> gcj
 			);
-
-    -- insert drivers for d here...
 
 		-- map gamecube controller to jamma inputs
 		inputs_i.jamma_n.coin(1) <= not gcj.l;
@@ -866,14 +866,16 @@ begin
     GEN_GPIO_0_O : for i in gpio_0'range generate
       gpio_0(i) <=  custom_gpio_0_o(i) when 
                       (gpio_0_is_custom(i) = '1' and custom_gpio_0_oe(i) = '1') else
-                    default_gpio_0_o(i) when gpio_0_is_custom(i) = '0' else
+                    default_gpio_0_o(i) when 
+                      (gpio_0_is_custom(i) = '0' and default_gpio_0_oe(i) = '1') else
                     'Z';
     end generate GEN_GPIO_0_O;
     
     GEN_GPIO_1_O : for i in gpio_1'range generate
       gpio_1(i) <=  custom_gpio_1_o(i) when 
                       (gpio_1_is_custom(i) = '1' and custom_gpio_1_oe(i) = '1') else
-                    default_gpio_1_o(i) when gpio_1_is_custom(i) = '0' else
+                    default_gpio_1_o(i) when 
+                      (gpio_1_is_custom(i) = '0' and default_gpio_1_oe(i) = '1') else
                     'Z';
     end generate GEN_GPIO_1_O;
 
