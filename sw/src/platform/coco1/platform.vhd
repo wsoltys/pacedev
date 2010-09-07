@@ -827,34 +827,38 @@ begin
       variable cpu_clk_r : std_logic := '0';
     begin
       if rst_57M272 = '1' then
+        target_o.wb_cyc_stb <= '0';
+        state <= S_IDLE;
       elsif rising_edge(clk_57M272) then
         case state is
           when S_IDLE =>
             target_o.wb_cyc_stb <= '0'; -- default
             -- start a new cycle on rising_edge cpu_clk
             if cpu_clk = '1' and cpu_clk_r = '0' then
-              if cpu_a(3 downto 0) = X"8" then
-                -- read latch from previous access
-                ide_d_o <= ide_d_r(15 downto 8);
-              else
-                -- start a new access
-                target_o.wb_cyc_stb <= ide_cs;
-                if cpu_a(3) = '0' then
-                  -- $00-$07 => $10-$17 (ATA registers)
-                  target_o.wb_adr <= '1' & cpu_a(3 downto 0);
+              if ide_cs = '1' then
+                if cpu_a(3 downto 0) = X"8" then
+                  -- read latch from previous access
+                  ide_d_o <= ide_d_r(15 downto 8);
                 else
-                  -- $0C-$0F => $00-$03 (core registers)
-                  target_o.wb_adr <= "000" & cpu_a(1 downto 0);
-                end if;
-                -- only 8-bit writes supported atm
-                target_o.wb_dat <= X"000000" & cpu_d_o;
-                target_o.wb_we <= not cpu_r_wn;
-                if cpu_r_wn = '1' then
-                  state <= S_R1;
-                else
-                  state <= S_W1;
-                end if;
-              end if; -- latch/access
+                  -- start a new access
+                  target_o.wb_cyc_stb <= ide_cs;
+                  if cpu_a(3) = '0' then
+                    -- $00-$07 => $10-$17 (ATA registers)
+                    target_o.wb_adr <= '1' & cpu_a(3 downto 0);
+                  else
+                    -- $0C-$0F => $00-$03 (core registers)
+                    target_o.wb_adr <= "000" & cpu_a(1 downto 0);
+                  end if;
+                  -- only 8-bit writes supported atm
+                  target_o.wb_dat <= X"000000" & cpu_d_o;
+                  target_o.wb_we <= not cpu_r_wn;
+                  if cpu_r_wn = '1' then
+                    state <= S_R1;
+                  else
+                    state <= S_W1;
+                  end if;
+                end if; -- latch/access
+              end if; -- ide_cs = '1'
             end if;
           when S_R1 =>
             if target_i.wb_ack = '1' then
