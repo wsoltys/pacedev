@@ -28,6 +28,10 @@ package platform_pkg is
     cpu_6809_vma      : std_logic;
     cpu_6809_a        : std_logic_vector(15 downto 0);
     cpu_6809_d_o      : std_logic_vector(7 downto 0);
+    -- from the OCIDE core
+    wb_ack      : std_logic;
+    wb_dat      : std_logic_vector(31 downto 0);
+    wb_inta     : std_logic;
   end record;
 
   type to_PLATFORM_IO_t is record
@@ -45,6 +49,14 @@ package platform_pkg is
     cpu_6809_tsc      : std_logic;
     -- to display on 7-segment display
     seg7              : std_logic_vector(15 downto 0);
+    -- to the OCIDE core
+    wb_clk      : std_logic;
+    wb_arst_n   : std_logic;
+    wb_rst      : std_logic;
+    wb_cyc_stb  : std_logic;
+    wb_adr      : std_logic_vector(6 downto 2);
+    wb_dat      : std_logic_vector(31 downto 0);
+    wb_we       : std_logic;
   end record;
 
 end;

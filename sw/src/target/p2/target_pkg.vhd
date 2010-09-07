@@ -24,21 +24,11 @@ package target_pkg is
 	constant ADV724_STD_NTSC	  : std_logic := not ADV724_STD_PAL;
 
   type from_TARGET_IO_t is record
-    -- from the OCIDE core
-    wb_ack      : std_logic;
-    wb_dat      : std_logic_vector(31 downto 0);
-    wb_inta     : std_logic;
+    not_used  : std_logic;
   end record;
 
   type to_TARGET_IO_t is record
-    -- to the OCIDE core
-    wb_clk      : std_logic;
-    wb_arst_n   : std_logic;
-    wb_rst      : std_logic;
-    wb_cyc_stb  : std_logic;
-    wb_adr      : std_logic_vector(6 downto 2);
-    wb_dat      : std_logic_vector(31 downto 0);
-    wb_we       : std_logic;
+    not_used  : std_logic;
   end record;
 
 end;

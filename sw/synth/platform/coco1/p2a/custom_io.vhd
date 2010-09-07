@@ -47,7 +47,7 @@ architecture SYN of custom_io is
 begin
 
   -- 16-bit access to PIO registers, otherwise 32
-  wb_sel <= "0011" when target_o.wb_adr(6) = '1' else "1111";
+  wb_sel <= "0011" when platform_o.wb_adr(6) = '1' else "1111";
   
   atahost_inst : entity work.atahost_top
     generic map
@@ -64,21 +64,21 @@ begin
     port map
     (
       -- WISHBONE SYSCON signals
-      wb_clk_i      => target_o.wb_clk,
-      arst_i        => target_o.wb_arst_n,
-      wb_rst_i      => target_o.wb_rst,
+      wb_clk_i      => platform_o.wb_clk,
+      arst_i        => platform_o.wb_arst_n,
+      wb_rst_i      => platform_o.wb_rst,
 
       -- WISHBONE SLAVE signals
-      wb_cyc_i      => target_o.wb_cyc_stb,
-      wb_stb_i      => target_o.wb_cyc_stb,
-      wb_ack_o      => target_i.wb_ack,
+      wb_cyc_i      => platform_o.wb_cyc_stb,
+      wb_stb_i      => platform_o.wb_cyc_stb,
+      wb_ack_o      => platform_i.wb_ack,
       wb_err_o      => open,
-      wb_adr_i      => unsigned(target_o.wb_adr),
-      wb_dat_i      => target_o.wb_dat,
-      wb_dat_o      => target_i.wb_dat,
+      wb_adr_i      => unsigned(platform_o.wb_adr),
+      wb_dat_i      => platform_o.wb_dat,
+      wb_dat_o      => platform_i.wb_dat,
       wb_sel_i      => wb_sel,
-      wb_we_i       => target_o.wb_we,
-      wb_inta_o     => target_i.wb_inta,
+      wb_we_i       => platform_o.wb_we,
+      wb_inta_o     => platform_i.wb_inta,
 
       -- ATA signals
       resetn_pad_o  => reset_cf,
