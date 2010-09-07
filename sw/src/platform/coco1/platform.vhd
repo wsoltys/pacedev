@@ -183,6 +183,10 @@ architecture SYN of platform is
   signal cart_cs          : std_logic;
   signal cart_d_o         : std_logic_vector(7 downto 0);
 
+  -- (Glenside) IDE adapter signals
+  signal ide_cs           : std_logic;
+  signal ide_d_o          : std_logic_vector(7 downto 0);
+  
   -- other coco signals
   signal casdin           : std_logic := '0';
   signal cassmot          : std_logic := '0';
@@ -282,6 +286,8 @@ begin
   -- memory read mux
   cpu_d_i <=  pia_0_datao when pia_0_cs = '1' else
               pia_1_datao when pia_1_cs = '1' else
+              -- does this need to go thru SAM?
+              ide_d_o when ide_cs = '1' else
               cart_d_o when (cart_cs = '1' and sw_cart_n = '1') else
               rom_datao when rom_cs = '1' else
               extrom_datao when extrom_cs = '1' else
@@ -783,6 +789,12 @@ begin
   cart_n <= '1' when (sw_cart_n = '0' or sw_cart_bank = "0000") else clk_q;
 
   GEN_IDE : if COCO1_HAS_IDE generate
+
+    type state_t is ( S_IDLE, S_R1, S_W1 );
+    signal state : state_t := S_IDLE;
+
+    signal ide_d_r  : std_logic_vector(31 downto 0) := (others => '0');
+    
   begin
 
     -- IDE registers
@@ -805,6 +817,62 @@ begin
     --
     -- $FF78-$FF79,$FF7C RTC registers
     --
+
+    ide_cs <= '1' when STD_MATCH(cpu_a, X"FF5"&"----") else '0';
+    
+    target_o.wb_clk <= clk_57M272;
+    target_o.wb_rst <= rst_57M272;
+    
+    process (clk_57M272, rst_57M272)
+      variable cpu_clk_r : std_logic := '0';
+    begin
+      if rst_57M272 = '1' then
+      elsif rising_edge(clk_57M272) then
+        case state is
+          when S_IDLE =>
+            target_o.wb_cyc_stb <= '0'; -- default
+            -- start a new cycle on rising_edge cpu_clk
+            if cpu_clk = '1' and cpu_clk_r = '0' then
+              if cpu_a(3 downto 0) = X"8" then
+                -- read latch from previous access
+                ide_d_o <= ide_d_r(15 downto 8);
+              else
+                -- start a new access
+                target_o.wb_cyc_stb <= ide_cs;
+                if cpu_a(3) = '0' then
+                  -- $00-$07 => $10-$17 (ATA registers)
+                  target_o.wb_adr <= '1' & cpu_a(3 downto 0);
+                else
+                  -- $0C-$0F => $00-$03 (core registers)
+                  target_o.wb_adr <= "000" & cpu_a(1 downto 0);
+                end if;
+                -- only 8-bit writes supported atm
+                target_o.wb_dat <= X"000000" & cpu_d_o;
+                target_o.wb_we <= not cpu_r_wn;
+                if cpu_r_wn = '1' then
+                  state <= S_R1;
+                else
+                  state <= S_W1;
+                end if;
+              end if; -- latch/access
+            end if;
+          when S_R1 =>
+            if target_i.wb_ack = '1' then
+              -- latch the whole data bus from the core
+              ide_d_r <= target_i.wb_dat;
+              ide_d_o <= target_i.wb_dat(ide_d_o'range);
+              state <= S_IDLE;
+            end if;
+          when S_W1 =>
+            if target_i.wb_ack = '1' then
+              state <= S_IDLE;
+            end if;
+          when others =>
+            state <= S_IDLE;
+        end case;
+        cpu_clk_r := cpu_clk;
+      end if;
+    end process;
     
   end generate GEN_IDE;
   

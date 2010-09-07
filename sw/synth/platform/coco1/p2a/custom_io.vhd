@@ -37,6 +37,8 @@ end entity custom_io;
 
 architecture SYN of custom_io is
 
+  signal wb_sel   : std_logic_vector(3 downto 0) := (others => '0');
+  
   signal dd_i     : std_logic_vector(15 downto 0) := (others => '0');
   signal dd_o     : std_logic_vector(15 downto 0) := (others => '0');
   signal dd_oe    : std_logic := '0';
@@ -44,14 +46,20 @@ architecture SYN of custom_io is
   
 begin
 
+  -- 16-bit access to PIO registers, otherwise 32
+  wb_sel <= "0011" when target_o.wb_adr(6) = '1' else "1111";
+  
   atahost_inst : entity work.atahost_top
     generic map
     (
-      -- PIO mode 0 settings (@100MHz clock)
-      PIO_mode0_T1    => 6,     -- 70ns
-      PIO_mode0_T2    => 28,    -- 290ns
-      PIO_mode0_T4    => 2,     -- 30ns
-      PIO_mode0_Teoc  => 23     -- 240ns ==> T0 - T1 - T2 = 600 - 70 - 290 = 240
+      --TWIDTH          => 5,
+      -- PIO mode 0 settings
+      -- - (100MHz = 6, 28, 2, 23)
+      -- - (57M272 = 4, 16, 1, 13)
+      PIO_mode0_T1    => 4,     -- 70ns
+      PIO_mode0_T2    => 16,    -- 290ns
+      PIO_mode0_T4    => 1,     -- 30ns
+      PIO_mode0_Teoc  => 13     -- 240ns ==> T0 - T1 - T2 = 600 - 70 - 290 = 240
     )
     port map
     (
@@ -61,16 +69,16 @@ begin
       wb_rst_i      => target_o.wb_rst,
 
       -- WISHBONE SLAVE signals
-      wb_cyc_i      => '0',
-      wb_stb_i      => '0',
-      wb_ack_o      => open,
+      wb_cyc_i      => target_o.wb_cyc_stb,
+      wb_stb_i      => target_o.wb_cyc_stb,
+      wb_ack_o      => target_i.wb_ack,
       wb_err_o      => open,
-      wb_adr_i      => (others => '0'),
-      wb_dat_i      => (others => '0'),
-      wb_dat_o      => open,
-      wb_sel_i      => "0000",
-      wb_we_i       => '0',
-      wb_inta_o     => open,
+      wb_adr_i      => unsigned(target_o.wb_adr),
+      wb_dat_i      => target_o.wb_dat,
+      wb_dat_o      => target_i.wb_dat,
+      wb_sel_i      => wb_sel,
+      wb_we_i       => target_o.wb_we,
+      wb_inta_o     => target_i.wb_inta,
 
       -- ATA signals
       resetn_pad_o  => reset_cf,
@@ -100,6 +108,6 @@ begin
   --<= cd_cf;
   
   -- power
-  non_cf <= '1';
+  non_cf <= '0';
   
 end architecture SYN;
