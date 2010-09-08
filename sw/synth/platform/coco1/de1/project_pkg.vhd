@@ -18,7 +18,7 @@ package project_pkg is
   --constant PACE_HAS_FLASH                   : boolean := true;
   constant PACE_HAS_SRAM                    : boolean := true;
   constant PACE_HAS_SDRAM                   : boolean := true;
-  constant PACE_HAS_SERIAL                  : boolean := false;
+  constant PACE_HAS_SERIAL                  : boolean := true;
   
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NGC;
 
@@ -61,7 +61,7 @@ package project_pkg is
   constant COCO1_JUMPER_32K_RAM             : std_logic := '1';
 	constant COCO1_CVBS                       : boolean := false;
   
-  constant COCO_HAS_IDE                     : boolean := true;
+  constant COCO1_HAS_IDE                    : boolean := false;
   
 	-- derived - do not edit
   constant PACE_HAS_FLASH                   : boolean := not COCO1_CART_INTERNAL;
