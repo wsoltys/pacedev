@@ -785,8 +785,8 @@ begin
   end generate GEN_NO_CART;
   
   -- CART# signal is tied to 'Q' on a real cartridge
-  -- - BANK0 is reserved for DOS (non-autostart)
-  cart_n <= '1' when (sw_cart_n = '0' or sw_cart_bank = "0000") else clk_q;
+  -- - BANKS 0,1 are reserved for DOS (non-autostart)
+  cart_n <= '1' when (sw_cart_n = '0' or sw_cart_bank(3 downto 1) = "000") else clk_q;
 
   GEN_IDE : if COCO1_HAS_IDE generate
 
