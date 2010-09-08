@@ -790,7 +790,7 @@ begin
 
   GEN_IDE : if COCO1_HAS_IDE generate
 
-    type state_t is ( S_IDLE, S_R1, S_W1 );
+    type state_t is ( S_IDLE, S_I1, S_R1, S_W1 );
     signal state : state_t := S_IDLE;
 
     signal ide_d_r  : std_logic_vector(31 downto 0) := (others => '0');
@@ -824,22 +824,35 @@ begin
     platform_o.wb_rst <= rst_57M272;
     platform_o.wb_arst_n <= '1';
     
-    process (clk_57M272, rst_57M272)
+    process (clk_57M272, platform_rst)
       variable cpu_clk_r : std_logic := '0';
     begin
-      if rst_57M272 = '1' then
+      if platform_rst = '1' then
         platform_o.wb_cyc_stb <= '0';
-        state <= S_IDLE;
+        platform_o.wb_we <= '0';
+        state <= S_I1;
       elsif rising_edge(clk_57M272) then
         case state is
+          when S_I1 =>
+            -- initialise the OCIDE core
+            platform_o.wb_cyc_stb <= '1';
+            platform_o.wb_adr <= "00000";
+            platform_o.wb_dat <= X"00000080";   -- enable IDE
+            platform_o.wb_we <= '1';
+            state <= S_W1;
           when S_IDLE =>
             platform_o.wb_cyc_stb <= '0'; -- default
             -- start a new cycle on falling_edge cpu_clk
             if cpu_clk = '0' and cpu_clk_r = '1' then
               if ide_cs = '1' then
                 if cpu_a(3 downto 0) = X"8" then
-                  -- read latch from previous access
-                  ide_d_o <= ide_d_r(15 downto 8);
+                  if cpu_r_wn = '1' then
+                    -- read latch from previous access
+                    ide_d_o <= ide_d_r(15 downto 8);
+                  else
+                    -- latch write data for subsequent access
+                    ide_d_r(15 downto 8) <= cpu_d_o;
+                  end if;
                 else
                   -- start a new access
                   platform_o.wb_cyc_stb <= ide_cs;
@@ -850,8 +863,7 @@ begin
                     -- $0C-$0F => $00-$03 (core registers)
                     platform_o.wb_adr <= "000" & cpu_a(1 downto 0);
                   end if;
-                  -- only 8-bit writes supported atm
-                  platform_o.wb_dat <= X"000000" & cpu_d_o;
+                  platform_o.wb_dat <= X"0000" & ide_d_r(15 downto 8) & cpu_d_o;
                   platform_o.wb_we <= not cpu_r_wn;
                   if cpu_r_wn = '1' then
                     state <= S_R1;
