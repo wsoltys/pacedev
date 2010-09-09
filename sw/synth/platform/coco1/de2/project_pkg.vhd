@@ -65,7 +65,7 @@ package project_pkg is
   constant COCO1_JUMPER_32K_RAM             : std_logic := '1';
 	constant COCO1_CVBS                       : boolean := false;
 
-  constant COCO1_HAS_IDE                    : boolean := false;
+  constant COCO1_HAS_IDE                    : boolean := true;
   
 	-- derived - do not edit
   constant PACE_HAS_FLASH                   : boolean := not COCO1_CART_INTERNAL;

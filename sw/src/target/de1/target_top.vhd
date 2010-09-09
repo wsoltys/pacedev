@@ -638,12 +638,6 @@ begin
 
   end block BLK_AUDIO;
   
-  -- disable SD card
-  sd_clk <= '0';
-  sd_dat <= 'Z';
-  sd_dat3 <= 'Z';
-  sd_cmd <= 'Z';
-
   -- disable JTAG
   tdo <= 'Z';
   
@@ -753,6 +747,12 @@ begin
 
         -- 7-segment display
         seg7              => seg7,
+
+        -- SD card
+        sd_dat            => sd_dat,
+        sd_dat3           => sd_dat3,
+        sd_cmd            => sd_cmd,
+        sd_clk            => sd_clk,
         
         -- custom i/o
         project_i         => project_i,

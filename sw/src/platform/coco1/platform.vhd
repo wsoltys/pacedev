@@ -22,6 +22,9 @@ library ieee;
 use ieee.std_logic_1164.all;
 use	ieee.numeric_std.all;
 
+library altera;
+use altera.altera_europa_support_lib.to_std_logic;
+
 library work;
 use work.pace_pkg.all;
 use work.sdram_pkg.all;
@@ -206,7 +209,8 @@ architecture SYN of platform is
   alias sw_joystick       : std_logic is switches_i(7);
   alias sw_artifact_en    : std_logic is switches_i(6);
   alias sw_cassette_out   : std_logic is switches_i(5);
-  alias sw_cart_n         : std_logic is switches_i(4);
+  --alias sw_cart_n         : std_logic is switches_i(4);
+  signal sw_cart_n        : std_logic := '0';
   alias sw_cart_bank      : std_logic_vector(3 downto 0) is switches_i(3 downto 0);
 
   alias jamma_left_fire   : std_logic is jamma_i.p(1).button(1);
@@ -218,6 +222,10 @@ begin
   platform_rst <= target_rst or buttons_i(1) or ps2_platform_rst;
 	cpu_rst <= platform_rst or buttons_i(2) or ps2_cpu_rst;
 
+  -- always 'insert' cartridge if internal
+  -- - this won't auto-start because bank="0000"
+  sw_cart_n <= switches_i(4) or to_std_logic(COCO1_CART_INTERNAL);
+  
   -- for ModelSim only!!!
   cpu_clk_n <= not cpu_clk;
   	
@@ -627,18 +635,31 @@ begin
                 (not (keys(0) or ps2_right_fire) and jamma_right_fire);
     end process;
 
-    GEN_JOY_SAMPLES : for i in joy'range generate
-      joy(i) <= '1' when analogue_i(i)(9 downto 4) >= dac_data else '0';
-    end generate GEN_JOY_SAMPLES;
-    joyin <=  joy(1) when sel = "00" and sw_joystick = '0' else   -- right X
-              joy(2) when sel = "01" and sw_joystick = '0' else   -- right Y
-              joy(3) when sel = "10" and sw_joystick = '0' else   -- left X
-              joy(4) when sel = "11" and sw_joystick = '0' else   -- left Y
-              joy(3) when sel = "00" and sw_joystick = '1' else
-              joy(4) when sel = "01" and sw_joystick = '1' else
-              joy(1) when sel = "10" and sw_joystick = '1' else
-              joy(2);
+    BLK_JOY : block
+      type joy_analogue_a is array (natural range <>) of std_logic_vector(9 downto 4);
+      signal joy_analogue : joy_analogue_a(1 to 4);
+    begin
+      -- invert Y axes
+      joy_analogue(1) <= analogue_i(1)(9 downto 4);
+      joy_analogue(2) <= not analogue_i(2)(9 downto 4);
+      joy_analogue(3) <= analogue_i(3)(9 downto 4);
+      joy_analogue(4) <= not analogue_i(4)(9 downto 4);
 
+      GEN_JOY_SAMPLES : for i in joy'range generate
+      begin
+        joy(i) <= '1' when joy_analogue(i) >= dac_data else '0';
+      end generate GEN_JOY_SAMPLES;
+
+      joyin <=  joy(1) when sel = "00" and sw_joystick = '0' else   -- right X
+                joy(2) when sel = "01" and sw_joystick = '0' else   -- right Y
+                joy(3) when sel = "10" and sw_joystick = '0' else   -- left X
+                joy(4) when sel = "11" and sw_joystick = '0' else   -- left Y
+                joy(3) when sel = "00" and sw_joystick = '1' else
+                joy(4) when sel = "01" and sw_joystick = '1' else
+                joy(1) when sel = "10" and sw_joystick = '1' else
+                joy(2);
+    end block BLK_JOY;
+    
     pia_0_inst : entity work.pia6821
       port map
       (	
