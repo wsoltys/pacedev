@@ -38,6 +38,8 @@ begin
   clk_20 <= not clk_20 after 25 ns;
 	arst <= '0' after 100 ns;
 
+  sw <= (others => '0');
+
 	SD_GEN_0 : if true generate
 	begin
 

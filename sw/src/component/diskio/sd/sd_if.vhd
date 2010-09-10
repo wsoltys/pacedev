@@ -64,7 +64,7 @@ architecture SYN of sd_if is
 		(exp => short_resp,	cmd => CMD17,		data => blk)									-- Read block
 	);
 	
-	signal msg_cnt_s : integer;
+	signal msg_cnt_s : integer := 0;
 
 	signal dbg_s					: std_logic_vector(31 downto 0);
 
