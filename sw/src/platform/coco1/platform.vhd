@@ -639,9 +639,13 @@ begin
       type joy_analogue_a is array (natural range <>) of std_logic_vector(9 downto 4);
       signal joy_analogue : joy_analogue_a(1 to 4);
     begin
-      -- invert Y axes
-      joy_analogue(1) <= analogue_i(1)(9 downto 4);
-      joy_analogue(2) <= not analogue_i(2)(9 downto 4);
+      -- use D-pad for 'digital' inputs & invert analogue Y axes
+      joy_analogue(1) <= (others => '0') when jamma_i.p(1).left = '0' else
+                         (others => '1') when jamma_i.p(1).right = '0' else
+                          analogue_i(1)(9 downto 4);
+      joy_analogue(2) <= (others => '0') when jamma_i.p(1).up = '0' else
+                         (others => '1') when Jamma_i.p(1).down = '0' else
+                         not analogue_i(2)(9 downto 4);
       joy_analogue(3) <= analogue_i(3)(9 downto 4);
       joy_analogue(4) <= not analogue_i(4)(9 downto 4);
 
