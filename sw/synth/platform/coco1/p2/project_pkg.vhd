@@ -45,6 +45,7 @@ package project_pkg is
   constant PACE_OSD_YPOS                    : natural := 0;
 
 	constant PACE_ADV724_STD						: std_logic := ADV724_STD_PAL;
+	--constant PACE_ADV724_STD						: std_logic := ADV724_STD_NTSC;
 
 	-- Coco1-specific constants
 

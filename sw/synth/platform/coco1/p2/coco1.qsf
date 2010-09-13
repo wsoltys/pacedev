@@ -735,50 +735,6 @@ set_parameter -name CYCLONEII_SAFE_WRITE "\"VERIFIED_SAFE\""
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
-set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sdram_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
-set_global_assignment -name VHDL_FILE project_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/platform_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/platform_pkg_body.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram_1r1w.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram.vhd
-set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dprom_2r.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/clk_div.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/cpu09/cpu09.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/inputmapper.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
-set_global_assignment -name VHDL_FILE ../../../../src/component/ttl/ttl_74LS138.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/pia6821.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/platform.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/mapctl.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/video/mc6883.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/video/mc6847.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/pace.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/conversion.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_upcounter.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gc_tx_bit.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_joy.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/ud_cnt.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/ro_cnt.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/atahost_pio_tctrl.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/atahost_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/atahost_wb_slave.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/atahost_top.vhd
-set_global_assignment -name VHDL_FILE ../p2a/custom_io.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_top.vhd
-set_global_assignment -name SIGNALTAP_FILE stp1.stp
-set_global_assignment -name SIGNALTAP_FILE ide.stp
 set_global_assignment -name SLD_NODE_CREATOR_ID 110 -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_ENTITY_NAME sld_signaltap -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_INFO=805334528" -section_id auto_signaltap_0
@@ -921,4 +877,49 @@ set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=00
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=200" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=24122" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=51149" -section_id auto_signaltap_0
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sdram_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE project_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/platform_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/platform_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram_1r1w.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dprom_2r.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/clk_div.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/cpu09/cpu09.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/inputmapper.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/component/ttl/ttl_74LS138.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/pia6821.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/video_hexy.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/platform.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/mapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/video/mc6883.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/video/mc6847.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/conversion.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_upcounter.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gc_tx_bit.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_joy.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/ud_cnt.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/ro_cnt.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/atahost_pio_tctrl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/atahost_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/atahost_wb_slave.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/atahost_top.vhd
+set_global_assignment -name VHDL_FILE ../p2a/custom_io.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_top.vhd
+set_global_assignment -name SIGNALTAP_FILE stp1.stp
+set_global_assignment -name SIGNALTAP_FILE ide.stp
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

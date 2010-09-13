@@ -11,7 +11,6 @@
 --  - add mouse support
 --  - add hires joystick support (CocoMax?)
 --  - add floppy disk support (WD177X)
---  - add hard disk support (Glenside IDE, HDBDOS?) CF/SD?
 --  - add deluxe RS232 support
 --  - add Orchestra-90 support
 --  - add multi-pak support?
@@ -133,6 +132,12 @@ architecture SYN of platform is
   signal vdg_gm           : std_logic_vector(2 downto 0);
   signal vdg_an_g         : std_logic;
 
+  signal r_s              : std_logic_vector(7 downto 0);
+  signal g_s              : std_logic_vector(7 downto 0);
+  signal b_s              : std_logic_vector(7 downto 0);
+  signal hs_s             : std_logic;
+  signal vs_s             : std_logic;
+  
   -- uP signals  
   alias cpu_clk           : std_logic is clk_e;
   signal cpu_clk_n        : std_logic;
@@ -458,11 +463,11 @@ begin
       css             => vdg_css,
       inv             => vdg_data(6),
 
-			red			        => video_o.rgb.r(9 downto 2),
-			green		        => video_o.rgb.g(9 downto 2),
-			blue		        => video_o.rgb.b(9 downto 2),
-			hsync		        => video_o.hsync,
-			vsync		        => video_o.vsync,
+			red			        => r_s, 
+			green		        => g_s, 
+			blue		        => b_s, 
+			hsync		        => hs_s, 
+			vsync		        => vs_s, 
 			-- needed for digital video
 			hblank          => video_o.hblank,
 			vblank          => video_o.vblank,
@@ -475,11 +480,6 @@ begin
 			cvbs            => open
     );
 
-  video_o.clk <= clk_57M272;
-  video_o.rgb.r(1 downto 0) <= (others => '0');
-  video_o.rgb.g(1 downto 0) <= (others => '0');
-  video_o.rgb.b(1 downto 0) <= (others => '0');
-  
   BLK_SND : block
   
     signal audio_data         : std_logic_vector(audio_o.ldata'range);
@@ -917,5 +917,48 @@ begin
     end process;
     
   end generate GEN_IDE;
+
+  -- some debug stuff
+  BLK_DEBUG : block
+  
+    signal dbg_video  : std_logic := '0';
+    signal dbg_dim    : std_logic := '0';
+  
+  begin
+  
+    vmode_debug_inst : entity work.vmode_hexy
+    	generic map
+    	(
+    		yOffset   => 100,
+    		xOffset   => 100
+    	)
+    	port map
+    	(
+    		clk       => clk_57M272,
+    		clk_ena   => clk_14M318_ena,
+    		vSync     => vs_s,
+    		hSync     => hs_s,
+    		video     => dbg_video,
+    		dim       => dbg_dim,
+    		
+    		spyAddr   => (others => '0'),   --: in unsigned(15 downto 0);
+    		spyPc     => (others => '0'),   --: in unsigned(15 downto 0);
+    		spyDo     => (others => '0'),   --: in unsigned(7 downto 0);
+    		spyOpcode => (others => '0'),   --: in unsigned(7 downto 0);
+    		spyA      => (others => '0'),   --: in unsigned(7 downto 0);
+    		spyX      => (others => '0'),   --: in unsigned(7 downto 0);
+    		spyY      => (others => '0'),   --: in unsigned(7 downto 0);
+    		spyS      => (others => '0')    --: in unsigned(7 downto 0)
+    	);
+
+    -- mux in debug video
+    video_o.clk <= clk_57M272;
+    video_o.rgb.r <= dbg_video & '0' & r_s when dbg_dim = '1' else r_s & "00";
+    video_o.rgb.g <= dbg_video & '0' & g_s when dbg_dim = '1' else g_s & "00";
+    video_o.rgb.b <= dbg_video & '0' & b_s when dbg_dim = '1' else b_s & "00";
+    video_o.hsync <= hs_s;
+    video_o.vsync <= vs_s;
+      
+  end block BLK_DEBUG;
   
 end architecture SYN;
