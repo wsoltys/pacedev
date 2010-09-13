@@ -163,7 +163,8 @@ architecture SYN of platform is
   signal ras_n            : std_logic;
   signal cas_n            : std_logic;
 	signal sam_we_n         : std_logic;
-                        
+  signal sam_dbg          : std_logic_vector(15 downto 0);
+  
   -- ROM signals        
   signal rom_wr					  : std_logic;
   signal rom_datao        : std_logic_vector(7 downto 0);
@@ -210,6 +211,7 @@ architecture SYN of platform is
   alias ps2_right_fire    : std_logic is inputs_i(8).d(3);
   alias ps2_volume_up     : std_logic is inputs_i(8).d(4);
   alias ps2_volume_dn     : std_logic is inputs_i(8).d(5);
+  alias ps2_video_hexy    : std_logic is inputs_i(8).d(6);
 
   alias sw_joystick       : std_logic is switches_i(7);
   alias sw_artifact_en    : std_logic is switches_i(6);
@@ -403,7 +405,9 @@ begin
 			-- ram
 			ras0_n	  => ras_n,
 			cas_n		  => cas_n,
-			we_n		  => sam_we_n
+			we_n		  => sam_we_n,
+			
+			dbg       => sam_dbg
 		);
 
   BLK_74LS138 : block
@@ -920,42 +924,61 @@ begin
 
   -- some debug stuff
   BLK_DEBUG : block
-  
-    signal dbg_video  : std_logic := '0';
-    signal dbg_dim    : std_logic := '0';
-  
+
+    signal dbg_clk_ena  : std_logic := '0';
+    signal dbg_video    : std_logic := '0';
+    signal dbg_dim      : std_logic := '0';
+    signal dbg_enable   : std_logic := '0';
+    
   begin
-  
+
+    process (clk_57M272, rst_57M272)
+      variable count  : std_logic := '0';
+      variable f10_r  : std_logic := '0';
+    begin
+      if rst_57M272 = '1' then
+        count := '0';
+        f10_r := '0';
+        dbg_enable <= '0';
+      elsif rising_edge(clk_57M272) then
+        count := not count;
+        if ps2_video_hexy = '1' and f10_r = '0' then
+          dbg_enable <= not dbg_enable;
+        end if;
+        f10_r := ps2_video_hexy;
+      end if;
+      dbg_clk_ena <= count;
+    end process;
+    
     vmode_debug_inst : entity work.vmode_hexy
     	generic map
     	(
-    		yOffset   => 100,
-    		xOffset   => 100
+    		xOffset   => 272,
+    		yOffset   => 480
     	)
     	port map
     	(
     		clk       => clk_57M272,
-    		clk_ena   => clk_14M318_ena,
+    		clk_ena   => dbg_clk_ena,
     		vSync     => vs_s,
     		hSync     => hs_s,
     		video     => dbg_video,
     		dim       => dbg_dim,
     		
-    		spyAddr   => (others => '0'),   --: in unsigned(15 downto 0);
-    		spyPc     => (others => '0'),   --: in unsigned(15 downto 0);
-    		spyDo     => (others => '0'),   --: in unsigned(7 downto 0);
-    		spyOpcode => (others => '0'),   --: in unsigned(7 downto 0);
-    		spyA      => (others => '0'),   --: in unsigned(7 downto 0);
-    		spyX      => (others => '0'),   --: in unsigned(7 downto 0);
-    		spyY      => (others => '0'),   --: in unsigned(7 downto 0);
-    		spyS      => (others => '0')    --: in unsigned(7 downto 0)
+    		sam_dbg   => unsigned(sam_dbg),
+    		an_g      => vdg_an_g,
+    		an_s      => vdg_data(7),
+    		intn_ext  => vdg_intn_ext,
+    		gm        => unsigned(vdg_gm),
+    		css       => vdg_css,
+    		inv       => vdg_data(6)
     	);
 
     -- mux in debug video
     video_o.clk <= clk_57M272;
-    video_o.rgb.r <= dbg_video & '0' & r_s when dbg_dim = '1' else r_s & "00";
-    video_o.rgb.g <= dbg_video & '0' & g_s when dbg_dim = '1' else g_s & "00";
-    video_o.rgb.b <= dbg_video & '0' & b_s when dbg_dim = '1' else b_s & "00";
+    video_o.rgb.r <= dbg_video & '0' & r_s when (dbg_enable and dbg_dim) = '1' else r_s & "00";
+    video_o.rgb.g <= dbg_video & '0' & g_s when (dbg_enable and dbg_dim) = '1' else g_s & "00";
+    video_o.rgb.b <= dbg_video & '0' & b_s when (dbg_enable and dbg_dim) = '1' else b_s & "00";
     video_o.hsync <= hs_s;
     video_o.vsync <= vs_s;
       

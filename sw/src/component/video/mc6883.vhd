@@ -32,7 +32,10 @@ entity mc6883 is
 		-- ram
 		ras0_n 	: out std_logic;
 		cas_n		: out std_logic;
-		we_n		: out std_logic
+		we_n		: out std_logic;
+		
+		-- debug
+		dbg     : out std_logic_vector(15 downto 0)
 	);
 end mc6883;
 
@@ -360,5 +363,7 @@ begin
 		end if;
 	end process WRITE_CR;
 
+  -- for hexy display, for example
+  dbg <= cr;
+  
 end SYN;
-

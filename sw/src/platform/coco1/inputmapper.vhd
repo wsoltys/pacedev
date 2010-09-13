@@ -181,6 +181,8 @@ begin
             inputs(8).d(4) <= press;
           when SCANCODE_PADMINUS =>
             inputs(8).d(5) <= press;
+          when SCANCODE_F10 =>
+            inputs(8).d(6) <= press;
           when others =>
         end case;
     end if; -- press or release

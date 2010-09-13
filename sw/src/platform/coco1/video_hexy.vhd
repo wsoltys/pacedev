@@ -26,14 +26,13 @@ entity vmode_hexy is
 		video     : out std_logic;
 		dim       : out std_logic;
 		
-		spyAddr   : in unsigned(15 downto 0);
-		spyPc     : in unsigned(15 downto 0);
-		spyDo     : in unsigned(7 downto 0);
-		spyOpcode : in unsigned(7 downto 0);
-		spyA      : in unsigned(7 downto 0);
-		spyX      : in unsigned(7 downto 0);
-		spyY      : in unsigned(7 downto 0);
-		spyS      : in unsigned(7 downto 0)
+		sam_dbg   : in unsigned(15 downto 0);
+		an_g      : in std_logic;
+		an_s      : in std_logic;
+		intn_ext  : in std_logic;
+		gm        : in unsigned(2 downto 0);
+		css       : in std_logic;
+		inv       : in std_logic
 	);
 end entity vmode_hexy;
 
@@ -82,8 +81,7 @@ begin
 					localY <= (others => '0');
 					runY <= '1';
 				end if;
-			elsif runX = '1'
-			and localX = "111111111" then
+			elsif runX = '1' and localX = "111111111" then
 				runX <= '0';
 				if localY = "111" then
 					runY <= '0';
@@ -100,63 +98,63 @@ begin
 	begin
 		if rising_edge(clk) and clk_ena = '1' then
 			case localX(8 downto 3) is
-			when "000000" => cChar <= "001010"; -- A
-			when "000001" => cChar <= "001101"; -- D
-			when "000010" => cChar <= "001101"; -- D
-			when "000011" => cChar <= "011011"; -- R
-			when "000100" => cChar <= "111110"; -- :
-			when "000101" => cChar <= "00" & spyAddr(15 downto 12);
-			when "000110" => cChar <= "00" & spyAddr(11 downto  8);
-			when "000111" => cChar <= "00" & spyAddr( 7 downto  4);
-			when "001000" => cChar <= "00" & spyAddr( 3 downto  0);
-			when "001001" => cChar <= "111111"; -- 
-			when "001010" => cChar <= "111111"; --
-			when "001011" => cChar <= "011001"; -- P
-			when "001100" => cChar <= "001100"; -- C
-			when "001101" => cChar <= "111110"; -- :
-			when "001110" => cChar <= "00" & spyPc(15 downto 12);
-			when "001111" => cChar <= "00" & spyPc(11 downto  8);
-			when "010000" => cChar <= "00" & spyPc( 7 downto  4);
-			when "010001" => cChar <= "00" & spyPc( 3 downto  0);
-			when "010010" => cChar <= "111111"; -- 
+			when "000000" => cChar <= "011111"; -- V
+			when "000001" => cChar <= "111110"; -- :
+			when "000010" => cChar <= "00000" & sam_dbg(2);
+			when "000011" => cChar <= "00000" & sam_dbg(1);
+			when "000100" => cChar <= "00000" & sam_dbg(0);
+			when "000101" => cChar <= "111111"; -- 
+			when "000110" => cChar <= "111111"; -- 
+			when "000111" => cChar <= "001010"; -- A
+			when "001000" => cChar <= "010111"; -- N
+			when "001001" => cChar <= "010000"; -- G
+			when "001010" => cChar <= "111110"; -- :
+			when "001011" => cChar <= "00000" & an_g;
+			when "001100" => cChar <= "111111"; -- 
+			when "001101" => cChar <= "111111"; -- 
+			when "001110" => cChar <= "001010"; -- A
+			when "001111" => cChar <= "010111"; -- N
+			when "010000" => cChar <= "011100"; -- S
+			when "010001" => cChar <= "111110"; -- :
+			when "010010" => cChar <= "00000" & an_s;
 			when "010011" => cChar <= "111111"; --
-			when "010100" => cChar <= "001101"; -- D
-			when "010101" => cChar <= "011000"; -- O
-			when "010110" => cChar <= "111110"; -- :
-			when "010111" => cChar <= "00" & spyDo(7 downto 4);
-			when "011000" => cChar <= "00" & spyDo(3 downto 0);
-			when "011001" => cChar <= "111111"; -- 
-			when "011010" => cChar <= "111111"; --
-			when "011011" => cChar <= "011000"; -- O
-			when "011100" => cChar <= "011001"; -- P
-			when "011101" => cChar <= "001100"; -- C
-			when "011110" => cChar <= "111110"; -- :
-			when "011111" => cChar <= "00" & spyOpcode(7 downto 4);
-			when "100000" => cChar <= "00" & spyOpcode(3 downto 0);
-			when "100001" => cChar <= "111111"; -- 
-			when "100010" => cChar <= "111111"; --
-			when "100011" => cChar <= "001010"; -- A
-			when "100100" => cChar <= "111110"; -- :
-			when "100101" => cChar <= "00" & spyA(7 downto 4);
-			when "100110" => cChar <= "00" & spyA(3 downto 0);
-			when "100111" => cChar <= "111111"; -- 
-			when "101000" => cChar <= "111111"; --
-			when "101001" => cChar <= "100001"; -- X
-			when "101010" => cChar <= "111110"; -- :
-			when "101011" => cChar <= "00" & spyX(7 downto 4);
-			when "101100" => cChar <= "00" & spyX(3 downto 0);
-			when "101101" => cChar <= "111111"; -- 
-			when "101110" => cChar <= "111111"; --
-			when "101111" => cChar <= "100010"; -- Y
-			when "110000" => cChar <= "111110"; -- :
-			when "110001" => cChar <= "00" & spyY(7 downto 4);
-			when "110010" => cChar <= "00" & spyY(3 downto 0);
-			when "110011" => cChar <= "111111"; -- 
-			when "110100" => cChar <= "111111"; --
-			when "110101" => cChar <= "011100"; -- S
-			when "110110" => cChar <= "111110"; -- :
-			when "110111" => cChar <= "00" & spyS(7 downto 4);
-			when "111000" => cChar <= "00" & spyS(3 downto 0);
+			when "010100" => cChar <= "111111"; --
+			when "010101" => cChar <= "010010"; -- I
+			when "010110" => cChar <= "010111"; -- N
+			when "010111" => cChar <= "011101"; -- T
+			when "011000" => cChar <= "010111"; -- N
+			when "011001" => cChar <= "001110"; -- E
+			when "011010" => cChar <= "100001"; -- X
+			when "011011" => cChar <= "011101"; -- T
+			when "011100" => cChar <= "111110"; -- :      
+			when "011101" => cChar <= "00000" & intn_ext; 
+			when "011110" => cChar <= "111111"; --        
+			when "011111" => cChar <= "111111"; --        
+			when "100000" => cChar <= "010000"; -- G      
+			when "100001" => cChar <= "010110"; -- M      
+			when "100010" => cChar <= "111110"; -- :      
+			when "100011" => cChar <= "00000" & gm(2);    
+			when "100100" => cChar <= "00000" & gm(1);    
+			when "100101" => cChar <= "00000" & gm(0);    
+			when "100110" => cChar <= "111111"; --        
+			when "100111" => cChar <= "111111"; --        
+			when "101000" => cChar <= "001100"; -- C      
+			when "101001" => cChar <= "011100"; -- S      
+			when "101010" => cChar <= "011100"; -- S      
+			when "101011" => cChar <= "111110"; -- :      
+			when "101100" => cChar <= "00000" & css;      
+			when "101101" => cChar <= "111111"; --        
+			when "101110" => cChar <= "111111"; --        
+			when "101111" => cChar <= "010010"; -- I      
+			when "110000" => cChar <= "010111"; -- N      
+			when "110001" => cChar <= "011111"; -- V      
+			when "110010" => cChar <= "111110"; -- :      
+			when "110011" => cChar <= "00000" & inv;      
+			when "110100" => cChar <= "111111"; -- 
+			when "110101" => cChar <= "111111"; -- 
+			when "110110" => cChar <= "111111"; -- 
+			when "110111" => cChar <= "111111"; -- 
+			when "111000" => cChar <= "111111"; -- 
 			when others => cChar <= (others => '1');
 			end case;
 		end if;
