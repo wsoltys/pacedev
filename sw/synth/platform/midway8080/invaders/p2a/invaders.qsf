@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "9.0 SP2"
+set_global_assignment -name LAST_QUARTUS_VERSION "9.1 SP2"
 
 # Pin & Location Assignments
 # ==========================
@@ -801,4 +801,6 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/io/maple/conv
 set_global_assignment -name VHDL_FILE ../../../../../src/component/io/maple/load_upcounter.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/io/gamecube/gc_tx_bit.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/io/gamecube/gamecube_joy.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/target/p2a/custom_io.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/p2a/target_top.vhd
+set_global_assignment -name MISC_FILE "D:/Projects/pace/pacedev.net/sw/synth/platform/midway8080/invaders/p2a/invaders.dpf"

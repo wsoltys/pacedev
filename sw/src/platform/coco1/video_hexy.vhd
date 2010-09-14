@@ -98,63 +98,63 @@ begin
 	begin
 		if rising_edge(clk) and clk_ena = '1' then
 			case localX(8 downto 3) is
-			when "000000" => cChar <= "011111"; -- V
-			when "000001" => cChar <= "111110"; -- :
-			when "000010" => cChar <= "00000" & sam_dbg(2);
-			when "000011" => cChar <= "00000" & sam_dbg(1);
-			when "000100" => cChar <= "00000" & sam_dbg(0);
-			when "000101" => cChar <= "111111"; -- 
-			when "000110" => cChar <= "111111"; -- 
-			when "000111" => cChar <= "001010"; -- A
-			when "001000" => cChar <= "010111"; -- N
-			when "001001" => cChar <= "010000"; -- G
-			when "001010" => cChar <= "111110"; -- :
-			when "001011" => cChar <= "00000" & an_g;
-			when "001100" => cChar <= "111111"; -- 
-			when "001101" => cChar <= "111111"; -- 
-			when "001110" => cChar <= "001010"; -- A
-			when "001111" => cChar <= "010111"; -- N
-			when "010000" => cChar <= "011100"; -- S
-			when "010001" => cChar <= "111110"; -- :
-			when "010010" => cChar <= "00000" & an_s;
-			when "010011" => cChar <= "111111"; --
-			when "010100" => cChar <= "111111"; --
-			when "010101" => cChar <= "010010"; -- I
-			when "010110" => cChar <= "010111"; -- N
-			when "010111" => cChar <= "011101"; -- T
-			when "011000" => cChar <= "010111"; -- N
-			when "011001" => cChar <= "001110"; -- E
-			when "011010" => cChar <= "100001"; -- X
-			when "011011" => cChar <= "011101"; -- T
-			when "011100" => cChar <= "111110"; -- :      
-			when "011101" => cChar <= "00000" & intn_ext; 
-			when "011110" => cChar <= "111111"; --        
-			when "011111" => cChar <= "111111"; --        
-			when "100000" => cChar <= "010000"; -- G      
-			when "100001" => cChar <= "010110"; -- M      
-			when "100010" => cChar <= "111110"; -- :      
-			when "100011" => cChar <= "00000" & gm(2);    
-			when "100100" => cChar <= "00000" & gm(1);    
-			when "100101" => cChar <= "00000" & gm(0);    
-			when "100110" => cChar <= "111111"; --        
-			when "100111" => cChar <= "111111"; --        
-			when "101000" => cChar <= "001100"; -- C      
-			when "101001" => cChar <= "011100"; -- S      
-			when "101010" => cChar <= "011100"; -- S      
-			when "101011" => cChar <= "111110"; -- :      
-			when "101100" => cChar <= "00000" & css;      
-			when "101101" => cChar <= "111111"; --        
-			when "101110" => cChar <= "111111"; --        
-			when "101111" => cChar <= "010010"; -- I      
-			when "110000" => cChar <= "010111"; -- N      
-			when "110001" => cChar <= "011111"; -- V      
-			when "110010" => cChar <= "111110"; -- :      
-			when "110011" => cChar <= "00000" & inv;      
-			when "110100" => cChar <= "111111"; -- 
-			when "110101" => cChar <= "111111"; -- 
-			when "110110" => cChar <= "111111"; -- 
-			when "110111" => cChar <= "111111"; -- 
-			when "111000" => cChar <= "111111"; -- 
+			when "000000" => cChar <= "001100"; -- C
+			when "000001" => cChar <= "011011"; -- R
+			when "000010" => cChar <= "111110"; -- :       
+			when "000011" => cChar <= "00" & sam_dbg(15 downto 12);
+			when "000100" => cChar <= "00" & sam_dbg(11 downto 8);
+			when "000101" => cChar <= "00" & sam_dbg(7 downto 4);
+			when "000110" => cChar <= "00" & sam_dbg(3 downto 0);
+			when "000111" => cChar <= "111111"; --         
+			when "001000" => cChar <= "111111"; --         
+			when "001001" => cChar <= "011111"; -- V       
+			when "001010" => cChar <= "111110"; -- :       
+			when "001011" => cChar <= "00000" & sam_dbg(2);
+			when "001100" => cChar <= "00000" & sam_dbg(1);
+			when "001101" => cChar <= "00000" & sam_dbg(0);
+			when "001110" => cChar <= "111111"; --         
+			when "001111" => cChar <= "111111"; --         
+			when "010000" => cChar <= "001010"; -- A       
+			when "010001" => cChar <= "010111"; -- N       
+			when "010010" => cChar <= "010000"; -- G       
+			when "010011" => cChar <= "111110"; -- :       
+			when "010100" => cChar <= "00000" & an_g;      
+			when "010101" => cChar <= "111111"; --         
+			when "010110" => cChar <= "111111"; --         
+			when "010111" => cChar <= "001010"; -- A       
+			when "011000" => cChar <= "010111"; -- N       
+			when "011001" => cChar <= "011100"; -- S       
+			when "011010" => cChar <= "111110"; -- :       
+			when "011011" => cChar <= "00000" & an_s;      
+			when "011100" => cChar <= "111111"; --         
+			when "011101" => cChar <= "111111"; --         
+			when "011110" => cChar <= "010010"; -- I       
+			when "011111" => cChar <= "010111"; -- N       
+			when "100000" => cChar <= "001110"; -- E       
+			when "100001" => cChar <= "111110"; -- :       
+			when "100010" => cChar <= "00000" & intn_ext;  
+			when "100011" => cChar <= "111111"; --         
+			when "100100" => cChar <= "111111"; --         
+			when "100101" => cChar <= "010000"; -- G       
+			when "100110" => cChar <= "010110"; -- M       
+			when "100111" => cChar <= "111110"; -- :       
+			when "101000" => cChar <= "00000" & gm(2);     
+			when "101001" => cChar <= "00000" & gm(1);     
+			when "101010" => cChar <= "00000" & gm(0);     
+			when "101011" => cChar <= "111111"; --         
+			when "101100" => cChar <= "111111"; --         
+			when "101101" => cChar <= "001100"; -- C       
+			when "101110" => cChar <= "011100"; -- S       
+			when "101111" => cChar <= "011100"; -- S       
+			when "110000" => cChar <= "111110"; -- :       
+			when "110001" => cChar <= "00000" & css;       
+			when "110010" => cChar <= "111111"; --         
+			when "110011" => cChar <= "111111"; --         
+			when "110100" => cChar <= "010010"; -- I       
+			when "110101" => cChar <= "010111"; -- N       
+			when "110110" => cChar <= "011111"; -- V       
+			when "110111" => cChar <= "111110"; -- :       
+			when "111000" => cChar <= "00000" & inv;       
 			when others => cChar <= (others => '1');
 			end case;
 		end if;
