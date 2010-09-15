@@ -308,8 +308,14 @@ begin
 						"111" when	-- $0000-$7FFF (32K) RW_N=0
 												a(15) = '0' and rw_n = '0';
 
-	-- fudge for now
-	s_ty1 <= s_ty0;
+	s_ty1 <= 	s_ty0 when	-- $FF00-$FFFF
+												a(15 downto 8) = X"FF"
+									else
+						"000"	when	-- $0000-$FEFF (32K) RW_N=1
+												rw_n = '1'
+									else
+						"111" when	-- $0000-$FEFF (32K) RW_N=0
+												rw_n = '0';
 	
 	s <= 	s_ty0 when ty = '0' else
 				s_ty1;

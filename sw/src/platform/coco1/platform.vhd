@@ -175,7 +175,7 @@ architecture SYN of platform is
 	signal extrom_cs			  : std_logic;
 
   -- RAM signals        
-  signal ram_cs           : std_logic;
+  signal ram_rd           : std_logic;
   signal ram_datao        : std_logic_vector(7 downto 0);
 
 	-- system chipselect selector from SAM
@@ -306,10 +306,13 @@ begin
               cart_d_o when (cart_cs = '1' and sw_cart_n = '1') else
               rom_datao when rom_cs = '1' else
               extrom_datao when extrom_cs = '1' else
-              ram_datao when ram_cs = '1' else
+              ram_datao when ram_rd = '1' else
               X"FF";
 
   -- SRAM signals
+  -- the 6883 is not used to select RAM
+  -- - rather the S=0 output is used to set the bus direction on the 74LS244
+  -- - i.e. the output is RAM_RD
   sram_o.a <= std_logic_vector(resize(unsigned(sam_a), sram_o.a'length));
   --sram_data <= cpu_d_o when (cpu_vma = '1' and ram_cs = '1' and cpu_r_wn = '0' and vdg_sram_cs = '0') 
   sram_o.d <= std_logic_vector(resize(unsigned(cpu_d_o), sram_o.d'length));
@@ -415,7 +418,7 @@ begin
   begin
   
     -- assign chipselects from MC6883 selector output
-    ram_cs <= y(0);
+    ram_rd <= y(0);
     extrom_cs <= y(1);
     rom_cs <= y(2);
     cart_cs <= y(3);
