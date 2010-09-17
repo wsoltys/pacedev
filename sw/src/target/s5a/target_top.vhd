@@ -132,16 +132,14 @@ end entity target_top;
 
 architecture SYN of target_top is
 
-  alias clk_24M576_a    : std_logic is mix_ckp_a;
-  alias clk_24M576_b    : std_logic is mix_ckp_b;
+  alias clk_24M576_a    : std_logic is clk_25_a;
+  alias clk_24M576_b    : std_logic is clk_25_b;
   
-	signal clk_i			  	: std_logic_vector(0 to 3);
   signal init       		: std_logic := '1';
-  signal reset_i     		: std_logic := '1';
-	signal reset_n				: std_logic := '0';
 
   signal pll_locked     : std_logic := '0';
     
+  signal clkrst_i       : from_CLKRST_t;
   signal buttons_i    	: from_BUTTONS_t;
   signal switches_i   	: from_SWITCHES_t;
   signal leds_o       	: to_LEDS_t;
@@ -173,21 +171,24 @@ architecture SYN of target_top is
 
 begin
 
-	PROC_RESET : process(clk_24M576_a)
-		variable reset_cnt : integer := 999999;
+	PROC_RESET : process(clk_24M576_a, pll_locked)
+		variable reset_cnt : integer range 0 to 42424:= 0;
 	begin
-		if rising_edge(clk_24M576_a) then
-			if reset_cnt > 0 then
+		if pll_locked = '0' then
+			init <= '1';
+			reset_cnt := 0;
+		elsif rising_edge(clk_24M576_a) then
+			if reset_cnt /= reset_cnt'high then
 				init <= '1';
-				reset_cnt := reset_cnt - 1;
+				reset_cnt := reset_cnt + 1;
 			else
 				init <= '0';
 			end if;
 		end if;
 	end process PROC_RESET;
 
-  reset_i <= init or mix_reset;
-	reset_n <= not reset_i;
+  clkrst_i.arst <= init;
+	clkrst_i.arst_n <= not clkrst_i.arst;
 
   BLK_CLOCKING : block
 
@@ -241,8 +242,8 @@ begin
         (
           inclk0  => clk_24M576_a,
           c0      => vo_idck,   -- 108MHz
-          c1      => clk_i(1),  -- 108MHz
-          c2      => clk_i(0),  -- 40MHz
+          c1      => clkrst_i.clk(1),  -- 108MHz
+          c2      => clkrst_i.clk(0),  -- 40MHz
           locked  => pll_locked
         );
     
@@ -253,12 +254,27 @@ begin
     GEN_NO_PLL : if not PACE_HAS_PLL generate
 
       -- feed input clocks into PACE core
-      clk_i(0) <= clk_24M576_a;
-      clk_i(1) <= clk_24M576_b;
+      clkrst_i.clk(0) <= clk_24M576_a;
+      clkrst_i.clk(1) <= clk_24M576_b;
         
     end generate GEN_NO_PLL;
 	
   end block BLK_CLOCKING;
+
+  GEN_RESETS : for i in 0 to 3 generate
+
+    process (clkrst_i.clk(i), clkrst_i.arst)
+      variable rst_r : std_logic_vector(2 downto 0) := (others => '0');
+    begin
+      if clkrst_i.arst = '1' then
+        rst_r := (others => '1');
+      elsif rising_edge(clkrst_i.clk(i)) then
+        rst_r := rst_r(rst_r'left-1 downto 0) & '0';
+      end if;
+      clkrst_i.rst(i) <= rst_r(rst_r'left);
+    end process;
+
+  end generate GEN_RESETS;
 
   -- buttons
   buttons_i <= std_logic_vector(to_unsigned(0, buttons_i'length));
@@ -278,7 +294,7 @@ begin
       port map
       (
         clk             => clk_24M576_a,
-        reset           => reset_i,
+        reset           => clkrst_i.arst,
 
         -- FIFO interface
         fifo_data       => ps2_fifo_data,
@@ -331,7 +347,7 @@ begin
   begin
 
     lpc_clk <= clk_24M576_a;
-    lpc_reset_n <= reset_n;
+    lpc_reset_n <= clkrst_i.arst_n;
     lpc_frame <= not mix_framen;
     
     lpc_periph_inst : wb_lpc_periph
@@ -448,7 +464,7 @@ begin
       (
         -- wishbone (LPC) interface
         wb_clk          => lpc_clk,
-        wb_rst          => reset_i,
+        wb_rst          => clkrst_i.arst,
         wb_cyc          => wb_cyc,
         wb_stb          => custom_io_stb,
         wb_adr          => wb_adr(7 downto 0),
@@ -503,7 +519,7 @@ begin
       (
         clk					=> clk_24M576_a,
         clk_ena     => '1',
-        reset				=> reset_i,
+        reset				=> clkrst_i.arst,
 
         -- I2C physical interface
         scl_i  	    => vo_scl_i,
@@ -520,9 +536,9 @@ begin
     vo_sda_i <= vo_sda;
     vo_sda <= vo_sda_o when vo_sda_oe_n = '0' else 'Z';
 
-    video_i.clk <= clk_i(1);
+    video_i.clk <= clkrst_i.clk(1);
     video_i.clk_ena <= '1';
-    video_i.reset <= reset_i;
+    video_i.reset <= clkrst_i.arst;
     
     --vo_idck <= clk_i(1);
     vo_red <= video_o.rgb.r(9 downto 2);
@@ -531,7 +547,7 @@ begin
     vo_hsync <= video_o.hsync;
     vo_vsync <= video_o.vsync;
     vo_de <= not (video_o.hblank or video_o.vblank);
-    vo_rstn <= reset_n;
+    vo_rstn <= clkrst_i.arst_n;
 
     GEN_TEST_VIDEO : if false generate
       --reg_i.h_scale <= "001";
@@ -590,8 +606,8 @@ begin
     port map
     (
     	-- clocks and resets
-	  	clk_i							=> clk_i,
-      reset_i          	=> reset_i,
+	  	clk_i							=> clkrst_i.clk,
+      reset_i          	=> clkrst_i.rst,
 
       -- misc inputs and outputs
       buttons_i         => buttons_i,
@@ -648,7 +664,7 @@ begin
       )
       port map
       (
-        clock		      => clk_i(0),
+        clock		      => clkrst_i.clk(0),
         address		    => sram_o.a(S5A_EMULATED_SRAM_WIDTH_AD-1 downto 0),
         data		      => sram_o.d(S5A_EMULATED_SRAM_WIDTH-1 downto 0),
         wren		      => wren,
@@ -669,7 +685,7 @@ begin
       )
       port map
       (
-        clock		      => clk_i(0),
+        clock		      => clkrst_i.clk(0),
         address		    => flash_o.a(S5A_EMULATED_FLASH_WIDTH_AD-1 downto 0),
         q		          => flash_i.d(S5A_EMULATED_FLASH_WIDTH-1 downto 0)
       );
@@ -677,10 +693,10 @@ begin
   end generate GEN_FLASH;
   
   -- blink a led
-  process (clk_24M576_a, reset_i)
+  process (clk_24M576_a, clkrst_i.arst)
     variable count : unsigned(22 downto 0) := (others => '0');
   begin
-    if reset_i = '1' then
+    if clkrst_i.arst = '1' then
       count := (others => '0');
     elsif rising_edge(clk_24M576_a) then
       count := count + 1;

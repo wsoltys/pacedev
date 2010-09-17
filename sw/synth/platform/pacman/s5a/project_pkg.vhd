@@ -69,9 +69,15 @@ package project_pkg is
   constant S5A_EMULATED_SRAM_WIDTH          : natural := 8;
 
   constant PACE_HAS_SRAM                    : boolean := S5A_EMULATE_SRAM;
+
+  constant S5A_EMULATE_FLASH                : boolean := false;
+  constant S5A_EMULATED_FLASH_INIT_FILE     : string := "bollocks.hex";
+  constant S5A_EMULATED_FLASH_WIDTH         : natural := 8;
+  constant S5A_EMULATED_FLASH_WIDTH_AD      : natural := 16;
     
 	-- Pacman-specific constants
 			
+	constant PACMAN_ROM_IN_SRAM               : boolean := false;
 	constant PACMAN_USE_VIDEO_VBLANK          : boolean := true;
 	constant PACMAN_USE_INTERNAL_WRAM				  : boolean := not PACE_HAS_SRAM;
 	
