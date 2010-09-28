@@ -37,6 +37,8 @@ add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/vdg_inst/pro
 add wave -noupdate -divider PROC_CVBS
 add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/vdg_inst/cvbs_vblank
 add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/vdg_inst/cvbs_hblank
+add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/vdg_inst/vsync
+add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/vdg_inst/hsync
 add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/vdg_inst/v_count
 add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/vdg_inst/row_v
 add wave -noupdate -format Logic /tb_coco/pace_inst/platform_inst/vdg_inst/hs_int
@@ -45,7 +47,7 @@ add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/vdg_inst/pro
 add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/vdg_inst/proc_cvbs/active_h_count
 add wave -noupdate -format Literal /tb_coco/pace_inst/platform_inst/vdg_inst/proc_cvbs/active_v_count
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {252335 ns} 0} {{Cursor 2} {1023392 ns} 0}
+WaveRestoreCursors {{Cursor 1} {2874978 ns} 0} {{Cursor 2} {2941794 ns} 0}
 configure wave -namecolwidth 159
 configure wave -valuecolwidth 50
 configure wave -justifyvalue left
@@ -59,4 +61,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {66964 ns} {1049108 ns}
+WaveRestoreZoom {16379006 ns} {17671313 ns}

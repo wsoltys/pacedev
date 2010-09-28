@@ -14,7 +14,7 @@
 
 
 # The default values for assignments are stored in the file
-#		dkong_assignment_defaults.qdf
+#		invaders_assignment_defaults.qdf
 # If this file doesn't exist, and for assignments not listed, see file
 #		assignment_defaults.qdf
 
@@ -25,7 +25,7 @@
 
 # Project-Wide Assignments
 # ========================
-set_global_assignment -name SMART_RECOMPILE ON
+set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
 set_global_assignment -name LAST_QUARTUS_VERSION "9.1 SP2"
@@ -39,10 +39,8 @@ set_location_assignment PIN_M19 -to NROMGDIS
 set_location_assignment PIN_N15 -to NBCS0
 set_location_assignment PIN_L22 -to NBRD
 set_location_assignment PIN_M21 -to NBCS2
-set_location_assignment PIN_L21 -to SW2_1
 set_location_assignment PIN_M22 -to NBCS4
 set_location_assignment PIN_L18 -to NRESET2
-set_location_assignment PIN_B11 -to CKE_DR1
 set_location_assignment PIN_F9 -to NCAS_DR1
 set_location_assignment PIN_C13 -to NCS_DR1
 set_location_assignment PIN_F10 -to NRAS_DR1
@@ -51,7 +49,6 @@ set_location_assignment PIN_Y10 -to NCAS_DR2
 set_location_assignment PIN_Y9 -to NCS_DR2
 set_location_assignment PIN_W9 -to NRAS_DR2
 set_location_assignment PIN_W11 -to NWE_DR2
-set_location_assignment PIN_V14 -to CKE_DR2
 set_location_assignment PIN_U21 -to RESET_enet
 set_location_assignment PIN_F8 -to RESET_CF
 set_location_assignment PIN_M5 -to NON_CF
@@ -72,7 +69,6 @@ set_location_assignment PIN_M1 -to IORDY0_CF
 set_location_assignment PIN_M2 -to DMARQ_CF
 set_location_assignment PIN_B12 -to CLOCK8
 set_location_assignment PIN_J4 -to NWE_S
-set_location_assignment PIN_V11 -to EXT_ENABLE
 set_location_assignment PIN_J2 -to NCS_S
 set_location_assignment PIN_D1 -to CD_CF
 set_location_assignment PIN_H11 -to NIOW0_CF
@@ -88,7 +84,6 @@ set_location_assignment PIN_R16 -to DATA_EE
 set_location_assignment PIN_U18 -to GAT_RXD
 set_location_assignment PIN_F4 -to MAC_ADDR
 set_location_assignment PIN_G20 -to NBWR
-set_location_assignment PIN_U20 -to RIP_enet
 set_location_assignment PIN_C1 -to A_CF[0]
 set_location_assignment PIN_H7 -to A_CF[1]
 set_location_assignment PIN_G7 -to A_CF[2]
@@ -354,7 +349,6 @@ set_global_assignment -name STRATIX_DEVICE_IO_STANDARD LVTTL
 # SignalTap II Assignments
 # ========================
 set_global_assignment -name ENABLE_SIGNALTAP OFF
-set_global_assignment -name USE_SIGNALTAP_FILE signaltap.stp
 
 # ----------------------------
 # start CLOCK(ethernet_clocks)
@@ -415,8 +409,6 @@ set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to *dr1*
 set_instance_assignment -name CUT ON -from reset_shift_n[0] -to *
 set_instance_assignment -name CLOCK_SETTINGS ethernet_clocks -to RXCLK_enet
 set_instance_assignment -name CLOCK_SETTINGS ethernet_clocks -to TXCLK_enet
-set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to scl
-set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to sda
 
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to BD*
 set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to NROMSOE
@@ -430,7 +422,6 @@ set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to ncs_dr*
 set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to nwe_dr*
 set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to ba_dr*
 set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to clk_dr*
-set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to cke_dr*
 set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to dqm_dr1*
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to dqm_dr2*
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to BD_NS*
@@ -547,8 +538,6 @@ set_instance_assignment -name OUTPUT_PIN_LOAD 8 -to ba_dr2[0]
 set_instance_assignment -name OUTPUT_PIN_LOAD 8 -to ba_dr2[1]
 set_instance_assignment -name OUTPUT_PIN_LOAD 7 -to CLK_DR1
 set_instance_assignment -name OUTPUT_PIN_LOAD 7 -to CLK_DR2
-set_instance_assignment -name OUTPUT_PIN_LOAD 8 -to CKE_DR1
-set_instance_assignment -name OUTPUT_PIN_LOAD 8 -to CKE_DR2
 set_instance_assignment -name OUTPUT_PIN_LOAD 8 -to NWE_DR1
 set_instance_assignment -name OUTPUT_PIN_LOAD 8 -to NWE_DR2
 set_instance_assignment -name OUTPUT_PIN_LOAD 8 -to NRAS_DR1
@@ -709,7 +698,6 @@ set_global_assignment -name FLOW_ENABLE_TIMING_CONSTRAINT_CHECK OFF
 set_global_assignment -name DO_COMBINED_ANALYSIS ON
 set_global_assignment -name ENABLE_CLOCK_LATENCY ON
 set_global_assignment -name REPORT_IO_PATHS_SEPARATELY ON
-set_instance_assignment -name GLOBAL_SIGNAL "GLOBAL CLOCK" -to "meb_pll:MEB_PLL_0|altpll:altpll_component|_clk1"
 set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_ASYNCHRONOUS_SIGNAL_PIPELINING ON
@@ -734,7 +722,39 @@ set_parameter -name CYCLONEII_SAFE_WRITE "\"VERIFIED_SAFE\""
 
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
 set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
+set_global_assignment -name INCREMENTAL_COMPILATION OFF
+set_location_assignment PIN_U20 -to nllb_s
+set_location_assignment PIN_B11 -to nlub_s
+set_location_assignment PIN_V14 -to nulb_s
+set_location_assignment PIN_V11 -to nuub_s
+set_location_assignment PIN_L21 -to sw2_1_ext_enable
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to nllb_s
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to nlub_s
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to nulb_s
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to nuub_s
+set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to nllb_s
+set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to nlub_s
+set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to nulb_s
+set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to nuub_s
+set_instance_assignment -name OUTPUT_PIN_LOAD 12 -to nllb_s
+set_instance_assignment -name OUTPUT_PIN_LOAD 12 -to nlub_s
+set_instance_assignment -name OUTPUT_PIN_LOAD 12 -to nulb_s
+set_instance_assignment -name OUTPUT_PIN_LOAD 12 -to nuub_s
+set_global_assignment -name MISC_FILE "E:/markm/pace/pacedev.net/sw/synth/platform/midway8080/invaders/p2a/invaders.dpf"
+set_global_assignment -name USE_CONFIGURATION_DEVICE ON
+set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to ba_ns
+set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to bd_ns
+set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to nwe_s
+set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to ncs_s
+set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to nce_n
+set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to nllb_s
+set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to nlub_s
+set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to nulb_s
+set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to nuub_s
+
+set_global_assignment -name NUM_PARALLEL_PROCESSORS ALL
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sdram_pkg.vhd
@@ -742,7 +762,7 @@ set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controlle
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/dkong/platform_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/p2a/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
 set_global_assignment -name VERILOG_FILE ../../../../src/platform/dkong/unzip/src/dkong/cyclone/cyc_ram_1024_8.v
 set_global_assignment -name VERILOG_FILE ../../../../src/platform/dkong/unzip/src/dkong/cyclone/cyc_ram_1024_8_8.v
@@ -770,7 +790,7 @@ set_global_assignment -name VERILOG_FILE ../../../../src/platform/dkong/unzip/sr
 set_global_assignment -name VERILOG_FILE ../../../../src/platform/dkong/unzip/src/dkong/dkong_vram.v
 set_global_assignment -name VERILOG_FILE ../../../../src/platform/dkong/unzip/src/dkong/dkong_col_pal.v
 set_global_assignment -name VERILOG_FILE ../../../../src/platform/dkong/unzip/src/dkong/dkong_vga_if.v
-set_global_assignment -name VERILOG_FILE dkong_top.v
+set_global_assignment -name VERILOG_FILE ../p2/dkong_top.v
 set_global_assignment -name VHDL_FILE ../../../../src/platform/dkong/inputmapper.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/platform/dkong/pace.vhd
@@ -780,6 +800,5 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_up
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/conversion.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gc_tx_bit.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_joy.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/target/p2/custom_io.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/target/p2/target_top.vhd
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name VHDL_FILE ../../../../src/target/p2a/custom_io.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/p2a/target_top.vhd

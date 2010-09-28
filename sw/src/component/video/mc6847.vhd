@@ -90,9 +90,9 @@ architecture SYN of mc6847 is
   constant V2_FRONT_PORCH      : integer := 2;
   constant V2_VERTICAL_SYNC    : integer := V2_FRONT_PORCH + 2;
   constant V2_BACK_PORCH       : integer := V2_VERTICAL_SYNC + 12;
-  constant V2_TOP_BORDER       : integer := V2_BACK_PORCH + 27;
+  constant V2_TOP_BORDER       : integer := V2_BACK_PORCH + 27 + 25;  -- +25 for PAL
   constant V2_VIDEO            : integer := V2_TOP_BORDER +  192;
-  constant V2_BOTTOM_BORDER    : integer := V2_VIDEO + 27;
+  constant V2_BOTTOM_BORDER    : integer := V2_VIDEO + 27 + 25;       -- +25 for PAL
   constant V2_TOTAL_PER_FIELD  : integer := V2_BOTTOM_BORDER;
 
   -- internal version of control ports
