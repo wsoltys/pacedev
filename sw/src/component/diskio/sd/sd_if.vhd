@@ -130,7 +130,7 @@ begin
 	cmd_s <= msg.cmd & msg.data;
 	poll_s <= '1' when state_s = msg_req else '0';
 
-	process(clk, clk_en_50MHz, reset)
+	PROC_MSG:process(clk, clk_en_50MHz, reset)
 		variable state : state_type;
 		variable cnt : integer;
 		variable msg_cnt : integer;
@@ -215,6 +215,6 @@ begin
 		
 		msg_cnt_s <= msg_cnt;
 		state_s <= state;
-	end process;
+	end process PROC_MSG;
 
 end SYN;

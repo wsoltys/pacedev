@@ -79,6 +79,20 @@ begin
 
 	end generate SD_GEN_0;
 
+  PROC_TEST : process
+  begin
+    rd_s <= '0';
+    wait until arst = '0';
+    --wait until rising_edge(clk_20);
+    --rd_s <= '1';
+    --wait until rising_edge(clk_20);
+    --rd_s <= '1';
+    wait until false;
+  end process PROC_TEST;
+
+  sd_cmd <= 'H';
+  sd_dat <= (others => 'H');
+
   sd_card : sdModel
     port map
     (
