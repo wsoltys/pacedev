@@ -74,7 +74,7 @@ package project_pkg is
   constant COCO1_CART_NAME                  : string := "hdbdoslba128MB_os9.hex";   -- 8KB
 
   constant COCO1_JUMPER_32K_RAM             : std_logic := '1';
-	constant COCO1_CVBS                       : boolean := true;
+	constant COCO1_CVBS                       : boolean := false;
   
   constant COCO1_HAS_IDE                    : boolean := true;
   

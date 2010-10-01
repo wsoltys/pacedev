@@ -71,19 +71,11 @@ package project_pkg is
 
   -- S5A-specific constants
   
-  constant S5A_DE_GEN                       : std_logic := '0';
-  constant S5A_VS_POL                       : std_logic := '0';
-  constant S5A_HS_POL                       : std_logic := '0';
-  constant S5A_DE_DLY                       : std_logic_vector(11 downto 0) := X"000";
-  constant S5A_DE_TOP                       : std_logic_vector(7 downto 0) := X"00";
-  constant S5A_DE_CNT                       : std_logic_vector(11 downto 0) := X"000";
-  constant S5A_DE_LIN                       : std_logic_vector(11 downto 0) := X"000";
+  constant S5AR2_EMULATE_SRAM               : boolean := false;
+  constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 16;
+  constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
 
-  constant S5A_EMULATE_SRAM                 : boolean := false;
-  constant S5A_EMULATED_SRAM_WIDTH_AD       : natural := 16;
-  constant S5A_EMULATED_SRAM_WIDTH          : natural := 8;
-
-  constant PACE_HAS_SRAM                    : boolean := S5A_EMULATE_SRAM;
+  constant PACE_HAS_SRAM                    : boolean := S5AR2_EMULATE_SRAM;
     
   --
 	-- Space Invaders-specific constants

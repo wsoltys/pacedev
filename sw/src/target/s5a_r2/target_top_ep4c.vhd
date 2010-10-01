@@ -200,17 +200,17 @@ begin
   reset <= init or not tp_84; --veb_reset;
 	reset_n <= not reset;
 
-    nios_pll_inst : entity work.ep4c_pll
-      port map
-      (
-        inclk0		=> clk_24M,
-        c0		    => clk_120M,        -- 120MHz
-        c1		    => clk_108M,        -- 108MHz
-        c2		    => open,            -- 108MHz
-        c3        => open,            -- 65MHz (1024x768), 108MHz (1280x1024)
-        c4        => open,            -- 65MHz (1024x768), 108MHz (1280x1024)
-        locked		=> open
-      );
+--    nios_pll_inst : entity work.ep4c_pll
+--      port map
+--      (
+--        inclk0		=> clk_24M,
+--        c0		    => clk_120M,        -- 120MHz
+--        c1		    => clk_108M,        -- 108MHz
+--        c2		    => open,            -- 108MHz
+--        c3        => open,            -- 65MHz (1024x768), 108MHz (1280x1024)
+--        c4        => open,            -- 65MHz (1024x768), 108MHz (1280x1024)
+--        locked		=> open
+--      );
   
   BLK_DVO_INIT : block
 
