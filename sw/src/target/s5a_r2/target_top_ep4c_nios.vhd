@@ -168,18 +168,23 @@ architecture SYN of target_top_ep4c is
 
   -- aliased clock pins
   alias clk_24M             : std_logic is clk24_a;
-  --alias clk_24M576_b        : std_logic is clk24_a;
   -- clocks
+  signal clk_NIOS           : std_logic := '0';
   
   signal ddc_reset          : std_logic := '0';
   signal dvi_hotplug_s      : std_logic := '0';
   signal dvo_hotplug        : std_logic := '0';
   signal dvo_rdy            : std_logic := '0';
   
-  signal led_clk            : std_logic := '0';
-	signal test_blink_n	      : std_logic := '1';
-  signal clk_120M           : std_logic := '0';
-  signal clk_108M           : std_logic := '0';
+  signal vai_i2c_scl_i      : std_logic := '0';
+  signal vai_i2c_scl_o      : std_logic;
+  signal vai_i2c_scl_oe_n   : std_logic;
+  signal vai_i2c_sda_i      : std_logic := '0';
+  signal vai_i2c_sda_o      : std_logic;
+  signal vai_i2c_sda_oe_n   : std_logic;
+
+  signal pio_0_i            : std_logic_vector(31 downto 0) := (others => '0');
+  signal pio_0_o            : std_logic_vector(31 downto 0);
   
 begin
 
@@ -200,17 +205,34 @@ begin
   reset <= init or not tp_84; --veb_reset;
 	reset_n <= not reset;
 
---    nios_pll_inst : entity work.ep4c_pll
---      port map
---      (
---        inclk0		=> clk_24M,
---        c0		    => clk_120M,        -- 120MHz
---        c1		    => clk_108M,        -- 108MHz
---        c2		    => open,            -- 108MHz
---        c3        => open,            -- 65MHz (1024x768), 108MHz (1280x1024)
---        c4        => open,            -- 65MHz (1024x768), 108MHz (1280x1024)
---        locked		=> open
---      );
+  clk_NIOS <= clk_24M;
+  
+  nios_inst : entity work.ep4c_nios_system
+    port map
+    (
+      -- 1) global signals:
+      clk_24                                            => clk_NIOS,
+      reset_n                                           => reset_n,
+
+      -- the_pio_0
+      in_port_to_the_pio_0                              => pio_0_i,
+      out_port_from_the_pio_0                           => pio_0_o,
+
+      -- the_vai_i2c_master_0
+      coe_arst_arst_i_to_the_vai_i2c_master_0           => reset,
+      coe_i2c_scl_pad_i_to_the_vai_i2c_master_0         => vai_i2c_scl_i,
+      coe_i2c_scl_pad_o_from_the_vai_i2c_master_0       => vai_i2c_scl_o,
+      coe_i2c_scl_padoen_o_from_the_vai_i2c_master_0    => vai_i2c_scl_oe_n,
+      coe_i2c_sda_pad_i_to_the_vai_i2c_master_0         => vai_i2c_sda_i,
+      coe_i2c_sda_pad_o_from_the_vai_i2c_master_0       => vai_i2c_sda_o,
+      coe_i2c_sda_padoen_o_from_the_vai_i2c_master_0    => vai_i2c_sda_oe_n
+    );
+
+  -- VAI I2C drives
+  vai_i2c_scl_i <= vai_scl;
+  vai_scl <= vai_i2c_scl_o when vai_i2c_scl_oe_n = '0' else 'Z';
+  vai_i2c_sda_i <= vai_sda;
+  vai_sda <= vai_i2c_sda_o when vai_i2c_sda_oe_n = '0' else 'Z';
   
   BLK_DVO_INIT : block
 
@@ -325,9 +347,9 @@ begin
   -- constant drivers
 	v15_s3				<= '0';
 	v15_s5				<= '0';
-	veb_pwrgoodn <= pok_12v and pok_5v and pok_3v3 and pok_1v9 and v15_pgood;
+	veb_pwrgoodn <= not (pok_12v and pok_5v and pok_3v3 and pok_1v9 and v15_pgood);
 	lvds_sel		<= 'Z';
-	vai_pdn			<= '0';   -- enable TVP7002
+	vai_pdn			<= pio_0_o(0);
 	dvi_hotplug	<= '1';
 	vsi_resetn	<= '1';
   vdi_pdn <= '1';
