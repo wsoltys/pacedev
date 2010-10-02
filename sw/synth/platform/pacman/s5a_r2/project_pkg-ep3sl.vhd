@@ -13,30 +13,30 @@ package project_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 	
-  -- Reference clock is 24.576MHz
+  -- Reference clock is 24MHz
 	constant PACE_HAS_PLL								      : boolean := true;
   constant PACE_HAS_SDRAM                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := false;
   
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
 
-  --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
-  --constant PACE_CLK0_DIVIDE_BY        		  : natural := 45;
-  --constant PACE_CLK0_MULTIPLY_BY      		  : natural := 44;    -- 24.576*44/45 = 24MHz
-  --constant PACE_CLK1_DIVIDE_BY        		  : natural := 27;
-  --constant PACE_CLK1_MULTIPLY_BY      		  : natural := 44;  	-- 24.576*44/27 = 40MHz
-	--constant PACE_VIDEO_H_SCALE         		  : integer := 2;
-	--constant PACE_VIDEO_V_SCALE         		  : integer := 2;
-	--constant PACE_ENABLE_ADV724							  : std_logic := '0';
+  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
+  constant PACE_CLK0_DIVIDE_BY        		  : natural := 1;
+  constant PACE_CLK0_MULTIPLY_BY      		  : natural := 1;     -- 24*1/1 = 24MHz
+  constant PACE_CLK1_DIVIDE_BY        		  : natural := 3;
+  constant PACE_CLK1_MULTIPLY_BY      		  : natural := 5;  	  -- 24*5/3 = 40MHz
+	constant PACE_VIDEO_H_SCALE         		  : integer := 2;
+	constant PACE_VIDEO_V_SCALE         		  : integer := 2;
+	constant PACE_ENABLE_ADV724							  : std_logic := '0';
 
-  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1280x1024_60Hz;
-  constant PACE_CLK0_DIVIDE_BY              : natural := 96;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 157;     -- 24.675*157/96 = 40.192MHz
-  constant PACE_CLK1_DIVIDE_BY              : natural := 11;
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 48;  	  -- 24.576*48/11 = 107.24MHz
-  constant PACE_VIDEO_H_SCALE       	      : integer := 2;
-  constant PACE_VIDEO_V_SCALE       	      : integer := 2;
-  constant PACE_ENABLE_ADV724					      : std_logic := '0';
+--  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1280x1024_60Hz;
+--  constant PACE_CLK0_DIVIDE_BY              : natural := 96;
+--  constant PACE_CLK0_MULTIPLY_BY            : natural := 157;     -- 24.675*157/96 = 40.192MHz
+--  constant PACE_CLK1_DIVIDE_BY              : natural := 11;
+--  constant PACE_CLK1_MULTIPLY_BY            : natural := 48;  	  -- 24.576*48/11 = 107.24MHz
+--  constant PACE_VIDEO_H_SCALE       	      : integer := 2;
+--  constant PACE_VIDEO_V_SCALE       	      : integer := 2;
+--  constant PACE_ENABLE_ADV724					      : std_logic := '0';
 
   --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_CVBS_720x288p_50Hz;
   --constant PACE_CLK0_DIVIDE_BY              : natural := 8;
@@ -56,25 +56,21 @@ package project_pkg is
 
   -- S5A-specific constants
   
-  constant S5A_DE_GEN                       : std_logic := '0';
-  constant S5A_VS_POL                       : std_logic := '0';
-  constant S5A_HS_POL                       : std_logic := '0';
-  constant S5A_DE_DLY                       : std_logic_vector(11 downto 0) := X"000";
-  constant S5A_DE_TOP                       : std_logic_vector(7 downto 0) := X"00";
-  constant S5A_DE_CNT                       : std_logic_vector(11 downto 0) := X"000";
-  constant S5A_DE_LIN                       : std_logic_vector(11 downto 0) := X"000";
-
-  constant S5A_EMULATE_SRAM                 : boolean := false;
-  constant S5A_EMULATED_SRAM_WIDTH_AD       : natural := 16;
-  constant S5A_EMULATED_SRAM_WIDTH          : natural := 8;
-
-  constant PACE_HAS_SRAM                    : boolean := S5A_EMULATE_SRAM;
+  constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 16;
+  constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
     
 	-- Pacman-specific constants
 			
 	constant PACMAN_ROM_IN_SRAM               : boolean := false;
 	constant PACMAN_USE_VIDEO_VBLANK          : boolean := true;
-	constant PACMAN_USE_INTERNAL_WRAM				  : boolean := not PACE_HAS_SRAM;
+	constant PACMAN_USE_INTERNAL_WRAM				  : boolean := true;
+	
+	-- derived - do not edit
+
+  constant S5AR2_EMULATE_SRAM               : boolean := PACMAN_ROM_IN_SRAM or 
+                                                          not PACMAN_USE_INTERNAL_WRAM;
+  constant PACE_HAS_SRAM                    : boolean := S5AR2_EMULATE_SRAM;
+	
 	
   type from_PROJECT_IO_t is record
     not_used  : std_logic;

@@ -13,7 +13,7 @@ package project_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 	
-  -- Reference clock is 25MHz
+  -- Reference clock is 24MHz
 	constant PACE_HAS_PLL								      : boolean := true;
   constant PACE_HAS_FLASH                   : boolean := false;
   --constant PACE_HAS_SRAM                    : boolean := false;
@@ -33,16 +33,14 @@ package project_pkg is
   --constant PACE_CLK1_MULTIPLY_BY            : natural := 20; 	-- 24*20/19 = 25.263158MHz
 	--constant PACE_VIDEO_H_SCALE       	      : integer := 1;
 	--constant PACE_VIDEO_V_SCALE       	      : integer := 1;
-  --constant PACE_ENABLE_ADV724					      : std_logic := '0';
 
-  --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
-  --constant PACE_CLK0_DIVIDE_BY              : natural := 1;
-  --constant PACE_CLK0_MULTIPLY_BY            : natural := 1;   -- 24*1/1 = 24MHz
-  --constant PACE_CLK1_DIVIDE_BY              : natural := 3;
-  --constant PACE_CLK1_MULTIPLY_BY            : natural := 5;  	-- 24*5/3 = 40MHz
-  --constant PACE_VIDEO_H_SCALE       	      : integer := 2;
-  --constant PACE_VIDEO_V_SCALE       	      : integer := 2;
-  --constant PACE_ENABLE_ADV724					      : std_logic := '0';
+  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
+  constant PACE_CLK0_DIVIDE_BY              : natural := 1;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 1;   -- 24*1/1 = 24MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 3;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 5;  	-- 24*5/3 = 40MHz
+  constant PACE_VIDEO_H_SCALE       	      : integer := 2;
+  constant PACE_VIDEO_V_SCALE       	      : integer := 2;
 
   --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_CVBS_720x288p_50Hz;
   --constant PACE_CLK0_DIVIDE_BY              : natural := 32;
@@ -51,17 +49,15 @@ package project_pkg is
   --constant PACE_CLK1_MULTIPLY_BY            : natural := 9;  		-- 24*9/16 = 13.5MHz
   --constant PACE_VIDEO_H_SCALE       	      : integer := 2;
   --constant PACE_VIDEO_V_SCALE       	      : integer := 1;
-  --constant PACE_ENABLE_ADV724					      : std_logic := '1';
 
-  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1280x1024_60Hz;
-  constant PACE_CLK0_DIVIDE_BY              : natural := 96;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 157;     -- 24.675*157/96 = 40.192MHz
-  constant PACE_CLK1_DIVIDE_BY              : natural := 11;
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 48;  	  -- 24.576*48/11 = 107.24MHz
-  constant PACE_VIDEO_H_SCALE       	      : integer := 2;
-  constant PACE_VIDEO_V_SCALE       	      : integer := 2;
-  constant PACE_ENABLE_ADV724					      : std_logic := '0';
-
+--  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1280x1024_60Hz;
+--  constant PACE_CLK0_DIVIDE_BY              : natural := 96;
+--  constant PACE_CLK0_MULTIPLY_BY            : natural := 157;     -- 24.675*157/96 = 40.192MHz
+--  constant PACE_CLK1_DIVIDE_BY              : natural := 11;
+--  constant PACE_CLK1_MULTIPLY_BY            : natural := 48;  	  -- 24.576*48/11 = 107.24MHz
+--  constant PACE_VIDEO_H_SCALE       	      : integer := 2;
+--  constant PACE_VIDEO_V_SCALE       	      : integer := 2;
+--
   --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
   constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
   
