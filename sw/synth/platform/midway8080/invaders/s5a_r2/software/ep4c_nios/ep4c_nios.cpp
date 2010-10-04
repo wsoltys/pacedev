@@ -43,7 +43,7 @@ int main (int argc, char* argv[], char* envp[])
   i2c_write_byte (VAI_I2C_MASTER_0_BASE, TVP7002_A, 0x03, 0x58);
   // Clamp Start (PC graphics)
   i2c_write_byte (VAI_I2C_MASTER_0_BASE, TVP7002_A, 0x05, 0x06);
-  // Clamp Width (PC graphics)
+  // Clamp Width (PC graphics & SDTV)
   i2c_write_byte (VAI_I2C_MASTER_0_BASE, TVP7002_A, 0x06, 0x10);
   // Sync Control 1 (all automatic)
   i2c_write_byte (VAI_I2C_MASTER_0_BASE, TVP7002_A, 0x0E, 0x00);
