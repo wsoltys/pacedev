@@ -296,7 +296,7 @@ begin
   begin
   
 		-- Dreamcast MapleBus joystick interface
-		MAPLE_JOY : entity work.maple_joy
+		maple_joy_inst : maple_joy
 			port map
 			(
 				clk				=> clock_50,
