@@ -20,14 +20,14 @@ package project_pkg is
   
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
 
-  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
-  constant PACE_CLK0_DIVIDE_BY        		  : natural := 45;
-  constant PACE_CLK0_MULTIPLY_BY      		  : natural := 44;    -- 24.576*44/45 = 24MHz
-  constant PACE_CLK1_DIVIDE_BY        		  : natural := 27;
-  constant PACE_CLK1_MULTIPLY_BY      		  : natural := 44;  	-- 24.576*44/27 = 40MHz
-	constant PACE_VIDEO_H_SCALE         		  : integer := 2;
-	constant PACE_VIDEO_V_SCALE         		  : integer := 2;
-	constant PACE_ENABLE_ADV724							  : std_logic := '0';
+--  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
+--  constant PACE_CLK0_DIVIDE_BY        		  : natural := 45;
+--  constant PACE_CLK0_MULTIPLY_BY      		  : natural := 44;    -- 24.576*44/45 = 24MHz
+--  constant PACE_CLK1_DIVIDE_BY        		  : natural := 27;
+--  constant PACE_CLK1_MULTIPLY_BY      		  : natural := 44;  	-- 24.576*44/27 = 40MHz
+--	constant PACE_VIDEO_H_SCALE         		  : integer := 2;
+--	constant PACE_VIDEO_V_SCALE         		  : integer := 2;
+--	constant PACE_ENABLE_ADV724							  : std_logic := '0';
 
   --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1280x1024_60Hz;
   --constant PACE_CLK0_DIVIDE_BY              : natural := 96;
@@ -37,6 +37,15 @@ package project_pkg is
   --constant PACE_VIDEO_H_SCALE       	      : integer := 2;
   --constant PACE_VIDEO_V_SCALE       	      : integer := 2;
   --constant PACE_ENABLE_ADV724					      : std_logic := '0';
+
+  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1680x1050_60Hz;
+  constant PACE_CLK0_DIVIDE_BY        		  : natural := 196;
+  constant PACE_CLK0_MULTIPLY_BY      		  : natural := 191;    -- 24.576*191/196 = 23.949061MHz
+  constant PACE_CLK1_DIVIDE_BY        		  : natural := 32;
+  constant PACE_CLK1_MULTIPLY_BY      		  : natural := 191;  	 -- 24.576*191/32 = 146.688000MHz
+	constant PACE_VIDEO_H_SCALE         		  : integer := 2;
+	constant PACE_VIDEO_V_SCALE         		  : integer := 2;
+	constant PACE_ENABLE_ADV724							  : std_logic := '0';
 
   --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_CVBS_720x288p_50Hz;
   --constant PACE_CLK0_DIVIDE_BY              : natural := 8;

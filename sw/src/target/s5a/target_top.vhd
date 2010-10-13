@@ -275,21 +275,6 @@ begin
 
   end generate GEN_RESETS;
 
-  GEN_RESETS : for i in 0 to 3 generate
-
-    process (clkrst_i.clk(i), clkrst_i.arst)
-      variable rst_r : std_logic_vector(2 downto 0) := (others => '0');
-    begin
-      if clkrst_i.arst = '1' then
-        rst_r := (others => '1');
-      elsif rising_edge(clkrst_i.clk(i)) then
-        rst_r := rst_r(rst_r'left-1 downto 0) & '0';
-      end if;
-      clkrst_i.rst(i) <= rst_r(rst_r'left);
-    end process;
-
-  end generate GEN_RESETS;
-	
   -- buttons
   buttons_i <= std_logic_vector(to_unsigned(0, buttons_i'length));
   -- switches - up = high

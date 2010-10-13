@@ -173,20 +173,20 @@ begin
 
         when PACE_VIDEO_VGA_1680x1050_60Hz =>
           -- WSXGA+, clk=147.14MHz
-          --h_front_porch_r <= 104;
-          --h_sync_r <= 184;
-          --h_back_porch_r <= 288;
-          --v_front_porch_r <= 1;
-          --v_sync_r <= 3;
-          --v_back_porch_r <= 33;
+          h_front_porch_r <= 104;
+          h_sync_r <= 184;
+          h_back_porch_r <= 288;
+          v_front_porch_r <= 1;
+          v_sync_r <= 3;
+          v_back_porch_r <= 33;
           -- WSXGA+, clk=118MHz
-          h_front_porch_r <= 48;
-          h_sync_r <= 32;
-          h_back_porch_r <= 80;
+          --h_front_porch_r <= 48;
+          --h_sync_r <= 32;
+          --h_back_porch_r <= 80;
+          --v_front_porch_r <= 3;
+          --v_sync_r <= 6;
+          --v_back_porch_r <= 21;
           h_border_r <= (1680-VIDEO_H_SIZE)/2;
-          v_front_porch_r <= 3;
-          v_sync_r <= 6;
-          v_back_porch_r <= 21;
           v_border_r <= (1050-VIDEO_V_SIZE)/2;
 
         when PACE_VIDEO_CVBS_720x288p_50Hz =>

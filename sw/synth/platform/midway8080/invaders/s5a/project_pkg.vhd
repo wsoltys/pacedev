@@ -52,14 +52,23 @@ package project_pkg is
   --constant PACE_VIDEO_V_SCALE       	      : integer := 1;
   --constant PACE_ENABLE_ADV724					      : std_logic := '1';
 
-  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1280x1024_60Hz;
-  constant PACE_CLK0_DIVIDE_BY              : natural := 96;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 157;     -- 24.675*157/96 = 40.192MHz
-  constant PACE_CLK1_DIVIDE_BY              : natural := 11;
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 48;  	  -- 24.576*48/11 = 107.24MHz
-  constant PACE_VIDEO_H_SCALE       	      : integer := 2;
-  constant PACE_VIDEO_V_SCALE       	      : integer := 2;
-  constant PACE_ENABLE_ADV724					      : std_logic := '0';
+--  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1280x1024_60Hz;
+--  constant PACE_CLK0_DIVIDE_BY              : natural := 96;
+--  constant PACE_CLK0_MULTIPLY_BY            : natural := 157;     -- 24.675*157/96 = 40.192MHz
+--  constant PACE_CLK1_DIVIDE_BY              : natural := 11;
+--  constant PACE_CLK1_MULTIPLY_BY            : natural := 48;  	  -- 24.576*48/11 = 107.24MHz
+--  constant PACE_VIDEO_H_SCALE       	      : integer := 2;
+--  constant PACE_VIDEO_V_SCALE       	      : integer := 2;
+--  constant PACE_ENABLE_ADV724					      : std_logic := '0';
+
+  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1680x1050_60Hz;
+  constant PACE_CLK0_DIVIDE_BY        		  : natural := 11;
+  constant PACE_CLK0_MULTIPLY_BY      		  : natural := 18;      -- 24.576*18/11 = 40.215273MHz
+  constant PACE_CLK1_DIVIDE_BY        		  : natural := 1;
+  constant PACE_CLK1_MULTIPLY_BY      		  : natural := 6;  	    -- 24.576*6/1 = 147.456000MHz
+	constant PACE_VIDEO_H_SCALE         		  : integer := 2;
+	constant PACE_VIDEO_V_SCALE         		  : integer := 2;
+	constant PACE_ENABLE_ADV724							  : std_logic := '0';
 
   --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
   constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
@@ -78,6 +87,11 @@ package project_pkg is
   constant S5A_DE_CNT                       : std_logic_vector(11 downto 0) := X"000";
   constant S5A_DE_LIN                       : std_logic_vector(11 downto 0) := X"000";
 
+  --constant S5A_EMULATE_FLASH                : boolean := false;
+  constant S5A_EMULATED_FLASH_INIT_FILE     : string := "bollocks.hex";
+  constant S5A_EMULATED_FLASH_WIDTH         : natural := 8;
+  constant S5A_EMULATED_FLASH_WIDTH_AD      : natural := 16;
+
   constant S5A_EMULATE_SRAM                 : boolean := false;
   constant S5A_EMULATED_SRAM_WIDTH_AD       : natural := 16;
   constant S5A_EMULATED_SRAM_WIDTH          : natural := 8;
@@ -88,11 +102,17 @@ package project_pkg is
 	-- Space Invaders-specific constants
 	--
 	
-  constant INVADERS_ROM_IN_FLASH            : boolean := PACE_HAS_FLASH;
+  constant INVADERS_ROM_IN_FLASH            : boolean := false;
 	constant INVADERS_USE_INTERNAL_WRAM				: boolean := not PACE_HAS_SRAM;
 
 	constant USE_VIDEO_VBLANK_INTERRUPT 			: boolean := false;
 	
+	--
+	-- derived - do not edit
+  --
+  constant S5A_EMULATE_FLASH                : boolean := INVADERS_ROM_IN_FLASH;
+  constant PACE_HAS_FLASH                   : boolean := S5A_EMULATE_FLASH;
+  
   type from_PROJECT_IO_t is record
     not_used  : std_logic;
   end record;
