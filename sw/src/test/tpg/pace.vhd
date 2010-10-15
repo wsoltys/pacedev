@@ -65,7 +65,10 @@ architecture SYN of PACE is
 	constant CLK_1US_COUNTS : integer := 
     integer(PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY);
 
-	signal mapped_inputs		: from_MAPPED_INPUTS_t(0 to PACE_INPUTS_NUM_BYTES-1);
+  signal clk_TPG          : std_logic;
+  signal rst_TPG          : std_logic;
+  
+	--signal mapped_inputs		: from_MAPPED_INPUTS_t(0 to PACE_INPUTS_NUM_BYTES-1);
 
   signal to_tilemap_ctl   : to_TILEMAP_CTL_t;
   signal from_tilemap_ctl : from_TILEMAP_CTL_t;
@@ -93,6 +96,23 @@ begin
     report  "CLK0_FREQ_MHz=" & integer'image(CLK0_FREQ_MHz) &
             " CLK_1US_COUNTS=" & integer'image(CLK_1US_COUNTS)
       severity note;
+
+--  GEN_NO_PLL : if PACE_HAS_PLL generate
+--    clk_TPG <= clkrst_i(1);
+--    rst_TPG <= clkrsi_i.arst;
+--  end generate GEN_NO_PLL;
+--  
+--  GEN_PLL: if not PACE_HAS_PLL generate
+--  begin
+--    pll_inst : entity work.pll
+--      port map
+--      (
+--        inclk0		=> clkrst_i(0),
+--        c0		    => open,
+--        c1		    => clk_TPG,
+--        locked		=> open
+--      );
+--  end generate GEN_PLL;
 
   graphics_inst : entity work.Graphics                                    
     Port Map

@@ -229,20 +229,22 @@ begin
           -- INCLK0
           INCLK0_INPUT_FREQUENCY  => 40960,
 
-          -- CLK0
+          -- CLK0 (actually C2 output)
           CLK0_DIVIDE_BY          => PACE_CLK0_DIVIDE_BY,
           CLK0_MULTIPLY_BY        => PACE_CLK0_MULTIPLY_BY,
-      
-          -- CLK1
+          
+          -- CLK1 (actually C0/C1 output)
+          -- - note that C0 has the phase shift only
           CLK1_DIVIDE_BY          => PACE_CLK1_DIVIDE_BY,
-          CLK1_MULTIPLY_BY        => PACE_CLK1_MULTIPLY_BY
+          CLK1_MULTIPLY_BY        => PACE_CLK1_MULTIPLY_BY,
+          CLK1_PHASE_SHIFT        => "-3000"
         )
         port map
         (
           inclk0  => clk_24M576_a,
-          c0      => vo_idck,   -- 108MHz
-          c1      => clkrst_i.clk(1),  -- 108MHz
-          c2      => clkrst_i.clk(0),  -- 40MHz
+          c0      => vo_idck,           -- 108MHz
+          c1      => clkrst_i.clk(1),   -- 108MHz
+          c2      => clkrst_i.clk(0),   -- 40MHz
           locked  => pll_locked
         );
     
@@ -312,7 +314,7 @@ begin
 
   end block BLK_PS2;
 
-  BLK_MIXER_BUS : block
+  GEN_MIXER_BUS : if S5_HAS_MIXER_BUS generate
 
     signal lpc_clk          : std_logic := '0';
     signal lpc_reset_n      : std_logic := '1';
@@ -480,7 +482,7 @@ begin
         target_o        => target_o
       );
 
-  end block BLK_MIXER_BUS;
+  end generate GEN_MIXER_BUS;
 
   BLK_VIDEO : block
   
@@ -538,15 +540,20 @@ begin
     video_i.clk <= clkrst_i.clk(1);
     video_i.clk_ena <= '1';
     video_i.reset <= clkrst_i.arst;
-    
-    --vo_idck <= clk_i(1);
-    vo_red <= video_o.rgb.r(9 downto 2);
-    vo_green <= video_o.rgb.g(9 downto 2);
-    vo_blue <= video_o.rgb.b(9 downto 2);
-    vo_hsync <= video_o.hsync;
-    vo_vsync <= video_o.vsync;
-    vo_de <= not (video_o.hblank or video_o.vblank);
-    vo_rstn <= clkrst_i.arst_n;
+
+    process (clkrst_i.clk(1))
+    begin
+      if rising_edge(clkrst_i.clk(1)) then
+        --vo_idck <= clk_i(1);
+        vo_red <= video_o.rgb.r(9 downto 2);
+        vo_green <= video_o.rgb.g(9 downto 2);
+        vo_blue <= video_o.rgb.b(9 downto 2);
+        vo_hsync <= video_o.hsync;
+        vo_vsync <= video_o.vsync;
+        vo_de <= not (video_o.hblank or video_o.vblank);
+        vo_rstn <= clkrst_i.arst_n;
+      end if;
+    end process;
 
     GEN_TEST_VIDEO : if false generate
       --reg_i.h_scale <= "001";

@@ -143,7 +143,7 @@ BEGIN
 		clk1_divide_by => CLK1_DIVIDE_BY,
 		clk1_duty_cycle => CLK1_DUTY_CYCLE,
 		clk1_multiply_by => CLK1_MULTIPLY_BY,
-		clk1_phase_shift => CLK1_PHASE_SHIFT,
+		clk1_phase_shift => "0",
 		clk2_divide_by => CLK0_DIVIDE_BY,
 		clk2_duty_cycle => CLK0_DUTY_CYCLE,
 		clk2_multiply_by => CLK0_MULTIPLY_BY,
