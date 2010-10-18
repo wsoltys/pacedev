@@ -42,6 +42,8 @@ void main (int argc, char *argv[])
 	fclose (fp);
 
   // read chr data
+  // dumped from MESS $B400-$B7FF after BASIC prompt
+  // (gets copied from BASIC ROM)
   fp = fopen ("chr10.bin", "rb");
   fread (&mem[CHR0_BASE], 0x400, 1, fp);
   fclose (fp);
