@@ -129,7 +129,7 @@ crcOut);
 
 
 reg appendCrc;
-reg [5:0] startUppCnt;
+reg [7:0] startUppCnt;
 
 reg q_start_bit;
 //Card initinCMd
@@ -186,6 +186,7 @@ initial begin
   crcDat_in<=0; 
   flash_write_cnt<=0;
   flash_blockwrite_cnt<=0;
+  startUppCnt<=0;
 end
 
 //CARD logic
@@ -299,11 +300,13 @@ if (CardTransferActive) begin
   end
 else 
   CardStatus[8]<=0;
-     
- startUppCnt<=startUppCnt+1;
- OCR[31]<=Busy;
- if (startUppCnt == `TIME_BUSY)
-   Busy <=1;   
+ 
+ if(startUppCnt < `TIME_BUSY)
+	 startUppCnt<=startUppCnt+1;
+ else
+	Busy <= 1;
+
+	OCR[31]<=Busy;
 end
 
 

@@ -7,8 +7,26 @@ add wave -noupdate -format Literal /tb_sd/sd_gen_0/blk0/sd_if_1/cmd_s
 add wave -noupdate -format Literal /tb_sd/sd_gen_0/blk0/sd_if_1/proc_msg/state
 add wave -noupdate -format Literal /tb_sd/sd_gen_0/blk0/sd_if_1/proc_msg/cnt
 add wave -noupdate -format Literal /tb_sd/sd_gen_0/blk0/sd_if_1/proc_msg/msg_cnt
+add wave -noupdate -format Literal -expand /tb_sd/sd_gen_0/blk0/sd_if_1/msg
 add wave -noupdate -format Literal /tb_sd/sd_gen_0/blk0/sd_if_1/card_ocr
-add wave -noupdate -format Literal /tb_sd/sd_gen_0/blk0/sd_if_1/resp_s
+add wave -noupdate -format Literal -radix hexadecimal /tb_sd/sd_gen_0/blk0/sd_if_1/resp_s
+add wave -noupdate -divider SD_BUSIF
+add wave -noupdate -format Logic /tb_sd/sd_gen_0/blk0/sd_if_1/sd_busif_1/clk
+add wave -noupdate -format Logic /tb_sd/sd_gen_0/blk0/sd_if_1/sd_busif_1/clk_en
+add wave -noupdate -format Logic /tb_sd/sd_gen_0/blk0/sd_if_1/sd_busif_1/reset
+add wave -noupdate -format Logic /tb_sd/sd_gen_0/blk0/sd_if_1/sd_busif_1/sd_clk
+add wave -noupdate -format Logic /tb_sd/sd_gen_0/blk0/sd_if_1/sd_busif_1/sd_cmd
+add wave -noupdate -format Literal /tb_sd/sd_gen_0/blk0/sd_if_1/sd_busif_1/sd_dat
+add wave -noupdate -format Logic /tb_sd/sd_gen_0/blk0/sd_if_1/sd_busif_1/send_cmd
+add wave -noupdate -format Logic /tb_sd/sd_gen_0/blk0/sd_if_1/sd_busif_1/busy
+add wave -noupdate -format Literal /tb_sd/sd_gen_0/blk0/sd_if_1/sd_busif_1/expect_resp
+add wave -noupdate -format Literal /tb_sd/sd_gen_0/blk0/sd_if_1/sd_busif_1/cmd
+add wave -noupdate -format Literal /tb_sd/sd_gen_0/blk0/sd_if_1/sd_busif_1/resp
+add wave -noupdate -format Logic /tb_sd/sd_gen_0/blk0/sd_if_1/sd_busif_1/resp_err
+add wave -noupdate -format Logic /tb_sd/sd_gen_0/blk0/sd_if_1/sd_busif_1/sc_top
+add wave -noupdate -format Logic /tb_sd/sd_gen_0/blk0/sd_if_1/sd_busif_1/sc_shift
+add wave -noupdate -format Logic /tb_sd/sd_gen_0/blk0/sd_if_1/sd_busif_1/sr_in
+add wave -noupdate -format Logic /tb_sd/sd_gen_0/blk0/sd_if_1/sd_busif_1/sr_shift
 add wave -noupdate -divider SD_CARD
 add wave -noupdate -format Logic /tb_sd/sd_clk
 add wave -noupdate -format Logic /tb_sd/sd_cmd
@@ -29,8 +47,9 @@ add wave -noupdate -format Literal /tb_sd/sd_card/response_CMD
 add wave -noupdate -format Literal /tb_sd/sd_card/cmdRead
 add wave -noupdate -format Literal /tb_sd/sd_card/cmdWrite
 add wave -noupdate -format Logic /tb_sd/sd_card/cmdOut
+add wave -noupdate -format Literal /tb_sd/sd_card/startUppCnt
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {27887 ns} 0}
+WaveRestoreCursors {{Cursor 1} {5609 ns} 0}
 configure wave -namecolwidth 150
 configure wave -valuecolwidth 100
 configure wave -justifyvalue left
@@ -44,4 +63,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {21127 ns} {35387 ns}
+WaveRestoreZoom {0 ns} {57040 ns}
