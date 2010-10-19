@@ -23,8 +23,8 @@ package project_pkg is
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
 
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_640x480_60Hz;
-  constant PACE_CLK0_DIVIDE_BY              : natural := 5;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 3;   -- 50*3/5 = 30MHz
+  constant PACE_CLK0_DIVIDE_BY              : natural := 25;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 16;  -- 50*16/25 = 32MHz
   constant PACE_CLK1_DIVIDE_BY              : natural := 2;
   constant PACE_CLK1_MULTIPLY_BY            : natural := 1;  	-- 50*1/2 = 25MHz
 	constant PACE_VIDEO_H_SCALE       	      : integer := 2;
@@ -48,8 +48,8 @@ package project_pkg is
 
 	-- Oric-specific constants      			
 
-  constant ORIC_BASIC_ROM                   : string := "basic10.hex";
-  --constant ORIC_BASIC_ROM                   : string := "basic11b.hex";
+  --constant ORIC_BASIC_ROM                   : string := "basic10.hex";
+  constant ORIC_BASIC_ROM                   : string := "basic11b.hex";
   constant ORIC_CHR0_ROM                    : string := "chr10.hex";
   --constant ORIC_CHR0_ROM                    : string := "chr11b.hex";
 

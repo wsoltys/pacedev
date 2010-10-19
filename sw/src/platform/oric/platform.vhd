@@ -84,31 +84,40 @@ end platform;
 
 architecture SYN of platform is
 
-	alias clk_30M					: std_logic is clk_i(0);
+	alias clk_32M					: std_logic is clk_i(0);
 	alias clk_video       : std_logic is clk_i(1);
 	
 	signal reset_n				: std_logic;
+
+  signal sys_cycle      : std_logic_vector(4 downto 0) := (others => '0');
+  signal clk_1M_ena		  : std_logic;
+  signal clk_4M_ena		  : std_logic;
 	
   -- uP signals  
-  signal clk_1M_en			: std_logic;
   signal cpu_a_ext      : std_logic_vector(23 downto 0);
 	alias cpu_a				    : std_logic_vector(15 downto 0) is cpu_a_ext(15 downto 0);
   signal cpu_d_i        : std_logic_vector(7 downto 0);
   signal cpu_d_o        : std_logic_vector(7 downto 0);
   signal cpu_r_wn				: std_logic;
   signal cpu_irq_n			: std_logic;
-	                        
+	      
+	signal io_cs          : std_logic := '0';
+	
+	-- VIA6522 signals
+  signal via_cs         : std_logic := '0';
+  signal via_d_o        : std_logic_vector(7 downto 0);
+  
   -- ROM signals        
-	signal basic_rom_cs		: std_logic;
+	signal basic_rom_cs		: std_logic := '0';
   signal basic_rom_d_o  : std_logic_vector(7 downto 0);
                         
   -- VRAM signals       
-	signal chrram_cs			: std_logic;
-	signal chrram_wr			: std_logic;
+	signal chrram_cs			: std_logic := '0';
+	signal chrram_wr			: std_logic := '0';
   signal chrram_d_o     : std_logic_vector(7 downto 0);
 
   -- RAM signals
-  signal wram_cs        : std_logic;
+  signal wram_cs        : std_logic := '0';
   alias wram_d_o     	  : std_logic_vector(7 downto 0) is sram_i.d(7 downto 0);
 
   -- other signals      
@@ -122,12 +131,20 @@ begin
 	basic_rom_cs <= '1' when STD_MATCH(cpu_a, "11--------------") else '0';
 	-- TEXT VIDEO $BB80-BFE0 ($B800-BFFF)
 	chrram_cs <= 		'1' when STD_MATCH(cpu_a, "10111-----------") else '0';
+	-- IO $0300-$03FF
+  io_cs <=        '1' when STD_MATCH(cpu_a, "00000011--------") else '0';
+  -- VIA6522 $0300-$030F
+  via_cs <=       '1' when STD_MATCH(cpu_a, "000000110000----") else '0';
+  
 	-- always write thru to (S)RAM
 	wram_cs <= 		'1';
 	
 	-- memory read mux
 	cpu_d_i <=	basic_rom_d_o when basic_rom_cs = '1' else
 							chrram_d_o when chrram_cs = '1' else
+							-- this must precede io_cs logic
+							via_d_o when via_cs = '1' else
+							X"FF" when io_cs = '1' else
 							wram_d_o; -- when wram_cs = '1'
 
 	-- vram write signal
@@ -158,26 +175,30 @@ begin
   -- COMPONENT INSTANTIATION
   --
 
-	-- generate CPU clock enable (1MHz from 30MHz)
-	clk_en_inst : entity work.clk_div
-		generic map
-		(
-			DIVISOR		=> integer(ORIC_CPU_CLK_ENA_DIVIDE_BY)
-		)
-		port map
-		(
-			clk				=> clk_30M,
-			reset			=> reset_i,
-			clk_en		=> clk_1M_en
-		);
-
+  process (clk_32M, reset_i)
+  begin
+    if reset_i = '1' then
+      sys_cycle <= (others => '0');
+    elsif rising_edge(clk_32M) then
+      clk_4M_ena <= '0';  -- default
+      clk_1M_ena <= '0';  -- default
+      if sys_cycle(2 downto 0) = "000" then
+        clk_4M_ena <= '1';
+        if sys_cycle(4 downto 3) = "00" then
+          clk_1M_ena <= '1';
+        end if;
+      end if;
+      sys_cycle <= std_logic_vector(unsigned(sys_cycle) + 1);
+    end if;
+  end process;
+  
 	cpu_inst : entity work.T65
 		port map
 		(
 			Mode    		=> "00",	-- 6502
 			Res_n   		=> reset_n,
-			Enable  		=> clk_1M_en,
-			Clk     		=> clk_30M,
+			Enable  		=> clk_1M_ena,
+			Clk     		=> clk_32M,
 			Rdy     		=> '1',
 			Abort_n 		=> '1',
 			IRQ_n   		=> cpu_irq_n,
@@ -197,6 +218,77 @@ begin
 			DO      		=> cpu_d_o
 		);
 
+  BLK_VIA6522 : block
+  
+    signal via6522_p2     : std_logic;
+    signal via6522_clk4   : std_logic;
+  
+  begin
+
+    -- clocks for 6522
+    -- P2 must lead cpu_clk_en by 1 system clock
+    -- - and is same frequency as cpu_clk but 50% duty cycle
+    -- clk4 goes low on rising edge of P2
+    process (clk_32M, reset_i)
+    begin
+      if reset_i = '1' then
+        via6522_p2 <= '1';
+        via6522_clk4 <= '0';
+      elsif rising_edge(clk_32M) then
+        if sys_cycle(3 downto 0) = "1111" then
+          via6522_p2 <= not via6522_p2;
+        end if;
+        if sys_cycle(1) = '1' then
+          via6522_clk4 <= not via6522_clk4;
+        end if;
+      end if;
+    end process;
+    
+    sysvia_inst : entity work.m6522
+      port map
+      (
+        I_RS              => cpu_a(3 downto 0),
+        I_DATA            => cpu_d_o,
+        O_DATA            => via_d_o,
+        O_DATA_OE_L       => open,
+
+        I_RW_L            => cpu_r_wn,
+        I_CS1             => via_cs,
+        I_CS2_L           => '0',
+
+        O_IRQ_L           => cpu_irq_n,
+
+        -- port a
+        I_CA1             => '0',
+        I_CA2             => '0',
+        O_CA2             => open,
+        O_CA2_OE_L        => open,
+
+        I_PA              => (others => '0'),
+        O_PA              => open,
+        O_PA_OE_L         => open,
+
+        -- port b
+        I_CB1             => '0',
+        O_CB1             => open,
+        O_CB1_OE_L        => open,
+
+        I_CB2             => '0',
+        O_CB2             => open,
+        O_CB2_OE_L        => open,
+
+        I_PB              => (others => '0'),
+        O_PB              => open,
+        O_PB_OE_L         => open,
+
+        I_P2_H            => via6522_p2,      -- high for phase 2 clock   ____----__
+        RESET_L           => reset_n,
+        ENA_4             => via6522_clk4,    -- 4x system clock (4MHZ)   _-_-_-_-_-
+        CLK               => clk_32M
+      );
+
+  end block BLK_VIA6522;
+
 	basic_rom_inst : entity work.sprom
 		generic map
 		(
@@ -205,7 +297,7 @@ begin
 		)
 		port map
 		(
-			clock			=> clk_30M,
+			clock			=> clk_32M,
 			address		=> cpu_a(13 downto 0),
 			q					=> basic_rom_d_o
 		);
@@ -233,7 +325,7 @@ begin
 		port map
 		(
 			-- uP interface
-			clock_b			=> clk_30M,
+			clock_b			=> clk_32M,
 			address_b		=> cpu_a(10 downto 0),
 			wren_b			=> chrram_wr,
 			data_b			=> cpu_d_o,
@@ -259,7 +351,7 @@ begin
 --    port map
 --    (
 --      -- uP interface
---      clock_b			=> clk_30M,
+--      clock_b			=> clk_32M,
 --      address_b		=> cpu_a(13 downto 0),
 --      wren_b			=> hgr_wr,
 --      data_b			=> cpu_d_o,
