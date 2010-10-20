@@ -9,7 +9,7 @@ use work.video_controller_pkg.all;
 use work.platform_pkg.all;
 
 --
---	Apple II Tilemap Controller
+--	Oric-1/Atmos Tilemap Controller
 --
 
 entity tilemapCtl_1 is          
@@ -63,6 +63,7 @@ begin
 		variable tile_d_r : std_logic_vector(7 downto 0);
 		alias pel         : std_logic is tile_d_r(tile_d_r'left-2);
     variable hblank_r : std_logic;
+    variable y_r      : std_logic_vector(2 downto 0);
   begin
 
 		if rising_edge(clk) and clk_ena = '1' and stb = '1' then
@@ -71,13 +72,16 @@ begin
         -- start of text RAM ($BB80)
         -- - use the 'bit' address so we can increment each clock
         map_a_r := X"BB80";
+        y_r := (others => '0');
       else
       
         if hblank = '1' then
           if hblank_r = '0' then
-            if y(2 downto 0) = "111" then
+            -- need to handle the doubled y's due to 2x V-scaling
+            if y(2 downto 0) = "111" then and y_r(2 downto 0) = "111" then
               map_a_r := std_logic_vector(unsigned(map_a_r) + 40);
             end if;
+            y_r := y(y_r'range);
           else
             map_a := map_a_r;
           end if;
