@@ -100,6 +100,7 @@ architecture SYN of platform is
   signal cpu_d_o        : std_logic_vector(7 downto 0);
   signal cpu_r_wn				: std_logic;
   signal cpu_irq_n			: std_logic;
+  signal cpu_nmi_n			: std_logic;
 	      
 	signal io_cs          : std_logic := '0';
 	
@@ -126,7 +127,10 @@ architecture SYN of platform is
 begin
 
 	reset_n <= not reset_i;
-	
+
+  -- RESET BUTTON on the ORIC is connected to NMI
+  cpu_nmi_n <= not buttons_i(1);
+  
 	-- ROM $C000-FFFF
 	basic_rom_cs <= '1' when STD_MATCH(cpu_a, "11--------------") else '0';
 	-- TEXT VIDEO $BB80-BFE0 ($B800-BFFF)
@@ -202,7 +206,7 @@ begin
 			Rdy     		=> '1',
 			Abort_n 		=> '1',
 			IRQ_n   		=> cpu_irq_n,
-			NMI_n   		=> '1',
+			NMI_n   		=> cpu_nmi_n,
 			SO_n    		=> '1',
 			R_W_n   		=> cpu_r_wn,
 			Sync    		=> open,

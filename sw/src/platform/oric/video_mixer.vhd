@@ -33,9 +33,9 @@ architecture SYN of pace_video_mixer is
 begin
 
 	rgb_o <=  -- mixed-mode graphics & text
-            bitmap_rgb 	when STD_MATCH(gfxmode, "1-10") and video_ctl_i.y < 160 else
+            --bitmap_rgb 	when STD_MATCH(gfxmode, "1-10") and video_ctl_i.y < 160 else
             -- full-screen graphics
-            bitmap_rgb 	when STD_MATCH(gfxmode, "1-00") else
+            --bitmap_rgb 	when STD_MATCH(gfxmode, "1-00") else
             -- everything else
             tilemap_rgb;
 
