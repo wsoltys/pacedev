@@ -67,7 +67,8 @@ reg [3:0] DataCurrentState;
 `define RCASTART 16'h20
 `define OCRSTART 32'hff8000
 `define STATUSSTART 32'h0
-`define CIDSTART 128'h00ffffffddddddddaaaaaaaa99999999  //Just some random data not really usefull anyway 
+//`define CIDSTART 128'h00ffffffddddddddaaaaaaaa99999999  //Just some random data not really usefull anyway 
+`define CIDSTART 128'h00800000000000000000000000000001  //Just some random data not really usefull anyway 
 
 `define outDelay 4 
 reg [2:0] outDelayCnt;
@@ -374,7 +375,7 @@ always @ (posedge sdClk) begin
         7 : response_S <= 48;
         8 : response_S <= 0;
         14 : response_S <= 0;
-        16 : response_S <= 48;
+        13 : response_S <= 48;
         17 : response_S <= 48;
         24 : response_S <= 48;
         33 : response_S <= 48;
@@ -443,7 +444,7 @@ always @ (posedge sdClk) begin
          end        
         end      
         8 : response_CMD[127:96] <= 0; //V1.0 card
-        16 : begin
+        13 : begin
           response_CMD[127:96] <= CardStatus ;         
                 
         end 

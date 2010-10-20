@@ -38,6 +38,8 @@ begin
 
 	sd_clk <= clk;
 
+	sd_dat <= (others => 'Z');
+
 	sd_cmdif_1 : entity work.sd_cmdif	port map
 	(
 		clk						=> clk,
@@ -79,11 +81,7 @@ begin
 
 			-- Response shifter
 			if sr_shift = '1' then
-				if expect_resp = "10" then
-					sr := sr(sr'high-1 downto sr'high-short_resp_len-1) & sr_in & "00" & X"000000000000000000000";
-				else
-					sr := sr(sr'high-1 downto sr'low) & sr_in;
-				end if;
+				sr := sr(sr'high-1 downto sr'low) & sr_in;
 			end if;
 
 			send_cmd_0 := send_cmd;

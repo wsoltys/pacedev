@@ -5,6 +5,9 @@ use ieee.std_logic_arith.all;
 use ieee.numeric_std.all;
 
 entity sd_if is
+	generic (
+		data_width		: std_logic_vector(1 downto 0) := "00"	-- 00 = 1-bit, 10=4-bit data bus
+	);
 	port
 	(
 		clk						: in std_logic;
@@ -28,6 +31,7 @@ architecture SYN of sd_if is
 
 	type state_type is (init, msg_wait, msg_req, msg_resp, idle);
 	type exp_type is (no_resp, short_resp, short_nocrc, long_resp);
+	type data_src is (send_none, send_rca, send_hcs, send_data_width, send_blk);
 	subtype cmd_type is std_logic_vector(6 downto 0);
 	
 	constant CMD0		: std_logic_vector(5 downto 0) := "000000";	-- Reset all cards to Idle state
@@ -41,27 +45,26 @@ architecture SYN of sd_if is
 	constant ACMD41	: std_logic_vector(5 downto 0) := "101001";	-- Asks the accessed card to send its operating condition 
 																															-- register (OCR) content in the response on the CMD line.	
   type msg_rec_type is record
-    exp		: exp_type;
-    cmd		: std_logic_vector(5 downto 0);
-    data	: std_logic_vector(31 downto 0);
+    exp			: exp_type;
+    cmd			: std_logic_vector(5 downto 0);
+		send		: data_src;
   end record;
 
 	type msg_rec_arr_type is array(natural range <>) of msg_rec_type;
 
 	signal card_rca				: std_logic_vector(15 downto 0) := (others => '0');
-	constant data_bit			: std_logic := '0';
 
 	signal msgs : msg_rec_arr_type(0 to 9) := (
-		(exp => no_resp, 		cmd => CMD0,		data => (others => '0')),			-- Set cards to init
-		(exp => short_resp,	cmd => CMD55,		data => card_rca & X"0000"),	-- App cmd
-		(exp => short_nocrc,cmd => ACMD41,	data => X"00FF8000"),					-- Return OCR
-		(exp => long_resp,	cmd => CMD2,		data => (others => '0')),			-- Return CID
-		(exp => short_resp,	cmd => CMD3,		data => (others => '0')),			-- Select and return RCA
-		(exp => short_resp,	cmd => CMD7,		data => card_rca & X"0000"),	-- Select card
-		(exp => short_resp,	cmd => CMD13,		data => card_rca & X"0000"),	-- Return card status
-		(exp => short_resp,	cmd => CMD55,		data => card_rca & X"0000"),	-- App cmd
-		(exp => short_resp,	cmd => ACMD6,		data => (1 => data_bit, others => '0')),	-- Set bus width
-		(exp => short_resp,	cmd => CMD17,		data => blk)									-- Read block
+		(exp => no_resp, 		cmd => CMD0,		send => send_none),	-- Set cards to init
+		(exp => short_resp,	cmd => CMD55,		send => send_none),	-- App cmd
+		(exp => short_nocrc,cmd => ACMD41,	send => send_hcs),	-- Return OCR
+		(exp => long_resp,	cmd => CMD2,		send => send_none),	-- Return CID
+		(exp => short_resp,	cmd => CMD3,		send => send_none),	-- Select and return RCA
+		(exp => short_resp,	cmd => CMD7,		send => send_rca),	-- Select card
+		(exp => short_resp,	cmd => CMD13,		send => send_rca),	-- Return card status
+		(exp => short_resp,	cmd => CMD55,		send => send_rca),	-- App cmd
+		(exp => short_resp,	cmd => ACMD6,		send => send_data_width),	-- Set bus width
+		(exp => short_resp,	cmd => CMD17,		send => send_blk)	-- Read block
 	);
 	
 	signal msg_cnt_s : integer := 0;
@@ -80,6 +83,7 @@ architecture SYN of sd_if is
 --                 48'hz))))))));
 	
 	signal cmd_s				: std_logic_vector(37 downto 0);
+	signal data_s				: std_logic_vector(31 downto 0);
 	signal exp_s				: std_logic_vector(1 downto 0);
 	signal poll_s				: std_logic;
 	signal expect_resp	: std_logic_vector(1 downto 0);
@@ -92,11 +96,11 @@ architecture SYN of sd_if is
 
 	signal card_ocr			: std_logic_vector(31 downto 0);
 	signal card_status	: std_logic_vector(31 downto 0);
-	signal card_id			: std_logic_vector(125 downto 0);
+	signal card_id			: std_logic_vector(119 downto 0);
 	
 begin
 	dbg_s <= card_ocr when dbgsel = "000" else
-		"00" & card_id(125 downto 96) when dbgsel = "001" else
+		"00000000" & card_id(119 downto 96) when dbgsel = "001" else
 		card_id(95 downto 64) when dbgsel = "010" else
 		card_id(63 downto 32) when dbgsel = "011" else
 		card_id(31 downto 0) when dbgsel = "100" else
@@ -127,7 +131,12 @@ begin
 					 "01" when msg.exp = short_resp else
 					 "11" when msg.exp = short_nocrc else
 					 "10";
-	cmd_s <= msg.cmd & msg.data;
+	data_s <= card_rca & X"0000" when msg.send = send_rca else
+						X"00FF8000" when msg.send = send_hcs else
+						X"0000000" & "00" & data_width when msg.send = send_data_width else
+						blk when msg.send = send_blk else
+						(others => '0');
+	cmd_s <= msg.cmd & data_s;
 	poll_s <= '1' when state_s = msg_req else '0';
 
 	PROC_MSG:process(clk, clk_en_50MHz, reset)
@@ -144,8 +153,23 @@ begin
 			card_id <= (others => '0');
 			card_status <= (others => '0');
 		elsif clk_en_50MHz = '1' and rising_edge(clk) then
-			case state is
+			if msg_cnt = 2 and state = msg_resp and cmd_busy = '0' and resp_err = '0' then
+				card_ocr <= resp_s(31 downto 0);
+			end if;
 			
+			if msg_cnt = 3 and state = msg_resp and cmd_busy = '0' and resp_err = '0' then
+				card_id <= resp_s(119 downto 0);
+			end if;
+
+			if msg_cnt = 4 and state = msg_resp and cmd_busy = '0' and resp_err = '0' then
+				card_rca <= resp_s(31 downto 16);
+			end if;
+			
+			if (msg_cnt >= 5) and state = msg_resp and cmd_busy = '0' and resp_err = '0' then
+				card_status <= resp_s(31 downto 0);
+			end if;
+		
+			case state is
 			when init =>
 				if cmd_busy = '0' then state := msg_wait; end if;
 				msg_cnt := 0;
@@ -170,18 +194,19 @@ begin
 				if cmd_busy = '0' then
 					if resp_err = '0' then 
 						if msg_cnt < msgs'high then
-							msg_cnt := msg_cnt + 1;
 					
 							-- Repeat read OCR until card is finished power-up sequence
 							if msg_cnt = 3 and card_ocr(31) = '0' then
 								msg_cnt := 1;
+							else
+								msg_cnt := msg_cnt + 1;
 							end if;
 					
-							if msg_cnt < msgs'high then
+							if msg_cnt = msgs'high then
+								state := idle;
+							else
 								state := msg_wait;
 								cnt := 128 - 80;
-							else
-								state := idle;
 							end if;
 						else
 							state := idle;
@@ -194,22 +219,6 @@ begin
 				cnt := 128 - 4;
 			end case;
 
-			if msg_cnt = 2 and state = idle then
-				card_ocr <= resp_s(125 downto 94);
-			end if;
-			
-			if msg_cnt = 3 and state = idle then
-				card_id <= resp_s;
-			end if;
-
-			if msg_cnt = 4 and state = idle then
-				card_rca <= resp_s(125 downto 110);
-			end if;
-			
-			if (msg_cnt >= 5) and state = idle then
-				card_status <= resp_s(125 downto 94);
-			end if;
-		
 			dbg <= dbg_s;
 		end if;
 		

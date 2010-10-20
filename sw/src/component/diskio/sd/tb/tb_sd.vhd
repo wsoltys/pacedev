@@ -30,6 +30,7 @@ architecture SYN of tb_sd is
 
 	signal dbg				: std_logic_vector(31 downto 0);
   signal sw         : std_logic_vector(17 downto 0);     --	Toggle Switch[17:0]
+	signal blk_s			: std_logic_vector(31 downto 0);
 	signal rd_s				: std_logic;
   
 begin
@@ -71,7 +72,7 @@ begin
   					block_r(i) <= block_r(i-1);
   					rd_r(i) <= rd_r(i-1);
   				end loop;
-  				block_r(0) <= X"0000" & sw(17 downto 10)& X"00";
+  				block_r(0) <= blk_s;
   				rd_r(0) <= rd_s;
   			end if;
   		end process;
@@ -82,12 +83,20 @@ begin
   PROC_TEST : process
   begin
     rd_s <= '0';
+		blk_s <= X"00000000";
     wait until arst = '0';
-    --wait until rising_edge(clk_20);
-    --rd_s <= '1';
-    --wait until rising_edge(clk_20);
-    --rd_s <= '1';
-    wait until false;
+		wait for 120 us;
+    wait until rising_edge(clk_20);
+    rd_s <= '1';
+    wait until rising_edge(clk_20);
+    rd_s <= '0';
+		wait for 60 us;
+		blk_s <= X"00000001";
+    wait until rising_edge(clk_20);
+    rd_s <= '1';
+    wait until rising_edge(clk_20);
+    rd_s <= '0';
+    wait;
   end process PROC_TEST;
 
   sd_cmd <= 'H';
