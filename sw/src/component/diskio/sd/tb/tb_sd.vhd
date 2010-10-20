@@ -49,7 +49,9 @@ begin
   		signal block_r	: block_type(2 downto 0);
   		signal rd_r		: std_logic_vector(2 downto 0);
   	begin
-  		sd_if_1 : entity work.sd_if port map (
+  		sd_if_1 : entity work.sd_if 
+			generic map(sd_width => 4)
+			port map (
   			clk						=> clk_20,
   			clk_en_50MHz	=> '1',
   			reset					=> arst,
@@ -91,7 +93,7 @@ begin
     wait until rising_edge(clk_20);
     rd_s <= '0';
 		wait for 60 us;
-		blk_s <= X"00000001";
+		blk_s <= X"00000200";
     wait until rising_edge(clk_20);
     rd_s <= '1';
     wait until rising_edge(clk_20);

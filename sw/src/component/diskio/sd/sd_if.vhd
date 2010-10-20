@@ -6,7 +6,7 @@ use ieee.numeric_std.all;
 
 entity sd_if is
 	generic (
-		data_width		: std_logic_vector(1 downto 0) := "00"	-- 00 = 1-bit, 10=4-bit data bus
+		sd_width 		: integer := 1		-- 1 or 4-bit data bus
 	);
 	port
 	(
@@ -33,6 +33,8 @@ architecture SYN of sd_if is
 	type exp_type is (no_resp, short_resp, short_nocrc, long_resp);
 	type data_src is (send_none, send_rca, send_hcs, send_data_width, send_blk);
 	subtype cmd_type is std_logic_vector(6 downto 0);
+	constant dwidth_1	: std_logic_vector(1 downto 0) := "00";	-- 1-bit data bus
+	constant dwidth_4	: std_logic_vector(1 downto 0) := "10";	-- 1-bit data bus
 	
 	constant CMD0		: std_logic_vector(5 downto 0) := "000000";	-- Reset all cards to Idle state
 	constant CMD2		: std_logic_vector(5 downto 0) := "000010";	-- Ask CID number
@@ -52,6 +54,7 @@ architecture SYN of sd_if is
 
 	type msg_rec_arr_type is array(natural range <>) of msg_rec_type;
 
+	signal dwidth_s				: std_logic_vector(1 downto 0);
 	signal card_rca				: std_logic_vector(15 downto 0) := (others => '0');
 
 	signal msgs : msg_rec_arr_type(0 to 9) := (
@@ -106,25 +109,29 @@ begin
 		card_id(31 downto 0) when dbgsel = "100" else
 		X"0000" & card_rca when dbgsel = "101" else
 		card_status;
-		
-	sd_busif_1 : entity work.sd_busif	port map
-	(
-		clk						=> clk,
-		clk_en				=> clk_en_50MHz,
-		reset					=> reset,
 
-		sd_clk				=> sd_clk,
-		sd_cmd				=> sd_cmd,
-		sd_dat				=> sd_dat,
-
-		expect_resp		=> exp_s,
-		cmd						=> cmd_s,
-		send_cmd			=> poll_s,
-		resp					=> resp_s,
-		resp_err			=> resp_err,
+	dwidth_s <= dwidth_4 when sd_width = 4 else dwidth_1;
 		
-		busy					=> cmd_busy
-	);
+	sd_busif_1 : entity work.sd_busif	
+		generic map(sd_width => sd_width)
+		port map
+		(
+			clk						=> clk,
+			clk_en				=> clk_en_50MHz,
+			reset					=> reset,
+
+			sd_clk				=> sd_clk,
+			sd_cmd				=> sd_cmd,
+			sd_dat				=> sd_dat,
+
+			expect_resp		=> exp_s,
+			cmd						=> cmd_s,
+			send_cmd			=> poll_s,
+			resp					=> resp_s,
+			resp_err			=> resp_err,
+			
+			busy					=> cmd_busy
+		);
 
 	msg <= msgs(msg_cnt_s);
 	exp_s <= "00" when msg.exp = no_resp else
@@ -133,7 +140,7 @@ begin
 					 "10";
 	data_s <= card_rca & X"0000" when msg.send = send_rca else
 						X"00FF8000" when msg.send = send_hcs else
-						X"0000000" & "00" & data_width when msg.send = send_data_width else
+						X"0000000" & "00" & dwidth_s when msg.send = send_data_width else
 						blk when msg.send = send_blk else
 						(others => '0');
 	cmd_s <= msg.cmd & data_s;

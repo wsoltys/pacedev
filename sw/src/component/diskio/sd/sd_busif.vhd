@@ -5,9 +5,9 @@ use ieee.std_logic_arith.all;
 use ieee.numeric_std.all;
 
 entity sd_busif is
---	generic (
---		data_width		: integer;
---	)
+	generic (
+		sd_width		: integer
+	);
 	port
 	(
 		clk						: in std_logic;
@@ -40,23 +40,50 @@ begin
 
 	sd_dat <= (others => 'Z');
 
-	sd_cmdif_1 : entity work.sd_cmdif	port map
-	(
-		clk						=> clk,
-		reset					=> reset,
+	sd_cmdif_1 : entity work.sd_cmdif	
+		port map
+		(
+			clk						=> clk,
+			reset					=> reset,
 
-		sd_cmd				=> sd_cmd,
+			sd_cmd				=> sd_cmd,
 
-		send_cmd			=> send_cmd,
-		expect_resp		=> expect_resp,
-		cmd_c					=> sc_top,
-		cmd_ce				=> sc_shift,
-		resp_c				=> sr_in,
-		resp_ce				=> sr_shift,
-		resp_err			=> resp_err,
-		
-		busy					=> busy
-	);
+			send_cmd			=> send_cmd,
+			expect_resp		=> expect_resp,
+			cmd_c					=> sc_top,
+			cmd_ce				=> sc_shift,
+			resp_c				=> sr_in,
+			resp_ce				=> sr_shift,
+			resp_err			=> resp_err,
+			
+			busy					=> busy
+		);
+
+	sd_datif_1 : entity work.sd_datif
+		generic map (
+			sd_width		=> sd_width,
+			dat_width		=> 8
+		)
+		port map
+		(
+			clk						=> clk,
+			reset					=> reset,
+
+			-- SD card bus interface
+			sd_dat				=> sd_dat,
+
+			-- Cooked SD card data serial interface
+			read					=> '0',
+			write					=> '0',
+			blocksize			=> "00",
+			busy					=> open,
+			dati					=> open,
+			dati_ce				=> open,
+			dati_err			=> open,
+			datout				=> (others => '0'),
+			datout_ce			=> open
+		);
+
 
 	-- Synchronous logic
 	process(clk, clk_en, reset)
