@@ -78,7 +78,7 @@ begin
         if hblank = '1' then
           if hblank_r = '0' then
             -- need to handle the doubled y's due to 2x V-scaling
-            if y(2 downto 0) = "111" then and y_r(2 downto 0) = "111" then
+            if y(2 downto 0) = "111" and y_r(2 downto 0) = "111" then
               map_a_r := std_logic_vector(unsigned(map_a_r) + 40);
             end if;
             y_r := y(y_r'range);
@@ -96,8 +96,8 @@ begin
           -- 3rd stage of pipeline
           -- - assign pixel colour based on tile data
           -- (each byte contains information for 6 pixels)
-          -- - and a pipeline delay of 5
-          if x_count(2 downto 0) = "101" then
+          -- - and a pipeline delay of 3
+          if x_count(2 downto 0) = "011" then
             tile_d_r := ctl_i.tile_d;
           else
             tile_d_r := tile_d_r(tile_d_r'left-1 downto 0) & '0';

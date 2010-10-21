@@ -111,7 +111,12 @@ architecture SYN of platform is
   -- ROM signals        
 	signal basic_rom_cs		: std_logic := '0';
   signal basic_rom_d_o  : std_logic_vector(7 downto 0);
-                        
+
+  -- STD CHARSET signals
+  signal std_chrset_cs  : std_logic := '0';
+  signal std_chrset_d_o : std_logic_vector(7 downto 0);
+  signal std_chrset_wr  : std_logic := '0';
+  
   -- VRAM signals       
 	signal chrram_cs			: std_logic := '0';
 	signal chrram_wr			: std_logic := '0';
@@ -132,27 +137,31 @@ begin
   cpu_nmi_n <= not buttons_i(1);
   
 	-- ROM $C000-FFFF
-	basic_rom_cs <= '1' when STD_MATCH(cpu_a, "11--------------") else '0';
+	basic_rom_cs <=   '1' when STD_MATCH(cpu_a, "11--------------") else '0';
 	-- TEXT VIDEO $BB80-BFE0 ($B800-BFFF)
-	chrram_cs <= 		'1' when STD_MATCH(cpu_a, "10111-----------") else '0';
+	chrram_cs <= 		  '1' when STD_MATCH(cpu_a, "10111-----------") else '0';
+	-- STD CHARSET text mode ($B400-$B7FF)
+  std_chrset_cs <=  '1' when STD_MATCH(cpu_a, "101101----------") else '0';
 	-- IO $0300-$03FF
-  io_cs <=        '1' when STD_MATCH(cpu_a, "00000011--------") else '0';
+  io_cs <=          '1' when STD_MATCH(cpu_a, "00000011--------") else '0';
   -- VIA6522 $0300-$030F
-  via_cs <=       '1' when STD_MATCH(cpu_a, "000000110000----") else '0';
+  via_cs <=         '1' when STD_MATCH(cpu_a, "000000110000----") else '0';
   
 	-- always write thru to (S)RAM
-	wram_cs <= 		'1';
+	wram_cs <= 		    '1';
 	
 	-- memory read mux
 	cpu_d_i <=	basic_rom_d_o when basic_rom_cs = '1' else
 							chrram_d_o when chrram_cs = '1' else
+							std_chrset_d_o when std_chrset_cs = '1' else
 							-- this must precede io_cs logic
 							via_d_o when via_cs = '1' else
 							X"FF" when io_cs = '1' else
 							wram_d_o; -- when wram_cs = '1'
 
-	-- vram write signal
+	-- write signals
   chrram_wr <= not cpu_r_wn and chrram_cs;
+  std_chrset_wr <= not cpu_r_wn and std_chrset_cs;
 	
 	-- use spritedata to expose the softswitches to the graphics core	
 	graphics_o.pal <= (others => (others => '0'));
@@ -242,7 +251,7 @@ begin
         if sys_cycle(3 downto 0) = "1111" then
           via6522_p2 <= not via6522_p2;
         end if;
-        if sys_cycle(1) = '1' then
+        if sys_cycle(1 downto 0) = "11" then
           via6522_clk4 <= not via6522_clk4;
         end if;
       end if;
@@ -306,19 +315,42 @@ begin
 			q					=> basic_rom_d_o
 		);
 	
-	chr_rom_inst : entity work.sprom
+--	chr_rom_inst : entity work.sprom
+--		generic map
+--		(
+--			init_file		=> "../../../../src/platform/oric/roms/" & ORIC_CHR0_ROM,
+--			widthad_a		=> 10
+--		)
+--		port map
+--		(
+--			clock			=> clk_video,
+--			address		=> tilemap_i.tile_a(9 downto 0),
+--			q					=> tilemap_o.tile_d
+--		);
+
+	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+  std_chrset_ram_inst : entity work.dpram
 		generic map
 		(
-			init_file		=> "../../../../src/platform/oric/roms/" & ORIC_CHR0_ROM,
 			widthad_a		=> 10
 		)
 		port map
 		(
-			clock			=> clk_video,
-			address		=> tilemap_i.tile_a(9 downto 0),
-			q					=> tilemap_o.tile_d
+			-- uP interface
+			clock_b			=> clk_32M,
+			address_b		=> cpu_a(9 downto 0),
+			wren_b			=> std_chrset_wr,
+			data_b			=> cpu_d_o,
+			q_b					=> std_chrset_d_o,
+			
+			-- graphics interface
+			clock_a			=> clk_video,
+			address_a		=> tilemap_i.tile_a(9 downto 0),
+			wren_a			=> '0',
+			data_a			=> (others => 'X'),
+			q_a					=> tilemap_o.tile_d
 		);
-	
+
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 	chr_ram_inst : entity work.dpram
 		generic map
