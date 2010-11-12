@@ -122,7 +122,7 @@ end entity target_top_ep3sl;
 
 architecture SYN of target_top_ep3sl is
 
-  constant ONBOARD_CLOCK_SPEED  : integer := 24576000;
+  constant ONBOARD_CLOCK_SPEED  : integer := 24000000;
 
   signal init         : std_logic := '1';
   alias clk_24M       : std_logic is clk24_d;

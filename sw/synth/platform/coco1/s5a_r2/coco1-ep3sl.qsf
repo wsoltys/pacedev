@@ -2161,6 +2161,7 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/ttl/ttl_74LS138.
 set_global_assignment -name VHDL_FILE ../../../../src/component/video/mc6883.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/video/mc6847.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/pia6821.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/video_hexy.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/inputmapper.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.vhd

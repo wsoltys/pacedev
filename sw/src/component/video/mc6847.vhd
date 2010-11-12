@@ -629,8 +629,8 @@ begin
     else
       hsync <= vga_hsync;
       vsync <= vga_vsync;
-      hblank <= vga_hblank;
-      vblank <= vga_vblank;
+      hblank <= not vga_hborder; --vga_hblank;
+      vblank <= not cvbs_vborder; --vga_vblank;
     end if;
   end process PROC_OUTPUT;
 

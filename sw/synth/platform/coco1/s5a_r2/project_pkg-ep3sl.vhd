@@ -16,7 +16,7 @@ package project_pkg is
   -- Reference clock is 24MHz
 	constant PACE_HAS_PLL								      : boolean := true;
   --constant PACE_HAS_FLASH                   : boolean := false;
-  --constant PACE_HAS_SRAM                    : boolean := false;
+  constant PACE_HAS_SRAM                    : boolean := true;
   constant PACE_HAS_SDRAM                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := false;
   
@@ -34,12 +34,10 @@ package project_pkg is
 
   -- S5A-specific constants
   
-  constant S5AR2_EMULATE_SRAM               : boolean := true;
+  constant S5AR2_EMULATE_SRAM               : boolean := PACE_HAS_SRAM;
   constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 16;
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
 
-  constant PACE_HAS_SRAM                    : boolean := S5AR2_EMULATE_SRAM;
-    
 	-- Coco1-specific constants
 
   constant COCO1_USE_REAL_6809              : boolean := false;
@@ -66,6 +64,8 @@ package project_pkg is
 
   constant COCO1_JUMPER_32K_RAM             : std_logic := '1';
 	constant COCO1_CVBS                       : boolean := false;
+
+  constant COCO1_HAS_IDE                    : boolean := false;
   
 	-- derived - do not edit
   constant PACE_HAS_FLASH                   : boolean := not COCO1_CART_INTERNAL;
