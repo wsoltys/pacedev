@@ -39,6 +39,11 @@ package platform_pkg is
     floppy_fifo_data    : std_logic_vector(7 downto 0);
     floppy_fifo_wr      : std_logic;
     
+    -- from the HDD core
+    hdd_cs              : std_logic;
+    hdd_d               : std_logic_vector(7 downto 0);
+    hdd_irq             : std_logic;
+
   end record;
 
   type to_PLATFORM_IO_t is record
@@ -51,6 +56,16 @@ package platform_pkg is
 
     seg7                : std_logic_vector(15 downto 0);
     
+    -- to the HDD core
+    clk                 : std_logic;
+    rst                 : std_logic;
+    arst_n              : std_logic;
+    cpu_clk_ena         : std_logic;
+    cpu_a               : std_logic_vector(15 downto 0);
+    cpu_d_o             : std_logic_vector(7 downto 0);
+    cpu_io_rd           : std_logic;
+    cpu_io_wr           : std_logic;
+
   end record;
 
 end;
