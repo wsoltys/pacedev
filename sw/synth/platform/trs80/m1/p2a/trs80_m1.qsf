@@ -710,7 +710,7 @@ set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to clk_ee
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to data_ee
 set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to d_dr1[*]
 
-set_global_assignment -name OPTIMIZE_FAST_CORNER_TIMING ON
+set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
 
 set_global_assignment -name OPTIMIZE_POWER_DURING_SYNTHESIS OFF
 set_instance_assignment -name REPORT_DELAY ON -from * -to noe_ns
@@ -744,7 +744,6 @@ set_instance_assignment -name OUTPUT_PIN_LOAD 12 -to nlub_s
 set_instance_assignment -name OUTPUT_PIN_LOAD 12 -to nulb_s
 set_instance_assignment -name OUTPUT_PIN_LOAD 12 -to nuub_s
 set_global_assignment -name MISC_FILE "E:/markm/pace/pacedev.net/sw/synth/platform/midway8080/invaders/p2a/invaders.dpf"
-set_global_assignment -name USE_CONFIGURATION_DEVICE ON
 set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to ba_ns
 set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to bd_ns
 set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to nwe_s

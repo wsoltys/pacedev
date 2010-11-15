@@ -29,6 +29,8 @@ package platform_pkg is
     PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
   constant CPU_FREQ_MHz                 : natural := 2;  -- should be a "real" for 1.77MHz
 
+	constant TRS80_M1_CPU_CLK_ENA_DIVIDE_BY : natural := CLK0_FREQ_MHz / CPU_FREQ_MHz;
+
 	constant INCLUDE_FDC_SUPPORT			: boolean := false;
 	
 	  type from_PLATFORM_IO_t is record

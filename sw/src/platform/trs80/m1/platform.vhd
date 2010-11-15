@@ -113,7 +113,7 @@ architecture SYN of platform is
 	   );
 	end component;
 
-	alias clk_20M					: std_logic is clk_i(0);
+	alias clk_40M					: std_logic is clk_i(0);
 	alias clk_video       : std_logic is clk_i(1);
 	signal clk_2M_ena			: std_logic;
 	
@@ -273,11 +273,11 @@ begin
 	clk_en_inst : entity work.clk_div
 		generic map
 		(
-			DIVISOR		=> 10
+			DIVISOR		=> TRS80_M1_CPU_CLK_ENA_DIVIDE_BY
 		)
 		port map
 		(
-			clk				=> clk_20M,
+			clk				=> clk_40M,
 			reset			=> reset_i,
 			clk_en		=> clk_2M_ena
 		);
@@ -285,7 +285,7 @@ begin
 	up_inst : entity work.Z80                                                
     port map
     (
-      clk			=> clk_20M,                                   
+      clk			=> clk_40M,                                   
       clk_en	=> clk_2M_ena,
       reset  	=> cpu_reset,                                     
 
@@ -312,7 +312,7 @@ begin
 		)
 		port map
 		(
-			clock			=> clk_20M,
+			clock			=> clk_40M,
 			address		=> cpu_a(13 downto 0),
 			q					=> rom_d_o
 		);
@@ -341,7 +341,7 @@ begin
 		)
 		port map
 		(
-			clock_b			=> clk_20M,
+			clock_b			=> clk_40M,
 			address_b		=> cpu_a(9 downto 0),
 			wren_b			=> vram_wr,
 			data_b			=> cpu_d_o,
@@ -358,7 +358,7 @@ begin
     interrupts_inst : entity work.TRS80_Interrupts                    
       port map
       (
-        clk           => clk_20M,
+        clk           => clk_40M,
         reset         => cpu_reset,
 
         -- enable inputs                    
@@ -381,7 +381,7 @@ begin
     fdc_inst : FDC_1793                                    
       port map
       (
-        clk         => clk_20M,
+        clk         => clk_40M,
         upclk       => clk_2M_ena,
         reset       => cpu_reset,
                     
@@ -421,7 +421,7 @@ begin
   begin
 
     -- to the HDD core
-    platform_o.clk <= clk_20M;
+    platform_o.clk <= clk_40M;
     platform_o.rst <= cpu_reset;
     platform_o.arst_n <= not reset_i;
     platform_o.cpu_clk_ena <= clk_2M_ena;
