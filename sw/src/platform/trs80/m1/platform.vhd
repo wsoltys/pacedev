@@ -191,8 +191,10 @@ begin
   sram_o.we <= ram_wr;
 
 	-- memory chip selects
-	-- ROM $0000-$2FFF
-	rom_cs <= '1' when cpu_a(15 downto 14) = "00" and cpu_a(13 downto 12) /= "11" else '0';
+	-- ROM $0000-$2FFF, Peter Bartlett's extensions: $3000-$35FF
+	rom_cs <= '1' when cpu_a(15 downto 14) = "00" and cpu_a(13 downto 12) /= "11" else 
+            '1' when cpu_a(15 downto 11) = "00110" and cpu_a(10 downto 9) /= "11" else
+            '0';
 
 	-- RDINTSTATUS $37E0-$37E3 (active high)
 	int_cs <= '1' when cpu_a(15 downto 2) = (X"37E" & "00") else '0';

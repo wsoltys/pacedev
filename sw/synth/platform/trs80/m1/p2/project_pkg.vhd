@@ -58,6 +58,21 @@ package project_pkg is
 
 	-- TRS-80-specific constants
 	
+  --constant TRS80_M1_ROM                     : string := "level1.hex";
+  --constant TRS80_M1_ROM                     : string := "model1a.hex";    -- v1.2
+  --constant TRS80_M1_ROM                     : string := "model1b.hex";    -- v1.3
+  constant TRS80_M1_ROM                     : string := "m1v13_bartlett.hex";
+
+  constant TRS80_M1_HAS_HDD                 : boolean := true;
+
 	constant USE_VIDEO_VBLANK_INTERRUPT       : boolean := false;
 	
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;
