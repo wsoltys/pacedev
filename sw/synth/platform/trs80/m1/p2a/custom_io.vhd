@@ -78,7 +78,7 @@ begin
   --
   
   ide_cs <= (platform_o.cpu_io_rd or platform_o.cpu_io_wr) 
-              when STD_MATCH(platform_o.cpu_a, X"00C"&"----") 
+              when STD_MATCH(platform_o.cpu_a(7 downto 0), X"C"&"----") 
               else '0';
   
   process (platform_o.clk, platform_o.rst)
@@ -152,13 +152,16 @@ begin
             else
               platform_i.hdd_d <= wb_dat_o(platform_i.hdd_d'range);
             end if;
+            wb_cyc_stb <= '0';
             state <= S_IDLE;
           end if;
         when S_W1 =>
           if wb_ack = '1' then
+            wb_cyc_stb <= '0';
             state <= S_IDLE;
           end if;
         when others =>
+          wb_cyc_stb <= '0';
           state <= S_IDLE;
       end case;
       cpu_clk_r := platform_o.cpu_clk_ena;
@@ -175,8 +178,8 @@ begin
       -- PIO mode 0 settings
       -- - (100MHz = 6, 28, 2, 23)
       -- - (57M272 = 4, 16, 1, 13)
-      -- - (20MHz  = 1, 5, 1, 4)
-      PIO_mode0_T1    => 1,     -- 70ns
+      -- - (40MHz  = 2, 11, 1, 9)
+      PIO_mode0_T1    => 2,     -- 70ns
       PIO_mode0_T2    => 5,     -- 290ns
       PIO_mode0_T4    => 1,     -- 30ns
       PIO_mode0_Teoc  => 4      -- 240ns ==> T0 - T1 - T2 = 600 - 70 - 290 = 240
