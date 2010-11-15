@@ -169,8 +169,8 @@ architecture SYN of platform is
 	signal cpu_reset			: std_logic;  
 	signal alpha_joy_cs		: std_logic;
 	signal snd_cs					: std_logic;
-  signal uPmem_datai    : std_logic_vector(7 downto 0);
-  signal uPio_datai     : std_logic_vector(7 downto 0);
+  signal mem_d          : std_logic_vector(7 downto 0);
+  signal io_d           : std_logic_vector(7 downto 0);
   
 begin
 
@@ -180,7 +180,7 @@ begin
   cpu_irq_vec <= (others => '0');
 
   -- read mux
-  cpu_d_i <= uPmem_datai when (cpu_mem_rd = '1') else uPio_datai;
+  cpu_d_i <= mem_d when (cpu_mem_rd = '1') else io_d;
 
   -- SRAM signals (may or may not be used)
   sram_o.a <= std_logic_vector(resize(unsigned(cpu_a), sram_o.a'length));
@@ -235,17 +235,17 @@ begin
   snd_o.wr <= snd_cs and cpu_io_wr;
 		
 	-- memory read mux
-	uPmem_datai <= 	rom_d_o when rom_cs = '1' else
-									int_status when int_cs = '1' else
-									fdc_datao when fdc_cs = '1' else
-									kbd_data when kbd_cs = '1' else
-									vram_datao when vram_cs = '1' else
-									ram_datao;
+	mem_d <= 	rom_d_o when rom_cs = '1' else
+            int_status when int_cs = '1' else
+						fdc_datao when fdc_cs = '1' else
+						kbd_data when kbd_cs = '1' else
+						vram_datao when vram_cs = '1' else
+						ram_datao;
 	
 	-- io read mux
-	uPio_datai <= X"FF" when alpha_joy_cs = '1' else
-                hdd_d when hdd_cs = '1' else
-								X"FF";
+	io_d <= X"FF" when alpha_joy_cs = '1' else
+          hdd_d when hdd_cs = '1' else
+					X"FF";
 		
 	KBD_MUX : process (cpu_a, inputs_i)
   	variable kbd_data_v : std_logic_vector(7 downto 0);
@@ -417,13 +417,13 @@ begin
   end generate GEN_NO_FDC;
 
   GEN_HDD : if TRS80_M1_HAS_HDD generate
-    signal hdd_irq  : std_logic;
+    signal hdd_irq    : std_logic;
   begin
 
     -- to the HDD core
     platform_o.clk <= clk_20M;
     platform_o.rst <= cpu_reset;
-    platform_o.arst_n <= reset_i;
+    platform_o.arst_n <= not reset_i;
     platform_o.cpu_clk_ena <= clk_2M_ena;
     platform_o.cpu_a <= cpu_a;
     platform_o.cpu_d_o <= cpu_d_o;

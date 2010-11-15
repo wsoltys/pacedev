@@ -58,6 +58,9 @@ architecture SYN of custom_io is
 
   signal ide_cs       : std_logic := '0';
   signal ide_d_r      : std_logic_vector(31 downto 0) := (others => '0');
+
+  signal hdci_cntl    : std_logic_vector(7 downto 0) := (others => '0');
+  alias hdci_enable   : std_logic is hdci_cntl(3);
   
 begin
 
@@ -82,6 +85,7 @@ begin
     variable cpu_clk_r : std_logic := '0';
   begin
     if platform_o.rst = '1' then
+      hdci_cntl <= (others => '0');
       wb_cyc_stb <= '0';
       wb_we <= '0';
       state <= S_I1;
@@ -99,37 +103,42 @@ begin
           -- start a new cycle on rising_edge cpu_clk
           if platform_o.cpu_clk_ena = '1' and cpu_clk_r = '0' then
             if ide_cs = '1' then
-              -- high-byte latch @$C3
-              if platform_o.cpu_a(3 downto 0) = X"3" then
-                if platform_o.cpu_io_rd = '1' then
-                  -- read latch from previous access
-                  platform_i.hdd_d <= ide_d_r(15 downto 8);
-                elsif platform_o.cpu_io_wr = '1' then
-                  -- latch write data for subsequent access
-                  ide_d_r(15 downto 8) <= platform_o.cpu_d_o;
-                end if;
-              else
-                -- start a new access
-                wb_cyc_stb <= ide_cs;
-                if platform_o.cpu_a(3) = '1' then
-                  -- $08-$0F => $10-$17 (ATA registers)
-                  wb_adr <= "10" & platform_o.cpu_a(2 downto 0);
-                end if;
-                wb_dat_i(31 downto 8) <= X"0000" & ide_d_r(15 downto 8);
-                -- Peter Bartlett's drivers require this
-                -- because IDE sectors start at 1, not 0
-                if platform_o.cpu_a(3 downto 0) = X"B" then
-                  wb_dat_i(7 downto 0) <= std_logic_vector(unsigned(platform_o.cpu_d_o) + 1);
-                else
-                  wb_dat_i(7 downto 0) <= platform_o.cpu_d_o;
-                end if;
-                wb_we <= platform_o.cpu_io_wr;
-                if platform_o.cpu_io_rd = '1' then
-                  state <= S_R1;
-                else
-                  state <= S_W1;
-                end if;
-              end if; -- latch/access
+              case platform_o.cpu_a(3 downto 0) is
+                when X"0" =>    -- hdci_wp
+                when X"1" =>    -- hdci_cntl
+                  hdci_cntl <= platform_o.cpu_d_o;
+                when X"2" =>    -- hdci_present
+                when X"3" =>    -- high-byte latch
+                  if platform_o.cpu_io_rd = '1' then
+                    -- read latch from previous access
+                    platform_i.hdd_d <= ide_d_r(15 downto 8);
+                  elsif platform_o.cpu_io_wr = '1' then
+                    -- latch write data for subsequent access
+                    ide_d_r(15 downto 8) <= platform_o.cpu_d_o;
+                  end if;
+                when others =>
+                  -- IDE device registers @$08-$0F
+                  if platform_o.cpu_a(3) = '1' then
+                    -- start a new access to the OCIDEC
+                    wb_cyc_stb <= ide_cs;
+                    -- $08-$0F => $10-$17 (ATA registers)
+                    wb_adr <= "10" & platform_o.cpu_a(2 downto 0);
+                    wb_dat_i(31 downto 8) <= X"0000" & ide_d_r(15 downto 8);
+                    -- Peter Bartlett's drivers require this
+                    -- because IDE sectors start at 1, not 0
+                    if platform_o.cpu_a(3 downto 0) = X"B" then
+                      wb_dat_i(7 downto 0) <= std_logic_vector(unsigned(platform_o.cpu_d_o) + 1);
+                    else
+                      wb_dat_i(7 downto 0) <= platform_o.cpu_d_o;
+                    end if;
+                    wb_we <= platform_o.cpu_io_wr;
+                    if platform_o.cpu_io_rd = '1' then
+                      state <= S_R1;
+                    else
+                      state <= S_W1;
+                    end if;
+                  end if; -- $08-$0F (device register)
+              end case;
             end if; -- ide_cs = '1'
           end if;
         when S_R1 =>
@@ -166,10 +175,11 @@ begin
       -- PIO mode 0 settings
       -- - (100MHz = 6, 28, 2, 23)
       -- - (57M272 = 4, 16, 1, 13)
-      PIO_mode0_T1    => 4,     -- 70ns
-      PIO_mode0_T2    => 16,    -- 290ns
+      -- - (20MHz  = 1, 5, 1, 4)
+      PIO_mode0_T1    => 1,     -- 70ns
+      PIO_mode0_T2    => 5,     -- 290ns
       PIO_mode0_T4    => 1,     -- 30ns
-      PIO_mode0_Teoc  => 13     -- 240ns ==> T0 - T1 - T2 = 600 - 70 - 290 = 240
+      PIO_mode0_Teoc  => 4      -- 240ns ==> T0 - T1 - T2 = 600 - 70 - 290 = 240
     )
     port map
     (
