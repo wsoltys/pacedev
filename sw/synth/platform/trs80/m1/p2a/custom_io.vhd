@@ -82,7 +82,7 @@ begin
               else '0';
   
   process (platform_o.clk, platform_o.rst)
-    variable iord_r : std_logic := '0';
+    variable cpu_io_r : std_logic := '0';
   begin
     if platform_o.rst = '1' then
       hdci_cntl <= (others => '0');
@@ -95,13 +95,13 @@ begin
           -- initialise the OCIDE core
           wb_cyc_stb <= '1';
           wb_adr <= "00000";
-          wb_dat_i <= X"00000080";   -- enable IDE
+          wb_dat_i <= X"00000082";   -- enable IDE, IORDY timing
           wb_we <= '1';
           state <= S_W1;
         when S_IDLE =>
           wb_cyc_stb <= '0'; -- default
           -- start a new cycle on rising_edge IORD
-          if iord_r = '0' and platform_o.cpu_io_rd = '1' then
+          if cpu_io_r = '0' and (platform_o.cpu_io_rd or platform_o.cpu_io_wr) = '1' then
             if ide_cs = '1' then
               case platform_o.cpu_a(3 downto 0) is
                 when X"0" =>    -- hdci_wp
@@ -164,27 +164,34 @@ begin
           wb_cyc_stb <= '0';
           state <= S_IDLE;
       end case;
-      iord_r := platform_o.cpu_io_rd;
+      cpu_io_r := platform_o.cpu_io_rd or platform_o.cpu_io_wr;
     end if;
   end process;
     
   -- 16-bit access to PIO registers, otherwise 32
   wb_sel <= "0011" when wb_adr(6) = '1' else "1111";
   
+  -- PIO mode timings
+  --          0,   1,   2,   3,   4,   5,   6
+  -- t1   -  70,  50,  30,  30,  25,  15,  10
+  -- t2   - 165, 125, 100,  80,  70,  65,  55
+  -- t4   -  30,  20,  15,  10,  10,   5,   5
+  -- teoc - 365, 208, 110,  70,  25,  25,  20
+  --
+  -- n = max(0, round_up((t * clk) - 2))
+  --
   atahost_inst : entity work.atahost_top
     generic map
     (
       --TWIDTH          => 5,
-      -- PIO mode 0 settings
-      -- - (100MHz = 6, 28, 2, 23)
-      -- - (57M272 = 4, 16, 1, 13)
-      -- PIO mode3 settings (t0=180, t1=30, t2=80, t4=10)
-      -- - (t0-t1-t2)=(180-30-80)=70, t9=10, t2i=70 => teoc=70
-      -- - 40MHz => 0, 2, 0, 1
-      PIO_mode0_T1    => 0,   -- 30ns
-      PIO_mode0_T2    => 2,   -- 80ns
-      PIO_mode0_T4    => 0,   -- 10ns
-      PIO_mode0_Teoc  => 1    -- 70ns
+      -- PIO mode0 100MHz = 6, 28, 2, 23
+      -- PIO mode0 57M272 = 4, 16, 1, 13
+      -- PIO mode0 40MHz => 1, 5, 0, 13
+      -- PIO mode3 40MHz => 0, 2, 0, 1
+      PIO_mode0_T1    => 1,
+      PIO_mode0_T2    => 5,
+      PIO_mode0_T4    => 0,
+      PIO_mode0_Teoc  => 13
     )
     port map
     (
