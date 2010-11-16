@@ -82,7 +82,7 @@ begin
               else '0';
   
   process (platform_o.clk, platform_o.rst)
-    variable cpu_clk_r : std_logic := '0';
+    variable iord_r : std_logic := '0';
   begin
     if platform_o.rst = '1' then
       hdci_cntl <= (others => '0');
@@ -100,8 +100,8 @@ begin
           state <= S_W1;
         when S_IDLE =>
           wb_cyc_stb <= '0'; -- default
-          -- start a new cycle on rising_edge cpu_clk
-          if platform_o.cpu_clk_ena = '1' and cpu_clk_r = '0' then
+          -- start a new cycle on rising_edge IORD
+          if iord_r = '0' and platform_o.cpu_io_rd = '1' then
             if ide_cs = '1' then
               case platform_o.cpu_a(3 downto 0) is
                 when X"0" =>    -- hdci_wp
@@ -164,7 +164,7 @@ begin
           wb_cyc_stb <= '0';
           state <= S_IDLE;
       end case;
-      cpu_clk_r := platform_o.cpu_clk_ena;
+      iord_r := platform_o.cpu_io_rd;
     end if;
   end process;
     
@@ -180,9 +180,9 @@ begin
       -- - (57M272 = 4, 16, 1, 13)
       -- - (40MHz  = 2, 11, 1, 9)
       PIO_mode0_T1    => 2,     -- 70ns
-      PIO_mode0_T2    => 5,     -- 290ns
+      PIO_mode0_T2    => 11,    -- 290ns
       PIO_mode0_T4    => 1,     -- 30ns
-      PIO_mode0_Teoc  => 4      -- 240ns ==> T0 - T1 - T2 = 600 - 70 - 290 = 240
+      PIO_mode0_Teoc  => 9      -- 240ns ==> T0 - T1 - T2 = 600 - 70 - 290 = 240
     )
     port map
     (
