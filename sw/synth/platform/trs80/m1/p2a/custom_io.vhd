@@ -178,11 +178,13 @@ begin
       -- PIO mode 0 settings
       -- - (100MHz = 6, 28, 2, 23)
       -- - (57M272 = 4, 16, 1, 13)
-      -- - (40MHz  = 2, 11, 1, 9)
-      PIO_mode0_T1    => 2,     -- 70ns
-      PIO_mode0_T2    => 11,    -- 290ns
-      PIO_mode0_T4    => 1,     -- 30ns
-      PIO_mode0_Teoc  => 9      -- 240ns ==> T0 - T1 - T2 = 600 - 70 - 290 = 240
+      -- PIO mode3 settings (t0=180, t1=30, t2=80, t4=10)
+      -- - (t0-t1-t2)=(180-30-80)=70, t9=10, t2i=70 => teoc=70
+      -- - 40MHz => 0, 2, 0, 1
+      PIO_mode0_T1    => 0,   -- 30ns
+      PIO_mode0_T2    => 2,   -- 80ns
+      PIO_mode0_T4    => 0,   -- 10ns
+      PIO_mode0_Teoc  => 1    -- 70ns
     )
     port map
     (
