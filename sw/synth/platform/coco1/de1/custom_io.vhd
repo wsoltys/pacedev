@@ -1,6 +1,8 @@
 library ieee;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
+-- the OCIDE controller uses UNSIGNED from here
+use ieee.std_logic_arith.unsigned;
 
 library work;
 use work.target_pkg.all;
@@ -66,7 +68,7 @@ architecture SYN of custom_io is
   signal cpu_6809_r_wn    : std_logic;
   
   signal clk_CPLD_ena     : std_logic;
-  
+
 begin
 
   GEN_REAL_6809 : if COCO1_USE_REAL_6809 generate
@@ -173,5 +175,137 @@ begin
   end generate GEN_CPU09;
   
   gpio_is_not_used <= (others => '0');
+
+
+  --
+  -- IDE Interface
+  --
+
+  GEN_IDE : if COCO1_HAS_IDE generate
+
+    signal iordy0_cf        : std_logic;
+    signal rdy_irq_cf       : std_logic;
+    signal cd_cf            : std_logic;
+    signal a_cf             : std_logic_vector(2 downto 0);
+    signal nce_cf           : std_logic_vector(2 downto 1);
+    signal d_cf             : std_logic_vector(15 downto 0);
+    signal nior0_cf         : std_logic;
+    signal niow0_cf         : std_logic;
+    signal non_cf           : std_logic;
+    signal reset_cf         : std_logic;
+
+    signal wb_sel           : std_logic_vector(3 downto 0) := (others => '0');
+    
+    signal dd_i             : std_logic_vector(15 downto 0) := (others => '0');
+    signal dd_o             : std_logic_vector(15 downto 0) := (others => '0');
+    signal dd_oe            : std_logic := '0';
+    signal a_cf_us          : ieee.std_logic_arith.unsigned(2 downto 0) := (others => '0');
+  
+    signal sd_dat_i         : std_logic_vector(3 downto 0) := (others => '0');
+    signal sd_dat_o         : std_logic_vector(3 downto 0);
+    signal sd_dat_oe        : std_logic;
+    signal sd_cmd_i         : std_logic := '0';
+    signal sd_cmd_o         : std_logic;
+    signal sd_cmd_oe        : std_logic;
+    
+  begin
+
+    -- 16-bit access to PIO registers, otherwise 32
+    wb_sel <= "0011" when platform_o.wb_adr(6) = '1' else "1111";
+    
+    atahost_inst : entity work.atahost_top
+      generic map
+      (
+        --TWIDTH          => 5,
+        -- PIO mode 0 settings
+        -- - (100MHz = 6, 28, 2, 23)
+        -- - (57M272 = 4, 16, 1, 13)
+        PIO_mode0_T1    => 4,     -- 70ns
+        PIO_mode0_T2    => 16,    -- 290ns
+        PIO_mode0_T4    => 1,     -- 30ns
+        PIO_mode0_Teoc  => 13     -- 240ns ==> T0 - T1 - T2 = 600 - 70 - 290 = 240
+      )
+      port map
+      (
+        -- WISHBONE SYSCON signals
+        wb_clk_i      => platform_o.wb_clk,
+        arst_i        => platform_o.wb_arst_n,
+        wb_rst_i      => platform_o.wb_rst,
+  
+        -- WISHBONE SLAVE signals
+        wb_cyc_i      => platform_o.wb_cyc_stb,
+        wb_stb_i      => platform_o.wb_cyc_stb,
+        wb_ack_o      => platform_i.wb_ack,
+        wb_err_o      => open,
+        wb_adr_i      => ieee.std_logic_arith.unsigned(platform_o.wb_adr),
+        wb_dat_i      => platform_o.wb_dat,
+        wb_dat_o      => platform_i.wb_dat,
+        wb_sel_i      => wb_sel,
+        wb_we_i       => platform_o.wb_we,
+        wb_inta_o     => platform_i.wb_inta,
+  
+        -- ATA signals
+        resetn_pad_o  => reset_cf,
+        dd_pad_i      => dd_i,
+        dd_pad_o      => dd_o,
+        dd_padoe_o    => dd_oe,
+        da_pad_o      => a_cf_us,
+        cs0n_pad_o    => nce_cf(1),
+        cs1n_pad_o    => nce_cf(2),
+  
+        diorn_pad_o	  => nior0_cf,
+        diown_pad_o	  => niow0_cf,
+        iordy_pad_i	  => iordy0_cf,
+        intrq_pad_i	  => rdy_irq_cf
+      );
+  
+    a_cf <= std_logic_vector(a_cf_us);
+    
+    -- power
+    non_cf <= '0';
+
+    sd_if : entity work.ide_sd
+      port map
+      (
+        -- clocking, reset
+        clk               => platform_o.wb_clk,
+        clk_ena           => '1',
+        rst               => platform_o.wb_rst,
+        
+        -- IDE interface
+        iordy0_cf         => iordy0_cf,
+        rdy_irq_cf        => rdy_irq_cf,
+        cd_cf             => open,
+        a_cf              => a_cf,
+        nce_cf            => nce_cf,
+        d_i               => dd_i,
+        d_o               => dd_o,
+        d_oe              => dd_oe,
+        nior0_cf          => nior0_cf,
+        niow0_cf          => niow0_cf,
+        non_cf            => non_cf,
+        reset_cf          => reset_cf,
+        ndmack_cf         => '0',
+        dmarq_cf          => open,
+        
+        -- SD/MMC interface
+        sd_dat_i          => sd_dat_i,
+        sd_dat_o          => sd_dat_o,
+        sd_dat_oe         => sd_dat_oe,
+        sd_cmd_i          => sd_cmd_i,
+        sd_cmd_o          => sd_cmd_o,
+        sd_cmd_oe         => sd_cmd_oe,
+        sd_clk            => sd_clk
+      );
+
+    -- SD/MMC drivers
+    sd_dat_i(0) <= sd_dat;
+    sd_dat <= sd_dat_o(0) when sd_dat_oe = '1' else 'Z';
+    sd_dat_i(3) <= sd_dat3;
+    sd_dat3 <= sd_dat_o(3) when sd_dat_oe = '1' else 'Z';
+    sd_cmd_i <= sd_cmd;
+    sd_cmd <= sd_cmd_o when sd_cmd_oe = '1' else 'Z';
+    
+  end generate GEN_IDE; 
 
 end architecture SYN;

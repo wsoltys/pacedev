@@ -577,6 +577,12 @@ set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2C_AV_Confi
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/seg7_lut.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2S_LCM_Config.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/i2s_controller.v
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/ud_cnt.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/ro_cnt.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/atahost_pio_tctrl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/atahost_wb_slave.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/atahost_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/atahost_top.vhd
 set_global_assignment -name VHDL_FILE custom_io.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/de1/target_top.vhd
 set_global_assignment -name SIGNALTAP_FILE clocks.stp
@@ -584,3 +590,4 @@ set_global_assignment -name SIGNALTAP_FILE vsync.stp
 set_global_assignment -name SIGNALTAP_FILE cpuif.stp
 set_global_assignment -name SIGNALTAP_FILE pia.stp
 set_global_assignment -name SIGNALTAP_FILE cpu09.stp
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/idesd.vhd
