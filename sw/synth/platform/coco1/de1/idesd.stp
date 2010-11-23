@@ -1,0 +1,230 @@
+<session jtag_chain="USB-Blaster [USB-0]" jtag_device="@1: EP2C15/20 (0x020B30DD)" sof_file="coco1.sof" top_level_entity="target_top">
+  <display_tree gui_logging_enabled="0">
+    <display_branch instance="auto_signaltap_0" log="USE_GLOBAL_TEMP" signal_set="USE_GLOBAL_TEMP" trigger="USE_GLOBAL_TEMP"/>
+  </display_tree>
+  <global_info>
+    <single attribute="active instance" value="0"/>
+    <single attribute="lock mode" value="36110"/>
+    <multi attribute="window position" size="9" value="1270,930,398,124,0,50,124,0,0"/>
+  </global_info>
+  <instance entity_name="sld_signaltap" is_auto_node="yes" name="auto_signaltap_0" source_file="sld_signaltap.vhd">
+    <node_ip_info instance_id="0" mfg_id="110" node_id="0" version="6"/>
+    <position_info>
+      <single attribute="active tab" value="0"/>
+      <single attribute="data vertical scroll position" value="0"/>
+      <single attribute="data horizontal scroll position" value="0"/>
+      <single attribute="zoom level numerator" value="1"/>
+      <single attribute="zoom level denominator" value="1"/>
+      <single attribute="zoom offset numerator" value="130944"/>
+      <single attribute="zoom offset denominator" value="1"/>
+    </position_info>
+    <signal_set global_temp="1" name="signal_set: 2010/11/23 19:11:02  #0">
+      <clock name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|clk" polarity="posedge" tap_mode="classic"/>
+      <config ram_type="M4K" reserved_data_nodes="0" reserved_storage_qualifier_nodes="0" reserved_trigger_nodes="0" sample_depth="128" trigger_in_enable="no" trigger_out_enable="no"/>
+      <top_entity/>
+      <signal_vec>
+        <trigger_input_vec>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_MAIN_SM:state.S_IDENTIFY" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_MAIN_SM:state.S_IDLE" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_MAIN_SM:state.S_READ_1" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_MAIN_SM:state.S_WAIT_READ" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_READ_SM:state.S_IDLE" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_READ_SM:state.S_LATCH_DATA" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_READ_SM:state.S_WAIT_IORD" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|a_cf[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|a_cf[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|a_cf[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_go" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[0]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[1]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[2]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[3]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[4]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[5]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[6]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[7]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|data_rd_go" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nce_cf[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nce_cf[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nior0_cf" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nior_r" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|niow0_cf" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|niow_r" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|rd_go" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|rst" tap_mode="classic" type="combinatorial"/>
+        </trigger_input_vec>
+        <data_input_vec>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_MAIN_SM:state.S_IDENTIFY" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_MAIN_SM:state.S_IDLE" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_MAIN_SM:state.S_READ_1" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_MAIN_SM:state.S_WAIT_READ" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_READ_SM:state.S_IDLE" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_READ_SM:state.S_LATCH_DATA" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_READ_SM:state.S_WAIT_IORD" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|a_cf[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|a_cf[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|a_cf[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_go" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[0]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[1]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[2]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[3]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[4]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[5]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[6]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[7]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|data_rd_go" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nce_cf[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nce_cf[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nior0_cf" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nior_r" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|niow0_cf" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|niow_r" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|rd_go" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|rst" tap_mode="classic" type="combinatorial"/>
+        </data_input_vec>
+        <storage_qualifier_input_vec>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_MAIN_SM:state.S_IDENTIFY" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_MAIN_SM:state.S_IDLE" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_MAIN_SM:state.S_READ_1" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_MAIN_SM:state.S_WAIT_READ" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_READ_SM:state.S_IDLE" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_READ_SM:state.S_LATCH_DATA" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_READ_SM:state.S_WAIT_IORD" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|a_cf[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|a_cf[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|a_cf[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_go" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[0]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[1]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[2]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[3]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[4]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[5]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[6]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[7]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|data_rd_go" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nce_cf[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nce_cf[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nior0_cf" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nior_r" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|niow0_cf" tap_mode="classic" type="combinatorial"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|niow_r" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|rd_go" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|rst" tap_mode="classic" type="combinatorial"/>
+        </storage_qualifier_input_vec>
+      </signal_vec>
+      <presentation>
+        <data_view>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|rst"/>
+          <bus is_signal_inverted="no" link="all" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nce_cf" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nce_cf[1]"/>
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nce_cf[2]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|a_cf" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|a_cf[0]"/>
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|a_cf[1]"/>
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|a_cf[2]"/>
+          </bus>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nior0_cf"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|niow0_cf"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_MAIN_SM:state.S_IDLE"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_MAIN_SM:state.S_IDENTIFY"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_MAIN_SM:state.S_READ_1"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_MAIN_SM:state.S_WAIT_READ"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_READ_SM:state.S_IDLE"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_READ_SM:state.S_LATCH_DATA"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_READ_SM:state.S_WAIT_IORD"/>
+          <bus is_signal_inverted="no" link="all" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i" order="lsb_to_msb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[0]"/>
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[1]"/>
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[2]"/>
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[3]"/>
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[4]"/>
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[5]"/>
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[6]"/>
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[7]"/>
+          </bus>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_go"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|rd_go"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|data_rd_go"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nior_r"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|niow_r"/>
+        </data_view>
+        <setup_view>
+          <bus is_signal_inverted="no" link="all" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|a_cf" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|a_cf[0]"/>
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|a_cf[1]"/>
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|a_cf[2]"/>
+          </bus>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nior0_cf"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|niow0_cf"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_MAIN_SM:state.S_IDLE"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_MAIN_SM:state.S_IDENTIFY"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_MAIN_SM:state.S_READ_1"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_MAIN_SM:state.S_WAIT_READ"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_READ_SM:state.S_IDLE"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_READ_SM:state.S_LATCH_DATA"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_READ_SM:state.S_WAIT_IORD"/>
+          <bus is_signal_inverted="no" link="all" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i" order="lsb_to_msb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[0]"/>
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[1]"/>
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[2]"/>
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[3]"/>
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[4]"/>
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[5]"/>
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[6]"/>
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[7]"/>
+          </bus>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_go"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|rd_go"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|data_rd_go"/>
+          <bus is_signal_inverted="no" link="all" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nce_cf" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nce_cf[1]"/>
+            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nce_cf[2]"/>
+          </bus>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|rst"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nior_r"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|niow_r"/>
+        </setup_view>
+      </presentation>
+      <trigger CRC="F56271E2" attribute_mem_mode="false" gap_record="true" global_temp="1" name="trigger: 2010/11/23 19:11:02  #1" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="1" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="true" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_in="dont_care" trigger_out="active high" trigger_type="circular">
+        <power_up_trigger position="pre" storage_qualifier_disabled="no" trigger_in="dont_care" trigger_out="active high"/>
+        <events use_custom_flow_control="no">
+          <level enabled="yes" name="condition1" type="basic">'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|niow0_cf' == falling edge
+            <power_up enabled="yes">
+            </power_up>
+            <op_node/>
+          </level>
+        </events>
+        <storage_qualifier_events>
+          <transitional>0000000000000000000000000000
+            <pwr_up_transitional>0000000000000000000000000000
+            </pwr_up_transitional>
+          </transitional>
+          <storage_qualifier_level type="basic">
+            <power_up>
+            </power_up>
+            <op_node/>
+          </storage_qualifier_level>
+          <storage_qualifier_level type="basic">
+            <power_up>
+            </power_up>
+            <op_node/>
+          </storage_qualifier_level>
+          <storage_qualifier_level type="basic">
+            <power_up>
+            </power_up>
+            <op_node/>
+          </storage_qualifier_level>
+        </storage_qualifier_events>
+        <log>
+          <data global_temp="1" name="log: 2010/11/23 19:14:16  #0" power_up_mode="false" sample_depth="128" trigger_position="16">01001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000011111000100100111000000000001111100010010011100000000000111110001001001110000000000011111000100100111000000000001111100010010011100000000000111110001001001110000000000011111000100100111000000000001110100010010011100000000000111000001001001110000000000011100000100100111000000000001110000010010011100000000000111000001001001110000000000011100000100100111000000000001110000010010011100000000000111000001001001110000000000011100000100100111000000000001110000010010011100000000000111000001001001110000000000011100000100100111000000000001110000010010011100000000000111000001001001110000000000011100000100100111000000000001110000010010011100000000000111000001001001110000000000011110000100100111000000000001111100010010011100000000000111110001001001110000000000011111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111010001001001110000000000111100000100100111000000000011110000010010011100000000001111000001001001110000000000111100000100100111000000000011110000010010011100000000001111000001001001110000000000111100000100100111000000000011110000010010011100000000001111000001001001110000000000111100000100100111000000000011110000010010011100000000001111000001001001110000000000111100000100100111000000000011110000010010011100000000001111000001001001110000000000111100000100100111000000000011111000010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100010010011100000000001111110001001001110000000000111111000100100111000000000011111100</data>
+          <extradata>1111111111111111T111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111</extradata>
+        </log>
+      </trigger>
+    </signal_set>
+  </instance>
+  <mnemonics/>
+  <static_plugin_mnemonics/>
+</session>

@@ -161,8 +161,9 @@ begin
           rd_go <= '0';   -- default
           case state is
             when S_IDLE =>
-              sts_r_o(BSY) <= '1';  -- default
+              sts_r_o(BSY) <= '0';        -- default
               if cmd_go = '1' then
+                sts_r_o(BSY) <= '1';      -- default
                 case cmd_r_i is
                   when IDENTIFY_DEVICE =>
                     state <= S_IDENTIFY;
@@ -170,11 +171,10 @@ begin
                   when READ_SECTORS_WO_RETRY =>
                     state <= S_READ_1;
                   when others =>
-                    sts_r_o(BSY) <= '0';
+                    sts_r_o(BSY) <= '0';  -- default
                 end case;
               end if;
             when S_IDENTIFY =>
-              state <= S_IDLE;
             when S_READ_1 =>
               -- set up some read operation here
               rd_go <= '1';
