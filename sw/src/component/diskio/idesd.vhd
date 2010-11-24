@@ -24,7 +24,7 @@ entity ide_sd is
     nior0_cf          : in std_logic;
     niow0_cf          : in std_logic;
     non_cf            : in std_logic;
-    reset_cf          : in std_logic;
+    nreset_cf         : in std_logic;
     ndmack_cf         : in std_logic;
     dmarq_cf          : out std_logic;
     
@@ -46,6 +46,7 @@ architecture SYN of ide_sd is
   constant WRITE_SECTORS_W_RETRY  : std_logic_vector(7 downto 0) := X"30";
   constant WRITE_SECTORS_WO_RETRY : std_logic_vector(7 downto 0) := X"31";
   constant SEEK                   : std_logic_vector(7 downto 0) := X"70";
+  constant EXEC_DEVICE_DIAGNOSTIC : std_logic_vector(7 downto 0) := X"90";
   constant READ_MULTIPLE          : std_logic_vector(7 downto 0) := X"C4";
   constant WRITE_MULTIPLE         : std_logic_vector(7 downto 0) := X"C5";
   constant IDENTIFY_DEVICE        : std_logic_vector(7 downto 0) := X"EC";
@@ -104,7 +105,8 @@ begin
       if clk_ena = '1' then
         cmd_go <= '0';      -- default
         data_rd_go <= '0';  -- default
-        if reset_cf = '1' then
+        if nreset_cf = '0' then
+          null;
         elsif nce_cf = "10" then
           -- command block selected
           if nior0_cf = '0' and nior_r = '1' then
@@ -165,6 +167,8 @@ begin
               if cmd_go = '1' then
                 sts_r_o(BSY) <= '1';      -- default
                 case cmd_r_i is
+                  when EXEC_DEVICE_DIAGNOSTIC =>
+                    null;
                   when IDENTIFY_DEVICE =>
                     state <= S_IDENTIFY;
                   when READ_SECTORS_W_RETRY =>

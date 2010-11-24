@@ -192,7 +192,7 @@ begin
     signal nior0_cf         : std_logic;
     signal niow0_cf         : std_logic;
     signal non_cf           : std_logic;
-    signal reset_cf         : std_logic;
+    signal nreset_cf        : std_logic;
 
     signal wb_sel           : std_logic_vector(3 downto 0) := (others => '0');
     
@@ -245,7 +245,7 @@ begin
         wb_inta_o     => platform_i.wb_inta,
   
         -- ATA signals
-        resetn_pad_o  => reset_cf,
+        resetn_pad_o  => nreset_cf,
         dd_pad_i      => dd_i,
         dd_pad_o      => dd_o,
         dd_padoe_o    => dd_oe,
@@ -284,7 +284,7 @@ begin
         nior0_cf          => nior0_cf,
         niow0_cf          => niow0_cf,
         non_cf            => non_cf,
-        reset_cf          => reset_cf,
+        nreset_cf         => nreset_cf,
         ndmack_cf         => '0',
         dmarq_cf          => open,
         
