@@ -86,6 +86,8 @@ architecture SYN of ide_sd is
   constant CORR       : integer := 2;
   constant IDX        : integer := 1;
   constant ERR        : integer := 0;
+  signal read_sts     : std_logic_vector(sts_r_o'range) := (others => '0');
+  signal cmd_sts      : std_logic_vector(sts_r_o'range) := (others => '0');
   
   signal cmd_go       : std_logic := '0';
   signal data_rd_go   : std_logic := '0';
@@ -115,6 +117,7 @@ begin
                 d_i <= data_r_o;
                 data_rd_go <= '1';
               when "001" =>   -- error
+                d_i <= X"00" & err_r_o;
               when "010" =>   -- sector_count
               when "011" =>   -- sector_number
               when "100" =>   -- cyl_lo
@@ -151,47 +154,57 @@ begin
     end if;
   end process;
 
+  -- wire-OR signals from CMD, READ SM
+  sts_r_o <= cmd_sts or read_sts;
+  
   BLK_MAIN_SM : block
-    type state_t is ( S_IDLE, S_IDENTIFY, S_READ_1, S_WAIT_READ );
+    type state_t is ( S_IDLE, S_DIAGNOSTIC, S_IDENTIFY, S_READ_1, S_WAIT_READ );
     signal state : state_t := S_IDLE;
   begin
     process (clk, rst)
     begin
       if rst = '1' then
+        cmd_sts <= (others => '0');
       elsif rising_edge(clk) then
         if clk_ena = '1' then
           rd_go <= '0';   -- default
-          case state is
-            when S_IDLE =>
-              sts_r_o(BSY) <= '0';        -- default
-              if cmd_go = '1' then
-                sts_r_o(BSY) <= '1';      -- default
-                case cmd_r_i is
-                  when EXEC_DEVICE_DIAGNOSTIC =>
-                    null;
-                  when IDENTIFY_DEVICE =>
-                    state <= S_IDENTIFY;
-                  when READ_SECTORS_W_RETRY =>
-                  when READ_SECTORS_WO_RETRY =>
-                    state <= S_READ_1;
-                  when others =>
-                    sts_r_o(BSY) <= '0';  -- default
-                end case;
-              end if;
-            when S_IDENTIFY =>
-            when S_READ_1 =>
-              -- set up some read operation here
-              rd_go <= '1';
-              state <= S_WAIT_READ;
-            when S_WAIT_READ =>
-              if rd_done = '1' then
-                sts_r_o(BSY) <= '0';
+          if cmd_go = '1' then
+            cmd_sts(BSY) <= '1';      -- default
+            case cmd_r_i is
+              when EXEC_DEVICE_DIAGNOSTIC =>
+                state <= S_DIAGNOSTIC;
+              when IDENTIFY_DEVICE =>
+                state <= S_IDENTIFY;
+              when READ_SECTORS_W_RETRY =>
+              when READ_SECTORS_WO_RETRY =>
+                state <= S_READ_1;
+              when others =>
+                cmd_sts(BSY) <= '0';  -- default
+            end case;
+          else
+            case state is
+              when S_IDLE =>
+                cmd_sts(BSY) <= '0';  -- default
+              when S_DIAGNOSTIC =>
+                -- device 0 passed, device 1 passed or not present
+                err_r_o <= X"01"; 
+                cmd_sts(DRDY) <= '1';
                 state <= S_IDLE;
-              end if;
-            when others =>
-              sts_r_o(BSY) <= '0';
-              state <= S_IDLE;
-          end case;
+              when S_IDENTIFY =>
+              when S_READ_1 =>
+                -- set up some read operation here
+                rd_go <= '1';
+                state <= S_WAIT_READ;
+              when S_WAIT_READ =>
+                if rd_done = '1' then
+                  cmd_sts(BSY) <= '0';
+                  state <= S_IDLE;
+                end if;
+              when others =>
+                cmd_sts(BSY) <= '0';
+                state <= S_IDLE;
+            end case;
+          end if; -- cmd_go='1'
         end if; -- clk_ena='1'
       end if;
     end process;
@@ -210,20 +223,20 @@ begin
         if clk_ena = '1' then
           case state is
             when S_IDLE =>
-              sts_r_o(DRDY) <= '0';   -- default
+              read_sts(DRDY) <= '0';   -- default
               if rd_go = '1' then
                 count := 0;
                 state <= S_LATCH_DATA;
               end if;
             when S_LATCH_DATA =>
               -- latch data in register & set data ready
-              sts_r_o(DRDY) <= '1';
+              read_sts(DRDY) <= '1';
               data_r_o <= std_logic_vector(to_unsigned(count, 16));
               state <= S_WAIT_IORD;
             when S_WAIT_IORD =>
               -- wait for an IORD to increment data
               if data_rd_go = '1' then
-                sts_r_o(DRDY) <= '0';
+                read_sts(DRDY) <= '0';
                 if count = count_t'high then
                   state <= S_IDLE;
                 else
