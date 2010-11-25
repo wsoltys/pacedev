@@ -77,6 +77,13 @@ architecture SYN of ide_sd is
   constant TK0NF      : integer := 1;
   constant AMNF       : integer := 0;
 
+  -- When BSY is set, all other bits are invalid
+  -- Status is not valid for 400ns after a command/data cycle
+  -- - (22 clocks & 57M272Hz)
+  -- Write to CMD register is ignoed when BSY=1
+  -- DRQ can only be changed when BSY=1
+  -- IDX,DRDY,DF,DSC,CORR can be changed when BSY=0
+  
   signal sts_r_o      : std_logic_vector(7 downto 0) := (others => '0');
   constant BSY        : integer := 7;
   constant DRDY       : integer := 6;
@@ -143,8 +150,11 @@ begin
                 dev4_r_i <= d_o(7 downto 4);
                 hd_r_i <= d_o(3 downto 0);
               when others =>  -- command
-                cmd_r_i <= d_o(7 downto 0);
-                cmd_go <= '1';
+                -- writes to this register are ignored if BSY=1
+                if cmd_sts(BSY) = '0' then
+                  cmd_r_i <= d_o(7 downto 0);
+                  cmd_go <= '1';
+                end if;
             end case;
           end if;
         end if; -- nce_cf="10"
@@ -165,6 +175,7 @@ begin
     begin
       if rst = '1' then
         cmd_sts <= (others => '0');
+        state <= S_IDLE;
       elsif rising_edge(clk) then
         if clk_ena = '1' then
           rd_go <= '0';   -- default
@@ -184,11 +195,11 @@ begin
           else
             case state is
               when S_IDLE =>
-                cmd_sts(BSY) <= '0';  -- default
+                cmd_sts(BSY) <= '0';
+                cmd_sts(DRDY) <= '1';
               when S_DIAGNOSTIC =>
                 -- device 0 passed, device 1 passed or not present
                 err_r_o <= X"01"; 
-                cmd_sts(DRDY) <= '1';
                 state <= S_IDLE;
               when S_IDENTIFY =>
               when S_READ_1 =>
@@ -223,20 +234,20 @@ begin
         if clk_ena = '1' then
           case state is
             when S_IDLE =>
-              read_sts(DRDY) <= '0';   -- default
+              read_sts(DRQ) <= '0';   -- default
               if rd_go = '1' then
                 count := 0;
                 state <= S_LATCH_DATA;
               end if;
             when S_LATCH_DATA =>
               -- latch data in register & set data ready
-              read_sts(DRDY) <= '1';
+              read_sts(DRQ) <= '1';
               data_r_o <= std_logic_vector(to_unsigned(count, 16));
               state <= S_WAIT_IORD;
             when S_WAIT_IORD =>
               -- wait for an IORD to increment data
               if data_rd_go = '1' then
-                read_sts(DRDY) <= '0';
+                read_sts(DRQ) <= '0';
                 if count = count_t'high then
                   state <= S_IDLE;
                 else
