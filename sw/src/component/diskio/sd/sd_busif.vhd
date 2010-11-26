@@ -15,8 +15,12 @@ entity sd_busif is
 		reset					: in std_logic;
 
 		sd_clk				: out std_logic;
-		sd_cmd				: inout std_logic;
-		sd_dat				: inout std_logic_vector(3 downto 0);
+		sd_cmd_i			: in std_logic;
+		sd_cmd_o			: out std_logic;
+		sd_cmd_oe			: out std_logic;
+		sd_dat_i			: in std_logic_vector(3 downto 0);
+		sd_dat_o			: out std_logic_vector(3 downto 0);
+		sd_dat_oe			: out std_logic;
 
 		send_cmd			: in std_logic;
 		busy					: out std_logic;
@@ -38,7 +42,7 @@ begin
 
 	sd_clk <= clk;
 
-	sd_dat <= (others => 'Z');
+	--sd_dat_o <= (others => 'Z');
 
 	sd_cmdif_1 : entity work.sd_cmdif	
 		port map
@@ -46,7 +50,9 @@ begin
 			clk						=> clk,
 			reset					=> reset,
 
-			sd_cmd				=> sd_cmd,
+			sd_cmd_i			=> sd_cmd_i,
+			sd_cmd_o			=> sd_cmd_o,
+			sd_cmd_oe		  => sd_cmd_oe,
 
 			send_cmd			=> send_cmd,
 			expect_resp		=> expect_resp,
@@ -70,7 +76,9 @@ begin
 			reset					=> reset,
 
 			-- SD card bus interface
-			sd_dat				=> sd_dat,
+			sd_dat_i			=> sd_dat_i,
+			sd_dat_o			=> sd_dat_o,
+			sd_dat_oe			=> sd_dat_oe,
 
 			-- Cooked SD card data serial interface
 			read					=> '0',

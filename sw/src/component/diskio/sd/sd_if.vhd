@@ -15,8 +15,12 @@ entity sd_if is
 		reset					: in std_logic;
 
 		sd_clk				: out std_logic;
-		sd_cmd				: inout std_logic;
-		sd_dat				: inout std_logic_vector(3 downto 0);
+		sd_cmd_i			: in std_logic;
+		sd_cmd_o			: out std_logic;
+		sd_cmd_oe		  : out std_logic;
+		sd_dat_i			: in std_logic_vector(3 downto 0);
+		sd_dat_o			: out std_logic_vector(3 downto 0);
+		sd_dat_oe			: out std_logic;
 		
 		blk						: in std_logic_vector(31 downto 0);
 		rd						: in std_logic;
@@ -121,8 +125,12 @@ begin
 			reset					=> reset,
 
 			sd_clk				=> sd_clk,
-			sd_cmd				=> sd_cmd,
-			sd_dat				=> sd_dat,
+			sd_cmd_i			=> sd_cmd_i,
+			sd_cmd_o			=> sd_cmd_o,
+			sd_cmd_oe			=> sd_cmd_oe,
+			sd_dat_i			=> sd_dat_i,
+			sd_dat_o			=> sd_dat_o,
+			sd_dat_oe			=> sd_dat_oe,
 
 			expect_resp		=> exp_s,
 			cmd						=> cmd_s,
@@ -148,8 +156,9 @@ begin
 
 	PROC_MSG:process(clk, clk_en_50MHz, reset)
 		variable state : state_type;
-		variable cnt : integer;
-		variable msg_cnt : integer;
+		variable cnt : integer range 0 to 128;
+		subtype msg_cnt_t is integer range msgs'range;
+		variable msg_cnt : msg_cnt_t;
 	begin
 		if reset = '1' then
 			state := init;

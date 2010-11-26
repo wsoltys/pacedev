@@ -21,7 +21,9 @@ entity sd_datif is
 		reset					: in std_logic;
 
 		-- SD card bus interface
-		sd_dat				: inout std_logic_vector(3 downto 0);
+		sd_dat_i			: in std_logic_vector(3 downto 0);
+		sd_dat_o			: out std_logic_vector(3 downto 0);
+		sd_dat_oe			: out std_logic;
 
 		-- Cooked SD card data serial interface
 		read					: in std_logic;
@@ -64,16 +66,17 @@ architecture SYN of sd_datif is
 
 begin
 
-	sd_dat <= sd_dat_r when sd_dat_oe_r = '1' else (others => 'Z');
+	sd_dat_o <= sd_dat_r; -- when sd_dat_oe_r = '1' else (others => 'Z');
+	sd_dat_oe <= sd_dat_oe_r;
 
 	-- Bit/clock counter is done when it reaches cnt_max
 	d_done <= d_cnt >= cnt_max;
 
 	-- Data channel combinatorial signal process
-	dat_state_machine : process(dstate, sd_dat)
+	dat_state_machine : process(dstate, sd_dat_i)
 		variable dstate_n : dstate_type;
 	begin
-		dc_in			<= sd_dat;
+		dc_in			<= sd_dat_i;
 		d_nx			<= (others => '1');
 		d_oe_nx		<= '0';
 		busy_nx		<= '1';
@@ -89,7 +92,7 @@ begin
 			end if;
 		
 		when datrdst =>
-			if sd_dat(0) = '0' then 
+			if sd_dat_i(0) = '0' then 
 				dstate_n := datrdbody;
 			end if;
 			
@@ -120,20 +123,20 @@ begin
 			busy_nx	<= '0';
 		
 		when datrdst =>
-			dc_in		<= sd_dat;
+			dc_in		<= sd_dat_i;
 			
 		when datrdbody =>
 			d_ld		<= cnt_max - chunksize + 1;
-			dc_in		<= sd_dat;
+			dc_in		<= sd_dat_i;
 
 		when datrdcrc =>
 			d_ld		<= cnt_max - crc_len + 1;
-			dc_in		<= sd_dat;
+			dc_in		<= sd_dat_i;
 		
 		when datrden =>
-			dc_in		<= sd_dat;
-			sdc_eof_nx <= sd_dat(0);
-			--sdc_eof_nx <= sd_dat(0) and sd_dat(1) and sd_dat(2) and sd_dat(3);	-- 4-bit data
+			dc_in		<= sd_dat_i;
+			sdc_eof_nx <= sd_dat_i(0);
+			--sdc_eof_nx <= sd_dat_i(0) and sd_dat_i(1) and sd_dat_i(2) and sd_dat_i(3);	-- 4-bit data
 
 		when datcheck =>
 
@@ -158,8 +161,8 @@ begin
 				dc(i) := (others => '0');
 				sdc(i) := (others => '0');
 			end loop;
-			d_nx				<= (others => '1');
-			d_oe_nx			<= '0';
+			--d_nx				<= (others => '1');
+			--d_oe_nx			<= '0';
 			d_cnt				<= d_ld;
 			sdc_match		<= '0';
 			dati_ce			<= '0';
@@ -214,7 +217,7 @@ begin
 			-- Data input shifter
 			dati_ce <= '0';
 			if sd_dat_oe_r = '0' then
-				dati_s := dati_s(dat_width-sd_width-1 downto 0) & sd_dat(sd_width-1 downto 0);
+				dati_s := dati_s(dat_width-sd_width-1 downto 0) & sd_dat_i(sd_width-1 downto 0);
 				if dati_cnt < dati_cnt_t'high then
 					dati_cnt := dati_cnt + 1;
 				else 

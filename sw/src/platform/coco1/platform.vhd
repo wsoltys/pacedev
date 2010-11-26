@@ -41,8 +41,7 @@ entity platform is
   port
   (
     -- clocking and reset
-    clk_i             : in std_logic_vector(0 to 3);
-    reset_i           : in std_logic_vector(0 to 3);
+    clkrst_i          : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i         : in from_BUTTONS_t;
@@ -106,8 +105,8 @@ end entity platform;
 
 architecture SYN of platform is
 
-	alias clk_57M272			  : std_logic is clk_i(0);
-	alias rst_57M272        : std_logic is reset_i(0);
+	alias clk_57M272			  : std_logic is clkrst_i.clk(0);
+	alias rst_57M272        : std_logic is clkrst_i.rst(0);
 
 	-- clocks
 	signal clk_14M318_ena   : std_logic := '0';
@@ -855,6 +854,8 @@ begin
     platform_o.wb_clk <= clk_57M272;
     platform_o.wb_rst <= rst_57M272;
     platform_o.wb_arst_n <= '1';
+
+    platform_o.clk_50M <= clkrst_i.clk_ref;
     
     process (clk_57M272, platform_rst)
       variable cpu_clk_r : std_logic := '0';

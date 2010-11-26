@@ -17,7 +17,9 @@ entity sd_cmdif is
 		reset					: in std_logic;
 
 		-- SD card bus interface
-		sd_cmd				: inout std_logic;
+		sd_cmd_i		  : in std_logic;
+		sd_cmd_o		  : out std_logic;
+		sd_cmd_oe		  : out std_logic;
 
 		-- Cooked SD card command serial interface
 		send_cmd			: in std_logic;
@@ -58,9 +60,10 @@ architecture SYN of sd_cmdif is
 	signal resp_err_s		: std_logic;		
 	signal busy_nx			: std_logic;
 begin
-	sd_cmd <= sd_cmd_r when sd_cmd_oe_r = '1' else 'Z';
+	sd_cmd_o <= sd_cmd_r; -- when sd_cmd_oe_r = '1' else 'Z';
+	sd_cmd_oe <= sd_cmd_oe_r;
 
-	resp_c <= sd_cmd when sd_cmd_oe_r = '0' else 'X';
+	resp_c <= sd_cmd_i; -- when sd_cmd_oe_r = '0' else 'X';
 	resp_ce <= '1' when cstate = respbody else '0';
 
 	-- Bit/clock counter is done when it reaches cnt_max
@@ -73,7 +76,7 @@ begin
 	end block BLK_C_DONE;
 
 	-- Command channel combinatorial signal process
-	cmd_state_machine : process(cstate, send_cmd, cmd_c, scc_top, sd_cmd, 
+	cmd_state_machine : process(cstate, send_cmd, cmd_c, scc_top, sd_cmd_i, 
 			c_done, expect_resp, scc_match)
 		variable cstate_n : cstate_type;
 	begin
@@ -101,13 +104,13 @@ begin
 			if c_done then 
 				resp_err_s <= '1';
 				cstate_n := idle; 
-			elsif sd_cmd = '0' then 
+			elsif sd_cmd_i = '0' then 
 				cstate_n := resptx;
 			end if;
 
 		-- Timeout ?
 		when resptx		=>	
-			if sd_cmd = '0' then cstate_n := respbody;
+			if sd_cmd_i = '0' then cstate_n := respbody;
 			else
 				resp_err_s <= '1';
 				cstate_n := idle;
@@ -178,14 +181,14 @@ begin
 			else
 				c_ld		<= cnt_max - resp_len + 1;
 			end if;
-			cc_in		<= sd_cmd;
+			cc_in		<= sd_cmd_i;
 			
 		when respcrc =>
-			cc_in		<= sd_cmd;
+			cc_in		<= sd_cmd_i;
 			c_ld		<= cnt_max - crc_len + 1;
 			
 		when respcheck =>
-			cc_in		<= sd_cmd;		
+			cc_in		<= sd_cmd_i;		
 		
 		when respen =>		
 		end case;

@@ -147,6 +147,8 @@ begin
   BLK_CLOCKING : block
   begin
   
+    clkrst_i.clk_ref <= clock_50;
+    
     GEN_PLL : if PACE_HAS_PLL generate
     
       pll_50_inst : entity work.pll
@@ -675,8 +677,7 @@ begin
     port map
     (
     	-- clocks and resets
-	  	clk_i							=> clkrst_i.clk,
-      reset_i          	=> clkrst_i.rst,
+	  	clkrst_i					=> clkrst_i,
 
       -- misc inputs and outputs
       buttons_i         => buttons_i,

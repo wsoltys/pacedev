@@ -201,6 +201,8 @@ begin
     signal dd_oe            : std_logic := '0';
     signal a_cf_us          : ieee.std_logic_arith.unsigned(2 downto 0) := (others => '0');
   
+    signal clk_25M          : std_logic := '0';
+  
     signal sd_dat_i         : std_logic_vector(3 downto 0) := (others => '0');
     signal sd_dat_o         : std_logic_vector(3 downto 0);
     signal sd_dat_oe        : std_logic;
@@ -264,6 +266,15 @@ begin
     -- power
     non_cf <= '0';
 
+    sd_pll_inst : entity work.sd_pll
+      port map
+      (
+        inclk0		  => platform_o.clk_50M,
+        c0		      => open,      -- 50MHz
+        c1		      => clk_25M,
+        locked		  => open
+      );
+
     sd_if : entity work.ide_sd
       port map
       (
@@ -289,6 +300,7 @@ begin
         dmarq_cf          => open,
         
         -- SD/MMC interface
+        clk_25M           => clk_25M,
         sd_dat_i          => sd_dat_i,
         sd_dat_o          => sd_dat_o,
         sd_dat_oe         => sd_dat_oe,

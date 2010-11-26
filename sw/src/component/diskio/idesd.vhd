@@ -29,6 +29,7 @@ entity ide_sd is
     dmarq_cf          : out std_logic;
     
     -- SD/MMC interface
+    clk_25M           : in std_logic;
 		sd_dat_i          : in std_logic_vector(3 downto 0);
 		sd_dat_o          : out std_logic_vector(3 downto 0);
 		sd_dat_oe         : out std_logic;
@@ -103,7 +104,9 @@ architecture SYN of ide_sd is
   
   signal rom_a        : std_logic_vector(7 downto 0) := (others => '0');
   signal rom_d        : std_logic_vector(15 downto 0) := (others => '0');
-  
+
+  signal lba          : std_logic_vector(31 downto 0) := (others => '0');
+
 begin
 
   process (clk, rst)
@@ -290,5 +293,31 @@ begin
   		address		  => rom_a(7 downto 0),
   		q			      => rom_d
   	);
+
+  sd_if_inst : entity work.sd_if
+    generic map
+    (
+      sd_width 		  => 1
+    )
+    port map
+    (
+      clk						=> clk_25M,
+      clk_en_50MHz	=> '1',
+      reset					=> rst,
+
+      sd_clk				=> sd_clk,
+      sd_cmd_i			=> sd_cmd_i,
+      sd_cmd_o			=> sd_cmd_o,
+      sd_cmd_oe			=> sd_cmd_oe,
+      sd_dat_i			=> sd_dat_i,
+      sd_dat_o			=> sd_dat_o,
+      sd_dat_oe			=> sd_dat_oe,
+      
+      blk						=> lba,
+      rd						=> '0',
+      
+      dbg						=> open,
+      dbgsel				=> "000"
+    );
 
 end architecture SYN;

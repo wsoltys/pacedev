@@ -66,6 +66,7 @@ package pace_pkg is
     arst      : std_logic;
     arst_n    : std_logic;
     rst       : std_logic_vector(0 to 3);
+    clk_ref   : std_logic;                  --reference clock
     clk       : std_logic_vector(0 to 3);
   end record;
   

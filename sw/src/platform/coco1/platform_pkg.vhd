@@ -57,6 +57,8 @@ package platform_pkg is
     wb_adr      : std_logic_vector(6 downto 2);
     wb_dat      : std_logic_vector(31 downto 0);
     wb_we       : std_logic;
+    -- to the SD core
+    clk_50M     : std_logic;
   end record;
 
 end;

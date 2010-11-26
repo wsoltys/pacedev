@@ -13,9 +13,8 @@ use work.project_pkg.all;
 entity PACE is
   port
   (
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic_vector(0 to 3);
-
+    clkrst_i        : in from_CLKRST_t;
+    
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
     switches_i      : in from_SWITCHES_t;
@@ -88,8 +87,8 @@ begin
     )
     port map
     (
-      clk     		    => clk_i(0),
-      reset   		    => reset_i(0),
+      clk     		    => clkrst_i.clk(0),
+      reset   		    => clkrst_i.rst(0),
       ps2clk  		    => inputs_i.ps2_kclk,
       ps2data 		    => inputs_i.ps2_kdat,
       jamma				    => inputs_i.jamma_n,
@@ -106,8 +105,7 @@ begin
     port map
     (
       -- clocking and reset
-      clk_i           => clk_i,
-      reset_i         => reset_i,
+      clkrst_i        => clkrst_i,
       
       -- misc inputs and outputs
       buttons_i       => buttons_i,
