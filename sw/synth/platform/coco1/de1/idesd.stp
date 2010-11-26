@@ -4,16 +4,7 @@
   </display_tree>
   <instance entity_name="sld_signaltap" is_auto_node="yes" is_expanded="true" name="auto_signaltap_0" source_file="sld_signaltap.vhd">
     <node_ip_info instance_id="0" mfg_id="110" node_id="0" version="6"/>
-    <position_info>
-      <single attribute="active tab" value="0"/>
-      <single attribute="data horizontal scroll position" value="0"/>
-      <single attribute="data vertical scroll position" value="0"/>
-      <single attribute="zoom level denominator" value="1"/>
-      <single attribute="zoom level numerator" value="1"/>
-      <single attribute="zoom offset denominator" value="1"/>
-      <single attribute="zoom offset numerator" value="130944"/>
-    </position_info>
-    <signal_set global_temp="1" name="signal_set: 2010/11/24 13:51:33  #0">
+    <signal_set global_temp="1" is_expanded="true" name="signal_set: 2010/11/26 11:33:31  #0">
       <clock name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|clk" polarity="posedge" tap_mode="classic"/>
       <config ram_type="M4K" reserved_data_nodes="0" reserved_storage_qualifier_nodes="0" reserved_trigger_nodes="0" sample_depth="128" trigger_in_enable="no" trigger_out_enable="no"/>
       <top_entity/>
@@ -38,14 +29,16 @@
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[5]" tap_mode="classic" type="register"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[6]" tap_mode="classic" type="register"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[7]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_sts[6]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_sts[7]" tap_mode="classic" type="register"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|data_rd_go" tap_mode="classic" type="register"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nce_cf[1]" tap_mode="classic" type="combinatorial"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nce_cf[2]" tap_mode="classic" type="combinatorial"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nior0_cf" tap_mode="classic" type="combinatorial"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|niow0_cf" tap_mode="classic" type="combinatorial"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|rd_go" tap_mode="classic" type="register"/>
-          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|sts_r_o[6]" tap_mode="classic" type="register"/>
-          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|sts_r_o[7]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|read_sts[3]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|sts_r_o[7]" tap_mode="classic" type="combinatorial"/>
         </trigger_input_vec>
         <data_input_vec>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_MAIN_SM:state.S_IDENTIFY" tap_mode="classic" type="combinatorial"/>
@@ -67,14 +60,16 @@
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[5]" tap_mode="classic" type="register"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[6]" tap_mode="classic" type="register"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[7]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_sts[6]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_sts[7]" tap_mode="classic" type="register"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|data_rd_go" tap_mode="classic" type="register"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nce_cf[1]" tap_mode="classic" type="combinatorial"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nce_cf[2]" tap_mode="classic" type="combinatorial"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nior0_cf" tap_mode="classic" type="combinatorial"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|niow0_cf" tap_mode="classic" type="combinatorial"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|rd_go" tap_mode="classic" type="register"/>
-          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|sts_r_o[6]" tap_mode="classic" type="register"/>
-          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|sts_r_o[7]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|read_sts[3]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|sts_r_o[7]" tap_mode="classic" type="combinatorial"/>
         </data_input_vec>
         <storage_qualifier_input_vec>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|\BLK_MAIN_SM:state.S_IDENTIFY" tap_mode="classic" type="combinatorial"/>
@@ -96,14 +91,16 @@
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[5]" tap_mode="classic" type="register"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[6]" tap_mode="classic" type="register"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_r_i[7]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_sts[6]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_sts[7]" tap_mode="classic" type="register"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|data_rd_go" tap_mode="classic" type="register"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nce_cf[1]" tap_mode="classic" type="combinatorial"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nce_cf[2]" tap_mode="classic" type="combinatorial"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nior0_cf" tap_mode="classic" type="combinatorial"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|niow0_cf" tap_mode="classic" type="combinatorial"/>
           <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|rd_go" tap_mode="classic" type="register"/>
-          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|sts_r_o[6]" tap_mode="classic" type="register"/>
-          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|sts_r_o[7]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|read_sts[3]" tap_mode="classic" type="register"/>
+          <wire name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|sts_r_o[7]" tap_mode="classic" type="combinatorial"/>
         </storage_qualifier_input_vec>
       </signal_vec>
       <presentation>
@@ -139,8 +136,10 @@
           <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_go"/>
           <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|rd_go"/>
           <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|data_rd_go"/>
-          <bus is_signal_inverted="no" link="all" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|sts_r_o" order="lsb_to_msb" radix="hex" state="collapse" type="register">
-            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|sts_r_o[6]"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_sts[6]"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_sts[7]"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|read_sts[3]"/>
+          <bus is_signal_inverted="no" link="all" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|sts_r_o" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
             <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|sts_r_o[7]"/>
           </bus>
         </data_view>
@@ -176,24 +175,26 @@
             <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nce_cf[1]"/>
             <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|nce_cf[2]"/>
           </bus>
-          <bus is_signal_inverted="no" link="all" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|sts_r_o" order="lsb_to_msb" radix="hex" state="collapse" type="register">
-            <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|sts_r_o[6]"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_sts[6]"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|cmd_sts[7]"/>
+          <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|read_sts[3]"/>
+          <bus is_signal_inverted="no" link="all" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|sts_r_o" order="msb_to_lsb" radix="hex" state="expand" type="combinatorial">
             <net is_signal_inverted="no" name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\GEN_IDE:sd_if|sts_r_o[7]"/>
           </bus>
         </setup_view>
       </presentation>
-      <trigger CRC="E33A20B" attribute_mem_mode="false" gap_record="true" global_temp="1" name="trigger: 2010/11/24 14:00:08  #0" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="1" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="false" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_in="dont_care" trigger_out="active high" trigger_type="circular">
+      <trigger CRC="E4A18A76" attribute_mem_mode="false" gap_record="true" global_temp="1" name="trigger: 2010/11/26 12:48:07  #0" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="1" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="false" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_in="dont_care" trigger_out="active high" trigger_type="circular">
         <power_up_trigger position="pre" storage_qualifier_disabled="no" trigger_in="dont_care" trigger_out="active high"/>
         <events use_custom_flow_control="no">
-          <level enabled="yes" name="condition1" type="basic">'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|nior0_cf' == falling edge
+          <level enabled="yes" name="condition1" type="basic">
             <power_up enabled="yes">
             </power_up>
             <op_node/>
           </level>
         </events>
         <storage_qualifier_events>
-          <transitional>000000000000000000000000000
-            <pwr_up_transitional>000000000000000000000000000
+          <transitional>00000000000000000000000000000
+            <pwr_up_transitional>00000000000000000000000000000
             </pwr_up_transitional>
           </transitional>
           <storage_qualifier_level type="basic">
@@ -213,17 +214,28 @@
           </storage_qualifier_level>
         </storage_qualifier_events>
         <log>
-          <data global_temp="1" name="log: 2010/11/24 14:00:08  #1" power_up_mode="false" sample_depth="128" trigger_position="16">010010010000000100101111000010010010000000100101111000010010010000000100101111000010010010000000100101111000010010010000000100101111000010010010000000100101111000010010010000000100101111000010010010000000100101111000010010010000000100101111000010010011100000100100111000010010011100000100100111000010010011100000100100111000010010011100000100100111000010010011100000100100111000010010011100000100100111000010010011100000100100111000010010011100000100100101000010010011100000100100101000010010011100000100100101000010010011100000100100101000010010011100000100100101000010010011100000100100101000010010011100000100100101000010010011100000100100101000010010011100000100100101000010010011100000100100101000010010011100000100100101000010010011100000100100101000010010011100000100100101000010010011100000100100101000010010011100000100100101000010010011100000100100101000010010011100000100100101000010010011100000100100111000010010011100000100100111000010010011100000100100111000010010011100000100100111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101101000010010011100000100101101000010010011100000100101101000010010011100000100101101000010010011100000100101101000010010011100000100101101000010010011100000100101101000010010011100000100101101000010010011100000100101101000010010011100000100101101000010010011100000100101101000010010011100000100101101000010010011100000100101101000010010011100000100101101000010010011100000100101101000010010011100000100101101000010010011100000100101101000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000010010011100000100101111000</data>
+          <data global_temp="1" name="log: 2010/11/26 12:49:00  #0" power_up_mode="false" sample_depth="128" trigger_position="16">0100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000010010011100000010010011110000100100111000000100100111100001001001110000001001001111000</data>
           <extradata>1111111111111111T111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111</extradata>
         </log>
       </trigger>
     </signal_set>
+    <position_info>
+      <single attribute="active tab" value="1"/>
+      <single attribute="data horizontal scroll position" value="0"/>
+      <single attribute="data vertical scroll position" value="0"/>
+      <single attribute="setup horizontal scroll position" value="0"/>
+      <single attribute="setup vertical scroll position" value="0"/>
+      <single attribute="zoom level denominator" value="1"/>
+      <single attribute="zoom level numerator" value="1"/>
+      <single attribute="zoom offset denominator" value="1"/>
+      <single attribute="zoom offset numerator" value="130944"/>
+    </position_info>
   </instance>
   <mnemonics/>
   <static_plugin_mnemonics/>
   <global_info>
     <single attribute="active instance" value="0"/>
     <single attribute="lock mode" value="36110"/>
-    <multi attribute="window position" size="9" value="1270,930,398,124,0,50,124,0,0"/>
+    <multi attribute="window position" size="9" value="1270,930,398,124,356,50,124,0,0"/>
   </global_info>
 </session>
