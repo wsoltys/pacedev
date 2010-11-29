@@ -361,7 +361,7 @@ begin
       sd_dat_o			=> sd_dat_o,
       sd_dat_oe			=> sd_dat_oe,
       
-      blk						=> lba,
+      blk						=> X"0001E000",
       rd						=> rd_go_25MHz,
       
       read_dat      => read_dat,

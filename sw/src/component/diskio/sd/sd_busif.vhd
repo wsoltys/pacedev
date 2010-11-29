@@ -25,6 +25,7 @@ entity sd_busif is
 		sd_dat_oe			: out std_logic;
 
 		send_cmd			: in std_logic;
+		rd            : in std_logic;
 		busy					: out std_logic;
 		expect_resp		: in std_logic_vector(1 downto 0);			-- Expect "00" (no resp), "01" (R1, R6), "10" (R2), "11" (R3) 
 		cmd						: in std_logic_vector(37 downto 0);
@@ -88,7 +89,7 @@ begin
 			sd_dat_oe			=> sd_dat_oe,
 
 			-- Cooked SD card data serial interface
-			read					=> '0',
+			read					=> rd,
 			write					=> '0',
 			blocksize			=> "00",
 			busy					=> open,

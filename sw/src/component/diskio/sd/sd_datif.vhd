@@ -42,15 +42,15 @@ end sd_datif;
 architecture SYN of sd_datif is
 	type dstate_type is (idle, datrdst, datrdbody, datrdcrc, datrden, datcheck);
 
-	constant crc_len		: integer := 16;		-- CRC length (bits)
-	constant cnt_max		: integer := 4096;	-- Max count value
+	constant crc_len		: integer := 16;		  -- CRC length (bits)
+	constant cnt_max		: integer := 2048*8;	-- Max count value
 
 	signal dstate				: dstate_type;
 	signal dstate_next	: dstate_type;
 	signal sd_dat_r			: std_logic_vector(3 downto 0);
 	signal sd_dat_oe_r	: std_logic;
 
-	signal chunksize		: integer := 512;	-- Expected size of data chunk
+	signal chunksize		: integer := 512*8;	  -- Expected size of data chunk
 
 	signal d_nx					: std_logic_vector(3 downto 0);		-- sd_dat_r next value
 	signal d_oe_nx			: std_logic;		-- sd_dat_oe_r next value
@@ -169,6 +169,7 @@ begin
 			dati_ce			<= '0';
 			dati_cnt		:= 0;
 			dstate			<= idle;
+			sd_dat_oe_r	<= '0';
 
 		-- Synchronous operation
 		elsif rising_edge(clk) then
@@ -217,17 +218,19 @@ begin
 
 			-- Data input shifter
 			dati_ce <= '0';
-			if sd_dat_oe_r = '0' then
-				dati_s := dati_s(dat_width-sd_width-1 downto 0) & sd_dat_i(sd_width-1 downto 0);
-				if dati_cnt < dati_cnt_t'high then
-					dati_cnt := dati_cnt + 1;
-				else 
-					dati_cnt := 0;
-				end if;
-				if dati_cnt = 0 then
-					dati_ce <= '1';
-				end if;
-			end if;
+			if dstate = datrdbody then
+        if sd_dat_oe_r = '0' then
+          dati_s := dati_s(dat_width-sd_width-1 downto 0) & sd_dat_i(sd_width-1 downto 0);
+          if dati_cnt < dati_cnt_t'high then
+            dati_cnt := dati_cnt + 1;
+          else 
+            dati_cnt := 0;
+          end if;
+          if dati_cnt = 0 then
+            dati_ce <= '1';
+          end if;
+        end if;
+			end if;		
 			dati <= dati_s;
 
 		end if;

@@ -615,8 +615,6 @@ set_global_assignment -name SIGNALTAP_FILE pia.stp
 set_global_assignment -name SIGNALTAP_FILE cpu09.stp
 set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/idesd.vhd
 set_global_assignment -name SIGNALTAP_FILE idesd.stp
-set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
-set_global_assignment -name TIMEQUEST_DO_CCPP_REMOVAL OFF
 set_global_assignment -name USE_TIMEQUEST_TIMING_ANALYZER ON
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to sd_clk -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[0] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_if:sd_if_inst|\\PROC_MSG:cnt[0]" -section_id auto_signaltap_0
@@ -816,49 +814,65 @@ set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[95] -t
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[96] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_if:sd_if_inst|sd_busif:sd_busif_1|sd_cmdif:sd_cmdif_1|cstate.respwait" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[97] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_if:sd_if_inst|sd_busif:sd_busif_1|sd_cmdif:sd_cmdif_1|scc_match" -section_id auto_signaltap_0
 set_global_assignment -name QIP_FILE sd_rd_fifo.qip
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[98] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[99] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[10]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[100] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[11]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[101] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[12]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[102] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[13]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[103] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[14]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[104] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[15]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[105] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[106] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[107] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[108] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[109] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[110] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[111] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[112] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[8]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[113] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[9]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[114] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|wrreq" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[115] -to sd_cmd -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[116] -to sd_dat -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[117] -to sd_dat3 -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[98] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[99] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[10]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[100] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[11]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[101] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[12]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[102] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[13]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[103] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[14]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[104] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[15]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[105] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[106] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[107] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[108] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[109] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[110] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[111] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[112] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[8]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[113] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[9]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[114] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|wrreq" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[115] -to sd_cmd -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[116] -to sd_dat -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[117] -to sd_dat3 -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=118" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=118" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=377" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=4780" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=55385" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[98] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_if:sd_if_inst|sd_busif:sd_busif_1|sd_datif:sd_datif_1|dstate.datcheck" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[99] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_if:sd_if_inst|sd_busif:sd_busif_1|sd_datif:sd_datif_1|dstate.datrdbody" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[100] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_if:sd_if_inst|sd_busif:sd_busif_1|sd_datif:sd_datif_1|dstate.datrdcrc" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[101] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_if:sd_if_inst|sd_busif:sd_busif_1|sd_datif:sd_datif_1|dstate.datrden" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[102] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_if:sd_if_inst|sd_busif:sd_busif_1|sd_datif:sd_datif_1|dstate.datrdst" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[103] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_if:sd_if_inst|sd_busif:sd_busif_1|sd_datif:sd_datif_1|dstate.idle" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[104] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_if:sd_if_inst|sd_busif:sd_busif_1|sd_datif:sd_datif_1|read" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[98] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_if:sd_if_inst|sd_busif:sd_busif_1|sd_datif:sd_datif_1|dstate.datcheck" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[99] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_if:sd_if_inst|sd_busif:sd_busif_1|sd_datif:sd_datif_1|dstate.datrdbody" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[100] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_if:sd_if_inst|sd_busif:sd_busif_1|sd_datif:sd_datif_1|dstate.datrdcrc" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[101] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_if:sd_if_inst|sd_busif:sd_busif_1|sd_datif:sd_datif_1|dstate.datrden" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[102] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_if:sd_if_inst|sd_busif:sd_busif_1|sd_datif:sd_datif_1|dstate.datrdst" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[103] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_if:sd_if_inst|sd_busif:sd_busif_1|sd_datif:sd_datif_1|dstate.idle" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[104] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_if:sd_if_inst|sd_busif:sd_busif_1|sd_datif:sd_datif_1|read" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[105] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_if:sd_if_inst|sd_busif:sd_busif_1|sd_datif:sd_datif_1|sdc_match" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[106] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[107] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[10]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[108] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[11]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[109] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[12]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[110] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[13]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[111] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[14]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[112] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[15]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[113] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[114] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[115] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[116] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[117] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[118] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[119] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[120] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[8]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[121] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[9]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[122] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|wrreq" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[123] -to sd_cmd -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[124] -to sd_dat -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[125] -to sd_dat3 -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[105] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_if:sd_if_inst|sd_busif:sd_busif_1|sd_datif:sd_datif_1|sdc_match" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[106] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[107] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[10]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[108] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[11]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[109] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[12]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[110] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[13]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[111] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[14]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[112] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[15]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[113] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[114] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[115] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[116] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[117] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[118] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[119] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[120] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[8]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[121] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|data[9]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[122] -to "custom_io:\\BLK_CUSTOM_IO:custom_io_inst|ide_sd:\\GEN_IDE:sd_if|sd_rd_fifo:rd_fifo_inst|wrreq" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[123] -to sd_cmd -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[124] -to sd_dat -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[125] -to sd_dat3 -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=126" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=126" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=401" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=22483" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=29400" -section_id auto_signaltap_0

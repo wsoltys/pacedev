@@ -108,7 +108,9 @@ architecture SYN of sd_if is
 	signal card_ocr			: std_logic_vector(31 downto 0);
 	signal card_status	: std_logic_vector(31 downto 0);
 	signal card_id			: std_logic_vector(119 downto 0);
-	
+
+  signal rd_go        : std_logic := '0';
+  
 begin
 	dbg_s <= card_ocr when dbgsel = "000" else
 		"00000000" & card_id(119 downto 96) when dbgsel = "001" else
@@ -146,6 +148,7 @@ begin
 			resp					=> resp_s,
 			resp_err			=> resp_err,
 			
+			rd            => rd_go,
 			busy					=> cmd_busy,
 			
 			read_dat      => read_dat,
@@ -181,6 +184,7 @@ begin
 			card_id <= (others => '0');
 			card_status <= (others => '0');
 		elsif clk_en_50MHz = '1' and rising_edge(clk) then
+      rd_go <= '0'; -- default
 			if msg_cnt = 2 and state = msg_resp and cmd_busy = '0' and resp_err = '0' then
 				card_ocr <= resp_s(31 downto 0);
 			end if;
@@ -244,7 +248,10 @@ begin
 				end if;
 			
 			when idle =>
-				if rd = '1' then state := msg_wait; end if;
+				if rd = '1' then 
+          state := msg_wait; 
+          rd_go <= '1';
+        end if;
 				cnt := 128 - 4;
 			end case;
 
@@ -253,6 +260,7 @@ begin
 		
 		msg_cnt_s <= msg_cnt;
 		state_s <= state;
+
 	end process PROC_MSG;
 
 end SYN;
