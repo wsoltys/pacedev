@@ -39,7 +39,7 @@ int main (int argc, char *argv[])
   int to_h = 16;
   int to_s = 32;
 
-  int use_c = 170;
+  int use_c = 5*170;
   int use_h = 8;
   int use_s = 32;
 
