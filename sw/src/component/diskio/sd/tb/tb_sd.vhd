@@ -32,6 +32,13 @@ architecture SYN of tb_sd is
   signal sw         : std_logic_vector(17 downto 0);     --	Toggle Switch[17:0]
 	signal blk_s			: std_logic_vector(31 downto 0);
 	signal rd_s				: std_logic;
+
+  signal sd_cmd_i   : std_logic := '0';
+  signal sd_cmd_o   : std_logic := '0';
+  signal sd_cmd_oe  : std_logic := '0';
+  signal sd_dat_i   : std_logic_vector(3 downto 0) := (others => '0');    
+  signal sd_dat_o   : std_logic_vector(3 downto 0) := (others => '0');    
+  signal sd_dat_oe  : std_logic;    
   
 begin
 
@@ -57,8 +64,12 @@ begin
   			reset					=> arst,
   
   			sd_clk				=> sd_clk,
-  			sd_cmd				=> sd_cmd,
-  			sd_dat			  => sd_dat,
+        sd_cmd_i      => sd_cmd_i,
+        sd_cmd_o      => sd_cmd_o,
+        sd_cmd_oe     => sd_cmd_oe,
+        sd_dat_i      => sd_dat_i,
+        sd_dat_o      => sd_dat_o,
+        sd_dat_oe     => sd_dat_oe,
   			
   			blk						=> block_r(2),
   			rd						=> rd_r(2),
@@ -107,9 +118,14 @@ begin
   sd_card : sdModel
     port map
     (
-      sdClk   => sd_clk,
-      cmd     => sd_cmd,
-      dat     => sd_dat
+      sdClk       => sd_clk,
+  		cmd			    => sd_cmd,
+  		dat			    => sd_dat
     );
 
+  sd_cmd_i <= sd_cmd;
+  sd_cmd <= sd_cmd_o when sd_cmd_oe = '1' else 'Z';
+  sd_dat_i <= sd_dat;
+  sd_dat <= sd_dat_o when sd_dat_oe = '1' else (others => 'Z');
+  
 end SYN;

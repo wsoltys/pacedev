@@ -10,7 +10,7 @@
 `define BLOCKSIZE 512
 `define MEMSIZE 2048 // 4 block
 `define BLOCK_BUFFER_SIZE 1
-`define TIME_BUSY 64
+`define TIME_BUSY 10000
 
 `define PRG 7
 `define RCV 6
@@ -130,7 +130,7 @@ crcOut);
 
 
 reg appendCrc;
-reg [7:0] startUppCnt;
+reg [15:0] startUppCnt;
 
 reg q_start_bit;
 //Card initinCMd
