@@ -106,7 +106,14 @@ architecture SYN of ide_sd is
   signal rom_d        : std_logic_vector(15 downto 0) := (others => '0');
 
   signal lba          : std_logic_vector(31 downto 0) := (others => '0');
-
+  signal rd_go_25MHz  : std_logic := '0';
+  signal read_dat     : std_logic_vector(15 downto 0);
+  signal read_ce      : std_logic;
+  signal read_err     : std_logic;
+  
+  signal sd_rd_rd     : std_logic := '0';
+  signal sd_rd_data   : std_logic_vector(15 downto 0) := (others => '0');
+  
 begin
 
   process (clk, rst)
@@ -120,6 +127,7 @@ begin
       if clk_ena = '1' then
         cmd_go <= '0';      -- default
         data_rd_go <= '0';  -- default
+        sd_rd_rd <= '0';    -- default
         if nreset_cf = '0' then
           null;
         elsif nce_cf = "10" then
@@ -132,6 +140,8 @@ begin
               when "001" =>   -- error
                 d_i <= X"00" & err_r_o;
               when "010" =>   -- sector_count
+                d_i <= sd_rd_data;
+                sd_rd_rd <= '1';
               when "011" =>   -- sector_number
               when "100" =>   -- cyl_lo
               when "101" =>   -- cyl_hi
@@ -279,6 +289,43 @@ begin
     end process;
   end block BLK_READ_SM;
   
+  BLK_TEMP : block
+    signal rd_go_slow : std_logic := '0';
+  begin
+    process (clk, rst)
+      variable count : integer range 0 to 4;
+    begin
+      if rst = '1' then
+        count := 0;
+        rd_go_slow <= '0';
+      elsif rising_edge(clk) then
+        if rd_go = '1' then
+          count := 4;
+        elsif count /= 0 then
+          rd_go_slow <= '1';
+          count := count - 1;
+        else
+          rd_go_slow <= '0';
+        end if;
+      end if;
+    end process;
+
+    process (clk_25M, rst)
+      variable rd_go_r : std_logic_vector(4 downto 0) := (others => '0');
+    begin
+      if rst = '1' then
+        rd_go_r := (others => '0');
+      elsif rising_edge(clk_25M) then
+        rd_go_25MHz <= '0'; -- default
+        if rd_go_r(4) = '0' and rd_go_r(3) = '1' then
+          rd_go_25MHz <= '1';
+        end if;
+        rd_go_r := rd_go_r(3 downto 0) & rd_go_slow;
+      end if;
+    end process;
+    
+  end block BLK_TEMP;
+  
   -- COLOR BASIC ROM
   iderom_inst : entity work.sprom
 		generic map
@@ -297,7 +344,8 @@ begin
   sd_if_inst : entity work.sd_if
     generic map
     (
-      sd_width 		  => 1
+      sd_width 		  => 1,
+      dat_width     => 16
     )
     port map
     (
@@ -314,10 +362,29 @@ begin
       sd_dat_oe			=> sd_dat_oe,
       
       blk						=> lba,
-      rd						=> '0',
+      rd						=> rd_go_25MHz,
       
+      read_dat      => read_dat,
+      read_ce       => read_ce,
+      read_err      => read_err,
+
       dbg						=> open,
       dbgsel				=> "000"
+    );
+
+  rd_fifo_inst : entity work.sd_rd_fifo
+    port map
+    (
+      aclr		  => rst,
+      wrclk		  => clk_25M,
+      wrreq		  => read_ce,
+      wrfull		=> open,
+      data		  => read_dat,
+
+      rdclk		  => clk,
+      rdreq		  => sd_rd_rd,
+      rdempty		=> open,
+      q		      => sd_rd_data
     );
 
 end architecture SYN;

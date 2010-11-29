@@ -6,7 +6,8 @@ use ieee.numeric_std.all;
 
 entity sd_if is
 	generic (
-		sd_width 		: integer := 1		-- 1 or 4-bit data bus
+		sd_width 		: integer := 1;	  -- 1 or 4-bit data bus
+		dat_width		: integer	:= 8		-- Width of data in/out bus
 	);
 	port
 	(
@@ -25,9 +26,12 @@ entity sd_if is
 		blk						: in std_logic_vector(31 downto 0);
 		rd						: in std_logic;
 		
+		read_dat      : out std_logic_vector(dat_width-1 downto 0);
+		read_ce       : out std_logic;
+		read_err      : out std_logic;
+
 		dbg						: out std_logic_vector(31 downto 0);
 		dbgsel				: in std_logic_vector(2 downto 0)
-
 	);
 end sd_if;
 
@@ -117,7 +121,11 @@ begin
 	dwidth_s <= dwidth_4 when sd_width = 4 else dwidth_1;
 		
 	sd_busif_1 : entity work.sd_busif	
-		generic map(sd_width => sd_width)
+		generic map
+		(
+      sd_width      => sd_width,
+      dat_width     => dat_width
+    )
 		port map
 		(
 			clk						=> clk,
@@ -138,7 +146,11 @@ begin
 			resp					=> resp_s,
 			resp_err			=> resp_err,
 			
-			busy					=> cmd_busy
+			busy					=> cmd_busy,
+			
+			read_dat      => read_dat,
+      read_ce       => read_ce,
+      read_err      => read_err
 		);
 
 	msg <= msgs(msg_cnt_s);
@@ -212,7 +224,8 @@ begin
 						if msg_cnt < msgs'high then
 					
 							-- Repeat read OCR until card is finished power-up sequence
-							if msg_cnt = 3 and card_ocr(31) = '0' then
+							--if msg_cnt = 2 and card_ocr(31) = '0' then
+							if msg_cnt = 2 and resp_s(31) = '0' then
 								msg_cnt := 1;
 							else
 								msg_cnt := msg_cnt + 1;

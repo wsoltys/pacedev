@@ -314,7 +314,8 @@ begin
     sd_dat_i(0) <= sd_dat;
     sd_dat <= sd_dat_o(0) when sd_dat_oe = '1' else 'Z';
     sd_dat_i(3) <= sd_dat3;
-    sd_dat3 <= sd_dat_o(3) when sd_dat_oe = '1' else 'Z';
+    --sd_dat3 <= sd_dat_o(3) when sd_dat_oe = '1' else 'Z';
+    sd_dat3 <= '1';
     sd_cmd_i <= sd_cmd;
     sd_cmd <= sd_cmd_o when sd_cmd_oe = '1' else 'Z';
     

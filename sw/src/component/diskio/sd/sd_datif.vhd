@@ -11,7 +11,8 @@ use ieee.std_logic_arith.all;
 use ieee.numeric_std.all;
 
 entity sd_datif is
-	generic (
+	generic 
+	(
 		sd_width		: integer;		-- Width of SD bus
 		dat_width		: integer			-- Width of data in/out bus
 	);

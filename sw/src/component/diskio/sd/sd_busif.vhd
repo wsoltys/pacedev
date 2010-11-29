@@ -5,8 +5,10 @@ use ieee.std_logic_arith.all;
 use ieee.numeric_std.all;
 
 entity sd_busif is
-	generic (
-		sd_width		: integer
+	generic 
+	(
+		sd_width		  : integer;
+		dat_width     : integer
 	);
 	port
 	(
@@ -27,7 +29,11 @@ entity sd_busif is
 		expect_resp		: in std_logic_vector(1 downto 0);			-- Expect "00" (no resp), "01" (R1, R6), "10" (R2), "11" (R3) 
 		cmd						: in std_logic_vector(37 downto 0);
 		resp					: out std_logic_vector(125 downto 0);
-		resp_err			: out std_logic
+		resp_err			: out std_logic;
+		
+		read_dat      : out std_logic_vector(dat_width-1 downto 0);
+		read_ce       : out std_logic;
+		read_err      : out std_logic
 	);
 end sd_busif;
 
@@ -66,9 +72,10 @@ begin
 		);
 
 	sd_datif_1 : entity work.sd_datif
-		generic map (
+		generic map 
+		(
 			sd_width		=> sd_width,
-			dat_width		=> 8
+			dat_width		=> dat_width
 		)
 		port map
 		(
@@ -85,9 +92,9 @@ begin
 			write					=> '0',
 			blocksize			=> "00",
 			busy					=> open,
-			dati					=> open,
-			dati_ce				=> open,
-			dati_err			=> open,
+			dati					=> read_dat,
+			dati_ce				=> read_ce,
+			dati_err			=> read_err,
 			datout				=> (others => '0'),
 			datout_ce			=> open
 		);
