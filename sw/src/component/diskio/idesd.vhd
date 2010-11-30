@@ -85,34 +85,30 @@ architecture SYN of ide_sd is
   -- DRQ can only be changed when BSY=1
   -- IDX,DRDY,DF,DSC,CORR can be changed when BSY=0
   
-  signal sts_r_o      : std_logic_vector(7 downto 0) := (others => '0');
-  constant BSY        : integer := 7;
-  constant DRDY       : integer := 6;
-  constant DF         : integer := 5;
-  constant DSC        : integer := 4;
-  constant DRQ        : integer := 3;
-  constant CORR       : integer := 2;
-  constant IDX        : integer := 1;
-  constant ERR        : integer := 0;
-  signal read_sts     : std_logic_vector(sts_r_o'range) := (others => '0');
-  signal cmd_sts      : std_logic_vector(sts_r_o'range) := (others => '0');
+  signal sts_r_o          : std_logic_vector(7 downto 0) := (others => '0');
+  constant BSY            : integer := 7;
+  constant DRDY           : integer := 6;
+  constant DF             : integer := 5;
+  constant DSC            : integer := 4;
+  constant DRQ            : integer := 3;
+  constant CORR           : integer := 2;
+  constant IDX            : integer := 1;
+  constant ERR            : integer := 0;
+  signal read_sts         : std_logic_vector(sts_r_o'range) := (others => '0');
+  signal cmd_sts          : std_logic_vector(sts_r_o'range) := (others => '0');
   
-  signal cmd_go       : std_logic := '0';
-  signal data_rd_go   : std_logic := '0';
-  signal rd_go        : std_logic := '0';
-  signal rd_done      : std_logic := '0';
+  signal cmd_go           : std_logic := '0';
+  signal rd_go            : std_logic := '0';
+  signal rd_go_25MHz      : std_logic := '0';
+  signal rd_done          : std_logic := '0';
+  signal rd_done_25MHz    : std_logic := '0';
   
-  signal rom_a        : std_logic_vector(7 downto 0) := (others => '0');
-  signal rom_d        : std_logic_vector(15 downto 0) := (others => '0');
+  -- read data fifo signals
+  signal rd_fifo_rdreq    : std_logic := '0';
+  signal rd_fifo_empty    : std_logic := '0';
+  signal rd_fifo_q        : std_logic_vector(15 downto 0) := (others => '0');
 
-  signal lba          : std_logic_vector(31 downto 0) := (others => '0');
-  signal rd_go_25MHz  : std_logic := '0';
-  signal read_dat     : std_logic_vector(15 downto 0);
-  signal read_ce      : std_logic;
-  signal read_err     : std_logic;
-  
-  signal sd_rd_rd     : std_logic := '0';
-  signal sd_rd_data   : std_logic_vector(15 downto 0) := (others => '0');
+  signal lba              : std_logic_vector(31 downto 0) := (others => '0');
   
 begin
 
@@ -125,9 +121,8 @@ begin
       niow_r := '1';
     elsif rising_edge(clk) then
       if clk_ena = '1' then
-        cmd_go <= '0';      -- default
-        data_rd_go <= '0';  -- default
-        sd_rd_rd <= '0';    -- default
+        cmd_go <= '0';          -- default
+        rd_fifo_rdreq <= '0';   -- default
         if nreset_cf = '0' then
           null;
         elsif nce_cf = "10" then
@@ -135,13 +130,11 @@ begin
           if nior0_cf = '0' and nior_r = '1' then
             case a_cf is
               when "000" =>   -- data
-                d_i <= data_r_o;
-                data_rd_go <= '1';
+                d_i <= rd_fifo_q;
+                rd_fifo_rdreq <= '1';
               when "001" =>   -- error
                 d_i <= X"00" & err_r_o;
               when "010" =>   -- sector_count
-                d_i <= sd_rd_data;
-                sd_rd_rd <= '1';
               when "011" =>   -- sector_number
               when "100" =>   -- cyl_lo
               when "101" =>   -- cyl_hi
@@ -185,17 +178,20 @@ begin
   sts_r_o(6 downto 0) <= cmd_sts(6 downto 0) or read_sts(6 downto 0);
   
   BLK_MAIN_SM : block
-    type state_t is ( S_IDLE, S_DIAGNOSTIC, S_IDENTIFY, S_READ_1, S_WAIT_READ );
+    type state_t is ( S_IDLE, S_DIAGNOSTIC, S_IDENTIFY, 
+                      S_READ_1, S_START_READ, S_WAIT_READ );
     signal state : state_t := S_IDLE;
   begin
     process (clk, rst)
+      subtype count_t is integer range 0 to 4;
+      variable count : count_t := 0;
     begin
       if rst = '1' then
         cmd_sts <= (others => '0');
+        rd_go <= '0';
         state <= S_IDLE;
       elsif rising_edge(clk) then
         if clk_ena = '1' then
-          rd_go <= '0';   -- default
           if cmd_go = '1' then
             cmd_sts(BSY) <= '1';      -- default
             cmd_sts(DRDY) <= '0';     -- default
@@ -204,8 +200,8 @@ begin
                 state <= S_DIAGNOSTIC;
               when IDENTIFY_DEVICE =>
                 state <= S_IDENTIFY;
-              when READ_SECTORS_W_RETRY =>
-              when READ_SECTORS_WO_RETRY =>
+              when READ_SECTORS_W_RETRY | 
+                    READ_SECTORS_WO_RETRY =>
                 state <= S_READ_1;
               when others =>
                 cmd_sts(BSY) <= '0';
@@ -222,12 +218,21 @@ begin
                 state <= S_IDLE;
               when S_IDENTIFY =>
                 -- set up some read operation here
-                rd_go <= '1';
-                state <= S_WAIT_READ;
+                count := count_t'high;
+                state <= S_START_READ;
               when S_READ_1 =>
                 -- set up some read operation here
-                rd_go <= '1';
-                state <= S_WAIT_READ;
+                count := count_t'high;
+                state <= S_START_READ;
+              when S_START_READ =>
+                -- pulse-extend rd_go for use in 25MHz clock domain
+                if count /= 0 then
+                  rd_go <= '1';
+                  count := count - 1;
+                else
+                  rd_go <= '0';
+                  state <= S_WAIT_READ;
+                end if;
               when S_WAIT_READ =>
                 if rd_done = '1' then
                   state <= S_IDLE;
@@ -240,151 +245,179 @@ begin
       end if;
     end process;
   end block BLK_MAIN_SM;
-  
-  BLK_READ_SM : block
-    type state_t is ( S_IDLE, S_LATCH_DATA, S_WAIT_IORD );
-    signal state : state_t := S_IDLE;
-  begin
-    process (clk, rst)
-      subtype count_t is integer range 0 to 255;
-      variable count : count_t := 0;
-    begin
-      if rst = '1' then
-        read_sts <= (others => '0');
-        state <= S_IDLE;
-      elsif rising_edge(clk) then
-        if clk_ena = '1' then
-          rd_done <= '0';   -- default
-          case state is
-            when S_IDLE =>
-              read_sts(DRQ) <= '0';   -- default
-              if rd_go = '1' then
-                count := 0;
-                rom_a <= (others => '0');
-                state <= S_LATCH_DATA;
-              end if;
-            when S_LATCH_DATA =>
-              -- latch data in register & set data ready
-              data_r_o <= rom_d;
-              read_sts(DRQ) <= '1';
-              state <= S_WAIT_IORD;
-            when S_WAIT_IORD =>
-              -- wait for an IORD to increment data
-              if data_rd_go = '1' then
-                read_sts(DRQ) <= '0';
-                if count = count_t'high then
-                  rd_done <= '1';
-                  state <= S_IDLE;
-                else
-                  count := count + 1;
-                  rom_a <= std_logic_vector(unsigned(rom_a) + 1);
-                  state <= S_LATCH_DATA;
-                end if;
-              end if;
-            when others =>
-              null;
-          end case;
-        end if; -- clk_ena='1'
-      end if;
-    end process;
-  end block BLK_READ_SM;
-  
-  BLK_TEMP : block
-    signal rd_go_slow : std_logic := '0';
-  begin
-    process (clk, rst)
-      variable count : integer range 0 to 4;
-    begin
-      if rst = '1' then
-        count := 0;
-        rd_go_slow <= '0';
-      elsif rising_edge(clk) then
-        if rd_go = '1' then
-          count := 4;
-        elsif count /= 0 then
-          rd_go_slow <= '1';
-          count := count - 1;
-        else
-          rd_go_slow <= '0';
-        end if;
-      end if;
-    end process;
 
+  -- create a 25MHz read_go pulse
+  process (clk_25M, rst)
+    variable rd_go_r : std_logic_vector(4 downto 0) := (others => '0');
+  begin
+    if rst = '1' then
+      rd_go_r := (others => '0');
+    elsif rising_edge(clk_25M) then
+      rd_go_25MHz <= '0'; -- default
+      if rd_go_r(4) = '0' and rd_go_r(3) = '1' then
+        rd_go_25MHz <= '1';
+      end if;
+      rd_go_r := rd_go_r(3 downto 0) & rd_go;
+    end if;
+  end process;
+
+  -- extract a SYSCLK read_done pulse
+  process (clk, rst)
+    variable rd_done_r : std_logic_vector(3 downto 0) := (others => '0');
+  begin
+    if rst = '1' then
+      rd_done_r := (others => '0');
+      rd_done <= '0';
+    elsif rising_edge(clk) then
+      rd_done <= '0';
+      if rd_done_r(rd_done_r'left) = '0' and rd_done_r(rd_done_r'left-1) = '1' then
+        rd_done <= '1';
+      end if;
+      rd_done_r := rd_done_r(rd_done_r'left-1 downto 0) & rd_done_25MHz;
+    end if;
+  end process;
+  
+  BLK_READ : block
+  
+    -- IDENTIFY_DEVICE ROM signals
+    signal id_rom_a       : std_logic_vector(7 downto 0) := (others => '0');
+    signal id_rom_d       : std_logic_vector(15 downto 0) := (others => '0');
+    
+    -- read signals from SD core
+    signal sd_rd_go       : std_logic;
+    signal sd_rd_d        : std_logic_vector(15 downto 0);
+    signal sd_rd_ce       : std_logic;
+    signal sd_rd_err      : std_logic;
+
+    -- read FIFO signals
+    signal rd_fifo_clr    : std_logic := '0';
+    signal rd_fifo_wrreq  : std_logic := '0';
+    signal rd_fifo_wrfull : std_logic := '0';
+    signal rd_fifo_data   : std_logic_vector(15 downto 0) := (others => '0');
+    
+    type state_t is ( S_IDLE, S_ID_1, S_RD_1 );
+    signal state  : state_t := S_IDLE;
+    
+  begin
     process (clk_25M, rst)
-      variable rd_go_r : std_logic_vector(4 downto 0) := (others => '0');
+      subtype count_t is integer range 0 to 255;
+      variable count  : count_t := 0;
     begin
       if rst = '1' then
-        rd_go_r := (others => '0');
+        state <= S_IDLE;
       elsif rising_edge(clk_25M) then
-        rd_go_25MHz <= '0'; -- default
-        if rd_go_r(4) = '0' and rd_go_r(3) = '1' then
-          rd_go_25MHz <= '1';
-        end if;
-        rd_go_r := rd_go_r(3 downto 0) & rd_go_slow;
+        sd_rd_go <= '0';        -- default
+        rd_fifo_wrreq <= '0';   -- default
+        rd_done_25MHz <= '0';   -- default
+        case state is
+          when S_IDLE =>
+            if rd_go_25MHz = '1' then
+              case cmd_r_i is
+                when IDENTIFY_DEVICE =>
+                  id_rom_a <= (others => '0');
+                  state <= S_ID_1;
+                when others =>
+                  count := 0;
+                  sd_rd_go <= '1';
+                  state <= S_RD_1;
+              end case;
+            end if;
+          when S_ID_1 =>
+            if rd_fifo_wrfull = '0' then
+              rd_fifo_wrreq <= '1';
+              rd_fifo_data <= id_rom_d;
+              if id_rom_a = X"FF" then
+                rd_done_25MHz <= '1';
+                state <= S_IDLE;
+              else
+                id_rom_a <= std_logic_vector(unsigned(id_rom_a) + 1);
+              end if;
+            end if;
+          when S_RD_1 =>
+            -- not much we can do about wrfull atm
+            rd_fifo_data <= sd_rd_d(7 downto 0) & sd_rd_d(15 downto 8);
+            rd_fifo_wrreq <= sd_rd_ce;
+            if sd_rd_ce = '1' then
+              if count = count_t'high then
+                rd_done_25MHz <= '1';
+                state <= S_IDLE;
+              else
+                count := count + 1;
+              end if;
+            end if;
+          when others =>
+            state <= S_IDLE;
+        end case;
       end if;
     end process;
     
-  end block BLK_TEMP;
-  
-  -- COLOR BASIC ROM
-  iderom_inst : entity work.sprom
-		generic map
-		(
-			init_file		=> "../../../../src/platform/coco1/roms/identifydevice.hex",
-			widthad_a   => 8,
-			width_a     => 16
-		)
-  	port map
-  	(
-  		clock		    => clk,
-  		address		  => rom_a(7 downto 0),
-  		q			      => rom_d
-  	);
+    -- IDE IDENTIFY_DEVICE ROM
+    iderom_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> "../../../../src/platform/coco1/roms/identifydevice.hex",
+        widthad_a   => 8,
+        width_a     => 16
+      )
+      port map
+      (
+        clock		    => clk_25M,
+        address		  => id_rom_a,
+        q			      => id_rom_d
+      );
 
-  sd_if_inst : entity work.sd_if
-    generic map
-    (
-      sd_width 		  => 1,
-      dat_width     => 16
-    )
-    port map
-    (
-      clk						=> clk_25M,
-      clk_en_50MHz	=> '1',
-      reset					=> rst,
+    -- read FIFO from ID/SD
+    rd_fifo_clr <= rst or rd_go;
+    rd_fifo_inst : entity work.sd_rd_fifo
+      port map
+      (
+        aclr		  => rst,
+        wrclk		  => clk_25M,
+        wrreq		  => rd_fifo_wrreq,
+        wrfull		=> rd_fifo_wrfull,
+        data		  => rd_fifo_data,
 
-      sd_clk				=> sd_clk,
-      sd_cmd_i			=> sd_cmd_i,
-      sd_cmd_o			=> sd_cmd_o,
-      sd_cmd_oe			=> sd_cmd_oe,
-      sd_dat_i			=> sd_dat_i,
-      sd_dat_o			=> sd_dat_o,
-      sd_dat_oe			=> sd_dat_oe,
-      
-      blk						=> X"0001E000",
-      rd						=> rd_go_25MHz,
-      
-      read_dat      => read_dat,
-      read_ce       => read_ce,
-      read_err      => read_err,
+        rdclk		  => clk,
+        rdreq		  => rd_fifo_rdreq,
+        rdempty		=> rd_fifo_empty,
+        q		      => rd_fifo_q
+      );
+    read_sts(DRQ) <= not rd_fifo_empty;
 
-      dbg						=> open,
-      dbgsel				=> "000"
-    );
+    -- sd core currently uses byte address
+    lba <= lba28_r_i(22 downto 0) & "000000000";
+    
+    sd_if_inst : entity work.sd_if
+      generic map
+      (
+        sd_width 		  => 1,
+        dat_width     => 16
+      )
+      port map
+      (
+        clk						=> clk_25M,
+        clk_en_50MHz	=> '1',
+        reset					=> rst,
 
-  rd_fifo_inst : entity work.sd_rd_fifo
-    port map
-    (
-      aclr		  => rst,
-      wrclk		  => clk_25M,
-      wrreq		  => read_ce,
-      wrfull		=> open,
-      data		  => read_dat,
+        sd_clk				=> sd_clk,
+        sd_cmd_i			=> sd_cmd_i,
+        sd_cmd_o			=> sd_cmd_o,
+        sd_cmd_oe			=> sd_cmd_oe,
+        sd_dat_i			=> sd_dat_i,
+        sd_dat_o			=> sd_dat_o,
+        sd_dat_oe			=> sd_dat_oe,
+        
+        blk						=> lba,
+        rd						=> sd_rd_go,
+        
+        read_dat      => sd_rd_d,
+        read_ce       => sd_rd_ce,
+        read_err      => sd_rd_err,
 
-      rdclk		  => clk,
-      rdreq		  => sd_rd_rd,
-      rdempty		=> open,
-      q		      => sd_rd_data
-    );
+        dbg						=> open,
+        dbgsel				=> "000"
+      );
+
+  end block BLK_READ;
 
 end architecture SYN;
