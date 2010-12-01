@@ -28,27 +28,92 @@ void dump (unsigned short int *buf)
 
 int main (int argc, char *argv[])
 {
-  FILE *fpin = fopen ("trs80cf.dsk", "rb");
-  FILE *fpout = fopen ("trs80cf_mmc.bin", "wb");
+  int fromByte = 0;
+  int toByte = 0;
 
-  int from_c = 3884;
-  int from_h = 16;
-  int from_s = 63;
+  unsigned short int zero[256];
+  memset ((unsigned char *)zero, 0, 512);
+
+#if 0
+
+  FILE *fpout = fopen ("hdd_repaired.bin", "wb");
+  FILE *fpin;
+
+  // use the 1st partition from the pre-image
+  fpin = fopen ("ldos_8bit_980.8.32_5x170.bin", "rb");
+  for (int i=0; i<1*170*8*32; i++)
+  {
+    unsigned char buf[512];
+    fread (buf, 2, 256, fpin);
+    for (int j=0; j<256; j++)
+    {
+      fwrite (&buf[j], 1, 1, fpout);
+      fwrite (&zero, 1, 1, fpout);
+    }
+  }
+  fclose (fpin);
+
+  // now use the rest from the new image
+  fpin = fopen ("hdd_pb.bin", "rb");
+  fseek (fpin, 1*170*8*32L, SEEK_SET);
+  for (int i=0; i<4*170*8*32; i++)
+  {
+    unsigned char buf[512];
+    fread (buf, 2, 256, fpin);
+    fwrite (buf, 2, 256, fpout);
+  }
+  fclose (fpin);
+
+  fclose (fpout);
+
+#else
+
+  //FILE *fpin = fopen ("trs80cf.dsk", "rb");
+  //FILE *fpout = fopen ("trs80cf_mmc.bin", "wb");
+
+  FILE *fpin = fopen ("hdd_pb.hdv", "rb");
+  FILE *fpout = fopen ("hdd_pb.bin", "wb");
+
+  int from_c = 980; //3884;
+  int from_h = 8; //16;
+  int from_s = 32; //63;
 
   int to_c = 980;
-  int to_h = 16;
+  int to_h = 16; //8; //16;
   int to_s = 32;
 
   int use_c = 5*170;
   int use_h = 8;
   int use_s = 32;
 
+  while (--argc)
+  {
+    switch (argv[argc][0])
+    {
+      case '/' : case '-' :
+        switch (tolower(argv[argc][1]))
+        {
+          case 'b' :
+            fromByte = 1;
+            break;
+          case 'B' :
+            toByte = 1;
+            break;
+          default :
+            break;
+        }
+        break;
+      default :
+        break;
+    }
+  }
+
   unsigned long from_size = from_c * from_h * from_s * 512L;
   unsigned long to_size = to_c * to_h * to_s * 512L;
   unsigned long use_size = use_c * use_h * use_s * 512L;
 
-  fprintf (stderr, "from: C,H,S=%d,%d,%d (%ld)\n", from_c, from_h, from_s, from_size);
-  fprintf (stderr, "  to: C,H,S=%d,%d,%d (%ld)\n", to_c, to_h, to_s, to_size);
+  fprintf (stderr, "from: C,H,S=%d,%d,%d (%ld) (%c)\n", from_c, from_h, from_s, from_size, (fromByte ? 'b' : 'w'));
+  fprintf (stderr, "  to: C,H,S=%d,%d,%d (%ld) (%c)\n", to_c, to_h, to_s, to_size, (toByte ? 'B' : 'W'));
   fprintf (stderr, " use: C,H,S=%d,%d,%d (%ld)\n", use_c, use_h, use_s, use_size);
 
   if (use_c > from_c || use_c > to_c || use_h > from_h || use_h > to_h || use_s > from_s || use_s > to_s)
@@ -68,10 +133,19 @@ int main (int argc, char *argv[])
     {
       for (int s=0; s<from_s; s++)
       {
-        unsigned short int buf[256];
+        unsigned char buf[512];
 
         // read sector
-        fread (buf, 2, 256, fpin);
+        if (fromByte)
+        {
+          for (int i=0; i<256; i++)
+          {
+            fread (&buf[i<<1], 1, 1, fpin);
+            buf[(i<<1)+1] = 0;
+          }
+        }
+        else
+          fread (buf, 2, 256, fpin);
 
         // are we interested?
         if (c >= use_c || h >= use_h || s >= use_s)
@@ -90,8 +164,8 @@ int main (int argc, char *argv[])
 #endif
 
   fseek (fpin, 0L, SEEK_SET);
-  unsigned short int zero[256];
-  memset ((unsigned char *)zero, 0, 512);
+  // skip header on virtual hard drive images
+  fseek (fpin, 256L, SEEK_CUR);
 
   // now copy...
   for (int c=0; c<max_c; c++)
@@ -100,22 +174,44 @@ int main (int argc, char *argv[])
     {
       for (int s=0; s<max_s; s++)
       {
-        unsigned short int buf[256];
+        unsigned char buf[512];
 
         // read sector
         if (c < from_c && h < from_h && s < from_s)
-          fread (buf, 2, 256, fpin);
+        {
+          if (fromByte)
+          {
+            for (int i=0; i<256; i++)
+            {
+              fread (&buf[i<<1], 1, 1, fpin);
+              buf[(i<<1)+1] = 0;
+            }
+          }
+          else
+            fread (buf, 2, 256, fpin);
+        }
 
         // do we need to copy it?
         if (c < use_c && h < use_h && s < use_s)
-          fwrite (buf, 2, 256, fpout);
+        {
+          if (toByte)
+          {
+            // only write every 2nd byte
+            for (int i=0; i<256; i++)
+              fwrite (&buf[i<<1], 1, 1, fpout);
+          }
+          else
+            fwrite (buf, (toByte ? 1 : 2), 256, fpout);
+        }
         else
         if (c < to_c && h < to_h && s < to_s)
-          fwrite (zero, 2, 256, fpout);
+          fwrite (zero, (toByte ? 1 : 2), 256, fpout);
       }
     }
   }
 
   fclose (fpout);
   fclose (fpin);
+
+#endif
 }
