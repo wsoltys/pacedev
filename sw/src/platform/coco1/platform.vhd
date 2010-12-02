@@ -203,6 +203,7 @@ architecture SYN of platform is
   signal sel              : std_logic_vector(2 downto 1);
   signal sndout           : std_logic := '0';
   signal joyin            : std_logic := '0';
+  signal cart_bank        : std_logic_vector(3 downto 0) := (others => '0');
   
   alias ps2_platform_rst  : std_logic is inputs_i(8).d(0);
   alias ps2_cpu_rst       : std_logic is inputs_i(8).d(1);
@@ -217,7 +218,7 @@ architecture SYN of platform is
   alias sw_cassette_out   : std_logic is switches_i(5);
   --alias sw_cart_n         : std_logic is switches_i(4);
   signal sw_cart_n        : std_logic := '0';
-  alias sw_cart_bank      : std_logic_vector(3 downto 0) is switches_i(3 downto 0);
+  alias hw_cart_bank      : std_logic_vector(3 downto 0) is switches_i(3 downto 0);
 
   alias jamma_left_fire   : std_logic is jamma_i.p(1).button(1);
   alias jamma_right_fire  : std_logic is jamma_i.p(1).button(2);
@@ -371,10 +372,10 @@ begin
     platform_o.cpu_6809_tsc <= '0';
 
     -- so they don't get optimised-out
-    leds_o(0) <= platform_i.cpu_6809_r_wn;
-    leds_o(1) <= platform_i.cpu_6809_busy;
-    leds_o(2) <= platform_i.cpu_6809_lic;
-    leds_o(3) <= platform_i.cpu_6809_vma;
+    leds_o(6) <= platform_i.cpu_6809_r_wn;
+    leds_o(7) <= platform_i.cpu_6809_busy;
+    leds_o(8) <= platform_i.cpu_6809_lic;
+    leds_o(9) <= platform_i.cpu_6809_vma;
     
   end generate GEN_REAL_6809;
   
@@ -807,7 +808,7 @@ begin
   GEN_NO_CART : if not COCO1_CART_INTERNAL generate
     -- only support 16x16KB cartridges atm
     flash_o.a(flash_o.a'left downto 18) <= (others => '0');
-    flash_o.a(17 downto 14) <= sw_cart_bank;
+    flash_o.a(17 downto 14) <= cart_bank;
     flash_o.a(13 downto 0) <= cpu_a(13 downto 0);
     cart_d_o <= flash_i.d(cart_d_o'range);
     flash_o.cs <= cart_cs;
@@ -817,8 +818,31 @@ begin
   
   -- CART# signal is tied to 'Q' on a real cartridge
   -- - BANKS 0,1 are reserved for DOS (non-autostart)
-  cart_n <= '1' when (sw_cart_n = '0' or sw_cart_bank(3 downto 1) = "000") else clk_q;
+  cart_n <= '1' when (sw_cart_n = '0' or cart_bank(3 downto 1) = "000") else clk_q;
 
+  -- MPI
+  process (clk_57M272, target_rst)
+    variable hw_r : std_logic_vector(cart_bank'range) := (others => '0');
+    variable sw_r : std_logic_vector(cart_bank'range) := (others => '0');
+  begin
+    if target_rst = '1' then
+      hw_r := hw_cart_bank;
+      cart_bank <= hw_cart_bank;
+    elsif rising_edge(clk_57M272) then
+      -- MPI switch changed?
+      if hw_cart_bank /= hw_r then
+        cart_bank <= hw_cart_bank;
+      end if;
+      -- software switch accessed?
+      if cpu_r_wn = '0' and cpu_a = X"FF7F" then
+        cart_bank <= cpu_d_o(cart_bank'range);
+      end if;
+      hw_r := hw_cart_bank;
+    end if;
+  end process;
+  -- show selected slot on the LEDs
+  leds_o(3 downto 0) <= cart_bank;
+  
   GEN_IDE : if COCO1_HAS_IDE generate
 
     type state_t is ( S_IDLE, S_I1, S_R1, S_W1 );
