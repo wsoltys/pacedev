@@ -226,9 +226,33 @@ architecture SYN of platform is
 begin
 
   target_rst <= rst_57M272 or buttons_i(0);
-  platform_rst <= target_rst or buttons_i(1) or ps2_platform_rst;
-	cpu_rst <= platform_rst or buttons_i(2) or ps2_cpu_rst;
 
+  -- extend CPU reset
+  process (clk_57M272, target_rst)
+    subtype count_t is integer range 0 to 31;
+    variable count : count_t := 0;
+    variable ext_rst : std_logic := '1';
+  begin
+    if target_rst = '1' then
+      platform_rst <= '1';
+      cpu_rst <= '1';
+      ext_rst := '1';
+    elsif rising_edge(clk_57M272) then
+      if platform_rst = '1' then
+        ext_rst := '1';
+        count := 0;
+      else
+        if count = count_t'high then
+          ext_rst := '0';
+        elsif cpu_clk_n = '0' then
+          count := count + 1;
+        end if;
+      end if;
+      platform_rst <= target_rst or buttons_i(1) or ps2_platform_rst;
+      cpu_rst <= ext_rst or buttons_i(2) or ps2_cpu_rst;
+    end if;
+  end process;
+  
   -- always 'insert' cartridge if internal
   -- - this won't auto-start because bank="0000"
   sw_cart_n <= switches_i(4) or to_std_logic(COCO1_CART_INTERNAL);
@@ -834,7 +858,7 @@ begin
         cart_bank <= hw_cart_bank;
       end if;
       -- software switch accessed?
-      if cpu_r_wn = '0' and cpu_a = X"FF7F" then
+      if cpu_clk_n = '0' and cpu_r_wn = '0' and cpu_a = X"FF7F" then
         cart_bank <= cpu_d_o(cart_bank'range);
       end if;
       hw_r := hw_cart_bank;

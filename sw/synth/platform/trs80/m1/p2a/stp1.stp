@@ -1,4 +1,4 @@
-<session jtag_chain="" jtag_device="" sof_file="trs80_m1.sof" top_level_entity="target_top">
+<session jtag_chain="USB-Blaster [USB-0]" jtag_device="@1: EP2C35 (0x020B40DD)" sof_file="trs80_m1.sof" top_level_entity="target_top">
   <display_tree>
     <display_branch instance="auto_signaltap_0" signal_set="signal_set: 2010/11/16 22:32:22  #0" trigger="trigger: 2010/11/16 22:32:22  #1"/>
   </display_tree>
@@ -405,10 +405,11 @@
           </bus>
         </setup_view>
       </presentation>
-      <trigger CRC="B28A23B9" attribute_mem_mode="false" gap_record="true" is_expanded="true" name="trigger: 2010/11/16 17:57:38  #0" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="1" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="true" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_in="dont_care" trigger_out="active high" trigger_type="circular">
+      <trigger CRC="B28A23B9" attribute_mem_mode="false" gap_record="true" is_expanded="true" name="trigger: 2010/11/16 17:57:38  #0" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="1" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="false" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_in="dont_care" trigger_out="active high" trigger_type="circular">
         <power_up_trigger position="pre" storage_qualifier_disabled="no" trigger_in="dont_care" trigger_out="active high"/>
         <events use_custom_flow_control="no">
           <level enabled="yes" name="condition1" type="basic">'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|state.S_R1' == rising edge
+            
             
             <power_up enabled="yes">
             </power_up>
@@ -418,7 +419,9 @@
         <storage_qualifier_events>
           <transitional>00000000000000000000000000000000000000000000000000000000000000000000000
             
+            
             <pwr_up_transitional>00000000000000000000000000000000000000000000000000000000000000000000000
+            
             
             </pwr_up_transitional>
           </transitional>
@@ -447,10 +450,11 @@
           <extradata>1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111T111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111</extradata>
         </log>
       </trigger>
-      <trigger CRC="B28A23B9" attribute_mem_mode="false" gap_record="true" is_expanded="true" name="trigger: 2010/11/16 17:59:50  #0" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="1" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="true" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_in="dont_care" trigger_out="active high" trigger_type="circular">
+      <trigger CRC="B28A23B9" attribute_mem_mode="false" gap_record="true" is_expanded="true" name="trigger: 2010/11/16 17:59:50  #0" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="1" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="false" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_in="dont_care" trigger_out="active high" trigger_type="circular">
         <power_up_trigger position="pre" storage_qualifier_disabled="no" trigger_in="dont_care" trigger_out="active high"/>
         <events use_custom_flow_control="no">
           <level enabled="yes" name="condition1" type="basic">'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[0]' == high &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[1]' == high &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[2]' == high &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[3]' == low &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[4]' == low &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[5]' == low &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[6]' == high &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[7]' == high &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|state.S_R1' == rising edge
+            
             
             <power_up enabled="yes">
             </power_up>
@@ -460,7 +464,9 @@
         <storage_qualifier_events>
           <transitional>00000000000000000000000000000000000000000000000000000000000000000000000
             
+            
             <pwr_up_transitional>00000000000000000000000000000000000000000000000000000000000000000000000
+            
             
             </pwr_up_transitional>
           </transitional>
@@ -489,10 +495,11 @@
           <extradata>1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111</extradata>
         </log>
       </trigger>
-      <trigger CRC="B28A23B9" attribute_mem_mode="false" gap_record="true" is_expanded="true" name="trigger: 2010/11/16 18:01:45  #0" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="1" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="true" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_in="dont_care" trigger_out="active high" trigger_type="circular">
+      <trigger CRC="B28A23B9" attribute_mem_mode="false" gap_record="true" is_expanded="true" name="trigger: 2010/11/16 18:01:45  #0" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="1" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="false" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_in="dont_care" trigger_out="active high" trigger_type="circular">
         <power_up_trigger position="pre" storage_qualifier_disabled="no" trigger_in="dont_care" trigger_out="active high"/>
         <events use_custom_flow_control="no">
           <level enabled="yes" name="condition1" type="basic">'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[0]' == low &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[1]' == low &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[2]' == low &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[3]' == high &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[4]' == low &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[5]' == low &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[6]' == high &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[7]' == high &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|state.S_R1' == rising edge
+            
             
             <power_up enabled="yes">
             </power_up>
@@ -502,7 +509,9 @@
         <storage_qualifier_events>
           <transitional>00000000000000000000000000000000000000000000000000000000000000000000000
             
+            
             <pwr_up_transitional>00000000000000000000000000000000000000000000000000000000000000000000000
+            
             
             </pwr_up_transitional>
           </transitional>
@@ -544,18 +553,7 @@
         </log>
       </trigger>
     </signal_set>
-    <position_info>
-      <single attribute="active tab" value="1"/>
-      <single attribute="data horizontal scroll position" value="228"/>
-      <single attribute="data vertical scroll position" value="0"/>
-      <single attribute="setup horizontal scroll position" value="0"/>
-      <single attribute="setup vertical scroll position" value="0"/>
-      <single attribute="zoom level denominator" value="1"/>
-      <single attribute="zoom level numerator" value="16"/>
-      <single attribute="zoom offset denominator" value="1"/>
-      <single attribute="zoom offset numerator" value="8064"/>
-    </position_info>
-    <signal_set name="signal_set: 2010/11/16 22:32:22  #0">
+    <signal_set is_expanded="true" name="signal_set: 2010/11/16 22:32:22  #0">
       <clock name="custom_io:\BLK_CUSTOM_IO:custom_io_inst|platform_o.clk" polarity="posedge" tap_mode="classic"/>
       <config ram_type="M4K" reserved_data_nodes="0" reserved_storage_qualifier_nodes="0" reserved_trigger_nodes="0" sample_depth="2048" trigger_in_enable="no" trigger_out_enable="no"/>
       <top_entity/>
@@ -1084,10 +1082,11 @@
           </bus>
         </setup_view>
       </presentation>
-      <trigger attribute_mem_mode="false" gap_record="true" name="trigger: 2010/11/16 22:32:22  #1" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="1" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="true" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_in="dont_care" trigger_out="active high" trigger_type="circular">
+      <trigger CRC="5821704F" attribute_mem_mode="false" gap_record="true" is_expanded="true" name="trigger: 2010/11/16 22:32:22  #1" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="1" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="false" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_in="dont_care" trigger_out="active high" trigger_type="circular">
         <power_up_trigger position="pre" storage_qualifier_disabled="no" trigger_in="dont_care" trigger_out="active high"/>
         <events use_custom_flow_control="no">
           <level enabled="yes" name="condition1" type="basic">'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[0]' == low &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[1]' == low &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[2]' == low &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[3]' == high &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[4]' == low &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[5]' == low &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[6]' == high &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|platform_o.cpu_a[7]' == high &amp;&amp; 'custom_io:\\BLK_CUSTOM_IO:custom_io_inst|state.S_R1' == rising edge
+            
             <power_up enabled="yes">
             </power_up>
             <op_node/>
@@ -1095,7 +1094,9 @@
         </events>
         <storage_qualifier_events>
           <transitional>00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+            
             <pwr_up_transitional>00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+            
             </pwr_up_transitional>
           </transitional>
           <storage_qualifier_level type="basic">
@@ -1116,6 +1117,17 @@
         </storage_qualifier_events>
       </trigger>
     </signal_set>
+    <position_info>
+      <single attribute="active tab" value="1"/>
+      <single attribute="data horizontal scroll position" value="228"/>
+      <single attribute="data vertical scroll position" value="0"/>
+      <single attribute="setup horizontal scroll position" value="0"/>
+      <single attribute="setup vertical scroll position" value="0"/>
+      <single attribute="zoom level denominator" value="1"/>
+      <single attribute="zoom level numerator" value="16"/>
+      <single attribute="zoom offset denominator" value="1"/>
+      <single attribute="zoom offset numerator" value="8064"/>
+    </position_info>
   </instance>
   <mnemonics/>
   <static_plugin_mnemonics/>
@@ -1123,6 +1135,6 @@
     <single attribute="active instance" value="0"/>
     <single attribute="lock mode" value="36110"/>
     <multi attribute="column width" size="23" value="34,34,225,74,68,70,88,88,98,98,88,88,110,101,101,101,101,101,101,101,101,107,78"/>
-    <multi attribute="window position" size="9" value="1920,972,497,155,445,50,155,0,0"/>
+    <multi attribute="window position" size="9" value="1270,930,497,155,445,50,155,0,0"/>
   </global_info>
 </session>

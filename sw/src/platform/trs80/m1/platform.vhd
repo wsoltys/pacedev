@@ -19,8 +19,7 @@ entity platform is
   port
   (
     -- clocking and reset
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -113,8 +112,8 @@ architecture SYN of platform is
 	   );
 	end component;
 
-	alias clk_40M					: std_logic is clk_i(0);
-	alias clk_video       : std_logic is clk_i(1);
+	alias clk_40M					: std_logic is clkrst_i.clk(0);
+	alias clk_video       : std_logic is clkrst_i.clk(1);
 	signal clk_2M_ena			: std_logic;
 	
   -- uP signals  
@@ -174,7 +173,7 @@ architecture SYN of platform is
   
 begin
 
-	cpu_reset <= reset_i or game_reset;
+	cpu_reset <= clkrst_i.arst or game_reset;
 
   -- not used for now
   cpu_irq_vec <= (others => '0');
@@ -278,7 +277,7 @@ begin
 		port map
 		(
 			clk				=> clk_40M,
-			reset			=> reset_i,
+			reset			=> clkrst_i.rst(0),
 			clk_en		=> clk_2M_ena
 		);
 
@@ -423,7 +422,7 @@ begin
     -- to the HDD core
     platform_o.clk <= clk_40M;
     platform_o.rst <= cpu_reset;
-    platform_o.arst_n <= not reset_i;
+    platform_o.arst_n <= clkrst_i.arst_n;
     platform_o.cpu_clk_ena <= clk_2M_ena;
     platform_o.cpu_a <= cpu_a;
     platform_o.cpu_d_o <= cpu_d_o;

@@ -16,6 +16,7 @@ package project_pkg is
   -- Reference clock is 50MHz
 	constant PACE_HAS_PLL								      : boolean := true;
   constant PACE_HAS_SRAM                    : boolean := true;
+  --constant PACE_HAS_FLASH                   : boolean := true;
   constant PACE_HAS_SDRAM                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := false;
 
@@ -58,12 +59,21 @@ package project_pkg is
 
 	-- TRS-80-specific constants
 	
+  --constant TRS80_M1_ROM                     : string := "level1.hex";
+  --constant TRS80_M1_ROM                     : string := "model1a.hex";    -- v1.2
+  constant TRS80_M1_ROM                     : string := "model1b.hex";    -- v1.3
+  --constant TRS80_M1_ROM                     : string := "m1v13_bartlett.hex";
+
   constant TRS80_M1_ROM_IN_FLASH            : boolean := false;
+
+  constant TRS80_M1_HAS_HDD                 : boolean := true;
+  
+	constant USE_VIDEO_VBLANK_INTERRUPT       : boolean := false;
+
+  -- derived: do not edit
   constant PACE_HAS_FLASH                   : boolean := TRS80_M1_ROM_IN_FLASH;
 
-	constant USE_VIDEO_VBLANK_INTERRUPT       : boolean := false;
-	
-	 type from_PROJECT_IO_t is record
+ type from_PROJECT_IO_t is record
     not_used  : std_logic;
   end record;
 
