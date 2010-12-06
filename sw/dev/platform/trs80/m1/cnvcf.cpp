@@ -79,7 +79,7 @@ int main (int argc, char *argv[])
   int from_s = 32; //63;
 
   int to_c = 980;
-  int to_h = 16; //8; //16;
+  int to_h = 8; //16;
   int to_s = 32;
 
   int use_c = 5*170;
@@ -111,6 +111,9 @@ int main (int argc, char *argv[])
   unsigned long from_size = from_c * from_h * from_s * 512L;
   unsigned long to_size = to_c * to_h * to_s * 512L;
   unsigned long use_size = use_c * use_h * use_s * 512L;
+
+  if (fromByte) from_size /= 2;
+  if (toByte) to_size /= 2;
 
   fprintf (stderr, "from: C,H,S=%d,%d,%d (%ld) (%c)\n", from_c, from_h, from_s, from_size, (fromByte ? 'b' : 'w'));
   fprintf (stderr, "  to: C,H,S=%d,%d,%d (%ld) (%c)\n", to_c, to_h, to_s, to_size, (toByte ? 'B' : 'W'));

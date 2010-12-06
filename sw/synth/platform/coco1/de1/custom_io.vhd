@@ -276,6 +276,10 @@ begin
       );
 
     sd_if : entity work.ide_sd
+      generic map
+      (
+        ID_INIT_FILE      => "../../../../src/platform/coco1/roms/identifydevice.hex"
+      )
       port map
       (
         -- clocking, reset

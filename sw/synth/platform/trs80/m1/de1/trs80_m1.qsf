@@ -496,6 +496,11 @@ set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_location_assignment PIN_V20 -to sd_clk
+set_location_assignment PIN_Y20 -to sd_cmd
+set_location_assignment PIN_W20 -to sd_dat
+set_location_assignment PIN_U20 -to sd_dat3
+set_location_assignment PIN_AB15 -to fl_ce_n
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sdram_pkg.vhd
@@ -549,6 +554,19 @@ set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/I2C_AV_Co
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/seg7_lut.v
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/I2S_LCM_Config.v
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/i2s_controller.v
-set_global_assignment -name VHDL_FILE ../../../../../src/target/de1/custom_io.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/ocidec1/ud_cnt.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/ocidec1/ro_cnt.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/ocidec1/atahost_pio_tctrl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/ocidec1/atahost_wb_slave.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/ocidec1/atahost_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/ocidec1/atahost_top.vhd
+set_global_assignment -name VHDL_FILE ../../../coco1/de1/sd_pll.vhd
+set_global_assignment -name VHDL_FILE ../../../coco1/de1/sd_rd_fifo.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/idesd.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/sd/sd_cmdif.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/sd/sd_datif.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/sd/sd_busif.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/sd/sd_if.vhd
+set_global_assignment -name VHDL_FILE custom_io.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/de1/target_top.vhd
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

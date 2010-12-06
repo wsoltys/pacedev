@@ -419,6 +419,9 @@ begin
     signal hdd_irq    : std_logic;
   begin
 
+    platform_o.clk_50M <= clkrst_i.clk_ref;
+    platform_o.clk_25M <= clkrst_i.clk(1);    -- maybe
+    
     -- to the HDD core
     platform_o.clk <= clk_40M;
     platform_o.rst <= cpu_reset;

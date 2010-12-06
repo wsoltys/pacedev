@@ -67,6 +67,9 @@ package platform_pkg is
     cpu_d_o             : std_logic_vector(7 downto 0);
     cpu_io_rd           : std_logic;
     cpu_io_wr           : std_logic;
+    -- to the SD core
+    clk_25M             : std_logic;
+    clk_50M             : std_logic;
 
   end record;
 

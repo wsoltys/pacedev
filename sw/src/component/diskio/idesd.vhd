@@ -1,10 +1,20 @@
 library ieee;
-use IEEE.std_logic_1164.all;
-use IEEE.numeric_std.all;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 -- the OCIDE controller uses UNSIGNED from here
 --use ieee.std_logic_arith.unsigned;
 
 entity ide_sd is
+  generic
+  (
+    -- when emulating devices accessed using LBA mode
+    -- - use the *default* values
+    LBA_MODE          : boolean := true;
+    CYLINDER_BITS     : integer := 16;
+    HEAD_BITS         : integer := 4;
+    SECTOR_BITS       : integer := 8;
+    ID_INIT_FILE      : string
+  );
   port
   (
     -- clocking, reset
@@ -108,7 +118,7 @@ architecture SYN of ide_sd is
   signal rd_fifo_empty    : std_logic := '0';
   signal rd_fifo_q        : std_logic_vector(15 downto 0) := (others => '0');
 
-  signal lba              : std_logic_vector(31 downto 0) := (others => '0');
+  signal lba              : std_logic_vector(36 downto 0) := (others => '0');
   
 begin
 
@@ -355,7 +365,7 @@ begin
     iderom_inst : entity work.sprom
       generic map
       (
-        init_file		=> "../../../../src/platform/coco1/roms/identifydevice.hex",
+        init_file		=> ID_INIT_FILE,
         widthad_a   => 8,
         width_a     => 16
       )
@@ -384,8 +394,19 @@ begin
       );
     read_sts(DRQ) <= not rd_fifo_empty;
 
-    -- sd core currently uses byte address
-    lba <= lba28_r_i(22 downto 0) & "000000000";
+    GEN_LBA_MODE : if LBA_MODE generate
+      lba <= lba28_r_i & "000000000";
+    end generate GEN_LBA_MODE;
+    
+    GEN_CHS_MODE : if not LBA_MODE generate
+      lba <=  std_logic_vector(resize(unsigned(
+                  cyl_hi_r_i(CYLINDER_BITS-9 downto 0) &
+                  cyl_lo_r_i(7 downto 0) &
+                  hd_r_i(HEAD_BITS-1 downto 0) &
+                  sec_no_r_i(SECTOR_BITS-1 downto 0) & 
+                  "000000000"), 
+                lba'length));
+    end generate GEN_CHS_MODE;
     
     sd_if_inst : entity work.sd_if
       generic map
@@ -407,7 +428,7 @@ begin
         sd_dat_o			=> sd_dat_o,
         sd_dat_oe			=> sd_dat_oe,
         
-        blk						=> lba,
+        blk						=> lba(31 downto 0),
         rd						=> sd_rd_go,
         
         read_dat      => sd_rd_d,
