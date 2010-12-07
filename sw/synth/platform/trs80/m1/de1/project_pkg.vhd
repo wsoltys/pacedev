@@ -28,7 +28,7 @@ package project_pkg is
 
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_640x480_60Hz;
   constant PACE_CLK0_DIVIDE_BY              : natural := 5;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 2;   -- 50*2/5 = 20MHz
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 4;   -- 50*4/5 = 40MHz
   constant PACE_CLK1_DIVIDE_BY              : natural := 2;
   constant PACE_CLK1_MULTIPLY_BY            : natural := 1;  	-- 50*1/2 = 25MHz
 	constant PACE_VIDEO_H_SCALE       	      : integer := 1;

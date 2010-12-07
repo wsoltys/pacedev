@@ -52,6 +52,7 @@ end entity ide_sd;
 
 architecture SYN of ide_sd is
 
+  constant RECALIBRATE            : std_logic_vector(7 downto 0) := X"10";
   constant READ_SECTORS_W_RETRY   : std_logic_vector(7 downto 0) := X"20";
   constant READ_SECTORS_WO_RETRY  : std_logic_vector(7 downto 0) := X"21";
   constant WRITE_SECTORS_W_RETRY  : std_logic_vector(7 downto 0) := X"30";
@@ -160,7 +161,12 @@ begin
               when "010" =>   -- sector_count
                 sec_cnt_r_i <= d_o(7 downto 0);
               when "011" =>   -- sector_number
-                sec_no_r_i <= d_o(7 downto 0);
+                if LBA_MODE then
+                  sec_no_r_i <= d_o(7 downto 0);
+                else
+                  -- because sectors start at 1 in CHS mode
+                  sec_no_r_i <= std_logic_vector(unsigned(d_o(7 downto 0))-1);
+                end if;
               when "100" =>   -- cyl_lo
                 cyl_lo_r_i <= d_o(7 downto 0);
               when "101" =>   -- cyl_hi
@@ -183,6 +189,8 @@ begin
     end if;
   end process;
 
+  iordy0_cf <= '1';
+  
   -- BUSY asserted during command unless DRQ asserted
   sts_r_o(BSY) <= cmd_sts(BSY) and not read_sts(DRQ);
   sts_r_o(6 downto 0) <= cmd_sts(6 downto 0) or read_sts(6 downto 0);
@@ -206,6 +214,12 @@ begin
             cmd_sts(BSY) <= '1';      -- default
             cmd_sts(DRDY) <= '0';     -- default
             case cmd_r_i is
+              when RECALIBRATE =>
+                -- TBD
+                -- - CHS: CYL_HI,CYL_LO,HEAD=0,SECTOR=1
+                -- - LBA: above all 0
+                cmd_sts(BSY) <= '0';
+                cmd_sts(DRDY) <= '1';
               when EXEC_DEVICE_DIAGNOSTIC =>
                 state <= S_DIAGNOSTIC;
               when IDENTIFY_DEVICE =>
@@ -214,8 +228,9 @@ begin
                     READ_SECTORS_WO_RETRY =>
                 state <= S_READ_1;
               when others =>
+                -- do we need to transition back to idle here?
                 cmd_sts(BSY) <= '0';
-                cmd_sts(DRDY) <= '0';
+                cmd_sts(DRDY) <= '1';
             end case;
           else
             case state is
