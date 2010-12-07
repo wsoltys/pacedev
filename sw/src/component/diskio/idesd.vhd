@@ -52,6 +52,15 @@ end entity ide_sd;
 
 architecture SYN of ide_sd is
 
+  -- drive geometry
+  constant CYLINDERS  : std_logic_vector(15 downto 0) :=
+                          std_logic_vector(to_unsigned(2**CYLINDER_BITS,16));
+  constant HEADS      : std_logic_vector(15 downto 0) :=
+                          std_logic_vector(to_unsigned(2**HEAD_BITS,16));
+  constant SECTORS    : std_logic_vector(15 downto 0) :=
+                          std_logic_vector(to_unsigned(2**SECTOR_BITS,16));
+
+  -- ATAPI commands
   constant RECALIBRATE            : std_logic_vector(7 downto 0) := X"10";
   constant READ_SECTORS_W_RETRY   : std_logic_vector(7 downto 0) := X"20";
   constant READ_SECTORS_WO_RETRY  : std_logic_vector(7 downto 0) := X"21";
@@ -350,7 +359,16 @@ begin
           when S_ID_1 =>
             if rd_fifo_wrfull = '0' then
               rd_fifo_wrreq <= '1';
-              rd_fifo_data <= id_rom_d;
+              case id_rom_a is
+                when X"01" =>
+                  rd_fifo_data <= CYLINDERS;
+                when X"03" =>
+                  rd_fifo_data <= HEADS;
+                when X"06" =>
+                  rd_fifo_data <= SECTORS;
+                when others =>
+                  rd_fifo_data <= id_rom_d;
+              end case;
               if id_rom_a = X"FF" then
                 rd_done_25MHz <= '1';
                 state <= S_IDLE;
