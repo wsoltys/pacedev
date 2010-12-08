@@ -3,6 +3,42 @@
 #include <ctype.h>
 #include <string.h>
 
+static unsigned char hdv_hdr[] =
+{
+  0x56, 0xCB, 0x11, 0xD5, 0x01, 0x04, 0x00, 0x00,
+  0x00, 0x00, 0xFF, 0x00, 0x0C, 0x01, 0x6E, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x03, 0xD4, 0x00, 0x10, 0x01,
+  0x54, 0x52, 0x53, 0x38, 0x30, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
 int isblank_s (unsigned short int *buf)
 {
   for (int i=0; i<256; i++)
@@ -26,53 +62,32 @@ void dump (unsigned short int *buf)
   }
 }
 
+void usage (char *argv0)
+{
+  printf ("usage: %s [-b|w] [-U<geom>] [-g<geom>] <infile> [-B|W] [-G<geom>] <outfile> \n", argv0);
+  printf ("  options:\n");
+  printf ("    -g    source disk geometry (cylinders,heads,sectors)\n");
+  printf ("    -b    source is byte data\n");
+  printf ("    -w    source is word data\n");
+  printf ("    -G    destination disk geometry (cylinders,heads,sectors)\n");
+  printf ("    -B    destination is byte data\n");
+  printf ("    -W    destination is word data\n");
+  printf ("    -U    use disk geometry (cylinders,heads,sectors)\n");
+  printf ("  parameters:\n");
+  printf ("    <geom> is <c>[,<h>[,<s>]]\n");
+  exit (0);
+}
+
 int main (int argc, char *argv[])
 {
-  int fromByte = 0;
-  int toByte = 0;
+  char  szIn[256], szOut[256];
+  
+  int nFilespecs = 0;
+  int fromByte = -1;
+  int toByte = -1;
 
   unsigned short int zero[256];
   memset ((unsigned char *)zero, 0, 512);
-
-#if 0
-
-  FILE *fpout = fopen ("hdd_repaired.bin", "wb");
-  FILE *fpin;
-
-  // use the 1st partition from the pre-image
-  fpin = fopen ("ldos_8bit_980.8.32_5x170.bin", "rb");
-  for (int i=0; i<1*170*8*32; i++)
-  {
-    unsigned char buf[512];
-    fread (buf, 2, 256, fpin);
-    for (int j=0; j<256; j++)
-    {
-      fwrite (&buf[j], 1, 1, fpout);
-      fwrite (&zero, 1, 1, fpout);
-    }
-  }
-  fclose (fpin);
-
-  // now use the rest from the new image
-  fpin = fopen ("hdd_pb.bin", "rb");
-  fseek (fpin, 1*170*8*32L, SEEK_SET);
-  for (int i=0; i<4*170*8*32; i++)
-  {
-    unsigned char buf[512];
-    fread (buf, 2, 256, fpin);
-    fwrite (buf, 2, 256, fpout);
-  }
-  fclose (fpin);
-
-  fclose (fpout);
-
-#else
-
-  //FILE *fpin = fopen ("trs80cf.dsk", "rb");
-  //FILE *fpout = fopen ("trs80cf_mmc.bin", "wb");
-
-  FILE *fpin = fopen ("hdd_pb.hdv", "rb");
-  FILE *fpout = fopen ("hdd_pb.bin", "wb");
 
   int from_c = 980; //3884;
   int from_h = 8; //16;
@@ -88,10 +103,12 @@ int main (int argc, char *argv[])
 
   while (--argc)
   {
+    char *p = argv[argc];
+    
     switch (argv[argc][0])
     {
       case '/' : case '-' :
-        switch (tolower(argv[argc][1]))
+        switch (argv[argc][1])
         {
           case 'b' :
             fromByte = 1;
@@ -99,14 +116,83 @@ int main (int argc, char *argv[])
           case 'B' :
             toByte = 1;
             break;
+          case 'g' :
+            from_c = atoi(p+2);
+            p = strchr(p, '.');
+            if (!p) break;
+            from_h = atoi(p+1);
+            p = strchr(p, '.');
+            if (!p) break;
+            from_s = atoi(p+1);
+            break;
+          case 'G' :
+            to_c = atoi(p+2);
+            p = strchr(p, '.');
+            if (!p) break;
+            to_h = atoi(p+1);
+            p = strchr(p, '.');
+            if (!p) break;
+            to_s = atoi(p+1);
+            break;
+          case 'u' :
+            use_c = atoi(p+2);
+            p = strchr(p, '.');
+            if (!p) break;
+            use_h = atoi(p+1);
+            p = strchr(p, '.');
+            if (!p) break;
+            use_s = atoi(p+1);
+            break;
+          case 'w' :
+            fromByte = 0;
+            break;
+          case 'W' :
+            toByte = 0;
           default :
+            usage (argv[0]);
             break;
         }
         break;
       default :
+        if (nFilespecs == 0)
+          strcpy (szOut, argv[argc]);
+        else if (nFilespecs == 1)
+          strcpy (szIn, argv[argc]);
+        nFilespecs++;
         break;
     }
   }
+
+#if 0
+  {
+    FILE *fp = fopen ("hdr.hdv", "rb");
+    unsigned char buf[256];
+    fread (buf, 1, 256, fp);
+    fclose (fp);
+    for (int i=0; i<256; i++)
+    {
+      printf ("0x%02X, ", buf[i]);
+      if (i%8 == 7) printf ("\n");
+    }
+  }
+#endif
+
+  if (nFilespecs != 2)
+    usage (argv[0]);
+
+  // if width not specified, default to 8 for HDV files
+  if (fromByte == -1)
+    if (strstr (szIn, ".hdv"))
+      fromByte = 1;
+    else
+      fromByte = 0;
+
+  // if width not specified, default to 8 for HDV files
+  if (toByte == -1)
+    if (strstr (szOut, ".hdv"))
+      toByte = 1;
+    else
+      toByte = 0;  
 
   unsigned long from_size = from_c * from_h * from_s * 512L;
   unsigned long to_size = to_c * to_h * to_s * 512L;
@@ -114,14 +200,33 @@ int main (int argc, char *argv[])
 
   if (fromByte) from_size /= 2;
   if (toByte) to_size /= 2;
-
-  fprintf (stderr, "from: C,H,S=%d,%d,%d (%ld) (%c)\n", from_c, from_h, from_s, from_size, (fromByte ? 'b' : 'w'));
-  fprintf (stderr, "  to: C,H,S=%d,%d,%d (%ld) (%c)\n", to_c, to_h, to_s, to_size, (toByte ? 'B' : 'W'));
-  fprintf (stderr, " use: C,H,S=%d,%d,%d (%ld)\n", use_c, use_h, use_s, use_size);
+  if (fromByte) use_size /= 2;
+  
+  fprintf (stderr, "from: %-16.16s C,H,S=%d,%d,%d (%ld) (%c)\n", 
+            szIn, from_c, from_h, from_s, from_size, (fromByte ? 'b' : 'w'));
+  fprintf (stderr, "  to: %-16.16s C,H,S=%d,%d,%d (%ld) (%c)\n", 
+            szOut, to_c, to_h, to_s, to_size, (toByte ? 'B' : 'W'));
+  fprintf (stderr, " use: %-16.16s C,H,S=%d,%d,%d (%ld)\n", 
+            "", use_c, use_h, use_s, use_size);
 
   if (use_c > from_c || use_c > to_c || use_h > from_h || use_h > to_h || use_s > from_s || use_s > to_s)
   {
     fprintf (stderr, "Invalid parameters!\n");
+    exit (0);
+  }
+
+  FILE *fpin = fopen (szIn, "rb");
+  if (!fpin)
+  {
+    printf ("error opening input \"%s\"!\n", szIn);
+    exit (0);
+  }
+  
+  FILE *fpout = fopen (szOut, "wb");
+  if (!fpout)
+  {
+    printf ("error opening output \"%s\"!\n", szOut);
+    exit (0);
   }
 
   int max_c = (from_c > to_c ? from_c : to_c);
@@ -168,8 +273,13 @@ int main (int argc, char *argv[])
 
   fseek (fpin, 0L, SEEK_SET);
   // skip header on virtual hard drive images
-  fseek (fpin, 256L, SEEK_CUR);
+  if (strstr (szIn, ".hdv"))
+    fseek (fpin, 256L, SEEK_CUR);
 
+  // add a header to virtual hard drive images
+  if (strstr(szOut, ".hdv"))
+    fwrite (hdv_hdr, 1, 256, fpout);
+    
   // now copy...
   for (int c=0; c<max_c; c++)
   {
@@ -215,6 +325,4 @@ int main (int argc, char *argv[])
 
   fclose (fpout);
   fclose (fpin);
-
-#endif
 }
