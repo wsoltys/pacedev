@@ -65,8 +65,6 @@ package project_pkg is
 
   constant TRS80_M1_HAS_HDD                 : boolean := true;
   
-	constant USE_VIDEO_VBLANK_INTERRUPT       : boolean := false;
-	
   type from_PROJECT_IO_t is record
     not_used  : std_logic;
   end record;

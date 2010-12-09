@@ -411,12 +411,32 @@ begin
   
     fdc_datao <= X"FF";
     fdc_drq_int <= '0';
-    leds_o <= (others => '0');
+    --leds_o <= (others => '0');
         
   end generate GEN_NO_FDC;
 
   GEN_HDD : if TRS80_M1_HAS_HDD generate
-    signal hdd_irq    : std_logic;
+
+    signal wb_cyc_stb   : std_logic := '0';
+    signal wb_sel       : std_logic_vector(3 downto 0) := (others => '0');
+    signal wb_adr       : std_logic_vector(6 downto 2) := (others => '0');
+    signal wb_dat_i     : std_logic_vector(31 downto 0) := (others => '0');
+    signal wb_dat_o     : std_logic_vector(31 downto 0) := (others => '0');
+    signal wb_we        : std_logic := '0';
+    signal wb_ack       : std_logic := '0';
+    
+    type state_t is ( S_IDLE, S_I1, S_R1, S_W1 );
+    signal state : state_t := S_IDLE;
+
+    signal hdci_cntl    : std_logic_vector(7 downto 0) := (others => '0');
+    alias hdci_enable   : std_logic is hdci_cntl(3);
+    signal hdd_irq      : std_logic;
+
+    signal a_cf_us      : ieee.std_logic_arith.unsigned(2 downto 0) := (others => '0');
+    signal nior0_cf_s   : std_logic := '0';
+    signal niow0_cf_s   : std_logic := '0';
+    signal ide_d_r      : std_logic_vector(31 downto 0) := (others => '0');
+    
   begin
 
     platform_o.clk_50M <= clkrst_i.clk_ref;
@@ -426,17 +446,203 @@ begin
     platform_o.clk <= clk_40M;
     platform_o.rst <= cpu_reset;
     platform_o.arst_n <= clkrst_i.arst_n;
-    platform_o.cpu_clk_ena <= clk_2M_ena;
-    platform_o.cpu_a <= cpu_a;
-    platform_o.cpu_d_o <= cpu_d_o;
-    platform_o.cpu_io_rd <= cpu_io_rd;
-    platform_o.cpu_io_wr <= cpu_io_wr;
 
-    -- from the HDD core
-    hdd_cs <= platform_i.hdd_cs;
-    hdd_d <= platform_i.hdd_d;
-    hdd_irq <= platform_i.hdd_irq;
+    -- IDE registers
+    --
+    --  $C0-C2  - original RS registers
+    --  $C3     - upper-byte data latch
+    --  $C8-CF  - write-thru to IDE device
+    --
+    
+    hdd_cs <= (cpu_io_rd or cpu_io_wr) 
+                when STD_MATCH(cpu_a(7 downto 0), X"C"&"----") 
+                else '0';
+    
+    process (clk_40M, cpu_reset)
+      variable cpu_io_r : std_logic := '0';
+    begin
+      if cpu_reset = '1' then
+        hdci_cntl <= (others => '0');
+        wb_cyc_stb <= '0';
+        wb_we <= '0';
+        state <= S_I1;
+      elsif rising_edge(clk_40M) then
+        case state is
+          when S_I1 =>
+            -- initialise the OCIDE core
+            wb_cyc_stb <= '1';
+            wb_adr <= "00000";
+            wb_dat_i <= X"00000082";   -- enable IDE, IORDY timing
+            wb_we <= '1';
+            state <= S_W1;
+          when S_IDLE =>
+            wb_cyc_stb <= '0'; -- default
+            -- start a new cycle on rising_edge IORD
+            if cpu_io_r = '0' and (cpu_io_rd or cpu_io_wr) = '1' then
+              if hdd_cs = '1' then
+                case cpu_a(3 downto 0) is
+                  when X"0" =>    -- hdci_wp
+                  when X"1" =>    -- hdci_cntl
+                    hdci_cntl <= cpu_d_o;
+                  when X"2" =>    -- hdci_present
+                  when X"3" =>    -- high-byte latch
+                    if cpu_io_rd = '1' then
+                      -- read latch from previous access
+                      hdd_d <= ide_d_r(15 downto 8);
+                    elsif cpu_io_wr = '1' then
+                      -- latch write data for subsequent access
+                      ide_d_r(15 downto 8) <= cpu_d_o;
+                    end if;
+                  when others =>
+                    -- IDE device registers @$08-$0F
+                    if cpu_a(3) = '1' then
+                      -- start a new access to the OCIDEC
+                      wb_cyc_stb <= hdd_cs;
+                      -- $08-$0F => $10-$17 (ATA registers)
+                      wb_adr <= "10" & cpu_a(2 downto 0);
+                      wb_dat_i(31 downto 8) <= X"0000" & ide_d_r(15 downto 8);
+                      -- Peter Bartlett's drivers require this
+                      -- because IDE sectors start at 1, not 0
+                      if cpu_a(3 downto 0) = X"B" then
+                        wb_dat_i(7 downto 0) <= std_logic_vector(unsigned(cpu_d_o) + 1);
+                      else
+                        wb_dat_i(7 downto 0) <= cpu_d_o;
+                      end if;
+                      wb_we <= cpu_io_wr;
+                      if cpu_io_rd = '1' then
+                        state <= S_R1;
+                      else
+                        state <= S_W1;
+                      end if;
+                    end if; -- $08-$0F (device register)
+                end case;
+              end if; -- ide_cs = '1'
+            end if;
+          when S_R1 =>
+            if wb_ack = '1' then
+              -- latch the whole data bus from the core
+              ide_d_r <= wb_dat_o;
+              -- Peter Bartlett's drivers require this
+              -- because IDE sectors start at 1, not 0
+              if cpu_a(3 downto 0) = X"B" then
+                hdd_d <= std_logic_vector(unsigned(wb_dat_o(hdd_d'range)) - 1);
+              else
+                hdd_d <= wb_dat_o(hdd_d'range);
+              end if;
+              wb_cyc_stb <= '0';
+              state <= S_IDLE;
+            end if;
+          when S_W1 =>
+            if wb_ack = '1' then
+              wb_cyc_stb <= '0';
+              state <= S_IDLE;
+            end if;
+          when others =>
+            wb_cyc_stb <= '0';
+            state <= S_IDLE;
+        end case;
+        cpu_io_r := cpu_io_rd or cpu_io_wr;
+      end if;
+    end process;
+      
+    -- 16-bit access to PIO registers, otherwise 32
+    wb_sel <= "0011" when wb_adr(6) = '1' else "1111";
+    
+    -- PIO mode timings
+    --          0,   1,   2,   3,   4,   5,   6
+    -- t1   -  70,  50,  30,  30,  25,  15,  10
+    -- t2   - 165, 125, 100,  80,  70,  65,  55
+    -- t4   -  30,  20,  15,  10,  10,   5,   5
+    -- teoc - 365, 208, 110,  70,  25,  25,  20
+    --
+    -- n = max(0, round_up((t * clk) - 2))
+    --
+    atahost_inst : entity work.atahost_top
+      generic map
+      (
+        --TWIDTH          => 5,
+        -- PIO mode0 100MHz = 6, 28, 2, 23
+        -- PIO mode0 57M272 = 4, 16, 1, 13
+        -- PIO mode0 40MHz => 1, 5, 0, 13
+        -- PIO mode3 40MHz => 0, 2, 0, 1
+        PIO_mode0_T1    => 1,
+        PIO_mode0_T2    => 5,
+        PIO_mode0_T4    => 0,
+        PIO_mode0_Teoc  => 13
+      )
+      port map
+      (
+        -- WISHBONE SYSCON signals
+        wb_clk_i      => clk_40M,
+        arst_i        => clkrst_i.arst_n,
+        wb_rst_i      => cpu_reset,
 
+        -- WISHBONE SLAVE signals
+        wb_cyc_i      => wb_cyc_stb,
+        wb_stb_i      => wb_cyc_stb,
+        wb_ack_o      => wb_ack,
+        wb_err_o      => open,
+        wb_adr_i      => ieee.std_logic_arith.unsigned(wb_adr),
+        wb_dat_i      => wb_dat_i,
+        wb_dat_o      => wb_dat_o,
+        wb_sel_i      => wb_sel,
+        wb_we_i       => wb_we,
+        wb_inta_o     => open,
+
+        -- ATA signals
+        resetn_pad_o  => platform_o.nreset_cf,
+        dd_pad_i      => platform_i.dd_i,
+        dd_pad_o      => platform_o.dd_o,
+        dd_padoe_o    => platform_o.dd_oe,
+        da_pad_o      => a_cf_us,
+        cs0n_pad_o    => platform_o.nce_cf(1),
+        cs1n_pad_o    => platform_o.nce_cf(2),
+
+        diorn_pad_o	  => nior0_cf_s,
+        diown_pad_o	  => niow0_cf_s,
+        iordy_pad_i	  => platform_i.iordy0_cf,
+        intrq_pad_i	  => platform_i.rdy_irq_cf
+      );
+
+    platform_o.a_cf <= std_logic_vector(a_cf_us);
+    platform_o.nior0_cf <= nior0_cf_s;
+    platform_o.niow0_cf <= niow0_cf_s;
+    
+    -- DMA mode not supported
+    platform_o.ndmack_cf <= 'Z';
+
+    -- detect
+    --<= platform_i.cd_cf;
+    
+    -- power
+    platform_o.non_cf <= '0';
+
+    BLK_ACTIVITY : block
+      signal ide_act : std_logic := '0';
+    begin
+      -- activity LED(s)
+      process (clk_40M, cpu_reset)
+        -- 40MHz for 1/10th sec
+        subtype count_t is integer range 0 to 40000000/10-1;
+        variable count : count_t := 0;
+      begin
+        if cpu_reset = '1' then
+          ide_act <= '0';
+          count := 0;
+        elsif rising_edge(clk_40M) then
+          if nior0_cf_s = '0' or niow0_cf_s = '0' then
+            ide_act <= '1';
+            count := count_t'high;
+          elsif count = 0 then
+            ide_act <= '0';
+          else
+            count := count - 1;
+          end if;
+        end if;
+      end process;
+      leds_o(0) <= ide_act;
+    end block BLK_ACTIVITY;
+    
   end generate GEN_HDD;
 					
 end architecture SYN;

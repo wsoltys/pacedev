@@ -720,7 +720,7 @@ begin
         nior0_cf          => nior0_cf,
         niow0_cf          => niow0_cf,
         non_cf            => non_cf,
-        reset_cf          => reset_cf,
+        nreset_cf         => reset_cf,
         ndmack_cf         => ndmack_cf,
         dmarq_cf          => dmarq_cf,
         
