@@ -375,6 +375,59 @@ begin
         int_reset     => intrst
       );
 
+  BLK_INTERRUPTS : block
+    signal tick_1ms   : std_logic := '0';
+    signal timer_irq  : std_logic := '0';
+  begin
+
+    -- interrupt register
+    process (clk_40M, cpu_reset)
+    begin
+      if cpu_reset = '1' then
+      elsif rising_edge(clk_40M) then
+      end if;
+    end process;
+
+    -- 1ms tick for slower counters
+    process (clk_40M, cpu_reset)
+      subtype count_1ms_t is integer range 0 to CLK0_FREQ_MHz/1000;
+      variable count_1ms : count_1ms_t := 0;
+    begin
+      if cpu_reset = '1' then
+        count_1ms := 0;
+        tick_1ms <= '0';
+      elsif rising_edge(clk_40M) then
+        tick_1ms <= '0';  -- default
+        if count_1ms = count_1ms_t'high then
+          count_1ms := 0;
+          tick_1ms <= '1';
+        else
+          count_1ms := count_1ms + 1;
+        end if;
+      end if;
+    end process;
+    
+    -- TIMER interrupt (40Hz/25ms)
+    process (clk_40M, cpu_reset)
+      variable count_25ms : integer range 0 to 24 := 0;
+    begin
+      if cpu_reset = '1' then
+        count_25ms := 0;
+      elsif rising_edge(clk_40M) then
+        if tick_1ms = '1' then
+          if count_25ms = count_25ms'high then
+            timer_irq <= '1';
+            count_25ms := 0;
+          else
+            timer_irq <= '0';
+            count_25ms := count_25ms + 1;
+          end if;
+        end if; -- tick_1ms
+      end if;
+    end process;
+    
+  end block BLK_INTERRUPTS;
+
   GEN_FDC : if INCLUDE_FDC_SUPPORT generate
   
     fdc_inst : FDC_1793                                    
