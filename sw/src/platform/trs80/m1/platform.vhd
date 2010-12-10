@@ -150,7 +150,6 @@ architecture SYN of platform is
   -- interrupt signals
 	signal int_cs					: std_logic;
   signal int_status     : std_logic_vector(7 downto 0);
-  signal intrst     		: std_logic;  -- clear RTC interrupt
 
   -- fdc signals
 	signal fdc_cs					: std_logic;
@@ -222,9 +221,6 @@ begin
 	alpha_joy_cs <= '1' when cpu_io_a = X"00" else '0';
   -- SOUND $FC-FF (Model I is $FF only)
 	snd_cs <= '1' when cpu_io_a = X"FF" else '0';
-	
-	-- io read strobes
-	intrst <= int_cs and cpu_mem_rd;
 	
 	-- io write enables
 	-- SOUND OUTPUT $FC-FF (Model I is $FF only)
@@ -354,27 +350,6 @@ begin
 		);
     tilemap_o.map_d(tilemap_o.map_d'left downto 8) <= (others => '0');
     
-    interrupts_inst : entity work.TRS80_Interrupts                    
-      port map
-      (
-        clk           => clk_40M,
-        reset         => cpu_reset,
-
-        -- enable inputs                    
-        z80_data      => cpu_d_o,
-                    
-        -- IRQ inputs
-        reset_btn_int => '0',
-        fdc_drq_int   => fdc_drq_int,                    
-
-        -- IRQ/status outputs
-        int_status    => int_status,
-        int_req       => cpu_irq,
-
-        -- interrupt clear inputs
-        int_reset     => intrst
-      );
-
   BLK_INTERRUPTS : block
     signal tick_1ms   : std_logic := '0';
     signal timer_irq  : std_logic := '0';
@@ -382,15 +357,34 @@ begin
 
     -- interrupt register
     process (clk_40M, cpu_reset)
+      variable intreg_r : std_logic := '0';
     begin
       if cpu_reset = '1' then
+        intreg_r := '0';
+        int_status <= (others => '0');
       elsif rising_edge(clk_40M) then
+        -- clear interrupts on falling edge of read
+        if intreg_r = '1' and (int_cs = '0' or cpu_mem_rd = '0') then
+          int_status(6) <= '0';
+          int_status(7) <= '0';
+        end if;
+        -- timer interrupt
+        if timer_irq = '1' then
+          int_status(7) <= '1';
+        end if;
+        -- FDC interrupt
+        if fdc_drq_int = '1' then
+          int_status(6) <= '1';
+        end if;
+        intreg_r := int_cs and cpu_mem_rd;
       end if;
     end process;
 
+    cpu_irq <= '1' when int_status /= X"00" else '0';
+    
     -- 1ms tick for slower counters
     process (clk_40M, cpu_reset)
-      subtype count_1ms_t is integer range 0 to CLK0_FREQ_MHz/1000;
+      subtype count_1ms_t is integer range 0 to CLK0_FREQ_MHz*1000-1;
       variable count_1ms : count_1ms_t := 0;
     begin
       if cpu_reset = '1' then
@@ -409,17 +403,19 @@ begin
     
     -- TIMER interrupt (40Hz/25ms)
     process (clk_40M, cpu_reset)
-      variable count_25ms : integer range 0 to 24 := 0;
+      subtype count_25ms_t is integer range 0 to 25-1;
+      variable count_25ms : count_25ms_t := 0;
     begin
       if cpu_reset = '1' then
+        timer_irq <= '0';
         count_25ms := 0;
       elsif rising_edge(clk_40M) then
+        timer_irq <= '0';   -- default
         if tick_1ms = '1' then
-          if count_25ms = count_25ms'high then
+          if count_25ms = count_25ms_t'high then
             timer_irq <= '1';
             count_25ms := 0;
           else
-            timer_irq <= '0';
             count_25ms := count_25ms + 1;
           end if;
         end if; -- tick_1ms
