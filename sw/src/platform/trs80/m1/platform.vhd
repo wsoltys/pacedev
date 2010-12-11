@@ -142,7 +142,17 @@ architecture SYN of platform is
 	signal vram_cs				: std_logic;
   signal vram_wr        : std_logic;
   signal vram_datao     : std_logic_vector(7 downto 0);
-                        
+
+  -- pcg80 signals
+  signal pcg80_a        : std_logic_vector(11 downto 0) := (others => '0');
+  alias pcg80_bank      : std_logic_vector(11 downto 10) is pcg80_a(11 downto 10);
+  signal pcg80_d_o      : std_logic_vector(7 downto 0);
+  signal pcg80_cs       : std_logic := '0';
+  signal pcg80_wr       : std_logic := '0';
+  signal pcg80_r        : std_logic_vector(7 downto 0) := (others => '0');
+  alias pcg80_en_hi     : std_logic is pcg80_r(7);  -- $AX
+  alias pcg80_en_lo     : std_logic is pcg80_r(3);  -- $X8
+  
   -- RAM signals        
   signal ram_wr         : std_logic;
   alias ram_datao      	: std_logic_vector(7 downto 0) is sram_i.d(7 downto 0);
@@ -225,6 +235,8 @@ begin
 	-- I/O chip selects
 	-- Alpha Joystick $00 (active low)
 	alpha_joy_cs <= '1' when cpu_io_a = X"00" else '0';
+	-- PCG-80 $FE
+	pcg80_cs <= '1' when cpu_io_a = X"FE" else '0';
   -- SOUND $FC-FF (Model I is $FF only)
 	snd_cs <= '1' when cpu_io_a = X"FF" else '0';
 	
@@ -245,6 +257,7 @@ begin
 	
 	-- io read mux
 	io_d <= X"FF" when alpha_joy_cs = '1' else
+          pcg80_r when pcg80_cs = '1' else
           hdd_d when hdd_cs = '1' else
 					X"FF";
 		
@@ -261,12 +274,38 @@ begin
 		kbd_data <= kbd_data_v;
   end process KBD_MUX;
 
+  -- PCG-80 register
+  process (clk_40M, cpu_reset)
+    variable pcg80_r_rd : std_logic := '0';
+  begin
+    if cpu_reset = '1' then
+      pcg80_r_rd := '0';
+      pcg80_r <= (others => '0');
+    elsif rising_edge(clk_40M) then
+      -- latch on rising edge IO read cycle
+      if pcg80_r_rd = '0' and pcg80_cs = '1' and cpu_io_rd = '1' then
+        pcg80_r <= cpu_d_o;
+        -- set programming bank
+        if cpu_d_o(7 downto 4) = X"6" then
+          pcg80_bank <= cpu_d_o(1 downto 0);
+        end if;
+      end if;
+      pcg80_r_rd := pcg80_cs and cpu_io_rd;
+    end if;
+    -- the rest of the address
+    pcg80_a(9 downto 0) <= cpu_a(9 downto 0);
+  end process;
+  pcg80_wr <= vram_wr when pcg80_r(7 downto 4) = X"6" else '0';
+
+  -- graphics control bits
+  graphics_o.bit8_1(5 downto 4) <= pcg80_en_hi & pcg80_en_lo;
+  graphics_o.bit8_1(3 downto 2) <= '0' & '0';
+  
   -- unused outputs
 	bitmap_o <= NULL_TO_BITMAP_CTL;
 	sprite_reg_o <= NULL_TO_SPRITE_REG;
 	sprite_o <= NULL_TO_SPRITE_CTL;
   tilemap_o.attr_d <= std_logic_vector(resize(unsigned(switches_i(7 downto 0)), tilemap_o.attr_d'length));
-	graphics_o <= NULL_TO_GRAPHICS;
 	ser_o <= NULL_TO_SERIAL;
   spi_o <= NULL_TO_SPI;
   --gp_o <= NULL_TO_GP;
@@ -354,6 +393,30 @@ begin
 			q_a					=> tilemap_o.map_d(7 downto 0)
 		);
     tilemap_o.map_d(tilemap_o.map_d'left downto 8) <= (others => '0');
+    
+  -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+	pcg80_inst : entity work.dpram
+		generic map
+		(
+			widthad_a		=> 12
+		)
+		port map
+		(
+			clock_b			=> clk_40M,
+			address_b		=> pcg80_a,
+			wren_b			=> pcg80_wr,
+			data_b			=> cpu_d_o,
+			q_b					=> pcg80_d_o,
+	
+      -- uses same address as built-in char ROM
+      -- - data fed back via 'attribute' port
+		  clock_a			=> clk_video,
+			address_a		=> tilemap_i.tile_a(11 downto 0),
+			wren_a			=> '0',
+			data_a			=> (others => 'X'),
+			q_a					=> tilemap_o.attr_d(7 downto 0)
+		);
+  tilemap_o.attr_d(tilemap_o.attr_d'left downto 8) <= (others => '0');
     
   BLK_INTERRUPTS : block
     signal tick_1ms   : std_logic := '0';

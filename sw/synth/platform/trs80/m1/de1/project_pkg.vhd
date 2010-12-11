@@ -73,10 +73,9 @@ package project_pkg is
   
   constant TRS80_M1_ROM_IN_FLASH            : boolean := false;
 
+  constant TRS80_M1_HAS_PCG80               : boolean := true;
   constant TRS80_M1_HAS_HDD                 : boolean := true;
   
-	constant USE_VIDEO_VBLANK_INTERRUPT       : boolean := false;
-
   -- derived: do not edit
   constant PACE_HAS_FLASH                   : boolean := TRS80_M1_ROM_IN_FLASH;
 
