@@ -102,7 +102,7 @@ begin
         end if;
 
         -- handle horiztonal count (part 1)
-        if hblank_v = '1' then
+        if hblank = '1' then
           hcount := (others => '0');
         end if;
       
@@ -122,7 +122,21 @@ begin
         -- (each byte contains information for 8 pixels)
         if hcount(2 downto 0) = "000" then
           if dbl_width = '0' then
-            tile_d_v := ctl_i.tile_d;
+            if ctl_i.map_d(7) = '0' then
+              tile_d_v := ctl_i.tile_d;
+            else
+              case vcount(2+PACE_VIDEO_V_SCALE downto 1+PACE_VIDEO_V_SCALE) is
+                when "00" =>
+                  tile_d_v := "00" & ctl_i.map_d(1) & ctl_i.map_d(1) & ctl_i.map_d(1) & 
+                              ctl_i.map_d(0) & ctl_i.map_d(0) & ctl_i.map_d(0);
+                when "01" =>
+                  tile_d_v := "00" & ctl_i.map_d(3) & ctl_i.map_d(3) & ctl_i.map_d(3) & 
+                              ctl_i.map_d(2) & ctl_i.map_d(2) & ctl_i.map_d(2);
+                when others =>
+                  tile_d_v := "00" & ctl_i.map_d(5) & ctl_i.map_d(5) & ctl_i.map_d(5) & 
+                              ctl_i.map_d(4) & ctl_i.map_d(4) & ctl_i.map_d(4);
+              end case;
+            end if;
           elsif hcount(3) = '0' then
             tile_d_v := ctl_i.tile_d(3) & ctl_i.tile_d(3) & ctl_i.tile_d(2) & ctl_i.tile_d(2) &
                         ctl_i.tile_d(1) & ctl_i.tile_d(1) & ctl_i.tile_d(0) & ctl_i.tile_d(0);
@@ -138,17 +152,16 @@ begin
         ctl_o.rgb.b <= (others => '0');
         ctl_o.set <= tile_d_v(0);
 
-        if hcount(2 downto 0) /= "000" then
+        if stb = '1' then
           tile_d_v := '0' & tile_d_v(tile_d_v'left downto 1);
-        end if;
-        
-        -- handle horiztonal count (part 2)
-        if hblank_v = '1' then
-          if hcount = 5 then
-            hcount := hcount + 3;
-          else
-            hcount := hcount + 1;
-          end if;
+          -- handle horiztonal count (part 2)
+          if hblank = '0' then
+            if hcount(2 downto 0) = "101" then
+              hcount := hcount + 3;
+            else
+              hcount := hcount + 1;
+            end if;
+          end if; -- stb='1'
         end if;
         
         -- for end-of-line detection

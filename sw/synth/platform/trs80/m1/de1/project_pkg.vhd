@@ -64,6 +64,13 @@ package project_pkg is
   --constant TRS80_M1_ROM                     : string := "model1b.hex";    -- v1.3
   constant TRS80_M1_ROM                     : string := "m1v13_bartlett.hex";
 
+  -- original Model I, no arrow keys
+  --constant TRS80_M1_CHARSET_ROM             : string := "trs80_m1_tile_0.hex";
+  -- standard Model I, no lowercase
+  --constant TRS80_M1_CHARSET_ROM             : string := "trs80_m1_tile_1.hex";
+  -- replacement Model I with lowercase mod
+  constant TRS80_M1_CHARSET_ROM             : string := "trs80_m1_tile_2.hex";
+  
   constant TRS80_M1_ROM_IN_FLASH            : boolean := false;
 
   constant TRS80_M1_HAS_HDD                 : boolean := true;

@@ -321,14 +321,13 @@ begin
 	tilerom_inst : entity work.sprom
 		generic map
 		(
-			init_file		=> "../../../../../src/platform/trs80/m1/roms/m1tile.hex",
-			numwords_a	=> 4096,
-			widthad_a		=> 12
+			init_file		=> "../../../../../src/platform/trs80/m1/roms/" & TRS80_M1_CHARSET_ROM,
+			widthad_a		=> 11
 		)
 		port map
 		(
 			clock			=> clk_video,
-			address		=> tilemap_i.tile_a(11 downto 0),
+			address		=> tilemap_i.tile_a(10 downto 0),
 			q					=> tilemap_o.tile_d
 		);
 	
