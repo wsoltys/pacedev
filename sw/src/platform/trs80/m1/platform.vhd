@@ -172,6 +172,12 @@ architecture SYN of platform is
   
 begin
 
+  assert false
+    report  "CLK0_FREQ_MHz=" & integer'image(CLK0_FREQ_MHz) &
+            " CPU_FREQ_MHz=" &  real'image(CPU_FREQ_MHz) &
+            " CPU_CLK_ENA_DIV=" & integer'image(TRS80_M1_CPU_CLK_ENA_DIVIDE_BY)
+      severity note;
+
 	cpu_reset <= clkrst_i.arst or game_reset;
 
   -- not used for now

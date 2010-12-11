@@ -1,6 +1,8 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
+use ieee.math_real.all;
 
 library work;
 use work.pace_pkg.all;
@@ -25,11 +27,12 @@ package platform_pkg is
 	--
 	-- Platform-specific constants (optional)
 	--
-		constant CLK0_FREQ_MHz		            : natural := 
-    PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
-  constant CPU_FREQ_MHz                 : natural := 2;  -- should be a "real" for 1.77MHz
+		constant CLK0_FREQ_MHz		            : integer := 
+                PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
+  constant CPU_FREQ_MHz                 : real := 1.77;
 
-	constant TRS80_M1_CPU_CLK_ENA_DIVIDE_BY : natural := CLK0_FREQ_MHz / CPU_FREQ_MHz;
+	constant TRS80_M1_CPU_CLK_ENA_DIVIDE_BY : natural := 
+                integer(round(real(CLK0_FREQ_MHz) / CPU_FREQ_MHz));
 
 	constant INCLUDE_FDC_SUPPORT			: boolean := false;
 	
