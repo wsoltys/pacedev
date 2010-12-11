@@ -123,29 +123,30 @@ begin
         -- - latch tile data
         -- (each byte contains information for 8 pixels)
         if hcount(2 downto 0) = "000" then
-          if dbl_width = '0' then
-            if ctl_i.map_d(7) = '0' then
-              tile_d_v := ctl_i.tile_d;
-            else
-              case vcount(2+PACE_VIDEO_V_SCALE downto 1+PACE_VIDEO_V_SCALE) is
-                when "00" =>
-                  tile_d_v := "00" & ctl_i.map_d(1) & ctl_i.map_d(1) & ctl_i.map_d(1) & 
-                              ctl_i.map_d(0) & ctl_i.map_d(0) & ctl_i.map_d(0);
-                when "01" =>
-                  tile_d_v := "00" & ctl_i.map_d(3) & ctl_i.map_d(3) & ctl_i.map_d(3) & 
-                              ctl_i.map_d(2) & ctl_i.map_d(2) & ctl_i.map_d(2);
-                when others =>
-                  tile_d_v := "00" & ctl_i.map_d(5) & ctl_i.map_d(5) & ctl_i.map_d(5) & 
-                              ctl_i.map_d(4) & ctl_i.map_d(4) & ctl_i.map_d(4);
-              end case;
-            end if;
-          elsif hcount(3) = '0' then
-            tile_d_v := ctl_i.tile_d(3) & ctl_i.tile_d(3) & ctl_i.tile_d(2) & ctl_i.tile_d(2) &
-                        ctl_i.tile_d(1) & ctl_i.tile_d(1) & ctl_i.tile_d(0) & ctl_i.tile_d(0);
+          if ctl_i.map_d(7) = '0' then
+            tile_d_v := ctl_i.tile_d;
           else
-            tile_d_v := ctl_i.tile_d(7) & ctl_i.tile_d(7) & ctl_i.tile_d(6) & ctl_i.tile_d(6) &
-                        ctl_i.tile_d(5) & ctl_i.tile_d(5) & ctl_i.tile_d(4) & ctl_i.tile_d(4);
+            case vcount(2+PACE_VIDEO_V_SCALE downto 1+PACE_VIDEO_V_SCALE) is
+              when "00" =>
+                tile_d_v := "00" & ctl_i.map_d(1) & ctl_i.map_d(1) & ctl_i.map_d(1) & 
+                            ctl_i.map_d(0) & ctl_i.map_d(0) & ctl_i.map_d(0);
+              when "01" =>
+                tile_d_v := "00" & ctl_i.map_d(3) & ctl_i.map_d(3) & ctl_i.map_d(3) & 
+                            ctl_i.map_d(2) & ctl_i.map_d(2) & ctl_i.map_d(2);
+              when others =>
+                tile_d_v := "00" & ctl_i.map_d(5) & ctl_i.map_d(5) & ctl_i.map_d(5) & 
+                            ctl_i.map_d(4) & ctl_i.map_d(4) & ctl_i.map_d(4);
+            end case;
           end if;
+          if dbl_width /= '0' then
+            if hcount(3) = '0' then
+              tile_d_v := "00" & tile_d_v(2) & tile_d_v(2) &
+                          tile_d_v(1) & tile_d_v(1) & tile_d_v(0) & tile_d_v(0);
+            else
+              tile_d_v := "00" & tile_d_v(5) & tile_d_v(5) &
+                          tile_d_v(4) & tile_d_v(4) & tile_d_v(3) & tile_d_v(3);
+            end if; -- hcount(3)='0'
+          end if; -- dlb_width/='0'
         end if;
 
         -- green-screen display
