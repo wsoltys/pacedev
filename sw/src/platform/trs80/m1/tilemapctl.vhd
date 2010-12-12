@@ -123,9 +123,16 @@ begin
         -- - latch tile data
         -- (each byte contains information for 8 pixels)
         if hcount(2 downto 0) = "000" then
-          if ctl_i.map_d(7) = '0' then
+          if TRS80_M1_HAS_PCG80 and 
+              ((ctl_i.map_d(7) = '0' and pcg80_en_lo = '1') or
+               (ctl_i.map_d(7) = '1' and pcg80_en_hi = '1')) then
+            -- latch character data from PCG-80 RAM
+            tile_d_v := ctl_i.attr_d(7 downto 0);
+          elsif ctl_i.map_d(7) = '0' then
+            -- latch alpha character rom data
             tile_d_v := ctl_i.tile_d;
           else
+            -- generate graphics character
             case vcount(2+PACE_VIDEO_V_SCALE downto 1+PACE_VIDEO_V_SCALE) is
               when "00" =>
                 tile_d_v := "00" & ctl_i.map_d(1) & ctl_i.map_d(1) & ctl_i.map_d(1) & 
@@ -158,13 +165,11 @@ begin
         if stb = '1' then
           tile_d_v := '0' & tile_d_v(tile_d_v'left downto 1);
           -- handle horiztonal count (part 2)
-          if hblank = '0' then
-            if hcount(2 downto 0) = "101" then
-              hcount := hcount + 3;
-            else
-              hcount := hcount + 1;
-            end if;
-          end if; -- stb='1'
+          if hcount(2 downto 0) = "101" then
+            hcount := hcount + 3;
+          else
+            hcount := hcount + 1;
+          end if;
         end if;
         
         -- for end-of-line detection
