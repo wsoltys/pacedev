@@ -127,8 +127,8 @@ begin
               ((ctl_i.map_d(7) = '0' and pcg80_en_lo = '1') or
                (ctl_i.map_d(7) = '1' and pcg80_en_hi = '1')) then
             -- latch character data from PCG-80 RAM
-            tile_d_v := ctl_i.attr_d(0) & ctl_i.attr_d(1) & ctl_i.attr_d(2) & ctl_i.attr_d(3) &
-                        ctl_i.attr_d(4) & ctl_i.attr_d(5) & ctl_i.attr_d(6) & ctl_i.attr_d(7);
+            tile_d_v := "00" & ctl_i.attr_d(0) & ctl_i.attr_d(1) & ctl_i.attr_d(2) & 
+                               ctl_i.attr_d(3) & ctl_i.attr_d(4) & ctl_i.attr_d(5);
           elsif ctl_i.map_d(7) = '0' then
             -- latch alpha character rom data
             tile_d_v := ctl_i.tile_d;
