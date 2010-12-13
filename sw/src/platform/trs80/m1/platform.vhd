@@ -769,9 +769,13 @@ begin
           end if;
         end if;
       end process;
-      leds_o(0) <= ide_act;
+      leds_o(4) <= ide_act;
     end block BLK_ACTIVITY;
     
   end generate GEN_HDD;
-					
+
+  leds_o(leds_o'left downto 5) <= (others => '0');
+  -- reserved for floppy drives 0-4
+  leds_o(3 downto 0) <= (others => '0');
+  
 end architecture SYN;

@@ -781,7 +781,6 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd_pk
 set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/inputmapper.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Inputs.VHD
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m1/trs80_interrupts.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/ocidec1/ro_cnt.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/ocidec1/ud_cnt.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/ocidec1/atahost_pio_tctrl.vhd
@@ -791,8 +790,8 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/ocidec
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m1/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/tilemapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_mixer.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m1/tilemapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Graphics.VHD
 set_global_assignment -name VHDL_FILE ../../../../../src/component/io/maple/conversion.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
