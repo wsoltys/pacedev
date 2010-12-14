@@ -122,8 +122,7 @@ begin
         -- 3rd stage of pipeline
         -- - latch tile data
         -- (each byte contains information for 8 pixels)
-        --if hcount(2 downto 0) = "000" then
-        if hcount(2 downto 0) = graphics_i.bit16_1(2 downto 0) then
+        if hcount(2 downto 0) = "101" then
           if TRS80_M1_HAS_PCG80 and 
               ((ctl_i.map_d(7) = '0' and pcg80_en_lo = '1') or
                (ctl_i.map_d(7) = '1' and pcg80_en_hi = '1')) then

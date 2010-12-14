@@ -279,10 +279,13 @@ begin
     elsif rising_edge(clk_40M) then
       -- latch on rising edge IO read cycle
       if pcg80_cs = '1' and cpu_io_wr = '1' then
-        pcg80_r <= cpu_d_o;
-        -- set programming bank
-        if cpu_d_o(7 downto 4) = X"6" then
-          pcg80_bank <= cpu_d_o(1 downto 0);
+        -- $20,$A0,$28,$A8 all have bit 5 set
+        if cpu_d_o(5) = '1' then
+          pcg80_r <= cpu_d_o;
+          -- set programming bank
+          if cpu_d_o(7 downto 4) = X"6" then
+            pcg80_bank <= cpu_d_o(1 downto 0);
+          end if;
         end if;
       end if;
     end if;
@@ -778,6 +781,4 @@ begin
   -- reserved for floppy drives 0-4
   leds_o(3 downto 0) <= (others => '0');
 
-  graphics_o.bit16_1(2 downto 0) <= switches_i(2 downto 0);
-  
 end architecture SYN;
