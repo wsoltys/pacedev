@@ -777,5 +777,7 @@ begin
   leds_o(leds_o'left downto 5) <= (others => '0');
   -- reserved for floppy drives 0-4
   leds_o(3 downto 0) <= (others => '0');
+
+  graphics_o.bit16_1(2 downto 0) <= switches_i(2 downto 0);
   
 end architecture SYN;
