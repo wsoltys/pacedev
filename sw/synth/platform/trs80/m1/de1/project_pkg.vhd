@@ -63,6 +63,7 @@ package project_pkg is
   --constant TRS80_M1_ROM                     : string := "model1a.hex";    -- v1.2
   --constant TRS80_M1_ROM                     : string := "model1b.hex";    -- v1.3
   constant TRS80_M1_ROM                     : string := "m1v13_bartlett.hex";
+  --constant TRS80_M1_ROM                     : string := "sys80.hex";
 
   -- original Model I, no arrow keys
   --constant TRS80_M1_CHARSET_ROM             : string := "trs80_m1_tile_0.hex";
@@ -73,7 +74,10 @@ package project_pkg is
   
   constant TRS80_M1_ROM_IN_FLASH            : boolean := false;
 
-  constant TRS80_M1_HAS_PCG80               : boolean := true;
+  constant TRS80_M1_IS_SYSTEM80             : boolean := (TRS80_M1_ROM = "sys80.hex");
+  constant TRS80_M1_HAS_PCG80               : boolean := false;
+  constant TRS80_M1_HAS_LE18                : boolean := true;
+  constant TRS80_M1_LE18_WIDTHAD            : natural := 14;    -- 16KiB
   constant TRS80_M1_HAS_HDD                 : boolean := true;
   
   -- derived: do not edit

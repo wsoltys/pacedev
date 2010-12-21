@@ -275,18 +275,25 @@ begin
 
   graphics_o.bit8_1(3) <= '0';  -- alt character set?
   
-  -- double-width characters
-  process (clk_40M, cpu_reset)
-  begin
-    if cpu_reset = '1' then
-      graphics_o.bit8_1(2) <= '0';
-    elsif rising_edge(clk_40M) then
-      if snd_cs = '1' and cpu_io_wr = '1' then
-        graphics_o.bit8_1(2) <= cpu_d_o(6);
+  -- software-controlled
+  GEN_DBL_WIDTH_TRS80_M1 : if not TRS80_M1_IS_SYSTEM80 generate
+    process (clk_40M, cpu_reset)
+    begin
+      if cpu_reset = '1' then
+        graphics_o.bit8_1(2) <= '0';
+      elsif rising_edge(clk_40M) then
+        if snd_cs = '1' and cpu_io_wr = '1' then
+          graphics_o.bit8_1(2) <= cpu_d_o(3);
+        end if;
       end if;
-    end if;
-  end process;
-
+    end process;
+  end generate GEN_DBL_WIDTH_TRS80_M1;
+  
+  -- a physical switch on the back of the System 80
+  GEN_DBL_WIDTH_SYSTEM80 : if TRS80_M1_IS_SYSTEM80 generate
+    graphics_o.bit8_1(2) <= switches_i(9);
+  end generate GEN_DBL_WIDTH_SYSTEM80;
+  
   -- unused outputs
 	sprite_reg_o <= NULL_TO_SPRITE_REG;
 	sprite_o <= NULL_TO_SPRITE_CTL;
