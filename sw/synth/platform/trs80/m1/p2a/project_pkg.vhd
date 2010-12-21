@@ -71,6 +71,8 @@ package project_pkg is
   constant TRS80_M1_CHARSET_ROM             : string := "trs80_m1_tile_2.hex";
   
   constant TRS80_M1_HAS_PCG80               : boolean := true;
+  constant TRS80_M1_HAS_LE18                : boolean := true;
+  constant TRS80_M1_LE18_WIDTHA             : natural := 14;    -- 16KiB
   constant TRS80_M1_HAS_HDD                 : boolean := true;
   
   type from_PROJECT_IO_t is record

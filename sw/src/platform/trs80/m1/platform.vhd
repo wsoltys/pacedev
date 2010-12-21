@@ -144,12 +144,11 @@ architecture SYN of platform is
   signal vram_datao     : std_logic_vector(7 downto 0);
 
   -- pcg80 signals
-  signal pcg80_a        : std_logic_vector(11 downto 0) := (others => '0');
-  alias pcg80_bank      : std_logic_vector(11 downto 10) is pcg80_a(11 downto 10);
-  signal pcg80_r        : std_logic_vector(7 downto 0) := (others => '0');
-  signal pcg80_d_o      : std_logic_vector(7 downto 0);
   signal pcg80_cs       : std_logic := '0';
-  signal pcg80_wr       : std_logic := '0';
+  signal pcg80_d_o      : std_logic_vector(7 downto 0);
+  -- le18 signals
+  signal le18_cs        : std_logic := '0';
+  signal le18_d_o       : std_logic_vector(7 downto 0) := (others => '0');
   
   -- RAM signals        
   signal ram_wr         : std_logic;
@@ -233,6 +232,8 @@ begin
 	-- I/O chip selects
 	-- Alpha Joystick $00 (active low)
 	alpha_joy_cs <= '1' when cpu_io_a = X"00" else '0';
+	-- LE18 $EC-$EF
+  le18_cs <= '1' when STD_MATCH(cpu_io_a, X"E" & "11--") else '0';
 	-- PCG-80 $FE
 	pcg80_cs <= '1' when cpu_io_a = X"FE" else '0';
   -- SOUND $FC-FF (Model I is $FF only)
@@ -255,6 +256,7 @@ begin
 	
 	-- io read mux
 	io_d <= X"FF" when alpha_joy_cs = '1' else
+          le18_d_o when le18_cs = '1' else
           hdd_d when hdd_cs = '1' else
 					X"FF";
 		
@@ -271,31 +273,6 @@ begin
 		kbd_data <= kbd_data_v;
   end process KBD_MUX;
 
-  -- PCG-80 register
-  process (clk_40M, cpu_reset)
-  begin
-    if cpu_reset = '1' then
-      pcg80_r <= (others => '0');
-    elsif rising_edge(clk_40M) then
-      -- latch on rising edge IO read cycle
-      if pcg80_cs = '1' and cpu_io_wr = '1' then
-        -- $20,$A0,$28,$A8 all have bit 5 set
-        if cpu_d_o(5) = '1' then
-          pcg80_r <= cpu_d_o;
-          -- set programming bank
-          if cpu_d_o(7 downto 4) = X"6" then
-            pcg80_bank <= cpu_d_o(1 downto 0);
-          end if;
-        end if;
-      end if;
-    end if;
-    -- the rest of the address
-    pcg80_a(9 downto 0) <= cpu_a(9 downto 0);
-  end process;
-  pcg80_wr <= vram_wr when pcg80_r(7 downto 4) = X"6" else '0';
-
-  graphics_o.bit8_1(5) <= pcg80_r(7); -- enable $80-$FF
-  graphics_o.bit8_1(4) <= pcg80_r(3); -- enable $00-$7F
   graphics_o.bit8_1(3) <= '0';  -- alt character set?
   
   -- double-width characters
@@ -311,7 +288,6 @@ begin
   end process;
 
   -- unused outputs
-	bitmap_o <= NULL_TO_BITMAP_CTL;
 	sprite_reg_o <= NULL_TO_SPRITE_REG;
 	sprite_o <= NULL_TO_SPRITE_CTL;
 	ser_o <= NULL_TO_SERIAL;
@@ -403,6 +379,40 @@ begin
     tilemap_o.map_d(tilemap_o.map_d'left downto 8) <= (others => '0');
 
   GEN_PCG80 : if TRS80_M1_HAS_PCG80 generate
+
+    signal pcg80_a        : std_logic_vector(11 downto 0) := (others => '0');
+    alias pcg80_bank      : std_logic_vector(11 downto 10) is pcg80_a(11 downto 10);
+    signal pcg80_r        : std_logic_vector(7 downto 0) := (others => '0');
+    signal pcg80_wr       : std_logic := '0';
+    
+  begin
+  
+    -- PCG-80 register
+    process (clk_40M, cpu_reset)
+    begin
+      if cpu_reset = '1' then
+        pcg80_r <= (others => '0');
+      elsif rising_edge(clk_40M) then
+        -- latch on rising edge IO read cycle
+        if pcg80_cs = '1' and cpu_io_wr = '1' then
+          -- $20,$A0,$28,$A8 all have bit 5 set
+          if cpu_d_o(5) = '1' then
+            pcg80_r <= cpu_d_o;
+            -- set programming bank
+            if cpu_d_o(7 downto 4) = X"6" then
+              pcg80_bank <= cpu_d_o(1 downto 0);
+            end if;
+          end if;
+        end if;
+      end if;
+      -- the rest of the address
+      pcg80_a(9 downto 0) <= cpu_a(9 downto 0);
+    end process;
+    pcg80_wr <= vram_wr when pcg80_r(7 downto 4) = X"6" else '0';
+
+    graphics_o.bit8_1(5) <= pcg80_r(7); -- enable $80-$FF
+    graphics_o.bit8_1(4) <= pcg80_r(3); -- enable $00-$7F
+
     -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
     pcg80_inst : entity work.dpram
       generic map
@@ -432,6 +442,89 @@ begin
     pcg80_d_o <= (others => '0');
     tilemap_o.attr_d <= (others => '0');
   end generate GEN_NO_PCG80;
+
+  GEN_LE18 : if TRS80_M1_HAS_LE18 generate
+    signal le18_ram_a   : std_logic_vector(TRS80_M1_LE18_WIDTHA-1 downto 0) := (others => '0');
+    signal le18_ram_wr  : std_logic := '0';
+    signal le18_ram_i   : std_logic_vector(5 downto 0) := (others => '0');
+    signal le18_ram_o   : std_logic_vector(5 downto 0) := (others => '0');
+    --
+    signal le18_x       : std_logic_vector(5 downto 0) := (others => '0');
+    signal le18_y       : std_logic_vector(7 downto 0) := (others => '0');
+    signal le18_en      : std_logic := '0';
+  begin
+  
+    process (clk_40M, cpu_reset)
+    begin
+      if cpu_reset = '1' then
+        le18_x <= (others => '0');
+        le18_y <= (others => '0');
+        le18_en <= '0';
+      elsif rising_edge(clk_40M) then
+        le18_ram_wr <= '0'; -- default
+        -- write to graphics registers
+        if le18_cs = '1' then
+          if cpu_io_wr = '1' then
+            case cpu_io_a(1 downto 0) is
+              when "00" =>
+                le18_ram_i <= cpu_d_o(le18_ram_i'range);
+                le18_ram_wr <= '1';
+              when "01" =>
+                le18_x <= cpu_d_o(le18_x'range);
+              when "10" =>
+                le18_y <= cpu_d_o;
+              when others =>
+                le18_en <= cpu_d_o(0);
+            end case;
+          elsif cpu_io_rd = '1' then
+            case cpu_io_a(1 downto 0) is
+              when "00" =>
+                -- bit7 should be '1' during blanking
+                le18_d_o <= '1' & le18_en & le18_ram_o(5 downto 0);
+              when "01" =>
+                le18_d_o <= "00" & le18_x;
+              when "10" =>
+                le18_d_o <= le18_y;
+              when others =>
+                le18_d_o <= "0000000" & le18_en;
+            end case;
+          end if; -- cpu_io_wr/rd=1
+        end if; -- le18_cs=1
+      end if;
+    end process;
+
+    -- construct RAM address
+    le18_ram_a <= le18_y & le18_x;
+    
+    -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+    le18_ram_inst : entity work.dpram
+      generic map
+      (
+        widthad_a		=> TRS80_M1_LE18_WIDTHA,
+        width_a     => 6
+      )
+      port map
+      (
+        clock_b			=> clk_40M,
+        address_b		=> le18_ram_a(TRS80_M1_LE18_WIDTHA-1 downto 0),
+        wren_b			=> le18_ram_wr,
+        data_b			=> le18_ram_i,
+        q_b					=> le18_ram_o,
+    
+        clock_a			=> clk_video,
+        address_a		=> bitmap_i.a(TRS80_M1_LE18_WIDTHA-1 downto 0),
+        wren_a			=> '0',
+        data_a			=> (others => 'X'),
+        q_a					=> bitmap_o.d(5 downto 0)
+      );
+    bitmap_o.d(7 downto 6) <= (others => '0');
+
+  end generate GEN_LE18;
+    
+  GEN_NO_LE18 : if not TRS80_M1_HAS_LE18 generate
+    le18_d_o <= X"FF";
+    bitmap_o.d <= (others => '0');
+  end generate GEN_NO_LE18;
     
   BLK_INTERRUPTS : block
     signal tick_1ms   : std_logic := '0';
