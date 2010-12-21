@@ -451,7 +451,7 @@ begin
   end generate GEN_NO_PCG80;
 
   GEN_LE18 : if TRS80_M1_HAS_LE18 generate
-    signal le18_ram_a   : std_logic_vector(TRS80_M1_LE18_WIDTHAD-1 downto 0) := (others => '0');
+    signal le18_ram_a   : std_logic_vector(13 downto 0) := (others => '0');
     signal le18_ram_wr  : std_logic := '0';
     signal le18_ram_i   : std_logic_vector(5 downto 0) := (others => '0');
     signal le18_ram_o   : std_logic_vector(5 downto 0) := (others => '0');

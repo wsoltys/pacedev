@@ -77,7 +77,8 @@ package project_pkg is
   constant TRS80_M1_IS_SYSTEM80             : boolean := (TRS80_M1_ROM = "sys80.hex");
   constant TRS80_M1_HAS_PCG80               : boolean := false;
   constant TRS80_M1_HAS_LE18                : boolean := true;
-  constant TRS80_M1_LE18_WIDTHAD            : natural := 14;    -- 16KiB
+  --constant TRS80_M1_LE18_WIDTHAD            : natural := 14;    -- 16KiB
+  constant TRS80_M1_LE18_WIDTHAD            : natural := 13;    -- 8KiB (half-screen)
   constant TRS80_M1_HAS_HDD                 : boolean := true;
   
   -- derived: do not edit
