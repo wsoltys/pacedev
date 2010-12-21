@@ -51,6 +51,7 @@ architecture SYN of tilemapCtl_1 is
   alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
   alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
 
+  alias le18_en     : std_logic is graphics_i.bit8_1(6);
   alias pcg80_en_hi : std_logic is graphics_i.bit8_1(5);
   alias pcg80_en_lo : std_logic is graphics_i.bit8_1(4);
   alias alt_char    : std_logic is graphics_i.bit8_1(3);

@@ -444,7 +444,7 @@ begin
   end generate GEN_NO_PCG80;
 
   GEN_LE18 : if TRS80_M1_HAS_LE18 generate
-    signal le18_ram_a   : std_logic_vector(TRS80_M1_LE18_WIDTHA-1 downto 0) := (others => '0');
+    signal le18_ram_a   : std_logic_vector(TRS80_M1_LE18_WIDTHAD-1 downto 0) := (others => '0');
     signal le18_ram_wr  : std_logic := '0';
     signal le18_ram_i   : std_logic_vector(5 downto 0) := (others => '0');
     signal le18_ram_o   : std_logic_vector(5 downto 0) := (others => '0');
@@ -457,6 +457,7 @@ begin
     process (clk_40M, cpu_reset)
     begin
       if cpu_reset = '1' then
+        le18_ram_wr <= '0';
         le18_x <= (others => '0');
         le18_y <= (others => '0');
         le18_en <= '0';
@@ -500,24 +501,26 @@ begin
     le18_ram_inst : entity work.dpram
       generic map
       (
-        widthad_a		=> TRS80_M1_LE18_WIDTHA,
+        widthad_a		=> TRS80_M1_LE18_WIDTHAD,
         width_a     => 6
       )
       port map
       (
         clock_b			=> clk_40M,
-        address_b		=> le18_ram_a(TRS80_M1_LE18_WIDTHA-1 downto 0),
+        address_b		=> le18_ram_a(TRS80_M1_LE18_WIDTHAD-1 downto 0),
         wren_b			=> le18_ram_wr,
         data_b			=> le18_ram_i,
         q_b					=> le18_ram_o,
     
         clock_a			=> clk_video,
-        address_a		=> bitmap_i.a(TRS80_M1_LE18_WIDTHA-1 downto 0),
+        address_a		=> bitmap_i.a(TRS80_M1_LE18_WIDTHAD-1 downto 0),
         wren_a			=> '0',
         data_a			=> (others => 'X'),
         q_a					=> bitmap_o.d(5 downto 0)
       );
     bitmap_o.d(7 downto 6) <= (others => '0');
+
+    graphics_o.bit8_1(6) <= le18_en;
 
   end generate GEN_LE18;
     

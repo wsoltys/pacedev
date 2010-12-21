@@ -10,7 +10,7 @@ use work.platform_pkg.all;
 use work.project_pkg.all;
 
 --
---	TRS-80 Microlabs Model III Hires Graphics Bitmap Controller
+--	TRS-80 Model I Lowe Electronics LE18 Hires Graphics Bitmap Controller
 --
 
 entity bitmapCtl_1 is          
@@ -42,109 +42,92 @@ architecture SYN of bitmapCtl_1 is
   alias vblank    : std_logic is video_ctl.vblank;
   alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
   alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
-  
-  alias alt_char  : std_logic is graphics_i.bit8_1(3);
-  alias dbl_width : std_logic is graphics_i.bit8_1(2);
-  
-  alias rgb       : RGB_t is ctl_o.rgb;
+
+  alias le18_en     : std_logic is graphics_i.bit8_1(6);
+  alias pcg80_en_hi : std_logic is graphics_i.bit8_1(5);
+  alias pcg80_en_lo : std_logic is graphics_i.bit8_1(4);
+  alias alt_char    : std_logic is graphics_i.bit8_1(3);
+  alias dbl_width   : std_logic is graphics_i.bit8_1(2);
+
+  signal hblank_r : std_logic_vector(DELAY-1 downto 0) := (others => '0');
   
 begin
 
   -- generate pixel
-  process (clk)
+  process (clk, clk_ena, reset)
 
-		variable hblank_r		: std_logic_vector(DELAY-1 downto 0);
-		alias hblank_prev		: std_logic is hblank_r(hblank_r'left);
-		alias hblank_v			: std_logic is hblank_r(hblank_r'left-1);
-		variable vcount			: std_logic_vector(8 downto 0);
-		constant X_PIPELINE_BITS  : integer := 4;
-		variable x_r	      : std_logic_vector(2*X_PIPELINE_BITS-1 downto 0);
-		variable xc         : std_logic_vector(2 downto 0);
-		variable pel_r      : std_logic_vector(DELAY-1-2 downto 0); -- 2 from above
-		alias pel           : std_logic is pel_r(pel_r'right);
+		--variable hblank_r		: std_logic_vector(DELAY-1 downto 0);
+		alias hblank_prev		  : std_logic is hblank_r(hblank_r'left);
+		alias hblank_v			  : std_logic is hblank_r(hblank_r'left-1);
+		variable hcount       : std_logic_vector(8 downto 0);
+		variable vcount			  : std_logic_vector(8 downto 0);
+		variable bitmap_d_v   : std_logic_vector(7 downto 0) := (others => '0');
 		
   begin
-
+  
     -- not used
     ctl_o.a(ctl_o.a'left downto 14) <= (others => '0');
-    
-  	if rising_edge(clk) and clk_ena = '1' then
 
-      if vblank = '1' then
-        vcount := (others => '0');
+		if reset = '1' then
+			hblank_r <= (others => '1');
+  	elsif rising_edge(clk) then
+      if clk_ena = '1' then
 
-      -- update vcount at the end of each line
-			elsif hblank_v = '1' and hblank_prev = '0' then
+        -- handle vertical count
+        if vblank = '1' then
+          vcount := (others => '0');
+        elsif hblank_v = '1' and hblank_prev = '0' then
+          if vcount(2+PACE_VIDEO_V_SCALE downto 0) = X"B" & 
+              std_logic_vector(to_signed(-1,PACE_VIDEO_V_SCALE-1)) then
+            vcount := vcount + 4 * PACE_VIDEO_V_SCALE + 1;
+          else
+            vcount := vcount + 1;
+          end if;
 
-        -- in effect we have vcount / 12 and vcount % 12
-				if vcount(2+PACE_VIDEO_V_SCALE downto 0) = X"B" & 
-						std_logic_vector(to_signed(-1,PACE_VIDEO_V_SCALE-1)) then
-					vcount := vcount + 4 * PACE_VIDEO_V_SCALE + 1;
-				else
-					vcount := vcount + 1;
-				end if;
+          -- fixed for the line
+          ctl_o.a(13 downto 6) <= 
+            vcount(6+PACE_VIDEO_V_SCALE downto -1+PACE_VIDEO_V_SCALE);
+        end if;
 
-        -- fixed for the line
-        -- VCOUNT%12*1KiB
-        ctl_o.a(13 downto 10) <= vcount(2+PACE_VIDEO_V_SCALE downto -1+PACE_VIDEO_V_SCALE);
-        -- VCOUNT/12*64
-  			ctl_o.a(9 downto 6) <= vcount(6+PACE_VIDEO_V_SCALE downto 3+PACE_VIDEO_V_SCALE);
-          
-			end if;
-        
-      -- 1st stage of pipeline
-      -- - read tile from tilemap
-      if stb = '1' then
-        ctl_o.a(5 downto 1) <= x(8 downto 4);
-        ctl_o.a(0) <= x(3) and not dbl_width;
-      end if;
-
-      -- pipeline pel by 2 clocks
-      pel_r(pel_r'left downto 1) := pel_r(pel_r'left-1 downto 0);
-
-      -- each byte contains information for 8 pixels
-      if dbl_width = '0' then
-        xc := x_r(x_r'left-1 downto x_r'left-3);
-      else
-        xc := x_r(x_r'left downto x_r'left-2);
-      end if;
-      case xc is
-        when "000" =>
-          pel := ctl_i.d(0);
-        when "001" =>
-          pel := ctl_i.d(1);
-        when "010" =>
-          pel := ctl_i.d(2);
-        when "011" =>
-          pel := ctl_i.d(3);
-        when "100" =>
-          pel := ctl_i.d(4);
-        when "101" =>
-          pel := ctl_i.d(5);
-        when "110" =>
-          pel := ctl_i.d(6);
-        when others =>
-          pel := ctl_i.d(7);
-      end case;
-
-      -- green-screen display
-      ctl_o.rgb.r <= (others => '0');
-      ctl_o.rgb.g <= (others => pel_r(pel_r'left));
-      ctl_o.rgb.b <= (others => '0');
+        -- handle horiztonal count (part 1)
+        if hblank = '1' then
+          hcount := (others => '0');
+        end if;
       
-			-- pipelined because of tile data loopkup
-      x_r := x_r(x_r'left-X_PIPELINE_BITS downto 0) & x(X_PIPELINE_BITS-1 downto 0);
+        -- 1st stage of pipeline
+        -- - read tile from tilemap
+        if stb = '1' then
+          ctl_o.a(5 downto 0) <= hcount(8 downto 3);
+        end if;
 
-      -- for end-of-line detection
-			hblank_r := hblank_r(hblank_r'left-1 downto 0) & hblank;
-		
-      ctl_o.set <= pel_r(pel_r'left);
+        -- 2nd stage of pipeline
+        -- - latch bitmap data
+        -- (each byte contains information for 8 pixels)
+        if hcount(2 downto 0) = "101" then
+          bitmap_d_v := ctl_i.d;
+        end if;
 
+        -- green-screen display
+        ctl_o.rgb.r <= (others => '0');
+        ctl_o.rgb.g <= (others => bitmap_d_v(0));
+        ctl_o.rgb.b <= (others => '0');
+        ctl_o.set <= bitmap_d_v(0);
+
+        if stb = '1' then
+          bitmap_d_v := '0' & bitmap_d_v(bitmap_d_v'left downto 1);
+          -- handle horiztonal count (part 2)
+          if hcount(2 downto 0) = "101" then
+            hcount := hcount + 3;
+          else
+            hcount := hcount + 1;
+          end if;
+        end if;
+        
+        -- for end-of-line detection
+        hblank_r <= hblank_r(hblank_r'left-1 downto 0) & hblank;
+      
+      end if; -- clk_ena='1'
 		end if; -- rising_edge(clk)
-
   end process;
-
-  -- may need to pipeline video to match tilemap
   
 end architecture SYN;
-
