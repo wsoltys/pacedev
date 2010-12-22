@@ -335,19 +335,29 @@ begin
       nmi    	=> cpu_nmi
     );
 
-	rom_inst : entity work.sprom
-		generic map
-		(
-			init_file		=> "../../../../../src/platform/trs80/m1/roms/" & TRS80_M1_ROM,
-			widthad_a		=> 14
-		)
-		port map
-		(
-			clock			=> clk_40M,
-			address		=> cpu_a(13 downto 0),
-			q					=> rom_d_o
-		);
-	
+  GEN_ROM_ONCHIP : if not TRS80_M1_ROM_IN_FLASH generate
+    rom_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> "../../../../../src/platform/trs80/m1/roms/" & TRS80_M1_ROM,
+        widthad_a		=> 14
+      )
+      port map
+      (
+        clock			=> clk_40M,
+        address		=> cpu_a(13 downto 0),
+        q					=> rom_d_o
+      );
+  end generate GEN_ROM_ONCHIP;
+  
+  GEN_ROM_IN_FLASH : if TRS80_M1_ROM_IN_FLASH generate
+    flash_o.a <= std_logic_vector(resize(unsigned(cpu_a(13 downto 0)), flash_o.a'length));
+    flash_o.we <= '0';
+    flash_o.cs <= rom_cs;
+    flash_o.oe <= '1';
+    rom_d_o <= flash_i.d(rom_d_o'range);
+  end generate GEN_ROM_IN_FLASH;
+  
 	tilerom_inst : entity work.sprom
 		generic map
 		(

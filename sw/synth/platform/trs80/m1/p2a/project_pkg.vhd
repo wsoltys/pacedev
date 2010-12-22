@@ -61,8 +61,8 @@ package project_pkg is
   --constant TRS80_M1_ROM                     : string := "level1.hex";
   --constant TRS80_M1_ROM                     : string := "model1a.hex";    -- v1.2
   --constant TRS80_M1_ROM                     : string := "model1b.hex";    -- v1.3
-  --constant TRS80_M1_ROM                     : string := "m1v13_bartlett.hex";
-  constant TRS80_M1_ROM                     : string := "sys80.hex";
+  constant TRS80_M1_ROM                     : string := "m1v13_bartlett.hex";
+  --constant TRS80_M1_ROM                     : string := "sys80.hex";
 
   -- original Model I, no arrow keys
   --constant TRS80_M1_CHARSET_ROM             : string := "trs80_m1_tile_0.hex";

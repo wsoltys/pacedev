@@ -77,13 +77,7 @@ begin
         if vblank = '1' then
           vcount := (others => '0');
         elsif hblank_v = '1' and hblank_prev = '0' then
-          if vcount(2+PACE_VIDEO_V_SCALE downto 0) = X"B" & 
-              std_logic_vector(to_signed(-1,PACE_VIDEO_V_SCALE-1)) then
-            vcount := vcount + 4 * PACE_VIDEO_V_SCALE + 1;
-          else
-            vcount := vcount + 1;
-          end if;
-
+          vcount := vcount + 1;
           -- fixed for the line
           ctl_o.a(13 downto 6) <= 
             vcount(6+PACE_VIDEO_V_SCALE downto -1+PACE_VIDEO_V_SCALE);
