@@ -2136,6 +2136,8 @@ set_location_assignment PIN_B10 -to vao_m1
 set_location_assignment PIN_A11 -to vao_m2
 set_instance_assignment -name IO_STANDARD "3.0-V LVCMOS" -to vao_vsync
 set_instance_assignment -name IO_STANDARD "3.0-V LVCMOS" -to vao_hsync
+set_global_assignment -name RESERVE_DATA7_THROUGH_DATA1_AFTER_CONFIGURATION "USE AS REGULAR IO"
+set_global_assignment -name MISC_FILE "D:/markm/pace/pacedev.net/sw/synth/platform/midway8080/invaders/s5a_r2b0/invaders-ep3sl.dpf"
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sdram_pkg.vhd
@@ -2144,7 +2146,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg_b
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2/target_pkg_ep3sl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2b0/target_pkg_ep3sl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/invaders/platform_variant_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/pll.vhd
@@ -2172,8 +2174,6 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/Z80.v
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/altera_mem.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2/target_top_ep3sl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2b0/target_top_ep3sl.vhd
 set_global_assignment -name SIGNALTAP_FILE cpu.stp
-set_global_assignment -name RESERVE_DATA7_THROUGH_DATA1_AFTER_CONFIGURATION "USE AS REGULAR IO"
-set_global_assignment -name MISC_FILE "D:/markm/pace/pacedev.net/sw/synth/platform/midway8080/invaders/s5a_r2b0/invaders-ep3sl.dpf"
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
