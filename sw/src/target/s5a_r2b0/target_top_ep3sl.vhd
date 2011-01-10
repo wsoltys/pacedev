@@ -366,7 +366,8 @@ begin
     port map
     (
     	-- clocks and resets
-	  	clkrst_i					=> clkrst_i,
+	  	clk_i							=> clkrst_i.clk,
+      reset_i          	=> clkrst_i.rst,
 
       -- misc inputs and outputs
       buttons_i         => buttons_i,

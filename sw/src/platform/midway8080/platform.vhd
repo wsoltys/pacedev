@@ -21,8 +21,7 @@ entity platform is
   port
   (
     -- clocking and reset
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -85,8 +84,8 @@ end entity platform;
 
 architecture SYN of platform is
 
-	alias clk_sys					: std_logic is clk_i(0);
-	alias clk_video       : std_logic is clk_i(1);
+	alias clk_sys					: std_logic is clkrst_i.clk(0);
+	alias clk_video       : std_logic is clkrst_i.clk(1);
 	
   -- uP signals  
   signal clk_2M_en			: std_logic;
@@ -133,7 +132,7 @@ architecture SYN of platform is
 	
 begin
 
-	cpu_reset <= reset_i or game_reset;
+	cpu_reset <= clkrst_i.arst or game_reset;
 	
   -- read mux
   uP_datai <= uPmem_datai when (uPmemrd = '1') else uPio_datai;
@@ -210,13 +209,13 @@ begin
 								X"00";
 
 	-- shifter block
-	process (clk_sys, reset_i)
+	process (clk_sys, clkrst_i.arst)
 		variable shift_din	: std_logic_vector(15 downto 0);
 		variable shift_amt 	: std_logic_vector(2 downto 0);
 		variable wr2_r 			: std_logic := '0';
 		variable wr4_r 			: std_logic := '0';
 	begin
-		if reset_i = '1' then
+		if clkrst_i.arst = '1' then
 			wr2_r := '0';
 			wr4_r := '0';
 		elsif rising_edge(clk_sys) then
@@ -288,11 +287,11 @@ begin
 	end block INT_BLOCK;	
 
   -- osd toggle (TAB)
-  process (clk_sys, reset_i)
+  process (clk_sys, clkrst_i.arst)
     variable osd_key_r  : std_logic;
     variable osd_en_v   : std_logic;
   begin
-    if reset_i = '1' then
+    if clkrst_i.arst = '1' then
       osd_en_v := '0';
       osd_key_r := '0';
     elsif rising_edge(clk_sys) then
@@ -339,7 +338,7 @@ begin
 		port map
 		(
 			clk				=> clk_sys,
-			reset			=> reset_i,
+			reset			=> clkrst_i.arst,
 			clk_en		=> clk_2M_en
 		);
 		
@@ -377,9 +376,9 @@ begin
 
   GEN_FLASH_ROM : if INVADERS_ROM_IN_FLASH generate
 
-    process (clk_sys, reset_i, clk_2M_en)
+    process (clk_sys, clkrst_i.arst, clk_2M_en)
     begin
-      if reset_i = '1' then
+      if clkrst_i.arst = '1' then
         null;
       elsif rising_edge (clk_sys) then
         -- 70ns flash - update address and latch every 500ns

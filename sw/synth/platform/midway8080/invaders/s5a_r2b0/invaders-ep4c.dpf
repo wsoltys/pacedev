@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<pin_planner>
+	<pin_info>
+		<pin name="lvds_a[3]" direction="Input" source="Hierarchy Database" diff_pair_node="lvds_a[3](n)" >
+		</pin>
+		<pin name="lvds_a[2]" direction="Input" source="Hierarchy Database" diff_pair_node="lvds_a[2](n)" >
+		</pin>
+		<pin name="lvds_a[1]" direction="Input" source="Hierarchy Database" diff_pair_node="lvds_a[1](n)" >
+		</pin>
+		<pin name="lvds_a[0]" direction="Input" source="Hierarchy Database" diff_pair_node="lvds_a[0](n)" >
+		</pin>
+		<pin name="lvds_a_clk" direction="Input" source="Hierarchy Database" diff_pair_node="lvds_a_clk(n)" >
+		</pin>
+		<pin name="vid_sp_clk" direction="Output" source="Hierarchy Database" diff_pair_node="vid_sp_clk(n)" >
+		</pin>
+		<pin name="vid_sp_clk(n)" source="Assignments" diff_pair_node="vid_sp_clk" >
+		</pin>
+		<pin name="lvds_a_clk(n)" source="Assignments" diff_pair_node="lvds_a_clk" >
+		</pin>
+		<pin name="lvds_a[0](n)" source="Assignments" diff_pair_node="lvds_a[0]" >
+		</pin>
+		<pin name="lvds_a[1](n)" source="Assignments" diff_pair_node="lvds_a[1]" >
+		</pin>
+		<pin name="lvds_a[2](n)" source="Assignments" diff_pair_node="lvds_a[2]" >
+		</pin>
+		<pin name="lvds_a[3](n)" source="Assignments" diff_pair_node="lvds_a[3]" >
+		</pin>
+	</pin_info>
+	<buses>
+	</buses>
+	<group_file_association>
+	</group_file_association>
+	<pin_planner_file_specifies>
+	</pin_planner_file_specifies>
+</pin_planner>
