@@ -718,3 +718,8 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/toys/led_chas
 set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2b0/target_top_ep4c.vhd
 set_global_assignment -name QIP_FILE ep4c_pll.qip
 set_global_assignment -name QIP_FILE lpll.qip
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to dbgio[0]
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to dbgio[2]
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to dbgio[4]
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to dbgio[6]
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to dbgio[7]

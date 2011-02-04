@@ -33,6 +33,9 @@ entity dvo_init_i2c_sm_controller is
 		clk_ena     : in std_logic;
 		reset				: in std_logic;
 
+    -- CTL outputs
+    ctl         : in std_logic_vector(3 downto 1) := "000";
+
     -- I2C physical interface
 		scl_i  	    : in std_logic;
 		scl_o  	    : out std_logic;
@@ -85,6 +88,7 @@ architecture SYN of dvo_init_i2c_sm_controller is
 
 	constant TFP410_CTL_1_MODE	: std_logic_vector(7 downto 0) := X"08";
 	constant TFP410_CTL_2_MODE	: std_logic_vector(7 downto 0) := X"09";
+	constant TFP410_CTL_3_MODE	: std_logic_vector(7 downto 0) := X"0A";
 	constant TFP410_DE_DLY_LSB  : std_logic_vector(7 downto 0) := X"32";
 	constant TFP410_DE_CTL      : std_logic_vector(7 downto 0) := X"33";
 	constant TFP410_DE_TOP      : std_logic_vector(7 downto 0) := X"34";
@@ -121,13 +125,14 @@ begin
 		  cfg_tx7a, cfg_tx7d0, cfg_tx7d1,
 		  cfg_tx8a, cfg_tx8d0, cfg_tx8d1,
 		  cfg_tx9a, cfg_tx9d0, cfg_tx9d1,
+		  cfg_tx10a, cfg_tx10d0, cfg_tx10d1,
 		  cfg_done
 		);
 
 		signal state : state_t;
 		
 		type state_a_t is array (natural range <>) of state_t;
-		constant next_state : state_a_t(0 to 28) := 
+		constant next_state : state_a_t(0 to 31) := 
 		( 
 		  init,
 		  cfg_tx1a, cfg_tx1d0, cfg_tx1d1,
@@ -139,6 +144,7 @@ begin
 		  cfg_tx7a, cfg_tx7d0, cfg_tx7d1,
 		  cfg_tx8a, cfg_tx8d0, cfg_tx8d1,
 		  cfg_tx9a, cfg_tx9d0, cfg_tx9d1,
+		  cfg_tx10a, cfg_tx10d0, cfg_tx10d1,
 		  cfg_done
 	  );
     
@@ -193,25 +199,26 @@ begin
     				last_byte <= '1';
     				do_tx <= '1';
     				
-          when cfg_tx3a =>
+    			when cfg_tx3a =>
     				txbyte <= DEV_ADDR_WR;
     				do_tx <= '1';
     			when cfg_tx3d0 =>
-    				txbyte <= TFP410_DE_DLY_LSB;
+    				txbyte <= TFP410_CTL_3_MODE;
     				do_tx <= '1';
     			when cfg_tx3d1 =>
-    				txbyte <= DE_DLY(7 downto 0);
+            -- All default except CTL3:1
+    				txbyte <= "1000" & ctl & '0';
     				last_byte <= '1';
     				do_tx <= '1';
-
+    				
           when cfg_tx4a =>
     				txbyte <= DEV_ADDR_WR;
     				do_tx <= '1';
     			when cfg_tx4d0 =>
-    				txbyte <= TFP410_DE_CTL;
+    				txbyte <= TFP410_DE_DLY_LSB;
     				do_tx <= '1';
     			when cfg_tx4d1 =>
-    				txbyte <= "0"& DE_GEN & VS_POL & HS_POL & "000" & DE_DLY(8);
+    				txbyte <= DE_DLY(7 downto 0);
     				last_byte <= '1';
     				do_tx <= '1';
 
@@ -219,10 +226,10 @@ begin
     				txbyte <= DEV_ADDR_WR;
     				do_tx <= '1';
     			when cfg_tx5d0 =>
-    				txbyte <= TFP410_DE_TOP;
+    				txbyte <= TFP410_DE_CTL;
     				do_tx <= '1';
     			when cfg_tx5d1 =>
-    				txbyte <= DE_TOP;
+    				txbyte <= "0"& DE_GEN & VS_POL & HS_POL & "000" & DE_DLY(8);
     				last_byte <= '1';
     				do_tx <= '1';
 
@@ -230,10 +237,10 @@ begin
     				txbyte <= DEV_ADDR_WR;
     				do_tx <= '1';
     			when cfg_tx6d0 =>
-    				txbyte <= TFP410_DE_CNT_LSB;
+    				txbyte <= TFP410_DE_TOP;
     				do_tx <= '1';
     			when cfg_tx6d1 =>
-    				txbyte <= DE_CNT(7 downto 0);
+    				txbyte <= DE_TOP;
     				last_byte <= '1';
     				do_tx <= '1';
 
@@ -241,10 +248,10 @@ begin
     				txbyte <= DEV_ADDR_WR;
     				do_tx <= '1';
     			when cfg_tx7d0 =>
-    				txbyte <= TFP410_DE_CNT_MSB;
+    				txbyte <= TFP410_DE_CNT_LSB;
     				do_tx <= '1';
     			when cfg_tx7d1 =>
-    				txbyte(2 downto 0) <= DE_CNT(10 downto 8);
+    				txbyte <= DE_CNT(7 downto 0);
     				last_byte <= '1';
     				do_tx <= '1';
 
@@ -252,10 +259,10 @@ begin
     				txbyte <= DEV_ADDR_WR;
     				do_tx <= '1';
     			when cfg_tx8d0 =>
-    				txbyte <= TFP410_DE_LIN_LSB;
+    				txbyte <= TFP410_DE_CNT_MSB;
     				do_tx <= '1';
     			when cfg_tx8d1 =>
-    				txbyte <= DE_LIN(7 downto 0);
+    				txbyte(2 downto 0) <= DE_CNT(10 downto 8);
     				last_byte <= '1';
     				do_tx <= '1';
 
@@ -263,9 +270,20 @@ begin
     				txbyte <= DEV_ADDR_WR;
     				do_tx <= '1';
     			when cfg_tx9d0 =>
-    				txbyte <= TFP410_DE_LIN_MSB;
+    				txbyte <= TFP410_DE_LIN_LSB;
     				do_tx <= '1';
     			when cfg_tx9d1 =>
+    				txbyte <= DE_LIN(7 downto 0);
+    				last_byte <= '1';
+    				do_tx <= '1';
+
+          when cfg_tx10a =>
+    				txbyte <= DEV_ADDR_WR;
+    				do_tx <= '1';
+    			when cfg_tx10d0 =>
+    				txbyte <= TFP410_DE_LIN_MSB;
+    				do_tx <= '1';
+    			when cfg_tx10d1 =>
     				txbyte(2 downto 0) <= DE_LIN(10 downto 8);
     				last_byte <= '1';
     				do_tx <= '1';

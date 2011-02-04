@@ -252,6 +252,14 @@ begin
 			locked			=> open --lvds_locked
 		);
 	
+    -- hook up the debug input (* not available)
+    --     5V  - 1  2 - GND
+    -- DBGIO0  - 3  4 - DBGIO7
+    -- DBGIO1* - 5  6 - DBGIO6
+    -- DBGIO2  - 7  8 - DBGIO5*
+    -- DBGIO3* - 9 10 - DBGIO4
+    --
+
   BLK_DVO_INIT : block
 
     signal vdo_scl_i      : std_logic := '0';
@@ -261,6 +269,8 @@ begin
     signal vdo_sda_o      : std_logic := '0';
     signal vdo_sda_oe_n   : std_logic := '0';
 
+    signal ctl            : std_logic_vector(3 downto 1) := (others => '0');
+    
   begin
 
     -- VO I2C (init) drivers
@@ -268,6 +278,8 @@ begin
     vdo_scl <= vdo_scl_o when vdo_scl_oe_n = '0' else 'Z';
     vdo_sda_i <= vdo_sda;
     vdo_sda <= vdo_sda_o when vdo_sda_oe_n = '0' else 'Z';
+  
+    ctl <= not (dbgio(4) & dbgio(6) & dbgio(7));
 
     dvo_sm : entity work.dvo_init_i2c_sm_controller
       generic map
@@ -290,6 +302,9 @@ begin
         clk_ena     => '1',
         reset				=> reset,
 
+        -- CTL outputs
+        ctl         => ctl,
+        
         -- I2C physical interface
         scl_i  	    => vdo_scl_i,
         scl_o  	    => vdo_scl_o,
