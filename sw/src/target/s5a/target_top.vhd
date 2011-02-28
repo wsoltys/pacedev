@@ -314,7 +314,7 @@ begin
 
   end block BLK_PS2;
 
-  GEN_MIXER_BUS : if S5_HAS_MIXER_BUS generate
+  GEN_MIXER_BUS : if S5A_HAS_MIXER_BUS generate
 
     signal lpc_clk          : std_logic := '0';
     signal lpc_reset_n      : std_logic := '1';
@@ -612,8 +612,7 @@ begin
     port map
     (
     	-- clocks and resets
-	  	clk_i							=> clkrst_i.clk,
-      reset_i          	=> clkrst_i.rst,
+	  	clkrst_i					=> clkrst_i,
 
       -- misc inputs and outputs
       buttons_i         => buttons_i,

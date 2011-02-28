@@ -20,8 +20,7 @@ entity platform is
   port
   (
     -- clocking and reset
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -85,8 +84,8 @@ end platform;
 
 architecture SYN of platform is
 
-	alias clk_sys					: std_logic is clk_i(0);
-	alias clk_video       : std_logic is clk_i(1);
+	alias clk_sys					: std_logic is clkrst_i.clk(0);
+	alias clk_video       : std_logic is clkrst_i.clk(1);
 	signal cpu_reset      : std_logic;
 
   -- uP signals  
@@ -137,7 +136,7 @@ architecture SYN of platform is
 	
 begin
 
-  cpu_reset <= reset_i or game_reset;
+  cpu_reset <= clkrst_i.rst(0) or game_reset;
 
 	GEN_EXTERNAL_WRAM : if PACE_HAS_SRAM generate
     
@@ -207,12 +206,12 @@ begin
 	snd_o.d <= uP_datao;
 
 	-- Snooping stuff
-	process (clk_sys, clk_3M_ena, reset_i)
+	process (clk_sys, clk_3M_ena, clkrst_i)
 		variable eaten_pill : std_logic;
     variable player_y_i : integer range 0 to 1023;
 		variable player_y		: std_logic_vector(9 downto 0);
 	begin
-		if reset_i = '1' then
+		if clkrst_i.rst(0) = '1' then
 			eaten_pill := '0';
 		elsif rising_edge(clk_sys) and clk_3M_ena = '1' then
 			-- $4DA6:0 determines is player has eaten pill or not
@@ -256,7 +255,7 @@ begin
 		port map
 		(
 			clk				=> clk_sys,
-			reset			=> reset_i,
+			reset			=> clkrst_i.rst(0),
 			clk_en		=> clk_3M_ena
 		);
 

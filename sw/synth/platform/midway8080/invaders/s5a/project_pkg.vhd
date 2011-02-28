@@ -52,23 +52,23 @@ package project_pkg is
   --constant PACE_VIDEO_V_SCALE       	      : integer := 1;
   --constant PACE_ENABLE_ADV724					      : std_logic := '1';
 
---  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1280x1024_60Hz;
---  constant PACE_CLK0_DIVIDE_BY              : natural := 96;
---  constant PACE_CLK0_MULTIPLY_BY            : natural := 157;     -- 24.675*157/96 = 40.192MHz
---  constant PACE_CLK1_DIVIDE_BY              : natural := 11;
---  constant PACE_CLK1_MULTIPLY_BY            : natural := 48;  	  -- 24.576*48/11 = 107.24MHz
---  constant PACE_VIDEO_H_SCALE       	      : integer := 2;
---  constant PACE_VIDEO_V_SCALE       	      : integer := 2;
---  constant PACE_ENABLE_ADV724					      : std_logic := '0';
+  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1280x1024_60Hz;
+  constant PACE_CLK0_DIVIDE_BY              : natural := 96;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 157;     -- 24.675*157/96 = 40.192MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 11;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 48;  	  -- 24.576*48/11 = 107.24MHz
+  constant PACE_VIDEO_H_SCALE       	      : integer := 2;
+  constant PACE_VIDEO_V_SCALE       	      : integer := 2;
+  constant PACE_ENABLE_ADV724					      : std_logic := '0';
 
-  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1680x1050_60Hz;
-  constant PACE_CLK0_DIVIDE_BY        		  : natural := 11;
-  constant PACE_CLK0_MULTIPLY_BY      		  : natural := 18;      -- 24.576*18/11 = 40.215273MHz
-  constant PACE_CLK1_DIVIDE_BY        		  : natural := 1;
-  constant PACE_CLK1_MULTIPLY_BY      		  : natural := 6;  	    -- 24.576*6/1 = 147.456000MHz
-	constant PACE_VIDEO_H_SCALE         		  : integer := 2;
-	constant PACE_VIDEO_V_SCALE         		  : integer := 2;
-	constant PACE_ENABLE_ADV724							  : std_logic := '0';
+--  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1680x1050_60Hz;
+--  constant PACE_CLK0_DIVIDE_BY        		  : natural := 11;
+--  constant PACE_CLK0_MULTIPLY_BY      		  : natural := 18;      -- 24.576*18/11 = 40.215273MHz
+--  constant PACE_CLK1_DIVIDE_BY        		  : natural := 1;
+--  constant PACE_CLK1_MULTIPLY_BY      		  : natural := 6;  	    -- 24.576*6/1 = 147.456000MHz
+--	constant PACE_VIDEO_H_SCALE         		  : integer := 2;
+--	constant PACE_VIDEO_V_SCALE         		  : integer := 2;
+--	constant PACE_ENABLE_ADV724							  : std_logic := '0';
 
   --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
   constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
@@ -97,7 +97,8 @@ package project_pkg is
   constant S5A_EMULATED_SRAM_WIDTH          : natural := 8;
 
   constant PACE_HAS_SRAM                    : boolean := S5A_EMULATE_SRAM;
-    
+
+  constant S5A_HAS_MIXER_BUS                : boolean := false;
   --
 	-- Space Invaders-specific constants
 	--

@@ -28,14 +28,13 @@ set_global_assignment -name DEVICE EP3C55F780C6
 set_global_assignment -name TOP_LEVEL_ENTITY target_top
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION "8.0 SP1"
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "13:48:09  NOVEMBER 05, 2008"
-set_global_assignment -name LAST_QUARTUS_VERSION "9.1 SP2"
+set_global_assignment -name LAST_QUARTUS_VERSION "10.1 SP1"
 set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id eda_palace
 set_global_assignment -name ENABLE_ADVANCED_IO_TIMING ON
 set_global_assignment -name CYCLONEIII_CONFIGURATION_SCHEME "PASSIVE SERIAL"
 set_global_assignment -name FORCE_CONFIGURATION_VCCIO ON
 set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.3-V LVCMOS"
 set_global_assignment -name NOMINAL_CORE_SUPPLY_VOLTAGE 1.2V
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_COLOR 14622752 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
@@ -71,7 +70,6 @@ set_global_assignment -name EDA_TEST_BENCH_NAME "System Test Bench" -section_id 
 set_global_assignment -name ENABLE_BENEFICIAL_SKEW_OPTIMIZATION ON
 set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
 set_global_assignment -name IGNORE_LCELL_BUFFERS ON
-set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MISC_FILE "/home/chris/work/vl/s5a/S5A-sw-MFP@2/S5A_mixer.dpf"
@@ -972,3 +970,5 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2host.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a/target_top.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a/custom_io.vhd
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
