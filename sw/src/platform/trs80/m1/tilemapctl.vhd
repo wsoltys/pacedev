@@ -63,9 +63,7 @@ begin
 
 	-- these are constant for a whole line
   ctl_o.tile_a(ctl_o.tile_a'left downto 12) <= (others => '0');
-
-  -- generate attribute RAM address (not used)
-  ctl_o.attr_a <= (others => '0');
+  ctl_o.attr_a(ctl_o.attr_a'left downto 12) <= (others => '0');
 
   -- generate pixel
   process (clk, clk_ena, reset)
@@ -102,6 +100,8 @@ begin
           ctl_o.map_a(9 downto 6) <= 
             vcount(6+PACE_VIDEO_V_SCALE downto 3+PACE_VIDEO_V_SCALE);
           ctl_o.tile_a(3 downto 0) <=  vcount(2+PACE_VIDEO_V_SCALE downto -1+PACE_VIDEO_V_SCALE);
+          -- for programmable character generators
+          ctl_o.attr_a(3 downto 0) <=  vcount(2+PACE_VIDEO_V_SCALE downto -1+PACE_VIDEO_V_SCALE);
         end if;
 
         -- handle horiztonal count (part 1)
@@ -119,6 +119,8 @@ begin
         -- 2nd stage of pipeline
         -- - read tile data from tile ROM
         ctl_o.tile_a(11 downto 4) <= ctl_i.map_d(7 downto 0);
+        -- for programmable character generators
+        ctl_o.attr_a(11 downto 4) <= ctl_i.map_d(7 downto 0);
 
         -- 3rd stage of pipeline
         -- - latch tile data

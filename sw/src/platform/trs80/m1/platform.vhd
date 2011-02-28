@@ -234,8 +234,10 @@ begin
 	alpha_joy_cs <= '1' when cpu_io_a = X"00" else '0';
 	-- LE18 $EC-$EF
   le18_cs <= '1' when STD_MATCH(cpu_io_a, X"E" & "11--") else '0';
-	-- PCG-80 $FE
-	pcg80_cs <= '1' when cpu_io_a = X"FE" else '0';
+	-- PCG-80 $FE, 80-GRAFIX $FF
+	pcg80_cs <= '1' when (TRS80_M1_HAS_PCG80 and cpu_io_a = X"FE") else 
+              '1' when (TRS80_M1_HAS_80GRAFIX and cpu_io_a = X"FF") else
+              '0';
   -- SOUND $FC-FF (Model I is $FF only)
 	snd_cs <= '1' when cpu_io_a = X"FF" else '0';
 	
@@ -395,7 +397,7 @@ begin
 		);
     tilemap_o.map_d(tilemap_o.map_d'left downto 8) <= (others => '0');
 
-  GEN_PCG80 : if TRS80_M1_HAS_PCG80 generate
+  GEN_PCG80 : if (TRS80_M1_HAS_PCG80 or TRS80_M1_HAS_80GRAFIX) generate
 
     signal pcg80_a        : std_logic_vector(11 downto 0) := (others => '0');
     alias pcg80_bank      : std_logic_vector(11 downto 10) is pcg80_a(11 downto 10);
@@ -416,7 +418,8 @@ begin
           if cpu_d_o(5) = '1' then
             pcg80_r <= cpu_d_o;
             -- set programming bank
-            if cpu_d_o(7 downto 4) = X"6" then
+            if (TRS80_M1_HAS_PCG80 and cpu_d_o(7 downto 4) = X"6") or
+               (TRS80_M1_HAS_80GRAFIX and cpu_d_o = X"60") then
               pcg80_bank <= cpu_d_o(1 downto 0);
             end if;
           end if;
@@ -444,10 +447,9 @@ begin
         data_b			=> cpu_d_o,
         q_b					=> pcg80_d_o,
     
-        -- uses same address as built-in char ROM
-        -- - data fed back via 'attribute' port
+        -- data fed back via 'attribute' port
         clock_a			=> clk_video,
-        address_a		=> tilemap_i.tile_a(11 downto 0),
+        address_a		=> tilemap_i.attr_a(11 downto 0),
         wren_a			=> '0',
         data_a			=> (others => 'X'),
         q_a					=> tilemap_o.attr_d(7 downto 0)
@@ -455,7 +457,7 @@ begin
     tilemap_o.attr_d(tilemap_o.attr_d'left downto 8) <= (others => '0');
   end generate GEN_PCG80;
 
-  GEN_NO_PCG80 : if not TRS80_M1_HAS_PCG80 generate
+  GEN_NO_PCG80 : if not (TRS80_M1_HAS_PCG80 or TRS80_M1_HAS_80GRAFIX) generate
     pcg80_d_o <= (others => '0');
     tilemap_o.attr_d <= (others => '0');
   end generate GEN_NO_PCG80;
