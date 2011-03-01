@@ -41,7 +41,7 @@ set_global_assignment -name DEVICE EP3SL70F780C3
 set_global_assignment -name TOP_LEVEL_ENTITY target_top_ep3sl
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 9.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "18:03:05  MARCH 10, 2010"
-set_global_assignment -name LAST_QUARTUS_VERSION "9.1 SP2"
+set_global_assignment -name LAST_QUARTUS_VERSION "10.1 SP1"
 set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id eda_blast_fpga
 set_global_assignment -name EDA_BOARD_DESIGN_SIGNAL_INTEGRITY_TOOL "IBIS (Signal Integrity)"
 set_global_assignment -name EDA_OUTPUT_DATA_FORMAT IBIS -section_id eda_board_design_signal_integrity
@@ -876,7 +876,7 @@ set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
-set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL COMPATIBLE_PLACEMENT -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT -section_id Top
 set_instance_assignment -name T11_DELAY 0 -to ddr32_mem_dqs
 set_instance_assignment -name T11_DELAY 0 -to ddrb_mem_dqs
 set_instance_assignment -name T11_DELAY 0 -to ddra_mem_dqs
@@ -2173,6 +2173,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/ocidec
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m1/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m1/bitmapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/tilemapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_mixer.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Graphics.VHD
