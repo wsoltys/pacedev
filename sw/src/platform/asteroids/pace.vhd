@@ -21,8 +21,7 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -68,8 +67,8 @@ end entity PACE;
 
 architecture SYN of PACE is
 
-	alias clk_24M								: std_logic is clk_i(0);
-	alias clk_video						  : std_logic is clk_i(1);
+	alias clk_24M								: std_logic is clkrst_i.clk(0);
+	alias clk_video						  : std_logic is clkrst_i.clk(1);
 	signal reset_n							: std_logic;
 	alias reset_6_l							: std_logic is reset_n;
 	
@@ -106,13 +105,13 @@ begin
 
 	-- map inputs
 	
-	reset_n <= not reset_i;
+	reset_n <= not clkrst_i.arst;
 
 	-- PLL can't produce a 6M clock
-	process (clk_24M, reset_i)
+	process (clk_24M, clkrst_i.arst)
 		variable count : std_logic_vector(1 downto 0) := (others => '0');
 	begin
-		if reset_i = '1' then
+		if clkrst_i.arst = '1' then
       count := (others => '0');
 			clk_6 <= '0';
 		elsif rising_edge(clk_24M) then
@@ -122,10 +121,10 @@ begin
 	end process;
 		
 	-- process to toggle erase with <F4>
-	process (clk_24M, reset_i)
+	process (clk_24M, clkrst_i.arst)
 		variable f4_r : std_logic := '0';
 	begin
-		if reset_i = '1' then
+		if clkrst_i.arst = '1' then
 			erase <= '1';
 		elsif rising_edge(clk_24M) then
 			if f4_r = '0' and toggle_erase = '1' then
@@ -269,8 +268,8 @@ begin
 		)
 	  port map
 	  (
-	    clk     	      => clk_i(0),
-	    reset   	      => reset_i,
+	    clk     	      => clkrst_i.clk(0),
+	    reset   	      => clkrst_i.rst(0),
 	    ps2clk  	      => inputs_i.ps2_kclk,
 	    ps2data 	      => inputs_i.ps2_kdat,
 			jamma			      => inputs_i.jamma_n,
@@ -306,8 +305,6 @@ begin
     graphics_inst : entity work.Graphics                                    
       Port Map
       (
-        reset           => reset_i,
-    
         bitmap_ctl_i    => to_bitmap_ctl,
         bitmap_ctl_o    => from_bitmap_ctl,
 
