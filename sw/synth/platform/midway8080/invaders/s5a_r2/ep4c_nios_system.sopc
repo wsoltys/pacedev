@@ -89,22 +89,6 @@
          type = "String";
       }
    }
-   element vai_i2c_master_0.s1
-   {
-      datum baseAddress
-      {
-         value = "8";
-         type = "long";
-      }
-   }
-   element pio_0.s1
-   {
-      datum baseAddress
-      {
-         value = "16";
-         type = "long";
-      }
-   }
    element onchip_memory2_0.s1
    {
       datum baseAddress
@@ -113,11 +97,27 @@
          type = "long";
       }
    }
+   element vai_i2c_master_0.s1
+   {
+      datum baseAddress
+      {
+         value = "8";
+         type = "long";
+      }
+   }
    element timer_0.s1
    {
       datum baseAddress
       {
          value = "32";
+         type = "long";
+      }
+   }
+   element pio_0.s1
+   {
+      datum baseAddress
+      {
+         value = "16";
          type = "long";
       }
    }
@@ -157,19 +157,42 @@
    }
 }
 ]]></parameter>
+ <parameter name="clockCrossingAdapter" value="HANDSHAKE" />
  <parameter name="deviceFamily" value="CYCLONEIVE" />
+ <parameter name="fabricMode" value="SOPC" />
  <parameter name="generateLegacySim" value="false" />
- <parameter name="hardcopyCompatible" value="false" />
+ <parameter name="generationId" value="0" />
+ <parameter name="globalResetBus" value="true" />
  <parameter name="hdlLanguage" value="VHDL" />
+ <parameter name="maxAdditionalLatency" value="0" />
  <parameter name="projectName" value="invaders-ep3sl.qpf" />
- <parameter name="systemHash" value="12760992657" />
- <parameter name="timeStamp" value="1286005296609" />
- <module name="clk_24" kind="clock_source" version="9.1" enabled="1">
+ <parameter name="sopcBorderPoints" value="true" />
+ <parameter name="systemHash" value="16213304870" />
+ <parameter name="timeStamp" value="1298972963036" />
+ <module kind="clock_source" version="10.1" enabled="1" name="clk_24">
   <parameter name="clockFrequency" value="24000000" />
   <parameter name="clockFrequencyKnown" value="true" />
+  <parameter name="inputClockFrequency" value="0" />
+  <parameter name="resetSynchronousEdges" value="NONE" />
  </module>
- <module name="cpu_0" kind="altera_nios2" version="9.1" enabled="1">
+ <module kind="altera_nios2" version="10.1" enabled="1" name="cpu_0">
   <parameter name="userDefinedSettings" value="" />
+  <parameter name="tightlyCoupledInstructionMaster3MapParam" value="" />
+  <parameter name="tightlyCoupledInstructionMaster3AddrWidth" value="1" />
+  <parameter name="tightlyCoupledInstructionMaster2MapParam" value="" />
+  <parameter name="tightlyCoupledInstructionMaster2AddrWidth" value="1" />
+  <parameter name="tightlyCoupledInstructionMaster1MapParam" value="" />
+  <parameter name="tightlyCoupledInstructionMaster1AddrWidth" value="1" />
+  <parameter name="tightlyCoupledInstructionMaster0MapParam" value="" />
+  <parameter name="tightlyCoupledInstructionMaster0AddrWidth" value="1" />
+  <parameter name="tightlyCoupledDataMaster3MapParam" value="" />
+  <parameter name="tightlyCoupledDataMaster3AddrWidth" value="1" />
+  <parameter name="tightlyCoupledDataMaster2MapParam" value="" />
+  <parameter name="tightlyCoupledDataMaster2AddrWidth" value="1" />
+  <parameter name="tightlyCoupledDataMaster1MapParam" value="" />
+  <parameter name="tightlyCoupledDataMaster1AddrWidth" value="1" />
+  <parameter name="tightlyCoupledDataMaster0MapParam" value="" />
+  <parameter name="tightlyCoupledDataMaster0AddrWidth" value="1" />
   <parameter name="setting_showUnpublishedSettings" value="false" />
   <parameter name="setting_showInternalSettings" value="false" />
   <parameter name="setting_shadowRegisterSets" value="0" />
@@ -220,6 +243,9 @@
   <parameter name="mmu_TLBMissExcSlave" value="" />
   <parameter name="mmu_TLBMissExcOffset" value="0" />
   <parameter name="manuallyAssignCpuID" value="false" />
+  <parameter name="internalIrqMaskSystemInfo" value="15" />
+  <parameter name="instSlaveMapParam"><![CDATA[<address-map><slave name='cpu_0.jtag_debug_module' start='0x800' end='0x1000' /><slave name='onchip_memory2_0.s1' start='0x8000' end='0x10000' /></address-map>]]></parameter>
+  <parameter name="instAddrWidth" value="16" />
   <parameter name="impl" value="Fast" />
   <parameter name="icache_size" value="_4096" />
   <parameter name="icache_ramBlockType" value="Automatic" />
@@ -227,6 +253,8 @@
   <parameter name="icache_burstType" value="None" />
   <parameter name="exceptionSlave" value="onchip_memory2_0.s1" />
   <parameter name="exceptionOffset" value="32" />
+  <parameter name="deviceFeaturesSystemInfo">M512_MEMORY 0 M4K_MEMORY 0 M9K_MEMORY 1 M20K_MEMORY 0 M144K_MEMORY 0 MRAM_MEMORY 0 MLAB_MEMORY 0 ESB 0 EPCS 1 DSP 0 EMUL 1 HARDCOPY 0 LVDS_IO 1 ADDRESS_STALL 1 TRANSCEIVER_3G_BLOCK 0 TRANSCEIVER_6G_BLOCK 0 DSP_SHIFTER_BLOCK 0</parameter>
+  <parameter name="deviceFamilyName" value="Cyclone IV E" />
   <parameter name="debug_triggerArming" value="true" />
   <parameter name="debug_level" value="Level1" />
   <parameter name="debug_jtagInstanceID" value="0" />
@@ -240,13 +268,19 @@
   <parameter name="dcache_numTCDM" value="_0" />
   <parameter name="dcache_lineSize" value="_32" />
   <parameter name="dcache_bursts" value="false" />
+  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='sysid.control_slave' start='0x0' end='0x8' /><slave name='vai_i2c_master_0.s1' start='0x8' end='0x10' /><slave name='pio_0.s1' start='0x10' end='0x20' /><slave name='timer_0.s1' start='0x20' end='0x40' /><slave name='jtag_uart_0.avalon_jtag_slave' start='0x40' end='0x48' /><slave name='cpu_0.jtag_debug_module' start='0x800' end='0x1000' /><slave name='onchip_memory2_0.s1' start='0x8000' end='0x10000' /></address-map>]]></parameter>
+  <parameter name="dataAddrWidth" value="16" />
+  <parameter name="customInstSlavesSystemInfo" value="&lt;info/&gt;" />
   <parameter name="cpuReset" value="false" />
   <parameter name="cpuID" value="0" />
+  <parameter name="clockFrequency" value="24000000" />
   <parameter name="breakSlave">cpu_0.jtag_debug_module</parameter>
   <parameter name="breakOffset" value="32" />
  </module>
- <module name="sysid" kind="altera_avalon_sysid" version="9.1" enabled="1" />
- <module name="timer_0" kind="altera_avalon_timer" version="9.1" enabled="1">
+ <module kind="altera_avalon_sysid" version="10.1" enabled="1" name="sysid">
+  <parameter name="id" value="0" />
+ </module>
+ <module kind="altera_avalon_timer" version="10.1" enabled="1" name="timer_0">
   <parameter name="alwaysRun" value="false" />
   <parameter name="counterSize" value="32" />
   <parameter name="fixedPeriod" value="false" />
@@ -254,17 +288,19 @@
   <parameter name="periodUnits" value="MSEC" />
   <parameter name="resetOutput" value="false" />
   <parameter name="snapshot" value="true" />
+  <parameter name="systemFrequency" value="24000000" />
   <parameter name="timeoutPulseOutput" value="false" />
   <parameter name="timerPreset" value="CUSTOM" />
  </module>
  <module
-   name="onchip_memory2_0"
    kind="altera_avalon_onchip_memory2"
-   version="9.1"
-   enabled="1">
+   version="10.1"
+   enabled="1"
+   name="onchip_memory2_0">
   <parameter name="allowInSystemMemoryContentEditor" value="false" />
   <parameter name="blockType" value="AUTO" />
   <parameter name="dataWidth" value="32" />
+  <parameter name="deviceFamily" value="Cyclone IV E" />
   <parameter name="dualPort" value="false" />
   <parameter name="initMemContent" value="true" />
   <parameter name="initializationFileName" value="onchip_memory2_0" />
@@ -279,14 +315,18 @@
   <parameter name="writable" value="true" />
  </module>
  <module
-   name="vai_i2c_master_0"
    kind="avalon_i2c_master_top"
    version="1.0"
-   enabled="1" />
- <module name="pio_0" kind="altera_avalon_pio" version="9.1" enabled="1">
+   enabled="1"
+   name="vai_i2c_master_0">
+  <parameter name="AUTO_CLOCKRESET_CLOCK_RATE" value="24000000" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
+ </module>
+ <module kind="altera_avalon_pio" version="10.1" enabled="1" name="pio_0">
   <parameter name="bitClearingEdgeCapReg" value="false" />
   <parameter name="bitModifyingOutReg" value="false" />
   <parameter name="captureEdge" value="true" />
+  <parameter name="clockRate" value="24000000" />
   <parameter name="direction" value="InOut" />
   <parameter name="edgeType" value="ANY" />
   <parameter name="generateIRQ" value="true" />
@@ -297,10 +337,10 @@
   <parameter name="width" value="32" />
  </module>
  <module
-   name="jtag_uart_0"
    kind="altera_avalon_jtag_uart"
-   version="9.1"
-   enabled="1">
+   version="10.1"
+   enabled="1"
+   name="jtag_uart_0">
   <parameter name="allowMultipleConnections" value="false" />
   <parameter name="hubInstanceID" value="0" />
   <parameter name="readBufferDepth" value="64" />
@@ -313,10 +353,10 @@
   <parameter name="writeBufferDepth" value="64" />
   <parameter name="writeIRQThreshold" value="8" />
  </module>
- <connection kind="clock" version="9.1" start="clk_24.clk" end="cpu_0.clk" />
+ <connection kind="clock" version="10.1" start="clk_24.clk" end="cpu_0.clk" />
  <connection
    kind="avalon"
-   version="6.1"
+   version="10.1"
    start="cpu_0.instruction_master"
    end="cpu_0.jtag_debug_module">
   <parameter name="arbitrationPriority" value="1" />
@@ -324,41 +364,41 @@
  </connection>
  <connection
    kind="avalon"
-   version="6.1"
+   version="10.1"
    start="cpu_0.data_master"
    end="cpu_0.jtag_debug_module">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0800" />
  </connection>
- <connection kind="clock" version="9.1" start="clk_24.clk" end="sysid.clk" />
+ <connection kind="clock" version="10.1" start="clk_24.clk" end="sysid.clk" />
  <connection
    kind="avalon"
-   version="6.1"
+   version="10.1"
    start="cpu_0.data_master"
    end="sysid.control_slave">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
  </connection>
- <connection kind="clock" version="9.1" start="clk_24.clk" end="timer_0.clk" />
+ <connection kind="clock" version="10.1" start="clk_24.clk" end="timer_0.clk" />
  <connection
    kind="avalon"
-   version="6.1"
+   version="10.1"
    start="cpu_0.data_master"
    end="timer_0.s1">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0020" />
  </connection>
- <connection kind="interrupt" version="9.1" start="cpu_0.d_irq" end="timer_0.irq">
+ <connection kind="interrupt" version="10.1" start="cpu_0.d_irq" end="timer_0.irq">
   <parameter name="irqNumber" value="0" />
  </connection>
  <connection
    kind="clock"
-   version="9.1"
+   version="10.1"
    start="clk_24.clk"
    end="onchip_memory2_0.clk1" />
  <connection
    kind="avalon"
-   version="6.1"
+   version="10.1"
    start="cpu_0.instruction_master"
    end="onchip_memory2_0.s1">
   <parameter name="arbitrationPriority" value="1" />
@@ -366,7 +406,7 @@
  </connection>
  <connection
    kind="avalon"
-   version="6.1"
+   version="10.1"
    start="cpu_0.data_master"
    end="onchip_memory2_0.s1">
   <parameter name="arbitrationPriority" value="1" />
@@ -374,12 +414,12 @@
  </connection>
  <connection
    kind="clock"
-   version="9.1"
+   version="10.1"
    start="clk_24.clk"
    end="vai_i2c_master_0.clockreset" />
  <connection
    kind="avalon"
-   version="6.1"
+   version="10.1"
    start="cpu_0.data_master"
    end="vai_i2c_master_0.s1">
   <parameter name="arbitrationPriority" value="1" />
@@ -387,23 +427,23 @@
  </connection>
  <connection
    kind="interrupt"
-   version="9.1"
+   version="10.1"
    start="cpu_0.d_irq"
    end="vai_i2c_master_0.irq1">
   <parameter name="irqNumber" value="1" />
  </connection>
- <connection kind="clock" version="9.1" start="clk_24.clk" end="pio_0.clk" />
- <connection kind="avalon" version="6.1" start="cpu_0.data_master" end="pio_0.s1">
+ <connection kind="clock" version="10.1" start="clk_24.clk" end="pio_0.clk" />
+ <connection kind="avalon" version="10.1" start="cpu_0.data_master" end="pio_0.s1">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0010" />
  </connection>
- <connection kind="interrupt" version="9.1" start="cpu_0.d_irq" end="pio_0.irq">
+ <connection kind="interrupt" version="10.1" start="cpu_0.d_irq" end="pio_0.irq">
   <parameter name="irqNumber" value="2" />
  </connection>
- <connection kind="clock" version="9.1" start="clk_24.clk" end="jtag_uart_0.clk" />
+ <connection kind="clock" version="10.1" start="clk_24.clk" end="jtag_uart_0.clk" />
  <connection
    kind="avalon"
-   version="6.1"
+   version="10.1"
    start="cpu_0.data_master"
    end="jtag_uart_0.avalon_jtag_slave">
   <parameter name="arbitrationPriority" value="1" />
@@ -411,7 +451,7 @@
  </connection>
  <connection
    kind="interrupt"
-   version="9.1"
+   version="10.1"
    start="cpu_0.d_irq"
    end="jtag_uart_0.irq">
   <parameter name="irqNumber" value="3" />

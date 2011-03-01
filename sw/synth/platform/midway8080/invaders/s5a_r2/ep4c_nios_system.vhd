@@ -3,7 +3,7 @@
 --VERSION: WM1.0
 
 
---Legal Notice: (C)2010 Altera Corporation. All rights reserved.  Your
+--Legal Notice: (C)2011 Altera Corporation. All rights reserved.  Your
 --use of Altera Corporation's design tools, logic functions and other
 --software and tools, and its AMPP partner logic functions, and any
 --output files any of the foregoing (including device programming or
@@ -1298,6 +1298,7 @@ entity onchip_memory2_0_s1_arbitrator is
                  signal onchip_memory2_0_s1_chipselect : OUT STD_LOGIC;
                  signal onchip_memory2_0_s1_clken : OUT STD_LOGIC;
                  signal onchip_memory2_0_s1_readdata_from_sa : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+                 signal onchip_memory2_0_s1_reset : OUT STD_LOGIC;
                  signal onchip_memory2_0_s1_write : OUT STD_LOGIC;
                  signal onchip_memory2_0_s1_writedata : OUT STD_LOGIC_VECTOR (31 DOWNTO 0)
               );
@@ -1550,6 +1551,8 @@ begin
 
   end process;
 
+  --~onchip_memory2_0_s1_reset assignment, which is an e_assign
+  onchip_memory2_0_s1_reset <= NOT reset_n;
   onchip_memory2_0_s1_chipselect <= internal_cpu_0_data_master_granted_onchip_memory2_0_s1 OR internal_cpu_0_instruction_master_granted_onchip_memory2_0_s1;
   --onchip_memory2_0_s1_firsttransfer first transaction, which is an e_assign
   onchip_memory2_0_s1_firsttransfer <= A_WE_StdLogic((std_logic'(onchip_memory2_0_s1_begins_xfer) = '1'), onchip_memory2_0_s1_unreg_firsttransfer, onchip_memory2_0_s1_reg_firsttransfer);
@@ -1939,7 +1942,8 @@ entity sysid_control_slave_arbitrator is
                  signal cpu_0_data_master_requests_sysid_control_slave : OUT STD_LOGIC;
                  signal d1_sysid_control_slave_end_xfer : OUT STD_LOGIC;
                  signal sysid_control_slave_address : OUT STD_LOGIC;
-                 signal sysid_control_slave_readdata_from_sa : OUT STD_LOGIC_VECTOR (31 DOWNTO 0)
+                 signal sysid_control_slave_readdata_from_sa : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+                 signal sysid_control_slave_reset_n : OUT STD_LOGIC
               );
 end entity sysid_control_slave_arbitrator;
 
@@ -2064,6 +2068,8 @@ begin
   sysid_control_slave_grant_vector <= std_logic'('1');
   --placeholder vector of master qualified-requests
   sysid_control_slave_master_qreq_vector <= std_logic'('1');
+  --sysid_control_slave_reset_n assignment, which is an e_assign
+  sysid_control_slave_reset_n <= reset_n;
   --sysid_control_slave_firsttransfer first transaction, which is an e_assign
   sysid_control_slave_firsttransfer <= A_WE_StdLogic((std_logic'(sysid_control_slave_begins_xfer) = '1'), sysid_control_slave_unreg_firsttransfer, sysid_control_slave_reg_firsttransfer);
   --sysid_control_slave_unreg_firsttransfer first transaction, which is an e_assign
@@ -2992,6 +2998,7 @@ component onchip_memory2_0_s1_arbitrator is
                     signal onchip_memory2_0_s1_chipselect : OUT STD_LOGIC;
                     signal onchip_memory2_0_s1_clken : OUT STD_LOGIC;
                     signal onchip_memory2_0_s1_readdata_from_sa : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+                    signal onchip_memory2_0_s1_reset : OUT STD_LOGIC;
                     signal onchip_memory2_0_s1_write : OUT STD_LOGIC;
                     signal onchip_memory2_0_s1_writedata : OUT STD_LOGIC_VECTOR (31 DOWNTO 0)
                  );
@@ -3005,6 +3012,7 @@ component onchip_memory2_0 is
                     signal chipselect : IN STD_LOGIC;
                     signal clk : IN STD_LOGIC;
                     signal clken : IN STD_LOGIC;
+                    signal reset : IN STD_LOGIC;
                     signal write : IN STD_LOGIC;
                     signal writedata : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
 
@@ -3078,7 +3086,8 @@ component sysid_control_slave_arbitrator is
                     signal cpu_0_data_master_requests_sysid_control_slave : OUT STD_LOGIC;
                     signal d1_sysid_control_slave_end_xfer : OUT STD_LOGIC;
                     signal sysid_control_slave_address : OUT STD_LOGIC;
-                    signal sysid_control_slave_readdata_from_sa : OUT STD_LOGIC_VECTOR (31 DOWNTO 0)
+                    signal sysid_control_slave_readdata_from_sa : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+                    signal sysid_control_slave_reset_n : OUT STD_LOGIC
                  );
 end component sysid_control_slave_arbitrator;
 
@@ -3086,6 +3095,8 @@ component sysid is
            port (
                  -- inputs:
                     signal address : IN STD_LOGIC;
+                    signal clock : IN STD_LOGIC;
+                    signal reset_n : IN STD_LOGIC;
 
                  -- outputs:
                     signal readdata : OUT STD_LOGIC_VECTOR (31 DOWNTO 0)
@@ -3313,6 +3324,7 @@ end component ep4c_nios_system_reset_clk_24_domain_synch_module;
                 signal onchip_memory2_0_s1_clken :  STD_LOGIC;
                 signal onchip_memory2_0_s1_readdata :  STD_LOGIC_VECTOR (31 DOWNTO 0);
                 signal onchip_memory2_0_s1_readdata_from_sa :  STD_LOGIC_VECTOR (31 DOWNTO 0);
+                signal onchip_memory2_0_s1_reset :  STD_LOGIC;
                 signal onchip_memory2_0_s1_write :  STD_LOGIC;
                 signal onchip_memory2_0_s1_writedata :  STD_LOGIC_VECTOR (31 DOWNTO 0);
                 signal pio_0_s1_address :  STD_LOGIC_VECTOR (1 DOWNTO 0);
@@ -3326,8 +3338,10 @@ end component ep4c_nios_system_reset_clk_24_domain_synch_module;
                 signal pio_0_s1_writedata :  STD_LOGIC_VECTOR (31 DOWNTO 0);
                 signal reset_n_sources :  STD_LOGIC;
                 signal sysid_control_slave_address :  STD_LOGIC;
+                signal sysid_control_slave_clock :  STD_LOGIC;
                 signal sysid_control_slave_readdata :  STD_LOGIC_VECTOR (31 DOWNTO 0);
                 signal sysid_control_slave_readdata_from_sa :  STD_LOGIC_VECTOR (31 DOWNTO 0);
+                signal sysid_control_slave_reset_n :  STD_LOGIC;
                 signal timer_0_s1_address :  STD_LOGIC_VECTOR (2 DOWNTO 0);
                 signal timer_0_s1_chipselect :  STD_LOGIC;
                 signal timer_0_s1_irq :  STD_LOGIC;
@@ -3588,6 +3602,7 @@ begin
       onchip_memory2_0_s1_chipselect => onchip_memory2_0_s1_chipselect,
       onchip_memory2_0_s1_clken => onchip_memory2_0_s1_clken,
       onchip_memory2_0_s1_readdata_from_sa => onchip_memory2_0_s1_readdata_from_sa,
+      onchip_memory2_0_s1_reset => onchip_memory2_0_s1_reset,
       onchip_memory2_0_s1_write => onchip_memory2_0_s1_write,
       onchip_memory2_0_s1_writedata => onchip_memory2_0_s1_writedata,
       clk => clk_24,
@@ -3614,6 +3629,7 @@ begin
       chipselect => onchip_memory2_0_s1_chipselect,
       clk => clk_24,
       clken => onchip_memory2_0_s1_clken,
+      reset => onchip_memory2_0_s1_reset,
       write => onchip_memory2_0_s1_write,
       writedata => onchip_memory2_0_s1_writedata
     );
@@ -3672,6 +3688,7 @@ begin
       d1_sysid_control_slave_end_xfer => d1_sysid_control_slave_end_xfer,
       sysid_control_slave_address => sysid_control_slave_address,
       sysid_control_slave_readdata_from_sa => sysid_control_slave_readdata_from_sa,
+      sysid_control_slave_reset_n => sysid_control_slave_reset_n,
       clk => clk_24,
       cpu_0_data_master_address_to_slave => cpu_0_data_master_address_to_slave,
       cpu_0_data_master_latency_counter => cpu_0_data_master_latency_counter,
@@ -3686,7 +3703,9 @@ begin
   the_sysid : sysid
     port map(
       readdata => sysid_control_slave_readdata,
-      address => sysid_control_slave_address
+      address => sysid_control_slave_address,
+      clock => sysid_control_slave_clock,
+      reset_n => sysid_control_slave_reset_n
     );
 
 
@@ -3798,6 +3817,8 @@ begin
 
   --reset sources mux, which is an e_mux
   reset_n_sources <= Vector_To_Std_Logic(NOT (((((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(NOT reset_n))) OR std_logic_vector'("00000000000000000000000000000000")) OR (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(cpu_0_jtag_debug_module_resetrequest_from_sa)))) OR (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(cpu_0_jtag_debug_module_resetrequest_from_sa))))));
+  --sysid_control_slave_clock of type clock does not connect to anything so wire it to default (0)
+  sysid_control_slave_clock <= std_logic'('0');
   --vhdl renameroo for output signals
   coe_i2c_scl_pad_o_from_the_vai_i2c_master_0 <= internal_coe_i2c_scl_pad_o_from_the_vai_i2c_master_0;
   --vhdl renameroo for output signals
@@ -3868,6 +3889,7 @@ end component ep4c_nios_system;
                 signal jtag_uart_0_avalon_jtag_slave_readyfordata_from_sa :  STD_LOGIC;
                 signal out_port_from_the_pio_0 :  STD_LOGIC_VECTOR (31 DOWNTO 0);
                 signal reset_n :  STD_LOGIC;
+                signal sysid_control_slave_clock :  STD_LOGIC;
 
 
 -- <ALTERA_NOTE> CODE INSERTED BETWEEN HERE

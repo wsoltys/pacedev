@@ -1,10 +1,19 @@
-set_global_assignment -name TCL_FILE D:/Projects/pace/pacedev.net/sw/src/component/io/i2c/oci2c/avalon_i2c_master_top_hw.tcl
-set_global_assignment -name VHDL_FILE D:/Projects/pace/pacedev.net/sw/src/component/io/i2c/oci2c/i2c_master_bit_ctrl.vhd
-set_global_assignment -name VHDL_FILE D:/Projects/pace/pacedev.net/sw/src/component/io/i2c/oci2c/avalon_i2c_master_top.vhd
-set_global_assignment -name SOURCE_FILE cpu_0.ocp
-set_global_assignment -name VHDL_FILE D:/Projects/pace/pacedev.net/sw/src/component/io/i2c/oci2c/i2c_master_byte_ctrl.vhd
-set_global_assignment -name SDC_FILE cpu_0.sdc
-set_global_assignment -name VHDL_FILE vai_i2c_master_0.vhd
-set_global_assignment -name VHDL_FILE D:/Projects/pace/pacedev.net/sw/src/component/io/i2c/oci2c/i2c_master_top.vhd
-set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID 00112FDFF87F0000012B6BE3DFE9 
+# clk_24
+# cpu_0
+set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) cpu_0.sdc]
+set_global_assignment -name SOURCE_FILE [file join $::quartus(qip_path) cpu_0.ocp]
+# sysid
+# timer_0
+# onchip_memory2_0
+# vai_i2c_master_0
+set_global_assignment -name TCL_FILE E:/markm/pace/pacedev.net/sw/src/component/io/i2c/oci2c/avalon_i2c_master_top_hw.tcl
+set_global_assignment -name VHDL_FILE E:/markm/pace/pacedev.net/sw/src/component/io/i2c/oci2c/avalon_i2c_master_top.vhd
+set_global_assignment -name VHDL_FILE E:/markm/pace/pacedev.net/sw/src/component/io/i2c/oci2c/i2c_master_bit_ctrl.vhd
+set_global_assignment -name VHDL_FILE E:/markm/pace/pacedev.net/sw/src/component/io/i2c/oci2c/i2c_master_byte_ctrl.vhd
+set_global_assignment -name VHDL_FILE E:/markm/pace/pacedev.net/sw/src/component/io/i2c/oci2c/i2c_master_top.vhd
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) vai_i2c_master_0.vhd]
+# pio_0
+# jtag_uart_0
+# null
+set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID 485D60032F9F0000012E70D28620 
  
