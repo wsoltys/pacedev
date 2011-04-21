@@ -3,7 +3,7 @@
 --                                                                          --
 -- This is the 68000 software compatible Kernal of TG68                     --
 --                                                                          --
--- Copyright (c) 2007 Tobias Gubener <tobiflex@opencores.org>               -- 
+-- Copyright (c) 2007-2010 Tobias Gubener <tobiflex@opencores.org>          -- 
 --                                                                          --
 -- This source file is free software: you can redistribute it and/or modify --
 -- it under the terms of the GNU Lesser General Public License as published --
@@ -21,6 +21,21 @@
 ------------------------------------------------------------------------------
 ------------------------------------------------------------------------------
 --
+-- Revision 1.08 2010/06/14
+-- Bugfix Movem with regmask==xFFFF
+-- Add missing Illegal $4AFC
+--
+-- Revision 1.07 2009/10/02
+-- Bugfix Movem with regmask==x0000
+--
+-- Revision 1.06 2009/02/10
+-- Bugfix shift and rotations opcodes when the bitcount and the data are in the same register:
+-- Example lsr.l D2,D2
+-- Thanks to Peter Graf for report
+--
+-- Revision 1.05 2009/01/26
+-- Implement missing RTR
+-- Thanks to Peter Graf for report
 --
 -- Revision 1.04 2007/12/29
 -- size improvement
@@ -47,7 +62,6 @@
 -- Add FC Output
 -- add odd Address test
 -- add TRACE
--- Movem with regmask==x0000
 
 
 library ieee;
@@ -64,10 +78,10 @@ entity TG68_fast is
         address           : out std_logic_vector(31 downto 0);
         data_write        : out std_logic_vector(15 downto 0);
         state_out         : out std_logic_vector(1 downto 0);
+		LDS, UDS		  : out std_logic;		
         decodeOPC         : buffer std_logic;
-		wr				  : out std_logic;
-		UDS, LDS		  : out std_logic		
-        );
+		wr				  : out std_logic
+		);
 end TG68_fast;
 
 architecture logic of TG68_fast is
@@ -217,6 +231,7 @@ architecture logic of TG68_fast is
 	signal rot_lsb        : std_logic;
 	signal rot_msb        : std_logic;
 	signal rot_XC         : std_logic;
+	signal set_rot_nop    : std_logic;
 	signal rot_nop        : std_logic;
     signal rot_out        : std_logic_vector(31 downto 0);
     signal rot_bits       : std_logic_vector(1 downto 0);
@@ -229,6 +244,8 @@ architecture logic of TG68_fast is
 	signal movem_mask     : std_logic_vector(15 downto 0);
 	signal set_get_movem_mask  : std_logic;
 	signal get_movem_mask : std_logic;
+	signal maskzero       : std_logic;
+	signal test_maskzero  : std_logic;
 	signal movem_muxa     : std_logic_vector(7 downto 0);
 	signal movem_muxb     : std_logic_vector(3 downto 0);
 	signal movem_muxc     : std_logic_vector(1 downto 0);
@@ -306,6 +323,8 @@ architecture logic of TG68_fast is
 	
     signal set_directSR	  : std_logic;
     signal directSR	      : std_logic;
+    signal set_directCCR  : std_logic;
+    signal directCCR	  : std_logic;
     signal set_stop	      : std_logic;
     signal stop	          : std_logic;
     signal trap_vector    : std_logic_vector(31 downto 0);
@@ -614,6 +633,7 @@ process (clk, reset, opcode, TG68_PC, TG68_PC_dec, TG68_PC_br8, TG68_PC_brw, PC_
 			TG68_PC_dec <= "00";
 			directPC <= '0';
 			directSR <= '0';
+			directCCR <= '0';
 			stop <= '0';
 			exec_ADD <= '0';
 			exec_OR <= '0';
@@ -634,9 +654,11 @@ process (clk, reset, opcode, TG68_PC, TG68_PC_dec, TG68_PC_br8, TG68_PC_brw, PC_
 			exec_CPMAW <= '0';
 			mem_byte <= '0';
 			rot_cnt <="000001";
+			rot_nop <= '0';
 			get_extendedOPC <= '0';
 			get_bitnumber <= '0';
 			get_movem_mask <= '0';
+			test_maskzero <= '0';
 			movepl <= '0';
 			movepw <= '0';
 			test_delay <= "000";
@@ -646,6 +668,7 @@ process (clk, reset, opcode, TG68_PC, TG68_PC_dec, TG68_PC_br8, TG68_PC_brw, PC_
 				get_extendedOPC <= set_get_extendedOPC;
 				get_bitnumber <= set_get_bitnumber;
 				get_movem_mask <= set_get_movem_mask;
+				test_maskzero <= get_movem_mask;
 				setstate_delay <= setstate;
 				
 				TG68_PC_dec <= TG68_PC_dec(0)&set_TG68_PC_dec;
@@ -700,9 +723,11 @@ process (clk, reset, opcode, TG68_PC, TG68_PC_dec, TG68_PC_br8, TG68_PC_brw, PC_
 				execOPC <= '0';
 				exec_EXT <= '0';
 				exec_Scc <= '0';
+				rot_nop <= '0';
 				decodeOPC <= fetchOPC;
 				directPC <= set_directPC;
 				directSR <= set_directSR;
+				directCCR <= set_directCCR;
 				exec_MULU <= set_exec_MULU;
 				exec_DIVU <= set_exec_DIVU;
 				movepl <= '0';
@@ -750,6 +775,8 @@ process (clk, reset, opcode, TG68_PC, TG68_PC_dec, TG68_PC_br8, TG68_PC_brw, PC_
 						exec_SBCD <= set_exec_SBCD;
 						exec_Scc <= set_exec_Scc;
 						exec_CPMAW <= set_exec_CPMAW;
+						rot_nop <= set_rot_nop;
+
 					END IF;
 				ELSE
 					IF endOPC='0' AND (setnextpass='1' OR (regdirectsource='1' AND decodeOPC='1')) THEN
@@ -988,7 +1015,7 @@ PROCESS (OP1out, OP2out, presub, postadd, execOPC, OP2out_one, datatype, use_SP,
 -----------------------------------------------------------------------------
 -- Write Reg
 -----------------------------------------------------------------------------
-PROCESS (clkena, OP1in, datatype, presub, postadd, endOPC, regwrena, state, execOPC, last_data_read, movem_addr, rf_dest_addr, reg_QA)
+PROCESS (clkena, OP1in, datatype, presub, postadd, endOPC, regwrena, state, execOPC, last_data_read, movem_addr, rf_dest_addr, reg_QA, maskzero)
 	BEGIN
 		Lwrena <= '0';
 		Hwrena <= '0';
@@ -997,7 +1024,7 @@ PROCESS (clkena, OP1in, datatype, presub, postadd, endOPC, regwrena, state, exec
 		IF (presub='1' OR postadd='1') AND endOPC='0' THEN		-- -(An)+
 			Hwrena <= '1';
 			Lwrena <= '1';
-		ELSIF Regwrena='1' THEN		--read (mem)
+		ELSIF Regwrena='1' AND maskzero='0' THEN		--read (mem)
 			Lwrena <= '1';
 			CASE datatype IS
 				WHEN "00" =>		--BYTE
@@ -1115,6 +1142,9 @@ PROCESS (clk, reset, opcode)
 				IF directSR='1' THEN
 					Flags <= data_read(15 downto 0);
 				END IF;	
+				IF directCCR='1' THEN
+					Flags(7 downto 0) <= data_read(7 downto 0);
+				END IF;	
 				IF interrupt='1' THEN
 					Flags(10 downto 8) <=rIPL_nr;
 					SVmode <= '1';
@@ -1173,7 +1203,7 @@ PROCESS (clk, reset, opcode)
 -----------------------------------------------------------------------------
 -- execute opcode
 -----------------------------------------------------------------------------
-PROCESS (clk, reset, OP2out, opcode, fetchOPC, decodeOPC, execOPC, endOPC, nextpass, condition, set_V_flag, trapmake, trapd, interrupt, trap_interrupt,
+PROCESS (clk, reset, OP2out, opcode, fetchOPC, decodeOPC, execOPC, endOPC, nextpass, condition, set_V_flag, trapmake, trapd, interrupt, trap_interrupt, rot_nop,
 	     Z_error, c_in, rot_cnt, one_bit_in, bit_number_reg, bit_number, ea_only, get_ea_now, ea_build, datatype, exec_write_back, get_extendedOPC,
 	     Flags, SVmode, movem_addr, movem_busy, getbrief, set_exec_AND, set_exec_OR, set_exec_EOR, TG68_PC_dec, c_out, OP1out, micro_state)
 	BEGIN
@@ -1221,7 +1251,7 @@ PROCESS (clk, reset, OP2out, opcode, fetchOPC, decodeOPC, execOPC, endOPC, nextp
 		ea_build <= '0';
 		get_ea_now <= '0';
 		rot_bits <= "XX";
-		rot_nop <= '0';
+		set_rot_nop <= '0';
 		set_rot_cnt <= "000001";
 		set_movem_busy <= '0';
 		set_get_movem_mask <= '0';
@@ -1257,6 +1287,7 @@ PROCESS (clk, reset, OP2out, opcode, fetchOPC, decodeOPC, execOPC, endOPC, nextp
 		set_vectoraddr <='0';
 		writeSR <= '0';
 		set_directSR <= '0';
+		set_directCCR <= '0';
 		set_stop <= '0';
 		from_SR <= '0';
 		to_SR <= '0';
@@ -1846,23 +1877,28 @@ PROCESS (clk, reset, OP2out, opcode, fetchOPC, decodeOPC, execOPC, endOPC, nextp
 							END IF;
 							
 						WHEN "101"=>						--tst, tas
-							IF decodeOPC='1' THEN
-								ea_build <= '1';
-							END IF;
-							IF execOPC='1' THEN
-								dest_hbits <= '1';				--for Flags
-								source_lowbits <= '1';
-		--						IF opcode(3)='1' THEN			--MC68020...
-		--							source_areg <= '1';
-		--						END IF;
-							END IF;
-							set_exec_MOVE <= '1';
-							IF opcode(7 downto 6)="11" THEN		--tas
-								set_exec_tas <= '1';
-								write_back <= '1';
-								datatype <= "00";				--Byte
-								IF execOPC='1' AND endOPC='1' THEN
-									regwrena <= '1';
+							IF opcode(7 downto 2)="111111" THEN   --4AFC illegal
+								trap_illegal <= '1';
+								trapmake <= '1';
+							ELSE
+								IF decodeOPC='1' THEN
+									ea_build <= '1';
+								END IF;
+								IF execOPC='1' THEN
+									dest_hbits <= '1';				--for Flags
+									source_lowbits <= '1';
+			--						IF opcode(3)='1' THEN			--MC68020...
+			--							source_areg <= '1';
+			--						END IF;
+								END IF;
+								set_exec_MOVE <= '1';
+								IF opcode(7 downto 6)="11" THEN		--tas
+									set_exec_tas <= '1';
+									write_back <= '1';
+									datatype <= "00";				--Byte
+									IF execOPC='1' AND endOPC='1' THEN
+										regwrena <= '1';
+									END IF;
 								END IF;
 							END IF;
 --						WHEN "110"=>
@@ -2011,6 +2047,18 @@ PROCESS (clk, reset, OP2out, opcode, fetchOPC, decodeOPC, execOPC, endOPC, nextp
 											trapmake <= '1';
 										END IF;
 										
+									WHEN "1110111" =>  									--rtr
+										IF decodeOPC='1' THEN
+											datatype <= "01";
+											setstate <= "10";
+											postadd <= '1';
+											setstackaddr <= '1';
+											set_mem_rega <= '1';
+											set_directCCR <= '1';	
+											next_micro_state <= rte;
+										END IF;
+									
+									
 									WHEN OTHERS =>	
 										trap_illegal <= '1';
 										trapmake <= '1';
@@ -2418,8 +2466,8 @@ PROCESS (clk, reset, OP2out, opcode, fetchOPC, decodeOPC, execOPC, endOPC, nextp
 						IF opcode(5)='1' THEN
 							IF OP2out(5 downto 0)/="000000" THEN
 								set_rot_cnt <= OP2out(5 downto 0);
---							ELSE
---								set_no_Flags <='1';
+							ELSE
+								set_rot_nop <= '1';
 							END IF;
 						ELSE
 							set_rot_cnt(2 downto 0) <= opcode(11 downto 9);
@@ -2432,10 +2480,7 @@ PROCESS (clk, reset, OP2out, opcode, fetchOPC, decodeOPC, execOPC, endOPC, nextp
 					END IF;	
 				END IF;	
 				IF opcode(7 downto 6)/="11" THEN
-					IF opcode(5)='1' AND OP2out(5 downto 0)="000000" THEN		--Macht Fehler wenn mit sich selbst geschoben wird
---						no_Flags <= '1';
-						rot_nop <= '1';
-					ELSIF execOPC='1' THEN
+					IF execOPC='1' AND rot_nop='0' THEN
 						Regwrena <= '1';
 						set_rot_cnt <= rot_cnt-1;
 					END IF;	
@@ -3155,13 +3200,22 @@ PROCESS (reset, clk, movem_mask, movem_muxa ,movem_muxb, movem_muxc)
       	IF reset = '0' THEN
 			movem_busy <= '0';
 			movem_addr <= '0';
+			maskzero <= '0';
 	  	ELSIF rising_edge(clk) THEN
 	 		IF clkena_in='1' AND get_movem_mask='1' THEN
 				movem_mask <= data_read(15 downto 0);
 			END IF;	
+	 		IF clkena_in='1' AND test_maskzero='1' THEN
+				IF movem_mask=X"0000" THEN
+					maskzero <= '1';
+				END IF;	
+			END IF;	
+	 		IF clkena_in='1' AND endOPC='1' THEN
+				maskzero <= '0';
+			END IF;	
 	       	IF clkena='1' THEN
 				IF set_movem_busy='1' THEN
-					IF movem_bits(3 downto 1) /= "000" OR opcode(10)='0' THEN	
+					IF movem_bits(4 downto 1) /= "0000" OR opcode(10)='0' THEN	
 						movem_busy <= '1';
 					END IF;
 					movem_addr <= '1';
