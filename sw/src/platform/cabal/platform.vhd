@@ -20,8 +20,7 @@ entity platform is
   port
   (
     -- clocking and reset
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -155,8 +154,8 @@ architecture SYN of platform is
     );
   end component TG68;
 
-	alias clk_12M				  : std_logic is clk_i(0);
-	alias clk_video			  : std_logic is clk_i(1);
+	alias clk_12M				  : std_logic is clkrst_i.clk(0);
+	alias clk_video			  : std_logic is clkrst_i.clk(1);
 	
 	-- 68k-specific signals
   signal data_en        : std_logic;
@@ -227,7 +226,7 @@ architecture SYN of platform is
 	
 begin
 
-	reset_n <= not (reset_i or game_reset);
+	reset_n <= not (clkrst_i.arst or game_reset);
 	
   -- SRAM signals (may or may not be used)
   sram_o.a <= std_logic_vector(resize(unsigned(up_addr), sram_o.a'length));
