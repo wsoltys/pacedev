@@ -24,6 +24,11 @@ entity custom_io is
 
     -- 7-segment display
     seg7              : out std_logic_vector(15 downto 0);
+    -- SD card
+		sd_dat            : inout std_logic;
+		sd_dat3           : inout std_logic;
+		sd_cmd            : inout std_logic;
+		sd_clk            : out std_logic;
     
     project_i         : out from_PROJECT_IO_t;
     project_o         : in to_PROJECT_IO_t;
@@ -42,5 +47,10 @@ begin
   gpio_1_is_custom <= (others => '0');
 
   seg7 <= X"dACE";
+  -- disable SD card
+  sd_clk <= '0';
+  sd_dat <= 'Z';
+  sd_dat3 <= 'Z';
+  sd_cmd <= 'Z';
   
 end architecture SYN;
