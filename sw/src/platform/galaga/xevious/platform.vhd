@@ -1,6 +1,5 @@
 library IEEE;
-use IEEE.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
+use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 library work;
@@ -130,73 +129,59 @@ architecture SYN of platform is
   signal sub2_intack    : std_logic;
   signal sub2_nmi       : std_logic;
 
+  -- muxed cpu signals
+  signal cpu_a          : std_logic_vector(15 downto 0);
+  signal cpu_d_o        : std_logic_vector(7 downto 0);
+  signal cpu_memrd      : std_logic;
+  signal cpu_memwr      : std_logic;
+  signal cpu_iord       : std_logic;
+  signal cpu_iowr       : std_logic;
+  
+  -- muxed data signals
+  signal mem_d_o        : std_logic_vector(7 downto 0);
+  signal io_d_o         : std_logic_vector(7 downto 0);
+  
   -- ROM signals        
   signal mainrom_cs     : std_logic;
-  signal mainrom_d      : std_logic_vector(7 downto 0);
+  signal mainrom_d_o    : std_logic_vector(7 downto 0);
+  signal subrom_cs      : std_logic;
+  signal subrom_d_o     : std_logic_vector(7 downto 0);
+  signal sub2rom_cs     : std_logic;
+  signal sub2rom_d_o    : std_logic_vector(7 downto 0);
   
   -- RAM signals
   
-  -- main cpu
-  signal mainram1_cs    : std_logic;
-  signal mainram1_d     : std_logic_vector(7 downto 0);
-  signal mainram2_cs    : std_logic;
-  signal mainram2_d     : std_logic_vector(7 downto 0);
-  signal mainram3_cs    : std_logic;
-  signal mainram3_d     : std_logic_vector(7 downto 0);
-  signal mainram4_cs    : std_logic;
-  signal mainram4_d     : std_logic_vector(7 downto 0);
-  
-  -- ram instances
-  signal ram1_a         : std_logic_vector(10 downto 0);
-  signal ram1_d_i       : std_logic_vector(7 downto 0);
-  signal ram1_d_o       : std_logic_vector(7 downto 0);
+  signal ram1_cs        : std_logic;
   signal ram1_we        : std_logic;
-  signal ram2_a         : std_logic_vector(10 downto 0);
-  signal ram2_d_i       : std_logic_vector(7 downto 0);
-  signal ram2_d_o       : std_logic_vector(7 downto 0);
+  signal ram1_d_o       : std_logic_vector(7 downto 0);
+  signal ram2_cs        : std_logic;
   signal ram2_we        : std_logic;
-  signal ram3_a         : std_logic_vector(10 downto 0);
-  signal ram3_d_i       : std_logic_vector(7 downto 0);
-  signal ram3_d_o       : std_logic_vector(7 downto 0);
+  signal ram2_d_o       : std_logic_vector(7 downto 0);
+  signal ram3_cs        : std_logic;
   signal ram3_we        : std_logic;
-  signal ram4_a         : std_logic_vector(10 downto 0);
-  signal ram4_d_i       : std_logic_vector(7 downto 0);
-  signal ram4_d_o       : std_logic_vector(7 downto 0);
+  signal ram3_d_o       : std_logic_vector(7 downto 0);
+  signal ram4_cs        : std_logic;
   signal ram4_we        : std_logic;
+  signal ram4_d_o       : std_logic_vector(7 downto 0);
   
   -- VRAM signals (names from MAME driver)
   
-  -- main cpu
-  signal mainrampf0_cs  : std_logic;
-  signal mainrampf0_d   : std_logic_vector(7 downto 0);
-  signal mainrampf1_cs  : std_logic;
-  signal mainrampf1_d   : std_logic_vector(7 downto 0);
-  signal mainrampf2_cs  : std_logic;
-  signal mainrampf2_d   : std_logic_vector(7 downto 0);
-  signal mainrampf3_cs  : std_logic;
-  signal mainrampf3_d   : std_logic_vector(7 downto 0);
-  
-  -- vram instances
   -- foreground attribute ram
-	signal rampf0_a      : std_logic_vector(10 downto 0);
-  signal rampf0_d_i    : std_logic_vector(7 downto 0);
-  signal rampf0_d_o    : std_logic_vector(7 downto 0);
-  signal rampf0_we     : std_logic;
+  signal rampf0_cs      : std_logic;
+  signal rampf0_we      : std_logic;
+  signal rampf0_d_o     : std_logic_vector(7 downto 0);
   -- background attribute ram
-	signal rampf1_a      : std_logic_vector(10 downto 0);
-  signal rampf1_d_i    : std_logic_vector(7 downto 0);
-  signal rampf1_d_o    : std_logic_vector(7 downto 0);
-  signal rampf1_we     : std_logic;
+  signal rampf1_cs      : std_logic;
+  signal rampf1_we      : std_logic;
+  signal rampf1_d_o     : std_logic_vector(7 downto 0);
   -- foreground tilecode ram
-	signal rampf2_a      : std_logic_vector(10 downto 0);
-  signal rampf2_d_i    : std_logic_vector(7 downto 0);
-  signal rampf2_d_o    : std_logic_vector(7 downto 0);
-  signal rampf2_we     : std_logic;
+  signal rampf2_cs      : std_logic;
+  signal rampf2_we      : std_logic;
+  signal rampf2_d_o     : std_logic_vector(7 downto 0);
   -- background tilecode ram
-	signal rampf3_a      : std_logic_vector(10 downto 0);
-  signal rampf3_d_i    : std_logic_vector(7 downto 0);
-  signal rampf3_d_o    : std_logic_vector(7 downto 0);
-  signal rampf3_we     : std_logic;
+  signal rampf3_cs      : std_logic;
+  signal rampf3_we      : std_logic;
+  signal rampf3_d_o     : std_logic_vector(7 downto 0);
                         
 	-- IO signals
 	alias game_reset			: std_logic is inputs_i(2).d(0);
@@ -204,8 +189,12 @@ architecture SYN of platform is
   -- other signals      
 	signal cpu_reset			: std_logic;
 	
-  subtype cnt_sys_t is integer range 0 to 11;
-  signal cnt_sys : cnt_sys_t := 0;
+  signal cnt_sys  : std_logic_vector(3 downto 0) := (others => '0');
+  alias cpu_sel   : std_logic_vector(1 downto 0) is cnt_sys(3 downto 2);
+  alias cpu_cyc   : std_logic_vector(1 downto 0) is cnt_sys(1 downto 0);
+  constant MAIN_CPU : std_logic_vector(cpu_sel'range) := "00";
+  constant SUB_CPU  : std_logic_vector(cpu_sel'range) := "01";
+  constant SUB2_CPU : std_logic_vector(cpu_sel'range) := "10";
   
 begin
 
@@ -213,7 +202,7 @@ begin
   cpu_reset <= rst_sys;
 	
   -- clocking
-  -- system clock: 36.864MHz
+  -- system clock: 49.152MHz
   -- cpu clocks = 3.072MHz
   process (clk_sys, rst_sys)
   begin
@@ -221,155 +210,283 @@ begin
       main_en <= '0';
       sub_en <= '0';
       sub2_en <= '0';
-      cnt_sys <= 0;
+      cnt_sys <= (others => '0');
     elsif rising_edge(clk_sys) then
       main_en <= '0';   -- default
       sub_en <= '0';    -- default
       sub2_en <= '0';   -- default
-      if cnt_sys = 0 then
-        main_en <= '1';
-      elsif cnt_sys = 4 then
-        sub_en <= '1';
-      elsif cnt_sys = 8 then
-        sub2_en <= '1';
+      if cpu_cyc = "00" then
+        case cpu_sel is
+          when MAIN_CPU =>
+            main_en <= '1';
+            cpu_a <= main_a;
+            cpu_d_o <= main_d_o;
+            cpu_memrd <= main_memrd;
+            cpu_memwr <= main_memwr;
+            cpu_iord <= main_iord;
+            cpu_iowr <= main_iowr;
+          when SUB_CPU =>
+            sub_en <= '1';
+            cpu_a <= sub_a;
+            cpu_d_o <= sub_d_o;
+            cpu_memrd <= sub_memrd;
+            cpu_memwr <= sub_memwr;
+            cpu_iord <= sub_iord;
+            cpu_iowr <= sub_iowr;
+          when SUB2_CPU =>
+            sub2_en <= '1';
+            cpu_a <= sub2_a;
+            cpu_d_o <= sub2_d_o;
+            cpu_memrd <= sub2_memrd;
+            cpu_memwr <= sub2_memwr;
+            cpu_iord <= sub2_iord;
+            cpu_iowr <= sub2_iowr;
+          when others =>
+        end case;
       end if;
-      if cnt_sys = cnt_sys_t'high then
-        cnt_sys <= 0;
-      else
-        cnt_sys <= cnt_sys + 1;
-      end if;
+      cnt_sys <= std_logic_vector(unsigned(cnt_sys) + 1);
     end if;
   end process;
-  
-	-- maincpu chip selects
+
+	-- chip selects
 	-- MAINROM $0000-$3FFF
-	mainrom_cs    <= '1' when STD_MATCH(main_a, "00--------------") else '0';
+	mainrom_cs  <= '1' when STD_MATCH(main_a, "00--------------") else '0';
+	-- SUBROM $0000-$1FFF
+	subrom_cs   <= '1' when STD_MATCH(sub_a,  "000-------------") else '0';
+	-- SUB2ROM $0000-$0FFF
+	sub2rom_cs  <= '1' when STD_MATCH(sub2_a, "0000------------") else '0';
 	-- WRAM1 $7800-$7FFF
-	mainram1_cs   <= '1' when STD_MATCH(main_a, "01111-----------") else '0';
+	ram1_cs     <= '1' when STD_MATCH(cpu_a,  "01111-----------") else '0';
 	-- WRAM2 $8000-$87FF
-	mainram2_cs   <= '1' when STD_MATCH(main_a, "10000-----------") else '0';
+	ram2_cs     <= '1' when STD_MATCH(cpu_a,  "10000-----------") else '0';
 	-- WRAM3 $9000-$97FF
-	mainram3_cs   <= '1' when STD_MATCH(main_a, "10010-----------") else '0';
+	ram3_cs     <= '1' when STD_MATCH(cpu_a,  "10010-----------") else '0';
 	-- WRAM4 $A000-$A7FF
-	mainram4_cs   <= '1' when STD_MATCH(main_a, "10100-----------") else '0';
+	ram4_cs     <= '1' when STD_MATCH(cpu_a,  "10100-----------") else '0';
   -- RAMPF0 $B000-$B7FF (foreground attribute)
-  mainrampf0_cs <= '1' when STD_MATCH(main_a, "10110-----------") else '0';
+  rampf0_cs   <= '1' when STD_MATCH(cpu_a,  "10110-----------") else '0';
   -- RAMPF1 $B800-$BFFF (background attribute)
-  mainrampf1_cs <= '1' when STD_MATCH(main_a, "10111-----------") else '0';
+  rampf1_cs   <= '1' when STD_MATCH(cpu_a,  "10111-----------") else '0';
   -- RAMPF2 $C000-$C7FF (foreground tile code )
-  mainrampf2_cs <= '1' when STD_MATCH(main_a, "11000-----------") else '0';
+  rampf2_cs   <= '1' when STD_MATCH(cpu_a,  "11000-----------") else '0';
   -- RAMPF3 $C800-$C8FF (background tile code )
-  mainrampf3_cs <= '1' when STD_MATCH(main_a, "11001-----------") else '0';
+  rampf3_cs   <= '1' when STD_MATCH(cpu_a,  "11001-----------") else '0';
 
-  BLK_MAIN_MUX : block
-    signal mem_d_i  : std_logic_vector(7 downto 0) := (others => '0');
-    signal io_d_i   : std_logic_vector(7 downto 0) := (others => '0');
+  -- write-enables
+  ram1_we <= ram1_cs and cpu_memwr;
+  ram2_we <= ram1_cs and cpu_memwr;
+  ram3_we <= ram1_cs and cpu_memwr;
+  ram4_we <= ram1_cs and cpu_memwr;
+  rampf0_we <= rampf0_cs and cpu_memwr;
+  rampf1_we <= rampf1_cs and cpu_memwr;
+  rampf2_we <= rampf2_cs and cpu_memwr;
+  rampf3_we <= rampf3_cs and cpu_memwr;
+
+  -- muxed data signals
+  mem_d_o <=  ram1_d_o when ram1_cs = '1' else
+              ram2_d_o when ram2_cs = '1' else
+              ram3_d_o when ram3_cs = '1' else
+              ram4_d_o when ram4_cs = '1' else
+              rampf0_d_o when rampf0_cs = '1' else
+              rampf1_d_o when rampf1_cs = '1' else
+              rampf2_d_o when rampf2_cs = '1' else
+              rampf3_d_o when rampf3_cs = '1' else
+              X"FF";
+              
+  io_d_o <= X"FF";
+
+  GEN_MAIN_CPU : if true generate
   begin
-    mem_d_i <=  mainrom_d when mainrom_cs = '1' else
-                mainram1_d when mainram1_cs = '1' else
-                mainram2_d when mainram2_cs = '1' else
-                mainram3_d when mainram3_cs = '1' else
-                mainram4_d when mainram4_cs = '1' else
-                mainrampf0_d when mainrampf0_cs = '1' else
-                mainrampf1_d when mainrampf1_cs = '1' else
-                mainrampf2_d when mainrampf2_cs = '1' else
-                mainrampf3_d when mainrampf3_cs = '1' else
-                X"FF";
-    io_d_i <= X"FF";
-    main_d_i <= mem_d_i when (main_memrd = '1') else io_d_i;
-  end block BLK_MAIN_MUX;
+    main_cpu_inst : entity work.Z80                                                
+      port map
+      (
+        clk			=> clk_sys,                                   
+        clk_en	=> main_en,
+        reset  	=> cpu_reset,                                     
 
-  BLK_RAM_MUX : block
+        addr   	=> main_a,
+        datai  	=> main_d_i,
+        datao  	=> main_d_o,
+
+        mem_rd 	=> main_memrd,
+        mem_wr 	=> main_memwr,
+        io_rd  	=> main_iord,
+        io_wr  	=> main_iowr,
+
+        intreq 	=> main_intreq,
+        intvec 	=> main_intvec,
+        intack 	=> main_intack,
+        nmi    	=> main_nmi
+      );
+
+    main_intreq <= '0';
+    main_intvec <= (others => '0');
+    main_nmi <= '0';
+    
+    main_rom_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> "../../../../../src/platform/galaga/xevious/roms/main.hex",
+        widthad_a		=> 14
+      )
+      port map
+      (
+        clock		=> clk_sys,
+        address => main_a(13 downto 0),
+        q				=> mainrom_d_o
+      );
+
+    -- data latch
+    process (clk_sys, rst_sys)
+    begin
+      if rst_sys = '1' then
+        null;
+      elsif rising_edge(clk_sys) then
+        if cpu_sel = MAIN_CPU and cpu_cyc = "10" then
+          -- latch read data for next clock
+          if main_memrd = '1' then
+            if mainrom_cs = '1' then
+              main_d_i <= mainrom_d_o;
+            else
+              main_d_i <= mem_d_o;
+            end if;
+          else
+            main_d_i <= io_d_o;
+          end if;
+        end if;
+      end if;
+    end process;
+    
+  end generate GEN_MAIN_CPU;
+  
+  GEN_SUB_CPU : if XEVIOUS_HAS_SUB_CPU generate
   begin
-    -- this needs to be time-sliced between CPUs
+    sub_cpu_inst : entity work.Z80                                                
+      port map
+      (
+        clk			=> clk_sys,                                   
+        clk_en	=> sub_en,
+        reset  	=> cpu_reset,                                     
 
-    ram1_a <= main_a(ram1_a'range);
-    ram1_d_i <= main_d_o;
-    mainram1_d <= ram1_d_o;
-    ram1_we <= mainram1_cs and main_memwr;
+        addr   	=> sub_a,
+        datai  	=> sub_d_i,
+        datao  	=> sub_d_o,
 
-    ram2_a <= main_a(ram2_a'range);
-    ram2_d_i <= main_d_o;
-    mainram2_d <= ram2_d_o;
-    ram2_we <= mainram2_cs and main_memwr;
+        mem_rd 	=> sub_memrd,
+        mem_wr 	=> sub_memwr,
+        io_rd  	=> sub_iord,
+        io_wr  	=> sub_iowr,
 
-    ram3_a <= main_a(ram3_a'range);
-    ram3_d_i <= main_d_o;
-    mainram3_d <= ram3_d_o;
-    ram3_we <= mainram3_cs and main_memwr;
+        intreq 	=> sub_intreq,
+        intvec 	=> sub_intvec,
+        intack 	=> sub_intack,
+        nmi    	=> sub_nmi
+      );
 
-    ram4_a <= main_a(ram4_a'range);
-    ram4_d_i <= main_d_o;
-    mainram4_d <= ram4_d_o;
-    ram4_we <= mainram4_cs and main_memwr;
+    sub_intreq <= '0';
+    sub_intvec <= (others => '0');
+    sub_nmi <= '0';
+    
+    sub_rom_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> "../../../../../src/platform/galaga/xevious/roms/sub.hex",
+        widthad_a		=> 13
+      )
+      port map
+      (
+        clock		=> clk_sys,
+        address => sub_a(12 downto 0),
+        q				=> subrom_d_o
+      );
 
-  end block BLK_RAM_MUX;
-  
-  BLK_VRAM_MUX : block
+    -- data latch
+    process (clk_sys, rst_sys)
+    begin
+      if rst_sys = '1' then
+        null;
+      elsif rising_edge(clk_sys) then
+        if cpu_sel = SUB_CPU and cpu_cyc = "10" then
+          -- latch read data for next clock
+          if sub_memrd = '1' then
+            if subrom_cs = '1' then
+              sub_d_i <= subrom_d_o;
+            else
+              sub_d_i <= mem_d_o;
+            end if;
+          else
+            sub_d_i <= io_d_o;
+          end if;
+        end if;
+      end if;
+    end process;
+
+  end generate GEN_SUB_CPU;
+
+  GEN_SUB2_CPU : if XEVIOUS_HAS_SUB2_CPU generate
   begin
-    -- this needs to be time-sliced between CPUs
+    sub2_cpu_inst : entity work.Z80                                                
+      port map
+      (
+        clk			=> clk_sys,                                   
+        clk_en	=> sub2_en,
+        reset  	=> cpu_reset,                                     
 
-    rampf0_a <= main_a(rampf0_a'range);
-    rampf0_d_i <= main_d_o;
-    mainrampf0_d <= rampf0_d_o;
-    rampf0_we <= mainrampf0_cs and main_memwr;
+        addr   	=> sub2_a,
+        datai  	=> sub2_d_i,
+        datao  	=> sub2_d_o,
 
-    rampf1_a <= main_a(rampf1_a'range);
-    rampf1_d_i <= main_d_o;
-    mainrampf1_d <= rampf1_d_o;
-    rampf1_we <= mainrampf1_cs and main_memwr;
+        mem_rd 	=> sub2_memrd,
+        mem_wr 	=> sub2_memwr,
+        io_rd  	=> sub2_iord,
+        io_wr  	=> sub2_iowr,
 
-    rampf2_a <= main_a(rampf2_a'range);
-    rampf2_d_i <= main_d_o;
-    mainrampf2_d <= rampf2_d_o;
-    rampf2_we <= mainrampf2_cs and main_memwr;
+        intreq 	=> sub2_intreq,
+        intvec 	=> sub2_intvec,
+        intack 	=> sub2_intack,
+        nmi    	=> sub2_nmi
+      );
 
-    rampf3_a <= main_a(rampf3_a'range);
-    rampf3_d_i <= main_d_o;
-    mainrampf3_d <= rampf3_d_o;
-    rampf3_we <= mainrampf3_cs and main_memwr;
+    sub2_intreq <= '0';
+    sub2_intvec <= (others => '0');
+    sub2_nmi <= '0';
+    
+    sub2_rom_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> "../../../../../src/platform/galaga/xevious/roms/sub2.hex",
+        widthad_a		=> 12
+      )
+      port map
+      (
+        clock		=> clk_sys,
+        address => sub2_a(11 downto 0),
+        q				=> sub2rom_d_o
+      );
 
-  end block BLK_VRAM_MUX;
+    -- data latch
+    process (clk_sys, rst_sys)
+    begin
+      if rst_sys = '1' then
+        null;
+      elsif rising_edge(clk_sys) then
+        if cpu_sel = SUB2_CPU and cpu_cyc = "10" then
+          -- latch read data for next clock
+          if sub2_memrd = '1' then
+            if sub2rom_cs = '1' then
+              sub2_d_i <= sub2rom_d_o;
+            else
+              sub2_d_i <= mem_d_o;
+            end if;
+          else
+            sub2_d_i <= io_d_o;
+          end if;
+        end if;
+      end if;
+    end process;
+
+  end generate GEN_SUB2_CPU;
   
-  main_cpu : entity work.Z80                                                
-    port map
-    (
-      clk			=> clk_sys,                                   
-      clk_en	=> main_en,
-      reset  	=> cpu_reset,                                     
-
-      addr   	=> main_a,
-      datai  	=> main_d_i,
-      datao  	=> main_d_o,
-
-      mem_rd 	=> main_memrd,
-      mem_wr 	=> main_memwr,
-      io_rd  	=> main_iord,
-      io_wr  	=> main_iowr,
-
-      intreq 	=> main_intreq,
-      intvec 	=> main_intvec,
-      intack 	=> main_intack,
-      nmi    	=> main_nmi
-    );
-
-  main_intreq <= '0';
-  main_intvec <= (others => '0');
-  main_nmi <= '0';
-  
-  main_rom_inst : entity work.sprom
-    generic map
-    (
-			init_file		=> "../../../../../src/platform/galaga/xevious/roms/main.hex",
-			widthad_a		=> 14
-    )
-    port map
-    (
-      clock		=> clk_sys,
-      address => main_a(13 downto 0),
-      q				=> mainrom_d
-    );
-
   -- WRAM1 $7800-$7FFF
   ram1_inst : entity work.spram
 		generic map
@@ -379,8 +496,8 @@ begin
     port map
     (
       clock				=> clk_sys,
-      address			=> ram1_a,
-      data				=> ram1_d_i,
+      address			=> cpu_a(10 downto 0),
+      data				=> cpu_d_o,
       wren				=> ram1_we,
       q						=> ram1_d_o
     );
@@ -394,8 +511,8 @@ begin
     port map
     (
       clock				=> clk_sys,
-      address			=> ram2_a,
-      data				=> ram2_d_i,
+      address			=> cpu_a(10 downto 0),
+      data				=> cpu_d_o,
       wren				=> ram2_we,
       q						=> ram2_d_o
     );
@@ -409,8 +526,8 @@ begin
     port map
     (
       clock				=> clk_sys,
-      address			=> ram3_a,
-      data				=> ram3_d_i,
+      address			=> cpu_a(10 downto 0),
+      data				=> cpu_d_o,
       wren				=> ram3_we,
       q						=> ram3_d_o
     );
@@ -424,8 +541,8 @@ begin
   port map
   (
     clock				=> clk_sys,
-    address			=> ram4_a,
-    data				=> ram4_d_i,
+    address			=> cpu_a(10 downto 0),
+    data				=> cpu_d_o,
     wren				=> ram4_we,
     q						=> ram4_d_o
   );
@@ -442,9 +559,9 @@ begin
 		(
 			-- uP interface
 			clock_b			=> clk_sys,
-			address_b		=> rampf0_a,
+			address_b		=> cpu_a(10 downto 0),
 			wren_b			=> rampf0_we,
-			data_b			=> rampf0_d_i,
+			data_b			=> cpu_d_o,
 			q_b					=> rampf0_d_o,
 			
 			-- graphics interface
@@ -467,9 +584,9 @@ begin
 		(
 			-- uP interface
 			clock_b			=> clk_sys,
-			address_b		=> rampf1_a,
+			address_b		=> cpu_a(10 downto 0),
 			wren_b			=> rampf1_we,
-			data_b			=> rampf1_d_i,
+			data_b			=> cpu_d_o,
 			q_b					=> rampf1_d_o,
 			
 			-- graphics interface
@@ -492,9 +609,9 @@ begin
 		(
 			-- uP interface
 			clock_b			=> clk_sys,
-			address_b		=> rampf2_a,
+			address_b		=> cpu_a(10 downto 0),
 			wren_b			=> rampf2_we,
-			data_b			=> rampf2_d_i,
+			data_b			=> cpu_d_o,
 			q_b					=> rampf2_d_o,
 			
 			-- graphics interface
@@ -517,9 +634,9 @@ begin
 		(
 			-- uP interface
 			clock_b			=> clk_sys,
-			address_b		=> rampf3_a,
+			address_b		=> cpu_a(10 downto 0),
 			wren_b			=> rampf3_we,
-			data_b			=> rampf3_d_i,
+			data_b			=> cpu_d_o,
 			q_b					=> rampf3_d_o,
 			
 			-- graphics interface

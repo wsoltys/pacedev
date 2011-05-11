@@ -35,8 +35,8 @@ package project_pkg is
 	--constant PACE_VIDEO_V_SCALE       	      : integer := 1;
 
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
-  constant PACE_CLK0_DIVIDE_BY              : natural := 15;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 23;  -- 24*23/15 = 36.8MHz (want 36.864MHz)
+  constant PACE_CLK0_DIVIDE_BY              : natural := 22;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 45;  -- 24*45/22 = 49.090909MHz (want 49.152MHz)
   constant PACE_CLK1_DIVIDE_BY              : natural := 3;
   constant PACE_CLK1_MULTIPLY_BY            : natural := 5;  	-- 24*5/3 = 40MHz
   constant PACE_VIDEO_H_SCALE       	      : integer := 2;
@@ -77,6 +77,9 @@ package project_pkg is
 	-- Xevious-specific constants
 	--
 	
+  constant XEVIOUS_HAS_SUB_CPU              : boolean := true;
+  constant XEVIOUS_HAS_SUB2_CPU             : boolean := true;
+  
   type from_PROJECT_IO_t is record
     not_used  : std_logic;
   end record;
