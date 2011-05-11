@@ -218,6 +218,8 @@ begin
 
   begin
 
+    clkrst_i.clk_ref <= clk_24M;
+    
     GEN_PLL : if PACE_HAS_PLL generate
     
       pll_inst : pll

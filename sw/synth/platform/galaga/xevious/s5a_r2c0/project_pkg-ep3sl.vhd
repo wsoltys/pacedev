@@ -35,8 +35,8 @@ package project_pkg is
 	--constant PACE_VIDEO_V_SCALE       	      : integer := 1;
 
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
-  constant PACE_CLK0_DIVIDE_BY              : natural := 1;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 1;   -- 24*1/1 = 24MHz
+  constant PACE_CLK0_DIVIDE_BY              : natural := 15;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 23;  -- 24*23/15 = 36.8MHz (want 36.864MHz)
   constant PACE_CLK1_DIVIDE_BY              : natural := 3;
   constant PACE_CLK1_MULTIPLY_BY            : natural := 5;  	-- 24*5/3 = 40MHz
   constant PACE_VIDEO_H_SCALE       	      : integer := 2;
@@ -74,13 +74,8 @@ package project_pkg is
   constant PACE_HAS_SRAM                    : boolean := S5AR2_EMULATE_SRAM;
     
   --
-	-- Space Invaders-specific constants
+	-- Xevious-specific constants
 	--
-	
-  constant INVADERS_ROM_IN_FLASH            : boolean := PACE_HAS_FLASH;
-	constant INVADERS_USE_INTERNAL_WRAM				: boolean := not PACE_HAS_SRAM;
-
-	constant USE_VIDEO_VBLANK_INTERRUPT 			: boolean := false;
 	
   type from_PROJECT_IO_t is record
     not_used  : std_logic;
