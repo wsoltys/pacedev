@@ -100,7 +100,7 @@ begin
       ctl_o.tile_a(10 downto 3) <= ctl_i.map_d(7 downto 0); -- each tile is 8 bytes
 
       if stb = '1' then
-        if x_adj(2 downto 0) = "000" then
+        if x_adj(2 downto 0) = "001" then
           tile_d_r := ctl_i.tile_d(7 downto 0);
         else
           tile_d_r := tile_d_r(tile_d_r'left-1 downto 0) & '0';

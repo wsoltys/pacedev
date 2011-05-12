@@ -272,15 +272,34 @@ begin
   -- RAMPF3 $C800-$C8FF (background tile code )
   rampf3_cs   <= '1' when STD_MATCH(cpu_a,  "11001-----------") else '0';
 
-  -- write-enables
-  ram1_we <= ram1_cs and cpu_memwr;
-  ram2_we <= ram1_cs and cpu_memwr;
-  ram3_we <= ram1_cs and cpu_memwr;
-  ram4_we <= ram1_cs and cpu_memwr;
-  rampf0_we <= rampf0_cs and cpu_memwr;
-  rampf1_we <= rampf1_cs and cpu_memwr;
-  rampf2_we <= rampf2_cs and cpu_memwr;
-  rampf3_we <= rampf3_cs and cpu_memwr;
+  -- write-enables, pulse for 1 clock only
+  process (clk_sys, rst_sys)
+    variable cpu_memwr_r : std_logic := '0';
+  begin
+    if rst_sys = '1' then
+      cpu_memwr_r := '0';
+    elsif rising_edge(clk_sys) then
+      ram1_we <= '0';
+      ram2_we <= '0';
+      ram3_we <= '0';
+      ram4_we <= '0';
+      rampf0_we <= '0';
+      rampf1_we <= '0';
+      rampf2_we <= '0';
+      rampf3_we <= '0';
+      if cpu_memwr = '1' and cpu_memwr_r = '0' then
+        ram1_we <= ram1_cs;
+        ram2_we <= ram2_cs;
+        ram3_we <= ram3_cs;
+        ram4_we <= ram4_cs;
+        rampf0_we <= rampf0_cs;
+        rampf1_we <= rampf1_cs;
+        rampf2_we <= rampf2_cs;
+        rampf3_we <= rampf3_cs;
+      end if;
+      cpu_memwr_r := cpu_memwr;
+    end if;
+  end process;
 
   -- muxed data signals
   mem_d_o <=  ram1_d_o when ram1_cs = '1' else
@@ -342,7 +361,7 @@ begin
       if rst_sys = '1' then
         null;
       elsif rising_edge(clk_sys) then
-        if cpu_sel = MAIN_CPU and cpu_cyc = "10" then
+        if cpu_sel = MAIN_CPU and cpu_cyc = "11" then
           -- latch read data for next clock
           if main_memrd = '1' then
             if mainrom_cs = '1' then
@@ -406,7 +425,7 @@ begin
       if rst_sys = '1' then
         null;
       elsif rising_edge(clk_sys) then
-        if cpu_sel = SUB_CPU and cpu_cyc = "10" then
+        if cpu_sel = SUB_CPU and cpu_cyc = "11" then
           -- latch read data for next clock
           if sub_memrd = '1' then
             if subrom_cs = '1' then
@@ -470,7 +489,7 @@ begin
       if rst_sys = '1' then
         null;
       elsif rising_edge(clk_sys) then
-        if cpu_sel = SUB2_CPU and cpu_cyc = "10" then
+        if cpu_sel = SUB2_CPU and cpu_cyc = "11" then
           -- latch read data for next clock
           if sub2_memrd = '1' then
             if sub2rom_cs = '1' then
@@ -488,7 +507,7 @@ begin
   end generate GEN_SUB2_CPU;
 
   -- GFX1 (foreground characters)
-  gfx_inst : entity work.sprom
+  gfx1_inst : entity work.sprom
     generic map
     (
       init_file		=> "../../../../../src/platform/galaga/xevious/roms/gfx1.hex",
@@ -499,6 +518,20 @@ begin
       clock		=> clk_vid,
       address => tilemap_i.tile_a(11 downto 0),
       q				=> tilemap_o.tile_d
+    );
+    
+  -- GFX2 (background characters)
+  gfx2_inst : entity work.sprom
+    generic map
+    (
+      init_file		=> "../../../../../src/platform/galaga/xevious/roms/gfx2.hex",
+      widthad_a     => 13
+    )
+    port map
+    (
+      clock		=> clk_vid,
+      address => tilemap_i.tile_a(12 downto 0),
+      q				=> open
     );
     
   -- WRAM1 $7800-$7FFF
@@ -583,9 +616,8 @@ begin
 			address_a		=> tilemap_i.map_a(10 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o.map_d(7 downto 0)
+			q_a					=> open
 		);
-  tilemap_o.map_d(tilemap_o.map_d'left downto 8) <= (others => '0');
   
   -- VRAM (background attribute) $B800-$BFFF
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
@@ -631,13 +663,15 @@ begin
 			
 			-- graphics interface
 			clock_a			=> clk_vid,
-			address_a		=> (others => '0'),
+			address_a		=> tilemap_i.map_a(10 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> open
+			q_a					=> tilemap_o.map_d(7 downto 0)
 		);
-  
-  -- VRAM (foreground tile code) $C800-$CFFF
+  --tilemap_o.map_d(7 downto 0) <= X"0A";
+  tilemap_o.map_d(tilemap_o.map_d'left downto 8) <= (others => '0');
+
+  -- VRAM (background tile code) $C800-$CFFF
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 	rampf3_inst : entity work.dpram
 		generic map
