@@ -9,12 +9,11 @@ use work.platform_pkg.all;
 use work.video_controller_pkg.all;
 
 --
---	Pacman/Pengo Tilemap Controller
+--	Xevious Foreground Character Tilemap Controller
 --
---	Tile data is 2 BPP.
+--	Tile data is 1 BPP.
 --	Attribute data encodes 
 --	- CLUT entry for tile in 5 bits.
---	(Pacman has no banking)
 --
 
 entity tilemapCtl_1 is          
@@ -56,9 +55,9 @@ begin
 
 	-- these are constant for a whole line
   ctl_o.map_a(ctl_o.map_a'left downto 11) <= (others => '0');
-  ctl_o.map_a(10 downto 6) <= y(7 downto 3);
+  ctl_o.map_a(10 downto 5) <= y(8 downto 3);
   ctl_o.tile_a(ctl_o.tile_a'left downto 12) <= (others => '0');
-  ctl_o.tile_a(3 downto 1) <=  y(2 downto 0);   	-- each row is 2 bytes
+  ctl_o.tile_a(2 downto 0) <= y(2 downto 0);
 
   -- generate attribute RAM address
   -- not used, the game routes the mangled VRAMMapper output
@@ -67,7 +66,7 @@ begin
   -- generate pixel
   process (clk, clk_ena)
 
-		variable pel        : std_logic_vector(1 downto 0);
+		variable pel        : std_logic;
 		variable pal_i      : std_logic_vector(3 downto 0);
 		variable clut_entry : clut_entry_typ;
 		variable pal_entry  : pal_entry_typ;
@@ -79,7 +78,8 @@ begin
 		variable attr_d_r	  : std_logic_vector(2*5-1 downto 0);
 
 		variable x_adj		  : unsigned(x'range);
-
+    variable tile_d_r   : std_logic_vector(ctl_i.tile_d'range);
+    
   begin
 
   	if rising_edge(clk) and clk_ena = '1' then
@@ -91,37 +91,36 @@ begin
       -- - read tile from tilemap
       -- - read attribute data
       if stb = '1' then
-        ctl_o.map_a(5 downto 0) <= std_logic_vector(x_adj(8 downto 3));
+        ctl_o.map_a(4 downto 0) <= std_logic_vector(x_adj(7 downto 3));
       end if;
       
       -- 2nd stage of pipeline
       -- - read tile data from tile ROM
-      ctl_o.tile_a(11 downto 4) <= ctl_i.map_d(7 downto 0); -- each tile is 16 bytes
-      ctl_o.tile_a(0) <= x_r(PIPELINED_BITS*1+2);
+      ctl_o.tile_a(11) <= '0';
+      ctl_o.tile_a(10 downto 3) <= ctl_i.map_d(7 downto 0); -- each tile is 8 bytes
 
-      -- each byte contains information for 4 pixels
-      --case x_r(x_r'left-1 downto x_r'left-2) is
-      case x_r_n is
-      --case x_r(10 downto 9) is
-        when "00" =>
-          pel := ctl_i.tile_d(6) & ctl_i.tile_d(7);
-        when "01" =>
-          pel := ctl_i.tile_d(4) & ctl_i.tile_d(5);
-        when "10" =>
-          pel := ctl_i.tile_d(2) & ctl_i.tile_d(3);
-        when others =>
-          pel := ctl_i.tile_d(0) & ctl_i.tile_d(1);
-      end case;
+      if stb = '1' then
+        if x_adj(2 downto 0) = "000" then
+          tile_d_r := ctl_i.tile_d(7 downto 0);
+        else
+          tile_d_r := tile_d_r(tile_d_r'left-1 downto 0) & '0';
+        end if;
+      end if;
+      pel := tile_d_r(tile_d_r'left);
+      
+--      -- extract R,G,B from colour palette
+--      -- bit 5 of the attribute is the clut bank (pengo)
+--      clut_entry := clut(to_integer(unsigned(clut_bank & attr_d_r(attr_d_r'left downto attr_d_r'left-4))));
+--      pal_i := clut_entry(to_integer(unsigned(pel)));
+--      -- bit 6 of the attribute is the palette bank (pengo)
+--      pal_entry := pal(to_integer(unsigned(palette_bank & pal_i)));
+--      ctl_o.rgb.r <= pal_entry(0) & "0000";
+--      ctl_o.rgb.g <= pal_entry(1) & "0000";
+--      ctl_o.rgb.b <= pal_entry(2) & "0000";
 
-      -- extract R,G,B from colour palette
-      -- bit 5 of the attribute is the clut bank (pengo)
-      clut_entry := clut(to_integer(unsigned(clut_bank & attr_d_r(attr_d_r'left downto attr_d_r'left-4))));
-      pal_i := clut_entry(to_integer(unsigned(pel)));
-      -- bit 6 of the attribute is the palette bank (pengo)
-      pal_entry := pal(to_integer(unsigned(palette_bank & pal_i)));
-      ctl_o.rgb.r <= pal_entry(0) & "0000";
-      ctl_o.rgb.g <= pal_entry(1) & "0000";
-      ctl_o.rgb.b <= pal_entry(2) & "0000";
+      ctl_o.rgb.r <= (others => pel);
+      ctl_o.rgb.g <= (others => pel);
+      ctl_o.rgb.b <= (others => pel);
 
 			-- pipelined because of tile data look-up
       x_r := x_r(x_r'left-PIPELINED_BITS downto 0) & x(PIPELINED_BITS-1 downto 0);
