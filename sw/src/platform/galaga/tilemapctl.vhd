@@ -55,8 +55,8 @@ architecture SYN of tilemapCtl_1 is
 begin
 
 	-- these are constant for a whole line
-  ctl_o.map_a(ctl_o.map_a'left downto 12) <= (others => '0');
-  ctl_o.map_a(11 downto 6) <= y(8 downto 3);
+  ctl_o.map_a(ctl_o.map_a'left downto 11) <= (others => '0');
+  ctl_o.map_a(10 downto 6) <= y(7 downto 3);
   ctl_o.tile_a(ctl_o.tile_a'left downto 12) <= (others => '0');
   ctl_o.tile_a(3 downto 1) <=  y(2 downto 0);   	-- each row is 2 bytes
 

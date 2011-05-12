@@ -486,7 +486,21 @@ begin
     end process;
 
   end generate GEN_SUB2_CPU;
-  
+
+  -- GFX1 (foreground characters)
+  gfx_inst : entity work.sprom
+    generic map
+    (
+      init_file		=> "../../../../../src/platform/galaga/xevious/roms/gfx1.hex",
+      widthad_a     => 12
+    )
+    port map
+    (
+      clock		=> clk_vid,
+      address => tilemap_i.tile_a(11 downto 0),
+      q				=> tilemap_o.tile_d
+    );
+    
   -- WRAM1 $7800-$7FFF
   ram1_inst : entity work.spram
 		generic map
@@ -566,11 +580,12 @@ begin
 			
 			-- graphics interface
 			clock_a			=> clk_vid,
-			address_a		=> (others => '0'),
+			address_a		=> tilemap_i.map_a(10 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> open
+			q_a					=> tilemap_o.map_d(7 downto 0)
 		);
+  tilemap_o.map_d(tilemap_o.map_d'left downto 8) <= (others => '0');
   
   -- VRAM (background attribute) $B800-$BFFF
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
@@ -669,7 +684,6 @@ begin
 
   sram_o <= NULL_TO_SRAM;
   graphics_o <= NULL_TO_GRAPHICS;
-  tilemap_o <= NULL_TO_TILEMAP_CTL;
   sprite_reg_o <= NULL_TO_SPRITE_REG;
   sprite_o <= NULL_TO_SPRITE_CTL;
   --osd_o <= NULL_TO_OSD;
