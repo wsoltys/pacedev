@@ -43,8 +43,8 @@ entity platform is
     bitmap_i        : in from_BITMAP_CTL_t;
     bitmap_o        : out to_BITMAP_CTL_t;
     
-    tilemap_i       : in from_TILEMAP_CTL_t;
-    tilemap_o       : out to_TILEMAP_CTL_t;
+    tilemap_i       : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
+    tilemap_o       : out to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
 
     sprite_reg_o    : out to_SPRITE_REG_t;
     sprite_i        : in from_SPRITE_CTL_t;
@@ -516,8 +516,8 @@ begin
     port map
     (
       clock		=> clk_vid,
-      address => tilemap_i.tile_a(11 downto 0),
-      q				=> tilemap_o.tile_d
+      address => tilemap_i(1).tile_a(11 downto 0),
+      q				=> tilemap_o(1).tile_d
     );
     
   -- GFX2 (background characters)
@@ -530,7 +530,7 @@ begin
     port map
     (
       clock		=> clk_vid,
-      address => tilemap_i.tile_a(12 downto 0),
+      address => tilemap_i(1).tile_a(12 downto 0),
       q				=> open
     );
     
@@ -613,7 +613,7 @@ begin
 			
 			-- graphics interface
 			clock_a			=> clk_vid,
-			address_a		=> tilemap_i.map_a(10 downto 0),
+			address_a		=> tilemap_i(1).map_a(10 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
 			q_a					=> open
@@ -663,13 +663,13 @@ begin
 			
 			-- graphics interface
 			clock_a			=> clk_vid,
-			address_a		=> tilemap_i.map_a(10 downto 0),
+			address_a		=> tilemap_i(1).map_a(10 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o.map_d(7 downto 0)
+			q_a					=> tilemap_o(1).map_d(7 downto 0)
 		);
   --tilemap_o.map_d(7 downto 0) <= X"0A";
-  tilemap_o.map_d(tilemap_o.map_d'left downto 8) <= (others => '0');
+  tilemap_o(1).map_d(tilemap_o(1).map_d'left downto 8) <= (others => '0');
 
   -- VRAM (background tile code) $C800-$CFFF
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE

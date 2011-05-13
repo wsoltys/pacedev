@@ -16,7 +16,7 @@ use work.video_controller_pkg.all;
 --	- CLUT entry for tile in 5 bits.
 --
 
-entity tilemapCtl_1 is          
+entity tilemapCtl is          
   generic
   (
     DELAY       : integer
@@ -34,9 +34,9 @@ entity tilemapCtl_1 is
 
     graphics_i  : in to_GRAPHICS_t
   );
-end entity tilemapCtl_1;
+end entity tilemapCtl;
 
-architecture SYN of tilemapCtl_1 is
+architecture SYN of tilemapCtl is
 
   alias clk       : std_logic is video_ctl.clk;
   alias clk_ena   : std_logic is video_ctl.clk_ena;
