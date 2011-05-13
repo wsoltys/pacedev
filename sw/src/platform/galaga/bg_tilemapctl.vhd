@@ -9,34 +9,14 @@ use work.platform_pkg.all;
 use work.video_controller_pkg.all;
 
 --
---	Xevious Foreground Character Tilemap Controller
+--	Xevious Background Character Tilemap Controller
 --
---	Tile data is 1 BPP.
+--	Tile data is 2 BPP.
 --	Attribute data encodes 
 --	- CLUT entry for tile in 5 bits.
 --
 
-entity tilemapCtl is          
-  generic
-  (
-    DELAY       : integer
-  );
-  port               
-  (
-    reset				: in std_logic;
-
-    -- video control signals		
-    video_ctl   : in from_VIDEO_CTL_t;
-
-    -- tilemap controller signals
-    ctl_i       : in to_TILEMAP_CTL_t;
-    ctl_o       : out from_TILEMAP_CTL_t;
-
-    graphics_i  : in to_GRAPHICS_t
-  );
-end entity tilemapCtl;
-
-architecture SYN of tilemapCtl is
+architecture TILEMAP_2 of tilemapCtl is
 
   alias clk       : std_logic is video_ctl.clk;
   alias clk_ena   : std_logic is video_ctl.clk_ena;
@@ -56,8 +36,8 @@ begin
 	-- these are constant for a whole line
   ctl_o.map_a(ctl_o.map_a'left downto 11) <= (others => '0');
   ctl_o.map_a(10 downto 5) <= y(8 downto 3);
-  ctl_o.tile_a(ctl_o.tile_a'left downto 12) <= (others => '0');
-  ctl_o.tile_a(2 downto 0) <= y(2 downto 0);
+  ctl_o.tile_a(ctl_o.tile_a'left downto 13) <= (others => '0');
+  ctl_o.tile_a(3 downto 1) <= y(2 downto 0);
 
   -- generate attribute RAM address
   -- not used, the game routes the mangled VRAMMapper output
@@ -66,7 +46,7 @@ begin
   -- generate pixel
   process (clk, clk_ena)
 
-		variable pel        : std_logic;
+		variable pel        : std_logic_vector(1 downto 0);
 		variable pal_i      : std_logic_vector(3 downto 0);
 		variable clut_entry : clut_entry_typ;
 		variable pal_entry  : pal_entry_typ;
@@ -96,17 +76,18 @@ begin
       
       -- 2nd stage of pipeline
       -- - read tile data from tile ROM
-      ctl_o.tile_a(11) <= '0';
-      ctl_o.tile_a(10 downto 3) <= ctl_i.map_d(7 downto 0); -- each tile is 8 bytes
-
+      ctl_o.tile_a(12) <= '0';
+      ctl_o.tile_a(11 downto 4) <= ctl_i.map_d(7 downto 0); -- each tile is 16 bytes
+      ctl_o.tile_a(0) <= x_adj(2);
+      
       if stb = '1' then
-        if x_adj(2 downto 0) = "001" then
+        if x_adj(1 downto 0) = "01" then
           tile_d_r := ctl_i.tile_d(7 downto 0);
         else
-          tile_d_r := tile_d_r(tile_d_r'left-1 downto 0) & '0';
+          tile_d_r := tile_d_r(tile_d_r'left-2 downto 0) & "00";
         end if;
       end if;
-      pel := tile_d_r(tile_d_r'left);
+      pel := tile_d_r(tile_d_r'left downto tile_d_r'left-1);
       
 --      -- extract R,G,B from colour palette
 --      -- bit 5 of the attribute is the clut bank (pengo)
@@ -118,9 +99,9 @@ begin
 --      ctl_o.rgb.g <= pal_entry(1) & "0000";
 --      ctl_o.rgb.b <= pal_entry(2) & "0000";
 
-      ctl_o.rgb.r <= (others => pel);
-      ctl_o.rgb.g <= (others => pel);
-      ctl_o.rgb.b <= (others => pel);
+      ctl_o.rgb.r <= pel & "00000000";
+      ctl_o.rgb.g <= pel & "00000000";
+      ctl_o.rgb.b <= pel & "00000000";
 
 			-- pipelined because of tile data look-up
       x_r := x_r(x_r'left-PIPELINED_BITS downto 0) & x(PIPELINED_BITS-1 downto 0);
@@ -132,4 +113,4 @@ begin
 
 	ctl_o.set <= '1';
 	
-end SYN;
+end TILEMAP_2;

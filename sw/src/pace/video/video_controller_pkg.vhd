@@ -34,6 +34,8 @@ package video_controller_pkg is
     b : std_logic_vector(9 downto 0);
   end record;
 
+  type RGB_a is array (natural range <>) of RGB_t;
+  
   function NULL_RGB return RGB_t;
 
   constant RGB_BLACK    : RGB_t := ((others=>'0'),(others=>'0'),(others=>'0'));
@@ -102,6 +104,8 @@ package video_controller_pkg is
     tile_d    : TILE_D_t;
     attr_d    : ATTR_D_t;
   end record;
+
+  type to_TILEMAP_CTL_a is array (natural range <>) of to_TILEMAP_CTL_t;
   
   function NULL_TO_TILEMAP_CTL return to_TILEMAP_CTL_t;
 
@@ -113,6 +117,8 @@ package video_controller_pkg is
     set       : std_logic;
   end record;
 
+  type from_TILEMAP_CTL_a is array (natural range <>) of from_TILEMAP_CTL_t;
+  
   subtype PAL_ENTRY_t is std_logic_vector(15 downto 0);
   type PAL_A_t is array (natural range <>) of PAL_ENTRY_t;
   
@@ -160,4 +166,24 @@ package video_controller_pkg is
     );
   end component pace_video_controller;
 
-end;
+	component tilemapCtl is          
+	  generic
+	  (
+	    DELAY       : integer
+	  );
+	  port               
+	  (
+	    reset				: in std_logic;
+	
+	    -- video control signals		
+	    video_ctl   : in from_VIDEO_CTL_t;
+	
+	    -- tilemap controller signals
+	    ctl_i       : in to_TILEMAP_CTL_t;
+	    ctl_o       : out from_TILEMAP_CTL_t;
+	
+	    graphics_i  : in to_GRAPHICS_t
+	  );
+	end component tilemapCtl;
+
+end package video_controller_pkg;

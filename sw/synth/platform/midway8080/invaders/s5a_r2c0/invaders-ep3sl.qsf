@@ -2226,6 +2226,7 @@ set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn
 set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[2]
 set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[1]
 set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[0]
+set_global_assignment -name MISC_FILE "E:/markm/pace/pacedev.net/sw/synth/platform/midway8080/invaders/s5a_r2c0/invaders-ep3sl.dpf"
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sdram_pkg.vhd
@@ -2247,6 +2248,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd.vh
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/InputMapper.VHDL
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Inputs.VHD
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/tilemapctl_e.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/bitmapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_mixer.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Graphics.VHD
@@ -2263,5 +2265,4 @@ set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/alt
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/target_top_ep3sl.vhd
-set_global_assignment -name MISC_FILE "E:/markm/pace/pacedev.net/sw/synth/platform/midway8080/invaders/s5a_r2c0/invaders-ep3sl.dpf"
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

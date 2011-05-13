@@ -43,8 +43,8 @@ entity platform is
     bitmap_i        : in from_BITMAP_CTL_t;
     bitmap_o        : out to_BITMAP_CTL_t;
     
-    tilemap_i       : in from_TILEMAP_CTL_t;
-    tilemap_o       : out to_TILEMAP_CTL_t;
+    tilemap_i       : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
+    tilemap_o       : out to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
 
     sprite_reg_o    : out to_SPRITE_REG_t;
     sprite_i        : in from_SPRITE_CTL_t;
@@ -310,16 +310,16 @@ begin
 			address_a		=> vram_addr,
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o.map_d(7 downto 0)
+			q_a					=> tilemap_o(1).map_d(7 downto 0)
 		);
-  tilemap_o.map_d(tilemap_o.map_d'left downto 8) <= (others => '0');
+  tilemap_o(1).map_d(tilemap_o(1).map_d'left downto 8) <= (others => '0');
 
 	vrammapper_inst : entity work.vramMapper
 		port map
 		(
 	    clk     => clk_video,
 
-	    inAddr  => tilemap_i.map_a(11 downto 0),
+	    inAddr  => tilemap_i(1).map_a(11 downto 0),
 	    outAddr => vram_addr
 		);
 
@@ -337,9 +337,9 @@ begin
 			address_a		=> vram_addr(9 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o.attr_d(7 downto 0)
+			q_a					=> tilemap_o(1).attr_d(7 downto 0)
 		);
-  tilemap_o.attr_d(tilemap_o.attr_d'left downto 8) <= (others => '0');
+  tilemap_o(1).attr_d(tilemap_o(1).attr_d'left downto 8) <= (others => '0');
   
   interrupts_inst : entity work.Pacman_Interrupts
     generic map
@@ -369,8 +369,8 @@ begin
 		port map
 		(
 			clock			=> clk_video,
-			address		=> tilemap_i.tile_a(11 downto 0),
-			q					=> tilemap_o.tile_d
+			address		=> tilemap_i(1).tile_a(11 downto 0),
+			q					=> tilemap_o(1).tile_d
 		);
 	
 	spriterom_inst : entity work.sprite_rom

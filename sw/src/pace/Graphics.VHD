@@ -15,8 +15,8 @@ entity Graphics is
   (
     bitmap_ctl_i    : in to_BITMAP_CTL_t;
     bitmap_ctl_o    : out from_BITMAP_CTL_t;
-    tilemap_ctl_i   : in to_TILEMAP_CTL_t;
-    tilemap_ctl_o   : out from_TILEMAP_CTL_t;
+    tilemap_ctl_i   : in to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
+    tilemap_ctl_o   : out from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
 
     sprite_reg_i    : in to_SPRITE_REG_t;
     sprite_ctl_i    : in to_SPRITE_CTL_t;
@@ -61,51 +61,11 @@ architecture SYN of Graphics is
     );
 	end component;
 
-	component tilemapCtl_1 is          
-    generic
-    (
-      DELAY         : integer
-    );          
-    port               
-    (
-      reset				  : in std_logic;
-        
-      -- video control signals		
-      video_ctl     : in from_VIDEO_CTL_t;
-
-      -- tilemap controller signals
-      ctl_i         : in to_TILEMAP_CTL_t;
-      ctl_o         : out from_TILEMAP_CTL_t;
-      
-      graphics_i    : in to_GRAPHICS_t
-    );
-	end component;
-
-	component tilemapCtl_2 is          
-    generic
-    (
-      DELAY         : integer
-    );
-    port               
-    (
-      reset				  : in std_logic;
-        
-      -- video control signals		
-      video_ctl     : in from_VIDEO_CTL_t;
-
-      -- tilemap controller signals
-      ctl_i         : in to_TILEMAP_CTL_t;
-      ctl_o         : out from_TILEMAP_CTL_t;
-      
-      graphics_i    : in to_GRAPHICS_t
-    );
-	end component;
-
 	alias clk 					    : std_logic is video_i.clk;
 
   signal from_video_ctl   : from_VIDEO_CTL_t;
   signal bitmap_ctl_o_s   : from_BITMAP_CTL_t;
-  signal tilemap_ctl_o_s  : from_TILEMAP_CTL_t;
+  signal tilemap_ctl_o_s  : from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
   signal sprite_ctl_o_s   : from_SPRITE_CTL_t;
   signal sprite_pri       : std_logic;
   
@@ -175,8 +135,7 @@ begin
     (
         bitmap_rgb    => bitmap_ctl_o_s.rgb,
         bitmap_set    => bitmap_ctl_o_s.set,
-        tilemap_rgb   => tilemap_ctl_o_s.rgb,
-        tilemap_set   => tilemap_ctl_o_s.set,
+        tilemap_ctl_o => tilemap_ctl_o_s,
         sprite_rgb    => sprite_ctl_o_s.rgb,
         sprite_set    => sprite_ctl_o_s.set,
         sprite_pri    => sprite_pri,
@@ -213,13 +172,13 @@ begin
   bitmap_ctl_o <= bitmap_ctl_o_s;
     
 	GEN_NO_TILEMAPS : if PACE_VIDEO_NUM_TILEMAPS = 0 generate
-    tilemap_ctl_o_s <= ((others => '0'), (others => '0'), (others => '0'), 
-                        (others => (others => '0')), '0');
+    --tilemap_ctl_o_s(1) <= ((others => '0'), (others => '0'), (others => '0'), 
+    --                      (others => (others => '0')), '0');
 	end generate GEN_NO_TILEMAPS;
 	
 	GEN_TILEMAP_1 : if PACE_VIDEO_NUM_TILEMAPS > 0 generate
 	
-	  foreground_mapctl_inst : tilemapCtl_1
+	  foreground_mapctl_inst : entity work.tilemapCtl(TILEMAP_1)
       generic map
       (
         DELAY         => PACE_VIDEO_PIPELINE_DELAY
@@ -230,14 +189,35 @@ begin
 				
 				video_ctl     => from_video_ctl,
 
-				ctl_i         => tilemap_ctl_i,
-				ctl_o         => tilemap_ctl_o_s,
+				ctl_i         => tilemap_ctl_i(1),
+				ctl_o         => tilemap_ctl_o_s(1),
 
         graphics_i    => graphics_i
 	    );
 
 		end generate GEN_TILEMAP_1;
 
+	GEN_TILEMAP_2 : if PACE_VIDEO_NUM_TILEMAPS > 1 generate
+	
+	  background_mapctl_inst : entity work.tilemapCtl(TILEMAP_2)
+      generic map
+      (
+        DELAY         => PACE_VIDEO_PIPELINE_DELAY
+      )
+	    port map
+	    (
+				reset					=> video_i.reset,
+				
+				video_ctl     => from_video_ctl,
+
+				ctl_i         => tilemap_ctl_i(2),
+				ctl_o         => tilemap_ctl_o_s(2),
+
+        graphics_i    => graphics_i
+	    );
+
+		end generate GEN_TILEMAP_2;
+    
   tilemap_ctl_o <= tilemap_ctl_o_s;
 
 	GEN_NO_SPRITES : if PACE_VIDEO_NUM_SPRITES = 0 generate

@@ -44,8 +44,8 @@ entity platform is
     bitmap_i        : in from_BITMAP_CTL_t;
     bitmap_o        : out to_BITMAP_CTL_t;
     
-    tilemap_i       : in from_TILEMAP_CTL_t;
-    tilemap_o       : out to_TILEMAP_CTL_t;
+    tilemap_i       : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
+    tilemap_o       : out to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
 
     sprite_reg_o    : out to_SPRITE_REG_t;
     sprite_i        : in from_SPRITE_CTL_t;
@@ -315,7 +315,7 @@ begin
   -- unused outputs
 
   graphics_o <= NULL_TO_GRAPHICS;
-  tilemap_o <= NULL_TO_TILEMAP_CTL;
+  --tilemap_o <= NULL_TO_TILEMAP_CTL;
   sprite_reg_o <= NULL_TO_SPRITE_REG;
   sprite_o <= NULL_TO_SPRITE_CTL;
   --osd_o <= NULL_TO_OSD;

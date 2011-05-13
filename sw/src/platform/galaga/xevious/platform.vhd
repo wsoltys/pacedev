@@ -530,8 +530,8 @@ begin
     port map
     (
       clock		=> clk_vid,
-      address => tilemap_i(1).tile_a(12 downto 0),
-      q				=> open
+      address => tilemap_i(2).tile_a(12 downto 0),
+      q				=> tilemap_o(2).tile_d
     );
     
   -- WRAM1 $7800-$7FFF
@@ -668,7 +668,6 @@ begin
 			data_a			=> (others => 'X'),
 			q_a					=> tilemap_o(1).map_d(7 downto 0)
 		);
-  --tilemap_o.map_d(7 downto 0) <= X"0A";
   tilemap_o(1).map_d(tilemap_o(1).map_d'left downto 8) <= (others => '0');
 
   -- VRAM (background tile code) $C800-$CFFF
@@ -690,11 +689,12 @@ begin
 			
 			-- graphics interface
 			clock_a			=> clk_vid,
-			address_a		=> (others => '0'),
+			address_a		=> tilemap_i(2).map_a(10 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> open
+			q_a					=> tilemap_o(2).map_d(7 downto 0)
 		);
+  tilemap_o(2).map_d(tilemap_o(2).map_d'left downto 8) <= (others => '0');
   
   -- osd toggle (TAB)
   process (clk_sys, clkrst_i.arst)
