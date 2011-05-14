@@ -21,27 +21,7 @@ use work.project_pkg.all;
 --   and then vcount is incremented before the 1st line starts displaying
 --
 
-entity tilemapCtl_1 is          
-  generic
-  (
-    DELAY       : integer
-  );          
-  port               
-  (
-    reset				: in std_logic;
-
-    -- video control signals		
-    video_ctl   : in from_VIDEO_CTL_t;
-
-    -- tilemap controller signals
-    ctl_i       : in to_TILEMAP_CTL_t;
-    ctl_o       : out from_TILEMAP_CTL_t;
-
-    graphics_i  : in to_GRAPHICS_t
-  );
-end tilemapCtl_1;
-
-architecture SYN of tilemapCtl_1 is
+architecture TILEMAP_1 of tilemapCtl is
 
   alias clk       : std_logic is video_ctl.clk;
   alias clk_ena   : std_logic is video_ctl.clk_ena;
@@ -161,5 +141,5 @@ begin
 
   end process;
 
-end SYN;
+end architecture TILEMAP_1;
 

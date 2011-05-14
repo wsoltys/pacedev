@@ -1,33 +1,47 @@
 /*
 
-    -- MIF file representing initial state of PLL Scan Chain
-    --    Device Family: Cyclone III
-    --    Device Part: -
-    --    Device Speed Grade: 6
-    --    PLL Scan Chain: Fast PLL (144 bits)
-    --    File Name: D:\markm\pace\bork.us.to\pace-vcb\sw\MCE-sw-VCB\synth\mega\dvo_pll.mif
-    --    Generated: Fri Oct 16 13:06:30 2009
-    
-    WIDTH=1;
-    DEPTH=144;
-    
-    ADDRESS_RADIX=UNS;
-    DATA_RADIX=UNS;
-    
-    CONTENT BEGIN
-    	0    :   0; -- Reserved Bits = 0 (1 bit(s))
-    	1    :   0; -- Reserved Bits = 0 (1 bit(s))
-    	2    :   0; -- Loop Filter Capacitance = 0 (2 bit(s)) (Setting 0)
-    	3    :   0;
-    	4    :   1; -- Loop Filter Resistance = 16 (5 bit(s)) (Setting 16)
-    	5    :   0;
-    ..
-    	11   :   0;
-    	12   :   0;
-    	13   :   0;
-    	142  :   0;
-    	143  :   0;
-    END;
+	-- MIF file representing initial state of PLL Scan Chain
+	--    Device Family: Stratix III
+	--    Device Part: -
+	--    Device Speed Grade: 3
+	--    PLL Scan Chain: Enhanced PLL (234 bits)
+	--    File Name: C:\work\vl\sw_trunk\S5A-sw-MF2\synth\ep3sl\mega\vip_pll.mif
+	--    Generated: Sat Oct 16 13:24:48 2010
+	
+	WIDTH=1;
+	DEPTH=234;
+	
+	ADDRESS_RADIX=UNS;
+	DATA_RADIX=UNS;
+	
+	CONTENT BEGIN
+		0    :   0; -- Reserved Bits = 0 (1 bit(s))
+		1    :   0; -- Reserved Bits = 0 (1 bit(s))
+		2    :   0; -- Loop Filter Capacitance = 0 (2 bit(s)) (Setting 0)
+		3    :   0;
+		4    :   1; -- Loop Filter Resistance = 16 (5 bit(s)) (Setting 16)
+		5    :   0;
+		6    :   0;
+		7    :   0;
+		8    :   0;
+		9    :   0; -- VCO Post Scale = 0 (1 bit(s)) (VCO post-scale divider counter value = 2)
+		10   :   0; -- Reserved Bits = 0 (5 bit(s))
+		11   :   0;
+		12   :   0;
+		13   :   0;
+		14   :   0;
+		15   :   0; -- Charge Pump Current = 1 (3 bit(s)) (Setting 1)
+		...
+		225  :   0; -- clk9 counter: Odd Division = 0 (1 bit(s))
+		226  :   0; -- clk9 counter: Low Count = 0 (8 bit(s))
+		227  :   0;
+		228  :   0;
+		229  :   0;
+		230  :   0;
+		231  :   0;
+		232  :   0;
+		233  :   0;
+	END;
 
 */
 

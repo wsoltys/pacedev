@@ -42,8 +42,8 @@ entity platform is
     bitmap_i        : in from_BITMAP_CTL_t;
     bitmap_o        : out to_BITMAP_CTL_t;
     
-    tilemap_i       : in from_TILEMAP_CTL_t;
-    tilemap_o       : out to_TILEMAP_CTL_t;
+    tilemap_i       : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
+    tilemap_o       : out to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
 
     sprite_reg_o    : out to_SPRITE_REG_t;
     sprite_i        : in from_SPRITE_CTL_t;
@@ -369,8 +369,8 @@ begin
 		port map
 		(
 			clock			=> clk_video,
-			address		=> tilemap_i.tile_a(10 downto 0),
-			q					=> tilemap_o.tile_d
+			address		=> tilemap_i(1).tile_a(10 downto 0),
+			q					=> tilemap_o(1).tile_d
 		);
 	
   -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
@@ -390,12 +390,12 @@ begin
 			q_b					=> vram_datao,
 	
 		  clock_a			=> clk_video,
-			address_a		=> tilemap_i.map_a(9 downto 0),
+			address_a		=> tilemap_i(1).map_a(9 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o.map_d(7 downto 0)
+			q_a					=> tilemap_o(1).map_d(7 downto 0)
 		);
-    tilemap_o.map_d(tilemap_o.map_d'left downto 8) <= (others => '0');
+    tilemap_o(1).map_d(tilemap_o(1).map_d'left downto 8) <= (others => '0');
 
   GEN_PCG80 : if (TRS80_M1_HAS_PCG80 or TRS80_M1_HAS_80GRAFIX) generate
 
@@ -449,17 +449,17 @@ begin
     
         -- data fed back via 'attribute' port
         clock_a			=> clk_video,
-        address_a		=> tilemap_i.attr_a(11 downto 0),
+        address_a		=> tilemap_i(1).attr_a(11 downto 0),
         wren_a			=> '0',
         data_a			=> (others => 'X'),
-        q_a					=> tilemap_o.attr_d(7 downto 0)
+        q_a					=> tilemap_o(1).attr_d(7 downto 0)
       );
-    tilemap_o.attr_d(tilemap_o.attr_d'left downto 8) <= (others => '0');
+    tilemap_o(1).attr_d(tilemap_o(1).attr_d'left downto 8) <= (others => '0');
   end generate GEN_PCG80;
 
   GEN_NO_PCG80 : if not (TRS80_M1_HAS_PCG80 or TRS80_M1_HAS_80GRAFIX) generate
     pcg80_d_o <= (others => '0');
-    tilemap_o.attr_d <= (others => '0');
+    tilemap_o(1).attr_d <= (others => '0');
   end generate GEN_NO_PCG80;
 
   GEN_LE18 : if TRS80_M1_HAS_LE18 generate
