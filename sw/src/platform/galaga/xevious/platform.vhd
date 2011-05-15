@@ -100,8 +100,11 @@ architecture SYN of platform is
   signal main_intvec    : std_logic_vector(7 downto 0);
   signal main_intack    : std_logic;
   signal main_nmi       : std_logic;
+  signal main_intena    : std_logic;
+  signal main_int       : std_logic;
 
   -- sub cpu signals
+  signal sub_rst        : std_logic;
   signal sub_en         : std_logic;
   signal sub_a          : std_logic_vector(15 downto 0);
   signal sub_d_i        : std_logic_vector(7 downto 0);
@@ -114,8 +117,11 @@ architecture SYN of platform is
   signal sub_intvec     : std_logic_vector(7 downto 0);
   signal sub_intack     : std_logic;
   signal sub_nmi        : std_logic;
+  signal sub_intena     : std_logic;
+  signal sub_int        : std_logic;
 
   -- sub2 cpu signals
+  signal sub2_rst       : std_logic;
   signal sub2_en        : std_logic;
   signal sub2_a         : std_logic_vector(15 downto 0);
   signal sub2_d_i       : std_logic_vector(7 downto 0);
@@ -127,6 +133,8 @@ architecture SYN of platform is
   signal sub2_intreq    : std_logic;
   signal sub2_intvec    : std_logic_vector(7 downto 0);
   signal sub2_intack    : std_logic;
+  signal sub2_nmireq    : std_logic;
+  signal sub2_nmiena    : std_logic;
   signal sub2_nmi       : std_logic;
 
   -- muxed cpu signals
@@ -148,12 +156,15 @@ architecture SYN of platform is
   signal subrom_d_o     : std_logic_vector(7 downto 0);
   signal sub2rom_cs     : std_logic;
   signal sub2rom_d_o    : std_logic_vector(7 downto 0);
+
+  -- latches
+  signal bosco_latch_cs   : std_logic;
   
   -- NAMCO custom signals
   signal namco_06xx_cs_n  : std_logic;
   signal namco_06xx_r_wn  : std_logic;
   signal namco_06xx_d_o   : std_logic_vector(7 downto 0);
-  
+
   -- RAM signals
   
   signal ram1_cs        : std_logic;
@@ -260,6 +271,8 @@ begin
 	subrom_cs       <= '1' when STD_MATCH(sub_a,  "000-------------") else '0';
 	-- SUB2ROM $0000-$0FFF
 	sub2rom_cs      <= '1' when STD_MATCH(sub2_a, "0000------------") else '0';
+  -- BOSCO_LATCHES
+  bosco_latch_cs  <= '1' when STD_MATCH(cpu_a,  "0110100000100---") else '0';
   -- NAMCO 06XX ($7000,$7100)
   namco_06xx_cs_n <= '0' when STD_MATCH(main_a, "0111000-00000000") else '1';
 	-- WRAM1 $7800-$7FFF
@@ -342,12 +355,14 @@ begin
         io_rd  	=> main_iord,
         io_wr  	=> main_iowr,
 
-        intreq 	=> main_intreq,
+        intreq 	=> main_int,
         intvec 	=> main_intvec,
         intack 	=> main_intack,
         nmi    	=> main_nmi
       );
 
+    -- irq enable via bosco_latch
+    main_int <= main_intreq and main_intena;
     main_intvec <= (others => '0');
     
     main_rom_inst : entity work.sprom
@@ -392,7 +407,8 @@ begin
         rst     => rst_sys,
         
         vbl     => graphics_i.vblank,
-        irq     => main_intreq
+        irq     => main_intreq,
+        ack     => main_intack
       );
 
   end generate GEN_MAIN_CPU;
@@ -404,7 +420,7 @@ begin
       (
         clk			=> clk_sys,                                   
         clk_en	=> sub_en,
-        reset  	=> cpu_reset,                                     
+        reset  	=> sub_rst,                                     
 
         addr   	=> sub_a,
         datai  	=> sub_d_i,
@@ -415,12 +431,14 @@ begin
         io_rd  	=> sub_iord,
         io_wr  	=> sub_iowr,
 
-        intreq 	=> sub_intreq,
+        intreq 	=> sub_int,
         intvec 	=> sub_intvec,
         intack 	=> sub_intack,
         nmi    	=> sub_nmi
       );
 
+    -- irq enable via bosco_latch
+    sub_int <= sub_intreq and sub_intena;
     sub_intvec <= (others => '0');
     sub_nmi <= '0';
     
@@ -466,7 +484,8 @@ begin
         rst     => rst_sys,
         
         vbl     => graphics_i.vblank,
-        irq     => sub_intreq
+        irq     => sub_intreq,
+        ack     => sub_intack
       );
 
   end generate GEN_SUB_CPU;
@@ -478,7 +497,7 @@ begin
       (
         clk			=> clk_sys,                                   
         clk_en	=> sub2_en,
-        reset  	=> cpu_reset,                                     
+        reset  	=> sub2_rst,                                     
 
         addr   	=> sub2_a,
         datai  	=> sub2_d_i,
@@ -497,7 +516,9 @@ begin
 
     sub2_intreq <= '0';
     sub2_intvec <= (others => '0');
-    sub2_nmi <= '0';
+    -- nmi enable via bosco_latch
+    sub2_nmireq <= '0';
+    sub2_nmi <= sub2_nmireq and sub2_nmiena;
     
     sub2_rom_inst : entity work.sprom
       generic map
@@ -535,6 +556,38 @@ begin
 
   end generate GEN_SUB2_CPU;
 
+  -- bosco latches
+  process (clk_sys, rst_sys)
+  begin
+    if rst_sys = '1' then
+      main_intena <= '0';
+      sub_intena <= '0';
+      sub2_nmiena <= '0';
+      sub_rst <= '0';
+      sub2_rst <= '0';
+    elsif rising_edge(clk_sys) then
+      if main_en = '1' or sub_en = '1' or sub2_en = '1' then
+        if bosco_latch_cs = '1' and cpu_memwr = '1' then
+          case cpu_a(2 downto 0) is
+            when "000" =>
+              main_intena <= cpu_d_o(0);
+              -- clear int when (0)=0
+            when "001" =>
+              sub_intena <= cpu_d_o(0);
+              -- clear int when (0)=0
+            when "010" =>
+              sub2_nmiena <= not cpu_d_o(0);
+            when "011" =>
+              sub_rst <= not cpu_d_o(0);
+              sub2_rst <= not cpu_d_o(0);
+            when others =>
+              null;
+          end case;
+        end if; -- bosco_latches_cs, cpu_mem_wr
+      end if; -- main_en, sub_en, sub2_en
+    end if;
+  end process;
+  
   namco_06xx_inst : entity work.namco_06xx
     generic map
     (
@@ -794,7 +847,8 @@ entity vbl_gen is
     rst     : in std_logic;
     
     vbl     : in std_logic;
-    irq     : out std_logic
+    irq     : out std_logic;
+    ack     : in std_logic
   );
 end entity vbl_gen;
 
@@ -803,16 +857,17 @@ begin
   -- vblank interrupt
   process (clk, rst)
     variable vbl_r : std_logic_vector(3 downto 0);
-    alias vbl_um : std_logic is vbl_r(vbl_r'left);
-    alias vbl_prev : std_logic is vbl_r(vbl_r'left-1);
+    alias vbl_prev : std_logic is vbl_r(vbl_r'left);
+    alias vbl_um : std_logic is vbl_r(vbl_r'left-1);
   begin
     if rst = '1' then
       irq <= '0';
     elsif rising_edge(clk) then
       if clk_en = '1' then
-        irq <= '0';  -- default
         if vbl_prev = '0' and vbl_um = '1' then
           irq <= '1';
+        elsif ack = '1' then
+          irq <= '0';
         end if;
         vbl_r := vbl_r(vbl_r'left-1 downto 0) & vbl;
       end if;
