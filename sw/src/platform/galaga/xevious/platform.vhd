@@ -149,6 +149,11 @@ architecture SYN of platform is
   signal sub2rom_cs     : std_logic;
   signal sub2rom_d_o    : std_logic_vector(7 downto 0);
   
+  -- NAMCO custom signals
+  signal namco_06xx_cs_n  : std_logic;
+  signal namco_06xx_r_wn  : std_logic;
+  signal namco_06xx_d_o   : std_logic_vector(7 downto 0);
+  
   -- RAM signals
   
   signal ram1_cs        : std_logic;
@@ -250,27 +255,29 @@ begin
 
 	-- chip selects
 	-- MAINROM $0000-$3FFF
-	mainrom_cs  <= '1' when STD_MATCH(main_a, "00--------------") else '0';
+	mainrom_cs      <= '1' when STD_MATCH(main_a, "00--------------") else '0';
 	-- SUBROM $0000-$1FFF
-	subrom_cs   <= '1' when STD_MATCH(sub_a,  "000-------------") else '0';
+	subrom_cs       <= '1' when STD_MATCH(sub_a,  "000-------------") else '0';
 	-- SUB2ROM $0000-$0FFF
-	sub2rom_cs  <= '1' when STD_MATCH(sub2_a, "0000------------") else '0';
+	sub2rom_cs      <= '1' when STD_MATCH(sub2_a, "0000------------") else '0';
+  -- NAMCO 06XX ($7000,$7100)
+  namco_06xx_cs_n <= '0' when STD_MATCH(main_a, "0111000-00000000") else '1';
 	-- WRAM1 $7800-$7FFF
-	ram1_cs     <= '1' when STD_MATCH(cpu_a,  "01111-----------") else '0';
+	ram1_cs         <= '1' when STD_MATCH(cpu_a,  "01111-----------") else '0';
 	-- WRAM2 $8000-$87FF
-	ram2_cs     <= '1' when STD_MATCH(cpu_a,  "10000-----------") else '0';
+	ram2_cs         <= '1' when STD_MATCH(cpu_a,  "10000-----------") else '0';
 	-- WRAM3 $9000-$97FF
-	ram3_cs     <= '1' when STD_MATCH(cpu_a,  "10010-----------") else '0';
+	ram3_cs         <= '1' when STD_MATCH(cpu_a,  "10010-----------") else '0';
 	-- WRAM4 $A000-$A7FF
-	ram4_cs     <= '1' when STD_MATCH(cpu_a,  "10100-----------") else '0';
+	ram4_cs         <= '1' when STD_MATCH(cpu_a,  "10100-----------") else '0';
   -- RAMPF0 $B000-$B7FF (foreground attribute)
-  rampf0_cs   <= '1' when STD_MATCH(cpu_a,  "10110-----------") else '0';
+  rampf0_cs       <= '1' when STD_MATCH(cpu_a,  "10110-----------") else '0';
   -- RAMPF1 $B800-$BFFF (background attribute)
-  rampf1_cs   <= '1' when STD_MATCH(cpu_a,  "10111-----------") else '0';
+  rampf1_cs       <= '1' when STD_MATCH(cpu_a,  "10111-----------") else '0';
   -- RAMPF2 $C000-$C7FF (foreground tile code )
-  rampf2_cs   <= '1' when STD_MATCH(cpu_a,  "11000-----------") else '0';
+  rampf2_cs       <= '1' when STD_MATCH(cpu_a,  "11000-----------") else '0';
   -- RAMPF3 $C800-$C8FF (background tile code )
-  rampf3_cs   <= '1' when STD_MATCH(cpu_a,  "11001-----------") else '0';
+  rampf3_cs     <= '1' when STD_MATCH(cpu_a,  "11001-----------") else '0';
 
   -- write-enables, pulse for 1 clock only
   process (clk_sys, rst_sys)
@@ -279,6 +286,7 @@ begin
     if rst_sys = '1' then
       cpu_memwr_r := '0';
     elsif rising_edge(clk_sys) then
+      namco_06xx_r_wn <= '1';
       ram1_we <= '0';
       ram2_we <= '0';
       ram3_we <= '0';
@@ -288,6 +296,7 @@ begin
       rampf2_we <= '0';
       rampf3_we <= '0';
       if cpu_memwr = '1' and cpu_memwr_r = '0' then
+        namco_06xx_r_wn <= namco_06xx_cs_n;
         ram1_we <= ram1_cs;
         ram2_we <= ram2_cs;
         ram3_we <= ram3_cs;
@@ -302,7 +311,8 @@ begin
   end process;
 
   -- muxed data signals
-  mem_d_o <=  ram1_d_o when ram1_cs = '1' else
+  mem_d_o <=  namco_06xx_d_o when namco_06xx_cs_n = '0' else
+              ram1_d_o when ram1_cs = '1' else
               ram2_d_o when ram2_cs = '1' else
               ram3_d_o when ram3_cs = '1' else
               ram4_d_o when ram4_cs = '1' else
@@ -338,9 +348,7 @@ begin
         nmi    	=> main_nmi
       );
 
-    main_intreq <= '0';
     main_intvec <= (others => '0');
-    main_nmi <= '0';
     
     main_rom_inst : entity work.sprom
       generic map
@@ -376,6 +384,17 @@ begin
       end if;
     end process;
     
+    main_vbl_irq_inst : entity work.vbl_gen
+      port map
+      (
+        clk     => clk_sys,
+        clk_en  => main_en,
+        rst     => rst_sys,
+        
+        vbl     => graphics_i.vblank,
+        irq     => main_intreq
+      );
+
   end generate GEN_MAIN_CPU;
   
   GEN_SUB_CPU : if XEVIOUS_HAS_SUB_CPU generate
@@ -402,7 +421,6 @@ begin
         nmi    	=> sub_nmi
       );
 
-    sub_intreq <= '0';
     sub_intvec <= (others => '0');
     sub_nmi <= '0';
     
@@ -439,6 +457,17 @@ begin
         end if;
       end if;
     end process;
+
+    sub_vbl_irq_inst : entity work.vbl_gen
+      port map
+      (
+        clk     => clk_sys,
+        clk_en  => sub_en,
+        rst     => rst_sys,
+        
+        vbl     => graphics_i.vblank,
+        irq     => sub_intreq
+      );
 
   end generate GEN_SUB_CPU;
 
@@ -506,6 +535,30 @@ begin
 
   end generate GEN_SUB2_CPU;
 
+  namco_06xx_inst : entity work.namco_06xx
+    generic map
+    (
+      SYS_CLK_Hz    => 49152000,
+      CLK_EN_DUTY   => 16
+    )
+    port map
+    (
+      clk           => clk_sys,
+      clk_en        => main_en,
+      rst           => rst_sys,
+      
+      cs_n          => namco_06xx_cs_n,
+      r_wn          => namco_06xx_r_wn,
+      sel           => main_a(8),
+      sd_i          => main_d_o,
+      sd_o          => namco_06xx_d_o,
+      nmi_n         => main_nmi,
+      
+      id_i          => (others => '0'),
+      id_o          => open,
+      io_n          => open
+    );
+    
   -- GFX1 (foreground characters)
   gfx1_inst : entity work.sprom
     generic map
@@ -613,11 +666,12 @@ begin
 			
 			-- graphics interface
 			clock_a			=> clk_vid,
-			address_a		=> tilemap_i(1).map_a(10 downto 0),
+			address_a		=> tilemap_i(1).attr_a(10 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> open
+			q_a					=> tilemap_o(1).attr_d(7 downto 0)
 		);
+  tilemap_o(1).attr_d(tilemap_o(1).attr_d'left downto 8) <= (others => '0');
   
   -- VRAM (background attribute) $B800-$BFFF
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
@@ -638,11 +692,12 @@ begin
 			
 			-- graphics interface
 			clock_a			=> clk_vid,
-			address_a		=> (others => '0'),
+			address_a		=> tilemap_i(2).attr_a(10 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> open
+			q_a					=> tilemap_o(2).attr_d(7 downto 0)
 		);
+  tilemap_o(2).attr_d(tilemap_o(2).attr_d'left downto 8) <= (others => '0');
   
   -- VRAM (foreground tile code) $C000-$CFFF
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
@@ -726,3 +781,41 @@ begin
 	leds_o <= (others => '0');
   
 end SYN;
+
+library IEEE;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+entity vbl_gen is
+  port
+  (
+    clk     : in std_logic;
+    clk_en  : in std_logic;
+    rst     : in std_logic;
+    
+    vbl     : in std_logic;
+    irq     : out std_logic
+  );
+end entity vbl_gen;
+
+architecture SYN of vbl_gen is
+begin
+  -- vblank interrupt
+  process (clk, rst)
+    variable vbl_r : std_logic_vector(3 downto 0);
+    alias vbl_um : std_logic is vbl_r(vbl_r'left);
+    alias vbl_prev : std_logic is vbl_r(vbl_r'left-1);
+  begin
+    if rst = '1' then
+      irq <= '0';
+    elsif rising_edge(clk) then
+      if clk_en = '1' then
+        irq <= '0';  -- default
+        if vbl_prev = '0' and vbl_um = '1' then
+          irq <= '1';
+        end if;
+        vbl_r := vbl_r(vbl_r'left-1 downto 0) & vbl;
+      end if;
+    end if;
+  end process;
+ end architecture SYN;

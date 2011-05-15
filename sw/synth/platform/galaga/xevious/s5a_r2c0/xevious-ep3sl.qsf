@@ -2510,6 +2510,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_R
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80se.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/Z80.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/galaga/namco_06XX.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/galaga/xevious/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/target_top_ep3sl.vhd
