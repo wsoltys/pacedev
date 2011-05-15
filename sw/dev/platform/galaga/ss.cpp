@@ -155,7 +155,11 @@ void main (int argc, char *argv[])
 
 	// read cpu memory dump	
 	fp = fopen (SUBDIR MEM_NAME, "rb");
-	if (!fp) exit (0);
+	if (!fp)
+	{
+		fprintf (stderr, "%s not found!\n", SUBDIR MEM_NAME);
+		exit (0);
+	}
 	fread (mem, 64*1024, 1, fp);
 	fclose (fp);
 
@@ -171,7 +175,11 @@ void main (int argc, char *argv[])
 
 	// read char rom(s)
 	fp = fopen (SUBDIR CHAR_ROM_1_NAME, "rb");
-	if (!fp) exit (0);
+	if (!fp)
+	{
+		fprintf (stderr, "%s not found!\n", SUBDIR CHAR_ROM_1_NAME);
+		exit (0);
+	}
 	fread (char_rom, CHAR_ROM_SIZE, 1, fp);
 	fclose (fp);
 

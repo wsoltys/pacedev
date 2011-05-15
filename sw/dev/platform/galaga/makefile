@@ -7,7 +7,8 @@ MD = mkdir
 
 CFLAGS = -Wall -g
 
-LDFLAGS = -mwindows -lalleg
+#LDFLAGS = -mwindows -lalleg
+LDFLAGS = -lalleg
 
 SS_OBJS = \
 	ss.o
