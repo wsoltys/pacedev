@@ -159,6 +159,10 @@ architecture SYN of platform is
 
   -- latches
   signal bosco_latch_cs   : std_logic;
+  signal bosco_dsw_cs     : std_logic;
+  signal bosco_dswa       : std_logic_vector(7 downto 0);
+  signal bosco_dswb       : std_logic_vector(7 downto 0);
+  signal bosco_dsw_d_o    : std_logic_vector(1 downto 0);
   
   -- NAMCO custom signals
   signal namco_06xx_cs_n  : std_logic;
@@ -271,7 +275,9 @@ begin
 	subrom_cs       <= '1' when STD_MATCH(sub_a,  "000-------------") else '0';
 	-- SUB2ROM $0000-$0FFF
 	sub2rom_cs      <= '1' when STD_MATCH(sub2_a, "0000------------") else '0';
-  -- BOSCO_LATCHES
+  -- BOSCO DSW $6800-$6807
+  bosco_dsw_cs    <= '1' when STD_MATCH(cpu_a,  "0110100000000---") else '0';
+  -- BOSCO_LATCHES $6820-$6827
   bosco_latch_cs  <= '1' when STD_MATCH(cpu_a,  "0110100000100---") else '0';
   -- NAMCO 06XX ($7000,$7100)
   namco_06xx_cs_n <= '0' when STD_MATCH(main_a, "0111000-00000000") else '1';
@@ -324,7 +330,9 @@ begin
   end process;
 
   -- muxed data signals
-  mem_d_o <=  namco_06xx_d_o when namco_06xx_cs_n = '0' else
+  mem_d_o <=  std_logic_vector(resize(unsigned(bosco_dsw_d_o),mem_d_o'length)) 
+                when bosco_dsw_cs = '1' else
+              namco_06xx_d_o when namco_06xx_cs_n = '0' else
               ram1_d_o when ram1_cs = '1' else
               ram2_d_o when ram2_cs = '1' else
               ram3_d_o when ram3_cs = '1' else
@@ -368,7 +376,8 @@ begin
     main_rom_inst : entity work.sprom
       generic map
       (
-        init_file		=> "../../../../../src/platform/galaga/xevious/roms/main.hex",
+        init_file		=> "../../../../../src/platform/galaga/xevious/roms/" & 
+                        XEVIOUS_VARIANT & "/main.hex",
         widthad_a		=> 14
       )
       port map
@@ -445,7 +454,8 @@ begin
     sub_rom_inst : entity work.sprom
       generic map
       (
-        init_file		=> "../../../../../src/platform/galaga/xevious/roms/sub.hex",
+        init_file		=> "../../../../../src/platform/galaga/xevious/roms/" & 
+                          XEVIOUS_VARIANT & "/sub.hex",
         widthad_a		=> 13
       )
       port map
@@ -523,7 +533,8 @@ begin
     sub2_rom_inst : entity work.sprom
       generic map
       (
-        init_file		=> "../../../../../src/platform/galaga/xevious/roms/sub2.hex",
+        init_file		=> "../../../../../src/platform/galaga/xevious/roms/" &
+                          XEVIOUS_VARIANT & "/sub2.hex",
         widthad_a		=> 12
       )
       port map
@@ -556,6 +567,21 @@ begin
 
   end generate GEN_SUB2_CPU;
 
+  -- bosco dipswitches
+  process (clk_sys, rst_sys)
+    variable i  : integer range 0 to 7;
+  begin
+    if rst_sys = '1' then
+      -- upright, 3 lives, bonus life 10K,40K,every 40K, Coin1 1C1C
+      bosco_dswa <= X"80" or X"60" or X"18" or X"03";
+      -- freeze off, easy, Coin2 1C1C, flags bonus life
+      bosco_dswb <= X"80" or X"40" or X"0C" or X"02";
+    elsif rising_edge(clk_sys) then
+      i := to_integer(unsigned(cpu_a(2 downto 0)));
+      bosco_dsw_d_o <= bosco_dswa(i) & bosco_dswb(i);
+    end if;
+  end process;
+  
   -- bosco latches
   process (clk_sys, rst_sys)
   begin

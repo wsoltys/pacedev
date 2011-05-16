@@ -79,7 +79,11 @@ package project_pkg is
 	
   constant XEVIOUS_HAS_SUB_CPU              : boolean := true;
   constant XEVIOUS_HAS_SUB2_CPU             : boolean := true;
-  
+
+  --constant XEVIOUS_VARIANT                  : string := "xevious";
+  constant XEVIOUS_VARIANT                  : string := "xevios";
+  --constant XEVIOUS_VARIANT                  : string := "battles";
+
   type from_PROJECT_IO_t is record
     not_used  : std_logic;
   end record;
