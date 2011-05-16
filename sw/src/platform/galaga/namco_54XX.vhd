@@ -4,7 +4,7 @@ use ieee.numeric_std.all;
 
 library work;
 
-entity namco_06xx is
+entity namco_54xx is
   generic
   (
     SYS_CLK_Hz    : integer;
@@ -25,11 +25,11 @@ entity namco_06xx is
     
     id_i          : in std_logic_vector(7 downto 0);
     id_o          : out std_logic_vector(7 downto 0);
-    io_n          : out std_logic_vector(4 downto 1)
+    io_n          : out std_logic_vector(3 downto 0)
   );
- end entity namco_06xx;
+ end entity namco_54xx;
  
- architecture SYN of namco_06xx is
+ architecture SYN of namco_54xx is
  
   signal control  : std_logic_vector(7 downto 0) := (others => '0');
   
