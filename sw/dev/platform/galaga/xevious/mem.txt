@@ -1,0 +1,8 @@
+xevious memory locations
+========================
+
+8016-8017   DSWA, DSWB
+
+C4D5-C4DC   DSWA (1 bit per byte)
+C495-C49C   DSWB (1 bit per byte)
+
