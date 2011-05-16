@@ -2339,14 +2339,6 @@ set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[106
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[107] -to "PACE:pace_inst|platform:platform_inst|cnt_sys[2]" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[108] -to "PACE:pace_inst|platform:platform_inst|cnt_sys[3]" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[109] -to "PACE:pace_inst|platform:platform_inst|cpu_memwr" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[110] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[111] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[112] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[113] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[114] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[115] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[116] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[117] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[7]" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[0] -to "PACE:pace_inst|platform:platform_inst|Z80:\\GEN_MAIN_CPU:main_cpu_inst|addr[0]" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[1] -to "PACE:pace_inst|platform:platform_inst|Z80:\\GEN_MAIN_CPU:main_cpu_inst|addr[10]" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[2] -to "PACE:pace_inst|platform:platform_inst|Z80:\\GEN_MAIN_CPU:main_cpu_inst|addr[11]" -section_id auto_signaltap_0
@@ -2457,21 +2449,9 @@ set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[106] -
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[107] -to "PACE:pace_inst|platform:platform_inst|cnt_sys[2]" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[108] -to "PACE:pace_inst|platform:platform_inst|cnt_sys[3]" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[109] -to "PACE:pace_inst|platform:platform_inst|cpu_memwr" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[110] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[111] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[112] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[113] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[114] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[115] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[116] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[117] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[7]" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_RAM_BLOCK_TYPE=M9K" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=118" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=118" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_INFO=805334528" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_POWER_UP_TRIGGER=1" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=00000000000000000000000000000000000000010100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010001110111111111" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=380" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STORAGE_QUALIFIER_INVERSION_MASK_LENGTH=0" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=4096" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ATTRIBUTE_MEM_MODE=OFF" -section_id auto_signaltap_0
@@ -2479,8 +2459,6 @@ set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_FLOW_USE_GE
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_BITS=11" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_BUFFER_FULL_STOP=1" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_CURRENT_RESOURCE_WIDTH=1" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=65382" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=24885" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL=1" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=4096" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_IN_ENABLED=0" -section_id auto_signaltap_0
@@ -2530,4 +2508,152 @@ set_global_assignment -name VHDL_FILE ../../../../../src/platform/galaga/xevious
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/target_top_ep3sl.vhd
 set_global_assignment -name SIGNALTAP_FILE platform.stp
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[110] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|control[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[111] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|control[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[112] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|control[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[113] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|control[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[114] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|control[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[115] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|control[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[116] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|control[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[117] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|control[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[118] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|cs_n" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[119] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_i[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[120] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_i[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[121] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_i[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[122] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_i[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[123] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_i[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[124] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_i[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[125] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_i[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[126] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_i[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[127] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_o[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[128] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_o[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[129] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_o[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[130] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_o[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[131] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_o[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[132] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_o[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[133] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_o[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[134] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_o[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[110] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|control[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[111] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|control[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[112] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|control[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[113] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|control[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[114] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|control[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[115] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|control[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[116] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|control[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[117] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|control[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[118] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|cs_n" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[119] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_i[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[120] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_i[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[121] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_i[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[122] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_i[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[123] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_i[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[124] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_i[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[125] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_i[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[126] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_i[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[127] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_o[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[128] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_o[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[129] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_o[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[130] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_o[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[131] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_o[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[132] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_o[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[133] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_o[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[134] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|id_o[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[135] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|io_n[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[136] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|io_n[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[137] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|io_n[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[138] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|io_n[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[139] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|r_wn" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[140] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_i[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[141] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_i[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[142] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_i[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[143] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_i[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[144] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_i[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[145] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_i[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[146] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_i[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[147] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_i[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[148] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_o[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[149] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_o[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[150] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_o[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[151] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_o[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[152] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_o[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[153] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_o[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[154] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_o[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[155] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_o[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[156] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sel" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[157] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|cmd[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[158] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|cmd[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[159] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|cmd[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[160] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|irq_n" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[161] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|k[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[162] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|k[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[163] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|k[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[164] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|k[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[165] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|o[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[166] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|o[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[167] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|o[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[168] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|o[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[169] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|o[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[170] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|o[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[171] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|o[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[172] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|o[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[173] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[174] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[175] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[176] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[177] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[178] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[179] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[180] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[135] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|io_n[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[136] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|io_n[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[137] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|io_n[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[138] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|io_n[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[139] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|r_wn" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[140] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_i[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[141] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_i[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[142] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_i[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[143] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_i[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[144] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_i[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[145] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_i[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[146] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_i[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[147] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_i[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[148] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_o[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[149] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_o[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[150] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_o[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[151] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_o[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[152] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_o[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[153] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_o[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[154] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_o[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[155] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sd_o[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[156] -to "PACE:pace_inst|platform:platform_inst|namco_06xx:\\BLK_NAMCO_CUSTOM:namco_06xx_inst|sel" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[157] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|cmd[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[158] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|cmd[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[159] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|cmd[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[160] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|irq_n" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[161] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|k[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[162] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|k[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[163] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|k[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[164] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|k[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[165] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|o[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[166] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|o[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[167] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|o[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[168] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|o[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[169] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|o[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[170] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|o[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[171] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|o[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[172] -to "PACE:pace_inst|platform:platform_inst|namco_51xx:\\BLK_NAMCO_CUSTOM:namco_51xx_inst|o[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[173] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[174] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[175] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[176] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[177] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[178] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[179] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[180] -to "PACE:pace_inst|platform:platform_inst|sprom:\\GEN_SUB2_CPU:sub2_rom_inst|q[7]" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=181" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=181" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010001110111111111" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=569" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=63789" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=51952" -section_id auto_signaltap_0
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

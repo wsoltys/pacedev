@@ -18,10 +18,10 @@ entity namco_51xx is
 
     si            : in std_logic;
     so            : out std_logic;
-    p             : in std_logic_vector(3 downto 0);
-    o             : in std_logic_vector(7 downto 0);
     k             : in std_logic_vector(3 downto 0);
     r             : in std_logic_vector(15 downto 0);
+    p             : out std_logic_vector(3 downto 0);
+    o             : out std_logic_vector(7 downto 0);
     
     to_n          : in std_logic;
     tc_n          : in std_logic;
@@ -31,15 +31,49 @@ entity namco_51xx is
  
  architecture SYN of namco_51xx is
  
+  signal cmd : std_logic_vector(2 downto 0) := (others => '0');
+  
  begin
  
   -- cpu interface
   process (clk, rst)
+    variable irq_n_r : std_logic := '0';
+    variable cnt : integer range 0 to 2 := 0;
   begin
     if rst = '1' then
+      irq_n_r := '0';
+      cnt := 0;
+      cmd <= (others => '0');
     elsif rising_edge(clk) then
       if clk_en = '1' then
-        
+        -- latch on leading-edge IRQn
+        if irq_n_r = '1' and irq_n = '0' then
+          if k(3) = '0' then
+            -- write
+            cmd <= k(2 downto 0);
+            cnt := 0;
+          else
+            -- read
+            case cmd is
+              -- switch mode
+              when "101" =>
+                case cnt is
+                  when 0 =>
+                    o <= X"FF";
+                    cnt := 1;
+                  when 1 =>
+                    o <= X"FF";
+                    cnt := 2;
+                  when others =>
+                    o <= X"00";
+                    cnt := 0;
+                end case;
+              when others =>
+                o <= (others => '0');
+            end case;
+          end if;
+        end if;
+        irq_n_r := irq_n;
       end if; -- clk_en
     end if;
   end process;

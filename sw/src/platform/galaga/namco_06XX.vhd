@@ -25,7 +25,7 @@ entity namco_06xx is
     
     id_i          : in std_logic_vector(7 downto 0);
     id_o          : out std_logic_vector(7 downto 0);
-    io_n          : out std_logic_vector(4 downto 1)
+    io_n          : out std_logic_vector(1 to 4)        -- sd_i(0)->IOn(4)
   );
  end entity namco_06xx;
  
@@ -38,7 +38,8 @@ entity namco_06xx is
   -- cpu interface
   process (clk, rst)
     -- NMI timer is 200us
-    subtype nmi_cnt_t is integer range 0 to SYS_CLK_Hz/CLK_EN_DUTY/5000;
+    --subtype nmi_cnt_t is integer range 0 to SYS_CLK_Hz/CLK_EN_DUTY/5000;
+    subtype nmi_cnt_t is integer range 0 to 23;
     variable nmi_cnt : nmi_cnt_t := 0;
   begin
     if rst = '1' then
@@ -48,13 +49,13 @@ entity namco_06xx is
     elsif rising_edge(clk) then
       if clk_en = '1' then
       
-        -- pulse NMI low for 1 clk_en
-        nmi_n <= '1'; -- default
+        -- pulse NMI low for 23 clocks
+        --nmi_n <= '1'; -- default
         if nmi_cnt > 0 then
-          if nmi_cnt = 1 then
-            nmi_n <= '0';
-          end if;
+          nmi_n <= '0';
           nmi_cnt := nmi_cnt - 1;
+        else
+          nmi_n <= '1';
         end if;
         
         if cs_n = '0' then
@@ -62,7 +63,7 @@ entity namco_06xx is
             if sel = '0' then
               -- data read
               if control(4) = '0' then
-                -- error: device in read mode
+                -- error: device in write mode
                 sd_o <= (others => '0');
               else
                 -- logical AND of all selected inputs
@@ -79,6 +80,7 @@ entity namco_06xx is
               if control(4) = '0' then
                 id_o <= sd_i;
                 -- assert IRQ signals to custom chips
+                -- when do we de-assert?
                 io_n <= not control(3 downto 0);
               end if;
             else
@@ -86,8 +88,10 @@ entity namco_06xx is
               control <= sd_i;
               if sd_i(3 downto 0) = "0000" then
                 nmi_cnt := 0;
+                io_n <= (others => '1');
               else
                 nmi_cnt := nmi_cnt_t'high;
+                -- assert for a subsequent read req
                 if sd_i(4) = '1' then
                   io_n <= not sd_i(3 downto 0);
                 end if;

@@ -615,9 +615,11 @@ begin
   end process;
   
   BLK_NAMCO_CUSTOM : block
+    signal namco_06xx_nmi_n : std_logic;
     signal namco_06xx_id_i  : std_logic_vector(7 downto 0);
     signal namco_06xx_id_o  : std_logic_vector(7 downto 0);
-    signal namco_06xx_io_o  : std_logic_vector(4 downto 1);
+    signal namco_06xx_io_o  : std_logic_vector(1 to 4);
+    signal namco_51xx_o     : std_logic_vector(7 downto 0);
     signal namco_50xx_ans   : std_logic_vector(7 downto 0);
   begin
   
@@ -625,12 +627,12 @@ begin
       generic map
       (
         SYS_CLK_Hz    => 49152000,
-        CLK_EN_DUTY   => 16
+        CLK_EN_DUTY   => 1
       )
       port map
       (
         clk           => clk_sys,
-        clk_en        => main_en,
+        clk_en        => '1',
         rst           => rst_sys,
         
         cs_n          => namco_06xx_cs_n,
@@ -638,13 +640,19 @@ begin
         sel           => main_a(8),
         sd_i          => main_d_o,
         sd_o          => namco_06xx_sd_o,
-        nmi_n         => main_nmi,
+        nmi_n         => namco_06xx_nmi_n,
         
         id_i          => namco_06xx_id_i,
         id_o          => namco_06xx_id_o,
         io_n          => namco_06xx_io_o
       );
 
+    main_nmi <= not namco_06xx_nmi_n;
+    
+    -- read mux
+    namco_06xx_id_i <= namco_51xx_o when namco_06xx_io_o(4) = '1' else
+                        (others => '0');
+                        
     namco_51xx_inst : entity work.namco_51xx
       generic map
       (
@@ -657,19 +665,20 @@ begin
         clk_en        => '1',
         rst           => rst_sys,
 
-        si            => '0',
-        so            => open,
-        p             => (others => '0'),
-        o             => (others => '0'),
-        k             => (others => '0'),
-        r             => (others => '0'),
+        si            => '0',                 -- NC
+        so            => open,                -- NC
+        k(3)          => namco_06xx_r_wn,
+        k(2 downto 0) => namco_06xx_id_o(2 downto 0),
+        r             => (others => '0'),     -- I/O
+        p             => open,                -- lamps etc
+        o             => namco_51xx_o,
         
-        irq_n         => namco_06xx_io_o(1),
-        to_n          => '0',
-        tc_n          => '0'
+        irq_n         => namco_06xx_io_o(4),
+        to_n          => '0',                 -- NC
+        tc_n          => '0'                  -- VBLANK#
       );
    
-    namco_05xx_inst : entity work.namco_50xx
+    namco_50xx_inst : entity work.namco_50xx
       generic map
       (
         SYS_CLK_Hz    => 49152000,
@@ -681,14 +690,34 @@ begin
         clk_en        => '1',
         rst           => rst_sys,
         
-        r_wn          => cpu_memrd,
-        irq_n         => namco_06xx_io_o(3),
+        r_wn          => namco_06xx_r_wn,
+        irq_n         => namco_06xx_io_o(2),
         tc_n          => '0',                   -- NC
         
         cmd           => namco_06xx_id_o,
         ans           => namco_50xx_ans
       );
      
+    namco_54xx_inst : entity work.namco_54xx
+      generic map
+      (
+        SYS_CLK_Hz    => 49152000,
+        CLK_EN_DUTY   => 16
+      )
+      port map
+      (
+        clk           => clk_sys,
+        clk_en        => '1',
+        rst           => rst_sys,
+        
+        irq_n         => namco_06xx_io_o(1),
+        tc_n          => '0',                   -- NC
+
+        cmd           => namco_06xx_id_o,
+        o0            => open,
+        o1            => open,
+        o2            => open
+      );
   end block BLK_NAMCO_CUSTOM;
   
   -- GFX1 (foreground characters)
