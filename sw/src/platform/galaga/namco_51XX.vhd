@@ -37,8 +37,8 @@ entity namco_51xx is
  
   -- cpu interface
   process (clk, rst)
-    variable irq_n_r : std_logic := '0';
-    variable cnt : integer range 0 to 2 := 0;
+    variable irq_n_r  : std_logic := '0';
+    variable cnt      : integer range 0 to 2 := 0;
   begin
     if rst = '1' then
       irq_n_r := '0';
@@ -46,13 +46,10 @@ entity namco_51xx is
       cmd <= (others => '0');
     elsif rising_edge(clk) then
       if clk_en = '1' then
-        -- latch on leading-edge IRQn
-        if irq_n_r = '1' and irq_n = '0' then
-          if k(3) = '0' then
-            -- write
-            cmd <= k(2 downto 0);
-            cnt := 0;
-          else
+        -- latch on IRQn edges
+        if irq_n_r /= irq_n then
+          -- latch read on leading-edge IRQn
+          if irq_n = '0' and k(3) = '1' then
             -- read
             case cmd is
               -- switch mode
@@ -71,8 +68,12 @@ entity namco_51xx is
               when others =>
                 o <= (others => '0');
             end case;
-          end if;
-        end if;
+          elsif irq_n = '1' and k(3) = '0' then
+            -- latch write on rising-edge IRQn
+            cmd <= k(2 downto 0);
+            cnt := 0;
+          end if; -- irq_n and k(3)
+        end if; -- irq_n_r /= irq_n
         irq_n_r := irq_n;
       end if; -- clk_en
     end if;

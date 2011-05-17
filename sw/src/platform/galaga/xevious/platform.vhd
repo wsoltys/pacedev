@@ -619,6 +619,7 @@ begin
     signal namco_06xx_id_i  : std_logic_vector(7 downto 0);
     signal namco_06xx_id_o  : std_logic_vector(7 downto 0);
     signal namco_06xx_io_o  : std_logic_vector(1 to 4);
+    signal namco_06xx_pin1  : std_logic;
     signal namco_51xx_o     : std_logic_vector(7 downto 0);
     signal namco_50xx_ans   : std_logic_vector(7 downto 0);
   begin
@@ -644,7 +645,9 @@ begin
         
         id_i          => namco_06xx_id_i,
         id_o          => namco_06xx_id_o,
-        io_n          => namco_06xx_io_o
+        io_n          => namco_06xx_io_o,
+
+        pin1          => namco_06xx_pin1
       );
 
     main_nmi <= not namco_06xx_nmi_n;
@@ -667,7 +670,7 @@ begin
 
         si            => '0',                 -- NC
         so            => open,                -- NC
-        k(3)          => namco_06xx_r_wn,
+        k(3)          => namco_06xx_pin1,
         k(2 downto 0) => namco_06xx_id_o(2 downto 0),
         r             => (others => '0'),     -- I/O
         p             => open,                -- lamps etc
