@@ -401,7 +401,7 @@ begin
             else
               main_d_i <= mem_d_o;
             end if;
-          else
+          elsif main_iord = '1' then
             main_d_i <= io_d_o;
           end if;
         end if;
@@ -653,7 +653,7 @@ begin
     main_nmi <= not namco_06xx_nmi_n;
     
     -- read mux
-    namco_06xx_id_i <= namco_51xx_o when namco_06xx_io_o(4) = '1' else
+    namco_06xx_id_i <= namco_51xx_o when namco_06xx_io_o(4) = '0' else
                         (others => '0');
                         
     namco_51xx_inst : entity work.namco_51xx

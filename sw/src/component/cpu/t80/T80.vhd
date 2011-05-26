@@ -911,7 +911,7 @@ begin
 			when "1010" =>
 				BusA <= "00000000";
 			when others =>
-				BusB <= "--------";
+				BusA <= "--------";
 			end case;
 			if XYbit_undoc='1' then
 				BusA <= DI_Reg;
