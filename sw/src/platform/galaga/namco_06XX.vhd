@@ -42,7 +42,7 @@ entity namco_06xx is
     -- NMI timer is 200us
     subtype nmi_tmr_t is integer range 0 to SYS_CLK_Hz/CLK_EN_DUTY/5000;
     variable nmi_tmr : nmi_tmr_t := 0;
-    subtype nmi_cnt_t is integer range 0 to 23;
+    subtype nmi_cnt_t is integer range 0 to 23*16;
     variable nmi_cnt : nmi_cnt_t := 0;
     variable nmi_ena : std_logic := '0';
   begin
