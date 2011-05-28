@@ -114,8 +114,8 @@ entity target_top_ep4c is
 		--uh_clkin		    : out std_logic;
 		
 		-- Connection to video FPGA
-		vid_reset       : inout std_logic;		-- Bridge reset
-		vid_reset_core  : inout std_logic;		-- IP core reset
+		vid_reset_n     : inout std_logic;		-- Bridge reset
+		vid_reset_core_n : inout std_logic;		-- IP core reset
 		vid_address		  : out std_logic_vector(10 downto 0);
 		vid_data		    : inout std_logic_vector(15 downto 0);
 		vid_write_n		  : out std_logic;
@@ -235,6 +235,8 @@ begin
   reset <= init; -- or not tp_84; --veb_reset;
 	reset_n <= not reset;
 
+  vid_reset_n <= dbgio(7);
+  
   ep4c_pll_inst : entity work.ep4c_pll
     port map
     (
@@ -284,7 +286,8 @@ begin
     vdo_sda_i <= vdo_sda;
     vdo_sda <= vdo_sda_o when vdo_sda_oe_n = '0' else 'Z';
   
-    ctl <= not (dbgio(4) & dbgio(6) & dbgio(7));
+    --ctl <= not (dbgio(4) & dbgio(6) & dbgio(7));
+    ctl <= "000";
 
     dvo_sm : entity work.dvo_init_i2c_sm_controller
       generic map

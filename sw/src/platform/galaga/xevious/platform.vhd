@@ -164,6 +164,8 @@ architecture SYN of platform is
   signal bosco_dswb       : std_logic_vector(7 downto 0);
   signal bosco_dsw_d_o    : std_logic_vector(1 downto 0);
   
+  signal vh_latch_cs      : std_logic;
+  
   -- NAMCO custom signals
   signal namco_06xx_cs_n  : std_logic;
   signal namco_06xx_r_wn  : std_logic;
@@ -296,8 +298,10 @@ begin
   -- RAMPF2 $C000-$C7FF (foreground tile code )
   rampf2_cs       <= '1' when STD_MATCH(cpu_a,  "11000-----------") else '0';
   -- RAMPF3 $C800-$C8FF (background tile code )
-  rampf3_cs     <= '1' when STD_MATCH(cpu_a,  "11001-----------") else '0';
-
+  rampf3_cs       <= '1' when STD_MATCH(cpu_a,  "11001-----------") else '0';
+  -- VH_LATCH $D000-$D07F
+  vh_latch_cs     <= '1' when STD_MATCH(cpu_a,  "110100000-------") else '0';
+  
   -- write-enables, pulse for 1 clock only
   process (clk_sys, rst_sys)
     variable cpu_memwr_r : std_logic := '0';
@@ -614,6 +618,39 @@ begin
     end if;
   end process;
   
+  -- video hardware latches
+  process (clk_sys, rst_sys)
+    variable scroll : std_logic_vector(8 downto 0) := (others => '0');
+  begin
+    if rst_sys = '1' then
+      scroll := (others => '0');
+    elsif rising_edge(clk_sys) then
+      scroll := cpu_a(0) & cpu_d_o;
+      if main_en = '1' or sub_en = '1' or sub2_en = '1' then
+        if vh_latch_cs = '1' and cpu_memwr = '1' then
+          case cpu_a(7 downto 4) is
+            when "0000" =>
+              -- bg x scroll
+              graphics_o.bit16(0) <= std_logic_vector(resize(unsigned(scroll),16));
+            when "0001" =>
+              -- fg x scroll
+              graphics_o.bit16(1) <= std_logic_vector(resize(unsigned(scroll),16));
+            when "0010" =>
+              -- bg y scroll
+              graphics_o.bit16(2) <= std_logic_vector(resize(unsigned(scroll),16));
+            when "0011" =>
+              -- fg y scroll
+              graphics_o.bit16(3) <= std_logic_vector(resize(unsigned(scroll),16));
+            when "0111" =>
+              -- flip screen
+            when others =>
+              null;
+          end case;
+        end if; -- vh_latches_cs, cpu_mem_wr
+      end if; -- main_en, sub_en, sub2_en
+    end if;
+  end process;
+  
   BLK_NAMCO_CUSTOM : block
     signal namco_06xx_nmi_n : std_logic;
     signal namco_06xx_id_i  : std_logic_vector(7 downto 0);
@@ -863,12 +900,12 @@ begin
 		);
   tilemap_o(2).attr_d(tilemap_o(2).attr_d'left downto 8) <= (others => '0');
   
-  -- VRAM (foreground tile code) $C000-$CFFF
+  -- VRAM (foreground tile code) $C000-$C7FF
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 	rampf2_inst : entity work.dpram
 		generic map
 		(
-			init_file		=> "",
+			init_file		=> "../../../../../src/platform/galaga/xevious/roms/rampf2.hex",
 			widthad_a		=> 11
 		)
 		port map
@@ -936,7 +973,7 @@ begin
   -- unused outputs
 
   sram_o <= NULL_TO_SRAM;
-  graphics_o <= NULL_TO_GRAPHICS;
+  --graphics_o <= NULL_TO_GRAPHICS;
   sprite_reg_o <= NULL_TO_SPRITE_REG;
   sprite_o <= NULL_TO_SPRITE_CTL;
   --osd_o <= NULL_TO_OSD;

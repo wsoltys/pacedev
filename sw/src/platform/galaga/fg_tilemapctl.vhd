@@ -26,17 +26,22 @@ architecture TILEMAP_1 of tilemapCtl is
   alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
   alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
   
+  signal y_adj    : std_logic_vector(video_ctl.y'range);
+  
 begin
 
+  --y_adj <= std_logic_vector(unsigned(y) + unsigned(graphics_i.bit16(3)(10 downto 0)));
+  y_adj <= std_logic_vector(unsigned(y) + "00100000000");
+  
 	-- these are constant for a whole line
   ctl_o.map_a(ctl_o.map_a'left downto 11) <= (others => '0');
-  ctl_o.map_a(10 downto 5) <= y(8 downto 3);
+  ctl_o.map_a(10 downto 5) <= y_adj(8 downto 3);
   ctl_o.tile_a(ctl_o.tile_a'left downto 12) <= (others => '0');
-  ctl_o.tile_a(2 downto 0) <= y(2 downto 0);
+  ctl_o.tile_a(2 downto 0) <= y_adj(2 downto 0);
 
   -- generate attribute RAM address
   ctl_o.attr_a(ctl_o.attr_a'left downto 11) <= (others => '0');
-  ctl_o.attr_a(10 downto 5) <= y(8 downto 3);
+  ctl_o.attr_a(10 downto 5) <= y_adj(8 downto 3);
 
   -- generate pixel
   process (clk, clk_ena)
@@ -74,18 +79,19 @@ begin
           tile_d_r := ctl_i.tile_d(7 downto 0);
           attr_d_r := ctl_i.attr_d(7 downto 0);
         else
-          tile_d_r := tile_d_r(tile_d_r'left-1 downto 0) & '0';
+          tile_d_r := '0' & tile_d_r(tile_d_r'left downto 1);
         end if;
       end if;
-      pel := tile_d_r(tile_d_r'left);
+      pel := tile_d_r(0);
       
       -- extract R,G,B from colour palette
       pal_i := to_integer(unsigned(attr_d_r(7 downto 1)));
       pal_entry := pal(pal_i);
+      --pal_entry := pal(61);
       ctl_o.rgb.r <= pal_entry(0) & "0000";
       ctl_o.rgb.g <= pal_entry(1) & "0000";
       ctl_o.rgb.b <= pal_entry(2) & "0000";
-      ctl_o.set <= pel and attr_d_r(0);
+      ctl_o.set <= pel; -- and attr_d_r(0);
       
 		end if;				
 

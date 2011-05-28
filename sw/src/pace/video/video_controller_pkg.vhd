@@ -122,11 +122,17 @@ package video_controller_pkg is
   subtype PAL_ENTRY_t is std_logic_vector(15 downto 0);
   type PAL_A_t is array (natural range <>) of PAL_ENTRY_t;
   
+  subtype BYTE_t is std_logic_vector(7 downto 0);
+  type BYTE_A_t is array (natural range <>) of BYTE_t;
+  
+  subtype WORD_t is std_logic_vector(15 downto 0);
+  type WORD_A_t is array (natural range <>) of WORD_t;
+  
   type to_GRAPHICS_t is record
     pal       : PAL_A_t(15 downto 0);
     -- for various uses
-    bit8_1    : std_logic_vector(7 downto 0);
-    bit16_1   : std_logic_vector(15 downto 0);
+    bit8      : BYTE_A_t(0 to 0);
+    bit16     : WORD_A_t(0 to 3);
   end record;
 
   function NULL_TO_GRAPHICS return to_GRAPHICS_t;

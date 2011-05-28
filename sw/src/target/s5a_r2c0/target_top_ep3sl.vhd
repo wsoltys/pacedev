@@ -112,8 +112,8 @@ entity target_top_ep3sl is
 		vid_waitrequest_n	: out std_logic;
 		vid_irq_n				  : out std_logic;
 		vid_clk					  : in std_logic;
-    vid_reset_core    : in std_logic;
-    vid_reset         : in std_logic;
+    vid_reset_core_n  : in std_logic;
+    vid_reset_n       : in std_logic;
     
 		vid_spare		  : in std_logic_vector(29 downto 28);
 
@@ -183,7 +183,7 @@ begin
 		end if;
 	end process reset_gen;
 
-  clkrst_i.arst <= init;
+  clkrst_i.arst <= init or not vid_reset_n;
 	clkrst_i.arst_n <= not clkrst_i.arst;
 
   BLK_CLOCKING : block

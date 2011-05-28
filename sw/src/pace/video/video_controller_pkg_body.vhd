@@ -20,7 +20,9 @@ package body video_controller_pkg is
   
   function NULL_TO_GRAPHICS return to_GRAPHICS_t is
   begin
-    return ((others => (others => '0')), (others => '0'), (others => '0'));
+    return ((others => (others => '0')), 
+            (others => (others => '0')), 
+            (others => (others => '0')));
   end NULL_TO_GRAPHICS;
 
 end package body video_controller_pkg;
