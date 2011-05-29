@@ -30,24 +30,24 @@ architecture TILEMAP_1 of tilemapCtl is
   
 begin
 
-  --y_adj <= std_logic_vector(unsigned(y) + unsigned(graphics_i.bit16(3)(10 downto 0)));
-  y_adj <= std_logic_vector(unsigned(y) + "00100000000");
+  y_adj <= std_logic_vector(unsigned(y) + unsigned(graphics_i.bit16(3)(10 downto 0)));
   
 	-- these are constant for a whole line
   ctl_o.map_a(ctl_o.map_a'left downto 11) <= (others => '0');
-  ctl_o.map_a(10 downto 5) <= y_adj(8 downto 3);
+  ctl_o.map_a(5 downto 0) <= y_adj(8 downto 3);
   ctl_o.tile_a(ctl_o.tile_a'left downto 12) <= (others => '0');
   ctl_o.tile_a(2 downto 0) <= y_adj(2 downto 0);
 
-  -- generate attribute RAM address
-  ctl_o.attr_a(ctl_o.attr_a'left downto 11) <= (others => '0');
-  ctl_o.attr_a(10 downto 5) <= y_adj(8 downto 3);
-
+  -- generate attribute RAM address (same, different memory bank)
+  ctl_o.attr_a(ctl_o.map_a'left downto 11) <= (others => '0');
+  ctl_o.attr_a(5 downto 0) <= y_adj(8 downto 3);
+  
   -- generate pixel
   process (clk, clk_ena)
 
-		variable pel        : std_logic;
+    variable attr_i     : std_logic_vector(5 downto 0);
 		variable pal_i      : integer range 0 to 127;
+		variable pel        : std_logic;
 		variable pal_entry  : pal_entry_typ;
 
 		variable x_adj		  : unsigned(x'range);
@@ -65,8 +65,8 @@ begin
       -- - read tile from tilemap
       -- - read attribute data
       if stb = '1' then
-        ctl_o.map_a(4 downto 0) <= std_logic_vector(x_adj(7 downto 3));
-        ctl_o.attr_a(4 downto 0) <= std_logic_vector(x_adj(7 downto 3));
+        ctl_o.map_a(10 downto 6) <= not std_logic_vector(x_adj(7 downto 3));
+        ctl_o.attr_a(10 downto 6) <= not std_logic_vector(x_adj(7 downto 3));
       end if;
       
       -- 2nd stage of pipeline
@@ -85,13 +85,13 @@ begin
       pel := tile_d_r(0);
       
       -- extract R,G,B from colour palette
-      pal_i := to_integer(unsigned(attr_d_r(7 downto 1)));
+      attr_i := attr_d_r(1 downto 0) & attr_d_r(5 downto 2);
+      pal_i := to_integer(unsigned(attr_i));
       pal_entry := pal(pal_i);
-      --pal_entry := pal(61);
       ctl_o.rgb.r <= pal_entry(0) & "0000";
       ctl_o.rgb.g <= pal_entry(1) & "0000";
       ctl_o.rgb.b <= pal_entry(2) & "0000";
-      ctl_o.set <= pel; -- and attr_d_r(0);
+      ctl_o.set <= pel;
       
 		end if;				
 
