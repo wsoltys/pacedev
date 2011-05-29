@@ -401,7 +401,15 @@ begin
           -- latch read data for next clock
           if main_memrd = '1' then
             if mainrom_cs = '1' then
-              main_d_i <= mainrom_d_o;
+              -- patch out ROM tests for now
+              -- as it fails (due to NAMCO custom ICs?)
+              case main_a is
+                -- 20 15 (jr nz,$278)
+                when X"0261" | X"0262" =>
+                  main_d_i <= X"00";  -- NOP
+                when others =>
+                  main_d_i <= mainrom_d_o;
+              end case;
             else
               main_d_i <= mem_d_o;
             end if;
