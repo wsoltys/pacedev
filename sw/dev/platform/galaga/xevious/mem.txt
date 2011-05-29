@@ -3,6 +3,11 @@ xevious memory locations
 
 8016-8017   DSWA, DSWB
 
+8571				SUB2 ROM checksum
+8572				SUB ROM[$0409] ($00)
+8573				SUB ROM[$15FB] ($00)
+8574-8577		MAIN ROM checksums (4x$00)
+
 C4D5-C4DC   DSWA (1 bit per byte)
 C495-C49C   DSWB (1 bit per byte)
 

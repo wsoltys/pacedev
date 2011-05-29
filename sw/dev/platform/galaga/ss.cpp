@@ -41,6 +41,10 @@
 #ifdef XEVIOUS
 #define SET_NAME                  "XEVIOUS"
 #define MEM_NAME		              "XEV0DUMP.BIN"
+#define MAIN_ROM1_NAME						"xvi_1.3p"
+#define MAIN_ROM2_NAME						"xvi_2.3m"
+#define MAIN_ROM3_NAME						"xvi_3.2m"
+#define MAIN_ROM4_NAME						"xvi_4.2l"
 #define CHAR_ROM_1_NAME           "xvi_12.3b"
 #define CHAR_ROM_SIZE             0x1000
 #define NUM_CHARS                 512
@@ -163,6 +167,51 @@ void main (int argc, char *argv[])
 	fread (mem, 64*1024, 1, fp);
 	fclose (fp);
 
+	// read main roms
+	fp = fopen (SUBDIR MAIN_ROM1_NAME, "rb");
+	if (!fp)
+	{
+		fprintf (stderr, "%s not found!\n", SUBDIR MAIN_ROM1_NAME);
+		exit (0);
+	}
+	fread (&mem[0*4*1024], 4*1024, 1, fp);
+	fclose (fp);
+	fp = fopen (SUBDIR MAIN_ROM2_NAME, "rb");
+	if (!fp)
+	{
+		fprintf (stderr, "%s not found!\n", SUBDIR MAIN_ROM2_NAME);
+		exit (0);
+	}
+	fread (&mem[1*4*1024], 4*1024, 1, fp);
+	fclose (fp);
+	fp = fopen (SUBDIR MAIN_ROM3_NAME, "rb");
+	if (!fp)
+	{
+		fprintf (stderr, "%s not found!\n", SUBDIR MAIN_ROM3_NAME);
+		exit (0);
+	}
+	fread (&mem[2*4*1024], 4*1024, 1, fp);
+	fclose (fp);
+	fp = fopen (SUBDIR MAIN_ROM4_NAME, "rb");
+	if (!fp)
+	{
+		fprintf (stderr, "%s not found!\n", SUBDIR MAIN_ROM4_NAME);
+		exit (0);
+	}
+	fread (&mem[3*4*1024], 4*1024, 1, fp);
+	fclose (fp);
+
+	// checksum
+	for (int b=0; b<4; b++)
+	{
+		unsigned char cksum = 0;
+		for (int a=0; a<4*1024; a++)
+			cksum += mem[b*4*1024+a];
+		printf ("cksum(%d)=$%02X\n", b, cksum);
+	}
+	
+	exit (0);
+			
   // write vram, bgram
   fp = fopen (SUBDIR "vram.bin", "wb");
   fwrite (&mem[VRAM_BASE], 0x400, 1, fp);
