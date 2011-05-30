@@ -29,6 +29,8 @@ entity namco_50xx is
  
   signal control  : std_logic_vector(7 downto 0) := (others => '0');
   
+  signal cmd_r    : std_logic_vector(cmd'range);
+  
  begin
  
   process (clk, rst)
@@ -38,14 +40,24 @@ entity namco_50xx is
       irq_n_r := '0';
     elsif rising_edge(clk) then
       if clk_en = '1' then
-        -- read/write on leading-edge IRQn
-        if irq_n_r = '1' and irq_n = '0' then
-          if r_wn = '0' then
-            -- write
-          else
+        -- latch on IRQn edges
+        if irq_n_r /= irq_n then
+          -- read/write on leading-edge IRQn
+          if irq_n = '0' and r_wn = '1' then
             -- read
-          end if; -- r_wn
-        end if; -- irq_n
+            case cmd_r is
+              when X"80" =>
+                ans <= X"05";
+              when X"E5" =>
+                ans <= X"95";
+              when others =>
+                null;
+            end case;
+          elsif irq_n = '1' and r_wn = '0' then
+            -- latch write on rising-edge IRQn
+            cmd_r <= cmd;
+          end if; -- irq_n and r_wn
+        end if; -- irq_n_r /= irq_n
         irq_n_r := irq_n;
       end if; -- clk_en
     end if;

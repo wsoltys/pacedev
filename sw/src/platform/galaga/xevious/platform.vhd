@@ -307,7 +307,7 @@ begin
     variable cpu_memwr_r : std_logic := '0';
   begin
     if rst_sys = '1' then
-      cpu_memwr_r := '0';
+      null;
     elsif rising_edge(clk_sys) then
       namco_06xx_r_wn <= '1';
       ram1_we <= '0';
@@ -318,7 +318,7 @@ begin
       rampf1_we <= '0';
       rampf2_we <= '0';
       rampf3_we <= '0';
-      if cpu_memwr = '1' and cpu_memwr_r = '0' then
+      if cpu_cyc = "10" and cpu_memwr = '1' then
         namco_06xx_r_wn <= namco_06xx_cs_n;
         ram1_we <= ram1_cs;
         ram2_we <= ram2_cs;
@@ -329,7 +329,6 @@ begin
         rampf2_we <= rampf2_cs;
         rampf3_we <= rampf3_cs;
       end if;
-      cpu_memwr_r := cpu_memwr;
     end if;
   end process;
 
@@ -402,7 +401,6 @@ begin
           if main_memrd = '1' then
             if mainrom_cs = '1' then
               -- patch out ROM tests for now
-              -- as it fails (due to NAMCO custom ICs?)
               case main_a is
                 -- 20 15 (jr nz,$278)
                 when X"0261" | X"0262" =>
@@ -698,7 +696,8 @@ begin
     main_nmi <= not namco_06xx_nmi_n;
     
     -- read mux
-    namco_06xx_id_i <= namco_51xx_o when namco_06xx_io_o(4) = '0' else
+    namco_06xx_id_i <=  namco_50xx_ans when namco_06xx_io_o(2) = '0' else
+                        namco_51xx_o when namco_06xx_io_o(4) = '0' else
                         (others => '0');
                         
     namco_51xx_inst : entity work.namco_51xx
@@ -738,7 +737,7 @@ begin
         clk_en        => '1',
         rst           => rst_sys,
         
-        r_wn          => namco_06xx_r_wn,
+        r_wn          => namco_06xx_pin1,
         irq_n         => namco_06xx_io_o(2),
         tc_n          => '0',                   -- NC
         
