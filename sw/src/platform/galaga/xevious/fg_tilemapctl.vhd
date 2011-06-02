@@ -59,7 +59,7 @@ begin
   	if rising_edge(clk) and clk_ena = '1' then
 
 			-- video is clipped left and right (only 224 wide)
-			x_adj := unsigned(x) + (256-PACE_VIDEO_H_SIZE)/2;
+			x_adj := unsigned(x); -- + (256-PACE_VIDEO_H_SIZE)/2;
 				
       -- 1st stage of pipeline
       -- - read tile from tilemap
@@ -71,13 +71,15 @@ begin
       
       -- 2nd stage of pipeline
       -- - read tile data from tile ROM
+      if stb = '1' then
+        attr_d_r := ctl_i.attr_d(7 downto 0);
+      end if;
       ctl_o.tile_a(11) <= '0';
       ctl_o.tile_a(10 downto 3) <= ctl_i.map_d(7 downto 0); -- each tile is 8 bytes
 
       if stb = '1' then
         if x_adj(2 downto 0) = "001" then
           tile_d_r := ctl_i.tile_d(7 downto 0);
-          attr_d_r := ctl_i.attr_d(7 downto 0);
         else
           tile_d_r := '0' & tile_d_r(tile_d_r'left downto 1);
         end if;

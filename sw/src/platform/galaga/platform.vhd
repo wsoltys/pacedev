@@ -353,7 +353,7 @@ begin
     main_cpu_inst : entity work.Z80                                                
       port map
       (
-        clk			=> clk_sys,                                   
+        clk			=> '0', --clk_sys,                                   
         clk_en	=> main_en,
         reset  	=> cpu_reset,                                     
 
@@ -938,7 +938,7 @@ begin
 	rampf3_inst : entity work.dpram
 		generic map
 		(
-			init_file		=> "",
+			init_file		=> "../../../../../src/platform/galaga/xevious/roms/rampf3.hex",
 			widthad_a		=> 11
 		)
 		port map
