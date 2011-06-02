@@ -86,7 +86,7 @@ architecture SYN of platform is
 	alias clk_sys					: std_logic is clkrst_i.clk(0);
 	alias clk_vid         : std_logic is clkrst_i.clk(1);
 	alias rst_sys         : std_logic is clkrst_i.rst(0);
-  
+
   -- main cpu signals
   signal main_en        : std_logic;
   signal main_a         : std_logic_vector(15 downto 0);
@@ -217,9 +217,15 @@ architecture SYN of platform is
   constant MAIN_CPU : std_logic_vector(cpu_sel'range) := "00";
   constant SUB_CPU  : std_logic_vector(cpu_sel'range) := "01";
   constant SUB2_CPU : std_logic_vector(cpu_sel'range) := "10";
+
+  -- purely for debugging (comment-out CPUs)
+  signal clk_cpu    : std_logic;
   
 begin
 
+  -- for debugging
+  clk_cpu <= '0'; --clk_sys;
+  
 	--cpu_reset <= clkrst_i.arst or game_reset;
   cpu_reset <= rst_sys;
 	
@@ -353,7 +359,7 @@ begin
     main_cpu_inst : entity work.Z80                                                
       port map
       (
-        clk			=> '0', --clk_sys,                                   
+        clk			=> clk_cpu,
         clk_en	=> main_en,
         reset  	=> cpu_reset,                                     
 
@@ -437,7 +443,7 @@ begin
     sub_cpu_inst : entity work.Z80                                                
       port map
       (
-        clk			=> clk_sys,                                   
+        clk			=> clk_cpu,                                   
         clk_en	=> sub_en,
         reset  	=> sub_rst,                                     
 
@@ -515,7 +521,7 @@ begin
     sub2_cpu_inst : entity work.Z80                                                
       port map
       (
-        clk			=> clk_sys,                                   
+        clk			=> clk_cpu,                                   
         clk_en	=> sub2_en,
         reset  	=> sub2_rst,                                     
 
@@ -630,6 +636,7 @@ begin
   begin
     if rst_sys = '1' then
       scroll := (others => '0');
+      graphics_o.bit16 <= (others => (others => '0'));
     elsif rising_edge(clk_sys) then
       scroll := cpu_a(0) & cpu_d_o;
       if main_en = '1' or sub_en = '1' or sub2_en = '1' then
@@ -860,7 +867,7 @@ begin
 	rampf0_inst : entity work.dpram
 		generic map
 		(
-			init_file		=> "",
+			init_file		=> "../../../../../src/platform/galaga/xevious/roms/rampf0.hex",
 			widthad_a		=> 11
 		)
 		port map
@@ -886,7 +893,7 @@ begin
 	rampf1_inst : entity work.dpram
 		generic map
 		(
-			init_file		=> "",
+			init_file		=> "../../../../../src/platform/galaga/xevious/roms/rampf1.hex",
 			widthad_a		=> 11
 		)
 		port map

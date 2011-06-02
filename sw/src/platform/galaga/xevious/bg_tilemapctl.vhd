@@ -30,13 +30,13 @@ architecture TILEMAP_2 of tilemapCtl is
   
 begin
 
-  y_adj <= std_logic_vector(unsigned(y)); -- + unsigned(graphics_i.bit16(3)(10 downto 0)));
+  --y_adj <= std_logic_vector(unsigned(y)); -- + unsigned(graphics_i.bit16(3)(10 downto 0)));
+  y_adj <= std_logic_vector(unsigned(y) + 128+32);
   
 	-- these are constant for a whole line
   ctl_o.map_a(ctl_o.map_a'left downto 11) <= (others => '0');
   ctl_o.map_a(5 downto 0) <= y_adj(8 downto 3);
   ctl_o.tile_a(ctl_o.tile_a'left downto 13) <= (others => '0');
-  ctl_o.tile_a(3 downto 1) <= y_adj(2 downto 0);
 
   -- generate attribute RAM address (same, different memory bank)
   ctl_o.attr_a(ctl_o.map_a'left downto 11) <= (others => '0');
@@ -78,11 +78,28 @@ begin
       end if;
       ctl_o.tile_a(12) <= attr_d_r(0);
       ctl_o.tile_a(11 downto 4) <= ctl_i.map_d(7 downto 0); -- each tile is 16 bytes
-      ctl_o.tile_a(0) <= x_adj(2);
+      -- attr_d(6) = Y FLIP
+      if attr_d_r(6) = '0' then
+        ctl_o.tile_a(3 downto 1) <= y_adj(2 downto 0);
+      else
+        ctl_o.tile_a(3 downto 1) <= not y_adj(2 downto 0);
+      end if;
+      -- attr_d(7) = X FLIP
+      if attr_d_r(7) = '1' then
+        ctl_o.tile_a(0) <= x_adj(2);
+      else
+        ctl_o.tile_a(0) <= not x_adj(2);
+      end if;
       
       if stb = '1' then
         if x_adj(1 downto 0) = "01" then
-          tile_d_r := ctl_i.tile_d(7 downto 0);
+          -- attr_d(7) = X FLIP
+          if attr_d_r(7) = '1' then
+            tile_d_r := ctl_i.tile_d(7 downto 0);
+          else
+            tile_d_r := ctl_i.tile_d(1 downto 0) & ctl_i.tile_d(3 downto 2) &
+                        ctl_i.tile_d(5 downto 4) & ctl_i.tile_d(7 downto 6);
+          end if;
         else
           tile_d_r := "00" & tile_d_r(tile_d_r'left downto 2);
         end if;

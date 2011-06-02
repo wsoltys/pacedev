@@ -66,7 +66,7 @@ begin
       -- - read attribute data
       if stb = '1' then
         ctl_o.map_a(10 downto 6) <= not std_logic_vector(x_adj(7 downto 3));
-        ctl_o.attr_a(10 downto 6) <= not std_logic_vector(x_adj(7 downto 3));
+        ctl_o.attr_a(10 downto 6) <= not std_logic_vector(x_adj(7 downto 3)-1);
       end if;
       
       -- 2nd stage of pipeline
