@@ -30,7 +30,8 @@ architecture TILEMAP_1 of tilemapCtl is
   
 begin
 
-  y_adj <= std_logic_vector(unsigned(y) + unsigned(graphics_i.bit16(3)(10 downto 0)));
+  -- technically, this is actually scroll x
+  y_adj <= std_logic_vector(unsigned(y) + unsigned(graphics_i.bit16(1)(10 downto 0)));
   
 	-- these are constant for a whole line
   ctl_o.map_a(ctl_o.map_a'left downto 11) <= (others => '0');

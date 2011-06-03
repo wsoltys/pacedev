@@ -30,7 +30,8 @@ architecture TILEMAP_2 of tilemapCtl is
   
 begin
 
-  y_adj <= std_logic_vector(unsigned(y) + unsigned(graphics_i.bit16(2)(10 downto 0)));
+  -- technically, this is actually scroll x
+  y_adj <= std_logic_vector(unsigned(y) + unsigned(graphics_i.bit16(0)(10 downto 0)));
   --y_adj <= std_logic_vector(unsigned(y) + 128+32);
   
 	-- these are constant for a whole line

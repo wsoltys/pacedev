@@ -86,7 +86,8 @@ architecture SYN of platform is
 	alias clk_sys					: std_logic is clkrst_i.clk(0);
 	alias clk_vid         : std_logic is clkrst_i.clk(1);
 	alias rst_sys         : std_logic is clkrst_i.rst(0);
-
+  alias rst_vid         : std_logic is clkrst_i.rst(1);
+  
   -- main cpu signals
   signal main_en        : std_logic;
   signal main_a         : std_logic_vector(15 downto 0);
@@ -408,9 +409,9 @@ begin
             if mainrom_cs = '1' then
               -- patch out ROM tests for now
               case main_a is
-                -- 20 15 (jr nz,$278)
-                when X"0261" | X"0262" =>
-                  main_d_i <= X"00";  -- NOP
+--                -- 20 15 (jr nz,$278)
+--                when X"0261" | X"0262" =>
+--                  main_d_i <= X"00";  -- NOP
                 when others =>
                   main_d_i <= mainrom_d_o;
               end case;
@@ -495,7 +496,7 @@ begin
             else
               sub_d_i <= mem_d_o;
             end if;
-          else
+          elsif sub_iord = '1' then
             sub_d_i <= io_d_o;
           end if;
         end if;
@@ -543,7 +544,6 @@ begin
     sub2_intreq <= '0';
     sub2_intvec <= (others => '0');
     -- nmi enable via bosco_latch
-    sub2_nmireq <= '0';
     sub2_nmi <= sub2_nmireq and sub2_nmiena;
     
     sub2_rom_inst : entity work.sprom
@@ -574,13 +574,61 @@ begin
             else
               sub2_d_i <= mem_d_o;
             end if;
-          else
+          elsif sub2_iord = '1' then
             sub2_d_i <= io_d_o;
           end if;
         end if;
       end if;
     end process;
 
+    BLK_SUB2_NMI : block
+    
+      signal scanline_irq : std_logic := '0';
+
+    begin
+      -- NMI triggered off scanlines 64 & 192
+      process (clk_vid, rst_vid)
+      begin
+        if rst_vid = '1' then
+          scanline_irq <= '0';
+        elsif rising_edge(clk_vid) then
+          if graphics_i.y = std_logic_vector(to_unsigned(64, graphics_i.y'length)) or 
+              graphics_i.y = std_logic_vector(to_unsigned(192, graphics_i.y'length)) then
+            scanline_irq <= '1';
+          else
+            scanline_irq <= '0';
+          end if;
+        end if;
+      end process;
+      
+      -- NMI line pulse
+      process (clk_sys, rst_sys)
+        variable irq_r  : std_logic_vector(3 downto 0) := (others => '0');
+        alias irq_prev  : std_logic is irq_r(irq_r'left);
+        alias irq_um    : std_logic is irq_r(irq_r'left-1);
+        subtype nmi_cnt_t is integer range 0 to 23*16;
+        variable nmi_cnt : nmi_cnt_t := 0;
+      begin
+        if rst_sys = '1' then
+          irq_r := (others => '0');
+          sub2_nmireq <= '0';
+        elsif rising_edge(clk_sys) then
+          irq_r := irq_r(irq_r'left-1 downto 0) & scanline_irq;
+        end if;
+        -- catch rising edge
+        if irq_prev = '0' and irq_um = '1' then
+          nmi_cnt := nmi_cnt_t'high;
+        end if;
+        if nmi_cnt > 0 then
+          sub2_nmireq <= '1';
+          nmi_cnt := nmi_cnt - 1;
+        else
+          sub2_nmireq <= '0';
+        end if;
+      end process;
+
+    end block BLK_SUB2_NMI;
+    
   end generate GEN_SUB2_CPU;
 
   -- bosco dipswitches
