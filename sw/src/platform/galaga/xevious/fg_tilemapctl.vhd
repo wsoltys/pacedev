@@ -56,47 +56,50 @@ begin
 
   begin
 
-  	if rising_edge(clk) and clk_ena = '1' then
+  	if rising_edge(clk) then
+      if clk_ena = '1' then
 
-			-- video is clipped left and right (only 224 wide)
-			x_adj := unsigned(x); -- + (256-PACE_VIDEO_H_SIZE)/2;
-				
-      -- 1st stage of pipeline
-      -- - read tile from tilemap
-      -- - read attribute data
-      if stb = '1' then
-        ctl_o.map_a(10 downto 6) <= not std_logic_vector(x_adj(7 downto 3));
-        ctl_o.attr_a(10 downto 6) <= not std_logic_vector(x_adj(7 downto 3)-1);
-      end if;
-      
-      -- 2nd stage of pipeline
-      -- - read tile data from tile ROM
-      if stb = '1' then
-        attr_d_r := ctl_i.attr_d(7 downto 0);
-      end if;
-      ctl_o.tile_a(11) <= '0';
-      ctl_o.tile_a(10 downto 3) <= ctl_i.map_d(7 downto 0); -- each tile is 8 bytes
-
-      if stb = '1' then
-        if x_adj(2 downto 0) = "001" then
-          tile_d_r := ctl_i.tile_d(7 downto 0);
-        else
-          tile_d_r := '0' & tile_d_r(tile_d_r'left downto 1);
+        -- video is clipped left and right (only 224 wide)
+        x_adj := unsigned(x); -- + (256-PACE_VIDEO_H_SIZE)/2;
+          
+        -- 1st stage of pipeline
+        -- - read tile from tilemap
+        -- - read attribute data
+        if stb = '1' then
+          ctl_o.map_a(10 downto 6) <= not std_logic_vector(x_adj(7 downto 3));
+          ctl_o.attr_a(10 downto 6) <= not std_logic_vector(x_adj(7 downto 3));
         end if;
-      end if;
-      pel := tile_d_r(0);
-      
-      -- extract R,G,B from colour palette
-      attr_i := attr_d_r(1 downto 0) & attr_d_r(5 downto 2);
-      pal_i := to_integer(unsigned(attr_i));
-      pal_entry := pal(pal_i);
-      ctl_o.rgb.r <= pal_entry(0) & "0000";
-      ctl_o.rgb.g <= pal_entry(1) & "0000";
-      ctl_o.rgb.b <= pal_entry(2) & "0000";
-      ctl_o.set <= pel;
-      
-		end if;				
+        
+        -- 2nd stage of pipeline
+        -- - read tile data from tile ROM
+        if stb = '1' then
+          if x_adj(2 downto 0) = "010" then
+            attr_d_r := ctl_i.attr_d(7 downto 0);
+          end if;
+        end if;
+        ctl_o.tile_a(11) <= '0';
+        ctl_o.tile_a(10 downto 3) <= ctl_i.map_d(7 downto 0); -- each tile is 8 bytes
 
+        if stb = '1' then
+          if x_adj(2 downto 0) = "010" then
+            tile_d_r := ctl_i.tile_d(7 downto 0);
+          else
+            tile_d_r := '0' & tile_d_r(tile_d_r'left downto 1);
+          end if;
+        end if;
+        pel := tile_d_r(0);
+        
+        -- extract R,G,B from colour palette
+        attr_i := attr_d_r(1 downto 0) & attr_d_r(5 downto 2);
+        pal_i := to_integer(unsigned(attr_i));
+        pal_entry := pal(pal_i);
+        ctl_o.rgb.r <= pal_entry(0) & "0000";
+        ctl_o.rgb.g <= pal_entry(1) & "0000";
+        ctl_o.rgb.b <= pal_entry(2) & "0000";
+        ctl_o.set <= pel;
+
+      end if; -- clk_ena
+		end if;
   end process;
 
 end TILEMAP_1;

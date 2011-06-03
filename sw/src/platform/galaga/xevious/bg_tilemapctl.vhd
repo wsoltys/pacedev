@@ -30,8 +30,8 @@ architecture TILEMAP_2 of tilemapCtl is
   
 begin
 
-  --y_adj <= std_logic_vector(unsigned(y)); -- + unsigned(graphics_i.bit16(3)(10 downto 0)));
-  y_adj <= std_logic_vector(unsigned(y) + 128+32);
+  y_adj <= std_logic_vector(unsigned(y) + unsigned(graphics_i.bit16(2)(10 downto 0)));
+  --y_adj <= std_logic_vector(unsigned(y) + 128+32);
   
 	-- these are constant for a whole line
   ctl_o.map_a(ctl_o.map_a'left downto 11) <= (others => '0');
@@ -72,7 +72,7 @@ begin
       -- 2nd stage of pipeline
       -- - read tile data from tile ROM
       if stb = '1' then
-        if x_adj(2 downto 0) = "001" then
+        if x_adj(2 downto 0) = "010" then
           attr_d_r := ctl_i.attr_d(7 downto 0);
         end if;
       end if;

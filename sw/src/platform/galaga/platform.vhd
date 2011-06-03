@@ -224,7 +224,7 @@ architecture SYN of platform is
 begin
 
   -- for debugging
-  clk_cpu <= '0'; --clk_sys;
+  clk_cpu <= clk_sys;
   
 	--cpu_reset <= clkrst_i.arst or game_reset;
   cpu_reset <= rst_sys;
