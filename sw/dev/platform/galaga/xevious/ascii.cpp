@@ -30,14 +30,22 @@ int main (int argc, char *argv[])
   fread (rom, 16*1024, 1, fp);
   fclose (fp);
 
-  find_str ("WA", 16*124);
-  
   for (int i=0; i<16*1024; i++)
+  {
+  	//rom[i] ^= 0xFF;
+  	
     if (rom[i] < 10)
       rom[i] += '0';
-    else
-      rom[i] += 'A' - 10;
-      
+    else if (rom[i] < 0x24)
+      rom[i] += -10 + 'A';
+    else if (rom[i] == 0x24)
+    	rom[i] = ' ';
+   	else if (rom[i] < 0x50)
+   		rom[i] += -0x36 + 'a';
+   	else
+   		rom[i] = '.';
+	}
+	      
   fp = fopen ("main.asc", "wb");
   fwrite (rom, 16*1024, 1, fp);
   fclose (fp);

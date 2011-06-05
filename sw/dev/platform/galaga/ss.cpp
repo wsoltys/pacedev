@@ -167,6 +167,7 @@ void main (int argc, char *argv[])
 	fread (mem, 64*1024, 1, fp);
 	fclose (fp);
 
+#if 0
 	// read main roms
 	fp = fopen (SUBDIR MAIN_ROM1_NAME, "rb");
 	if (!fp)
@@ -209,9 +210,8 @@ void main (int argc, char *argv[])
 			cksum += mem[b*4*1024+a];
 		printf ("cksum(%d)=$%02X\n", b, cksum);
 	}
+#endif
 	
-	exit (0);
-			
   // write vram, bgram
   fp = fopen (SUBDIR "vram.bin", "wb");
   fwrite (&mem[VRAM_BASE], 0x400, 1, fp);

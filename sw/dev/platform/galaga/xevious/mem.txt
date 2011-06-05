@@ -3,6 +3,10 @@ xevious memory locations
 
 8016-8017   DSWA, DSWB
 
+8024-8026		High Score
+
+8510-855F		High score table
+
 8571				SUB2 ROM checksum
 8572				SUB ROM[$0409] ($00)
 8573				SUB ROM[$15FB] ($00)
