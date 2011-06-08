@@ -38,6 +38,7 @@ entity namco_51xx is
   -- cpu interface
   process (clk, rst)
     variable irq_n_r  : std_logic := '0';
+    variable mode     : integer range 0 to 1 := 0;
     variable cnt      : integer range 0 to 2 := 0;
   begin
     if rst = '1' then
@@ -51,27 +52,51 @@ entity namco_51xx is
           -- latch read on leading-edge IRQn
           if irq_n = '0' and k(3) = '1' then
             -- read
-            case cmd is
+            case mode is
               -- switch mode
-              when "101" =>
+              when 0 =>
                 case cnt is
                   when 0 =>
                     o <= X"FF";
-                    cnt := 1;
                   when 1 =>
                     o <= X"FF";
-                    cnt := 2;
                   when others =>
                     o <= X"00";
-                    cnt := 0;
+                end case;
+              -- credits mode
+              when 1 =>
+                case cnt is
+                  when 0 =>
+                    -- credits(BCD)
+                    o <= X"00";
+                  when 1 =>
+                    -- JOY
+                    o <= X"00";
+                  when 2 =>
+                    -- JOY
+                    o <= X"00";
                 end case;
               when others =>
-                o <= (others => '0');
+                null;
             end case;
+            if cnt = cnt'high then
+              cnt := 0;
+            else
+              cnt := cnt + 1;
+            end if;
           elsif irq_n = '1' and k(3) = '0' then
             -- latch write on rising-edge IRQn
             cmd <= k(2 downto 0);
-            cnt := 0;
+            case k(2 downto 0) is
+              when "010" =>
+                mode := 1;
+                cnt := 0;
+              when "101" =>
+                mode := 0;
+                cnt := 0;
+              when others =>
+                null;
+            end case;
           end if; -- irq_n and k(3)
         end if; -- irq_n_r /= irq_n
         irq_n_r := irq_n;
