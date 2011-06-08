@@ -1,12 +1,19 @@
 xevious memory locations
 ========================
 
+800E				BG SCROLL Y
 8016-8017   DSWA, DSWB
+8018				Coins/credit
 
 8021				Current player (0/1/2)?
 8022				Demo/Attract?
 8023				Demo/Attract?
 8024-8026		High Score
+8029				Credits
+
+8182				Current player score?
+81BE-81C2		High?Score??
+81C3				Number of players?
 
 8510-855F		High score table
 
