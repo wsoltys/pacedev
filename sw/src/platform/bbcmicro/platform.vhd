@@ -18,8 +18,7 @@ entity platform is
   port
   (
     -- clocking and reset
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -91,7 +90,8 @@ architecture SYN of platform is
 
   signal reset_n            : std_logic;
 
-  alias clk_32M             : std_logic is clk_i(0);
+  alias clk_32M             : std_logic is clkrst_i.clk(0);
+  alias rst_32M             : std_logic is clkrst_i.rst(0);
   signal sys_cycle          : std_logic_vector(4 downto 0);
   signal clk_16M_en         : std_logic;
   signal clk_8M_en          : std_logic;
@@ -211,9 +211,9 @@ begin
       severity note;
       
   -- clock generation - phase-aligned
-  process (clk_32M, reset_i)
+  process (clk_32M, rst_32M)
   begin
-    if reset_i = '1' then
+    if rst_32M = '1' then
       sys_cycle <= (others => '0');
       via6522_p2 <= '1';
       via6522_clk4 <= '0';
@@ -263,8 +263,8 @@ begin
   cpu_clk_en <= clk_1M_en;
 
   -- some simple inversions
-  reset_n <= not reset_i;
-  cpu_reset_n <= not (reset_i or game_reset);
+  reset_n <= not rst_32M;
+  cpu_reset_n <= not (rst_32M or game_reset);
   cpu_we <= not cpu_rw_n;
 
   -- main chip-select logic
@@ -496,7 +496,7 @@ begin
     (
       clk					=> clk_32M,
       clk_en			=> clk_4M_en,
-      reset				=> reset_i,
+      reset				=> rst_32M,
                   
       d						=> slow_databus_o,
       ready				=> open,            -- tied to GND on schematic
@@ -669,7 +669,7 @@ begin
       crtc6845_clk <= clk_1M_90_en when clk_rate_r = '0' else clk_2M_180_en;
 
 			-- graphics data serialiser
-			process (clk_32M, reset_i)
+			process (clk_32M, rst_32M)
 				variable video_byte 	: std_logic_vector(7 downto 0) := (others => '0');
         variable v_mode       : std_logic_vector(2 downto 0);
         variable log_clr      : std_logic_vector(3 downto 0);
@@ -678,7 +678,7 @@ begin
 			
         v_mode := clk_rate_r & cpl_r;
 
-				if reset_i = '1' then
+				if rst_32M = '1' then
 					video_byte := (others => '0');
 				elsif rising_edge(clk_32M) then
           
@@ -747,11 +747,11 @@ begin
 
     -- enable output of the video ULA
     -- pipeline delay because of clock phasing
-    process (clk_32M, reset_i)
+    process (clk_32M, rst_32M)
       variable de_r : std_logic_vector(7 downto 0);
       variable ra3_r : std_logic_vector(7 downto 0);
     begin
-      if reset_i = '1' then
+      if rst_32M = '1' then
         de_r := (others => '0');
       elsif rising_edge(clk_32M) then
         de_r := de_r(de_r'left-1 downto 0) & crtc6845_disptmg;
@@ -854,10 +854,10 @@ begin
 
     -- generate 6M clock for SAA5050
 		-- fudge for now - use 2 out of every 3 8M clocks
-    process (clk_32M, reset_i)
+    process (clk_32M, rst_32M)
       variable timing_chain : std_logic_vector(7 downto 0);
     begin
-      if reset_i = '1' then
+      if rst_32M = '1' then
         timing_chain := "10101000";
       elsif rising_edge(clk_32M) then
 				clk_6M_en <= timing_chain(timing_chain'left);
@@ -872,7 +872,7 @@ begin
       port map
       (
         clk				=> clk_32M,
-        reset			=> reset_i,
+        reset			=> rst_32M,
 
         si_i_n		=> '0',               -- tied low on schematic
         si_o			=> open,              -- not used
@@ -957,10 +957,10 @@ begin
 
   GEN_EXTERNAL_RAM : if not BBC_USE_INTERNAL_RAM generate
 
-    process (clk_32M, reset_i)
+    process (clk_32M, rst_32M)
       variable ram_a  : std_logic_vector(14 downto 0);
     begin
-      if reset_i = '1' then
+      if rst_32M = '1' then
         null;
       elsif rising_edge(clk_32M) then
         if sys_cycle = X"4" then

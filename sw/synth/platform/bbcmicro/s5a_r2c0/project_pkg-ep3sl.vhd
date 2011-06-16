@@ -12,29 +12,31 @@ package project_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 	
-  -- Reference clock is 50MHz
+  -- Reference clock is 24MHz
 	constant PACE_HAS_PLL										  : boolean := true;
-  constant PACE_HAS_SRAM                    : boolean := true;
+  --constant PACE_HAS_SRAM                    : boolean := true;
   constant PACE_HAS_FLASH                   : boolean := false;
   constant PACE_HAS_SDRAM                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := false;
 
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
 
-  constant PACE_CLK0_DIVIDE_BY              : natural := 25;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 8;   -- 50*8/25 = 16MHz
-  constant PACE_CLK1_DIVIDE_BY              : natural := 25;
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 8;   -- 50*8/25 = 16MHz
+  constant PACE_CLK0_DIVIDE_BY              : natural := 3;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 2;   -- 24*2/3 = 16MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 3;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 2;   -- 24*2/3 = 16MHz
 
   constant PACE_HAS_OSD                     : boolean := false;
   constant PACE_OSD_XPOS                    : natural := 0;
   constant PACE_OSD_YPOS                    : natural := 0;
 
-  -- DE2-specific constants
-  constant DE2_JAMMA_IS_MAPLE               : boolean := false;
-  constant DE2_JAMMA_IS_NGC                 : boolean := true;
+  -- S5A-specific constants
+  
+  constant S5AR2_EMULATE_SRAM               : boolean := true;
+  constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 15;
+  constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
 
-	constant DE2_LCD_LINE2							      : string := "   BBC MICRO    ";
+  constant PACE_HAS_SRAM                    : boolean := S5AR2_EMULATE_SRAM;
 
 	-- BBC-specific constants
 

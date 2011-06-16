@@ -13,8 +13,7 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -77,7 +76,7 @@ architecture SYN of PACE is
 begin
 
 	-- hook up VGA output
-  video_o.clk <= clk_i(0);
+  video_o.clk <= clkrst_i.clk(0);
 	video_o.rgb.r<= vga_red;
 	video_o.rgb.g <= vga_green;
 	video_o.rgb.b <= vga_blue;
@@ -93,8 +92,8 @@ begin
 		)
 	  port map
 	  (
-	    clk     		=> clk_i(0),
-	    reset   		=> reset_i,
+	    clk     		=> clkrst_i.clk(0),
+	    reset   		=> clkrst_i.rst(0),
 	    ps2clk  		=> inputs_i.ps2_kclk,
 	    ps2data 		=> inputs_i.ps2_kdat,
 			jamma				=> inputs_i.jamma_n,
@@ -111,8 +110,7 @@ begin
     Port Map
     (
       -- clocking and reset
-      clk_i						=> clk_i,
-      reset_i         => reset_i,
+      clkrst_i        => clkrst_i,
 
       -- misc inputs and outputs
       buttons_i       => buttons_i,

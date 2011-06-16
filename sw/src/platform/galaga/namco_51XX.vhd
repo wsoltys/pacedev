@@ -37,12 +37,15 @@ entity namco_51xx is
  
   -- cpu interface
   process (clk, rst)
-    variable irq_n_r  : std_logic := '0';
-    variable mode     : integer range 0 to 1 := 0;
-    variable cnt      : integer range 0 to 2 := 0;
+    variable irq_n_r        : std_logic := '0';
+    variable coincred_mode  : integer range 0 to 6 := 0;
+    variable mode           : integer range 0 to 1 := 0;
+    variable cnt            : integer range 0 to 2 := 0;
   begin
     if rst = '1' then
       irq_n_r := '0';
+      coincred_mode := 0;
+      mode := 0;
       cnt := 0;
       cmd <= (others => '0');
     elsif rising_edge(clk) then
@@ -52,33 +55,30 @@ entity namco_51xx is
           -- latch read on leading-edge IRQn
           if irq_n = '0' and k(3) = '1' then
             -- read
-            case mode is
+            if mode = 0 then
               -- switch mode
-              when 0 =>
-                case cnt is
-                  when 0 =>
-                    o <= X"FF";
-                  when 1 =>
-                    o <= X"FF";
-                  when others =>
-                    o <= X"00";
-                end case;
+              case cnt is
+                when 0 =>
+                  o <= X"FF";
+                when 1 =>
+                  o <= X"FF";
+                when others =>
+                  o <= X"00";
+              end case;
+            else
               -- credits mode
-              when 1 =>
-                case cnt is
-                  when 0 =>
-                    -- credits(BCD)
-                    o <= X"00";
-                  when 1 =>
-                    -- JOY
-                    o <= X"00";
-                  when 2 =>
-                    -- JOY
-                    o <= X"00";
-                end case;
-              when others =>
-                null;
-            end case;
+              case cnt is
+                when 0 =>
+                  -- credits(BCD)
+                  o <= X"00";
+                when 1 =>
+                  -- JOY
+                  o <= X"00";
+                when 2 =>
+                  -- JOY
+                  o <= X"00";
+              end case;
+            end if;
             if cnt = cnt'high then
               cnt := 0;
             else
@@ -86,17 +86,23 @@ entity namco_51xx is
             end if;
           elsif irq_n = '1' and k(3) = '0' then
             -- latch write on rising-edge IRQn
-            cmd <= k(2 downto 0);
-            case k(2 downto 0) is
-              when "010" =>
-                mode := 1;
-                cnt := 0;
-              when "101" =>
-                mode := 0;
-                cnt := 0;
-              when others =>
-                null;
-            end case;
+            if coincred_mode > 0 then
+              coincred_mode := coincred_mode - 1;
+            else
+              cmd <= k(2 downto 0);
+              case k(2 downto 0) is
+                when "001" =>
+                  coincred_mode := 4;
+                when "010" =>
+                  mode := 1;
+                  cnt := 0;
+                when "101" =>
+                  mode := 0;
+                  cnt := 0;
+                when others =>
+                  null;
+              end case;
+            end if; --coincred_mode
           end if; -- irq_n and k(3)
         end if; -- irq_n_r /= irq_n
         irq_n_r := irq_n;
