@@ -22,9 +22,9 @@ package project_pkg is
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
 
   constant PACE_CLK0_DIVIDE_BY              : natural := 3;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 2;   -- 24*2/3 = 16MHz
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 4;   -- 24*4/3 = 32MHz
   constant PACE_CLK1_DIVIDE_BY              : natural := 3;
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 2;   -- 24*2/3 = 16MHz
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 4;   -- 24*4/3 = 32MHz
 
   constant PACE_HAS_OSD                     : boolean := false;
   constant PACE_OSD_XPOS                    : natural := 0;

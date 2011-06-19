@@ -65,6 +65,7 @@ package video_controller_pkg is
     vsync     : std_logic;
     hblank    : std_logic;
     vblank    : std_logic;
+    de        : std_logic;
   end record;
 
   type from_VIDEO_CTL_t is record

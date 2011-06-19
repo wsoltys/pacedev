@@ -6,6 +6,7 @@ use	ieee.numeric_std.all;
 library work;
 use work.pace_pkg.all;
 use work.sdram_pkg.all;
+use work.video_controller_pkg.all;
 use work.kbd_pkg.all;
 use work.platform_pkg.all;
 use work.project_pkg.all;
@@ -37,11 +38,7 @@ entity platform is
     sdram_o         : out to_SDRAM_t;
 
     -- graphics (control)
-    red							: out std_logic_vector(9 downto 0);
-		green						: out std_logic_vector(9 downto 0);
-		blue						: out std_logic_vector(9 downto 0);
-		hsync						: out std_logic;
-		vsync						: out std_logic;
+    video_o         : out to_VIDEO_t;
 
     -- OSD
     --osd_i           : in from_OSD_t;
@@ -898,12 +895,14 @@ begin
 
     -- drive VGA outputs
     -- fudge for now
-    hsync <= not crtc6845_hsync;
-    vsync <= not crtc6845_vsync;
-    red <= video_r when video_de = '1' else (others => '0');
-    green <= video_g when video_de = '1' else (others => '0');
-    blue <= video_b when video_de = '1' else (others => '0');
-
+    video_o.clk <= clk_32M;
+    video_o.hsync <= not crtc6845_hsync;
+    video_o.vsync <= not crtc6845_vsync;
+    video_o.rgb.r <= video_r when video_de = '1' else (others => '0');
+    video_o.rgb.g <= video_g when video_de = '1' else (others => '0');
+    video_o.rgb.b <= video_b when video_de = '1' else (others => '0');
+    video_o.de <= video_de;
+    
   end block BLK_VIDEO;
 
   --

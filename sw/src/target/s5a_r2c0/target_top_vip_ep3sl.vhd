@@ -17,8 +17,8 @@ entity target_top_vip_ep3sl is
 	port
 	(
 		ddr64_odt             : out std_logic_vector(0 downto 0);
-		--ddr64_clk             : inout std_logic_vector(0 downto 0);
-		--ddr64_clk_n           : inout std_logic_vector(0 downto 0);
+		ddr64_clk             : inout std_logic_vector(0 downto 0);
+		ddr64_clk_n           : inout std_logic_vector(0 downto 0);
 		ddr64_cs_n            : out std_logic_vector(0 downto 0);
 		ddr64_cke             : out std_logic_vector(0 downto 0);
 		ddr64_a               : out std_logic_vector(12 downto 0);
@@ -27,8 +27,8 @@ entity target_top_vip_ep3sl is
 		ddr64_cas_n           : out std_logic;
 		ddr64_we_n            : out std_logic;
 		ddr64_dq              : inout std_logic_vector(63 downto 0);
-		--ddr64_dqs             : inout std_logic_vector(7 downto 0);
-		--ddr64_dqsn            : inout std_logic_vector(7 downto 0);
+		ddr64_dqs             : inout std_logic_vector(7 downto 0);
+		ddr64_dqsn            : inout std_logic_vector(7 downto 0);
 		ddr64_dm              : out std_logic_vector(7 downto 0);
 		ddr64_reset_n         : out std_logic;
 
@@ -133,35 +133,50 @@ end entity target_top_vip_ep3sl;
 
 architecture SYN of target_top_vip_ep3sl is
 
+  signal init           : std_logic := '0';
+  alias reset           : std_logic is init;
+  signal reset_n        : std_logic := '1';
+  
+  signal clk_65M        : std_logic;
+  signal clk_120M       : std_logic;
+
+  signal vdo_idck_s     : std_logic;
+  signal vdo_red_s      : std_logic_vector(7 downto 0);
+  signal vdo_green_s    : std_logic_vector(7 downto 0);
+  signal vdo_blue_s     : std_logic_vector(7 downto 0);
+  signal vdo_hsync_s    : std_logic;
+  signal vdo_vsync_s    : std_logic;
+  signal vdo_de_s       : std_logic;
+  
 begin
 
   target_top_ep3sl_inst : entity work.target_top_ep3sl
   	port map
   	(
-  		ddr64_odt           => ddr64_odt,    
---  		ddr64_clk         => ddr64_clk,  
---  		ddr64_clk_n       => ddr64_clk_n,
-  		ddr64_cs_n          => ddr64_cs_n,   
-  		ddr64_cke           => ddr64_cke,    
-  		ddr64_a             => ddr64_a,      
-  		ddr64_ba            => ddr64_ba,     
-  		ddr64_ras_n         => ddr64_ras_n,  
-  		ddr64_cas_n         => ddr64_cas_n,  
-  		ddr64_we_n          => ddr64_we_n,   
-  		ddr64_dq            => ddr64_dq,     
---  		ddr64_dqs         => ddr64_dqs,  
---  		ddr64_dqsn        => ddr64_dqsn, 
-  		ddr64_dm            => ddr64_dm,     
-  		ddr64_reset_n       => ddr64_reset_n,
+--  		ddr64_odt           => ddr64_odt,    
+----  		ddr64_clk         => ddr64_clk,  
+----  		ddr64_clk_n       => ddr64_clk_n,
+--  		ddr64_cs_n          => ddr64_cs_n,   
+--  		ddr64_cke           => ddr64_cke,    
+--  		ddr64_a             => ddr64_a,      
+--  		ddr64_ba            => ddr64_ba,     
+--  		ddr64_ras_n         => ddr64_ras_n,  
+--  		ddr64_cas_n         => ddr64_cas_n,  
+--  		ddr64_we_n          => ddr64_we_n,   
+--  		ddr64_dq            => ddr64_dq,     
+----  		ddr64_dqs         => ddr64_dqs,  
+----  		ddr64_dqsn        => ddr64_dqsn, 
+--  		ddr64_dm            => ddr64_dm,     
+--  		ddr64_reset_n       => ddr64_reset_n,
   
       -- DVI output, 1V5 I/O 1 pix/clk, 24-bit mode
-  		vdo_red			        => vdo_red,		
-  		vdo_green		        => vdo_green,	
-  		vdo_blue		        => vdo_blue,	  
-  		vdo_idck		        => vdo_idck,	  
-  		vdo_hsync		        => vdo_hsync,	
-  		vdo_vsync		        => vdo_vsync,	
-  		vdo_de			        => vdo_de,		  
+  		vdo_red			        => vdo_red_s,		
+  		vdo_green		        => vdo_green_s,	
+  		vdo_blue		        => vdo_blue_s,	  
+  		vdo_idck		        => vdo_idck_s,	  
+  		vdo_hsync		        => vdo_hsync_s,	
+  		vdo_vsync		        => vdo_vsync_s,	
+  		vdo_de			        => vdo_de_s,		  
   
       -- DVI input, 1 pix/clk, 24-bit mode
   		vdi_odck			      => vdi_odck,		  
@@ -250,5 +265,92 @@ begin
   
 --      ddr_clk			        => ddr_clk
   	);
+
+	reset_gen : process (clk24_d)
+		variable reset_cnt : integer := 999999;
+	begin
+		if rising_edge(clk24_d) then
+			if reset_cnt > 0 then
+				init <= '1';
+				reset_cnt := reset_cnt - 1;
+			else
+				init <= '0';
+			end if;
+		end if;
+	end process reset_gen;
+
+  reset <= init;
+  reset_n <= not init;
+  
+  vip_pll_inst : entity work.vip_pll
+    port map
+    (
+      inclk0		=> clk24_d,
+      c0		    => clk_120M,
+      c1		    => clk_65M,
+      c2		    => vdo_idck
+    );
+
+  vip_1024x768_inst : entity work.vip_1024x768
+    port map
+    (
+      clk_24M                                         => clk24_c,
+      vip_clk                                         => clk_120M,
+      reset_n                                         => reset_n,
+
+      altmemddr_0_aux_full_rate_clk_out               => open,
+      altmemddr_0_aux_half_rate_clk_out               => open,
+      altmemddr_0_phy_clk_out                         => open,
+
+      vid_clk_to_the_alt_vip_cti_0                    => vdo_idck_s,
+      vid_data_to_the_alt_vip_cti_0(23 downto 16)     => vdo_red_s,
+      vid_data_to_the_alt_vip_cti_0(15 downto 8)      => vdo_green_s,
+      vid_data_to_the_alt_vip_cti_0(7 downto 0)       => vdo_blue_s,
+      vid_datavalid_to_the_alt_vip_cti_0              => vdo_de_s,
+      vid_f_to_the_alt_vip_cti_0                      => '0',
+      vid_h_sync_to_the_alt_vip_cti_0                 => vdo_hsync_s,
+      vid_locked_to_the_alt_vip_cti_0                 => '1',
+      vid_v_sync_to_the_alt_vip_cti_0                 => vdo_vsync_s,
+
+      -- the_altmemddr_0
+      aux_scan_clk_from_the_altmemddr_0               => open,
+      aux_scan_clk_reset_n_from_the_altmemddr_0       => open,
+      dll_reference_clk_from_the_altmemddr_0          => open,
+      dqs_delay_ctrl_export_from_the_altmemddr_0      => open,
+      global_reset_n_to_the_altmemddr_0               => reset_n,
+      local_init_done_from_the_altmemddr_0            => open,
+      local_refresh_ack_from_the_altmemddr_0          => open,
+      local_wdata_req_from_the_altmemddr_0            => open,
+      mem_addr_from_the_altmemddr_0                   => ddr64_a,
+      mem_ba_from_the_altmemddr_0                     => ddr64_ba,
+      mem_cas_n_from_the_altmemddr_0                  => ddr64_cas_n,
+      mem_cke_from_the_altmemddr_0                    => ddr64_cke(0),
+      mem_clk_n_to_and_from_the_altmemddr_0           => ddr64_clk_n(0),
+      mem_clk_to_and_from_the_altmemddr_0             => ddr64_clk(0),
+      mem_cs_n_from_the_altmemddr_0                   => ddr64_cs_n(0),
+      mem_dm_from_the_altmemddr_0                     => ddr64_dm,
+      mem_dq_to_and_from_the_altmemddr_0              => ddr64_dq,
+      mem_dqs_to_and_from_the_altmemddr_0             => ddr64_dqs,
+      mem_dqsn_to_and_from_the_altmemddr_0            => ddr64_dqsn,
+      mem_odt_from_the_altmemddr_0                    => ddr64_odt(0),
+      mem_ras_n_from_the_altmemddr_0                  => ddr64_ras_n,
+      mem_reset_n_from_the_altmemddr_0                => ddr64_reset_n,
+      mem_we_n_from_the_altmemddr_0                   => ddr64_we_n,
+      oct_ctl_rs_value_to_the_altmemddr_0             => (others =>'0'),
+      oct_ctl_rt_value_to_the_altmemddr_0             => (others =>'0'),
+      reset_phy_clk_n_from_the_altmemddr_0            => open,
+      
+      underflow_from_the_alt_vip_itc_0                => open,
+      vid_data_from_the_alt_vip_itc_0(23 downto 16)   => vdo_red,
+      vid_data_from_the_alt_vip_itc_0(15 downto 8)    => vdo_green,
+      vid_data_from_the_alt_vip_itc_0(7 downto 0)     => vdo_blue,
+      vid_datavalid_from_the_alt_vip_itc_0            => vdo_de,
+      vid_f_from_the_alt_vip_itc_0                    => open,
+      vid_h_from_the_alt_vip_itc_0                    => open,
+      vid_h_sync_from_the_alt_vip_itc_0               => vdo_hsync,
+      vid_v_from_the_alt_vip_itc_0                    => open,
+      vid_v_sync_from_the_alt_vip_itc_0               => vdo_vsync,
+      vid_clk_to_the_alt_vip_itc_0                    => clk_65M
+  );
   
 end;

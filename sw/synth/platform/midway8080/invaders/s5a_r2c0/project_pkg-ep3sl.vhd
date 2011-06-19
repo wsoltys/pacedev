@@ -34,13 +34,13 @@ package project_pkg is
 	--constant PACE_VIDEO_H_SCALE       	      : integer := 1;
 	--constant PACE_VIDEO_V_SCALE       	      : integer := 1;
 
-  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
-  constant PACE_CLK0_DIVIDE_BY              : natural := 1;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 1;   -- 24*1/1 = 24MHz
-  constant PACE_CLK1_DIVIDE_BY              : natural := 3;
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 5;  	-- 24*5/3 = 40MHz
-  constant PACE_VIDEO_H_SCALE       	      : integer := 2;
-  constant PACE_VIDEO_V_SCALE       	      : integer := 2;
+--  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
+--  constant PACE_CLK0_DIVIDE_BY              : natural := 1;
+--  constant PACE_CLK0_MULTIPLY_BY            : natural := 1;   -- 24*1/1 = 24MHz
+--  constant PACE_CLK1_DIVIDE_BY              : natural := 3;
+--  constant PACE_CLK1_MULTIPLY_BY            : natural := 5;  	-- 24*5/3 = 40MHz
+--  constant PACE_VIDEO_H_SCALE       	      : integer := 2;
+--  constant PACE_VIDEO_V_SCALE       	      : integer := 2;
 
   --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_CVBS_720x288p_50Hz;
   --constant PACE_CLK0_DIVIDE_BY              : natural := 32;
@@ -57,7 +57,15 @@ package project_pkg is
 --  constant PACE_CLK1_MULTIPLY_BY            : natural := 48;  	  -- 24.576*48/11 = 107.24MHz
 --  constant PACE_VIDEO_H_SCALE       	      : integer := 2;
 --  constant PACE_VIDEO_V_SCALE       	      : integer := 2;
---
+
+  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1024x768_60Hz;
+  constant PACE_CLK0_DIVIDE_BY              : natural := 3;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 5;       -- 24*5/3 = 40MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 24;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 65;  	  -- 24*65/24 = 65MHz
+  constant PACE_VIDEO_H_SCALE       	      : integer := 2;
+  constant PACE_VIDEO_V_SCALE       	      : integer := 2;
+
   --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
   constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
   

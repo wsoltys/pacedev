@@ -65,24 +65,10 @@ architecture SYN of PACE is
   signal to_osd           : to_OSD_t;
   signal from_osd         : from_OSD_t;
 
-	signal vga_red					: std_logic_vector(9 downto 0);
-	signal vga_green				: std_logic_vector(9 downto 0);
-	signal vga_blue					: std_logic_vector(9 downto 0);
-	signal vga_hsync				: std_logic;
-	signal vga_vsync				: std_logic;
-			        
 	signal mapped_inputs		: from_MAPPED_INPUTS_t(0 to PACE_INPUTS_NUM_BYTES-1);
 
 begin
 
-	-- hook up VGA output
-  video_o.clk <= clkrst_i.clk(0);
-	video_o.rgb.r<= vga_red;
-	video_o.rgb.g <= vga_green;
-	video_o.rgb.b <= vga_blue;
-	video_o.hsync <= vga_hsync;
-	video_o.vsync <= vga_vsync;
-	    
 	inputs_inst : entity work.inputs
 		generic map
 		(
@@ -129,11 +115,7 @@ begin
       sdram_o         => sdram_o,
   
       -- graphics (control)
-	    red     				=> vga_red,
-	    green   				=> vga_green,
-	    blue    				=> vga_blue,
-  	  hsync   				=> vga_hsync,
-	    vsync						=> vga_vsync,
+      video_o         => video_o,
 
       -- sound
       audio_i         => audio_i,
