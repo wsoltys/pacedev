@@ -896,8 +896,8 @@ begin
     -- drive VGA outputs
     -- fudge for now
     video_o.clk <= clk_32M;
-    video_o.hsync <= not crtc6845_hsync;
-    video_o.vsync <= not crtc6845_vsync;
+    video_o.hsync <= crtc6845_hsync;
+    video_o.vsync <= crtc6845_vsync;
     video_o.rgb.r <= video_r when video_de = '1' else (others => '0');
     video_o.rgb.g <= video_g when video_de = '1' else (others => '0');
     video_o.rgb.b <= video_b when video_de = '1' else (others => '0');
