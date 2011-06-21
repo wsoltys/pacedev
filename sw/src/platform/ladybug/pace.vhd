@@ -69,8 +69,7 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic_vector(0 to 3);
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -165,7 +164,7 @@ architecture SYN of PACE is
 	
 begin
 
-	reset_n <= not reset_i(0);
+	reset_n <= not clkrst_i.rst(0);
 
 	-- SRAM interface	
 	sram_oe_n <= '0' when (sram_cs_n = '0' and sram_we_n = '1') else '1';
@@ -178,8 +177,8 @@ begin
 		
 	-- map inputs
 	
-	clk_20mhz_s <= clk_i(0);
-	video_o.clk <= clk_i(1);	-- by convention
+	clk_20mhz_s <= clkrst_i.clk(0);
+	video_o.clk <= clkrst_i.clk(1);	-- by convention
 
 	-- all inputs are active LOW except coin chutes
 	coin_left_s <= not inputs(2).d(2);
@@ -197,7 +196,7 @@ begin
 	  port map
 	  (
 	    clk     				=> clk_20mhz_s,
-	    reset   				=> reset_i(0),
+	    reset   				=> clkrst_i.rst(0),
 	    ps2clk  				=> inputs_i.ps2_kclk,
 	    ps2data 				=> inputs_i.ps2_kdat,
 			jamma						=> inputs_i.jamma_n,

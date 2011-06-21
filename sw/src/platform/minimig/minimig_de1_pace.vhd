@@ -490,41 +490,41 @@ begin
       reset_out	    => sdreset
     );
 
-  spihost_inst : spihost
-    port map
-    (
-      data_rd       => zdataout,
-      host_clk      => c_28m,
-      memwait       => zena_o,
-      host_reset    => host_reset,
-      sd_di         => sd_dat,
-      di_floppy     => do_floppy,
-      di_user       => do_user,
-      sw            => key(3 downto 0),
-      lin(15 downto 2) => ldata,
-      lin(1 downto 0) => (others => '0'),
-      rin2(15 downto 2) => rdata,
-      rin2(1 downto 0) => (others => '0'),
-      data_wr       => zdatawr,
-      addr          => zaddr,
-      mem_wr        => zwr,
-      sd_cs         => spi_cs,
-      sd_clk        => sd_clk,
-      sd_do         => sd_cmd,
-      uart_txd      => uart_txd,
-      do_user       => user,
-      do_floppy     => floppy,
-      hex0          => hex0,
-      hex1          => hex1,
-      hex2          => hex2,
-      hex3          => hex3,
-      ledr          => ledr,
-      links         => links,
-      rechts        => rechts,
-      romled        => rl,
-      enaled        => el,
-      zstate        => zstate
-    );
+--  spihost_inst : spihost
+--    port map
+--    (
+--      data_rd       => zdataout,
+--      host_clk      => c_28m,
+--      memwait       => zena_o,
+--      host_reset    => host_reset,
+--      sd_di         => sd_dat,
+--      di_floppy     => do_floppy,
+--      di_user       => do_user,
+--      sw            => key(3 downto 0),
+--      lin(15 downto 2) => ldata,
+--      lin(1 downto 0) => (others => '0'),
+--      rin2(15 downto 2) => rdata,
+--      rin2(1 downto 0) => (others => '0'),
+--      data_wr       => zdatawr,
+--      addr          => zaddr,
+--      mem_wr        => zwr,
+--      sd_cs         => spi_cs,
+--      sd_clk        => sd_clk,
+--      sd_do         => sd_cmd,
+--      uart_txd      => uart_txd,
+--      do_user       => user,
+--      do_floppy     => floppy,
+--      hex0          => hex0,
+--      hex1          => hex1,
+--      hex2          => hex2,
+--      hex3          => hex3,
+--      ledr          => ledr,
+--      links         => links,
+--      rechts        => rechts,
+--      romled        => rl,
+--      enaled        => el,
+--      zstate        => zstate
+--    );
 
   a_codec_inst : a_codec
     port map

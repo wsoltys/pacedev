@@ -177,6 +177,9 @@ architecture SYN of target_top is
 	-- gamecube controller interface
 	signal gcj					: work.gamecube_pkg.joystate_type;
 	alias gcj_data			: std_logic is bd(4);
+	signal gcj_d_i		  : std_logic;
+	signal gcj_d_o			: std_logic;
+	signal gcj_d_oe	    : std_logic;
 		
 	signal gpio_i				: std_logic_vector(9 downto 2);
 	signal gpio_o				: std_logic_vector(gpio_i'range);
@@ -245,11 +248,15 @@ begin
 		  (
   			clk 				=> clk_24M_misc,
 				reset 			=> reset,
-				oe 					=> open,
-				d 					=> gcj_data,
+				d_i 				=> gcj_d_i,
+        d_o         => gcj_d_o,
+				d_oe 				=> gcj_d_oe,
 				joystate 		=> gcj
 			);
 
+    gcj_d_i <= gcj_data;
+    gcj_data <= gcj_d_o when gcj_d_oe = '1' else 'Z';
+    
 		-- map gamecube controller to jamma inputs
 		jamma_s.coin(1) <= not gcj.l;
 		jamma_s.p(1).start <= not gcj.start;

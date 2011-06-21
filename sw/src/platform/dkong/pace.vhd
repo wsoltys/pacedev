@@ -14,8 +14,7 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic_vector(0 to 3);
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -133,7 +132,7 @@ architecture SYN of PACE is
 	
 begin
 
-	reset_n <= not reset_i(0);
+	reset_n <= not clkrst_i.rst(0);
 
 	-- map inputs
 	
@@ -148,8 +147,8 @@ begin
 		)
 	  port map
 	  (
-	    clk     	      => clk_i(1),
-	    reset   	      => reset_i(1),
+	    clk     	      => clkrst_i.clk(1),
+	    reset   	      => clkrst_i.rst(1),
 	    ps2clk  	      => inputs_i.ps2_kclk,
 	    ps2data 	      => inputs_i.ps2_kdat,
 			jamma			      => inputs_i.jamma_n,
@@ -162,7 +161,7 @@ begin
 		port map
 		(
 			--    FPGA_USE
-			I_CLK_24576M				=> clk_i(1),
+			I_CLK_24576M				=> clkrst_i.clk(1),
 			I_RESETn						=> reset_n,
 
 			--    ROM IF
@@ -245,7 +244,7 @@ begin
 			)
 			port map
 			(
-				clock							=> clk_i(1),
+				clock							=> clkrst_i.clk(1),
 				address						=> rom_addr(13 downto 0),
 				q									=> cpu_rom_data
 			);
@@ -266,7 +265,7 @@ begin
     )
     port map
     (
-      clock							=> clk_i(1),
+      clock							=> clkrst_i.clk(1),
       address						=> vid_rom_addr,
       q									=> vid_rom_data
     );
@@ -285,7 +284,7 @@ begin
     )
     port map
     (
-      clock							=> clk_i(1),
+      clock							=> clkrst_i.clk(1),
       address						=> obj_rom_addr,
       q									=> obj_rom_data
     );
@@ -301,7 +300,7 @@ begin
     )
     port map
     (
-      clock							=> clk_i(1),
+      clock							=> clkrst_i.clk(1),
       address						=> rom_addr(11 downto 0),
       q									=> col_rom_data
     );

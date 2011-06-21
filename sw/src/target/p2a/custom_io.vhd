@@ -20,7 +20,7 @@ entity custom_io is
     nior0_cf          : out std_logic;
     niow0_cf          : out std_logic;
     non_cf            : out std_logic;
-    reset_cf          : out std_logic;
+    nreset_cf         : out std_logic;
     ndmack_cf         : out std_logic;
     dmarq_cf          : in std_logic;
     
@@ -43,7 +43,7 @@ begin
   nior0_cf <= 'Z';
   niow0_cf <= 'Z';
   non_cf <= '1';
-  reset_cf <= 'Z';
+  nreset_cf <= 'Z';
   ndmack_cf <= 'Z';
   
 end architecture SYN;

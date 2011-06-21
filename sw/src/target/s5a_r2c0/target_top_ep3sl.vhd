@@ -140,7 +140,7 @@ architecture SYN of target_top_ep3sl is
   
   signal clk_108M     : std_logic := '0';
   signal vip_clk      : std_logic := '0';
-  signal vdo_clk      : std_logic := '0';
+  signal vdo_clk_x2   : std_logic := '0';
   
   signal pll_locked     : std_logic := '0';
     
@@ -239,14 +239,12 @@ begin
         port map
         (
           inclk0  => clk_24M,
-          c0      => open,
+          c0      => clkrst_i.clk(0),
           c1      => clkrst_i.clk(1),
-          c2      => clkrst_i.clk(0),
+          c2      => vdo_clk_x2,
           locked  => pll_locked
         );
     
-        --vo_idck_n <= '0';
-        
     end generate GEN_PLL;
 	
     GEN_NO_PLL : if not PACE_HAS_PLL generate
@@ -314,7 +312,12 @@ begin
     video_i.reset <= clkrst_i.rst(1);
 
     -- DVI (digital) output
-    vdo_idck <= video_o.clk;
+    GEN_VDO_IDCK : if not S5AR2_DOUBLE_VDO_IDCK generate
+      vdo_idck <= video_o.clk;
+    end generate GEN_VDO_IDCK;
+    GEN_VDO_IDCKx2 : if S5AR2_DOUBLE_VDO_IDCK generate
+      vdo_idck <= vdo_clk_x2;
+    end generate GEN_VDO_IDCKx2;
     vdo_red <= video_o.rgb.r(9 downto 2);
     vdo_green <= video_o.rgb.g(9 downto 2);
     vdo_blue <= video_o.rgb.b(9 downto 2);

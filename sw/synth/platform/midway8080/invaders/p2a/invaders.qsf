@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "9.1 SP2"
+set_global_assignment -name LAST_QUARTUS_VERSION "10.1 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -723,9 +723,7 @@ set_parameter -name CYCLONEII_SAFE_WRITE "\"VERIFIED_SAFE\""
 
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
-set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
 set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
-set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_location_assignment PIN_U20 -to nllb_s
 set_location_assignment PIN_B11 -to nlub_s
 set_location_assignment PIN_V14 -to nulb_s
@@ -754,11 +752,14 @@ set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to nllb_s
 set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to nlub_s
 set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to nulb_s
 set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to nuub_s
+set_global_assignment -name MISC_FILE "D:/Projects/pace/pacedev.net/sw/synth/platform/midway8080/invaders/p2a/invaders.dpf"
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sdram_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/tilemapctl_e.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg_body.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
@@ -803,4 +804,4 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/io/gamecube/g
 set_global_assignment -name VHDL_FILE ../../../../../src/component/io/gamecube/gamecube_joy.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/p2a/custom_io.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/p2a/target_top.vhd
-set_global_assignment -name MISC_FILE "D:/Projects/pace/pacedev.net/sw/synth/platform/midway8080/invaders/p2a/invaders.dpf"
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
