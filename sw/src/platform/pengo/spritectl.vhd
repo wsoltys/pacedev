@@ -36,8 +36,8 @@ architecture SYN of spritectl is
   alias clk       : std_logic is video_ctl.clk;
   alias clk_ena   : std_logic is video_ctl.clk_ena;
 
-  alias palette_bank  : std_logic is graphics_i.bit8_1(1);
-  alias clut_bank     : std_logic is graphics_i.bit8_1(0);
+  alias palette_bank  : std_logic is graphics_i.bit8(0)(1);
+  alias clut_bank     : std_logic is graphics_i.bit8(0)(0);
   
   signal flipData : std_logic_vector(31 downto 0);   -- flipped row data
    

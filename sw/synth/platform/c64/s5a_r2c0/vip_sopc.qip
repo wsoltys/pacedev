@@ -1,0 +1,47 @@
+# vip_clk
+# ddr3_clk
+# alt_vip_itc_0
+set_global_assignment -name TCL_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_output/alt_vip_itc_hw.tcl]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_output/src_hdl/alt_vipitc101_IS2Vid.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_output/src_hdl/alt_vipitc101_IS2Vid_sync_compare.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_output/src_hdl/alt_vipitc101_IS2Vid_calculate_mode.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_output/src_hdl/alt_vipitc101_IS2Vid_control.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_output/src_hdl/alt_vipitc101_IS2Vid_mode_banks.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_output/src_hdl/alt_vipitc101_IS2Vid_statemachine.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_output/src_hdl/alt_vipitc101_common_fifo.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_output/src_hdl/alt_vipitc101_common_generic_count.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_output/src_hdl/alt_vipitc101_common_to_binary.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_output/src_hdl/alt_vipitc101_common_sync.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_output/src_hdl/alt_vipitc101_common_trigger_sync.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_output/src_hdl/alt_vipitc101_common_sync_generation.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_output/src_hdl/alt_vipitc101_common_frame_counter.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_output/src_hdl/alt_vipitc101_common_sample_counter.v]
+set_global_assignment -name SDC_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_output/alt_vipitc101_cvo.sdc]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) alt_vip_itc_0.v]
+# alt_vip_vfb_0
+set_global_assignment -name CUSP_FILE [file join $::quartus(ip_rootpath) altera/frame_buffer/lib/alt_vip_vfb.cpp]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) alt_vip_vfb_0.vhd]
+# altmemddr_0
+# clk_24M
+# alt_vip_scl_0
+set_global_assignment -name CUSP_FILE [file join $::quartus(ip_rootpath) altera/scaler/lib/alt_vip_scl.cpp]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) alt_vip_scl_0.vhd]
+# alt_vip_cti_0
+set_global_assignment -name TCL_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_input/alt_vip_cti_hw.tcl]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_input/src_hdl/alt_vipcti101_Vid2IS.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_input/src_hdl/alt_vipcti101_Vid2IS_control.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_input/src_hdl/alt_vipcti101_Vid2IS_av_st_output.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_input/src_hdl/alt_vipcti101_Vid2IS_resolution_detection.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_input/src_hdl/alt_vipcti101_Vid2IS_write_buffer.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_input/src_hdl/alt_vipcti101_Vid2IS_embedded_sync_extractor.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_input/src_hdl/alt_vipcti101_Vid2IS_sync_polarity_convertor.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_input/src_hdl/alt_vipcti101_common_fifo.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_input/src_hdl/alt_vipcti101_common_sync.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_input/src_hdl/alt_vipcti101_common_sync_generation.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_input/src_hdl/alt_vipcti101_common_frame_counter.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_input/src_hdl/alt_vipcti101_common_sample_counter.v]
+set_global_assignment -name SDC_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_input/alt_vipcti101_cvi.sdc]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) alt_vip_cti_0.v]
+# null
+set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID 485B3986CE0200000130B4F26A7E 
+ 

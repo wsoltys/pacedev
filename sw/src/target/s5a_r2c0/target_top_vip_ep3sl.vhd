@@ -291,7 +291,7 @@ begin
       c2		    => vdo_idck
     );
 
-  vip_1024x768_inst : entity work.vip_1024x768
+  vip_sopc_inst : entity work.vip_sopc
     port map
     (
       clk_24M                                         => clk24_c,

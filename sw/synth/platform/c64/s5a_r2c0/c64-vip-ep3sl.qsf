@@ -18,14 +18,14 @@
 #
 # Quartus II
 # Version 10.1 Build 197 01/19/2011 Service Pack 1 SJ Full Version
-# Date created = 18:31:02  March 10, 2011
+# Date created = 00:53:04  March 11, 2011
 #
 # -------------------------------------------------------------------------- #
 #
 # Notes:
 #
 # 1) The default values for assignments are stored in the file:
-#		invaders-ep3sl_assignment_defaults.qdf
+#		pacman-ep3sl_assignment_defaults.qdf
 #    If this file doesn't exist, see file:
 #		assignment_defaults.qdf
 #
@@ -420,7 +420,7 @@ set_global_assignment -name TIMEQUEST_DO_CCPP_REMOVAL ON
 # Analysis & Synthesis Assignments
 # ================================
 set_global_assignment -name FAMILY "Stratix III"
-set_global_assignment -name TOP_LEVEL_ENTITY target_top_ep3sl
+set_global_assignment -name TOP_LEVEL_ENTITY target_top_vip_ep3sl
 set_global_assignment -name STRATIXII_OPTIMIZATION_TECHNIQUE SPEED
 
 # Fitter Assignments
@@ -772,7 +772,7 @@ set_global_assignment -name STRATIXII_CONFIGURATION_DEVICE AUTO
 # SignalTap II Assignments
 # ========================
 set_global_assignment -name ENABLE_SIGNALTAP ON
-set_global_assignment -name USE_SIGNALTAP_FILE platform.stp
+set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
 
 # Power Estimation Assignments
 # ============================
@@ -811,7 +811,7 @@ set_global_assignment -name EDA_IBIS_MODEL_SELECTOR OFF -section_id eda_board_de
 
 	# Analysis & Synthesis Assignments
 	# ================================
-set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id eda_blast_fpga
+	set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id eda_blast_fpga
 
 # end EDA_TOOL_SETTINGS(eda_blast_fpga)
 # -------------------------------------
@@ -821,11 +821,11 @@ set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id e
 
 	# Assignment Group Assignments
 	# ============================
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddo12_datain_h[11..0] -section_id ddo12
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddo12_datain_l[11..0] -section_id ddo12
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddo12_outclock -section_id ddo12
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddo12_outclocken -section_id ddo12
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddo12_dataout[11..0] -section_id ddo12
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddo12_datain_h[11..0] -section_id ddo12
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddo12_datain_l[11..0] -section_id ddo12
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddo12_outclock -section_id ddo12
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddo12_outclocken -section_id ddo12
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddo12_dataout[11..0] -section_id ddo12
 
 # end ASSIGNMENT_GROUP(ddo12)
 # ---------------------------
@@ -835,48 +835,48 @@ set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddo12_dataout[11..0] -sectio
 
 	# Assignment Group Assignments
 	# ============================
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_address[24..0] -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_write_req -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_read_req -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_burstbegin -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_ready -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_rdata[255..0] -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_rdata_valid -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_wdata[255..0] -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_be[31..0] -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_size[2..0] -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_reset_request_n -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_odt[0..0] -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_clk[1..0] -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_clk_n[1..0] -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_cs_n[0..0] -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_cke[0..0] -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[13..0] -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_ba[2..0] -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_ras_n -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_cas_n -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_we_n -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_dq[63..0] -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_dqs[7..0] -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_dqsn[7..0] -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_dm[7..0] -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_refresh_ack -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_wdata_req -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_init_done -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_reset_phy_clk_n -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_reset_n -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_oct_ctl_rs_value[13..0] -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_oct_ctl_rt_value[13..0] -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_dll_reference_clk -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_dqs_delay_ctrl_export[5..0] -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_aux_scan_clk_reset_n -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_aux_scan_clk -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_global_reset_n -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_pll_ref_clk -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_soft_reset_n -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_phy_clk -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_aux_full_rate_clk -section_id ddr64
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_aux_half_rate_clk -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_address[24..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_write_req -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_read_req -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_burstbegin -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_ready -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_rdata[255..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_rdata_valid -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_wdata[255..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_be[31..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_size[2..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_reset_request_n -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_odt[0..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_clk[1..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_clk_n[1..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_cs_n[0..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_cke[0..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[13..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_ba[2..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_ras_n -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_cas_n -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_we_n -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_dq[63..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_dqs[7..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_dqsn[7..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_dm[7..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_refresh_ack -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_wdata_req -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_init_done -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_reset_phy_clk_n -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_reset_n -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_oct_ctl_rs_value[13..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_oct_ctl_rt_value[13..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_dll_reference_clk -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_dqs_delay_ctrl_export[5..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_aux_scan_clk_reset_n -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_aux_scan_clk -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_global_reset_n -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_pll_ref_clk -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_soft_reset_n -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_phy_clk -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_aux_full_rate_clk -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_aux_half_rate_clk -section_id ddr64
 
 # end ASSIGNMENT_GROUP(ddr64)
 # ---------------------------
@@ -886,30 +886,30 @@ set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_aux_half_rate_clk -sec
 
 	# Assignment Group Assignments
 	# ============================
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_odt[0] -section_id ddr64_ctl
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_cs_n[0] -section_id ddr64_ctl
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_cke[0] -section_id ddr64_ctl
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[13] -section_id ddr64_ctl
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[12] -section_id ddr64_ctl
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[11] -section_id ddr64_ctl
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[10] -section_id ddr64_ctl
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[9] -section_id ddr64_ctl
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[8] -section_id ddr64_ctl
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[7] -section_id ddr64_ctl
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[6] -section_id ddr64_ctl
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[5] -section_id ddr64_ctl
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[4] -section_id ddr64_ctl
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[3] -section_id ddr64_ctl
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[2] -section_id ddr64_ctl
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[1] -section_id ddr64_ctl
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[0] -section_id ddr64_ctl
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_ba[2] -section_id ddr64_ctl
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_ba[1] -section_id ddr64_ctl
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_ba[0] -section_id ddr64_ctl
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_ras_n -section_id ddr64_ctl
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_cas_n -section_id ddr64_ctl
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_we_n -section_id ddr64_ctl
-set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_reset_n -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_odt[0] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_cs_n[0] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_cke[0] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[13] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[12] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[11] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[10] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[9] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[8] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[7] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[6] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[5] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[4] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[3] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[2] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[1] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[0] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_ba[2] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_ba[1] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_ba[0] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_ras_n -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_cas_n -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_we_n -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_reset_n -section_id ddr64_ctl
 
 # end ASSIGNMENT_GROUP(ddr64_ctl)
 # -------------------------------
@@ -917,12 +917,35 @@ set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_reset_n -section_id dd
 # -----------------------
 # start ENTITY(ep3sl_top)
 
+	# Fitter Assignments
+	# ==================
+set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vli_clk -entity ep3sl_top -disable
+set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vli_data[0] -entity ep3sl_top -disable
+set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vli_data[1] -entity ep3sl_top -disable
+set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vli_data[2] -entity ep3sl_top -disable
+set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vli_data[3] -entity ep3sl_top -disable
+
+# end ENTITY(ep3sl_top)
+# ---------------------
+
+# ------------------------
+# start ENTITY(mixer_test)
+
+	# Fitter Assignments
+	# ==================
+set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vsi_clk[1] -entity mixer_test -disable
+
+# end ENTITY(mixer_test)
+# ----------------------
+
+# ------------------------------
+# start ENTITY(target_top_ep3sl)
+
 	# Pin & Location Assignments
 	# ==========================
 
 	# Fitter Assignments
 	# ==================
-
 
 	# Advanced I/O Timing Assignments
 	# ===============================
@@ -945,24 +968,12 @@ set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_reset_n -section_id dd
 	# end DESIGN_PARTITION(Top)
 	# -------------------------
 
-# end ENTITY(ep3sl_top)
-# ---------------------
-
-# ------------------------
-# start ENTITY(mixer_test)
-
-	# Fitter Assignments
-	# ==================
-set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vsi_clk[1] -entity mixer_test -disable
-set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vli_clk -entity ep3sl_top -disable
-set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vli_data[0] -entity ep3sl_top -disable
-set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vli_data[1] -entity ep3sl_top -disable
-set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vli_data[2] -entity ep3sl_top -disable
-set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vli_data[3] -entity ep3sl_top -disable
-
-# end ENTITY(mixer_test)
-# ----------------------
-
+# end ENTITY(target_top_ep3sl)
+# ----------------------------
+set_location_assignment PIN_J27 -to vid_reset_core_n
+set_location_assignment PIN_K27 -to vid_reset_n
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_reset_n
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_reset_core_n
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
@@ -2220,47 +2231,58 @@ set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn
 set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[2]
 set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[1]
 set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[0]
-set_location_assignment PIN_J27 -to vid_reset_core_n
-set_location_assignment PIN_K27 -to vid_reset_n
-set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_reset_n
-set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_reset_core_n
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to vid_reset_n
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to vid_reset_core_n
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sdram_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2c0/target_pkg_ep3sl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE "project_pkg-ep3sl.vhd"
-set_global_assignment -name VHDL_FILE ../../../../src/platform/bbcmicro/platform_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../device/stratixiii/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../device/stratixiii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../device/stratixiii/dpram.vhd
 set_global_assignment -name VHDL_FILE ../../../device/stratixiii/spram.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/clk_div.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/cpu65xx_e.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/cpu65xx_fast.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/video_vicII_656x_e.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/video_vicII_656x_a.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/cpu_6510.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/gen_ram.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/gen_rwram.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/fpga64_hexy.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/fpga64_hexy_vmode.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/fpga64_cone_scanconverter.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/io_ps2_keyboard.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/cia6526.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/fpga64_keyboard_matrix_joyemu.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/roms/rom_c64_kernal.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/roms/rom_c64_basic.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/roms/rom_c64_chargen.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/fpga64_buslogic_roms_fixed.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/fpga64_bustiming.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/unzip/sources/rtl/fpga64_rgbcolor.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/sound/sid/sid_components.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/sound/sid/sid_voice.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/sound/sid/sid6581.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/fpga64_pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_Pack.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_ALU.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_MCode.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_ALU.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/65xx/cpu65xx_e.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/65xx/cpu65xx_fast.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/bbcmicro/inputmapper.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/inputs.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/m6522.vhd
-set_global_assignment -name VERILOG_FILE ../../../../src/component/video/crtc6845s.v
-set_global_assignment -name VHDL_FILE ../../../../src/component/video/cursor.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/video/oc_crtc6845.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/video/saa505x.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/sound/sn76489/sn76489.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/bbcmicro/altera_mem.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/bbcmicro/platform.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/bbcmicro/pace.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/c1541_logic.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/c1541_fifo.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/c1541_core_fifo.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/c64/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2c0/target_top_ep3sl.vhd
-set_global_assignment -name SIGNALTAP_FILE platform.stp
-set_global_assignment -name QIP_FILE vip_1024x768.qip
-set_global_assignment -name MISC_FILE "E:/markm/pace/pacedev.net/sw/synth/platform/bbcmicro/s5a_r2c0/bbcmicro-ep3sl.dpf"
+set_global_assignment -name QIP_FILE vip_pll.qip
+set_global_assignment -name QIP_FILE vip_sopc.qip
+set_global_assignment -name VHDL_FILE vip_sopc.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2c0/target_top_vip_ep3sl.vhd
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

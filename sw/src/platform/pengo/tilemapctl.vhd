@@ -27,8 +27,8 @@ architecture TILEMAP_1 of tilemapCtl is
   alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
   alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
   
-  alias palette_bank  : std_logic is graphics_i.bit8_1(1);
-  alias clut_bank     : std_logic is graphics_i.bit8_1(0);
+  alias palette_bank  : std_logic is graphics_i.bit8(0)(1);
+  alias clut_bank     : std_logic is graphics_i.bit8(0)(0);
 
   constant PIPELINED_BITS   : integer := 3;
   

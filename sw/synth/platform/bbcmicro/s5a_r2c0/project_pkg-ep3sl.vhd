@@ -32,6 +32,8 @@ package project_pkg is
 
   -- S5A-specific constants
   
+  constant S5AR2_DOUBLE_VDO_IDCK            : boolean := true;
+  
   constant S5AR2_EMULATE_SRAM               : boolean := true;
   constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 15;
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;

@@ -16,8 +16,7 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic_vector(0 to 3);
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -100,9 +99,9 @@ architecture SYN of PACE is
     );
   end component c1541_core;
 
-	alias clk_32M								: std_logic is clk_i(0);
-	alias rst_32M               : std_logic is reset_i(0);
-	alias clk_50M								: std_logic is clk_i(1);
+	alias clk_32M								: std_logic is clkrst_i.clk(0);
+	alias rst_32M               : std_logic is clkrst_i.rst(0);
+	alias clk_50M								: std_logic is clkrst_i.clk(1);
 		
 	signal sram_addr_s					: unsigned(16 downto 0);
 	signal sram_cs_n            : std_logic;
@@ -111,6 +110,8 @@ architecture SYN of PACE is
 	signal r_s									: unsigned(7 downto 0);
 	signal g_s									: unsigned(7 downto 0);
 	signal b_s									: unsigned(7 downto 0);
+  signal hsync_s              : std_logic;
+  signal vsync_s              : std_logic;
 	signal leds_s								: unsigned(leds_o'range);
 	signal snd_data_s						: std_logic_vector(17 downto 0);
 
@@ -191,14 +192,62 @@ begin
     c64_romdata_i <= unsigned(flash_i.d(7 downto 0));
     
   end generate GEN_FLASH;
+
+  process (clk_32M, rst_32M)
+    constant HSYNC_DELAY  : integer := 112;
+    constant HACTIVE      : integer := 800;
+    constant VSYNC_DELAY  : integer := 24;
+    constant VACTIVE      : integer := 477;
+    variable hactive_cnt  : integer range 0 to 2047;
+    variable vactive_cnt  : integer range 0 to 2047;
+    variable hsync_r      : std_logic := '0';
+    variable vsync_r      : std_logic := '0';
+  begin
+    if rst_32M = '1' then
+      hactive_cnt := 0;
+      vactive_cnt := 0;
+      hsync_r := '0';
+      vsync_r := '0';
+    elsif rising_edge(clk_32M) then
+      if vsync_r = '0' and vsync_s = '1' then
+        vactive_cnt := 0;
+      end if;
+      if hsync_r = '0' and hsync_s = '1' then
+        vactive_cnt := vactive_cnt + 1;
+        hactive_cnt := 0;
+      else
+        hactive_cnt := hactive_cnt + 1;
+      end if;
+      if vactive_cnt > VSYNC_DELAY and vactive_cnt <= (VSYNC_DELAY + VACTIVE) then
+        video_o.vblank <= '0';
+        if hactive_cnt > HSYNC_DELAY and hactive_cnt <= (HSYNC_DELAY + HACTIVE) then
+          video_o.hblank <= '0';
+        else
+          video_o.hblank <= '1';
+        end if;
+      else
+        video_o.vblank <= '1';
+      end if;
+      hsync_r := hsync_s;
+      vsync_r := vsync_s;
+    end if;
+  end process;
   
-	video_o.clk <= clk_32M; -- for DE2
-	video_o.rgb.r <= std_logic_vector(r_s) & "00";
-	video_o.rgb.g <= std_logic_vector(g_s) & "00";
-	video_o.rgb.b <= std_logic_vector(b_s) & "00";
-	-- not used, need to generate DE manually
-  video_o.hblank <= '0';
-  video_o.vblank <= '0';
+  video_o.clk <= clk_32M; -- for DE2/DVI
+
+  process (clk_32M)
+  begin
+    if rising_edge(clk_32M) then
+      video_o.rgb.r <= std_logic_vector(r_s) & "00";
+      video_o.rgb.g <= std_logic_vector(g_s) & "00";
+      video_o.rgb.b <= std_logic_vector(b_s) & "00";
+      video_o.hsync <= hsync_s;
+      video_o.vsync <= vsync_s;
+      -- not used, need to generate DE manually
+      --video_o.hblank <= '0';
+      --video_o.vblank <= '0';
+    end if;
+  end process;
   
 	leds_o <= std_logic_vector(leds_s(leds_s'left downto 1)) & c1541_activity_led;
 
@@ -259,8 +308,8 @@ begin
 				ramCE					=> sram_cs_n,
 				ramWe					=> sram_we_n,
 				
-				hsync					=> video_o.hsync,
-				vsync					=> video_o.vsync,
+				hsync					=> hsync_s,
+				vsync					=> vsync_s,
 				r 						=> r_s,
 				g 						=> g_s,
 				b 						=> b_s,
