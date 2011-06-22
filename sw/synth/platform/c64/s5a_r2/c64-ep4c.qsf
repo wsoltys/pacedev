@@ -41,7 +41,7 @@ set_global_assignment -name DEVICE EP4CE15F23C6
 set_global_assignment -name TOP_LEVEL_ENTITY target_top_ep4c
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION "9.1 SP2"
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "04:30:36  MAY 19, 2010"
-set_global_assignment -name LAST_QUARTUS_VERSION "9.1 SP2"
+set_global_assignment -name LAST_QUARTUS_VERSION "10.1 SP1"
 set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id eda_blast_fpga
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
@@ -638,10 +638,8 @@ set_location_assignment PIN_P16 -to tp_80
 set_location_assignment PIN_P20 -to tp_84
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to tp_80
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to tp_84
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
 set_global_assignment -name TIMEQUEST_DO_CCPP_REMOVAL ON
-set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_global_assignment -name VHDL_FILE "project_pkg-ep4c.vhd"
 set_global_assignment -name VHDL_FILE ../../midway8080/invaders/s5a_r2/ep4c_pll.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/io/i2c/oci2c/i2c_master_bit_ctrl.vhd
@@ -654,3 +652,5 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/toys/pwm_chas
 set_global_assignment -name VHDL_FILE ../../../../../src/component/toys/led_chaser.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2/target_top_ep4c.vhd
 set_global_assignment -name SIGNALTAP_FILE stp1_ep4c.stp
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
