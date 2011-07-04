@@ -106,6 +106,8 @@ begin
       V_SIZE      => PACE_VIDEO_V_SIZE,
       H_SCALE     => PACE_VIDEO_H_SCALE,
       V_SCALE     => PACE_VIDEO_V_SCALE,
+      H_SYNC_POL  => PACE_VIDEO_H_SYNC_POLARITY,
+      V_SYNC_POL  => PACE_VIDEO_V_SYNC_POLARITY,
       BORDER_RGB  => PACE_VIDEO_BORDER_RGB
     )
     port map

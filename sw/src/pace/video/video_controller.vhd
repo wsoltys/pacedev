@@ -15,6 +15,8 @@ entity pace_video_controller is
 		V_SIZE      : integer;
 		H_SCALE     : integer;
 		V_SCALE     : integer;
+    H_SYNC_POL  : std_logic := '1';
+    V_SYNC_POL  : std_logic := '1';
 		BORDER_RGB  : RGB_t := RGB_BLACK
   );
   port
@@ -266,7 +268,7 @@ begin
       vblank_s <= '1';
       hactive_s <= '0';
       vactive_s <= '0';
-      hsync_s <= '0';
+      hsync_s <= not H_SYNC_POL;
       x_count <= 0;
       y_count <= 0;
     elsif rising_edge(clk) and clk_ena = '1' then
@@ -280,9 +282,9 @@ begin
         else
           y_s <= y_s + 1;
           if y_count = v_sync_start then
-            vsync_s <= '1';
+            vsync_s <= V_SYNC_POL;
           elsif y_count = v_back_porch_start then
-            vsync_s <= '0';
+            vsync_s <= not V_SYNC_POL;
           elsif y_count = v_video_start then
             vblank_s <= '0';  -- for 0 borders
             vactive_s <= '1';
@@ -299,9 +301,9 @@ begin
       else
         x_s <= x_s + 1;
         if x_count = h_sync_start then
-          hsync_s <= '1';
+          hsync_s <= H_SYNC_POL;
         elsif x_count = h_back_porch_start then
-          hsync_s <= '0';
+          hsync_s <= not H_SYNC_POL;
         elsif x_count = h_video_start then
           hblank_s <= '0'; -- for 0 borders
           hactive_s <= '1';
@@ -350,8 +352,8 @@ begin
       variable stb_cnt_v    : std_logic_vector(3 downto 0); -- up to 16x scaling
     begin
       if extended_reset = '1' then
-        hsync_v_r := (others => '0');
-        vsync_v_r := (others => '0');
+        hsync_v_r := (others => not H_SYNC_POL);
+        vsync_v_r := (others => not V_SYNC_POL);
         hactive_v_r <= (others => '0');
         vactive_v_r <= (others => '0');
         hblank_v_r := (others => '0');
@@ -384,8 +386,8 @@ begin
           video_o.rgb.g <= (others => '0') after SIM_DELAY;
           video_o.rgb.b <= (others => '0') after SIM_DELAY;
         end if;
-        video_o.hsync <= not hsync_v after SIM_DELAY;
-        video_o.vsync <= not vsync_v after SIM_DELAY;
+        video_o.hsync <= hsync_v after SIM_DELAY;
+        video_o.vsync <= vsync_v after SIM_DELAY;
         video_o.hblank <= hblank_v after SIM_DELAY;
         video_o.vblank <= vblank_v after SIM_DELAY;
         -- pipelined signals
