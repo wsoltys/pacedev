@@ -2242,6 +2242,21 @@ set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn
 set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[0]
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to vid_reset_n
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to vid_reset_core_n
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to "target_top_ep3sl:target_top_ep3sl_inst|PACE:pace_inst|platform:platform_inst|video_o.clk" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[0] -to "target_top_ep3sl:target_top_ep3sl_inst|PACE:pace_inst|platform:platform_inst|video_o.de" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[1] -to "target_top_ep3sl:target_top_ep3sl_inst|PACE:pace_inst|platform:platform_inst|video_o.hsync" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[2] -to "target_top_ep3sl:target_top_ep3sl_inst|PACE:pace_inst|platform:platform_inst|video_o.vsync" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[0] -to "target_top_ep3sl:target_top_ep3sl_inst|PACE:pace_inst|platform:platform_inst|video_o.de" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[1] -to "target_top_ep3sl:target_top_ep3sl_inst|PACE:pace_inst|platform:platform_inst|video_o.hsync" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[2] -to "target_top_ep3sl:target_top_ep3sl_inst|PACE:pace_inst|platform:platform_inst|video_o.vsync" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=3" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=3" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=46465" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=00000000000000000000000000000000000000" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=38" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=32768" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=10333" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=32768" -section_id auto_signaltap_0
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sdram_pkg.vhd
@@ -2278,21 +2293,6 @@ set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2c0/target_top_ep3sl.vhd
 set_global_assignment -name QIP_FILE vip_pll.qip
 set_global_assignment -name QIP_FILE vip_1024x768.qip
-set_global_assignment -name VHDL_FILE vip_1024x768.vhd
+set_global_assignment -name VHDL_FILE vip_sopc.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2c0/target_top_vip_ep3sl.vhd
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to "target_top_ep3sl:target_top_ep3sl_inst|PACE:pace_inst|platform:platform_inst|video_o.clk" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[0] -to "target_top_ep3sl:target_top_ep3sl_inst|PACE:pace_inst|platform:platform_inst|video_o.de" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[1] -to "target_top_ep3sl:target_top_ep3sl_inst|PACE:pace_inst|platform:platform_inst|video_o.hsync" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[2] -to "target_top_ep3sl:target_top_ep3sl_inst|PACE:pace_inst|platform:platform_inst|video_o.vsync" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[0] -to "target_top_ep3sl:target_top_ep3sl_inst|PACE:pace_inst|platform:platform_inst|video_o.de" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[1] -to "target_top_ep3sl:target_top_ep3sl_inst|PACE:pace_inst|platform:platform_inst|video_o.hsync" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[2] -to "target_top_ep3sl:target_top_ep3sl_inst|PACE:pace_inst|platform:platform_inst|video_o.vsync" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=3" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=3" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=46465" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=00000000000000000000000000000000000000" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=38" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=32768" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=10333" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=32768" -section_id auto_signaltap_0
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

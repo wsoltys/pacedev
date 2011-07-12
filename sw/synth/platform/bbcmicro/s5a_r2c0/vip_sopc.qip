@@ -41,5 +41,5 @@ set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) alte
 set_global_assignment -name SDC_FILE [file join $::quartus(ip_rootpath) altera/clocked_video_input/alt_vipcti101_cvi.sdc]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) alt_vip_cti_0.v]
 # null
-set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID 485D60032F9F00000130A7031F42 
+set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID 485D60032F9F000001311CE0D593 
  

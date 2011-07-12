@@ -2267,3 +2267,4 @@ set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_reset_core_n
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to vid_reset_n
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to vid_reset_core_n
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name QIP_FILE vip_sopc.qip

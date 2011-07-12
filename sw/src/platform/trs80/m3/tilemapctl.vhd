@@ -31,8 +31,8 @@ architecture TILEMAP_1 of tilemapCtl is
   alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
   alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
   
-  alias alt_char  : std_logic is graphics_i.bit8_1(3);
-  alias dbl_width : std_logic is graphics_i.bit8_1(2);
+  alias alt_char  : std_logic is graphics_i.bit8(0)(3);
+  alias dbl_width : std_logic is graphics_i.bit8(0)(2);
 
   signal hblank_r : std_logic_vector(DELAY-1 downto 0) := (others => '0');
   

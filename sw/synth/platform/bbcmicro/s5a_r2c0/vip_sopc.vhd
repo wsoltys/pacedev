@@ -324,17 +324,17 @@ entity alt_vip_vfb_0_read_master_arbitrator is
               -- inputs:
                  signal alt_vip_vfb_0_read_master_address : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
                  signal alt_vip_vfb_0_read_master_burstcount : IN STD_LOGIC_VECTOR (6 DOWNTO 0);
-                 signal alt_vip_vfb_0_read_master_granted_vip_1024x768_burst_1_upstream : IN STD_LOGIC;
-                 signal alt_vip_vfb_0_read_master_qualified_request_vip_1024x768_burst_1_upstream : IN STD_LOGIC;
+                 signal alt_vip_vfb_0_read_master_granted_vip_sopc_burst_1_upstream : IN STD_LOGIC;
+                 signal alt_vip_vfb_0_read_master_qualified_request_vip_sopc_burst_1_upstream : IN STD_LOGIC;
                  signal alt_vip_vfb_0_read_master_read : IN STD_LOGIC;
-                 signal alt_vip_vfb_0_read_master_read_data_valid_vip_1024x768_burst_1_upstream : IN STD_LOGIC;
-                 signal alt_vip_vfb_0_read_master_read_data_valid_vip_1024x768_burst_1_upstream_shift_register : IN STD_LOGIC;
-                 signal alt_vip_vfb_0_read_master_requests_vip_1024x768_burst_1_upstream : IN STD_LOGIC;
+                 signal alt_vip_vfb_0_read_master_read_data_valid_vip_sopc_burst_1_upstream : IN STD_LOGIC;
+                 signal alt_vip_vfb_0_read_master_read_data_valid_vip_sopc_burst_1_upstream_shift_register : IN STD_LOGIC;
+                 signal alt_vip_vfb_0_read_master_requests_vip_sopc_burst_1_upstream : IN STD_LOGIC;
                  signal clk : IN STD_LOGIC;
-                 signal d1_vip_1024x768_burst_1_upstream_end_xfer : IN STD_LOGIC;
+                 signal d1_vip_sopc_burst_1_upstream_end_xfer : IN STD_LOGIC;
                  signal reset_n : IN STD_LOGIC;
-                 signal vip_1024x768_burst_1_upstream_readdata_from_sa : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
-                 signal vip_1024x768_burst_1_upstream_waitrequest_from_sa : IN STD_LOGIC;
+                 signal vip_sopc_burst_1_upstream_readdata_from_sa : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
+                 signal vip_sopc_burst_1_upstream_waitrequest_from_sa : IN STD_LOGIC;
 
               -- outputs:
                  signal alt_vip_vfb_0_read_master_address_to_slave : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
@@ -361,17 +361,17 @@ architecture europa of alt_vip_vfb_0_read_master_arbitrator is
 begin
 
   --r_0 master_run cascaded wait assignment, which is an e_assign
-  r_0 <= Vector_To_Std_Logic(((std_logic_vector'("00000000000000000000000000000001") AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(((alt_vip_vfb_0_read_master_qualified_request_vip_1024x768_burst_1_upstream OR NOT alt_vip_vfb_0_read_master_requests_vip_1024x768_burst_1_upstream)))))) AND (((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR((NOT alt_vip_vfb_0_read_master_qualified_request_vip_1024x768_burst_1_upstream OR NOT (alt_vip_vfb_0_read_master_read))))) OR (((std_logic_vector'("00000000000000000000000000000001") AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(NOT vip_1024x768_burst_1_upstream_waitrequest_from_sa)))) AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR((alt_vip_vfb_0_read_master_read))))))))));
+  r_0 <= Vector_To_Std_Logic(((std_logic_vector'("00000000000000000000000000000001") AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(((alt_vip_vfb_0_read_master_qualified_request_vip_sopc_burst_1_upstream OR NOT alt_vip_vfb_0_read_master_requests_vip_sopc_burst_1_upstream)))))) AND (((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR((NOT alt_vip_vfb_0_read_master_qualified_request_vip_sopc_burst_1_upstream OR NOT (alt_vip_vfb_0_read_master_read))))) OR (((std_logic_vector'("00000000000000000000000000000001") AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(NOT vip_sopc_burst_1_upstream_waitrequest_from_sa)))) AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR((alt_vip_vfb_0_read_master_read))))))))));
   --cascaded wait assignment, which is an e_assign
   alt_vip_vfb_0_read_master_run <= r_0;
   --optimize select-logic by passing only those address bits which matter.
   internal_alt_vip_vfb_0_read_master_address_to_slave <= Std_Logic_Vector'(std_logic_vector'("000") & alt_vip_vfb_0_read_master_address(28 DOWNTO 0));
   --latent slave read data valids which may be flushed, which is an e_mux
-  pre_flush_alt_vip_vfb_0_read_master_readdatavalid <= alt_vip_vfb_0_read_master_read_data_valid_vip_1024x768_burst_1_upstream;
+  pre_flush_alt_vip_vfb_0_read_master_readdatavalid <= alt_vip_vfb_0_read_master_read_data_valid_vip_sopc_burst_1_upstream;
   --latent slave read data valid which is not flushed, which is an e_mux
   alt_vip_vfb_0_read_master_readdatavalid <= Vector_To_Std_Logic((std_logic_vector'("00000000000000000000000000000000") OR (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(pre_flush_alt_vip_vfb_0_read_master_readdatavalid)))));
   --alt_vip_vfb_0/read_master readdata mux, which is an e_mux
-  alt_vip_vfb_0_read_master_readdata <= vip_1024x768_burst_1_upstream_readdata_from_sa;
+  alt_vip_vfb_0_read_master_readdata <= vip_sopc_burst_1_upstream_readdata_from_sa;
   --actual waitrequest port, which is an e_assign
   internal_alt_vip_vfb_0_read_master_waitrequest <= NOT alt_vip_vfb_0_read_master_run;
   --latent max counter, which is an e_assign
@@ -504,15 +504,15 @@ entity alt_vip_vfb_0_write_master_arbitrator is
               -- inputs:
                  signal alt_vip_vfb_0_write_master_address : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
                  signal alt_vip_vfb_0_write_master_burstcount : IN STD_LOGIC_VECTOR (6 DOWNTO 0);
-                 signal alt_vip_vfb_0_write_master_granted_vip_1024x768_burst_0_upstream : IN STD_LOGIC;
-                 signal alt_vip_vfb_0_write_master_qualified_request_vip_1024x768_burst_0_upstream : IN STD_LOGIC;
-                 signal alt_vip_vfb_0_write_master_requests_vip_1024x768_burst_0_upstream : IN STD_LOGIC;
+                 signal alt_vip_vfb_0_write_master_granted_vip_sopc_burst_0_upstream : IN STD_LOGIC;
+                 signal alt_vip_vfb_0_write_master_qualified_request_vip_sopc_burst_0_upstream : IN STD_LOGIC;
+                 signal alt_vip_vfb_0_write_master_requests_vip_sopc_burst_0_upstream : IN STD_LOGIC;
                  signal alt_vip_vfb_0_write_master_write : IN STD_LOGIC;
                  signal alt_vip_vfb_0_write_master_writedata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
                  signal clk : IN STD_LOGIC;
-                 signal d1_vip_1024x768_burst_0_upstream_end_xfer : IN STD_LOGIC;
+                 signal d1_vip_sopc_burst_0_upstream_end_xfer : IN STD_LOGIC;
                  signal reset_n : IN STD_LOGIC;
-                 signal vip_1024x768_burst_0_upstream_waitrequest_from_sa : IN STD_LOGIC;
+                 signal vip_sopc_burst_0_upstream_waitrequest_from_sa : IN STD_LOGIC;
 
               -- outputs:
                  signal alt_vip_vfb_0_write_master_address_to_slave : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
@@ -536,7 +536,7 @@ architecture europa of alt_vip_vfb_0_write_master_arbitrator is
 begin
 
   --r_0 master_run cascaded wait assignment, which is an e_assign
-  r_0 <= Vector_To_Std_Logic((std_logic_vector'("00000000000000000000000000000001") AND (((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR((NOT alt_vip_vfb_0_write_master_qualified_request_vip_1024x768_burst_0_upstream OR NOT (alt_vip_vfb_0_write_master_write))))) OR (((std_logic_vector'("00000000000000000000000000000001") AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(NOT vip_1024x768_burst_0_upstream_waitrequest_from_sa)))) AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR((alt_vip_vfb_0_write_master_write))))))))));
+  r_0 <= Vector_To_Std_Logic((std_logic_vector'("00000000000000000000000000000001") AND (((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR((NOT alt_vip_vfb_0_write_master_qualified_request_vip_sopc_burst_0_upstream OR NOT (alt_vip_vfb_0_write_master_write))))) OR (((std_logic_vector'("00000000000000000000000000000001") AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(NOT vip_sopc_burst_0_upstream_waitrequest_from_sa)))) AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR((alt_vip_vfb_0_write_master_write))))))))));
   --cascaded wait assignment, which is an e_assign
   alt_vip_vfb_0_write_master_run <= r_0;
   --optimize select-logic by passing only those address bits which matter.
@@ -2115,7 +2115,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 
-entity rdv_fifo_for_vip_1024x768_burst_0_downstream_to_altmemddr_0_s1_module is 
+entity rdv_fifo_for_vip_sopc_burst_0_downstream_to_altmemddr_0_s1_module is 
         port (
               -- inputs:
                  signal clear_fifo : IN STD_LOGIC;
@@ -2132,10 +2132,10 @@ entity rdv_fifo_for_vip_1024x768_burst_0_downstream_to_altmemddr_0_s1_module is
                  signal fifo_contains_ones_n : OUT STD_LOGIC;
                  signal full : OUT STD_LOGIC
               );
-end entity rdv_fifo_for_vip_1024x768_burst_0_downstream_to_altmemddr_0_s1_module;
+end entity rdv_fifo_for_vip_sopc_burst_0_downstream_to_altmemddr_0_s1_module;
 
 
-architecture europa of rdv_fifo_for_vip_1024x768_burst_0_downstream_to_altmemddr_0_s1_module is
+architecture europa of rdv_fifo_for_vip_sopc_burst_0_downstream_to_altmemddr_0_s1_module is
                 signal full_0 :  STD_LOGIC;
                 signal full_1 :  STD_LOGIC;
                 signal full_10 :  STD_LOGIC;
@@ -3539,7 +3539,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 
-entity rdv_fifo_for_vip_1024x768_burst_1_downstream_to_altmemddr_0_s1_module is 
+entity rdv_fifo_for_vip_sopc_burst_1_downstream_to_altmemddr_0_s1_module is 
         port (
               -- inputs:
                  signal clear_fifo : IN STD_LOGIC;
@@ -3556,10 +3556,10 @@ entity rdv_fifo_for_vip_1024x768_burst_1_downstream_to_altmemddr_0_s1_module is
                  signal fifo_contains_ones_n : OUT STD_LOGIC;
                  signal full : OUT STD_LOGIC
               );
-end entity rdv_fifo_for_vip_1024x768_burst_1_downstream_to_altmemddr_0_s1_module;
+end entity rdv_fifo_for_vip_sopc_burst_1_downstream_to_altmemddr_0_s1_module;
 
 
-architecture europa of rdv_fifo_for_vip_1024x768_burst_1_downstream_to_altmemddr_0_s1_module is
+architecture europa of rdv_fifo_for_vip_sopc_burst_1_downstream_to_altmemddr_0_s1_module is
                 signal full_0 :  STD_LOGIC;
                 signal full_1 :  STD_LOGIC;
                 signal full_10 :  STD_LOGIC;
@@ -4975,22 +4975,22 @@ entity altmemddr_0_s1_arbitrator is
                  signal altmemddr_0_s1_waitrequest_n : IN STD_LOGIC;
                  signal clk : IN STD_LOGIC;
                  signal reset_n : IN STD_LOGIC;
-                 signal vip_1024x768_burst_0_downstream_address_to_slave : IN STD_LOGIC_VECTOR (28 DOWNTO 0);
-                 signal vip_1024x768_burst_0_downstream_arbitrationshare : IN STD_LOGIC_VECTOR (6 DOWNTO 0);
-                 signal vip_1024x768_burst_0_downstream_burstcount : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
-                 signal vip_1024x768_burst_0_downstream_byteenable : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
-                 signal vip_1024x768_burst_0_downstream_latency_counter : IN STD_LOGIC;
-                 signal vip_1024x768_burst_0_downstream_read : IN STD_LOGIC;
-                 signal vip_1024x768_burst_0_downstream_write : IN STD_LOGIC;
-                 signal vip_1024x768_burst_0_downstream_writedata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
-                 signal vip_1024x768_burst_1_downstream_address_to_slave : IN STD_LOGIC_VECTOR (28 DOWNTO 0);
-                 signal vip_1024x768_burst_1_downstream_arbitrationshare : IN STD_LOGIC_VECTOR (6 DOWNTO 0);
-                 signal vip_1024x768_burst_1_downstream_burstcount : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
-                 signal vip_1024x768_burst_1_downstream_byteenable : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
-                 signal vip_1024x768_burst_1_downstream_latency_counter : IN STD_LOGIC;
-                 signal vip_1024x768_burst_1_downstream_read : IN STD_LOGIC;
-                 signal vip_1024x768_burst_1_downstream_write : IN STD_LOGIC;
-                 signal vip_1024x768_burst_1_downstream_writedata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
+                 signal vip_sopc_burst_0_downstream_address_to_slave : IN STD_LOGIC_VECTOR (28 DOWNTO 0);
+                 signal vip_sopc_burst_0_downstream_arbitrationshare : IN STD_LOGIC_VECTOR (6 DOWNTO 0);
+                 signal vip_sopc_burst_0_downstream_burstcount : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
+                 signal vip_sopc_burst_0_downstream_byteenable : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+                 signal vip_sopc_burst_0_downstream_latency_counter : IN STD_LOGIC;
+                 signal vip_sopc_burst_0_downstream_read : IN STD_LOGIC;
+                 signal vip_sopc_burst_0_downstream_write : IN STD_LOGIC;
+                 signal vip_sopc_burst_0_downstream_writedata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
+                 signal vip_sopc_burst_1_downstream_address_to_slave : IN STD_LOGIC_VECTOR (28 DOWNTO 0);
+                 signal vip_sopc_burst_1_downstream_arbitrationshare : IN STD_LOGIC_VECTOR (6 DOWNTO 0);
+                 signal vip_sopc_burst_1_downstream_burstcount : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
+                 signal vip_sopc_burst_1_downstream_byteenable : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+                 signal vip_sopc_burst_1_downstream_latency_counter : IN STD_LOGIC;
+                 signal vip_sopc_burst_1_downstream_read : IN STD_LOGIC;
+                 signal vip_sopc_burst_1_downstream_write : IN STD_LOGIC;
+                 signal vip_sopc_burst_1_downstream_writedata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
 
               -- outputs:
                  signal altmemddr_0_s1_address : OUT STD_LOGIC_VECTOR (23 DOWNTO 0);
@@ -5004,16 +5004,16 @@ entity altmemddr_0_s1_arbitrator is
                  signal altmemddr_0_s1_write : OUT STD_LOGIC;
                  signal altmemddr_0_s1_writedata : OUT STD_LOGIC_VECTOR (255 DOWNTO 0);
                  signal d1_altmemddr_0_s1_end_xfer : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1 : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_0_downstream_qualified_request_altmemddr_0_s1 : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_0_downstream_read_data_valid_altmemddr_0_s1 : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_0_downstream_read_data_valid_altmemddr_0_s1_shift_register : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_0_downstream_requests_altmemddr_0_s1 : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1 : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_1_downstream_qualified_request_altmemddr_0_s1 : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_1_downstream_read_data_valid_altmemddr_0_s1 : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_1_downstream_read_data_valid_altmemddr_0_s1_shift_register : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_1_downstream_requests_altmemddr_0_s1 : OUT STD_LOGIC
+                 signal vip_sopc_burst_0_downstream_granted_altmemddr_0_s1 : OUT STD_LOGIC;
+                 signal vip_sopc_burst_0_downstream_qualified_request_altmemddr_0_s1 : OUT STD_LOGIC;
+                 signal vip_sopc_burst_0_downstream_read_data_valid_altmemddr_0_s1 : OUT STD_LOGIC;
+                 signal vip_sopc_burst_0_downstream_read_data_valid_altmemddr_0_s1_shift_register : OUT STD_LOGIC;
+                 signal vip_sopc_burst_0_downstream_requests_altmemddr_0_s1 : OUT STD_LOGIC;
+                 signal vip_sopc_burst_1_downstream_granted_altmemddr_0_s1 : OUT STD_LOGIC;
+                 signal vip_sopc_burst_1_downstream_qualified_request_altmemddr_0_s1 : OUT STD_LOGIC;
+                 signal vip_sopc_burst_1_downstream_read_data_valid_altmemddr_0_s1 : OUT STD_LOGIC;
+                 signal vip_sopc_burst_1_downstream_read_data_valid_altmemddr_0_s1_shift_register : OUT STD_LOGIC;
+                 signal vip_sopc_burst_1_downstream_requests_altmemddr_0_s1 : OUT STD_LOGIC
               );
 end entity altmemddr_0_s1_arbitrator;
 
@@ -5038,7 +5038,7 @@ component burstcount_fifo_for_altmemddr_0_s1_module is
                  );
 end component burstcount_fifo_for_altmemddr_0_s1_module;
 
-component rdv_fifo_for_vip_1024x768_burst_0_downstream_to_altmemddr_0_s1_module is 
+component rdv_fifo_for_vip_sopc_burst_0_downstream_to_altmemddr_0_s1_module is 
            port (
                  -- inputs:
                     signal clear_fifo : IN STD_LOGIC;
@@ -5055,9 +5055,9 @@ component rdv_fifo_for_vip_1024x768_burst_0_downstream_to_altmemddr_0_s1_module 
                     signal fifo_contains_ones_n : OUT STD_LOGIC;
                     signal full : OUT STD_LOGIC
                  );
-end component rdv_fifo_for_vip_1024x768_burst_0_downstream_to_altmemddr_0_s1_module;
+end component rdv_fifo_for_vip_sopc_burst_0_downstream_to_altmemddr_0_s1_module;
 
-component rdv_fifo_for_vip_1024x768_burst_1_downstream_to_altmemddr_0_s1_module is 
+component rdv_fifo_for_vip_sopc_burst_1_downstream_to_altmemddr_0_s1_module is 
            port (
                  -- inputs:
                     signal clear_fifo : IN STD_LOGIC;
@@ -5074,7 +5074,7 @@ component rdv_fifo_for_vip_1024x768_burst_1_downstream_to_altmemddr_0_s1_module 
                     signal fifo_contains_ones_n : OUT STD_LOGIC;
                     signal full : OUT STD_LOGIC
                  );
-end component rdv_fifo_for_vip_1024x768_burst_1_downstream_to_altmemddr_0_s1_module;
+end component rdv_fifo_for_vip_sopc_burst_1_downstream_to_altmemddr_0_s1_module;
 
                 signal altmemddr_0_s1_allgrants :  STD_LOGIC;
                 signal altmemddr_0_s1_allow_new_arb_cycle :  STD_LOGIC;
@@ -5126,14 +5126,14 @@ end component rdv_fifo_for_vip_1024x768_burst_1_downstream_to_altmemddr_0_s1_mod
                 signal internal_altmemddr_0_s1_read :  STD_LOGIC;
                 signal internal_altmemddr_0_s1_waitrequest_n_from_sa :  STD_LOGIC;
                 signal internal_altmemddr_0_s1_write :  STD_LOGIC;
-                signal internal_vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1 :  STD_LOGIC;
-                signal internal_vip_1024x768_burst_0_downstream_qualified_request_altmemddr_0_s1 :  STD_LOGIC;
-                signal internal_vip_1024x768_burst_0_downstream_requests_altmemddr_0_s1 :  STD_LOGIC;
-                signal internal_vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1 :  STD_LOGIC;
-                signal internal_vip_1024x768_burst_1_downstream_qualified_request_altmemddr_0_s1 :  STD_LOGIC;
-                signal internal_vip_1024x768_burst_1_downstream_requests_altmemddr_0_s1 :  STD_LOGIC;
-                signal last_cycle_vip_1024x768_burst_0_downstream_granted_slave_altmemddr_0_s1 :  STD_LOGIC;
-                signal last_cycle_vip_1024x768_burst_1_downstream_granted_slave_altmemddr_0_s1 :  STD_LOGIC;
+                signal internal_vip_sopc_burst_0_downstream_granted_altmemddr_0_s1 :  STD_LOGIC;
+                signal internal_vip_sopc_burst_0_downstream_qualified_request_altmemddr_0_s1 :  STD_LOGIC;
+                signal internal_vip_sopc_burst_0_downstream_requests_altmemddr_0_s1 :  STD_LOGIC;
+                signal internal_vip_sopc_burst_1_downstream_granted_altmemddr_0_s1 :  STD_LOGIC;
+                signal internal_vip_sopc_burst_1_downstream_qualified_request_altmemddr_0_s1 :  STD_LOGIC;
+                signal internal_vip_sopc_burst_1_downstream_requests_altmemddr_0_s1 :  STD_LOGIC;
+                signal last_cycle_vip_sopc_burst_0_downstream_granted_slave_altmemddr_0_s1 :  STD_LOGIC;
+                signal last_cycle_vip_sopc_burst_1_downstream_granted_slave_altmemddr_0_s1 :  STD_LOGIC;
                 signal module_input :  STD_LOGIC;
                 signal module_input1 :  STD_LOGIC;
                 signal module_input2 :  STD_LOGIC;
@@ -5144,20 +5144,20 @@ end component rdv_fifo_for_vip_1024x768_burst_1_downstream_to_altmemddr_0_s1_mod
                 signal module_input7 :  STD_LOGIC;
                 signal module_input8 :  STD_LOGIC;
                 signal p0_altmemddr_0_s1_load_fifo :  STD_LOGIC;
-                signal shifted_address_to_altmemddr_0_s1_from_vip_1024x768_burst_0_downstream :  STD_LOGIC_VECTOR (28 DOWNTO 0);
-                signal shifted_address_to_altmemddr_0_s1_from_vip_1024x768_burst_1_downstream :  STD_LOGIC_VECTOR (28 DOWNTO 0);
-                signal vip_1024x768_burst_0_downstream_arbiterlock :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_arbiterlock2 :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_continuerequest :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_rdv_fifo_empty_altmemddr_0_s1 :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_rdv_fifo_output_from_altmemddr_0_s1 :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_saved_grant_altmemddr_0_s1 :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_arbiterlock :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_arbiterlock2 :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_continuerequest :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_rdv_fifo_empty_altmemddr_0_s1 :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_rdv_fifo_output_from_altmemddr_0_s1 :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_saved_grant_altmemddr_0_s1 :  STD_LOGIC;
+                signal shifted_address_to_altmemddr_0_s1_from_vip_sopc_burst_0_downstream :  STD_LOGIC_VECTOR (28 DOWNTO 0);
+                signal shifted_address_to_altmemddr_0_s1_from_vip_sopc_burst_1_downstream :  STD_LOGIC_VECTOR (28 DOWNTO 0);
+                signal vip_sopc_burst_0_downstream_arbiterlock :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_arbiterlock2 :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_continuerequest :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_rdv_fifo_empty_altmemddr_0_s1 :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_rdv_fifo_output_from_altmemddr_0_s1 :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_saved_grant_altmemddr_0_s1 :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_arbiterlock :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_arbiterlock2 :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_continuerequest :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_rdv_fifo_empty_altmemddr_0_s1 :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_rdv_fifo_output_from_altmemddr_0_s1 :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_saved_grant_altmemddr_0_s1 :  STD_LOGIC;
                 signal wait_for_altmemddr_0_s1_counter :  STD_LOGIC;
 
 begin
@@ -5172,20 +5172,20 @@ begin
 
   end process;
 
-  altmemddr_0_s1_begins_xfer <= NOT d1_reasons_to_wait AND ((internal_vip_1024x768_burst_0_downstream_qualified_request_altmemddr_0_s1 OR internal_vip_1024x768_burst_1_downstream_qualified_request_altmemddr_0_s1));
+  altmemddr_0_s1_begins_xfer <= NOT d1_reasons_to_wait AND ((internal_vip_sopc_burst_0_downstream_qualified_request_altmemddr_0_s1 OR internal_vip_sopc_burst_1_downstream_qualified_request_altmemddr_0_s1));
   --assign altmemddr_0_s1_readdata_from_sa = altmemddr_0_s1_readdata so that symbol knows where to group signals which may go to master only, which is an e_assign
   altmemddr_0_s1_readdata_from_sa <= altmemddr_0_s1_readdata;
-  internal_vip_1024x768_burst_0_downstream_requests_altmemddr_0_s1 <= Vector_To_Std_Logic(((std_logic_vector'("00000000000000000000000000000001")) AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(((vip_1024x768_burst_0_downstream_read OR vip_1024x768_burst_0_downstream_write)))))));
+  internal_vip_sopc_burst_0_downstream_requests_altmemddr_0_s1 <= Vector_To_Std_Logic(((std_logic_vector'("00000000000000000000000000000001")) AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(((vip_sopc_burst_0_downstream_read OR vip_sopc_burst_0_downstream_write)))))));
   --assign altmemddr_0_s1_waitrequest_n_from_sa = altmemddr_0_s1_waitrequest_n so that symbol knows where to group signals which may go to master only, which is an e_assign
   internal_altmemddr_0_s1_waitrequest_n_from_sa <= altmemddr_0_s1_waitrequest_n;
   --assign altmemddr_0_s1_readdatavalid_from_sa = altmemddr_0_s1_readdatavalid so that symbol knows where to group signals which may go to master only, which is an e_assign
   altmemddr_0_s1_readdatavalid_from_sa <= altmemddr_0_s1_readdatavalid;
   --altmemddr_0_s1_arb_share_counter set values, which is an e_mux
-  altmemddr_0_s1_arb_share_set_values <= A_EXT (A_WE_StdLogicVector((std_logic'((internal_vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1)) = '1'), (std_logic_vector'("0000000000000000000000000") & (vip_1024x768_burst_0_downstream_arbitrationshare)), A_WE_StdLogicVector((std_logic'((internal_vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1)) = '1'), (std_logic_vector'("0000000000000000000000000") & (vip_1024x768_burst_1_downstream_arbitrationshare)), A_WE_StdLogicVector((std_logic'((internal_vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1)) = '1'), (std_logic_vector'("0000000000000000000000000") & (vip_1024x768_burst_0_downstream_arbitrationshare)), A_WE_StdLogicVector((std_logic'((internal_vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1)) = '1'), (std_logic_vector'("0000000000000000000000000") & (vip_1024x768_burst_1_downstream_arbitrationshare)), std_logic_vector'("00000000000000000000000000000001"))))), 7);
+  altmemddr_0_s1_arb_share_set_values <= A_EXT (A_WE_StdLogicVector((std_logic'((internal_vip_sopc_burst_0_downstream_granted_altmemddr_0_s1)) = '1'), (std_logic_vector'("0000000000000000000000000") & (vip_sopc_burst_0_downstream_arbitrationshare)), A_WE_StdLogicVector((std_logic'((internal_vip_sopc_burst_1_downstream_granted_altmemddr_0_s1)) = '1'), (std_logic_vector'("0000000000000000000000000") & (vip_sopc_burst_1_downstream_arbitrationshare)), A_WE_StdLogicVector((std_logic'((internal_vip_sopc_burst_0_downstream_granted_altmemddr_0_s1)) = '1'), (std_logic_vector'("0000000000000000000000000") & (vip_sopc_burst_0_downstream_arbitrationshare)), A_WE_StdLogicVector((std_logic'((internal_vip_sopc_burst_1_downstream_granted_altmemddr_0_s1)) = '1'), (std_logic_vector'("0000000000000000000000000") & (vip_sopc_burst_1_downstream_arbitrationshare)), std_logic_vector'("00000000000000000000000000000001"))))), 7);
   --altmemddr_0_s1_non_bursting_master_requests mux, which is an e_mux
   altmemddr_0_s1_non_bursting_master_requests <= std_logic'('0');
   --altmemddr_0_s1_any_bursting_master_saved_grant mux, which is an e_mux
-  altmemddr_0_s1_any_bursting_master_saved_grant <= ((vip_1024x768_burst_0_downstream_saved_grant_altmemddr_0_s1 OR vip_1024x768_burst_1_downstream_saved_grant_altmemddr_0_s1) OR vip_1024x768_burst_0_downstream_saved_grant_altmemddr_0_s1) OR vip_1024x768_burst_1_downstream_saved_grant_altmemddr_0_s1;
+  altmemddr_0_s1_any_bursting_master_saved_grant <= ((vip_sopc_burst_0_downstream_saved_grant_altmemddr_0_s1 OR vip_sopc_burst_1_downstream_saved_grant_altmemddr_0_s1) OR vip_sopc_burst_0_downstream_saved_grant_altmemddr_0_s1) OR vip_sopc_burst_1_downstream_saved_grant_altmemddr_0_s1;
   --altmemddr_0_s1_arb_share_counter_next_value assignment, which is an e_assign
   altmemddr_0_s1_arb_share_counter_next_value <= A_EXT (A_WE_StdLogicVector((std_logic'(altmemddr_0_s1_firsttransfer) = '1'), (((std_logic_vector'("00000000000000000000000000") & (altmemddr_0_s1_arb_share_set_values)) - std_logic_vector'("000000000000000000000000000000001"))), A_WE_StdLogicVector((std_logic'(or_reduce(altmemddr_0_s1_arb_share_counter)) = '1'), (((std_logic_vector'("00000000000000000000000000") & (altmemddr_0_s1_arb_share_counter)) - std_logic_vector'("000000000000000000000000000000001"))), std_logic_vector'("000000000000000000000000000000000"))), 7);
   --altmemddr_0_s1_allgrants all slave grants, which is an e_mux
@@ -5222,36 +5222,36 @@ begin
 
   end process;
 
-  --vip_1024x768_burst_0/downstream altmemddr_0/s1 arbiterlock, which is an e_assign
-  vip_1024x768_burst_0_downstream_arbiterlock <= altmemddr_0_s1_slavearbiterlockenable AND vip_1024x768_burst_0_downstream_continuerequest;
+  --vip_sopc_burst_0/downstream altmemddr_0/s1 arbiterlock, which is an e_assign
+  vip_sopc_burst_0_downstream_arbiterlock <= altmemddr_0_s1_slavearbiterlockenable AND vip_sopc_burst_0_downstream_continuerequest;
   --altmemddr_0_s1_slavearbiterlockenable2 slave enables arbiterlock2, which is an e_assign
   altmemddr_0_s1_slavearbiterlockenable2 <= or_reduce(altmemddr_0_s1_arb_share_counter_next_value);
-  --vip_1024x768_burst_0/downstream altmemddr_0/s1 arbiterlock2, which is an e_assign
-  vip_1024x768_burst_0_downstream_arbiterlock2 <= altmemddr_0_s1_slavearbiterlockenable2 AND vip_1024x768_burst_0_downstream_continuerequest;
-  --vip_1024x768_burst_1/downstream altmemddr_0/s1 arbiterlock, which is an e_assign
-  vip_1024x768_burst_1_downstream_arbiterlock <= altmemddr_0_s1_slavearbiterlockenable AND vip_1024x768_burst_1_downstream_continuerequest;
-  --vip_1024x768_burst_1/downstream altmemddr_0/s1 arbiterlock2, which is an e_assign
-  vip_1024x768_burst_1_downstream_arbiterlock2 <= altmemddr_0_s1_slavearbiterlockenable2 AND vip_1024x768_burst_1_downstream_continuerequest;
-  --vip_1024x768_burst_1/downstream granted altmemddr_0/s1 last time, which is an e_register
+  --vip_sopc_burst_0/downstream altmemddr_0/s1 arbiterlock2, which is an e_assign
+  vip_sopc_burst_0_downstream_arbiterlock2 <= altmemddr_0_s1_slavearbiterlockenable2 AND vip_sopc_burst_0_downstream_continuerequest;
+  --vip_sopc_burst_1/downstream altmemddr_0/s1 arbiterlock, which is an e_assign
+  vip_sopc_burst_1_downstream_arbiterlock <= altmemddr_0_s1_slavearbiterlockenable AND vip_sopc_burst_1_downstream_continuerequest;
+  --vip_sopc_burst_1/downstream altmemddr_0/s1 arbiterlock2, which is an e_assign
+  vip_sopc_burst_1_downstream_arbiterlock2 <= altmemddr_0_s1_slavearbiterlockenable2 AND vip_sopc_burst_1_downstream_continuerequest;
+  --vip_sopc_burst_1/downstream granted altmemddr_0/s1 last time, which is an e_register
   process (clk, reset_n)
   begin
     if reset_n = '0' then
-      last_cycle_vip_1024x768_burst_1_downstream_granted_slave_altmemddr_0_s1 <= std_logic'('0');
+      last_cycle_vip_sopc_burst_1_downstream_granted_slave_altmemddr_0_s1 <= std_logic'('0');
     elsif clk'event and clk = '1' then
-      last_cycle_vip_1024x768_burst_1_downstream_granted_slave_altmemddr_0_s1 <= Vector_To_Std_Logic(A_WE_StdLogicVector((std_logic'(vip_1024x768_burst_1_downstream_saved_grant_altmemddr_0_s1) = '1'), std_logic_vector'("00000000000000000000000000000001"), A_WE_StdLogicVector((((((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(altmemddr_0_s1_arbitration_holdoff_internal))) OR std_logic_vector'("00000000000000000000000000000000")))) /= std_logic_vector'("00000000000000000000000000000000")), std_logic_vector'("00000000000000000000000000000000"), (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(last_cycle_vip_1024x768_burst_1_downstream_granted_slave_altmemddr_0_s1))))));
+      last_cycle_vip_sopc_burst_1_downstream_granted_slave_altmemddr_0_s1 <= Vector_To_Std_Logic(A_WE_StdLogicVector((std_logic'(vip_sopc_burst_1_downstream_saved_grant_altmemddr_0_s1) = '1'), std_logic_vector'("00000000000000000000000000000001"), A_WE_StdLogicVector((((((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(altmemddr_0_s1_arbitration_holdoff_internal))) OR std_logic_vector'("00000000000000000000000000000000")))) /= std_logic_vector'("00000000000000000000000000000000")), std_logic_vector'("00000000000000000000000000000000"), (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(last_cycle_vip_sopc_burst_1_downstream_granted_slave_altmemddr_0_s1))))));
     end if;
 
   end process;
 
-  --vip_1024x768_burst_1_downstream_continuerequest continued request, which is an e_mux
-  vip_1024x768_burst_1_downstream_continuerequest <= Vector_To_Std_Logic(((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(last_cycle_vip_1024x768_burst_1_downstream_granted_slave_altmemddr_0_s1))) AND std_logic_vector'("00000000000000000000000000000001")));
+  --vip_sopc_burst_1_downstream_continuerequest continued request, which is an e_mux
+  vip_sopc_burst_1_downstream_continuerequest <= Vector_To_Std_Logic(((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(last_cycle_vip_sopc_burst_1_downstream_granted_slave_altmemddr_0_s1))) AND std_logic_vector'("00000000000000000000000000000001")));
   --altmemddr_0_s1_any_continuerequest at least one master continues requesting, which is an e_mux
-  altmemddr_0_s1_any_continuerequest <= vip_1024x768_burst_1_downstream_continuerequest OR vip_1024x768_burst_0_downstream_continuerequest;
-  internal_vip_1024x768_burst_0_downstream_qualified_request_altmemddr_0_s1 <= internal_vip_1024x768_burst_0_downstream_requests_altmemddr_0_s1 AND NOT ((((vip_1024x768_burst_0_downstream_read AND to_std_logic((((((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(vip_1024x768_burst_0_downstream_latency_counter))) /= std_logic_vector'("00000000000000000000000000000000"))) OR ((std_logic_vector'("00000000000000000000000000000001")<(std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(vip_1024x768_burst_0_downstream_latency_counter)))))))))) OR vip_1024x768_burst_1_downstream_arbiterlock));
+  altmemddr_0_s1_any_continuerequest <= vip_sopc_burst_1_downstream_continuerequest OR vip_sopc_burst_0_downstream_continuerequest;
+  internal_vip_sopc_burst_0_downstream_qualified_request_altmemddr_0_s1 <= internal_vip_sopc_burst_0_downstream_requests_altmemddr_0_s1 AND NOT ((((vip_sopc_burst_0_downstream_read AND to_std_logic((((((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(vip_sopc_burst_0_downstream_latency_counter))) /= std_logic_vector'("00000000000000000000000000000000"))) OR ((std_logic_vector'("00000000000000000000000000000001")<(std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(vip_sopc_burst_0_downstream_latency_counter)))))))))) OR vip_sopc_burst_1_downstream_arbiterlock));
   --unique name for altmemddr_0_s1_move_on_to_next_transaction, which is an e_assign
   altmemddr_0_s1_move_on_to_next_transaction <= altmemddr_0_s1_this_cycle_is_the_last_burst AND altmemddr_0_s1_load_fifo;
   --the currently selected burstcount for altmemddr_0_s1, which is an e_mux
-  altmemddr_0_s1_selected_burstcount <= A_EXT (A_WE_StdLogicVector((std_logic'((internal_vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1)) = '1'), (std_logic_vector'("00000000000000000000000000000") & (vip_1024x768_burst_0_downstream_burstcount)), A_WE_StdLogicVector((std_logic'((internal_vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1)) = '1'), (std_logic_vector'("00000000000000000000000000000") & (vip_1024x768_burst_1_downstream_burstcount)), std_logic_vector'("00000000000000000000000000000001"))), 3);
+  altmemddr_0_s1_selected_burstcount <= A_EXT (A_WE_StdLogicVector((std_logic'((internal_vip_sopc_burst_0_downstream_granted_altmemddr_0_s1)) = '1'), (std_logic_vector'("00000000000000000000000000000") & (vip_sopc_burst_0_downstream_burstcount)), A_WE_StdLogicVector((std_logic'((internal_vip_sopc_burst_1_downstream_granted_altmemddr_0_s1)) = '1'), (std_logic_vector'("00000000000000000000000000000") & (vip_sopc_burst_1_downstream_burstcount)), std_logic_vector'("00000000000000000000000000000001"))), 3);
   --burstcount_fifo_for_altmemddr_0_s1, which is an e_fifo_with_registered_outputs
   burstcount_fifo_for_altmemddr_0_s1 : burstcount_fifo_for_altmemddr_0_s1_module
     port map(
@@ -5306,16 +5306,16 @@ begin
 
   --the last cycle in the burst for altmemddr_0_s1, which is an e_assign
   altmemddr_0_s1_this_cycle_is_the_last_burst <= NOT (or_reduce(altmemddr_0_s1_current_burst_minus_one)) AND altmemddr_0_s1_readdatavalid_from_sa;
-  --rdv_fifo_for_vip_1024x768_burst_0_downstream_to_altmemddr_0_s1, which is an e_fifo_with_registered_outputs
-  rdv_fifo_for_vip_1024x768_burst_0_downstream_to_altmemddr_0_s1 : rdv_fifo_for_vip_1024x768_burst_0_downstream_to_altmemddr_0_s1_module
+  --rdv_fifo_for_vip_sopc_burst_0_downstream_to_altmemddr_0_s1, which is an e_fifo_with_registered_outputs
+  rdv_fifo_for_vip_sopc_burst_0_downstream_to_altmemddr_0_s1 : rdv_fifo_for_vip_sopc_burst_0_downstream_to_altmemddr_0_s1_module
     port map(
-      data_out => vip_1024x768_burst_0_downstream_rdv_fifo_output_from_altmemddr_0_s1,
+      data_out => vip_sopc_burst_0_downstream_rdv_fifo_output_from_altmemddr_0_s1,
       empty => open,
-      fifo_contains_ones_n => vip_1024x768_burst_0_downstream_rdv_fifo_empty_altmemddr_0_s1,
+      fifo_contains_ones_n => vip_sopc_burst_0_downstream_rdv_fifo_empty_altmemddr_0_s1,
       full => open,
       clear_fifo => module_input3,
       clk => clk,
-      data_in => internal_vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1,
+      data_in => internal_vip_sopc_burst_0_downstream_granted_altmemddr_0_s1,
       read => altmemddr_0_s1_move_on_to_next_transaction,
       reset_n => reset_n,
       sync_reset => module_input4,
@@ -5326,36 +5326,36 @@ begin
   module_input4 <= std_logic'('0');
   module_input5 <= in_a_read_cycle AND NOT altmemddr_0_s1_waits_for_read;
 
-  vip_1024x768_burst_0_downstream_read_data_valid_altmemddr_0_s1_shift_register <= NOT vip_1024x768_burst_0_downstream_rdv_fifo_empty_altmemddr_0_s1;
-  --local readdatavalid vip_1024x768_burst_0_downstream_read_data_valid_altmemddr_0_s1, which is an e_mux
-  vip_1024x768_burst_0_downstream_read_data_valid_altmemddr_0_s1 <= ((altmemddr_0_s1_readdatavalid_from_sa AND vip_1024x768_burst_0_downstream_rdv_fifo_output_from_altmemddr_0_s1)) AND NOT vip_1024x768_burst_0_downstream_rdv_fifo_empty_altmemddr_0_s1;
+  vip_sopc_burst_0_downstream_read_data_valid_altmemddr_0_s1_shift_register <= NOT vip_sopc_burst_0_downstream_rdv_fifo_empty_altmemddr_0_s1;
+  --local readdatavalid vip_sopc_burst_0_downstream_read_data_valid_altmemddr_0_s1, which is an e_mux
+  vip_sopc_burst_0_downstream_read_data_valid_altmemddr_0_s1 <= ((altmemddr_0_s1_readdatavalid_from_sa AND vip_sopc_burst_0_downstream_rdv_fifo_output_from_altmemddr_0_s1)) AND NOT vip_sopc_burst_0_downstream_rdv_fifo_empty_altmemddr_0_s1;
   --altmemddr_0_s1_writedata mux, which is an e_mux
-  altmemddr_0_s1_writedata <= A_WE_StdLogicVector((std_logic'((internal_vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1)) = '1'), vip_1024x768_burst_0_downstream_writedata, vip_1024x768_burst_1_downstream_writedata);
-  internal_vip_1024x768_burst_1_downstream_requests_altmemddr_0_s1 <= Vector_To_Std_Logic(((std_logic_vector'("00000000000000000000000000000001")) AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(((vip_1024x768_burst_1_downstream_read OR vip_1024x768_burst_1_downstream_write)))))));
-  --vip_1024x768_burst_0/downstream granted altmemddr_0/s1 last time, which is an e_register
+  altmemddr_0_s1_writedata <= A_WE_StdLogicVector((std_logic'((internal_vip_sopc_burst_0_downstream_granted_altmemddr_0_s1)) = '1'), vip_sopc_burst_0_downstream_writedata, vip_sopc_burst_1_downstream_writedata);
+  internal_vip_sopc_burst_1_downstream_requests_altmemddr_0_s1 <= Vector_To_Std_Logic(((std_logic_vector'("00000000000000000000000000000001")) AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(((vip_sopc_burst_1_downstream_read OR vip_sopc_burst_1_downstream_write)))))));
+  --vip_sopc_burst_0/downstream granted altmemddr_0/s1 last time, which is an e_register
   process (clk, reset_n)
   begin
     if reset_n = '0' then
-      last_cycle_vip_1024x768_burst_0_downstream_granted_slave_altmemddr_0_s1 <= std_logic'('0');
+      last_cycle_vip_sopc_burst_0_downstream_granted_slave_altmemddr_0_s1 <= std_logic'('0');
     elsif clk'event and clk = '1' then
-      last_cycle_vip_1024x768_burst_0_downstream_granted_slave_altmemddr_0_s1 <= Vector_To_Std_Logic(A_WE_StdLogicVector((std_logic'(vip_1024x768_burst_0_downstream_saved_grant_altmemddr_0_s1) = '1'), std_logic_vector'("00000000000000000000000000000001"), A_WE_StdLogicVector((((((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(altmemddr_0_s1_arbitration_holdoff_internal))) OR std_logic_vector'("00000000000000000000000000000000")))) /= std_logic_vector'("00000000000000000000000000000000")), std_logic_vector'("00000000000000000000000000000000"), (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(last_cycle_vip_1024x768_burst_0_downstream_granted_slave_altmemddr_0_s1))))));
+      last_cycle_vip_sopc_burst_0_downstream_granted_slave_altmemddr_0_s1 <= Vector_To_Std_Logic(A_WE_StdLogicVector((std_logic'(vip_sopc_burst_0_downstream_saved_grant_altmemddr_0_s1) = '1'), std_logic_vector'("00000000000000000000000000000001"), A_WE_StdLogicVector((((((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(altmemddr_0_s1_arbitration_holdoff_internal))) OR std_logic_vector'("00000000000000000000000000000000")))) /= std_logic_vector'("00000000000000000000000000000000")), std_logic_vector'("00000000000000000000000000000000"), (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(last_cycle_vip_sopc_burst_0_downstream_granted_slave_altmemddr_0_s1))))));
     end if;
 
   end process;
 
-  --vip_1024x768_burst_0_downstream_continuerequest continued request, which is an e_mux
-  vip_1024x768_burst_0_downstream_continuerequest <= Vector_To_Std_Logic(((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(last_cycle_vip_1024x768_burst_0_downstream_granted_slave_altmemddr_0_s1))) AND std_logic_vector'("00000000000000000000000000000001")));
-  internal_vip_1024x768_burst_1_downstream_qualified_request_altmemddr_0_s1 <= internal_vip_1024x768_burst_1_downstream_requests_altmemddr_0_s1 AND NOT ((((vip_1024x768_burst_1_downstream_read AND to_std_logic((((((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(vip_1024x768_burst_1_downstream_latency_counter))) /= std_logic_vector'("00000000000000000000000000000000"))) OR ((std_logic_vector'("00000000000000000000000000000001")<(std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(vip_1024x768_burst_1_downstream_latency_counter)))))))))) OR vip_1024x768_burst_0_downstream_arbiterlock));
-  --rdv_fifo_for_vip_1024x768_burst_1_downstream_to_altmemddr_0_s1, which is an e_fifo_with_registered_outputs
-  rdv_fifo_for_vip_1024x768_burst_1_downstream_to_altmemddr_0_s1 : rdv_fifo_for_vip_1024x768_burst_1_downstream_to_altmemddr_0_s1_module
+  --vip_sopc_burst_0_downstream_continuerequest continued request, which is an e_mux
+  vip_sopc_burst_0_downstream_continuerequest <= Vector_To_Std_Logic(((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(last_cycle_vip_sopc_burst_0_downstream_granted_slave_altmemddr_0_s1))) AND std_logic_vector'("00000000000000000000000000000001")));
+  internal_vip_sopc_burst_1_downstream_qualified_request_altmemddr_0_s1 <= internal_vip_sopc_burst_1_downstream_requests_altmemddr_0_s1 AND NOT ((((vip_sopc_burst_1_downstream_read AND to_std_logic((((((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(vip_sopc_burst_1_downstream_latency_counter))) /= std_logic_vector'("00000000000000000000000000000000"))) OR ((std_logic_vector'("00000000000000000000000000000001")<(std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(vip_sopc_burst_1_downstream_latency_counter)))))))))) OR vip_sopc_burst_0_downstream_arbiterlock));
+  --rdv_fifo_for_vip_sopc_burst_1_downstream_to_altmemddr_0_s1, which is an e_fifo_with_registered_outputs
+  rdv_fifo_for_vip_sopc_burst_1_downstream_to_altmemddr_0_s1 : rdv_fifo_for_vip_sopc_burst_1_downstream_to_altmemddr_0_s1_module
     port map(
-      data_out => vip_1024x768_burst_1_downstream_rdv_fifo_output_from_altmemddr_0_s1,
+      data_out => vip_sopc_burst_1_downstream_rdv_fifo_output_from_altmemddr_0_s1,
       empty => open,
-      fifo_contains_ones_n => vip_1024x768_burst_1_downstream_rdv_fifo_empty_altmemddr_0_s1,
+      fifo_contains_ones_n => vip_sopc_burst_1_downstream_rdv_fifo_empty_altmemddr_0_s1,
       full => open,
       clear_fifo => module_input6,
       clk => clk,
-      data_in => internal_vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1,
+      data_in => internal_vip_sopc_burst_1_downstream_granted_altmemddr_0_s1,
       read => altmemddr_0_s1_move_on_to_next_transaction,
       reset_n => reset_n,
       sync_reset => module_input7,
@@ -5366,23 +5366,23 @@ begin
   module_input7 <= std_logic'('0');
   module_input8 <= in_a_read_cycle AND NOT altmemddr_0_s1_waits_for_read;
 
-  vip_1024x768_burst_1_downstream_read_data_valid_altmemddr_0_s1_shift_register <= NOT vip_1024x768_burst_1_downstream_rdv_fifo_empty_altmemddr_0_s1;
-  --local readdatavalid vip_1024x768_burst_1_downstream_read_data_valid_altmemddr_0_s1, which is an e_mux
-  vip_1024x768_burst_1_downstream_read_data_valid_altmemddr_0_s1 <= ((altmemddr_0_s1_readdatavalid_from_sa AND vip_1024x768_burst_1_downstream_rdv_fifo_output_from_altmemddr_0_s1)) AND NOT vip_1024x768_burst_1_downstream_rdv_fifo_empty_altmemddr_0_s1;
+  vip_sopc_burst_1_downstream_read_data_valid_altmemddr_0_s1_shift_register <= NOT vip_sopc_burst_1_downstream_rdv_fifo_empty_altmemddr_0_s1;
+  --local readdatavalid vip_sopc_burst_1_downstream_read_data_valid_altmemddr_0_s1, which is an e_mux
+  vip_sopc_burst_1_downstream_read_data_valid_altmemddr_0_s1 <= ((altmemddr_0_s1_readdatavalid_from_sa AND vip_sopc_burst_1_downstream_rdv_fifo_output_from_altmemddr_0_s1)) AND NOT vip_sopc_burst_1_downstream_rdv_fifo_empty_altmemddr_0_s1;
   --allow new arb cycle for altmemddr_0/s1, which is an e_assign
-  altmemddr_0_s1_allow_new_arb_cycle <= NOT vip_1024x768_burst_0_downstream_arbiterlock AND NOT vip_1024x768_burst_1_downstream_arbiterlock;
-  --vip_1024x768_burst_1/downstream assignment into master qualified-requests vector for altmemddr_0/s1, which is an e_assign
-  altmemddr_0_s1_master_qreq_vector(0) <= internal_vip_1024x768_burst_1_downstream_qualified_request_altmemddr_0_s1;
-  --vip_1024x768_burst_1/downstream grant altmemddr_0/s1, which is an e_assign
-  internal_vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1 <= altmemddr_0_s1_grant_vector(0);
-  --vip_1024x768_burst_1/downstream saved-grant altmemddr_0/s1, which is an e_assign
-  vip_1024x768_burst_1_downstream_saved_grant_altmemddr_0_s1 <= altmemddr_0_s1_arb_winner(0);
-  --vip_1024x768_burst_0/downstream assignment into master qualified-requests vector for altmemddr_0/s1, which is an e_assign
-  altmemddr_0_s1_master_qreq_vector(1) <= internal_vip_1024x768_burst_0_downstream_qualified_request_altmemddr_0_s1;
-  --vip_1024x768_burst_0/downstream grant altmemddr_0/s1, which is an e_assign
-  internal_vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1 <= altmemddr_0_s1_grant_vector(1);
-  --vip_1024x768_burst_0/downstream saved-grant altmemddr_0/s1, which is an e_assign
-  vip_1024x768_burst_0_downstream_saved_grant_altmemddr_0_s1 <= altmemddr_0_s1_arb_winner(1);
+  altmemddr_0_s1_allow_new_arb_cycle <= NOT vip_sopc_burst_0_downstream_arbiterlock AND NOT vip_sopc_burst_1_downstream_arbiterlock;
+  --vip_sopc_burst_1/downstream assignment into master qualified-requests vector for altmemddr_0/s1, which is an e_assign
+  altmemddr_0_s1_master_qreq_vector(0) <= internal_vip_sopc_burst_1_downstream_qualified_request_altmemddr_0_s1;
+  --vip_sopc_burst_1/downstream grant altmemddr_0/s1, which is an e_assign
+  internal_vip_sopc_burst_1_downstream_granted_altmemddr_0_s1 <= altmemddr_0_s1_grant_vector(0);
+  --vip_sopc_burst_1/downstream saved-grant altmemddr_0/s1, which is an e_assign
+  vip_sopc_burst_1_downstream_saved_grant_altmemddr_0_s1 <= altmemddr_0_s1_arb_winner(0);
+  --vip_sopc_burst_0/downstream assignment into master qualified-requests vector for altmemddr_0/s1, which is an e_assign
+  altmemddr_0_s1_master_qreq_vector(1) <= internal_vip_sopc_burst_0_downstream_qualified_request_altmemddr_0_s1;
+  --vip_sopc_burst_0/downstream grant altmemddr_0/s1, which is an e_assign
+  internal_vip_sopc_burst_0_downstream_granted_altmemddr_0_s1 <= altmemddr_0_s1_grant_vector(1);
+  --vip_sopc_burst_0/downstream saved-grant altmemddr_0/s1, which is an e_assign
+  vip_sopc_burst_0_downstream_saved_grant_altmemddr_0_s1 <= altmemddr_0_s1_arb_winner(1);
   --altmemddr_0/s1 chosen-master double-vector, which is an e_assign
   altmemddr_0_s1_chosen_master_double_vector <= A_EXT (((std_logic_vector'("0") & ((altmemddr_0_s1_master_qreq_vector & altmemddr_0_s1_master_qreq_vector))) AND (((std_logic_vector'("0") & (Std_Logic_Vector'(NOT altmemddr_0_s1_master_qreq_vector & NOT altmemddr_0_s1_master_qreq_vector))) + (std_logic_vector'("000") & (altmemddr_0_s1_arb_addend))))), 4);
   --stable onehot encoding of arb winner
@@ -5458,13 +5458,13 @@ begin
   --altmemddr_0_s1_arbitration_holdoff_internal arbitration_holdoff, which is an e_assign
   altmemddr_0_s1_arbitration_holdoff_internal <= altmemddr_0_s1_begins_xfer AND altmemddr_0_s1_firsttransfer;
   --altmemddr_0_s1_read assignment, which is an e_mux
-  internal_altmemddr_0_s1_read <= ((internal_vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1 AND vip_1024x768_burst_0_downstream_read)) OR ((internal_vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1 AND vip_1024x768_burst_1_downstream_read));
+  internal_altmemddr_0_s1_read <= ((internal_vip_sopc_burst_0_downstream_granted_altmemddr_0_s1 AND vip_sopc_burst_0_downstream_read)) OR ((internal_vip_sopc_burst_1_downstream_granted_altmemddr_0_s1 AND vip_sopc_burst_1_downstream_read));
   --altmemddr_0_s1_write assignment, which is an e_mux
-  internal_altmemddr_0_s1_write <= ((internal_vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1 AND vip_1024x768_burst_0_downstream_write)) OR ((internal_vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1 AND vip_1024x768_burst_1_downstream_write));
-  shifted_address_to_altmemddr_0_s1_from_vip_1024x768_burst_0_downstream <= vip_1024x768_burst_0_downstream_address_to_slave;
+  internal_altmemddr_0_s1_write <= ((internal_vip_sopc_burst_0_downstream_granted_altmemddr_0_s1 AND vip_sopc_burst_0_downstream_write)) OR ((internal_vip_sopc_burst_1_downstream_granted_altmemddr_0_s1 AND vip_sopc_burst_1_downstream_write));
+  shifted_address_to_altmemddr_0_s1_from_vip_sopc_burst_0_downstream <= vip_sopc_burst_0_downstream_address_to_slave;
   --altmemddr_0_s1_address mux, which is an e_mux
-  altmemddr_0_s1_address <= A_EXT (A_WE_StdLogicVector((std_logic'((internal_vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1)) = '1'), (A_SRL(shifted_address_to_altmemddr_0_s1_from_vip_1024x768_burst_0_downstream,std_logic_vector'("00000000000000000000000000000101"))), (A_SRL(shifted_address_to_altmemddr_0_s1_from_vip_1024x768_burst_1_downstream,std_logic_vector'("00000000000000000000000000000101")))), 24);
-  shifted_address_to_altmemddr_0_s1_from_vip_1024x768_burst_1_downstream <= vip_1024x768_burst_1_downstream_address_to_slave;
+  altmemddr_0_s1_address <= A_EXT (A_WE_StdLogicVector((std_logic'((internal_vip_sopc_burst_0_downstream_granted_altmemddr_0_s1)) = '1'), (A_SRL(shifted_address_to_altmemddr_0_s1_from_vip_sopc_burst_0_downstream,std_logic_vector'("00000000000000000000000000000101"))), (A_SRL(shifted_address_to_altmemddr_0_s1_from_vip_sopc_burst_1_downstream,std_logic_vector'("00000000000000000000000000000101")))), 24);
+  shifted_address_to_altmemddr_0_s1_from_vip_sopc_burst_1_downstream <= vip_sopc_burst_1_downstream_address_to_slave;
   --d1_altmemddr_0_s1_end_xfer register, which is an e_register
   process (clk, reset_n)
   begin
@@ -5479,20 +5479,20 @@ begin
   --altmemddr_0_s1_waits_for_read in a cycle, which is an e_mux
   altmemddr_0_s1_waits_for_read <= altmemddr_0_s1_in_a_read_cycle AND NOT internal_altmemddr_0_s1_waitrequest_n_from_sa;
   --altmemddr_0_s1_in_a_read_cycle assignment, which is an e_assign
-  altmemddr_0_s1_in_a_read_cycle <= ((internal_vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1 AND vip_1024x768_burst_0_downstream_read)) OR ((internal_vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1 AND vip_1024x768_burst_1_downstream_read));
+  altmemddr_0_s1_in_a_read_cycle <= ((internal_vip_sopc_burst_0_downstream_granted_altmemddr_0_s1 AND vip_sopc_burst_0_downstream_read)) OR ((internal_vip_sopc_burst_1_downstream_granted_altmemddr_0_s1 AND vip_sopc_burst_1_downstream_read));
   --in_a_read_cycle assignment, which is an e_mux
   in_a_read_cycle <= altmemddr_0_s1_in_a_read_cycle;
   --altmemddr_0_s1_waits_for_write in a cycle, which is an e_mux
   altmemddr_0_s1_waits_for_write <= altmemddr_0_s1_in_a_write_cycle AND NOT internal_altmemddr_0_s1_waitrequest_n_from_sa;
   --altmemddr_0_s1_in_a_write_cycle assignment, which is an e_assign
-  altmemddr_0_s1_in_a_write_cycle <= ((internal_vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1 AND vip_1024x768_burst_0_downstream_write)) OR ((internal_vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1 AND vip_1024x768_burst_1_downstream_write));
+  altmemddr_0_s1_in_a_write_cycle <= ((internal_vip_sopc_burst_0_downstream_granted_altmemddr_0_s1 AND vip_sopc_burst_0_downstream_write)) OR ((internal_vip_sopc_burst_1_downstream_granted_altmemddr_0_s1 AND vip_sopc_burst_1_downstream_write));
   --in_a_write_cycle assignment, which is an e_mux
   in_a_write_cycle <= altmemddr_0_s1_in_a_write_cycle;
   wait_for_altmemddr_0_s1_counter <= std_logic'('0');
   --altmemddr_0_s1_byteenable byte enable port mux, which is an e_mux
-  altmemddr_0_s1_byteenable <= A_WE_StdLogicVector((std_logic'((internal_vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1)) = '1'), vip_1024x768_burst_0_downstream_byteenable, A_WE_StdLogicVector((std_logic'((internal_vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1)) = '1'), vip_1024x768_burst_1_downstream_byteenable, -SIGNED(std_logic_vector'("00000000000000000000000000000001"))));
+  altmemddr_0_s1_byteenable <= A_WE_StdLogicVector((std_logic'((internal_vip_sopc_burst_0_downstream_granted_altmemddr_0_s1)) = '1'), vip_sopc_burst_0_downstream_byteenable, A_WE_StdLogicVector((std_logic'((internal_vip_sopc_burst_1_downstream_granted_altmemddr_0_s1)) = '1'), vip_sopc_burst_1_downstream_byteenable, -SIGNED(std_logic_vector'("00000000000000000000000000000001"))));
   --burstcount mux, which is an e_mux
-  internal_altmemddr_0_s1_burstcount <= A_EXT (A_WE_StdLogicVector((std_logic'((internal_vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1)) = '1'), (std_logic_vector'("00000000000000000000000000000") & (vip_1024x768_burst_0_downstream_burstcount)), A_WE_StdLogicVector((std_logic'((internal_vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1)) = '1'), (std_logic_vector'("00000000000000000000000000000") & (vip_1024x768_burst_1_downstream_burstcount)), std_logic_vector'("00000000000000000000000000000001"))), 3);
+  internal_altmemddr_0_s1_burstcount <= A_EXT (A_WE_StdLogicVector((std_logic'((internal_vip_sopc_burst_0_downstream_granted_altmemddr_0_s1)) = '1'), (std_logic_vector'("00000000000000000000000000000") & (vip_sopc_burst_0_downstream_burstcount)), A_WE_StdLogicVector((std_logic'((internal_vip_sopc_burst_1_downstream_granted_altmemddr_0_s1)) = '1'), (std_logic_vector'("00000000000000000000000000000") & (vip_sopc_burst_1_downstream_burstcount)), std_logic_vector'("00000000000000000000000000000001"))), 3);
   --vhdl renameroo for output signals
   altmemddr_0_s1_burstcount <= internal_altmemddr_0_s1_burstcount;
   --vhdl renameroo for output signals
@@ -5502,17 +5502,17 @@ begin
   --vhdl renameroo for output signals
   altmemddr_0_s1_write <= internal_altmemddr_0_s1_write;
   --vhdl renameroo for output signals
-  vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1 <= internal_vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1;
+  vip_sopc_burst_0_downstream_granted_altmemddr_0_s1 <= internal_vip_sopc_burst_0_downstream_granted_altmemddr_0_s1;
   --vhdl renameroo for output signals
-  vip_1024x768_burst_0_downstream_qualified_request_altmemddr_0_s1 <= internal_vip_1024x768_burst_0_downstream_qualified_request_altmemddr_0_s1;
+  vip_sopc_burst_0_downstream_qualified_request_altmemddr_0_s1 <= internal_vip_sopc_burst_0_downstream_qualified_request_altmemddr_0_s1;
   --vhdl renameroo for output signals
-  vip_1024x768_burst_0_downstream_requests_altmemddr_0_s1 <= internal_vip_1024x768_burst_0_downstream_requests_altmemddr_0_s1;
+  vip_sopc_burst_0_downstream_requests_altmemddr_0_s1 <= internal_vip_sopc_burst_0_downstream_requests_altmemddr_0_s1;
   --vhdl renameroo for output signals
-  vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1 <= internal_vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1;
+  vip_sopc_burst_1_downstream_granted_altmemddr_0_s1 <= internal_vip_sopc_burst_1_downstream_granted_altmemddr_0_s1;
   --vhdl renameroo for output signals
-  vip_1024x768_burst_1_downstream_qualified_request_altmemddr_0_s1 <= internal_vip_1024x768_burst_1_downstream_qualified_request_altmemddr_0_s1;
+  vip_sopc_burst_1_downstream_qualified_request_altmemddr_0_s1 <= internal_vip_sopc_burst_1_downstream_qualified_request_altmemddr_0_s1;
   --vhdl renameroo for output signals
-  vip_1024x768_burst_1_downstream_requests_altmemddr_0_s1 <= internal_vip_1024x768_burst_1_downstream_requests_altmemddr_0_s1;
+  vip_sopc_burst_1_downstream_requests_altmemddr_0_s1 <= internal_vip_sopc_burst_1_downstream_requests_altmemddr_0_s1;
 --synthesis translate_off
     --altmemddr_0/s1 enable non-zero assertions, which is an e_register
     process (clk, reset_n)
@@ -5525,15 +5525,15 @@ begin
 
     end process;
 
-    --vip_1024x768_burst_0/downstream non-zero arbitrationshare assertion, which is an e_process
+    --vip_sopc_burst_0/downstream non-zero arbitrationshare assertion, which is an e_process
     process (clk)
     VARIABLE write_line7 : line;
     begin
       if clk'event and clk = '1' then
-        if std_logic'(((internal_vip_1024x768_burst_0_downstream_requests_altmemddr_0_s1 AND to_std_logic((((std_logic_vector'("0000000000000000000000000") & (vip_1024x768_burst_0_downstream_arbitrationshare)) = std_logic_vector'("00000000000000000000000000000000"))))) AND enable_nonzero_assertions)) = '1' then 
+        if std_logic'(((internal_vip_sopc_burst_0_downstream_requests_altmemddr_0_s1 AND to_std_logic((((std_logic_vector'("0000000000000000000000000") & (vip_sopc_burst_0_downstream_arbitrationshare)) = std_logic_vector'("00000000000000000000000000000000"))))) AND enable_nonzero_assertions)) = '1' then 
           write(write_line7, now);
           write(write_line7, string'(": "));
-          write(write_line7, string'("vip_1024x768_burst_0/downstream drove 0 on its 'arbitrationshare' port while accessing slave altmemddr_0/s1"));
+          write(write_line7, string'("vip_sopc_burst_0/downstream drove 0 on its 'arbitrationshare' port while accessing slave altmemddr_0/s1"));
           write(output, write_line7.all);
           deallocate (write_line7);
           assert false report "VHDL STOP" severity failure;
@@ -5542,15 +5542,15 @@ begin
 
     end process;
 
-    --vip_1024x768_burst_0/downstream non-zero burstcount assertion, which is an e_process
+    --vip_sopc_burst_0/downstream non-zero burstcount assertion, which is an e_process
     process (clk)
     VARIABLE write_line8 : line;
     begin
       if clk'event and clk = '1' then
-        if std_logic'(((internal_vip_1024x768_burst_0_downstream_requests_altmemddr_0_s1 AND to_std_logic((((std_logic_vector'("00000000000000000000000000000") & (vip_1024x768_burst_0_downstream_burstcount)) = std_logic_vector'("00000000000000000000000000000000"))))) AND enable_nonzero_assertions)) = '1' then 
+        if std_logic'(((internal_vip_sopc_burst_0_downstream_requests_altmemddr_0_s1 AND to_std_logic((((std_logic_vector'("00000000000000000000000000000") & (vip_sopc_burst_0_downstream_burstcount)) = std_logic_vector'("00000000000000000000000000000000"))))) AND enable_nonzero_assertions)) = '1' then 
           write(write_line8, now);
           write(write_line8, string'(": "));
-          write(write_line8, string'("vip_1024x768_burst_0/downstream drove 0 on its 'burstcount' port while accessing slave altmemddr_0/s1"));
+          write(write_line8, string'("vip_sopc_burst_0/downstream drove 0 on its 'burstcount' port while accessing slave altmemddr_0/s1"));
           write(output, write_line8.all);
           deallocate (write_line8);
           assert false report "VHDL STOP" severity failure;
@@ -5559,15 +5559,15 @@ begin
 
     end process;
 
-    --vip_1024x768_burst_1/downstream non-zero arbitrationshare assertion, which is an e_process
+    --vip_sopc_burst_1/downstream non-zero arbitrationshare assertion, which is an e_process
     process (clk)
     VARIABLE write_line9 : line;
     begin
       if clk'event and clk = '1' then
-        if std_logic'(((internal_vip_1024x768_burst_1_downstream_requests_altmemddr_0_s1 AND to_std_logic((((std_logic_vector'("0000000000000000000000000") & (vip_1024x768_burst_1_downstream_arbitrationshare)) = std_logic_vector'("00000000000000000000000000000000"))))) AND enable_nonzero_assertions)) = '1' then 
+        if std_logic'(((internal_vip_sopc_burst_1_downstream_requests_altmemddr_0_s1 AND to_std_logic((((std_logic_vector'("0000000000000000000000000") & (vip_sopc_burst_1_downstream_arbitrationshare)) = std_logic_vector'("00000000000000000000000000000000"))))) AND enable_nonzero_assertions)) = '1' then 
           write(write_line9, now);
           write(write_line9, string'(": "));
-          write(write_line9, string'("vip_1024x768_burst_1/downstream drove 0 on its 'arbitrationshare' port while accessing slave altmemddr_0/s1"));
+          write(write_line9, string'("vip_sopc_burst_1/downstream drove 0 on its 'arbitrationshare' port while accessing slave altmemddr_0/s1"));
           write(output, write_line9.all);
           deallocate (write_line9);
           assert false report "VHDL STOP" severity failure;
@@ -5576,15 +5576,15 @@ begin
 
     end process;
 
-    --vip_1024x768_burst_1/downstream non-zero burstcount assertion, which is an e_process
+    --vip_sopc_burst_1/downstream non-zero burstcount assertion, which is an e_process
     process (clk)
     VARIABLE write_line10 : line;
     begin
       if clk'event and clk = '1' then
-        if std_logic'(((internal_vip_1024x768_burst_1_downstream_requests_altmemddr_0_s1 AND to_std_logic((((std_logic_vector'("00000000000000000000000000000") & (vip_1024x768_burst_1_downstream_burstcount)) = std_logic_vector'("00000000000000000000000000000000"))))) AND enable_nonzero_assertions)) = '1' then 
+        if std_logic'(((internal_vip_sopc_burst_1_downstream_requests_altmemddr_0_s1 AND to_std_logic((((std_logic_vector'("00000000000000000000000000000") & (vip_sopc_burst_1_downstream_burstcount)) = std_logic_vector'("00000000000000000000000000000000"))))) AND enable_nonzero_assertions)) = '1' then 
           write(write_line10, now);
           write(write_line10, string'(": "));
-          write(write_line10, string'("vip_1024x768_burst_1/downstream drove 0 on its 'burstcount' port while accessing slave altmemddr_0/s1"));
+          write(write_line10, string'("vip_sopc_burst_1/downstream drove 0 on its 'burstcount' port while accessing slave altmemddr_0/s1"));
           write(output, write_line10.all);
           deallocate (write_line10);
           assert false report "VHDL STOP" severity failure;
@@ -5598,7 +5598,7 @@ begin
     VARIABLE write_line11 : line;
     begin
       if clk'event and clk = '1' then
-        if (std_logic_vector'("000000000000000000000000000000") & (((std_logic_vector'("0") & (A_TOSTDLOGICVECTOR(internal_vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1))) + (std_logic_vector'("0") & (A_TOSTDLOGICVECTOR(internal_vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1))))))>std_logic_vector'("00000000000000000000000000000001") then 
+        if (std_logic_vector'("000000000000000000000000000000") & (((std_logic_vector'("0") & (A_TOSTDLOGICVECTOR(internal_vip_sopc_burst_0_downstream_granted_altmemddr_0_s1))) + (std_logic_vector'("0") & (A_TOSTDLOGICVECTOR(internal_vip_sopc_burst_1_downstream_granted_altmemddr_0_s1))))))>std_logic_vector'("00000000000000000000000000000001") then 
           write(write_line11, now);
           write(write_line11, string'(": "));
           write(write_line11, string'("> 1 of grant signals are active simultaneously"));
@@ -5615,7 +5615,7 @@ begin
     VARIABLE write_line12 : line;
     begin
       if clk'event and clk = '1' then
-        if (std_logic_vector'("000000000000000000000000000000") & (((std_logic_vector'("0") & (A_TOSTDLOGICVECTOR(vip_1024x768_burst_0_downstream_saved_grant_altmemddr_0_s1))) + (std_logic_vector'("0") & (A_TOSTDLOGICVECTOR(vip_1024x768_burst_1_downstream_saved_grant_altmemddr_0_s1))))))>std_logic_vector'("00000000000000000000000000000001") then 
+        if (std_logic_vector'("000000000000000000000000000000") & (((std_logic_vector'("0") & (A_TOSTDLOGICVECTOR(vip_sopc_burst_0_downstream_saved_grant_altmemddr_0_s1))) + (std_logic_vector'("0") & (A_TOSTDLOGICVECTOR(vip_sopc_burst_1_downstream_saved_grant_altmemddr_0_s1))))))>std_logic_vector'("00000000000000000000000000000001") then 
           write(write_line12, now);
           write(write_line12, string'(": "));
           write(write_line12, string'("> 1 of saved_grant signals are active simultaneously"));
@@ -5645,7 +5645,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 
-entity vip_1024x768_reset_clk_24M_domain_synch_module is 
+entity vip_sopc_reset_clk_24M_domain_synch_module is 
         port (
               -- inputs:
                  signal clk : IN STD_LOGIC;
@@ -5655,10 +5655,10 @@ entity vip_1024x768_reset_clk_24M_domain_synch_module is
               -- outputs:
                  signal data_out : OUT STD_LOGIC
               );
-end entity vip_1024x768_reset_clk_24M_domain_synch_module;
+end entity vip_sopc_reset_clk_24M_domain_synch_module;
 
 
-architecture europa of vip_1024x768_reset_clk_24M_domain_synch_module is
+architecture europa of vip_sopc_reset_clk_24M_domain_synch_module is
                 signal data_in_d1 :  STD_LOGIC;
 attribute ALTERA_ATTRIBUTE : string;
 attribute ALTERA_ATTRIBUTE of data_in_d1 : signal is "{-from ""*""} CUT=ON ; PRESERVE_REGISTER=ON ; SUPPRESS_DA_RULE_INTERNAL=R101";
@@ -5706,7 +5706,7 @@ use ieee.std_logic_unsigned.all;
 library std;
 use std.textio.all;
 
-entity vip_1024x768_burst_0_upstream_arbitrator is 
+entity vip_sopc_burst_0_upstream_arbitrator is 
         port (
               -- inputs:
                  signal alt_vip_vfb_0_write_master_address_to_slave : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
@@ -5715,73 +5715,73 @@ entity vip_1024x768_burst_0_upstream_arbitrator is
                  signal alt_vip_vfb_0_write_master_writedata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
                  signal clk : IN STD_LOGIC;
                  signal reset_n : IN STD_LOGIC;
-                 signal vip_1024x768_burst_0_upstream_readdata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
-                 signal vip_1024x768_burst_0_upstream_readdatavalid : IN STD_LOGIC;
-                 signal vip_1024x768_burst_0_upstream_waitrequest : IN STD_LOGIC;
+                 signal vip_sopc_burst_0_upstream_readdata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
+                 signal vip_sopc_burst_0_upstream_readdatavalid : IN STD_LOGIC;
+                 signal vip_sopc_burst_0_upstream_waitrequest : IN STD_LOGIC;
 
               -- outputs:
-                 signal alt_vip_vfb_0_write_master_granted_vip_1024x768_burst_0_upstream : OUT STD_LOGIC;
-                 signal alt_vip_vfb_0_write_master_qualified_request_vip_1024x768_burst_0_upstream : OUT STD_LOGIC;
-                 signal alt_vip_vfb_0_write_master_requests_vip_1024x768_burst_0_upstream : OUT STD_LOGIC;
-                 signal d1_vip_1024x768_burst_0_upstream_end_xfer : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_0_upstream_address : OUT STD_LOGIC_VECTOR (28 DOWNTO 0);
-                 signal vip_1024x768_burst_0_upstream_burstcount : OUT STD_LOGIC_VECTOR (6 DOWNTO 0);
-                 signal vip_1024x768_burst_0_upstream_byteaddress : OUT STD_LOGIC_VECTOR (33 DOWNTO 0);
-                 signal vip_1024x768_burst_0_upstream_byteenable : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
-                 signal vip_1024x768_burst_0_upstream_debugaccess : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_0_upstream_read : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_0_upstream_readdata_from_sa : OUT STD_LOGIC_VECTOR (255 DOWNTO 0);
-                 signal vip_1024x768_burst_0_upstream_readdatavalid_from_sa : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_0_upstream_waitrequest_from_sa : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_0_upstream_write : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_0_upstream_writedata : OUT STD_LOGIC_VECTOR (255 DOWNTO 0)
+                 signal alt_vip_vfb_0_write_master_granted_vip_sopc_burst_0_upstream : OUT STD_LOGIC;
+                 signal alt_vip_vfb_0_write_master_qualified_request_vip_sopc_burst_0_upstream : OUT STD_LOGIC;
+                 signal alt_vip_vfb_0_write_master_requests_vip_sopc_burst_0_upstream : OUT STD_LOGIC;
+                 signal d1_vip_sopc_burst_0_upstream_end_xfer : OUT STD_LOGIC;
+                 signal vip_sopc_burst_0_upstream_address : OUT STD_LOGIC_VECTOR (28 DOWNTO 0);
+                 signal vip_sopc_burst_0_upstream_burstcount : OUT STD_LOGIC_VECTOR (6 DOWNTO 0);
+                 signal vip_sopc_burst_0_upstream_byteaddress : OUT STD_LOGIC_VECTOR (33 DOWNTO 0);
+                 signal vip_sopc_burst_0_upstream_byteenable : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+                 signal vip_sopc_burst_0_upstream_debugaccess : OUT STD_LOGIC;
+                 signal vip_sopc_burst_0_upstream_read : OUT STD_LOGIC;
+                 signal vip_sopc_burst_0_upstream_readdata_from_sa : OUT STD_LOGIC_VECTOR (255 DOWNTO 0);
+                 signal vip_sopc_burst_0_upstream_readdatavalid_from_sa : OUT STD_LOGIC;
+                 signal vip_sopc_burst_0_upstream_waitrequest_from_sa : OUT STD_LOGIC;
+                 signal vip_sopc_burst_0_upstream_write : OUT STD_LOGIC;
+                 signal vip_sopc_burst_0_upstream_writedata : OUT STD_LOGIC_VECTOR (255 DOWNTO 0)
               );
-end entity vip_1024x768_burst_0_upstream_arbitrator;
+end entity vip_sopc_burst_0_upstream_arbitrator;
 
 
-architecture europa of vip_1024x768_burst_0_upstream_arbitrator is
+architecture europa of vip_sopc_burst_0_upstream_arbitrator is
                 signal alt_vip_vfb_0_write_master_arbiterlock :  STD_LOGIC;
                 signal alt_vip_vfb_0_write_master_arbiterlock2 :  STD_LOGIC;
                 signal alt_vip_vfb_0_write_master_continuerequest :  STD_LOGIC;
-                signal alt_vip_vfb_0_write_master_saved_grant_vip_1024x768_burst_0_upstream :  STD_LOGIC;
+                signal alt_vip_vfb_0_write_master_saved_grant_vip_sopc_burst_0_upstream :  STD_LOGIC;
                 signal d1_reasons_to_wait :  STD_LOGIC;
                 signal enable_nonzero_assertions :  STD_LOGIC;
-                signal end_xfer_arb_share_counter_term_vip_1024x768_burst_0_upstream :  STD_LOGIC;
+                signal end_xfer_arb_share_counter_term_vip_sopc_burst_0_upstream :  STD_LOGIC;
                 signal in_a_read_cycle :  STD_LOGIC;
                 signal in_a_write_cycle :  STD_LOGIC;
-                signal internal_alt_vip_vfb_0_write_master_granted_vip_1024x768_burst_0_upstream :  STD_LOGIC;
-                signal internal_alt_vip_vfb_0_write_master_qualified_request_vip_1024x768_burst_0_upstream :  STD_LOGIC;
-                signal internal_alt_vip_vfb_0_write_master_requests_vip_1024x768_burst_0_upstream :  STD_LOGIC;
-                signal internal_vip_1024x768_burst_0_upstream_burstcount :  STD_LOGIC_VECTOR (6 DOWNTO 0);
-                signal internal_vip_1024x768_burst_0_upstream_read :  STD_LOGIC;
-                signal internal_vip_1024x768_burst_0_upstream_waitrequest_from_sa :  STD_LOGIC;
-                signal internal_vip_1024x768_burst_0_upstream_write :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_allgrants :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_allow_new_arb_cycle :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_any_bursting_master_saved_grant :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_any_continuerequest :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_arb_counter_enable :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_arb_share_counter :  STD_LOGIC_VECTOR (6 DOWNTO 0);
-                signal vip_1024x768_burst_0_upstream_arb_share_counter_next_value :  STD_LOGIC_VECTOR (6 DOWNTO 0);
-                signal vip_1024x768_burst_0_upstream_arb_share_set_values :  STD_LOGIC_VECTOR (6 DOWNTO 0);
-                signal vip_1024x768_burst_0_upstream_bbt_burstcounter :  STD_LOGIC_VECTOR (5 DOWNTO 0);
-                signal vip_1024x768_burst_0_upstream_beginbursttransfer_internal :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_begins_xfer :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_end_xfer :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_firsttransfer :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_grant_vector :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_in_a_read_cycle :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_in_a_write_cycle :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_master_qreq_vector :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_next_bbt_burstcount :  STD_LOGIC_VECTOR (5 DOWNTO 0);
-                signal vip_1024x768_burst_0_upstream_non_bursting_master_requests :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_reg_firsttransfer :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_slavearbiterlockenable :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_slavearbiterlockenable2 :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_unreg_firsttransfer :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_waits_for_read :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_waits_for_write :  STD_LOGIC;
-                signal wait_for_vip_1024x768_burst_0_upstream_counter :  STD_LOGIC;
+                signal internal_alt_vip_vfb_0_write_master_granted_vip_sopc_burst_0_upstream :  STD_LOGIC;
+                signal internal_alt_vip_vfb_0_write_master_qualified_request_vip_sopc_burst_0_upstream :  STD_LOGIC;
+                signal internal_alt_vip_vfb_0_write_master_requests_vip_sopc_burst_0_upstream :  STD_LOGIC;
+                signal internal_vip_sopc_burst_0_upstream_burstcount :  STD_LOGIC_VECTOR (6 DOWNTO 0);
+                signal internal_vip_sopc_burst_0_upstream_read :  STD_LOGIC;
+                signal internal_vip_sopc_burst_0_upstream_waitrequest_from_sa :  STD_LOGIC;
+                signal internal_vip_sopc_burst_0_upstream_write :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_allgrants :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_allow_new_arb_cycle :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_any_bursting_master_saved_grant :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_any_continuerequest :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_arb_counter_enable :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_arb_share_counter :  STD_LOGIC_VECTOR (6 DOWNTO 0);
+                signal vip_sopc_burst_0_upstream_arb_share_counter_next_value :  STD_LOGIC_VECTOR (6 DOWNTO 0);
+                signal vip_sopc_burst_0_upstream_arb_share_set_values :  STD_LOGIC_VECTOR (6 DOWNTO 0);
+                signal vip_sopc_burst_0_upstream_bbt_burstcounter :  STD_LOGIC_VECTOR (5 DOWNTO 0);
+                signal vip_sopc_burst_0_upstream_beginbursttransfer_internal :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_begins_xfer :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_end_xfer :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_firsttransfer :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_grant_vector :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_in_a_read_cycle :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_in_a_write_cycle :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_master_qreq_vector :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_next_bbt_burstcount :  STD_LOGIC_VECTOR (5 DOWNTO 0);
+                signal vip_sopc_burst_0_upstream_non_bursting_master_requests :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_reg_firsttransfer :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_slavearbiterlockenable :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_slavearbiterlockenable2 :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_unreg_firsttransfer :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_waits_for_read :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_waits_for_write :  STD_LOGIC;
+                signal wait_for_vip_sopc_burst_0_upstream_counter :  STD_LOGIC;
 
 begin
 
@@ -5790,172 +5790,172 @@ begin
     if reset_n = '0' then
       d1_reasons_to_wait <= std_logic'('0');
     elsif clk'event and clk = '1' then
-      d1_reasons_to_wait <= NOT vip_1024x768_burst_0_upstream_end_xfer;
+      d1_reasons_to_wait <= NOT vip_sopc_burst_0_upstream_end_xfer;
     end if;
 
   end process;
 
-  vip_1024x768_burst_0_upstream_begins_xfer <= NOT d1_reasons_to_wait AND (internal_alt_vip_vfb_0_write_master_qualified_request_vip_1024x768_burst_0_upstream);
-  --assign vip_1024x768_burst_0_upstream_readdata_from_sa = vip_1024x768_burst_0_upstream_readdata so that symbol knows where to group signals which may go to master only, which is an e_assign
-  vip_1024x768_burst_0_upstream_readdata_from_sa <= vip_1024x768_burst_0_upstream_readdata;
-  internal_alt_vip_vfb_0_write_master_requests_vip_1024x768_burst_0_upstream <= ((to_std_logic(((Std_Logic_Vector'(alt_vip_vfb_0_write_master_address_to_slave(31 DOWNTO 29) & std_logic_vector'("00000000000000000000000000000")) = std_logic_vector'("00000000000000000000000000000000")))) AND (alt_vip_vfb_0_write_master_write))) AND alt_vip_vfb_0_write_master_write;
-  --assign vip_1024x768_burst_0_upstream_waitrequest_from_sa = vip_1024x768_burst_0_upstream_waitrequest so that symbol knows where to group signals which may go to master only, which is an e_assign
-  internal_vip_1024x768_burst_0_upstream_waitrequest_from_sa <= vip_1024x768_burst_0_upstream_waitrequest;
-  --vip_1024x768_burst_0_upstream_arb_share_counter set values, which is an e_mux
-  vip_1024x768_burst_0_upstream_arb_share_set_values <= A_EXT (A_WE_StdLogicVector((std_logic'((internal_alt_vip_vfb_0_write_master_granted_vip_1024x768_burst_0_upstream)) = '1'), (std_logic_vector'("0000000000000000000000000") & (alt_vip_vfb_0_write_master_burstcount)), std_logic_vector'("00000000000000000000000000000001")), 7);
-  --vip_1024x768_burst_0_upstream_non_bursting_master_requests mux, which is an e_mux
-  vip_1024x768_burst_0_upstream_non_bursting_master_requests <= std_logic'('0');
-  --vip_1024x768_burst_0_upstream_any_bursting_master_saved_grant mux, which is an e_mux
-  vip_1024x768_burst_0_upstream_any_bursting_master_saved_grant <= alt_vip_vfb_0_write_master_saved_grant_vip_1024x768_burst_0_upstream;
-  --vip_1024x768_burst_0_upstream_arb_share_counter_next_value assignment, which is an e_assign
-  vip_1024x768_burst_0_upstream_arb_share_counter_next_value <= A_EXT (A_WE_StdLogicVector((std_logic'(vip_1024x768_burst_0_upstream_firsttransfer) = '1'), (((std_logic_vector'("00000000000000000000000000") & (vip_1024x768_burst_0_upstream_arb_share_set_values)) - std_logic_vector'("000000000000000000000000000000001"))), A_WE_StdLogicVector((std_logic'(or_reduce(vip_1024x768_burst_0_upstream_arb_share_counter)) = '1'), (((std_logic_vector'("00000000000000000000000000") & (vip_1024x768_burst_0_upstream_arb_share_counter)) - std_logic_vector'("000000000000000000000000000000001"))), std_logic_vector'("000000000000000000000000000000000"))), 7);
-  --vip_1024x768_burst_0_upstream_allgrants all slave grants, which is an e_mux
-  vip_1024x768_burst_0_upstream_allgrants <= vip_1024x768_burst_0_upstream_grant_vector;
-  --vip_1024x768_burst_0_upstream_end_xfer assignment, which is an e_assign
-  vip_1024x768_burst_0_upstream_end_xfer <= NOT ((vip_1024x768_burst_0_upstream_waits_for_read OR vip_1024x768_burst_0_upstream_waits_for_write));
-  --end_xfer_arb_share_counter_term_vip_1024x768_burst_0_upstream arb share counter enable term, which is an e_assign
-  end_xfer_arb_share_counter_term_vip_1024x768_burst_0_upstream <= vip_1024x768_burst_0_upstream_end_xfer AND (((NOT vip_1024x768_burst_0_upstream_any_bursting_master_saved_grant OR in_a_read_cycle) OR in_a_write_cycle));
-  --vip_1024x768_burst_0_upstream_arb_share_counter arbitration counter enable, which is an e_assign
-  vip_1024x768_burst_0_upstream_arb_counter_enable <= ((end_xfer_arb_share_counter_term_vip_1024x768_burst_0_upstream AND vip_1024x768_burst_0_upstream_allgrants)) OR ((end_xfer_arb_share_counter_term_vip_1024x768_burst_0_upstream AND NOT vip_1024x768_burst_0_upstream_non_bursting_master_requests));
-  --vip_1024x768_burst_0_upstream_arb_share_counter counter, which is an e_register
+  vip_sopc_burst_0_upstream_begins_xfer <= NOT d1_reasons_to_wait AND (internal_alt_vip_vfb_0_write_master_qualified_request_vip_sopc_burst_0_upstream);
+  --assign vip_sopc_burst_0_upstream_readdata_from_sa = vip_sopc_burst_0_upstream_readdata so that symbol knows where to group signals which may go to master only, which is an e_assign
+  vip_sopc_burst_0_upstream_readdata_from_sa <= vip_sopc_burst_0_upstream_readdata;
+  internal_alt_vip_vfb_0_write_master_requests_vip_sopc_burst_0_upstream <= ((to_std_logic(((Std_Logic_Vector'(alt_vip_vfb_0_write_master_address_to_slave(31 DOWNTO 29) & std_logic_vector'("00000000000000000000000000000")) = std_logic_vector'("00000000000000000000000000000000")))) AND (alt_vip_vfb_0_write_master_write))) AND alt_vip_vfb_0_write_master_write;
+  --assign vip_sopc_burst_0_upstream_waitrequest_from_sa = vip_sopc_burst_0_upstream_waitrequest so that symbol knows where to group signals which may go to master only, which is an e_assign
+  internal_vip_sopc_burst_0_upstream_waitrequest_from_sa <= vip_sopc_burst_0_upstream_waitrequest;
+  --vip_sopc_burst_0_upstream_arb_share_counter set values, which is an e_mux
+  vip_sopc_burst_0_upstream_arb_share_set_values <= A_EXT (A_WE_StdLogicVector((std_logic'((internal_alt_vip_vfb_0_write_master_granted_vip_sopc_burst_0_upstream)) = '1'), (std_logic_vector'("0000000000000000000000000") & (alt_vip_vfb_0_write_master_burstcount)), std_logic_vector'("00000000000000000000000000000001")), 7);
+  --vip_sopc_burst_0_upstream_non_bursting_master_requests mux, which is an e_mux
+  vip_sopc_burst_0_upstream_non_bursting_master_requests <= std_logic'('0');
+  --vip_sopc_burst_0_upstream_any_bursting_master_saved_grant mux, which is an e_mux
+  vip_sopc_burst_0_upstream_any_bursting_master_saved_grant <= alt_vip_vfb_0_write_master_saved_grant_vip_sopc_burst_0_upstream;
+  --vip_sopc_burst_0_upstream_arb_share_counter_next_value assignment, which is an e_assign
+  vip_sopc_burst_0_upstream_arb_share_counter_next_value <= A_EXT (A_WE_StdLogicVector((std_logic'(vip_sopc_burst_0_upstream_firsttransfer) = '1'), (((std_logic_vector'("00000000000000000000000000") & (vip_sopc_burst_0_upstream_arb_share_set_values)) - std_logic_vector'("000000000000000000000000000000001"))), A_WE_StdLogicVector((std_logic'(or_reduce(vip_sopc_burst_0_upstream_arb_share_counter)) = '1'), (((std_logic_vector'("00000000000000000000000000") & (vip_sopc_burst_0_upstream_arb_share_counter)) - std_logic_vector'("000000000000000000000000000000001"))), std_logic_vector'("000000000000000000000000000000000"))), 7);
+  --vip_sopc_burst_0_upstream_allgrants all slave grants, which is an e_mux
+  vip_sopc_burst_0_upstream_allgrants <= vip_sopc_burst_0_upstream_grant_vector;
+  --vip_sopc_burst_0_upstream_end_xfer assignment, which is an e_assign
+  vip_sopc_burst_0_upstream_end_xfer <= NOT ((vip_sopc_burst_0_upstream_waits_for_read OR vip_sopc_burst_0_upstream_waits_for_write));
+  --end_xfer_arb_share_counter_term_vip_sopc_burst_0_upstream arb share counter enable term, which is an e_assign
+  end_xfer_arb_share_counter_term_vip_sopc_burst_0_upstream <= vip_sopc_burst_0_upstream_end_xfer AND (((NOT vip_sopc_burst_0_upstream_any_bursting_master_saved_grant OR in_a_read_cycle) OR in_a_write_cycle));
+  --vip_sopc_burst_0_upstream_arb_share_counter arbitration counter enable, which is an e_assign
+  vip_sopc_burst_0_upstream_arb_counter_enable <= ((end_xfer_arb_share_counter_term_vip_sopc_burst_0_upstream AND vip_sopc_burst_0_upstream_allgrants)) OR ((end_xfer_arb_share_counter_term_vip_sopc_burst_0_upstream AND NOT vip_sopc_burst_0_upstream_non_bursting_master_requests));
+  --vip_sopc_burst_0_upstream_arb_share_counter counter, which is an e_register
   process (clk, reset_n)
   begin
     if reset_n = '0' then
-      vip_1024x768_burst_0_upstream_arb_share_counter <= std_logic_vector'("0000000");
+      vip_sopc_burst_0_upstream_arb_share_counter <= std_logic_vector'("0000000");
     elsif clk'event and clk = '1' then
-      if std_logic'(vip_1024x768_burst_0_upstream_arb_counter_enable) = '1' then 
-        vip_1024x768_burst_0_upstream_arb_share_counter <= vip_1024x768_burst_0_upstream_arb_share_counter_next_value;
+      if std_logic'(vip_sopc_burst_0_upstream_arb_counter_enable) = '1' then 
+        vip_sopc_burst_0_upstream_arb_share_counter <= vip_sopc_burst_0_upstream_arb_share_counter_next_value;
       end if;
     end if;
 
   end process;
 
-  --vip_1024x768_burst_0_upstream_slavearbiterlockenable slave enables arbiterlock, which is an e_register
+  --vip_sopc_burst_0_upstream_slavearbiterlockenable slave enables arbiterlock, which is an e_register
   process (clk, reset_n)
   begin
     if reset_n = '0' then
-      vip_1024x768_burst_0_upstream_slavearbiterlockenable <= std_logic'('0');
+      vip_sopc_burst_0_upstream_slavearbiterlockenable <= std_logic'('0');
     elsif clk'event and clk = '1' then
-      if std_logic'((((vip_1024x768_burst_0_upstream_master_qreq_vector AND end_xfer_arb_share_counter_term_vip_1024x768_burst_0_upstream)) OR ((end_xfer_arb_share_counter_term_vip_1024x768_burst_0_upstream AND NOT vip_1024x768_burst_0_upstream_non_bursting_master_requests)))) = '1' then 
-        vip_1024x768_burst_0_upstream_slavearbiterlockenable <= or_reduce(vip_1024x768_burst_0_upstream_arb_share_counter_next_value);
+      if std_logic'((((vip_sopc_burst_0_upstream_master_qreq_vector AND end_xfer_arb_share_counter_term_vip_sopc_burst_0_upstream)) OR ((end_xfer_arb_share_counter_term_vip_sopc_burst_0_upstream AND NOT vip_sopc_burst_0_upstream_non_bursting_master_requests)))) = '1' then 
+        vip_sopc_burst_0_upstream_slavearbiterlockenable <= or_reduce(vip_sopc_burst_0_upstream_arb_share_counter_next_value);
       end if;
     end if;
 
   end process;
 
-  --alt_vip_vfb_0/write_master vip_1024x768_burst_0/upstream arbiterlock, which is an e_assign
-  alt_vip_vfb_0_write_master_arbiterlock <= vip_1024x768_burst_0_upstream_slavearbiterlockenable AND alt_vip_vfb_0_write_master_continuerequest;
-  --vip_1024x768_burst_0_upstream_slavearbiterlockenable2 slave enables arbiterlock2, which is an e_assign
-  vip_1024x768_burst_0_upstream_slavearbiterlockenable2 <= or_reduce(vip_1024x768_burst_0_upstream_arb_share_counter_next_value);
-  --alt_vip_vfb_0/write_master vip_1024x768_burst_0/upstream arbiterlock2, which is an e_assign
-  alt_vip_vfb_0_write_master_arbiterlock2 <= vip_1024x768_burst_0_upstream_slavearbiterlockenable2 AND alt_vip_vfb_0_write_master_continuerequest;
-  --vip_1024x768_burst_0_upstream_any_continuerequest at least one master continues requesting, which is an e_assign
-  vip_1024x768_burst_0_upstream_any_continuerequest <= std_logic'('1');
+  --alt_vip_vfb_0/write_master vip_sopc_burst_0/upstream arbiterlock, which is an e_assign
+  alt_vip_vfb_0_write_master_arbiterlock <= vip_sopc_burst_0_upstream_slavearbiterlockenable AND alt_vip_vfb_0_write_master_continuerequest;
+  --vip_sopc_burst_0_upstream_slavearbiterlockenable2 slave enables arbiterlock2, which is an e_assign
+  vip_sopc_burst_0_upstream_slavearbiterlockenable2 <= or_reduce(vip_sopc_burst_0_upstream_arb_share_counter_next_value);
+  --alt_vip_vfb_0/write_master vip_sopc_burst_0/upstream arbiterlock2, which is an e_assign
+  alt_vip_vfb_0_write_master_arbiterlock2 <= vip_sopc_burst_0_upstream_slavearbiterlockenable2 AND alt_vip_vfb_0_write_master_continuerequest;
+  --vip_sopc_burst_0_upstream_any_continuerequest at least one master continues requesting, which is an e_assign
+  vip_sopc_burst_0_upstream_any_continuerequest <= std_logic'('1');
   --alt_vip_vfb_0_write_master_continuerequest continued request, which is an e_assign
   alt_vip_vfb_0_write_master_continuerequest <= std_logic'('1');
-  internal_alt_vip_vfb_0_write_master_qualified_request_vip_1024x768_burst_0_upstream <= internal_alt_vip_vfb_0_write_master_requests_vip_1024x768_burst_0_upstream;
-  --vip_1024x768_burst_0_upstream_writedata mux, which is an e_mux
-  vip_1024x768_burst_0_upstream_writedata <= alt_vip_vfb_0_write_master_writedata;
-  --byteaddress mux for vip_1024x768_burst_0/upstream, which is an e_mux
-  vip_1024x768_burst_0_upstream_byteaddress <= std_logic_vector'("00") & (alt_vip_vfb_0_write_master_address_to_slave);
+  internal_alt_vip_vfb_0_write_master_qualified_request_vip_sopc_burst_0_upstream <= internal_alt_vip_vfb_0_write_master_requests_vip_sopc_burst_0_upstream;
+  --vip_sopc_burst_0_upstream_writedata mux, which is an e_mux
+  vip_sopc_burst_0_upstream_writedata <= alt_vip_vfb_0_write_master_writedata;
+  --byteaddress mux for vip_sopc_burst_0/upstream, which is an e_mux
+  vip_sopc_burst_0_upstream_byteaddress <= std_logic_vector'("00") & (alt_vip_vfb_0_write_master_address_to_slave);
   --master is always granted when requested
-  internal_alt_vip_vfb_0_write_master_granted_vip_1024x768_burst_0_upstream <= internal_alt_vip_vfb_0_write_master_qualified_request_vip_1024x768_burst_0_upstream;
-  --alt_vip_vfb_0/write_master saved-grant vip_1024x768_burst_0/upstream, which is an e_assign
-  alt_vip_vfb_0_write_master_saved_grant_vip_1024x768_burst_0_upstream <= internal_alt_vip_vfb_0_write_master_requests_vip_1024x768_burst_0_upstream;
-  --allow new arb cycle for vip_1024x768_burst_0/upstream, which is an e_assign
-  vip_1024x768_burst_0_upstream_allow_new_arb_cycle <= std_logic'('1');
+  internal_alt_vip_vfb_0_write_master_granted_vip_sopc_burst_0_upstream <= internal_alt_vip_vfb_0_write_master_qualified_request_vip_sopc_burst_0_upstream;
+  --alt_vip_vfb_0/write_master saved-grant vip_sopc_burst_0/upstream, which is an e_assign
+  alt_vip_vfb_0_write_master_saved_grant_vip_sopc_burst_0_upstream <= internal_alt_vip_vfb_0_write_master_requests_vip_sopc_burst_0_upstream;
+  --allow new arb cycle for vip_sopc_burst_0/upstream, which is an e_assign
+  vip_sopc_burst_0_upstream_allow_new_arb_cycle <= std_logic'('1');
   --placeholder chosen master
-  vip_1024x768_burst_0_upstream_grant_vector <= std_logic'('1');
+  vip_sopc_burst_0_upstream_grant_vector <= std_logic'('1');
   --placeholder vector of master qualified-requests
-  vip_1024x768_burst_0_upstream_master_qreq_vector <= std_logic'('1');
-  --vip_1024x768_burst_0_upstream_firsttransfer first transaction, which is an e_assign
-  vip_1024x768_burst_0_upstream_firsttransfer <= A_WE_StdLogic((std_logic'(vip_1024x768_burst_0_upstream_begins_xfer) = '1'), vip_1024x768_burst_0_upstream_unreg_firsttransfer, vip_1024x768_burst_0_upstream_reg_firsttransfer);
-  --vip_1024x768_burst_0_upstream_unreg_firsttransfer first transaction, which is an e_assign
-  vip_1024x768_burst_0_upstream_unreg_firsttransfer <= NOT ((vip_1024x768_burst_0_upstream_slavearbiterlockenable AND vip_1024x768_burst_0_upstream_any_continuerequest));
-  --vip_1024x768_burst_0_upstream_reg_firsttransfer first transaction, which is an e_register
+  vip_sopc_burst_0_upstream_master_qreq_vector <= std_logic'('1');
+  --vip_sopc_burst_0_upstream_firsttransfer first transaction, which is an e_assign
+  vip_sopc_burst_0_upstream_firsttransfer <= A_WE_StdLogic((std_logic'(vip_sopc_burst_0_upstream_begins_xfer) = '1'), vip_sopc_burst_0_upstream_unreg_firsttransfer, vip_sopc_burst_0_upstream_reg_firsttransfer);
+  --vip_sopc_burst_0_upstream_unreg_firsttransfer first transaction, which is an e_assign
+  vip_sopc_burst_0_upstream_unreg_firsttransfer <= NOT ((vip_sopc_burst_0_upstream_slavearbiterlockenable AND vip_sopc_burst_0_upstream_any_continuerequest));
+  --vip_sopc_burst_0_upstream_reg_firsttransfer first transaction, which is an e_register
   process (clk, reset_n)
   begin
     if reset_n = '0' then
-      vip_1024x768_burst_0_upstream_reg_firsttransfer <= std_logic'('1');
+      vip_sopc_burst_0_upstream_reg_firsttransfer <= std_logic'('1');
     elsif clk'event and clk = '1' then
-      if std_logic'(vip_1024x768_burst_0_upstream_begins_xfer) = '1' then 
-        vip_1024x768_burst_0_upstream_reg_firsttransfer <= vip_1024x768_burst_0_upstream_unreg_firsttransfer;
+      if std_logic'(vip_sopc_burst_0_upstream_begins_xfer) = '1' then 
+        vip_sopc_burst_0_upstream_reg_firsttransfer <= vip_sopc_burst_0_upstream_unreg_firsttransfer;
       end if;
     end if;
 
   end process;
 
-  --vip_1024x768_burst_0_upstream_next_bbt_burstcount next_bbt_burstcount, which is an e_mux
-  vip_1024x768_burst_0_upstream_next_bbt_burstcount <= A_EXT (A_WE_StdLogicVector((std_logic'((((internal_vip_1024x768_burst_0_upstream_write) AND to_std_logic((((std_logic_vector'("00000000000000000000000000") & (vip_1024x768_burst_0_upstream_bbt_burstcounter)) = std_logic_vector'("00000000000000000000000000000000"))))))) = '1'), (((std_logic_vector'("00000000000000000000000000") & (internal_vip_1024x768_burst_0_upstream_burstcount)) - std_logic_vector'("000000000000000000000000000000001"))), A_WE_StdLogicVector((std_logic'((((internal_vip_1024x768_burst_0_upstream_read) AND to_std_logic((((std_logic_vector'("00000000000000000000000000") & (vip_1024x768_burst_0_upstream_bbt_burstcounter)) = std_logic_vector'("00000000000000000000000000000000"))))))) = '1'), std_logic_vector'("000000000000000000000000000000000"), (((std_logic_vector'("000000000000000000000000000") & (vip_1024x768_burst_0_upstream_bbt_burstcounter)) - std_logic_vector'("000000000000000000000000000000001"))))), 6);
-  --vip_1024x768_burst_0_upstream_bbt_burstcounter bbt_burstcounter, which is an e_register
+  --vip_sopc_burst_0_upstream_next_bbt_burstcount next_bbt_burstcount, which is an e_mux
+  vip_sopc_burst_0_upstream_next_bbt_burstcount <= A_EXT (A_WE_StdLogicVector((std_logic'((((internal_vip_sopc_burst_0_upstream_write) AND to_std_logic((((std_logic_vector'("00000000000000000000000000") & (vip_sopc_burst_0_upstream_bbt_burstcounter)) = std_logic_vector'("00000000000000000000000000000000"))))))) = '1'), (((std_logic_vector'("00000000000000000000000000") & (internal_vip_sopc_burst_0_upstream_burstcount)) - std_logic_vector'("000000000000000000000000000000001"))), A_WE_StdLogicVector((std_logic'((((internal_vip_sopc_burst_0_upstream_read) AND to_std_logic((((std_logic_vector'("00000000000000000000000000") & (vip_sopc_burst_0_upstream_bbt_burstcounter)) = std_logic_vector'("00000000000000000000000000000000"))))))) = '1'), std_logic_vector'("000000000000000000000000000000000"), (((std_logic_vector'("000000000000000000000000000") & (vip_sopc_burst_0_upstream_bbt_burstcounter)) - std_logic_vector'("000000000000000000000000000000001"))))), 6);
+  --vip_sopc_burst_0_upstream_bbt_burstcounter bbt_burstcounter, which is an e_register
   process (clk, reset_n)
   begin
     if reset_n = '0' then
-      vip_1024x768_burst_0_upstream_bbt_burstcounter <= std_logic_vector'("000000");
+      vip_sopc_burst_0_upstream_bbt_burstcounter <= std_logic_vector'("000000");
     elsif clk'event and clk = '1' then
-      if std_logic'(vip_1024x768_burst_0_upstream_begins_xfer) = '1' then 
-        vip_1024x768_burst_0_upstream_bbt_burstcounter <= vip_1024x768_burst_0_upstream_next_bbt_burstcount;
+      if std_logic'(vip_sopc_burst_0_upstream_begins_xfer) = '1' then 
+        vip_sopc_burst_0_upstream_bbt_burstcounter <= vip_sopc_burst_0_upstream_next_bbt_burstcount;
       end if;
     end if;
 
   end process;
 
-  --vip_1024x768_burst_0_upstream_beginbursttransfer_internal begin burst transfer, which is an e_assign
-  vip_1024x768_burst_0_upstream_beginbursttransfer_internal <= vip_1024x768_burst_0_upstream_begins_xfer AND to_std_logic((((std_logic_vector'("00000000000000000000000000") & (vip_1024x768_burst_0_upstream_bbt_burstcounter)) = std_logic_vector'("00000000000000000000000000000000"))));
-  --vip_1024x768_burst_0_upstream_read assignment, which is an e_mux
-  internal_vip_1024x768_burst_0_upstream_read <= std_logic'('0');
-  --vip_1024x768_burst_0_upstream_write assignment, which is an e_mux
-  internal_vip_1024x768_burst_0_upstream_write <= internal_alt_vip_vfb_0_write_master_granted_vip_1024x768_burst_0_upstream AND alt_vip_vfb_0_write_master_write;
-  --vip_1024x768_burst_0_upstream_address mux, which is an e_mux
-  vip_1024x768_burst_0_upstream_address <= alt_vip_vfb_0_write_master_address_to_slave (28 DOWNTO 0);
-  --d1_vip_1024x768_burst_0_upstream_end_xfer register, which is an e_register
+  --vip_sopc_burst_0_upstream_beginbursttransfer_internal begin burst transfer, which is an e_assign
+  vip_sopc_burst_0_upstream_beginbursttransfer_internal <= vip_sopc_burst_0_upstream_begins_xfer AND to_std_logic((((std_logic_vector'("00000000000000000000000000") & (vip_sopc_burst_0_upstream_bbt_burstcounter)) = std_logic_vector'("00000000000000000000000000000000"))));
+  --vip_sopc_burst_0_upstream_read assignment, which is an e_mux
+  internal_vip_sopc_burst_0_upstream_read <= std_logic'('0');
+  --vip_sopc_burst_0_upstream_write assignment, which is an e_mux
+  internal_vip_sopc_burst_0_upstream_write <= internal_alt_vip_vfb_0_write_master_granted_vip_sopc_burst_0_upstream AND alt_vip_vfb_0_write_master_write;
+  --vip_sopc_burst_0_upstream_address mux, which is an e_mux
+  vip_sopc_burst_0_upstream_address <= alt_vip_vfb_0_write_master_address_to_slave (28 DOWNTO 0);
+  --d1_vip_sopc_burst_0_upstream_end_xfer register, which is an e_register
   process (clk, reset_n)
   begin
     if reset_n = '0' then
-      d1_vip_1024x768_burst_0_upstream_end_xfer <= std_logic'('1');
+      d1_vip_sopc_burst_0_upstream_end_xfer <= std_logic'('1');
     elsif clk'event and clk = '1' then
-      d1_vip_1024x768_burst_0_upstream_end_xfer <= vip_1024x768_burst_0_upstream_end_xfer;
+      d1_vip_sopc_burst_0_upstream_end_xfer <= vip_sopc_burst_0_upstream_end_xfer;
     end if;
 
   end process;
 
-  --vip_1024x768_burst_0_upstream_waits_for_read in a cycle, which is an e_mux
-  vip_1024x768_burst_0_upstream_waits_for_read <= vip_1024x768_burst_0_upstream_in_a_read_cycle AND internal_vip_1024x768_burst_0_upstream_waitrequest_from_sa;
-  --vip_1024x768_burst_0_upstream_in_a_read_cycle assignment, which is an e_assign
-  vip_1024x768_burst_0_upstream_in_a_read_cycle <= std_logic'('0');
+  --vip_sopc_burst_0_upstream_waits_for_read in a cycle, which is an e_mux
+  vip_sopc_burst_0_upstream_waits_for_read <= vip_sopc_burst_0_upstream_in_a_read_cycle AND internal_vip_sopc_burst_0_upstream_waitrequest_from_sa;
+  --vip_sopc_burst_0_upstream_in_a_read_cycle assignment, which is an e_assign
+  vip_sopc_burst_0_upstream_in_a_read_cycle <= std_logic'('0');
   --in_a_read_cycle assignment, which is an e_mux
-  in_a_read_cycle <= vip_1024x768_burst_0_upstream_in_a_read_cycle;
-  --vip_1024x768_burst_0_upstream_waits_for_write in a cycle, which is an e_mux
-  vip_1024x768_burst_0_upstream_waits_for_write <= vip_1024x768_burst_0_upstream_in_a_write_cycle AND internal_vip_1024x768_burst_0_upstream_waitrequest_from_sa;
-  --assign vip_1024x768_burst_0_upstream_readdatavalid_from_sa = vip_1024x768_burst_0_upstream_readdatavalid so that symbol knows where to group signals which may go to master only, which is an e_assign
-  vip_1024x768_burst_0_upstream_readdatavalid_from_sa <= vip_1024x768_burst_0_upstream_readdatavalid;
-  --vip_1024x768_burst_0_upstream_in_a_write_cycle assignment, which is an e_assign
-  vip_1024x768_burst_0_upstream_in_a_write_cycle <= internal_alt_vip_vfb_0_write_master_granted_vip_1024x768_burst_0_upstream AND alt_vip_vfb_0_write_master_write;
+  in_a_read_cycle <= vip_sopc_burst_0_upstream_in_a_read_cycle;
+  --vip_sopc_burst_0_upstream_waits_for_write in a cycle, which is an e_mux
+  vip_sopc_burst_0_upstream_waits_for_write <= vip_sopc_burst_0_upstream_in_a_write_cycle AND internal_vip_sopc_burst_0_upstream_waitrequest_from_sa;
+  --assign vip_sopc_burst_0_upstream_readdatavalid_from_sa = vip_sopc_burst_0_upstream_readdatavalid so that symbol knows where to group signals which may go to master only, which is an e_assign
+  vip_sopc_burst_0_upstream_readdatavalid_from_sa <= vip_sopc_burst_0_upstream_readdatavalid;
+  --vip_sopc_burst_0_upstream_in_a_write_cycle assignment, which is an e_assign
+  vip_sopc_burst_0_upstream_in_a_write_cycle <= internal_alt_vip_vfb_0_write_master_granted_vip_sopc_burst_0_upstream AND alt_vip_vfb_0_write_master_write;
   --in_a_write_cycle assignment, which is an e_mux
-  in_a_write_cycle <= vip_1024x768_burst_0_upstream_in_a_write_cycle;
-  wait_for_vip_1024x768_burst_0_upstream_counter <= std_logic'('0');
-  --vip_1024x768_burst_0_upstream_byteenable byte enable port mux, which is an e_mux
-  vip_1024x768_burst_0_upstream_byteenable <= A_WE_StdLogicVector((std_logic'((internal_alt_vip_vfb_0_write_master_granted_vip_1024x768_burst_0_upstream)) = '1'), A_REP(std_logic'('1'), 32), -SIGNED(std_logic_vector'("00000000000000000000000000000001")));
+  in_a_write_cycle <= vip_sopc_burst_0_upstream_in_a_write_cycle;
+  wait_for_vip_sopc_burst_0_upstream_counter <= std_logic'('0');
+  --vip_sopc_burst_0_upstream_byteenable byte enable port mux, which is an e_mux
+  vip_sopc_burst_0_upstream_byteenable <= A_WE_StdLogicVector((std_logic'((internal_alt_vip_vfb_0_write_master_granted_vip_sopc_burst_0_upstream)) = '1'), A_REP(std_logic'('1'), 32), -SIGNED(std_logic_vector'("00000000000000000000000000000001")));
   --burstcount mux, which is an e_mux
-  internal_vip_1024x768_burst_0_upstream_burstcount <= A_EXT (A_WE_StdLogicVector((std_logic'((internal_alt_vip_vfb_0_write_master_granted_vip_1024x768_burst_0_upstream)) = '1'), (std_logic_vector'("0000000000000000000000000") & (alt_vip_vfb_0_write_master_burstcount)), std_logic_vector'("00000000000000000000000000000001")), 7);
+  internal_vip_sopc_burst_0_upstream_burstcount <= A_EXT (A_WE_StdLogicVector((std_logic'((internal_alt_vip_vfb_0_write_master_granted_vip_sopc_burst_0_upstream)) = '1'), (std_logic_vector'("0000000000000000000000000") & (alt_vip_vfb_0_write_master_burstcount)), std_logic_vector'("00000000000000000000000000000001")), 7);
   --debugaccess mux, which is an e_mux
-  vip_1024x768_burst_0_upstream_debugaccess <= std_logic'('0');
+  vip_sopc_burst_0_upstream_debugaccess <= std_logic'('0');
   --vhdl renameroo for output signals
-  alt_vip_vfb_0_write_master_granted_vip_1024x768_burst_0_upstream <= internal_alt_vip_vfb_0_write_master_granted_vip_1024x768_burst_0_upstream;
+  alt_vip_vfb_0_write_master_granted_vip_sopc_burst_0_upstream <= internal_alt_vip_vfb_0_write_master_granted_vip_sopc_burst_0_upstream;
   --vhdl renameroo for output signals
-  alt_vip_vfb_0_write_master_qualified_request_vip_1024x768_burst_0_upstream <= internal_alt_vip_vfb_0_write_master_qualified_request_vip_1024x768_burst_0_upstream;
+  alt_vip_vfb_0_write_master_qualified_request_vip_sopc_burst_0_upstream <= internal_alt_vip_vfb_0_write_master_qualified_request_vip_sopc_burst_0_upstream;
   --vhdl renameroo for output signals
-  alt_vip_vfb_0_write_master_requests_vip_1024x768_burst_0_upstream <= internal_alt_vip_vfb_0_write_master_requests_vip_1024x768_burst_0_upstream;
+  alt_vip_vfb_0_write_master_requests_vip_sopc_burst_0_upstream <= internal_alt_vip_vfb_0_write_master_requests_vip_sopc_burst_0_upstream;
   --vhdl renameroo for output signals
-  vip_1024x768_burst_0_upstream_burstcount <= internal_vip_1024x768_burst_0_upstream_burstcount;
+  vip_sopc_burst_0_upstream_burstcount <= internal_vip_sopc_burst_0_upstream_burstcount;
   --vhdl renameroo for output signals
-  vip_1024x768_burst_0_upstream_read <= internal_vip_1024x768_burst_0_upstream_read;
+  vip_sopc_burst_0_upstream_read <= internal_vip_sopc_burst_0_upstream_read;
   --vhdl renameroo for output signals
-  vip_1024x768_burst_0_upstream_waitrequest_from_sa <= internal_vip_1024x768_burst_0_upstream_waitrequest_from_sa;
+  vip_sopc_burst_0_upstream_waitrequest_from_sa <= internal_vip_sopc_burst_0_upstream_waitrequest_from_sa;
   --vhdl renameroo for output signals
-  vip_1024x768_burst_0_upstream_write <= internal_vip_1024x768_burst_0_upstream_write;
+  vip_sopc_burst_0_upstream_write <= internal_vip_sopc_burst_0_upstream_write;
 --synthesis translate_off
-    --vip_1024x768_burst_0/upstream enable non-zero assertions, which is an e_register
+    --vip_sopc_burst_0/upstream enable non-zero assertions, which is an e_register
     process (clk, reset_n)
     begin
       if reset_n = '0' then
@@ -5971,10 +5971,10 @@ begin
     VARIABLE write_line13 : line;
     begin
       if clk'event and clk = '1' then
-        if std_logic'(((internal_alt_vip_vfb_0_write_master_requests_vip_1024x768_burst_0_upstream AND to_std_logic((((std_logic_vector'("0000000000000000000000000") & (alt_vip_vfb_0_write_master_burstcount)) = std_logic_vector'("00000000000000000000000000000000"))))) AND enable_nonzero_assertions)) = '1' then 
+        if std_logic'(((internal_alt_vip_vfb_0_write_master_requests_vip_sopc_burst_0_upstream AND to_std_logic((((std_logic_vector'("0000000000000000000000000") & (alt_vip_vfb_0_write_master_burstcount)) = std_logic_vector'("00000000000000000000000000000000"))))) AND enable_nonzero_assertions)) = '1' then 
           write(write_line13, now);
           write(write_line13, string'(": "));
-          write(write_line13, string'("alt_vip_vfb_0/write_master drove 0 on its 'burstcount' port while accessing slave vip_1024x768_burst_0/upstream"));
+          write(write_line13, string'("alt_vip_vfb_0/write_master drove 0 on its 'burstcount' port while accessing slave vip_sopc_burst_0/upstream"));
           write(output, write_line13.all);
           deallocate (write_line13);
           assert false report "VHDL STOP" severity failure;
@@ -6004,7 +6004,7 @@ use ieee.std_logic_unsigned.all;
 library std;
 use std.textio.all;
 
-entity vip_1024x768_burst_0_downstream_arbitrator is 
+entity vip_sopc_burst_0_downstream_arbitrator is 
         port (
               -- inputs:
                  signal altmemddr_0_s1_readdata_from_sa : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
@@ -6012,132 +6012,132 @@ entity vip_1024x768_burst_0_downstream_arbitrator is
                  signal clk : IN STD_LOGIC;
                  signal d1_altmemddr_0_s1_end_xfer : IN STD_LOGIC;
                  signal reset_n : IN STD_LOGIC;
-                 signal vip_1024x768_burst_0_downstream_address : IN STD_LOGIC_VECTOR (28 DOWNTO 0);
-                 signal vip_1024x768_burst_0_downstream_burstcount : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
-                 signal vip_1024x768_burst_0_downstream_byteenable : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
-                 signal vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1 : IN STD_LOGIC;
-                 signal vip_1024x768_burst_0_downstream_qualified_request_altmemddr_0_s1 : IN STD_LOGIC;
-                 signal vip_1024x768_burst_0_downstream_read : IN STD_LOGIC;
-                 signal vip_1024x768_burst_0_downstream_read_data_valid_altmemddr_0_s1 : IN STD_LOGIC;
-                 signal vip_1024x768_burst_0_downstream_read_data_valid_altmemddr_0_s1_shift_register : IN STD_LOGIC;
-                 signal vip_1024x768_burst_0_downstream_requests_altmemddr_0_s1 : IN STD_LOGIC;
-                 signal vip_1024x768_burst_0_downstream_write : IN STD_LOGIC;
-                 signal vip_1024x768_burst_0_downstream_writedata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
+                 signal vip_sopc_burst_0_downstream_address : IN STD_LOGIC_VECTOR (28 DOWNTO 0);
+                 signal vip_sopc_burst_0_downstream_burstcount : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
+                 signal vip_sopc_burst_0_downstream_byteenable : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+                 signal vip_sopc_burst_0_downstream_granted_altmemddr_0_s1 : IN STD_LOGIC;
+                 signal vip_sopc_burst_0_downstream_qualified_request_altmemddr_0_s1 : IN STD_LOGIC;
+                 signal vip_sopc_burst_0_downstream_read : IN STD_LOGIC;
+                 signal vip_sopc_burst_0_downstream_read_data_valid_altmemddr_0_s1 : IN STD_LOGIC;
+                 signal vip_sopc_burst_0_downstream_read_data_valid_altmemddr_0_s1_shift_register : IN STD_LOGIC;
+                 signal vip_sopc_burst_0_downstream_requests_altmemddr_0_s1 : IN STD_LOGIC;
+                 signal vip_sopc_burst_0_downstream_write : IN STD_LOGIC;
+                 signal vip_sopc_burst_0_downstream_writedata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
 
               -- outputs:
-                 signal vip_1024x768_burst_0_downstream_address_to_slave : OUT STD_LOGIC_VECTOR (28 DOWNTO 0);
-                 signal vip_1024x768_burst_0_downstream_latency_counter : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_0_downstream_readdata : OUT STD_LOGIC_VECTOR (255 DOWNTO 0);
-                 signal vip_1024x768_burst_0_downstream_readdatavalid : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_0_downstream_reset_n : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_0_downstream_waitrequest : OUT STD_LOGIC
+                 signal vip_sopc_burst_0_downstream_address_to_slave : OUT STD_LOGIC_VECTOR (28 DOWNTO 0);
+                 signal vip_sopc_burst_0_downstream_latency_counter : OUT STD_LOGIC;
+                 signal vip_sopc_burst_0_downstream_readdata : OUT STD_LOGIC_VECTOR (255 DOWNTO 0);
+                 signal vip_sopc_burst_0_downstream_readdatavalid : OUT STD_LOGIC;
+                 signal vip_sopc_burst_0_downstream_reset_n : OUT STD_LOGIC;
+                 signal vip_sopc_burst_0_downstream_waitrequest : OUT STD_LOGIC
               );
-end entity vip_1024x768_burst_0_downstream_arbitrator;
+end entity vip_sopc_burst_0_downstream_arbitrator;
 
 
-architecture europa of vip_1024x768_burst_0_downstream_arbitrator is
+architecture europa of vip_sopc_burst_0_downstream_arbitrator is
                 signal active_and_waiting_last_time :  STD_LOGIC;
-                signal internal_vip_1024x768_burst_0_downstream_address_to_slave :  STD_LOGIC_VECTOR (28 DOWNTO 0);
-                signal internal_vip_1024x768_burst_0_downstream_latency_counter :  STD_LOGIC;
-                signal internal_vip_1024x768_burst_0_downstream_waitrequest :  STD_LOGIC;
+                signal internal_vip_sopc_burst_0_downstream_address_to_slave :  STD_LOGIC_VECTOR (28 DOWNTO 0);
+                signal internal_vip_sopc_burst_0_downstream_latency_counter :  STD_LOGIC;
+                signal internal_vip_sopc_burst_0_downstream_waitrequest :  STD_LOGIC;
                 signal latency_load_value :  STD_LOGIC;
-                signal p1_vip_1024x768_burst_0_downstream_latency_counter :  STD_LOGIC;
-                signal pre_flush_vip_1024x768_burst_0_downstream_readdatavalid :  STD_LOGIC;
+                signal p1_vip_sopc_burst_0_downstream_latency_counter :  STD_LOGIC;
+                signal pre_flush_vip_sopc_burst_0_downstream_readdatavalid :  STD_LOGIC;
                 signal r_0 :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_address_last_time :  STD_LOGIC_VECTOR (28 DOWNTO 0);
-                signal vip_1024x768_burst_0_downstream_burstcount_last_time :  STD_LOGIC_VECTOR (2 DOWNTO 0);
-                signal vip_1024x768_burst_0_downstream_byteenable_last_time :  STD_LOGIC_VECTOR (31 DOWNTO 0);
-                signal vip_1024x768_burst_0_downstream_is_granted_some_slave :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_read_but_no_slave_selected :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_read_last_time :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_run :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_write_last_time :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_writedata_last_time :  STD_LOGIC_VECTOR (255 DOWNTO 0);
+                signal vip_sopc_burst_0_downstream_address_last_time :  STD_LOGIC_VECTOR (28 DOWNTO 0);
+                signal vip_sopc_burst_0_downstream_burstcount_last_time :  STD_LOGIC_VECTOR (2 DOWNTO 0);
+                signal vip_sopc_burst_0_downstream_byteenable_last_time :  STD_LOGIC_VECTOR (31 DOWNTO 0);
+                signal vip_sopc_burst_0_downstream_is_granted_some_slave :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_read_but_no_slave_selected :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_read_last_time :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_run :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_write_last_time :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_writedata_last_time :  STD_LOGIC_VECTOR (255 DOWNTO 0);
 
 begin
 
   --r_0 master_run cascaded wait assignment, which is an e_assign
-  r_0 <= Vector_To_Std_Logic(((((std_logic_vector'("00000000000000000000000000000001") AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(((vip_1024x768_burst_0_downstream_qualified_request_altmemddr_0_s1 OR NOT vip_1024x768_burst_0_downstream_requests_altmemddr_0_s1)))))) AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(((vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1 OR NOT vip_1024x768_burst_0_downstream_qualified_request_altmemddr_0_s1)))))) AND (((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR((NOT vip_1024x768_burst_0_downstream_qualified_request_altmemddr_0_s1 OR NOT ((vip_1024x768_burst_0_downstream_read OR vip_1024x768_burst_0_downstream_write)))))) OR (((std_logic_vector'("00000000000000000000000000000001") AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(altmemddr_0_s1_waitrequest_n_from_sa)))) AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(((vip_1024x768_burst_0_downstream_read OR vip_1024x768_burst_0_downstream_write)))))))))) AND (((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR((NOT vip_1024x768_burst_0_downstream_qualified_request_altmemddr_0_s1 OR NOT ((vip_1024x768_burst_0_downstream_read OR vip_1024x768_burst_0_downstream_write)))))) OR (((std_logic_vector'("00000000000000000000000000000001") AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(altmemddr_0_s1_waitrequest_n_from_sa)))) AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(((vip_1024x768_burst_0_downstream_read OR vip_1024x768_burst_0_downstream_write)))))))))));
+  r_0 <= Vector_To_Std_Logic(((((std_logic_vector'("00000000000000000000000000000001") AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(((vip_sopc_burst_0_downstream_qualified_request_altmemddr_0_s1 OR NOT vip_sopc_burst_0_downstream_requests_altmemddr_0_s1)))))) AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(((vip_sopc_burst_0_downstream_granted_altmemddr_0_s1 OR NOT vip_sopc_burst_0_downstream_qualified_request_altmemddr_0_s1)))))) AND (((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR((NOT vip_sopc_burst_0_downstream_qualified_request_altmemddr_0_s1 OR NOT ((vip_sopc_burst_0_downstream_read OR vip_sopc_burst_0_downstream_write)))))) OR (((std_logic_vector'("00000000000000000000000000000001") AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(altmemddr_0_s1_waitrequest_n_from_sa)))) AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(((vip_sopc_burst_0_downstream_read OR vip_sopc_burst_0_downstream_write)))))))))) AND (((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR((NOT vip_sopc_burst_0_downstream_qualified_request_altmemddr_0_s1 OR NOT ((vip_sopc_burst_0_downstream_read OR vip_sopc_burst_0_downstream_write)))))) OR (((std_logic_vector'("00000000000000000000000000000001") AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(altmemddr_0_s1_waitrequest_n_from_sa)))) AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(((vip_sopc_burst_0_downstream_read OR vip_sopc_burst_0_downstream_write)))))))))));
   --cascaded wait assignment, which is an e_assign
-  vip_1024x768_burst_0_downstream_run <= r_0;
+  vip_sopc_burst_0_downstream_run <= r_0;
   --optimize select-logic by passing only those address bits which matter.
-  internal_vip_1024x768_burst_0_downstream_address_to_slave <= vip_1024x768_burst_0_downstream_address;
-  --vip_1024x768_burst_0_downstream_read_but_no_slave_selected assignment, which is an e_register
+  internal_vip_sopc_burst_0_downstream_address_to_slave <= vip_sopc_burst_0_downstream_address;
+  --vip_sopc_burst_0_downstream_read_but_no_slave_selected assignment, which is an e_register
   process (clk, reset_n)
   begin
     if reset_n = '0' then
-      vip_1024x768_burst_0_downstream_read_but_no_slave_selected <= std_logic'('0');
+      vip_sopc_burst_0_downstream_read_but_no_slave_selected <= std_logic'('0');
     elsif clk'event and clk = '1' then
-      vip_1024x768_burst_0_downstream_read_but_no_slave_selected <= (vip_1024x768_burst_0_downstream_read AND vip_1024x768_burst_0_downstream_run) AND NOT vip_1024x768_burst_0_downstream_is_granted_some_slave;
+      vip_sopc_burst_0_downstream_read_but_no_slave_selected <= (vip_sopc_burst_0_downstream_read AND vip_sopc_burst_0_downstream_run) AND NOT vip_sopc_burst_0_downstream_is_granted_some_slave;
     end if;
 
   end process;
 
   --some slave is getting selected, which is an e_mux
-  vip_1024x768_burst_0_downstream_is_granted_some_slave <= vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1;
+  vip_sopc_burst_0_downstream_is_granted_some_slave <= vip_sopc_burst_0_downstream_granted_altmemddr_0_s1;
   --latent slave read data valids which may be flushed, which is an e_mux
-  pre_flush_vip_1024x768_burst_0_downstream_readdatavalid <= vip_1024x768_burst_0_downstream_read_data_valid_altmemddr_0_s1;
+  pre_flush_vip_sopc_burst_0_downstream_readdatavalid <= vip_sopc_burst_0_downstream_read_data_valid_altmemddr_0_s1;
   --latent slave read data valid which is not flushed, which is an e_mux
-  vip_1024x768_burst_0_downstream_readdatavalid <= vip_1024x768_burst_0_downstream_read_but_no_slave_selected OR pre_flush_vip_1024x768_burst_0_downstream_readdatavalid;
-  --vip_1024x768_burst_0/downstream readdata mux, which is an e_mux
-  vip_1024x768_burst_0_downstream_readdata <= altmemddr_0_s1_readdata_from_sa;
+  vip_sopc_burst_0_downstream_readdatavalid <= vip_sopc_burst_0_downstream_read_but_no_slave_selected OR pre_flush_vip_sopc_burst_0_downstream_readdatavalid;
+  --vip_sopc_burst_0/downstream readdata mux, which is an e_mux
+  vip_sopc_burst_0_downstream_readdata <= altmemddr_0_s1_readdata_from_sa;
   --actual waitrequest port, which is an e_assign
-  internal_vip_1024x768_burst_0_downstream_waitrequest <= NOT vip_1024x768_burst_0_downstream_run;
+  internal_vip_sopc_burst_0_downstream_waitrequest <= NOT vip_sopc_burst_0_downstream_run;
   --latent max counter, which is an e_register
   process (clk, reset_n)
   begin
     if reset_n = '0' then
-      internal_vip_1024x768_burst_0_downstream_latency_counter <= std_logic'('0');
+      internal_vip_sopc_burst_0_downstream_latency_counter <= std_logic'('0');
     elsif clk'event and clk = '1' then
-      internal_vip_1024x768_burst_0_downstream_latency_counter <= p1_vip_1024x768_burst_0_downstream_latency_counter;
+      internal_vip_sopc_burst_0_downstream_latency_counter <= p1_vip_sopc_burst_0_downstream_latency_counter;
     end if;
 
   end process;
 
   --latency counter load mux, which is an e_mux
-  p1_vip_1024x768_burst_0_downstream_latency_counter <= Vector_To_Std_Logic(A_WE_StdLogicVector((std_logic'(((vip_1024x768_burst_0_downstream_run AND vip_1024x768_burst_0_downstream_read))) = '1'), (std_logic_vector'("00000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(latency_load_value))), A_WE_StdLogicVector((std_logic'((internal_vip_1024x768_burst_0_downstream_latency_counter)) = '1'), ((std_logic_vector'("00000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(internal_vip_1024x768_burst_0_downstream_latency_counter))) - std_logic_vector'("000000000000000000000000000000001")), std_logic_vector'("000000000000000000000000000000000"))));
+  p1_vip_sopc_burst_0_downstream_latency_counter <= Vector_To_Std_Logic(A_WE_StdLogicVector((std_logic'(((vip_sopc_burst_0_downstream_run AND vip_sopc_burst_0_downstream_read))) = '1'), (std_logic_vector'("00000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(latency_load_value))), A_WE_StdLogicVector((std_logic'((internal_vip_sopc_burst_0_downstream_latency_counter)) = '1'), ((std_logic_vector'("00000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(internal_vip_sopc_burst_0_downstream_latency_counter))) - std_logic_vector'("000000000000000000000000000000001")), std_logic_vector'("000000000000000000000000000000000"))));
   --read latency load values, which is an e_mux
   latency_load_value <= std_logic'('0');
-  --vip_1024x768_burst_0_downstream_reset_n assignment, which is an e_assign
-  vip_1024x768_burst_0_downstream_reset_n <= reset_n;
+  --vip_sopc_burst_0_downstream_reset_n assignment, which is an e_assign
+  vip_sopc_burst_0_downstream_reset_n <= reset_n;
   --vhdl renameroo for output signals
-  vip_1024x768_burst_0_downstream_address_to_slave <= internal_vip_1024x768_burst_0_downstream_address_to_slave;
+  vip_sopc_burst_0_downstream_address_to_slave <= internal_vip_sopc_burst_0_downstream_address_to_slave;
   --vhdl renameroo for output signals
-  vip_1024x768_burst_0_downstream_latency_counter <= internal_vip_1024x768_burst_0_downstream_latency_counter;
+  vip_sopc_burst_0_downstream_latency_counter <= internal_vip_sopc_burst_0_downstream_latency_counter;
   --vhdl renameroo for output signals
-  vip_1024x768_burst_0_downstream_waitrequest <= internal_vip_1024x768_burst_0_downstream_waitrequest;
+  vip_sopc_burst_0_downstream_waitrequest <= internal_vip_sopc_burst_0_downstream_waitrequest;
 --synthesis translate_off
-    --vip_1024x768_burst_0_downstream_address check against wait, which is an e_register
+    --vip_sopc_burst_0_downstream_address check against wait, which is an e_register
     process (clk, reset_n)
     begin
       if reset_n = '0' then
-        vip_1024x768_burst_0_downstream_address_last_time <= std_logic_vector'("00000000000000000000000000000");
+        vip_sopc_burst_0_downstream_address_last_time <= std_logic_vector'("00000000000000000000000000000");
       elsif clk'event and clk = '1' then
-        vip_1024x768_burst_0_downstream_address_last_time <= vip_1024x768_burst_0_downstream_address;
+        vip_sopc_burst_0_downstream_address_last_time <= vip_sopc_burst_0_downstream_address;
       end if;
 
     end process;
 
-    --vip_1024x768_burst_0/downstream waited last time, which is an e_register
+    --vip_sopc_burst_0/downstream waited last time, which is an e_register
     process (clk, reset_n)
     begin
       if reset_n = '0' then
         active_and_waiting_last_time <= std_logic'('0');
       elsif clk'event and clk = '1' then
-        active_and_waiting_last_time <= internal_vip_1024x768_burst_0_downstream_waitrequest AND ((vip_1024x768_burst_0_downstream_read OR vip_1024x768_burst_0_downstream_write));
+        active_and_waiting_last_time <= internal_vip_sopc_burst_0_downstream_waitrequest AND ((vip_sopc_burst_0_downstream_read OR vip_sopc_burst_0_downstream_write));
       end if;
 
     end process;
 
-    --vip_1024x768_burst_0_downstream_address matches last port_name, which is an e_process
+    --vip_sopc_burst_0_downstream_address matches last port_name, which is an e_process
     process (clk)
     VARIABLE write_line14 : line;
     begin
       if clk'event and clk = '1' then
-        if std_logic'((active_and_waiting_last_time AND to_std_logic(((vip_1024x768_burst_0_downstream_address /= vip_1024x768_burst_0_downstream_address_last_time))))) = '1' then 
+        if std_logic'((active_and_waiting_last_time AND to_std_logic(((vip_sopc_burst_0_downstream_address /= vip_sopc_burst_0_downstream_address_last_time))))) = '1' then 
           write(write_line14, now);
           write(write_line14, string'(": "));
-          write(write_line14, string'("vip_1024x768_burst_0_downstream_address did not heed wait!!!"));
+          write(write_line14, string'("vip_sopc_burst_0_downstream_address did not heed wait!!!"));
           write(output, write_line14.all);
           deallocate (write_line14);
           assert false report "VHDL STOP" severity failure;
@@ -6146,26 +6146,26 @@ begin
 
     end process;
 
-    --vip_1024x768_burst_0_downstream_burstcount check against wait, which is an e_register
+    --vip_sopc_burst_0_downstream_burstcount check against wait, which is an e_register
     process (clk, reset_n)
     begin
       if reset_n = '0' then
-        vip_1024x768_burst_0_downstream_burstcount_last_time <= std_logic_vector'("000");
+        vip_sopc_burst_0_downstream_burstcount_last_time <= std_logic_vector'("000");
       elsif clk'event and clk = '1' then
-        vip_1024x768_burst_0_downstream_burstcount_last_time <= vip_1024x768_burst_0_downstream_burstcount;
+        vip_sopc_burst_0_downstream_burstcount_last_time <= vip_sopc_burst_0_downstream_burstcount;
       end if;
 
     end process;
 
-    --vip_1024x768_burst_0_downstream_burstcount matches last port_name, which is an e_process
+    --vip_sopc_burst_0_downstream_burstcount matches last port_name, which is an e_process
     process (clk)
     VARIABLE write_line15 : line;
     begin
       if clk'event and clk = '1' then
-        if std_logic'((active_and_waiting_last_time AND to_std_logic(((vip_1024x768_burst_0_downstream_burstcount /= vip_1024x768_burst_0_downstream_burstcount_last_time))))) = '1' then 
+        if std_logic'((active_and_waiting_last_time AND to_std_logic(((vip_sopc_burst_0_downstream_burstcount /= vip_sopc_burst_0_downstream_burstcount_last_time))))) = '1' then 
           write(write_line15, now);
           write(write_line15, string'(": "));
-          write(write_line15, string'("vip_1024x768_burst_0_downstream_burstcount did not heed wait!!!"));
+          write(write_line15, string'("vip_sopc_burst_0_downstream_burstcount did not heed wait!!!"));
           write(output, write_line15.all);
           deallocate (write_line15);
           assert false report "VHDL STOP" severity failure;
@@ -6174,26 +6174,26 @@ begin
 
     end process;
 
-    --vip_1024x768_burst_0_downstream_byteenable check against wait, which is an e_register
+    --vip_sopc_burst_0_downstream_byteenable check against wait, which is an e_register
     process (clk, reset_n)
     begin
       if reset_n = '0' then
-        vip_1024x768_burst_0_downstream_byteenable_last_time <= std_logic_vector'("00000000000000000000000000000000");
+        vip_sopc_burst_0_downstream_byteenable_last_time <= std_logic_vector'("00000000000000000000000000000000");
       elsif clk'event and clk = '1' then
-        vip_1024x768_burst_0_downstream_byteenable_last_time <= vip_1024x768_burst_0_downstream_byteenable;
+        vip_sopc_burst_0_downstream_byteenable_last_time <= vip_sopc_burst_0_downstream_byteenable;
       end if;
 
     end process;
 
-    --vip_1024x768_burst_0_downstream_byteenable matches last port_name, which is an e_process
+    --vip_sopc_burst_0_downstream_byteenable matches last port_name, which is an e_process
     process (clk)
     VARIABLE write_line16 : line;
     begin
       if clk'event and clk = '1' then
-        if std_logic'((active_and_waiting_last_time AND to_std_logic(((vip_1024x768_burst_0_downstream_byteenable /= vip_1024x768_burst_0_downstream_byteenable_last_time))))) = '1' then 
+        if std_logic'((active_and_waiting_last_time AND to_std_logic(((vip_sopc_burst_0_downstream_byteenable /= vip_sopc_burst_0_downstream_byteenable_last_time))))) = '1' then 
           write(write_line16, now);
           write(write_line16, string'(": "));
-          write(write_line16, string'("vip_1024x768_burst_0_downstream_byteenable did not heed wait!!!"));
+          write(write_line16, string'("vip_sopc_burst_0_downstream_byteenable did not heed wait!!!"));
           write(output, write_line16.all);
           deallocate (write_line16);
           assert false report "VHDL STOP" severity failure;
@@ -6202,26 +6202,26 @@ begin
 
     end process;
 
-    --vip_1024x768_burst_0_downstream_read check against wait, which is an e_register
+    --vip_sopc_burst_0_downstream_read check against wait, which is an e_register
     process (clk, reset_n)
     begin
       if reset_n = '0' then
-        vip_1024x768_burst_0_downstream_read_last_time <= std_logic'('0');
+        vip_sopc_burst_0_downstream_read_last_time <= std_logic'('0');
       elsif clk'event and clk = '1' then
-        vip_1024x768_burst_0_downstream_read_last_time <= vip_1024x768_burst_0_downstream_read;
+        vip_sopc_burst_0_downstream_read_last_time <= vip_sopc_burst_0_downstream_read;
       end if;
 
     end process;
 
-    --vip_1024x768_burst_0_downstream_read matches last port_name, which is an e_process
+    --vip_sopc_burst_0_downstream_read matches last port_name, which is an e_process
     process (clk)
     VARIABLE write_line17 : line;
     begin
       if clk'event and clk = '1' then
-        if std_logic'((active_and_waiting_last_time AND to_std_logic(((std_logic'(vip_1024x768_burst_0_downstream_read) /= std_logic'(vip_1024x768_burst_0_downstream_read_last_time)))))) = '1' then 
+        if std_logic'((active_and_waiting_last_time AND to_std_logic(((std_logic'(vip_sopc_burst_0_downstream_read) /= std_logic'(vip_sopc_burst_0_downstream_read_last_time)))))) = '1' then 
           write(write_line17, now);
           write(write_line17, string'(": "));
-          write(write_line17, string'("vip_1024x768_burst_0_downstream_read did not heed wait!!!"));
+          write(write_line17, string'("vip_sopc_burst_0_downstream_read did not heed wait!!!"));
           write(output, write_line17.all);
           deallocate (write_line17);
           assert false report "VHDL STOP" severity failure;
@@ -6230,26 +6230,26 @@ begin
 
     end process;
 
-    --vip_1024x768_burst_0_downstream_write check against wait, which is an e_register
+    --vip_sopc_burst_0_downstream_write check against wait, which is an e_register
     process (clk, reset_n)
     begin
       if reset_n = '0' then
-        vip_1024x768_burst_0_downstream_write_last_time <= std_logic'('0');
+        vip_sopc_burst_0_downstream_write_last_time <= std_logic'('0');
       elsif clk'event and clk = '1' then
-        vip_1024x768_burst_0_downstream_write_last_time <= vip_1024x768_burst_0_downstream_write;
+        vip_sopc_burst_0_downstream_write_last_time <= vip_sopc_burst_0_downstream_write;
       end if;
 
     end process;
 
-    --vip_1024x768_burst_0_downstream_write matches last port_name, which is an e_process
+    --vip_sopc_burst_0_downstream_write matches last port_name, which is an e_process
     process (clk)
     VARIABLE write_line18 : line;
     begin
       if clk'event and clk = '1' then
-        if std_logic'((active_and_waiting_last_time AND to_std_logic(((std_logic'(vip_1024x768_burst_0_downstream_write) /= std_logic'(vip_1024x768_burst_0_downstream_write_last_time)))))) = '1' then 
+        if std_logic'((active_and_waiting_last_time AND to_std_logic(((std_logic'(vip_sopc_burst_0_downstream_write) /= std_logic'(vip_sopc_burst_0_downstream_write_last_time)))))) = '1' then 
           write(write_line18, now);
           write(write_line18, string'(": "));
-          write(write_line18, string'("vip_1024x768_burst_0_downstream_write did not heed wait!!!"));
+          write(write_line18, string'("vip_sopc_burst_0_downstream_write did not heed wait!!!"));
           write(output, write_line18.all);
           deallocate (write_line18);
           assert false report "VHDL STOP" severity failure;
@@ -6258,26 +6258,26 @@ begin
 
     end process;
 
-    --vip_1024x768_burst_0_downstream_writedata check against wait, which is an e_register
+    --vip_sopc_burst_0_downstream_writedata check against wait, which is an e_register
     process (clk, reset_n)
     begin
       if reset_n = '0' then
-        vip_1024x768_burst_0_downstream_writedata_last_time <= std_logic_vector'("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+        vip_sopc_burst_0_downstream_writedata_last_time <= std_logic_vector'("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
       elsif clk'event and clk = '1' then
-        vip_1024x768_burst_0_downstream_writedata_last_time <= vip_1024x768_burst_0_downstream_writedata;
+        vip_sopc_burst_0_downstream_writedata_last_time <= vip_sopc_burst_0_downstream_writedata;
       end if;
 
     end process;
 
-    --vip_1024x768_burst_0_downstream_writedata matches last port_name, which is an e_process
+    --vip_sopc_burst_0_downstream_writedata matches last port_name, which is an e_process
     process (clk)
     VARIABLE write_line19 : line;
     begin
       if clk'event and clk = '1' then
-        if std_logic'(((active_and_waiting_last_time AND to_std_logic(((vip_1024x768_burst_0_downstream_writedata /= vip_1024x768_burst_0_downstream_writedata_last_time)))) AND vip_1024x768_burst_0_downstream_write)) = '1' then 
+        if std_logic'(((active_and_waiting_last_time AND to_std_logic(((vip_sopc_burst_0_downstream_writedata /= vip_sopc_burst_0_downstream_writedata_last_time)))) AND vip_sopc_burst_0_downstream_write)) = '1' then 
           write(write_line19, now);
           write(write_line19, string'(": "));
-          write(write_line19, string'("vip_1024x768_burst_0_downstream_writedata did not heed wait!!!"));
+          write(write_line19, string'("vip_sopc_burst_0_downstream_writedata did not heed wait!!!"));
           write(output, write_line19.all);
           deallocate (write_line19);
           assert false report "VHDL STOP" severity failure;
@@ -6304,7 +6304,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 
-entity burstcount_fifo_for_vip_1024x768_burst_1_upstream_module is 
+entity burstcount_fifo_for_vip_sopc_burst_1_upstream_module is 
         port (
               -- inputs:
                  signal clear_fifo : IN STD_LOGIC;
@@ -6321,10 +6321,10 @@ entity burstcount_fifo_for_vip_1024x768_burst_1_upstream_module is
                  signal fifo_contains_ones_n : OUT STD_LOGIC;
                  signal full : OUT STD_LOGIC
               );
-end entity burstcount_fifo_for_vip_1024x768_burst_1_upstream_module;
+end entity burstcount_fifo_for_vip_sopc_burst_1_upstream_module;
 
 
-architecture europa of burstcount_fifo_for_vip_1024x768_burst_1_upstream_module is
+architecture europa of burstcount_fifo_for_vip_sopc_burst_1_upstream_module is
                 signal full_0 :  STD_LOGIC;
                 signal full_1 :  STD_LOGIC;
                 signal full_10 :  STD_LOGIC;
@@ -7812,7 +7812,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 
-entity rdv_fifo_for_alt_vip_vfb_0_read_master_to_vip_1024x768_burst_1_upstream_module is 
+entity rdv_fifo_for_alt_vip_vfb_0_read_master_to_vip_sopc_burst_1_upstream_module is 
         port (
               -- inputs:
                  signal clear_fifo : IN STD_LOGIC;
@@ -7829,10 +7829,10 @@ entity rdv_fifo_for_alt_vip_vfb_0_read_master_to_vip_1024x768_burst_1_upstream_m
                  signal fifo_contains_ones_n : OUT STD_LOGIC;
                  signal full : OUT STD_LOGIC
               );
-end entity rdv_fifo_for_alt_vip_vfb_0_read_master_to_vip_1024x768_burst_1_upstream_module;
+end entity rdv_fifo_for_alt_vip_vfb_0_read_master_to_vip_sopc_burst_1_upstream_module;
 
 
-architecture europa of rdv_fifo_for_alt_vip_vfb_0_read_master_to_vip_1024x768_burst_1_upstream_module is
+architecture europa of rdv_fifo_for_alt_vip_vfb_0_read_master_to_vip_sopc_burst_1_upstream_module is
                 signal full_0 :  STD_LOGIC;
                 signal full_1 :  STD_LOGIC;
                 signal full_10 :  STD_LOGIC;
@@ -9323,7 +9323,7 @@ use ieee.std_logic_unsigned.all;
 library std;
 use std.textio.all;
 
-entity vip_1024x768_burst_1_upstream_arbitrator is 
+entity vip_sopc_burst_1_upstream_arbitrator is 
         port (
               -- inputs:
                  signal alt_vip_vfb_0_read_master_address_to_slave : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
@@ -9332,32 +9332,32 @@ entity vip_1024x768_burst_1_upstream_arbitrator is
                  signal alt_vip_vfb_0_read_master_read : IN STD_LOGIC;
                  signal clk : IN STD_LOGIC;
                  signal reset_n : IN STD_LOGIC;
-                 signal vip_1024x768_burst_1_upstream_readdata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
-                 signal vip_1024x768_burst_1_upstream_readdatavalid : IN STD_LOGIC;
-                 signal vip_1024x768_burst_1_upstream_waitrequest : IN STD_LOGIC;
+                 signal vip_sopc_burst_1_upstream_readdata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
+                 signal vip_sopc_burst_1_upstream_readdatavalid : IN STD_LOGIC;
+                 signal vip_sopc_burst_1_upstream_waitrequest : IN STD_LOGIC;
 
               -- outputs:
-                 signal alt_vip_vfb_0_read_master_granted_vip_1024x768_burst_1_upstream : OUT STD_LOGIC;
-                 signal alt_vip_vfb_0_read_master_qualified_request_vip_1024x768_burst_1_upstream : OUT STD_LOGIC;
-                 signal alt_vip_vfb_0_read_master_read_data_valid_vip_1024x768_burst_1_upstream : OUT STD_LOGIC;
-                 signal alt_vip_vfb_0_read_master_read_data_valid_vip_1024x768_burst_1_upstream_shift_register : OUT STD_LOGIC;
-                 signal alt_vip_vfb_0_read_master_requests_vip_1024x768_burst_1_upstream : OUT STD_LOGIC;
-                 signal d1_vip_1024x768_burst_1_upstream_end_xfer : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_1_upstream_address : OUT STD_LOGIC_VECTOR (28 DOWNTO 0);
-                 signal vip_1024x768_burst_1_upstream_burstcount : OUT STD_LOGIC_VECTOR (6 DOWNTO 0);
-                 signal vip_1024x768_burst_1_upstream_byteaddress : OUT STD_LOGIC_VECTOR (33 DOWNTO 0);
-                 signal vip_1024x768_burst_1_upstream_byteenable : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
-                 signal vip_1024x768_burst_1_upstream_debugaccess : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_1_upstream_read : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_1_upstream_readdata_from_sa : OUT STD_LOGIC_VECTOR (255 DOWNTO 0);
-                 signal vip_1024x768_burst_1_upstream_waitrequest_from_sa : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_1_upstream_write : OUT STD_LOGIC
+                 signal alt_vip_vfb_0_read_master_granted_vip_sopc_burst_1_upstream : OUT STD_LOGIC;
+                 signal alt_vip_vfb_0_read_master_qualified_request_vip_sopc_burst_1_upstream : OUT STD_LOGIC;
+                 signal alt_vip_vfb_0_read_master_read_data_valid_vip_sopc_burst_1_upstream : OUT STD_LOGIC;
+                 signal alt_vip_vfb_0_read_master_read_data_valid_vip_sopc_burst_1_upstream_shift_register : OUT STD_LOGIC;
+                 signal alt_vip_vfb_0_read_master_requests_vip_sopc_burst_1_upstream : OUT STD_LOGIC;
+                 signal d1_vip_sopc_burst_1_upstream_end_xfer : OUT STD_LOGIC;
+                 signal vip_sopc_burst_1_upstream_address : OUT STD_LOGIC_VECTOR (28 DOWNTO 0);
+                 signal vip_sopc_burst_1_upstream_burstcount : OUT STD_LOGIC_VECTOR (6 DOWNTO 0);
+                 signal vip_sopc_burst_1_upstream_byteaddress : OUT STD_LOGIC_VECTOR (33 DOWNTO 0);
+                 signal vip_sopc_burst_1_upstream_byteenable : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+                 signal vip_sopc_burst_1_upstream_debugaccess : OUT STD_LOGIC;
+                 signal vip_sopc_burst_1_upstream_read : OUT STD_LOGIC;
+                 signal vip_sopc_burst_1_upstream_readdata_from_sa : OUT STD_LOGIC_VECTOR (255 DOWNTO 0);
+                 signal vip_sopc_burst_1_upstream_waitrequest_from_sa : OUT STD_LOGIC;
+                 signal vip_sopc_burst_1_upstream_write : OUT STD_LOGIC
               );
-end entity vip_1024x768_burst_1_upstream_arbitrator;
+end entity vip_sopc_burst_1_upstream_arbitrator;
 
 
-architecture europa of vip_1024x768_burst_1_upstream_arbitrator is
-component burstcount_fifo_for_vip_1024x768_burst_1_upstream_module is 
+architecture europa of vip_sopc_burst_1_upstream_arbitrator is
+component burstcount_fifo_for_vip_sopc_burst_1_upstream_module is 
            port (
                  -- inputs:
                     signal clear_fifo : IN STD_LOGIC;
@@ -9374,9 +9374,9 @@ component burstcount_fifo_for_vip_1024x768_burst_1_upstream_module is
                     signal fifo_contains_ones_n : OUT STD_LOGIC;
                     signal full : OUT STD_LOGIC
                  );
-end component burstcount_fifo_for_vip_1024x768_burst_1_upstream_module;
+end component burstcount_fifo_for_vip_sopc_burst_1_upstream_module;
 
-component rdv_fifo_for_alt_vip_vfb_0_read_master_to_vip_1024x768_burst_1_upstream_module is 
+component rdv_fifo_for_alt_vip_vfb_0_read_master_to_vip_sopc_burst_1_upstream_module is 
            port (
                  -- inputs:
                     signal clear_fifo : IN STD_LOGIC;
@@ -9393,69 +9393,69 @@ component rdv_fifo_for_alt_vip_vfb_0_read_master_to_vip_1024x768_burst_1_upstrea
                     signal fifo_contains_ones_n : OUT STD_LOGIC;
                     signal full : OUT STD_LOGIC
                  );
-end component rdv_fifo_for_alt_vip_vfb_0_read_master_to_vip_1024x768_burst_1_upstream_module;
+end component rdv_fifo_for_alt_vip_vfb_0_read_master_to_vip_sopc_burst_1_upstream_module;
 
                 signal alt_vip_vfb_0_read_master_arbiterlock :  STD_LOGIC;
                 signal alt_vip_vfb_0_read_master_arbiterlock2 :  STD_LOGIC;
                 signal alt_vip_vfb_0_read_master_continuerequest :  STD_LOGIC;
-                signal alt_vip_vfb_0_read_master_rdv_fifo_empty_vip_1024x768_burst_1_upstream :  STD_LOGIC;
-                signal alt_vip_vfb_0_read_master_rdv_fifo_output_from_vip_1024x768_burst_1_upstream :  STD_LOGIC;
-                signal alt_vip_vfb_0_read_master_saved_grant_vip_1024x768_burst_1_upstream :  STD_LOGIC;
+                signal alt_vip_vfb_0_read_master_rdv_fifo_empty_vip_sopc_burst_1_upstream :  STD_LOGIC;
+                signal alt_vip_vfb_0_read_master_rdv_fifo_output_from_vip_sopc_burst_1_upstream :  STD_LOGIC;
+                signal alt_vip_vfb_0_read_master_saved_grant_vip_sopc_burst_1_upstream :  STD_LOGIC;
                 signal d1_reasons_to_wait :  STD_LOGIC;
                 signal enable_nonzero_assertions :  STD_LOGIC;
-                signal end_xfer_arb_share_counter_term_vip_1024x768_burst_1_upstream :  STD_LOGIC;
+                signal end_xfer_arb_share_counter_term_vip_sopc_burst_1_upstream :  STD_LOGIC;
                 signal in_a_read_cycle :  STD_LOGIC;
                 signal in_a_write_cycle :  STD_LOGIC;
-                signal internal_alt_vip_vfb_0_read_master_granted_vip_1024x768_burst_1_upstream :  STD_LOGIC;
-                signal internal_alt_vip_vfb_0_read_master_qualified_request_vip_1024x768_burst_1_upstream :  STD_LOGIC;
-                signal internal_alt_vip_vfb_0_read_master_requests_vip_1024x768_burst_1_upstream :  STD_LOGIC;
-                signal internal_vip_1024x768_burst_1_upstream_burstcount :  STD_LOGIC_VECTOR (6 DOWNTO 0);
-                signal internal_vip_1024x768_burst_1_upstream_read :  STD_LOGIC;
-                signal internal_vip_1024x768_burst_1_upstream_waitrequest_from_sa :  STD_LOGIC;
-                signal internal_vip_1024x768_burst_1_upstream_write :  STD_LOGIC;
+                signal internal_alt_vip_vfb_0_read_master_granted_vip_sopc_burst_1_upstream :  STD_LOGIC;
+                signal internal_alt_vip_vfb_0_read_master_qualified_request_vip_sopc_burst_1_upstream :  STD_LOGIC;
+                signal internal_alt_vip_vfb_0_read_master_requests_vip_sopc_burst_1_upstream :  STD_LOGIC;
+                signal internal_vip_sopc_burst_1_upstream_burstcount :  STD_LOGIC_VECTOR (6 DOWNTO 0);
+                signal internal_vip_sopc_burst_1_upstream_read :  STD_LOGIC;
+                signal internal_vip_sopc_burst_1_upstream_waitrequest_from_sa :  STD_LOGIC;
+                signal internal_vip_sopc_burst_1_upstream_write :  STD_LOGIC;
                 signal module_input10 :  STD_LOGIC;
                 signal module_input11 :  STD_LOGIC;
                 signal module_input12 :  STD_LOGIC;
                 signal module_input13 :  STD_LOGIC;
                 signal module_input14 :  STD_LOGIC;
                 signal module_input15 :  STD_LOGIC;
-                signal p0_vip_1024x768_burst_1_upstream_load_fifo :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_allgrants :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_allow_new_arb_cycle :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_any_bursting_master_saved_grant :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_any_continuerequest :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_arb_counter_enable :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_arb_share_counter :  STD_LOGIC_VECTOR (6 DOWNTO 0);
-                signal vip_1024x768_burst_1_upstream_arb_share_counter_next_value :  STD_LOGIC_VECTOR (6 DOWNTO 0);
-                signal vip_1024x768_burst_1_upstream_arb_share_set_values :  STD_LOGIC_VECTOR (6 DOWNTO 0);
-                signal vip_1024x768_burst_1_upstream_bbt_burstcounter :  STD_LOGIC_VECTOR (5 DOWNTO 0);
-                signal vip_1024x768_burst_1_upstream_beginbursttransfer_internal :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_begins_xfer :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_burstcount_fifo_empty :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_current_burst :  STD_LOGIC_VECTOR (6 DOWNTO 0);
-                signal vip_1024x768_burst_1_upstream_current_burst_minus_one :  STD_LOGIC_VECTOR (6 DOWNTO 0);
-                signal vip_1024x768_burst_1_upstream_end_xfer :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_firsttransfer :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_grant_vector :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_in_a_read_cycle :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_in_a_write_cycle :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_load_fifo :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_master_qreq_vector :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_move_on_to_next_transaction :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_next_bbt_burstcount :  STD_LOGIC_VECTOR (5 DOWNTO 0);
-                signal vip_1024x768_burst_1_upstream_next_burst_count :  STD_LOGIC_VECTOR (6 DOWNTO 0);
-                signal vip_1024x768_burst_1_upstream_non_bursting_master_requests :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_readdatavalid_from_sa :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_reg_firsttransfer :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_selected_burstcount :  STD_LOGIC_VECTOR (6 DOWNTO 0);
-                signal vip_1024x768_burst_1_upstream_slavearbiterlockenable :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_slavearbiterlockenable2 :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_this_cycle_is_the_last_burst :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_transaction_burst_count :  STD_LOGIC_VECTOR (6 DOWNTO 0);
-                signal vip_1024x768_burst_1_upstream_unreg_firsttransfer :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_waits_for_read :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_waits_for_write :  STD_LOGIC;
-                signal wait_for_vip_1024x768_burst_1_upstream_counter :  STD_LOGIC;
+                signal p0_vip_sopc_burst_1_upstream_load_fifo :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_allgrants :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_allow_new_arb_cycle :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_any_bursting_master_saved_grant :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_any_continuerequest :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_arb_counter_enable :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_arb_share_counter :  STD_LOGIC_VECTOR (6 DOWNTO 0);
+                signal vip_sopc_burst_1_upstream_arb_share_counter_next_value :  STD_LOGIC_VECTOR (6 DOWNTO 0);
+                signal vip_sopc_burst_1_upstream_arb_share_set_values :  STD_LOGIC_VECTOR (6 DOWNTO 0);
+                signal vip_sopc_burst_1_upstream_bbt_burstcounter :  STD_LOGIC_VECTOR (5 DOWNTO 0);
+                signal vip_sopc_burst_1_upstream_beginbursttransfer_internal :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_begins_xfer :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_burstcount_fifo_empty :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_current_burst :  STD_LOGIC_VECTOR (6 DOWNTO 0);
+                signal vip_sopc_burst_1_upstream_current_burst_minus_one :  STD_LOGIC_VECTOR (6 DOWNTO 0);
+                signal vip_sopc_burst_1_upstream_end_xfer :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_firsttransfer :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_grant_vector :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_in_a_read_cycle :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_in_a_write_cycle :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_load_fifo :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_master_qreq_vector :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_move_on_to_next_transaction :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_next_bbt_burstcount :  STD_LOGIC_VECTOR (5 DOWNTO 0);
+                signal vip_sopc_burst_1_upstream_next_burst_count :  STD_LOGIC_VECTOR (6 DOWNTO 0);
+                signal vip_sopc_burst_1_upstream_non_bursting_master_requests :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_readdatavalid_from_sa :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_reg_firsttransfer :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_selected_burstcount :  STD_LOGIC_VECTOR (6 DOWNTO 0);
+                signal vip_sopc_burst_1_upstream_slavearbiterlockenable :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_slavearbiterlockenable2 :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_this_cycle_is_the_last_burst :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_transaction_burst_count :  STD_LOGIC_VECTOR (6 DOWNTO 0);
+                signal vip_sopc_burst_1_upstream_unreg_firsttransfer :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_waits_for_read :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_waits_for_write :  STD_LOGIC;
+                signal wait_for_vip_sopc_burst_1_upstream_counter :  STD_LOGIC;
 
 begin
 
@@ -9464,87 +9464,87 @@ begin
     if reset_n = '0' then
       d1_reasons_to_wait <= std_logic'('0');
     elsif clk'event and clk = '1' then
-      d1_reasons_to_wait <= NOT vip_1024x768_burst_1_upstream_end_xfer;
+      d1_reasons_to_wait <= NOT vip_sopc_burst_1_upstream_end_xfer;
     end if;
 
   end process;
 
-  vip_1024x768_burst_1_upstream_begins_xfer <= NOT d1_reasons_to_wait AND (internal_alt_vip_vfb_0_read_master_qualified_request_vip_1024x768_burst_1_upstream);
-  --assign vip_1024x768_burst_1_upstream_readdata_from_sa = vip_1024x768_burst_1_upstream_readdata so that symbol knows where to group signals which may go to master only, which is an e_assign
-  vip_1024x768_burst_1_upstream_readdata_from_sa <= vip_1024x768_burst_1_upstream_readdata;
-  internal_alt_vip_vfb_0_read_master_requests_vip_1024x768_burst_1_upstream <= ((to_std_logic(((Std_Logic_Vector'(alt_vip_vfb_0_read_master_address_to_slave(31 DOWNTO 29) & std_logic_vector'("00000000000000000000000000000")) = std_logic_vector'("00000000000000000000000000000000")))) AND (alt_vip_vfb_0_read_master_read))) AND alt_vip_vfb_0_read_master_read;
-  --assign vip_1024x768_burst_1_upstream_waitrequest_from_sa = vip_1024x768_burst_1_upstream_waitrequest so that symbol knows where to group signals which may go to master only, which is an e_assign
-  internal_vip_1024x768_burst_1_upstream_waitrequest_from_sa <= vip_1024x768_burst_1_upstream_waitrequest;
-  --assign vip_1024x768_burst_1_upstream_readdatavalid_from_sa = vip_1024x768_burst_1_upstream_readdatavalid so that symbol knows where to group signals which may go to master only, which is an e_assign
-  vip_1024x768_burst_1_upstream_readdatavalid_from_sa <= vip_1024x768_burst_1_upstream_readdatavalid;
-  --vip_1024x768_burst_1_upstream_arb_share_counter set values, which is an e_mux
-  vip_1024x768_burst_1_upstream_arb_share_set_values <= std_logic_vector'("0000001");
-  --vip_1024x768_burst_1_upstream_non_bursting_master_requests mux, which is an e_mux
-  vip_1024x768_burst_1_upstream_non_bursting_master_requests <= std_logic'('0');
-  --vip_1024x768_burst_1_upstream_any_bursting_master_saved_grant mux, which is an e_mux
-  vip_1024x768_burst_1_upstream_any_bursting_master_saved_grant <= alt_vip_vfb_0_read_master_saved_grant_vip_1024x768_burst_1_upstream;
-  --vip_1024x768_burst_1_upstream_arb_share_counter_next_value assignment, which is an e_assign
-  vip_1024x768_burst_1_upstream_arb_share_counter_next_value <= A_EXT (A_WE_StdLogicVector((std_logic'(vip_1024x768_burst_1_upstream_firsttransfer) = '1'), (((std_logic_vector'("00000000000000000000000000") & (vip_1024x768_burst_1_upstream_arb_share_set_values)) - std_logic_vector'("000000000000000000000000000000001"))), A_WE_StdLogicVector((std_logic'(or_reduce(vip_1024x768_burst_1_upstream_arb_share_counter)) = '1'), (((std_logic_vector'("00000000000000000000000000") & (vip_1024x768_burst_1_upstream_arb_share_counter)) - std_logic_vector'("000000000000000000000000000000001"))), std_logic_vector'("000000000000000000000000000000000"))), 7);
-  --vip_1024x768_burst_1_upstream_allgrants all slave grants, which is an e_mux
-  vip_1024x768_burst_1_upstream_allgrants <= vip_1024x768_burst_1_upstream_grant_vector;
-  --vip_1024x768_burst_1_upstream_end_xfer assignment, which is an e_assign
-  vip_1024x768_burst_1_upstream_end_xfer <= NOT ((vip_1024x768_burst_1_upstream_waits_for_read OR vip_1024x768_burst_1_upstream_waits_for_write));
-  --end_xfer_arb_share_counter_term_vip_1024x768_burst_1_upstream arb share counter enable term, which is an e_assign
-  end_xfer_arb_share_counter_term_vip_1024x768_burst_1_upstream <= vip_1024x768_burst_1_upstream_end_xfer AND (((NOT vip_1024x768_burst_1_upstream_any_bursting_master_saved_grant OR in_a_read_cycle) OR in_a_write_cycle));
-  --vip_1024x768_burst_1_upstream_arb_share_counter arbitration counter enable, which is an e_assign
-  vip_1024x768_burst_1_upstream_arb_counter_enable <= ((end_xfer_arb_share_counter_term_vip_1024x768_burst_1_upstream AND vip_1024x768_burst_1_upstream_allgrants)) OR ((end_xfer_arb_share_counter_term_vip_1024x768_burst_1_upstream AND NOT vip_1024x768_burst_1_upstream_non_bursting_master_requests));
-  --vip_1024x768_burst_1_upstream_arb_share_counter counter, which is an e_register
+  vip_sopc_burst_1_upstream_begins_xfer <= NOT d1_reasons_to_wait AND (internal_alt_vip_vfb_0_read_master_qualified_request_vip_sopc_burst_1_upstream);
+  --assign vip_sopc_burst_1_upstream_readdata_from_sa = vip_sopc_burst_1_upstream_readdata so that symbol knows where to group signals which may go to master only, which is an e_assign
+  vip_sopc_burst_1_upstream_readdata_from_sa <= vip_sopc_burst_1_upstream_readdata;
+  internal_alt_vip_vfb_0_read_master_requests_vip_sopc_burst_1_upstream <= ((to_std_logic(((Std_Logic_Vector'(alt_vip_vfb_0_read_master_address_to_slave(31 DOWNTO 29) & std_logic_vector'("00000000000000000000000000000")) = std_logic_vector'("00000000000000000000000000000000")))) AND (alt_vip_vfb_0_read_master_read))) AND alt_vip_vfb_0_read_master_read;
+  --assign vip_sopc_burst_1_upstream_waitrequest_from_sa = vip_sopc_burst_1_upstream_waitrequest so that symbol knows where to group signals which may go to master only, which is an e_assign
+  internal_vip_sopc_burst_1_upstream_waitrequest_from_sa <= vip_sopc_burst_1_upstream_waitrequest;
+  --assign vip_sopc_burst_1_upstream_readdatavalid_from_sa = vip_sopc_burst_1_upstream_readdatavalid so that symbol knows where to group signals which may go to master only, which is an e_assign
+  vip_sopc_burst_1_upstream_readdatavalid_from_sa <= vip_sopc_burst_1_upstream_readdatavalid;
+  --vip_sopc_burst_1_upstream_arb_share_counter set values, which is an e_mux
+  vip_sopc_burst_1_upstream_arb_share_set_values <= std_logic_vector'("0000001");
+  --vip_sopc_burst_1_upstream_non_bursting_master_requests mux, which is an e_mux
+  vip_sopc_burst_1_upstream_non_bursting_master_requests <= std_logic'('0');
+  --vip_sopc_burst_1_upstream_any_bursting_master_saved_grant mux, which is an e_mux
+  vip_sopc_burst_1_upstream_any_bursting_master_saved_grant <= alt_vip_vfb_0_read_master_saved_grant_vip_sopc_burst_1_upstream;
+  --vip_sopc_burst_1_upstream_arb_share_counter_next_value assignment, which is an e_assign
+  vip_sopc_burst_1_upstream_arb_share_counter_next_value <= A_EXT (A_WE_StdLogicVector((std_logic'(vip_sopc_burst_1_upstream_firsttransfer) = '1'), (((std_logic_vector'("00000000000000000000000000") & (vip_sopc_burst_1_upstream_arb_share_set_values)) - std_logic_vector'("000000000000000000000000000000001"))), A_WE_StdLogicVector((std_logic'(or_reduce(vip_sopc_burst_1_upstream_arb_share_counter)) = '1'), (((std_logic_vector'("00000000000000000000000000") & (vip_sopc_burst_1_upstream_arb_share_counter)) - std_logic_vector'("000000000000000000000000000000001"))), std_logic_vector'("000000000000000000000000000000000"))), 7);
+  --vip_sopc_burst_1_upstream_allgrants all slave grants, which is an e_mux
+  vip_sopc_burst_1_upstream_allgrants <= vip_sopc_burst_1_upstream_grant_vector;
+  --vip_sopc_burst_1_upstream_end_xfer assignment, which is an e_assign
+  vip_sopc_burst_1_upstream_end_xfer <= NOT ((vip_sopc_burst_1_upstream_waits_for_read OR vip_sopc_burst_1_upstream_waits_for_write));
+  --end_xfer_arb_share_counter_term_vip_sopc_burst_1_upstream arb share counter enable term, which is an e_assign
+  end_xfer_arb_share_counter_term_vip_sopc_burst_1_upstream <= vip_sopc_burst_1_upstream_end_xfer AND (((NOT vip_sopc_burst_1_upstream_any_bursting_master_saved_grant OR in_a_read_cycle) OR in_a_write_cycle));
+  --vip_sopc_burst_1_upstream_arb_share_counter arbitration counter enable, which is an e_assign
+  vip_sopc_burst_1_upstream_arb_counter_enable <= ((end_xfer_arb_share_counter_term_vip_sopc_burst_1_upstream AND vip_sopc_burst_1_upstream_allgrants)) OR ((end_xfer_arb_share_counter_term_vip_sopc_burst_1_upstream AND NOT vip_sopc_burst_1_upstream_non_bursting_master_requests));
+  --vip_sopc_burst_1_upstream_arb_share_counter counter, which is an e_register
   process (clk, reset_n)
   begin
     if reset_n = '0' then
-      vip_1024x768_burst_1_upstream_arb_share_counter <= std_logic_vector'("0000000");
+      vip_sopc_burst_1_upstream_arb_share_counter <= std_logic_vector'("0000000");
     elsif clk'event and clk = '1' then
-      if std_logic'(vip_1024x768_burst_1_upstream_arb_counter_enable) = '1' then 
-        vip_1024x768_burst_1_upstream_arb_share_counter <= vip_1024x768_burst_1_upstream_arb_share_counter_next_value;
+      if std_logic'(vip_sopc_burst_1_upstream_arb_counter_enable) = '1' then 
+        vip_sopc_burst_1_upstream_arb_share_counter <= vip_sopc_burst_1_upstream_arb_share_counter_next_value;
       end if;
     end if;
 
   end process;
 
-  --vip_1024x768_burst_1_upstream_slavearbiterlockenable slave enables arbiterlock, which is an e_register
+  --vip_sopc_burst_1_upstream_slavearbiterlockenable slave enables arbiterlock, which is an e_register
   process (clk, reset_n)
   begin
     if reset_n = '0' then
-      vip_1024x768_burst_1_upstream_slavearbiterlockenable <= std_logic'('0');
+      vip_sopc_burst_1_upstream_slavearbiterlockenable <= std_logic'('0');
     elsif clk'event and clk = '1' then
-      if std_logic'((((vip_1024x768_burst_1_upstream_master_qreq_vector AND end_xfer_arb_share_counter_term_vip_1024x768_burst_1_upstream)) OR ((end_xfer_arb_share_counter_term_vip_1024x768_burst_1_upstream AND NOT vip_1024x768_burst_1_upstream_non_bursting_master_requests)))) = '1' then 
-        vip_1024x768_burst_1_upstream_slavearbiterlockenable <= or_reduce(vip_1024x768_burst_1_upstream_arb_share_counter_next_value);
+      if std_logic'((((vip_sopc_burst_1_upstream_master_qreq_vector AND end_xfer_arb_share_counter_term_vip_sopc_burst_1_upstream)) OR ((end_xfer_arb_share_counter_term_vip_sopc_burst_1_upstream AND NOT vip_sopc_burst_1_upstream_non_bursting_master_requests)))) = '1' then 
+        vip_sopc_burst_1_upstream_slavearbiterlockenable <= or_reduce(vip_sopc_burst_1_upstream_arb_share_counter_next_value);
       end if;
     end if;
 
   end process;
 
-  --alt_vip_vfb_0/read_master vip_1024x768_burst_1/upstream arbiterlock, which is an e_assign
-  alt_vip_vfb_0_read_master_arbiterlock <= vip_1024x768_burst_1_upstream_slavearbiterlockenable AND alt_vip_vfb_0_read_master_continuerequest;
-  --vip_1024x768_burst_1_upstream_slavearbiterlockenable2 slave enables arbiterlock2, which is an e_assign
-  vip_1024x768_burst_1_upstream_slavearbiterlockenable2 <= or_reduce(vip_1024x768_burst_1_upstream_arb_share_counter_next_value);
-  --alt_vip_vfb_0/read_master vip_1024x768_burst_1/upstream arbiterlock2, which is an e_assign
-  alt_vip_vfb_0_read_master_arbiterlock2 <= vip_1024x768_burst_1_upstream_slavearbiterlockenable2 AND alt_vip_vfb_0_read_master_continuerequest;
-  --vip_1024x768_burst_1_upstream_any_continuerequest at least one master continues requesting, which is an e_assign
-  vip_1024x768_burst_1_upstream_any_continuerequest <= std_logic'('1');
+  --alt_vip_vfb_0/read_master vip_sopc_burst_1/upstream arbiterlock, which is an e_assign
+  alt_vip_vfb_0_read_master_arbiterlock <= vip_sopc_burst_1_upstream_slavearbiterlockenable AND alt_vip_vfb_0_read_master_continuerequest;
+  --vip_sopc_burst_1_upstream_slavearbiterlockenable2 slave enables arbiterlock2, which is an e_assign
+  vip_sopc_burst_1_upstream_slavearbiterlockenable2 <= or_reduce(vip_sopc_burst_1_upstream_arb_share_counter_next_value);
+  --alt_vip_vfb_0/read_master vip_sopc_burst_1/upstream arbiterlock2, which is an e_assign
+  alt_vip_vfb_0_read_master_arbiterlock2 <= vip_sopc_burst_1_upstream_slavearbiterlockenable2 AND alt_vip_vfb_0_read_master_continuerequest;
+  --vip_sopc_burst_1_upstream_any_continuerequest at least one master continues requesting, which is an e_assign
+  vip_sopc_burst_1_upstream_any_continuerequest <= std_logic'('1');
   --alt_vip_vfb_0_read_master_continuerequest continued request, which is an e_assign
   alt_vip_vfb_0_read_master_continuerequest <= std_logic'('1');
-  internal_alt_vip_vfb_0_read_master_qualified_request_vip_1024x768_burst_1_upstream <= internal_alt_vip_vfb_0_read_master_requests_vip_1024x768_burst_1_upstream AND NOT ((alt_vip_vfb_0_read_master_read AND to_std_logic((((((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(alt_vip_vfb_0_read_master_latency_counter))) /= std_logic_vector'("00000000000000000000000000000000"))) OR ((std_logic_vector'("00000000000000000000000000000001")<(std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(alt_vip_vfb_0_read_master_latency_counter))))))))));
-  --unique name for vip_1024x768_burst_1_upstream_move_on_to_next_transaction, which is an e_assign
-  vip_1024x768_burst_1_upstream_move_on_to_next_transaction <= vip_1024x768_burst_1_upstream_this_cycle_is_the_last_burst AND vip_1024x768_burst_1_upstream_load_fifo;
-  --the currently selected burstcount for vip_1024x768_burst_1_upstream, which is an e_mux
-  vip_1024x768_burst_1_upstream_selected_burstcount <= A_EXT (A_WE_StdLogicVector((std_logic'((internal_alt_vip_vfb_0_read_master_granted_vip_1024x768_burst_1_upstream)) = '1'), (std_logic_vector'("0000000000000000000000000") & (alt_vip_vfb_0_read_master_burstcount)), std_logic_vector'("00000000000000000000000000000001")), 7);
-  --burstcount_fifo_for_vip_1024x768_burst_1_upstream, which is an e_fifo_with_registered_outputs
-  burstcount_fifo_for_vip_1024x768_burst_1_upstream : burstcount_fifo_for_vip_1024x768_burst_1_upstream_module
+  internal_alt_vip_vfb_0_read_master_qualified_request_vip_sopc_burst_1_upstream <= internal_alt_vip_vfb_0_read_master_requests_vip_sopc_burst_1_upstream AND NOT ((alt_vip_vfb_0_read_master_read AND to_std_logic((((((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(alt_vip_vfb_0_read_master_latency_counter))) /= std_logic_vector'("00000000000000000000000000000000"))) OR ((std_logic_vector'("00000000000000000000000000000001")<(std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(alt_vip_vfb_0_read_master_latency_counter))))))))));
+  --unique name for vip_sopc_burst_1_upstream_move_on_to_next_transaction, which is an e_assign
+  vip_sopc_burst_1_upstream_move_on_to_next_transaction <= vip_sopc_burst_1_upstream_this_cycle_is_the_last_burst AND vip_sopc_burst_1_upstream_load_fifo;
+  --the currently selected burstcount for vip_sopc_burst_1_upstream, which is an e_mux
+  vip_sopc_burst_1_upstream_selected_burstcount <= A_EXT (A_WE_StdLogicVector((std_logic'((internal_alt_vip_vfb_0_read_master_granted_vip_sopc_burst_1_upstream)) = '1'), (std_logic_vector'("0000000000000000000000000") & (alt_vip_vfb_0_read_master_burstcount)), std_logic_vector'("00000000000000000000000000000001")), 7);
+  --burstcount_fifo_for_vip_sopc_burst_1_upstream, which is an e_fifo_with_registered_outputs
+  burstcount_fifo_for_vip_sopc_burst_1_upstream : burstcount_fifo_for_vip_sopc_burst_1_upstream_module
     port map(
-      data_out => vip_1024x768_burst_1_upstream_transaction_burst_count,
-      empty => vip_1024x768_burst_1_upstream_burstcount_fifo_empty,
+      data_out => vip_sopc_burst_1_upstream_transaction_burst_count,
+      empty => vip_sopc_burst_1_upstream_burstcount_fifo_empty,
       fifo_contains_ones_n => open,
       full => open,
       clear_fifo => module_input10,
       clk => clk,
-      data_in => vip_1024x768_burst_1_upstream_selected_burstcount,
-      read => vip_1024x768_burst_1_upstream_this_cycle_is_the_last_burst,
+      data_in => vip_sopc_burst_1_upstream_selected_burstcount,
+      read => vip_sopc_burst_1_upstream_this_cycle_is_the_last_burst,
       reset_n => reset_n,
       sync_reset => module_input11,
       write => module_input12
@@ -9552,53 +9552,53 @@ begin
 
   module_input10 <= std_logic'('0');
   module_input11 <= std_logic'('0');
-  module_input12 <= ((in_a_read_cycle AND NOT vip_1024x768_burst_1_upstream_waits_for_read) AND vip_1024x768_burst_1_upstream_load_fifo) AND NOT ((vip_1024x768_burst_1_upstream_this_cycle_is_the_last_burst AND vip_1024x768_burst_1_upstream_burstcount_fifo_empty));
+  module_input12 <= ((in_a_read_cycle AND NOT vip_sopc_burst_1_upstream_waits_for_read) AND vip_sopc_burst_1_upstream_load_fifo) AND NOT ((vip_sopc_burst_1_upstream_this_cycle_is_the_last_burst AND vip_sopc_burst_1_upstream_burstcount_fifo_empty));
 
-  --vip_1024x768_burst_1_upstream current burst minus one, which is an e_assign
-  vip_1024x768_burst_1_upstream_current_burst_minus_one <= A_EXT (((std_logic_vector'("00000000000000000000000000") & (vip_1024x768_burst_1_upstream_current_burst)) - std_logic_vector'("000000000000000000000000000000001")), 7);
-  --what to load in current_burst, for vip_1024x768_burst_1_upstream, which is an e_mux
-  vip_1024x768_burst_1_upstream_next_burst_count <= A_WE_StdLogicVector((std_logic'(((((in_a_read_cycle AND NOT vip_1024x768_burst_1_upstream_waits_for_read)) AND NOT vip_1024x768_burst_1_upstream_load_fifo))) = '1'), vip_1024x768_burst_1_upstream_selected_burstcount, A_WE_StdLogicVector((std_logic'(((((in_a_read_cycle AND NOT vip_1024x768_burst_1_upstream_waits_for_read) AND vip_1024x768_burst_1_upstream_this_cycle_is_the_last_burst) AND vip_1024x768_burst_1_upstream_burstcount_fifo_empty))) = '1'), vip_1024x768_burst_1_upstream_selected_burstcount, A_WE_StdLogicVector((std_logic'((vip_1024x768_burst_1_upstream_this_cycle_is_the_last_burst)) = '1'), vip_1024x768_burst_1_upstream_transaction_burst_count, vip_1024x768_burst_1_upstream_current_burst_minus_one)));
-  --the current burst count for vip_1024x768_burst_1_upstream, to be decremented, which is an e_register
+  --vip_sopc_burst_1_upstream current burst minus one, which is an e_assign
+  vip_sopc_burst_1_upstream_current_burst_minus_one <= A_EXT (((std_logic_vector'("00000000000000000000000000") & (vip_sopc_burst_1_upstream_current_burst)) - std_logic_vector'("000000000000000000000000000000001")), 7);
+  --what to load in current_burst, for vip_sopc_burst_1_upstream, which is an e_mux
+  vip_sopc_burst_1_upstream_next_burst_count <= A_WE_StdLogicVector((std_logic'(((((in_a_read_cycle AND NOT vip_sopc_burst_1_upstream_waits_for_read)) AND NOT vip_sopc_burst_1_upstream_load_fifo))) = '1'), vip_sopc_burst_1_upstream_selected_burstcount, A_WE_StdLogicVector((std_logic'(((((in_a_read_cycle AND NOT vip_sopc_burst_1_upstream_waits_for_read) AND vip_sopc_burst_1_upstream_this_cycle_is_the_last_burst) AND vip_sopc_burst_1_upstream_burstcount_fifo_empty))) = '1'), vip_sopc_burst_1_upstream_selected_burstcount, A_WE_StdLogicVector((std_logic'((vip_sopc_burst_1_upstream_this_cycle_is_the_last_burst)) = '1'), vip_sopc_burst_1_upstream_transaction_burst_count, vip_sopc_burst_1_upstream_current_burst_minus_one)));
+  --the current burst count for vip_sopc_burst_1_upstream, to be decremented, which is an e_register
   process (clk, reset_n)
   begin
     if reset_n = '0' then
-      vip_1024x768_burst_1_upstream_current_burst <= std_logic_vector'("0000000");
+      vip_sopc_burst_1_upstream_current_burst <= std_logic_vector'("0000000");
     elsif clk'event and clk = '1' then
-      if std_logic'((vip_1024x768_burst_1_upstream_readdatavalid_from_sa OR ((NOT vip_1024x768_burst_1_upstream_load_fifo AND ((in_a_read_cycle AND NOT vip_1024x768_burst_1_upstream_waits_for_read)))))) = '1' then 
-        vip_1024x768_burst_1_upstream_current_burst <= vip_1024x768_burst_1_upstream_next_burst_count;
+      if std_logic'((vip_sopc_burst_1_upstream_readdatavalid_from_sa OR ((NOT vip_sopc_burst_1_upstream_load_fifo AND ((in_a_read_cycle AND NOT vip_sopc_burst_1_upstream_waits_for_read)))))) = '1' then 
+        vip_sopc_burst_1_upstream_current_burst <= vip_sopc_burst_1_upstream_next_burst_count;
       end if;
     end if;
 
   end process;
 
   --a 1 or burstcount fifo empty, to initialize the counter, which is an e_mux
-  p0_vip_1024x768_burst_1_upstream_load_fifo <= Vector_To_Std_Logic(A_WE_StdLogicVector((std_logic'((NOT vip_1024x768_burst_1_upstream_load_fifo)) = '1'), std_logic_vector'("00000000000000000000000000000001"), A_WE_StdLogicVector((std_logic'(((((in_a_read_cycle AND NOT vip_1024x768_burst_1_upstream_waits_for_read)) AND vip_1024x768_burst_1_upstream_load_fifo))) = '1'), std_logic_vector'("00000000000000000000000000000001"), (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(NOT vip_1024x768_burst_1_upstream_burstcount_fifo_empty))))));
+  p0_vip_sopc_burst_1_upstream_load_fifo <= Vector_To_Std_Logic(A_WE_StdLogicVector((std_logic'((NOT vip_sopc_burst_1_upstream_load_fifo)) = '1'), std_logic_vector'("00000000000000000000000000000001"), A_WE_StdLogicVector((std_logic'(((((in_a_read_cycle AND NOT vip_sopc_burst_1_upstream_waits_for_read)) AND vip_sopc_burst_1_upstream_load_fifo))) = '1'), std_logic_vector'("00000000000000000000000000000001"), (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(NOT vip_sopc_burst_1_upstream_burstcount_fifo_empty))))));
   --whether to load directly to the counter or to the fifo, which is an e_register
   process (clk, reset_n)
   begin
     if reset_n = '0' then
-      vip_1024x768_burst_1_upstream_load_fifo <= std_logic'('0');
+      vip_sopc_burst_1_upstream_load_fifo <= std_logic'('0');
     elsif clk'event and clk = '1' then
-      if std_logic'(((((in_a_read_cycle AND NOT vip_1024x768_burst_1_upstream_waits_for_read)) AND NOT vip_1024x768_burst_1_upstream_load_fifo) OR vip_1024x768_burst_1_upstream_this_cycle_is_the_last_burst)) = '1' then 
-        vip_1024x768_burst_1_upstream_load_fifo <= p0_vip_1024x768_burst_1_upstream_load_fifo;
+      if std_logic'(((((in_a_read_cycle AND NOT vip_sopc_burst_1_upstream_waits_for_read)) AND NOT vip_sopc_burst_1_upstream_load_fifo) OR vip_sopc_burst_1_upstream_this_cycle_is_the_last_burst)) = '1' then 
+        vip_sopc_burst_1_upstream_load_fifo <= p0_vip_sopc_burst_1_upstream_load_fifo;
       end if;
     end if;
 
   end process;
 
-  --the last cycle in the burst for vip_1024x768_burst_1_upstream, which is an e_assign
-  vip_1024x768_burst_1_upstream_this_cycle_is_the_last_burst <= NOT (or_reduce(vip_1024x768_burst_1_upstream_current_burst_minus_one)) AND vip_1024x768_burst_1_upstream_readdatavalid_from_sa;
-  --rdv_fifo_for_alt_vip_vfb_0_read_master_to_vip_1024x768_burst_1_upstream, which is an e_fifo_with_registered_outputs
-  rdv_fifo_for_alt_vip_vfb_0_read_master_to_vip_1024x768_burst_1_upstream : rdv_fifo_for_alt_vip_vfb_0_read_master_to_vip_1024x768_burst_1_upstream_module
+  --the last cycle in the burst for vip_sopc_burst_1_upstream, which is an e_assign
+  vip_sopc_burst_1_upstream_this_cycle_is_the_last_burst <= NOT (or_reduce(vip_sopc_burst_1_upstream_current_burst_minus_one)) AND vip_sopc_burst_1_upstream_readdatavalid_from_sa;
+  --rdv_fifo_for_alt_vip_vfb_0_read_master_to_vip_sopc_burst_1_upstream, which is an e_fifo_with_registered_outputs
+  rdv_fifo_for_alt_vip_vfb_0_read_master_to_vip_sopc_burst_1_upstream : rdv_fifo_for_alt_vip_vfb_0_read_master_to_vip_sopc_burst_1_upstream_module
     port map(
-      data_out => alt_vip_vfb_0_read_master_rdv_fifo_output_from_vip_1024x768_burst_1_upstream,
+      data_out => alt_vip_vfb_0_read_master_rdv_fifo_output_from_vip_sopc_burst_1_upstream,
       empty => open,
-      fifo_contains_ones_n => alt_vip_vfb_0_read_master_rdv_fifo_empty_vip_1024x768_burst_1_upstream,
+      fifo_contains_ones_n => alt_vip_vfb_0_read_master_rdv_fifo_empty_vip_sopc_burst_1_upstream,
       full => open,
       clear_fifo => module_input13,
       clk => clk,
-      data_in => internal_alt_vip_vfb_0_read_master_granted_vip_1024x768_burst_1_upstream,
-      read => vip_1024x768_burst_1_upstream_move_on_to_next_transaction,
+      data_in => internal_alt_vip_vfb_0_read_master_granted_vip_sopc_burst_1_upstream,
+      read => vip_sopc_burst_1_upstream_move_on_to_next_transaction,
       reset_n => reset_n,
       sync_reset => module_input14,
       write => module_input15
@@ -9606,109 +9606,109 @@ begin
 
   module_input13 <= std_logic'('0');
   module_input14 <= std_logic'('0');
-  module_input15 <= in_a_read_cycle AND NOT vip_1024x768_burst_1_upstream_waits_for_read;
+  module_input15 <= in_a_read_cycle AND NOT vip_sopc_burst_1_upstream_waits_for_read;
 
-  alt_vip_vfb_0_read_master_read_data_valid_vip_1024x768_burst_1_upstream_shift_register <= NOT alt_vip_vfb_0_read_master_rdv_fifo_empty_vip_1024x768_burst_1_upstream;
-  --local readdatavalid alt_vip_vfb_0_read_master_read_data_valid_vip_1024x768_burst_1_upstream, which is an e_mux
-  alt_vip_vfb_0_read_master_read_data_valid_vip_1024x768_burst_1_upstream <= vip_1024x768_burst_1_upstream_readdatavalid_from_sa;
-  --byteaddress mux for vip_1024x768_burst_1/upstream, which is an e_mux
-  vip_1024x768_burst_1_upstream_byteaddress <= std_logic_vector'("00") & (alt_vip_vfb_0_read_master_address_to_slave);
+  alt_vip_vfb_0_read_master_read_data_valid_vip_sopc_burst_1_upstream_shift_register <= NOT alt_vip_vfb_0_read_master_rdv_fifo_empty_vip_sopc_burst_1_upstream;
+  --local readdatavalid alt_vip_vfb_0_read_master_read_data_valid_vip_sopc_burst_1_upstream, which is an e_mux
+  alt_vip_vfb_0_read_master_read_data_valid_vip_sopc_burst_1_upstream <= vip_sopc_burst_1_upstream_readdatavalid_from_sa;
+  --byteaddress mux for vip_sopc_burst_1/upstream, which is an e_mux
+  vip_sopc_burst_1_upstream_byteaddress <= std_logic_vector'("00") & (alt_vip_vfb_0_read_master_address_to_slave);
   --master is always granted when requested
-  internal_alt_vip_vfb_0_read_master_granted_vip_1024x768_burst_1_upstream <= internal_alt_vip_vfb_0_read_master_qualified_request_vip_1024x768_burst_1_upstream;
-  --alt_vip_vfb_0/read_master saved-grant vip_1024x768_burst_1/upstream, which is an e_assign
-  alt_vip_vfb_0_read_master_saved_grant_vip_1024x768_burst_1_upstream <= internal_alt_vip_vfb_0_read_master_requests_vip_1024x768_burst_1_upstream;
-  --allow new arb cycle for vip_1024x768_burst_1/upstream, which is an e_assign
-  vip_1024x768_burst_1_upstream_allow_new_arb_cycle <= std_logic'('1');
+  internal_alt_vip_vfb_0_read_master_granted_vip_sopc_burst_1_upstream <= internal_alt_vip_vfb_0_read_master_qualified_request_vip_sopc_burst_1_upstream;
+  --alt_vip_vfb_0/read_master saved-grant vip_sopc_burst_1/upstream, which is an e_assign
+  alt_vip_vfb_0_read_master_saved_grant_vip_sopc_burst_1_upstream <= internal_alt_vip_vfb_0_read_master_requests_vip_sopc_burst_1_upstream;
+  --allow new arb cycle for vip_sopc_burst_1/upstream, which is an e_assign
+  vip_sopc_burst_1_upstream_allow_new_arb_cycle <= std_logic'('1');
   --placeholder chosen master
-  vip_1024x768_burst_1_upstream_grant_vector <= std_logic'('1');
+  vip_sopc_burst_1_upstream_grant_vector <= std_logic'('1');
   --placeholder vector of master qualified-requests
-  vip_1024x768_burst_1_upstream_master_qreq_vector <= std_logic'('1');
-  --vip_1024x768_burst_1_upstream_firsttransfer first transaction, which is an e_assign
-  vip_1024x768_burst_1_upstream_firsttransfer <= A_WE_StdLogic((std_logic'(vip_1024x768_burst_1_upstream_begins_xfer) = '1'), vip_1024x768_burst_1_upstream_unreg_firsttransfer, vip_1024x768_burst_1_upstream_reg_firsttransfer);
-  --vip_1024x768_burst_1_upstream_unreg_firsttransfer first transaction, which is an e_assign
-  vip_1024x768_burst_1_upstream_unreg_firsttransfer <= NOT ((vip_1024x768_burst_1_upstream_slavearbiterlockenable AND vip_1024x768_burst_1_upstream_any_continuerequest));
-  --vip_1024x768_burst_1_upstream_reg_firsttransfer first transaction, which is an e_register
+  vip_sopc_burst_1_upstream_master_qreq_vector <= std_logic'('1');
+  --vip_sopc_burst_1_upstream_firsttransfer first transaction, which is an e_assign
+  vip_sopc_burst_1_upstream_firsttransfer <= A_WE_StdLogic((std_logic'(vip_sopc_burst_1_upstream_begins_xfer) = '1'), vip_sopc_burst_1_upstream_unreg_firsttransfer, vip_sopc_burst_1_upstream_reg_firsttransfer);
+  --vip_sopc_burst_1_upstream_unreg_firsttransfer first transaction, which is an e_assign
+  vip_sopc_burst_1_upstream_unreg_firsttransfer <= NOT ((vip_sopc_burst_1_upstream_slavearbiterlockenable AND vip_sopc_burst_1_upstream_any_continuerequest));
+  --vip_sopc_burst_1_upstream_reg_firsttransfer first transaction, which is an e_register
   process (clk, reset_n)
   begin
     if reset_n = '0' then
-      vip_1024x768_burst_1_upstream_reg_firsttransfer <= std_logic'('1');
+      vip_sopc_burst_1_upstream_reg_firsttransfer <= std_logic'('1');
     elsif clk'event and clk = '1' then
-      if std_logic'(vip_1024x768_burst_1_upstream_begins_xfer) = '1' then 
-        vip_1024x768_burst_1_upstream_reg_firsttransfer <= vip_1024x768_burst_1_upstream_unreg_firsttransfer;
+      if std_logic'(vip_sopc_burst_1_upstream_begins_xfer) = '1' then 
+        vip_sopc_burst_1_upstream_reg_firsttransfer <= vip_sopc_burst_1_upstream_unreg_firsttransfer;
       end if;
     end if;
 
   end process;
 
-  --vip_1024x768_burst_1_upstream_next_bbt_burstcount next_bbt_burstcount, which is an e_mux
-  vip_1024x768_burst_1_upstream_next_bbt_burstcount <= A_EXT (A_WE_StdLogicVector((std_logic'((((internal_vip_1024x768_burst_1_upstream_write) AND to_std_logic((((std_logic_vector'("00000000000000000000000000") & (vip_1024x768_burst_1_upstream_bbt_burstcounter)) = std_logic_vector'("00000000000000000000000000000000"))))))) = '1'), (((std_logic_vector'("00000000000000000000000000") & (internal_vip_1024x768_burst_1_upstream_burstcount)) - std_logic_vector'("000000000000000000000000000000001"))), A_WE_StdLogicVector((std_logic'((((internal_vip_1024x768_burst_1_upstream_read) AND to_std_logic((((std_logic_vector'("00000000000000000000000000") & (vip_1024x768_burst_1_upstream_bbt_burstcounter)) = std_logic_vector'("00000000000000000000000000000000"))))))) = '1'), std_logic_vector'("000000000000000000000000000000000"), (((std_logic_vector'("000000000000000000000000000") & (vip_1024x768_burst_1_upstream_bbt_burstcounter)) - std_logic_vector'("000000000000000000000000000000001"))))), 6);
-  --vip_1024x768_burst_1_upstream_bbt_burstcounter bbt_burstcounter, which is an e_register
+  --vip_sopc_burst_1_upstream_next_bbt_burstcount next_bbt_burstcount, which is an e_mux
+  vip_sopc_burst_1_upstream_next_bbt_burstcount <= A_EXT (A_WE_StdLogicVector((std_logic'((((internal_vip_sopc_burst_1_upstream_write) AND to_std_logic((((std_logic_vector'("00000000000000000000000000") & (vip_sopc_burst_1_upstream_bbt_burstcounter)) = std_logic_vector'("00000000000000000000000000000000"))))))) = '1'), (((std_logic_vector'("00000000000000000000000000") & (internal_vip_sopc_burst_1_upstream_burstcount)) - std_logic_vector'("000000000000000000000000000000001"))), A_WE_StdLogicVector((std_logic'((((internal_vip_sopc_burst_1_upstream_read) AND to_std_logic((((std_logic_vector'("00000000000000000000000000") & (vip_sopc_burst_1_upstream_bbt_burstcounter)) = std_logic_vector'("00000000000000000000000000000000"))))))) = '1'), std_logic_vector'("000000000000000000000000000000000"), (((std_logic_vector'("000000000000000000000000000") & (vip_sopc_burst_1_upstream_bbt_burstcounter)) - std_logic_vector'("000000000000000000000000000000001"))))), 6);
+  --vip_sopc_burst_1_upstream_bbt_burstcounter bbt_burstcounter, which is an e_register
   process (clk, reset_n)
   begin
     if reset_n = '0' then
-      vip_1024x768_burst_1_upstream_bbt_burstcounter <= std_logic_vector'("000000");
+      vip_sopc_burst_1_upstream_bbt_burstcounter <= std_logic_vector'("000000");
     elsif clk'event and clk = '1' then
-      if std_logic'(vip_1024x768_burst_1_upstream_begins_xfer) = '1' then 
-        vip_1024x768_burst_1_upstream_bbt_burstcounter <= vip_1024x768_burst_1_upstream_next_bbt_burstcount;
+      if std_logic'(vip_sopc_burst_1_upstream_begins_xfer) = '1' then 
+        vip_sopc_burst_1_upstream_bbt_burstcounter <= vip_sopc_burst_1_upstream_next_bbt_burstcount;
       end if;
     end if;
 
   end process;
 
-  --vip_1024x768_burst_1_upstream_beginbursttransfer_internal begin burst transfer, which is an e_assign
-  vip_1024x768_burst_1_upstream_beginbursttransfer_internal <= vip_1024x768_burst_1_upstream_begins_xfer AND to_std_logic((((std_logic_vector'("00000000000000000000000000") & (vip_1024x768_burst_1_upstream_bbt_burstcounter)) = std_logic_vector'("00000000000000000000000000000000"))));
-  --vip_1024x768_burst_1_upstream_read assignment, which is an e_mux
-  internal_vip_1024x768_burst_1_upstream_read <= internal_alt_vip_vfb_0_read_master_granted_vip_1024x768_burst_1_upstream AND alt_vip_vfb_0_read_master_read;
-  --vip_1024x768_burst_1_upstream_write assignment, which is an e_mux
-  internal_vip_1024x768_burst_1_upstream_write <= std_logic'('0');
-  --vip_1024x768_burst_1_upstream_address mux, which is an e_mux
-  vip_1024x768_burst_1_upstream_address <= alt_vip_vfb_0_read_master_address_to_slave (28 DOWNTO 0);
-  --d1_vip_1024x768_burst_1_upstream_end_xfer register, which is an e_register
+  --vip_sopc_burst_1_upstream_beginbursttransfer_internal begin burst transfer, which is an e_assign
+  vip_sopc_burst_1_upstream_beginbursttransfer_internal <= vip_sopc_burst_1_upstream_begins_xfer AND to_std_logic((((std_logic_vector'("00000000000000000000000000") & (vip_sopc_burst_1_upstream_bbt_burstcounter)) = std_logic_vector'("00000000000000000000000000000000"))));
+  --vip_sopc_burst_1_upstream_read assignment, which is an e_mux
+  internal_vip_sopc_burst_1_upstream_read <= internal_alt_vip_vfb_0_read_master_granted_vip_sopc_burst_1_upstream AND alt_vip_vfb_0_read_master_read;
+  --vip_sopc_burst_1_upstream_write assignment, which is an e_mux
+  internal_vip_sopc_burst_1_upstream_write <= std_logic'('0');
+  --vip_sopc_burst_1_upstream_address mux, which is an e_mux
+  vip_sopc_burst_1_upstream_address <= alt_vip_vfb_0_read_master_address_to_slave (28 DOWNTO 0);
+  --d1_vip_sopc_burst_1_upstream_end_xfer register, which is an e_register
   process (clk, reset_n)
   begin
     if reset_n = '0' then
-      d1_vip_1024x768_burst_1_upstream_end_xfer <= std_logic'('1');
+      d1_vip_sopc_burst_1_upstream_end_xfer <= std_logic'('1');
     elsif clk'event and clk = '1' then
-      d1_vip_1024x768_burst_1_upstream_end_xfer <= vip_1024x768_burst_1_upstream_end_xfer;
+      d1_vip_sopc_burst_1_upstream_end_xfer <= vip_sopc_burst_1_upstream_end_xfer;
     end if;
 
   end process;
 
-  --vip_1024x768_burst_1_upstream_waits_for_read in a cycle, which is an e_mux
-  vip_1024x768_burst_1_upstream_waits_for_read <= vip_1024x768_burst_1_upstream_in_a_read_cycle AND internal_vip_1024x768_burst_1_upstream_waitrequest_from_sa;
-  --vip_1024x768_burst_1_upstream_in_a_read_cycle assignment, which is an e_assign
-  vip_1024x768_burst_1_upstream_in_a_read_cycle <= internal_alt_vip_vfb_0_read_master_granted_vip_1024x768_burst_1_upstream AND alt_vip_vfb_0_read_master_read;
+  --vip_sopc_burst_1_upstream_waits_for_read in a cycle, which is an e_mux
+  vip_sopc_burst_1_upstream_waits_for_read <= vip_sopc_burst_1_upstream_in_a_read_cycle AND internal_vip_sopc_burst_1_upstream_waitrequest_from_sa;
+  --vip_sopc_burst_1_upstream_in_a_read_cycle assignment, which is an e_assign
+  vip_sopc_burst_1_upstream_in_a_read_cycle <= internal_alt_vip_vfb_0_read_master_granted_vip_sopc_burst_1_upstream AND alt_vip_vfb_0_read_master_read;
   --in_a_read_cycle assignment, which is an e_mux
-  in_a_read_cycle <= vip_1024x768_burst_1_upstream_in_a_read_cycle;
-  --vip_1024x768_burst_1_upstream_waits_for_write in a cycle, which is an e_mux
-  vip_1024x768_burst_1_upstream_waits_for_write <= vip_1024x768_burst_1_upstream_in_a_write_cycle AND internal_vip_1024x768_burst_1_upstream_waitrequest_from_sa;
-  --vip_1024x768_burst_1_upstream_in_a_write_cycle assignment, which is an e_assign
-  vip_1024x768_burst_1_upstream_in_a_write_cycle <= std_logic'('0');
+  in_a_read_cycle <= vip_sopc_burst_1_upstream_in_a_read_cycle;
+  --vip_sopc_burst_1_upstream_waits_for_write in a cycle, which is an e_mux
+  vip_sopc_burst_1_upstream_waits_for_write <= vip_sopc_burst_1_upstream_in_a_write_cycle AND internal_vip_sopc_burst_1_upstream_waitrequest_from_sa;
+  --vip_sopc_burst_1_upstream_in_a_write_cycle assignment, which is an e_assign
+  vip_sopc_burst_1_upstream_in_a_write_cycle <= std_logic'('0');
   --in_a_write_cycle assignment, which is an e_mux
-  in_a_write_cycle <= vip_1024x768_burst_1_upstream_in_a_write_cycle;
-  wait_for_vip_1024x768_burst_1_upstream_counter <= std_logic'('0');
-  --vip_1024x768_burst_1_upstream_byteenable byte enable port mux, which is an e_mux
-  vip_1024x768_burst_1_upstream_byteenable <= -SIGNED(std_logic_vector'("00000000000000000000000000000001"));
+  in_a_write_cycle <= vip_sopc_burst_1_upstream_in_a_write_cycle;
+  wait_for_vip_sopc_burst_1_upstream_counter <= std_logic'('0');
+  --vip_sopc_burst_1_upstream_byteenable byte enable port mux, which is an e_mux
+  vip_sopc_burst_1_upstream_byteenable <= -SIGNED(std_logic_vector'("00000000000000000000000000000001"));
   --burstcount mux, which is an e_mux
-  internal_vip_1024x768_burst_1_upstream_burstcount <= A_EXT (A_WE_StdLogicVector((std_logic'((internal_alt_vip_vfb_0_read_master_granted_vip_1024x768_burst_1_upstream)) = '1'), (std_logic_vector'("0000000000000000000000000") & (alt_vip_vfb_0_read_master_burstcount)), std_logic_vector'("00000000000000000000000000000001")), 7);
+  internal_vip_sopc_burst_1_upstream_burstcount <= A_EXT (A_WE_StdLogicVector((std_logic'((internal_alt_vip_vfb_0_read_master_granted_vip_sopc_burst_1_upstream)) = '1'), (std_logic_vector'("0000000000000000000000000") & (alt_vip_vfb_0_read_master_burstcount)), std_logic_vector'("00000000000000000000000000000001")), 7);
   --debugaccess mux, which is an e_mux
-  vip_1024x768_burst_1_upstream_debugaccess <= std_logic'('0');
+  vip_sopc_burst_1_upstream_debugaccess <= std_logic'('0');
   --vhdl renameroo for output signals
-  alt_vip_vfb_0_read_master_granted_vip_1024x768_burst_1_upstream <= internal_alt_vip_vfb_0_read_master_granted_vip_1024x768_burst_1_upstream;
+  alt_vip_vfb_0_read_master_granted_vip_sopc_burst_1_upstream <= internal_alt_vip_vfb_0_read_master_granted_vip_sopc_burst_1_upstream;
   --vhdl renameroo for output signals
-  alt_vip_vfb_0_read_master_qualified_request_vip_1024x768_burst_1_upstream <= internal_alt_vip_vfb_0_read_master_qualified_request_vip_1024x768_burst_1_upstream;
+  alt_vip_vfb_0_read_master_qualified_request_vip_sopc_burst_1_upstream <= internal_alt_vip_vfb_0_read_master_qualified_request_vip_sopc_burst_1_upstream;
   --vhdl renameroo for output signals
-  alt_vip_vfb_0_read_master_requests_vip_1024x768_burst_1_upstream <= internal_alt_vip_vfb_0_read_master_requests_vip_1024x768_burst_1_upstream;
+  alt_vip_vfb_0_read_master_requests_vip_sopc_burst_1_upstream <= internal_alt_vip_vfb_0_read_master_requests_vip_sopc_burst_1_upstream;
   --vhdl renameroo for output signals
-  vip_1024x768_burst_1_upstream_burstcount <= internal_vip_1024x768_burst_1_upstream_burstcount;
+  vip_sopc_burst_1_upstream_burstcount <= internal_vip_sopc_burst_1_upstream_burstcount;
   --vhdl renameroo for output signals
-  vip_1024x768_burst_1_upstream_read <= internal_vip_1024x768_burst_1_upstream_read;
+  vip_sopc_burst_1_upstream_read <= internal_vip_sopc_burst_1_upstream_read;
   --vhdl renameroo for output signals
-  vip_1024x768_burst_1_upstream_waitrequest_from_sa <= internal_vip_1024x768_burst_1_upstream_waitrequest_from_sa;
+  vip_sopc_burst_1_upstream_waitrequest_from_sa <= internal_vip_sopc_burst_1_upstream_waitrequest_from_sa;
   --vhdl renameroo for output signals
-  vip_1024x768_burst_1_upstream_write <= internal_vip_1024x768_burst_1_upstream_write;
+  vip_sopc_burst_1_upstream_write <= internal_vip_sopc_burst_1_upstream_write;
 --synthesis translate_off
-    --vip_1024x768_burst_1/upstream enable non-zero assertions, which is an e_register
+    --vip_sopc_burst_1/upstream enable non-zero assertions, which is an e_register
     process (clk, reset_n)
     begin
       if reset_n = '0' then
@@ -9724,10 +9724,10 @@ begin
     VARIABLE write_line20 : line;
     begin
       if clk'event and clk = '1' then
-        if std_logic'(((internal_alt_vip_vfb_0_read_master_requests_vip_1024x768_burst_1_upstream AND to_std_logic((((std_logic_vector'("0000000000000000000000000") & (alt_vip_vfb_0_read_master_burstcount)) = std_logic_vector'("00000000000000000000000000000000"))))) AND enable_nonzero_assertions)) = '1' then 
+        if std_logic'(((internal_alt_vip_vfb_0_read_master_requests_vip_sopc_burst_1_upstream AND to_std_logic((((std_logic_vector'("0000000000000000000000000") & (alt_vip_vfb_0_read_master_burstcount)) = std_logic_vector'("00000000000000000000000000000000"))))) AND enable_nonzero_assertions)) = '1' then 
           write(write_line20, now);
           write(write_line20, string'(": "));
-          write(write_line20, string'("alt_vip_vfb_0/read_master drove 0 on its 'burstcount' port while accessing slave vip_1024x768_burst_1/upstream"));
+          write(write_line20, string'("alt_vip_vfb_0/read_master drove 0 on its 'burstcount' port while accessing slave vip_sopc_burst_1/upstream"));
           write(output, write_line20.all);
           deallocate (write_line20);
           assert false report "VHDL STOP" severity failure;
@@ -9757,7 +9757,7 @@ use ieee.std_logic_unsigned.all;
 library std;
 use std.textio.all;
 
-entity vip_1024x768_burst_1_downstream_arbitrator is 
+entity vip_sopc_burst_1_downstream_arbitrator is 
         port (
               -- inputs:
                  signal altmemddr_0_s1_readdata_from_sa : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
@@ -9765,132 +9765,132 @@ entity vip_1024x768_burst_1_downstream_arbitrator is
                  signal clk : IN STD_LOGIC;
                  signal d1_altmemddr_0_s1_end_xfer : IN STD_LOGIC;
                  signal reset_n : IN STD_LOGIC;
-                 signal vip_1024x768_burst_1_downstream_address : IN STD_LOGIC_VECTOR (28 DOWNTO 0);
-                 signal vip_1024x768_burst_1_downstream_burstcount : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
-                 signal vip_1024x768_burst_1_downstream_byteenable : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
-                 signal vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1 : IN STD_LOGIC;
-                 signal vip_1024x768_burst_1_downstream_qualified_request_altmemddr_0_s1 : IN STD_LOGIC;
-                 signal vip_1024x768_burst_1_downstream_read : IN STD_LOGIC;
-                 signal vip_1024x768_burst_1_downstream_read_data_valid_altmemddr_0_s1 : IN STD_LOGIC;
-                 signal vip_1024x768_burst_1_downstream_read_data_valid_altmemddr_0_s1_shift_register : IN STD_LOGIC;
-                 signal vip_1024x768_burst_1_downstream_requests_altmemddr_0_s1 : IN STD_LOGIC;
-                 signal vip_1024x768_burst_1_downstream_write : IN STD_LOGIC;
-                 signal vip_1024x768_burst_1_downstream_writedata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
+                 signal vip_sopc_burst_1_downstream_address : IN STD_LOGIC_VECTOR (28 DOWNTO 0);
+                 signal vip_sopc_burst_1_downstream_burstcount : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
+                 signal vip_sopc_burst_1_downstream_byteenable : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+                 signal vip_sopc_burst_1_downstream_granted_altmemddr_0_s1 : IN STD_LOGIC;
+                 signal vip_sopc_burst_1_downstream_qualified_request_altmemddr_0_s1 : IN STD_LOGIC;
+                 signal vip_sopc_burst_1_downstream_read : IN STD_LOGIC;
+                 signal vip_sopc_burst_1_downstream_read_data_valid_altmemddr_0_s1 : IN STD_LOGIC;
+                 signal vip_sopc_burst_1_downstream_read_data_valid_altmemddr_0_s1_shift_register : IN STD_LOGIC;
+                 signal vip_sopc_burst_1_downstream_requests_altmemddr_0_s1 : IN STD_LOGIC;
+                 signal vip_sopc_burst_1_downstream_write : IN STD_LOGIC;
+                 signal vip_sopc_burst_1_downstream_writedata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
 
               -- outputs:
-                 signal vip_1024x768_burst_1_downstream_address_to_slave : OUT STD_LOGIC_VECTOR (28 DOWNTO 0);
-                 signal vip_1024x768_burst_1_downstream_latency_counter : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_1_downstream_readdata : OUT STD_LOGIC_VECTOR (255 DOWNTO 0);
-                 signal vip_1024x768_burst_1_downstream_readdatavalid : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_1_downstream_reset_n : OUT STD_LOGIC;
-                 signal vip_1024x768_burst_1_downstream_waitrequest : OUT STD_LOGIC
+                 signal vip_sopc_burst_1_downstream_address_to_slave : OUT STD_LOGIC_VECTOR (28 DOWNTO 0);
+                 signal vip_sopc_burst_1_downstream_latency_counter : OUT STD_LOGIC;
+                 signal vip_sopc_burst_1_downstream_readdata : OUT STD_LOGIC_VECTOR (255 DOWNTO 0);
+                 signal vip_sopc_burst_1_downstream_readdatavalid : OUT STD_LOGIC;
+                 signal vip_sopc_burst_1_downstream_reset_n : OUT STD_LOGIC;
+                 signal vip_sopc_burst_1_downstream_waitrequest : OUT STD_LOGIC
               );
-end entity vip_1024x768_burst_1_downstream_arbitrator;
+end entity vip_sopc_burst_1_downstream_arbitrator;
 
 
-architecture europa of vip_1024x768_burst_1_downstream_arbitrator is
+architecture europa of vip_sopc_burst_1_downstream_arbitrator is
                 signal active_and_waiting_last_time :  STD_LOGIC;
-                signal internal_vip_1024x768_burst_1_downstream_address_to_slave :  STD_LOGIC_VECTOR (28 DOWNTO 0);
-                signal internal_vip_1024x768_burst_1_downstream_latency_counter :  STD_LOGIC;
-                signal internal_vip_1024x768_burst_1_downstream_waitrequest :  STD_LOGIC;
+                signal internal_vip_sopc_burst_1_downstream_address_to_slave :  STD_LOGIC_VECTOR (28 DOWNTO 0);
+                signal internal_vip_sopc_burst_1_downstream_latency_counter :  STD_LOGIC;
+                signal internal_vip_sopc_burst_1_downstream_waitrequest :  STD_LOGIC;
                 signal latency_load_value :  STD_LOGIC;
-                signal p1_vip_1024x768_burst_1_downstream_latency_counter :  STD_LOGIC;
-                signal pre_flush_vip_1024x768_burst_1_downstream_readdatavalid :  STD_LOGIC;
+                signal p1_vip_sopc_burst_1_downstream_latency_counter :  STD_LOGIC;
+                signal pre_flush_vip_sopc_burst_1_downstream_readdatavalid :  STD_LOGIC;
                 signal r_0 :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_address_last_time :  STD_LOGIC_VECTOR (28 DOWNTO 0);
-                signal vip_1024x768_burst_1_downstream_burstcount_last_time :  STD_LOGIC_VECTOR (2 DOWNTO 0);
-                signal vip_1024x768_burst_1_downstream_byteenable_last_time :  STD_LOGIC_VECTOR (31 DOWNTO 0);
-                signal vip_1024x768_burst_1_downstream_is_granted_some_slave :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_read_but_no_slave_selected :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_read_last_time :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_run :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_write_last_time :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_writedata_last_time :  STD_LOGIC_VECTOR (255 DOWNTO 0);
+                signal vip_sopc_burst_1_downstream_address_last_time :  STD_LOGIC_VECTOR (28 DOWNTO 0);
+                signal vip_sopc_burst_1_downstream_burstcount_last_time :  STD_LOGIC_VECTOR (2 DOWNTO 0);
+                signal vip_sopc_burst_1_downstream_byteenable_last_time :  STD_LOGIC_VECTOR (31 DOWNTO 0);
+                signal vip_sopc_burst_1_downstream_is_granted_some_slave :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_read_but_no_slave_selected :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_read_last_time :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_run :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_write_last_time :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_writedata_last_time :  STD_LOGIC_VECTOR (255 DOWNTO 0);
 
 begin
 
   --r_0 master_run cascaded wait assignment, which is an e_assign
-  r_0 <= Vector_To_Std_Logic(((((std_logic_vector'("00000000000000000000000000000001") AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(((vip_1024x768_burst_1_downstream_qualified_request_altmemddr_0_s1 OR NOT vip_1024x768_burst_1_downstream_requests_altmemddr_0_s1)))))) AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(((vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1 OR NOT vip_1024x768_burst_1_downstream_qualified_request_altmemddr_0_s1)))))) AND (((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR((NOT vip_1024x768_burst_1_downstream_qualified_request_altmemddr_0_s1 OR NOT ((vip_1024x768_burst_1_downstream_read OR vip_1024x768_burst_1_downstream_write)))))) OR (((std_logic_vector'("00000000000000000000000000000001") AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(altmemddr_0_s1_waitrequest_n_from_sa)))) AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(((vip_1024x768_burst_1_downstream_read OR vip_1024x768_burst_1_downstream_write)))))))))) AND (((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR((NOT vip_1024x768_burst_1_downstream_qualified_request_altmemddr_0_s1 OR NOT ((vip_1024x768_burst_1_downstream_read OR vip_1024x768_burst_1_downstream_write)))))) OR (((std_logic_vector'("00000000000000000000000000000001") AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(altmemddr_0_s1_waitrequest_n_from_sa)))) AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(((vip_1024x768_burst_1_downstream_read OR vip_1024x768_burst_1_downstream_write)))))))))));
+  r_0 <= Vector_To_Std_Logic(((((std_logic_vector'("00000000000000000000000000000001") AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(((vip_sopc_burst_1_downstream_qualified_request_altmemddr_0_s1 OR NOT vip_sopc_burst_1_downstream_requests_altmemddr_0_s1)))))) AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(((vip_sopc_burst_1_downstream_granted_altmemddr_0_s1 OR NOT vip_sopc_burst_1_downstream_qualified_request_altmemddr_0_s1)))))) AND (((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR((NOT vip_sopc_burst_1_downstream_qualified_request_altmemddr_0_s1 OR NOT ((vip_sopc_burst_1_downstream_read OR vip_sopc_burst_1_downstream_write)))))) OR (((std_logic_vector'("00000000000000000000000000000001") AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(altmemddr_0_s1_waitrequest_n_from_sa)))) AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(((vip_sopc_burst_1_downstream_read OR vip_sopc_burst_1_downstream_write)))))))))) AND (((std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR((NOT vip_sopc_burst_1_downstream_qualified_request_altmemddr_0_s1 OR NOT ((vip_sopc_burst_1_downstream_read OR vip_sopc_burst_1_downstream_write)))))) OR (((std_logic_vector'("00000000000000000000000000000001") AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(altmemddr_0_s1_waitrequest_n_from_sa)))) AND (std_logic_vector'("0000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(((vip_sopc_burst_1_downstream_read OR vip_sopc_burst_1_downstream_write)))))))))));
   --cascaded wait assignment, which is an e_assign
-  vip_1024x768_burst_1_downstream_run <= r_0;
+  vip_sopc_burst_1_downstream_run <= r_0;
   --optimize select-logic by passing only those address bits which matter.
-  internal_vip_1024x768_burst_1_downstream_address_to_slave <= vip_1024x768_burst_1_downstream_address;
-  --vip_1024x768_burst_1_downstream_read_but_no_slave_selected assignment, which is an e_register
+  internal_vip_sopc_burst_1_downstream_address_to_slave <= vip_sopc_burst_1_downstream_address;
+  --vip_sopc_burst_1_downstream_read_but_no_slave_selected assignment, which is an e_register
   process (clk, reset_n)
   begin
     if reset_n = '0' then
-      vip_1024x768_burst_1_downstream_read_but_no_slave_selected <= std_logic'('0');
+      vip_sopc_burst_1_downstream_read_but_no_slave_selected <= std_logic'('0');
     elsif clk'event and clk = '1' then
-      vip_1024x768_burst_1_downstream_read_but_no_slave_selected <= (vip_1024x768_burst_1_downstream_read AND vip_1024x768_burst_1_downstream_run) AND NOT vip_1024x768_burst_1_downstream_is_granted_some_slave;
+      vip_sopc_burst_1_downstream_read_but_no_slave_selected <= (vip_sopc_burst_1_downstream_read AND vip_sopc_burst_1_downstream_run) AND NOT vip_sopc_burst_1_downstream_is_granted_some_slave;
     end if;
 
   end process;
 
   --some slave is getting selected, which is an e_mux
-  vip_1024x768_burst_1_downstream_is_granted_some_slave <= vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1;
+  vip_sopc_burst_1_downstream_is_granted_some_slave <= vip_sopc_burst_1_downstream_granted_altmemddr_0_s1;
   --latent slave read data valids which may be flushed, which is an e_mux
-  pre_flush_vip_1024x768_burst_1_downstream_readdatavalid <= vip_1024x768_burst_1_downstream_read_data_valid_altmemddr_0_s1;
+  pre_flush_vip_sopc_burst_1_downstream_readdatavalid <= vip_sopc_burst_1_downstream_read_data_valid_altmemddr_0_s1;
   --latent slave read data valid which is not flushed, which is an e_mux
-  vip_1024x768_burst_1_downstream_readdatavalid <= vip_1024x768_burst_1_downstream_read_but_no_slave_selected OR pre_flush_vip_1024x768_burst_1_downstream_readdatavalid;
-  --vip_1024x768_burst_1/downstream readdata mux, which is an e_mux
-  vip_1024x768_burst_1_downstream_readdata <= altmemddr_0_s1_readdata_from_sa;
+  vip_sopc_burst_1_downstream_readdatavalid <= vip_sopc_burst_1_downstream_read_but_no_slave_selected OR pre_flush_vip_sopc_burst_1_downstream_readdatavalid;
+  --vip_sopc_burst_1/downstream readdata mux, which is an e_mux
+  vip_sopc_burst_1_downstream_readdata <= altmemddr_0_s1_readdata_from_sa;
   --actual waitrequest port, which is an e_assign
-  internal_vip_1024x768_burst_1_downstream_waitrequest <= NOT vip_1024x768_burst_1_downstream_run;
+  internal_vip_sopc_burst_1_downstream_waitrequest <= NOT vip_sopc_burst_1_downstream_run;
   --latent max counter, which is an e_register
   process (clk, reset_n)
   begin
     if reset_n = '0' then
-      internal_vip_1024x768_burst_1_downstream_latency_counter <= std_logic'('0');
+      internal_vip_sopc_burst_1_downstream_latency_counter <= std_logic'('0');
     elsif clk'event and clk = '1' then
-      internal_vip_1024x768_burst_1_downstream_latency_counter <= p1_vip_1024x768_burst_1_downstream_latency_counter;
+      internal_vip_sopc_burst_1_downstream_latency_counter <= p1_vip_sopc_burst_1_downstream_latency_counter;
     end if;
 
   end process;
 
   --latency counter load mux, which is an e_mux
-  p1_vip_1024x768_burst_1_downstream_latency_counter <= Vector_To_Std_Logic(A_WE_StdLogicVector((std_logic'(((vip_1024x768_burst_1_downstream_run AND vip_1024x768_burst_1_downstream_read))) = '1'), (std_logic_vector'("00000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(latency_load_value))), A_WE_StdLogicVector((std_logic'((internal_vip_1024x768_burst_1_downstream_latency_counter)) = '1'), ((std_logic_vector'("00000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(internal_vip_1024x768_burst_1_downstream_latency_counter))) - std_logic_vector'("000000000000000000000000000000001")), std_logic_vector'("000000000000000000000000000000000"))));
+  p1_vip_sopc_burst_1_downstream_latency_counter <= Vector_To_Std_Logic(A_WE_StdLogicVector((std_logic'(((vip_sopc_burst_1_downstream_run AND vip_sopc_burst_1_downstream_read))) = '1'), (std_logic_vector'("00000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(latency_load_value))), A_WE_StdLogicVector((std_logic'((internal_vip_sopc_burst_1_downstream_latency_counter)) = '1'), ((std_logic_vector'("00000000000000000000000000000000") & (A_TOSTDLOGICVECTOR(internal_vip_sopc_burst_1_downstream_latency_counter))) - std_logic_vector'("000000000000000000000000000000001")), std_logic_vector'("000000000000000000000000000000000"))));
   --read latency load values, which is an e_mux
   latency_load_value <= std_logic'('0');
-  --vip_1024x768_burst_1_downstream_reset_n assignment, which is an e_assign
-  vip_1024x768_burst_1_downstream_reset_n <= reset_n;
+  --vip_sopc_burst_1_downstream_reset_n assignment, which is an e_assign
+  vip_sopc_burst_1_downstream_reset_n <= reset_n;
   --vhdl renameroo for output signals
-  vip_1024x768_burst_1_downstream_address_to_slave <= internal_vip_1024x768_burst_1_downstream_address_to_slave;
+  vip_sopc_burst_1_downstream_address_to_slave <= internal_vip_sopc_burst_1_downstream_address_to_slave;
   --vhdl renameroo for output signals
-  vip_1024x768_burst_1_downstream_latency_counter <= internal_vip_1024x768_burst_1_downstream_latency_counter;
+  vip_sopc_burst_1_downstream_latency_counter <= internal_vip_sopc_burst_1_downstream_latency_counter;
   --vhdl renameroo for output signals
-  vip_1024x768_burst_1_downstream_waitrequest <= internal_vip_1024x768_burst_1_downstream_waitrequest;
+  vip_sopc_burst_1_downstream_waitrequest <= internal_vip_sopc_burst_1_downstream_waitrequest;
 --synthesis translate_off
-    --vip_1024x768_burst_1_downstream_address check against wait, which is an e_register
+    --vip_sopc_burst_1_downstream_address check against wait, which is an e_register
     process (clk, reset_n)
     begin
       if reset_n = '0' then
-        vip_1024x768_burst_1_downstream_address_last_time <= std_logic_vector'("00000000000000000000000000000");
+        vip_sopc_burst_1_downstream_address_last_time <= std_logic_vector'("00000000000000000000000000000");
       elsif clk'event and clk = '1' then
-        vip_1024x768_burst_1_downstream_address_last_time <= vip_1024x768_burst_1_downstream_address;
+        vip_sopc_burst_1_downstream_address_last_time <= vip_sopc_burst_1_downstream_address;
       end if;
 
     end process;
 
-    --vip_1024x768_burst_1/downstream waited last time, which is an e_register
+    --vip_sopc_burst_1/downstream waited last time, which is an e_register
     process (clk, reset_n)
     begin
       if reset_n = '0' then
         active_and_waiting_last_time <= std_logic'('0');
       elsif clk'event and clk = '1' then
-        active_and_waiting_last_time <= internal_vip_1024x768_burst_1_downstream_waitrequest AND ((vip_1024x768_burst_1_downstream_read OR vip_1024x768_burst_1_downstream_write));
+        active_and_waiting_last_time <= internal_vip_sopc_burst_1_downstream_waitrequest AND ((vip_sopc_burst_1_downstream_read OR vip_sopc_burst_1_downstream_write));
       end if;
 
     end process;
 
-    --vip_1024x768_burst_1_downstream_address matches last port_name, which is an e_process
+    --vip_sopc_burst_1_downstream_address matches last port_name, which is an e_process
     process (clk)
     VARIABLE write_line21 : line;
     begin
       if clk'event and clk = '1' then
-        if std_logic'((active_and_waiting_last_time AND to_std_logic(((vip_1024x768_burst_1_downstream_address /= vip_1024x768_burst_1_downstream_address_last_time))))) = '1' then 
+        if std_logic'((active_and_waiting_last_time AND to_std_logic(((vip_sopc_burst_1_downstream_address /= vip_sopc_burst_1_downstream_address_last_time))))) = '1' then 
           write(write_line21, now);
           write(write_line21, string'(": "));
-          write(write_line21, string'("vip_1024x768_burst_1_downstream_address did not heed wait!!!"));
+          write(write_line21, string'("vip_sopc_burst_1_downstream_address did not heed wait!!!"));
           write(output, write_line21.all);
           deallocate (write_line21);
           assert false report "VHDL STOP" severity failure;
@@ -9899,26 +9899,26 @@ begin
 
     end process;
 
-    --vip_1024x768_burst_1_downstream_burstcount check against wait, which is an e_register
+    --vip_sopc_burst_1_downstream_burstcount check against wait, which is an e_register
     process (clk, reset_n)
     begin
       if reset_n = '0' then
-        vip_1024x768_burst_1_downstream_burstcount_last_time <= std_logic_vector'("000");
+        vip_sopc_burst_1_downstream_burstcount_last_time <= std_logic_vector'("000");
       elsif clk'event and clk = '1' then
-        vip_1024x768_burst_1_downstream_burstcount_last_time <= vip_1024x768_burst_1_downstream_burstcount;
+        vip_sopc_burst_1_downstream_burstcount_last_time <= vip_sopc_burst_1_downstream_burstcount;
       end if;
 
     end process;
 
-    --vip_1024x768_burst_1_downstream_burstcount matches last port_name, which is an e_process
+    --vip_sopc_burst_1_downstream_burstcount matches last port_name, which is an e_process
     process (clk)
     VARIABLE write_line22 : line;
     begin
       if clk'event and clk = '1' then
-        if std_logic'((active_and_waiting_last_time AND to_std_logic(((vip_1024x768_burst_1_downstream_burstcount /= vip_1024x768_burst_1_downstream_burstcount_last_time))))) = '1' then 
+        if std_logic'((active_and_waiting_last_time AND to_std_logic(((vip_sopc_burst_1_downstream_burstcount /= vip_sopc_burst_1_downstream_burstcount_last_time))))) = '1' then 
           write(write_line22, now);
           write(write_line22, string'(": "));
-          write(write_line22, string'("vip_1024x768_burst_1_downstream_burstcount did not heed wait!!!"));
+          write(write_line22, string'("vip_sopc_burst_1_downstream_burstcount did not heed wait!!!"));
           write(output, write_line22.all);
           deallocate (write_line22);
           assert false report "VHDL STOP" severity failure;
@@ -9927,26 +9927,26 @@ begin
 
     end process;
 
-    --vip_1024x768_burst_1_downstream_byteenable check against wait, which is an e_register
+    --vip_sopc_burst_1_downstream_byteenable check against wait, which is an e_register
     process (clk, reset_n)
     begin
       if reset_n = '0' then
-        vip_1024x768_burst_1_downstream_byteenable_last_time <= std_logic_vector'("00000000000000000000000000000000");
+        vip_sopc_burst_1_downstream_byteenable_last_time <= std_logic_vector'("00000000000000000000000000000000");
       elsif clk'event and clk = '1' then
-        vip_1024x768_burst_1_downstream_byteenable_last_time <= vip_1024x768_burst_1_downstream_byteenable;
+        vip_sopc_burst_1_downstream_byteenable_last_time <= vip_sopc_burst_1_downstream_byteenable;
       end if;
 
     end process;
 
-    --vip_1024x768_burst_1_downstream_byteenable matches last port_name, which is an e_process
+    --vip_sopc_burst_1_downstream_byteenable matches last port_name, which is an e_process
     process (clk)
     VARIABLE write_line23 : line;
     begin
       if clk'event and clk = '1' then
-        if std_logic'((active_and_waiting_last_time AND to_std_logic(((vip_1024x768_burst_1_downstream_byteenable /= vip_1024x768_burst_1_downstream_byteenable_last_time))))) = '1' then 
+        if std_logic'((active_and_waiting_last_time AND to_std_logic(((vip_sopc_burst_1_downstream_byteenable /= vip_sopc_burst_1_downstream_byteenable_last_time))))) = '1' then 
           write(write_line23, now);
           write(write_line23, string'(": "));
-          write(write_line23, string'("vip_1024x768_burst_1_downstream_byteenable did not heed wait!!!"));
+          write(write_line23, string'("vip_sopc_burst_1_downstream_byteenable did not heed wait!!!"));
           write(output, write_line23.all);
           deallocate (write_line23);
           assert false report "VHDL STOP" severity failure;
@@ -9955,26 +9955,26 @@ begin
 
     end process;
 
-    --vip_1024x768_burst_1_downstream_read check against wait, which is an e_register
+    --vip_sopc_burst_1_downstream_read check against wait, which is an e_register
     process (clk, reset_n)
     begin
       if reset_n = '0' then
-        vip_1024x768_burst_1_downstream_read_last_time <= std_logic'('0');
+        vip_sopc_burst_1_downstream_read_last_time <= std_logic'('0');
       elsif clk'event and clk = '1' then
-        vip_1024x768_burst_1_downstream_read_last_time <= vip_1024x768_burst_1_downstream_read;
+        vip_sopc_burst_1_downstream_read_last_time <= vip_sopc_burst_1_downstream_read;
       end if;
 
     end process;
 
-    --vip_1024x768_burst_1_downstream_read matches last port_name, which is an e_process
+    --vip_sopc_burst_1_downstream_read matches last port_name, which is an e_process
     process (clk)
     VARIABLE write_line24 : line;
     begin
       if clk'event and clk = '1' then
-        if std_logic'((active_and_waiting_last_time AND to_std_logic(((std_logic'(vip_1024x768_burst_1_downstream_read) /= std_logic'(vip_1024x768_burst_1_downstream_read_last_time)))))) = '1' then 
+        if std_logic'((active_and_waiting_last_time AND to_std_logic(((std_logic'(vip_sopc_burst_1_downstream_read) /= std_logic'(vip_sopc_burst_1_downstream_read_last_time)))))) = '1' then 
           write(write_line24, now);
           write(write_line24, string'(": "));
-          write(write_line24, string'("vip_1024x768_burst_1_downstream_read did not heed wait!!!"));
+          write(write_line24, string'("vip_sopc_burst_1_downstream_read did not heed wait!!!"));
           write(output, write_line24.all);
           deallocate (write_line24);
           assert false report "VHDL STOP" severity failure;
@@ -9983,26 +9983,26 @@ begin
 
     end process;
 
-    --vip_1024x768_burst_1_downstream_write check against wait, which is an e_register
+    --vip_sopc_burst_1_downstream_write check against wait, which is an e_register
     process (clk, reset_n)
     begin
       if reset_n = '0' then
-        vip_1024x768_burst_1_downstream_write_last_time <= std_logic'('0');
+        vip_sopc_burst_1_downstream_write_last_time <= std_logic'('0');
       elsif clk'event and clk = '1' then
-        vip_1024x768_burst_1_downstream_write_last_time <= vip_1024x768_burst_1_downstream_write;
+        vip_sopc_burst_1_downstream_write_last_time <= vip_sopc_burst_1_downstream_write;
       end if;
 
     end process;
 
-    --vip_1024x768_burst_1_downstream_write matches last port_name, which is an e_process
+    --vip_sopc_burst_1_downstream_write matches last port_name, which is an e_process
     process (clk)
     VARIABLE write_line25 : line;
     begin
       if clk'event and clk = '1' then
-        if std_logic'((active_and_waiting_last_time AND to_std_logic(((std_logic'(vip_1024x768_burst_1_downstream_write) /= std_logic'(vip_1024x768_burst_1_downstream_write_last_time)))))) = '1' then 
+        if std_logic'((active_and_waiting_last_time AND to_std_logic(((std_logic'(vip_sopc_burst_1_downstream_write) /= std_logic'(vip_sopc_burst_1_downstream_write_last_time)))))) = '1' then 
           write(write_line25, now);
           write(write_line25, string'(": "));
-          write(write_line25, string'("vip_1024x768_burst_1_downstream_write did not heed wait!!!"));
+          write(write_line25, string'("vip_sopc_burst_1_downstream_write did not heed wait!!!"));
           write(output, write_line25.all);
           deallocate (write_line25);
           assert false report "VHDL STOP" severity failure;
@@ -10011,26 +10011,26 @@ begin
 
     end process;
 
-    --vip_1024x768_burst_1_downstream_writedata check against wait, which is an e_register
+    --vip_sopc_burst_1_downstream_writedata check against wait, which is an e_register
     process (clk, reset_n)
     begin
       if reset_n = '0' then
-        vip_1024x768_burst_1_downstream_writedata_last_time <= std_logic_vector'("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+        vip_sopc_burst_1_downstream_writedata_last_time <= std_logic_vector'("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
       elsif clk'event and clk = '1' then
-        vip_1024x768_burst_1_downstream_writedata_last_time <= vip_1024x768_burst_1_downstream_writedata;
+        vip_sopc_burst_1_downstream_writedata_last_time <= vip_sopc_burst_1_downstream_writedata;
       end if;
 
     end process;
 
-    --vip_1024x768_burst_1_downstream_writedata matches last port_name, which is an e_process
+    --vip_sopc_burst_1_downstream_writedata matches last port_name, which is an e_process
     process (clk)
     VARIABLE write_line26 : line;
     begin
       if clk'event and clk = '1' then
-        if std_logic'(((active_and_waiting_last_time AND to_std_logic(((vip_1024x768_burst_1_downstream_writedata /= vip_1024x768_burst_1_downstream_writedata_last_time)))) AND vip_1024x768_burst_1_downstream_write)) = '1' then 
+        if std_logic'(((active_and_waiting_last_time AND to_std_logic(((vip_sopc_burst_1_downstream_writedata /= vip_sopc_burst_1_downstream_writedata_last_time)))) AND vip_sopc_burst_1_downstream_write)) = '1' then 
           write(write_line26, now);
           write(write_line26, string'(": "));
-          write(write_line26, string'("vip_1024x768_burst_1_downstream_writedata did not heed wait!!!"));
+          write(write_line26, string'("vip_sopc_burst_1_downstream_writedata did not heed wait!!!"));
           write(output, write_line26.all);
           deallocate (write_line26);
           assert false report "VHDL STOP" severity failure;
@@ -10057,7 +10057,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 
-entity vip_1024x768_reset_vip_clk_domain_synch_module is 
+entity vip_sopc_reset_vip_clk_domain_synch_module is 
         port (
               -- inputs:
                  signal clk : IN STD_LOGIC;
@@ -10067,10 +10067,10 @@ entity vip_1024x768_reset_vip_clk_domain_synch_module is
               -- outputs:
                  signal data_out : OUT STD_LOGIC
               );
-end entity vip_1024x768_reset_vip_clk_domain_synch_module;
+end entity vip_sopc_reset_vip_clk_domain_synch_module;
 
 
-architecture europa of vip_1024x768_reset_vip_clk_domain_synch_module is
+architecture europa of vip_sopc_reset_vip_clk_domain_synch_module is
                 signal data_in_d1 :  STD_LOGIC;
 attribute ALTERA_ATTRIBUTE : string;
 attribute ALTERA_ATTRIBUTE of data_in_d1 : signal is "{-from ""*""} CUT=ON ; PRESERVE_REGISTER=ON ; SUPPRESS_DA_RULE_INTERNAL=R101";
@@ -10115,7 +10115,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 
-entity vip_1024x768_reset_altmemddr_0_phy_clk_out_domain_synch_module is 
+entity vip_sopc_reset_altmemddr_0_phy_clk_out_domain_synch_module is 
         port (
               -- inputs:
                  signal clk : IN STD_LOGIC;
@@ -10125,10 +10125,10 @@ entity vip_1024x768_reset_altmemddr_0_phy_clk_out_domain_synch_module is
               -- outputs:
                  signal data_out : OUT STD_LOGIC
               );
-end entity vip_1024x768_reset_altmemddr_0_phy_clk_out_domain_synch_module;
+end entity vip_sopc_reset_altmemddr_0_phy_clk_out_domain_synch_module;
 
 
-architecture europa of vip_1024x768_reset_altmemddr_0_phy_clk_out_domain_synch_module is
+architecture europa of vip_sopc_reset_altmemddr_0_phy_clk_out_domain_synch_module is
                 signal data_in_d1 :  STD_LOGIC;
 attribute ALTERA_ATTRIBUTE : string;
 attribute ALTERA_ATTRIBUTE of data_in_d1 : signal is "{-from ""*""} CUT=ON ; PRESERVE_REGISTER=ON ; SUPPRESS_DA_RULE_INTERNAL=R101";
@@ -10173,7 +10173,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 
-entity vip_1024x768 is 
+entity vip_sopc is 
         port (
               -- 1) global signals:
                  signal altmemddr_0_aux_full_rate_clk_out : OUT STD_LOGIC;
@@ -10232,10 +10232,10 @@ entity vip_1024x768 is
                  signal oct_ctl_rt_value_to_the_altmemddr_0 : IN STD_LOGIC_VECTOR (13 DOWNTO 0);
                  signal reset_phy_clk_n_from_the_altmemddr_0 : OUT STD_LOGIC
               );
-end entity vip_1024x768;
+end entity vip_sopc;
 
 
-architecture europa of vip_1024x768 is
+architecture europa of vip_sopc is
 component alt_vip_cti_0_dout_arbitrator is 
            port (
                  -- inputs:
@@ -10420,17 +10420,17 @@ component alt_vip_vfb_0_read_master_arbitrator is
                  -- inputs:
                     signal alt_vip_vfb_0_read_master_address : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
                     signal alt_vip_vfb_0_read_master_burstcount : IN STD_LOGIC_VECTOR (6 DOWNTO 0);
-                    signal alt_vip_vfb_0_read_master_granted_vip_1024x768_burst_1_upstream : IN STD_LOGIC;
-                    signal alt_vip_vfb_0_read_master_qualified_request_vip_1024x768_burst_1_upstream : IN STD_LOGIC;
+                    signal alt_vip_vfb_0_read_master_granted_vip_sopc_burst_1_upstream : IN STD_LOGIC;
+                    signal alt_vip_vfb_0_read_master_qualified_request_vip_sopc_burst_1_upstream : IN STD_LOGIC;
                     signal alt_vip_vfb_0_read_master_read : IN STD_LOGIC;
-                    signal alt_vip_vfb_0_read_master_read_data_valid_vip_1024x768_burst_1_upstream : IN STD_LOGIC;
-                    signal alt_vip_vfb_0_read_master_read_data_valid_vip_1024x768_burst_1_upstream_shift_register : IN STD_LOGIC;
-                    signal alt_vip_vfb_0_read_master_requests_vip_1024x768_burst_1_upstream : IN STD_LOGIC;
+                    signal alt_vip_vfb_0_read_master_read_data_valid_vip_sopc_burst_1_upstream : IN STD_LOGIC;
+                    signal alt_vip_vfb_0_read_master_read_data_valid_vip_sopc_burst_1_upstream_shift_register : IN STD_LOGIC;
+                    signal alt_vip_vfb_0_read_master_requests_vip_sopc_burst_1_upstream : IN STD_LOGIC;
                     signal clk : IN STD_LOGIC;
-                    signal d1_vip_1024x768_burst_1_upstream_end_xfer : IN STD_LOGIC;
+                    signal d1_vip_sopc_burst_1_upstream_end_xfer : IN STD_LOGIC;
                     signal reset_n : IN STD_LOGIC;
-                    signal vip_1024x768_burst_1_upstream_readdata_from_sa : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
-                    signal vip_1024x768_burst_1_upstream_waitrequest_from_sa : IN STD_LOGIC;
+                    signal vip_sopc_burst_1_upstream_readdata_from_sa : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
+                    signal vip_sopc_burst_1_upstream_waitrequest_from_sa : IN STD_LOGIC;
 
                  -- outputs:
                     signal alt_vip_vfb_0_read_master_address_to_slave : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
@@ -10447,15 +10447,15 @@ component alt_vip_vfb_0_write_master_arbitrator is
                  -- inputs:
                     signal alt_vip_vfb_0_write_master_address : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
                     signal alt_vip_vfb_0_write_master_burstcount : IN STD_LOGIC_VECTOR (6 DOWNTO 0);
-                    signal alt_vip_vfb_0_write_master_granted_vip_1024x768_burst_0_upstream : IN STD_LOGIC;
-                    signal alt_vip_vfb_0_write_master_qualified_request_vip_1024x768_burst_0_upstream : IN STD_LOGIC;
-                    signal alt_vip_vfb_0_write_master_requests_vip_1024x768_burst_0_upstream : IN STD_LOGIC;
+                    signal alt_vip_vfb_0_write_master_granted_vip_sopc_burst_0_upstream : IN STD_LOGIC;
+                    signal alt_vip_vfb_0_write_master_qualified_request_vip_sopc_burst_0_upstream : IN STD_LOGIC;
+                    signal alt_vip_vfb_0_write_master_requests_vip_sopc_burst_0_upstream : IN STD_LOGIC;
                     signal alt_vip_vfb_0_write_master_write : IN STD_LOGIC;
                     signal alt_vip_vfb_0_write_master_writedata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
                     signal clk : IN STD_LOGIC;
-                    signal d1_vip_1024x768_burst_0_upstream_end_xfer : IN STD_LOGIC;
+                    signal d1_vip_sopc_burst_0_upstream_end_xfer : IN STD_LOGIC;
                     signal reset_n : IN STD_LOGIC;
-                    signal vip_1024x768_burst_0_upstream_waitrequest_from_sa : IN STD_LOGIC;
+                    signal vip_sopc_burst_0_upstream_waitrequest_from_sa : IN STD_LOGIC;
 
                  -- outputs:
                     signal alt_vip_vfb_0_write_master_address_to_slave : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
@@ -10508,22 +10508,22 @@ component altmemddr_0_s1_arbitrator is
                     signal altmemddr_0_s1_waitrequest_n : IN STD_LOGIC;
                     signal clk : IN STD_LOGIC;
                     signal reset_n : IN STD_LOGIC;
-                    signal vip_1024x768_burst_0_downstream_address_to_slave : IN STD_LOGIC_VECTOR (28 DOWNTO 0);
-                    signal vip_1024x768_burst_0_downstream_arbitrationshare : IN STD_LOGIC_VECTOR (6 DOWNTO 0);
-                    signal vip_1024x768_burst_0_downstream_burstcount : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
-                    signal vip_1024x768_burst_0_downstream_byteenable : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
-                    signal vip_1024x768_burst_0_downstream_latency_counter : IN STD_LOGIC;
-                    signal vip_1024x768_burst_0_downstream_read : IN STD_LOGIC;
-                    signal vip_1024x768_burst_0_downstream_write : IN STD_LOGIC;
-                    signal vip_1024x768_burst_0_downstream_writedata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
-                    signal vip_1024x768_burst_1_downstream_address_to_slave : IN STD_LOGIC_VECTOR (28 DOWNTO 0);
-                    signal vip_1024x768_burst_1_downstream_arbitrationshare : IN STD_LOGIC_VECTOR (6 DOWNTO 0);
-                    signal vip_1024x768_burst_1_downstream_burstcount : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
-                    signal vip_1024x768_burst_1_downstream_byteenable : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
-                    signal vip_1024x768_burst_1_downstream_latency_counter : IN STD_LOGIC;
-                    signal vip_1024x768_burst_1_downstream_read : IN STD_LOGIC;
-                    signal vip_1024x768_burst_1_downstream_write : IN STD_LOGIC;
-                    signal vip_1024x768_burst_1_downstream_writedata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
+                    signal vip_sopc_burst_0_downstream_address_to_slave : IN STD_LOGIC_VECTOR (28 DOWNTO 0);
+                    signal vip_sopc_burst_0_downstream_arbitrationshare : IN STD_LOGIC_VECTOR (6 DOWNTO 0);
+                    signal vip_sopc_burst_0_downstream_burstcount : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
+                    signal vip_sopc_burst_0_downstream_byteenable : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+                    signal vip_sopc_burst_0_downstream_latency_counter : IN STD_LOGIC;
+                    signal vip_sopc_burst_0_downstream_read : IN STD_LOGIC;
+                    signal vip_sopc_burst_0_downstream_write : IN STD_LOGIC;
+                    signal vip_sopc_burst_0_downstream_writedata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
+                    signal vip_sopc_burst_1_downstream_address_to_slave : IN STD_LOGIC_VECTOR (28 DOWNTO 0);
+                    signal vip_sopc_burst_1_downstream_arbitrationshare : IN STD_LOGIC_VECTOR (6 DOWNTO 0);
+                    signal vip_sopc_burst_1_downstream_burstcount : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
+                    signal vip_sopc_burst_1_downstream_byteenable : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+                    signal vip_sopc_burst_1_downstream_latency_counter : IN STD_LOGIC;
+                    signal vip_sopc_burst_1_downstream_read : IN STD_LOGIC;
+                    signal vip_sopc_burst_1_downstream_write : IN STD_LOGIC;
+                    signal vip_sopc_burst_1_downstream_writedata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
 
                  -- outputs:
                     signal altmemddr_0_s1_address : OUT STD_LOGIC_VECTOR (23 DOWNTO 0);
@@ -10537,20 +10537,20 @@ component altmemddr_0_s1_arbitrator is
                     signal altmemddr_0_s1_write : OUT STD_LOGIC;
                     signal altmemddr_0_s1_writedata : OUT STD_LOGIC_VECTOR (255 DOWNTO 0);
                     signal d1_altmemddr_0_s1_end_xfer : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1 : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_0_downstream_qualified_request_altmemddr_0_s1 : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_0_downstream_read_data_valid_altmemddr_0_s1 : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_0_downstream_read_data_valid_altmemddr_0_s1_shift_register : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_0_downstream_requests_altmemddr_0_s1 : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1 : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_1_downstream_qualified_request_altmemddr_0_s1 : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_1_downstream_read_data_valid_altmemddr_0_s1 : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_1_downstream_read_data_valid_altmemddr_0_s1_shift_register : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_1_downstream_requests_altmemddr_0_s1 : OUT STD_LOGIC
+                    signal vip_sopc_burst_0_downstream_granted_altmemddr_0_s1 : OUT STD_LOGIC;
+                    signal vip_sopc_burst_0_downstream_qualified_request_altmemddr_0_s1 : OUT STD_LOGIC;
+                    signal vip_sopc_burst_0_downstream_read_data_valid_altmemddr_0_s1 : OUT STD_LOGIC;
+                    signal vip_sopc_burst_0_downstream_read_data_valid_altmemddr_0_s1_shift_register : OUT STD_LOGIC;
+                    signal vip_sopc_burst_0_downstream_requests_altmemddr_0_s1 : OUT STD_LOGIC;
+                    signal vip_sopc_burst_1_downstream_granted_altmemddr_0_s1 : OUT STD_LOGIC;
+                    signal vip_sopc_burst_1_downstream_qualified_request_altmemddr_0_s1 : OUT STD_LOGIC;
+                    signal vip_sopc_burst_1_downstream_read_data_valid_altmemddr_0_s1 : OUT STD_LOGIC;
+                    signal vip_sopc_burst_1_downstream_read_data_valid_altmemddr_0_s1_shift_register : OUT STD_LOGIC;
+                    signal vip_sopc_burst_1_downstream_requests_altmemddr_0_s1 : OUT STD_LOGIC
                  );
 end component altmemddr_0_s1_arbitrator;
 
-component vip_1024x768_reset_clk_24M_domain_synch_module is 
+component vip_sopc_reset_clk_24M_domain_synch_module is 
            port (
                  -- inputs:
                     signal clk : IN STD_LOGIC;
@@ -10560,7 +10560,7 @@ component vip_1024x768_reset_clk_24M_domain_synch_module is
                  -- outputs:
                     signal data_out : OUT STD_LOGIC
                  );
-end component vip_1024x768_reset_clk_24M_domain_synch_module;
+end component vip_sopc_reset_clk_24M_domain_synch_module;
 
 component altmemddr_0 is 
            port (
@@ -10612,7 +10612,7 @@ component altmemddr_0 is
                  );
 end component altmemddr_0;
 
-component vip_1024x768_burst_0_upstream_arbitrator is 
+component vip_sopc_burst_0_upstream_arbitrator is 
            port (
                  -- inputs:
                     signal alt_vip_vfb_0_write_master_address_to_slave : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
@@ -10621,30 +10621,30 @@ component vip_1024x768_burst_0_upstream_arbitrator is
                     signal alt_vip_vfb_0_write_master_writedata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
                     signal clk : IN STD_LOGIC;
                     signal reset_n : IN STD_LOGIC;
-                    signal vip_1024x768_burst_0_upstream_readdata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
-                    signal vip_1024x768_burst_0_upstream_readdatavalid : IN STD_LOGIC;
-                    signal vip_1024x768_burst_0_upstream_waitrequest : IN STD_LOGIC;
+                    signal vip_sopc_burst_0_upstream_readdata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
+                    signal vip_sopc_burst_0_upstream_readdatavalid : IN STD_LOGIC;
+                    signal vip_sopc_burst_0_upstream_waitrequest : IN STD_LOGIC;
 
                  -- outputs:
-                    signal alt_vip_vfb_0_write_master_granted_vip_1024x768_burst_0_upstream : OUT STD_LOGIC;
-                    signal alt_vip_vfb_0_write_master_qualified_request_vip_1024x768_burst_0_upstream : OUT STD_LOGIC;
-                    signal alt_vip_vfb_0_write_master_requests_vip_1024x768_burst_0_upstream : OUT STD_LOGIC;
-                    signal d1_vip_1024x768_burst_0_upstream_end_xfer : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_0_upstream_address : OUT STD_LOGIC_VECTOR (28 DOWNTO 0);
-                    signal vip_1024x768_burst_0_upstream_burstcount : OUT STD_LOGIC_VECTOR (6 DOWNTO 0);
-                    signal vip_1024x768_burst_0_upstream_byteaddress : OUT STD_LOGIC_VECTOR (33 DOWNTO 0);
-                    signal vip_1024x768_burst_0_upstream_byteenable : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
-                    signal vip_1024x768_burst_0_upstream_debugaccess : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_0_upstream_read : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_0_upstream_readdata_from_sa : OUT STD_LOGIC_VECTOR (255 DOWNTO 0);
-                    signal vip_1024x768_burst_0_upstream_readdatavalid_from_sa : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_0_upstream_waitrequest_from_sa : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_0_upstream_write : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_0_upstream_writedata : OUT STD_LOGIC_VECTOR (255 DOWNTO 0)
+                    signal alt_vip_vfb_0_write_master_granted_vip_sopc_burst_0_upstream : OUT STD_LOGIC;
+                    signal alt_vip_vfb_0_write_master_qualified_request_vip_sopc_burst_0_upstream : OUT STD_LOGIC;
+                    signal alt_vip_vfb_0_write_master_requests_vip_sopc_burst_0_upstream : OUT STD_LOGIC;
+                    signal d1_vip_sopc_burst_0_upstream_end_xfer : OUT STD_LOGIC;
+                    signal vip_sopc_burst_0_upstream_address : OUT STD_LOGIC_VECTOR (28 DOWNTO 0);
+                    signal vip_sopc_burst_0_upstream_burstcount : OUT STD_LOGIC_VECTOR (6 DOWNTO 0);
+                    signal vip_sopc_burst_0_upstream_byteaddress : OUT STD_LOGIC_VECTOR (33 DOWNTO 0);
+                    signal vip_sopc_burst_0_upstream_byteenable : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+                    signal vip_sopc_burst_0_upstream_debugaccess : OUT STD_LOGIC;
+                    signal vip_sopc_burst_0_upstream_read : OUT STD_LOGIC;
+                    signal vip_sopc_burst_0_upstream_readdata_from_sa : OUT STD_LOGIC_VECTOR (255 DOWNTO 0);
+                    signal vip_sopc_burst_0_upstream_readdatavalid_from_sa : OUT STD_LOGIC;
+                    signal vip_sopc_burst_0_upstream_waitrequest_from_sa : OUT STD_LOGIC;
+                    signal vip_sopc_burst_0_upstream_write : OUT STD_LOGIC;
+                    signal vip_sopc_burst_0_upstream_writedata : OUT STD_LOGIC_VECTOR (255 DOWNTO 0)
                  );
-end component vip_1024x768_burst_0_upstream_arbitrator;
+end component vip_sopc_burst_0_upstream_arbitrator;
 
-component vip_1024x768_burst_0_downstream_arbitrator is 
+component vip_sopc_burst_0_downstream_arbitrator is 
            port (
                  -- inputs:
                     signal altmemddr_0_s1_readdata_from_sa : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
@@ -10652,29 +10652,29 @@ component vip_1024x768_burst_0_downstream_arbitrator is
                     signal clk : IN STD_LOGIC;
                     signal d1_altmemddr_0_s1_end_xfer : IN STD_LOGIC;
                     signal reset_n : IN STD_LOGIC;
-                    signal vip_1024x768_burst_0_downstream_address : IN STD_LOGIC_VECTOR (28 DOWNTO 0);
-                    signal vip_1024x768_burst_0_downstream_burstcount : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
-                    signal vip_1024x768_burst_0_downstream_byteenable : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
-                    signal vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1 : IN STD_LOGIC;
-                    signal vip_1024x768_burst_0_downstream_qualified_request_altmemddr_0_s1 : IN STD_LOGIC;
-                    signal vip_1024x768_burst_0_downstream_read : IN STD_LOGIC;
-                    signal vip_1024x768_burst_0_downstream_read_data_valid_altmemddr_0_s1 : IN STD_LOGIC;
-                    signal vip_1024x768_burst_0_downstream_read_data_valid_altmemddr_0_s1_shift_register : IN STD_LOGIC;
-                    signal vip_1024x768_burst_0_downstream_requests_altmemddr_0_s1 : IN STD_LOGIC;
-                    signal vip_1024x768_burst_0_downstream_write : IN STD_LOGIC;
-                    signal vip_1024x768_burst_0_downstream_writedata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
+                    signal vip_sopc_burst_0_downstream_address : IN STD_LOGIC_VECTOR (28 DOWNTO 0);
+                    signal vip_sopc_burst_0_downstream_burstcount : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
+                    signal vip_sopc_burst_0_downstream_byteenable : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+                    signal vip_sopc_burst_0_downstream_granted_altmemddr_0_s1 : IN STD_LOGIC;
+                    signal vip_sopc_burst_0_downstream_qualified_request_altmemddr_0_s1 : IN STD_LOGIC;
+                    signal vip_sopc_burst_0_downstream_read : IN STD_LOGIC;
+                    signal vip_sopc_burst_0_downstream_read_data_valid_altmemddr_0_s1 : IN STD_LOGIC;
+                    signal vip_sopc_burst_0_downstream_read_data_valid_altmemddr_0_s1_shift_register : IN STD_LOGIC;
+                    signal vip_sopc_burst_0_downstream_requests_altmemddr_0_s1 : IN STD_LOGIC;
+                    signal vip_sopc_burst_0_downstream_write : IN STD_LOGIC;
+                    signal vip_sopc_burst_0_downstream_writedata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
 
                  -- outputs:
-                    signal vip_1024x768_burst_0_downstream_address_to_slave : OUT STD_LOGIC_VECTOR (28 DOWNTO 0);
-                    signal vip_1024x768_burst_0_downstream_latency_counter : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_0_downstream_readdata : OUT STD_LOGIC_VECTOR (255 DOWNTO 0);
-                    signal vip_1024x768_burst_0_downstream_readdatavalid : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_0_downstream_reset_n : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_0_downstream_waitrequest : OUT STD_LOGIC
+                    signal vip_sopc_burst_0_downstream_address_to_slave : OUT STD_LOGIC_VECTOR (28 DOWNTO 0);
+                    signal vip_sopc_burst_0_downstream_latency_counter : OUT STD_LOGIC;
+                    signal vip_sopc_burst_0_downstream_readdata : OUT STD_LOGIC_VECTOR (255 DOWNTO 0);
+                    signal vip_sopc_burst_0_downstream_readdatavalid : OUT STD_LOGIC;
+                    signal vip_sopc_burst_0_downstream_reset_n : OUT STD_LOGIC;
+                    signal vip_sopc_burst_0_downstream_waitrequest : OUT STD_LOGIC
                  );
-end component vip_1024x768_burst_0_downstream_arbitrator;
+end component vip_sopc_burst_0_downstream_arbitrator;
 
-component vip_1024x768_burst_0 is 
+component vip_sopc_burst_0 is 
            port (
                  -- inputs:
                     signal clk : IN STD_LOGIC;
@@ -10705,9 +10705,9 @@ component vip_1024x768_burst_0 is
                     signal upstream_readdatavalid : OUT STD_LOGIC;
                     signal upstream_waitrequest : OUT STD_LOGIC
                  );
-end component vip_1024x768_burst_0;
+end component vip_sopc_burst_0;
 
-component vip_1024x768_burst_1_upstream_arbitrator is 
+component vip_sopc_burst_1_upstream_arbitrator is 
            port (
                  -- inputs:
                     signal alt_vip_vfb_0_read_master_address_to_slave : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
@@ -10716,30 +10716,30 @@ component vip_1024x768_burst_1_upstream_arbitrator is
                     signal alt_vip_vfb_0_read_master_read : IN STD_LOGIC;
                     signal clk : IN STD_LOGIC;
                     signal reset_n : IN STD_LOGIC;
-                    signal vip_1024x768_burst_1_upstream_readdata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
-                    signal vip_1024x768_burst_1_upstream_readdatavalid : IN STD_LOGIC;
-                    signal vip_1024x768_burst_1_upstream_waitrequest : IN STD_LOGIC;
+                    signal vip_sopc_burst_1_upstream_readdata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
+                    signal vip_sopc_burst_1_upstream_readdatavalid : IN STD_LOGIC;
+                    signal vip_sopc_burst_1_upstream_waitrequest : IN STD_LOGIC;
 
                  -- outputs:
-                    signal alt_vip_vfb_0_read_master_granted_vip_1024x768_burst_1_upstream : OUT STD_LOGIC;
-                    signal alt_vip_vfb_0_read_master_qualified_request_vip_1024x768_burst_1_upstream : OUT STD_LOGIC;
-                    signal alt_vip_vfb_0_read_master_read_data_valid_vip_1024x768_burst_1_upstream : OUT STD_LOGIC;
-                    signal alt_vip_vfb_0_read_master_read_data_valid_vip_1024x768_burst_1_upstream_shift_register : OUT STD_LOGIC;
-                    signal alt_vip_vfb_0_read_master_requests_vip_1024x768_burst_1_upstream : OUT STD_LOGIC;
-                    signal d1_vip_1024x768_burst_1_upstream_end_xfer : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_1_upstream_address : OUT STD_LOGIC_VECTOR (28 DOWNTO 0);
-                    signal vip_1024x768_burst_1_upstream_burstcount : OUT STD_LOGIC_VECTOR (6 DOWNTO 0);
-                    signal vip_1024x768_burst_1_upstream_byteaddress : OUT STD_LOGIC_VECTOR (33 DOWNTO 0);
-                    signal vip_1024x768_burst_1_upstream_byteenable : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
-                    signal vip_1024x768_burst_1_upstream_debugaccess : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_1_upstream_read : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_1_upstream_readdata_from_sa : OUT STD_LOGIC_VECTOR (255 DOWNTO 0);
-                    signal vip_1024x768_burst_1_upstream_waitrequest_from_sa : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_1_upstream_write : OUT STD_LOGIC
+                    signal alt_vip_vfb_0_read_master_granted_vip_sopc_burst_1_upstream : OUT STD_LOGIC;
+                    signal alt_vip_vfb_0_read_master_qualified_request_vip_sopc_burst_1_upstream : OUT STD_LOGIC;
+                    signal alt_vip_vfb_0_read_master_read_data_valid_vip_sopc_burst_1_upstream : OUT STD_LOGIC;
+                    signal alt_vip_vfb_0_read_master_read_data_valid_vip_sopc_burst_1_upstream_shift_register : OUT STD_LOGIC;
+                    signal alt_vip_vfb_0_read_master_requests_vip_sopc_burst_1_upstream : OUT STD_LOGIC;
+                    signal d1_vip_sopc_burst_1_upstream_end_xfer : OUT STD_LOGIC;
+                    signal vip_sopc_burst_1_upstream_address : OUT STD_LOGIC_VECTOR (28 DOWNTO 0);
+                    signal vip_sopc_burst_1_upstream_burstcount : OUT STD_LOGIC_VECTOR (6 DOWNTO 0);
+                    signal vip_sopc_burst_1_upstream_byteaddress : OUT STD_LOGIC_VECTOR (33 DOWNTO 0);
+                    signal vip_sopc_burst_1_upstream_byteenable : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+                    signal vip_sopc_burst_1_upstream_debugaccess : OUT STD_LOGIC;
+                    signal vip_sopc_burst_1_upstream_read : OUT STD_LOGIC;
+                    signal vip_sopc_burst_1_upstream_readdata_from_sa : OUT STD_LOGIC_VECTOR (255 DOWNTO 0);
+                    signal vip_sopc_burst_1_upstream_waitrequest_from_sa : OUT STD_LOGIC;
+                    signal vip_sopc_burst_1_upstream_write : OUT STD_LOGIC
                  );
-end component vip_1024x768_burst_1_upstream_arbitrator;
+end component vip_sopc_burst_1_upstream_arbitrator;
 
-component vip_1024x768_burst_1_downstream_arbitrator is 
+component vip_sopc_burst_1_downstream_arbitrator is 
            port (
                  -- inputs:
                     signal altmemddr_0_s1_readdata_from_sa : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
@@ -10747,29 +10747,29 @@ component vip_1024x768_burst_1_downstream_arbitrator is
                     signal clk : IN STD_LOGIC;
                     signal d1_altmemddr_0_s1_end_xfer : IN STD_LOGIC;
                     signal reset_n : IN STD_LOGIC;
-                    signal vip_1024x768_burst_1_downstream_address : IN STD_LOGIC_VECTOR (28 DOWNTO 0);
-                    signal vip_1024x768_burst_1_downstream_burstcount : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
-                    signal vip_1024x768_burst_1_downstream_byteenable : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
-                    signal vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1 : IN STD_LOGIC;
-                    signal vip_1024x768_burst_1_downstream_qualified_request_altmemddr_0_s1 : IN STD_LOGIC;
-                    signal vip_1024x768_burst_1_downstream_read : IN STD_LOGIC;
-                    signal vip_1024x768_burst_1_downstream_read_data_valid_altmemddr_0_s1 : IN STD_LOGIC;
-                    signal vip_1024x768_burst_1_downstream_read_data_valid_altmemddr_0_s1_shift_register : IN STD_LOGIC;
-                    signal vip_1024x768_burst_1_downstream_requests_altmemddr_0_s1 : IN STD_LOGIC;
-                    signal vip_1024x768_burst_1_downstream_write : IN STD_LOGIC;
-                    signal vip_1024x768_burst_1_downstream_writedata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
+                    signal vip_sopc_burst_1_downstream_address : IN STD_LOGIC_VECTOR (28 DOWNTO 0);
+                    signal vip_sopc_burst_1_downstream_burstcount : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
+                    signal vip_sopc_burst_1_downstream_byteenable : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+                    signal vip_sopc_burst_1_downstream_granted_altmemddr_0_s1 : IN STD_LOGIC;
+                    signal vip_sopc_burst_1_downstream_qualified_request_altmemddr_0_s1 : IN STD_LOGIC;
+                    signal vip_sopc_burst_1_downstream_read : IN STD_LOGIC;
+                    signal vip_sopc_burst_1_downstream_read_data_valid_altmemddr_0_s1 : IN STD_LOGIC;
+                    signal vip_sopc_burst_1_downstream_read_data_valid_altmemddr_0_s1_shift_register : IN STD_LOGIC;
+                    signal vip_sopc_burst_1_downstream_requests_altmemddr_0_s1 : IN STD_LOGIC;
+                    signal vip_sopc_burst_1_downstream_write : IN STD_LOGIC;
+                    signal vip_sopc_burst_1_downstream_writedata : IN STD_LOGIC_VECTOR (255 DOWNTO 0);
 
                  -- outputs:
-                    signal vip_1024x768_burst_1_downstream_address_to_slave : OUT STD_LOGIC_VECTOR (28 DOWNTO 0);
-                    signal vip_1024x768_burst_1_downstream_latency_counter : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_1_downstream_readdata : OUT STD_LOGIC_VECTOR (255 DOWNTO 0);
-                    signal vip_1024x768_burst_1_downstream_readdatavalid : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_1_downstream_reset_n : OUT STD_LOGIC;
-                    signal vip_1024x768_burst_1_downstream_waitrequest : OUT STD_LOGIC
+                    signal vip_sopc_burst_1_downstream_address_to_slave : OUT STD_LOGIC_VECTOR (28 DOWNTO 0);
+                    signal vip_sopc_burst_1_downstream_latency_counter : OUT STD_LOGIC;
+                    signal vip_sopc_burst_1_downstream_readdata : OUT STD_LOGIC_VECTOR (255 DOWNTO 0);
+                    signal vip_sopc_burst_1_downstream_readdatavalid : OUT STD_LOGIC;
+                    signal vip_sopc_burst_1_downstream_reset_n : OUT STD_LOGIC;
+                    signal vip_sopc_burst_1_downstream_waitrequest : OUT STD_LOGIC
                  );
-end component vip_1024x768_burst_1_downstream_arbitrator;
+end component vip_sopc_burst_1_downstream_arbitrator;
 
-component vip_1024x768_burst_1 is 
+component vip_sopc_burst_1 is 
            port (
                  -- inputs:
                     signal clk : IN STD_LOGIC;
@@ -10800,9 +10800,9 @@ component vip_1024x768_burst_1 is
                     signal upstream_readdatavalid : OUT STD_LOGIC;
                     signal upstream_waitrequest : OUT STD_LOGIC
                  );
-end component vip_1024x768_burst_1;
+end component vip_sopc_burst_1;
 
-component vip_1024x768_reset_vip_clk_domain_synch_module is 
+component vip_sopc_reset_vip_clk_domain_synch_module is 
            port (
                  -- inputs:
                     signal clk : IN STD_LOGIC;
@@ -10812,9 +10812,9 @@ component vip_1024x768_reset_vip_clk_domain_synch_module is
                  -- outputs:
                     signal data_out : OUT STD_LOGIC
                  );
-end component vip_1024x768_reset_vip_clk_domain_synch_module;
+end component vip_sopc_reset_vip_clk_domain_synch_module;
 
-component vip_1024x768_reset_altmemddr_0_phy_clk_out_domain_synch_module is 
+component vip_sopc_reset_altmemddr_0_phy_clk_out_domain_synch_module is 
            port (
                  -- inputs:
                     signal clk : IN STD_LOGIC;
@@ -10824,7 +10824,7 @@ component vip_1024x768_reset_altmemddr_0_phy_clk_out_domain_synch_module is
                  -- outputs:
                     signal data_out : OUT STD_LOGIC
                  );
-end component vip_1024x768_reset_altmemddr_0_phy_clk_out_domain_synch_module;
+end component vip_sopc_reset_altmemddr_0_phy_clk_out_domain_synch_module;
 
                 signal alt_vip_cti_0_dout_data :  STD_LOGIC_VECTOR (23 DOWNTO 0);
                 signal alt_vip_cti_0_dout_endofpacket :  STD_LOGIC;
@@ -10866,23 +10866,23 @@ end component vip_1024x768_reset_altmemddr_0_phy_clk_out_domain_synch_module;
                 signal alt_vip_vfb_0_read_master_address :  STD_LOGIC_VECTOR (31 DOWNTO 0);
                 signal alt_vip_vfb_0_read_master_address_to_slave :  STD_LOGIC_VECTOR (31 DOWNTO 0);
                 signal alt_vip_vfb_0_read_master_burstcount :  STD_LOGIC_VECTOR (6 DOWNTO 0);
-                signal alt_vip_vfb_0_read_master_granted_vip_1024x768_burst_1_upstream :  STD_LOGIC;
+                signal alt_vip_vfb_0_read_master_granted_vip_sopc_burst_1_upstream :  STD_LOGIC;
                 signal alt_vip_vfb_0_read_master_latency_counter :  STD_LOGIC;
-                signal alt_vip_vfb_0_read_master_qualified_request_vip_1024x768_burst_1_upstream :  STD_LOGIC;
+                signal alt_vip_vfb_0_read_master_qualified_request_vip_sopc_burst_1_upstream :  STD_LOGIC;
                 signal alt_vip_vfb_0_read_master_read :  STD_LOGIC;
-                signal alt_vip_vfb_0_read_master_read_data_valid_vip_1024x768_burst_1_upstream :  STD_LOGIC;
-                signal alt_vip_vfb_0_read_master_read_data_valid_vip_1024x768_burst_1_upstream_shift_register :  STD_LOGIC;
+                signal alt_vip_vfb_0_read_master_read_data_valid_vip_sopc_burst_1_upstream :  STD_LOGIC;
+                signal alt_vip_vfb_0_read_master_read_data_valid_vip_sopc_burst_1_upstream_shift_register :  STD_LOGIC;
                 signal alt_vip_vfb_0_read_master_readdata :  STD_LOGIC_VECTOR (255 DOWNTO 0);
                 signal alt_vip_vfb_0_read_master_readdatavalid :  STD_LOGIC;
-                signal alt_vip_vfb_0_read_master_requests_vip_1024x768_burst_1_upstream :  STD_LOGIC;
+                signal alt_vip_vfb_0_read_master_requests_vip_sopc_burst_1_upstream :  STD_LOGIC;
                 signal alt_vip_vfb_0_read_master_reset :  STD_LOGIC;
                 signal alt_vip_vfb_0_read_master_waitrequest :  STD_LOGIC;
                 signal alt_vip_vfb_0_write_master_address :  STD_LOGIC_VECTOR (31 DOWNTO 0);
                 signal alt_vip_vfb_0_write_master_address_to_slave :  STD_LOGIC_VECTOR (31 DOWNTO 0);
                 signal alt_vip_vfb_0_write_master_burstcount :  STD_LOGIC_VECTOR (6 DOWNTO 0);
-                signal alt_vip_vfb_0_write_master_granted_vip_1024x768_burst_0_upstream :  STD_LOGIC;
-                signal alt_vip_vfb_0_write_master_qualified_request_vip_1024x768_burst_0_upstream :  STD_LOGIC;
-                signal alt_vip_vfb_0_write_master_requests_vip_1024x768_burst_0_upstream :  STD_LOGIC;
+                signal alt_vip_vfb_0_write_master_granted_vip_sopc_burst_0_upstream :  STD_LOGIC;
+                signal alt_vip_vfb_0_write_master_qualified_request_vip_sopc_burst_0_upstream :  STD_LOGIC;
+                signal alt_vip_vfb_0_write_master_requests_vip_sopc_burst_0_upstream :  STD_LOGIC;
                 signal alt_vip_vfb_0_write_master_reset :  STD_LOGIC;
                 signal alt_vip_vfb_0_write_master_waitrequest :  STD_LOGIC;
                 signal alt_vip_vfb_0_write_master_write :  STD_LOGIC;
@@ -10904,8 +10904,8 @@ end component vip_1024x768_reset_altmemddr_0_phy_clk_out_domain_synch_module;
                 signal altmemddr_0_s1_writedata :  STD_LOGIC_VECTOR (255 DOWNTO 0);
                 signal clk_24M_reset_n :  STD_LOGIC;
                 signal d1_altmemddr_0_s1_end_xfer :  STD_LOGIC;
-                signal d1_vip_1024x768_burst_0_upstream_end_xfer :  STD_LOGIC;
-                signal d1_vip_1024x768_burst_1_upstream_end_xfer :  STD_LOGIC;
+                signal d1_vip_sopc_burst_0_upstream_end_xfer :  STD_LOGIC;
+                signal d1_vip_sopc_burst_1_upstream_end_xfer :  STD_LOGIC;
                 signal internal_altmemddr_0_phy_clk_out :  STD_LOGIC;
                 signal internal_aux_scan_clk_from_the_altmemddr_0 :  STD_LOGIC;
                 signal internal_aux_scan_clk_reset_n_from_the_altmemddr_0 :  STD_LOGIC;
@@ -10941,74 +10941,74 @@ end component vip_1024x768_reset_altmemddr_0_phy_clk_out_domain_synch_module;
                 signal out_clk_altmemddr_0_aux_half_rate_clk :  STD_LOGIC;
                 signal out_clk_altmemddr_0_phy_clk :  STD_LOGIC;
                 signal reset_n_sources :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_address :  STD_LOGIC_VECTOR (28 DOWNTO 0);
-                signal vip_1024x768_burst_0_downstream_address_to_slave :  STD_LOGIC_VECTOR (28 DOWNTO 0);
-                signal vip_1024x768_burst_0_downstream_arbitrationshare :  STD_LOGIC_VECTOR (6 DOWNTO 0);
-                signal vip_1024x768_burst_0_downstream_burstcount :  STD_LOGIC_VECTOR (2 DOWNTO 0);
-                signal vip_1024x768_burst_0_downstream_byteenable :  STD_LOGIC_VECTOR (31 DOWNTO 0);
-                signal vip_1024x768_burst_0_downstream_debugaccess :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1 :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_latency_counter :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_nativeaddress :  STD_LOGIC_VECTOR (28 DOWNTO 0);
-                signal vip_1024x768_burst_0_downstream_qualified_request_altmemddr_0_s1 :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_read :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_read_data_valid_altmemddr_0_s1 :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_read_data_valid_altmemddr_0_s1_shift_register :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_readdata :  STD_LOGIC_VECTOR (255 DOWNTO 0);
-                signal vip_1024x768_burst_0_downstream_readdatavalid :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_requests_altmemddr_0_s1 :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_reset_n :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_waitrequest :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_write :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_writedata :  STD_LOGIC_VECTOR (255 DOWNTO 0);
-                signal vip_1024x768_burst_0_upstream_address :  STD_LOGIC_VECTOR (28 DOWNTO 0);
-                signal vip_1024x768_burst_0_upstream_burstcount :  STD_LOGIC_VECTOR (6 DOWNTO 0);
-                signal vip_1024x768_burst_0_upstream_byteaddress :  STD_LOGIC_VECTOR (33 DOWNTO 0);
-                signal vip_1024x768_burst_0_upstream_byteenable :  STD_LOGIC_VECTOR (31 DOWNTO 0);
-                signal vip_1024x768_burst_0_upstream_debugaccess :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_read :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_readdata :  STD_LOGIC_VECTOR (255 DOWNTO 0);
-                signal vip_1024x768_burst_0_upstream_readdata_from_sa :  STD_LOGIC_VECTOR (255 DOWNTO 0);
-                signal vip_1024x768_burst_0_upstream_readdatavalid :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_readdatavalid_from_sa :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_waitrequest :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_waitrequest_from_sa :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_write :  STD_LOGIC;
-                signal vip_1024x768_burst_0_upstream_writedata :  STD_LOGIC_VECTOR (255 DOWNTO 0);
-                signal vip_1024x768_burst_1_downstream_address :  STD_LOGIC_VECTOR (28 DOWNTO 0);
-                signal vip_1024x768_burst_1_downstream_address_to_slave :  STD_LOGIC_VECTOR (28 DOWNTO 0);
-                signal vip_1024x768_burst_1_downstream_arbitrationshare :  STD_LOGIC_VECTOR (6 DOWNTO 0);
-                signal vip_1024x768_burst_1_downstream_burstcount :  STD_LOGIC_VECTOR (2 DOWNTO 0);
-                signal vip_1024x768_burst_1_downstream_byteenable :  STD_LOGIC_VECTOR (31 DOWNTO 0);
-                signal vip_1024x768_burst_1_downstream_debugaccess :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1 :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_latency_counter :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_nativeaddress :  STD_LOGIC_VECTOR (28 DOWNTO 0);
-                signal vip_1024x768_burst_1_downstream_qualified_request_altmemddr_0_s1 :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_read :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_read_data_valid_altmemddr_0_s1 :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_read_data_valid_altmemddr_0_s1_shift_register :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_readdata :  STD_LOGIC_VECTOR (255 DOWNTO 0);
-                signal vip_1024x768_burst_1_downstream_readdatavalid :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_requests_altmemddr_0_s1 :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_reset_n :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_waitrequest :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_write :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_writedata :  STD_LOGIC_VECTOR (255 DOWNTO 0);
-                signal vip_1024x768_burst_1_upstream_address :  STD_LOGIC_VECTOR (28 DOWNTO 0);
-                signal vip_1024x768_burst_1_upstream_burstcount :  STD_LOGIC_VECTOR (6 DOWNTO 0);
-                signal vip_1024x768_burst_1_upstream_byteaddress :  STD_LOGIC_VECTOR (33 DOWNTO 0);
-                signal vip_1024x768_burst_1_upstream_byteenable :  STD_LOGIC_VECTOR (31 DOWNTO 0);
-                signal vip_1024x768_burst_1_upstream_debugaccess :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_read :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_readdata :  STD_LOGIC_VECTOR (255 DOWNTO 0);
-                signal vip_1024x768_burst_1_upstream_readdata_from_sa :  STD_LOGIC_VECTOR (255 DOWNTO 0);
-                signal vip_1024x768_burst_1_upstream_readdatavalid :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_waitrequest :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_waitrequest_from_sa :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_write :  STD_LOGIC;
-                signal vip_1024x768_burst_1_upstream_writedata :  STD_LOGIC_VECTOR (255 DOWNTO 0);
                 signal vip_clk_reset_n :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_address :  STD_LOGIC_VECTOR (28 DOWNTO 0);
+                signal vip_sopc_burst_0_downstream_address_to_slave :  STD_LOGIC_VECTOR (28 DOWNTO 0);
+                signal vip_sopc_burst_0_downstream_arbitrationshare :  STD_LOGIC_VECTOR (6 DOWNTO 0);
+                signal vip_sopc_burst_0_downstream_burstcount :  STD_LOGIC_VECTOR (2 DOWNTO 0);
+                signal vip_sopc_burst_0_downstream_byteenable :  STD_LOGIC_VECTOR (31 DOWNTO 0);
+                signal vip_sopc_burst_0_downstream_debugaccess :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_granted_altmemddr_0_s1 :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_latency_counter :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_nativeaddress :  STD_LOGIC_VECTOR (28 DOWNTO 0);
+                signal vip_sopc_burst_0_downstream_qualified_request_altmemddr_0_s1 :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_read :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_read_data_valid_altmemddr_0_s1 :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_read_data_valid_altmemddr_0_s1_shift_register :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_readdata :  STD_LOGIC_VECTOR (255 DOWNTO 0);
+                signal vip_sopc_burst_0_downstream_readdatavalid :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_requests_altmemddr_0_s1 :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_reset_n :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_waitrequest :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_write :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_writedata :  STD_LOGIC_VECTOR (255 DOWNTO 0);
+                signal vip_sopc_burst_0_upstream_address :  STD_LOGIC_VECTOR (28 DOWNTO 0);
+                signal vip_sopc_burst_0_upstream_burstcount :  STD_LOGIC_VECTOR (6 DOWNTO 0);
+                signal vip_sopc_burst_0_upstream_byteaddress :  STD_LOGIC_VECTOR (33 DOWNTO 0);
+                signal vip_sopc_burst_0_upstream_byteenable :  STD_LOGIC_VECTOR (31 DOWNTO 0);
+                signal vip_sopc_burst_0_upstream_debugaccess :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_read :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_readdata :  STD_LOGIC_VECTOR (255 DOWNTO 0);
+                signal vip_sopc_burst_0_upstream_readdata_from_sa :  STD_LOGIC_VECTOR (255 DOWNTO 0);
+                signal vip_sopc_burst_0_upstream_readdatavalid :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_readdatavalid_from_sa :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_waitrequest :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_waitrequest_from_sa :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_write :  STD_LOGIC;
+                signal vip_sopc_burst_0_upstream_writedata :  STD_LOGIC_VECTOR (255 DOWNTO 0);
+                signal vip_sopc_burst_1_downstream_address :  STD_LOGIC_VECTOR (28 DOWNTO 0);
+                signal vip_sopc_burst_1_downstream_address_to_slave :  STD_LOGIC_VECTOR (28 DOWNTO 0);
+                signal vip_sopc_burst_1_downstream_arbitrationshare :  STD_LOGIC_VECTOR (6 DOWNTO 0);
+                signal vip_sopc_burst_1_downstream_burstcount :  STD_LOGIC_VECTOR (2 DOWNTO 0);
+                signal vip_sopc_burst_1_downstream_byteenable :  STD_LOGIC_VECTOR (31 DOWNTO 0);
+                signal vip_sopc_burst_1_downstream_debugaccess :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_granted_altmemddr_0_s1 :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_latency_counter :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_nativeaddress :  STD_LOGIC_VECTOR (28 DOWNTO 0);
+                signal vip_sopc_burst_1_downstream_qualified_request_altmemddr_0_s1 :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_read :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_read_data_valid_altmemddr_0_s1 :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_read_data_valid_altmemddr_0_s1_shift_register :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_readdata :  STD_LOGIC_VECTOR (255 DOWNTO 0);
+                signal vip_sopc_burst_1_downstream_readdatavalid :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_requests_altmemddr_0_s1 :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_reset_n :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_waitrequest :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_write :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_writedata :  STD_LOGIC_VECTOR (255 DOWNTO 0);
+                signal vip_sopc_burst_1_upstream_address :  STD_LOGIC_VECTOR (28 DOWNTO 0);
+                signal vip_sopc_burst_1_upstream_burstcount :  STD_LOGIC_VECTOR (6 DOWNTO 0);
+                signal vip_sopc_burst_1_upstream_byteaddress :  STD_LOGIC_VECTOR (33 DOWNTO 0);
+                signal vip_sopc_burst_1_upstream_byteenable :  STD_LOGIC_VECTOR (31 DOWNTO 0);
+                signal vip_sopc_burst_1_upstream_debugaccess :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_read :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_readdata :  STD_LOGIC_VECTOR (255 DOWNTO 0);
+                signal vip_sopc_burst_1_upstream_readdata_from_sa :  STD_LOGIC_VECTOR (255 DOWNTO 0);
+                signal vip_sopc_burst_1_upstream_readdatavalid :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_waitrequest :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_waitrequest_from_sa :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_write :  STD_LOGIC;
+                signal vip_sopc_burst_1_upstream_writedata :  STD_LOGIC_VECTOR (255 DOWNTO 0);
 
 begin
 
@@ -11184,17 +11184,17 @@ begin
       alt_vip_vfb_0_read_master_waitrequest => alt_vip_vfb_0_read_master_waitrequest,
       alt_vip_vfb_0_read_master_address => alt_vip_vfb_0_read_master_address,
       alt_vip_vfb_0_read_master_burstcount => alt_vip_vfb_0_read_master_burstcount,
-      alt_vip_vfb_0_read_master_granted_vip_1024x768_burst_1_upstream => alt_vip_vfb_0_read_master_granted_vip_1024x768_burst_1_upstream,
-      alt_vip_vfb_0_read_master_qualified_request_vip_1024x768_burst_1_upstream => alt_vip_vfb_0_read_master_qualified_request_vip_1024x768_burst_1_upstream,
+      alt_vip_vfb_0_read_master_granted_vip_sopc_burst_1_upstream => alt_vip_vfb_0_read_master_granted_vip_sopc_burst_1_upstream,
+      alt_vip_vfb_0_read_master_qualified_request_vip_sopc_burst_1_upstream => alt_vip_vfb_0_read_master_qualified_request_vip_sopc_burst_1_upstream,
       alt_vip_vfb_0_read_master_read => alt_vip_vfb_0_read_master_read,
-      alt_vip_vfb_0_read_master_read_data_valid_vip_1024x768_burst_1_upstream => alt_vip_vfb_0_read_master_read_data_valid_vip_1024x768_burst_1_upstream,
-      alt_vip_vfb_0_read_master_read_data_valid_vip_1024x768_burst_1_upstream_shift_register => alt_vip_vfb_0_read_master_read_data_valid_vip_1024x768_burst_1_upstream_shift_register,
-      alt_vip_vfb_0_read_master_requests_vip_1024x768_burst_1_upstream => alt_vip_vfb_0_read_master_requests_vip_1024x768_burst_1_upstream,
+      alt_vip_vfb_0_read_master_read_data_valid_vip_sopc_burst_1_upstream => alt_vip_vfb_0_read_master_read_data_valid_vip_sopc_burst_1_upstream,
+      alt_vip_vfb_0_read_master_read_data_valid_vip_sopc_burst_1_upstream_shift_register => alt_vip_vfb_0_read_master_read_data_valid_vip_sopc_burst_1_upstream_shift_register,
+      alt_vip_vfb_0_read_master_requests_vip_sopc_burst_1_upstream => alt_vip_vfb_0_read_master_requests_vip_sopc_burst_1_upstream,
       clk => internal_altmemddr_0_phy_clk_out,
-      d1_vip_1024x768_burst_1_upstream_end_xfer => d1_vip_1024x768_burst_1_upstream_end_xfer,
+      d1_vip_sopc_burst_1_upstream_end_xfer => d1_vip_sopc_burst_1_upstream_end_xfer,
       reset_n => altmemddr_0_phy_clk_out_reset_n,
-      vip_1024x768_burst_1_upstream_readdata_from_sa => vip_1024x768_burst_1_upstream_readdata_from_sa,
-      vip_1024x768_burst_1_upstream_waitrequest_from_sa => vip_1024x768_burst_1_upstream_waitrequest_from_sa
+      vip_sopc_burst_1_upstream_readdata_from_sa => vip_sopc_burst_1_upstream_readdata_from_sa,
+      vip_sopc_burst_1_upstream_waitrequest_from_sa => vip_sopc_burst_1_upstream_waitrequest_from_sa
     );
 
 
@@ -11206,15 +11206,15 @@ begin
       alt_vip_vfb_0_write_master_waitrequest => alt_vip_vfb_0_write_master_waitrequest,
       alt_vip_vfb_0_write_master_address => alt_vip_vfb_0_write_master_address,
       alt_vip_vfb_0_write_master_burstcount => alt_vip_vfb_0_write_master_burstcount,
-      alt_vip_vfb_0_write_master_granted_vip_1024x768_burst_0_upstream => alt_vip_vfb_0_write_master_granted_vip_1024x768_burst_0_upstream,
-      alt_vip_vfb_0_write_master_qualified_request_vip_1024x768_burst_0_upstream => alt_vip_vfb_0_write_master_qualified_request_vip_1024x768_burst_0_upstream,
-      alt_vip_vfb_0_write_master_requests_vip_1024x768_burst_0_upstream => alt_vip_vfb_0_write_master_requests_vip_1024x768_burst_0_upstream,
+      alt_vip_vfb_0_write_master_granted_vip_sopc_burst_0_upstream => alt_vip_vfb_0_write_master_granted_vip_sopc_burst_0_upstream,
+      alt_vip_vfb_0_write_master_qualified_request_vip_sopc_burst_0_upstream => alt_vip_vfb_0_write_master_qualified_request_vip_sopc_burst_0_upstream,
+      alt_vip_vfb_0_write_master_requests_vip_sopc_burst_0_upstream => alt_vip_vfb_0_write_master_requests_vip_sopc_burst_0_upstream,
       alt_vip_vfb_0_write_master_write => alt_vip_vfb_0_write_master_write,
       alt_vip_vfb_0_write_master_writedata => alt_vip_vfb_0_write_master_writedata,
       clk => internal_altmemddr_0_phy_clk_out,
-      d1_vip_1024x768_burst_0_upstream_end_xfer => d1_vip_1024x768_burst_0_upstream_end_xfer,
+      d1_vip_sopc_burst_0_upstream_end_xfer => d1_vip_sopc_burst_0_upstream_end_xfer,
       reset_n => altmemddr_0_phy_clk_out_reset_n,
-      vip_1024x768_burst_0_upstream_waitrequest_from_sa => vip_1024x768_burst_0_upstream_waitrequest_from_sa
+      vip_sopc_burst_0_upstream_waitrequest_from_sa => vip_sopc_burst_0_upstream_waitrequest_from_sa
     );
 
 
@@ -11265,38 +11265,38 @@ begin
       altmemddr_0_s1_write => altmemddr_0_s1_write,
       altmemddr_0_s1_writedata => altmemddr_0_s1_writedata,
       d1_altmemddr_0_s1_end_xfer => d1_altmemddr_0_s1_end_xfer,
-      vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1 => vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1,
-      vip_1024x768_burst_0_downstream_qualified_request_altmemddr_0_s1 => vip_1024x768_burst_0_downstream_qualified_request_altmemddr_0_s1,
-      vip_1024x768_burst_0_downstream_read_data_valid_altmemddr_0_s1 => vip_1024x768_burst_0_downstream_read_data_valid_altmemddr_0_s1,
-      vip_1024x768_burst_0_downstream_read_data_valid_altmemddr_0_s1_shift_register => vip_1024x768_burst_0_downstream_read_data_valid_altmemddr_0_s1_shift_register,
-      vip_1024x768_burst_0_downstream_requests_altmemddr_0_s1 => vip_1024x768_burst_0_downstream_requests_altmemddr_0_s1,
-      vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1 => vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1,
-      vip_1024x768_burst_1_downstream_qualified_request_altmemddr_0_s1 => vip_1024x768_burst_1_downstream_qualified_request_altmemddr_0_s1,
-      vip_1024x768_burst_1_downstream_read_data_valid_altmemddr_0_s1 => vip_1024x768_burst_1_downstream_read_data_valid_altmemddr_0_s1,
-      vip_1024x768_burst_1_downstream_read_data_valid_altmemddr_0_s1_shift_register => vip_1024x768_burst_1_downstream_read_data_valid_altmemddr_0_s1_shift_register,
-      vip_1024x768_burst_1_downstream_requests_altmemddr_0_s1 => vip_1024x768_burst_1_downstream_requests_altmemddr_0_s1,
+      vip_sopc_burst_0_downstream_granted_altmemddr_0_s1 => vip_sopc_burst_0_downstream_granted_altmemddr_0_s1,
+      vip_sopc_burst_0_downstream_qualified_request_altmemddr_0_s1 => vip_sopc_burst_0_downstream_qualified_request_altmemddr_0_s1,
+      vip_sopc_burst_0_downstream_read_data_valid_altmemddr_0_s1 => vip_sopc_burst_0_downstream_read_data_valid_altmemddr_0_s1,
+      vip_sopc_burst_0_downstream_read_data_valid_altmemddr_0_s1_shift_register => vip_sopc_burst_0_downstream_read_data_valid_altmemddr_0_s1_shift_register,
+      vip_sopc_burst_0_downstream_requests_altmemddr_0_s1 => vip_sopc_burst_0_downstream_requests_altmemddr_0_s1,
+      vip_sopc_burst_1_downstream_granted_altmemddr_0_s1 => vip_sopc_burst_1_downstream_granted_altmemddr_0_s1,
+      vip_sopc_burst_1_downstream_qualified_request_altmemddr_0_s1 => vip_sopc_burst_1_downstream_qualified_request_altmemddr_0_s1,
+      vip_sopc_burst_1_downstream_read_data_valid_altmemddr_0_s1 => vip_sopc_burst_1_downstream_read_data_valid_altmemddr_0_s1,
+      vip_sopc_burst_1_downstream_read_data_valid_altmemddr_0_s1_shift_register => vip_sopc_burst_1_downstream_read_data_valid_altmemddr_0_s1_shift_register,
+      vip_sopc_burst_1_downstream_requests_altmemddr_0_s1 => vip_sopc_burst_1_downstream_requests_altmemddr_0_s1,
       altmemddr_0_s1_readdata => altmemddr_0_s1_readdata,
       altmemddr_0_s1_readdatavalid => altmemddr_0_s1_readdatavalid,
       altmemddr_0_s1_resetrequest_n => altmemddr_0_s1_resetrequest_n,
       altmemddr_0_s1_waitrequest_n => altmemddr_0_s1_waitrequest_n,
       clk => internal_altmemddr_0_phy_clk_out,
       reset_n => altmemddr_0_phy_clk_out_reset_n,
-      vip_1024x768_burst_0_downstream_address_to_slave => vip_1024x768_burst_0_downstream_address_to_slave,
-      vip_1024x768_burst_0_downstream_arbitrationshare => vip_1024x768_burst_0_downstream_arbitrationshare,
-      vip_1024x768_burst_0_downstream_burstcount => vip_1024x768_burst_0_downstream_burstcount,
-      vip_1024x768_burst_0_downstream_byteenable => vip_1024x768_burst_0_downstream_byteenable,
-      vip_1024x768_burst_0_downstream_latency_counter => vip_1024x768_burst_0_downstream_latency_counter,
-      vip_1024x768_burst_0_downstream_read => vip_1024x768_burst_0_downstream_read,
-      vip_1024x768_burst_0_downstream_write => vip_1024x768_burst_0_downstream_write,
-      vip_1024x768_burst_0_downstream_writedata => vip_1024x768_burst_0_downstream_writedata,
-      vip_1024x768_burst_1_downstream_address_to_slave => vip_1024x768_burst_1_downstream_address_to_slave,
-      vip_1024x768_burst_1_downstream_arbitrationshare => vip_1024x768_burst_1_downstream_arbitrationshare,
-      vip_1024x768_burst_1_downstream_burstcount => vip_1024x768_burst_1_downstream_burstcount,
-      vip_1024x768_burst_1_downstream_byteenable => vip_1024x768_burst_1_downstream_byteenable,
-      vip_1024x768_burst_1_downstream_latency_counter => vip_1024x768_burst_1_downstream_latency_counter,
-      vip_1024x768_burst_1_downstream_read => vip_1024x768_burst_1_downstream_read,
-      vip_1024x768_burst_1_downstream_write => vip_1024x768_burst_1_downstream_write,
-      vip_1024x768_burst_1_downstream_writedata => vip_1024x768_burst_1_downstream_writedata
+      vip_sopc_burst_0_downstream_address_to_slave => vip_sopc_burst_0_downstream_address_to_slave,
+      vip_sopc_burst_0_downstream_arbitrationshare => vip_sopc_burst_0_downstream_arbitrationshare,
+      vip_sopc_burst_0_downstream_burstcount => vip_sopc_burst_0_downstream_burstcount,
+      vip_sopc_burst_0_downstream_byteenable => vip_sopc_burst_0_downstream_byteenable,
+      vip_sopc_burst_0_downstream_latency_counter => vip_sopc_burst_0_downstream_latency_counter,
+      vip_sopc_burst_0_downstream_read => vip_sopc_burst_0_downstream_read,
+      vip_sopc_burst_0_downstream_write => vip_sopc_burst_0_downstream_write,
+      vip_sopc_burst_0_downstream_writedata => vip_sopc_burst_0_downstream_writedata,
+      vip_sopc_burst_1_downstream_address_to_slave => vip_sopc_burst_1_downstream_address_to_slave,
+      vip_sopc_burst_1_downstream_arbitrationshare => vip_sopc_burst_1_downstream_arbitrationshare,
+      vip_sopc_burst_1_downstream_burstcount => vip_sopc_burst_1_downstream_burstcount,
+      vip_sopc_burst_1_downstream_byteenable => vip_sopc_burst_1_downstream_byteenable,
+      vip_sopc_burst_1_downstream_latency_counter => vip_sopc_burst_1_downstream_latency_counter,
+      vip_sopc_burst_1_downstream_read => vip_sopc_burst_1_downstream_read,
+      vip_sopc_burst_1_downstream_write => vip_sopc_burst_1_downstream_write,
+      vip_sopc_burst_1_downstream_writedata => vip_sopc_burst_1_downstream_writedata
     );
 
 
@@ -11307,7 +11307,7 @@ begin
   --altmemddr_0_phy_clk_out out_clk assignment, which is an e_assign
   internal_altmemddr_0_phy_clk_out <= out_clk_altmemddr_0_phy_clk;
   --reset is asserted asynchronously and deasserted synchronously
-  vip_1024x768_reset_clk_24M_domain_synch : vip_1024x768_reset_clk_24M_domain_synch_module
+  vip_sopc_reset_clk_24M_domain_synch : vip_sopc_reset_clk_24M_domain_synch_module
     port map(
       data_out => clk_24M_reset_n,
       clk => clk_24M,
@@ -11367,186 +11367,186 @@ begin
     );
 
 
-  --the_vip_1024x768_burst_0_upstream, which is an e_instance
-  the_vip_1024x768_burst_0_upstream : vip_1024x768_burst_0_upstream_arbitrator
+  --the_vip_sopc_burst_0_upstream, which is an e_instance
+  the_vip_sopc_burst_0_upstream : vip_sopc_burst_0_upstream_arbitrator
     port map(
-      alt_vip_vfb_0_write_master_granted_vip_1024x768_burst_0_upstream => alt_vip_vfb_0_write_master_granted_vip_1024x768_burst_0_upstream,
-      alt_vip_vfb_0_write_master_qualified_request_vip_1024x768_burst_0_upstream => alt_vip_vfb_0_write_master_qualified_request_vip_1024x768_burst_0_upstream,
-      alt_vip_vfb_0_write_master_requests_vip_1024x768_burst_0_upstream => alt_vip_vfb_0_write_master_requests_vip_1024x768_burst_0_upstream,
-      d1_vip_1024x768_burst_0_upstream_end_xfer => d1_vip_1024x768_burst_0_upstream_end_xfer,
-      vip_1024x768_burst_0_upstream_address => vip_1024x768_burst_0_upstream_address,
-      vip_1024x768_burst_0_upstream_burstcount => vip_1024x768_burst_0_upstream_burstcount,
-      vip_1024x768_burst_0_upstream_byteaddress => vip_1024x768_burst_0_upstream_byteaddress,
-      vip_1024x768_burst_0_upstream_byteenable => vip_1024x768_burst_0_upstream_byteenable,
-      vip_1024x768_burst_0_upstream_debugaccess => vip_1024x768_burst_0_upstream_debugaccess,
-      vip_1024x768_burst_0_upstream_read => vip_1024x768_burst_0_upstream_read,
-      vip_1024x768_burst_0_upstream_readdata_from_sa => vip_1024x768_burst_0_upstream_readdata_from_sa,
-      vip_1024x768_burst_0_upstream_readdatavalid_from_sa => vip_1024x768_burst_0_upstream_readdatavalid_from_sa,
-      vip_1024x768_burst_0_upstream_waitrequest_from_sa => vip_1024x768_burst_0_upstream_waitrequest_from_sa,
-      vip_1024x768_burst_0_upstream_write => vip_1024x768_burst_0_upstream_write,
-      vip_1024x768_burst_0_upstream_writedata => vip_1024x768_burst_0_upstream_writedata,
+      alt_vip_vfb_0_write_master_granted_vip_sopc_burst_0_upstream => alt_vip_vfb_0_write_master_granted_vip_sopc_burst_0_upstream,
+      alt_vip_vfb_0_write_master_qualified_request_vip_sopc_burst_0_upstream => alt_vip_vfb_0_write_master_qualified_request_vip_sopc_burst_0_upstream,
+      alt_vip_vfb_0_write_master_requests_vip_sopc_burst_0_upstream => alt_vip_vfb_0_write_master_requests_vip_sopc_burst_0_upstream,
+      d1_vip_sopc_burst_0_upstream_end_xfer => d1_vip_sopc_burst_0_upstream_end_xfer,
+      vip_sopc_burst_0_upstream_address => vip_sopc_burst_0_upstream_address,
+      vip_sopc_burst_0_upstream_burstcount => vip_sopc_burst_0_upstream_burstcount,
+      vip_sopc_burst_0_upstream_byteaddress => vip_sopc_burst_0_upstream_byteaddress,
+      vip_sopc_burst_0_upstream_byteenable => vip_sopc_burst_0_upstream_byteenable,
+      vip_sopc_burst_0_upstream_debugaccess => vip_sopc_burst_0_upstream_debugaccess,
+      vip_sopc_burst_0_upstream_read => vip_sopc_burst_0_upstream_read,
+      vip_sopc_burst_0_upstream_readdata_from_sa => vip_sopc_burst_0_upstream_readdata_from_sa,
+      vip_sopc_burst_0_upstream_readdatavalid_from_sa => vip_sopc_burst_0_upstream_readdatavalid_from_sa,
+      vip_sopc_burst_0_upstream_waitrequest_from_sa => vip_sopc_burst_0_upstream_waitrequest_from_sa,
+      vip_sopc_burst_0_upstream_write => vip_sopc_burst_0_upstream_write,
+      vip_sopc_burst_0_upstream_writedata => vip_sopc_burst_0_upstream_writedata,
       alt_vip_vfb_0_write_master_address_to_slave => alt_vip_vfb_0_write_master_address_to_slave,
       alt_vip_vfb_0_write_master_burstcount => alt_vip_vfb_0_write_master_burstcount,
       alt_vip_vfb_0_write_master_write => alt_vip_vfb_0_write_master_write,
       alt_vip_vfb_0_write_master_writedata => alt_vip_vfb_0_write_master_writedata,
       clk => internal_altmemddr_0_phy_clk_out,
       reset_n => altmemddr_0_phy_clk_out_reset_n,
-      vip_1024x768_burst_0_upstream_readdata => vip_1024x768_burst_0_upstream_readdata,
-      vip_1024x768_burst_0_upstream_readdatavalid => vip_1024x768_burst_0_upstream_readdatavalid,
-      vip_1024x768_burst_0_upstream_waitrequest => vip_1024x768_burst_0_upstream_waitrequest
+      vip_sopc_burst_0_upstream_readdata => vip_sopc_burst_0_upstream_readdata,
+      vip_sopc_burst_0_upstream_readdatavalid => vip_sopc_burst_0_upstream_readdatavalid,
+      vip_sopc_burst_0_upstream_waitrequest => vip_sopc_burst_0_upstream_waitrequest
     );
 
 
-  --the_vip_1024x768_burst_0_downstream, which is an e_instance
-  the_vip_1024x768_burst_0_downstream : vip_1024x768_burst_0_downstream_arbitrator
+  --the_vip_sopc_burst_0_downstream, which is an e_instance
+  the_vip_sopc_burst_0_downstream : vip_sopc_burst_0_downstream_arbitrator
     port map(
-      vip_1024x768_burst_0_downstream_address_to_slave => vip_1024x768_burst_0_downstream_address_to_slave,
-      vip_1024x768_burst_0_downstream_latency_counter => vip_1024x768_burst_0_downstream_latency_counter,
-      vip_1024x768_burst_0_downstream_readdata => vip_1024x768_burst_0_downstream_readdata,
-      vip_1024x768_burst_0_downstream_readdatavalid => vip_1024x768_burst_0_downstream_readdatavalid,
-      vip_1024x768_burst_0_downstream_reset_n => vip_1024x768_burst_0_downstream_reset_n,
-      vip_1024x768_burst_0_downstream_waitrequest => vip_1024x768_burst_0_downstream_waitrequest,
+      vip_sopc_burst_0_downstream_address_to_slave => vip_sopc_burst_0_downstream_address_to_slave,
+      vip_sopc_burst_0_downstream_latency_counter => vip_sopc_burst_0_downstream_latency_counter,
+      vip_sopc_burst_0_downstream_readdata => vip_sopc_burst_0_downstream_readdata,
+      vip_sopc_burst_0_downstream_readdatavalid => vip_sopc_burst_0_downstream_readdatavalid,
+      vip_sopc_burst_0_downstream_reset_n => vip_sopc_burst_0_downstream_reset_n,
+      vip_sopc_burst_0_downstream_waitrequest => vip_sopc_burst_0_downstream_waitrequest,
       altmemddr_0_s1_readdata_from_sa => altmemddr_0_s1_readdata_from_sa,
       altmemddr_0_s1_waitrequest_n_from_sa => altmemddr_0_s1_waitrequest_n_from_sa,
       clk => internal_altmemddr_0_phy_clk_out,
       d1_altmemddr_0_s1_end_xfer => d1_altmemddr_0_s1_end_xfer,
       reset_n => altmemddr_0_phy_clk_out_reset_n,
-      vip_1024x768_burst_0_downstream_address => vip_1024x768_burst_0_downstream_address,
-      vip_1024x768_burst_0_downstream_burstcount => vip_1024x768_burst_0_downstream_burstcount,
-      vip_1024x768_burst_0_downstream_byteenable => vip_1024x768_burst_0_downstream_byteenable,
-      vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1 => vip_1024x768_burst_0_downstream_granted_altmemddr_0_s1,
-      vip_1024x768_burst_0_downstream_qualified_request_altmemddr_0_s1 => vip_1024x768_burst_0_downstream_qualified_request_altmemddr_0_s1,
-      vip_1024x768_burst_0_downstream_read => vip_1024x768_burst_0_downstream_read,
-      vip_1024x768_burst_0_downstream_read_data_valid_altmemddr_0_s1 => vip_1024x768_burst_0_downstream_read_data_valid_altmemddr_0_s1,
-      vip_1024x768_burst_0_downstream_read_data_valid_altmemddr_0_s1_shift_register => vip_1024x768_burst_0_downstream_read_data_valid_altmemddr_0_s1_shift_register,
-      vip_1024x768_burst_0_downstream_requests_altmemddr_0_s1 => vip_1024x768_burst_0_downstream_requests_altmemddr_0_s1,
-      vip_1024x768_burst_0_downstream_write => vip_1024x768_burst_0_downstream_write,
-      vip_1024x768_burst_0_downstream_writedata => vip_1024x768_burst_0_downstream_writedata
+      vip_sopc_burst_0_downstream_address => vip_sopc_burst_0_downstream_address,
+      vip_sopc_burst_0_downstream_burstcount => vip_sopc_burst_0_downstream_burstcount,
+      vip_sopc_burst_0_downstream_byteenable => vip_sopc_burst_0_downstream_byteenable,
+      vip_sopc_burst_0_downstream_granted_altmemddr_0_s1 => vip_sopc_burst_0_downstream_granted_altmemddr_0_s1,
+      vip_sopc_burst_0_downstream_qualified_request_altmemddr_0_s1 => vip_sopc_burst_0_downstream_qualified_request_altmemddr_0_s1,
+      vip_sopc_burst_0_downstream_read => vip_sopc_burst_0_downstream_read,
+      vip_sopc_burst_0_downstream_read_data_valid_altmemddr_0_s1 => vip_sopc_burst_0_downstream_read_data_valid_altmemddr_0_s1,
+      vip_sopc_burst_0_downstream_read_data_valid_altmemddr_0_s1_shift_register => vip_sopc_burst_0_downstream_read_data_valid_altmemddr_0_s1_shift_register,
+      vip_sopc_burst_0_downstream_requests_altmemddr_0_s1 => vip_sopc_burst_0_downstream_requests_altmemddr_0_s1,
+      vip_sopc_burst_0_downstream_write => vip_sopc_burst_0_downstream_write,
+      vip_sopc_burst_0_downstream_writedata => vip_sopc_burst_0_downstream_writedata
     );
 
 
-  --the_vip_1024x768_burst_0, which is an e_ptf_instance
-  the_vip_1024x768_burst_0 : vip_1024x768_burst_0
+  --the_vip_sopc_burst_0, which is an e_ptf_instance
+  the_vip_sopc_burst_0 : vip_sopc_burst_0
     port map(
-      downstream_address => vip_1024x768_burst_0_downstream_address,
-      downstream_arbitrationshare => vip_1024x768_burst_0_downstream_arbitrationshare,
-      downstream_burstcount => vip_1024x768_burst_0_downstream_burstcount,
-      downstream_byteenable => vip_1024x768_burst_0_downstream_byteenable,
-      downstream_debugaccess => vip_1024x768_burst_0_downstream_debugaccess,
-      downstream_nativeaddress => vip_1024x768_burst_0_downstream_nativeaddress,
-      downstream_read => vip_1024x768_burst_0_downstream_read,
-      downstream_write => vip_1024x768_burst_0_downstream_write,
-      downstream_writedata => vip_1024x768_burst_0_downstream_writedata,
-      upstream_readdata => vip_1024x768_burst_0_upstream_readdata,
-      upstream_readdatavalid => vip_1024x768_burst_0_upstream_readdatavalid,
-      upstream_waitrequest => vip_1024x768_burst_0_upstream_waitrequest,
+      downstream_address => vip_sopc_burst_0_downstream_address,
+      downstream_arbitrationshare => vip_sopc_burst_0_downstream_arbitrationshare,
+      downstream_burstcount => vip_sopc_burst_0_downstream_burstcount,
+      downstream_byteenable => vip_sopc_burst_0_downstream_byteenable,
+      downstream_debugaccess => vip_sopc_burst_0_downstream_debugaccess,
+      downstream_nativeaddress => vip_sopc_burst_0_downstream_nativeaddress,
+      downstream_read => vip_sopc_burst_0_downstream_read,
+      downstream_write => vip_sopc_burst_0_downstream_write,
+      downstream_writedata => vip_sopc_burst_0_downstream_writedata,
+      upstream_readdata => vip_sopc_burst_0_upstream_readdata,
+      upstream_readdatavalid => vip_sopc_burst_0_upstream_readdatavalid,
+      upstream_waitrequest => vip_sopc_burst_0_upstream_waitrequest,
       clk => internal_altmemddr_0_phy_clk_out,
-      downstream_readdata => vip_1024x768_burst_0_downstream_readdata,
-      downstream_readdatavalid => vip_1024x768_burst_0_downstream_readdatavalid,
-      downstream_waitrequest => vip_1024x768_burst_0_downstream_waitrequest,
-      reset_n => vip_1024x768_burst_0_downstream_reset_n,
-      upstream_address => vip_1024x768_burst_0_upstream_byteaddress,
-      upstream_burstcount => vip_1024x768_burst_0_upstream_burstcount,
-      upstream_byteenable => vip_1024x768_burst_0_upstream_byteenable,
-      upstream_debugaccess => vip_1024x768_burst_0_upstream_debugaccess,
-      upstream_nativeaddress => vip_1024x768_burst_0_upstream_address,
-      upstream_read => vip_1024x768_burst_0_upstream_read,
-      upstream_write => vip_1024x768_burst_0_upstream_write,
-      upstream_writedata => vip_1024x768_burst_0_upstream_writedata
+      downstream_readdata => vip_sopc_burst_0_downstream_readdata,
+      downstream_readdatavalid => vip_sopc_burst_0_downstream_readdatavalid,
+      downstream_waitrequest => vip_sopc_burst_0_downstream_waitrequest,
+      reset_n => vip_sopc_burst_0_downstream_reset_n,
+      upstream_address => vip_sopc_burst_0_upstream_byteaddress,
+      upstream_burstcount => vip_sopc_burst_0_upstream_burstcount,
+      upstream_byteenable => vip_sopc_burst_0_upstream_byteenable,
+      upstream_debugaccess => vip_sopc_burst_0_upstream_debugaccess,
+      upstream_nativeaddress => vip_sopc_burst_0_upstream_address,
+      upstream_read => vip_sopc_burst_0_upstream_read,
+      upstream_write => vip_sopc_burst_0_upstream_write,
+      upstream_writedata => vip_sopc_burst_0_upstream_writedata
     );
 
 
-  --the_vip_1024x768_burst_1_upstream, which is an e_instance
-  the_vip_1024x768_burst_1_upstream : vip_1024x768_burst_1_upstream_arbitrator
+  --the_vip_sopc_burst_1_upstream, which is an e_instance
+  the_vip_sopc_burst_1_upstream : vip_sopc_burst_1_upstream_arbitrator
     port map(
-      alt_vip_vfb_0_read_master_granted_vip_1024x768_burst_1_upstream => alt_vip_vfb_0_read_master_granted_vip_1024x768_burst_1_upstream,
-      alt_vip_vfb_0_read_master_qualified_request_vip_1024x768_burst_1_upstream => alt_vip_vfb_0_read_master_qualified_request_vip_1024x768_burst_1_upstream,
-      alt_vip_vfb_0_read_master_read_data_valid_vip_1024x768_burst_1_upstream => alt_vip_vfb_0_read_master_read_data_valid_vip_1024x768_burst_1_upstream,
-      alt_vip_vfb_0_read_master_read_data_valid_vip_1024x768_burst_1_upstream_shift_register => alt_vip_vfb_0_read_master_read_data_valid_vip_1024x768_burst_1_upstream_shift_register,
-      alt_vip_vfb_0_read_master_requests_vip_1024x768_burst_1_upstream => alt_vip_vfb_0_read_master_requests_vip_1024x768_burst_1_upstream,
-      d1_vip_1024x768_burst_1_upstream_end_xfer => d1_vip_1024x768_burst_1_upstream_end_xfer,
-      vip_1024x768_burst_1_upstream_address => vip_1024x768_burst_1_upstream_address,
-      vip_1024x768_burst_1_upstream_burstcount => vip_1024x768_burst_1_upstream_burstcount,
-      vip_1024x768_burst_1_upstream_byteaddress => vip_1024x768_burst_1_upstream_byteaddress,
-      vip_1024x768_burst_1_upstream_byteenable => vip_1024x768_burst_1_upstream_byteenable,
-      vip_1024x768_burst_1_upstream_debugaccess => vip_1024x768_burst_1_upstream_debugaccess,
-      vip_1024x768_burst_1_upstream_read => vip_1024x768_burst_1_upstream_read,
-      vip_1024x768_burst_1_upstream_readdata_from_sa => vip_1024x768_burst_1_upstream_readdata_from_sa,
-      vip_1024x768_burst_1_upstream_waitrequest_from_sa => vip_1024x768_burst_1_upstream_waitrequest_from_sa,
-      vip_1024x768_burst_1_upstream_write => vip_1024x768_burst_1_upstream_write,
+      alt_vip_vfb_0_read_master_granted_vip_sopc_burst_1_upstream => alt_vip_vfb_0_read_master_granted_vip_sopc_burst_1_upstream,
+      alt_vip_vfb_0_read_master_qualified_request_vip_sopc_burst_1_upstream => alt_vip_vfb_0_read_master_qualified_request_vip_sopc_burst_1_upstream,
+      alt_vip_vfb_0_read_master_read_data_valid_vip_sopc_burst_1_upstream => alt_vip_vfb_0_read_master_read_data_valid_vip_sopc_burst_1_upstream,
+      alt_vip_vfb_0_read_master_read_data_valid_vip_sopc_burst_1_upstream_shift_register => alt_vip_vfb_0_read_master_read_data_valid_vip_sopc_burst_1_upstream_shift_register,
+      alt_vip_vfb_0_read_master_requests_vip_sopc_burst_1_upstream => alt_vip_vfb_0_read_master_requests_vip_sopc_burst_1_upstream,
+      d1_vip_sopc_burst_1_upstream_end_xfer => d1_vip_sopc_burst_1_upstream_end_xfer,
+      vip_sopc_burst_1_upstream_address => vip_sopc_burst_1_upstream_address,
+      vip_sopc_burst_1_upstream_burstcount => vip_sopc_burst_1_upstream_burstcount,
+      vip_sopc_burst_1_upstream_byteaddress => vip_sopc_burst_1_upstream_byteaddress,
+      vip_sopc_burst_1_upstream_byteenable => vip_sopc_burst_1_upstream_byteenable,
+      vip_sopc_burst_1_upstream_debugaccess => vip_sopc_burst_1_upstream_debugaccess,
+      vip_sopc_burst_1_upstream_read => vip_sopc_burst_1_upstream_read,
+      vip_sopc_burst_1_upstream_readdata_from_sa => vip_sopc_burst_1_upstream_readdata_from_sa,
+      vip_sopc_burst_1_upstream_waitrequest_from_sa => vip_sopc_burst_1_upstream_waitrequest_from_sa,
+      vip_sopc_burst_1_upstream_write => vip_sopc_burst_1_upstream_write,
       alt_vip_vfb_0_read_master_address_to_slave => alt_vip_vfb_0_read_master_address_to_slave,
       alt_vip_vfb_0_read_master_burstcount => alt_vip_vfb_0_read_master_burstcount,
       alt_vip_vfb_0_read_master_latency_counter => alt_vip_vfb_0_read_master_latency_counter,
       alt_vip_vfb_0_read_master_read => alt_vip_vfb_0_read_master_read,
       clk => internal_altmemddr_0_phy_clk_out,
       reset_n => altmemddr_0_phy_clk_out_reset_n,
-      vip_1024x768_burst_1_upstream_readdata => vip_1024x768_burst_1_upstream_readdata,
-      vip_1024x768_burst_1_upstream_readdatavalid => vip_1024x768_burst_1_upstream_readdatavalid,
-      vip_1024x768_burst_1_upstream_waitrequest => vip_1024x768_burst_1_upstream_waitrequest
+      vip_sopc_burst_1_upstream_readdata => vip_sopc_burst_1_upstream_readdata,
+      vip_sopc_burst_1_upstream_readdatavalid => vip_sopc_burst_1_upstream_readdatavalid,
+      vip_sopc_burst_1_upstream_waitrequest => vip_sopc_burst_1_upstream_waitrequest
     );
 
 
-  --the_vip_1024x768_burst_1_downstream, which is an e_instance
-  the_vip_1024x768_burst_1_downstream : vip_1024x768_burst_1_downstream_arbitrator
+  --the_vip_sopc_burst_1_downstream, which is an e_instance
+  the_vip_sopc_burst_1_downstream : vip_sopc_burst_1_downstream_arbitrator
     port map(
-      vip_1024x768_burst_1_downstream_address_to_slave => vip_1024x768_burst_1_downstream_address_to_slave,
-      vip_1024x768_burst_1_downstream_latency_counter => vip_1024x768_burst_1_downstream_latency_counter,
-      vip_1024x768_burst_1_downstream_readdata => vip_1024x768_burst_1_downstream_readdata,
-      vip_1024x768_burst_1_downstream_readdatavalid => vip_1024x768_burst_1_downstream_readdatavalid,
-      vip_1024x768_burst_1_downstream_reset_n => vip_1024x768_burst_1_downstream_reset_n,
-      vip_1024x768_burst_1_downstream_waitrequest => vip_1024x768_burst_1_downstream_waitrequest,
+      vip_sopc_burst_1_downstream_address_to_slave => vip_sopc_burst_1_downstream_address_to_slave,
+      vip_sopc_burst_1_downstream_latency_counter => vip_sopc_burst_1_downstream_latency_counter,
+      vip_sopc_burst_1_downstream_readdata => vip_sopc_burst_1_downstream_readdata,
+      vip_sopc_burst_1_downstream_readdatavalid => vip_sopc_burst_1_downstream_readdatavalid,
+      vip_sopc_burst_1_downstream_reset_n => vip_sopc_burst_1_downstream_reset_n,
+      vip_sopc_burst_1_downstream_waitrequest => vip_sopc_burst_1_downstream_waitrequest,
       altmemddr_0_s1_readdata_from_sa => altmemddr_0_s1_readdata_from_sa,
       altmemddr_0_s1_waitrequest_n_from_sa => altmemddr_0_s1_waitrequest_n_from_sa,
       clk => internal_altmemddr_0_phy_clk_out,
       d1_altmemddr_0_s1_end_xfer => d1_altmemddr_0_s1_end_xfer,
       reset_n => altmemddr_0_phy_clk_out_reset_n,
-      vip_1024x768_burst_1_downstream_address => vip_1024x768_burst_1_downstream_address,
-      vip_1024x768_burst_1_downstream_burstcount => vip_1024x768_burst_1_downstream_burstcount,
-      vip_1024x768_burst_1_downstream_byteenable => vip_1024x768_burst_1_downstream_byteenable,
-      vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1 => vip_1024x768_burst_1_downstream_granted_altmemddr_0_s1,
-      vip_1024x768_burst_1_downstream_qualified_request_altmemddr_0_s1 => vip_1024x768_burst_1_downstream_qualified_request_altmemddr_0_s1,
-      vip_1024x768_burst_1_downstream_read => vip_1024x768_burst_1_downstream_read,
-      vip_1024x768_burst_1_downstream_read_data_valid_altmemddr_0_s1 => vip_1024x768_burst_1_downstream_read_data_valid_altmemddr_0_s1,
-      vip_1024x768_burst_1_downstream_read_data_valid_altmemddr_0_s1_shift_register => vip_1024x768_burst_1_downstream_read_data_valid_altmemddr_0_s1_shift_register,
-      vip_1024x768_burst_1_downstream_requests_altmemddr_0_s1 => vip_1024x768_burst_1_downstream_requests_altmemddr_0_s1,
-      vip_1024x768_burst_1_downstream_write => vip_1024x768_burst_1_downstream_write,
-      vip_1024x768_burst_1_downstream_writedata => vip_1024x768_burst_1_downstream_writedata
+      vip_sopc_burst_1_downstream_address => vip_sopc_burst_1_downstream_address,
+      vip_sopc_burst_1_downstream_burstcount => vip_sopc_burst_1_downstream_burstcount,
+      vip_sopc_burst_1_downstream_byteenable => vip_sopc_burst_1_downstream_byteenable,
+      vip_sopc_burst_1_downstream_granted_altmemddr_0_s1 => vip_sopc_burst_1_downstream_granted_altmemddr_0_s1,
+      vip_sopc_burst_1_downstream_qualified_request_altmemddr_0_s1 => vip_sopc_burst_1_downstream_qualified_request_altmemddr_0_s1,
+      vip_sopc_burst_1_downstream_read => vip_sopc_burst_1_downstream_read,
+      vip_sopc_burst_1_downstream_read_data_valid_altmemddr_0_s1 => vip_sopc_burst_1_downstream_read_data_valid_altmemddr_0_s1,
+      vip_sopc_burst_1_downstream_read_data_valid_altmemddr_0_s1_shift_register => vip_sopc_burst_1_downstream_read_data_valid_altmemddr_0_s1_shift_register,
+      vip_sopc_burst_1_downstream_requests_altmemddr_0_s1 => vip_sopc_burst_1_downstream_requests_altmemddr_0_s1,
+      vip_sopc_burst_1_downstream_write => vip_sopc_burst_1_downstream_write,
+      vip_sopc_burst_1_downstream_writedata => vip_sopc_burst_1_downstream_writedata
     );
 
 
-  --the_vip_1024x768_burst_1, which is an e_ptf_instance
-  the_vip_1024x768_burst_1 : vip_1024x768_burst_1
+  --the_vip_sopc_burst_1, which is an e_ptf_instance
+  the_vip_sopc_burst_1 : vip_sopc_burst_1
     port map(
-      downstream_address => vip_1024x768_burst_1_downstream_address,
-      downstream_arbitrationshare => vip_1024x768_burst_1_downstream_arbitrationshare,
-      downstream_burstcount => vip_1024x768_burst_1_downstream_burstcount,
-      downstream_byteenable => vip_1024x768_burst_1_downstream_byteenable,
-      downstream_debugaccess => vip_1024x768_burst_1_downstream_debugaccess,
-      downstream_nativeaddress => vip_1024x768_burst_1_downstream_nativeaddress,
-      downstream_read => vip_1024x768_burst_1_downstream_read,
-      downstream_write => vip_1024x768_burst_1_downstream_write,
-      downstream_writedata => vip_1024x768_burst_1_downstream_writedata,
-      upstream_readdata => vip_1024x768_burst_1_upstream_readdata,
-      upstream_readdatavalid => vip_1024x768_burst_1_upstream_readdatavalid,
-      upstream_waitrequest => vip_1024x768_burst_1_upstream_waitrequest,
+      downstream_address => vip_sopc_burst_1_downstream_address,
+      downstream_arbitrationshare => vip_sopc_burst_1_downstream_arbitrationshare,
+      downstream_burstcount => vip_sopc_burst_1_downstream_burstcount,
+      downstream_byteenable => vip_sopc_burst_1_downstream_byteenable,
+      downstream_debugaccess => vip_sopc_burst_1_downstream_debugaccess,
+      downstream_nativeaddress => vip_sopc_burst_1_downstream_nativeaddress,
+      downstream_read => vip_sopc_burst_1_downstream_read,
+      downstream_write => vip_sopc_burst_1_downstream_write,
+      downstream_writedata => vip_sopc_burst_1_downstream_writedata,
+      upstream_readdata => vip_sopc_burst_1_upstream_readdata,
+      upstream_readdatavalid => vip_sopc_burst_1_upstream_readdatavalid,
+      upstream_waitrequest => vip_sopc_burst_1_upstream_waitrequest,
       clk => internal_altmemddr_0_phy_clk_out,
-      downstream_readdata => vip_1024x768_burst_1_downstream_readdata,
-      downstream_readdatavalid => vip_1024x768_burst_1_downstream_readdatavalid,
-      downstream_waitrequest => vip_1024x768_burst_1_downstream_waitrequest,
-      reset_n => vip_1024x768_burst_1_downstream_reset_n,
-      upstream_address => vip_1024x768_burst_1_upstream_byteaddress,
-      upstream_burstcount => vip_1024x768_burst_1_upstream_burstcount,
-      upstream_byteenable => vip_1024x768_burst_1_upstream_byteenable,
-      upstream_debugaccess => vip_1024x768_burst_1_upstream_debugaccess,
-      upstream_nativeaddress => vip_1024x768_burst_1_upstream_address,
-      upstream_read => vip_1024x768_burst_1_upstream_read,
-      upstream_write => vip_1024x768_burst_1_upstream_write,
-      upstream_writedata => vip_1024x768_burst_1_upstream_writedata
+      downstream_readdata => vip_sopc_burst_1_downstream_readdata,
+      downstream_readdatavalid => vip_sopc_burst_1_downstream_readdatavalid,
+      downstream_waitrequest => vip_sopc_burst_1_downstream_waitrequest,
+      reset_n => vip_sopc_burst_1_downstream_reset_n,
+      upstream_address => vip_sopc_burst_1_upstream_byteaddress,
+      upstream_burstcount => vip_sopc_burst_1_upstream_burstcount,
+      upstream_byteenable => vip_sopc_burst_1_upstream_byteenable,
+      upstream_debugaccess => vip_sopc_burst_1_upstream_debugaccess,
+      upstream_nativeaddress => vip_sopc_burst_1_upstream_address,
+      upstream_read => vip_sopc_burst_1_upstream_read,
+      upstream_write => vip_sopc_burst_1_upstream_write,
+      upstream_writedata => vip_sopc_burst_1_upstream_writedata
     );
 
 
   --reset is asserted asynchronously and deasserted synchronously
-  vip_1024x768_reset_vip_clk_domain_synch : vip_1024x768_reset_vip_clk_domain_synch_module
+  vip_sopc_reset_vip_clk_domain_synch : vip_sopc_reset_vip_clk_domain_synch_module
     port map(
       data_out => vip_clk_reset_n,
       clk => vip_clk,
@@ -11557,7 +11557,7 @@ begin
   module_input16 <= std_logic'('1');
 
   --reset is asserted asynchronously and deasserted synchronously
-  vip_1024x768_reset_altmemddr_0_phy_clk_out_domain_synch : vip_1024x768_reset_altmemddr_0_phy_clk_out_domain_synch_module
+  vip_sopc_reset_altmemddr_0_phy_clk_out_domain_synch : vip_sopc_reset_altmemddr_0_phy_clk_out_domain_synch_module
     port map(
       data_out => altmemddr_0_phy_clk_out_reset_n,
       clk => internal_altmemddr_0_phy_clk_out,
@@ -11567,8 +11567,8 @@ begin
 
   module_input17 <= std_logic'('1');
 
-  --vip_1024x768_burst_1_upstream_writedata of type writedata does not connect to anything so wire it to default (0)
-  vip_1024x768_burst_1_upstream_writedata <= std_logic_vector'("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+  --vip_sopc_burst_1_upstream_writedata of type writedata does not connect to anything so wire it to default (0)
+  vip_sopc_burst_1_upstream_writedata <= std_logic_vector'("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
   --vhdl renameroo for output signals
   altmemddr_0_phy_clk_out <= internal_altmemddr_0_phy_clk_out;
   --vhdl renameroo for output signals
@@ -11650,7 +11650,7 @@ end entity test_bench;
 
 
 architecture europa of test_bench is
-component vip_1024x768 is 
+component vip_sopc is 
            port (
                  -- 1) global signals:
                     signal altmemddr_0_aux_full_rate_clk_out : OUT STD_LOGIC;
@@ -11709,7 +11709,7 @@ component vip_1024x768 is
                     signal oct_ctl_rt_value_to_the_altmemddr_0 : IN STD_LOGIC_VECTOR (13 DOWNTO 0);
                     signal reset_phy_clk_n_from_the_altmemddr_0 : OUT STD_LOGIC
                  );
-end component vip_1024x768;
+end component vip_sopc;
 
                 signal altmemddr_0_aux_full_rate_clk_out :  STD_LOGIC;
                 signal altmemddr_0_aux_half_rate_clk_out :  STD_LOGIC;
@@ -11760,14 +11760,14 @@ end component vip_1024x768;
                 signal vid_v_from_the_alt_vip_itc_0 :  STD_LOGIC;
                 signal vid_v_sync_from_the_alt_vip_itc_0 :  STD_LOGIC;
                 signal vid_v_sync_to_the_alt_vip_cti_0 :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_debugaccess :  STD_LOGIC;
-                signal vip_1024x768_burst_0_downstream_nativeaddress :  STD_LOGIC_VECTOR (28 DOWNTO 0);
-                signal vip_1024x768_burst_0_upstream_readdata_from_sa :  STD_LOGIC_VECTOR (255 DOWNTO 0);
-                signal vip_1024x768_burst_0_upstream_readdatavalid_from_sa :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_debugaccess :  STD_LOGIC;
-                signal vip_1024x768_burst_1_downstream_nativeaddress :  STD_LOGIC_VECTOR (28 DOWNTO 0);
-                signal vip_1024x768_burst_1_upstream_writedata :  STD_LOGIC_VECTOR (255 DOWNTO 0);
                 signal vip_clk :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_debugaccess :  STD_LOGIC;
+                signal vip_sopc_burst_0_downstream_nativeaddress :  STD_LOGIC_VECTOR (28 DOWNTO 0);
+                signal vip_sopc_burst_0_upstream_readdata_from_sa :  STD_LOGIC_VECTOR (255 DOWNTO 0);
+                signal vip_sopc_burst_0_upstream_readdatavalid_from_sa :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_debugaccess :  STD_LOGIC;
+                signal vip_sopc_burst_1_downstream_nativeaddress :  STD_LOGIC_VECTOR (28 DOWNTO 0);
+                signal vip_sopc_burst_1_upstream_writedata :  STD_LOGIC_VECTOR (255 DOWNTO 0);
 
 
 -- <ALTERA_NOTE> CODE INSERTED BETWEEN HERE
@@ -11778,7 +11778,7 @@ end component vip_1024x768;
 begin
 
   --Set us up the Dut
-  DUT : vip_1024x768
+  DUT : vip_sopc
     port map(
       altmemddr_0_aux_full_rate_clk_out => altmemddr_0_aux_full_rate_clk_out,
       altmemddr_0_aux_half_rate_clk_out => altmemddr_0_aux_half_rate_clk_out,

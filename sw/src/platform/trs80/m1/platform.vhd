@@ -275,17 +275,17 @@ begin
 		kbd_data <= kbd_data_v;
   end process KBD_MUX;
 
-  graphics_o.bit8_1(3) <= '0';  -- alt character set?
+  graphics_o.bit8(0)(3) <= '0';  -- alt character set?
   
   -- software-controlled
   GEN_DBL_WIDTH_TRS80_M1 : if not TRS80_M1_IS_SYSTEM80 generate
     process (clk_40M, cpu_reset)
     begin
       if cpu_reset = '1' then
-        graphics_o.bit8_1(2) <= '0';
+        graphics_o.bit8(0)(2) <= '0';
       elsif rising_edge(clk_40M) then
         if snd_cs = '1' and cpu_io_wr = '1' then
-          graphics_o.bit8_1(2) <= cpu_d_o(3);
+          graphics_o.bit8(0)(2) <= cpu_d_o(3);
         end if;
       end if;
     end process;
@@ -293,7 +293,7 @@ begin
   
   -- a physical switch on the back of the System 80
   GEN_DBL_WIDTH_SYSTEM80 : if TRS80_M1_IS_SYSTEM80 generate
-    graphics_o.bit8_1(2) <= switches_i(9);
+    graphics_o.bit8(0)(2) <= switches_i(9);
   end generate GEN_DBL_WIDTH_SYSTEM80;
   
   -- unused outputs
@@ -430,8 +430,8 @@ begin
     end process;
     pcg80_wr <= vram_wr when pcg80_r(7 downto 4) = X"6" else '0';
 
-    graphics_o.bit8_1(5) <= pcg80_r(7); -- enable $80-$FF
-    graphics_o.bit8_1(4) <= pcg80_r(3); -- enable $00-$7F
+    graphics_o.bit8(0)(5) <= pcg80_r(7); -- enable $80-$FF
+    graphics_o.bit8(0)(4) <= pcg80_r(3); -- enable $00-$7F
 
     -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
     pcg80_inst : entity work.dpram
@@ -539,7 +539,7 @@ begin
       );
     bitmap_o.d(7 downto 6) <= (others => '0');
 
-    graphics_o.bit8_1(6) <= le18_en;
+    graphics_o.bit8(0)(6) <= le18_en;
 
   end generate GEN_LE18;
     
