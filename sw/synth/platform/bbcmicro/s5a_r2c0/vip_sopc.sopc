@@ -53,7 +53,7 @@
       }
       datum megawizard_uipreferences
       {
-         value = "{}";
+         value = "{output_language=VHDL, output_directory=E:\\markm\\pace\\pacedev.net\\sw\\synth\\platform\\bbcmicro\\s5a_r2c0}";
          type = "String";
       }
    }
@@ -109,8 +109,8 @@
  <parameter name="maxAdditionalLatency" value="0" />
  <parameter name="projectName" value="bbcmicro-ep3sl.qpf" />
  <parameter name="sopcBorderPoints" value="true" />
- <parameter name="systemHash" value="-34284710067" />
- <parameter name="timeStamp" value="1310449505905" />
+ <parameter name="systemHash" value="-28059736022" />
+ <parameter name="timeStamp" value="1310484329802" />
  <module kind="clock_source" version="10.1" enabled="1" name="vip_clk">
   <parameter name="clockFrequency" value="120000000" />
   <parameter name="clockFrequencyKnown" value="true" />
@@ -368,7 +368,7 @@
  <module kind="alt_vip_scl" version="10.1" enabled="1" name="alt_vip_scl_0">
   <parameter name="AUTO_DEVICE_FAMILY" value="Stratix III" />
   <parameter name="CONTROL_DEPTH" value="29" />
-  <parameter name="PARAMETERISATION"><![CDATA[<scalerParams><SCL_NAME>scaler</SCL_NAME><SCL_RUNTIME_CONTROL>0</SCL_RUNTIME_CONTROL><SCL_IN_WIDTH>1280</SCL_IN_WIDTH><SCL_IN_HEIGHT>1024</SCL_IN_HEIGHT><SCL_OUT_WIDTH>1024</SCL_OUT_WIDTH><SCL_OUT_HEIGHT>768</SCL_OUT_HEIGHT><SCL_BPS>8</SCL_BPS><SCL_CHANNELS_IN_SEQ>1</SCL_CHANNELS_IN_SEQ><SCL_CHANNELS_IN_PAR>3</SCL_CHANNELS_IN_PAR><SCL_ALGORITHM><NAME>BILINEAR</NAME><V><TAPS>4</TAPS><PHASES>16</PHASES></V><H><TAPS>4</TAPS><PHASES>16</PHASES></H></SCL_ALGORITHM><SCL_PRECISION><V><SIGNED>true</SIGNED><INTEGER_BITS>1</INTEGER_BITS><FRACTION_BITS>7</FRACTION_BITS></V><H><SIGNED>true</SIGNED><INTEGER_BITS>1</INTEGER_BITS><FRACTION_BITS>7</FRACTION_BITS><KERNEL_BITS>9</KERNEL_BITS></H></SCL_PRECISION><SCL_COEFFICIENTS><LOAD_AT_RUNTIME>false</LOAD_AT_RUNTIME><ARE_IDENTICAL>0</ARE_IDENTICAL><V><BANKS>2</BANKS><FUNCTION>LANCZOS_2</FUNCTION><SYMMETRIC>0</SYMMETRIC><FILENAME /></V><H><BANKS>2</BANKS><FUNCTION>LANCZOS_2</FUNCTION><SYMMETRIC>0</SYMMETRIC><FILENAME /></H></SCL_COEFFICIENTS></scalerParams>]]></parameter>
+  <parameter name="PARAMETERISATION"><![CDATA[<scalerParams><SCL_NAME>scaler</SCL_NAME><SCL_RUNTIME_CONTROL>0</SCL_RUNTIME_CONTROL><SCL_IN_WIDTH>2048</SCL_IN_WIDTH><SCL_IN_HEIGHT>576</SCL_IN_HEIGHT><SCL_OUT_WIDTH>1024</SCL_OUT_WIDTH><SCL_OUT_HEIGHT>768</SCL_OUT_HEIGHT><SCL_BPS>8</SCL_BPS><SCL_CHANNELS_IN_SEQ>1</SCL_CHANNELS_IN_SEQ><SCL_CHANNELS_IN_PAR>3</SCL_CHANNELS_IN_PAR><SCL_ALGORITHM><NAME>BILINEAR</NAME><V><TAPS>4</TAPS><PHASES>16</PHASES></V><H><TAPS>4</TAPS><PHASES>16</PHASES></H></SCL_ALGORITHM><SCL_PRECISION><V><SIGNED>true</SIGNED><INTEGER_BITS>1</INTEGER_BITS><FRACTION_BITS>7</FRACTION_BITS></V><H><SIGNED>true</SIGNED><INTEGER_BITS>1</INTEGER_BITS><FRACTION_BITS>7</FRACTION_BITS><KERNEL_BITS>9</KERNEL_BITS></H></SCL_PRECISION><SCL_COEFFICIENTS><LOAD_AT_RUNTIME>false</LOAD_AT_RUNTIME><ARE_IDENTICAL>0</ARE_IDENTICAL><V><BANKS>2</BANKS><FUNCTION>LANCZOS_2</FUNCTION><SYMMETRIC>0</SYMMETRIC><FILENAME /></V><H><BANKS>2</BANKS><FUNCTION>LANCZOS_2</FUNCTION><SYMMETRIC>0</SYMMETRIC><FILENAME /></H></SCL_COEFFICIENTS></scalerParams>]]></parameter>
  </module>
  <module kind="alt_vip_cti" version="10.1" enabled="1" name="alt_vip_cti_0">
   <parameter name="BPS" value="8" />
@@ -381,10 +381,10 @@
   <parameter name="STD_WIDTH" value="1" />
   <parameter name="GENERATE_ANC" value="0" />
   <parameter name="INTERLACED" value="0" />
-  <parameter name="H_ACTIVE_PIXELS_F0" value="1280" />
-  <parameter name="V_ACTIVE_LINES_F0" value="1024" />
-  <parameter name="V_ACTIVE_LINES_F1" value="1024" />
-  <parameter name="FIFO_DEPTH" value="2048" />
+  <parameter name="H_ACTIVE_PIXELS_F0" value="2048" />
+  <parameter name="V_ACTIVE_LINES_F0" value="576" />
+  <parameter name="V_ACTIVE_LINES_F1" value="576" />
+  <parameter name="FIFO_DEPTH" value="4096" />
   <parameter name="CLOCKS_ARE_SAME" value="0" />
   <parameter name="USE_CONTROL" value="0" />
   <parameter name="GENERATE_SYNC" value="0" />

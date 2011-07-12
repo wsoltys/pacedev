@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EnsembleReport name="vip_sopc" kind="system" version="10.1" fabric="SOPC">
  <!-- Format version 10.1sp1 197 (Future versions may contain additional information.) -->
- <!-- 2011.07.12.15:45:22 -->
+ <!-- 2011.07.13.01:25:33 -->
  <!-- A collection of modules and connections -->
  <parameter name="clockCrossingAdapter">
   <type>com.altera.sopcmodel.ensemble.Ensemble$EClockAdapter</type>
@@ -85,7 +85,7 @@
  </parameter>
  <parameter name="systemHash">
   <type>long</type>
-  <value>-34284710067</value>
+  <value>-28059736022</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>false</visible>
@@ -93,7 +93,7 @@
  </parameter>
  <parameter name="timeStamp">
   <type>long</type>
-  <value>1310449505905</value>
+  <value>1310484329802</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>false</visible>
@@ -5350,7 +5350,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="PARAMETERISATION">
    <type>java.lang.String</type>
-   <value><![CDATA[<scalerParams><SCL_NAME>scaler</SCL_NAME><SCL_RUNTIME_CONTROL>0</SCL_RUNTIME_CONTROL><SCL_IN_WIDTH>1280</SCL_IN_WIDTH><SCL_IN_HEIGHT>1024</SCL_IN_HEIGHT><SCL_OUT_WIDTH>1024</SCL_OUT_WIDTH><SCL_OUT_HEIGHT>768</SCL_OUT_HEIGHT><SCL_BPS>8</SCL_BPS><SCL_CHANNELS_IN_SEQ>1</SCL_CHANNELS_IN_SEQ><SCL_CHANNELS_IN_PAR>3</SCL_CHANNELS_IN_PAR><SCL_ALGORITHM><NAME>BILINEAR</NAME><V><TAPS>4</TAPS><PHASES>16</PHASES></V><H><TAPS>4</TAPS><PHASES>16</PHASES></H></SCL_ALGORITHM><SCL_PRECISION><V><SIGNED>true</SIGNED><INTEGER_BITS>1</INTEGER_BITS><FRACTION_BITS>7</FRACTION_BITS></V><H><SIGNED>true</SIGNED><INTEGER_BITS>1</INTEGER_BITS><FRACTION_BITS>7</FRACTION_BITS><KERNEL_BITS>9</KERNEL_BITS></H></SCL_PRECISION><SCL_COEFFICIENTS><LOAD_AT_RUNTIME>false</LOAD_AT_RUNTIME><ARE_IDENTICAL>0</ARE_IDENTICAL><V><BANKS>2</BANKS><FUNCTION>LANCZOS_2</FUNCTION><SYMMETRIC>0</SYMMETRIC><FILENAME /></V><H><BANKS>2</BANKS><FUNCTION>LANCZOS_2</FUNCTION><SYMMETRIC>0</SYMMETRIC><FILENAME /></H></SCL_COEFFICIENTS></scalerParams>]]></value>
+   <value><![CDATA[<scalerParams><SCL_NAME>scaler</SCL_NAME><SCL_RUNTIME_CONTROL>0</SCL_RUNTIME_CONTROL><SCL_IN_WIDTH>2048</SCL_IN_WIDTH><SCL_IN_HEIGHT>576</SCL_IN_HEIGHT><SCL_OUT_WIDTH>1024</SCL_OUT_WIDTH><SCL_OUT_HEIGHT>768</SCL_OUT_HEIGHT><SCL_BPS>8</SCL_BPS><SCL_CHANNELS_IN_SEQ>1</SCL_CHANNELS_IN_SEQ><SCL_CHANNELS_IN_PAR>3</SCL_CHANNELS_IN_PAR><SCL_ALGORITHM><NAME>BILINEAR</NAME><V><TAPS>4</TAPS><PHASES>16</PHASES></V><H><TAPS>4</TAPS><PHASES>16</PHASES></H></SCL_ALGORITHM><SCL_PRECISION><V><SIGNED>true</SIGNED><INTEGER_BITS>1</INTEGER_BITS><FRACTION_BITS>7</FRACTION_BITS></V><H><SIGNED>true</SIGNED><INTEGER_BITS>1</INTEGER_BITS><FRACTION_BITS>7</FRACTION_BITS><KERNEL_BITS>9</KERNEL_BITS></H></SCL_PRECISION><SCL_COEFFICIENTS><LOAD_AT_RUNTIME>false</LOAD_AT_RUNTIME><ARE_IDENTICAL>0</ARE_IDENTICAL><V><BANKS>2</BANKS><FUNCTION>LANCZOS_2</FUNCTION><SYMMETRIC>0</SYMMETRIC><FILENAME /></V><H><BANKS>2</BANKS><FUNCTION>LANCZOS_2</FUNCTION><SYMMETRIC>0</SYMMETRIC><FILENAME /></H></SCL_COEFFICIENTS></scalerParams>]]></value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -5818,7 +5818,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="H_ACTIVE_PIXELS_F0">
    <type>int</type>
-   <value>1280</value>
+   <value>2048</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -5826,7 +5826,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="V_ACTIVE_LINES_F0">
    <type>int</type>
-   <value>1024</value>
+   <value>576</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -5834,7 +5834,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="V_ACTIVE_LINES_F1">
    <type>int</type>
-   <value>1024</value>
+   <value>576</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -5842,7 +5842,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="FIFO_DEPTH">
    <type>int</type>
-   <value>2048</value>
+   <value>4096</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -6607,51 +6607,11 @@ parameters are a RESULT of the module parameters. -->
   <endConnectionPoint>din</endConnectionPoint>
  </connection>
  <plugin>
-  <instanceCount>3</instanceCount>
-  <name>clock_source</name>
-  <type>com.altera.entityinterfaces.IElementClass</type>
-  <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-  <displayName>Clock Output</displayName>
-  <version>10.1</version>
- </plugin>
- <plugin>
-  <instanceCount>7</instanceCount>
-  <name>clock_sink</name>
-  <type>com.altera.entityinterfaces.IElementClass</type>
-  <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-  <displayName>Clock Input</displayName>
-  <version>10.1</version>
- </plugin>
- <plugin>
-  <instanceCount>3</instanceCount>
-  <name>avalon_streaming</name>
-  <type>com.altera.entityinterfaces.IElementClass</type>
-  <subtype>com.altera.entityinterfaces.IConnection</subtype>
-  <displayName>Avalon Streaming Connection</displayName>
-  <version>10.1</version>
- </plugin>
- <plugin>
-  <instanceCount>6</instanceCount>
-  <name>reset_sink</name>
-  <type>com.altera.entityinterfaces.IElementClass</type>
-  <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-  <displayName>Reset Input</displayName>
-  <version>10.1</version>
- </plugin>
- <plugin>
-  <instanceCount>2</instanceCount>
-  <name>avalon_master</name>
-  <type>com.altera.entityinterfaces.IElementClass</type>
-  <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-  <displayName>Avalon Memory Mapped Master</displayName>
-  <version>10.1</version>
- </plugin>
- <plugin>
   <instanceCount>1</instanceCount>
-  <name>altmemddr3</name>
+  <name>alt_vip_scl</name>
   <type>com.altera.entityinterfaces.IElementClass</type>
   <subtype>com.altera.entityinterfaces.IModule</subtype>
-  <displayName>DDR3 SDRAM Controller with ALTMEMPHY</displayName>
+  <displayName>Scaler</displayName>
   <version>10.1</version>
  </plugin>
  <plugin>
@@ -6664,6 +6624,14 @@ parameters are a RESULT of the module parameters. -->
  </plugin>
  <plugin>
   <instanceCount>3</instanceCount>
+  <name>avalon_streaming</name>
+  <type>com.altera.entityinterfaces.IElementClass</type>
+  <subtype>com.altera.entityinterfaces.IConnection</subtype>
+  <displayName>Avalon Streaming Connection</displayName>
+  <version>10.1</version>
+ </plugin>
+ <plugin>
+  <instanceCount>3</instanceCount>
   <name>clock_source</name>
   <type>com.altera.entityinterfaces.IElementClass</type>
   <subtype>com.altera.entityinterfaces.IModule</subtype>
@@ -6671,11 +6639,11 @@ parameters are a RESULT of the module parameters. -->
   <version>10.1</version>
  </plugin>
  <plugin>
-  <instanceCount>1</instanceCount>
-  <name>alt_vip_itc</name>
+  <instanceCount>7</instanceCount>
+  <name>clock</name>
   <type>com.altera.entityinterfaces.IElementClass</type>
-  <subtype>com.altera.entityinterfaces.IModule</subtype>
-  <displayName>Clocked Video Output</displayName>
+  <subtype>com.altera.entityinterfaces.IConnection</subtype>
+  <displayName>Clock Connection</displayName>
   <version>10.1</version>
  </plugin>
  <plugin>
@@ -6688,74 +6656,18 @@ parameters are a RESULT of the module parameters. -->
  </plugin>
  <plugin>
   <instanceCount>1</instanceCount>
-  <name>alt_vip_scl</name>
-  <type>com.altera.entityinterfaces.IElementClass</type>
-  <subtype>com.altera.entityinterfaces.IModule</subtype>
-  <displayName>Scaler</displayName>
-  <version>10.1</version>
- </plugin>
- <plugin>
-  <instanceCount>3</instanceCount>
-  <name>avalon_streaming_sink</name>
-  <type>com.altera.entityinterfaces.IElementClass</type>
-  <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-  <displayName>Avalon Streaming Sink</displayName>
-  <version>10.1</version>
- </plugin>
- <plugin>
-  <instanceCount>3</instanceCount>
-  <name>avalon</name>
-  <type>com.altera.entityinterfaces.IElementClass</type>
-  <subtype>com.altera.entityinterfaces.IConnection</subtype>
-  <displayName>Avalon Memory Mapped Connection</displayName>
-  <version>10.1</version>
- </plugin>
- <plugin>
-  <instanceCount>3</instanceCount>
-  <name>conduit_end</name>
-  <type>com.altera.entityinterfaces.IElementClass</type>
-  <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-  <displayName>Conduit</displayName>
-  <version>10.1</version>
- </plugin>
- <plugin>
-  <instanceCount>7</instanceCount>
-  <name>clock</name>
-  <type>com.altera.entityinterfaces.IElementClass</type>
-  <subtype>com.altera.entityinterfaces.IConnection</subtype>
-  <displayName>Clock Connection</displayName>
-  <version>10.1</version>
- </plugin>
- <plugin>
-  <instanceCount>4</instanceCount>
-  <name>reset_source</name>
-  <type>com.altera.entityinterfaces.IElementClass</type>
-  <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-  <displayName>Reset Output</displayName>
-  <version>10.1</version>
- </plugin>
- <plugin>
-  <instanceCount>3</instanceCount>
-  <name>avalon_streaming_source</name>
-  <type>com.altera.entityinterfaces.IElementClass</type>
-  <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
-  <displayName>Avalon Streaming Source</displayName>
-  <version>10.1</version>
- </plugin>
- <plugin>
-  <instanceCount>1</instanceCount>
-  <name>alt_vip_cti</name>
-  <type>com.altera.entityinterfaces.IElementClass</type>
-  <subtype>com.altera.entityinterfaces.IModule</subtype>
-  <displayName>Clocked Video Input</displayName>
-  <version>10.1</version>
- </plugin>
- <plugin>
-  <instanceCount>1</instanceCount>
   <name>avalon_slave</name>
   <type>com.altera.entityinterfaces.IElementClass</type>
   <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
   <displayName>Avalon Memory Mapped Slave</displayName>
+  <version>10.1</version>
+ </plugin>
+ <plugin>
+  <instanceCount>1</instanceCount>
+  <name>alt_vip_itc</name>
+  <type>com.altera.entityinterfaces.IElementClass</type>
+  <subtype>com.altera.entityinterfaces.IModule</subtype>
+  <displayName>Clocked Video Output</displayName>
   <version>10.1</version>
  </plugin>
  <plugin>
@@ -6774,6 +6686,94 @@ parameters are a RESULT of the module parameters. -->
   <displayName>Reset Input</displayName>
   <version>10.1</version>
  </plugin>
+ <plugin>
+  <instanceCount>4</instanceCount>
+  <name>reset_source</name>
+  <type>com.altera.entityinterfaces.IElementClass</type>
+  <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+  <displayName>Reset Output</displayName>
+  <version>10.1</version>
+ </plugin>
+ <plugin>
+  <instanceCount>3</instanceCount>
+  <name>avalon</name>
+  <type>com.altera.entityinterfaces.IElementClass</type>
+  <subtype>com.altera.entityinterfaces.IConnection</subtype>
+  <displayName>Avalon Memory Mapped Connection</displayName>
+  <version>10.1</version>
+ </plugin>
+ <plugin>
+  <instanceCount>7</instanceCount>
+  <name>clock_sink</name>
+  <type>com.altera.entityinterfaces.IElementClass</type>
+  <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+  <displayName>Clock Input</displayName>
+  <version>10.1</version>
+ </plugin>
+ <plugin>
+  <instanceCount>3</instanceCount>
+  <name>avalon_streaming_sink</name>
+  <type>com.altera.entityinterfaces.IElementClass</type>
+  <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+  <displayName>Avalon Streaming Sink</displayName>
+  <version>10.1</version>
+ </plugin>
+ <plugin>
+  <instanceCount>3</instanceCount>
+  <name>avalon_streaming_source</name>
+  <type>com.altera.entityinterfaces.IElementClass</type>
+  <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+  <displayName>Avalon Streaming Source</displayName>
+  <version>10.1</version>
+ </plugin>
+ <plugin>
+  <instanceCount>2</instanceCount>
+  <name>avalon_master</name>
+  <type>com.altera.entityinterfaces.IElementClass</type>
+  <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+  <displayName>Avalon Memory Mapped Master</displayName>
+  <version>10.1</version>
+ </plugin>
+ <plugin>
+  <instanceCount>6</instanceCount>
+  <name>reset_sink</name>
+  <type>com.altera.entityinterfaces.IElementClass</type>
+  <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+  <displayName>Reset Input</displayName>
+  <version>10.1</version>
+ </plugin>
+ <plugin>
+  <instanceCount>1</instanceCount>
+  <name>altmemddr3</name>
+  <type>com.altera.entityinterfaces.IElementClass</type>
+  <subtype>com.altera.entityinterfaces.IModule</subtype>
+  <displayName>DDR3 SDRAM Controller with ALTMEMPHY</displayName>
+  <version>10.1</version>
+ </plugin>
+ <plugin>
+  <instanceCount>3</instanceCount>
+  <name>conduit_end</name>
+  <type>com.altera.entityinterfaces.IElementClass</type>
+  <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+  <displayName>Conduit</displayName>
+  <version>10.1</version>
+ </plugin>
+ <plugin>
+  <instanceCount>1</instanceCount>
+  <name>alt_vip_cti</name>
+  <type>com.altera.entityinterfaces.IElementClass</type>
+  <subtype>com.altera.entityinterfaces.IModule</subtype>
+  <displayName>Clocked Video Input</displayName>
+  <version>10.1</version>
+ </plugin>
+ <plugin>
+  <instanceCount>3</instanceCount>
+  <name>clock_source</name>
+  <type>com.altera.entityinterfaces.IElementClass</type>
+  <subtype>com.altera.entityinterfaces.IMutableConnectionPoint</subtype>
+  <displayName>Clock Output</displayName>
+  <version>10.1</version>
+ </plugin>
  <reportVersion>10.1sp1 197</reportVersion>
- <uniqueIdentifier>485D60032F9F000001311CE074CE</uniqueIdentifier>
+ <uniqueIdentifier>485B3986CE02000001311EF31657</uniqueIdentifier>
 </EnsembleReport>
