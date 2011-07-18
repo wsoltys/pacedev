@@ -85,6 +85,8 @@ package video_controller_pkg is
     d         : BITMAP_D_t;
   end record;
   
+  type to_BITMAP_CTL_a is array (natural range <>) of to_BITMAP_CTL_t;
+
   function NULL_TO_BITMAP_CTL return to_BITMAP_CTL_t;
 
   type from_BITMAP_CTL_t is record
@@ -92,6 +94,8 @@ package video_controller_pkg is
     rgb       : RGB_t;
     set       : std_logic;
   end record;
+
+  type from_BITMAP_CTL_a is array (natural range <>) of from_BITMAP_CTL_t;
 
   subtype TILEMAP_D_t is std_logic_vector(15 downto 0);
   subtype TILEMAP_A_t is std_logic_vector(15 downto 0);
@@ -132,7 +136,7 @@ package video_controller_pkg is
   type to_GRAPHICS_t is record
     pal       : PAL_A_t(15 downto 0);
     -- for various uses
-    bit8      : BYTE_A_t(0 to 0);
+    bit8      : BYTE_A_t(0 to 1);
     bit16     : WORD_A_t(0 to 3);
   end record;
 
@@ -192,5 +196,25 @@ package video_controller_pkg is
 	    graphics_i  : in to_GRAPHICS_t
 	  );
 	end component tilemapCtl;
+
+  component bitmapCtl is
+    generic
+    (
+      DELAY         : integer
+    );
+    port               
+    (
+      reset					: in std_logic;
+
+      -- video control signals		
+      video_ctl     : in from_VIDEO_CTL_t;
+
+      -- bitmap controller signals
+      ctl_i         : in to_BITMAP_CTL_t;
+      ctl_o         : out from_BITMAP_CTL_t;
+
+      graphics_i    : in to_GRAPHICS_t
+    );
+  end component bitmapCtl;
 
 end package video_controller_pkg;

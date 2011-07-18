@@ -69,8 +69,8 @@ architecture SYN of PACE is
   signal to_tilemap_ctl   : to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
   signal from_tilemap_ctl : from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
 
-  signal to_bitmap_ctl    : to_BITMAP_CTL_t;
-  signal from_bitmap_ctl  : from_BITMAP_CTL_t;
+  signal to_bitmap_ctl    : to_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
+  signal from_bitmap_ctl  : from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
 
   signal to_sprite_reg    : to_SPRITE_REG_t;
   signal to_sprite_ctl    : to_SPRITE_CTL_t;

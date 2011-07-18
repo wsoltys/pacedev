@@ -39,8 +39,8 @@ entity platform is
 
     -- graphics
     
-    bitmap_i        : in from_BITMAP_CTL_t;
-    bitmap_o        : out to_BITMAP_CTL_t;
+    bitmap_i        : in from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
+    bitmap_o        : out to_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
     
     tilemap_i       : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
     tilemap_o       : out to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
@@ -117,65 +117,67 @@ architecture SYN of platform is
 	signal clk_2M_ena			: std_logic;
 	
   -- uP signals  
-  signal cpu_a          : std_logic_vector(15 downto 0);
-  signal cpu_d_i        : std_logic_vector(7 downto 0);
-  signal cpu_d_o        : std_logic_vector(7 downto 0);
-  signal cpu_mem_rd     : std_logic;
-  signal cpu_mem_wr     : std_logic;
-  signal cpu_io_rd      : std_logic;
-  signal cpu_io_wr      : std_logic;
-  signal cpu_irq        : std_logic;
-  signal cpu_irq_vec    : std_logic_vector(7 downto 0);
-  signal cpu_irq_ack    : std_logic;
-  signal cpu_nmi        : std_logic;
-	alias cpu_io_a				: std_logic_vector(7 downto 0) is cpu_a(7 downto 0);
+  signal cpu_a              : std_logic_vector(15 downto 0);
+  signal cpu_d_i            : std_logic_vector(7 downto 0);
+  signal cpu_d_o            : std_logic_vector(7 downto 0);
+  signal cpu_mem_rd         : std_logic;
+  signal cpu_mem_wr         : std_logic;
+  signal cpu_io_rd          : std_logic;
+  signal cpu_io_wr          : std_logic;
+  signal cpu_irq            : std_logic;
+  signal cpu_irq_vec        : std_logic_vector(7 downto 0);
+  signal cpu_irq_ack        : std_logic;
+  signal cpu_nmi            : std_logic;
+	alias cpu_io_a				    : std_logic_vector(7 downto 0) is cpu_a(7 downto 0);
 	                        
   -- ROM signals        
-	signal rom_cs					: std_logic;
-  signal rom_d_o        : std_logic_vector(7 downto 0);
+	signal rom_cs					    : std_logic;
+  signal rom_d_o            : std_logic_vector(7 downto 0);
                         
   -- keyboard signals
-	signal kbd_cs					: std_logic;
-	signal kbd_data				: std_logic_vector(7 downto 0);
+	signal kbd_cs					    : std_logic;
+	signal kbd_data				    : std_logic_vector(7 downto 0);
 		                        
   -- VRAM signals       
-	signal vram_cs				: std_logic;
-  signal vram_wr        : std_logic;
-  signal vram_datao     : std_logic_vector(7 downto 0);
+	signal vram_cs				    : std_logic;
+  signal vram_wr            : std_logic;
+  signal vram_datao         : std_logic_vector(7 downto 0);
 
   -- pcg80 signals
-  signal pcg80_cs       : std_logic := '0';
-  signal pcg80_d_o      : std_logic_vector(7 downto 0);
+  signal pcg80_cs           : std_logic := '0';
+  signal pcg80_d_o          : std_logic_vector(7 downto 0);
   -- le18 signals
-  signal le18_cs        : std_logic := '0';
-  signal le18_d_o       : std_logic_vector(7 downto 0) := (others => '0');
+  signal le18_cs            : std_logic := '0';
+  signal le18_d_o           : std_logic_vector(7 downto 0) := (others => '0');
+  -- lnw80 signals
+  signal lnw80_video_ctl_r  : std_logic_vector(7 downto 0) := (others => '0');
   
   -- RAM signals        
-  signal ram_wr         : std_logic;
-  alias ram_datao      	: std_logic_vector(7 downto 0) is sram_i.d(7 downto 0);
+  signal ram_wr             : std_logic;
+  alias ram_datao      	    : std_logic_vector(7 downto 0) is sram_i.d(7 downto 0);
 
   -- interrupt signals
-	signal int_cs					: std_logic;
-  signal int_status     : std_logic_vector(7 downto 0);
+	signal int_cs					    : std_logic;
+  signal int_status         : std_logic_vector(7 downto 0);
 
   -- fdc signals
-	signal fdc_cs					: std_logic;
-  signal fdc_rd         : std_logic;
-  signal fdc_wr         : std_logic;
-  signal fdc_datao      : std_logic_vector(7 downto 0);
-  signal fdc_drq_int    : std_logic;
-	signal fdc_addr				: std_logic_vector(2 downto 0);
+	signal fdc_cs					    : std_logic;
+  signal fdc_rd             : std_logic;
+  signal fdc_wr             : std_logic;
+  signal fdc_datao          : std_logic_vector(7 downto 0);
+  signal fdc_drq_int        : std_logic;
+	signal fdc_addr				    : std_logic_vector(2 downto 0);
 
-  signal hdd_d          : std_logic_vector(7 downto 0);
-  signal hdd_cs         : std_logic := '0';
+  signal hdd_d              : std_logic_vector(7 downto 0);
+  signal hdd_cs             : std_logic := '0';
   
   -- other signals      
-	alias game_reset			: std_logic is inputs_i(NUM_INPUT_BYTES-1).d(0);
-	signal cpu_reset			: std_logic;  
-	signal alpha_joy_cs		: std_logic;
-	signal snd_cs					: std_logic;
-  signal mem_d          : std_logic_vector(7 downto 0);
-  signal io_d           : std_logic_vector(7 downto 0);
+	alias game_reset			    : std_logic is inputs_i(NUM_INPUT_BYTES-1).d(0);
+	signal cpu_reset			    : std_logic;  
+	signal alpha_joy_cs		    : std_logic;
+	signal snd_cs					    : std_logic;
+  signal mem_d              : std_logic_vector(7 downto 0);
+  signal io_d               : std_logic_vector(7 downto 0);
   
 begin
 
@@ -185,6 +187,15 @@ begin
             " CPU_CLK_ENA_DIV=" & integer'image(TRS80_M1_CPU_CLK_ENA_DIVIDE_BY)
       severity note;
 
+  -- check invalid combinations of options
+  
+  assert not (TRS80_M1_IS_LNW80 and (TRS80_M1_HAS_PCG80 or TRS80_M1_HAS_80GRAFIX))
+    report  "TRS80_M1_IS_LNW80 and (TRS80_M1_HAS_PCG80 or TRS80_M1_HAS_80GRAFIX) not supported"
+      severity error;
+  assert not (TRS80_M1_IS_LNW80 and (TRS80_M1_HAS_LE18))
+    report  "TRS80_M1_IS_LNW80 and TRS80_M1_HAS_LE18 not supported"
+      severity error;
+  
 	cpu_reset <= clkrst_i.arst or game_reset;
 
   -- not used for now
@@ -235,9 +246,10 @@ begin
 	-- LE18 $EC-$EF
   le18_cs <= '1' when STD_MATCH(cpu_io_a, X"E" & "11--") else '0';
 	-- PCG-80 $FE, 80-GRAFIX $FF
-	pcg80_cs <= '1' when (TRS80_M1_HAS_PCG80 and cpu_io_a = X"FE") else 
-              '1' when (TRS80_M1_HAS_80GRAFIX and cpu_io_a = X"FF") else
+	pcg80_cs <= '1' when (not TRS80_M1_IS_LNW80 and TRS80_M1_HAS_PCG80 and cpu_io_a = X"FE") else 
+              '1' when (not TRS80_M1_IS_LNW80 and TRS80_M1_HAS_80GRAFIX and cpu_io_a = X"FF") else
               '0';
+
   -- SOUND $FC-FF (Model I is $FF only)
 	snd_cs <= '1' when cpu_io_a = X"FF" else '0';
 	
@@ -405,7 +417,7 @@ begin
     signal pcg80_wr       : std_logic := '0';
     
   begin
-  
+
     -- PCG-80 register
     process (clk_40M, cpu_reset)
     begin
@@ -532,12 +544,12 @@ begin
         q_b					=> le18_ram_o,
     
         clock_a			=> clk_video,
-        address_a		=> bitmap_i.a(TRS80_M1_LE18_WIDTHAD-1 downto 0),
+        address_a		=> bitmap_i(1).a(TRS80_M1_LE18_WIDTHAD-1 downto 0),
         wren_a			=> '0',
         data_a			=> (others => 'X'),
-        q_a					=> bitmap_o.d(5 downto 0)
+        q_a					=> bitmap_o(1).d(5 downto 0)
       );
-    bitmap_o.d(7 downto 6) <= (others => '0');
+    bitmap_o(1).d(7 downto 6) <= (others => '0');
 
     graphics_o.bit8(0)(6) <= le18_en;
 
@@ -545,9 +557,59 @@ begin
     
   GEN_NO_LE18 : if not TRS80_M1_HAS_LE18 generate
     le18_d_o <= X"FF";
-    bitmap_o.d <= (others => '0');
+    bitmap_o(1).d <= (others => '0');
   end generate GEN_NO_LE18;
     
+  GEN_LNW80_VIDEO : if TRS80_M1_IS_LNW80 generate
+    alias hires_ena             : std_logic is lnw80_video_ctl_r(3);
+    alias colour_ena            : std_logic is lnw80_video_ctl_r(2);
+    alias inverse_ena           : std_logic is lnw80_video_ctl_r(0);
+
+    signal lnw80_hires_ram_a    : std_logic_vector(13 downto 0) := (others => '0');
+    signal lnw80_hires_ram_wr   : std_logic := '0';
+    signal lnw80_hires_ram_i    : std_logic_vector(7 downto 0) := (others => '0');
+    signal lnw80_hires_ram_o    : std_logic_vector(7 downto 0) := (others => '0');
+  begin
+    process (clk_40M, cpu_reset)
+    begin
+      if cpu_reset = '1' then
+        lnw80_video_ctl_r <= (others => '0');
+      elsif rising_edge(clk_40M) then
+        if cpu_io_wr = '1' then
+          -- port 254 controls LNW video
+          if cpu_io_a = X"FE" then
+            lnw80_video_ctl_r <= cpu_d_o;
+          end if;
+        end if; -- cpu_io_wr
+      end if; -- rising_edge(clk_40M)
+    end process;
+
+    graphics_o.bit8(1) <= lnw80_video_ctl_r;
+    
+    -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+    lnw80_hires_ram_inst : entity work.dpram
+      generic map
+      (
+        widthad_a		=> TRS80_M1_LNW80_HIRES_WIDTHAD,
+        width_a     => 8
+      )
+      port map
+      (
+        clock_b			=> clk_40M,
+        address_b		=> lnw80_hires_ram_a(TRS80_M1_LNW80_HIRES_WIDTHAD-1 downto 0),
+        wren_b			=> lnw80_hires_ram_wr,
+        data_b			=> lnw80_hires_ram_i,
+        q_b					=> lnw80_hires_ram_o,
+    
+        clock_a			=> clk_video,
+        address_a		=> bitmap_i(2).a(TRS80_M1_LNW80_HIRES_WIDTHAD-1 downto 0),
+        wren_a			=> '0',
+        data_a			=> (others => 'X'),
+        q_a					=> bitmap_o(2).d(7 downto 0)
+      );
+
+  end generate GEN_LNW80_VIDEO;
+  
   BLK_INTERRUPTS : block
     signal tick_1ms   : std_logic := '0';
     signal timer_irq  : std_logic := '0';

@@ -13,8 +13,8 @@ use work.platform_pkg.all;
 entity Graphics is
   port
   (
-    bitmap_ctl_i    : in to_BITMAP_CTL_t;
-    bitmap_ctl_o    : out from_BITMAP_CTL_t;
+    bitmap_ctl_i    : in to_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
+    bitmap_ctl_o    : out from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
     tilemap_ctl_i   : in to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
     tilemap_ctl_o   : out from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
 
@@ -37,34 +37,10 @@ end Graphics;
 
 architecture SYN of Graphics is
 
-	-- don't really want this here,
-	-- but prevents having dummy components
-	-- *** some other way to fix???
-	
-	component bitmapCtl_1 is
-    generic
-    (
-      DELAY         : integer
-    );          
-    port               
-    (
-      reset					: in std_logic;
-        
-      -- video control signals		
-      video_ctl     : in from_VIDEO_CTL_t;
-
-      -- bitmap controller signals
-      ctl_i         : in to_BITMAP_CTL_t;
-      ctl_o         : out from_BITMAP_CTL_t;
-      
-      graphics_i    : in to_GRAPHICS_t
-    );
-	end component;
-
 	alias clk 					    : std_logic is video_i.clk;
 
   signal from_video_ctl   : from_VIDEO_CTL_t;
-  signal bitmap_ctl_o_s   : from_BITMAP_CTL_t;
+  signal bitmap_ctl_o_s   : from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
   signal tilemap_ctl_o_s  : from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
   signal sprite_ctl_o_s   : from_SPRITE_CTL_t;
   signal sprite_pri       : std_logic;
@@ -135,8 +111,7 @@ begin
   pace_video_mixer_inst : entity work.pace_video_mixer
     port map
     (
-        bitmap_rgb    => bitmap_ctl_o_s.rgb,
-        bitmap_set    => bitmap_ctl_o_s.set,
+        bitmap_ctl_o  => bitmap_ctl_o_s,
         tilemap_ctl_o => tilemap_ctl_o_s,
         sprite_rgb    => sprite_ctl_o_s.rgb,
         sprite_set    => sprite_ctl_o_s.set,
@@ -148,12 +123,12 @@ begin
     );
     
 	GEN_NO_BITMAPS : if PACE_VIDEO_NUM_BITMAPS = 0 generate
-    bitmap_ctl_o_s <= ((others => '0'), (others => (others => '0')), '0');
+    --bitmap_ctl_o_s <= ((others => '0'), (others => (others => '0')), '0');
 	end generate GEN_NO_BITMAPS;
 	
 	GEN_BITMAP_1 : if PACE_VIDEO_NUM_BITMAPS > 0 generate
 	
-	  bitmapctl_inst : bitmapCtl_1
+	  forground_bitmapctl_inst : entity work.bitmapCtl(BITMAP_1)
       generic map
       (
         DELAY         => PACE_VIDEO_PIPELINE_DELAY
@@ -164,15 +139,36 @@ begin
 				
 				video_ctl     => from_video_ctl,
 
-	      ctl_i         => bitmap_ctl_i,
-	      ctl_o         => bitmap_ctl_o_s,
+	      ctl_i         => bitmap_ctl_i(1),
+	      ctl_o         => bitmap_ctl_o_s(1),
 
         graphics_i    => graphics_i
 	    );
 		end generate GEN_BITMAP_1;
 
+	GEN_BITMAP_2 : if PACE_VIDEO_NUM_BITMAPS > 1 generate
+
+	  forground_bitmapctl_inst : entity work.bitmapCtl(BITMAP_2)
+      generic map
+      (
+        DELAY         => PACE_VIDEO_PIPELINE_DELAY
+      )
+	    port map
+	    (
+				reset					=> video_i.reset,
+				
+				video_ctl     => from_video_ctl,
+
+	      ctl_i         => bitmap_ctl_i(2),
+	      ctl_o         => bitmap_ctl_o_s(2),
+
+        graphics_i    => graphics_i
+	    );
+      
+  end generate GEN_BITMAP_2;
+
   bitmap_ctl_o <= bitmap_ctl_o_s;
-    
+  
 	GEN_NO_TILEMAPS : if PACE_VIDEO_NUM_TILEMAPS = 0 generate
     --tilemap_ctl_o_s(1) <= ((others => '0'), (others => '0'), (others => '0'), 
     --                      (others => (others => '0')), '0');
