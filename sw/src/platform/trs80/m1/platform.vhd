@@ -561,8 +561,8 @@ begin
   end generate GEN_NO_LE18;
     
   GEN_LNW80_VIDEO : if TRS80_M1_IS_LNW80 generate
-    alias hires_ena             : std_logic is lnw80_video_ctl_r(3);
-    alias colour_ena            : std_logic is lnw80_video_ctl_r(2);
+    alias gfxram_ena            : std_logic is lnw80_video_ctl_r(3);
+    alias gfxmode               : std_logic_vector(1 downto 0) is lnw80_video_ctl_r(2 downto 1);
     alias inverse_ena           : std_logic is lnw80_video_ctl_r(0);
 
     signal lnw80_hires_ram_a    : std_logic_vector(13 downto 0) := (others => '0');
