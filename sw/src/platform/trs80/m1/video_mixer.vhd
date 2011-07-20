@@ -33,20 +33,22 @@ architecture SYN of pace_video_mixer is
   alias alt_char          : std_logic is graphics_i.bit8(0)(3);
   alias dbl_width         : std_logic is graphics_i.bit8(0)(2);
 
-  alias lnw80_hires_ena   : std_logic is graphics_i.bit8(1)(3);
+  alias gfxram_ena        : std_logic is graphics_i.bit8(1)(3);
+  alias gfxmode           : std_logic_vector(1 downto 0) is graphics_i.bit8(1)(2 downto 1);
+  alias inverse_ena       : std_logic is graphics_i.bit8(1)(0);
   
 begin
 
   -- LE18 graphics are XOR'd with standard text video
   -- LNW80 hires graphics is ???
 	rgb_o.r <=  bitmap_ctl_o(1).rgb.r xor tilemap_ctl_o(1).rgb.r when (TRS80_M1_HAS_LE18 and le18_en = '1') else
-              bitmap_ctl_o(2).rgb.r when (TRS80_M1_IS_LNW80 and lnw80_hires_ena = '1') else
+              bitmap_ctl_o(2).rgb.r when (TRS80_M1_IS_LNW80 and gfxmode /= "00") else
               tilemap_ctl_o(1).rgb.r;
 	rgb_o.g <=  bitmap_ctl_o(1).rgb.g xor tilemap_ctl_o(1).rgb.g when (TRS80_M1_HAS_LE18 and le18_en = '1') else
-              bitmap_ctl_o(2).rgb.g when (TRS80_M1_IS_LNW80 and lnw80_hires_ena = '1') else
+              bitmap_ctl_o(2).rgb.g when (TRS80_M1_IS_LNW80 and gfxmode /= "00") else
               tilemap_ctl_o(1).rgb.g;
 	rgb_o.b <=  bitmap_ctl_o(1).rgb.b xor tilemap_ctl_o(1).rgb.b when (TRS80_M1_HAS_LE18 and le18_en = '1') else
-              bitmap_ctl_o(2).rgb.b when (TRS80_M1_IS_LNW80 and lnw80_hires_ena = '1') else
+              bitmap_ctl_o(2).rgb.b when (TRS80_M1_IS_LNW80 and gfxmode /= "00") else
               tilemap_ctl_o(1).rgb.b;
 
 end architecture SYN;

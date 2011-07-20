@@ -18,7 +18,7 @@ package platform_pkg is
 	constant PACE_VIDEO_NUM_BITMAPS 	    : natural := 2;
 	constant PACE_VIDEO_NUM_TILEMAPS 	    : natural := 1;
 	constant PACE_VIDEO_NUM_SPRITES 	    : natural := 0;
-	constant PACE_VIDEO_H_SIZE				    : integer := 384;
+	constant PACE_VIDEO_H_SIZE				    : integer := 480;
 	constant PACE_VIDEO_V_SIZE				    : integer := 192;
   constant PACE_VIDEO_PIPELINE_DELAY    : integer := 5;
 
@@ -27,7 +27,7 @@ package platform_pkg is
 	--
 	-- Platform-specific constants (optional)
 	--
-		constant CLK0_FREQ_MHz		            : integer := 
+  constant CLK0_FREQ_MHz		            : integer := 
                 PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
   constant CPU_FREQ_MHz                 : real := 1.77;
 

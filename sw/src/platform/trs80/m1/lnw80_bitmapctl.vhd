@@ -11,6 +11,7 @@ use work.project_pkg.all;
 
 --
 --	LNW80 Hires Graphics Bitmap Controller
+--  - modes 1-3
 --
 
 architecture BITMAP_2 of bitmapCtl is
@@ -23,11 +24,10 @@ architecture BITMAP_2 of bitmapCtl is
   alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
   alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
 
-  alias le18_en     : std_logic is graphics_i.bit8(0)(6);
-  alias pcg80_en_hi : std_logic is graphics_i.bit8(0)(5);
-  alias pcg80_en_lo : std_logic is graphics_i.bit8(0)(4);
-  alias alt_char    : std_logic is graphics_i.bit8(0)(3);
-  alias dbl_width   : std_logic is graphics_i.bit8(0)(2);
+  -- LNW80
+  alias gfxram_ena  : std_logic is graphics_i.bit8(1)(3);
+  alias gfxmode     : std_logic_vector(1 downto 0) is graphics_i.bit8(1)(2 downto 1);
+  alias inverse_ena : std_logic is graphics_i.bit8(1)(0);
 
   signal hblank_r : std_logic_vector(DELAY-1 downto 0) := (others => '0');
   

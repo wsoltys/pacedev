@@ -11,6 +11,7 @@ use work.project_pkg.all;
 
 --
 --	TRS-80 Model I Tilemap Controller
+--  - also LNW80 Mode 0 (only)
 --
 --	Tile data is 1 BPP.
 --
@@ -37,6 +38,10 @@ architecture TILEMAP_1 of tilemapCtl is
   alias alt_char    : std_logic is graphics_i.bit8(0)(3);
   alias dbl_width   : std_logic is graphics_i.bit8(0)(2);
 
+  -- LNW80
+  alias gfxram_ena  : std_logic is graphics_i.bit8(1)(3);
+  alias gfxmode     : std_logic_vector(1 downto 0) is graphics_i.bit8(1)(2 downto 1);
+  alias inverse_ena : std_logic is graphics_i.bit8(1)(0);
   signal hblank_r : std_logic_vector(DELAY-1 downto 0) := (others => '0');
   
 begin
@@ -142,9 +147,9 @@ begin
 
         -- green-screen display
         ctl_o.rgb.r <= (others => '0');
-        ctl_o.rgb.g <= (others => tile_d_v(0));
+        ctl_o.rgb.g <= (others => inverse_ena xor tile_d_v(0));
         ctl_o.rgb.b <= (others => '0');
-        ctl_o.set <= tile_d_v(0);
+        ctl_o.set <= inverse_ena xor tile_d_v(0);
 
         if stb = '1' then
           tile_d_v := '0' & tile_d_v(tile_d_v'left downto 1);
