@@ -65,7 +65,8 @@ package project_pkg is
   --constant TRS80_M1_ROM                     : string := "model1b.hex";    -- v1.3
   --constant TRS80_M1_ROM                     : string := "m1v13_bartlett.hex";
   --constant TRS80_M1_ROM                     : string := "sys80.hex";
-  constant TRS80_M1_ROM                     : string := "lnw80.hex";
+  --constant TRS80_M1_ROM                     : string := "lnw80.hex";
+  constant TRS80_M1_ROM                     : string := "lnw80_bartlett.hex";
 
   constant TRS80_M1_ROM_IN_FLASH            : boolean := PACE_HAS_FLASH;
 
@@ -77,7 +78,7 @@ package project_pkg is
   constant TRS80_M1_CHARSET_ROM             : string := "trs80_m1_tile_2.hex";
   
   constant TRS80_M1_IS_SYSTEM80             : boolean := (TRS80_M1_ROM = "sys80.hex");
-  constant TRS80_M1_IS_LNW80                : boolean := (TRS80_M1_ROM = "lnw80.hex");
+  constant TRS80_M1_IS_LNW80                : boolean := (TRS80_M1_ROM(1 to 5) = "lnw80");
   constant TRS80_M1_LNW80_HIRES_WIDTHAD     : natural := 14;    -- 16KiB
   --constant TRS80_M1_LNW80_HIRES_WIDTHAD     : natural := 12;    -- 4KiB
   constant TRS80_M1_HAS_PCG80               : boolean := (not TRS80_M1_IS_LNW80) and true;
