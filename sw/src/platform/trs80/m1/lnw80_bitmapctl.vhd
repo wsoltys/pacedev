@@ -39,8 +39,10 @@ begin
 		--variable hblank_r		: std_logic_vector(DELAY-1 downto 0);
 		alias hblank_prev		  : std_logic is hblank_r(hblank_r'left);
 		alias hblank_v			  : std_logic is hblank_r(hblank_r'left-1);
-		variable hcount       : std_logic_vector(8 downto 0);
-		variable vcount			  : std_logic_vector(8 downto 0);
+    variable chr_v        : integer range 0 to 79;
+		variable pixel_v      : integer range 0 to 5;
+		variable row_v			  : integer range 0 to 11;
+		variable line_v			  : integer range 0 to 15;
 		variable bitmap_d_v   : std_logic_vector(7 downto 0) := (others => '0');
 		
   begin
@@ -55,29 +57,46 @@ begin
 
         -- handle vertical count
         if vblank = '1' then
-          vcount := (others => '0');
+          row_v := 0;
+          line_v := 0;
         elsif hblank_v = '1' and hblank_prev = '0' then
-          vcount := vcount + 1;
+          if row_v = 11 then
+            line_v := line_v + 1;
+            row_v := 0;
+          else
+            row_v := row_v + 1;
+          end if;
           -- fixed for the line
-          ctl_o.a(13 downto 6) <= 
-            vcount(6+PACE_VIDEO_V_SCALE downto -1+PACE_VIDEO_V_SCALE);
+          ctl_o.a(11 downto 10) <= std_logic_vector(to_unsigned(row_v,4))(1 downto 0);
+          ctl_o.a(9 downto 6) <= std_logic_vector(to_unsigned(line_v,4));
+          --vcount(6+PACE_VIDEO_V_SCALE downto -1+PACE_VIDEO_V_SCALE);
         end if;
 
         -- handle horiztonal count (part 1)
         if hblank = '1' then
-          hcount := (others => '0');
+          chr_v := 0;
+          pixel_v := 0;
         end if;
       
         -- 1st stage of pipeline
         -- - read tile from tilemap
         if stb = '1' then
-          ctl_o.a(5 downto 0) <= hcount(8 downto 3);
+          if chr_v < 64 then
+            -- "inner" region
+            ctl_o.a(13 downto 12) <= std_logic_vector(to_unsigned(row_v,4))(3 downto 2);
+            ctl_o.a(5 downto 0) <= std_logic_vector(to_unsigned(chr_v,7))(5 downto 0);
+          else
+            -- "outer" region
+            ctl_o.a(13 downto 12) <= "11";
+            ctl_o.a(5 downto 4) <= std_logic_vector(to_unsigned(row_v,4))(3 downto 2);
+            ctl_o.a(3 downto 0) <= std_logic_vector(to_unsigned(chr_v,7))(3 downto 0);
+          end if;
         end if;
 
         -- 2nd stage of pipeline
         -- - latch bitmap data
         -- (each byte contains information for 8 pixels)
-        if hcount(2 downto 0) = "101" then
+        if pixel_v = 5 then
           bitmap_d_v := ctl_i.d;
         end if;
 
@@ -90,10 +109,10 @@ begin
         if stb = '1' then
           bitmap_d_v := '0' & bitmap_d_v(bitmap_d_v'left downto 1);
           -- handle horiztonal count (part 2)
-          if hcount(2 downto 0) = "101" then
-            hcount := hcount + 3;
+          if pixel_v = 5 then
+            pixel_v := 0;
           else
-            hcount := hcount + 1;
+            pixel_v := pixel_v + 1;
           end if;
         end if;
         

@@ -27,7 +27,7 @@ package project_pkg is
   constant PACE_CLK1_DIVIDE_BY              : natural := 24;
   constant PACE_CLK1_MULTIPLY_BY            : natural := 25; 	-- 24*25/24 = 25MHz
 	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
-	constant PACE_VIDEO_V_SCALE       	      : integer := 2;
+	constant PACE_VIDEO_V_SCALE       	      : integer := 1;
   constant PACE_ENABLE_ADV724					      : std_logic := '0';
   constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';
   constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '1';
