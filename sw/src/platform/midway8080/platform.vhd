@@ -41,8 +41,8 @@ entity platform is
 
     -- graphics
     
-    bitmap_i        : in from_BITMAP_CTL_t;
-    bitmap_o        : out to_BITMAP_CTL_t;
+    bitmap_i        : in from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
+    bitmap_o        : out to_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
     
     tilemap_i       : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
     tilemap_o       : out to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
@@ -305,8 +305,8 @@ begin
   end process;
 
 	-- old vram mapper logic
-  bitmap_addr_rotated(4 downto 0) <= not bitmap_i.a(12 downto 8);
-  bitmap_addr_rotated(12 downto 5) <= bitmap_i.a(7 downto 0) + 32;
+  bitmap_addr_rotated(4 downto 0) <= not bitmap_i(1).a(12 downto 8);
+  bitmap_addr_rotated(12 downto 5) <= bitmap_i(1).a(7 downto 0) + 32;
 
 	-- this will probably require adjustment
 	--xcentre <= std_logic_vector(conv_unsigned(0, xcentre'length));
@@ -432,7 +432,7 @@ begin
 	        clock_a     => clk_video,
 	        address_a   => bitmap_addr_rotated,
       		data_a      => (others => '0'),
-	        q_a					=> bitmap_o.d,
+	        q_a					=> bitmap_o(1).d,
       		wren_a			=> '0'
 	    );
 

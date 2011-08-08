@@ -12,8 +12,9 @@ use work.platform_pkg.all;
 entity pace_video_mixer is
   port
   (
-      bitmap_rgb    : in RGB_t;
-      bitmap_set    : in std_logic;
+      --bitmap_rgb    : in RGB_t;
+      --bitmap_set    : in std_logic;
+		bitmap_ctl_o  : in from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
       tilemap_ctl_o : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
       sprite_rgb    : in RGB_t;
       sprite_set    : in std_logic;
@@ -29,17 +30,19 @@ architecture SYN of pace_video_mixer is
   signal tilemap_rgb : RGB_t;
 begin
 
+	-- Code below assumes only 1 bitmap active.
+	-- Will need to customise for any other combinations
   GEN_0_TILEMAP : if PACE_VIDEO_NUM_TILEMAPS = 0 generate
     rgb_o <=  sprite_rgb when sprite_set = '1' and sprite_pri = '1' else
               sprite_rgb when sprite_set = '1' else
-              bitmap_rgb;
+              bitmap_ctl_o(1).rgb;
   end generate GEN_0_TILEMAP;
   
   GEN_1_TILEMAP : if PACE_VIDEO_NUM_TILEMAPS = 1 generate
     rgb_o <=  sprite_rgb when sprite_set = '1' and sprite_pri = '1' else
               tilemap_ctl_o(1).rgb when tilemap_ctl_o(1).set = '1' else
               sprite_rgb when sprite_set = '1' else
-              bitmap_rgb;
+              bitmap_ctl_o(1).rgb;
   end generate GEN_1_TILEMAP;
 
   GEN_2_TILEMAPS : if PACE_VIDEO_NUM_TILEMAPS = 2 generate
@@ -47,7 +50,7 @@ begin
               tilemap_ctl_o(1).rgb when tilemap_ctl_o(1).set = '1' else
               tilemap_ctl_o(2).rgb when tilemap_ctl_o(2).set = '1' else
               sprite_rgb when sprite_set = '1' else
-              bitmap_rgb;
+              bitmap_ctl_o(1).rgb;
   end generate GEN_2_TILEMAPS;
   
 end architecture SYN;
