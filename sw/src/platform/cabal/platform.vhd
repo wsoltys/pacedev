@@ -40,11 +40,11 @@ entity platform is
     
     -- graphics
     
-    bitmap_i        : in from_BITMAP_CTL_t;
-    bitmap_o        : out to_BITMAP_CTL_t;
+    bitmap_i        : in from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
+    bitmap_o        : out to_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
     
-    tilemap_i       : in from_TILEMAP_CTL_t;
-    tilemap_o       : out to_TILEMAP_CTL_t;
+    tilemap_i       : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
+    tilemap_o       : out to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
 
     sprite_reg_o    : out to_SPRITE_REG_t;
     sprite_i        : in from_SPRITE_CTL_t;
@@ -173,40 +173,40 @@ architecture SYN of platform is
 	signal reset_n				: std_logic;
   signal cpu_reset_n    : std_logic;
   signal cpu_reset_out_en : std_logic;
-  signal up_addr_ext    : std_logic_vector(31 downto 0);
-  alias up_addr         : std_logic_vector(23 downto 1) is up_addr_ext(23 downto 1);
-  signal up_datai       : std_logic_vector(15 downto 0);
-  signal up_datao       : std_logic_vector(15 downto 0);
-  signal up_rwn					: std_logic;
-  signal uPnmireq       : std_logic;
+  signal cpu_a_ext      : std_logic_vector(31 downto 0);
+  alias cpu_a           : std_logic_vector(23 downto 1) is cpu_a_ext(23 downto 1);
+  signal cpu_d_i        : std_logic_vector(15 downto 0);
+  signal cpu_d_o        : std_logic_vector(15 downto 0);
+  signal cpu_rwn				: std_logic;
+  signal cpu_nmireq     : std_logic;
 	                        
   -- ROM signals        
 	signal rom_cs					: std_logic;
-  signal rom_datao      : std_logic_vector(15 downto 0);
+  signal rom_d_o        : std_logic_vector(15 downto 0);
                         
   -- keyboard signals
 	                        
   -- VRAM (text) signals       
 	signal tram_cs				: std_logic;
 	signal tram_wr				: std_logic;
-  signal tram_datao     : std_logic_vector(15 downto 0);
+  signal tram_d_o       : std_logic_vector(15 downto 0);
 
 	-- VARM (background) signals
 	signal bgram_cs				: std_logic;
 	signal bgram_wr				: std_logic;
-	signal bgram_datao		: std_logic_vector(15 downto 0);
+	signal bgram_d_o		  : std_logic_vector(15 downto 0);
 	                        
   -- RAM signals        
   signal wram_cs        : std_logic;
-  signal wram_datao     : std_logic_vector(15 downto 0);
+  signal wram_d_o       : std_logic_vector(15 downto 0);
 
   -- RAM signals        
   signal cram_cs        : std_logic;
   signal cram_wr        : std_logic;
 	signal cram0_wr				: std_logic;
 	signal cram1_wr				: std_logic;
-	signal cram0_datao		: std_logic_vector(7 downto 0);
-	signal cram1_datao		: std_logic_vector(7 downto 0);
+	signal cram0_d_o		  : std_logic_vector(7 downto 0);
+	signal cram1_d_o		  : std_logic_vector(7 downto 0);
 	
   -- interrupt signals
   signal cpu_ipl_n			: std_logic_vector(2 downto 0);
@@ -229,55 +229,58 @@ begin
 	reset_n <= not (clkrst_i.arst or game_reset);
 	
   -- SRAM signals (may or may not be used)
-  sram_o.a <= std_logic_vector(resize(unsigned(up_addr), sram_o.a'length));
-  sram_o.d <= std_logic_vector(resize(unsigned(up_datao), sram_o.d'length));
+  sram_o.a <= std_logic_vector(resize(unsigned(cpu_a), sram_o.a'length));
+  sram_o.d <= std_logic_vector(resize(unsigned(cpu_d_o), sram_o.d'length));
 	sram_o.be(3 downto 2) <= (others => '0');
 	sram_o.be(1) <= '1' when (udsn_en = '1' and udsn = '0') else '0';
 	sram_o.be(0) <= '1' when (ldsn_en = '1' and ldsn = '0') else '0';
   sram_o.cs <= '1';
-  sram_o.oe <= (rom_cs or wram_cs) and up_rwn;
-  sram_o.we <= wram_cs and not up_rwn;
+  sram_o.oe <= (rom_cs or wram_cs) and cpu_rwn;
+  sram_o.we <= wram_cs and not cpu_rwn;
 
 	-- only signal write when rwn enabled
-	up_rwn <= '0' when (rwn_en = '1' and rwn = '0') else '1';
+	cpu_rwn <= '0' when (rwn_en = '1' and rwn = '0') else '1';
 	
 	-- chipselect signals
-	-- - note: up_addr _doesn't_ include bit 0
+	-- - note: cpu_a _doesn't_ include bit 0
 	-- ROM $000000-$03FFFF (256KB)
-	rom_cs <= 		'1' when STD_MATCH(up_addr, X"0"&"00-----------------") else '0';
+	rom_cs <= 		'1' when STD_MATCH(cpu_a, X"0"&"00-----------------") else '0';
 	-- RAM $040000-$04FFFF (64KB)
-	wram_cs <= 		'1' when STD_MATCH(up_addr,    X"04"&"---------------") else '0';
+	wram_cs <= 		'1' when STD_MATCH(cpu_a,    X"04"&"---------------") else '0';
 	-- TEXT RAM $060000-$0607FF (2KB)
-	tram_cs <= 		'1' when STD_MATCH(up_addr,       X"060"&"0----------") else '0';
+	tram_cs <= 		'1' when STD_MATCH(cpu_a,       X"060"&"0----------") else '0';
 	-- BACKGROUND RAM $080000-$0803FF (1KB)
-	bgram_cs <=		'1' when STD_MATCH(up_addr,       X"080"&"00---------") else '0';
+	bgram_cs <=		'1' when STD_MATCH(cpu_a,       X"080"&"00---------") else '0';
 	-- dipswitches $0A0000-$0A0001 (1 word)
-	dips_cs <= 		'1' when STD_MATCH(up_addr,             X"0A000"&"000") else '0';
+	dips_cs <= 		'1' when STD_MATCH(cpu_a,             X"0A000"&"000") else '0';
 	-- trackball(s) $0A0008-$0A000F (4 words)
-	track_cs <= 	'1' when STD_MATCH(up_addr,             X"0A000"&"1--") else '0';
+	track_cs <= 	'1' when STD_MATCH(cpu_a,             X"0A000"&"1--") else '0';
 	-- input port 0 $0A0010-$0A0011 (1 word)
-	inport0_cs <= '1' when STD_MATCH(up_addr,             X"0A001"&"000") else '0';
+	inport0_cs <= '1' when STD_MATCH(cpu_a,             X"0A001"&"000") else '0';
 	-- seibu comms $0E8000-$0E800D
-	seibu_cs <= 	'1' when STD_MATCH(up_addr,             X"0E800"&"---") else '0';
+	seibu_cs <= 	'1' when STD_MATCH(cpu_a,             X"0E800"&"---") else '0';
 	
 	-- write signals
-	tram_wr <= tram_cs and not up_rwn;
-	bgram_wr <= bgram_cs and not up_rwn;
-	
-	rom_datao <= sram_i.d(rom_datao'range);
-	wram_datao <= sram_i.d(wram_datao'range);
+	tram_wr <= tram_cs and not cpu_rwn;
+	bgram_wr <= bgram_cs and not cpu_rwn;
+
+  GEN_ROM_IN_SRAM : if CABAL_ROM_IN_SRAM generate
+    rom_d_o <= sram_i.d(rom_d_o'range);
+  end generate GEN_ROM_IN_SRAM;
+  
+	wram_d_o <= sram_i.d(wram_d_o'range);
 	dips_datao <= X"7D70"; -- FreePlay, Easy etc
 	inport0_datao <= inputs_i(1).d & inputs_i(0).d; -- buttons
 			
 	-- read mux
-	up_datai <= rom_datao when rom_cs = '1' else
-							tram_datao when tram_cs = '1' else
-							bgram_datao when bgram_cs = '1' else
+	cpu_d_i <= rom_d_o when rom_cs = '1' else
+							tram_d_o when tram_cs = '1' else
+							bgram_d_o when bgram_cs = '1' else
 							dips_datao when dips_cs = '1' else
 							(others => '0') when track_cs = '1' else
 							inport0_datao when inport0_cs = '1' else
 							(others => '1') when seibu_cs = '1' else
-							wram_datao;
+							wram_d_o;
 
   -- graphics subsystem values		
 
@@ -323,8 +326,8 @@ begin
 			
 			-- acknowlegement cycle
 			-- note that DTACK, and AVECn should never be asserted simultaneously
-			--elsif cpu_fc = "111" and cpu_fc_en = '1' and up_addr(19 downto 16) = "1111" then
-			if cpu_fc = "111" and cpu_fc_en = '1' and up_addr(3 downto 1) = "001" then
+			--elsif cpu_fc = "111" and cpu_fc_en = '1' and cpu_a(19 downto 16) = "1111" then
+			if cpu_fc = "111" and cpu_fc_en = '1' and cpu_a(3 downto 1) = "001" then
 				cpu_ipl_n <= (others => '1'); -- reset interrupt source
 				dtackn <= '1';
 			else
@@ -336,7 +339,7 @@ begin
 	end process;
 
   -- unused outputs
-  bitmap_o <= NULL_TO_BITMAP_CTL;
+  --bitmap_o <= NULL_TO_BITMAP_CTL;
   sprite_reg_o <= NULL_TO_SPRITE_REG;
   sprite_o <= NULL_TO_SPRITE_CTL;
   graphics_o <= NULL_TO_GRAPHICS;
@@ -359,10 +362,10 @@ begin
 				RESET_COREn		=> cpu_reset_n,
 				
 				-- Address and data:
-				ADR_OUT				=> up_addr,
+				ADR_OUT				=> cpu_a,
 				ADR_EN				=> open,
-				DATA_IN				=> up_datai,
-				DATA_OUT			=> up_datao,
+				DATA_IN				=> cpu_d_i,
+				DATA_OUT			=> cpu_d_o,
 				DATA_EN				=> data_en,
 
 				-- System control:
@@ -412,11 +415,11 @@ begin
 			clk           => clk_12M,
 			reset         => reset_n, -- active low
       clkena_in     => '1',
-      data_in       => up_datai,
+      data_in       => cpu_d_i,
       IPL           => cpu_ipl_n,
       dtack         => dtackn,
-      addr          => up_addr_ext,
-      data_out      => up_datao,
+      addr          => cpu_a_ext,
+      data_out      => cpu_d_o,
       as            => asn,
       uds           => udsn,
       lds           => ldsn,
@@ -432,28 +435,47 @@ begin
 
 	end generate GEN_TG68;
 	
+  GEN_INTERNAL_ROM : if not CABAL_ROM_IN_SRAM generate
+  
+    rom_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> CABAL_SRC_DIR & "roms/cabalus/maincpu.hex",
+        --numwords_a	=> 65536,
+        widthad_a		=> 15,
+        width_a     => 16
+      )
+      port map
+      (
+        clock				=> clk_video,
+        address			=> cpu_a(15 downto 1),
+        q						=> rom_d_o
+      );
+    
+  end generate GEN_INTERNAL_ROM;
+
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 	vram_text_inst : entity work.dpram
 		generic map
 		(
 			--init_file		=> CABAL_SRC_DIR & "roms/cabal_vram.hex",
-			numwords_a	=> 1024,
+			--numwords_a	=> 1024,
 			widthad_a		=> 10,
 			width_a			=> 16
 		)
 		port map
 		(
 			clock_b			=> clk_12M,
-			address_b		=> uP_addr(10 downto 1),
+			address_b		=> cpu_a(10 downto 1),
 			wren_b			=> tram_wr,
-			data_b			=> up_datao,
-			q_b					=> tram_datao,
+			data_b			=> cpu_d_o,
+			q_b					=> tram_d_o,
 
 			clock_a			=> clk_video,
-			address_a		=> tilemap_i.map_a(9 downto 0),
+			address_a		=> tilemap_i(1).map_a(9 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o.map_d
+			q_a					=> tilemap_o(1).map_d
 		);
 
 	GEN_BGRAM : if false generate
@@ -463,17 +485,17 @@ begin
 			generic map
 			(
 				init_file		=> CABAL_SRC_DIR & "roms/cabal_vram.hex",
-				numwords_a	=> 512,
+				--numwords_a	=> 512,
 				widthad_a		=> 9,
 				width_a			=> 16
 			)
 			port map
 			(
 				clock_b			=> clk_12M,
-				address_b		=> uP_addr(9 downto 1),
+				address_b		=> cpu_a(9 downto 1),
 				wren_b			=> bgram_wr,
-				data_b			=> up_datao,
-				q_b					=> bgram_datao,
+				data_b			=> cpu_d_o,
+				q_b					=> bgram_d_o,
 
 				clock_a			=> clk_video,
 				address_a		=> (others => 'X'),
@@ -488,14 +510,14 @@ begin
 		generic map
 		(
 			init_file		=> CABAL_SRC_DIR & "roms/cabal_chr.hex",
-			numwords_a	=> 16384,
+			--numwords_a	=> 16384,
 			widthad_a		=> 14
 		)
 		port map
 		(
 			clock				=> clk_video,
-			address			=> tilemap_i.tile_a(13 downto 0),
-			q						=> tilemap_o.tile_d
+			address			=> tilemap_i(1).tile_a(13 downto 0),
+			q						=> tilemap_o(1).tile_d
 		);
 
 end SYN;

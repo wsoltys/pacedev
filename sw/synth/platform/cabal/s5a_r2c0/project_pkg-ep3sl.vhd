@@ -28,6 +28,8 @@ package project_pkg is
 	constant PACE_VIDEO_H_SCALE         		  : integer := 2;
 	constant PACE_VIDEO_V_SCALE         		  : integer := 2;
 	constant PACE_ENABLE_ADV724							  : std_logic := '0';
+	constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '0';
+	constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '0';
 
 --  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1280x1024_60Hz;
 --  constant PACE_CLK0_DIVIDE_BY              : natural := 96;
@@ -56,14 +58,17 @@ package project_pkg is
 
   -- S5A-specific constants
   
+  constant S5AR2_DOUBLE_VDO_IDCK            : boolean := false;
+  
   constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 16;
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
     
-	-- Pacman-specific constants
+	-- Cabal-specific constants
 			
 	constant CABAL_USE_WF68K_CORE						  : boolean := false;
 	constant CABAL_USE_TG68_CORE						  : boolean := not CABAL_USE_WF68K_CORE;
-	
+  constant CABAL_ROM_IN_SRAM	              : boolean := false;
+  
 	-- derived - do not edit
 
   constant S5AR2_EMULATE_SRAM               : boolean := false;
