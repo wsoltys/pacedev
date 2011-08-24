@@ -40,8 +40,8 @@ entity platform is
 
     -- graphics
     
-    bitmap_i        : in from_BITMAP_CTL_t;
-    bitmap_o        : out to_BITMAP_CTL_t;
+    bitmap_i        : in from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
+    bitmap_o        : out to_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
     
     tilemap_i       : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
     tilemap_o       : out to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
@@ -231,7 +231,7 @@ begin
 	
   -- unused outputs
   flash_o <= NULL_TO_FLASH;
-	bitmap_o <= NULL_TO_BITMAP_CTL;
+	bitmap_o <= (others => NULL_TO_BITMAP_CTL);
 	graphics_o <= NULL_TO_GRAPHICS;
 	spi_o <= NULL_TO_SPI;
   ser_o <= NULL_TO_SERIAL;

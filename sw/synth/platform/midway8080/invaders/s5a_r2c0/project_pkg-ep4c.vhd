@@ -25,6 +25,8 @@ package project_pkg is
   constant S5AR2_DE_CNT                     : std_logic_vector(11 downto 0) := X"000";
   constant S5AR2_DE_LIN                     : std_logic_vector(11 downto 0) := X"000";
 
+  constant S5AR2_HAS_PS2                    : boolean := true;
+  
   --
 	-- Space Invaders-specific constants
 	--

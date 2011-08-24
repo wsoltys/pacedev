@@ -235,7 +235,9 @@ begin
   reset <= init; -- or not tp_84; --veb_reset;
 	reset_n <= not reset;
 
-  vid_reset_n <= dbgio(7);
+  GEN_VID_RESET : if not S5AR2_HAS_PS2 generate
+    vid_reset_n <= dbgio(7);
+  end generate GEN_VID_RESET;
   
   ep4c_pll_inst : entity work.ep4c_pll
     port map
@@ -267,6 +269,21 @@ begin
     -- DBGIO3* - 9 10 - DBGIO4
     --
 
+  -- this is the VEB Button Board (MCE-as-S5D@1)
+  -- - configured as PS/2 input
+  GEN_PS2 : if S5AR2_HAS_PS2 generate
+    alias ps2_kdat  : std_logic is vid_address(3);
+    alias ps2_mdat  : std_logic is vid_address(2);
+    alias ps2_kclk  : std_logic is vid_address(1);
+    alias ps2_mclk  : std_logic is vid_address(0);
+  begin
+    vid_reset_n <= '1';
+    ps2_kdat <= dbgio(5);
+    ps2_mdat <= dbgio(4);
+    ps2_kclk <= dbgio(7);
+    ps2_mclk <= dbgio(6);
+  end generate GEN_PS2;
+  
   BLK_DVO_INIT : block
 
     signal vdo_scl_i      : std_logic := '0';

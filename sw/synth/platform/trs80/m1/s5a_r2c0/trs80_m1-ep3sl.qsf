@@ -2237,6 +2237,8 @@ set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sdram_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/tilemapctl_e.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/bitmapctl_e.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/target_pkg_ep3sl.vhd
@@ -2258,7 +2260,6 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd_pk
 set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/inputmapper.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Inputs.VHD
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m1/trs80_interrupts.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/ocidec1/ro_cnt.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/ocidec1/ud_cnt.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/ocidec1/atahost_pio_tctrl.vhd
@@ -2268,8 +2269,8 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/ocidec
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m1/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/tilemapctl_e.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m1/bitmapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m1/le18_bitmapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m1/lnw80_bitmapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m3/tilemapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_mixer.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Graphics.VHD

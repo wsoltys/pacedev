@@ -280,11 +280,29 @@ begin
   --ledout <= leds_o(0);
   
   -- inputs
-  inputs_i.ps2_kclk <= '1';
-  inputs_i.ps2_kdat <= '1';
-  inputs_i.ps2_mclk <= '1';
-  inputs_i.ps2_mdat <= '1';
-
+  process (clkrst_i)
+    variable kdat_r : std_logic_vector(2 downto 0);
+    variable mdat_r : std_logic_vector(2 downto 0);
+    variable kclk_r : std_logic_vector(2 downto 0);
+    variable mclk_r : std_logic_vector(2 downto 0);
+  begin
+    if clkrst_i.rst(0) = '1' then
+      kdat_r := (others => '0');
+      mdat_r := (others => '0');
+      kclk_r := (others => '0');
+      mclk_r := (others => '0');
+    elsif rising_edge(clkrst_i.clk(0)) then
+      kdat_r := kdat_r(kdat_r'left-1 downto 0) & vid_address(3);
+      mdat_r := mdat_r(mdat_r'left-1 downto 0) & vid_address(2);
+      kclk_r := kclk_r(kclk_r'left-1 downto 0) & vid_address(1);
+      mclk_r := mclk_r(mclk_r'left-1 downto 0) & vid_address(0);
+    end if;
+    inputs_i.ps2_kdat <= kdat_r(kdat_r'left);
+    inputs_i.ps2_mdat <= mdat_r(mdat_r'left);
+    inputs_i.ps2_kclk <= kclk_r(kclk_r'left);
+    inputs_i.ps2_mclk <= mclk_r(mclk_r'left);
+  end process;
+  
   GEN_JAMMA : for i in 1 to 2 generate
     inputs_i.jamma_n.coin(i) <= '1';
     inputs_i.jamma_n.p(i).start <= '1';

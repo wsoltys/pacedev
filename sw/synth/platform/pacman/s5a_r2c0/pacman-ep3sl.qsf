@@ -2238,6 +2238,8 @@ set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sdram_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/bitmapctl_e.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/tilemapctl_e.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
@@ -2253,7 +2255,6 @@ set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/InputMappe
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_array.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/tilemapctl_e.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/tilemapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/spritereg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/spritectl.vhd
