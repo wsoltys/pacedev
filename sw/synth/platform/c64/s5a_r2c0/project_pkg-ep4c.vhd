@@ -34,4 +34,6 @@ package project_pkg is
   constant S5AR2_DE_LIN                       : std_logic_vector(11 downto 0) := X"1E0";  -- 480
   --constant S5AR2_DE_LIN                       : std_logic_vector(11 downto 0) := X"258";  -- 600
 
+  constant S5AR2_HAS_PS2                      : boolean := true;
+  
 end;
