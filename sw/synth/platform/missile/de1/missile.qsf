@@ -533,6 +533,7 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_Pack
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_MCode.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65_ALU.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t65/T65.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/sound/pokey/asteroids_pokey.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/missile/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd

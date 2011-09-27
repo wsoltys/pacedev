@@ -85,9 +85,12 @@ end platform;
 architecture SYN of platform is
 
 	alias clk_sys					: std_logic is clkrst_i.clk(0);
+	alias rst_sys					: std_logic is clkrst_i.rst(0);
 	alias clk_video       : std_logic is clkrst_i.clk(1);
-	signal cpu_reset      : std_logic;
-
+	signal cpu_reset_n    : std_logic;
+  signal wdog_rst       : std_logic;
+  signal platform_rst   : std_logic;
+  
   -- uP signals  
   signal clk_1M25_en		: std_logic;
   signal cpu_a_ext      : std_logic_vector(23 downto 0);
@@ -109,26 +112,33 @@ architecture SYN of platform is
                         
   -- RAM signals        
   signal pokey_cs       : std_logic;
-	signal wram_wr				: std_logic;
+	signal pokey_wr				: std_logic;
   signal pokey_d_o      : std_logic_vector(7 downto 0);
 
   -- other signals      
   signal in0_cs         : std_logic;
   signal in1_cs         : std_logic;
   signal in2_cs         : std_logic;
+  signal cram_cs        : std_logic;
+  signal wdog_cs        : std_logic;
+  signal irqack_cs      : std_logic;
   alias game_reset      : std_logic is inputs_i(inputs_i'high).d(0);
 
   -- not used (yet)
   signal wram_cs        : std_logic;
+  signal wram_wr        : std_logic;
+  signal wram_d_o       : std_logic_vector(7 downto 0);
 	
 begin
 
-  cpu_reset <= clkrst_i.rst(0) or game_reset;
+  -- reset logic
+  platform_rst <= clkrst_i.rst(0) or wdog_rst;
+  cpu_reset_n <= not (platform_rst or game_reset);
 
 	GEN_EXTERNAL_WRAM : if PACE_HAS_SRAM generate
 	  -- SRAM signals (may or may not be used)
 	  sram_o.a <= std_logic_vector(resize(unsigned(cpu_a), sram_o.a'length));
-		pokey_d_o <= sram_i.d(pokey_d_o'range);
+		wram_d_o <= sram_i.d(wram_d_o'range);
 	  sram_o.d <= std_logic_vector(resize(unsigned(cpu_d_o), sram_o.d'length));
 		sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
 	  sram_o.cs <= '1';
@@ -154,6 +164,12 @@ begin
   in1_cs <= '1' when cpu_a(14 downto 8) = "1001001" else '0';
 	-- IN2 $4A00-$4AFF
   in2_cs <= '1' when cpu_a(14 downto 8) = "1001010" else '0';
+  -- CRAM $4B00-$4BFF
+  cram_cs <= '1' when cpu_a(14 downto 8) = "1001011" else '0';
+  -- WDOG $4C00-$4CFF
+  wdog_cs <= '1' when cpu_a(14 downto 8) = "1001100" else '0';
+  -- IRQACK $4D00-$4DFF
+  irqack_cs <= '1' when cpu_a(14 downto 8) = "1001101" else '0';
 	-- ROM $5000-$7FFF,$D000-$FFFF
   rom_cs <= '1' when (cpu_a(14 downto 12) = "101" or cpu_a(14 downto 13) = "11") else '0';
 
@@ -166,9 +182,9 @@ begin
               rom_d_o when rom_cs = '1' else
 							(others => 'X');
 	
-	-- ram write enables
-	vram_wr <= vram_cs and cpu_r_wn;
-	wram_wr <= wram_cs and cpu_r_wn;
+	-- ram block write enables
+	vram_wr <= vram_cs and not cpu_r_wn;
+	wram_wr <= wram_cs and not cpu_r_wn;
 
 	snd_o.wr <= '0';
 	snd_o.a <= cpu_a(snd_o.a'range);
@@ -200,7 +216,7 @@ begin
 		port map
 		(
 			Mode    		=> "00",	-- 6502
-			Res_n   		=> clkrst_i.arst_n,
+			Res_n   		=> cpu_reset_n,
 			Enable  		=> clk_1M25_en,
 			Clk     		=> clk_sys,
 			Rdy     		=> '1',
@@ -222,6 +238,75 @@ begin
 			DO      		=> cpu_d_o
 		);
 
+  pokey : entity work.ASTEROIDS_POKEY
+    port map 
+    (
+      ADDR      => cpu_a(3 downto 0),
+      DIN       => cpu_d_o,
+      DOUT      => pokey_d_o,
+      DOUT_OE_L => open,
+      RW_L      => cpu_r_wn,
+      CS        => pokey_cs,
+      CS_L      => '0',
+      --
+      AUDIO_OUT => open,
+      --
+      PIN       => (others => '0'),
+      ENA       => clk_1M25_en,
+      CLK       => clk_sys
+    );
+
+  -- watchdog
+  -- - 8 vblank interrupts triggers reset
+  process (clk_sys, rst_sys)
+    variable wdog_cnt   : integer range 0 to 8;
+    variable vblank_r   : std_logic_vector(4 downto 0);
+    alias vblank_prev   : std_logic is vblank_r(vblank_r'left);
+    alias vblank_um     : std_logic is vblank_r(vblank_r'left-1);
+  begin
+    if rst_sys = '1' then
+      wdog_rst <= '0';
+      wdog_cnt := wdog_cnt'high;
+      vblank_r := (others => '0');
+    elsif rising_edge(clk_sys) then
+      if clk_1M25_en = '1' then
+        -- reset asserted for 1 clock
+        if wdog_rst = '1' then
+          wdog_rst <= '0';
+          wdog_cnt := wdog_cnt'high;
+        -- kicking has precedence over reset
+        elsif wdog_cs = '1' and cpu_r_wn = '0' then
+          wdog_cnt := wdog_cnt'high;
+        elsif vblank_prev = '0' and vblank_um = '1' then
+          -- decrement watchdog counter
+          if wdog_cnt = 0 then
+            wdog_rst <= '1';
+          else
+            wdog_cnt := wdog_cnt - 1;
+          end if;
+        end if;
+        -- unmeta VBLANK
+        vblank_r := vblank_r(vblank_r'left-1 downto 0) & graphics_i.vblank;
+      end if; -- clk_1M25_en
+    end if;
+  end process;
+  
+  -- interrupts
+  process (clk_sys, rst_sys)
+  begin
+    if rst_sys = '1' then
+      cpu_irq_n <= '1';
+    elsif rising_edge(clk_sys) then
+      if clk_1M25_en = '1' then
+        -- IRQ generation has priority over clear
+        if false then
+        elsif irqack_cs = '1' and cpu_r_wn = '0' then
+          cpu_irq_n <= '1';
+        end if;
+      end if;
+    end if;
+  end process;
+  
   GEN_INTERNAL_ROM : if not MISSILE_ROM_IN_SRAM generate
     rom_inst : entity work.prg_rom
       port map
@@ -232,6 +317,19 @@ begin
       );
   end generate GEN_INTERNAL_ROM;
 
+  -- colour ram
+  process (clk_sys, rst_sys)
+  begin
+    if rst_sys = '1' then
+    elsif rising_edge(clk_sys) then
+      if clk_1M25_en = '1' then
+        if cram_cs = '1' and cpu_r_wn = '0' then
+          -- set palette RAM value
+        end if;
+      end if;
+    end if;
+  end process;
+  
   GEN_SRAM_ROM : if MISSILE_ROM_IN_SRAM generate
     rom_d_o <= sram_i.d(rom_d_o'range);
   end generate GEN_SRAM_ROM;
@@ -263,7 +361,7 @@ begin
 				address			=> cpu_a(9 downto 0),
 				data				=> cpu_d_o,
 				wren				=> wram_wr,
-				q						=> pokey_d_o
+				q						=> wram_d_o
 			);
 	
 	end generate GEN_INTERNAL_WRAM;
