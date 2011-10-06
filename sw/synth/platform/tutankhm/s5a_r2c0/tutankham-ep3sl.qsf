@@ -2244,7 +2244,7 @@ set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controlle
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2c0/target_pkg_ep3sl.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/tutankhm/platform_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/tutankhm/platform_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/tutankhm/tutankham/platform_variant_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../device/stratixiii/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../device/stratixiii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../device/stratixiii/dpram.vhd

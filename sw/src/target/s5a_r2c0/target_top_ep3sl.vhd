@@ -481,6 +481,8 @@ begin
     end process;
   end block BLK_CHASER;
 
+  vid_data(7 downto 0) <= leds_o(7 downto 0);
+  
   --vid_spare(31 downto 10) <= (others => 'Z');
   -- route the leds to the cyclone
   --vid_spare(9) <= '1';  -- don't care

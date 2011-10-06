@@ -10,6 +10,7 @@ use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
 use work.target_pkg.all;
 use work.platform_pkg.all;
+use work.platform_variant_pkg.all;
 use work.project_pkg.all;
 
 entity platform is
@@ -434,11 +435,21 @@ begin
 	end generate GEN_SRAM_ROMS;
 	
 	GEN_FPGA_ROMS : if not TUTANKHAM_ROMS_IN_SRAM generate
-	
+    signal data_9000_c1   : std_logic_vector(7 downto 0);
+    signal data_9000_c2   : std_logic_vector(7 downto 0);
+    signal data_9000_c3   : std_logic_vector(7 downto 0);
+    signal data_9000_c4   : std_logic_vector(7 downto 0);
+    signal data_9000_c5   : std_logic_vector(7 downto 0);
+    signal data_9000_c6   : std_logic_vector(7 downto 0);
+    signal data_9000_c7   : std_logic_vector(7 downto 0);
+    signal data_9000_c8   : std_logic_vector(7 downto 0);
+    signal data_9000_c9   : std_logic_vector(7 downto 0);
+	begin
     rom_C000_inst : entity work.sprom
       generic map
       (
-        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & "roms/romC000.hex",
+        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT & 
+                        "/roms/romC000.hex",
         numwords_a	=> 16384,
         widthad_a		=> 14
       )
@@ -452,7 +463,8 @@ begin
     rom_A000_inst : entity work.sprom
       generic map
       (
-        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & "roms/romA000.hex",
+        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
+                        "/roms/romA000.hex",
         numwords_a	=> 8192,
         widthad_a		=> 13
       )
@@ -463,10 +475,11 @@ begin
         q					=> rom_a_data
       );
     
-    rom_j1_inst : entity work.sprom
+    rom_c1_inst : entity work.sprom
       generic map
       (
-        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & "roms/j1.hex",
+        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
+                        "/roms/c1.hex",
         numwords_a	=> 4096,
         widthad_a		=> 12
       )
@@ -474,16 +487,148 @@ begin
       (
         clock			=> clk_30M,
         address		=> cpu_addr(11 downto 0),
-        q					=> data_9000
+        q					=> data_9000_c1
       );
 		
+    rom_c2_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
+                        "/roms/c2.hex",
+        numwords_a	=> 4096,
+        widthad_a		=> 12
+      )
+      port map
+      (
+        clock			=> clk_30M,
+        address		=> cpu_addr(11 downto 0),
+        q					=> data_9000_c2
+      );
+		
+    rom_c3_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
+                        "/roms/c3.hex",
+        numwords_a	=> 4096,
+        widthad_a		=> 12
+      )
+      port map
+      (
+        clock			=> clk_30M,
+        address		=> cpu_addr(11 downto 0),
+        q					=> data_9000_c3
+      );
+		
+    rom_c4_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
+                        "/roms/c4.hex",
+        numwords_a	=> 4096,
+        widthad_a		=> 12
+      )
+      port map
+      (
+        clock			=> clk_30M,
+        address		=> cpu_addr(11 downto 0),
+        q					=> data_9000_c4
+      );
+		
+    rom_c5_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
+                        "/roms/c5.hex",
+        numwords_a	=> 4096,
+        widthad_a		=> 12
+      )
+      port map
+      (
+        clock			=> clk_30M,
+        address		=> cpu_addr(11 downto 0),
+        q					=> data_9000_c5
+      );
+		
+    rom_c6_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
+                        "/roms/c6.hex",
+        numwords_a	=> 4096,
+        widthad_a		=> 12
+      )
+      port map
+      (
+        clock			=> clk_30M,
+        address		=> cpu_addr(11 downto 0),
+        q					=> data_9000_c6
+      );
+		
+    rom_c7_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
+                        "/roms/c7.hex",
+        numwords_a	=> 4096,
+        widthad_a		=> 12
+      )
+      port map
+      (
+        clock			=> clk_30M,
+        address		=> cpu_addr(11 downto 0),
+        q					=> data_9000_c7
+      );
+		
+    rom_c8_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
+                        "/roms/c8.hex",
+        numwords_a	=> 4096,
+        widthad_a		=> 12
+      )
+      port map
+      (
+        clock			=> clk_30M,
+        address		=> cpu_addr(11 downto 0),
+        q					=> data_9000_c8
+      );
+		
+    rom_c9_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
+                        "/roms/c9.hex",
+        numwords_a	=> 4096,
+        widthad_a		=> 12
+      )
+      port map
+      (
+        clock			=> clk_30M,
+        address		=> cpu_addr(11 downto 0),
+        q					=> data_9000_c9
+      );
+
+    data_9000 <=  data_9000_c1 when bank_r = X"0" else
+                  data_9000_c2 when bank_r = X"1" else
+                  data_9000_c3 when bank_r = X"2" else
+                  data_9000_c4 when bank_r = X"3" else
+                  data_9000_c5 when bank_r = X"4" else
+                  data_9000_c6 when bank_r = X"5" else
+                  data_9000_c7 when bank_r = X"6" else
+                  data_9000_c8 when bank_r = X"7" else
+                  data_9000_c9 when bank_r = X"8" else
+                  (others => 'Z');
+                  
 	end generate GEN_FPGA_ROMS;
 	
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 	vram0_inst : entity work.dpram
 		generic map
 		(
-			init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & "roms/vram.hex",
+			init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
+                      "/roms/vram.hex",
 			numwords_a	=> TUTANKHAM_VRAM_SIZE,
 			widthad_a		=> TUTANKHAM_VRAM_WIDTHAD
 		)

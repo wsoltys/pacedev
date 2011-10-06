@@ -179,7 +179,7 @@ entity target_top_ep4c is
     
     -- debug header
     -- elements 1,3,5 are virtual pins because fitter barfs
-    dbgio           : in std_logic_vector(7 downto 0);
+    dbgio           : inout std_logic_vector(7 downto 0);
     
     -- test points (default to in)
 		tp82            : in std_logic;
@@ -282,6 +282,7 @@ begin
     ps2_mdat <= dbgio(4);
     ps2_kclk <= dbgio(7);
     ps2_mclk <= dbgio(6);
+    dbgio(7 downto 4) <= (others => 'Z');
   end generate GEN_PS2;
   
   BLK_DVO_INIT : block
@@ -361,15 +362,22 @@ begin
   -- leds from the EP3SL
   --dbgled(8 downto 5) <= vid_spare(8 downto 5);
   
+  BLK_LEDS : block
+    signal leds_o : std_logic_vector(7 downto 0);
+  begin
+    vid_data <= (others => '0');
+    leds_o <= vid_data(7 downto 0);
+  end block BLK_LEDS;
+  
 	BLK_CHASER : block
 
 		signal chaseen        : std_logic;
 		signal pwmen	        : std_logic;
-		signal ledout					: std_logic_vector(4 downto 0);
+		signal ledout					: std_logic_vector(3 downto 0);
 
 	begin
 	  pchaser: entity work.pwm_chaser
-			generic map(nleds  => 5, nbits => 8, period => 4, hold_time => 12)
+			generic map(nleds  => 4, nbits => 8, period => 4, hold_time => 12)
 			port map (clk => clk_24M, clk_en => chaseen, pwm_en => pwmen, reset => reset, fade => X"0F", ledout => ledout);
 			
 		-- Generate pwmen pulse every 256 clocks, chase pulse every 256k clocks
@@ -399,6 +407,10 @@ begin
 		end process;
 
     --dbgled(4 downto 0) <= not ledout;
+    dbgio(3) <= ledout(3);
+    dbgio(2) <= ledout(2);
+    dbgio(1) <= ledout(1);
+    dbgio(0) <= ledout(0);
 
 	end block BLK_CHASER;
 

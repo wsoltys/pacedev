@@ -34,7 +34,7 @@ package platform_pkg is
 	constant TUTANKHAM_CPU_CLK_ENA_DIVIDE_BY	: natural := 
     CLK0_FREQ_MHz * 2 / 3;
 
-  constant TUTANKHAM_SOURCE_ROOT_DIR        : string;
+  constant TUTANKHAM_SOURCE_ROOT_DIR        : string := "../../../../../src/platform/tutankhm/";
 
   type from_PLATFORM_IO_t is record
     -- to connect to real 6809
