@@ -20,8 +20,7 @@ entity platform is
   port
   (
     -- clocking and reset
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -41,11 +40,11 @@ entity platform is
 
     -- graphics
     
-    bitmap_i        : in from_BITMAP_CTL_t;
-    bitmap_o        : out to_BITMAP_CTL_t;
+    bitmap_i        : in from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
+    bitmap_o        : out to_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
     
-    tilemap_i       : in from_TILEMAP_CTL_t;
-    tilemap_o       : out to_TILEMAP_CTL_t;
+    tilemap_i       : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
+    tilemap_o       : out to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
 
     sprite_reg_o    : out to_SPRITE_REG_t;
     sprite_i        : in from_SPRITE_CTL_t;
@@ -87,8 +86,8 @@ architecture SYN of platform is
 
 	constant TUTANKHAM_VRAM_SIZE		: integer := 2**TUTANKHAM_VRAM_WIDTHAD;
 
-	alias clk_30M					: std_logic is clk_i(0);
-	alias clk_video       : std_logic is clk_i(1);
+	alias clk_30M					: std_logic is clkrst_i.clk(0);
+	alias clk_video       : std_logic is clkrst_i.clk(1);
 	signal cpu_reset			: std_logic;
 
 	alias video_counter		: std_logic_vector(7 downto 0) is graphics_i.y(7 downto 0);
@@ -154,13 +153,13 @@ begin
 	clk_1M5_en_n <= not clk_1M5_en;
 
 	-- add game reset later
-	cpu_reset <= reset_i or game_reset;
+	cpu_reset <= clkrst_i.rst(0) or game_reset;
 	
   -- SRAM signals (may or may not be used)
   sram_o.a(sram_o.a'left downto 17) <= (others => '0');
   sram_o.a(16 downto 0) <= -- Graphics ROM starts at $10000 in 4KB banks - mapped to $9000
-						('1' & bank_r & cpu_addr(11 downto 0)) when data_9_cs = '1' else
-						std_logic_vector(resize(unsigned(cpu_addr), 17));
+          ('1' & bank_r & cpu_addr(11 downto 0)) when data_9_cs = '1' else
+          std_logic_vector(resize(unsigned(cpu_addr), 17));
   sram_o.d <= std_logic_vector(resize(unsigned(cpu_data_o), sram_o.d'length));
   sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
   sram_o.cs <= '1';
@@ -241,13 +240,13 @@ begin
 	end process;
 	
 	-- implementation of scroll register
-	process (clk_30M, reset_i)
+	process (clk_30M, clkrst_i.rst(0))
 	begin
-		if reset_i = '1' then
-			graphics_o.bit8_1 <= (others => '0');
+		if clkrst_i.rst(0) = '1' then
+			graphics_o.bit8(0) <= (others => '0');
 		elsif rising_edge(clk_30M) and clk_1M5_en = '1' then
 			if cpu_rw = '0' and STD_MATCH(cpu_addr, X"8100") then
-				graphics_o.bit8_1 <= cpu_data_o;
+				graphics_o.bit8(0) <= cpu_data_o;
 			end if;
 		end if;
 	end process;
@@ -282,7 +281,7 @@ begin
 	end process;
 	
 	-- vblank interrupt at 30Hz
-	process (clk_30M, reset_i)
+	process (clk_30M, clkrst_i.rst(0))
 		variable toggle_v 	: std_logic := '0';
 		variable vblank_r		: std_logic_vector(2 downto 0) := (others => '0');
 		alias vblank_prev 	: std_logic is vblank_r(vblank_r'left);
@@ -290,7 +289,7 @@ begin
 		subtype count_t is integer range 0 to 7;
 		variable count			: count_t;
 	begin
-		if reset_i = '1' then
+		if clkrst_i.rst(0) = '1' then
 			toggle_v := '0';
 			vblank_r := (others => '0');
 			cpu_irq <= '0';
@@ -322,10 +321,10 @@ begin
 
   -- unused outputs
   flash_o <= NULL_TO_FLASH;
-  tilemap_o <= NULL_TO_TILEMAP_CTL;
+  tilemap_o <= (others => NULL_TO_TILEMAP_CTL);
   sprite_reg_o <= NULL_TO_SPRITE_REG;
   sprite_o <= NULL_TO_SPRITE_CTL;
-  graphics_o.bit16_1 <= (others => '0');
+  graphics_o.bit16(0) <= (others => '0');
   osd_o <= NULL_TO_OSD;
   snd_o <= NULL_TO_SOUND;
   spi_o <= NULL_TO_SPI;
@@ -342,7 +341,7 @@ begin
       port map
       (
         clk				=> clk_30M,
-        reset			=> reset_i,
+        reset			=> clkrst_i.rst(0),
         clk_en		=> clk_1M5_en
       );
 		
@@ -363,21 +362,23 @@ begin
         nmi				=> cpu_nmi
       );
 
+    wram_data <= sram_i.d(7 downto 0);
+    
   end generate GEN_CPU09;
   
   GEN_REAL_6809 : if TUTANKHAM_USE_REAL_6809 generate
   begin
 
     --platform_o.arst <= clkrst_i.arst;
-    platform_o.arst <= reset_i;
+    platform_o.arst <= clkrst_i.rst(0);
     --platform_o.clk_50M <= clk_rst_i.clk(0);
-    platform_o.clk_cpld <= clk_i(0);
+    platform_o.clk_cpld <= clkrst_i.clk(0);
     platform_o.button <= buttons_i(platform_o.button'range);
 
-    process (clk_30M, reset_i)
+    process (clk_30M, clkrst_i.rst(0))
       variable count : std_logic_vector(4 downto 0) := (others => '0');
     begin
-      if reset_i = '1' then
+      if clkrst_i.rst(0) = '1' then
         platform_o.cpu_6809_q <= '0';
         platform_o.cpu_6809_e <= '0';
         count := (others => '0');
@@ -434,47 +435,47 @@ begin
 	
 	GEN_FPGA_ROMS : if not TUTANKHAM_ROMS_IN_SRAM generate
 	
-	rom_C000_inst : entity work.sprom
-		generic map
-		(
-			init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & "roms/romC000.hex",
-			numwords_a	=> 16384,
-			widthad_a		=> 14
-		)
-		port map
-		(
-			clock			=> clk_30M,
-			address		=> cpu_addr(13 downto 0),
-			q					=> rom_c_data
-		);
-	
-	rom_A000_inst : entity work.sprom
-		generic map
-		(
-			init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & "roms/romA000.hex",
-			numwords_a	=> 8192,
-			widthad_a		=> 13
-		)
-		port map
-		(
-			clock			=> clk_30M,
-			address		=> cpu_addr(12 downto 0),
-			q					=> rom_a_data
-		);
-	
-		rom_j1_inst : entity work.sprom
-			generic map
-			(
-				init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & "roms/j1.hex",
-				numwords_a	=> 4096,
-				widthad_a		=> 12
-			)
-			port map
-			(
-				clock			=> clk_30M,
-				address		=> cpu_addr(11 downto 0),
-				q					=> data_9000
-			);
+    rom_C000_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & "roms/romC000.hex",
+        numwords_a	=> 16384,
+        widthad_a		=> 14
+      )
+      port map
+      (
+        clock			=> clk_30M,
+        address		=> cpu_addr(13 downto 0),
+        q					=> rom_c_data
+      );
+    
+    rom_A000_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & "roms/romA000.hex",
+        numwords_a	=> 8192,
+        widthad_a		=> 13
+      )
+      port map
+      (
+        clock			=> clk_30M,
+        address		=> cpu_addr(12 downto 0),
+        q					=> rom_a_data
+      );
+    
+    rom_j1_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & "roms/j1.hex",
+        numwords_a	=> 4096,
+        widthad_a		=> 12
+      )
+      port map
+      (
+        clock			=> clk_30M,
+        address		=> cpu_addr(11 downto 0),
+        q					=> data_9000
+      );
 		
 	end generate GEN_FPGA_ROMS;
 	
@@ -495,10 +496,10 @@ begin
 			q_b					=> vram0_data,
 
 			clock_a			=> clk_video,
-			address_a		=> bitmap_i.a(TUTANKHAM_VRAM_WIDTHAD-1 downto 0),
+			address_a		=> bitmap_i(1).a(TUTANKHAM_VRAM_WIDTHAD-1 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> bitmap_o.d
+			q_a					=> bitmap_o(1).d
 		);
 
 end SYN;
