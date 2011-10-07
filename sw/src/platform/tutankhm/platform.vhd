@@ -167,45 +167,70 @@ begin
   sram_o.oe <= not wram_wr;
   sram_o.we <= wram_wr;
 
-	-- memory chip selects
-	-- ROM $A000-$BFFF,$C000-$FFFF
-	rom_c_cs <= 	'1' when STD_MATCH(cpu_addr,  "11--------------") else '0';
-	rom_a_cs <= 	'1' when STD_MATCH(cpu_addr,  "101-------------") else '0';
-	-- banked area $9000-$9FFF
-	data_9_cs <= 	'1' when STD_MATCH(cpu_addr, X"9"&"------------") else '0';
-	-- RAM $8800-$8FFF
-	wram_cs <=		'1' when STD_MATCH(cpu_addr, X"8"&"1-----------") else '0';
-	-- Interrupt Enable $8200
-	intena_cs <= 	'1' when STD_MATCH(cpu_addr, X"8200") else '0';
-	-- DIPS1 $81E0
-	dip1_cs <=		'1' when STD_MATCH(cpu_addr, X"81E"&"----") else '0';
-	-- IN2 $81C0
-	in2_cs <=			'1' when STD_MATCH(cpu_addr, X"81C"&"----") else '0';
-	-- IN1 $81A0
-	in1_cs <=			'1' when STD_MATCH(cpu_addr, X"81A"&"----") else '0';
-	-- IN0 $8180
-	in0_cs <=			'1' when STD_MATCH(cpu_addr, X"818"&"----") else '0';
-	-- DIPS2 $8160
-	dip2_cs <=		'1' when STD_MATCH(cpu_addr, X"816"&"----") else '0';
-	-- Palette RAM $8000-$800F
-	palette_cs <=	'1' when STD_MATCH(cpu_addr, X"800"      &"----") else '0';
-	-- video ram $0000-$7FFF
-	vram0_cs <=		'1' when STD_MATCH(cpu_addr,  "0---------------") else '0';
+	-- chip selects
 
+	-- video ram $0000-$7FFF
+	vram0_cs <=		      '1' when STD_MATCH(cpu_addr,  "0---------------") else '0';
+	-- Palette RAM $8000-$800F
+	palette_cs <=	      '1' when STD_MATCH(cpu_addr, X"800"      &"----") else '0';
+	-- banked area $9000-$9FFF
+	data_9_cs <= 	      '1' when STD_MATCH(cpu_addr, X"9"&"------------") else '0';
+	-- ROM $A000-$BFFF,$C000-$FFFF
+	rom_a_cs <= 	      '1' when STD_MATCH(cpu_addr,  "101-------------") else '0';
+	rom_c_cs <= 	      '1' when STD_MATCH(cpu_addr,  "11--------------") else '0';
 	-- video counter $C800-$CBFF
-	video_counter_cs <=	'1' when STD_MATCH(cpu_addr, X"C"&"10----------") else '0';
-	
+	video_counter_cs <= '1' when STD_MATCH(cpu_addr, X"C"&"10----------") else '0';
+
+  GEN_TUTANKHAM_IO : if PLATFORM_VARIANT = "tutankham" generate
+  
+    -- RAM $8800-$8FFF
+    wram_cs <=		'1' when STD_MATCH(cpu_addr, X"8"&"1-----------") else '0';
+    -- Interrupt Enable $8200
+    intena_cs <= 	'1' when STD_MATCH(cpu_addr, X"8200") else '0';
+    -- DIPS1 $81E0
+    dip1_cs <=		'1' when STD_MATCH(cpu_addr, X"81E"&"----") else '0';
+    -- IN2 $81C0
+    in2_cs <=			'1' when STD_MATCH(cpu_addr, X"81C"&"----") else '0';
+    -- IN1 $81A0
+    in1_cs <=			'1' when STD_MATCH(cpu_addr, X"81A"&"----") else '0';
+    -- IN0 $8180
+    in0_cs <=			'1' when STD_MATCH(cpu_addr, X"818"&"----") else '0';
+    -- DIPS2 $8160
+    dip2_cs <=		'1' when STD_MATCH(cpu_addr, X"816"&"----") else '0';
+
+  end generate GEN_TUTANKHAM_IO;
+  
+  GEN_JUNOFRST_IO : if PLATFORM_VARIANT = "junofrst" generate
+  
+    -- DIPS2 $8010
+    dip2_cs <=		'1' when STD_MATCH(cpu_addr, X"8010") else '0';
+    -- IN0 $8020
+    in0_cs <=			'1' when STD_MATCH(cpu_addr, X"8020") else '0';
+    -- IN1 $8024
+    in1_cs <=			'1' when STD_MATCH(cpu_addr, X"8024") else '0';
+    -- IN2 $8028
+    in2_cs <=			'1' when STD_MATCH(cpu_addr, X"8028") else '0';
+    -- DIPS1 $802C
+    dip1_cs <=		'1' when STD_MATCH(cpu_addr, X"802C") else '0';
+    -- Interrupt Enable $8030
+    intena_cs <= 	'1' when STD_MATCH(cpu_addr, X"8030") else '0';
+    -- RAM $8100-$8FFF
+    wram_cs <=		'1' when STD_MATCH(cpu_addr, X"8"&"------------") else '0';
+
+  end generate GEN_JUNOFRST_IO;
+  
 	-- memory read mux
-	cpu_data_i <= 	rom_c_data when rom_c_cs = '1' else
-									rom_a_data when rom_a_cs = '1' else
-									data_9000 when data_9_cs = '1' else
-									wram_data when wram_cs = '1' else
-									X"ff" when dip1_cs = '1' else
-									inputs_i(2).d when in2_cs = '1' else
-									inputs_i(1).d when in1_cs = '1' else
-									inputs_i(0).d when in0_cs = '1' else
+	cpu_data_i <= 	vram0_data when vram0_cs = '1' else
 									"11011011" when dip2_cs = '1' else
-									vram0_data when vram0_cs = '1' else
+									inputs_i(0).d when in0_cs = '1' else
+									inputs_i(1).d when in1_cs = '1' else
+									inputs_i(2).d when in2_cs = '1' else
+									X"ff" when dip1_cs = '1' else
+                  -- needs to come *after* the above since it shadows
+									wram_data when wram_cs = '1' else
+									data_9000 when data_9_cs = '1' else
+									rom_a_data when rom_a_cs = '1' else
+                  rom_c_data when rom_c_cs = '1' else
 									(others => '0');
 	
 	vram0_wr <= vram0_cs and clk_1M5_en and not cpu_rw;
@@ -234,7 +259,9 @@ begin
 			bank_r <= (others => '0');
 			sram_addr_hi <= (others => '0');
 		elsif rising_edge(clk_30M) and clk_1M5_en = '1' then
-			if cpu_rw = '0' and STD_MATCH(cpu_addr, X"8300") then
+			if cpu_rw = '0' and 
+          ((PLATFORM_VARIANT = "tutankham" and STD_MATCH(cpu_addr, X"8300")) or
+           (PLATFORM_VARIANT = "junofrst" and STD_MATCH(cpu_addr, X"8060"))) then
 				bank_r <= cpu_data_o(bank_r'range);
 			end if;
 		end if;
@@ -246,7 +273,9 @@ begin
 		if clkrst_i.rst(0) = '1' then
 			graphics_o.bit8(0) <= (others => '0');
 		elsif rising_edge(clk_30M) and clk_1M5_en = '1' then
-			if cpu_rw = '0' and STD_MATCH(cpu_addr, X"8100") then
+			if cpu_rw = '0' and 
+          ((PLATFORM_VARIANT = "tutankham" and STD_MATCH(cpu_addr, X"8100")) or
+           (PLATFORM_VARIANT = "junofrst" and STD_MATCH(cpu_addr, X"8033"))) then
 				graphics_o.bit8(0) <= cpu_data_o;
 			end if;
 		end if;
@@ -564,52 +593,56 @@ begin
         address		=> cpu_addr(11 downto 0),
         q					=> data_9000_c6
       );
-		
-    rom_c7_inst : entity work.sprom
-      generic map
-      (
-        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
-                        "/roms/c7.hex",
-        numwords_a	=> 4096,
-        widthad_a		=> 12
-      )
-      port map
-      (
-        clock			=> clk_30M,
-        address		=> cpu_addr(11 downto 0),
-        q					=> data_9000_c7
-      );
-		
-    rom_c8_inst : entity work.sprom
-      generic map
-      (
-        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
-                        "/roms/c8.hex",
-        numwords_a	=> 4096,
-        widthad_a		=> 12
-      )
-      port map
-      (
-        clock			=> clk_30M,
-        address		=> cpu_addr(11 downto 0),
-        q					=> data_9000_c8
-      );
-		
-    rom_c9_inst : entity work.sprom
-      generic map
-      (
-        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
-                        "/roms/c9.hex",
-        numwords_a	=> 4096,
-        widthad_a		=> 12
-      )
-      port map
-      (
-        clock			=> clk_30M,
-        address		=> cpu_addr(11 downto 0),
-        q					=> data_9000_c9
-      );
 
+    GEN_C7_C9_ROMS : if PLATFORM_VARIANT = "tutankham" generate
+    
+      rom_c7_inst : entity work.sprom
+        generic map
+        (
+          init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
+                          "/roms/c7.hex",
+          numwords_a	=> 4096,
+          widthad_a		=> 12
+        )
+        port map
+        (
+          clock			=> clk_30M,
+          address		=> cpu_addr(11 downto 0),
+          q					=> data_9000_c7
+        );
+      
+      rom_c8_inst : entity work.sprom
+        generic map
+        (
+          init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
+                          "/roms/c8.hex",
+          numwords_a	=> 4096,
+          widthad_a		=> 12
+        )
+        port map
+        (
+          clock			=> clk_30M,
+          address		=> cpu_addr(11 downto 0),
+          q					=> data_9000_c8
+        );
+      
+      rom_c9_inst : entity work.sprom
+        generic map
+        (
+          init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
+                          "/roms/c9.hex",
+          numwords_a	=> 4096,
+          widthad_a		=> 12
+        )
+        port map
+        (
+          clock			=> clk_30M,
+          address		=> cpu_addr(11 downto 0),
+          q					=> data_9000_c9
+        );
+
+    end generate GEN_C7_C9_ROMS;
+    
     data_9000 <=  data_9000_c1 when bank_r = X"0" else
                   data_9000_c2 when bank_r = X"1" else
                   data_9000_c3 when bank_r = X"2" else
