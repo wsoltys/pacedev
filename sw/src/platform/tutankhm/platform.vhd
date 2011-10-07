@@ -183,20 +183,20 @@ begin
 
   GEN_TUTANKHAM_IO : if PLATFORM_VARIANT = "tutankham" generate
   
-    -- RAM $8800-$8FFF
-    wram_cs <=		'1' when STD_MATCH(cpu_addr, X"8"&"1-----------") else '0';
-    -- Interrupt Enable $8200
-    intena_cs <= 	'1' when STD_MATCH(cpu_addr, X"8200") else '0';
-    -- DIPS1 $81E0
-    dip1_cs <=		'1' when STD_MATCH(cpu_addr, X"81E"&"----") else '0';
-    -- IN2 $81C0
-    in2_cs <=			'1' when STD_MATCH(cpu_addr, X"81C"&"----") else '0';
-    -- IN1 $81A0
-    in1_cs <=			'1' when STD_MATCH(cpu_addr, X"81A"&"----") else '0';
-    -- IN0 $8180
-    in0_cs <=			'1' when STD_MATCH(cpu_addr, X"818"&"----") else '0';
     -- DIPS2 $8160
     dip2_cs <=		'1' when STD_MATCH(cpu_addr, X"816"&"----") else '0';
+    -- IN0 $8180
+    in0_cs <=			'1' when STD_MATCH(cpu_addr, X"818"&"----") else '0';
+    -- IN1 $81A0
+    in1_cs <=			'1' when STD_MATCH(cpu_addr, X"81A"&"----") else '0';
+    -- IN2 $81C0
+    in2_cs <=			'1' when STD_MATCH(cpu_addr, X"81C"&"----") else '0';
+    -- DIPS1 $81E0
+    dip1_cs <=		'1' when STD_MATCH(cpu_addr, X"81E"&"----") else '0';
+    -- Interrupt Enable $8200
+    intena_cs <= 	'1' when STD_MATCH(cpu_addr, X"8200") else '0';
+    -- RAM $8800-$8FFF
+    wram_cs <=		'1' when STD_MATCH(cpu_addr, X"8"&"1-----------") else '0';
 
   end generate GEN_TUTANKHAM_IO;
   
@@ -464,16 +464,10 @@ begin
 	end generate GEN_SRAM_ROMS;
 	
 	GEN_FPGA_ROMS : if not TUTANKHAM_ROMS_IN_SRAM generate
-    signal data_9000_c1   : std_logic_vector(7 downto 0);
-    signal data_9000_c2   : std_logic_vector(7 downto 0);
-    signal data_9000_c3   : std_logic_vector(7 downto 0);
-    signal data_9000_c4   : std_logic_vector(7 downto 0);
-    signal data_9000_c5   : std_logic_vector(7 downto 0);
-    signal data_9000_c6   : std_logic_vector(7 downto 0);
-    signal data_9000_c7   : std_logic_vector(7 downto 0);
-    signal data_9000_c8   : std_logic_vector(7 downto 0);
-    signal data_9000_c9   : std_logic_vector(7 downto 0);
+    type data_9000_t is array (natural range <>) of std_logic_vector(7 downto 0);
+    signal data_9000_c    : data_9000_t(1 to 9);
 	begin
+    
     rom_C000_inst : entity work.sprom
       generic map
       (
@@ -504,156 +498,68 @@ begin
         q					=> rom_a_data
       );
     
-    rom_c1_inst : entity work.sprom
-      generic map
-      (
-        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
-                        "/roms/c1.hex",
-        numwords_a	=> 4096,
-        widthad_a		=> 12
-      )
-      port map
-      (
-        clock			=> clk_30M,
-        address		=> cpu_addr(11 downto 0),
-        q					=> data_9000_c1
-      );
-		
-    rom_c2_inst : entity work.sprom
-      generic map
-      (
-        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
-                        "/roms/c2.hex",
-        numwords_a	=> 4096,
-        widthad_a		=> 12
-      )
-      port map
-      (
-        clock			=> clk_30M,
-        address		=> cpu_addr(11 downto 0),
-        q					=> data_9000_c2
-      );
-		
-    rom_c3_inst : entity work.sprom
-      generic map
-      (
-        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
-                        "/roms/c3.hex",
-        numwords_a	=> 4096,
-        widthad_a		=> 12
-      )
-      port map
-      (
-        clock			=> clk_30M,
-        address		=> cpu_addr(11 downto 0),
-        q					=> data_9000_c3
-      );
-		
-    rom_c4_inst : entity work.sprom
-      generic map
-      (
-        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
-                        "/roms/c4.hex",
-        numwords_a	=> 4096,
-        widthad_a		=> 12
-      )
-      port map
-      (
-        clock			=> clk_30M,
-        address		=> cpu_addr(11 downto 0),
-        q					=> data_9000_c4
-      );
-		
-    rom_c5_inst : entity work.sprom
-      generic map
-      (
-        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
-                        "/roms/c5.hex",
-        numwords_a	=> 4096,
-        widthad_a		=> 12
-      )
-      port map
-      (
-        clock			=> clk_30M,
-        address		=> cpu_addr(11 downto 0),
-        q					=> data_9000_c5
-      );
-		
-    rom_c6_inst : entity work.sprom
-      generic map
-      (
-        init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
-                        "/roms/c6.hex",
-        numwords_a	=> 4096,
-        widthad_a		=> 12
-      )
-      port map
-      (
-        clock			=> clk_30M,
-        address		=> cpu_addr(11 downto 0),
-        q					=> data_9000_c6
-      );
-
-    GEN_C7_C9_ROMS : if PLATFORM_VARIANT = "tutankham" generate
+    GEN_TUTANKHM_ROM_DATA : if PLATFORM_VARIANT = "tutankham" generate
     
-      rom_c7_inst : entity work.sprom
-        generic map
-        (
-          init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
-                          "/roms/c7.hex",
-          numwords_a	=> 4096,
-          widthad_a		=> 12
-        )
-        port map
-        (
-          clock			=> clk_30M,
-          address		=> cpu_addr(11 downto 0),
-          q					=> data_9000_c7
-        );
-      
-      rom_c8_inst : entity work.sprom
-        generic map
-        (
-          init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
-                          "/roms/c8.hex",
-          numwords_a	=> 4096,
-          widthad_a		=> 12
-        )
-        port map
-        (
-          clock			=> clk_30M,
-          address		=> cpu_addr(11 downto 0),
-          q					=> data_9000_c8
-        );
-      
-      rom_c9_inst : entity work.sprom
-        generic map
-        (
-          init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
-                          "/roms/c9.hex",
-          numwords_a	=> 4096,
-          widthad_a		=> 12
-        )
-        port map
-        (
-          clock			=> clk_30M,
-          address		=> cpu_addr(11 downto 0),
-          q					=> data_9000_c9
-        );
+      GEN_TUTANKHM_ROMS : for i in 1 to 9 generate
+        rom_c_inst : entity work.sprom
+          generic map
+          (
+            init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
+                            "/roms/c" & integer'image(i) & ".hex",
+            --numwords_a	=> 4096,
+            widthad_a		=> 12
+          )
+          port map
+          (
+            clock			=> clk_30M,
+            address		=> cpu_addr(11 downto 0),
+            q					=> data_9000_c(i)
+          );
+      end generate GEN_TUTANKHM_ROMS;
 
-    end generate GEN_C7_C9_ROMS;
-    
-    data_9000 <=  data_9000_c1 when bank_r = X"0" else
-                  data_9000_c2 when bank_r = X"1" else
-                  data_9000_c3 when bank_r = X"2" else
-                  data_9000_c4 when bank_r = X"3" else
-                  data_9000_c5 when bank_r = X"4" else
-                  data_9000_c6 when bank_r = X"5" else
-                  data_9000_c7 when bank_r = X"6" else
-                  data_9000_c8 when bank_r = X"7" else
-                  data_9000_c9 when bank_r = X"8" else
-                  (others => 'Z');
-                  
+      data_9000 <=  data_9000_c(1) when bank_r = X"0" else
+                    data_9000_c(2) when bank_r = X"1" else
+                    data_9000_c(3) when bank_r = X"2" else
+                    data_9000_c(4) when bank_r = X"3" else
+                    data_9000_c(5) when bank_r = X"4" else
+                    data_9000_c(6) when bank_r = X"5" else
+                    data_9000_c(7) when bank_r = X"6" else
+                    data_9000_c(8) when bank_r = X"7" else
+                    data_9000_c(9) when bank_r = X"8" else
+                    (others => 'Z');
+                    
+    end generate GEN_TUTANKHM_ROM_DATA;
+  
+    GEN_JUNOFRST_ROM_DATA : if PLATFORM_VARIANT = "junofrst" generate
+
+      GEN_JUNOFRST_ROMS : for i in 1 to 6 generate
+        rom_c_inst : entity work.sprom
+          generic map
+          (
+            init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
+                            "/roms/c" & integer'image(i) & ".hex",
+            --numwords_a	=> 8192,
+            widthad_a		=> 13
+          )
+          port map
+          (
+            clock			            => clk_30M,
+            address(12)           => bank_r(0),
+            address(11 downto 0)  => cpu_addr(11 downto 0),
+            q					            => data_9000_c(i)
+          );
+      end generate GEN_JUNOFRST_ROMS;
+
+      data_9000 <=  data_9000_c(1) when bank_r(3 downto 1) = "000" else
+                    data_9000_c(2) when bank_r(3 downto 1) = "001" else
+                    data_9000_c(3) when bank_r(3 downto 1) = "010" else
+                    data_9000_c(4) when bank_r(3 downto 1) = "011" else
+                    data_9000_c(5) when bank_r(3 downto 1) = "100" else
+                    data_9000_c(6) when bank_r(3 downto 1) = "101" else
+                    (others => 'Z');
+                    
+    end generate GEN_JUNOFRST_ROM_DATA;
+  
 	end generate GEN_FPGA_ROMS;
 	
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
