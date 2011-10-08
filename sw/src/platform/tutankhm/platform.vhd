@@ -221,7 +221,7 @@ begin
   
 	-- memory read mux
 	cpu_data_i <= 	vram0_data when vram0_cs = '1' else
-									"11011011" when dip2_cs = '1' else
+									"11111011" when dip2_cs = '1' else
 									inputs_i(0).d when in0_cs = '1' else
 									inputs_i(1).d when in1_cs = '1' else
 									inputs_i(2).d when in2_cs = '1' else
@@ -282,14 +282,21 @@ begin
 	end process;
 	
 	-- implementation of palette RAM
-	process (clk_30M, clk_1M5_en)
+	process (clk_30M, clkrst_i.rst(0))
 		variable offset : integer;
 	begin
-		if rising_edge(clk_30M) and clk_1M5_en = '1' then
-			if palette_wr = '1' then
-				offset := conv_integer(cpu_addr(3 downto 0));
-				palette_r(offset) <= cpu_data_o;
-			end if;
+    if clkrst_i.rst(0) = '1' then
+      palette_r(0) <= X"5555";
+      palette_r(1) <= X"AAAA";
+      palette_r(2) <= X"FFFF";
+      palette_r(3) <= X"8080";
+		elsif rising_edge(clk_30M) then
+      if clk_1M5_en = '1' then
+        if palette_wr = '1' then
+          offset := conv_integer(cpu_addr(3 downto 0));
+          palette_r(offset) <= cpu_data_o;
+        end if;
+      end if;
 		end if;
 		graphics_o.pal <= palette_r;
 	end process;
@@ -299,14 +306,12 @@ begin
 	begin
 		if cpu_reset = '1' then
 			intena_r <= '0';
-		elsif rising_edge(clk_30M) and clk_1M5_en = '1' then
-			if intena_cs = '1' and cpu_rw = '0' then
-        if cpu_data_o = X"00" then
-  				intena_r <= '0';
-        else
-  				intena_r <= '1';
+		elsif rising_edge(clk_30M) then
+      if clk_1M5_en = '1' then
+        if intena_cs = '1' and cpu_rw = '0' then
+          intena_r <= cpu_data_o(0);
         end if;
-			end if;
+      end if;
 		end if;
 	end process;
 	
