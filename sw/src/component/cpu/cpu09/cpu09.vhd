@@ -4,12 +4,13 @@
 --                                                                           --
 --===========================================================================--
 --
--- File name      : cpu09f.vhd
+-- File name      : cpu09l.vhd
 --
--- Entity name    : cpu09f
+-- Entity name    : cpu09
 --
 -- Purpose        : 6809 instruction compatible CPU core written in VHDL
---                  with instruction fetch cycle signal
+--                  with Last Instruction Cycle, bus available, bus status,
+--                  and instruction fetch signals.
 --                  Not cycle compatible with the original 6809 CPU
 --
 -- Dependencies   : ieee.std_logic_1164
@@ -21,6 +22,21 @@
 --
 -- Web            : http://opencores.org/project,system09
 --
+-- Description    : VMA (valid memory address) is hight whenever a valid memory
+--                  access is made by an instruction fetch, interrupt vector fetch
+--                  or a data read or write otherwise it is low indicating an idle
+--                  bus cycle.
+--                  IFETCH (instruction fetch output) is high whenever an
+--                  instruction byte is read i.e. the program counter is applied 
+--                  to the address bus.
+--                  LIC (last instruction cycle output) is normally low
+--                  but goes high on the last cycle of an instruction.
+--                  BA (bus available output) is normally low but goes high while
+--                  waiting in a Sync instruction state or the CPU is halted
+--                  i.e. a DMA grant.
+--                  BS (bus status output) is normally low but goes high during an
+--                  interrupt or reset vector fetch or the processor is halted
+--                  i.e. a DMA grant.
 -- 
 --  Copyright (C) 2003 - 2010 John Kent
 --
@@ -186,29 +202,37 @@
 -- Version 1.10 - 8th October 2011 - John Kent
 -- added fetch output which should go high during the fetch cycle
 --
+-- Version 1.11 - 8th October 2011 - John Kent
+-- added Last Instruction Cycle signal
+-- replaced fetch with ifetch (instruction fetch) signal
+-- added ba & bs (bus available & bus status) signals
+--
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 
-entity cpu09f is
+entity cpu09 is
 	port (	
-		clk      :	in std_logic;
-		rst      :  in std_logic;
-		vma      : out std_logic;
-      fetch    : out std_logic;
-		addr     : out std_logic_vector(15 downto 0);
-		rw       : out std_logic;
-	   data_out : out std_logic_vector(7 downto 0);
-	   data_in  :  in std_logic_vector(7 downto 0);
-		irq      :  in std_logic;
-		firq     :  in std_logic;
-		nmi      :  in std_logic;
-		halt     :  in std_logic;
-		hold     :  in std_logic
+		clk      :	in std_logic;                     -- E clock input (falling edge)
+		rst      :  in std_logic;                     -- reset input (active high)
+		vma      : out std_logic;                     -- valid memory address (active high)
+      lic      : out std_logic;                     -- last instruction cycle (active high)
+      ifetch   : out std_logic;                     -- instruction fetch cycle (active high)
+      ba       : out std_logic;                     -- bus available (high on sync wait or DMA grant)
+      bs       : out std_logic;                     -- bus status (high on interrupt or reset vector fetch or DMA grant)
+		addr     : out std_logic_vector(15 downto 0); -- address bus output
+		rw       : out std_logic;                     -- read not write output
+	   data_out : out std_logic_vector(7 downto 0);  -- data bus output
+	   data_in  :  in std_logic_vector(7 downto 0);  -- data bus input
+		irq      :  in std_logic;                     -- interrupt request input (active high)
+		firq     :  in std_logic;                     -- fast interrupt request input (active high)
+		nmi      :  in std_logic;                     -- non maskable interrupt request input (active high)
+		halt     :  in std_logic;                     -- halt input (active high) grants DMA
+		hold     :  in std_logic                      -- hold input (active high) extend bus cycle
 		);
-end cpu09f;
+end cpu09;
 
-architecture rtl of cpu09f is
+architecture rtl of cpu09 is
 
   constant EBIT : integer := 7;
   constant FBIT : integer := 6;
@@ -843,14 +867,11 @@ begin
 	 else
     case op_ctrl is
 	 when reset_op =>
-      fetch   <= '0';
 	   op_code <= "00010010";
   	 when fetch_op =>
-      fetch   <= '1';
       op_code <= data_in;
 	 when others =>
 --	 when latch_op =>
-      fetch   <= '0';
 	   op_code <= op_code;
     end case;
 	 end if;
@@ -964,51 +985,35 @@ end process;
 
 addr_mux: process( addr_ctrl, pc, ea, up, sp, iv )
 begin
+  ifetch <= '0';
+  vma    <= '1';
+  rw     <= '1';
+  addr <= "1111111111111111";
   case addr_ctrl is
-    when idle_ad =>
-		vma  <= '0';
-	   addr <= "1111111111111111";
-		rw   <= '1';
     when fetch_ad =>
-		vma  <= '1';
-	   addr <= pc;
-		rw   <= '1';
+	   addr   <= pc;
+      ifetch <= '1';
 	 when read_ad =>
-		vma  <= '1';
 	   addr <= ea;
-		rw   <= '1';
     when write_ad =>
-		vma  <= '1';
 	   addr <= ea;
 		rw   <= '0';
 	 when pushs_ad =>
-		vma  <= '1';
 	   addr <= sp;
 		rw   <= '0';
     when pulls_ad =>
-		vma  <= '1';
 	   addr <= sp;
-		rw   <= '1';
 	 when pushu_ad =>
-		vma  <= '1';
 	   addr <= up;
 		rw   <= '0';
     when pullu_ad =>
-		vma  <= '1';
 	   addr <= up;
-		rw   <= '1';
 	 when int_hi_ad =>
-		vma  <= '1';
 	   addr <= "111111111111" & iv & "0";
-		rw   <= '1';
     when int_lo_ad =>
-		vma  <= '1';
 	   addr <= "111111111111" & iv & "1";
-		rw   <= '1';
 	 when others =>
-		vma  <= '0';
-	   addr <= "1111111111111111";
-		rw   <= '1';
+      vma  <= '0';
   end case;
 end process;
 
@@ -1483,6 +1488,9 @@ process( state, saved_state,
 			irq, firq, nmi_req, nmi_ack, halt )
 variable cond_true : boolean;  -- variable used to evaluate coditional branches
 begin
+        ba         <= '0';
+        bs         <= '0';
+        lic        <= '0';
         -- Registers preserved
         cc_ctrl    <= latch_cc;
         acca_ctrl  <= latch_acca;
@@ -1540,6 +1548,7 @@ begin
 				 -- fetch pc low interrupt vector
 		       pc_ctrl    <= pull_hi_pc;
              addr_ctrl  <= int_hi_ad;
+             bs         <= '1';
 	 	       next_state <= vect_lo_state;
 			 --
 			 -- jump via interrupt vector
@@ -1550,6 +1559,7 @@ begin
 				 -- fetch the vector low byte
 		       pc_ctrl    <= pull_lo_pc;
              addr_ctrl  <= int_lo_ad;
+             bs         <= '1';
 	 	       next_state <= fetch_state;
 			 --
 			 -- Here to fetch an instruction
@@ -1926,6 +1936,7 @@ begin
 					-- 2 decode
 					-- 
 		         when "0010" => -- nop
+                 lic          <= '1';
 					  next_state   <= fetch_state;
 
 					--
@@ -1980,6 +1991,7 @@ begin
 					  alu_ctrl   <= alu_daa;
                  cc_ctrl    <= load_cc;
 					  acca_ctrl  <= load_acca;
+                 lic        <= '1';
 					  next_state <= fetch_state;
 
 		         when "1010" => -- orcc
@@ -2003,6 +2015,7 @@ begin
                  alu_ctrl   <= alu_sex;
 					  cc_ctrl    <= load_cc;
 					  acca_ctrl  <= load_hi_acca;
+                 lic        <= '1';
 					  next_state <= fetch_state;
 
 		         when "1110" => -- exg
@@ -2021,6 +2034,7 @@ begin
 		         when others =>
 					  -- increment the pc
                  pc_ctrl    <= incr_pc;
+                 lic        <= '1';
 					  next_state <= fetch_state;
 		         end case;
              --
@@ -2150,6 +2164,7 @@ begin
 		            right_ctrl <= accb_right;
 						alu_ctrl   <= alu_abx;
 						ix_ctrl    <= load_ix;
+                  lic        <= '1';
 						next_state <= fetch_state;
 
 		         when "1011" => -- rti
@@ -2181,6 +2196,7 @@ begin
 						next_state <= int_entire_state;
 
 		         when others =>
+                  lic        <= '1';
 						next_state <= fetch_state;
 
 		         end case;
@@ -2269,6 +2285,7 @@ begin
 					  acca_ctrl  <= latch_acca;
 					  cc_ctrl    <= latch_cc;
 		         end case;
+               lic        <= '1';
 				   next_state <= fetch_state;
 				 --
 				 -- Single Operand accb
@@ -2354,6 +2371,7 @@ begin
 					  accb_ctrl  <= latch_accb;
 					  cc_ctrl    <= latch_cc;
 		         end case;
+               lic          <= '1';
 				   next_state   <= fetch_state;
 				 --
 				 -- Single operand indexed
@@ -2425,6 +2443,7 @@ begin
 					  next_state   <= push_return_lo_state;
 
 					when others =>
+                 lic          <= '1';
 				     next_state   <= fetch_state;
                end case;
 
@@ -2552,6 +2571,7 @@ begin
 					  next_state   <= imm16_state;
 
 					when others =>
+                 lic          <= '1';
 				     next_state   <= fetch_state;
 
                end case;
@@ -2689,7 +2709,8 @@ begin
 						next_state <= int_entire_state;
 
 		         when others =>
-						next_state   <= fetch_state;
+                 lic          <= '1';
+					  next_state   <= fetch_state;
 		         end case;
 
 	          when "1000" => -- acca immediate
@@ -2704,6 +2725,7 @@ begin
 					  next_state   <= imm16_state;
 
 					when others =>
+                 lic          <= '1';
 				     next_state   <= fetch_state;
 
                end case;
@@ -2721,6 +2743,7 @@ begin
 				     next_state   <= dual_op_write16_state;
 
 					when others =>
+                 lic          <= '1';
 				     next_state   <= fetch_state;
 
                end case;
@@ -2742,6 +2765,7 @@ begin
 				     next_state   <= indexed_state;
 
 					when others =>
+                 lic          <= '1';
 				     next_state   <= fetch_state;
                end case;
 
@@ -2762,6 +2786,7 @@ begin
 				     next_state   <= extended_state;
 
 					when others =>
+                 lic          <= '1';
 				     next_state   <= fetch_state;
 
                end case;
@@ -2795,6 +2820,7 @@ begin
 				     next_state   <= dual_op_write16_state;
 
 					when others =>
+                 lic          <= '1';
 				     next_state   <= fetch_state;
 
                end case;
@@ -2816,6 +2842,7 @@ begin
 				     next_state   <= indexed_state;
 
 					when others =>
+                 lic          <= '1';
 				     next_state   <= fetch_state;
 
                end case;
@@ -2837,10 +2864,12 @@ begin
 				     next_state   <= extended_state;
 
 					when others =>
+                 lic          <= '1';
 				     next_state   <= fetch_state;
                end case;
 
 	          when others =>
+               lic          <= '1';
  		         next_state   <= fetch_state;
              end case;
 			 --
@@ -2869,7 +2898,8 @@ begin
                   iv_ctrl    <= swi3_iv;
 						next_state <= int_entire_state;
 		         when others =>
-						next_state   <= fetch_state;
+                 lic          <= '1';
+					  next_state   <= fetch_state;
 		         end case;
 
 	          when "1000" => -- acca immediate
@@ -2883,6 +2913,7 @@ begin
 				     return_state <= fetch_state;
 					  next_state   <= imm16_state;
 					when others =>
+                 lic          <= '1';
 				     next_state   <= fetch_state;
                end case;
 
@@ -2898,6 +2929,7 @@ begin
 					  next_state   <= dual_op_read16_state;
 
 					when others =>
+                 lic          <= '1';
 				     next_state   <= fetch_state;
 
                end case;
@@ -2914,6 +2946,7 @@ begin
 					  next_state   <= indexed_state;
 
 					when others =>
+                 lic          <= '1';
 				     next_state   <= fetch_state;
 
                end case;
@@ -2929,10 +2962,12 @@ begin
 				     return_state <= dual_op_read16_state;
 					  next_state   <= extended_state;
 					when others =>
+                 lic          <= '1';
 				     next_state   <= fetch_state;
                end case;
 
 	          when others =>
+               lic          <= '1';
  		         next_state   <= fetch_state;
              end case;
 
@@ -3009,6 +3044,7 @@ begin
 				       md_ctrl    <= load_md;
 				       next_state <= single_op_write_state;
 		         when "1011" => -- undefined
+                   lic        <= '1';
 				       next_state <= fetch_state;
 		         when "1100" => -- inc
                    left_ctrl  <= md_left;
@@ -3022,12 +3058,14 @@ begin
 		             right_ctrl <= zero_right;
 					    alu_ctrl   <= alu_st8;
 					    cc_ctrl    <= load_cc;
+                   lic        <= '1';
 				       next_state <= fetch_state;
 		         when "1110" => -- jmp
                    left_ctrl  <= md_left;
 						 right_ctrl <= zero_right;
 					    alu_ctrl   <= alu_ld16;
                    pc_ctrl    <= load_pc;
+                   lic          <= '1';
 				       next_state <= fetch_state;
 		         when "1111" => -- clr
                    left_ctrl  <= md_left;
@@ -3037,7 +3075,8 @@ begin
 				       md_ctrl    <= load_md;
 				       next_state <= single_op_write_state;
 		         when others =>
-				       next_state <= fetch_state;
+                 lic        <= '1';
+				     next_state <= fetch_state;
 		         end case;
            --
 			  -- single operand 8 bit write
@@ -3049,6 +3088,7 @@ begin
 				 -- write ALU low byte output
              addr_ctrl  <= write_ad;
              dout_ctrl  <= md_lo_dout;
+             lic        <= '1';
 				 next_state <= fetch_state;
 
            --
@@ -3059,6 +3099,7 @@ begin
 				   -- read first data byte from ea
 				   md_ctrl    <= fetch_first_md;
                addr_ctrl  <= read_ad;
+               lic        <= '1';
 					next_state <= fetch_state;
 
 				--
@@ -3086,6 +3127,7 @@ begin
 					-- read the low byte of the 16 bit data
 				   md_ctrl    <= fetch_next_md;
                addr_ctrl  <= read_ad;
+               lic        <= '1';
 					next_state <= fetch_state;
 
            --
@@ -3175,6 +3217,7 @@ begin
              end if;
 				 -- write ALU low byte output
              addr_ctrl    <= write_ad;
+             lic          <= '1';
 				 next_state   <= fetch_state;
 
 			  --
@@ -3187,6 +3230,7 @@ begin
 			      md_ctrl    <= fetch_next_md;
                addr_ctrl  <= fetch_ad;
 					st_ctrl    <= pull_st;
+               lic        <= '1';
 					next_state <= saved_state;
 
            --
@@ -3749,6 +3793,7 @@ begin
 					when others =>
 					    null;
 					end case;
+               lic          <= '1';
                next_state   <= fetch_state;
 
 				--
@@ -3778,6 +3823,7 @@ begin
 					right_ctrl <= ea_right;
 				   alu_ctrl   <= alu_ld16;
 					pc_ctrl    <= load_pc;
+               lic        <= '1';
                next_state <= fetch_state;
 
 				--
@@ -3858,6 +3904,7 @@ begin
 					if cond_true then
 					  pc_ctrl    <= load_pc;
                end if;
+               lic          <= '1';
 					next_state   <= fetch_state;
 
 				 --
@@ -3913,6 +3960,7 @@ begin
                  dout_ctrl  <= pc_lo_dout;
  					  --
 					  st_ctrl      <= pull_st;
+                 lic          <= '1';
                  next_state   <= saved_state;
 
 				 when andcc_state =>
@@ -3923,6 +3971,7 @@ begin
                  cc_ctrl    <= load_cc;
  					  --
 					  st_ctrl    <= pull_st;
+                 lic        <= '1';
 				     next_state <= saved_state;
 
 				 when orcc_state =>
@@ -3933,6 +3982,7 @@ begin
                  cc_ctrl    <= load_cc;
  					  --
 					  st_ctrl    <= pull_st;
+                 lic        <= '1';
 				     next_state <= saved_state;
 
 				 when tfr_state =>
@@ -3991,6 +4041,7 @@ begin
 					  end case;
  					  --
 					  st_ctrl      <= pull_st;
+                 lic          <= '1';
 				     next_state   <= saved_state;
 
 				 when exg_state =>
@@ -4058,6 +4109,7 @@ begin
 					  when others =>
 					    null;
 					  end case;
+                 lic          <= '1';
 				     next_state   <= fetch_state;
 
 				 when mul_state =>
@@ -4203,6 +4255,7 @@ begin
                  acca_ctrl  <= load_hi_acca;
                  accb_ctrl  <= load_accb;
                  md_ctrl    <= shiftl_md;
+                 lic          <= '1';
 				     next_state <= fetch_state;
 
 			  --
@@ -4239,6 +4292,7 @@ begin
 				 elsif ea(0) = '1' then
  				   next_state <= pshs_cc_state;
 				 else
+               lic        <= '1';
 				   next_state <= fetch_state;
 				 end if;
 
@@ -4281,6 +4335,7 @@ begin
 				 elsif ea(0) = '1' then
  				   next_state <= pshs_cc_state;
 				 else
+               lic        <= '1';
 				   next_state <= fetch_state;
 				 end if;
 
@@ -4322,6 +4377,7 @@ begin
 				 elsif ea(0) = '1' then
  				   next_state   <= pshs_cc_state;
 				 else
+               lic          <= '1';
 				   next_state   <= fetch_state;
 				 end if;
 
@@ -4360,6 +4416,7 @@ begin
 				 elsif ea(0) = '1' then
  				   next_state   <= pshs_cc_state;
 				 else
+               lic          <= '1';
 				   next_state   <= fetch_state;
 				 end if;
 
@@ -4396,6 +4453,7 @@ begin
 				 elsif ea(0) = '1' then
  				   next_state   <= pshs_cc_state;
 				 else
+               lic          <= '1';
 				   next_state   <= fetch_state;
 				 end if;
 
@@ -4419,6 +4477,7 @@ begin
 				 elsif ea(0) = '1' then
  				   next_state   <= pshs_cc_state;
 				 else
+               lic          <= '1';
 				   next_state   <= fetch_state;
 				 end if;
 
@@ -4440,6 +4499,7 @@ begin
 				 elsif ea(0) = '1' then
  				   next_state   <= pshs_cc_state;
 				 else
+               lic          <= '1';
 				   next_state   <= fetch_state;
 				 end if;
 
@@ -4459,6 +4519,7 @@ begin
 				 if ea(0) = '1' then
  				   next_state   <= pshs_cc_state;
 				 else
+               lic          <= '1';
 				   next_state   <= fetch_state;
 				 end if;
 
@@ -4467,6 +4528,7 @@ begin
 				 -- write cc
              addr_ctrl  <= pushs_ad;
 			    dout_ctrl  <= cc_dout; 
+             lic          <= '1';
              next_state <= fetch_state;
 
 			  --
@@ -4491,6 +4553,7 @@ begin
 				 elsif ea(7) = '1' then
                next_state <= puls_pch_state;
 				 else
+               lic        <= '1';
 				   next_state <= fetch_state;
 				 end if;
 
@@ -4518,6 +4581,7 @@ begin
 				 elsif ea(7) = '1' then
                next_state <= puls_pch_state;
 				 else
+               lic        <= '1';
 				   next_state <= fetch_state;
 				 end if;
 
@@ -4543,6 +4607,7 @@ begin
 				 elsif ea(7) = '1' then
                next_state <= puls_pch_state;
 				 else
+               lic          <= '1';
 				   next_state <= fetch_state;
 				 end if;
 
@@ -4566,6 +4631,7 @@ begin
 				 elsif ea(7) = '1' then
                next_state <= puls_pch_state;
 				 else
+               lic        <= '1';
 				   next_state <= fetch_state;
 				 end if;
 
@@ -4587,6 +4653,7 @@ begin
 				 elsif ea(7) = '1' then
                next_state <= puls_pch_state;
 				 else
+               lic        <= '1';
 				   next_state <= fetch_state;
 				 end if;
 
@@ -4617,6 +4684,7 @@ begin
 				 elsif ea(7) = '1' then
                next_state <= puls_pch_state;
 				 else
+               lic        <= '1';
 				   next_state <= fetch_state;
 				 end if;
 
@@ -4645,6 +4713,7 @@ begin
 				 elsif ea(7) = '1' then
                next_state <= puls_pch_state;
 				 else
+               lic        <= '1';
 				   next_state <= fetch_state;
 				 end if;
 
@@ -4671,6 +4740,7 @@ begin
 				 if ea(7) = '1' then
                next_state <= puls_pch_state;
 				 else
+               lic        <= '1';
 				   next_state <= fetch_state;
 				 end if;
 
@@ -4694,6 +4764,7 @@ begin
 				 -- read pc low
 				 pc_ctrl    <= pull_lo_pc;
              addr_ctrl  <= pulls_ad;
+             lic        <= '1';
              next_state <= fetch_state;
 
 			  --
@@ -4728,6 +4799,7 @@ begin
 				 elsif ea(0) = '1' then
  				   next_state   <= pshu_cc_state;
 				 else
+               lic          <= '1';
 				   next_state   <= fetch_state;
 				 end if;
 			  --
@@ -4772,6 +4844,7 @@ begin
 				 elsif ea(0) = '1' then
  				   next_state   <= pshu_cc_state;
 				 else
+               lic          <= '1';
 				   next_state   <= fetch_state;
 				 end if;
 
@@ -4812,6 +4885,7 @@ begin
 				 elsif ea(0) = '1' then
  				   next_state   <= pshu_cc_state;
 				 else
+               lic          <= '1';
 				   next_state   <= fetch_state;
 				 end if;
 
@@ -4850,6 +4924,7 @@ begin
 				 elsif ea(0) = '1' then
  				   next_state   <= pshu_cc_state;
 				 else
+               lic          <= '1';
 				   next_state   <= fetch_state;
 				 end if;
 
@@ -4886,6 +4961,7 @@ begin
 				 elsif ea(0) = '1' then
  				   next_state   <= pshu_cc_state;
 				 else
+               lic          <= '1';
 				   next_state   <= fetch_state;
 				 end if;
 
@@ -4909,6 +4985,7 @@ begin
 				 elsif ea(0) = '1' then
  				   next_state   <= pshu_cc_state;
 				 else
+               lic          <= '1';
 				   next_state   <= fetch_state;
 				 end if;
 
@@ -4930,6 +5007,7 @@ begin
 				 elsif ea(0) = '1' then
  				   next_state   <= pshu_cc_state;
 				 else
+               lic          <= '1';
 				   next_state   <= fetch_state;
 				 end if;
 
@@ -4949,6 +5027,7 @@ begin
 				 if ea(0) = '1' then
  				   next_state   <= pshu_cc_state;
 				 else
+               lic          <= '1';
 				   next_state   <= fetch_state;
 				 end if;
 
@@ -4957,6 +5036,7 @@ begin
 				 -- write cc
              addr_ctrl  <= pushu_ad;
 			    dout_ctrl  <= cc_dout; 
+             lic        <= '1';
              next_state <= fetch_state;
 
 			  --
@@ -4983,6 +5063,7 @@ begin
 				 elsif ea(7) = '1' then
                next_state <= pulu_pch_state;
 				 else
+               lic        <= '1';
 				   next_state <= fetch_state;
 				 end if;
 
@@ -5010,6 +5091,7 @@ begin
 				 elsif ea(7) = '1' then
                next_state <= pulu_pch_state;
 				 else
+               lic        <= '1';
 				   next_state <= fetch_state;
 				 end if;
 
@@ -5035,6 +5117,7 @@ begin
 				 elsif ea(7) = '1' then
                next_state <= pulu_pch_state;
 				 else
+               lic        <= '1';
 				   next_state <= fetch_state;
 				 end if;
 
@@ -5058,6 +5141,7 @@ begin
 				 elsif ea(7) = '1' then
                next_state <= pulu_pch_state;
 				 else
+               lic        <= '1';
 				   next_state <= fetch_state;
 				 end if;
 
@@ -5079,6 +5163,7 @@ begin
 				 elsif ea(7) = '1' then
                next_state <= pulu_pch_state;
 				 else
+               lic        <= '1';
 				   next_state <= fetch_state;
 				 end if;
 
@@ -5109,6 +5194,7 @@ begin
 				 elsif ea(7) = '1' then
                next_state <= pulu_pch_state;
 				 else
+               lic        <= '1';
 				   next_state <= fetch_state;
 				 end if;
 
@@ -5137,6 +5223,7 @@ begin
 				 elsif ea(7) = '1' then
                next_state <= pulu_pch_state;
 				 else
+               lic        <= '1';
 				   next_state <= fetch_state;
 				 end if;
 
@@ -5163,6 +5250,7 @@ begin
 				 if ea(7) = '1' then
                next_state <= pulu_pch_state;
 				 else
+               lic        <= '1';
 				   next_state <= fetch_state;
 				 end if;
 
@@ -5186,6 +5274,7 @@ begin
 				 -- read pc low
 				 pc_ctrl    <= pull_lo_pc;
              addr_ctrl  <= pullu_ad;
+             lic        <= '1';
              next_state <= fetch_state;
 
 			  --
@@ -5338,6 +5427,7 @@ begin
 	          -- pull pc low
 				 pc_ctrl    <= pull_lo_pc;
              addr_ctrl  <= pulls_ad;
+             lic        <= '1';
              next_state <= fetch_state;
 
 			  --
@@ -5612,6 +5702,7 @@ begin
                    next_state <= int_firq_state;
 					  else
                    iv_ctrl    <= reset_iv;
+                   lic        <= '1';
 			          next_state <= fetch_state;
 					  end if;
 					--
@@ -5623,10 +5714,12 @@ begin
                    next_state <= int_nmiirq_state;
 					  else
                    iv_ctrl    <= reset_iv;
+                   lic        <= '1';
 			          next_state <= fetch_state;
 					  end if;
                else
                  iv_ctrl    <= reset_iv;
+                 ba         <= '1';
 	              next_state <= sync_state;
 					end if;
 				 end if;
@@ -5634,8 +5727,11 @@ begin
 
 			  when halt_state =>
 				 if halt = '1' then
+               ba           <= '1';
+               bs           <= '1';
                next_state   <= halt_state;
 				 else
+               lic          <= '1';
 				   next_state   <= fetch_state;
 				 end if;
 
@@ -5646,3 +5742,4 @@ end process;
 
 end rtl;
 	
+
