@@ -4,11 +4,12 @@
 --                                                                           --
 --===========================================================================--
 --
--- File name      : cpu09.vhd
+-- File name      : cpu09f.vhd
 --
--- Entity name    : cpu09
+-- Entity name    : cpu09f
 --
 -- Purpose        : 6809 instruction compatible CPU core written in VHDL
+--                  with instruction fetch cycle signal
 --                  Not cycle compatible with the original 6809 CPU
 --
 -- Dependencies   : ieee.std_logic_1164
@@ -182,15 +183,19 @@
 -- Enumerated separate states for MASKI and MASKIF states
 -- Removed code on BSR/JSR in fetch cycle
 --
+-- Version 1.10 - 8th October 2011 - John Kent
+-- added fetch output which should go high during the fetch cycle
+--
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 
-entity cpu09 is
+entity cpu09f is
 	port (	
 		clk      :	in std_logic;
 		rst      :  in std_logic;
 		vma      : out std_logic;
+      fetch    : out std_logic;
 		addr     : out std_logic_vector(15 downto 0);
 		rw       : out std_logic;
 	   data_out : out std_logic_vector(7 downto 0);
@@ -201,9 +206,9 @@ entity cpu09 is
 		halt     :  in std_logic;
 		hold     :  in std_logic
 		);
-end cpu09;
+end cpu09f;
 
-architecture rtl of cpu09 is
+architecture rtl of cpu09f is
 
   constant EBIT : integer := 7;
   constant FBIT : integer := 6;
@@ -838,11 +843,14 @@ begin
 	 else
     case op_ctrl is
 	 when reset_op =>
+      fetch   <= '0';
 	   op_code <= "00010010";
   	 when fetch_op =>
+      fetch   <= '1';
       op_code <= data_in;
 	 when others =>
 --	 when latch_op =>
+      fetch   <= '0';
 	   op_code <= op_code;
     end case;
 	 end if;
