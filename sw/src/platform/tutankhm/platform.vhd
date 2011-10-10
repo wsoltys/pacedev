@@ -98,13 +98,14 @@ architecture SYN of platform is
 	signal clk_1M5_en_n		: std_logic;
 	signal cpu_rw					: std_logic;
 	signal cpu_vma				: std_logic;
-	signal cpu_addr				: std_logic_vector(15 downto 0);
-	signal cpu_data_i			: std_logic_vector(7 downto 0);
-	signal cpu_data_o			: std_logic_vector(7 downto 0);
+	signal cpu_a				  : std_logic_vector(15 downto 0);
+	signal cpu_d_i			  : std_logic_vector(7 downto 0);
+	signal cpu_d_o			  : std_logic_vector(7 downto 0);
 	signal cpu_irq				: std_logic;
 	signal cpu_firq				: std_logic;
 	signal cpu_nmi				: std_logic;
-	                        
+  signal cpu_opfetch    : std_logic;
+  
   -- ROM signals        
 	signal rom_a_cs				: std_logic;
   signal rom_a_data     : std_logic_vector(7 downto 0);
@@ -157,11 +158,11 @@ begin
 	cpu_reset <= clkrst_i.rst(0) or game_reset;
 	
   -- SRAM signals (may or may not be used)
-  sram_o.a(sram_o.a'left downto 17) <= (others => '0');
+ sram_o.a(sram_o.a'left downto 17) <= (others => '0');
   sram_o.a(16 downto 0) <= -- Graphics ROM starts at $10000 in 4KB banks - mapped to $9000
-          ('1' & bank_r & cpu_addr(11 downto 0)) when data_9_cs = '1' else
-          std_logic_vector(resize(unsigned(cpu_addr), 17));
-  sram_o.d <= std_logic_vector(resize(unsigned(cpu_data_o), sram_o.d'length));
+          ('1' & bank_r & cpu_a(11 downto 0)) when data_9_cs = '1' else
+          std_logic_vector(resize(unsigned(cpu_a), 17));
+  sram_o.d <= std_logic_vector(resize(unsigned(cpu_d_o), sram_o.d'length));
   sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
   sram_o.cs <= '1';
   sram_o.oe <= not wram_wr;
@@ -170,57 +171,57 @@ begin
 	-- chip selects
 
 	-- video ram $0000-$7FFF
-	vram0_cs <=		      '1' when STD_MATCH(cpu_addr,  "0---------------") else '0';
+	vram0_cs <=		      '1' when STD_MATCH(cpu_a,  "0---------------") else '0';
 	-- Palette RAM $8000-$800F
-	palette_cs <=	      '1' when STD_MATCH(cpu_addr, X"800"      &"----") else '0';
+	palette_cs <=	      '1' when STD_MATCH(cpu_a, X"800"      &"----") else '0';
 	-- banked area $9000-$9FFF
-	data_9_cs <= 	      '1' when STD_MATCH(cpu_addr, X"9"&"------------") else '0';
+	data_9_cs <= 	      '1' when STD_MATCH(cpu_a, X"9"&"------------") else '0';
 	-- ROM $A000-$BFFF,$C000-$FFFF
-	rom_a_cs <= 	      '1' when STD_MATCH(cpu_addr,  "101-------------") else '0';
-	rom_c_cs <= 	      '1' when STD_MATCH(cpu_addr,  "11--------------") else '0';
+	rom_a_cs <= 	      '1' when STD_MATCH(cpu_a,  "101-------------") else '0';
+	rom_c_cs <= 	      '1' when STD_MATCH(cpu_a,  "11--------------") else '0';
 	-- video counter $C800-$CBFF
-	video_counter_cs <= '1' when STD_MATCH(cpu_addr, X"C"&"10----------") else '0';
+	video_counter_cs <= '1' when STD_MATCH(cpu_a, X"C"&"10----------") else '0';
 
   GEN_TUTANKHAM_IO : if PLATFORM_VARIANT = "tutankham" generate
   
     -- DIPS2 $8160
-    dip2_cs <=		'1' when STD_MATCH(cpu_addr, X"816"&"----") else '0';
+    dip2_cs <=		'1' when STD_MATCH(cpu_a, X"816"&"----") else '0';
     -- IN0 $8180
-    in0_cs <=			'1' when STD_MATCH(cpu_addr, X"818"&"----") else '0';
+    in0_cs <=			'1' when STD_MATCH(cpu_a, X"818"&"----") else '0';
     -- IN1 $81A0
-    in1_cs <=			'1' when STD_MATCH(cpu_addr, X"81A"&"----") else '0';
+    in1_cs <=			'1' when STD_MATCH(cpu_a, X"81A"&"----") else '0';
     -- IN2 $81C0
-    in2_cs <=			'1' when STD_MATCH(cpu_addr, X"81C"&"----") else '0';
+    in2_cs <=			'1' when STD_MATCH(cpu_a, X"81C"&"----") else '0';
     -- DIPS1 $81E0
-    dip1_cs <=		'1' when STD_MATCH(cpu_addr, X"81E"&"----") else '0';
+    dip1_cs <=		'1' when STD_MATCH(cpu_a, X"81E"&"----") else '0';
     -- Interrupt Enable $8200
-    intena_cs <= 	'1' when STD_MATCH(cpu_addr, X"8200") else '0';
+    intena_cs <= 	'1' when STD_MATCH(cpu_a, X"8200") else '0';
     -- RAM $8800-$8FFF
-    wram_cs <=		'1' when STD_MATCH(cpu_addr, X"8"&"1-----------") else '0';
+    wram_cs <=		'1' when STD_MATCH(cpu_a, X"8"&"1-----------") else '0';
 
   end generate GEN_TUTANKHAM_IO;
   
   GEN_JUNOFRST_IO : if PLATFORM_VARIANT = "junofrst" generate
   
     -- DIPS2 $8010
-    dip2_cs <=		'1' when STD_MATCH(cpu_addr, X"8010") else '0';
+    dip2_cs <=		'1' when STD_MATCH(cpu_a, X"8010") else '0';
     -- IN0 $8020
-    in0_cs <=			'1' when STD_MATCH(cpu_addr, X"8020") else '0';
+    in0_cs <=			'1' when STD_MATCH(cpu_a, X"8020") else '0';
     -- IN1 $8024
-    in1_cs <=			'1' when STD_MATCH(cpu_addr, X"8024") else '0';
+    in1_cs <=			'1' when STD_MATCH(cpu_a, X"8024") else '0';
     -- IN2 $8028
-    in2_cs <=			'1' when STD_MATCH(cpu_addr, X"8028") else '0';
+    in2_cs <=			'1' when STD_MATCH(cpu_a, X"8028") else '0';
     -- DIPS1 $802C
-    dip1_cs <=		'1' when STD_MATCH(cpu_addr, X"802C") else '0';
+    dip1_cs <=		'1' when STD_MATCH(cpu_a, X"802C") else '0';
     -- Interrupt Enable $8030
-    intena_cs <= 	'1' when STD_MATCH(cpu_addr, X"8030") else '0';
+    intena_cs <= 	'1' when STD_MATCH(cpu_a, X"8030") else '0';
     -- RAM $8100-$8FFF
-    wram_cs <=		'1' when STD_MATCH(cpu_addr, X"8"&"------------") else '0';
+    wram_cs <=		'1' when STD_MATCH(cpu_a, X"8"&"------------") else '0';
 
   end generate GEN_JUNOFRST_IO;
   
 	-- memory read mux
-	cpu_data_i <= 	vram0_data when vram0_cs = '1' else
+	cpu_d_i <= 	vram0_data when vram0_cs = '1' else
 									"11111011" when dip2_cs = '1' else
 									inputs_i(0).d when in0_cs = '1' else
 									inputs_i(1).d when in1_cs = '1' else
@@ -260,9 +261,9 @@ begin
 			sram_addr_hi <= (others => '0');
 		elsif rising_edge(clk_30M) and clk_1M5_en = '1' then
 			if cpu_rw = '0' and 
-          ((PLATFORM_VARIANT = "tutankham" and STD_MATCH(cpu_addr, X"8300")) or
-           (PLATFORM_VARIANT = "junofrst" and STD_MATCH(cpu_addr, X"8060"))) then
-				bank_r <= cpu_data_o(bank_r'range);
+          ((PLATFORM_VARIANT = "tutankham" and STD_MATCH(cpu_a, X"8300")) or
+           (PLATFORM_VARIANT = "junofrst" and STD_MATCH(cpu_a, X"8060"))) then
+				bank_r <= cpu_d_o(bank_r'range);
 			end if;
 		end if;
 	end process;
@@ -274,9 +275,9 @@ begin
 			graphics_o.bit8(0) <= (others => '0');
 		elsif rising_edge(clk_30M) and clk_1M5_en = '1' then
 			if cpu_rw = '0' and 
-          ((PLATFORM_VARIANT = "tutankham" and STD_MATCH(cpu_addr, X"8100")) or
-           (PLATFORM_VARIANT = "junofrst" and STD_MATCH(cpu_addr, X"8033"))) then
-				graphics_o.bit8(0) <= cpu_data_o;
+          ((PLATFORM_VARIANT = "tutankham" and STD_MATCH(cpu_a, X"8100")) or
+           (PLATFORM_VARIANT = "junofrst" and STD_MATCH(cpu_a, X"8033"))) then
+				graphics_o.bit8(0) <= cpu_d_o;
 			end if;
 		end if;
 	end process;
@@ -293,8 +294,8 @@ begin
 		elsif rising_edge(clk_30M) then
       if clk_1M5_en = '1' then
         if palette_wr = '1' then
-          offset := conv_integer(cpu_addr(3 downto 0));
-          palette_r(offset) <= cpu_data_o;
+          offset := conv_integer(cpu_a(3 downto 0));
+          palette_r(offset) <= cpu_d_o;
         end if;
       end if;
 		end if;
@@ -309,7 +310,7 @@ begin
 		elsif rising_edge(clk_30M) then
       if clk_1M5_en = '1' then
         if intena_cs = '1' and cpu_rw = '0' then
-          intena_r <= cpu_data_o(0);
+          intena_r <= cpu_d_o(0);
         end if;
       end if;
 		end if;
@@ -367,7 +368,9 @@ begin
 	leds_o <= (others => '0');
 
   GEN_CPU09 : if not TUTANKHAM_USE_REAL_6809 generate
-
+    signal decrypted_d_i  : std_logic_vector(cpu_d_i'range);
+  begin
+  
     clk_en_inst : entity work.clk_div
       generic map
       (
@@ -380,16 +383,17 @@ begin
         clk_en		=> clk_1M5_en
       );
 		
-    cpu_inst : entity work.cpu09
+    cpu_inst : entity work.cpu09f
       port map
       (	
         clk				=> clk_1M5_en_n,
         rst				=> cpu_reset,
         rw				=> cpu_rw,
         vma				=> cpu_vma,
-        address		=> cpu_addr,
-        data_in		=> cpu_data_i,
-        data_out	=> cpu_data_o,
+        fetch     => cpu_opfetch,
+        addr		  => cpu_a,
+        data_in		=> decrypted_d_i,
+        data_out	=> cpu_d_o,
         halt			=> '0',
         hold			=> '0',
         irq				=> cpu_irq,
@@ -397,8 +401,31 @@ begin
         nmi				=> cpu_nmi
       );
 
-    wram_data <= sram_i.d(7 downto 0);
+    GEN_STOCK_6809 : if not PLATFORM_HAS_KONAMI_CPU generate
+      decrypted_d_i <= cpu_d_i;
+    end generate GEN_STOCK_6809;
     
+    GEN_KONAMI : if PLATFORM_HAS_KONAMI_CPU generate
+      decrypted_d_i(7) <= ((cpu_d_i(7) and not cpu_a(1)) or (not cpu_d_i(7) and cpu_a(1))) 
+                              when cpu_opfetch = '1' else
+                            cpu_d_i(7);
+      decrypted_d_i(6) <= cpu_d_i(6);
+      decrypted_d_i(5) <= ((cpu_d_i(5) and cpu_a(1)) or (not cpu_d_i(5) and not cpu_a(1))) 
+                              when cpu_opfetch = '1' else
+                            cpu_d_i(5);
+      decrypted_d_i(4) <= cpu_d_i(4);
+      decrypted_d_i(3) <= ((cpu_d_i(3) and not cpu_a(3)) or (not cpu_d_i(3) and cpu_a(3))) 
+                              when cpu_opfetch = '1' else
+                            cpu_d_i(3);
+      decrypted_d_i(2) <= cpu_d_i(2);
+      decrypted_d_i(1) <= ((cpu_d_i(1) and cpu_a(3)) or (not cpu_d_i(1) and not cpu_a(3))) 
+                              when cpu_opfetch = '1' else
+                            cpu_d_i(1);
+      decrypted_d_i(0) <= cpu_d_i(0);
+    end generate GEN_KONAMI;
+    
+    wram_data <= sram_i.d(7 downto 0);
+
   end generate GEN_CPU09;
   
   GEN_REAL_6809 : if TUTANKHAM_USE_REAL_6809 generate
@@ -426,11 +453,11 @@ begin
             platform_o.cpu_6809_e <= '1';
           when "10001" =>
             -- this is where coco1 latches cpu address LSB
-            cpu_addr(7 downto 0) <= platform_i.cpu_6809_a(7 downto 0);
+            cpu_a(7 downto 0) <= platform_i.cpu_6809_a(7 downto 0);
           when "10111" =>
             platform_o.cpu_6809_q <= '0';
             -- this is where coco1 latches cpu address MSB
-            cpu_addr(15 downto 8) <= platform_i.cpu_6809_a(15 downto 8);
+            cpu_a(15 downto 8) <= platform_i.cpu_6809_a(15 downto 8);
             -- this is where coco1 enables writes to SRAM
             -- - just use clk_1M5_en in this case
             clk_1M5_en <= '1';
@@ -449,9 +476,9 @@ begin
     platform_o.cpu_6809_rst_n <= not cpu_reset;
     cpu_rw <= platform_i.cpu_6809_r_wn;
     cpu_vma <= platform_i.cpu_6809_vma;
-    --cpu_addr <= platform_i.cpu_6809_a;
-    platform_o.cpu_6809_d_i <= cpu_data_i;
-    cpu_data_o <= platform_i.cpu_6809_d_o;
+    --cpu_a <= platform_i.cpu_6809_a;
+    platform_o.cpu_6809_d_i <= cpu_d_i;
+    cpu_d_o <= platform_i.cpu_6809_d_o;
     platform_o.cpu_6809_halt_n <= '1';
     platform_o.cpu_6809_irq_n <= not cpu_irq;
     platform_o.cpu_6809_firq_n <= not cpu_firq;
@@ -484,7 +511,7 @@ begin
       port map
       (
         clock			=> clk_30M,
-        address		=> cpu_addr(13 downto 0),
+        address		=> cpu_a(13 downto 0),
         q					=> rom_c_data
       );
     
@@ -499,7 +526,7 @@ begin
       port map
       (
         clock			=> clk_30M,
-        address		=> cpu_addr(12 downto 0),
+        address		=> cpu_a(12 downto 0),
         q					=> rom_a_data
       );
     
@@ -517,7 +544,7 @@ begin
           port map
           (
             clock			=> clk_30M,
-            address		=> cpu_addr(11 downto 0),
+            address		=> cpu_a(11 downto 0),
             q					=> data_9000_c(i)
           );
       end generate GEN_TUTANKHM_ROMS;
@@ -550,7 +577,7 @@ begin
           (
             clock			            => clk_30M,
             address(12)           => bank_r(0),
-            address(11 downto 0)  => cpu_addr(11 downto 0),
+            address(11 downto 0)  => cpu_a(11 downto 0),
             q					            => data_9000_c(i)
           );
       end generate GEN_JUNOFRST_ROMS;
@@ -579,9 +606,9 @@ begin
 		port map
 		(
 			clock_b			=> clk_30M,
-			address_b		=> cpu_addr(TUTANKHAM_VRAM_WIDTHAD-1 downto 0),
+			address_b		=> cpu_a(TUTANKHAM_VRAM_WIDTHAD-1 downto 0),
 			wren_b			=> vram0_wr,
-			data_b			=> cpu_data_o,
+			data_b			=> cpu_d_o,
 			q_b					=> vram0_data,
 
 			clock_a			=> clk_video,

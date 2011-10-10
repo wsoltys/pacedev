@@ -8,6 +8,7 @@ package platform_variant_pkg is
 	-- Platform-variant-specific constants (optional)
 	--
 
-  constant PLATFORM_VARIANT : string := "junofrst";
-	
+  constant PLATFORM_VARIANT         : string := "junofrst";
+	constant PLATFORM_HAS_KONAMI_CPU  : boolean := true;
+  
 end;
