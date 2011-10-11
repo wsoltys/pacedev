@@ -218,6 +218,7 @@ entity cpu09 is
 		vma      : out std_logic;                     -- valid memory address (active high)
       lic      : out std_logic;                     -- last instruction cycle (active high)
       ifetch   : out std_logic;                     -- instruction fetch cycle (active high)
+      opfetch  : out std_logic;                     -- opcode fetch (active high)
       ba       : out std_logic;                     -- bus available (high on sync wait or DMA grant)
       bs       : out std_logic;                     -- bus status (high on interrupt or reset vector fetch or DMA grant)
 		addr     : out std_logic_vector(15 downto 0); -- address bus output
@@ -1491,6 +1492,7 @@ begin
         ba         <= '0';
         bs         <= '0';
         lic        <= '0';
+        opfetch    <= '0';
         -- Registers preserved
         cc_ctrl    <= latch_cc;
         acca_ctrl  <= latch_acca;
@@ -1570,6 +1572,7 @@ begin
 			 --
           when fetch_state =>
 				   -- fetch the op code
+               opfetch    <= '1';
 			      op_ctrl    <= fetch_op;
                pre_ctrl   <= fetch_pre;
                ea_ctrl    <= reset_ea;
@@ -1912,6 +1915,7 @@ begin
 					-- op=(pc) / pc=pc+1
 					--
 		         when "0000" => -- page2
+                 opfetch    <= '1';
 			        op_ctrl    <= fetch_op;
 					  -- advance pc
                  pc_ctrl    <= incr_pc;
@@ -1923,6 +1927,7 @@ begin
 					-- op=(pc) / pc=pc+1
 					--
 		         when "0001" => -- page3
+                 opfetch    <= '1';
 			        op_ctrl    <= fetch_op;
 					  -- advance pc
                  pc_ctrl    <= incr_pc;
@@ -5742,4 +5747,3 @@ end process;
 
 end rtl;
 	
-
