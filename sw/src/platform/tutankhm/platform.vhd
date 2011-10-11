@@ -98,13 +98,14 @@ architecture SYN of platform is
 	signal clk_1M5_en_n		: std_logic;
 	signal cpu_rw					: std_logic;
 	signal cpu_vma				: std_logic;
+  signal cpu_lic        : std_logic;
+  signal cpu_opfetch    : std_logic;
 	signal cpu_a				  : std_logic_vector(15 downto 0);
 	signal cpu_d_i			  : std_logic_vector(7 downto 0);
 	signal cpu_d_o			  : std_logic_vector(7 downto 0);
 	signal cpu_irq				: std_logic;
 	signal cpu_firq				: std_logic;
 	signal cpu_nmi				: std_logic;
-  signal cpu_opfetch    : std_logic;
   
   -- ROM signals        
 	signal rom_a_cs				: std_logic;
@@ -158,7 +159,7 @@ begin
 	cpu_reset <= clkrst_i.rst(0) or game_reset;
 	
   -- SRAM signals (may or may not be used)
- sram_o.a(sram_o.a'left downto 17) <= (others => '0');
+  sram_o.a(sram_o.a'left downto 17) <= (others => '0');
   sram_o.a(16 downto 0) <= -- Graphics ROM starts at $10000 in 4KB banks - mapped to $9000
           ('1' & bank_r & cpu_a(11 downto 0)) when data_9_cs = '1' else
           std_logic_vector(resize(unsigned(cpu_a), 17));
@@ -368,7 +369,6 @@ begin
 	leds_o <= (others => '0');
 
   GEN_CPU09 : if not TUTANKHAM_USE_REAL_6809 generate
-    signal decrypted_d_i  : std_logic_vector(cpu_d_i'range);
   begin
   
     clk_en_inst : entity work.clk_div
@@ -383,16 +383,19 @@ begin
         clk_en		=> clk_1M5_en
       );
 		
-    cpu_inst : entity work.cpu09f
+    cpu_inst : entity work.konami_1
+      generic map
+      (
+        ENABLE_OPCODE_ENCRYPTION => PLATFORM_HAS_KONAMI_CPU
+      )
       port map
       (	
         clk				=> clk_1M5_en_n,
         rst				=> cpu_reset,
         rw				=> cpu_rw,
         vma				=> cpu_vma,
-        fetch     => cpu_opfetch,
         addr		  => cpu_a,
-        data_in		=> decrypted_d_i,
+        data_in		=> cpu_d_i,
         data_out	=> cpu_d_o,
         halt			=> '0',
         hold			=> '0',
@@ -401,29 +404,6 @@ begin
         nmi				=> cpu_nmi
       );
 
-    GEN_STOCK_6809 : if not PLATFORM_HAS_KONAMI_CPU generate
-      decrypted_d_i <= cpu_d_i;
-    end generate GEN_STOCK_6809;
-    
-    GEN_KONAMI : if PLATFORM_HAS_KONAMI_CPU generate
-      decrypted_d_i(7) <= ((cpu_d_i(7) and not cpu_a(1)) or (not cpu_d_i(7) and cpu_a(1))) 
-                              when cpu_opfetch = '1' else
-                            cpu_d_i(7);
-      decrypted_d_i(6) <= cpu_d_i(6);
-      decrypted_d_i(5) <= ((cpu_d_i(5) and cpu_a(1)) or (not cpu_d_i(5) and not cpu_a(1))) 
-                              when cpu_opfetch = '1' else
-                            cpu_d_i(5);
-      decrypted_d_i(4) <= cpu_d_i(4);
-      decrypted_d_i(3) <= ((cpu_d_i(3) and not cpu_a(3)) or (not cpu_d_i(3) and cpu_a(3))) 
-                              when cpu_opfetch = '1' else
-                            cpu_d_i(3);
-      decrypted_d_i(2) <= cpu_d_i(2);
-      decrypted_d_i(1) <= ((cpu_d_i(1) and cpu_a(3)) or (not cpu_d_i(1) and not cpu_a(3))) 
-                              when cpu_opfetch = '1' else
-                            cpu_d_i(1);
-      decrypted_d_i(0) <= cpu_d_i(0);
-    end generate GEN_KONAMI;
-    
     wram_data <= sram_i.d(7 downto 0);
 
   end generate GEN_CPU09;
