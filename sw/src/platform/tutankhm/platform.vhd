@@ -1,6 +1,5 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
 library work;
@@ -124,9 +123,11 @@ architecture SYN of platform is
 	signal data_9000			: std_logic_vector(7 downto 0);
 	                        
   -- VRAM signals       
-	signal vram0_cs				: std_logic;
-  signal vram0_wr       : std_logic;
-  signal vram0_data     : std_logic_vector(7 downto 0);
+	signal vram_cs				: std_logic;
+  signal vram_wr        : std_logic;
+  signal vram_a         : std_logic_vector(TUTANKHAM_VRAM_WIDTHAD-1 downto 0);
+  signal vram_d_i       : std_logic_vector(7 downto 0);
+  signal vram_d_o       : std_logic_vector(7 downto 0);
 
   -- RAM signals        
 	signal wram_cs				: std_logic;
@@ -146,6 +147,9 @@ architecture SYN of platform is
   signal blitter_cs     : std_logic;
   signal blitter_src_r  : std_logic_vector(15 downto 0);
   signal blitter_dst_r  : std_logic_vector(15 downto 0);
+  signal blitter_src    : unsigned(blitter_src_r'range);
+  signal blitter_dst    : unsigned(blitter_dst_r'range);
+  signal blitter_d      : std_logic_vector(7 downto 0);
   
 	signal dip2_cs				: std_logic;
 	signal dip1_cs				: std_logic;
@@ -178,7 +182,7 @@ begin
 	-- chip selects
 
 	-- video ram $0000-$7FFF
-	vram0_cs <=		      '1' when STD_MATCH(cpu_a,  "0---------------") else '0';
+	vram_cs <=		      '1' when STD_MATCH(cpu_a,  "0---------------") else '0';
 	-- Palette RAM $8000-$800F
 	palette_cs <=	      '1' when STD_MATCH(cpu_a, X"800"      &"----") else '0';
 	-- banked area $9000-$9FFF
@@ -230,7 +234,7 @@ begin
   end generate GEN_JUNOFRST_IO;
   
 	-- memory read mux
-	cpu_d_i <= 	vram0_data when vram0_cs = '1' else
+	cpu_d_i <= 	vram_d_o when vram_cs = '1' else
 									"11111011" when dip2_cs = '1' else
 									inputs_i(0).d when in0_cs = '1' else
 									inputs_i(1).d when in1_cs = '1' else
@@ -243,7 +247,6 @@ begin
                   rom_c_data when rom_c_cs = '1' else
 									(others => '0');
 	
-	vram0_wr <= vram0_cs and clk_1M5_en and not cpu_rw;
 	palette_wr <= palette_cs and not cpu_rw;
 
 	-- memory write enables
@@ -284,8 +287,7 @@ begin
 			graphics_o.bit8(0) <= (others => '0');
 		elsif rising_edge(clk_30M) and clk_1M5_en = '1' then
 			if cpu_rw = '0' and 
-          ((PLATFORM_VARIANT = "tutankham" and STD_MATCH(cpu_a, X"8100")) or
-           (PLATFORM_VARIANT = "junofrst" and STD_MATCH(cpu_a, X"8033"))) then
+          PLATFORM_VARIANT = "tutankham" and STD_MATCH(cpu_a, X"8100") then
 				graphics_o.bit8(0) <= cpu_d_o;
 			end if;
 		end if;
@@ -303,7 +305,7 @@ begin
 		elsif rising_edge(clk_30M) then
       if clk_1M5_en = '1' then
         if palette_wr = '1' then
-          offset := conv_integer(cpu_a(3 downto 0));
+          offset := to_integer(unsigned(cpu_a(3 downto 0)));
           palette_r(offset) <= cpu_d_o;
         end if;
       end if;
@@ -325,9 +327,11 @@ begin
 		end if;
 	end process;
 
-  BLK_BLITTER : block
-    signal blitter_go : std_logic := '0';
-    type state_t is ( S_IDLE, S_HALTING, S_BLIT );
+  GEN_BLITTER : if PLATFORM_VARIANT = "junofrst" generate
+    signal blitter_go   : std_logic := '0';
+    signal blitting     : std_logic := '0';
+    signal blitter_wr   : std_logic := '0';
+    type state_t is ( S_IDLE, S_HALTING, S_BLIT, S_INC );
     signal state : state_t;
   begin
   
@@ -344,7 +348,8 @@ begin
         blitter_go <= '0';  -- default
         if clk_1M5_en = '1' then
           -- latch on leading-edge write
-          if blitter_cs = '1' and cpu_rw_r = '1' and cpu_rw = '0' then
+          --if blitter_cs = '1' and cpu_rw_r = '1' and cpu_rw = '0' then
+          if blitter_cs = '1' and cpu_rw = '0' then
             case cpu_a(1 downto 0) is
               when "00" =>
                 blitter_dst_r(15 downto 8) <= cpu_d_o;
@@ -364,31 +369,71 @@ begin
 
     -- blitter SM
     process (clk_30M, rst_30M)
+      variable y : integer range 0 to 15;
+      variable x : integer range 0 to 15;
     begin
       if rst_30M = '1' then
         cpu_halt <= '0';
+        blitting <= '0';
+        blitter_wr <= '0';
         state <= S_IDLE;
       elsif rising_edge(clk_30M) then
         case state is
           when S_IDLE =>
+            blitting <= '0';
             if blitter_go = '1' then
               cpu_halt <= '1';
               state <= S_HALTING;
             end if;
           when S_HALTING =>
             if cpu_ba = '1' then
+              blitting <= '1';
+              blitter_src <= unsigned(blitter_src_r);
+              blitter_dst <= unsigned(blitter_dst_r);
+              y := 0;
+              x := 0;
               state <= S_BLIT;
             end if;
           when S_BLIT =>
-            cpu_halt <= '0';
-            state <= S_IDLE;
+            blitter_wr <= '1';
+            state <= S_INC;
+          when S_INC =>
+            blitter_wr <= '0';
+            state <= S_BLIT;  -- default
+            if x = 15 then
+              x := 0;
+              y := y + 1;
+              blitter_dst <= blitter_dst + 241;
+            elsif y = 15 then
+              cpu_halt <= '0';
+              state <= S_IDLE;
+            else
+              x := x + 1;
+              blitter_dst <= blitter_dst + 1;
+            end if;
+            -- source data is contiguous
+            blitter_src <= blitter_src + 1;
           when others =>
             state <= S_IDLE;
         end case;
       end if;
     end process;
+
+    -- video ram data mux
+    vram_a <= cpu_a(vram_a'range) when blitting = '0' else
+              std_logic_vector(blitter_dst(vram_a'range));
+    vram_d_i <= cpu_d_o when blitting = '0' else
+                blitter_d;
+    vram_wr <=  (vram_cs and clk_1M5_en and not cpu_rw) when blitting = '0' else
+                blitter_wr;
     
-  end block BLK_BLITTER;
+  end generate GEN_BLITTER;
+  
+  GEN_NO_BLITTER : if PLATFORM_VARIANT /= "junofrst" generate
+    cpu_halt <= '0';
+    vram_a <= cpu_a(vram_a'range);
+    vram_d_i <= cpu_d_o;
+  end generate GEN_NO_BLITTER;
   
 	-- vblank interrupt at 30Hz
 	process (clk_30M, rst_30M)
@@ -492,7 +537,7 @@ begin
     platform_o.button <= buttons_i(platform_o.button'range);
 
     process (clk_30M, rst_30M)
-      variable count : std_logic_vector(4 downto 0) := (others => '0');
+      variable count : unsigned(4 downto 0) := (others => '0');
     begin
       if clkrst_i.rst(0) = '1' then
         platform_o.cpu_6809_q <= '0';
@@ -617,7 +662,9 @@ begin
     end generate GEN_TUTANKHM_ROM_DATA;
   
     GEN_JUNOFRST_ROM_DATA : if PLATFORM_VARIANT = "junofrst" generate
-
+      signal gfx1_0_d : std_logic_vector(7 downto 0);
+      signal gfx1_1_d : std_logic_vector(7 downto 0);
+    begin
       GEN_JUNOFRST_ROMS : for i in 1 to 6 generate
         rom_c_inst : entity work.sprom
           generic map
@@ -644,12 +691,43 @@ begin
                     data_9000_c(6) when bank_r(3 downto 1) = "101" else
                     (others => 'Z');
                     
+      gfx1_0_inst : entity work.sprom
+        generic map
+        (
+          init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
+                          "/roms/gfx1_0.hex",
+          widthad_a		=> 14
+        )
+        port map
+        (
+          clock			            => clk_30M,
+          address(13 downto 0)  => std_logic_vector(blitter_src(14 downto 1)),
+          q					            => gfx1_0_d
+        );
+    
+      gfx1_1_inst : entity work.sprom
+        generic map
+        (
+          init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
+                          "/roms/gfx1_1.hex",
+          widthad_a		=> 13
+        )
+        port map
+        (
+          clock			            => clk_30M,
+          address(12 downto 0)  => std_logic_vector(blitter_src(13 downto 1)),
+          q					            => gfx1_1_d
+        );
+    
+      blitter_d <=  gfx1_0_d when blitter_src(15) = '0' else
+                    gfx1_1_d;
+                  
     end generate GEN_JUNOFRST_ROM_DATA;
   
 	end generate GEN_FPGA_ROMS;
 	
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-	vram0_inst : entity work.dpram
+	vram_inst : entity work.dpram
 		generic map
 		(
 			init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
@@ -660,10 +738,10 @@ begin
 		port map
 		(
 			clock_b			=> clk_30M,
-			address_b		=> cpu_a(TUTANKHAM_VRAM_WIDTHAD-1 downto 0),
-			wren_b			=> vram0_wr,
-			data_b			=> cpu_d_o,
-			q_b					=> vram0_data,
+			address_b		=> vram_a,
+			wren_b			=> vram_wr,
+			data_b			=> vram_d_i,
+			q_b					=> vram_d_o,
 
 			clock_a			=> clk_video,
 			address_a		=> bitmap_i(1).a(TUTANKHAM_VRAM_WIDTHAD-1 downto 0),
