@@ -88,6 +88,7 @@ architecture SYN of platform is
 	constant TUTANKHAM_VRAM_SIZE		: integer := 2**TUTANKHAM_VRAM_WIDTHAD;
 
 	alias clk_30M					: std_logic is clkrst_i.clk(0);
+  alias rst_30M         : std_logic is clkrst_i.rst(0);
 	alias clk_video       : std_logic is clkrst_i.clk(1);
 	signal cpu_reset			: std_logic;
 
@@ -97,12 +98,12 @@ architecture SYN of platform is
   signal clk_1M5_en			: std_logic;
 	signal clk_1M5_en_n		: std_logic;
 	signal cpu_rw					: std_logic;
+  signal cpu_ba         : std_logic;
 	signal cpu_vma				: std_logic;
-  signal cpu_lic        : std_logic;
-  signal cpu_opfetch    : std_logic;
 	signal cpu_a				  : std_logic_vector(15 downto 0);
 	signal cpu_d_i			  : std_logic_vector(7 downto 0);
 	signal cpu_d_o			  : std_logic_vector(7 downto 0);
+  signal cpu_halt       : std_logic;
 	signal cpu_irq				: std_logic;
 	signal cpu_firq				: std_logic;
 	signal cpu_nmi				: std_logic;
@@ -140,7 +141,12 @@ architecture SYN of platform is
 	signal palette_cs			: std_logic;
 	signal palette_wr			: std_logic;
 	signal palette_r			: PAL_A_t(15 downto 0);
-	
+
+    -- blitter signals
+  signal blitter_cs     : std_logic;
+  signal blitter_src_r  : std_logic_vector(15 downto 0);
+  signal blitter_dst_r  : std_logic_vector(15 downto 0);
+  
 	signal dip2_cs				: std_logic;
 	signal dip1_cs				: std_logic;
 	signal in2_cs					: std_logic;
@@ -156,7 +162,7 @@ begin
 	clk_1M5_en_n <= not clk_1M5_en;
 
 	-- add game reset later
-	cpu_reset <= clkrst_i.rst(0) or game_reset;
+	cpu_reset <= rst_30M or game_reset;
 	
   -- SRAM signals (may or may not be used)
   sram_o.a(sram_o.a'left downto 17) <= (others => '0');
@@ -203,7 +209,7 @@ begin
   end generate GEN_TUTANKHAM_IO;
   
   GEN_JUNOFRST_IO : if PLATFORM_VARIANT = "junofrst" generate
-  
+
     -- DIPS2 $8010
     dip2_cs <=		'1' when STD_MATCH(cpu_a, X"8010") else '0';
     -- IN0 $8020
@@ -216,6 +222,8 @@ begin
     dip1_cs <=		'1' when STD_MATCH(cpu_a, X"802C") else '0';
     -- Interrupt Enable $8030
     intena_cs <= 	'1' when STD_MATCH(cpu_a, X"8030") else '0';
+    -- blitter
+    blitter_cs <= '1' when STD_MATCH(cpu_a, X"807" & "00--") else '0';
     -- RAM $8100-$8FFF
     wram_cs <=		'1' when STD_MATCH(cpu_a, X"8"&"------------") else '0';
 
@@ -270,7 +278,7 @@ begin
 	end process;
 	
 	-- implementation of scroll register
-	process (clk_30M, clkrst_i.rst(0))
+	process (clk_30M, rst_30M)
 	begin
 		if clkrst_i.rst(0) = '1' then
 			graphics_o.bit8(0) <= (others => '0');
@@ -284,7 +292,7 @@ begin
 	end process;
 	
 	-- implementation of palette RAM
-	process (clk_30M, clkrst_i.rst(0))
+	process (clk_30M, rst_30M)
 		variable offset : integer;
 	begin
     if clkrst_i.rst(0) = '1' then
@@ -316,9 +324,74 @@ begin
       end if;
 		end if;
 	end process;
-	
+
+  BLK_BLITTER : block
+    signal blitter_go : std_logic := '0';
+    type state_t is ( S_IDLE, S_HALTING, S_BLIT );
+    signal state : state_t;
+  begin
+  
+    -- blitter registers
+    process (clk_30M, rst_30M)
+      variable cpu_rw_r : std_logic;
+    begin
+      if rst_30M = '1' then
+        blitter_src_r <= (others => '0');
+        blitter_dst_r <= (others => '0');
+        blitter_go <= '0';
+        cpu_rw_r := '0';
+      elsif rising_edge(clk_30M) then
+        blitter_go <= '0';  -- default
+        if clk_1M5_en = '1' then
+          -- latch on leading-edge write
+          if blitter_cs = '1' and cpu_rw_r = '1' and cpu_rw = '0' then
+            case cpu_a(1 downto 0) is
+              when "00" =>
+                blitter_dst_r(15 downto 8) <= cpu_d_o;
+              when "01" =>
+                blitter_dst_r(7 downto 0) <= cpu_d_o;
+              when "10" =>
+                blitter_src_r(15 downto 8) <= cpu_d_o;
+              when others =>
+                blitter_src_r(7 downto 0) <= cpu_d_o;
+                blitter_go <= '1';
+            end case;
+          end if; -- blitter_cs
+          cpu_rw_r := cpu_rw;
+        end if; -- clk_1M5_en
+      end if;
+    end process;
+
+    -- blitter SM
+    process (clk_30M, rst_30M)
+    begin
+      if rst_30M = '1' then
+        cpu_halt <= '0';
+        state <= S_IDLE;
+      elsif rising_edge(clk_30M) then
+        case state is
+          when S_IDLE =>
+            if blitter_go = '1' then
+              cpu_halt <= '1';
+              state <= S_HALTING;
+            end if;
+          when S_HALTING =>
+            if cpu_ba = '1' then
+              state <= S_BLIT;
+            end if;
+          when S_BLIT =>
+            cpu_halt <= '0';
+            state <= S_IDLE;
+          when others =>
+            state <= S_IDLE;
+        end case;
+      end if;
+    end process;
+    
+  end block BLK_BLITTER;
+  
 	-- vblank interrupt at 30Hz
-	process (clk_30M, clkrst_i.rst(0))
+	process (clk_30M, rst_30M)
 		variable toggle_v 	: std_logic := '0';
 		variable vblank_r		: std_logic_vector(2 downto 0) := (others => '0');
 		alias vblank_prev 	: std_logic is vblank_r(vblank_r'left);
@@ -379,7 +452,7 @@ begin
       port map
       (
         clk				=> clk_30M,
-        reset			=> clkrst_i.rst(0),
+        reset			=> rst_30M,
         clk_en		=> clk_1M5_en
       );
 		
@@ -393,11 +466,12 @@ begin
         clk				=> clk_1M5_en_n,
         rst				=> cpu_reset,
         rw				=> cpu_rw,
+        ba        => cpu_ba,
         vma				=> cpu_vma,
         addr		  => cpu_a,
         data_in		=> cpu_d_i,
         data_out	=> cpu_d_o,
-        halt			=> '0',
+        halt			=> cpu_halt,
         hold			=> '0',
         irq				=> cpu_irq,
         firq			=> cpu_firq,
@@ -412,12 +486,12 @@ begin
   begin
 
     --platform_o.arst <= clkrst_i.arst;
-    platform_o.arst <= clkrst_i.rst(0);
+    platform_o.arst <= rst_30M;
     --platform_o.clk_50M <= clk_rst_i.clk(0);
-    platform_o.clk_cpld <= clkrst_i.clk(0);
+    platform_o.clk_cpld <= rst_30M;
     platform_o.button <= buttons_i(platform_o.button'range);
 
-    process (clk_30M, clkrst_i.rst(0))
+    process (clk_30M, rst_30M)
       variable count : std_logic_vector(4 downto 0) := (others => '0');
     begin
       if clkrst_i.rst(0) = '1' then

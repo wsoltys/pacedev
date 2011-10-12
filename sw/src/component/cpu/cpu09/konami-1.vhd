@@ -12,6 +12,7 @@ entity konami_1 is
 		clk      :	in std_logic;                     -- E clock input (falling edge)
 		rst      :  in std_logic;                     -- reset input (active high)
 		vma      : out std_logic;                     -- valid memory address (active high)
+    ba       : out std_logic;                     -- bus available (high on sync wait or DMA grant)
 		addr     : out std_logic_vector(15 downto 0); -- address bus output
 		rw       : out std_logic;                     -- read not write output
 	  data_out : out std_logic_vector(7 downto 0);  -- data bus output
@@ -67,7 +68,7 @@ begin
       lic       => open,
       ifetch    => open,
       opfetch   => opfetch,
-      ba        => open,
+      ba        => ba,
       bs        => open,
       addr		  => addr_s,
       data_in		=> decrypted_data_in,
