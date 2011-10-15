@@ -433,6 +433,7 @@ begin
     cpu_halt <= '0';
     vram_a <= cpu_a(vram_a'range);
     vram_d_i <= cpu_d_o;
+    vram_wr <=  vram_cs and clk_1M5_en and not cpu_rw;
   end generate GEN_NO_BLITTER;
   
 	-- vblank interrupt at 30Hz
