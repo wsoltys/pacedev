@@ -1,19 +1,10 @@
-<session jtag_chain="USB-Blaster [USB-0]" jtag_device="@2: EP3SL70 (0x021010DD)" sof_file="junofrst-ep3sl.sof">
+<session jtag_chain="USB-Blaster [USB-0]" jtag_device="@1: EP3C16/EP4CE15 (0x020F20DD)" sof_file="junofrst-ep3sl.sof">
   <display_tree gui_logging_enabled="0">
     <display_branch instance="auto_signaltap_0" log="USE_GLOBAL_TEMP" signal_set="USE_GLOBAL_TEMP" trigger="USE_GLOBAL_TEMP"/>
   </display_tree>
   <instance entity_name="sld_signaltap" is_auto_node="yes" is_expanded="true" name="auto_signaltap_0" source_file="sld_signaltap.vhd">
     <node_ip_info instance_id="0" mfg_id="110" node_id="0" version="6"/>
-    <position_info>
-      <single attribute="active tab" value="0"/>
-      <single attribute="data horizontal scroll position" value="0"/>
-      <single attribute="data vertical scroll position" value="0"/>
-      <single attribute="zoom level denominator" value="1"/>
-      <single attribute="zoom level numerator" value="1"/>
-      <single attribute="zoom offset denominator" value="1"/>
-      <single attribute="zoom offset numerator" value="129024"/>
-    </position_info>
-    <signal_set global_temp="1" name="signal_set: 2011/10/13 01:08:36  #0">
+    <signal_set global_temp="1" is_expanded="true" name="signal_set: 2011/10/15 23:28:45  #0">
       <clock name="PACE:pace_inst|platform:platform_inst|clkrst_i.clk[0]" polarity="posedge" tap_mode="classic"/>
       <config ram_type="M4K" reserved_data_nodes="0" reserved_storage_qualifier_nodes="0" reserved_trigger_nodes="0" sample_depth="2048" trigger_in_enable="no" trigger_out_enable="no"/>
       <top_entity/>
@@ -22,16 +13,85 @@
           <wire name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:blitter_go" tap_mode="classic" type="register"/>
           <wire name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:blitter_wr" tap_mode="classic" type="register"/>
           <wire name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:blitting" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:state.S_BLIT" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:state.S_HALTING" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:state.S_IDLE" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:state.S_INC" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[9]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|halt" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|rst" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|rw" tap_mode="classic" type="combinatorial"/>
         </trigger_input_vec>
         <data_input_vec>
           <wire name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:blitter_go" tap_mode="classic" type="register"/>
           <wire name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:blitter_wr" tap_mode="classic" type="register"/>
           <wire name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:blitting" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:state.S_BLIT" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:state.S_HALTING" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:state.S_IDLE" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:state.S_INC" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[9]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|halt" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|rst" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|rw" tap_mode="classic" type="combinatorial"/>
         </data_input_vec>
         <storage_qualifier_input_vec>
           <wire name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:blitter_go" tap_mode="classic" type="register"/>
           <wire name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:blitter_wr" tap_mode="classic" type="register"/>
           <wire name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:blitting" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:state.S_BLIT" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:state.S_HALTING" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:state.S_IDLE" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:state.S_INC" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[9]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|halt" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|rst" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|rw" tap_mode="classic" type="combinatorial"/>
         </storage_qualifier_input_vec>
       </signal_vec>
       <presentation>
@@ -39,25 +99,75 @@
           <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:blitter_go"/>
           <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:blitter_wr"/>
           <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:blitting"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|halt"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:state.S_IDLE"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:state.S_HALTING"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:state.S_BLIT"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:state.S_INC"/>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[15]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[14]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[13]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[12]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[11]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[10]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[9]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[8]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[0]"/>
+          </bus>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|rw"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|rst"/>
         </data_view>
         <setup_view>
           <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:blitter_go"/>
           <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:blitter_wr"/>
           <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:blitting"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|halt"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:state.S_IDLE"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:state.S_HALTING"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:state.S_BLIT"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|\GEN_BLITTER:state.S_INC"/>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[15]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[14]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[13]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[12]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[11]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[10]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[9]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[8]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|addr[0]"/>
+          </bus>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|rw"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|konami_1:\GEN_CPU09:cpu_inst|rst"/>
         </setup_view>
       </presentation>
-      <trigger CRC="BE89ECE" attribute_mem_mode="false" gap_record="true" global_temp="1" name="trigger: 2011/10/13 01:26:32  #0" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="64" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="true" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_in="dont_care" trigger_out="active high" trigger_type="circular">
+      <trigger CRC="1875B76C" attribute_mem_mode="false" gap_record="true" global_temp="1" name="trigger: 2011/10/16 00:29:09  #0" position="pre" power_up_trigger_mode="true" record_data_gap="true" segment_size="64" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="true" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_in="dont_care" trigger_out="active high" trigger_type="circular">
         <power_up_trigger position="pre" storage_qualifier_disabled="no" trigger_in="dont_care" trigger_out="active high"/>
         <events use_custom_flow_control="no">
           <level enabled="yes" name="condition1" type="basic">
-            <power_up enabled="yes">
+            <power_up enabled="yes">'PACE:pace_inst|platform:platform_inst|konami_1:\\GEN_CPU09:cpu_inst|rst' == falling edge
             </power_up>
             <op_node/>
           </level>
         </events>
         <storage_qualifier_events>
-          <transitional>000
-            <pwr_up_transitional>000</pwr_up_transitional>
+          <transitional>00000000000000000000000000
+            <pwr_up_transitional>00000000000000000000000000</pwr_up_transitional>
           </transitional>
           <storage_qualifier_level type="basic">
             <power_up>
@@ -76,23 +186,32 @@
           </storage_qualifier_level>
         </storage_qualifier_events>
         <log>
-          <data global_temp="1" name="log: 2011/10/13 01:26:32  #1" power_up_mode="false" sample_depth="2048" trigger_position="256">000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</data>
-          <extradata>1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111T111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111</extradata>
+          <data global_temp="1" name="log: 2011/10/16 00:29:09  #1"/>
+          <extradata/>
         </log>
       </trigger>
     </signal_set>
+    <position_info>
+      <single attribute="active tab" value="1"/>
+      <single attribute="data horizontal scroll position" value="0"/>
+      <single attribute="data vertical scroll position" value="0"/>
+      <single attribute="zoom level denominator" value="1"/>
+      <single attribute="zoom level numerator" value="1"/>
+      <single attribute="zoom offset denominator" value="1"/>
+      <single attribute="zoom offset numerator" value="129279"/>
+    </position_info>
   </instance>
   <static_plugin_mnemonics/>
   <mnemonics/>
   <global_info>
-    <single attribute="active instance" value="0"/>
+    <single attribute="active instance" value="1"/>
     <single attribute="config widget visible" value="1"/>
     <single attribute="data log widget visible" value="1"/>
     <single attribute="hierarchy widget visible" value="1"/>
     <single attribute="instance widget visible" value="1"/>
     <single attribute="jtag widget visible" value="1"/>
     <multi attribute="column width" size="23" value="34,34,286,74,68,70,88,88,98,98,88,88,110,101,101,101,101,101,101,101,101,107,78"/>
-    <multi attribute="frame size" size="2" value="1920,1019"/>
+    <multi attribute="frame size" size="2" value="1920,1138"/>
     <multi attribute="jtag widget size" size="2" value="351,139"/>
   </global_info>
 </session>

@@ -146,6 +146,7 @@ architecture SYN of platform is
     -- blitter signals
   signal blitter_cs     : std_logic;
   signal blitter_src_r  : std_logic_vector(15 downto 0);
+  alias blitter_copy    : std_logic is blitter_src_r(0);
   signal blitter_dst_r  : std_logic_vector(15 downto 0);
   signal blitter_src    : unsigned(blitter_src_r'range);
   signal blitter_dst    : unsigned(blitter_dst_r'range);
@@ -347,8 +348,8 @@ begin
       elsif rising_edge(clk_30M) then
         blitter_go <= '0';  -- default
         if clk_1M5_en = '1' then
-          -- latch on leading-edge write
-          --if blitter_cs = '1' and cpu_rw_r = '1' and cpu_rw = '0' then
+          -- can't use leading-edge write
+          -- - because 16-bit write operation to $8072/3
           if blitter_cs = '1' and cpu_rw = '0' then
             case cpu_a(1 downto 0) is
               when "00" =>
@@ -370,7 +371,7 @@ begin
     -- blitter SM
     process (clk_30M, rst_30M)
       variable y : integer range 0 to 15;
-      variable x : integer range 0 to 15;
+      variable x : integer range 0 to 7;
     begin
       if rst_30M = '1' then
         cpu_halt <= '0';
@@ -388,31 +389,33 @@ begin
           when S_HALTING =>
             if cpu_ba = '1' then
               blitting <= '1';
-              blitter_src <= unsigned(blitter_src_r);
+              blitter_src <= unsigned(blitter_src_r(blitter_src_r'left downto 2)) & "00";
               blitter_dst <= unsigned(blitter_dst_r);
               y := 0;
               x := 0;
               state <= S_BLIT;
             end if;
           when S_BLIT =>
-            blitter_wr <= '1';
+            if blitter_d /= X"00" then
+              blitter_wr <= '1';
+            end if;
             state <= S_INC;
           when S_INC =>
             blitter_wr <= '0';
             state <= S_BLIT;  -- default
-            if x = 15 then
+            if x = 7 then
               x := 0;
               y := y + 1;
-              blitter_dst <= blitter_dst + 241;
+              blitter_dst <= blitter_dst + 242;
             elsif y = 15 then
               cpu_halt <= '0';
               state <= S_IDLE;
             else
               x := x + 1;
-              blitter_dst <= blitter_dst + 1;
+              blitter_dst <= blitter_dst + 2;
             end if;
             -- source data is contiguous
-            blitter_src <= blitter_src + 1;
+            blitter_src <= blitter_src + 2;
           when others =>
             state <= S_IDLE;
         end case;
@@ -421,8 +424,9 @@ begin
 
     -- video ram data mux
     vram_a <= cpu_a(vram_a'range) when blitting = '0' else
-              std_logic_vector(blitter_dst(vram_a'range));
+              std_logic_vector(blitter_dst(vram_a'left+1 downto 1));
     vram_d_i <= cpu_d_o when blitting = '0' else
+                (others => '0') when blitter_copy = '0' else
                 blitter_d;
     vram_wr <=  (vram_cs and clk_1M5_en and not cpu_rw) when blitting = '0' else
                 blitter_wr;
