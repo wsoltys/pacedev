@@ -307,7 +307,6 @@ set_location_assignment PIN_K21 -to vid_address[3]
 set_location_assignment PIN_K23 -to vid_irq_n
 set_location_assignment PIN_K25 -to vid_address[1]
 set_location_assignment PIN_K26 -to vid_address[0]
-set_location_assignment PIN_K27 -to vid_reset
 set_location_assignment PIN_K28 -to "vsi_data[4](n)"
 set_location_assignment PIN_K5 -to vdi_red[1]
 set_location_assignment PIN_K6 -to vdi_red[2]
@@ -507,7 +506,6 @@ set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_data[8]
 set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_data[9]
 set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_irq_n
 set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_read_n
-set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_reset
 set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_reset_core
 set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_spare[28]
 set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_spare[29]
@@ -1282,7 +1280,6 @@ set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vsi_clk[1] -ent
 	set_instance_assignment -name T11_DELAY 0 -to ddrc_mem_dqs
 	set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to tp88
 	set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to tp92
-	set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to vid_reset
 	set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to vid_reset_core
 
 	# Advanced I/O Timing Assignments
@@ -2344,4 +2341,7 @@ set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=4
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_POWER_UP_TRIGGER=1" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=0001010000000000000000000000000000000000000000000000000000000000000000000000000000000001000111011111111" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=6261" -section_id auto_signaltap_0
+set_location_assignment PIN_K27 -to vid_reset_n
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_reset_n
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to vid_reset_n
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

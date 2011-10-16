@@ -124,7 +124,7 @@ architecture SYN of platform is
 	                        
   -- VRAM signals       
 	signal vram_cs				: std_logic;
-  signal vram_wr        : std_logic;
+  signal vram_wr        : std_logic_vector(1 downto 0);
   signal vram_a         : std_logic_vector(TUTANKHAM_VRAM_WIDTHAD-1 downto 0);
   signal vram_d_i       : std_logic_vector(7 downto 0);
   signal vram_d_o       : std_logic_vector(7 downto 0);
@@ -150,7 +150,8 @@ architecture SYN of platform is
   signal blitter_dst_r  : std_logic_vector(15 downto 0);
   signal blitter_src    : unsigned(blitter_src_r'range);
   signal blitter_dst    : unsigned(blitter_dst_r'range);
-  signal blitter_d      : std_logic_vector(7 downto 0);
+  signal blitter_d_o    : std_logic_vector(7 downto 0);
+  signal blitter_d_i    : std_logic_vector(3 downto 0);
   
 	signal dip2_cs				: std_logic;
 	signal dip1_cs				: std_logic;
@@ -160,11 +161,12 @@ architecture SYN of platform is
 	
   -- other signals      
 	alias game_reset			: std_logic is inputs_i(3).d(0);
-
+  alias pause           : std_logic is inputs_i(3).d(1);
+  
 begin
 
 	-- cpu09 core uses negative clock edge
-	clk_1M5_en_n <= not clk_1M5_en;
+	clk_1M5_en_n <= not (clk_1M5_en and not pause);
 
 	-- add game reset later
 	cpu_reset <= rst_30M or game_reset;
@@ -331,8 +333,8 @@ begin
   GEN_BLITTER : if PLATFORM_VARIANT = "junofrst" generate
     signal blitter_go   : std_logic := '0';
     signal blitting     : std_logic := '0';
-    signal blitter_wr   : std_logic := '0';
-    type state_t is ( S_IDLE, S_HALTING, S_BLIT, S_INC );
+    signal blitter_wr   : std_logic_vector(1 downto 0) := (others => '0');
+    type state_t is ( S_IDLE, S_HALTING, S_BLIT, S_INC, S_BLIT_0, S_INC_0 );
     signal state : state_t;
   begin
   
@@ -371,12 +373,12 @@ begin
     -- blitter SM
     process (clk_30M, rst_30M)
       variable y : integer range 0 to 15;
-      variable x : integer range 0 to 7;
+      variable x : integer range 0 to 15;
     begin
       if rst_30M = '1' then
         cpu_halt <= '0';
         blitting <= '0';
-        blitter_wr <= '0';
+        blitter_wr <= (others => '0');
         state <= S_IDLE;
       elsif rising_edge(clk_30M) then
         case state is
@@ -389,33 +391,49 @@ begin
           when S_HALTING =>
             if cpu_ba = '1' then
               blitting <= '1';
+              -- b1 needs to be masked off, according to MAME
+              -- b0 is the copy bit
               blitter_src <= unsigned(blitter_src_r(blitter_src_r'left downto 2)) & "00";
               blitter_dst <= unsigned(blitter_dst_r);
               y := 0;
               x := 0;
-              state <= S_BLIT;
+              state <= S_BLIT_0;
             end if;
+          when S_BLIT_0 =>
+            if blitter_src(0) = '1' then
+              blitter_d_i <= blitter_d_o(7 downto 4);
+            else
+              blitter_d_i <= blitter_d_o(3 downto 0);
+            end if;
+            state <= S_BLIT;
           when S_BLIT =>
-            if blitter_d /= X"00" then
-              blitter_wr <= '1';
+            if blitter_d_i /= X"0" then
+              if blitter_dst(0) = '1' then
+                blitter_wr(1) <= '1';
+              else
+                blitter_wr(0) <= '1';
+              end if;
             end if;
+            state <= S_INC_0;
+          when S_INC_0 =>
+            blitter_wr <= (others => '0');
             state <= S_INC;
           when S_INC =>
-            blitter_wr <= '0';
-            state <= S_BLIT;  -- default
-            if x = 7 then
+            -- source data is contiguous
+            blitter_src <= blitter_src + 1;
+            blitter_wr <= (others => '0');
+            state <= S_BLIT_0;  -- default
+            if x = x'high then
               x := 0;
               y := y + 1;
-              blitter_dst <= blitter_dst + 242;
-            elsif y = 15 then
+              blitter_dst <= blitter_dst + 241;
+            elsif y = y'high then
               cpu_halt <= '0';
               state <= S_IDLE;
             else
               x := x + 1;
-              blitter_dst <= blitter_dst + 2;
+              blitter_dst <= blitter_dst + 1;
             end if;
-            -- source data is contiguous
-            blitter_src <= blitter_src + 2;
           when others =>
             state <= S_IDLE;
         end case;
@@ -427,8 +445,8 @@ begin
               std_logic_vector(blitter_dst(vram_a'left+1 downto 1));
     vram_d_i <= cpu_d_o when blitting = '0' else
                 (others => '0') when blitter_copy = '0' else
-                blitter_d;
-    vram_wr <=  (vram_cs and clk_1M5_en and not cpu_rw) when blitting = '0' else
+                (blitter_d_i & blitter_d_i);
+    vram_wr <=  (others => (vram_cs and clk_1M5_en and not cpu_rw)) when blitting = '0' else
                 blitter_wr;
     
   end generate GEN_BLITTER;
@@ -437,7 +455,7 @@ begin
     cpu_halt <= '0';
     vram_a <= cpu_a(vram_a'range);
     vram_d_i <= cpu_d_o;
-    vram_wr <=  vram_cs and clk_1M5_en and not cpu_rw;
+    vram_wr <= (others => vram_cs and clk_1M5_en and not cpu_rw);
   end generate GEN_NO_BLITTER;
   
 	-- vblank interrupt at 30Hz
@@ -724,35 +742,60 @@ begin
           q					            => gfx1_1_d
         );
     
-      blitter_d <=  gfx1_0_d when blitter_src(15) = '0' else
-                    gfx1_1_d;
+      blitter_d_o <=  gfx1_0_d when blitter_src(15) = '0' else
+                      gfx1_1_d;
                   
     end generate GEN_JUNOFRST_ROM_DATA;
   
 	end generate GEN_FPGA_ROMS;
 	
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-	vram_inst : entity work.dpram
+	vram74_inst : entity work.dpram
 		generic map
 		(
-			init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
-                      "/roms/vram.hex",
+--			init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
+--                      "/roms/vram.hex",
 			numwords_a	=> TUTANKHAM_VRAM_SIZE,
-			widthad_a		=> TUTANKHAM_VRAM_WIDTHAD
+			widthad_a		=> TUTANKHAM_VRAM_WIDTHAD,
+      width_a     => 4
 		)
 		port map
 		(
 			clock_b			=> clk_30M,
 			address_b		=> vram_a,
-			wren_b			=> vram_wr,
-			data_b			=> vram_d_i,
-			q_b					=> vram_d_o,
+			wren_b			=> vram_wr(1),
+			data_b			=> vram_d_i(7 downto 4),
+			q_b					=> vram_d_o(7 downto 4),
 
 			clock_a			=> clk_video,
 			address_a		=> bitmap_i(1).a(TUTANKHAM_VRAM_WIDTHAD-1 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> bitmap_o(1).d
+			q_a					=> bitmap_o(1).d(7 downto 4)
+		);
+
+	vram30_inst : entity work.dpram
+		generic map
+		(
+--			init_file		=> TUTANKHAM_SOURCE_ROOT_DIR & PLATFORM_VARIANT &
+--                      "/roms/vram.hex",
+			numwords_a	=> TUTANKHAM_VRAM_SIZE,
+			widthad_a		=> TUTANKHAM_VRAM_WIDTHAD,
+      width_a     => 4
+		)
+		port map
+		(
+			clock_b			=> clk_30M,
+			address_b		=> vram_a,
+			wren_b			=> vram_wr(0),
+			data_b			=> vram_d_i(3 downto 0),
+			q_b					=> vram_d_o(3 downto 0),
+
+			clock_a			=> clk_video,
+			address_a		=> bitmap_i(1).a(TUTANKHAM_VRAM_WIDTHAD-1 downto 0),
+			wren_a			=> '0',
+			data_a			=> (others => 'X'),
+			q_a					=> bitmap_o(1).d(3 downto 0)
 		);
 
 end SYN;
