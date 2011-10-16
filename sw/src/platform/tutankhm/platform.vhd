@@ -424,12 +424,14 @@ begin
             blitter_wr <= (others => '0');
             state <= S_BLIT_0;  -- default
             if x = x'high then
-              x := 0;
-              y := y + 1;
-              blitter_dst <= blitter_dst + 241;
-            elsif y = y'high then
-              cpu_halt <= '0';
-              state <= S_IDLE;
+              if y = y'high then
+                cpu_halt <= '0';
+                state <= S_IDLE;
+              else
+                x := 0;
+                y := y + 1;
+                blitter_dst <= blitter_dst + 241;
+              end if;
             else
               x := x + 1;
               blitter_dst <= blitter_dst + 1;
