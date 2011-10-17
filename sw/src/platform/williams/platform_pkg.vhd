@@ -25,11 +25,11 @@ package platform_pkg is
 	-- Platform-specific constants (optional)
 	--
 
-	constant DEFENDER_1MHz_CLK0_COUNTS			  : natural := 
+	constant CLK0_FREQ_MHz			          : natural := 
     PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
 
 	constant DEFENDER_CPU_CLK_ENA_DIVIDE_BY	  : natural := 
-    DEFENDER_1MHz_CLK0_COUNTS / 3;
+          CLK0_FREQ_MHz / 3;
 
   type from_PLATFORM_IO_t is record
     not_used  : std_logic;

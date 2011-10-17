@@ -1,6 +1,5 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
 library work;
@@ -20,8 +19,7 @@ entity platform is
   port
   (
     -- clocking and reset
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -41,11 +39,11 @@ entity platform is
 
     -- graphics
     
-    bitmap_i        : in from_BITMAP_CTL_t;
-    bitmap_o        : out to_BITMAP_CTL_t;
+    bitmap_i        : in from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
+    bitmap_o        : out to_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
     
-    tilemap_i       : in from_TILEMAP_CTL_t;
-    tilemap_o       : out to_TILEMAP_CTL_t;
+    tilemap_i       : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
+    tilemap_o       : out to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
 
     sprite_reg_o    : out to_SPRITE_REG_t;
     sprite_i        : in from_SPRITE_CTL_t;
@@ -87,10 +85,11 @@ architecture SYN of platform is
 
 	constant DEFENDER_VRAM_SIZE		: integer := 2**DEFENDER_VRAM_WIDTHAD;
 
-	alias clk_20M					: std_logic is clk_i(0);
-	alias clk_video				: std_logic is clk_i(1);
+	alias clk_20M					: std_logic is clkrst_i.clk(0);
+	alias clk_video				: std_logic is clkrst_i.clk(1);
 	signal cpu_reset			: std_logic;
-
+  alias rst_20M         : std_logic is clkrst_i.rst(0);
+  
   -- uP signals  
   signal clk_1M_en			: std_logic;
 	signal clk_1M_en_n		: std_logic;
@@ -169,7 +168,7 @@ begin
 	clk_1M_en_n <= not clk_1M_en;
 
 	-- add game reset later
-	cpu_reset <= reset_i or game_reset;
+	cpu_reset <= rst_20M or game_reset;
 	
   -- SRAM signals (may or may not be used)
   sram_o.a(sram_o.a'left downto 17) <= (others => '0');
@@ -254,7 +253,8 @@ begin
 		
 	-- implementation of the banking register
 	process (clk_20M, clk_1M_en, cpu_reset)
-		variable bank_offset_v : std_logic_vector(bank_r'range);
+		--variable bank_offset_v : std_logic_vector(bank_r'range);
+		variable bank_offset_v : integer range 0 to 2**bank_r'length-1;
 	begin
 		if cpu_reset = '1' then
 			bank_r <= (others => '0');
@@ -263,13 +263,13 @@ begin
 			if cpu_rw = '0' and STD_MATCH(cpu_addr, X"D000") then
 				bank_r <= cpu_data_o(bank_r'range);
 				-- calculate high bits of sram address
-				if (cpu_data_o(bank_r'range) = 0) then
+				if cpu_data_o(bank_r'range) = "000" then
 					-- strictly speaking, we don't care about sram_addr when bank=0
 					-- but this simplifies sram_we masking to protect ROMs
 					sram_addr_hi <= '0' & X"C";
 				else
-					bank_offset_v := cpu_data_o(bank_r'range) - 1;
-					sram_addr_hi <= "10" & bank_offset_v;
+					bank_offset_v := to_integer(unsigned(cpu_data_o(bank_r'range))) - 1;
+					sram_addr_hi <= "10" & std_logic_vector(to_unsigned(bank_offset_v, bank_r'length));
 				end if;
 			end if;
 		end if;
@@ -277,32 +277,32 @@ begin
 	
 	-- implementation of palette RAM
 	process (clk_20M, clk_1M_en, palette_r)
-		variable offset : integer;
+		variable offset : integer range 0 to 2**4-1;
 	begin
 		if rising_edge(clk_20M) and clk_1M_en = '1' then
 			if palette_wr = '1' then
-				offset := conv_integer(cpu_addr(3 downto 0));
+				offset := to_integer(unsigned(cpu_addr(3 downto 0)));
 				palette_r(offset) <= cpu_data_o;
 			end if;
 		end if;
 		graphics_o.pal <= palette_r;
 	end process;
 	
-	bitmap_o.d <= 	bitmap0_data when bitmap_i.a(15) = '0' else
-									bitmap8_data when bitmap_i.a(15 downto 12) = X"8" else
-									bitmap9_data;
+	bitmap_o(1).d <= 	bitmap0_data when bitmap_i(1).a(15) = '0' else
+                    bitmap8_data when bitmap_i(1).a(15 downto 12) = X"8" else
+                    bitmap9_data;
 
 	-- irqa interrupt at scanline 240
-	process (clk_20M, reset_i)
+	process (clk_20M, rst_20M)
 	begin
-		if reset_i = '1' then
+		if rst_20M = '1' then
 			count240 <= '0';
 		elsif rising_edge(clk_20M) then
-			if graphics_i.y = 0 then
+			if graphics_i.y = std_logic_vector(to_unsigned(0, graphics_i.y'length)) then
 				count240 <= '0';
 			-- check for 240
 			--elsif video_counter = 240 then
-			elsif graphics_i.y = 239 then
+			elsif graphics_i.y = std_logic_vector(to_unsigned(239, graphics_i.y'length)) then
 				count240 <= '1';
 			end if;
 		end if;
@@ -320,9 +320,9 @@ begin
   flash_o <= NULL_TO_FLASH;
   sprite_reg_o <= NULL_TO_SPRITE_REG;
   sprite_o <= NULL_TO_SPRITE_CTL;
-  tilemap_o <= NULL_TO_TILEMAP_CTL;
-  graphics_o.bit8_1 <= (others => '0');
-  graphics_o.bit16_1 <= (others => '0');
+  --tilemap_o <= NULL_TO_TILEMAP_CTL;
+  graphics_o.bit8(0) <= (others => '0');
+  graphics_o.bit16(0) <= (others => '0');
   osd_o <= NULL_TO_OSD;
   snd_o <= NULL_TO_SOUND;
   ser_o <= NULL_TO_SERIAL;
@@ -337,7 +337,7 @@ begin
 		port map
 		(
 			clk				=> clk_20M,
-			reset			=> reset_i,
+			reset			=> rst_20M,
 			clk_en		=> clk_1M_en
 		);
 		
@@ -348,7 +348,7 @@ begin
 			rst				=> cpu_reset,
 			rw				=> cpu_rw,
 			vma				=> cpu_vma,
-			address		=> cpu_addr,
+			addr		  => cpu_addr,
 		  data_in		=> cpu_data_i,
 		  data_out	=> cpu_data_o,
 			halt			=> '0',
@@ -392,7 +392,7 @@ begin
 			generic map
 			(
 				init_file		=> "../../../../../src/platform/williams/defender/roms/rom_d.hex",
-				numwords_a	=> 4096,
+				--numwords_a	=> 4096,
 				widthad_a		=> 12
 			)
 			port map
@@ -406,7 +406,7 @@ begin
 			generic map
 			(
 				init_file		=> "../../../../../src/platform/williams/defender/roms/rom_ef.hex",
-				numwords_a	=> 8192,
+				--numwords_a	=> 8192,
 				widthad_a		=> 13
 			)
 			port map
@@ -420,7 +420,7 @@ begin
 			generic map
 			(
 				init_file		=> "../../../../../src/platform/williams/defender/roms/rom_b0.hex",
-				numwords_a	=> 4096,
+				--numwords_a	=> 4096,
 				widthad_a		=> 12
 			)
 			port map
@@ -434,7 +434,7 @@ begin
 			generic map
 			(
 				init_file		=> "../../../../../src/platform/williams/defender/roms/rom_b1.hex",
-				numwords_a	=> 4096,
+				--numwords_a	=> 4096,
 				widthad_a		=> 12
 			)
 			port map
@@ -448,7 +448,7 @@ begin
 			generic map
 			(
 				init_file		=> "../../../../../src/platform/williams/defender/roms/rom_b2.hex",
-				numwords_a	=> 4096,
+				--numwords_a	=> 4096,
 				widthad_a		=> 12
 			)
 			port map
@@ -462,7 +462,7 @@ begin
 			generic map
 			(
 				init_file		=> "../../../../../src/platform/williams/defender/roms/rom_b6.hex",
-				numwords_a	=> 2048,
+				--numwords_a	=> 2048,
 				widthad_a		=> 11
 			)
 			port map
@@ -479,7 +479,7 @@ begin
 		generic map
 		(
 			init_file		=> "../../../../../src/platform/williams/defender/roms/vram.hex",
-			numwords_a	=> DEFENDER_VRAM_SIZE,
+			--numwords_a	=> DEFENDER_VRAM_SIZE,
 			widthad_a		=> DEFENDER_VRAM_WIDTHAD
 		)
 		port map
@@ -491,7 +491,7 @@ begin
 			q_b					=> vram0_data,
 
 			clock_a			=> clk_video,
-			address_a		=> bitmap_i.a(DEFENDER_VRAM_WIDTHAD-1 downto 0),
+			address_a		=> bitmap_i(1).a(DEFENDER_VRAM_WIDTHAD-1 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
 			q_a					=> bitmap0_data
@@ -501,7 +501,7 @@ begin
 	vram8_inst : entity work.dpram
 		generic map
 		(
-			numwords_a	=> 4096,
+			--numwords_a	=> 4096,
 			widthad_a		=> 12
 		)
 		port map
@@ -513,7 +513,7 @@ begin
 			q_b					=> vram8_data,
 
 			clock_a			=> clk_video,
-			address_a		=> bitmap_i.a(11 downto 0),
+			address_a		=> bitmap_i(1).a(11 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
 			q_a					=> bitmap8_data
@@ -523,7 +523,7 @@ begin
 	vram9_inst : entity work.dpram
 		generic map
 		(
-			numwords_a	=> 2048,
+			--numwords_a	=> 2048,
 			widthad_a		=> 11
 		)
 		port map
@@ -535,7 +535,7 @@ begin
 			q_b					=> vram9_data,
 
 			clock_a			=> clk_video,
-			address_a		=> bitmap_i.a(10 downto 0),
+			address_a		=> bitmap_i(1).a(10 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
 			q_a					=> bitmap9_data
@@ -545,7 +545,7 @@ begin
 		port map
 		(	
 			clk       	=> clk_1M_en,
-	    rst       	=> reset_i,
+	    rst       	=> rst_20M,
 	    cs        	=> pia0_cs,
 	    rw        	=> cpu_rw,
 	    addr      	=> cpu_addr(1 downto 0),
@@ -573,7 +573,7 @@ begin
 		port map
 		(	
 			clk       	=> clk_1M_en,
-	    rst       	=> reset_i,
+	    rst       	=> rst_20M,
 	    cs        	=> pia1_cs,
 	    rw        	=> cpu_rw,
 	    addr      	=> cpu_addr(1 downto 0),

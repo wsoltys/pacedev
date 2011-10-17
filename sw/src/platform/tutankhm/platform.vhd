@@ -393,7 +393,12 @@ begin
               blitting <= '1';
               -- b1 needs to be masked off, according to MAME
               -- b0 is the copy bit
-              blitter_src <= unsigned(blitter_src_r(blitter_src_r'left downto 2)) & "00";
+              --blitter_src <= unsigned(blitter_src_r(blitter_src_r'left downto 2)) & "00";
+              -- I don't understand why we need to add 1...
+              --blitter_src <= (unsigned(blitter_src_r(blitter_src_r'left downto 2)) & "00") + 1;
+              -- this is what the schematics suggest...
+              blitter_src <= unsigned(blitter_src_r(blitter_src_r'left downto 8)) & 
+                              unsigned(blitter_src_r(6 downto 1)) & "00";
               blitter_dst <= unsigned(blitter_dst_r);
               y := 0;
               x := 0;
