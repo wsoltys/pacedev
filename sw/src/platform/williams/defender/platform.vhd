@@ -231,11 +231,11 @@ begin
 									vram0_data when vram0_cs = '1' else
 									(others => '0');
 	
-	vram0_wr <= vram0_cs and not cpu_rw;
-	vram8_wr <= vram8_cs and not cpu_rw;
-	vram9_wr <= vram9_cs and not cpu_rw;
-	palette_wr <= palette_cs and not cpu_rw;
-	nvram_wr <= (nvram_cs and not cpu_rw) when bank_r = "000" else '0';
+	vram0_wr <= vram0_cs and clk_1M_en and not cpu_rw;
+	vram8_wr <= vram8_cs and clk_1M_en and not cpu_rw;
+	vram9_wr <= vram9_cs and clk_1M_en and not cpu_rw;
+	palette_wr <= palette_cs and clk_1M_en and not cpu_rw;
+	nvram_wr <= (nvram_cs and clk_1M_en and not cpu_rw) when bank_r = "000" else '0';
 	--wram_wr <= not cpu_rw and not (rom_d_cs or rom_e_cs or (data_c_cs and sram_addr_hi(16)));
 
 	-- memory write enables
@@ -244,7 +244,8 @@ begin
 		if rising_edge(clk_20M) then
 			if clk_1M_en = '1' then
 				-- always write thru to RAM unless ROM is addressed
-				wram_wr <= not cpu_rw and not (rom_d_cs or rom_e_cs or (data_c_cs and sram_addr_hi(16)));
+				--wram_wr <= not cpu_rw and not (rom_d_cs or rom_e_cs or (data_c_cs and sram_addr_hi(16)));
+				wram_wr <= not cpu_rw and clk_1M_en and wram_cs;
 			else
 				wram_wr <= '0';
 			end if;
