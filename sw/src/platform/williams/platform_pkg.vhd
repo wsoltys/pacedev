@@ -31,6 +31,8 @@ package platform_pkg is
 	constant DEFENDER_CPU_CLK_ENA_DIVIDE_BY	  : natural := 
           CLK0_FREQ_MHz / 3;
 
+  constant WILLIAMS_SOURCE_ROOT_DIR : string := "../../../../../src/platform/williams/";
+
   type from_PLATFORM_IO_t is record
     not_used  : std_logic;
   end record;
