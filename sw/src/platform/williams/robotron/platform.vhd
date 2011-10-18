@@ -84,42 +84,44 @@ end platform;
 
 architecture SYN of platform is
 
-	constant DEFENDER_VRAM_SIZE		: integer := 2**DEFENDER_VRAM_WIDTHAD;
+	constant ROBOTRON_VRAM_SIZE		: integer := 2**ROBOTRON_VRAM_WIDTHAD;
 
-	alias clk_20M					: std_logic is clkrst_i.clk(0);
-	alias clk_video				: std_logic is clkrst_i.clk(1);
-	signal cpu_reset			: std_logic;
-  alias rst_20M         : std_logic is clkrst_i.rst(0);
+	alias clk_20M					    : std_logic is clkrst_i.clk(0);
+  alias rst_20M             : std_logic is clkrst_i.rst(0);
+	alias clk_video				    : std_logic is clkrst_i.clk(1);
+	signal cpu_reset			    : std_logic;
   
   -- uP signals  
-  signal clk_1M_en			: std_logic;
-	signal clk_1M_en_n		: std_logic;
-	signal cpu_r_wn				: std_logic;
-	signal cpu_vma				: std_logic;
-	signal cpu_a				  : std_logic_vector(15 downto 0);
-	signal cpu_d_i			  : std_logic_vector(7 downto 0);
-	signal cpu_d_o			  : std_logic_vector(7 downto 0);
-	signal cpu_irq				: std_logic;
-	signal cpu_firq				: std_logic;
-	signal cpu_nmi				: std_logic;
+  signal clk_1M_en			    : std_logic;
+	signal clk_1M_en_n		    : std_logic;
+	signal cpu_r_wn				    : std_logic;
+	signal cpu_vma				    : std_logic;
+	signal cpu_a				      : std_logic_vector(15 downto 0);
+	signal cpu_d_i			      : std_logic_vector(7 downto 0);
+	signal cpu_d_o			      : std_logic_vector(7 downto 0);
+	signal cpu_irq				    : std_logic;
+	signal cpu_firq				    : std_logic;
+	signal cpu_nmi				    : std_logic;
 	                        
   -- ROM signals        
-	signal rom0_cs				: std_logic;
-  signal rom0_d_o       : std_logic_vector(7 downto 0);
-	signal romD_cs				: std_logic;
-  signal romD_d_o       : std_logic_vector(7 downto 0);
-	signal romE_cs				: std_logic;
-  signal romE_d_o       : std_logic_vector(7 downto 0);
-	signal romF_cs				: std_logic;
-  signal romF_d_o       : std_logic_vector(7 downto 0);
+	signal rom0_cs				    : std_logic;
+  signal rom0_d_o           : std_logic_vector(7 downto 0);
+	signal romD_cs				    : std_logic;
+  signal romD_d_o           : std_logic_vector(7 downto 0);
+	signal romE_cs				    : std_logic;
+  signal romE_d_o           : std_logic_vector(7 downto 0);
+	signal romF_cs				    : std_logic;
+  signal romF_d_o           : std_logic_vector(7 downto 0);
 	
-	-- NVRAM signals
-	signal nvram_cs				: std_logic;
-	signal nvram_wr				: std_logic;
-	signal nvram_data			: std_logic_vector(7 downto 0);
+  -- VRAM signals       
+	signal vram_cs				    : std_logic;
+  signal vram_wr            : std_logic;
+  signal vram_d_o           : std_logic_vector(7 downto 0);
 
-	-- video counter
-	signal video_counter_cs	: std_logic;	
+  -- RAM signals        
+	signal wram_cs				    : std_logic;
+  signal wram_wr            : std_logic;
+  alias wram_d_o      	    : std_logic_vector(7 downto 0) is sram_i.d(7 downto 0);
 
   -- I/O signals
 	signal palette_cs			    : std_logic;
@@ -128,41 +130,30 @@ architecture SYN of platform is
 	signal widget_pia_d_o			: std_logic_vector(7 downto 0);
 	signal rom_pia_cs				  : std_logic;
 	signal rom_pia_d_o        : std_logic_vector(7 downto 0);  
+	signal rom_pia_irqa			  : std_logic;
+	signal rom_pia_irqb			  : std_logic;
 	signal vram_select_cs			: std_logic;
   signal vram_select_r      : std_logic;
+	signal video_counter_cs	  : std_logic;	
+	signal nvram_cs				    : std_logic;
+	signal nvram_wr				    : std_logic;
+	signal nvram_data			    : std_logic_vector(7 downto 0);
 	signal io_cs			        : std_logic;
 	signal io_d_o			        : std_logic_vector(7 downto 0);
 	                        
-  -- VRAM signals       
-	signal vram0_cs				: std_logic;
-  signal vram0_wr       : std_logic;
-  signal vram0_data     : std_logic_vector(7 downto 0);
-	signal vram8_cs				: std_logic;
-  signal vram8_wr       : std_logic;
-  signal vram8_data     : std_logic_vector(7 downto 0);
-	signal vram9_cs				: std_logic;
-  signal vram9_wr       : std_logic;
-  signal vram9_data     : std_logic_vector(7 downto 0);
-
-  -- RAM signals        
-	signal wram_cs				: std_logic;
-  signal wram_wr        : std_logic;
-  alias wram_data      	: std_logic_vector(7 downto 0) is sram_i.d(7 downto 0);
-
   -- other signals      
-	alias game_reset			: std_logic is inputs_i(3).d(0);
-	signal va11						: std_logic;
-	signal count240				: std_logic;
-	signal pia1_irqa			: std_logic;
-	signal pia1_irqb			: std_logic;
+	alias platform_reset			: std_logic is inputs_i(3).d(0);
+	alias platform_pause      : std_logic is inputs_i(3).d(1);
+	signal va11						    : std_logic;
+	signal count240				    : std_logic;
 	
 begin
 
 	-- cpu09 core uses negative clock edge
-	clk_1M_en_n <= not clk_1M_en;
+	clk_1M_en_n <= not (clk_1M_en and not platform_pause);
 
 	-- add game reset later
-	cpu_reset <= rst_20M or game_reset;
+	cpu_reset <= rst_20M or platform_reset;
 	
   -- SRAM signals (may or may not be used)
   sram_o.a(sram_o.a'left downto 17) <= (others => '0');
@@ -177,9 +168,14 @@ begin
 	-- ROM chip selects
   -- $0000-$8FFF
   --            $0000-$7FFF
-	rom0_cs <= 	  '1' when STD_MATCH(cpu_a, "0---------------") else 
+	rom0_cs <= 	  '1' when STD_MATCH(cpu_a,  "0---------------") else 
   --            $8000-$8FFF
-                '1' when STD_MATCH(cpu_a, "1000------------") else 
+                '1' when STD_MATCH(cpu_a, X"8"&"------------") else 
+                '0';
+  -- video ram $0000-$97FF
+  vram_cs <=		'1' when STD_MATCH(cpu_a,  "0---------------") else
+                '1' when STD_MATCH(cpu_a, X"8"&"------------") else
+                '1' when STD_MATCH(cpu_a, X"9"&"0-----------") else 
                 '0';
 	-- ROMS $D000-$FFFF
 	romD_cs <= 	  '1' when STD_MATCH(cpu_a, X"D"&"------------") else '0';
@@ -191,10 +187,6 @@ begin
 	wram_cs <=		'1' when STD_MATCH(cpu_a,  "101-------------") else
 								'1' when STD_MATCH(cpu_a, X"9"&"1-----------") else
 								'0';
-	-- video ram $0000-$9800
-	vram0_cs <=		'1' when STD_MATCH(cpu_a,  "0---------------") else '0';
-	vram8_cs <=		'1' when STD_MATCH(cpu_a, X"8"&"------------") else '0';
-	vram9_cs <= 	'1' when STD_MATCH(cpu_a, X"9"&"0-----------") else '0';
 
   -- I/O chip selects
   -- I/O $C000-$CFFF
@@ -215,9 +207,6 @@ begin
 	nvram_cs <=					'1' when STD_MATCH(cpu_a, X"C"&"1100--------") else '0';
 
   -- memory block write enables
-	vram0_wr <= vram0_cs and clk_1M_en and not cpu_r_wn;
-	vram8_wr <= vram8_cs and clk_1M_en and not cpu_r_wn;
-	vram9_wr <= vram9_cs and clk_1M_en and not cpu_r_wn;
 	nvram_wr <= (nvram_cs and clk_1M_en and not cpu_r_wn);
 	
 	-- I/O bank
@@ -229,11 +218,11 @@ begin
 						(others => '0');
 								
 	-- memory read mux
-	cpu_d_i <=  rom0_d_o when rom0_cs = '1' else
-							vram0_data when vram0_cs = '1' else
-							vram8_data when vram8_cs = '1' else
-							vram9_data when vram9_cs = '1' else
-							wram_data when wram_cs = '1' else
+	cpu_d_i <=  -- ROM $0000-$8FFF, VRAM $0000-$97FF (overlapping)
+              -- so decode ROM space first, and fall back to VRAM
+              rom0_d_o when (rom0_cs = '1' and vram_select_r = '1') else
+							vram_d_o when vram_cs = '1' else
+							wram_d_o when wram_cs = '1' else
               io_d_o when io_cs = '1' else
               romD_d_o when romD_cs = '1' else
 							romE_d_o when romE_cs = '1' else
@@ -270,11 +259,14 @@ begin
 	end process;
 
   -- vram select register
-	process (clk_20M)
+	process (clk_20M, platform_reset)
 	begin
-		if rising_edge(clk_20M) then
+    if platform_reset = '1' then
+      vram_select_r <= '0';
+		elsif rising_edge(clk_20M) then
       if clk_1M_en = '1' then
-        if vram_select_cs = '1' and clk_1M_en = '1' and cpu_r_wn = '0' then
+        if vram_select_cs = '1' and cpu_r_wn = '0' then
+          -- 0=VRAM, 1=ROM
           vram_select_r <= cpu_d_o(0);
         end if;
       end if;
@@ -301,7 +293,7 @@ begin
 	va11 <= graphics_i.y(5);
 
 	-- cpu interrupts
-	cpu_irq <= pia1_irqa or pia1_irqb;
+	cpu_irq <= rom_pia_irqa or rom_pia_irqb;
 	cpu_firq <= '0';
 	cpu_nmi <= '0';
 
@@ -351,7 +343,7 @@ begin
 	nvram_inst : entity work.spram
 		generic map
 		(
-			init_file		=> "../../../../../src/platform/williams/defender/roms/defcmos.hex",
+			init_file		=> VARIANT_ROM_DIR & "nvram.hex",
 			numwords_a	=> 256,
 			widthad_a		=> 8
 		)
@@ -369,7 +361,7 @@ begin
 		rom_D000_inst : entity work.sprom
 			generic map
 			(
-        init_file		=> WILLIAMS_SOURCE_ROOT_DIR & PLATFORM_VARIANT & "/roms/sba.hex",
+        init_file		=> VARIANT_ROM_DIR & "sba.hex",
 				widthad_a		=> 12
 			)
 			port map
@@ -382,7 +374,7 @@ begin
 		rom_E000_inst : entity work.sprom
 			generic map
 			(
-        init_file		=> WILLIAMS_SOURCE_ROOT_DIR & PLATFORM_VARIANT & "/roms/sbb.hex",
+        init_file		=> VARIANT_ROM_DIR & "sbb.hex",
 				widthad_a		=> 12
 			)
 			port map
@@ -395,7 +387,7 @@ begin
 		rom_F000_inst : entity work.sprom
 			generic map
 			(
-        init_file		=> WILLIAMS_SOURCE_ROOT_DIR & PLATFORM_VARIANT & "/roms/sbc.hex",
+        init_file		=> VARIANT_ROM_DIR & "sbc.hex",
 				widthad_a		=> 12
 			)
 			port map
@@ -413,8 +405,7 @@ begin
       rom_inst : entity work.sprom
         generic map
         (
-          init_file		=> WILLIAMS_SOURCE_ROOT_DIR & PLATFORM_VARIANT & 
-                          "/roms/sb" & integer'image(i) & ".hex",
+          init_file		=> VARIANT_ROM_DIR & "sb" & integer'image(i) & ".hex",
           widthad_a		=> 12
         )
         port map
@@ -440,31 +431,60 @@ begin
 	end generate GEN_FPGA_ROMS;
 
   BLK_VRAM : block
-    signal bitmap0_data		: std_logic_vector(7 downto 0);
-    signal bitmap8_data		: std_logic_vector(7 downto 0);
-    signal bitmap9_data		: std_logic_vector(7 downto 0);
+  
+    signal vram0_cs				: std_logic;
+    signal vram0_wr       : std_logic;
+    signal vram0_d_o      : std_logic_vector(7 downto 0);
+    signal vram8_cs				: std_logic;
+    signal vram8_wr       : std_logic;
+    signal vram8_d_o      : std_logic_vector(7 downto 0);
+    signal vram9_cs				: std_logic;
+    signal vram9_wr       : std_logic;
+    signal vram9_d_o      : std_logic_vector(7 downto 0);
+
+    signal bitmap0_d_o    : std_logic_vector(7 downto 0);
+    signal bitmap8_d_o    : std_logic_vector(7 downto 0);
+    signal bitmap9_d_o    : std_logic_vector(7 downto 0);
+    
   begin
+
+    -- video ram $0000-$9800
+    vram0_cs <=		'1' when STD_MATCH(cpu_a,  "0---------------") else '0';
+    vram8_cs <=		'1' when STD_MATCH(cpu_a, X"8"&"------------") else '0';
+    vram9_cs <= 	'1' when STD_MATCH(cpu_a, X"9"&"0-----------") else '0';
+
+    vram0_wr <= vram0_cs and clk_1M_en and not cpu_r_wn;
+    vram8_wr <= vram8_cs and clk_1M_en and not cpu_r_wn;
+    vram9_wr <= vram9_cs and clk_1M_en and not cpu_r_wn;
+
+    vram_d_o <= vram0_d_o when vram0_cs = '1' else
+                vram8_d_o when vram8_cs = '1' else
+                vram9_d_o;
+                
+    bitmap_o(1).d <= 	bitmap0_d_o when bitmap_i(1).a(15) = '0' else
+                      bitmap8_d_o when bitmap_i(1).a(15 downto 12) = X"8" else
+                      bitmap9_d_o;
+
     -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
     vram0_inst : entity work.dpram
       generic map
       (
-        init_file		=> "../../../../../src/platform/williams/defender/roms/vram.hex",
-        --numwords_a	=> DEFENDER_VRAM_SIZE,
-        widthad_a		=> DEFENDER_VRAM_WIDTHAD
+        init_file		=> VARIANT_ROM_DIR & "vram.hex",
+        widthad_a		=> ROBOTRON_VRAM_WIDTHAD
       )
       port map
       (
         clock_b			=> clk_20M,
-        address_b		=> cpu_a(DEFENDER_VRAM_WIDTHAD-1 downto 0),
+        address_b		=> cpu_a(ROBOTRON_VRAM_WIDTHAD-1 downto 0),
         wren_b			=> vram0_wr,
         data_b			=> cpu_d_o,
-        q_b					=> vram0_data,
+        q_b					=> vram0_d_o,
 
         clock_a			=> clk_video,
-        address_a		=> bitmap_i(1).a(DEFENDER_VRAM_WIDTHAD-1 downto 0),
+        address_a		=> bitmap_i(1).a(ROBOTRON_VRAM_WIDTHAD-1 downto 0),
         wren_a			=> '0',
         data_a			=> (others => 'X'),
-        q_a					=> bitmap0_data
+        q_a					=> bitmap0_d_o
       );
 
     -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
@@ -480,13 +500,13 @@ begin
         address_b		=> cpu_a(11 downto 0),
         wren_b			=> vram8_wr,
         data_b			=> cpu_d_o,
-        q_b					=> vram8_data,
+        q_b					=> vram8_d_o,
 
         clock_a			=> clk_video,
         address_a		=> bitmap_i(1).a(11 downto 0),
         wren_a			=> '0',
         data_a			=> (others => 'X'),
-        q_a					=> bitmap8_data
+        q_a					=> bitmap8_d_o
       );
 
     -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
@@ -502,18 +522,14 @@ begin
         address_b		=> cpu_a(10 downto 0),
         wren_b			=> vram9_wr,
         data_b			=> cpu_d_o,
-        q_b					=> vram9_data,
+        q_b					=> vram9_d_o,
 
         clock_a			=> clk_video,
         address_a		=> bitmap_i(1).a(10 downto 0),
         wren_a			=> '0',
         data_a			=> (others => 'X'),
-        q_a					=> bitmap9_data
+        q_a					=> bitmap9_d_o
       );
-
-    bitmap_o(1).d <= 	bitmap0_data when bitmap_i(1).a(15) = '0' else
-                      bitmap8_data when bitmap_i(1).a(15 downto 12) = X"8" else
-                      bitmap9_data;
 
   end block BLK_VRAM;
   
@@ -555,8 +571,8 @@ begin
 	    addr      	=> cpu_a(1 downto 0),
 	    data_in   	=> cpu_d_o,
 		 	data_out  	=> rom_pia_d_o,
-		 	irqa      	=> pia1_irqa,
-		 	irqb      	=> pia1_irqb,
+		 	irqa      	=> rom_pia_irqa,
+		 	irqb      	=> rom_pia_irqb,
 		 	pa_i      	=> inputs_i(2).d,
       pa_o        => open,
       pa_oe       => open,

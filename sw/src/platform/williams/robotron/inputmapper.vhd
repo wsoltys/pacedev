@@ -33,6 +33,8 @@ end inputmapper;
 
 architecture SYN of inputmapper is
 
+  signal pause  : std_logic;
+  
 begin
 
   latchInputs: process (clk, rst_n)
@@ -45,30 +47,36 @@ begin
       for i in 0 to NUM_INPUTS-1 loop
         inputs(i).d <= (others =>'0');
       end loop;
+      pause <= '0';
     elsif rising_edge (clk) then
       -- map the dipswitches
       if (press or release) = '1' then
         case data(7 downto 0) is
+        
             -- IN0
-            when SCANCODE_LCTRL =>		-- fire
-              inputs(0).d(0) <= press;
-            when SCANCODE_LALT =>			-- thrust
-              inputs(0).d(1) <= press;
-            when SCANCODE_SPACE =>		-- smart bomb
-              inputs(0).d(2) <= press;
-            when SCANCODE_LSHIFT =>		-- hyperspace
-              inputs(0).d(3) <= press;
-            when SCANCODE_2 =>				-- start2
-              inputs(0).d(4) <= press;
-            when SCANCODE_1 =>				-- start1
-              inputs(0).d(5) <= press;
-            when SCANCODE_Z =>				-- reverse
-              inputs(0).d(6) <= press;
-            when SCANCODE_DOWN =>			-- down
-              inputs(0).d(7) <= press;
-            -- IN1
             when SCANCODE_UP =>				-- up
+              inputs(0).d(0) <= press;
+            when SCANCODE_DOWN =>			-- down
+              inputs(0).d(1) <= press;
+            when SCANCODE_LEFT =>			-- left
+              inputs(0).d(2) <= press;
+            when SCANCODE_RIGHT =>		-- right
+              inputs(0).d(3) <= press;
+            when SCANCODE_1 =>				-- start1
+              inputs(0).d(4) <= press;
+            when SCANCODE_2 =>				-- start2
+              inputs(0).d(5) <= press;
+            when SCANCODE_W =>				-- fire up
+              inputs(0).d(6) <= press;
+            when SCANCODE_Z =>				-- fire down
+              inputs(0).d(7) <= press;
+
+            -- IN1
+            when SCANCODE_A =>		    -- fire left
               inputs(1).d(0) <= press;
+            when SCANCODE_S =>		    -- fire right
+              inputs(1).d(1) <= press;
+              
             -- IN2
             when SCANCODE_F1 =>				-- auto up
               inputs(2).d(0) <= press;
@@ -82,18 +90,29 @@ begin
               inputs(2).d(4) <= press;
             when SCANCODE_6 =>				-- coin2
               inputs(2).d(5) <= press;
+
             -- special keys
             when SCANCODE_F3 =>				-- game reset
               inputs(3).d(0) <= press;
+            when SCANCODE_P =>				-- pause (toggle)
+              if press = '1' then
+                pause <= not pause;
+              end if;
+              
             when others =>
         end case;
       end if; -- press or release
+
       if (reset = '1') then
         for i in 0 to NUM_INPUTS-1 loop
           inputs(i).d <= (others =>'0');
         end loop;
       end if;
+
     end if; -- rising_edge (clk)
+
+    inputs(3).d(1) <= pause;
+
   end process latchInputs;
 
 end SYN;

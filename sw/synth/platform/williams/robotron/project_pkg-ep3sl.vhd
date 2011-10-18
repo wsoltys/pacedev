@@ -64,16 +64,13 @@ package project_pkg is
 
   -- always need SRAM (for now, use for WRAM)
   constant S5AR2_EMULATE_SRAM               : boolean := true;
-  -- required if ROMs in SRAM
-  --constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 16;
   -- $9800-$BFFF (so $8000-$BFFF)
   constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 14;
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
     
-	-- Defender constants
+	-- Robotron constants
 	
-	constant DEFENDER_ROMS_IN_SRAM			      : boolean := false;	
-	constant DEFENDER_VRAM_WIDTHAD			      : integer := 15;		-- 32KB
+	constant ROBOTRON_VRAM_WIDTHAD			      : integer := 15;		-- 32KB
 	
 	-- derived - do not edit
 

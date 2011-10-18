@@ -28,7 +28,7 @@ package platform_pkg is
 	constant CLK0_FREQ_MHz			          : natural := 
     PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
 
-	constant DEFENDER_CPU_CLK_ENA_DIVIDE_BY	  : natural := 
+	constant WILLIAMS_CPU_CLK_ENA_DIVIDE_BY	  : natural := 
           CLK0_FREQ_MHz / 3;
 
   constant WILLIAMS_SOURCE_ROOT_DIR : string := "../../../../../src/platform/williams/";
