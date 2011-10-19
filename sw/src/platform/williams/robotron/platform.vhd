@@ -116,6 +116,8 @@ architecture SYN of platform is
   -- VRAM signals       
 	signal vram_cs				    : std_logic;
   signal vram_wr            : std_logic;
+  signal vram_a             : std_logic_vector(15 downto 0);
+  signal vram_d_i           : std_logic_vector(7 downto 0);
   signal vram_d_o           : std_logic_vector(7 downto 0);
 
   -- RAM signals        
@@ -134,6 +136,7 @@ architecture SYN of platform is
 	signal rom_pia_irqb			  : std_logic;
 	signal vram_select_cs			: std_logic;
   signal vram_select_r      : std_logic;
+  signal blitter_cs         : std_logic;
 	signal video_counter_cs	  : std_logic;	
 	signal nvram_cs				    : std_logic;
 	signal nvram_wr				    : std_logic;
@@ -201,6 +204,8 @@ begin
 	rom_pia_cs <= 			'1' when STD_MATCH(cpu_a, X"C80"&"11--") else '0';
   -- VRAM SWITCH $C900-$C9FF
   vram_select_cs <=   '1' when STD_MATCH(cpu_a, X"C9"&"--------") else '0';
+	-- blitter $CA00-$CA07
+	blitter_cs <=	      '1' when STD_MATCH(cpu_a, X"CA0"&"0---") else '0';
 	-- video counter $CB00-$CBFF
 	video_counter_cs <=	'1' when STD_MATCH(cpu_a, X"CB"&"--------") else '0';
 	-- nvram $CC00-$CFFF
@@ -310,18 +315,32 @@ begin
   spi_o <= NULL_TO_SPI;
 	leds_o <= (others => '0');
 
-	clk_en_inst : entity work.clk_div
-		generic map
-		(
-			DIVISOR		=> 20
-		)
-		port map
-		(
-			clk				=> clk_20M,
-			reset			=> rst_20M,
-			clk_en		=> clk_1M_en
-		);
-		
+  -- system timing
+  process (clk_20M, rst_20M)
+    variable count : integer range 0 to 20-1;
+  begin
+    if rst_20M = '1' then
+      count := 0;
+    elsif rising_edge(clk_20M) then
+      clk_1M_en <= '0'; -- default
+      case count is
+        when 0 =>
+          clk_1M_en <= '1';
+        when others =>
+          null;
+      end case;
+      if count = count'high then
+        count := 0;
+      else
+        count := count + 1;
+      end if;
+    end if;
+  end process;
+
+  vram_a <= cpu_a;
+  vram_d_i <= cpu_d_o;
+  vram_wr <= clk_1M_en and not cpu_r_wn;
+  
 	cpu_inst : entity work.cpu09
 		port map
 		(	
@@ -449,13 +468,13 @@ begin
   begin
 
     -- video ram $0000-$9800
-    vram0_cs <=		'1' when STD_MATCH(cpu_a,  "0---------------") else '0';
-    vram8_cs <=		'1' when STD_MATCH(cpu_a, X"8"&"------------") else '0';
-    vram9_cs <= 	'1' when STD_MATCH(cpu_a, X"9"&"0-----------") else '0';
+    vram0_cs <=		'1' when STD_MATCH(vram_a,  "0---------------") else '0';
+    vram8_cs <=		'1' when STD_MATCH(vram_a, X"8"&"------------") else '0';
+    vram9_cs <= 	'1' when STD_MATCH(vram_a, X"9"&"0-----------") else '0';
 
-    vram0_wr <= vram0_cs and clk_1M_en and not cpu_r_wn;
-    vram8_wr <= vram8_cs and clk_1M_en and not cpu_r_wn;
-    vram9_wr <= vram9_cs and clk_1M_en and not cpu_r_wn;
+    vram0_wr <= vram0_cs and vram_wr;
+    vram8_wr <= vram8_cs and vram_wr;
+    vram9_wr <= vram9_cs and vram_wr;
 
     vram_d_o <= vram0_d_o when vram0_cs = '1' else
                 vram8_d_o when vram8_cs = '1' else
@@ -475,9 +494,9 @@ begin
       port map
       (
         clock_b			=> clk_20M,
-        address_b		=> cpu_a(ROBOTRON_VRAM_WIDTHAD-1 downto 0),
+        address_b		=> vram_a(ROBOTRON_VRAM_WIDTHAD-1 downto 0),
         wren_b			=> vram0_wr,
-        data_b			=> cpu_d_o,
+        data_b			=> vram_d_i,
         q_b					=> vram0_d_o,
 
         clock_a			=> clk_video,
@@ -497,9 +516,9 @@ begin
       port map
       (
         clock_b			=> clk_20M,
-        address_b		=> cpu_a(11 downto 0),
+        address_b		=> vram_a(11 downto 0),
         wren_b			=> vram8_wr,
-        data_b			=> cpu_d_o,
+        data_b			=> vram_d_i,
         q_b					=> vram8_d_o,
 
         clock_a			=> clk_video,
@@ -519,9 +538,9 @@ begin
       port map
       (
         clock_b			=> clk_20M,
-        address_b		=> cpu_a(10 downto 0),
+        address_b		=> vram_a(10 downto 0),
         wren_b			=> vram9_wr,
-        data_b			=> cpu_d_o,
+        data_b			=> vram_d_i,
         q_b					=> vram9_d_o,
 
         clock_a			=> clk_video,
