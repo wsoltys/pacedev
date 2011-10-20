@@ -136,7 +136,8 @@ architecture SYN of platform is
 	signal rom_pia_irqb			  : std_logic;
 	signal vram_select_cs			: std_logic;
   signal vram_select_r      : std_logic;
-  signal blitter_cs         : std_logic;
+  signal sc02_cs            : std_logic;
+  signal sc02_wr            : std_logic;
 	signal video_counter_cs	  : std_logic;	
 	signal nvram_cs				    : std_logic;
 	signal nvram_wr				    : std_logic;
@@ -205,7 +206,7 @@ begin
   -- VRAM SWITCH $C900-$C9FF
   vram_select_cs <=   '1' when STD_MATCH(cpu_a, X"C9"&"--------") else '0';
 	-- blitter $CA00-$CA07
-	blitter_cs <=	      '1' when STD_MATCH(cpu_a, X"CA0"&"0---") else '0';
+	sc02_cs <=	        '1' when STD_MATCH(cpu_a, X"CA0"&"0---") else '0';
 	-- video counter $CB00-$CBFF
 	video_counter_cs <=	'1' when STD_MATCH(cpu_a, X"CB"&"--------") else '0';
 	-- nvram $CC00-$CFFF
@@ -213,6 +214,7 @@ begin
 
   -- memory block write enables
 	nvram_wr <= (nvram_cs and clk_1M_en and not cpu_r_wn);
+  sc02_wr <= sc02_cs and clk_1M_en and not cpu_r_wn;
 	
 	-- I/O bank
 	io_d_o <= -- palette is WO
@@ -358,6 +360,22 @@ begin
 			nmi				=> cpu_nmi
 		);
 
+  sc02_inst : entity work.sc02
+    port map
+    (
+      clk       => clk_20M,
+      clk_en    => '1',
+      rst       => rst_20M,
+      
+      wr        => sc02_wr,
+      d         => cpu_d_o,
+      a         => cpu_a(2 downto 0),
+      ba_bs     => '0',
+      halt      => open,
+      
+      vram_a    => open
+    );
+    
 	-- Battery-backed CMOS RAM
 	nvram_inst : entity work.spram
 		generic map
