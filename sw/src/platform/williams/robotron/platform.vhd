@@ -96,12 +96,15 @@ architecture SYN of platform is
 	signal clk_1M_en_n		    : std_logic;
 	signal cpu_r_wn				    : std_logic;
 	signal cpu_vma				    : std_logic;
+	signal cpu_ba				      : std_logic;
+	signal cpu_bs				      : std_logic;
 	signal cpu_a				      : std_logic_vector(15 downto 0);
 	signal cpu_d_i			      : std_logic_vector(7 downto 0);
 	signal cpu_d_o			      : std_logic_vector(7 downto 0);
 	signal cpu_irq				    : std_logic;
 	signal cpu_firq				    : std_logic;
 	signal cpu_nmi				    : std_logic;
+	signal cpu_halt			      : std_logic;
 	                        
   -- ROM signals        
 	signal rom0_cs				    : std_logic;
@@ -145,7 +148,8 @@ architecture SYN of platform is
 	signal io_cs			        : std_logic;
 	signal io_d_o			        : std_logic_vector(7 downto 0);
 	                        
-  -- other signals      
+  -- other signals   
+  signal ba_bs              : std_logic := '0';
 	alias platform_reset			: std_logic is inputs_i(3).d(0);
 	alias platform_pause      : std_logic is inputs_i(3).d(1);
 	signal va11						    : std_logic;
@@ -350,16 +354,22 @@ begin
 			rst				=> cpu_reset,
 			rw				=> cpu_r_wn,
 			vma				=> cpu_vma,
+      ba        => cpu_ba,
+      bs        => cpu_bs,
 			addr		  => cpu_a,
 		  data_in		=> cpu_d_i,
 		  data_out	=> cpu_d_o,
-			halt			=> '0',
+			halt			=> cpu_halt,
 			hold			=> '0',
 			irq				=> cpu_irq,
 			firq			=> cpu_firq,
 			nmi				=> cpu_nmi
 		);
 
+  -- bus available signal to the SC02
+  ba_bs <= cpu_ba and cpu_bs;
+  
+  -- blitter chip(s)
   sc02_inst : entity work.sc02
     port map
     (
@@ -370,9 +380,10 @@ begin
       wr        => sc02_wr,
       d         => cpu_d_o,
       a         => cpu_a(2 downto 0),
-      ba_bs     => '0',
-      halt      => open,
+      ba_bs     => ba_bs,
+      halt      => cpu_halt,
       
+      vram_wr   => open,
       vram_a    => open
     );
     

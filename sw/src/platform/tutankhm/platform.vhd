@@ -442,6 +442,7 @@ begin
               blitter_dst <= blitter_dst + 1;
             end if;
           when others =>
+            halt <= '0';
             state <= S_IDLE;
         end case;
       end if;
