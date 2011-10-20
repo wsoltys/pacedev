@@ -22,9 +22,14 @@ entity sc02 is
     ba_bs     : in std_logic;
     halt      : out std_logic;
 
-    -- VRAM interface
+    busy      : out std_logic;
+    
+    -- memory interface
     vram_wr   : out std_logic;
-    vram_a    : out std_logic_vector(15 downto 0)
+    vram_a    : out std_logic_vector(15 downto 0);
+    vram_d_i  : in std_logic_vector(7 downto 0);
+    vram_d_o  : out std_logic_vector(7 downto 0);
+    rom_d_i   : in std_logic_vector(7 downto 0)
   );
 end entity sc02;
 
@@ -42,14 +47,12 @@ architecture SYN of sc02 is
     alias even        : std_logic is cmd(6);
     alias odd         : std_logic is cmd(7);
   alias mask          : std_logic_vector(7 downto 0) is r(1);
-  alias h             : std_logic_vector(7 downto 0) is r(6);
-  alias w             : std_logic_vector(7 downto 0) is r(7);
 
   -- aliases of a fashion
   signal src_a  : std_logic_vector(15 downto 0);
   signal dst_a  : std_logic_vector(15 downto 0);
 
-  type state_t is ( S_IDLE, S_HALTING, S_BLIT, S_INC );
+  type state_t is ( S_IDLE, S_HALTING, S_BLIT_0, S_BLIT_1, S_INC );
   signal state : state_t := S_IDLE;
   
 begin
@@ -72,53 +75,107 @@ begin
   process (clk, rst)
     variable src  : unsigned(src_a'range);
     variable dst  : unsigned(dst_a'range);
-    variable x    : integer range 0 to 2**8-1;
-    variable y    : integer range 0 to 2**8-1;
+    variable w    : integer range 0 to 256;   -- yes 256!
+    variable h    : integer range 0 to 256;
+    variable x    : integer range 0 to 256;
+    variable y    : integer range 0 to 256;
+    variable d_sx : integer range 0 to 256;
+    variable d_sy : integer range 0 to 256;
+    variable d_dx : integer range 0 to 256;
+    variable d_dy : integer range 0 to 256;
+    variable d_i  : std_logic_vector(vram_d_i'range);
+    variable d_o  : std_logic_vector(vram_d_o'range);
   begin
     if rst = '1' then
       halt <= '0';
+      busy <= '0';
       state <= S_IDLE;
     elsif rising_edge(clk) then
-      vram_wr <= '0'; -- default
-      case state is
-        when S_IDLE =>
-          if clk_en = '1' and wr = '1' then
-            if to_integer(unsigned(a)) = 0 then
-              halt <= '1';
-              state <= S_HALTING;
+      if clk_en = '1' then
+        vram_wr <= '0'; -- default
+        case state is
+          when S_IDLE =>
+            if wr = '1' then
+              if to_integer(unsigned(a)) = 0 then
+                halt <= '1';
+                state <= S_HALTING;
+              end if;
             end if;
-          end if;
-        when S_HALTING =>
-          if ba_bs = '1' then
-            src := unsigned(src_a);
-            dst := unsigned(dst_a);
-            x := 0;
-            y := 0;
-            state <= S_BLIT;
-          end if;
-        when S_BLIT =>
-          vram_wr <= '1';
-          state <= S_INC;
-        when S_INC =>
-          state <= S_BLIT;  -- default
-          src := src + 1;
-          if x = to_integer(unsigned(w)) then
-            if y = to_integer(unsigned(h)) then
-              halt <= '0';
-              state <= S_IDLE;
-            else
+          when S_HALTING =>
+            if ba_bs = '1' then
+              busy <= '1';
+              src := unsigned(src_a);
+              dst := unsigned(dst_a);
+              w := to_integer(unsigned(r(6)));
+              h := to_integer(unsigned(r(7)));
+              -- handle bug in SC01
+              if REVISION = 1 then
+                w := to_integer(to_unsigned(w,9) xor to_unsigned(4,9));
+                h := to_integer(to_unsigned(h,9) xor to_unsigned(4,9));
+              end if;
+              if w = 0 then
+                w := 1;
+              elsif w = 255 then
+                w := 256;
+              end if;
+              if h = 0 then
+                h := 1;
+              elsif h = 255 then
+                h := 256;
+              end if;
               x := 0;
-              y := y + 1;
-              dst := dst + 256;
+              y := 0;
+              if src_inc = '1' then
+                d_sx := 256;
+                d_sy := 1;
+              else
+                d_sx := 1;
+                d_sy := w;
+              end if;
+              if dst_inc = '1' then
+                d_dx := 256;
+                d_dy := 1;
+              else
+                d_dx := 1;
+                d_dy := w;
+              end if;
+              vram_a <= std_logic_vector(src);
+              state <= S_BLIT_0;
             end if;
-          else
-            x := x + 1;
-            dst := dst + 1;
-          end if;
-        when others =>
-          halt <= '0';
-          state <= S_IDLE;
-      end case;
+          when S_BLIT_0 =>
+            -- always read from ROM atm
+            d_i := rom_d_i;
+            state <= S_BLIT_1;
+          when S_BLIT_1 =>
+            vram_a <= std_logic_vector(dst);
+            vram_d_o <= d_i;
+            vram_wr <= '1';
+            state <= S_INC;
+          when S_INC =>
+            state <= S_BLIT_0;  -- default
+            if x = w then
+              if y = h then
+                busy <= '0';
+                halt <= '0';
+                state <= S_IDLE;
+              else
+                x := 0;
+                y := y + 1;
+                src := src + d_sy + d_sx;
+                dst := dst + d_dy + d_dx;
+              end if;
+            else
+              x := x + 1;
+              src := src + d_sx;
+              dst := dst + d_dx;
+            end if;
+            --vram_a <= std_logic_vector(src);
+          when others =>
+            busy <= '0';
+            halt <= '0';
+            state <= S_IDLE;
+        end case;
+      end if; -- clk_en
     end if;
   end process;
   

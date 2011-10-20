@@ -115,6 +115,7 @@ architecture SYN of platform is
   signal romE_d_o           : std_logic_vector(7 downto 0);
 	signal romF_cs				    : std_logic;
   signal romF_d_o           : std_logic_vector(7 downto 0);
+  signal rom0_a             : std_logic_vector(15 downto 0);
 	
   -- VRAM signals       
 	signal vram_cs				    : std_logic;
@@ -149,7 +150,6 @@ architecture SYN of platform is
 	signal io_d_o			        : std_logic_vector(7 downto 0);
 	                        
   -- other signals   
-  signal ba_bs              : std_logic := '0';
 	alias platform_reset			: std_logic is inputs_i(3).d(0);
 	alias platform_pause      : std_logic is inputs_i(3).d(1);
 	signal va11						    : std_logic;
@@ -343,10 +343,6 @@ begin
     end if;
   end process;
 
-  vram_a <= cpu_a;
-  vram_d_i <= cpu_d_o;
-  vram_wr <= clk_1M_en and not cpu_r_wn;
-  
 	cpu_inst : entity work.cpu09
 		port map
 		(	
@@ -366,27 +362,55 @@ begin
 			nmi				=> cpu_nmi
 		);
 
-  -- bus available signal to the SC02
-  ba_bs <= cpu_ba and cpu_bs;
-  
-  -- blitter chip(s)
-  sc02_inst : entity work.sc02
-    port map
-    (
-      clk       => clk_20M,
-      clk_en    => '1',
-      rst       => rst_20M,
-      
-      wr        => sc02_wr,
-      d         => cpu_d_o,
-      a         => cpu_a(2 downto 0),
-      ba_bs     => ba_bs,
-      halt      => cpu_halt,
-      
-      vram_wr   => open,
-      vram_a    => open
-    );
+  BLK_BLITTER : block
+
+    signal ba_bs        : std_logic := '0';
     
+    signal blit_busy    : std_logic;
+    signal blit_wr      : std_logic;
+    signal blit_a       : std_logic_vector(15 downto 0);
+    signal blit_d       : std_logic_vector(7 downto 0);
+    
+  begin
+  
+    -- bus available signal to the SC02
+    ba_bs <= cpu_ba and cpu_bs;
+
+    vram_wr <=  blit_wr when blit_busy = '1' else
+                (clk_1M_en and not cpu_r_wn);
+    vram_a <= blit_a when blit_busy = '1' else cpu_a;
+    vram_d_i <= blit_d when blit_busy = '1' else cpu_d_o;
+    rom0_a <= blit_a when blit_busy = '1' else cpu_a;
+    
+    -- blitter chip(s)
+    sc02_inst : entity work.sc02
+      generic map
+      (
+        REVISION  => 1
+      )
+      port map
+      (
+        clk       => clk_20M,
+        clk_en    => '1',
+        rst       => rst_20M,
+        
+        wr        => sc02_wr,
+        d         => cpu_d_o,
+        a         => cpu_a(2 downto 0),
+        ba_bs     => ba_bs,
+        halt      => cpu_halt,
+        
+        busy      => blit_busy,
+        
+        vram_wr   => blit_wr,
+        vram_a    => blit_a,
+        vram_d_i  => vram_d_o,
+        vram_d_o  => blit_d,
+        rom_d_i   => rom0_d_o
+      );
+
+  end block BLK_BLITTER;
+  
 	-- Battery-backed CMOS RAM
 	nvram_inst : entity work.spram
 		generic map
@@ -459,19 +483,19 @@ begin
         port map
         (
           clock			=> clk_20M,
-          address		=> cpu_a(11 downto 0),
+          address		=> rom0_a(11 downto 0),
           q					=> rom_data(i)
         );
         
-      rom0_d_o <= rom_data(1) when STD_MATCH(cpu_a, X"0" & "------------") else
-                  rom_data(2) when STD_MATCH(cpu_a, X"1" & "------------") else
-                  rom_data(3) when STD_MATCH(cpu_a, X"2" & "------------") else
-                  rom_data(4) when STD_MATCH(cpu_a, X"3" & "------------") else
-                  rom_data(5) when STD_MATCH(cpu_a, X"4" & "------------") else
-                  rom_data(6) when STD_MATCH(cpu_a, X"5" & "------------") else
-                  rom_data(7) when STD_MATCH(cpu_a, X"6" & "------------") else
-                  rom_data(8) when STD_MATCH(cpu_a, X"7" & "------------") else
-                  rom_data(9) when STD_MATCH(cpu_a, X"8" & "------------") else
+      rom0_d_o <= rom_data(1) when STD_MATCH(rom0_a, X"0" & "------------") else
+                  rom_data(2) when STD_MATCH(rom0_a, X"1" & "------------") else
+                  rom_data(3) when STD_MATCH(rom0_a, X"2" & "------------") else
+                  rom_data(4) when STD_MATCH(rom0_a, X"3" & "------------") else
+                  rom_data(5) when STD_MATCH(rom0_a, X"4" & "------------") else
+                  rom_data(6) when STD_MATCH(rom0_a, X"5" & "------------") else
+                  rom_data(7) when STD_MATCH(rom0_a, X"6" & "------------") else
+                  rom_data(8) when STD_MATCH(rom0_a, X"7" & "------------") else
+                  rom_data(9) when STD_MATCH(rom0_a, X"8" & "------------") else
                   (others => 'Z');
                   
     end generate GEN_ROMS;

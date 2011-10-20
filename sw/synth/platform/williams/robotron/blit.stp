@@ -1,0 +1,440 @@
+<session jtag_chain="USB-Blaster [USB-0]" jtag_device="@2: EP3SL70 (0x021010DD)" sof_file="../../../../synth/platform/williams/robotron/robotron-ep3sl.sof">
+  <display_tree gui_logging_enabled="0">
+    <display_branch instance="auto_signaltap_0" log="USE_GLOBAL_TEMP" signal_set="USE_GLOBAL_TEMP" trigger="USE_GLOBAL_TEMP"/>
+  </display_tree>
+  <global_info>
+    <single attribute="active instance" value="0"/>
+    <multi attribute="frame size" size="2" value="1920,1138"/>
+    <single attribute="jtag widget visible" value="1"/>
+    <multi attribute="jtag widget size" size="2" value="334,120"/>
+    <single attribute="instance widget visible" value="1"/>
+    <single attribute="config widget visible" value="1"/>
+    <single attribute="hierarchy widget visible" value="1"/>
+    <single attribute="data log widget visible" value="1"/>
+  </global_info>
+  <instance entity_name="sld_signaltap" is_auto_node="yes" name="auto_signaltap_0" source_file="sld_signaltap.vhd">
+    <node_ip_info instance_id="0" mfg_id="110" node_id="0" version="6"/>
+    <position_info>
+      <single attribute="active tab" value="0"/>
+      <single attribute="data vertical scroll position" value="0"/>
+      <single attribute="data horizontal scroll position" value="0"/>
+      <single attribute="zoom level numerator" value="2"/>
+      <single attribute="zoom level denominator" value="1"/>
+      <single attribute="zoom offset numerator" value="65024"/>
+      <single attribute="zoom offset denominator" value="1"/>
+    </position_info>
+    <signal_set global_temp="1" name="signal_set: 2011/10/21 09:23:34  #0">
+      <clock name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|clk" polarity="posedge" tap_mode="classic"/>
+      <config ram_type="M4K" reserved_data_nodes="0" reserved_storage_qualifier_nodes="0" reserved_trigger_nodes="0" sample_depth="128" trigger_in_enable="no" trigger_out_enable="no"/>
+      <top_entity/>
+      <signal_vec>
+        <trigger_input_vec>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|a[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|a[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|a[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|ba_bs" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|busy" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[8]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[8]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[8]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|halt" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|rst" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_BLIT_0" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_BLIT_1" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_HALTING" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_IDLE" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_INC" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|vram_wr" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[8]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|wr" tap_mode="classic" type="combinatorial"/>
+        </trigger_input_vec>
+        <data_input_vec>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|a[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|a[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|a[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|ba_bs" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|busy" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[8]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[8]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[8]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|halt" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|rst" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_BLIT_0" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_BLIT_1" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_HALTING" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_IDLE" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_INC" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|vram_wr" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[8]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|wr" tap_mode="classic" type="combinatorial"/>
+        </data_input_vec>
+        <storage_qualifier_input_vec>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|a[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|a[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|a[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|ba_bs" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|busy" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[8]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[8]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[8]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|halt" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|rst" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_BLIT_0" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_BLIT_1" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_HALTING" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_IDLE" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_INC" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|vram_wr" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[8]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|wr" tap_mode="classic" type="combinatorial"/>
+        </storage_qualifier_input_vec>
+      </signal_vec>
+      <presentation>
+        <data_view>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|ba_bs"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|busy"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|halt"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|rst"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|wr"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|vram_wr"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_IDLE"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_HALTING"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_INC"/>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|a" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|a[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|a[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|a[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0]" order="msb_to_lsb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][0]"/>
+          </bus>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_BLIT_0"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_BLIT_1"/>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h" order="msb_to_lsb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[8]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w" order="msb_to_lsb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[8]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx" order="msb_to_lsb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[8]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy" order="msb_to_lsb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[8]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[0]"/>
+          </bus>
+        </data_view>
+        <setup_view>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|ba_bs"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|busy"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|halt"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|rst"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|wr"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|vram_wr"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_IDLE"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_HALTING"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_INC"/>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|a" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|a[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|a[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|a[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d[0]"/>
+          </bus>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_BLIT_0"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|state.S_BLIT_1"/>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h" order="msb_to_lsb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[8]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|h[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0]" order="msb_to_lsb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|r[0][0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w" order="msb_to_lsb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[8]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|w[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx" order="msb_to_lsb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[8]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dx[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy" order="msb_to_lsb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[8]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|sc02:\BLK_BLITTER:sc02_inst|d_dy[0]"/>
+          </bus>
+        </setup_view>
+      </presentation>
+      <trigger CRC="EA90D7CC" attribute_mem_mode="false" gap_record="true" global_temp="1" name="trigger: 2011/10/21 09:23:34  #1" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="128" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="true" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_in="dont_care" trigger_out="active high" trigger_type="circular">
+        <power_up_trigger position="pre" storage_qualifier_disabled="no" trigger_in="dont_care" trigger_out="active high"/>
+        <events use_custom_flow_control="no">
+          <level enabled="yes" name="condition1" type="basic">'PACE:pace_inst|platform:platform_inst|sc02:\\BLK_BLITTER:sc02_inst|a[0]' == low &amp;&amp; 'PACE:pace_inst|platform:platform_inst|sc02:\\BLK_BLITTER:sc02_inst|a[1]' == low &amp;&amp; 'PACE:pace_inst|platform:platform_inst|sc02:\\BLK_BLITTER:sc02_inst|a[2]' == low &amp;&amp; 'PACE:pace_inst|platform:platform_inst|sc02:\\BLK_BLITTER:sc02_inst|wr' == rising edge
+            <power_up enabled="yes">
+            </power_up>
+            <op_node/>
+          </level>
+        </events>
+        <storage_qualifier_events>
+          <transitional>000000000000000000000000000000000000000000000000000000000000000000
+            <pwr_up_transitional>000000000000000000000000000000000000000000000000000000000000000000</pwr_up_transitional>
+          </transitional>
+          <storage_qualifier_level type="basic">
+            <power_up>
+            </power_up>
+            <op_node/>
+          </storage_qualifier_level>
+          <storage_qualifier_level type="basic">
+            <power_up>
+            </power_up>
+            <op_node/>
+          </storage_qualifier_level>
+          <storage_qualifier_level type="basic">
+            <power_up>
+            </power_up>
+            <op_node/>
+          </storage_qualifier_level>
+        </storage_qualifier_events>
+        <log>
+          <data global_temp="1" name="log: 2011/10/21 09:29:48  #0" power_up_mode="false" sample_depth="127" trigger_position="16">001000010100100000000110000000000110000000100000000001000010000000001000010100100000000110000000000110000000100000000001000010000000001000010100100000000110000000000110000000100000000001000010000000001000010100100000000110000000000110000000100000000001000010000000001000010100100000000110000000000110000000100000000001000010000000001000010100100000000110000000000110000000100000000001000010000000001000010100100000000110000000000110000000100000000001000010000000001000010100100000000110000000000110000000100000000001000010000000001000010100100000000110000000000110000000100000000001000010000000001000010100100000000110000000000110000000100000000001000010000000001000010100100000000110000000000110000000100000000001000010000000001000010100100000000110000000000110000000100000000001000010000000001000010100100000000110000000000110000000100000000001000010000000001000010100100000000110000000000110000000100000000001000010000000001000010100100000000110000000000110000000100000000001000010000000001000010100100000000110000000000110000000100000000001000010000000000000101100000000000110000000000110000000100000000001000010000001000000101100000000000110000000000110000010100000000010000010000000000000101100000000000110000000000110000010100000000010000010000000000000101100000000000110000000000110000010100000000010000010000000000000101100000000000110000000000110000010100000000010000010000000000000101100000000000110000000000110000010100000000010000010000000000000101100000000000110000000000110000010100000000010000010000000000000101100000000000110000000000110000010100000000010000010000000000000101100000000000110000000000110000010100000000010000010000000000000101100000000000110000000000110000010100000000010000010000000000000101100000000000110000000000110000010100000000010000010000000000000101100000000000110000000000110000010100000000010000010000000000000101100000000000110000000000110000010100000000010000010000000000000101100000000000110000000000110000010100000000010000010000000000000101100000000000110000000000110000010100000000010000010000000000000101100000000000110000000000110000010100000000010000010000000000000101100000000000110000000000110000010100000000010000010000000000000101100000000000110000000000110000010100000000010000010000000000000101100000000000110000000000110000010100000000010000010000000000000101100000000000110000000000110000010100000000010000010000000101000010100100000000110000000000110000010100000000010000010000000101000010100100000000110000000000110000010100000000010000010000000101000010100100000000110000000000110000010100000000010000010000000101000010100100000000110000000000110000010100000000010000010000000101000010100100000000110000000000110000010100000000010000010000000101000010100100000000110000000000110000010100000000010000010000000101000010100100000000110000000000110000010100000000010000010000000101000010100100000000110000000000110000010100000000010000010000000101000010100100000000110000000000110000010100000000010000010000000101000010100100000000110000000000110000010100000000010000010000000101000010100100000000110000000000110000010100000000010000010000000101000010100100000000110000000000110000010100000000010000010000000101000010100100000000110000000000110000010100000000010000010000000101000010100100000000110000000000110000010100000000010000010000000101000010100100000000110000000000110000010100000000010000010000000101000010100100000000110000000000110000010100000000010000010000000101000010100100000000110000000000110000010100000000010000010000000101000010100100000000110000000000110000010100000000010000010000000101000010100100000000110000000000110000010100000000010000010000000101000010100100000000110000000000110000010100000000010000010000000111100000100100000000110000000000110000010100000000010000010000000111110000100100000000110000000000001000010100000001000001110000000111110000100100000000110000000000001000010100000000100001110000000111110000100100000000110000000000001000010100000000000111110000000111110000100100000000110000000000001000010100000001000001110000000111110000100100000000110000000000001000010100000000100001110000000111110000100100000000110000000000001000010100000000000111110000000111110000100100000000110000000000001000010100000001000001110000000111110000100100000000110000000000001000010100000000100001110000000111110000100100000000110000000000001000010100000000000111110000000111110000100100000000110000000000001000010100000001000001110000000111110000100100000000110000000000001000010100000000100001110000000111110000100100000000110000000000001000010100000000000111110000000111110000100100000000110000000000001000010100000001000001110000000111110000100100000000110000000000001000010100000000100001110000000111110000100100000000110000000000001000010100000000000111110000000111110000100100000000110000000000001000010100000001000001110000000111110000100100000000110000000000001000010100000000100001110000000111110000100100000000110000000000001000010100000000000111110000000111110000100100000000110000000000001000010100000001000001110000000111110000100100000000110000000000001000010100000000100001110000000111110000100100000000110000000000001000010100000000000111110000000111110000100100000000110000000000001000010100000001000001110000000111110000100100000000110000000000001000010100000000100001110000000111110000100100000000110000000000001000010100000000000111110000000111110000100100000000110000000000001000010100000001000001110000000111110000100100000000110000000000001000010100000000100001110000000111110000100100000000110000000000001000010100000000000111110000000111110000100100000000110000000000001000010100000001000001110000000111110000100100000000110000000000001000010100000000100001110000000111110000100100000000110000000000001000010100000000000111110000000111110000100100000000110000000000001000010100000001000001110000000111110000100100000000110000000000001000010100000000100001110000000111110000100100000000110000000000001000010100000000000111110000000111110000100100000000110000000000001000010100000001000001110000000111110000100100000000110000000000001000010100000000100001110000000111110000100100000000110000000000001000010100000000000111110000000111110000100100000000110000000000001000010100000001000001110000000111110000100100000000110000000000001000010100000000100001110000000111110000100100000000110000000000001000010100000000000111110000000111110000100100000000110000000000001000010100000001000001110000000111110000100100000000110000000000001000010100000000100001110000000111110000100100000000110000000000001000010100000000000111110000000111110000100100000000110000000000001000010100000001000001110000000111110000100100000000110000000000001000010100000000100001110000000111110000100100000000110000000000001000010100000000000111110000000111110000100100000000110000000000001000010100000001000001110000000111110000100100000000110000000000001000010100000000100001110000000111110000100100000000110000000000001000010100000000000111110000000111110000100100000000110000000000001000010100000001000001110000000111110000100100000000110000000000001000010100000000100001110000000111110000100100000000110000000000001000010100000000000111110000000111110000100100000000110000000000001000010100000001000001110000000111110000100100000000110000000000001000010100000000100001110000000111110000100100000000110000000000001000010100000000000111110000000111110000100100000000110000000000001000010100000001000001110000000111110000100100000000110000000000001000010100000000100001110000000111110000100100000000110000000000001000010100000000000111110000000111110000100100000000110000000000001000010100000001000001110000000111110000100100000000110000000000001000010100000000100001110000000111110000100100000000110000000000001000010100000000000111110000000111110000100100000000110000000000001000010100000001000001110000000111110000100100000000110000000000001000010100000000100001110000000111110000100100000000110000000000001000010100000000000111110000000111110000100100000000110000000000001000010100000001000001110000000111110000100100000000110000000000001000010100000000100001110000000111110000100100000000110000000000001000010100000000000111110000000111110000100100000000110000000000001000010100000001000001110000000111110000100100000000110000000000001000010100000000100001110000000111110000100100000000110000000000001000010100000000000111110000000111110000100100000000110000000000001000010100000001000001110000000111110000110100000000110000000000001000010100000000100001110000000</data>
+          <extradata>1111111111111111T111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111</extradata>
+        </log>
+      </trigger>
+    </signal_set>
+  </instance>
+  <mnemonics/>
+  <static_plugin_mnemonics/>
+</session>
