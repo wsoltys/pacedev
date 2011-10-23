@@ -105,7 +105,10 @@ architecture SYN of platform is
 	signal cpu_firq				    : std_logic;
 	signal cpu_nmi				    : std_logic;
 	signal cpu_halt			      : std_logic;
-	                        
+
+  -- generic address
+  signal mem_a              : std_logic_vector(15 downto 0);
+  
   -- ROM signals        
 	signal rom0_cs				    : std_logic;
   signal rom0_d_o           : std_logic_vector(7 downto 0);
@@ -115,12 +118,10 @@ architecture SYN of platform is
   signal romE_d_o           : std_logic_vector(7 downto 0);
 	signal romF_cs				    : std_logic;
   signal romF_d_o           : std_logic_vector(7 downto 0);
-  signal rom0_a             : std_logic_vector(15 downto 0);
 	
   -- VRAM signals       
 	signal vram_cs				    : std_logic;
   signal vram_wr            : std_logic;
-  signal vram_a             : std_logic_vector(15 downto 0);
   signal vram_d_i           : std_logic_vector(7 downto 0);
   signal vram_d_o           : std_logic_vector(7 downto 0);
 
@@ -140,6 +141,7 @@ architecture SYN of platform is
 	signal rom_pia_irqb			  : std_logic;
 	signal vram_select_cs			: std_logic;
   signal vram_select_r      : std_logic;
+  signal vram_sel           : std_logic;
   signal sc02_cs            : std_logic;
   signal sc02_wr            : std_logic;
 	signal video_counter_cs	  : std_logic;	
@@ -165,7 +167,7 @@ begin
 	
   -- SRAM signals (may or may not be used)
   sram_o.a(sram_o.a'left downto 17) <= (others => '0');
-  sram_o.a(16 downto 0)	<= 	std_logic_vector(resize(unsigned(cpu_a), 17));
+  sram_o.a(16 downto 0)	<= 	std_logic_vector(resize(unsigned(mem_a), 17));
   sram_o.d <= std_logic_vector(resize(unsigned(cpu_d_o), sram_o.d'length)) 
 								when (wram_wr = '1') else (others => 'Z');
   sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
@@ -176,45 +178,45 @@ begin
 	-- ROM chip selects
   -- $0000-$8FFF
   --            $0000-$7FFF
-	rom0_cs <= 	  '1' when STD_MATCH(cpu_a,  "0---------------") else 
+	rom0_cs <= 	  '1' when STD_MATCH(mem_a,  "0---------------") else 
   --            $8000-$8FFF
-                '1' when STD_MATCH(cpu_a, X"8"&"------------") else 
+                '1' when STD_MATCH(mem_a, X"8"&"------------") else 
                 '0';
   -- video ram $0000-$97FF
-  vram_cs <=		'1' when STD_MATCH(cpu_a,  "0---------------") else
-                '1' when STD_MATCH(cpu_a, X"8"&"------------") else
-                '1' when STD_MATCH(cpu_a, X"9"&"0-----------") else 
+  vram_cs <=		'1' when STD_MATCH(mem_a,  "0---------------") else
+                '1' when STD_MATCH(mem_a, X"8"&"------------") else
+                '1' when STD_MATCH(mem_a, X"9"&"0-----------") else 
                 '0';
 	-- ROMS $D000-$FFFF
-	romD_cs <= 	  '1' when STD_MATCH(cpu_a, X"D"&"------------") else '0';
-	romE_cs <= 	  '1' when STD_MATCH(cpu_a, X"E"&"------------") else '0';
-	romF_cs <= 	  '1' when STD_MATCH(cpu_a, X"F"&"------------") else '0';
+	romD_cs <= 	  '1' when STD_MATCH(mem_a, X"D"&"------------") else '0';
+	romE_cs <= 	  '1' when STD_MATCH(mem_a, X"E"&"------------") else '0';
+	romF_cs <= 	  '1' when STD_MATCH(mem_a, X"F"&"------------") else '0';
 
 	-- RAM chip selects
 	-- RAM $9800-$BFFF
-	wram_cs <=		'1' when STD_MATCH(cpu_a,  "101-------------") else
-								'1' when STD_MATCH(cpu_a, X"9"&"1-----------") else
+	wram_cs <=		'1' when STD_MATCH(mem_a,  "101-------------") else
+								'1' when STD_MATCH(mem_a, X"9"&"1-----------") else
 								'0';
 
   -- I/O chip selects
   -- I/O $C000-$CFFF
-	io_cs <=      '1' when STD_MATCH(cpu_a, X"C"&"------------") else '0';
+	io_cs <=      '1' when STD_MATCH(mem_a, X"C"&"------------") else '0';
 
 	-- I/O decoding
   -- Palette $C000-$C00F
-	palette_cs <=				'1' when STD_MATCH(cpu_a, X"C00"&"----") else '0';
+	palette_cs <=				'1' when STD_MATCH(mem_a, X"C00"&"----") else '0';
 	-- WIDGET PIA $C804-$C807
-	widget_pia_cs <= 		'1' when STD_MATCH(cpu_a, X"C80"&"01--") else '0';
+	widget_pia_cs <= 		'1' when STD_MATCH(mem_a, X"C80"&"01--") else '0';
 	-- ROM PIA $C80C-$C80F
-	rom_pia_cs <= 			'1' when STD_MATCH(cpu_a, X"C80"&"11--") else '0';
+	rom_pia_cs <= 			'1' when STD_MATCH(mem_a, X"C80"&"11--") else '0';
   -- VRAM SWITCH $C900-$C9FF
-  vram_select_cs <=   '1' when STD_MATCH(cpu_a, X"C9"&"--------") else '0';
+  vram_select_cs <=   '1' when STD_MATCH(mem_a, X"C9"&"--------") else '0';
 	-- blitter $CA00-$CA07
-	sc02_cs <=	        '1' when STD_MATCH(cpu_a, X"CA0"&"0---") else '0';
+	sc02_cs <=	        '1' when STD_MATCH(mem_a, X"CA0"&"0---") else '0';
 	-- video counter $CB00-$CBFF
-	video_counter_cs <=	'1' when STD_MATCH(cpu_a, X"CB"&"--------") else '0';
+	video_counter_cs <=	'1' when STD_MATCH(mem_a, X"CB"&"--------") else '0';
 	-- nvram $CC00-$CFFF
-	nvram_cs <=					'1' when STD_MATCH(cpu_a, X"C"&"1100--------") else '0';
+	nvram_cs <=					'1' when STD_MATCH(mem_a, X"C"&"1100--------") else '0';
 
   -- memory block write enables
 	nvram_wr <= (nvram_cs and clk_1M_en and not cpu_r_wn);
@@ -231,7 +233,7 @@ begin
 	-- memory read mux
 	cpu_d_i <=  -- ROM $0000-$8FFF, VRAM $0000-$97FF (overlapping)
               -- so decode ROM space first, and fall back to VRAM
-              rom0_d_o when (rom0_cs = '1' and vram_select_r = '1') else
+              rom0_d_o when (rom0_cs = '1' and vram_sel = '1') else
 							vram_d_o when vram_cs = '1' else
 							wram_d_o when wram_cs = '1' else
               io_d_o when io_cs = '1' else
@@ -261,7 +263,7 @@ begin
 		if rising_edge(clk_20M) then
       if clk_1M_en = '1' then
         if palette_cs = '1' and clk_1M_en = '1' and cpu_r_wn = '0' then
-          offset := to_integer(unsigned(cpu_a(3 downto 0)));
+          offset := to_integer(unsigned(mem_a(3 downto 0)));
           palette_r(offset) <= cpu_d_o;
         end if;
       end if;
@@ -364,23 +366,26 @@ begin
 
   BLK_BLITTER : block
 
-    signal ba_bs        : std_logic := '0';
+    signal ba_bs          : std_logic := '0';
     
-    signal blit_busy    : std_logic;
-    signal blit_wr      : std_logic;
-    signal blit_a       : std_logic_vector(15 downto 0);
-    signal blit_d       : std_logic_vector(7 downto 0);
+    signal blit_busy      : std_logic;
+    signal blit_wr        : std_logic;
+    signal blit_vram_sel  : std_logic;
+    signal blit_a         : std_logic_vector(15 downto 0);
+    signal blit_d         : std_logic_vector(7 downto 0);
     
   begin
   
     -- bus available signal to the SC02
     ba_bs <= cpu_ba and cpu_bs;
 
+    mem_a <= blit_a when blit_busy = '1' else cpu_a;
+    -- blitter can force VRAM selection
+    vram_sel <= '0' when (blit_busy = '1' and blit_vram_sel = '1') else
+                  vram_select_r;
+    vram_d_i <= blit_d when blit_busy = '1' else cpu_d_o;
     vram_wr <=  blit_wr when blit_busy = '1' else
                 (clk_1M_en and not cpu_r_wn);
-    vram_a <= blit_a when blit_busy = '1' else cpu_a;
-    vram_d_i <= blit_d when blit_busy = '1' else cpu_d_o;
-    rom0_a <= blit_a when blit_busy = '1' else cpu_a;
     
     -- blitter chip(s)
     sc02_inst : entity work.sc02
@@ -396,17 +401,17 @@ begin
         
         wr        => sc02_wr,
         d         => cpu_d_o,
-        a         => cpu_a(2 downto 0),
+        a         => mem_a(2 downto 0),
         ba_bs     => ba_bs,
         halt      => cpu_halt,
         
         busy      => blit_busy,
+        vram_sel  => blit_vram_sel,
         
-        vram_wr   => blit_wr,
-        vram_a    => blit_a,
-        vram_d_i  => vram_d_o,
-        vram_d_o  => blit_d,
-        rom_d_i   => rom0_d_o
+        mem_wr    => blit_wr,
+        mem_a     => blit_a,
+        mem_d_i   => cpu_d_i,
+        mem_d_o   => blit_d
       );
 
   end block BLK_BLITTER;
@@ -422,7 +427,7 @@ begin
 		port map
 		(
 			clock				=> clk_20M,
-			address			=> cpu_a(7 downto 0),
+			address			=> mem_a(7 downto 0),
 			wren				=> nvram_wr,
 			data				=> cpu_d_o,
 			q						=> nvram_data
@@ -439,7 +444,7 @@ begin
 			port map
 			(
 				clock			=> clk_20M,
-				address		=> cpu_a(11 downto 0),
+				address		=> mem_a(11 downto 0),
 				q					=> romD_d_o
 			);
 		
@@ -452,7 +457,7 @@ begin
 			port map
 			(
 				clock			=> clk_20M,
-				address		=> cpu_a(11 downto 0),
+				address		=> mem_a(11 downto 0),
 				q					=> romE_d_o
 			);
 		
@@ -465,7 +470,7 @@ begin
 			port map
 			(
 				clock			=> clk_20M,
-				address		=> cpu_a(11 downto 0),
+				address		=> mem_a(11 downto 0),
 				q					=> romF_d_o
 			);
 		
@@ -483,19 +488,19 @@ begin
         port map
         (
           clock			=> clk_20M,
-          address		=> rom0_a(11 downto 0),
+          address		=> mem_a(11 downto 0),
           q					=> rom_data(i)
         );
         
-      rom0_d_o <= rom_data(1) when STD_MATCH(rom0_a, X"0" & "------------") else
-                  rom_data(2) when STD_MATCH(rom0_a, X"1" & "------------") else
-                  rom_data(3) when STD_MATCH(rom0_a, X"2" & "------------") else
-                  rom_data(4) when STD_MATCH(rom0_a, X"3" & "------------") else
-                  rom_data(5) when STD_MATCH(rom0_a, X"4" & "------------") else
-                  rom_data(6) when STD_MATCH(rom0_a, X"5" & "------------") else
-                  rom_data(7) when STD_MATCH(rom0_a, X"6" & "------------") else
-                  rom_data(8) when STD_MATCH(rom0_a, X"7" & "------------") else
-                  rom_data(9) when STD_MATCH(rom0_a, X"8" & "------------") else
+      rom0_d_o <= rom_data(1) when STD_MATCH(mem_a, X"0" & "------------") else
+                  rom_data(2) when STD_MATCH(mem_a, X"1" & "------------") else
+                  rom_data(3) when STD_MATCH(mem_a, X"2" & "------------") else
+                  rom_data(4) when STD_MATCH(mem_a, X"3" & "------------") else
+                  rom_data(5) when STD_MATCH(mem_a, X"4" & "------------") else
+                  rom_data(6) when STD_MATCH(mem_a, X"5" & "------------") else
+                  rom_data(7) when STD_MATCH(mem_a, X"6" & "------------") else
+                  rom_data(8) when STD_MATCH(mem_a, X"7" & "------------") else
+                  rom_data(9) when STD_MATCH(mem_a, X"8" & "------------") else
                   (others => 'Z');
                   
     end generate GEN_ROMS;
@@ -521,9 +526,9 @@ begin
   begin
 
     -- video ram $0000-$9800
-    vram0_cs <=		'1' when STD_MATCH(vram_a,  "0---------------") else '0';
-    vram8_cs <=		'1' when STD_MATCH(vram_a, X"8"&"------------") else '0';
-    vram9_cs <= 	'1' when STD_MATCH(vram_a, X"9"&"0-----------") else '0';
+    vram0_cs <=		'1' when STD_MATCH(mem_a,  "0---------------") else '0';
+    vram8_cs <=		'1' when STD_MATCH(mem_a, X"8"&"------------") else '0';
+    vram9_cs <= 	'1' when STD_MATCH(mem_a, X"9"&"0-----------") else '0';
 
     vram0_wr <= vram0_cs and vram_wr;
     vram8_wr <= vram8_cs and vram_wr;
@@ -547,7 +552,7 @@ begin
       port map
       (
         clock_b			=> clk_20M,
-        address_b		=> vram_a(ROBOTRON_VRAM_WIDTHAD-1 downto 0),
+        address_b		=> mem_a(ROBOTRON_VRAM_WIDTHAD-1 downto 0),
         wren_b			=> vram0_wr,
         data_b			=> vram_d_i,
         q_b					=> vram0_d_o,
@@ -569,7 +574,7 @@ begin
       port map
       (
         clock_b			=> clk_20M,
-        address_b		=> vram_a(11 downto 0),
+        address_b		=> mem_a(11 downto 0),
         wren_b			=> vram8_wr,
         data_b			=> vram_d_i,
         q_b					=> vram8_d_o,
@@ -591,7 +596,7 @@ begin
       port map
       (
         clock_b			=> clk_20M,
-        address_b		=> vram_a(10 downto 0),
+        address_b		=> mem_a(10 downto 0),
         wren_b			=> vram9_wr,
         data_b			=> vram_d_i,
         q_b					=> vram9_d_o,
@@ -612,7 +617,7 @@ begin
 	    rst       	=> rst_20M,
 	    cs        	=> widget_pia_cs,
 	    rw        	=> cpu_r_wn,
-	    addr      	=> cpu_a(1 downto 0),
+	    addr      	=> mem_a(1 downto 0),
 	    data_in   	=> cpu_d_o,
 		 	data_out  	=> widget_pia_d_o,
 		 	irqa      	=> open,
@@ -640,7 +645,7 @@ begin
 	    rst       	=> rst_20M,
 	    cs        	=> rom_pia_cs,
 	    rw        	=> cpu_r_wn,
-	    addr      	=> cpu_a(1 downto 0),
+	    addr      	=> mem_a(1 downto 0),
 	    data_in   	=> cpu_d_o,
 		 	data_out  	=> rom_pia_d_o,
 		 	irqa      	=> rom_pia_irqa,

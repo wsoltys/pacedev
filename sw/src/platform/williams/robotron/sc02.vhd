@@ -23,13 +23,13 @@ entity sc02 is
     halt      : out std_logic;
 
     busy      : out std_logic;
+    vram_sel  : out std_logic;
     
     -- memory interface
-    vram_wr   : out std_logic;
-    vram_a    : out std_logic_vector(15 downto 0);
-    vram_d_i  : in std_logic_vector(7 downto 0);
-    vram_d_o  : out std_logic_vector(7 downto 0);
-    rom_d_i   : in std_logic_vector(7 downto 0)
+    mem_wr    : out std_logic;
+    mem_a     : out std_logic_vector(15 downto 0);
+    mem_d_i   : in std_logic_vector(7 downto 0);
+    mem_d_o   : out std_logic_vector(7 downto 0)
   );
 end entity sc02;
 
@@ -52,7 +52,12 @@ architecture SYN of sc02 is
   signal src_a  : std_logic_vector(15 downto 0);
   signal dst_a  : std_logic_vector(15 downto 0);
 
-  type state_t is ( S_IDLE, S_HALTING, S_BLIT_0, S_BLIT_1, S_INC );
+  type state_t is 
+  ( 
+    S_IDLE, S_HALTING, 
+    S_BLIT_0, S_BLIT_1, S_BLIT_2, S_BLIT_3, S_BLIT_4,
+    S_INC 
+  );
   signal state : state_t := S_IDLE;
   
 begin
@@ -73,18 +78,21 @@ begin
   end process;
 
   process (clk, rst)
-    variable src  : unsigned(src_a'range);
-    variable dst  : unsigned(dst_a'range);
-    variable w    : integer range 0 to 256;   -- yes 256!
-    variable h    : integer range 0 to 256;
-    variable x    : integer range 0 to 256;
-    variable y    : integer range 0 to 256;
-    variable d_sx : integer range 0 to 256;
-    variable d_sy : integer range 0 to 256;
-    variable d_dx : integer range 0 to 256;
-    variable d_dy : integer range 0 to 256;
-    variable d_i  : std_logic_vector(vram_d_i'range);
-    variable d_o  : std_logic_vector(vram_d_o'range);
+    variable src      : unsigned(src_a'range);
+    variable dst      : unsigned(dst_a'range);
+    variable sstart   : unsigned(src_a'range);
+    variable dstart   : unsigned(dst_a'range);
+    variable w        : integer range 0 to 256;   -- yes 256!
+    variable h        : integer range 0 to 256;
+    variable x        : integer range 0 to 256;
+    variable y        : integer range 0 to 256;
+    variable d_sx     : integer range 0 to 256;
+    variable d_sy     : integer range 0 to 256;
+    variable d_dx     : integer range 0 to 256;
+    variable d_dy     : integer range 0 to 256;
+    variable keepmask : std_logic_vector(7 downto 0);
+    variable d_i      : std_logic_vector(mem_d_i'range);
+    variable d_o      : std_logic_vector(mem_d_o'range);
   begin
     if rst = '1' then
       halt <= '0';
@@ -92,7 +100,7 @@ begin
       state <= S_IDLE;
     elsif rising_edge(clk) then
       if clk_en = '1' then
-        vram_wr <= '0'; -- default
+        mem_wr <= '0'; -- default
         case state is
           when S_IDLE =>
             if wr = '1' then
@@ -104,8 +112,10 @@ begin
           when S_HALTING =>
             if ba_bs = '1' then
               busy <= '1';
-              src := unsigned(src_a);
-              dst := unsigned(dst_a);
+              sstart := unsigned(src_a);
+              dstart := unsigned(dst_a);
+              src := sstart;
+              dst := dstart;
               w := to_integer(unsigned(r(6)));
               h := to_integer(unsigned(r(7)));
               -- handle bug in SC01
@@ -123,8 +133,8 @@ begin
               elsif h = 255 then
                 h := 256;
               end if;
-              x := 0;
-              y := 0;
+              x := 1;
+              y := 1;
               if src_inc = '1' then
                 d_sx := 256;
                 d_sy := 1;
@@ -139,17 +149,27 @@ begin
                 d_dx := 1;
                 d_dy := w;
               end if;
-              vram_a <= std_logic_vector(src);
+              keepmask(7 downto 4) := (others => odd);
+              keepmask(3 downto 0) := (others => even);
               state <= S_BLIT_0;
             end if;
           when S_BLIT_0 =>
-            -- always read from ROM atm
-            d_i := rom_d_i;
+            -- read from currently selected space
+            vram_sel <= '0';
+            mem_a <= std_logic_vector(src);
             state <= S_BLIT_1;
           when S_BLIT_1 =>
-            vram_a <= std_logic_vector(dst);
-            vram_d_o <= d_i;
-            vram_wr <= '1';
+            state <= S_BLIT_2;
+          when S_BLIT_2 =>
+            mem_d_o <= mem_d_i;
+            state <= S_BLIT_3;
+          when S_BLIT_3 =>
+            -- force write to VRAM
+            vram_sel <= '1';
+            mem_a <= std_logic_vector(dst);
+            state <= S_BLIT_4;
+          when S_BLIT_4 =>
+            mem_wr <= '1';
             state <= S_INC;
           when S_INC =>
             state <= S_BLIT_0;  -- default
@@ -159,17 +179,18 @@ begin
                 halt <= '0';
                 state <= S_IDLE;
               else
-                x := 0;
+                x := 1;
                 y := y + 1;
-                src := src + d_sy + d_sx;
-                dst := dst + d_dy + d_dx;
+                sstart := sstart + d_sy;
+                dstart := dstart + d_dy;
               end if;
+              src := sstart;
+              dst := dstart;
             else
               x := x + 1;
               src := src + d_sx;
               dst := dst + d_dx;
             end if;
-            --vram_a <= std_logic_vector(src);
           when others =>
             busy <= '0';
             halt <= '0';
