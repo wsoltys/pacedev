@@ -98,6 +98,7 @@ architecture SYN of platform is
 	signal clk_1M5_en_n		: std_logic;
 	signal cpu_rw					: std_logic;
   signal cpu_ba         : std_logic;
+  signal cpu_bs         : std_logic;
 	signal cpu_vma				: std_logic;
 	signal cpu_a				  : std_logic_vector(15 downto 0);
 	signal cpu_d_i			  : std_logic_vector(7 downto 0);
@@ -389,16 +390,16 @@ begin
               state <= S_HALTING;
             end if;
           when S_HALTING =>
-            if cpu_ba = '1' then
+            if cpu_ba = '1' and cpu_bs = '1' then
               blitting <= '1';
               -- b1 needs to be masked off, according to MAME
               -- b0 is the copy bit
               --blitter_src <= unsigned(blitter_src_r(blitter_src_r'left downto 2)) & "00";
               -- I don't understand why we need to add 1...
-              --blitter_src <= (unsigned(blitter_src_r(blitter_src_r'left downto 2)) & "00") + 1;
+              blitter_src <= (unsigned(blitter_src_r(blitter_src_r'left downto 2)) & "00") + 1;
               -- this is what the schematics suggest...
-              blitter_src <= unsigned(blitter_src_r(blitter_src_r'left downto 8)) & 
-                              unsigned(blitter_src_r(6 downto 1)) & "00";
+--              blitter_src <= unsigned(blitter_src_r(blitter_src_r'left downto 8)) & 
+--                              unsigned(blitter_src_r(6 downto 1)) & "00";
               blitter_dst <= unsigned(blitter_dst_r);
               y := 0;
               x := 0;
@@ -442,7 +443,7 @@ begin
               blitter_dst <= blitter_dst + 1;
             end if;
           when others =>
-            halt <= '0';
+            cpu_halt <= '0';
             state <= S_IDLE;
         end case;
       end if;
@@ -543,6 +544,7 @@ begin
         rst				=> cpu_reset,
         rw				=> cpu_rw,
         ba        => cpu_ba,
+        bs        => cpu_bs,
         vma				=> cpu_vma,
         addr		  => cpu_a,
         data_in		=> cpu_d_i,

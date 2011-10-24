@@ -41,12 +41,12 @@ architecture SYN of sc02 is
   alias cmd             : std_logic_vector(7 downto 0) is r(0);
     alias src_inc_f     : std_logic is cmd(0);
     alias dst_inc_f     : std_logic is cmd(1);
+    alias no_wrap_f     : std_logic is cmd(2);
     alias transparent_f : std_logic is cmd(3);
     alias solid_f       : std_logic is cmd(4);
     alias shift_f       : std_logic is cmd(5);
     alias even_f        : std_logic is cmd(6);
     alias odd_f         : std_logic is cmd(7);
-  alias solid           : std_logic_vector(7 downto 0) is r(1);
 
   -- aliases of a fashion
   signal src_a  : std_logic_vector(15 downto 0);
@@ -79,22 +79,24 @@ begin
   end process;
 
   process (clk, rst)
-    variable src      : unsigned(src_a'range);
-    variable dst      : unsigned(dst_a'range);
-    variable sstart   : unsigned(src_a'range);
-    variable dstart   : unsigned(dst_a'range);
-    variable w        : integer range 0 to 256;   -- yes 256!
-    variable h        : integer range 0 to 256;
-    variable x        : integer range 0 to 256;
-    variable y        : integer range 0 to 256;
-    variable d_sx     : integer range 0 to 256;
-    variable d_sy     : integer range 0 to 256;
-    variable d_dx     : integer range 0 to 256;
-    variable d_dy     : integer range 0 to 256;
-    variable keepmask : std_logic_vector(7 downto 0);
-    variable mask     : std_logic_vector(keepmask'range);
-    variable src_d_i  : std_logic_vector(mem_d_i'range);
-    variable dst_d_i  : std_logic_vector(mem_d_o'range);
+    variable src          : unsigned(src_a'range);
+    variable dst          : unsigned(dst_a'range);
+    variable sstart       : unsigned(src_a'range);
+    variable dstart       : unsigned(dst_a'range);
+    variable w            : integer range 0 to 256;   -- yes 256!
+    variable h            : integer range 0 to 256;
+    variable x            : integer range 0 to 256;
+    variable y            : integer range 0 to 256;
+    variable d_sx         : integer range 0 to 256;
+    variable d_sy         : integer range 0 to 256;
+    variable d_dx         : integer range 0 to 256;
+    variable d_dy         : integer range 0 to 256;
+    variable keepmask     : std_logic_vector(7 downto 0);
+    variable solid        : std_logic_vector(7 downto 0);
+    variable mask         : std_logic_vector(keepmask'range);
+    variable src_d_i_buf  : std_logic_vector(11 downto 0);
+    alias src_d_i         : std_logic_vector(mem_d_o'range) is src_d_i_buf(11 downto 4);
+    variable dst_d_i      : std_logic_vector(mem_d_o'range);
   begin
     if rst = '1' then
       halt <= '0';
@@ -151,8 +153,17 @@ begin
                 d_dx := 1;
                 d_dy := w;
               end if;
-              keepmask(7 downto 4) := (others => odd_f);
-              keepmask(3 downto 0) := (others => even_f);
+              if shift_f = '0' then
+                keepmask(7 downto 4) := (others => odd_f);
+                keepmask(3 downto 0) := (others => even_f);
+                solid := r(1);
+              else
+                keepmask(7 downto 4) := (others => even_f);
+                keepmask(3 downto 0) := (others => odd_f);
+                solid := r(1)(3 downto 0) & r(1)(7 downto 4);
+                -- must be done here, after all delta calcs
+                w := w + 1;
+              end if;
               state <= S_BLIT_0;
             end if;
           when S_BLIT_0 =>
@@ -164,7 +175,16 @@ begin
             state <= S_BLIT_2;
           when S_BLIT_2 =>
             -- read source byte from ROM/VRAM
-            src_d_i := mem_d_i;
+            -- account for shifter logic here
+            if shift_f = '0' then
+              src_d_i := mem_d_i;
+            elsif x = 1 then
+              src_d_i_buf := "0000" & mem_d_i;
+            elsif x /= w then
+              src_d_i_buf := src_d_i_buf(3 downto 0) & mem_d_i;
+            else
+              src_d_i_buf := src_d_i_buf(3 downto 0) & "00000000";
+            end if;
             state <= S_BLIT_3;
           when S_BLIT_3 =>
             -- force read/write to/from VRAM
@@ -178,8 +198,14 @@ begin
             dst_d_i := mem_d_i;
             state <= S_BLIT_6;
           when S_BLIT_6 =>
-            -- do the magic
-            mask := keepmask;
+            -- handle shift logic
+            if shift_f = '1' and x = 1 then
+              mask := "1111" & keepmask(3 downto 0);
+            elsif shift_f = '1' and x = w then
+              mask := keepmask(7 downto 4) & "1111";
+            else
+              mask := keepmask;
+            end if;
             -- handle transparency
             if transparent_f = '1' then
               if src_d_i(7 downto 4) = "0000" then
@@ -213,7 +239,13 @@ begin
                 x := 1;
                 y := y + 1;
                 sstart := sstart + d_sy;
-                dstart := dstart + d_dy;
+                if no_wrap_f = '1' then
+                  -- todo: handle no_wrap_f
+                  -- easier with vectors!
+                  dstart := dstart + d_dy;
+                else
+                  dstart := dstart + d_dy;
+                end if;
               end if;
               src := sstart;
               dst := dstart;
