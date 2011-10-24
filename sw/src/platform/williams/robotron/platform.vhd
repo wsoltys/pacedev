@@ -147,7 +147,7 @@ architecture SYN of platform is
 	signal video_counter_cs	  : std_logic;	
 	signal nvram_cs				    : std_logic;
 	signal nvram_wr				    : std_logic;
-	signal nvram_data			    : std_logic_vector(7 downto 0);
+	signal nvram_data			    : std_logic_vector(3 downto 0);
 	signal io_cs			        : std_logic;
 	signal io_d_o			        : std_logic_vector(7 downto 0);
 	                        
@@ -216,7 +216,7 @@ begin
 	-- video counter $CB00-$CBFF
 	video_counter_cs <=	'1' when STD_MATCH(mem_a, X"CB"&"--------") else '0';
 	-- nvram $CC00-$CFFF
-	nvram_cs <=					'1' when STD_MATCH(mem_a, X"C"&"1100--------") else '0';
+	nvram_cs <=					'1' when STD_MATCH(mem_a, X"C"&"11----------") else '0';
 
   -- memory block write enables
 	nvram_wr <= (nvram_cs and clk_1M_en and not cpu_r_wn);
@@ -227,7 +227,7 @@ begin
             widget_pia_d_o when widget_pia_cs = '1' else
 						rom_pia_d_o when rom_pia_cs = '1' else
 						graphics_i.y(7 downto 2) & "00" when video_counter_cs = '1' else
-						nvram_data when nvram_cs = '1' else
+						(X"F" & nvram_data) when nvram_cs = '1' else
 						(others => '0');
 								
 	-- memory read mux
@@ -421,15 +421,15 @@ begin
 		generic map
 		(
 			init_file		=> VARIANT_ROM_DIR & "nvram.hex",
-			numwords_a	=> 256,
-			widthad_a		=> 8
+			widthad_a		=> 10,
+			width_a		  => 4
 		)
 		port map
 		(
 			clock				=> clk_20M,
-			address			=> mem_a(7 downto 0),
+			address			=> mem_a(9 downto 0),
 			wren				=> nvram_wr,
-			data				=> cpu_d_o,
+			data				=> cpu_d_o(3 downto 0),
 			q						=> nvram_data
 		);
 

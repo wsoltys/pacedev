@@ -38,15 +38,15 @@ architecture SYN of sc02 is
   type r_a is array (natural range <>) of std_logic_vector(7 downto 0);
   signal r : r_a(0 to 2**3-1);
   
-  alias cmd           : std_logic_vector(7 downto 0) is r(0);
-    alias src_inc     : std_logic is cmd(0);
-    alias dst_inc     : std_logic is cmd(1);
-    alias transparent : std_logic is cmd(3);
-    alias solid       : std_logic is cmd(4);
-    alias shift       : std_logic is cmd(5);
-    alias even        : std_logic is cmd(6);
-    alias odd         : std_logic is cmd(7);
-  alias mask          : std_logic_vector(7 downto 0) is r(1);
+  alias cmd             : std_logic_vector(7 downto 0) is r(0);
+    alias src_inc_f     : std_logic is cmd(0);
+    alias dst_inc_f     : std_logic is cmd(1);
+    alias transparent_f : std_logic is cmd(3);
+    alias solid_f       : std_logic is cmd(4);
+    alias shift_f       : std_logic is cmd(5);
+    alias even_f        : std_logic is cmd(6);
+    alias odd_f         : std_logic is cmd(7);
+  alias solid           : std_logic_vector(7 downto 0) is r(1);
 
   -- aliases of a fashion
   signal src_a  : std_logic_vector(15 downto 0);
@@ -56,6 +56,7 @@ architecture SYN of sc02 is
   ( 
     S_IDLE, S_HALTING, 
     S_BLIT_0, S_BLIT_1, S_BLIT_2, S_BLIT_3, S_BLIT_4,
+    S_BLIT_5, S_BLIT_6, S_BLIT_7,
     S_INC 
   );
   signal state : state_t := S_IDLE;
@@ -91,8 +92,9 @@ begin
     variable d_dx     : integer range 0 to 256;
     variable d_dy     : integer range 0 to 256;
     variable keepmask : std_logic_vector(7 downto 0);
-    variable d_i      : std_logic_vector(mem_d_i'range);
-    variable d_o      : std_logic_vector(mem_d_o'range);
+    variable mask     : std_logic_vector(keepmask'range);
+    variable src_d_i  : std_logic_vector(mem_d_i'range);
+    variable dst_d_i  : std_logic_vector(mem_d_o'range);
   begin
     if rst = '1' then
       halt <= '0';
@@ -135,22 +137,22 @@ begin
               end if;
               x := 1;
               y := 1;
-              if src_inc = '1' then
+              if src_inc_f = '1' then
                 d_sx := 256;
                 d_sy := 1;
               else
                 d_sx := 1;
                 d_sy := w;
               end if;
-              if dst_inc = '1' then
+              if dst_inc_f = '1' then
                 d_dx := 256;
                 d_dy := 1;
               else
                 d_dx := 1;
                 d_dy := w;
               end if;
-              keepmask(7 downto 4) := (others => odd);
-              keepmask(3 downto 0) := (others => even);
+              keepmask(7 downto 4) := (others => odd_f);
+              keepmask(3 downto 0) := (others => even_f);
               state <= S_BLIT_0;
             end if;
           when S_BLIT_0 =>
@@ -161,14 +163,43 @@ begin
           when S_BLIT_1 =>
             state <= S_BLIT_2;
           when S_BLIT_2 =>
-            mem_d_o <= mem_d_i;
+            -- read source byte from ROM/VRAM
+            src_d_i := mem_d_i;
             state <= S_BLIT_3;
           when S_BLIT_3 =>
-            -- force write to VRAM
+            -- force read/write to/from VRAM
             vram_sel <= '1';
             mem_a <= std_logic_vector(dst);
             state <= S_BLIT_4;
           when S_BLIT_4 =>
+            state <= S_BLIT_5;
+          when S_BLIT_5 =>
+            -- read source byte from VRAM
+            dst_d_i := mem_d_i;
+            state <= S_BLIT_6;
+          when S_BLIT_6 =>
+            -- do the magic
+            mask := keepmask;
+            -- handle transparency
+            if transparent_f = '1' then
+              if src_d_i(7 downto 4) = "0000" then
+                mask(7 downto 4) := (others => '1');
+              end if;
+              if src_d_i(3 downto 0) = "0000" then
+                mask(3 downto 0) := (others => '1');
+              end if;
+            end if;
+            -- handle solid vs source data
+            dst_d_i := dst_d_i and mask;
+            if solid_f = '1' then
+              dst_d_i := dst_d_i or (solid and not mask);
+            else
+              dst_d_i := dst_d_i or (src_d_i and not mask);
+            end if;
+            state <= S_BLIT_7;
+          when S_BLIT_7 =>
+            -- write byte to VRAM
+            mem_d_o <= dst_d_i;
             mem_wr <= '1';
             state <= S_INC;
           when S_INC =>
