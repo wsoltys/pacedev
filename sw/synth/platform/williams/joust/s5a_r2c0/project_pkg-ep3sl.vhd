@@ -68,9 +68,11 @@ package project_pkg is
   constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 14;
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
     
-	-- Robotron constants
+	-- Williams constants
 	
-	constant ROBOTRON_VRAM_WIDTHAD			      : integer := 15;		-- 32KB
+	constant WILLIAMS_VRAM_WIDTHAD			      : integer := 15;		-- 32KB
+  constant WILLIAMS_HAS_BLITTER             : boolean := true;
+  constant WILLIAMS_SC02_REVISION           : integer := 1;
 	
 	-- derived - do not edit
 

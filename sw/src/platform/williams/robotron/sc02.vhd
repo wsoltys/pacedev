@@ -7,7 +7,7 @@ library work;
 entity sc02 is
   generic
   (
-    REVISION  : integer := 2
+    REVISION  : integer range 1 to 2 := 2
   );
   port
   (

@@ -84,7 +84,7 @@ end platform;
 
 architecture SYN of platform is
 
-	constant ROBOTRON_VRAM_SIZE		: integer := 2**ROBOTRON_VRAM_WIDTHAD;
+	constant WILLIAMS_VRAM_SIZE		: integer := 2**WILLIAMS_VRAM_WIDTHAD;
 
 	alias clk_20M					    : std_logic is clkrst_i.clk(0);
   alias rst_20M             : std_logic is clkrst_i.rst(0);
@@ -364,7 +364,7 @@ begin
 			nmi				=> cpu_nmi
 		);
 
-  BLK_BLITTER : block
+  GEN_BLITTER : if WILLIAMS_HAS_BLITTER generate
 
     signal ba_bs          : std_logic := '0';
     
@@ -391,7 +391,7 @@ begin
     sc02_inst : entity work.sc02
       generic map
       (
-        REVISION  => 1
+        REVISION  => WILLIAMS_SC02_REVISION
       )
       port map
       (
@@ -414,7 +414,15 @@ begin
         mem_d_o   => blit_d
       );
 
-  end block BLK_BLITTER;
+  else generate
+
+    cpu_halt <= '0';
+    mem_a <= cpu_a;
+    vram_sel <= vram_select_r;
+    vram_d_i <= cpu_d_o;
+    vram_wr <= clk_1M_en and not cpu_r_wn;
+    
+  end generate GEN_BLITTER;
   
 	-- Battery-backed CMOS RAM
 	nvram_inst : entity work.spram
@@ -551,18 +559,18 @@ begin
       generic map
       (
         init_file		=> VARIANT_ROM_DIR & "vram.hex",
-        widthad_a		=> ROBOTRON_VRAM_WIDTHAD
+        widthad_a		=> WILLIAMS_VRAM_WIDTHAD
       )
       port map
       (
         clock_b			=> clk_20M,
-        address_b		=> mem_a(ROBOTRON_VRAM_WIDTHAD-1 downto 0),
+        address_b		=> mem_a(WILLIAMS_VRAM_WIDTHAD-1 downto 0),
         wren_b			=> vram0_wr,
         data_b			=> vram_d_i,
         q_b					=> vram0_d_o,
 
         clock_a			=> clk_video,
-        address_a		=> bitmap_i(1).a(ROBOTRON_VRAM_WIDTHAD-1 downto 0),
+        address_a		=> bitmap_i(1).a(WILLIAMS_VRAM_WIDTHAD-1 downto 0),
         wren_a			=> '0',
         data_a			=> (others => 'X'),
         q_a					=> bitmap0_d_o
