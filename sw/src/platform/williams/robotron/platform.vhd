@@ -438,7 +438,7 @@ begin
 		rom_D000_inst : entity work.sprom
 			generic map
 			(
-        init_file		=> VARIANT_ROM_DIR & "sba.hex",
+        init_file		=> VARIANT_ROM_DIR & "rom10.hex",
 				widthad_a		=> 12
 			)
 			port map
@@ -451,7 +451,7 @@ begin
 		rom_E000_inst : entity work.sprom
 			generic map
 			(
-        init_file		=> VARIANT_ROM_DIR & "sbb.hex",
+        init_file		=> VARIANT_ROM_DIR & "rom11.hex",
 				widthad_a		=> 12
 			)
 			port map
@@ -464,7 +464,7 @@ begin
 		rom_F000_inst : entity work.sprom
 			generic map
 			(
-        init_file		=> VARIANT_ROM_DIR & "sbc.hex",
+        init_file		=> VARIANT_ROM_DIR & "rom12.hex",
 				widthad_a		=> 12
 			)
 			port map
@@ -482,7 +482,7 @@ begin
       rom_inst : entity work.sprom
         generic map
         (
-          init_file		=> VARIANT_ROM_DIR & "sb" & integer'image(i) & ".hex",
+          init_file		=> VARIANT_ROM_DIR & "rom0" & integer'image(i) & ".hex",
           widthad_a		=> 12
         )
         port map
