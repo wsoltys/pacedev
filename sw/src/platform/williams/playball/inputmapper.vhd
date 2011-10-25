@@ -54,20 +54,29 @@ begin
         case data(7 downto 0) is
         
             -- IN0
-            when SCANCODE_LEFT =>			-- left
+            when SCANCODE_UP =>				-- up
               inputs(0).d(0) <= press;
-            when SCANCODE_RIGHT =>		-- right
+            when SCANCODE_DOWN =>			-- down
               inputs(0).d(1) <= press;
-            when SCANCODE_LCTRL =>		-- flap
+            when SCANCODE_LEFT =>			-- left
               inputs(0).d(2) <= press;
-            when SCANCODE_2 =>				-- start2
-              inputs(0).d(4) <= press;
+            when SCANCODE_RIGHT =>		-- right
+              inputs(0).d(3) <= press;
             when SCANCODE_1 =>				-- start1
+              inputs(0).d(4) <= press;
+            when SCANCODE_2 =>				-- start2
               inputs(0).d(5) <= press;
+            when SCANCODE_W =>				-- fire up
+              inputs(0).d(6) <= press;
+            when SCANCODE_Z =>				-- fire down
+              inputs(0).d(7) <= press;
 
             -- IN1
-            -- (not used)
-            
+            when SCANCODE_A =>		    -- fire left
+              inputs(1).d(0) <= press;
+            when SCANCODE_S =>		    -- fire right
+              inputs(1).d(1) <= press;
+              
             -- IN2
             when SCANCODE_F1 =>				-- auto up
               inputs(2).d(0) <= press;
