@@ -434,20 +434,24 @@ begin
 		);
 
 	GEN_FPGA_ROMS : if true generate
-	
-		rom_D000_inst : entity work.sprom
-			generic map
-			(
-        init_file		=> VARIANT_ROM_DIR & "rom10.hex",
-				widthad_a		=> 12
-			)
-			port map
-			(
-				clock			=> clk_20M,
-				address		=> mem_a(11 downto 0),
-				q					=> romD_d_o
-			);
-		
+
+    GEN_ROM10 : if PLATFORM_VARIANT /= "sinistar" generate
+      rom_D000_inst : entity work.sprom
+        generic map
+        (
+          init_file		=> VARIANT_ROM_DIR & "rom10.hex",
+          widthad_a		=> 12
+        )
+        port map
+        (
+          clock			=> clk_20M,
+          address		=> mem_a(11 downto 0),
+          q					=> romD_d_o
+        );
+    else generate
+      romD_d_o <= (others => 'Z');
+    end generate GEN_ROM10;
+    
 		rom_E000_inst : entity work.sprom
 			generic map
 			(

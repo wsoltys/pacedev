@@ -21,7 +21,7 @@
 -- specific prior written permission.
 --
 -- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
--- AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+-- AND ANY EXKeyDown OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 -- THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
 -- PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE
 -- LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
@@ -43,7 +43,7 @@
 --
 -- File history :
 --
---	0242 : First release
+--	0242 : First KeyUp
 --
 
 library IEEE;
@@ -52,14 +52,14 @@ use IEEE.numeric_std.all;
 
 entity ps2kbd is
 	port(
-		Rst_n		: in std_logic;
-		Clk			: in std_logic;
+		Rst_n		  : in std_logic;
+		Clk			  : in std_logic;
 		Tick1us		: in std_logic;
 		PS2_Clk		: in std_logic;
 		PS2_Data	: in std_logic;
-		Press		: out std_logic;
-		Release		: out std_logic;
-		Reset		: out std_logic;
+		KeyDown   : out std_logic;
+		KeyUp     : out std_logic;
+		Reset		  : out std_logic;
 		ScanCode	: out std_logic_vector(7 downto 0));
 end ps2kbd;
 
@@ -71,7 +71,7 @@ architecture rtl of ps2kbd is
 	signal	RX_Bit_Cnt		: unsigned(3 downto 0);
 	signal	RX_Byte			: unsigned(2 downto 0);
 	signal	RX_ShiftReg		: std_logic_vector(7 downto 0);
-	signal	RX_Release		: std_logic;
+	signal	RX_KeyUp		: std_logic;
 	signal	RX_Received		: std_logic;
 
 begin
@@ -167,29 +167,29 @@ begin
 	process (Clk, Rst_n)
 	begin
 		if Rst_n = '0' then
-			Press <= '0';
-			Release <= '0';
+			KeyDown <= '0';
+			KeyUp <= '0';
 			Reset <= '0';
 			RX_Byte <= (others => '0');
-			RX_Release <= '0';
+			RX_KeyUp <= '0';
 		elsif Clk'event and Clk = '1' then
-			Press <= '0';
-			Release <= '0';
+			KeyDown <= '0';
+			KeyUp <= '0';
 			Reset <= '0';
 			if RX_Received = '1' then
 				RX_Byte <= RX_Byte + 1;
 				if RX_ShiftReg = x"F0" then
-					RX_Release <= '1';
+					RX_KeyUp <= '1';
 				elsif RX_ShiftReg = x"E0" then
 				else
-					RX_Release <= '0';
-					-- Normal key press
-					if RX_Release = '0' then
-						Press <= '1';
+					RX_KeyUp <= '0';
+					-- Normal key KeyDown
+					if RX_KeyUp = '0' then
+						KeyDown <= '1';
 					end if;
-					-- Normal key release
-					if RX_Release = '1' then
-						Release <= '1';
+					-- Normal key KeyUp
+					if RX_KeyUp = '1' then
+						KeyUp <= '1';
 					end if;
 				end if;
 				if RX_ShiftReg = x"aa" then

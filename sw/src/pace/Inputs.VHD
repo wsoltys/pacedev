@@ -30,16 +30,16 @@ architecture SYN of inputs is
   component ps2kbd                                          
     port
     (
-      clk      : in  std_logic;                            
-      rst_n    : in  std_logic;                            
-      tick1us  : in  std_logic;
-      ps2_clk  : in  std_logic;                            
-      ps2_data : in  std_logic;                            
+      clk       : in  std_logic;                            
+      rst_n     : in  std_logic;                            
+      tick1us   : in  std_logic;
+      ps2_clk   : in  std_logic;                            
+      ps2_data  : in  std_logic;                            
 
-      reset    : out std_logic;                            
-      press    : out std_logic;                            
-      release  : out std_logic;                            
-      scancode : out std_logic_vector(7 downto 0)
+      reset     : out std_logic;                            
+      keydown   : out std_logic;                            
+      keyup     : out std_logic;                            
+      scancode  : out std_logic_vector(7 downto 0)
     );
   end component;
 
@@ -60,16 +60,16 @@ begin
   ps2kbd_inst : ps2kbd                                        
     port map
     (
-      clk      => clk,                                     
-      rst_n    => reset_n,
-      tick1us  => tick_1us,
-      ps2_clk  => ps2clk,
-      ps2_data => ps2data,
+      clk       => clk,                                     
+      rst_n     => reset_n,
+      tick1us   => tick_1us,
+      ps2_clk   => ps2clk,
+      ps2_data  => ps2data,
 			
-      reset    => ps2_reset,
-      press    => ps2_press,
-      release  => ps2_release,
-      scancode => ps2_scancode
+      reset     => ps2_reset,
+      keydown   => ps2_press,
+      keyup     => ps2_release,
+      scancode  => ps2_scancode
     );
 
   inputmapper_inst : entity work.inputmapper
@@ -80,17 +80,17 @@ begin
 		)
     port map
     (
-      clk     => clk,
-      rst_n   => reset_n,
+      clk       => clk,
+      rst_n     => reset_n,
 
-      reset   => ps2_reset,
-      press   => ps2_press,
-      release => ps2_release,
-      data    => ps2_scancode,
-			jamma		=> jamma,
+      reset     => ps2_reset,
+      key_down  => ps2_press,
+      key_up    => ps2_release,
+      data      => ps2_scancode,
+			jamma		  => jamma,
 			
-			dips		=> dips,
-      inputs	=> inputs
+			dips		  => dips,
+      inputs	  => inputs
     );
 
     process (clk, reset)

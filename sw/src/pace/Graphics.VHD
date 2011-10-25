@@ -92,12 +92,8 @@ begin
       video_i         => video_i,
       
 			-- register interface
-			reg_i.h_scale	=> (others => '0'),
-			reg_i.v_scale 	=> (others => '0'),
-			
-			-- If using Q10.x , replace the above two lines with these to avoid error(10427) "VHDL Aggregate error"
-			--reg_i.h_scale	=> "000",
-			--reg_i.v_scale 	=> "000",
+			reg_i.h_scale	=> "000",
+			reg_i.v_scale 	=> "000",
       -- video data signals (in)
       rgb_i		    		=> rgb_data,
 

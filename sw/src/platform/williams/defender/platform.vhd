@@ -376,7 +376,7 @@ begin
 			q						=> nvram_data
 		);
 
-	GEN_SRAM_ROMS : if DEFENDER_ROMS_IN_SRAM generate
+	GEN_ROMS : if DEFENDER_ROMS_IN_SRAM generate
 
 		rom_d_data <= sram_i.d(rom_d_data'range);
 		rom_e_data <= sram_i.d(rom_e_data'range);
@@ -385,10 +385,8 @@ begin
 		rom_b2_data <= sram_i.d(rom_b2_data'range);
 		rom_b6_data <= sram_i.d(rom_b6_data'range);
 
-	end generate GEN_SRAM_ROMS;
-	
-	GEN_FPGA_ROMS : if not DEFENDER_ROMS_IN_SRAM generate
-	
+  else generate
+  
 		rom_D000_inst : entity work.sprom
 			generic map
 			(
@@ -473,7 +471,7 @@ begin
 				q					=> rom_b6_data
 			);
 
-	end generate GEN_FPGA_ROMS;
+	end generate GEN_ROMS;
 	
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 	vram0_inst : entity work.dpram
