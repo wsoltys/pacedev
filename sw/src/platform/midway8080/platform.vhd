@@ -132,28 +132,17 @@ architecture SYN of platform is
 	
 begin
 
+  assert false
+    report  "CLK0_FREQ_MHz=" & integer'image(CLK0_FREQ_MHz) &
+            " CPU_FREQ_MHz=" &  integer'image(CPU_FREQ_MHz) &
+            " CPU_CLK_ENA_DIV=" & integer'image(INVADERS_CPU_CLK_ENA_DIVIDE_BY)
+      severity note;
+
 	cpu_reset <= clkrst_i.arst or game_reset;
 	
   -- read mux
   uP_datai <= uPmem_datai when (uPmemrd = '1') else uPio_datai;
 
-	GEN_EXTERNAL_WRAM : if not INVADERS_USE_INTERNAL_WRAM generate
-	
-	  -- SRAM signals (may or may not be used)
-	  sram_o.a <= std_logic_vector(resize(unsigned(uP_addr), sram_o.a'length));
-	  sram_o.d <= std_logic_vector(resize(unsigned(uP_datao), sram_o.d'length));
-		sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
-	  sram_o.cs <= wram_cs;
-	  sram_o.oe <= not wram_wr;
-	  sram_o.we <= wram_wr;
-		wram_datao <= sram_i.d(wram_datao'range);
-
-	end generate GEN_EXTERNAL_WRAM;
-
-	GEN_NO_SRAM : if INVADERS_USE_INTERNAL_WRAM generate
-    sram_o <= NULL_TO_SRAM;
-	end generate GEN_NO_SRAM;
-	
 	-- memory chip selects
 	-- ROM0 $0000-$1FFF
 	rom0_cs <= '1' when uP_addr(14 downto 13) = "00" else '0';
@@ -312,23 +301,6 @@ begin
 	--xcentre <= std_logic_vector(conv_unsigned(0, xcentre'length));
 	--ycentre <= std_logic_vector(conv_unsigned(198, ycentre'length));
 
-  -- unused outputs
-
-  graphics_o <= NULL_TO_GRAPHICS;
-  --tilemap_o <= NULL_TO_TILEMAP_CTL;
-  sprite_reg_o <= NULL_TO_SPRITE_REG;
-  sprite_o <= NULL_TO_SPRITE_CTL;
-  --osd_o <= NULL_TO_OSD;
-  spi_o <= NULL_TO_SPI;
-  ser_o <= NULL_TO_SERIAL;
-	leds_o <= (others => '0');
-  
-  assert false
-    report  "CLK0_FREQ_MHz=" & integer'image(CLK0_FREQ_MHz) &
-            " CPU_FREQ_MHz=" &  integer'image(CPU_FREQ_MHz) &
-            " CPU_CLK_ENA_DIV=" & integer'image(INVADERS_CPU_CLK_ENA_DIVIDE_BY)
-      severity note;
-
 	-- generate CPU clock (2MHz from 20MHz)
 	clk_en_inst : entity work.clk_div
 		generic map
@@ -364,17 +336,7 @@ begin
       nmi    	=> '0'
     );
 
-  GEN_INTERNAL_ROM : if not INVADERS_ROM_IN_FLASH generate
-    rom0_inst : entity work.invaders_rom_0
-      port map
-      (
-        clock		=> clk_sys,
-        address => uP_addr(12 downto 0),
-        q				=> rom0_datao
-      );
-  end generate GEN_INTERNAL_ROM;
-
-  GEN_FLASH_ROM : if INVADERS_ROM_IN_FLASH generate
+  GEN_ROM : if INVADERS_ROM_IN_FLASH generate
 
     process (clk_sys, clkrst_i.arst, clk_2M_en)
     begin
@@ -389,54 +351,61 @@ begin
       end if;
     end process;
 
-  end generate GEN_FLASH_ROM;
+  else generate
   
-  GEN_NO_FLASH_ROM : if not INVADERS_ROM_IN_FLASH generate
+    rom0_inst : entity work.invaders_rom_0
+      port map
+      (
+        clock		=> clk_sys,
+        address => uP_addr(12 downto 0),
+        q				=> rom0_datao
+      );
+      
     flash_o.a <= (others => '0');
-  end generate GEN_NO_FLASH_ROM;
+    flash_o.d <= (others => 'Z');
+    flash_o.we <= '0';
+    flash_o.cs <= '1';
+    flash_o.oe <= '1';
 
-  flash_o.d <= (others => 'Z');
-  flash_o.we <= '0';
-  flash_o.cs <= '1';
-  flash_o.oe <= '1';
+  end generate GEN_ROM;
 
-	GEN_ROM1 : if ROM_1_NAME /= "" generate
-		rom1_inst : entity work.invaders_rom_1
-	    port map
-	    (
+  -- this should be inside the above generate
+  -- but this crashes Quartus v10.1SP1
+  GEN_ROM1 : if ROM_1_NAME /= "" generate
+    rom1_inst : entity work.invaders_rom_1
+      port map
+      (
         clock		=> clk_sys,
         address => uP_addr(11 downto 0),
         q				=> rom1_datao
-	    );
-	end generate GEN_ROM1;
-  
-  GEN_NO_ROM1 : if ROM_1_NAME = "" generate
+      );
+  else generate
     rom1_datao <= (others => '0');
-  end generate GEN_NO_ROM1;
+  end generate GEN_ROM1;
 
-		--
-		--	*** WARNING - the contents of the VRAM are offset!!!
-		--							- the video won't look right!!!!
-		--
-		
-		-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-		vram_inst : entity work.vram
-	    port map
-	    (
-	        clock_b   	=> clk_sys,
-	        address_b   => uP_addr(12 downto 0),
-	        data_b      => uP_datao,
-	        q_b					=> vram_datao,
-	        wren_b			=> vram_wr,
+  --
+  --	*** WARNING - the contents of the VRAM are offset!!!
+  --							- the video won't look right!!!!
+  --
+  
+  -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+  vram_inst : entity work.vram
+    port map
+    (
+        clock_b   	=> clk_sys,
+        address_b   => uP_addr(12 downto 0),
+        data_b      => uP_datao,
+        q_b					=> vram_datao,
+        wren_b			=> vram_wr,
 
-	        clock_a     => clk_video,
-	        address_a   => bitmap_addr_rotated,
-      		data_a      => (others => '0'),
-	        q_a					=> bitmap_o(1).d,
-      		wren_a			=> '0'
-	    );
+        clock_a     => clk_video,
+        address_a   => bitmap_addr_rotated,
+        data_a      => (others => '0'),
+        q_a					=> bitmap_o(1).d,
+        wren_a			=> '0'
+    );
 
-		GEN_INTERNAL_WRAM : if INVADERS_USE_INTERNAL_WRAM generate
+	GEN_WRAM : if INVADERS_USE_INTERNAL_WRAM generate
 		
 			wram_inst : entity work.wram
 				port map
@@ -448,6 +417,30 @@ begin
 					q						=> wram_datao
 				);
 		
-		end generate GEN_INTERNAL_WRAM;
+      sram_o <= NULL_TO_SRAM;
+      
+    else generate
+  
+      -- SRAM signals (may or may not be used)
+      sram_o.a <= std_logic_vector(resize(unsigned(uP_addr), sram_o.a'length));
+      sram_o.d <= std_logic_vector(resize(unsigned(uP_datao), sram_o.d'length));
+      sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
+      sram_o.cs <= wram_cs;
+      sram_o.oe <= not wram_wr;
+      sram_o.we <= wram_wr;
+      wram_datao <= sram_i.d(wram_datao'range);
+
+	end generate GEN_WRAM;
 		
+  -- unused outputs
+
+  graphics_o <= NULL_TO_GRAPHICS;
+  --tilemap_o <= NULL_TO_TILEMAP_CTL;
+  sprite_reg_o <= NULL_TO_SPRITE_REG;
+  sprite_o <= NULL_TO_SPRITE_CTL;
+  --osd_o <= NULL_TO_OSD;
+  spi_o <= NULL_TO_SPI;
+  ser_o <= NULL_TO_SERIAL;
+	leds_o <= (others => '0');
+  
 end SYN;

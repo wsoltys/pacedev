@@ -19,8 +19,8 @@ entity inputmapper is
 
     -- inputs from keyboard controller
     reset     : in     std_logic;
-    press     : in     std_logic;
-    release   : in     std_logic;
+    key_down  : in     std_logic;
+    key_up    : in     std_logic;
     data      : in     std_logic_vector(7 downto 0);
 		-- JAMMA interface
 		jamma			: in from_JAMMA_t;
@@ -64,24 +64,24 @@ begin
           -- map the dipswitches
           keybd_v(1).d(3 downto 0) := dips(3 downto 0);
           keybd_v(1).d(7) := dips(7);
-          if (press or release) = '1' then
+          if (key_down or key_up) = '1' then
                case data(7 downto 0) is
                     -- IN0
                     when SCANCODE_5 =>
-                      keybd_v(0).d(0) := press;
+                      keybd_v(0).d(0) := key_down;
                     when SCANCODE_2 =>
-                      keybd_v(0).d(1) := press;
+                      keybd_v(0).d(1) := key_down;
                     when SCANCODE_1 =>
-                      keybd_v(0).d(2) := press;
+                      keybd_v(0).d(2) := key_down;
                     when SCANCODE_LCTRL | SCANCODE_SPACE =>
-                      keybd_v(0).d(4) := press;
-                      keybd_v(1).d(4) := press;
+                      keybd_v(0).d(4) := key_down;
+                      keybd_v(1).d(4) := key_down;
                     when SCANCODE_LEFT =>
-                      keybd_v(0).d(5) := press;
-                      keybd_v(1).d(5) := press;
+                      keybd_v(0).d(5) := key_down;
+                      keybd_v(1).d(5) := key_down;
                     when SCANCODE_RIGHT =>
-                    	keybd_v(0).d(6) := press;
-                      keybd_v(1).d(6) := press;
+                    	keybd_v(0).d(6) := key_down;
+                      keybd_v(1).d(6) := key_down;
                     -- IN1
                     --when "01110101" =>           -- $75 = UP
                     --when "01110010" =>           -- $72 = DOWN
@@ -89,12 +89,12 @@ begin
                     --when "00011011" =>           -- $1B = 'S'
 										-- Special keys
 										when SCANCODE_F3 =>
-											keybd_v(2).d(0) := press;			-- CPU RESET
+											keybd_v(2).d(0) := key_down;			-- CPU RESET
 										when SCANCODE_TAB =>
-                      keybd_v(2).d(1) := press;     -- OSD TOGGLE
+                      keybd_v(2).d(1) := key_down;     -- OSD TOGGLE
                     when others =>
                end case;
-            end if; -- press or release
+            end if; -- key_down or key_up
 
 						-- this is PS/2 reset only
             if (reset = '1') then
