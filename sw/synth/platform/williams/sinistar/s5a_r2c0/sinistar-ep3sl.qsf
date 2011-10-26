@@ -2233,6 +2233,8 @@ set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_RO
 set_location_assignment PIN_K27 -to vid_reset_n
 set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_reset_n
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to vid_reset_n
+set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
+set_global_assignment -name VHDL_SHOW_LMF_MAPPING_MESSAGES OFF
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sdram_pkg.vhd
@@ -2256,7 +2258,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/cpu09/cpu
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/williams/sinistar/inputmapper.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/inputs.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/williams/bitmapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/williams/playball/bitmapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_mixer.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Graphics.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/io/pia6821.vhd
@@ -2266,6 +2268,4 @@ set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/target_top_ep3sl.vhd
 set_global_assignment -name SIGNALTAP_FILE blit.stp
-set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
-set_global_assignment -name VHDL_SHOW_LMF_MAPPING_MESSAGES OFF
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

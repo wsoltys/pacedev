@@ -5,6 +5,7 @@ use ieee.std_logic_unsigned.all;
 library work;
 use work.project_pkg.all;
 use work.target_pkg.all;
+use work.platform_variant_pkg.all;
 
 package platform_pkg is
 
@@ -15,8 +16,8 @@ package platform_pkg is
 	constant PACE_VIDEO_NUM_BITMAPS 	    : natural := 1;
 	constant PACE_VIDEO_NUM_TILEMAPS 	    : natural := 0;
 	constant PACE_VIDEO_NUM_SPRITES 	    : natural := 0;
-	constant PACE_VIDEO_H_SIZE				    : integer := 304;
-	constant PACE_VIDEO_V_SIZE				    : integer := 256;
+	constant PACE_VIDEO_H_SIZE				    : integer := WILLIAMS_VIDEO_H_SIZE;
+	constant PACE_VIDEO_V_SIZE				    : integer := WILLIAMS_VIDEO_V_SIZE;
 	constant PACE_VIDEO_PIPELINE_DELAY    : integer := 3;
 	
 	constant PACE_INPUTS_NUM_BYTES        : integer := 4;
@@ -32,6 +33,10 @@ package platform_pkg is
           CLK0_FREQ_MHz / 3;
 
   constant WILLIAMS_SOURCE_ROOT_DIR : string := "../../../../../src/platform/williams/";
+  constant VARIANT_SOURCE_ROOT_DIR  : string := WILLIAMS_SOURCE_ROOT_DIR & 
+                                                PLATFORM_VARIANT & "/";
+  constant VARIANT_ROM_DIR          : string := VARIANT_SOURCE_ROOT_DIR &
+                                                "roms/";
 
   type from_PLATFORM_IO_t is record
     not_used  : std_logic;

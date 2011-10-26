@@ -20,14 +20,24 @@ package project_pkg is
   
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
 
-  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
+--  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
+--  constant PACE_CLK0_DIVIDE_BY              : natural := 6;
+--  constant PACE_CLK0_MULTIPLY_BY            : natural := 5;   -- 24*5/4 = 20MHz
+--  constant PACE_CLK1_DIVIDE_BY        		  : natural := 3;
+--  constant PACE_CLK1_MULTIPLY_BY      		  : natural := 5;  	-- 24*5/3 = 40MHz
+--	constant PACE_VIDEO_H_SCALE         		  : integer := 2;
+--	constant PACE_VIDEO_V_SCALE         		  : integer := 2;
+--	constant PACE_ENABLE_ADV724							  : std_logic := '0';
+--  constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';
+--  constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '1';
+
+  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1024x768_60Hz;
   constant PACE_CLK0_DIVIDE_BY              : natural := 6;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 5;   -- 24*5/4 = 20MHz
-  constant PACE_CLK1_DIVIDE_BY        		  : natural := 3;
-  constant PACE_CLK1_MULTIPLY_BY      		  : natural := 5;  	-- 24*5/3 = 40MHz
-	constant PACE_VIDEO_H_SCALE         		  : integer := 2;
-	constant PACE_VIDEO_V_SCALE         		  : integer := 2;
-	constant PACE_ENABLE_ADV724							  : std_logic := '0';
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 5;       -- 24*5/6 = 20MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 24;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 65;  	  -- 24*65/24 = 65MHz
+  constant PACE_VIDEO_H_SCALE       	      : integer := 2;
+  constant PACE_VIDEO_V_SCALE       	      : integer := 2;
   constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';
   constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '1';
 
@@ -64,7 +74,7 @@ package project_pkg is
 
   -- always need SRAM (for now, use for WRAM)
   constant S5AR2_EMULATE_SRAM               : boolean := true;
-  -- $9800-$BFFF (so $8000-$BFFF)
+  -- $9000-$BFFF (so $8000-$BFFF)
   constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 14;
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
     
