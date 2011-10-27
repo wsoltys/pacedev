@@ -108,6 +108,8 @@ architecture SYN of platform is
 
   -- generic address
   signal mem_a              : std_logic_vector(15 downto 0);
+  signal mem_d_o            : std_logic_vector(7 downto 0);
+  signal mem_wr             : std_logic;
   
   -- ROM signals        
 	signal rom0_cs				    : std_logic;
@@ -124,8 +126,6 @@ architecture SYN of platform is
 	
   -- VRAM signals       
 	signal vram_cs				    : std_logic;
-  signal vram_wr            : std_logic;
-  signal vram_d_i           : std_logic_vector(7 downto 0);
   signal vram_d_o           : std_logic_vector(7 downto 0);
 
   -- RAM signals        
@@ -171,7 +171,7 @@ begin
   -- SRAM signals (may or may not be used)
   sram_o.a(sram_o.a'left downto 17) <= (others => '0');
   sram_o.a(16 downto 0)	<= 	std_logic_vector(resize(unsigned(mem_a), 17));
-  sram_o.d <= std_logic_vector(resize(unsigned(cpu_d_o), sram_o.d'length)) 
+  sram_o.d <= std_logic_vector(resize(unsigned(mem_d_o), sram_o.d'length)) 
 								when (wram_wr = '1') else (others => 'Z');
   sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
   sram_o.cs <= '1';
@@ -222,10 +222,11 @@ begin
 	nvram_cs <=					'1' when STD_MATCH(mem_a, X"C"&"11----------") else '0';
 
   -- memory block write enables
-  ramD_wr <= (ramD_cs and clk_1M_en and not cpu_r_wn);
-	nvram_wr <= (nvram_cs and clk_1M_en and not cpu_r_wn);
+  ramD_wr <= ramD_cs and mem_wr;
+  wram_wr <= wram_cs and mem_wr;
+	nvram_wr <= nvram_cs and mem_wr;
   sc02_wr <= sc02_cs and clk_1M_en and not cpu_r_wn;
-	
+
 	-- I/O bank
 	io_d_o <= -- palette is WO
             widget_pia_d_o when widget_pia_cs = '1' else
@@ -245,20 +246,6 @@ begin
 							romE_d_o when romE_cs = '1' else
 							romF_d_o when romF_cs = '1' else
 							(others => '0');
-	
-	-- memory write enables
-	process (clk_20M, clk_1M_en)
-	begin
-		if rising_edge(clk_20M) then
-			if clk_1M_en = '1' then
-				-- always write thru to RAM unless ROM is addressed
-				--wram_wr <= not cpu_r_wn and not (rom_d_cs or rom_e_cs or (data_c_cs and sram_addr_hi(16)));
-				wram_wr <= not cpu_r_wn and clk_1M_en and wram_cs;
-			else
-				wram_wr <= '0';
-			end if;
-		end if;
-	end process;
 		
 	-- implementation of palette RAM
 	process (clk_20M)
@@ -266,9 +253,9 @@ begin
 	begin
 		if rising_edge(clk_20M) then
       if clk_1M_en = '1' then
-        if palette_cs = '1' and clk_1M_en = '1' and cpu_r_wn = '0' then
+        if palette_cs = '1' and mem_wr = '1' then
           offset := to_integer(unsigned(mem_a(3 downto 0)));
-          palette_r(offset) <= cpu_d_o;
+          palette_r(offset) <= mem_d_o;
         end if;
       end if;
 		end if;
@@ -384,12 +371,12 @@ begin
     ba_bs <= cpu_ba and cpu_bs;
 
     mem_a <= blit_a when blit_busy = '1' else cpu_a;
+    mem_d_o <= blit_d when blit_busy = '1' else cpu_d_o;
+    mem_wr <=  blit_wr when blit_busy = '1' else
+                (clk_1M_en and not cpu_r_wn);
     -- blitter can force VRAM selection
     vram_sel <= '0' when (blit_busy = '1' and blit_vram_sel = '1') else
                   vram_select_r;
-    vram_d_i <= blit_d when blit_busy = '1' else cpu_d_o;
-    vram_wr <=  blit_wr when blit_busy = '1' else
-                (clk_1M_en and not cpu_r_wn);
     
     -- blitter chip(s)
     sc02_inst : entity work.sc02
@@ -423,9 +410,9 @@ begin
 
     cpu_halt <= '0';
     mem_a <= cpu_a;
+    mem_d_o <= cpu_d_o;
+    mem_wr <= clk_1M_en and not cpu_r_wn;
     vram_sel <= vram_select_r;
-    vram_d_i <= cpu_d_o;
-    vram_wr <= clk_1M_en and not cpu_r_wn;
     
   end generate GEN_BLITTER;
   
@@ -442,7 +429,7 @@ begin
 			clock				=> clk_20M,
 			address			=> mem_a(9 downto 0),
 			wren				=> nvram_wr,
-			data				=> cpu_d_o(WILLIAMS_NVRAM_WIDTH-1 downto 0),
+			data				=> mem_d_o(WILLIAMS_NVRAM_WIDTH-1 downto 0),
 			q						=> nvram_data(WILLIAMS_NVRAM_WIDTH-1 downto 0)
 		);
   nvram_data(7 downto WILLIAMS_NVRAM_WIDTH) <= (others => '1');
@@ -473,7 +460,7 @@ begin
           clock				=> clk_20M,
           address			=> mem_a(11 downto 0),
           wren				=> ramD_wr,
-          data				=> cpu_d_o,
+          data				=> mem_d_o,
           q						=> ramD_d_o
         );
     end generate GEN_ROM10;
@@ -560,9 +547,9 @@ begin
     vram8_cs <=		'1' when STD_MATCH(mem_a, X"8"&"------------") else '0';
     vram9_cs <= 	'1' when STD_MATCH(mem_a, X"9"&"0-----------") else '0';
 
-    vram0_wr <= vram0_cs and vram_wr;
-    vram8_wr <= vram8_cs and vram_wr;
-    vram9_wr <= vram9_cs and vram_wr;
+    vram0_wr <= vram0_cs and mem_wr;
+    vram8_wr <= vram8_cs and mem_wr;
+    vram9_wr <= vram9_cs and mem_wr;
 
     vram_d_o <= vram0_d_o when vram0_cs = '1' else
                 vram8_d_o when vram8_cs = '1' else
@@ -584,7 +571,7 @@ begin
         clock_b			=> clk_20M,
         address_b		=> mem_a(WILLIAMS_VRAM_WIDTHAD-1 downto 0),
         wren_b			=> vram0_wr,
-        data_b			=> vram_d_i,
+        data_b			=> mem_d_o,
         q_b					=> vram0_d_o,
 
         clock_a			=> clk_video,
@@ -606,7 +593,7 @@ begin
         clock_b			=> clk_20M,
         address_b		=> mem_a(11 downto 0),
         wren_b			=> vram8_wr,
-        data_b			=> vram_d_i,
+        data_b			=> mem_d_o,
         q_b					=> vram8_d_o,
 
         clock_a			=> clk_video,
@@ -628,7 +615,7 @@ begin
         clock_b			=> clk_20M,
         address_b		=> mem_a(10 downto 0),
         wren_b			=> vram9_wr,
-        data_b			=> vram_d_i,
+        data_b			=> mem_d_o,
         q_b					=> vram9_d_o,
 
         clock_a			=> clk_video,
@@ -648,7 +635,7 @@ begin
 	    cs        	=> widget_pia_cs,
 	    rw        	=> cpu_r_wn,
 	    addr      	=> mem_a(1 downto 0),
-	    data_in   	=> cpu_d_o,
+	    data_in   	=> mem_d_o,
 		 	data_out  	=> widget_pia_d_o,
 		 	irqa      	=> open,
 		 	irqb      	=> open,
@@ -676,7 +663,7 @@ begin
 	    cs        	=> rom_pia_cs,
 	    rw        	=> cpu_r_wn,
 	    addr      	=> mem_a(1 downto 0),
-	    data_in   	=> cpu_d_o,
+	    data_in   	=> mem_d_o,
 		 	data_out  	=> rom_pia_d_o,
 		 	irqa      	=> rom_pia_irqa,
 		 	irqb      	=> rom_pia_irqb,
