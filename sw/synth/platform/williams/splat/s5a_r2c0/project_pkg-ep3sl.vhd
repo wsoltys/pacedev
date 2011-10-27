@@ -71,8 +71,6 @@ package project_pkg is
 	-- Williams constants
 	
 	constant WILLIAMS_VRAM_WIDTHAD			      : integer := 15;		-- 32KB
-  constant WILLIAMS_HAS_BLITTER             : boolean := true;
-  constant WILLIAMS_SC02_REVISION           : integer := 2;
   
 	-- derived - do not edit
 
