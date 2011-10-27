@@ -7,7 +7,8 @@ library work;
 entity sc02 is
   generic
   (
-    REVISION  : integer range 1 to 2 := 2
+    REVISION  : integer range 1 to 2 := 2;
+    CLIP_ADDR : unsigned(15 downto 0) := X"0000"
   );
   port
   (
@@ -83,14 +84,14 @@ begin
     variable dst          : unsigned(dst_a'range);
     variable sstart       : unsigned(src_a'range);
     variable dstart       : unsigned(dst_a'range);
-    variable w            : integer range 0 to 256;   -- yes 256!
-    variable h            : integer range 0 to 256;
-    variable x            : integer range 0 to 256;
-    variable y            : integer range 0 to 256;
-    variable d_sx         : integer range 0 to 256;
-    variable d_sy         : integer range 0 to 256;
-    variable d_dx         : integer range 0 to 256;
-    variable d_dy         : integer range 0 to 256;
+    variable w            : integer range 0 to 257;   -- yes 256!
+    variable h            : integer range 0 to 257;
+    variable x            : integer range 0 to 257;
+    variable y            : integer range 0 to 257;
+    variable d_sx         : integer range 0 to 257;
+    variable d_sy         : integer range 0 to 257;
+    variable d_dx         : integer range 0 to 257;
+    variable d_dy         : integer range 0 to 257;
     variable keepmask     : std_logic_vector(7 downto 0);
     variable solid        : std_logic_vector(7 downto 0);
     variable mask         : std_logic_vector(keepmask'range);
@@ -137,8 +138,6 @@ begin
               elsif h = 255 then
                 h := 256;
               end if;
-              x := 1;
-              y := 1;
               if src_inc_f = '1' then
                 d_sx := 256;
                 d_sy := 1;
@@ -164,6 +163,8 @@ begin
                 -- must be done here, after all delta calcs
                 w := w + 1;
               end if;
+              x := 1;
+              y := 1;
               state <= S_BLIT_0;
             end if;
           when S_BLIT_0 =>
@@ -224,9 +225,11 @@ begin
             end if;
             state <= S_BLIT_7;
           when S_BLIT_7 =>
-            -- write byte to VRAM
-            mem_d_o <= dst_d_i;
-            mem_wr <= '1';
+--            if dst < CLIP_ADDR then
+              -- write byte to VRAM
+              mem_d_o <= dst_d_i;
+              mem_wr <= '1';
+--            end if;
             state <= S_INC;
           when S_INC =>
             state <= S_BLIT_0;  -- default

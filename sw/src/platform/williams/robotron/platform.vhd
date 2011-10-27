@@ -197,8 +197,8 @@ begin
 
 	-- RAM chip selects
 	-- RAM $9800-$BFFF
-	wram_cs <=		'1' when STD_MATCH(mem_a,  "101-------------") else
-								'1' when STD_MATCH(mem_a, X"9"&"1-----------") else
+	wram_cs <=		'1' when STD_MATCH(mem_a, X"9"&"1-----------") else
+                '1' when STD_MATCH(mem_a,  "101-------------") else
 								'0';
 
   -- I/O chip selects
@@ -306,7 +306,7 @@ begin
 		end if;
 	end process;
 
-	-- irqb every 16 scanlines
+	-- irqb every 32 scanlines
 	va11 <= graphics_i.y(5);
 
 	-- cpu interrupts
@@ -395,7 +395,8 @@ begin
     sc02_inst : entity work.sc02
       generic map
       (
-        REVISION  => WILLIAMS_SC02_REVISION
+        REVISION  => WILLIAMS_SC02_REVISION,
+        CLIP_ADDR => WILLIAMS_SC02_CLIP_ADDR
       )
       port map
       (
