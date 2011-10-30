@@ -163,7 +163,8 @@ architecture SYN of platform is
 begin
 
 	-- cpu09 core uses negative clock edge
-	clk_1M_en_n <= not (clk_1M_en and not platform_pause);
+	--clk_1M_en_n <= not (clk_1M_en and not platform_pause);
+	clk_1M_en_n <= not (clk_1M_en and not platform_pause) or cpu_halt;
 
 	-- add game reset later
 	cpu_reset <= rst_20M or platform_reset;
@@ -348,7 +349,7 @@ begin
 			addr		  => cpu_a,
 		  data_in		=> cpu_d_i,
 		  data_out	=> cpu_d_o,
-			halt			=> cpu_halt,
+			halt			=> '0', --cpu_halt,
 			hold			=> '0',
 			irq				=> cpu_irq,
 			firq			=> cpu_firq,
@@ -368,7 +369,8 @@ begin
   begin
   
     -- bus available signal to the SC02
-    ba_bs <= cpu_ba and cpu_bs;
+    --ba_bs <= cpu_ba and cpu_bs;
+    ba_bs <= cpu_halt;
 
     mem_a <= blit_a when blit_busy = '1' else cpu_a;
     mem_d_o <= blit_d when blit_busy = '1' else cpu_d_o;
