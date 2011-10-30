@@ -143,7 +143,7 @@ architecture SYN of platform is
 	signal rom_pia_irqa			  : std_logic;
 	signal rom_pia_irqb			  : std_logic;
 	signal vram_select_cs			: std_logic;
-  signal vram_select_r      : std_logic;
+  signal vram_select_r      : std_logic_vector(2 downto 0);
   signal vram_sel           : std_logic;
   signal sc02_cs            : std_logic;
   signal sc02_wr            : std_logic;
@@ -267,12 +267,12 @@ begin
 	process (clk_20M, platform_reset)
 	begin
     if platform_reset = '1' then
-      vram_select_r <= '0';
+      vram_select_r <= (others => '0');
 		elsif rising_edge(clk_20M) then
       if clk_1M_en = '1' then
         if vram_select_cs = '1' and cpu_r_wn = '0' then
           -- 0=VRAM, 1=ROM
-          vram_select_r <= cpu_d_o(0);
+          vram_select_r <= cpu_d_o(vram_select_r'range);
         end if;
       end if;
 		end if;
@@ -378,7 +378,7 @@ begin
                 (clk_1M_en and not cpu_r_wn);
     -- blitter can force VRAM selection
     vram_sel <= '0' when (blit_busy = '1' and blit_vram_sel = '1') else
-                  vram_select_r;
+                  vram_select_r(0);
     
     -- blitter chip(s)
     sc02_inst : entity work.sc02
@@ -389,23 +389,24 @@ begin
       )
       port map
       (
-        clk       => clk_20M,
-        clk_en    => '1',
-        rst       => rst_20M,
+        clk         => clk_20M,
+        clk_en      => '1',
+        rst         => rst_20M,
         
-        wr        => sc02_wr,
-        d         => cpu_d_o,
-        a         => mem_a(2 downto 0),
-        ba_bs     => ba_bs,
-        halt      => cpu_halt,
+        wr          => sc02_wr,
+        d           => cpu_d_o,
+        a           => mem_a(2 downto 0),
+        ba_bs       => ba_bs,
+        halt        => cpu_halt,
         
-        busy      => blit_busy,
-        vram_sel  => blit_vram_sel,
+        window_en   => vram_select_r(2),
+        busy        => blit_busy,
+        vram_sel    => blit_vram_sel,
         
-        mem_wr    => blit_wr,
-        mem_a     => blit_a,
-        mem_d_i   => cpu_d_i,
-        mem_d_o   => blit_d
+        mem_wr      => blit_wr,
+        mem_a       => blit_a,
+        mem_d_i     => cpu_d_i,
+        mem_d_o     => blit_d
       );
 
   else generate
@@ -414,7 +415,7 @@ begin
     mem_a <= cpu_a;
     mem_d_o <= cpu_d_o;
     mem_wr <= clk_1M_en and not cpu_r_wn;
-    vram_sel <= vram_select_r;
+    vram_sel <= vram_select_r(0);
     
   end generate GEN_BLITTER;
   

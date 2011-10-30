@@ -12,25 +12,26 @@ entity sc02 is
   );
   port
   (
-    clk       : in std_logic;
-    clk_en    : in std_logic;
-    rst       : in std_logic;
+    clk         : in std_logic;
+    clk_en      : in std_logic;
+    rst         : in std_logic;
     
     -- CPU interface
-    wr        : in std_logic;
-    d         : in std_logic_vector(7 downto 0);
-    a         : in std_logic_vector(2 downto 0);
-    ba_bs     : in std_logic;
-    halt      : out std_logic;
+    wr          : in std_logic;
+    d           : in std_logic_vector(7 downto 0);
+    a           : in std_logic_vector(2 downto 0);
+    ba_bs       : in std_logic;
+    halt        : out std_logic;
 
-    busy      : out std_logic;
-    vram_sel  : out std_logic;
+    window_en   : in std_logic;
+    busy        : out std_logic;
+    vram_sel    : out std_logic;
     
     -- memory interface
-    mem_wr    : out std_logic;
-    mem_a     : out std_logic_vector(15 downto 0);
-    mem_d_i   : in std_logic_vector(7 downto 0);
-    mem_d_o   : out std_logic_vector(7 downto 0)
+    mem_wr      : out std_logic;
+    mem_a       : out std_logic_vector(15 downto 0);
+    mem_d_i     : in std_logic_vector(7 downto 0);
+    mem_d_o     : out std_logic_vector(7 downto 0)
   );
 end entity sc02;
 
@@ -225,11 +226,12 @@ begin
             end if;
             state <= S_BLIT_7;
           when S_BLIT_7 =>
---            if dst < CLIP_ADDR then
+            if window_en = '0' or 
+                dst < CLIP_ADDR or dst > X"C000" then
               -- write byte to VRAM
               mem_d_o <= dst_d_i;
               mem_wr <= '1';
---            end if;
+            end if;
             state <= S_INC;
           when S_INC =>
             state <= S_BLIT_0;  -- default
