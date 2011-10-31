@@ -41,6 +41,8 @@ package project_pkg is
   constant PACE_CLK1_MULTIPLY_BY            : natural := 5;  	-- 24*5/3 = 40MHz
   constant PACE_VIDEO_H_SCALE       	      : integer := 2;
   constant PACE_VIDEO_V_SCALE       	      : integer := 2;
+  constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';
+  constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '1';
 
   --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_CVBS_720x288p_50Hz;
   --constant PACE_CLK0_DIVIDE_BY              : natural := 32;
@@ -67,6 +69,8 @@ package project_pkg is
 
   -- S5A-specific constants
   
+  constant S5AR2_DOUBLE_VDO_IDCK            : boolean := false;
+
   constant S5AR2_EMULATE_SRAM               : boolean := false;
   constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 16;
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;

@@ -40,8 +40,8 @@ entity platform is
 
     -- graphics
     
-    bitmap_i        : in from_BITMAP_CTL_t;
-    bitmap_o        : out to_BITMAP_CTL_t;
+    bitmap_i        : in from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
+    bitmap_o        : out to_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
     
     tilemap_i       : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
     tilemap_o       : out to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
@@ -208,7 +208,8 @@ architecture SYN of platform is
                         
 	-- IO signals
 	alias game_reset			: std_logic is inputs_i(2).d(0);
-
+  alias game_pause      : std_logic is inputs_i(2).d(2);
+  
   -- other signals      
 	signal cpu_reset			: std_logic;
 	
@@ -225,10 +226,9 @@ architecture SYN of platform is
 begin
 
   -- for debugging
-  clk_cpu <= clk_sys;
+  clk_cpu <= clk_sys and not game_pause;
   
-	--cpu_reset <= clkrst_i.arst or game_reset;
-  cpu_reset <= rst_sys;
+  cpu_reset <= rst_sys; -- or game_reset;
 	
   -- clocking
   -- system clock: 49.152MHz

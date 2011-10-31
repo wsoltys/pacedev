@@ -264,10 +264,6 @@ begin
 	tram_wr <= tram_cs and not cpu_rwn;
 	bgram_wr <= bgram_cs and not cpu_rwn;
 
-  GEN_ROM_IN_SRAM : if CABAL_ROM_IN_SRAM generate
-    rom_d_o <= sram_i.d(rom_d_o'range);
-  end generate GEN_ROM_IN_SRAM;
-  
 	wram_d_o <= sram_i.d(wram_d_o'range);
 	dips_datao <= X"7D70"; -- FreePlay, Easy etc
 	inport0_datao <= inputs_i(1).d & inputs_i(0).d; -- buttons
@@ -338,17 +334,6 @@ begin
 		end if;
 	end process;
 
-  -- unused outputs
-  --bitmap_o <= NULL_TO_BITMAP_CTL;
-  sprite_reg_o <= NULL_TO_SPRITE_REG;
-  sprite_o <= NULL_TO_SPRITE_CTL;
-  graphics_o <= NULL_TO_GRAPHICS;
-  spi_o <= NULL_TO_SPI;
-  ser_o <= NULL_TO_SERIAL;
-  snd_o <= NULL_TO_SOUND;
-  osd_o <= NULL_TO_OSD;
-	leds_o <= (others => '0');
-	
   --
   -- COMPONENT INSTANTIATION
   --
@@ -435,7 +420,7 @@ begin
 
 	end generate GEN_TG68;
 	
-  GEN_INTERNAL_ROM : if not CABAL_ROM_IN_SRAM generate
+  GEN_ROM : if not CABAL_ROM_IN_SRAM generate
   
     rom_inst : entity work.sprom
       generic map
@@ -452,8 +437,10 @@ begin
         q						=> rom_d_o
       );
     
-  end generate GEN_INTERNAL_ROM;
-
+  else generate
+    rom_d_o <= sram_i.d(rom_d_o'range);
+  end generate GEN_ROM;
+  
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 	vram_text_inst : entity work.dpram
 		generic map
@@ -520,4 +507,15 @@ begin
 			q						=> tilemap_o(1).tile_d
 		);
 
+  -- unused outputs
+  --bitmap_o <= NULL_TO_BITMAP_CTL;
+  sprite_reg_o <= NULL_TO_SPRITE_REG;
+  sprite_o <= NULL_TO_SPRITE_CTL;
+  graphics_o <= NULL_TO_GRAPHICS;
+  spi_o <= NULL_TO_SPI;
+  ser_o <= NULL_TO_SERIAL;
+  snd_o <= NULL_TO_SOUND;
+  osd_o <= NULL_TO_OSD;
+	leds_o <= (others => '0');
+	
 end SYN;
