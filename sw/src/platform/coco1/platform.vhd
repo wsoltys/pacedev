@@ -361,7 +361,7 @@ begin
         rst				=> cpu_rst,
         rw 	    	=> cpu_r_wn,
         vma 	    => cpu_vma,
-        address 	=> cpu_a,
+        addr      => cpu_a,
         data_in		=> cpu_d_i,
         data_out 	=> cpu_d_o,
         halt     	=> '0',
@@ -470,7 +470,7 @@ begin
 		generic map
 		(
       T1_VARIANT    => false,
-			CHAR_ROM_FILE => COCO1_SOURCE_ROOT_DIR & "roms/" & COCO1_MC6847_ROM,
+			CHAR_ROM_FILE => COCO1_ROM_DIR & COCO1_MC6847_ROM,
       
       CVBS_NOT_VGA  => COCO1_CVBS
 		)
@@ -781,7 +781,7 @@ begin
   basrom_inst : entity work.sprom
 		generic map
 		(
-			init_file		=> COCO1_SOURCE_ROOT_DIR & "roms/" & COCO1_BASIC_ROM,
+			init_file		=> COCO1_ROM_DIR & COCO1_BASIC_ROM,
 			numwords_a	=> 8192,
 			widthad_a		=> 13
 		)
@@ -797,7 +797,7 @@ begin
 	  extbasrom_inst : entity work.sprom
 			generic map
 			(
-				init_file		=> COCO1_SOURCE_ROOT_DIR & "roms/" & COCO1_EXTENDED_BASIC_ROM,
+				init_file		=> COCO1_ROM_DIR & COCO1_EXTENDED_BASIC_ROM,
 				numwords_a	=> 8192,
 				widthad_a		=> 13
 			)
@@ -807,17 +807,15 @@ begin
 	  		address		  => cpu_a(12 downto 0),
 	  		q			      => extrom_datao
 	  	);
-	end generate GEN_EXT;
-
-	GEN_NO_EXT : if not COCO1_EXTENDED_COLOR_BASIC generate
+  else generate
     extrom_datao <= (others => '0');
-	end generate GEN_NO_EXT;
+	end generate GEN_EXT;
 
 	GEN_CART : if COCO1_CART_INTERNAL generate
 	  cart_inst : entity work.sprom
 			generic map
 			(
-				init_file		=> COCO1_SOURCE_ROOT_DIR & "roms/" & COCO1_CART_NAME,
+				init_file		=> COCO1_ROM_DIR & COCO1_CART_NAME,
 				numwords_a	=> 2**COCO1_CART_WIDTHAD,
 				widthad_a		=> COCO1_CART_WIDTHAD
 			)
@@ -827,9 +825,7 @@ begin
 	  		address		  => cpu_a(COCO1_CART_WIDTHAD-1 downto 0),
 	  		q			      => cart_d_o
 	  	);
-	end generate GEN_CART;
-
-  GEN_NO_CART : if not COCO1_CART_INTERNAL generate
+  else generate
     -- only support 16x16KB cartridges atm
     flash_o.a(flash_o.a'left downto 18) <= (others => '0');
     flash_o.a(17 downto 14) <= cart_bank;
@@ -838,7 +834,7 @@ begin
     flash_o.cs <= cart_cs;
     flash_o.oe <= cpu_r_wn;
     flash_o.we <= '0';
-  end generate GEN_NO_CART;
+	end generate GEN_CART;
   
   -- CART# signal is tied to 'Q' on a real cartridge
   -- - BANKS 0,1 are reserved for DOS (non-autostart)

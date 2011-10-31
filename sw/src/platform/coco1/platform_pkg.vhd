@@ -14,7 +14,8 @@ package platform_pkg is
 	constant PACE_INPUTS_NUM_BYTES        : integer := 9;
 	
   -- depends on build or simulation
-  constant COCO1_SOURCE_ROOT_DIR  : string;
+  constant COCO1_SOURCE_ROOT_DIR  : string := "../../../../../src/platform/coco1/";
+  constant COCO1_ROM_DIR          : string := COCO1_SOURCE_ROOT_DIR & "roms/";
 
 	--
 	-- Platform-specific constants (optional)
