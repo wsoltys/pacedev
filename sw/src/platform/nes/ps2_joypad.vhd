@@ -110,16 +110,16 @@ begin
   ps2kbd_inst : entity work.ps2kbd                                        
     port map
     (
-      clk      => clk,                                     
-      rst_n    => reset_n,
-      tick1us  => clk_1M_en,
-      ps2_clk  => ps2clk,
-      ps2_data => ps2data,
+      clk       => clk,                                     
+      rst_n     => reset_n,
+      tick1us   => clk_1M_en,
+      ps2_clk   => ps2clk,
+      ps2_data  => ps2data,
 			
-      reset    => ps2_reset,
-      press    => ps2_press,
-      release  => ps2_release,
-      scancode => ps2_scancode
+      reset     => ps2_reset,
+      keydown   => ps2_press,
+      keyup     => ps2_release,
+      scancode  => ps2_scancode
     );
 
 end SYN;

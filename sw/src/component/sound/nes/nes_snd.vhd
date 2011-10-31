@@ -49,7 +49,7 @@ begin
 -- $4015   if-d nt21   DMC IRQ, frame IRQ, length counter statuses
 
 	-- Sequence states
-	sequence : process(seqphase)
+	proc_sequence : process(seqphase)
 	begin
 		case seqphase is
 		when seq1 => seqphase_next <= seq2;
@@ -59,7 +59,7 @@ begin
 			if seq5mode = '0' then seqphase_next <= seq1; else seqphase_next <= seq5; end if;
 		when seq5 => seqphase_next <= seq1;
 		end case;
-	end process sequence;
+	end process proc_sequence;
 
 	-- Lookup table for loading length registers
 	length : process(d_in)

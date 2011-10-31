@@ -15,8 +15,7 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic_vector(0 to 3);
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -62,8 +61,8 @@ end entity PACE;
 
 architecture SYN of PACE is
 
-	alias clk_21M						: std_logic is clk_i(1);
-	alias rst_21M           : std_logic is reset_i(1);
+	alias clk_21M						: std_logic is clkrst_i.clk(1);
+	alias rst_21M           : std_logic is clkrst_i.rst(1);
 	
 	signal ppu_r						: std_logic_vector(5 downto 0) := (others => '0');
 	signal ppu_g						: std_logic_vector(5 downto 0) := (others => '0');
