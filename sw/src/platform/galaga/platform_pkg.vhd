@@ -1,10 +1,11 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 
 library work;
 use work.project_pkg.all;
 use work.target_pkg.all;
+use work.platform_variant_pkg.all;
 
 package platform_pkg is
 
@@ -21,16 +22,19 @@ package platform_pkg is
 	
   constant PACE_INPUTS_NUM_BYTES        : integer := 3;
 
+	constant CLK0_FREQ_MHz		            : natural := 
+    PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
+  
 	--
 	-- Platform-specific constants (optional)
 	--
 
-	constant CLK0_FREQ_MHz		            : natural := 
-    PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
-  constant CPU_FREQ_MHz                 : natural := 2;
+  constant GALAGA_SOURCE_ROOT_DIR       : string := "../../../../../src/platform/galaga/";
+  constant VARIANT_SOURCE_ROOT_DIR      : string := GALAGA_SOURCE_ROOT_DIR & 
+                                                    PLATFORM_VARIANT & "/";
+  constant VARIANT_ROM_DIR              : string := VARIANT_SOURCE_ROOT_DIR & 
+                                                    "roms/";
   
-	constant INVADERS_CPU_CLK_ENA_DIVIDE_BY   : natural := CLK0_FREQ_MHz / CPU_FREQ_MHz;
-
 	type pal_entry_typ is array (0 to 2) of std_logic_vector(5 downto 0);
 	type pal_typ is array (0 to 127) of pal_entry_typ;
 

@@ -208,6 +208,7 @@ architecture SYN of platform is
                         
 	-- IO signals
 	alias game_reset			: std_logic is inputs_i(2).d(0);
+	alias osd_toggle      : std_logic is inputs_i(2).d(1);
   alias game_pause      : std_logic is inputs_i(2).d(2);
   
   -- other signals      
@@ -228,7 +229,7 @@ begin
   -- for debugging
   clk_cpu <= clk_sys and not game_pause;
   
-  cpu_reset <= rst_sys; -- or game_reset;
+  cpu_reset <= rst_sys or game_reset;
 	
   -- clocking
   -- system clock: 49.152MHz
@@ -311,10 +312,17 @@ begin
   
   -- write-enables, pulse for 1 clock only
   process (clk_sys, rst_sys)
-    variable cpu_memwr_r : std_logic := '0';
   begin
     if rst_sys = '1' then
-      null;
+      namco_06xx_r_wn <= '1';
+      ram1_we <= '0';
+      ram2_we <= '0';
+      ram3_we <= '0';
+      ram4_we <= '0';
+      rampf0_we <= '0';
+      rampf1_we <= '0';
+      rampf2_we <= '0';
+      rampf3_we <= '0';
     elsif rising_edge(clk_sys) then
       namco_06xx_r_wn <= '1';
       ram1_we <= '0';
@@ -386,8 +394,8 @@ begin
     main_rom_inst : entity work.sprom
       generic map
       (
-        init_file		=> "../../../../../src/platform/galaga/xevious/roms/" & 
-                        XEVIOUS_VARIANT & "/main.hex",
+        init_file		=>  VARIANT_ROM_DIR & ROM_VARIANT_SUBDIR & 
+                          "main.hex",
         widthad_a		=> 14
       )
       port map
@@ -439,7 +447,7 @@ begin
 
   end generate GEN_MAIN_CPU;
   
-  GEN_SUB_CPU : if XEVIOUS_HAS_SUB_CPU generate
+  GEN_SUB_CPU : if GALAGA_HAS_SUB_CPU generate
   begin
     sub_cpu_inst : entity work.Z80                                                
       port map
@@ -471,8 +479,8 @@ begin
     sub_rom_inst : entity work.sprom
       generic map
       (
-        init_file		=> "../../../../../src/platform/galaga/xevious/roms/" & 
-                          XEVIOUS_VARIANT & "/sub.hex",
+        init_file		=> VARIANT_ROM_DIR & ROM_VARIANT_SUBDIR & 
+                        "sub.hex",
         widthad_a		=> 13
       )
       port map
@@ -517,7 +525,7 @@ begin
 
   end generate GEN_SUB_CPU;
 
-  GEN_SUB2_CPU : if XEVIOUS_HAS_SUB2_CPU generate
+  GEN_SUB2_CPU : if GALAGA_HAS_SUB2_CPU generate
   begin
     sub2_cpu_inst : entity work.Z80                                                
       port map
@@ -549,8 +557,8 @@ begin
     sub2_rom_inst : entity work.sprom
       generic map
       (
-        init_file		=> "../../../../../src/platform/galaga/xevious/roms/" &
-                          XEVIOUS_VARIANT & "/sub2.hex",
+        init_file		=> VARIANT_ROM_DIR & ROM_VARIANT_SUBDIR & 
+                        "sub2.hex",
         widthad_a		=> 12
       )
       port map
@@ -611,6 +619,7 @@ begin
       begin
         if rst_sys = '1' then
           irq_r := (others => '0');
+          nmi_cnt := 0;
           sub2_nmireq <= '0';
         elsif rising_edge(clk_sys) then
           irq_r := irq_r(irq_r'left-1 downto 0) & scanline_irq;
@@ -826,7 +835,7 @@ begin
   gfx1_inst : entity work.sprom
     generic map
     (
-      init_file		=> "../../../../../src/platform/galaga/xevious/roms/gfx1.hex",
+      init_file		=> VARIANT_ROM_DIR & "gfx1.hex",
       widthad_a     => 12
     )
     port map
@@ -840,7 +849,7 @@ begin
   gfx2_inst : entity work.sprom
     generic map
     (
-      init_file		=> "../../../../../src/platform/galaga/xevious/roms/gfx2.hex",
+      init_file		=> VARIANT_ROM_DIR & "gfx2.hex",
       widthad_a     => 13
     )
     port map
@@ -915,7 +924,7 @@ begin
 	rampf0_inst : entity work.dpram
 		generic map
 		(
-			init_file		=> "../../../../../src/platform/galaga/xevious/roms/rampf0.hex",
+			init_file		=> VARIANT_ROM_DIR & "rampf0.hex",
 			widthad_a		=> 11
 		)
 		port map
@@ -941,7 +950,7 @@ begin
 	rampf1_inst : entity work.dpram
 		generic map
 		(
-			init_file		=> "../../../../../src/platform/galaga/xevious/roms/rampf1.hex",
+			init_file		=> VARIANT_ROM_DIR & "rampf1.hex",
 			widthad_a		=> 11
 		)
 		port map
@@ -967,7 +976,7 @@ begin
 	rampf2_inst : entity work.dpram
 		generic map
 		(
-			init_file		=> "../../../../../src/platform/galaga/xevious/roms/rampf2.hex",
+			init_file		=> VARIANT_ROM_DIR & "rampf2.hex",
 			widthad_a		=> 11
 		)
 		port map
@@ -993,7 +1002,7 @@ begin
 	rampf3_inst : entity work.dpram
 		generic map
 		(
-			init_file		=> "../../../../../src/platform/galaga/xevious/roms/rampf3.hex",
+			init_file		=> VARIANT_ROM_DIR & "rampf3.hex",
 			widthad_a		=> 11
 		)
 		port map
@@ -1024,10 +1033,10 @@ begin
       osd_key_r := '0';
     elsif rising_edge(clk_sys) then
       -- toggle on OSD KEY PRESS
-      if inputs_i(2).d(1) = '1' and osd_key_r = '0' then
+      if osd_toggle = '1' and osd_key_r = '0' then
         osd_en_v := not osd_en_v;
       end if;
-      osd_key_r := inputs_i(2).d(1);
+      osd_key_r := osd_toggle;
     end if;
     osd_o.en <= osd_en_v;
   end process;

@@ -78,16 +78,18 @@ package project_pkg is
   constant PACE_HAS_SRAM                    : boolean := S5AR2_EMULATE_SRAM;
     
   --
-	-- Xevious-specific constants
+	-- Galaga/Xevious-specific constants
 	--
 	
-  constant XEVIOUS_HAS_SUB_CPU              : boolean := true;
-  constant XEVIOUS_HAS_SUB2_CPU             : boolean := true;
+  constant GALAGA_HAS_SUB_CPU               : boolean := true;
+  constant GALAGA_HAS_SUB2_CPU              : boolean := true;
 
-  constant XEVIOUS_VARIANT                  : string := "xevious";
-  --constant XEVIOUS_VARIANT                  : string := "xevios";
-  --constant XEVIOUS_VARIANT                  : string := "battles";
-
+  constant ROM_VARIANT                      : string := "xevious";
+  --constant ROM_VARIANT                      : string := "xevios";
+  --constant ROM_VARIANT                      : string := "battles";
+  -- this might be NULL for platforms with no ROM variants
+  constant ROM_VARIANT_SUBDIR                : string := ROM_VARIANT & "/";
+  
   type from_PROJECT_IO_t is record
     not_used  : std_logic;
   end record;
