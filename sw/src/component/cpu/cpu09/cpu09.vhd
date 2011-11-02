@@ -199,14 +199,40 @@
 -- Enumerated separate states for MASKI and MASKIF states
 -- Removed code on BSR/JSR in fetch cycle
 --
--- Version 1.10 - 8th October 2011 - John Kent
+-- Version 1.20 - 8th October 2011 - John Kent
 -- added fetch output which should go high during the fetch cycle
 --
--- Version 1.11 - 8th October 2011 - John Kent
+-- Version 1.21 - 8th October 2011 - John Kent
 -- added Last Instruction Cycle signal
 -- replaced fetch with ifetch (instruction fetch) signal
 -- added ba & bs (bus available & bus status) signals
 --
+-- Version 1.22 - 2011-10-29 John Kent
+-- The halt state isn't correct. 
+-- The halt state is entered into from the fetch_state
+-- It returned to the fetch state which may re-run an execute cycle
+-- on the accumulator and it won't necessarily be the last instruction cycle
+-- I've changed the halt state to return to the decode1_state
+--
+-- Version 1.23 - 2011-10-30 John Kent
+-- sample halt in the change_state process if lic is high (last instruction cycle)
+--
+-- Version 1.24 - 2011-11-01 John Kent
+-- Handle interrupts in change_state process
+-- Sample interrupt inputs on last instruction cycle
+-- Remove iv_ctrl and implement iv (interrupt vector) in change_state process.
+-- Generate fic (first instruction cycle) from lic (last instruction cycle)
+-- and use it to complete the dual operand execute cycle before servicing
+-- halt or interrupts requests.
+-- rename lic to lic_out on the entity declaration so that lic can be tested internally.
+-- add int_firq1_state and int_nmirq1_state to allow for the dual operand execute cycle
+-- integrated nmi_ctrl into change_state process
+-- Reduces the microcode state stack to one entry (saved_state)
+-- imm16_state jumps directly to the fetch_state
+-- pull_return_lo states jumps directly to the fetch_state
+-- duplicate andcc_state as cwai_state
+-- rename exg1_state as exg2 state and duplicate tfr_state as exg1_state
+-- 
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
@@ -216,7 +242,7 @@ entity cpu09 is
 		clk      :	in std_logic;                     -- E clock input (falling edge)
 		rst      :  in std_logic;                     -- reset input (active high)
 		vma      : out std_logic;                     -- valid memory address (active high)
-      lic      : out std_logic;                     -- last instruction cycle (active high)
+      lic_out  : out std_logic;                     -- last instruction cycle (active high)
       ifetch   : out std_logic;                     -- instruction fetch cycle (active high)
       opfetch  : out std_logic;                     -- opcode fetch (active high)
       ba       : out std_logic;                     -- bus available (high on sync wait or DMA grant)
@@ -280,10 +306,11 @@ architecture rtl of cpu09 is
 							  dual_op_read8_state, dual_op_read16_state, dual_op_read16_2_state,
 						     dual_op_write8_state, dual_op_write16_state,
                        -- 
-						     sync_state, halt_state, error_state,
+						     sync_state, halt_state, cwai_state,
 							  --
 							  andcc_state, orcc_state,
-							  tfr_state, exg_state, exg1_state,
+							  tfr_state, 
+                       exg_state, exg1_state, exg2_state,
 							  lea_state,
 							  -- Multiplication
 						     mul_state, mulea_state, muld_state,
@@ -296,7 +323,8 @@ architecture rtl of cpu09 is
                        push_return_hi_state, push_return_lo_state,
                        pull_return_hi_state, pull_return_lo_state,
 							  -- Interrupt cycles
-							  int_nmiirq_state, int_firq_state,
+							  int_nmirq_state, int_nmirq1_state,
+                       int_firq_state,  int_firq1_state,
 							  int_entire_state, int_fast_state,
 							  int_pcl_state,  int_pch_state,
 						     int_upl_state,  int_uph_state,
@@ -352,8 +380,7 @@ architecture rtl of cpu09 is
 						     pulu_spl_state,  pulu_sph_state,
 						     pulu_pcl_state,  pulu_pch_state );
 
-	type stack_type is array(2 downto 0) of state_type;
-	type st_type    is (idle_st, push_st, pull_st );
+	type st_type    is (reset_st, push_st, idle_st );
 	type addr_type  is (idle_ad, fetch_ad, read_ad, write_ad, pushu_ad, pullu_ad, pushs_ad, pulls_ad, int_hi_ad, int_lo_ad );
 	type dout_type  is (cc_dout, acca_dout, accb_dout, dp_dout,
                        ix_lo_dout, ix_hi_dout, iy_lo_dout, iy_hi_dout,
@@ -372,8 +399,6 @@ architecture rtl of cpu09 is
 	type pc_type    is (reset_pc, latch_pc, load_pc, pull_lo_pc, pull_hi_pc, incr_pc );
    type md_type    is (reset_md, latch_md, load_md, fetch_first_md, fetch_next_md, shiftl_md );
    type ea_type    is (reset_ea, latch_ea, load_ea, fetch_first_ea, fetch_next_ea );
-	type iv_type    is (latch_iv, reset_iv, nmi_iv, irq_iv, firq_iv, swi_iv, swi2_iv, swi3_iv, resv_iv);
-	type nmi_type   is (reset_nmi, set_nmi, latch_nmi );
 	type left_type  is (cc_left, acca_left, accb_left, dp_left,
 							  ix_left, iy_left, up_left, sp_left,
                        accd_left, md_left, pc_left, ea_left );
@@ -411,12 +436,13 @@ architecture rtl of cpu09 is
 	signal nmi_req:     std_logic;
 	signal nmi_ack:     std_logic;
 	signal nmi_enable:  std_logic;
+   signal fic:         std_logic; -- first instruction cycle
+   signal lic:         std_logic; -- last instruction cycle
 
 	signal state:        state_type;
 	signal next_state:   state_type;
-	signal saved_state:  state_type;
 	signal return_state: state_type;
-	signal state_stack:  stack_type;
+	signal saved_state:  state_type;
 	signal st_ctrl:      st_type;
    signal pc_ctrl:      pc_type;
    signal ea_ctrl:      ea_type; 
@@ -431,13 +457,11 @@ architecture rtl of cpu09 is
 	signal dp_ctrl:      dp_type;
 	signal sp_ctrl:      sp_type;
 	signal up_ctrl:      up_type;
-	signal iv_ctrl:      iv_type;
 	signal left_ctrl:    left_type;
 	signal right_ctrl:   right_type;
    signal alu_ctrl:     alu_type;
    signal addr_ctrl:    addr_type;
    signal dout_ctrl:    dout_type;
-   signal nmi_ctrl:     nmi_type;
 
 
 begin
@@ -449,35 +473,20 @@ begin
 ----------------------------------
 --state_stack_proc: process( clk, hold, state_stack, st_ctrl, 
 --                           return_state, fetch_state  )
-state_stack_proc: process( clk, state_stack )
+state_stack_proc: process( clk, st_ctrl, return_state )
 begin
   if clk'event and clk = '0' then
-    if hold= '1' then
-	   state_stack(0) <= state_stack(0); 
-	   state_stack(1) <= state_stack(1); 
-	   state_stack(2) <= state_stack(2); 
-	 else
+    if hold = '0' then
 	   case st_ctrl is
-		when idle_st =>
-		  state_stack(0) <= state_stack(0); 
-	     state_stack(1) <= state_stack(1); 
-	     state_stack(2) <= state_stack(2); 
+      when reset_st =>
+        saved_state <= fetch_state;
       when push_st =>
-		  state_stack(0) <= return_state; 
-	     state_stack(1) <= state_stack(0); 
-	     state_stack(2) <= state_stack(1); 
-      when pull_st =>
-		  state_stack(0) <= state_stack(1); 
-	     state_stack(1) <= state_stack(2); 
-	     state_stack(2) <= fetch_state;
+		  saved_state <= return_state; 
 		when others =>
-		  state_stack(0) <= state_stack(0); 
-	     state_stack(1) <= state_stack(1); 
-	     state_stack(2) <= state_stack(2); 
+        null;
  	   end case;
     end if;
   end if;
-  saved_state <= state_stack(0);
 end process;
 
 ----------------------------------
@@ -490,12 +499,10 @@ end process;
 pc_reg: process( clk )
 begin
   if clk'event and clk = '0' then
-    if hold= '1' then
-	   pc <= pc;
-	 else
+    if hold = '0' then
     case pc_ctrl is
 	 when reset_pc =>
-	   pc <= "0000000000000000";
+	   pc <= (others=>'0');
 	 when load_pc =>
 	   pc <= out_alu(15 downto 0);
 	 when pull_lo_pc =>
@@ -505,8 +512,7 @@ begin
 	 when incr_pc =>
 	   pc <= pc + 1;
 	 when others =>
---	 when latch_pc =>
-      pc <= pc;
+      null;
     end case;
 	 end if;
   end if;
@@ -523,12 +529,10 @@ ea_reg: process( clk )
 begin
 
   if clk'event and clk = '0' then
-    if hold= '1' then
-	   ea <= ea;
-	 else
+    if hold= '0' then
     case ea_ctrl is
 	 when reset_ea =>
-	   ea <= "0000000000000000";
+	   ea <= (others=>'0');
 	 when fetch_first_ea =>
 	   ea(7 downto 0) <= data_in;
       ea(15 downto 8) <= dp;
@@ -538,8 +542,7 @@ begin
 	 when load_ea =>
 	   ea <= out_alu(15 downto 0);
 	 when others =>
---  	 when latch_ea =>
-      ea <= ea;
+      null;
     end case;
 	 end if;
   end if;
@@ -554,12 +557,10 @@ end process;
 acca_reg : process( clk )
 begin
   if clk'event and clk = '0' then
-    if hold= '1' then
-	   acca <= acca;
-	 else
+    if hold = '0' then
     case acca_ctrl is
     when reset_acca =>
-	   acca <= "00000000";
+	   acca <= (others=>'0');
 	 when load_acca =>
 	   acca <= out_alu(7 downto 0);
 	 when load_hi_acca =>
@@ -567,8 +568,7 @@ begin
 	 when pull_acca =>
 	   acca <= data_in;
 	 when others =>
---	 when latch_acca =>
-	   acca <= acca;
+      null;
     end case;
 	 end if;
   end if;
@@ -583,19 +583,16 @@ end process;
 accb_reg : process( clk )
 begin
   if clk'event and clk = '0' then
-    if hold= '1' then
-	   accb <= accb;
-	 else
+    if hold = '0' then
     case accb_ctrl is
     when reset_accb =>
-	   accb <= "00000000";
+	   accb <= (others=>'0');
 	 when load_accb =>
 	   accb <= out_alu(7 downto 0);
 	 when pull_accb =>
 	   accb <= data_in;
 	 when others =>
---	 when latch_accb =>
-	   accb <= accb;
+      null;
     end case;
 	 end if;
   end if;
@@ -610,12 +607,10 @@ end process;
 ix_reg : process( clk )
 begin
   if clk'event and clk = '0' then
-    if hold= '1' then
-	   xreg <= xreg;
-	 else
+    if hold = '0' then
     case ix_ctrl is
     when reset_ix =>
-	   xreg <= "0000000000000000";
+	   xreg <= (others=>'0');
 	 when load_ix =>
 	   xreg <= out_alu(15 downto 0);
 	 when pull_hi_ix =>
@@ -623,8 +618,7 @@ begin
 	 when pull_lo_ix =>
 	   xreg(7 downto 0) <= data_in;
 	 when others =>
---	 when latch_ix =>
-	   xreg <= xreg;
+      null;
     end case;
 	 end if;
   end if;
@@ -639,12 +633,10 @@ end process;
 iy_reg : process( clk )
 begin
   if clk'event and clk = '0' then
-    if hold= '1' then
-	   yreg <= yreg;
-	 else
+    if hold = '0' then
     case iy_ctrl is
     when reset_iy =>
-	   yreg <= "0000000000000000";
+	   yreg <= (others=>'0');
 	 when load_iy =>
 	   yreg <= out_alu(15 downto 0);
 	 when pull_hi_iy =>
@@ -652,8 +644,7 @@ begin
 	 when pull_lo_iy =>
 	   yreg(7 downto 0) <= data_in;
 	 when others =>
---	 when latch_iy =>
-	   yreg <= yreg;
+      null;
     end case;
 	 end if;
   end if;
@@ -668,27 +659,21 @@ end process;
 sp_reg : process( clk )
 begin
   if clk'event and clk = '0' then
-    if hold= '1' then
-	   sp <= sp;
-		nmi_enable <= nmi_enable;
-	 else
+    if hold = '0' then
     case sp_ctrl is
     when reset_sp =>
-	   sp <= "0000000000000000";
+	   sp <= (others=>'0');
 		nmi_enable <= '0';
 	 when load_sp =>
 	   sp <= out_alu(15 downto 0);
 		nmi_enable <= '1';
 	 when pull_hi_sp =>
 	   sp(15 downto 8) <= data_in;
-		nmi_enable <= nmi_enable;
 	 when pull_lo_sp =>
 	   sp(7 downto 0) <= data_in;
 		nmi_enable <= '1';
 	 when others =>
---	 when latch_sp =>
-	   sp <= sp;
-		nmi_enable <= nmi_enable;
+      null;
     end case;
 	 end if;
   end if;
@@ -703,12 +688,10 @@ end process;
 up_reg : process( clk )
 begin
   if clk'event and clk = '0' then
-    if hold= '1' then
-	   up <= up;
-	 else
+    if hold = '0' then
     case up_ctrl is
     when reset_up =>
-	   up <= "0000000000000000";
+	   up <= (others=>'0');
 	 when load_up =>
 	   up <= out_alu(15 downto 0);
 	 when pull_hi_up =>
@@ -716,8 +699,7 @@ begin
 	 when pull_lo_up =>
 	   up(7 downto 0) <= data_in;
 	 when others =>
---	 when latch_up =>
-	   up <= up;
+      null;
     end case;
 	 end if;
   end if;
@@ -732,12 +714,10 @@ end process;
 md_reg : process( clk )
 begin
   if clk'event and clk = '0' then
-    if hold= '1' then
-	   md <= md;
-	 else
+    if hold = '0' then
     case md_ctrl is
     when reset_md =>
-	   md <= "0000000000000000";
+	   md <= (others=>'0');
 	 when load_md =>
 	   md <= out_alu(15 downto 0);
 	 when fetch_first_md => -- sign extend md for branches
@@ -751,8 +731,7 @@ begin
 	   md(15 downto 1) <= md(14 downto 0);
 		md(0) <= '0';
 	 when others =>
---	 when latch_md =>
-	   md <= md;
+      null;
     end case;
 	 end if;
   end if;
@@ -769,9 +748,7 @@ end process;
 cc_reg: process( clk )
 begin
   if clk'event and clk = '0' then
-    if hold= '1' then
-	   cc <= cc;
-	 else
+    if hold = '0' then
     case cc_ctrl is
 	 when reset_cc =>
 	   cc <= "11010000"; -- set EBIT, FBIT & IBIT
@@ -780,8 +757,7 @@ begin
   	 when pull_cc =>
       cc <= data_in;
 	 when others =>
---  when latch_cc =>
-      cc <= cc;
+      null;
     end case;
 	 end if;
   end if;
@@ -797,56 +773,16 @@ end process;
 dp_reg: process( clk )
 begin
   if clk'event and clk = '0' then
-    if hold= '1' then
-	   dp <= dp;
-	 else
+    if hold = '0' then
     case dp_ctrl is
 	 when reset_dp =>
-	   dp <= "00000000";
+	   dp <= (others=>'0');
 	 when load_dp =>
 	   dp <= out_alu(7 downto 0);
   	 when pull_dp =>
       dp <= data_in;
 	 when others =>
---  when latch_dp =>
-      dp <= dp;
-    end case;
-	 end if;
-  end if;
-end process;
-
-----------------------------------
---
--- interrupt vector
---
-----------------------------------
-
---iv_mux: process( clk, iv_ctrl, hold, iv )
-iv_mux: process( clk )
-begin
-  if clk'event and clk = '0' then
-    if hold= '1' then
-	   iv <= iv;
-	 else
-    case iv_ctrl is
-	 when reset_iv =>
-	   iv <= RST_VEC;
-	 when nmi_iv =>
-      iv <= NMI_VEC;
-  	 when swi_iv =>
-      iv <= SWI_VEC;
-	 when irq_iv =>
-      iv <= IRQ_VEC;
-	 when firq_iv =>
-	   iv <= FIRQ_VEC;
-	 when swi2_iv =>
-      iv <= SWI2_VEC;
-  	 when swi3_iv =>
-      iv <= SWI3_VEC;
-	 when resv_iv =>
-      iv <= RESV_VEC;
-	 when others =>
-	   iv <= iv;
+      null;
     end case;
 	 end if;
   end if;
@@ -863,17 +799,14 @@ end process;
 op_reg: process( clk )
 begin
   if clk'event and clk = '0' then
-    if hold= '1' then
-	   op_code <= op_code;
-	 else
+    if hold = '0' then
     case op_ctrl is
 	 when reset_op =>
 	   op_code <= "00010010";
   	 when fetch_op =>
       op_code <= data_in;
 	 when others =>
---	 when latch_op =>
-	   op_code <= op_code;
+      null;
     end case;
 	 end if;
   end if;
@@ -890,17 +823,14 @@ end process;
 pre_reg: process( clk )
 begin
   if clk'event and clk = '0' then
-    if hold= '1' then
-	   pre_code <= pre_code;
-	 else
+    if hold = '0' then
     case pre_ctrl is
 	 when reset_pre =>
-	   pre_code <= "00000000";
+	   pre_code <= (others=>'0');
   	 when fetch_pre =>
       pre_code <= data_in;
 	 when others =>
---	 when latch_pre =>
-	   pre_code <= pre_code;
+      null;
     end case;
 	 end if;
   end if;
@@ -917,44 +847,62 @@ change_state: process( clk )
 begin
   if clk'event and clk = '0' then
     if rst = '1' then
- 	   state <= reset_state;
-    else
-	   if hold = '1' then
-		  state <= state;
-		else
-        state <= next_state;
-		end if;
-	 end if;
-  end if;
-end process;
-	-- output
-	
-------------------------------------
---
--- Nmi register
---
-------------------------------------
-
---nmi_reg: process( clk, nmi_ctrl, hold, nmi_ack )
-nmi_reg: process( clk )
-begin
-  if clk'event and clk='0' then
-    if hold = '1' then
-      nmi_ack <= nmi_ack;
-    else
-    case nmi_ctrl is
-	 when set_nmi =>
-      nmi_ack <= '1';
-	 when reset_nmi =>
+      iv      <= RST_VEC;
+      fic     <= '0';
 	   nmi_ack <= '0';
-	 when others =>
---  when latch_nmi =>
-	   nmi_ack <= nmi_ack;
-	 end case;
-	 end if;
-  end if;
-end process;
+ 	   state   <= reset_state;
+    else
+	   if hold = '0' then
+		  --
+		  -- nmi request is not cleared until nmi input goes low
+		  --
+		  if(nmi_req = '0') and (nmi_ack='1') then
+          nmi_ack <= '0';
+		  end if;
+        fic   <= lic;
+        state <= next_state;
+        if lic = '1' then
+			 if op_code = "00111111" then -- SWI
+             case pre_code is 
+             when "00010000" => -- Page 2
+               iv <= SWI2_VEC;
+             when "00010001" => -- Page 3
+               iv <= SWI3_VEC;
+             when others =>
+               iv <= SWI_VEC;
+             end case;
+          elsif halt = '1' then
+			    state <= halt_state;
+             -- service non maskable interrupts
+          elsif (nmi_req = '1') and (nmi_ack = '0') then
+             iv <= NMI_VEC;
+             nmi_ack <= '1';
+             if op_code /= "00111100" then -- CWAI
+			      state <= int_nmirq_state;
+             end if;
+				 --
+				 -- FIRQ & IRQ are level sensitive
+				 --
+          elsif (firq = '1') and (cc(FBIT) = '0') then
+             iv <= FIRQ_VEC;
+             if op_code /= "00111100" then -- CWAI
+			      state  <= int_firq_state;
+             end if;
 
+			 elsif (irq = '1') and (cc(IBIT) = '0') then
+             iv <= IRQ_VEC;
+             if op_code /= "00111100" then -- CWAI
+			      state <= int_nmirq_state;
+             end if;
+          else
+             iv <= RST_VEC;
+          end if; -- op_code, halt, nmi, firq, irq
+        end if; -- lic
+		end if; -- hold
+	 end if; -- reset
+  end if; -- clk
+end process;
+	
 ------------------------------------
 --
 -- Detect Edge of NMI interrupt
@@ -1485,8 +1433,7 @@ end process;
 ------------------------------------
 process( state, saved_state, 
          op_code, pre_code, 
-			cc, ea, md, iv,
-			irq, firq, nmi_req, nmi_ack, halt )
+			cc, ea, md, iv, fic, halt )
 variable cond_true : boolean;  -- variable used to evaluate coditional branches
 begin
         ba         <= '0';
@@ -1505,10 +1452,8 @@ begin
         pc_ctrl    <= latch_pc;
         md_ctrl    <= latch_md;
         ea_ctrl    <= latch_ea;
-        iv_ctrl    <= latch_iv;
         op_ctrl    <= latch_op;
         pre_ctrl   <= latch_pre;
-        nmi_ctrl   <= latch_nmi;
 		  -- ALU Idle
         left_ctrl  <= pc_left;
         right_ctrl <= zero_right;
@@ -1537,8 +1482,7 @@ begin
 		       pc_ctrl    <= reset_pc;
 	 		    ea_ctrl    <= reset_ea;
 				 md_ctrl    <= reset_md;
-				 iv_ctrl    <= reset_iv;
-				 nmi_ctrl   <= reset_nmi;
+             st_ctrl    <= reset_st;
 	 	       next_state <= vect_hi_state;
 
 			 --
@@ -1566,9 +1510,6 @@ begin
 			 --
 			 -- Here to fetch an instruction
 			 -- PC points to opcode
-			 -- Should service interrupt requests at this point
-			 -- either from the timer
-			 -- or from the external input.
 			 --
           when fetch_state =>
 				   -- fetch the op code
@@ -1578,294 +1519,10 @@ begin
                ea_ctrl    <= reset_ea;
 				   -- Fetch op code
                addr_ctrl  <= fetch_ad;
-				   --
-					case op_code(7 downto 6) is
-					when "10" => -- acca
-				     case op_code(3 downto 0) is
-					  when "0000" => -- suba
-					    left_ctrl  <= acca_left;
-					    right_ctrl <= md_right;
-					    alu_ctrl   <= alu_sub8;
-						 cc_ctrl    <= load_cc;
-					    acca_ctrl  <= load_acca;
-					  when "0001" => -- cmpa
-					    left_ctrl   <= acca_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_sub8;
-						 cc_ctrl     <= load_cc;
-					  when "0010" => -- sbca
-					    left_ctrl   <= acca_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_sbc;
-						 cc_ctrl     <= load_cc;
-					    acca_ctrl   <= load_acca;
-					  when "0011" =>
-					    case pre_code is
-						 when "00010000" => -- page 2 -- cmpd
-					      left_ctrl   <= accd_left;
-					      right_ctrl  <= md_right;
-					      alu_ctrl    <= alu_sub16;
-						   cc_ctrl     <= load_cc;
-						 when "00010001" => -- page 3 -- cmpu
-					      left_ctrl   <= up_left;
-					      right_ctrl  <= md_right;
-					      alu_ctrl    <= alu_sub16;
-						   cc_ctrl     <= load_cc;
-						 when others => -- page 1 -- subd
-					      left_ctrl   <= accd_left;
-					      right_ctrl  <= md_right;
-					      alu_ctrl    <= alu_sub16;
-						   cc_ctrl     <= load_cc;
-					      acca_ctrl   <= load_hi_acca;
-						   accb_ctrl   <= load_accb;
-						 end case;
-					  when "0100" => -- anda
-					    left_ctrl   <= acca_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_and;
-						 cc_ctrl     <= load_cc;
-					    acca_ctrl   <= load_acca;
-					  when "0101" => -- bita
-					    left_ctrl   <= acca_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_and;
-						 cc_ctrl     <= load_cc;
-					  when "0110" => -- ldaa
-					    left_ctrl   <= acca_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_ld8;
-						 cc_ctrl     <= load_cc;
-					    acca_ctrl   <= load_acca;
-					  when "0111" => -- staa
-					    left_ctrl   <= acca_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_st8;
-						 cc_ctrl     <= load_cc;
-					  when "1000" => -- eora
-					    left_ctrl   <= acca_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_eor;
-						 cc_ctrl     <= load_cc;
-					    acca_ctrl   <= load_acca;
-					  when "1001" => -- adca
-					    left_ctrl   <= acca_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_adc;
-						 cc_ctrl     <= load_cc;
-					    acca_ctrl   <= load_acca;
-					  when "1010" => -- oraa
-					    left_ctrl   <= acca_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_ora;
-						 cc_ctrl     <= load_cc;
-					    acca_ctrl   <= load_acca;
-					  when "1011" => -- adda
-					    left_ctrl   <= acca_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_add8;
-						 cc_ctrl     <= load_cc;
-					    acca_ctrl   <= load_acca;
-					  when "1100" =>
-					    case pre_code is
-						 when "00010000" => -- page 2 -- cmpy
-					      left_ctrl   <= iy_left;
-					      right_ctrl  <= md_right;
-					      alu_ctrl    <= alu_sub16;
-						   cc_ctrl     <= load_cc;
-						 when "00010001" => -- page 3 -- cmps
-					      left_ctrl   <= sp_left;
-					      right_ctrl  <= md_right;
-					      alu_ctrl    <= alu_sub16;
-						   cc_ctrl     <= load_cc;
-						 when others => -- page 1 -- cmpx
-					      left_ctrl   <= ix_left;
-					      right_ctrl  <= md_right;
-					      alu_ctrl    <= alu_sub16;
-						   cc_ctrl     <= load_cc;
-						 end case;
-					  when "1101" => -- bsr / jsr
-					    null;
-					  when "1110" => -- ldx
-					    case pre_code is
-						 when "00010000" => -- page 2 -- ldy
-					      left_ctrl   <= iy_left;
-					      right_ctrl  <= md_right;
-					      alu_ctrl    <= alu_ld16;
-						   cc_ctrl     <= load_cc;
-                     iy_ctrl     <= load_iy;
-						 when others =>   -- page 1 -- ldx
-					      left_ctrl   <= ix_left;
-					      right_ctrl  <= md_right;
-					      alu_ctrl    <= alu_ld16;
-						   cc_ctrl     <= load_cc;
-                     ix_ctrl     <= load_ix;
-						 end case;
-					  when "1111" => -- stx
-					    case pre_code is
-						 when "00010000" => -- page 2 -- sty
-					      left_ctrl   <= iy_left;
-					      right_ctrl  <= md_right;
-					      alu_ctrl    <= alu_st16;
-						   cc_ctrl     <= load_cc;
-						 when others =>     -- page 1 -- stx
-					      left_ctrl   <= ix_left;
-					      right_ctrl  <= md_right;
-					      alu_ctrl    <= alu_st16;
-						   cc_ctrl     <= load_cc;
-						 end case;
-					  when others =>
-					    null;
-					  end case;
-					when "11" => -- accb dual op
-				     case op_code(3 downto 0) is
-					  when "0000" => -- subb
-					    left_ctrl   <= accb_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_sub8;
-						 cc_ctrl     <= load_cc;
-                   accb_ctrl   <= load_accb;
-					  when "0001" => -- cmpb
-					    left_ctrl   <= accb_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_sub8;
-						 cc_ctrl     <= load_cc;
-					  when "0010" => -- sbcb
-					    left_ctrl   <= accb_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_sbc;
-						 cc_ctrl     <= load_cc;
-                   accb_ctrl   <= load_accb;
-					  when "0011" => -- addd
-					    left_ctrl   <= accd_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_add16;
-						 cc_ctrl     <= load_cc;
-					    acca_ctrl   <= load_hi_acca;
-						 accb_ctrl   <= load_accb;
-					  when "0100" => -- andb
-					    left_ctrl   <= accb_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_and;
-						 cc_ctrl     <= load_cc;
-                   accb_ctrl   <= load_accb;
-					  when "0101" => -- bitb
-					    left_ctrl   <= accb_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_and;
-						 cc_ctrl     <= load_cc;
-					  when "0110" => -- ldab
-					    left_ctrl   <= accb_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_ld8;
-						 cc_ctrl     <= load_cc;
-                   accb_ctrl   <= load_accb;
-					  when "0111" => -- stab
-					    left_ctrl   <= accb_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_st8;
-						 cc_ctrl     <= load_cc;
-					  when "1000" => -- eorb
-					    left_ctrl   <= accb_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_eor;
-						 cc_ctrl     <= load_cc;
-                   accb_ctrl   <= load_accb;
-					  when "1001" => -- adcb
-					    left_ctrl   <= accb_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_adc;
-						 cc_ctrl     <= load_cc;
-                   accb_ctrl   <= load_accb;
-					  when "1010" => -- orab
-					    left_ctrl   <= accb_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_ora;
-						 cc_ctrl     <= load_cc;
-                   accb_ctrl   <= load_accb;
-					  when "1011" => -- addb
-					    left_ctrl   <= accb_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_add8;
-						 cc_ctrl     <= load_cc;
-                   accb_ctrl   <= load_accb;
-					  when "1100" => -- ldd
-					    left_ctrl   <= accd_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_ld16;
-						 cc_ctrl     <= load_cc;
-					    acca_ctrl   <= load_hi_acca;
-                   accb_ctrl   <= load_accb;
-					  when "1101" => -- std
-					    left_ctrl   <= accd_left;
-					    right_ctrl  <= md_right;
-					    alu_ctrl    <= alu_st16;
-						 cc_ctrl     <= load_cc;
-					  when "1110" => -- ldu
-					    case pre_code is
-						 when "00010000" => -- page 2 -- lds
-					      left_ctrl   <= sp_left;
-					      right_ctrl  <= md_right;
-					      alu_ctrl    <= alu_ld16;
-						   cc_ctrl     <= load_cc;
-						   sp_ctrl     <= load_sp;
-						 when others => -- page 1 -- ldu
-					      left_ctrl   <= up_left;
-					      right_ctrl  <= md_right;
-					      alu_ctrl    <= alu_ld16;
-						   cc_ctrl     <= load_cc;
-                     up_ctrl     <= load_up;
-						 end case;
-					  when "1111" =>
-					    case pre_code is
-						 when "00010000" => -- page 2 -- sts
-					      left_ctrl   <= sp_left;
-					      right_ctrl  <= md_right;
-					      alu_ctrl    <= alu_st16;
-						   cc_ctrl     <= load_cc;
-						 when others =>     -- page 1 -- stu
-					      left_ctrl   <= up_left;
-					      right_ctrl  <= md_right;
-					      alu_ctrl    <= alu_st16;
-						   cc_ctrl     <= load_cc;
-						 end case;
-					  when others =>
-					    null;
-					  end case;
-					when others =>
-					  null;
-					end case;
-				 if halt = '1' then
-		  	      iv_ctrl    <= reset_iv;
-			      next_state <= halt_state;
-				 -- service non maskable interrupts
-			    elsif (nmi_req = '1') and (nmi_ack = '0') then
-		  	      iv_ctrl    <= nmi_iv;
-				   nmi_ctrl   <= set_nmi;
-			      next_state <= int_nmiirq_state;
-				 -- service maskable interrupts
-			    else
-				   --
-					-- nmi request is not cleared until nmi input goes low
-					--
-				   if(nmi_req = '0') and (nmi_ack='1') then
-				     nmi_ctrl <= reset_nmi;
-					end if;
-					--
-					-- FIRQ & IRQ are level sensitive
-					--
-               if (firq = '1') and (cc(FBIT) = '0') then
-		  	        iv_ctrl    <= firq_iv;
-			        next_state <= int_firq_state;
-				   elsif (irq = '1') and (cc(IBIT) = '0') then
-		  	        iv_ctrl    <= irq_iv;
-			        next_state <= int_nmiirq_state;
-               else
-				     -- Advance the PC to fetch next instruction byte
-		  	        iv_ctrl    <= reset_iv; -- default to reset
-                 pc_ctrl    <= incr_pc;
-			        next_state <= decode1_state;
-               end if;
-				 end if;
+				   -- Advance the PC to fetch next instruction byte
+               pc_ctrl    <= incr_pc;
+			      next_state <= decode1_state;
+
 			  --
 			  -- Here to decode instruction
 			  -- and fetch next byte of intruction
@@ -2002,15 +1659,11 @@ begin
 		         when "1010" => -- orcc
 					  -- increment the pc
                  pc_ctrl      <= incr_pc;
-				     st_ctrl      <= push_st;
-				     return_state <= fetch_state;
 					  next_state   <= orcc_state;
 
 		         when "1100" => -- andcc
 					  -- increment the pc
                  pc_ctrl      <= incr_pc;
-				     st_ctrl      <= push_st;
-				     return_state <= fetch_state;
 					  next_state   <= andcc_state;
 
 		         when "1101" => -- sex
@@ -2032,8 +1685,6 @@ begin
 					  -- increment the pc
                  pc_ctrl      <= incr_pc;
 					  -- call transfer as a subroutine
-				     st_ctrl      <= push_st;
-				     return_state <= fetch_state;
 					  next_state   <= tfr_state;
 
 		         when others =>
@@ -2151,8 +1802,6 @@ begin
 					-- 4 pc_lo = (sp) / sp=sp+1
 					--
 		         when "1001" =>
-				      st_ctrl      <= push_st;
-				      return_state <= fetch_state;
 						next_state   <= pull_return_hi_state;
 
 					--
@@ -2181,23 +1830,20 @@ begin
 		            right_ctrl   <= one_right;
 						alu_ctrl     <= alu_sub16;
 						sp_ctrl      <= load_sp;
-                  iv_ctrl      <= reset_iv;
 						--	increment pc
                   pc_ctrl      <= incr_pc;
-				      st_ctrl      <= push_st;
-				      return_state <= int_entire_state; -- set entire flag
-						next_state   <= andcc_state;
+						next_state   <= cwai_state;
 
 		         when "1101" => -- mul
 						next_state <= mul_state;
 
 		         when "1111" => -- swi
+                  lic        <= '1';
 					   -- predecrement SP
 		            left_ctrl  <= sp_left;
 		            right_ctrl <= one_right;
 						alu_ctrl   <= alu_sub16;
 						sp_ctrl    <= load_sp;
-                  iv_ctrl    <= swi_iv;
 						next_state <= int_entire_state;
 
 		         when others =>
@@ -2422,8 +2068,6 @@ begin
                when "0011" | -- subd #
 					     "1100" | -- cmpx #
 					     "1110" => -- ldx #
-				     st_ctrl      <= push_st;
-				     return_state <= fetch_state;
 					  next_state   <= imm16_state;
 
 					--
@@ -2571,8 +2215,6 @@ begin
                when "0011" | -- addd #
 					     "1100" | -- ldd #
 					     "1110" => -- ldu #
-				     st_ctrl      <= push_st;
-				     return_state <= fetch_state;
 					  next_state   <= imm16_state;
 
 					when others =>
@@ -2705,12 +2347,12 @@ begin
 	          when "0011" =>
 	            case op_code(3 downto 0) is
 		         when "1111" => -- swi 2
+                  lic        <= '1';
 					   -- predecrement sp
 		            left_ctrl  <= sp_left;
 		            right_ctrl <= one_right;
 						alu_ctrl   <= alu_sub16;
 						sp_ctrl    <= load_sp;
-                  iv_ctrl    <= swi2_iv;
 						next_state <= int_entire_state;
 
 		         when others =>
@@ -2725,8 +2367,6 @@ begin
                when "0011" | -- cmpd #
 					     "1100" | -- cmpy #
 					     "1110" => -- ldy #
-				     st_ctrl      <= push_st;
-				     return_state <= fetch_state;
 					  next_state   <= imm16_state;
 
 					when others =>
@@ -2803,8 +2443,6 @@ begin
                when "0011" | -- undef #
 					     "1100" | -- undef #
 					     "1110" => -- lds #
-				     st_ctrl      <= push_st;
-				     return_state <= fetch_state;
 					  next_state   <= imm16_state;
 
 					when others =>
@@ -2895,12 +2533,12 @@ begin
 	          when "0011" =>
 	            case op_code(3 downto 0) is
 		         when "1111" => -- swi3
+                  lic        <= '1';
 					   -- predecrement sp
 		            left_ctrl  <= sp_left;
 		            right_ctrl <= one_right;
 						alu_ctrl   <= alu_sub16;
 						sp_ctrl    <= load_sp;
-                  iv_ctrl    <= swi3_iv;
 						next_state <= int_entire_state;
 		         when others =>
                  lic          <= '1';
@@ -2914,8 +2552,6 @@ begin
                when "0011" | -- cmpu #
 					     "1100" | -- cmps #
 					     "1110" => -- undef #
-				     st_ctrl      <= push_st;
-				     return_state <= fetch_state;
 					  next_state   <= imm16_state;
 					when others =>
                  lic          <= '1';
@@ -2929,8 +2565,6 @@ begin
                when "0011" | -- cmpu <
 					     "1100" | -- cmps <
 					     "1110" => -- undef <
-				     st_ctrl      <= idle_st;
-				     return_state <= fetch_state;
 					  next_state   <= dual_op_read16_state;
 
 					when others =>
@@ -3234,9 +2868,8 @@ begin
 				   -- fetch next immediate byte
 			      md_ctrl    <= fetch_next_md;
                addr_ctrl  <= fetch_ad;
-					st_ctrl    <= pull_st;
                lic        <= '1';
-					next_state <= saved_state;
+					next_state <= fetch_state;
 
            --
 			  -- md & ea holds 8 bit index offset
@@ -3262,7 +2895,6 @@ begin
 				   right_ctrl   <= md_sign5_right;
 				   alu_ctrl     <= alu_add16;
                ea_ctrl      <= load_ea;
-					st_ctrl      <= pull_st;
 					next_state   <= saved_state;
 
 				 else
@@ -3320,7 +2952,6 @@ begin
 				     right_ctrl   <= one_right;
 				     alu_ctrl     <= alu_sub16;
                  ea_ctrl      <= load_ea;
-					  st_ctrl      <= pull_st;
 					  next_state   <= saved_state;
 
 					when "0011" =>     -- ,--R
@@ -3343,7 +2974,6 @@ begin
 				     alu_ctrl   <= alu_sub16;
                  ea_ctrl    <= load_ea;
 					  if md(4) = '0' then
-					    st_ctrl      <= pull_st;
 					    next_state   <= saved_state;
 					  else
 					    next_state   <= indirect_state;
@@ -3365,7 +2995,6 @@ begin
 				     alu_ctrl   <= alu_add16;
                  ea_ctrl    <= load_ea;
 					  if md(4) = '0' then
-					    st_ctrl      <= pull_st;
 					    next_state   <= saved_state;
 					  else
 					    next_state   <= indirect_state;
@@ -3387,7 +3016,6 @@ begin
 				     alu_ctrl   <= alu_add16;
                  ea_ctrl    <= load_ea;
 					  if md(4) = '0' then
-					    st_ctrl      <= pull_st;
 					    next_state   <= saved_state;
 					  else
 					    next_state   <= indirect_state;
@@ -3409,7 +3037,6 @@ begin
 				     alu_ctrl   <= alu_add16;
                  ea_ctrl    <= load_ea;
 					  if md(4) = '0' then
-					    st_ctrl      <= pull_st;
 					    next_state   <= saved_state;
 					  else
 					    next_state   <= indirect_state;
@@ -3431,7 +3058,6 @@ begin
 				     alu_ctrl   <= alu_add16;
                  ea_ctrl    <= load_ea;
 					  if md(4) = '0' then
-					    st_ctrl      <= pull_st;
 					    next_state   <= saved_state;
 					  else
 					    next_state   <= indirect_state;
@@ -3466,7 +3092,6 @@ begin
                  ea_ctrl    <= load_ea;
 					  --
 					  if md(4) = '0' then
-					    st_ctrl      <= pull_st;
 					    next_state   <= saved_state;
 					  else
 					    next_state   <= indirect_state;
@@ -3488,7 +3113,6 @@ begin
 				     alu_ctrl   <= alu_add16;
                  ea_ctrl    <= load_ea;
 					  if md(4) = '0' then
-					    st_ctrl      <= pull_st;
 					    next_state   <= saved_state;
 					  else
 					    next_state   <= indirect_state;
@@ -3524,7 +3148,6 @@ begin
 				     alu_ctrl   <= alu_add16;
                  ea_ctrl    <= load_ea;
 					  if md(4) = '0' then
-					    st_ctrl      <= pull_st;
 					    next_state   <= saved_state;
 					  else
 					    next_state   <= indirect_state;
@@ -3558,7 +3181,6 @@ begin
 			    end case;
 				 -- return to previous state
 			    if md(4) = '0' then
-					 st_ctrl      <= pull_st;
 					 next_state   <= saved_state;
 				 else
 					 next_state   <= indirect_state;
@@ -3583,7 +3205,6 @@ begin
 			    end case;
 				 -- return to previous state
 			    if md(4) = '0' then
-					 st_ctrl      <= pull_st;
 					 next_state   <= saved_state;
 				 else
 					 next_state   <= indirect_state;
@@ -3610,7 +3231,6 @@ begin
              ea_ctrl    <= load_ea;
 				 -- return to previous state
 			    if ea(4) = '0' then
-					 st_ctrl      <= pull_st;
 					 next_state   <= saved_state;
 				 else
 					 next_state   <= indirect_state;
@@ -3645,7 +3265,6 @@ begin
              ea_ctrl    <= load_ea;
 				 -- return to previous state
 			    if ea(4) = '0' then
-					 st_ctrl      <= pull_st;
 					 next_state   <= saved_state;
 				 else
 					 next_state   <= indirect_state;
@@ -3662,7 +3281,6 @@ begin
              ea_ctrl    <= load_ea;
 				 -- return to previous state
 			    if ea(4) = '0' then
-					 st_ctrl      <= pull_st;
 					 next_state   <= saved_state;
 				 else
 					 next_state   <= indirect_state;
@@ -3689,7 +3307,6 @@ begin
              ea_ctrl    <= load_ea;
 				 -- return to previous state
 			    if ea(4) = '0' then
-					 st_ctrl      <= pull_st;
 					 next_state   <= saved_state;
 				 else
 					 next_state   <= indirect_state;
@@ -3717,7 +3334,6 @@ begin
              ea_ctrl    <= load_ea;
 				 -- return to previous state
 			    if ea(4) = '0' then
-					 st_ctrl      <= pull_st;
 					 next_state   <= saved_state;
 				 else
 					 next_state   <= indirect_state;
@@ -3760,7 +3376,6 @@ begin
 			    alu_ctrl   <= alu_ld16;
              ea_ctrl    <= load_ea;
 				 -- return to previous state
-				 st_ctrl      <= pull_st;
 				 next_state   <= saved_state;
 
            --
@@ -3776,7 +3391,6 @@ begin
 					ea_ctrl      <= fetch_next_ea;
                addr_ctrl    <= fetch_ad;
 				   -- return to previous state
-				   st_ctrl      <= pull_st;
 				   next_state   <= saved_state;
 
 				when lea_state => -- here on load effective address
@@ -3939,9 +3553,11 @@ begin
 					  -- write pc hi bytes
                  addr_ctrl    <= pushs_ad;
                  dout_ctrl    <= pc_hi_dout;
- 					  st_ctrl      <= pull_st;
                  next_state   <= saved_state;
 
+             --
+             -- RTS pull return address from stack
+             --
 				 when pull_return_hi_state =>
 					  -- increment the sp
                  left_ctrl  <= sp_left;
@@ -3964,9 +3580,8 @@ begin
                  addr_ctrl  <= pulls_ad;
                  dout_ctrl  <= pc_lo_dout;
  					  --
-					  st_ctrl      <= pull_st;
                  lic          <= '1';
-                 next_state   <= saved_state;
+                 next_state   <= fetch_state;
 
 				 when andcc_state =>
 					  -- AND CC with md
@@ -3975,9 +3590,8 @@ begin
                  alu_ctrl   <= alu_andcc;
                  cc_ctrl    <= load_cc;
  					  --
-					  st_ctrl    <= pull_st;
                  lic        <= '1';
-				     next_state <= saved_state;
+				     next_state <= fetch_state;
 
 				 when orcc_state =>
 					  -- OR CC with md
@@ -3986,9 +3600,8 @@ begin
                  alu_ctrl   <= alu_orcc;
                  cc_ctrl    <= load_cc;
  					  --
-					  st_ctrl    <= pull_st;
                  lic        <= '1';
-				     next_state <= saved_state;
+				     next_state <= fetch_state;
 
 				 when tfr_state =>
 					  -- select source register
@@ -4045,9 +3658,8 @@ begin
 					    null;
 					  end case;
  					  --
-					  st_ctrl      <= pull_st;
                  lic          <= '1';
-				     next_state   <= saved_state;
+				     next_state   <= fetch_state;
 
 				 when exg_state =>
 					  -- save destination register
@@ -4079,11 +3691,65 @@ begin
                  alu_ctrl   <= alu_tfr;
                  ea_ctrl    <= load_ea;
  					  -- call tranfer microcode
-					  st_ctrl      <= push_st;
-					  return_state <= exg1_state;
-				     next_state   <= tfr_state;
+				     next_state   <= exg1_state;
 
 				 when exg1_state =>
+					  -- select source register
+					  case md(7 downto 4) is
+					  when "0000" =>
+					    left_ctrl <= accd_left;
+					  when "0001" =>
+					    left_ctrl <= ix_left;
+					  when "0010" =>
+					    left_ctrl <= iy_left;
+					  when "0011" =>
+					    left_ctrl <= up_left;
+					  when "0100" =>
+					    left_ctrl <= sp_left;
+					  when "0101" =>
+					    left_ctrl <= pc_left;
+					  when "1000" =>
+					    left_ctrl <= acca_left;
+					  when "1001" =>
+					    left_ctrl <= accb_left;
+					  when "1010" =>
+					    left_ctrl <= cc_left;
+					  when "1011" =>
+					    left_ctrl <= dp_left;
+					  when others =>
+                   left_ctrl  <= md_left;
+					  end case;
+                 right_ctrl <= zero_right;
+                 alu_ctrl   <= alu_tfr;
+					  -- select destination register
+					  case md(3 downto 0) is
+					  when "0000" => -- accd
+                   acca_ctrl  <= load_hi_acca;
+                   accb_ctrl  <= load_accb;
+					  when "0001" => -- ix
+                   ix_ctrl    <= load_ix;
+					  when "0010" => -- iy
+                   iy_ctrl    <= load_iy;
+					  when "0011" => -- up
+                   up_ctrl    <= load_up;
+					  when "0100" => -- sp
+                   sp_ctrl    <= load_sp;
+					  when "0101" => -- pc
+                   pc_ctrl    <= load_pc;
+					  when "1000" => -- acca
+                   acca_ctrl  <= load_acca;
+					  when "1001" => -- accb
+                   accb_ctrl  <= load_accb;
+					  when "1010" => -- cc
+                   cc_ctrl    <= load_cc;
+					  when "1011" => --dp
+                   dp_ctrl    <= load_dp;
+					  when others =>
+					    null;
+					  end case;
+				     next_state   <= exg2_state;
+
+				 when exg2_state =>
 					  -- restore destination
                  left_ctrl  <= ea_left;
                  right_ctrl <= zero_right;
@@ -5437,16 +5103,35 @@ begin
 
 			  --
 			  -- here on IRQ or NMI interrupt
+			  -- Complete execute cycle of the last instruction.
+           -- If it was a dual operand instruction
+           --
+			  when int_nmirq_state =>
+             next_state <= int_nmirq1_state;
+
 			  -- pre decrement the sp
 			  -- Idle bus cycle
-			  --
-			  when int_nmiirq_state =>
+           when int_nmirq1_state =>
              -- decrement sp
              left_ctrl  <= sp_left;
              right_ctrl <= one_right;
              alu_ctrl   <= alu_sub16;
              sp_ctrl    <= load_sp;
              next_state <= int_entire_state;
+
+           --
+           -- CWAI entry point
+           -- stack pointer already pre-decremented
+           -- mask condition codes
+           --
+           when cwai_state =>
+              lic        <= '1';
+              -- AND CC with md
+              left_ctrl  <= md_left;
+              right_ctrl <= zero_right;
+              alu_ctrl   <= alu_andcc;
+              cc_ctrl    <= load_cc;
+				  next_state <= int_entire_state;
 
 			  --
 			  -- set Entire Flag on SWI, SWI2, SWI3 and CWAI, IRQ and NMI
@@ -5461,10 +5146,15 @@ begin
 
 			  --
 			  -- here on FIRQ interrupt
+			  -- Complete execution cycle of the last instruction
+           -- if it was a dual operand instruction
+           --
+			  when int_firq_state =>
+             next_state <= int_firq1_state;
+
 			  -- pre decrement the sp
 			  -- Idle bus cycle
-			  --
-			  when int_firq_state =>
+           when int_firq1_state =>
              -- decrement sp
              left_ctrl  <= sp_left;
              right_ctrl <= one_right;
@@ -5632,39 +5322,21 @@ begin
 				 end case;
 
 			  --
-			  -- wait here for an inteerupt
+			  -- wait here for an interrupt
 			  --
 			  when int_cwai_state =>
-			    if (nmi_req = '1') and (nmi_ack='0') then
-		  			iv_ctrl    <= nmi_iv;
-				   nmi_ctrl   <= set_nmi;
+				 case iv is
+				 when NMI_VEC =>
 			      next_state <= int_maskif_state;
-			    else
-				   --
-					-- nmi request is not cleared until nmi input goes low
-					--
-				   if (nmi_req = '0') and (nmi_ack='1') then
-				     nmi_ctrl <= reset_nmi;
-					end if;
-					--
-					-- FIRQ is level sensitive
-					--
-               if (firq = '1') and (cc(FBIT) = '0') then
-		  			  iv_ctrl    <= firq_iv;
-			        next_state <= int_maskif_state;
-					--
-					-- IRQ is level sensitive
-					--
-				   elsif (irq = '1') and (cc(IBIT) = '0') then
-		  			  iv_ctrl    <= irq_iv;
-			        next_state <= int_maski_state;
-               else
-                 iv_ctrl    <= reset_iv;
-	              next_state <= int_cwai_state;
-					end if;
-				 end if;
+				 when FIRQ_VEC =>
+			      next_state <= int_maskif_state;
+				 when IRQ_VEC =>
+			      next_state <= int_maski_state;
+				 when others =>
+					next_state <= int_cwai_state;
+				 end case;
 
-			  when int_maski_state =>
+           when int_maski_state =>
 				 alu_ctrl   <= alu_sei;
 				 cc_ctrl    <= load_cc;
              next_state <= vect_hi_state;
@@ -5686,63 +5358,292 @@ begin
 			  -- John Kent 11th July 2006
 			  --
 			  when sync_state =>
-			    if (nmi_req = '1') and (nmi_ack='0') then
-		  			iv_ctrl    <= nmi_iv;
-				   nmi_ctrl   <= set_nmi;
-               next_state <= int_nmiirq_state;
-			    else
-				   --
-					-- nmi request is not cleared until nmi input goes low
-					--
-				   if (nmi_req = '0') and (nmi_ack='1') then
-		  			  iv_ctrl  <= reset_iv;
-				     nmi_ctrl <= reset_nmi;
-					end if;
-					--
-					-- FIRQ is level sensitive
-					--
-               if (firq = '1') then
-					  if (cc(FBIT) = '0') then
-                   iv_ctrl    <= firq_iv;
-                   next_state <= int_firq_state;
-					  else
-                   iv_ctrl    <= reset_iv;
-                   lic        <= '1';
-			          next_state <= fetch_state;
-					  end if;
-					--
-					-- IRQ is level sensitive
-					--
-				   elsif (irq = '1') then
-					  if (cc(IBIT) = '0') then
-                   iv_ctrl    <= irq_iv;
-                   next_state <= int_nmiirq_state;
-					  else
-                   iv_ctrl    <= reset_iv;
-                   lic        <= '1';
-			          next_state <= fetch_state;
-					  end if;
-               else
-                 iv_ctrl    <= reset_iv;
-                 ba         <= '1';
-	              next_state <= sync_state;
-					end if;
-				 end if;
-
+             lic        <= '1';
+             ba         <= '1';
+	          next_state <= sync_state;
 
 			  when halt_state =>
+           --
+           -- 2011-10-30 John Kent
+           -- ba & bs should be high
+             ba           <= '1';
+             bs           <= '1';
 				 if halt = '1' then
-               ba           <= '1';
-               bs           <= '1';
                next_state   <= halt_state;
 				 else
-               lic          <= '1';
-				   next_state   <= fetch_state;
+               next_state   <= fetch_state;
 				 end if;
 
-			  when others => -- halt on undefine states
-			    next_state <= error_state;
 		  end case;
+
+--
+-- Ver 1.23 2011-10-30 John Kent
+-- First instruction cycle might be
+-- fetch_state
+-- halt_state
+-- int_nmirq_state
+-- int_firq_state
+--
+        if fic = '1' then
+        		   --
+					case op_code(7 downto 6) is
+					when "10" => -- acca
+				     case op_code(3 downto 0) is
+					  when "0000" => -- suba
+					    left_ctrl  <= acca_left;
+					    right_ctrl <= md_right;
+					    alu_ctrl   <= alu_sub8;
+						 cc_ctrl    <= load_cc;
+					    acca_ctrl  <= load_acca;
+					  when "0001" => -- cmpa
+					    left_ctrl   <= acca_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_sub8;
+						 cc_ctrl     <= load_cc;
+					  when "0010" => -- sbca
+					    left_ctrl   <= acca_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_sbc;
+						 cc_ctrl     <= load_cc;
+					    acca_ctrl   <= load_acca;
+					  when "0011" =>
+					    case pre_code is
+						 when "00010000" => -- page 2 -- cmpd
+					      left_ctrl   <= accd_left;
+					      right_ctrl  <= md_right;
+					      alu_ctrl    <= alu_sub16;
+						   cc_ctrl     <= load_cc;
+						 when "00010001" => -- page 3 -- cmpu
+					      left_ctrl   <= up_left;
+					      right_ctrl  <= md_right;
+					      alu_ctrl    <= alu_sub16;
+						   cc_ctrl     <= load_cc;
+						 when others => -- page 1 -- subd
+					      left_ctrl   <= accd_left;
+					      right_ctrl  <= md_right;
+					      alu_ctrl    <= alu_sub16;
+						   cc_ctrl     <= load_cc;
+					      acca_ctrl   <= load_hi_acca;
+						   accb_ctrl   <= load_accb;
+						 end case;
+					  when "0100" => -- anda
+					    left_ctrl   <= acca_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_and;
+						 cc_ctrl     <= load_cc;
+					    acca_ctrl   <= load_acca;
+					  when "0101" => -- bita
+					    left_ctrl   <= acca_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_and;
+						 cc_ctrl     <= load_cc;
+					  when "0110" => -- ldaa
+					    left_ctrl   <= acca_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_ld8;
+						 cc_ctrl     <= load_cc;
+					    acca_ctrl   <= load_acca;
+					  when "0111" => -- staa
+					    left_ctrl   <= acca_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_st8;
+						 cc_ctrl     <= load_cc;
+					  when "1000" => -- eora
+					    left_ctrl   <= acca_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_eor;
+						 cc_ctrl     <= load_cc;
+					    acca_ctrl   <= load_acca;
+					  when "1001" => -- adca
+					    left_ctrl   <= acca_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_adc;
+						 cc_ctrl     <= load_cc;
+					    acca_ctrl   <= load_acca;
+					  when "1010" => -- oraa
+					    left_ctrl   <= acca_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_ora;
+						 cc_ctrl     <= load_cc;
+					    acca_ctrl   <= load_acca;
+					  when "1011" => -- adda
+					    left_ctrl   <= acca_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_add8;
+						 cc_ctrl     <= load_cc;
+					    acca_ctrl   <= load_acca;
+					  when "1100" =>
+					    case pre_code is
+						 when "00010000" => -- page 2 -- cmpy
+					      left_ctrl   <= iy_left;
+					      right_ctrl  <= md_right;
+					      alu_ctrl    <= alu_sub16;
+						   cc_ctrl     <= load_cc;
+						 when "00010001" => -- page 3 -- cmps
+					      left_ctrl   <= sp_left;
+					      right_ctrl  <= md_right;
+					      alu_ctrl    <= alu_sub16;
+						   cc_ctrl     <= load_cc;
+						 when others => -- page 1 -- cmpx
+					      left_ctrl   <= ix_left;
+					      right_ctrl  <= md_right;
+					      alu_ctrl    <= alu_sub16;
+						   cc_ctrl     <= load_cc;
+						 end case;
+					  when "1101" => -- bsr / jsr
+					    null;
+					  when "1110" => -- ldx
+					    case pre_code is
+						 when "00010000" => -- page 2 -- ldy
+					      left_ctrl   <= iy_left;
+					      right_ctrl  <= md_right;
+					      alu_ctrl    <= alu_ld16;
+						   cc_ctrl     <= load_cc;
+                     iy_ctrl     <= load_iy;
+						 when others =>   -- page 1 -- ldx
+					      left_ctrl   <= ix_left;
+					      right_ctrl  <= md_right;
+					      alu_ctrl    <= alu_ld16;
+						   cc_ctrl     <= load_cc;
+                     ix_ctrl     <= load_ix;
+						 end case;
+					  when "1111" => -- stx
+					    case pre_code is
+						 when "00010000" => -- page 2 -- sty
+					      left_ctrl   <= iy_left;
+					      right_ctrl  <= md_right;
+					      alu_ctrl    <= alu_st16;
+						   cc_ctrl     <= load_cc;
+						 when others =>     -- page 1 -- stx
+					      left_ctrl   <= ix_left;
+					      right_ctrl  <= md_right;
+					      alu_ctrl    <= alu_st16;
+						   cc_ctrl     <= load_cc;
+						 end case;
+					  when others =>
+					    null;
+					  end case;
+					when "11" => -- accb dual op
+				     case op_code(3 downto 0) is
+					  when "0000" => -- subb
+					    left_ctrl   <= accb_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_sub8;
+						 cc_ctrl     <= load_cc;
+                   accb_ctrl   <= load_accb;
+					  when "0001" => -- cmpb
+					    left_ctrl   <= accb_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_sub8;
+						 cc_ctrl     <= load_cc;
+					  when "0010" => -- sbcb
+					    left_ctrl   <= accb_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_sbc;
+						 cc_ctrl     <= load_cc;
+                   accb_ctrl   <= load_accb;
+					  when "0011" => -- addd
+					    left_ctrl   <= accd_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_add16;
+						 cc_ctrl     <= load_cc;
+					    acca_ctrl   <= load_hi_acca;
+						 accb_ctrl   <= load_accb;
+					  when "0100" => -- andb
+					    left_ctrl   <= accb_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_and;
+						 cc_ctrl     <= load_cc;
+                   accb_ctrl   <= load_accb;
+					  when "0101" => -- bitb
+					    left_ctrl   <= accb_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_and;
+						 cc_ctrl     <= load_cc;
+					  when "0110" => -- ldab
+					    left_ctrl   <= accb_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_ld8;
+						 cc_ctrl     <= load_cc;
+                   accb_ctrl   <= load_accb;
+					  when "0111" => -- stab
+					    left_ctrl   <= accb_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_st8;
+						 cc_ctrl     <= load_cc;
+					  when "1000" => -- eorb
+					    left_ctrl   <= accb_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_eor;
+						 cc_ctrl     <= load_cc;
+                   accb_ctrl   <= load_accb;
+					  when "1001" => -- adcb
+					    left_ctrl   <= accb_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_adc;
+						 cc_ctrl     <= load_cc;
+                   accb_ctrl   <= load_accb;
+					  when "1010" => -- orab
+					    left_ctrl   <= accb_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_ora;
+						 cc_ctrl     <= load_cc;
+                   accb_ctrl   <= load_accb;
+					  when "1011" => -- addb
+					    left_ctrl   <= accb_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_add8;
+						 cc_ctrl     <= load_cc;
+                   accb_ctrl   <= load_accb;
+					  when "1100" => -- ldd
+					    left_ctrl   <= accd_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_ld16;
+						 cc_ctrl     <= load_cc;
+					    acca_ctrl   <= load_hi_acca;
+                   accb_ctrl   <= load_accb;
+					  when "1101" => -- std
+					    left_ctrl   <= accd_left;
+					    right_ctrl  <= md_right;
+					    alu_ctrl    <= alu_st16;
+						 cc_ctrl     <= load_cc;
+					  when "1110" => -- ldu
+					    case pre_code is
+						 when "00010000" => -- page 2 -- lds
+					      left_ctrl   <= sp_left;
+					      right_ctrl  <= md_right;
+					      alu_ctrl    <= alu_ld16;
+						   cc_ctrl     <= load_cc;
+						   sp_ctrl     <= load_sp;
+						 when others => -- page 1 -- ldu
+					      left_ctrl   <= up_left;
+					      right_ctrl  <= md_right;
+					      alu_ctrl    <= alu_ld16;
+						   cc_ctrl     <= load_cc;
+                     up_ctrl     <= load_up;
+						 end case;
+					  when "1111" =>
+					    case pre_code is
+						 when "00010000" => -- page 2 -- sts
+					      left_ctrl   <= sp_left;
+					      right_ctrl  <= md_right;
+					      alu_ctrl    <= alu_st16;
+						   cc_ctrl     <= load_cc;
+						 when others =>     -- page 1 -- stu
+					      left_ctrl   <= up_left;
+					      right_ctrl  <= md_right;
+					      alu_ctrl    <= alu_st16;
+						   cc_ctrl     <= load_cc;
+						 end case;
+					  when others =>
+					    null;
+					  end case;
+					when others =>
+					  null;
+					end case;
+
+       end if; -- first instruction cycle (fic)
+       lic_out <= lic;
 end process;
 
 end rtl;
