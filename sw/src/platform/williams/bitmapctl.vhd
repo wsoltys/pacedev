@@ -29,40 +29,35 @@ begin
 	ctl_o.a(7 downto 0) <= y(7 downto 0);	
 
   -- generate pixel
-  process (clk, clk_ena, reset)
+  process (clk, reset)
 
-		variable x_r		    : std_logic_vector(PACE_VIDEO_PIPELINE_DELAY-1 downto 0);
-		variable pel 				: std_logic_vector(3 downto 0);
+    variable d          : std_logic_vector(7 downto 0);
+		alias pel 				  : std_logic_vector(3 downto 0) is d(7 downto 4);
 		variable pal_entry 	: std_logic_vector(7 downto 0);
 		
   begin
-  	if rising_edge(clk) and clk_ena = '1' then
+  	if rising_edge(clk) then
+      if clk_ena = '1' then
 
-      -- 1st stage of pipeline
-      -- - read data from bitmap
-      if video_ctl.stb = '1' then
-        ctl_o.a(15 downto 8) <= x(8 downto 1);
-      end if;
-      
-      -- 2nd stage of pipeline
-      -- - set pixel colour from bitmap data
-      case x_r(1) is
-        when '0' =>
-          pel := ctl_i.d(7 downto 4);
-        when others =>
-          pel := ctl_i.d(3 downto 0);
-      end case;
-                
-      -- extract R,G,B from colour palette
-      pal_entry := graphics_i.pal(conv_integer(pel))(pal_entry'range);
-      rgb.r <= pal_entry(2 downto 0) & "0000000";
-      rgb.g <= pal_entry(5 downto 3) & "0000000";
-      rgb.b <= pal_entry(7 downto 6) & "00000000";
-      
-			-- pipelined because of tile data loopkup
-			x_r := x_r(x_r'left-1 downto 0) & x(0);
-			
-		end if;				
+        if video_ctl.stb = '1' then
+          -- set the bitmap address
+          ctl_o.a(15 downto 8) <= x(8 downto 1);
+          -- read/shift bitmap data
+          if x(0) = '1' then
+            d := ctl_i.d(7 downto 0);
+          else
+            d := d(3 downto 0) & X"0";
+          end if;
+        end if;
+        
+        -- extract R,G,B from colour palette
+        pal_entry := graphics_i.pal(conv_integer(pel))(pal_entry'range);
+        rgb.r <= pal_entry(2 downto 0) & "0000000";
+        rgb.g <= pal_entry(5 downto 3) & "0000000";
+        rgb.b <= pal_entry(7 downto 6) & "00000000";
+        
+      end if; -- clk_ena
+		end if; -- rising_edge(clk)
 
     ctl_o.set <= '1';
 
