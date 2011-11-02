@@ -34,37 +34,29 @@ begin
   -- generate pixel
   process (clk, reset)
 
-		variable x_r		    : std_logic_vector(PACE_VIDEO_PIPELINE_DELAY-1 downto 0);
-		variable pel 				: std_logic_vector(3 downto 0);
+		variable pel        : std_logic_vector(3 downto 0);
 		variable pal_entry 	: std_logic_vector(7 downto 0);
 		
   begin
   	if rising_edge(clk) then
       if clk_ena = '1' then
 
-        -- 1st stage of pipeline
-        -- - read data from bitmap
         if video_ctl.stb = '1' then
+          -- set the address
           ctl_o.a(7 downto 0) <= x(7 downto 0);
+          -- read the pixel
+          if y(0) = '0' then
+            pel := ctl_i.d(7 downto 4);
+          else
+            pel := ctl_i.d(3 downto 0);
+          end if;
         end if;
         
-        -- 2nd stage of pipeline
-        -- - set pixel colour from bitmap data
-        case y(0) is
-          when '0' =>
-            pel := ctl_i.d(7 downto 4);
-          when others =>
-            pel := ctl_i.d(3 downto 0);
-        end case;
-                  
         -- extract R,G,B from colour palette
         pal_entry := graphics_i.pal(conv_integer(pel))(pal_entry'range);
         rgb.r <= pal_entry(2 downto 0) & "0000000";
         rgb.g <= pal_entry(5 downto 3) & "0000000";
         rgb.b <= pal_entry(7 downto 6) & "00000000";
-        
-        -- pipelined because of tile data loopkup
-        x_r := x_r(x_r'left-1 downto 0) & x(0);
         
       end if; -- clk_ena
     end if; -- rising_edge(clk)

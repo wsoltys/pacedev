@@ -245,9 +245,8 @@ begin
                 y := y + 1;
                 sstart := sstart + d_sy;
                 if no_wrap_f = '1' then
-                  -- todo: handle no_wrap_f
-                  -- easier with vectors!
-                  dstart := dstart + d_dy;
+                  dstart := dstart(15 downto 8) &
+                            (dstart(7 downto 0) + d_dy);
                 else
                   dstart := dstart + d_dy;
                 end if;
