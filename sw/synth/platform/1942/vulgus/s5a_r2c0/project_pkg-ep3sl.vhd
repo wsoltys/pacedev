@@ -68,9 +68,13 @@ package project_pkg is
   constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 14;
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
     
-	-- Williams constants
+	-- 1942/Vulgus constants
 	
-	constant WILLIAMS_VRAM_WIDTHAD			      : integer := 15;		-- 32KB
+  constant ROM_VARIANT                      : string := "vulgus";
+  --constant ROM_VARIANT                      : string := "vulgus2";
+  --constant ROM_VARIANT                      : string := "vulgusj";
+  -- this might be NULL for platforms with no ROM variants
+  constant ROM_VARIANT_SUBDIR                : string := ROM_VARIANT & "/";
 	
 	-- derived - do not edit
 

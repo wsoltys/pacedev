@@ -68,9 +68,15 @@ package project_pkg is
   constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 14;
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
     
-	-- Williams constants
+	-- 1942 constants
 	
-	constant WILLIAMS_VRAM_WIDTHAD			      : integer := 15;		-- 32KB
+  constant ROM_VARIANT                      : string := "1942";
+  --constant ROM_VARIANT                      : string := "1942a";
+  --constant ROM_VARIANT                      : string := "1942abl";
+  --constant ROM_VARIANT                      : string := "1942b";
+  --constant ROM_VARIANT                      : string := "1942w";
+  -- this might be NULL for platforms with no ROM variants
+  constant ROM_VARIANT_SUBDIR                : string := ROM_VARIANT & "/";
 	
 	-- derived - do not edit
 
