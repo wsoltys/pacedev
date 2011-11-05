@@ -153,6 +153,7 @@ architecture SYN of platform is
 	
   -- other signals      
 	alias game_reset			: std_logic is inputs_i(3).d(0);
+	alias game_pause      : std_logic is inputs_i(3).d(1);
 	signal pia0_cs				: std_logic;
 	signal pia1_cs				: std_logic;
 	signal pia0_data			: std_logic_vector(7 downto 0);
@@ -165,7 +166,7 @@ architecture SYN of platform is
 begin
 
 	-- cpu09 core uses negative clock edge
-	clk_1M_en_n <= not clk_1M_en;
+	clk_1M_en_n <= not clk_1M_en or game_pause;
 
 	-- add game reset later
 	cpu_reset <= rst_20M or game_reset;

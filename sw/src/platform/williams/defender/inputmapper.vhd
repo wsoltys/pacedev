@@ -33,6 +33,8 @@ end inputmapper;
 
 architecture SYN of inputmapper is
 
+  signal pause  : std_logic;
+    
 begin
 
   latchInputs: process (clk, rst_n)
@@ -45,6 +47,7 @@ begin
       for i in 0 to NUM_INPUTS-1 loop
         inputs(i).d <= (others =>'0');
       end loop;
+      pause <= '0';
     elsif rising_edge (clk) then
       -- map the dipswitches
       if (key_down or key_up) = '1' then
@@ -85,6 +88,10 @@ begin
             -- special keys
             when SCANCODE_F3 =>				-- game reset
               inputs(3).d(0) <= key_down;
+            when SCANCODE_P =>				-- game pause
+              if key_down = '1' then
+                pause <= not pause;
+              end if;
             when others =>
         end case;
       end if; -- key_down or key_up
@@ -94,6 +101,10 @@ begin
         end loop;
       end if;
     end if; -- rising_edge (clk)
+    
+    -- assign outputs
+    inputs(3).d(1) <= pause;
+    
   end process latchInputs;
 
 end SYN;
