@@ -70,6 +70,8 @@ package project_pkg is
     
 	-- 1942 constants
 	
+  constant CAPCOM_1942_HAS_AUDIO_CPU        : boolean := false;
+
   constant ROM_VARIANT                      : string := "1942";
   --constant ROM_VARIANT                      : string := "1942a";
   --constant ROM_VARIANT                      : string := "1942abl";
