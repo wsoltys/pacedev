@@ -147,6 +147,9 @@ void main (int argc, char *argv[])
   fp = fopen (SUBDIR "vram.bin", "wb");
   fwrite (&mem[VRAM_BASE], 0x400, 1, fp);
   fclose (fp);
+  fp = fopen (SUBDIR "cram.bin", "wb");
+  fwrite (&mem[VRAM_BASE+0x400], 0x400, 1, fp);
+  fclose (fp);
   fp = fopen (SUBDIR "bgram.bin", "wb");
   fwrite (&mem[BGRAM_BASE], 0x400, 1, fp);
   fclose (fp);

@@ -704,32 +704,6 @@ begin
     q						=> ram4_d_o
   );
 
-  -- VRAM (foreground attribute) $B000-$B7FF
-	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-	rampf0_inst : entity work.dpram
-		generic map
-		(
-			init_file		=> VARIANT_ROM_DIR & "rampf0.hex",
-			widthad_a		=> 11
-		)
-		port map
-		(
-			-- uP interface
-			clock_b			=> clk_sys,
-			address_b		=> cpu_a(10 downto 0),
-			wren_b			=> rampf0_we,
-			data_b			=> cpu_d_o,
-			q_b					=> rampf0_d_o,
-			
-			-- graphics interface
-			clock_a			=> clk_vid,
-			address_a		=> tilemap_i(1).attr_a(10 downto 0),
-			wren_a			=> '0',
-			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o(1).attr_d(7 downto 0)
-		);
-  tilemap_o(1).attr_d(tilemap_o(1).attr_d'left downto 8) <= (others => '0');
-  
   -- VRAM (background attribute) $B800-$BFFF
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 	rampf1_inst : entity work.dpram
@@ -782,26 +756,52 @@ begin
 		);
   tilemap_o(1).map_d(tilemap_o(1).map_d'left downto 8) <= (others => '0');
 
-  -- VRAM (background tile code) $C800-$CFFF
+  -- VRAM (foreground attribute) $B000-$B7FF
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-	rampf3_inst : entity work.dpram
+	cram_inst : entity work.dpram
 		generic map
 		(
-			init_file		=> VARIANT_ROM_DIR & "rampf3.hex",
-			widthad_a		=> 11
+			init_file		=> VARIANT_ROM_DIR & "cram.hex",
+			widthad_a		=> 10
 		)
 		port map
 		(
 			-- uP interface
 			clock_b			=> clk_sys,
-			address_b		=> cpu_a(10 downto 0),
+			address_b		=> cpu_a(9 downto 0),
+			wren_b			=> rampf0_we,
+			data_b			=> cpu_d_o,
+			q_b					=> rampf0_d_o,
+			
+			-- graphics interface
+			clock_a			=> clk_vid,
+			address_a		=> tilemap_i(1).attr_a(9 downto 0),
+			wren_a			=> '0',
+			data_a			=> (others => 'X'),
+			q_a					=> tilemap_o(1).attr_d(7 downto 0)
+		);
+  tilemap_o(1).attr_d(tilemap_o(1).attr_d'left downto 8) <= (others => '0');
+  
+  -- VRAM (background tile code) $D800-$DBFF
+	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+	rampf3_inst : entity work.dpram
+		generic map
+		(
+			init_file		=> VARIANT_ROM_DIR & "bgram.hex",
+			widthad_a		=> 10
+		)
+		port map
+		(
+			-- uP interface
+			clock_b			=> clk_sys,
+			address_b		=> cpu_a(9 downto 0),
 			wren_b			=> rampf3_we,
 			data_b			=> cpu_d_o,
 			q_b					=> rampf3_d_o,
 			
 			-- graphics interface
 			clock_a			=> clk_vid,
-			address_a		=> tilemap_i(2).map_a(10 downto 0),
+			address_a		=> tilemap_i(2).map_a(9 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
 			q_a					=> tilemap_o(2).map_d(7 downto 0)

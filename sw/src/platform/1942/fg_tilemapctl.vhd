@@ -30,21 +30,21 @@ begin
 
   -- technically, this is actually scroll x
 	-- these are constant for a whole line
-  ctl_o.map_a(ctl_o.map_a'left downto 11) <= (others => '0');
-  ctl_o.map_a(5 downto 0) <= y(8 downto 3);
+  ctl_o.map_a(ctl_o.map_a'left downto 10) <= (others => '0');
+  ctl_o.map_a(4 downto 0) <= not y(7 downto 3);
   ctl_o.tile_a(ctl_o.tile_a'left downto 12) <= (others => '0');
-  ctl_o.tile_a(2 downto 0) <= y(2 downto 0);
+  ctl_o.tile_a(3 downto 1) <= y(2 downto 0);
 
   -- generate attribute RAM address (same, different memory bank)
-  ctl_o.attr_a(ctl_o.map_a'left downto 11) <= (others => '0');
-  ctl_o.attr_a(5 downto 0) <= y(8 downto 3);
+  ctl_o.attr_a(ctl_o.map_a'left downto 10) <= (others => '0');
+  ctl_o.attr_a(4 downto 0) <= not y(7 downto 3);
   
   -- generate pixel
   process (clk, clk_ena)
 
     variable attr_i     : std_logic_vector(5 downto 0);
 		variable pal_i      : integer range 0 to 127;
-		variable pel        : std_logic;
+		variable pel        : std_logic_vector(1 downto 0);
 		variable pal_entry  : pal_entry_typ;
 
 		variable x_adj		  : unsigned(x'range);
@@ -63,8 +63,8 @@ begin
         -- - read tile from tilemap
         -- - read attribute data
         if stb = '1' then
-          ctl_o.map_a(10 downto 6) <= not std_logic_vector(x_adj(7 downto 3));
-          ctl_o.attr_a(10 downto 6) <= not std_logic_vector(x_adj(7 downto 3));
+          ctl_o.map_a(9 downto 5) <= std_logic_vector(x_adj(7 downto 3));
+          ctl_o.attr_a(9 downto 5) <= std_logic_vector(x_adj(7 downto 3));
         end if;
         
         -- 2nd stage of pipeline
@@ -74,26 +74,27 @@ begin
             attr_d_r := ctl_i.attr_d(7 downto 0);
           end if;
         end if;
-        ctl_o.tile_a(11) <= '0';
-        ctl_o.tile_a(10 downto 3) <= ctl_i.map_d(7 downto 0); -- each tile is 8 bytes
+        ctl_o.tile_a(11 downto 4) <= ctl_i.map_d(7 downto 0); -- each tile is 16 bytes
+        ctl_o.tile_a(0) <= x_adj(2);
 
         if stb = '1' then
-          if x_adj(2 downto 0) = "010" then
+          if x_adj(1 downto 0) = "10" then
             tile_d_r := ctl_i.tile_d(7 downto 0);
           else
-            tile_d_r := '0' & tile_d_r(tile_d_r'left downto 1);
+            tile_d_r := tile_d_r(tile_d_r'left-2 downto 0) & "00";
           end if;
         end if;
-        pel := tile_d_r(0);
+        pel := tile_d_r(7 downto 6);
         
         -- extract R,G,B from colour palette
-        attr_i := attr_d_r(1 downto 0) & attr_d_r(5 downto 2);
-        pal_i := to_integer(unsigned(attr_i));
+        attr_i := attr_d_r(3 downto 0) & pel; -- made this shit up
+        pal_i := 128 + to_integer(unsigned(attr_i)); -- this too
         pal_entry := pal(pal_i);
         ctl_o.rgb.r <= pal_entry(0) & "0000";
         ctl_o.rgb.g <= pal_entry(1) & "0000";
         ctl_o.rgb.b <= pal_entry(2) & "0000";
-        ctl_o.set <= pel;
+        -- this is a fudge
+        ctl_o.set <= '1';
 
       end if; -- clk_ena
 		end if;

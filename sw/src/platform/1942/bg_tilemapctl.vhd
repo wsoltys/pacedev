@@ -9,7 +9,7 @@ use work.platform_pkg.all;
 use work.video_controller_pkg.all;
 
 --
---	Xevious Foreground Character Tilemap Controller
+--	1942 Background Character Tilemap Controller
 --
 --	Tile data is 2 BPP.
 --	Attribute data 7:1 is palette entry
@@ -118,7 +118,7 @@ begin
       
 		end if;				
 
-    ctl_o.set <= '1';
+    ctl_o.set <= '0';
 
   end process;
 
