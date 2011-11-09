@@ -133,6 +133,14 @@ char *int2bin (int value, int bits)
   return (bin);
 }
 
+//#define SHOW_PALETTE
+//#define SHOW_CLUTS
+//#define SHOW_CHARS
+//#define SHOW_TILES
+//#define SHOW_SPRITES
+#define SHOW_VRAM
+#define SHOW_BGRAM
+
 void main (int argc, char *argv[])
 {
 	FILE *fp;
@@ -339,7 +347,7 @@ void main (int argc, char *argv[])
 	install_keyboard ();
 
 	set_color_depth (8);
-	set_gfx_mode (GFX_AUTODETECT_WINDOWED, WIDTH_PIXELS, HEIGHT_PIXELS, 0, 0);
+	set_gfx_mode (GFX_AUTODETECT_WINDOWED, WIDTH_PIXELS, 2*HEIGHT_PIXELS, 0, 0);
 
 	// set the palette
   FILE *fppal = fopen (SUBDIR "pal.txt", "wt");
@@ -376,9 +384,9 @@ void main (int argc, char *argv[])
     }
   }
   fclose (fppal);
-	set_palette_range (pal, 0, 256, 1);
+	set_palette_range (pal, 0, 255, 1);
 
-#if 1
+#ifdef SHOW_PALETTE
   // display palette
   clear_bitmap (screen);
   for (int t=0; t<256; t++)
@@ -394,7 +402,7 @@ void main (int argc, char *argv[])
   while (key[KEY_ESC]);	  
 #endif
 
-#if 1
+#ifdef SHOW_CLUTS
   // display char clut
   // chars use colours 128-143
   clear_bitmap (screen);
@@ -441,7 +449,7 @@ void main (int argc, char *argv[])
   while (key[KEY_ESC]);	  
 #endif
 
-#if 1
+#ifdef SHOW_CHARS
   // display the chars
   clear_bitmap (screen);
   for (int t=0; t<NUM_CHARS; t++)
@@ -464,7 +472,7 @@ void main (int argc, char *argv[])
   while (key[KEY_ESC]);	  
 #endif
 
-#if 1
+#ifdef SHOW_TILES
   // display the tiles
   clear_bitmap (screen);
   //for (int t=0; t<NUM_TILES; t++)
@@ -488,7 +496,7 @@ void main (int argc, char *argv[])
   while (key[KEY_ESC]);	  
 #endif
 
-#if 1
+#if SHOW_SPRITES
   // display the sprites
   clear_bitmap (screen);
   //for (int t=0; t<NUM_SPRITES; t++)
@@ -513,6 +521,59 @@ void main (int argc, char *argv[])
   while (key[KEY_ESC]);	  
 #endif
 
+#ifdef SHOW_VRAM
+  clear_bitmap (screen);
+	for (int y=0; y<32; y++)
+	{
+		for (int x=0; x<28; x++)
+		{
+			int addr = (x+2)*32+(31-y);
+			int t = mem[VRAM_BASE+addr];
+    	int tile_addr = t*16;
+    	for (int ty=0; ty<8; ty++)
+    		for (int tx=0; tx<8; tx++)
+    		{
+					BYTE pel = chr_rot90[tile_addr+ty*2+(tx>>2)];
+					pel = pel >> (((7-tx)<<1)&0x6) & 0x03;
+					putpixel (screen, x*8+tx, y*8+ty, CHAR_COLOUR(char_clut_prom[pel]));
+    		}
+		}
+	}
+  //SS_TEXTOUT_CENTRE(screen, font, "CHAR RAM", SCREEN_W/2, SCREEN_H-8, 1);
+  while (!key[KEY_ESC]);	  
+  while (key[KEY_ESC]);	  
+#endif
+
+#ifdef SHOW_BGRAM
+  clear_bitmap (screen);
+  while (!key[KEY_ESC])
+  {
+  	for (int h=0; h<32; h+=16)
+  	{
+			for (int y=0; y<32; y++)
+			{
+				for (int x=0; x<16; x++)
+				{
+					int addr = (h+x)*32+(16-y);
+						addr = (addr & 0x0f) | ((addr & 0x01f0) << 1);
+					int t = mem[BGRAM_BASE+addr];
+			  	int tile_addr = t*128;
+			  	for (int ty=0; ty<16; ty++)
+			  		for (int tx=0; tx<16; tx++)
+			  		{
+							BYTE pel = tile_rot90[tile_addr+ty*8+(tx>>1)];
+							pel = (pel >> (((tx^1)&1)<<2)) & 0x07;
+							putpixel (screen, x*16+tx, h*256+y*16+ty, TILE_COLOUR(0,tile_clut_prom[pel]));
+			  		}
+				}
+			}
+		}
+	}
+  //SS_TEXTOUT_CENTRE(screen, font, "CHAR RAM", SCREEN_W/2, SCREEN_H-8, 1);
+  while (!key[KEY_ESC]);	  
+  while (key[KEY_ESC]);	  
+#endif
+	
 #if 0
 	for (int y=0; y<HEIGHT_BYTES; y++)
 	{

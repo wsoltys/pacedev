@@ -635,12 +635,12 @@ begin
     generic map
     (
       init_file		=> VARIANT_ROM_DIR & "gfx2.hex",
-      widthad_a     => 13
+      widthad_a     => 16
     )
     port map
     (
       clock		=> clk_vid,
-      address => tilemap_i(2).tile_a(12 downto 0),
+      address => tilemap_i(2).tile_a(15 downto 0),
       q				=> tilemap_o(2).tile_d
     );
     
@@ -756,7 +756,7 @@ begin
 		);
   tilemap_o(1).map_d(tilemap_o(1).map_d'left downto 8) <= (others => '0');
 
-  -- VRAM (foreground attribute) $B000-$B7FF
+  -- CRAM (foreground colour) $D400-$D7FF
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 	cram_inst : entity work.dpram
 		generic map
@@ -782,9 +782,9 @@ begin
 		);
   tilemap_o(1).attr_d(tilemap_o(1).attr_d'left downto 8) <= (others => '0');
   
-  -- VRAM (background tile code) $D800-$DBFF
+  -- BGRAM (background tile code) $D800-$DBFF
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-	rampf3_inst : entity work.dpram
+	bgram_inst : entity work.dpram
 		generic map
 		(
 			init_file		=> VARIANT_ROM_DIR & "bgram.hex",
