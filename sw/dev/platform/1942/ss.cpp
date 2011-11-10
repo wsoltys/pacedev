@@ -550,20 +550,22 @@ void main (int argc, char *argv[])
   {
   	for (int h=0; h<32; h+=16)
   	{
-			for (int y=0; y<32; y++)
+			for (int y=0; y<16; y++)
 			{
-				for (int x=0; x<16; x++)
+				for (int x=0; x<14; x++)
 				{
-					int addr = (h+x)*32+(16-y);
+					int addr = (15-y)*16+(h*16+x+1);
 						addr = (addr & 0x0f) | ((addr & 0x01f0) << 1);
 					int t = mem[BGRAM_BASE+addr];
+					int a = mem[BGRAM_BASE+addr+0x10];
+					t += (a&0x80) << 1;
 			  	int tile_addr = t*128;
 			  	for (int ty=0; ty<16; ty++)
 			  		for (int tx=0; tx<16; tx++)
 			  		{
 							BYTE pel = tile_rot90[tile_addr+ty*8+(tx>>1)];
 							pel = (pel >> (((tx^1)&1)<<2)) & 0x07;
-							putpixel (screen, x*16+tx, h*256+y*16+ty, TILE_COLOUR(0,tile_clut_prom[pel]));
+							putpixel (screen, x*16+tx, h*16+y*16+ty, TILE_COLOUR(0,tile_clut_prom[pel]));
 			  		}
 				}
 			}
