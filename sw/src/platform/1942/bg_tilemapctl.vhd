@@ -26,8 +26,6 @@ architecture TILEMAP_2 of tilemapCtl is
   alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
   alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
   
-  signal y_adj    : std_logic_vector(video_ctl.y'range);
-  
 begin
 
   -- technically, this is actually scroll x
@@ -35,13 +33,13 @@ begin
   --y_adj <= std_logic_vector(unsigned(y) + 128+32);
   
 	-- these are constant for a whole line
-  ctl_o.map_a(ctl_o.map_a'left downto 11) <= (others => '0');
-  ctl_o.map_a(4 downto 0) <= '0' & y(7 downto 4);
+  ctl_o.map_a(ctl_o.map_a'left downto 9) <= (others => '0');
+  ctl_o.map_a(8 downto 4) <= '0' & not y(7 downto 4);
   ctl_o.tile_a(ctl_o.tile_a'left downto 16) <= (others => '0');
 
   -- generate attribute RAM address (next 16 bytes)
-  ctl_o.attr_a(ctl_o.map_a'left downto 11) <= (others => '0');
-  ctl_o.attr_a(4 downto 0) <= '1' & y(7 downto 4);
+  ctl_o.attr_a(ctl_o.map_a'left downto 9) <= (others => '0');
+  ctl_o.attr_a(8 downto 4) <= '1' & not y(7 downto 4);
   
   -- generate pixel
   process (clk)
@@ -52,11 +50,15 @@ begin
 		variable pal_entry  : pal_entry_typ;
 
 		variable x_adj		  : unsigned(x'range);
+    variable y_adj      : std_logic_vector(y'range);
+  
     variable tile_d_r   : std_logic_vector(ctl_i.tile_d'range);
 		variable attr_d_r	  : std_logic_vector(7 downto 0);
 
   begin
 
+    y_adj := y;
+    
   	if rising_edge(clk) then
       if clk_ena = '1' then
 
@@ -67,43 +69,42 @@ begin
         -- - read tile from tilemap
         -- - read attribute data
         if stb = '1' then
-          ctl_o.map_a(9 downto 5) <= std_logic_vector(x_adj(8 downto 4));
-          ctl_o.attr_a(9 downto 5) <= std_logic_vector(x_adj(8 downto 4));
+          ctl_o.map_a(3 downto 0) <= std_logic_vector(x_adj(7 downto 4));
+          ctl_o.attr_a(3 downto 0) <= std_logic_vector(x_adj(7 downto 4));
         end if;
         
         -- 2nd stage of pipeline
         -- - read tile data from tile ROM
+        ctl_o.tile_a(14 downto 7) <= ctl_i.map_d(7 downto 0); -- each tile is 128 bytes
         if stb = '1' then
-          -- latch every 2nd pixel
-          if x_adj(0) = '0' then
-            --attr_d_r := ctl_i.attr_d(7 downto 0);
-            attr_d_r := (others => '0');
+          if x_adj(3 downto 0) = "0010" then
+            attr_d_r := ctl_i.attr_d(7 downto 0);
           end if;
         end if;
-        ctl_o.tile_a(15) <= '0'; -- fudge
-        ctl_o.tile_a(14 downto 7) <= ctl_i.map_d(7 downto 0); -- each tile is 128 bytes
         -- attr_d(6) = Y FLIP
-        if attr_d_r(6) = '0' then
+--        if attr_d_r(6) = '0' then
           ctl_o.tile_a(6 downto 3) <= y_adj(3 downto 0);
-        else
-          ctl_o.tile_a(6 downto 3) <= not y_adj(3 downto 0);
-        end if;
+--        else
+--          ctl_o.tile_a(6 downto 3) <= not y_adj(3 downto 0);
+--        end if;
         -- attr_d(7) = X FLIP
-        if attr_d_r(7) = '0' then
+--        if attr_d_r(7) = '0' then
           ctl_o.tile_a(2 downto 0) <= std_logic_vector(x_adj(3 downto 1));
-        else
-          ctl_o.tile_a(2 downto 0) <= not std_logic_vector(x_adj(3 downto 1));
-        end if;
+--        else
+--          ctl_o.tile_a(2 downto 0) <= not std_logic_vector(x_adj(3 downto 1));
+--        end if;
         
         if stb = '1' then
           -- latch every 2nd pixel
           if x_adj(0) = '0' then
+            -- select tile bank
+            ctl_o.tile_a(15) <= attr_d_r(7);
             -- attr_d(7) = X FLIP
-            if attr_d_r(7) = '0' then
+--            if attr_d_r(7) = '0' then
               tile_d_r := ctl_i.tile_d(7 downto 0);
-            else
-              tile_d_r := ctl_i.tile_d(3 downto 0) & ctl_i.tile_d(7 downto 4);
-            end if;
+--            else
+--              tile_d_r := ctl_i.tile_d(3 downto 0) & ctl_i.tile_d(7 downto 4);
+--            end if;
           else
             tile_d_r := "0000" & tile_d_r(7 downto 4);
           end if;
