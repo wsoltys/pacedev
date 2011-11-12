@@ -704,32 +704,6 @@ begin
     q						=> ram4_d_o
   );
 
-  -- VRAM (background attribute) $B800-$BFFF
-	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-	rampf1_inst : entity work.dpram
-		generic map
-		(
-			init_file		=> VARIANT_ROM_DIR & "rampf1.hex",
-			widthad_a		=> 11
-		)
-		port map
-		(
-			-- uP interface
-			clock_b			=> clk_sys,
-			address_b		=> cpu_a(10 downto 0),
-			wren_b			=> rampf1_we,
-			data_b			=> cpu_d_o,
-			q_b					=> rampf1_d_o,
-			
-			-- graphics interface
-			clock_a			=> clk_vid,
-			address_a		=> tilemap_i(2).attr_a(10 downto 0),
-			wren_a			=> '0',
-			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o(2).attr_d(7 downto 0)
-		);
-  tilemap_o(2).attr_d(tilemap_o(2).attr_d'left downto 8) <= (others => '0');
-  
   -- VRAM (foreground tile code) $D000-$D3FF
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 	vram_inst : entity work.dpram
@@ -783,30 +757,60 @@ begin
   tilemap_o(1).attr_d(tilemap_o(1).attr_d'left downto 8) <= (others => '0');
   
   -- BGRAM (background tile code) $D800-$DBFF
+  -- - consists of 16 bytes of map interleaved with 16 bytes of attr
+  -- - so break it into 2 blocks so we can read in parallel
+  
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-	bgram_inst : entity work.dpram
+	bgram_t_inst : entity work.dpram
 		generic map
 		(
-			init_file		=> VARIANT_ROM_DIR & "bgram.hex",
-			widthad_a		=> 10
+			init_file		          => VARIANT_ROM_DIR & "bgram_t.hex",
+			widthad_a		          => 9
 		)
 		port map
 		(
 			-- uP interface
-			clock_b			=> clk_sys,
-			address_b		=> cpu_a(9 downto 0),
-			wren_b			=> rampf3_we,
-			data_b			=> cpu_d_o,
-			q_b					=> rampf3_d_o,
+			clock_b			          => clk_sys,
+			address_b		          => cpu_a(8 downto 0),
+			wren_b			          => rampf3_we,
+			data_b			          => cpu_d_o,
+			q_b					          => rampf3_d_o,
 			
 			-- graphics interface
-			clock_a			=> clk_vid,
-			address_a		=> tilemap_i(2).map_a(9 downto 0),
-			wren_a			=> '0',
-			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o(2).map_d(7 downto 0)
+			clock_a			          => clk_vid,
+			address_a(8 downto 4) => tilemap_i(2).map_a(9 downto 5),
+			address_a(3 downto 0) => tilemap_i(2).map_a(3 downto 0),
+			wren_a			          => '0',
+			data_a			          => (others => 'X'),
+			q_a					          => tilemap_o(2).map_d(7 downto 0)
 		);
   tilemap_o(2).map_d(tilemap_o(2).map_d'left downto 8) <= (others => '0');
+  
+	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+	bgram_a_inst : entity work.dpram
+		generic map
+		(
+			init_file		          => VARIANT_ROM_DIR & "bgram_a.hex",
+			widthad_a		          => 9
+		)
+		port map
+		(
+			-- uP interface
+			clock_b			          => clk_sys,
+			address_b		          => cpu_a(8 downto 0),
+			wren_b			          => rampf3_we,
+			data_b			          => cpu_d_o,
+			q_b					          => open,
+			
+			-- graphics interface
+			clock_a			          => clk_vid,
+			address_a(8 downto 4) => tilemap_i(2).attr_a(9 downto 5),
+			address_a(3 downto 0) => tilemap_i(2).attr_a(3 downto 0),
+			wren_a			          => '0',
+			data_a			          => (others => 'X'),
+			q_a					          => tilemap_o(2).attr_d(7 downto 0)
+		);
+  tilemap_o(2).attr_d(tilemap_o(2).attr_d'left downto 8) <= (others => '0');
   
   -- osd toggle (TAB)
   process (clk_sys, clkrst_i.arst)

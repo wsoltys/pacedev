@@ -34,12 +34,12 @@ begin
   
 	-- these are constant for a whole line
   ctl_o.map_a(ctl_o.map_a'left downto 9) <= (others => '0');
-  ctl_o.map_a(8 downto 4) <= '0' & not y(7 downto 4);
+  ctl_o.map_a(8 downto 4) <= not y(7 downto 4) & '0';
   ctl_o.tile_a(ctl_o.tile_a'left downto 16) <= (others => '0');
 
   -- generate attribute RAM address (next 16 bytes)
   ctl_o.attr_a(ctl_o.map_a'left downto 9) <= (others => '0');
-  ctl_o.attr_a(8 downto 4) <= '1' & not y(7 downto 4);
+  ctl_o.attr_a(8 downto 4) <= not y(7 downto 4) & '1';
   
   -- generate pixel
   process (clk)
@@ -75,6 +75,7 @@ begin
         
         -- 2nd stage of pipeline
         -- - read tile data from tile ROM
+        ctl_o.tile_a(15) <= ctl_i.attr_d(7);
         ctl_o.tile_a(14 downto 7) <= ctl_i.map_d(7 downto 0); -- each tile is 128 bytes
         if stb = '1' then
           if x_adj(3 downto 0) = "0010" then
@@ -98,7 +99,6 @@ begin
           -- latch every 2nd pixel
           if x_adj(0) = '0' then
             -- select tile bank
-            ctl_o.tile_a(15) <= attr_d_r(7);
             -- attr_d(7) = X FLIP
 --            if attr_d_r(7) = '0' then
               tile_d_r := ctl_i.tile_d(7 downto 0);

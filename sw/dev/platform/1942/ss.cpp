@@ -143,8 +143,9 @@ char *int2bin (int value, int bits)
 
 void main (int argc, char *argv[])
 {
-	FILE *fp;
-
+	FILE 	*fp;
+	int		i;
+	
 	// read cpu memory dump	
 	fp = fopen (SUBDIR MEM_NAME, "rb");
 	if (!fp) exit (0);
@@ -158,8 +159,13 @@ void main (int argc, char *argv[])
   fp = fopen (SUBDIR "cram.bin", "wb");
   fwrite (&mem[VRAM_BASE+0x400], 0x400, 1, fp);
   fclose (fp);
-  fp = fopen (SUBDIR "bgram.bin", "wb");
-  fwrite (&mem[BGRAM_BASE], 0x400, 1, fp);
+  fp = fopen (SUBDIR "bgram_t.bin", "wb");
+  for (i=0; i<1024; i+=32)
+  	fwrite (&mem[BGRAM_BASE+i], 1, 16, fp);
+  fclose (fp);
+  fp = fopen (SUBDIR "bgram_a.bin", "wb");
+  for (i=0; i<1024; i+=32)
+  	fwrite (&mem[BGRAM_BASE+16+i], 1, 16, fp);
   fclose (fp);
 
 	// read char rom(s)
@@ -563,7 +569,22 @@ void main (int argc, char *argv[])
 			  	for (int ty=0; ty<16; ty++)
 			  		for (int tx=0; tx<16; tx++)
 			  		{
-							BYTE pel = tile_rot90[tile_addr+ty*8+(tx>>1)];
+							BYTE pel;
+							switch (a & (0x60))
+							{
+								case 0x00:
+									pel = tile_rot90[tile_addr+ty*8+(tx>>1)];
+									break;
+								case 0x20:
+									pel = tile_rot90[tile_addr+ty*8+((15-tx)>>1)];
+									break;
+								case 0x40:
+									pel = tile_rot90[tile_addr+(15-ty)*8+(tx>>1)];
+									break;
+								default:
+									pel = tile_rot90[tile_addr+(15-ty)*8+((15-tx)>>1)];
+									break;
+							}
 							pel = (pel >> (((tx^1)&1)<<2)) & 0x07;
 							putpixel (screen, x*16+tx, h*16+y*16+ty, TILE_COLOUR(0,tile_clut_prom[pel]));
 			  		}
