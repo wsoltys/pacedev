@@ -83,28 +83,28 @@ begin
           end if;
         end if;
         -- attr_d(6) = Y FLIP
---        if attr_d_r(6) = '0' then
+        if attr_d_r(6) = '0' then
           ctl_o.tile_a(6 downto 3) <= y_adj(3 downto 0);
---        else
---          ctl_o.tile_a(6 downto 3) <= not y_adj(3 downto 0);
---        end if;
-        -- attr_d(7) = X FLIP
---        if attr_d_r(7) = '0' then
+        else
+          ctl_o.tile_a(6 downto 3) <= not y_adj(3 downto 0);
+        end if;
+        -- attr_d(5) = X FLIP
+        if attr_d_r(5) = '0' then
           ctl_o.tile_a(2 downto 0) <= std_logic_vector(x_adj(3 downto 1));
---        else
---          ctl_o.tile_a(2 downto 0) <= not std_logic_vector(x_adj(3 downto 1));
---        end if;
+        else
+          ctl_o.tile_a(2 downto 0) <= not std_logic_vector(x_adj(3 downto 1));
+        end if;
         
         if stb = '1' then
           -- latch every 2nd pixel
           if x_adj(0) = '0' then
             -- select tile bank
-            -- attr_d(7) = X FLIP
---            if attr_d_r(7) = '0' then
+            -- attr_d(5) = X FLIP
+            if attr_d_r(5) = '0' then
               tile_d_r := ctl_i.tile_d(7 downto 0);
---            else
---              tile_d_r := ctl_i.tile_d(3 downto 0) & ctl_i.tile_d(7 downto 4);
---            end if;
+            else
+              tile_d_r := ctl_i.tile_d(3 downto 0) & ctl_i.tile_d(7 downto 4);
+            end if;
           else
             tile_d_r := "0000" & tile_d_r(7 downto 4);
           end if;
