@@ -97,8 +97,12 @@ begin
         ctl_o.rgb.r <= pal_entry(0) & "0000";
         ctl_o.rgb.g <= pal_entry(1) & "0000";
         ctl_o.rgb.b <= pal_entry(2) & "0000";
-        -- this is a fudge
-        ctl_o.set <= '1';
+        -- transparency
+        if pel_i = 0 then
+          ctl_o.set <= '0';
+        else
+          ctl_o.set <= '1';
+        end if;
 
       end if; -- clk_ena
 		end if;
