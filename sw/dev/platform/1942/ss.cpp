@@ -535,13 +535,14 @@ void main (int argc, char *argv[])
 		{
 			int addr = (x+2)*32+(31-y);
 			int t = mem[VRAM_BASE+addr];
+			int a = mem[VRAM_BASE+0x400+addr];
     	int tile_addr = t*16;
     	for (int ty=0; ty<8; ty++)
     		for (int tx=0; tx<8; tx++)
     		{
 					BYTE pel = chr_rot90[tile_addr+ty*2+(tx>>2)];
 					pel = pel >> (((7-tx)<<1)&0x6) & 0x03;
-					putpixel (screen, x*8+tx, y*8+ty, CHAR_COLOUR(char_clut_prom[pel]));
+					putpixel (screen, x*8+tx, y*8+ty, CHAR_COLOUR(char_clut_prom[(a&0x3f)*4+pel]));
     		}
 		}
 	}
