@@ -47,7 +47,7 @@ begin
     variable attr_i     : integer;
 		variable pal_i      : integer range 0 to 127;
 		variable pel        : std_logic_vector(2 downto 0);
-		variable pal_entry  : pal_entry_typ;
+		variable pal_entry  : palette_entry_t;
 
 		variable x_adj		  : unsigned(x'range);
     variable y_adj      : std_logic_vector(y'range);

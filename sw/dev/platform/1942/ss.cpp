@@ -348,7 +348,27 @@ void main (int argc, char *argv[])
 	fwrite (sprite_rot90, NUM_SPRITES*128, 1, fp);
 	fclose (fp);
 
-	
+  FILE *fpclut = fopen (SUBDIR "clut.txt", "wt");
+	for (i=0; i<256; i+=4)
+	{
+		if (char_clut_prom[i+0] != 0x0F ||
+				char_clut_prom[i+1] != 0x0F ||
+				char_clut_prom[i+2] != 0x0F ||
+				char_clut_prom[i+3] != 0x0F)
+		{
+				fprintf (fpclut, "%2d => (", i/4);
+				for (int j=0; j<4; j++)
+					fprintf (fpclut, "%d=>X\"%01X\"%s", 
+										j, char_clut_prom[i+j], 
+										(j<3 ? ", " : ""));
+			fprintf (fpclut, "),\n");
+		}
+	}  
+	fprintf (fpclut, "others => (others => X\"F\")\n");
+  fclose (fpclut);
+  
+	exit (0);
+		
 	allegro_init ();
 	install_keyboard ();
 

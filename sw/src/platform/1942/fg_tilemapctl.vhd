@@ -42,14 +42,16 @@ begin
   -- generate pixel
   process (clk, clk_ena)
 
-    variable attr_i     : std_logic_vector(5 downto 0);
-		variable pal_i      : integer range 0 to 127;
-		variable pel        : std_logic_vector(1 downto 0);
-		variable pal_entry  : pal_entry_typ;
-
 		variable x_adj		  : unsigned(x'range);
     variable tile_d_r   : std_logic_vector(ctl_i.tile_d'range);
 		variable attr_d_r	  : std_logic_vector(7 downto 0);
+    variable pel        : std_logic_vector(1 downto 0);
+
+    variable clut_i     : integer range 0 to 63;
+    variable clut_entry : clut_entry_t;
+    variable pel_i      : integer range 0 to 3;
+    variable pal_i      : integer range 0 to 255;
+    variable pal_entry  : palette_entry_t;
 
   begin
 
@@ -85,16 +87,18 @@ begin
           end if;
         end if;
         pel := tile_d_r(7 downto 6);
-        
+
         -- extract R,G,B from colour palette
-        attr_i := attr_d_r(3 downto 0) & pel; -- made this shit up
-        pal_i := 128 + to_integer(unsigned(attr_i)); -- this too
+        clut_i := to_integer(unsigned(attr_d_r(4 downto 0)));
+        clut_entry := fg_clut(clut_i);
+        pel_i := to_integer(unsigned(pel));
+        pal_i := 128 + to_integer(unsigned(clut_entry(pel_i)));
         pal_entry := pal(pal_i);
         ctl_o.rgb.r <= pal_entry(0) & "0000";
         ctl_o.rgb.g <= pal_entry(1) & "0000";
         ctl_o.rgb.b <= pal_entry(2) & "0000";
         -- this is a fudge
-        ctl_o.set <= '0';
+        ctl_o.set <= '1';
 
       end if; -- clk_ena
 		end if;
