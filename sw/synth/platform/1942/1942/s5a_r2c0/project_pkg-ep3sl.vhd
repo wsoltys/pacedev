@@ -21,8 +21,8 @@ package project_pkg is
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
 
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
-  constant PACE_CLK0_DIVIDE_BY              : natural := 6;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 5;   -- 24*5/4 = 20MHz
+  constant PACE_CLK0_DIVIDE_BY              : natural := 3;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 8;   -- 24*8/3 = 64MHz
   constant PACE_CLK1_DIVIDE_BY        		  : natural := 3;
   constant PACE_CLK1_MULTIPLY_BY      		  : natural := 5;  	-- 24*5/3 = 40MHz
 	constant PACE_VIDEO_H_SCALE         		  : integer := 2;
@@ -63,7 +63,7 @@ package project_pkg is
   constant S5AR2_DOUBLE_VDO_IDCK            : boolean := false;
 
   -- always need SRAM (for now, use for WRAM)
-  constant S5AR2_EMULATE_SRAM               : boolean := true;
+  constant S5AR2_EMULATE_SRAM               : boolean := false;
   -- $9800-$BFFF (so $8000-$BFFF)
   constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 14;
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;

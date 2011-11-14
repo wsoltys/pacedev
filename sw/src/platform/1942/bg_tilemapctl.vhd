@@ -44,16 +44,18 @@ begin
   -- generate pixel
   process (clk)
 
-    variable attr_i     : integer;
-		variable pal_i      : integer range 0 to 127;
-		variable pel        : std_logic_vector(2 downto 0);
-		variable pal_entry  : palette_entry_t;
-
 		variable x_adj		  : unsigned(x'range);
     variable y_adj      : std_logic_vector(y'range);
   
     variable tile_d_r   : std_logic_vector(ctl_i.tile_d'range);
 		variable attr_d_r	  : std_logic_vector(7 downto 0);
+    variable pel        : std_logic_vector(2 downto 0);
+
+    variable clut_i     : integer range 0 to 63;
+    variable clut_entry : bg_clut_entry_t;
+    variable pel_i      : integer range 0 to 7;
+    variable pal_i      : integer range 0 to 255;
+    variable pal_entry  : palette_entry_t;
 
   begin
 
@@ -113,11 +115,10 @@ begin
         -- we expanded 3BPP data
         pel := tile_d_r(2 downto 0);
         
-        -- extract R,G,B from colour palette
-        --attr_i := attr_d_r(1 downto 0) & tile_d_r(7) & attr_d_r(5 downto 2);
-        --attr_i := attr_d_r(1 downto 0) & tile_d_r(7) & attr_d_r(5 downto 4) & pel;
-        attr_i := to_integer(unsigned(pel));
-        pal_i := attr_i;
+        clut_i := to_integer(unsigned(attr_d_r(4 downto 0)));
+        clut_entry := bg_clut(clut_i);
+        pel_i := to_integer(unsigned(pel));
+        pal_i := to_integer(unsigned(clut_entry(pel_i)));
         pal_entry := pal(pal_i);
         ctl_o.rgb.r <= pal_entry(0) & "0000";
         ctl_o.rgb.g <= pal_entry(1) & "0000";

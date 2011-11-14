@@ -48,7 +48,7 @@ begin
     variable pel        : std_logic_vector(1 downto 0);
 
     variable clut_i     : integer range 0 to 63;
-    variable clut_entry : clut_entry_t;
+    variable clut_entry : fg_clut_entry_t;
     variable pel_i      : integer range 0 to 3;
     variable pal_i      : integer range 0 to 255;
     variable pal_entry  : palette_entry_t;

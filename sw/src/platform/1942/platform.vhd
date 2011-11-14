@@ -101,8 +101,6 @@ architecture SYN of platform is
   signal main_intvec    : std_logic_vector(7 downto 0);
   signal main_intack    : std_logic;
   signal main_nmi       : std_logic;
-  signal main_intena    : std_logic;
-  signal main_int       : std_logic;
 
   -- sub cpu signals
   signal sub_rst        : std_logic;
@@ -121,23 +119,6 @@ architecture SYN of platform is
   signal sub_intena     : std_logic;
   signal sub_int        : std_logic;
 
-  -- sub2 cpu signals
-  signal sub2_rst       : std_logic;
-  signal sub2_en        : std_logic;
-  signal sub2_a         : std_logic_vector(15 downto 0);
-  signal sub2_d_i       : std_logic_vector(7 downto 0);
-  signal sub2_d_o       : std_logic_vector(7 downto 0);
-  signal sub2_memrd     : std_logic;
-  signal sub2_memwr     : std_logic;
-  signal sub2_iord      : std_logic;
-  signal sub2_iowr      : std_logic;
-  signal sub2_intreq    : std_logic;
-  signal sub2_intvec    : std_logic_vector(7 downto 0);
-  signal sub2_intack    : std_logic;
-  signal sub2_nmireq    : std_logic;
-  signal sub2_nmiena    : std_logic;
-  signal sub2_nmi       : std_logic;
-
   -- muxed cpu signals
   signal cpu_a          : std_logic_vector(15 downto 0);
   signal cpu_d_o        : std_logic_vector(7 downto 0);
@@ -155,61 +136,41 @@ architecture SYN of platform is
   signal mainrom_d_o    : std_logic_vector(7 downto 0);
   signal subrom_cs      : std_logic;
   signal subrom_d_o     : std_logic_vector(7 downto 0);
-  signal sub2rom_cs     : std_logic;
-  signal sub2rom_d_o    : std_logic_vector(7 downto 0);
 
-  -- latches
-  signal bosco_latch_cs   : std_logic;
-  signal bosco_dsw_cs     : std_logic;
-  signal bosco_dswa       : std_logic_vector(7 downto 0);
-  signal bosco_dswb       : std_logic_vector(7 downto 0);
-  signal bosco_dsw_d_o    : std_logic_vector(1 downto 0);
-  
-  signal vh_latch_cs      : std_logic;
-  
-  -- NAMCO custom signals
-  signal namco_06xx_cs_n  : std_logic;
-  signal namco_06xx_r_wn  : std_logic;
-  signal namco_06xx_sd_o  : std_logic_vector(7 downto 0);
-  
-  -- RAM signals
-  
-  signal ram1_cs        : std_logic;
-  signal ram1_we        : std_logic;
-  signal ram1_d_o       : std_logic_vector(7 downto 0);
-  signal ram2_cs        : std_logic;
-  signal ram2_we        : std_logic;
-  signal ram2_d_o       : std_logic_vector(7 downto 0);
-  signal ram3_cs        : std_logic;
-  signal ram3_we        : std_logic;
-  signal ram3_d_o       : std_logic_vector(7 downto 0);
-  signal ram4_cs        : std_logic;
-  signal ram4_we        : std_logic;
-  signal ram4_d_o       : std_logic_vector(7 downto 0);
-  
   -- VRAM signals (names from MAME driver)
   
+  -- latches
+  signal inputs_cs      : std_logic;
+  signal inputs_d_o     : std_logic_vector(7 downto 0);
+  signal scroll_cs      : std_logic;
+  
   -- foreground attribute ram
-  signal rampf0_cs      : std_logic;
-  signal rampf0_we      : std_logic;
-  signal rampf0_d_o     : std_logic_vector(7 downto 0);
+  signal vram_cs        : std_logic;
+  signal vram_we        : std_logic;
+  signal vram_d_o       : std_logic_vector(7 downto 0);
   -- background attribute ram
-  signal rampf1_cs      : std_logic;
-  signal rampf1_we      : std_logic;
-  signal rampf1_d_o     : std_logic_vector(7 downto 0);
+  signal cram_cs        : std_logic;
+  signal cram_we        : std_logic;
+  signal cram_d_o       : std_logic_vector(7 downto 0);
   -- foreground tilecode ram
-  signal rampf2_cs      : std_logic;
-  signal rampf2_we      : std_logic;
-  signal rampf2_d_o     : std_logic_vector(7 downto 0);
+  signal bgram_t_cs     : std_logic;
+  signal bgram_t_we     : std_logic;
+  signal bgram_t_d_o    : std_logic_vector(7 downto 0);
   -- background tilecode ram
-  signal rampf3_cs      : std_logic;
-  signal rampf3_we      : std_logic;
-  signal rampf3_d_o     : std_logic_vector(7 downto 0);
+  signal bgram_a_cs     : std_logic;
+  signal bgram_a_we     : std_logic;
+  signal bgram_a_d_o    : std_logic_vector(7 downto 0);
                         
+  -- RAM signals
+  
+  signal wram_cs        : std_logic;
+  signal wram_we        : std_logic;
+  signal wram_d_o       : std_logic_vector(7 downto 0);
+  
 	-- IO signals
-	alias game_reset			: std_logic is inputs_i(2).d(0);
-	alias osd_toggle      : std_logic is inputs_i(2).d(1);
-  alias game_pause      : std_logic is inputs_i(2).d(2);
+	alias game_reset			: std_logic is inputs_i(PACE_INPUTS_NUM_BYTES-1).d(0);
+	alias osd_toggle      : std_logic is inputs_i(PACE_INPUTS_NUM_BYTES-1).d(1);
+  alias game_pause      : std_logic is inputs_i(PACE_INPUTS_NUM_BYTES-1).d(2);
   
   -- other signals      
 	signal cpu_reset			: std_logic;
@@ -219,7 +180,6 @@ architecture SYN of platform is
   alias cpu_cyc   : std_logic_vector(1 downto 0) is cnt_sys(1 downto 0);
   constant MAIN_CPU : std_logic_vector(cpu_sel'range) := "00";
   constant SUB_CPU  : std_logic_vector(cpu_sel'range) := "01";
-  constant SUB2_CPU : std_logic_vector(cpu_sel'range) := "10";
 
   -- purely for debugging (comment-out CPUs)
   signal clk_cpu    : std_logic;
@@ -227,28 +187,25 @@ architecture SYN of platform is
 begin
 
   -- for debugging
-  clk_cpu <= clk_sys and not game_pause;
-  
+  clk_cpu <= clk_sys;  
   cpu_reset <= rst_sys or game_reset;
 	
   -- clocking
-  -- system clock: 49.152MHz
-  -- cpu clocks = 3.072MHz
+  -- system clock: 64MHz
+  -- cpu clocks = 4MHz
   process (clk_sys, rst_sys)
   begin
     if rst_sys = '1' then
       main_en <= '0';
       sub_en <= '0';
-      sub2_en <= '0';
       cnt_sys <= (others => '0');
     elsif rising_edge(clk_sys) then
       main_en <= '0';   -- default
       sub_en <= '0';    -- default
-      sub2_en <= '0';   -- default
       if cpu_cyc = "00" then
         case cpu_sel is
           when MAIN_CPU =>
-            main_en <= '1';
+            main_en <= '1' and not game_pause;
             cpu_a <= main_a;
             cpu_d_o <= main_d_o;
             cpu_memrd <= main_memrd;
@@ -256,21 +213,13 @@ begin
             cpu_iord <= main_iord;
             cpu_iowr <= main_iowr;
           when SUB_CPU =>
-            sub_en <= '1';
+            sub_en <= '1' and not game_pause;
             cpu_a <= sub_a;
             cpu_d_o <= sub_d_o;
             cpu_memrd <= sub_memrd;
             cpu_memwr <= sub_memwr;
             cpu_iord <= sub_iord;
             cpu_iowr <= sub_iowr;
-          when SUB2_CPU =>
-            sub2_en <= '1';
-            cpu_a <= sub2_a;
-            cpu_d_o <= sub2_d_o;
-            cpu_memrd <= sub2_memrd;
-            cpu_memwr <= sub2_memwr;
-            cpu_iord <= sub2_iord;
-            cpu_iowr <= sub2_iowr;
           when others =>
         end case;
       end if;
@@ -279,86 +228,57 @@ begin
   end process;
 
 	-- chip selects
-	-- MAINROM $0000-$3FFF
-	mainrom_cs      <= '1' when STD_MATCH(main_a, "00--------------") else '0';
+	-- MAINROM $0000-$BFFF
+	mainrom_cs      <= '0' when STD_MATCH(main_a, "11--------------") else '1';
 	-- SUBROM $0000-$1FFF
 	subrom_cs       <= '1' when STD_MATCH(sub_a,  "000-------------") else '0';
-	-- SUB2ROM $0000-$0FFF
-	sub2rom_cs      <= '1' when STD_MATCH(sub2_a, "0000------------") else '0';
-  -- BOSCO DSW $6800-$6807
-  bosco_dsw_cs    <= '1' when STD_MATCH(cpu_a,  "0110100000000---") else '0';
-  -- BOSCO_LATCHES $6820-$6827
-  bosco_latch_cs  <= '1' when STD_MATCH(cpu_a,  "0110100000100---") else '0';
-  -- NAMCO 06XX ($7000,$7100)
-  namco_06xx_cs_n <= '0' when STD_MATCH(main_a, "0111000-00000000") else '1';
-	-- WRAM1 $7800-$7FFF
-	ram1_cs         <= '1' when STD_MATCH(cpu_a,  "01111-----------") else '0';
-	-- WRAM2 $8000-$87FF
-	ram2_cs         <= '1' when STD_MATCH(cpu_a,  "10000-----------") else '0';
-	-- WRAM3 $9000-$97FF
-	ram3_cs         <= '1' when STD_MATCH(cpu_a,  "10010-----------") else '0';
-	-- WRAM4 $A000-$A7FF
-	ram4_cs         <= '1' when STD_MATCH(cpu_a,  "10100-----------") else '0';
-  -- RAMPF0 $B000-$B7FF (foreground attribute)
-  rampf0_cs       <= '1' when STD_MATCH(cpu_a,  "10110-----------") else '0';
-  -- RAMPF1 $B800-$BFFF (background attribute)
-  rampf1_cs       <= '1' when STD_MATCH(cpu_a,  "10111-----------") else '0';
-  -- RAMPF2 $C000-$C7FF (foreground tile code )
-  rampf2_cs       <= '1' when STD_MATCH(cpu_a,  "11000-----------") else '0';
-  -- RAMPF3 $C800-$C8FF (background tile code )
-  rampf3_cs       <= '1' when STD_MATCH(cpu_a,  "11001-----------") else '0';
-  -- VH_LATCH $D000-$D07F
-  vh_latch_cs     <= '1' when STD_MATCH(cpu_a,  "110100000-------") else '0';
+  -- INPUTS $C000-$C004
+  inputs_cs       <= '1' when STD_MATCH(cpu_a,       X"C00"&"0---") else '0';
+  -- SCROLL $C802-$C803
+  scroll_cs       <= '1' when STD_MATCH(cpu_a,       X"C80"&"001-") else '0';
+  -- VRAM $D000-$D3FF (foreground tile code)
+  vram_cs         <= '1' when STD_MATCH(cpu_a, X"D"&"00----------") else '0';
+  -- CRAM $D400-$D7FF (background attribute)
+  cram_cs         <= '1' when STD_MATCH(cpu_a, X"D"&"01----------") else '0';
+  -- BGRAM_T $D800-$DBFF (background tile code)
+  bgram_t_cs      <= '1' when STD_MATCH(cpu_a, X"D"&"10-----0----") else '0';
+  -- BGRAM_A $D800-$DBFF (background attr)
+  bgram_a_cs      <= '1' when STD_MATCH(cpu_a, X"D"&"10-----1----") else '0';
+	-- WRAM1 $E000-$EFFF
+	wram_cs         <= '1' when STD_MATCH(cpu_a, X"E"&"------------") else '0';
   
   -- write-enables, pulse for 1 clock only
   process (clk_sys, rst_sys)
   begin
     if rst_sys = '1' then
-      namco_06xx_r_wn <= '1';
-      ram1_we <= '0';
-      ram2_we <= '0';
-      ram3_we <= '0';
-      ram4_we <= '0';
-      rampf0_we <= '0';
-      rampf1_we <= '0';
-      rampf2_we <= '0';
-      rampf3_we <= '0';
+      vram_we <= '0';
+      cram_we <= '0';
+      bgram_t_we <= '0';
+      bgram_a_we <= '0';
+      wram_we <= '0';
     elsif rising_edge(clk_sys) then
-      namco_06xx_r_wn <= '1';
-      ram1_we <= '0';
-      ram2_we <= '0';
-      ram3_we <= '0';
-      ram4_we <= '0';
-      rampf0_we <= '0';
-      rampf1_we <= '0';
-      rampf2_we <= '0';
-      rampf3_we <= '0';
+      vram_we <= '0';
+      cram_we <= '0';
+      bgram_t_we <= '0';
+      bgram_a_we <= '0';
+      wram_we <= '0';
       if cpu_cyc = "10" and cpu_memwr = '1' then
-        namco_06xx_r_wn <= namco_06xx_cs_n;
-        ram1_we <= ram1_cs;
-        ram2_we <= ram2_cs;
-        ram3_we <= ram3_cs;
-        ram4_we <= ram4_cs;
-        rampf0_we <= rampf0_cs;
-        rampf1_we <= rampf1_cs;
-        rampf2_we <= rampf2_cs;
-        rampf3_we <= rampf3_cs;
+        vram_we <= vram_cs;
+        cram_we <= cram_cs;
+        bgram_t_we <= bgram_t_cs;
+        bgram_a_we <= bgram_a_cs;
+        wram_we <= wram_cs;
       end if;
     end if;
   end process;
 
   -- muxed data signals
-  mem_d_o <=  std_logic_vector(resize(unsigned(bosco_dsw_d_o),mem_d_o'length)) 
-                when bosco_dsw_cs = '1' else
-              namco_06xx_sd_o when namco_06xx_cs_n = '0' else
-              ram1_d_o when ram1_cs = '1' else
-              ram2_d_o when ram2_cs = '1' else
-              ram3_d_o when ram3_cs = '1' else
-              ram4_d_o when ram4_cs = '1' else
-              rampf0_d_o when rampf0_cs = '1' else
-              rampf1_d_o when rampf1_cs = '1' else
-              rampf2_d_o when rampf2_cs = '1' else
-              rampf3_d_o when rampf3_cs = '1' else
+  mem_d_o <=  inputs_d_o when inputs_cs = '1' else
+              vram_d_o when vram_cs = '1' else
+              cram_d_o when cram_cs = '1' else
+              bgram_t_d_o when bgram_t_cs = '1' else
+              bgram_a_d_o when bgram_a_cs = '1' else
+              wram_d_o when wram_cs = '1' else
               X"FF";
               
   io_d_o <= X"FF";
@@ -368,7 +288,7 @@ begin
     main_cpu_inst : entity work.Z80                                                
       port map
       (
-        clk			=> '0', --clk_cpu,
+        clk			=> clk_cpu,
         clk_en	=> main_en,
         reset  	=> cpu_reset,                                     
 
@@ -381,21 +301,40 @@ begin
         io_rd  	=> main_iord,
         io_wr  	=> main_iowr,
 
-        intreq 	=> main_int,
+        intreq 	=> main_intreq,
         intvec 	=> main_intvec,
         intack 	=> main_intack,
         nmi    	=> main_nmi
       );
 
-    -- irq enable via bosco_latch
-    main_int <= main_intreq and main_intena;
-    main_intvec <= (others => '0');
-
     BLK_MAINROM : block
       type d_a is array (natural range <>) of std_logic_vector(7 downto 0);
-      signal srb_d_o  : d_a(3 to 7);
+      signal srb_d_o          : d_a(3 to 7);
+      signal mainrom_bank_r   : std_logic_vector(1 downto 0);
     begin
 
+      process (clk_sys, rst_sys)
+      begin
+        if rst_sys = '1' then
+          mainrom_bank_r <= (others => '0');
+        elsif rising_edge(clk_sys) then
+          if cpu_sel = MAIN_CPU and cpu_cyc = "11" then
+            if STD_MATCH(cpu_a, X"C806") and main_memwr = '1' then
+              mainrom_bank_r <= cpu_d_o(mainrom_bank_r'range);
+            end if;
+          end if;
+        end if;
+      end process;
+      
+      -- $0000-$3FFF, $4000-$7FFF, $8000-$8FFF (banked)
+      mainrom_d_o <=  srb_d_o(3) when STD_MATCH(cpu_a, "00--------------") else
+                      srb_d_o(4) when STD_MATCH(cpu_a, "01--------------") else
+                      srb_d_o(5) when (STD_MATCH(cpu_a, "10--------------") and 
+                        mainrom_bank_r = "00") else
+                      srb_d_o(6) when (STD_MATCH(cpu_a, "10--------------") and 
+                        mainrom_bank_r = "01") else
+                      srb_d_o(7);
+                      
       GEN_MAINROM : for i in 3 to 7 generate
       begin
         main_rom_inst : entity work.sprom
@@ -443,18 +382,46 @@ begin
       end if;
     end process;
     
-    main_vbl_irq_inst : entity work.vbl_gen
-      port map
-      (
-        clk     => clk_sys,
-        clk_en  => main_en,
-        rst     => rst_sys,
-        
-        vbl     => graphics_i.vblank,
-        irq     => main_intreq,
-        ack     => main_intack
-      );
-
+    -- generate interrupts
+    -- - scanlines 0 and 240
+    process (clk_sys, rst_sys)
+      subtype count_t is integer range 0 to 255;
+      type count_a is array (natural range <>) of count_t;
+      variable count_r : count_a(4 downto 0);
+      alias count_prev  : count_t is count_r(count_r'left);
+      alias count_um    : count_t is count_r(count_r'left-1);
+    begin
+      if rst_sys = '1' then
+        count_r := (others => 0);
+        main_intvec <= (others => '0');
+        main_intreq <= '0';
+        main_nmi <= '0';
+      elsif rising_edge(clk_sys) then
+        -- handle ACK
+        if main_intack = '1' then
+          main_intreq <= '0';
+        end if;
+        -- generate interrupt (priority)
+        if count_prev /= count_um then
+          case count_um is
+            when 0 =>
+              -- RST8
+              main_intvec <= X"CF";
+              main_intreq <= '1';
+            when 240 =>
+              -- RST10
+              main_intvec <= X"D7";
+              main_intreq <= '1';
+            when others =>
+              null;
+          end case;
+        end if; -- count_prev /= count_um
+        -- unmeta the video counter
+        count_r(count_r'left-1 downto 1) := count_r(count_r'left-2 downto 0);
+        count_r(0) := to_integer(unsigned(graphics_i.y(7 downto 0)));
+      end if;
+    end process;
+    
   end generate GEN_MAIN_CPU;
   
   GEN_AUDIO_CPU : if CAPCOM_1942_HAS_AUDIO_CPU generate
@@ -481,7 +448,6 @@ begin
         nmi    	=> sub_nmi
       );
 
-    -- irq enable via bosco_latch
     sub_int <= sub_intreq and sub_intena;
     sub_intvec <= (others => '0');
     sub_nmi <= '0';
@@ -521,64 +487,36 @@ begin
       end if;
     end process;
 
-    sub_vbl_irq_inst : entity work.vbl_gen
-      port map
-      (
-        clk     => clk_sys,
-        clk_en  => sub_en,
-        rst     => rst_sys,
-        
-        vbl     => graphics_i.vblank,
-        irq     => sub_intreq,
-        ack     => sub_intack
-      );
-
+  else generate
+    sub_memrd <= '0';
+    sub_memwr <= '0';
+    sub_iord <= '0';
+    sub_iowr <= '0';
   end generate GEN_AUDIO_CPU;
 
-  -- bosco dipswitches
+  -- dipswitches and inputs
   process (clk_sys, rst_sys)
     variable i  : integer range 0 to 7;
   begin
     if rst_sys = '1' then
-      -- upright, 3 lives, bonus life 10K,40K,every 40K, Coin1 1C1C
-      bosco_dswa <= X"80" or X"60" or X"18" or X"03";
-      -- freeze off, easy, Coin2 1C1C, flags bonus life
-      bosco_dswb <= X"80" or X"40" or X"0C" or X"02";
+      null;
     elsif rising_edge(clk_sys) then
-      i := to_integer(unsigned(cpu_a(2 downto 0)));
-      bosco_dsw_d_o <= bosco_dswa(i) & bosco_dswb(i);
-    end if;
-  end process;
-  
-  -- bosco latches
-  process (clk_sys, rst_sys)
-  begin
-    if rst_sys = '1' then
-      main_intena <= '0';
-      sub_intena <= '0';
-      sub2_nmiena <= '0';
-      sub_rst <= '0';
-      sub2_rst <= '0';
-    elsif rising_edge(clk_sys) then
-      if main_en = '1' or sub_en = '1' or sub2_en = '1' then
-        if bosco_latch_cs = '1' and cpu_memwr = '1' then
-          case cpu_a(2 downto 0) is
-            when "000" =>
-              main_intena <= cpu_d_o(0);
-              -- clear int when (0)=0
-            when "001" =>
-              sub_intena <= cpu_d_o(0);
-              -- clear int when (0)=0
-            when "010" =>
-              sub2_nmiena <= not cpu_d_o(0);
-            when "011" =>
-              sub_rst <= not cpu_d_o(0);
-              sub2_rst <= not cpu_d_o(0);
-            when others =>
-              null;
-          end case;
-        end if; -- bosco_latches_cs, cpu_mem_wr
-      end if; -- main_en, sub_en, sub2_en
+      case cpu_a(3 downto 0) is
+        when X"0" =>
+          inputs_d_o <= inputs_i(0).d;
+        when X"1" =>
+          inputs_d_o <= inputs_i(1).d;
+        when X"2" =>
+          inputs_d_o <= inputs_i(2).d;
+        when X"3" =>
+          -- 3 lives, 20K/80K/80K+, Upright, 1C1C
+          inputs_d_o <= X"C0" or X"30" or X"00" or X"07";
+        when X"4" =>
+          -- screen stop off, easy, flip screen off, 1C1C
+          inputs_d_o <= X"80" or X"40" or X"10" or X"07";
+        when others =>
+          null;
+      end case;
     end if;
   end process;
   
@@ -591,28 +529,17 @@ begin
       graphics_o.bit16 <= (others => (others => '0'));
     elsif rising_edge(clk_sys) then
       scroll := cpu_a(0) & cpu_d_o;
-      if main_en = '1' or sub_en = '1' or sub2_en = '1' then
-        if vh_latch_cs = '1' and cpu_memwr = '1' then
-          case cpu_a(7 downto 4) is
-            when "0000" =>
+      if main_en = '1' then
+        if scroll_cs = '1' and cpu_memwr = '1' then
+          case cpu_a(0) is
+            when '0' =>
               -- bg x scroll
-              graphics_o.bit16(0) <= std_logic_vector(resize(unsigned(scroll),16));
-            when "0001" =>
-              -- fg x scroll
-              graphics_o.bit16(1) <= std_logic_vector(resize(unsigned(scroll),16));
-            when "0010" =>
-              -- bg y scroll
-              graphics_o.bit16(2) <= std_logic_vector(resize(unsigned(scroll),16));
-            when "0011" =>
-              -- fg y scroll
-              graphics_o.bit16(3) <= std_logic_vector(resize(unsigned(scroll),16));
-            when "0111" =>
-              -- flip screen
+              graphics_o.bit16(0) <= (others => '0');
             when others =>
               null;
           end case;
-        end if; -- vh_latches_cs, cpu_mem_wr
-      end if; -- main_en, sub_en, sub2_en
+        end if; -- scroll_cs, cpu_mem_wr
+      end if; -- main_en
     end if;
   end process;
   
@@ -644,66 +571,6 @@ begin
       q				=> tilemap_o(2).tile_d
     );
     
-  -- WRAM1 $7800-$7FFF
-  ram1_inst : entity work.spram
-		generic map
-		(
-			widthad_a			=> 11
-		)
-    port map
-    (
-      clock				=> clk_sys,
-      address			=> cpu_a(10 downto 0),
-      data				=> cpu_d_o,
-      wren				=> ram1_we,
-      q						=> ram1_d_o
-    );
-
-  -- WRAM2 $8000-$87FF
-  ram2_inst : entity work.spram
-		generic map
-		(
-			widthad_a			=> 11
-		)
-    port map
-    (
-      clock				=> clk_sys,
-      address			=> cpu_a(10 downto 0),
-      data				=> cpu_d_o,
-      wren				=> ram2_we,
-      q						=> ram2_d_o
-    );
-
-  -- WRAM3 $9000-$97FF
-  ram3_inst : entity work.spram
-		generic map
-		(
-			widthad_a			=> 11
-		)
-    port map
-    (
-      clock				=> clk_sys,
-      address			=> cpu_a(10 downto 0),
-      data				=> cpu_d_o,
-      wren				=> ram3_we,
-      q						=> ram3_d_o
-    );
-
-  -- WRAM4 $A000-$A7FF
-  ram4_inst : entity work.spram
-  generic map
-  (
-    widthad_a			=> 11
-  )
-  port map
-  (
-    clock				=> clk_sys,
-    address			=> cpu_a(10 downto 0),
-    data				=> cpu_d_o,
-    wren				=> ram4_we,
-    q						=> ram4_d_o
-  );
-
   -- VRAM (foreground tile code) $D000-$D3FF
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 	vram_inst : entity work.dpram
@@ -717,9 +584,9 @@ begin
 			-- uP interface
 			clock_b			=> clk_sys,
 			address_b		=> cpu_a(9 downto 0),
-			wren_b			=> rampf2_we,
+			wren_b			=> vram_we,
 			data_b			=> cpu_d_o,
-			q_b					=> rampf2_d_o,
+			q_b					=> vram_d_o,
 			
 			-- graphics interface
 			clock_a			=> clk_vid,
@@ -743,9 +610,9 @@ begin
 			-- uP interface
 			clock_b			=> clk_sys,
 			address_b		=> cpu_a(9 downto 0),
-			wren_b			=> rampf0_we,
+			wren_b			=> cram_we,
 			data_b			=> cpu_d_o,
-			q_b					=> rampf0_d_o,
+			q_b					=> cram_d_o,
 			
 			-- graphics interface
 			clock_a			=> clk_vid,
@@ -771,10 +638,11 @@ begin
 		(
 			-- uP interface
 			clock_b			          => clk_sys,
-			address_b		          => cpu_a(8 downto 0),
-			wren_b			          => rampf3_we,
+			address_b(8 downto 4) => cpu_a(9 downto 5),
+			address_b(3 downto 0) => cpu_a(3 downto 0),
+			wren_b			          => bgram_t_we,
 			data_b			          => cpu_d_o,
-			q_b					          => rampf3_d_o,
+			q_b					          => bgram_t_d_o,
 			
 			-- graphics interface
 			clock_a			          => clk_vid,
@@ -797,10 +665,11 @@ begin
 		(
 			-- uP interface
 			clock_b			          => clk_sys,
-			address_b		          => cpu_a(8 downto 0),
-			wren_b			          => rampf3_we,
+			address_b(8 downto 4) => cpu_a(9 downto 5),
+			address_b(3 downto 0) => cpu_a(3 downto 0),
+			wren_b			          => bgram_a_we,
 			data_b			          => cpu_d_o,
-			q_b					          => open,
+			q_b					          => bgram_a_d_o,
 			
 			-- graphics interface
 			clock_a			          => clk_vid,
@@ -812,6 +681,21 @@ begin
 		);
   tilemap_o(2).attr_d(tilemap_o(2).attr_d'left downto 8) <= (others => '0');
   
+  -- WRAM1 $E000-$EFFF
+  wram_inst : entity work.spram
+		generic map
+		(
+			widthad_a			=> 12
+		)
+    port map
+    (
+      clock				=> clk_sys,
+      address			=> cpu_a(11 downto 0),
+      data				=> cpu_d_o,
+      wren				=> wram_we,
+      q						=> wram_d_o
+    );
+
   -- osd toggle (TAB)
   process (clk_sys, clkrst_i.arst)
     variable osd_key_r  : std_logic;
@@ -842,43 +726,3 @@ begin
 	leds_o <= (others => '0');
   
 end SYN;
-
-library IEEE;
-use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
-
-entity vbl_gen is
-  port
-  (
-    clk     : in std_logic;
-    clk_en  : in std_logic;
-    rst     : in std_logic;
-    
-    vbl     : in std_logic;
-    irq     : out std_logic;
-    ack     : in std_logic
-  );
-end entity vbl_gen;
-
-architecture SYN of vbl_gen is
-begin
-  -- vblank interrupt
-  process (clk, rst)
-    variable vbl_r : std_logic_vector(3 downto 0);
-    alias vbl_prev : std_logic is vbl_r(vbl_r'left);
-    alias vbl_um : std_logic is vbl_r(vbl_r'left-1);
-  begin
-    if rst = '1' then
-      irq <= '0';
-    elsif rising_edge(clk) then
-      if clk_en = '1' then
-        if vbl_prev = '0' and vbl_um = '1' then
-          irq <= '1';
-        elsif ack = '1' then
-          irq <= '0';
-        end if;
-        vbl_r := vbl_r(vbl_r'left-1 downto 0) & vbl;
-      end if;
-    end if;
-  end process;
- end architecture SYN;

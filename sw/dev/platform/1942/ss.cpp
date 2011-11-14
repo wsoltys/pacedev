@@ -83,7 +83,7 @@
 #define BGRAM_BASE            0xD800
 
 #define CHAR_COLOUR(i)        (128+i)
-#define TILE_COLOUR(b,i)      ((b)*16+i)
+#define TILE_COLOUR(b,i)      (b*0x20+i)
 #define SPRITE_COLOUR(i)      (64+i)
 
 // don't know if these are right???
@@ -365,10 +365,28 @@ void main (int argc, char *argv[])
 		}
 	}  
 	fprintf (fpclut, "others => (others => X\"F\")\n");
+	for (i=0; i<256; i+=8)
+	{
+		if (tile_clut_prom[i+0] != 0x0F ||
+				tile_clut_prom[i+1] != 0x0F ||
+				tile_clut_prom[i+2] != 0x0F ||
+				tile_clut_prom[i+3] != 0x0F ||
+				tile_clut_prom[i+4] != 0x0F ||
+				tile_clut_prom[i+5] != 0x0F ||
+				tile_clut_prom[i+6] != 0x0F ||
+				tile_clut_prom[i+7] != 0x0F)
+		{
+				fprintf (fpclut, "%2d => (", i/8);
+				for (int j=0; j<8; j++)
+					fprintf (fpclut, "%d=>X\"%01X\"%s", 
+										j, tile_clut_prom[i+j], 
+										(j<7 ? ", " : ""));
+			fprintf (fpclut, "),\n");
+		}
+	}  
+	fprintf (fpclut, "others => (others => X\"F\")\n");
   fclose (fpclut);
   
-	exit (0);
-		
 	allegro_init ();
 	install_keyboard ();
 
@@ -607,7 +625,7 @@ void main (int argc, char *argv[])
 									break;
 							}
 							pel = (pel >> (((tx^1)&1)<<2)) & 0x07;
-							putpixel (screen, x*16+tx, h*16+y*16+ty, TILE_COLOUR(0,tile_clut_prom[pel]));
+							putpixel (screen, x*16+tx, h*16+y*16+ty, TILE_COLOUR(0,tile_clut_prom[(a&0x1f)*8+pel]));
 			  		}
 				}
 			}

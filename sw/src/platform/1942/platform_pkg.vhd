@@ -20,7 +20,7 @@ package platform_pkg is
 	constant PACE_VIDEO_V_SIZE				    : integer := 256;
   constant PACE_VIDEO_PIPELINE_DELAY    : integer := 3;
 	
-  constant PACE_INPUTS_NUM_BYTES        : integer := 3;
+  constant PACE_INPUTS_NUM_BYTES        : integer := 4;
 
 	constant CLK0_FREQ_MHz		            : natural := 
     PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
@@ -147,10 +147,10 @@ package platform_pkg is
 	-- - each row has four (4) palette indexes
 	--   decoded from 2 bits of tile data
 	
-	type clut_entry_t is array (0 to 3) of std_logic_vector(3 downto 0);
-	type clut_entry_a is array (0 to 63) of clut_entry_t;
+	type fg_clut_entry_t is array (0 to 3) of std_logic_vector(3 downto 0);
+	type fg_clut_entry_a is array (0 to 63) of fg_clut_entry_t;
 
-	constant fg_clut : clut_entry_a :=
+	constant fg_clut : fg_clut_entry_a :=
 	(
      0 => (0=>X"F", 1=>X"1", 2=>X"2", 3=>X"3"),
      1 => (0=>X"F", 1=>X"2", 2=>X"3", 3=>X"4"),
@@ -207,6 +207,32 @@ package platform_pkg is
     others => (others => X"F")
 	);
 
+	type bg_clut_entry_t is array (0 to 7) of std_logic_vector(3 downto 0);
+	type bg_clut_entry_a is array (0 to 32) of bg_clut_entry_t;
+
+	constant bg_clut : bg_clut_entry_a :=
+	(
+     0 => (0=>X"0", 1=>X"1", 2=>X"2", 3=>X"3", 4=>X"4", 5=>X"5", 6=>X"8", 7=>X"A"),
+     1 => (0=>X"0", 1=>X"1", 2=>X"7", 3=>X"C", 4=>X"4", 5=>X"5", 6=>X"E", 7=>X"F"),
+     2 => (0=>X"0", 1=>X"1", 2=>X"2", 3=>X"3", 4=>X"4", 5=>X"5", 6=>X"6", 7=>X"A"),
+     3 => (0=>X"0", 1=>X"1", 2=>X"D", 3=>X"3", 4=>X"4", 5=>X"E", 6=>X"9", 7=>X"F"),
+     4 => (0=>X"0", 1=>X"1", 2=>X"A", 3=>X"3", 4=>X"4", 5=>X"5", 6=>X"6", 7=>X"8"),
+     5 => (0=>X"0", 1=>X"1", 2=>X"2", 3=>X"E", 4=>X"F", 5=>X"5", 6=>X"6", 7=>X"7"),
+     6 => (0=>X"0", 1=>X"1", 2=>X"8", 3=>X"3", 4=>X"B", 5=>X"E", 6=>X"6", 7=>X"F"),
+     7 => (0=>X"0", 1=>X"1", 2=>X"7", 3=>X"B", 4=>X"9", 5=>X"E", 6=>X"D", 7=>X"F"),
+     8 => (0=>X"0", 1=>X"1", 2=>X"F", 3=>X"C", 4=>X"4", 5=>X"5", 6=>X"6", 7=>X"7"),
+     9 => (0=>X"0", 1=>X"1", 2=>X"A", 3=>X"F", 4=>X"4", 5=>X"E", 6=>X"6", 7=>X"7"),
+    10 => (0=>X"0", 1=>X"1", 2=>X"2", 3=>X"3", 4=>X"4", 5=>X"5", 6=>X"6", 7=>X"9"),
+    11 => (0=>X"0", 1=>X"A", 2=>X"2", 3=>X"9", 4=>X"8", 5=>X"5", 6=>X"6", 7=>X"7"),
+    12 => (0=>X"0", 1=>X"8", 2=>X"A", 3=>X"3", 4=>X"4", 5=>X"5", 6=>X"D", 7=>X"B"),
+    13 => (0=>X"0", 1=>X"1", 2=>X"2", 3=>X"3", 4=>X"C", 5=>X"5", 6=>X"6", 7=>X"D"),
+    14 => (0=>X"0", 1=>X"1", 2=>X"2", 3=>X"3", 4=>X"5", 5=>X"8", 6=>X"9", 7=>X"A"),
+    15 => (0=>X"0", 1=>X"8", 2=>X"2", 3=>X"9", 4=>X"4", 5=>X"5", 6=>X"6", 7=>X"7"),
+    30 => (0=>X"0", 1=>X"1", 2=>X"2", 3=>X"3", 4=>X"4", 5=>X"5", 6=>X"6", 7=>X"7"),
+    31 => (0=>X"0", 1=>X"D", 2=>X"8", 3=>X"9", 4=>X"A", 5=>X"B", 6=>X"C", 7=>X"E"),
+    others => (others => X"F")
+	);
+  
   type from_PLATFORM_IO_t is record
     not_used  : std_logic;
   end record;
