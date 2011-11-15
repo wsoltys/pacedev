@@ -458,14 +458,14 @@ begin
     vram_wr <=  (others => (vram_cs and clk_1M5_en and not cpu_rw)) when blitting = '0' else
                 blitter_wr;
     
-  end generate GEN_BLITTER;
+  else generate
   
-  GEN_NO_BLITTER : if PLATFORM_VARIANT /= "junofrst" generate
     cpu_halt <= '0';
     vram_a <= cpu_a(vram_a'range);
     vram_d_i <= cpu_d_o;
     vram_wr <= (others => vram_cs and clk_1M5_en and not cpu_rw);
-  end generate GEN_NO_BLITTER;
+    
+  end generate GEN_BLITTER;
   
 	-- vblank interrupt at 30Hz
 	process (clk_30M, rst_30M)
@@ -518,7 +518,7 @@ begin
   ser_o <= NULL_TO_SERIAL;
 	leds_o <= (others => '0');
 
-  GEN_CPU09 : if not TUTANKHAM_USE_REAL_6809 generate
+  GEN_CPU : if not TUTANKHAM_USE_REAL_6809 generate
   begin
   
     clk_en_inst : entity work.clk_div
@@ -558,10 +558,7 @@ begin
 
     wram_data <= sram_i.d(7 downto 0);
 
-  end generate GEN_CPU09;
-  
-  GEN_REAL_6809 : if TUTANKHAM_USE_REAL_6809 generate
-  begin
+  else generate
 
     --platform_o.arst <= clkrst_i.arst;
     platform_o.arst <= rst_30M;
@@ -617,7 +614,7 @@ begin
     platform_o.cpu_6809_nmi_n <= not cpu_nmi;
     platform_o.cpu_6809_tsc <= '0';
     
-  end generate GEN_REAL_6809;
+  end generate GEN_CPU;
 
 	GEN_SRAM_ROMS : if TUTANKHAM_ROMS_IN_SRAM generate
 
