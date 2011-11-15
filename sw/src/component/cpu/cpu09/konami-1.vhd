@@ -66,7 +66,7 @@ begin
       rst				=> rst,
       rw				=> rw,
       vma				=> vma,
-      lic       => open,
+      lic_out   => open,
       ifetch    => open,
       opfetch   => opfetch,
       ba        => ba,

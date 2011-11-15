@@ -19,8 +19,8 @@ entity inputmapper is
 
     -- inputs from keyboard controller
     reset     : in std_logic;
-    press     : in std_logic;
-    release   : in std_logic;
+    key_down  : in std_logic;
+    key_up    : in std_logic;
     data      : in std_logic_vector(7 downto 0);
     -- inputs from jamma connector
     jamma			: in from_JAMMA_t;
@@ -48,46 +48,46 @@ begin
           pause <= '0';
         elsif rising_edge (clk) then
           -- map the dipswitches
-          if (press or release) = '1' then
+          if (key_down or key_up) = '1' then
           	case data(7 downto 0) is
             	-- IN0
               when SCANCODE_5 =>				-- coin1
-              	inputs(0).d(0) <= release;
+              	inputs(0).d(0) <= key_up;
               when SCANCODE_6 =>				-- coin2
-                inputs(0).d(1) <= release;
+                inputs(0).d(1) <= key_up;
               when SCANCODE_9 =>				-- service
-                inputs(0).d(2) <= release;
+                inputs(0).d(2) <= key_up;
               when SCANCODE_1 =>				-- start1
-                inputs(0).d(3) <= release;
+                inputs(0).d(3) <= key_up;
               when SCANCODE_2 =>				-- start2
-                inputs(0).d(4) <= release;
+                inputs(0).d(4) <= key_up;
               -- IN1
               when SCANCODE_LEFT =>			-- left
-                inputs(1).d(0) <= release;
+                inputs(1).d(0) <= key_up;
               when SCANCODE_RIGHT =>		-- right
-                inputs(1).d(1) <= release;
+                inputs(1).d(1) <= key_up;
               when SCANCODE_UP =>				-- up
-                inputs(1).d(2) <= release;
+                inputs(1).d(2) <= key_up;
               when SCANCODE_DOWN =>			-- down
-                inputs(1).d(3) <= release;
+                inputs(1).d(3) <= key_up;
               when SCANCODE_LCTRL =>		-- button1
-                inputs(1).d(4) <= release;
+                inputs(1).d(4) <= key_up;
               when SCANCODE_LALT =>			-- button2
-                inputs(1).d(5) <= release;
+                inputs(1).d(5) <= key_up;
               when SCANCODE_SPACE =>		-- button3
-                inputs(1).d(6) <= release;
+                inputs(1).d(6) <= key_up;
               -- IN2
 							-- T.B.D. (cocktail controls)
 							-- special keys
 							when SCANCODE_F3 =>				-- game reset
-								inputs(3).d(0) <= press;
+								inputs(3).d(0) <= key_down;
 							when SCANCODE_P =>				-- pause (toggle)
-                if press = '1' then
+                if key_down = '1' then
                   pause <= not pause;
                 end if;
               when others =>
             end case;
-          end if; -- press or release
+          end if; -- key_down or key_up
           if (reset = '1') then
 						for i in 0 to NUM_INPUTS-2 loop
 							inputs(i).d <= (others =>'1');
