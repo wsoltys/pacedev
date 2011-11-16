@@ -26,26 +26,29 @@ architecture TILEMAP_2 of tilemapCtl is
   alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
   alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
   
+  alias scroll    : std_logic_vector(15 downto 0) is graphics_i.bit16(0);
+
+  signal y_adj    : std_logic_vector(y'range);
+  
 begin
 
-  -- technically, this is actually scroll x
-  --y_adj <= std_logic_vector(unsigned(y) + unsigned(graphics_i.bit16(0)(10 downto 0)));
-  --y_adj <= std_logic_vector(unsigned(y) + 128+32);
-  
+  -- scroll register
+  y_adj <= std_logic_vector(to_unsigned(256,y'length) + unsigned(y) - unsigned(scroll(y'range)));
+  --y_adj <= std_logic_vector(unsigned(y) + unsigned(scroll(y'range)));
+    
 	-- these are constant for a whole line
-  ctl_o.map_a(ctl_o.map_a'left downto 9) <= (others => '0');
-  ctl_o.map_a(8 downto 4) <= not y(7 downto 4) & '0';
+  ctl_o.map_a(ctl_o.map_a'left downto 10) <= (others => '0');
+  ctl_o.map_a(9 downto 4) <= not y_adj(8 downto 4) & '0';
   ctl_o.tile_a(ctl_o.tile_a'left downto 16) <= (others => '0');
 
   -- generate attribute RAM address (next 16 bytes)
-  ctl_o.attr_a(ctl_o.map_a'left downto 9) <= (others => '0');
-  ctl_o.attr_a(8 downto 4) <= not y(7 downto 4) & '1';
+  ctl_o.attr_a(ctl_o.map_a'left downto 10) <= (others => '0');
+  ctl_o.attr_a(9 downto 4) <= not y_adj(8 downto 4) & '1';
   
   -- generate pixel
   process (clk)
 
 		variable x_adj		  : unsigned(x'range);
-    variable y_adj      : std_logic_vector(y'range);
   
     variable tile_d_r   : std_logic_vector(ctl_i.tile_d'range);
 		variable attr_d_r	  : std_logic_vector(7 downto 0);
@@ -59,8 +62,6 @@ begin
 
   begin
 
-    y_adj := y;
-    
   	if rising_edge(clk) then
       if clk_ena = '1' then
 

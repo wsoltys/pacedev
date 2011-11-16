@@ -2368,44 +2368,58 @@ set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[36] -t
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[37] -to "PACE:pace_inst|platform:platform_inst|Z80:\\GEN_MAIN_CPU:main_cpu_inst|reset" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=4096" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=4096" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[38] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[39] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[40] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[41] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[42] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[43] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[44] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[45] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[46] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[47] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[48] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[49] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[50] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[51] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[52] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[53] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[54] -to "PACE:pace_inst|platform:platform_inst|mainrom_cs" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[38] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[39] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[40] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[41] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[42] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[43] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[44] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[45] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[46] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[47] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[48] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[49] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[50] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[51] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[52] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[53] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[54] -to "PACE:pace_inst|platform:platform_inst|mainrom_cs" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=55" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=55" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=191" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=2830" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=54690" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[38] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:BLK_MAINROM:mainrom_bank_r[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[39] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:BLK_MAINROM:mainrom_bank_r[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[40] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[41] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[42] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[43] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[44] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[45] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[46] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[47] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[48] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[49] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[50] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[51] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[52] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[53] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[54] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[55] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[56] -to "PACE:pace_inst|platform:platform_inst|cnt_sys[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[57] -to "PACE:pace_inst|platform:platform_inst|cnt_sys[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[58] -to "PACE:pace_inst|platform:platform_inst|cnt_sys[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[59] -to "PACE:pace_inst|platform:platform_inst|cnt_sys[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[60] -to "PACE:pace_inst|platform:platform_inst|cpu_memwr" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[61] -to "PACE:pace_inst|platform:platform_inst|mainrom_cs" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[38] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:BLK_MAINROM:mainrom_bank_r[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[39] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:BLK_MAINROM:mainrom_bank_r[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[40] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[41] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[42] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[43] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[44] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[45] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[46] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[47] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[1][7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[48] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[49] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[50] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[51] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[52] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[53] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[54] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[55] -to "PACE:pace_inst|platform:platform_inst|\\GEN_MAIN_CPU:count_r[2][7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[56] -to "PACE:pace_inst|platform:platform_inst|cnt_sys[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[57] -to "PACE:pace_inst|platform:platform_inst|cnt_sys[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[58] -to "PACE:pace_inst|platform:platform_inst|cnt_sys[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[59] -to "PACE:pace_inst|platform:platform_inst|cnt_sys[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[60] -to "PACE:pace_inst|platform:platform_inst|cpu_memwr" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[61] -to "PACE:pace_inst|platform:platform_inst|mainrom_cs" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=62" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=62" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=212" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=56875" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=20705" -section_id auto_signaltap_0
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

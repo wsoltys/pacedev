@@ -319,7 +319,7 @@ begin
           mainrom_bank_r <= (others => '0');
         elsif rising_edge(clk_sys) then
           if cpu_sel = MAIN_CPU and cpu_cyc = "11" then
-            if STD_MATCH(cpu_a, X"C806") and main_memwr = '1' then
+            if STD_MATCH(cpu_a, X"C806") and cpu_memwr = '1' then
               mainrom_bank_r <= cpu_d_o(mainrom_bank_r'range);
             end if;
           end if;
@@ -327,11 +327,11 @@ begin
       end process;
       
       -- $0000-$3FFF, $4000-$7FFF, $8000-$8FFF (banked)
-      mainrom_d_o <=  srb_d_o(3) when STD_MATCH(cpu_a, "00--------------") else
-                      srb_d_o(4) when STD_MATCH(cpu_a, "01--------------") else
-                      srb_d_o(5) when (STD_MATCH(cpu_a, "10--------------") and 
+      mainrom_d_o <=  srb_d_o(3) when STD_MATCH(main_a, "00--------------") else
+                      srb_d_o(4) when STD_MATCH(main_a, "01--------------") else
+                      srb_d_o(5) when (STD_MATCH(main_a, "10--------------") and 
                         mainrom_bank_r = "00") else
-                      srb_d_o(6) when (STD_MATCH(cpu_a, "10--------------") and 
+                      srb_d_o(6) when (STD_MATCH(main_a, "10--------------") and 
                         mainrom_bank_r = "01") else
                       srb_d_o(7);
                       
@@ -509,11 +509,11 @@ begin
         when X"2" =>
           inputs_d_o <= inputs_i(2).d;
         when X"3" =>
-          -- 3 lives, 20K/80K/80K+, Upright, 1C1C
+          -- DSWA: 3 lives, 20K/80K/80K+, Upright, 1C1C
           inputs_d_o <= X"C0" or X"30" or X"00" or X"07";
         when X"4" =>
-          -- screen stop off, easy, flip screen off, 1C1C
-          inputs_d_o <= X"80" or X"40" or X"10" or X"07";
+          -- DSWB: screen stop off, easy, flip screen off, service off, 1C1C
+          inputs_d_o <= X"80" or X"40" or X"10" or X"08" or X"07";
         when others =>
           null;
       end case;
@@ -522,25 +522,22 @@ begin
   
   -- video hardware latches
   process (clk_sys, rst_sys)
-    variable scroll : std_logic_vector(8 downto 0) := (others => '0');
+    variable scroll : std_logic_vector(15 downto 0);
   begin
     if rst_sys = '1' then
       scroll := (others => '0');
-      graphics_o.bit16 <= (others => (others => '0'));
     elsif rising_edge(clk_sys) then
-      scroll := cpu_a(0) & cpu_d_o;
-      if main_en = '1' then
+      if cpu_sel = MAIN_CPU and cpu_cyc = "11" then
         if scroll_cs = '1' and cpu_memwr = '1' then
-          case cpu_a(0) is
-            when '0' =>
-              -- bg x scroll
-              graphics_o.bit16(0) <= (others => '0');
-            when others =>
-              null;
-          end case;
-        end if; -- scroll_cs, cpu_mem_wr
-      end if; -- main_en
+          if cpu_a(0) = '0' then
+            scroll(7 downto 0) := cpu_d_o;
+          else
+            scroll(15 downto 8) := cpu_d_o;
+          end if; -- cpu_a(0)
+        end if; -- scroll_cs & cpu_memwr
+      end if; -- sel_cpu_MAIN_CPU
     end if;
+    graphics_o.bit16(0) <= scroll;
   end process;
   
   -- GFX1 (foreground characters)
