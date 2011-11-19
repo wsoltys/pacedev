@@ -140,6 +140,7 @@ char *int2bin (int value, int bits)
 //#define SHOW_SPRITES
 #define SHOW_VRAM
 #define SHOW_BGRAM
+#define SHOW_SPRITERAM
 
 void main (int argc, char *argv[])
 {
@@ -565,33 +566,9 @@ void main (int argc, char *argv[])
   while (key[KEY_ESC]);	  
 #endif
 
-#ifdef SHOW_VRAM
-  clear_bitmap (screen);
-	for (int y=0; y<32; y++)
-	{
-		for (int x=0; x<28; x++)
-		{
-			int addr = (x+2)*32+(31-y);
-			int t = mem[VRAM_BASE+addr];
-			int a = mem[VRAM_BASE+0x400+addr];
-    	int tile_addr = t*16;
-    	for (int ty=0; ty<8; ty++)
-    		for (int tx=0; tx<8; tx++)
-    		{
-					BYTE pel = chr_rot90[tile_addr+ty*2+(tx>>2)];
-					pel = pel >> (((7-tx)<<1)&0x6) & 0x03;
-					putpixel (screen, x*8+tx, y*8+ty, CHAR_COLOUR(char_clut_prom[(a&0x3f)*4+pel]));
-    		}
-		}
-	}
-  //SS_TEXTOUT_CENTRE(screen, font, "CHAR RAM", SCREEN_W/2, SCREEN_H-8, 1);
-  while (!key[KEY_ESC]);	  
-  while (key[KEY_ESC]);	  
-#endif
-
 #ifdef SHOW_BGRAM
   clear_bitmap (screen);
-  while (!key[KEY_ESC])
+  //while (!key[KEY_ESC])
   {
   	for (int h=0; h<32; h+=16)
   	{
@@ -599,7 +576,9 @@ void main (int argc, char *argv[])
 			{
 				for (int x=0; x<14; x++)
 				{
-					int addr = (15-y)*16+(h*16+x+1);
+					int y_adj = (y+3)%16;
+					
+					int addr = (15-y_adj)*16+(h*16+x+1);
 						addr = (addr & 0x0f) | ((addr & 0x01f0) << 1);
 					int t = mem[BGRAM_BASE+addr];
 					int a = mem[BGRAM_BASE+addr+0x10];
@@ -631,6 +610,86 @@ void main (int argc, char *argv[])
 			}
 		}
 	}
+  //SS_TEXTOUT_CENTRE(screen, font, "CHAR RAM", SCREEN_W/2, SCREEN_H-8, 1);
+  while (!key[KEY_ESC]);	  
+  while (key[KEY_ESC]);	  
+#endif
+	
+#ifdef SHOW_VRAM
+  //clear_bitmap (screen);
+	for (int y=0; y<32; y++)
+	{
+		for (int x=0; x<28; x++)
+		{
+			int addr = (x+2)*32+(31-y);
+			int t = mem[VRAM_BASE+addr];
+			int a = mem[VRAM_BASE+0x400+addr];
+    	int tile_addr = t*16;
+    	for (int ty=0; ty<8; ty++)
+    		for (int tx=0; tx<8; tx++)
+    		{
+					BYTE pel = chr_rot90[tile_addr+ty*2+(tx>>2)];
+					pel = pel >> (((7-tx)<<1)&0x6) & 0x03;
+					int pel_col = char_clut_prom[(a&0x3f)*4+pel];
+					if (pel_col != 0x0F)
+						putpixel (screen, x*8+tx, y*8+ty, CHAR_COLOUR(pel_col));
+    		}
+		}
+	}
+  //SS_TEXTOUT_CENTRE(screen, font, "CHAR RAM", SCREEN_W/2, SCREEN_H-8, 1);
+  while (!key[KEY_ESC]);	  
+  while (key[KEY_ESC]);	  
+#endif
+
+#ifdef SHOW_SPRITERAM
+	FILE *fpl = fopen("log.txt", "wt");
+  //clear_bitmap (screen);
+  //while (!key[KEY_ESC])
+  {
+  	for (int s=0; s<128/4; s++)
+  	{
+  		int addr = SPRITE_BASE + (31-s)*4;
+  		
+			int code = ((int)mem[addr] & 0x7f) + 
+									4 * ((int)mem[addr+1] & 0x20) + 
+									2 * ((int)mem[addr] & 0x80);
+			int col = (int)mem[addr+1] & 0x0f;
+			int sy = 256-((int)mem[addr+3] - 0x10 * ((int)mem[addr+1] & 0x10));
+			int sx = (int)mem[addr+2];
+
+			if (sx < 16)
+				continue;
+			sx -= 16;
+				  		
+  		fprintf (fpl,"code=%d,col=%d,x,y=%d,%d\n",
+  							code, col, sx, sy);
+  						
+			/* handle double / quadruple height */
+			int n = (mem[addr+1] & 0xc0) >> 6;
+			if (n == 2)
+				n = 3;
+
+			do
+			{
+	  		int sprite_addr = (code+n)*128;
+
+				for (int ty=0; ty<16; ty++)
+				{
+					for (int tx=0; tx<16; tx++)
+					{
+						BYTE pel = sprite_rot90[sprite_addr+ty*8+(tx>>1)];
+						pel = ((pel >> (((tx^1)&1)<<2)) & 0x0f);
+		        pel = (((pel&8)>>1) | ((pel&4)<<1) | ((pel&2)>>1) | ((pel&1)<<1)) & 0x0f;
+		        int pel_col = sprite_clut_prom[col*16+pel];
+		        if (pel_col != 0x0F)
+							putpixel (screen, sx+n*16+tx, sy+ty, SPRITE_COLOUR(pel_col));
+					}
+				}
+				n--;
+			} while (n >= 0);
+		}
+	}
+	fclose(fpl);
   //SS_TEXTOUT_CENTRE(screen, font, "CHAR RAM", SCREEN_W/2, SCREEN_H-8, 1);
   while (!key[KEY_ESC]);	  
   while (key[KEY_ESC]);	  
