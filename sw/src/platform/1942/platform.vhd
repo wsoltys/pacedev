@@ -568,6 +568,20 @@ begin
       q				=> tilemap_o(2).tile_d
     );
     
+  -- GFX3 (sprite characters)
+  gfx3_inst : entity work.sprom
+    generic map
+    (
+      init_file		=> VARIANT_ROM_DIR & "gfx3.hex",
+      widthad_a     => 16
+    )
+    port map
+    (
+      clock		=> clk_vid,
+      address => sprite_i.a(15 downto 0),
+      q				=> sprite_o.d
+    );
+    
   -- VRAM (foreground tile code) $D000-$D3FF
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 	vram_inst : entity work.dpram
