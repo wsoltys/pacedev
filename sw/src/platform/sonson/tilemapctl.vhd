@@ -9,11 +9,7 @@ use work.platform_pkg.all;
 use work.video_controller_pkg.all;
 
 --
---	1942 Foreground Character Tilemap Controller
---
---	Tile data is 1 BPP.
---	Attribute data 7:1 is palette entry
---  Attribute data 0 denotes transparency
+--	SonSon Tilemap Controller
 --
 
 architecture TILEMAP_1 of tilemapCtl is
@@ -25,6 +21,8 @@ architecture TILEMAP_1 of tilemapCtl is
   alias vblank    : std_logic is video_ctl.vblank;
   alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
   alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
+  
+  alias scroll    : std_logic_vector(7 downto 0) is graphics_i.bit8(0);
   
 begin
 
@@ -59,8 +57,12 @@ begin
       if clk_ena = '1' then
 
         -- video is clipped left and right (only 224 wide)
-        x_adj := unsigned(x); -- + (256-PACE_VIDEO_H_SIZE)/2;
-          
+        if unsigned(y) < 40 then
+          x_adj := unsigned(x);
+          else
+          x_adj := unsigned(x) + unsigned(scroll);
+        end if;
+        
         -- 1st stage of pipeline
         -- - read tile from tilemap
         -- - read attribute data

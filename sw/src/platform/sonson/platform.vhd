@@ -113,6 +113,7 @@ architecture SYN of platform is
   signal cram_wr            : std_logic;
 
   -- I/O signals
+  signal scroll_cs          : std_logic;
   signal in0_cs             : std_logic;
   signal in1_cs             : std_logic;
   signal in2_cs             : std_logic;
@@ -153,6 +154,7 @@ begin
   cram_cs <=		'1' when STD_MATCH(cpu_a,  "000101----------") else
                 '0';
   -- I/O
+  scroll_cs <=  '1' when STD_MATCH(cpu_a, X"3000") else '0';
   in0_cs <=     '1' when STD_MATCH(cpu_a, X"3002") else '0';
   in1_cs <=     '1' when STD_MATCH(cpu_a, X"3003") else '0';
   in2_cs <=     '1' when STD_MATCH(cpu_a, X"3004") else '0';
@@ -245,6 +247,18 @@ begin
 		end if;
 	end process;
 
+  -- scroll register
+  process (clk_20M, rst_20M)
+  begin
+    if rst_20M = '1' then
+      graphics_o.bit8(0) <= (others => '0');
+    elsif rising_edge(clk_20M) then
+      if scroll_cs and clk_2M_en and not cpu_r_wn then
+        graphics_o.bit8(0) <= cpu_d_o;
+      end if;
+    end if;
+  end process;
+  
 	GEN_FPGA_ROMS : if true generate
     signal rom4_d_o   : std_logic_vector(7 downto 0);
     signal rom8_d_o   : std_logic_vector(7 downto 0);
@@ -477,7 +491,6 @@ begin
   -- unused outputs
   flash_o <= NULL_TO_FLASH;
   sprite_reg_o <= NULL_TO_SPRITE_REG;
-  graphics_o.bit8(0) <= (others => '0');
   graphics_o.bit16(0) <= (others => '0');
   osd_o <= NULL_TO_OSD;
   snd_o <= NULL_TO_SOUND;
