@@ -111,7 +111,8 @@ architecture SYN of platform is
 	signal cram_cs				    : std_logic;
   signal cram_d_o           : std_logic_vector(7 downto 0);
   signal cram_wr            : std_logic;
-
+  signal sprite_cs          : std_logic;
+  
   -- I/O signals
   signal scroll_cs          : std_logic;
   signal in0_cs             : std_logic;
@@ -152,6 +153,10 @@ begin
                 '0';
   -- colour ram $1400-$17FF
   cram_cs <=		'1' when STD_MATCH(cpu_a,  "000101----------") else
+                '0';
+  -- sprite 'ram' $2020-$207F
+  sprite_cs <=	'1' when STD_MATCH(cpu_a,    X"20"&"001-----") else
+                '1' when STD_MATCH(cpu_a,    X"20"&"01------") else
                 '0';
   -- I/O
   scroll_cs <=  '1' when STD_MATCH(cpu_a, X"3000") else '0';
@@ -392,7 +397,14 @@ begin
     signal bit2_1 : std_logic_vector(7 downto 0);
     signal bit2_2 : std_logic_vector(7 downto 0);
   begin
-  
+
+    -- registers
+    sprite_reg_o.clk <= clk_20M;
+    sprite_reg_o.clk_ena <= clk_2M_en;
+    sprite_reg_o.a <= cpu_a(sprite_reg_o.a'range);
+    sprite_reg_o.d <= cpu_d_o;
+    sprite_reg_o.wr <= sprite_cs and clk_2M_en and not cpu_r_wn;
+    
     -- sprite rom (bit 0, part 1/2)
     ss_9_m5_inst : entity work.sprom
       generic map
@@ -485,12 +497,11 @@ begin
       
     sprite_o.d(23 downto 16) <= bit2_1 when sprite_i.a(13) = '0' else
                                 bit2_2;
-                              
+
   end block BLK_SPRITES;
   
   -- unused outputs
   flash_o <= NULL_TO_FLASH;
-  sprite_reg_o <= NULL_TO_SPRITE_REG;
   graphics_o.bit16(0) <= (others => '0');
   osd_o <= NULL_TO_OSD;
   snd_o <= NULL_TO_SOUND;
