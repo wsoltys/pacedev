@@ -774,7 +774,7 @@ set_global_assignment -name STRATIXII_CONFIGURATION_DEVICE AUTO
 # SignalTap II Assignments
 # ========================
 set_global_assignment -name ENABLE_SIGNALTAP ON
-set_global_assignment -name USE_SIGNALTAP_FILE blit.stp
+set_global_assignment -name USE_SIGNALTAP_FILE cpu.stp
 
 # Power Estimation Assignments
 # ============================
@@ -2268,4 +2268,5 @@ set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2c0/target_top_ep3sl.vhd
 set_global_assignment -name SIGNALTAP_FILE blit.stp
+set_global_assignment -name SIGNALTAP_FILE cpu.stp
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

@@ -89,18 +89,13 @@ architecture SYN of platform is
 	signal cpu_reset			    : std_logic;
   
   -- uP signals  
-  signal clk_1M_en			    : std_logic;
-	signal clk_1M_en_n		    : std_logic;
+  signal clk_2M_en			    : std_logic;
+	signal clk_2M_en_n		    : std_logic;
 	signal cpu_r_wn				    : std_logic;
-	signal cpu_vma				    : std_logic;
-	signal cpu_ba				      : std_logic;
-	signal cpu_bs				      : std_logic;
 	signal cpu_a				      : std_logic_vector(15 downto 0);
 	signal cpu_d_i			      : std_logic_vector(7 downto 0);
 	signal cpu_d_o			      : std_logic_vector(7 downto 0);
 	signal cpu_irq				    : std_logic;
-	signal cpu_firq				    : std_logic;
-	signal cpu_nmi				    : std_logic;
 
   -- ROM signals        
 	signal rom_cs				      : std_logic;
@@ -117,17 +112,23 @@ architecture SYN of platform is
   signal cram_d_o           : std_logic_vector(7 downto 0);
   signal cram_wr            : std_logic;
 
+  -- I/O signals
+  signal in0_cs             : std_logic;
+  signal in1_cs             : std_logic;
+  signal in2_cs             : std_logic;
+  signal dsw1_cs            : std_logic;
+  signal dsw2_cs            : std_logic;
+  
   -- other signals   
 	alias platform_reset			: std_logic is inputs_i(3).d(0);
-	alias platform_pause      : std_logic is inputs_i(3).d(1);
-	signal va11						    : std_logic;
-	signal count240				    : std_logic;
+	alias osd_toggle          : std_logic is inputs_i(3).d(1);
+	alias platform_pause      : std_logic is inputs_i(3).d(2);
 	
 begin
 
 	-- cpu09 core uses negative clock edge
-	clk_1M_en_n <= not (clk_1M_en and not platform_pause);
-	--clk_1M_en_n <= not (clk_1M_en and not platform_pause) or cpu_halt;
+	clk_2M_en_n <= not (clk_2M_en and not platform_pause);
+	--clk_2M_en_n <= not (clk_2M_en and not platform_pause) or cpu_halt;
 
 	-- add game reset later
 	cpu_reset <= rst_20M or platform_reset;
@@ -145,66 +146,55 @@ begin
 	-- RAM $0000-$0FFF
 	wram_cs <=		'1' when STD_MATCH(cpu_a,  "0000------------") else
 								'0';
-  -- ROM $4000-$FFFF
-  --            $4000-$7FFF
-	rom_cs  <= 	  '1' when STD_MATCH(cpu_a,  "01--------------") else 
-  --            $8000-$FFFF
-                '1' when STD_MATCH(cpu_a,  "1---------------") else 
-                '0';
   -- video ram $1000-$13FF
   vram_cs <=		'1' when STD_MATCH(cpu_a,  "000100----------") else
                 '0';
   -- colour ram $1400-$17FF
   cram_cs <=		'1' when STD_MATCH(cpu_a,  "000101----------") else
                 '0';
+  -- I/O
+  in0_cs <=     '1' when STD_MATCH(cpu_a, X"3002") else '0';
+  in1_cs <=     '1' when STD_MATCH(cpu_a, X"3003") else '0';
+  in2_cs <=     '1' when STD_MATCH(cpu_a, X"3004") else '0';
+  dsw1_cs <=    '1' when STD_MATCH(cpu_a, X"3005") else '0';
+  dsw2_cs <=    '1' when STD_MATCH(cpu_a, X"3006") else '0';
+  -- ROM $4000-$FFFF
+  --            $4000-$7FFF
+	rom_cs  <= 	  '1' when STD_MATCH(cpu_a,  "01--------------") else 
+  --            $8000-$FFFF
+                '1' when STD_MATCH(cpu_a,  "1---------------") else 
+                '0';
 
   -- memory block write enables
-  wram_wr <= wram_cs and clk_1M_en and not cpu_r_wn;
-  vram_wr <= vram_cs and clk_1M_en and not cpu_r_wn;
-  cram_wr <= cram_cs and clk_1M_en and not cpu_r_wn;
+  wram_wr <= wram_cs and clk_2M_en and not cpu_r_wn;
+  vram_wr <= vram_cs and clk_2M_en and not cpu_r_wn;
+  cram_wr <= cram_cs and clk_2M_en and not cpu_r_wn;
 
 	-- memory read mux
 	cpu_d_i <=  wram_d_o when wram_cs = '1' else
 							vram_d_o when vram_cs = '1' else
 							cram_d_o when cram_cs = '1' else
+              inputs_i(0).d when in0_cs = '1' else
+              inputs_i(1).d when in1_cs = '1' else
+              inputs_i(2).d when in2_cs = '1' else
+              -- flip off, service off, coin A, 1C1C
+              (X"80" or X"40" or X"10" or X"0F") when dsw1_cs = '1' else
+              -- freeze off, easy, 20K/80K/100K, 3 lives
+              (X"80" or X"60" or X"08" or X"03") when dsw2_cs = '1' else
               rom_d_o when rom_cs = '1' else
 							(others => 'Z');
 		
-	-- irqa interrupt at scanline 240
-	process (clk_20M, rst_20M)
-	begin
-		if rst_20M = '1' then
-			count240 <= '0';
-		elsif rising_edge(clk_20M) then
-			if graphics_i.y = std_logic_vector(to_unsigned(0, graphics_i.y'length)) then
-				count240 <= '0';
-			-- check for 240
-			--elsif video_counter = 240 then
-			elsif graphics_i.y = std_logic_vector(to_unsigned(239, graphics_i.y'length)) then
-				count240 <= '1';
-			end if;
-		end if;
-	end process;
-
-	-- irqb every 32 scanlines
-	va11 <= graphics_i.y(5);
-
-	-- cpu interrupts
-	cpu_irq <= '0';
-	cpu_firq <= '0';
-	cpu_nmi <= '0';
-
   -- system timing
   process (clk_20M, rst_20M)
-    variable count : integer range 0 to 20-1;
+    variable count : integer range 0 to 10-1;
   begin
     if rst_20M = '1' then
       count := 0;
     elsif rising_edge(clk_20M) then
-      clk_1M_en <= '0'; -- default
+      clk_2M_en <= '0'; -- default
       case count is
         when 0 =>
-          clk_1M_en <= '1';
+          clk_2M_en <= '1';
         when others =>
           null;
       end case;
@@ -219,21 +209,41 @@ begin
 	cpu_inst : entity work.cpu09
 		port map
 		(	
-			clk				=> '0', --clk_1M_en_n,
+			clk				=> clk_2M_en_n,
 			rst				=> cpu_reset,
 			rw				=> cpu_r_wn,
-			vma				=> cpu_vma,
-      ba        => cpu_ba,
-      bs        => cpu_bs,
+			vma				=> open,
+      --ba        => open,
+      --bs        => open,
 			addr		  => cpu_a,
 		  data_in		=> cpu_d_i,
 		  data_out	=> cpu_d_o,
 			halt			=> '0',
 			hold			=> '0',
 			irq				=> cpu_irq,
-			firq			=> cpu_firq,
-			nmi				=> cpu_nmi
+			firq			=> '0',
+			nmi				=> '0'
 		);
+
+	-- irq vblank interrupt
+	process (clk_20M, rst_20M)
+    variable vblank_r : std_logic_vector(3 downto 0);
+    alias vblank_prev : std_logic is vblank_r(vblank_r'left);
+    alias vblank_um   : std_logic is vblank_r(vblank_r'left-1);
+	begin
+		if rst_20M = '1' then
+			vblank_r := (others => '0');
+      cpu_irq <= '0';
+		elsif rising_edge(clk_20M) then
+			if vblank_um = '1' and vblank_prev = '0' then
+				cpu_irq <= '1';
+      elsif vblank_um = '0' then
+        cpu_irq <= '0';
+			end if;
+      -- numeta the vblank
+      vblank_r := vblank_r(vblank_r'left-1 downto 0) & graphics_i.vblank;
+		end if;
+	end process;
 
 	GEN_FPGA_ROMS : if true generate
     signal rom4_d_o   : std_logic_vector(7 downto 0);

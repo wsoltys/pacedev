@@ -65,38 +65,33 @@ begin
 
       if (key_down or key_up) = '1' then
         case data(7 downto 0) is
-          -- IN0
-          when SCANCODE_1 =>
-            keybd_v(0).d(0) := key_up;
-          when SCANCODE_2 =>
-            keybd_v(0).d(1) := key_up;
-          when SCANCODE_S =>
-            keybd_v(0).d(4) := key_up;
-          when SCANCODE_6 =>
-            keybd_v(0).d(6) := key_up;
-          when SCANCODE_5 =>
-            keybd_v(0).d(7) := key_up;
-
-           -- IN1/2
-          when SCANCODE_RIGHT =>
-            keybd_v(1).d(0) := key_up;
-            keybd_v(2).d(0) := key_up;
-          when SCANCODE_LEFT =>
-            keybd_v(1).d(1) := key_up;
-            keybd_v(2).d(1) := key_up;
-          when SCANCODE_DOWN =>
-            keybd_v(1).d(2) := key_up;
-            keybd_v(2).d(2) := key_up;
-          when SCANCODE_UP =>
-            keybd_v(1).d(3) := key_up;
-            keybd_v(2).d(3) := key_up;
+          -- IN0/1
           when SCANCODE_LCTRL =>
+            keybd_v(0).d(0) := key_up;
+            keybd_v(1).d(0) := key_up;
+          when SCANCODE_LEFT =>
+            keybd_v(0).d(2) := key_up;
+            keybd_v(1).d(2) := key_up;
+          when SCANCODE_RIGHT =>
+            keybd_v(0).d(3) := key_up;
+            keybd_v(1).d(3) := key_up;
+          when SCANCODE_UP =>
+            keybd_v(0).d(4) := key_up;
             keybd_v(1).d(4) := key_up;
-            keybd_v(2).d(4) := key_up;
-          when SCANCODE_LALT =>
+          when SCANCODE_DOWN =>
+            keybd_v(0).d(5) := key_up;
             keybd_v(1).d(5) := key_up;
+
+           -- IN2
+          when SCANCODE_1 =>
+            keybd_v(2).d(0) := key_up;
+          when SCANCODE_2 =>
+            keybd_v(2).d(1) := key_up;
+          when SCANCODE_5 =>
+            keybd_v(2).d(4) := key_up;
+          when SCANCODE_6 =>
             keybd_v(2).d(5) := key_up;
-            
+
           -- Special keys
           when SCANCODE_F3 =>
             keybd_v(3).d(0) := key_down;			-- CPU RESET
