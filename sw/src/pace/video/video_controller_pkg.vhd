@@ -100,7 +100,7 @@ package video_controller_pkg is
   subtype TILEMAP_D_t is std_logic_vector(15 downto 0);
   subtype TILEMAP_A_t is std_logic_vector(15 downto 0);
   subtype TILE_A_t is std_logic_vector(16 downto 0);
-  subtype TILE_D_t is std_logic_vector(7 downto 0);
+  subtype TILE_D_t is std_logic_vector(23 downto 0);
   subtype ATTR_A_t is std_logic_vector(15 downto 0);
   subtype ATTR_D_t is std_logic_vector(15 downto 0);
   

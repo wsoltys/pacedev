@@ -83,8 +83,6 @@ end platform;
 
 architecture SYN of platform is
 
-	constant WILLIAMS_VRAM_SIZE		: integer := 2**WILLIAMS_VRAM_WIDTHAD;
-
 	alias clk_20M					    : std_logic is clkrst_i.clk(0);
   alias rst_20M             : std_logic is clkrst_i.rst(0);
 	alias clk_video				    : std_logic is clkrst_i.clk(1);
@@ -221,7 +219,7 @@ begin
 	cpu_inst : entity work.cpu09
 		port map
 		(	
-			clk				=> clk_1M_en_n,
+			clk				=> '0', --clk_1M_en_n,
 			rst				=> cpu_reset,
 			rw				=> cpu_r_wn,
 			vma				=> cpu_vma,
@@ -304,12 +302,12 @@ begin
       q_b					=> vram_d_o,
 
       clock_a			=> clk_video,
-      address_a		=> tilemap_i(1).tile_a(9 downto 0),
+      address_a		=> tilemap_i(1).map_a(9 downto 0),
       wren_a			=> '0',
       data_a			=> (others => 'X'),
-      q_a					=> tilemap_o(1).tile_d(7 downto 0)
+      q_a					=> tilemap_o(1).map_d(7 downto 0)
     );
-  tilemap_o(1).tile_d(tilemap_o(1).tile_d'left downto 8) <= (others => 'Z');
+  tilemap_o(1).map_d(tilemap_o(1).map_d'left downto 8) <= (others => 'Z');
   
   -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
   cram_inst : entity work.dpram
@@ -334,10 +332,141 @@ begin
     );
   tilemap_o(1).attr_d(tilemap_o(1).attr_d'left downto 8) <= (others => 'Z');
 
+  -- tile rom (bit 0)
+  ss_7_b6_inst : entity work.sprom
+    generic map
+    (
+      init_file		=> SONSON_ROM_DIR & "ss_7_b6.hex",
+      widthad_a		=> 13
+    )
+    port map
+    (
+      clock			=> clk_video,
+      address		=> tilemap_i(1).tile_a(12 downto 0),
+      q					=> tilemap_o(1).tile_d(7 downto 0)
+    );
+		
+  -- tile rom (bit 1)
+  ss_8_b5_inst : entity work.sprom
+    generic map
+    (
+      init_file		=> SONSON_ROM_DIR & "ss_8_b5.hex",
+      widthad_a		=> 13
+    )
+    port map
+    (
+      clock			=> clk_video,
+      address		=> tilemap_i(1).tile_a(12 downto 0),
+      q					=> tilemap_o(1).tile_d(15 downto 8)
+    );
+
+  BLK_SPRITES : block
+    signal bit0_1 : std_logic_vector(7 downto 0);
+    signal bit0_2 : std_logic_vector(7 downto 0);
+    signal bit1_1 : std_logic_vector(7 downto 0);
+    signal bit1_2 : std_logic_vector(7 downto 0);
+    signal bit2_1 : std_logic_vector(7 downto 0);
+    signal bit2_2 : std_logic_vector(7 downto 0);
+  begin
+  
+    -- sprite rom (bit 0, part 1/2)
+    ss_9_m5_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> SONSON_ROM_DIR & "ss_9_m5.hex",
+        widthad_a		=> 13
+      )
+      port map
+      (
+        clock			=> clk_video,
+        address		=> sprite_i.a(12 downto 0),
+        q					=> bit0_1
+      );
+      
+    -- sprite rom (bit 0, part 2/2)
+    ss_10_m6_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> SONSON_ROM_DIR & "ss_10_m6.hex",
+        widthad_a		=> 13
+      )
+      port map
+      (
+        clock			=> clk_video,
+        address		=> sprite_i.a(12 downto 0),
+        q					=> bit0_2
+      );
+      
+    sprite_o.d(7 downto 0) <= bit0_1 when sprite_i.a(13) = '0' else
+                              bit0_2;
+                              
+    -- sprite rom (bit 1, part 1/2)
+    ss_11_m3_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> SONSON_ROM_DIR & "ss_11_m3.hex",
+        widthad_a		=> 13
+      )
+      port map
+      (
+        clock			=> clk_video,
+        address		=> sprite_i.a(12 downto 0),
+        q					=> bit1_1
+      );
+      
+    -- sprite rom (bit 0, part 2/2)
+    ss_12_m4_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> SONSON_ROM_DIR & "ss_12_m4.hex",
+        widthad_a		=> 13
+      )
+      port map
+      (
+        clock			=> clk_video,
+        address		=> sprite_i.a(12 downto 0),
+        q					=> bit1_2
+      );
+      
+    sprite_o.d(15 downto 8) <=  bit1_1 when sprite_i.a(13) = '0' else
+                                bit1_2;
+                              
+    -- sprite rom (bit 2, part 1/2)
+    ss_13_m1_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> SONSON_ROM_DIR & "ss_13_m1.hex",
+        widthad_a		=> 13
+      )
+      port map
+      (
+        clock			=> clk_video,
+        address		=> sprite_i.a(12 downto 0),
+        q					=> bit2_1
+      );
+      
+    -- sprite rom (bit 2, part 2/2)
+    ss_14_m2_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> SONSON_ROM_DIR & "ss_14_m2.hex",
+        widthad_a		=> 13
+      )
+      port map
+      (
+        clock			=> clk_video,
+        address		=> sprite_i.a(12 downto 0),
+        q					=> bit2_2
+      );
+      
+    sprite_o.d(23 downto 16) <= bit2_1 when sprite_i.a(13) = '0' else
+                                bit2_2;
+                              
+  end block BLK_SPRITES;
+  
   -- unused outputs
   flash_o <= NULL_TO_FLASH;
   sprite_reg_o <= NULL_TO_SPRITE_REG;
-  sprite_o <= NULL_TO_SPRITE_CTL;
   graphics_o.bit8(0) <= (others => '0');
   graphics_o.bit16(0) <= (others => '0');
   osd_o <= NULL_TO_OSD;

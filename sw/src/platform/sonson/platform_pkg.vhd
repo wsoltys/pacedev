@@ -14,7 +14,7 @@ package platform_pkg is
 
 	constant PACE_VIDEO_NUM_BITMAPS 	    : natural := 0;
 	constant PACE_VIDEO_NUM_TILEMAPS 	    : natural := 1;
-	constant PACE_VIDEO_NUM_SPRITES 	    : natural := 0;
+	constant PACE_VIDEO_NUM_SPRITES 	    : natural := 24;
 	constant PACE_VIDEO_H_SIZE				    : integer := 256;   -- 240
 	constant PACE_VIDEO_V_SIZE				    : integer := 256;   -- 240
 	constant PACE_VIDEO_PIPELINE_DELAY    : integer := 3;
@@ -147,6 +147,50 @@ package platform_pkg is
     others => (others => X"0")
   );
 
+	-- Colour Look-up Table (CLUT) : Table of palette entries
+	-- - each row has four (8) palette indexes
+	--   decoded from 8 bits of sprite data
+	
+	type sprite_clut_entry_t is array (0 to 7) of std_logic_vector(3 downto 0);
+	type sprite_clut_entry_a is array (0 to 31) of sprite_clut_entry_t;
+
+	constant sprite_clut : sprite_clut_entry_a :=
+	(
+     0 => (0=>X"F", 1=>X"1", 2=>X"3", 3=>X"4", 4=>X"7", 5=>X"8", 6=>X"B", 7=>X"0"),
+     1 => (0=>X"F", 1=>X"1", 2=>X"3", 3=>X"4", 4=>X"C", 5=>X"6", 6=>X"B", 7=>X"0"),
+     2 => (0=>X"F", 1=>X"1", 2=>X"2", 3=>X"4", 4=>X"C", 5=>X"8", 6=>X"B", 7=>X"0"),
+     3 => (0=>X"F", 1=>X"C", 2=>X"4", 3=>X"F", 4=>X"F", 5=>X"F", 6=>X"F", 7=>X"0"),
+     4 => (0=>X"F", 1=>X"1", 2=>X"2", 3=>X"6", 4=>X"7", 5=>X"E", 6=>X"B", 7=>X"0"),
+     5 => (0=>X"F", 1=>X"1", 2=>X"2", 3=>X"8", 4=>X"7", 5=>X"B", 6=>X"F", 7=>X"0"),
+     6 => (0=>X"F", 1=>X"3", 2=>X"6", 3=>X"A", 4=>X"D", 5=>X"E", 6=>X"B", 7=>X"0"),
+     7 => (0=>X"F", 1=>X"1", 2=>X"2", 3=>X"8", 4=>X"7", 5=>X"B", 6=>X"E", 7=>X"C"),
+     8 => (0=>X"F", 1=>X"1", 2=>X"2", 3=>X"5", 4=>X"8", 5=>X"D", 6=>X"E", 7=>X"0"),
+     9 => (0=>X"F", 1=>X"1", 2=>X"2", 3=>X"F", 4=>X"7", 5=>X"E", 6=>X"D", 7=>X"0"),
+    10 => (0=>X"F", 1=>X"1", 2=>X"4", 3=>X"7", 4=>X"8", 5=>X"2", 6=>X"C", 7=>X"0"),
+    11 => (0=>X"F", 1=>X"1", 2=>X"4", 3=>X"7", 4=>X"5", 5=>X"2", 6=>X"C", 7=>X"0"),
+    12 => (0=>X"F", 1=>X"1", 2=>X"3", 3=>X"4", 4=>X"8", 5=>X"9", 6=>X"6", 7=>X"0"),
+    13 => (0=>X"F", 1=>X"F", 2=>X"F", 3=>X"4", 4=>X"8", 5=>X"5", 6=>X"F", 7=>X"0"),
+    14 => (0=>X"F", 1=>X"5", 2=>X"6", 3=>X"7", 4=>X"D", 5=>X"E", 6=>X"0", 7=>X"F"),
+    15 => (0=>X"F", 1=>X"1", 2=>X"3", 3=>X"4", 4=>X"C", 5=>X"F", 6=>X"B", 7=>X"0"),
+    16 => (0=>X"F", 1=>X"F", 2=>X"8", 3=>X"4", 4=>X"D", 5=>X"E", 6=>X"0", 7=>X"C"),
+    17 => (0=>X"F", 1=>X"F", 2=>X"8", 3=>X"4", 4=>X"D", 5=>X"E", 6=>X"0", 7=>X"C"),
+    18 => (0=>X"F", 1=>X"1", 2=>X"6", 3=>X"7", 4=>X"8", 5=>X"D", 6=>X"C", 7=>X"E"),
+    19 => (0=>X"F", 1=>X"1", 2=>X"3", 3=>X"5", 4=>X"D", 5=>X"8", 6=>X"E", 7=>X"0"),
+    20 => (0=>X"F", 1=>X"1", 2=>X"6", 3=>X"4", 4=>X"D", 5=>X"2", 6=>X"0", 7=>X"C"),
+    21 => (0=>X"F", 1=>X"1", 2=>X"8", 3=>X"7", 4=>X"A", 5=>X"B", 6=>X"0", 7=>X"C"),
+    22 => (0=>X"F", 1=>X"1", 2=>X"3", 3=>X"B", 4=>X"2", 5=>X"8", 6=>X"6", 7=>X"0"),
+    23 => (0=>X"F", 1=>X"1", 2=>X"4", 3=>X"C", 4=>X"7", 5=>X"8", 6=>X"6", 7=>X"0"),
+    24 => (0=>X"F", 1=>X"1", 2=>X"D", 3=>X"E", 4=>X"6", 5=>X"7", 6=>X"8", 7=>X"0"),
+    25 => (0=>X"F", 1=>X"1", 2=>X"2", 3=>X"4", 4=>X"7", 5=>X"8", 6=>X"C", 7=>X"0"),
+    26 => (0=>X"F", 1=>X"1", 2=>X"2", 3=>X"3", 4=>X"A", 5=>X"B", 6=>X"0", 7=>X"6"),
+    27 => (0=>X"F", 1=>X"1", 2=>X"2", 3=>X"3", 4=>X"4", 5=>X"5", 6=>X"0", 7=>X"6"),
+    28 => (0=>X"F", 1=>X"1", 2=>X"2", 3=>X"3", 4=>X"D", 5=>X"E", 6=>X"0", 7=>X"6"),
+    29 => (0=>X"F", 1=>X"1", 2=>X"F", 3=>X"E", 4=>X"7", 5=>X"A", 6=>X"B", 7=>X"0"),
+    30 => (0=>X"F", 1=>X"1", 2=>X"2", 3=>X"4", 4=>X"6", 5=>X"7", 6=>X"8", 7=>X"0"),
+    31 => (0=>X"F", 1=>X"1", 2=>X"3", 3=>X"7", 4=>X"A", 5=>X"6", 6=>X"9", 7=>X"0"),
+    others => (others => X"0")
+  );
+ 
   type from_PLATFORM_IO_t is record
     not_used  : std_logic;
   end record;

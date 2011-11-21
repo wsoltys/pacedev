@@ -64,13 +64,11 @@ package project_pkg is
 
   -- always need SRAM (for now, use for WRAM)
   constant S5AR2_EMULATE_SRAM               : boolean := true;
-  -- $9800-$BFFF (so $8000-$BFFF)
-  constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 14;
+  -- $0000-$0FFF
+  constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 12;
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
     
-	-- Williams constants
-	
-	constant WILLIAMS_VRAM_WIDTHAD			      : integer := 15;		-- 32KB
+	-- Sonson constants
 	
 	-- derived - do not edit
 

@@ -2257,8 +2257,11 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/cpu09/cpu09.
 set_global_assignment -name VHDL_FILE ../../../../src/platform/sonson/inputmapper.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/inputs.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_array.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/sonson/spritereg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_mixer.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/sonson/tilemapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/sonson/spritectl.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Graphics.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/sonson/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd

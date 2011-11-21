@@ -14,105 +14,119 @@ entity inputmapper is
 	);
 	port
 	(
-    clk       : in std_logic;
-    rst_n     : in std_logic;
+    clk       : in     std_logic;
+    rst_n     : in     std_logic;
 
     -- inputs from keyboard controller
-    reset     : in std_logic;
-    key_down  : in std_logic;
-    key_up    : in std_logic;
-    data      : in std_logic_vector(7 downto 0);
-    -- inputs from jamma connector
-    jamma			: in from_JAMMA_t;
+    reset     : in     std_logic;
+    key_down  : in     std_logic;
+    key_up    : in     std_logic;
+    data      : in     std_logic_vector(7 downto 0);
+		-- JAMMA interface
+		jamma			: in from_JAMMA_t;
 
     -- user outputs
-    dips			: in	std_logic_vector(NUM_DIPS-1 downto 0);
-    inputs		: out from_MAPPED_INPUTS_t(0 to NUM_INPUTS-1)
+    dips			: in		std_logic_vector(NUM_DIPS-1 downto 0);
+    inputs		: out   from_MAPPED_INPUTS_t(0 to NUM_INPUTS-1)
 	);
-end inputmapper;
+	end inputmapper;
 
 architecture SYN of inputmapper is
 
-  signal pause  : std_logic;
-  
 begin
 
   latchInputs: process (clk, rst_n)
-
+    variable jamma_v	: from_MAPPED_INPUTS_t(0 to NUM_INPUTS-1);
+    variable keybd_v 	: from_MAPPED_INPUTS_t(0 to NUM_INPUTS-1);
+    alias pause       : std_logic is keybd_v(3).d(2);
   begin
 
-    -- note: all inputs are active HIGH
+    -- note: all inputs are active LOW
 
     if rst_n = '0' then
-      for i in 0 to NUM_INPUTS-1 loop
-        inputs(i).d <= (others =>'0');
+      for i in 0 to NUM_INPUTS-2 loop
+        jamma_v(i).d := (others => '1');
+        keybd_v(i).d := (others => '1');
       end loop;
-      pause <= '0';
+      keybd_v(NUM_INPUTS-1).d := (others => '0');
+
     elsif rising_edge (clk) then
-      -- map the dipswitches
+
+      -- handle JAMMA inputs
+      jamma_v(0).d(0) := jamma.coin(1);
+      jamma_v(0).d(1) := jamma.p(2).start;
+      jamma_v(0).d(2) := jamma.p(1).start;
+      jamma_v(0).d(4) := jamma.p(1).button(1);
+      jamma_v(1).d(4) := jamma.p(1).button(1);
+      jamma_v(0).d(5) := jamma.p(1).left;
+      jamma_v(1).d(5) := jamma.p(1).left;
+      jamma_v(0).d(6) := jamma.p(1).right;
+      jamma_v(1).d(6) := jamma.p(1).right;
+
       if (key_down or key_up) = '1' then
         case data(7 downto 0) is
-        
-            -- IN0
-            when SCANCODE_UP =>				-- up
-              inputs(0).d(0) <= key_down;
-            when SCANCODE_DOWN =>			-- down
-              inputs(0).d(1) <= key_down;
-            when SCANCODE_LEFT =>			-- left
-              inputs(0).d(2) <= key_down;
-            when SCANCODE_RIGHT =>		-- right
-              inputs(0).d(3) <= key_down;
-            when SCANCODE_1 =>				-- start1
-              inputs(0).d(4) <= key_down;
-            when SCANCODE_2 =>				-- start2
-              inputs(0).d(5) <= key_down;
-            when SCANCODE_W =>				-- fire up
-              inputs(0).d(6) <= key_down;
-            when SCANCODE_Z =>				-- fire down
-              inputs(0).d(7) <= key_down;
+          -- IN0
+          when SCANCODE_1 =>
+            keybd_v(0).d(0) := key_up;
+          when SCANCODE_2 =>
+            keybd_v(0).d(1) := key_up;
+          when SCANCODE_S =>
+            keybd_v(0).d(4) := key_up;
+          when SCANCODE_6 =>
+            keybd_v(0).d(6) := key_up;
+          when SCANCODE_5 =>
+            keybd_v(0).d(7) := key_up;
 
-            -- IN1
-            when SCANCODE_A =>		    -- fire left
-              inputs(1).d(0) <= key_down;
-            when SCANCODE_S =>		    -- fire right
-              inputs(1).d(1) <= key_down;
-              
-            -- IN2
-            when SCANCODE_F1 =>				-- auto up
-              inputs(2).d(0) <= key_down;
-            when SCANCODE_F2 =>				-- advance
-              inputs(2).d(1) <= key_down;
-            when SCANCODE_7 =>				-- coin3
-              inputs(2).d(2) <= key_down;
-            when SCANCODE_9 =>				-- highscore reset
-              inputs(2).d(3) <= key_down;
-            when SCANCODE_5 =>				-- coin1
-              inputs(2).d(4) <= key_down;
-            when SCANCODE_6 =>				-- coin2
-              inputs(2).d(5) <= key_down;
-
-            -- special keys
-            when SCANCODE_F3 =>				-- game reset
-              inputs(3).d(0) <= key_down;
-            when SCANCODE_P =>				-- pause (toggle)
-              if key_down = '1' then
-                pause <= not pause;
-              end if;
-              
-            when others =>
+           -- IN1/2
+          when SCANCODE_RIGHT =>
+            keybd_v(1).d(0) := key_up;
+            keybd_v(2).d(0) := key_up;
+          when SCANCODE_LEFT =>
+            keybd_v(1).d(1) := key_up;
+            keybd_v(2).d(1) := key_up;
+          when SCANCODE_DOWN =>
+            keybd_v(1).d(2) := key_up;
+            keybd_v(2).d(2) := key_up;
+          when SCANCODE_UP =>
+            keybd_v(1).d(3) := key_up;
+            keybd_v(2).d(3) := key_up;
+          when SCANCODE_LCTRL =>
+            keybd_v(1).d(4) := key_up;
+            keybd_v(2).d(4) := key_up;
+          when SCANCODE_LALT =>
+            keybd_v(1).d(5) := key_up;
+            keybd_v(2).d(5) := key_up;
+            
+          -- Special keys
+          when SCANCODE_F3 =>
+            keybd_v(3).d(0) := key_down;			-- CPU RESET
+          when SCANCODE_TAB =>
+            keybd_v(3).d(1) := key_down;      -- OSD TOGGLE
+          when SCANCODE_P =>				          -- pause (toggle)
+            if key_down = '1' then
+              pause := not pause;
+            end if;
+          when others =>
+            null;
         end case;
       end if; -- key_down or key_up
 
+      -- this is PS/2 reset only
       if (reset = '1') then
-        for i in 0 to NUM_INPUTS-1 loop
-          inputs(i).d <= (others =>'0');
+        for i in 0 to NUM_INPUTS-2 loop
+          keybd_v(i).d := (others =>'1');
         end loop;
       end if;
-
     end if; -- rising_edge (clk)
 
-    inputs(3).d(1) <= pause;
+    -- assign outputs
+    for i in 0 to NUM_INPUTS-2 loop
+      inputs(i).d <= jamma_v(i).d and keybd_v(i).d;
+    end loop;
+    inputs(3).d <= keybd_v(3).d;
 
   end process latchInputs;
 
 end SYN;
+
+
