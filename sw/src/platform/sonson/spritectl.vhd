@@ -117,11 +117,14 @@ begin
           
           if xMat then
             -- shift in next pixel
-            --pel := rowStore(rowStore'left downto rowStore'left-pel'length+1);
-            pel := rowStore(47) & rowStore(31) & rowStore(15);
-            rowStore(47 downto 32) := rowStore(46 downto 32) & '0';
-            rowStore(31 downto 16) := rowStore(30 downto 16) & '0';
-            rowStore(15 downto 0) := rowStore(14 downto 0) & '0';
+--            pel := rowStore(47) & rowStore(31) & rowStore(15);
+--            rowStore(47 downto 32) := rowStore(46 downto 32) & '0';
+--            rowStore(31 downto 16) := rowStore(30 downto 16) & '0';
+--            rowStore(15 downto 0) := rowStore(14 downto 0) & '0';
+            pel := rowStore(32) & rowStore(16) & rowStore(0);
+            rowStore(47 downto 32) := '0' & rowStore(47 downto 33);
+            rowStore(31 downto 16) := '0' & rowStore(31 downto 17);
+            rowStore(15 downto 0) := '0' & rowStore(15 downto 1);
           end if;
 
         end if;

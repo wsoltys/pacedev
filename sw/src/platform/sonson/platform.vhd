@@ -90,7 +90,7 @@ architecture SYN of platform is
   
   -- uP signals  
   signal clk_2M_en			    : std_logic;
-	signal clk_2M_en_n		    : std_logic;
+	signal cpu_clk_en         : std_logic;
 	signal cpu_r_wn				    : std_logic;
 	signal cpu_a				      : std_logic_vector(15 downto 0);
 	signal cpu_d_i			      : std_logic_vector(7 downto 0);
@@ -128,13 +128,6 @@ architecture SYN of platform is
 	
 begin
 
-	-- cpu09 core uses negative clock edge
-	clk_2M_en_n <= not (clk_2M_en and not platform_pause);
-	--clk_2M_en_n <= not (clk_2M_en and not platform_pause) or cpu_halt;
-
-	-- add game reset later
-	cpu_reset <= rst_20M or platform_reset;
-	
   -- SRAM signals (may or may not be used)
   sram_o.a(sram_o.a'left downto 17) <= (others => '0');
   sram_o.a(16 downto 0)	<= 	std_logic_vector(resize(unsigned(cpu_a), 17));
@@ -213,10 +206,22 @@ begin
     end if;
   end process;
 
+	-- cpu09 core uses negative clock edge
+	--cpu_clk_en <= not (clk_2M_en and not platform_pause);
+	cpu_clk_en <= clk_2M_en and not platform_pause;
+
+	-- add game reset later
+	cpu_reset <= rst_20M or platform_reset;
+	
 	cpu_inst : entity work.cpu09
+    generic map
+    (
+      CLK_POL   => '1'
+    )
 		port map
 		(	
-			clk				=> clk_2M_en_n,
+			clk				=> clk_20M,
+      clk_en    => cpu_clk_en,
 			rst				=> cpu_reset,
 			rw				=> cpu_r_wn,
 			vma				=> open,

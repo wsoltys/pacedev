@@ -2260,7 +2260,7 @@ set_global_assignment -name VHDL_FILE ../../../device/stratixiii/spram.vhd
 set_global_assignment -name VHDL_FILE "project_pkg-ep3sl.vhd"
 set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/cpu09/cpu09.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/cpu09/cpu09s.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/sonson/inputmapper.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/inputs.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
