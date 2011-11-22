@@ -390,12 +390,22 @@ begin
     );
 
   BLK_SPRITES : block
-    signal bit0_1 : std_logic_vector(7 downto 0);
-    signal bit0_2 : std_logic_vector(7 downto 0);
-    signal bit1_1 : std_logic_vector(7 downto 0);
-    signal bit1_2 : std_logic_vector(7 downto 0);
-    signal bit2_1 : std_logic_vector(7 downto 0);
-    signal bit2_2 : std_logic_vector(7 downto 0);
+    signal bit0_1       : std_logic_vector(7 downto 0);   -- offset 0
+    signal bit0_2       : std_logic_vector(7 downto 0);   -- offset 0
+    signal bit0_3       : std_logic_vector(7 downto 0);   -- offset 16
+    signal bit0_4       : std_logic_vector(7 downto 0);   -- offset 16
+    signal bit1_1       : std_logic_vector(7 downto 0);
+    signal bit1_2       : std_logic_vector(7 downto 0);
+    signal bit1_3       : std_logic_vector(7 downto 0);
+    signal bit1_4       : std_logic_vector(7 downto 0);
+    signal bit2_1       : std_logic_vector(7 downto 0);
+    signal bit2_2       : std_logic_vector(7 downto 0);
+    signal bit2_3       : std_logic_vector(7 downto 0);
+    signal bit2_4       : std_logic_vector(7 downto 0);
+    
+    signal sprite_a_00  : std_logic_vector(12 downto 0);
+    signal sprite_a_16  : std_logic_vector(12 downto 0);
+    
   begin
 
     -- registers
@@ -404,99 +414,127 @@ begin
     sprite_reg_o.a <= cpu_a(sprite_reg_o.a'range);
     sprite_reg_o.d <= cpu_d_o;
     sprite_reg_o.wr <= sprite_cs and clk_2M_en and not cpu_r_wn;
+
+    -- - sprite data consists of:
+    --   16 consecutive bytes for the 1st half
+    --   then the next 16 bytes for the 2nd half
+    -- - because we need to fetch an entire row at once
+    --   use dual-port memory to access both halves of each row
+
+    -- generate address for each port
+    sprite_a_00 <= sprite_i.a(12 downto 5) & '0' & sprite_i.a(3 downto 0);
+    sprite_a_16 <= sprite_i.a(12 downto 5) & '1' & sprite_i.a(3 downto 0);
     
     -- sprite rom (bit 0, part 1/2)
-    ss_9_m5_inst : entity work.sprom
+    ss_9_m5_inst : entity work.dprom_2r
       generic map
       (
         init_file		=> SONSON_ROM_DIR & "ss_9_m5.hex",
-        widthad_a		=> 13
+        widthad_a		=> 13,
+        widthad_b		=> 13
       )
       port map
       (
-        clock			=> clk_video,
-        address		=> sprite_i.a(12 downto 0),
-        q					=> bit0_1
+        clock			  => clk_video,
+        address_a   => sprite_a_00,
+        q_a 			  => bit0_1,
+        address_b   => sprite_a_16,
+        q_b         => bit0_3
       );
       
     -- sprite rom (bit 0, part 2/2)
-    ss_10_m6_inst : entity work.sprom
+    ss_10_m6_inst : entity work.dprom_2r
       generic map
       (
         init_file		=> SONSON_ROM_DIR & "ss_10_m6.hex",
-        widthad_a		=> 13
+        widthad_a		=> 13,
+        widthad_b		=> 13
       )
       port map
       (
-        clock			=> clk_video,
-        address		=> sprite_i.a(12 downto 0),
-        q					=> bit0_2
+        clock			  => clk_video,
+        address_a   => sprite_a_00,
+        q_a 			  => bit0_2,
+        address_b   => sprite_a_16,
+        q_b         => bit0_4
       );
       
-    sprite_o.d(7 downto 0) <= bit0_1 when sprite_i.a(13) = '0' else
-                              bit0_2;
+    sprite_o.d(15 downto 0) <=  (bit0_1 & bit0_3) when sprite_i.a(13) = '0' else
+                                (bit0_2 & bit0_4);
                               
     -- sprite rom (bit 1, part 1/2)
-    ss_11_m3_inst : entity work.sprom
+    ss_11_m3_inst : entity work.dprom_2r
       generic map
       (
         init_file		=> SONSON_ROM_DIR & "ss_11_m3.hex",
-        widthad_a		=> 13
+        widthad_a		=> 13,
+        widthad_b		=> 13
       )
       port map
       (
-        clock			=> clk_video,
-        address		=> sprite_i.a(12 downto 0),
-        q					=> bit1_1
+        clock			  => clk_video,
+        address_a   => sprite_a_00,
+        q_a 			  => bit1_1,
+        address_b   => sprite_a_16,
+        q_b         => bit1_3
       );
       
     -- sprite rom (bit 0, part 2/2)
-    ss_12_m4_inst : entity work.sprom
+    ss_12_m4_inst : entity work.dprom_2r
       generic map
       (
         init_file		=> SONSON_ROM_DIR & "ss_12_m4.hex",
-        widthad_a		=> 13
+        widthad_a		=> 13,
+        widthad_b		=> 13
       )
       port map
       (
-        clock			=> clk_video,
-        address		=> sprite_i.a(12 downto 0),
-        q					=> bit1_2
+        clock			  => clk_video,
+        address_a   => sprite_a_00,
+        q_a 			  => bit1_2,
+        address_b   => sprite_a_16,
+        q_b         => bit1_4
       );
       
-    sprite_o.d(15 downto 8) <=  bit1_1 when sprite_i.a(13) = '0' else
-                                bit1_2;
+    sprite_o.d(31 downto 16) <= (bit1_1 & bit1_3) when sprite_i.a(13) = '0' else
+                                (bit1_2 & bit1_4);
                               
     -- sprite rom (bit 2, part 1/2)
-    ss_13_m1_inst : entity work.sprom
+    ss_13_m1_inst : entity work.dprom_2r
       generic map
       (
         init_file		=> SONSON_ROM_DIR & "ss_13_m1.hex",
-        widthad_a		=> 13
+        widthad_a		=> 13,
+        widthad_b		=> 13
       )
       port map
       (
-        clock			=> clk_video,
-        address		=> sprite_i.a(12 downto 0),
-        q					=> bit2_1
+        clock			  => clk_video,
+        address_a   => sprite_a_00,
+        q_a 			  => bit2_1,
+        address_b   => sprite_a_16,
+        q_b         => bit2_3
       );
       
     -- sprite rom (bit 2, part 2/2)
-    ss_14_m2_inst : entity work.sprom
+    ss_14_m2_inst : entity work.dprom_2r
       generic map
       (
         init_file		=> SONSON_ROM_DIR & "ss_14_m2.hex",
-        widthad_a		=> 13
+        widthad_a		=> 13,
+        widthad_b		=> 13
       )
       port map
       (
-        clock			=> clk_video,
-        address		=> sprite_i.a(12 downto 0),
-        q					=> bit2_2
+        clock			  => clk_video,
+        address_a   => sprite_a_00,
+        q_a 			  => bit2_2,
+        address_b   => sprite_a_16,
+        q_b         => bit2_4
       );
-      
-    sprite_o.d(23 downto 16) <= bit2_1 when sprite_i.a(13) = '0' else
-                                bit2_2;
+     
+    sprite_o.d(47 downto 32) <= (bit2_1 & bit2_3) when sprite_i.a(13) = '0' else
+                                (bit2_2 & bit2_4);
 
   end block BLK_SPRITES;
   

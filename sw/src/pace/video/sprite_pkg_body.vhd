@@ -16,14 +16,16 @@ package body sprite_pkg is
 
   function flip_row
   (
-    row_in      : SPRITE_ROW_D_t;
+    row_in      : std_logic_vector;
     flip        : std_logic
   )
-  return SPRITE_ROW_D_t is
+  return std_logic_vector is
   
-    constant HALF	    : natural := (SPRITE_ROW_D_t'length / 2) - 1;
+    constant HALF	    : natural := (row_in'length / 2) - 1;
 
-    variable row_out  : SPRITE_ROW_D_t;
+    alias row_in_0    : std_logic_vector(row_in'length-1 downto 0)
+                          is row_in;
+    variable row_out  : std_logic_vector(row_in_0'range);
     
   begin
 
@@ -31,7 +33,7 @@ package body sprite_pkg is
       return row_in;
     else
       GEN_FLIP : for i in 0 to HALF loop
-        row_out ((HALF-i)*2+1 downto (HALF-i)*2) := row_in(i*2+1 downto i*2);
+        row_out ((HALF-i)*2+1 downto (HALF-i)*2) := row_in_0(i*2+1 downto i*2);
       end loop GEN_FLIP;
       return row_out;
     end if;
