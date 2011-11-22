@@ -38,8 +38,8 @@ begin
             when "00" =>
               reg_o.y <= std_logic_vector(RESIZE(unsigned(reg_i.d), reg_o.y'length));
             when "01" =>
-              reg_o.yflip <= reg_i.d(7);
-              reg_o.xflip <= reg_i.d(6);
+              reg_o.yflip <= not reg_i.d(7);
+              reg_o.xflip <= not reg_i.d(6);
               reg_o.n(8) <= reg_i.d(5);
               reg_o.colour <= std_logic_vector(RESIZE(unsigned(reg_i.d(4 downto 0)),
                                                 reg_o.colour'length));
