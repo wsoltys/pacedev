@@ -17,6 +17,8 @@ package platform_pkg is
 	constant PACE_VIDEO_NUM_SPRITES 	    : natural := 24;
 	constant PACE_VIDEO_H_SIZE				    : integer := 256;   -- 240
 	constant PACE_VIDEO_V_SIZE				    : integer := 256;   -- 240
+  constant PACE_VIDEO_L_CROP            : integer := (256-240)/2;
+  constant PACE_VIDEO_R_CROP            : integer := PACE_VIDEO_L_CROP;
 	constant PACE_VIDEO_PIPELINE_DELAY    : integer := 3;
 	
 	constant PACE_INPUTS_NUM_BYTES        : integer := 4;

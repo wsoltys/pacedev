@@ -1,7 +1,6 @@
 library IEEE;
-use IEEE.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
-use IEEE.numeric_std.all;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 library work;
 use work.video_controller_pkg.all;
@@ -13,6 +12,8 @@ entity pace_video_controller is
 		DELAY       : integer := 1;
 		H_SIZE      : integer;
 		V_SIZE      : integer;
+    L_CROP      : integer range 0 to 255;
+    R_CROP      : integer range 0 to 255;
 		H_SCALE     : integer;
 		V_SCALE     : integer;
     H_SYNC_POL  : std_logic := '1';
@@ -90,8 +91,8 @@ architecture SYN of pace_video_controller is
   signal x_count                : count_t := 0;
   signal y_count                : count_t := 0;
   
-  signal x_s                    : std_logic_vector(10 downto 0) := (others => '0');
-  signal y_s                    : std_logic_vector(10 downto 0) := (others => '0');
+  signal x_s                    : unsigned(10 downto 0) := (others => '0');
+  signal y_s                    : unsigned(10 downto 0) := (others => '0');
   
   --signal extended_reset         : std_logic := '1';
   alias extended_reset          : std_logic is video_i.reset;
@@ -349,7 +350,7 @@ begin
       alias vactive_v       : std_logic is vactive_v_r(vactive_v_r'left);
       alias hblank_v        : std_logic is hblank_v_r(hblank_v_r'left);
       alias vblank_v        : std_logic is vblank_v_r(vblank_v_r'left);
-      variable stb_cnt_v    : std_logic_vector(3 downto 0); -- up to 16x scaling
+      variable stb_cnt_v    : unsigned(3 downto 0); -- up to 16x scaling
     begin
       if extended_reset = '1' then
         hsync_v_r := (others => not H_SYNC_POL);
@@ -371,13 +372,18 @@ begin
         elsif hblank_s = '0' and vblank_s = '0' then    
           stb_cnt_v := (others => '1');
         end if;
-        video_ctl_o.x <= std_logic_vector(resize(unsigned(x_s(x_s'left downto H_SCALE-1)), video_ctl_o.x'length)) after SIM_DELAY;
-        video_ctl_o.y <= std_logic_vector(resize(unsigned(y_s(y_s'left downto V_SCALE-1)), video_ctl_o.y'length)) after SIM_DELAY;
+        video_ctl_o.x <= std_logic_vector(resize(x_s(x_s'left downto H_SCALE-1), video_ctl_o.x'length)) after SIM_DELAY;
+        video_ctl_o.y <= std_logic_vector(resize(y_s(y_s'left downto V_SCALE-1), video_ctl_o.y'length)) after SIM_DELAY;
   
         -- register video outputs
         if hactive_v = '1' and vactive_v = '1' then
           -- active video
-          video_o.rgb <= rgb_i after SIM_DELAY;
+          if  x_s(x_s'left downto H_SCALE-1) < L_CROP or 
+              x_s(x_s'left downto H_SCALE-1) >= (H_SIZE - R_CROP) then
+            video_o.rgb <= RGB_BLACK after SIM_DELAY;
+          else
+            video_o.rgb <= rgb_i after SIM_DELAY;
+          end if;
         elsif hblank_v = '0' and vblank_v = '0' then
           -- border
           video_o.rgb <= border_rgb_r after SIM_DELAY;

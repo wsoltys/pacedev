@@ -80,6 +80,8 @@ begin
       DELAY       => PACE_VIDEO_PIPELINE_DELAY,
       H_SIZE      => PACE_VIDEO_H_SIZE,
       V_SIZE      => PACE_VIDEO_V_SIZE,
+      L_CROP      => PACE_VIDEO_L_CROP,
+      R_CROP      => PACE_VIDEO_R_CROP,
       H_SCALE     => PACE_VIDEO_H_SCALE,
       V_SCALE     => PACE_VIDEO_V_SCALE,
       H_SYNC_POL  => PACE_VIDEO_H_SYNC_POLARITY,
