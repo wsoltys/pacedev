@@ -11,6 +11,8 @@ package platform_variant_pkg is
   -- MAME says 240x292, but it's clipped in PACE
 	constant WILLIAMS_VIDEO_H_SIZE		: integer := 240+8;
 	constant WILLIAMS_VIDEO_V_SIZE		: integer := 292+8;
+	constant WILLIAMS_VIDEO_L_CROP    : integer := 0;
+	constant WILLIAMS_VIDEO_R_CROP    : integer := 0;
 
   constant WILLIAMS_HAS_BLITTER     : boolean := true;
   constant WILLIAMS_SC02_REVISION   : integer := 1;

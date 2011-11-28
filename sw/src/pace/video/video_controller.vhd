@@ -378,8 +378,8 @@ begin
         -- register video outputs
         if hactive_v = '1' and vactive_v = '1' then
           -- active video
-          if  x_s(x_s'left downto H_SCALE-1) < L_CROP or 
-              x_s(x_s'left downto H_SCALE-1) >= (H_SIZE - R_CROP) then
+          if  x_s(x_s'left downto H_SCALE-1) < (L_CROP + PIPELINE_DELAY) or 
+              x_s(x_s'left downto H_SCALE-1) >= (H_SIZE - R_CROP + PIPELINE_DELAY) then
             video_o.rgb <= RGB_BLACK after SIM_DELAY;
           else
             video_o.rgb <= rgb_i after SIM_DELAY;
