@@ -842,7 +842,7 @@ begin
     (
       clock		=> clk_vid,
       address => tilemap_i(1).tile_a(11 downto 0),
-      q				=> tilemap_o(1).tile_d
+      q				=> tilemap_o(1).tile_d(7 downto 0)
     );
     
   -- GFX2 (background characters)
@@ -856,7 +856,7 @@ begin
     (
       clock		=> clk_vid,
       address => tilemap_i(2).tile_a(12 downto 0),
-      q				=> tilemap_o(2).tile_d
+      q				=> tilemap_o(2).tile_d(7 downto 0)
     );
     
   -- WRAM1 $7800-$7FFF

@@ -52,7 +52,7 @@ begin
 		variable pal_entry  : pal_entry_typ;
 
 		variable x_adj		  : unsigned(x'range);
-    variable tile_d_r   : std_logic_vector(ctl_i.tile_d'range);
+    variable tile_d_r   : std_logic_vector(7 downto 0);
 		variable attr_d_r	  : std_logic_vector(7 downto 0);
 
   begin
