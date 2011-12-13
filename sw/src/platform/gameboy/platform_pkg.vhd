@@ -14,11 +14,11 @@ package platform_pkg is
 
 	constant PACE_VIDEO_NUM_BITMAPS 	    : natural := 0;
 	constant PACE_VIDEO_NUM_TILEMAPS 	    : natural := 1;
-	constant PACE_VIDEO_NUM_SPRITES 	    : natural := 24;
-	constant PACE_VIDEO_H_SIZE				    : integer := 256;   -- 240
-	constant PACE_VIDEO_V_SIZE				    : integer := 256;   -- 240
-  constant PACE_VIDEO_L_CROP            : integer := (256-240)/2;
-  constant PACE_VIDEO_R_CROP            : integer := PACE_VIDEO_L_CROP;
+	constant PACE_VIDEO_NUM_SPRITES 	    : natural := 8;
+	constant PACE_VIDEO_H_SIZE				    : integer := 160;
+	constant PACE_VIDEO_V_SIZE				    : integer := 144;
+  constant PACE_VIDEO_L_CROP            : integer := 0;
+  constant PACE_VIDEO_R_CROP            : integer := 0;
 	constant PACE_VIDEO_PIPELINE_DELAY    : integer := 3;
 	
 	constant PACE_INPUTS_NUM_BYTES        : integer := 4;
@@ -35,6 +35,7 @@ package platform_pkg is
 
   constant GAMEBOY_SOURCE_ROOT_DIR      : string := "../../../../../src/platform/gameboy/";
   constant GAMEBOY_ROM_DIR              : string := GAMEBOY_SOURCE_ROOT_DIR & "roms/";
+  constant GAMEBOY_CART_DIR             : string := GAMEBOY_SOURCE_ROOT_DIR & "carts/";
 
 	type palette_entry_t is array (0 to 2) of std_logic_vector(5 downto 0);
 	type palette_entry_a is array (0 to 255) of palette_entry_t;

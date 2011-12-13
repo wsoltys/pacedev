@@ -67,8 +67,11 @@ package project_pkg is
   constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 12;
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
     
-	-- Sonson constants
+	-- GameBoy constants
 	
+  constant GAMEBOY_CART_NAME                : string := "tetris10";
+  constant GAMEBOY_CART_WIDTHAD             : natural := 15;
+  
 	-- derived - do not edit
 
   constant PACE_HAS_SRAM                    : boolean := S5AR2_EMULATE_SRAM;

@@ -104,6 +104,17 @@ architecture SYN of platform is
 	signal bootrom_cs				  : std_logic;
   signal bootrom_d_o        : std_logic_vector(7 downto 0);
 	
+  -- CART signals
+  signal cart0_cs           : std_logic;
+  signal cart0_d_o          : std_logic_vector(7 downto 0);
+  signal cart4_cs           : std_logic;
+  signal cart4_d_o          : std_logic_vector(7 downto 0);
+
+    -- VIDEO RAM
+	signal video_ram_cs				: std_logic;
+  signal video_ram_d_o      : std_logic_vector(7 downto 0);
+  signal video_ram_wr       : std_logic;
+
   -- RAM signals        
 	signal ramC_cs				    : std_logic;
   signal ramC_wr            : std_logic;
@@ -115,18 +126,14 @@ architecture SYN of platform is
   -- registers
   signal ioreg_cs           : std_logic;
   signal ioreg_d_o          : std_logic_vector(7 downto 0);
-
-  -- tba
-	signal vram_cs				    : std_logic;
-  signal vram_d_o           : std_logic_vector(7 downto 0);
-  signal vram_wr            : std_logic;
-	signal cram_cs				    : std_logic;
-  signal cram_d_o           : std_logic_vector(7 downto 0);
-  signal cram_wr            : std_logic;
-  signal sprite_cs          : std_logic;
+  signal ie_cs              : std_logic;
+  -- individual registers
+  signal lcdc_r             : std_logic_vector(7 downto 0);   -- $FF40
+  signal scy_r              : std_logic_vector(7 downto 0);   -- $FF42
+  signal bootsel_r          : std_logic;                      -- $FF50
+  signal ie_r               : std_logic_vector(7 downto 0);   -- $FFFF
   
   -- I/O signals
-  signal scroll_cs          : std_logic;
   signal in0_cs             : std_logic;
   signal in1_cs             : std_logic;
   signal in2_cs             : std_logic;
@@ -134,7 +141,7 @@ architecture SYN of platform is
   signal dsw2_cs            : std_logic;
   
   -- other signals   
-	alias platform_reset			: std_logic is inputs_i(3).d(0);
+	alias platform_rst			  : std_logic is inputs_i(3).d(0);
 	alias osd_toggle          : std_logic is inputs_i(3).d(1);
 	alias platform_pause      : std_logic is inputs_i(3).d(2);
 	
@@ -159,30 +166,28 @@ begin
   begin
   
     -- BOOTROM $0000-$00FF
-    bootrom_cs <= '1' when STD_MATCH(cpu_a,    X"00"&"--------") else 
-                  '0';
+    bootrom_cs <=   '1' when STD_MATCH(cpu_a,    X"00"&"--------") else 
+                    '0';
+    -- CART ROM (BANK 1) $0000-$3FFF
+    cart0_cs <=     '1' when STD_MATCH(cpu_a,  "00--------------") else
+                    '0';
+    -- CART ROM (BANK 2) $4000-$7FFF
+    cart4_cs <=     '1' when STD_MATCH(cpu_a,  "01--------------") else
+                    '0';
+    -- VIDEO RAM $8000-$9FFF
+    video_ram_cs <= '1' when STD_MATCH(cpu_a,  "100-------------") else
+                    '0';
     -- RAM $C000-$DFFF (mirrored $E000-$FDFF)
-    ramC_cs <=		'1' when STD_MATCH(cpu_a,  "110-------------") else
-                  '1' when STD_MATCH(cpu_a,  "111-------------") else
-                  '0';
+    ramC_cs <=		  '1' when STD_MATCH(cpu_a,  "110-------------") else
+                    '1' when STD_MATCH(cpu_a,  "111-------------") else
+                    '0';
     -- I/O registers $FF00-$FF7F
-    ioreg_cs <=   '1' when STD_MATCH(cpu_a,    X"FF"&"0-------") else
-                  '0';
+    ioreg_cs <=     '1' when STD_MATCH(cpu_a,    X"FF"&"0-------") else
+                    '0';
     -- RAM $FF80-$FFFF
-    ramF_cs <=		'1' when STD_MATCH(cpu_a,    X"FF"&"1-------") else
-                  '0';
-    -- video ram $1000-$13FF
-    vram_cs <=		'1' when STD_MATCH(cpu_a,  "000100----------") else
-                  '0';
-    -- colour ram $1400-$17FF
-    cram_cs <=		'1' when STD_MATCH(cpu_a,  "000101----------") else
-                  '0';
-    -- sprite 'ram' $2020-$207F
-    sprite_cs <=	'1' when STD_MATCH(cpu_a,    X"20"&"001-----") else
-                  '1' when STD_MATCH(cpu_a,    X"20"&"01------") else
-                  '0';
+    ramF_cs <=		  '1' when STD_MATCH(cpu_a,    X"FF"&"1-------") else
+                    '0';
     -- I/O
-    scroll_cs <=  '1' when STD_MATCH(cpu_a, X"3000") else '0';
     in0_cs <=     '1' when STD_MATCH(cpu_a, X"3002") else '0';
     in1_cs <=     '1' when STD_MATCH(cpu_a, X"3003") else '0';
     in2_cs <=     '1' when STD_MATCH(cpu_a, X"3004") else '0';
@@ -190,13 +195,18 @@ begin
     dsw2_cs <=    '1' when STD_MATCH(cpu_a, X"3006") else '0';
 
     -- memory block write enables
+    video_ram_wr <= video_ram_cs and cpu_clk_en and cpu_mem_wr;
     ramC_wr <= ramC_cs and cpu_clk_en and cpu_mem_wr;
     ramF_wr <= ramF_cs and cpu_clk_en and cpu_mem_wr;
-    cram_wr <= cram_cs and cpu_clk_en and cpu_mem_wr;
 
-    mem_d_i <=  bootrom_d_o when bootrom_cs = '1' else
-                ramC_d_o when ramC_cs = '1' else
+    mem_d_i <=  bootrom_d_o when (bootrom_cs = '1' and bootsel_r = '0') else
+                cart0_d_o when cart0_cs = '1' else
+                cart4_d_o when cart4_cs = '1' else
+                video_ram_d_o when video_ram_cs = '1' else
                 ioreg_d_o when ioreg_cs = '1' else
+                ie_r when ie_cs = '1' else
+                -- decode *after* ioreg, ie because it overlaps
+                ramC_d_o when ramC_cs = '1' else
                 ramF_d_o when ramF_cs = '1' else
 --                inputs_i(0).d when in0_cs = '1' else
 --                inputs_i(1).d when in1_cs = '1' else
@@ -238,7 +248,7 @@ begin
 	cpu_clk_en <= clk_4M19_en and not platform_pause;
 
 	-- add game reset later
-	cpu_reset <= rst_sys or platform_reset;
+	cpu_reset <= rst_sys or platform_rst;
 
   BLK_CPU : block
     signal mreq_n   : std_logic;
@@ -300,18 +310,6 @@ begin
 		end if;
 	end process;
 
-  -- scroll register
-  process (clk_sys, rst_sys)
-  begin
-    if rst_sys = '1' then
-      graphics_o.bit8(0) <= (others => '0');
-    elsif rising_edge(clk_sys) then
-      if scroll_cs and cpu_clk_en and cpu_mem_wr then
-        graphics_o.bit8(0) <= cpu_d_o;
-      end if;
-    end if;
-  end process;
-  
 	GEN_FPGA_ROMS : if true generate
   begin
   
@@ -328,7 +326,119 @@ begin
         q					=> bootrom_d_o
       );
                   
+    cart0_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> GAMEBOY_CART_DIR & GAMEBOY_CART_NAME & ".hex",
+        widthad_a		=> GAMEBOY_CART_WIDTHAD
+      )
+      port map
+      (
+        clock			=> clk_sys,
+        address		=> cpu_a(GAMEBOY_CART_WIDTHAD-1 downto 0),
+        q					=> cart0_d_o
+      );
+      cart4_d_o <= cart0_d_o;
+                  
 	end generate GEN_FPGA_ROMS;
+
+  BLK_VRAM : block
+  
+    type bit_a is array (natural range <>) of std_logic;
+    type byte_a is array (natural range <>) of std_logic_vector(7 downto 0);
+    
+    signal tile_d_cs  : bit_a(0 to 2);
+    signal tile_d_wr  : bit_a(0 to 2);
+    signal tile_d_o   : byte_a(0 to 2);
+    signal tile_d_q   : byte_a(0 to 2);
+    
+    signal map_d_cs   : bit_a(0 to 1);
+    signal map_d_wr   : bit_a(0 to 1);
+    signal map_d_o    : byte_a(0 to 1);
+    signal map_d_q    : byte_a(0 to 1);
+    
+  begin
+
+    -- $8000-$87FF
+    tile_d_cs(0) <= video_ram_cs when cpu_a(12 downto 11) = "00" else '0';
+    -- $8800-$8FFF
+    tile_d_cs(1) <= video_ram_cs when cpu_a(12 downto 11) = "01" else '0';
+    -- $9000-$97FF
+    tile_d_cs(2) <= video_ram_cs when cpu_a(12 downto 11) = "10" else '0';
+    -- $9800-$9BFF
+    map_d_cs(0) <= video_ram_cs when cpu_a(12 downto 10) = "110" else '0';
+    -- $9C00-$9FFF
+    map_d_cs(1) <= video_ram_cs when cpu_a(12 downto 10) = "111" else '0';
+
+    video_ram_d_o <=  tile_d_o(0) when tile_d_cs(0) = '1' else
+                      tile_d_o(1) when tile_d_cs(1) = '1' else
+                      tile_d_o(2) when tile_d_cs(2) = '1' else
+                      map_d_o(0) when map_d_cs(0) = '1' else                      
+                      map_d_o(1);
+    
+    -- tile data mux (fudge for now)
+    tilemap_o(1).tile_d(7 downto 0) <= tile_d_q(0);
+
+    -- tile map mux (fudge for now)
+    tilemap_o(1).map_d(7 downto 0) <= map_d_q(0);
+
+    GEN_TILE_D_RAM : for i in 0 to 2 generate
+
+      tile_d_wr(i) <= tile_d_cs(i) when cpu_mem_wr = '1' else '0';
+      
+      -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+      tile_d_inst : entity work.dpram
+        generic map
+        (
+          init_file		=> "",
+          widthad_a		=> 11
+        )
+        port map
+        (
+          clock_b			=> clk_sys,
+          address_b		=> cpu_a(10 downto 0),
+          wren_b			=> tile_d_wr(i),
+          data_b			=> cpu_d_o,
+          q_b					=> tile_d_o(i),
+
+          clock_a			=> clk_video,
+          address_a		=> tilemap_i(1).tile_a(10 downto 0),
+          wren_a			=> '0',
+          data_a			=> (others => 'X'),
+          q_a					=> tile_d_q(i)
+        );
+
+    end generate GEN_TILE_D_RAM;
+    
+    GEN_MAP_D_RAM : for i in 0 to 1 generate
+    
+      map_d_wr(i) <= map_d_cs(i) when cpu_mem_wr = '1' else '0';
+
+      -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+      map_d_inst : entity work.dpram
+        generic map
+        (
+          init_file		=> "",
+          widthad_a		=> 10
+        )
+        port map
+        (
+          clock_b			=> clk_sys,
+          address_b		=> cpu_a(9 downto 0),
+          wren_b			=> map_d_wr(i),
+          data_b			=> cpu_d_o,
+          q_b					=> map_d_o(i),
+
+          clock_a			=> clk_video,
+          address_a		=> tilemap_i(1).map_a(9 downto 0),
+          wren_a			=> '0',
+          data_a			=> (others => 'X'),
+          q_a					=> map_d_q(i)
+        );
+
+    end generate GEN_MAP_D_RAM;
+    
+  end block BLK_VRAM;
 
   -- Internal RAM $C000-$DFFF
   -- - mirrored at $E000-$FDFF
@@ -347,28 +457,60 @@ begin
     );
 
   BLK_IOREG : block
+    signal  ly_um : std_logic_vector(7 downto 0);
   begin
   
-    process (clk_sys, rst_sys)
+    process (clk_sys, platform_rst)
     begin
-      if rst_sys = '1' then
+      if platform_rst = '1' then
+        lcdc_r <= X"91";
+        scy_r <= X"00";
+        bootsel_r <= '0';
       elsif rising_edge(clk_sys) then
         if cpu_clk_en = '1' then
           if ioreg_cs = '1' then 
+            -- READS
             if cpu_mem_rd = '1' then
               case cpu_a(7 downto 0) is
+                when X"40" =>
+                  ioreg_d_o <= lcdc_r;
+                when X"42" =>
+                  ioreg_d_o <= scy_r;
                 when X"44" =>
                   -- LY (0-153) (144-153 is VBLANK)
-                  -- - TBD unmeta
-                  ioreg_d_o <= graphics_i.y(7 downto 0);
+                  ioreg_d_o <= ly_um;
                 when others =>
                   null;
               end case;
-            end if; -- cpu_mem_rd
-            if cpu_mem_wr = '1' then
-            end if; -- cpu_mem_wr
+            -- WRITES
+            elsif cpu_mem_wr = '1' then
+              case cpu_a(7 downto 0) is
+                when X"40" =>
+                  lcdc_r <= cpu_d_o;
+                when X"42" =>
+                  scy_r <= cpu_d_o;
+                when X"50" =>
+                  -- can never go back
+                  bootsel_r <= '1';
+                when others =>
+                  null;
+              end case;
+            end if; -- cpu_mem_rd/wr
           end if; -- ioreg_cs
         end if; -- cpu_clk_ena
+      end if;
+    end process;
+
+    -- unmeta the video Y coordinate
+    process (clk_sys, rst_sys)
+      type ly_t is array (natural range <>) of std_logic_vector(7 downto 0);
+      variable ly_r : ly_t(3 downto 0);
+    begin
+      if rst_sys = '1' then
+        ly_r := (others => (others => '0'));
+      elsif rising_edge(clk_sys) then
+        ly_r := ly_r(ly_r'left-1 downto 0) & graphics_i.y(7 downto 0);
+        ly_um <= ly_r(ly_r'left);
       end if;
     end process;
     
@@ -389,66 +531,25 @@ begin
       q						=> ramF_d_o
     );
 
-  -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-  vram_inst : entity work.dpram
-    generic map
-    (
-      init_file		=> GAMEBOY_ROM_DIR & "vram.hex",
-      widthad_a		=> 10
-    )
-    port map
-    (
-      clock_b			=> clk_sys,
-      address_b		=> cpu_a(9 downto 0),
-      wren_b			=> vram_wr,
-      data_b			=> cpu_d_o,
-      q_b					=> vram_d_o,
-
-      clock_a			=> clk_video,
-      address_a		=> tilemap_i(1).map_a(9 downto 0),
-      wren_a			=> '0',
-      data_a			=> (others => 'X'),
-      q_a					=> tilemap_o(1).map_d(7 downto 0)
-    );
-  tilemap_o(1).map_d(tilemap_o(1).map_d'left downto 8) <= (others => 'Z');
+  -- interrupt register
+  BLK_IE : block
+  begin
+    process (clk_sys, rst_sys)
+    begin
+      if rst_sys = '1' then
+        ie_r <= (others => '0');
+      elsif rising_edge(clk_sys) then
+        if cpu_clk_en = '1' then
+          if ie_cs = '1' then
+            if cpu_mem_wr = '1' then
+              ie_r <= cpu_d_o;
+            end if;
+          end if;
+        end if;
+      end if;
+    end process;
+  end block BLK_IE;
   
-  -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-  cram_inst : entity work.dpram
-    generic map
-    (
-      init_file		=> GAMEBOY_ROM_DIR & "cram.hex",
-      widthad_a		=> 10
-    )
-    port map
-    (
-      clock_b			=> clk_sys,
-      address_b		=> cpu_a(9 downto 0),
-      wren_b			=> cram_wr,
-      data_b			=> cpu_d_o,
-      q_b					=> cram_d_o,
-
-      clock_a			=> clk_video,
-      address_a		=> tilemap_i(1).attr_a(9 downto 0),
-      wren_a			=> '0',
-      data_a			=> (others => 'X'),
-      q_a					=> tilemap_o(1).attr_d(7 downto 0)
-    );
-  tilemap_o(1).attr_d(tilemap_o(1).attr_d'left downto 8) <= (others => 'Z');
-
-  -- tile rom (bit 0)
-  ss_7_b6_inst : entity work.sprom
-    generic map
-    (
-      init_file		=> GAMEBOY_ROM_DIR & "dmg_rom.hex",
-      widthad_a		=> 13
-    )
-    port map
-    (
-      clock			=> clk_video,
-      address		=> tilemap_i(1).tile_a(12 downto 0),
-      q					=> tilemap_o(1).tile_d(7 downto 0)
-    );
-		
   BLK_SPRITES : block
     signal bit0_1       : std_logic_vector(7 downto 0);   -- offset 0
     signal bit0_2       : std_logic_vector(7 downto 0);   -- offset 0
@@ -473,7 +574,7 @@ begin
     sprite_reg_o.clk_ena <= cpu_clk_en;
     sprite_reg_o.a <= cpu_a(sprite_reg_o.a'range);
     sprite_reg_o.d <= cpu_d_o;
-    sprite_reg_o.wr <= sprite_cs and cpu_clk_en and cpu_mem_wr;
+    sprite_reg_o.wr <= '0' and cpu_clk_en and cpu_mem_wr;
 
     -- sprite rom (bit 0, part 1/2)
     ss_9_m5_inst : entity work.dprom_2r
