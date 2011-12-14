@@ -113,7 +113,6 @@ architecture SYN of platform is
     -- VIDEO RAM
 	signal video_ram_cs				: std_logic;
   signal video_ram_d_o      : std_logic_vector(7 downto 0);
-  signal video_ram_wr       : std_logic;
 
   -- RAM signals        
 	signal ramC_cs				    : std_logic;
@@ -187,6 +186,9 @@ begin
     -- RAM $FF80-$FFFF
     ramF_cs <=		  '1' when STD_MATCH(cpu_a,    X"FF"&"1-------") else
                     '0';
+    ie_cs <=        '1' when STD_MATCH(cpu_a,             X"FFFF") else
+                    '0';
+
     -- I/O
     in0_cs <=     '1' when STD_MATCH(cpu_a, X"3002") else '0';
     in1_cs <=     '1' when STD_MATCH(cpu_a, X"3003") else '0';
@@ -195,7 +197,6 @@ begin
     dsw2_cs <=    '1' when STD_MATCH(cpu_a, X"3006") else '0';
 
     -- memory block write enables
-    video_ram_wr <= video_ram_cs and cpu_clk_en and cpu_mem_wr;
     ramC_wr <= ramC_cs and cpu_clk_en and cpu_mem_wr;
     ramF_wr <= ramF_cs and cpu_clk_en and cpu_mem_wr;
 
@@ -346,14 +347,12 @@ begin
   
     type bit_a is array (natural range <>) of std_logic;
     type byte_a is array (natural range <>) of std_logic_vector(7 downto 0);
+    type word_a is array (natural range <>) of std_logic_vector(15 downto 0);
     
-    signal tile_d_cs    : bit_a(0 to 2);
-    signal tile_d0_wr   : bit_a(0 to 2);
-    signal tile_d1_wr   : bit_a(0 to 2);
-    signal tile_d0_o    : byte_a(0 to 2);
-    signal tile_d0_q    : byte_a(0 to 2);
-    signal tile_d1_o    : byte_a(0 to 2);
-    signal tile_d1_q    : byte_a(0 to 2);
+    signal tile_d_cs  : bit_a(0 to 2);
+    signal tile_d_wr  : bit_a(0 to 2);
+    signal tile_d_o   : byte_a(0 to 2);
+    signal tile_d_q   : word_a(0 to 2);
 
     signal map_d_cs   : bit_a(0 to 1);
     signal map_d_wr   : bit_a(0 to 1);
@@ -374,20 +373,20 @@ begin
     map_d_cs(1) <= video_ram_cs when cpu_a(12 downto 10) = "111" else '0';
 
     video_ram_d_o <=  
-      tile_d0_o(0) when (tile_d_cs(0) = '1' and cpu_a(0) = '0') else
-      tile_d1_o(0) when (tile_d_cs(0) = '1' and cpu_a(0) = '1') else
-      tile_d0_o(1) when (tile_d_cs(1) = '1' and cpu_a(0) = '0') else
-      tile_d1_o(1) when (tile_d_cs(1) = '1' and cpu_a(0) = '1') else
-      tile_d0_o(2) when (tile_d_cs(2) = '1' and cpu_a(0) = '0') else
-      tile_d1_o(2) when (tile_d_cs(2) = '1' and cpu_a(0) = '1') else
+      tile_d_o(0) when tile_d_cs(0) = '1' else
+      tile_d_o(1) when tile_d_cs(1) = '1' else
+      tile_d_o(2) when tile_d_cs(2) = '1' else
       map_d_o(0) when map_d_cs(0) = '1' else                      
       map_d_o(1);
+
+    -- this register affects the tile addr generation
+    graphics_o.bit8(0) <= lcdc_r;
     
     -- tile data mux
     tilemap_o(1).tile_d(15 downto 0) <=
-      (tile_d1_q(0) & tile_d0_q(0)) when (lcdc_r(4) = '1' and tilemap_i(1).tile_a(11) = '0') else
-      (tile_d1_q(2) & tile_d0_q(2)) when (lcdc_r(4) = '0' and tilemap_i(1).tile_a(11) = '1') else
-      (tile_d1_q(1) & tile_d0_q(1));
+      tile_d_q(0) when (lcdc_r(4) = '1' and tilemap_i(1).tile_a(11) = '0') else
+      tile_d_q(2) when (lcdc_r(4) = '0' and tilemap_i(1).tile_a(11) = '1') else
+      tile_d_q(1);
 
     -- tile map mux
     tilemap_o(1).map_d(7 downto 0) <= 
@@ -396,53 +395,31 @@ begin
 
     GEN_TILE_D_RAM : for i in 0 to 2 generate
 
-      tile_d0_wr(i) <= 
-        tile_d_cs(i) when (cpu_a(0) = '0' and cpu_mem_wr = '1') else '0';
+      tile_d_wr(i) <= tile_d_cs(i) when cpu_mem_wr = '1' else '0';
 
-      tile_d1_wr(i) <= 
-        tile_d_cs(i) when (cpu_a(0) = '1' and cpu_mem_wr = '1') else '0';
-      
       -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-      tile_d0_inst : entity work.dpram
+      tile_d_inst : entity work.dpram_ex
         generic map
         (
           init_file		=> "",
-          widthad_a		=> 10
+          widthad_a		=> 9,
+          width_a     => 16,
+          widthad_b		=> 10,
+          width_b     => 8
         )
         port map
         (
           clock_b			=> clk_sys,
-          address_b		=> cpu_a(10 downto 1),
-          wren_b			=> tile_d0_wr(i),
+          address_b		=> cpu_a(9 downto 0),
+          wren_b			=> tile_d_wr(i),
           data_b			=> cpu_d_o,
-          q_b					=> tile_d0_o(i),
+          q_b					=> tile_d_o(i),
 
           clock_a			=> clk_video,
-          address_a		=> tilemap_i(1).tile_a(10 downto 1),
+          address_a		=> tilemap_i(1).tile_a(9 downto 1),
           wren_a			=> '0',
           data_a			=> (others => 'X'),
-          q_a					=> tile_d0_q(i)
-        );
-
-      tile_d1_inst : entity work.dpram
-        generic map
-        (
-          init_file		=> "",
-          widthad_a		=> 10
-        )
-        port map
-        (
-          clock_b			=> clk_sys,
-          address_b		=> cpu_a(10 downto 1),
-          wren_b			=> tile_d1_wr(i),
-          data_b			=> cpu_d_o,
-          q_b					=> tile_d1_o(i),
-
-          clock_a			=> clk_video,
-          address_a		=> tilemap_i(1).tile_a(10 downto 1),
-          wren_a			=> '0',
-          data_a			=> (others => 'X'),
-          q_a					=> tile_d1_q(i)
+          q_a					=> tile_d_q(i)
         );
 
     end generate GEN_TILE_D_RAM;

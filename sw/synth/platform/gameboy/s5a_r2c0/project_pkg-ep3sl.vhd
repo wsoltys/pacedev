@@ -62,7 +62,7 @@ package project_pkg is
   constant S5AR2_DOUBLE_VDO_IDCK            : boolean := false;
 
   -- always need SRAM (for now, use for WRAM)
-  constant S5AR2_EMULATE_SRAM               : boolean := true;
+  constant S5AR2_EMULATE_SRAM               : boolean := false;
   -- $0000-$0FFF
   constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 12;
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;

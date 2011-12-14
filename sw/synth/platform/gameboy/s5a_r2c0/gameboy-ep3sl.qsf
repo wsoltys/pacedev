@@ -2241,45 +2241,6 @@ set_instance_assignment -name GLOBAL_SIGNAL "GLOBAL CLOCK" -from "pll:\\BLK_CLOC
 set_instance_assignment -name GLOBAL_SIGNAL "GLOBAL CLOCK" -from "pll:\\BLK_CLOCKING:GEN_PLL:pll_inst|altpll:altpll_component|clk[1]" -to *
 set_instance_assignment -name GLOBAL_SIGNAL "GLOBAL CLOCK" -from "PACE:pace_inst|platform:platform_inst|clk_2M_en" -to *
 set_global_assignment -name MUX_RESTRUCTURE OFF
-set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sdram_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/bitmapctl_e.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/tilemapctl_e.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/gameboy/platform_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2c0/target_pkg_ep3sl.vhd
-set_global_assignment -name VHDL_FILE ../../../device/stratixiii/pll.vhd
-set_global_assignment -name VHDL_FILE ../../../device/stratixiii/sprom.vhd
-set_global_assignment -name VHDL_FILE ../../../device/stratixiii/dprom_2r.vhd
-set_global_assignment -name VHDL_FILE ../../../device/stratixiii/dpram.vhd
-set_global_assignment -name VHDL_FILE ../../../device/stratixiii/spram.vhd
-set_global_assignment -name VHDL_FILE "project_pkg-ep3sl.vhd"
-set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/gameboy/inputmapper.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/inputs.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_array.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/sonson/spritereg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_mixer.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/gameboy/tilemapctl.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/gameboy/spritectl.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/Graphics.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_Pack.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_Reg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_MCode.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_ALU.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80se.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/gameboy/platform.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2c0/target_top_ep3sl.vhd
-set_global_assignment -name SIGNALTAP_FILE cpu.stp
 set_global_assignment -name SLD_NODE_CREATOR_ID 110 -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_ENTITY_NAME sld_signaltap -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to "PACE:pace_inst|platform:platform_inst|T80se:\\BLK_CPU:cpu_inst|CLK_n" -section_id auto_signaltap_0
@@ -2395,4 +2356,44 @@ set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=00
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=162" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=9435" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=8739" -section_id auto_signaltap_0
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sdram_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/bitmapctl_e.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/tilemapctl_e.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/gameboy/platform_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2c0/target_pkg_ep3sl.vhd
+set_global_assignment -name VHDL_FILE ../../../device/stratixiii/pll.vhd
+set_global_assignment -name VHDL_FILE ../../../device/stratixiii/sprom.vhd
+set_global_assignment -name VHDL_FILE ../../../device/stratixiii/dprom_2r.vhd
+set_global_assignment -name VHDL_FILE ../../../device/stratixiii/dpram.vhd
+set_global_assignment -name VHDL_FILE ../../../device/stratixiii/dpram_ex.vhd
+set_global_assignment -name VHDL_FILE ../../../device/stratixiii/spram.vhd
+set_global_assignment -name VHDL_FILE "project_pkg-ep3sl.vhd"
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/gameboy/inputmapper.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/inputs.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_array.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/sonson/spritereg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_mixer.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/gameboy/tilemapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/gameboy/spritectl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/Graphics.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_Pack.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_Reg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_MCode.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_ALU.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80se.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/gameboy/platform.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2c0/target_top_ep3sl.vhd
+set_global_assignment -name SIGNALTAP_FILE cpu.stp
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
