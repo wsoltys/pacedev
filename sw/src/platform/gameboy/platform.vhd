@@ -98,7 +98,9 @@ architecture SYN of platform is
 	signal cpu_a				      : std_logic_vector(15 downto 0);
 	signal cpu_d_i			      : std_logic_vector(7 downto 0);
 	signal cpu_d_o			      : std_logic_vector(7 downto 0);
-	signal cpu_irq				    : std_logic;
+	signal cpu_int_n				  : std_logic;
+	signal cpu_int_ack			  : std_logic;
+	signal cpu_int_vec        : std_logic_vector(7 downto 0);
 
   -- ROM signals        
 	signal bootrom_cs				  : std_logic;
@@ -127,18 +129,15 @@ architecture SYN of platform is
   signal ioreg_d_o          : std_logic_vector(7 downto 0);
   signal ie_cs              : std_logic;
   -- individual registers
+  signal tima_r             : std_logic_vector(7 downto 0);   -- $FF05
+  signal tma_r              : std_logic_vector(7 downto 0);   -- $FF06
+  signal tac_r              : std_logic_vector(7 downto 0);   -- $FF07
+  signal if_r               : std_logic_vector(7 downto 0);   -- $FF0F
   signal lcdc_r             : std_logic_vector(7 downto 0);   -- $FF40
   signal scy_r              : std_logic_vector(7 downto 0);   -- $FF42
   signal scx_r              : std_logic_vector(7 downto 0);   -- $FF43
   signal bootsel_r          : std_logic;                      -- $FF50
   signal ie_r               : std_logic_vector(7 downto 0);   -- $FFFF
-  
-  -- I/O signals
-  signal in0_cs             : std_logic;
-  signal in1_cs             : std_logic;
-  signal in2_cs             : std_logic;
-  signal dsw1_cs            : std_logic;
-  signal dsw2_cs            : std_logic;
   
   -- other signals   
 	alias platform_rst			  : std_logic is inputs_i(3).d(0);
@@ -189,13 +188,6 @@ begin
                     '0';
     ie_cs <=        '1' when STD_MATCH(cpu_a,             X"FFFF") else
                     '0';
-
-    -- I/O
-    in0_cs <=     '1' when STD_MATCH(cpu_a, X"3002") else '0';
-    in1_cs <=     '1' when STD_MATCH(cpu_a, X"3003") else '0';
-    in2_cs <=     '1' when STD_MATCH(cpu_a, X"3004") else '0';
-    dsw1_cs <=    '1' when STD_MATCH(cpu_a, X"3005") else '0';
-    dsw2_cs <=    '1' when STD_MATCH(cpu_a, X"3006") else '0';
 
     -- memory block write enables
     ramC_wr <= ramC_cs and cpu_clk_en and cpu_mem_wr;
@@ -253,16 +245,22 @@ begin
 	cpu_reset <= rst_sys or platform_rst;
 
   BLK_CPU : block
+    signal m1_n     : std_logic;
     signal mreq_n   : std_logic;
     signal iorq_n   : std_logic;
     signal rd_n     : std_logic;
     signal wr_n     : std_logic;
+    signal di       : std_logic_vector(7 downto 0);
   begin
   
 	  cpu_mem_rd <= mreq_n nor rd_n;
 	  cpu_mem_wr <= mreq_n nor wr_n;
     cpu_io_rd <= iorq_n nor rd_n;
     cpu_io_wr <= iorq_n nor wr_n;
+    cpu_int_ack <= m1_n nor iorq_n;
+    
+    di <= cpu_int_vec when (cpu_mem_rd = '0' and cpu_mem_wr = '0') else
+          cpu_d_i;
     
     cpu_inst : entity work.GBse
       port map
@@ -271,10 +269,10 @@ begin
         CLK_n           => clk_sys,
         CLKEN           => cpu_clk_en,
         WAIT_n          => '1',
-        INT_n           => '1',
+        INT_n           => cpu_int_n,
         NMI_n           => '1',
         BUSRQ_n         => '1',
-        M1_n            => open,
+        M1_n            => m1_n,
         MREQ_n          => mreq_n,
         IORQ_n          => iorq_n,
         RD_n            => rd_n,
@@ -283,31 +281,11 @@ begin
         HALT_n          => open,
         BUSAK_n         => open,
         A               => cpu_a,
-        DI              => cpu_d_i,
+        DI              => di,
         DO              => cpu_d_o
       );
   end block BLK_CPU;
   
-	-- irq vblank interrupt
-	process (clk_sys, rst_sys)
-    variable vblank_r : std_logic_vector(3 downto 0);
-    alias vblank_prev : std_logic is vblank_r(vblank_r'left);
-    alias vblank_um   : std_logic is vblank_r(vblank_r'left-1);
-	begin
-		if rst_sys = '1' then
-			vblank_r := (others => '0');
-      cpu_irq <= '0';
-		elsif rising_edge(clk_sys) then
-			if vblank_um = '1' and vblank_prev = '0' then
-				cpu_irq <= '1';
-      elsif vblank_um = '0' then
-        cpu_irq <= '0';
-			end if;
-      -- numeta the vblank
-      vblank_r := vblank_r(vblank_r'left-1 downto 0) & graphics_i.vblank;
-		end if;
-	end process;
-
 	GEN_FPGA_ROMS : if true generate
   begin
   
@@ -401,21 +379,21 @@ begin
         generic map
         (
           init_file		=> "",
-          widthad_a		=> 9,
+          widthad_a		=> 10,
           width_a     => 16,
-          widthad_b		=> 10,
+          widthad_b		=> 11,
           width_b     => 8
         )
         port map
         (
           clock_b			=> clk_sys,
-          address_b		=> cpu_a(9 downto 0),
+          address_b		=> cpu_a(10 downto 0),
           wren_b			=> tile_d_wr(i),
           data_b			=> cpu_d_o,
           q_b					=> tile_d_o(i),
 
           clock_a			=> clk_video,
-          address_a		=> tilemap_i(1).tile_a(9 downto 1),
+          address_a		=> tilemap_i(1).tile_a(10 downto 1),
           wren_a			=> '0',
           data_a			=> (others => 'X'),
           q_a					=> tile_d_q(i)
@@ -470,12 +448,20 @@ begin
     );
 
   BLK_IOREG : block
-    signal  ly_um : std_logic_vector(7 downto 0);
+    signal tick_262k144   : std_logic;
+    signal tick_65k536    : std_logic;
+    signal tick_16k384    : std_logic;
+    signal tick_4k096     : std_logic;
+    signal ly_um          : std_logic_vector(7 downto 0);
+    signal vblank_p       : std_logic;
   begin
   
     process (clk_sys, platform_rst)
     begin
       if platform_rst = '1' then
+        tima_r <= X"00";
+        tma_r <= X"00";
+        tac_r <= X"00";
         lcdc_r <= X"91";
         scy_r <= X"00";
         scx_r <= X"00";
@@ -485,6 +471,14 @@ begin
           -- READS
           if cpu_mem_rd = '1' then
             case cpu_a(7 downto 0) is
+              when X"05" =>
+                ioreg_d_o <= tima_r;
+              when X"06" =>
+                ioreg_d_o <= tma_r;
+              when X"07" =>
+                ioreg_d_o <= tac_r;
+              when X"0F" =>
+                ioreg_d_o <= if_r;
               when X"40" =>
                 ioreg_d_o <= lcdc_r;
               when X"42" =>
@@ -501,6 +495,12 @@ begin
           elsif cpu_mem_wr = '1' then
             if cpu_clk_en = '1' then
               case cpu_a(7 downto 0) is
+                when X"05" =>
+                  tima_r <= cpu_d_o;
+                when X"06" =>
+                  tma_r <= cpu_d_o;
+                when X"07" =>
+                  tac_r <= cpu_d_o;
                 when X"40" =>
                   lcdc_r <= cpu_d_o;
                 when X"42" =>
@@ -519,6 +519,110 @@ begin
       end if;
     end process;
 
+    -- interrupt register and interrupts
+    -- $FF0F
+    process (clk_sys, rst_sys)
+      variable vblank_r : std_logic;
+    begin
+      if platform_rst = '1' then
+        if_r <= (others => '0');
+        vblank_r := '0';
+      elsif rising_edge(clk_sys) then
+
+        -- register
+        if ioreg_cs = '1' then 
+          -- WRITES
+          if cpu_mem_wr = '1' then
+            if cpu_clk_en = '1' then
+              case cpu_a(7 downto 0) is
+                when X"0F" =>
+                  if_r <= cpu_d_o;
+                when others =>
+                  null;
+              end case;
+            end if; -- cpu_clk_en
+          end if; -- cpu_mem_rd/wr
+        end if; -- ioreg_cs
+        
+        -- interrupts
+        if vblank_r = '0' and vblank_p = '1' then
+          if_r(0) <= '1';
+        end if;
+        vblank_r := vblank_p;
+
+        -- descending priority
+        if ie_r(0) = '1' and if_r(0) = '1' then
+          if cpu_int_ack = '0' then
+            cpu_int_vec <= X"40";
+          else
+            if_r(0) <= '0';
+          end if;
+        elsif ie_r(1) = '1' and if_r(1) = '1' then
+          if cpu_int_ack = '0' then
+            cpu_int_vec <= X"48";
+          else
+            if_r(1) <= '0';
+          end if;
+        elsif ie_r(2) = '1' and if_r(2) = '1' then
+          if cpu_int_ack = '0' then
+            cpu_int_vec <= X"50";
+          else
+            if_r(2) <= '0';
+          end if;
+        elsif ie_r(3) = '1' and if_r(3) = '1' then
+          if cpu_int_ack = '0' then
+            cpu_int_vec <= X"58";
+          else
+            if_r(3) <= '0';
+          end if;
+        elsif ie_r(4) = '1' and if_r(4) = '1' then
+          if cpu_int_ack = '0' then
+            cpu_int_vec <= X"60";
+          else
+            if_r(4) <= '0';
+          end if;
+        end if;
+
+        -- generate CPU interrupt line
+        if (ie_r(4 downto 0) and if_r(4 downto 0)) /= "00000" then
+          cpu_int_n <= '0';
+        else
+          cpu_int_n <= '1';
+        end if;
+        
+      end if;
+    end process;
+    
+
+    -- timer implementation
+    process (clk_sys, rst_sys)
+      variable count : unsigned(9 downto 0);
+    begin
+      if rst_sys = '1' then
+        count := (others => '0');
+      elsif rising_edge(clk_sys) then
+        if clk_4M19_en = '1' then
+          tick_262k144 <= '0';
+          tick_65k536 <= '0';
+          tick_16k384 <= '0';
+          tick_4k096 <= '0';
+          if count(3 downto 0) = "0000" then
+            tick_262k144 <= '1';
+            if count(5 downto 4) = "00" then
+              tick_65k536 <= '1';
+              if count(7 downto 6) = "00" then
+                tick_16k384 <= '1';
+                if count(9 downto 8) = "00" then
+                  tick_4k096 <= '1';
+                end if; -- 9..8
+              end if; -- 7..6
+            end if; -- 5..4
+          end if; -- 3 downto 0
+          count := count + 1;
+        end if;
+      end if;
+    end process;
+    
     -- unmeta the video Y coordinate
     process (clk_sys, rst_sys)
       type ly_t is array (natural range <>) of std_logic_vector(7 downto 0);
@@ -526,8 +630,20 @@ begin
     begin
       if rst_sys = '1' then
         ly_r := (others => (others => '0'));
+        vblank_p <= '0';
       elsif rising_edge(clk_sys) then
-        ly_r := ly_r(ly_r'left-1 downto 0) & graphics_i.y(7 downto 0);
+        -- ensure we don't wrap at 256
+        if graphics_i.y(10 downto 8) = "000" then
+          -- check for vblank
+          vblank_p <= '0';
+          -- VBLANK starts at line 144
+          if graphics_i.y(7 downto 0) = X"90" then
+            vblank_p <= '1';
+          end if;
+          ly_r := ly_r(ly_r'left-1 downto 0) & graphics_i.y(7 downto 0);
+        else
+          ly_r := ly_r(ly_r'left-1 downto 0) & X"FF";
+        end if;
         ly_um <= ly_r(ly_r'left);
       end if;
     end process;

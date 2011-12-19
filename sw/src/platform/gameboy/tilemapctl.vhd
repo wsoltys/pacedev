@@ -91,7 +91,8 @@ begin
           end if;
         end if;
         -- 1 bit from each byte
-        pel := tile_d_r(15) & tile_d_r(7);
+        --pel := tile_d_r(15) & tile_d_r(7);
+        pel := tile_d_r(7) & tile_d_r(15);
 
         -- extract R,G,B from colour palette
         pel_i := to_integer(unsigned(pel));
