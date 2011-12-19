@@ -136,7 +136,7 @@ package video_controller_pkg is
   type to_GRAPHICS_t is record
     pal       : PAL_A_t(15 downto 0);
     -- for various uses
-    bit8      : BYTE_A_t(0 to 1);
+    bit8      : BYTE_A_t(0 to 7);
     bit16     : WORD_A_t(0 to 3);
   end record;
 

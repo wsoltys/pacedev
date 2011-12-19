@@ -37,15 +37,16 @@ package platform_pkg is
   constant GAMEBOY_ROM_DIR              : string := GAMEBOY_SOURCE_ROOT_DIR & "roms/";
   constant GAMEBOY_CART_DIR             : string := GAMEBOY_SOURCE_ROOT_DIR & "carts/";
 
-	type palette_entry_t is array (0 to 2) of std_logic_vector(5 downto 0);
+	type palette_entry_t is array (0 to 2) of std_logic_vector(7 downto 0);
 	type palette_entry_a is array (0 to 3) of palette_entry_t;
 
+  -- values from wikipedia entry on "console palettes"
 	constant pal : palette_entry_a :=
 	(
-    1 => (0=>"100111", 1=>"100111", 2=>"100111"),
-    2 => (0=>"000000", 1=>"100011", 2=>"000000"),
-    3 => (0=>"011100", 1=>"001011", 2=>"000111"),
-		others => (others => (others => '0'))
+    0 => (0=>X"9B", 1=>X"BC", 2=>X"0F"),
+    1 => (0=>X"8B", 1=>X"AC", 2=>X"0F"),
+    2 => (0=>X"30", 1=>X"62", 2=>X"30"),
+    3 => (0=>X"0F", 1=>X"38", 2=>X"0F")
 	);
  
   type from_PLATFORM_IO_t is record

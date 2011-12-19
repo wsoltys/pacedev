@@ -23,14 +23,20 @@ architecture TILEMAP_1 of tilemapCtl is
   alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
   
   alias lcdc      : std_logic_vector(7 downto 0) is graphics_i.bit8(0);
+  alias scy       : std_logic_vector(7 downto 0) is graphics_i.bit8(1);
+  alias scx       : std_logic_vector(7 downto 0) is graphics_i.bit8(2);
+
+  signal y_adj		: std_logic_vector(y'range);
   
 begin
 
+  y_adj <= std_logic_vector(unsigned(y)+ unsigned(scy));
+
 	-- these are constant for a whole line
   ctl_o.map_a(ctl_o.map_a'left downto 10) <= (others => '0');
-  ctl_o.map_a(9 downto 5) <= y(7 downto 3);
+  ctl_o.map_a(9 downto 5) <= y_adj(7 downto 3);
   ctl_o.tile_a(ctl_o.tile_a'left downto 12) <= (others => '0');
-  ctl_o.tile_a(3 downto 1) <= y(2 downto 0);
+  ctl_o.tile_a(3 downto 1) <= y_adj(2 downto 0);
   ctl_o.tile_a(0) <= '0'; -- not used since we're reading 2 bytes
 
   -- no attribute (atm)
@@ -90,9 +96,9 @@ begin
         -- extract R,G,B from colour palette
         pel_i := to_integer(unsigned(pel));
         pal_entry := pal(pel_i);
-        ctl_o.rgb.r <= pal_entry(0) & "0000";
-        ctl_o.rgb.g <= pal_entry(1) & "0000";
-        ctl_o.rgb.b <= pal_entry(2) & "0000";
+        ctl_o.rgb.r <= pal_entry(0) & "00";
+        ctl_o.rgb.g <= pal_entry(1) & "00";
+        ctl_o.rgb.b <= pal_entry(2) & "00";
 
         ctl_o.set <= '1';
 

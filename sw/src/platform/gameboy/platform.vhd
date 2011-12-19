@@ -129,6 +129,7 @@ architecture SYN of platform is
   -- individual registers
   signal lcdc_r             : std_logic_vector(7 downto 0);   -- $FF40
   signal scy_r              : std_logic_vector(7 downto 0);   -- $FF42
+  signal scx_r              : std_logic_vector(7 downto 0);   -- $FF43
   signal bootsel_r          : std_logic;                      -- $FF50
   signal ie_r               : std_logic_vector(7 downto 0);   -- $FFFF
   
@@ -212,13 +213,13 @@ begin
 --                inputs_i(0).d when in0_cs = '1' else
 --                inputs_i(1).d when in1_cs = '1' else
 --                inputs_i(2).d when in2_cs = '1' else
-                (others => 'Z');
+                (others => '0');
 
     io_d_i <=   X"FF";
     
     -- memory read mux
-    cpu_d_i <=  mem_d_i when cpu_mem_rd = '1' else
-                io_d_i;
+    cpu_d_i <=  mem_d_i; -- when cpu_mem_rd = '1' else
+                --io_d_i;
                 
   end block BLK_DECODE;
   
@@ -263,11 +264,7 @@ begin
     cpu_io_rd <= iorq_n nor rd_n;
     cpu_io_wr <= iorq_n nor wr_n;
     
-    cpu_inst : entity work.T80se
-      generic map
-      (
-        Mode            => 3
-      )
+    cpu_inst : entity work.GBse
       port map
       (
         RESET_n         => not cpu_reset,
@@ -381,6 +378,8 @@ begin
 
     -- this register affects the tile addr generation
     graphics_o.bit8(0) <= lcdc_r;
+    graphics_o.bit8(1) <= scy_r;
+    graphics_o.bit8(2) <= scx_r;
     
     -- tile data mux
     tilemap_o(1).tile_d(15 downto 0) <=
@@ -479,39 +478,44 @@ begin
       if platform_rst = '1' then
         lcdc_r <= X"91";
         scy_r <= X"00";
+        scx_r <= X"00";
         bootsel_r <= '0';
       elsif rising_edge(clk_sys) then
-        if cpu_clk_en = '1' then
-          if ioreg_cs = '1' then 
-            -- READS
-            if cpu_mem_rd = '1' then
-              case cpu_a(7 downto 0) is
-                when X"40" =>
-                  ioreg_d_o <= lcdc_r;
-                when X"42" =>
-                  ioreg_d_o <= scy_r;
-                when X"44" =>
-                  -- LY (0-153) (144-153 is VBLANK)
-                  ioreg_d_o <= ly_um;
-                when others =>
-                  null;
-              end case;
-            -- WRITES
-            elsif cpu_mem_wr = '1' then
+        if ioreg_cs = '1' then 
+          -- READS
+          if cpu_mem_rd = '1' then
+            case cpu_a(7 downto 0) is
+              when X"40" =>
+                ioreg_d_o <= lcdc_r;
+              when X"42" =>
+                ioreg_d_o <= scy_r;
+              when X"43" =>
+                ioreg_d_o <= scx_r;
+              when X"44" =>
+                -- LY (0-153) (144-153 is VBLANK)
+                ioreg_d_o <= ly_um;
+              when others =>
+                null;
+            end case;
+          -- WRITES
+          elsif cpu_mem_wr = '1' then
+            if cpu_clk_en = '1' then
               case cpu_a(7 downto 0) is
                 when X"40" =>
                   lcdc_r <= cpu_d_o;
                 when X"42" =>
                   scy_r <= cpu_d_o;
+                when X"43" =>
+                  scx_r <= cpu_d_o;
                 when X"50" =>
                   -- can never go back
                   bootsel_r <= '1';
                 when others =>
                   null;
               end case;
-            end if; -- cpu_mem_rd/wr
-          end if; -- ioreg_cs
-        end if; -- cpu_clk_ena
+            end if; -- cpu_clk_en
+          end if; -- cpu_mem_rd/wr
+        end if; -- ioreg_cs
       end if;
     end process;
 
@@ -553,9 +557,9 @@ begin
       if rst_sys = '1' then
         ie_r <= (others => '0');
       elsif rising_edge(clk_sys) then
-        if cpu_clk_en = '1' then
-          if ie_cs = '1' then
-            if cpu_mem_wr = '1' then
+        if ie_cs = '1' then
+          if cpu_mem_wr = '1' then
+            if cpu_clk_en = '1' then
               ie_r <= cpu_d_o;
             end if;
           end if;
