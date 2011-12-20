@@ -259,7 +259,7 @@ begin
     cpu_io_wr <= iorq_n nor wr_n;
     cpu_int_ack <= m1_n nor iorq_n;
     
-    di <= cpu_int_vec when (cpu_mem_rd = '0' and cpu_mem_wr = '0') else
+    di <= cpu_int_vec when (cpu_mem_rd = '0' and cpu_io_rd = '0') else
           cpu_d_i;
     
     cpu_inst : entity work.GBse
@@ -521,7 +521,7 @@ begin
 
     -- interrupt register and interrupts
     -- $FF0F
-    process (clk_sys, rst_sys)
+    process (clk_sys, platform_rst)
       variable vblank_r : std_logic;
     begin
       if platform_rst = '1' then
@@ -550,55 +550,40 @@ begin
         end if;
         vblank_r := vblank_p;
 
-        -- descending priority
-        if ie_r(0) = '1' and if_r(0) = '1' then
-          if cpu_int_ack = '0' then
-            cpu_int_vec <= X"40";
-          else
-            if_r(0) <= '0';
-          end if;
-        elsif ie_r(1) = '1' and if_r(1) = '1' then
-          if cpu_int_ack = '0' then
-            cpu_int_vec <= X"48";
-          else
-            if_r(1) <= '0';
-          end if;
-        elsif ie_r(2) = '1' and if_r(2) = '1' then
-          if cpu_int_ack = '0' then
-            cpu_int_vec <= X"50";
-          else
-            if_r(2) <= '0';
-          end if;
-        elsif ie_r(3) = '1' and if_r(3) = '1' then
-          if cpu_int_ack = '0' then
-            cpu_int_vec <= X"58";
-          else
-            if_r(3) <= '0';
-          end if;
-        elsif ie_r(4) = '1' and if_r(4) = '1' then
-          if cpu_int_ack = '0' then
-            cpu_int_vec <= X"60";
-          else
-            if_r(4) <= '0';
-          end if;
-        end if;
-
-        -- generate CPU interrupt line
-        if (ie_r(4 downto 0) and if_r(4 downto 0)) /= "00000" then
-          cpu_int_n <= '0';
-        else
-          cpu_int_n <= '1';
-        end if;
-        
+        -- interrupt acknowledge
+        if cpu_int_n = '0' then
+          if cpu_int_ack = '1' then
+            if ie_r(0) = '1' and if_r(0) = '1' then
+              if_r(0) <= '0';
+            elsif ie_r(1) = '1' and if_r(1) = '1' then
+              if_r(1) <= '0';
+            elsif ie_r(2) = '1' and if_r(2) = '1' then
+              if_r(2) <= '0';
+            elsif ie_r(3) = '1' and if_r(3) = '1' then
+              if_r(4) <= '0';
+            end if;
+          end if; -- cpu_int_ack
+        end if; -- cpu_int_n
+       
       end if;
     end process;
     
+    -- generate CPU interrupt line
+    cpu_int_n <=  '0' when (ie_r(4 downto 0) and if_r(4 downto 0)) /= "00000" else
+                  '1';
+    
+    -- generate interrupt vector (priority encoded)
+    cpu_int_vec <=  X"40" when (ie_r(0) = '1' and if_r(0) = '1') else
+                    X"48" when (ie_r(1) = '1' and if_r(1) = '1') else
+                    X"50" when (ie_r(2) = '1' and if_r(2) = '1') else
+                    X"58" when (ie_r(3) = '1' and if_r(3) = '1') else
+                    X"60";
 
     -- timer implementation
-    process (clk_sys, rst_sys)
+    process (clk_sys, platform_rst)
       variable count : unsigned(9 downto 0);
     begin
-      if rst_sys = '1' then
+      if platform_rst = '1' then
         count := (others => '0');
       elsif rising_edge(clk_sys) then
         if clk_4M19_en = '1' then
@@ -668,9 +653,9 @@ begin
   -- interrupt register
   BLK_IE : block
   begin
-    process (clk_sys, rst_sys)
+    process (clk_sys, platform_rst)
     begin
-      if rst_sys = '1' then
+      if platform_rst = '1' then
         ie_r <= (others => '0');
       elsif rising_edge(clk_sys) then
         if ie_cs = '1' then
@@ -711,21 +696,21 @@ begin
     sprite_reg_o.wr <= '0' and cpu_clk_en and cpu_mem_wr;
 
     -- sprite rom (bit 0, part 1/2)
-    ss_9_m5_inst : entity work.dprom_2r
-      generic map
-      (
-        --init_file		=> GAMEBOY_ROM_DIR & "ss_9_m5.hex",
-        widthad_a		=> 13,
-        widthad_b		=> 13
-      )
-      port map
-      (
-        clock			  => clk_video,
-        address_a   => sprite_a_00,
-        q_a 			  => bit0_1,
-        address_b   => sprite_a_16,
-        q_b         => sprite_o.d(7 downto 0)
-      );
+--    ss_9_m5_inst : entity work.dprom_2r
+--      generic map
+--      (
+--        --init_file		=> GAMEBOY_ROM_DIR & "ss_9_m5.hex",
+--        widthad_a		=> 13,
+--        widthad_b		=> 13
+--      )
+--      port map
+--      (
+--        clock			  => clk_video,
+--        address_a   => sprite_a_00,
+--        q_a 			  => bit0_1,
+--        address_b   => sprite_a_16,
+--        q_b         => sprite_o.d(7 downto 0)
+--      );
 
   end block BLK_SPRITES;
   
