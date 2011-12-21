@@ -199,9 +199,10 @@ begin
                 video_ram_d_o when video_ram_cs = '1' else
                 io_d_o when io_cs = '1' else
                 ie_r when ie_cs = '1' else
-                -- decode *after* ioreg, ie because it overlaps
-                ramC_d_o when ramC_cs = '1' else
+                -- decode RAM blocks *after* ioreg, ie because it overlaps
+                -- decode RAMF block before ramC block because they overlap
                 ramF_d_o when ramF_cs = '1' else
+                ramC_d_o when ramC_cs = '1' else
 --                inputs_i(0).d when in0_cs = '1' else
 --                inputs_i(1).d when in1_cs = '1' else
 --                inputs_i(2).d when in2_cs = '1' else
