@@ -60,6 +60,14 @@ use IEEE.std_logic_1164.all;
 
 package T80_Pack is
 
+	constant aNone      : std_logic_vector(2 downto 0) := "111";
+	constant aBC        : std_logic_vector(2 downto 0) := "000";
+	constant aDE        : std_logic_vector(2 downto 0) := "001";
+	constant aXY        : std_logic_vector(2 downto 0) := "010";
+	constant aIOA       : std_logic_vector(2 downto 0) := "100";
+	constant aSP        : std_logic_vector(2 downto 0) := "101";
+	constant aZI        : std_logic_vector(2 downto 0) := "110";
+
 	component T80
 	generic(
 		Mode : integer := 0;    -- 0 => Z80, 1 => Fast Z80, 2 => 8080, 3 => GB

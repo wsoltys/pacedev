@@ -127,14 +127,6 @@ end T80;
 
 architecture rtl of T80 is
 
-	constant aNone              : std_logic_vector(2 downto 0) := "111";
-	constant aBC                : std_logic_vector(2 downto 0) := "000";
-	constant aDE                : std_logic_vector(2 downto 0) := "001";
-	constant aXY                : std_logic_vector(2 downto 0) := "010";
-	constant aIOA               : std_logic_vector(2 downto 0) := "100";
-	constant aSP                : std_logic_vector(2 downto 0) := "101";
-	constant aZI                : std_logic_vector(2 downto 0) := "110";
-
 	-- Registers
 	signal ACC, F               : std_logic_vector(7 downto 0);
 	signal Ap, Fp               : std_logic_vector(7 downto 0);
