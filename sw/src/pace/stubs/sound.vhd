@@ -21,7 +21,8 @@ entity Sound is
     sndif_addr        : in    std_logic_vector(15 downto 0);
     
     snd_clk           : out   std_logic;
-    snd_data          : out   std_logic_vector(7 downto 0);
+    snd_data_l        : out   std_logic_vector(7 downto 0);
+    snd_data_r        : out   std_logic_vector(7 downto 0);
     sndif_datao       : out   std_logic_vector(7 downto 0)
   );
   end entity Sound;
@@ -37,7 +38,8 @@ architecture Structure of Sound is
 begin
 
      snd_clk <= '0';
-     snd_data <= X"00";
+     snd_data_l <= X"00";
+     snd_data_r <= X"00";
      sndif_datao <= X"00";
      
 end Structure;
