@@ -205,7 +205,8 @@ begin
     );
 
 	SOUND_BLOCK : block
-		signal snd_data		: std_logic_vector(7 downto 0);
+		signal snd_data_l	: std_logic_vector(7 downto 0);
+		signal snd_data_r : std_logic_vector(7 downto 0);
     signal snd_a      : std_logic_vector(15 downto 0);
 	begin
 
@@ -227,13 +228,14 @@ begin
 	      sndif_datai => to_sound.d,
 
 	      snd_clk     => audio_o.clk,
-	      snd_data    => snd_data,           
+	      snd_data_l  => snd_data_l,
+	      snd_data_r  => snd_data_r,
 	      sndif_datao => from_sound.d
 	    );
 
 		-- route audio to both channels
-		audio_o.ldata <= snd_data & "00000000";
-		audio_o.rdata <= snd_data & "00000000";
+		audio_o.ldata <= snd_data_l & "00000000";
+		audio_o.rdata <= snd_data_r & "00000000";
 	
 	end block SOUND_BLOCK;
 		

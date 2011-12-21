@@ -125,8 +125,8 @@ architecture SYN of platform is
   signal ramF_d_o           : std_logic_vector(7 downto 0);
   
   -- registers
-  signal ioreg_cs           : std_logic;
-  signal ioreg_d_o          : std_logic_vector(7 downto 0);
+  signal io_cs              : std_logic;
+  signal io_d_o             : std_logic_vector(7 downto 0);
   signal ie_cs              : std_logic;
   -- individual registers
   signal tima_r             : std_logic_vector(7 downto 0);   -- $FF05
@@ -180,8 +180,8 @@ begin
     ramC_cs <=		  '1' when STD_MATCH(cpu_a,  "110-------------") else
                     '1' when STD_MATCH(cpu_a,  "111-------------") else
                     '0';
-    -- I/O registers $FF00-$FF7F
-    ioreg_cs <=     '1' when STD_MATCH(cpu_a,    X"FF"&"0-------") else
+    -- sound and I/O registers $FF00-$FF7F
+    io_cs <=        '1' when STD_MATCH(cpu_a,    X"FF"&"0-------") else
                     '0';
     -- RAM $FF80-$FFFF
     ramF_cs <=		  '1' when STD_MATCH(cpu_a,    X"FF"&"1-------") else
@@ -197,7 +197,7 @@ begin
                 cart0_d_o when cart0_cs = '1' else
                 cart4_d_o when cart4_cs = '1' else
                 video_ram_d_o when video_ram_cs = '1' else
-                ioreg_d_o when ioreg_cs = '1' else
+                io_d_o when io_cs = '1' else
                 ie_r when ie_cs = '1' else
                 -- decode *after* ioreg, ie because it overlaps
                 ramC_d_o when ramC_cs = '1' else
@@ -448,6 +448,10 @@ begin
     );
 
   BLK_IOREG : block
+  
+    signal ioreg_d_o      : std_logic_vector(7 downto 0);
+    signal snd_cs         : std_logic;
+    
     signal tick_262k144   : std_logic;
     signal tick_65k536    : std_logic;
     signal tick_16k384    : std_logic;
@@ -455,7 +459,7 @@ begin
     signal ly_um          : std_logic_vector(7 downto 0);
     signal vblank_p       : std_logic;
   begin
-  
+
     process (clk_sys, platform_rst)
     begin
       if platform_rst = '1' then
@@ -467,7 +471,7 @@ begin
         scx_r <= X"00";
         bootsel_r <= '0';
       elsif rising_edge(clk_sys) then
-        if ioreg_cs = '1' then 
+        if io_cs = '1' then 
           -- READS
           if cpu_mem_rd = '1' then
             case cpu_a(7 downto 0) is
@@ -530,7 +534,7 @@ begin
       elsif rising_edge(clk_sys) then
 
         -- register
-        if ioreg_cs = '1' then 
+        if io_cs = '1' then 
           -- WRITES
           if cpu_mem_wr = '1' then
             if cpu_clk_en = '1' then
@@ -632,6 +636,22 @@ begin
         ly_um <= ly_r(ly_r'left);
       end if;
     end process;
+
+    -- sound implementation
+    
+    -- $FF10-$FF3F
+    snd_cs <= '1' when STD_MATCH(cpu_a,    X"FF1"&"----") else
+              '1' when STD_MATCH(cpu_a, X"FF"&"001-----") else
+              '0';
+
+    snd_o.a <= cpu_a(snd_o.a'range);
+    snd_o.d <= cpu_d_o;
+    snd_o.rd <= snd_cs and cpu_clk_en and cpu_mem_rd;
+    snd_o.wr <= snd_cs and cpu_clk_en and cpu_mem_wr;
+    
+    -- read MUX
+    io_d_o <= snd_i.d when snd_cs = '1' else
+              ioreg_d_o;
     
   end block BLK_IOREG;
   
@@ -718,7 +738,6 @@ begin
   flash_o <= NULL_TO_FLASH;
   graphics_o.bit16(0) <= (others => '0');
   osd_o <= NULL_TO_OSD;
-  snd_o <= NULL_TO_SOUND;
   ser_o <= NULL_TO_SERIAL;
   spi_o <= NULL_TO_SPI;
 	leds_o <= (others => '0');

@@ -18,7 +18,8 @@ entity Sound is
     sndif_addr        : in    std_logic_vector(15 downto 0);
     
     snd_clk           : out   std_logic;
-    snd_data          : out   std_logic_vector(7 downto 0);
+    snd_data_l        : out   std_logic_vector(7 downto 0);
+    snd_data_r        : out   std_logic_vector(7 downto 0);
     sndif_datao       : out   std_logic_vector(7 downto 0)
   );
   end entity Sound;
@@ -50,9 +51,9 @@ begin
       s1_readdata		=> sndif_datao,
       s1_writedata	=> sndif_datai,
       
-      snd_left(15 downto 8)   => snd_data,
+      snd_left(15 downto 8)   => snd_data_l,
       snd_left(7 downto 0)    => open,
-      snd_right(15 downto 8)  => open,
+      snd_right(15 downto 8)  => snd_data_r,
       snd_right(7 downto 0)   => open
     );
      
