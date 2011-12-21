@@ -52,7 +52,7 @@ begin
       
       snd_left(15 downto 8)   => snd_data,
       snd_left(7 downto 0)    => open,
-      snd_right(15 downto 8)  => snd_data,
+      snd_right(15 downto 8)  => open,
       snd_right(7 downto 0)   => open
     );
      

@@ -26,51 +26,76 @@ end gbc_snd;
 
 architecture SYN of gbc_snd is
 
+	subtype wav_t is std_logic_vector(3 downto 0);
+	type wav_arr_t is array(0 to 31) of wav_t;
+
 	constant clk_freq		: integer := 100000000;
 	constant snd_freq		: integer := 4194304;
 
-	signal en_snd				: boolean;
+	signal en_snd				: boolean;	-- Enable at base sound frequency (4.19MHz)
+	signal en_snd2			: boolean;	-- Enable at clk/2
+	signal en_snd4			: boolean;	-- Enable at clk/4
 	signal en_512				: boolean;	-- 512Hz enable 
+
+	signal en_snden2		: boolean;	-- Enable at clk/2
+	signal en_snden4		: boolean;	-- Enable at clk/4
 
 	signal en_len				: boolean;	-- Sample length
 	signal en_env				: boolean;	-- Envelope
 	signal en_sweep			: boolean;	-- Sweep
 
-	signal snd_power		: std_logic;
+	signal snd_enable		: std_logic;
 
-	signal s1_swper			: std_logic_vector(2 downto 0);		-- Sq1 sweep period
-	signal s1_swdir			: std_logic;											-- Sq1 sweep direction
-	signal s1_swshift		: std_logic_vector(2 downto 0);		-- Sq1 sweep frequency shift
-	signal s1_duty			: std_logic_vector(1 downto 0);		-- Sq1 duty cycle
-	signal s1_len				: std_logic_vector(6 downto 0);		-- Sq1 play length
-	signal s1_svol			: std_logic_vector(3 downto 0);		-- Sq1 initial volume
-	signal s1_envsgn		: std_logic;											-- Sq1 envelope sign
-	signal s1_envper		: std_logic_vector(2 downto 0);		-- Sq1 envelope period
-	signal s1_freq			: std_logic_vector(10 downto 0);	-- Sq1 frequency
-	signal s1_trigger		: std_logic;											-- Sq1 trigger play note
-	signal s1_lenchk		: std_logic;											-- Sq1 length check enable
+	signal sq1_swper		: std_logic_vector(2 downto 0);		-- Sq1 sweep period
+	signal sq1_swdir		: std_logic;											-- Sq1 sweep direction
+	signal sq1_swshift	: std_logic_vector(2 downto 0);		-- Sq1 sweep frequency shift
+	signal sq1_duty			: std_logic_vector(1 downto 0);		-- Sq1 duty cycle
+	signal sq1_slen			: std_logic_vector(5 downto 0);		-- Sq1 play length
+	signal sq1_svol			: std_logic_vector(3 downto 0);		-- Sq1 initial volume
+	signal sq1_envsgn		: std_logic;											-- Sq1 envelope sign
+	signal sq1_envper		: std_logic_vector(2 downto 0);		-- Sq1 envelope period
+	signal sq1_freq			: std_logic_vector(10 downto 0);	-- Sq1 frequency
+	signal sq1_trigger	: std_logic;											-- Sq1 trigger play note
+	signal sq1_lenchk		: std_logic;											-- Sq1 length check enable
 
-	signal s1_fr2				: std_logic_vector(10 downto 0);	-- Sq1 frequency (shadow copy)
-	signal s1_vol				: std_logic_vector(3 downto 0);		-- Sq1 initial volume
-	signal s1_envcnt		: std_logic_vector(2 downto 0);		-- Sq1 initial volume
-	signal s1_playing		: std_logic;
-	signal s1_wav				: std_logic_vector(3 downto 0);		-- Sq1 output waveform
+	signal sq1_fr2			: std_logic_vector(10 downto 0);	-- Sq1 frequency (shadow copy)
+	signal sq1_vol			: std_logic_vector(3 downto 0);		-- Sq1 initial volume
+	signal sq1_envcnt		: std_logic_vector(2 downto 0);		-- Sq1 initial volume
+	signal sq1_playing	: std_logic;
+	signal sq1_wav			: std_logic_vector(5 downto 0);		-- Sq1 output waveform
 
-	signal s2_duty			: std_logic_vector(1 downto 0);		-- Sq2 duty cycle
-	signal s2_len				: std_logic_vector(6 downto 0);		-- Sq2 play length
-	signal s2_svol			: std_logic_vector(3 downto 0);		-- Sq2 initial volume
-	signal s2_envsgn		: std_logic;											-- Sq2 envelope sign
-	signal s2_envper		: std_logic_vector(2 downto 0);		-- Sq2 envelope period
-	signal s2_freq			: std_logic_vector(10 downto 0);	-- Sq2 frequency
-	signal s2_trigger		: std_logic;											-- Sq2 trigger play note
-	signal s2_lenchk		: std_logic;											-- Sq2 length check enable
+	signal sq2_duty			: std_logic_vector(1 downto 0);		-- Sq2 duty cycle
+	signal sq2_slen			: std_logic_vector(5 downto 0);		-- Sq2 play length
+	signal sq2_svol			: std_logic_vector(3 downto 0);		-- Sq2 initial volume
+	signal sq2_envsgn		: std_logic;											-- Sq2 envelope sign
+	signal sq2_envper		: std_logic_vector(2 downto 0);		-- Sq2 envelope period
+	signal sq2_freq			: std_logic_vector(10 downto 0);	-- Sq2 frequency
+	signal sq2_trigger	: std_logic;											-- Sq2 trigger play note
+	signal sq2_lenchk		: std_logic;											-- Sq2 length check enable
 
-	signal s2_fr2				: std_logic_vector(10 downto 0);	-- Sq2 frequency (shadow copy)
-	signal s2_vol				: std_logic_vector(3 downto 0);		-- Sq2 initial volume
-	signal s2_envcnt		: std_logic_vector(2 downto 0);		-- Sq2 initial volume
-	signal s2_playing		: std_logic;
-	signal s2_wav				: std_logic_vector(3 downto 0);		-- Sq2 output waveform
+	signal sq2_fr2			: std_logic_vector(10 downto 0);	-- Sq2 frequency (shadow copy)
+	signal sq2_vol			: std_logic_vector(3 downto 0);		-- Sq2 initial volume
+	signal sq2_envcnt		: std_logic_vector(2 downto 0);		-- Sq2 initial volume
+	signal sq2_playing	: std_logic;
+	signal sq2_wav			: std_logic_vector(5 downto 0);		-- Sq2 output waveform
+
+	signal wav_enable		: std_logic;											-- Wave enable
+	signal wav_slen			: std_logic_vector(7 downto 0);		-- Wave play length
+	signal wav_volsh		: std_logic_vector(1 downto 0);		-- Wave volume shift
+	signal wav_freq			: std_logic_vector(10 downto 0);	-- Wave frequency
+	signal wav_trigger		: std_logic;											-- Wave trigger play note
+	signal wav_lenchk		: std_logic;											-- Wave length check enable
+
+	signal wav_fr2			: std_logic_vector(10 downto 0);	-- Wave frequency (shadow copy)
+	signal wav_playing	: std_logic;
+	signal wav_wav			: std_logic_vector(5 downto 0);		-- Wave output waveform
+	signal wav_ram			: wav_arr_t;											-- Wave table
+	signal wav_shift		: boolean;
+
 begin
+
+	en_snd2 <= en_snd and en_snden2;
+	en_snd4 <= en_snd and en_snden4;
 
 	-- Calculate base clock enable (4.194304MHz)
 	process(clk, reset)
@@ -90,15 +115,32 @@ begin
 
 	-- Calculate divided and frame sequencer clock enables
 	process(clk, en_snd, reset)
+		variable clkcnt			: unsigned(1 downto 0);
 		variable cnt_512		: unsigned(12 downto 0);
 		variable temp_512		: unsigned(13 downto 0);
 		variable framecnt		: integer range 0 to 7 := 0;
 	begin
 		if reset = '1' then
+			clkcnt := "00";
 			cnt_512 := (others => '0');
 			framecnt := 0;
 
 		elsif rising_edge(clk) then
+			-- Base clock divider
+			if en_snd then
+				clkcnt := clkcnt + 1;
+				if clkcnt(0) = '1' then
+					en_snden2 <= true;
+				else 
+					en_snden2 <= false;
+				end if;
+				if clkcnt = "11" then
+					en_snden4 <= true;
+				else
+					en_snden4 <= false;
+				end if;
+			end if;
+
 			-- Frame sequencer (length, envelope, sweep) clock enables
 			en_len <= false;
 			en_env <= false;
@@ -132,240 +174,107 @@ begin
 	end process;
 
 	-- Registers
-	process(clk, snd_power, reset, en_snd, en_len, en_env, en_sweep)
-		constant duty_0			: std_logic_vector(0 to 7) := "00000001";
-		constant duty_1			: std_logic_vector(0 to 7) := "10000001";
-		constant duty_2			: std_logic_vector(0 to 7) := "10000111";
-		constant duty_3			: std_logic_vector(0 to 7) := "01111110";
-		variable s1_fcnt		: unsigned(10 downto 0);
-		variable s1_phase		: integer range 0 to 7;
-		variable s1_out			: std_logic;
-		variable s2_fcnt		: unsigned(10 downto 0);
-		variable s2_phase		: integer range 0 to 7;
-		variable s2_out			: std_logic;
-
-		variable acc_fcnt		: unsigned(11 downto 0);
+	registers : process(clk, snd_enable, reset)
+		variable wav_shift_r		: boolean;
+		variable wav_temp				: wav_t;
 	begin
-		-- Sound processing
-		if snd_power = '0' then
-			s1_playing	<= '0';
-			s1_fcnt			:= (others => '0');
-			s1_phase		:= 0;
-			s1_vol		 	<= "0000";
-			s1_envcnt		<= "000";
-			s2_playing	<= '0';
-			s2_fcnt			:= (others => '0');
-			s2_phase		:= 0;
-			s2_vol		 	<= "0000";
-			s2_envcnt		<= "000";
+
+		-- Registers
+		if snd_enable = '0' then
+			-- Reset register values
+			sq1_swper		<= (others => '0');
+			sq1_swdir		<= '0';
+			sq1_swshift	<= (others => '0');
+			sq1_duty		<= (others => '0');
+			sq1_slen		<= (others => '0');
+			sq1_svol		<= (others => '0');
+			sq1_envsgn	<= '0';
+			sq1_envper	<= (others => '0');
+			sq1_freq		<= (others => '0');
+			sq1_lenchk	<= '0';
+			sq1_trigger	<= '0';
+			sq2_duty		<= (others => '0');
+			sq2_slen		<= (others => '0');
+			sq2_svol		<= (others => '0');
+			sq2_envsgn	<= '0';
+			sq2_envper	<= (others => '0');
+			sq2_freq		<= (others => '0');
+			sq2_lenchk	<= '0';
+			sq2_trigger	<= '0';
+			wav_enable	<= '0';
+			wav_volsh		<= (others => '0');
+			wav_freq		<= (others => '0');
+			wav_trigger	<= '0';
+			wav_lenchk	<= '0';
+
+			wav_shift_r := false;
 
 		elsif rising_edge(clk) then
 			if en_snd then
-				-- Sq1 frequency timer
-				if s1_playing = '1' then
-					acc_fcnt := ('0'&s1_fcnt) + to_unsigned(1, acc_fcnt'length);
-					if acc_fcnt(acc_fcnt'high) = '1' then
-						if s1_phase < 7 then
-							s1_phase := s1_phase + 1;
-						else
-							s1_phase := 0;
-						end if;
-						s1_fcnt := unsigned(s1_fr2);
-					else
-						s1_fcnt := acc_fcnt(s1_fcnt'range);
-					end if;
-				end if;
-
-				-- Sq2 frequency timer
-				if s2_playing = '1' then
-					acc_fcnt := ('0'&s2_fcnt) + to_unsigned(1, acc_fcnt'length);
-					if acc_fcnt(acc_fcnt'high) = '1' then
-						if s2_phase < 7 then
-							s2_phase := s2_phase + 1;
-						else
-							s2_phase := 0;
-						end if;
-						s2_fcnt := unsigned(s2_fr2);
-					else
-						s2_fcnt := acc_fcnt(s2_fcnt'range);
-					end if;
-				end if;
-
-				case s1_duty is
-				when "00" => s1_out := duty_0(s1_phase);
-				when "01" => s1_out := duty_1(s1_phase);
-				when "10" => s1_out := duty_2(s1_phase);
-				when "11" => s1_out := duty_3(s1_phase);
-				when others => null;
-				end case;
-
-				if s1_out = '1' then
-					s1_wav <= s1_vol;
-				else
-					s1_wav <= "0000";
-				end if;
-
-				case s2_duty is
-				when "00" => s2_out := duty_0(s2_phase);
-				when "01" => s2_out := duty_1(s2_phase);
-				when "10" => s2_out := duty_2(s2_phase);
-				when "11" => s2_out := duty_3(s2_phase);
-				when others => null;
-				end case;
-
-				if s2_out = '1' then
-					s2_wav <= s2_vol;
-				else
-					s2_wav <= "0000";
-				end if;
+				sq1_trigger <= '0';
+				sq2_trigger <= '0';
+				wav_trigger <= '0';
 			end if;
 
-			if s1_playing = '1' then
-				-- Length counter
-				if en_len then
-					if s1_len(6) = '0' then
-						s1_len <= std_logic_vector(unsigned(s1_len) + to_unsigned(1, s1_len'length));
-					end if;
-				end if;
-
-				-- Envelope counter
-				if en_env then
-					if s1_envper /= "000" and s1_envcnt /= s1_envper then
-						s1_envcnt <= std_logic_vector(unsigned(s1_envcnt) + to_unsigned(1, s1_envcnt'length));
-					else
-						if s1_envper /= "000" then
-							if s1_envsgn = '1' then
-								if s1_vol /= "1111" then 
-									s1_vol <= std_logic_vector(unsigned(s1_vol) + to_unsigned(1, s1_vol'length));
-								end if;
-							else
-								if s1_vol /= "0000" then 
-									s1_vol <= std_logic_vector(unsigned(s1_vol) - to_unsigned(1, s1_vol'length));
-								end if;
-							end if;
-						end if;
-
-						s1_envcnt <= "000";
-					end if;
-				end if;
-
-				-- Check for end of playing conditions
-				if s1_vol = X"0" or (s1_lenchk = '1' and s1_len(6) = '1') then
-					s1_playing <= '0';
-					s1_envcnt <= "000";
-					s1_wav <= "0000";
-				end if;
-			end if;
-
-			-- Check sample trigger and start playing
-			if s1_trigger = '1' then
-				s1_fr2 <= s1_freq;
-				s1_fcnt := unsigned(s1_freq);
-				s1_playing <= '1';
-				s1_vol <= s1_svol;
-				s1_envcnt <= "000";
-				s1_len(6) <= '0';
-			end if;
-
-			if s2_playing = '1' then
-				-- Length counter
-				if en_len then
-					if s2_len(6) = '0' then
-						s2_len <= std_logic_vector(unsigned(s2_len) + to_unsigned(1, s2_len'length));
-					end if;
-				end if;
-
-				-- Envelope counter
-				if en_env then
-					if s2_envper /= "000" and s2_envcnt /= s2_envper then
-						s2_envcnt <= std_logic_vector(unsigned(s2_envcnt) + to_unsigned(1, s2_envcnt'length));
-					else
-						if s2_envper /= "000" then
-							if s2_envsgn = '1' then
-								if s2_vol /= "1111" then 
-									s2_vol <= std_logic_vector(unsigned(s2_vol) + to_unsigned(1, s2_vol'length));
-								end if;
-							else
-								if s2_vol /= "0000" then 
-									s2_vol <= std_logic_vector(unsigned(s2_vol) - to_unsigned(1, s2_vol'length));
-								end if;
-							end if;
-						end if;
-
-						s2_envcnt <= "000";
-					end if;
-				end if;
-
-				-- Check for end of playing conditions
-				if s2_vol = X"0" or (s2_lenchk = '1' and s2_len(6) = '1') then
-					s2_playing <= '0';
-					s2_envcnt <= "000";
-					s2_wav <= "0000";
-				end if;
-			end if;
-
-			-- Check sample trigger and start playing
-			if s2_trigger = '1' then
-				s2_fr2 <= s2_freq;
-				s2_fcnt := unsigned(s2_freq);
-				s2_playing <= '1';
-				s2_vol <= s2_svol;
-				s2_envcnt <= "000";
-				s2_len(6) <= '0';
-			end if;
-
-		end if;	-- snd_power
-
-		-- Registers
-		if rising_edge(clk) then
-			if en_snd then
-				s1_trigger <= '0';
-				s2_trigger <= '0';
+			-- Rotate wave table on rising edge of wav_shift
+			if wav_shift and not wav_shift_r then
+				wav_temp := wav_ram(0);
+				for I in 0 to 30 loop
+					wav_ram(I) <= wav_ram(I+1);
+				end loop;
+				wav_ram(31) <= wav_temp;
 			end if;
 
 			if s1_write = '1' then
 				case s1_addr is
 		       								-- Square 1
 				when "010000" =>	-- NR10 FF10 -PPP NSSS Sweep period, negate, shift
-					s1_swper <= s1_writedata(6 downto 4);
-					s1_swdir <= s1_writedata(3);
-					s1_swshift <= s1_writedata(2 downto 0);
+					sq1_swper <= s1_writedata(6 downto 4);
+					sq1_swdir <= s1_writedata(3);
+					sq1_swshift <= s1_writedata(2 downto 0);
 				when "010001" =>	-- NR11 FF11 DDLL LLLL Duty, Length load (64-L)
-					s1_duty <= s1_writedata(7 downto 6);
-					s1_len(5 downto 0) <= s1_writedata(5 downto 0);
+					sq1_duty <= s1_writedata(7 downto 6);
+					sq1_slen <= s1_writedata(5 downto 0);
 				when "010010" =>	-- NR12 FF12 VVVV APPP Starting volume, Envelope add mode, period
-					s1_svol <= s1_writedata(7 downto 4);
-					s1_envsgn <= s1_writedata(3);
-					s1_envper <= s1_writedata(2 downto 0);
+					sq1_svol <= s1_writedata(7 downto 4);
+					sq1_envsgn <= s1_writedata(3);
+					sq1_envper <= s1_writedata(2 downto 0);
 				when "010011" =>	-- NR13 FF13 FFFF FFFF Frequency LSB
-					s1_freq(7 downto 0) <= s1_writedata;
+					sq1_freq(7 downto 0) <= s1_writedata;
 				when "010100" =>	-- NR14 FF14 TL-- -FFF Trigger, Length enable, Frequency MSB
-					s1_trigger <= s1_writedata(7);
-					s1_lenchk <= s1_writedata(6);
-					s1_freq(10 downto 8) <= s1_writedata(2 downto 0);
+					sq1_trigger <= s1_writedata(7);
+					sq1_lenchk <= s1_writedata(6);
+					sq1_freq(10 downto 8) <= s1_writedata(2 downto 0);
 
 													-- Square 2
 				when "010110" =>	-- NR21 FF16 DDLL LLLL Duty, Length load (64-L)
-					s2_duty <= s1_writedata(7 downto 6);
-					s2_len(5 downto 0) <= s1_writedata(5 downto 0);
+					sq2_duty <= s1_writedata(7 downto 6);
+					sq2_slen <= s1_writedata(5 downto 0);
 				when "010111" =>	-- NR22 FF17 VVVV APPP Starting volume, Envelope add mode, period
-					s2_svol <= s1_writedata(7 downto 4);
-					s2_envsgn <= s1_writedata(3);
-					s2_envper <= s1_writedata(2 downto 0);
+					sq2_svol <= s1_writedata(7 downto 4);
+					sq2_envsgn <= s1_writedata(3);
+					sq2_envper <= s1_writedata(2 downto 0);
 				when "011000" =>	-- NR23 FF18 FFFF FFFF Frequency LSB
-					s2_freq(7 downto 0) <= s1_writedata;
+					sq2_freq(7 downto 0) <= s1_writedata;
 				when "011001" =>	-- NR24 FF19 TL-- -FFF Trigger, Length enable, Frequency MSB
-					s2_trigger <= s1_writedata(7);
-					s2_lenchk <= s1_writedata(6);
-					s2_freq(10 downto 8) <= s1_writedata(2 downto 0);
+					sq2_trigger <= s1_writedata(7);
+					sq2_lenchk <= s1_writedata(6);
+					sq2_freq(10 downto 8) <= s1_writedata(2 downto 0);
 
---									-- Wave
---				when "011010" =>	-- NR30 FF1A E--- ---- DAC power
---				when "011011" =>	-- NR31 FF1B LLLL LLLL Length load (256-L)
---				when "011100" =>	-- NR32 FF1C -VV- ---- Volume code (00=0%, 01=100%, 10=50%, 11=25%)
---				when "011101" =>	-- NR33 FF1D FFFF FFFF Frequency LSB
---				when "011110" =>	-- NR34 FF1E TL-- -FFF Trigger, Length enable, Frequency MSB
---
+													-- Wave
+				when "011010" =>	-- NR30 FF1A E--- ---- DAC power
+					wav_enable <= s1_writedata(7);
+				when "011011" =>	-- NR31 FF1B LLLL LLLL Length load (256-L)
+					wav_slen <= s1_writedata;
+				when "011100" =>	-- NR32 FF1C -VV- ---- Volume code (00=0%, 01=100%, 10=50%, 11=25%)
+					wav_volsh <= s1_writedata(6 downto 5);
+				when "011101" =>	-- NR33 FF1D FFFF FFFF Frequency LSB
+					wav_freq(7 downto 0) <= s1_writedata;
+				when "011110" =>	-- NR34 FF1E TL-- -FFF Trigger, Length enable, Frequency MSB
+					wav_trigger <= s1_writedata(7);
+					wav_lenchk <= s1_writedata(6);
+					wav_freq(10 downto 8) <= s1_writedata(2 downto 0);
+
 --									-- Noise
 --				when "100000" =>	-- NR41 FF20 --LL LLLL Length load (64-L)
 --				when "100001" =>	-- NR42 FF21 VVVV APPP Starting volume, Envelope add mode, period
@@ -375,26 +284,56 @@ begin
 --									-- Control/Status
 --				when "100100" =>	-- NR50 FF24 ALLL BRRR Vin L enable, Left vol, Vin R enable, Right vol
 --				when "100101" =>	-- NR51 FF25 NW21 NW21 Left enables, Right enables
-				when "100110" =>	-- NR52 FF26 P--- NW21 Power control/status, Channel length statuses
-					snd_power <= s1_writedata(7);
 --
---									-- Wave Table
---				when "110000" =>	--      FF30 0000 1111 Samples 0 and 1
---				when "110001" =>	--      FF31 0000 1111 Samples 2 and 3
---				when "110010" =>	--      FF32 0000 1111 Samples 4 and 5
---				when "110011" =>	--      FF33 0000 1111 Samples 6 and 31
---				when "110100" =>	--      FF34 0000 1111 Samples 8 and 31
---				when "110101" =>	--      FF35 0000 1111 Samples 10 and 11
---				when "110110" =>	--      FF36 0000 1111 Samples 12 and 13
---				when "110111" =>	--      FF37 0000 1111 Samples 14 and 15
---				when "111000" =>	--      FF38 0000 1111 Samples 16 and 17
---				when "111001" =>	--      FF39 0000 1111 Samples 18 and 19
---				when "111010" =>	--      FF3A 0000 1111 Samples 20 and 21
---				when "111011" =>	--      FF3B 0000 1111 Samples 22 and 23
---				when "111100" =>	--      FF3C 0000 1111 Samples 24 and 25
---				when "111101" =>	--      FF3D 0000 1111 Samples 26 and 27
---				when "111110" =>	--      FF3E 0000 1111 Samples 28 and 29
---				when "111111" =>	--      FF3F 0000 1111 Samples 30 and 31
+													-- Wave Table
+				when "110000" =>	--      FF30 0000 1111 Samples 0 and 1
+					wav_ram(0) <= s1_writedata(7 downto 4);
+					wav_ram(1) <= s1_writedata(3 downto 0);
+				when "110001" =>	--      FF31 0000 1111 Samples 2 and 3
+					wav_ram(2) <= s1_writedata(7 downto 4);
+					wav_ram(3) <= s1_writedata(3 downto 0);
+				when "110010" =>	--      FF32 0000 1111 Samples 4 and 5
+					wav_ram(4) <= s1_writedata(7 downto 4);
+					wav_ram(5) <= s1_writedata(3 downto 0);
+				when "110011" =>	--      FF33 0000 1111 Samples 6 and 31
+					wav_ram(6) <= s1_writedata(7 downto 4);
+					wav_ram(7) <= s1_writedata(3 downto 0);
+				when "110100" =>	--      FF34 0000 1111 Samples 8 and 31
+					wav_ram(8) <= s1_writedata(7 downto 4);
+					wav_ram(9) <= s1_writedata(3 downto 0);
+				when "110101" =>	--      FF35 0000 1111 Samples 10 and 11
+					wav_ram(10) <= s1_writedata(7 downto 4);
+					wav_ram(11) <= s1_writedata(3 downto 0);
+				when "110110" =>	--      FF36 0000 1111 Samples 12 and 13
+					wav_ram(12) <= s1_writedata(7 downto 4);
+					wav_ram(13) <= s1_writedata(3 downto 0);
+				when "110111" =>	--      FF37 0000 1111 Samples 14 and 15
+					wav_ram(14) <= s1_writedata(7 downto 4);
+					wav_ram(15) <= s1_writedata(3 downto 0);
+				when "111000" =>	--      FF38 0000 1111 Samples 16 and 17
+					wav_ram(16) <= s1_writedata(7 downto 4);
+					wav_ram(17) <= s1_writedata(3 downto 0);
+				when "111001" =>	--      FF39 0000 1111 Samples 18 and 19
+					wav_ram(18) <= s1_writedata(7 downto 4);
+					wav_ram(19) <= s1_writedata(3 downto 0);
+				when "111010" =>	--      FF3A 0000 1111 Samples 20 and 21
+					wav_ram(20) <= s1_writedata(7 downto 4);
+					wav_ram(21) <= s1_writedata(3 downto 0);
+				when "111011" =>	--      FF3B 0000 1111 Samples 22 and 23
+					wav_ram(22) <= s1_writedata(7 downto 4);
+					wav_ram(23) <= s1_writedata(3 downto 0);
+				when "111100" =>	--      FF3C 0000 1111 Samples 24 and 25
+					wav_ram(24) <= s1_writedata(7 downto 4);
+					wav_ram(25) <= s1_writedata(3 downto 0);
+				when "111101" =>	--      FF3D 0000 1111 Samples 26 and 27
+					wav_ram(26) <= s1_writedata(7 downto 4);
+					wav_ram(27) <= s1_writedata(3 downto 0);
+				when "111110" =>	--      FF3E 0000 1111 Samples 28 and 29
+					wav_ram(28) <= s1_writedata(7 downto 4);
+					wav_ram(29) <= s1_writedata(3 downto 0);
+				when "111111" =>	--      FF3F 0000 1111 Samples 30 and 31
+					wav_ram(30) <= s1_writedata(7 downto 4);
+					wav_ram(31) <= s1_writedata(3 downto 0);
 
 				when others =>
 					null;
@@ -403,55 +342,345 @@ begin
 
 			if s1_read = '1' then
 				case s1_addr is
-       								-- Square 1
+       										-- Square 1
 				when "010000" =>	-- NR10 FF10 -PPP NSSS Sweep period, negate, shift
-					s1_readdata <= '1' & s1_swper & s1_swdir & s1_swshift;
+					s1_readdata <= '1' & sq1_swper & sq1_swdir & sq1_swshift;
 				when "010001" =>	-- NR11 FF11 DDLL LLLL Duty, Length load (64-L)
-					s1_readdata <= s1_duty & "111111";
+					s1_readdata <= sq1_duty & "111111";
 				when "010010" =>	-- NR12 FF12 VVVV APPP Starting volume, Envelope add mode, period
-					s1_readdata <= s1_vol & s1_envsgn & s1_envper;
+					s1_readdata <= sq1_vol & sq1_envsgn & sq1_envper;
 				when "010011" =>	-- NR13 FF13 FFFF FFFF Frequency LSB
 					s1_readdata <= X"FF";
 				when "010100" =>	-- NR14 FF14 TL-- -FFF Trigger, Length enable, Frequency MSB
-					s1_readdata <= '0' & s1_lenchk & "111111";
+					s1_readdata <= '0' & sq1_lenchk & "111111";
 
 													-- Square 2
 				when "010110" =>	-- NR21 FF16 DDLL LLLL Duty, Length load (64-L)
-					s1_readdata <= s2_duty & "111111";
+					s1_readdata <= sq2_duty & "111111";
 				when "010111" =>	-- NR22 FF17 VVVV APPP Starting volume, Envelope add mode, period
-					s1_readdata <= s2_vol & s2_envsgn & s2_envper;
+					s1_readdata <= sq2_vol & sq2_envsgn & sq2_envper;
 				when "011000" =>	-- NR23 FF18 FFFF FFFF Frequency LSB
 					s1_readdata <= X"FF";
 				when "011001" =>	-- NR24 FF19 TL-- -FFF Trigger, Length enable, Frequency MSB
-					s1_readdata <= '0' & s2_lenchk & "111111";
+					s1_readdata <= '0' & sq2_lenchk & "111111";
 
 				when "100110" =>	-- NR52 FF26 P--- NW21 Power control/status, Channel length statuses
-					s1_readdata <= snd_power & "000000" & s1_playing;
+					s1_readdata <= snd_enable & "00000" & sq2_playing & sq1_playing;
+
+													-- Wave
+				when "011010" =>	-- NR30 FF1A E--- ---- DAC power
+					s1_readdata <= wav_enable & "1111111";
+				when "011011" =>	-- NR31 FF1B LLLL LLLL Length load (256-L)
+					s1_readdata <= X"FF";
+				when "011100" =>	-- NR32 FF1C -VV- ---- Volume code (00=0%, 01=100%, 10=50%, 11=25%)
+					s1_readdata <= '1' & wav_volsh & "11111";
+				when "011101" =>	-- NR33 FF1D FFFF FFFF Frequency LSB
+					s1_readdata <= X"FF";
+				when "011110" =>	-- NR34 FF1E TL-- -FFF Trigger, Length enable, Frequency MSB
+					s1_readdata <= wav_trigger & wav_lenchk & "111111";
+
+													-- Wave Table
+				when "110000" =>	--      FF30 0000 1111 Samples 0 and 1
+					s1_readdata <= wav_ram(0) & wav_ram(1);
+				when "110001" =>	--      FF31 0000 1111 Samples 2 and 3
+					s1_readdata <= wav_ram(2) & wav_ram(3);
+				when "110010" =>	--      FF32 0000 1111 Samples 4 and 5
+					s1_readdata <= wav_ram(4) & wav_ram(5);
+				when "110011" =>	--      FF33 0000 1111 Samples 6 and 31
+					s1_readdata <= wav_ram(6) & wav_ram(7);
+				when "110100" =>	--      FF34 0000 1111 Samples 8 and 31
+					s1_readdata <= wav_ram(8) & wav_ram(9);
+				when "110101" =>	--      FF35 0000 1111 Samples 10 and 11
+					s1_readdata <= wav_ram(10) & wav_ram(11);
+				when "110110" =>	--      FF36 0000 1111 Samples 12 and 13
+					s1_readdata <= wav_ram(12) & wav_ram(13);
+				when "110111" =>	--      FF37 0000 1111 Samples 14 and 15
+					s1_readdata <= wav_ram(14) & wav_ram(15);
+				when "111000" =>	--      FF38 0000 1111 Samples 16 and 17
+					s1_readdata <= wav_ram(16) & wav_ram(17);
+				when "111001" =>	--      FF39 0000 1111 Samples 18 and 19
+					s1_readdata <= wav_ram(18) & wav_ram(19);
+				when "111010" =>	--      FF3A 0000 1111 Samples 20 and 21
+					s1_readdata <= wav_ram(20) & wav_ram(21);
+				when "111011" =>	--      FF3B 0000 1111 Samples 22 and 23
+					s1_readdata <= wav_ram(22) & wav_ram(23);
+				when "111100" =>	--      FF3C 0000 1111 Samples 24 and 25
+					s1_readdata <= wav_ram(24) & wav_ram(25);
+				when "111101" =>	--      FF3D 0000 1111 Samples 26 and 27
+					s1_readdata <= wav_ram(26) & wav_ram(27);
+				when "111110" =>	--      FF3E 0000 1111 Samples 28 and 29
+					s1_readdata <= wav_ram(28) & wav_ram(29);
+				when "111111" =>	--      FF3F 0000 1111 Samples 30 and 31
+					s1_readdata <= wav_ram(30) & wav_ram(31);
+
 				when others =>
 					s1_readdata <= X"FF";
 				end case;
+
 			end if;
+
+			wav_shift_r := wav_shift;
 		end if;
 
-		-- Reset register values
-		if snd_power = '0' then
-			s1_swper		<= (others => '0');
-			s1_swdir		<= '0';
-			s1_swshift	<= (others => '0');
-			s1_duty			<= (others => '0');
-			s1_len			<= (others => '0');
-			s1_vol			<= (others => '0');
-			s1_envsgn		<= '0';
-			s1_envper		<= (others => '0');
-			s1_freq			<= (others => '0');
-			s1_fr2			<= (others => '0');
-			s1_lenchk		<= '0';
-			s1_trigger	<= '0';
-		end if;
 		if reset = '1' then
-			snd_power <= '0';
+			snd_enable <= '0';
+		elsif rising_edge(clk) then
+			if s1_write = '1' and s1_addr = "100110" then
+				-- NR52 FF26 P--- NW21 Power control/status, Channel length statuses
+				snd_enable <= s1_writedata(7);
+			end if;
 		end if;
 	end process;
+
+	sound : process(clk, snd_enable, en_snd, en_len, en_env, en_sweep)
+		constant duty_0			: std_logic_vector(0 to 7) := "00000001";
+		constant duty_1			: std_logic_vector(0 to 7) := "10000001";
+		constant duty_2			: std_logic_vector(0 to 7) := "10000111";
+		constant duty_3			: std_logic_vector(0 to 7) := "01111110";
+		variable sq1_fcnt		: unsigned(10 downto 0);
+		variable sq1_phase	: integer range 0 to 7;
+		variable sq1_len		: std_logic_vector(6 downto 0);
+		variable sq1_out		: std_logic;
+		variable sq2_fcnt		: unsigned(10 downto 0);
+		variable sq2_phase	: integer range 0 to 7;
+		variable sq2_len		: std_logic_vector(6 downto 0);
+		variable sq2_out		: std_logic;
+		variable wav_fcnt		: unsigned(10 downto 0);
+		variable wav_len		: std_logic_vector(8 downto 0);
+
+		variable acc_fcnt		: unsigned(11 downto 0);
+	begin
+		-- Sound processing
+		if snd_enable = '0' then
+			sq1_playing	<= '0';
+			sq1_fr2			<= (others => '0');
+			sq1_fcnt		:= (others => '0');
+			sq1_phase		:= 0;
+			sq1_len			:= (others => '0');
+			sq1_vol		 	<= "0000";
+			sq1_envcnt	<= "000";
+			sq1_out			:= '0';
+			sq2_playing	<= '0';
+			sq2_fr2			<= (others => '0');
+			sq2_fcnt		:= (others => '0');
+			sq2_phase		:= 0;
+			sq2_len			:= (others => '0');
+			sq2_vol		 	<= "0000";
+			sq2_envcnt	<= "000";
+			sq2_out			:= '0';
+			wav_fcnt		:= (others => '0');
+			wav_len			:= (others => '0');
+
+		elsif rising_edge(clk) then
+			if en_snd4 then
+				-- Sq1 frequency timer
+				if sq1_playing = '1' then
+					acc_fcnt := ('0'&sq1_fcnt) + to_unsigned(1, acc_fcnt'length);
+					if acc_fcnt(acc_fcnt'high) = '1' then
+						if sq1_phase < 7 then
+							sq1_phase := sq1_phase + 1;
+						else
+							sq1_phase := 0;
+						end if;
+						sq1_fcnt := unsigned(sq1_fr2);
+					else
+						sq1_fcnt := acc_fcnt(sq1_fcnt'range);
+					end if;
+				end if;
+
+				-- Sq2 frequency timer
+				if sq2_playing = '1' then
+					acc_fcnt := ('0'&sq2_fcnt) + to_unsigned(1, acc_fcnt'length);
+					if acc_fcnt(acc_fcnt'high) = '1' then
+						if sq2_phase < 7 then
+							sq2_phase := sq2_phase + 1;
+						else
+							sq2_phase := 0;
+						end if;
+						sq2_fcnt := unsigned(sq2_fr2);
+					else
+						sq2_fcnt := acc_fcnt(sq2_fcnt'range);
+					end if;
+				end if;
+
+				case sq1_duty is
+				when "00" => sq1_out := duty_0(sq1_phase);
+				when "01" => sq1_out := duty_1(sq1_phase);
+				when "10" => sq1_out := duty_2(sq1_phase);
+				when "11" => sq1_out := duty_3(sq1_phase);
+				when others => null;
+				end case;
+
+				if sq1_out = '1' then
+					sq1_wav <= sq1_vol & "00";
+				else
+					sq1_wav <= "000000";
+				end if;
+
+				case sq2_duty is
+				when "00" => sq2_out := duty_0(sq2_phase);
+				when "01" => sq2_out := duty_1(sq2_phase);
+				when "10" => sq2_out := duty_2(sq2_phase);
+				when "11" => sq2_out := duty_3(sq2_phase);
+				when others => null;
+				end case;
+
+				if sq2_out = '1' then
+					sq2_wav <= sq2_vol & "00";
+				else
+					sq2_wav <= "000000";
+				end if;
+			end if;
+
+			-- Square channel 1
+			if sq1_playing = '1' then
+				-- Length counter
+				if en_len then
+					if sq1_len(6) = '0' then
+						sq1_len := std_logic_vector(unsigned(sq1_len) + to_unsigned(1, sq1_len'length));
+					end if;
+				end if;
+
+				-- Envelope counter
+				if en_env then
+					if sq1_envper /= "000" and sq1_envcnt /= sq1_envper then
+						sq1_envcnt <= std_logic_vector(unsigned(sq1_envcnt) + to_unsigned(1, sq1_envcnt'length));
+					else
+						if sq1_envper /= "000" then
+							if sq1_envsgn = '1' then
+								if sq1_vol /= "1111" then 
+									sq1_vol <= std_logic_vector(unsigned(sq1_vol) + to_unsigned(1, sq1_vol'length));
+								end if;
+							else
+								if sq1_vol /= "0000" then 
+									sq1_vol <= std_logic_vector(unsigned(sq1_vol) - to_unsigned(1, sq1_vol'length));
+								end if;
+							end if;
+						end if;
+
+						sq1_envcnt <= "000";
+					end if;
+				end if;
+
+				-- Check for end of playing conditions
+				if sq1_vol = X"0" or (sq1_lenchk = '1' and sq1_len(6) = '1') then
+					sq1_playing <= '0';
+					sq1_envcnt <= "000";
+					--sq1_wav <= "000000";
+				end if;
+			end if;
+
+			-- Check sample trigger and start playing
+			if sq1_trigger = '1' then
+				sq1_fr2 <= sq1_freq;
+				sq1_fcnt := unsigned(sq1_freq);
+				sq1_playing <= '1';
+				sq1_vol <= sq1_svol;
+				sq1_envcnt <= "000";
+				sq1_len := '0' & sq1_slen;
+				sq1_phase := 0;
+			end if;
+
+			-- Square channel 2
+			if sq2_playing = '1' then
+				-- Length counter
+				if en_len then
+					if sq2_len(6) = '0' then
+						sq2_len := std_logic_vector(unsigned(sq2_len) + to_unsigned(1, sq2_len'length));
+					end if;
+				end if;
+
+				-- Envelope counter
+				if en_env then
+					if sq2_envper /= "000" and sq2_envcnt /= sq2_envper then
+						sq2_envcnt <= std_logic_vector(unsigned(sq2_envcnt) + to_unsigned(1, sq2_envcnt'length));
+					else
+						if sq2_envper /= "000" then
+							if sq2_envsgn = '1' then
+								if sq2_vol /= "1111" then 
+									sq2_vol <= std_logic_vector(unsigned(sq2_vol) + to_unsigned(1, sq2_vol'length));
+								end if;
+							else
+								if sq2_vol /= "0000" then 
+									sq2_vol <= std_logic_vector(unsigned(sq2_vol) - to_unsigned(1, sq2_vol'length));
+								end if;
+							end if;
+						end if;
+
+						sq2_envcnt <= "000";
+					end if;
+				end if;
+
+				-- Check for end of playing conditions
+				if sq2_vol = X"0" or (sq2_lenchk = '1' and sq2_len(6) = '1') then
+					sq2_playing <= '0';
+					sq2_envcnt <= "000";
+					--sq2_wav <= "000000";
+				end if;
+			end if;
+
+			-- Check sample trigger and start playing
+			if sq2_trigger = '1' then
+				sq2_fr2 <= sq2_freq;
+				sq2_fcnt := unsigned(sq2_freq);
+				sq2_playing <= '1';
+				sq2_vol <= sq2_svol;
+				sq2_envcnt <= "000";
+				sq2_len := '0' & sq2_slen;
+				sq2_phase := 0;
+			end if;
+
+			if en_snd2 then
+				-- Wave frequency timer
+				wav_shift <= false;
+				if wav_playing = '1' then
+					acc_fcnt := ('0'&wav_fcnt) + to_unsigned(1, acc_fcnt'length);
+					if acc_fcnt(acc_fcnt'high) = '1' then
+						wav_shift <= true;
+						wav_fcnt := unsigned(wav_fr2);
+					else
+						wav_fcnt := acc_fcnt(wav_fcnt'range);
+					end if;
+				end if;
+			end if;
+
+			-- Wave channel
+			if wav_playing = '1' then
+				-- Length counter
+				if en_len then
+					if wav_len(8) = '0' then
+						wav_len := std_logic_vector(unsigned(wav_len) + to_unsigned(1, wav_len'length));
+					end if;
+				end if;
+
+				-- Check for end of playing conditions
+				if (wav_lenchk = '1' and wav_len(8) = '1') then
+					wav_playing <= '0';
+					wav_wav <= "000000";
+				end if;
+			end if;
+
+			-- Check sample trigger and start playing
+			if wav_trigger = '1' then
+				wav_fr2 <= wav_freq;
+				wav_fcnt := unsigned(wav_freq);
+				wav_playing <= '1';
+				wav_len := '0' & wav_slen;
+			end if;
+
+			if wav_enable = '1' and wav_volsh /= "00" then
+				case wav_volsh is
+				when "01" => wav_wav <= wav_ram(0) & "00";
+				when "10" => wav_wav <= '0' & wav_ram(0) & '0';
+				when "11" => wav_wav <= "00" & wav_ram(0);
+				when others => wav_wav <= (others => 'X');
+				end case;
+			else
+				wav_wav <= "000000";
+			end if;
+
+		end if;	-- snd_enable
+	end process sound;
 
 	-- Test
 	process(clk, en_512, reset)
@@ -469,7 +698,19 @@ begin
 	end process;
 
 	-- Mixer
-	snd_left <= "00" & s1_wav & "00" & X"00";
-	snd_right <= "00" & s2_wav & "00" & X"00";
+	mixer : process(sq1_wav, sq2_wav, wav_wav)
+		variable snd_left_in		: unsigned(7 downto 0);
+		variable snd_right_in		: unsigned(7 downto 0);
+	begin
+		snd_left_in := (others => '0');
+		snd_right_in := (others => '0');
+
+		snd_left_in := snd_left_in + ("00"&unsigned(sq1_wav));
+	 	snd_left_in := snd_left_in + ("00"&unsigned(wav_wav));
+		snd_right_in := snd_right_in + ("00"&unsigned(sq2_wav));
+
+		snd_left <= std_logic_vector(snd_left_in) & X"00";
+		snd_right <= std_logic_vector(snd_right_in) & X"00";
+	end process;
 
 end SYN;
