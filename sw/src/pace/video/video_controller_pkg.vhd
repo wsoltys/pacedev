@@ -144,6 +144,7 @@ package video_controller_pkg is
 
   type from_GRAPHICS_t is record
     y         : std_logic_vector(10 downto 0);
+    hblank    : std_logic;
     vblank    : std_logic;
   end record;
 

@@ -70,6 +70,7 @@ begin
   graphics_o.y <= from_video_ctl.y;
   -- should this be the 'real' vblank or the 'active' vblank?
   -- - use the real for now
+  graphics_o.hblank <= video_o_s.hblank;
   graphics_o.vblank <= video_o_s.vblank;
   --graphics_o.vblank <= from_video_ctl.vblank;
     

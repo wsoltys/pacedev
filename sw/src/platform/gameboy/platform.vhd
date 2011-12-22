@@ -134,8 +134,10 @@ architecture SYN of platform is
   signal tac_r              : std_logic_vector(7 downto 0);   -- $FF07
   signal if_r               : std_logic_vector(7 downto 0);   -- $FF0F
   signal lcdc_r             : std_logic_vector(7 downto 0);   -- $FF40
+  signal stat_r             : std_logic_vector(7 downto 0);   -- $FF41
   signal scy_r              : std_logic_vector(7 downto 0);   -- $FF42
   signal scx_r              : std_logic_vector(7 downto 0);   -- $FF43
+  signal lyc_r              : std_logic_vector(7 downto 0);   -- $FF45
   signal bootsel_r          : std_logic;                      -- $FF50
   signal ie_r               : std_logic_vector(7 downto 0);   -- $FFFF
   
@@ -191,7 +193,9 @@ begin
 
     -- memory block write enables
     ramC_wr <= ramC_cs and cpu_clk_en and cpu_mem_wr;
-    ramF_wr <= ramF_cs and cpu_clk_en and cpu_mem_wr;
+    ramF_wr <= (ramF_cs and cpu_clk_en and cpu_mem_wr) or
+                -- fudge for broken LD($FF00+C),A
+                (cpu_a(7) and cpu_clk_en and cpu_io_wr);
 
     mem_d_i <=  bootrom_d_o when (bootrom_cs = '1' and bootsel_r = '0') else
                 cart0_d_o when cart0_cs = '1' else
@@ -208,11 +212,13 @@ begin
 --                inputs_i(2).d when in2_cs = '1' else
                 (others => '0');
 
-    io_d_i <=   X"FF";
+    -- can do I/O to $FF00-$FFFF
+    io_d_i <=   io_d_o when cpu_a(7) = '0' else
+                ramF_d_o;
     
     -- memory read mux
-    cpu_d_i <=  mem_d_i; -- when cpu_mem_rd = '1' else
-                --io_d_i;
+    cpu_d_i <=  mem_d_i when cpu_mem_rd = '1' else
+                io_d_i;
                 
   end block BLK_DECODE;
   
@@ -461,6 +467,8 @@ begin
     signal tick_16k384    : std_logic;
     signal tick_4k096     : std_logic;
     signal ly_um          : std_logic_vector(7 downto 0);
+    signal hblank_um      : std_logic;
+    signal vblank_um      : std_logic;
     signal vblank_p       : std_logic;
   begin
 
@@ -481,6 +489,8 @@ begin
         -- READS
         if io_rd = '1' then
           case cpu_a(7 downto 0) is
+            when X"00" =>
+              ioreg_d_o <= X"FF";
             when X"05" =>
               ioreg_d_o <= tima_r;
             when X"06" =>
@@ -491,6 +501,8 @@ begin
               ioreg_d_o <= if_r;
             when X"40" =>
               ioreg_d_o <= lcdc_r;
+            when X"41" =>
+              ioreg_d_o <= stat_r;
             when X"42" =>
               ioreg_d_o <= scy_r;
             when X"43" =>
@@ -498,6 +510,8 @@ begin
             when X"44" =>
               -- LY (0-153) (144-153 is VBLANK)
               ioreg_d_o <= ly_um;
+            when X"45" =>
+              ioreg_d_o <= lyc_r;
             when others =>
               null;
           end case;
@@ -517,6 +531,8 @@ begin
                 scy_r <= cpu_d_o;
               when X"43" =>
                 scx_r <= cpu_d_o;
+              when X"45" =>
+                lyc_r <= cpu_d_o;
               when X"50" =>
                 -- can never go back
                 bootsel_r <= '1';
@@ -528,6 +544,14 @@ begin
       end if;
     end process;
 
+    -- $FF41 - STAT
+    stat_r(2) <=  '1' when ly_um = lyc_r else 
+                  '0';
+    stat_r(1 downto 0) <= "00" when hblank_um = '1' else
+                          "01" when vblank_um = '1' else
+                          --"10" when (dma) else
+                          "11";
+    
     -- interrupt register and interrupts
     -- $FF0F
     process (clk_sys, platform_rst)
@@ -636,9 +660,13 @@ begin
     process (clk_sys, rst_sys)
       type ly_t is array (natural range <>) of std_logic_vector(7 downto 0);
       variable ly_r : ly_t(3 downto 0);
+      variable hblank_r : std_logic_vector(3 downto 0);
+      variable vblank_r : std_logic_vector(3 downto 0);
     begin
       if rst_sys = '1' then
         ly_r := (others => (others => '0'));
+        hblank_r := (others => '0');
+        vblank_r := (others => '0');
         vblank_p <= '0';
       elsif rising_edge(clk_sys) then
         -- ensure we don't wrap at 256
@@ -653,8 +681,12 @@ begin
         else
           ly_r := ly_r(ly_r'left-1 downto 0) & X"FF";
         end if;
-        ly_um <= ly_r(ly_r'left);
+        hblank_r := hblank_r(hblank_r'left-1 downto 0) & graphics_i.hblank;
+        vblank_r := vblank_r(vblank_r'left-1 downto 0) & graphics_i.vblank;
       end if;
+      ly_um <= ly_r(ly_r'left);
+      hblank_um <= hblank_r(hblank_r'left);
+      vblank_um <= vblank_r(vblank_r'left);
     end process;
 
     -- sound implementation
