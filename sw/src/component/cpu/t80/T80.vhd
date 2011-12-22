@@ -396,6 +396,8 @@ begin
 
 			if IMode /= "11" then
 				IStatus <= IMode;
+      else
+        IStatus <= "10";
 			end if;
 
 			Arith16_r <= Arith16;
@@ -462,10 +464,10 @@ begin
 				if T_Res = '1' then
 					BTR_r <= (I_BT or I_BC or I_BTR) and not No_BTR;
 					if Jump = '1' then
-						A(15 downto 8) <= DI_Reg;
-						A(7 downto 0) <= TmpAddr(7 downto 0);
-						PC(15 downto 8) <= unsigned(DI_Reg);
-						PC(7 downto 0) <= unsigned(TmpAddr(7 downto 0));
+            A(15 downto 8) <= DI_Reg;
+            A(7 downto 0) <= TmpAddr(7 downto 0);
+            PC(15 downto 8) <= unsigned(DI_Reg);
+            PC(7 downto 0) <= unsigned(TmpAddr(7 downto 0));
 					elsif JumpXY = '1' then
 						A <= RegBusC;
 						PC <= unsigned(RegBusC);
@@ -476,10 +478,10 @@ begin
 						A <= "0000000001100110";
 						PC <= "0000000001100110";
 					elsif MCycle = "011" and IntCycle = '1' and IStatus = "10" then
-						A(15 downto 8) <= I;
-						A(7 downto 0) <= TmpAddr(7 downto 0);
-						PC(15 downto 8) <= unsigned(I);
-						PC(7 downto 0) <= unsigned(TmpAddr(7 downto 0));
+            A(15 downto 8) <= I;
+            A(7 downto 0) <= TmpAddr(7 downto 0);
+            PC(15 downto 8) <= unsigned(I);
+            PC(7 downto 0) <= unsigned(TmpAddr(7 downto 0));
 					else
 						case Set_Addr_To is
 						when aXY =>
