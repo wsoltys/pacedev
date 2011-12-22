@@ -64,8 +64,7 @@ architecture SYN of gbc_snd is
 
 	signal sq1_fr2			: std_logic_vector(10 downto 0);	-- Sq1 frequency (shadow copy)
 	signal sq1_vol			: std_logic_vector(3 downto 0);		-- Sq1 initial volume
-	signal sq1_envcnt		: std_logic_vector(2 downto 0);		-- Sq1 initial volume
-	signal sq1_playing	: std_logic;
+	signal sq1_playing	: std_logic;											-- Sq1 channel active
 	signal sq1_wav			: std_logic_vector(5 downto 0);		-- Sq1 output waveform
 
 	signal sq2_duty			: std_logic_vector(1 downto 0);		-- Sq2 duty cycle
@@ -79,8 +78,7 @@ architecture SYN of gbc_snd is
 
 	signal sq2_fr2			: std_logic_vector(10 downto 0);	-- Sq2 frequency (shadow copy)
 	signal sq2_vol			: std_logic_vector(3 downto 0);		-- Sq2 initial volume
-	signal sq2_envcnt		: std_logic_vector(2 downto 0);		-- Sq2 initial volume
-	signal sq2_playing	: std_logic;
+	signal sq2_playing	: std_logic;											-- Sq2 channel active
 	signal sq2_wav			: std_logic_vector(5 downto 0);		-- Sq2 output waveform
 
 	signal wav_enable		: std_logic;											-- Wave enable
@@ -95,6 +93,21 @@ architecture SYN of gbc_snd is
 	signal wav_wav			: std_logic_vector(5 downto 0);		-- Wave output waveform
 	signal wav_ram			: wav_arr_t;											-- Wave table
 	signal wav_shift		: boolean;
+
+	signal noi_slen			: std_logic_vector(5 downto 0);
+	signal noi_svol			: std_logic_vector(3 downto 0);
+	signal noi_envsgn		: std_logic;
+	signal noi_envper		: std_logic_vector(2 downto 0);
+	signal noi_freqsh		: std_logic_vector(3 downto 0);
+	signal noi_short		: std_logic;
+	signal noi_div			: std_logic_vector(2 downto 0);
+	signal noi_trigger	: std_logic;
+	signal noi_lenchk		: std_logic;
+
+	signal noi_fr2			: std_logic_vector(10 downto 0);	-- Noise frequency (shadow copy)
+	signal noi_vol			: std_logic_vector(3 downto 0);		-- Noise initial volume
+	signal noi_playing	: std_logic;											-- Noise channel active
+	signal noi_wav			: std_logic_vector(5 downto 0);		-- Noise output waveform
 
 begin
 
@@ -156,10 +169,10 @@ begin
 					en_len <= true;
 				end if;
 				if framecnt = 2 or framecnt = 6 then
-					en_env <= true;
+					en_sweep <= true;
 				end if;
 				if framecnt = 7 then
-					en_sweep <= true;
+					en_env <= true;
 				end if;
 
 				if framecnt < 7 then
@@ -199,6 +212,7 @@ begin
 			sq1_freq		<= (others => '0');
 			sq1_lenchk	<= '0';
 			sq1_trigger	<= '0';
+
 			sq2_duty		<= (others => '0');
 			sq2_slen		<= (others => '0');
 			sq2_svol		<= (others => '0');
@@ -207,19 +221,30 @@ begin
 			sq2_freq		<= (others => '0');
 			sq2_lenchk	<= '0';
 			sq2_trigger	<= '0';
+
 			wav_enable	<= '0';
 			wav_volsh		<= (others => '0');
 			wav_freq		<= (others => '0');
 			wav_trigger	<= '0';
 			wav_lenchk	<= '0';
-
 			wav_shift_r := false;
+
+			noi_slen		<= (others => '0');
+			noi_svol		<= (others => '0');
+			noi_envsgn	<= '0';
+			noi_envper	<= (others => '0');
+			noi_freqsh	<= (others => '0');
+			noi_short		<= '0';
+			noi_div			<= (others => '0');
+			noi_trigger	<= '0';
+			noi_lenchk	<= '0';
 
 		elsif rising_edge(clk) then
 			if en_snd then
 				sq1_trigger <= '0';
 				sq2_trigger <= '0';
 				wav_trigger <= '0';
+				noi_trigger <= '0';
 			end if;
 
 			-- Rotate wave table on rising edge of wav_shift
@@ -281,12 +306,21 @@ begin
 					wav_lenchk <= s1_writedata(6);
 					wav_freq(10 downto 8) <= s1_writedata(2 downto 0);
 
---									-- Noise
---				when "100000" =>	-- NR41 FF20 --LL LLLL Length load (64-L)
---				when "100001" =>	-- NR42 FF21 VVVV APPP Starting volume, Envelope add mode, period
---				when "100010" =>	-- NR43 FF22 SSSS WDDD Clock shift, Width mode of LFSR, Divisor code
---				when "100011" =>	-- NR44 FF23 TL-- ---- Trigger, Length enable
---
+													-- Noise
+				when "100000" =>	-- NR41 FF20 --LL LLLL Length load (64-L)
+					noi_slen <= s1_writedata(5 downto 0);
+				when "100001" =>	-- NR42 FF21 VVVV APPP Starting volume, Envelope add mode, period
+					noi_svol <= s1_writedata(7 downto 4);
+					noi_envsgn <= s1_writedata(3);
+					noi_envper <= s1_writedata(2 downto 0);
+				when "100010" =>	-- NR43 FF22 SSSS WDDD Clock shift, Width mode of LFSR, Divisor code
+					noi_freqsh <= s1_writedata(7 downto 4);
+					noi_short <= s1_writedata(3);
+					noi_div <= s1_writedata(2 downto 0);
+				when "100011" =>	-- NR44 FF23 TL-- ---- Trigger, Length enable
+					noi_trigger <= s1_writedata(7);
+					noi_lenchk <= s1_writedata(6);
+
 --									-- Control/Status
 --				when "100100" =>	-- NR50 FF24 ALLL BRRR Vin L enable, Left vol, Vin R enable, Right vol
 --				when "100101" =>	-- NR51 FF25 NW21 NW21 Left enables, Right enables
@@ -385,6 +419,16 @@ begin
 				when "011110" =>	-- NR34 FF1E TL-- -FFF Trigger, Length enable, Frequency MSB
 					s1_readdata <= wav_trigger & wav_lenchk & "111111";
 
+													-- Noise
+				when "100000" =>	-- NR41 FF20 --LL LLLL Length load (64-L)
+					s1_readdata <= X"FF";
+				when "100001" =>	-- NR42 FF21 VVVV APPP Starting volume, Envelope add mode, period
+					s1_readdata <= noi_svol & noi_envsgn & noi_envper;
+				when "100010" =>	-- NR43 FF22 SSSS WDDD Clock shift, Width mode of LFSR, Divisor code
+					s1_readdata <= noi_freqsh & noi_short &	noi_div;
+				when "100011" =>	-- NR44 FF23 TL-- ---- Trigger, Length enable
+					s1_readdata <= noi_trigger & noi_lenchk & "111111"; 
+
 													-- Wave Table
 				when "110000" =>	--      FF30 0000 1111 Samples 0 and 1
 					s1_readdata <= wav_ram(0) & wav_ram(1);
@@ -446,13 +490,28 @@ begin
 		variable sq1_fcnt		: unsigned(10 downto 0);
 		variable sq1_phase	: integer range 0 to 7;
 		variable sq1_len		: std_logic_vector(6 downto 0);
+		variable sq1_envcnt	: std_logic_vector(2 downto 0);		-- Sq1 envelope timer count
+		variable sq1_swcnt	: std_logic_vector(2 downto 0);		-- Sq1 sweep timer count
+		variable sq1_swoffs	: unsigned(11 downto 0);
+		variable sq1_swfr		: unsigned(11 downto 0);
 		variable sq1_out		: std_logic;
+		
 		variable sq2_fcnt		: unsigned(10 downto 0);
 		variable sq2_phase	: integer range 0 to 7;
 		variable sq2_len		: std_logic_vector(6 downto 0);
+		variable sq2_envcnt	: std_logic_vector(2 downto 0);		-- Sq2 envelope timer count
 		variable sq2_out		: std_logic;
+		
 		variable wav_fcnt		: unsigned(10 downto 0);
 		variable wav_len		: std_logic_vector(8 downto 0);
+
+		variable noi_divisor: unsigned(10 downto 0);	-- Noise frequency divisor
+		variable noi_freq		: unsigned(10 downto 0);	-- Noise frequency (calculated)
+		variable noi_fcnt		: unsigned(10 downto 0);
+		variable noi_lfsr		: unsigned(15 downto 0);
+		variable noi_len		: std_logic_vector(6 downto 0);
+		variable noi_envcnt	: std_logic_vector(2 downto 0);		-- Noise envelope timer count
+		variable noi_out		: std_logic;
 
 		variable acc_fcnt		: unsigned(11 downto 0);
 	begin
@@ -464,18 +523,32 @@ begin
 			sq1_phase		:= 0;
 			sq1_len			:= (others => '0');
 			sq1_vol		 	<= "0000";
-			sq1_envcnt	<= "000";
+			sq1_envcnt	:= "000";
+			sq1_swcnt		:= "000";
+			sq1_swoffs	:= (others => '0');
+			sq1_swfr		:= (others => '0');
 			sq1_out			:= '0';
+			
 			sq2_playing	<= '0';
 			sq2_fr2			<= (others => '0');
 			sq2_fcnt		:= (others => '0');
 			sq2_phase		:= 0;
 			sq2_len			:= (others => '0');
 			sq2_vol		 	<= "0000";
-			sq2_envcnt	<= "000";
+			sq2_envcnt	:= "000";
 			sq2_out			:= '0';
+
 			wav_fcnt		:= (others => '0');
 			wav_len			:= (others => '0');
+
+			noi_playing	<= '0';
+			noi_fr2			<= (others => '0');
+			noi_fcnt		:= (others => '0');
+			noi_lfsr		:= (others => '1');
+			noi_len			:= (others => '0');
+			noi_vol		 	<= "0000";
+			noi_envcnt	:= "000";
+			noi_out			:= '0';
 
 		elsif rising_edge(clk) then
 			if en_snd4 then
@@ -509,6 +582,24 @@ begin
 					end if;
 				end if;
 
+				-- Noi frequency timer
+				if noi_playing = '1' then
+					acc_fcnt := ('0'&noi_fcnt) + to_unsigned(1, acc_fcnt'length);
+					if acc_fcnt(acc_fcnt'high) = '1' then
+						-- Noise LFSR
+						if noi_short = '1' then
+							noi_lfsr := (noi_lfsr(0) xor noi_lfsr(1)) & noi_lfsr(15 downto 8) & (noi_lfsr(0) xor noi_lfsr(1)) & noi_lfsr(6 downto 1);
+						else
+							noi_lfsr := (noi_lfsr(0) xor noi_lfsr(1)) & noi_lfsr(15 downto 1);
+						end if;
+						
+						noi_out := not noi_lfsr(0);
+						noi_fcnt := unsigned(noi_fr2);
+					else
+						noi_fcnt := acc_fcnt(noi_fcnt'range);
+					end if;
+				end if;
+
 				case sq1_duty is
 				when "00" => sq1_out := duty_0(sq1_phase);
 				when "01" => sq1_out := duty_1(sq1_phase);
@@ -536,6 +627,13 @@ begin
 				else
 					sq2_wav <= "000000";
 				end if;
+
+				if noi_out = '1' then
+					noi_wav <= noi_vol & "00";
+				else
+					noi_wav <= "000000";
+				end if;
+
 			end if;
 
 			-- Square channel 1
@@ -549,10 +647,9 @@ begin
 
 				-- Envelope counter
 				if en_env then
-					if sq1_envper /= "000" and sq1_envcnt /= sq1_envper then
-						sq1_envcnt <= std_logic_vector(unsigned(sq1_envcnt) + to_unsigned(1, sq1_envcnt'length));
-					else
-						if sq1_envper /= "000" then
+					if sq1_envper /= "000" then
+						sq1_envcnt := std_logic_vector(unsigned(sq1_envcnt) + to_unsigned(1, sq1_envcnt'length));
+						if sq1_envcnt = sq1_envper then
 							if sq1_envsgn = '1' then
 								if sq1_vol /= "1111" then 
 									sq1_vol <= std_logic_vector(unsigned(sq1_vol) + to_unsigned(1, sq1_vol'length));
@@ -562,16 +659,54 @@ begin
 									sq1_vol <= std_logic_vector(unsigned(sq1_vol) - to_unsigned(1, sq1_vol'length));
 								end if;
 							end if;
+							sq1_envcnt := "000";
 						end if;
+					end if;
+				end if;
 
-						sq1_envcnt <= "000";
+				-- Sweep processing
+				if en_sweep or sq1_trigger = '1' then
+					case sq1_swshift is
+					when "000" => sq1_swoffs := unsigned('0' & sq1_fr2);
+					when "001" => sq1_swoffs := "00" & unsigned(sq1_fr2(10 downto 1));
+					when "010" => sq1_swoffs := "000" & unsigned(sq1_fr2(10 downto 2));
+					when "011" => sq1_swoffs := "0000" & unsigned(sq1_fr2(10 downto 3));
+					when "100" => sq1_swoffs := "00000" & unsigned(sq1_fr2(10 downto 4));
+					when "101" => sq1_swoffs := "000000" & unsigned(sq1_fr2(10 downto 5));
+					when "110" => sq1_swoffs := "0000000" & unsigned(sq1_fr2(10 downto 6));
+					when "111" => sq1_swoffs := "00000000" & unsigned(sq1_fr2(10 downto 7));
+					when others => sq1_swoffs := unsigned('0' & sq1_fr2);
+					end case;
+
+					-- Calculate next sweep frequency
+					if sq1_swper /= "000" then
+						if sq1_swdir = '0' then
+							sq1_swfr := ('0' & unsigned(sq1_fr2)) - sq1_swoffs;
+						else
+							sq1_swfr := ('0' & unsigned(sq1_fr2)) + sq1_swoffs;
+						end if;
+					else -- Sweep disabled
+						sq1_swfr := unsigned('0' & sq1_fr2);
+					end if;
+
+					-- Sweep counter
+					if sq1_swper /= "000" then
+						sq1_swcnt := std_logic_vector(unsigned(sq1_swcnt) + to_unsigned(1, sq1_swcnt'length));
+						if sq1_swcnt = sq1_swper then
+							sq1_fr2 <= std_logic_vector(sq1_swfr(10 downto 0));
+							sq1_swcnt := "000";
+						end if;
 					end if;
 				end if;
 
 				-- Check for end of playing conditions
-				if sq1_vol = X"0" or (sq1_lenchk = '1' and sq1_len(6) = '1') then
+				if sq1_vol = X"0" 																	-- Volume == 0
+					or (sq1_lenchk = '1' and sq1_len(6) = '1') 				-- Play length timer overrun
+					or (sq1_swper /= "000" and sq1_swfr(11) = '1') 		-- Sweep frequency overrun
+				then
 					sq1_playing <= '0';
-					sq1_envcnt <= "000";
+					sq1_envcnt := "000";
+					sq1_swcnt := "000";
 					--sq1_wav <= "000000";
 				end if;
 			end if;
@@ -580,9 +715,11 @@ begin
 			if sq1_trigger = '1' then
 				sq1_fr2 <= sq1_freq;
 				sq1_fcnt := unsigned(sq1_freq);
+				noi_lfsr := (others => '1');
 				sq1_playing <= '1';
 				sq1_vol <= sq1_svol;
-				sq1_envcnt <= "000";
+				sq1_envcnt := "000";
+				sq1_swcnt := "000";
 				sq1_len := '0' & sq1_slen;
 				sq1_phase := 0;
 			end if;
@@ -598,10 +735,9 @@ begin
 
 				-- Envelope counter
 				if en_env then
-					if sq2_envper /= "000" and sq2_envcnt /= sq2_envper then
-						sq2_envcnt <= std_logic_vector(unsigned(sq2_envcnt) + to_unsigned(1, sq2_envcnt'length));
-					else
-						if sq2_envper /= "000" then
+					if sq2_envper /= "000" then
+						sq2_envcnt := std_logic_vector(unsigned(sq2_envcnt) + to_unsigned(1, sq2_envcnt'length));
+						if sq2_envcnt = sq2_envper then
 							if sq2_envsgn = '1' then
 								if sq2_vol /= "1111" then 
 									sq2_vol <= std_logic_vector(unsigned(sq2_vol) + to_unsigned(1, sq2_vol'length));
@@ -611,16 +747,17 @@ begin
 									sq2_vol <= std_logic_vector(unsigned(sq2_vol) - to_unsigned(1, sq2_vol'length));
 								end if;
 							end if;
+							sq2_envcnt := "000";
 						end if;
-
-						sq2_envcnt <= "000";
 					end if;
 				end if;
 
 				-- Check for end of playing conditions
-				if sq2_vol = X"0" or (sq2_lenchk = '1' and sq2_len(6) = '1') then
+				if sq2_vol = X"0" 															-- Volume == 0              	
+					or (sq2_lenchk = '1' and sq2_len(6) = '1')		-- Play length timer overrun
+				then
 					sq2_playing <= '0';
-					sq2_envcnt <= "000";
+					sq2_envcnt := "000";
 					--sq2_wav <= "000000";
 				end if;
 			end if;
@@ -631,9 +768,82 @@ begin
 				sq2_fcnt := unsigned(sq2_freq);
 				sq2_playing <= '1';
 				sq2_vol <= sq2_svol;
-				sq2_envcnt <= "000";
+				sq2_envcnt := "000";
 				sq2_len := '0' & sq2_slen;
 				sq2_phase := 0;
+			end if;
+
+			-- Noise channel
+			if noi_playing = '1' then
+				-- Length counter
+				if en_len then
+					if noi_len(6) = '0' then
+						noi_len := std_logic_vector(unsigned(noi_len) + to_unsigned(1, noi_len'length));
+					end if;
+				end if;
+
+				-- Envelope counter
+				if en_env then
+					if noi_envper /= "000" then
+						noi_envcnt := std_logic_vector(unsigned(noi_envcnt) + to_unsigned(1, noi_envcnt'length));
+						if noi_envcnt = noi_envper then
+							if noi_envsgn = '1' then
+								if noi_vol /= "1111" then 
+									noi_vol <= std_logic_vector(unsigned(noi_vol) + to_unsigned(1, noi_vol'length));
+								end if;
+							else
+								if noi_vol /= "0000" then 
+									noi_vol <= std_logic_vector(unsigned(noi_vol) - to_unsigned(1, noi_vol'length));
+								end if;
+							end if;
+							noi_envcnt := "000";
+						end if;
+					end if;
+				end if;
+
+				-- Check for end of playing conditions
+				if noi_vol = X"0" 															-- Volume == 0              	
+					or (noi_lenchk = '1' and noi_len(6) = '1')		-- Play length timer overrun
+				then
+					noi_playing <= '0';
+					noi_envcnt := "000";
+					--sq2_wav <= "000000";
+				end if;
+			end if;
+
+			-- Check sample trigger and start playing
+			if noi_trigger = '1' then
+				-- Calculate noise frequency
+				case noi_div is 
+				when "000" => noi_divisor := to_unsigned(2048 - 8, noi_divisor'length);
+				when "001" => noi_divisor := to_unsigned(2048 - 16, noi_divisor'length);
+				when "010" => noi_divisor := to_unsigned(2048 - 32, noi_divisor'length);
+				when "011" => noi_divisor := to_unsigned(2048 - 48, noi_divisor'length);
+				when "100" => noi_divisor := to_unsigned(2048 - 64, noi_divisor'length);
+				when "101" => noi_divisor := to_unsigned(2048 - 80, noi_divisor'length);
+				when "110" => noi_divisor := to_unsigned(2048 - 96, noi_divisor'length);
+				when others => noi_divisor := to_unsigned(2048 - 112, noi_divisor'length);
+				end case;
+
+--				case noi_freqsh is
+--				when "000" => noi_freq := unsigned(noi_divisor);
+--				when "001" => noi_freq := '0' & unsigned(noi_divisor(10 downto 1));
+--				when "010" => noi_freq := "00" & unsigned(noi_divisor(10 downto 2));
+--				when "011" => noi_freq := "000" & unsigned(noi_divisor(10 downto 3));
+--				when "100" => noi_freq := "0000" & unsigned(noi_divisor(10 downto 4));
+--				when "101" => noi_freq := "00000" & unsigned(noi_divisor(10 downto 5));
+--				when "110" => noi_freq := "000000" & unsigned(noi_divisor(10 downto 6));
+--				when "111" => noi_freq := "0000000" & unsigned(noi_divisor(10 downto 7));
+--				when others => noi_freq := unsigned(noi_divisor);
+--				end case;
+				noi_freq := noi_divisor sll to_integer(unsigned(noi_freqsh));
+
+				noi_fr2 <= std_logic_vector(noi_freq);
+				noi_fcnt := noi_freq;
+				noi_playing <= '1';
+				noi_vol <= noi_svol;
+				noi_envcnt := "000";
+				noi_len := '0' & noi_slen;
 			end if;
 
 			if en_snd2 then
@@ -704,7 +914,7 @@ begin
 	end process;
 
 	-- Mixer
-	mixer : process(sq1_wav, sq2_wav, wav_wav)
+	mixer : process(sq1_wav, sq2_wav, noi_wav, wav_wav)
 		variable snd_left_in		: unsigned(7 downto 0);
 		variable snd_right_in		: unsigned(7 downto 0);
 	begin
@@ -714,6 +924,7 @@ begin
 		snd_left_in := snd_left_in + ("00"&unsigned(sq1_wav));
 	 	snd_left_in := snd_left_in + ("00"&unsigned(wav_wav));
 		snd_right_in := snd_right_in + ("00"&unsigned(sq2_wav));
+		snd_right_in := snd_right_in + ("00"&unsigned(noi_wav));
 
 		snd_left <= std_logic_vector(snd_left_in) & X"00";
 		snd_right <= std_logic_vector(snd_right_in) & X"00";
