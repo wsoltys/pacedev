@@ -580,11 +580,11 @@ begin
                   '1';
     
     -- generate interrupt vector (priority encoded)
-    cpu_int_vec <=  X"40" when (ie_r(0) = '1' and if_r(0) = '1') else
-                    X"48" when (ie_r(1) = '1' and if_r(1) = '1') else
-                    X"50" when (ie_r(2) = '1' and if_r(2) = '1') else
-                    X"58" when (ie_r(3) = '1' and if_r(3) = '1') else
-                    X"60";
+    cpu_int_vec <=  X"40"; -- when (ie_r(0) = '1' and if_r(0) = '1') else
+--                    X"48" when (ie_r(1) = '1' and if_r(1) = '1') else
+--                    X"50" when (ie_r(2) = '1' and if_r(2) = '1') else
+--                    X"58" when (ie_r(3) = '1' and if_r(3) = '1') else
+--                    X"60";
 
     -- timer implementation
     process (clk_sys, platform_rst)

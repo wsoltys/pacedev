@@ -90,10 +90,16 @@ begin
             tile_d_r(7 downto 0) := tile_d_r(6 downto 0) & '0';
           end if;
         end if;
-        -- 1 bit from each byte
-        --pel := tile_d_r(15) & tile_d_r(7);
-        pel := tile_d_r(7) & tile_d_r(15);
 
+        -- Bit(0) controls BG/window on/off
+        if lcdc(0) = '1' then
+          -- 1 bit from each byte
+          --pel := tile_d_r(15) & tile_d_r(7);
+          pel := tile_d_r(7) & tile_d_r(15);
+        else
+          pel := "00";
+        end if;
+        
         -- extract R,G,B from colour palette
         pel_i := to_integer(unsigned(pel));
         pal_entry := pal(pel_i);
