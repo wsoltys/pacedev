@@ -40,6 +40,10 @@ begin
   end process;
   
   gbc_snd_inst : entity work.gbc_snd
+    generic map
+    (
+      CLK_FREQ      => 42000000
+    )
     port map
     (
       clk						=> sysClk,

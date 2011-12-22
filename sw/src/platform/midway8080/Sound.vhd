@@ -18,7 +18,8 @@ entity sound is
     sndif_addr        : in    std_logic_vector(15 downto 0);
     
     snd_clk           : out   std_logic;
-    snd_data          : out   std_logic_vector(7 downto 0);
+    snd_data_l        : out   std_logic_vector(7 downto 0);
+    snd_data_r        : out   std_logic_vector(7 downto 0);
     sndif_datao       : out   std_logic_vector(7 downto 0)
   );
 end entity sound;
@@ -38,13 +39,15 @@ architecture SYN of Sound is
 -- Signal Declarations
 
 	-- audio module clock
-	signal clk_5M		: std_logic;
-	signal clk_10M	: std_logic;
+	signal clk_5M		  : std_logic;
+	signal clk_10M	  : std_logic;
 	
 	-- port latches
-	signal s1_r			: std_logic_vector(5 downto 0);
-	signal s2_r			: std_logic_vector(5 downto 0);
+	signal s1_r			  : std_logic_vector(5 downto 0);
+	signal s2_r			  : std_logic_vector(5 downto 0);
 	
+  signal snd_data_s : std_logic_vector(7 downto 0);
+  
 begin
 
   sndif_datao <= X"00";
@@ -104,7 +107,10 @@ begin
         Clk => clk_10M,
         S1  => s1_r,
         S2  => s2_r,
-        Aud => snd_data
+        Aud => snd_data_s
       );
      
+  snd_data_l <= snd_data_s;
+  snd_data_r <= snd_data_s;
+  
 end architecture SYN;

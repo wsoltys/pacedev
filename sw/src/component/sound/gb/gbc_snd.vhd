@@ -7,6 +7,10 @@ library work;
 
 
 entity gbc_snd is
+  generic
+  (
+    CLK_FREQ      : integer := 100000000
+  );
   port
   (
 		clk						: in std_logic;
@@ -29,7 +33,7 @@ architecture SYN of gbc_snd is
 	subtype wav_t is std_logic_vector(3 downto 0);
 	type wav_arr_t is array(0 to 31) of wav_t;
 
-	constant clk_freq		: integer := 100000000;
+	--constant clk_freq		: integer := 100000000;
 	constant snd_freq		: integer := 4194304;
 
 	signal en_snd				: boolean;	-- Enable at base sound frequency (4.19MHz)
@@ -99,7 +103,9 @@ begin
 
 	-- Calculate base clock enable (4.194304MHz)
 	process(clk, reset)
-		constant clk_frac		: unsigned(15 downto 0) := X"0ABD"; --to_unsigned(snd_freq * 65536 / clk_freq, 16);
+    --to_unsigned(snd_freq * 65536 / clk_freq, 16);
+		--constant clk_frac		: unsigned(15 downto 0) := X"0ABD"; -- clk_freq=100MHz
+		constant clk_frac		: unsigned(15 downto 0) := X"1991"; -- clk_freq=42MHz
 		variable divacc			: unsigned(15 downto 0);
 		variable acc				: unsigned(16 downto 0);
 	begin

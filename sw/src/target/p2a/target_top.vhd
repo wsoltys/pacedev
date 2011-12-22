@@ -510,9 +510,9 @@ begin
     nromsdis <= video_o.vsync;
 
     -- drive encoder enable
-    ba3 <= PACE_ENABLE_ADV724;
+    ba3 <= P2A_ENABLE_ADV724;
     -- drive PAL/NTSC selector
-    ad724_stnd <= PACE_ADV724_STD;
+    ad724_stnd <= P2A_ADV724_STD;
     ba6 <= ad724_stnd;
     ba4 <= not ad724_stnd;
 

@@ -449,7 +449,10 @@ begin
     );
 
   BLK_IOREG : block
-  
+
+    signal io_rd          : std_logic;
+    signal io_wr          : std_logic;
+    
     signal ioreg_d_o      : std_logic_vector(7 downto 0);
     signal snd_cs         : std_logic;
     
@@ -461,6 +464,9 @@ begin
     signal vblank_p       : std_logic;
   begin
 
+    io_rd <= (io_cs and cpu_mem_rd) or cpu_io_rd;
+    io_wr <= (io_cs and cpu_mem_wr) or cpu_io_wr;
+    
     process (clk_sys, platform_rst)
     begin
       if platform_rst = '1' then
@@ -472,55 +478,53 @@ begin
         scx_r <= X"00";
         bootsel_r <= '0';
       elsif rising_edge(clk_sys) then
-        if io_cs = '1' then 
-          -- READS
-          if cpu_mem_rd = '1' then
+        -- READS
+        if io_rd = '1' then
+          case cpu_a(7 downto 0) is
+            when X"05" =>
+              ioreg_d_o <= tima_r;
+            when X"06" =>
+              ioreg_d_o <= tma_r;
+            when X"07" =>
+              ioreg_d_o <= tac_r;
+            when X"0F" =>
+              ioreg_d_o <= if_r;
+            when X"40" =>
+              ioreg_d_o <= lcdc_r;
+            when X"42" =>
+              ioreg_d_o <= scy_r;
+            when X"43" =>
+              ioreg_d_o <= scx_r;
+            when X"44" =>
+              -- LY (0-153) (144-153 is VBLANK)
+              ioreg_d_o <= ly_um;
+            when others =>
+              null;
+          end case;
+        -- WRITES
+        elsif io_wr = '1' then
+          if cpu_clk_en = '1' then
             case cpu_a(7 downto 0) is
               when X"05" =>
-                ioreg_d_o <= tima_r;
+                tima_r <= cpu_d_o;
               when X"06" =>
-                ioreg_d_o <= tma_r;
+                tma_r <= cpu_d_o;
               when X"07" =>
-                ioreg_d_o <= tac_r;
-              when X"0F" =>
-                ioreg_d_o <= if_r;
+                tac_r <= cpu_d_o;
               when X"40" =>
-                ioreg_d_o <= lcdc_r;
+                lcdc_r <= cpu_d_o;
               when X"42" =>
-                ioreg_d_o <= scy_r;
+                scy_r <= cpu_d_o;
               when X"43" =>
-                ioreg_d_o <= scx_r;
-              when X"44" =>
-                -- LY (0-153) (144-153 is VBLANK)
-                ioreg_d_o <= ly_um;
+                scx_r <= cpu_d_o;
+              when X"50" =>
+                -- can never go back
+                bootsel_r <= '1';
               when others =>
                 null;
             end case;
-          -- WRITES
-          elsif cpu_mem_wr = '1' then
-            if cpu_clk_en = '1' then
-              case cpu_a(7 downto 0) is
-                when X"05" =>
-                  tima_r <= cpu_d_o;
-                when X"06" =>
-                  tma_r <= cpu_d_o;
-                when X"07" =>
-                  tac_r <= cpu_d_o;
-                when X"40" =>
-                  lcdc_r <= cpu_d_o;
-                when X"42" =>
-                  scy_r <= cpu_d_o;
-                when X"43" =>
-                  scx_r <= cpu_d_o;
-                when X"50" =>
-                  -- can never go back
-                  bootsel_r <= '1';
-                when others =>
-                  null;
-              end case;
-            end if; -- cpu_clk_en
-          end if; -- cpu_mem_rd/wr
-        end if; -- ioreg_cs
+          end if; -- cpu_clk_en
+        end if; -- cpu_mem_rd/wr
       end if;
     end process;
 
@@ -535,19 +539,17 @@ begin
       elsif rising_edge(clk_sys) then
 
         -- register
-        if io_cs = '1' then 
-          -- WRITES
-          if cpu_mem_wr = '1' then
-            if cpu_clk_en = '1' then
-              case cpu_a(7 downto 0) is
-                when X"0F" =>
-                  if_r <= cpu_d_o;
-                when others =>
-                  null;
-              end case;
-            end if; -- cpu_clk_en
-          end if; -- cpu_mem_rd/wr
-        end if; -- ioreg_cs
+        -- WRITES
+        if io_wr = '1' then
+          if cpu_clk_en = '1' then
+            case cpu_a(7 downto 0) is
+              when X"0F" =>
+                if_r <= cpu_d_o;
+              when others =>
+                null;
+            end case;
+          end if; -- cpu_clk_en
+        end if; -- cpu_mem_rd/wr
         
         -- interrupts
         if vblank_r = '0' and vblank_p = '1' then
@@ -641,14 +643,14 @@ begin
     -- sound implementation
     
     -- $FF10-$FF3F
-    snd_cs <= '1' when STD_MATCH(cpu_a,    X"FF1"&"----") else
-              '1' when STD_MATCH(cpu_a, X"FF"&"001-----") else
+    snd_cs <= '1' when STD_MATCH(cpu_a(7 downto 0), "0001----") else
+              '1' when STD_MATCH(cpu_a(7 downto 0), "001-----") else
               '0';
 
     snd_o.a <= cpu_a(snd_o.a'range);
     snd_o.d <= cpu_d_o;
-    snd_o.rd <= snd_cs and cpu_clk_en and cpu_mem_rd;
-    snd_o.wr <= snd_cs and cpu_clk_en and cpu_mem_wr;
+    snd_o.rd <= snd_cs and cpu_clk_en and io_rd;
+    snd_o.wr <= snd_cs and cpu_clk_en and io_wr;
     
     -- read MUX
     io_d_o <= snd_i.d when snd_cs = '1' else
