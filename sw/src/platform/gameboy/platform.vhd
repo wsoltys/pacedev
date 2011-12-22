@@ -579,12 +579,29 @@ begin
     cpu_int_n <=  '0' when (ie_r(4 downto 0) and if_r(4 downto 0)) /= "00000" else
                   '1';
     
-    -- generate interrupt vector (priority encoded)
-    cpu_int_vec <=  X"40"; -- when (ie_r(0) = '1' and if_r(0) = '1') else
---                    X"48" when (ie_r(1) = '1' and if_r(1) = '1') else
---                    X"50" when (ie_r(2) = '1' and if_r(2) = '1') else
---                    X"58" when (ie_r(3) = '1' and if_r(3) = '1') else
---                    X"60";
+    -- latch interrupt vector (priority encoded)
+    process (clk_sys, platform_rst)
+      variable if_rr : std_logic_vector(if_r'range);
+    begin
+      if platform_rst = '1' then
+        if_rr := (others => '0');
+      elsif rising_edge(clk_sys) then
+        if if_r /= if_rr then
+          if if_rr(0) = '1' then
+            cpu_int_vec <=  X"40";
+          elsif if_rr(1) = '1' then
+            cpu_int_vec <=  X"48";
+          elsif if_rr(2) = '1' then
+            cpu_int_vec <=  X"50";
+          elsif if_rr(3) = '1' then
+            cpu_int_vec <=  X"58";
+          elsif if_rr(4) = '1' then
+            cpu_int_vec <=  X"60";
+          end if;
+        end if;
+        if_rr := if_r;
+      end if;
+    end process;
 
     -- timer implementation
     process (clk_sys, platform_rst)
