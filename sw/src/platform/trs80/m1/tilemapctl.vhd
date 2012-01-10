@@ -119,7 +119,7 @@ begin
                                ctl_i.attr_d(4) & ctl_i.attr_d(5) & ctl_i.attr_d(6);
           elsif ctl_i.map_d(7) = '0' then
             -- latch alpha character rom data
-            tile_d_v := ctl_i.tile_d;
+            tile_d_v := ctl_i.tile_d(7 downto 0);
           else
             -- generate graphics character
             case vcount(2+PACE_VIDEO_V_SCALE downto 1+PACE_VIDEO_V_SCALE) is

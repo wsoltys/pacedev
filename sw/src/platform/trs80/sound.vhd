@@ -21,7 +21,8 @@ entity Sound is
      sndif_addr        : in    std_logic_vector(15 downto 0);
 
      snd_clk           : out   std_logic;
-     snd_data          : out   std_logic_vector(7 downto 0);
+     snd_data_l        : out   std_logic_vector(7 downto 0);
+	  snd_data_r        : out   std_logic_vector(7 downto 0);
      sndif_datao       : out   std_logic_vector(7 downto 0)
    );
 end Sound;
@@ -57,8 +58,9 @@ begin
         wr_v := sndif_wr;
       end if;
     end if;
-    -- assign latched sound data to output
-    snd_data <= snd_data_v & "000000";
+    -- assign latched sound data to outputs
+    snd_data_l <= snd_data_v & "000000";
+	 snd_data_r <= snd_data_v & "000000";
   end process;
 
   -- create a (20/4) 5MHz sound clock

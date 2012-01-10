@@ -402,7 +402,7 @@ begin
 		(
 			clock			=> clk_video,
 			address		=> tilemap_i(1).tile_a(10 downto 0),
-			q					=> tilemap_o(1).tile_d
+			q					=> tilemap_o(1).tile_d(7 downto 0)
 		);
 	
   -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE

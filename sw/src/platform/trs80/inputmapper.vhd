@@ -19,8 +19,8 @@ entity inputmapper is
 
 	    -- inputs from keyboard controller
 	    reset     : in std_logic;
-	    press     : in std_logic;
-	    release   : in std_logic;
+	    key_down     : in std_logic;
+	    key_up   : in std_logic;
 	    data      : in std_logic_vector(7 downto 0);
 			-- inputs from jamma interface
 			jamma			: in from_JAMMA_t;
@@ -71,136 +71,136 @@ begin
       jamma_v(6).d(1) := jamma_n.p(1).button(3);    -- <CLEAR>
       jamma_v(6).d(2) := jamma_n.p(1).button(4);    -- <BREAK>
     
-      if (press or release) = '1' then
+      if (key_down or key_up) = '1' then
         case data(7 downto 0) is
           -- row 0
           when SCANCODE_BACKQUOTE =>			-- TRS(@)
-            keybd_v(0).d(0) := press;
+            keybd_v(0).d(0) := key_down;
           when SCANCODE_A =>
-            keybd_v(0).d(1) := press;
+            keybd_v(0).d(1) := key_down;
           when SCANCODE_B =>
-            keybd_v(0).d(2) := press;
+            keybd_v(0).d(2) := key_down;
           when SCANCODE_C =>
-            keybd_v(0).d(3) := press;
+            keybd_v(0).d(3) := key_down;
           when SCANCODE_D =>
-            keybd_v(0).d(4) := press;
+            keybd_v(0).d(4) := key_down;
           when SCANCODE_E =>
-            keybd_v(0).d(5) := press;
+            keybd_v(0).d(5) := key_down;
           when SCANCODE_F =>
-            keybd_v(0).d(6) := press;
+            keybd_v(0).d(6) := key_down;
           when SCANCODE_G =>
-            keybd_v(0).d(7) := press;
+            keybd_v(0).d(7) := key_down;
           -- row 1
           when SCANCODE_H =>
-            keybd_v(1).d(0) := press;
+            keybd_v(1).d(0) := key_down;
           when SCANCODE_I =>
-            keybd_v(1).d(1) := press;
+            keybd_v(1).d(1) := key_down;
           when SCANCODE_J =>
-            keybd_v(1).d(2) := press;
+            keybd_v(1).d(2) := key_down;
           when SCANCODE_K =>
-            keybd_v(1).d(3) := press;
+            keybd_v(1).d(3) := key_down;
           when SCANCODE_L =>
-            keybd_v(1).d(4) := press;
+            keybd_v(1).d(4) := key_down;
           when SCANCODE_M =>
-            keybd_v(1).d(5) := press;
+            keybd_v(1).d(5) := key_down;
           when SCANCODE_N =>
-            keybd_v(1).d(6) := press;
+            keybd_v(1).d(6) := key_down;
           when SCANCODE_O =>
-            keybd_v(1).d(7) := press;
+            keybd_v(1).d(7) := key_down;
           -- row 2
           when SCANCODE_P =>
-            keybd_v(2).d(0) := press;
+            keybd_v(2).d(0) := key_down;
           when SCANCODE_Q =>
-            keybd_v(2).d(1) := press;
+            keybd_v(2).d(1) := key_down;
           when SCANCODE_R =>
-            keybd_v(2).d(2) := press;
+            keybd_v(2).d(2) := key_down;
           when SCANCODE_S =>
-            keybd_v(2).d(3) := press;
+            keybd_v(2).d(3) := key_down;
           when SCANCODE_T =>
-            keybd_v(2).d(4) := press;
+            keybd_v(2).d(4) := key_down;
           when SCANCODE_U =>
-            keybd_v(2).d(5) := press;
+            keybd_v(2).d(5) := key_down;
           when SCANCODE_V =>
-            keybd_v(2).d(6) := press;
+            keybd_v(2).d(6) := key_down;
           when SCANCODE_W =>
-            keybd_v(2).d(7) := press;
+            keybd_v(2).d(7) := key_down;
           -- row 3
           when SCANCODE_X =>
-            keybd_v(3).d(0) := press;
+            keybd_v(3).d(0) := key_down;
           when SCANCODE_Y =>
-            keybd_v(3).d(1) := press;
+            keybd_v(3).d(1) := key_down;
           when SCANCODE_Z =>
-            keybd_v(3).d(2) := press;
+            keybd_v(3).d(2) := key_down;
           -- row 4
           when SCANCODE_0 =>
-            keybd_v(4).d(0) := press;
+            keybd_v(4).d(0) := key_down;
           when SCANCODE_1 =>
-            keybd_v(4).d(1) := press;
+            keybd_v(4).d(1) := key_down;
           when SCANCODE_2 =>
-            keybd_v(4).d(2) := press;
+            keybd_v(4).d(2) := key_down;
           when SCANCODE_3 =>
-            keybd_v(4).d(3) := press;
+            keybd_v(4).d(3) := key_down;
           when SCANCODE_4 =>
-            keybd_v(4).d(4) := press;
+            keybd_v(4).d(4) := key_down;
           when SCANCODE_5 =>
-            keybd_v(4).d(5) := press;
+            keybd_v(4).d(5) := key_down;
           when SCANCODE_6 =>
-            keybd_v(4).d(6) := press;
+            keybd_v(4).d(6) := key_down;
           when SCANCODE_7 =>
-            keybd_v(4).d(7) := press;
+            keybd_v(4).d(7) := key_down;
           -- row 5
           when SCANCODE_8 =>
-            keybd_v(5).d(0) := press;
+            keybd_v(5).d(0) := key_down;
           when SCANCODE_9 =>
-            keybd_v(5).d(1) := press;
+            keybd_v(5).d(1) := key_down;
           when SCANCODE_QUOTE =>					-- TRS(:)
-            keybd_v(5).d(2) := press;
+            keybd_v(5).d(2) := key_down;
           when SCANCODE_SEMICOLON =>
-            keybd_v(5).d(3) := press;
+            keybd_v(5).d(3) := key_down;
           when SCANCODE_COMMA =>
-            keybd_v(5).d(4) := press;
+            keybd_v(5).d(4) := key_down;
           when SCANCODE_MINUS =>        	-- TRS(_)
-            keybd_v(5).d(5) := press;
+            keybd_v(5).d(5) := key_down;
           when SCANCODE_PERIOD =>
-            keybd_v(5).d(6) := press;
+            keybd_v(5).d(6) := key_down;
           when SCANCODE_SLASH =>
-            keybd_v(5).d(7) := press;
+            keybd_v(5).d(7) := key_down;
           -- row 6
           when SCANCODE_ENTER =>
-            keybd_v(6).d(0) := press;
+            keybd_v(6).d(0) := key_down;
           when SCANCODE_HOME =>						-- (EX)TRS(CLR)
-            keybd_v(6).d(1) := press;
+            keybd_v(6).d(1) := key_down;
           when SCANCODE_INS =>           	-- (EX)TRS(BREAK)
-            keybd_v(6).d(2) := press;
+            keybd_v(6).d(2) := key_down;
           when SCANCODE_UP =>
-            keybd_v(6).d(3) := press;
+            keybd_v(6).d(3) := key_down;
           when SCANCODE_DOWN =>
-            keybd_v(6).d(4) := press;
+            keybd_v(6).d(4) := key_down;
           when SCANCODE_LEFT =>
-            keybd_v(6).d(5) := press;
+            keybd_v(6).d(5) := key_down;
           when SCANCODE_BACKSPACE =>
-            keybd_v(6).d(5) := press;
+            keybd_v(6).d(5) := key_down;
           when SCANCODE_RIGHT =>
-            keybd_v(6).d(6) := press;
+            keybd_v(6).d(6) := key_down;
           when SCANCODE_SPACE =>
-            keybd_v(6).d(7) := press;
+            keybd_v(6).d(7) := key_down;
           -- row 7
           when SCANCODE_LSHIFT =>
-            keybd_v(7).d(0) := press;
-            shift := press;
+            keybd_v(7).d(0) := key_down;
+            shift := key_down;
           when SCANCODE_RSHIFT =>
-            keybd_v(7).d(1) := press;
-            shift := press;
+            keybd_v(7).d(1) := key_down;
+            shift := key_down;
           -- special keys
           when SCANCODE_LCTRL =>
-            ctrl := press;
+            ctrl := key_down;
           when SCANCODE_ESC =>
-            esc := press;
+            esc := key_down;
           when SCANCODE_TAB =>
-            keybd_v(8).d(1) := press;
+            keybd_v(8).d(1) := key_down;
           when others =>
         end case;
-      end if; -- press or release
+      end if; -- key_down or key_up
       
       -- special keys
       keybd_v(8).d(0) := ctrl and esc;		-- platform reset
