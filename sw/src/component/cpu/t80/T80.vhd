@@ -394,10 +394,10 @@ begin
 
 			MCycles <= MCycles_d;
 
-			if IMode /= "11" then
-				IStatus <= IMode;
-      else
+      if Mode = 3 then
         IStatus <= "10";
+			elsif IMode /= "11" then
+				IStatus <= IMode;
 			end if;
 
 			Arith16_r <= Arith16;
