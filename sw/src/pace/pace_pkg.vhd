@@ -160,12 +160,12 @@ package pace_pkg is
 	-- FLASH interface data structure
 	--
 	type from_FLASH_t is record
-		d					: std_logic_vector(7 downto 0);
+		d					: std_logic_vector(15 downto 0);
 	end record;
 	
 	type to_FLASH_t is record
 		a					: std_logic_vector(21 downto 0);
-		d					: std_logic_vector(7 downto 0);
+		d					: std_logic_vector(15 downto 0);
 		we				: std_logic;
 		cs				: std_logic;
 		oe				: std_logic;

@@ -84,308 +84,278 @@ end platform;
 
 architecture SYN of platform is
 
-	alias clk_20M					    : std_logic is clkrst_i.clk(0);
-  alias rst_20M             : std_logic is clkrst_i.rst(0);
+	alias clk_sys             : std_logic is clkrst_i.clk(0);
+  alias rst_sys             : std_logic is clkrst_i.rst(0);
 	alias clk_video				    : std_logic is clkrst_i.clk(1);
+  signal clk_8M_en			    : std_logic;
+  signal clk_4M_en			    : std_logic;
 	signal cpu_reset			    : std_logic;
   
   -- uP signals  
-  signal clk_1M_en			    : std_logic;
-	signal clk_1M_en_n		    : std_logic;
+	signal cpu_en_n		        : std_logic;
 	signal cpu_r_wn				    : std_logic;
-	signal cpu_vma				    : std_logic;
-	signal cpu_ba				      : std_logic;
-	signal cpu_bs				      : std_logic;
-	signal cpu_a				      : std_logic_vector(15 downto 0);
+	signal cpu_a_ext				  : std_logic_vector(31 downto 0);
+	alias cpu_a               : std_logic_vector(23 downto 1) is cpu_a_ext(23 downto 1);
 	signal cpu_d_i			      : std_logic_vector(15 downto 0);
 	signal cpu_d_o			      : std_logic_vector(15 downto 0);
-	signal cpu_irq				    : std_logic;
-	signal cpu_firq				    : std_logic;
-	signal cpu_nmi				    : std_logic;
-	signal cpu_halt			      : std_logic;
+  signal cpu_ipl_n          : std_logic_vector(2 downto 0);
+  signal cpu_dtack_n        : std_logic;
+  signal cpu_as_n           : std_logic;
+  signal cpu_uds_n          : std_logic;
+  signal cpu_lds_n          : std_logic;
 
-  -- generic address
-  signal mem_a              : std_logic_vector(15 downto 0);
-  signal mem_d_o            : std_logic_vector(15 downto 0);
-  signal mem_wr             : std_logic;
-  
   -- ROM signals        
 	signal rom0_cs				    : std_logic;
   signal rom0_d_o           : std_logic_vector(15 downto 0);
-	signal romD_cs				    : std_logic;
-    alias ramD_cs				    : std_logic is romD_cs;
-  signal ramD_wr            : std_logic;
-  signal romD_d_o           : std_logic_vector(15 downto 0);
-    alias ramD_d_o          : std_logic_vector(15 downto 0) is romD_d_o;
-	signal romE_cs				    : std_logic;
-  signal romE_d_o           : std_logic_vector(15 downto 0);
-	signal romF_cs				    : std_logic;
-  signal romF_d_o           : std_logic_vector(15 downto 0);
 	
+  -- RAM signals
+  signal ram0_cs            : std_logic;
+  signal ram0_a             : std_logic_vector(15 downto 0);
+  signal ram0_d_o           : std_logic_vector(15 downto 0);
+  signal ram0_wr            : std_logic;
+  
   -- VRAM signals       
 	signal vram_cs				    : std_logic;
   signal vram_d_o           : std_logic_vector(15 downto 0);
 
-  -- RAM signals        
-	signal wram_cs				    : std_logic;
-  signal wram_wr            : std_logic;
-  alias wram_d_o      	    : std_logic_vector(15 downto 0) is sram_i.d(15 downto 0);
-
   -- I/O signals
 	signal video_counter_cs	  : std_logic;	
-	signal io_cs			        : std_logic;
-	signal io_d_o			        : std_logic_vector(15 downto 0);
+	signal iwm_cs			        : std_logic;
+	signal iwm_d_o			      : std_logic_vector(15 downto 0);
+	signal via_cs			        : std_logic;
+	signal via_d_o			      : std_logic_vector(7 downto 0);
+  signal via_irq_n          : std_logic;
+  signal via_p2_h           : std_logic;
+	signal avec_cs			      : std_logic;
+	signal avec_d_o			      : std_logic_vector(15 downto 0);
 	                        
   -- other signals   
+  signal mem_overlay        : std_logic;
+  signal tick_1Hz           : std_logic;
+  
 	alias platform_reset			: std_logic is inputs_i(3).d(0);
 	alias platform_pause      : std_logic is inputs_i(3).d(1);
-	signal va11						    : std_logic;
-	signal count240				    : std_logic;
 	
 begin
 
-	-- cpu09 core uses negative clock edge
-	clk_1M_en_n <= not (clk_1M_en and not platform_pause);
-	--clk_1M_en_n <= not (clk_1M_en and not platform_pause) or cpu_halt;
+--  Thus far I've actually implemented very little Mac-specific hardware behavior, 
+--  so it's suprising that it gets to the question mark disk screen. 
+--  The implemented hardware is:
+--
+--    68000 CPU (synthetic soft-CPU in the FPGA)
+--    128 KB ROM from Mac Plus (in external Flash ROM)
+--    512 KB RAM (in external SRAM)
+--    address decoder maps ROM to $400000 and RAM to $000000
+--    IWM floppy controller always returns $1F when read, and otherwise does nothing
+--    Reads from address $FFFFFx return 24 + x. This makes interrupt vectors work correctly.
+--    VIA is partially implemented: vblank and one second interrupts work, the interrupt enable and flags registers work, and the memory overlay bit works.
+--    Video circuit reads from a hard-coded frame buffer address of $3FA700, which wraps around to the correct address in the 512 KB RAM space.
+
+	cpu_en_n <= not (clk_8M_en and not platform_pause);
 
 	-- add game reset later
-	cpu_reset <= rst_20M or platform_reset;
-	
-  -- SRAM signals (may or may not be used)
-  sram_o.a(sram_o.a'left downto 17) <= (others => '0');
-  sram_o.a(16 downto 0)	<= 	std_logic_vector(resize(unsigned(mem_a), 17));
-  sram_o.d <= std_logic_vector(resize(unsigned(mem_d_o), sram_o.d'length)) 
-								when (wram_wr = '1') else (others => 'Z');
-  sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
-  sram_o.cs <= '1';
-  sram_o.oe <= not wram_wr;
-  sram_o.we <= wram_wr;
-
-	-- ROM chip selects
-  -- $0000-$8FFF
-  --            $0000-$7FFF
-	rom0_cs <= 	  '1' when STD_MATCH(mem_a,  "0---------------") else 
-  --            $8000-$8FFF
-                '1' when STD_MATCH(mem_a, X"8"&"------------") else 
-                '0';
-  -- video ram $0000-$97FF
-  vram_cs <=		'1' when STD_MATCH(mem_a,  "0---------------") else
-                '1' when STD_MATCH(mem_a, X"8"&"------------") else
-                '1' when STD_MATCH(mem_a, X"9"&"0-----------") else 
-                '0';
-	-- ROMS $D000-$FFFF
-	romD_cs <= 	  '1' when STD_MATCH(mem_a, X"D"&"------------") else '0';
-	romE_cs <= 	  '1' when STD_MATCH(mem_a, X"E"&"------------") else '0';
-	romF_cs <= 	  '1' when STD_MATCH(mem_a, X"F"&"------------") else '0';
+	cpu_reset <= rst_sys or platform_reset;
 
 	-- RAM chip selects
-	-- RAM $9800-$BFFF
-	wram_cs <=		'1' when STD_MATCH(mem_a, X"9"&"1-----------") else
-                '1' when STD_MATCH(mem_a,  "101-------------") else
+	-- - RAM $000000
+	ram0_cs <=		'1' when STD_MATCH(cpu_a, X"0"&"-------------------") else 
 								'0';
 
-  -- I/O chip selects
-  -- I/O $C000-$CFFF
-	io_cs <=      '1' when STD_MATCH(mem_a, X"C"&"------------") else '0';
+  -- video ram $3FA000-$3FFFFF
+  --            - $3FA000-$3FBFFF
+  vram_cs <=		'1' when STD_MATCH(cpu_a, X"3F"&"101------------") else 
+  --            - $3FC000-$3FFFFF
+                '1' when STD_MATCH(cpu_a, X"3F"&"11-------------") else 
+                '0';
 
-	-- I/O decoding
+	-- ROM chip selects
+  -- - $400000
+	rom0_cs <= 	  -- quick hack for vector table
+                '1' when STD_MATCH(cpu_a, X"00000"&            "0--") else
+                '1' when STD_MATCH(cpu_a, X"4"&"-------------------") else 
+                '0';
+                
+  -- I/O chip selects
+  -- IWM (floppy controller) $C00000-$DFFFFF
+	iwm_cs <=     '1' when STD_MATCH(cpu_a,  "110--------------------") else 
+                '0';
+  -- VIA (6522) $E80000-$EFFFFF
+	via_cs <=     '1' when STD_MATCH(cpu_a, X"E"&"1------------------") else 
+                '0';
+
+  -- Auto-vector $FFFFF0-$FFFFFF
+	avec_cs <=    '1' when STD_MATCH(cpu_a, X"FFFFF"&            "---") else 
+                '0';
 
   -- memory block write enables
-  ramD_wr <= ramD_cs and mem_wr;
-  wram_wr <= wram_cs and mem_wr;
+  ram0_wr <= ram0_cs and clk_8M_en and not cpu_as_n and not cpu_r_wn;
 
-	-- I/O bank
-	io_d_o <= -- palette is WO
-						graphics_i.y(7 downto 2) & "00" when video_counter_cs = '1' else
-						(others => '0');
-								
 	-- memory read mux
-	cpu_d_i <=  -- ROM $0000-$8FFF, VRAM $0000-$97FF (overlapping)
-              -- so decode ROM space first, and fall back to VRAM
+	cpu_d_i <=  -- decode ROM 1st for vector hack
               rom0_d_o when rom0_cs = '1' else
-							vram_d_o when vram_cs = '1' else
-							wram_d_o when wram_cs = '1' else
-              io_d_o when io_cs = '1' else
-              romD_d_o when romD_cs = '1' else
-							romE_d_o when romE_cs = '1' else
-							romF_d_o when romF_cs = '1' else
+              vram_d_o when vram_cs = '1' else
+							ram0_d_o when ram0_cs = '1' else
+              iwm_d_o when iwm_cs = '1' else
+              (via_d_o & via_d_o) when via_cs = '1' else
+              avec_d_o when avec_cs = '1' else
 							(others => '0');
   
-	-- irqa interrupt at scanline 240
-	process (clk_20M, rst_20M)
-	begin
-		if rst_20M = '1' then
-			count240 <= '0';
-		elsif rising_edge(clk_20M) then
-			if graphics_i.y = std_logic_vector(to_unsigned(0, graphics_i.y'length)) then
-				count240 <= '0';
-			-- check for 240
-			--elsif video_counter = 240 then
-			elsif graphics_i.y = std_logic_vector(to_unsigned(239, graphics_i.y'length)) then
-				count240 <= '1';
-			end if;
-		end if;
-	end process;
-
-	-- irqb every 32 scanlines
-	va11 <= graphics_i.y(5);
-
-	-- cpu interrupts
-	cpu_irq <= '0';
-	cpu_firq <= '0';
-	cpu_nmi <= '0';
-
-  -- unused outputs
-  flash_o <= NULL_TO_FLASH;
-  sprite_reg_o <= NULL_TO_SPRITE_REG;
-  sprite_o <= NULL_TO_SPRITE_CTL;
-  --tilemap_o <= NULL_TO_TILEMAP_CTL;
-  graphics_o.bit8(0) <= (others => '0');
-  graphics_o.bit16(0) <= (others => '0');
-  osd_o <= NULL_TO_OSD;
-  snd_o <= NULL_TO_SOUND;
-  ser_o <= NULL_TO_SERIAL;
-  spi_o <= NULL_TO_SPI;
-	leds_o <= (others => '0');
-
   -- system timing
-  process (clk_20M, rst_20M)
-    variable count : integer range 0 to 20-1;
+  process (clk_sys, rst_sys)
+    --variable count : integer range 0 to 32/4-1;
+    variable count : unsigned(4 downto 0);
   begin
-    if rst_20M = '1' then
-      count := 0;
-    elsif rising_edge(clk_20M) then
-      clk_1M_en <= '0'; -- default
-      case count is
-        when 0 =>
-          clk_1M_en <= '1';
-        when others =>
-          null;
-      end case;
-      if count = count'high then
-        count := 0;
-      else
-        count := count + 1;
+    if rst_sys = '1' then
+      clk_8M_en <= '0';
+      clk_4M_en <= '0';
+      count := (others => '0');
+    elsif rising_edge(clk_sys) then
+      clk_8M_en <= '0'; -- default
+      clk_4M_en <= '0'; -- default
+      if count(1 downto 0) = "00" then
+        clk_8M_en <= '1';
+        if count(2) = '0' then
+          clk_4M_en <= '1';
+        end if;
       end if;
+      count := count + 1;
     end if;
+    via_p2_h <= not count(count'left);
   end process;
 
-	GEN_FPGA_ROMS : if false generate
-
-    GEN_ROM10 : if PLATFORM_VARIANT /= "sinistar" generate
-      rom_D000_inst : entity work.sprom
-        generic map
-        (
-          init_file		=> VARIANT_ROM_DIR & "rom10.hex",
-          widthad_a		=> 12
-        )
-        port map
-        (
-          clock			=> clk_20M,
-          address		=> mem_a(11 downto 0),
-          q					=> romD_d_o
-        );
-    else generate
-      ram_D000_inst : entity work.spram
-        generic map
-        (
-          widthad_a		=> 12
-        )
-        port map
-        (
-          clock				=> clk_20M,
-          address			=> mem_a(11 downto 0),
-          wren				=> ramD_wr,
-          data				=> mem_d_o,
-          q						=> ramD_d_o
-        );
-    end generate GEN_ROM10;
+  BLK_CPU : block
+    signal wr_p : std_logic;
+    signal delayed_dtack_n  : std_logic;
+  begin
+  
+    --
+    -- dtack logic
+    --
     
-		rom_E000_inst : entity work.sprom
-			generic map
-			(
-        init_file		=> VARIANT_ROM_DIR & "rom11.hex",
-				widthad_a		=> 12
-			)
-			port map
-			(
-				clock			=> clk_20M,
-				address		=> mem_a(11 downto 0),
-				q					=> romE_d_o
-			);
-		
-		rom_F000_inst : entity work.sprom
-			generic map
-			(
-        init_file		=> VARIANT_ROM_DIR & "rom12.hex",
-				widthad_a		=> 12
-			)
-			port map
-			(
-				clock			=> clk_20M,
-				address		=> mem_a(11 downto 0),
-				q					=> romF_d_o
-			);
-		
-    GEN_ROMS : for i in 1 to 9 generate
-      type rom_data_t is array (natural range <>) of std_logic_vector(7 downto 0);
-      signal rom_data : rom_data_t(1 to 9);
+    process (clk_sys)
+      variable asn_r : std_logic_vector(10 downto 0) := (others => '1');
     begin
+      if rst_sys = '1' then
+        asn_r := (others => '1');
+      elsif rising_edge(clk_sys) and clk_8M_en = '1' then
+        delayed_dtack_n <= asn_r(2);
+        -- de-assertion immediately clears the pipeline
+        if cpu_as_n = '1' then
+          asn_r := (others => '1');
+        else
+          asn_r := asn_r(asn_r'left-1 downto 0) & cpu_as_n;
+        end if;
+      end if;
+    end process;
 
-      rom_inst : entity work.sprom
-        generic map
-        (
-          init_file		=> VARIANT_ROM_DIR & "rom0" & integer'image(i) & ".hex",
-          widthad_a		=> 12
-        )
-        port map
-        (
-          clock			=> clk_20M,
-          address		=> mem_a(11 downto 0),
-          q					=> rom_data(i)
-        );
-        
-      rom0_d_o <= rom_data(1) when STD_MATCH(mem_a, X"0" & "------------") else
-                  rom_data(2) when STD_MATCH(mem_a, X"1" & "------------") else
-                  rom_data(3) when STD_MATCH(mem_a, X"2" & "------------") else
-                  rom_data(4) when STD_MATCH(mem_a, X"3" & "------------") else
-                  rom_data(5) when STD_MATCH(mem_a, X"4" & "------------") else
-                  rom_data(6) when STD_MATCH(mem_a, X"5" & "------------") else
-                  rom_data(7) when STD_MATCH(mem_a, X"6" & "------------") else
-                  rom_data(8) when STD_MATCH(mem_a, X"7" & "------------") else
-                  rom_data(9) when STD_MATCH(mem_a, X"8" & "------------") else
-                  (others => 'Z');
-                  
-    end generate GEN_ROMS;
+    cpu_dtack_n <=  --delayed_dtack_n when bootdata_f = '1' and bootdata_cs = '1' else
+                    --sdram_dtackn when (bios_cs or ram_cs or sram_cs or memcard_cs or rom1_cs) = '1' else
+                    cpu_as_n;
+
+    --
+    -- interrupts
+    --
+    process (clk_sys, rst_sys)
+      variable irq_r    : std_logic_vector(1 to 3) := (others => '0');
+    begin
+      if rst_sys = '1' then
+        cpu_ipl_n <= not "000";
+      elsif rising_edge(clk_sys) then
+        -- VIA level 1
+        irq_r(1) := not via_irq_n;
+        -- SCC level 2
+        -- Interrupt switch level 4
+      end if;
+      -- priority-encoded interrupts
+      if irq_r(3) = '1' then
+        cpu_ipl_n <= not "011";      -- cold boot???
+      elsif irq_r(1) = '1' then
+        cpu_ipl_n <= not "001";      -- VIA
+      else
+        cpu_ipl_n <= not "000";
+      end if;
+    end process;
     
-	end generate GEN_FPGA_ROMS;
+    tg68_inst : entity work.TG68
+      port map
+      (        
+        clk           => clk_sys,
+        reset         => not cpu_reset,
+        clkena_in     => clk_8M_en,
 
+        data_in       => cpu_d_i,
+        IPL           => cpu_ipl_n,
+        dtack         => cpu_dtack_n,
+        addr          => cpu_a_ext,
+        data_out      => cpu_d_o,
+        as            => cpu_as_n,
+        uds           => cpu_uds_n,
+        lds           => cpu_lds_n,
+        rw            => cpu_r_wn
+      );
+
+  end block BLK_CPU;
+  
+  BLK_ROM : block
+  begin
+    -- system ROM (64KB) resides in flash memory
+    -- - data bus is 16 bits wide
+    flash_o.a <= std_logic_vector(RESIZE(unsigned(cpu_a(15 downto 1)),
+                                          flash_o.a'length));
+    flash_o.d <= (others => 'X');
+    flash_o.we <= '0';
+    flash_o.cs <= rom0_cs;
+    flash_o.oe <= '1';
+    
+    -- flash contents are byte-swapped
+    rom0_d_o <= flash_i.d(7 downto 0) & flash_i.d(15 downto 8);
+  end block BLK_ROM;
+
+  BLK_RAM : block
+  begin
+    -- system RAM (128KB) resides in SRAM
+    -- - data bus is 16 bits wide
+		sram_o.a <= std_logic_vector(RESIZE(unsigned(cpu_a(16 downto 1)), 
+                                        sram_o.a'length));
+		sram_o.d(15 downto 0) <= cpu_d_o when ram0_wr = '1' else (others => 'Z');
+		sram_o.be <= "00" & "11";
+		sram_o.cs <= ram0_cs;
+		sram_o.oe <= not ram0_wr;
+		sram_o.we <= ram0_wr;
+
+    ram0_d_o <= sram_i.d(ram0_d_o'range);
+  end block BLK_RAM;
+  
   BLK_VRAM : block
   
     signal vram0_cs				: std_logic;
     signal vram0_wr       : std_logic;
     signal vram0_d_o      : std_logic_vector(15 downto 0);
-    signal vram8_cs				: std_logic;
-    signal vram8_wr       : std_logic;
-    signal vram8_d_o      : std_logic_vector(15 downto 0);
+    signal vram1_cs				: std_logic;
+    signal vram1_wr       : std_logic;
+    signal vram1_d_o      : std_logic_vector(15 downto 0);
 
     signal bitmap0_d_o    : std_logic_vector(15 downto 0);
-    signal bitmap8_d_o    : std_logic_vector(15 downto 0);
+    signal bitmap1_d_o    : std_logic_vector(15 downto 0);
     
   begin
 
-    -- video ram $0000-$9800
-    vram0_cs <=		'1' when STD_MATCH(mem_a,  "0---------------") else '0';
-    vram8_cs <=		'1' when STD_MATCH(mem_a, X"8"&"------------") else '0';
+    -- video ram $3FA000-$3FFFFF
+    -- - $3FA000-$3FBFFF
+    vram0_cs <=		'1' when STD_MATCH(cpu_a, X"3F"&"101------------") else 
+                  '0';
+    -- - $3FC000-$3FFFFF
+    vram1_cs <=		'1' when STD_MATCH(cpu_a, X"3F"&"11-------------") else 
+                  '0';
 
-    vram0_wr <= vram0_cs and mem_wr;
-    vram8_wr <= vram8_cs and mem_wr;
+    vram0_wr <= vram0_cs and clk_8M_en and not cpu_as_n and not cpu_r_wn;
+    vram1_wr <= vram1_cs and clk_8M_en and not cpu_as_n and not cpu_r_wn;
 
     vram_d_o <= vram0_d_o when vram0_cs = '1' else
-                vram8_d_o;
+                vram1_d_o;
                 
     bitmap_o(1).d <= 	bitmap0_d_o when bitmap_i(1).a(13 downto 12) = "00" else
-                      bitmap8_d_o;
+                      bitmap1_d_o;
 
     -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
     vram0_inst : entity work.dpram
@@ -397,10 +367,10 @@ begin
       )
       port map
       (
-        clock_b			=> clk_20M,
-        address_b		=> mem_a(11 downto 0),
+        clock_b			=> clk_sys,
+        address_b		=> cpu_a(12 downto 1),
         wren_b			=> vram0_wr,
-        data_b			=> mem_d_o,
+        data_b			=> cpu_d_o,
         q_b					=> vram0_d_o,
 
         clock_a			=> clk_video,
@@ -411,7 +381,7 @@ begin
       );
 
     -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-    vram8_inst : entity work.dpram
+    vram1_inst : entity work.dpram
       generic map
       (
         init_file		            => VARIANT_ROM_DIR & "vram1.hex",
@@ -420,20 +390,140 @@ begin
       )
       port map
       (
-        clock_b			            => clk_20M,
-        address_b		            => mem_a(12 downto 0),
-        wren_b			            => vram8_wr,
-        data_b			            => mem_d_o,
-        q_b					            => vram8_d_o,
+        clock_b			            => clk_sys,
+        address_b		            => cpu_a(13 downto 1),
+        wren_b			            => vram1_wr,
+        data_b			            => cpu_d_o,
+        q_b					            => vram1_d_o,
 
         clock_a			            => clk_video,
         address_a(12)           => not bitmap_i(1).a(12),
         address_a(11 downto 0)  => bitmap_i(1).a(11 downto 0),
         wren_a			            => '0',
         data_a			            => (others => 'X'),
-        q_a					            => bitmap8_d_o
+        q_a					            => bitmap1_d_o
       );
 
   end block BLK_VRAM;
+
+  -- IWM (floppy controller)
+  BLK_IWM : block
+  begin
+    iwm_d_o <= X"001F";
+  end block BLK_IWM;
   
+  BLK_VIA : block
+    signal via_o_pa   : std_logic_vector(7 downto 0);
+    signal via_i_ca1  : std_logic;
+    signal via_i_ca2  : std_logic;
+  begin
+
+    -- controls ROM/RAM at $000000 (boot vectors)
+    mem_overlay <= '0' when cpu_reset = '0' else
+                    via_o_pa(4);
+
+    -- unmeta vblank
+    process (clk_sys, rst_sys)
+      variable vblank_r     : std_logic_vector(3 downto 0);
+      alias vblank_um       : std_logic is vblank_r(vblank_r'left);
+    begin
+      if rst_sys = '1' then
+        vblank_r := (others => '0');
+      elsif rising_edge(clk_sys) then
+        vblank_r := vblank_r(vblank_r'left-1 downto 0) & graphics_i.vblank;
+      end if;
+      -- VIA should interrupt on edge
+      via_i_ca1 <= vblank_um;
+    end process;
+    
+    -- from RTC
+    via_i_ca2 <= tick_1Hz;
+    
+    via6522_inst : entity work.M6522
+      port map
+      (
+        I_RS            => cpu_a(11 downto 8),
+        I_DATA          => cpu_d_o(15 downto 8),
+        O_DATA          => via_d_o,
+        O_DATA_OE_L     => open,
+
+        I_RW_L          => cpu_r_wn,
+        I_CS1           => via_cs,
+        -- only accessed on upper byte
+        I_CS2_L         => cpu_uds_n,
+
+        O_IRQ_L         => via_irq_n,
+
+        -- port a
+        I_CA1           => via_i_ca1, -- VBLANK
+        I_CA2           => via_i_ca2, -- 1Hz (RTC)
+        O_CA2           => open,
+        O_CA2_OE_L      => open,
+
+        I_PA            => X"80",   -- MESS MAC driver
+        O_PA            => via_o_pa,
+        O_PA_OE_L       => open,
+
+        -- port b
+        I_CB1           => '0',
+        O_CB1           => open,
+        O_CB1_OE_L      => open,
+
+        I_CB2           => '0',
+        O_CB2           => open,
+        O_CB2_OE_L      => open,
+
+        I_PB            => (others => '0'), -- video/mouse stuff
+        O_PB            => open,            -- snd, rtc etc
+        O_PB_OE_L       => open,
+
+        RESET_L         => not cpu_reset,
+        CLK             => clk_sys,
+        I_P2_H          => via_p2_h,      -- high for phase 2 clock  ____----__
+        ENA_4           => clk_4M_en      -- 4x system clock (4HZ)   _-_-_-_-_-
+      );
+
+  end block BLK_VIA;
+  
+  BLK_RTC : block
+  begin
+    process (clk_sys, rst_sys)
+      variable count : integer range 0 to 4000000-1;
+    begin
+      if rst_sys = '1' then
+        tick_1Hz <= '0';
+        count := 0;
+      elsif rising_edge(clk_sys) then
+        if clk_4M_en = '1' then
+          -- note extended pulse width
+          tick_1Hz <= '0';  -- default
+          if count = count'high then
+            tick_1Hz <= '1';
+            count := 0;
+          else
+            count := count + 1;
+          end if;
+        end if;
+      end if;
+    end process;
+  end block BLK_RTC;
+  
+  BLK_AVEC : block
+  begin
+    -- quick hack for interrupt vectors
+    avec_d_o <= std_logic_vector(to_unsigned(24,16) + unsigned(cpu_a(3 downto 1)));
+  end block BLK_AVEC;
+  
+  -- unused outputs
+  sprite_reg_o <= NULL_TO_SPRITE_REG;
+  sprite_o <= NULL_TO_SPRITE_CTL;
+  --tilemap_o <= NULL_TO_TILEMAP_CTL;
+  graphics_o.bit8(0) <= (others => '0');
+  graphics_o.bit16(0) <= (others => '0');
+  osd_o <= NULL_TO_OSD;
+  snd_o <= NULL_TO_SOUND;
+  ser_o <= NULL_TO_SERIAL;
+  spi_o <= NULL_TO_SPI;
+	leds_o <= (others => '0');
+
 end SYN;

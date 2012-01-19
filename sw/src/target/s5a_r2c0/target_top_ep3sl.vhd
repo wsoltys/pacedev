@@ -443,6 +443,24 @@ begin
       target_o          => target_o
     );
 
+  -- emulate some FLASH
+  GEN_FLASH : if S5AR2_EMULATE_FLASH generate
+    flash_inst : entity work.sprom
+      generic map
+      (
+        init_file     => S5AR2_EMULATED_FLASH_INIT_FILE,
+        widthad_a			=> S5AR2_EMULATED_FLASH_WIDTH_AD,
+        width_a				=> S5AR2_EMULATED_FLASH_WIDTH
+      )
+      port map
+      (
+        clock		      => clkrst_i.clk(0),
+        address		    => flash_o.a(S5AR2_EMULATED_FLASH_WIDTH_AD-1 downto 0),
+        q		          => flash_i.d(S5AR2_EMULATED_FLASH_WIDTH-1 downto 0)
+      );
+    flash_i.d(flash_i.d'left downto S5AR2_EMULATED_FLASH_WIDTH) <= (others => '0');
+  end generate GEN_FLASH;
+  
   -- emulate some SRAM
   GEN_SRAM : if S5AR2_EMULATE_SRAM generate
     signal wren : std_logic := '0';

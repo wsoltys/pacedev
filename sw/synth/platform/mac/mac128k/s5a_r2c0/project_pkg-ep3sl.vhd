@@ -21,8 +21,8 @@ package project_pkg is
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
 
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
-  constant PACE_CLK0_DIVIDE_BY              : natural := 6;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 5;   -- 24*5/4 = 20MHz
+  constant PACE_CLK0_DIVIDE_BY              : natural := 3;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 4;   -- 24*4/3 = 32MHz
   constant PACE_CLK1_DIVIDE_BY        		  : natural := 3;
   constant PACE_CLK1_MULTIPLY_BY      		  : natural := 5;  	-- 24*5/3 = 40MHz
 	constant PACE_VIDEO_H_SCALE         		  : integer := 1;
@@ -59,22 +59,25 @@ package project_pkg is
   
   constant S5AR2_DOUBLE_VDO_IDCK            : boolean := false;
 
-  -- always need SRAM (for now, use for WRAM)
-  constant S5AR2_EMULATE_SRAM               : boolean := true;
-  -- required if ROMs in SRAM
-  --constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 16;
-  -- $9800-$BFFF (so $8000-$BFFF)
-  constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 14;
-  constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
+  -- ROM (64KB) in (emulated) FLASH
+  constant S5AR2_EMULATED_FLASH_INIT_FILE   : string := "../../../../../src/platform/mac/mac128k/roms/mac128k.hex";
+  constant S5AR2_EMULATE_FLASH              : boolean := true;
+  constant S5AR2_EMULATED_FLASH_WIDTH_AD    : natural := 15;
+  constant S5AR2_EMULATED_FLASH_WIDTH       : natural := 16;
     
-	-- Defender constants
+  -- RAM (128KB) in (emulated) SRAM
+  constant S5AR2_EMULATE_SRAM               : boolean := true;
+  --constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 16;
+  constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 14;
+  constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 16;
+    
+	-- Mac128K constants
 	
-	constant DEFENDER_ROMS_IN_SRAM			      : boolean := false;	
-	constant DEFENDER_VRAM_WIDTHAD			      : integer := 15;		-- 32KB
 	
 	-- derived - do not edit
 
   constant PACE_HAS_SRAM                    : boolean := S5AR2_EMULATE_SRAM;
+  constant PACE_HAS_FLASH                   : boolean := S5AR2_EMULATE_FLASH;
 	
   type from_PROJECT_IO_t is record
     not_used  : std_logic;
