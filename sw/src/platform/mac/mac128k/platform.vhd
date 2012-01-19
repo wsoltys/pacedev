@@ -163,9 +163,9 @@ begin
 
   -- video ram $3FA000-$3FFFFF
   --            - $3FA000-$3FBFFF
-  vram_cs <=		'1' when STD_MATCH(cpu_a, X"3F"&"101------------") else 
+  vram_cs <=		'1' when STD_MATCH(cpu_a, X"3F"&   "101------------") else 
   --            - $3FC000-$3FFFFF
-                '1' when STD_MATCH(cpu_a, X"3F"&"11-------------") else 
+                '1' when STD_MATCH(cpu_a, X"3F"&   "11-------------") else 
                 '0';
 
 	-- ROM chip selects
@@ -298,17 +298,50 @@ begin
   
   BLK_ROM : block
   begin
-    -- system ROM (64KB) resides in flash memory
-    -- - data bus is 16 bits wide
-    flash_o.a <= std_logic_vector(RESIZE(unsigned(cpu_a(15 downto 1)),
-                                          flash_o.a'length));
     flash_o.d <= (others => 'X');
     flash_o.we <= '0';
     flash_o.cs <= rom0_cs;
     flash_o.oe <= '1';
-    
-    -- flash contents are byte-swapped
-    rom0_d_o <= flash_i.d(7 downto 0) & flash_i.d(15 downto 8);
+
+    -- system ROM (64KB) resides in flash memory
+    GEN_FLASH : if PACE_TARGET = PACE_TARGET_DE1 generate
+    begin
+      process (clk_sys, rst_sys)
+        variable state : integer range 0 to 4;
+      begin
+        if rst_sys = '1' then
+        elsif rising_edge(clk_sys) then
+          if clk_8M_en = '1' then
+            flash_o.a(flash_o.a'left downto 1) <= 
+              std_logic_vector(RESIZE(unsigned(cpu_a(15 downto 1)),
+                                      flash_o.a'length-1));
+            state := 0;
+          end if;
+          case state is
+            when 0 =>
+              flash_o.a(0) <= '0';
+              state := 1;
+            when 1 =>
+              rom0_d_o(7 downto 0) <= flash_i.d(7 downto 0);
+              state := 2;
+            when 2 =>
+              flash_o.a(0) <= '1';
+              state := 3;
+            when 3 =>
+              rom0_d_o(15 downto 8) <= flash_i.d(7 downto 0);
+              state := 4;
+            when others =>
+              null;
+          end case;
+        end if;
+      end process;
+    else generate
+      -- - data bus is 16 bits wide
+      flash_o.a <= std_logic_vector(RESIZE(unsigned(cpu_a(15 downto 1)),
+                                            flash_o.a'length));
+      -- flash contents are byte-swapped
+      rom0_d_o <= flash_i.d(7 downto 0) & flash_i.d(15 downto 8);
+    end generate GEN_FLASH;
   end block BLK_ROM;
 
   BLK_RAM : block
@@ -318,15 +351,15 @@ begin
 		sram_o.a <= std_logic_vector(RESIZE(unsigned(cpu_a(16 downto 1)), 
                                         sram_o.a'length));
 		sram_o.d(15 downto 0) <= cpu_d_o when ram0_wr = '1' else (others => 'Z');
-		sram_o.be <= "00" & "11";
+		sram_o.be <= "00" & not (cpu_uds_n & cpu_lds_n);
 		sram_o.cs <= ram0_cs;
 		sram_o.oe <= not ram0_wr;
 		sram_o.we <= ram0_wr;
 
     ram0_d_o <= sram_i.d(ram0_d_o'range);
   end block BLK_RAM;
-  
-  BLK_VRAM : block
+
+  GEN_VRAM : if true generate
   
     signal vram0_cs				: std_logic;
     signal vram0_wr       : std_logic;
@@ -404,12 +437,12 @@ begin
         q_a					            => bitmap1_d_o
       );
 
-  end block BLK_VRAM;
-
+  end generate GEN_VRAM;
+  
   -- IWM (floppy controller)
   BLK_IWM : block
   begin
-    iwm_d_o <= X"001F";
+    iwm_d_o <= X"1F1F";
   end block BLK_IWM;
   
   BLK_VIA : block
@@ -419,7 +452,7 @@ begin
   begin
 
     -- controls ROM/RAM at $000000 (boot vectors)
-    mem_overlay <= '0' when cpu_reset = '0' else
+    mem_overlay <= '0' when cpu_reset = '1' else
                     via_o_pa(4);
 
     -- unmeta vblank

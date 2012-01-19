@@ -1,6 +1,5 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
 library work;
@@ -208,7 +207,7 @@ begin
   -- FPGA STARTUP
 	-- should extend power-on reset if registers init to '0'
 	process (clock_50)
-		variable count : std_logic_vector (11 downto 0) := (others => '0');
+		variable count : unsigned(11 downto 0) := (others => '0');
 	begin
 		if rising_edge(clock_50) then
 			if count = X"FFF" then
@@ -419,8 +418,8 @@ begin
     fl_rst_n <= '1';
 
     GEN_FLASH : if PACE_HAS_FLASH generate
-      flash_i.d <= fl_dq;
-      fl_dq <=  flash_o.d when (flash_o.cs = '1' and flash_o.we = '1' and flash_o.oe = '0') else 
+      flash_i.d <= std_logic_vector(RESIZE(unsigned(fl_dq),flash_i.d'length));
+      fl_dq <=  flash_o.d(fl_dq'range) when (flash_o.cs = '1' and flash_o.we = '1' and flash_o.oe = '0') else 
                 (others => 'Z');
       fl_addr <= flash_o.a;
       fl_we_n <= not flash_o.we;
@@ -656,7 +655,7 @@ begin
 
     process (clock_27, clkrst_i.arst)
       variable r : std_logic_vector(15 downto 0);
-      variable count : std_logic_vector(21 downto 0);
+      variable count : unsigned(21 downto 0);
     begin
       if clkrst_i.arst = '1' then
         r := (0=>'1', others => '0');
@@ -821,9 +820,9 @@ begin
 
     -- Generate pwmen pulse every 1024 clocks, chase pulse every 512k clocks
     process(clock_50, clkrst_i.arst)
-      variable pcount     : std_logic_vector(9 downto 0);
+      variable pcount     : unsigned(9 downto 0);
       variable pwmen_r    : std_logic;
-      variable ccount     : std_logic_vector(18 downto 0);
+      variable ccount     : unsigned(18 downto 0);
       variable chaseen_r  : std_logic;
     begin
       pwmen <= pwmen_r;
@@ -833,11 +832,11 @@ begin
         ccount := (others => '0');
       elsif rising_edge(clock_50) then
         pwmen_r := '0';
-        if pcount = std_logic_vector(to_unsigned(0, pcount'length)) then
+        if pcount = 0 then
           pwmen_r := '1';
         end if;
         chaseen_r := '0';
-        if ccount = std_logic_vector(to_unsigned(0, ccount'length)) then
+        if ccount = 0 then
           chaseen_r := '1';
         end if;
         pcount := pcount + 1;
