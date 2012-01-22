@@ -380,10 +380,10 @@ begin
 
     -- video ram $3FA000-$3FFFFF
     -- - $3FA000-$3FBFFF
-    vram0_cs <=		'1' when STD_MATCH(cpu_a, X"3F"&"101------------") else 
+    vram0_cs <=		vram_cs when cpu_a(15 downto 13) = "101" else 
                   '0';
     -- - $3FC000-$3FFFFF
-    vram1_cs <=		'1' when STD_MATCH(cpu_a, X"3F"&"11-------------") else 
+    vram1_cs <=		vram_cs when cpu_a(15 downto 14) = "11" else 
                   '0';
 
     vram0_wr <= vram0_cs and clk_8M_en and not cpu_as_n and not cpu_r_wn;
