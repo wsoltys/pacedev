@@ -110,7 +110,6 @@ architecture SYN of platform is
 	
   -- RAM signals
   signal ram0_cs            : std_logic;
-  signal ram0_a             : std_logic_vector(15 downto 0);
   signal ram0_d_o           : std_logic_vector(15 downto 0);
   signal ram0_wr            : std_logic;
   
@@ -157,8 +156,11 @@ begin
 	cpu_reset <= rst_sys or platform_reset;
 
 	-- RAM chip selects
-	-- - RAM $000000
-	ram0_cs <=		'1' when STD_MATCH(cpu_a, X"0"&"-------------------") else 
+	-- - RAM $000000-$3FFFFF
+	ram0_cs <=		'1' when (mem_overlay = '0' and 
+                          STD_MATCH(cpu_a,  "00---------------------")) else 
+                '1' when (mem_overlay = '1' and 
+                          STD_MATCH(cpu_a, X"6"&"-------------------")) else 
 								'0';
 
   -- video ram $3FA000-$3FFFFF
@@ -170,9 +172,13 @@ begin
 
 	-- ROM chip selects
   -- - $400000
-	rom0_cs <= 	  -- quick hack for vector table
-                '1' when STD_MATCH(cpu_a, X"00000"&            "0--") else
-                '1' when STD_MATCH(cpu_a, X"4"&"-------------------") else 
+	rom0_cs <= 	  -- MacPlus only aliased $00000-$0FFFF
+                '1' when (mem_overlay = '1' and 
+                          STD_MATCH(cpu_a, X"0"&"-------------------")) else 
+                -- Mac512K also aliased $20000-$2FFFF
+                '1' when (PLATFORM_VARIANT = "mac512k" and mem_overlay = '1' and 
+                          STD_MATCH(cpu_a, X"2"&"-------------------")) else 
+                '1' when  STD_MATCH(cpu_a, X"4"&"-------------------") else 
                 '0';
                 
   -- I/O chip selects
@@ -255,26 +261,15 @@ begin
     --
     -- interrupts
     --
-    process (clk_sys, rst_sys)
-      variable irq_r    : std_logic_vector(1 to 3) := (others => '0');
-    begin
-      if rst_sys = '1' then
-        cpu_ipl_n <= not "000";
-      elsif rising_edge(clk_sys) then
-        -- VIA level 1
-        irq_r(1) := not via_irq_n;
-        -- SCC level 2
-        -- Interrupt switch level 4
-      end if;
-      -- priority-encoded interrupts
-      if irq_r(3) = '1' then
-        cpu_ipl_n <= not "011";      -- cold boot???
-      elsif irq_r(1) = '1' then
-        cpu_ipl_n <= not "001";      -- VIA
-      else
-        cpu_ipl_n <= not "000";
-      end if;
-    end process;
+--    process (clk_sys, rst_sys)
+--      variable irq_r    : std_logic_vector(1 to 3) := (others => '0');
+--    begin
+--      if rst_sys = '1' then
+--        cpu_ipl_n <= not "000";
+--      elsif rising_edge(clk_sys) then
+        cpu_ipl_n <= '1' & '1' & via_irq_n;
+--      end if;
+--    end process;
     
     tg68_inst : entity work.TG68
       port map
@@ -303,7 +298,7 @@ begin
     flash_o.cs <= rom0_cs;
     flash_o.oe <= '1';
 
-    -- system ROM (64KB) resides in flash memory
+    -- system ROM (64KB/128KB) resides in flash memory
     GEN_FLASH : if PACE_TARGET = PACE_TARGET_DE1 generate
     begin
       process (clk_sys, rst_sys)
@@ -313,7 +308,7 @@ begin
         elsif rising_edge(clk_sys) then
           if clk_8M_en = '1' then
             flash_o.a(flash_o.a'left downto 1) <= 
-              std_logic_vector(RESIZE(unsigned(cpu_a(15 downto 1)),
+              std_logic_vector(RESIZE(unsigned(switches_i(0) & cpu_a(16 downto 1)),
                                       flash_o.a'length-1));
             state := 0;
           end if;
@@ -337,7 +332,7 @@ begin
       end process;
     else generate
       -- - data bus is 16 bits wide
-      flash_o.a <= std_logic_vector(RESIZE(unsigned(cpu_a(15 downto 1)),
+      flash_o.a <= std_logic_vector(RESIZE(unsigned(cpu_a(16 downto 1)),
                                             flash_o.a'length));
       -- flash contents are byte-swapped
       rom0_d_o <= flash_i.d(7 downto 0) & flash_i.d(15 downto 8);
@@ -346,17 +341,27 @@ begin
 
   BLK_RAM : block
   begin
-    -- system RAM (128KB) resides in SRAM
-    -- - data bus is 16 bits wide
-		sram_o.a <= std_logic_vector(RESIZE(unsigned(cpu_a(16 downto 1)), 
-                                        sram_o.a'length));
+  
+    process (clk_sys, rst_sys)
+    begin
+      if rst_sys = '1' then
+      elsif rising_edge(clk_sys) then
+        if clk_8M_en = '1' and cpu_as_n = '0' then
+          -- system RAM (512KB) resides in SRAM
+          -- - data bus is 16 bits wide
+          sram_o.a <= std_logic_vector(RESIZE(unsigned(cpu_a(18 downto 1)), 
+                                              sram_o.a'length));
+          sram_o.be <= "00" & not (cpu_uds_n & cpu_lds_n);
+        end if;
+      end if;
+    end process;
+    
+    sram_o.cs <= ram0_cs;
+    sram_o.oe <= not ram0_wr;
+    sram_o.we <= ram0_wr;
 		sram_o.d(15 downto 0) <= cpu_d_o when ram0_wr = '1' else (others => 'Z');
-		sram_o.be <= "00" & not (cpu_uds_n & cpu_lds_n);
-		sram_o.cs <= ram0_cs;
-		sram_o.oe <= not ram0_wr;
-		sram_o.we <= ram0_wr;
-
     ram0_d_o <= sram_i.d(ram0_d_o'range);
+    
   end block BLK_RAM;
 
   GEN_VRAM : if true generate
@@ -446,14 +451,23 @@ begin
   end block BLK_IWM;
   
   BLK_VIA : block
-    signal via_o_pa   : std_logic_vector(7 downto 0);
-    signal via_i_ca1  : std_logic;
-    signal via_i_ca2  : std_logic;
+    signal via_o_pa       : std_logic_vector(7 downto 0);
+    signal via_o_pa_oe_l  : std_logic_vector(7 downto 0);
+    signal via_i_ca1      : std_logic;
+    signal via_i_ca2      : std_logic;
   begin
 
     -- controls ROM/RAM at $000000 (boot vectors)
-    mem_overlay <= '0' when cpu_reset = '1' else
-                    via_o_pa(4);
+    process (clk_sys, rst_sys)
+    begin
+      if rst_sys = '1' then
+        mem_overlay <= '1';
+      elsif rising_edge(clk_sys) then
+        if via_o_pa_oe_l(4) = '0' then
+          mem_overlay <= via_o_pa(4);
+        end if;
+      end if;
+    end process;
 
     -- unmeta vblank
     process (clk_sys, rst_sys)
@@ -475,7 +489,7 @@ begin
     via6522_inst : entity work.M6522
       port map
       (
-        I_RS            => cpu_a(11 downto 8),
+        I_RS            => cpu_a(12 downto 9),
         I_DATA          => cpu_d_o(15 downto 8),
         O_DATA          => via_d_o,
         O_DATA_OE_L     => open,
@@ -495,7 +509,7 @@ begin
 
         I_PA            => X"80",   -- MESS MAC driver
         O_PA            => via_o_pa,
-        O_PA_OE_L       => open,
+        O_PA_OE_L       => via_o_pa_oe_l,
 
         -- port b
         I_CB1           => '0',
@@ -544,7 +558,7 @@ begin
   BLK_AVEC : block
   begin
     -- quick hack for interrupt vectors
-    avec_d_o <= std_logic_vector(to_unsigned(24,16) + unsigned(cpu_a(3 downto 1)));
+    avec_d_o <= X"0018" or cpu_a(3 downto 1);
   end block BLK_AVEC;
   
   -- unused outputs
