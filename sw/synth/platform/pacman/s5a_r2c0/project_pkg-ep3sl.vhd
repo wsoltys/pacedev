@@ -70,11 +70,17 @@ package project_pkg is
 	constant PACMAN_ROM_IN_SRAM               : boolean := false;
 	constant PACMAN_USE_VIDEO_VBLANK          : boolean := true;
 	constant PACMAN_USE_INTERNAL_WRAM				  : boolean := true;
-	
+
+  constant S5AR2_EMULATE_FLASH              : boolean := false;
+  constant S5AR2_EMULATED_FLASH_INIT_FILE   : string := "";
+  constant S5AR2_EMULATED_FLASH_WIDTH_AD    : natural := 10;
+  constant S5AR2_EMULATED_FLASH_WIDTH       : natural := 8;
+  
 	-- derived - do not edit
 
   constant S5AR2_EMULATE_SRAM               : boolean := PACMAN_ROM_IN_SRAM or 
                                                           not PACMAN_USE_INTERNAL_WRAM;
+  constant PACE_HAS_FLASH                   : boolean := S5AR2_EMULATE_FLASH;
   constant PACE_HAS_SRAM                    : boolean := S5AR2_EMULATE_SRAM;
 	
 	

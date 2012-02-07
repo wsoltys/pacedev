@@ -370,7 +370,7 @@ begin
 		(
 			clock			=> clk_video,
 			address		=> tilemap_i(1).tile_a(11 downto 0),
-			q					=> tilemap_o(1).tile_d
+			q					=> tilemap_o(1).tile_d(7 downto 0)
 		);
 	
 	spriterom_inst : entity work.sprite_rom
@@ -378,7 +378,7 @@ begin
 		(
 			clock			=> clk_video,
 			address		=> sprite_i.a(9 downto 0),
-			q					=> sprite_o.d
+			q					=> sprite_o.d(31 downto 0)
 		);
 	
 	GEN_INTERNAL_WRAM : if PACMAN_USE_INTERNAL_WRAM generate

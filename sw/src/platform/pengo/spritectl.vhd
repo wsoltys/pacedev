@@ -43,7 +43,7 @@ architecture SYN of spritectl is
    
 begin
 
-  flipData <= flip_row (ctl_i.d, reg_i.xflip);
+  flipData <= flip_row (ctl_i.d(31 downto 0), reg_i.xflip);
   
 	process (clk, clk_ena, reg_i)
 
