@@ -15,7 +15,6 @@ package project_pkg is
 	
   -- Reference clock is 24MHz
 	constant PACE_HAS_PLL								      : boolean := true;
-  constant PACE_HAS_SRAM                    : boolean := true;
   constant PACE_HAS_SDRAM                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := false;
   
@@ -69,10 +68,16 @@ package project_pkg is
   -- S5A-specific constants
 
   -- need 64KB of RAM for the TRS-80  
+  constant S5AR2_EMULATE_SRAM               : boolean := true;
   constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 16;
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
   constant S5AR2_DOUBLE_VDO_IDCK            : boolean := false;
   
+  constant S5AR2_EMULATED_FLASH_INIT_FILE   : string := "";
+  constant S5AR2_EMULATE_FLASH              : boolean := false;
+  constant S5AR2_EMULATED_FLASH_WIDTH_AD    : natural := 10;
+  constant S5AR2_EMULATED_FLASH_WIDTH       : natural := 8;
+
 	-- TRS-80-specific constants
 
   --constant TRS80_M1_ROM                     : string := "level1.hex";
@@ -99,12 +104,14 @@ package project_pkg is
   constant TRS80_M1_HAS_PCG80               : boolean := (not TRS80_M1_IS_LNW80) and true;
   constant TRS80_M1_HAS_80GRAFIX            : boolean := (not TRS80_M1_IS_LNW80) and false;
   constant TRS80_M1_HAS_LE18                : boolean := (not TRS80_M1_IS_LNW80) and false;
+  constant TRS80_M1_HAS_MIKROKOLOR          : boolean := true;
   constant TRS80_M1_LE18_WIDTHAD            : natural := 14;    -- 16KiB
   constant TRS80_M1_HAS_HDD                 : boolean := false;
 	
 	-- derived - do not edit
 
-  constant S5AR2_EMULATE_SRAM               : boolean := PACE_HAS_SRAM;
+  constant PACE_HAS_SRAM                    : boolean := S5AR2_EMULATE_SRAM;
+  constant PACE_HAS_FLASH                   : boolean := S5AR2_EMULATE_FLASH;
 	
   type from_PROJECT_IO_t is record
     not_used  : std_logic;

@@ -51,6 +51,10 @@ package platform_pkg is
     cd_cf               : std_logic;
     dd_i                : std_logic_vector(15 downto 0);
     dmarq_cf            : std_logic;
+
+    -- expansion bus signals
+    bus_d               : std_logic_vector(7 downto 0);
+    bus_int_n           : std_logic;
     
   end record;
 
@@ -81,6 +85,13 @@ package platform_pkg is
     clk_25M             : std_logic;
     clk_50M             : std_logic;
 
+    -- expansion bus signals
+    bus_rst_n           : std_logic;
+    bus_a               : std_logic_vector(7 downto 0);
+    bus_d               : std_logic_vector(7 downto 0);
+    bus_rd_n            : std_logic;
+    bus_wr_n            : std_logic;
+    
   end record;
 
 end;

@@ -107,6 +107,7 @@ architecture SYN of platform is
   -- ROM signals        
 	signal rom0_cs				    : std_logic;
   signal rom0_d_o           : std_logic_vector(15 downto 0);
+	signal rom0_dtack         : std_logic;
 	
   -- RAM signals
   signal ram0_cs            : std_logic;
@@ -156,26 +157,32 @@ begin
 	cpu_reset <= rst_sys or platform_reset;
 
 	-- RAM chip selects
-	-- - RAM $000000-$3FFFFF
+	-- - RAM $000000-$3FFFFF ($000000-$07FFFF installed - 512KB)
 	ram0_cs <=		'1' when (mem_overlay = '0' and 
-                          STD_MATCH(cpu_a,  "00---------------------")) else 
+                          --STD_MATCH(cpu_a,  "00---------------------")) else 
+                          STD_MATCH(cpu_a, X"0"&"0------------------")) else 
                 '1' when (mem_overlay = '1' and 
-                          STD_MATCH(cpu_a, X"6"&"-------------------")) else 
+                          --STD_MATCH(cpu_a, X"6"&"-------------------")) else 
+                          STD_MATCH(cpu_a, X"6"&"0------------------")) else 
 								'0';
 
   -- video ram $3FA000-$3FFFFF
   --            - $3FA000-$3FBFFF
-  vram_cs <=		'1' when STD_MATCH(cpu_a, X"3F"&   "101------------") else 
+  --vram_cs <=		'1' when STD_MATCH(cpu_a, X"3F"&   "101------------") else 
+  -- video ram $07A000-$07FFFF
+  --            - $07A000-$07BFFF
+  vram_cs <=		'1' when STD_MATCH(cpu_a, X"07"&   "101------------") else 
   --            - $3FC000-$3FFFFF
-                '1' when STD_MATCH(cpu_a, X"3F"&   "11-------------") else 
+                --'1' when STD_MATCH(cpu_a, X"3F"&   "11-------------") else 
+  --            - $07C000-$07FFFF
+                '1' when STD_MATCH(cpu_a, X"07"&   "11-------------") else 
                 '0';
 
 	-- ROM chip selects
-  -- - $400000
-	rom0_cs <= 	  -- MacPlus only aliased $00000-$0FFFF
+	rom0_cs <= 	  -- MacPlus (128KB) only aliased $000000-$00FFFF
                 '1' when (mem_overlay = '1' and 
                           STD_MATCH(cpu_a, X"0"&"-------------------")) else 
-                -- Mac512K also aliased $20000-$2FFFF
+                -- Mac512K (64KB) also aliased $200000-$21FFFF
                 '1' when (PLATFORM_VARIANT = "mac512k" and mem_overlay = '1' and 
                           STD_MATCH(cpu_a, X"2"&"-------------------")) else 
                 '1' when  STD_MATCH(cpu_a, X"4"&"-------------------") else 
@@ -256,6 +263,7 @@ begin
 
     cpu_dtack_n <=  --delayed_dtack_n when bootdata_f = '1' and bootdata_cs = '1' else
                     --sdram_dtackn when (bios_cs or ram_cs or sram_cs or memcard_cs or rom1_cs) = '1' else
+                    (not rom0_dtack) when rom0_cs = '1' else
                     cpu_as_n;
 
     --
@@ -307,29 +315,28 @@ begin
         if rst_sys = '1' then
         elsif rising_edge(clk_sys) then
           if clk_8M_en = '1' then
-            flash_o.a(flash_o.a'left downto 1) <= 
-              std_logic_vector(RESIZE(unsigned(switches_i(0) & cpu_a(16 downto 1)),
-                                      flash_o.a'length-1));
-            state := 0;
-          end if;
-          case state is
-            when 0 =>
-              flash_o.a(0) <= '0';
-              state := 1;
-            when 1 =>
-              rom0_d_o(7 downto 0) <= flash_i.d(7 downto 0);
-              state := 2;
-            when 2 =>
-              flash_o.a(0) <= '1';
-              state := 3;
-            when 3 =>
-              rom0_d_o(15 downto 8) <= flash_i.d(7 downto 0);
-              state := 4;
-            when others =>
-              null;
-          end case;
+            rom0_dtack <= '0';
+            if rom0_cs = '1' then
+              flash_o.a(flash_o.a'left downto 1) <= 
+                std_logic_vector(RESIZE(unsigned(switches_i(0) & cpu_a(16 downto 1)),
+                                        flash_o.a'length-1));
+              if state = 0 then
+                flash_o.a(0) <= '0';
+                state := state + 1;
+              elsif state = 1 then
+                rom0_d_o(7 downto 0) <= flash_i.d(7 downto 0);
+                flash_o.a(0) <= '1';
+                state := state + 1;
+              elsif state = 2 then
+                rom0_d_o(15 downto 8) <= flash_i.d(7 downto 0);
+                rom0_dtack <= '1';
+                state := 0;
+              end if;
+            end if; -- rom0_cs
+          end if; -- clk_8M_en
         end if;
       end process;
+          
     else generate
       -- - data bus is 16 bits wide
       flash_o.a <= std_logic_vector(RESIZE(unsigned(cpu_a(16 downto 1)),

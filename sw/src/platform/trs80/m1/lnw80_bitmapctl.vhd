@@ -97,7 +97,7 @@ begin
         -- - latch bitmap data
         -- (each byte contains information for 8 pixels)
         if pixel_v = 5 then
-          bitmap_d_v := ctl_i.d;
+          bitmap_d_v := ctl_i.d(bitmap_d_v'range);
         end if;
 
         -- green-screen display

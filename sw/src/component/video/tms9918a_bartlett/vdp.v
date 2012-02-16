@@ -1,6 +1,7 @@
 module vdp(
 	por_73_n,
-	clk50m_17,
+//	clk50m_17,
+  clk40m,
 	push_144_n,
 	led1_3_n,
 	led2_7_n,
@@ -24,7 +25,8 @@ module vdp(
 
 	// Development board hardwired pins
 	input		por_73_n;		// 100 ms time constant RC POR on pin 73
-	input		clk50m_17;		// 50 MHz oscillator on pin 17
+//	input		clk50m_17;		// 50 MHz oscillator on pin 17
+  input   clk40m;
 	input		push_144_n;		// Pushbutton on pin 144
 	output	led1_3_n;		// LED on pin 3
 	output	led2_7_n;		// LED on pin 7
@@ -114,11 +116,11 @@ module vdp(
 	assign led3_9_n = !spr_collide;
 
 	// PLL to convert 50 MHz to 40 MHz.
-	wire clk40m;
-	vdp_clkgen clkgen(
-		clk50m_17,
-		clk40m
-	);
+//	wire clk40m;
+//	vdp_clkgen clkgen(
+//		clk50m_17,
+//		clk40m
+//	);
 
 	vdp_colormap colormap(
 		clk40m,

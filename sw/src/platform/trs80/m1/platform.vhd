@@ -309,8 +309,14 @@ begin
 
   graphics_o.bit8(0)(3) <= '0';  -- alt character set?
   
-  -- software-controlled
-  GEN_DBL_WIDTH_TRS80_M1 : if not TRS80_M1_IS_SYSTEM80 generate
+  GEN_DBL_WIDTH : if TRS80_M1_IS_SYSTEM80 generate
+  
+    -- a physical switch on the back of the System 80
+    graphics_o.bit8(0)(2) <= switches_i(9);
+
+  else generate
+  
+    -- software-controlled
     process (clk_40M, cpu_reset)
     begin
       if cpu_reset = '1' then
@@ -321,12 +327,8 @@ begin
         end if;
       end if;
     end process;
-  end generate GEN_DBL_WIDTH_TRS80_M1;
-  
-  -- a physical switch on the back of the System 80
-  GEN_DBL_WIDTH_SYSTEM80 : if TRS80_M1_IS_SYSTEM80 generate
-    graphics_o.bit8(0)(2) <= switches_i(9);
-  end generate GEN_DBL_WIDTH_SYSTEM80;
+    
+  end generate GEN_DBL_WIDTH;
   
   -- unused outputs
 	sprite_reg_o <= NULL_TO_SPRITE_REG;
@@ -369,7 +371,8 @@ begin
       nmi    	=> cpu_nmi
     );
 
-  GEN_ROM_ONCHIP : if not TRS80_M1_ROM_IN_FLASH generate
+  GEN_ROM : if not TRS80_M1_ROM_IN_FLASH generate
+  
     rom_inst : entity work.sprom
       generic map
       (
@@ -382,15 +385,15 @@ begin
         address		=> cpu_a(13 downto 0),
         q					=> rom_d_o
       );
-  end generate GEN_ROM_ONCHIP;
+  else generate
   
-  GEN_ROM_IN_FLASH : if TRS80_M1_ROM_IN_FLASH generate
     flash_o.a <= std_logic_vector(resize(unsigned(cpu_a(13 downto 0)), flash_o.a'length));
     flash_o.we <= '0';
     flash_o.cs <= rom_cs;
     flash_o.oe <= '1';
     rom_d_o <= flash_i.d(rom_d_o'range);
-  end generate GEN_ROM_IN_FLASH;
+    
+  end generate GEN_ROM;
   
 	tilerom_inst : entity work.sprom
 		generic map
@@ -487,12 +490,13 @@ begin
         q_a					=> tilemap_o(1).attr_d(7 downto 0)
       );
     tilemap_o(1).attr_d(tilemap_o(1).attr_d'left downto 8) <= (others => '0');
-  end generate GEN_PCG80;
+    
+  else generate
 
-  GEN_NO_PCG80 : if not (TRS80_M1_HAS_PCG80 or TRS80_M1_HAS_80GRAFIX) generate
     pcg80_d_o <= (others => '0');
     tilemap_o(1).attr_d <= (others => '0');
-  end generate GEN_NO_PCG80;
+    
+  end generate GEN_PCG80;
 
   GEN_LE18 : if TRS80_M1_HAS_LE18 generate
     signal le18_ram_a   : std_logic_vector(13 downto 0) := (others => '0');
@@ -573,12 +577,12 @@ begin
 
     graphics_o.bit8(0)(6) <= le18_en;
 
-  end generate GEN_LE18;
+  else generate
     
-  GEN_NO_LE18 : if not TRS80_M1_HAS_LE18 generate
     le18_d_o <= X"FF";
     bitmap_o(1).d <= (others => '0');
-  end generate GEN_NO_LE18;
+    
+  end generate GEN_LE18;
     
   GEN_LNW80_VIDEO : if TRS80_M1_IS_LNW80 generate
   begin
@@ -620,12 +624,105 @@ begin
         q_a					=> bitmap_o(2).d(7 downto 0)
       );
 
-  end generate GEN_LNW80_VIDEO;
+  else generate
 
-  GEN_NO_LNW80_VIDEO : if not TRS80_M1_IS_LNW80 generate
     lnw80_video_ctl_r <= (others => '0');
     bitmap_o(2).d <= (others => '0');
-  end generate GEN_NO_LNW80_VIDEO;
+    
+  end generate GEN_LNW80_VIDEO;
+  
+  GEN_MIKROKOLOR : if TRS80_M1_HAS_MIKROKOLOR generate
+    component vdp is
+      port
+      (
+        por_73_n    : in std_logic;
+--        clk50m_17   : in std_logic;
+        clk40m      : in std_logic;
+        push_144_n  : in std_logic;
+        led1_3_n    : out std_logic;
+        led2_7_n    : out std_logic;
+        led3_9_n    : out std_logic;
+        cpu_rst_n   : in std_logic;
+        cpu_a       : in std_logic_vector(7 downto 0);
+        cpu_d       : inout std_logic_vector(7 downto 0);
+        cpu_in_n    : in std_logic;
+        cpu_out_n   : in std_logic;
+        cpu_int_n   : out std_logic;
+        sram_a      : out std_logic_vector(18 downto 0);
+        sram_d      : inout std_logic_vector(7 downto 0);
+        sram_oe_n   : out std_logic;
+        sram_we_n   : out std_logic;
+        hsync       : out std_logic;
+        vsync       : out std_logic;
+        r           : out std_logic_vector(3 downto 0);
+        g           : out std_logic_vector(3 downto 0);
+        b           : out std_logic_vector(3 downto 0)
+      );
+    end component vdp;
+
+    signal clk_50M      : std_logic;
+    signal vdp_int_n    : std_logic;
+    signal cpu_d        : std_logic_vector(7 downto 0);
+    
+    signal vdp_ram_a    : std_logic_vector(18 downto 0);
+    signal vdp_ram_d    : std_logic_vector(7 downto 0);
+    signal vdp_ram_d_i  : std_logic_vector(vdp_ram_d'range);
+    signal vdp_ram_d_o  : std_logic_vector(vdp_ram_d'range);
+    signal vdp_ram_we_n : std_logic;
+    
+  begin
+
+    -- not really kosher inside an fpga...
+    
+    --mikrokolor_d <= cpu_d;
+    cpu_d <=  cpu_d_o when cpu_io_wr = '1' else
+              (others => 'Z');
+              
+    vdp_ram_d_i <= vdp_ram_d;
+    vdp_ram_d <=  vdp_ram_d_o when vdp_ram_we_n = '1' else 
+                  (others => 'Z');
+    
+    vdp_inst : vdp
+      port map
+      (
+        por_73_n    => not clkrst_i.rst(0),
+        clk40m      => clk_40M,
+        push_144_n  => '1',
+        led1_3_n    => open,
+        led2_7_n    => open,
+        led3_9_n    => open,
+        cpu_rst_n   => not clkrst_i.rst(0),
+        cpu_a       => cpu_a(7 downto 0),
+        cpu_d       => cpu_d,
+        cpu_in_n    => cpu_io_rd,
+        cpu_out_n   => cpu_io_wr,
+        cpu_int_n   => vdp_int_n,
+        sram_a      => vdp_ram_a,
+        sram_d      => vdp_ram_d,
+        sram_oe_n   => open,
+        sram_we_n   => vdp_ram_we_n,
+        hsync       => open,
+        vsync       => open,
+        r           => open,
+        g           => open,
+        b           => open
+      );
+      
+    vdp_ram_inst : entity work.spram
+      generic map
+      (
+        widthad_a	  => 14
+      )
+      port map
+      (
+        clock		    => clk_40M,
+        address		  => vdp_ram_a(13 downto 0),
+        data		    => vdp_ram_d_i,
+        wren		    => not vdp_ram_we_n,
+        q		        => vdp_ram_d_o
+      );
+
+  end generate GEN_MIKROKOLOR;
   
   BLK_INTERRUPTS : block
     signal tick_1ms   : std_logic := '0';
@@ -731,15 +828,13 @@ begin
         debug       => leds_o(7 downto 0)
       );
 
-  end generate GEN_FDC;
+  else generate
 
-  GEN_NO_FDC : if not INCLUDE_FDC_SUPPORT generate
-  
     fdc_d_o <= X"FF";
     fdc_drq_int <= '0';
     --leds_o <= (others => '0');
         
-  end generate GEN_NO_FDC;
+  end generate GEN_FDC;
 
   GEN_HDD : if TRS80_M1_HAS_HDD generate
 

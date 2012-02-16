@@ -14,7 +14,7 @@ entity pace_video_mixer is
   (
       --bitmap_rgb    : in RGB_t;
       --bitmap_set    : in std_logic;
-		bitmap_ctl_o  : in from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
+      bitmap_ctl_o  : in from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
       tilemap_ctl_o : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
       sprite_rgb    : in RGB_t;
       sprite_set    : in std_logic;
