@@ -1,10 +1,12 @@
 module vdp_cpu(
 	clk40m,
-	cpu_rst_n,
+	rst_n,
 	cpu_vram_port,
 	cpu_vdp_port,
 	cpu_a,
-	cpu_d,
+	cpu_din,
+	cpu_dout,
+	cpu_doe,
 	cpu_in_n,
 	cpu_out_n,
 	cpu_int_n,
@@ -39,11 +41,13 @@ module vdp_cpu(
 
 	input		clk40m;
 	
-	input		cpu_rst_n;
+	input		rst_n;
 	input		[ 7 : 0 ] cpu_vram_port;
 	input		[ 7 : 0 ] cpu_vdp_port;
 	input		[ 7 : 0 ] cpu_a;
-	inout		[ 7 : 0 ] cpu_d;
+	input		[ 7 : 0 ] cpu_din;
+	output	[ 7 : 0 ] cpu_dout;
+	output	cpu_doe;
 	input		cpu_in_n;
 	input		cpu_out_n;
 	output	cpu_int_n;
@@ -85,8 +89,8 @@ module vdp_cpu(
 	// Synchronize CPU interface.
 	reg in_1, in_2, in_3;
 	reg out_1, out_2, out_3;
-	always @( negedge cpu_rst_n or posedge clk40m ) begin
-		if( !cpu_rst_n ) begin
+	always @( negedge rst_n or posedge clk40m ) begin
+		if( !rst_n ) begin
 			in_1 <= 0;
 			in_2 <= 0;
 			in_3 <= 0;
@@ -119,8 +123,8 @@ module vdp_cpu(
 	end
 	
 	// Interrupt status.
-	always @( negedge cpu_rst_n or posedge clk40m ) begin
-		if( !cpu_rst_n ) begin
+	always @( negedge rst_n or posedge clk40m ) begin
+		if( !rst_n ) begin
 			stat_f <= 0;
 			stat_c <= 0;
 			stat_5 <= 0;
@@ -153,13 +157,11 @@ module vdp_cpu(
 	// Added (nonstandard) functions.
 	reg xspr_nolimit;
 	
-	wire addr_carry;
-	
 	// Capture CPU write data.
 	reg cpu_byte2;
 	reg [ 7 : 0 ] vram_cpu_wdata;
-	always @( negedge cpu_rst_n or posedge clk40m ) begin
-		if( !cpu_rst_n ) begin
+	always @( negedge rst_n or posedge clk40m ) begin
+		if( !rst_n ) begin
 			cpu_byte2 <= 0;
 			xm3 <= 0;
 			xm2 <= 0;
@@ -180,10 +182,10 @@ module vdp_cpu(
 			if( cpu_wr ) begin
 				if( mode ) begin
 					if( cpu_byte2 ) begin
-						if( cpu_d[ 7 ] ) begin
-							if( cpu_d[ 6 ] == 1'b0 ) begin
+						if( cpu_din[ 7 ] ) begin
+							if( cpu_din[ 6 ] == 1'b0 ) begin
 								// Register write.
-								case( cpu_d[ 5 : 0 ] )
+								case( cpu_din[ 5 : 0 ] )
 									0: begin
 										xm3 <= vram_cpu_a[ 1 ];
 									end
@@ -226,7 +228,7 @@ module vdp_cpu(
 					cpu_byte2 <= !cpu_byte2;
 				end else begin
 					// VRAM write (malformed if cpu_byte2, but do it anyway).
-					vram_cpu_wdata <= cpu_d;
+					vram_cpu_wdata <= cpu_din;
 					cpu_byte2 <= 0;
 				end
 			end else if( cpu_rd ) begin
@@ -245,8 +247,8 @@ module vdp_cpu(
 	reg spr_mag;
 	reg spr_nolimit;
 	reg blank_n;
-	always @( negedge cpu_rst_n or posedge clk40m ) begin
-		if( !cpu_rst_n ) begin
+	always @( negedge rst_n or posedge clk40m ) begin
+		if( !rst_n ) begin
 			g1_mode <= 1;
 			g2_mode <= 0;
 			multi_mode <= 0;
@@ -270,7 +272,7 @@ module vdp_cpu(
 	end
 
 	wire set_addr_lsb = cpu_wr && mode && !cpu_byte2;
-	wire set_addr_msb = cpu_wr && mode && cpu_byte2 && !cpu_d[ 7 ];
+	wire set_addr_msb = cpu_wr && mode && cpu_byte2 && !cpu_din[ 7 ];
 		
 		// VRAM CPU access state machine.
 	reg [ 13 : 0 ] vram_cpu_a;
@@ -279,10 +281,10 @@ module vdp_cpu(
 	reg vram_cpu_wr;
 	reg addr_mod;
 	wire start_req = ( ( cpu_wr || cpu_rd ) && !mode && ( !vram_cpu_req || vram_cpu_ack ) )
-		              || ( set_addr_msb && !cpu_d[ 6 ] && ( !vram_cpu_req || vram_cpu_ack ) );
+		              || ( set_addr_msb && !cpu_din[ 6 ] && ( !vram_cpu_req || vram_cpu_ack ) );
 	wire start_wr = !mode && cpu_wr;
-	always @( negedge cpu_rst_n or posedge clk40m ) begin
-		if( !cpu_rst_n ) begin
+	always @( negedge rst_n or posedge clk40m ) begin
+		if( !rst_n ) begin
 			vram_cpu_a <= 0;
 			vram_rdata <= 0;
 			vram_cpu_req <= 0;
@@ -310,19 +312,20 @@ module vdp_cpu(
 				if( vram_cpu_req && !vram_cpu_ack ) begin
 					addr_mod <= 1;
 				end
-				vram_cpu_a[ 7 : 0 ] <= cpu_d;
+				vram_cpu_a[ 7 : 0 ] <= cpu_din;
 			end
 			if( set_addr_msb ) begin
 				if( vram_cpu_req && !vram_cpu_ack ) begin
 					addr_mod <= 1;
 				end
-				vram_cpu_a[ 13 : 8 ] <= cpu_d[ 5 : 0 ];
+				vram_cpu_a[ 13 : 8 ] <= cpu_din[ 5 : 0 ];
 			end
 		end
 	end
 	
 	// CPU read data.
-	assign cpu_d = in_sel ? ( mode ? stat : vram_rdata ) : 8'hZZ;
+	assign cpu_dout = ( mode ? stat : vram_rdata );
+	assign cpu_doe = in_sel;
 	
 	// CPU interrupt.
 	assign cpu_int_n = ( stat_f && ien ) ? 1'b0 : 1'bZ;

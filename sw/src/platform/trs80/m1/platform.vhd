@@ -635,21 +635,20 @@ begin
     component vdp is
       port
       (
-        por_73_n    : in std_logic;
---        clk50m_17   : in std_logic;
         clk40m      : in std_logic;
-        push_144_n  : in std_logic;
-        led1_3_n    : out std_logic;
-        led2_7_n    : out std_logic;
-        led3_9_n    : out std_logic;
+        clk40m_n    : in std_logic;
         cpu_rst_n   : in std_logic;
         cpu_a       : in std_logic_vector(7 downto 0);
-        cpu_d       : inout std_logic_vector(7 downto 0);
+        cpu_din     : in std_logic_vector(7 downto 0);
+        cpu_dout    : out std_logic_vector(7 downto 0);
+        cpu_doe     : out std_logic;
         cpu_in_n    : in std_logic;
         cpu_out_n   : in std_logic;
         cpu_int_n   : out std_logic;
         sram_a      : out std_logic_vector(18 downto 0);
-        sram_d      : inout std_logic_vector(7 downto 0);
+        sram_din    : in std_logic_vector(7 downto 0);
+        sram_dout   : out std_logic_vector(7 downto 0);
+        sram_doe    : out std_logic;
         sram_oe_n   : out std_logic;
         sram_we_n   : out std_logic;
         hsync       : out std_logic;
@@ -660,53 +659,45 @@ begin
       );
     end component vdp;
 
-    signal clk_50M      : std_logic;
+    signal vdp_d_o      : std_logic_vector(7 downto 0);
     signal vdp_int_n    : std_logic;
-    signal cpu_d        : std_logic_vector(7 downto 0);
     
     signal vdp_ram_a    : std_logic_vector(18 downto 0);
-    signal vdp_ram_d    : std_logic_vector(7 downto 0);
-    signal vdp_ram_d_i  : std_logic_vector(vdp_ram_d'range);
-    signal vdp_ram_d_o  : std_logic_vector(vdp_ram_d'range);
+    signal vdp_ram_d_i  : std_logic_vector(7 downto 0);
+    signal vdp_ram_d_o  : std_logic_vector(7 downto 0);
     signal vdp_ram_we_n : std_logic;
     
   begin
 
-    -- not really kosher inside an fpga...
-    
-    --mikrokolor_d <= cpu_d;
-    cpu_d <=  cpu_d_o when cpu_io_wr = '1' else
-              (others => 'Z');
-              
-    vdp_ram_d_i <= vdp_ram_d;
-    vdp_ram_d <=  vdp_ram_d_o when vdp_ram_we_n = '1' else 
-                  (others => 'Z');
-    
     vdp_inst : vdp
       port map
       (
-        por_73_n    => not clkrst_i.rst(0),
         clk40m      => clk_40M,
-        push_144_n  => '1',
-        led1_3_n    => open,
-        led2_7_n    => open,
-        led3_9_n    => open,
+        clk40m_n    => not clk_40M,
         cpu_rst_n   => not clkrst_i.rst(0),
         cpu_a       => cpu_a(7 downto 0),
-        cpu_d       => cpu_d,
+        cpu_din     => cpu_d_o,
+        cpu_dout    => vdp_d_o,
+        cpu_doe     => open,
         cpu_in_n    => cpu_io_rd,
         cpu_out_n   => cpu_io_wr,
         cpu_int_n   => vdp_int_n,
         sram_a      => vdp_ram_a,
-        sram_d      => vdp_ram_d,
+        sram_din    => vdp_ram_d_i,
+        sram_dout   => vdp_ram_d_o,
+        sram_doe    => open,
         sram_oe_n   => open,
         sram_we_n   => vdp_ram_we_n,
-        hsync       => open,
-        vsync       => open,
-        r           => open,
-        g           => open,
-        b           => open
+        hsync       => graphics_o.hsync,
+        vsync       => graphics_o.vsync,
+        r           => graphics_o.rgb.r(9 downto 6),
+        g           => graphics_o.rgb.g(9 downto 6),
+        b           => graphics_o.rgb.b(9 downto 6)
       );
+      
+    graphics_o.rgb.r(5 downto 0) <= (others => '0');
+    graphics_o.rgb.g(5 downto 0) <= (others => '0');
+    graphics_o.rgb.b(5 downto 0) <= (others => '0');
       
     vdp_ram_inst : entity work.spram
       generic map

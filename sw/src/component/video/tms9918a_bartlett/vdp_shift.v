@@ -1,6 +1,6 @@
 module vdp_shift(
 	clk40m,
-	cpu_rst_n,
+	rst_n,
 	pattern,
 	color,
 	color1,
@@ -13,7 +13,7 @@ module vdp_shift(
 );
 
 	input		clk40m;
-	input		cpu_rst_n;
+	input		rst_n;
 	input		[ 7 : 0 ] pattern;
 	input		[ 7 : 0 ] color;
 	input		[ 3 : 0 ] color1;
@@ -26,8 +26,8 @@ module vdp_shift(
 	
 	reg [ 3 : 0 ] color_1;
 	reg [ 3 : 0 ] color_0;
-	always @( negedge cpu_rst_n or posedge clk40m ) begin
-		if( !cpu_rst_n ) begin
+	always @( negedge rst_n or posedge clk40m ) begin
+		if( !rst_n ) begin
 			color_1 <= 0;
 			color_0 <= 0;
 		end else if( load ) begin
@@ -39,8 +39,8 @@ module vdp_shift(
 	reg pixel;
 	reg [ 6 : 0 ] shift;
 	reg [ 1 : 0 ] hrep;
-	always @( negedge cpu_rst_n or posedge clk40m ) begin
-		if( !cpu_rst_n ) begin
+	always @( negedge rst_n or posedge clk40m ) begin
+		if( !rst_n ) begin
 			pixel <= 0;
 			shift <= 0;
 			hrep <= 0;

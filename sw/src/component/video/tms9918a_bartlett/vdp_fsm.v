@@ -86,17 +86,20 @@ module vdp_fsm(
 	output	[ 4 : 0 ] spr_5num;
 	input		spr_nolimit;
 	
-	// 800x600 @ 60 Hz SVGA, pixel frequency = 40 MHz, +HSYNC, +VSYNC
-	// H: 800 active, 40 front porch, 128 sync, 88 back porch = 1056 pixel clocks per line
-	// V: 600 active, 1 front porch, 4 sync, 23 back porch = 628 lines
-`define H_ACT	800
-`define H_FP	40
-`define H_SYNC	128
-`define H_BP	88
-`define V_ACT	600
-`define V_FP	1
-`define V_SYNC	4
-`define V_BP	23
+	// 800x600 @ 60 Hz SVGA, pixel frequency = 40 MHz, +HSYNC, +VSYNC.
+	// H: 800 active, 40 front porch, 128 sync, 88 back porch = 1056 pixel clocks per line.
+	// V: 600 active, 1 front porch, 4 sync, 23 back porch = 628 lines.
+	// TMS9918A pixels are 3x3 SVGA pixels each (768x576 visible non-border).
+`define H_ACT		800
+`define H_FP		40
+`define H_SYNC		128
+`define H_BP		88
+`define H_WIDTH	`H_ACT+`H_FP+`H_SYNC+`H_BP
+`define V_ACT		600
+`define V_FP		1
+`define V_SYNC		4
+`define V_BP		23
+`define V_HEIGHT	`V_ACT+`V_FP+`V_SYNC+`V_BP
 	reg [ 10 : 0 ] h;
 	reg [ 9 : 0 ] v;
 	reg hsync;
@@ -117,10 +120,10 @@ module vdp_fsm(
 			visible <= 1;
 		end else begin
 			hsync <= ( h >= `H_ACT+`H_FP-1 && h < `H_ACT+`H_FP+`H_SYNC-1 );
-			line_end <= ( h == `H_ACT+`H_FP+`H_SYNC+`H_BP-2 );
-			set_mode <= ( h == `H_ACT+`H_FP+`H_SYNC+`H_BP-3 ) && ( v == `V_ACT+`V_FP+`V_SYNC+`V_BP-1 );
-			start_vblank <= ( h == `H_ACT+`H_FP+`H_SYNC+`H_BP-2 ) && ( v == `V_ACT-1 );
-			visible <= ( h >= `H_ACT+`H_FP+`H_SYNC+`H_BP-2 && ( v == `V_ACT+`V_FP+`V_SYNC+`V_BP-1 || v < `V_ACT-1 ) )
+			line_end <= ( h == `H_WIDTH-2 );
+			set_mode <= ( h == `H_WIDTH-3 ) && ( v == `V_HEIGHT-1 );
+			start_vblank <= ( h == `H_WIDTH-2 ) && ( v == `V_ACT-1 );
+			visible <= ( h >= `H_WIDTH-2 && ( v == `V_HEIGHT-1 || v < `V_ACT-1 ) )
 			           || ( h < `H_ACT-2 && v <= `V_ACT-1 );
 			if( line_end ) begin
 				h <= 0;
@@ -129,7 +132,7 @@ module vdp_fsm(
 				end else begin
 					vsync <= 0;
 				end
-				if( v == `V_ACT+`V_FP+`V_SYNC+`V_BP-1 ) begin
+				if( v == `V_HEIGHT-1 ) begin
 					v <= 0;
 				end else begin
 					v <= v + 1'b1;
@@ -363,6 +366,7 @@ module vdp_fsm(
 	assign vram_cpu_ack = reqs[ 0 ] && vram_ack2;
 
 	// Sprite data RAM, 256 x 8-bit words.
+	// Synchronous inputs and outputs.
 	reg [ 7 : 0 ] spr_addr;
 	wire spr_wren;
 	wire [ 7 : 0 ] spr_rdata;
@@ -385,7 +389,7 @@ module vdp_fsm(
 			end else if( reqs[ 4 ] ) begin
 				spr_addr[ 1 : 0 ] = 2'b01;	// Pattern 1.
 			end else if( reqs[ 6 ] ) begin
-				spr_addr[ 1 : 0 ] = 2'b10;	// Early clock/color/valid.
+				spr_addr[ 1 : 0 ] = 2'b10;	// Early clock/color.
 			end else if( reqs[ 8 ] ) begin
 				spr_addr[ 1 : 0 ] = 2'b11;	// Horizontal position.
 			end
@@ -402,7 +406,7 @@ module vdp_fsm(
 	wire [ 5 : 0 ] spr_side = spr_size ? ( spr_mag ? 6'd32 : 6'd16 ) : ( spr_mag ? 6'd16 : 6'd8 );
 	wire [ 7 : 0 ] spr_min = vram_rdata;
 	wire [ 7 : 0 ] spr_max = vram_rdata + spr_side;
-	wire spr_start = ( h == 1055+`BORD_GRAPH-32*3-4 );
+	wire spr_start = ( h == `H_WIDTH-1+`BORD_GRAPH-32*3-4 );
 	wire spr_setup = ( spr_start && vrep == 2 );
 	
 	// Store VRAM read data.
@@ -421,7 +425,7 @@ module vdp_fsm(
 			spr_5 <= 0;
 		end else if( spr_setup ) begin
 			spr_load <= 1;
-			spr_xvld <= 32'h00000000;
+			spr_xvld <= 0;
 			spr_count <= 0;
 		end else if( vram_ack2 ) begin
 			if( reqs[ 3 ] ) begin
@@ -442,10 +446,10 @@ module vdp_fsm(
 				if( vram_rdata == 208 ) begin
 					spr_load <= 0;
 				end else if( !spr_nolimit && spr_count == 4 ) begin
-					spr_5 <= 1;
 					if( !spr_5 ) begin
 						spr_5num <= spr_num;
 					end
+					spr_5 <= 1;
 					spr_load <= 0;
 				end else if( scan_next+8'd32 > spr_min+8'd32 && scan_next+8'd32 <= spr_max+8'd32 ) begin
 					spr_xvld[ spr_num ] <= 1;
@@ -467,7 +471,7 @@ module vdp_fsm(
 				 or creq or colb or vram_rdata
 				 or svreq or shreq or snreq or sareq or sp0req or sp1req
 				 or spr_num or spr_size or spr_mag or spr_name or spr_line or spgb or sab ) begin
-		vram_addr = 0;
+		vram_addr = 14'hXXXX;
 		if( xreq ) begin
 			vram_addr = vram_cpu_a;
 		end
@@ -481,14 +485,12 @@ module vdp_fsm(
 		end
 		if( preq ) begin
 			// Name is not set until next clock, use vram_rdata instead.
-			if( g1_mode ) begin
+			if( g1_mode || text_mode ) begin
 				vram_addr = { pgb, vram_rdata, line };
 			end else if( g2_mode ) begin
 				vram_addr = { pgb[ 2 ], row[ 4 : 3 ], vram_rdata, line };
 			end else if( multi_mode ) begin
 				vram_addr = { pgb, vram_rdata, multi_row[ 2 : 0 ] };
-			end else begin
-				vram_addr = { pgb, vram_rdata, line };
 			end
 		end
 		if( creq ) begin
@@ -556,7 +558,7 @@ module vdp_fsm(
 			spr_active <= 0;
 		end else if( start_vblank ) begin
 			spr_collide <= 0;
-			spr_vld <= 32'h00000000;
+			spr_vld <= 0;
 		end else if( col >= 32 && col < 40 && ghcount >= 2 && ghcount < 18 ) begin
 			spr_active <= 0;
 			// Unload sprite data from RAM.
@@ -579,25 +581,21 @@ module vdp_fsm(
 				end
 				3: begin
 					if( spr_size ) begin
-						spr_pat[ snum ][ 7 : 0 ] <= { spr_rdata };
+						spr_pat[ snum ][ 7 : 0 ] <= spr_rdata;
 					end else begin
 						spr_pat[ snum ][ 7 : 0 ] <= 8'h00;
 					end
 				end
 			endcase
-		end else if( spr_setup ) begin
-			spr_vld <= spr_xvld;
-			spr_hrep <= 2;
-			spr_pattern <= 0;
-			spr_odd <= 32'h00000000;
-			spr_hcount <= 0;
-			spr_active <= 1;
 		end else if( spr_start ) begin
 			spr_hrep <= 2;
 			spr_pattern <= 0;
-			spr_odd <= 32'h00000000;
+			spr_odd <= 0;
 			spr_hcount <= 0;
 			spr_active <= 1;
+			if( spr_setup ) begin
+				spr_vld <= spr_xvld;
+			end
 		end else if( spr_active && spr_hrep == 1 ) begin
 			// Multicycle path:
 			// Count, pattern, color, collide clocked in when hrep 1->2 only.
@@ -615,7 +613,7 @@ module vdp_fsm(
 							spr_found = 1;
 						end
 						if( !spr_mag || spr_odd[ i ] ) begin
-							// Zero backfill.
+							// Shift pattern, zero backfill.
 							spr_pat[ i ] <= { spr_pat[ i ][ 14 : 0 ], 1'b0 };
 						end
 					end

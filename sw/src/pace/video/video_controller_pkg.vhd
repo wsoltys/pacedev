@@ -138,6 +138,10 @@ package video_controller_pkg is
     -- for various uses
     bit8      : BYTE_A_t(0 to 7);
     bit16     : WORD_A_t(0 to 3);
+    -- 'native' graphics stream
+    hsync     : std_logic;
+    vsync     : std_logic;
+    rgb       : RGB_t;
   end record;
 
   function NULL_TO_GRAPHICS return to_GRAPHICS_t;

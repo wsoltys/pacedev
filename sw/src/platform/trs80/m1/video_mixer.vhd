@@ -41,14 +41,18 @@ begin
 
   -- LE18 graphics are XOR'd with standard text video
   -- LNW80 hires graphics is ???
-	rgb_o.r <=  bitmap_ctl_o(1).rgb.r xor tilemap_ctl_o(1).rgb.r when (TRS80_M1_HAS_LE18 and le18_en = '1') else
-              bitmap_ctl_o(2).rgb.r when (TRS80_M1_IS_LNW80 and gfxmode /= "00") else
-              tilemap_ctl_o(1).rgb.r;
-	rgb_o.g <=  bitmap_ctl_o(1).rgb.g xor tilemap_ctl_o(1).rgb.g when (TRS80_M1_HAS_LE18 and le18_en = '1') else
-              bitmap_ctl_o(2).rgb.g when (TRS80_M1_IS_LNW80 and gfxmode /= "00") else
-              tilemap_ctl_o(1).rgb.g;
-	rgb_o.b <=  bitmap_ctl_o(1).rgb.b xor tilemap_ctl_o(1).rgb.b when (TRS80_M1_HAS_LE18 and le18_en = '1') else
-              bitmap_ctl_o(2).rgb.b when (TRS80_M1_IS_LNW80 and gfxmode /= "00") else
-              tilemap_ctl_o(1).rgb.b;
+--	rgb_o.r <=  bitmap_ctl_o(1).rgb.r xor tilemap_ctl_o(1).rgb.r when (TRS80_M1_HAS_LE18 and le18_en = '1') else
+--              bitmap_ctl_o(2).rgb.r when (TRS80_M1_IS_LNW80 and gfxmode /= "00") else
+--              tilemap_ctl_o(1).rgb.r;
+--	rgb_o.g <=  bitmap_ctl_o(1).rgb.g xor tilemap_ctl_o(1).rgb.g when (TRS80_M1_HAS_LE18 and le18_en = '1') else
+--              bitmap_ctl_o(2).rgb.g when (TRS80_M1_IS_LNW80 and gfxmode /= "00") else
+--              tilemap_ctl_o(1).rgb.g;
+--	rgb_o.b <=  bitmap_ctl_o(1).rgb.b xor tilemap_ctl_o(1).rgb.b when (TRS80_M1_HAS_LE18 and le18_en = '1') else
+--              bitmap_ctl_o(2).rgb.b when (TRS80_M1_IS_LNW80 and gfxmode /= "00") else
+--              tilemap_ctl_o(1).rgb.b;
+
+	rgb_o.r <=  tilemap_ctl_o(1).rgb.r or graphics_i.rgb.r;
+	rgb_o.g <=  tilemap_ctl_o(1).rgb.g or graphics_i.rgb.g;
+	rgb_o.b <=  tilemap_ctl_o(1).rgb.b or graphics_i.rgb.b;
 
 end architecture SYN;

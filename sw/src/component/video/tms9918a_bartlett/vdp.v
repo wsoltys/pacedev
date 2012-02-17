@@ -1,19 +1,18 @@
 module vdp(
-	por_73_n,
-//	clk50m_17,
-  clk40m,
-	push_144_n,
-	led1_3_n,
-	led2_7_n,
-	led3_9_n,
+	clk40m,
+	clk40m_n,
 	cpu_rst_n,
  	cpu_a,
-	cpu_d,
+	cpu_din,
+	cpu_dout,
+	cpu_doe,
 	cpu_in_n,
 	cpu_out_n,
 	cpu_int_n,
 	sram_a,
-	sram_d,
+	sram_din,
+	sram_dout,
+	sram_doe,
 	sram_oe_n,
 	sram_we_n,
 	hsync,
@@ -23,26 +22,25 @@ module vdp(
 	b
 );
 
-	// Development board hardwired pins
-	input		por_73_n;		// 100 ms time constant RC POR on pin 73
-//	input		clk50m_17;		// 50 MHz oscillator on pin 17
-  input   clk40m;
-	input		push_144_n;		// Pushbutton on pin 144
-	output	led1_3_n;		// LED on pin 3
-	output	led2_7_n;		// LED on pin 7
-	output	led3_9_n;		// LED on pin 9
+	// Clocks
+	input		clk40m;
+	input		clk40m_n;
 	
 	// CPU interface
 	input		cpu_rst_n;
 	input		[ 7 : 0 ] cpu_a;
-	inout		[ 7 : 0 ] cpu_d;
+	input		[ 7 : 0 ] cpu_din;
+	output	[ 7 : 0 ] cpu_dout;
+	output	cpu_doe;
 	input		cpu_in_n;
 	input		cpu_out_n;
 	output	cpu_int_n;
 
 	// SRAM interface
 	output	[ 18 : 0 ] sram_a;
-	inout		[ 7 : 0 ] sram_d;
+	input		[ 7 : 0 ] sram_din;
+	output	[ 7 : 0 ] sram_dout;
+	output	sram_doe;
 	output	sram_oe_n;
 	output	sram_we_n;
 	
@@ -53,6 +51,7 @@ module vdp(
 	output	[ 3 : 0 ] g;
 	output	[ 3 : 0 ] b;
 
+	// VDP I/O ports.
 	parameter [ 7 : 0 ] cpu_vram_port = 8'h01;
 	parameter [ 7 : 0 ] cpu_vdp_port = 8'h02;
 	
@@ -63,7 +62,6 @@ module vdp(
 	wire vram_cpu_wr;
 	wire vram_ack;
 	wire [ 13 : 0 ] vram_cpu_a;
-	wire [ 7 : 0 ] vram_cpu_wdata;
 	wire [ 7 : 0 ] vram_cpu_rdata;
 	
 	wire [ 7 : 0 ] vram_rdata;
@@ -106,22 +104,10 @@ module vdp(
 	wire [ 4 : 0 ] spr_5num;
 	wire spr_nolimit;
 	
-	assign rst_n = !( !cpu_rst_n || !por_73_n || !push_144_n );
+	assign rst_n = cpu_rst_n;
 
 	assign sram_a[ 18 : 14 ] = 5'b00000;
 	
-	// Useless LED signals to reduce synthesis warnings.
-	assign led1_3_n = rst_n;
-	assign led2_7_n = blank_n;
-	assign led3_9_n = !spr_collide;
-
-	// PLL to convert 50 MHz to 40 MHz.
-//	wire clk40m;
-//	vdp_clkgen clkgen(
-//		clk50m_17,
-//		clk40m
-//	);
-
 	vdp_colormap colormap(
 		clk40m,
 		rst_n,
@@ -197,15 +183,16 @@ module vdp(
 	// SRAM interface.
 	vdp_sram sram(
 		clk40m,
+		clk40m_n,
 		rst_n,
 		vram_req,
 		vram_wr,
 		vram_ack,
 		vram_addr,
-		vram_cpu_wdata,
 		vram_rdata,
 		sram_a[ 13 : 0 ],
-		sram_d,
+		sram_din,
+		sram_doe,
 		sram_oe_n,
 		sram_we_n
 	);
@@ -217,7 +204,9 @@ module vdp(
 		cpu_vram_port,
 		cpu_vdp_port,
 		cpu_a,
-		cpu_d,
+		cpu_din,
+		cpu_dout,
+		cpu_doe,
 		cpu_in_n,
 		cpu_out_n,
 		cpu_int_n,
@@ -225,7 +214,7 @@ module vdp(
 		vram_cpu_ack,
 		vram_cpu_wr,
 		vram_cpu_a,
-		vram_cpu_wdata,
+		sram_dout,
 		vram_rdata,
 		g1_mode,
 		g2_mode,

@@ -1,38 +1,40 @@
 module vdp_sram(
 	clk40m,
+	clk40m_n,
 	rst_n,
 	vram_req,
 	vram_wr,
 	vram_ack,
 	vram_addr,
-	vram_wdata,
 	vram_rdata,
 	sram_a,
-	sram_d,
+	sram_din,
+	sram_doe,
 	sram_oe_n,
 	sram_we_n
 );
 
 	input		clk40m;
+	input		clk40m_n;
 	input		rst_n;
 
 	input		vram_req;
 	input		vram_wr;
 	output	vram_ack;
 	input		[ 13 : 0 ] vram_addr;
-	input		[ 7 : 0 ] vram_wdata;
 	output	[ 7 : 0 ] vram_rdata;
 
 	output	[ 13 : 0 ] sram_a;
-	inout		[ 7 : 0 ] sram_d;
+	input		[ 7 : 0 ] sram_din;
+	output	sram_doe;
 	output	sram_oe_n;
 	output	sram_we_n;
 	
-	// SRAM controller, 4 cycles per access.
+	// SRAM controller, 3 cycles per access.
 	reg [ 7 : 0 ] vram_rdata;
 	reg vram_active;
 	reg [ 13 : 0 ] sram_a;
-	reg sram_d_en;
+	reg sram_doe;
 	reg sram_oe_n;
 	reg sram_pwe_n;
 	reg [ 1 : 0 ] vram_state;
@@ -40,7 +42,7 @@ module vdp_sram(
 	always @( negedge rst_n or posedge clk40m ) begin
 		if( !rst_n ) begin
 			vram_active <= 0;
-			sram_d_en <= 0;
+			sram_doe <= 0;
 			sram_oe_n <= 1;
 			sram_pwe_n <= 1;
 			vram_state <= 0;
@@ -58,16 +60,16 @@ module vdp_sram(
 						sram_pwe_n <= 1;
 						vram_state <= 0;
 					end
-					sram_d_en <= 0;
+					sram_doe <= 0;
 					sram_oe_n <= 1;
 					if( vram_active && !sram_oe_n ) begin
-						vram_rdata <= sram_d;
+						vram_rdata <= sram_din;
 					end
 					vram_ack <= 0;
 				end
 				1: begin
 					sram_oe_n <= !( vram_active && sram_pwe_n );
-					sram_d_en <= !sram_pwe_n;
+					sram_doe <= !sram_pwe_n;
 					vram_state <= 2;
 					vram_ack <= 0;
 				end
@@ -79,7 +81,7 @@ module vdp_sram(
 				3: begin
 					// Illegal state.
 					vram_active <= 0;
-					sram_d_en <= 0;
+					sram_doe <= 0;
 					sram_oe_n <= 1;
 					sram_pwe_n <= 1;
 					vram_ack <= 0;
@@ -89,15 +91,14 @@ module vdp_sram(
 		end
 	end
 
+	// WE* on half clock for pulse width, addr setup/hold.
 	reg sram_we_n;
-	always @( negedge rst_n or negedge clk40m ) begin
+	always @( negedge rst_n or posedge clk40m_n ) begin
 		if( !rst_n ) begin
 			sram_we_n <= 1;
 		end else begin
 			sram_we_n <= sram_pwe_n;
 		end
 	end
-	
-	assign sram_d = sram_d_en ? vram_wdata : 8'hZZ;
 
 endmodule

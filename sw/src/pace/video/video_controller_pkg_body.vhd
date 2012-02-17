@@ -22,7 +22,8 @@ package body video_controller_pkg is
   begin
     return ((others => (others => '0')), 
             (others => (others => '0')), 
-            (others => (others => '0')));
+            (others => (others => '0')),
+            '0', '0', NULL_RGB);
   end NULL_TO_GRAPHICS;
 
 end package body video_controller_pkg;
