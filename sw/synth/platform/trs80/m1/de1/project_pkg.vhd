@@ -64,10 +64,10 @@ package project_pkg is
   --constant TRS80_M1_ROM                     : string := "level1.hex";
   --constant TRS80_M1_ROM                     : string := "model1a.hex";    -- v1.2
   --constant TRS80_M1_ROM                     : string := "model1b.hex";    -- v1.3
-  --constant TRS80_M1_ROM                     : string := "m1v13_bartlett.hex";
+  constant TRS80_M1_ROM                     : string := "m1v13_bartlett.hex";
   --constant TRS80_M1_ROM                     : string := "sys80.hex";
   --constant TRS80_M1_ROM                     : string := "lnw80.hex";
-  constant TRS80_M1_ROM                     : string := "lnw80_bartlett.hex";
+  --constant TRS80_M1_ROM                     : string := "lnw80_bartlett.hex";
   
   -- original Model I, no arrow keys
   --constant TRS80_M1_CHARSET_ROM             : string := "trs80_m1_tile_0.hex";
@@ -83,11 +83,12 @@ package project_pkg is
   constant TRS80_M1_IS_LNW80                : boolean := (TRS80_M1_ROM(1 to 5) = "lnw80");
   --constant TRS80_M1_LNW80_HIRES_WIDTHAD     : natural := 14;    -- 16KiB
   constant TRS80_M1_LNW80_HIRES_WIDTHAD     : natural := 12;    -- 4KiB
-  constant TRS80_M1_HAS_PCG80               : boolean := (not TRS80_M1_IS_LNW80) and true;
+  constant TRS80_M1_HAS_PCG80               : boolean := (not TRS80_M1_IS_LNW80) and false;
   constant TRS80_M1_HAS_80GRAFIX            : boolean := (not TRS80_M1_IS_LNW80) and false;
   constant TRS80_M1_HAS_LE18                : boolean := (not TRS80_M1_IS_LNW80) and false;
   constant TRS80_M1_LE18_WIDTHAD            : natural := 14;    -- 16KiB
   --constant TRS80_M1_LE18_WIDTHAD            : natural := 13;    -- 8KiB (half-screen)
+  constant TRS80_M1_HAS_MIKROKOLOR          : boolean := (not TRS80_M1_IS_LNW80) and true;
   constant TRS80_M1_HAS_HDD                 : boolean := true;
   
   -- derived: do not edit

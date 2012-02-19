@@ -158,6 +158,9 @@ architecture SYN of platform is
   signal lnw80_hires_ram_cs   : std_logic := '0';
   signal lnw80_hires_ram_wr   : std_logic := '0';
   signal lnw80_hires_ram_d_o  : std_logic_vector(7 downto 0) := (others => '0');
+  -- mikrokolor signals
+  signal vdp_cs               : std_logic;
+  signal vdp_d_o              : std_logic_vector(7 downto 0);
   
   -- RAM signals        
   signal ram_wr             : std_logic;
@@ -259,7 +262,9 @@ begin
               '0';
   -- LNW80 video control register $FE/254
   lnw80_video_ctl_cs <= '1' when (TRS80_M1_IS_LNW80 and cpu_io_a = X"FE") else '0';
-
+  -- mikrokolor I/O $01-$02
+  vdp_cs <= '1' when (cpu_a(7 downto 0) = X"01" or cpu_a(7 downto 0) = X"02") else '0';
+  
   -- SOUND $FC-FF (Model I is $FF only)
 	snd_cs <= '1' when cpu_io_a = X"FF" else '0';
 	
@@ -289,6 +294,7 @@ begin
     -- io read mux
     io_d <= X"FF" when alpha_joy_cs = '1' else
             le18_d_o when le18_cs = '1' else
+            vdp_d_o when vdp_cs = '1' else
             hdd_d when hdd_cs = '1' else
             lnw80_video_ctl_r when lnw80_video_ctl_cs = '1' else
             X"FF";
@@ -659,13 +665,16 @@ begin
       );
     end component vdp;
 
-    signal vdp_d_o      : std_logic_vector(7 downto 0);
     signal vdp_int_n    : std_logic;
     
     signal vdp_ram_a    : std_logic_vector(18 downto 0);
     signal vdp_ram_d_i  : std_logic_vector(7 downto 0);
     signal vdp_ram_d_o  : std_logic_vector(7 downto 0);
     signal vdp_ram_we_n : std_logic;
+
+    signal r            : std_logic_vector(3 downto 0);
+    signal g            : std_logic_vector(3 downto 0);
+    signal b            : std_logic_vector(3 downto 0);
     
   begin
 
@@ -679,8 +688,8 @@ begin
         cpu_din     => cpu_d_o,
         cpu_dout    => vdp_d_o,
         cpu_doe     => open,
-        cpu_in_n    => cpu_io_rd,
-        cpu_out_n   => cpu_io_wr,
+        cpu_in_n    => not cpu_io_rd,
+        cpu_out_n   => not cpu_io_wr,
         cpu_int_n   => vdp_int_n,
         sram_a      => vdp_ram_a,
         sram_din    => vdp_ram_d_i,
@@ -690,14 +699,14 @@ begin
         sram_we_n   => vdp_ram_we_n,
         hsync       => graphics_o.hsync,
         vsync       => graphics_o.vsync,
-        r           => graphics_o.rgb.r(9 downto 6),
-        g           => graphics_o.rgb.g(9 downto 6),
-        b           => graphics_o.rgb.b(9 downto 6)
+        r           => r,
+        g           => g,
+        b           => b
       );
       
-    graphics_o.rgb.r(5 downto 0) <= (others => '0');
-    graphics_o.rgb.g(5 downto 0) <= (others => '0');
-    graphics_o.rgb.b(5 downto 0) <= (others => '0');
+    graphics_o.rgb.r <= not (r(3)&r(3)&r(2)&r(2)&r(1)&r(1)&r(0)&r(0)) & "00";
+    graphics_o.rgb.g <= not (g(3)&g(3)&g(2)&g(2)&g(1)&g(1)&g(0)&g(0)) & "00";
+    graphics_o.rgb.b <= not (r(3)&b(3)&b(2)&b(2)&b(1)&b(1)&b(0)&b(0)) & "00";
       
     vdp_ram_inst : entity work.spram
       generic map
