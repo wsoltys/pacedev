@@ -205,6 +205,7 @@ architecture SYN of target_top_ep4c is
   alias clk_24M             : std_logic is clk24_a;
   --alias clk_24M576_b        : std_logic is clk24_a;
   -- clocks
+  signal clk_20M            : std_logic;
   
   signal ddc_reset          : std_logic := '0';
   signal dvi_hotplug_s      : std_logic := '0';
@@ -243,8 +244,8 @@ begin
     port map
     (
       inclk0		=> clk_24M,
-      c0		    => open, --uh_clkin,      -- 12MHz
-      c1		    => open, --clk_NIOS,      -- 72MHz
+      c0		    => clk_20M,       -- 20Mhz
+      c1		    => open,          -- 72MHz
       c2		    => vid_clk,       -- 24MHz
       c3        => vsi_extclk,    -- 14.4MHz
       locked		=> open --pll_locked
@@ -342,6 +343,8 @@ begin
 
   end block BLK_DVO_INIT;
 
+  BLK_FLOPPY : block
+  
 --    -- floppy disk signals
 --    vid_data(3 downto 0) <= target_o.ds_n;
 --    vid_data(4) <= target_o.motor_on;
@@ -349,11 +352,94 @@ begin
 --    vid_data(6) <= target_o.direction_select_n;
 --    vid_data(7) <= target_o.write_gate_n;
 --    vid_data(8) <= target_o.write_data_n;
---    target_i.read_data_n <= vid_data(9);
---    target_i.write_protect_n <= vid_data(10);
---    target_i.index_pulse_n <= vid_data(11);
---    target_i.track_zero_n <= vid_data(12);
-      
+
+    signal sync_reset   : std_logic := '1';
+    signal step         : std_logic;
+    signal dirc         : std_logic;
+    signal wg           : std_logic;
+    signal wd           : std_logic;
+    
+    signal raw_read_n   : std_logic;
+    signal tr00_n       : std_logic;
+    signal ip_n         : std_logic;
+    
+  begin
+  
+    process (clk_20M, reset)
+      variable rst_r : std_logic_vector(3 downto 0) := (others => '1');
+    begin
+      if rising_edge(clk_20M) then
+        rst_r := rst_r(rst_r'left-1 downto 0) & reset;
+      end if;
+      sync_reset <= rst_r(rst_r'left);
+    end process;
+
+    vid_data(9) <= raw_read_n;
+    vid_data(10) <= '1';
+    vid_data(11) <= ip_n;
+    vid_data(12) <= tr00_n;
+    
+    process (clk_20m, sync_reset)
+      variable step_r   : std_logic_vector(3 downto 0);
+      variable dirc_r   : std_logic_vector(3 downto 0);
+      variable wg_r     : std_logic_vector(3 downto 0);
+      variable wd_r     : std_logic_vector(3 downto 0);
+    begin
+      if sync_reset = '1' then
+      elsif rising_edge(clk_20M) then
+        step_r := step_r(step_r'left-1 downto 0) & vid_data(5);
+        dirc_r := dirc_r(dirc_r'left-1 downto 0) & vid_data(6);
+        wg_r := wg_r(wg_r'left-1 downto 0) & vid_data(7);
+        wd_r := wd_r(wd_r'left-1 downto 0) & vid_data(8);
+      end if;
+      step <= step_r(step_r'left);
+      dirc <= dirc_r(dirc_r'left);
+      wg <= wg_r(wg_r'left);
+      wd <= wd_r(wd_r'left);
+    end process;
+    
+    floppy_if_inst : entity work.floppy_if
+      generic map
+      (
+        NUM_TRACKS      => 40
+      )
+      port map
+      (
+        clk           => clk_20M,
+        clk_20M_ena   => '1',
+        reset         => sync_reset,
+        
+        -- drive select lines
+        drv_ena       => "0001",
+        drv_sel       => "0001",
+        
+        step          => step,
+        dirc          => dirc,
+        rg            => '1',         -- unused
+        rclk          => open,        -- unused
+        raw_read_n    => raw_read_n,
+        wg            => wg,
+        wd            => wd,
+        tr00_n        => tr00_n,
+        ip_n          => ip_n,
+        
+        -- media interface
+
+        track         => track,
+        dat_i         => rd_data_from_media,
+        dat_o         => open,
+        wr            => media_wr,
+        -- random-access control
+        offset        => offset,
+        -- fifo control
+        rd            => fifo_rd,
+        flush         => fifo_flush,
+        
+        debug         => floppy_dbg
+      );
+
+  end block BLK_FLOPPY;
+  
   BLK_FLASHER : block
   begin
     -- flash the led so we know it's alive
