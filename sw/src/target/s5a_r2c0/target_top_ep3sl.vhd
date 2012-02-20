@@ -483,6 +483,32 @@ begin
       );
     sram_i.d(sram_i.d'left downto S5AR2_EMULATED_SRAM_WIDTH) <= (others => '0');
   end generate GEN_SRAM;
+
+  GEN_FLOPPY_IF : if FALSE generate
+  begin
+    -- floppy disk signals
+    vid_data(3 downto 0) <= target_o.ds_n;
+    vid_data(4) <= target_o.motor_on;
+    vid_data(5) <= target_o.step_n;
+    vid_data(6) <= target_o.direction_select_n;
+    vid_data(7) <= target_o.write_gate_n;
+    vid_data(8) <= target_o.write_data_n;
+    process (clkrst_i)
+    begin
+      if clkrst_i.rst(0) = '1' then
+      elsif rising_edge(clkrst_i.clk(0)) then
+        target_i.read_data_n <= vid_data(9);
+        target_i.write_protect_n <= vid_data(10);
+        target_i.index_pulse_n <= vid_data(11);
+        target_i.track_zero_n <= vid_data(12);
+      end if;
+    end process;
+    -- b/c it's defined as inout
+    vid_data(vid_data'left downto 9) <= (others => 'Z');
+    
+  else generate
+    vid_data <= (others => 'Z');
+  end generate GEN_FLOPPY_IF;
   
   BLK_CHASER : block
   begin
@@ -499,7 +525,7 @@ begin
     end process;
   end block BLK_CHASER;
 
-  vid_data(7 downto 0) <= leds_o(7 downto 0);
+  --vid_data(7 downto 0) <= leds_o(7 downto 0);
   
   --vid_spare(31 downto 10) <= (others => 'Z');
   -- route the leds to the cyclone

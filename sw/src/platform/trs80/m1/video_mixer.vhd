@@ -51,8 +51,11 @@ begin
 --              bitmap_ctl_o(2).rgb.b when (TRS80_M1_IS_LNW80 and gfxmode /= "00") else
 --              tilemap_ctl_o(1).rgb.b;
 
-	rgb_o.r <=  tilemap_ctl_o(1).rgb.r or graphics_i.rgb.r;
-	rgb_o.g <=  tilemap_ctl_o(1).rgb.g or graphics_i.rgb.g;
-	rgb_o.b <=  tilemap_ctl_o(1).rgb.b or graphics_i.rgb.b;
+	rgb_o.r <=  --(others => '0') when (video_ctl_i.hblank = '1' or video_ctl_i.vblank = '1') else 
+                tilemap_ctl_o(1).rgb.r; -- or graphics_i.rgb.r;
+	rgb_o.g <=  --(others => '0') when (video_ctl_i.hblank = '1' or video_ctl_i.vblank = '1') else 
+                tilemap_ctl_o(1).rgb.g; -- or graphics_i.rgb.g;
+	rgb_o.b <=  --(others => '0') when (video_ctl_i.hblank = '1' or video_ctl_i.vblank = '1') else 
+                tilemap_ctl_o(1).rgb.b; -- or graphics_i.rgb.b;
 
 end architecture SYN;

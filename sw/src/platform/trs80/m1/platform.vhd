@@ -82,36 +82,6 @@ end entity platform;
 
 architecture SYN of platform is
 
-	-- need this for projects that don't have it!
-	component FDC_1793 is 
-		port
-	   (
-	     clk            : in    std_logic;
-	     uPclk          : in    std_logic;
-	     reset          : in    std_logic;
-
-	     fdcaddr        : in    std_logic_vector(2 downto 0);
-	     fdcdatai       : in    std_logic_vector(7 downto 0);
-	     fdcdatao       : out   std_logic_vector(7 downto 0);
-	     fdc_rd         : in    std_logic;
-	     fdc_wr         : in    std_logic;
-	     fdc_drq_int    : out   std_logic;
-	     fdc_dto_int		: out   std_logic;
-
-	     spi_clk        : out   std_logic;
-	     spi_ena        : out   std_logic;
-	     spi_mode       : out   std_logic;
-	     spi_sel        : out   std_logic;
-	     spi_din        : in    std_logic;
-	     spi_dout       : out   std_logic;
-
-	     ser_rx         : in    std_logic;
-	     ser_tx         : out   std_logic;
-
-	     debug          : out   std_logic_vector(7 downto 0)
-	   );
-	end component;
-
 	alias clk_40M					: std_logic is clkrst_i.clk(0);
 	alias clk_video       : std_logic is clkrst_i.clk(1);
 	signal clk_2M_ena			: std_logic;
@@ -172,11 +142,8 @@ architecture SYN of platform is
 
   -- fdc signals
 	signal fdc_cs					    : std_logic;
-  signal fdc_rd             : std_logic;
-  signal fdc_wr             : std_logic;
   signal fdc_d_o            : std_logic_vector(7 downto 0);
   signal fdc_drq_int        : std_logic;
-	signal fdc_addr				    : std_logic_vector(2 downto 0);
 
   signal hdd_d              : std_logic_vector(7 downto 0);
   signal hdd_cs             : std_logic := '0';
@@ -236,15 +203,7 @@ begin
   lnw80_hires_ram_cs <= '1' when TRS80_M1_IS_LNW80 and (gfxram_ena = '1') and 
                               (cpu_a(15 downto 14) = "00") else '0';
   
-	-- memory read strobes	
-	fdc_rd <= fdc_cs and cpu_mem_rd;
-
-	-- quick fudge for now
-	fdc_addr <= '0' & cpu_a(1 downto 0) when fdc_cs = '1' else
-							"100";
-	
 	-- memory write enables
-  fdc_wr <= cpu_mem_wr when (fdc_cs = '1' or cpu_a(15 downto 2) = (X"37E" & "00")) else '0';
 	vram_wr <= vram_cs and cpu_mem_wr;
   lnw80_hires_ram_wr <= lnw80_hires_ram_cs and cpu_mem_wr;
   
@@ -704,9 +663,9 @@ begin
         b           => b
       );
       
-    graphics_o.rgb.r <= not (r(3)&r(3)&r(2)&r(2)&r(1)&r(1)&r(0)&r(0)) & "00";
-    graphics_o.rgb.g <= not (g(3)&g(3)&g(2)&g(2)&g(1)&g(1)&g(0)&g(0)) & "00";
-    graphics_o.rgb.b <= not (r(3)&b(3)&b(2)&b(2)&b(1)&b(1)&b(0)&b(0)) & "00";
+    graphics_o.rgb.r <= "0000" & not r(3 downto 0) & "00";
+    graphics_o.rgb.g <= "0000" & not g(3 downto 0) & "00";
+    graphics_o.rgb.b <= "0000" & not b(3 downto 0) & "00";
       
     vdp_ram_inst : entity work.spram
       generic map
@@ -798,41 +757,148 @@ begin
     
   end block BLK_INTERRUPTS;
 
-  GEN_FDC : if INCLUDE_FDC_SUPPORT generate
+  GEN_FDC : if TRS80_M1_FDC_SUPPORT generate
   
-    fdc_inst : FDC_1793                                    
+    component wd179x is
+      port
+      (
+        clk           : in std_logic;
+        clk_20M_ena   : in std_logic;
+        reset         : in std_logic;
+        
+        -- micro bus interface
+        mr_n          : in std_logic;
+        we_n          : in std_logic;
+        cs_n          : in std_logic;
+        re_n          : in std_logic;
+        a             : in std_logic_vector(1 downto 0);
+        dal_i         : in std_logic_vector(7 downto 0);
+        dal_o         : out std_logic_vector(7 downto 0);
+        clk_1mhz_en   : in std_logic;
+        drq           : out std_logic;
+        intrq         : out std_logic;
+        
+        -- drive interface
+        step          : out std_logic;
+        dirc          : out std_logic; -- 1=in, 0=out
+        early         : out std_logic;
+        late          : out std_logic;
+        test_n        : in std_logic;
+        hlt           : in std_logic;
+        rg            : out std_logic;
+        sso           : out std_logic;
+        rclk          : in std_logic;
+        raw_read_n    : in std_logic;
+        hld           : out std_logic;
+        tg43          : out std_Logic;
+        wg            : out std_logic;
+        wd            : out std_logic;
+        ready         : in std_logic;
+        wf_n_i        : in std_logic;
+        vfoe_n_o      : out std_logic;
+        tr00_n        : in std_logic;
+        ip_n          : in std_logic;
+        wprt_n        : in std_logic;
+        dden_n        : in std_logic;
+
+        -- temp fudge!!!
+        wr_dat_o			: out std_logic_vector(7 downto 0);
+        
+        debug         : out std_logic_vector(31 downto 0)
+      );
+    end component wd179x;
+    
+    signal clk_20M_ena  : std_logic;
+    
+    signal raw_read_n   : std_logic;
+    signal step         : std_logic;
+    signal dirc         : std_logic;
+    signal wg           : std_logic;
+    signal wd           : std_logic;
+    signal tr00_n       : std_logic;
+    signal ip_n         : std_logic;
+    signal wprt_n       : std_logic;
+    
+  begin
+
+    process (clk_40M, clkrst_i.rst(0))
+    begin
+      if clkrst_i.rst(0) = '1' then
+        clk_20M_ena <= '0';
+      elsif rising_edge(clk_40M) then
+        clk_20M_ena <= not clk_20M_ena;
+      end if;
+    end process;
+    
+    -- inverted for 179X???
+    raw_read_n <= target_i.read_data_n;
+    tr00_n <= target_i.track_zero_n;
+    ip_n <= target_i.index_pulse_n;
+    wprt_n <= target_i.write_protect_n;
+    
+    target_o.step_n <= not step;
+    target_o.direction_select_n <= not dirc;
+    target_o.write_gate_n <= not wg;
+    target_o.write_data_n <= not wd;
+
+    wd179x_inst : wd179x
       port map
       (
-        clk         => clk_40M,
-        upclk       => clk_2M_ena,
-        reset       => cpu_reset,
-                    
-        fdcaddr     => fdc_addr,
-        fdcdatai    => cpu_d_o,
-        fdcdatao    => fdc_d_o,
-        fdc_rd      => fdc_rd,                      
-        fdc_wr      => fdc_wr,                      
-        fdc_drq_int => fdc_drq_int,   
-        fdc_dto_int => open,         
+        clk           => clk_40M,
+        clk_20M_ena   => '1',
+        reset         => clkrst_i.rst(0),
+        
+        -- micro bus interface
+        mr_n          => '1',
+        we_n          => not cpu_mem_wr,
+        cs_n          => not fdc_cs,
+        re_n          => not cpu_mem_rd,
+        a             => cpu_a(1 downto 0),
+        dal_i         => cpu_d_o,
+        dal_o         => fdc_d_o,
+        clk_1mhz_en   => '1',
+        drq           => open,    -- NC on M1
+        intrq         => fdc_drq_int,
+        
+        -- drive interface
+        step          => step,
+        dirc          => dirc,
+        early         => open,    -- not used atm
+        late          => open,    -- not used atm
+        test_n        => '1',     -- not used
+        hlt           => '1',     -- head always engaged atm
+        rg            => open,    -- 179X only?
+        sso           => open,
+        rclk          => '1',     -- to be fixed
+        raw_read_n    => raw_read_n,
+        hld           => open,    -- not used atm
+        tg43          => open,    -- not used on TRS-80 designs
+        wg            => wg,
+        wd            => wd,      -- 200ns (MFM) or 500ns (FM) pulse
+        ready         => '1',     -- always read atm
+        wf_n_i        => '1',     -- no write faults atm
+        vfoe_n_o      => open,    -- not used in TRS-80 designs?
+        tr00_n        => tr00_n,
+        ip_n          => ip_n,
+        wprt_n        => wprt_n,
+        dden_n        => '0',     -- double density only atm
+        
+        -- 1771-only signals
+--        ph3           => '1',     -- NC on M1
+--        3pm_n         => '1',     -- tied high on M1
+--        xtds_n        => '1',     -- tied high on M1
+--        dint_n        => '1',     -- tied high on M1
+        
+        wr_dat_o      => open,
 
-        spi_clk     => spi_o.clk,
-        spi_din     => spi_i.din,                                 
-        spi_dout    => spi_o.dout,           
-        spi_ena     => spi_o.ena,            
-        spi_mode    => spi_o.mode,           
-        spi_sel     => spi_o.sel,            
-                    
-        ser_rx      => ser_i.rxd,                                  
-        ser_tx      => ser_o.txd,
-
-        debug       => leds_o(7 downto 0)
+        debug         => open
       );
-
+      
   else generate
 
     fdc_d_o <= X"FF";
     fdc_drq_int <= '0';
-    --leds_o <= (others => '0');
+    leds_o <= (others => '0');
         
   end generate GEN_FDC;
 
