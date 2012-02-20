@@ -1,0 +1,20 @@
+# clk_72M
+# cpu_0
+set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) cpu_0.sdc]
+set_global_assignment -name SOURCE_FILE [file join $::quartus(qip_path) cpu_0.ocp]
+# sysid
+# timer_0
+# jtag_uart_0
+# clk_24M
+# oxu210hp_int
+# altmemddr_0
+# usb_pio
+# track_pio
+# fifo_sts_pio
+# null
+# fifo_wr_if
+set_global_assignment -name TCL_FILE E:/Projects/pace/pacedev.net/sw/src/pace/sopc/avalon_slave_conduit/avalon_slave_conduit_hw.tcl
+set_global_assignment -name VHDL_FILE E:/Projects/pace/pacedev.net/sw/src/pace/sopc/avalon_slave_conduit/avalon_slave_conduit.vhd
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) fifo_wr_if.vhd]
+set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID BCAEC5010FFB000001359AED4079 
+ 

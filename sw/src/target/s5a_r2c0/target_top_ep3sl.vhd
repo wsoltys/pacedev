@@ -484,7 +484,7 @@ begin
     sram_i.d(sram_i.d'left downto S5AR2_EMULATED_SRAM_WIDTH) <= (others => '0');
   end generate GEN_SRAM;
 
-  GEN_FLOPPY_IF : if FALSE generate
+  GEN_FLOPPY_IF : if S5AR2_HAS_FLOPPY_IF generate
   begin
     -- floppy disk signals
     vid_data(3 downto 0) <= target_o.ds_n;
@@ -494,14 +494,26 @@ begin
     vid_data(7) <= target_o.write_gate_n;
     vid_data(8) <= target_o.write_data_n;
     process (clkrst_i)
+      variable rd_n_r     : std_logic_vector(3 downto 0);
+      variable wp_n_r     : std_logic_vector(3 downto 0);
+      variable ip_n_r     : std_logic_vector(3 downto 0);
+      variable tr00_n_r   : std_logic_vector(3 downto 0);
     begin
       if clkrst_i.rst(0) = '1' then
+        rd_n_r := (others => '1');
+        wp_n_r := (others => '1');
+        ip_n_r := (others => '1');
+        tr00_n_r := (others => '1');
       elsif rising_edge(clkrst_i.clk(0)) then
-        target_i.read_data_n <= vid_data(9);
-        target_i.write_protect_n <= vid_data(10);
-        target_i.index_pulse_n <= vid_data(11);
-        target_i.track_zero_n <= vid_data(12);
+        rd_n_r := rd_n_r(rd_n_r'left-1 downto 0) & vid_data(9);
+        wp_n_r := wp_n_r(wp_n_r'left-1 downto 0) & vid_data(10);
+        ip_n_r := ip_n_r(ip_n_r'left-1 downto 0) & vid_data(11);
+        tr00_n_r := tr00_n_r(tr00_n_r'left-1 downto 0) & vid_data(12);
       end if;
+      target_i.read_data_n <= rd_n_r(rd_n_r'left);
+      target_i.write_protect_n <= wp_n_r(wp_n_r'left);
+      target_i.index_pulse_n <= ip_n_r(ip_n_r'left);
+      target_i.track_zero_n <= tr00_n_r(tr00_n_r'left);
     end process;
     -- b/c it's defined as inout
     vid_data(vid_data'left downto 9) <= (others => 'Z');

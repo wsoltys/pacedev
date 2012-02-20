@@ -206,6 +206,7 @@ architecture SYN of target_top_ep4c is
   --alias clk_24M576_b        : std_logic is clk24_a;
   -- clocks
   signal clk_20M            : std_logic;
+  signal clk_nios           : std_logic;
   
   signal ddc_reset          : std_logic := '0';
   signal dvi_hotplug_s      : std_logic := '0';
@@ -245,7 +246,7 @@ begin
     (
       inclk0		=> clk_24M,
       c0		    => clk_20M,       -- 20Mhz
-      c1		    => open,          -- 72MHz
+      c1		    => clk_nios,      -- 72MHz
       c2		    => vid_clk,       -- 24MHz
       c3        => vsi_extclk,    -- 14.4MHz
       locked		=> open --pll_locked
@@ -345,14 +346,6 @@ begin
 
   BLK_FLOPPY : block
   
---    -- floppy disk signals
---    vid_data(3 downto 0) <= target_o.ds_n;
---    vid_data(4) <= target_o.motor_on;
---    vid_data(5) <= target_o.step_n;
---    vid_data(6) <= target_o.direction_select_n;
---    vid_data(7) <= target_o.write_gate_n;
---    vid_data(8) <= target_o.write_data_n;
-
     signal sync_reset   : std_logic := '1';
     signal step         : std_logic;
     signal dirc         : std_logic;
@@ -362,6 +355,23 @@ begin
     signal raw_read_n   : std_logic;
     signal tr00_n       : std_logic;
     signal ip_n         : std_logic;
+    
+    signal track                : std_logic_vector(7 downto 0);
+    signal rd_data_from_media   : std_logic_vector(7 downto 0);
+    signal media_wr             : std_logic;
+    signal offset               : std_logic_vector(12 downto 0);
+    signal fifo_rd              : std_logic;
+    signal fifo_flush           : std_logic;
+    signal fifo_wrreq           : std_logic;
+    signal floppy_dbg           : std_logic_vector(31 downto 0);
+    
+    signal track_pio_i          : std_logic_vector(31 downto 0);
+    signal fifo_sts_pio_i       : std_logic_vector(7 downto 0);
+    signal fifo_wr_if_clk       : std_logic;
+    signal fifo_wr_if_a         : std_logic_vector(2 downto 0);
+    signal fifo_wr_if_cs        : std_logic;
+    signal fifo_wr_if_wr        : std_logic;
+    signal fifo_wr_if_data      : std_logic_vector(7 downto 0);
     
   begin
   
@@ -386,16 +396,20 @@ begin
       variable wd_r     : std_logic_vector(3 downto 0);
     begin
       if sync_reset = '1' then
+        step_r := (others => '1');
+        dirc_r := (others => '1');
+        wg_r := (others => '1');
+        wd_r := (others => '1');
       elsif rising_edge(clk_20M) then
         step_r := step_r(step_r'left-1 downto 0) & vid_data(5);
         dirc_r := dirc_r(dirc_r'left-1 downto 0) & vid_data(6);
         wg_r := wg_r(wg_r'left-1 downto 0) & vid_data(7);
         wd_r := wd_r(wd_r'left-1 downto 0) & vid_data(8);
       end if;
-      step <= step_r(step_r'left);
-      dirc <= dirc_r(dirc_r'left);
-      wg <= wg_r(wg_r'left);
-      wd <= wd_r(wd_r'left);
+      step <= not step_r(step_r'left);
+      dirc <= not dirc_r(dirc_r'left);
+      wg <= not wg_r(wg_r'left);
+      wd <= not wd_r(wd_r'left);
     end process;
     
     floppy_if_inst : entity work.floppy_if
@@ -437,6 +451,142 @@ begin
         
         debug         => floppy_dbg
       );
+
+    BLK_FIFO : block
+      signal fifo_rd_pulse	: std_logic := '0';
+      signal fifo_empty     : std_logic := '0';   -- not used
+      signal fifo_full      : std_logic := '0';
+    begin
+
+      process (clk_20M, sync_reset)
+        subtype count_t is integer range 0 to 7;
+        variable count      : count_t := 0;
+        variable offset_v   : std_logic_vector(12 downto 0) := (others => '0');
+        variable fifo_rd_r	: std_logic := '0';
+      begin
+        if sync_reset = '1' then
+          count := 0;
+          offset_v := (others => '0');
+        elsif rising_edge(clk_20M) then
+
+          -- fifo read pulse is too wide - edge-detect
+          fifo_rd_pulse <= '0';	-- default
+          if fifo_rd = '1' and fifo_rd_r = '0' then
+            fifo_rd_pulse <= '1';
+          end if;
+          fifo_rd_r := fifo_rd;
+
+          --fifo_wr <= '0';   -- default
+          --if count = count_t'high then
+          --  if fifo_full = '0' then
+          --    fifo_wr <= '1';
+          --    if offset_v = 6272-1 then
+          --      offset_v := (others => '0');
+          --    else
+          --      offset_v := offset_v + 1;
+          --    end if;
+          --  end if;
+          --  count := 0;
+          --else
+          --  count := count + 1;
+          --  -- don't update when writing to FIFO
+          --  flash_o.a(12 downto 0) <= offset_v;
+          --end if;
+        end if;
+      end process;
+
+      -- generate a write pulse for the FIFO
+      process (fifo_wr_if_clk, reset_n)
+        variable wr_r : std_logic;
+      begin
+        if reset_n = '0' then
+          wr_r := '0';
+        elsif rising_edge(fifo_wr_if_clk) then
+          fifo_wrreq <= '0';  -- default
+          if fifo_wr_if_cs = '1' and fifo_wr_if_a = "000" then
+            if not wr_r and fifo_wr_if_wr then
+              fifo_wrreq <= '1';
+            end if;
+          end if;
+          wr_r := fifo_wr_if_wr;
+        end if;
+      end process;
+      
+      fifo_inst : entity work.floppy_fifo
+        PORT map
+        (
+          rdclk		  => clk_20M,
+          q		      => rd_data_from_media,
+          rdreq		  => fifo_rd_pulse,
+          rdempty		=> fifo_empty,
+
+          wrclk		  => fifo_wr_if_clk,
+          data		  => fifo_wr_if_data,
+          wrreq		  => fifo_wrreq,
+          wrfull		=> fifo_full,
+          aclr      => fifo_flush
+        );
+
+      fifo_sts_pio_i <= "0000000" & fifo_full;
+      
+    end block BLK_FIFO;
+
+    track_pio_i <= X"000000" & track;
+    
+    nios_inst : entity work.ep4c_sopc_system
+      port map
+      (
+         -- 1) global signals:
+        altmemddr_0_aux_full_rate_clk_out                 => open,
+        altmemddr_0_aux_half_rate_clk_out                 => open, --clk_nios,
+        altmemddr_0_phy_clk_out                           => open,
+        clk_24M                                           => clk24_a,
+        reset_n                                           => reset_n,
+
+         -- the_altmemddr_0
+        global_reset_n_to_the_altmemddr_0									=> reset_n,
+        local_init_done_from_the_altmemddr_0							=> open,
+        local_refresh_ack_from_the_altmemddr_0						=> open,
+        local_wdata_req_from_the_altmemddr_0							=> open,
+        mem_addr_from_the_altmemddr_0											=> ddr16_a,			
+        mem_ba_from_the_altmemddr_0												=> ddr16_ba(1 downto 0),
+        mem_cas_n_from_the_altmemddr_0										=> ddr16_cas_n,
+        mem_cke_from_the_altmemddr_0											=> ddr16_cke,
+        mem_clk_n_to_and_from_the_altmemddr_0							=> ddr16_clk_n,
+        mem_clk_to_and_from_the_altmemddr_0								=> ddr16_clk,
+        mem_cs_n_from_the_altmemddr_0											=> ddr16_cs_n,
+        mem_dm_from_the_altmemddr_0												=> ddr16_dm,
+        mem_dq_to_and_from_the_altmemddr_0								=> ddr16_dq(15 downto 0),
+        mem_dqs_to_and_from_the_altmemddr_0								=> ddr16_dqs,
+        mem_odt_from_the_altmemddr_0											=> ddr16_odt,
+        mem_ras_n_from_the_altmemddr_0										=> ddr16_ras_n,
+        mem_we_n_from_the_altmemddr_0											=> ddr16_we_n,
+        reset_phy_clk_n_from_the_altmemddr_0							=> open,
+
+         -- the_fifo_sts_pio
+        in_port_to_the_fifo_sts_pio                       => fifo_sts_pio_i,
+
+         -- the_fifo_wr_if
+        coe_s2_address_from_the_fifo_wr_if                => fifo_wr_if_a,
+        coe_s2_chipselect_from_the_fifo_wr_if             => fifo_wr_if_cs,
+        coe_s2_clk_from_the_fifo_wr_if                    => fifo_wr_if_clk,
+        coe_s2_read_from_the_fifo_wr_if                   => open,
+        coe_s2_readdata_to_the_fifo_wr_if                 => (others => '0'),
+        coe_s2_reset_from_the_fifo_wr_if                  => open,
+        coe_s2_waitrequest_to_the_fifo_wr_if              => '0',
+        coe_s2_write_from_the_fifo_wr_if                  => fifo_wr_if_wr,
+        coe_s2_writedata_from_the_fifo_wr_if              => fifo_wr_if_data,
+
+         -- the_oxu210hp_int
+        in_port_to_the_oxu210hp_int                       => '0',
+        out_port_from_the_oxu210hp_int                    => open,
+
+         -- the_track_pio
+        in_port_to_the_track_pio                          => track_pio_i,
+                    
+         -- the_usb_pio
+        out_port_from_the_usb_pio                         => open
+       );
 
   end block BLK_FLOPPY;
   

@@ -78,6 +78,8 @@ package project_pkg is
   constant S5AR2_EMULATED_FLASH_WIDTH_AD    : natural := 10;
   constant S5AR2_EMULATED_FLASH_WIDTH       : natural := 8;
 
+  constant S5AR2_HAS_FLOPPY_IF              : boolean := true;
+
 	-- TRS-80-specific constants
 
   --constant TRS80_M1_ROM                     : string := "level1.hex";
