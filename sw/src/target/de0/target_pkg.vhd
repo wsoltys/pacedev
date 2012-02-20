@@ -11,6 +11,7 @@ package target_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 constant PACE_TARGET      : PACETargetType := PACE_TARGET_DE0;
+constant PACE_TARGET_NAME : string := "DE0";
 constant PACE_FPGA_VENDOR : PACEFpgaVendor_t := PACE_FPGA_VENDOR_ALTERA;
 constant PACE_FPGA_FAMILY : PACEFpgaFamily_t := PACE_FPGA_FAMILY_CYCLONE3;
 
@@ -19,7 +20,7 @@ constant PACE_CLKIN0      : natural := 50;
 constant PACE_HAS_SPI     : boolean := false;
 
 	--
-	-- DE1-specific constants
+	-- DE0-specific constants
 	--
   type from_TARGET_IO_t is record
     not_used  : std_logic;

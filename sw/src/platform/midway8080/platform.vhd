@@ -401,8 +401,8 @@ begin
         clock_a     => clk_video,
         address_a   => bitmap_addr_rotated,
         data_a      => (others => '0'),
-        q_a					=> bitmap_o(1).d,
-        wren_a			=> '0'
+        q_a			=> bitmap_o(1).d(7 downto 0),
+        wren_a		=> '0'
     );
 
 	GEN_WRAM : if INVADERS_USE_INTERNAL_WRAM generate
