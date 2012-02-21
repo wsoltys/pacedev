@@ -2,9 +2,9 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>21/02/2012 12:44:06 AM</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1329745446273</BspGeneratedUnixTimeStamp>
-        <BspGeneratedLocation>E:\Projects\pace\pacedev.net\sw\synth\platform\trs80\m1\s5a_r2c0\software\floppy_bsp</BspGeneratedLocation>
+        <BspGeneratedTimeStamp>21/02/2012 4:17:10 PM</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1329801430109</BspGeneratedUnixTimeStamp>
+        <BspGeneratedLocation>E:\markm\pace\pacedev.net\sw\synth\platform\trs80\m1\s5a_r2c0\software\floppy_bsp</BspGeneratedLocation>
         <BspSettingsFile>settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\ep4c_sopc_system.sopcinfo</SopcDesignFile>
         <JdiFile>default</JdiFile>
@@ -26,7 +26,7 @@
                 <SettingName>hal.timestamp_timer</SettingName>
                 <Identifier>ALT_TIMESTAMP_CLK</Identifier>
                 <Type>UnquotedString</Type>
-                <Value>none</Value>
+                <Value>timer_0</Value>
                 <DefaultValue>none</DefaultValue>
                 <DestinationFile>system_h_define</DestinationFile>
                 <Description>Slave descriptor of timestamp timer device. This device is used by Altera HAL timestamp drivers for high-resolution time measurement. This setting defines the value of ALT_TIMESTAMP_CLK in system.h.</Description>
@@ -951,21 +951,21 @@
         <DriverPackageInfo>
                 <name>altera_avalon_pio_driver</name>
                 <version>default</version>
-                <moduleName>oxu210hp_int</moduleName>
-        </DriverPackageInfo>
-        <DriverPackageInfo>
-                <name>altera_avalon_jtag_uart_driver</name>
-                <version>default</version>
-                <moduleName>jtag_uart_0</moduleName>
-        </DriverPackageInfo>
-        <DriverPackageInfo>
-                <name>altera_avalon_pio_driver</name>
-                <version>default</version>
                 <moduleName>track_pio</moduleName>
         </DriverPackageInfo>
         <DriverPackageInfo>
                 <name>altera_avalon_pio_driver</name>
                 <version>default</version>
+                <moduleName>oxu210hp_int</moduleName>
+        </DriverPackageInfo>
+        <DriverPackageInfo>
+                <name>altera_avalon_pio_driver</name>
+                <version>default</version>
                 <moduleName>fifo_sts_pio</moduleName>
+        </DriverPackageInfo>
+        <DriverPackageInfo>
+                <name>altera_avalon_jtag_uart_driver</name>
+                <version>default</version>
+                <moduleName>jtag_uart_0</moduleName>
         </DriverPackageInfo>
 </sch:Settings>

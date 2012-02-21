@@ -527,7 +527,7 @@ begin
           aclr      => fifo_flush
         );
 
-      fifo_sts_pio_i <= "0000000" & fifo_full;
+      fifo_sts_pio_i <= "00000" & dirc & step & fifo_full;
       
     end block BLK_FIFO;
 
