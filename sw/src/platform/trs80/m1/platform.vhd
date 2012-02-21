@@ -818,6 +818,7 @@ begin
     signal tr00_n       : std_logic;
     signal ip_n         : std_logic;
     signal wprt_n       : std_logic;
+    signal rclk         : std_logic;
     
   begin
 
@@ -835,6 +836,7 @@ begin
     tr00_n <= target_i.track_zero_n;
     ip_n <= target_i.index_pulse_n;
     wprt_n <= target_i.write_protect_n;
+    rclk <= target_i.rclk;
     
     target_o.step_n <= not step;
     target_o.direction_select_n <= not dirc;
@@ -869,7 +871,7 @@ begin
         hlt           => '1',     -- head always engaged atm
         rg            => open,    -- 179X only?
         sso           => open,
-        rclk          => '1',     -- to be fixed
+        rclk          => rclk,
         raw_read_n    => raw_read_n,
         hld           => open,    -- not used atm
         tg43          => open,    -- not used on TRS-80 designs

@@ -246,7 +246,7 @@ begin
     (
       inclk0		=> clk_24M,
       c0		    => clk_20M,       -- 20Mhz
-      c1		    => clk_nios,      -- 72MHz
+      c1		    => open, --clk_nios,      -- 72MHz
       c2		    => vid_clk,       -- 24MHz
       c3        => vsi_extclk,    -- 14.4MHz
       locked		=> open --pll_locked
@@ -346,15 +346,16 @@ begin
 
   BLK_FLOPPY : block
   
-    signal sync_reset   : std_logic := '1';
-    signal step         : std_logic;
-    signal dirc         : std_logic;
-    signal wg           : std_logic;
-    signal wd           : std_logic;
+    signal sync_reset           : std_logic := '1';
+    signal step                 : std_logic;
+    signal dirc                 : std_logic;
+    signal wg                   : std_logic;
+    signal wd                   : std_logic;
     
-    signal raw_read_n   : std_logic;
-    signal tr00_n       : std_logic;
-    signal ip_n         : std_logic;
+    signal raw_read_n           : std_logic;
+    signal tr00_n               : std_logic;
+    signal ip_n                 : std_logic;
+    signal rclk                 : std_logic;
     
     signal track                : std_logic_vector(7 downto 0);
     signal rd_data_from_media   : std_logic_vector(7 downto 0);
@@ -388,6 +389,7 @@ begin
     vid_data(10) <= '1';
     vid_data(11) <= ip_n;
     vid_data(12) <= tr00_n;
+    vid_data(13) <= rclk;
     
     process (clk_20m, sync_reset)
       variable step_r   : std_logic_vector(3 downto 0);
@@ -430,7 +432,7 @@ begin
         step          => step,
         dirc          => dirc,
         rg            => '1',         -- unused
-        rclk          => open,        -- unused
+        rclk          => rclk,
         raw_read_n    => raw_read_n,
         wg            => wg,
         wd            => wd,
@@ -454,6 +456,7 @@ begin
 
     BLK_FIFO : block
       signal fifo_rd_pulse	: std_logic := '0';
+      signal fifo_data      : std_logic_vector(7 downto 0);
       signal fifo_empty     : std_logic := '0';   -- not used
       signal fifo_full      : std_logic := '0';
     begin
@@ -505,6 +508,7 @@ begin
           fifo_wrreq <= '0';  -- default
           if fifo_wr_if_cs = '1' and fifo_wr_if_a = "000" then
             if not wr_r and fifo_wr_if_wr then
+              fifo_data <= fifo_wr_if_data;
               fifo_wrreq <= '1';
             end if;
           end if;
@@ -521,7 +525,7 @@ begin
           rdempty		=> fifo_empty,
 
           wrclk		  => fifo_wr_if_clk,
-          data		  => fifo_wr_if_data,
+          data		  => fifo_data,
           wrreq		  => fifo_wrreq,
           wrfull		=> fifo_full,
           aclr      => fifo_flush
@@ -538,7 +542,7 @@ begin
       (
          -- 1) global signals:
         altmemddr_0_aux_full_rate_clk_out                 => open,
-        altmemddr_0_aux_half_rate_clk_out                 => open, --clk_nios,
+        altmemddr_0_aux_half_rate_clk_out                 => clk_nios,
         altmemddr_0_phy_clk_out                           => open,
         clk_24M                                           => clk24_a,
         reset_n                                           => reset_n,

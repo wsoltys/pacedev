@@ -2290,4 +2290,55 @@ set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to vid_reset_n
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to vid_reset_core_n
 set_global_assignment -name SIGNALTAP_FILE wd179x.stp
 set_global_assignment -name QIP_FILE ep4c_sopc_system.qip
+set_global_assignment -name SLD_NODE_CREATOR_ID 110 -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_ENTITY_NAME sld_signaltap -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|clk" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[0] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|\\BLK_TYPE_I:state.DONE" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[1] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|\\BLK_TYPE_I:state.IDLE" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[2] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|\\BLK_TYPE_I:state.RESTORE" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[3] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|\\BLK_TYPE_I:state.SEEK" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[4] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|\\BLK_TYPE_I:state.STEPIO" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[5] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|\\BLK_TYPE_I:state.STEP_WAIT" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[6] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|\\BLK_TYPE_II:state.DONE" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[7] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|\\BLK_TYPE_II:state.IDLE" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[8] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|\\BLK_TYPE_III:state.DONE" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[9] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|\\BLK_TYPE_III:state.IDLE" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[10] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|dirc" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[11] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|step" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[12] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|tr00_n" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[0] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|\\BLK_TYPE_I:state.DONE" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[1] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|\\BLK_TYPE_I:state.IDLE" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[2] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|\\BLK_TYPE_I:state.RESTORE" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[3] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|\\BLK_TYPE_I:state.SEEK" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[4] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|\\BLK_TYPE_I:state.STEPIO" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[5] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|\\BLK_TYPE_I:state.STEP_WAIT" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[6] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|\\BLK_TYPE_II:state.DONE" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[7] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|\\BLK_TYPE_II:state.IDLE" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[8] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|\\BLK_TYPE_III:state.DONE" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[9] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|\\BLK_TYPE_III:state.IDLE" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[10] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|dirc" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[11] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|step" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[12] -to "PACE:pace_inst|platform:platform_inst|wd179x:\\GEN_FDC:wd179x_inst|tr00_n" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_RAM_BLOCK_TYPE=M9K" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=13" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=13" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_INFO=805334528" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_POWER_UP_TRIGGER=0" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=000000000000000000000000000000000000000000000000000000000000000" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=63" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STORAGE_QUALIFIER_INVERSION_MASK_LENGTH=0" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=1024" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ATTRIBUTE_MEM_MODE=OFF" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_FLOW_USE_GENERATED=0" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_BITS=11" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_BUFFER_FULL_STOP=1" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_CURRENT_RESOURCE_WIDTH=1" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=4685" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=8164" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL=1" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=1024" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_IN_ENABLED=0" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ADVANCED_TRIGGER_ENTITY=basic,1," -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL_PIPELINE=1" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ENABLE_ADVANCED_TRIGGER=0" -section_id auto_signaltap_0
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

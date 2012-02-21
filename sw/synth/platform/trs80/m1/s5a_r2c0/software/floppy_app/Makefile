@@ -141,6 +141,7 @@ ELF := floppy_app.elf
 
 # Paths to C, C++, and assembly source files.
 C_SRCS :=
+CXX_SRCS += ccitt_crc16.cpp
 CXX_SRCS += main.cpp
 CXX_SRCS += nd80mst.cpp
 ASM_SRCS :=

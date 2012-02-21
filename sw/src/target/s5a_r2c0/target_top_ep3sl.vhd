@@ -498,22 +498,26 @@ begin
       variable wp_n_r     : std_logic_vector(3 downto 0);
       variable ip_n_r     : std_logic_vector(3 downto 0);
       variable tr00_n_r   : std_logic_vector(3 downto 0);
+      variable rclk_r     : std_logic_vector(3 downto 0);
     begin
       if clkrst_i.rst(0) = '1' then
         rd_n_r := (others => '1');
         wp_n_r := (others => '1');
         ip_n_r := (others => '1');
         tr00_n_r := (others => '1');
+        rclk_r := (others => '1');
       elsif rising_edge(clkrst_i.clk(0)) then
         rd_n_r := rd_n_r(rd_n_r'left-1 downto 0) & vid_data(9);
         wp_n_r := wp_n_r(wp_n_r'left-1 downto 0) & vid_data(10);
         ip_n_r := ip_n_r(ip_n_r'left-1 downto 0) & vid_data(11);
         tr00_n_r := tr00_n_r(tr00_n_r'left-1 downto 0) & vid_data(12);
+        rclk_r := rclk_r(rclk_r'left-1 downto 0) & vid_data(13);
       end if;
       target_i.read_data_n <= rd_n_r(rd_n_r'left);
       target_i.write_protect_n <= wp_n_r(wp_n_r'left);
       target_i.index_pulse_n <= ip_n_r(ip_n_r'left);
       target_i.track_zero_n <= tr00_n_r(tr00_n_r'left);
+      target_i.rclk <= rclk_r(rclk_r'left);
     end process;
     -- b/c it's defined as inout
     vid_data(vid_data'left downto 9) <= (others => 'Z');

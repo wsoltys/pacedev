@@ -11,7 +11,7 @@
       }
       datum megawizard_uipreferences
       {
-         value = "{}";
+         value = "{output_language=VHDL, output_directory=E:\\Projects\\pace\\pacedev.net\\sw\\synth\\platform\\trs80\\m1\\s5a_r2c0}";
          type = "String";
       }
    }
@@ -118,27 +118,11 @@
          type = "String";
       }
    }
-   element timer_0.s1
-   {
-      datum baseAddress
-      {
-         value = "131584";
-         type = "long";
-      }
-   }
    element fifo_sts_pio.s1
    {
       datum baseAddress
       {
          value = "16";
-         type = "long";
-      }
-   }
-   element track_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "0";
          type = "long";
       }
    }
@@ -150,11 +134,11 @@
          type = "long";
       }
    }
-   element usb_pio.s1
+   element timer_0.s1
    {
       datum baseAddress
       {
-         value = "131200";
+         value = "131584";
          type = "long";
       }
    }
@@ -163,6 +147,22 @@
       datum baseAddress
       {
          value = "1024";
+         type = "long";
+      }
+   }
+   element usb_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "131200";
+         type = "long";
+      }
+   }
+   element track_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "0";
          type = "long";
       }
    }
@@ -221,7 +221,7 @@
  <parameter name="projectName" value="trs80_m1-ep3sl.qpf" />
  <parameter name="sopcBorderPoints" value="true" />
  <parameter name="systemHash" value="-28043780615" />
- <parameter name="timeStamp" value="1329789485107" />
+ <parameter name="timeStamp" value="1329824413642" />
  <module kind="clock_source" version="10.1" enabled="1" name="clk_72M">
   <parameter name="clockFrequency" value="72000000" />
   <parameter name="clockFrequencyKnown" value="true" />

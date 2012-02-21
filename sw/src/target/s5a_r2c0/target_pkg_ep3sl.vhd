@@ -25,6 +25,7 @@ package target_pkg is
     write_protect_n     : std_logic;
     index_pulse_n       : std_logic;
     track_zero_n        : std_logic;
+    rclk                : std_logic;
   end record;
 
   type to_TARGET_IO_t is record

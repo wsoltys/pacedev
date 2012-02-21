@@ -12,6 +12,8 @@
 
 volatile alt_u32 fifo_sts_pio_irq = 0;
 
+extern alt_u16 ccitt_crc16_one( alt_u16 crc, const alt_u8 data );
+
 void fifo_sts_pio_isr (void *context)
 {
   fifo_sts_pio_irq |= IORD_ALTERA_AVALON_PIO_EDGE_CAP(FIFO_STS_PIO_BASE);
@@ -22,7 +24,7 @@ void fifo_sts_pio_isr (void *context)
 
 // @0    22+   $4E
 //       12+   $00
-//       3     $A1
+// @34   3     $A1          +reset CRC
 //       1     $FE
 // @38   1     (TRK)
 // @39   1     (SIDE)
@@ -32,7 +34,7 @@ void fifo_sts_pio_isr (void *context)
 // @44   22    $4E
 //       8     $00
 //       3     $A1
-//       1     (IDAM) $FB
+// @77   1     (IDAM) $FB   + reset CRC
 // @78   256   sector data
 // @334  2     (CRC)
 // @336  54    $4E
@@ -62,7 +64,7 @@ static unsigned char raw_sector_data[] =
               // $4E
 };
 
-extern unsigned char *dat;
+extern alt_u8 dat[];
 
 int main (int argc, char *argv[])
 {
@@ -78,8 +80,8 @@ int main (int argc, char *argv[])
   alt_u32 sector = 0;
   unsigned offset = 0;
   alt_u8 byte = 0;
-  alt_u16 crc = 0, crc2 = 0;
-  alt_u8 *sector_data = 0; //dat;
+  alt_u16 crc = 0;
+  alt_u8 *sector_data = dat;
 
 	while (1)
 	{
@@ -91,7 +93,7 @@ int main (int argc, char *argv[])
 
 	    sector = 0;
 	    offset = 0;
-	    sector_data = 0; //&dat[256*(track*10+sector)];
+	    sector_data = &dat[256*(track*10+sector)];
 
 	    fifo_sts_pio_irq = 0;
 	  }
@@ -126,18 +128,25 @@ int main (int argc, char *argv[])
 	  else if (offset < 334)
 	    byte = sector_data[offset-334];
 	  else if (offset == 334)
-	    byte = crc2 >> 8;
+	    byte = crc >> 8;
 	  else if (offset == 335)
-	    byte = crc2 & 0xFF;
+	    byte = crc & 0xFF;
 	  else if (offset <= 335+22)
 	    byte = 0x4E;
+
+	  // calculate CRC
+    if (offset == 34 || offset == 77)
+      crc = 0xFFFF;
+    else if (offset != 42 && offset != 43 &&
+              offset != 334 && offset != 335)
+      crc = ccitt_crc16_one (crc, byte);
 
     if (offset++ == 335+22)
     {
       if (++sector == 10)
         sector = 0;
       offset = 0;
-      sector_data = 0; //&dat[256*(track*10+sector)];
+      sector_data = &dat[256*(track*10+sector)];
     }
 
 	  IOWR_ALTERA_AVALON_PIO_DATA (FIFO_WR_IF_BASE, byte);
