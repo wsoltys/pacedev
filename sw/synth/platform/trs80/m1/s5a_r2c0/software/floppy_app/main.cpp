@@ -126,7 +126,7 @@ int main (int argc, char *argv[])
 	  else if (offset < 78)
       byte = raw_sector_data[offset];
 	  else if (offset < 334)
-	    byte = sector_data[offset-334];
+	    byte = offset-334; //sector_data[offset-334];
 	  else if (offset == 334)
 	    byte = crc >> 8;
 	  else if (offset == 335)
@@ -143,13 +143,14 @@ int main (int argc, char *argv[])
 
     if (offset++ == 335+22)
     {
-      if (++sector == 10)
+      //if (++sector == 10)
         sector = 0;
       offset = 0;
       sector_data = &dat[256*(track*10+sector)];
     }
 
 	  IOWR_ALTERA_AVALON_PIO_DATA (FIFO_WR_IF_BASE, byte);
+    //IOWR_ALTERA_AVALON_PIO_DATA (FIFO_WR_IF_BASE, offset&0xFF);
 	}
 
   alt_ic_irq_disable (FIFO_STS_PIO_IRQ_INTERRUPT_CONTROLLER_ID, FIFO_STS_PIO_IRQ);
