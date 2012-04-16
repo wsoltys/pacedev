@@ -83,12 +83,13 @@ end platform;
 
 architecture SYN of platform is
 
-	alias clk_30M					    : std_logic is clkrst_i.clk(0);
-  alias rst_30M             : std_logic is clkrst_i.rst(0);
+	alias clk_24M					    : std_logic is clkrst_i.clk(0);
+  alias rst_24M             : std_logic is clkrst_i.rst(0);
 	alias clk_video				    : std_logic is clkrst_i.clk(1);
 	signal cpu_reset			    : std_logic;
   
   -- uP signals  
+  signal clk_6M_en			    : std_logic;
   signal clk_1M5_en			    : std_logic;
 	signal cpu_clk_en         : std_logic;
 	signal cpu_r_wn				    : std_logic;
@@ -118,6 +119,8 @@ architecture SYN of platform is
   signal via_cs             : std_logic;
   signal via_d_o            : std_logic_vector(7 downto 0);
   signal via_d_oe_n         : std_logic;
+  signal via_i_p2_h         : std_logic;
+  alias via_ena_4           : std_logic is clk_6M_en;
   
   -- other signals   
 	alias platform_reset			: std_logic is inputs_i(3).d(0);
@@ -160,25 +163,25 @@ begin
 							(others => 'Z');
 		
   -- system timing
-  process (clk_30M, rst_30M)
-    variable count : integer range 0 to 19-1;
+  process (clk_24M, rst_24M)
+    variable cnt_16   : unsigned(3 downto 0);
   begin
-    if rst_30M = '1' then
-      count := 0;
-    elsif rising_edge(clk_30M) then
+    if rst_24M = '1' then
+      clk_6M_en <= '0'; -- default
       clk_1M5_en <= '0'; -- default
-      case count is
-        when 0 =>
+      cnt_16 := (others => '0');
+    elsif rising_edge(clk_24M) then
+      clk_6M_en <= '0'; -- default
+      clk_1M5_en <= '0'; -- default
+      if cnt_16(1 downto 0) = "00" then
+        clk_6M_en <= '1';
+        if cnt_16(3 downto 2) = "00" then
           clk_1M5_en <= '1';
-        when others =>
-          null;
-      end case;
-      if count = count'high then
-        count := 0;
-      else
-        count := count + 1;
+        end if;
       end if;
+      cnt_16 := cnt_16 + 1;
     end if;
+    via_i_p2_h <= not cnt_16(cnt_16'left);
   end process;
 
 	-- cpu09 core uses negative clock edge
@@ -186,7 +189,7 @@ begin
 	cpu_clk_en <= clk_1M5_en and not platform_pause;
 
 	-- add game reset later
-	cpu_reset <= rst_30M or platform_reset;
+	cpu_reset <= rst_24M or platform_reset;
 	
 	cpu_inst : entity work.cpu09
     generic map
@@ -195,7 +198,7 @@ begin
     )
 		port map
 		(	
-			clk				=> clk_30M,
+			clk				=> clk_24M,
       clk_en    => cpu_clk_en,
 			rst				=> cpu_reset,
 			rw				=> cpu_r_wn,
@@ -219,8 +222,6 @@ begin
     signal via_pb_i     : std_logic_vector(7 downto 0);
     signal via_pb_o     : std_logic_vector(7 downto 0);
     signal via_pb_oe_n  : std_logic_vector(7 downto 0);
-    signal via_i_p2     : std_logic;
-    signal via_ena_4    : std_logic;
     
     signal sw           : std_logic_vector(7 downto 0);
     signal zero_n       : std_logic;
@@ -262,20 +263,20 @@ begin
         O_PB              => via_pb_o,
         O_PB_OE_L         => via_pb_oe_n,
 
-        I_P2_H            => via_i_p2,    -- high for phase 2 clock  ____----__
-        RESET_L           => not rst_30M,
+        I_P2_H            => via_i_p2_h,  -- high for phase 2 clock  ____----__
+        RESET_L           => not rst_24M,
         ENA_4             => via_ena_4,   -- clk enable
-        CLK               => clk_30M
+        CLK               => clk_24M
       );
   end block BLK_VIA;
   
   -- registers
   BLK_REGS : block
   begin
-    process (clk_30M, rst_30M)
+    process (clk_24M, rst_24M)
     begin
-      if rst_30M = '1' then
-      elsif rising_edge(clk_30M) then
+      if rst_24M = '1' then
+      elsif rising_edge(clk_24M) then
         if clk_1M5_en = '1' then
           if reg_cs = '1' then
             if cpu_r_wn = '1' then
@@ -295,21 +296,21 @@ begin
             end if; -- cpu_r_wn
           end if; -- reg_cs
         end if; -- clk_1M5_en
-      end if; -- rising_edge(clk_30M)
+      end if; -- rising_edge(clk_24M)
     end process;
     
   end block BLK_REGS;
   
 --	-- irq vblank interrupt
---	process (clk_30M, rst_30M)
+--	process (clk_24M, rst_24M)
 --    variable vblank_r : std_logic_vector(3 downto 0);
 --    alias vblank_prev : std_logic is vblank_r(vblank_r'left);
 --    alias vblank_um   : std_logic is vblank_r(vblank_r'left-1);
 --	begin
---		if rst_30M = '1' then
+--		if rst_24M = '1' then
 --			vblank_r := (others => '0');
 --      cpu_irq <= '0';
---		elsif rising_edge(clk_30M) then
+--		elsif rising_edge(clk_24M) then
 --			if vblank_um = '1' and vblank_prev = '0' then
 --				cpu_irq <= '1';
 --      elsif vblank_um = '0' then
@@ -331,7 +332,7 @@ begin
       )
       port map
       (
-        clock			=> clk_30M,
+        clock			=> clk_24M,
         address		=> cpu_a(12 downto 0),
         q					=> rom_d_o
       );
