@@ -111,27 +111,62 @@ architecture SYN of platform is
 	signal rom_cs				      : std_logic;
   signal rom_d_o            : std_logic_vector(7 downto 0);
 	
-  -- register signals
-  signal reg_cs             : std_logic;
-  signal reg_d_o            : std_logic_vector(7 downto 0);
-
   -- 6522 signals
   signal via_cs             : std_logic;
   signal via_d_o            : std_logic_vector(7 downto 0);
   signal via_d_oe_n         : std_logic;
+  signal via_pa_o           : std_logic_vector(7 downto 0);
+  signal via_pa_oe_n        : std_logic_vector(7 downto 0);
   signal via_i_p2_h         : std_logic;
   alias via_ena_4           : std_logic is clk_6M_en;
   
+  -- AY-3-8912 signals
+  signal ay38912_bc1        : std_logic;
+  signal ay38912_bdir       : std_logic;
+  signal ay38912_a_o        : std_logic_vector(7 downto 0);
+  signal ay38912_b_o        : std_logic_vector(7 downto 0);
+  signal ay38912_c_o        : std_logic_vector(7 downto 0);
+  signal ay38912_d_o        : std_logic_vector(7 downto 0);
+
+  -- DAC
+  signal dac_d_i            : std_logic_vector(7 downto 0);
+
+  -- integrators
+  signal x_v                : signed(7 downto 0);
+  signal y_v                : signed(7 downto 0);
+  signal z                  : std_logic_vector(7 downto 0);
+  signal offset             : signed(7 downto 0);
+  
   -- other signals   
+  signal s_hn               : std_logic;
+  signal sel                : std_logic_vector(1 downto 0);
+  signal compare            : std_logic;
+  signal ramp_n             : std_logic;
+  signal sw                 : std_logic_vector(7 downto 0);
+  signal zero_n             : std_logic;
+  signal blank_n            : std_logic;
+
+  -- vector outputs
+  signal x                  : signed(15 downto 0);
+  signal y                  : signed(15 downto 0);
+  
 	alias platform_reset			: std_logic is inputs_i(3).d(0);
 	alias osd_toggle          : std_logic is inputs_i(3).d(1);
 	alias platform_pause      : std_logic is inputs_i(3).d(2);
-	
+
+  attribute noprune: boolean;
+  attribute noprune of x_v: signal is true;
+  attribute noprune of y_v: signal is true;
+  attribute noprune of x: signal is true;
+  attribute noprune of y: signal is true;
+  attribute noprune of z: signal is true;
+
 begin
 
   -- SRAM signals (may or may not be used)
-  sram_o.a(sram_o.a'left downto 17) <= (others => '0');
-  sram_o.a(10 downto 0)	<= 	std_logic_vector(resize(unsigned(cpu_a), 11));
+  sram_o.a(sram_o.a'left downto 10) <= (others => '0');
+  -- 1KB
+  sram_o.a(9 downto 0) <= std_logic_vector(resize(unsigned(cpu_a), 10));
   sram_o.d <= std_logic_vector(resize(unsigned(cpu_d_o), sram_o.d'length)) 
 								when (ram_wr = '1') else (others => 'Z');
   sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
@@ -142,11 +177,11 @@ begin
 	-- cartridge $0000-$7FFF
 	cart_cs <=		'1' when STD_MATCH(cpu_a,  "0---------------") else
 								'0';
-  -- RAM $C800-$CFFF
+  -- RAM $C800-$CFFF (1KB shadowed)
   ram_cs <=		  '1' when STD_MATCH(cpu_a, X"C"&"1-----------") else
                 '0';
   -- registers $D000-$DFFF
-  reg_cs <=		  '1' when STD_MATCH(cpu_a, X"D"&"------------") else
+  via_cs <=		  '1' when STD_MATCH(cpu_a, X"D"&"------------") else
                 '0';
   -- ROM $E000-$FFFF
 	rom_cs  <= 	  '1' when STD_MATCH(cpu_a,  "111-------------") else 
@@ -158,7 +193,7 @@ begin
 	-- memory read mux
 	cpu_d_i <=  cart_d_o when cart_cs = '1' else
 							ram_d_o when ram_cs = '1' else
-							reg_d_o when reg_cs = '1' else
+							via_d_o when via_cs = '1' else
               rom_d_o when rom_cs = '1' else
 							(others => 'Z');
 		
@@ -215,18 +250,62 @@ begin
 			nmi				=> '0'
 		);
 
+  -- MUX
+  process (clk_24M, rst_24M)
+  begin
+    if rst_24M = '1' then
+      offset <= (others => '0');
+      x_v <= (others => '0');
+      y_v <= (others => '0');
+      z <= (others => '0');
+    elsif rising_edge(clk_24M) then
+      if s_hn = '0' then
+        case sel is
+          when "00" =>
+            y_v <= signed(dac_d_i);
+          when "01" =>
+            offset <= signed(dac_d_i);
+          when "10" =>
+            z <= dac_d_i;
+          when others =>
+            null;
+        end case;
+      else
+        x_v <= signed(dac_d_i);
+      end if;
+    end if;
+    dac_d_i <= via_pa_o;
+  end process;
+  
+  -- integrator
+  process (clk_24M, rst_24M)
+  begin
+    if rst_24M = '1' then
+    elsif rising_edge(clk_24M) then
+      if zero_n = '0' then
+        x <= (others => '0');
+        y <= (others => '0');
+      elsif ramp_n = '0' then
+        x <= x + x_v;
+        y <= y + y_v;
+      end if;
+    end if;
+  end process;
+  
   BLK_VIA : block
-    signal via_pa_i     : std_logic_vector(7 downto 0);
-    signal via_pa_o     : std_logic_vector(7 downto 0);
-    signal via_pa_oe_n  : std_logic_vector(7 downto 0);
     signal via_pb_i     : std_logic_vector(7 downto 0);
     signal via_pb_o     : std_logic_vector(7 downto 0);
     signal via_pb_oe_n  : std_logic_vector(7 downto 0);
-    
-    signal sw           : std_logic_vector(7 downto 0);
-    signal zero_n       : std_logic;
-    signal blank_n      : std_logic;
   begin
+  
+    -- Port 'B' Data - Vectrex Hardware Control [CNTRL]
+    s_hn <= via_pb_o(0);
+    sel <= via_pb_o(2 downto 1);
+    ay38912_bc1 <= via_pb_o(3);
+    ay38912_bdir <= via_pb_o(4);
+    via_pb_i(5) <= compare;
+    ramp_n <= via_pb_o(7);
+    
     via_inst : entity work.M6522
       port map
       (
@@ -236,8 +315,8 @@ begin
         O_DATA_OE_L       => via_d_oe_n,
 
         I_RW_L            => cpu_r_wn,
-        I_CS1             => cpu_a(12),
-        I_CS2_L           => not reg_cs,
+        I_CS1             => via_cs,      -- really A12
+        I_CS2_L           => not via_cs,
 
         O_IRQ_L           => cpu_irq,
         -- port a
@@ -246,7 +325,7 @@ begin
         O_CA2             => zero_n,
         O_CA2_OE_L        => open,
 
-        I_PA              => via_pa_i,
+        I_PA              => ay38912_d_o,
         O_PA              => via_pa_o,
         O_PA_OE_L         => via_pa_oe_n,
 
@@ -268,62 +347,44 @@ begin
         ENA_4             => via_ena_4,   -- clk enable
         CLK               => clk_24M
       );
-  end block BLK_VIA;
-  
-  -- registers
-  BLK_REGS : block
-  begin
-    process (clk_24M, rst_24M)
-    begin
-      if rst_24M = '1' then
-      elsif rising_edge(clk_24M) then
-        if clk_1M5_en = '1' then
-          if reg_cs = '1' then
-            if cpu_r_wn = '1' then
-              -- reads
-              case cpu_a(3 downto 0) is
-                when X"0" =>
-                when others =>
-                  null;
-              end case;
-            else
-              -- writes
-              case cpu_a(3 downto 0) is
-                when X"0" =>
-                when others =>
-                  null;
-              end case;
-            end if; -- cpu_r_wn
-          end if; -- reg_cs
-        end if; -- clk_1M5_en
-      end if; -- rising_edge(clk_24M)
-    end process;
     
-  end block BLK_REGS;
-  
---	-- irq vblank interrupt
---	process (clk_24M, rst_24M)
---    variable vblank_r : std_logic_vector(3 downto 0);
---    alias vblank_prev : std_logic is vblank_r(vblank_r'left);
---    alias vblank_um   : std_logic is vblank_r(vblank_r'left-1);
---	begin
---		if rst_24M = '1' then
---			vblank_r := (others => '0');
---      cpu_irq <= '0';
---		elsif rising_edge(clk_24M) then
---			if vblank_um = '1' and vblank_prev = '0' then
---				cpu_irq <= '1';
---      elsif vblank_um = '0' then
---        cpu_irq <= '0';
---			end if;
---      -- numeta the vblank
---      vblank_r := vblank_r(vblank_r'left-1 downto 0) & graphics_i.vblank;
---		end if;
---	end process;
+  end block BLK_VIA;
 
+  BLK_AY3_8912 : block 
+  begin
+    ay3_8912_inst : entity work.ay_3_8910
+      port map
+      (
+        -- AY-3-8910 sound controller
+        clk         => clk_24M,
+        reset       => rst_24M,
+        clk_en      => clk_1M5_en,
+
+        -- CPU I/F
+        cpu_d_in    => via_pa_o,
+        cpu_d_out   => ay38912_d_o,
+        cpu_bdir    => ay38912_bdir,
+        cpu_bc1     => ay38912_bc1,
+        cpu_bc2     => '1',
+
+        -- I/O I/F
+        io_a_in     => sw,
+        io_b_in     => (others => '0'),
+        io_a_out    => open,
+        io_b_out    => open,
+
+        -- Sound output
+        snd_A       => ay38912_a_o,
+        snd_B       => ay38912_b_o,
+        snd_C       => ay38912_c_o
+      );
+  end block BLK_AY3_8912;
+  
 	GEN_FPGA_ROMS : if true generate
   begin
   
+    cart_d_o <= X"FF";
+    
     system_rom_inst : entity work.sprom
       generic map
       (

@@ -1,0 +1,525 @@
+<session jtag_chain="USB-Blaster [USB-0]" jtag_device="@2: EP3SL70 (0x021010DD)" sof_file="vectrex-ep3sl.sof">
+  <display_tree gui_logging_enabled="0">
+    <display_branch instance="auto_signaltap_0" log="USE_GLOBAL_TEMP" signal_set="USE_GLOBAL_TEMP" trigger="USE_GLOBAL_TEMP"/>
+  </display_tree>
+  <global_info>
+    <single attribute="active instance" value="0"/>
+    <multi attribute="frame size" size="2" value="1920,1138"/>
+    <single attribute="jtag widget visible" value="1"/>
+    <multi attribute="jtag widget size" size="2" value="334,120"/>
+    <single attribute="instance widget visible" value="1"/>
+    <single attribute="config widget visible" value="1"/>
+    <single attribute="hierarchy widget visible" value="1"/>
+    <single attribute="data log widget visible" value="1"/>
+  </global_info>
+  <instance entity_name="sld_signaltap" is_auto_node="yes" name="auto_signaltap_0" source_file="sld_signaltap.vhd">
+    <node_ip_info instance_id="0" mfg_id="110" node_id="0" version="6"/>
+    <position_info>
+      <single attribute="active tab" value="0"/>
+      <single attribute="data vertical scroll position" value="0"/>
+      <single attribute="data horizontal scroll position" value="0"/>
+      <single attribute="zoom level numerator" value="1"/>
+      <single attribute="zoom level denominator" value="1"/>
+      <single attribute="zoom offset numerator" value="130944"/>
+      <single attribute="zoom offset denominator" value="1"/>
+    </position_info>
+    <signal_set global_temp="1" name="signal_set: 2012/04/17 01:09:55  #0">
+      <clock name="PACE:pace_inst|platform:platform_inst|clkrst_i.clk[0]" polarity="posedge" tap_mode="classic"/>
+      <config ram_type="M4K" reserved_data_nodes="0" reserved_storage_qualifier_nodes="0" reserved_trigger_nodes="0" sample_depth="128" trigger_in_enable="no" trigger_out_enable="no"/>
+      <top_entity/>
+      <signal_vec>
+        <trigger_input_vec>
+          <wire name="PACE:pace_inst|platform:platform_inst|clk_1M5_en" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|clk_6M_en" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|clkrst_i.rst[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[9]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[10]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[11]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[12]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[13]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[14]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[15]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[8]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[9]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[10]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[11]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[12]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[13]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[14]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[15]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[8]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[9]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[7]" tap_mode="classic" type="register"/>
+        </trigger_input_vec>
+        <data_input_vec>
+          <wire name="PACE:pace_inst|platform:platform_inst|clk_1M5_en" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|clk_6M_en" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|clkrst_i.rst[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[9]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[10]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[11]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[12]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[13]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[14]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[15]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[8]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[9]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[10]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[11]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[12]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[13]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[14]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[15]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[8]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[9]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[7]" tap_mode="classic" type="register"/>
+        </data_input_vec>
+        <storage_qualifier_input_vec>
+          <wire name="PACE:pace_inst|platform:platform_inst|clk_1M5_en" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|clk_6M_en" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|clkrst_i.rst[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[10]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[11]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[12]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[13]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[14]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[15]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[8]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[9]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[10]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[11]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[12]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[13]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[14]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[15]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[8]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x[9]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|x_v[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[10]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[11]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[12]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[13]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[14]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[15]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[8]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y[9]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|y_v[7]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[0]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[1]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[2]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[3]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[4]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[5]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[6]" tap_mode="classic" type="register"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|z[7]" tap_mode="classic" type="register"/>
+        </storage_qualifier_input_vec>
+      </signal_vec>
+      <presentation>
+        <data_view>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|clk_1M5_en"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|clk_6M_en"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|clkrst_i.rst[0]"/>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[15]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[14]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[13]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[12]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[11]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[10]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[9]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[8]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|x" order="msb_to_lsb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[15]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[14]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[13]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[12]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[11]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[10]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[9]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[8]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|x_v" order="msb_to_lsb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x_v[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x_v[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x_v[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x_v[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x_v[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x_v[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x_v[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x_v[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|y" order="msb_to_lsb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[15]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[14]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[13]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[12]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[11]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[10]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[9]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[8]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|y_v" order="msb_to_lsb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y_v[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y_v[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y_v[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y_v[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y_v[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y_v[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y_v[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y_v[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|z" order="msb_to_lsb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|z[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|z[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|z[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|z[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|z[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|z[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|z[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|z[0]"/>
+          </bus>
+        </data_view>
+        <setup_view>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|clk_1M5_en"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|clk_6M_en"/>
+          <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|clkrst_i.rst[0]"/>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[15]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[14]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[13]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[12]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[11]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[10]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[9]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[8]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|addr[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|cpu09:cpu_inst|data_out[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|x" order="msb_to_lsb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[15]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[14]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[13]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[12]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[11]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[10]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[9]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[8]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|x_v" order="msb_to_lsb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x_v[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x_v[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x_v[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x_v[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x_v[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x_v[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x_v[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|x_v[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|y" order="msb_to_lsb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[15]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[14]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[13]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[12]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[11]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[10]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[9]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[8]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|y_v" order="msb_to_lsb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y_v[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y_v[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y_v[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y_v[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y_v[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y_v[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y_v[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|y_v[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|z" order="msb_to_lsb" radix="hex" state="collapse" type="register">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|z[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|z[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|z[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|z[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|z[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|z[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|z[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|z[0]"/>
+          </bus>
+        </setup_view>
+      </presentation>
+      <trigger CRC="E1139AB2" attribute_mem_mode="false" gap_record="true" global_temp="1" name="trigger: 2012/04/17 01:09:55  #1" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="1" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="true" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_in="dont_care" trigger_out="active high" trigger_type="circular">
+        <power_up_trigger position="pre" storage_qualifier_disabled="no" trigger_in="dont_care" trigger_out="active high"/>
+        <events use_custom_flow_control="no">
+          <level enabled="yes" name="condition1" type="basic">
+            <power_up enabled="yes">
+            </power_up>
+            <op_node/>
+          </level>
+        </events>
+        <storage_qualifier_events>
+          <transitional>00000000000000000000000000000000000000000000000000000000000000000000000000000000000
+            <pwr_up_transitional>00000000000000000000000000000000000000000000000000000000000000000000000000000000000</pwr_up_transitional>
+          </transitional>
+          <storage_qualifier_level type="basic">
+            <power_up>
+            </power_up>
+            <op_node/>
+          </storage_qualifier_level>
+          <storage_qualifier_level type="basic">
+            <power_up>
+            </power_up>
+            <op_node/>
+          </storage_qualifier_level>
+          <storage_qualifier_level type="basic">
+            <power_up>
+            </power_up>
+            <op_node/>
+          </storage_qualifier_level>
+        </storage_qualifier_events>
+        <log>
+          <data global_temp="1" name="log: 2012/04/17 01:19:08  #0" power_up_mode="false" sample_depth="128" trigger_position="16">1101001111000010110101010110000000000000000000000000000000000000000000000001111111000011111111111111111010101100000000000000000000000000000000000000000000000011111110000111111111111111110101011000000000000000000000000000000000000000000000000111111100001111111111111111101010110000000000000000000000000000000000000000000000001111111001011111111111111111010101100000000000000000000000000000000000000000000000011111110000111111111111111110101011000000000000000000000000000000000000000000000000111111100001111111111111111101010110000000000000000000000000000000000000000000000001111111000011111111111111111010101100000000000000000000000000000000000000000000000011111110010111111111111111110101011000000000000000000000000000000000000000000000000111111100001111111111111111101010110000000000000000000000000000000000000000000000001111111000011111111111111111010101100000000000000000000000000000000000000000000000011111110000111111111111111110101011000000000000000000000000000000000000000000000000111111100101111111111111111101010110000000000000000000000000000000000000000000000001111111000011111111111111111010101100000000000000000000000000000000000000000000000011111110000111111111111111110101011000000000000000000000000000000000000000000000000111111100001111111111111111101010110000000000000000000000000000000000000000000000001111111011011111111111111111010101100000000000000000000000000000000000000000000000011111110000000111111110011010101011000000000000000000000000000000000000000000000000111111100000001111111100110101010110000000000000000000000000000000000000000000000001111111000000011111111001101010101100000000000000000000000000000000000000000000000011111110010000111111110011010101011000000000000000000000000000000000000000000000000111111100000001111111100110101010110000000000000000000000000000000000000000000000001111111000000011111111001101010101100000000000000000000000000000000000000000000000011111110000000111111110011010101011000000000000000000000000000000000000000000000000111111100100001111111100110101010110000000000000000000000000000000000000000000000001111111000000011111111001101010101100000000000000000000000000000000000000000000000011111110000000111111110011010101011000000000000000000000000000000000000000000000000111111100000001111111100110101010110000000000000000000000000000000000000000000000001111111001000011111111001101010101100000000000000000000000000000000000000000000000011111110000000111111110011010101011000000000000000000000000000000000000000000000000111111100000001111111100110101010110000000000000000000000000000000000000000000000001111111000000011111111001101010101100000000000000000000000000000000000000000000000011111110110000111111110011010101011000000000000000000000000000000000000000000000000111111100001001111111100110101010110000000000000000000000000000000000000000000000001111111000010011111111001101010101100000000000000000000000000000000000000000000000011111110000100111111110011010101011000000000000000000000000000000000000000000000000111111100101001111111100110101010110000000000000000000000000000000000000000000000001111111000010011111111001101010101100000000000000000000000000000000000000000000000011111110000100111111110011010101011000000000000000000000000000000000000000000000000111111100001001111111100110101010110000000000000000000000000000000000000000000000001111111001010011111111001101010101100000000000000000000000000000000000000000000000011111110000100111111110011010101011000000000000000000000000000000000000000000000000111111100001001111111100110101010110000000000000000000000000000000000000000000000001111111000010011111111001101010101100000000000000000000000000000000000000000000000011111110010100111111110011010101011000000000000000000000000000000000000000000000000111111100001001111111100110101010110000000000000000000000000000000000000000000000001111111000010011111111001101010101100000000000000000000000000000000000000000000000011111110000100111111110011010101011000000000000000000000000000000000000000000000000111111101101001111111100110101010110000000000000000000000000000000000000000000000001111111000010010110110000001010101100000000000000000000000000000000000000000000000011111110000100101101100000010101011000000000000000000000000000000000000000000000000111111100001001011011000000101010110000000000000000000000000000000000000000000000001111111001010010110110000001010101100000000000000000000000000000000000000000000000011111110000100101101100000010101011000000000000000000000000000000000000000000000000111111100001001011011000000101010110000000000000000000000000000000000000000000000001111111000010010110110000001010101100000000000000000000000000000000000000000000000011111110010100101101100000010101011000000000000000000000000000000000000000000000000111111100001001011011000000101010110000000000000000000000000000000000000000000000001111111000010010110110000001010101100000000000000000000000000000000000000000000000011111110000100101101100000010101011000000000000000000000000000000000000000000000000111111100101001011011000000101010110000000000000000000000000000000000000000000000001111111000010010110110000001010101100000000000000000000000000000000000000000000000011111110000100101101100000010101011000000000000000000000000000000000000000000000000111111100001001011011000000101010110000000000000000000000000000000000000000000000001111111011010010110110000001010101100000000000000000000000000000000000000000000000011111110000000111100001011010101011000000000000000000000000000000000000000000000000111111100000001111000010110101010110000000000000000000000000000000000000000000000001111111000000011110000101101010101100000000000000000000000000000000000000000000000011111110010000111100001011010101011000000000000000000000000000000000000000000000000111111100000001111000010110101010110000000000000000000000000000000000000000000000001111111000000011110000101101010101100000000000000000000000000000000000000000000000011111110000000111100001011010101011000000000000000000000000000000000000000000000000111111100100001111000010110101010110000000000000000000000000000000000000000000000001111111000000011110000101101010101100000000000000000000000000000000000000000000000011111110000000111100001011010101011000000000000000000000000000000000000000000000000111111100000001111000010110101010110000000000000000000000000000000000000000000000001111111001000011110000101101010101100000000000000000000000000000000000000000000000011111110000000111100001011010101011000000000000000000000000000000000000000000000000111111100000001111000010110101010110000000000000000000000000000000000000000000000001111111000000011110000101101010101100000000000000000000000000000000000000000000000011111110110000111100001011010101011000000000000000000000000000000000000000000000000111111100001001111000010110101010110000000000000000000000000000000000000000000000001111111000010011110000101101010101100000000000000000000000000000000000000000000000011111110000100111100001011010101011000000000000000000000000000000000000000000000000111111100101001111000010110101010110000000000000000000000000000000000000000000000001111111000010011110000101101010101100000000000000000000000000000000000000000000000011111110000100111100001011010101011000000000000000000000000000000000000000000000000111111100001001111000010110101010110000000000000000000000000000000000000000000000001111111001010011110000101101010101100000000000000000000000000000000000000000000000011111110000100111100001011010101011000000000000000000000000000000000000000000000000111111100001001111000010110101010110000000000000000000000000000000000000000000000001111111000010011110000101101010101100000000000000000000000000000000000000000000000011111110010100111100001011010101011000000000000000000000000000000000000000000000000111111100001001111000010110101010110000000000000000000000000000000000000000000000001111111000010011110000101101010101100000000000000000000000000000000000000000000000011111110000100111100001011010101011000000000000000000000000000000000000000000000000111111101101001111000010110101010110000000000000000000000000000000000000000000000001111111000011111111111111111010101100000000000000000000000000000000000000000000000011111110000111111111111111110101011000000000000000000000000000000000000000000000000111111100001111111111111111101010110000000000000000000000000000000000000000000000001111111001011111111111111111010101100000000000000000000000000000000000000000000000011111110000111111111111111110101011000000000000000000000000000000000000000000000000111111100001111111111111111101010110000000000000000000000000000000000000000000000001111111000011111111111111111010101100000000000000000000000000000000000000000000000011111110010111111111111111110101011000000000000000000000000000000000000000000000000111111100001111111111111111101010110000000000000000000000000000000000000000000000001111111000011111111111111111010101100000000000000000000000000000000000000000000000011111110000111111111111111110101011000000000000000000000000000000000000000000000000111111100101111111111111111101010110000000000000000000000000000000000000000000000001111111000011111111111111111010101100000000000000000000000000000000000000000000000011111110000111111111111111110101011000000000000000000000000000000000000000000000000111111100001111111111111111101010110000000000000000000000000000000000000000000000001111111011011111111111111111010101100000000000000000000000000000000000000000000000011111110000000111111110011010101011000000000000000000000000000000000000000000000000111111100000001111111100110101010110000000000000000000000000000000000000000000000001111111000000011111111001101010101100000000000000000000000000000000000000000000000011111110010000111111110011010101011000000000000000000000000000000000000000000000000111111100000001111111100110101010110000000000000000000000000000000000000000000000001111111000000011111111001101010101100000000000000000000000000000000000000000000000011111110000000111111110011010101011000000000000000000000000000000000000000000000000111111100100001111111100110101010110000000000000000000000000000000000000000000000001111111000000011111111001101010101100000000000000000000000000000000000000000000000011111110000000111111110011010101011000000000000000000000000000000000000000000000000111111100000001111111100110101010110000000000000000000000000000000000000000000000001111111001000011111111001101010101100000000000000000000000000000000000000000000000011111110000000111111110011010101011000000000000000000000000000000000000000000000000111111100000001111111100110101010110000000000000000000000000000000000000000000000001111111000000011111111001101010101100000000000000000000000000000000000000000000000011111110</data>
+          <extradata>1111111111111111T111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111</extradata>
+        </log>
+      </trigger>
+    </signal_set>
+  </instance>
+  <mnemonics/>
+  <static_plugin_mnemonics/>
+</session>
