@@ -84,7 +84,7 @@ architecture SYN of PACE is
 
 	-- video generator signals
 	signal vid_addr							: std_logic_vector(15 downto 0);
-	signal vid_q								: std_logic_vector(7 downto 0);
+	signal vid_q								: std_logic_vector(15 downto 0);
 	
 	-- video ram signals
 	signal vram_addr						: std_logic_vector(14 downto 0);
@@ -250,7 +250,7 @@ begin
 			address_a					=> vid_addr(14 downto 0),
 			wren_a						=> '0',
 			data_a						=> (others => 'X'),
-			q_a								=> vid_q,
+			q_a								=> vid_q(7 downto 0),
 			
 			-- vector-generator interface
 			clock_b						=> clk_24M,
@@ -280,11 +280,11 @@ begin
 
   BLK_GRAPHICS : block
 
-    signal to_tilemap_ctl   : to_TILEMAP_CTL_t;
-    signal from_tilemap_ctl : from_TILEMAP_CTL_t;
+    signal to_tilemap_ctl   : to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
+    signal from_tilemap_ctl : from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
 
-    signal to_bitmap_ctl    : to_BITMAP_CTL_t;
-    signal from_bitmap_ctl  : from_BITMAP_CTL_t;
+    signal to_bitmap_ctl    : to_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
+    signal from_bitmap_ctl  : from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
 
     signal to_sprite_reg    : to_SPRITE_REG_t;
     signal to_sprite_ctl    : to_SPRITE_CTL_t;
@@ -299,8 +299,8 @@ begin
 
   begin
   
-    vid_addr <= from_bitmap_ctl.a;
-    to_bitmap_ctl.d <= vid_q;
+    vid_addr <= from_bitmap_ctl(1).a;
+    to_bitmap_ctl(1).d <= vid_q;
     
     graphics_inst : entity work.Graphics                                    
       Port Map

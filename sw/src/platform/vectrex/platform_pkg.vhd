@@ -12,12 +12,13 @@ package platform_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 
-	constant PACE_VIDEO_NUM_BITMAPS 	    : natural := 0;
+	constant PACE_VIDEO_NUM_BITMAPS 	    : natural := 1;
 	constant PACE_VIDEO_NUM_TILEMAPS 	    : natural := 0;
 	constant PACE_VIDEO_NUM_SPRITES 	    : natural := 0;
-	constant PACE_VIDEO_H_SIZE				    : integer := 256;   -- 240
-	constant PACE_VIDEO_V_SIZE				    : integer := 256;   -- 240
-  constant PACE_VIDEO_L_CROP            : integer := (256-240)/2;
+  --defined in project_pkg for vector display
+	--constant PACE_VIDEO_H_SIZE				    : integer := 640;   -- 240
+	--constant PACE_VIDEO_V_SIZE				    : integer := 480;   -- 240
+  constant PACE_VIDEO_L_CROP            : integer := 0;
   constant PACE_VIDEO_R_CROP            : integer := PACE_VIDEO_L_CROP;
 	constant PACE_VIDEO_PIPELINE_DELAY    : integer := 3;
 	

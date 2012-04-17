@@ -279,15 +279,24 @@ begin
   
   -- integrator
   process (clk_24M, rst_24M)
+    -- gain
+    variable count : integer range 0 to 32-1;
   begin
     if rst_24M = '1' then
+      count := 0;
     elsif rising_edge(clk_24M) then
       if zero_n = '0' then
         x <= (others => '0');
         y <= (others => '0');
-      elsif ramp_n = '0' then
-        x <= x + x_v;
-        y <= y + y_v;
+        count := 0;
+      elsif count = count'high then
+        if ramp_n = '0' then
+          x <= x + x_v;
+          y <= y + y_v;
+        end if;
+        count := 0;
+      else
+        count := count + 1;
       end if;
     end if;
   end process;
@@ -400,6 +409,127 @@ begin
     
 	end generate GEN_FPGA_ROMS;
 
+  BLK_VRAM : block
+  
+    signal pixel_data : std_logic_vector(7 downto 0);
+    
+    signal vram_d_i   : std_logic_vector(7 downto 0);
+    signal vram_d_o   : std_logic_vector(7 downto 0);
+    signal vram_a     : std_logic_vector(14 downto 0);
+    signal vram_we    : std_logic;
+  
+  begin
+  
+    -- process to update video ram and do a _crude_ decay
+    -- decay just wipes one byte of video ram
+    -- each time a set number of points is displayed
+    -- given by (count'length - vram_addr'length)
+    process (clk_24M, clkrst_i.arst)
+      variable state 				: integer range 0 to 4;
+      variable beam_ena_r 	: std_logic := '0';
+      variable count				: unsigned(15 downto 0);
+    begin
+      if clkrst_i.arst = '1' then
+        state := 0;
+        beam_ena_r := '0';
+        count := (others => '0');
+      elsif rising_edge(clk_24M) then
+
+        -- default case
+        vram_we <= '0' after 2 ns;
+
+        case state is
+        
+          when 0 =>
+            -- prepare to draw a pixel if it's on
+            --if beam_on = '1' and beam_ena_r = '0' and beam_ena = '1' then
+            --if blank_n = '1' then
+            if true then
+              vram_a(5 downto 0) <= std_logic_vector(x(x'left downto x'left-5));
+              vram_a(14 downto 6) <= not std_logic_vector(y(y'left downto y'left-8));
+              case x(x'left-6 downto x'left-8) is
+                when "000" =>		pixel_data <= "00000001";
+                when "001" =>		pixel_data <= "00000010";
+                when "010" =>		pixel_data <= "00000100";
+                when "011" =>		pixel_data <= "00001000";
+                when "100" =>		pixel_data <= "00010000";
+                when "101" =>		pixel_data <= "00100000";
+                when "110" =>		pixel_data <= "01000000";
+                when others =>	pixel_data <= "10000000";
+              end case;
+              -- only draw if beam intensity is non-zero
+              --if z /= "0000" then
+              if true then
+                state := 1;
+              else
+                state := 3;
+              end if;
+            end if;
+
+          when 1 =>
+            state := 2;
+
+          when 2 =>
+            -- do the write-back
+            vram_d_i <= pixel_data or vram_d_o after 2 ns;
+            vram_we <= '1' after 2 ns;
+            state := 3;
+
+          when 3 =>
+            state := 4;
+            
+          when 4 =>
+            -- only erase if it's activated
+            --if erase = '1' then
+            if false then
+              -- latch the 'erase' counter value for vram_addr
+              vram_a <= std_logic_vector(count(count'left downto count'length-vram_a'length));
+              -- only erase once per address
+              if count(count'length-vram_a'length-1 downto 0) = 0 then
+                -- erase the whole byte
+                vram_d_i <= (others => '0') after 2 ns;
+                vram_we <= '1' after 2 ns;
+              end if;
+            end if;
+            count := count + 1;
+            state := 0;
+
+          when others =>
+            state := 0;
+        end case;
+        -- latch for rising-edge detect
+        --beam_ena_r := beam_ena;
+      end if;
+    end process;
+
+    vram_inst : entity work.dpram
+      generic map
+      (
+        numwords_a				=> 32768,
+        widthad_a					=> 15
+    -- pragma translate_off
+        ,init_file         => "null32k.hex"
+    -- pragma translate_on
+      )
+      port map
+      (
+        -- video interface
+        clock_a						=> clk_video,
+        address_a					=> bitmap_i(1).a(14 downto 0),
+        wren_a						=> '0',
+        data_a						=> (others => 'X'),
+        q_a								=> bitmap_o(1).d(7 downto 0),
+        
+        -- vector-generator interface
+        clock_b						=> clk_24M,
+        address_b					=> vram_a(14 downto 0),
+        wren_b						=> vram_we,
+        data_b						=> vram_d_i,
+        q_b								=> vram_d_o
+      );
+
+  end block BLK_VRAM;
+  
   -- unused outputs
   flash_o <= NULL_TO_FLASH;
   graphics_o.bit16(0) <= (others => '0');
