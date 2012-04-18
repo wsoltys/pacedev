@@ -147,8 +147,8 @@ architecture SYN of platform is
   signal blank_n            : std_logic;
 
   -- vector outputs
-  signal x                  : signed(15 downto 0);
-  signal y                  : signed(15 downto 0);
+  signal x_vector           : signed(15 downto 0);
+  signal y_vector           : signed(15 downto 0);
   
 	alias platform_reset			: std_logic is inputs_i(PACE_INPUTS_NUM_BYTES-1).d(0);
 	alias osd_toggle          : std_logic is inputs_i(PACE_INPUTS_NUM_BYTES-1).d(1);
@@ -157,12 +157,12 @@ architecture SYN of platform is
 	alias use_blank           : std_logic is inputs_i(PACE_INPUTS_NUM_BYTES-1).d(4);
 	alias use_z               : std_logic is inputs_i(PACE_INPUTS_NUM_BYTES-1).d(5);
 
-  attribute noprune: boolean;
-  attribute noprune of x_v: signal is true;
-  attribute noprune of y_v: signal is true;
-  attribute noprune of x: signal is true;
-  attribute noprune of y: signal is true;
-  attribute noprune of z: signal is true;
+  attribute noprune             : boolean;
+  attribute noprune of x_v      : signal is true;
+  attribute noprune of y_v      : signal is true;
+  attribute noprune of x_vector : signal is true;
+  attribute noprune of y_vector : signal is true;
+  attribute noprune of z        : signal is true;
 
 begin
 
@@ -282,26 +282,30 @@ begin
   
   -- integrator
   process (clk_24M, rst_24M)
+    variable x : signed(15 downto 0);
+    variable y : signed(15 downto 0);
     -- gain
-    variable count : integer range 0 to 32-1;
+    variable count : integer range 0 to 20-1;
   begin
     if rst_24M = '1' then
       count := 0;
     elsif rising_edge(clk_24M) then
       if zero_n = '0' then
-        x <= (others => '0');
-        y <= (others => '0');
+        x := (x'left => '1', others => '0');
+        y := (y'left => '1', others => '0');
         count := 0;
       elsif count = count'high then
         if ramp_n = '0' then
-          x <= x + x_v;
-          y <= y + y_v;
+          x := x + x_v;
+          y := y + y_v;
         end if;
         count := 0;
       else
         count := count + 1;
       end if;
     end if;
+    x_vector <= x + offset;
+    y_vector <= y + offset;
   end process;
   
   BLK_VIA : block
@@ -447,9 +451,9 @@ begin
             -- prepare to draw a pixel if it's on
             --if beam_on = '1' and beam_ena_r = '0' and beam_ena = '1' then
             if use_blank = '0' or blank_n = '1' then
-              vram_a(5 downto 0) <= std_logic_vector(x(x'left downto x'left-5));
-              vram_a(14 downto 6) <= not std_logic_vector(y(y'left downto y'left-8));
-              case x(x'left-6 downto x'left-8) is
+              vram_a(5 downto 0) <= std_logic_vector(x_vector(x_vector'left downto x_vector'left-5));
+              vram_a(14 downto 6) <= std_logic_vector(y_vector(y_vector'left downto y_vector'left-8));
+              case x_vector(x_vector'left-6 downto x_vector'left-8) is
                 when "000" =>		pixel_data <= "00000001";
                 when "001" =>		pixel_data <= "00000010";
                 when "010" =>		pixel_data <= "00000100";
