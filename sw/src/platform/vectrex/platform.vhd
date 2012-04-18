@@ -150,9 +150,12 @@ architecture SYN of platform is
   signal x                  : signed(15 downto 0);
   signal y                  : signed(15 downto 0);
   
-	alias platform_reset			: std_logic is inputs_i(3).d(0);
-	alias osd_toggle          : std_logic is inputs_i(3).d(1);
-	alias platform_pause      : std_logic is inputs_i(3).d(2);
+	alias platform_reset			: std_logic is inputs_i(PACE_INPUTS_NUM_BYTES-1).d(0);
+	alias osd_toggle          : std_logic is inputs_i(PACE_INPUTS_NUM_BYTES-1).d(1);
+	alias platform_pause      : std_logic is inputs_i(PACE_INPUTS_NUM_BYTES-1).d(2);
+	alias erase               : std_logic is inputs_i(PACE_INPUTS_NUM_BYTES-1).d(3);
+	alias use_blank           : std_logic is inputs_i(PACE_INPUTS_NUM_BYTES-1).d(4);
+	alias use_z               : std_logic is inputs_i(PACE_INPUTS_NUM_BYTES-1).d(5);
 
   attribute noprune: boolean;
   attribute noprune of x_v: signal is true;
@@ -443,8 +446,7 @@ begin
           when 0 =>
             -- prepare to draw a pixel if it's on
             --if beam_on = '1' and beam_ena_r = '0' and beam_ena = '1' then
-            --if blank_n = '1' then
-            if true then
+            if use_blank = '0' or blank_n = '1' then
               vram_a(5 downto 0) <= std_logic_vector(x(x'left downto x'left-5));
               vram_a(14 downto 6) <= not std_logic_vector(y(y'left downto y'left-8));
               case x(x'left-6 downto x'left-8) is
@@ -458,8 +460,7 @@ begin
                 when others =>	pixel_data <= "10000000";
               end case;
               -- only draw if beam intensity is non-zero
-              --if z /= "0000" then
-              if true then
+              if use_z = '0' or z /= X"00" then
                 state := 1;
               else
                 state := 3;
@@ -480,8 +481,7 @@ begin
             
           when 4 =>
             -- only erase if it's activated
-            --if erase = '1' then
-            if false then
+            if erase = '1' then
               -- latch the 'erase' counter value for vram_addr
               vram_a <= std_logic_vector(count(count'left downto count'length-vram_a'length));
               -- only erase once per address
