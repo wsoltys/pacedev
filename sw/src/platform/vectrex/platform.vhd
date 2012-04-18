@@ -118,7 +118,7 @@ architecture SYN of platform is
   signal via_pa_o           : std_logic_vector(7 downto 0);
   signal via_pa_oe_n        : std_logic_vector(7 downto 0);
   signal via_i_p2_h         : std_logic;
-  alias via_ena_4           : std_logic is clk_6M_en;
+  signal via_irq_n          : std_logic;
   
   -- AY-3-8912 signals
   signal ay38912_bc1        : std_logic;
@@ -131,24 +131,27 @@ architecture SYN of platform is
   -- DAC
   signal dac_d_i            : std_logic_vector(7 downto 0);
 
-  -- integrators
-  signal x_v                : signed(7 downto 0);
-  signal y_v                : signed(7 downto 0);
-  signal z                  : std_logic_vector(7 downto 0);
-  signal offset             : signed(7 downto 0);
-  
   -- other signals   
   signal s_hn               : std_logic;
   signal sel                : std_logic_vector(1 downto 0);
   signal compare            : std_logic;
   signal ramp_n             : std_logic;
-  signal sw                 : std_logic_vector(7 downto 0);
+  alias sw                  : std_logic_vector(7 downto 0) is inputs_i(0).d;
   signal zero_n             : std_logic;
   signal blank_n            : std_logic;
 
+  -- vector types
+  constant VECTOR_SIZE      : natural := 20;
+  subtype vector_t is signed(VECTOR_SIZE-1 downto 0);
+  
+  -- integrators
+  signal x_v                : vector_t;
+  signal y_v                : vector_t;
+  signal z                  : std_logic_vector(7 downto 0);
+  signal offset             : vector_t;
   -- vector outputs
-  signal x_vector           : signed(15 downto 0);
-  signal y_vector           : signed(15 downto 0);
+  signal x_vector           : vector_t;
+  signal y_vector           : vector_t;
   
 	alias platform_reset			: std_logic is inputs_i(PACE_INPUTS_NUM_BYTES-1).d(0);
 	alias osd_toggle          : std_logic is inputs_i(PACE_INPUTS_NUM_BYTES-1).d(1);
@@ -211,7 +214,7 @@ begin
     elsif rising_edge(clk_24M) then
       clk_6M_en <= '0'; -- default
       clk_1M5_en <= '0'; -- default
-      if cnt_16(1 downto 0) = "00" then
+      if cnt_16(1 downto 0) = "10" then
         clk_6M_en <= '1';
         if cnt_16(3 downto 2) = "00" then
           clk_1M5_en <= '1';
@@ -228,7 +231,8 @@ begin
 
 	-- add game reset later
 	cpu_reset <= rst_24M or platform_reset;
-	
+  cpu_irq <= not via_irq_n;
+  
 	cpu_inst : entity work.cpu09
     generic map
     (
@@ -253,74 +257,184 @@ begin
 			nmi				=> '0'
 		);
 
-  -- MUX
-  process (clk_24M, rst_24M)
+  BLK_VECTOR_HW : block
+    subtype delay_t is integer range 0 to 187-1;
   begin
-    if rst_24M = '1' then
-      offset <= (others => '0');
-      x_v <= (others => '0');
-      y_v <= (others => '0');
-      z <= (others => '0');
-    elsif rising_edge(clk_24M) then
-      if s_hn = '0' then
-        case sel is
-          when "00" =>
-            y_v <= signed(dac_d_i);
-          when "01" =>
-            offset <= signed(dac_d_i);
-          when "10" =>
-            z <= dac_d_i;
-          when others =>
-            null;
-        end case;
-      else
-        x_v <= signed(dac_d_i);
-      end if;
-    end if;
-    dac_d_i <= via_pa_o;
-  end process;
   
-  -- integrator
-  process (clk_24M, rst_24M)
-    variable x : signed(15 downto 0);
-    variable y : signed(15 downto 0);
-    -- gain
-    variable count : integer range 0 to 20-1;
-  begin
-    if rst_24M = '1' then
-      count := 0;
-    elsif rising_edge(clk_24M) then
-      if zero_n = '0' then
-        x := (x'left => '1', others => '0');
-        y := (y'left => '1', others => '0');
-        count := 0;
-      elsif count = count'high then
-        if ramp_n = '0' then
-          x := x + x_v;
-          y := y + y_v;
-        end if;
-        count := 0;
-      else
-        count := count + 1;
+    -- Vector analogue hardware modules have a 
+    -- propagation delay of ~7800ns (187 clocks @24MHz)
+    -- - important for vector operations
+  
+    -- Analogue MUX
+    process (clk_24M, rst_24M)
+      variable s_hn_r     : std_logic;
+      variable s_hn_d     : std_logic;
+      variable sel_d      : std_logic_vector(sel'range);
+      variable dac_d      : std_logic_vector(dac_d_i'range);
+      variable delay_cnt  : delay_t;
+    begin
+      if rst_24M = '1' then
+        offset <= (others => '0');
+        x_v <= (others => '0');
+        y_v <= (others => '0');
+        z <= (others => '0');
+        s_hn_r := '1';
+        delay_cnt := 0;
+      elsif rising_edge(clk_24M) then
+--        -- handle delay
+--        if s_hn /= s_hn_r then
+--          delay_cnt := delay_cnt'high;
+--        elsif delay_cnt = 0 then
+          s_hn_d := s_hn;
+          sel_d := sel;
+          dac_d := dac_d_i;
+--        else
+--          delay_cnt := delay_cnt - 1;
+--        end if;
+--        s_hn_r := s_hn;
+        -- handle mux
+        if s_hn_d = '0' then
+          case sel_d is
+            when "00" =>
+              y_v <= resize(signed(dac_d), y_v'length);
+            when "01" =>
+              -- offset must be same scale as output vector
+              offset(offset'left downto offset'left-7) <= signed(dac_d);
+              offset(offset'left-8 downto 0) <= (others => dac_d(0));
+            when "10" =>
+              z <= dac_d;
+            when others =>
+              null;
+          end case;
+        else
+          x_v <= resize(signed(dac_d), x_v'length);
+        end if; -- s_hn='0'
       end if;
-    end if;
-    x_vector <= x + offset;
-    y_vector <= y + offset;
-  end process;
+      dac_d_i <= via_pa_o;
+    end process;
+    
+    -- integrator
+    process (clk_24M, rst_24M)
+      variable x : vector_t;
+      variable y : vector_t;
+      -- fine(r) gain control
+      variable count : integer range 0 to 24-1;
+      -- ramp delay
+      variable ramp_n_r   : std_logic;
+      variable ramp_d     : std_logic;
+      variable ramp_d_cnt : delay_t;
+      variable zero_n_r   : std_logic;
+      variable zero_d     : std_logic;
+      variable zero_d_cnt : delay_t;
+    begin
+      if rst_24M = '1' then
+        count := 0;
+        ramp_n_r := '1';
+        ramp_d := '0';
+        ramp_d_cnt := 0;
+      elsif rising_edge(clk_24M) then
+        -- handle ramp delay
+        if ramp_n_r /= ramp_n then
+          ramp_d_cnt := ramp_d_cnt'high;
+        elsif ramp_d_cnt = 0 then
+          -- assume min pulse width > delay
+          ramp_d := not ramp_n;
+        else
+          ramp_d_cnt := ramp_d_cnt - 1;
+        end if;
+        ramp_n_r := ramp_n;
+        -- handle zero delay
+        if zero_n_r /= zero_n then
+          zero_d_cnt := zero_d_cnt'high;
+        elsif zero_d_cnt = 0 then
+          -- assume min pulse width > delay
+          zero_d := not zero_n;
+        else
+          zero_d_cnt := zero_d_cnt - 1;
+        end if;
+        zero_n_r := zero_n;
+        -- intgerate
+        if zero_d = '1' then
+          -- offset to middle of screen
+          x := (x'left => '1', others => '0');
+          y := (y'left => '1', others => '0');
+          count := 0;
+  --      elsif count = count'high then
+        else
+          if ramp_d = '1' then
+            x := x + x_v;
+            y := y + y_v;
+          end if;
+          count := 0;
+  --      else
+  --        count := count + 1;
+        end if;
+      end if;
+      x_vector <= x + offset;
+      y_vector <= y + offset;
+    end process;
+
+  end block BLK_VECTOR_HW;
   
   BLK_VIA : block
-    signal via_pb_i     : std_logic_vector(7 downto 0);
-    signal via_pb_o     : std_logic_vector(7 downto 0);
-    signal via_pb_oe_n  : std_logic_vector(7 downto 0);
+    signal via_pb_i         : std_logic_vector(7 downto 0);
+    signal via_pb_o         : std_logic_vector(7 downto 0);
+    signal via_pb_oe_n      : std_logic_vector(7 downto 0);
+    signal via_o_ca2        : std_logic;
+    signal via_o_ca2_oe_n   : std_logic;
+    signal via_o_cb2        : std_logic;
+    signal via_o_cb2_oe_n   : std_logic;
+    
+    signal pot              : signed(7 downto 0);
   begin
   
-    -- Port 'B' Data - Vectrex Hardware Control [CNTRL]
-    s_hn <= via_pb_o(0);
-    sel <= via_pb_o(2 downto 1);
-    ay38912_bc1 <= via_pb_o(3);
-    ay38912_bdir <= via_pb_o(4);
     via_pb_i(5) <= compare;
-    ramp_n <= via_pb_o(7);
+
+    -- handle analogue joysticks
+    -- - 'sel' selects input
+    pot <= X"00";
+    compare <= '1' when pot > signed(via_pa_o) else '0';
+
+    process (clk_24M, rst_24M)
+    begin
+      if rst_24M = '1' then
+        blank_n <= '0';
+      elsif rising_edge(clk_24M) then
+        -- Port 'B' Data - Vectrex Hardware Control [CNTRL]
+        if via_pb_oe_n(0) = '0' then
+          s_hn <= via_pb_o(0);
+        end if;
+        if via_pb_oe_n(1) = '0' then
+          sel(0) <= via_pb_o(1);
+        end if;
+        if via_pb_oe_n(2) = '0' then
+          sel(1) <= via_pb_o(2);
+        end if;
+        if via_pb_oe_n(3) = '0' then
+          ay38912_bc1 <= via_pb_o(3);
+        end if;
+        if via_pb_oe_n(4) = '0' then
+          ay38912_bdir <= via_pb_o(4);
+        end if;
+        if via_pb_oe_n(7) = '0' then
+          ramp_n <= via_pb_o(7);
+        end if;
+        -- CA2/CB2 - vector zero/blank control
+        if via_o_ca2_oe_n = '0' then
+          zero_n <= via_o_ca2;
+        end if;
+        if via_o_cb2_oe_n = '0' then
+          blank_n <= via_o_cb2;
+        end if;
+      end if;
+    end process;
+    
+    -- VIA clocking:
+    -- PHI2 runs off the CPU E clock (1.5MHz = 24/16)
+    -- ENA4 is 4x the PHI2 clock  (6MHz = 24/4)
+    -- - with the following phase relationship:
+    -- high for phase 2 clock  ____----__
+    -- 4x system clock (4HZ)   _-_-_-_-_-
     
     via_inst : entity work.M6522
       port map
@@ -334,12 +448,12 @@ begin
         I_CS1             => via_cs,      -- really A12
         I_CS2_L           => not via_cs,
 
-        O_IRQ_L           => cpu_irq,
+        O_IRQ_L           => via_irq_n,
         -- port a
         I_CA1             => sw(7),
         I_CA2             => '0',
-        O_CA2             => zero_n,
-        O_CA2_OE_L        => open,
+        O_CA2             => via_o_ca2,
+        O_CA2_OE_L        => via_o_ca2_oe_n,
 
         I_PA              => ay38912_d_o,
         O_PA              => via_pa_o,
@@ -351,8 +465,8 @@ begin
         O_CB1_OE_L        => open,
 
         I_CB2             => '0',
-        O_CB2             => blank_n,
-        O_CB2_OE_L        => open,
+        O_CB2             => via_o_cb2,
+        O_CB2_OE_L        => via_o_cb2_oe_n,
 
         I_PB              => via_pb_i,
         O_PB              => via_pb_o,
@@ -360,7 +474,7 @@ begin
 
         I_P2_H            => via_i_p2_h,  -- high for phase 2 clock  ____----__
         RESET_L           => not rst_24M,
-        ENA_4             => via_ena_4,   -- clk enable
+        ENA_4             => clk_6M_en,
         CLK               => clk_24M
       );
     
@@ -449,26 +563,24 @@ begin
         
           when 0 =>
             -- prepare to draw a pixel if it's on
-            --if beam_on = '1' and beam_ena_r = '0' and beam_ena = '1' then
-            if use_blank = '0' or blank_n = '1' then
-              vram_a(5 downto 0) <= std_logic_vector(x_vector(x_vector'left downto x_vector'left-5));
-              vram_a(14 downto 6) <= std_logic_vector(y_vector(y_vector'left downto y_vector'left-8));
-              case x_vector(x_vector'left-6 downto x_vector'left-8) is
-                when "000" =>		pixel_data <= "00000001";
-                when "001" =>		pixel_data <= "00000010";
-                when "010" =>		pixel_data <= "00000100";
-                when "011" =>		pixel_data <= "00001000";
-                when "100" =>		pixel_data <= "00010000";
-                when "101" =>		pixel_data <= "00100000";
-                when "110" =>		pixel_data <= "01000000";
-                when others =>	pixel_data <= "10000000";
-              end case;
-              -- only draw if beam intensity is non-zero
-              if use_z = '0' or z /= X"00" then
-                state := 1;
-              else
-                state := 3;
-              end if;
+            vram_a(5 downto 0) <= std_logic_vector(x_vector(x_vector'left downto x_vector'left-5));
+            vram_a(14 downto 6) <= not std_logic_vector(y_vector(y_vector'left downto y_vector'left-8));
+            case x_vector(x_vector'left-6 downto x_vector'left-8) is
+              when "000" =>		pixel_data <= "00000001";
+              when "001" =>		pixel_data <= "00000010";
+              when "010" =>		pixel_data <= "00000100";
+              when "011" =>		pixel_data <= "00001000";
+              when "100" =>		pixel_data <= "00010000";
+              when "101" =>		pixel_data <= "00100000";
+              when "110" =>		pixel_data <= "01000000";
+              when others =>	pixel_data <= "10000000";
+            end case;
+            -- only draw if beam intensity is non-zero
+            if (use_blank = '1' and blank_n = '0') or
+                (use_z = '1' and z < X"20") then
+              state := 3;
+            else
+              state := 1;
             end if;
 
           when 1 =>
@@ -484,8 +596,8 @@ begin
             state := 4;
             
           when 4 =>
-            -- only erase if it's activated
-            if erase = '1' then
+            -- only erase if it's activated (and we're not paused)
+            if erase = '1' and platform_pause = '0' then
               -- latch the 'erase' counter value for vram_addr
               vram_a <= std_logic_vector(count(count'left downto count'length-vram_a'length));
               -- only erase once per address

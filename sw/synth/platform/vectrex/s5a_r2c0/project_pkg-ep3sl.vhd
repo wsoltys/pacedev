@@ -20,8 +20,8 @@ package project_pkg is
   
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
 
-	constant PACE_VIDEO_H_SIZE				        : integer := 1024/2;
-	constant PACE_VIDEO_V_SIZE				        : integer := 768/2;
+	constant PACE_VIDEO_H_SIZE				        : integer := 512;
+	constant PACE_VIDEO_V_SIZE				        : integer := 480;
 
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_640x480_60Hz;
   constant PACE_CLK0_DIVIDE_BY              : natural := 1;
@@ -71,10 +71,10 @@ package project_pkg is
 
   constant S5AR2_HAS_FLOPPY_IF              : boolean := false;
   
-  -- always need SRAM (for now, use for WRAM)
+  -- always need SRAM
   constant S5AR2_EMULATE_SRAM               : boolean := true;
-  -- $C800-$CFFF
-  constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 11;
+  -- $C800-$CBFF (1KB)
+  constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 10;
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
     
 	-- Vectrex constants
