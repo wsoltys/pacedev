@@ -277,7 +277,7 @@ begin
         offset <= (others => '0');
         x_v <= (others => '0');
         y_v <= (others => '0');
-        z <= (others => '0');
+        z <= (7 => '1', others => '0');
         s_hn_r := '1';
         delay_cnt := 0;
       elsif rising_edge(clk_24M) then
@@ -310,8 +310,9 @@ begin
           x_v <= resize(signed(dac_d), x_v'length);
         end if; -- s_hn='0'
       end if;
-      dac_d_i <= via_pa_o;
     end process;
+
+    dac_d_i <= via_pa_o;
     
     -- integrator
     process (clk_24M, rst_24M)
@@ -577,7 +578,7 @@ begin
             end case;
             -- only draw if beam intensity is non-zero
             if (use_blank = '1' and blank_n = '0') or
-                (use_z = '1' and z < X"20") then
+                (use_z = '1' and (z(7) = '1' or z = X"00")) then
               state := 3;
             else
               state := 1;
