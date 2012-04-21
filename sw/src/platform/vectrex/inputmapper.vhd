@@ -106,6 +106,10 @@ begin
             if key_down = '1' then
               keybd_v(1).d(5) := not keybd_v(1).d(5);
             end if;
+          when SCANCODE_PADPLUS =>
+            keybd_v(1).d(6) := key_down;
+          when SCANCODE_PADMINUS =>
+            keybd_v(1).d(7) := key_down;
           when others =>
             null;
         end case;

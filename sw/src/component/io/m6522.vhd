@@ -781,9 +781,11 @@ begin
                 r_sr(7 downto 1) <= r_sr(6 downto 0);
                 r_sr(0) <= r_sr(7);
                 sr_out <= r_sr(7);
+                sr_drive_cb2 <= '1';
               end if;
             else
               sr_out <= '1';
+              sr_drive_cb2 <= '0';
             end if;
           end if;
         end if;
@@ -808,7 +810,7 @@ begin
         end if;
 
         -- assign ops
-        sr_drive_cb2 <= dir_out;
+        --sr_drive_cb2 <= dir_out;
         sr_cb1_oe_l  <= not cb1_op;
         sr_cb1_out   <= sr_strobe;
       end if;

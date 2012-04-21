@@ -153,12 +153,16 @@ architecture SYN of platform is
   signal x_vector           : vector_t;
   signal y_vector           : vector_t;
   
+  signal DELAY_T_HIGH       : unsigned(8 downto 0);
+  
 	alias platform_reset			: std_logic is inputs_i(PACE_INPUTS_NUM_BYTES-1).d(0);
 	alias osd_toggle          : std_logic is inputs_i(PACE_INPUTS_NUM_BYTES-1).d(1);
 	alias platform_pause      : std_logic is inputs_i(PACE_INPUTS_NUM_BYTES-1).d(2);
 	alias erase               : std_logic is inputs_i(PACE_INPUTS_NUM_BYTES-1).d(3);
 	alias use_blank           : std_logic is inputs_i(PACE_INPUTS_NUM_BYTES-1).d(4);
 	alias use_z               : std_logic is inputs_i(PACE_INPUTS_NUM_BYTES-1).d(5);
+  alias plus                : std_logic is inputs_i(PACE_INPUTS_NUM_BYTES-1).d(6);
+  alias minus               : std_logic is inputs_i(PACE_INPUTS_NUM_BYTES-1).d(7);
 
   attribute noprune             : boolean;
   attribute noprune of x_v      : signal is true;
@@ -201,7 +205,7 @@ begin
 							ram_d_o when ram_cs = '1' else
 							via_d_o when via_cs = '1' else
               rom_d_o when rom_cs = '1' else
-							(others => 'Z');
+							(others => '1');
 		
   -- system timing
   process (clk_24M, rst_24M)
@@ -258,9 +262,33 @@ begin
 		);
 
   BLK_VECTOR_HW : block
-    subtype delay_t is integer range 0 to 187-1;
+    --subtype delay_t is integer range 0 to 187-1;
+    subtype delay_t is integer range 0 to 511;
   begin
   
+    process (clk_24M, rst_24M)
+      variable plus_r   : std_logic;
+      variable minus_r  : std_logic;
+    begin
+      if rst_24M = '1' then
+        plus_r := '0';
+        minus_r := '0';
+        DELAY_T_HIGH <= to_unsigned(187,DELAY_T_HIGH'length);
+      elsif rising_edge(clk_24M) then
+        if plus = '1' and plus_r = '0' then
+          if DELAY_T_HIGH /= 511 then
+            DELAY_T_HIGH <= DELAY_T_HIGH + 1;
+          end if;
+        elsif minus = '1' and minus_r = '0' then
+          if DELAY_T_HIGH /= 0 then
+            DELAY_T_HIGH <= DELAY_T_HIGH - 1;
+          end if;
+        end if;
+        plus_r := plus;
+        minus_r := minus;
+      end if;
+    end process;
+    
     -- Vector analogue hardware modules have a 
     -- propagation delay of ~7800ns (187 clocks @24MHz)
     -- - important for vector operations
@@ -336,7 +364,8 @@ begin
       elsif rising_edge(clk_24M) then
         -- handle ramp delay
         if ramp_n_r /= ramp_n then
-          ramp_d_cnt := ramp_d_cnt'high;
+          --ramp_d_cnt := ramp_d_cnt'high;
+          ramp_d_cnt := to_integer(DELAY_T_HIGH);
         elsif ramp_d_cnt = 0 then
           -- assume min pulse width > delay
           ramp_d := not ramp_n;
@@ -346,7 +375,8 @@ begin
         ramp_n_r := ramp_n;
         -- handle zero delay
         if zero_n_r /= zero_n then
-          zero_d_cnt := zero_d_cnt'high;
+          --zero_d_cnt := zero_d_cnt'high;
+          zero_d_cnt := to_integer(DELAY_T_HIGH);
         elsif zero_d_cnt = 0 then
           -- assume min pulse width > delay
           zero_d := not zero_n;
