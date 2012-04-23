@@ -341,7 +341,8 @@ begin
         --when x"0" => O_DATA <= r_irb; r_irb_hs <= '1';
         -- fix from Mark McDougall, untested
         when x"0" => O_DATA <= (r_irb and not r_ddrb) or (r_orb and r_ddrb); r_irb_hs <= '1';
-        when x"1" => O_DATA <= r_ira; r_ira_hs <= '1';
+        --when x"1" => O_DATA <= r_ira; r_ira_hs <= '1';
+        when x"1" => O_DATA <= (r_ira and not r_ddra) or (r_ora and r_ddra); r_ira_hs <= '1';
         when x"2" => O_DATA <= r_ddrb;
         when x"3" => O_DATA <= r_ddra;
         when x"4" => O_DATA <= t1c( 7 downto 0);  t1_r_reset_int <= true;
