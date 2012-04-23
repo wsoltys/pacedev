@@ -737,7 +737,7 @@ begin
           when "011" => ena := '1'; cb1_ip := '1';
           when "100" => ena := '1';                use_t2 := '1'; free_run := '1';
           when "101" => ena := '1'; cb1_op := '1'; use_t2 := '1';
-          when "110" => ena := '1';
+          when "110" => ena := '1';                               free_run := '1'; -- hack
           when "111" => ena := '1'; cb1_ip := '1';
           when others => null;
         end case;
@@ -782,11 +782,9 @@ begin
                 r_sr(7 downto 1) <= r_sr(6 downto 0);
                 r_sr(0) <= r_sr(7);
                 sr_out <= r_sr(7);
-                sr_drive_cb2 <= '1';
               end if;
             else
               sr_out <= '1';
-              sr_drive_cb2 <= '0';
             end if;
           end if;
         end if;
@@ -811,7 +809,7 @@ begin
         end if;
 
         -- assign ops
-        --sr_drive_cb2 <= dir_out;
+        sr_drive_cb2 <= dir_out;
         sr_cb1_oe_l  <= not cb1_op;
         sr_cb1_out   <= sr_strobe;
       end if;

@@ -328,7 +328,7 @@ begin
             when "01" =>
               -- offset must be same scale as output vector
               offset(offset'left downto offset'left-7) <= signed(dac_d);
-              offset(offset'left-8 downto 0) <= (others => dac_d(0));
+              offset(offset'left-8 downto 0) <= (others => '0');
             when "10" =>
               z <= dac_d;
             when others =>
