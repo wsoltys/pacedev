@@ -263,6 +263,7 @@ begin
 
   BLK_VECTOR_HW : block
     --subtype delay_t is integer range 0 to 187-1;
+    constant ANALOGUE_DELAY : natural := 187;
     subtype delay_t is integer range 0 to 511;
   begin
   
@@ -344,61 +345,27 @@ begin
     
     -- integrator
     process (clk_24M, rst_24M)
-      variable x : vector_t;
-      variable y : vector_t;
-      -- fine(r) gain control
-      variable count : integer range 0 to 24-1;
-      -- ramp delay
-      variable ramp_n_r   : std_logic;
-      variable ramp_d     : std_logic;
-      variable ramp_d_cnt : delay_t;
-      variable zero_n_r   : std_logic;
-      variable zero_d     : std_logic;
-      variable zero_d_cnt : delay_t;
+      variable ramp_n_r   : std_logic_vector(ANALOGUE_DELAY-1 downto 0);
+      variable zero_n_r   : std_logic_vector(ANALOGUE_DELAY-1 downto 0);
+      variable x          : vector_t;
+      variable y          : vector_t;
     begin
       if rst_24M = '1' then
-        count := 0;
-        ramp_n_r := '1';
-        ramp_d := '0';
-        ramp_d_cnt := 0;
+        ramp_n_r := (others => '1');
+        zero_n_r := (others => '1');
       elsif rising_edge(clk_24M) then
-        -- handle ramp delay
-        if ramp_n_r /= ramp_n then
-          --ramp_d_cnt := ramp_d_cnt'high;
-          ramp_d_cnt := to_integer(DELAY_T_HIGH);
-        elsif ramp_d_cnt = 0 then
-          -- assume min pulse width > delay
-          ramp_d := not ramp_n;
-        else
-          ramp_d_cnt := ramp_d_cnt - 1;
-        end if;
-        ramp_n_r := ramp_n;
-        -- handle zero delay
-        if zero_n_r /= zero_n then
-          --zero_d_cnt := zero_d_cnt'high;
-          zero_d_cnt := to_integer(DELAY_T_HIGH);
-        elsif zero_d_cnt = 0 then
-          -- assume min pulse width > delay
-          zero_d := not zero_n;
-        else
-          zero_d_cnt := zero_d_cnt - 1;
-        end if;
-        zero_n_r := zero_n;
+        ramp_n_r := ramp_n_r(ramp_n_r'left-1 downto 0) & ramp_n;
+        zero_n_r := zero_n_r(zero_n_r'left-1 downto 0) & zero_n;
         -- intgerate
-        if zero_d = '1' then
+        if zero_n_r(zero_n_r'left) = '0' then
           -- offset to middle of screen
           x := (x'left => '1', others => '0');
           y := (y'left => '1', others => '0');
-          count := 0;
-  --      elsif count = count'high then
         else
-          if ramp_d = '1' then
+          if ramp_n_r(ramp_n_r'left) = '0' then
             x := x + x_v;
             y := y + y_v;
           end if;
-          count := 0;
-  --      else
-  --        count := count + 1;
         end if;
       end if;
       x_vector <= x + offset;
