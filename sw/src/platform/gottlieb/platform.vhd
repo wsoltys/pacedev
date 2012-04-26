@@ -92,13 +92,18 @@ architecture SYN of platform is
 	signal cpu_reset			    : std_logic;
   
   -- uP signals  
-  signal clk_1M_en			    : std_logic;
-	signal clk_1M_en_n		    : std_logic;
-	signal cpu_r_wn				    : std_logic;
-	signal cpu_a				      : std_logic_vector(15 downto 0);
-	signal cpu_d_i			      : std_logic_vector(15 downto 0);
-	signal cpu_d_o			      : std_logic_vector(15 downto 0);
-	signal cpu_irq				    : std_logic;
+  signal clk_5M_en			    : std_logic;
+	signal clk_5M_en_n		    : std_logic;
+	signal cpu_rd_n				    : std_logic;
+	signal cpu_wr_n				    : std_logic;
+  signal cpu_iom            : std_logic;
+	signal cpu_a_ext	        : std_logic_vector(19 downto 0);
+	alias cpu_a	              : std_logic_vector(15 downto 0) is cpu_a_ext(15 downto 0);
+	signal cpu_d_i			      : std_logic_vector(7 downto 0);
+	signal cpu_d_o			      : std_logic_vector(7 downto 0);
+	signal cpu_intr				    : std_logic;
+	signal cpu_inta				    : std_logic;
+	signal cpu_nmi				    : std_logic;
 
   -- RAM signals        
 	signal wram_cs				    : std_logic;
@@ -131,8 +136,8 @@ architecture SYN of platform is
 begin
 
 	-- cpu09 core uses negative clock edge
-	clk_1M_en_n <= not (clk_1M_en and not platform_pause);
-	--clk_1M_en_n <= not (clk_1M_en and not platform_pause) or cpu_halt;
+	clk_5M_en_n <= not (clk_5M_en and not platform_pause);
+	--clk_5M_en_n <= not (clk_5M_en and not platform_pause) or cpu_halt;
 
 	-- add game reset later
 	cpu_reset <= rst_20M or platform_reset;
@@ -171,10 +176,10 @@ begin
 	palette_cs <=				'1' when STD_MATCH(cpu_a, X"C00"&"----") else '0';
 
   -- memory block write enables
-	nvram_wr <= nvram_cs and not cpu_r_wn;
-  wram_wr <= wram_cs and not cpu_r_wn;
-  vram_wr <= vram_cs and not cpu_r_wn;
-  cram_wr <= cram_cs and not cpu_r_wn;
+	nvram_wr <= nvram_cs and cpu_iom and not cpu_wr_n;
+  wram_wr <= wram_cs and cpu_iom and not cpu_wr_n;
+  vram_wr <= vram_cs and cpu_iom and not cpu_wr_n;
+  cram_wr <= cram_cs and cpu_iom and not cpu_wr_n;
 
 	-- memory read mux
 	cpu_d_i <=  nvram_data when nvram_cs = '1' else
@@ -189,8 +194,8 @@ begin
 		variable offset : integer range 0 to 2**4-1;
 	begin
 		if rising_edge(clk_20M) then
-      if clk_1M_en = '1' then
-        if palette_cs = '1' and cpu_r_wn = '0' then
+      if clk_5M_en = '1' then
+        if palette_cs = '1' and cpu_iom = '1' and cpu_wr_n = '0' then
           offset := to_integer(unsigned(cpu_a(3 downto 0)));
           palette_r(offset) <= cpu_d_o;
         end if;
@@ -219,7 +224,8 @@ begin
 --	va11 <= graphics_i.y(5);
 
 	-- cpu interrupts
-	cpu_irq <= '0';
+	cpu_intr <= '0';
+	cpu_nmi <= '0';
 
   -- unused outputs
   flash_o <= NULL_TO_FLASH;
@@ -236,15 +242,16 @@ begin
 
   -- system timing
   process (clk_20M, rst_20M)
-    variable count : integer range 0 to 20-1;
+    -- 20/4=5MHz
+    variable count : integer range 0 to 20/4-1;
   begin
     if rst_20M = '1' then
       count := 0;
     elsif rising_edge(clk_20M) then
-      clk_1M_en <= '0'; -- default
+      clk_5M_en <= '0'; -- default
       case count is
         when 0 =>
-          clk_1M_en <= '1';
+          clk_5M_en <= '1';
         when others =>
           null;
       end case;
@@ -257,31 +264,27 @@ begin
   end process;
 
   BLK_CPU : block
-    component zet is
-      port
-      (
-        -- Wishbone master interface
-        wb_clk_i      : in std_logic;
-        wb_rst_i      : in std_logic;
-        wb_dat_i      : in std_logic_vector(15 downto 0);
-        wb_dat_o      : out std_logic_vector(15 downto 0);
-        wb_adr_o      : out std_logic_vector(19 downto 1);
-        wb_we_o       : out std_logic;
-        wb_tga_o      : out std_logic;  -- io/mem
-        wb_sel_o      : out std_logic_vector(1 downto 0);
-        wb_stb_o      : out std_logic;
-        wb_cyc_o      : out std_logic;
-        wb_ack_i      : in std_logic;
-        wb_tgc_i      : in std_logic;   -- intr
-        wb_tgc_o      : out std_logic;  -- inta
-        nmi           : in std_logic;
-        nmia          : out std_logic;
-
-        -- for debugging purposes
-        pc            : out std_logic_vector(19 downto 0)
-      );
-    end component zet;
   begin
+    cpu_inst : entity work.cpu86
+       port map
+       ( 
+          clk      => clk_5M_en,
+          dbus_in  => cpu_d_i,
+          intr     => cpu_intr,
+          nmi      => cpu_nmi,
+          por      => cpu_reset,
+          abus     => cpu_a_ext,
+          dbus_out => cpu_d_o,
+          cpuerror => open,
+          inta     => cpu_inta,
+          iom      => cpu_iom,
+          rdn      => cpu_rd_n,
+          -- external (active low) (sync) reset
+          resoutn  => open,
+          -- early wr strobe negation for d/a hold
+          wran     => open,
+          wrn      => cpu_wr_n
+       );
   end block BLK_CPU;
   
 	-- Battery-backed CMOS RAM
@@ -329,6 +332,29 @@ begin
                   
 	end generate GEN_FPGA_ROMS;
 
+	GEN_FPGA_BG_ROMS : if true generate
+    type tile_data_t is array (natural range <>) of std_logic_vector(7 downto 0);
+    signal tile_d_o : tile_data_t(0 to 1);
+  begin
+    GEN_BG_ROMS : for i in 0 to 1 generate
+      begin
+        bg_rom_inst : entity work.sprom
+          generic map
+          (
+            init_file		=> VARIANT_ROM_DIR & "qb-bg" & integer'image(i) & ".hex",
+            widthad_a		=> 12
+          )
+          port map
+          (
+            clock			=> clk_20M,
+            address		=> tilemap_i(1).map_a(11 downto 0),
+            q					=> tile_d_o(i)
+          );
+      end generate GEN_BG_ROMS;
+    tilemap_o(1).tile_d(7 downto 0) <= tile_d_o(0);
+    tilemap_o(1).tile_d(15 downto 8) <= tile_d_o(1);
+	end generate GEN_FPGA_BG_ROMS;
+
   -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
   vram_inst : entity work.dpram
     generic map
@@ -345,10 +371,10 @@ begin
       q_b					=> vram_d_o,
 
       clock_a			=> clk_video,
-      address_a		=> bitmap_i(1).a(9 downto 0),
+      address_a		=> tilemap_i(1).map_a(9 downto 0),
       wren_a			=> '0',
       data_a			=> (others => 'X'),
-      q_a					=> bitmap_o(1).d(7 downto 0)
+      q_a					=> tilemap_o(1).map_d(7 downto 0)
     );
 
   -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
@@ -367,10 +393,10 @@ begin
       q_b					=> cram_d_o,
 
       clock_a			=> clk_video,
-      address_a		=> bitmap_i(1).a(11 downto 0),
+      address_a		=> tilemap_i(1).map_a(11 downto 0),
       wren_a			=> '0',
       data_a			=> (others => 'X'),
-      q_a					=> bitmap_o(1).d(15 downto 8)
+      q_a					=> tilemap_o(1).map_d(15 downto 8)
     );
 
 end SYN;
