@@ -123,6 +123,8 @@ architecture SYN of platform is
   signal rom_d_o            : std_logic_vector(7 downto 0);
 	
   -- I/O signals
+	signal io_cs				      : std_logic;
+  signal io_d_o             : std_logic_vector(7 downto 0);
 	signal palette_cs			    : std_logic;
 	signal palette_r			    : PAL_A_t(15 downto 0);
 	signal nvram_cs				    : std_logic;
@@ -164,6 +166,11 @@ begin
   -- character ram $4000-$4FFF
   cram_cs <=		'1' when STD_MATCH(cpu_a, X"4"&"------------") else
                 '0';
+  -- Palette $5000-$57FF
+	palette_cs <=	'1' when STD_MATCH(cpu_a, X"5"&"0-----------") else '0';
+  -- I/O $5800-$5FFF
+  io_cs <=		  '1' when STD_MATCH(cpu_a, X"5"&"1-----------") else
+                '0';
 	-- ROM $A000-$FFFF
   --            $A000-$BFFF
 	rom_cs <= 	  '1' when STD_MATCH(cpu_a,  "101-------------") else 
@@ -171,75 +178,50 @@ begin
                 '1' when STD_MATCH(cpu_a,  "11--------------") else 
                 '0';
 
-	-- I/O decoding
-  -- Palette $C000-$C00F
-	palette_cs <=				'1' when STD_MATCH(cpu_a, X"C00"&"----") else '0';
-
   -- memory block write enables
-	nvram_wr <= nvram_cs and cpu_iom and not cpu_wr_n;
-  wram_wr <= wram_cs and cpu_iom and not cpu_wr_n;
-  vram_wr <= vram_cs and cpu_iom and not cpu_wr_n;
-  cram_wr <= cram_cs and cpu_iom and not cpu_wr_n;
+	nvram_wr <= nvram_cs and not cpu_iom and not cpu_wr_n;
+  wram_wr <= wram_cs and not cpu_iom and not cpu_wr_n;
+  vram_wr <= vram_cs and not cpu_iom and not cpu_wr_n;
+  cram_wr <= cram_cs and not cpu_iom and not cpu_wr_n;
 
 	-- memory read mux
 	cpu_d_i <=  nvram_data when nvram_cs = '1' else
 							wram_d_o when wram_cs = '1' else
 							vram_d_o when vram_cs = '1' else
 							cram_d_o when cram_cs = '1' else
+							--palette_d_o when palette_cs = '1' else
+							io_d_o when io_cs = '1' else
               rom_d_o when rom_cs = '1' else
 							(others => '0');
 		
-	-- implementation of palette RAM
-	process (clk_20M)
-		variable offset : integer range 0 to 2**4-1;
-	begin
-		if rising_edge(clk_20M) then
-      if clk_5M_en = '1' then
-        if palette_cs = '1' and cpu_iom = '1' and cpu_wr_n = '0' then
-          offset := to_integer(unsigned(cpu_a(3 downto 0)));
-          palette_r(offset) <= cpu_d_o;
+  BLK_INTERRUPTS : block
+  begin
+  
+    -- NMI connected to VBLANK
+    process (clk_20M, rst_20M)
+      variable nmi_cnt  : integer range 0 to 15;
+      variable vblank_r : std_logic;
+    begin
+      if rst_20M = '1' then
+        vblank_r := '0';
+        cpu_nmi <= '0';
+      elsif rising_edge(clk_20M) then
+        if graphics_i.vblank = '1' and vblank_r = '0' then
+          nmi_cnt := nmi_cnt'high;
+          cpu_nmi <= '1';
+        elsif nmi_cnt = 0 then
+          cpu_nmi <= '0';
+        else
+          nmi_cnt := nmi_cnt - 1;
         end if;
       end if;
-		end if;
-		graphics_o.pal <= palette_r;
-	end process;
+    end process;
+    
+    -- cpu interrupts
+    cpu_intr <= '0';  -- not connected
 
---	-- irqa interrupt at scanline 240
---	process (clk_20M, rst_20M)
---	begin
---		if rst_20M = '1' then
---			count240 <= '0';
---		elsif rising_edge(clk_20M) then
---			if graphics_i.y = std_logic_vector(to_unsigned(0, graphics_i.y'length)) then
---				count240 <= '0';
---			-- check for 240
---			--elsif video_counter = 240 then
---			elsif graphics_i.y = std_logic_vector(to_unsigned(239, graphics_i.y'length)) then
---				count240 <= '1';
---			end if;
---		end if;
---	end process;
---
---	-- irqb every 32 scanlines
---	va11 <= graphics_i.y(5);
-
-	-- cpu interrupts
-	cpu_intr <= '0';
-	cpu_nmi <= '0';
-
-  -- unused outputs
-  flash_o <= NULL_TO_FLASH;
-  sprite_reg_o <= NULL_TO_SPRITE_REG;
-  sprite_o <= NULL_TO_SPRITE_CTL;
-  --tilemap_o <= NULL_TO_TILEMAP_CTL;
-  graphics_o.bit8(0) <= (others => '0');
-  graphics_o.bit16(0) <= (others => '0');
-  osd_o <= NULL_TO_OSD;
-  snd_o <= NULL_TO_SOUND;
-  ser_o <= NULL_TO_SERIAL;
-  spi_o <= NULL_TO_SPI;
-	leds_o <= (others => '0');
-
+  end block BLK_INTERRUPTS;
+  
   -- system timing
   process (clk_20M, rst_20M)
     -- 20/4=5MHz
@@ -304,57 +286,6 @@ begin
 			q						=> nvram_data
 		);
   
-	GEN_FPGA_ROMS : if true generate
-    type rom_data_t is array (natural range <>) of std_logic_vector(7 downto 0);
-    signal rom_data : rom_data_t(0 to 2);
-  begin
-
-    GEN_ROMS : for i in 0 to 2 generate
-    begin
-      rom_inst : entity work.sprom
-        generic map
-        (
-          init_file		=> VARIANT_ROM_DIR & "qb-rom" & integer'image(i) & ".hex",
-          widthad_a		=> 13
-        )
-        port map
-        (
-          clock			=> clk_20M,
-          address		=> cpu_a(12 downto 0),
-          q					=> rom_data(i)
-        );
-    end generate GEN_ROMS;
-        
-    rom_d_o <=  rom_data(0) when STD_MATCH(cpu_a, "101-------------") else
-                rom_data(1) when STD_MATCH(cpu_a, "110-------------") else
-                rom_data(2) when STD_MATCH(cpu_a, "111-------------") else
-                (others => '0');
-                  
-	end generate GEN_FPGA_ROMS;
-
-	GEN_FPGA_BG_ROMS : if true generate
-    type tile_data_t is array (natural range <>) of std_logic_vector(7 downto 0);
-    signal tile_d_o : tile_data_t(0 to 1);
-  begin
-    GEN_BG_ROMS : for i in 0 to 1 generate
-      begin
-        bg_rom_inst : entity work.sprom
-          generic map
-          (
-            init_file		=> VARIANT_ROM_DIR & "qb-bg" & integer'image(i) & ".hex",
-            widthad_a		=> 12
-          )
-          port map
-          (
-            clock			=> clk_20M,
-            address		=> tilemap_i(1).map_a(11 downto 0),
-            q					=> tile_d_o(i)
-          );
-      end generate GEN_BG_ROMS;
-    tilemap_o(1).tile_d(7 downto 0) <= tile_d_o(0);
-    tilemap_o(1).tile_d(15 downto 8) <= tile_d_o(1);
-	end generate GEN_FPGA_BG_ROMS;
-
   -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
   vram_inst : entity work.dpram
     generic map
@@ -398,5 +329,119 @@ begin
       data_a			=> (others => 'X'),
       q_a					=> tilemap_o(1).map_d(15 downto 8)
     );
+
+	-- implementation of palette RAM
+	process (clk_20M, rst_20M)
+		variable offset : integer range 0 to 2**4-1;
+	begin
+		if rising_edge(clk_20M) then
+      if clk_5M_en = '1' then
+        if palette_cs = '1' and cpu_iom = '0' and cpu_wr_n = '0' then
+          offset := to_integer(unsigned(cpu_a(3 downto 0)));
+          palette_r(offset) <= cpu_d_o;
+        end if;
+      end if;
+		end if;
+		graphics_o.pal <= palette_r;
+	end process;
+
+  -- I/O
+  process (clk_20M, rst_20M)
+  begin
+    if rst_20M = '1' then
+    elsif rising_edge(clk_20M) then
+      if io_cs = '1' then
+        if cpu_iom = '0' then
+          if cpu_rd_n = '0' then
+            case cpu_a(3 downto 0) is
+              when X"0" =>
+                -- DSW
+                io_d_o <= X"00";
+              when X"1" =>
+                -- IN1 (coin, start etc)
+                io_d_o <= X"00";
+              when X"2" | X"3" =>
+                -- IN2,3 (trackball H,V) (unused)
+                io_d_o <= X"FF";
+              when X"4" =>
+                -- IN4 (joystick)
+                io_d_o <= X"00";
+              when others =>
+                null;
+            end case;
+          elsif cpu_wr_n = '0' then
+          end if; -- cpu_rd_n/cpu_wr_n
+        end if; -- cpu_iom
+      end if; -- io_cs
+    end if;
+  end process;
+  
+	GEN_FPGA_ROMS : if true generate
+    type rom_data_t is array (natural range <>) of std_logic_vector(7 downto 0);
+    signal rom_data : rom_data_t(0 to 2);
+  begin
+
+    GEN_ROMS : for i in 0 to 2 generate
+    begin
+      rom_inst : entity work.sprom
+        generic map
+        (
+          init_file		=> VARIANT_ROM_DIR & "qb-rom" & integer'image(i) & ".hex",
+          widthad_a		=> 13
+        )
+        port map
+        (
+          clock			=> clk_20M,
+          address		=> cpu_a(12 downto 0),
+          q					=> rom_data(i)
+        );
+    end generate GEN_ROMS;
+        
+    rom_d_o <=  rom_data(0) when STD_MATCH(cpu_a, "101-------------") else
+                rom_data(1) when STD_MATCH(cpu_a, "110-------------") else
+                rom_data(2) when STD_MATCH(cpu_a, "111-------------") else
+                (others => '0');
+                  
+	end generate GEN_FPGA_ROMS;
+
+  --
+  -- graphics (not mapped to CPU)
+  --
+  
+	GEN_FPGA_BG_ROMS : if true generate
+    type tile_data_t is array (natural range <>) of std_logic_vector(7 downto 0);
+    signal tile_d_o : tile_data_t(0 to 1);
+  begin
+    GEN_BG_ROMS : for i in 0 to 1 generate
+      begin
+        bg_rom_inst : entity work.sprom
+          generic map
+          (
+            init_file		=> VARIANT_ROM_DIR & "qb-bg" & integer'image(i) & ".hex",
+            widthad_a		=> 12
+          )
+          port map
+          (
+            clock			=> clk_20M,
+            address		=> tilemap_i(1).map_a(11 downto 0),
+            q					=> tile_d_o(i)
+          );
+      end generate GEN_BG_ROMS;
+    tilemap_o(1).tile_d(7 downto 0) <= tile_d_o(0);
+    tilemap_o(1).tile_d(15 downto 8) <= tile_d_o(1);
+	end generate GEN_FPGA_BG_ROMS;
+
+  -- unused outputs
+  flash_o <= NULL_TO_FLASH;
+  sprite_reg_o <= NULL_TO_SPRITE_REG;
+  sprite_o <= NULL_TO_SPRITE_CTL;
+  --tilemap_o <= NULL_TO_TILEMAP_CTL;
+  graphics_o.bit8(0) <= (others => '0');
+  graphics_o.bit16(0) <= (others => '0');
+  osd_o <= NULL_TO_OSD;
+  snd_o <= NULL_TO_SOUND;
+  ser_o <= NULL_TO_SERIAL;
+  spi_o <= NULL_TO_SPI;
+	leds_o <= (others => '0');
 
 end SYN;
