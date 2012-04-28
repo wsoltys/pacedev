@@ -16,11 +16,6 @@ package platform_variant_pkg is
 	constant WILLIAMS_VIDEO_L_CROP    : integer := 0;
 	constant WILLIAMS_VIDEO_R_CROP    : integer := 0;
 
-  constant WILLIAMS_HAS_BLITTER     : boolean := false;
-  constant WILLIAMS_SC02_REVISION   : integer := 1;
-  constant WILLIAMS_SC02_CLIP_ADDR  : unsigned(15 downto 0) := X"C000";
-
-  constant WILLIAMS_NVRAM_WIDTH     : integer := 4;
   constant PLATFORM_VARIANT         : string := "qbert";
                                                 
 end;

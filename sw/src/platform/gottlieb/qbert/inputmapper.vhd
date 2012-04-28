@@ -32,62 +32,66 @@ entity inputmapper is
 end inputmapper;
 
 architecture SYN of inputmapper is
-
-  signal pause  : std_logic;
-  
 begin
 
   latchInputs: process (clk, rst_n)
-
+    variable service  : std_logic;
+    variable pause    : std_logic;
   begin
 
-    -- note: all inputs are active HIGH
+    -- note: all inputs (except service) are active HIGH
 
     if rst_n = '0' then
       for i in 0 to NUM_INPUTS-1 loop
         inputs(i).d <= (others =>'0');
       end loop;
-      pause <= '0';
+      pause := '0';
+      service := '1';
     elsif rising_edge (clk) then
       -- map the dipswitches
       if (key_down or key_up) = '1' then
         case data(7 downto 0) is
         
-            -- IN0
-            when SCANCODE_LEFT =>			-- left
-              inputs(0).d(0) <= key_down;
-            when SCANCODE_RIGHT =>		-- right
-              inputs(0).d(1) <= key_down;
-            when SCANCODE_LCTRL =>		-- flap
-              inputs(0).d(2) <= key_down;
-            when SCANCODE_2 =>				-- start2
-              inputs(0).d(4) <= key_down;
-            when SCANCODE_1 =>				-- start1
-              inputs(0).d(5) <= key_down;
-
             -- IN1
-            -- (not used)
-            
-            -- IN2
-            when SCANCODE_F1 =>				-- auto up
-              inputs(2).d(0) <= key_down;
-            when SCANCODE_F2 =>				-- advance
-              inputs(2).d(1) <= key_down;
-            when SCANCODE_7 =>				-- coin3
-              inputs(2).d(2) <= key_down;
-            when SCANCODE_9 =>				-- highscore reset
-              inputs(2).d(3) <= key_down;
-            when SCANCODE_5 =>				-- coin1
-              inputs(2).d(4) <= key_down;
-            when SCANCODE_6 =>				-- coin2
-              inputs(2).d(5) <= key_down;
+            when SCANCODE_1 =>        -- 1P start
+              inputs(0).d(0) <= key_down;
+            when SCANCODE_2 =>		    -- 2P start
+              inputs(0).d(1) <= key_down;
+            when SCANCODE_5 =>		    -- coin 1
+              inputs(0).d(2) <= key_down;
+            when SCANCODE_6 =>				-- coin 2
+              inputs(0).d(3) <= key_down;
+            when SCANCODE_F2 =>				-- service
+              if key_down = '1' then
+                service := not service;
+              end if;
+            when SCANCODE_F1 =>				-- select
+              inputs(0).d(7) <= key_down;
 
-            -- special keys
+            -- IN4
+            when SCANCODE_RIGHT =>
+              inputs(3).d(0) <= key_down;
+            when SCANCODE_LEFT =>
+              inputs(3).d(1) <= key_down;
+            when SCANCODE_UP =>
+              inputs(3).d(2) <= key_down;
+            when SCANCODE_DOWN =>
+              inputs(3).d(3) <= key_down;
+          when SCANCODE_L =>
+              inputs(3).d(4) <= key_down;
+            when SCANCODE_J =>
+              inputs(3).d(5) <= key_down;
+            when SCANCODE_I =>
+              inputs(3).d(6) <= key_down;
+            when SCANCODE_K =>
+              inputs(3).d(7) <= key_down;
+
+              -- special keys
             when SCANCODE_F3 =>				-- game reset
               inputs(3).d(0) <= key_down;
             when SCANCODE_P =>				-- pause (toggle)
               if key_down = '1' then
-                pause <= not pause;
+                pause := not pause;
               end if;
               
             when others =>
@@ -102,7 +106,8 @@ begin
 
     end if; -- rising_edge (clk)
 
-    inputs(3).d(1) <= pause;
+    inputs(0).d(6) <= service;
+    inputs(NUM_INPUTS-1).d(1) <= pause;
 
   end process latchInputs;
 

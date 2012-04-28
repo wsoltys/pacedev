@@ -84,8 +84,6 @@ end platform;
 
 architecture SYN of platform is
 
-	constant WILLIAMS_VRAM_SIZE		: integer := 2**WILLIAMS_VRAM_WIDTHAD;
-
 	alias clk_20M					    : std_logic is clkrst_i.clk(0);
   alias rst_20M             : std_logic is clkrst_i.rst(0);
 	alias clk_video				    : std_logic is clkrst_i.clk(1);
@@ -132,8 +130,8 @@ architecture SYN of platform is
 	signal nvram_data			    : std_logic_vector(7 downto 0);
 	                        
   -- other signals   
-	alias platform_reset			: std_logic is inputs_i(3).d(0);
-	alias platform_pause      : std_logic is inputs_i(3).d(1);
+	alias platform_reset			: std_logic is inputs_i(NUM_INPUT_BYTES).d(0);
+	alias platform_pause      : std_logic is inputs_i(NUM_INPUT_BYTES).d(1);
 	
 begin
 
@@ -359,13 +357,13 @@ begin
                 io_d_o <= X"00";
               when X"1" =>
                 -- IN1 (coin, start etc)
-                io_d_o <= X"00";
+                io_d_o <= inputs_i(0).d;
               when X"2" | X"3" =>
                 -- IN2,3 (trackball H,V) (unused)
                 io_d_o <= X"FF";
               when X"4" =>
                 -- IN4 (joystick)
-                io_d_o <= X"00";
+                io_d_o <= inputs_i(3).d;
               when others =>
                 null;
             end case;
@@ -378,10 +376,10 @@ begin
   
 	GEN_FPGA_ROMS : if true generate
     type rom_data_t is array (natural range <>) of std_logic_vector(7 downto 0);
-    signal rom_data : rom_data_t(0 to 2);
+    signal rom_data : rom_data_t(2 downto 0);
   begin
 
-    GEN_ROMS : for i in 0 to 2 generate
+    GEN_ROMS : for i in 2 downto 0 generate
     begin
       rom_inst : entity work.sprom
         generic map
@@ -397,9 +395,9 @@ begin
         );
     end generate GEN_ROMS;
         
-    rom_d_o <=  rom_data(0) when STD_MATCH(cpu_a, "101-------------") else
+    rom_d_o <=  rom_data(2) when STD_MATCH(cpu_a, "101-------------") else
                 rom_data(1) when STD_MATCH(cpu_a, "110-------------") else
-                rom_data(2) when STD_MATCH(cpu_a, "111-------------") else
+                rom_data(0) when STD_MATCH(cpu_a, "111-------------") else
                 (others => '0');
                   
 	end generate GEN_FPGA_ROMS;
