@@ -130,8 +130,8 @@ architecture SYN of platform is
 	signal nvram_data			    : std_logic_vector(7 downto 0);
 	                        
   -- other signals   
-	alias platform_reset			: std_logic is inputs_i(NUM_INPUT_BYTES).d(0);
-	alias platform_pause      : std_logic is inputs_i(NUM_INPUT_BYTES).d(1);
+	alias platform_reset			: std_logic is inputs_i(NUM_INPUT_BYTES-1).d(0);
+	alias platform_pause      : std_logic is inputs_i(NUM_INPUT_BYTES-1).d(1);
 	
 begin
 
@@ -192,34 +192,6 @@ begin
               rom_d_o when rom_cs = '1' else
 							(others => '0');
 		
-  BLK_INTERRUPTS : block
-  begin
-  
-    -- NMI connected to VBLANK
-    process (clk_20M, rst_20M)
-      variable nmi_cnt  : integer range 0 to 15;
-      variable vblank_r : std_logic;
-    begin
-      if rst_20M = '1' then
-        vblank_r := '0';
-        cpu_nmi <= '0';
-      elsif rising_edge(clk_20M) then
-        if graphics_i.vblank = '1' and vblank_r = '0' then
-          nmi_cnt := nmi_cnt'high;
-          cpu_nmi <= '1';
-        elsif nmi_cnt = 0 then
-          cpu_nmi <= '0';
-        else
-          nmi_cnt := nmi_cnt - 1;
-        end if;
-      end if;
-    end process;
-    
-    -- cpu interrupts
-    cpu_intr <= '0';  -- not connected
-
-  end block BLK_INTERRUPTS;
-  
   -- system timing
   process (clk_20M, rst_20M)
     -- 20/4=5MHz
@@ -248,7 +220,7 @@ begin
     cpu_inst : entity work.cpu86
        port map
        ( 
-          clk      => clk_5M_en,
+          clk      => '0', --clk_5M_en,
           dbus_in  => cpu_d_i,
           intr     => cpu_intr,
           nmi      => cpu_nmi,
@@ -266,6 +238,34 @@ begin
           wrn      => cpu_wr_n
        );
   end block BLK_CPU;
+  
+  BLK_INTERRUPTS : block
+  begin
+  
+    -- NMI connected to VBLANK
+    process (clk_20M, rst_20M)
+      variable nmi_cnt  : integer range 0 to 15;
+      variable vblank_r : std_logic;
+    begin
+      if rst_20M = '1' then
+        vblank_r := '0';
+        cpu_nmi <= '0';
+      elsif rising_edge(clk_20M) then
+        if graphics_i.vblank = '1' and vblank_r = '0' then
+          nmi_cnt := nmi_cnt'high;
+          cpu_nmi <= '1';
+        elsif nmi_cnt = 0 then
+          cpu_nmi <= '0';
+        else
+          nmi_cnt := nmi_cnt - 1;
+        end if;
+      end if;
+    end process;
+    
+    -- cpu interrupts
+    cpu_intr <= '0';  -- not connected
+
+  end block BLK_INTERRUPTS;
   
 	-- Battery-backed CMOS RAM
 	nvram_inst : entity work.spram
@@ -288,7 +288,7 @@ begin
   vram_inst : entity work.dpram
     generic map
     (
-      init_file		=> VARIANT_ROM_DIR & "vram.hex",
+      init_file		=> VARIANT_RAM_DIR & "vram.hex",
       widthad_a		=> 10
     )
     port map
@@ -421,7 +421,7 @@ begin
           port map
           (
             clock			=> clk_20M,
-            address		=> tilemap_i(1).map_a(11 downto 0),
+            address		=> tilemap_i(1).tile_a(11 downto 0),
             q					=> tile_d_o(i)
           );
       end generate GEN_BG_ROMS;

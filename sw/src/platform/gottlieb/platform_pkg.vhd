@@ -39,6 +39,8 @@ package platform_pkg is
                                                 PLATFORM_VARIANT & "/";
   constant VARIANT_ROM_DIR          : string := VARIANT_SOURCE_ROOT_DIR &
                                                 "roms/";
+  constant VARIANT_RAM_DIR          : string := VARIANT_SOURCE_ROOT_DIR &
+                                                "rams/";
 
   type from_PLATFORM_IO_t is record
     not_used  : std_logic;
