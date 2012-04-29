@@ -220,7 +220,7 @@ begin
     cpu_inst : entity work.cpu86
        port map
        ( 
-          clk      => '0', --clk_5M_en,
+          clk      => clk_5M_en,
           dbus_in  => cpu_d_i,
           intr     => cpu_intr,
           nmi      => cpu_nmi,
