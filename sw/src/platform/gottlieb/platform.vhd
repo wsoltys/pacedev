@@ -127,7 +127,7 @@ architecture SYN of platform is
 	signal palette_r			    : PAL_A_t(15 downto 0);
 	signal nvram_cs				    : std_logic;
 	signal nvram_wr				    : std_logic;
-	signal nvram_data			    : std_logic_vector(7 downto 0);
+	signal nvram_d_o          : std_logic_vector(7 downto 0);
 	                        
   -- other signals   
 	alias platform_reset			: std_logic is inputs_i(NUM_INPUT_BYTES-1).d(0);
@@ -183,7 +183,7 @@ begin
   cram_wr <= cram_cs and not cpu_iom and not cpu_wr_n;
 
 	-- memory read mux
-	cpu_d_i <=  nvram_data when nvram_cs = '1' else
+	cpu_d_i <=  nvram_d_o when nvram_cs = '1' else
 							wram_d_o when wram_cs = '1' else
 							vram_d_o when vram_cs = '1' else
 							cram_d_o when cram_cs = '1' else
@@ -244,14 +244,19 @@ begin
   
     -- NMI connected to VBLANK
     process (clk_20M, rst_20M)
-      variable nmi_cnt  : integer range 0 to 15;
-      variable vblank_r : std_logic;
+      -- NMI must be high for more than 2 cycles
+      -- - according to the 8088 datasheet anyway
+      variable nmi_cnt  : integer range 0 to 20;
+      variable vblank_r : std_logic_vector(3 downto 0);
+      alias vblank_prev : std_logic is vblank_r(vblank_r'left);
+      alias vblank_um   : std_logic is vblank_r(vblank_r'left-1);
     begin
       if rst_20M = '1' then
-        vblank_r := '0';
+        vblank_r := (others => '0');
         cpu_nmi <= '0';
       elsif rising_edge(clk_20M) then
-        if graphics_i.vblank = '1' and vblank_r = '0' then
+        if vblank_prev /= vblank_um and 
+            vblank_um = PACE_VIDEO_V_SYNC_POLARITY then
           nmi_cnt := nmi_cnt'high;
           cpu_nmi <= '1';
         elsif nmi_cnt = 0 then
@@ -259,6 +264,8 @@ begin
         else
           nmi_cnt := nmi_cnt - 1;
         end if;
+        -- unmeta VBLANK
+        vblank_r := vblank_r(vblank_r'left-1 downto 0) & graphics_i.vblank;
       end if;
     end process;
     
@@ -271,17 +278,17 @@ begin
 	nvram_inst : entity work.spram
 		generic map
 		(
-			init_file		=> VARIANT_ROM_DIR & "nvram.hex",
-			widthad_a		=> 10,
+			init_file		=> VARIANT_RAM_DIR & "nvram.hex",
+			widthad_a		=> 12,
 			width_a		  => 8
 		)
 		port map
 		(
 			clock				=> clk_20M,
-			address			=> cpu_a(9 downto 0),
+			address			=> cpu_a(11 downto 0),
 			wren				=> nvram_wr,
 			data				=> cpu_d_o,
-			q						=> nvram_data
+			q						=> nvram_d_o
 		);
   
   -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
@@ -425,8 +432,10 @@ begin
             q					=> tile_d_o(i)
           );
       end generate GEN_BG_ROMS;
-    tilemap_o(1).tile_d(7 downto 0) <= tile_d_o(0);
-    tilemap_o(1).tile_d(15 downto 8) <= tile_d_o(1);
+    tilemap_o(1).tile_d(tilemap_o(1).tile_d'left downto 8) <= (others => '0');
+    tilemap_o(1).tile_d(7 downto 0) <= 
+      tile_d_o(0) when tilemap_i(1).tile_a(12) = '0' else
+      tile_d_o(1);
 	end generate GEN_FPGA_BG_ROMS;
 
   -- unused outputs

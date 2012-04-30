@@ -23,14 +23,14 @@ architecture TILEMAP_1 of tilemapCtl is
   alias vblank    : std_logic is video_ctl.vblank;
   alias tile_x    : std_logic_vector(video_ctl.x'range) is video_ctl.x;
   alias tile_y    : std_logic_vector(video_ctl.y'range) is video_ctl.y;
-  alias map_x     : std_logic_vector(video_ctl.x'range) is video_ctl.x;
-  alias map_y     : std_logic_vector(video_ctl.y'range) is video_ctl.y;
+  --alias map_x     : std_logic_vector(video_ctl.x'range) is video_ctl.x;
+  --alias map_y     : std_logic_vector(video_ctl.y'range) is video_ctl.y;
   
 begin
 
 	-- these are constant for a whole line
   ctl_o.map_a(ctl_o.map_a'left downto 10) <= (others => '0');
-  ctl_o.map_a(4 downto 0) <= tile_y(7 downto 3);
+  ctl_o.map_a(4 downto 0) <= tile_x(7 downto 3);
   ctl_o.tile_a(ctl_o.tile_a'left downto 13) <= (others => '0');
 
   -- generate pixel
@@ -52,7 +52,7 @@ begin
       -- - read tile from tilemap
       -- - read attribute data
       if stb = '1' then
-        ctl_o.map_a(9 downto 5) <= tile_x(7 downto 3);
+        ctl_o.map_a(9 downto 5) <= tile_y(7 downto 3);
         ctl_o.attr_a(9 downto 5) <= not tile_x(7 downto 3);
       end if;
       
