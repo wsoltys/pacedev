@@ -37,10 +37,8 @@ begin
   process (clk, clk_ena)
 
     variable attr_i     : std_logic_vector(6 downto 0);
-		variable pal_i      : integer range 0 to 127;
-		variable pel        : std_logic_vector(3 downto 0);
-		--variable pal_entry  : pal_entry_typ;
-
+		variable pel_i      : integer range 0 to 15;
+    variable pal_e      : std_logic_vector(15 downto 0);
     variable tile_d_r   : std_logic_vector(7 downto 0);
 		variable attr_d_r	  : std_logic_vector(7 downto 0);
 
@@ -69,16 +67,13 @@ begin
           tile_d_r := tile_d_r(3 downto 0) & "0000";
         end if;
       end if;
-      pel := tile_d_r(7 downto 4);
+      pel_i := to_integer(unsigned(tile_d_r(7 downto 4)));
       
       -- extract R,G,B from colour palette
-      --attr_i := attr_d_r(1 downto 0) & tile_d_r(7) & attr_d_r(5 downto 2);
-      attr_i := attr_d_r(1 downto 0) & attr_d_r(4) & pel;
-      pal_i := to_integer(unsigned(attr_i));
-      --pal_entry := pal(pal_i);
-      ctl_o.rgb.r <= pel & "000000";
-      ctl_o.rgb.g <= pel & "000000";
-      ctl_o.rgb.b <= pel & "000000";
+      pal_e := graphics_i.pal(pel_i);
+      ctl_o.rgb.r <= pal_e(11 downto 8) & "000000";
+      ctl_o.rgb.g <= pal_e(7 downto 4) & "000000";
+      ctl_o.rgb.b <= pal_e(3 downto 0) & "000000";
       
 		end if;				
 

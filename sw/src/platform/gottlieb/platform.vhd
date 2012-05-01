@@ -124,7 +124,7 @@ architecture SYN of platform is
 	signal io_cs				      : std_logic;
   signal io_d_o             : std_logic_vector(7 downto 0);
 	signal palette_cs			    : std_logic;
-	signal palette_r			    : PAL_A_t(15 downto 0);
+	signal palette_r			    : PAL_A_t(0 to 15);
 	signal nvram_cs				    : std_logic;
 	signal nvram_wr				    : std_logic;
 	signal nvram_d_o          : std_logic_vector(7 downto 0);
@@ -164,8 +164,8 @@ begin
   -- character ram $4000-$4FFF
   cram_cs <=		'1' when STD_MATCH(cpu_a, X"4"&"------------") else
                 '0';
-  -- Palette $5000-$57FF
-	palette_cs <=	'1' when STD_MATCH(cpu_a, X"5"&"0-----------") else '0';
+  -- Palette $5000-$501F
+	palette_cs <=	'1' when STD_MATCH(cpu_a,       X"501"&"----") else '0';
   -- I/O $5800-$5FFF
   io_cs <=		  '1' when STD_MATCH(cpu_a, X"5"&"1-----------") else
                 '0';
@@ -337,15 +337,21 @@ begin
 
 	-- implementation of palette RAM
 	process (clk_20M, rst_20M)
-		variable offset : integer range 0 to 2**4-1;
+		variable entry_i : integer range 0 to 15;
 	begin
 		if rising_edge(clk_20M) then
       if clk_5M_en = '1' then
         if palette_cs = '1' and cpu_iom = '0' and cpu_wr_n = '0' then
-          offset := to_integer(unsigned(cpu_a(3 downto 0)));
-          palette_r(offset) <= cpu_d_o;
-        end if;
-      end if;
+          entry_i := to_integer(unsigned(cpu_a(4 downto 1)));
+          if cpu_a(0) = '0' then
+            -- even bytes G=(7..4) B=(3..0)
+            palette_r(entry_i)(7 downto 0) <= cpu_d_o;
+          else
+            -- odd bytes R=(3..0)
+            palette_r(entry_i)(15 downto 8) <= cpu_d_o;
+          end if; -- cpu_a(0)
+        end if; -- palette_cs,cpu_iom,cpu_wr_n
+      end if; -- clk_5M_en
 		end if;
 		graphics_o.pal <= palette_r;
 	end process;
