@@ -419,6 +419,8 @@ begin
   -- graphics (not mapped to CPU)
   --
   
+  -- TILES
+  
 	GEN_FPGA_BG_ROMS : if true generate
     type tile_data_t is array (natural range <>) of std_logic_vector(7 downto 0);
     signal tile_d_o : tile_data_t(0 to 1);
@@ -433,7 +435,7 @@ begin
           )
           port map
           (
-            clock			=> clk_20M,
+            clock			=> clk_video,
             address		=> tilemap_i(1).tile_a(11 downto 0),
             q					=> tile_d_o(i)
           );
@@ -444,10 +446,37 @@ begin
       tile_d_o(1);
 	end generate GEN_FPGA_BG_ROMS;
 
+  -- SPRITES
+  
+  GEN_FPGA_FG_ROMS : if true generate
+    type sprite_data_t is array (natural range <>) of std_logic_vector(15 downto 0);
+    signal sprite_d_o : sprite_data_t(0 to 3);
+  begin
+    GEN_FG_ROMS : for i in 3 downto 0 generate
+      begin
+        -- cheating by accessing 16-bits at a time
+        fg_rom_inst : entity work.dprom_2r
+          generic map
+          (
+            init_file		=> VARIANT_ROM_DIR & "qb-fg" & integer'image(i) & ".hex",
+            widthad_a		=> 13,
+            widthad_b		=> 13
+          )
+          port map
+          (
+            clock			  => clk_video,
+            address_a   => sprite_i.a(12 downto 0),
+            q_a 			  => sprite_d_o(i)(7 downto 0),
+            address_b   => sprite_i.a(12 downto 0),
+            q_b         => sprite_d_o(i)(15 downto 8)
+          );
+      end generate GEN_FG_ROMS;
+    sprite_o.d <= sprite_d_o(3) & sprite_d_o(2) & sprite_d_o(1) & sprite_d_o(0);
+  end generate GEN_FPGA_FG_ROMS;
+  
   -- unused outputs
   flash_o <= NULL_TO_FLASH;
   sprite_reg_o <= NULL_TO_SPRITE_REG;
-  sprite_o <= NULL_TO_SPRITE_CTL;
   --tilemap_o <= NULL_TO_TILEMAP_CTL;
   graphics_o.bit8(0) <= (others => '0');
   graphics_o.bit16(0) <= (others => '0');

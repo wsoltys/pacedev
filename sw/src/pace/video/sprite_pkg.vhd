@@ -33,7 +33,7 @@ package sprite_pkg is
 
   function NULL_TO_SPRITE_REG return to_SPRITE_REG_t;
   
-  subtype SPRITE_ROW_D_t is std_logic_vector(47 downto 0);
+  subtype SPRITE_ROW_D_t is std_logic_vector(63 downto 0);
   subtype SPRITE_ROW_A_t is std_logic_vector(15 downto 0);
   
   type to_SPRITE_CTL_t is record
