@@ -165,7 +165,7 @@ begin
   cram_cs <=		'1' when STD_MATCH(cpu_a, X"4"&"------------") else
                 '0';
   -- Palette $5000-$501F
-	palette_cs <=	'1' when STD_MATCH(cpu_a,       X"501"&"----") else '0';
+	palette_cs <=	'1' when STD_MATCH(cpu_a,    X"50"&"000-----") else '0';
   -- I/O $5800-$5FFF
   io_cs <=		  '1' when STD_MATCH(cpu_a, X"5"&"1-----------") else
                 '0';
