@@ -103,6 +103,10 @@ architecture SYN of platform is
 	signal cpu_inta				    : std_logic;
 	signal cpu_nmi				    : std_logic;
 
+  -- SPRITE signals
+	signal sprite_cs				  : std_logic;
+  signal sprite_wr          : std_logic;
+  
   -- RAM signals        
 	signal wram_cs				    : std_logic;
   signal wram_wr            : std_logic;
@@ -158,6 +162,9 @@ begin
 	wram_cs <=		'1' when STD_MATCH(cpu_a, X"1"&"------------") else
                 '1' when STD_MATCH(cpu_a, X"2"&"------------") else
 								'0';
+  -- sprite ram $3000-$30FF
+  sprite_cs <=	'1' when STD_MATCH(cpu_a,    X"30"&"--------") else
+                '0';
   -- video ram $3800-$3BFF
   vram_cs <=		'1' when STD_MATCH(cpu_a, X"3"&"10----------") else
                 '0';
@@ -178,6 +185,7 @@ begin
 
   -- memory block write enables
 	nvram_wr <= nvram_cs and not cpu_iom and not cpu_wr_n;
+  sprite_wr <= sprite_cs and not cpu_iom and not cpu_wr_n;
   wram_wr <= wram_cs and not cpu_iom and not cpu_wr_n;
   vram_wr <= vram_cs and not cpu_iom and not cpu_wr_n;
   cram_wr <= cram_cs and not cpu_iom and not cpu_wr_n;
@@ -290,7 +298,14 @@ begin
 			data				=> cpu_d_o,
 			q						=> nvram_d_o
 		);
-  
+
+  -- sprites
+  sprite_reg_o.clk <= clk_20M;
+  sprite_reg_o.clk_ena <= clk_5M_en;
+  sprite_reg_o.wr <= sprite_wr;
+  sprite_reg_o.a <= cpu_a(sprite_reg_o.a'range);
+  sprite_reg_o.d <= cpu_d_o;
+    
   -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
   vram_inst : entity work.dpram
     generic map
@@ -464,20 +479,27 @@ begin
           )
           port map
           (
-            clock			  => clk_video,
-            address_a   => sprite_i.a(12 downto 0),
-            q_a 			  => sprite_d_o(i)(7 downto 0),
-            address_b   => sprite_i.a(12 downto 0),
-            q_b         => sprite_d_o(i)(15 downto 8)
+            clock			              => clk_video,
+            address_a(12 downto 1)  => sprite_i.a(12 downto 1),
+            address_a(0)            => '0',
+            q_a 			              => sprite_d_o(i)(15 downto 8),
+            address_b(12 downto 1)  => sprite_i.a(12 downto 1),
+            address_b(0)            => '1',
+            q_b                     => sprite_d_o(i)(7 downto 0)
           );
       end generate GEN_FG_ROMS;
-    sprite_o.d <= sprite_d_o(3) & sprite_d_o(2) & sprite_d_o(1) & sprite_d_o(0);
+      
+      -- construct the sprite row
+      GEN_1 : for b1 in 15 downto 0 generate
+        GEN_2 : for b2 in 3 downto 0 generate
+          sprite_o.d(b1*4+b2) <= sprite_d_o(b2)(b1);
+        end generate GEN_2;
+      end generate GEN_1;
+    
   end generate GEN_FPGA_FG_ROMS;
   
   -- unused outputs
   flash_o <= NULL_TO_FLASH;
-  sprite_reg_o <= NULL_TO_SPRITE_REG;
-  --tilemap_o <= NULL_TO_TILEMAP_CTL;
   graphics_o.bit8(0) <= (others => '0');
   graphics_o.bit16(0) <= (others => '0');
   osd_o <= NULL_TO_OSD;

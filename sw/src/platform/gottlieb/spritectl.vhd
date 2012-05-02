@@ -10,11 +10,10 @@ use work.project_pkg.all;
 use work.platform_pkg.all;    
 
 --
--- SonSon Sprite Controller
+--  Gottlieb Sprite Controller
 --
---  Sprite data is 48 bits wide:
---  <bitplane2><bitplane1><bitplane0>
---  < 16 bits >< 16 bits >< 16 bits >
+--  Sprite data is 64 bits wide:
+--  - 4 BPP packed in platform.vhd
 --
 
 entity spritectl is
@@ -44,19 +43,15 @@ architecture SYN of spritectl is
   alias clk       : std_logic is video_ctl.clk;
   alias clk_ena   : std_logic is video_ctl.clk_ena;
 
-  signal flipData : std_logic_vector(47 downto 0);   -- flipped row data
+  -- Gottlieb doesn't support sprite flipping
+  alias flipData  : std_logic_vector(63 downto 0) is ctl_i.d(63 downto 0);
    
 begin
 
-  -- handle xflip
-  flipData(47 downto 32) <= flip_row (ctl_i.d(47 downto 32), reg_i.xflip);
-  flipData(31 downto 16) <= flip_row (ctl_i.d(31 downto 16), reg_i.xflip);
-  flipData(15 downto 0) <= flip_row (ctl_i.d(15 downto 0), reg_i.xflip);
-  
 	process (clk)
 
-   	variable rowStore : std_logic_vector(47 downto 0);  -- saved row of spt to show during visibile period
-		variable pel      : std_logic_vector(2 downto 0);
+   	variable rowStore : std_logic_vector(63 downto 0);  -- saved row of spt to show during visibile period
+		variable pel      : std_logic_vector(3 downto 0);
     variable x        : unsigned(video_ctl.x'range);
     variable y        : unsigned(video_ctl.y'range);
     variable yMat     : boolean;    -- raster is between first and last line of sprite
@@ -67,11 +62,8 @@ begin
 		-- 				(5 downto 0) is 2:1 (scan-doubling)
   	variable rowCount : std_logic_vector(3+PACE_VIDEO_V_SCALE downto 0);
 
-    variable clut_i     : integer range 0 to 31;
-		--variable clut_entry : sprite_clut_entry_t;
-    variable pel_i      : integer range 0 to 7;
-		variable pal_i      : integer range 0 to 15;
-		--variable pal_entry  : palette_entry_t;
+		variable pel_i      : integer range 0 to 15;
+    variable pal_e      : std_logic_vector(15 downto 0);
 
   begin
 
@@ -115,23 +107,18 @@ begin
           
           if xMat then
             -- shift in next pixel
-            pel := rowStore(32) & rowStore(16) & rowStore(0);
-            rowStore(47 downto 32) := '0' & rowStore(47 downto 33);
-            rowStore(31 downto 16) := '0' & rowStore(31 downto 17);
-            rowStore(15 downto 0) := '0' & rowStore(15 downto 1);
+            pel := rowStore(63 downto 60);
+            rowStore := rowStore(59 downto 0) & "0000";
           end if;
 
         end if;
 
         -- extract R,G,B from colour palette
-        clut_i := to_integer(unsigned(reg_i.colour(4 downto 0)));
-        --clut_entry := sprite_clut(clut_i);
         pel_i := to_integer(unsigned(pel));
-        pal_i := 0; --to_integer(unsigned(clut_entry(pel_i)));
-        --pal_entry := pal(16 + pal_i);
-        ctl_o.rgb.r <= (others => '0'); --pal_entry(0) & "0000";
-        ctl_o.rgb.g <= (others => '0'); --pal_entry(1) & "0000";
-        ctl_o.rgb.b <= (others => '0'); --pal_entry(2) & "0000";
+        pal_e := graphics_i.pal(pel_i);
+        ctl_o.rgb.r <= pal_e(11 downto 8) & "000000";
+        ctl_o.rgb.g <= pal_e(7 downto 4) & "000000";
+        ctl_o.rgb.b <= pal_e(3 downto 0) & "000000";
 
         -- set pixel transparency based on match
         ctl_o.set <= '0';
@@ -143,17 +130,11 @@ begin
 
       -- generate sprite data address
       ctl_o.a(ctl_o.a'left downto 14) <= (others => '0');
-      ctl_o.a(13 downto 5) <= reg_i.n(8 downto 0);
-      -- - sprite data consists of 16 consecutive bytes for the 1st half
-      -- then the next 16 bytes for the 2nd half
-      -- - because we need to fetch an entire row at once
-      --   use dual-port memory to access both halves of each row
-      ctl_o.a(4) <= '0'; -- used for 1st/2nd port of dual-port memory
-      if reg_i.yflip = '1' then
-        ctl_o.a(3 downto 0) <= not rowCount(rowCount'left-1 downto rowCount'left-4);
-      else
-        ctl_o.a(3 downto 0) <= rowCount(rowCount'left-1 downto rowCount'left-4);
-      end if;
+      ctl_o.a(12 downto 5) <= reg_i.n(7 downto 0);
+      -- - each row (64 bits) contains 16 bits (2 bytes) from each ROM
+      -- - so each rom is 32 bytes / sprite
+      ctl_o.a(4 downto 1) <= rowCount(rowCount'left-1 downto rowCount'left-4);
+      ctl_o.a(0) <= '0'; -- not used since we're emualting 16-bit wide memory
       
     end if; -- rising_edge(clk)
   end process;
