@@ -404,15 +404,15 @@ begin
   
 	GEN_FPGA_ROMS : if true generate
     type rom_data_t is array (natural range <>) of std_logic_vector(7 downto 0);
-    signal rom_data : rom_data_t(2 downto 0);
+    signal rom_data : rom_data_t(4 downto 0);
   begin
 
-    GEN_ROMS : for i in 2 downto 0 generate
+    GEN_ROMS : for i in GOTTLIEB_NUM_ROMS-1 downto 0 generate
     begin
       rom_inst : entity work.sprom
         generic map
         (
-          init_file		=> VARIANT_ROM_DIR & "qb-rom" & integer'image(i) & ".hex",
+          init_file		=> VARIANT_ROM_DIR & "rom" & integer'image(i) & ".hex",
           widthad_a		=> 13
         )
         port map
@@ -423,7 +423,9 @@ begin
         );
     end generate GEN_ROMS;
         
-    rom_d_o <=  rom_data(2) when STD_MATCH(cpu_a, "101-------------") else
+    rom_d_o <=  rom_data(4) when STD_MATCH(cpu_a, "011-------------") else
+                rom_data(3) when STD_MATCH(cpu_a, "100-------------") else
+                rom_data(2) when STD_MATCH(cpu_a, "101-------------") else
                 rom_data(1) when STD_MATCH(cpu_a, "110-------------") else
                 rom_data(0) when STD_MATCH(cpu_a, "111-------------") else
                 (others => '0');
@@ -445,7 +447,7 @@ begin
         bg_rom_inst : entity work.sprom
           generic map
           (
-            init_file		=> VARIANT_ROM_DIR & "qb-bg" & integer'image(i) & ".hex",
+            init_file		=> VARIANT_ROM_DIR & "bg" & integer'image(i) & ".hex",
             widthad_a		=> 12
           )
           port map
@@ -473,7 +475,7 @@ begin
         fg_rom_inst : entity work.dprom_2r
           generic map
           (
-            init_file		=> VARIANT_ROM_DIR & "qb-fg" & integer'image(i) & ".hex",
+            init_file		=> VARIANT_ROM_DIR & "fg" & integer'image(i) & ".hex",
             widthad_a		=> 13,
             widthad_b		=> 13
           )

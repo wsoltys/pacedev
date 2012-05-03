@@ -13,7 +13,7 @@ package platform_variant_pkg is
 	constant GOTTLIEB_VIDEO_L_CROP    : integer := 0;
 	constant GOTTLIEB_VIDEO_R_CROP    : integer := 0;
 
-  constant GOTTLIEB_NUM_ROMS        : natural := 3;
-  constant PLATFORM_VARIANT         : string := "qbert";
+  constant GOTTLIEB_NUM_ROMS        : natural := 5;
+  constant PLATFORM_VARIANT         : string := "mplanets";
                                                 
 end;
