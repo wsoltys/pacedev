@@ -134,8 +134,11 @@ architecture SYN of platform is
 	signal nvram_d_o          : std_logic_vector(7 downto 0);
 	                        
   -- other signals   
-	alias platform_reset			: std_logic is inputs_i(NUM_INPUT_BYTES-1).d(0);
-	alias platform_pause      : std_logic is inputs_i(NUM_INPUT_BYTES-1).d(1);
+  signal general_output_r       : std_logic_vector(7 downto 0);
+    alias background_priority   : std_logic is general_output_r(0);
+  
+	alias platform_reset			    : std_logic is inputs_i(NUM_INPUT_BYTES-1).d(0);
+	alias platform_pause          : std_logic is inputs_i(NUM_INPUT_BYTES-1).d(1);
 	
 begin
 
@@ -375,6 +378,7 @@ begin
   process (clk_20M, rst_20M)
   begin
     if rst_20M = '1' then
+      general_output_r <= (others => '0');
     elsif rising_edge(clk_20M) then
       if io_cs = '1' then
         if cpu_iom = '0' then
@@ -396,11 +400,20 @@ begin
                 null;
             end case;
           elsif cpu_wr_n = '0' then
+            case cpu_a(3 downto 0) is
+              when X"3" =>
+                general_output_r <= cpu_d_o;
+              when others =>
+                null;
+            end case;
           end if; -- cpu_rd_n/cpu_wr_n
         end if; -- cpu_iom
       end if; -- io_cs
     end if;
   end process;
+
+  -- sets priority between background tilemap and sprites
+  graphics_o.bit8(0) <= (0 => background_priority, others => '0');
   
 	GEN_FPGA_ROMS : if true generate
     type rom_data_t is array (natural range <>) of std_logic_vector(7 downto 0);
@@ -502,7 +515,6 @@ begin
   
   -- unused outputs
   flash_o <= NULL_TO_FLASH;
-  graphics_o.bit8(0) <= (others => '0');
   graphics_o.bit16(0) <= (others => '0');
   osd_o <= NULL_TO_OSD;
   snd_o <= NULL_TO_SOUND;

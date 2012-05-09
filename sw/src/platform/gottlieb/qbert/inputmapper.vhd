@@ -88,7 +88,7 @@ begin
 
               -- special keys
             when SCANCODE_F3 =>				-- game reset
-              inputs(3).d(0) <= key_down;
+              inputs(NUM_INPUTS-1).d(0) <= key_down;
             when SCANCODE_P =>				-- pause (toggle)
               if key_down = '1' then
                 pause := not pause;
