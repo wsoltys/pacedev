@@ -179,11 +179,11 @@ begin
   -- I/O $5800-$5FFF
   io_cs <=		  '1' when STD_MATCH(cpu_a, X"5"&"1-----------") else
                 '0';
-	-- ROM $A000-$FFFF
-  --            $A000-$BFFF
-	rom_cs <= 	  '1' when STD_MATCH(cpu_a,  "101-------------") else 
-  --            $C000-$FFFF
-                '1' when STD_MATCH(cpu_a,  "11--------------") else 
+	-- ROM $6000-$FFFF
+  --            $6000-$7FFF
+	rom_cs <= 	  '1' when STD_MATCH(cpu_a,  "011-------------") else 
+  --            $8000-$FFFF
+                '1' when STD_MATCH(cpu_a,  "1---------------") else 
                 '0';
 
   -- memory block write enables
@@ -257,19 +257,29 @@ begin
     process (clk_20M, rst_20M)
       -- NMI must be high for more than 2 cycles
       -- - according to the 8088 datasheet anyway
-      variable nmi_cnt  : integer range 0 to 20;
+      -- from MAME:
+      -- - VBlank duration: 1/VSYNC * (16/256) = 1017.6 us
+      -- - = 20352 clocks @20MHz
+      variable nmi_cnt  : integer range 0 to 20352-1;
       variable vblank_r : std_logic_vector(3 downto 0);
       alias vblank_prev : std_logic is vblank_r(vblank_r'left);
       alias vblank_um   : std_logic is vblank_r(vblank_r'left-1);
+      variable had_one  : boolean := false;
     begin
       if rst_20M = '1' then
-        vblank_r := (others => '0');
+        vblank_r := (others => '1');
         cpu_nmi <= '0';
+        had_one := false;
       elsif rising_edge(clk_20M) then
         if vblank_prev /= vblank_um and 
             vblank_um = PACE_VIDEO_V_SYNC_POLARITY then
-          nmi_cnt := nmi_cnt'high;
-          cpu_nmi <= '1';
+          -- skip 1st VBLANK
+          if had_one then
+            nmi_cnt := nmi_cnt'high;
+            cpu_nmi <= '1';
+          else
+            had_one := true;
+          end if;
         elsif nmi_cnt = 0 then
           cpu_nmi <= '0';
         else

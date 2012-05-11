@@ -53,37 +53,33 @@ begin
         case data(7 downto 0) is
         
             -- IN1
-            when SCANCODE_1 =>        -- 1P start
-              inputs(0).d(0) <= key_down;
-            when SCANCODE_2 =>		    -- 2P start
-              inputs(0).d(1) <= key_down;
             when SCANCODE_5 =>		    -- coin 1
-              inputs(0).d(2) <= key_down;
+              inputs(0).d(0) <= key_down;
             when SCANCODE_6 =>				-- coin 2
-              inputs(0).d(3) <= key_down;
+              inputs(0).d(1) <= key_down;
+            when SCANCODE_F1 =>				-- select
+              inputs(0).d(6) <= key_down;
             when SCANCODE_F2 =>				-- service
               if key_down = '1' then
                 service := not service;
               end if;
-            when SCANCODE_F1 =>				-- select
-              inputs(0).d(7) <= key_down;
 
             -- IN4
-            when SCANCODE_RIGHT =>
-              inputs(3).d(0) <= key_down;
-            when SCANCODE_LEFT =>
-              inputs(3).d(1) <= key_down;
             when SCANCODE_UP =>
-              inputs(3).d(2) <= key_down;
+              inputs(3).d(0) <= key_down;
+            when SCANCODE_RIGHT =>
+              inputs(3).d(1) <= key_down;
             when SCANCODE_DOWN =>
+              inputs(3).d(2) <= key_down;
+            when SCANCODE_LEFT =>
               inputs(3).d(3) <= key_down;
-          when SCANCODE_L =>
+          when SCANCODE_LCTRL =>
               inputs(3).d(4) <= key_down;
-            when SCANCODE_J =>
+            when SCANCODE_1 =>        -- 1P start
               inputs(3).d(5) <= key_down;
-            when SCANCODE_I =>
+            when SCANCODE_2 =>		    -- 2P start
               inputs(3).d(6) <= key_down;
-            when SCANCODE_K =>
+            when SCANCODE_LALT =>
               inputs(3).d(7) <= key_down;
 
               -- special keys
@@ -106,7 +102,7 @@ begin
 
     end if; -- rising_edge (clk)
 
-    inputs(0).d(6) <= service;
+    inputs(0).d(7) <= service;
     inputs(NUM_INPUTS-1).d(1) <= pause;
 
   end process latchInputs;
