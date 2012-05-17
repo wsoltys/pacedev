@@ -81,7 +81,9 @@ package project_pkg is
   constant S5AR2_EMULATE_FLASH              : boolean := false;
   constant S5AR2_EMULATED_FLASH_WIDTH_AD    : natural := 10;
   constant S5AR2_EMULATED_FLASH_WIDTH       : natural := 8;
-
+  
+  constant S5AR2_HAS_FLOPPY_IF              : boolean := false;
+  
 	-- GameBoy constants
 	
   constant GAMEBOY_CART_NAME                : string := "tetris10";

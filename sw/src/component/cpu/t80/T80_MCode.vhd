@@ -617,7 +617,7 @@ begin
 				when 3 =>
 					Jump <= '1';
 					IncDec_16 <= "0111";
-					I_RETN <= '1';
+					--I_RETN <= '1';
 					SetEI <= '1';
 				when others => null;
 				end case;

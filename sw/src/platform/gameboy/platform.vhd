@@ -111,7 +111,10 @@ architecture SYN of platform is
   signal cart0_d_o          : std_logic_vector(7 downto 0);
   signal cart4_cs           : std_logic;
   signal cart4_d_o          : std_logic_vector(7 downto 0);
-
+  signal cartA_cs           : std_logic;
+  signal cartA_wr           : std_logic;
+  signal cartA_d_o          : std_logic_vector(7 downto 0);
+  
     -- VIDEO RAM
 	signal video_ram_cs				: std_logic;
   signal video_ram_d_o      : std_logic_vector(7 downto 0);
@@ -178,6 +181,9 @@ begin
     -- VIDEO RAM $8000-$9FFF
     video_ram_cs <= '1' when STD_MATCH(cpu_a,  "100-------------") else
                     '0';
+    -- CART banked RAM $A000-$BFFF
+    cartA_cs <=     '1' when STD_MATCH(cpu_a,  "101-------------") else
+                    '0';
     -- RAM $C000-$DFFF (mirrored $E000-$FDFF)
     ramC_cs <=		  '1' when STD_MATCH(cpu_a,  "110-------------") else
                     '1' when STD_MATCH(cpu_a,  "111-------------") else
@@ -192,6 +198,7 @@ begin
                     '0';
 
     -- memory block write enables
+    cartA_wr <= cartA_cs and cpu_clk_en and cpu_mem_wr;
     ramC_wr <= ramC_cs and cpu_clk_en and cpu_mem_wr;
     ramF_wr <= (ramF_cs and cpu_clk_en and cpu_mem_wr) or
                 -- fudge for broken LD($FF00+C),A
@@ -201,6 +208,7 @@ begin
                 cart0_d_o when cart0_cs = '1' else
                 cart4_d_o when cart4_cs = '1' else
                 video_ram_d_o when video_ram_cs = '1' else
+                cartA_d_o when cartA_cs = '1' else
                 io_d_o when io_cs = '1' else
                 ie_r when ie_cs = '1' else
                 -- decode RAM blocks *after* ioreg, ie because it overlaps
@@ -438,6 +446,21 @@ begin
     
   end block BLK_VRAM;
 
+  -- this in on the cart... fudge
+  ram_A000_inst : entity work.spram
+		generic map
+		(
+			widthad_a			=> 13
+		)
+    port map
+    (
+      clock				=> clk_sys,
+      address			=> cpu_a(12 downto 0),
+      data				=> cpu_d_o,
+      wren				=> cartA_wr,
+      q						=> cartA_d_o
+    );
+
   -- Internal RAM $C000-$DFFF
   -- - mirrored at $E000-$FDFF
   ram_C000_inst : entity work.spram
@@ -469,7 +492,10 @@ begin
     signal ly_um          : std_logic_vector(7 downto 0);
     signal hblank_um      : std_logic;
     signal vblank_um      : std_logic;
+    
+    -- interrupts
     signal vblank_p       : std_logic;
+    signal tima_p         : std_logic;
   begin
 
     io_rd <= (io_cs and cpu_mem_rd) or cpu_io_rd;
@@ -478,7 +504,7 @@ begin
     process (clk_sys, platform_rst)
     begin
       if platform_rst = '1' then
-        tima_r <= X"00";
+--        tima_r <= X"00";
         tma_r <= X"00";
         tac_r <= X"00";
         lcdc_r <= X"91";
@@ -519,8 +545,8 @@ begin
         elsif io_wr = '1' then
           if cpu_clk_en = '1' then
             case cpu_a(7 downto 0) is
-              when X"05" =>
-                tima_r <= cpu_d_o;
+--              when X"05" =>
+--                tima_r <= cpu_d_o;
               when X"06" =>
                 tma_r <= cpu_d_o;
               when X"07" =>
@@ -580,7 +606,10 @@ begin
           if_r(0) <= '1';
         end if;
         vblank_r := vblank_p;
-
+        if tima_p = '1' then
+          if_r(2) <= '1';
+        end if;
+        
         -- interrupt acknowledge
         if cpu_int_n = '0' then
           if cpu_int_ack = '1' then
@@ -591,11 +620,13 @@ begin
             elsif ie_r(2) = '1' and if_r(2) = '1' then
               if_r(2) <= '0';
             elsif ie_r(3) = '1' and if_r(3) = '1' then
+              if_r(3) <= '0';
+            elsif ie_r(4) = '1' and if_r(4) = '1' then
               if_r(4) <= '0';
             end if;
           end if; -- cpu_int_ack
         end if; -- cpu_int_n
-       
+        
       end if;
     end process;
     
@@ -632,8 +663,10 @@ begin
       variable count : unsigned(9 downto 0);
     begin
       if platform_rst = '1' then
+        tima_r <= (others => '0');
         count := (others => '0');
       elsif rising_edge(clk_sys) then
+      
         if clk_4M19_en = '1' then
           tick_262k144 <= '0';
           tick_65k536 <= '0';
@@ -652,7 +685,39 @@ begin
             end if; -- 5..4
           end if; -- 3 downto 0
           count := count + 1;
+        end if; -- clk_4M19_en
+        
+        -- register
+        -- WRITES
+        if io_wr = '1' then
+          if cpu_clk_en = '1' then
+            case cpu_a(7 downto 0) is
+              when X"05" =>
+                tima_r <= cpu_d_o;
+              when others =>
+                null;
+            end case;
+          end if; -- cpu_clk_en
+        end if; -- cpu_mem_rd/wr
+
+        -- timer
+        tima_p <= '0'; -- default
+        if tac_r(2) = '1' then
+          if (tac_r(1 downto 0) = "00" and tick_4k096 = '1' ) or
+              (tac_r(1 downto 0) = "01" and tick_262k144 = '1') or
+              (tac_r(1 downto 0) = "10" and tick_65k536 = '1') or
+              (tac_r(1 downto 0) = "11" and tick_16k384 = '1') then
+            if tima_r = X"FF" then
+              -- reload with TMA
+              tima_r <= tma_r;
+              -- generate interrupt
+              tima_p <= '1';
+            else
+              tima_r <= std_logic_vector(unsigned(tima_r) + 1);
+            end if;
+          end if;
         end if;
+        
       end if;
     end process;
     
