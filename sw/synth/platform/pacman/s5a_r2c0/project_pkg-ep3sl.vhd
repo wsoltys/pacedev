@@ -64,7 +64,8 @@ package project_pkg is
   
   constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 16;
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
-    
+  constant S5AR2_HAS_FLOPPY_IF              : boolean := false;
+  
 	-- Pacman-specific constants
 			
 	constant PACMAN_ROM_IN_SRAM               : boolean := false;
