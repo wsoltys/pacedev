@@ -21,7 +21,7 @@ package platform_pkg is
   constant PACE_VIDEO_R_CROP            : integer := 0;
 	constant PACE_VIDEO_PIPELINE_DELAY    : integer := 3;
 	
-	constant PACE_INPUTS_NUM_BYTES        : integer := 4;
+	constant PACE_INPUTS_NUM_BYTES        : integer := 3;
 		
 	--
 	-- Platform-specific constants (optional)

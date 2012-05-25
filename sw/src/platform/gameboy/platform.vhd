@@ -132,6 +132,7 @@ architecture SYN of platform is
   signal io_d_o             : std_logic_vector(7 downto 0);
   signal ie_cs              : std_logic;
   -- individual registers
+  signal p1_r               : std_logic_vector(7 downto 0);   -- $FF00
   signal tima_r             : std_logic_vector(7 downto 0);   -- $FF05
   signal tma_r              : std_logic_vector(7 downto 0);   -- $FF06
   signal tac_r              : std_logic_vector(7 downto 0);   -- $FF07
@@ -145,9 +146,9 @@ architecture SYN of platform is
   signal ie_r               : std_logic_vector(7 downto 0);   -- $FFFF
   
   -- other signals   
-	alias platform_rst			  : std_logic is inputs_i(3).d(0);
-	alias osd_toggle          : std_logic is inputs_i(3).d(1);
-	alias platform_pause      : std_logic is inputs_i(3).d(2);
+	alias platform_rst			  : std_logic is inputs_i(NUM_INPUT_BYTES-1).d(0);
+	alias osd_toggle          : std_logic is inputs_i(NUM_INPUT_BYTES-1).d(1);
+	alias platform_pause      : std_logic is inputs_i(NUM_INPUT_BYTES-1).d(2);
 	
 begin
 
@@ -516,7 +517,11 @@ begin
         if io_rd = '1' then
           case cpu_a(7 downto 0) is
             when X"00" =>
-              ioreg_d_o <= X"FF";
+              if p1_r(4) = '0' then
+                ioreg_d_o <= inputs_i(0).d;
+              elsif p1_r(5) = '0' then
+                ioreg_d_o <= inputs_i(1).d;
+              end if;
             when X"05" =>
               ioreg_d_o <= tima_r;
             when X"06" =>
@@ -545,8 +550,8 @@ begin
         elsif io_wr = '1' then
           if cpu_clk_en = '1' then
             case cpu_a(7 downto 0) is
---              when X"05" =>
---                tima_r <= cpu_d_o;
+              when X"00" =>
+                p1_r <= cpu_d_o;
               when X"06" =>
                 tma_r <= cpu_d_o;
               when X"07" =>

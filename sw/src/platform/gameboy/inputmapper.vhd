@@ -38,7 +38,7 @@ begin
   latchInputs: process (clk, rst_n)
     variable jamma_v	: from_MAPPED_INPUTS_t(0 to NUM_INPUTS-1);
     variable keybd_v 	: from_MAPPED_INPUTS_t(0 to NUM_INPUTS-1);
-    alias pause       : std_logic is keybd_v(3).d(2);
+    alias pause       : std_logic is keybd_v(NUM_INPUTS-1).d(2);
   begin
 
     -- note: all inputs are active LOW
@@ -65,39 +65,32 @@ begin
 
       if (key_down or key_up) = '1' then
         case data(7 downto 0) is
-          -- IN0/1
-          when SCANCODE_LCTRL =>
-            keybd_v(0).d(0) := key_up;
-            keybd_v(1).d(0) := key_up;
-          when SCANCODE_LEFT =>
-            keybd_v(0).d(2) := key_up;
-            keybd_v(1).d(2) := key_up;
+          -- IN0
           when SCANCODE_RIGHT =>
-            keybd_v(0).d(3) := key_up;
-            keybd_v(1).d(3) := key_up;
+            keybd_v(0).d(0) := key_up;
+          when SCANCODE_LEFT =>
+            keybd_v(0).d(1) := key_up;
           when SCANCODE_UP =>
-            keybd_v(0).d(4) := key_up;
-            keybd_v(1).d(4) := key_up;
+            keybd_v(0).d(2) := key_up;
           when SCANCODE_DOWN =>
-            keybd_v(0).d(5) := key_up;
-            keybd_v(1).d(5) := key_up;
+            keybd_v(0).d(3) := key_up;
 
-           -- IN2
-          when SCANCODE_1 =>
-            keybd_v(2).d(0) := key_up;
-          when SCANCODE_2 =>
-            keybd_v(2).d(1) := key_up;
-          when SCANCODE_5 =>
-            keybd_v(2).d(4) := key_up;
-          when SCANCODE_6 =>
-            keybd_v(2).d(5) := key_up;
+           -- IN1
+          when SCANCODE_LCTRL =>          -- A
+            keybd_v(1).d(0) := key_up;
+          when SCANCODE_LALT =>           -- B
+            keybd_v(1).d(1) := key_up;
+          when SCANCODE_ENTER =>          -- Select
+            keybd_v(1).d(2) := key_up;
+          when SCANCODE_SPACE =>          -- Start
+            keybd_v(1).d(3) := key_up;
 
           -- Special keys
           when SCANCODE_F3 =>
-            keybd_v(3).d(0) := key_down;			-- CPU RESET
+            keybd_v(NUM_INPUTS-1).d(0) := key_down;			-- CPU RESET
           when SCANCODE_TAB =>
-            keybd_v(3).d(1) := key_down;      -- OSD TOGGLE
-          when SCANCODE_P =>				          -- pause (toggle)
+            keybd_v(NUM_INPUTS-1).d(1) := key_down;      -- OSD TOGGLE
+          when SCANCODE_P =>				                    -- pause (toggle)
             if key_down = '1' then
               pause := not pause;
             end if;
@@ -118,7 +111,7 @@ begin
     for i in 0 to NUM_INPUTS-2 loop
       inputs(i).d <= jamma_v(i).d and keybd_v(i).d;
     end loop;
-    inputs(3).d <= keybd_v(3).d;
+    inputs(NUM_INPUTS-1).d <= keybd_v(NUM_INPUTS-1).d;
 
   end process latchInputs;
 
