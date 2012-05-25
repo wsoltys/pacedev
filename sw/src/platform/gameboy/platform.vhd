@@ -199,7 +199,7 @@ begin
 
     -- memory block write enables
     cartA_wr <= cartA_cs and cpu_clk_en and cpu_mem_wr;
-    ramC_wr <= ramC_cs and cpu_clk_en and cpu_mem_wr;
+    ramC_wr <= (ramC_cs and not io_cs and not ramF_cs) and cpu_clk_en and cpu_mem_wr;
     ramF_wr <= (ramF_cs and cpu_clk_en and cpu_mem_wr) or
                 -- fudge for broken LD($FF00+C),A
                 (cpu_a(7) and cpu_clk_en and cpu_io_wr);
