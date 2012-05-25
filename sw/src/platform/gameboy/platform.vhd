@@ -208,7 +208,7 @@ begin
                 cart0_d_o when cart0_cs = '1' else
                 cart4_d_o when cart4_cs = '1' else
                 video_ram_d_o when video_ram_cs = '1' else
-                cartA_d_o when cartA_cs = '1' else
+                --cartA_d_o when cartA_cs = '1' else
                 io_d_o when io_cs = '1' else
                 ie_r when ie_cs = '1' else
                 -- decode RAM blocks *after* ioreg, ie because it overlaps
@@ -735,11 +735,10 @@ begin
         vblank_p <= '0';
       elsif rising_edge(clk_sys) then
         -- ensure we don't wrap at 256
+        vblank_p <= '0';
         if graphics_i.y(10 downto 8) = "000" then
-          -- check for vblank
-          vblank_p <= '0';
           -- VBLANK starts at line 144
-          if graphics_i.y(7 downto 0) = X"90" then
+          if ly_um = X"90" then
             vblank_p <= '1';
           end if;
           ly_r := ly_r(ly_r'left-1 downto 0) & graphics_i.y(7 downto 0);
