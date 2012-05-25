@@ -587,6 +587,10 @@ begin
     -- $FF0F
     process (clk_sys, platform_rst)
       variable vblank_r : std_logic;
+      variable p14_r    : std_logic_vector(3 downto 0);
+      variable p14_d    : std_logic_vector(3 downto 0);
+      variable p15_r    : std_logic_vector(3 downto 0);
+      variable p15_d    : std_logic_vector(3 downto 0);
     begin
       if platform_rst = '1' then
         if_r <= (others => '0');
@@ -607,13 +611,26 @@ begin
         end if; -- cpu_mem_rd/wr
         
         -- interrupts
+        -- bit 0 VBLANK
         if vblank_r = '0' and vblank_p = '1' then
           if_r(0) <= '1';
         end if;
         vblank_r := vblank_p;
+        -- bit 2 TIMA
         if tima_p = '1' then
           if_r(2) <= '1';
         end if;
+        -- bit 4 INPUTS (falling edge on any input)
+        p14_d := inputs_i(0).d(p14_r'range) xor p14_r;
+        if (not inputs_i(0).d(p14_d'range) and p14_d) /= "0000" then
+          if_r(4) <= '1';
+        end if;
+        p14_r := inputs_i(0).d(p14_r'range);
+        p15_d := inputs_i(1).d(p15_r'range) xor p15_r;
+        if (not inputs_i(1).d(p15_d'range) and p15_d) /= "0000" then
+          if_r(4) <= '1';
+        end if;
+        p15_r := inputs_i(1).d(p15_r'range);
         
         -- interrupt acknowledge
         if cpu_int_n = '0' then

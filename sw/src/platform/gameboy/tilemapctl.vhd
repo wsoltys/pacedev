@@ -94,8 +94,7 @@ begin
         -- Bit(0) controls BG/window on/off
         if lcdc(0) = '1' then
           -- 1 bit from each byte
-          --pel := tile_d_r(15) & tile_d_r(7);
-          pel := tile_d_r(7) & tile_d_r(15);
+          pel := tile_d_r(15) & tile_d_r(7);
         else
           pel := "00";
         end if;

@@ -80,9 +80,9 @@ begin
             keybd_v(1).d(0) := key_up;
           when SCANCODE_LALT =>           -- B
             keybd_v(1).d(1) := key_up;
-          when SCANCODE_ENTER =>          -- Select
+          when SCANCODE_5 =>              -- Select
             keybd_v(1).d(2) := key_up;
-          when SCANCODE_SPACE =>          -- Start
+          when SCANCODE_1 =>              -- Start
             keybd_v(1).d(3) := key_up;
 
           -- Special keys
