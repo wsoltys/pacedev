@@ -97,7 +97,10 @@ architecture SYN of platform is
 	signal cpu_d_i			      : std_logic_vector(7 downto 0);
 	signal cpu_d_o			      : std_logic_vector(7 downto 0);
 	signal cpu_irq				    : std_logic;
-
+  -- for a real 6809
+  signal cpu_clk_q          : std_logic;
+  signal cpu_clk_e          : std_logic;
+  
   -- cart signals        
 	signal cart_cs				    : std_logic;
   signal cart_d_o           : std_logic_vector(7 downto 0);
@@ -209,58 +212,98 @@ begin
 		
   -- system timing
   process (clk_24M, rst_24M)
-    variable cnt_16   : unsigned(3 downto 0);
+    variable cnt_32   : unsigned(4 downto 0);
+    alias cnt_16   : unsigned(3 downto 0) is cnt_32(4 downto 1);
   begin
     if rst_24M = '1' then
       clk_6M_en <= '0'; -- default
       clk_1M5_en <= '0'; -- default
+      cpu_clk_q <= '0';
+      cpu_clk_e <= '0';
       cnt_16 := (others => '0');
     elsif rising_edge(clk_24M) then
       clk_6M_en <= '0'; -- default
       clk_1M5_en <= '0'; -- default
-      if cnt_16(1 downto 0) = "10" then
-        clk_6M_en <= '1';
-        if cnt_16(3 downto 2) = "00" then
-          clk_1M5_en <= '1';
+--      if cnt_32(0) = '0' then
+        if cnt_16(1 downto 0) = "10" then
+          clk_6M_en <= '1';
+          if cnt_16(3 downto 2) = "00" then
+            clk_1M5_en <= '1';
+          end if;
         end if;
-      end if;
+--      end if;
+      -- Q,E clocks for real 6809
+      -- must be in phase with clk_1M5_en above
+      -- eg. just after falling-edge E clk
+      case cnt_16 is
+        when "0100" =>
+          cpu_clk_q <= '1';
+        when "1000" =>
+          cpu_clk_e <= '1';
+        when "1100" =>
+          cpu_clk_q <= '0';
+        when "0000" =>
+          cpu_clk_e <= '0';
+        when others =>
+          null;
+      end case;
+      --cnt_32 := cnt_32 + 1;
       cnt_16 := cnt_16 + 1;
     end if;
     via_i_p2_h <= not cnt_16(cnt_16'left);
   end process;
 
 	-- cpu09 core uses negative clock edge
-	--cpu_clk_en <= not (clk_1M5_en and not platform_pause);
 	cpu_clk_en <= clk_1M5_en and not platform_pause;
 
 	-- add game reset later
 	cpu_reset <= rst_24M or platform_reset;
   cpu_irq <= not via_irq_n;
   
-	cpu_inst : entity work.cpu09
-    generic map
-    (
-      CLK_POL   => '1'
-    )
-		port map
-		(	
-			clk				=> clk_24M,
-      clk_en    => cpu_clk_en,
-			rst				=> cpu_reset,
-			rw				=> cpu_r_wn,
-			vma				=> open,
-      --ba        => open,
-      --bs        => open,
-			addr		  => cpu_a,
-		  data_in		=> cpu_d_i,
-		  data_out	=> cpu_d_o,
-			halt			=> '0',
-			hold			=> '0',
-			irq				=> cpu_irq,
-			firq			=> '0',
-			nmi				=> '0'
-		);
-
+  GEN_CPU : if not VECTREX_USE_REAL_6809 generate
+  begin
+    cpu_inst : entity work.cpu09
+      generic map
+      (
+        CLK_POL   => '1'
+      )
+      port map
+      (	
+        clk				=> clk_24M,
+        clk_en    => cpu_clk_en,
+        rst				=> cpu_reset,
+        rw				=> cpu_r_wn,
+        vma				=> open,
+        --ba        => open,
+        --bs        => open,
+        addr		  => cpu_a,
+        data_in		=> cpu_d_i,
+        data_out	=> cpu_d_o,
+        halt			=> '0',
+        hold			=> '0',
+        irq				=> cpu_irq,
+        firq			=> '0',
+        nmi				=> '0'
+      );
+  else generate
+    platform_o.arst <= rst_24M;
+    platform_o.clk_cpld <= clk_24M;
+    platform_o.button <= buttons_i(platform_o.button'range);
+    platform_o.cpu_6809_rst_n <= not rst_24M;
+    platform_o.cpu_6809_q <= cpu_clk_q;
+    platform_o.cpu_6809_e <= cpu_clk_e;
+    cpu_r_wn <= platform_i.cpu_6809_r_wn;
+    --cpu_vma <= platform_i.cpu_6809_vma;
+    cpu_a <= platform_i.cpu_6809_a;
+    platform_o.cpu_6809_d_i <= cpu_d_i;
+    cpu_d_o <= platform_i.cpu_6809_d_o;
+    platform_o.cpu_6809_halt_n <= '1';
+    platform_o.cpu_6809_irq_n <= not cpu_irq;
+    platform_o.cpu_6809_firq_n <= '1';
+    platform_o.cpu_6809_nmi_n <= '1';
+    platform_o.cpu_6809_tsc <= '0';
+  end generate GEN_CPU;
+  
   BLK_VECTOR_HW : block
     --subtype delay_t is integer range 0 to 187-1;
     constant ANALOGUE_DELAY : natural := 187;

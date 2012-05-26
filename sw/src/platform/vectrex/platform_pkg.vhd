@@ -35,11 +35,29 @@ package platform_pkg is
   constant VECTREX_ROM_DIR          : string := VECTREX_SOURCE_ROOT_DIR & "roms/";
 
   type from_PLATFORM_IO_t is record
-    not_used  : std_logic;
+    -- to connect to real 6809
+    cpu_6809_r_wn     : std_logic;
+    cpu_6809_busy     : std_logic;
+    cpu_6809_lic      : std_logic;
+    cpu_6809_vma      : std_logic;
+    cpu_6809_a        : std_logic_vector(15 downto 0);
+    cpu_6809_d_o      : std_logic_vector(7 downto 0);
   end record;
 
   type to_PLATFORM_IO_t is record
-    not_used  : std_logic;
+    arst              : std_logic;
+    clk_cpld          : std_logic;
+    button            : std_logic_vector(3 downto 0);
+    -- to connect to real 6809
+    cpu_6809_q        : std_logic;
+    cpu_6809_e        : std_logic;
+    cpu_6809_rst_n    : std_logic;
+    cpu_6809_d_i      : std_logic_vector(7 downto 0);
+    cpu_6809_halt_n   : std_logic;
+    cpu_6809_irq_n    : std_logic;
+    cpu_6809_firq_n   : std_logic;
+    cpu_6809_nmi_n    : std_logic;
+    cpu_6809_tsc      : std_logic;
   end record;
 
 end;

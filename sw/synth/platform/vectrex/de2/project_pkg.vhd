@@ -25,6 +25,8 @@ package project_pkg is
 	constant PACE_VIDEO_V_SIZE				        : integer := 480;
 
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_640x480_60Hz;
+--  constant PACE_CLK0_DIVIDE_BY        		  : natural := 26;
+--  constant PACE_CLK0_MULTIPLY_BY      		  : natural := 25;  -- 50*25/26 = 48.076923MHz
   constant PACE_CLK0_DIVIDE_BY        		  : natural := 25;
   constant PACE_CLK0_MULTIPLY_BY      		  : natural := 12;  -- 50*12/25 = 24MHz
   constant PACE_CLK1_DIVIDE_BY        		  : natural := 2;
@@ -43,10 +45,12 @@ package project_pkg is
 
 	-- DE2 constants which *MUST* be defined
 	
-	constant DE2_LCD_LINE2							      : string := "    VECTREX     ";
+	constant DE2_LCD_LINE2							      : string := " VECTREX  (VGA) ";
 		
 	-- Vectrex-specific constants
-			
+
+  constant VECTREX_USE_REAL_6809            : boolean := false;
+  
 	-- derived
 	
   type from_PROJECT_IO_t is record
