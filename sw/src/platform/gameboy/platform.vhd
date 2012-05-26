@@ -302,22 +302,21 @@ begin
       );
   end block BLK_CPU;
   
-	GEN_FPGA_ROMS : if true generate
+  dmg_rom_inst : entity work.sprom
+    generic map
+    (
+      init_file		=> GAMEBOY_ROM_DIR & "dmg_rom.hex",
+      widthad_a		=> 8
+    )
+    port map
+    (
+      clock			=> clk_sys,
+      address		=> cpu_a(7 downto 0),
+      q					=> bootrom_d_o
+    );
+                
+	GEN_CART_ROM : if not GAMEBOY_CART_IN_FLASH generate
   begin
-  
-    dmg_rom_inst : entity work.sprom
-      generic map
-      (
-        init_file		=> GAMEBOY_ROM_DIR & "dmg_rom.hex",
-        widthad_a		=> 8
-      )
-      port map
-      (
-        clock			=> clk_sys,
-        address		=> cpu_a(7 downto 0),
-        q					=> bootrom_d_o
-      );
-                  
     cart0_inst : entity work.sprom
       generic map
       (
@@ -331,8 +330,14 @@ begin
         q					=> cart0_d_o
       );
       cart4_d_o <= cart0_d_o;
-                  
-	end generate GEN_FPGA_ROMS;
+  else generate
+    flash_o.a <= std_logic_vector(resize(unsigned(cpu_a(GAMEBOY_CART_WIDTHAD-1 downto 0)),
+                                          flash_o.a'length));
+    flash_o.we <= '0';
+    flash_o.cs <= '1';
+    flash_o.oe <= '1';
+    cart0_d_o <= flash_i.d(cart0_d_o'range);
+	end generate GEN_CART_ROM;
 
   BLK_VRAM : block
   
@@ -447,21 +452,25 @@ begin
     
   end block BLK_VRAM;
 
-  -- this in on the cart... fudge
-  ram_A000_inst : entity work.spram
-		generic map
-		(
-			widthad_a			=> 13
-		)
-    port map
-    (
-      clock				=> clk_sys,
-      address			=> cpu_a(12 downto 0),
-      data				=> cpu_d_o,
-      wren				=> cartA_wr,
-      q						=> cartA_d_o
-    );
-
+  -- cartridge RAM
+  GEN_RAM_A000 : if false generate
+  begin
+    -- this in on the cart... fudge
+    ram_A000_inst : entity work.spram
+      generic map
+      (
+        widthad_a			=> 13
+      )
+      port map
+      (
+        clock				=> clk_sys,
+        address			=> cpu_a(12 downto 0),
+        data				=> cpu_d_o,
+        wren				=> cartA_wr,
+        q						=> cartA_d_o
+      );
+  end generate GEN_RAM_A000;
+  
   -- Internal RAM $C000-$DFFF
   -- - mirrored at $E000-$FDFF
   ram_C000_inst : entity work.spram
@@ -873,7 +882,6 @@ begin
   end block BLK_SPRITES;
   
   -- unused outputs
-  flash_o <= NULL_TO_FLASH;
   graphics_o.bit16(0) <= (others => '0');
   osd_o <= NULL_TO_OSD;
   ser_o <= NULL_TO_SERIAL;

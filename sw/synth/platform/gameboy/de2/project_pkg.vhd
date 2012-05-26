@@ -22,13 +22,23 @@ package project_pkg is
   
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
 
-  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_640x480_60Hz;
+--  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_640x480_60Hz;
+--  constant PACE_CLK0_DIVIDE_BY              : natural := 19;
+--  constant PACE_CLK0_MULTIPLY_BY            : natural := 16;    -- 50*16/19 = 42M105263Hz
+--  constant PACE_CLK1_DIVIDE_BY              : natural := 2;
+--  constant PACE_CLK1_MULTIPLY_BY            : natural := 1; 	  -- 50*1/2 = 25MHz
+--	constant PACE_VIDEO_H_SCALE       	      : integer := 2;
+--	constant PACE_VIDEO_V_SCALE       	      : integer := 2;
+--  constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';
+--  constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '1';
+
+  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
   constant PACE_CLK0_DIVIDE_BY              : natural := 19;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 16;    -- 50*16/19 = 42M105263Hz
-  constant PACE_CLK1_DIVIDE_BY              : natural := 2;
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 1; 	  -- 50*1/2 = 25MHz
-	constant PACE_VIDEO_H_SCALE       	      : integer := 2;
-	constant PACE_VIDEO_V_SCALE       	      : integer := 2;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 16;  -- 50*16/19 = 42.105263MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 5;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 4;   -- 50*4/5 = 40MHz
+	constant PACE_VIDEO_H_SCALE               : integer := 2;
+	constant PACE_VIDEO_V_SCALE               : integer := 2;
   constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';
   constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '1';
 
@@ -50,12 +60,15 @@ package project_pkg is
 
   -- DE2 constants which *MUST* be defined
   
-	constant DE2_LCD_LINE2							      : string := " GAMEBOY (LCD)  ";
+	constant DE2_LCD_LINE2							      : string := " GAMEBOY (VGA)  ";
 
 	-- GameBoy constants
 	
+  constant GAMEBOY_CART_IN_FLASH            : boolean := false;
   constant GAMEBOY_CART_NAME                : string := "tetris10";
   constant GAMEBOY_CART_WIDTHAD             : natural := 15;
+--  constant GAMEBOY_CART_NAME                : string := "sml11";
+--  constant GAMEBOY_CART_WIDTHAD             : natural := 16;
 
   type from_PROJECT_IO_t is record
     not_used  : std_logic;

@@ -421,8 +421,8 @@ begin
     fl_rst_n <= '1';
 
     GEN_FLASH : if PACE_HAS_FLASH generate
-      flash_i.d <= fl_dq;
-      fl_dq <=  flash_o.d when (flash_o.cs = '1' and flash_o.we = '1' and flash_o.oe = '0') else 
+      flash_i.d <= std_logic_vector(RESIZE(unsigned(fl_dq),flash_i.d'length));
+      fl_dq <=  flash_o.d(fl_dq'range) when (flash_o.cs = '1' and flash_o.we = '1' and flash_o.oe = '0') else 
                 (others => 'Z');
       fl_addr <= flash_o.a;
       fl_we_n <= not flash_o.we;
