@@ -119,6 +119,10 @@ architecture SYN of platform is
 	signal video_ram_cs				: std_logic;
   signal video_ram_d_o      : std_logic_vector(7 downto 0);
 
+  -- SPRITE signals
+  signal oam_cs             : std_logic;
+  signal oam_wr             : std_logic;
+  
   -- RAM signals        
 	signal ramC_cs				    : std_logic;
   signal ramC_wr            : std_logic;
@@ -189,6 +193,10 @@ begin
     ramC_cs <=		  '1' when STD_MATCH(cpu_a,  "110-------------") else
                     '1' when STD_MATCH(cpu_a,  "111-------------") else
                     '0';
+    -- OBJECT ATTRIBUTE (sprite) memory $FE00-$FE9F
+    oam_cs <=       '1' when STD_MATCH(cpu_a,    X"FE"&"0-------") else
+                    '1' when STD_MATCH(cpu_a,    X"FE"&"100-----") else
+                    '0';
     -- sound and I/O registers $FF00-$FF7F
     io_cs <=        '1' when STD_MATCH(cpu_a,    X"FF"&"0-------") else
                     '0';
@@ -200,7 +208,9 @@ begin
 
     -- memory block write enables
     cartA_wr <= cartA_cs and cpu_clk_en and cpu_mem_wr;
-    ramC_wr <= (ramC_cs and not io_cs and not ramF_cs) and cpu_clk_en and cpu_mem_wr;
+    ramC_wr <= (ramC_cs and not oam_cs and not io_cs and not ramF_cs) 
+                  and cpu_clk_en and cpu_mem_wr;
+    oam_wr <= oam_cs and cpu_clk_en and cpu_mem_wr;
     ramF_wr <= (ramF_cs and cpu_clk_en and cpu_mem_wr) or
                 -- fudge for broken LD($FF00+C),A
                 (cpu_a(7) and cpu_clk_en and cpu_io_wr);
@@ -487,6 +497,53 @@ begin
       q						=> ramC_d_o
     );
 
+  BLK_SPRITES : block
+  
+    signal sprite_d_cs    : std_logic;
+    signal sprite_d_wr    : std_logic;
+    
+  begin
+
+    -- registers
+    sprite_reg_o.clk <= clk_sys;
+    sprite_reg_o.clk_ena <= cpu_clk_en;
+    sprite_reg_o.a <= cpu_a(sprite_reg_o.a'range);
+    sprite_reg_o.d <= cpu_d_o;
+    sprite_reg_o.wr <= oam_wr;
+
+    -- for now, mirror sprite memory
+
+     -- $8000-$8FFF
+    sprite_d_cs <= video_ram_cs when cpu_a(12) = '0' else '0';
+    sprite_d_wr <= sprite_d_cs and cpu_clk_en and cpu_mem_wr;
+    
+    -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+    sprite_d_inst : entity work.dpram_ex
+      generic map
+      (
+        init_file		=> "",
+        widthad_a		=> 11,
+        width_a     => 16,
+        widthad_b		=> 12,
+        width_b     => 8
+      )
+      port map
+      (
+        clock_b			=> clk_sys,
+        address_b		=> cpu_a(11 downto 0),
+        wren_b			=> sprite_d_wr,
+        data_b			=> cpu_d_o,
+        q_b					=> open,
+
+        clock_a			=> clk_video,
+        address_a		=> sprite_i.a(11 downto 1),
+        wren_a			=> '0',
+        data_a			=> (others => 'X'),
+        q_a					=> sprite_o.d(15 downto 0)
+      );
+
+  end block BLK_SPRITES;
+  
   BLK_IOREG : block
 
     signal io_rd          : std_logic;
@@ -835,51 +892,6 @@ begin
       end if;
     end process;
   end block BLK_IE;
-  
-  BLK_SPRITES : block
-    signal bit0_1       : std_logic_vector(7 downto 0);   -- offset 0
-    signal bit0_2       : std_logic_vector(7 downto 0);   -- offset 0
-    signal bit0_3       : std_logic_vector(7 downto 0);   -- offset 16
-    signal bit0_4       : std_logic_vector(7 downto 0);   -- offset 16
-    signal bit1_1       : std_logic_vector(7 downto 0);
-    signal bit1_2       : std_logic_vector(7 downto 0);
-    signal bit1_3       : std_logic_vector(7 downto 0);
-    signal bit1_4       : std_logic_vector(7 downto 0);
-    signal bit2_1       : std_logic_vector(7 downto 0);
-    signal bit2_2       : std_logic_vector(7 downto 0);
-    signal bit2_3       : std_logic_vector(7 downto 0);
-    signal bit2_4       : std_logic_vector(7 downto 0);
-    
-    signal sprite_a_00  : std_logic_vector(12 downto 0);
-    signal sprite_a_16  : std_logic_vector(12 downto 0);
-    
-  begin
-
-    -- registers
-    sprite_reg_o.clk <= clk_sys;
-    sprite_reg_o.clk_ena <= cpu_clk_en;
-    sprite_reg_o.a <= cpu_a(sprite_reg_o.a'range);
-    sprite_reg_o.d <= cpu_d_o;
-    sprite_reg_o.wr <= '0' and cpu_clk_en and cpu_mem_wr;
-
-    -- sprite rom (bit 0, part 1/2)
---    ss_9_m5_inst : entity work.dprom_2r
---      generic map
---      (
---        --init_file		=> GAMEBOY_ROM_DIR & "ss_9_m5.hex",
---        widthad_a		=> 13,
---        widthad_b		=> 13
---      )
---      port map
---      (
---        clock			  => clk_video,
---        address_a   => sprite_a_00,
---        q_a 			  => bit0_1,
---        address_b   => sprite_a_16,
---        q_b         => sprite_o.d(7 downto 0)
---      );
-
-  end block BLK_SPRITES;
   
   -- unused outputs
   graphics_o.bit16(0) <= (others => '0');
