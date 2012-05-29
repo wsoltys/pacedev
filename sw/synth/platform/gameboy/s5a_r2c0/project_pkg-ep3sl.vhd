@@ -86,6 +86,7 @@ package project_pkg is
   
 	-- GameBoy constants
 	
+  constant GAMEBOY_CART_IN_FLASH            : boolean := S5AR2_EMULATE_FLASH and false;
   constant GAMEBOY_CART_NAME                : string := "tetris10";
   constant GAMEBOY_CART_WIDTHAD             : natural := 15;
 --  constant GAMEBOY_CART_NAME                : string := "sml11";
@@ -94,6 +95,7 @@ package project_pkg is
 	-- derived - do not edit
 
   constant PACE_HAS_SRAM                    : boolean := S5AR2_EMULATE_SRAM;
+  constant PACE_HAS_FLASH                   : boolean := S5AR2_EMULATE_FLASH;
 	
   type from_PROJECT_IO_t is record
     not_used  : std_logic;

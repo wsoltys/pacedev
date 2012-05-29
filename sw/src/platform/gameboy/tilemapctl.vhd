@@ -50,10 +50,7 @@ begin
 		variable map_d_r	  : std_logic_vector(7 downto 0);
     variable pel        : std_logic_vector(1 downto 0);
 
-    variable clut_i     : integer range 0 to 63;
-    --variable clut_entry : tile_clut_entry_t;
     variable pel_i      : integer range 0 to 3;
-    variable pal_i      : integer range 0 to 255;
     variable pal_entry  : palette_entry_t;
 
   begin
