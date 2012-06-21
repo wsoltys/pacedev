@@ -20,7 +20,7 @@ package project_pkg is
   constant PACE_HAS_FLASH                   : boolean := true;
   constant PACE_HAS_SERIAL                  : boolean := false;
   
-	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
+	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_MAPLE;
 
 --  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_640x480_60Hz;
 --  constant PACE_CLK0_DIVIDE_BY              : natural := 19;
@@ -67,7 +67,8 @@ package project_pkg is
   constant GAMEBOY_CART_IN_FLASH            : boolean := false;
   -- 32KB carts
   --constant GAMEBOY_CART_NAME                : string := "tetris10";
-  constant GAMEBOY_CART_NAME                : string := "drmario10";
+  --constant GAMEBOY_CART_NAME                : string := "drmario10";
+  constant GAMEBOY_CART_NAME                : string := "hyperlr";
   constant GAMEBOY_CART_WIDTHAD             : natural := 15;
   -- 64KB carts
 --  constant GAMEBOY_CART_NAME                : string := "sml11";

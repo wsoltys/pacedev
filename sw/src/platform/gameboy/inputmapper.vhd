@@ -53,15 +53,14 @@ begin
     elsif rising_edge (clk) then
 
       -- handle JAMMA inputs
-      jamma_v(0).d(0) := jamma.coin(1);
-      jamma_v(0).d(1) := jamma.p(2).start;
-      jamma_v(0).d(2) := jamma.p(1).start;
-      jamma_v(0).d(4) := jamma.p(1).button(1);
-      jamma_v(1).d(4) := jamma.p(1).button(1);
-      jamma_v(0).d(5) := jamma.p(1).left;
-      jamma_v(1).d(5) := jamma.p(1).left;
-      jamma_v(0).d(6) := jamma.p(1).right;
-      jamma_v(1).d(6) := jamma.p(1).right;
+      jamma_v(0).d(0) := jamma.p(1).right;
+      jamma_v(0).d(1) := jamma.p(1).left;
+      jamma_v(0).d(2) := jamma.p(1).up;
+      jamma_v(0).d(3) := jamma.p(1).up;
+      jamma_v(1).d(0) := jamma.p(1).button(1);  -- A
+      jamma_v(1).d(1) := jamma.p(1).button(3);  -- B
+      jamma_v(1).d(2) := jamma.p(1).button(2);  -- X (select)
+      jamma_v(1).d(3) := jamma.p(1).start;
 
       if (key_down or key_up) = '1' then
         case data(7 downto 0) is

@@ -279,7 +279,7 @@ begin
   -- switches - up = high
   switches_i <= std_logic_vector(resize(unsigned(sw), switches_i'length));
   -- leds
-  ledr <= leds_o(ledr'range);
+  --ledr <= leds_o(ledr'range);
   
 	-- inputs
 	inputs_i.ps2_kclk <= ps2_clk;
@@ -290,14 +290,13 @@ begin
 	GEN_MAPLE : if PACE_JAMMA = PACE_JAMMA_MAPLE generate
 
     -- all this is so we can easily switch GPIO ports for maple bus!
-    alias gpio_maple_i  : std_logic_vector(17 downto 11) is gpio_0;
-    alias gpio_maple_o  : std_logic_vector(14 downto 11) is default_gpio_0_o;
+    alias gpio_maple_i  : std_logic_vector(17 downto 11) is gpio_0(17 downto 11);
+    alias gpio_maple_o  : std_logic_vector(14 downto 11) is default_gpio_0_o(14 downto 11);
+    alias gpio_maple_io : std_logic_vector(17 downto 11) is gpio_maple_i;
 
     signal maple_sense	: std_logic;
     signal maple_oe			: std_logic;
     signal mpj					: work.maple_pkg.joystate_type;
-    signal a            : std_logic;
-    signal b            : std_logic;
 
   begin
 
@@ -309,8 +308,8 @@ begin
 				reset			=> clkrst_i.arst,
         sense			=> maple_sense,
         oe				=> maple_oe,
-        a					=> a, --gpio_maple(14), ***needs fixing
-        b					=> b, --gpio_maple(13), ***needs fixing
+        a					=> gpio_0(14),
+        b					=> gpio_0(13),
         joystate	=> mpj
       );
       
@@ -399,7 +398,7 @@ begin
 	inputs_i.jamma_n.test <= '1';
 		
 	-- show JAMMA inputs on LED bank
-	GEN_JAMMA_LEDS : if false generate
+	GEN_JAMMA_LEDS : if true generate
     ledr(17) <= not inputs_i.jamma_n.coin(1);
     ledr(16) <= not inputs_i.jamma_n.coin(2);
     ledr(15) <= not inputs_i.jamma_n.p(1).start;
