@@ -502,7 +502,7 @@ set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
 
-set_global_assignment -name ENABLE_SIGNALTAP ON
+set_global_assignment -name ENABLE_SIGNALTAP OFF
 set_global_assignment -name USE_SIGNALTAP_FILE pia.stp
 set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to gpio_1[*]
 set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to gpio_0[*]

@@ -517,31 +517,37 @@ begin
     sprite_d_cs <= video_ram_cs when cpu_a(12) = '0' else '0';
     sprite_d_wr <= sprite_d_cs and cpu_clk_en and cpu_mem_wr;
     
-    -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-    sprite_d_inst : entity work.dpram_ex
-      generic map
-      (
-        init_file		=> "",
-        widthad_a		=> 11,
-        width_a     => 16,
-        widthad_b		=> 12,
-        width_b     => 8
-      )
-      port map
-      (
-        clock_b			=> clk_sys,
-        address_b		=> cpu_a(11 downto 0),
-        wren_b			=> sprite_d_wr,
-        data_b			=> cpu_d_o,
-        q_b					=> open,
+    GEN_SPRITE_ROMS : if false generate
+    
+      -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+      sprite_d_inst : entity work.dpram_ex
+        generic map
+        (
+          init_file		=> "",
+          widthad_a		=> 11,
+          width_a     => 16,
+          widthad_b		=> 12,
+          width_b     => 8
+        )
+        port map
+        (
+          clock_b			=> clk_sys,
+          address_b		=> cpu_a(11 downto 0),
+          wren_b			=> sprite_d_wr,
+          data_b			=> cpu_d_o,
+          q_b					=> open,
 
-        clock_a			=> clk_video,
-        address_a		=> sprite_i.a(11 downto 1),
-        wren_a			=> '0',
-        data_a			=> (others => 'X'),
-        q_a					=> sprite_o.d(15 downto 0)
-      );
+          clock_a			=> clk_video,
+          address_a		=> sprite_i.a(11 downto 1),
+          wren_a			=> '0',
+          data_a			=> (others => 'X'),
+          q_a					=> sprite_o.d(15 downto 0)
+        );
 
+    else generate
+      sprite_o.d <= (others => '0');
+    end generate GEN_SPRITE_ROMS;
+    
   end block BLK_SPRITES;
   
   BLK_IOREG : block

@@ -65,8 +65,11 @@ package project_pkg is
 	-- GameBoy constants
 	
   constant GAMEBOY_CART_IN_FLASH            : boolean := false;
-  constant GAMEBOY_CART_NAME                : string := "tetris10";
+  -- 32KB carts
+  --constant GAMEBOY_CART_NAME                : string := "tetris10";
+  constant GAMEBOY_CART_NAME                : string := "drmario10";
   constant GAMEBOY_CART_WIDTHAD             : natural := 15;
+  -- 64KB carts
 --  constant GAMEBOY_CART_NAME                : string := "sml11";
 --  constant GAMEBOY_CART_WIDTHAD             : natural := 16;
 
