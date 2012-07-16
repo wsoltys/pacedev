@@ -68,7 +68,7 @@ package project_pkg is
   -- S5A-specific constants
 
   -- need 64KB of RAM for the TRS-80  
-  constant S5AR2_EMULATE_SRAM               : boolean := true;
+  constant S5AR2_EMULATE_SRAM               : boolean := false;
   constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 16;
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
   constant S5AR2_DOUBLE_VDO_IDCK            : boolean := false;
@@ -82,9 +82,9 @@ package project_pkg is
 
 	-- TRS-80-specific constants
 
-  --constant TRS80_M1_ROM                     : string := "level1.hex";
+  constant TRS80_M1_ROM                     : string := "level1.hex";
   --constant TRS80_M1_ROM                     : string := "model1a.hex";    -- v1.2
-  constant TRS80_M1_ROM                     : string := "model1b.hex";    -- v1.3
+  --constant TRS80_M1_ROM                     : string := "model1b.hex";    -- v1.3
   --constant TRS80_M1_ROM                     : string := "m1v13_bartlett.hex";
   --constant TRS80_M1_ROM                     : string := "sys80.hex";
   --constant TRS80_M1_ROM                     : string := "lnw80.hex";

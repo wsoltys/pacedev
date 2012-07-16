@@ -84,12 +84,13 @@ architecture SYN of platform is
 
 	alias clk_40M					: std_logic is clkrst_i.clk(0);
 	alias clk_video       : std_logic is clkrst_i.clk(1);
-	signal clk_2M_ena			: std_logic;
+	signal clk_2M_en			: std_logic;
 	
   -- uP signals  
   signal cpu_a              : std_logic_vector(15 downto 0);
   signal cpu_d_i            : std_logic_vector(7 downto 0);
   signal cpu_d_o            : std_logic_vector(7 downto 0);
+  signal cpu_m1_n           : std_logic;
   signal cpu_mem_rd         : std_logic;
   signal cpu_mem_wr         : std_logic;
   signal cpu_io_rd          : std_logic;
@@ -99,11 +100,21 @@ architecture SYN of platform is
   signal cpu_irq_ack        : std_logic;
   signal cpu_nmi            : std_logic;
 	alias cpu_io_a				    : std_logic_vector(7 downto 0) is cpu_a(7 downto 0);
-	                        
+
+  -- start-of-day hardware signal
+  signal sod                : std_logic;
+  
   -- ROM signals        
 	signal rom_cs					    : std_logic;
   signal rom_d_o            : std_logic_vector(7 downto 0);
-                        
+
+  -- port signals
+  signal portFX_cs          : std_logic;
+  signal portF0_r           : std_logic_vector(7 downto 0);
+  signal portF1_r           : std_logic_vector(7 downto 0);
+    alias video_page_r      : std_logic_vector(15 downto 9) is portF1_r(7 downto 1);
+  signal portF2_r           : std_logic_vector(7 downto 0);
+  
   -- keyboard signals
 	signal kbd_cs					    : std_logic;
 	signal kbd_d_o				    : std_logic_vector(7 downto 0);
@@ -185,10 +196,57 @@ begin
   sram_o.we <= ram_wr;
 
 	-- memory chip selects
-	-- ROM $0000-$2FFF, Peter Bartlett's extensions: $3000-$35FF
-	rom_cs <= '1' when cpu_a(15 downto 14) = "00" and cpu_a(13 downto 12) /= "11" else 
-            '1' when cpu_a(15 downto 11) = "00110" and cpu_a(10 downto 9) /= "11" else
+	-- ROM $0000-$3FFF (SOD=1), $C000-$EFFF (SOD=0)
+	rom_cs <= '1' when sod = '1' and cpu_a(15 downto 14) = "00" else
+            '1' when cpu_a(15 downto 13) = "110" else
+            '1' when cpu_a(15 downto 12) = "1110" else
             '0';
+	-- VRAM (all of memory)
+	vram_cs <= '1';
+ 
+   -- io selects
+  portFX_cs <=  '1' when cpu_a(7 downto 4) = X"F" else
+                '0';
+
+  -- start-of-day circuit emulation
+  -- ROMs appear at $0000-$3FFF
+  -- - until A15,14 high and M1# asserted
+  process (clk_40M, cpu_reset)
+  begin
+    if cpu_reset = '1' then
+      sod <= '1';
+    elsif rising_edge(clk_40M) then
+      if clk_2M_en = '1' then
+        if cpu_a(15 downto 14) = "11" and cpu_m1_n = '0' then
+          sod <= '0';
+        end if;
+      end if; -- clk_2M_en
+    end if;
+  end process;
+  
+  -- port I/O
+  process (clk_40M, cpu_reset)
+  begin 
+    if cpu_reset = '1' then
+      portF0_r <= (others => '0');
+      portF1_r <= (others => '0');
+    elsif rising_edge(clk_40M) then
+      if clk_2M_en = '1' then
+        if portFX_cs = '1' then
+          if cpu_io_wr = '1' then
+            case cpu_a(3 downto 0) is
+              when X"0" =>
+                portF0_r <= cpu_d_o;
+              when X"1" =>
+                portF1_r <= cpu_d_o;
+              when others =>
+                null;
+            end case;
+          end if; -- cpu_io_wr
+        end if; -- portFX_cs
+      end if; -- clk_2M_en
+    end if;
+  end process;
 
 	-- RDINTSTATUS $37E0-$37E3 (active high)
 	int_cs <= '1' when cpu_a(15 downto 2) = (X"37E" & "00") else '0';
@@ -196,8 +254,6 @@ begin
 	fdc_cs <= '1' when cpu_a(15 downto 2) = (X"37E" & "11") else '0';
 	-- KEYBOARD $3800-$38FF
 	kbd_cs <= '1' when cpu_a(15 downto 10) = (X"3" & "10") else '0';
-	-- VRAM $3C00-$3FFF
-	vram_cs <= '1' when cpu_a(15 downto 10) = (X"3" & "11") else '0';
 
   -- LNW80 hires RAM ($0000-$3FFF)
   lnw80_hires_ram_cs <= '1' when TRS80_M1_IS_LNW80 and (gfxram_ena = '1') and 
@@ -242,20 +298,21 @@ begin
     cpu_d_i <= mem_d when (cpu_mem_rd = '1') else io_d;
 
     -- memory read mux
-    mem_d <= 	lnw80_hires_ram_d_o when lnw80_hires_ram_cs = '1' else
+    mem_d <= 	--lnw80_hires_ram_d_o when lnw80_hires_ram_cs = '1' else
+              -- decode ROM before RAM because of SOD logic
               rom_d_o when rom_cs = '1' else
-              int_status when int_cs = '1' else
-              fdc_d_o when fdc_cs = '1' else
-              kbd_d_o when kbd_cs = '1' else
-              vram_d_o when vram_cs = '1' else
-              ram_d_o;
+              --int_status when int_cs = '1' else
+              --fdc_d_o when fdc_cs = '1' else
+              --kbd_d_o when kbd_cs = '1' else
+              --vram_d_o when vram_cs = '1' else
+              vram_d_o;
     
     -- io read mux
-    io_d <= X"FF" when alpha_joy_cs = '1' else
-            le18_d_o when le18_cs = '1' else
-            vdp_d_o when vdp_cs = '1' else
-            hdd_d when hdd_cs = '1' else
-            lnw80_video_ctl_r when lnw80_video_ctl_cs = '1' else
+    io_d <= --X"FF" when alpha_joy_cs = '1' else
+            --le18_d_o when le18_cs = '1' else
+            --vdp_d_o when vdp_cs = '1' else
+            --hdd_d when hdd_cs = '1' else
+            --lnw80_video_ctl_r when lnw80_video_ctl_cs = '1' else
             X"FF";
   end block BLK_RD_MUX;
   
@@ -311,20 +368,21 @@ begin
 		(
 			clk				=> clk_40M,
 			reset			=> clkrst_i.rst(0),
-			clk_en		=> clk_2M_ena
+			clk_en		=> clk_2M_en
 		);
 
 	up_inst : entity work.Z80                                                
     port map
     (
       clk			=> clk_40M,                                   
-      clk_en	=> clk_2M_ena,
+      clk_en	=> clk_2M_en,
       reset  	=> cpu_reset,                                     
 
       addr   	=> cpu_a,
       datai  	=> cpu_d_i,
       datao  	=> cpu_d_o,
 
+      m1      => cpu_m1_n,
       mem_rd 	=> cpu_mem_rd,
       mem_wr 	=> cpu_mem_wr,
       io_rd  	=> cpu_io_rd,
@@ -333,23 +391,62 @@ begin
       intreq 	=> cpu_irq,
       intvec 	=> cpu_irq_vec,
       intack 	=> cpu_irq_ack,
-      nmi    	=> cpu_nmi
+      nmi    	=> '0' --cpu_nmi
     );
 
   GEN_ROM : if not TRS80_M1_ROM_IN_FLASH generate
   
-    rom_inst : entity work.sprom
+    signal romC000_d_o  : std_logic_vector(7 downto 0);
+    signal romD000_d_o  : std_logic_vector(7 downto 0);
+    signal romE000_d_o  : std_logic_vector(7 downto 0);
+    
+  begin
+
+    -- only decode A13..12 because SOD moves the ROMs to $0000
+    rom_d_o <=  romC000_d_o when cpu_a(13 downto 12) = "00" else
+                romD000_d_o when cpu_a(13 downto 12) = "01" else
+                romE000_d_o when cpu_a(13 downto 12) = "10" else
+                (others => '1');
+                
+    romC000_inst : entity work.sprom
       generic map
       (
-        init_file		=> "../../../../../src/platform/trs80/m1/roms/" & TRS80_M1_ROM,
-        widthad_a		=> 14
+        init_file		=> "../../../../../src/platform/super80/roms/super80/u26.hex",
+        widthad_a		=> 12
       )
       port map
       (
         clock			=> clk_40M,
-        address		=> cpu_a(13 downto 0),
-        q					=> rom_d_o
+        address		=> cpu_a(11 downto 0),
+        q					=> romC000_d_o
       );
+
+    romD000_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> "../../../../../src/platform/super80/roms/super80/u33.hex",
+        widthad_a		=> 12
+      )
+      port map
+      (
+        clock			=> clk_40M,
+        address		=> cpu_a(11 downto 0),
+        q					=> romD000_d_o
+      );
+
+    romE000_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> "../../../../../src/platform/super80/roms/super80/u42.hex",
+        widthad_a		=> 12
+      )
+      port map
+      (
+        clock			=> clk_40M,
+        address		=> cpu_a(11 downto 0),
+        q					=> romE000_d_o
+      );
+
   else generate
   
     flash_o.a <= std_logic_vector(resize(unsigned(cpu_a(13 downto 0)), flash_o.a'length));
@@ -377,23 +474,24 @@ begin
 	vram_inst : entity work.dpram
 		generic map
 		(
-			init_file		=> "../../../../../src/platform/trs80/m3/roms/trsvram.hex",
-			numwords_a	=> 1024,
-			widthad_a		=> 10
+			init_file		=> "",
+			--numwords_a	=> 1024,
+			widthad_a		=> 16
 		)
 		port map
 		(
-			clock_b			=> clk_40M,
-			address_b		=> cpu_a(9 downto 0),
-			wren_b			=> vram_wr,
-			data_b			=> cpu_d_o,
-			q_b					=> vram_d_o,
+			clock_b			            => clk_40M,
+			address_b		            => cpu_a(15 downto 0),
+			wren_b			            => vram_wr,
+			data_b			            => cpu_d_o,
+			q_b					            => vram_d_o,
 	
-		  clock_a			=> clk_video,
-			address_a		=> tilemap_i(1).map_a(9 downto 0),
-			wren_a			=> '0',
-			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o(1).map_d(7 downto 0)
+		  clock_a			            => clk_video,
+			address_a(15 downto 9)  => video_page_r,
+			address_a(8 downto 0)   => tilemap_i(1).map_a(8 downto 0),
+			wren_a			            => '0',
+			data_a			            => (others => 'X'),
+			q_a					            => tilemap_o(1).map_d(7 downto 0)
 		);
     tilemap_o(1).map_d(tilemap_o(1).map_d'left downto 8) <= (others => '0');
 
