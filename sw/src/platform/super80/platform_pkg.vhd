@@ -18,9 +18,8 @@ package platform_pkg is
 	constant PACE_VIDEO_NUM_BITMAPS		: natural := 2;
 	constant PACE_VIDEO_NUM_TILEMAPS		: natural := 1;
 	constant PACE_VIDEO_NUM_SPRITES		: natural := 0;
---	constant PACE_VIDEO_H_SIZE				: integer := 480;
-	constant PACE_VIDEO_H_SIZE				: integer := 64*6;
-	constant PACE_VIDEO_V_SIZE				: integer := 192;
+	constant PACE_VIDEO_H_SIZE				: integer := 32*6;
+	constant PACE_VIDEO_V_SIZE				: integer := 16*12;
 	constant PACE_VIDEO_L_CROP          : integer := 0;
 	constant PACE_VIDEO_R_CROP          : integer := PACE_VIDEO_L_CROP;
 	constant PACE_VIDEO_PIPELINE_DELAY  : integer := 5;
@@ -38,8 +37,8 @@ package platform_pkg is
 
 	constant INCLUDE_FDC_SUPPORT			: boolean := false;
 	
-	  type from_PLATFORM_IO_t is record
-  
+  type from_PLATFORM_IO_t is record
+
     sram_i              : from_SRAM_t;
     
     floppy_fifo_clk     : std_logic;

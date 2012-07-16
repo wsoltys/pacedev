@@ -313,6 +313,8 @@ begin
             --vdp_d_o when vdp_cs = '1' else
             --hdd_d when hdd_cs = '1' else
             --lnw80_video_ctl_r when lnw80_video_ctl_cs = '1' else
+            -- port F2 (dipswitches)
+            X"6F" when portFX_cs = '1' and cpu_a(3 downto 0) = X"2" else
             X"FF";
   end block BLK_RD_MUX;
   
