@@ -111,9 +111,12 @@ architecture SYN of platform is
   -- port signals
   signal portFX_cs          : std_logic;
   signal portF0_r           : std_logic_vector(7 downto 0);
+    alias snd_r             : std_logic is portF0_r(3);
   signal portF1_r           : std_logic_vector(7 downto 0);
     alias video_page_r      : std_logic_vector(15 downto 9) is portF1_r(7 downto 1);
   signal portF2_r           : std_logic_vector(7 downto 0);
+  signal portF8_r           : std_logic_vector(7 downto 0);
+    alias kbd_line          : std_logic_vector(7 downto 0) is portF8_r;
   
   -- keyboard signals
 	signal kbd_cs					    : std_logic;
@@ -236,9 +239,14 @@ begin
           if cpu_io_wr = '1' then
             case cpu_a(3 downto 0) is
               when X"0" =>
+                -- general purpose output
                 portF0_r <= cpu_d_o;
               when X"1" =>
+                -- video page
                 portF1_r <= cpu_d_o;
+              when X"8" =>
+                -- keyboard scan line
+                portF8_r <= cpu_d_o;
               when others =>
                 null;
             end case;
@@ -303,7 +311,6 @@ begin
               rom_d_o when rom_cs = '1' else
               --int_status when int_cs = '1' else
               --fdc_d_o when fdc_cs = '1' else
-              --kbd_d_o when kbd_cs = '1' else
               --vram_d_o when vram_cs = '1' else
               vram_d_o;
     
@@ -315,22 +322,27 @@ begin
             --lnw80_video_ctl_r when lnw80_video_ctl_cs = '1' else
             -- port F2 (dipswitches)
             X"6F" when portFX_cs = '1' and cpu_a(3 downto 0) = X"2" else
+            kbd_d_o when portFX_cs = '1' and cpu_a(3 downto 0) = X"A" else
             X"FF";
   end block BLK_RD_MUX;
   
-	KBD_MUX : process (cpu_a, inputs_i)
-  	variable kbd_d_o_v : std_logic_vector(7 downto 0);
-	begin
-  	kbd_d_o_v := X"00";
-		for i in 0 to 7 loop
-	 		if cpu_a(i) = '1' then
-			  kbd_d_o_v := kbd_d_o_v or inputs_i(i).d;
-		  end if;
-		end loop;
-  	-- assign the output
-		kbd_d_o <= kbd_d_o_v;
-  end process KBD_MUX;
-
+  -- Keyboard Matrix
+  process (clk_40M, cpu_reset)
+    variable kbd_d_v  : std_logic_vector(7 downto 0);
+  begin
+    if cpu_reset = '1' then
+      kbd_d_v := (others => '1');
+    elsif rising_edge(clk_40M) then
+      kbd_d_v := (others => '1');
+      for i in 0 to 7 loop
+        if kbd_line(i) = '0' then
+          kbd_d_v := kbd_d_v and inputs_i(i).d;
+        end if;
+      end loop;
+      kbd_d_o <= kbd_d_v;
+    end if;
+  end process;
+  
   graphics_o.bit8(0)(3) <= '0';  -- alt character set?
   
   GEN_DBL_WIDTH : if TRS80_M1_IS_SYSTEM80 generate
@@ -390,7 +402,7 @@ begin
       io_rd  	=> cpu_io_rd,
       io_wr  	=> cpu_io_wr,
 
-      intreq 	=> cpu_irq,
+      intreq 	=> '0', --cpu_irq,
       intvec 	=> cpu_irq_vec,
       intack 	=> cpu_irq_ack,
       nmi    	=> '0' --cpu_nmi
@@ -462,13 +474,13 @@ begin
 	tilerom_inst : entity work.sprom
 		generic map
 		(
-			init_file		=> "../../../../../src/platform/trs80/m1/roms/" & TRS80_M1_CHARSET_ROM,
-			widthad_a		=> 11
+			init_file		=> "../../../../../src/platform/super80/roms/super80/u27.hex",
+			widthad_a		=> 10
 		)
 		port map
 		(
 			clock			=> clk_video,
-			address		=> tilemap_i(1).tile_a(10 downto 0),
+			address		=> tilemap_i(1).tile_a(9 downto 0),
 			q					=> tilemap_o(1).tile_d(7 downto 0)
 		);
 	

@@ -12,7 +12,7 @@ use work.project_pkg.all;
 --
 --	Super-80 Tilemap Controller
 --
---	Tile data is 1 BPP.
+--	Tile data is 8x10(16) 1 BPP.
 --
 
 -- NOTE: this is currently broken when borders = 0
@@ -46,7 +46,7 @@ architecture TILEMAP_1 of tilemapCtl is
 begin
 
 	-- these are constant for a whole line
-  ctl_o.tile_a(ctl_o.tile_a'left downto 12) <= (others => '0');
+  ctl_o.tile_a(ctl_o.tile_a'left downto 10) <= (others => '0');
   ctl_o.attr_a(ctl_o.attr_a'left downto 12) <= (others => '0');
 
   -- generate pixel
@@ -58,7 +58,8 @@ begin
 		variable hcount     : std_logic_vector(7 downto 0);
 		variable vcount			: std_logic_vector(8 downto 0);
 		variable tile_d_v   : std_logic_vector(7 downto 0) := (others => '0');
-		
+		variable line_v     : std_logic_vector(3 downto 0);
+    
   begin
   
     -- not used
@@ -73,9 +74,9 @@ begin
         if vblank = '1' then
           vcount := (others => '0');
         elsif hblank_v = '1' and hblank_prev = '0' then
-          if vcount(2+PACE_VIDEO_V_SCALE downto 0) = X"B" & 
+          if vcount(2+PACE_VIDEO_V_SCALE downto 0) = X"9" & 
               std_logic_vector(to_signed(-1,PACE_VIDEO_V_SCALE-1)) then
-            vcount := vcount + 4 * PACE_VIDEO_V_SCALE + 1;
+            vcount := vcount + 6 * PACE_VIDEO_V_SCALE + 1;
           else
             vcount := vcount + 1;
           end if;
@@ -83,7 +84,9 @@ begin
           -- fixed for the line
           ctl_o.map_a(8 downto 5) <= 
             vcount(6+PACE_VIDEO_V_SCALE downto 3+PACE_VIDEO_V_SCALE);
-          ctl_o.tile_a(3 downto 0) <=  vcount(2+PACE_VIDEO_V_SCALE downto -1+PACE_VIDEO_V_SCALE);
+          -- line offsets in char rom are 0,2,4,6,8,10,12,14,1,3,5,7,9,11,13,15
+          line_v := vcount(2+PACE_VIDEO_V_SCALE downto -1+PACE_VIDEO_V_SCALE);
+          ctl_o.tile_a(3 downto 0) <= line_v(2 downto 0) & line_v(3);
           -- for programmable character generators
           ctl_o.attr_a(3 downto 0) <=  vcount(2+PACE_VIDEO_V_SCALE downto -1+PACE_VIDEO_V_SCALE);
         end if;
@@ -102,7 +105,7 @@ begin
 
         -- 2nd stage of pipeline
         -- - read tile data from tile ROM
-        ctl_o.tile_a(11 downto 4) <= ctl_i.map_d(7 downto 0);
+        ctl_o.tile_a(9 downto 4) <= ctl_i.map_d(5 downto 0);
         -- for programmable character generators
         ctl_o.attr_a(11 downto 4) <= ctl_i.map_d(7 downto 0);
 
@@ -116,22 +119,22 @@ begin
             -- latch character data from PCG-80 RAM
             tile_d_v := "00" & ctl_i.attr_d(1) & ctl_i.attr_d(2) & ctl_i.attr_d(3) & 
                                ctl_i.attr_d(4) & ctl_i.attr_d(5) & ctl_i.attr_d(6);
-          elsif ctl_i.map_d(7) = '0' then
+          else --if ctl_i.map_d(7) = '0' then
             -- latch alpha character rom data
             tile_d_v := ctl_i.tile_d(7 downto 0);
-          else
-            -- generate graphics character
-            case vcount(2+PACE_VIDEO_V_SCALE downto 1+PACE_VIDEO_V_SCALE) is
-              when "00" =>
-                tile_d_v := "00" & ctl_i.map_d(1) & ctl_i.map_d(1) & ctl_i.map_d(1) & 
-                            ctl_i.map_d(0) & ctl_i.map_d(0) & ctl_i.map_d(0);
-              when "01" =>
-                tile_d_v := "00" & ctl_i.map_d(3) & ctl_i.map_d(3) & ctl_i.map_d(3) & 
-                            ctl_i.map_d(2) & ctl_i.map_d(2) & ctl_i.map_d(2);
-              when others =>
-                tile_d_v := "00" & ctl_i.map_d(5) & ctl_i.map_d(5) & ctl_i.map_d(5) & 
-                            ctl_i.map_d(4) & ctl_i.map_d(4) & ctl_i.map_d(4);
-            end case;
+--          else
+--            -- generate graphics character
+--            case vcount(2+PACE_VIDEO_V_SCALE downto 1+PACE_VIDEO_V_SCALE) is
+--              when "00" =>
+--                tile_d_v := "00" & ctl_i.map_d(1) & ctl_i.map_d(1) & ctl_i.map_d(1) & 
+--                            ctl_i.map_d(0) & ctl_i.map_d(0) & ctl_i.map_d(0);
+--              when "01" =>
+--                tile_d_v := "00" & ctl_i.map_d(3) & ctl_i.map_d(3) & ctl_i.map_d(3) & 
+--                            ctl_i.map_d(2) & ctl_i.map_d(2) & ctl_i.map_d(2);
+--              when others =>
+--                tile_d_v := "00" & ctl_i.map_d(5) & ctl_i.map_d(5) & ctl_i.map_d(5) & 
+--                            ctl_i.map_d(4) & ctl_i.map_d(4) & ctl_i.map_d(4);
+--            end case;
           end if;
           if dbl_width /= '0' then
             if hcount(3) = '0' then
@@ -146,18 +149,14 @@ begin
 
         -- green-screen display
         ctl_o.rgb.r <= (others => '0');
-        ctl_o.rgb.g <= (others => inverse_ena xor tile_d_v(0));
+        ctl_o.rgb.g <= (others => inverse_ena xor tile_d_v(7));
         ctl_o.rgb.b <= (others => '0');
         ctl_o.set <= inverse_ena xor tile_d_v(0);
 
         if stb = '1' then
-          tile_d_v := '0' & tile_d_v(tile_d_v'left downto 1);
+          tile_d_v := tile_d_v(tile_d_v'left-1 downto 0) & '0';
           -- handle horiztonal count (part 2)
-          if hcount(2 downto 0) = "101" then
-            hcount := hcount + 3;
-          else
-            hcount := hcount + 1;
-          end if;
+          hcount := hcount + 1;
         end if;
         
         -- for end-of-line detection
