@@ -50,6 +50,7 @@ package kbd_pkg is
   constant SCANCODE_HOME        : std_logic_vector(7 downto 0) := X"6C";
   constant SCANCODE_INS         : std_logic_vector(7 downto 0) := X"70"; -- E0
   constant SCANCODE_PGUP        : std_logic_vector(7 downto 0) := X"7D"; -- E0
+  constant SCANCODE_DELETE      : std_logic_vector(7 downto 0) := X"71"; -- E0
   constant SCANCODE_PGDN        : std_logic_vector(7 downto 0) := X"7A"; -- E0
   constant SCANCODE_UP          : std_logic_vector(7 downto 0) := X"75"; -- E0
   constant SCANCODE_DOWN        : std_logic_vector(7 downto 0) := X"72"; -- E0
@@ -74,10 +75,14 @@ package kbd_pkg is
 	constant SCANCODE_F10					: std_logic_vector(7 downto 0) := X"09";
 	constant SCANCODE_F11					: std_logic_vector(7 downto 0) := X"78";
 	constant SCANCODE_F12					: std_logic_vector(7 downto 0) := X"07";
+  constant SCANCODE_SCROLL      : std_logic_vector(7 downto 0) := X"7E";
 	constant SCANCODE_CAPSLOCK    : std_logic_vector(7 downto 0) := X"58";
 	constant SCANCODE_BACKSLASH   : std_logic_vector(7 downto 0) := X"5D";
   constant SCANCODE_LCTRL      	: std_logic_vector(7 downto 0) := X"14";
+  constant SCANCODE_LGUI        : std_logic_vector(7 downto 0) := X"1F"; -- E0
 	constant SCANCODE_LALT				: std_logic_vector(7 downto 0) := X"11";
+	constant SCANCODE_RGUI        : std_logic_vector(7 downto 0) := X"27"; -- E0
+	--constant SCANCODE_RALT				: std_logic_vector(7 downto 0) := X"11";
 	alias SCANCODE_TILDE          : std_logic_vector(7 downto 0) is SCANCODE_BACKQUOTE;
 	constant SCANCODE_OPENBRKT    : std_logic_vector(7 downto 0) := X"54";
 	alias SCANCODE_OPENBRACE      : std_logic_vector(7 downto 0) is SCANCODE_OPENBRKT;

@@ -126,6 +126,10 @@ architecture SYN of platform is
 	signal vram_cs				    : std_logic;
   signal vram_wr            : std_logic;
   signal vram_d_o           : std_logic_vector(7 downto 0);
+  -- CRAM signals       
+	signal cram_cs				    : std_logic;
+  signal cram_wr            : std_logic;
+  signal cram_d_o           : std_logic_vector(7 downto 0);
 
   -- pcg80 signals
   signal pcg80_cs           : std_logic := '0';
@@ -200,12 +204,15 @@ begin
 
 	-- memory chip selects
 	-- ROM $0000-$3FFF (SOD=1), $C000-$EFFF (SOD=0)
-	rom_cs <= '1' when sod = '1' and cpu_a(15 downto 14) = "00" else
-            '1' when cpu_a(15 downto 13) = "110" else
-            '1' when cpu_a(15 downto 12) = "1110" else
-            '0';
+	rom_cs <=   '1' when sod = '1' and cpu_a(15 downto 14) = "00" else
+              '1' when cpu_a(15 downto 13) = "110" else
+              '1' when cpu_a(15 downto 12) = "1110" else
+              '0';
+  -- CRAM $FE00-$FFFF (Chipspeed Colour Board)
+  cram_cs <=  '1' when cpu_a(15 downto 9) = X"F"&"111" else
+              '0';
 	-- VRAM (all of memory)
-	vram_cs <= '1';
+	vram_cs <=  '1';
  
    -- io selects
   portFX_cs <=  '1' when cpu_a(7 downto 4) = X"F" else
@@ -268,6 +275,7 @@ begin
                               (cpu_a(15 downto 14) = "00") else '0';
   
 	-- memory write enables
+  cram_wr <= cram_cs and cpu_mem_wr;
 	vram_wr <= vram_cs and cpu_mem_wr;
   lnw80_hires_ram_wr <= lnw80_hires_ram_cs and cpu_mem_wr;
   
@@ -309,6 +317,7 @@ begin
     mem_d <= 	--lnw80_hires_ram_d_o when lnw80_hires_ram_cs = '1' else
               -- decode ROM before RAM because of SOD logic
               rom_d_o when rom_cs = '1' else
+              cram_d_o when (SUPER80_HAS_CHIPSPEED_COLOUR and cram_cs = '1') else
               --int_status when int_cs = '1' else
               --fdc_d_o when fdc_cs = '1' else
               --vram_d_o when vram_cs = '1' else
@@ -340,6 +349,8 @@ begin
         end if;
       end loop;
       kbd_d_o <= kbd_d_v;
+      -- <CTRL><C><4> generates an interrupt
+      cpu_irq <= not (inputs_i(3).d(0) or inputs_i(3).d(4) or inputs_i(3).d(7));
     end if;
   end process;
   
@@ -402,7 +413,7 @@ begin
       io_rd  	=> cpu_io_rd,
       io_wr  	=> cpu_io_wr,
 
-      intreq 	=> '0', --cpu_irq,
+      intreq 	=> cpu_irq,
       intvec 	=> cpu_irq_vec,
       intack 	=> cpu_irq_ack,
       nmi    	=> '0' --cpu_nmi
@@ -425,7 +436,8 @@ begin
     romC000_inst : entity work.sprom
       generic map
       (
-        init_file		=> "../../../../../src/platform/super80/roms/super80/u26.hex",
+        init_file		=> "../../../../../src/platform/super80/roms/" &
+                        SUPER80_VARIANT & "/" & SUPER80_BIOS & "u26.hex",
         widthad_a		=> 12
       )
       port map
@@ -438,7 +450,8 @@ begin
     romD000_inst : entity work.sprom
       generic map
       (
-        init_file		=> "../../../../../src/platform/super80/roms/super80/u33.hex",
+        init_file		=> "../../../../../src/platform/super80/roms/" &
+                        SUPER80_VARIANT & "/" & SUPER80_BIOS & "u33.hex",
         widthad_a		=> 12
       )
       port map
@@ -451,7 +464,8 @@ begin
     romE000_inst : entity work.sprom
       generic map
       (
-        init_file		=> "../../../../../src/platform/super80/roms/super80/u42.hex",
+        init_file		=> "../../../../../src/platform/super80/roms/" &
+                        SUPER80_VARIANT & "/" & SUPER80_BIOS & "u42.hex",
         widthad_a		=> 12
       )
       port map
@@ -474,13 +488,14 @@ begin
 	tilerom_inst : entity work.sprom
 		generic map
 		(
-			init_file		=> "../../../../../src/platform/super80/roms/super80/u27.hex",
-			widthad_a		=> 10
+			init_file		=> "../../../../../src/platform/super80/roms/" &
+                      SUPER80_VARIANT & "/u27.hex",
+			widthad_a		=> 11
 		)
 		port map
 		(
 			clock			=> clk_video,
-			address		=> tilemap_i(1).tile_a(9 downto 0),
+			address		=> tilemap_i(1).tile_a(10 downto 0),
 			q					=> tilemap_o(1).tile_d(7 downto 0)
 		);
 	
@@ -509,6 +524,33 @@ begin
 		);
     tilemap_o(1).map_d(tilemap_o(1).map_d'left downto 8) <= (others => '0');
 
+  GEN_CHIPSPEED_COLOUR : if SUPER80_HAS_CHIPSPEED_COLOUR generate
+  begin
+    -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+    cram_inst : entity work.dpram
+      generic map
+      (
+        init_file		=> "",
+        --numwords_a	=> 512,
+        widthad_a		=> 9
+      )
+      port map
+      (
+        clock_b			            => clk_40M,
+        address_b		            => cpu_a(8 downto 0),
+        wren_b			            => cram_wr,
+        data_b			            => cpu_d_o,
+        q_b					            => cram_d_o,
+    
+        clock_a			            => clk_video,
+        address_a(8 downto 0)   => tilemap_i(1).attr_a(8 downto 0),
+        wren_a			            => '0',
+        data_a			            => (others => 'X'),
+        q_a					            => tilemap_o(1).attr_d(7 downto 0)
+      );
+      tilemap_o(1).attr_d(tilemap_o(1).attr_d'left downto 8) <= (others => '0');
+  end generate GEN_CHIPSPEED_COLOUR;
+  
   GEN_PCG80 : if (TRS80_M1_HAS_PCG80 or TRS80_M1_HAS_80GRAFIX) generate
 
     signal pcg80_a        : std_logic_vector(11 downto 0) := (others => '0');
@@ -571,7 +613,7 @@ begin
   else generate
 
     pcg80_d_o <= (others => '0');
-    tilemap_o(1).attr_d <= (others => '0');
+    --tilemap_o(1).attr_d <= (others => '0');
     
   end generate GEN_PCG80;
 
@@ -795,80 +837,6 @@ begin
 --
 --  end generate GEN_MIKROKOLOR;
   
-  BLK_INTERRUPTS : block
-    signal tick_1ms   : std_logic := '0';
-    signal timer_irq  : std_logic := '0';
-  begin
-
-    -- interrupt register
-    process (clk_40M, cpu_reset)
-      variable intreg_r : std_logic := '0';
-    begin
-      if cpu_reset = '1' then
-        intreg_r := '0';
-        int_status <= (others => '0');
-      elsif rising_edge(clk_40M) then
-        -- clear interrupts on falling edge of read
-        if intreg_r = '1' and (int_cs = '0' or cpu_mem_rd = '0') then
-          int_status(6) <= '0';
-          int_status(7) <= '0';
-        end if;
-        -- timer interrupt
-        if timer_irq = '1' then
-          int_status(7) <= '1';
-        end if;
-        -- FDC interrupt
-        if fdc_drq_int = '1' then
-          int_status(6) <= '1';
-        end if;
-        intreg_r := int_cs and cpu_mem_rd;
-      end if;
-    end process;
-
-    cpu_irq <= '1' when int_status /= X"00" else '0';
-    
-    -- 1ms tick for slower counters
-    process (clk_40M, cpu_reset)
-      subtype count_1ms_t is integer range 0 to CLK0_FREQ_MHz*1000-1;
-      variable count_1ms : count_1ms_t := 0;
-    begin
-      if cpu_reset = '1' then
-        count_1ms := 0;
-        tick_1ms <= '0';
-      elsif rising_edge(clk_40M) then
-        tick_1ms <= '0';  -- default
-        if count_1ms = count_1ms_t'high then
-          count_1ms := 0;
-          tick_1ms <= '1';
-        else
-          count_1ms := count_1ms + 1;
-        end if;
-      end if;
-    end process;
-    
-    -- TIMER interrupt (40Hz/25ms)
-    process (clk_40M, cpu_reset)
-      subtype count_25ms_t is integer range 0 to 25-1;
-      variable count_25ms : count_25ms_t := 0;
-    begin
-      if cpu_reset = '1' then
-        timer_irq <= '0';
-        count_25ms := 0;
-      elsif rising_edge(clk_40M) then
-        timer_irq <= '0';   -- default
-        if tick_1ms = '1' then
-          if count_25ms = count_25ms_t'high then
-            timer_irq <= '1';
-            count_25ms := 0;
-          else
-            count_25ms := count_25ms + 1;
-          end if;
-        end if; -- tick_1ms
-      end if;
-    end process;
-    
-  end block BLK_INTERRUPTS;
-
   GEN_FDC : if TRS80_M1_FDC_SUPPORT generate
   
     component wd179x is

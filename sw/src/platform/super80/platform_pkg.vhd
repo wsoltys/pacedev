@@ -36,6 +36,47 @@ package platform_pkg is
                 integer(round(real(CLK0_FREQ_MHz) / CPU_FREQ_MHz));
 
 	constant INCLUDE_FDC_SUPPORT			: boolean := false;
+
+	type palette_entry_t is array (0 to 2) of std_logic_vector(7 downto 0);
+	type palette_entry_a is array (0 to 15) of palette_entry_t;
+
+	constant rgb_pal : palette_entry_a :=
+	(
+     2 => (0=>X"00", 1=>X"00", 2=>X"7F"),   -- Blue
+     3 => (0=>X"00", 1=>X"00", 2=>X"FF"),   -- Light Blue
+     4 => (0=>X"00", 1=>X"7F", 2=>X"00"),   -- Green
+     5 => (0=>X"00", 1=>X"FF", 2=>X"00"),   -- Bright Green
+     6 => (0=>X"00", 1=>X"7F", 2=>X"7F"),   -- Cyan
+     7 => (0=>X"00", 1=>X"FF", 2=>X"FF"),   -- Turquoise
+     8 => (0=>X"7F", 1=>X"00", 2=>X"00"),   -- Dark Red
+     9 => (0=>X"FF", 1=>X"00", 2=>X"00"),   -- Red
+    10 => (0=>X"7F", 1=>X"00", 2=>X"7F"),   -- Purple
+    11 => (0=>X"FF", 1=>X"00", 2=>X"FF"),   -- Magenta
+    12 => (0=>X"7F", 1=>X"7F", 2=>X"00"),   -- Lime
+    13 => (0=>X"FF", 1=>X"FF", 2=>X"00"),   -- Yellow
+    14 => (0=>X"BF", 1=>X"BF", 2=>X"BF"),   -- Off-White
+    15 => (0=>X"FF", 1=>X"FF", 2=>X"FF"),   -- White
+		others => (others => (others => '0'))
+	);
+
+	constant comp_pal : palette_entry_a :=
+	(
+     1 => (0=>X"80", 1=>X"80", 2=>X"80"),   -- Grey
+     2 => (0=>X"00", 1=>X"00", 2=>X"FF"),   -- Blue
+     3 => (0=>X"FF", 1=>X"FF", 2=>X"80"),   -- Light Yellow
+     4 => (0=>X"00", 1=>X"FF", 2=>X"00"),   -- Green
+     5 => (0=>X"FF", 1=>X"80", 2=>X"FF"),   -- Light Magenta
+     6 => (0=>X"00", 1=>X"FF", 2=>X"FF"),   -- Cyan
+     7 => (0=>X"FF", 1=>X"40", 2=>X"40"),   -- Light Red
+     8 => (0=>X"FF", 1=>X"00", 2=>X"00"),   -- Red
+     9 => (0=>X"00", 1=>X"80", 2=>X"80"),   -- Dark Cyan
+    10 => (0=>X"FF", 1=>X"00", 2=>X"FF"),   -- Magenta
+    11 => (0=>X"80", 1=>X"FF", 2=>X"80"),   -- Light Green
+    12 => (0=>X"FF", 1=>X"FF", 2=>X"00"),   -- Yellow
+    13 => (0=>X"00", 1=>X"00", 2=>X"80"),   -- Dark Blue
+    14 => (0=>X"FF", 1=>X"FF", 2=>X"FF"),   -- White
+		others => (others => (others => '0'))
+	);
 	
   type from_PLATFORM_IO_t is record
 

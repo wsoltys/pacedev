@@ -124,8 +124,8 @@ begin
             keybd_v(2).d(5) := key_up;
           when SCANCODE_TAB =>
             keybd_v(2).d(6) := key_up;
-          --when SCANCODE_W =>              -- Super-80 FIRE
-          --  keybd_v(2).d(7) := key_up;
+          when SCANCODE_LGUI =>           -- Super-80 FIRE
+            keybd_v(2).d(7) := key_up;
           -- row 3
           when SCANCODE_C =>
             keybd_v(3).d(0) := key_up;
@@ -139,8 +139,8 @@ begin
             keybd_v(3).d(4) := key_up;
           when SCANCODE_COMMA =>
             keybd_v(3).d(5) := key_up;
-          --when SCANCODE_DOWN =>           -- Super-80 LF
-          --  keybd_v(3).d(6) := key_up;
+          when SCANCODE_PGDN =>           -- Super-80 LF
+            keybd_v(3).d(6) := key_up;
           when SCANCODE_LCTRL =>
             keybd_v(3).d(7) := key_up;
             ctrl := key_down;
@@ -186,14 +186,14 @@ begin
             keybd_v(6).d(1) := key_up;
           when SCANCODE_V =>
             keybd_v(6).d(2) := key_up;
-          --when SCANCODE_TILDE =>          -- Super-80 '^'/'~'
-          --  keybd_v(6).d(3) := key_up;
+          when SCANCODE_EQUALS =>         -- Super-80 '^'/'~'
+            keybd_v(6).d(3) := key_up;
           when SCANCODE_7 =>
             keybd_v(6).d(4) := key_up;
           when SCANCODE_SLASH =>
             keybd_v(6).d(5) := key_up;
-          --when SCANCODE_DEL =>            -- Super-80 DEL
-          --  keybd_v(6).d(6) := key_up;
+          when SCANCODE_DELETE =>         -- Super-80 DEL
+            keybd_v(6).d(6) := key_up;
           when SCANCODE_DOWN =>
             keybd_v(6).d(7) := key_up;
           -- row 7
@@ -209,8 +209,8 @@ begin
             keybd_v(7).d(4) := key_up;
           when SCANCODE_0 =>
             keybd_v(7).d(5) := key_up;
-          --when SCANCODE_LOCK =>           -- Super-80 LOCK
-          --  keybd_v(7).d(6) := key_up;
+          when SCANCODE_CAPSLOCK =>           -- Super-80 LOCK
+            keybd_v(7).d(6) := key_up;
           when SCANCODE_UP =>
             keybd_v(7).d(7) := key_up;
           when others =>

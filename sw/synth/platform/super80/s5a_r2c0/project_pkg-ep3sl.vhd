@@ -80,8 +80,28 @@ package project_pkg is
 
   constant S5AR2_HAS_FLOPPY_IF              : boolean := false;
 
-	-- TRS-80-specific constants
+	-- Super-80-specific constants
 
+  -- monochrome colours taken from the RGB palette
+  constant SUPER80_MONOCHROME_FG_COLOUR_I   : integer range 0 to 15 := 5;   -- bright green
+  constant SUPER80_MONOCHROME_BG_COLOUR_I   : integer range 0 to 15 := 0;   -- black
+
+  -- VARIANT
+  --constant SUPER80_VARIANT                  : string := "super80";
+  constant SUPER80_VARIANT                  : string := "super80m";
+  
+  -- BIOS
+  --constant SUPER80_BIOS                     : string := "";     -- super80
+  constant SUPER80_BIOS                     : string := "8r0";  -- super80m
+  --constant SUPER80_BIOS                     : string := "v37";  -- super80m
+  
+  -- Chipspeed colour board
+  constant SUPER80_HAS_CHIPSPEED_COLOUR     : boolean := SUPER80_VARIANT = "super80m" and true;
+  constant SUPER80_CHIPSPEED_RGB            : boolean := SUPER80_HAS_CHIPSPEED_COLOUR and true;
+  -- derived (do not edit)
+  constant SUPER80_CHIPSPEED_COMPOSITE      : boolean := SUPER80_HAS_CHIPSPEED_COLOUR and 
+                                                          not SUPER80_CHIPSPEED_RGB;
+  
   constant TRS80_M1_ROM                     : string := "level1.hex";
   --constant TRS80_M1_ROM                     : string := "model1a.hex";    -- v1.2
   --constant TRS80_M1_ROM                     : string := "model1b.hex";    -- v1.3

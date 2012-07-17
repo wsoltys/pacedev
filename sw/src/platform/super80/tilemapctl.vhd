@@ -35,7 +35,6 @@ architecture TILEMAP_1 of tilemapCtl is
   alias pcg80_en_hi : std_logic is graphics_i.bit8(0)(5);
   alias pcg80_en_lo : std_logic is graphics_i.bit8(0)(4);
   alias alt_char    : std_logic is graphics_i.bit8(0)(3);
-  alias dbl_width   : std_logic is graphics_i.bit8(0)(2);
 
   -- LNW80
   alias gfxram_ena  : std_logic is graphics_i.bit8(1)(3);
@@ -46,8 +45,7 @@ architecture TILEMAP_1 of tilemapCtl is
 begin
 
 	-- these are constant for a whole line
-  ctl_o.tile_a(ctl_o.tile_a'left downto 10) <= (others => '0');
-  ctl_o.attr_a(ctl_o.attr_a'left downto 12) <= (others => '0');
+  ctl_o.tile_a(ctl_o.tile_a'left downto 11) <= (others => '0');
 
   -- generate pixel
   process (clk, clk_ena, reset)
@@ -58,12 +56,17 @@ begin
 		variable hcount     : std_logic_vector(7 downto 0);
 		variable vcount			: std_logic_vector(8 downto 0);
 		variable tile_d_v   : std_logic_vector(7 downto 0) := (others => '0');
+    variable attr_d_v   : unsigned(7 downto 0);
+      alias bg_attr     : unsigned(3 downto 0) is attr_d_v(7 downto 4);
+      alias fg_attr     : unsigned(3 downto 0) is attr_d_v(3 downto 0);
 		variable line_v     : std_logic_vector(3 downto 0);
+    variable pal_e      : palette_entry_t;
     
   begin
   
     -- not used
     ctl_o.map_a(ctl_o.map_a'left downto 9) <= (others => '0');
+    ctl_o.attr_a(ctl_o.attr_a'left downto 9) <= (others => '0');
 
 		if reset = '1' then
 			hblank_r <= (others => '1');
@@ -84,11 +87,11 @@ begin
           -- fixed for the line
           ctl_o.map_a(8 downto 5) <= 
             vcount(6+PACE_VIDEO_V_SCALE downto 3+PACE_VIDEO_V_SCALE);
+          ctl_o.attr_a(8 downto 5) <= 
+            vcount(6+PACE_VIDEO_V_SCALE downto 3+PACE_VIDEO_V_SCALE);
           -- line offsets in char rom are 0,2,4,6,8,10,12,14,1,3,5,7,9,11,13,15
           line_v := vcount(2+PACE_VIDEO_V_SCALE downto -1+PACE_VIDEO_V_SCALE);
           ctl_o.tile_a(3 downto 0) <= line_v(2 downto 0) & line_v(3);
-          -- for programmable character generators
-          ctl_o.attr_a(3 downto 0) <=  vcount(2+PACE_VIDEO_V_SCALE downto -1+PACE_VIDEO_V_SCALE);
         end if;
 
         -- handle horiztonal count (part 1)
@@ -99,59 +102,56 @@ begin
         -- 1st stage of pipeline
         -- - read tile from tilemap
         if stb = '1' then
-          ctl_o.map_a(4 downto 1) <= hcount(7 downto 4);
-          ctl_o.map_a(0) <= hcount(3) and not dbl_width;
+          ctl_o.map_a(4 downto 0) <= hcount(7 downto 3);
+          ctl_o.attr_a(4 downto 0) <= hcount(7 downto 3);
         end if;
 
         -- 2nd stage of pipeline
         -- - read tile data from tile ROM
+        if SUPER80_BIOS = "" then
+          ctl_o.tile_a(10) <= '0';
+        else
+          ctl_o.tile_a(10) <= ctl_i.map_d(6);
+        end if;
         ctl_o.tile_a(9 downto 4) <= ctl_i.map_d(5 downto 0);
-        -- for programmable character generators
-        ctl_o.attr_a(11 downto 4) <= ctl_i.map_d(7 downto 0);
+        -- - read attribute (colour) from CRAM
+        attr_d_v := unsigned(ctl_i.attr_d(7 downto 0));
 
         -- 3rd stage of pipeline
         -- - latch tile data
         -- (each byte contains information for 8 pixels)
         if hcount(2 downto 0) = "101" then
-          if TRS80_M1_HAS_PCG80 and 
-              ((ctl_i.map_d(7) = '0' and pcg80_en_lo = '1') or
-               (ctl_i.map_d(7) = '1' and pcg80_en_hi = '1')) then
-            -- latch character data from PCG-80 RAM
-            tile_d_v := "00" & ctl_i.attr_d(1) & ctl_i.attr_d(2) & ctl_i.attr_d(3) & 
-                               ctl_i.attr_d(4) & ctl_i.attr_d(5) & ctl_i.attr_d(6);
-          else --if ctl_i.map_d(7) = '0' then
-            -- latch alpha character rom data
-            tile_d_v := ctl_i.tile_d(7 downto 0);
---          else
---            -- generate graphics character
---            case vcount(2+PACE_VIDEO_V_SCALE downto 1+PACE_VIDEO_V_SCALE) is
---              when "00" =>
---                tile_d_v := "00" & ctl_i.map_d(1) & ctl_i.map_d(1) & ctl_i.map_d(1) & 
---                            ctl_i.map_d(0) & ctl_i.map_d(0) & ctl_i.map_d(0);
---              when "01" =>
---                tile_d_v := "00" & ctl_i.map_d(3) & ctl_i.map_d(3) & ctl_i.map_d(3) & 
---                            ctl_i.map_d(2) & ctl_i.map_d(2) & ctl_i.map_d(2);
---              when others =>
---                tile_d_v := "00" & ctl_i.map_d(5) & ctl_i.map_d(5) & ctl_i.map_d(5) & 
---                            ctl_i.map_d(4) & ctl_i.map_d(4) & ctl_i.map_d(4);
---            end case;
-          end if;
-          if dbl_width /= '0' then
-            if hcount(3) = '0' then
-              tile_d_v := "00" & tile_d_v(2) & tile_d_v(2) &
-                          tile_d_v(1) & tile_d_v(1) & tile_d_v(0) & tile_d_v(0);
-            else
-              tile_d_v := "00" & tile_d_v(5) & tile_d_v(5) &
-                          tile_d_v(4) & tile_d_v(4) & tile_d_v(3) & tile_d_v(3);
-            end if; -- hcount(3)='0'
-          end if; -- dlb_width/='0'
+          -- latch alpha character rom data
+          tile_d_v := ctl_i.tile_d(7 downto 0);
         end if;
 
-        -- green-screen display
-        ctl_o.rgb.r <= (others => '0');
-        ctl_o.rgb.g <= (others => inverse_ena xor tile_d_v(7));
-        ctl_o.rgb.b <= (others => '0');
-        ctl_o.set <= inverse_ena xor tile_d_v(0);
+        if SUPER80_HAS_CHIPSPEED_COLOUR then
+          if tile_d_v(7) = '0' then
+            if SUPER80_CHIPSPEED_RGB then
+              pal_e := rgb_pal(to_integer(bg_attr));
+            else
+              pal_e := comp_pal(to_integer(bg_attr));
+            end if;
+          else
+            if SUPER80_CHIPSPEED_RGB then
+              pal_e := rgb_pal(to_integer(fg_attr));
+            else
+              pal_e := comp_pal(to_integer(fg_attr));
+            end if;
+          end if;
+        else
+          -- normal monochrome
+          if tile_d_v(7) = '0' then
+            pal_e := rgb_pal(SUPER80_MONOCHROME_BG_COLOUR_I);
+          else
+            pal_e := rgb_pal(SUPER80_MONOCHROME_FG_COLOUR_I);
+          end if;
+        end if;
+        
+        ctl_o.rgb.r <= pal_e(0) & "00";
+        ctl_o.rgb.g <= pal_e(1) & "00";
+        ctl_o.rgb.b <= pal_e(2) & "00";
+        ctl_o.set <= '1';
 
         if stb = '1' then
           tile_d_v := tile_d_v(tile_d_v'left-1 downto 0) & '0';
