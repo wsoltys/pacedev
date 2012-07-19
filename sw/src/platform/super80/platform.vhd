@@ -437,7 +437,7 @@ begin
       generic map
       (
         init_file		=> "../../../../../src/platform/super80/roms/" &
-                        SUPER80_VARIANT & "/" & SUPER80_BIOS & "u26.hex",
+                        SUPER80_BIOS_C000 & ".u26.hex",
         widthad_a		=> 12
       )
       port map
@@ -451,7 +451,7 @@ begin
       generic map
       (
         init_file		=> "../../../../../src/platform/super80/roms/" &
-                        SUPER80_VARIANT & "/" & SUPER80_BIOS & "u33.hex",
+                        SUPER80_BIOS_D000 & ".u33.hex",
         widthad_a		=> 12
       )
       port map
@@ -465,7 +465,7 @@ begin
       generic map
       (
         init_file		=> "../../../../../src/platform/super80/roms/" &
-                        SUPER80_VARIANT & "/" & SUPER80_BIOS & "u42.hex",
+                        SUPER80_BIOS_E000 & ".u42.hex",
         widthad_a		=> 12
       )
       port map
@@ -489,13 +489,13 @@ begin
 		generic map
 		(
 			init_file		=> "../../../../../src/platform/super80/roms/" &
-                      SUPER80_VARIANT & "/u27.hex",
-			widthad_a		=> 11
+                      SUPER80_VARIANT & ".u27.hex",
+			widthad_a		=> 13
 		)
 		port map
 		(
 			clock			=> clk_video,
-			address		=> tilemap_i(1).tile_a(10 downto 0),
+			address		=> tilemap_i(1).tile_a(12 downto 0),
 			q					=> tilemap_o(1).tile_d(7 downto 0)
 		);
 	

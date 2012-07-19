@@ -35,8 +35,8 @@ package project_pkg is
 
   -- P2-specific constants
 
-	constant PACE_ENABLE_ADV724							  : std_logic := '1';
-	constant PACE_ADV724_STD								  : std_logic := ADV724_STD_PAL;
+	constant P2A_ENABLE_ADV724							  : std_logic := '1';
+	constant P2A_ADV724_STD								    : std_logic := ADV724_STD_PAL;
 
 	-- BBC-specific constants
 

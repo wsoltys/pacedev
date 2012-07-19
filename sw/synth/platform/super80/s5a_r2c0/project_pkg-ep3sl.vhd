@@ -86,17 +86,53 @@ package project_pkg is
   constant SUPER80_MONOCHROME_FG_COLOUR_I   : integer range 0 to 15 := 5;   -- bright green
   constant SUPER80_MONOCHROME_BG_COLOUR_I   : integer range 0 to 15 := 0;   -- black
 
-  -- VARIANT
-  --constant SUPER80_VARIANT                  : string := "super80";
-  constant SUPER80_VARIANT                  : string := "super80m";
+  -- VARIANTS/BIOSes
+
+--  -- V1.2
+--  constant SUPER80_VARIANT                  : string := "super80";
+--  constant SUPER80_BIOS_C000                : string := "super80";        -- V1.2
+--  constant SUPER80_BIOS_D000                : string := SUPER80_BIOS_C000;
+--  constant SUPER80_BIOS_E000                : string := SUPER80_BIOS_C000;
   
-  -- BIOS
-  --constant SUPER80_BIOS                     : string := "";     -- super80
-  constant SUPER80_BIOS                     : string := "8r0";  -- super80m
-  --constant SUPER80_BIOS                     : string := "v37";  -- super80m
+--  -- V2.2
+--  constant SUPER80_VARIANT                  : string := "super80d";
+--  constant SUPER80_BIOS_C000                : string := "super80d";       -- V2.2
+--  constant SUPER80_BIOS_C000                : string := "super80f";       -- MDS (original)
+--  constant SUPER80_BIOS_C000                : string := "super80g";       -- MDS (upgraded)
+--  constant SUPER80_BIOS_D000                : string := "super80";
+--  constant SUPER80_BIOS_E000                : string := "super80";
+
+--  -- El Grafix 4
+--  constant SUPER80_VARIANT                  : string := "super80e";
+--  constant SUPER80_BIOS_C000                : string := "super80e";       -- MDS (original)
+--  constant SUPER80_BIOS_D000                : string := "super80";
+--  constant SUPER80_BIOS_E000                : string := "super80";
+
+  -- With Colour
+  constant SUPER80_VARIANT                  : string := "super80m";
+  constant SUPER80_BIOS_C000                : string := "s80-8r0";        -- v3.8r0
+--  constant SUPER80_BIOS_C000                : string := "s80-v37";        -- v3.7
+  constant SUPER80_BIOS_D000                : string := SUPER80_BIOS_C000;
+  constant SUPER80_BIOS_E000                : string := SUPER80_BIOS_C000;
+
+--  -- With VDUEB
+--  constant SUPER80_VARIANT                  : string := "super80r";
+--  constant SUPER80_BIOS_C000                : string := "super80r";       -- MCE (original)
+--  constant SUPER80_BIOS_C000                : string := "super80s";       -- MCE (upgraded)
+--  constant SUPER80_BIOS_D000                : string := "super80";
+--  constant SUPER80_BIOS_E000                : string := "super80";
+--  constant SUPER80_CHAR                     : string := "s80hmce.ic24";   -- 2KB
+
+--  -- With Enhanced VDUEB
+--  constant SUPER80_VARIANT                  : string := "super80v";
+--  constant SUPER80_BIOS_C000                : string := "s80-v37v";
+--  constant SUPER80_BIOS_D000                : string := SUPER80_BIOS_C000;
+--  constant SUPER80_BIOS_E000                : string := SUPER80_BIOS_C000;
+--  constant SUPER80_CHAR                     : string := "s80hmce.ic24";   -- 2KB
   
   -- Chipspeed colour board
-  constant SUPER80_HAS_CHIPSPEED_COLOUR     : boolean := SUPER80_VARIANT = "super80m" and true;
+  constant SUPER80_HAS_CHIPSPEED_COLOUR     : boolean := (SUPER80_VARIANT = "super80m" or SUPER80_VARIANT = "super80v") 
+                                                          and true;
   constant SUPER80_CHIPSPEED_RGB            : boolean := SUPER80_HAS_CHIPSPEED_COLOUR and true;
   -- derived (do not edit)
   constant SUPER80_CHIPSPEED_COMPOSITE      : boolean := SUPER80_HAS_CHIPSPEED_COLOUR and 

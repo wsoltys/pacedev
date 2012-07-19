@@ -45,7 +45,7 @@ architecture TILEMAP_1 of tilemapCtl is
 begin
 
 	-- these are constant for a whole line
-  ctl_o.tile_a(ctl_o.tile_a'left downto 11) <= (others => '0');
+  ctl_o.tile_a(ctl_o.tile_a'left downto 12) <= (others => '0');
 
   -- generate pixel
   process (clk, clk_ena, reset)
@@ -108,10 +108,10 @@ begin
 
         -- 2nd stage of pipeline
         -- - read tile data from tile ROM
-        if SUPER80_BIOS = "" then
-          ctl_o.tile_a(10) <= '0';
+        if SUPER80_VARIANT = "super80" then
+          ctl_o.tile_a(11 downto 10) <= (others => '0');
         else
-          ctl_o.tile_a(10) <= ctl_i.map_d(6);
+          ctl_o.tile_a(11 downto 10) <= ctl_i.map_d(7 downto 6);
         end if;
         ctl_o.tile_a(9 downto 4) <= ctl_i.map_d(5 downto 0);
         -- - read attribute (colour) from CRAM
