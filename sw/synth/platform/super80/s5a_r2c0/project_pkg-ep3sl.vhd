@@ -95,18 +95,18 @@ package project_pkg is
 --  constant SUPER80_BIOS_E000                : string := SUPER80_BIOS_C000;
   
   -- V2.2
-  constant SUPER80_VARIANT                  : string := "super80d";
-  constant SUPER80_BIOS_C000                : string := "super80d";       -- V2.2
-  --constant SUPER80_BIOS_C000                : string := "super80f";       -- MDS (original)
-  --constant SUPER80_BIOS_C000                : string := "super80g";       -- MDS (upgraded)
-  constant SUPER80_BIOS_D000                : string := "super80";
-  constant SUPER80_BIOS_E000                : string := "super80";
-
---  -- El Grafix 4
---  constant SUPER80_VARIANT                  : string := "super80e";
---  constant SUPER80_BIOS_C000                : string := "super80e";       -- MDS (original)
+--  constant SUPER80_VARIANT                  : string := "super80d";
+--  constant SUPER80_BIOS_C000                : string := "super80d";       -- V2.2
+--  --constant SUPER80_BIOS_C000                : string := "super80f";       -- MDS (original)
+--  --constant SUPER80_BIOS_C000                : string := "super80g";       -- MDS (upgraded)
 --  constant SUPER80_BIOS_D000                : string := "super80";
 --  constant SUPER80_BIOS_E000                : string := "super80";
+
+  -- El Grafix 4
+  constant SUPER80_VARIANT                  : string := "super80e";
+  constant SUPER80_BIOS_C000                : string := "super80e";       -- MDS (original)
+  constant SUPER80_BIOS_D000                : string := "super80";
+  constant SUPER80_BIOS_E000                : string := "super80";
 
 --  -- With Colour
 --  constant SUPER80_VARIANT                  : string := "super80m";

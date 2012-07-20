@@ -111,6 +111,7 @@ architecture SYN of platform is
   -- port signals
   signal portFX_cs          : std_logic;
   signal portF0_r           : std_logic_vector(7 downto 0);
+    alias charset_r         : std_logic is portF0_r(0);
     alias snd_r             : std_logic is portF0_r(3);
   signal portF1_r           : std_logic_vector(7 downto 0);
     alias video_page_r      : std_logic_vector(15 downto 9) is portF1_r(7 downto 1);
@@ -485,6 +486,9 @@ begin
     
   end generate GEN_ROM;
   
+  -- character set select
+  graphics_o.bit8(0)(0) <= charset_r;
+  
 	tilerom_inst : entity work.sprom
 		generic map
 		(
@@ -495,7 +499,7 @@ begin
 		port map
 		(
 			clock			=> clk_video,
-			address		=> tilemap_i(1).tile_a(12 downto 0),
+			address   => tilemap_i(1).tile_a(12 downto 0),
 			q					=> tilemap_o(1).tile_d(7 downto 0)
 		);
 	
@@ -551,204 +555,204 @@ begin
       tilemap_o(1).attr_d(tilemap_o(1).attr_d'left downto 8) <= (others => '0');
   end generate GEN_CHIPSPEED_COLOUR;
   
-  GEN_PCG80 : if (TRS80_M1_HAS_PCG80 or TRS80_M1_HAS_80GRAFIX) generate
-
-    signal pcg80_a        : std_logic_vector(11 downto 0) := (others => '0');
-    alias pcg80_bank      : std_logic_vector(11 downto 10) is pcg80_a(11 downto 10);
-    signal pcg80_r        : std_logic_vector(7 downto 0) := (others => '0');
-    signal pcg80_wr       : std_logic := '0';
-    
-  begin
-
-    -- PCG-80 register
-    process (clk_40M, cpu_reset)
-    begin
-      if cpu_reset = '1' then
-        pcg80_r <= (others => '0');
-      elsif rising_edge(clk_40M) then
-        -- latch on rising edge IO read cycle
-        if pcg80_cs = '1' and cpu_io_wr = '1' then
-          -- $20,$A0,$28,$A8 all have bit 5 set
-          if cpu_d_o(5) = '1' then
-            pcg80_r <= cpu_d_o;
-            -- set programming bank
-            if (TRS80_M1_HAS_PCG80 and cpu_d_o(7 downto 4) = X"6") or
-               (TRS80_M1_HAS_80GRAFIX and cpu_d_o = X"60") then
-              pcg80_bank <= cpu_d_o(1 downto 0);
-            end if;
-          end if;
-        end if;
-      end if;
-      -- the rest of the address
-      pcg80_a(9 downto 0) <= cpu_a(9 downto 0);
-    end process;
-    pcg80_wr <= vram_wr when pcg80_r(7 downto 4) = X"6" else '0';
-
-    graphics_o.bit8(0)(5) <= pcg80_r(7); -- enable $80-$FF
-    graphics_o.bit8(0)(4) <= pcg80_r(3); -- enable $00-$7F
-
-    -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-    pcg80_inst : entity work.dpram
-      generic map
-      (
-        widthad_a		=> 12
-      )
-      port map
-      (
-        clock_b			=> clk_40M,
-        address_b		=> pcg80_a,
-        wren_b			=> pcg80_wr,
-        data_b			=> cpu_d_o,
-        q_b					=> pcg80_d_o,
-    
-        -- data fed back via 'attribute' port
-        clock_a			=> clk_video,
-        address_a		=> tilemap_i(1).attr_a(11 downto 0),
-        wren_a			=> '0',
-        data_a			=> (others => 'X'),
-        q_a					=> tilemap_o(1).attr_d(7 downto 0)
-      );
-    tilemap_o(1).attr_d(tilemap_o(1).attr_d'left downto 8) <= (others => '0');
-    
-  else generate
-
-    pcg80_d_o <= (others => '0');
-    --tilemap_o(1).attr_d <= (others => '0');
-    
-  end generate GEN_PCG80;
-
-  GEN_LE18 : if TRS80_M1_HAS_LE18 generate
-    signal le18_ram_a   : std_logic_vector(13 downto 0) := (others => '0');
-    signal le18_ram_wr  : std_logic := '0';
-    signal le18_ram_i   : std_logic_vector(5 downto 0) := (others => '0');
-    signal le18_ram_o   : std_logic_vector(5 downto 0) := (others => '0');
-    --
-    signal le18_x       : std_logic_vector(5 downto 0) := (others => '0');
-    signal le18_y       : std_logic_vector(7 downto 0) := (others => '0');
-    signal le18_en      : std_logic := '0';
-  begin
-  
-    process (clk_40M, cpu_reset)
-    begin
-      if cpu_reset = '1' then
-        le18_ram_wr <= '0';
-        le18_x <= (others => '0');
-        le18_y <= (others => '0');
-        le18_en <= '0';
-      elsif rising_edge(clk_40M) then
-        le18_ram_wr <= '0'; -- default
-        -- write to graphics registers
-        if le18_cs = '1' then
-          if cpu_io_wr = '1' then
-            case cpu_io_a(1 downto 0) is
-              when "00" =>
-                le18_ram_i <= cpu_d_o(le18_ram_i'range);
-                le18_ram_wr <= '1';
-              when "01" =>
-                le18_x <= cpu_d_o(le18_x'range);
-              when "10" =>
-                le18_y <= cpu_d_o;
-              when others =>
-                le18_en <= cpu_d_o(0);
-            end case;
-          elsif cpu_io_rd = '1' then
-            case cpu_io_a(1 downto 0) is
-              when "00" =>
-                -- bit7 should be '1' during blanking
-                le18_d_o <= '1' & le18_en & le18_ram_o(5 downto 0);
-              when "01" =>
-                le18_d_o <= "00" & le18_x;
-              when "10" =>
-                le18_d_o <= le18_y;
-              when others =>
-                le18_d_o <= "0000000" & le18_en;
-            end case;
-          end if; -- cpu_io_wr/rd=1
-        end if; -- le18_cs=1
-      end if;
-    end process;
-
-    -- construct RAM address
-    le18_ram_a <= le18_y & le18_x;
-    
-    -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-    le18_ram_inst : entity work.dpram
-      generic map
-      (
-        widthad_a		=> TRS80_M1_LE18_WIDTHAD,
-        width_a     => 6
-      )
-      port map
-      (
-        clock_b			=> clk_40M,
-        address_b		=> le18_ram_a(TRS80_M1_LE18_WIDTHAD-1 downto 0),
-        wren_b			=> le18_ram_wr,
-        data_b			=> le18_ram_i,
-        q_b					=> le18_ram_o,
-    
-        clock_a			=> clk_video,
-        address_a		=> bitmap_i(1).a(TRS80_M1_LE18_WIDTHAD-1 downto 0),
-        wren_a			=> '0',
-        data_a			=> (others => 'X'),
-        q_a					=> bitmap_o(1).d(5 downto 0)
-      );
-    bitmap_o(1).d(7 downto 6) <= (others => '0');
-
-    graphics_o.bit8(0)(6) <= le18_en;
-
-  else generate
-    
-    le18_d_o <= X"FF";
-    bitmap_o(1).d <= (others => '0');
-    
-  end generate GEN_LE18;
-    
-  GEN_LNW80_VIDEO : if TRS80_M1_IS_LNW80 generate
-  begin
-    process (clk_40M, cpu_reset)
-    begin
-      if cpu_reset = '1' then
-        lnw80_video_ctl_r <= (others => '0');
-      elsif rising_edge(clk_40M) then
-        if cpu_io_wr = '1' then
-          -- port 254 controls LNW video
-          if lnw80_video_ctl_cs = '1' then
-            lnw80_video_ctl_r <= cpu_d_o;
-          end if;
-        end if; -- cpu_io_wr
-      end if; -- rising_edge(clk_40M)
-    end process;
-
-    graphics_o.bit8(1) <= lnw80_video_ctl_r;
-    
-    -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-    lnw80_hires_ram_inst : entity work.dpram
-      generic map
-      (
-        widthad_a		=> TRS80_M1_LNW80_HIRES_WIDTHAD,
-        width_a     => 8
-      )
-      port map
-      (
-        clock_b			=> clk_40M,
-        address_b		=> cpu_a(TRS80_M1_LNW80_HIRES_WIDTHAD-1 downto 0),
-        wren_b			=> lnw80_hires_ram_wr,
-        data_b			=> cpu_d_o,
-        q_b					=> lnw80_hires_ram_d_o,
-    
-        clock_a			=> clk_video,
-        address_a		=> bitmap_i(2).a(TRS80_M1_LNW80_HIRES_WIDTHAD-1 downto 0),
-        wren_a			=> '0',
-        data_a			=> (others => 'X'),
-        q_a					=> bitmap_o(2).d(7 downto 0)
-      );
-
-  else generate
-
-    lnw80_video_ctl_r <= (others => '0');
-    bitmap_o(2).d <= (others => '0');
-    
-  end generate GEN_LNW80_VIDEO;
+--  GEN_PCG80 : if (TRS80_M1_HAS_PCG80 or TRS80_M1_HAS_80GRAFIX) generate
+--
+--    signal pcg80_a        : std_logic_vector(11 downto 0) := (others => '0');
+--    alias pcg80_bank      : std_logic_vector(11 downto 10) is pcg80_a(11 downto 10);
+--    signal pcg80_r        : std_logic_vector(7 downto 0) := (others => '0');
+--    signal pcg80_wr       : std_logic := '0';
+--    
+--  begin
+--
+--    -- PCG-80 register
+--    process (clk_40M, cpu_reset)
+--    begin
+--      if cpu_reset = '1' then
+--        pcg80_r <= (others => '0');
+--      elsif rising_edge(clk_40M) then
+--        -- latch on rising edge IO read cycle
+--        if pcg80_cs = '1' and cpu_io_wr = '1' then
+--          -- $20,$A0,$28,$A8 all have bit 5 set
+--          if cpu_d_o(5) = '1' then
+--            pcg80_r <= cpu_d_o;
+--            -- set programming bank
+--            if (TRS80_M1_HAS_PCG80 and cpu_d_o(7 downto 4) = X"6") or
+--               (TRS80_M1_HAS_80GRAFIX and cpu_d_o = X"60") then
+--              pcg80_bank <= cpu_d_o(1 downto 0);
+--            end if;
+--          end if;
+--        end if;
+--      end if;
+--      -- the rest of the address
+--      pcg80_a(9 downto 0) <= cpu_a(9 downto 0);
+--    end process;
+--    pcg80_wr <= vram_wr when pcg80_r(7 downto 4) = X"6" else '0';
+--
+--    graphics_o.bit8(0)(5) <= pcg80_r(7); -- enable $80-$FF
+--    graphics_o.bit8(0)(4) <= pcg80_r(3); -- enable $00-$7F
+--
+--    -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+--    pcg80_inst : entity work.dpram
+--      generic map
+--      (
+--        widthad_a		=> 12
+--      )
+--      port map
+--      (
+--        clock_b			=> clk_40M,
+--        address_b		=> pcg80_a,
+--        wren_b			=> pcg80_wr,
+--        data_b			=> cpu_d_o,
+--        q_b					=> pcg80_d_o,
+--    
+--        -- data fed back via 'attribute' port
+--        clock_a			=> clk_video,
+--        address_a		=> tilemap_i(1).attr_a(11 downto 0),
+--        wren_a			=> '0',
+--        data_a			=> (others => 'X'),
+--        q_a					=> tilemap_o(1).attr_d(7 downto 0)
+--      );
+--    tilemap_o(1).attr_d(tilemap_o(1).attr_d'left downto 8) <= (others => '0');
+--    
+--  else generate
+--
+--    pcg80_d_o <= (others => '0');
+--    --tilemap_o(1).attr_d <= (others => '0');
+--    
+--  end generate GEN_PCG80;
+--
+--  GEN_LE18 : if TRS80_M1_HAS_LE18 generate
+--    signal le18_ram_a   : std_logic_vector(13 downto 0) := (others => '0');
+--    signal le18_ram_wr  : std_logic := '0';
+--    signal le18_ram_i   : std_logic_vector(5 downto 0) := (others => '0');
+--    signal le18_ram_o   : std_logic_vector(5 downto 0) := (others => '0');
+--    --
+--    signal le18_x       : std_logic_vector(5 downto 0) := (others => '0');
+--    signal le18_y       : std_logic_vector(7 downto 0) := (others => '0');
+--    signal le18_en      : std_logic := '0';
+--  begin
+--  
+--    process (clk_40M, cpu_reset)
+--    begin
+--      if cpu_reset = '1' then
+--        le18_ram_wr <= '0';
+--        le18_x <= (others => '0');
+--        le18_y <= (others => '0');
+--        le18_en <= '0';
+--      elsif rising_edge(clk_40M) then
+--        le18_ram_wr <= '0'; -- default
+--        -- write to graphics registers
+--        if le18_cs = '1' then
+--          if cpu_io_wr = '1' then
+--            case cpu_io_a(1 downto 0) is
+--              when "00" =>
+--                le18_ram_i <= cpu_d_o(le18_ram_i'range);
+--                le18_ram_wr <= '1';
+--              when "01" =>
+--                le18_x <= cpu_d_o(le18_x'range);
+--              when "10" =>
+--                le18_y <= cpu_d_o;
+--              when others =>
+--                le18_en <= cpu_d_o(0);
+--            end case;
+--          elsif cpu_io_rd = '1' then
+--            case cpu_io_a(1 downto 0) is
+--              when "00" =>
+--                -- bit7 should be '1' during blanking
+--                le18_d_o <= '1' & le18_en & le18_ram_o(5 downto 0);
+--              when "01" =>
+--                le18_d_o <= "00" & le18_x;
+--              when "10" =>
+--                le18_d_o <= le18_y;
+--              when others =>
+--                le18_d_o <= "0000000" & le18_en;
+--            end case;
+--          end if; -- cpu_io_wr/rd=1
+--        end if; -- le18_cs=1
+--      end if;
+--    end process;
+--
+--    -- construct RAM address
+--    le18_ram_a <= le18_y & le18_x;
+--    
+--    -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+--    le18_ram_inst : entity work.dpram
+--      generic map
+--      (
+--        widthad_a		=> TRS80_M1_LE18_WIDTHAD,
+--        width_a     => 6
+--      )
+--      port map
+--      (
+--        clock_b			=> clk_40M,
+--        address_b		=> le18_ram_a(TRS80_M1_LE18_WIDTHAD-1 downto 0),
+--        wren_b			=> le18_ram_wr,
+--        data_b			=> le18_ram_i,
+--        q_b					=> le18_ram_o,
+--    
+--        clock_a			=> clk_video,
+--        address_a		=> bitmap_i(1).a(TRS80_M1_LE18_WIDTHAD-1 downto 0),
+--        wren_a			=> '0',
+--        data_a			=> (others => 'X'),
+--        q_a					=> bitmap_o(1).d(5 downto 0)
+--      );
+--    bitmap_o(1).d(7 downto 6) <= (others => '0');
+--
+--    graphics_o.bit8(0)(6) <= le18_en;
+--
+--  else generate
+--    
+--    le18_d_o <= X"FF";
+--    bitmap_o(1).d <= (others => '0');
+--    
+--  end generate GEN_LE18;
+--    
+--  GEN_LNW80_VIDEO : if TRS80_M1_IS_LNW80 generate
+--  begin
+--    process (clk_40M, cpu_reset)
+--    begin
+--      if cpu_reset = '1' then
+--        lnw80_video_ctl_r <= (others => '0');
+--      elsif rising_edge(clk_40M) then
+--        if cpu_io_wr = '1' then
+--          -- port 254 controls LNW video
+--          if lnw80_video_ctl_cs = '1' then
+--            lnw80_video_ctl_r <= cpu_d_o;
+--          end if;
+--        end if; -- cpu_io_wr
+--      end if; -- rising_edge(clk_40M)
+--    end process;
+--
+--    graphics_o.bit8(1) <= lnw80_video_ctl_r;
+--    
+--    -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+--    lnw80_hires_ram_inst : entity work.dpram
+--      generic map
+--      (
+--        widthad_a		=> TRS80_M1_LNW80_HIRES_WIDTHAD,
+--        width_a     => 8
+--      )
+--      port map
+--      (
+--        clock_b			=> clk_40M,
+--        address_b		=> cpu_a(TRS80_M1_LNW80_HIRES_WIDTHAD-1 downto 0),
+--        wren_b			=> lnw80_hires_ram_wr,
+--        data_b			=> cpu_d_o,
+--        q_b					=> lnw80_hires_ram_d_o,
+--    
+--        clock_a			=> clk_video,
+--        address_a		=> bitmap_i(2).a(TRS80_M1_LNW80_HIRES_WIDTHAD-1 downto 0),
+--        wren_a			=> '0',
+--        data_a			=> (others => 'X'),
+--        q_a					=> bitmap_o(2).d(7 downto 0)
+--      );
+--
+--  else generate
+--
+--    lnw80_video_ctl_r <= (others => '0');
+--    bitmap_o(2).d <= (others => '0');
+--    
+--  end generate GEN_LNW80_VIDEO;
   
 --  GEN_MIKROKOLOR : if TRS80_M1_HAS_MIKROKOLOR generate
 --    component vdp is

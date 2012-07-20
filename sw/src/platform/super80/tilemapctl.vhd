@@ -31,21 +31,18 @@ architecture TILEMAP_1 of tilemapCtl is
   alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
   alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
 
-  alias le18_en     : std_logic is graphics_i.bit8(0)(6);
-  alias pcg80_en_hi : std_logic is graphics_i.bit8(0)(5);
-  alias pcg80_en_lo : std_logic is graphics_i.bit8(0)(4);
-  alias alt_char    : std_logic is graphics_i.bit8(0)(3);
+  alias charset   : std_logic is graphics_i.bit8(0)(0);
 
   -- LNW80
-  alias gfxram_ena  : std_logic is graphics_i.bit8(1)(3);
-  alias gfxmode     : std_logic_vector(1 downto 0) is graphics_i.bit8(1)(2 downto 1);
-  alias inverse_ena : std_logic is graphics_i.bit8(1)(0);
+--  alias gfxram_ena  : std_logic is graphics_i.bit8(1)(3);
+--  alias gfxmode     : std_logic_vector(1 downto 0) is graphics_i.bit8(1)(2 downto 1);
+--  alias inverse_ena : std_logic is graphics_i.bit8(1)(0);
   signal hblank_r : std_logic_vector(DELAY-1 downto 0) := (others => '0');
   
 begin
 
 	-- these are constant for a whole line
-  ctl_o.tile_a(ctl_o.tile_a'left downto 12) <= (others => '0');
+  ctl_o.tile_a(ctl_o.tile_a'left downto 13) <= (others => '0');
 
   -- generate pixel
   process (clk, clk_ena, reset)
@@ -109,11 +106,19 @@ begin
         -- 2nd stage of pipeline
         -- - read tile data from tile ROM
         if SUPER80_VARIANT = "super80" then
-          ctl_o.tile_a(11 downto 10) <= (others => '0');
+          ctl_o.tile_a(12 downto 4) <= "000" & ctl_i.map_d(5 downto 0);
+        elsif SUPER80_VARIANT = "super80d" then
+          ctl_o.tile_a(12 downto 4) <= "00" & ctl_i.map_d(6 downto 0);
+        elsif SUPER80_VARIANT = "super80e" then
+          ctl_o.tile_a(12 downto 4) <= '0' & ctl_i.map_d(7 downto 0);
         else
-          ctl_o.tile_a(11 downto 10) <= ctl_i.map_d(7 downto 6);
+          -- "super80m"
+          if charset = '0' then
+            ctl_o.tile_a(12 downto 4) <= '0' & ctl_i.map_d(7 downto 0);
+          else
+            ctl_o.tile_a(12 downto 4) <= "10" & ctl_i.map_d(6 downto 0);
+          end if;
         end if;
-        ctl_o.tile_a(9 downto 4) <= ctl_i.map_d(5 downto 0);
         -- - read attribute (colour) from CRAM
         attr_d_v := unsigned(ctl_i.attr_d(7 downto 0));
 
