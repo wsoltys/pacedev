@@ -94,13 +94,13 @@ package project_pkg is
 --  constant SUPER80_BIOS_D000                : string := SUPER80_BIOS_C000;
 --  constant SUPER80_BIOS_E000                : string := SUPER80_BIOS_C000;
   
---  -- V2.2
---  constant SUPER80_VARIANT                  : string := "super80d";
---  constant SUPER80_BIOS_C000                : string := "super80d";       -- V2.2
---  constant SUPER80_BIOS_C000                : string := "super80f";       -- MDS (original)
---  constant SUPER80_BIOS_C000                : string := "super80g";       -- MDS (upgraded)
---  constant SUPER80_BIOS_D000                : string := "super80";
---  constant SUPER80_BIOS_E000                : string := "super80";
+  -- V2.2
+  constant SUPER80_VARIANT                  : string := "super80d";
+  constant SUPER80_BIOS_C000                : string := "super80d";       -- V2.2
+  --constant SUPER80_BIOS_C000                : string := "super80f";       -- MDS (original)
+  --constant SUPER80_BIOS_C000                : string := "super80g";       -- MDS (upgraded)
+  constant SUPER80_BIOS_D000                : string := "super80";
+  constant SUPER80_BIOS_E000                : string := "super80";
 
 --  -- El Grafix 4
 --  constant SUPER80_VARIANT                  : string := "super80e";
@@ -108,12 +108,12 @@ package project_pkg is
 --  constant SUPER80_BIOS_D000                : string := "super80";
 --  constant SUPER80_BIOS_E000                : string := "super80";
 
-  -- With Colour
-  constant SUPER80_VARIANT                  : string := "super80m";
-  constant SUPER80_BIOS_C000                : string := "s80-8r0";        -- v3.8r0
---  constant SUPER80_BIOS_C000                : string := "s80-v37";        -- v3.7
-  constant SUPER80_BIOS_D000                : string := SUPER80_BIOS_C000;
-  constant SUPER80_BIOS_E000                : string := SUPER80_BIOS_C000;
+--  -- With Colour
+--  constant SUPER80_VARIANT                  : string := "super80m";
+--  constant SUPER80_BIOS_C000                : string := "s80-8r0";        -- v3.8r0
+----  constant SUPER80_BIOS_C000                : string := "s80-v37";        -- v3.7
+--  constant SUPER80_BIOS_D000                : string := SUPER80_BIOS_C000;
+--  constant SUPER80_BIOS_E000                : string := SUPER80_BIOS_C000;
 
 --  -- With VDUEB
 --  constant SUPER80_VARIANT                  : string := "super80r";
