@@ -2262,6 +2262,7 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.v
 set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/super80/inputmapper.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
+set_global_assignment -name VERILOG_FILE ../../../../src/component/video/crtc6845s.v
 set_global_assignment -name VHDL_FILE ../../../../src/platform/trs80/wd179x.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/ro_cnt.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/ud_cnt.vhd

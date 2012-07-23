@@ -112,7 +112,9 @@ architecture SYN of platform is
   signal portFX_cs          : std_logic;
   signal portF0_r           : std_logic_vector(7 downto 0);
     alias charset_r         : std_logic is portF0_r(0);
+    alias video_r           : std_logic is portF0_r(2);   -- super80v only
     alias snd_r             : std_logic is portF0_r(3);
+    alias pcg_r             : std_logic is portF0_r(4);   -- super80r/v only
   signal portF1_r           : std_logic_vector(7 downto 0);
     alias video_page_r      : std_logic_vector(15 downto 9) is portF1_r(7 downto 1);
   signal portF2_r           : std_logic_vector(7 downto 0);
@@ -132,6 +134,9 @@ architecture SYN of platform is
   signal cram_wr            : std_logic;
   signal cram_d_o           : std_logic_vector(7 downto 0);
 
+  -- VDUEB signals
+  signal crtc6845_cs        : std_logic;
+  
   -- pcg80 signals
   signal pcg80_cs           : std_logic := '0';
   signal pcg80_d_o          : std_logic_vector(7 downto 0);
@@ -176,20 +181,16 @@ architecture SYN of platform is
 begin
 
   assert false
+    report  "SUPER80_VARIANT=" & SUPER80_VARIANT &
+            " SUPER80_BIOS=" & SUPER80_BIOS_C000
+      severity note;
+      
+  assert false
     report  "CLK0_FREQ_MHz=" & integer'image(CLK0_FREQ_MHz) &
             " CPU_FREQ_MHz=" &  real'image(CPU_FREQ_MHz) &
             " CPU_CLK_ENA_DIV=" & integer'image(TRS80_M1_CPU_CLK_ENA_DIVIDE_BY)
       severity note;
 
-  -- check invalid combinations of options
-  
-  assert not (TRS80_M1_IS_LNW80 and (TRS80_M1_HAS_PCG80 or TRS80_M1_HAS_80GRAFIX))
-    report  "TRS80_M1_IS_LNW80 and (TRS80_M1_HAS_PCG80 or TRS80_M1_HAS_80GRAFIX) not supported"
-      severity error;
-  assert not (TRS80_M1_IS_LNW80 and (TRS80_M1_HAS_LE18))
-    report  "TRS80_M1_IS_LNW80 and TRS80_M1_HAS_LE18 not supported"
-      severity error;
-  
 	cpu_reset <= clkrst_i.arst or game_reset;
 
   -- not used for now
@@ -216,8 +217,10 @@ begin
 	vram_cs <=  '1';
  
    -- io selects
-  portFX_cs <=  '1' when cpu_a(7 downto 4) = X"F" else
-                '0';
+  crtc6845_cs <=  '1' when cpu_a(7 downto 1) = X"1"&"000" else
+                  '0';
+  portFX_cs <=    '1' when cpu_a(7 downto 4) = X"F" else
+                  '0';
 
   -- start-of-day circuit emulation
   -- ROMs appear at $0000-$3FFF
@@ -271,9 +274,9 @@ begin
 	-- KEYBOARD $3800-$38FF
 	kbd_cs <= '1' when cpu_a(15 downto 10) = (X"3" & "10") else '0';
 
-  -- LNW80 hires RAM ($0000-$3FFF)
-  lnw80_hires_ram_cs <= '1' when TRS80_M1_IS_LNW80 and (gfxram_ena = '1') and 
-                              (cpu_a(15 downto 14) = "00") else '0';
+--  -- LNW80 hires RAM ($0000-$3FFF)
+--  lnw80_hires_ram_cs <= '1' when TRS80_M1_IS_LNW80 and (gfxram_ena = '1') and 
+--                              (cpu_a(15 downto 14) = "00") else '0';
   
 	-- memory write enables
   cram_wr <= cram_cs and cpu_mem_wr;
@@ -289,11 +292,11 @@ begin
 	-- LE18 $EC-$EF
   le18_cs <= '1' when STD_MATCH(cpu_io_a, X"E" & "11--") else '0';
 	-- PCG-80 $FE, 80-GRAFIX $FF
-	pcg80_cs <= '1' when (TRS80_M1_HAS_PCG80 and cpu_io_a = X"FE") else 
-              '1' when (TRS80_M1_HAS_80GRAFIX and cpu_io_a = X"FF") else
-              '0';
+--	pcg80_cs <= '1' when (TRS80_M1_HAS_PCG80 and cpu_io_a = X"FE") else 
+--              '1' when (TRS80_M1_HAS_80GRAFIX and cpu_io_a = X"FF") else
+--              '0';
   -- LNW80 video control register $FE/254
-  lnw80_video_ctl_cs <= '1' when (TRS80_M1_IS_LNW80 and cpu_io_a = X"FE") else '0';
+--  lnw80_video_ctl_cs <= '1' when (TRS80_M1_IS_LNW80 and cpu_io_a = X"FE") else '0';
   -- mikrokolor I/O $01-$02
   vdp_cs <= '1' when (cpu_a(7 downto 0) = X"01" or cpu_a(7 downto 0) = X"02") else '0';
   
@@ -357,27 +360,6 @@ begin
   
   graphics_o.bit8(0)(3) <= '0';  -- alt character set?
   
-  GEN_DBL_WIDTH : if TRS80_M1_IS_SYSTEM80 generate
-  
-    -- a physical switch on the back of the System 80
-    graphics_o.bit8(0)(2) <= switches_i(9);
-
-  else generate
-  
-    -- software-controlled
-    process (clk_40M, cpu_reset)
-    begin
-      if cpu_reset = '1' then
-        graphics_o.bit8(0)(2) <= '0';
-      elsif rising_edge(clk_40M) then
-        if snd_cs = '1' and cpu_io_wr = '1' then
-          graphics_o.bit8(0)(2) <= cpu_d_o(3);
-        end if;
-      end if;
-    end process;
-    
-  end generate GEN_DBL_WIDTH;
-  
   -- unused outputs
 	sprite_reg_o <= NULL_TO_SPRITE_REG;
 	sprite_o <= NULL_TO_SPRITE_CTL;
@@ -420,7 +402,7 @@ begin
       nmi    	=> '0' --cpu_nmi
     );
 
-  GEN_ROM : if not TRS80_M1_ROM_IN_FLASH generate
+  GEN_ROM : if true generate
   
     signal romC000_d_o  : std_logic_vector(7 downto 0);
     signal romD000_d_o  : std_logic_vector(7 downto 0);
@@ -489,45 +471,111 @@ begin
   -- character set select
   graphics_o.bit8(0)(0) <= charset_r;
   
-	tilerom_inst : entity work.sprom
-		generic map
-		(
-			init_file		=> "../../../../../src/platform/super80/roms/" &
-                      SUPER80_VARIANT & ".u27.hex",
-			widthad_a		=> 13
-		)
-		port map
-		(
-			clock			=> clk_video,
-			address   => tilemap_i(1).tile_a(12 downto 0),
-			q					=> tilemap_o(1).tile_d(7 downto 0)
-		);
-	
-  -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-	vram_inst : entity work.dpram
-		generic map
-		(
-			init_file		=> "",
-			--numwords_a	=> 1024,
-			widthad_a		=> 16
-		)
-		port map
-		(
-			clock_b			            => clk_40M,
-			address_b		            => cpu_a(15 downto 0),
-			wren_b			            => vram_wr,
-			data_b			            => cpu_d_o,
-			q_b					            => vram_d_o,
-	
-		  clock_a			            => clk_video,
-			address_a(15 downto 9)  => video_page_r,
-			address_a(8 downto 0)   => tilemap_i(1).map_a(8 downto 0),
-			wren_a			            => '0',
-			data_a			            => (others => 'X'),
-			q_a					            => tilemap_o(1).map_d(7 downto 0)
-		);
-    tilemap_o(1).map_d(tilemap_o(1).map_d'left downto 8) <= (others => '0');
+  GEN_VIDEO : if SUPER80_HAS_VDUEB generate
 
+    GEN_CRTC6845 : if true generate
+    
+      component crtc6845s is
+        port
+        (
+          -- INPUT
+          I_E         : in std_logic;
+          I_DI        : in std_logic_vector(7 downto 0);
+          I_RS        : in std_logic;
+          I_RWn       : in std_logic;
+          I_CSn       : in std_logic;
+          I_CLK       : in std_logic;
+          I_RSTn      : in std_logic;
+
+          -- OUTPUT
+          O_RA        : out std_logic_vector(4 downto 0);
+          O_MA        : out std_logic_vector(13 downto 0);
+          O_H_SYNC    : out std_logic;
+          O_V_SYNC    : out std_logic;
+          O_DISPTMG   : out std_logic
+        );
+      end component crtc6845s;
+      
+      signal crtc6845_clk     : std_logic;
+      signal crtc6845_e       : std_logic;
+      signal crtc6845_ra      : std_logic_vector(4 downto 0);
+      signal crtc6845_ma      : std_logic_vector(13 downto 0);
+      signal crtc6845_hsync   : std_logic;
+      signal crtc6845_vsync   : std_logic;
+      signal crtc6845_disptmg : std_logic;
+      
+    begin
+    
+      crtc6845_clk <= clk_2M_en;
+      crtc6845_e <= not clk_2M_en;
+      
+      crtc6845s_inst : crtc6845s
+        port map
+        (
+          -- INPUT
+          I_E         => crtc6845_e,
+          I_DI        => cpu_d_o,
+          I_RS        => cpu_a(0),
+          I_RWn       => not cpu_io_wr,
+          I_CSn       => not crtc6845_cs,
+          I_CLK       => crtc6845_clk,
+          I_RSTn      => not cpu_reset,
+
+          -- OUTPUT
+          O_RA        => crtc6845_ra,
+          O_MA        => crtc6845_ma,
+          O_H_SYNC    => crtc6845_hsync,
+          O_V_SYNC    => crtc6845_vsync,
+          O_DISPTMG   => crtc6845_disptmg
+        );
+
+    else generate
+    begin
+    end generate GEN_CRTC6845;
+    
+  else generate
+
+    tilerom_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> "../../../../../src/platform/super80/roms/" &
+                        SUPER80_VARIANT & ".u27.hex",
+        widthad_a		=> 13
+      )
+      port map
+      (
+        clock			=> clk_video,
+        address   => tilemap_i(1).tile_a(12 downto 0),
+        q					=> tilemap_o(1).tile_d(7 downto 0)
+      );
+
+    -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+    vram_inst : entity work.dpram
+      generic map
+      (
+        init_file		=> "",
+        --numwords_a	=> 1024,
+        widthad_a		=> 16
+      )
+      port map
+      (
+        clock_b			            => clk_40M,
+        address_b		            => cpu_a(15 downto 0),
+        wren_b			            => vram_wr,
+        data_b			            => cpu_d_o,
+        q_b					            => vram_d_o,
+    
+        clock_a			            => clk_video,
+        address_a(15 downto 9)  => video_page_r,
+        address_a(8 downto 0)   => tilemap_i(1).map_a(8 downto 0),
+        wren_a			            => '0',
+        data_a			            => (others => 'X'),
+        q_a					            => tilemap_o(1).map_d(7 downto 0)
+      );
+      tilemap_o(1).map_d(tilemap_o(1).map_d'left downto 8) <= (others => '0');
+  
+  end generate GEN_VIDEO;
+  
   GEN_CHIPSPEED_COLOUR : if SUPER80_HAS_CHIPSPEED_COLOUR generate
   begin
     -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
@@ -841,382 +889,382 @@ begin
 --
 --  end generate GEN_MIKROKOLOR;
   
-  GEN_FDC : if TRS80_M1_FDC_SUPPORT generate
-  
-    component wd179x is
-      port
-      (
-        clk           : in std_logic;
-        clk_20M_ena   : in std_logic;
-        reset         : in std_logic;
-        
-        -- micro bus interface
-        mr_n          : in std_logic;
-        we_n          : in std_logic;
-        cs_n          : in std_logic;
-        re_n          : in std_logic;
-        a             : in std_logic_vector(1 downto 0);
-        dal_i         : in std_logic_vector(7 downto 0);
-        dal_o         : out std_logic_vector(7 downto 0);
-        clk_1mhz_en   : in std_logic;
-        drq           : out std_logic;
-        intrq         : out std_logic;
-        
-        -- drive interface
-        step          : out std_logic;
-        dirc          : out std_logic; -- 1=in, 0=out
-        early         : out std_logic;
-        late          : out std_logic;
-        test_n        : in std_logic;
-        hlt           : in std_logic;
-        rg            : out std_logic;
-        sso           : out std_logic;
-        rclk          : in std_logic;
-        raw_read_n    : in std_logic;
-        hld           : out std_logic;
-        tg43          : out std_Logic;
-        wg            : out std_logic;
-        wd            : out std_logic;
-        ready         : in std_logic;
-        wf_n_i        : in std_logic;
-        vfoe_n_o      : out std_logic;
-        tr00_n        : in std_logic;
-        ip_n          : in std_logic;
-        wprt_n        : in std_logic;
-        dden_n        : in std_logic;
+--  GEN_FDC : if TRS80_M1_FDC_SUPPORT generate
+--  
+--    component wd179x is
+--      port
+--      (
+--        clk           : in std_logic;
+--        clk_20M_ena   : in std_logic;
+--        reset         : in std_logic;
+--        
+--        -- micro bus interface
+--        mr_n          : in std_logic;
+--        we_n          : in std_logic;
+--        cs_n          : in std_logic;
+--        re_n          : in std_logic;
+--        a             : in std_logic_vector(1 downto 0);
+--        dal_i         : in std_logic_vector(7 downto 0);
+--        dal_o         : out std_logic_vector(7 downto 0);
+--        clk_1mhz_en   : in std_logic;
+--        drq           : out std_logic;
+--        intrq         : out std_logic;
+--        
+--        -- drive interface
+--        step          : out std_logic;
+--        dirc          : out std_logic; -- 1=in, 0=out
+--        early         : out std_logic;
+--        late          : out std_logic;
+--        test_n        : in std_logic;
+--        hlt           : in std_logic;
+--        rg            : out std_logic;
+--        sso           : out std_logic;
+--        rclk          : in std_logic;
+--        raw_read_n    : in std_logic;
+--        hld           : out std_logic;
+--        tg43          : out std_Logic;
+--        wg            : out std_logic;
+--        wd            : out std_logic;
+--        ready         : in std_logic;
+--        wf_n_i        : in std_logic;
+--        vfoe_n_o      : out std_logic;
+--        tr00_n        : in std_logic;
+--        ip_n          : in std_logic;
+--        wprt_n        : in std_logic;
+--        dden_n        : in std_logic;
+--
+--        -- temp fudge!!!
+--        wr_dat_o			: out std_logic_vector(7 downto 0);
+--        
+--        debug         : out std_logic_vector(31 downto 0)
+--      );
+--    end component wd179x;
+--    
+--    signal clk_20M_ena  : std_logic;
+--    
+--    signal raw_read_n   : std_logic;
+--    signal step         : std_logic;
+--    signal dirc         : std_logic;
+--    signal wg           : std_logic;
+--    signal wd           : std_logic;
+--    signal tr00_n       : std_logic;
+--    signal ip_n         : std_logic;
+--    signal wprt_n       : std_logic;
+--    signal rclk         : std_logic;
+--    
+--  begin
+--
+--    process (clk_40M, clkrst_i.rst(0))
+--    begin
+--      if clkrst_i.rst(0) = '1' then
+--        clk_20M_ena <= '0';
+--      elsif rising_edge(clk_40M) then
+--        clk_20M_ena <= not clk_20M_ena;
+--      end if;
+--    end process;
+--    
+--    -- inverted for 179X???
+--    raw_read_n <= target_i.read_data_n;
+--    tr00_n <= target_i.track_zero_n;
+--    ip_n <= target_i.index_pulse_n;
+--    wprt_n <= target_i.write_protect_n;
+--    rclk <= target_i.rclk;
+--    
+--    target_o.step_n <= not step;
+--    target_o.direction_select_n <= not dirc;
+--    target_o.write_gate_n <= not wg;
+--    target_o.write_data_n <= not wd;
+--
+--    wd179x_inst : wd179x
+--      port map
+--      (
+--        clk           => clk_40M,
+--        clk_20M_ena   => '1',
+--        reset         => clkrst_i.rst(0),
+--        
+--        -- micro bus interface
+--        mr_n          => '1',
+--        we_n          => not cpu_mem_wr,
+--        cs_n          => not fdc_cs,
+--        re_n          => not cpu_mem_rd,
+--        a             => cpu_a(1 downto 0),
+--        dal_i         => cpu_d_o,
+--        dal_o         => fdc_d_o,
+--        clk_1mhz_en   => '1',
+--        drq           => open,    -- NC on M1
+--        intrq         => fdc_drq_int,
+--        
+--        -- drive interface
+--        step          => step,
+--        dirc          => dirc,
+--        early         => open,    -- not used atm
+--        late          => open,    -- not used atm
+--        test_n        => '1',     -- not used
+--        hlt           => '1',     -- head always engaged atm
+--        rg            => open,    -- 179X only?
+--        sso           => open,
+--        rclk          => rclk,
+--        raw_read_n    => raw_read_n,
+--        hld           => open,    -- not used atm
+--        tg43          => open,    -- not used on TRS-80 designs
+--        wg            => wg,
+--        wd            => wd,      -- 200ns (MFM) or 500ns (FM) pulse
+--        ready         => '1',     -- always read atm
+--        wf_n_i        => '1',     -- no write faults atm
+--        vfoe_n_o      => open,    -- not used in TRS-80 designs?
+--        tr00_n        => tr00_n,
+--        ip_n          => ip_n,
+--        wprt_n        => wprt_n,
+--        dden_n        => '0',     -- double density only atm
+--        
+--        -- 1771-only signals
+----        ph3           => '1',     -- NC on M1
+----        3pm_n         => '1',     -- tied high on M1
+----        xtds_n        => '1',     -- tied high on M1
+----        dint_n        => '1',     -- tied high on M1
+--        
+--        wr_dat_o      => open,
+--
+--        debug         => open
+--      );
+--      
+--  else generate
+--
+--    fdc_d_o <= X"FF";
+--    fdc_drq_int <= '0';
+--    leds_o <= (others => '0');
+--        
+--  end generate GEN_FDC;
 
-        -- temp fudge!!!
-        wr_dat_o			: out std_logic_vector(7 downto 0);
-        
-        debug         : out std_logic_vector(31 downto 0)
-      );
-    end component wd179x;
-    
-    signal clk_20M_ena  : std_logic;
-    
-    signal raw_read_n   : std_logic;
-    signal step         : std_logic;
-    signal dirc         : std_logic;
-    signal wg           : std_logic;
-    signal wd           : std_logic;
-    signal tr00_n       : std_logic;
-    signal ip_n         : std_logic;
-    signal wprt_n       : std_logic;
-    signal rclk         : std_logic;
-    
-  begin
-
-    process (clk_40M, clkrst_i.rst(0))
-    begin
-      if clkrst_i.rst(0) = '1' then
-        clk_20M_ena <= '0';
-      elsif rising_edge(clk_40M) then
-        clk_20M_ena <= not clk_20M_ena;
-      end if;
-    end process;
-    
-    -- inverted for 179X???
-    raw_read_n <= target_i.read_data_n;
-    tr00_n <= target_i.track_zero_n;
-    ip_n <= target_i.index_pulse_n;
-    wprt_n <= target_i.write_protect_n;
-    rclk <= target_i.rclk;
-    
-    target_o.step_n <= not step;
-    target_o.direction_select_n <= not dirc;
-    target_o.write_gate_n <= not wg;
-    target_o.write_data_n <= not wd;
-
-    wd179x_inst : wd179x
-      port map
-      (
-        clk           => clk_40M,
-        clk_20M_ena   => '1',
-        reset         => clkrst_i.rst(0),
-        
-        -- micro bus interface
-        mr_n          => '1',
-        we_n          => not cpu_mem_wr,
-        cs_n          => not fdc_cs,
-        re_n          => not cpu_mem_rd,
-        a             => cpu_a(1 downto 0),
-        dal_i         => cpu_d_o,
-        dal_o         => fdc_d_o,
-        clk_1mhz_en   => '1',
-        drq           => open,    -- NC on M1
-        intrq         => fdc_drq_int,
-        
-        -- drive interface
-        step          => step,
-        dirc          => dirc,
-        early         => open,    -- not used atm
-        late          => open,    -- not used atm
-        test_n        => '1',     -- not used
-        hlt           => '1',     -- head always engaged atm
-        rg            => open,    -- 179X only?
-        sso           => open,
-        rclk          => rclk,
-        raw_read_n    => raw_read_n,
-        hld           => open,    -- not used atm
-        tg43          => open,    -- not used on TRS-80 designs
-        wg            => wg,
-        wd            => wd,      -- 200ns (MFM) or 500ns (FM) pulse
-        ready         => '1',     -- always read atm
-        wf_n_i        => '1',     -- no write faults atm
-        vfoe_n_o      => open,    -- not used in TRS-80 designs?
-        tr00_n        => tr00_n,
-        ip_n          => ip_n,
-        wprt_n        => wprt_n,
-        dden_n        => '0',     -- double density only atm
-        
-        -- 1771-only signals
---        ph3           => '1',     -- NC on M1
---        3pm_n         => '1',     -- tied high on M1
---        xtds_n        => '1',     -- tied high on M1
---        dint_n        => '1',     -- tied high on M1
-        
-        wr_dat_o      => open,
-
-        debug         => open
-      );
-      
-  else generate
-
-    fdc_d_o <= X"FF";
-    fdc_drq_int <= '0';
-    leds_o <= (others => '0');
-        
-  end generate GEN_FDC;
-
-  GEN_HDD : if TRS80_M1_HAS_HDD generate
-
-    signal wb_cyc_stb   : std_logic := '0';
-    signal wb_sel       : std_logic_vector(3 downto 0) := (others => '0');
-    signal wb_adr       : std_logic_vector(6 downto 2) := (others => '0');
-    signal wb_dat_i     : std_logic_vector(31 downto 0) := (others => '0');
-    signal wb_dat_o     : std_logic_vector(31 downto 0) := (others => '0');
-    signal wb_we        : std_logic := '0';
-    signal wb_ack       : std_logic := '0';
-    
-    type state_t is ( S_IDLE, S_I1, S_R1, S_W1 );
-    signal state : state_t := S_IDLE;
-
-    signal hdci_cntl    : std_logic_vector(7 downto 0) := (others => '0');
-    alias hdci_enable   : std_logic is hdci_cntl(3);
-    signal hdd_irq      : std_logic;
-
-    signal a_cf_us      : ieee.std_logic_arith.unsigned(2 downto 0) := (others => '0');
-    signal nior0_cf_s   : std_logic := '0';
-    signal niow0_cf_s   : std_logic := '0';
-    signal ide_d_r      : std_logic_vector(31 downto 0) := (others => '0');
-    
-  begin
-
-    platform_o.clk_50M <= clkrst_i.clk_ref;
-    platform_o.clk_25M <= clkrst_i.clk(1);    -- maybe
-    
-    -- to the HDD core
-    platform_o.clk <= clk_40M;
-    platform_o.rst <= cpu_reset;
-    platform_o.arst_n <= clkrst_i.arst_n;
-
-    -- IDE registers
-    --
-    --  $C0-C2  - original RS registers
-    --  $C3     - upper-byte data latch
-    --  $C8-CF  - write-thru to IDE device
-    --
-    
-    hdd_cs <= (cpu_io_rd or cpu_io_wr) 
-                when STD_MATCH(cpu_a(7 downto 0), X"C"&"----") 
-                else '0';
-    
-    process (clk_40M, cpu_reset)
-      variable cpu_io_r : std_logic := '0';
-    begin
-      if cpu_reset = '1' then
-        hdci_cntl <= (others => '0');
-        wb_cyc_stb <= '0';
-        wb_we <= '0';
-        state <= S_I1;
-      elsif rising_edge(clk_40M) then
-        case state is
-          when S_I1 =>
-            -- initialise the OCIDE core
-            wb_cyc_stb <= '1';
-            wb_adr <= "00000";
-            wb_dat_i <= X"00000082";   -- enable IDE, IORDY timing
-            wb_we <= '1';
-            state <= S_W1;
-          when S_IDLE =>
-            wb_cyc_stb <= '0'; -- default
-            -- start a new cycle on rising_edge IORD
-            if cpu_io_r = '0' and (cpu_io_rd or cpu_io_wr) = '1' then
-              if hdd_cs = '1' then
-                case cpu_a(3 downto 0) is
-                  when X"0" =>    -- hdci_wp
-                  when X"1" =>    -- hdci_cntl
-                    hdci_cntl <= cpu_d_o;
-                  when X"2" =>    -- hdci_present
-                  when X"3" =>    -- high-byte latch
-                    if cpu_io_rd = '1' then
-                      -- read latch from previous access
-                      hdd_d <= ide_d_r(15 downto 8);
-                    elsif cpu_io_wr = '1' then
-                      -- latch write data for subsequent access
-                      ide_d_r(15 downto 8) <= cpu_d_o;
-                    end if;
-                  when others =>
-                    -- IDE device registers @$08-$0F
-                    if cpu_a(3) = '1' then
-                      -- start a new access to the OCIDEC
-                      wb_cyc_stb <= hdd_cs;
-                      -- $08-$0F => $10-$17 (ATA registers)
-                      wb_adr <= "10" & cpu_a(2 downto 0);
-                      wb_dat_i(31 downto 8) <= X"0000" & ide_d_r(15 downto 8);
-                      -- Peter Bartlett's drivers require this
-                      -- because IDE sectors start at 1, not 0
-                      if cpu_a(3 downto 0) = X"B" then
-                        wb_dat_i(7 downto 0) <= std_logic_vector(unsigned(cpu_d_o) + 1);
-                      else
-                        wb_dat_i(7 downto 0) <= cpu_d_o;
-                      end if;
-                      wb_we <= cpu_io_wr;
-                      if cpu_io_rd = '1' then
-                        state <= S_R1;
-                      else
-                        state <= S_W1;
-                      end if;
-                    end if; -- $08-$0F (device register)
-                end case;
-              end if; -- ide_cs = '1'
-            end if;
-          when S_R1 =>
-            if wb_ack = '1' then
-              -- latch the whole data bus from the core
-              ide_d_r <= wb_dat_o;
-              -- Peter Bartlett's drivers require this
-              -- because IDE sectors start at 1, not 0
-              if cpu_a(3 downto 0) = X"B" then
-                hdd_d <= std_logic_vector(unsigned(wb_dat_o(hdd_d'range)) - 1);
-              else
-                hdd_d <= wb_dat_o(hdd_d'range);
-              end if;
-              wb_cyc_stb <= '0';
-              state <= S_IDLE;
-            end if;
-          when S_W1 =>
-            if wb_ack = '1' then
-              wb_cyc_stb <= '0';
-              state <= S_IDLE;
-            end if;
-          when others =>
-            wb_cyc_stb <= '0';
-            state <= S_IDLE;
-        end case;
-        cpu_io_r := cpu_io_rd or cpu_io_wr;
-      end if;
-    end process;
-      
-    -- 16-bit access to PIO registers, otherwise 32
-    wb_sel <= "0011" when wb_adr(6) = '1' else "1111";
-    
-    -- PIO mode timings
-    --          0,   1,   2,   3,   4,   5,   6
-    -- t1   -  70,  50,  30,  30,  25,  15,  10
-    -- t2   - 165, 125, 100,  80,  70,  65,  55
-    -- t4   -  30,  20,  15,  10,  10,   5,   5
-    -- teoc - 365, 208, 110,  70,  25,  25,  20
-    --
-    -- n = max(0, round_up((t * clk) - 2))
-    --
-    atahost_inst : entity work.atahost_top
-      generic map
-      (
-        --TWIDTH          => 5,
-        -- PIO mode0 100MHz = 6, 28, 2, 23
-        -- PIO mode0 57M272 = 4, 16, 1, 13
-        -- PIO mode0 40MHz => 1, 5, 0, 13
-        -- PIO mode3 40MHz => 0, 2, 0, 1
-        PIO_mode0_T1    => 1,
-        PIO_mode0_T2    => 5,
-        PIO_mode0_T4    => 0,
-        PIO_mode0_Teoc  => 13
-      )
-      port map
-      (
-        -- WISHBONE SYSCON signals
-        wb_clk_i      => clk_40M,
-        arst_i        => clkrst_i.arst_n,
-        wb_rst_i      => cpu_reset,
-
-        -- WISHBONE SLAVE signals
-        wb_cyc_i      => wb_cyc_stb,
-        wb_stb_i      => wb_cyc_stb,
-        wb_ack_o      => wb_ack,
-        wb_err_o      => open,
-        wb_adr_i      => ieee.std_logic_arith.unsigned(wb_adr),
-        wb_dat_i      => wb_dat_i,
-        wb_dat_o      => wb_dat_o,
-        wb_sel_i      => wb_sel,
-        wb_we_i       => wb_we,
-        wb_inta_o     => open,
-
-        -- ATA signals
-        resetn_pad_o  => platform_o.nreset_cf,
-        dd_pad_i      => platform_i.dd_i,
-        dd_pad_o      => platform_o.dd_o,
-        dd_padoe_o    => platform_o.dd_oe,
-        da_pad_o      => a_cf_us,
-        cs0n_pad_o    => platform_o.nce_cf(1),
-        cs1n_pad_o    => platform_o.nce_cf(2),
-
-        diorn_pad_o	  => nior0_cf_s,
-        diown_pad_o	  => niow0_cf_s,
-        iordy_pad_i	  => platform_i.iordy0_cf,
-        intrq_pad_i	  => platform_i.rdy_irq_cf
-      );
-
-    platform_o.a_cf <= std_logic_vector(a_cf_us);
-    platform_o.nior0_cf <= nior0_cf_s;
-    platform_o.niow0_cf <= niow0_cf_s;
-    
-    -- DMA mode not supported
-    platform_o.ndmack_cf <= 'Z';
-
-    -- detect
-    --<= platform_i.cd_cf;
-    
-    -- power
-    platform_o.non_cf <= '0';
-
-    BLK_ACTIVITY : block
-      signal ide_act : std_logic := '0';
-    begin
-      -- activity LED(s)
-      process (clk_40M, cpu_reset)
-        -- 40MHz for 1/10th sec
-        subtype count_t is integer range 0 to 40000000/10-1;
-        variable count : count_t := 0;
-      begin
-        if cpu_reset = '1' then
-          ide_act <= '0';
-          count := 0;
-        elsif rising_edge(clk_40M) then
-          if nior0_cf_s = '0' or niow0_cf_s = '0' then
-            ide_act <= '1';
-            count := count_t'high;
-          elsif count = 0 then
-            ide_act <= '0';
-          else
-            count := count - 1;
-          end if;
-        end if;
-      end process;
-      leds_o(4) <= ide_act;
-    end block BLK_ACTIVITY;
-    
-  end generate GEN_HDD;
+--  GEN_HDD : if TRS80_M1_HAS_HDD generate
+--
+--    signal wb_cyc_stb   : std_logic := '0';
+--    signal wb_sel       : std_logic_vector(3 downto 0) := (others => '0');
+--    signal wb_adr       : std_logic_vector(6 downto 2) := (others => '0');
+--    signal wb_dat_i     : std_logic_vector(31 downto 0) := (others => '0');
+--    signal wb_dat_o     : std_logic_vector(31 downto 0) := (others => '0');
+--    signal wb_we        : std_logic := '0';
+--    signal wb_ack       : std_logic := '0';
+--    
+--    type state_t is ( S_IDLE, S_I1, S_R1, S_W1 );
+--    signal state : state_t := S_IDLE;
+--
+--    signal hdci_cntl    : std_logic_vector(7 downto 0) := (others => '0');
+--    alias hdci_enable   : std_logic is hdci_cntl(3);
+--    signal hdd_irq      : std_logic;
+--
+--    signal a_cf_us      : ieee.std_logic_arith.unsigned(2 downto 0) := (others => '0');
+--    signal nior0_cf_s   : std_logic := '0';
+--    signal niow0_cf_s   : std_logic := '0';
+--    signal ide_d_r      : std_logic_vector(31 downto 0) := (others => '0');
+--    
+--  begin
+--
+--    platform_o.clk_50M <= clkrst_i.clk_ref;
+--    platform_o.clk_25M <= clkrst_i.clk(1);    -- maybe
+--    
+--    -- to the HDD core
+--    platform_o.clk <= clk_40M;
+--    platform_o.rst <= cpu_reset;
+--    platform_o.arst_n <= clkrst_i.arst_n;
+--
+--    -- IDE registers
+--    --
+--    --  $C0-C2  - original RS registers
+--    --  $C3     - upper-byte data latch
+--    --  $C8-CF  - write-thru to IDE device
+--    --
+--    
+--    hdd_cs <= (cpu_io_rd or cpu_io_wr) 
+--                when STD_MATCH(cpu_a(7 downto 0), X"C"&"----") 
+--                else '0';
+--    
+--    process (clk_40M, cpu_reset)
+--      variable cpu_io_r : std_logic := '0';
+--    begin
+--      if cpu_reset = '1' then
+--        hdci_cntl <= (others => '0');
+--        wb_cyc_stb <= '0';
+--        wb_we <= '0';
+--        state <= S_I1;
+--      elsif rising_edge(clk_40M) then
+--        case state is
+--          when S_I1 =>
+--            -- initialise the OCIDE core
+--            wb_cyc_stb <= '1';
+--            wb_adr <= "00000";
+--            wb_dat_i <= X"00000082";   -- enable IDE, IORDY timing
+--            wb_we <= '1';
+--            state <= S_W1;
+--          when S_IDLE =>
+--            wb_cyc_stb <= '0'; -- default
+--            -- start a new cycle on rising_edge IORD
+--            if cpu_io_r = '0' and (cpu_io_rd or cpu_io_wr) = '1' then
+--              if hdd_cs = '1' then
+--                case cpu_a(3 downto 0) is
+--                  when X"0" =>    -- hdci_wp
+--                  when X"1" =>    -- hdci_cntl
+--                    hdci_cntl <= cpu_d_o;
+--                  when X"2" =>    -- hdci_present
+--                  when X"3" =>    -- high-byte latch
+--                    if cpu_io_rd = '1' then
+--                      -- read latch from previous access
+--                      hdd_d <= ide_d_r(15 downto 8);
+--                    elsif cpu_io_wr = '1' then
+--                      -- latch write data for subsequent access
+--                      ide_d_r(15 downto 8) <= cpu_d_o;
+--                    end if;
+--                  when others =>
+--                    -- IDE device registers @$08-$0F
+--                    if cpu_a(3) = '1' then
+--                      -- start a new access to the OCIDEC
+--                      wb_cyc_stb <= hdd_cs;
+--                      -- $08-$0F => $10-$17 (ATA registers)
+--                      wb_adr <= "10" & cpu_a(2 downto 0);
+--                      wb_dat_i(31 downto 8) <= X"0000" & ide_d_r(15 downto 8);
+--                      -- Peter Bartlett's drivers require this
+--                      -- because IDE sectors start at 1, not 0
+--                      if cpu_a(3 downto 0) = X"B" then
+--                        wb_dat_i(7 downto 0) <= std_logic_vector(unsigned(cpu_d_o) + 1);
+--                      else
+--                        wb_dat_i(7 downto 0) <= cpu_d_o;
+--                      end if;
+--                      wb_we <= cpu_io_wr;
+--                      if cpu_io_rd = '1' then
+--                        state <= S_R1;
+--                      else
+--                        state <= S_W1;
+--                      end if;
+--                    end if; -- $08-$0F (device register)
+--                end case;
+--              end if; -- ide_cs = '1'
+--            end if;
+--          when S_R1 =>
+--            if wb_ack = '1' then
+--              -- latch the whole data bus from the core
+--              ide_d_r <= wb_dat_o;
+--              -- Peter Bartlett's drivers require this
+--              -- because IDE sectors start at 1, not 0
+--              if cpu_a(3 downto 0) = X"B" then
+--                hdd_d <= std_logic_vector(unsigned(wb_dat_o(hdd_d'range)) - 1);
+--              else
+--                hdd_d <= wb_dat_o(hdd_d'range);
+--              end if;
+--              wb_cyc_stb <= '0';
+--              state <= S_IDLE;
+--            end if;
+--          when S_W1 =>
+--            if wb_ack = '1' then
+--              wb_cyc_stb <= '0';
+--              state <= S_IDLE;
+--            end if;
+--          when others =>
+--            wb_cyc_stb <= '0';
+--            state <= S_IDLE;
+--        end case;
+--        cpu_io_r := cpu_io_rd or cpu_io_wr;
+--      end if;
+--    end process;
+--      
+--    -- 16-bit access to PIO registers, otherwise 32
+--    wb_sel <= "0011" when wb_adr(6) = '1' else "1111";
+--    
+--    -- PIO mode timings
+--    --          0,   1,   2,   3,   4,   5,   6
+--    -- t1   -  70,  50,  30,  30,  25,  15,  10
+--    -- t2   - 165, 125, 100,  80,  70,  65,  55
+--    -- t4   -  30,  20,  15,  10,  10,   5,   5
+--    -- teoc - 365, 208, 110,  70,  25,  25,  20
+--    --
+--    -- n = max(0, round_up((t * clk) - 2))
+--    --
+--    atahost_inst : entity work.atahost_top
+--      generic map
+--      (
+--        --TWIDTH          => 5,
+--        -- PIO mode0 100MHz = 6, 28, 2, 23
+--        -- PIO mode0 57M272 = 4, 16, 1, 13
+--        -- PIO mode0 40MHz => 1, 5, 0, 13
+--        -- PIO mode3 40MHz => 0, 2, 0, 1
+--        PIO_mode0_T1    => 1,
+--        PIO_mode0_T2    => 5,
+--        PIO_mode0_T4    => 0,
+--        PIO_mode0_Teoc  => 13
+--      )
+--      port map
+--      (
+--        -- WISHBONE SYSCON signals
+--        wb_clk_i      => clk_40M,
+--        arst_i        => clkrst_i.arst_n,
+--        wb_rst_i      => cpu_reset,
+--
+--        -- WISHBONE SLAVE signals
+--        wb_cyc_i      => wb_cyc_stb,
+--        wb_stb_i      => wb_cyc_stb,
+--        wb_ack_o      => wb_ack,
+--        wb_err_o      => open,
+--        wb_adr_i      => ieee.std_logic_arith.unsigned(wb_adr),
+--        wb_dat_i      => wb_dat_i,
+--        wb_dat_o      => wb_dat_o,
+--        wb_sel_i      => wb_sel,
+--        wb_we_i       => wb_we,
+--        wb_inta_o     => open,
+--
+--        -- ATA signals
+--        resetn_pad_o  => platform_o.nreset_cf,
+--        dd_pad_i      => platform_i.dd_i,
+--        dd_pad_o      => platform_o.dd_o,
+--        dd_padoe_o    => platform_o.dd_oe,
+--        da_pad_o      => a_cf_us,
+--        cs0n_pad_o    => platform_o.nce_cf(1),
+--        cs1n_pad_o    => platform_o.nce_cf(2),
+--
+--        diorn_pad_o	  => nior0_cf_s,
+--        diown_pad_o	  => niow0_cf_s,
+--        iordy_pad_i	  => platform_i.iordy0_cf,
+--        intrq_pad_i	  => platform_i.rdy_irq_cf
+--      );
+--
+--    platform_o.a_cf <= std_logic_vector(a_cf_us);
+--    platform_o.nior0_cf <= nior0_cf_s;
+--    platform_o.niow0_cf <= niow0_cf_s;
+--    
+--    -- DMA mode not supported
+--    platform_o.ndmack_cf <= 'Z';
+--
+--    -- detect
+--    --<= platform_i.cd_cf;
+--    
+--    -- power
+--    platform_o.non_cf <= '0';
+--
+--    BLK_ACTIVITY : block
+--      signal ide_act : std_logic := '0';
+--    begin
+--      -- activity LED(s)
+--      process (clk_40M, cpu_reset)
+--        -- 40MHz for 1/10th sec
+--        subtype count_t is integer range 0 to 40000000/10-1;
+--        variable count : count_t := 0;
+--      begin
+--        if cpu_reset = '1' then
+--          ide_act <= '0';
+--          count := 0;
+--        elsif rising_edge(clk_40M) then
+--          if nior0_cf_s = '0' or niow0_cf_s = '0' then
+--            ide_act <= '1';
+--            count := count_t'high;
+--          elsif count = 0 then
+--            ide_act <= '0';
+--          else
+--            count := count - 1;
+--          end if;
+--        end if;
+--      end process;
+--      leds_o(4) <= ide_act;
+--    end block BLK_ACTIVITY;
+--    
+--  end generate GEN_HDD;
 
   leds_o(leds_o'left downto 5) <= (others => '0');
   -- reserved for floppy drives 0-4

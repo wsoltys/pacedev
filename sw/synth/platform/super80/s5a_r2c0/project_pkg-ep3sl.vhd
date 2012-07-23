@@ -102,11 +102,11 @@ package project_pkg is
 --  constant SUPER80_BIOS_D000                : string := "super80";
 --  constant SUPER80_BIOS_E000                : string := "super80";
 
-  -- El Grafix 4
-  constant SUPER80_VARIANT                  : string := "super80e";
-  constant SUPER80_BIOS_C000                : string := "super80e";       -- MDS (original)
-  constant SUPER80_BIOS_D000                : string := "super80";
-  constant SUPER80_BIOS_E000                : string := "super80";
+--  -- El Grafix 4
+--  constant SUPER80_VARIANT                  : string := "super80e";
+--  constant SUPER80_BIOS_C000                : string := "super80e";       -- MDS (original)
+--  constant SUPER80_BIOS_D000                : string := "super80";
+--  constant SUPER80_BIOS_E000                : string := "super80";
 
 --  -- With Colour
 --  constant SUPER80_VARIANT                  : string := "super80m";
@@ -115,13 +115,13 @@ package project_pkg is
 --  constant SUPER80_BIOS_D000                : string := SUPER80_BIOS_C000;
 --  constant SUPER80_BIOS_E000                : string := SUPER80_BIOS_C000;
 
---  -- With VDUEB
---  constant SUPER80_VARIANT                  : string := "super80r";
---  constant SUPER80_BIOS_C000                : string := "super80r";       -- MCE (original)
---  constant SUPER80_BIOS_C000                : string := "super80s";       -- MCE (upgraded)
---  constant SUPER80_BIOS_D000                : string := "super80";
---  constant SUPER80_BIOS_E000                : string := "super80";
---  constant SUPER80_CHAR                     : string := "s80hmce.ic24";   -- 2KB
+  -- With VDUEB
+  constant SUPER80_VARIANT                  : string := "super80r";
+  constant SUPER80_BIOS_C000                : string := "super80r";       -- MCE (original)
+  --constant SUPER80_BIOS_C000                : string := "super80s";       -- MCE (upgraded)
+  constant SUPER80_BIOS_D000                : string := "super80";
+  constant SUPER80_BIOS_E000                : string := "super80";
+  constant SUPER80_CHAR                     : string := "s80hmce.ic24";   -- 2KB
 
 --  -- With Enhanced VDUEB
 --  constant SUPER80_VARIANT                  : string := "super80v";
@@ -131,42 +131,18 @@ package project_pkg is
 --  constant SUPER80_CHAR                     : string := "s80hmce.ic24";   -- 2KB
   
   -- Chipspeed colour board
-  constant SUPER80_HAS_CHIPSPEED_COLOUR     : boolean := (SUPER80_VARIANT = "super80m" or SUPER80_VARIANT = "super80v") 
+  constant SUPER80_HAS_CHIPSPEED_COLOUR     : boolean := (SUPER80_VARIANT = "super80m" or 
+                                                            SUPER80_VARIANT = "super80v") 
                                                           and true;
   constant SUPER80_CHIPSPEED_RGB            : boolean := SUPER80_HAS_CHIPSPEED_COLOUR and true;
   -- derived (do not edit)
   constant SUPER80_CHIPSPEED_COMPOSITE      : boolean := SUPER80_HAS_CHIPSPEED_COLOUR and 
                                                           not SUPER80_CHIPSPEED_RGB;
-  
-  constant TRS80_M1_ROM                     : string := "level1.hex";
-  --constant TRS80_M1_ROM                     : string := "model1a.hex";    -- v1.2
-  --constant TRS80_M1_ROM                     : string := "model1b.hex";    -- v1.3
-  --constant TRS80_M1_ROM                     : string := "m1v13_bartlett.hex";
-  --constant TRS80_M1_ROM                     : string := "sys80.hex";
-  --constant TRS80_M1_ROM                     : string := "lnw80.hex";
-  --constant TRS80_M1_ROM                     : string := "lnw80_bartlett.hex";
 
-  -- original Model I, no arrow keys
-  --constant TRS80_M1_CHARSET_ROM             : string := "trs80_m1_tile_0.hex";
-  -- standard Model I, no lowercase
-  --constant TRS80_M1_CHARSET_ROM             : string := "trs80_m1_tile_1.hex";
-  -- replacement Model I with lowercase mod
-  constant TRS80_M1_CHARSET_ROM             : string := "trs80_m1_tile_2.hex";
-  --constant TRS80_M1_CHARSET_ROM             : string := "lnw_chr.hex";
-
-  constant TRS80_M1_ROM_IN_FLASH            : boolean := false;
-
-  constant TRS80_M1_IS_SYSTEM80             : boolean := (TRS80_M1_ROM = "sys80.hex");
-  constant TRS80_M1_IS_LNW80                : boolean := (TRS80_M1_ROM(1 to 5) = "lnw80");
-  constant TRS80_M1_LNW80_HIRES_WIDTHAD     : natural := 14;    -- 16KiB
-  constant TRS80_M1_HAS_PCG80               : boolean := (not TRS80_M1_IS_LNW80) and false;
-  constant TRS80_M1_HAS_80GRAFIX            : boolean := (not TRS80_M1_IS_LNW80) and false;
-  constant TRS80_M1_HAS_LE18                : boolean := (not TRS80_M1_IS_LNW80) and false;
-  constant TRS80_M1_LE18_WIDTHAD            : natural := 14;    -- 16KiB
-  constant TRS80_M1_FDC_SUPPORT             : boolean := false;
-  constant TRS80_M1_HAS_HDD                 : boolean := false;
-  constant TRS80_M1_HAS_MIKROKOLOR          : boolean := (not TRS80_M1_IS_LNW80) and false;
-	
+  -- derived (do not edit)
+  constant SUPER80_HAS_VDUEB                : boolean := (SUPER80_VARIANT = "super80r" or 
+                                                            SUPER80_VARIANT = "super80v");
+                                                        
 	-- derived - do not edit
 
   constant PACE_HAS_SRAM                    : boolean := S5AR2_EMULATE_SRAM;
