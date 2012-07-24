@@ -2278,7 +2278,7 @@ set_global_assignment -name VHDL_FILE ../../../../src/platform/trs80/m1/lnw80_bi
 set_global_assignment -name VHDL_FILE ../../../../src/platform/super80/tilemapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/trs80/m1/video_mixer.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Graphics.VHD
-set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_integrated_gfx.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2c0/target_top_ep3sl.vhd
 set_global_assignment -name QIP_FILE vdp_sprdata.qip
 set_global_assignment -name SIGNALTAP_FILE vdp.stp

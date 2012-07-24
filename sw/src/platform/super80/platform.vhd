@@ -37,23 +37,27 @@ entity platform is
     sdram_i	        : in from_SDRAM_t;
     sdram_o	        : out to_SDRAM_t;
 
-    -- graphics
+--    -- graphics
+--    
+--    bitmap_i        : in from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
+--    bitmap_o        : out to_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
+--    
+--    tilemap_i       : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
+--    tilemap_o       : out to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
+--
+--    sprite_reg_o    : out to_SPRITE_REG_t;
+--    sprite_i        : in from_SPRITE_CTL_t;
+--    sprite_o        : out to_SPRITE_CTL_t;
+--    spr0_hit	      : in std_logic;
+--
+--    -- various graphics information
+--    graphics_i      : in from_GRAPHICS_t;
+--    graphics_o      : out to_GRAPHICS_t;
     
-    bitmap_i        : in from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
-    bitmap_o        : out to_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
-    
-    tilemap_i       : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
-    tilemap_o       : out to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
+		-- video (incl. clk)
+		video_i					: in from_VIDEO_t;
+		video_o					: out to_VIDEO_t;
 
-    sprite_reg_o    : out to_SPRITE_REG_t;
-    sprite_i        : in from_SPRITE_CTL_t;
-    sprite_o        : out to_SPRITE_CTL_t;
-    spr0_hit	      : in std_logic;
-
-    -- various graphics information
-    graphics_i      : in from_GRAPHICS_t;
-    graphics_o      : out to_GRAPHICS_t;
-    
     -- OSD
     osd_i           : in from_OSD_t;
     osd_o           : out to_OSD_t;
@@ -358,13 +362,11 @@ begin
     end if;
   end process;
   
-  graphics_o.bit8(0)(3) <= '0';  -- alt character set?
-  
   -- unused outputs
-	sprite_reg_o <= NULL_TO_SPRITE_REG;
-	sprite_o <= NULL_TO_SPRITE_CTL;
-	ser_o <= NULL_TO_SERIAL;
-  spi_o <= NULL_TO_SPI;
+--	sprite_reg_o <= NULL_TO_SPRITE_REG;
+--	sprite_o <= NULL_TO_SPRITE_CTL;
+--	ser_o <= NULL_TO_SERIAL;
+--  spi_o <= NULL_TO_SPI;
   --gp_o <= NULL_TO_GP;
 
 	clk_en_inst : entity work.clk_div
@@ -468,9 +470,6 @@ begin
     
   end generate GEN_ROM;
   
-  -- character set select
-  graphics_o.bit8(0)(0) <= charset_r;
-  
   GEN_VIDEO : if SUPER80_HAS_VDUEB generate
 
     GEN_CRTC6845 : if true generate
@@ -534,6 +533,39 @@ begin
     end generate GEN_CRTC6845;
     
   else generate
+  
+    signal tilemap_o        : to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
+    signal tilemap_i        : from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
+    signal graphics_o       : to_GRAPHICS_t;
+    signal graphics_i       : from_GRAPHICS_t;
+    
+  begin
+  
+    graphics_inst : entity work.Graphics                                    
+      port map
+      (
+        bitmap_ctl_i    => (others => NULL_TO_BITMAP_CTL),
+        bitmap_ctl_o    => open,
+
+        tilemap_ctl_i   => tilemap_o,
+        tilemap_ctl_o   => tilemap_i,
+
+        sprite_reg_i    => NULL_TO_SPRITE_REG,
+        sprite_ctl_i    => NULL_TO_SPRITE_CTL,
+        sprite_ctl_o    => open,
+        spr0_hit				=> open,
+        
+        graphics_i      => graphics_o,
+        graphics_o      => graphics_i,
+        
+        -- OSD
+        to_osd          => NULL_TO_OSD,
+        from_osd        => open,
+
+        -- video (incl. clk)
+        video_i					=> video_i,
+        video_o					=> video_o
+      );
 
     tilerom_inst : entity work.sprom
       generic map
@@ -578,29 +610,29 @@ begin
   
   GEN_CHIPSPEED_COLOUR : if SUPER80_HAS_CHIPSPEED_COLOUR generate
   begin
-    -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-    cram_inst : entity work.dpram
-      generic map
-      (
-        init_file		=> "",
-        --numwords_a	=> 512,
-        widthad_a		=> 9
-      )
-      port map
-      (
-        clock_b			            => clk_40M,
-        address_b		            => cpu_a(8 downto 0),
-        wren_b			            => cram_wr,
-        data_b			            => cpu_d_o,
-        q_b					            => cram_d_o,
-    
-        clock_a			            => clk_video,
-        address_a(8 downto 0)   => tilemap_i(1).attr_a(8 downto 0),
-        wren_a			            => '0',
-        data_a			            => (others => 'X'),
-        q_a					            => tilemap_o(1).attr_d(7 downto 0)
-      );
-      tilemap_o(1).attr_d(tilemap_o(1).attr_d'left downto 8) <= (others => '0');
+--    -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+--    cram_inst : entity work.dpram
+--      generic map
+--      (
+--        init_file		=> "",
+--        --numwords_a	=> 512,
+--        widthad_a		=> 9
+--      )
+--      port map
+--      (
+--        clock_b			            => clk_40M,
+--        address_b		            => cpu_a(8 downto 0),
+--        wren_b			            => cram_wr,
+--        data_b			            => cpu_d_o,
+--        q_b					            => cram_d_o,
+--    
+--        clock_a			            => clk_video,
+--        address_a(8 downto 0)   => tilemap_i(1).attr_a(8 downto 0),
+--        wren_a			            => '0',
+--        data_a			            => (others => 'X'),
+--        q_a					            => tilemap_o(1).attr_d(7 downto 0)
+--      );
+--      tilemap_o(1).attr_d(tilemap_o(1).attr_d'left downto 8) <= (others => '0');
   end generate GEN_CHIPSPEED_COLOUR;
   
 --  GEN_PCG80 : if (TRS80_M1_HAS_PCG80 or TRS80_M1_HAS_80GRAFIX) generate
