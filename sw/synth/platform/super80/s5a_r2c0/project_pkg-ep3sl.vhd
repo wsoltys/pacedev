@@ -67,11 +67,12 @@ package project_pkg is
 
   -- S5A-specific constants
 
-  -- need 64KB of RAM for the TRS-80  
-  constant S5AR2_EMULATE_SRAM               : boolean := false;
+  constant S5AR2_DOUBLE_VDO_IDCK            : boolean := false;
+
+  -- need 64KB of RAM for VDUEB models
+  --constant S5AR2_EMULATE_SRAM               : boolean := false;
   constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 16;
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
-  constant S5AR2_DOUBLE_VDO_IDCK            : boolean := false;
   
   constant S5AR2_EMULATED_FLASH_INIT_FILE   : string := "";
   constant S5AR2_EMULATE_FLASH              : boolean := false;
@@ -115,20 +116,18 @@ package project_pkg is
   constant SUPER80_BIOS_D000                : string := SUPER80_BIOS_C000;
   constant SUPER80_BIOS_E000                : string := SUPER80_BIOS_C000;
 
-  -- With VDUEB
+--  -- With VDUEB
 --  constant SUPER80_VARIANT                  : string := "super80r";
 --  constant SUPER80_BIOS_C000                : string := "super80r";       -- MCE (original)
 --  --constant SUPER80_BIOS_C000                : string := "super80s";       -- MCE (upgraded)
 --  constant SUPER80_BIOS_D000                : string := "super80";
 --  constant SUPER80_BIOS_E000                : string := "super80";
---  constant SUPER80_CHAR                     : string := "s80hmce.ic24";   -- 2KB
 
 --  -- With Enhanced VDUEB
 --  constant SUPER80_VARIANT                  : string := "super80v";
 --  constant SUPER80_BIOS_C000                : string := "s80-v37v";
 --  constant SUPER80_BIOS_D000                : string := SUPER80_BIOS_C000;
 --  constant SUPER80_BIOS_E000                : string := SUPER80_BIOS_C000;
---  constant SUPER80_CHAR                     : string := "s80hmce.ic24";   -- 2KB
   
   -- Chipspeed colour board
   constant SUPER80_HAS_CHIPSPEED_COLOUR     : boolean := (SUPER80_VARIANT = "super80m" or 
@@ -145,6 +144,7 @@ package project_pkg is
                                                         
 	-- derived - do not edit
 
+  constant S5AR2_EMULATE_SRAM               : boolean := SUPER80_HAS_VDUEB;
   constant PACE_HAS_SRAM                    : boolean := S5AR2_EMULATE_SRAM;
   constant PACE_HAS_FLASH                   : boolean := S5AR2_EMULATE_FLASH;
 	

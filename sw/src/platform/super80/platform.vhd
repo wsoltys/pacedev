@@ -102,7 +102,7 @@ architecture SYN of platform is
   signal cpu_irq            : std_logic;
   signal cpu_irq_vec        : std_logic_vector(7 downto 0);
   signal cpu_irq_ack        : std_logic;
-  signal cpu_nmi            : std_logic;
+  --signal cpu_nmi            : std_logic;
 	alias cpu_io_a				    : std_logic_vector(7 downto 0) is cpu_a(7 downto 0);
 
   -- start-of-day hardware signal
@@ -126,7 +126,6 @@ architecture SYN of platform is
     alias kbd_line          : std_logic_vector(7 downto 0) is portF8_r;
   
   -- keyboard signals
-	signal kbd_cs					    : std_logic;
 	signal kbd_d_o				    : std_logic_vector(7 downto 0);
 		                        
   -- VRAM signals       
@@ -140,33 +139,13 @@ architecture SYN of platform is
 
   -- VDUEB signals
   signal crtc6845_cs        : std_logic;
-  
-  -- pcg80 signals
-  signal pcg80_cs           : std_logic := '0';
-  signal pcg80_d_o          : std_logic_vector(7 downto 0);
-  -- le18 signals
-  signal le18_cs            : std_logic := '0';
-  signal le18_d_o           : std_logic_vector(7 downto 0) := (others => '0');
-  -- lnw80 signals
-  signal lnw80_video_ctl_cs   : std_logic := '0';
-  signal lnw80_video_ctl_r    : std_logic_vector(7 downto 0) := (others => '0');
-    alias gfxram_ena          : std_logic is lnw80_video_ctl_r(3);
-    alias gfxmode             : std_logic_vector(1 downto 0) is lnw80_video_ctl_r(2 downto 1);
-    alias inverse_ena         : std_logic is lnw80_video_ctl_r(0);
-  signal lnw80_hires_ram_cs   : std_logic := '0';
-  signal lnw80_hires_ram_wr   : std_logic := '0';
-  signal lnw80_hires_ram_d_o  : std_logic_vector(7 downto 0) := (others => '0');
-  -- mikrokolor signals
-  signal vdp_cs               : std_logic;
-  signal vdp_d_o              : std_logic_vector(7 downto 0);
+  signal chr_cs             : std_logic;
+  signal chr_wr             : std_logic;
+  signal chr_d_o            : std_logic_vector(7 downto 0);
   
   -- RAM signals        
   signal ram_wr             : std_logic;
   alias ram_d_o      	      : std_logic_vector(7 downto 0) is sram_i.d(7 downto 0);
-
-  -- interrupt signals
-	signal int_cs					    : std_logic;
-  signal int_status         : std_logic_vector(7 downto 0);
 
   -- fdc signals
 	signal fdc_cs					    : std_logic;
@@ -179,7 +158,6 @@ architecture SYN of platform is
   -- other signals      
 	alias game_reset			    : std_logic is inputs_i(NUM_INPUT_BYTES-1).d(0);
 	signal cpu_reset			    : std_logic;  
-	signal alpha_joy_cs		    : std_logic;
 	signal snd_cs					    : std_logic;
 
 begin
@@ -214,12 +192,19 @@ begin
               '1' when cpu_a(15 downto 13) = "110" else
               '1' when cpu_a(15 downto 12) = "1110" else
               '0';
-  -- CRAM $FE00-$FFFF (Chipspeed Colour Board)
-  cram_cs <=  '1' when cpu_a(15 downto 9) = X"F"&"111" else
+	-- VRAM (all of memory) or $F000-$F7FF (VDUEB only)
+	vram_cs <=  '1' when not SUPER80_HAS_VDUEB else
+              '1' when cpu_a(15 downto 11) = X"F"&'0' else
               '0';
-	-- VRAM (all of memory)
-	vram_cs <=  '1';
- 
+  -- CHR/PCG $F800-$FFFF (VDUEB only)
+	chr_cs <=   '0' when not SUPER80_HAS_VDUEB else
+              '1' when cpu_a(15 downto 11) = X"F"&'1' else
+              '0';
+  -- CRAM $FE00-$FFFF (Chipspeed Colour Board)
+  cram_cs <=  '0' when not SUPER80_HAS_CHIPSPEED_COLOUR else
+              '1' when cpu_a(15 downto 9) = X"F"&"111" else
+              '0';
+  
    -- io selects
   crtc6845_cs <=  '1' when cpu_a(7 downto 1) = X"1"&"000" else
                   '0';
@@ -271,38 +256,16 @@ begin
     end if;
   end process;
 
-	-- RDINTSTATUS $37E0-$37E3 (active high)
-	int_cs <= '1' when cpu_a(15 downto 2) = (X"37E" & "00") else '0';
 	-- FDC $37EC-$37EF
 	fdc_cs <= '1' when cpu_a(15 downto 2) = (X"37E" & "11") else '0';
-	-- KEYBOARD $3800-$38FF
-	kbd_cs <= '1' when cpu_a(15 downto 10) = (X"3" & "10") else '0';
 
---  -- LNW80 hires RAM ($0000-$3FFF)
---  lnw80_hires_ram_cs <= '1' when TRS80_M1_IS_LNW80 and (gfxram_ena = '1') and 
---                              (cpu_a(15 downto 14) = "00") else '0';
-  
 	-- memory write enables
   cram_wr <= cram_cs and cpu_mem_wr;
 	vram_wr <= vram_cs and cpu_mem_wr;
-  lnw80_hires_ram_wr <= lnw80_hires_ram_cs and cpu_mem_wr;
-  
-	-- always write thru to RAM (except LNW80 hires RAM)
-	ram_wr <= (not lnw80_hires_ram_cs) and cpu_mem_wr;
+	chr_wr <= chr_cs and cpu_mem_wr;
+	ram_wr <= cpu_mem_wr;
 
 	-- I/O chip selects
-	-- Alpha Joystick $00 (active low)
-	alpha_joy_cs <= '1' when cpu_io_a = X"00" else '0';
-	-- LE18 $EC-$EF
-  le18_cs <= '1' when STD_MATCH(cpu_io_a, X"E" & "11--") else '0';
-	-- PCG-80 $FE, 80-GRAFIX $FF
---	pcg80_cs <= '1' when (TRS80_M1_HAS_PCG80 and cpu_io_a = X"FE") else 
---              '1' when (TRS80_M1_HAS_80GRAFIX and cpu_io_a = X"FF") else
---              '0';
-  -- LNW80 video control register $FE/254
---  lnw80_video_ctl_cs <= '1' when (TRS80_M1_IS_LNW80 and cpu_io_a = X"FE") else '0';
-  -- mikrokolor I/O $01-$02
-  vdp_cs <= '1' when (cpu_a(7 downto 0) = X"01" or cpu_a(7 downto 0) = X"02") else '0';
   
   -- SOUND $FC-FF (Model I is $FF only)
 	snd_cs <= '1' when cpu_io_a = X"FF" else '0';
@@ -322,22 +285,16 @@ begin
     cpu_d_i <= mem_d when (cpu_mem_rd = '1') else io_d;
 
     -- memory read mux
-    mem_d <= 	--lnw80_hires_ram_d_o when lnw80_hires_ram_cs = '1' else
-              -- decode ROM before RAM because of SOD logic
+    mem_d <= 	-- decode ROM before RAM because of SOD logic
               rom_d_o when rom_cs = '1' else
-              cram_d_o when (SUPER80_HAS_CHIPSPEED_COLOUR and cram_cs = '1') else
-              --int_status when int_cs = '1' else
+              cram_d_o when cram_cs = '1' else
+              chr_d_o when chr_cs = '1' else
               --fdc_d_o when fdc_cs = '1' else
-              --vram_d_o when vram_cs = '1' else
-              vram_d_o;
+              vram_d_o when vram_cs = '1' else
+              ram_d_o;
     
     -- io read mux
-    io_d <= --X"FF" when alpha_joy_cs = '1' else
-            --le18_d_o when le18_cs = '1' else
-            --vdp_d_o when vdp_cs = '1' else
-            --hdd_d when hdd_cs = '1' else
-            --lnw80_video_ctl_r when lnw80_video_ctl_cs = '1' else
-            -- port F2 (dipswitches)
+    io_d <= -- port F2 (dipswitches)
             X"6F" when portFX_cs = '1' and cpu_a(3 downto 0) = X"2" else
             kbd_d_o when portFX_cs = '1' and cpu_a(3 downto 0) = X"A" else
             X"FF";
@@ -362,13 +319,6 @@ begin
     end if;
   end process;
   
-  -- unused outputs
---	sprite_reg_o <= NULL_TO_SPRITE_REG;
---	sprite_o <= NULL_TO_SPRITE_CTL;
---	ser_o <= NULL_TO_SERIAL;
---  spi_o <= NULL_TO_SPI;
-  --gp_o <= NULL_TO_GP;
-
 	clk_en_inst : entity work.clk_div
 		generic map
 		(
@@ -401,7 +351,7 @@ begin
       intreq 	=> cpu_irq,
       intvec 	=> cpu_irq_vec,
       intack 	=> cpu_irq_ack,
-      nmi    	=> '0' --cpu_nmi
+      nmi    	=> '0'
     );
 
   GEN_ROM : if true generate
@@ -502,10 +452,17 @@ begin
       signal crtc6845_hsync   : std_logic;
       signal crtc6845_vsync   : std_logic;
       signal crtc6845_disptmg : std_logic;
+
+      signal vram_v_o         : std_logic_vector(7 downto 0);
+      
+      signal chrrom_d_o       : std_logic_vector(7 downto 0);
+      signal chrrom_v_o       : std_logic_vector(7 downto 0);
+      signal pcg_wr           : std_logic;
+      signal pcg_d_o          : std_logic_vector(7 downto 0);
       
     begin
     
-      crtc6845_clk <= clk_2M_en;
+      crtc6845_clk <= clk_40M;
       crtc6845_e <= not clk_2M_en;
       
       crtc6845s_inst : crtc6845s
@@ -528,6 +485,94 @@ begin
           O_DISPTMG   => crtc6845_disptmg
         );
 
+      -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+      vram_inst : entity work.dpram
+        generic map
+        (
+          init_file		=> "",
+          --numwords_a	=> 1024,
+          widthad_a		=> 11
+        )
+        port map
+        (
+          clock_b			  => clk_40M,
+          address_b		  => cpu_a(10 downto 0),
+          wren_b			  => vram_wr,
+          data_b			  => cpu_d_o,
+          q_b					  => vram_d_o,
+      
+          clock_a			  => crtc6845_clk,
+          address_a     => crtc6845_ma(10 downto 0),
+          wren_a			  => '0',
+          data_a			  => vram_v_o,
+          q_a					  => open
+        );
+
+      -- signals for the ROM/PCG space
+      chr_d_o <=  chrrom_d_o when pcg_r = '0' else
+                  pcg_d_o;
+      pcg_wr <= chr_wr and pcg_r;
+      
+      -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+      chrrom_inst : entity work.dpram
+        generic map
+        (
+          init_file		=> "../../../../../src/platform/super80/roms/s80hmce.ic24.hex",
+          widthad_a		=> 11
+        )
+        port map
+        (
+          clock_b			            => clk_40M,
+          address_b		            => cpu_a(10 downto 0),
+          wren_b			            => '0',
+          data_b			            => (others => 'X'),
+          q_b					            => chrrom_d_o,
+      
+          clock_a			            => crtc6845_clk,
+          address_a(10 downto 4)  => vram_v_o(6 downto 0),
+          address_a(3 downto 0)   => crtc6845_ra(3 downto 0),
+          wren_a			            => '0',
+          data_a			            => chrrom_v_o,
+          q_a					            => open
+        );
+        
+      -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+      pcg_inst : entity work.dpram
+        generic map
+        (
+          init_file		=> "",
+          --numwords_a	=> 1024,
+          widthad_a		=> 11
+        )
+        port map
+        (
+          clock_b			  => clk_40M,
+          address_b		  => cpu_a(10 downto 0),
+          wren_b			  => pcg_wr,
+          data_b			  => cpu_d_o,
+          q_b					  => pcg_d_o,
+      
+          clock_a			  => crtc6845_clk,
+          address_a     => (others => '0'),
+          wren_a			  => '0',
+          data_a			  => (others => 'X'),
+          q_a					  => open
+        );
+        
+      video_o.clk <= crtc6845_clk;
+      video_o.hsync <= crtc6845_hsync;
+      video_o.vsync <= crtc6845_vsync;
+      -- hblank & vblank drive (DVI) DE
+      -- - just use disptmg for both
+      video_o.hblank <= not crtc6845_disptmg;
+      video_o.vblank <= not crtc6845_disptmg;
+      video_o.rgb.r <=  (others => '0') when crtc6845_disptmg = '0' else
+                        (others => '0');
+      video_o.rgb.g <=  (others => '0') when crtc6845_disptmg = '0' else
+                        (others => chrrom_v_o(2));
+      video_o.rgb.b <=  (others => '0') when crtc6845_disptmg = '0' else
+                        (others => '0');
+                        
     else generate
     begin
     end generate GEN_CRTC6845;
@@ -637,292 +682,6 @@ begin
     --end generate GEN_CHIPSPEED_COLOUR;
     
   end generate GEN_VIDEO;
-  
---  GEN_PCG80 : if (TRS80_M1_HAS_PCG80 or TRS80_M1_HAS_80GRAFIX) generate
---
---    signal pcg80_a        : std_logic_vector(11 downto 0) := (others => '0');
---    alias pcg80_bank      : std_logic_vector(11 downto 10) is pcg80_a(11 downto 10);
---    signal pcg80_r        : std_logic_vector(7 downto 0) := (others => '0');
---    signal pcg80_wr       : std_logic := '0';
---    
---  begin
---
---    -- PCG-80 register
---    process (clk_40M, cpu_reset)
---    begin
---      if cpu_reset = '1' then
---        pcg80_r <= (others => '0');
---      elsif rising_edge(clk_40M) then
---        -- latch on rising edge IO read cycle
---        if pcg80_cs = '1' and cpu_io_wr = '1' then
---          -- $20,$A0,$28,$A8 all have bit 5 set
---          if cpu_d_o(5) = '1' then
---            pcg80_r <= cpu_d_o;
---            -- set programming bank
---            if (TRS80_M1_HAS_PCG80 and cpu_d_o(7 downto 4) = X"6") or
---               (TRS80_M1_HAS_80GRAFIX and cpu_d_o = X"60") then
---              pcg80_bank <= cpu_d_o(1 downto 0);
---            end if;
---          end if;
---        end if;
---      end if;
---      -- the rest of the address
---      pcg80_a(9 downto 0) <= cpu_a(9 downto 0);
---    end process;
---    pcg80_wr <= vram_wr when pcg80_r(7 downto 4) = X"6" else '0';
---
---    graphics_o.bit8(0)(5) <= pcg80_r(7); -- enable $80-$FF
---    graphics_o.bit8(0)(4) <= pcg80_r(3); -- enable $00-$7F
---
---    -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
---    pcg80_inst : entity work.dpram
---      generic map
---      (
---        widthad_a		=> 12
---      )
---      port map
---      (
---        clock_b			=> clk_40M,
---        address_b		=> pcg80_a,
---        wren_b			=> pcg80_wr,
---        data_b			=> cpu_d_o,
---        q_b					=> pcg80_d_o,
---    
---        -- data fed back via 'attribute' port
---        clock_a			=> clk_video,
---        address_a		=> tilemap_i(1).attr_a(11 downto 0),
---        wren_a			=> '0',
---        data_a			=> (others => 'X'),
---        q_a					=> tilemap_o(1).attr_d(7 downto 0)
---      );
---    tilemap_o(1).attr_d(tilemap_o(1).attr_d'left downto 8) <= (others => '0');
---    
---  else generate
---
---    pcg80_d_o <= (others => '0');
---    --tilemap_o(1).attr_d <= (others => '0');
---    
---  end generate GEN_PCG80;
---
---  GEN_LE18 : if TRS80_M1_HAS_LE18 generate
---    signal le18_ram_a   : std_logic_vector(13 downto 0) := (others => '0');
---    signal le18_ram_wr  : std_logic := '0';
---    signal le18_ram_i   : std_logic_vector(5 downto 0) := (others => '0');
---    signal le18_ram_o   : std_logic_vector(5 downto 0) := (others => '0');
---    --
---    signal le18_x       : std_logic_vector(5 downto 0) := (others => '0');
---    signal le18_y       : std_logic_vector(7 downto 0) := (others => '0');
---    signal le18_en      : std_logic := '0';
---  begin
---  
---    process (clk_40M, cpu_reset)
---    begin
---      if cpu_reset = '1' then
---        le18_ram_wr <= '0';
---        le18_x <= (others => '0');
---        le18_y <= (others => '0');
---        le18_en <= '0';
---      elsif rising_edge(clk_40M) then
---        le18_ram_wr <= '0'; -- default
---        -- write to graphics registers
---        if le18_cs = '1' then
---          if cpu_io_wr = '1' then
---            case cpu_io_a(1 downto 0) is
---              when "00" =>
---                le18_ram_i <= cpu_d_o(le18_ram_i'range);
---                le18_ram_wr <= '1';
---              when "01" =>
---                le18_x <= cpu_d_o(le18_x'range);
---              when "10" =>
---                le18_y <= cpu_d_o;
---              when others =>
---                le18_en <= cpu_d_o(0);
---            end case;
---          elsif cpu_io_rd = '1' then
---            case cpu_io_a(1 downto 0) is
---              when "00" =>
---                -- bit7 should be '1' during blanking
---                le18_d_o <= '1' & le18_en & le18_ram_o(5 downto 0);
---              when "01" =>
---                le18_d_o <= "00" & le18_x;
---              when "10" =>
---                le18_d_o <= le18_y;
---              when others =>
---                le18_d_o <= "0000000" & le18_en;
---            end case;
---          end if; -- cpu_io_wr/rd=1
---        end if; -- le18_cs=1
---      end if;
---    end process;
---
---    -- construct RAM address
---    le18_ram_a <= le18_y & le18_x;
---    
---    -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
---    le18_ram_inst : entity work.dpram
---      generic map
---      (
---        widthad_a		=> TRS80_M1_LE18_WIDTHAD,
---        width_a     => 6
---      )
---      port map
---      (
---        clock_b			=> clk_40M,
---        address_b		=> le18_ram_a(TRS80_M1_LE18_WIDTHAD-1 downto 0),
---        wren_b			=> le18_ram_wr,
---        data_b			=> le18_ram_i,
---        q_b					=> le18_ram_o,
---    
---        clock_a			=> clk_video,
---        address_a		=> bitmap_i(1).a(TRS80_M1_LE18_WIDTHAD-1 downto 0),
---        wren_a			=> '0',
---        data_a			=> (others => 'X'),
---        q_a					=> bitmap_o(1).d(5 downto 0)
---      );
---    bitmap_o(1).d(7 downto 6) <= (others => '0');
---
---    graphics_o.bit8(0)(6) <= le18_en;
---
---  else generate
---    
---    le18_d_o <= X"FF";
---    bitmap_o(1).d <= (others => '0');
---    
---  end generate GEN_LE18;
---    
---  GEN_LNW80_VIDEO : if TRS80_M1_IS_LNW80 generate
---  begin
---    process (clk_40M, cpu_reset)
---    begin
---      if cpu_reset = '1' then
---        lnw80_video_ctl_r <= (others => '0');
---      elsif rising_edge(clk_40M) then
---        if cpu_io_wr = '1' then
---          -- port 254 controls LNW video
---          if lnw80_video_ctl_cs = '1' then
---            lnw80_video_ctl_r <= cpu_d_o;
---          end if;
---        end if; -- cpu_io_wr
---      end if; -- rising_edge(clk_40M)
---    end process;
---
---    graphics_o.bit8(1) <= lnw80_video_ctl_r;
---    
---    -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
---    lnw80_hires_ram_inst : entity work.dpram
---      generic map
---      (
---        widthad_a		=> TRS80_M1_LNW80_HIRES_WIDTHAD,
---        width_a     => 8
---      )
---      port map
---      (
---        clock_b			=> clk_40M,
---        address_b		=> cpu_a(TRS80_M1_LNW80_HIRES_WIDTHAD-1 downto 0),
---        wren_b			=> lnw80_hires_ram_wr,
---        data_b			=> cpu_d_o,
---        q_b					=> lnw80_hires_ram_d_o,
---    
---        clock_a			=> clk_video,
---        address_a		=> bitmap_i(2).a(TRS80_M1_LNW80_HIRES_WIDTHAD-1 downto 0),
---        wren_a			=> '0',
---        data_a			=> (others => 'X'),
---        q_a					=> bitmap_o(2).d(7 downto 0)
---      );
---
---  else generate
---
---    lnw80_video_ctl_r <= (others => '0');
---    bitmap_o(2).d <= (others => '0');
---    
---  end generate GEN_LNW80_VIDEO;
-  
---  GEN_MIKROKOLOR : if TRS80_M1_HAS_MIKROKOLOR generate
---    component vdp is
---      port
---      (
---        clk40m      : in std_logic;
---        clk40m_n    : in std_logic;
---        cpu_rst_n   : in std_logic;
---        cpu_a       : in std_logic_vector(7 downto 0);
---        cpu_din     : in std_logic_vector(7 downto 0);
---        cpu_dout    : out std_logic_vector(7 downto 0);
---        cpu_doe     : out std_logic;
---        cpu_in_n    : in std_logic;
---        cpu_out_n   : in std_logic;
---        cpu_int_n   : out std_logic;
---        sram_a      : out std_logic_vector(18 downto 0);
---        sram_din    : in std_logic_vector(7 downto 0);
---        sram_dout   : out std_logic_vector(7 downto 0);
---        sram_doe    : out std_logic;
---        sram_oe_n   : out std_logic;
---        sram_we_n   : out std_logic;
---        hsync       : out std_logic;
---        vsync       : out std_logic;
---        r           : out std_logic_vector(3 downto 0);
---        g           : out std_logic_vector(3 downto 0);
---        b           : out std_logic_vector(3 downto 0)
---      );
---    end component vdp;
---
---    signal vdp_int_n    : std_logic;
---    
---    signal vdp_ram_a    : std_logic_vector(18 downto 0);
---    signal vdp_ram_d_i  : std_logic_vector(7 downto 0);
---    signal vdp_ram_d_o  : std_logic_vector(7 downto 0);
---    signal vdp_ram_we_n : std_logic;
---
---    signal r            : std_logic_vector(3 downto 0);
---    signal g            : std_logic_vector(3 downto 0);
---    signal b            : std_logic_vector(3 downto 0);
---    
---  begin
---
---    vdp_inst : vdp
---      port map
---      (
---        clk40m      => clk_40M,
---        clk40m_n    => not clk_40M,
---        cpu_rst_n   => not clkrst_i.rst(0),
---        cpu_a       => cpu_a(7 downto 0),
---        cpu_din     => cpu_d_o,
---        cpu_dout    => vdp_d_o,
---        cpu_doe     => open,
---        cpu_in_n    => not cpu_io_rd,
---        cpu_out_n   => not cpu_io_wr,
---        cpu_int_n   => vdp_int_n,
---        sram_a      => vdp_ram_a,
---        sram_din    => vdp_ram_d_i,
---        sram_dout   => vdp_ram_d_o,
---        sram_doe    => open,
---        sram_oe_n   => open,
---        sram_we_n   => vdp_ram_we_n,
---        hsync       => graphics_o.hsync,
---        vsync       => graphics_o.vsync,
---        r           => r,
---        g           => g,
---        b           => b
---      );
---      
---    graphics_o.rgb.r <= "0000" & not r(3 downto 0) & "00";
---    graphics_o.rgb.g <= "0000" & not g(3 downto 0) & "00";
---    graphics_o.rgb.b <= "0000" & not b(3 downto 0) & "00";
---      
---    vdp_ram_inst : entity work.spram
---      generic map
---      (
---        widthad_a	  => 14
---      )
---      port map
---      (
---        clock		    => clk_40M,
---        address		  => vdp_ram_a(13 downto 0),
---        data		    => vdp_ram_d_i,
---        wren		    => not vdp_ram_we_n,
---        q		        => vdp_ram_d_o
---      );
---
---  end generate GEN_MIKROKOLOR;
   
 --  GEN_FDC : if TRS80_M1_FDC_SUPPORT generate
 --  
@@ -1304,5 +1063,12 @@ begin
   leds_o(leds_o'left downto 5) <= (others => '0');
   -- reserved for floppy drives 0-4
   leds_o(3 downto 0) <= (others => '0');
+
+  -- unused outputs
+--	sprite_reg_o <= NULL_TO_SPRITE_REG;
+--	sprite_o <= NULL_TO_SPRITE_CTL;
+--	ser_o <= NULL_TO_SERIAL;
+--  spi_o <= NULL_TO_SPI;
+  --gp_o <= NULL_TO_GP;
 
 end architecture SYN;
