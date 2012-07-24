@@ -108,20 +108,20 @@ package project_pkg is
 --  constant SUPER80_BIOS_D000                : string := "super80";
 --  constant SUPER80_BIOS_E000                : string := "super80";
 
---  -- With Colour
---  constant SUPER80_VARIANT                  : string := "super80m";
---  constant SUPER80_BIOS_C000                : string := "s80-8r0";        -- v3.8r0
-----  constant SUPER80_BIOS_C000                : string := "s80-v37";        -- v3.7
---  constant SUPER80_BIOS_D000                : string := SUPER80_BIOS_C000;
---  constant SUPER80_BIOS_E000                : string := SUPER80_BIOS_C000;
+  -- With Colour
+  constant SUPER80_VARIANT                  : string := "super80m";
+  constant SUPER80_BIOS_C000                : string := "s80-8r0";        -- v3.8r0
+--  constant SUPER80_BIOS_C000                : string := "s80-v37";        -- v3.7
+  constant SUPER80_BIOS_D000                : string := SUPER80_BIOS_C000;
+  constant SUPER80_BIOS_E000                : string := SUPER80_BIOS_C000;
 
   -- With VDUEB
-  constant SUPER80_VARIANT                  : string := "super80r";
-  constant SUPER80_BIOS_C000                : string := "super80r";       -- MCE (original)
-  --constant SUPER80_BIOS_C000                : string := "super80s";       -- MCE (upgraded)
-  constant SUPER80_BIOS_D000                : string := "super80";
-  constant SUPER80_BIOS_E000                : string := "super80";
-  constant SUPER80_CHAR                     : string := "s80hmce.ic24";   -- 2KB
+--  constant SUPER80_VARIANT                  : string := "super80r";
+--  constant SUPER80_BIOS_C000                : string := "super80r";       -- MCE (original)
+--  --constant SUPER80_BIOS_C000                : string := "super80s";       -- MCE (upgraded)
+--  constant SUPER80_BIOS_D000                : string := "super80";
+--  constant SUPER80_BIOS_E000                : string := "super80";
+--  constant SUPER80_CHAR                     : string := "s80hmce.ic24";   -- 2KB
 
 --  -- With Enhanced VDUEB
 --  constant SUPER80_VARIANT                  : string := "super80v";

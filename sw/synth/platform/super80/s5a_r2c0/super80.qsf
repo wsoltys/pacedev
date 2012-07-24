@@ -2273,10 +2273,8 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/a
 set_global_assignment -name VHDL_FILE ../../../../src/platform/super80/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/trs80/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/trs80/m1/le18_bitmapctl.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/trs80/m1/lnw80_bitmapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/super80/tilemapctl.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/trs80/m1/video_mixer.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_mixer.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Graphics.VHD
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_integrated_gfx.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2c0/target_top_ep3sl.vhd

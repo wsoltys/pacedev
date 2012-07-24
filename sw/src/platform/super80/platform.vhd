@@ -540,7 +540,10 @@ begin
     signal graphics_i       : from_GRAPHICS_t;
     
   begin
-  
+
+    -- character set bank select
+    graphics_o.bit8(0)(0) <= charset_r;
+    
     graphics_inst : entity work.Graphics                                    
       port map
       (
@@ -606,34 +609,34 @@ begin
       );
       tilemap_o(1).map_d(tilemap_o(1).map_d'left downto 8) <= (others => '0');
   
+    --GEN_CHIPSPEED_COLOUR : if SUPER80_HAS_CHIPSPEED_COLOUR generate
+    --begin
+      -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+      cram_inst : entity work.dpram
+        generic map
+        (
+          init_file		=> "",
+          --numwords_a	=> 512,
+          widthad_a		=> 9
+        )
+        port map
+        (
+          clock_b			            => clk_40M,
+          address_b		            => cpu_a(8 downto 0),
+          wren_b			            => cram_wr,
+          data_b			            => cpu_d_o,
+          q_b					            => cram_d_o,
+      
+          clock_a			            => clk_video,
+          address_a(8 downto 0)   => tilemap_i(1).attr_a(8 downto 0),
+          wren_a			            => '0',
+          data_a			            => (others => 'X'),
+          q_a					            => tilemap_o(1).attr_d(7 downto 0)
+        );
+        tilemap_o(1).attr_d(tilemap_o(1).attr_d'left downto 8) <= (others => '0');
+    --end generate GEN_CHIPSPEED_COLOUR;
+    
   end generate GEN_VIDEO;
-  
-  GEN_CHIPSPEED_COLOUR : if SUPER80_HAS_CHIPSPEED_COLOUR generate
-  begin
---    -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
---    cram_inst : entity work.dpram
---      generic map
---      (
---        init_file		=> "",
---        --numwords_a	=> 512,
---        widthad_a		=> 9
---      )
---      port map
---      (
---        clock_b			            => clk_40M,
---        address_b		            => cpu_a(8 downto 0),
---        wren_b			            => cram_wr,
---        data_b			            => cpu_d_o,
---        q_b					            => cram_d_o,
---    
---        clock_a			            => clk_video,
---        address_a(8 downto 0)   => tilemap_i(1).attr_a(8 downto 0),
---        wren_a			            => '0',
---        data_a			            => (others => 'X'),
---        q_a					            => tilemap_o(1).attr_d(7 downto 0)
---      );
---      tilemap_o(1).attr_d(tilemap_o(1).attr_d'left downto 8) <= (others => '0');
-  end generate GEN_CHIPSPEED_COLOUR;
   
 --  GEN_PCG80 : if (TRS80_M1_HAS_PCG80 or TRS80_M1_HAS_80GRAFIX) generate
 --
