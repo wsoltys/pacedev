@@ -20,8 +20,7 @@ entity platform is
   port
   (
     -- clocking and reset
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -41,11 +40,11 @@ entity platform is
 
     -- graphics
     
-    bitmap_i        : in from_BITMAP_CTL_t;
-    bitmap_o        : out to_BITMAP_CTL_t;
+    bitmap_i        : in from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
+    bitmap_o        : out to_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
     
-    tilemap_i       : in from_TILEMAP_CTL_t;
-    tilemap_o       : out to_TILEMAP_CTL_t;
+    tilemap_i       : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
+    tilemap_o       : out to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
 
     sprite_reg_o    : out to_SPRITE_REG_t;
     sprite_i        : in from_SPRITE_CTL_t;
@@ -85,8 +84,8 @@ end platform;
 
 architecture SYN of platform is
 
-	alias clk_30M					: std_logic is clk_i(0);
-	alias clk_video       : std_logic is clk_i(1);
+	alias clk_30M					: std_logic is clkrst_i.clk(0);
+	alias clk_video       : std_logic is clkrst_i.clk(1);
 	signal cpu_reset			: std_logic;
 	
   -- uP signals  
@@ -130,7 +129,7 @@ architecture SYN of platform is
   signal in_cs					: std_logic_vector(0 to 2);
 	alias game_reset			: std_logic is inputs_i(3).d(0);
 	
-	alias  tileCode				: std_logic_vector(8 downto 0) is tilemap_i.tile_a(12 downto 4);
+	alias  tileCode				: std_logic_vector(8 downto 0) is tilemap_i(1).tile_a(12 downto 4);
 	signal tmpTileAddr		: std_logic_vector(12 downto 0);
 	alias  newTileCode		: std_logic_vector(8 downto 0) is tmpTileAddr(12 downto 4);
 	signal newTileAddr		: std_logic_vector(12 downto 0);
@@ -145,7 +144,7 @@ architecture SYN of platform is
 	  
 begin
 
-	cpu_reset <= reset_i or game_reset;
+	cpu_reset <= clkrst_i.rst(0) or game_reset;
 	
   -- SRAM signals (may or may not be used)
   sram_o.a <= std_logic_vector(resize(unsigned(uP_addr(13 downto 0)), sram_o.a'length));
@@ -198,9 +197,9 @@ begin
   sprite_reg_o.wr <= upmemwr and sprite_reg_cs;
   
 	-- implement gfxbank registers
-	process (clk_30M, reset_i)
+	process (clk_30M, clkrst_i.rst(0))
 	begin
-		if reset_i = '1' then
+		if clkrst_i.rst(0) = '1' then
 			gfxbank <= (others => '0');
 		elsif rising_edge(clk_30M) then
 			if uP_addr(15 downto 2) = (X"A00" & "00") then
@@ -225,7 +224,7 @@ begin
 									"100000000"
 										when (gfxbank2 /= X"00") and (tileCode(7 downto 6) = "10") else
 									tileCode;
-	tmpTileAddr(3 downto 0) <= tilemap_i.tile_a(3 downto 0);
+	tmpTileAddr(3 downto 0) <= tilemap_i(1).tile_a(3 downto 0);
 		
 	-- mangle tile address according to sprite layout
 	-- WIP - can re-arrange sprites to fix
@@ -244,7 +243,7 @@ begin
 	
   -- unused outputs
   flash_o <= NULL_TO_FLASH;
-  bitmap_o <= NULL_TO_BITMAP_CTL;
+  bitmap_o <= (others => NULL_TO_BITMAP_CTL);
   graphics_o <= NULL_TO_GRAPHICS;
   osd_o <= NULL_TO_OSD;
   spi_o <= NULL_TO_SPI;
@@ -265,7 +264,7 @@ begin
 		port map
 		(
 			clk				=> clk_30M,
-			reset			=> reset_i,
+			reset			=> clkrst_i.rst(0),
 			clk_en		=> clk_3M_ena
 		);
 	
@@ -319,7 +318,7 @@ begin
 		(
 			clock										=> clk_video,
 			address_a								=> newTileAddr,
-			q_a											=> tilemap_o.tile_d(7 downto 0),
+			q_a											=> tilemap_o(1).tile_d(7 downto 0),
 			
 			address_b								=> newSpriteAddr(10 downto 0),
 			q_b(31 downto 24)				=> sprite_o.d(7 downto 0),
@@ -327,7 +326,7 @@ begin
 			q_b(15 downto 8)				=> sprite_o.d(23 downto 16),
 			q_b(7 downto 0)					=> sprite_o.d(31 downto 24)
 		);
-	tilemap_o.tile_d(tilemap_o.tile_d'left downto 8) <= (others => '0');
+	tilemap_o(1).tile_d(tilemap_o(1).tile_d'left downto 8) <= (others => '0');
 
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 	vram_inst : entity work.dpram
@@ -349,16 +348,16 @@ begin
 			address_a		=> vram_addr,
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o.map_d(7 downto 0)
+			q_a					=> tilemap_o(1).map_d(7 downto 0)
 		);
-  tilemap_o.map_d(15 downto 8) <= (others => '0');
+  tilemap_o(1).map_d(15 downto 8) <= (others => '0');
 
 	vrammapper_inst : entity work.vramMapper
 		port map
 		(
 	    clk     => clk_video,
 
-	    inAddr  => tilemap_i.map_a(12 downto 0),
+	    inAddr  => tilemap_i(1).map_a(12 downto 0),
 	    outAddr => vram_addr
 		);
 
@@ -380,10 +379,10 @@ begin
 			q_b					=> cram0_datao,
 			
 			clock_a			=> clk_video,
-			address_a		=> tilemap_i.attr_a(7 downto 1),
+			address_a		=> tilemap_i(1).attr_a(7 downto 1),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o.attr_d(7 downto 0)
+			q_a					=> tilemap_o(1).attr_d(7 downto 0)
 		);
 
 	cram1_wr <= cram_wr and uP_addr(0);
@@ -404,10 +403,10 @@ begin
 			q_b					=> cram1_datao,
 			
 			clock_a			=> clk_video,
-			address_a		=> tilemap_i.attr_a(7 downto 1),
+			address_a		=> tilemap_i(1).attr_a(7 downto 1),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o.attr_d(15 downto 8)
+			q_a					=> tilemap_o(1).attr_d(15 downto 8)
 		);
 
   interrupts_inst : entity work.Galaxian_Interrupts

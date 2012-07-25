@@ -19,8 +19,8 @@ entity inputmapper is
 
     -- inputs from keyboard controller
     reset     : in std_logic;
-    press     : in std_logic;
-    release   : in std_logic;
+    key_down  : in std_logic;
+    key_up    : in std_logic;
     data      : in std_logic_vector(7 downto 0);
     -- input from jamma connector
     jamma			: in from_JAMMA_t;
@@ -66,33 +66,33 @@ begin
       keybd_v(0).d(6 downto 5) := not dips(7 downto 6); -- unknown/reset, cabinet
       keybd_v(1).d(7 downto 6) := not dips(5 downto 4); -- language, bonus life
       keybd_v(2).d(3 downto 0) := not dips(3 downto 0); -- coinage
-      if (press or release) = '1' then
+      if (key_down or key_up) = '1' then
         case data(7 downto 0) is
           -- IN0
           when SCANCODE_5 =>
-            keybd_v(0).d(0) := press;
+            keybd_v(0).d(0) := key_down;
           when SCANCODE_6 =>
-            keybd_v(0).d(1) := press;
+            keybd_v(0).d(1) := key_down;
           when SCANCODE_LEFT =>
-            keybd_v(0).d(2) := press;
-            keybd_v(1).d(2) := press;
+            keybd_v(0).d(2) := key_down;
+            keybd_v(1).d(2) := key_down;
           when SCANCODE_RIGHT =>
-            keybd_v(0).d(3) := press;
-            keybd_v(1).d(3) := press;
+            keybd_v(0).d(3) := key_down;
+            keybd_v(1).d(3) := key_down;
           when SCANCODE_LCTRL =>
-            keybd_v(0).d(4) := press;
-            keybd_v(1).d(4) := press;
+            keybd_v(0).d(4) := key_down;
+            keybd_v(1).d(4) := key_down;
           -- IN1
           when SCANCODE_1 =>
-            keybd_v(1).d(0) := press;
+            keybd_v(1).d(0) := key_down;
           when SCANCODE_2 =>
-            keybd_v(1).d(1) := press;
+            keybd_v(1).d(1) := key_down;
           -- special keys
           when SCANCODE_F3 =>
-            keybd_v(3).d(0) := press;
+            keybd_v(3).d(0) := key_down;
           when others =>
         end case;
-      end if; -- press or release
+      end if; -- key_down or key_up
 
       -- this is PS/2 reset ONLY
       if (reset = '1') then

@@ -29,6 +29,8 @@ package project_pkg is
 	constant PACE_VIDEO_H_SCALE               : integer := 2;
 	constant PACE_VIDEO_V_SCALE               : integer := 2;
 	constant PACE_ENABLE_ADV724					      : std_logic := '0';
+  constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';
+  constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '1';
 
   --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_CVBS_720x288p_50Hz;
   --constant PACE_CLK0_DIVIDE_BY              : natural := 8;

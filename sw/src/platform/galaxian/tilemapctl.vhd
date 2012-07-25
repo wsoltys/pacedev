@@ -14,27 +14,7 @@ use work.video_controller_pkg.all;
 --	Tile data is 2 BPP.
 --
 
-entity tilemapCtl_1 is          
-  generic
-  (
-    DELAY       : integer
-  );
-  port               
-  (
-    reset				: in std_logic;
-
-    -- video control signals		
-    video_ctl   : in from_VIDEO_CTL_t;
-
-    -- tilemap controller signals
-    ctl_i       : in to_TILEMAP_CTL_t;
-    ctl_o       : out from_TILEMAP_CTL_t;
-
-    graphics_i  : in to_GRAPHICS_t
-  );
-end entity tilemapCtl_1;
-
-architecture SYN of tilemapCtl_1 is
+architecture TILEMAP_1 of tilemapCtl is
 
   alias clk       : std_logic is video_ctl.clk;
   alias clk_ena   : std_logic is video_ctl.clk_ena;
@@ -51,7 +31,7 @@ begin
   ctl_o.tile_a(15 downto 12) <= (others => '0');
   ctl_o.tile_a(3 downto 1) <=  y(2 downto 0);   	-- each row is 2 bytes
   -- generate attribute RAM address
-  ctl_o.attr_a <= "0000" & y(7 downto 3) & '0';
+  ctl_o.attr_a <= "0000000000" & y(7 downto 3) & '0';
 
   -- generate pixel
   process (clk, clk_ena)
@@ -118,4 +98,4 @@ begin
 
   end process;
 
-end architecture SYN;
+end architecture TILEMAP_1;
