@@ -33,8 +33,10 @@ package project_pkg is
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
   constant PACE_CLK0_DIVIDE_BY        		  : natural := 3;
   constant PACE_CLK0_MULTIPLY_BY      		  : natural := 5;     -- 24*5/3 = 40MHz
-  constant PACE_CLK1_DIVIDE_BY        		  : natural := 3;
-  constant PACE_CLK1_MULTIPLY_BY      		  : natural := 5;  	  -- 24*5/3 = 40MHz
+--  constant PACE_CLK1_DIVIDE_BY        		  : natural := 3;
+--  constant PACE_CLK1_MULTIPLY_BY      		  : natural := 5;  	  -- 24*5/3 = 40MHz
+  constant PACE_CLK1_DIVIDE_BY        		  : natural := 7;
+  constant PACE_CLK1_MULTIPLY_BY      		  : natural := 1;  	  -- 24*1/7 = 3M428571Hz
 	constant PACE_VIDEO_H_SCALE         		  : integer := 2;
 	constant PACE_VIDEO_V_SCALE         		  : integer := 2;
   constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';
@@ -109,19 +111,19 @@ package project_pkg is
 --  constant SUPER80_BIOS_D000                : string := "super80";
 --  constant SUPER80_BIOS_E000                : string := "super80";
 
-  -- With Colour
-  constant SUPER80_VARIANT                  : string := "super80m";
-  constant SUPER80_BIOS_C000                : string := "s80-8r0";        -- v3.8r0
---  constant SUPER80_BIOS_C000                : string := "s80-v37";        -- v3.7
-  constant SUPER80_BIOS_D000                : string := SUPER80_BIOS_C000;
-  constant SUPER80_BIOS_E000                : string := SUPER80_BIOS_C000;
+--  -- With Colour
+--  constant SUPER80_VARIANT                  : string := "super80m";
+--  constant SUPER80_BIOS_C000                : string := "s80-8r0";        -- v3.8r0
+----  constant SUPER80_BIOS_C000                : string := "s80-v37";        -- v3.7
+--  constant SUPER80_BIOS_D000                : string := SUPER80_BIOS_C000;
+--  constant SUPER80_BIOS_E000                : string := SUPER80_BIOS_C000;
 
---  -- With VDUEB
---  constant SUPER80_VARIANT                  : string := "super80r";
---  constant SUPER80_BIOS_C000                : string := "super80r";       -- MCE (original)
---  --constant SUPER80_BIOS_C000                : string := "super80s";       -- MCE (upgraded)
---  constant SUPER80_BIOS_D000                : string := "super80";
---  constant SUPER80_BIOS_E000                : string := "super80";
+  -- With VDUEB
+  constant SUPER80_VARIANT                  : string := "super80r";
+  constant SUPER80_BIOS_C000                : string := "super80r";       -- MCE (original)
+  --constant SUPER80_BIOS_C000                : string := "super80s";       -- MCE (upgraded)
+  constant SUPER80_BIOS_D000                : string := "super80";
+  constant SUPER80_BIOS_E000                : string := "super80";
 
 --  -- With Enhanced VDUEB
 --  constant SUPER80_VARIANT                  : string := "super80v";

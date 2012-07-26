@@ -38,7 +38,13 @@
 //--------------------------------------------------------------------------------------
 
 
-module crtc6845s(
+module crtc6845s #(
+  // type 0 : 6845    - Based on MC6845 datasheet
+  //                  - Super-80
+  // type 1 : 6845-1  - supports vsync pulse width
+  //                  - Rockola, BBC Micro
+  parameter device_type = 1
+) (
 // INPUT
 I_E,
 I_DI,
@@ -89,7 +95,7 @@ wire   W_IntSync;
 wire   [1:0] W_DScue;
 wire   [1:0] W_CScue;
 
-mpu_if mpu_if(
+mpu_if mpu_if (
 
 .I_RSTn(I_RSTn),
 .I_E(I_E),

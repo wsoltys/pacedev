@@ -425,6 +425,10 @@ begin
     GEN_CRTC6845 : if true generate
     
       component crtc6845s is
+        generic
+        (
+          DEVICE_TYPE : natural
+        );
         port
         (
           -- INPUT
@@ -462,10 +466,14 @@ begin
       
     begin
     
-      crtc6845_clk <= clk_40M;
+      crtc6845_clk <= clk_video;
       crtc6845_e <= not clk_2M_en;
       
       crtc6845s_inst : crtc6845s
+        generic map
+        (
+          DEVICE_TYPE => 0
+        )
         port map
         (
           -- INPUT
