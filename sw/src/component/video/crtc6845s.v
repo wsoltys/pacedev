@@ -95,7 +95,9 @@ wire   W_IntSync;
 wire   [1:0] W_DScue;
 wire   [1:0] W_CScue;
 
-mpu_if mpu_if (
+mpu_if # (
+.device_type(device_type)
+) mpu_if (
 
 .I_RSTn(I_RSTn),
 .I_E(I_E),
@@ -151,7 +153,9 @@ crtc_gen crtc_gen(
 endmodule
 
 
-module mpu_if(
+module mpu_if #(
+  parameter device_type
+)(
 
 I_RSTn,
 I_E,
@@ -241,6 +245,7 @@ begin
     R_Nht  <= 8'h3F;				// 0
     R_Nhd  <= 8'h28;				// 1
     R_Nhsp <= 8'h33;				// 2
+    // device_type=0 should default R_Nsw[7:4] to 16!
     R_Nsw  <= 8'h24;				// 3
     R_Nvt  <= 7'h1E;				// 4
     R_Nadj <= 5'h02;				// 5
@@ -260,8 +265,12 @@ begin
           5'h0 : R_Nht  <= I_DI ;
           5'h1 : R_Nhd  <= I_DI ;
           5'h2 : R_Nhsp <= I_DI ;
-          5'h3 : R_Nsw  <= I_DI ;
-          5'h4 : R_Nvt  <= I_DI[6:0] ;
+          5'h3 : R_Nsw  <= (device_type == 0
+                              ? { R_Nsw[7:4], I_DI[3:0] }
+                              : I_DI) ;
+          //5'h4 : R_Nvt  <= I_DI[6:0] ;
+          //5'h4 : R_Nvt  <= { I_DI[5:0], 1'b0 } ;
+          5'h4 : R_Nvt  <= 7'h38;
           4'h5 : R_Nadj <= I_DI[4:0] ;
           5'h6 : R_Nvd  <= I_DI[6:0] ;
           5'h7 : R_Nvsp <= I_DI[6:0] ;

@@ -88,6 +88,8 @@ architecture SYN of platform is
 
 	alias clk_40M					: std_logic is clkrst_i.clk(0);
 	alias clk_video       : std_logic is clkrst_i.clk(1);
+  alias rst_video       : std_logic is clkrst_i.rst(0);
+  
 	signal clk_2M_en			: std_logic;
 	
   -- uP signals  
@@ -464,10 +466,43 @@ begin
       signal pcg_wr           : std_logic;
       signal pcg_d_o          : std_logic_vector(7 downto 0);
       
+      signal chr_d_r          : std_logic_vector(7 downto 0);
+
+      alias clk_3M428571_en   : std_logic is crtc6845_clk;
+      
     begin
     
-      crtc6845_clk <= clk_video;
+      process (clk_video, rst_video)
+        variable cnt : integer range 0 to 6;
+      begin
+        if rst_video = '1' then
+          cnt := 0;
+          clk_3M428571_en <= '0';
+        elsif rising_edge(clk_video) then
+          clk_3M428571_en <= '0';
+          if cnt = cnt'high then
+            clk_3M428571_en <= '1';
+            cnt := 0;
+          else
+            cnt := cnt + 1;
+          end if;
+        end if;
+      end process;
+      
       crtc6845_e <= not clk_2M_en;
+
+      process (clk_video, rst_video)
+      begin
+        if rst_video = '1' then
+          null;
+        elsif rising_edge(clk_video) then
+          if crtc6845_clk = '1' then
+            chr_d_r <= chrrom_v_o;
+          else
+            chr_d_r <= chr_d_r(chr_d_r'left-1 downto 0) & '0';
+          end if;
+        end if;
+      end process;
       
       crtc6845s_inst : crtc6845s
         generic map
@@ -512,8 +547,8 @@ begin
           clock_a			  => crtc6845_clk,
           address_a     => crtc6845_ma(10 downto 0),
           wren_a			  => '0',
-          data_a			  => vram_v_o,
-          q_a					  => open
+          data_a			  => (others => 'X'),
+          q_a					  => vram_v_o
         );
 
       -- signals for the ROM/PCG space
@@ -540,8 +575,8 @@ begin
           address_a(10 downto 4)  => vram_v_o(6 downto 0),
           address_a(3 downto 0)   => crtc6845_ra(3 downto 0),
           wren_a			            => '0',
-          data_a			            => chrrom_v_o,
-          q_a					            => open
+          data_a			            => (others => 'X'),
+          q_a					            => chrrom_v_o
         );
         
       -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
@@ -567,7 +602,7 @@ begin
           q_a					  => open
         );
         
-      video_o.clk <= crtc6845_clk;
+      video_o.clk <= clk_video;
       video_o.hsync <= crtc6845_hsync;
       video_o.vsync <= crtc6845_vsync;
       -- hblank & vblank drive (DVI) DE
@@ -577,7 +612,7 @@ begin
       video_o.rgb.r <=  (others => '0') when crtc6845_disptmg = '0' else
                         (others => '0');
       video_o.rgb.g <=  (others => '0') when crtc6845_disptmg = '0' else
-                        (others => chrrom_v_o(2));
+                        (others => chr_d_r(chr_d_r'left));
       video_o.rgb.b <=  (others => '0') when crtc6845_disptmg = '0' else
                         (others => '0');
                         
