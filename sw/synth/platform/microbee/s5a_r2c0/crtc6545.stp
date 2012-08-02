@@ -1,0 +1,431 @@
+<session jtag_chain="USB-Blaster [USB-0]" jtag_device="@2: EP3SL70 (0x021010DD)" sof_file="">
+  <display_tree gui_logging_enabled="0">
+    <display_branch instance="auto_signaltap_0" log="USE_GLOBAL_TEMP" signal_set="USE_GLOBAL_TEMP" trigger="USE_GLOBAL_TEMP"/>
+  </display_tree>
+  <global_info>
+    <single attribute="active instance" value="0"/>
+    <multi attribute="frame size" size="2" value="1920,1138"/>
+    <single attribute="jtag widget visible" value="1"/>
+    <multi attribute="jtag widget size" size="2" value="334,120"/>
+    <single attribute="instance widget visible" value="1"/>
+    <single attribute="config widget visible" value="1"/>
+    <single attribute="hierarchy widget visible" value="1"/>
+    <single attribute="data log widget visible" value="1"/>
+  </global_info>
+  <instance entity_name="sld_signaltap" is_auto_node="yes" name="auto_signaltap_0" source_file="sld_signaltap.vhd">
+    <node_ip_info instance_id="0" mfg_id="110" node_id="0" version="6"/>
+    <position_info>
+      <single attribute="active tab" value="0"/>
+    </position_info>
+    <signal_set global_temp="1" name="signal_set: 2012/08/02 23:04:46  #0">
+      <clock name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|I_CLK" polarity="posedge" tap_mode="classic"/>
+      <config ram_type="M4K" reserved_data_nodes="0" reserved_storage_qualifier_nodes="0" reserved_trigger_nodes="0" sample_depth="128" trigger_in_enable="no" trigger_out_enable="no"/>
+      <top_entity/>
+      <signal_vec>
+        <trigger_input_vec>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsw[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsw[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsw[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsw[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsw[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsw[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsw[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsw[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[6]" tap_mode="classic" type="combinatorial"/>
+        </trigger_input_vec>
+        <data_input_vec>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsw[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsw[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsw[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsw[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsw[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsw[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsw[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsw[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[6]" tap_mode="classic" type="combinatorial"/>
+        </data_input_vec>
+        <storage_qualifier_input_vec>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsw[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsw[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsw[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsw[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[7]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[6]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsw[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsw[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsw[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsw[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[3]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[4]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[5]" tap_mode="classic" type="combinatorial"/>
+          <wire name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[6]" tap_mode="classic" type="combinatorial"/>
+        </storage_qualifier_input_vec>
+      </signal_vec>
+      <presentation>
+        <data_view>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsw" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsw[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsw[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsw[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsw[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsw" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsw[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsw[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsw[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsw[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[0]"/>
+          </bus>
+        </data_view>
+        <setup_view>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nadj[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhd[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsp[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsw" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsw[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsw[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsw[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nhsw[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[7]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nht[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nr[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvd[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsp[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsw" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsw[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsw[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsw[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvsw[0]"/>
+          </bus>
+          <bus is_signal_inverted="no" link="all" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[6]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[5]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[4]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[3]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[2]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[1]"/>
+            <net is_signal_inverted="no" name="PACE:pace_inst|platform:platform_inst|crtc6845s:\GEN_CRTC6845:crtc6845s_inst|mpu_if:mpu_if|O_Nvt[0]"/>
+          </bus>
+        </setup_view>
+      </presentation>
+      <trigger CRC="4C78CC84" attribute_mem_mode="false" gap_record="true" global_temp="1" name="trigger: 2012/08/02 23:04:46  #1" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="1" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="true" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_in="dont_care" trigger_out="active high" trigger_type="circular">
+        <power_up_trigger position="pre" storage_qualifier_disabled="no" trigger_in="dont_care" trigger_out="active high"/>
+        <events use_custom_flow_control="no">
+          <level enabled="yes" name="condition1" type="basic">
+            <power_up enabled="yes">
+            </power_up>
+            <op_node/>
+          </level>
+        </events>
+        <storage_qualifier_events>
+          <transitional>000000000000000000000000000000000000000000000000000000000000000
+            <pwr_up_transitional>000000000000000000000000000000000000000000000000000000000000000</pwr_up_transitional>
+          </transitional>
+          <storage_qualifier_level type="basic">
+            <power_up>
+            </power_up>
+            <op_node/>
+          </storage_qualifier_level>
+          <storage_qualifier_level type="basic">
+            <power_up>
+            </power_up>
+            <op_node/>
+          </storage_qualifier_level>
+          <storage_qualifier_level type="basic">
+            <power_up>
+            </power_up>
+            <op_node/>
+          </storage_qualifier_level>
+        </storage_qualifier_events>
+        <log>
+          <data global_temp="1" name="log: 2012/08/02 23:31:15  #0" power_up_mode="false" sample_depth="128" trigger_position="16">100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100100100000001010001010111011010110111100000100100010001000100100</data>
+          <extradata>1111111111111111T111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111</extradata>
+        </log>
+      </trigger>
+    </signal_set>
+  </instance>
+  <static_plugin_mnemonics/>
+  <mnemonics/>
+</session>
