@@ -43,6 +43,8 @@ module crtc6845s #(
   //                  - Super-80
   // type 1 : 6845-1  - supports vsync pulse width
   //                  - Rockola, BBC Micro
+  // type 2 : 6545-1  - supports vsync pulse width
+  //                  - Microbee
   parameter device_type = 1
 ) (
 // INPUT
@@ -269,8 +271,7 @@ begin
                               ? { R_Nsw[7:4], I_DI[3:0] }
                               : I_DI) ;
           //5'h4 : R_Nvt  <= I_DI[6:0] ;
-          //5'h4 : R_Nvt  <= { I_DI[5:0], 1'b0 } ;
-          5'h4 : R_Nvt  <= 7'h38;
+          5'h4 : R_Nvt  <= 7'h0E;
           4'h5 : R_Nadj <= I_DI[4:0] ;
           5'h6 : R_Nvd  <= I_DI[6:0] ;
           5'h7 : R_Nvsp <= I_DI[6:0] ;

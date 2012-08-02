@@ -71,8 +71,8 @@ package project_pkg is
 
   constant S5AR2_DOUBLE_VDO_IDCK            : boolean := false;
 
-  -- need 64KB of RAM for VDUEB models
-  --constant S5AR2_EMULATE_SRAM               : boolean := false;
+  -- need 64KB of RAM
+  constant S5AR2_EMULATE_SRAM               : boolean := true;
   constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 16;
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
   
@@ -89,51 +89,35 @@ package project_pkg is
   constant SUPER80_MONOCHROME_FG_COLOUR_I   : integer range 0 to 15 := 5;   -- bright green
   constant SUPER80_MONOCHROME_BG_COLOUR_I   : integer range 0 to 15 := 0;   -- black
 
-  -- VARIANTS/BIOSes
+  -- VARIANTS
 
---  -- V1.2
---  constant SUPER80_VARIANT                  : string := "super80";
---  constant SUPER80_BIOS_C000                : string := "super80";        -- V1.2
---  constant SUPER80_BIOS_D000                : string := SUPER80_BIOS_C000;
---  constant SUPER80_BIOS_E000                : string := SUPER80_BIOS_C000;
+  constant MICROBEE_VARIANT                 : string := "mbee";
   
-  -- V2.2
---  constant SUPER80_VARIANT                  : string := "super80d";
---  constant SUPER80_BIOS_C000                : string := "super80d";       -- V2.2
---  --constant SUPER80_BIOS_C000                : string := "super80f";       -- MDS (original)
---  --constant SUPER80_BIOS_C000                : string := "super80g";       -- MDS (upgraded)
---  constant SUPER80_BIOS_D000                : string := "super80";
---  constant SUPER80_BIOS_E000                : string := "super80";
+  type bios_a is array (natural range <>) of string;
+  
+  -- BIOSES
 
---  -- El Grafix 4
---  constant SUPER80_VARIANT                  : string := "super80e";
---  constant SUPER80_BIOS_C000                : string := "super80e";       -- MDS (original)
---  constant SUPER80_BIOS_D000                : string := "super80";
---  constant SUPER80_BIOS_E000                : string := "super80";
-
---  -- With Colour
---  constant SUPER80_VARIANT                  : string := "super80m";
---  constant SUPER80_BIOS_C000                : string := "s80-8r0";        -- v3.8r0
-----  constant SUPER80_BIOS_C000                : string := "s80-v37";        -- v3.7
---  constant SUPER80_BIOS_D000                : string := SUPER80_BIOS_C000;
---  constant SUPER80_BIOS_E000                : string := SUPER80_BIOS_C000;
-
-  -- With VDUEB
-  constant SUPER80_VARIANT                  : string := "super80r";
-  constant SUPER80_BIOS_C000                : string := "super80r";       -- MCE (original)
-  --constant SUPER80_BIOS_C000                : string := "super80s";       -- MCE (upgraded)
-  constant SUPER80_BIOS_D000                : string := "super80";
-  constant SUPER80_BIOS_E000                : string := "super80";
-
---  -- With Enhanced VDUEB
---  constant SUPER80_VARIANT                  : string := "super80v";
---  constant SUPER80_BIOS_C000                : string := "s80-v37v";
---  constant SUPER80_BIOS_D000                : string := SUPER80_BIOS_C000;
---  constant SUPER80_BIOS_E000                : string := SUPER80_BIOS_C000;
+  -- BASIC 5.10
+--  constant MICROBEE_BIOS                    : bios_a(0 to 3) := 
+--                                              (
+--                                                0 => "bas510a.ic25", 
+--                                                1 => "bas510b.ic27",
+--                                                2 => "bas510c.ic28",
+--                                                3 => "bas510d.ic30"
+--                                              );
+--  constant MICROBEE_BIOS_WIDTHAD            : natural := 12;
+                                                
+  -- BASIC 5.22
+  constant MICROBEE_BIOS                    : bios_a(0 to 1) := 
+                                              (
+                                                0 => "bas522a.rom", 
+                                                1 => "bas522b.rom"
+                                              );
+  constant MICROBEE_BIOS_WIDTHAD            : natural := 13;
   
   -- Chipspeed colour board
-  constant SUPER80_HAS_CHIPSPEED_COLOUR     : boolean := (SUPER80_VARIANT = "super80m" or 
-                                                            SUPER80_VARIANT = "super80v") 
+  constant SUPER80_HAS_CHIPSPEED_COLOUR     : boolean := (MICROBEE_VARIANT = "super80m" or 
+                                                            MICROBEE_VARIANT = "super80v") 
                                                           and true;
   constant SUPER80_CHIPSPEED_RGB            : boolean := SUPER80_HAS_CHIPSPEED_COLOUR and true;
   -- derived (do not edit)
@@ -141,12 +125,11 @@ package project_pkg is
                                                           not SUPER80_CHIPSPEED_RGB;
 
   -- derived (do not edit)
-  constant SUPER80_HAS_VDUEB                : boolean := (SUPER80_VARIANT = "super80r" or 
-                                                            SUPER80_VARIANT = "super80v");
+  constant SUPER80_HAS_VDUEB                : boolean := (MICROBEE_VARIANT = "super80r" or 
+                                                            MICROBEE_VARIANT = "super80v");
                                                         
 	-- derived - do not edit
 
-  constant S5AR2_EMULATE_SRAM               : boolean := SUPER80_HAS_VDUEB;
   constant PACE_HAS_SRAM                    : boolean := S5AR2_EMULATE_SRAM;
   constant PACE_HAS_FLASH                   : boolean := S5AR2_EMULATE_FLASH;
 	
