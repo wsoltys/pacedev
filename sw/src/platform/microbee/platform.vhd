@@ -140,7 +140,7 @@ architecture SYN of platform is
 --  signal cram_d_o           : std_logic_vector(7 downto 0);
 
   -- VDUEB signals
-  signal crtc6845_cs        : std_logic;
+  signal crtc6545_cs        : std_logic;
   signal pcg_cs             : std_logic;
   signal pcg_wr             : std_logic;
   signal pcg_d_o            : std_logic_vector(7 downto 0);
@@ -209,8 +209,8 @@ begin
 --              '0';
   
   -- io selects
-  -- CRTC6845 $0C-$0D
-  crtc6845_cs <=  '1' when cpu_a(7 downto 1) = X"0"&"110" else
+  -- CRTC6545 $0C-$0D
+  crtc6545_cs <=  '1' when cpu_a(7 downto 1) = X"0"&"110" else
                   '0';
   portFX_cs <=    '1' when cpu_a(7 downto 4) = X"F" else
                   '0';
@@ -319,7 +319,7 @@ begin
       end loop;
       kbd_d_o <= kbd_d_v;
       -- <CTRL><C><4> generates an interrupt
-      cpu_irq <= not (inputs_i(3).d(0) or inputs_i(3).d(4) or inputs_i(3).d(7));
+      cpu_irq <= '0'; --not (inputs_i(3).d(0) or inputs_i(3).d(4) or inputs_i(3).d(7));
     end if;
   end process;
   
@@ -396,7 +396,7 @@ begin
     
   end generate GEN_ROM;
   
-  GEN_CRTC6845 : if true generate
+  GEN_CRTC6545 : if true generate
   
     component crtc6845s is
       generic
@@ -423,33 +423,34 @@ begin
       );
     end component crtc6845s;
     
-    signal crtc6845_clk     : std_logic;
-    signal crtc6845_e       : std_logic;
-    signal crtc6845_ra      : std_logic_vector(4 downto 0);
-    signal crtc6845_ma      : std_logic_vector(13 downto 0);
-    signal crtc6845_hsync   : std_logic;
-    signal crtc6845_vsync   : std_logic;
-    signal crtc6845_disptmg : std_logic;
+    signal crtc6545_clk     : std_logic;
+    signal crtc6545_e       : std_logic;
+    signal crtc6545_ra      : std_logic_vector(4 downto 0);
+    signal crtc6545_ma      : std_logic_vector(13 downto 0);
+    signal crtc6545_hsync   : std_logic;
+    signal crtc6545_vsync   : std_logic;
+    signal crtc6545_disptmg : std_logic;
 
     signal chr_d_r          : std_logic_vector(7 downto 0);
 
     signal vram_v_o         : std_logic_vector(7 downto 0);
     signal chrrom_v_o       : std_logic_vector(7 downto 0);
     
-    alias clk_3M428571_en   : std_logic is crtc6845_clk;
+    alias clk_1M5_en        : std_logic is crtc6545_clk;
     
   begin
   
+    -- CRTC6545 clock is 12/8M = 1.5MHz
     process (clk_video, rst_video)
-      variable cnt : integer range 0 to 6;
+      variable cnt : integer range 0 to 7;
     begin
       if rst_video = '1' then
         cnt := 0;
-        clk_3M428571_en <= '0';
+        clk_1M5_en <= '0';
       elsif rising_edge(clk_video) then
-        clk_3M428571_en <= '0';
+        clk_1M5_en <= '0';
         if cnt = cnt'high then
-          clk_3M428571_en <= '1';
+          clk_1M5_en <= '1';
           cnt := 0;
         else
           cnt := cnt + 1;
@@ -457,14 +458,14 @@ begin
       end if;
     end process;
     
-    crtc6845_e <= not clk_2M_en;
+    crtc6545_e <= not clk_2M_en;
 
     process (clk_video, rst_video)
     begin
       if rst_video = '1' then
         null;
       elsif rising_edge(clk_video) then
-        if crtc6845_clk = '1' then
+        if crtc6545_clk = '1' then
           chr_d_r <= chrrom_v_o;
         else
           chr_d_r <= chr_d_r(chr_d_r'left-1 downto 0) & '0';
@@ -472,28 +473,28 @@ begin
       end if;
     end process;
     
-    crtc6845s_inst : crtc6845s
+    crtc6545s_inst : crtc6845s
       generic map
       (
-        DEVICE_TYPE => 0
+        DEVICE_TYPE => 1
       )
       port map
       (
         -- INPUT
-        I_E         => crtc6845_e,
+        I_E         => crtc6545_e,
         I_DI        => cpu_d_o,
         I_RS        => cpu_a(0),
         I_RWn       => not cpu_io_wr,
-        I_CSn       => not crtc6845_cs,
-        I_CLK       => crtc6845_clk,
+        I_CSn       => not crtc6545_cs,
+        I_CLK       => crtc6545_clk,
         I_RSTn      => not cpu_reset,
 
         -- OUTPUT
-        O_RA        => crtc6845_ra,
-        O_MA        => crtc6845_ma,
-        O_H_SYNC    => crtc6845_hsync,
-        O_V_SYNC    => crtc6845_vsync,
-        O_DISPTMG   => crtc6845_disptmg
+        O_RA        => crtc6545_ra,
+        O_MA        => crtc6545_ma,
+        O_H_SYNC    => crtc6545_hsync,
+        O_V_SYNC    => crtc6545_vsync,
+        O_DISPTMG   => crtc6545_disptmg
       );
 
     -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
@@ -512,8 +513,8 @@ begin
         data_b			  => cpu_d_o,
         q_b					  => vram_d_o,
     
-        clock_a			  => crtc6845_clk,
-        address_a     => crtc6845_ma(10 downto 0),
+        clock_a			  => crtc6545_clk,
+        address_a     => crtc6545_ma(10 downto 0),
         wren_a			  => '0',
         data_a			  => (others => 'X'),
         q_a					  => vram_v_o
@@ -534,9 +535,9 @@ begin
         data_b			            => (others => 'X'),
         q_b					            => open,
     
-        clock_a			            => crtc6845_clk,
+        clock_a			            => crtc6545_clk,
         address_a(10 downto 4)  => vram_v_o(6 downto 0),
-        address_a(3 downto 0)   => crtc6845_ra(3 downto 0),
+        address_a(3 downto 0)   => crtc6545_ra(3 downto 0),
         wren_a			            => '0',
         data_a			            => (others => 'X'),
         q_a					            => chrrom_v_o
@@ -558,7 +559,7 @@ begin
         data_b			  => cpu_d_o,
         q_b					  => pcg_d_o,
     
-        clock_a			  => crtc6845_clk,
+        clock_a			  => crtc6545_clk,
         address_a     => (others => '0'),
         wren_a			  => '0',
         data_a			  => (others => 'X'),
@@ -566,20 +567,20 @@ begin
       );
       
     video_o.clk <= clk_video;
-    video_o.hsync <= crtc6845_hsync;
-    video_o.vsync <= crtc6845_vsync;
+    video_o.hsync <= crtc6545_hsync;
+    video_o.vsync <= crtc6545_vsync;
     -- hblank & vblank drive (DVI) DE
     -- - just use disptmg for both
-    video_o.hblank <= not crtc6845_disptmg;
-    video_o.vblank <= not crtc6845_disptmg;
-    video_o.rgb.r <=  (others => '0') when crtc6845_disptmg = '0' else
+    video_o.hblank <= not crtc6545_disptmg;
+    video_o.vblank <= not crtc6545_disptmg;
+    video_o.rgb.r <=  (others => '0') when crtc6545_disptmg = '0' else
                       (others => '0');
-    video_o.rgb.g <=  (others => '0') when crtc6845_disptmg = '0' else
+    video_o.rgb.g <=  (others => '0') when crtc6545_disptmg = '0' else
                       (others => chr_d_r(chr_d_r'left));
-    video_o.rgb.b <=  (others => '0') when crtc6845_disptmg = '0' else
+    video_o.rgb.b <=  (others => '0') when crtc6545_disptmg = '0' else
                       (others => '0');
   
-  end generate GEN_CRTC6845;
+  end generate GEN_CRTC6545;
   
 --  GEN_FDC : if TRS80_M1_FDC_SUPPORT generate
 --  
