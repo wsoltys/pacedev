@@ -55,13 +55,16 @@ I_RWn,
 I_CSn,
 I_CLK,
 I_RSTn,
+I_LPSTB,
 
 // OUTPUT
+O_DO,
 O_RA,
 O_MA,
 O_H_SYNC,
 O_V_SYNC,
-O_DISPTMG
+O_DISPTMG,
+O_CURSOR
 
 );
 
@@ -74,11 +77,16 @@ input  I_CSn;
 input  I_CLK;
 input  I_RSTn;
 
+input  I_LPSTB;
+
+output [7:0]O_DO;
 output [4:0]O_RA;
 output [13:0]O_MA;
 output O_H_SYNC;
 output O_V_SYNC;
 output O_DISPTMG;
+
+output O_CURSOR;
 
 wire   [7:0]W_Nht;
 wire   [7:0]W_Nhd;
@@ -97,6 +105,8 @@ wire   W_IntSync;
 wire   [1:0] W_DScue;
 wire   [1:0] W_CScue;
 
+wire   [7:6] W_STS;
+
 mpu_if # (
 .device_type(device_type)
 ) mpu_if (
@@ -107,7 +117,9 @@ mpu_if # (
 .I_RS(I_RS),
 .I_RWn(I_RWn),
 .I_CSn(I_CSn),
+.I_STS(W_STS),
 
+.O_DO(O_DO),
 .O_Nht(W_Nht),
 .O_Nhd(W_Nhd),
 .O_Nhsp(W_Nhsp),
@@ -124,7 +136,9 @@ mpu_if # (
 .O_IntSync(W_IntSync),
 // HD46505-SP only
 .O_DScue(W_DScue),
-.O_CScue(W_CScue)
+.O_CScue(W_CScue),
+// 6545-1 only
+.O_LPRd(W_LPRd)
 );
 
 crtc_gen crtc_gen(
@@ -142,7 +156,11 @@ crtc_gen crtc_gen(
 .I_Nvsw(W_Nvsw),
 .I_Nr(W_Nr),
 .I_Msa(W_Msa),
+// 6545-1 only
+.I_LPSTB(I_LPSTB),
+.I_LPRd(W_LPRd),
 
+.O_STS(W_STS),
 .O_RA(O_RA),
 .O_MA(O_MA),
 .O_H_SYNC(O_H_SYNC),
@@ -150,7 +168,6 @@ crtc_gen crtc_gen(
 .O_DISPTMG(O_DISPTMG)
 
 );
-
 
 endmodule
 
@@ -165,7 +182,9 @@ I_DI,
 I_RS,
 I_RWn,
 I_CSn,
+I_STS,
 
+O_DO,
 O_Nht,
 O_Nhd,
 O_Nhsp,
@@ -181,7 +200,8 @@ O_Msa,
 O_DScue,
 O_CScue,
 O_VMode,
-O_IntSync
+O_IntSync,
+O_LPRd
 );
 
 input I_RSTn;
@@ -190,7 +210,9 @@ input  [7:0]I_DI;
 input  I_RS;
 input  I_RWn;
 input  I_CSn;
+input  [6:5]I_STS;
 
+output [7:0]O_DO;
 output [7:0]O_Nht;
 output [7:0]O_Nhd;
 output [7:0]O_Nhsp;
@@ -206,21 +228,29 @@ output [1:0] O_DScue;
 output [1:0] O_CScue;
 output O_VMode;
 output O_IntSync;
+output O_LPRd;
 
-reg    [4:0]R_ADR;
-reg    [7:0]R_Nht;
-reg    [7:0]R_Nhd;
-reg    [7:0]R_Nhsp;
-reg    [7:0]R_Nsw;
-reg    [6:0]R_Nvt;
-reg    [4:0]R_Nadj;
-reg    [6:0]R_Nvd;
-reg    [6:0]R_Nvsp;
-reg    [7:0]R_Intr;
-reg    [4:0]R_Nr;
-reg    [5:0]R_Msah;
-reg    [7:0]R_Msal;
+reg   [7:0]R_DO;
+reg   [4:0]R_ADR;
+reg   [7:0]R_Nht;
+reg   [7:0]R_Nhd;
+reg   [7:0]R_Nhsp;
+reg   [7:0]R_Nsw;
+reg   [6:0]R_Nvt;
+reg   [4:0]R_Nadj;
+reg   [6:0]R_Nvd;
+reg   [6:0]R_Nvsp;
+reg   [7:0]R_Intr;
+reg   [4:0]R_Nr;
+reg   [5:0]R_Msah;
+reg   [7:0]R_Msal;
+reg   [7:0]R_Curh;
+reg   [7:0]R_Curl;
+reg   [7:0]R_Lph;
+reg   [7:0]R_Lpl;
+reg   R_LPRd;
 
+assign O_DO   = R_DO;
 assign O_Nht  = R_Nht;
 assign O_Nhd  = R_Nhd;
 assign O_Nhsp = R_Nhsp;
@@ -232,16 +262,18 @@ assign O_Nvsp = R_Nvsp;
 assign O_Nvsw = R_Nsw[7:4];
 assign O_Nr   = R_Nr;
 assign O_Msa  = {R_Msah,R_Msal};
-
 assign O_VMode   =  R_Intr[1];
 assign O_IntSync =  R_Intr[0];
 // HD46505-SP only
 assign O_DScue   = R_Intr[5:4]; // disp   scue 0,1,2 or OFF
 assign O_CScue   = R_Intr[7:6]; // cursor scue 0,1,2 or OFF
+// 6545-1 only
+assign O_LPRd    = R_LPRd;
 
 always@(negedge I_RSTn or negedge I_E)
 begin
   if(~I_RSTn) begin
+    R_DO   <= 8'h00;
 		// this is currently set for "non-interlace MODE 7"
 		// - it's a fudge because this controller doesn't support interlace
     R_Nht  <= 8'h3F;				// 0
@@ -258,29 +290,43 @@ begin
     R_Msah <= 6'h28;				// 12
     R_Msal <= 8'h00;				// 13
 	end else
-  if(~I_CSn)begin
-    if(~I_RWn)begin
-      if(~I_RS)begin      
-        R_ADR <= I_DI[4:0];
+  begin
+    // Read-reset bit (6545-1 only)
+    // - reads on R16,R17
+    if (~I_CSn & I_RWn & I_RS & (R_ADR[4:1] == 4'b1000))
+      R_LPRd <= 1'b1;
+    else
+      R_LPRd <= 1'b0;
+
+    if(~I_CSn)begin
+      if(I_RWn)begin
+        // reads
+        if(~I_RS)
+          R_DO <= { 1'b0, I_STS, 5'b0 };
       end else begin
-        case(R_ADR)
-          5'h0 : R_Nht  <= I_DI ;
-          5'h1 : R_Nhd  <= I_DI ;
-          5'h2 : R_Nhsp <= I_DI ;
-          5'h3 : R_Nsw  <= (device_type == 0
-                              ? { R_Nsw[7:4], I_DI[3:0] }
-                              : I_DI) ;
-          //5'h4 : R_Nvt  <= I_DI[6:0] ;
-          5'h4 : R_Nvt  <= 7'h0E;
-          4'h5 : R_Nadj <= I_DI[4:0] ;
-          5'h6 : R_Nvd  <= I_DI[6:0] ;
-          5'h7 : R_Nvsp <= I_DI[6:0] ;
-          5'h8 : R_Intr <= I_DI[7:0] ;
-          5'h9 : R_Nr   <= I_DI[4:0] ;
-          5'hC : R_Msah <= I_DI[5:0] ;
-          5'hD : R_Msal <= I_DI ;
-          default:;
-        endcase
+        // writes
+        if(~I_RS)begin      
+          R_ADR <= I_DI[4:0];
+        end else begin
+          case(R_ADR)
+            5'h0 : R_Nht  <= I_DI ;
+            5'h1 : R_Nhd  <= I_DI ;
+            5'h2 : R_Nhsp <= I_DI ;
+            5'h3 : R_Nsw  <= (device_type == 0
+                                ? { R_Nsw[7:4], I_DI[3:0] }
+                                : I_DI) ;
+            //5'h4 : R_Nvt  <= I_DI[6:0] ;
+            5'h4 : R_Nvt  <= 7'h0E;
+            4'h5 : R_Nadj <= I_DI[4:0] ;
+            5'h6 : R_Nvd  <= I_DI[6:0] ;
+            5'h7 : R_Nvsp <= I_DI[6:0] ;
+            5'h8 : R_Intr <= I_DI[7:0] ;
+            5'h9 : R_Nr   <= I_DI[4:0] ;
+            5'hC : R_Msah <= I_DI[5:0] ;
+            5'hD : R_Msal <= I_DI ;
+            default:;
+          endcase
+        end
       end
     end
   end
@@ -303,7 +349,10 @@ I_Nvsp,
 I_Nvsw,
 I_Nr,
 I_Msa,
+I_LPSTB,
+I_LPRd,
 
+O_STS,
 O_RA,
 O_MA,
 O_H_SYNC,
@@ -325,7 +374,10 @@ input  [6:0]I_Nvd;
 input  [6:0]I_Nvsp;
 input  [3:0]I_Nvsw;
 input  [13:0]I_Msa;
+input  I_LPSTB;
+input  I_LPRd;
 
+output [6:5]O_STS;
 output [4:0]O_RA;
 output [13:0]O_MA;
 output O_H_SYNC;
@@ -435,5 +487,31 @@ begin
     else if(W_HDISP_N) R_DISPTMG <= 1'b0;
   end
 end
+
+//
+//  6545-1 ONLY
+//
+
+reg       R_LPSTB;
+reg [6:5] R_STS;
+
+always @(negedge I_RSTn or negedge I_CLK)
+begin
+  if (~I_RSTn)
+  begin
+    R_STS <= 2'b00;
+  end else begin
+    // negedge I_CLK
+    if (I_LPSTB & ~R_LPSTB)
+      R_STS[6] <= 1'b1;
+    else if (I_LPRd)
+      R_STS[6] <= 1'b0;
+    R_STS[5] <= ~R_V_DISPTMG;
+  end
+  // edge-detect
+  R_LPSTB <= I_LPSTB;
+end
+
+assign O_STS = R_STS;
 
 endmodule

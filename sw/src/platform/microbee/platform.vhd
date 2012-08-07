@@ -139,8 +139,9 @@ architecture SYN of platform is
 --  signal cram_wr            : std_logic;
 --  signal cram_d_o           : std_logic_vector(7 downto 0);
 
-  -- VDUEB signals
+  -- video
   signal crtc6545_cs        : std_logic;
+  signal crtc6545_d_o       : std_logic_vector(7 downto 0);
   signal pcg_cs             : std_logic;
   signal pcg_wr             : std_logic;
   signal pcg_d_o            : std_logic_vector(7 downto 0);
@@ -298,9 +299,7 @@ begin
               ram_d_o;
     
     -- io read mux
-    io_d <= -- port F2 (dipswitches)
-            X"6F" when portFX_cs = '1' and cpu_a(3 downto 0) = X"2" else
-            kbd_d_o when portFX_cs = '1' and cpu_a(3 downto 0) = X"A" else
+    io_d <= crtc6545_d_o when crtc6545_cs = '1' else
             X"FF";
   end block BLK_RD_MUX;
   
@@ -413,13 +412,16 @@ begin
         I_CSn       : in std_logic;
         I_CLK       : in std_logic;
         I_RSTn      : in std_logic;
+        I_LPSTB     : in std_logic;
 
         -- OUTPUT
+        O_DO        : out std_logic_vector(7 downto 0);
         O_RA        : out std_logic_vector(4 downto 0);
         O_MA        : out std_logic_vector(13 downto 0);
         O_H_SYNC    : out std_logic;
         O_V_SYNC    : out std_logic;
-        O_DISPTMG   : out std_logic
+        O_DISPTMG   : out std_logic;
+        O_CURSOR    : out std_logic
       );
     end component crtc6845s;
     
@@ -476,7 +478,7 @@ begin
     crtc6545s_inst : crtc6845s
       generic map
       (
-        DEVICE_TYPE => 1
+        DEVICE_TYPE => 2
       )
       port map
       (
@@ -488,13 +490,16 @@ begin
         I_CSn       => not crtc6545_cs,
         I_CLK       => crtc6545_clk,
         I_RSTn      => not cpu_reset,
-
+        I_LPSTB     => '0',
+        
         -- OUTPUT
+        O_DO        => crtc6545_d_o,
         O_RA        => crtc6545_ra,
         O_MA        => crtc6545_ma,
         O_H_SYNC    => crtc6545_hsync,
         O_V_SYNC    => crtc6545_vsync,
-        O_DISPTMG   => crtc6545_disptmg
+        O_DISPTMG   => crtc6545_disptmg,
+        O_CURSOR    => open
       );
 
     -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
