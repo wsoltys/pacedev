@@ -137,7 +137,6 @@ mpu_if # (
 // HD46505-SP only
 .O_DScue(W_DScue),
 .O_CScue(W_CScue),
-// 6545-1 only
 .O_LPRd(W_LPRd)
 );
 
@@ -156,7 +155,6 @@ crtc_gen crtc_gen(
 .I_Nvsw(W_Nvsw),
 .I_Nr(W_Nr),
 .I_Msa(W_Msa),
-// 6545-1 only
 .I_LPSTB(I_LPSTB),
 .I_LPRd(W_LPRd),
 
@@ -267,7 +265,6 @@ assign O_IntSync =  R_Intr[0];
 // HD46505-SP only
 assign O_DScue   = R_Intr[5:4]; // disp   scue 0,1,2 or OFF
 assign O_CScue   = R_Intr[7:6]; // cursor scue 0,1,2 or OFF
-// 6545-1 only
 assign O_LPRd    = R_LPRd;
 
 always@(negedge I_RSTn or negedge I_E)
@@ -280,7 +277,8 @@ begin
     R_Nhd  <= 8'h28;				// 1
     R_Nhsp <= 8'h33;				// 2
     // device_type=0 should default R_Nsw[7:4] to 16!
-    R_Nsw  <= 8'h24;				// 3
+    //R_Nsw  <= 8'h24;				// 3
+    R_Nsw  <= 8'h44;				// 3
     R_Nvt  <= 7'h1E;				// 4
     R_Nadj <= 5'h02;				// 5
     R_Nvd  <= 7'h19;				// 6
@@ -291,7 +289,7 @@ begin
     R_Msal <= 8'h00;				// 13
 	end else
   begin
-    // Read-reset bit (6545-1 only)
+    // Read-reset bit
     // - reads on R16,R17
     if (~I_CSn & I_RWn & I_RS & (R_ADR[4:1] == 4'b1000))
       R_LPRd <= 1'b1;
@@ -315,8 +313,7 @@ begin
             5'h3 : R_Nsw  <= (device_type == 0
                                 ? { R_Nsw[7:4], I_DI[3:0] }
                                 : I_DI) ;
-            //5'h4 : R_Nvt  <= I_DI[6:0] ;
-            5'h4 : R_Nvt  <= 7'h0E;
+            5'h4 : R_Nvt  <= I_DI[6:0] ;
             4'h5 : R_Nadj <= I_DI[4:0] ;
             5'h6 : R_Nvd  <= I_DI[6:0] ;
             5'h7 : R_Nvsp <= I_DI[6:0] ;
@@ -487,10 +484,6 @@ begin
     else if(W_HDISP_N) R_DISPTMG <= 1'b0;
   end
 end
-
-//
-//  6545-1 ONLY
-//
 
 reg       R_LPSTB;
 reg [6:5] R_STS;

@@ -465,6 +465,7 @@ begin
       signal chrrom_v_o       : std_logic_vector(7 downto 0);
       signal pcg_wr           : std_logic;
       signal pcg_d_o          : std_logic_vector(7 downto 0);
+      signal pcg_v_o          : std_logic_vector(7 downto 0);
       
       signal chr_d_r          : std_logic_vector(7 downto 0);
 
@@ -497,7 +498,11 @@ begin
           null;
         elsif rising_edge(clk_video) then
           if crtc6845_clk = '1' then
-            chr_d_r <= chrrom_v_o;
+            if vram_v_o(7) = '0' then
+              chr_d_r <= chrrom_v_o;
+            else
+              chr_d_r <= pcg_v_o;
+            end if;
           else
             chr_d_r <= chr_d_r(chr_d_r'left-1 downto 0) & '0';
           end if;
@@ -589,17 +594,18 @@ begin
         )
         port map
         (
-          clock_b			  => clk_40M,
-          address_b		  => cpu_a(10 downto 0),
-          wren_b			  => pcg_wr,
-          data_b			  => cpu_d_o,
-          q_b					  => pcg_d_o,
+          clock_b			            => clk_40M,
+          address_b		            => cpu_a(10 downto 0),
+          wren_b			            => pcg_wr,
+          data_b			            => cpu_d_o,
+          q_b					            => pcg_d_o,
       
-          clock_a			  => crtc6845_clk,
-          address_a     => (others => '0'),
-          wren_a			  => '0',
-          data_a			  => (others => 'X'),
-          q_a					  => open
+          clock_a			            => crtc6845_clk,
+          address_a(10 downto 4)  => vram_v_o(6 downto 0),
+          address_a(3 downto 0)   => crtc6845_ra(3 downto 0),
+          wren_a			            => '0',
+          data_a			            => (others => 'X'),
+          q_a					            => pcg_v_o
         );
         
       video_o.clk <= clk_video;

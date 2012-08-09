@@ -1,0 +1,9 @@
+10 for i=0 to 2047
+20 out 240,0
+20 p=peek(63448+i)
+40 out 240,16
+50 poke 63448+i,255-p
+60 next i
+100 for i=0 to 255
+110 poke 61440+i,i
+120 next i
