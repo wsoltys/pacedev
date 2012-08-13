@@ -22,7 +22,7 @@ entity custom_io is
     nior0_cf          : out std_logic;
     niow0_cf          : out std_logic;
     non_cf            : out std_logic;
-    reset_cf          : out std_logic;
+    nreset_cf         : out std_logic;
     ndmack_cf         : out std_logic;
     dmarq_cf          : in std_logic;
     
@@ -81,7 +81,7 @@ begin
       wb_inta_o     => platform_i.wb_inta,
 
       -- ATA signals
-      resetn_pad_o  => reset_cf,
+      resetn_pad_o  => nreset_cf,
       dd_pad_i      => dd_i,
       dd_pad_o      => dd_o,
       dd_padoe_o    => dd_oe,

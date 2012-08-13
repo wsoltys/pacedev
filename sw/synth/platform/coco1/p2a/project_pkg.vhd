@@ -26,9 +26,9 @@ package project_pkg is
   
 	-- NTSC (x16)
   constant PACE_CLK0_DIVIDE_BY              : natural := 13;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 31;    -- 50*31/13 = 57M143Hz (57.23077)
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 31;    -- 24*31/13 = 57M143Hz (57.23077)
   constant PACE_CLK1_DIVIDE_BY              : natural := 13;
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 31;  	-- 50*31/13 = 57M143Hz (57.23077)
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 31;  	-- 24*31/13 = 57M143Hz (57.23077)
 	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
 	constant PACE_VIDEO_V_SCALE       	      : integer := 2;
 	-- PAL (x16)
@@ -44,7 +44,7 @@ package project_pkg is
   constant PACE_OSD_XPOS                    : natural := 0;
   constant PACE_OSD_YPOS                    : natural := 0;
 
-	constant PACE_ADV724_STD						: std_logic := ADV724_STD_PAL;
+	constant P2A_ADV724_STD						        : std_logic := ADV724_STD_PAL;
 
 	-- Coco1-specific constants
 
@@ -80,7 +80,7 @@ package project_pkg is
   
 	-- derived - do not edit
 	constant COCO1_VGA                        : boolean := not COCO1_CVBS;
-	constant PACE_ENABLE_ADV724					      : std_logic := to_std_logic(COCO1_CVBS);
+	constant P2A_ENABLE_ADV724					      : std_logic := to_std_logic(COCO1_CVBS);
 
   type from_PROJECT_IO_t is record
     not_used  : std_logic;

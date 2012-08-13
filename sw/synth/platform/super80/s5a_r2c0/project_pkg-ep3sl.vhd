@@ -118,18 +118,18 @@ package project_pkg is
 --  constant SUPER80_BIOS_D000                : string := SUPER80_BIOS_C000;
 --  constant SUPER80_BIOS_E000                : string := SUPER80_BIOS_C000;
 
-  -- With VDUEB
-  constant SUPER80_VARIANT                  : string := "super80r";
-  constant SUPER80_BIOS_C000                : string := "super80r";       -- MCE (original)
-  --constant SUPER80_BIOS_C000                : string := "super80s";       -- MCE (upgraded)
-  constant SUPER80_BIOS_D000                : string := "super80";
-  constant SUPER80_BIOS_E000                : string := "super80";
+--  -- With VDUEB
+--  constant SUPER80_VARIANT                  : string := "super80r";
+--  constant SUPER80_BIOS_C000                : string := "super80r";       -- MCE (original)
+--  --constant SUPER80_BIOS_C000                : string := "super80s";       -- MCE (upgraded)
+--  constant SUPER80_BIOS_D000                : string := "super80";
+--  constant SUPER80_BIOS_E000                : string := "super80";
 
---  -- With Enhanced VDUEB
---  constant SUPER80_VARIANT                  : string := "super80v";
---  constant SUPER80_BIOS_C000                : string := "s80-v37v";
---  constant SUPER80_BIOS_D000                : string := SUPER80_BIOS_C000;
---  constant SUPER80_BIOS_E000                : string := SUPER80_BIOS_C000;
+  -- With Enhanced VDUEB
+  constant SUPER80_VARIANT                  : string := "super80v";
+  constant SUPER80_BIOS_C000                : string := "s80-v37v";
+  constant SUPER80_BIOS_D000                : string := SUPER80_BIOS_C000;
+  constant SUPER80_BIOS_E000                : string := SUPER80_BIOS_C000;
   
   -- Chipspeed colour board
   constant SUPER80_HAS_CHIPSPEED_COLOUR     : boolean := (SUPER80_VARIANT = "super80m" or 
