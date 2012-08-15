@@ -172,7 +172,7 @@ begin
   assert false
     report  "CLK0_FREQ_MHz=" & integer'image(CLK0_FREQ_MHz) &
             " CPU_FREQ_MHz=" &  real'image(CPU_FREQ_MHz) &
-            " CPU_CLK_ENA_DIV=" & integer'image(TRS80_M1_CPU_CLK_ENA_DIVIDE_BY)
+            " CPU_CLK_ENA_DIV=" & integer'image(SUPER80_CPU_CLK_ENA_DIVIDE_BY)
       severity note;
 
 	cpu_reset <= clkrst_i.arst or game_reset;
@@ -328,7 +328,7 @@ begin
 	clk_en_inst : entity work.clk_div
 		generic map
 		(
-			DIVISOR		=> TRS80_M1_CPU_CLK_ENA_DIVIDE_BY
+			DIVISOR		=> SUPER80_CPU_CLK_ENA_DIVIDE_BY
 		)
 		port map
 		(

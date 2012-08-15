@@ -30,9 +30,9 @@ package platform_pkg is
 	--
   constant CLK0_FREQ_MHz		            : integer := 
                 PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
-  constant CPU_FREQ_MHz                 : real := 1.77;
+  constant CPU_FREQ_MHz                 : real := 2.00;
 
-	constant TRS80_M1_CPU_CLK_ENA_DIVIDE_BY : natural := 
+	constant SUPER80_CPU_CLK_ENA_DIVIDE_BY : natural := 
                 integer(round(real(CLK0_FREQ_MHz) / CPU_FREQ_MHz));
 
 	constant INCLUDE_FDC_SUPPORT			: boolean := false;
