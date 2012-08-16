@@ -1,6 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -152,7 +152,13 @@ package project_pkg is
   -- derived (do not edit)
   constant SUPER80_HAS_VDUEB                : boolean := (SUPER80_VARIANT = "super80r" or 
                                                             SUPER80_VARIANT = "super80v");
-                                                        
+
+  -- software
+  constant SUPER80_HAS_QUICKLOAD            : boolean := true;
+  constant SUPER80_QUICKLOAD_INITFILE       : string := "invaders";
+  constant SUPER80_QUICKLOAD_WIDTHAD        : natural := 13;        -- 8KB
+  constant SUPER80_QUICKLOAD_EXEC           : unsigned(15 downto 0) := X"0400";
+  
 	-- derived - do not edit
 
   constant S5AR2_EMULATE_SRAM               : boolean := SUPER80_HAS_VDUEB;

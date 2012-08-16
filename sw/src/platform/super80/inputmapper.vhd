@@ -213,6 +213,9 @@ begin
             keybd_v(7).d(6) := key_up;
           when SCANCODE_UP =>
             keybd_v(7).d(7) := key_up;
+          -- special keys
+          when SCANCODE_F7 =>
+            keybd_v(8).d(1) := key_down;
           when others =>
         end case;
       end if; -- key_up or key_up

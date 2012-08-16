@@ -149,6 +149,12 @@ architecture SYN of platform is
   signal ram_wr             : std_logic;
   alias ram_d_o      	      : std_logic_vector(7 downto 0) is sram_i.d(7 downto 0);
 
+  -- QUICKLOAD signals
+  signal quickload_en       : std_logic;
+  signal quickload_cs       : std_logic;
+  signal quickload_wr       : std_logic;
+  signal quickload_d_o      : std_logic_vector(7 downto 0);
+  
   -- fdc signals
 	signal fdc_cs					    : std_logic;
   signal fdc_d_o            : std_logic_vector(7 downto 0);
@@ -208,6 +214,12 @@ begin
               '1' when not SUPER80_HAS_VDUEB and cpu_a(15 downto 9) = X"F"&"111" else
               '1' when SUPER80_HAS_VDUEB and video_r = '0' and cpu_a(15 downto 12) = X"F" else
               '0';
+  
+  -- QUICKLOAD $0000-????
+  quickload_cs  <=  '1' when quickload_en = '1' and 
+                          cpu_a(15 downto SUPER80_QUICKLOAD_WIDTHAD) = 
+                                (15 downto SUPER80_QUICKLOAD_WIDTHAD => '0') else
+                    '0';
   
   -- io selects
   -- CRTC6845 $10/$11
@@ -270,6 +282,7 @@ begin
 	vram_wr <= vram_cs and cpu_mem_wr;
 	chr_wr <= chr_cs and cpu_mem_wr;
 	ram_wr <= cpu_mem_wr;
+  quickload_wr <= quickload_cs and cpu_mem_wr;
 
 	-- I/O chip selects
   
@@ -296,6 +309,8 @@ begin
               cram_d_o when cram_cs = '1' else
               chr_d_o when chr_cs = '1' else
               --fdc_d_o when fdc_cs = '1' else
+              -- decode QUICKLOAD before VRAM/RAM
+              quickload_d_o when quickload_cs = '1' else
               vram_d_o when vram_cs = '1' else
               ram_d_o;
     
@@ -312,6 +327,7 @@ begin
   begin
     if cpu_reset = '1' then
       kbd_d_v := (others => '1');
+      quickload_en <= '0';
     elsif rising_edge(clk_40M) then
       kbd_d_v := (others => '1');
       for i in 0 to 7 loop
@@ -322,6 +338,10 @@ begin
       kbd_d_o <= kbd_d_v;
       -- <CTRL><C><4> generates an interrupt
       cpu_irq <= not (inputs_i(3).d(0) or inputs_i(3).d(4) or inputs_i(3).d(7));
+      -- enables quickload memory space
+      if inputs_i(8).d(1) = '1' then
+        quickload_en <= '1';
+      end if;
     end if;
   end process;
   
@@ -635,7 +655,7 @@ begin
           q_a					            => cram_v_o
         );
     end generate GEN_CHIPSPEED_COLOUR;
-    
+
     video_o.clk <= clk_video;
     video_o.hsync <= crtc6845_hsync;
     video_o.vsync <= crtc6845_vsync;
@@ -652,10 +672,17 @@ begin
                       
   else generate
   
+    constant SUPER80_QUICKLOAD_START  : unsigned(15 downto 0) := X"0000";
+    constant SUPER80_QUICKLOAD_END    : unsigned(15 downto 0) := to_unsigned(2**SUPER80_QUICKLOAD_WIDTHAD - 1, 16);
+    
     signal tilemap_o        : to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
     signal tilemap_i        : from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
     signal graphics_o       : to_GRAPHICS_t;
     signal graphics_i       : from_GRAPHICS_t;
+    signal vs               : to_VIDEO_t;
+    
+    signal hexy_video       : std_logic;
+    signal hexy_dim         : std_logic;
     
   begin
 
@@ -685,7 +712,7 @@ begin
 
         -- video (incl. clk)
         video_i					=> video_i,
-        video_o					=> video_o
+        video_o					=> vs
       );
 
     tilerom_inst : entity work.sprom
@@ -754,7 +781,76 @@ begin
         tilemap_o(1).attr_d(tilemap_o(1).attr_d'left downto 8) <= (others => '0');
     --end generate GEN_CHIPSPEED_COLOUR;
     
+--    GEN_QUICKLOAD_HEXY : if SUPER80_HAS_QUICKLOAD generate
+    
+      quickload_info_inst : entity work.quickload_hexy
+        generic map
+        (
+          -- negative sync, add sync+back_porch
+          xOffset   => 96+48+(640-512)/2,
+          yOffset   => 2+33+480-64
+        )
+        port map
+        (
+          clk       => clk_video,
+          clk_ena   => '1',
+          vSync     => vs.vsync,
+          hSync     => vs.hsync,
+          video     => hexy_video,
+          dim       => hexy_dim,
+          
+          image(8*8-1 downto 8*7) => to_unsigned(10+character'pos(SUPER80_QUICKLOAD_INITFILE(1))-character'pos('a'),8),
+          image(8*7-1 downto 8*6) => to_unsigned(10+character'pos(SUPER80_QUICKLOAD_INITFILE(2))-character'pos('a'),8),
+          image(8*6-1 downto 8*5) => to_unsigned(10+character'pos(SUPER80_QUICKLOAD_INITFILE(3))-character'pos('a'),8),
+          image(8*5-1 downto 8*4) => to_unsigned(10+character'pos(SUPER80_QUICKLOAD_INITFILE(4))-character'pos('a'),8),
+          image(8*4-1 downto 8*3) => to_unsigned(10+character'pos(SUPER80_QUICKLOAD_INITFILE(5))-character'pos('a'),8),
+          image(8*3-1 downto 8*2) => to_unsigned(10+character'pos(SUPER80_QUICKLOAD_INITFILE(6))-character'pos('a'),8),
+          image(8*2-1 downto 8*1) => to_unsigned(10+character'pos(SUPER80_QUICKLOAD_INITFILE(7))-character'pos('a'),8),
+          image(8*1-1 downto 8*0) => to_unsigned(10+character'pos(SUPER80_QUICKLOAD_INITFILE(8))-character'pos('a'),8),
+          start_a   => SUPER80_QUICKLOAD_START,
+          end_a     => SUPER80_QUICKLOAD_END,
+          exec_a    => SUPER80_QUICKLOAD_EXEC
+        );
+
+      video_o.clk <= vs.clk;
+      video_o.hsync <= vs.hsync;
+      video_o.vsync <= vs.vsync;
+      video_o.hblank <= vs.hblank;
+      video_o.vblank <= vs.vblank;
+      video_o.rgb.r <= hexy_video & '0' & vs.rgb.r(vs.rgb.r'left downto 2) 
+                        when (quickload_en and hexy_dim) = '1' else vs.rgb.r;
+      video_o.rgb.g <= hexy_video & '0' & vs.rgb.g(vs.rgb.g'left downto 2) 
+                        when (quickload_en and hexy_dim) = '1' else vs.rgb.g;
+      video_o.rgb.b <= hexy_video & '0' & vs.rgb.b(vs.rgb.b'left downto 2) 
+                        when (quickload_en and hexy_dim) = '1' else vs.rgb.b;
+      
+--    else generate
+--      video_o <= vs;
+--    end generate GEN_QUICKLOAD_HEXY;
+    
   end generate GEN_VIDEO;
+
+  GEN_QUICKLOAD : if SUPER80_HAS_QUICKLOAD generate
+  begin
+  
+    quickload_inst : entity work.spram
+      generic map
+      (
+        init_file		  => "../../../../../src/platform/super80/sw/" &
+                          SUPER80_QUICKLOAD_INITFILE & ".hex",
+        widthad_a			=> SUPER80_QUICKLOAD_WIDTHAD,
+        width_a				=> 8
+      )
+      port map
+      (
+        clock		      => clk_40M,
+        address		    => cpu_a(SUPER80_QUICKLOAD_WIDTHAD-1 downto 0),
+        data		      => cpu_d_o,
+        wren		      => quickload_wr,
+        q		          => quickload_d_o
+      );
+      
+  end generate GEN_QUICKLOAD;
   
 --  GEN_FDC : if TRS80_M1_FDC_SUPPORT generate
 --  
