@@ -86,14 +86,15 @@ int main (int argc, char *argv[])
 	fprintf (stderr, "$%04X-$%04X $%04X (len=%d)\n",
 						start, end, exec, end-start+1);
 
-	uint16_t bytes = fread(&buf[exec], 1, end-start+1, fpin);
+	uint16_t bytes = fread(&buf[start], 1, end-start+1, fpin);
 	
 	if (bytes < (end-start+1))
 		fprintf (stderr, "WARNING: read %d\%d bytes!\n",
 							bytes, end-start+1);
 
-	// todo: pad the beginning
-	fwrite (&buf[exec], 1, bytes, fpout);
+	//fwrite (&buf[start], 1, bytes, fpout);
+	memset (buf, '\0', 64*1024);
+	fwrite (buf, 1, end+1, fpout);
 
 	bytes = fread (buf, 64*1024, 1, fpin);
 	if (bytes || !feof (fpin))

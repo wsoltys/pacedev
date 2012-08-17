@@ -106,7 +106,7 @@ package project_pkg is
 --  constant SUPER80_BIOS_D000                : string := SUPER80_BIOS_C000;
 --  constant SUPER80_BIOS_E000                : string := SUPER80_BIOS_C000;
   
-  -- V2.2
+--  -- V2.2
 --  constant SUPER80_VARIANT                  : string := "super80d";
 --  constant SUPER80_BIOS_C000                : string := "super80d";       -- V2.2
 --  --constant SUPER80_BIOS_C000                : string := "super80f";       -- MDS (original)
@@ -155,9 +155,19 @@ package project_pkg is
 
   -- software
   constant SUPER80_HAS_QUICKLOAD            : boolean := true;
-  constant SUPER80_QUICKLOAD_INITFILE       : string := "invaders";
   constant SUPER80_QUICKLOAD_WIDTHAD        : natural := 13;        -- 8KB
-  constant SUPER80_QUICKLOAD_EXEC           : unsigned(15 downto 0) := X"0400";
+
+--  -- super80d
+--  constant SUPER80_QUICKLOAD_INITFILE       : string := "zipzap00";
+--  constant SUPER80_QUICKLOAD_EXEC           : unsigned(15 downto 0) := X"0100";
+
+  -- super80m
+--  constant SUPER80_QUICKLOAD_INITFILE       : string := "invaders";
+--  constant SUPER80_QUICKLOAD_EXEC           : unsigned(15 downto 0) := X"0400";
+  -- (basic programs)
+  constant SUPER80_QUICKLOAD_INITFILE       : string := "meteorrun";
+--  constant SUPER80_QUICKLOAD_INITFILE       : string := "missileattack";
+  constant SUPER80_QUICKLOAD_EXEC           : unsigned(15 downto 0) := X"D006";
   
 	-- derived - do not edit
 
