@@ -192,6 +192,28 @@ begin
           h_border_r <= (1680-VIDEO_H_SIZE)/2;
           v_border_r <= (1050-VIDEO_V_SIZE)/2;
 
+        when PACE_VIDEO_ARCADE_STD_336x240_60Hz =>
+          -- arcade standard resolution, clk=7.16MHz
+          h_front_porch_r <= 34;
+          h_sync_r <= 34;
+          h_back_porch_r <= 51;
+          h_border_r <= (336-VIDEO_H_SIZE)/2;
+          v_front_porch_r <= 3;
+          v_sync_r <= 3;
+          v_back_porch_r <= 16;
+          v_border_r <= (240-VIDEO_V_SIZE)/2;
+
+        when PACE_VIDEO_ARCADE_STD_336x240_60Hz_28M64 =>
+          -- arcade standard resolution, clk=28.64MHz
+          h_front_porch_r <= 4*34;
+          h_sync_r <= 4*34;
+          h_back_porch_r <= 4*51;
+          h_border_r <= 4*(336-VIDEO_H_SIZE)/2;
+          v_front_porch_r <= 3;
+          v_sync_r <= 3;
+          v_back_porch_r <= 16;
+          v_border_r <= (240-VIDEO_V_SIZE)/2;
+
         when PACE_VIDEO_CVBS_720x288p_50Hz =>
           -- generic composite, clk=13.5MHz
           h_front_porch_r <= (8+12);

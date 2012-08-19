@@ -164,9 +164,9 @@ package project_pkg is
   -- super80m
 --  constant SUPER80_QUICKLOAD_INITFILE       : string := "invaders";
 --  constant SUPER80_QUICKLOAD_EXEC           : unsigned(15 downto 0) := X"0400";
-  -- (basic programs)
-  constant SUPER80_QUICKLOAD_INITFILE       : string := "meteorrun";
---  constant SUPER80_QUICKLOAD_INITFILE       : string := "missileattack";
+  -- (basic programs all have EXEC=$D006)
+--  constant SUPER80_QUICKLOAD_INITFILE       : string := "meteorrun";
+  constant SUPER80_QUICKLOAD_INITFILE       : string := "missileattack";
   constant SUPER80_QUICKLOAD_EXEC           : unsigned(15 downto 0) := X"D006";
   
 	-- derived - do not edit

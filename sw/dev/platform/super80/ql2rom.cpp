@@ -86,6 +86,8 @@ int main (int argc, char *argv[])
 	fprintf (stderr, "$%04X-$%04X $%04X (len=%d)\n",
 						start, end, exec, end-start+1);
 
+	memset (buf, '\0', 64*1024);
+
 	uint16_t bytes = fread(&buf[start], 1, end-start+1, fpin);
 	
 	if (bytes < (end-start+1))
@@ -93,7 +95,6 @@ int main (int argc, char *argv[])
 							bytes, end-start+1);
 
 	//fwrite (&buf[start], 1, bytes, fpout);
-	memset (buf, '\0', 64*1024);
 	fwrite (buf, 1, end+1, fpout);
 
 	bytes = fread (buf, 64*1024, 1, fpin);

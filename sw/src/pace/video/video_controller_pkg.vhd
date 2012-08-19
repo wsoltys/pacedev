@@ -8,16 +8,18 @@ package video_controller_pkg is
 
   type PACEVideoController_t is
   (
-    PACE_VIDEO_NONE,                  -- PACE video controller not used
-    PACE_VIDEO_VGA_240x320_60Hz,      -- P3M video
-    PACE_VIDEO_VGA_320x480_60Hz,      -- for 320x200 (12.588MHz)
-    PACE_VIDEO_VGA_640x480_60Hz,      -- generic VGA (25.175MHz)
-    PACE_VIDEO_VGA_800x600_60Hz,      -- generic VGA (40MHz)
-    PACE_VIDEO_VGA_1024x768_60Hz,     -- XVGA (65MHz)
-    PACE_VIDEO_VGA_1280x1024_60Hz,    -- SXGA (108MHz)
-    PACE_VIDEO_VGA_1680x1050_60Hz,    -- WSXGA+ (147MHz)
-    PACE_VIDEO_LCM_320x240_60Hz,      -- DE2 LCD
-    PACE_VIDEO_CVBS_720x288p_50Hz     -- generic composite
+    PACE_VIDEO_NONE,                      -- PACE video controller not used
+    PACE_VIDEO_VGA_240x320_60Hz,          -- P3M video
+    PACE_VIDEO_VGA_320x480_60Hz,          -- for 320x200 (12.588MHz)
+    PACE_VIDEO_VGA_640x480_60Hz,          -- generic VGA (25.175MHz)
+    PACE_VIDEO_VGA_800x600_60Hz,          -- generic VGA (40MHz)
+    PACE_VIDEO_VGA_1024x768_60Hz,         -- XVGA (65MHz)
+    PACE_VIDEO_VGA_1280x1024_60Hz,        -- SXGA (108MHz)
+    PACE_VIDEO_VGA_1680x1050_60Hz,        -- WSXGA+ (147MHz)
+    PACE_VIDEO_ARCADE_STD_336x240_60Hz,   -- arcade std resolution (7.16MHz)
+    PACE_VIDEO_ARCADE_STD_336x240_60Hz_28M64,   -- arcade std resolution (28.64MHz)
+    PACE_VIDEO_CVBS_720x288p_50Hz,        -- generic composite
+    PACE_VIDEO_LCM_320x240_60Hz           -- DE2 LCD
   );
 
   type PACEVideoDisplay_t is
