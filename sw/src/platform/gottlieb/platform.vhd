@@ -91,7 +91,6 @@ architecture SYN of platform is
   
   -- uP signals  
   signal clk_5M_en			    : std_logic;
-	signal clk_5M_en_n		    : std_logic;
 	signal cpu_rd_n				    : std_logic;
 	signal cpu_wr_n				    : std_logic;
   signal cpu_iom            : std_logic;
@@ -141,10 +140,6 @@ architecture SYN of platform is
 	alias platform_pause          : std_logic is inputs_i(NUM_INPUT_BYTES-1).d(1);
 	
 begin
-
-	-- cpu09 core uses negative clock edge
-	clk_5M_en_n <= not (clk_5M_en and not platform_pause);
-	--clk_5M_en_n <= not (clk_5M_en and not platform_pause) or cpu_halt;
 
 	-- add game reset later
 	cpu_reset <= rst_20M or platform_reset;
@@ -482,8 +477,8 @@ begin
       end generate GEN_BG_ROMS;
     tilemap_o(1).tile_d(tilemap_o(1).tile_d'left downto 8) <= (others => '0');
     tilemap_o(1).tile_d(7 downto 0) <= 
-      tile_d_o(0) when tilemap_i(1).tile_a(12) = '0' else
-      tile_d_o(1);
+    tile_d_o(0) when tilemap_i(1).tile_a(12) = '0' else
+    tile_d_o(1);
 	end generate GEN_FPGA_BG_ROMS;
 
   -- SPRITES
