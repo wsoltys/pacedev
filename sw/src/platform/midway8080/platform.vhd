@@ -3,6 +3,9 @@ use IEEE.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
+library altera;
+use altera.altera_europa_support_lib.to_std_logic;
+
 library work;
 use work.pace_pkg.all;
 use work.sdram_pkg.all;
@@ -89,17 +92,17 @@ architecture SYN of platform is
 	
   -- uP signals  
   signal clk_2M_en			: std_logic;
-  signal uP_addr        : std_logic_vector(15 downto 0);
-  signal uP_datai       : std_logic_vector(7 downto 0);
-  signal uP_datao       : std_logic_vector(7 downto 0);
-  signal uPmemrd        : std_logic;
-  signal uPmemwr        : std_logic;
-  signal uPiord         : std_logic;
-  signal uPiowr         : std_logic;
-  signal uPintreq       : std_logic;
-  signal uPintvec       : std_logic_vector(7 downto 0);
-  signal uPintack       : std_logic;
-	alias io_addr					: std_logic_vector(7 downto 0) is uP_addr(7 downto 0);
+  signal cpu_a          : std_logic_vector(15 downto 0);
+  signal cpu_d_i        : std_logic_vector(7 downto 0);
+  signal cpu_d_o        : std_logic_vector(7 downto 0);
+  signal cpu_mem_rd     : std_logic;
+  signal cpu_mem_wr     : std_logic;
+  signal cpu_io_rd      : std_logic;
+  signal cpu_io_wr      : std_logic;
+  signal cpu_irq        : std_logic;
+  signal cpu_intvec     : std_logic_vector(7 downto 0);
+  signal cpu_intack     : std_logic;
+	alias io_addr					: std_logic_vector(7 downto 0) is cpu_a(7 downto 0);
 	                        
   -- ROM signals        
 	signal rom0_cs				: std_logic;
@@ -125,11 +128,13 @@ architecture SYN of platform is
 
   -- other signals      
 	signal cpu_reset			: std_logic;
-  signal uPmem_datai    : std_logic_vector(7 downto 0);
-  signal uPio_datai     : std_logic_vector(7 downto 0);
+  signal cpu_mem_d_i    : std_logic_vector(7 downto 0);
+  signal cpu_io_d_i     : std_logic_vector(7 downto 0);
   
-	signal bitmap_addr_rotated	: std_logic_vector(12 downto 0);
-	
+  signal spec_key_en    : std_logic_vector(7 downto 0);
+  alias osd_key_en      : std_logic is spec_key_en(1);
+  alias rot_key_en      : std_logic is spec_key_en(2);
+  
 begin
 
   assert false
@@ -141,57 +146,57 @@ begin
 	cpu_reset <= clkrst_i.arst or game_reset;
 	
   -- read mux
-  uP_datai <= uPmem_datai when (uPmemrd = '1') else uPio_datai;
+  cpu_d_i <= cpu_mem_d_i when (cpu_mem_rd = '1') else cpu_io_d_i;
 
 	-- memory chip selects
 	-- ROM0 $0000-$1FFF
-	rom0_cs <= '1' when uP_addr(14 downto 13) = "00" else '0';
+	rom0_cs <= '1' when cpu_a(14 downto 13) = "00" else '0';
 	-- WRAM $2000-$23FF
-	wram_cs <= '1' when uP_addr(14 downto 10) = "01000" else '0';
+	wram_cs <= '1' when cpu_a(14 downto 10) = "01000" else '0';
 	-- VRAM $2400-$3FFF
-	vram_cs <= '1' when uP_addr(14 downto 13) = "01" and uP_addr(12 downto 10) /= "000" else '0';
+	vram_cs <= '1' when cpu_a(14 downto 13) = "01" and cpu_a(12 downto 10) /= "000" else '0';
 	-- ROM1 $4000-$5FFF
-	rom1_cs <= '1' when uP_addr(14 downto 13) = "10" else '0';
+	rom1_cs <= '1' when cpu_a(14 downto 13) = "10" else '0';
 
 	-- memory write enables
-	vram_wr <= vram_cs and uPmemwr;
-	wram_wr <= wram_cs and uPmemwr;
+	vram_wr <= vram_cs and cpu_mem_wr;
+	wram_wr <= wram_cs and cpu_mem_wr;
 
 	-- I/O chip selects
 	-- inputs port 0
-	port_cs(0) <= '1' when uP_addr(2 downto 0) = "000" else '0';
+	port_cs(0) <= '1' when cpu_a(2 downto 0) = "000" else '0';
 	-- inputs port 1
-	port_cs(1) <= '1' when uP_addr(2 downto 0) = "001" else '0';
+	port_cs(1) <= '1' when cpu_a(2 downto 0) = "001" else '0';
 	-- number of bits to shift ($2)
-	port_cs(2) <= '1' when uP_addr(2 downto 0) = "010" else '0';
+	port_cs(2) <= '1' when cpu_a(2 downto 0) = "010" else '0';
 	-- sound reg #1 ($3)
-	port_cs(3) <= '1' when uP_addr(2 downto 0) = "011" else '0';
+	port_cs(3) <= '1' when cpu_a(2 downto 0) = "011" else '0';
 	-- shifter data ($4)
-	port_cs(4) <= '1' when uP_addr(2 downto 0) = "100" else '0';
+	port_cs(4) <= '1' when cpu_a(2 downto 0) = "100" else '0';
 	-- sound reg #2 ($5)
-	port_cs(5) <= '1' when uP_addr(2 downto 0) = "101" else '0';
+	port_cs(5) <= '1' when cpu_a(2 downto 0) = "101" else '0';
 
 	-- io write enables
-	port_wr(2) <= port_cs(2) and uPiowr;
-	port_wr(3) <= port_cs(3) and uPiowr;
-	port_wr(4) <= port_cs(4) and uPiowr;
-	port_wr(5) <= port_cs(5) and uPiowr;
+	port_wr(2) <= port_cs(2) and cpu_io_wr;
+	port_wr(3) <= port_cs(3) and cpu_io_wr;
+	port_wr(4) <= port_cs(4) and cpu_io_wr;
+	port_wr(5) <= port_cs(5) and cpu_io_wr;
 
 	-- sound interface
-	snd_o.rd <= (port_cs(3) or port_cs(5)) and uPiord; -- not used
-	snd_o.wr <= (port_cs(3) or port_cs(5)) and uPiowr;
-  snd_o.d <= up_datao;
-  snd_o.a <= up_addr(snd_o.a'range);
+	snd_o.rd <= (port_cs(3) or port_cs(5)) and cpu_io_rd; -- not used
+	snd_o.wr <= (port_cs(3) or port_cs(5)) and cpu_io_wr;
+  snd_o.d <= cpu_d_o;
+  snd_o.a <= cpu_a(snd_o.a'range);
   
 	-- memory read mux
-	uPmem_datai <= 	rom0_datao when rom0_cs = '1' else
+	cpu_mem_d_i <= 	rom0_datao when rom0_cs = '1' else
 									wram_datao when wram_cs = '1' else
 									vram_datao when vram_cs = '1' else
 									rom1_datao when rom1_cs = '1' else
 									(others => '1');
 	
 	-- io read mux
-	uPio_datai <= X"40" when port_cs(0) = '1' else
+	cpu_io_d_i <= X"40" when port_cs(0) = '1' else
 								inputs_i(0).d when port_cs(1) = '1' else
 								inputs_i(1).d when port_cs(2) = '1' else
 								shift_dout when port_cs(3) = '1' else
@@ -210,10 +215,10 @@ begin
 		elsif rising_edge(clk_sys) then
 			-- latch on rising edge of WR to port 2 (shift_amt)
 			if port_wr(2) = '1' and wr2_r = '0' then
-				shift_amt := uP_datao(2 downto 0);
+				shift_amt := cpu_d_o(2 downto 0);
 			-- latch on rising edge of WR to port 4 (shift_din)
 			elsif port_wr(4) = '1' and wr4_r = '0' then
-				shift_din := uP_datao & shift_din(15 downto 8);
+				shift_din := cpu_d_o & shift_din(15 downto 8);
 			end if;
 			wr2_r := port_wr(2);
 			wr4_r := port_wr(4);
@@ -254,55 +259,48 @@ begin
 			variable count : count_60Hz_t;
 		begin
 			if cpu_reset = '1' then
-				uPintreq <= '0';
+				cpu_irq <= '0';
 				count := 0;
 			elsif rising_edge(clk_sys) then
 				-- generate interrupt
 				count := count + 1;
 				if count = count_60Hz_t'high/2 then
-					uPintreq <= '1';
-					uPintvec <= RST08;
+					cpu_irq <= '1';
+					cpu_intvec <= RST08;
 				elsif count = count_60Hz_t'high then
 					count := 0;
-					uPintreq <= '1';
-					uPintvec <= RST10;
+					cpu_irq <= '1';
+					cpu_intvec <= RST10;
 				-- clear interrupt
-				elsif uPintack = '1' then
-					uPintreq <= '0';
+				elsif cpu_intack = '1' then
+					cpu_irq <= '0';
 				end if;
 			end if;
 		end process;
 
 	end block INT_BLOCK;	
 
-  -- osd toggle (TAB)
+  -- special keys
   process (clk_sys, clkrst_i.arst)
-    variable osd_key_r  : std_logic;
-    variable osd_en_v   : std_logic;
+    variable spec_key_r   : std_logic_vector(7 downto 0);
   begin
     if clkrst_i.arst = '1' then
-      osd_en_v := '0';
-      osd_key_r := '0';
+      spec_key_r := (others => '0');
+      osd_key_en <= '0';
+      rot_key_en <= to_std_logic(INVADERS_ROTATE_VIDEO);
     elsif rising_edge(clk_sys) then
-      -- toggle on OSD KEY PRESS
-      if inputs_i(2).d(1) = '1' and osd_key_r = '0' then
-        osd_en_v := not osd_en_v;
-      end if;
-      osd_key_r := inputs_i(2).d(1);
+      for i in 0 to 7 loop
+        if inputs_i(2).d(i) = '1' and spec_key_r(i) = '0' then
+          spec_key_en <= not spec_key_en;
+        end if;
+      end loop;
+      spec_key_r := inputs_i(2).d;
     end if;
-    osd_o.en <= osd_en_v;
   end process;
 
-	-- old vram mapper logic
-  --bitmap_addr_rotated(4 downto 0) <= not bitmap_i(1).a(12 downto 8);
-  --bitmap_addr_rotated(12 downto 5) <= bitmap_i(1).a(7 downto 0) + 32;
-  bitmap_addr_rotated(4 downto 0) <= bitmap_i(1).a(4 downto 0);
-  bitmap_addr_rotated(12 downto 5) <= bitmap_i(1).a(12 downto 5);
-
-	-- this will probably require adjustment
-	--xcentre <= std_logic_vector(conv_unsigned(0, xcentre'length));
-	--ycentre <= std_logic_vector(conv_unsigned(198, ycentre'length));
-
+  -- video rotate key
+  graphics_o.bit8(0)(0) <= rot_key_en;
+  
 	-- generate CPU clock (2MHz from 20MHz)
 	clk_en_inst : entity work.clk_div
 		generic map
@@ -323,18 +321,18 @@ begin
       clk_en	=> clk_2M_en,
       reset  	=> cpu_reset,                                     
 
-      addr   	=> uP_addr,
-      datai  	=> uP_datai,
-      datao  	=> uP_datao,
+      addr   	=> cpu_a,
+      datai  	=> cpu_d_i,
+      datao  	=> cpu_d_o,
 
-      mem_rd 	=> uPmemrd,
-      mem_wr 	=> uPmemwr,
-      io_rd  	=> uPiord,
-      io_wr  	=> uPiowr,
+      mem_rd 	=> cpu_mem_rd,
+      mem_wr 	=> cpu_mem_wr,
+      io_rd  	=> cpu_io_rd,
+      io_wr  	=> cpu_io_wr,
 
-      intreq 	=> uPintreq,
-      intvec 	=> uPintvec,
-      intack 	=> uPintack,
+      intreq 	=> cpu_irq,
+      intvec 	=> cpu_intvec,
+      intack 	=> cpu_intack,
       nmi    	=> '0'
     );
 
@@ -347,7 +345,7 @@ begin
       elsif rising_edge (clk_sys) then
         -- 70ns flash - update address and latch every 500ns
         if clk_2M_en = '1' then
-          flash_o.a <= std_logic_vector(resize(unsigned(uP_addr(12 downto 0)), flash_o.a'length));
+          flash_o.a <= std_logic_vector(resize(unsigned(cpu_a(12 downto 0)), flash_o.a'length));
           rom0_datao <= flash_i.d;
         end if;
       end if;
@@ -359,7 +357,7 @@ begin
       port map
       (
         clock		=> clk_sys,
-        address => uP_addr(12 downto 0),
+        address => cpu_a(12 downto 0),
         q				=> rom0_datao
       );
       
@@ -378,7 +376,7 @@ begin
       port map
       (
         clock		=> clk_sys,
-        address => uP_addr(11 downto 0),
+        address => cpu_a(11 downto 0),
         q				=> rom1_datao
       );
   else generate
@@ -395,13 +393,12 @@ begin
     port map
     (
         clock_b   	=> clk_sys,
-        address_b   => uP_addr(12 downto 0),
-        data_b      => uP_datao,
+        address_b   => cpu_a(12 downto 0),
+        data_b      => cpu_d_o,
         q_b					=> vram_datao,
         wren_b			=> vram_wr,
 
         clock_a     => clk_video,
-        --address_a   => bitmap_addr_rotated,
         address_a   => bitmap_i(1).a(12 downto 0),
         data_a      => (others => '0'),
         q_a			    => bitmap_o(1).d(7 downto 0),
@@ -414,8 +411,8 @@ begin
 				port map
 				(
 					clock				=> clk_sys,
-					address			=> uP_addr(9 downto 0),
-					data				=> up_datao,
+					address			=> cpu_a(9 downto 0),
+					data				=> cpu_d_o,
 					wren				=> wram_wr,
 					q						=> wram_datao
 				);
@@ -425,8 +422,8 @@ begin
     else generate
   
       -- SRAM signals (may or may not be used)
-      sram_o.a <= std_logic_vector(resize(unsigned(uP_addr), sram_o.a'length));
-      sram_o.d <= std_logic_vector(resize(unsigned(uP_datao), sram_o.d'length));
+      sram_o.a <= std_logic_vector(resize(unsigned(cpu_a), sram_o.a'length));
+      sram_o.d <= std_logic_vector(resize(unsigned(cpu_d_o), sram_o.d'length));
       sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
       sram_o.cs <= wram_cs;
       sram_o.oe <= not wram_wr;
@@ -437,7 +434,7 @@ begin
 		
   -- unused outputs
 
-  graphics_o <= NULL_TO_GRAPHICS;
+  --graphics_o <= NULL_TO_GRAPHICS;
   --tilemap_o <= NULL_TO_TILEMAP_CTL;
   sprite_reg_o <= NULL_TO_SPRITE_REG;
   sprite_o <= NULL_TO_SPRITE_CTL;

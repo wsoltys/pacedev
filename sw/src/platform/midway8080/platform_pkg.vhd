@@ -12,14 +12,15 @@ package platform_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 
+  -- native orientation
+  constant INVADERS_VIDEO_H_SIZE				: integer := 256;
+	constant INVADERS_VIDEO_V_SIZE				: integer := 224;
+
 	constant PACE_VIDEO_NUM_BITMAPS		    : natural := 1;
 	constant PACE_VIDEO_NUM_TILEMAPS 	    : natural := 0;
 	constant PACE_VIDEO_NUM_SPRITES 	    : natural := 0;
---	constant PACE_VIDEO_H_SIZE				    : integer := 224;
---	--constant PACE_VIDEO_V_SIZE				    : integer := 240; -- why not 240?
-	--constant PACE_VIDEO_V_SIZE				    : integer := 256; -- why not 240?
-	constant PACE_VIDEO_H_SIZE				    : integer := 256;
-	constant PACE_VIDEO_V_SIZE				    : integer := 224;
+	constant PACE_VIDEO_H_SIZE				    : integer := INVADERS_VIDEO_V_SIZE;
+	constant PACE_VIDEO_V_SIZE				    : integer := INVADERS_VIDEO_H_SIZE;
 	constant PACE_VIDEO_L_CROP				    : integer := 0;
 	constant PACE_VIDEO_R_CROP				    : integer := 0;
   constant PACE_VIDEO_PIPELINE_DELAY    : integer := 3;
@@ -44,4 +45,4 @@ package platform_pkg is
     not_used  : std_logic;
   end record;
 
-end;
+end package;

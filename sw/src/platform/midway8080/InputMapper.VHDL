@@ -89,9 +89,11 @@ begin
                     --when "00011011" =>           -- $1B = 'S'
 										-- Special keys
 										when SCANCODE_F3 =>
-											keybd_v(2).d(0) := key_down;			-- CPU RESET
+											keybd_v(2).d(0) := key_down;		-- CPU RESET
 										when SCANCODE_TAB =>
-                      keybd_v(2).d(1) := key_down;     -- OSD TOGGLE
+                      keybd_v(2).d(1) := key_down;    -- OSD TOGGLE
+                    when SCANCODE_F4 =>
+                      keybd_v(2).d(2) := key_down;    -- video rotate
                     when others =>
                end case;
             end if; -- key_down or key_up
