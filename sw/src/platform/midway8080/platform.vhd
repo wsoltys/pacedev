@@ -294,8 +294,10 @@ begin
   end process;
 
 	-- old vram mapper logic
-  bitmap_addr_rotated(4 downto 0) <= not bitmap_i(1).a(12 downto 8);
-  bitmap_addr_rotated(12 downto 5) <= bitmap_i(1).a(7 downto 0) + 32;
+  --bitmap_addr_rotated(4 downto 0) <= not bitmap_i(1).a(12 downto 8);
+  --bitmap_addr_rotated(12 downto 5) <= bitmap_i(1).a(7 downto 0) + 32;
+  bitmap_addr_rotated(4 downto 0) <= bitmap_i(1).a(4 downto 0);
+  bitmap_addr_rotated(12 downto 5) <= bitmap_i(1).a(12 downto 5);
 
 	-- this will probably require adjustment
 	--xcentre <= std_logic_vector(conv_unsigned(0, xcentre'length));
@@ -399,10 +401,11 @@ begin
         wren_b			=> vram_wr,
 
         clock_a     => clk_video,
-        address_a   => bitmap_addr_rotated,
+        --address_a   => bitmap_addr_rotated,
+        address_a   => bitmap_i(1).a(12 downto 0),
         data_a      => (others => '0'),
-        q_a			=> bitmap_o(1).d(7 downto 0),
-        wren_a		=> '0'
+        q_a			    => bitmap_o(1).d(7 downto 0),
+        wren_a		  => '0'
     );
 
 	GEN_WRAM : if INVADERS_USE_INTERNAL_WRAM generate

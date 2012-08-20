@@ -18,8 +18,8 @@ architecture BITMAP_1 of bitmapCtl is
   alias stb       : std_logic is video_ctl.stb;
   alias hblank    : std_logic is video_ctl.hblank;
   alias vblank    : std_logic is video_ctl.vblank;
-  alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
-  alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
+  alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.y;
+  alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.x;
   
   alias rgb       : RGB_t is ctl_o.rgb;
   
@@ -27,7 +27,8 @@ begin
 
 	-- these are constant for a whole line
 	ctl_o.a(15 downto 13) <= (others => '0');
-  ctl_o.a(12 downto 8) <= y(7 downto 3);
+  --ctl_o.a(12 downto 8) <= y(7 downto 3);
+  ctl_o.a(12 downto 5) <= x(7 downto 0);
 
   -- generate pixel
   process (clk)
@@ -40,7 +41,8 @@ begin
       -- 1st stage of pipeline
       -- - read tile from tilemap
       if stb = '1' then
-        ctl_o.a(7 downto 0) <= x(7 downto 0);
+        --ctl_o.a(7 downto 0) <= x(7 downto 0);
+        ctl_o.a(4 downto 0) <= y(7 downto 3);
       end if;
 
       -- each byte contains information for 8 pixels
