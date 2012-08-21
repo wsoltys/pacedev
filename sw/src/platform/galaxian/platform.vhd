@@ -85,9 +85,10 @@ end platform;
 architecture SYN of platform is
 
 	alias clk_sys				  : std_logic is clkrst_i.clk(0);
+	alias rst_sys				  : std_logic is clkrst_i.rst(0);
 	alias clk_video       : std_logic is clkrst_i.clk(1);
 	
-  -- uP signals  
+  -- cpu signals  
   signal clk_3M_en			: std_logic;
   signal cpu_clk_en     : std_logic;
   signal cpu_a          : std_logic_vector(15 downto 0);
@@ -105,7 +106,6 @@ architecture SYN of platform is
   -- VRAM signals       
 	signal vram_cs				: std_logic;
 	signal vram_wr				: std_logic;
-	signal vram_a			    : std_logic_vector(9 downto 0);
   signal vram_d_o       : std_logic_vector(7 downto 0);
                         
   -- RAM signals        
@@ -125,7 +125,6 @@ architecture SYN of platform is
   signal inZero_cs      : std_logic;
   signal inOne_cs       : std_logic;
   signal dips_cs        : std_logic;
-	signal newTileAddr		: std_logic_vector(11 downto 0);
 	
 begin
 
@@ -147,10 +146,15 @@ begin
 	end generate GEN_NO_SRAM;
 	
   -- chip select logic
+  -- ROM $0000-$2800
   rom_cs <= '1' when cpu_a(15 downto 14) = "00" else '0';
+  -- WRAM
   wram_cs <= '1' when cpu_a(15 downto 11) = "01000" else '0';
+  -- VRAM $5000-$57FF
   vram_cs <= '1' when cpu_a(15 downto 11) = "01010" else '0';
+  -- CRAM $5800-$5BFF
   cram_cs <= '1' when cpu_a(15 downto 10) = "010110" else '0';
+  -- INPUTS $6000,$6800,$7000
   inZero_cs <= '1' when cpu_a(15 downto 11) = "01100" else '0';
   inOne_cs <= '1' when cpu_a(15 downto 11) = "01101" else '0';
   dips_cs <= '1' when cpu_a(15 downto 11) = "01110" else '0';
@@ -168,7 +172,6 @@ begin
 	vram_wr <= cpu_mem_wr and vram_cs;
 	cram_wr <= cram_cs and cpu_mem_wr;
 	wram_wr <= wram_cs and cpu_mem_wr;
-  nmiena_wr <= cpu_mem_wr when (cpu_a(15 downto 12) = "0111" and cpu_a(2 downto 0) = "001") else '0';
 
   -- sprite registers
   sprite_reg_o.clk <= clk_sys;
@@ -178,22 +181,6 @@ begin
   sprite_reg_o.wr <=  cpu_mem_wr when (cpu_a(15 downto 10) = "010110" and cpu_a(7 downto 6) = "01") 
                       else '0';
 
-	-- mangle tile address according to sprite layout
-	newTileAddr <=  tilemap_i(1).tile_a(11 downto 6) & tilemap_i(1).tile_a(4 downto 1) & 
-                  not tilemap_i(1).tile_a(5) & tilemap_i(1).tile_a(0);
-
-  -- unused outputs
-
-  flash_o <= NULL_TO_FLASH;
-  bitmap_o <= (others => NULL_TO_BITMAP_CTL);
-  sprite_o.ld <= '0';
-  graphics_o <= NULL_TO_GRAPHICS;
-  osd_o <= NULL_TO_OSD;
-  snd_o <= NULL_TO_SOUND;
-  spi_o <= NULL_TO_SPI;
-  ser_o <= NULL_TO_SERIAL;
-  leds_o <= (others => '0');
-  
   --
   -- COMPONENT INSTANTIATION
   --
@@ -213,19 +200,19 @@ begin
     port map
     (
       clk				=> clk_sys,
-      reset			=> clkrst_i.rst(0),
+      reset			=> rst_sys,
       clk_en		=> clk_3M_en
     );
   
   -- accomodate pause function
   cpu_clk_en <= clk_3M_en and not switches_i(8);
   
-  U_uP : entity work.Z80                                                
+  cpu_inst : entity work.Z80                                                
     port map
     (
       clk 		=> clk_sys,                                   
       clk_en	=> cpu_clk_en,
-      reset  	=> clkrst_i.rst(0),                                     
+      reset  	=> rst_sys,
 
       addr   	=> cpu_a,
       datai  	=> cpu_d_i,
@@ -242,33 +229,109 @@ begin
       nmi    	=> cpu_nmireq
     );
 
-  interrupts_inst : entity work.Galaxian_Interrupts
-    generic map
-    (
-      USE_VIDEO_VBLANK  => GALAXIAN_USE_VIDEO_VBLANK
-    )
-    port map
-    (
-      clk               => clk_sys,
-      reset             => clkrst_i.rst(0),
+  BLK_INTERRUPTS : block
   
-      z80_data          => cpu_d_o,
-      nmiena_wr         => nmiena_wr,
-  
-			vblank						=> graphics_i.vblank,
-			
-      -- interrupt status & request lines
-      nmi_req           => cpu_nmireq
-    );
+    signal vblank_int     : std_logic;
+    signal nmiena_s       : std_logic;
 
-	rom_inst : entity work.galaxian_rom
-		port map
-		(
-			clock			=> clk_sys,
-			address		=> cpu_a(13 downto 0),
-			q					=> rom_d_o
-		);
-	
+  begin
+  
+		process (clk_sys, rst_sys)
+			variable vblank_r : std_logic_vector(3 downto 0);
+			alias vblank_prev : std_logic is vblank_r(vblank_r'left);
+			alias vblank_um   : std_logic is vblank_r(vblank_r'left-1);
+      -- 1us duty for VBLANK_INT
+      variable count    : integer range 0 to CLK0_FREQ_MHz * 1000;
+		begin
+			if rst_sys = '1' then
+				vblank_int <= '0';
+				vblank_r := (others => '0');
+        count := count'high;
+			elsif rising_edge(clk_sys) then
+        -- rising edge vblank only
+        if vblank_prev = '0' and vblank_um = '1' then
+          count := 0;
+        end if;
+        if count /= count'high then
+          vblank_int <= '1';
+          count := count + 1;
+        else
+          vblank_int <= '0';
+        end if;
+        vblank_r := vblank_r(vblank_r'left-1 downto 0) & graphics_i.vblank;
+			end if; -- rising_edge(clk_sys)
+		end process;
+
+    -- latch interrupt enables
+    process (clk_sys, rst_sys)
+    begin
+      if rst_sys = '1' then
+        nmiena_s <= '0';
+      elsif rising_edge (clk_sys) then
+        if cpu_mem_wr then
+          if STD_MATCH(cpu_a, X"7"&"---------001") then
+            nmiena_s <= cpu_d_o(0);
+          end if;
+        end if;
+      end if; -- rising_edge(clk_sys)
+    end process;
+    
+    -- generate INT
+    cpu_nmireq <= '1' when (vblank_int and nmiena_s) /= '0' else '0';
+    
+  end block BLK_INTERRUPTS;
+  
+  GEN_ROMS : if true generate
+  
+    type rom_d_a is array(GALAXIAN_ROM'range) of std_logic_vector(7 downto 0);
+    signal rom_d  : rom_d_a;
+
+    type gfx_rom_d_a is array(GALAXIAN_GFX_ROM'range) of std_logic_vector(7 downto 0);
+    signal gfx_rom_d  : gfx_rom_d_a;
+    
+  begin
+    rom_d_o <=  rom_d(0) when cpu_a(13 downto 11) = "000" else
+                rom_d(1) when cpu_a(13 downto 11) = "001" else
+                rom_d(2) when cpu_a(13 downto 11) = "010" else
+                rom_d(3) when cpu_a(13 downto 11) = "011" else
+                rom_d(4);
+
+    GEN_CPU_ROMS : for i in GALAXIAN_ROM'range generate
+      rom_inst : entity work.sprom
+        generic map
+        (
+          init_file		=> "../../../../../src/platform/galaxian/roms/galaxian/" &
+                          GALAXIAN_ROM(i) & ".hex",
+          widthad_a		=> 11
+        )
+        port map
+        (
+          clock			=> clk_sys,
+          address		=> cpu_a(10 downto 0),
+          q					=> rom_d(i)
+        );
+    end generate GEN_CPU_ROMS;
+    
+    tilemap_o(1).tile_d(15 downto 0) <=  gfx_rom_d(1) & gfx_rom_d(0);
+
+    GEN_GFX_ROMS : for i in GALAXIAN_GFX_ROM'range generate
+      gfx_rom_inst : entity work.sprom
+        generic map
+        (
+          init_file		=> "../../../../../src/platform/galaxian/roms/galaxian/" &
+                          GALAXIAN_GFX_ROM(i) & ".hex",
+          widthad_a		=> 11
+        )
+        port map
+        (
+          clock			=> clk_sys,
+          address		=> tilemap_i(1).tile_a(10 downto 0),
+          q					=> gfx_rom_d(i)
+        );
+    end generate GEN_GFX_ROMS;
+
+  end generate GEN_ROMS;
+  
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 	vram_inst : entity work.galaxian_vram
 		port map
@@ -280,22 +343,16 @@ begin
 			q_b					=> vram_d_o,
 
 			clock_a			=> clk_video,
-			address_a		=> vram_a,
+			address_a		=> tilemap_i(1).map_a(9 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
 			q_a					=> tilemap_o(1).map_d(7 downto 0)
 		);
   tilemap_o(1).map_d(15 downto 8) <= (others => '0');
 
-	vrammapper_inst : entity work.vramMapper
-		port map
-		(
-	    clk     => clk_video,
-
-	    inAddr  => tilemap_i(1).map_a(12 downto 0),
-	    outAddr => vram_a
-		);
-
+  -- tilemap colour ram
+  -- - even addresses: scroll position
+  -- - odd addresses: colour base for row
 	cram_inst : entity work.galaxian_cram
 		port map
 		(
@@ -310,19 +367,19 @@ begin
 			q_a					=> tilemap_o(1).attr_d(15 downto 0)
 		);
 
-	gfxrom_inst : entity work.galaxian_gfxrom
-		port map
-		(
-			clock										=> clk_video,
-			address_a								=> newTileAddr,
-			q_a											=> tilemap_o(1).tile_d(7 downto 0),
-			
-			address_b								=> sprite_i.a(9 downto 0),
-			q_b(31 downto 24)				=> sprite_o.d(7 downto 0),
-			q_b(23 downto 16)				=> sprite_o.d(15 downto 8),
-			q_b(15 downto 8)				=> sprite_o.d(23 downto 16),
-			q_b(7 downto 0)					=> sprite_o.d(31 downto 24)
-		);
+--	gfxrom_inst : entity work.galaxian_gfxrom
+--		port map
+--		(
+--			clock										=> clk_video,
+--			address_a								=> tilemap_i(1).tile_a(11 downto 0),
+--			q_a											=> tilemap_o(1).tile_d(7 downto 0),
+--			
+--			address_b								=> sprite_i.a(9 downto 0),
+--			q_b(31 downto 24)				=> sprite_o.d(7 downto 0),
+--			q_b(23 downto 16)				=> sprite_o.d(15 downto 8),
+--			q_b(15 downto 8)				=> sprite_o.d(23 downto 16),
+--			q_b(7 downto 0)					=> sprite_o.d(31 downto 24)
+--		);
 
 		GEN_INTERNAL_WRAM : if GALAXIAN_USE_INTERNAL_WRAM generate
 		
@@ -343,4 +400,16 @@ begin
 		
 		end generate GEN_INTERNAL_WRAM;
 		
+  -- unused outputs
+
+  flash_o <= NULL_TO_FLASH;
+  bitmap_o <= (others => NULL_TO_BITMAP_CTL);
+  sprite_o.ld <= '0';
+  graphics_o <= NULL_TO_GRAPHICS;
+  osd_o <= NULL_TO_OSD;
+  snd_o <= NULL_TO_SOUND;
+  spi_o <= NULL_TO_SPI;
+  ser_o <= NULL_TO_SERIAL;
+  leds_o <= (others => '0');
+  
 end SYN;

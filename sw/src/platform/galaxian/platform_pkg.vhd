@@ -11,12 +11,15 @@ package platform_pkg is
 	--  
 	-- PACE constants which *MUST* be defined
 	--
+
+	constant GALAXIAN_VIDEO_H_SIZE				: integer := 256;
+	constant GALAXIAN_VIDEO_V_SIZE				: integer := 224; --224;
 	
 	constant PACE_VIDEO_NUM_BITMAPS		    : natural := 1;
 	constant PACE_VIDEO_NUM_TILEMAPS	    : natural := 1;
 	constant PACE_VIDEO_NUM_SPRITES 	    : natural := 16;
-	constant PACE_VIDEO_H_SIZE				    : integer := 224;
-	constant PACE_VIDEO_V_SIZE				    : integer := 256;
+	constant PACE_VIDEO_H_SIZE				    : integer := GALAXIAN_VIDEO_H_SIZE;
+	constant PACE_VIDEO_V_SIZE				    : integer := GALAXIAN_VIDEO_V_SIZE;
 	constant PACE_VIDEO_L_CROP            : integer := 0;
 	constant PACE_VIDEO_R_CROP            : integer := PACE_VIDEO_L_CROP;
   constant PACE_VIDEO_PIPELINE_DELAY    : integer := 5;
@@ -33,6 +36,21 @@ package platform_pkg is
   
 	constant GALAXIAN_CPU_CLK_ENA_DIVIDE_BY   : natural := CLK0_FREQ_MHz / CPU_FREQ_MHz;
 
+  type rom_a is array (natural range <>) of string;
+  constant GALAXIAN_ROM                 : rom_a(0 to 4) := 
+                                          (
+                                            0 => "galmidw.u", 
+                                            1 => "galmidw.v",
+                                            2 => "galmidw.w",
+                                            3 => "galmidw.y",
+                                            4 => "7l"
+                                          );
+  constant GALAXIAN_GFX_ROM             : rom_a(0 to 1) := 
+                                          (
+                                            0 => "1h.bin", 
+                                            1 => "1k.bin"
+                                          );
+  
 	-- Palette : Table of RGB entries	
 
 	type pal_entry_typ is array (0 to 2) of std_logic_vector(5 downto 0);

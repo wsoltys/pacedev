@@ -1,6 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -24,77 +24,77 @@ architecture TILEMAP_1 of tilemapCtl is
   alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
   alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
   
+  alias colour    : std_logic_vector(2 downto 0) is ctl_i.attr_d(10 downto 8);
+  alias scroll    : std_logic_vector(7 downto 0) is ctl_i.attr_d(7 downto 0);
+  
 begin
 
-	-- these are constant for a whole line
-	ctl_o.map_a(15 downto 6) <= "0000" & y(8 downto 3);
-  ctl_o.tile_a(15 downto 12) <= (others => '0');
-  ctl_o.tile_a(3 downto 1) <=  y(2 downto 0);   	-- each row is 2 bytes
-  -- generate attribute RAM address
-  ctl_o.attr_a <= "0000000000" & y(7 downto 3) & '0';
+  -- not used
+	ctl_o.map_a(ctl_o.map_a'left downto 10) <= (others => '0');
+  ctl_o.attr_a(ctl_o.attr_a'left downto 6) <= (others => '0');
+  ctl_o.attr_a(0) <= '0'; -- 16-bit side attribute memory
+  ctl_o.tile_a(ctl_o.tile_a'left downto 11) <= (others => '0');
 
+	-- these are constant for a whole line
+  
   -- generate pixel
   process (clk, clk_ena)
 
-		variable pel : std_logic_vector(1 downto 0);
-		variable pal_entry : pal_entry_typ;
+    variable tile_d_r   : std_logic_vector(15 downto 0);
+		variable pel        : std_logic_vector(1 downto 0);
+    variable pal_i      : std_logic_vector(4 downto 0);
+		variable pal_entry  : pal_entry_typ;
 
-		variable scroll_x : std_logic_vector(8 downto 0);
-		-- pipelined pixel X location
-		variable x_r	: std_logic_vector((DELAY-1)*3-1 downto 0);
-    alias x_r_n : std_logic_vector(1 downto 0) is x_r(x_r'left-1 downto x_r'left-2);
+		variable y_adj      : std_logic_vector(7 downto 0);
 		
   begin
-  	if rising_edge(clk) and clk_ena = '1' then
+  	if rising_edge(clk) then
+      if clk_ena = '1' then
 
-      -- 1st stage of pipeline
-      -- - read tile from tilemap
-			if hblank = '1' then
-				-- video is clipped left and right (only 224 wide)
-				scroll_x := ('0' & not(ctl_i.attr_d(7 downto 0))) + (256-PACE_VIDEO_H_SIZE)/2;
-      elsif stb = '1' then
-				scroll_x := scroll_x + 1;
-        ctl_o.map_a(5 downto 0) <= scroll_x(8 downto 3);
-      end if;
+        -- 1st stage of pipeline
+        -- - read from attribute memory
+        if x(2 downto 0) = "000" then
+          ctl_o.attr_a(5 downto 1) <= x(7 downto 3);
+        end if;
 
-      -- 2nd stage of pipeline
-      -- - read tile data from tile ROM
-      ctl_o.tile_a(11 downto 4) <= ctl_i.map_d(7 downto 0); -- each tile is 16 bytes
-      ctl_o.tile_a(0) <= x_r(3*1+2);
-      
-      -- 3rd stage of pipeline
-      -- - assign pixel colour based on tile data
-      -- (each byte contains information for 4 pixels)
-      --case x_r(x_r'left-1 downto x_r'left-2) is
-      case x_r_n is
-        when "00" =>
-          pel := ctl_i.tile_d(6) & ctl_i.tile_d(7);
-        when "01" =>
-          pel := ctl_i.tile_d(4) & ctl_i.tile_d(5);
-        when "10" =>
-          pel := ctl_i.tile_d(2) & ctl_i.tile_d(3);
-        when others =>
-          pel := ctl_i.tile_d(0) & ctl_i.tile_d(1);
-      end case;
+        -- 2nd stage of pipeline
+        -- - read tile from tilemap
+        if x(2 downto 0) = "010" then
+          y_adj := std_logic_vector(unsigned(y(7 downto 0)) + unsigned(scroll));
+          ctl_o.map_a(9 downto 5) <= y_adj(7 downto 3);
+          ctl_o.map_a(4 downto 0) <= x(7 downto 3);
+        end if;
+        
+        -- 3rd stage of pipeline
+        -- - read tile data from ROM
+        ctl_o.tile_a(10 downto 3) <= ctl_i.map_d(7 downto 0);
+        ctl_o.tile_a(2 downto 0) <= y_adj(2 downto 0);
+        if stb = '1' then
+          if x(2 downto 0) = "000" then
+            tile_d_r := ctl_i.tile_d(tile_d_r'range);
+          else
+            tile_d_r := tile_d_r(tile_d_r'left-1 downto 0) & '0';
+          end if;
+          pel := tile_d_r(tile_d_r'left) & tile_d_r(tile_d_r'left-8);
+        end if;
+        
+        -- extract R,G,B from colour palette
+        pal_i := colour & pel;
+        pal_entry := pal(to_integer(unsigned(pal_i)));
+        ctl_o.rgb.r <= pal_entry(0) & "0000";
+        ctl_o.rgb.g <= pal_entry(1) & "0000";
+        ctl_o.rgb.b <= pal_entry(2) & "0000";
 
-      -- extract R,G,B from colour palette
-      pal_entry := pal(conv_integer(ctl_i.attr_d(10 downto 8) & pel(0) & pel(1)));
-      ctl_o.rgb.r <= pal_entry(0) & "0000";
-      ctl_o.rgb.g <= pal_entry(1) & "0000";
-      ctl_o.rgb.b <= pal_entry(2) & "0000";
+        if 	pal_entry(0)(5 downto 4) /= "00" or
+            pal_entry(1)(5 downto 4) /= "00" or
+            pal_entry(2)(5 downto 4) /= "00" then
+          ctl_o.set <= '1';
+        else
+          ctl_o.set <= '0';
+        end if;
 
-      if 	pal_entry(0)(5 downto 4) /= "00" or
-          pal_entry(1)(5 downto 4) /= "00" or
-          pal_entry(2)(5 downto 4) /= "00" then
-        ctl_o.set <= '1';
-      else
-        ctl_o.set <= '0';
-      end if;
-
-      -- pipelined because of tile data look-up
-      x_r := x_r(x_r'left-3 downto 0) & scroll_x(2 downto 0);
-
-		end if;				
+      end if; -- clk_ena
+		end if; -- rising_edge_clk
 
   end process;
 
