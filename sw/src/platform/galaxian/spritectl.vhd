@@ -8,6 +8,7 @@ use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
 use work.project_pkg.all;
 use work.platform_pkg.all;    
+use work.platform_variant_pkg.all;
 
 entity spritectl is
 	generic

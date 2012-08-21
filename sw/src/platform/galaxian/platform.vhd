@@ -10,6 +10,7 @@ use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
 use work.target_pkg.all;
 use work.platform_pkg.all;
+use work.platform_variant_pkg.all;
 use work.project_pkg.all;
 
 entity platform is
@@ -146,14 +147,11 @@ begin
 	end generate GEN_NO_SRAM;
 	
   -- chip select logic
-  -- ROM $0000-$2800
-  rom_cs <= '1' when cpu_a(15 downto 14) = "00" else '0';
-  -- WRAM
-  wram_cs <= '1' when cpu_a(15 downto 11) = "01000" else '0';
-  -- VRAM $5000-$57FF
-  vram_cs <= '1' when cpu_a(15 downto 11) = "01010" else '0';
-  -- CRAM $5800-$5BFF
-  cram_cs <= '1' when cpu_a(15 downto 10) = "010110" else '0';
+  -- ROM $0000-$3FFF
+  rom_cs <= '1' when STD_MATCH(cpu_a, "00--------------") else '0';
+  wram_cs <= '1' when STD_MATCH(cpu_a, GALAXIAN_WRAM_A) else '0';
+  vram_cs <= '1' when STD_MATCH(cpu_a, GALAXIAN_VRAM_A) else '0';
+  cram_cs <= '1' when STD_MATCH(cpu_a, GALAXIAN_CRAM_A) else '0';
   -- INPUTS $6000,$6800,$7000
   inZero_cs <= '1' when cpu_a(15 downto 11) = "01100" else '0';
   inOne_cs <= '1' when cpu_a(15 downto 11) = "01101" else '0';
@@ -283,7 +281,7 @@ begin
   
   GEN_ROMS : if true generate
   
-    type rom_d_a is array(GALAXIAN_ROM'range) of std_logic_vector(7 downto 0);
+    type rom_d_a is array(0 to 7) of std_logic_vector(7 downto 0);
     signal rom_d  : rom_d_a;
 
     type gfx_rom_d_a is array(GALAXIAN_GFX_ROM'range) of std_logic_vector(7 downto 0);
@@ -294,13 +292,16 @@ begin
                 rom_d(1) when cpu_a(13 downto 11) = "001" else
                 rom_d(2) when cpu_a(13 downto 11) = "010" else
                 rom_d(3) when cpu_a(13 downto 11) = "011" else
-                rom_d(4);
+                rom_d(4) when cpu_a(13 downto 11) = "100" else
+                rom_d(5) when cpu_a(13 downto 11) = "101" else
+                rom_d(6) when cpu_a(13 downto 11) = "110" else
+                rom_d(7);
 
     GEN_CPU_ROMS : for i in GALAXIAN_ROM'range generate
       rom_inst : entity work.sprom
         generic map
         (
-          init_file		=> "../../../../../src/platform/galaxian/roms/galaxian/" &
+          init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" &
                           GALAXIAN_ROM(i) & ".hex",
           widthad_a		=> 11
         )
@@ -314,11 +315,12 @@ begin
     
     tilemap_o(1).tile_d(15 downto 0) <=  gfx_rom_d(1) & gfx_rom_d(0);
 
-    GEN_GFX_ROMS : for i in GALAXIAN_GFX_ROM'range generate
+    --GEN_GFX_ROMS : for i in GALAXIAN_GFX_ROM'range generate
+    GEN_GFX_ROMS : for i in 0 to 1 generate
       gfx_rom_inst : entity work.sprom
         generic map
         (
-          init_file		=> "../../../../../src/platform/galaxian/roms/galaxian/" &
+          init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" &
                           GALAXIAN_GFX_ROM(i) & ".hex",
           widthad_a		=> 11
         )
