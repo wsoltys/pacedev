@@ -24,9 +24,6 @@ architecture TILEMAP_1 of tilemapCtl is
   alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
   alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
   
-  alias colour    : std_logic_vector(2 downto 0) is ctl_i.attr_d(10 downto 8);
-  alias scroll    : std_logic_vector(7 downto 0) is ctl_i.attr_d(7 downto 0);
-  
 begin
 
   -- not used
@@ -45,41 +42,49 @@ begin
     variable pal_i      : std_logic_vector(4 downto 0);
 		variable pal_entry  : pal_entry_typ;
 
-		variable y_adj      : std_logic_vector(7 downto 0);
-		
+    -- attributes, latched at different times
+    variable scroll_r   : std_logic_vector(7 downto 0);
+    variable colour_r   : std_logic_vector(2 downto 0);
+
+    variable y_adj      : std_logic_vector(7 downto 0);
+  
   begin
   	if rising_edge(clk) then
       if clk_ena = '1' then
 
+        -- - set attribute address
+        ctl_o.attr_a(5 downto 1) <= x(7 downto 3);
+
         -- 1st stage of pipeline
-        -- - read from attribute memory
-        if x(2 downto 0) = "000" then
-          ctl_o.attr_a(5 downto 1) <= x(7 downto 3);
+        -- - set tilemap address
+        if x(2 downto 0) = "010" then
+          -- latch attr_d for the 1st time
+          scroll_r := ctl_i.attr_d(7 downto 0);  
+          y_adj := std_logic_vector(unsigned(y(7 downto 0)) + unsigned(scroll_r));
+        end if;
+        ctl_o.map_a(9 downto 5) <= y_adj(7 downto 3);
+        ctl_o.map_a(4 downto 0) <= x(7 downto 3);
+        
+        -- 2nd stage of pipeline
+        -- - set tile address
+        if x(2 downto 0) = "100" then
+          ctl_o.tile_a(10 downto 3) <= ctl_i.map_d(7 downto 0);
+          ctl_o.tile_a(2 downto 0) <= y_adj(2 downto 0);
         end if;
 
-        -- 2nd stage of pipeline
-        -- - read tile from tilemap
-        if x(2 downto 0) = "010" then
-          y_adj := std_logic_vector(unsigned(y(7 downto 0)) + unsigned(scroll));
-          ctl_o.map_a(9 downto 5) <= y_adj(7 downto 3);
-          ctl_o.map_a(4 downto 0) <= x(7 downto 3);
-        end if;
-        
         -- 3rd stage of pipeline
         -- - read tile data from ROM
-        ctl_o.tile_a(10 downto 3) <= ctl_i.map_d(7 downto 0);
-        ctl_o.tile_a(2 downto 0) <= y_adj(2 downto 0);
-        if stb = '1' then
-          if x(2 downto 0) = "000" then
-            tile_d_r := ctl_i.tile_d(tile_d_r'range);
-          else
-            tile_d_r := tile_d_r(tile_d_r'left-1 downto 0) & '0';
-          end if;
-          pel := tile_d_r(tile_d_r'left) & tile_d_r(tile_d_r'left-8);
+        if x(2 downto 0) = "110" then
+          -- latch attr_d for the 2nd time
+          colour_r := ctl_i.attr_d(10 downto 8);
+          tile_d_r := ctl_i.tile_d(tile_d_r'range);
+        elsif stb = '1' then
+          tile_d_r := tile_d_r(tile_d_r'left-1 downto 0) & '0';
         end if;
         
         -- extract R,G,B from colour palette
-        pal_i := colour & pel;
+        pel := tile_d_r(tile_d_r'left-8) & tile_d_r(tile_d_r'left);
+        pal_i := colour_r & pel;
         pal_entry := pal(to_integer(unsigned(pal_i)));
         ctl_o.rgb.r <= pal_entry(0) & "0000";
         ctl_o.rgb.g <= pal_entry(1) & "0000";
