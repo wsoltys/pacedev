@@ -19,8 +19,8 @@ entity inputmapper is
 
     -- inputs from keyboard controller
     reset     : in std_logic;
-    press     : in std_logic;
-    release   : in std_logic;
+    key_down  : in std_logic;
+    key_up    : in std_logic;
     data      : in std_logic_vector(7 downto 0);
     -- inputs from jamma connector
     jamma			: in from_JAMMA_t;
@@ -61,29 +61,29 @@ begin
 					jamma_v(1).d(1) := jamma.p(2).start;
 					
 					-- handle PS/2 inputs
-          if (press or release) = '1' then
+          if (key_down or key_up) = '1' then
           	case data(7 downto 0) is
             	-- IN0
               when SCANCODE_5 =>
-              	keybd_v(0).d(0) := press;
+              	keybd_v(0).d(0) := key_down;
               when SCANCODE_6 =>
-                keybd_v(0).d(1) := press;
+                keybd_v(0).d(1) := key_down;
               when SCANCODE_LEFT =>
-                keybd_v(0).d(2) := press;
+                keybd_v(0).d(2) := key_down;
               when SCANCODE_RIGHT =>
-                keybd_v(0).d(3) := press;
+                keybd_v(0).d(3) := key_down;
               when SCANCODE_LCTRL =>
-                keybd_v(0).d(4) := press;
+                keybd_v(0).d(4) := key_down;
               when SCANCODE_S =>
-                keybd_v(0).d(6) := press;
+                keybd_v(0).d(6) := key_down;
               -- IN1
               when SCANCODE_1 =>
-                keybd_v(1).d(0) := press;
+                keybd_v(1).d(0) := key_down;
               when SCANCODE_2 =>
-                keybd_v(1).d(1) := press;
+                keybd_v(1).d(1) := key_down;
               when others =>
             end case;
-          end if; -- press or release
+          end if; -- key_down or key_up
 
 					-- this is PS/2 reset only
           if (reset = '1') then
