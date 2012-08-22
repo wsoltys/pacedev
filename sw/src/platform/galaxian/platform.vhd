@@ -123,9 +123,7 @@ architecture SYN of platform is
   signal nmiena_wr      : std_logic;
 
   -- other signals      
-  signal inZero_cs      : std_logic;
-  signal inOne_cs       : std_logic;
-  signal dips_cs        : std_logic;
+  signal in_cs          : std_logic_vector(0 to PACE_INPUTS_NUM_BYTES-1);
 	
 begin
 
@@ -149,23 +147,26 @@ begin
   -- chip select logic
   -- ROM $0000-$3FFF
   rom_cs <= '1' when STD_MATCH(cpu_a, "00--------------") else '0';
+  -- every thing else is variant-dependent
   wram_cs <= '1' when STD_MATCH(cpu_a, GALAXIAN_WRAM_A) else '0';
   vram_cs <= '1' when STD_MATCH(cpu_a, GALAXIAN_VRAM_A) else '0';
   cram_cs <= '1' when STD_MATCH(cpu_a, GALAXIAN_CRAM_A) else '0';
-  -- INPUTS $6000,$6800,$7000
-  inZero_cs <= '1' when cpu_a(15 downto 11) = "01100" else '0';
-  inOne_cs <= '1' when cpu_a(15 downto 11) = "01101" else '0';
-  dips_cs <= '1' when cpu_a(15 downto 11) = "01110" else '0';
+  --in_cs(0) <= '1' when STD_MATCH(cpu_a(15 downto 11), GALAXIAN_INPUTS_A+"00000") else '0';
+  in_cs(0) <= '1' when STD_MATCH(cpu_a(15 downto 11), "01100") else '0';
+  --in_cs(1) <= '1' when STD_MATCH(cpu_a(15 downto 11), GALAXIAN_INPUTS_A+"00001") else '0';
+  in_cs(1) <= '1' when STD_MATCH(cpu_a(15 downto 11), "01101") else '0';
+  --in_cs(2) <= '1' when STD_MATCH(cpu_a(15 downto 11), GALAXIAN_INPUTS_A+"00010") else '0';
+  in_cs(2) <= '1' when STD_MATCH(cpu_a(15 downto 11), "01110") else '0';
 
 	-- memory read mux
-	cpu_d_i <= rom_d_o when rom_cs = '1' else
+	cpu_d_i <=  rom_d_o when rom_cs = '1' else
 							wram_d_o when wram_cs = '1' else
 							vram_d_o when vram_cs = '1' else
 							cram_d_o when cram_cs = '1' else
-              inputs_i(0).d when inzero_cs = '1' else
-              inputs_i(1).d when inone_cs = '1' else
-              switches_i(7 downto 0) when dips_cs = '1' else
-							(others => 'X');
+              inputs_i(0).d when in_cs(0) = '1' else
+              inputs_i(1).d when in_cs(1) = '1' else
+              inputs_i(2).d when in_cs(2) = '1' else
+							(others => '0');
 	
 	vram_wr <= cpu_mem_wr and vram_cs;
 	cram_wr <= cram_cs and cpu_mem_wr;
@@ -267,7 +268,7 @@ begin
         nmiena_s <= '0';
       elsif rising_edge (clk_sys) then
         if cpu_mem_wr then
-          if STD_MATCH(cpu_a, X"7"&"---------001") then
+          if STD_MATCH(cpu_a, GALAXIAN_NMIENA_A) then
             nmiena_s <= cpu_d_o(0);
           end if;
         end if;

@@ -13,6 +13,8 @@ package platform_variant_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 
+	constant GALAXIAN_INPUTS_NUM_BYTES    : integer := 4;
+	
 	--
 	-- Platform-specific constants (optional)
 	--
@@ -46,6 +48,10 @@ package platform_variant_pkg is
   constant GALAXIAN_VRAM_A    : std_logic_vector(15 downto 0) := X"9"&"00----------";
   -- CRAM $9800-$98FF
   constant GALAXIAN_CRAM_A    : std_logic_vector(15 downto 0) := X"98"&   "--------";
+  -- INPUTS $A000,$A800,$B000
+  constant GALAXIAN_INPUTS_A  : std_logic_vector(15 downto 0) := X"A"&"0-----------";
+  -- NMIENA $B000
+  constant GALAXIAN_NMIENA_A  : std_logic_vector(15 downto 0) := X"B000";
   
 	-- Palette : Table of RGB entries	
 

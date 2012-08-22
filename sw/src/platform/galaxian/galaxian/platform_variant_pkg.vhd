@@ -41,6 +41,10 @@ package platform_variant_pkg is
   constant GALAXIAN_VRAM_A    : std_logic_vector(15 downto 0) := X"5"&"0-----------";
   -- CRAM $5800-$5BFF
   constant GALAXIAN_CRAM_A    : std_logic_vector(15 downto 0) := X"5"&"10----------";
+  -- INPUTS $6000,$6800,$7000
+  constant GALAXIAN_INPUTS_A  : std_logic_vector(15 downto 11) := X"6"&"0";
+  -- NMIENA $7001
+  constant GALAXIAN_NMIENA_A  : std_logic_vector(15 downto 0) := X"7"&"---------001";
   
 	-- Palette : Table of RGB entries	
 

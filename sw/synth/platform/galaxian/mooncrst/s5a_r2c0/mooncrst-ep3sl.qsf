@@ -2271,18 +2271,10 @@ set_global_assignment -name VHDL_FILE ../../../../../src/platform/galaxian/sprit
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_array.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_mixer.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Graphics.VHD
-set_global_assignment -name VHDL_FILE ../../../../../src/component/io/pia8255.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/galaxian/InputMapper.VHDL
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/galaxian/mooncrst/input_mapper.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Inputs.VHD
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/galaxian/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/target_top_ep3sl.vhd
-set_global_assignment -name QIP_FILE vdp_sprdata.qip
-set_global_assignment -name SIGNALTAP_FILE vdp.stp
-set_global_assignment -name SIGNALTAP_FILE mikrokolor.stp
-set_global_assignment -name SIGNALTAP_FILE wd179x.stp
-set_global_assignment -name QIP_FILE ep4c_sopc_system.qip
-set_global_assignment -name SIGNALTAP_FILE cpu.stp
-set_global_assignment -name SIGNALTAP_FILE vdueb.stp
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
