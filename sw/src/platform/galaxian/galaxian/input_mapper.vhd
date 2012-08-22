@@ -82,11 +82,11 @@ begin
             when SCANCODE_2 =>
               keybd_v(1).d(1) := key_down;
             -- special keys
-            when SCANCODE_F3 =>
+            when SCANCODE_F3 =>   -- reset platform
               keybd_v(NUM_INPUTS-1).d(0) := key_down;
-            when SCANCODE_P =>
+            when SCANCODE_P =>    -- pause CPU
               keybd_v(NUM_INPUTS-1).d(1) := key_down;
-            when SCANCODE_F4 =>
+            when SCANCODE_F4 =>   -- rotate display
               keybd_v(NUM_INPUTS-1).d(2) := key_down;
             when others =>
           end case;

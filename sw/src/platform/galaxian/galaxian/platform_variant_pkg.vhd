@@ -29,12 +29,17 @@ package platform_variant_pkg is
                                             3 => "galmidw.y",
                                             4 => "7l"
                                           );
+  constant GALAXIAN_ROM_WIDTHAD         : natural := 11;
+
   constant GALAXIAN_GFX_ROM             : rom_a(0 to 1) := 
                                           (
                                             0 => "1h.bin", 
                                             1 => "1k.bin"
                                           );
-  
+
+   -- null range
+  constant GALAXIAN_EXTRA_ROM           : rom_a(0 to -1) := (others => "");
+                                          
   -- WRAM $4000-$47FF
   constant GALAXIAN_WRAM_A    : std_logic_vector(15 downto 0) := X"4"&"0-----------";
   -- VRAM $5000-$57FF
