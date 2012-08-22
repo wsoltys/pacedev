@@ -1,0 +1,2281 @@
+# -------------------------------------------------------------------------- #
+#
+# Copyright (C) 1991-2011 Altera Corporation
+# Your use of Altera Corporation's design tools, logic functions 
+# and other software and tools, and its AMPP partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Altera Program License 
+# Subscription Agreement, Altera MegaCore Function License 
+# Agreement, or other applicable license agreement, including, 
+# without limitation, that your use is for the sole purpose of 
+# programming logic devices manufactured by Altera and sold by 
+# Altera or its authorized distributors.  Please refer to the 
+# applicable agreement for further details.
+#
+# -------------------------------------------------------------------------- #
+#
+# Quartus II
+# Version 10.1 Build 197 01/19/2011 Service Pack 1 SJ Full Version
+# Date created = 00:53:04  March 11, 2011
+#
+# -------------------------------------------------------------------------- #
+#
+# Notes:
+#
+# 1) The default values for assignments are stored in the file:
+#		trs80_m1-ep3sl_assignment_defaults.qdf
+#    If this file doesn't exist, see file:
+#		assignment_defaults.qdf
+#
+# 2) Altera recommends that you do not modify this file. This
+#    file is updated automatically by the Quartus II software
+#    and any changes you make may be lost or overwritten.
+#
+# -------------------------------------------------------------------------- #
+
+
+
+# Project-Wide Assignments
+# ========================
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 9.1
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "18:03:05  MARCH 10, 2010"
+set_global_assignment -name LAST_QUARTUS_VERSION "10.1 SP1"
+set_global_assignment -name SMART_RECOMPILE ON
+
+# Pin & Location Assignments
+# ==========================
+set_instance_assignment -name RESERVE_PIN "AS OUTPUT DRIVING GROUND" -to user_reserve_1
+set_instance_assignment -name RESERVE_PIN "AS OUTPUT DRIVING GROUND" -to user_reserve_2
+set_location_assignment PIN_A10 -to vao_blue[9]
+set_location_assignment PIN_A11 -to vao_m2
+set_location_assignment PIN_A12 -to vao_blue[2]
+set_location_assignment PIN_A13 -to vao_blue[8]
+set_location_assignment PIN_A14 -to vao_clk
+set_location_assignment PIN_A17 -to tp92
+set_location_assignment PIN_A18 -to tp88
+set_location_assignment PIN_A2 -to vao_red[8]
+set_location_assignment PIN_A20 -to vdo_green[7]
+set_location_assignment PIN_A21 -to vdo_green[3]
+set_location_assignment PIN_A22 -to vdo_green[2]
+set_location_assignment PIN_A23 -to vdo_blue[5]
+set_location_assignment PIN_A24 -to vdo_blue[3]
+set_location_assignment PIN_A25 -to vdo_blue[1]
+set_location_assignment PIN_A26 -to vdo_hsync
+set_location_assignment PIN_A27 -to vdo_vsync
+set_location_assignment PIN_A3 -to vao_red[7]
+set_location_assignment PIN_A4 -to vao_red[6]
+set_location_assignment PIN_A5 -to vao_red[5]
+set_location_assignment PIN_A6 -to vao_red[3]
+set_location_assignment PIN_A8 -to vao_blue[3]
+set_location_assignment PIN_A9 -to vao_blue[5]
+set_location_assignment PIN_AA1 -to vai_green[9]
+set_location_assignment PIN_AA10 -to ddr64_dq[3]
+set_location_assignment PIN_AA13 -to ddr64_a[6]
+set_location_assignment PIN_AA19 -to ddr64_dq[32]
+set_location_assignment PIN_AA24 -to ddr64_dq[60]
+set_location_assignment PIN_AA26 -to vid_address[9]
+set_location_assignment PIN_AA27 -to vid_address[5]
+set_location_assignment PIN_AA28 -to vid_address[7]
+set_location_assignment PIN_AA4 -to vai_resetb_n
+set_location_assignment PIN_AA6 -to cfg_asdo
+set_location_assignment PIN_AA9 -to ddr64_dm[0]
+set_location_assignment PIN_AB1 -to vai_blue[0]
+set_location_assignment PIN_AB11 -to ddr64_a[7]
+set_location_assignment PIN_AB13 -to ddr64_ba[2]
+set_location_assignment PIN_AB16 -to ddr64_we_n
+set_location_assignment PIN_AB17 -to ddr64_cas_n
+set_location_assignment PIN_AB19 -to ddr64_dq[34]
+set_location_assignment PIN_AB2 -to vai_blue[1]
+set_location_assignment PIN_AB21 -to ddr64_dm[6]
+set_location_assignment PIN_AB25 -to ddr64_dq[62]
+set_location_assignment PIN_AB26 -to ddr64_dq[58]
+set_location_assignment PIN_AB27 -to vid_address[8]
+set_location_assignment PIN_AB28 -to vid_address[10]
+set_location_assignment PIN_AB3 -to vai_vsync
+set_location_assignment PIN_AB4 -to vai_hsync
+set_location_assignment PIN_AB5 -to ccfg_cen
+set_location_assignment PIN_AB7 -to ddr64_reset_n
+set_location_assignment PIN_AB8 -to ddr64_a[13]
+set_location_assignment PIN_AB9 -to ddr64_dq[1]
+set_location_assignment PIN_AC1 -to vai_blue[2]
+set_location_assignment PIN_AC11 -to ddr64_dq[16]
+set_location_assignment PIN_AC12 -to ddr64_dm[2]
+set_location_assignment PIN_AC14 -to netc524_1
+set_location_assignment PIN_AC19 -to ddr64_dqs[4]
+set_location_assignment PIN_AC2 -to vai_blue[3]
+set_location_assignment PIN_AC20 -to ddr64_dq[36]
+set_location_assignment PIN_AC21 -to ddr64_dq[49]
+set_location_assignment PIN_AC25 -to ddr64_dq[59]
+set_location_assignment PIN_AC26 -to ddr64_dm[7]
+set_location_assignment PIN_AC28 -to vid_address[6]
+set_location_assignment PIN_AC3 -to vai_fidout
+set_location_assignment PIN_AC4 -to vai_vsout
+set_location_assignment PIN_AC5 -to scfg_dclk
+set_location_assignment PIN_AC7 -to user_reserve_2
+set_location_assignment PIN_AC8 -to ddr64_a[9]
+set_location_assignment PIN_AC9 -to ddr64_dq[7]
+set_location_assignment PIN_AD1 -to vai_blue[4]
+set_location_assignment PIN_AD12 -to ddr64_dq[17]
+set_location_assignment PIN_AD13 -to ddr64_a[4]
+set_location_assignment PIN_AD16 -to ddr64_dq[29]
+set_location_assignment PIN_AD19 -to ddr64_dqsn[4]
+set_location_assignment PIN_AD21 -to ddr64_dq[52]
+set_location_assignment PIN_AD22 -to ddr64_dqs[6]
+set_location_assignment PIN_AD24 -to ddr64_dq[44]
+set_location_assignment PIN_AD25 -to cfg_statusn
+set_location_assignment PIN_AD27 -to ddr64_dqs[7]
+set_location_assignment PIN_AD28 -to ddr64_dqsn[7]
+set_location_assignment PIN_AD4 -to cfg_cson
+set_location_assignment PIN_AD6 -to ddr64_ba[1]
+set_location_assignment PIN_AD7 -to user_reserve_1
+set_location_assignment PIN_AD9 -to ddr64_dq[5]
+set_location_assignment PIN_AE1 -to vai_blue[5]
+set_location_assignment PIN_AE10 -to ddr64_dq[10]
+set_location_assignment PIN_AE11 -to ddr64_a[3]
+set_location_assignment PIN_AE12 -to ddr64_dq[19]
+set_location_assignment PIN_AE14 -to clk24_c
+set_location_assignment PIN_AE16 -to ddr64_dq[25]
+set_location_assignment PIN_AE17 -to ddr64_dq[31]
+set_location_assignment PIN_AE18 -to ddr64_dqs[3]
+set_location_assignment PIN_AE19 -to ddr64_dq[38]
+set_location_assignment PIN_AE2 -to vai_blue[6]
+set_location_assignment PIN_AE20 -to ddr64_dq[39]
+set_location_assignment PIN_AE21 -to ddr64_dq[33]
+set_location_assignment PIN_AE22 -to ddr64_dqsn[6]
+set_location_assignment PIN_AE23 -to ddr64_dq[45]
+set_location_assignment PIN_AE24 -to ddr64_dq[42]
+set_location_assignment PIN_AE26 -to cfg_done
+set_location_assignment PIN_AE27 -to termination_blk0~_rup_pad
+set_location_assignment PIN_AE28 -to termination_blk0~_rdn_pad
+set_location_assignment PIN_AE4 -to ddr64_a[5]
+set_location_assignment PIN_AE6 -to ddr64_clk[0]
+set_location_assignment PIN_AE7 -to ddr64_a[2]
+set_location_assignment PIN_AE8 -to ddr64_dq[15]
+set_location_assignment PIN_AE9 -to ddr64_dqs[1]
+set_location_assignment PIN_AF1 -to vai_blue[7]
+set_location_assignment PIN_AF10 -to ddr64_dqs[2]
+set_location_assignment PIN_AF11 -to ddr64_dqsn[2]
+set_location_assignment PIN_AF12 -to ddr64_dq[23]
+set_location_assignment PIN_AF16 -to ddr64_dm[3]
+set_location_assignment PIN_AF17 -to ddr64_dqsn[3]
+set_location_assignment PIN_AF2 -to vai_blue[8]
+set_location_assignment PIN_AF20 -to ddr64_dq[37]
+set_location_assignment PIN_AF21 -to ddr64_dm[4]
+set_location_assignment PIN_AF23 -to ddr64_dq[41]
+set_location_assignment PIN_AF24 -to ddr64_dq[46]
+set_location_assignment PIN_AF26 -to ddr64_dq[53]
+set_location_assignment PIN_AF6 -to ddr64_clk_n[0]
+set_location_assignment PIN_AF8 -to ddr64_dq[9]
+set_location_assignment PIN_AF9 -to ddr64_dqsn[1]
+set_location_assignment PIN_AG1 -to vai_blue[9]
+set_location_assignment PIN_AG10 -to ddr64_dq[18]
+set_location_assignment PIN_AG13 -to veb_ck_c
+set_location_assignment PIN_AG16 -to ddr64_a[12]
+set_location_assignment PIN_AG18 -to ddr64_dq[28]
+set_location_assignment PIN_AG19 -to ddr64_dq[26]
+set_location_assignment PIN_AG21 -to ddr64_dq[35]
+set_location_assignment PIN_AG22 -to ddr64_dm[5]
+set_location_assignment PIN_AG24 -to ddr64_dq[40]
+set_location_assignment PIN_AG25 -to ddr64_dq[50]
+set_location_assignment PIN_AG27 -to ddr64_dq[51]
+set_location_assignment PIN_AG28 -to ddr64_dq[56]
+set_location_assignment PIN_AG3 -to ddr64_dqs[0]
+set_location_assignment PIN_AG4 -to ddr64_dq[0]
+set_location_assignment PIN_AG6 -to ddr64_dq[13]
+set_location_assignment PIN_AG7 -to ddr64_dq[11]
+set_location_assignment PIN_AG9 -to ddr64_dq[12]
+set_location_assignment PIN_AH10 -to ddr64_dq[22]
+set_location_assignment PIN_AH11 -to ddr64_dq[20]
+set_location_assignment PIN_AH12 -to ddr64_dq[21]
+set_location_assignment PIN_AH13 -to ddr64_a[10]
+set_location_assignment PIN_AH16 -to ddr64_cs_n
+set_location_assignment PIN_AH17 -to ddr64_dq[27]
+set_location_assignment PIN_AH18 -to ddr64_dq[30]
+set_location_assignment PIN_AH19 -to ddr64_dq[24]
+set_location_assignment PIN_AH2 -to ddr64_dqsn[0]
+set_location_assignment PIN_AH21 -to ddr64_dq[47]
+set_location_assignment PIN_AH22 -to ddr64_dq[43]
+set_location_assignment PIN_AH23 -to ddr64_dqs[5]
+set_location_assignment PIN_AH24 -to ddr64_dqsn[5]
+set_location_assignment PIN_AH25 -to ddr64_dq[48]
+set_location_assignment PIN_AH26 -to ddr64_dq[54]
+set_location_assignment PIN_AH27 -to ddr64_dq[55]
+set_location_assignment PIN_AH3 -to ddr64_dq[6]
+set_location_assignment PIN_AH4 -to ddr64_dq[4]
+set_location_assignment PIN_AH5 -to ddr64_dq[2]
+set_location_assignment PIN_AH6 -to ddr64_a[0]
+set_location_assignment PIN_AH7 -to ddr64_dm[1]
+set_location_assignment PIN_AH8 -to ddr64_dq[8]
+set_location_assignment PIN_AH9 -to ddr64_dq[14]
+set_location_assignment PIN_B10 -to vao_m1
+set_location_assignment PIN_B11 -to vao_blue[0]
+set_location_assignment PIN_B13 -to vao_blue[6]
+set_location_assignment PIN_B16 -to veb_ck_b
+set_location_assignment PIN_B2 -to vao_blank_n
+set_location_assignment PIN_B20 -to vdo_green[5]
+set_location_assignment PIN_B22 -to vdo_green[0]
+set_location_assignment PIN_B23 -to vdo_blue[6]
+set_location_assignment PIN_B25 -to vdo_blue[0]
+set_location_assignment PIN_B26 -to vdo_de
+set_location_assignment PIN_B28 -to vid_spare[0]
+set_location_assignment PIN_B4 -to vao_red[9]
+set_location_assignment PIN_B8 -to vao_red[2]
+set_location_assignment PIN_C1 -to vdi_scdt
+set_location_assignment PIN_C10 -to vao_blue[7]
+set_location_assignment PIN_C12 -to vao_blue[4]
+set_location_assignment PIN_C17 -to tp93
+set_location_assignment PIN_C18 -to tp87
+set_location_assignment PIN_C19 -to tp86
+set_location_assignment PIN_C20 -to vdo_red[3]
+set_location_assignment PIN_C21 -to "vdo_idck(n)"
+set_location_assignment PIN_C23 -to vdo_blue[7]
+set_location_assignment PIN_C24 -to vdo_blue[2]
+set_location_assignment PIN_C26 -to stck
+set_location_assignment PIN_C28 -to vid_data[6]
+set_location_assignment PIN_C3 -to vao_sync_t
+set_location_assignment PIN_C5 -to vao_sync_n
+set_location_assignment PIN_C8 -to vao_red[0]
+set_location_assignment PIN_C9 -to vao_blue[1]
+set_location_assignment PIN_D1 -to vdi_green[4]
+set_location_assignment PIN_D10 -to vao_red[4]
+set_location_assignment PIN_D15 -to clk24_b
+set_location_assignment PIN_D17 -to tp94
+set_location_assignment PIN_D18 -to tp89
+set_location_assignment PIN_D20 -to vdo_red[5]
+set_location_assignment PIN_D21 -to vdo_idck
+set_location_assignment PIN_D22 -to vdo_green[1]
+set_location_assignment PIN_D23 -to vdo_blue[4]
+set_location_assignment PIN_D24 -to vdo_red[0]
+set_location_assignment PIN_D27 -to vid_spare[1]
+set_location_assignment PIN_D28 -to vid_data[14]
+set_location_assignment PIN_D8 -to vao_green[9]
+set_location_assignment PIN_D9 -to vao_red[1]
+set_location_assignment PIN_E1 -to vdi_green[0]
+set_location_assignment PIN_E10 -to vao_green[7]
+set_location_assignment PIN_E17 -to tp95
+set_location_assignment PIN_E20 -to vdo_red[7]
+set_location_assignment PIN_E22 -to vdo_green[4]
+set_location_assignment PIN_E23 -to vdo_red[1]
+set_location_assignment PIN_E28 -to vid_data[5]
+set_location_assignment PIN_E7 -to vao_green[3]
+set_location_assignment PIN_E8 -to vao_green[5]
+set_location_assignment PIN_F1 -to vdi_blue[2]
+set_location_assignment PIN_F17 -to tp91
+set_location_assignment PIN_F18 -to tp90
+set_location_assignment PIN_F20 -to vdo_green[6]
+set_location_assignment PIN_F21 -to vdo_red[4]
+set_location_assignment PIN_F22 -to vdo_red[6]
+set_location_assignment PIN_F24 -to ctdo
+set_location_assignment PIN_F26 -to vid_data[15]
+set_location_assignment PIN_F27 -to vid_data[7]
+set_location_assignment PIN_F3 -to vdi_blue[1]
+set_location_assignment PIN_F4 -to vdi_blue[0]
+set_location_assignment PIN_F8 -to vao_green[1]
+set_location_assignment PIN_F9 -to vao_green[8]
+set_location_assignment PIN_G1 -to vdi_blue[6]
+set_location_assignment PIN_G10 -to vao_green[2]
+set_location_assignment PIN_G2 -to vdi_blue[4]
+set_location_assignment PIN_G20 -to vdo_red[2]
+set_location_assignment PIN_G25 -to vid_data[8]
+set_location_assignment PIN_G27 -to vid_data[4]
+set_location_assignment PIN_G28 -to vid_data[3]
+set_location_assignment PIN_G4 -to vdi_green[5]
+set_location_assignment PIN_G5 -to vdi_green[3]
+set_location_assignment PIN_G8 -to vao_green[6]
+set_location_assignment PIN_G9 -to vao_green[4]
+set_location_assignment PIN_H1 -to vdi_blue[5]
+set_location_assignment PIN_H10 -to vao_green[0]
+set_location_assignment PIN_H2 -to vdi_blue[3]
+set_location_assignment PIN_H22 -to stms
+set_location_assignment PIN_H25 -to vid_data[2]
+set_location_assignment PIN_H28 -to vid_data[0]
+set_location_assignment PIN_H4 -to vdi_green[1]
+set_location_assignment PIN_H5 -to vdi_green[7]
+set_location_assignment PIN_J1 -to vdi_blue[7]
+set_location_assignment PIN_J22 -to vid_data[10]
+set_location_assignment PIN_J23 -to vid_data[9]
+set_location_assignment PIN_J28 -to vid_data[1]
+set_location_assignment PIN_J3 -to vdi_green[2]
+set_location_assignment PIN_J4 -to vdi_green[6]
+set_location_assignment PIN_J6 -to vdi_red[0]
+set_location_assignment PIN_K20 -to vid_address[2]
+set_location_assignment PIN_K21 -to vid_address[3]
+set_location_assignment PIN_K23 -to vid_irq_n
+set_location_assignment PIN_K25 -to vid_address[1]
+set_location_assignment PIN_K26 -to vid_address[0]
+set_location_assignment PIN_K28 -to "vsi_data[4](n)"
+set_location_assignment PIN_K5 -to vdi_red[1]
+set_location_assignment PIN_K6 -to vdi_red[2]
+set_location_assignment PIN_K8 -to vao_vsync
+set_location_assignment PIN_K9 -to vao_hsync
+set_location_assignment PIN_L1 -to "vsi_data[3](n)"
+set_location_assignment PIN_L2 -to vsi_data[3]
+set_location_assignment PIN_L22 -to vid_read_n
+set_location_assignment PIN_L25 -to vsi_data[7]
+set_location_assignment PIN_L26 -to "vsi_data[7](n)"
+set_location_assignment PIN_L28 -to vsi_data[4]
+set_location_assignment PIN_L3 -to vsi_data[0]
+set_location_assignment PIN_L5 -to vsi_enavdd
+set_location_assignment PIN_L6 -to vsi_enabkl
+set_location_assignment PIN_M1 -to vsi_clk[0]
+set_location_assignment PIN_M25 -to vsi_data[5]
+set_location_assignment PIN_M26 -to "vsi_data[5](n)"
+set_location_assignment PIN_M27 -to vid_scl
+set_location_assignment PIN_M28 -to vid_sda
+set_location_assignment PIN_M3 -to "vsi_data[0](n)"
+set_location_assignment PIN_N1 -to "vsi_clk[0](n)"
+set_location_assignment PIN_N2 -to "vsi_data[2](n)"
+set_location_assignment PIN_N21 -to scfg_data
+set_location_assignment PIN_N23 -to sinit_done
+set_location_assignment PIN_N24 -to vsi_data[6]
+set_location_assignment PIN_N26 -to vsi_clk[1]
+set_location_assignment PIN_N27 -to "vsi_clk[1](n)"
+set_location_assignment PIN_N28 -to "vli_clk(n)"
+set_location_assignment PIN_N4 -to vsi_data[1]
+set_location_assignment PIN_P1 -to "tp_clk(n)"
+set_location_assignment PIN_P2 -to tp_clk
+set_location_assignment PIN_P23 -to scrc_error
+set_location_assignment PIN_P25 -to "vsi_data[6](n)"
+set_location_assignment PIN_P28 -to vli_clk
+set_location_assignment PIN_P3 -to vsi_data[2]
+set_location_assignment PIN_P4 -to "vsi_data[1](n)"
+set_location_assignment PIN_R1 -to vdi_odck
+set_location_assignment PIN_R26 -to vli_data[0]
+set_location_assignment PIN_R27 -to vid_clk
+set_location_assignment PIN_R28 -to "vid_clk(n)"
+set_location_assignment PIN_R4 -to vdi_red[5]
+set_location_assignment PIN_R6 -to vdi_red[3]
+set_location_assignment PIN_T1 -to tp56
+set_location_assignment PIN_T2 -to vdi_red[7]
+set_location_assignment PIN_T27 -to "vli_data[0](n)"
+set_location_assignment PIN_T28 -to veb_ck_d
+set_location_assignment PIN_T3 -to vdi_de
+set_location_assignment PIN_T4 -to vdi_red[6]
+set_location_assignment PIN_T5 -to vdi_red[4]
+set_location_assignment PIN_T6 -to vdi_vsync
+set_location_assignment PIN_T9 -to vdi_ctl[2]
+set_location_assignment PIN_U1 -to vai_dataclk
+set_location_assignment PIN_U2 -to vai_extclk
+set_location_assignment PIN_U26 -to "vli_data[2](n)"
+set_location_assignment PIN_U28 -to clk24_d
+set_location_assignment PIN_U3 -to vai_red[4]
+set_location_assignment PIN_U4 -to vai_red[5]
+set_location_assignment PIN_U5 -to vai_red[6]
+set_location_assignment PIN_U6 -to vai_green[1]
+set_location_assignment PIN_U7 -to vdi_hsync
+set_location_assignment PIN_U8 -to vdi_ctl[1]
+set_location_assignment PIN_U9 -to vdi_ctl[3]
+set_location_assignment PIN_V1 -to vai_green[2]
+set_location_assignment PIN_V21 -to vid_write_n
+set_location_assignment PIN_V24 -to vli_data[1]
+set_location_assignment PIN_V25 -to "vli_data[1](n)"
+set_location_assignment PIN_V26 -to vli_data[2]
+set_location_assignment PIN_V27 -to vli_data[3]
+set_location_assignment PIN_V28 -to "vli_data[3](n)"
+set_location_assignment PIN_V3 -to vai_red[2]
+set_location_assignment PIN_V4 -to vai_red[3]
+set_location_assignment PIN_V6 -to vai_red[7]
+set_location_assignment PIN_V7 -to vai_red[9]
+set_location_assignment PIN_W1 -to vai_green[3]
+set_location_assignment PIN_W19 -to cfg_confign
+set_location_assignment PIN_W2 -to vai_green[4]
+set_location_assignment PIN_W20 -to ddr64_dq[61]
+set_location_assignment PIN_W21 -to ddr64_dq[63]
+set_location_assignment PIN_W23 -to vid_waitrequest_n
+set_location_assignment PIN_W25 -to vid_data[12]
+set_location_assignment PIN_W3 -to vai_red[0]
+set_location_assignment PIN_W4 -to vai_red[1]
+set_location_assignment PIN_W5 -to vai_green[6]
+set_location_assignment PIN_W6 -to vai_green[0]
+set_location_assignment PIN_W8 -to vai_red[8]
+set_location_assignment PIN_Y1 -to vai_green[5]
+set_location_assignment PIN_Y10 -to ddr64_a[8]
+set_location_assignment PIN_Y11 -to ddr64_a[11]
+set_location_assignment PIN_Y13 -to ddr64_ba[0]
+set_location_assignment PIN_Y14 -to ddr64_a[1]
+set_location_assignment PIN_Y17 -to ddr64_odt
+set_location_assignment PIN_Y18 -to ddr64_ras_n
+set_location_assignment PIN_Y19 -to ddr64_cke
+set_location_assignment PIN_Y2 -to vai_green[8]
+set_location_assignment PIN_Y20 -to scfg_cen0
+set_location_assignment PIN_Y23 -to ddr64_dq[57]
+set_location_assignment PIN_Y25 -to vid_data[11]
+set_location_assignment PIN_Y26 -to vid_address[4]
+set_location_assignment PIN_Y28 -to vid_data[13]
+set_location_assignment PIN_Y3 -to vai_green[7]
+set_location_assignment PIN_Y4 -to vai_coast
+set_location_assignment PIN_Y5 -to vai_hsout
+set_location_assignment PIN_Y6 -to vai_sogout
+
+# Classic Timing Assignments
+# ==========================
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
+set_global_assignment -name TIMEQUEST_DO_CCPP_REMOVAL ON
+
+# Analysis & Synthesis Assignments
+# ================================
+set_global_assignment -name FAMILY "Stratix III"
+set_global_assignment -name TOP_LEVEL_ENTITY target_top_ep3sl
+set_global_assignment -name STRATIXII_OPTIMIZATION_TECHNIQUE SPEED
+
+# Fitter Assignments
+# ==================
+set_global_assignment -name DEVICE EP3SL70F780C3
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.3-V LVCMOS"
+set_global_assignment -name CRC_ERROR_OPEN_DRAIN OFF
+set_global_assignment -name DEVICE_MIGRATION_LIST "EP3SL70F780C3,EP3SL110F780C3,EP3SL50F780C3"
+set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
+set_global_assignment -name FORCE_CONFIGURATION_VCCIO OFF
+set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
+set_global_assignment -name ROUTER_CLOCKING_TOPOLOGY_ANALYSIS ON
+set_global_assignment -name ROUTER_LCELL_INSERTION_AND_LOGIC_DUPLICATION ON
+set_global_assignment -name ROUTER_TIMING_OPTIMIZATION_LEVEL MAXIMUM
+set_global_assignment -name SEED 42
+set_global_assignment -name STRATIXIII_CONFIGURATION_SCHEME "FAST PASSIVE PARALLEL"
+set_instance_assignment -name IO_STANDARD "1.5 V" -to clk24_c
+set_instance_assignment -name IO_STANDARD "1.5 V" -to ddr_clk
+set_instance_assignment -name IO_STANDARD "1.5 V" -to ddr64_global_reset_n
+set_instance_assignment -name IO_STANDARD "1.5 V" -to ddr64_pll_ref_clk
+set_instance_assignment -name IO_STANDARD "1.5 V" -to termination_blk0~_rdn_pad
+set_instance_assignment -name IO_STANDARD "1.5 V" -to termination_blk0~_rup_pad
+set_instance_assignment -name IO_STANDARD "1.5 V" -to user_reserve_1
+set_instance_assignment -name IO_STANDARD "1.5 V" -to user_reserve_2
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_blue[0]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_blue[1]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_blue[2]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_blue[3]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_blue[4]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_blue[5]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_blue[6]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_blue[7]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_de
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_green[0]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_green[1]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_green[2]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_green[3]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_green[4]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_green[5]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_green[6]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_green[7]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_hsync
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_red[0]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_red[1]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_red[2]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_red[3]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_red[4]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_red[5]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_red[6]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_red[7]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vdo_vsync
+set_instance_assignment -name IO_STANDARD "1.5 V" -to veb_ck_c
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_address[0]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_address[1]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_address[10]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_address[2]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_address[3]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_address[4]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_address[5]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_address[6]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_address[7]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_address[8]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_address[9]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_data[0]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_data[1]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_data[10]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_data[11]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_data[12]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_data[13]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_data[14]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_data[15]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_data[2]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_data[3]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_data[4]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_data[5]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_data[6]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_data[7]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_data[8]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_data[9]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_irq_n
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_read_n
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_spare[28]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_spare[29]
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_waitrequest_n
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_write_n
+set_instance_assignment -name IO_STANDARD "1.8 V" -to ~ALTERA_DATA0~
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_blank_n
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_blue[0]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_blue[1]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_blue[2]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_blue[3]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_blue[4]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_blue[5]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_blue[6]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_blue[7]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_blue[8]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_blue[9]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_clk
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_green[0]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_green[1]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_green[2]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_green[3]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_green[4]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_green[5]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_green[6]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_green[7]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_green[8]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_green[9]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_m1
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_m2
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_red[0]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_red[1]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_red[2]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_red[3]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_red[4]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_red[5]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_red[6]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_red[7]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_red[8]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_red[9]
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_sync_n
+set_instance_assignment -name IO_STANDARD "1.8 V" -to vao_sync_t
+set_instance_assignment -name IO_STANDARD "2.5 V" -to clk24_d
+set_instance_assignment -name IO_STANDARD "2.5 V" -to veb_ck_d
+set_instance_assignment -name IO_STANDARD "2.5 V" -to vid_scl
+set_instance_assignment -name IO_STANDARD "2.5 V" -to vid_sda
+set_instance_assignment -name IO_STANDARD "2.5 V" -to vsi_enabkl
+set_instance_assignment -name IO_STANDARD "2.5 V" -to vsi_enavdd
+set_instance_assignment -name IO_STANDARD "2.5 V" -to vsi_reset_n
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to dvao_scl
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to dvao_sda
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to dvi_hotplug
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to dvi_scl
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to dvi_sda
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_blue[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_blue[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_blue[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_blue[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_blue[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_blue[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_blue[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_blue[7]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_dataclk
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_green[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_green[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_green[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_green[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_green[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_green[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_green[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_green[7]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_hsout
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_pwdn
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_red[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_red[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_red[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_red[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_red[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_red[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_red[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_red[7]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_resetb_n
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_sogout
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vai_vsout
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vao_hsync
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vao_vsync
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_blue[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_blue[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_blue[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_blue[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_blue[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_blue[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_blue[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_blue[7]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_ctl[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_ctl[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_ctl[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_de
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_green[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_green[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_green[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_green[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_green[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_green[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_green[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_green[7]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_hsync
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_odck
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_pdn
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_red[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_red[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_red[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_red[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_red[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_red[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_red[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_red[7]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_scdt
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to vdi_vsync
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V HSTL CLASS I" -to vid_clk
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr64_clk[0]
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr64_clk_n[0]
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr64_dqs[0]
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr64_dqs[1]
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr64_dqs[2]
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr64_dqs[3]
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr64_dqs[4]
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr64_dqs[5]
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr64_dqs[6]
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr64_dqs[7]
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr64_dqsn[0]
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr64_dqsn[1]
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr64_dqsn[2]
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr64_dqsn[3]
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr64_dqsn[4]
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr64_dqsn[5]
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr64_dqsn[6]
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr64_dqsn[7]
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to vdo_idck
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_a[0]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_a[1]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_a[10]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_a[11]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_a[12]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_a[13]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_a[2]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_a[3]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_a[4]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_a[5]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_a[6]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_a[7]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_a[8]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_a[9]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_ba[0]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_ba[1]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_ba[2]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_cas_n
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_cke[0]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_cs_n[0]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dm[0]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dm[1]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dm[2]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dm[3]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dm[4]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dm[5]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dm[6]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dm[7]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[0]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[1]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[10]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[11]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[12]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[13]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[14]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[15]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[16]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[17]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[18]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[19]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[2]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[20]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[21]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[22]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[23]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[24]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[25]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[26]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[27]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[28]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[29]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[3]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[30]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[31]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[32]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[33]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[34]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[35]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[36]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[37]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[38]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[39]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[4]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[40]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[41]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[42]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[43]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[44]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[45]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[46]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[47]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[48]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[49]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[5]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[50]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[51]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[52]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[53]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[54]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[55]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[56]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[57]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[58]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[59]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[6]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[60]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[61]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[62]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[63]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[7]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[8]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_dq[9]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_odt[0]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_ras_n
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_reset_n
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr64_we_n
+set_instance_assignment -name IO_STANDARD LVDS -to vli_clk
+set_instance_assignment -name IO_STANDARD LVDS -to vli_data[0]
+set_instance_assignment -name IO_STANDARD LVDS -to vli_data[1]
+set_instance_assignment -name IO_STANDARD LVDS -to vli_data[2]
+set_instance_assignment -name IO_STANDARD LVDS -to vli_data[3]
+set_instance_assignment -name IO_STANDARD LVDS -to vlo_clk
+set_instance_assignment -name IO_STANDARD LVDS -to vlo_data[0]
+set_instance_assignment -name IO_STANDARD LVDS -to vlo_data[1]
+set_instance_assignment -name IO_STANDARD LVDS -to vlo_data[2]
+set_instance_assignment -name IO_STANDARD LVDS -to vlo_data[3]
+set_instance_assignment -name IO_STANDARD LVDS -to vsi_clk[0]
+set_instance_assignment -name IO_STANDARD LVDS -to vsi_clk[1]
+set_instance_assignment -name IO_STANDARD LVDS -to vsi_data[0]
+set_instance_assignment -name IO_STANDARD LVDS -to vsi_data[1]
+set_instance_assignment -name IO_STANDARD LVDS -to vsi_data[2]
+set_instance_assignment -name IO_STANDARD LVDS -to vsi_data[3]
+set_instance_assignment -name IO_STANDARD LVDS -to vsi_data[4]
+set_instance_assignment -name IO_STANDARD LVDS -to vsi_data[5]
+set_instance_assignment -name IO_STANDARD LVDS -to vsi_data[6]
+set_instance_assignment -name IO_STANDARD LVDS -to vsi_data[7]
+
+# EDA Netlist Writer Assignments
+# ==============================
+set_global_assignment -name EDA_BOARD_DESIGN_SIGNAL_INTEGRITY_TOOL "<None>"
+
+# Assembler Assignments
+# =====================
+set_global_assignment -name USE_CONFIGURATION_DEVICE ON
+set_global_assignment -name STRATIXII_CONFIGURATION_DEVICE AUTO
+
+# SignalTap II Assignments
+# ========================
+set_global_assignment -name ENABLE_SIGNALTAP OFF
+set_global_assignment -name USE_SIGNALTAP_FILE cpu.stp
+
+# Power Estimation Assignments
+# ============================
+set_global_assignment -name POWER_USE_TA_VALUE 50
+set_global_assignment -name POWER_USE_INPUT_FILES OFF
+set_global_assignment -name POWER_USE_PVA OFF
+set_global_assignment -name POWER_DEFAULT_INPUT_IO_TOGGLE_RATE 25%
+set_global_assignment -name POWER_DEFAULT_TOGGLE_RATE 25%
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+
+# Incremental Compilation Assignments
+# ===================================
+set_global_assignment -name RAPID_RECOMPILE_MODE OFF
+
+# Advanced I/O Timing Assignments
+# ===============================
+set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -rise
+set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -fall
+set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -rise
+set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -fall
+
+# start EDA_TOOL_SETTINGS(eda_board_design_signal_integrity)
+# ----------------------------------------------------------
+
+	# EDA Netlist Writer Assignments
+	# ==============================
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT NONE -section_id eda_board_design_signal_integrity
+set_global_assignment -name EDA_IBIS_MODEL_SELECTOR OFF -section_id eda_board_design_signal_integrity
+
+# end EDA_TOOL_SETTINGS(eda_board_design_signal_integrity)
+# --------------------------------------------------------
+
+# start EDA_TOOL_SETTINGS(eda_blast_fpga)
+# ---------------------------------------
+
+	# Analysis & Synthesis Assignments
+	# ================================
+	set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id eda_blast_fpga
+
+# end EDA_TOOL_SETTINGS(eda_blast_fpga)
+# -------------------------------------
+
+# start ASSIGNMENT_GROUP(ddo12)
+# -----------------------------
+
+	# Assignment Group Assignments
+	# ============================
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddo12_datain_h[11..0] -section_id ddo12
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddo12_datain_l[11..0] -section_id ddo12
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddo12_outclock -section_id ddo12
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddo12_outclocken -section_id ddo12
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddo12_dataout[11..0] -section_id ddo12
+
+# end ASSIGNMENT_GROUP(ddo12)
+# ---------------------------
+
+# start ASSIGNMENT_GROUP(ddr64)
+# -----------------------------
+
+	# Assignment Group Assignments
+	# ============================
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_address[24..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_write_req -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_read_req -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_burstbegin -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_ready -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_rdata[255..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_rdata_valid -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_wdata[255..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_be[31..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_size[2..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_reset_request_n -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_odt[0..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_clk[1..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_clk_n[1..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_cs_n[0..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_cke[0..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[13..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_ba[2..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_ras_n -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_cas_n -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_we_n -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_dq[63..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_dqs[7..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_dqsn[7..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_dm[7..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_refresh_ack -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_wdata_req -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_local_init_done -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_reset_phy_clk_n -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_reset_n -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_oct_ctl_rs_value[13..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_oct_ctl_rt_value[13..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_dll_reference_clk -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_dqs_delay_ctrl_export[5..0] -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_aux_scan_clk_reset_n -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_aux_scan_clk -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_global_reset_n -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_pll_ref_clk -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_soft_reset_n -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_phy_clk -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_aux_full_rate_clk -section_id ddr64
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_aux_half_rate_clk -section_id ddr64
+
+# end ASSIGNMENT_GROUP(ddr64)
+# ---------------------------
+
+# start ASSIGNMENT_GROUP(ddr64_ctl)
+# ---------------------------------
+
+	# Assignment Group Assignments
+	# ============================
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_odt[0] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_cs_n[0] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_cke[0] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[13] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[12] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[11] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[10] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[9] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[8] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[7] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[6] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[5] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[4] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[3] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[2] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[1] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_a[0] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_ba[2] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_ba[1] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_ba[0] -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_ras_n -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_cas_n -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_we_n -section_id ddr64_ctl
+	set_global_assignment -name ASSIGNMENT_GROUP_MEMBER ddr64_reset_n -section_id ddr64_ctl
+
+# end ASSIGNMENT_GROUP(ddr64_ctl)
+# -------------------------------
+
+# -----------------------
+# start ENTITY(ep3sl_top)
+
+	# Fitter Assignments
+	# ==================
+set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vli_clk -entity ep3sl_top -disable
+set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vli_data[0] -entity ep3sl_top -disable
+set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vli_data[1] -entity ep3sl_top -disable
+set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vli_data[2] -entity ep3sl_top -disable
+set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vli_data[3] -entity ep3sl_top -disable
+
+# end ENTITY(ep3sl_top)
+# ---------------------
+
+# ------------------------
+# start ENTITY(mixer_test)
+
+	# Fitter Assignments
+	# ==================
+set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vsi_clk[1] -entity mixer_test -disable
+
+# end ENTITY(mixer_test)
+# ----------------------
+
+# ------------------------------
+# start ENTITY(target_top_ep3sl)
+
+	# Pin & Location Assignments
+	# ==========================
+	set_instance_assignment -name FAST_INPUT_REGISTER ON -to vdi*
+	set_instance_assignment -name FAST_INPUT_REGISTER ON -to vai*
+	set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to vdo*
+	set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to vao*
+
+	# Fitter Assignments
+	# ==================
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_a[0]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_a[1]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_a[10]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_a[11]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_a[12]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_a[13]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_a[2]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_a[3]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_a[4]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_a[5]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_a[6]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_a[7]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_a[8]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_a[9]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_ba[0]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_ba[1]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_ba[2]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_cas_n
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_cke[0]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_cs_n[0]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_odt[0]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_ras_n
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_reset_n
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr64_we_n
+	set_instance_assignment -name D6_DELAY 3 -to ddr64_clk[0]
+	set_instance_assignment -name D6_DELAY 3 -to ddr64_clk_n[0]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[0] -to ddr64_dm[0]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[0] -to ddr64_dq[0]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[0] -to ddr64_dq[1]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[0] -to ddr64_dq[2]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[0] -to ddr64_dq[3]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[0] -to ddr64_dq[4]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[0] -to ddr64_dq[5]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[0] -to ddr64_dq[6]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[0] -to ddr64_dq[7]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[1] -to ddr64_dm[1]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[1] -to ddr64_dq[10]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[1] -to ddr64_dq[11]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[1] -to ddr64_dq[12]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[1] -to ddr64_dq[13]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[1] -to ddr64_dq[14]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[1] -to ddr64_dq[15]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[1] -to ddr64_dq[8]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[1] -to ddr64_dq[9]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[2] -to ddr64_dm[2]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[2] -to ddr64_dq[16]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[2] -to ddr64_dq[17]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[2] -to ddr64_dq[18]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[2] -to ddr64_dq[19]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[2] -to ddr64_dq[20]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[2] -to ddr64_dq[21]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[2] -to ddr64_dq[22]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[2] -to ddr64_dq[23]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[3] -to ddr64_dm[3]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[3] -to ddr64_dq[24]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[3] -to ddr64_dq[25]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[3] -to ddr64_dq[26]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[3] -to ddr64_dq[27]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[3] -to ddr64_dq[28]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[3] -to ddr64_dq[29]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[3] -to ddr64_dq[30]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[3] -to ddr64_dq[31]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[4] -to ddr64_dm[4]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[4] -to ddr64_dq[32]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[4] -to ddr64_dq[33]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[4] -to ddr64_dq[34]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[4] -to ddr64_dq[35]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[4] -to ddr64_dq[36]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[4] -to ddr64_dq[37]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[4] -to ddr64_dq[38]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[4] -to ddr64_dq[39]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[5] -to ddr64_dm[5]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[5] -to ddr64_dq[40]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[5] -to ddr64_dq[41]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[5] -to ddr64_dq[42]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[5] -to ddr64_dq[43]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[5] -to ddr64_dq[44]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[5] -to ddr64_dq[45]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[5] -to ddr64_dq[46]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[5] -to ddr64_dq[47]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[6] -to ddr64_dm[6]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[6] -to ddr64_dq[48]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[6] -to ddr64_dq[49]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[6] -to ddr64_dq[50]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[6] -to ddr64_dq[51]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[6] -to ddr64_dq[52]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[6] -to ddr64_dq[53]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[6] -to ddr64_dq[54]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[6] -to ddr64_dq[55]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[7] -to ddr64_dm[7]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[7] -to ddr64_dq[56]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[7] -to ddr64_dq[57]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[7] -to ddr64_dq[58]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[7] -to ddr64_dq[59]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[7] -to ddr64_dq[60]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[7] -to ddr64_dq[61]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[7] -to ddr64_dq[62]
+	set_instance_assignment -name DQ_GROUP 9 -from ddr64_dqs[7] -to ddr64_dq[63]
+	set_instance_assignment -name DQSB_DQS_PAIR ON -from ddr64_dqsn[0] -to ddr64_dqs[0]
+	set_instance_assignment -name DQSB_DQS_PAIR ON -from ddr64_dqsn[1] -to ddr64_dqs[1]
+	set_instance_assignment -name DQSB_DQS_PAIR ON -from ddr64_dqsn[2] -to ddr64_dqs[2]
+	set_instance_assignment -name DQSB_DQS_PAIR ON -from ddr64_dqsn[3] -to ddr64_dqs[3]
+	set_instance_assignment -name DQSB_DQS_PAIR ON -from ddr64_dqsn[4] -to ddr64_dqs[4]
+	set_instance_assignment -name DQSB_DQS_PAIR ON -from ddr64_dqsn[5] -to ddr64_dqs[5]
+	set_instance_assignment -name DQSB_DQS_PAIR ON -from ddr64_dqsn[6] -to ddr64_dqs[6]
+	set_instance_assignment -name DQSB_DQS_PAIR ON -from ddr64_dqsn[7] -to ddr64_dqs[7]
+	set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vsi_clk[0]
+	set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vsi_data[0]
+	set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vsi_data[1]
+	set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vsi_data[2]
+	set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vsi_data[3]
+	set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vsi_data[4]
+	set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vsi_data[5]
+	set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vsi_data[6]
+	set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vsi_data[7]
+	set_instance_assignment -name MEMORY_INTERFACE_DATA_PIN_GROUP 4 -from ddr64_clk[0] -to ddr64_clk_n[0]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_blank_n
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_blue[0]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_blue[1]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_blue[2]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_blue[3]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_blue[4]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_blue[5]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_blue[6]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_blue[7]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_green[0]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_green[1]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_green[2]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_green[3]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_green[4]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_green[5]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_green[6]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_green[7]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_green[8]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_hsync
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_red[0]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_red[1]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_red[2]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_red[3]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_red[4]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_red[5]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_red[6]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_red[7]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 1 -to vao_vsync
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dm[0]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dm[1]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dm[2]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dm[3]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dm[4]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dm[5]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dm[6]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dm[7]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[0]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[1]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[10]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[11]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[12]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[13]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[14]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[15]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[16]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[17]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[18]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[19]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[2]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[20]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[21]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[22]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[23]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[24]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[25]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[26]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[27]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[28]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[29]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[3]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[30]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[31]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[32]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[33]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[34]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[35]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[36]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[37]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[38]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[39]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[4]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[40]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[41]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[42]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[43]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[44]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[45]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[46]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[47]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[48]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[49]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[5]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[50]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[51]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[52]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[53]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[54]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[55]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[56]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[57]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[58]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[59]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[6]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[60]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[61]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[62]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[63]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[7]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[8]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dq[9]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dqs[0]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dqs[1]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dqs[2]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dqs[3]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dqs[4]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dqs[5]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dqs[6]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dqs[7]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dqsn[0]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dqsn[1]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dqsn[2]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dqsn[3]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dqsn[4]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dqsn[5]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dqsn[6]
+	set_instance_assignment -name OUTPUT_ENABLE_GROUP 95442480 -to ddr64_dqsn[7]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_clk[0]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_clk_n[0]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dm[0]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dm[1]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dm[2]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dm[3]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dm[4]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dm[5]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dm[6]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dm[7]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[0]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[1]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[10]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[11]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[12]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[13]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[14]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[15]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[16]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[17]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[18]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[19]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[2]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[20]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[21]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[22]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[23]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[24]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[25]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[26]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[27]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[28]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[29]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[3]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[30]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[31]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[32]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[33]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[34]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[35]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[36]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[37]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[38]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[39]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[4]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[40]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[41]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[42]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[43]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[44]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[45]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[46]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[47]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[48]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[49]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[5]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[50]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[51]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[52]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[53]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[54]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[55]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[56]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[57]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[58]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[59]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[6]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[60]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[61]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[62]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[63]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[7]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[8]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dq[9]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dqs[0]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dqs[1]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dqs[2]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dqs[3]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dqs[4]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dqs[5]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dqs[6]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dqs[7]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dqsn[0]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dqsn[1]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dqsn[2]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dqsn[3]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dqsn[4]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dqsn[5]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dqsn[6]
+	set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr64_dqsn[7]
+	set_instance_assignment -name T11_DELAY 0 -to ddr32_mem_dqs
+	set_instance_assignment -name T11_DELAY 0 -to ddra_mem_dqs
+	set_instance_assignment -name T11_DELAY 0 -to ddrb_mem_dqs
+	set_instance_assignment -name T11_DELAY 0 -to ddrc_mem_dqs
+	set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to tp88
+	set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to tp92
+
+	# Advanced I/O Timing Assignments
+	# ===============================
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_a[0]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_a[13]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_a[12]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_a[11]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_a[10]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_a[9]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_a[8]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_a[7]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_a[6]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_a[5]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_a[4]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_a[3]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_a[2]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_a[1]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_cke[0]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_ba[2]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_ba[1]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_ba[0]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_ras_n
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_cas_n
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_we_n
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_reset_n
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_cs_n[0]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 6P -to ddr64_odt[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_a[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_a[13]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_a[12]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_a[11]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_a[10]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_a[9]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_a[8]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_a[7]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_a[6]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_a[5]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_a[4]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_a[3]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_a[2]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_a[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_cke[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_ba[2]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_ba[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_ba[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_ras_n
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_cas_n
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_we_n
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_reset_n
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_cs_n[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_odt[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_a[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_a[13]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_a[12]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_a[11]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_a[10]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_a[9]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_a[8]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_a[7]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_a[6]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_a[5]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_a[4]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_a[3]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_a[2]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_a[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_cke[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_ba[2]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_ba[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_ba[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_ras_n
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_cas_n
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_we_n
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_reset_n
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_cs_n[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_odt[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[13]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[12]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[11]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[10]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[9]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[8]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[7]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[6]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[5]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[4]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[3]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[2]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_cke[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_ba[2]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_ba[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_ba[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_ras_n
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_cas_n
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_we_n
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_reset_n
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_cs_n[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_odt[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_a[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_a[13]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_a[12]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_a[11]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_a[10]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_a[9]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_a[8]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_a[7]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_a[6]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_a[5]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_a[4]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_a[3]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_a[2]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_a[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_cke[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_ba[2]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_ba[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_ba[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_ras_n
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_cas_n
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_we_n
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_reset_n
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_cs_n[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_odt[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[13]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[12]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[11]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[10]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[9]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[8]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[7]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[6]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[5]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[4]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[3]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[2]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_a[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_cke[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_ba[2]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_ba[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_ba[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_ras_n
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_cas_n
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_we_n
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_reset_n
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_cs_n[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_odt[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[63]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[62]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[61]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[60]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[59]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[58]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[57]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[56]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[55]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[54]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[53]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[52]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[51]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[50]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[49]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[48]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[47]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[46]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[45]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[44]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[43]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[42]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[41]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[40]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[39]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[38]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[37]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[36]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[35]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[34]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[33]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[32]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[31]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[30]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[29]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[28]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[27]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[26]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[25]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[24]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[23]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[22]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[21]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[20]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[19]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[18]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[17]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[16]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[15]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[14]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[13]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[12]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[11]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[10]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[9]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[8]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[7]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[6]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[5]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[4]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[3]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[2]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dq[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dm[7]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dm[6]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dm[5]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dm[4]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dm[3]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dm[2]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dm[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dm[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[63]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[62]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[61]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[60]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[59]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[58]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[57]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[56]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[55]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[54]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[53]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[52]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[51]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[50]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[49]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[48]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[47]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[46]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[45]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[44]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[43]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[42]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[41]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[40]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[39]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[38]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[37]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[36]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[35]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[34]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[33]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[32]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[31]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[30]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[29]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[28]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[27]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[26]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[25]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[24]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[23]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[22]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[21]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[20]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[19]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[18]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[17]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[16]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[15]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[14]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[13]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[12]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[11]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[10]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[9]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[8]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[7]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[6]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[5]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[4]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[3]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[2]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dq[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dm[7]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dm[6]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dm[5]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dm[4]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dm[3]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dm[2]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dm[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dm[0]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[0]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[63]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[62]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[61]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[60]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[59]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[58]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[57]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[56]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[55]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[54]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[53]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[52]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[51]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[50]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[49]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[48]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[47]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[46]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[45]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[44]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[43]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[42]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[41]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[40]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[39]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[38]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[37]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[36]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[35]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[34]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[33]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[32]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[31]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[30]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[29]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[28]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[27]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[26]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[25]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[24]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[23]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[22]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[21]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[20]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[19]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[18]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[17]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[16]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[15]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[14]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[13]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[12]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[11]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[10]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[9]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[8]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[7]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[6]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[5]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[4]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[3]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[2]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dq[1]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dm[7]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dm[6]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dm[5]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dm[4]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dm[3]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dm[2]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dm[1]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dm[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[63]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[62]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[61]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[60]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[59]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[58]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[57]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[56]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[55]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[54]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[53]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[52]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[51]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[50]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[49]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[48]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[47]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[46]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[45]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[44]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[43]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[42]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[41]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[40]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[39]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[38]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[37]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[36]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[35]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[34]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[33]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[32]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[31]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[30]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[29]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[28]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[27]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[26]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[25]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[24]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[23]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[22]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[21]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[20]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[19]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[18]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[17]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[16]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[15]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[14]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[13]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[12]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[11]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[10]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[9]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[8]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[7]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[6]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[5]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[4]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[3]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[2]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dq[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dm[7]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dm[6]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dm[5]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dm[4]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dm[3]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dm[2]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dm[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dm[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[63]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[62]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[61]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[60]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[59]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[58]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[57]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[56]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[55]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[54]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[53]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[52]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[51]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[50]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[49]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[48]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[47]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[46]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[45]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[44]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[43]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[42]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[41]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[40]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[39]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[38]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[37]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[36]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[35]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[34]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[33]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[32]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[31]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[30]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[29]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[28]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[27]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[26]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[25]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[24]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[23]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[22]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[21]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[20]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[19]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[18]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[17]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[16]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[15]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[14]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[13]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[12]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[11]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[10]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[9]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[8]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[7]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[6]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[5]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[4]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[3]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[2]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dm[7]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dm[6]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dm[5]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dm[4]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dm[3]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dm[2]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dm[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dm[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[63]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[62]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[61]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[60]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[59]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[58]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[57]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[56]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[55]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[54]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[53]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[52]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[51]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[50]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[49]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[48]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[47]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[46]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[45]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[44]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[43]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[42]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[41]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[40]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[39]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[38]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[37]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[36]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[35]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[34]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[33]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[32]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[31]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[30]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[29]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[28]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[27]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[26]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[25]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[24]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[23]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[22]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[21]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[20]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[19]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[18]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[17]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[16]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[15]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[14]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[13]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[12]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[11]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[10]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[9]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[8]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[7]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[6]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[5]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[4]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[3]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[2]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dq[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dm[7]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dm[6]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dm[5]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dm[4]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dm[3]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dm[2]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dm[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dm[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[63]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[62]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[61]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[60]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[59]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[58]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[57]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[56]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[55]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[54]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[53]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[52]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[51]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[50]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[49]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[48]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[47]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[46]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[45]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[44]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[43]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[42]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[41]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[40]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[39]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[38]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[37]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[36]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[35]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[34]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[33]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[32]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[31]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[30]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[29]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[28]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[27]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[26]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[25]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[24]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[23]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[22]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[21]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[20]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[19]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[18]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[17]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[16]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[15]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[14]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[13]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[12]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[11]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[10]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[9]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[8]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[7]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[6]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[5]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[4]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[3]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[2]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dq[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dm[7]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dm[6]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dm[5]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dm[4]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dm[3]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dm[2]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dm[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dm[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[63]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[62]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[61]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[60]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[59]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[58]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[57]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[56]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[55]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[54]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[53]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[52]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[51]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[50]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[49]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[48]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[47]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[46]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[45]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[44]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[43]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[42]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[41]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[40]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[39]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[38]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[37]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[36]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[35]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[34]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[33]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[32]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[31]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[30]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[29]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[28]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[27]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[26]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[25]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[24]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[23]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[22]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[21]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[20]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[19]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[18]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[17]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[16]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[15]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[14]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[13]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[12]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[11]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[10]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[9]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[8]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[7]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[6]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[5]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[4]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[3]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[2]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dq[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dm[7]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dm[6]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dm[5]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dm[4]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dm[3]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dm[2]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dm[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dm[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dqs[7]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dqs[6]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dqs[5]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dqs[4]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dqs[3]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dqs[2]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dqs[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dqs[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dqsn[7]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dqsn[6]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dqsn[5]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dqsn[4]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dqsn[3]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dqsn[2]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dqsn[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_dqsn[0]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dqs[7]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dqs[6]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dqs[5]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dqs[4]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dqs[3]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dqs[2]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dqs[1]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dqs[0]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dqsn[7]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dqsn[6]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dqsn[5]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dqsn[4]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dqsn[3]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dqsn[2]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dqsn[1]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 3P -to ddr64_dqsn[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dqs[7]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dqs[6]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dqs[5]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dqs[4]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dqs[3]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dqs[2]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dqs[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dqs[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dqsn[7]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dqsn[6]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dqsn[5]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dqsn[4]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dqsn[3]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dqsn[2]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dqsn[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0508 -to ddr64_dqsn[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dqs[7]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dqs[6]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dqs[5]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dqs[4]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dqs[3]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dqs[2]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dqs[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dqs[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dqsn[7]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dqsn[6]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dqsn[5]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dqsn[4]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dqsn[3]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dqsn[2]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dqsn[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_dqsn[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dqs[7]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dqs[6]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dqs[5]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dqs[4]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dqs[3]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dqs[2]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dqs[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dqs[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[7]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[6]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[5]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[4]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[3]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[2]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqs[7]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqs[6]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqs[5]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqs[4]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqs[3]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqs[2]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqs[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqs[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqsn[7]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqsn[6]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqsn[5]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqsn[4]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqsn[3]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqsn[2]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqsn[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqsn[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqs[7]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqs[6]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqs[5]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqs[4]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqs[3]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqs[2]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqs[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqs[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqsn[7]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqsn[6]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqsn[5]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqsn[4]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqsn[3]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqsn[2]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqsn[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_dqsn[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_odt[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_cs_n[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_cke[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_a[13]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_a[12]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_a[11]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_a[10]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_a[9]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_a[8]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_a[7]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_a[6]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_a[5]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_a[4]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_a[3]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_a[2]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_a[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_a[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_ba[2]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_ba[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_ba[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_ras_n
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_cas_n
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_we_n
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_reset_n
+	set_instance_assignment -name BOARD_MODEL_FAR_C 0.6P -to ddr32_mem_clk[0]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 0.6P -to ddr32_mem_clk_n[0]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 0.6P -to ddr64_clk[1]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 0.6P -to ddr64_clk[0]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 0.6P -to ddr64_clk_n[1]
+	set_instance_assignment -name BOARD_MODEL_FAR_C 0.6P -to ddr64_clk_n[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr32_mem_clk[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr32_mem_clk_n[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_clk[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_clk[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_clk_n[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_LENGTH 0.0762 -to ddr64_clk_n[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr32_mem_clk[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr32_mem_clk_n[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_clk[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_clk[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_clk_n[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_clk_n[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr32_mem_clk[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr32_mem_clk_n[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_clk[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_clk[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_clk_n[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_C_PER_LENGTH 0.24N -to ddr64_clk_n[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr32_mem_clk[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr32_mem_clk_n[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_clk[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_clk[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_clk_n[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_C_PER_LENGTH 0.24N -to ddr64_clk_n[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr32_mem_clk[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr32_mem_clk_n[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_clk[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_clk[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_clk_n[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_L_PER_LENGTH 735N -to ddr64_clk_n[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr32_mem_clk[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr32_mem_clk_n[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_clk[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_clk[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_clk_n[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_TLINE_LENGTH 0.0127 -to ddr64_clk_n[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr32_mem_clk[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr32_mem_clk_n[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_clk[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_clk[0]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_clk_n[1]
+	set_instance_assignment -name BOARD_MODEL_NEAR_SERIES_R 22 -to ddr64_clk_n[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqs[7]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqs[6]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqs[5]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqs[4]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqs[3]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqs[2]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqs[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqs[0]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[7]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[6]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[5]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[4]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[3]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[2]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[1]
+	set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[0]
+
+	# start LOGICLOCK_REGION(Root Region)
+	# -----------------------------------
+
+		# LogicLock Region Assignments
+		# ============================
+		set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+		set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+
+	# end LOGICLOCK_REGION(Root Region)
+	# ---------------------------------
+
+	# start DESIGN_PARTITION(Top)
+	# ---------------------------
+
+		# Incremental Compilation Assignments
+		# ===================================
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+		set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+		set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+
+	# end DESIGN_PARTITION(Top)
+	# -------------------------
+
+# end ENTITY(target_top_ep3sl)
+# ----------------------------
+set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
+set_global_assignment -name VHDL_SHOW_LMF_MAPPING_MESSAGES OFF
+set_location_assignment PIN_J27 -to vid_reset_core_n
+set_location_assignment PIN_K27 -to vid_reset_n
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_reset_n
+set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_reset_core_n
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to vid_reset_n
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to vid_reset_core_n
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sdram_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/tilemapctl_e.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/bitmapctl_e.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/target_pkg_ep3sl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/galaxian/platform_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/galaxian/pacmanbl/platform_variant_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/pll.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/sprom.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/dpram.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/spram.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/dprom_2r.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/galaxian/altera_mem.vhd
+set_global_assignment -name VHDL_FILE "project_pkg-ep3sl.vhd"
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/clk_div.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_Pack.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_ALU.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_MCode.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_Reg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80se.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/Z80.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/galaxian/bitmapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/galaxian/tilemapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/galaxian/spritereg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/galaxian/spritectl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_array.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_mixer.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/Graphics.VHD
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/galaxian/galaxian/input_mapper.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/Inputs.VHD
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/galaxian/platform.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sound.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/target_top_ep3sl.vhd
+set_global_assignment -name SDC_FILE "pacmanbl-ep3sl.sdc"
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
