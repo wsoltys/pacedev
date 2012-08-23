@@ -20,7 +20,8 @@ package project_pkg is
   constant PACE_HAS_FLASH                   : boolean := true;
   constant PACE_HAS_SERIAL                  : boolean := false;
   
-	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_MAPLE;
+	--constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_MAPLE;
+	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NGC;
 
 --  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_640x480_60Hz;
 --  constant PACE_CLK0_DIVIDE_BY              : natural := 19;

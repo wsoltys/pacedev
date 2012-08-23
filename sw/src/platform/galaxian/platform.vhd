@@ -334,7 +334,7 @@ begin
     
   begin
   
-    GEN_DECRYPT : if PLATFORM_VARIANT = "dkongg" generate
+    GEN_DECRYPT : if PLATFORM_VARIANT = "ckongg" generate
     
       -- I'm sure this is done via NOT & XOR in a GAL, but I can't derive the algorithm...
       -- - tried brute-force approach but didn't get any matches

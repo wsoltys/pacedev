@@ -353,6 +353,8 @@ begin
 				joystate 		=> gcj
 			);
 
+    --gpio_0(25) <= default_gpio_0_o(25) when default_gpio_0_oe(25) = '1' else 'Z';
+    
 		-- map gamecube controller to jamma inputs
 		inputs_i.jamma_n.coin(1) <= not gcj.l;
 		inputs_i.jamma_n.p(1).start <= not gcj.start;

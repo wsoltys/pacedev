@@ -64,11 +64,26 @@ int main (int argc, char *argv[])
 			break;
 	}
 
+  unsigned track = 0;
+  unsigned sector = 0;
+  
 	unsigned int count = 0;
 	while (!feof(fp))
 	{
 		unsigned char byte;
 
+		int n = fread (&byte, 1, 1, fp);
+		if (!n)
+			break;
+
+	  // hack for 10SPT disk images
+    if (count % 256 == 0)
+    {
+		  if (sector == 0)
+		    printf ("\n  // track %d\n\n", track);
+		  printf ("  // sector %d\n", sector);
+    }
+    
 		if (count % 16 == 0)
 			switch (language)
 			{
@@ -81,10 +96,6 @@ int main (int argc, char *argv[])
 				default :
 					break;
 			}
-
-		int n = fread (&byte, 1, 1, fp);
-		if (!n)
-			break;
 
 		switch (language)
 		{
@@ -100,6 +111,13 @@ int main (int argc, char *argv[])
 
 		if (count % 16 == 15)
 			printf ("\n");
+			
+	  if (count %256 == 255)
+	    if (++sector == 10)
+      {
+        sector = 0;
+        track++;
+      }
 
 		++count;
 	}
