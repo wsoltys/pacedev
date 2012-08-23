@@ -120,6 +120,11 @@ void timer_60Hz_isr_deinit (void)
   rtems_interrupt_catch(timer_60Hz_isr_old, TIMER_60HZ_IRQ, &old);
 }
 
+void hid_keybd_event (uint16_t vendor, uint16_t product)
+{
+	PRINT (0, "%s($%04X,$%04X)\n", __FUNCTION__, vendor, product);
+}
+
 void system_base_task (void* data)
 {
   struct    timespec ticks_r;

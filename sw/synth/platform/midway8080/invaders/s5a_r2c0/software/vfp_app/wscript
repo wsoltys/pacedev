@@ -241,6 +241,7 @@ def vl_usb(bld):
                  'usb/subr_uio.c',
 #                 'usb/tc-mtouch.c',
 #                 'usb/tc-zytronic.c',
+                 'usb/hidkbd.c',
                  'usb/tc.c',
                  'usb/ums.c',
                  'usb/usb_busdma.c',
