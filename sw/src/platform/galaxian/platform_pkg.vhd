@@ -13,7 +13,7 @@ package platform_pkg is
 	--
 
 	constant GALAXIAN_VIDEO_H_SIZE				: integer := 256;
-	constant GALAXIAN_VIDEO_V_SIZE				: integer := 256; --224;
+	constant GALAXIAN_VIDEO_V_SIZE				: integer := 224;
 	
 	constant PACE_VIDEO_NUM_BITMAPS		    : natural := 1;
 	constant PACE_VIDEO_NUM_TILEMAPS	    : natural := 1;

@@ -158,7 +158,12 @@ begin
   
   -- chip select logic
   -- ROM $0000-$3FFF
-  rom_cs <= '1' when STD_MATCH(cpu_a, "00--------------") else '0';
+  rom_cs <= '1' when STD_MATCH(cpu_a, "00--------------") else 
+                -- ckongg $0000-$57FF
+            '1' when PLATFORM_VARIANT = "ckongg" and
+                      (STD_MATCH(cpu_a, "0100------------") or
+                        STD_MATCH(cpu_a, "01010-----------")) else 
+            '0';
   -- every thing else is variant-dependent
   wram_cs <= '1' when STD_MATCH(cpu_a, GALAXIAN_WRAM_A) else '0';
   vram_cs <= '1' when STD_MATCH(cpu_a, GALAXIAN_VRAM_A) else '0';
@@ -176,27 +181,7 @@ begin
                       '0';
                     
 	-- memory read mux
-	cpu_d_i <=  
---              -- hack for scramble
---              X"00" when STD_MATCH(cpu_a, X"00AE") else
---							X"00" when STD_MATCH(cpu_a, X"00C2") else
---							X"00" when STD_MATCH(cpu_a, X"00C3") else
---							X"00" when STD_MATCH(cpu_a, X"00C4") else
---							X"00" when STD_MATCH(cpu_a, X"0C22") else
---							X"00" when STD_MATCH(cpu_a, X"0C23") else
---							X"00" when STD_MATCH(cpu_a, X"0C24") else
---							X"00" when STD_MATCH(cpu_a, X"0C71") else
---							X"00" when STD_MATCH(cpu_a, X"0C72") else
---							X"00" when STD_MATCH(cpu_a, X"0C73") else
---							X"00" when STD_MATCH(cpu_a, X"0CF0") else
---							X"00" when STD_MATCH(cpu_a, X"0CF1") else
---							X"00" when STD_MATCH(cpu_a, X"0D3C") else
---							X"00" when STD_MATCH(cpu_a, X"0D3D") else
---							X"00" when STD_MATCH(cpu_a, X"0D3E") else
---							X"00" when STD_MATCH(cpu_a, X"1D82") else
---							X"00" when STD_MATCH(cpu_a, X"1D83") else
-              
-              rom_d_o when rom_cs = '1' else
+	cpu_d_i <=  rom_d_o when rom_cs = '1' else
 							wram_d_o when wram_cs = '1' else
 							vram_d_o when vram_cs = '1' else
 							cram_d_o when cram_cs = '1' else
@@ -349,7 +334,36 @@ begin
     
   begin
   
-    GEN_DECRYPT : if PLATFORM_VARIANT = "mooncrst" generate
+    GEN_DECRYPT : if PLATFORM_VARIANT = "dkongg" generate
+    
+      -- I'm sure this is done via NOT & XOR in a GAL, but I can't derive the algorithm...
+      -- - tried brute-force approach but didn't get any matches
+      rom_device_a(cpu_a'left downto 15) <= cpu_a(cpu_a'left downto 15);
+      rom_device_a(14 downto 10) <= "01001" when cpu_a(14 downto 10) = "00000" else
+                                    "00111" when cpu_a(14 downto 10) = "00001" else
+                                    "10010" when cpu_a(14 downto 10) = "00010" else
+                                    "00011" when cpu_a(14 downto 10) = "00011" else
+                                    "10001" when cpu_a(14 downto 10) = "00100" else
+                                    "00000" when cpu_a(14 downto 10) = "00101" else
+                                    "00110" when cpu_a(14 downto 10) = "00110" else
+                                    "01010" when cpu_a(14 downto 10) = "00111" else
+                                    "01101" when cpu_a(14 downto 10) = "01000" else
+                                    "10011" when cpu_a(14 downto 10) = "01001" else
+                                    "10100" when cpu_a(14 downto 10) = "01010" else
+                                    "00001" when cpu_a(14 downto 10) = "01011" else
+                                    "01000" when cpu_a(14 downto 10) = "01100" else
+                                    "01110" when cpu_a(14 downto 10) = "01101" else
+                                    "00100" when cpu_a(14 downto 10) = "01110" else
+                                    "10000" when cpu_a(14 downto 10) = "01111" else
+                                    "00010" when cpu_a(14 downto 10) = "10000" else
+                                    "10101" when cpu_a(14 downto 10) = "10001" else
+                                    "01011" when cpu_a(14 downto 10) = "10010" else
+                                    "00101" when cpu_a(14 downto 10) = "10011" else
+                                    "01100" when cpu_a(14 downto 10) = "10100" else
+                                    "01111";
+      rom_device_a(9 downto 0) <= cpu_a(9 downto 0);
+      
+    elsif PLATFORM_VARIANT = "mooncrst" generate
         signal res  : std_logic_vector(rom_d_o'range);
       begin
       
@@ -399,7 +413,7 @@ begin
       rom_device_a(11 downto 0) <= cpu_a(11 downto 0);
       
       rom_d_o <= rom_device_d_o;
-      
+
     else generate
 
       rom_device_a <= cpu_a;
@@ -577,16 +591,15 @@ begin
 
   GEN_WRAM : if GALAXIAN_USE_INTERNAL_WRAM generate
   
-    wram_inst : entity work.galaxian_wram
-      --generic map
-      --(
-      --	numwords_a => 2048,
-      --	widthad_a => 11
-      --)
+    wram_inst : entity work.spram
+      generic map
+      (
+      	widthad_a => GALAXIAN_WRAM_WIDTHAD
+      )
       port map
       (
         clock				=> clk_sys,
-        address			=> cpu_a(10 downto 0),
+        address			=> cpu_a(GALAXIAN_WRAM_WIDTHAD-1 downto 0),
         data				=> cpu_d_o,
         wren				=> wram_wr,
         q						=> wram_d_o
