@@ -1,0 +1,399 @@
+import os
+import os.path
+import sys
+
+#
+# These set the software version numbers.
+#
+ver_major = 1
+ver_minor = 33
+ver_revision = 4
+
+#
+# Version RTEMS.
+#
+rtems_ver = '4.11'
+rtems = 'rtems' + rtems_ver
+rtems_arch = 'nios2'
+rtems_arch_path = rtems_arch + '-' + rtems
+rtems_bsp = rtems_arch + '-alt'
+
+def options(opt):
+    rtems_tools()
+    opt.load("g++")
+    opt.load("gcc")
+    opt.load("gas")
+    opt.add_option('--opt-flags',
+                   action = 'store', 
+                   default = '-O2',
+                   dest = 'opt_flags',
+                   help = 'Change the compiler optimisation level.')
+    opt.add_option('--rtems-tools', 
+                   action = 'store',
+                   default = '/opt/rtems-' + rtems_ver + '/bin',
+                   dest = 'rtems_tools',
+                   help = 'Set a path to the RTEMS tools.')
+    opt.add_option('--rtems', 
+                   action = 'store',
+                   default = '/opt/rtems-' + rtems_ver,
+                   dest = 'rtems',
+                   help = 'Set a path to RTEMS.')
+    opt.add_option('--show-commands', 
+                   action = 'store_true',
+                   default = False,
+                   dest = 'show_commands',
+                   help = 'Print the commands as strings.')
+    opt.add_option('--debug-level', 
+                   action = 'store',
+                   default = 0,
+                   dest = 'debug_level',
+                   help = 'Enable debug and set the level.')
+    opt.add_option('--os-debug-level', 
+                   action = 'store',
+                   default = 0,
+                   dest = 'os_debug_level',
+                   help = 'Enable OS debug and set the level.')
+    opt.add_option('--usb-debug-level', 
+                   action = 'store',
+                   default = 0,
+                   dest = 'usb_debug_level',
+                   help = 'Enable USB debug and set the level.')
+
+def configure(conf):
+    #
+    # Set up the RTEMS tools and paths.
+    #
+    rtems_tools()
+    conf.env.OPT_FLAGS = conf.options.opt_flags
+    conf.env.RTEMS_TOOLS = conf.options.rtems_tools
+    conf.env.RTEMS_TOOLS_BIN = os.path.join(conf.options.rtems_tools, 'bin')
+    conf.env.RTEMS = conf.options.rtems
+    conf.env.RTEMS_INCLUDE = os.path.join(conf.env.RTEMS, 
+                                          rtems_arch_path, rtems_bsp,
+                                          'lib', 'include')
+    conf.env.RTEMS_LIB = os.path.join(conf.options.rtems, 
+                                      rtems_arch_path, rtems_bsp,
+                                      'lib')
+    append_path(conf.env.RTEMS_TOOLS_BIN)
+
+    #
+    # Show commands.
+    #
+    if conf.options.show_commands:
+        conf.env.SHOW_COMMANDS = 'yes'
+    else:
+        conf.env.SHOW_COMMANDS = 'no'
+
+    #
+    # Manage the debug trace settings.
+    #
+    conf.env.DEBUG_LEVEL = conf.options.debug_level
+    conf.env.OS_DEBUG_LEVEL = conf.options.os_debug_level
+    conf.env.USB_DEBUG_LEVEL = conf.options.usb_debug_level
+
+    #
+    # Check we have a valid RTEMS.
+    #
+    conf.find_file('rtems.h',       conf.env.RTEMS_INCLUDE)
+    conf.find_file('librtemscpu.a', conf.env.RTEMS_LIB)
+    conf.find_file('librtemsbsp.a', conf.env.RTEMS_LIB)
+
+    #
+    # Load the tool support.
+    #
+    conf.load("g++")
+    conf.load("gcc")
+    conf.load("gas")
+
+def build(bld):
+    rtems_tools()
+
+    #
+    # Make the path to the tool is set.
+    #
+    append_path(bld.env.RTEMS_TOOLS_BIN)
+
+    #
+    # Add a post build function.
+    #
+    bld.add_post_fun(post)
+
+    #
+    # The global include paths.
+    #
+    bld.includes = ['alt',
+                    'bsp/include',
+                    'alt/HAL/inc',
+                    'alt/drivers/inc',
+                    bld.env.RTEMS_INCLUDE]
+
+    #
+    # Global build flags.
+    #
+    common_flags = ['-pipe', '-g', bld.env.OPT_FLAGS,
+                    '-mno-hw-div', '-DSYSTEM_BUS_WIDTH=32',
+                    '-DVER_MAJOR=%d' % (ver_major),
+                    '-DVER_MINOR=%d' % (ver_minor),
+                    '-DVER_REVISION=%d' % (ver_revision)]
+
+    #
+    # If a debug build set the correct level.
+    #
+    if int(bld.env.DEBUG_LEVEL) > 0:
+        common_flags += ['-DBUILD_INCLUDE_DEBUG=1', '-DDB_LVL=' + bld.env.DEBUG_LEVEL]
+    if int(bld.env.OS_DEBUG_LEVEL) > 0:
+        common_flags += ['-DOS_PRINTING=' + bld.env.OS_DEBUG_LEVEL]
+    if int(bld.env.USB_DEBUG_LEVEL) > 0:
+        common_flags += ['-DUSB_DEBUG_LEVEL=' + bld.env.USB_DEBUG_LEVEL]
+
+    # provide a stub for printf() if there is absolutely NO debug
+    if (int(bld.env.DEBUG_LEVEL) == 0) and (int(bld.env.OS_DEBUG_LEVEL) == 0) and (int(bld.env.USB_DEBUG_LEVEL) == 0):
+        printf = ['printf.c']
+    else:
+        printf = []
+
+    bld.cstd = ['-std=c99', '-Dnios2=1']
+
+    bld.wflags    = ['-Wall']
+    bld.cflags    = common_flags
+    bld.cxxflags  = common_flags
+
+    rtems_ldflags(bld)
+
+    #
+    # Create each of the modules as object files each with their own
+    # configurations.
+    #
+    vl_app(bld)
+    vl_usb(bld)
+    vl_bsp(bld)
+    vl_alt(bld)
+
+    #
+    # Build a unit test program for the SiToro shared library.
+    #
+    bld.program(target = 'vfp_app',
+                source = ['main.c'] + printf,
+                includes = bld.includes + ['.'],
+                cflags = bld.cflags + bld.wflags + bld.cstd,
+                cxxflags = bld.cxxflags + bld.wflags,
+                linkflags = bld.linkflags,
+                use = ['app', 'usb', 'bsp', 'alt'])
+
+    if bld.env.SHOW_COMMANDS == 'yes':
+        customize_ze_outputs()
+
+def post(bld):
+    copy_file('nios2-gdbinit', os.path.join('build', '.gdbinit'))
+    if bld.cmd == 'install':
+        post_install(bld)
+    pass
+
+def post_install(bld):
+    #
+    # Holder for now.
+    #
+    pass
+
+#
+# Application module.
+#
+def vl_app(bld):
+    bld(target = 'app',
+        features = 'c cxx',
+        includes = bld.includes + ['e:/work/S5L/sw/S5L-sw-VAP/api/inc', '.'],
+        cflags = bld.cflags + bld.wflags + bld.cstd,
+        cxxflags = bld.cxxflags + bld.wflags,
+        source =['dbg_helper.c',
+                 'i2c_master.c',
+                 'os-support-rtems.c',
+                 'ow.c',
+                 'spi_helper.c',
+                 'sys-base.c',
+                 'touchcon.c',
+                 'uhe.c',
+                 'usb_helper.c'])
+
+#
+# USB module.
+#
+def vl_usb(bld):
+    bld(target = 'usb',
+        features = 'c',
+        includes = bld.includes + ['e:/work/S5L/sw/S5L-sw-VAP/api/inc', '..'],
+        cflags = bld.cflags + bld.wflags,
+        source =['usb/bsd-bus-dma.c',
+                 'usb/bsd-wrap.c',
+                 'usb/bus_if.c',
+                 'usb/device_if.c',
+                 'usb/ehci.c',
+                 'usb/ehci_oxu210.c',
+                 'usb/init_main.c',
+                 'usb/kern_linker.c',
+                 'usb/kern_module.c',
+                 'usb/kern_sysctl.c',
+                 'usb/oxu210-alloc.c',
+                 'usb/oxu210-intr.c',
+                 'usb/pdev.c',
+                 'usb/s5a-autoconf.c',
+                 'usb/subr_bus.c',
+                 'usb/subr_kobj.c',
+                 'usb/subr_uio.c',
+#                 'usb/tc-mtouch.c',
+#                 'usb/tc-zytronic.c',
+                 'usb/tc.c',
+                 'usb/ums.c',
+                 'usb/usb_busdma.c',
+                 'usb/usb_controller.c',
+                 'usb/usb_debug.c',
+                 'usb/usb_device.c',
+                 'usb/usb_dynamic.c',
+                 'usb/usb_error.c',
+                 'usb/usb_handle_request.c',
+                 'usb/usb_hid.c',
+                 'usb/usb_hub.c',
+                 'usb/usb_if.c',
+                 'usb/usb_parse.c',
+                 'usb/usb_process.c',
+                 'usb/usb_request.c',
+                 'usb/usb_s5a.c',
+                 'usb/usb_transfer.c',
+                 'usb/usb_util.c',
+                 'usb/usbdev_oxu210.c'])
+
+#
+# BSP module.
+#
+def vl_bsp(bld):
+    bld(target = 'bsp',
+        features = 'c asm',
+        includes = bld.includes,
+        asflags = bld.cflags + bld.wflags + ['-Dalt_irq_handler=__ISR_Handler', '-c'],
+        cflags = bld.cflags + bld.wflags,
+        source =['bsp/init.c',
+                 'bsp/clock/clock.c',
+                 'bsp/console/console.c',
+                 'bsp/start/start.S',
+                 'bsp/startup/bspstart.c',
+                 'bsp/startup/setvec.c',
+                 'bsp/timer/timer.c'])
+
+#
+# Altera BSP and HAL module.
+#
+def vl_alt(bld):
+    hal_src = 'alt/HAL/src/'
+    drv_src = 'alt/drivers/src/'
+    bld(target = 'alt',
+        features = 'c asm',
+        includes = bld.includes,
+        asflags = bld.cflags + bld.wflags + ['-Dalt_irq_handler=__ISR_Handler', '-c'],
+        cflags = bld.cflags + bld.wflags,
+        source = [hal_src + 'alt_dcache_flush.c',
+                  hal_src + 'alt_dcache_flush_all.c',
+                  hal_src + 'alt_do_ctors.c',
+                  hal_src + 'alt_do_dtors.c',
+                  hal_src + 'alt_exception_entry.S',
+                  hal_src + 'alt_exception_muldiv.S',
+                  hal_src + 'alt_exception_trap.S',
+                  hal_src + 'alt_icache_flush.c',
+                  hal_src + 'alt_icache_flush_all.c',
+                  hal_src + 'alt_instruction_exception_entry.c',
+                  hal_src + 'alt_instruction_exception_register.c',
+                  hal_src + 'alt_irq_entry.S',
+                  hal_src + 'alt_load.c',
+                  hal_src + 'alt_software_exception.S',
+                  drv_src + 'altera_avalon_spi.c'])
+
+#
+# The RTEMS tools.
+#
+def rtems_tools():
+    if sys.platform == 'win32':
+        exeext = '.exe'
+    else:
+        exeext = ''
+
+    os.environ['CC'] = 'nios2-' + rtems + '-gcc' + exeext
+    os.environ['CXX'] = 'nios2-' + rtems + '-g++' + exeext
+    os.environ['AS'] = 'nios2-' + rtems + '-gcc' + exeext
+    os.environ['AR'] = 'nios2-' + rtems + '-ar' + exeext
+
+#
+# RTEMS linker flags.
+#
+def rtems_ldflags(bld):
+    start_files = ['crti.o', 'crtbegin.o']
+    end_files = ['crtend.o', 'crtn.o']
+    sf = []
+    for f in start_files:
+        sf += [rtems_gcc_file_name(bld, f)]
+    ef = []
+    for f in end_files:
+        ef += [rtems_gcc_file_name(bld, f)]
+    bld.linkpreflags = ['-nostartfiles', '-Wl,-T../alt/linker.x'] + sf
+    bld.linkflags = ['-g', '-L' + bld.env.RTEMS_LIB, 
+                     '-Wl,--start-group',
+                     '-lrtemsbsp',
+                     '-lrtemscpu',
+                     '-lgcc',
+                     '-lg',
+                     '-lc',
+                     '-lstdc++',
+                     '-Wl,--end-group'] + ef
+    bld.env.LINK_CC = bld.env.LINK_CC + bld.linkpreflags
+    bld.env.LINKFLAGS = []
+
+#
+# Hack until I add something to call gcc to find this path during config
+#
+def rtems_gcc_file_name(bld, name):
+    # hack that use 'gcc --print-file-name=$name
+    return os.path.join(bld.env.RTEMS_TOOLS, 'lib', 'gcc', 'nios2-rtems4.11', '4.1.2', name)
+
+def append_path(path):
+    os.environ['PATH'] = os.path.abspath(path)  + os.pathsep + os.environ['PATH']
+
+def copy_file(src, dst):
+    print('Coping ' + src + ' -> ' + dst)
+    import shutil
+    shutil.copyfile(src, dst)
+
+#
+# From the demos. Use this to get the command to cut+paste to play.
+#
+def customize_ze_outputs():
+    # first, display strings, people like them
+    from waflib import Utils, Logs
+    from waflib.Context import Context
+    def exec_command(self, cmd, **kw):
+        subprocess = Utils.subprocess
+        kw['shell'] = isinstance(cmd, str)
+        if isinstance(cmd, str):
+            Logs.info('%s' % cmd)
+        else:
+            Logs.info('%s' % ' '.join(cmd)) # here is the change
+        Logs.debug('runner_env: kw=%s' % kw)
+        try:
+            if self.logger:
+                self.logger.info(cmd)
+                kw['stdout'] = kw['stderr'] = subprocess.PIPE
+                p = subprocess.Popen(cmd, **kw)
+                (out, err) = p.communicate()
+                if out:
+                    self.logger.debug('out: %s' % out.decode(sys.stdout.encoding or 'iso8859-1'))
+                if err:
+                    self.logger.error('err: %s' % err.decode(sys.stdout.encoding or 'iso8859-1'))
+                return p.returncode
+            else:
+                p = subprocess.Popen(cmd, **kw)
+                return p.wait()
+        except OSError:
+            return -1
+    Context.exec_command = exec_command
+
+    # Change the outputs for tasks too
+    from waflib.Task import Task
+    def display(self):
+        return '' # no output on empty strings
+    Task.__str__ = display

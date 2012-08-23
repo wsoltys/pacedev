@@ -12,9 +12,9 @@ set_global_assignment -name SOURCE_FILE [file join $::quartus(qip_path) cpu_0.oc
 # track_pio
 # fifo_sts_pio
 # fifo_wr_if
-set_global_assignment -name TCL_FILE E:/Projects/pace/pacedev.net/sw/src/pace/sopc/avalon_slave_conduit/avalon_slave_conduit_hw.tcl
-set_global_assignment -name VHDL_FILE E:/Projects/pace/pacedev.net/sw/src/pace/sopc/avalon_slave_conduit/avalon_slave_conduit.vhd
+set_global_assignment -name TCL_FILE E:/markm/pace/pacedev.net/sw/src/pace/sopc/avalon_slave_conduit/avalon_slave_conduit_hw.tcl
+set_global_assignment -name VHDL_FILE E:/markm/pace/pacedev.net/sw/src/pace/sopc/avalon_slave_conduit/avalon_slave_conduit.vhd
 set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) fifo_wr_if.vhd]
 # null
-set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID BCAEC5010FFB000001359FB80D2D 
+set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID 485B3986CE0200000135A31AB01F 
  

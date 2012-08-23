@@ -110,8 +110,10 @@ entity target_top_ep4c is
 		uh_intn		      : in std_logic;
 		uh_dreq		      : in std_logic_vector(1 downto 0);
 		uh_dack			    : out std_logic_vector(1 downto 0);
-		
-		--uh_clkin		    : out std_logic;
+
+    -- S5A ONLY (not Lite)
+		uh_clkin0		    : out std_logic;
+		uh_clkin1		    : out std_logic;
 		
 		-- Connection to video FPGA
 		vid_reset_n     : inout std_logic;		-- Bridge reset
@@ -248,8 +250,11 @@ begin
       c1		    => open, --clk_NIOS,      -- 72MHz
       c2		    => vid_clk,       -- 24MHz
       c3        => vsi_extclk,    -- 14.4MHz
+      c4		    => uh_clkin1,     -- 12MHz 3V3
       locked		=> open --pll_locked
     );
+
+  uh_clkin0 <= 'Z';
   
   lvdsplla : entity work.lpll
 		port map	

@@ -2,9 +2,9 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>21/02/2012 10:53:13 PM</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1329825193699</BspGeneratedUnixTimeStamp>
-        <BspGeneratedLocation>E:\Projects\pace\pacedev.net\sw\synth\platform\trs80\m1\s5a_r2c0\software\floppy_bsp</BspGeneratedLocation>
+        <BspGeneratedTimeStamp>22/02/2012 2:36:32 PM</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1329881792399</BspGeneratedUnixTimeStamp>
+        <BspGeneratedLocation>E:\markm\pace\pacedev.net\sw\synth\platform\trs80\m1\s5a_r2c0\software\floppy_bsp</BspGeneratedLocation>
         <BspSettingsFile>settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\ep4c_sopc_system.sopcinfo</SopcDesignFile>
         <JdiFile>default</JdiFile>

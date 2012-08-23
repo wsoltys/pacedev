@@ -595,7 +595,7 @@ set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -
 
 	# Analysis & Synthesis Assignments
 	# ================================
-	set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id eda_blast_fpga
+set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id eda_blast_fpga
 
 # end EDA_TOOL_SETTINGS(eda_blast_fpga)
 # -------------------------------------

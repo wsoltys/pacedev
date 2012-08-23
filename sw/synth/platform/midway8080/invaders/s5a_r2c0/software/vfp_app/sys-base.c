@@ -1,0 +1,286 @@
+#include <stdlib.h>
+#include <io.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <string.h>
+#include <math.h>
+
+#include <altera_avalon_pio_regs.h>
+#include <altera_avalon_timer_regs.h>
+#include <sys/alt_irq.h>
+#include "system.h"
+
+#include "veb.h"
+#include "ow.h"
+#include "spi_helper.h"
+#include "i2c_master.h"
+#include "usb_helper.h"
+#include "dbg_helper.h"
+
+#include "os-support.h"
+
+#ifndef BUILD_MINIMAL
+#include <stdio.h>
+#endif
+
+uint32_t debug_pio_in = 0;
+
+static os_thread_t system_base_thread;
+
+void
+s5a_watchdog_reset (void)
+{
+  printf ("generating watchdog\n");
+  while (1);
+}
+
+void led_enable (int mask, int enable)
+{
+  static uint32_t led_pio_out = (3<<30);
+
+  led_pio_out &= ~mask;
+  if (enable)
+    led_pio_out |= mask;
+
+  IOWR_ALTERA_AVALON_PIO_DATA (DEBUG_PIO_BASE, led_pio_out);
+}
+
+void usb_led_enable (int mask, int enable)
+{
+  static uint32_t usb_pio_out = 0 & USB_PIO_DIR;
+  
+  mask &= USB_PIO_DIR;
+  usb_pio_out &= ~mask;
+  if (enable)
+    usb_pio_out |= mask;
+
+  IOWR_ALTERA_AVALON_PIO_DATA (USB_PIO_BASE, usb_pio_out);
+}
+
+static os_mutex_t		   restart_mutex;
+static os_events_t     timer_60Hz_wait;
+static uint32_t        timer_60Hz_irq;
+static rtems_isr_entry timer_60Hz_isr_old;
+
+static void timer_60Hz_isr (rtems_vector_number vector)
+{
+  static int count = 0;
+  if (++count == 60)
+  {
+    timer_60Hz_irq |= 1;
+    count = 0;
+  }
+
+  // acknowledge timer interrupt
+  IOWR (TIMER_60HZ_BASE, 0, 0);
+
+  #ifndef BUILD_ENABLE_SYNCHRONISERS
+    #if 0
+      ANIMATE_FRAME(0);
+      ANIMATE_FRAME(1);
+    #else
+      // new update method
+      sync0_irq |= 1;
+      sync1_irq |= 1;
+    #endif
+  #endif
+
+  //os_events_send (&timer_60Hz_wait, 1);
+}
+
+static void timer_60Hz_isr_enable (void)
+{
+  os_interrupt_level level;
+  os_interrupt_disable (level);
+  Nios2_Set_ienable(TIMER_60HZ_IRQ);
+  os_interrupt_enable (level);
+}
+
+static void timer_60Hz_isr_disable (void)
+{
+  os_interrupt_level level;
+  os_interrupt_disable (level);
+  Nios2_Clear_ienable(TIMER_60HZ_IRQ);
+  os_interrupt_enable (level);
+}
+
+static void timer_60Hz_isr_init (void)
+{
+  // register and enable the video status update
+  rtems_interrupt_catch(timer_60Hz_isr, TIMER_60HZ_IRQ, &timer_60Hz_isr_old);
+  //start timer, continuous mode, enable interrupt
+  IOWR(TIMER_60HZ_BASE,1,(1<<2)|(1<<1)|(1<<0));
+}
+
+void timer_60Hz_isr_deinit (void)
+{
+  rtems_isr_entry old;
+  timer_60Hz_isr_disable ();
+  rtems_interrupt_catch(timer_60Hz_isr_old, TIMER_60HZ_IRQ, &old);
+}
+
+void system_base_task (void* data)
+{
+  struct    timespec ticks_r;
+  uint32_t  usec_r;
+  
+  rtems_clock_get_uptime (&ticks_r);
+  usec_r = (uint32_t)ticks_r.tv_sec * 1000000 + (uint32_t)ticks_r.tv_nsec / 1000;
+
+  #ifdef BUILD_INCLUDE_DEBUG
+    //dump_heap_info ();
+  #endif
+  
+  // set direction registers for USB PIO
+  IOWR_ALTERA_AVALON_PIO_DIRECTION (USB_PIO_BASE, USB_PIO_DIR);
+
+  debug_pio_in = IORD_ALTERA_AVALON_PIO_DATA (DEBUG_PIO_BASE);
+  debug_pio_in |= 0xFF;
+  PRINT (0, "debug_pio_in = $%08lX\n", debug_pio_in);
+
+  uint8_t romid[8];
+  int result;
+  result = ow_read_romid(ONE_WIRE_INTERFACE_0_BASE, romid);
+  #ifdef BUILD_INCLUDE_DEBUG
+  	if (result != OW_RESULT_OK)
+      PRINT (0, "ow_read_romid() failed! (%d)\n", result);
+    else
+    {
+      PRINT (0, "ROMID="); 
+      DUMP (romid, 8);
+    }
+  #endif
+
+  PRINT (0, "Executing one-off NIOS/hardware initialisation\n");
+
+#if 0
+  // for now, (re)init EE data if we can't read the header
+  // dbgio(4) is pin10 on the dbgio hdr
+  if (((debug_pio_in & (1<<4)) == 0) || 
+      EE_ReadData (&ee_map) != EE_OP_SUCCESS)
+  {
+    PRINT (0, "Initialising EEPROM data...\n");
+    //EE_InitAndWriteEdid ();
+    EE_InitAndWriteData ();
+  }
+  else
+    PRINT (0, "Detected initialised EEPROM!\n");
+
+  #ifdef BUILD_INCLUDE_DEBUG
+    EE_DumpFormattedData (ee_data);
+    // dump data directly from EEPROM (unformatted)
+    //EE_DumpData ();
+  #endif
+#endif
+
+  // turn all the leds off
+  led_enable (LED_ALL ,0);
+  usb_led_enable (USB_LED_ALL, 0);
+  // we should only turn these on when host appears in pdev
+  // - USB_LED_HOST is only an indicator
+  // - USB_LED_CLIENT also powers the host (downstream) port 
+  //    from the client (upstream) port
+  usb_led_enable (USB_LED_HOST|USB_LED_CLIENT, 1);
+
+  // initialise DVI out transmitter
+  //tfp410_init ();
+
+  timer_60Hz_isr_init ();      
+
+  // enable SPI channel to MCU
+  //HOST_IF_INIT ();
+  
+  while (1)
+  {
+    timer_60Hz_isr_enable ();  
+    mcuspi_isr_enable ();
+
+    PRINT (0, "Main loop running...\n");
+    led_enable (LED_NIOS_RDY, 1);
+
+    uint8_t loop_break = 0;
+    
+    while (!loop_break)
+    {
+      if (timer_60Hz_irq)
+      {
+        timer_60Hz_irq = 0;
+      }
+
+      #if 0
+        // set the video indicator LEDs
+        led_enable (LED_VAI, vi_0_format==EE_VI_ANALOGUE && CTI_OK(vi_0_pio_stat, egmvid_stat, cti0_stat));
+        led_enable (LED_VDI, vi_0_format!=EE_VI_ANALOGUE && CTI_OK(vi_0_pio_stat, egmvid_stat, cti0_stat));
+        led_enable (LED_VSI, CTI_STAT_OK(cti1_stat));
+        led_enable (LED_VAO|LED_VDO, ITC_STAT_OK(itc0_stat));
+        led_enable (LED_VLI,CTI_STABLE(egmvid_stat));
+      #endif
+
+      // 'alive' LED
+      static uint8_t alive_led = 0;
+      struct timespec ticks;
+      uint32_t usec;
+
+      rtems_clock_get_uptime (&ticks);
+      usec = (uint32_t)ticks.tv_sec * 1000000 + (uint32_t)ticks.tv_nsec / 1000;
+      if ((usec - usec_r) > 250000)
+      {
+        static int count = 0;
+        if (++count == 2.5*4)
+        {
+          //dump_video_stats (0);
+          //dump_heap_info ();
+          count = 0;
+        }
+
+        led_enable (LED_NIOS_RDY, alive_led);
+        alive_led ^= 1;
+        usec_r = usec;
+      }
+
+      // for debugging only
+      //#ifdef BUILD_INCLUDE_DEBUG
+      debug_pio_in = IORD_ALTERA_AVALON_PIO_DATA (DEBUG_PIO_BASE);
+      debug_pio_in |= 0xFF;
+      if ((debug_pio_in & (1<<7)) == 0)
+        loop_break = 1;
+      //#endif
+    }
+
+    // de-activate NIOS_RDY LED
+    led_enable (LED_NIOS_RDY, 0);
+
+    // disable and de-register all interrupts
+    timer_60Hz_isr_disable ();
+    mcuspi_isr_disable ();
+
+    PRINT (0, "loop_break=1\n");
+  }
+
+  timer_60Hz_isr_deinit ();      
+  HOST_IF_DEINIT ();
+}
+
+#define INTRPT_STACKSIZE		(16*1024)
+
+int
+system_base_init (void)
+{
+	os_mutex_create (&restart_mutex);
+	
+  if (os_events_create (&timer_60Hz_wait, 0) != os_successful)
+  {
+    PRINT (0, "error: cannot creating timer_60Hz events\n");
+  }
+	
+//	os_thread_create (timer_60Hz_task, NULL, INTRPT_TASK_PRIORITY+1,
+//										INTRPT_STACKSIZE, NULL);
+
+	// mainline function
+  os_error_t e = os_thread_create (&system_base_thread,
+                                   system_base_task, NULL,
+                                   SYSTEM_BASE_TASK_PRIORITY,
+                                   SYS_BASE_TASK_STACKSIZE, NULL);
+  return e == os_successful;
+}
