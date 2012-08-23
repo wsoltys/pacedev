@@ -194,6 +194,7 @@ end entity target_top_ep4c;
 architecture SYN of target_top_ep4c is
 
   constant ONBOARD_CLOCK_SPEED  : integer := 24000000;
+  constant NIOS_CLOCK_SPEED     : integer := 72500000;
 
   -- reset signals
   signal init               : std_logic := '1';
@@ -342,6 +343,188 @@ begin
 
   end block BLK_DVO_INIT;
 
+  BLK_NIOS : block
+  
+    -- here's everything we're not using for now
+    signal clk_nios           : std_logic;
+    signal rst_nios           : std_logic;
+    signal debug_pio_i        : std_logic_vector(31 downto 0);
+    signal debug_pio_o        : std_logic_vector(debug_pio_i'range);
+
+    -- USB interrupts
+    signal oxu210hp_int_mask  : std_logic := '0';
+    signal uh_intn_s          : std_logic;
+
+    -- not driven by the NIOS at this point
+    signal vdo_scl_i          : std_logic := '0';
+    signal vdo_scl_o          : std_logic := '0';
+    signal vdo_scl_oe_n       : std_logic := '0';
+    signal vdo_sda_i          : std_logic := '0';
+    signal vdo_sda_o          : std_logic := '0';
+    signal vdo_sda_oe_n       : std_logic := '0';
+
+    -- uarts (not used yet)
+    signal ser_ts_cts_p       : std_logic;
+    signal ser_ts_rts_p       : std_logic;
+    signal ser_pc_cts_p       : std_logic;
+    signal ser_pc_rts_p       : std_logic;
+    
+    -- VO PIO (not used yet)
+    signal vo_pio_i           : std_logic_vector(7 downto 0);
+    signal vo_pio_o           : std_logic_vector(vo_pio_i'range);
+    
+    -- these signals are only on the LITE
+    signal cfg_data           : std_logic;
+    signal cfg_dclk_s         : std_logic;
+    signal cfg_cson_s         : std_logic;
+    signal cfg_asdo_s         : std_logic;
+    -- MCU i/f
+		signal mcu_pio_i			    : std_logic_vector (7 downto 0);
+		signal mcu_pio_o			    : std_logic_vector (mcu_pio_i'range);
+    signal mcu_spi_miso       : std_logic;
+    signal mcu_spi_mosi       : std_logic;
+    signal mcu_spi_sclk       : std_logic;
+    signal mcu_spi_ss_n       : std_logic;
+    signal mcu_spi_mrdy_n     : std_logic;
+    signal mcu_spi_srdy_n     : std_logic;
+    -- security chip
+    signal sec_data           : std_logic;
+    -- USB leds
+		signal usb_led_host		    : std_logic;
+		signal usb_led_client	    : std_logic;
+		signal usb_led_low			  : std_logic;
+		signal usb_led_spare		  : std_logic;
+    
+  begin
+
+    -- should unmeta this!?!
+    rst_nios <= init;
+    
+    -- NIOS
+    nios_inst : entity work.ep4c_sopc_system
+      port map
+      (
+        -- 1) global signals:
+        altmemddr_0_aux_full_rate_clk_out												=> open,
+        altmemddr_0_aux_half_rate_clk_out												=> clk_nios,
+        altmemddr_0_phy_clk_out																	=> open,
+        clk_24M																									=> clk24_a,
+        reset_n                                                 => not rst_nios,
+
+        -- the_altmemddr_0
+        global_reset_n_to_the_altmemddr_0												=> reset_n,
+        local_init_done_from_the_altmemddr_0										=> open,
+        local_refresh_ack_from_the_altmemddr_0									=> open,
+        local_wdata_req_from_the_altmemddr_0										=> open,
+        mem_addr_from_the_altmemddr_0														=> ddr16_a,			
+        mem_ba_from_the_altmemddr_0															=> ddr16_ba(1 downto 0),
+        mem_cas_n_from_the_altmemddr_0													=> ddr16_cas_n,
+        mem_cke_from_the_altmemddr_0														=> ddr16_cke,
+        mem_clk_n_to_and_from_the_altmemddr_0										=> ddr16_clk_n,
+        mem_clk_to_and_from_the_altmemddr_0											=> ddr16_clk,
+        mem_cs_n_from_the_altmemddr_0														=> ddr16_cs_n,
+        mem_dm_from_the_altmemddr_0															=> ddr16_dm,
+        mem_dq_to_and_from_the_altmemddr_0											=> ddr16_dq(15 downto 0),
+        mem_dqs_to_and_from_the_altmemddr_0											=> ddr16_dqs,
+        mem_odt_from_the_altmemddr_0														=> ddr16_odt,
+        mem_ras_n_from_the_altmemddr_0													=> ddr16_ras_n,
+        mem_we_n_from_the_altmemddr_0														=> ddr16_we_n,
+        reset_phy_clk_n_from_the_altmemddr_0										=> open,
+
+        -- the_debug_pio
+        in_port_to_the_debug_pio                                => debug_pio_i,
+        out_port_from_the_debug_pio                             => debug_pio_o,
+
+        -- the_epcs_spi
+        MISO_to_the_epcs_spi																		=> cfg_data,
+        SCLK_from_the_epcs_spi																	=> cfg_dclk_s,
+        SS_n_from_the_epcs_spi																	=> cfg_cson_s,
+        MOSI_from_the_epcs_spi																	=> cfg_asdo_s,
+
+        -- the_m95320
+        MISO_to_the_m95320                                      => ee_so,
+        MOSI_from_the_m95320                                    => ee_si,
+        SCLK_from_the_m95320                                    => ee_ck,
+        SS_n_from_the_m95320                                    => ee_csn,
+
+        -- the_mcu_pio
+        in_port_to_the_mcu_pio																	=> mcu_pio_i,
+        out_port_from_the_mcu_pio																=> mcu_pio_o,
+
+        -- the_mcu_spi
+        spi_miso_from_the_mcu_spi																=> mcu_spi_miso,
+        spi_mosi_to_the_mcu_spi																	=> mcu_spi_mosi,
+        spi_clk_to_the_mcu_spi																	=> mcu_spi_sclk,
+        spi_ss_n_to_the_mcu_spi																	=> mcu_spi_ss_n,
+        spi_mrdy_n_to_the_mcu_spi																=> mcu_spi_mrdy_n,
+        spi_srdy_n_from_the_mcu_spi															=> mcu_spi_srdy_n,
+
+        -- the_one_wire_interface_0
+        data_to_and_from_the_one_wire_interface_0               => sec_data,
+
+        -- the_oxu210hp_if_0
+        coe_uh_a_from_the_oxu210hp_if_0                         => uh_a,
+        coe_uh_be_from_the_oxu210hp_if_0                        => uh_be,
+        coe_uh_cs_n_from_the_oxu210hp_if_0                      => uh_csn,
+        coe_uh_d_to_and_from_the_oxu210hp_if_0                  => uh_d,
+        coe_uh_dack_from_the_oxu210hp_if_0                      => uh_dack,
+        coe_uh_dreq_to_the_oxu210hp_if_0                        => uh_dreq,
+        coe_uh_int_n_to_the_oxu210hp_if_0                       => uh_intn_s,
+        coe_uh_rd_n_from_the_oxu210hp_if_0                      => uh_rdn,
+        coe_uh_reset_n_from_the_oxu210hp_if_0                   => uh_resetn,
+        coe_uh_wr_n_from_the_oxu210hp_if_0                      => uh_wrn,
+
+        -- the_oxu210hp_int
+        in_port_to_the_oxu210hp_int                             => uh_intn,
+        out_port_from_the_oxu210hp_int                          => oxu210hp_int_mask,
+
+        -- the_tfp410_i2c_master
+        coe_arst_arst_i_to_the_tfp410_i2c_master                => rst_nios,
+        coe_i2c_scl_pad_i_to_the_tfp410_i2c_master              => vdo_scl_i,
+        coe_i2c_scl_pad_o_from_the_tfp410_i2c_master            => vdo_scl_o,
+        coe_i2c_scl_padoen_o_from_the_tfp410_i2c_master         => vdo_scl_oe_n,
+        coe_i2c_sda_pad_i_to_the_tfp410_i2c_master              => vdo_sda_i,
+        coe_i2c_sda_pad_o_from_the_tfp410_i2c_master            => vdo_sda_o,
+        coe_i2c_sda_padoen_o_from_the_tfp410_i2c_master         => vdo_sda_oe_n,
+
+        -- the_uart_pc
+        cts_to_the_uart_pc                                      => ser_pc_cts_p,
+        rts_from_the_uart_pc                                    => ser_pc_rts_p,
+        rxd_led_from_the_uart_pc                                => open,
+        rxd_to_the_uart_pc                                      => ser_pc_rx,
+        txd_active_from_the_uart_pc                             => open,
+        txd_from_the_uart_pc                                    => ser_pc_tx,
+        txd_led_from_the_uart_pc                                => open,
+
+        -- the_uart_ts
+        cts_to_the_uart_ts                                      => ser_ts_cts_p,
+        rts_from_the_uart_ts                                    => ser_ts_rts_p,
+        rxd_led_from_the_uart_ts                                => open,
+        rxd_to_the_uart_ts                                      => ser_ts_rx,
+        txd_active_from_the_uart_ts                             => open,
+        txd_from_the_uart_ts                                    => ser_ts_tx,
+        txd_led_from_the_uart_ts                                => open,
+
+        -- the_usb_pio
+        out_port_from_the_usb_pio(3)														=> usb_led_spare,
+        out_port_from_the_usb_pio(2)														=> usb_led_low,
+        out_port_from_the_usb_pio(1)														=> usb_led_client,
+        out_port_from_the_usb_pio(0)														=> usb_led_host,
+
+        -- the_version_pio
+        in_port_to_the_version_pio                              => X"00000001",
+        out_port_from_the_version_pio                           => open,
+
+        -- the_vo_pio
+        in_port_to_the_vo_pio                                   => vo_pio_i,
+        out_port_from_the_vo_pio                                => vo_pio_o
+      );
+
+    -- We can disable uh_intn to the nios by setting oxu210hp_int pio to '1'
+		uh_intn_s	<= uh_intn or oxu210hp_int_mask;
+
+  end block BLK_NIOS;
+  
   BLK_FLASHER : block
   begin
     -- flash the led so we know it's alive
