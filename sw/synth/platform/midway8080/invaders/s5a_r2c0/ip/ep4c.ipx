@@ -1,3 +1,4 @@
 <library>
   <path path="../../../../../../src/target/s5a_r2c0/**/*" />
+  <path path="../../../../../../src/component/io/**/**/*" />
 </library>
