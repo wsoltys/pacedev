@@ -335,6 +335,7 @@ void joy_event (uint8_t *buf, uint16_t len)
 
 void kbd_event (uint8_t *buf, uint16_t len)
 {
+#if 0
   uint32_t jamma = 0;
 
 	for (unsigned i=0; i<len; i++)
@@ -369,6 +370,38 @@ void kbd_event (uint8_t *buf, uint16_t len)
   IOWR_ALTERA_AVALON_PIO_DATA (JAMMA_PIO_BASE, ~jamma);
   IOWR_ALTERA_AVALON_PIO_DATA (SPI_PIO_BASE, (1<<0));   // go
   IOWR_ALTERA_AVALON_PIO_DATA (SPI_PIO_BASE, 0);        // stop
+  
+#else
+
+  uint32_t keybd = 0;
+
+	for (unsigned i=0; i<len; i++)
+	{
+		if (i == 0)
+			switch (buf[i])
+			{
+				default :
+					continue;
+					break;
+			}
+		else
+			switch (buf[i])
+			{
+				case 0x22 :		keybd = '5';			break;
+				case 0x1E :		keybd = '1';			break;
+				default :
+					continue;
+					break;
+			}
+
+	  keybd |= (1<<31)|(1<<30);
+		printf ("%#x\n", keybd);
+	  IOWR_ALTERA_AVALON_PIO_DATA (KEYBD_PIO_BASE, keybd);
+	  keybd &= ~(1<<30);
+	  IOWR_ALTERA_AVALON_PIO_DATA (KEYBD_PIO_BASE, keybd);
+	}
+	
+#endif
 }
 
 #define INTRPT_STACKSIZE		(16*1024)

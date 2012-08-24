@@ -758,6 +758,8 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/toys/pwmout.v
 set_global_assignment -name VHDL_FILE ../../../../../src/component/toys/pwm_chaser.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/toys/led_chaser.vhd
 set_global_assignment -name VHDL_FILE ep4c_sopc_system.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/target/cb/ps2_host_fifo.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/target/cb/ps2host.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/target_top_ep4c.vhd
 set_global_assignment -name QIP_FILE ep4c_pll.qip
 set_global_assignment -name QIP_FILE lpll.qip

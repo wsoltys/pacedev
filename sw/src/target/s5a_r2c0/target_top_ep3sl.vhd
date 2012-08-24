@@ -309,11 +309,19 @@ begin
     alias spi_clk         : std_logic is vid_address(5);
     alias spi_d           : std_logic is vid_address(6);
       
+    signal spi_fast_clk   : std_logic;
     signal jamma_i        : std_logic_vector(31 downto 0);
   
   begin
   
-    process (clkrst_i)
+    spi_pll_inst : entity work.spi_pll
+      port map
+      (
+        inclk0  =>  clk_24M,
+        c0      =>  spi_fast_clk
+      );
+      
+    process (spi_fast_clk, clkrst_i.arst)
     
       variable spi_en_r   : std_logic_vector(3 downto 0);
       alias spi_en_prev   : std_logic is spi_en_r(spi_en_r'left);
@@ -326,13 +334,13 @@ begin
       alias spi_d_um      : std_logic is spi_d_r(spi_d_r'left-1);
       variable spi_reg    : std_logic_vector(31 downto 0);
     begin
-      if clkrst_i.rst(0) = '1' then
+      if clkrst_i.arst = '1' then
         spi_en_r := (others => '0');
         spi_clk_r := (others => '0');
         spi_d_r := (others => '0');
         spi_reg := (others => '0');
         jamma_i <= (others => '1');
-      elsif rising_edge(clkrst_i.clk(0)) then
+      elsif rising_edge(spi_fast_clk) then
         -- start of transfer?
         if spi_en_prev = '0' and spi_en_um = '1' then
           count := (others => '0');
@@ -351,6 +359,8 @@ begin
         spi_d_r := spi_d_r(spi_d_r'left-1 downto 0) & spi_d;
       end if;
     end process;
+    
+    -- really should unmeta jamma_i...
     
     inputs_i.jamma_n.coin(1) <= jamma_i(9);
     inputs_i.jamma_n.p(1).start <= jamma_i(10);

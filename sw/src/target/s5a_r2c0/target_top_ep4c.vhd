@@ -282,20 +282,74 @@ begin
     -- DBGIO3* - 9 10 - DBGIO4
     --
 
-  -- this is the VEB Button Board (MCE-as-S5D@1)
-  -- - configured as PS/2 input
   GEN_PS2 : if S5AR2_HAS_PS2 generate
+  
     alias ps2_kdat  : std_logic is vid_address(3);
     alias ps2_mdat  : std_logic is vid_address(2);
     alias ps2_kclk  : std_logic is vid_address(1);
     alias ps2_mclk  : std_logic is vid_address(0);
+    
+    signal ps2_ps2_kclk : std_logic;
+    signal ps2_ps2_kdat : std_logic;
+    signal usb_ps2_kclk : std_logic;
+    signal usb_ps2_kdat : std_logic;
+    
+    alias ps2_fifo_data   : std_logic_vector(7 downto 0) is keybd_pio_o(7 downto 0);
+    alias ps2_use_usb     : std_logic is keybd_pio_o(31);
+    alias ps2_fifo_wren   : std_logic is keybd_pio_o(30);
+    signal ps2_fifo_wrreq : std_logic;
+    
   begin
+  
+    ps2_kclk <= ps2_ps2_kclk when ps2_use_usb = '0' else
+                usb_ps2_kclk;
+    ps2_kdat <= ps2_ps2_kdat when ps2_use_usb = '0' else
+                usb_ps2_kdat;
+                
+    -- this is the VEB Button Board (MCE-as-S5D@1)
+    -- - configured as PS/2 input
     vid_reset_n <= '1';
-    ps2_kdat <= dbgio(5);
+    ps2_ps2_kdat <= dbgio(5);
     ps2_mdat <= dbgio(4);
-    ps2_kclk <= dbgio(7);
+    ps2_ps2_kclk <= dbgio(7);
     ps2_mclk <= dbgio(6);
     dbgio(7 downto 4) <= (others => 'Z');
+
+    process (clk_24M, reset)
+      variable wren_r : std_logic_vector(3 downto 0);
+      alias wren_prev : std_logic is wren_r(wren_r'left);
+      alias wren_um   : std_logic is wren_r(wren_r'left-1);
+    begin
+      if reset = '1' then
+      elsif rising_edge(clk_24M) then
+        ps2_fifo_wrreq <= '0';
+        if wren_prev = '0' and wren_um = '1' then
+          ps2_fifo_wrreq <= '1';
+        end if;
+        wren_r := wren_r(wren_r'left-1 downto 0) & ps2_fifo_wren;
+      end if;
+    end process;
+    
+    ps2_host_inst : entity work.apple_ii_ps2_host
+      generic map
+      (
+        CLK_HZ          => 24000000
+      )
+      port map
+      (
+        clk             => clk_24M,
+        reset           => reset,
+    
+        -- FIFO interface
+        fifo_data       => ps2_fifo_data,
+        fifo_wrreq      => ps2_fifo_wrreq,
+        fifo_full       => open,
+            
+        -- PS/2 lines
+        ps2_kclk        => usb_ps2_kclk,
+        ps2_kdat        => usb_ps2_kdat
+      );
+    
   end generate GEN_PS2;
   
   BLK_DVO_INIT : block
