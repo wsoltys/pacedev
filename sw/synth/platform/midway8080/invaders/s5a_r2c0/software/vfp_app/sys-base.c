@@ -300,13 +300,15 @@ void joy_event (uint8_t *buf, uint16_t len)
 */  
   uint32_t jamma = 0;
 
-  if (buf[1] & (1<<7))
+  printf ("buf[0] = %#x\n", buf[0]);
+  
+  if ((int8_t)buf[1] < -40)
     jamma |= (1<<0);
-  if (buf[0] & (1<<7))
+  if ((int8_t)buf[0] < -40)
     jamma |= (1<<1);
-  if (buf[0] & 0x7f != 0)
+  if ((int8_t)buf[0] > 40)
     jamma |= (1<<2);
-  if (buf[1] & 0x7f != 0)
+  if ((int8_t)buf[1] > 40)
     jamma |= (1<<3);
   if (buf[2] & (1<<0))
     jamma |= (1<<4);
@@ -318,7 +320,8 @@ void joy_event (uint8_t *buf, uint16_t len)
     jamma |= (1<<7);
   if (buf[2] & (1<<4))
     jamma |= (1<<8);
-  if (buf[2] & (1<<6))
+  //if (buf[2] & (1<<6))
+  if (buf[2] & (1<<2))
     jamma |= (1<<9);
   if (buf[2] & (1<<5))
     jamma |= (1<<10);
