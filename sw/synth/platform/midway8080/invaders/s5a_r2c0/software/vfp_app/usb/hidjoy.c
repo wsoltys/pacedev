@@ -4,21 +4,21 @@
 #include "usbdi_util.h"
 #include "usbhid.h"
 
-#define	USB_DEBUG_VAR kbd_debug
+#define	USB_DEBUG_VAR joy_debug
 #include "usb_debug.h"
 
-int	kbd_debug = 1;
+int	joy_debug = 1;
 
-#define KBD_INTR_DT 0
-#define KBD_N_TRANSFER 1
+#define JOY_INTR_DT 0
+#define JOY_N_TRANSFER 1
 
-struct kbd_softc 
+struct joy_softc 
 {
 	struct mtx sc_mtx;
 	struct usb_callout sc_callout;
 
 	struct usb_device *sc_udev;
- 	struct usb_xfer *sc_xfer[KBD_N_TRANSFER];
+ 	struct usb_xfer *sc_xfer[JOY_N_TRANSFER];
 
 	uint8_t	sc_name[16];
 	uint8_t	sc_buf[64];
@@ -26,14 +26,14 @@ struct kbd_softc
 
 /* prototypes */
 
-static device_probe_t kbd_probe;
-static device_attach_t kbd_attach;
-static device_detach_t kbd_detach;
+static device_probe_t joy_probe;
+static device_attach_t joy_attach;
+static device_detach_t joy_detach;
 
 static void
-kbd_intr_callback(struct usb_xfer *xfer, usb_error_t error)
+joy_intr_callback(struct usb_xfer *xfer, usb_error_t error)
 {
-	struct kbd_softc *sc = usbd_xfer_softc(xfer);
+	struct joy_softc *sc = usbd_xfer_softc(xfer);
   //struct ums_info *info = &sc->sc_info[0];
 	struct usb_page_cache *pc;
 	uint8_t *buf = sc->sc_buf;
@@ -59,7 +59,7 @@ kbd_intr_callback(struct usb_xfer *xfer, usb_error_t error)
   		pc = usbd_xfer_get_frame(xfer, 0);
   		usbd_copy_out(pc, 0, buf, len);
   		#if 1
-  		  if ((buf[0] | buf[1] | buf[2] | buf[3] | buf[4] | buf[5] | buf[6] | buf[7]) != 0)
+  		  //if ((buf[0] | buf[1] | buf[2] | buf[3] | buf[4] | buf[5] | buf[6] | buf[7]) != 0)
       		printf("data = %02x %02x %02x %02x "
       			"%02x %02x %02x %02x\n",
       			(len > 0) ? buf[0] : 0, (len > 1) ? buf[1] : 0,
@@ -86,20 +86,20 @@ kbd_intr_callback(struct usb_xfer *xfer, usb_error_t error)
 	}
 }
 
-static const struct usb_config kbd_config[KBD_N_TRANSFER] = {
+static const struct usb_config joy_config[JOY_N_TRANSFER] = {
 
-	[KBD_INTR_DT] = {
+	[JOY_INTR_DT] = {
 		.type = UE_INTERRUPT,
 		.endpoint = UE_ADDR_ANY,
 		.direction = UE_DIR_IN,
 		.flags = {.pipe_bof = 1,.short_xfer_ok = 1,},
 		.bufsize = 0,	/* use wMaxPacketSize */
-		.callback = &kbd_intr_callback,
+		.callback = &joy_intr_callback,
 	},
 };
 
 static int
-kbd_probe(device_t dev)
+joy_probe(device_t dev)
 {
 	struct usb_attach_arg *uaa = device_get_ivars(dev);
 	void *d_ptr;
@@ -112,22 +112,14 @@ kbd_probe(device_t dev)
 	if (uaa->info.bInterfaceClass != UICLASS_HID)
 		return (ENXIO);
 
-	if ((uaa->info.bInterfaceSubClass == UISUBCLASS_BOOT) &&
-	    (uaa->info.bInterfaceProtocol == UIPROTO_BOOT_KEYBOARD))
-  {
-    printf ("%s() - UISUBCLASS_BOOT:UIPROTO_BOOT_KEYBOARD detected!\n",
-            __FUNCTION__);
-		return (BUS_PROBE_GENERIC);
-  }
-
 	if (usbd_req_get_hid_desc(uaa->device, NULL,
 	    &d_ptr, &d_len, M_TEMP, uaa->info.bIfaceIndex))
 	  return (ENXIO);
 
 	if (hid_is_collection(d_ptr, d_len,
-	    HID_USAGE2(HUP_GENERIC_DESKTOP, HUG_JOYSTICK)))
+	    HID_USAGE2(HUP_GENERIC_DESKTOP, HUG_KEYBOARD)))
   {
-    printf ("%s() - HUP_GENERIC_DESKTOP:HUG_JOYSTICK detected!\n",
+    printf ("%s() - HUP_GENERIC_DESKTOP:HUG_KEYBOARD detected!\n",
             __FUNCTION__);
 		error = BUS_PROBE_GENERIC;
 	}
@@ -140,10 +132,10 @@ kbd_probe(device_t dev)
 }
 
 static int
-kbd_attach(device_t dev)
+joy_attach(device_t dev)
 {
 	struct usb_attach_arg *uaa = device_get_ivars(dev);
-	struct kbd_softc *sc = device_get_softc(dev);
+	struct joy_softc *sc = device_get_softc(dev);
 	int error;
 
 	sc->sc_udev = uaa->device;
@@ -151,37 +143,37 @@ kbd_attach(device_t dev)
 	snprintf((char*)sc->sc_name, sizeof(sc->sc_name), "%s",
 	    device_get_nameunit(dev));
 
-	mtx_init(&sc->sc_mtx, "kbd lock", NULL, MTX_DEF | MTX_RECURSE);
+	mtx_init(&sc->sc_mtx, "joy lock", NULL, MTX_DEF | MTX_RECURSE);
 
 	device_set_usb_desc(dev);
 
  	usb_callout_init_mtx(&sc->sc_callout, &sc->sc_mtx, 0);
 
 	error = usbd_transfer_setup(uaa->device,
-      	    &uaa->info.bIfaceIndex, sc->sc_xfer, kbd_config,
-      	    KBD_N_TRANSFER, sc, &sc->sc_mtx);
+      	    &uaa->info.bIfaceIndex, sc->sc_xfer, joy_config,
+      	    JOY_N_TRANSFER, sc, &sc->sc_mtx);
 
 	if (error) {
 		DPRINTF("error=%s\n", usbd_errstr(error));
 		goto detach;
 	}
 
-	usbd_transfer_start(sc->sc_xfer[KBD_INTR_DT]);
+	usbd_transfer_start(sc->sc_xfer[JOY_INTR_DT]);
 	return (0);			/* success */
 
 detach:
-	kbd_detach(dev);
+	joy_detach(dev);
 	return (ENXIO);
 }
 
 static int
-kbd_detach(device_t dev)
+joy_detach(device_t dev)
 {
-	struct kbd_softc *sc = device_get_softc(dev);
+	struct joy_softc *sc = device_get_softc(dev);
 
 //	usb_fifo_detach(&sc->sc_fifo);
 
-	usbd_transfer_unsetup(sc->sc_xfer, KBD_N_TRANSFER);
+	usbd_transfer_unsetup(sc->sc_xfer, JOY_N_TRANSFER);
 
 	usb_callout_drain(&sc->sc_callout);
 
@@ -190,21 +182,21 @@ kbd_detach(device_t dev)
 	return (0);
 }
 
-devclass_t kbd_devclass;
+devclass_t joy_devclass;
 
-static device_method_t kbd_methods[] = {
-	DEVMETHOD(device_probe, kbd_probe),
-	DEVMETHOD(device_attach, kbd_attach),
-	DEVMETHOD(device_detach, kbd_detach),
+static device_method_t joy_methods[] = {
+	DEVMETHOD(device_probe, joy_probe),
+	DEVMETHOD(device_attach, joy_attach),
+	DEVMETHOD(device_detach, joy_detach),
 	{0, 0}
 };
 
-static driver_t kbd_driver = {
-	.name = "kbd",
-	.methods = kbd_methods,
-	.size = sizeof(struct kbd_softc),
+static driver_t joy_driver = {
+	.name = "joy",
+	.methods = joy_methods,
+	.size = sizeof(struct joy_softc),
 };
 
-DRIVER_MODULE(kbd, uhub, kbd_driver, kbd_devclass, NULL, 0);
-MODULE_DEPEND(kbd, usb, 1, 1, 1);
-MODULE_VERSION(kbd, 1);
+DRIVER_MODULE(joy, uhub, joy_driver, joy_devclass, NULL, 0);
+MODULE_DEPEND(joy, usb, 1, 1, 1);
+MODULE_VERSION(joy, 1);
