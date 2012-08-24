@@ -333,6 +333,44 @@ void joy_event (uint8_t *buf, uint16_t len)
   IOWR_ALTERA_AVALON_PIO_DATA (SPI_PIO_BASE, 0);        // stop
 }
 
+void kbd_event (uint8_t *buf, uint16_t len)
+{
+  uint32_t jamma = 0;
+
+	for (unsigned i=0; i<len; i++)
+	{
+		if (i == 0)
+			switch (buf[i])
+			{
+				case 0x01 :		jamma |= (1<<4);		break;	// <CTRL>
+				case 0x04 :		jamma |= (1<<5);		break;	// <ALT>
+				default :
+					break;
+			}
+		else
+			switch (buf[i])
+			{
+				case 0x52 :		jamma |= (1<<0);		break;	// <UP>
+				case 0x50 :		jamma |= (1<<1);		break;	// <LEFT>
+				case 0x4F :		jamma |= (1<<2);		break;	// <RIGHT>
+				case 0x51 :		jamma |= (1<<3);		break;	// <DOWN>
+				case 0x1D :		jamma |= (1<<6);		break;	// <Z>
+				case 0x1B :		jamma |= (1<<7);		break;	// <X>
+				case 0x06 :		jamma |= (1<<8);		break;	// <C>
+				case 0x22 :		jamma |= (1<<9);		break;	// <5>
+				case 0x1E :		jamma |= (1<<10);		break;	// <1>
+				case 0x3B :		jamma |= (1<<11);		break;	// <F2>
+				default :
+					break;
+			}
+				
+	}
+
+  IOWR_ALTERA_AVALON_PIO_DATA (JAMMA_PIO_BASE, ~jamma);
+  IOWR_ALTERA_AVALON_PIO_DATA (SPI_PIO_BASE, (1<<0));   // go
+  IOWR_ALTERA_AVALON_PIO_DATA (SPI_PIO_BASE, 0);        // stop
+}
+
 #define INTRPT_STACKSIZE		(16*1024)
 
 int

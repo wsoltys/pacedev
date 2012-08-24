@@ -30,6 +30,8 @@ static device_probe_t kbd_probe;
 static device_attach_t kbd_attach;
 static device_detach_t kbd_detach;
 
+extern void kbd_event (uint8_t *buf, uint16_t len);
+
 static void
 kbd_intr_callback(struct usb_xfer *xfer, usb_error_t error)
 {
@@ -58,7 +60,7 @@ kbd_intr_callback(struct usb_xfer *xfer, usb_error_t error)
   
   		pc = usbd_xfer_get_frame(xfer, 0);
   		usbd_copy_out(pc, 0, buf, len);
-  		#if 1
+  		#if 0
   		  if ((buf[0] | buf[1] | buf[2] | buf[3] | buf[4] | buf[5] | buf[6] | buf[7]) != 0)
       		printf("data = %02x %02x %02x %02x "
       			"%02x %02x %02x %02x\n",
@@ -67,6 +69,7 @@ kbd_intr_callback(struct usb_xfer *xfer, usb_error_t error)
       			(len > 4) ? buf[4] : 0, (len > 5) ? buf[5] : 0,
       			(len > 6) ? buf[6] : 0, (len > 7) ? buf[7] : 0);
       #endif
+      kbd_event (buf, len);
       // fall thru
         
   	case USB_ST_SETUP:
