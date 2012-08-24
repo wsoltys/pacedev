@@ -208,9 +208,7 @@ def vl_app(bld):
                  'i2c_master.c',
                  'os-support-rtems.c',
                  'ow.c',
-                 'spi_helper.c',
                  'sys-base.c',
-                 'touchcon.c',
                  'uhe.c',
                  'usb_helper.c'])
 

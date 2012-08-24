@@ -15,6 +15,14 @@
          type = "String";
       }
    }
+   element audio_pio
+   {
+      datum _sortIndex
+      {
+         value = "24";
+         type = "int";
+      }
+   }
    element jtag_uart_0.avalon_jtag_slave
    {
       datum baseAddress
@@ -121,6 +129,14 @@
          type = "int";
       }
    }
+   element jamma_pio
+   {
+      datum _sortIndex
+      {
+         value = "22";
+         type = "int";
+      }
+   }
    element cpu_0.jtag_debug_module
    {
       datum _lockedAddress
@@ -147,6 +163,14 @@
          type = "String";
       }
    }
+   element keybd_pio
+   {
+      datum _sortIndex
+      {
+         value = "23";
+         type = "int";
+      }
+   }
    element m95320
    {
       datum _sortIndex
@@ -158,22 +182,6 @@
       {
          value = "{}";
          type = "String";
-      }
-   }
-   element mcu_pio
-   {
-      datum _sortIndex
-      {
-         value = "21";
-         type = "int";
-      }
-   }
-   element mcu_spi
-   {
-      datum _sortIndex
-      {
-         value = "22";
-         type = "int";
       }
    }
    element one_wire_interface_0
@@ -223,11 +231,51 @@
          type = "long";
       }
    }
+   element keybd_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "131232";
+         type = "long";
+      }
+   }
+   element timer_0.s1
+   {
+      datum baseAddress
+      {
+         value = "131584";
+         type = "long";
+      }
+   }
+   element audio_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "131264";
+         type = "long";
+      }
+   }
+   element spi_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "131248";
+         type = "long";
+      }
+   }
    element tfp410_i2c_master.s1
    {
       datum baseAddress
       {
          value = "131080";
+         type = "long";
+      }
+   }
+   element oxu210hp_int.s1
+   {
+      datum baseAddress
+      {
+         value = "135424";
          type = "long";
       }
    }
@@ -244,19 +292,24 @@
          type = "long";
       }
    }
-   element mcu_spi.s1
+   element bootloader.s1
    {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
       datum baseAddress
       {
-         value = "131392";
+         value = "536870912";
          type = "long";
       }
    }
-   element mcu_pio.s1
+   element jamma_pio.s1
    {
       datum baseAddress
       {
-         value = "131248";
+         value = "131216";
          type = "long";
       }
    }
@@ -276,35 +329,6 @@
          type = "long";
       }
    }
-   element timer_0.s1
-   {
-      datum baseAddress
-      {
-         value = "131584";
-         type = "long";
-      }
-   }
-   element bootloader.s1
-   {
-      datum _lockedAddress
-      {
-         value = "1";
-         type = "boolean";
-      }
-      datum baseAddress
-      {
-         value = "536870912";
-         type = "long";
-      }
-   }
-   element oxu210hp_int.s1
-   {
-      datum baseAddress
-      {
-         value = "135424";
-         type = "long";
-      }
-   }
    element epcs_spi.spi_control_port
    {
       datum baseAddress
@@ -319,6 +343,14 @@
       {
          value = "134400";
          type = "long";
+      }
+   }
+   element spi_pio
+   {
+      datum _sortIndex
+      {
+         value = "21";
+         type = "int";
       }
    }
    element sysid
@@ -425,8 +457,8 @@
  <parameter name="maxAdditionalLatency" value="0" />
  <parameter name="projectName" value="invaders-ep3sl.qpf" />
  <parameter name="sopcBorderPoints" value="true" />
- <parameter name="systemHash" value="-10098612370" />
- <parameter name="timeStamp" value="1345722691191" />
+ <parameter name="systemHash" value="-7052495688" />
+ <parameter name="timeStamp" value="1345784875683" />
  <module kind="clock_source" version="10.1" enabled="1" name="clk_72M">
   <parameter name="clockFrequency" value="72000000" />
   <parameter name="clockFrequencyKnown" value="true" />
@@ -501,7 +533,7 @@
   <parameter name="mmu_TLBMissExcSlave" value="" />
   <parameter name="mmu_TLBMissExcOffset" value="0" />
   <parameter name="manuallyAssignCpuID" value="false" />
-  <parameter name="internalIrqMaskSystemInfo" value="2494415" />
+  <parameter name="internalIrqMaskSystemInfo" value="2494287" />
   <parameter name="instSlaveMapParam"><![CDATA[<address-map><slave name='bootloader.s1' start='0x20000000' end='0x20001800' /><slave name='cpu_0.jtag_debug_module' start='0x21000000' end='0x21000800' /><slave name='altmemddr_0.s1' start='0x40000000' end='0x44000000' /></address-map>]]></parameter>
   <parameter name="instAddrWidth" value="31" />
   <parameter name="impl" value="Fast" />
@@ -526,7 +558,7 @@
   <parameter name="dcache_numTCDM" value="_0" />
   <parameter name="dcache_lineSize" value="_32" />
   <parameter name="dcache_bursts" value="true" />
-  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='oxu210hp_if_0.s0' start='0x0' end='0x20000' /><slave name='sysid.control_slave' start='0x20000' end='0x20008' /><slave name='tfp410_i2c_master.s1' start='0x20008' end='0x20010' /><slave name='vo_pio.s1' start='0x20010' end='0x20020' /><slave name='epcs_spi.spi_control_port' start='0x20020' end='0x20040' /><slave name='one_wire_interface_0.avalon_slave_0' start='0x20040' end='0x20080' /><slave name='usb_pio.s1' start='0x20080' end='0x20090' /><slave name='mcu_pio.s1' start='0x200B0' end='0x200C0' /><slave name='jtag_uart_0.avalon_jtag_slave' start='0x20100' end='0x20108' /><slave name='mcu_spi.s1' start='0x20140' end='0x20180' /><slave name='timer_0.s1' start='0x20200' end='0x20220' /><slave name='timer_60Hz.s1' start='0x20300' end='0x20320' /><slave name='debug_pio.s1' start='0x20600' end='0x20610' /><slave name='version_pio.s1' start='0x20900' end='0x20910' /><slave name='m95320.spi_control_port' start='0x20D00' end='0x20D20' /><slave name='uart_ts.avalon_slave' start='0x20F00' end='0x20F20' /><slave name='uart_pc.avalon_slave' start='0x21000' end='0x21020' /><slave name='oxu210hp_int.s1' start='0x21100' end='0x21110' /><slave name='bootloader.s1' start='0x20000000' end='0x20001800' /><slave name='cpu_0.jtag_debug_module' start='0x21000000' end='0x21000800' /><slave name='altmemddr_0.s1' start='0x40000000' end='0x44000000' /></address-map>]]></parameter>
+  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='oxu210hp_if_0.s0' start='0x0' end='0x20000' /><slave name='sysid.control_slave' start='0x20000' end='0x20008' /><slave name='tfp410_i2c_master.s1' start='0x20008' end='0x20010' /><slave name='vo_pio.s1' start='0x20010' end='0x20020' /><slave name='epcs_spi.spi_control_port' start='0x20020' end='0x20040' /><slave name='one_wire_interface_0.avalon_slave_0' start='0x20040' end='0x20080' /><slave name='usb_pio.s1' start='0x20080' end='0x20090' /><slave name='jamma_pio.s1' start='0x20090' end='0x200A0' /><slave name='keybd_pio.s1' start='0x200A0' end='0x200B0' /><slave name='spi_pio.s1' start='0x200B0' end='0x200C0' /><slave name='audio_pio.s1' start='0x200C0' end='0x200D0' /><slave name='jtag_uart_0.avalon_jtag_slave' start='0x20100' end='0x20108' /><slave name='timer_0.s1' start='0x20200' end='0x20220' /><slave name='timer_60Hz.s1' start='0x20300' end='0x20320' /><slave name='debug_pio.s1' start='0x20600' end='0x20610' /><slave name='version_pio.s1' start='0x20900' end='0x20910' /><slave name='m95320.spi_control_port' start='0x20D00' end='0x20D20' /><slave name='uart_ts.avalon_slave' start='0x20F00' end='0x20F20' /><slave name='uart_pc.avalon_slave' start='0x21000' end='0x21020' /><slave name='oxu210hp_int.s1' start='0x21100' end='0x21110' /><slave name='bootloader.s1' start='0x20000000' end='0x20001800' /><slave name='cpu_0.jtag_debug_module' start='0x21000000' end='0x21000800' /><slave name='altmemddr_0.s1' start='0x40000000' end='0x44000000' /></address-map>]]></parameter>
   <parameter name="dataAddrWidth" value="31" />
   <parameter name="customInstSlavesSystemInfo" value="&lt;info/&gt;" />
   <parameter name="cpuReset" value="false" />
@@ -958,7 +990,7 @@
   <parameter name="simDrivenValue" value="0" />
   <parameter name="width" value="4" />
  </module>
- <module kind="altera_avalon_pio" version="10.1" enabled="1" name="mcu_pio">
+ <module kind="altera_avalon_pio" version="10.1" enabled="1" name="spi_pio">
   <parameter name="bitClearingEdgeCapReg" value="true" />
   <parameter name="bitModifyingOutReg" value="false" />
   <parameter name="captureEdge" value="true" />
@@ -970,12 +1002,49 @@
   <parameter name="resetValue" value="0" />
   <parameter name="simDoTestBenchWiring" value="false" />
   <parameter name="simDrivenValue" value="0" />
-  <parameter name="width" value="8" />
+  <parameter name="width" value="32" />
  </module>
- <module kind="vl_avalon_spi_slave" version="1.0" enabled="1" name="mcu_spi">
-  <parameter name="FIFO_DEPTH" value="16" />
-  <parameter name="BIT_WIDTH" value="8" />
-  <parameter name="AUTO_CLOCK_SINK_CLOCK_RATE" value="72500000" />
+ <module kind="altera_avalon_pio" version="10.1" enabled="1" name="jamma_pio">
+  <parameter name="bitClearingEdgeCapReg" value="false" />
+  <parameter name="bitModifyingOutReg" value="false" />
+  <parameter name="captureEdge" value="false" />
+  <parameter name="clockRate" value="72500000" />
+  <parameter name="direction" value="Output" />
+  <parameter name="edgeType" value="RISING" />
+  <parameter name="generateIRQ" value="false" />
+  <parameter name="irqType" value="LEVEL" />
+  <parameter name="resetValue" value="0" />
+  <parameter name="simDoTestBenchWiring" value="false" />
+  <parameter name="simDrivenValue" value="0" />
+  <parameter name="width" value="32" />
+ </module>
+ <module kind="altera_avalon_pio" version="10.1" enabled="1" name="keybd_pio">
+  <parameter name="bitClearingEdgeCapReg" value="false" />
+  <parameter name="bitModifyingOutReg" value="false" />
+  <parameter name="captureEdge" value="false" />
+  <parameter name="clockRate" value="72500000" />
+  <parameter name="direction" value="Output" />
+  <parameter name="edgeType" value="RISING" />
+  <parameter name="generateIRQ" value="false" />
+  <parameter name="irqType" value="LEVEL" />
+  <parameter name="resetValue" value="0" />
+  <parameter name="simDoTestBenchWiring" value="false" />
+  <parameter name="simDrivenValue" value="0" />
+  <parameter name="width" value="32" />
+ </module>
+ <module kind="altera_avalon_pio" version="10.1" enabled="1" name="audio_pio">
+  <parameter name="bitClearingEdgeCapReg" value="false" />
+  <parameter name="bitModifyingOutReg" value="false" />
+  <parameter name="captureEdge" value="false" />
+  <parameter name="clockRate" value="72500000" />
+  <parameter name="direction" value="Input" />
+  <parameter name="edgeType" value="RISING" />
+  <parameter name="generateIRQ" value="false" />
+  <parameter name="irqType" value="LEVEL" />
+  <parameter name="resetValue" value="0" />
+  <parameter name="simDoTestBenchWiring" value="false" />
+  <parameter name="simDrivenValue" value="0" />
+  <parameter name="width" value="32" />
  </module>
  <connection
    kind="avalon"
@@ -1317,36 +1386,55 @@
    kind="clock"
    version="10.1"
    start="altmemddr_0.sysclk"
-   end="mcu_pio.clk" />
+   end="spi_pio.clk" />
  <connection
    kind="avalon"
    version="10.1"
    start="cpu_0.data_master"
-   end="mcu_pio.s1">
+   end="spi_pio.s1">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x000200b0" />
  </connection>
- <connection kind="interrupt" version="10.1" start="cpu_0.d_irq" end="mcu_pio.irq">
+ <connection kind="interrupt" version="10.1" start="cpu_0.d_irq" end="spi_pio.irq">
   <parameter name="irqNumber" value="2" />
- </connection>
- <connection
-   kind="avalon"
-   version="10.1"
-   start="cpu_0.data_master"
-   end="mcu_spi.s1">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00020140" />
  </connection>
  <connection
    kind="clock"
    version="10.1"
    start="altmemddr_0.sysclk"
-   end="mcu_spi.clock_sink" />
+   end="jamma_pio.clk" />
  <connection
-   kind="interrupt"
+   kind="avalon"
    version="10.1"
-   start="cpu_0.d_irq"
-   end="mcu_spi.interrupt_sender">
-  <parameter name="irqNumber" value="7" />
+   start="cpu_0.data_master"
+   end="jamma_pio.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00020090" />
+ </connection>
+ <connection
+   kind="clock"
+   version="10.1"
+   start="altmemddr_0.sysclk"
+   end="keybd_pio.clk" />
+ <connection
+   kind="avalon"
+   version="10.1"
+   start="cpu_0.data_master"
+   end="keybd_pio.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x000200a0" />
+ </connection>
+ <connection
+   kind="clock"
+   version="10.1"
+   start="altmemddr_0.sysclk"
+   end="audio_pio.clk" />
+ <connection
+   kind="avalon"
+   version="10.1"
+   start="cpu_0.data_master"
+   end="audio_pio.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x000200c0" />
  </connection>
 </system>

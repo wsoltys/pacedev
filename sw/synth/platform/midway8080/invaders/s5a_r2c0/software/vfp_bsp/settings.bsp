@@ -2,9 +2,9 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>23/11/2011 10:46:22 PM</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1322048782464</BspGeneratedUnixTimeStamp>
-        <BspGeneratedLocation>E:\work\S5L\sw\S5L-sw-MF2\synth\ep4c_C0\software\mf2_ddr_bsp</BspGeneratedLocation>
+        <BspGeneratedTimeStamp>24/08/2012 3:47:32 PM</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1345787252960</BspGeneratedUnixTimeStamp>
+        <BspGeneratedLocation>E:\markm\pace\pacedev.net\sw\synth\platform\midway8080\invaders\s5a_r2c0\software\vfp_bsp</BspGeneratedLocation>
         <BspSettingsFile>settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\ep4c_sopc_system.sopcinfo</SopcDesignFile>
         <JdiFile>default</JdiFile>
@@ -893,20 +893,26 @@
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
-                <slaveDescriptor>interrupt_pio</slaveDescriptor>
+                <slaveDescriptor>jamma_pio</slaveDescriptor>
                 <addressRange>0x00020090 - 0x0002009F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
-                <slaveDescriptor>ts_pio</slaveDescriptor>
+                <slaveDescriptor>keybd_pio</slaveDescriptor>
                 <addressRange>0x000200A0 - 0x000200AF</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
-                <slaveDescriptor>mcu_pio</slaveDescriptor>
+                <slaveDescriptor>spi_pio</slaveDescriptor>
                 <addressRange>0x000200B0 - 0x000200BF</addressRange>
+                <addressSpan>16</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>audio_pio</slaveDescriptor>
+                <addressRange>0x000200C0 - 0x000200CF</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
@@ -915,12 +921,6 @@
                 <addressRange>0x00020100 - 0x00020107</addressRange>
                 <addressSpan>8</addressSpan>
                 <attributes>printable</attributes>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>mcu_spi</slaveDescriptor>
-                <addressRange>0x00020140 - 0x0002017F</addressRange>
-                <addressSpan>64</addressSpan>
-                <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>timer_0</slaveDescriptor>
@@ -935,39 +935,9 @@
                 <attributes>timer</attributes>
         </MemoryMap>
         <MemoryMap>
-                <slaveDescriptor>vi_0_pio</slaveDescriptor>
-                <addressRange>0x00020400 - 0x0002040F</addressRange>
-                <addressSpan>16</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>vi_1_pio</slaveDescriptor>
-                <addressRange>0x00020480 - 0x0002049F</addressRange>
-                <addressSpan>32</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>ddc_eeprom_pio</slaveDescriptor>
-                <addressRange>0x00020500 - 0x0002050F</addressRange>
-                <addressSpan>16</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
                 <slaveDescriptor>debug_pio</slaveDescriptor>
                 <addressRange>0x00020600 - 0x0002060F</addressRange>
                 <addressSpan>16</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>lvds_pio</slaveDescriptor>
-                <addressRange>0x00020700 - 0x0002070F</addressRange>
-                <addressSpan>16</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>reset_pio</slaveDescriptor>
-                <addressRange>0x00020800 - 0x0002081F</addressRange>
-                <addressSpan>32</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
@@ -977,33 +947,9 @@
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
-                <slaveDescriptor>ddc_eeprom_i2c_master</slaveDescriptor>
-                <addressRange>0x00020A00 - 0x00020A07</addressRange>
-                <addressSpan>8</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>vai_i2c_master</slaveDescriptor>
-                <addressRange>0x00020B00 - 0x00020B07</addressRange>
-                <addressSpan>8</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>veb_i2c_master</slaveDescriptor>
-                <addressRange>0x00020C00 - 0x00020C07</addressRange>
-                <addressSpan>8</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
                 <slaveDescriptor>m95320</slaveDescriptor>
                 <addressRange>0x00020D00 - 0x00020D1F</addressRange>
                 <addressSpan>32</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>ts_fifo_if_avalon_0</slaveDescriptor>
-                <addressRange>0x00020E00 - 0x00020E07</addressRange>
-                <addressSpan>8</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
@@ -1022,48 +968,6 @@
                 <slaveDescriptor>oxu210hp_int</slaveDescriptor>
                 <addressRange>0x00021100 - 0x0002110F</addressRange>
                 <addressSpan>16</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>gfx_fifo_if</slaveDescriptor>
-                <addressRange>0x00021200 - 0x0002120F</addressRange>
-                <addressSpan>16</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>cmd_fifo_if</slaveDescriptor>
-                <addressRange>0x00021300 - 0x0002130F</addressRange>
-                <addressSpan>16</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>lvds_edid_mem</slaveDescriptor>
-                <addressRange>0x00021400 - 0x000215FF</addressRange>
-                <addressSpan>512</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>sdvo_edid_mem</slaveDescriptor>
-                <addressRange>0x00021800 - 0x000219FF</addressRange>
-                <addressSpan>512</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>ddc_master_mem</slaveDescriptor>
-                <addressRange>0x00022000 - 0x000221FF</addressRange>
-                <addressSpan>512</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>ddc_slave_mem</slaveDescriptor>
-                <addressRange>0x00024000 - 0x000241FF</addressRange>
-                <addressSpan>512</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>faster_interface_0</slaveDescriptor>
-                <addressRange>0x01000000 - 0x01FFFFFF</addressRange>
-                <addressSpan>16777216</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
@@ -1150,42 +1054,12 @@
         <DriverPackageInfo>
                 <name>altera_avalon_pio_driver</name>
                 <version>default</version>
-                <moduleName>ts_pio</moduleName>
-        </DriverPackageInfo>
-        <DriverPackageInfo>
-                <name>altera_avalon_pio_driver</name>
-                <version>default</version>
-                <moduleName>reset_pio</moduleName>
-        </DriverPackageInfo>
-        <DriverPackageInfo>
-                <name>altera_avalon_pio_driver</name>
-                <version>default</version>
                 <moduleName>oxu210hp_int</moduleName>
         </DriverPackageInfo>
         <DriverPackageInfo>
                 <name>altera_avalon_pio_driver</name>
                 <version>default</version>
-                <moduleName>mcu_pio</moduleName>
-        </DriverPackageInfo>
-        <DriverPackageInfo>
-                <name>altera_avalon_pio_driver</name>
-                <version>default</version>
-                <moduleName>lvds_pio</moduleName>
-        </DriverPackageInfo>
-        <DriverPackageInfo>
-                <name>altera_avalon_pio_driver</name>
-                <version>default</version>
-                <moduleName>interrupt_pio</moduleName>
-        </DriverPackageInfo>
-        <DriverPackageInfo>
-                <name>altera_avalon_pio_driver</name>
-                <version>default</version>
                 <moduleName>debug_pio</moduleName>
-        </DriverPackageInfo>
-        <DriverPackageInfo>
-                <name>altera_avalon_pio_driver</name>
-                <version>default</version>
-                <moduleName>ddc_eeprom_pio</moduleName>
         </DriverPackageInfo>
         <DriverPackageInfo>
                 <name>altera_avalon_jtag_uart_driver</name>
@@ -1195,11 +1069,21 @@
         <DriverPackageInfo>
                 <name>altera_avalon_pio_driver</name>
                 <version>default</version>
-                <moduleName>vi_0_pio</moduleName>
+                <moduleName>jamma_pio</moduleName>
         </DriverPackageInfo>
         <DriverPackageInfo>
                 <name>altera_avalon_pio_driver</name>
                 <version>default</version>
-                <moduleName>vi_1_pio</moduleName>
+                <moduleName>keybd_pio</moduleName>
+        </DriverPackageInfo>
+        <DriverPackageInfo>
+                <name>altera_avalon_pio_driver</name>
+                <version>default</version>
+                <moduleName>spi_pio</moduleName>
+        </DriverPackageInfo>
+        <DriverPackageInfo>
+                <name>altera_avalon_pio_driver</name>
+                <version>default</version>
+                <moduleName>audio_pio</moduleName>
         </DriverPackageInfo>
 </sch:Settings>

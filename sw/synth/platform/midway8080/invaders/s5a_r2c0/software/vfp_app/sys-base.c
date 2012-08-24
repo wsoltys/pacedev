@@ -13,7 +13,6 @@
 
 #include "veb.h"
 #include "ow.h"
-#include "spi_helper.h"
 #include "i2c_master.h"
 #include "usb_helper.h"
 #include "dbg_helper.h"
@@ -199,7 +198,6 @@ void system_base_task (void* data)
   while (1)
   {
     timer_60Hz_isr_enable ();  
-    mcuspi_isr_enable ();
 
     PRINT (0, "Main loop running...\n");
     led_enable (LED_NIOS_RDY, 1);
@@ -258,13 +256,78 @@ void system_base_task (void* data)
 
     // disable and de-register all interrupts
     timer_60Hz_isr_disable ();
-    mcuspi_isr_disable ();
 
     PRINT (0, "loop_break=1\n");
   }
 
   timer_60Hz_isr_deinit ();      
-  HOST_IF_DEINIT ();
+}
+
+void joy_event (uint8_t *buf, uint16_t len)
+{
+  // Chris' joystick
+  // 0 left-right (signed) -ve=left
+  // 1 up-down -ve=up
+  // 2 b1,b2,b3,b4,b5,start,coin,service (b0-b7)
+
+/*  { S_1P_UP_GPIO, S_1P_UP_PIN },
+  { S_1P_LEFT_GPIO, S_1P_LEFT_PIN },
+  { S_1P_RIGHT_GPIO, S_1P_RIGHT_PIN },
+  { S_1P_DOWN_GPIO, S_1P_DOWN_PIN },
+  { S_1P_BUTTON1_GPIO, S_1P_BUTTON1_PIN },
+  { S_1P_BUTTON2_GPIO, S_1P_BUTTON2_PIN },
+  { S_1P_BUTTON3_GPIO, S_1P_BUTTON3_PIN },
+  { S_1P_BUTTON4_GPIO, S_1P_BUTTON4_PIN },
+  { S_1P_BUTTON5_GPIO, S_1P_BUTTON5_PIN },
+  { S_1P_COIN_GPIO, S_1P_COIN_PIN },
+  { S_1P_START_GPIO, S_1P_START_PIN },
+  { S_SERVICE_SW_GPIO, S_SERVICE_SW_PIN },
+  { S_TILT_SW_GPIO, S_TILT_SW_PIN },
+  { S_TEST_SW_GPIO, S_TEST_SW_PIN },
+  { S_TEST_SW_GPIO, S_TEST_SW_PIN },
+  { S_TEST_SW_GPIO, S_TEST_SW_PIN },
+  { S_2P_UP_GPIO, S_2P_UP_PIN },
+  { S_2P_LEFT_GPIO, S_2P_LEFT_PIN },
+  { S_2P_RIGHT_GPIO, S_2P_RIGHT_PIN },
+  { S_2P_DOWN_GPIO, S_2P_DOWN_PIN },
+  { S_2P_BUTTON1_GPIO, S_2P_BUTTON1_PIN },
+  { S_2P_BUTTON2_GPIO, S_2P_BUTTON2_PIN },
+  { S_2P_BUTTON3_GPIO, S_2P_BUTTON3_PIN },
+  { S_2P_BUTTON4_GPIO, S_2P_BUTTON4_PIN },
+  { S_2P_BUTTON5_GPIO, S_2P_BUTTON5_PIN },
+  { S_2P_COIN_GPIO, S_2P_COIN_PIN },
+  { S_2P_START_GPIO, S_2P_START_PIN },
+*/  
+  uint32_t jamma = 0;
+
+  if (buf[1] & (1<<7))
+    jamma |= (1<<0);
+  if (buf[0] & (1<<7))
+    jamma |= (1<<1);
+  if (buf[0] & 0x7f != 0)
+    jamma |= (1<<2);
+  if (buf[1] & 0x7f != 0)
+    jamma |= (1<<3);
+  if (buf[2] & (1<<0))
+    jamma |= (1<<4);
+  if (buf[2] & (1<<1))
+    jamma |= (1<<5);
+  if (buf[2] & (1<<2))
+    jamma |= (1<<6);
+  if (buf[2] & (1<<3))
+    jamma |= (1<<7);
+  if (buf[2] & (1<<4))
+    jamma |= (1<<8);
+  if (buf[2] & (1<<6))
+    jamma |= (1<<9);
+  if (buf[2] & (1<<5))
+    jamma |= (1<<10);
+  if (buf[2] & (1<<7))
+    jamma |= (1<<11);
+    
+  IOWR_ALTERA_AVALON_PIO_DATA (JAMMA_PIO_BASE, ~jamma);
+  IOWR_ALTERA_AVALON_PIO_DATA (SPI_PIO_BASE, (1<<0));   // go
+  IOWR_ALTERA_AVALON_PIO_DATA (SPI_PIO_BASE, 0);        // stop
 }
 
 #define INTRPT_STACKSIZE		(16*1024)

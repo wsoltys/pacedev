@@ -11,46 +11,45 @@ set_global_assignment -name SOURCE_FILE [file join $::quartus(qip_path) cpu_0.oc
 # bootloader
 # version_pio
 # uart_ts
-set_global_assignment -name TCL_FILE E:/Projects/pace/pacedev.net/sw/src/target/s5a_r2c0/braemac_uart/uart_top_level_hw.tcl
-set_global_assignment -name VERILOG_FILE E:/Projects/pace/pacedev.net/sw/src/target/s5a_r2c0/braemac_uart/uart_top_level.v
-set_global_assignment -name VERILOG_FILE E:/Projects/pace/pacedev.net/sw/src/target/s5a_r2c0/braemac_uart/baud_measure.v
-set_global_assignment -name VERILOG_FILE E:/Projects/pace/pacedev.net/sw/src/target/s5a_r2c0/braemac_uart/baudrate_generator.v
-set_global_assignment -name VERILOG_FILE E:/Projects/pace/pacedev.net/sw/src/target/s5a_r2c0/braemac_uart/meta_sample.v
-set_global_assignment -name VERILOG_FILE E:/Projects/pace/pacedev.net/sw/src/target/s5a_r2c0/braemac_uart/reset_gen.v
-set_global_assignment -name VERILOG_FILE E:/Projects/pace/pacedev.net/sw/src/target/s5a_r2c0/braemac_uart/uart_led.v
-set_global_assignment -name VERILOG_FILE E:/Projects/pace/pacedev.net/sw/src/target/s5a_r2c0/braemac_uart/uart_led_top.v
-set_global_assignment -name VERILOG_FILE E:/Projects/pace/pacedev.net/sw/src/target/s5a_r2c0/braemac_uart/uart_rx.v
-set_global_assignment -name VERILOG_FILE E:/Projects/pace/pacedev.net/sw/src/target/s5a_r2c0/braemac_uart/uart_tx.v
+set_global_assignment -name TCL_FILE E:/markm/pace/pacedev.net/sw/src/target/s5a_r2c0/braemac_uart/uart_top_level_hw.tcl
+set_global_assignment -name VERILOG_FILE E:/markm/pace/pacedev.net/sw/src/target/s5a_r2c0/braemac_uart/uart_top_level.v
+set_global_assignment -name VERILOG_FILE E:/markm/pace/pacedev.net/sw/src/target/s5a_r2c0/braemac_uart/baud_measure.v
+set_global_assignment -name VERILOG_FILE E:/markm/pace/pacedev.net/sw/src/target/s5a_r2c0/braemac_uart/baudrate_generator.v
+set_global_assignment -name VERILOG_FILE E:/markm/pace/pacedev.net/sw/src/target/s5a_r2c0/braemac_uart/meta_sample.v
+set_global_assignment -name VERILOG_FILE E:/markm/pace/pacedev.net/sw/src/target/s5a_r2c0/braemac_uart/reset_gen.v
+set_global_assignment -name VERILOG_FILE E:/markm/pace/pacedev.net/sw/src/target/s5a_r2c0/braemac_uart/uart_led.v
+set_global_assignment -name VERILOG_FILE E:/markm/pace/pacedev.net/sw/src/target/s5a_r2c0/braemac_uart/uart_led_top.v
+set_global_assignment -name VERILOG_FILE E:/markm/pace/pacedev.net/sw/src/target/s5a_r2c0/braemac_uart/uart_rx.v
+set_global_assignment -name VERILOG_FILE E:/markm/pace/pacedev.net/sw/src/target/s5a_r2c0/braemac_uart/uart_tx.v
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) uart_ts.v]
 # uart_pc
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) uart_pc.v]
 # oxu210hp_if_0
-set_global_assignment -name TCL_FILE E:/Projects/pace/pacedev.net/sw/src/target/s5a_r2c0/oxu210hp/oxu210hp_if_hw.tcl
-set_global_assignment -name VHDL_FILE E:/Projects/pace/pacedev.net/sw/src/target/s5a_r2c0/oxu210hp/oxu210hp_if.vhd
+set_global_assignment -name TCL_FILE E:/markm/pace/pacedev.net/sw/src/target/s5a_r2c0/oxu210hp/oxu210hp_if_hw.tcl
+set_global_assignment -name VHDL_FILE E:/markm/pace/pacedev.net/sw/src/target/s5a_r2c0/oxu210hp/oxu210hp_if.vhd
 set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) oxu210hp_if_0.vhd]
 # oxu210hp_int
 # m95320
 # altmemddr_0
 # vo_pio
 # tfp410_i2c_master
-set_global_assignment -name TCL_FILE E:/Projects/pace/pacedev.net/sw/src/component/io/i2c/oci2c/avalon_i2c_master_top_hw.tcl
-set_global_assignment -name VHDL_FILE E:/Projects/pace/pacedev.net/sw/src/component/io/i2c/oci2c/avalon_i2c_master_top.vhd
-set_global_assignment -name VHDL_FILE E:/Projects/pace/pacedev.net/sw/src/component/io/i2c/oci2c/i2c_master_bit_ctrl.vhd
-set_global_assignment -name VHDL_FILE E:/Projects/pace/pacedev.net/sw/src/component/io/i2c/oci2c/i2c_master_byte_ctrl.vhd
-set_global_assignment -name VHDL_FILE E:/Projects/pace/pacedev.net/sw/src/component/io/i2c/oci2c/i2c_master_top.vhd
+set_global_assignment -name TCL_FILE E:/markm/pace/pacedev.net/sw/src/component/io/i2c/oci2c/avalon_i2c_master_top_hw.tcl
+set_global_assignment -name VHDL_FILE E:/markm/pace/pacedev.net/sw/src/component/io/i2c/oci2c/avalon_i2c_master_top.vhd
+set_global_assignment -name VHDL_FILE E:/markm/pace/pacedev.net/sw/src/component/io/i2c/oci2c/i2c_master_bit_ctrl.vhd
+set_global_assignment -name VHDL_FILE E:/markm/pace/pacedev.net/sw/src/component/io/i2c/oci2c/i2c_master_byte_ctrl.vhd
+set_global_assignment -name VHDL_FILE E:/markm/pace/pacedev.net/sw/src/component/io/i2c/oci2c/i2c_master_top.vhd
 set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) tfp410_i2c_master.vhd]
 # epcs_spi
 # one_wire_interface_0
-set_global_assignment -name TCL_FILE E:/Projects/pace/pacedev.net/sw/src/target/s5a_r2c0/one_wire/one_wire_interface_hw.tcl
-set_global_assignment -name VERILOG_FILE E:/Projects/pace/pacedev.net/sw/src/target/s5a_r2c0/one_wire/one_wire_interface.v
-set_global_assignment -name VERILOG_FILE E:/Projects/pace/pacedev.net/sw/src/target/s5a_r2c0/one_wire/one_wire_commands.v
+set_global_assignment -name TCL_FILE E:/markm/pace/pacedev.net/sw/src/target/s5a_r2c0/one_wire/one_wire_interface_hw.tcl
+set_global_assignment -name VERILOG_FILE E:/markm/pace/pacedev.net/sw/src/target/s5a_r2c0/one_wire/one_wire_interface.v
+set_global_assignment -name VERILOG_FILE E:/markm/pace/pacedev.net/sw/src/target/s5a_r2c0/one_wire/one_wire_commands.v
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) one_wire_interface_0.v]
 # usb_pio
-# mcu_pio
-# mcu_spi
-set_global_assignment -name TCL_FILE E:/Projects/pace/pacedev.net/sw/src/target/s5a_r2c0/vl_avalon_spi_slave/vl_avalon_spi_slave_hw.tcl
-set_global_assignment -name VHDL_FILE E:/Projects/pace/pacedev.net/sw/src/target/s5a_r2c0/vl_avalon_spi_slave/vl_avalon_spi_slave.vhd
-set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) mcu_spi.vhd]
+# spi_pio
 # null
-set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID BCAEC5010FFB000001395352C84D 
+# jamma_pio
+# keybd_pio
+# audio_pio
+set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID 485B3986CE02000001395707B268 
  

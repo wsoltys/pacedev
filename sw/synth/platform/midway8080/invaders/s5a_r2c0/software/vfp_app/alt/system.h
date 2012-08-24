@@ -4,7 +4,7 @@
  * Machine generated for CPU 'cpu_0' in SOPC Builder design 'ep4c_sopc_system'
  * SOPC Builder design path: ../../ep4c_sopc_system.sopcinfo
  *
- * Generated: Wed Nov 23 22:46:24 EST 2011
+ * Generated: Fri Aug 24 15:47:33 EST 2012
  */
 
 /*
@@ -140,14 +140,9 @@
 #define __ALTERA_NIOS2
 #define __ALTMEMDDR2
 #define __AVALON_I2C_MASTER_TOP
-#define __AVALON_SLAVE_CONDUIT
-#define __CMD_FIFO_IF_AVALON
-#define __FASTER_INTERFACE
 #define __ONE_WIRE_INTERFACE
 #define __OXU210HP_IF
-#define __TS_FIFO_IF_AVALON
 #define __UART_TOP_LEVEL
-#define __VL_AVALON_SPI_SLAVE
 
 
 /*
@@ -201,6 +196,33 @@
 
 
 /*
+ * audio_pio configuration
+ *
+ */
+
+#define ALT_MODULE_CLASS_audio_pio altera_avalon_pio
+#define AUDIO_PIO_BASE 0x200c0
+#define AUDIO_PIO_BIT_CLEARING_EDGE_REGISTER 0
+#define AUDIO_PIO_BIT_MODIFYING_OUTPUT_REGISTER 0
+#define AUDIO_PIO_CAPTURE 0
+#define AUDIO_PIO_DATA_WIDTH 32
+#define AUDIO_PIO_DO_TEST_BENCH_WIRING 0
+#define AUDIO_PIO_DRIVEN_SIM_VALUE 0x0
+#define AUDIO_PIO_EDGE_TYPE "NONE"
+#define AUDIO_PIO_FREQ 72500000u
+#define AUDIO_PIO_HAS_IN 1
+#define AUDIO_PIO_HAS_OUT 0
+#define AUDIO_PIO_HAS_TRI 0
+#define AUDIO_PIO_IRQ -1
+#define AUDIO_PIO_IRQ_INTERRUPT_CONTROLLER_ID -1
+#define AUDIO_PIO_IRQ_TYPE "NONE"
+#define AUDIO_PIO_NAME "/dev/audio_pio"
+#define AUDIO_PIO_RESET_VALUE 0x0
+#define AUDIO_PIO_SPAN 16
+#define AUDIO_PIO_TYPE "altera_avalon_pio"
+
+
+/*
  * bootloader configuration
  *
  */
@@ -226,89 +248,6 @@
 #define BOOTLOADER_SPAN 6144
 #define BOOTLOADER_TYPE "altera_avalon_onchip_memory2"
 #define BOOTLOADER_WRITABLE 1
-
-
-/*
- * cmd_fifo_if configuration
- *
- */
-
-#define ALT_MODULE_CLASS_cmd_fifo_if cmd_fifo_if_avalon
-#define CMD_FIFO_IF_BASE 0x21300
-#define CMD_FIFO_IF_IRQ 14
-#define CMD_FIFO_IF_IRQ_INTERRUPT_CONTROLLER_ID 0
-#define CMD_FIFO_IF_NAME "/dev/cmd_fifo_if"
-#define CMD_FIFO_IF_SPAN 16
-#define CMD_FIFO_IF_TYPE "cmd_fifo_if_avalon"
-
-
-/*
- * ddc_eeprom_i2c_master configuration
- *
- */
-
-#define ALT_MODULE_CLASS_ddc_eeprom_i2c_master avalon_i2c_master_top
-#define DDC_EEPROM_I2C_MASTER_BASE 0x20a00
-#define DDC_EEPROM_I2C_MASTER_IRQ 15
-#define DDC_EEPROM_I2C_MASTER_IRQ_INTERRUPT_CONTROLLER_ID 0
-#define DDC_EEPROM_I2C_MASTER_NAME "/dev/ddc_eeprom_i2c_master"
-#define DDC_EEPROM_I2C_MASTER_SPAN 8
-#define DDC_EEPROM_I2C_MASTER_TYPE "avalon_i2c_master_top"
-
-
-/*
- * ddc_eeprom_pio configuration
- *
- */
-
-#define ALT_MODULE_CLASS_ddc_eeprom_pio altera_avalon_pio
-#define DDC_EEPROM_PIO_BASE 0x20500
-#define DDC_EEPROM_PIO_BIT_CLEARING_EDGE_REGISTER 0
-#define DDC_EEPROM_PIO_BIT_MODIFYING_OUTPUT_REGISTER 0
-#define DDC_EEPROM_PIO_CAPTURE 1
-#define DDC_EEPROM_PIO_DATA_WIDTH 8
-#define DDC_EEPROM_PIO_DO_TEST_BENCH_WIRING 0
-#define DDC_EEPROM_PIO_DRIVEN_SIM_VALUE 0x0
-#define DDC_EEPROM_PIO_EDGE_TYPE "RISING"
-#define DDC_EEPROM_PIO_FREQ 72500000u
-#define DDC_EEPROM_PIO_HAS_IN 1
-#define DDC_EEPROM_PIO_HAS_OUT 1
-#define DDC_EEPROM_PIO_HAS_TRI 0
-#define DDC_EEPROM_PIO_IRQ 24
-#define DDC_EEPROM_PIO_IRQ_INTERRUPT_CONTROLLER_ID 0
-#define DDC_EEPROM_PIO_IRQ_TYPE "LEVEL"
-#define DDC_EEPROM_PIO_NAME "/dev/ddc_eeprom_pio"
-#define DDC_EEPROM_PIO_RESET_VALUE 0xc
-#define DDC_EEPROM_PIO_SPAN 16
-#define DDC_EEPROM_PIO_TYPE "altera_avalon_pio"
-
-
-/*
- * ddc_master_mem configuration
- *
- */
-
-#define ALT_MODULE_CLASS_ddc_master_mem avalon_slave_conduit
-#define DDC_MASTER_MEM_BASE 0x22000
-#define DDC_MASTER_MEM_IRQ -1
-#define DDC_MASTER_MEM_IRQ_INTERRUPT_CONTROLLER_ID -1
-#define DDC_MASTER_MEM_NAME "/dev/ddc_master_mem"
-#define DDC_MASTER_MEM_SPAN 512
-#define DDC_MASTER_MEM_TYPE "avalon_slave_conduit"
-
-
-/*
- * ddc_slave_mem configuration
- *
- */
-
-#define ALT_MODULE_CLASS_ddc_slave_mem avalon_slave_conduit
-#define DDC_SLAVE_MEM_BASE 0x24000
-#define DDC_SLAVE_MEM_IRQ -1
-#define DDC_SLAVE_MEM_IRQ_INTERRUPT_CONTROLLER_ID -1
-#define DDC_SLAVE_MEM_NAME "/dev/ddc_slave_mem"
-#define DDC_SLAVE_MEM_SPAN 512
-#define DDC_SLAVE_MEM_TYPE "avalon_slave_conduit"
 
 
 /*
@@ -370,34 +309,6 @@
 
 
 /*
- * faster_interface_0 configuration
- *
- */
-
-#define ALT_MODULE_CLASS_faster_interface_0 faster_interface
-#define FASTER_INTERFACE_0_BASE 0x1000000
-#define FASTER_INTERFACE_0_IRQ 4
-#define FASTER_INTERFACE_0_IRQ_INTERRUPT_CONTROLLER_ID 0
-#define FASTER_INTERFACE_0_NAME "/dev/faster_interface_0"
-#define FASTER_INTERFACE_0_SPAN 16777216
-#define FASTER_INTERFACE_0_TYPE "faster_interface"
-
-
-/*
- * gfx_fifo_if configuration
- *
- */
-
-#define ALT_MODULE_CLASS_gfx_fifo_if cmd_fifo_if_avalon
-#define GFX_FIFO_IF_BASE 0x21200
-#define GFX_FIFO_IF_IRQ 12
-#define GFX_FIFO_IF_IRQ_INTERRUPT_CONTROLLER_ID 0
-#define GFX_FIFO_IF_NAME "/dev/gfx_fifo_if"
-#define GFX_FIFO_IF_SPAN 16
-#define GFX_FIFO_IF_TYPE "cmd_fifo_if_avalon"
-
-
-/*
  * hal configuration
  *
  */
@@ -409,30 +320,30 @@
 
 
 /*
- * interrupt_pio configuration
+ * jamma_pio configuration
  *
  */
 
-#define ALT_MODULE_CLASS_interrupt_pio altera_avalon_pio
-#define INTERRUPT_PIO_BASE 0x20090
-#define INTERRUPT_PIO_BIT_CLEARING_EDGE_REGISTER 0
-#define INTERRUPT_PIO_BIT_MODIFYING_OUTPUT_REGISTER 0
-#define INTERRUPT_PIO_CAPTURE 0
-#define INTERRUPT_PIO_DATA_WIDTH 8
-#define INTERRUPT_PIO_DO_TEST_BENCH_WIRING 0
-#define INTERRUPT_PIO_DRIVEN_SIM_VALUE 0x0
-#define INTERRUPT_PIO_EDGE_TYPE "NONE"
-#define INTERRUPT_PIO_FREQ 72500000u
-#define INTERRUPT_PIO_HAS_IN 1
-#define INTERRUPT_PIO_HAS_OUT 1
-#define INTERRUPT_PIO_HAS_TRI 0
-#define INTERRUPT_PIO_IRQ -1
-#define INTERRUPT_PIO_IRQ_INTERRUPT_CONTROLLER_ID -1
-#define INTERRUPT_PIO_IRQ_TYPE "NONE"
-#define INTERRUPT_PIO_NAME "/dev/interrupt_pio"
-#define INTERRUPT_PIO_RESET_VALUE 0x0
-#define INTERRUPT_PIO_SPAN 16
-#define INTERRUPT_PIO_TYPE "altera_avalon_pio"
+#define ALT_MODULE_CLASS_jamma_pio altera_avalon_pio
+#define JAMMA_PIO_BASE 0x20090
+#define JAMMA_PIO_BIT_CLEARING_EDGE_REGISTER 0
+#define JAMMA_PIO_BIT_MODIFYING_OUTPUT_REGISTER 0
+#define JAMMA_PIO_CAPTURE 0
+#define JAMMA_PIO_DATA_WIDTH 32
+#define JAMMA_PIO_DO_TEST_BENCH_WIRING 0
+#define JAMMA_PIO_DRIVEN_SIM_VALUE 0x0
+#define JAMMA_PIO_EDGE_TYPE "NONE"
+#define JAMMA_PIO_FREQ 72500000u
+#define JAMMA_PIO_HAS_IN 0
+#define JAMMA_PIO_HAS_OUT 1
+#define JAMMA_PIO_HAS_TRI 0
+#define JAMMA_PIO_IRQ -1
+#define JAMMA_PIO_IRQ_INTERRUPT_CONTROLLER_ID -1
+#define JAMMA_PIO_IRQ_TYPE "NONE"
+#define JAMMA_PIO_NAME "/dev/jamma_pio"
+#define JAMMA_PIO_RESET_VALUE 0x0
+#define JAMMA_PIO_SPAN 16
+#define JAMMA_PIO_TYPE "altera_avalon_pio"
 
 
 /*
@@ -454,44 +365,30 @@
 
 
 /*
- * lvds_edid_mem configuration
+ * keybd_pio configuration
  *
  */
 
-#define ALT_MODULE_CLASS_lvds_edid_mem avalon_slave_conduit
-#define LVDS_EDID_MEM_BASE 0x21400
-#define LVDS_EDID_MEM_IRQ -1
-#define LVDS_EDID_MEM_IRQ_INTERRUPT_CONTROLLER_ID -1
-#define LVDS_EDID_MEM_NAME "/dev/lvds_edid_mem"
-#define LVDS_EDID_MEM_SPAN 512
-#define LVDS_EDID_MEM_TYPE "avalon_slave_conduit"
-
-
-/*
- * lvds_pio configuration
- *
- */
-
-#define ALT_MODULE_CLASS_lvds_pio altera_avalon_pio
-#define LVDS_PIO_BASE 0x20700
-#define LVDS_PIO_BIT_CLEARING_EDGE_REGISTER 1
-#define LVDS_PIO_BIT_MODIFYING_OUTPUT_REGISTER 0
-#define LVDS_PIO_CAPTURE 1
-#define LVDS_PIO_DATA_WIDTH 8
-#define LVDS_PIO_DO_TEST_BENCH_WIRING 0
-#define LVDS_PIO_DRIVEN_SIM_VALUE 0x0
-#define LVDS_PIO_EDGE_TYPE "ANY"
-#define LVDS_PIO_FREQ 72500000u
-#define LVDS_PIO_HAS_IN 1
-#define LVDS_PIO_HAS_OUT 1
-#define LVDS_PIO_HAS_TRI 0
-#define LVDS_PIO_IRQ 22
-#define LVDS_PIO_IRQ_INTERRUPT_CONTROLLER_ID 0
-#define LVDS_PIO_IRQ_TYPE "EDGE"
-#define LVDS_PIO_NAME "/dev/lvds_pio"
-#define LVDS_PIO_RESET_VALUE 0x0
-#define LVDS_PIO_SPAN 16
-#define LVDS_PIO_TYPE "altera_avalon_pio"
+#define ALT_MODULE_CLASS_keybd_pio altera_avalon_pio
+#define KEYBD_PIO_BASE 0x200a0
+#define KEYBD_PIO_BIT_CLEARING_EDGE_REGISTER 0
+#define KEYBD_PIO_BIT_MODIFYING_OUTPUT_REGISTER 0
+#define KEYBD_PIO_CAPTURE 0
+#define KEYBD_PIO_DATA_WIDTH 32
+#define KEYBD_PIO_DO_TEST_BENCH_WIRING 0
+#define KEYBD_PIO_DRIVEN_SIM_VALUE 0x0
+#define KEYBD_PIO_EDGE_TYPE "NONE"
+#define KEYBD_PIO_FREQ 72500000u
+#define KEYBD_PIO_HAS_IN 0
+#define KEYBD_PIO_HAS_OUT 1
+#define KEYBD_PIO_HAS_TRI 0
+#define KEYBD_PIO_IRQ -1
+#define KEYBD_PIO_IRQ_INTERRUPT_CONTROLLER_ID -1
+#define KEYBD_PIO_IRQ_TYPE "NONE"
+#define KEYBD_PIO_NAME "/dev/keybd_pio"
+#define KEYBD_PIO_RESET_VALUE 0x0
+#define KEYBD_PIO_SPAN 16
+#define KEYBD_PIO_TYPE "altera_avalon_pio"
 
 
 /*
@@ -523,47 +420,6 @@
 #define M95320_TARGETCLOCK 10000000u
 #define M95320_TARGETSSDELAY "30.0"
 #define M95320_TYPE "altera_avalon_spi"
-
-
-/*
- * mcu_pio configuration
- *
- */
-
-#define ALT_MODULE_CLASS_mcu_pio altera_avalon_pio
-#define MCU_PIO_BASE 0x200b0
-#define MCU_PIO_BIT_CLEARING_EDGE_REGISTER 1
-#define MCU_PIO_BIT_MODIFYING_OUTPUT_REGISTER 0
-#define MCU_PIO_CAPTURE 1
-#define MCU_PIO_DATA_WIDTH 8
-#define MCU_PIO_DO_TEST_BENCH_WIRING 0
-#define MCU_PIO_DRIVEN_SIM_VALUE 0x0
-#define MCU_PIO_EDGE_TYPE "ANY"
-#define MCU_PIO_FREQ 72500000u
-#define MCU_PIO_HAS_IN 1
-#define MCU_PIO_HAS_OUT 1
-#define MCU_PIO_HAS_TRI 0
-#define MCU_PIO_IRQ 2
-#define MCU_PIO_IRQ_INTERRUPT_CONTROLLER_ID 0
-#define MCU_PIO_IRQ_TYPE "EDGE"
-#define MCU_PIO_NAME "/dev/mcu_pio"
-#define MCU_PIO_RESET_VALUE 0x0
-#define MCU_PIO_SPAN 16
-#define MCU_PIO_TYPE "altera_avalon_pio"
-
-
-/*
- * mcu_spi configuration
- *
- */
-
-#define ALT_MODULE_CLASS_mcu_spi vl_avalon_spi_slave
-#define MCU_SPI_BASE 0x20140
-#define MCU_SPI_IRQ 7
-#define MCU_SPI_IRQ_INTERRUPT_CONTROLLER_ID 0
-#define MCU_SPI_NAME "/dev/mcu_spi"
-#define MCU_SPI_SPAN 64
-#define MCU_SPI_TYPE "vl_avalon_spi_slave"
 
 
 /*
@@ -622,44 +478,30 @@
 
 
 /*
- * reset_pio configuration
+ * spi_pio configuration
  *
  */
 
-#define ALT_MODULE_CLASS_reset_pio altera_avalon_pio
-#define RESET_PIO_BASE 0x20800
-#define RESET_PIO_BIT_CLEARING_EDGE_REGISTER 0
-#define RESET_PIO_BIT_MODIFYING_OUTPUT_REGISTER 1
-#define RESET_PIO_CAPTURE 0
-#define RESET_PIO_DATA_WIDTH 8
-#define RESET_PIO_DO_TEST_BENCH_WIRING 0
-#define RESET_PIO_DRIVEN_SIM_VALUE 0x0
-#define RESET_PIO_EDGE_TYPE "NONE"
-#define RESET_PIO_FREQ 72500000u
-#define RESET_PIO_HAS_IN 0
-#define RESET_PIO_HAS_OUT 1
-#define RESET_PIO_HAS_TRI 0
-#define RESET_PIO_IRQ -1
-#define RESET_PIO_IRQ_INTERRUPT_CONTROLLER_ID -1
-#define RESET_PIO_IRQ_TYPE "NONE"
-#define RESET_PIO_NAME "/dev/reset_pio"
-#define RESET_PIO_RESET_VALUE 0xff
-#define RESET_PIO_SPAN 32
-#define RESET_PIO_TYPE "altera_avalon_pio"
-
-
-/*
- * sdvo_edid_mem configuration
- *
- */
-
-#define ALT_MODULE_CLASS_sdvo_edid_mem avalon_slave_conduit
-#define SDVO_EDID_MEM_BASE 0x21800
-#define SDVO_EDID_MEM_IRQ -1
-#define SDVO_EDID_MEM_IRQ_INTERRUPT_CONTROLLER_ID -1
-#define SDVO_EDID_MEM_NAME "/dev/sdvo_edid_mem"
-#define SDVO_EDID_MEM_SPAN 512
-#define SDVO_EDID_MEM_TYPE "avalon_slave_conduit"
+#define ALT_MODULE_CLASS_spi_pio altera_avalon_pio
+#define SPI_PIO_BASE 0x200b0
+#define SPI_PIO_BIT_CLEARING_EDGE_REGISTER 1
+#define SPI_PIO_BIT_MODIFYING_OUTPUT_REGISTER 0
+#define SPI_PIO_CAPTURE 1
+#define SPI_PIO_DATA_WIDTH 32
+#define SPI_PIO_DO_TEST_BENCH_WIRING 0
+#define SPI_PIO_DRIVEN_SIM_VALUE 0x0
+#define SPI_PIO_EDGE_TYPE "ANY"
+#define SPI_PIO_FREQ 72500000u
+#define SPI_PIO_HAS_IN 1
+#define SPI_PIO_HAS_OUT 1
+#define SPI_PIO_HAS_TRI 0
+#define SPI_PIO_IRQ 2
+#define SPI_PIO_IRQ_INTERRUPT_CONTROLLER_ID 0
+#define SPI_PIO_IRQ_TYPE "EDGE"
+#define SPI_PIO_NAME "/dev/spi_pio"
+#define SPI_PIO_RESET_VALUE 0x0
+#define SPI_PIO_SPAN 16
+#define SPI_PIO_TYPE "altera_avalon_pio"
 
 
 /*
@@ -674,7 +516,7 @@
 #define SYSID_IRQ_INTERRUPT_CONTROLLER_ID -1
 #define SYSID_NAME "/dev/sysid"
 #define SYSID_SPAN 8
-#define SYSID_TIMESTAMP 1322046977u
+#define SYSID_TIMESTAMP 1345784876u
 #define SYSID_TYPE "altera_avalon_sysid"
 
 
@@ -745,47 +587,6 @@
 
 
 /*
- * ts_fifo_if_avalon_0 configuration
- *
- */
-
-#define ALT_MODULE_CLASS_ts_fifo_if_avalon_0 ts_fifo_if_avalon
-#define TS_FIFO_IF_AVALON_0_BASE 0x20e00
-#define TS_FIFO_IF_AVALON_0_IRQ -1
-#define TS_FIFO_IF_AVALON_0_IRQ_INTERRUPT_CONTROLLER_ID -1
-#define TS_FIFO_IF_AVALON_0_NAME "/dev/ts_fifo_if_avalon_0"
-#define TS_FIFO_IF_AVALON_0_SPAN 8
-#define TS_FIFO_IF_AVALON_0_TYPE "ts_fifo_if_avalon"
-
-
-/*
- * ts_pio configuration
- *
- */
-
-#define ALT_MODULE_CLASS_ts_pio altera_avalon_pio
-#define TS_PIO_BASE 0x200a0
-#define TS_PIO_BIT_CLEARING_EDGE_REGISTER 0
-#define TS_PIO_BIT_MODIFYING_OUTPUT_REGISTER 0
-#define TS_PIO_CAPTURE 0
-#define TS_PIO_DATA_WIDTH 8
-#define TS_PIO_DO_TEST_BENCH_WIRING 0
-#define TS_PIO_DRIVEN_SIM_VALUE 0x0
-#define TS_PIO_EDGE_TYPE "NONE"
-#define TS_PIO_FREQ 72500000u
-#define TS_PIO_HAS_IN 1
-#define TS_PIO_HAS_OUT 1
-#define TS_PIO_HAS_TRI 0
-#define TS_PIO_IRQ -1
-#define TS_PIO_IRQ_INTERRUPT_CONTROLLER_ID -1
-#define TS_PIO_IRQ_TYPE "NONE"
-#define TS_PIO_NAME "/dev/ts_pio"
-#define TS_PIO_RESET_VALUE 0x0
-#define TS_PIO_SPAN 16
-#define TS_PIO_TYPE "altera_avalon_pio"
-
-
-/*
  * uart_pc configuration
  *
  */
@@ -841,34 +642,6 @@
 
 
 /*
- * vai_i2c_master configuration
- *
- */
-
-#define ALT_MODULE_CLASS_vai_i2c_master avalon_i2c_master_top
-#define VAI_I2C_MASTER_BASE 0x20b00
-#define VAI_I2C_MASTER_IRQ 5
-#define VAI_I2C_MASTER_IRQ_INTERRUPT_CONTROLLER_ID 0
-#define VAI_I2C_MASTER_NAME "/dev/vai_i2c_master"
-#define VAI_I2C_MASTER_SPAN 8
-#define VAI_I2C_MASTER_TYPE "avalon_i2c_master_top"
-
-
-/*
- * veb_i2c_master configuration
- *
- */
-
-#define ALT_MODULE_CLASS_veb_i2c_master avalon_i2c_master_top
-#define VEB_I2C_MASTER_BASE 0x20c00
-#define VEB_I2C_MASTER_IRQ 13
-#define VEB_I2C_MASTER_IRQ_INTERRUPT_CONTROLLER_ID 0
-#define VEB_I2C_MASTER_NAME "/dev/veb_i2c_master"
-#define VEB_I2C_MASTER_SPAN 8
-#define VEB_I2C_MASTER_TYPE "avalon_i2c_master_top"
-
-
-/*
  * version_pio configuration
  *
  */
@@ -893,60 +666,6 @@
 #define VERSION_PIO_RESET_VALUE 0x0
 #define VERSION_PIO_SPAN 16
 #define VERSION_PIO_TYPE "altera_avalon_pio"
-
-
-/*
- * vi_0_pio configuration
- *
- */
-
-#define ALT_MODULE_CLASS_vi_0_pio altera_avalon_pio
-#define VI_0_PIO_BASE 0x20400
-#define VI_0_PIO_BIT_CLEARING_EDGE_REGISTER 1
-#define VI_0_PIO_BIT_MODIFYING_OUTPUT_REGISTER 0
-#define VI_0_PIO_CAPTURE 1
-#define VI_0_PIO_DATA_WIDTH 8
-#define VI_0_PIO_DO_TEST_BENCH_WIRING 0
-#define VI_0_PIO_DRIVEN_SIM_VALUE 0x0
-#define VI_0_PIO_EDGE_TYPE "ANY"
-#define VI_0_PIO_FREQ 72500000u
-#define VI_0_PIO_HAS_IN 1
-#define VI_0_PIO_HAS_OUT 1
-#define VI_0_PIO_HAS_TRI 0
-#define VI_0_PIO_IRQ 20
-#define VI_0_PIO_IRQ_INTERRUPT_CONTROLLER_ID 0
-#define VI_0_PIO_IRQ_TYPE "EDGE"
-#define VI_0_PIO_NAME "/dev/vi_0_pio"
-#define VI_0_PIO_RESET_VALUE 0x0
-#define VI_0_PIO_SPAN 16
-#define VI_0_PIO_TYPE "altera_avalon_pio"
-
-
-/*
- * vi_1_pio configuration
- *
- */
-
-#define ALT_MODULE_CLASS_vi_1_pio altera_avalon_pio
-#define VI_1_PIO_BASE 0x20480
-#define VI_1_PIO_BIT_CLEARING_EDGE_REGISTER 1
-#define VI_1_PIO_BIT_MODIFYING_OUTPUT_REGISTER 1
-#define VI_1_PIO_CAPTURE 1
-#define VI_1_PIO_DATA_WIDTH 8
-#define VI_1_PIO_DO_TEST_BENCH_WIRING 0
-#define VI_1_PIO_DRIVEN_SIM_VALUE 0x0
-#define VI_1_PIO_EDGE_TYPE "ANY"
-#define VI_1_PIO_FREQ 72500000u
-#define VI_1_PIO_HAS_IN 1
-#define VI_1_PIO_HAS_OUT 1
-#define VI_1_PIO_HAS_TRI 0
-#define VI_1_PIO_IRQ 19
-#define VI_1_PIO_IRQ_INTERRUPT_CONTROLLER_ID 0
-#define VI_1_PIO_IRQ_TYPE "LEVEL"
-#define VI_1_PIO_NAME "/dev/vi_1_pio"
-#define VI_1_PIO_RESET_VALUE 0x0
-#define VI_1_PIO_SPAN 32
-#define VI_1_PIO_TYPE "altera_avalon_pio"
 
 
 /*

@@ -87,7 +87,7 @@ ACDS_VERSION := 10.1sp1
 
 # Quartus Generated JDI File. Required for resolving node instance ID's with 
 # design component names. 
-JDI_FILE := $(ABS_BSP_ROOT_DIR)/../../S5L-sw-MF2-ep4c.jdi
+JDI_FILE := $(ABS_BSP_ROOT_DIR)/../../invaders-ep4c.jdi
 
 # Big-Endian operation. 
 # setting BIG_ENDIAN is false
@@ -147,9 +147,9 @@ SOPC_SYSID_FLAG += --sidp=0x20000
 ELF_PATCH_FLAG  += --sidp 0x20000
 
 # The SOPC Timestamp 
-# setting SOPC_TIMESTAMP is 1322046977
-SOPC_SYSID_FLAG += --timestamp=1322046977
-ELF_PATCH_FLAG  += --timestamp 1322046977
+# setting SOPC_TIMESTAMP is 1345784876
+SOPC_SYSID_FLAG += --timestamp=1345784876
+ELF_PATCH_FLAG  += --timestamp 1345784876
 
 # Small-footprint (polled mode) driver none 
 # setting altera_avalon_jtag_uart_driver.enable_small_driver is false

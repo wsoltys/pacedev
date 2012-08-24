@@ -125,9 +125,9 @@ kbd_probe(device_t dev)
 	  return (ENXIO);
 
 	if (hid_is_collection(d_ptr, d_len,
-	    HID_USAGE2(HUP_GENERIC_DESKTOP, HUG_JOYSTICK)))
+	    HID_USAGE2(HUP_GENERIC_DESKTOP, HUG_KEYBOARD)))
   {
-    printf ("%s() - HUP_GENERIC_DESKTOP:HUG_JOYSTICK detected!\n",
+    printf ("%s() - HUP_GENERIC_DESKTOP:HUG_KEYBOARD detected!\n",
             __FUNCTION__);
 		error = BUS_PROBE_GENERIC;
 	}

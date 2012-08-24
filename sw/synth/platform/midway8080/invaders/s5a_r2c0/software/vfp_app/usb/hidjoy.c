@@ -30,6 +30,8 @@ static device_probe_t joy_probe;
 static device_attach_t joy_attach;
 static device_detach_t joy_detach;
 
+extern void joy_event (uint8_t *buf, uint16_t len);
+
 static void
 joy_intr_callback(struct usb_xfer *xfer, usb_error_t error)
 {
@@ -58,7 +60,7 @@ joy_intr_callback(struct usb_xfer *xfer, usb_error_t error)
   
   		pc = usbd_xfer_get_frame(xfer, 0);
   		usbd_copy_out(pc, 0, buf, len);
-  		#if 1
+  		#if 0
   		  //if ((buf[0] | buf[1] | buf[2] | buf[3] | buf[4] | buf[5] | buf[6] | buf[7]) != 0)
       		printf("data = %02x %02x %02x %02x "
       			"%02x %02x %02x %02x\n",
@@ -67,6 +69,7 @@ joy_intr_callback(struct usb_xfer *xfer, usb_error_t error)
       			(len > 4) ? buf[4] : 0, (len > 5) ? buf[5] : 0,
       			(len > 6) ? buf[6] : 0, (len > 7) ? buf[7] : 0);
       #endif
+      joy_event (buf, len);
       // fall thru
         
   	case USB_ST_SETUP:
@@ -117,9 +120,9 @@ joy_probe(device_t dev)
 	  return (ENXIO);
 
 	if (hid_is_collection(d_ptr, d_len,
-	    HID_USAGE2(HUP_GENERIC_DESKTOP, HUG_KEYBOARD)))
+	    HID_USAGE2(HUP_GENERIC_DESKTOP, HUG_JOYSTICK)))
   {
-    printf ("%s() - HUP_GENERIC_DESKTOP:HUG_KEYBOARD detected!\n",
+    printf ("%s() - HUP_GENERIC_DESKTOP:HUG_JOYSTICK detected!\n",
             __FUNCTION__);
 		error = BUS_PROBE_GENERIC;
 	}

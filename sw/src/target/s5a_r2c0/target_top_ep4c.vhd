@@ -218,6 +218,13 @@ architecture SYN of target_top_ep4c is
 	signal test_blink_n	      : std_logic := '1';
   signal clk_120M           : std_logic := '0';
   signal clk_108M           : std_logic := '0';
+
+  -- CYCLONE<->STRATIX SPI signals
+  signal audio_pio_i        : std_logic_vector(31 downto 0);
+  signal jamma_pio_o        : std_logic_vector(31 downto 0);
+  signal keybd_pio_o        : std_logic_vector(31 downto 0);
+  signal spi_pio_i          : std_logic_vector(31 downto 0);
+  signal spi_pio_o          : std_logic_vector(spi_pio_i'range);
   
 begin
 
@@ -350,9 +357,10 @@ begin
 
   BLK_NIOS : block
   
-    -- here's everything we're not using for now
     signal clk_nios           : std_logic;
     signal rst_nios           : std_logic;
+
+    -- here's everything we're not using for now
     signal debug_pio_i        : std_logic_vector(31 downto 0);
     signal debug_pio_o        : std_logic_vector(debug_pio_i'range);
 
@@ -436,6 +444,9 @@ begin
         mem_we_n_from_the_altmemddr_0														=> ddr16_we_n,
         reset_phy_clk_n_from_the_altmemddr_0										=> open,
 
+        -- the_audio_pio
+        in_port_to_the_audio_pio                                => (others => '0'),
+
         -- the_debug_pio
         in_port_to_the_debug_pio                                => debug_pio_i,
         out_port_from_the_debug_pio                             => debug_pio_o,
@@ -446,23 +457,17 @@ begin
         SS_n_from_the_epcs_spi																	=> cfg_cson_s,
         MOSI_from_the_epcs_spi																	=> cfg_asdo_s,
 
+        -- the_jamma_pio
+        out_port_from_the_jamma_pio                             => jamma_pio_o,
+
+        -- the_keybd_pio
+        out_port_from_the_keybd_pio                             => keybd_pio_o,
+
         -- the_m95320
         MISO_to_the_m95320                                      => ee_so,
         MOSI_from_the_m95320                                    => ee_si,
         SCLK_from_the_m95320                                    => ee_ck,
         SS_n_from_the_m95320                                    => ee_csn,
-
-        -- the_mcu_pio
-        in_port_to_the_mcu_pio																	=> mcu_pio_i,
-        out_port_from_the_mcu_pio																=> mcu_pio_o,
-
-        -- the_mcu_spi
-        spi_miso_from_the_mcu_spi																=> mcu_spi_miso,
-        spi_mosi_to_the_mcu_spi																	=> mcu_spi_mosi,
-        spi_clk_to_the_mcu_spi																	=> mcu_spi_sclk,
-        spi_ss_n_to_the_mcu_spi																	=> mcu_spi_ss_n,
-        spi_mrdy_n_to_the_mcu_spi																=> mcu_spi_mrdy_n,
-        spi_srdy_n_from_the_mcu_spi															=> mcu_spi_srdy_n,
 
         -- the_one_wire_interface_0
         data_to_and_from_the_one_wire_interface_0               => sec_data,
@@ -478,6 +483,10 @@ begin
         coe_uh_rd_n_from_the_oxu210hp_if_0                      => uh_rdn,
         coe_uh_reset_n_from_the_oxu210hp_if_0                   => uh_resetn,
         coe_uh_wr_n_from_the_oxu210hp_if_0                      => uh_wrn,
+
+        -- the_spi_pio
+        in_port_to_the_spi_pio                                  => spi_pio_i,
+        out_port_from_the_spi_pio                               => spi_pio_o,
 
         -- the_oxu210hp_int
         in_port_to_the_oxu210hp_int                             => uh_intn,
@@ -529,6 +538,45 @@ begin
 		uh_intn_s	<= uh_intn or oxu210hp_int_mask;
 
   end block BLK_NIOS;
+  
+  BLK_SPI : block
+  begin
+    -- transmit jamma and keyboard to the STRATIX
+    process (clk_24M, reset)
+      variable spi_go_r : std_logic_vector(3 downto 0);
+      alias spi_go_prev : std_logic is spi_go_r(spi_go_r'left);
+      alias spi_go_um   : std_logic is spi_go_r(spi_go_r'left-1);
+      variable spi_d_r  : std_logic_vector(jamma_pio_o'range);
+      variable count    : unsigned(6 downto 0);
+      variable spi_clk  : std_logic;
+    begin
+      if reset = '1' then
+        spi_go_r := (others => '0');
+        count := (others => '1');
+      elsif rising_edge(clk_24M) then
+        -- start a transfer
+        if spi_go_prev = '0' and spi_go_um = '1' then
+          -- this should be stable before 'go'
+          spi_d_r := jamma_pio_o;
+          count := (others => '0');
+          spi_clk := '0';
+        elsif count(count'left) = '0' then
+          spi_clk := not spi_clk;
+          if spi_clk = '0' then
+            spi_d_r := spi_d_r(spi_d_r'left-1 downto 0) & '0';
+          end if;
+          count := count + 1;
+        end if;
+        -- unmeta the spi_pio_o 'go' signal
+        spi_go_r := spi_go_r(spi_go_r'left-1 downto 0) & spi_pio_o(0);
+      end if;
+      -- assign to pin
+      vid_address(4) <= not count(count'left);
+      vid_address(5) <= spi_clk;
+      vid_address(6) <= spi_d_r(spi_d_r'left);
+    end process;
+    
+  end block BLK_SPI;
   
   BLK_FLASHER : block
   begin

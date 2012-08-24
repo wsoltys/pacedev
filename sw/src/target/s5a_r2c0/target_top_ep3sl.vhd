@@ -303,20 +303,85 @@ begin
     inputs_i.ps2_mclk <= mclk_r(mclk_r'left);
   end process;
   
-  GEN_JAMMA : for i in 1 to 2 generate
-    inputs_i.jamma_n.coin(i) <= '1';
-    inputs_i.jamma_n.p(i).start <= '1';
-    inputs_i.jamma_n.p(i).up <= '1';
-    inputs_i.jamma_n.p(i).down <= '1';
-    inputs_i.jamma_n.p(i).left <= '1';
-    inputs_i.jamma_n.p(i).right <= '1';
-    inputs_i.jamma_n.p(i).button <= (others => '1');
-  end generate GEN_JAMMA;
+  BLK_SPI : block
+  
+    alias spi_en          : std_logic is vid_address(4);
+    alias spi_clk         : std_logic is vid_address(5);
+    alias spi_d           : std_logic is vid_address(6);
+      
+    signal jamma_i        : std_logic_vector(31 downto 0);
+  
+  begin
+  
+    process (clkrst_i)
+    
+      variable spi_en_r   : std_logic_vector(3 downto 0);
+      alias spi_en_prev   : std_logic is spi_en_r(spi_en_r'left);
+      alias spi_en_um     : std_logic is spi_en_r(spi_en_r'left-1);
+      variable spi_clk_r  : std_logic_vector(3 downto 0);
+      alias spi_clk_prev  : std_logic is spi_clk_r(spi_clk_r'left);
+      alias spi_clk_um    : std_logic is spi_clk_r(spi_clk_r'left-1);
+      variable count      : unsigned(5 downto 0); -- 0..64
+      variable spi_d_r    : std_logic_vector(3 downto 0);
+      alias spi_d_um      : std_logic is spi_d_r(spi_d_r'left-1);
+      variable spi_reg    : std_logic_vector(31 downto 0);
+    begin
+      if clkrst_i.rst(0) = '1' then
+        spi_en_r := (others => '0');
+        spi_clk_r := (others => '0');
+        spi_d_r := (others => '0');
+        spi_reg := (others => '0');
+        jamma_i <= (others => '1');
+      elsif rising_edge(clkrst_i.clk(0)) then
+        -- start of transfer?
+        if spi_en_prev = '0' and spi_en_um = '1' then
+          count := (others => '0');
+        elsif count(count'left) = '0' then
+          if spi_clk_prev = '0' and spi_clk_um = '1' then
+            -- clock in data on rising edge clk
+            spi_reg := spi_reg(spi_reg'left-1 downto 0) & spi_d_um;
+            count := count + 1;
+          end if;
+        else
+          jamma_i <= spi_reg;
+        end if;
+        -- unmeta en,clk signals
+        spi_en_r := spi_en_r(spi_en_r'left-1 downto 0) & spi_en;
+        spi_clk_r := spi_clk_r(spi_clk_r'left-1 downto 0) & spi_clk;
+        spi_d_r := spi_d_r(spi_d_r'left-1 downto 0) & spi_d;
+      end if;
+    end process;
+    
+    inputs_i.jamma_n.coin(1) <= jamma_i(9);
+    inputs_i.jamma_n.p(1).start <= jamma_i(10);
+    inputs_i.jamma_n.p(1).up <= jamma_i(0);
+    inputs_i.jamma_n.p(1).down <= jamma_i(3);
+    inputs_i.jamma_n.p(1).left <= jamma_i(1);
+    inputs_i.jamma_n.p(1).right <= jamma_i(2);
+    inputs_i.jamma_n.p(1).button(1) <= jamma_i(4);
+    inputs_i.jamma_n.p(1).button(2) <= jamma_i(5);
+    inputs_i.jamma_n.p(1).button(3) <= jamma_i(6);
+    inputs_i.jamma_n.p(1).button(4) <= jamma_i(7);
+    inputs_i.jamma_n.p(1).button(5) <= jamma_i(8);
+    
+    inputs_i.jamma_n.coin(2) <= '1';
+    inputs_i.jamma_n.p(2).start <= '1';
+    inputs_i.jamma_n.p(2).up <= '1';
+    inputs_i.jamma_n.p(2).down <= '1';
+    inputs_i.jamma_n.p(2).left <= '1';
+    inputs_i.jamma_n.p(2).right <= '1';
+    inputs_i.jamma_n.p(2).button(1) <= '1';
+    inputs_i.jamma_n.p(2).button(2) <= '1';
+    inputs_i.jamma_n.p(2).button(3) <= '1';
+    inputs_i.jamma_n.p(2).button(4) <= '1';
+    inputs_i.jamma_n.p(2).button(5) <= '1';
 
-  inputs_i.jamma_n.coin_cnt <= (others => '1');
-  inputs_i.jamma_n.service <= '1';
-  inputs_i.jamma_n.tilt <= '1';
-  inputs_i.jamma_n.test <= '1';
+    inputs_i.jamma_n.coin_cnt <= (others => '1');
+    inputs_i.jamma_n.service <= jamma_i(11);
+    inputs_i.jamma_n.tilt <= '1';
+    inputs_i.jamma_n.test <= '1';
+    
+  end block BLK_SPI;
   
   inputs_i.analogue <= (others => (others => '0'));
 
