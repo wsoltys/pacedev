@@ -330,7 +330,7 @@ begin
       end if;
     end process;
     
-    ps2_host_inst : entity work.apple_ii_ps2_host
+    ps2_host_inst : entity work.usb_ps2_host
       generic map
       (
         CLK_HZ          => 24000000
