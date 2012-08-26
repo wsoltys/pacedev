@@ -775,20 +775,8 @@ set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL_PIP
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ENABLE_ADVANCED_TRIGGER=0" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[9] -to "apple_ii_ps2_host:\\GEN_PS2:ps2_host_inst|ps2_kclk" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[10] -to "apple_ii_ps2_host:\\GEN_PS2:ps2_host_inst|ps2_kdat" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[11] -to vid_address[4] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[12] -to vid_address[5] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[13] -to vid_address[6] -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[9] -to "apple_ii_ps2_host:\\GEN_PS2:ps2_host_inst|ps2_kclk" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[10] -to "apple_ii_ps2_host:\\GEN_PS2:ps2_host_inst|ps2_kdat" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[11] -to vid_address[4] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[12] -to vid_address[5] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[13] -to vid_address[6] -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=14" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=14" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=000000000000000000000000000000000000000000000000000000000000000000" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=66" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=8140" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=26642" -section_id auto_signaltap_0
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/s5a_r2c0/braemac_uart/uart_top_level.v
 set_global_assignment -name VHDL_FILE ../../../../../src/component/io/i2c/oci2c/avalon_i2c_master_top.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/oxu210hp/oxu210hp_if.vhd
@@ -811,9 +799,38 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/toys/pwm_chas
 set_global_assignment -name VHDL_FILE ../../../../../src/component/toys/led_chaser.vhd
 set_global_assignment -name VHDL_FILE ep4c_sopc_system.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/ps2_host_fifo.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/ps2_host.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/target_top_ep4c.vhd
 set_global_assignment -name QIP_FILE ep4c_pll.qip
 set_global_assignment -name QIP_FILE lpll.qip
 set_global_assignment -name SIGNALTAP_FILE spi.stp
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[11] -to "usb_ps2_host:\\GEN_PS2:ps2_host_inst|ps2_send_data[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[12] -to "usb_ps2_host:\\GEN_PS2:ps2_host_inst|ps2_send_data[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[13] -to "usb_ps2_host:\\GEN_PS2:ps2_host_inst|ps2_send_data[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[14] -to "usb_ps2_host:\\GEN_PS2:ps2_host_inst|ps2_send_data[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[15] -to "usb_ps2_host:\\GEN_PS2:ps2_host_inst|ps2_send_data[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[16] -to "usb_ps2_host:\\GEN_PS2:ps2_host_inst|ps2_send_data[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[17] -to "usb_ps2_host:\\GEN_PS2:ps2_host_inst|ps2_send_data[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[18] -to "usb_ps2_host:\\GEN_PS2:ps2_host_inst|ps2_send_data[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[19] -to vid_address[4] -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[20] -to vid_address[5] -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[21] -to vid_address[6] -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[11] -to "usb_ps2_host:\\GEN_PS2:ps2_host_inst|ps2_send_data[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[12] -to "usb_ps2_host:\\GEN_PS2:ps2_host_inst|ps2_send_data[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[13] -to "usb_ps2_host:\\GEN_PS2:ps2_host_inst|ps2_send_data[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[14] -to "usb_ps2_host:\\GEN_PS2:ps2_host_inst|ps2_send_data[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[15] -to "usb_ps2_host:\\GEN_PS2:ps2_host_inst|ps2_send_data[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[16] -to "usb_ps2_host:\\GEN_PS2:ps2_host_inst|ps2_send_data[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[17] -to "usb_ps2_host:\\GEN_PS2:ps2_host_inst|ps2_send_data[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[18] -to "usb_ps2_host:\\GEN_PS2:ps2_host_inst|ps2_send_data[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[19] -to vid_address[4] -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[20] -to vid_address[5] -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[21] -to vid_address[6] -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=22" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=22" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=90" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=23119" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=22128" -section_id auto_signaltap_0
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

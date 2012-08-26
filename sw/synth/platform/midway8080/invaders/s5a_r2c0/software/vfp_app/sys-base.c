@@ -30,7 +30,7 @@ static os_thread_t system_base_thread;
 void
 s5a_watchdog_reset (void)
 {
-  printf ("generating watchdog\n");
+  PRINT (0, "generating watchdog\n");
   while (1);
 }
 
@@ -300,8 +300,6 @@ void joy_event (uint8_t *buf, uint16_t len)
 */  
   uint32_t jamma = 0;
 
-  printf ("buf[0] = %#x\n", buf[0]);
-  
   if ((int8_t)buf[1] < -40)
     jamma |= (1<<0);
   if ((int8_t)buf[0] < -40)
@@ -333,75 +331,145 @@ void joy_event (uint8_t *buf, uint16_t len)
   IOWR_ALTERA_AVALON_PIO_DATA (SPI_PIO_BASE, 0);        // stop
 }
 
+static uint32_t kbd_override = 0;
+
+void kbd_attach_event (uint8_t attach)
+{
+	PRINT (0, "%s(%d)\n", __FUNCTION__, attach);
+	
+	if (attach)
+		kbd_override = (1<<31);
+	else
+		kbd_override = 0;
+
+  IOWR_ALTERA_AVALON_PIO_DATA (KEYBD_PIO_BASE, kbd_override);
+}
+
+#define KBD_OVERRIDE	(1<<31)
+#define KBD_GO				(1<<30)
+#define KBD_MAKE			(1<<15)
+
+#define SEND(n)																					\
+	keybd = kbd_override | KBD_GO | (n);									\
+	IOWR_ALTERA_AVALON_PIO_DATA (KEYBD_PIO_BASE, keybd);	\
+	keybd &= ~KBD_GO;																			\
+	IOWR_ALTERA_AVALON_PIO_DATA (KEYBD_PIO_BASE, keybd)
+
+#define SEND_MAKE(n)		SEND(KBD_MAKE|(n))
+#define SEND_BREAK(n)		SEND(n)
+
 void kbd_event (uint8_t *buf, uint16_t len)
 {
-#if 0
-  uint32_t jamma = 0;
+	static uint8_t buf_r[16] = 
+	{ 
+		0, 0, 0, 0, 0, 0, 0, 0,  
+		0, 0, 0, 0, 0, 0, 0, 0
+	};
 
-	for (unsigned i=0; i<len; i++)
+	// 0=PS/2, 1=JAMMA
+	static uint8_t mode = 0;
+	unsigned i;
+
+  uint32_t keybd;
+
+	// check for mode switch
+	// <CTRL><ALT>
+	if (buf[0] == 0x05)
 	{
-		if (i == 0)
-			switch (buf[i])
-			{
-				case 0x01 :		jamma |= (1<<4);		break;	// <CTRL>
-				case 0x04 :		jamma |= (1<<5);		break;	// <ALT>
-				default :
-					break;
-			}
+		// <K>
+		if (buf[2] == 0x0E)
+		{
+			PRINT (0, "switched to KEYBOARD mode\n");
+			SEND_BREAK(0x78|(1<<0));
+			SEND_BREAK(0x78|(1<<2));
+			SEND_BREAK(0x0E);
+			mode = 0;
+			return;
+		}
 		else
-			switch (buf[i])
+		// <J>
+		if (buf[2] == 0x0D)
+		{
+			PRINT (0, "switched to JAMMA mode\n");
+			SEND_BREAK(0x78|(1<<0));
+			SEND_BREAK(0x78|(1<<2));
+			SEND_BREAK(0x0D);
+			mode = 1;
+			return;
+		}
+	}
+					
+	if (mode == 0)
+	{
+		if (!kbd_override)
+			return;
+
+		for (i=0; i<8; i++)
+		{
+			if (buf_r[0] & (buf_r[0] ^ buf[0]) & (1<<i))
 			{
-				case 0x52 :		jamma |= (1<<0);		break;	// <UP>
-				case 0x50 :		jamma |= (1<<1);		break;	// <LEFT>
-				case 0x4F :		jamma |= (1<<2);		break;	// <RIGHT>
-				case 0x51 :		jamma |= (1<<3);		break;	// <DOWN>
-				case 0x1D :		jamma |= (1<<6);		break;	// <Z>
-				case 0x1B :		jamma |= (1<<7);		break;	// <X>
-				case 0x06 :		jamma |= (1<<8);		break;	// <C>
-				case 0x22 :		jamma |= (1<<9);		break;	// <5>
-				case 0x1E :		jamma |= (1<<10);		break;	// <1>
-				case 0x3B :		jamma |= (1<<11);		break;	// <F2>
-				default :
-					break;
+				PRINT (0, "BREAK:b%d\n", i);
+				SEND_BREAK(0x78|i);
+			}
+			if (buf[0] & (1<<i))
+			{
+				PRINT (0, "MAKE:b%d\n", i);
+				SEND_MAKE(0x78|i);
+			}						
+		}
+		
+		for (unsigned i=1; i<len; i++)
+		{
+			if (buf_r[i] != 0 && buf[i] != buf_r[i])
+			{
+				// send a 'break' code
+				PRINT (0, "BREAK:%#02x\n", buf_r[i]);
+				SEND_BREAK(buf_r[i]);
 			}
 				
+			if (buf[i] == 0)
+				continue;
+				
+			PRINT (0, "MAKE:%#02x\n", buf[i]);
+			SEND_MAKE(buf[i]);
+		}
+		
+		memcpy (buf_r, buf, len);
 	}
-
-  IOWR_ALTERA_AVALON_PIO_DATA (JAMMA_PIO_BASE, ~jamma);
-  IOWR_ALTERA_AVALON_PIO_DATA (SPI_PIO_BASE, (1<<0));   // go
-  IOWR_ALTERA_AVALON_PIO_DATA (SPI_PIO_BASE, 0);        // stop
-  
-#else
-
-  uint32_t keybd = 0;
-
-	for (unsigned i=0; i<len; i++)
+	else
 	{
-		if (i == 0)
-			switch (buf[i])
-			{
-				default :
-					continue;
-					break;
-			}
-		else
-			switch (buf[i])
-			{
-				case 0x22 :		keybd = '5';			break;
-				case 0x1E :		keybd = '1';			break;
-				default :
-					continue;
-					break;
-			}
-
-	  keybd |= (1<<31)|(1<<30);
-		printf ("%#x\n", keybd);
-	  IOWR_ALTERA_AVALON_PIO_DATA (KEYBD_PIO_BASE, keybd);
-	  keybd &= ~(1<<30);
-	  IOWR_ALTERA_AVALON_PIO_DATA (KEYBD_PIO_BASE, keybd);
-	}
+	  uint32_t jamma = 0;
 	
-#endif
+		for (unsigned i=0; i<len; i++)
+		{
+			if (i == 0)
+			{
+				if (buf[i] & (1<<0))	jamma |= (1<<4);	// <CTRL>
+				if (buf[i] & (1<<2))	jamma |= (1<<5);	// <ALT>
+			}
+			else
+				switch (buf[i])
+				{
+					case 0x52 :		jamma |= (1<<0);		break;	// <UP>
+					case 0x50 :		jamma |= (1<<1);		break;	// <LEFT>
+					case 0x4F :		jamma |= (1<<2);		break;	// <RIGHT>
+					case 0x51 :		jamma |= (1<<3);		break;	// <DOWN>
+					case 0x1D :		jamma |= (1<<6);		break;	// <Z>
+					case 0x1B :		jamma |= (1<<7);		break;	// <X>
+					case 0x06 :		jamma |= (1<<8);		break;	// <C>
+					case 0x22 :		jamma |= (1<<9);		break;	// <5>
+					case 0x1E :		jamma |= (1<<10);		break;	// <1>
+					case 0x3B :		jamma |= (1<<11);		break;	// <F2>
+					default :
+						break;
+				}
+					
+		}
+	
+	  IOWR_ALTERA_AVALON_PIO_DATA (JAMMA_PIO_BASE, ~jamma);
+	  IOWR_ALTERA_AVALON_PIO_DATA (SPI_PIO_BASE, (1<<0));   // go
+	  IOWR_ALTERA_AVALON_PIO_DATA (SPI_PIO_BASE, 0);        // stop
+	}  
 }
 
 #define INTRPT_STACKSIZE		(16*1024)

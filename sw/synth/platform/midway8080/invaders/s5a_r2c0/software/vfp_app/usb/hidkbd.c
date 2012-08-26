@@ -142,6 +142,8 @@ kbd_probe(device_t dev)
 	return (error);
 }
 
+extern void kbd_attach_event (uint8_t attach);
+
 static int
 kbd_attach(device_t dev)
 {
@@ -169,6 +171,7 @@ kbd_attach(device_t dev)
 		goto detach;
 	}
 
+	kbd_attach_event (1);
 	usbd_transfer_start(sc->sc_xfer[KBD_INTR_DT]);
 	return (0);			/* success */
 
@@ -189,6 +192,8 @@ kbd_detach(device_t dev)
 	usb_callout_drain(&sc->sc_callout);
 
 	mtx_destroy(&sc->sc_mtx);
+
+	kbd_attach_event (0);
 
 	return (0);
 }

@@ -78,6 +78,7 @@ package kbd_pkg is
   constant SCANCODE_SCROLL      : std_logic_vector(7 downto 0) := X"7E";
 	constant SCANCODE_CAPSLOCK    : std_logic_vector(7 downto 0) := X"58";
 	constant SCANCODE_BACKSLASH   : std_logic_vector(7 downto 0) := X"5D";
+	constant SCANCODE_NUMLOCK     : std_logic_vector(7 downto 0) := X"77";
   constant SCANCODE_LCTRL      	: std_logic_vector(7 downto 0) := X"14";
   constant SCANCODE_LGUI        : std_logic_vector(7 downto 0) := X"1F"; -- E0
 	constant SCANCODE_LALT				: std_logic_vector(7 downto 0) := X"11";
@@ -101,6 +102,8 @@ package kbd_pkg is
 	alias SCANCODE_PAD9           : std_logic_vector(7 downto 0) is SCANCODE_PGUP;
 	constant SCANCODE_PADPLUS     : std_logic_vector(7 downto 0) := X"79";
 	constant SCANCODE_PADMINUS    : std_logic_vector(7 downto 0) := X"7B";
+  constant SCANCODE_PADTIMES    : std_logic_vector(7 downto 0) := X"7C";
+  constant SCANCODE_PADEQUALS   : std_logic_vector(7 downto 0) := X"0F";
 	
   type kbd_row is array (natural range <>) of std_logic_vector(7 downto 0);
   type kbd_col is array (natural range <>) of std_logic_vector(7 downto 0);

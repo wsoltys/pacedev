@@ -294,7 +294,7 @@ begin
     signal usb_ps2_kclk : std_logic;
     signal usb_ps2_kdat : std_logic;
     
-    alias ps2_fifo_data   : std_logic_vector(7 downto 0) is keybd_pio_o(7 downto 0);
+    alias ps2_fifo_data   : std_logic_vector(15 downto 0) is keybd_pio_o(15 downto 0);
     alias ps2_use_usb     : std_logic is keybd_pio_o(31);
     alias ps2_fifo_wren   : std_logic is keybd_pio_o(30);
     signal ps2_fifo_wrreq : std_logic;
