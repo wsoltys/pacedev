@@ -436,8 +436,6 @@ begin
     signal oxu210hp_int_mask  : std_logic := '0';
     signal uh_intn_s          : std_logic;
 
-    -- these signals are only on the S5
-    signal cfg_data           : std_logic;
     signal cfg_dclk_s         : std_logic;
     signal cfg_cson_s         : std_logic;
     signal cfg_asdo_s         : std_logic;

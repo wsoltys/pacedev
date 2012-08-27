@@ -2234,6 +2234,7 @@ set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_reset_n
 set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_reset_core_n
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to vid_reset_n
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to vid_reset_core_n
+set_global_assignment -name VHDL_FILE ../../../midway8080/invaders/s5a_r2c0/spi_pll.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sdram_pkg.vhd
