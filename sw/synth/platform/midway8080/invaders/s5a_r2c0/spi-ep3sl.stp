@@ -1,225 +1,57 @@
 <session jtag_chain="USB-Blaster [USB-0]" jtag_device="@2: EP3SL70 (0x021010DD)" sof_file="">
   <display_tree gui_logging_enabled="0">
-    <display_branch instance="auto_signaltap_0" signal_set="USE_GLOBAL_TEMP" trigger="USE_GLOBAL_TEMP"/>
+    <display_branch instance="auto_signaltap_0" log="USE_GLOBAL_TEMP" signal_set="USE_GLOBAL_TEMP" trigger="USE_GLOBAL_TEMP"/>
   </display_tree>
-  <global_info>
-    <single attribute="active instance" value="0"/>
-    <multi attribute="frame size" size="2" value="1920,1138"/>
-    <single attribute="jtag widget visible" value="1"/>
-    <multi attribute="jtag widget size" size="2" value="334,120"/>
-    <single attribute="instance widget visible" value="1"/>
-    <single attribute="config widget visible" value="1"/>
-    <single attribute="hierarchy widget visible" value="1"/>
-    <single attribute="data log widget visible" value="1"/>
-  </global_info>
-  <instance entity_name="sld_signaltap" is_auto_node="yes" name="auto_signaltap_0" source_file="sld_signaltap.vhd">
+  <instance entity_name="sld_signaltap" is_auto_node="yes" is_expanded="true" name="auto_signaltap_0" source_file="sld_signaltap.vhd">
     <node_ip_info instance_id="0" mfg_id="110" node_id="0" version="6"/>
     <position_info>
-      <single attribute="active tab" value="1"/>
+      <single attribute="active tab" value="0"/>
     </position_info>
-    <signal_set global_temp="1" name="signal_set: 2012/08/24 17:02:30  #0">
-      <clock name="pll:\BLK_CLOCKING:GEN_PLL:pll_inst|c0" polarity="posedge" tap_mode="classic"/>
+    <signal_set global_temp="1" name="signal_set: 2012/08/28 00:03:52  #0">
+      <clock name="clk24_d" polarity="posedge" tap_mode="classic"/>
       <config ram_type="M4K" reserved_data_nodes="0" reserved_storage_qualifier_nodes="0" reserved_trigger_nodes="0" sample_depth="128" trigger_in_enable="no" trigger_out_enable="no"/>
       <top_entity/>
       <signal_vec>
         <trigger_input_vec>
-          <wire name="\BLK_SPI:count[0]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:count[1]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:count[2]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:count[3]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:count[4]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:count[5]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[0]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[10]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[11]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[1]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[2]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[3]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[4]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[5]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[6]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[7]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[8]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[9]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[0]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[10]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[11]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[1]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[2]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[3]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[4]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[5]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[6]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[7]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[8]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[9]" tap_mode="classic" type="register"/>
-          <wire name="vid_address[4]" tap_mode="classic" type="input pin"/>
-          <wire name="vid_address[5]" tap_mode="classic" type="input pin"/>
-          <wire name="vid_address[6]" tap_mode="classic" type="input pin"/>
+          <wire name="vid_data[10]" tap_mode="classic" type="bidir pin"/>
+          <wire name="vid_data[8]" tap_mode="classic" type="bidir pin"/>
+          <wire name="vid_data[9]" tap_mode="classic" type="bidir pin"/>
         </trigger_input_vec>
         <data_input_vec>
-          <wire name="\BLK_SPI:count[0]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:count[1]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:count[2]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:count[3]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:count[4]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:count[5]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[0]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[10]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[11]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[1]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[2]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[3]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[4]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[5]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[6]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[7]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[8]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[9]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[0]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[10]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[11]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[1]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[2]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[3]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[4]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[5]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[6]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[7]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[8]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[9]" tap_mode="classic" type="register"/>
-          <wire name="vid_address[4]" tap_mode="classic" type="input pin"/>
-          <wire name="vid_address[5]" tap_mode="classic" type="input pin"/>
-          <wire name="vid_address[6]" tap_mode="classic" type="input pin"/>
+          <wire name="vid_data[10]" tap_mode="classic" type="bidir pin"/>
+          <wire name="vid_data[8]" tap_mode="classic" type="bidir pin"/>
+          <wire name="vid_data[9]" tap_mode="classic" type="bidir pin"/>
         </data_input_vec>
         <storage_qualifier_input_vec>
-          <wire name="\BLK_SPI:count[0]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:count[1]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:count[2]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:count[3]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:count[4]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:count[5]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[0]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[10]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[11]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[1]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[2]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[3]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[4]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[5]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[6]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[7]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[8]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:jamma_i[9]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[0]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[10]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[11]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[1]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[2]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[3]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[4]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[5]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[6]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[7]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[8]" tap_mode="classic" type="register"/>
-          <wire name="\BLK_SPI:spi_reg[9]" tap_mode="classic" type="register"/>
-          <wire name="vid_address[4]" tap_mode="classic" type="input pin"/>
-          <wire name="vid_address[5]" tap_mode="classic" type="input pin"/>
-          <wire name="vid_address[6]" tap_mode="classic" type="input pin"/>
+          <wire name="vid_data[10]" tap_mode="classic" type="bidir pin"/>
+          <wire name="vid_data[8]" tap_mode="classic" type="bidir pin"/>
+          <wire name="vid_data[9]" tap_mode="classic" type="bidir pin"/>
         </storage_qualifier_input_vec>
       </signal_vec>
       <presentation>
         <data_view>
-          <net is_signal_inverted="no" name="vid_address[4]"/>
-          <net is_signal_inverted="no" name="vid_address[5]"/>
-          <net is_signal_inverted="no" name="vid_address[6]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[0]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[1]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[2]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[3]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[4]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[5]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[6]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[7]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[8]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[9]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[10]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[11]"/>
-          <bus is_signal_inverted="no" link="all" name="\BLK_SPI:count[0..5]" order="lsb_to_msb" radix="hex" state="collapse" type="register">
-            <net is_signal_inverted="no" name="\BLK_SPI:count[0]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:count[1]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:count[2]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:count[3]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:count[4]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:count[5]"/>
-          </bus>
-          <bus is_signal_inverted="no" link="all" name="\BLK_SPI:spi_reg[0..11]" order="lsb_to_msb" radix="hex" state="collapse" type="register">
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[0]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[1]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[2]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[3]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[4]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[5]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[6]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[7]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[8]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[9]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[10]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[11]"/>
-          </bus>
+          <net is_signal_inverted="no" name="vid_data[8]"/>
+          <net is_signal_inverted="no" name="vid_data[9]"/>
+          <net is_signal_inverted="no" name="vid_data[10]"/>
         </data_view>
         <setup_view>
-          <net is_signal_inverted="no" name="vid_address[4]"/>
-          <net is_signal_inverted="no" name="vid_address[5]"/>
-          <net is_signal_inverted="no" name="vid_address[6]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[0]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[1]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[2]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[3]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[4]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[5]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[6]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[7]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[8]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[9]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[10]"/>
-          <net is_signal_inverted="no" name="\BLK_SPI:jamma_i[11]"/>
-          <bus is_signal_inverted="no" link="all" name="\BLK_SPI:count[0..5]" order="lsb_to_msb" radix="hex" state="collapse" type="register">
-            <net is_signal_inverted="no" name="\BLK_SPI:count[0]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:count[1]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:count[2]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:count[3]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:count[4]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:count[5]"/>
-          </bus>
-          <bus is_signal_inverted="no" link="all" name="\BLK_SPI:spi_reg[0..11]" order="lsb_to_msb" radix="hex" state="collapse" type="register">
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[0]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[1]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[2]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[3]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[4]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[5]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[6]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[7]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[8]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[9]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[10]"/>
-            <net is_signal_inverted="no" name="\BLK_SPI:spi_reg[11]"/>
-          </bus>
+          <net is_signal_inverted="no" name="vid_data[8]"/>
+          <net is_signal_inverted="no" name="vid_data[9]"/>
+          <net is_signal_inverted="no" name="vid_data[10]"/>
         </setup_view>
       </presentation>
-      <trigger attribute_mem_mode="false" gap_record="true" global_temp="1" name="trigger: 2012/08/24 17:02:30  #1" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="1" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="true" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_in="dont_care" trigger_out="active high" trigger_type="circular">
+      <trigger CRC="76AF8047" attribute_mem_mode="false" gap_record="true" global_temp="1" name="trigger: 2012/08/28 00:03:52  #1" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="1" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="false" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_in="dont_care" trigger_out="active high" trigger_type="circular">
         <power_up_trigger position="pre" storage_qualifier_disabled="no" trigger_in="dont_care" trigger_out="active high"/>
         <events use_custom_flow_control="no">
-          <level enabled="yes" name="condition1" type="basic">'vid_address[4]' == rising edge
+          <level enabled="yes" name="condition1" type="basic">
             <power_up enabled="yes">
             </power_up>
             <op_node/>
           </level>
         </events>
         <storage_qualifier_events>
-          <transitional>000000000000000000000000000000000
-            <pwr_up_transitional>000000000000000000000000000000000</pwr_up_transitional>
+          <transitional>000
+            <pwr_up_transitional>000</pwr_up_transitional>
           </transitional>
           <storage_qualifier_level type="basic">
             <power_up>
@@ -237,9 +69,23 @@
             <op_node/>
           </storage_qualifier_level>
         </storage_qualifier_events>
+        <log>
+          <data global_temp="1" name="log: 2012/08/28 00:08:55  #0" power_up_mode="false" sample_depth="128" trigger_position="16">010011010011010011010011010011010011000000000000000000010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011000000000000000000010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011010011</data>
+          <extradata>1111111111111111T111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111</extradata>
+        </log>
       </trigger>
     </signal_set>
   </instance>
   <mnemonics/>
   <static_plugin_mnemonics/>
+  <global_info>
+    <single attribute="active instance" value="0"/>
+    <single attribute="config widget visible" value="1"/>
+    <single attribute="data log widget visible" value="1"/>
+    <single attribute="hierarchy widget visible" value="1"/>
+    <single attribute="instance widget visible" value="1"/>
+    <single attribute="jtag widget visible" value="1"/>
+    <multi attribute="frame size" size="2" value="1920,1138"/>
+    <multi attribute="jtag widget size" size="2" value="334,120"/>
+  </global_info>
 </session>

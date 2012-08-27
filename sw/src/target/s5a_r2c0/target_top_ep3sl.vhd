@@ -303,12 +303,8 @@ begin
     inputs_i.ps2_mclk <= mclk_r(mclk_r'left);
   end process;
   
-  BLK_SPI : block
+  BLK_JAMMA : block
   
-    alias spi_en          : std_logic is vid_address(4);
-    alias spi_clk         : std_logic is vid_address(5);
-    alias spi_d           : std_logic is vid_address(6);
-      
     signal spi_fast_clk   : std_logic;
     signal jamma_i        : std_logic_vector(31 downto 0);
   
@@ -317,49 +313,23 @@ begin
     spi_pll_inst : entity work.spi_pll
       port map
       (
-        inclk0  =>  clk_24M,
-        c0      =>  spi_fast_clk
+        inclk0        =>  clk_24M,
+        c0            =>  spi_fast_clk
+      );
+
+    uni_spi_rx_inst : entity work.uni_spi_rx
+      port map
+      (
+        clk           => spi_fast_clk,
+        rst           => clkrst_i.arst,
+        
+        spi_en        => vid_address(4),
+        spi_clk       => vid_address(5),
+        spi_d         => vid_address(6),
+        
+        data          => jamma_i
       );
       
-    process (spi_fast_clk, clkrst_i.arst)
-    
-      variable spi_en_r   : std_logic_vector(3 downto 0);
-      alias spi_en_prev   : std_logic is spi_en_r(spi_en_r'left);
-      alias spi_en_um     : std_logic is spi_en_r(spi_en_r'left-1);
-      variable spi_clk_r  : std_logic_vector(3 downto 0);
-      alias spi_clk_prev  : std_logic is spi_clk_r(spi_clk_r'left);
-      alias spi_clk_um    : std_logic is spi_clk_r(spi_clk_r'left-1);
-      variable count      : unsigned(5 downto 0); -- 0..64
-      variable spi_d_r    : std_logic_vector(3 downto 0);
-      alias spi_d_um      : std_logic is spi_d_r(spi_d_r'left-1);
-      variable spi_reg    : std_logic_vector(31 downto 0);
-    begin
-      if clkrst_i.arst = '1' then
-        spi_en_r := (others => '0');
-        spi_clk_r := (others => '0');
-        spi_d_r := (others => '0');
-        spi_reg := (others => '0');
-        jamma_i <= (others => '1');
-      elsif rising_edge(spi_fast_clk) then
-        -- start of transfer?
-        if spi_en_prev = '0' and spi_en_um = '1' then
-          count := (others => '0');
-        elsif count(count'left) = '0' then
-          if spi_clk_prev = '0' and spi_clk_um = '1' then
-            -- clock in data on rising edge clk
-            spi_reg := spi_reg(spi_reg'left-1 downto 0) & spi_d_um;
-            count := count + 1;
-          end if;
-        else
-          jamma_i <= spi_reg;
-        end if;
-        -- unmeta en,clk signals
-        spi_en_r := spi_en_r(spi_en_r'left-1 downto 0) & spi_en;
-        spi_clk_r := spi_clk_r(spi_clk_r'left-1 downto 0) & spi_clk;
-        spi_d_r := spi_d_r(spi_d_r'left-1 downto 0) & spi_d;
-      end if;
-    end process;
-    
     -- really should unmeta jamma_i...
     
     inputs_i.jamma_n.coin(1) <= jamma_i(9);
@@ -391,7 +361,69 @@ begin
     inputs_i.jamma_n.tilt <= '1';
     inputs_i.jamma_n.test <= '1';
     
-  end block BLK_SPI;
+  end block BLK_JAMMA;
+  
+  BLK_AUDIO : block
+  
+    signal spi_en_s   : std_logic;
+    signal spi_go     : std_logic;
+    
+  begin
+
+    -- this is really crappy, but good enough for testing
+    -- what we really should be doing is using a FIFO
+    -- clocked in by the audio clock
+    -- clocked out by the SPI clock
+    -- so we might drop samples, but never glitch
+    
+    process (clk_24M, clkrst_i.arst)
+      type state_t is ( IDLE, SENDING );
+      variable state    : state_t;
+      variable spi_en_r : std_logic;
+    begin
+      if clkrst_i.arst = '1' then
+        spi_go <= '0';
+        state := IDLE;
+        spi_en_r := '0';
+      elsif rising_edge(clk_24M) then
+        spi_go <= '0';  -- default
+        case state is
+          when IDLE =>
+            -- any time we're idle is good to go
+            if spi_en_s = '0' then
+              spi_go <= '1';
+              state := SENDING;
+            end if;
+          when SENDING =>
+            -- wait for falling-edge of spi_en
+            if spi_en_r = '1' and spi_en_s = '0' then
+              state := IDLE;
+            end if;
+          when others =>
+            null;
+        end case;
+        spi_en_r := spi_en_s;
+      end if;
+    end process;
+    
+    uni_spi_tx_inst : entity work.uni_spi_tx
+      port map
+      (
+        clk                 => clk_24M,
+        rst                 => clkrst_i.arst,
+        
+        spi_en              => spi_en_s,
+        spi_clk             => vid_data(9),
+        spi_d               => vid_data(10),
+        
+        go                  => spi_go,
+        data(31 downto 16)  => audio_o.ldata,
+        data(15 downto 0)   => audio_o.rdata
+      );
+  
+    vid_data(8) <= spi_en_s;
+    
+  end block BLK_AUDIO;
   
   inputs_i.analogue <= (others => (others => '0'));
 

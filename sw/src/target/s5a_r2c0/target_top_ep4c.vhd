@@ -223,6 +223,9 @@ architecture SYN of target_top_ep4c is
   --alias clk_24M576_b        : std_logic is clk24_a;
   -- clocks
   
+  signal clk_nios           : std_logic;
+  signal rst_nios           : std_logic;
+
   signal ddc_reset          : std_logic := '0';
   signal dvi_hotplug_s      : std_logic := '0';
   signal dvo_hotplug        : std_logic := '0';
@@ -239,7 +242,7 @@ architecture SYN of target_top_ep4c is
   signal keybd_pio_o        : std_logic_vector(31 downto 0);
   signal spi_pio_i          : std_logic_vector(31 downto 0);
   signal spi_pio_o          : std_logic_vector(spi_pio_i'range);
-  
+
 begin
 
 	reset_gen : process(clk_24M)
@@ -259,10 +262,6 @@ begin
   reset <= init; -- or not tp_84; --veb_reset;
 	reset_n <= not reset;
 
-  GEN_VID_RESET : if not S5AR2_HAS_PS2 generate
-    vid_reset_n <= dbgio(7);
-  end generate GEN_VID_RESET;
-  
   ep4c_pll_inst : entity work.ep4c_pll
     port map
     (
@@ -363,9 +362,10 @@ begin
         ps2_kclk        => usb_ps2_kclk,
         ps2_kdat        => usb_ps2_kdat
       );
-    
+  else generate
+    vid_reset_n <= '1';
   end generate GEN_PS2;
-  
+
   BLK_DVO_INIT : block
 
     signal vdo_scl_i      : std_logic := '0';
@@ -425,9 +425,6 @@ begin
 
   BLK_NIOS : block
   
-    signal clk_nios           : std_logic;
-    signal rst_nios           : std_logic;
-
     -- here's everything we're not using for now
     signal debug_pio_i        : std_logic_vector(31 downto 0);
     signal debug_pio_o        : std_logic_vector(debug_pio_i'range);
@@ -510,7 +507,7 @@ begin
         reset_phy_clk_n_from_the_altmemddr_0										=> open,
 
         -- the_audio_pio
-        in_port_to_the_audio_pio                                => (others => '0'),
+        in_port_to_the_audio_pio                                => audio_pio_i,
 
         -- the_debug_pio
         in_port_to_the_debug_pio                                => debug_pio_i,
@@ -602,6 +599,8 @@ begin
     -- We can disable uh_intn to the nios by setting oxu210hp_int pio to '1'
 		uh_intn_s	<= uh_intn or oxu210hp_int_mask;
 
+    debug_pio_i(7 downto 0) <= dbgio(7 downto 0);
+    
 		led_avo <= not debug_pio_o(0);
 		led_dvo <= not debug_pio_o(1);
 		led_avi <= not debug_pio_o(2);
@@ -619,44 +618,43 @@ begin
     
   end block BLK_NIOS;
   
-  BLK_SPI : block
+  BLK_JAMMA_TX : block
   begin
-    -- transmit jamma and keyboard to the STRATIX
-    process (clk_24M, reset)
-      variable spi_go_r : std_logic_vector(3 downto 0);
-      alias spi_go_prev : std_logic is spi_go_r(spi_go_r'left);
-      alias spi_go_um   : std_logic is spi_go_r(spi_go_r'left-1);
-      variable spi_d_r  : std_logic_vector(jamma_pio_o'range);
-      variable count    : unsigned(6 downto 0);
-      variable spi_clk  : std_logic;
-    begin
-      if reset = '1' then
-        spi_go_r := (others => '0');
-        count := (others => '1');
-      elsif rising_edge(clk_24M) then
-        -- start a transfer
-        if spi_go_prev = '0' and spi_go_um = '1' then
-          -- this should be stable before 'go'
-          spi_d_r := jamma_pio_o;
-          count := (others => '0');
-          spi_clk := '0';
-        elsif count(count'left) = '0' then
-          spi_clk := not spi_clk;
-          if spi_clk = '0' then
-            spi_d_r := spi_d_r(spi_d_r'left-1 downto 0) & '0';
-          end if;
-          count := count + 1;
-        end if;
-        -- unmeta the spi_pio_o 'go' signal
-        spi_go_r := spi_go_r(spi_go_r'left-1 downto 0) & spi_pio_o(0);
-      end if;
-      -- assign to pin
-      vid_address(4) <= not count(count'left);
-      vid_address(5) <= spi_clk;
-      vid_address(6) <= spi_d_r(spi_d_r'left);
-    end process;
-    
-  end block BLK_SPI;
+  
+    uni_spi_tx_inst : entity work.uni_spi_tx
+      port map
+      (
+        clk           => clk_24M,
+        rst           => reset,
+        
+        spi_en        => vid_address(4),
+        spi_clk       => vid_address(5),
+        spi_d         => vid_address(6),
+        
+        go            => spi_pio_o(0),
+        data          => jamma_pio_o
+      );
+  
+  end block BLK_JAMMA_TX;
+  
+  BLK_AUDIO_RX : block
+  begin
+  
+    uni_spi_rx_inst : entity work.uni_spi_rx
+      port map
+      (
+        clk           => clk_nios,
+        rst           => rst_nios,
+        
+        spi_en        => vid_data(8),
+        spi_clk       => vid_data(9),
+        spi_d         => vid_data(10),
+        
+        irq           => spi_pio_i(0),
+        data          => audio_pio_i
+      );
+      
+  end block BLK_AUDIO_RX;
   
   BLK_FLASHER : block
   begin
@@ -681,7 +679,7 @@ begin
   BLK_LEDS : block
     signal leds_o : std_logic_vector(7 downto 0);
   begin
-    vid_data <= (others => '0');
+    vid_data <= (others => 'Z');
     leds_o <= vid_data(7 downto 0);
   end block BLK_LEDS;
   

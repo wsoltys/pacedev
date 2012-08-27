@@ -140,7 +140,7 @@ void system_base_task (void* data)
   IOWR_ALTERA_AVALON_PIO_DIRECTION (USB_PIO_BASE, USB_PIO_DIR);
 
   debug_pio_in = IORD_ALTERA_AVALON_PIO_DATA (DEBUG_PIO_BASE);
-  debug_pio_in |= 0xFF;
+  debug_pio_in |= 0x0F;
   PRINT (0, "debug_pio_in = $%08lX\n", debug_pio_in);
 
   uint8_t romid[8];
@@ -220,6 +220,7 @@ void system_base_task (void* data)
         led_enable (LED_VLI,CTI_STABLE(egmvid_stat));
       #endif
 
+			
       // 'alive' LED
       static uint8_t alive_led = 0;
       struct timespec ticks;
@@ -242,12 +243,18 @@ void system_base_task (void* data)
         usec_r = usec;
       }
 
+      uint32_t audio_in = IORD_ALTERA_AVALON_PIO_DATA (AUDIO_PIO_BASE);
+			if (audio_in != 0)
+				printf ("%#x\n", audio_in);
+				
       // for debugging only
       //#ifdef BUILD_INCLUDE_DEBUG
+      #if 0
       debug_pio_in = IORD_ALTERA_AVALON_PIO_DATA (DEBUG_PIO_BASE);
       debug_pio_in |= 0xFF;
       if ((debug_pio_in & (1<<7)) == 0)
         loop_break = 1;
+      #endif
       //#endif
     }
 

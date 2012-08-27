@@ -40,8 +40,9 @@ Init (rtems_task_argument arg)
 	system_base_init ();
 
   #ifdef BUILD_ENABLE_USB
+  	uint32_t debug_pio_in = IORD_ALTERA_AVALON_PIO_DATA (DEBUG_PIO_BASE);
     PRINT (0, "#define BUILD_ENABLE_USB\n");
-    if (init_usb () < 0)
+    if (init_usb (debug_pio_in & (1<<7) ? 0 : 1) < 0)
       PRINT (0, "init_usb() failed!\n");
   #endif
 

@@ -28,11 +28,13 @@
 int usb_start_bsd_stack (void);
 
 int
-init_usb (void)
+init_usb (uint8_t use_host_power)
 {
   // init the OXU210HP
   uint32_t data32;
 
+	PRINT (0, "%s(%d)\n", __FUNCTION__, use_host_power);
+	
   // Ensure device clocks are running
 //  OXU210HP_HOSTIF_WR(R_ClkCtrl_Set, R_ClkCtrl_CE | R_ClkCtrl_SE | R_ClkCtrl_OE);
 
@@ -52,9 +54,12 @@ init_usb (void)
 																		OXU210HP_GPIO_USB_LOW_EN|
 																	 	OXU210HP_GPIO_USB_CLIENT_EN|
 																	 	OXU210HP_GPIO_USB_HOST_EN);
-	OXU210HP_HOSTIF_WR(R_GPIODataOut, OXU210HP_GPIO_USB_CLIENT_EN|
-																		//OXU210HP_GPIO_USB_HOST_EN);
-																		OXU210HP_GPIO_SPARE);
+	if (!use_host_power)																	 
+		OXU210HP_HOSTIF_WR(R_GPIODataOut, OXU210HP_GPIO_USB_CLIENT_EN|
+																			OXU210HP_GPIO_SPARE);
+	else
+		OXU210HP_HOSTIF_WR(R_GPIODataOut, OXU210HP_GPIO_USB_CLIENT_EN|
+																			OXU210HP_GPIO_USB_HOST_EN);
   
   PRINT (0, "OX210HP Test ... ");
   
