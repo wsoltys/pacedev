@@ -31,19 +31,19 @@
          type = "long";
       }
    }
-   element uart_ts.avalon_slave
-   {
-      datum baseAddress
-      {
-         value = "134912";
-         type = "long";
-      }
-   }
    element uart_pc.avalon_slave
    {
       datum baseAddress
       {
          value = "135168";
+         type = "long";
+      }
+   }
+   element uart_ts.avalon_slave
+   {
+      datum baseAddress
+      {
+         value = "134912";
          type = "long";
       }
    }
@@ -101,7 +101,7 @@
       }
       datum megawizard_uipreferences
       {
-         value = "{}";
+         value = "{output_language=VHDL, output_directory=E:\\markm\\pace\\pacedev.net\\sw\\synth\\platform\\midway8080\\invaders\\s5a_r2c0}";
          type = "String";
       }
    }
@@ -239,6 +239,30 @@
          type = "long";
       }
    }
+   element audio_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "131264";
+         type = "long";
+      }
+   }
+   element keybd_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "131232";
+         type = "long";
+      }
+   }
+   element usb_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "131200";
+         type = "long";
+      }
+   }
    element bootloader.s1
    {
       datum _lockedAddress
@@ -252,22 +276,6 @@
          type = "long";
       }
    }
-   element version_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "133376";
-         type = "long";
-      }
-   }
-   element audio_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "131264";
-         type = "long";
-      }
-   }
    element timer_0.s1
    {
       datum baseAddress
@@ -276,11 +284,35 @@
          type = "long";
       }
    }
-   element usb_pio.s1
+   element spi_pio.s1
    {
       datum baseAddress
       {
-         value = "131200";
+         value = "131248";
+         type = "long";
+      }
+   }
+   element oxu210hp_int.s1
+   {
+      datum baseAddress
+      {
+         value = "135424";
+         type = "long";
+      }
+   }
+   element jamma_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "131216";
+         type = "long";
+      }
+   }
+   element version_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "133376";
          type = "long";
       }
    }
@@ -294,38 +326,6 @@
       datum baseAddress
       {
          value = "131840";
-         type = "long";
-      }
-   }
-   element spi_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "131248";
-         type = "long";
-      }
-   }
-   element jamma_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "131216";
-         type = "long";
-      }
-   }
-   element oxu210hp_int.s1
-   {
-      datum baseAddress
-      {
-         value = "135424";
-         type = "long";
-      }
-   }
-   element keybd_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "131232";
          type = "long";
       }
    }
@@ -458,7 +458,7 @@
  <parameter name="projectName" value="invaders-ep3sl.qpf" />
  <parameter name="sopcBorderPoints" value="true" />
  <parameter name="systemHash" value="-7052495688" />
- <parameter name="timeStamp" value="1345807318879" />
+ <parameter name="timeStamp" value="1346060027247" />
  <module kind="clock_source" version="10.1" enabled="1" name="clk_72M">
   <parameter name="clockFrequency" value="72000000" />
   <parameter name="clockFrequencyKnown" value="true" />

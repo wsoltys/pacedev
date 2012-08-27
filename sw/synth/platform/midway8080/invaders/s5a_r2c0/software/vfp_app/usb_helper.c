@@ -53,8 +53,8 @@ init_usb (void)
 																	 	OXU210HP_GPIO_USB_CLIENT_EN|
 																	 	OXU210HP_GPIO_USB_HOST_EN);
 	OXU210HP_HOSTIF_WR(R_GPIODataOut, OXU210HP_GPIO_USB_CLIENT_EN|
-																		OXU210HP_GPIO_USB_HOST_EN);
-																		//OXU210HP_GPIO_SPARE);
+																		//OXU210HP_GPIO_USB_HOST_EN);
+																		OXU210HP_GPIO_SPARE);
   
   PRINT (0, "OX210HP Test ... ");
   

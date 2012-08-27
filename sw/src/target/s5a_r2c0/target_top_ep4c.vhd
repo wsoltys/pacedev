@@ -169,6 +169,15 @@ entity target_top_ep4c is
 		--vdi_led         : out std_logic;
     --vli_led         : out std_logic;
     --vsi_led         : out std_logic;
+		led_lvds		    : out std_logic;
+		led_sdvo		    : out std_logic;
+		led_avo			    : out std_logic;
+		led_dvo			    : out std_logic;
+		led_avi			    : out std_logic;
+		led_dvi			    : out std_logic;
+
+    sec_boost       : out std_logic;
+    sec_data        : inout std_logic;
 
     -- spi eeprom
     ee_ck           : out std_logic;
@@ -183,6 +192,11 @@ entity target_top_ep4c is
     -- elements 1,3,5 are virtual pins because fitter barfs
     dbgio           : inout std_logic_vector(7 downto 0);
     
+		cfg_data				: inout std_logic;
+		cfg_dclk				:	out std_logic;
+		cfg_asdo				: out std_logic;
+		cfg_cson				: out std_logic;
+
     -- test points (default to in)
 		tp82            : in std_logic;
 		tp83            : in std_logic;
@@ -422,6 +436,12 @@ begin
     signal oxu210hp_int_mask  : std_logic := '0';
     signal uh_intn_s          : std_logic;
 
+    -- these signals are only on the S5
+    signal cfg_data           : std_logic;
+    signal cfg_dclk_s         : std_logic;
+    signal cfg_cson_s         : std_logic;
+    signal cfg_asdo_s         : std_logic;
+
     -- not driven by the NIOS at this point
     signal vdo_scl_i          : std_logic := '0';
     signal vdo_scl_o          : std_logic := '0';
@@ -440,11 +460,6 @@ begin
     signal vo_pio_i           : std_logic_vector(7 downto 0);
     signal vo_pio_o           : std_logic_vector(vo_pio_i'range);
     
-    -- these signals are only on the LITE
-    signal cfg_data           : std_logic;
-    signal cfg_dclk_s         : std_logic;
-    signal cfg_cson_s         : std_logic;
-    signal cfg_asdo_s         : std_logic;
     -- MCU i/f
 		signal mcu_pio_i			    : std_logic_vector (7 downto 0);
 		signal mcu_pio_o			    : std_logic_vector (mcu_pio_i'range);
@@ -454,8 +469,6 @@ begin
     signal mcu_spi_ss_n       : std_logic;
     signal mcu_spi_mrdy_n     : std_logic;
     signal mcu_spi_srdy_n     : std_logic;
-    -- security chip
-    signal sec_data           : std_logic;
     -- USB leds
 		signal usb_led_host		    : std_logic;
 		signal usb_led_client	    : std_logic;
@@ -591,6 +604,21 @@ begin
     -- We can disable uh_intn to the nios by setting oxu210hp_int pio to '1'
 		uh_intn_s	<= uh_intn or oxu210hp_int_mask;
 
+		led_avo <= not debug_pio_o(0);
+		led_dvo <= not debug_pio_o(1);
+		led_avi <= not debug_pio_o(2);
+		led_dvi <= not debug_pio_o(3);
+    led_lvds <= not debug_pio_o(4);
+    led_sdvo <= not debug_pio_o(5);
+
+    -- epcs driver logic
+    cfg_dclk <= cfg_dclk_s when cfg_cson_s = '0' else 'Z';
+    cfg_asdo <= cfg_asdo_s when cfg_cson_s = '0' else 'Z';
+    cfg_cson <= cfg_cson_s;
+
+    -- Drive DDR BA2 to ground for now
+    --ddr16_ba(2) <= '0';
+    
   end block BLK_NIOS;
   
   BLK_SPI : block
@@ -705,15 +733,16 @@ begin
 	end block BLK_CHASER;
 
   -- constant drivers
-  v15_s3 <= 'Z';
-  v15_s5 <= 'Z';
-	veb_pwrgoodn  <= not (pok_12v and pok_5v and pok_3v3 and pok_1v9 and v15_pgood);
+  sec_boost     <= 'Z';
+  v15_s3        <= 'Z';
+  v15_s5        <= 'Z';
 	lvds_sel		  <= 'Z';
 	vai_pdn			  <= '0'; --reset_pio(2);
 	vsi_resetn	  <= '1';
   vdo_rstn      <= reset_n;
-
   clk24_en      <= '1';
+  
+	veb_pwrgoodn  <= not (pok_12v and pok_5v and pok_3v3 and pok_1v9 and v15_pgood);
   dvi_connect   <= '1';
   dvi_oen       <= '0';
 
