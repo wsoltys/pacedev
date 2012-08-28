@@ -241,6 +241,7 @@ def vl_usb(bld):
 #                 'usb/tc-zytronic.c',
                  'usb/hidkbd.c',
                  'usb/hidjoy.c',
+                 'usb/usbaudio.c',
 #                 'usb/ums.c',
                  'usb/usb_busdma.c',
                  'usb/usb_controller.c',

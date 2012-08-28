@@ -194,7 +194,7 @@ void system_base_task (void* data)
 
   // enable SPI channel to MCU
   //HOST_IF_INIT ();
-  
+
   while (1)
   {
     timer_60Hz_isr_enable ();  
