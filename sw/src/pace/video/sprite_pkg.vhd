@@ -87,4 +87,11 @@ package sprite_pkg is
   )
   return SPRITE_ROW_D_t;
 
+  function flip_1
+  (
+    d_i         : std_logic_vector;
+    flip        : std_logic
+  )
+  return std_logic_vector;
+
 end package sprite_pkg;

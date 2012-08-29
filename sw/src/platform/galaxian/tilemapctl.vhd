@@ -61,7 +61,9 @@ begin
         if x(2 downto 0) = "010" then
           -- latch attr_d for the 1st time
           scroll_r := ctl_i.attr_d(7 downto 0);  
-          y_adj := std_logic_vector(unsigned(y(7 downto 0)) + unsigned(scroll_r));
+          y_adj := std_logic_vector(to_unsigned(16,y_adj'length)
+                                      + unsigned(y(7 downto 0)) 
+                                      + unsigned(scroll_r));
         end if;
         ctl_o.map_a(9 downto 5) <= y_adj(7 downto 3);
         ctl_o.map_a(4 downto 0) <= x(7 downto 3);
@@ -84,7 +86,7 @@ begin
         end if;
         
         -- extract R,G,B from colour palette
-        pel := tile_d_r(tile_d_r'left-8) & tile_d_r(tile_d_r'left);
+        pel := tile_d_r(tile_d_r'left) & tile_d_r(tile_d_r'left-8);
         pal_i := colour_r & pel;
         pal_entry := pal(to_integer(unsigned(pal_i)));
         ctl_o.rgb.r <= pal_entry(0) & "0000";

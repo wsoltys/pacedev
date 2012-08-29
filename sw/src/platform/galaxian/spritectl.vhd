@@ -1,6 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 
 library work;
 use work.pace_pkg.all;
@@ -43,13 +43,13 @@ architecture SYN of spritectl is
   
 begin
 
-  flipData <= flip_row (ctl_i.d(31 downto 0), reg_i.xflip);
+  flipData(31 downto 16) <= flip_1 (ctl_i.d(31 downto 16), reg_i.xflip);
+  flipData(15 downto 0) <= flip_1 (ctl_i.d(15 downto 0), reg_i.xflip);
   
 	process (clk, clk_ena)
 
    	variable rowStore : std_logic_vector(31 downto 0);  -- saved row of spt to show during visibile period
-    variable pel_r    : std_logic_vector((DELAY-3)*2-1 downto 0);
-		alias pel         : std_logic_vector(1 downto 0) is pel_r(pel_r'left downto pel_r'left-1);
+		variable pel      : std_logic_vector(1 downto 0);
     variable x        : std_logic_vector(video_ctl.x'range);
     variable y        : std_logic_vector(video_ctl.y'range);
     variable yMat     : boolean;      -- raster is between first and last line of sprite
@@ -58,30 +58,25 @@ begin
 		-- the width of rowCount determines the scanline multipler
 		-- - eg.	(4 downto 0) is 1:1
 		-- 				(5 downto 0) is 2:1 (scan-doubling)
-  	variable rowCount : std_logic_vector(3+PACE_VIDEO_V_SCALE downto 0);
+  	variable rowCount : unsigned(3+PACE_VIDEO_V_SCALE downto 0);
+    alias row         : unsigned(4 downto 0) is 
+                          rowCount(rowCount'left downto rowCount'left-4);
 
+    variable pal_i      : std_logic_vector(4 downto 0);
 		variable pal_entry  : pal_entry_typ;
-
+    
   begin
 
 		if rising_edge(clk) and clk_ena = '1' then
 
-			-- different offsets for sprites & bullets/bombs
-			if INDEX < 8 then
-        x := reg_i.x;
-        y := reg_i.y;
-			else
-        x := reg_i.x + 1;
-		  	y := reg_i.y - 5;
-			end if;
-			-- video is clipped left and right (only 224 wide)
-			x := x - (256-PACE_VIDEO_H_SIZE)/2;
+      x := reg_i.x;
+      y := std_logic_vector(to_unsigned(16,y'length) + unsigned(reg_i.y));
 			
 			if video_ctl.hblank = '1' then
 
 				xMat := false;
 				-- stop sprites wrapping from bottom of screen
-				if video_ctl.y = 0 then
+				if unsigned(video_ctl.y) = 0 then
 					yMat := false;
 				end if;
 				
@@ -89,19 +84,19 @@ begin
 					-- start counting sprite row
 					rowCount := (others => '0');
 					yMat := true;
-				elsif rowCount(rowCount'left downto rowCount'left-4) = "10000" then
+				elsif row = "10000" then
 					yMat := false;				
 				end if;
 
 				-- sprites not visible before row 16				
 				if ctl_i.ld = '1' then
-					if yMat and y > 16 then
+					if yMat and unsigned(y) > 16 then
 						if INDEX < 8 then
 							rowStore := flipData;			-- load sprite data
 						else
 							-- bullet/bomb sprite
-							if rowCount(rowCount'left downto rowCount'left-4) = 0 then
-								rowStore := ('1', '1', '1', '1', others => '0');
+							if row = 0 then
+								rowStore := (X"F000F000");
 							else
 								rowStore := (others => '0');
 							end if;
@@ -119,23 +114,24 @@ begin
           -- count up at left edge of sprite
           rowCount := rowCount + 1;
           -- start of sprite
-          if video_ctl.x /= 0 and video_ctl.x < 240 then
+          if unsigned(video_ctl.x) /= 0 and unsigned(video_ctl.x) < 240 then
             xMat := true;
           end if;
         end if;
         
         if xMat then
           -- shift in next pixel
-          -- pel is pipelined to match the delay in the tilemap controller
-          pel_r := pel_r(pel_r'left-2 downto 0) & rowStore(rowStore'left downto rowStore'left-1);
-          rowStore := rowStore(rowStore'left-2 downto 0) & "00";
+          pel := rowStore(rowStore'left) & rowStore(rowStore'left-16);
+          rowStore(31 downto 16) := rowStore(30 downto 16) & '0';
+          rowStore(15 downto 0) := rowStore(14 downto 0) & '0';
         end if;
 
       end if;
 
       -- extract R,G,B from colour palette
       -- apparently only 3 bits of colour info (aside from pel)
-      pal_entry := pal(conv_integer(reg_i.colour(2 downto 0) & pel));
+      pal_i := reg_i.colour(2 downto 0) & pel;
+      pal_entry := pal(to_integer(unsigned(pal_i)));
       rgb.r(rgb.r'left downto rgb.r'left-5) <= pal_entry(0);
       rgb.r(rgb.r'left-6 downto 0) <= (others => '0');
       rgb.g(rgb.g'left downto rgb.g'left-5) <= pal_entry(1);
@@ -155,11 +151,14 @@ begin
 		end if;
 
     -- generate sprite data address
-    ctl_o.a(15 downto 4) <= reg_i.n;
-    if reg_i.yflip = '1' then
-      ctl_o.a(3 downto 0) <=  not rowCount(rowCount'left-1 downto rowCount'left-4);
+    ctl_o.a(10 downto 5) <= reg_i.n(5 downto 0);
+    ctl_o.a(3) <= '0'; -- dual-port RAM
+    if reg_i.yflip = '0' then
+      ctl_o.a(4) <= row(3);
+      ctl_o.a(2 downto 0) <= std_logic_vector(row(2 downto 0));
     else
-      ctl_o.a(3 downto 0) <= rowCount(rowCount'left-1 downto rowCount'left-4);
+      ctl_o.a(4) <= not row(3);
+      ctl_o.a(2 downto 0) <=  not std_logic_vector(row(2 downto 0));
     end if;
 
   end process;

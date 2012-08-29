@@ -51,7 +51,8 @@ begin
         elsif rising_edge (clk) then
 
 					-- handle JAMMA inputs
-					jamma_v(0).d(0) := jamma.coin(1);
+          -- enable button 3 to insert coin
+					jamma_v(0).d(0) := jamma.coin(1) and jamma.p(1).button(3);
 					jamma_v(0).d(1) := jamma.p(2).start;
 					jamma_v(0).d(2) := jamma.p(1).start;
 					jamma_v(0).d(4) := jamma.p(1).button(1);
