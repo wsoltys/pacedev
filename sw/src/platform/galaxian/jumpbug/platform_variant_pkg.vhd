@@ -32,7 +32,7 @@ package platform_variant_pkg is
                                           );
   constant GALAXIAN_ROM_WIDTHAD         : natural := 12;
   
-  constant GALAXIAN_GFX_ROM             : rom_a(0 to 5) := 
+  constant GALAXIAN_TILE_ROM            : rom_a(0 to 5) := 
                                           (
                                             0 => "jbl", 
                                             1 => "jbm", 
@@ -41,6 +41,8 @@ package platform_variant_pkg is
                                             4 => "jbj",
                                             5 => "jbk"
                                           );
+
+  alias GALAXIAN_SPRITE_ROM             : rom_a(0 to 5) is GALAXIAN_TILE_ROM;
 
   -- extra CPU ROMs @$8000
   constant GALAXIAN_EXTRA_ROM           : rom_a(4 to 6) := 
@@ -51,15 +53,16 @@ package platform_variant_pkg is
                                           );
 
   -- WRAM $4000-$47FF
-  constant GALAXIAN_WRAM_A    : std_logic_vector(15 downto 0) := X"4"&"0-----------";
+  constant GALAXIAN_WRAM_A        : std_logic_vector(15 downto 0) := X"4"&"0-----------";
+  constant GALAXIAN_WRAM_WIDTHAD  : natural := 12;
   -- VRAM $4800-$4BFF (shadowed $4C00)
-  constant GALAXIAN_VRAM_A    : std_logic_vector(15 downto 0) := X"4"&"1-----------";
+  constant GALAXIAN_VRAM_A        : std_logic_vector(15 downto 0) := X"4"&"1-----------";
   -- CRAM $5000-$50FF
-  constant GALAXIAN_CRAM_A    : std_logic_vector(15 downto 0) := X"50"&   "--------";
+  constant GALAXIAN_CRAM_A        : std_logic_vector(15 downto 0) := X"50"&   "--------";
   -- INPUTS $6000,$6800,$7000
-  constant GALAXIAN_INPUTS_A  : std_logic_vector(15 downto 11) := X"6"&"0";
+  constant GALAXIAN_INPUTS_A      : std_logic_vector(15 downto 11) := X"6"&"0";
   -- NMIENA $B000
-  constant GALAXIAN_NMIENA_A  : std_logic_vector(15 downto 0) := X"7001";
+  constant GALAXIAN_NMIENA_A      : std_logic_vector(15 downto 0) := X"7001";
   
 	-- Palette : Table of RGB entries	
 

@@ -22,8 +22,11 @@ architecture TILEMAP_1 of tilemapCtl is
   alias stb       : std_logic is video_ctl.stb;
   alias hblank    : std_logic is video_ctl.hblank;
   alias vblank    : std_logic is video_ctl.vblank;
-  alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
-  alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
+  
+  signal x        : std_logic_vector(video_ctl.x'range);
+  signal y        : std_logic_vector(video_ctl.y'range);
+  
+  alias rot_en    : std_logic is graphics_i.bit8(0)(0);
   
 begin
 
@@ -33,7 +36,10 @@ begin
   ctl_o.attr_a(0) <= '0'; -- 16-bit side attribute memory
   ctl_o.tile_a(ctl_o.tile_a'left downto 11) <= (others => '0');
 
-	-- these are constant for a whole line
+  -- screen rotation
+  x <= video_ctl.x; -- when rot_en = '0' else not video_ctl.y;
+  --y <= not video_ctl.y when rot_en = '0' else 32 + video_ctl.x;
+  y <= video_ctl.y; -- when rot_en = '0' else video_ctl.x;
   
   -- generate pixel
   process (clk, clk_ena)
@@ -50,6 +56,7 @@ begin
     variable y_adj      : std_logic_vector(7 downto 0);
   
   begin
+  
   	if rising_edge(clk) then
       if clk_ena = '1' then
 

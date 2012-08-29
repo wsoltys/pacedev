@@ -35,12 +35,16 @@ package platform_variant_pkg is
                                           );
   constant GALAXIAN_ROM_WIDTHAD         : natural := 11;
   
-  constant GALAXIAN_GFX_ROM             : rom_a(0 to 1) := 
+  constant GALAXIAN_TILE_ROM            : rom_a(0 to 1) := 
                                           (
                                             0 => "12", 
                                             1 => "11"
---                                            2 => "10", 
---                                            3 => "9"
+                                          );
+
+  constant GALAXIAN_SPRITE_ROM          : rom_a(0 to 1) := 
+                                          (
+                                            0 => "10", 
+                                            1 => "9"
                                           );
 
    -- null range

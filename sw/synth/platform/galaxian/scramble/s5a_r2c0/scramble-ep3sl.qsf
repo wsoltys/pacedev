@@ -2276,6 +2276,9 @@ set_global_assignment -name VHDL_FILE ../../../../../src/pace/Inputs.VHD
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/galaxian/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/spi_pll.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/io/spi/uni_spi_tx.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/io/spi/uni_spi_rx.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/target_top_ep3sl.vhd
 set_global_assignment -name SDC_FILE "scramble-ep3sl.sdc"
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

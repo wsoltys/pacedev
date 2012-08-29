@@ -31,12 +31,14 @@ package platform_variant_pkg is
                                           );
   constant GALAXIAN_ROM_WIDTHAD         : natural := 11;
 
-  constant GALAXIAN_GFX_ROM             : rom_a(0 to 1) := 
+  constant GALAXIAN_TILE_ROM            : rom_a(0 to 1) := 
                                           (
                                             0 => "1h.bin", 
                                             1 => "1k.bin"
                                           );
 
+  alias GALAXIAN_SPRITE_ROM             : rom_a(0 to 1) is GALAXIAN_TILE_ROM;
+                                          
    -- null range
   constant GALAXIAN_EXTRA_ROM           : rom_a(0 to -1) := (others => "");
                                           

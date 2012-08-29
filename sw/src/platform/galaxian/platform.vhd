@@ -156,6 +156,8 @@ begin
     end if;
   end process;
   
+  graphics_o.bit8(0)(0) <= rot_en;
+  
   -- chip select logic
   -- ROM $0000-$3FFF
   rom_cs <= '1' when STD_MATCH(cpu_a, "00--------------") else 
@@ -481,29 +483,29 @@ begin
     
   begin
   
-    GEN_BANK : if PLATFORM_VARIANT = "mooncrst" generate
+    -- implement gfxbank registers
+    process (clk_sys, rst_sys)
+      variable i : integer range 0 to 3;
     begin
-      -- implement gfxbank registers
-      process (clk_sys, rst_sys)
-        variable i : integer range 0 to 3;
-      begin
-        if rst_sys = '1' then
-          bank <= (others => (others => '0'));
-        elsif rising_edge(clk_sys) then
-          if cpu_mem_wr = '1' then
+      if rst_sys = '1' then
+        bank <= (others => (others => '0'));
+      elsif rising_edge(clk_sys) then
+        if cpu_mem_wr = '1' then
+          if PLATFORM_VARIANT = "mooncrst" then
             if STD_MATCH(cpu_a, X"A00"&"00--") then
               i := to_integer(unsigned(cpu_a(1 downto 0)));
               if i /= 3 then
                 bank(i) <= cpu_d_o;
               end if;
             end if; -- STD_MATCH
-          end if; -- cpu_mem_wr
-        end if; -- rising_edge(clk_sys)
-      end process;
-    else generate
-      -- no graphics banks
-      bank <= (others => (others => '0'));
-    end generate GEN_BANK;
+          elsif PLATFORM_VARIANT = "pacmanbl" then
+            if STD_MATCH(cpu_a, X"6002") then
+              bank(0) <= cpu_d_o;
+            end if;  -- STD_MATCH
+          end if; -- PLATFORM_VARIANT
+        end if; -- cpu_mem_wr
+      end if; -- rising_edge(clk_sys)
+    end process;
 
     GEN_TILE_A : if PLATFORM_VARIANT = "mooncrst" generate
       -- mooncrst_extend_tile_info
@@ -513,23 +515,22 @@ begin
                   when (bank(2) /= X"00" and tilemap_i(1).tile_a(10 downto 9) = "10")
                   else '0' & tilemap_i(1).tile_a(10 downto 0);
     else generate
-      tile_a <= '0' & tilemap_i(1).tile_a(10 downto 0);
+      tile_a <= bank(0)(0) & tilemap_i(1).tile_a(10 downto 0);
     end generate GEN_TILE_A;
     
     tilemap_o(1).tile_d(15 downto 0) <= gfx_rom_d(0) & gfx_rom_d(1) when tile_a(11) = '0' else
                                         gfx_rom_d(2) & gfx_rom_d(3);
-    
 
     -- mooncrst_extend_sprite_info(running_machine &machine, const UINT8 *base, UINT8 *sx, UINT8 *sy, UINT8 *flipx, UINT8 *flipy, UINT16 *code, UINT8 *color)
     -- if (state->m_gfxbank[2] && (*code & 0x30) == 0x20)
     -- 	*code = (*code & 0x0f) | (state->m_gfxbank[0] << 4) | (state->m_gfxbank[1] << 5) | 0x40;
     
-    GEN_GFX_ROMS : for i in GALAXIAN_GFX_ROM'range generate
-      gfx_rom_inst : entity work.sprom
+    GEN_TILE_ROMS : for i in GALAXIAN_TILE_ROM'range generate
+      tile_rom_inst : entity work.sprom
         generic map
         (
           init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" &
-                          GALAXIAN_GFX_ROM(i) & ".hex",
+                          GALAXIAN_TILE_ROM(i) & ".hex",
           widthad_a		=> 11
         )
         port map
@@ -538,14 +539,14 @@ begin
           address		=> tile_a(10 downto 0),
           q					=> gfx_rom_d(i)
         );
-    end generate GEN_GFX_ROMS;
+    end generate GEN_TILE_ROMS;
 
-    GEN_SPR_ROMS : for i in GALAXIAN_GFX_ROM'range generate
-      gfx_rom_inst : entity work.dprom_2r
+    GEN_SPRITE_ROMS : for i in GALAXIAN_SPRITE_ROM'range generate
+      sprite_rom_inst : entity work.dprom_2r
         generic map
         (
           init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" &
-                          GALAXIAN_GFX_ROM(i) & ".hex",
+                          GALAXIAN_SPRITE_ROM(i) & ".hex",
           widthad_a		=> 11,
           widthad_b		=> 11
         )
@@ -561,7 +562,7 @@ begin
           address_b(2 downto 0)   => sprite_i.a(2 downto 0),
           q_b                     => spr_rom_right(i)
         );
-    end generate GEN_SPR_ROMS;
+    end generate GEN_SPRITE_ROMS;
 
     sprite_o.d(sprite_o.d'left downto 32) <= (others => '0');
     sprite_o.d(31 downto 0) <= spr_rom_left(0) & spr_rom_right(0) & 
@@ -640,7 +641,7 @@ begin
   flash_o <= NULL_TO_FLASH;
   bitmap_o <= (others => NULL_TO_BITMAP_CTL);
   sprite_o.ld <= '0';
-  graphics_o <= NULL_TO_GRAPHICS;
+  --graphics_o <= NULL_TO_GRAPHICS;
   osd_o <= NULL_TO_OSD;
   snd_o <= NULL_TO_SOUND;
   spi_o <= NULL_TO_SPI;

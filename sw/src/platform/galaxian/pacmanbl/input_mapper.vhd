@@ -72,10 +72,10 @@ begin
               keybd_v(0).d(2) := key_down;
             when SCANCODE_RIGHT =>
               keybd_v(0).d(3) := key_down;
-            when SCANCODE_LCTRL =>
-              keybd_v(0).d(4) := key_down;
-            when SCANCODE_F2 =>
-              keybd_v(0).d(6) := key_down;
+            when SCANCODE_DOWN =>
+              keybd_v(0).d(5) := key_down;
+            when SCANCODE_UP =>
+              keybd_v(0).d(7) := key_down;
             -- IN1
             when SCANCODE_1 =>
               keybd_v(1).d(0) := key_down;

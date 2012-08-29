@@ -31,25 +31,28 @@ package platform_variant_pkg is
                                           );
   constant GALAXIAN_ROM_WIDTHAD         : natural := 12;
   
-  constant GALAXIAN_GFX_ROM             : rom_a(0 to 1) := 
+  constant GALAXIAN_TILE_ROM            : rom_a(0 to 1) := 
                                           (
                                             0 => "frogger.607", 
                                             1 => "frogger.606"
                                           );
 
+  alias GALAXIAN_SPRITE_ROM             : rom_a(0 to 1) is GALAXIAN_TILE_ROM;
+                                          
    -- null range
   constant GALAXIAN_EXTRA_ROM           : rom_a(0 to -1) := (others => "");
                                           
   -- WRAM $8000-$87FF
-  constant GALAXIAN_WRAM_A    : std_logic_vector(15 downto 0) := X"8"&"0-----------";
+  constant GALAXIAN_WRAM_A        : std_logic_vector(15 downto 0) := X"8"&"0-----------";
+  constant GALAXIAN_WRAM_WIDTHAD  : natural := 12;
   -- VRAM $A800-$ABFF (mirrored $AC00)
-  constant GALAXIAN_VRAM_A    : std_logic_vector(15 downto 0) := X"A"&"1-----------";
+  constant GALAXIAN_VRAM_A        : std_logic_vector(15 downto 0) := X"A"&"1-----------";
   -- CRAM $B000-$B0FF (mirrored $B100-$B6FF)
-  constant GALAXIAN_CRAM_A    : std_logic_vector(15 downto 0) := X"B0"&   "--------";
+  constant GALAXIAN_CRAM_A        : std_logic_vector(15 downto 0) := X"B0"&   "--------";
   -- INPUTS $C000 (PIA8255)
-  constant GALAXIAN_INPUTS_A  : std_logic_vector(15 downto 11) := X"C"&"0";
+  constant GALAXIAN_INPUTS_A      : std_logic_vector(15 downto 11) := X"C"&"0";
   -- NMIENA $B808
-  constant GALAXIAN_NMIENA_A  : std_logic_vector(15 downto 0) := X"B808";
+  constant GALAXIAN_NMIENA_A      : std_logic_vector(15 downto 0) := X"B808";
   
 	-- Palette : Table of RGB entries	
 

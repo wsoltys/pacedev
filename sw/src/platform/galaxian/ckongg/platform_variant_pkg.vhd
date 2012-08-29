@@ -39,12 +39,14 @@ package platform_variant_pkg is
 
   constant GALAXIAN_ROM_WIDTHAD         : natural := 12;
   
-  constant GALAXIAN_GFX_ROM             : rom_a(0 to 1) := 
+  constant GALAXIAN_TILE_ROM            : rom_a(0 to 1) := 
                                           (
                                             0 => "ckvid10.bin", 
                                             1 => "ckvid7.bin"
                                           );
 
+  alias GALAXIAN_SPRITE_ROM             : rom_a(0 to 1) is GALAXIAN_TILE_ROM;
+                                          
   -- WRAM $6000-$6FFF
   constant GALAXIAN_WRAM_A        : std_logic_vector(15 downto 0) := X"6---";
   constant GALAXIAN_WRAM_WIDTHAD  : natural := 12;
