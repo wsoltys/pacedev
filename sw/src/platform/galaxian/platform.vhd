@@ -472,6 +472,7 @@ begin
   
     type gfx_rom_d_a is array(0 to 5) of std_logic_vector(7 downto 0);
     signal gfx_rom_d      : gfx_rom_d_a;
+    signal spr_rom_d      : gfx_rom_d_a;
     
     type bank_a is array(0 to 2) of std_logic_vector(7 downto 0);
     signal bank     : bank_a;
@@ -537,6 +538,25 @@ begin
           q					=> gfx_rom_d(i)
         );
     end generate GEN_GFX_ROMS;
+    
+    GEN_SPR_ROMS : for i in GALAXIAN_GFX_ROM'range generate
+      gfx_rom_inst : entity work.sprom
+        generic map
+        (
+          init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" &
+                          GALAXIAN_GFX_ROM(i) & ".hex",
+          widthad_a		=> 11
+        )
+        port map
+        (
+          clock			=> clk_sys,
+          address		=> sprite_i.a(10 downto 0),
+          q					=> spr_rom_d(i)
+        );
+    end generate GEN_SPR_ROMS;
+
+    sprite_o.d(sprite_o.d'left downto 16) <= (others => '0');
+    sprite_o.d(15 downto 0) <= spr_rom_d(1) & spr_rom_d(0);
     
   end block BLK_GFX_ROMS;
 

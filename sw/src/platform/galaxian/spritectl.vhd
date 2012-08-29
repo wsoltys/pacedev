@@ -100,8 +100,8 @@ begin
 							rowStore := flipData;			-- load sprite data
 						else
 							-- bullet/bomb sprite
-							if rowCount(rowCount'left downto rowCount'left-4) < 4 then
-								rowStore := ('1', '1', others => '0');
+							if rowCount(rowCount'left downto rowCount'left-4) = 0 then
+								rowStore := ('1', '1', '1', '1', others => '0');
 							else
 								rowStore := (others => '0');
 							end if;
