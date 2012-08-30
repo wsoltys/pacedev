@@ -481,6 +481,7 @@ begin
     type bank_a is array(0 to 2) of std_logic_vector(7 downto 0);
     signal bank     : bank_a;
     signal tile_a   : std_logic_vector(11 downto 0);
+    signal sprite_a : std_logic_vector(11 downto 0);
     
   begin
   
@@ -514,6 +515,7 @@ begin
       -- mooncrst_extend_tile_info
       -- if (state->m_gfxbank[2] && (*code & 0xc0) == 0x80)
       -- 	*code = (*code & 0x3f) | (state->m_gfxbank[0] << 6) | (state->m_gfxbank[1] << 7) | 0x0100;
+      -- - code = (10..3)
       tile_a <= '1' & bank(1)(0) & bank(0)(0) & tilemap_i(1).tile_a(8 downto 0)
                   when (bank(2) /= X"00" and tilemap_i(1).tile_a(10 downto 9) = "10")
                   else '0' & tilemap_i(1).tile_a(10 downto 0);
@@ -524,10 +526,6 @@ begin
     tilemap_o(1).tile_d(15 downto 0) <= gfx_rom_d(0) & gfx_rom_d(1) when tile_a(11) = '0' else
                                         gfx_rom_d(2) & gfx_rom_d(3);
 
-    -- mooncrst_extend_sprite_info(running_machine &machine, const UINT8 *base, UINT8 *sx, UINT8 *sy, UINT8 *flipx, UINT8 *flipy, UINT16 *code, UINT8 *color)
-    -- if (state->m_gfxbank[2] && (*code & 0x30) == 0x20)
-    -- 	*code = (*code & 0x0f) | (state->m_gfxbank[0] << 4) | (state->m_gfxbank[1] << 5) | 0x40;
-    
     GEN_TILE_ROMS : for i in GALAXIAN_TILE_ROM'range generate
       tile_rom_inst : entity work.sprom
         generic map
@@ -544,6 +542,19 @@ begin
         );
     end generate GEN_TILE_ROMS;
 
+    GEN_SPRITE_A : if PLATFORM_VARIANT = "mooncrst" or
+                      PLATFORM_VARIANT = "mooncrstu" generate
+      -- mooncrst_extend_sprite_info(running_machine &machine, const UINT8 *base, UINT8 *sx, UINT8 *sy, UINT8 *flipx, UINT8 *flipy, UINT16 *code, UINT8 *color)
+      -- if (state->m_gfxbank[2] && (*code & 0x30) == 0x20)
+      -- 	*code = (*code & 0x0f) | (state->m_gfxbank[0] << 4) | (state->m_gfxbank[1] << 5) | 0x40;
+      -- - code = (10..5)
+      sprite_a <= '1' & bank(1)(0) & bank(0)(0) & sprite_i.a(8 downto 0) when
+                    (bank(2) /= X"00" and sprite_i.a(10 downto 9) = "10") else
+                  '0' & sprite_i.a(10 downto 0);
+    else generate
+      sprite_a <= '0' & sprite_i.a(10 downto 0);
+    end generate GEN_SPRITE_A;
+                      
     GEN_SPRITE_ROMS : for i in GALAXIAN_SPRITE_ROM'range generate
       sprite_rom_inst : entity work.dprom_2r
         generic map
@@ -556,20 +567,23 @@ begin
         port map
         (
           clock			              => clk_video,
-          address_a(10 downto 4)  => sprite_i.a(10 downto 4),
+          address_a(10 downto 4)  => sprite_a(10 downto 4),
           address_a(3)            => '0',
-          address_a(2 downto 0)   => sprite_i.a(2 downto 0),
+          address_a(2 downto 0)   => sprite_a(2 downto 0),
           q_a 			              => spr_rom_left(i),
-          address_b(10 downto 4)  => sprite_i.a(10 downto 4),
+          address_b(10 downto 4)  => sprite_a(10 downto 4),
           address_b(3)            => '1',
-          address_b(2 downto 0)   => sprite_i.a(2 downto 0),
+          address_b(2 downto 0)   => sprite_a(2 downto 0),
           q_b                     => spr_rom_right(i)
         );
     end generate GEN_SPRITE_ROMS;
 
     sprite_o.d(sprite_o.d'left downto 32) <= (others => '0');
-    sprite_o.d(31 downto 0) <= spr_rom_left(0) & spr_rom_right(0) & 
-                                spr_rom_left(1) & spr_rom_right(1);
+    sprite_o.d(31 downto 0) <=  spr_rom_left(0) & spr_rom_right(0) & 
+                                spr_rom_left(1) & spr_rom_right(1)
+                                  when sprite_a(11) = '0' else
+                                spr_rom_left(2) & spr_rom_right(2) & 
+                                spr_rom_left(3) & spr_rom_right(3);
     
   end block BLK_GFX_ROMS;
 
