@@ -41,14 +41,18 @@ package platform_variant_pkg is
                                           
    -- null range
   constant GALAXIAN_EXTRA_ROM           : rom_a(0 to -1) := (others => "");
-                                          
+  
+  -- ROM $0000-$3FFF
+  constant GALAXIAN_ROM_A         : std_logic_vector(15 downto 0) := "00--------------";
   -- WRAM $4000-$47FF
   constant GALAXIAN_WRAM_A        : std_logic_vector(15 downto 0) := X"4"&"0-----------";
   constant GALAXIAN_WRAM_WIDTHAD  : natural := 12;
   -- VRAM $5000-$57FF
   constant GALAXIAN_VRAM_A        : std_logic_vector(15 downto 0) := X"5"&"0-----------";
-  -- CRAM $5800-$5BFF
-  constant GALAXIAN_CRAM_A        : std_logic_vector(15 downto 0) := X"5"&"10----------";
+  -- CRAM $5800-$58FF
+  constant GALAXIAN_CRAM_A        : std_logic_vector(15 downto 0) := X"58"&"--------";
+  -- SPRITES/BULLETS $5840-$587F
+  constant GALAXIAN_SPRITE_A      : std_logic_vector(15 downto 0) := X"58"&"01------";
   -- INPUTS $6000,$6800,$7000
   constant GALAXIAN_INPUTS_A      : std_logic_vector(15 downto 11) := X"6"&"0";
   -- NMIENA $7001

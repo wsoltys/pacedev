@@ -113,11 +113,12 @@ architecture SYN of platform is
   signal wram_wr        : std_logic;
   signal wram_d_o       : std_logic_vector(7 downto 0);
 
-  -- RAM signals        
+  -- CRAM/SPRITE signals        
   signal cram_cs        : std_logic;
   signal cram_wr        : std_logic;
 	signal cram_d_o		    : std_logic_vector(7 downto 0);
-	
+	signal sprite_cs      : std_logic;
+  
   -- input signals      
   signal in_cs          : std_logic_vector(0 to PACE_INPUTS_NUM_BYTES-1);
 	
@@ -160,19 +161,20 @@ begin
   
   -- chip select logic
   -- ROM $0000-$3FFF
-  rom_cs <= '1' when STD_MATCH(cpu_a, "00--------------") else 
-                -- ckongg $0000-$57FF
-            '1' when PLATFORM_VARIANT = "ckongg" and
+  rom_cs <=     '1' when STD_MATCH(cpu_a, GALAXIAN_ROM_A) else 
+                    -- ckongg $0000-$57FF
+                '1' when PLATFORM_VARIANT = "ckongg" and
                       (STD_MATCH(cpu_a, "0100------------") or
                         STD_MATCH(cpu_a, "01010-----------")) else 
-            '0';
+                '0';
   -- every thing else is variant-dependent
-  wram_cs <= '1' when STD_MATCH(cpu_a, GALAXIAN_WRAM_A) else '0';
-  vram_cs <= '1' when STD_MATCH(cpu_a, GALAXIAN_VRAM_A) else '0';
-  cram_cs <= '1' when STD_MATCH(cpu_a, GALAXIAN_CRAM_A) else '0';
-  in_cs(0) <= '1' when STD_MATCH(cpu_a(15 downto 11), GALAXIAN_INPUTS_A+"00000") else '0';
-  in_cs(1) <= '1' when STD_MATCH(cpu_a(15 downto 11), GALAXIAN_INPUTS_A+"00001") else '0';
-  in_cs(2) <= '1' when STD_MATCH(cpu_a(15 downto 11), GALAXIAN_INPUTS_A+"00010") else '0';
+  wram_cs <=    '1' when STD_MATCH(cpu_a, GALAXIAN_WRAM_A) else '0';
+  vram_cs <=    '1' when STD_MATCH(cpu_a, GALAXIAN_VRAM_A) else '0';
+  cram_cs <=    '1' when STD_MATCH(cpu_a, GALAXIAN_CRAM_A) else '0';
+  sprite_cs <=  '1' when STD_MATCH(cpu_a, GALAXIAN_SPRITE_A) else '0';
+  in_cs(0) <=   '1' when STD_MATCH(cpu_a(15 downto 11), GALAXIAN_INPUTS_A+"00000") else '0';
+  in_cs(1) <=   '1' when STD_MATCH(cpu_a(15 downto 11), GALAXIAN_INPUTS_A+"00001") else '0';
+  in_cs(2) <=   '1' when STD_MATCH(cpu_a(15 downto 11), GALAXIAN_INPUTS_A+"00010") else '0';
   -- ROM $8000-$AFFF (jumpbug only)
   extra_rom_cs <= '1' when PLATFORM_VARIANT = "jumpbug" and
                             (STD_MATCH(cpu_a, "100-------------") or
@@ -203,8 +205,7 @@ begin
   sprite_reg_o.clk_ena <= clk_3M_en;
   sprite_reg_o.a <= cpu_a(7 downto 0);
   sprite_reg_o.d <= cpu_d_o;
-  sprite_reg_o.wr <=  cpu_mem_wr when (cpu_a(15 downto 10) = "010110" and cpu_a(7 downto 6) = "01") 
-                      else '0';
+  sprite_reg_o.wr <=  sprite_cs and cpu_mem_wr;
 
   --
   -- COMPONENT INSTANTIATION
@@ -491,7 +492,8 @@ begin
         bank <= (others => (others => '0'));
       elsif rising_edge(clk_sys) then
         if cpu_mem_wr = '1' then
-          if PLATFORM_VARIANT = "mooncrst" then
+          if PLATFORM_VARIANT = "mooncrst" or
+              PLATFORM_VARIANT = "mooncrstu" then
             if STD_MATCH(cpu_a, X"A00"&"00--") then
               i := to_integer(unsigned(cpu_a(1 downto 0)));
               if i /= 3 then
@@ -507,7 +509,8 @@ begin
       end if; -- rising_edge(clk_sys)
     end process;
 
-    GEN_TILE_A : if PLATFORM_VARIANT = "mooncrst" generate
+    GEN_TILE_A : if PLATFORM_VARIANT = "mooncrst" or
+                    PLATFORM_VARIANT = "mooncrstu" generate
       -- mooncrst_extend_tile_info
       -- if (state->m_gfxbank[2] && (*code & 0xc0) == 0x80)
       -- 	*code = (*code & 0x3f) | (state->m_gfxbank[0] << 6) | (state->m_gfxbank[1] << 7) | 0x0100;
