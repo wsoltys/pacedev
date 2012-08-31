@@ -4,8 +4,8 @@
 
 #include <allegro.h>
 
-#define GALAXIAN
-//#define MOONCRST
+//#define GALAXIAN
+#define MOONCRST
 //#define ZIGZAG
 //#define JUMPBUG
 //#define FROGGER
@@ -151,10 +151,10 @@ void main (int argc, char *argv[])
 	if (!fp) 
   {
     printf ("unable to open \"%s\"!\n", SUBDIR MEM_NAME);
-    exit (0);
+    //exit (0);
   }
-	fread (mem, 64*1024, 1, fp);
-	fclose (fp);
+	//fread (mem, 64*1024, 1, fp);
+	//fclose (fp);
 
   // write vram, attr, sprite & bullet ram
   fp = fopen (SUBDIR "vram.bin", "wb");
@@ -391,6 +391,32 @@ void main (int argc, char *argv[])
     pal[33].b = 0x47 >> 2;
 
   	set_palette_range (pal, 0, 34, 1);
+
+  // show tiles
+  for (int t=0; t<NUM_TILES; t++)
+  {
+    int x = t % 32;
+    int y = t / 32;
+    
+		for (int ty=0; ty<8; ty++)
+		{
+  		for (int tx=0; tx<8; tx++)
+  		{
+#ifndef ROT90
+				int p0 = (gfx_rom[t*16+ty] >> (7-tx)) & 0x01; 
+				int p1 = (gfx_rom[2*1024+t*16+ty] >> (7-tx)) & 0x01;
+				int pel = (p1 << 1) | p0;
+#else
+				BYTE pel = chr_rot90[t*16+ty*2+(tx>>2)];
+				pel = pel >> (((7-tx)<<1)&0x6) & 0x03;
+#endif
+				putpixel (screen, x*8+tx, y*8+ty, COLOUR(0)*4+pel);
+			}
+		}
+  }
+  while (!key[KEY_ESC]);	  
+  while (key[KEY_ESC]);	  
+  
   	
 	for (int y=0; y<HEIGHT_BYTES; y++)
 	{

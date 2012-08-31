@@ -63,9 +63,9 @@ begin
       jamma_v(1).d(1) := jamma.p(2).start;
       
       -- handle PS/2 inputs
-      keybd_v(0).d(6 downto 5) := not dips(7 downto 6); -- unknown/reset, cabinet
-      keybd_v(1).d(7 downto 6) := not dips(5 downto 4); -- language, bonus life
-      keybd_v(2).d(3 downto 0) := not dips(3 downto 0); -- coinage
+      keybd_v(0).d(7 downto 5) := "000";  --dips(7 downto 6); -- unknown/reset, cabinet
+      keybd_v(1).d(7 downto 5) := "101";  --dips(5 downto 4); -- language, bonus life
+      keybd_v(2).d(7 downto 0) := "11110000"; --dips(3 downto 0); -- coinage
       if (key_down or key_up) = '1' then
         case data(7 downto 0) is
           -- IN0

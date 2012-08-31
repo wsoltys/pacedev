@@ -57,7 +57,7 @@ package platform_variant_pkg is
   -- VRAM $9000-$93FF (shadowed $9400)
   constant GALAXIAN_VRAM_A        : std_logic_vector(15 downto 0) := X"9"&"0-----------";
   -- CRAM $9800-$98FF
-  constant GALAXIAN_CRAM_A        : std_logic_vector(15 downto 0) := X"98"&"--------";
+  constant GALAXIAN_CRAM_A        : std_logic_vector(15 downto 0) := X"98"&"00------";
   -- SPRITES/BULLETS $9840-$987F
   constant GALAXIAN_SPRITE_A      : std_logic_vector(15 downto 0) := X"98"&"01------";
   -- INPUTS $A000,$A800,$B000
