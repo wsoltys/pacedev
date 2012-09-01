@@ -39,8 +39,8 @@ package platform_variant_pkg is
   constant GALAXIAN_TILE_ROM            : rom_a(0 to 3) := 
                                           (
                                             0 => "mcs_b", 
-                                            1 => "mcs_d", 
-                                            2 => "mcs_a", 
+                                            2 => "mcs_d", 
+                                            1 => "mcs_a", 
                                             3 => "mcs_c"
                                           );
 

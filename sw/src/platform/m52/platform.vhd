@@ -182,7 +182,7 @@ begin
                              STD_MATCH(cpu_a, "1010------------")) else 
                   '0';
   jumpbug_prot_cs <=  '1' when PLATFORM_VARIANT = "jumpbug" and
-                            STD_MATCH(cpu_a, X"B---") else
+                            STD_MATCH(cpu_a, X"B----") else
                       '0';
                     
 	-- memory read mux
@@ -266,8 +266,8 @@ begin
                       X"D3" when STD_MATCH(cpu_a, X"-118") else
                       X"CF" when STD_MATCH(cpu_a, X"-214") else
                       X"02" when STD_MATCH(cpu_a, X"-235") else
-                      X"FF" when STD_MATCH(cpu_a, X"-311") else
-                      X"FF";
+                      X"00" when STD_MATCH(cpu_a, X"-311") else
+                      X"00";
   end generate GEN_JUMPBUG_PROTECTION;
   
   BLK_INTERRUPTS : block
@@ -472,18 +472,16 @@ begin
   end block BLK_CPU_ROMS;
   
   BLK_GFX_ROMS : block
-
+  
     type gfx_rom_d_a is array(0 to 5) of std_logic_vector(7 downto 0);
     signal gfx_rom_d      : gfx_rom_d_a;
     signal spr_rom_left   : gfx_rom_d_a;
     signal spr_rom_right  : gfx_rom_d_a;
     
-    type bank_a is array(0 to 4) of std_logic_vector(7 downto 0);
+    type bank_a is array(0 to 2) of std_logic_vector(7 downto 0);
     signal bank     : bank_a;
-    signal tile_a   : std_logic_vector(12 downto 0);
+    signal tile_a   : std_logic_vector(11 downto 0);
     signal sprite_a : std_logic_vector(11 downto 0);
-
-    alias code : std_logic_vector(7 downto 0) is tilemap_i(1).tile_a(10 downto 3);
     
   begin
   
@@ -495,18 +493,11 @@ begin
         bank <= (others => (others => '0'));
       elsif rising_edge(clk_sys) then
         if cpu_clk_en = '1' and cpu_mem_wr = '1' then
-          if PLATFORM_VARIANT = "jumpbug" then
-            if STD_MATCH(cpu_a, X"600"&"0---") then
-              i := to_integer(unsigned(cpu_a(2 downto 0))) - 2;
-              if i < 3 then
-                bank(i) <= cpu_d_o;
-              end if;
-            end if; -- STD_MATCH
-          elsif PLATFORM_VARIANT = "mooncrst" or
+          if PLATFORM_VARIANT = "mooncrst" or
               PLATFORM_VARIANT = "mooncrstu" then
             if STD_MATCH(cpu_a, X"A00"&"00--") then
               i := to_integer(unsigned(cpu_a(1 downto 0)));
-              if i < 3 then
+              if i /= 3 then
                 bank(i) <= cpu_d_o;
               end if;
             end if; -- STD_MATCH
@@ -519,32 +510,18 @@ begin
       end if; -- rising_edge(clk_sys)
     end process;
 
-    GEN_TILE_A : if PLATFORM_VARIANT = "jumpbug" generate
-    
-      --if ((*code & 0xc0) == 0x80 && (state->m_gfxbank[2] & 0x01))
-      --  *code += 128 + (( state->m_gfxbank[0] & 0x01) << 6) +
-      --         (( state->m_gfxbank[1] & 0x01) << 7) +
-      --         ((~state->m_gfxbank[4] & 0x01) << 8);
-      tile_a(12 downto 3) <= tile_a(12 downto 3) + 
-                              128 +
-                              ('0' & bank(4)(0) & bank(1)(0) & bank(0)(0) & "000000")
-                                when (code(7 downto 6) = "10" and bank(2)(0) /= '0') else
-                              "00" & code;
-      
-    elsif PLATFORM_VARIANT = "mooncrst" or
-          PLATFORM_VARIANT = "mooncrstu" generate
+    GEN_TILE_A : if PLATFORM_VARIANT = "mooncrst" or
+                    PLATFORM_VARIANT = "mooncrstu" generate
       -- mooncrst_extend_tile_info
       -- if (state->m_gfxbank[2] && (*code & 0xc0) == 0x80)
       -- 	*code = (*code & 0x3f) | (state->m_gfxbank[0] << 6) | (state->m_gfxbank[1] << 7) | 0x0100;
-      tile_a(12 downto 3) <= "01" & bank(1)(0) & bank(0)(0) & code(5 downto 0)
-                                  when (bank(2) /= X"00" and code(7 downto 6) = "10") else
-                             "00" & code;
+      -- - code = (10..3)
+      tile_a <= '1' & bank(1)(0) & bank(0)(0) & tilemap_i(1).tile_a(8 downto 0)
+                  when (bank(2) /= X"00" and tilemap_i(1).tile_a(10 downto 9) = "10")
+                  else '0' & tilemap_i(1).tile_a(10 downto 0);
     else generate
-      tile_a(12 downto 3) <= "00" & code;
+      tile_a <= bank(0)(0) & tilemap_i(1).tile_a(10 downto 0);
     end generate GEN_TILE_A;
-
-    -- the non-code (row) part of the tile address
-    tile_a(2 downto 0) <= tilemap_i(1).tile_a(2 downto 0);
     
     tilemap_o(1).tile_d(15 downto 0) <= gfx_rom_d(0) & gfx_rom_d(1) when tile_a(11) = '0' else
                                         gfx_rom_d(2) & gfx_rom_d(3);
@@ -642,8 +619,9 @@ begin
 			
 			clock_a			=> clk_video,
 			address_a		=> tilemap_i(1).attr_a(7 downto 1),
-			q_a					=> tilemap_o(1).attr_d(15 downto 0)
+			q_a					=> open --tilemap_o(1).attr_d(15 downto 0)
 		);
+    tilemap_o(1).attr_d(15 downto 0) <= (others => '0');
     
   GEN_WRAM : if GALAXIAN_USE_INTERNAL_WRAM generate
   

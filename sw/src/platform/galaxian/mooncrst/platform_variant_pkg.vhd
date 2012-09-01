@@ -39,8 +39,8 @@ package platform_variant_pkg is
   constant GALAXIAN_TILE_ROM            : rom_a(0 to 3) := 
                                           (
                                             0 => "mcs_b", 
-                                            1 => "mcs_d", 
-                                            2 => "mcs_a", 
+                                            2 => "mcs_d", 
+                                            1 => "mcs_a", 
                                             3 => "mcs_c"
                                           );
 
@@ -49,6 +49,8 @@ package platform_variant_pkg is
    -- null range
   constant GALAXIAN_EXTRA_ROM           : rom_a(0 to -1) := (others => "");
                                           
+  -- ROM $0000-$5FFF ($7FFF)
+  constant GALAXIAN_ROM_A         : std_logic_vector(15 downto 0) := "0---------------";
   -- WRAM $8000-$83FF (shadowed $8400)
   constant GALAXIAN_WRAM_A        : std_logic_vector(15 downto 0) := X"8"&"0-----------";
   constant GALAXIAN_WRAM_WIDTHAD  : natural := 11;
@@ -56,6 +58,8 @@ package platform_variant_pkg is
   constant GALAXIAN_VRAM_A        : std_logic_vector(15 downto 0) := X"9"&"0-----------";
   -- CRAM $9800-$98FF
   constant GALAXIAN_CRAM_A        : std_logic_vector(15 downto 0) := X"98"&   "--------";
+  -- SPRITES/BULLETS $9840-$987F
+  constant GALAXIAN_SPRITE_A      : std_logic_vector(15 downto 0) := X"98"&"01------";
   -- INPUTS $A000,$A800,$B000
   constant GALAXIAN_INPUTS_A      : std_logic_vector(15 downto 11) := X"A"&"0";
   -- NMIENA $B000

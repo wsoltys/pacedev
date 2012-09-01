@@ -52,16 +52,20 @@ package platform_variant_pkg is
                                             6 => "jb7"
                                           );
 
+  -- ROM $0000-$3FFF
+  constant GALAXIAN_ROM_A         : std_logic_vector(15 downto 0) := "00--------------";
   -- WRAM $4000-$47FF
   constant GALAXIAN_WRAM_A        : std_logic_vector(15 downto 0) := X"4"&"0-----------";
-  constant GALAXIAN_WRAM_WIDTHAD  : natural := 12;
+  constant GALAXIAN_WRAM_WIDTHAD  : natural := 11;
   -- VRAM $4800-$4BFF (shadowed $4C00)
   constant GALAXIAN_VRAM_A        : std_logic_vector(15 downto 0) := X"4"&"1-----------";
   -- CRAM $5000-$50FF
-  constant GALAXIAN_CRAM_A        : std_logic_vector(15 downto 0) := X"50"&   "--------";
+  constant GALAXIAN_CRAM_A        : std_logic_vector(15 downto 0) := X"50"&"--------";
+  -- SPRITES/BULLETS $5040-$507F
+  constant GALAXIAN_SPRITE_A      : std_logic_vector(15 downto 0) := X"50"&"01------";
   -- INPUTS $6000,$6800,$7000
   constant GALAXIAN_INPUTS_A      : std_logic_vector(15 downto 11) := X"6"&"0";
-  -- NMIENA $B000
+  -- NMIENA $7001
   constant GALAXIAN_NMIENA_A      : std_logic_vector(15 downto 0) := X"7001";
   
 	-- Palette : Table of RGB entries	
