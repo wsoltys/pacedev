@@ -2273,6 +2273,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_mixer.
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Graphics.VHD
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/galaxian/frogger/input_mapper.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Inputs.VHD
+set_global_assignment -name VHDL_FILE ../../../../../src/component/io/pia8255.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/galaxian/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd

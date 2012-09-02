@@ -42,15 +42,19 @@ package platform_variant_pkg is
    -- null range
   constant GALAXIAN_EXTRA_ROM           : rom_a(0 to -1) := (others => "");
                                           
+  -- ROM $0000-$3FFF
+  constant GALAXIAN_ROM_A         : std_logic_vector(15 downto 0) := "00--------------";
   -- WRAM $8000-$87FF
   constant GALAXIAN_WRAM_A        : std_logic_vector(15 downto 0) := X"8"&"0-----------";
-  constant GALAXIAN_WRAM_WIDTHAD  : natural := 12;
+  constant GALAXIAN_WRAM_WIDTHAD  : natural := 11;
   -- VRAM $A800-$ABFF (mirrored $AC00)
   constant GALAXIAN_VRAM_A        : std_logic_vector(15 downto 0) := X"A"&"1-----------";
   -- CRAM $B000-$B0FF (mirrored $B100-$B6FF)
   constant GALAXIAN_CRAM_A        : std_logic_vector(15 downto 0) := X"B0"&   "--------";
-  -- INPUTS $C000 (PIA8255)
-  constant GALAXIAN_INPUTS_A      : std_logic_vector(15 downto 11) := X"C"&"0";
+  -- SPRITES/BULLETS $B040-$B07F
+  constant GALAXIAN_SPRITE_A      : std_logic_vector(15 downto 0) := X"B0"&"01------";
+  -- INPUTS (not used - PIA8255)
+  constant GALAXIAN_INPUTS_A      : std_logic_vector(15 downto 0) := X"9---";
   -- NMIENA $B808
   constant GALAXIAN_NMIENA_A      : std_logic_vector(15 downto 0) := X"B808";
   

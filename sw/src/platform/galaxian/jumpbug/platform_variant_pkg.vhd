@@ -35,10 +35,10 @@ package platform_variant_pkg is
   constant GALAXIAN_TILE_ROM            : rom_a(0 to 5) := 
                                           (
                                             0 => "jbl", 
-                                            1 => "jbm", 
-                                            2 => "jbn", 
-                                            3 => "jbi",
-                                            4 => "jbj",
+                                            2 => "jbm", 
+                                            4 => "jbn", 
+                                            1 => "jbi",
+                                            3 => "jbj",
                                             5 => "jbk"
                                           );
 

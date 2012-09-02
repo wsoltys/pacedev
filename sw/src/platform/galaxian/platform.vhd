@@ -92,9 +92,11 @@ architecture SYN of platform is
   -- cpu signals  
   signal clk_3M_en			: std_logic;
   signal cpu_clk_en     : std_logic;
+  signal cpu_rst        : std_logic;
   signal cpu_a          : std_logic_vector(15 downto 0);
   signal cpu_d_i        : std_logic_vector(7 downto 0);
   signal cpu_d_o        : std_logic_vector(7 downto 0);
+  signal cpu_mem_rd     : std_logic;
   signal cpu_mem_wr     : std_logic;
   signal cpu_nmireq     : std_logic;
 
@@ -128,6 +130,10 @@ architecture SYN of platform is
   signal pause          : std_logic;
   signal rot_en         : std_logic;
 
+  -- frogger signals
+  signal pia0_cs        : std_logic;
+  signal pia0_d_o       : std_logic_vector(7 downto 0);
+  
   -- jumpbug signals
   signal extra_rom_cs     : std_logic;
   signal extra_rom_d_o    : std_logic_vector(7 downto 0);
@@ -176,6 +182,12 @@ begin
   in_cs(0) <=   '1' when STD_MATCH(cpu_a(15 downto 11), GALAXIAN_INPUTS_A+"00000") else '0';
   in_cs(1) <=   '1' when STD_MATCH(cpu_a(15 downto 11), GALAXIAN_INPUTS_A+"00001") else '0';
   in_cs(2) <=   '1' when STD_MATCH(cpu_a(15 downto 11), GALAXIAN_INPUTS_A+"00010") else '0';
+  
+  -- PIA_8255 $C000-$FFFF (frogger only)
+  pia0_cs <=    '1' when PLATFORM_VARIANT = "frogger" and
+                          STD_MATCH(cpu_a, "11--------------") else 
+                '0';
+  
   -- ROM $8000-$AFFF (jumpbug only)
   extra_rom_cs <= '1' when PLATFORM_VARIANT = "jumpbug" and
                             (STD_MATCH(cpu_a, "100-------------") or
@@ -194,6 +206,7 @@ begin
               inputs_i(1).d when in_cs(1) = '1' else
               inputs_i(2).d when in_cs(2) = '1' else
               extra_rom_d_o when extra_rom_cs = '1' else
+              pia0_d_o when pia0_cs = '1' else
               jumpbug_prot_d when jumpbug_prot_cs = '1' else
 							(others => '0');
 	
@@ -219,7 +232,6 @@ begin
       severity note;
 
   BLK_CPU : block
-    signal cpu_rst        : std_logic;
   begin
     -- generate CPU enable clock (3MHz from 27/30MHz)
     clk_en_inst : entity work.clk_div
@@ -249,7 +261,7 @@ begin
         datai  	=> cpu_d_i,
         datao  	=> cpu_d_o,
 
-        mem_rd 	=> open,
+        mem_rd 	=> cpu_mem_rd,
         mem_wr 	=> cpu_mem_wr,
         io_rd  	=> open,
         io_wr  	=> open,
@@ -546,7 +558,9 @@ begin
     -- the non-code (row) part of the tile address
     tile_a(2 downto 0) <= tilemap_i(1).tile_a(2 downto 0);
     
-    tilemap_o(1).tile_d(15 downto 0) <= gfx_rom_d(0) & gfx_rom_d(1) when tile_a(11) = '0' else
+    tilemap_o(1).tile_d(15 downto 0) <= gfx_rom_d(0) & gfx_rom_d(1)(7 downto 2) & gfx_rom_d(1)(0) & gfx_rom_d(1)(1)
+                                          when PLATFORM_VARIANT = "frogger" else
+                                        gfx_rom_d(0) & gfx_rom_d(1) when tile_a(11) = '0' else
                                         gfx_rom_d(2) & gfx_rom_d(3);
 
     GEN_TILE_ROMS : for i in GALAXIAN_TILE_ROM'range generate
@@ -628,23 +642,39 @@ begin
 		);
   tilemap_o(1).map_d(15 downto 8) <= (others => '0');
 
-  -- tilemap colour ram
-  -- - even addresses: scroll position
-  -- - odd addresses: colour base for row
-	cram_inst : entity work.galaxian_cram
-		port map
-		(
-			clock_b			=> clk_sys,
-			address_b		=> cpu_a(7 downto 0),
-			wren_b			=> cram_wr,
-			data_b			=> cpu_d_o,
-			q_b					=> cram_d_o,
-			
-			clock_a			=> clk_video,
-			address_a		=> tilemap_i(1).attr_a(7 downto 1),
-			q_a					=> tilemap_o(1).attr_d(15 downto 0)
-		);
+  BLK_CRAM : block
+    signal cram_d_i   : std_logic_vector(7 downto 0);
+  begin
+  
+    GEN_CRAM_D : if PLATFORM_VARIANT = "frogger" generate
+                  -- data = (data >> 4) | (data << 4);
+    cram_d_i <= cpu_d_o(3 downto 0) & cpu_d_o(7 downto 4) 
+                    when cpu_a(0) = '0' else
+                  -- *color = ((*color >> 1) & 0x03) | ((*color << 2) & 0x04);
+                  "00000" & cpu_d_o(1 downto 0) & cpu_d_o(2);
+    else generate
+      cram_d_i <= cpu_d_o;
+    end generate GEN_CRAM_D;
     
+    -- tilemap colour ram
+    -- - even addresses: scroll position
+    -- - odd addresses: colour base for row
+    cram_inst : entity work.galaxian_cram
+      port map
+      (
+        clock_b			=> clk_sys,
+        address_b		=> cpu_a(7 downto 0),
+        wren_b			=> cram_wr,
+        data_b			=> cram_d_i,
+        q_b					=> cram_d_o,
+        
+        clock_a			=> clk_video,
+        address_a		=> tilemap_i(1).attr_a(7 downto 1),
+        q_a					=> tilemap_o(1).attr_d(15 downto 0)
+      );
+      
+  end block BLK_CRAM;
+  
   GEN_WRAM : if GALAXIAN_USE_INTERNAL_WRAM generate
   
     wram_inst : entity work.spram
@@ -675,7 +705,34 @@ begin
     sram_o.we <= wram_wr;
 
   end generate GEN_WRAM;
-		
+
+  GEN_PIA8255 : if PLATFORM_VARIANT = "frogger" generate
+  
+    pia8255_0_inst : entity work.pia8255
+      port map
+      (
+        -- uC interface
+        clk			=> clk_sys,
+        clken		=> '1',
+        reset		=> cpu_rst,
+        a				=> cpu_a(2 downto 1),
+        d_i			=> cpu_d_o,
+        d_o			=> pia0_d_o,
+        cs			=> pia0_cs,
+        rd			=> cpu_mem_rd,
+        wr			=> cpu_mem_wr,
+        
+        -- I/O interface
+        pa_i		=> inputs_i(0).d,
+        pa_o		=> open,
+        pb_i		=> inputs_i(1).d,
+        pb_o		=> open,
+        pc_i		=> inputs_i(2).d,
+        pc_o		=> open
+      );
+
+  end generate GEN_PIA8255;
+  
   -- unused outputs
 
   flash_o <= NULL_TO_FLASH;
