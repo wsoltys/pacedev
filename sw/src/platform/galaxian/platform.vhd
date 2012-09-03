@@ -130,9 +130,11 @@ architecture SYN of platform is
   signal pause          : std_logic;
   signal rot_en         : std_logic;
 
-  -- frogger signals
+  -- frogger, scramble signals
   signal pia0_cs        : std_logic;
   signal pia0_d_o       : std_logic_vector(7 downto 0);
+  signal pia1_cs        : std_logic;
+  signal pia1_d_o       : std_logic_vector(7 downto 0);
   
   -- jumpbug signals
   signal extra_rom_cs     : std_logic;
@@ -179,13 +181,29 @@ begin
   vram_cs <=    '1' when STD_MATCH(cpu_a, GALAXIAN_VRAM_A) else '0';
   cram_cs <=    '1' when STD_MATCH(cpu_a, GALAXIAN_CRAM_A) else '0';
   sprite_cs <=  '1' when STD_MATCH(cpu_a, GALAXIAN_SPRITE_A) else '0';
-  in_cs(0) <=   '1' when STD_MATCH(cpu_a(15 downto 11), GALAXIAN_INPUTS_A+"00000") else '0';
-  in_cs(1) <=   '1' when STD_MATCH(cpu_a(15 downto 11), GALAXIAN_INPUTS_A+"00001") else '0';
-  in_cs(2) <=   '1' when STD_MATCH(cpu_a(15 downto 11), GALAXIAN_INPUTS_A+"00010") else '0';
+  in_cs(0) <=   '1' when not GALAXIAN_HAS_PIA8255 and
+                        STD_MATCH(cpu_a(15 downto 11), GALAXIAN_INPUTS_A+"00000") else 
+                '0';
+  in_cs(1) <=   '1' when not GALAXIAN_HAS_PIA8255 and
+                        STD_MATCH(cpu_a(15 downto 11), GALAXIAN_INPUTS_A+"00001") else
+                '0';
+  in_cs(2) <=   '1' when not GALAXIAN_HAS_PIA8255 and
+                        STD_MATCH(cpu_a(15 downto 11), GALAXIAN_INPUTS_A+"00010") else 
+                '0';
   
-  -- PIA_8255 $C000-$FFFF (frogger only)
+                -- PIA_8255 $C000-$FFFF (frogger only)
   pia0_cs <=    '1' when PLATFORM_VARIANT = "frogger" and
-                          STD_MATCH(cpu_a, "11--------------") else 
+                          STD_MATCH(cpu_a, "11--------------") else
+                -- PIA_8255 $8000-$FFFF (scramble only)
+                '1' when PLATFORM_VARIANT = "scramble" and
+                          STD_MATCH(cpu_a, "1------1--------") else
+                '0';
+                -- PIA_8255 $C000-$FFFF (frogger only)
+  pia1_cs <=    '1' when PLATFORM_VARIANT = "frogger" and
+                          STD_MATCH(cpu_a, "11--------------") else
+                -- PIA_8255 $8000-$FFFF (scramble only)
+                '1' when PLATFORM_VARIANT = "scramble" and
+                          STD_MATCH(cpu_a, "1-----1---------") else
                 '0';
   
   -- ROM $8000-$AFFF (jumpbug only)
@@ -207,6 +225,7 @@ begin
               inputs_i(2).d when in_cs(2) = '1' else
               extra_rom_d_o when extra_rom_cs = '1' else
               pia0_d_o when pia0_cs = '1' else
+              pia1_d_o when pia1_cs = '1' else
               jumpbug_prot_d when jumpbug_prot_cs = '1' else
 							(others => '0');
 	
@@ -706,16 +725,57 @@ begin
 
   end generate GEN_WRAM;
 
-  GEN_PIA8255 : if PLATFORM_VARIANT = "frogger" generate
+  GEN_PIA8255 : if PLATFORM_VARIANT = "frogger" or
+                    PLATFORM_VARIANT = "scramble" generate
+                    
+    component pia8255 is
+      port
+      (
+        -- uC interface
+        clk     : in std_logic;
+        clken   : in std_logic;
+        reset   : in std_logic;
+        a       : in std_logic_vector(1 downto 0);
+        d_i     : in std_logic_vector(7 downto 0);
+        d_o     : out std_logic_vector(7 downto 0);
+        cs    	: in std_logic;
+        rd  	  : in std_logic;
+        wr	    : in std_logic;
+
+        -- I/O interface
+        pa_i    : in std_logic_vector(7 downto 0);
+        pb_i    : in std_logic_vector(7 downto 0);
+        pc_i    : in std_logic_vector(7 downto 0);
+        pa_o    : out std_logic_vector(7 downto 0);
+        pb_o    : out std_logic_vector(7 downto 0);
+        pc_o    : out std_logic_vector(7 downto 0)
+      );
+    end component pia8255;
   
-    pia8255_0_inst : entity work.pia8255
+    signal pia8255_a  : std_logic_vector(1 downto 0);
+    signal pia0_pc_i  : std_logic_vector(7 downto 0);
+    signal pia1_pc_i  : std_logic_vector(7 downto 0);
+    signal pia1_pc_o  : std_logic_vector(7 downto 0);
+    
+    signal prot_d_o   : std_logic_vector(7 downto 0);
+    
+  begin
+  
+    pia8255_a <=  cpu_a(2 downto 1) when PLATFORM_VARIANT = "frogger" else
+                  cpu_a(1 downto 0) when PLATFORM_VARIANT = "scramble";
+  
+    pia0_pc_i <=  prot_d_o(7) & inputs_i(2).d(6) & prot_d_o(7) & inputs_i(2).d(4 downto 0)
+                    when PLATFORM_VARIANT = "scramble" else
+                  inputs_i(2).d;
+                  
+    pia8255_0_inst : pia8255
       port map
       (
         -- uC interface
         clk			=> clk_sys,
         clken		=> '1',
         reset		=> cpu_rst,
-        a				=> cpu_a(2 downto 1),
+        a				=> pia8255_a,
         d_i			=> cpu_d_o,
         d_o			=> pia0_d_o,
         cs			=> pia0_cs,
@@ -727,10 +787,85 @@ begin
         pa_o		=> open,
         pb_i		=> inputs_i(1).d,
         pb_o		=> open,
-        pc_i		=> inputs_i(2).d,
+        pc_i		=> pia0_pc_i,
         pc_o		=> open
       );
 
+    pia8255_1_inst : pia8255
+      port map
+      (
+        -- uC interface
+        clk			=> clk_sys,
+        clken		=> '1',
+        reset		=> cpu_rst,
+        a				=> pia8255_a,
+        d_i			=> cpu_d_o,
+        d_o			=> pia1_d_o,
+        cs			=> pia1_cs,
+        rd			=> cpu_mem_rd,
+        wr			=> cpu_mem_wr,
+        
+        -- I/O interface
+        pa_i		=> (others => '0'),
+        pa_o		=> open,
+        pb_i		=> (others => '0'),
+        pb_o		=> open,
+        pc_i		=> pia1_pc_i,
+        pc_o		=> pia1_pc_o
+      );
+
+    GEN_SCRAMBLE_PROT : if PLATFORM_VARIANT = "scramble" generate
+    begin
+      --  state->m_protection_state = (state->m_protection_state << 4) | (data & 0x0f);
+      --	switch (state->m_protection_state & 0xfff)
+      --	{
+      --		/* scramble */
+      --		case 0xf09:		state->m_protection_result = 0xff;	break;
+      --		case 0xa49:		state->m_protection_result = 0xbf;	break;
+      --		case 0x319:		state->m_protection_result = 0x4f;	break;
+      --		case 0x5c9:		state->m_protection_result = 0x6f;	break;
+      --
+      --		/* scrambls */
+      --		case 0x246:		state->m_protection_result ^= 0x80;	break;
+      --		case 0xb5f:		state->m_protection_result = 0x6f;	break;
+      --	}
+      process (clk_sys, cpu_rst)
+        variable prot_state : std_logic_vector(11 downto 0);
+        variable pc_o_r     : std_logic_vector(7 downto 0);
+      begin
+        if cpu_rst = '1' then
+          prot_state := (others => '0');
+          prot_d_o <= (others => '0');
+        elsif rising_edge(clk_sys) then
+          if pia1_pc_o /= pc_o_r then
+            prot_state := prot_state(7 downto 0) & pia1_pc_o(3 downto 0);
+            case prot_state is
+              -- scramble
+              when X"F09" =>
+                prot_d_o <= X"FF";
+              when X"A49" =>
+                prot_d_o <= X"BF";
+              when X"319" =>
+                prot_d_o <= X"4F";
+              when X"5C9" =>
+                prot_d_o <= X"6F";
+              -- scrambls
+              when X"246" =>
+                prot_d_o(7) <= prot_d_o(7) xor '1';
+              when X"B5F" =>
+                prot_d_o <= X"6F";
+              when others =>
+                null;
+            end case;
+          end if; -- pia1_pc_o /= pc_o_r
+          pc_o_r := pia1_pc_o;
+        end if; -- rising_egde(clk_sys)
+      end process;
+      
+      pia1_pc_i <= prot_d_o;
+      
+    end generate GEN_SCRAMBLE_PROT;
+    
   end generate GEN_PIA8255;
   
   -- unused outputs
