@@ -44,8 +44,10 @@ package platform_variant_pkg is
                                             0 => "ckvid10.bin", 
                                             1 => "ckvid7.bin"
                                           );
-
+  constant GALAXIAN_TILE_ROM_WIDTHAD    : natural := 12;
+  
   alias GALAXIAN_SPRITE_ROM             : rom_a(0 to 1) is GALAXIAN_TILE_ROM;
+  alias GALAXIAN_SPRITE_ROM_WIDTHAD     : natural is GALAXIAN_TILE_ROM_WIDTHAD;
                                           
   -- ROM $0000-$5FFF
   constant GALAXIAN_ROM_A         : std_logic_vector(15 downto 0) := "00--------------";
@@ -60,7 +62,8 @@ package platform_variant_pkg is
   constant GALAXIAN_SPRITE_A      : std_logic_vector(15 downto 0) := GALAXIAN_CRAM_A(15 downto 8) &"01------";
   -- INPUTS $C000,$C400,$C800
   constant GALAXIAN_HAS_PIA8255   : boolean := false;
-  constant GALAXIAN_INPUTS_A      : std_logic_vector(15 downto 11) := X"C"&"0";
+  constant GALAXIAN_INPUTS_A      : std_logic_vector(15 downto 0) := X"C000";
+  constant GALAXIAN_INPUTS_INC    : std_logic_vector(15 downto 0) := X"0400";
   -- NMIENA $C801
   constant GALAXIAN_NMIENA_A      : std_logic_vector(15 downto 0) := X"C801";
   

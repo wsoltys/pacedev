@@ -41,8 +41,10 @@ package platform_variant_pkg is
                                             0 => "c2.5f", 
                                             1 => "c1.5h"
                                           );
+  constant GALAXIAN_TILE_ROM_WIDTHAD    : natural := 11;
 
   alias GALAXIAN_SPRITE_ROM             : rom_a(0 to 1) is GALAXIAN_TILE_ROM;
+  alias GALAXIAN_SPRITE_ROM_WIDTHAD     : natural is GALAXIAN_TILE_ROM_WIDTHAD;
                                           
    -- null range
   constant GALAXIAN_EXTRA_ROM           : rom_a(0 to -1) := (others => "");
@@ -61,6 +63,7 @@ package platform_variant_pkg is
   -- INPUTS $8000-$FFFF (PIA8255)
   constant GALAXIAN_HAS_PIA8255   : boolean := true;
   constant GALAXIAN_INPUTS_A      : std_logic_vector(15 downto 0) := "1------1--------";
+  constant GALAXIAN_INPUTS_INC    : std_logic_vector(15 downto 0) := X"0000";
   -- NMIENA $6801
   constant GALAXIAN_NMIENA_A      : std_logic_vector(15 downto 0) := X"6801";
   

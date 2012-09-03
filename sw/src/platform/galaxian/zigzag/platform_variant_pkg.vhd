@@ -37,8 +37,10 @@ package platform_variant_pkg is
                                             0 => "zz_6.1h", 
                                             1 => "zz_5.1k"
                                           );
+  constant GALAXIAN_TILE_ROM_WIDTHAD    : natural := 11;
 
   alias GALAXIAN_SPRITE_ROM             : rom_a(0 to 1) is GALAXIAN_TILE_ROM;
+  alias GALAXIAN_SPRITE_ROM_WIDTHAD     : natural is GALAXIAN_TILE_ROM_WIDTHAD;
                                           
    -- null range
   constant GALAXIAN_EXTRA_ROM           : rom_a(0 to -1) := (others => "");
@@ -57,7 +59,9 @@ package platform_variant_pkg is
   -- SPRITES/BULLETS $5840-$587F
   constant GALAXIAN_SPRITE_A      : std_logic_vector(15 downto 0) := X"58"&"01------";
   -- INPUTS $6000,$6800,$7000
-  constant GALAXIAN_INPUTS_A      : std_logic_vector(15 downto 11) := X"6"&"0";
+  constant GALAXIAN_HAS_PIA8255   : boolean := false;
+  constant GALAXIAN_INPUTS_A      : std_logic_vector(15 downto 0) := X"6000";
+  constant GALAXIAN_INPUTS_INC    : std_logic_vector(15 downto 0) := X"0800";
   -- NMIENA $7001
   constant GALAXIAN_NMIENA_A      : std_logic_vector(15 downto 0) := X"7"&"---------001";
   

@@ -40,18 +40,22 @@ package platform_variant_pkg is
                                             0 => "12", 
                                             1 => "11"
                                           );
+  constant GALAXIAN_TILE_ROM_WIDTHAD    : natural := 11;
 
   constant GALAXIAN_SPRITE_ROM          : rom_a(0 to 1) := 
                                           (
                                             0 => "10", 
                                             1 => "9"
                                           );
+  constant GALAXIAN_SPRITE_ROM_WIDTHAD  : natural := 11;
 
    -- null range
   constant GALAXIAN_EXTRA_ROM           : rom_a(0 to -1) := (others => "");
 
   -- same as "galaxian"
     
+  -- ROM $0000-$3FFF
+  constant GALAXIAN_ROM_A         : std_logic_vector(15 downto 0) := "00--------------";
   -- WRAM $4000-$47FF
   constant GALAXIAN_WRAM_A        : std_logic_vector(15 downto 0) := X"4"&"0-----------";
   constant GALAXIAN_WRAM_WIDTHAD  : natural := 11;
@@ -59,8 +63,12 @@ package platform_variant_pkg is
   constant GALAXIAN_VRAM_A        : std_logic_vector(15 downto 0) := X"5"&"0-----------";
   -- CRAM $5800-$5BFF
   constant GALAXIAN_CRAM_A        : std_logic_vector(15 downto 0) := X"5"&"10----------";
+  -- SPRITES/BULLETS $5840-$587F
+  constant GALAXIAN_SPRITE_A      : std_logic_vector(15 downto 0) := X"58"&"01------";
   -- INPUTS $6000,$6800,$7000
-  constant GALAXIAN_INPUTS_A      : std_logic_vector(15 downto 11) := X"6"&"0";
+  constant GALAXIAN_HAS_PIA8255   : boolean := false;
+  constant GALAXIAN_INPUTS_A      : std_logic_vector(15 downto 0) := X"6000";
+  constant GALAXIAN_INPUTS_INC    : std_logic_vector(15 downto 0) := X"0800";
   -- NMIENA $7001
   constant GALAXIAN_NMIENA_A      : std_logic_vector(15 downto 0) := X"7"&"---------001";
   

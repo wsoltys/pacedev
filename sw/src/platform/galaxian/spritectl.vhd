@@ -161,7 +161,15 @@ begin
     end if; -- rising_edge(clk)
     
     -- generate sprite data address
+                            --	*code |= ((spriteram[offs + 2] & 0x30) << 2);
+                            
+    if PLATFORM_VARIANT = "ckongg" then
+      ctl_o.a(12 downto 11) <= reg_i.colour(5 downto 4);
+    else
+      ctl_o.a(12 downto 11) <= "00";
+    end if;
     ctl_o.a(10 downto 5) <= reg_i.n(5 downto 0);
+      
     ctl_o.a(3) <= '0'; -- dual-port RAM
     if reg_i.yflip = '0' then
       ctl_o.a(4) <= row(3);

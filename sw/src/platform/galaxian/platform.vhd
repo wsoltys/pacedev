@@ -135,7 +135,7 @@ architecture SYN of platform is
   signal pia0_d_o       : std_logic_vector(7 downto 0);
   signal pia1_cs        : std_logic;
   signal pia1_d_o       : std_logic_vector(7 downto 0);
-  
+
   -- jumpbug signals
   signal extra_rom_cs     : std_logic;
   signal extra_rom_d_o    : std_logic_vector(7 downto 0);
@@ -166,7 +166,7 @@ begin
     end if;
   end process;
   
-  graphics_o.bit8(0)(0) <= rot_en;
+  graphics_o.bit8(0)(1) <= rot_en;
   
   -- chip select logic
   -- ROM $0000-$3FFF
@@ -181,13 +181,13 @@ begin
   cram_cs <=    '1' when STD_MATCH(cpu_a, GALAXIAN_CRAM_A) else '0';
   sprite_cs <=  '1' when STD_MATCH(cpu_a, GALAXIAN_SPRITE_A) else '0';
   in_cs(0) <=   '1' when not GALAXIAN_HAS_PIA8255 and
-                        STD_MATCH(cpu_a(15 downto 11), GALAXIAN_INPUTS_A+"00000") else 
+                        STD_MATCH(cpu_a, GALAXIAN_INPUTS_A) else 
                 '0';
   in_cs(1) <=   '1' when not GALAXIAN_HAS_PIA8255 and
-                        STD_MATCH(cpu_a(15 downto 11), GALAXIAN_INPUTS_A+"00001") else
+                        STD_MATCH(cpu_a, GALAXIAN_INPUTS_A+GALAXIAN_INPUTS_INC) else
                 '0';
   in_cs(2) <=   '1' when not GALAXIAN_HAS_PIA8255 and
-                        STD_MATCH(cpu_a(15 downto 11), GALAXIAN_INPUTS_A+"00010") else 
+                        STD_MATCH(cpu_a, GALAXIAN_INPUTS_A+GALAXIAN_INPUTS_INC+GALAXIAN_INPUTS_INC) else 
                 '0';
   
                 -- PIA_8255 $C000-$FFFF (frogger only)
@@ -372,29 +372,30 @@ begin
       -- I'm sure this is done via NOT & XOR in a GAL, but I can't derive the algorithm...
       -- - tried brute-force approach but didn't get any matches
       rom_device_a(cpu_a'left downto 15) <= cpu_a(cpu_a'left downto 15);
-      rom_device_a(14 downto 10) <= "01001" when cpu_a(14 downto 10) = "00000" else
-                                    "00111" when cpu_a(14 downto 10) = "00001" else
-                                    "10010" when cpu_a(14 downto 10) = "00010" else
+      rom_device_a(14 downto 10) <= "00101" when cpu_a(14 downto 10) = "00000" else
+                                    "01011" when cpu_a(14 downto 10) = "00001" else
+                                    "10000" when cpu_a(14 downto 10) = "00010" else
                                     "00011" when cpu_a(14 downto 10) = "00011" else
-                                    "10001" when cpu_a(14 downto 10) = "00100" else
-                                    "00000" when cpu_a(14 downto 10) = "00101" else
+                                    "01110" when cpu_a(14 downto 10) = "00100" else
+                                    "10011" when cpu_a(14 downto 10) = "00101" else
                                     "00110" when cpu_a(14 downto 10) = "00110" else
-                                    "01010" when cpu_a(14 downto 10) = "00111" else
-                                    "01101" when cpu_a(14 downto 10) = "01000" else
-                                    "10011" when cpu_a(14 downto 10) = "01001" else
-                                    "10100" when cpu_a(14 downto 10) = "01010" else
-                                    "00001" when cpu_a(14 downto 10) = "01011" else
-                                    "01000" when cpu_a(14 downto 10) = "01100" else
-                                    "01110" when cpu_a(14 downto 10) = "01101" else
-                                    "00100" when cpu_a(14 downto 10) = "01110" else
-                                    "10000" when cpu_a(14 downto 10) = "01111" else
-                                    "00010" when cpu_a(14 downto 10) = "10000" else
-                                    "10101" when cpu_a(14 downto 10) = "10001" else
-                                    "01011" when cpu_a(14 downto 10) = "10010" else
-                                    "00101" when cpu_a(14 downto 10) = "10011" else
-                                    "01100" when cpu_a(14 downto 10) = "10100" else
-                                    "01111";
+                                    "00001" when cpu_a(14 downto 10) = "00111" else
+                                    "01100" when cpu_a(14 downto 10) = "01000" else
+                                    "00000" when cpu_a(14 downto 10) = "01001" else
+                                    "00111" when cpu_a(14 downto 10) = "01010" else
+                                    "10010" when cpu_a(14 downto 10) = "01011" else
+                                    "10100" when cpu_a(14 downto 10) = "01100" else
+                                    "01000" when cpu_a(14 downto 10) = "01101" else
+                                    "01101" when cpu_a(14 downto 10) = "01110" else
+                                    "10101" when cpu_a(14 downto 10) = "01111" else
+                                    "01111" when cpu_a(14 downto 10) = "10000" else
+                                    "00100" when cpu_a(14 downto 10) = "10001" else
+                                    "00010" when cpu_a(14 downto 10) = "10010" else
+                                    "01001" when cpu_a(14 downto 10) = "10011" else
+                                    "01010" when cpu_a(14 downto 10) = "10100" else
+                                    "10001";
       rom_device_a(9 downto 0) <= cpu_a(9 downto 0);
+      rom_d_o <= rom_device_d_o;
       
     elsif PLATFORM_VARIANT = "mooncrst" generate
         signal res  : std_logic_vector(rom_d_o'range);
@@ -511,7 +512,7 @@ begin
     type bank_a is array(0 to 4) of std_logic_vector(7 downto 0);
     signal bank     : bank_a;
     signal tile_a   : std_logic_vector(12 downto 0);
-    signal sprite_a : std_logic_vector(11 downto 0);
+    signal sprite_a : std_logic_vector(12 downto 0);
 
     alias code : std_logic_vector(7 downto 0) is tilemap_i(1).tile_a(10 downto 3);
     
@@ -549,13 +550,16 @@ begin
       end if; -- rising_edge(clk_sys)
     end process;
 
-    GEN_TILE_A : if PLATFORM_VARIANT = "jumpbug" generate
+    GEN_TILE_A : if PLATFORM_VARIANT = "ckongg" generate
+      -- all 9 bits are 'code' (generated in controller)
+      tile_a(12 downto 3) <= tilemap_i(1).tile_a(12 downto 3);
+    elsif PLATFORM_VARIANT = "jumpbug" generate
     
       --if ((*code & 0xc0) == 0x80 && (state->m_gfxbank[2] & 0x01))
       --  *code += 128 + (( state->m_gfxbank[0] & 0x01) << 6) +
       --         (( state->m_gfxbank[1] & 0x01) << 7) +
       --         ((~state->m_gfxbank[4] & 0x01) << 8);
-      tile_a(12 downto 3) <= tile_a(12 downto 3) + 
+      tile_a(12 downto 3) <= code + 
                               128 +
                               ('0' & bank(4)(0) & bank(1)(0) & bank(0)(0) & "000000")
                                 when (code(7 downto 6) = "10" and bank(2)(0) /= '0') else
@@ -578,7 +582,7 @@ begin
     
     tilemap_o(1).tile_d(15 downto 0) <= gfx_rom_d(0) & gfx_rom_d(1)(7 downto 2) & gfx_rom_d(1)(0) & gfx_rom_d(1)(1)
                                           when PLATFORM_VARIANT = "frogger" else
-                                        gfx_rom_d(0) & gfx_rom_d(1) when tile_a(11) = '0' else
+                                        gfx_rom_d(0) & gfx_rom_d(1) when tile_a(GALAXIAN_TILE_ROM_WIDTHAD) = '0' else
                                         gfx_rom_d(2) & gfx_rom_d(3);
 
     GEN_TILE_ROMS : for i in GALAXIAN_TILE_ROM'range generate
@@ -587,12 +591,12 @@ begin
         (
           init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" &
                           GALAXIAN_TILE_ROM(i) & ".hex",
-          widthad_a		=> 11
+          widthad_a		=> GALAXIAN_TILE_ROM_WIDTHAD
         )
         port map
         (
           clock			=> clk_video,
-          address		=> tile_a(10 downto 0),
+          address		=> tile_a(GALAXIAN_TILE_ROM_WIDTHAD-1 downto 0),
           q					=> gfx_rom_d(i)
         );
     end generate GEN_TILE_ROMS;
@@ -603,11 +607,11 @@ begin
       -- if (state->m_gfxbank[2] && (*code & 0x30) == 0x20)
       -- 	*code = (*code & 0x0f) | (state->m_gfxbank[0] << 4) | (state->m_gfxbank[1] << 5) | 0x40;
       -- - code = (10..5)
-      sprite_a <= '1' & bank(1)(0) & bank(0)(0) & sprite_i.a(8 downto 0) when
+      sprite_a <= "01" & bank(1)(0) & bank(0)(0) & sprite_i.a(8 downto 0) when
                     (bank(2) /= X"00" and sprite_i.a(10 downto 9) = "10") else
-                  '0' & sprite_i.a(10 downto 0);
+                  "00" & sprite_i.a(10 downto 0);
     else generate
-      sprite_a <= '0' & sprite_i.a(10 downto 0);
+      sprite_a <= std_logic_vector(resize(unsigned(sprite_i.a(GALAXIAN_SPRITE_ROM_WIDTHAD-1 downto 0)),sprite_a'length));
     end generate GEN_SPRITE_A;
                       
     GEN_SPRITE_ROMS : for i in GALAXIAN_SPRITE_ROM'range generate
@@ -616,17 +620,19 @@ begin
         (
           init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" &
                           GALAXIAN_SPRITE_ROM(i) & ".hex",
-          widthad_a		=> 11,
-          widthad_b		=> 11
+          widthad_a		=> GALAXIAN_SPRITE_ROM_WIDTHAD,
+          widthad_b		=> GALAXIAN_SPRITE_ROM_WIDTHAD
         )
         port map
         (
           clock			              => clk_video,
-          address_a(10 downto 4)  => sprite_a(10 downto 4),
+          address_a(GALAXIAN_SPRITE_ROM_WIDTHAD-1 downto 4)  
+                                  => sprite_a(GALAXIAN_SPRITE_ROM_WIDTHAD-1 downto 4),
           address_a(3)            => '0',
           address_a(2 downto 0)   => sprite_a(2 downto 0),
           q_a 			              => spr_rom_left(i),
-          address_b(10 downto 4)  => sprite_a(10 downto 4),
+          address_b(GALAXIAN_SPRITE_ROM_WIDTHAD-1 downto 4)  
+                                  => sprite_a(GALAXIAN_SPRITE_ROM_WIDTHAD-1 downto 4),
           address_b(3)            => '1',
           address_b(2 downto 0)   => sprite_a(2 downto 0),
           q_b                     => spr_rom_right(i)
@@ -636,7 +642,7 @@ begin
     sprite_o.d(sprite_o.d'left downto 32) <= (others => '0');
     sprite_o.d(31 downto 0) <=  spr_rom_left(0) & spr_rom_right(0) & 
                                 spr_rom_left(1) & spr_rom_right(1)
-                                  when sprite_a(11) = '0' else
+                                  when sprite_a(GALAXIAN_SPRITE_ROM_WIDTHAD) = '0' else
                                 spr_rom_left(2) & spr_rom_right(2) & 
                                 spr_rom_left(3) & spr_rom_right(3);
     
@@ -724,6 +730,27 @@ begin
 
   end generate GEN_WRAM;
 
+  BLK_BITMAP : block
+    signal bitmap_en      : std_logic;
+  begin
+  
+    process (clk_sys, rst_sys)
+    begin
+      if rst_sys = '1' then
+        bitmap_en <= '1';
+      elsif rising_edge(clk_sys) then
+        if PLATFORM_VARIANT = "ckongg" or
+            PLATFORM_VARIANT = "pacmanbl" then
+          bitmap_en <= '0';
+        else
+        end if;
+      end if;
+    end process;
+    
+    graphics_o.bit8(0)(0) <= bitmap_en;
+    
+  end block BLK_BITMAP;
+  
   GEN_PIA8255 : if PLATFORM_VARIANT = "frogger" or
                     PLATFORM_VARIANT = "scramble" generate
                     

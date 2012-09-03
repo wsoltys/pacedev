@@ -41,8 +41,10 @@ package platform_variant_pkg is
                                             3 => "jbj",
                                             5 => "jbk"
                                           );
+  constant GALAXIAN_TILE_ROM_WIDTHAD    : natural := 11;
 
   alias GALAXIAN_SPRITE_ROM             : rom_a(0 to 5) is GALAXIAN_TILE_ROM;
+  alias GALAXIAN_SPRITE_ROM_WIDTHAD     : natural is GALAXIAN_TILE_ROM_WIDTHAD;
 
   -- extra CPU ROMs @$8000
   constant GALAXIAN_EXTRA_ROM           : rom_a(4 to 6) := 
@@ -64,7 +66,9 @@ package platform_variant_pkg is
   -- SPRITES/BULLETS $5040-$507F
   constant GALAXIAN_SPRITE_A      : std_logic_vector(15 downto 0) := X"50"&"01------";
   -- INPUTS $6000,$6800,$7000
-  constant GALAXIAN_INPUTS_A      : std_logic_vector(15 downto 11) := X"6"&"0";
+  constant GALAXIAN_HAS_PIA8255   : boolean := false;
+  constant GALAXIAN_INPUTS_A      : std_logic_vector(15 downto 0) := X"6000";
+  constant GALAXIAN_INPUTS_INC    : std_logic_vector(15 downto 0) := X"0800";
   -- NMIENA $7001
   constant GALAXIAN_NMIENA_A      : std_logic_vector(15 downto 0) := X"7001";
   
