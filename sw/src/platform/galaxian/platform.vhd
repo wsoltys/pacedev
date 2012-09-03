@@ -171,10 +171,9 @@ begin
   -- chip select logic
   -- ROM $0000-$3FFF
   rom_cs <=     '1' when STD_MATCH(cpu_a, GALAXIAN_ROM_A) else 
-                    -- ckongg $0000-$57FF
+                    -- ckongg $0000-$5FFF
                 '1' when PLATFORM_VARIANT = "ckongg" and
-                      (STD_MATCH(cpu_a, "0100------------") or
-                        STD_MATCH(cpu_a, "01010-----------")) else 
+                      STD_MATCH(cpu_a, "010-------------") else 
                 '0';
   -- every thing else is variant-dependent
   wram_cs <=    '1' when STD_MATCH(cpu_a, GALAXIAN_WRAM_A) else '0';
