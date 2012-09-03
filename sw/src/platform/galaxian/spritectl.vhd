@@ -78,7 +78,7 @@ begin
         y := std_logic_vector(to_unsigned(32,y'length) + unsigned(video_ctl.y));
         -- 1st three sprites & 1st three bullets match against (y-1)
         if INDEX < 3 or (INDEX >= 8 and INDEX <= 10) then
-          y := std_logic_vector(unsigned(y) + to_unsigned(1,y'length));
+          y := std_logic_vector(unsigned(y) - to_unsigned(1,y'length));
         end if;
         
         if video_ctl.hblank = '1' then
@@ -99,7 +99,7 @@ begin
 
           -- sprites not visible before row 16				
           if ctl_i.ld = '1' then
-            if yMat and unsigned(y) > 16 then
+            if yMat and unsigned(y) < 255 then
               if INDEX < 8 then
                 rowStore := flipData;			-- load sprite data
               else
@@ -123,7 +123,7 @@ begin
             -- count up at left edge of sprite
             rowCount := rowCount + 1;
             -- start of sprite
-            if unsigned(x) /= 0 and unsigned(x) < 240 then
+            if unsigned(x) > 15 then
               xMat := true;
             end if;
           end if;

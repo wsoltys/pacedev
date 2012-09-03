@@ -4,6 +4,7 @@ use ieee.numeric_std.all;
 
 library work;
 use work.sprite_pkg.all;
+use work.platform_variant_pkg.PLATFORM_VARIANT;
 
 entity sptReg is
 
@@ -35,13 +36,23 @@ begin
             -- normal sprites
             case reg_i.a(1 downto 0) is
               when "00" =>
-                reg_o.y <= std_logic_vector(resize(unsigned(not reg_i.d), reg_o.y'length));
+                if PLATFORM_VARIANT = "frogger" then
+                  -- UINT8 base0 = state->m_frogger_adjust ? ((base[0] >> 4) | (base[0] << 4)) : base[0];
+                  reg_o.y <= std_logic_vector(resize(unsigned(not (reg_i.d(3 downto 0) & reg_i.d(7 downto 4))), reg_o.y'length));
+                else
+                  reg_o.y <= std_logic_vector(resize(unsigned(not reg_i.d), reg_o.y'length));
+                end if;
               when "01" =>
                 reg_o.n <= std_logic_vector(resize(unsigned(reg_i.d(5 downto 0)), reg_o.n'length));
                 reg_o.xflip <= reg_i.d(6);
                 reg_o.yflip <= reg_i.d(7);
               when "10" =>
-                reg_o.colour <= reg_i.d;
+                if PLATFORM_VARIANT = "frogger" then
+                  -- *color = ((*color >> 1) & 0x03) | ((*color << 2) & 0x04);
+                  reg_o.colour <= "00000" & reg_i.d(0) & reg_i.d(2 downto 1);
+                else
+                  reg_o.colour <= reg_i.d;
+                end if;
               when others =>
                 reg_o.x <= std_logic_vector(resize(unsigned(reg_i.d), reg_o.x'length));
             end case;

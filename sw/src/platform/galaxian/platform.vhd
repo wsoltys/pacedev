@@ -647,11 +647,11 @@ begin
   begin
   
     GEN_CRAM_D : if PLATFORM_VARIANT = "frogger" generate
-                  -- data = (data >> 4) | (data << 4);
-    cram_d_i <= cpu_d_o(3 downto 0) & cpu_d_o(7 downto 4) 
-                    when cpu_a(0) = '0' else
-                  -- *color = ((*color >> 1) & 0x03) | ((*color << 2) & 0x04);
-                  "00000" & cpu_d_o(1 downto 0) & cpu_d_o(2);
+                    -- data = (data >> 4) | (data << 4);
+      cram_d_i <= cpu_d_o(3 downto 0) & cpu_d_o(7 downto 4) 
+                      when cpu_a(0) = '0' else
+                    -- *color = ((*color >> 1) & 0x03) | ((*color << 2) & 0x04);
+                    "00000" & cpu_d_o(0) & cpu_d_o(2 downto 1);
     else generate
       cram_d_i <= cpu_d_o;
     end generate GEN_CRAM_D;

@@ -49,7 +49,7 @@ begin
 			end loop;
 			-- special keys
       jamma_v(NUM_INPUTS-1).d := (others => '0');
-      keybd_v(NUM_INPUTS-1).d := (others => '1');	-- because we AND jamma,keybd
+      keybd_v(NUM_INPUTS-1).d := (others => '0');
 			
     elsif rising_edge (clk) then
 
@@ -62,7 +62,7 @@ begin
 			jamma_v(0).d(5) := jamma.p(1).left;
 			jamma_v(1).d(5) := jamma.p(1).left;
 			jamma_v(0).d(6) := jamma.coin(2);
-			jamma_v(0).d(7) := jamma.coin(1);
+			jamma_v(0).d(7) := jamma.coin(1) and jamma.p(1).button(3);
 			jamma_v(1).d(6) := jamma.p(2).start;
 			jamma_v(1).d(7) := jamma.p(1).start;
 			jamma_v(2).d(0) := jamma.p(1).down;
@@ -120,9 +120,10 @@ begin
     end if; -- rising_edge (clk)
 
 		-- assign outputs
-		for i in 0 to NUM_INPUTS-1 loop
+		for i in 0 to NUM_INPUTS-2 loop
 			inputs(i).d <= jamma_v(i).d and keybd_v(i).d;
 		end loop;
+    inputs(NUM_INPUTS-1).d <= jamma_v(NUM_INPUTS-1).d or keybd_v(NUM_INPUTS-1).d;
 			
   end process latchInputs;
 
