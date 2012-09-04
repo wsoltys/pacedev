@@ -31,26 +31,33 @@ architecture SYN of pace_video_mixer is
 begin
 
   GEN_BITMAPS : 
-    if PACE_VIDEO_NUM_BITMAPS = 0 generate
-      bg_rgb <= (others => (others => '0'));
-    else generate
+    if PACE_VIDEO_NUM_BITMAPS = 1 generate
       bg_rgb <= bitmap_ctl_o(1).rgb;
+    elsif PACE_VIDEO_NUM_BITMAPS = 2 generate
+      bg_rgb <= bitmap_ctl_o(1).rgb when bitmap_ctl_o(1).set = '1' else
+                bitmap_ctl_o(2).rgb;
+    elsif PACE_VIDEO_NUM_BITMAPS = 3 generate
+      bg_rgb <= bitmap_ctl_o(1).rgb when bitmap_ctl_o(1).set = '1' else
+                bitmap_ctl_o(2).rgb when bitmap_ctl_o(2).set = '1' else
+                bitmap_ctl_o(3).rgb;
+    else generate
+      bg_rgb <= (others => (others => '0'));
   end generate GEN_BITMAPS;
     
   GEN_TILEMAPS : 
-    if PACE_VIDEO_NUM_TILEMAPS = 0 generate
-      rgb_o <=  sprite_rgb when sprite_set = '1' and sprite_pri = '1' else
-                sprite_rgb when sprite_set = '1' else
-                bg_rgb;
-    elsif PACE_VIDEO_NUM_TILEMAPS = 1 generate
+    if PACE_VIDEO_NUM_TILEMAPS = 1 generate
       rgb_o <=  sprite_rgb when sprite_set = '1' and sprite_pri = '1' else
                 tilemap_ctl_o(1).rgb when tilemap_ctl_o(1).set = '1' else
+                sprite_rgb when sprite_set = '1' else
+                bg_rgb;
+    elsif PACE_VIDEO_NUM_TILEMAPS = 2 generate
+      rgb_o <=  sprite_rgb when sprite_set = '1' and sprite_pri = '1' else
+                tilemap_ctl_o(1).rgb when tilemap_ctl_o(1).set = '1' else
+                tilemap_ctl_o(2).rgb when tilemap_ctl_o(2).set = '1' else
                 sprite_rgb when sprite_set = '1' else
                 bg_rgb;
     else generate
       rgb_o <=  sprite_rgb when sprite_set = '1' and sprite_pri = '1' else
-                tilemap_ctl_o(1).rgb when tilemap_ctl_o(1).set = '1' else
-                tilemap_ctl_o(2).rgb when tilemap_ctl_o(2).set = '1' else
                 sprite_rgb when sprite_set = '1' else
                 bg_rgb;
   end generate GEN_TILEMAPS;

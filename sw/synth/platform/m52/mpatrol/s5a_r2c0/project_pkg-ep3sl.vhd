@@ -69,8 +69,8 @@ package project_pkg is
 	--constant PACE_ENABLE_ADV724					      : std_logic := '1';
 	--constant USE_VIDEO_VBLANK_INTERRUPT 		  : boolean := false;
 
-  constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
-  --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
+  --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
+  constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
 
 --  -- for VDUEB variants (uses CRTC6845 video controller)
 --  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_NONE;
@@ -103,13 +103,13 @@ package project_pkg is
 
   constant S5AR2_HAS_FLOPPY_IF              : boolean := false;
 
-	-- Galaxian-specific constants
+	-- Moon Patrol-specific constants
 			
-	constant GALAXIAN_USE_INTERNAL_WRAM       : boolean := true;
+	constant M52_USE_INTERNAL_WRAM            : boolean := true;
   
 	-- derived - do not edit
 
-  constant S5AR2_EMULATE_SRAM               : boolean := not GALAXIAN_USE_INTERNAL_WRAM;
+  constant S5AR2_EMULATE_SRAM               : boolean := not M52_USE_INTERNAL_WRAM;
   constant PACE_HAS_SRAM                    : boolean := S5AR2_EMULATE_SRAM;
   constant PACE_HAS_FLASH                   : boolean := S5AR2_EMULATE_FLASH;
 	

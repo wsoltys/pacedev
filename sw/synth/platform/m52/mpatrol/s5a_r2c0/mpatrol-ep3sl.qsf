@@ -2294,7 +2294,9 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80.v
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80se.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/Z80.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/m52/bitmapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/m52/bitmap1_ctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/m52/bitmap2_ctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/m52/bitmap3_ctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/m52/tilemapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/m52/spritereg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/m52/spritectl.vhd

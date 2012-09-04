@@ -17,47 +17,39 @@ package platform_variant_pkg is
 	-- Platform-specific constants (optional)
 	--
 
-  constant PLATFORM_VARIANT             : string := "galaxian";
+  constant PLATFORM_VARIANT             : string := "mpatrol";
   constant PLATFORM_VARIANT_SRC_DIR     : string := PLATFORM_SRC_DIR & PLATFORM_VARIANT & "/";
   
   type rom_a is array (natural range <>) of string;
-  constant GALAXIAN_ROM                 : rom_a(0 to 4) := 
+  constant M52_ROM                      : rom_a(0 to 3) := 
                                           (
-                                            0 => "galmidw.u", 
-                                            1 => "galmidw.v",
-                                            2 => "galmidw.w",
-                                            3 => "galmidw.y",
-                                            4 => "7l"
+                                            0 => "mpa-1.3m", 
+                                            1 => "mpa-2.3l",
+                                            2 => "mpa-3.3k",
+                                            3 => "mpa-4.3j"
                                           );
-  constant GALAXIAN_ROM_WIDTHAD         : natural := 11;
+  constant M52_ROM_WIDTHAD              : natural := 12;
 
-  constant GALAXIAN_TILE_ROM            : rom_a(0 to 1) := 
+  constant M52_CHAR_ROM                 : rom_a(0 to 1) := 
                                           (
-                                            0 => "1h.bin", 
-                                            1 => "1k.bin"
+                                            0 => "mpe-5.3e", 
+                                            1 => "mpe-4.3f"
                                           );
 
-  alias GALAXIAN_SPRITE_ROM             : rom_a(0 to 1) is GALAXIAN_TILE_ROM;
+  constant M52_SPRITE_ROM               : rom_a(0 to 1) := 
+                                          (
+                                            0 => "mpb-2.3m", 
+                                            1 => "mpb-1.3n"
+                                          );
+
+  constant M52_BG_ROM                   : rom_a(0 to 2) := 
+                                          (
+                                            2 => "mpe-1.3l",  -- mountains
+                                            1 => "mpe-2.3k",  -- hills
+                                            0 => "mpe-3.3h"   -- cityscape
+                                          );
+
                                           
-   -- null range
-  constant GALAXIAN_EXTRA_ROM           : rom_a(0 to -1) := (others => "");
-  
-  -- ROM $0000-$3FFF
-  constant GALAXIAN_ROM_A         : std_logic_vector(15 downto 0) := "00--------------";
-  -- WRAM $4000-$47FF
-  constant GALAXIAN_WRAM_A        : std_logic_vector(15 downto 0) := X"4"&"0-----------";
-  constant GALAXIAN_WRAM_WIDTHAD  : natural := 12;
-  -- VRAM $5000-$57FF
-  constant GALAXIAN_VRAM_A        : std_logic_vector(15 downto 0) := X"5"&"0-----------";
-  -- CRAM $5800-$58FF
-  constant GALAXIAN_CRAM_A        : std_logic_vector(15 downto 0) := X"58"&"--------";
-  -- SPRITES/BULLETS $5840-$587F
-  constant GALAXIAN_SPRITE_A      : std_logic_vector(15 downto 0) := X"58"&"01------";
-  -- INPUTS $6000,$6800,$7000
-  constant GALAXIAN_INPUTS_A      : std_logic_vector(15 downto 11) := X"6"&"0";
-  -- NMIENA $7001
-  constant GALAXIAN_NMIENA_A      : std_logic_vector(15 downto 0) := X"7"&"---------001";
-  
 	-- Palette : Table of RGB entries	
 
 	constant pal : pal_typ :=
