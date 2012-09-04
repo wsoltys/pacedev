@@ -24,40 +24,77 @@ architecture BITMAP_1 of bitmapCtl is
 
   alias rgb       : RGB_t is ctl_o.rgb;
   
+  alias m52_bg1xpos   : std_logic_vector(7 downto 0) is graphics_i.bit16(0)(15 downto 8);
+  alias m52_bg1ypos   : std_logic_vector(7 downto 0) is graphics_i.bit16(0)(7 downto 0);
+--  alias m52_bg2xpos   : std_logic_vector(7 downto 0) is graphics_i.bit16(1)(15 downto 8);
+--  alias m52_bg2ypos   : std_logic_vector(7 downto 0) is graphics_i.bit16(1)(7 downto 0);
+  alias m52_bgcontrol : std_logic_vector(7 downto 0) is graphics_i.bit16(2)(7 downto 0);
+  
 begin
 
   process (clk, reset)
+    variable y_r          : std_logic_vector(y'range);
+    -- ensure bgy won't wrap on the screen
+    variable bgy          : unsigned(7 downto 0);
+    -- must wrap at 256!!!
+    variable bgx          : unsigned(7 downto 0);
     variable bitmap_d_r   : std_logic_vector(7 downto 0);
 		variable pel          : std_logic_vector(1 downto 0);
     variable pal_i        : std_logic_vector(4 downto 0);
 		variable pal_entry    : pal_entry_typ;
   begin
 		if reset = '1' then
+      y_r := (others => '0');
 		elsif rising_edge (clk) then
       -- default
       ctl_o.set <= '0';
       -- same for a whole line
-      ctl_o.a(11 downto 6) <= y(5 downto 0);
+      ctl_o.a(11 downto 6) <= std_logic_vector(bgy(5 downto 0));
       if clk_en = '1' then
-        if y > 63 and y < 64+64 then
-          ctl_o.a(5 downto 0) <= x(7 downto 2);
-          if hblank = '0' then
-            if x(1 downto 0) = "01" then
-              bitmap_d_r := ctl_i.d(7 downto 0);
-            else
-              bitmap_d_r := bitmap_d_r(6 downto 0) & '0';
-            end if;
-            pel := bitmap_d_r(7) & bitmap_d_r(3);
-            pal_i := "001" & pel;
-            pal_entry := pal(to_integer(unsigned(pal_i)));
-            ctl_o.rgb.r <= pal_entry(0) & "0000";
-            ctl_o.rgb.g <= pal_entry(1) & "0000";
-            ctl_o.rgb.b <= pal_entry(2) & "0000";
-            if 	pel /= "00" then
-              ctl_o.set <= '1';
-            end if;
-          end if; -- hblank='0'
-        end if; -- y<64
+        -- handle line changes
+        if vblank = '1' then
+          bgy := (others => '1');
+        elsif y /= y_r then
+          if y = m52_bg1ypos then
+            bgy := (others => '0');
+          elsif y < 64 then
+            bgx := unsigned(m52_bg1xpos);
+            bgy := bgy + 1;
+          end if;
+        end if;
+        -- bit 5 is background enable, bit 2 is layer enable
+        if m52_bgcontrol(5) = '0' and m52_bgcontrol(2) = '0' then
+          if bgy < 64 then
+            ctl_o.a(5 downto 0) <= std_logic_vector(bgx(7 downto 2));
+            if hblank = '0' then
+              if x(1 downto 0) = "01" then
+                case bgx(1 downto 0) is
+                  when "01" =>
+                    bitmap_d_r := ctl_i.d(4 downto 0) & "000";
+                  when "10" =>
+                    bitmap_d_r := ctl_i.d(5 downto 0) & "00";
+                  when "11" =>
+                    bitmap_d_r := ctl_i.d(6 downto 0) & '0';
+                  when others =>
+                    bitmap_d_r := ctl_i.d(7 downto 0);
+                end case;
+              else
+                bitmap_d_r := bitmap_d_r(6 downto 0) & '0';
+              end if;
+              bgx := bgx + 1;
+              pel := bitmap_d_r(7) & bitmap_d_r(3);
+              pal_i := "001" & pel;
+              pal_entry := pal(to_integer(unsigned(pal_i)));
+              ctl_o.rgb.r <= pal_entry(0) & "0000";
+              ctl_o.rgb.g <= pal_entry(1) & "0000";
+              ctl_o.rgb.b <= pal_entry(2) & "0000";
+              if 	pel /= "00" then
+                ctl_o.set <= '1';
+              end if;
+            end if; -- hblank='0'
+          end if; -- bgy<64
+        end if; -- m52_bgcontrol
+        y_r := y;
       end if; -- clk_en='1'
     end if; -- rising_edge(clk)
   end process;

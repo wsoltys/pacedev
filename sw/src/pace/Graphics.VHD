@@ -166,6 +166,27 @@ begin
       
   end generate GEN_BITMAP_2;
 
+	GEN_BITMAP_3 : if PACE_VIDEO_NUM_BITMAPS > 2 generate
+
+	  forground_bitmapctl_inst : entity work.bitmapCtl(BITMAP_3)
+      generic map
+      (
+        DELAY         => PACE_VIDEO_PIPELINE_DELAY
+      )
+	    port map
+	    (
+				reset					=> video_i.reset,
+				
+				video_ctl     => from_video_ctl,
+
+	      ctl_i         => bitmap_ctl_i(3),
+	      ctl_o         => bitmap_ctl_o_s(3),
+
+        graphics_i    => graphics_i
+	    );
+      
+  end generate GEN_BITMAP_3;
+  
   bitmap_ctl_o <= bitmap_ctl_o_s;
   
 	GEN_NO_TILEMAPS : if PACE_VIDEO_NUM_TILEMAPS = 0 generate

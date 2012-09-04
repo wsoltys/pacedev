@@ -96,6 +96,7 @@ architecture SYN of platform is
   signal cpu_d_i        : std_logic_vector(7 downto 0);
   signal cpu_d_o        : std_logic_vector(7 downto 0);
   signal cpu_mem_wr     : std_logic;
+  signal cpu_io_wr      : std_logic;
   signal cpu_irq        : std_logic;
 
   -- ROM signals        
@@ -172,7 +173,7 @@ begin
   in_cs <=      '1' when STD_MATCH(cpu_a, X"D"&"01----------") else '0';
   -- RAM $E000-$E7FF
   wram_cs <=    '1' when STD_MATCH(cpu_a, X"E"&"01----------") else '0';
-                    
+
 	-- memory read mux
 	cpu_d_i <=  rom_d_o when rom_cs = '1' else
 							vram_d_o when vram_cs = '1' else
@@ -182,6 +183,78 @@ begin
 							wram_d_o when wram_cs = '1' else
 							(others => '1');
 
+  BLK_BGCONTROL : block
+  
+    signal m52_bg1xpos    : std_logic_vector(7 downto 0);
+    signal m52_bg1ypos    : std_logic_vector(7 downto 0);
+    signal m52_bg2xpos    : std_logic_vector(7 downto 0);
+    signal m52_bg2ypos    : std_logic_vector(7 downto 0);
+    signal m52_bgcontrol  : std_logic_vector(7 downto 0);
+
+    signal prot_recalc    : std_logic;
+    
+  begin
+    -- handle I/O (writes only)
+    process (clk_sys, rst_sys)
+    begin
+      if rst_sys = '1' then
+        m52_bg1xpos <= (others => '0');
+        m52_bg1ypos <= (others => '0');
+        m52_bg2xpos <= (others => '0');
+        m52_bg2ypos <= (others => '0');
+        m52_bgcontrol <= (others => '0');
+        prot_recalc <= '0';
+      elsif rising_edge(clk_sys) then
+        prot_recalc <= '0'; -- default
+        if cpu_clk_en = '1' and cpu_io_wr = '1' then
+          case cpu_a(7 downto 5) is
+            when "000" =>
+            when "010" =>
+              m52_bg1xpos <= cpu_d_o;
+              prot_recalc <= '1';
+            when "011" =>
+              m52_bg1ypos <= cpu_d_o;
+            when "100" =>
+              m52_bg2xpos <= cpu_d_o;
+            when "101" =>
+              m52_bg2ypos <= cpu_d_o;
+            when "110" =>
+              m52_bgcontrol <= cpu_d_o;
+            when others =>
+              null;
+          end case;
+        end if;
+      end if;
+    end process;
+    
+    graphics_o.bit16(0) <= m52_bg1xpos & m52_bg1ypos;
+    graphics_o.bit16(1) <= m52_bg2xpos & m52_bg2ypos;
+    graphics_o.bit16(2) <= X"00" & m52_bgcontrol;
+    
+    GEN_PROTECTION : if PLATFORM_VARIANT = "mpatrol" generate
+      -- handle protection
+      process (clk_sys, rst_sys)
+        variable popcount : unsigned(2 downto 0);
+      begin
+        if rst_sys = '1' then
+          prot_d_o <= (others => '0');
+        elsif rising_edge(clk_sys) then
+          if prot_recalc = '1' then
+            popcount := (others => '0');
+            for i in 6 downto 0 loop
+              if m52_bg1xpos(i) /= '0' then
+                popcount := popcount + 1;
+              end if;
+            end loop;
+            popcount(0) := popcount(0) xor m52_bg1xpos(7);
+          end if; -- prot_recalc='1'
+        end if; -- rising_edge(clk_sys)
+        prot_d_o <= "00000" & std_logic_vector(popcount);
+      end process;
+    end generate GEN_PROTECTION;
+    
+  end block BLK_BGCONTROL;
+  
   -- memory block write signals 
 	vram_wr <= vram_cs and cpu_mem_wr;
 	cram_wr <= cram_cs and cpu_mem_wr;
@@ -238,7 +311,7 @@ begin
         mem_rd 	=> open,
         mem_wr 	=> cpu_mem_wr,
         io_rd  	=> open,
-        io_wr  	=> open,
+        io_wr  	=> cpu_io_wr,
 
         intreq 	=> cpu_irq,
         intvec 	=> cpu_d_i,
@@ -246,11 +319,6 @@ begin
         nmi    	=> '0'
       );
   end block BLK_CPU;
-  
-  GEN_MPATROL_PROTECTION : if PLATFORM_VARIANT = "mpatrol" generate
-    prot_d_o <= X"4F" when STD_MATCH(cpu_a, X"-114") else
-                X"00";
-  end generate GEN_MPATROL_PROTECTION;
   
   BLK_INTERRUPTS : block
   
@@ -299,22 +367,6 @@ begin
               inputs_i(4).d when cpu_a(2 downto 0) = "100" else
               X"FF";
   
---    process (clk_sys, rst_sys)
---    begin
---      if rst_sys = '1' then
---      elsif rising_edge(clk_sys) then
---        if cpu_clk_en = '1' and cpu_mem_rd = '1' then
---          if in_cs = '1' then
---            case cpu_a() is
---              when "" =>
---              when others =>
---                null;
---            end casel
---          end if; -- in_cs='1'
---        end if; -- cpu_clk_en='1' and cpu_mem_wr='1'
---      end if; -- rising_edge(clk_sys)
---    end process;
-
   end block BLK_INPUTS;
   
   BLK_CPU_ROMS : block
