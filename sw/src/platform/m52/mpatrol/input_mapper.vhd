@@ -115,8 +115,10 @@ begin
       inputs(0).d <= jamma_v(0).d and not keybd_v(0).d;
       inputs(1).d <= jamma_v(1).d and not keybd_v(1).d;
       inputs(2).d <= jamma_v(2).d and not keybd_v(2).d;
-      inputs(3).d <= "00001110";
+      inputs(3).d <= "11111110";  -- 1C/1C, 10/30/50K, 3 lives
       inputs(4).d <= "11111100";
+      -- activate service which is only checked on startup
+      --inputs(4).d <= "01111100";
       inputs(NUM_INPUTS-1).d <= keybd_v(NUM_INPUTS-1).d;
 
   end process;

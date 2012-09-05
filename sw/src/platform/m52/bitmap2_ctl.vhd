@@ -55,10 +55,11 @@ begin
         if vblank = '1' then
           bgy := (others => '1');
         elsif y /= y_r then
-          if y = m52_bg1ypos then
+          if y(7 downto 0) = m52_bg1ypos then
             bgy := (others => '0');
-          elsif y < 64 then
-            bgx := unsigned(m52_bg1xpos);
+          elsif bgy < 64 then
+            -- need to invert to scroll in the right direction
+            bgx := not unsigned(m52_bg1xpos);
             bgy := bgy + 1;
           end if;
         end if;
@@ -67,17 +68,8 @@ begin
           if bgy < 64 then
             ctl_o.a(5 downto 0) <= std_logic_vector(bgx(7 downto 2));
             if hblank = '0' then
-              if x(1 downto 0) = "01" then
-                case bgx(1 downto 0) is
-                  when "01" =>
-                    bitmap_d_r := ctl_i.d(4 downto 0) & "000";
-                  when "10" =>
-                    bitmap_d_r := ctl_i.d(5 downto 0) & "00";
-                  when "11" =>
-                    bitmap_d_r := ctl_i.d(6 downto 0) & '0';
-                  when others =>
-                    bitmap_d_r := ctl_i.d(7 downto 0);
-                end case;
+              if bgx(1 downto 0) = "01" then
+                bitmap_d_r := ctl_i.d(7 downto 0);
               else
                 bitmap_d_r := bitmap_d_r(6 downto 0) & '0';
               end if;

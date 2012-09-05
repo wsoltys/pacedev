@@ -170,9 +170,9 @@ begin
   -- SPRITE $C800-$CBFF
   sprite_cs <=  '1' when STD_MATCH(cpu_a, X"C"&"10----------") else '0';
   -- INPUTS $D000-$D004 (-$D7FF)
-  in_cs <=      '1' when STD_MATCH(cpu_a, X"D"&"01----------") else '0';
+  in_cs <=      '1' when STD_MATCH(cpu_a, X"D"&"0-----------") else '0';
   -- RAM $E000-$E7FF
-  wram_cs <=    '1' when STD_MATCH(cpu_a, X"E"&"01----------") else '0';
+  wram_cs <=    '1' when STD_MATCH(cpu_a, X"E"&"0-----------") else '0';
 
 	-- memory read mux
 	cpu_d_i <=  rom_d_o when rom_cs = '1' else
@@ -185,6 +185,7 @@ begin
 
   BLK_BGCONTROL : block
   
+    signal m52_scroll     : std_logic_vector(7 downto 0);
     signal m52_bg1xpos    : std_logic_vector(7 downto 0);
     signal m52_bg1ypos    : std_logic_vector(7 downto 0);
     signal m52_bg2xpos    : std_logic_vector(7 downto 0);
@@ -198,6 +199,7 @@ begin
     process (clk_sys, rst_sys)
     begin
       if rst_sys = '1' then
+        m52_scroll <= (others => '0');
         m52_bg1xpos <= (others => '0');
         m52_bg1ypos <= (others => '0');
         m52_bg2xpos <= (others => '0');
@@ -209,6 +211,7 @@ begin
         if cpu_clk_en = '1' and cpu_io_wr = '1' then
           case cpu_a(7 downto 5) is
             when "000" =>
+              m52_scroll <= cpu_d_o;
             when "010" =>
               m52_bg1xpos <= cpu_d_o;
               prot_recalc <= '1';
@@ -227,6 +230,7 @@ begin
       end if;
     end process;
     
+    graphics_o.bit8(1) <= m52_scroll;
     graphics_o.bit16(0) <= m52_bg1xpos & m52_bg1ypos;
     graphics_o.bit16(1) <= m52_bg2xpos & m52_bg2ypos;
     graphics_o.bit16(2) <= X"00" & m52_bgcontrol;
@@ -331,7 +335,7 @@ begin
 			alias vblank_prev : std_logic is vblank_r(vblank_r'left);
 			alias vblank_um   : std_logic is vblank_r(vblank_r'left-1);
       -- 1us duty for VBLANK_INT
-      variable count    : integer range 0 to CLK0_FREQ_MHz;
+      variable count    : integer range 0 to CLK0_FREQ_MHz * 100;
 		begin
 			if rst_sys = '1' then
 				vblank_int <= '0';

@@ -27,6 +27,7 @@ architecture TILEMAP_1 of tilemapCtl is
   signal y        : std_logic_vector(video_ctl.y'range);
   
   alias rot_en    : std_logic is graphics_i.bit8(0)(0);
+  alias scroll    : std_logic_vector(7 downto 0) is graphics_i.bit8(1);
   
 begin
 
@@ -36,7 +37,9 @@ begin
   ctl_o.tile_a(ctl_o.tile_a'left downto 12) <= (others => '0');
 
   -- screen rotation
-  x <= video_ctl.x; -- when rot_en = '0' else not video_ctl.y;
+  x <=  video_ctl.x when unsigned(y) < 192 else
+        std_logic_vector(unsigned(video_ctl.x) + not unsigned(scroll)); 
+        -- when rot_en = '0' else not video_ctl.y;
   --y <= not video_ctl.y when rot_en = '0' else 32 + video_ctl.x;
   y <= video_ctl.y; -- when rot_en = '0' else video_ctl.x;
   
@@ -81,7 +84,8 @@ begin
 
         -- extract R,G,B from colour palette
         pel := tile_d_r(tile_d_r'left) & tile_d_r(tile_d_r'left-8);
-        pal_i := attr_d_r(2 downto 0) & pel;
+        --pal_i := attr_d_r(2 downto 0) & pel;
+        pal_i := "001" & pel;
         pal_entry := pal(to_integer(unsigned(pal_i)));
         ctl_o.rgb.r <= pal_entry(0) & "0000";
         ctl_o.rgb.g <= pal_entry(1) & "0000";
