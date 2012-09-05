@@ -41,7 +41,7 @@ begin
     variable bitmap_d_r   : std_logic_vector(7 downto 0);
 		variable pel          : std_logic_vector(1 downto 0);
     variable pal_i        : std_logic_vector(4 downto 0);
-		variable pal_entry    : pal_entry_typ;
+		variable pal_rgb      : pal_rgb_t;
   begin
 		if reset = '1' then
       y_r := (others => '0');
@@ -74,12 +74,16 @@ begin
                 bitmap_d_r := bitmap_d_r(6 downto 0) & '0';
               end if;
               bgx := bgx + 1;
+              --/* the colors to pick is as follows: */
+              --/* xbb00: mountains */
+              --/* 0xxbb: hills */
+              --/* 1xxbb: city */
               pel := bitmap_d_r(7) & bitmap_d_r(3);
-              pal_i := "001" & pel;
-              pal_entry := pal(to_integer(unsigned(pal_i)));
-              ctl_o.rgb.r <= pal_entry(0) & "0000";
-              ctl_o.rgb.g <= pal_entry(1) & "0000";
-              ctl_o.rgb.b <= pal_entry(2) & "0000";
+              pal_i := "100" & pel;
+              pal_rgb := bg_pal(to_integer(unsigned(pal_i)));
+              ctl_o.rgb.r <= pal_rgb(0) & "00";
+              ctl_o.rgb.g <= pal_rgb(1) & "00";
+              ctl_o.rgb.b <= pal_rgb(2) & "00";
               if 	pel /= "00" then
                 ctl_o.set <= '1';
               end if;

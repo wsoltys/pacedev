@@ -442,13 +442,13 @@ begin
         port map
         (
           clock			              => clk_video,
-          address_a(11 downto 4)  => sprite_i.a(11 downto 4),
-          address_a(3)            => '0',
-          address_a(2 downto 0)   => sprite_i.a(2 downto 0),
+          address_a(11 downto 5)  => sprite_i.a(11 downto 5),
+          address_a(4)            => '0',
+          address_a(3 downto 0)   => sprite_i.a(3 downto 0),
           q_a 			              => spr_rom_left(i),
-          address_b(11 downto 4)  => sprite_i.a(11 downto 4),
-          address_b(3)            => '1',
-          address_b(2 downto 0)   => sprite_i.a(2 downto 0),
+          address_b(11 downto 5)  => sprite_i.a(11 downto 5),
+          address_b(4)            => '1',
+          address_b(3 downto 0)   => sprite_i.a(3 downto 0),
           q_b                     => spr_rom_right(i)
         );
     end generate GEN_SPRITE_ROMS;

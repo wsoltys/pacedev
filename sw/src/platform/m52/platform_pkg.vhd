@@ -39,8 +39,8 @@ package platform_pkg is
   
 	constant M52_CPU_CLK_ENA_DIVIDE_BY    : natural := CLK0_FREQ_MHz / CPU_FREQ_MHz;
 
-	type pal_entry_typ is array (0 to 2) of std_logic_vector(5 downto 0);
-	type pal_typ is array (0 to 31) of pal_entry_typ;
+	type pal_rgb_t is array (0 to 2) of std_logic_vector(7 downto 0);
+	type pal_a is array (natural range <>) of pal_rgb_t;
 
   type from_PLATFORM_IO_t is record
     not_used  : std_logic;

@@ -63,7 +63,7 @@ begin
                           rowCount(rowCount'left downto rowCount'left-4);
 
     variable pal_i      : std_logic_vector(4 downto 0);
-		variable pal_entry  : pal_entry_typ;
+		variable pal_rgb    : pal_rgb_t;
     
   begin
 
@@ -71,15 +71,8 @@ begin
       if clk_ena = '1' then
 
         x := std_logic_vector(unsigned(video_ctl.x) - PACE_VIDEO_PIPELINE_DELAY);
-        if INDEX >=8 then
-          -- bullet hardware offsets by 4 (why do we need 6?)
-          x := std_logic_vector(unsigned(x) + to_unsigned(6,x'length));
-        end if;
-        y := std_logic_vector(to_unsigned(32,y'length) + unsigned(video_ctl.y));
-        -- 1st three sprites & 1st three bullets match against (y-1)
-        if INDEX < 3 or (INDEX >= 8 and INDEX <= 10) then
-          y := std_logic_vector(unsigned(y) + to_unsigned(1,y'length));
-        end if;
+        -- not entirely sure why we need an offset of 18?
+        y := std_logic_vector(to_unsigned(257-18,y'length) - unsigned(video_ctl.y));
         
         if video_ctl.hblank = '1' then
 
@@ -100,16 +93,7 @@ begin
           -- sprites not visible before row 16				
           if ctl_i.ld = '1' then
             if yMat and unsigned(y) > 16 then
-              if INDEX < 8 then
-                rowStore := flipData;			-- load sprite data
-              else
-                -- bullet/bomb sprite
-                if row = 15 then
-                  rowStore := (X"F000F000");
-                else
-                  rowStore := (others => '0');
-                end if;
-              end if;
+              rowStore := flipData;			-- load sprite data
             else
               rowStore := (others => '0');
             end if;
@@ -137,23 +121,24 @@ begin
 
         end if;
 
-        -- extract R,G,B from colour palette
-        -- apparently only 3 bits of colour info (aside from pel)
-        pal_i := reg_i.colour(2 downto 0) & pel;
-        pal_entry := pal(to_integer(unsigned(pal_i)));
-        rgb.r(rgb.r'left downto rgb.r'left-5) <= pal_entry(0);
-        rgb.r(rgb.r'left-6 downto 0) <= (others => '0');
-        rgb.g(rgb.g'left downto rgb.g'left-5) <= pal_entry(1);
-        rgb.g(rgb.g'left-6 downto 0) <= (others => '0');
-        rgb.b(rgb.b'left downto rgb.b'left-5) <= pal_entry(2);
-        rgb.b(rgb.b'left-6 downto 0) <= (others => '0');
+        --/* sprite lookup table */
+        --for (i = 0; i < 16 * 4; i++)
+        --{
+        --  UINT8 promval = sprite_table[(i & 3) | ((i & ~3) << 1)];
+        --  colortable_entry_set_value(machine.colortable, 512 + i, 512 + 32 + promval);
+        --}
+        pal_i := reg_i.colour(2) & reg_i.colour(1 downto 0) & pel;
+        pal_rgb := sprite_pal(to_integer(unsigned(pal_i)));
+        rgb.r <= pal_rgb(0) & "00";
+        rgb.g <= pal_rgb(1) & "00";
+        rgb.b <= pal_rgb(2) & "00";
 
         -- set pixel transparency based on match
         ctl_o.set <= '0';
-        --if xMat and pel /= "00" then
-        if xMat and yMat and (pal_entry(0)(5 downto 4) /= "00" or
-                              pal_entry(1)(5 downto 4) /= "00" or
-                              pal_entry(2)(5 downto 4) /= "00") then
+        if xMat and pel /= "00" then
+--        if xMat and yMat and (pal_rgb(0)(7 downto 4) /= "0000" or
+--                              pal_rgb(1)(7 downto 4) /= "0000" or
+--                              pal_rgb(2)(7 downto 4) /= "0000") then
           ctl_o.set <= '1';
         end if;
 
@@ -161,14 +146,12 @@ begin
     end if; -- rising_edge(clk)
     
     -- generate sprite data address
-    ctl_o.a(10 downto 5) <= reg_i.n(5 downto 0);
-    ctl_o.a(3) <= '0'; -- dual-port RAM
+    ctl_o.a(11 downto 5) <= reg_i.n(6 downto 0);
+    ctl_o.a(4) <= '0'; -- dual-port RAM
     if reg_i.yflip = '0' then
-      ctl_o.a(4) <= row(3);
-      ctl_o.a(2 downto 0) <= std_logic_vector(row(2 downto 0));
+      ctl_o.a(3 downto 0) <= std_logic_vector(row(3 downto 0));
     else
-      ctl_o.a(4) <= not row(3);
-      ctl_o.a(2 downto 0) <=  not std_logic_vector(row(2 downto 0));
+      ctl_o.a(3 downto 0) <=  not std_logic_vector(row(3 downto 0));
     end if;
 
   end process;

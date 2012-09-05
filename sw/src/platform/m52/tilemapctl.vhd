@@ -50,7 +50,7 @@ begin
     variable attr_d_r   : std_logic_vector(7 downto 0);
 		variable pel        : std_logic_vector(1 downto 0);
     variable pal_i      : std_logic_vector(4 downto 0);
-		variable pal_entry  : pal_entry_typ;
+		variable pal_rgb    : pal_rgb_t;
 
   begin
   
@@ -86,17 +86,16 @@ begin
         pel := tile_d_r(tile_d_r'left) & tile_d_r(tile_d_r'left-8);
         --pal_i := attr_d_r(2 downto 0) & pel;
         pal_i := "001" & pel;
-        pal_entry := pal(to_integer(unsigned(pal_i)));
-        ctl_o.rgb.r <= pal_entry(0) & "0000";
-        ctl_o.rgb.g <= pal_entry(1) & "0000";
-        ctl_o.rgb.b <= pal_entry(2) & "0000";
-
-        if 	pal_entry(0)(5 downto 4) /= "00" or
-            pal_entry(1)(5 downto 4) /= "00" or
-            pal_entry(2)(5 downto 4) /= "00" then
+        pal_rgb := bg_pal(to_integer(unsigned(pal_i)));
+        ctl_o.rgb.r <= pal_rgb(0) & "00";
+        ctl_o.rgb.g <= pal_rgb(1) & "00";
+        ctl_o.rgb.b <= pal_rgb(2) & "00";
+        ctl_o.set <= '0'; -- default
+        if pel /= "00" then
+--        if 	pal_rgb(0)(5 downto 4) /= "00" or
+--            pal_rgb(1)(5 downto 4) /= "00" or
+--            pal_rgb(2)(5 downto 4) /= "00" then
           ctl_o.set <= '1';
-        else
-          ctl_o.set <= '0';
         end if;
 
       end if; -- clk_ena
