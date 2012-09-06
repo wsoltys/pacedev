@@ -138,12 +138,14 @@ begin
   process (clk_sys, rst_sys)
     variable spec_keys_r  : std_logic_vector(7 downto 0);
     alias spec_keys       : std_logic_vector(7 downto 0) is inputs_i(PACE_INPUTS_NUM_BYTES-1).d;
+    variable layer_en     : std_logic_vector(4 downto 0);
   begin
     if rst_sys = '1' then
       rst_platform <= '0';
       pause <= '0';
       rot_en <= '0';  -- to default later
       spec_keys_r := (others => '0');
+      layer_en := "11111";
     elsif rising_edge(clk_sys) then
       rst_platform <= spec_keys(0);
       if spec_keys_r(1) = '0' and spec_keys(1) = '1' then
@@ -151,12 +153,20 @@ begin
       end if;
       if spec_keys_r(2) = '0' and spec_keys(2) = '1' then
         rot_en <= not rot_en;
+        if layer_en = "11111" then
+          layer_en := "00001";
+        elsif layer_en = "10000" then
+          layer_en := "11111";
+        else
+          layer_en := layer_en(3 downto 0) & layer_en(4);
+        end if;
       end if;
       spec_keys_r := spec_keys;
     end if;
+    graphics_o.bit8(0)(4 downto 0) <= layer_en;
   end process;
   
-  graphics_o.bit8(0)(0) <= rot_en;
+  --graphics_o.bit8(0)(0) <= rot_en;
   
   -- chip select logic
   -- ROM $0000-$3FFF

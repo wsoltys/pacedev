@@ -71,8 +71,8 @@ begin
       if clk_ena = '1' then
 
         x := std_logic_vector(unsigned(video_ctl.x) - PACE_VIDEO_PIPELINE_DELAY);
-        -- not entirely sure why we need an offset of 18?
-        y := std_logic_vector(to_unsigned(257-18,y'length) - unsigned(video_ctl.y));
+        -- not entirely sure why we need an offset of 19?
+        y := std_logic_vector(to_unsigned(257-19,y'length) - unsigned(video_ctl.y));
         
         if video_ctl.hblank = '1' then
 
@@ -139,7 +139,9 @@ begin
 --        if xMat and yMat and (pal_rgb(0)(7 downto 4) /= "0000" or
 --                              pal_rgb(1)(7 downto 4) /= "0000" or
 --                              pal_rgb(2)(7 downto 4) /= "0000") then
-          ctl_o.set <= '1';
+          if graphics_i.bit8(0)(4) = '1' then
+            ctl_o.set <= '1';
+          end if;
         end if;
 
       end if; -- clk_ena='1'

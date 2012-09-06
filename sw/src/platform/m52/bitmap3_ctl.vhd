@@ -57,14 +57,16 @@ begin
         elsif y /= y_r then
           if y(7 downto 0) = m52_bg2ypos then
             bgy := (others => '0');
-          elsif bgy < 64 then
+          else
             -- need to invert to scroll in the right direction
             bgx := not unsigned(m52_bg2xpos);
-            bgy := bgy + 1;
+            if bgy < 63 then
+              bgy := bgy + 1;
+            end if;
           end if;
         end if;
         -- bit 5 is background enable, bit 4 is layer enable
-        if m52_bgcontrol(5) = '0' and m52_bgcontrol(4) = '0' then
+        if m52_bgcontrol(5) = '0' and m52_bgcontrol(4) = '0' and graphics_i.bit8(0)(2) = '1' then
           if bgy < 64 then
             ctl_o.a(5 downto 0) <= std_logic_vector(bgx(7 downto 2));
             if hblank = '0' then
@@ -76,9 +78,7 @@ begin
               bgx := bgx + 1;
               --/* the colors to pick is as follows: */
               --/* xbb00: mountains */
-              --/* 0xxbb: hills */
-              --/* 1xxbb: city */
-              pel := bitmap_d_r(7) & bitmap_d_r(3);
+              pel := bitmap_d_r(3) & bitmap_d_r(7);
               pal_i := '0' & pel & "00";
               pal_rgb := bg_pal(to_integer(unsigned(pal_i)));
               ctl_o.rgb.r <= pal_rgb(0) & "00";

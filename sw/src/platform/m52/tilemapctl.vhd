@@ -49,7 +49,7 @@ begin
     variable tile_d_r   : std_logic_vector(15 downto 0);
     variable attr_d_r   : std_logic_vector(7 downto 0);
 		variable pel        : std_logic_vector(1 downto 0);
-    variable pal_i      : std_logic_vector(4 downto 0);
+    variable pal_i      : std_logic_vector(6 downto 0);
 		variable pal_rgb    : pal_rgb_t;
 
   begin
@@ -83,19 +83,26 @@ begin
         end if;
 
         -- extract R,G,B from colour palette
+        -- MAME says there are 512 palette entries
+        -- although the code uses 6 bits of colour only
+        -- the highest colour in the PROM is 83
+        -- so we're going with 128 (5+2 bits)
         pel := tile_d_r(tile_d_r'left) & tile_d_r(tile_d_r'left-8);
-        --pal_i := attr_d_r(2 downto 0) & pel;
-        pal_i := "001" & pel;
-        pal_rgb := bg_pal(to_integer(unsigned(pal_i)));
+        pal_i := attr_d_r(4 downto 0) & pel;
+        pal_rgb := tile_pal(to_integer(unsigned(pal_i)));
         ctl_o.rgb.r <= pal_rgb(0) & "00";
         ctl_o.rgb.g <= pal_rgb(1) & "00";
         ctl_o.rgb.b <= pal_rgb(2) & "00";
         ctl_o.set <= '0'; -- default
-        if pel /= "00" then
---        if 	pal_rgb(0)(5 downto 4) /= "00" or
---            pal_rgb(1)(5 downto 4) /= "00" or
---            pal_rgb(2)(5 downto 4) /= "00" then
-          ctl_o.set <= '1';
+--        if pel /= "00" then
+        -- lines 0-6 are opaque apparently
+        if unsigned(y) < 7*8 or 
+            pal_rgb(0)(7 downto 5) /= "000" or
+            pal_rgb(1)(7 downto 5) /= "000" or
+            pal_rgb(2)(7 downto 5) /= "000" then
+          if graphics_i.bit8(0)(3) = '1' then
+            ctl_o.set <= '1';
+          end if;
         end if;
 
       end if; -- clk_ena

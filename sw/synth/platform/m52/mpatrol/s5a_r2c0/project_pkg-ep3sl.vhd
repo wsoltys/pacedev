@@ -69,8 +69,7 @@ package project_pkg is
 	--constant PACE_ENABLE_ADV724					      : std_logic := '1';
 	--constant USE_VIDEO_VBLANK_INTERRUPT 		  : boolean := false;
 
-  --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
-  constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
+  constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
 
 --  -- for VDUEB variants (uses CRTC6845 video controller)
 --  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_NONE;

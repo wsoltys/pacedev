@@ -20,7 +20,7 @@ package platform_pkg is
 	constant PACE_VIDEO_NUM_SPRITES 	    : natural := 64;
 	constant PACE_VIDEO_H_SIZE				    : integer := M52_VIDEO_H_SIZE;
 	constant PACE_VIDEO_V_SIZE				    : integer := M52_VIDEO_V_SIZE;
-	constant PACE_VIDEO_L_CROP            : integer := 0;
+	constant PACE_VIDEO_L_CROP            : integer := 8;
 	constant PACE_VIDEO_R_CROP            : integer := PACE_VIDEO_L_CROP;
   constant PACE_VIDEO_PIPELINE_DELAY    : integer := 7;
 	

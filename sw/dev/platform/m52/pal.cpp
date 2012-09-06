@@ -57,6 +57,10 @@ int main (int argc, char *argv[])
 	double weights_r[3], weights_g[3], weights_b[3], scale;
 	int i;
 
+	fp = fopen ("mpatrol/mpc-4.2a", "rb");
+	if (!fp) exit (0);
+	fread ((void *)char_pal, 1, 512, fp);
+	fclose (fp);
 	fp = fopen ("mpatrol/mpc-3.1m", "rb");
 	if (!fp) exit (0);
 	fread ((void *)back_pal, 1, 32, fp);
@@ -75,6 +79,7 @@ int main (int argc, char *argv[])
 			3, resistances_3, weights_g, 0, 0,
 			2, resistances_2, weights_b, 0, 0);
 
+	printf ("character palette:\n");
 	/* character palette */
 	for (i = 0; i < 512; i++)
 	{
@@ -84,7 +89,10 @@ int main (int argc, char *argv[])
 		int b = combine_2_weights(weights_b, BIT(promval,6), BIT(promval,7));
 
 		//colortable_palette_set_color(machine.colortable, i, MAKE_RGB(r,g,b));
-		printf ("%03d: %02X,%02X,%02X\n", i, r, g, b);
+		//printf ("%03d: %02X,%02X,%02X\n", i, r, g, b);
+		if (r!=0 || g!=0 || b!=0)
+			printf ("%d => (0=>\"%s\", 1=>\"%s\", 2=>\"%s\"),\n",
+							i, int2bin(r,b1), int2bin(g,b2), int2bin(b,b3));
 	}
 
 	printf ("background palette:\n");

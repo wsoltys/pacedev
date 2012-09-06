@@ -39,7 +39,8 @@ begin
     elsif PACE_VIDEO_NUM_BITMAPS = 3 generate
       bg_rgb <= bitmap_ctl_o(1).rgb when bitmap_ctl_o(1).set = '1' else
                 bitmap_ctl_o(2).rgb when bitmap_ctl_o(2).set = '1' else
-                bitmap_ctl_o(3).rgb;
+                bitmap_ctl_o(3).rgb when bitmap_ctl_o(3).set = '1' else
+                (others => (others => '0'));
     else generate
       bg_rgb <= (others => (others => '0'));
   end generate GEN_BITMAPS;
