@@ -162,4 +162,47 @@ package platform_variant_pkg is
 		others => (others => (others => '0'))
 	);
 
+  type table_a is array (natural range <>) of integer range 0 to 15;
+  constant sprite_table : table_a(0 to 63) :=
+  (
+    1 => 1,
+    2 => 2,
+    3 => 3,
+    5 => 4,
+    6 => 2,
+    7 => 5,
+    9 => 5,
+    10 => 6,
+    11 => 7,
+    13 => 7,
+    14 => 8,
+    15 => 9,
+    17 => 10,
+    19 => 11,
+    29 => 9,
+    30 => 14,
+    31 => 5,
+    33 => 5,
+    34 => 3,
+    35 => 15,
+    37 => 9,
+    38 => 1,
+    39 => 5,
+    41 => 1,
+    42 => 8,
+    45 => 1,
+    46 => 5,
+    49 => 1,
+    50 => 5,
+    51 => 3,
+    53 => 4,
+    54 => 13,
+    55 => 5,
+    57 => 5,
+    59 => 5,
+    62 => 5,
+    63 => 5,
+    others => 0
+  );
+  
 end package platform_variant_pkg;

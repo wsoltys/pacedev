@@ -62,7 +62,8 @@ begin
     alias row         : unsigned(4 downto 0) is 
                           rowCount(rowCount'left downto rowCount'left-4);
 
-    variable pal_i      : std_logic_vector(4 downto 0);
+    variable tbl_i      : std_logic_vector(5 downto 0);   -- 64 table entries
+    variable pal_i      : integer range 0 to 15;
 		variable pal_rgb    : pal_rgb_t;
     
   begin
@@ -121,14 +122,12 @@ begin
 
         end if;
 
-        --/* sprite lookup table */
-        --for (i = 0; i < 16 * 4; i++)
-        --{
-        --  UINT8 promval = sprite_table[(i & 3) | ((i & ~3) << 1)];
-        --  colortable_entry_set_value(machine.colortable, 512 + i, 512 + 32 + promval);
-        --}
-        pal_i := reg_i.colour(2) & reg_i.colour(1 downto 0) & pel;
-        pal_rgb := sprite_pal(to_integer(unsigned(pal_i)));
+        -- the sprite table is pre-calculated and
+        --   contains 64 entries for palette look-up
+        -- the palette itself contains just 16 entries
+        tbl_i := reg_i.colour(3 downto 0) & pel;
+        pal_i := sprite_table(to_integer(unsigned(tbl_i)));
+        pal_rgb := sprite_pal(pal_i);
         rgb.r <= pal_rgb(0) & "00";
         rgb.g <= pal_rgb(1) & "00";
         rgb.b <= pal_rgb(2) & "00";

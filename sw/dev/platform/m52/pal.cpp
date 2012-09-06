@@ -69,6 +69,10 @@ int main (int argc, char *argv[])
 	if (!fp) exit (0);
 	fread ((void *)sprite_pal, 1, 32, fp);
 	fclose (fp);
+	fp = fopen ("mpatrol/mpc-2.2h", "rb");
+	if (!fp) exit (0);
+	fread ((void *)sprite_table, 1, 256, fp);
+	fclose (fp);
 
 
 	//machine.colortable = colortable_alloc(machine, 512 + 32 + 32);
@@ -133,18 +137,21 @@ int main (int argc, char *argv[])
 							i, int2bin(r,b1), int2bin(g,b2), int2bin(b,b3));
 	}
 
-#if 0
 	/* character lookup table */
-	for (i = 0; i < 512; i++)
-		colortable_entry_set_value(machine.colortable, i, i);
+	//for (i = 0; i < 512; i++)
+	//	colortable_entry_set_value(machine.colortable, i, i);
 
+	printf ("sprite lookup:\n");
 	/* sprite lookup table */
 	for (i = 0; i < 16 * 4; i++)
 	{
 		UINT8 promval = sprite_table[(i & 3) | ((i & ~3) << 1)];
-		colortable_entry_set_value(machine.colortable, 512 + i, 512 + 32 + promval);
+		//colortable_entry_set_value(machine.colortable, 512 + i, 512 + 32 + promval);
+		if (promval != 0)
+		  printf ("%d => %d,\n", i, promval);
 	}
 
+#if 0
 	/* background */
 	/* the palette is a 32x8 PROM with many colors repeated. The address of */
 	/* the colors to pick is as follows: */
