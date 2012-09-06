@@ -50,8 +50,8 @@ begin
 
    	variable rowStore : std_logic_vector(31 downto 0);  -- saved row of spt to show during visibile period
 		variable pel      : std_logic_vector(1 downto 0);
-    variable x        : std_logic_vector(video_ctl.x'range);
-    variable y        : std_logic_vector(video_ctl.y'range);
+    variable x        : unsigned(video_ctl.x'range);
+    variable y        : unsigned(video_ctl.y'range);
     variable yMat     : boolean;      -- raster is between first and last line of sprite
     variable xMat     : boolean;      -- raster in between left edge and end of line
 
@@ -71,19 +71,18 @@ begin
 		if rising_edge(clk) then
       if clk_ena = '1' then
 
-        x := std_logic_vector(unsigned(video_ctl.x) - PACE_VIDEO_PIPELINE_DELAY);
-        -- not entirely sure why we need an offset of 19?
-        y := std_logic_vector(to_unsigned(257-19,y'length) - unsigned(video_ctl.y));
+        x := unsigned(reg_i.x) + PACE_VIDEO_PIPELINE_DELAY;
+        y := 254 - unsigned(reg_i.y) - 16;
         
         if video_ctl.hblank = '1' then
 
           xMat := false;
           -- stop sprites wrapping from bottom of screen
-          if unsigned(y) = 0 then
+          if y = 0 then
             yMat := false;
           end if;
           
-          if reg_i.y = y then
+          if y = unsigned(video_ctl.y) then
             -- start counting sprite row
             rowCount := (others => '0');
             yMat := true;
@@ -93,7 +92,7 @@ begin
 
           -- sprites not visible before row 16				
           if ctl_i.ld = '1' then
-            if yMat and unsigned(y) > 16 then
+            if yMat then
               rowStore := flipData;			-- load sprite data
             else
               rowStore := (others => '0');
@@ -104,13 +103,13 @@ begin
         
         if video_ctl.stb = '1' then
       
-          if x = reg_i.x then
+          if x = unsigned(video_ctl.x) then
             -- count up at left edge of sprite
             rowCount := rowCount + 1;
             -- start of sprite
-            if unsigned(x) /= 0 and unsigned(x) < 240 then
+            --if unsigned(x) /= 0 and unsigned(x) < 240 then
               xMat := true;
-            end if;
+            --end if;
           end if;
           
           if xMat then
