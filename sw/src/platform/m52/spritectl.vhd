@@ -136,9 +136,6 @@ begin
         -- set pixel transparency based on match
         ctl_o.set <= '0';
         if xMat and pel /= "00" then
---        if xMat and yMat and (pal_rgb(0)(7 downto 4) /= "0000" or
---                              pal_rgb(1)(7 downto 4) /= "0000" or
---                              pal_rgb(2)(7 downto 4) /= "0000") then
           if graphics_i.bit8(0)(4) = '1' then
             ctl_o.set <= '1';
           end if;

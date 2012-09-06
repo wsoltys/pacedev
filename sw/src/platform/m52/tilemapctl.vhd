@@ -94,12 +94,12 @@ begin
         ctl_o.rgb.g <= pal_rgb(1) & "00";
         ctl_o.rgb.b <= pal_rgb(2) & "00";
         ctl_o.set <= '0'; -- default
---        if pel /= "00" then
         -- lines 0-6 are opaque apparently
         if unsigned(y) < 7*8 or 
-            pal_rgb(0)(7 downto 5) /= "000" or
-            pal_rgb(1)(7 downto 5) /= "000" or
-            pal_rgb(2)(7 downto 5) /= "000" then
+            pel /= "00" then
+--            pal_rgb(0)(7 downto 5) /= "000" or
+--            pal_rgb(1)(7 downto 5) /= "000" or
+--            pal_rgb(2)(7 downto 5) /= "000" then
           if graphics_i.bit8(0)(3) = '1' then
             ctl_o.set <= '1';
           end if;
