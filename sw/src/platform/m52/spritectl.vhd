@@ -71,7 +71,7 @@ begin
 		if rising_edge(clk) then
       if clk_ena = '1' then
 
-        x := unsigned(reg_i.x) + PACE_VIDEO_PIPELINE_DELAY;
+        x := unsigned(reg_i.x) + PACE_VIDEO_PIPELINE_DELAY - 3;
         y := 254 - unsigned(reg_i.y) - 16;
         
         if video_ctl.hblank = '1' then
