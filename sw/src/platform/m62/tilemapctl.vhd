@@ -10,7 +10,7 @@ use work.platform_variant_pkg.all;
 use work.video_controller_pkg.all;
 
 --
---	Galaxian Tilemap Controller
+--	Irem M62 Tilemap Controller
 --
 --	Tile data is 2 BPP.
 --
@@ -27,18 +27,18 @@ architecture TILEMAP_1 of tilemapCtl is
   signal y        : std_logic_vector(video_ctl.y'range);
   
   alias rot_en    : std_logic is graphics_i.bit8(0)(0);
-  alias scroll    : std_logic_vector(7 downto 0) is graphics_i.bit8(1);
+  alias hscroll   : std_logic_vector(15 downto 0) is graphics_i.bit16(0);
   
 begin
 
   -- not used
-	ctl_o.map_a(ctl_o.map_a'left downto 10) <= (others => '0');
-  ctl_o.attr_a(ctl_o.attr_a'left downto 10) <= (others => '0');
-  ctl_o.tile_a(ctl_o.tile_a'left downto 12) <= (others => '0');
+	ctl_o.map_a(ctl_o.map_a'left downto 11) <= (others => '0');
+  ctl_o.attr_a(ctl_o.attr_a'left downto 11) <= (others => '0');
+  ctl_o.tile_a(ctl_o.tile_a'left downto 13) <= (others => '0');
 
   -- screen rotation
-  x <=  video_ctl.x when unsigned(y) < 192 else
-        std_logic_vector(unsigned(video_ctl.x) + not unsigned(scroll)); 
+  x <=  std_logic_vector(128 + unsigned(video_ctl.x)) when unsigned(y) < 6*8 else
+        std_logic_vector(128 + unsigned(video_ctl.x) + unsigned(hscroll(8 downto 0))); 
         -- when rot_en = '0' else not video_ctl.y;
   --y <= not video_ctl.y when rot_en = '0' else 32 + video_ctl.x;
   y <= video_ctl.y; -- when rot_en = '0' else video_ctl.x;
@@ -46,9 +46,9 @@ begin
   -- generate pixel
   process (clk, clk_ena)
 
-    variable tile_d_r   : std_logic_vector(15 downto 0);
+    variable tile_d_r   : std_logic_vector(23 downto 0);
     variable attr_d_r   : std_logic_vector(7 downto 0);
-		variable pel        : std_logic_vector(1 downto 0);
+		variable pel        : std_logic_vector(2 downto 0);
     variable pal_i      : std_logic_vector(6 downto 0);
 		variable pal_rgb    : pal_rgb_t;
 
@@ -59,18 +59,17 @@ begin
 
         -- 1st stage of pipeline
         -- - set tilemap, attribute address
-        ctl_o.map_a(9 downto 5) <= y(7 downto 3);
-        ctl_o.map_a(4 downto 0) <= x(7 downto 3);
-        ctl_o.attr_a(9 downto 5) <= y(7 downto 3);
-        ctl_o.attr_a(4 downto 0) <= x(7 downto 3);
+        ctl_o.map_a(10 downto 6) <= y(7 downto 3);
+        ctl_o.map_a(5 downto 0) <= x(8 downto 3);
+        ctl_o.attr_a(10 downto 6) <= y(7 downto 3);
+        ctl_o.attr_a(5 downto 0) <= x(8 downto 3);
 
         -- 2nd stage of pipeline
         -- - set tile address
         if x(2 downto 0) = "010" then
-          ctl_o.tile_a(11) <= ctl_i.attr_d(7);
+          ctl_o.tile_a(12 downto 11) <= ctl_i.attr_d(7 downto 6);
           ctl_o.tile_a(10 downto 3) <= ctl_i.map_d(7 downto 0);
           ctl_o.tile_a(2 downto 0) <= y(2 downto 0);
-          
         end if;
         
         -- 3rd stage of pipeline
@@ -87,8 +86,8 @@ begin
         -- although the code uses 6 bits of colour only
         -- the highest colour in the PROM is 83
         -- so we're going with 128 (5+2 bits)
-        pel := tile_d_r(tile_d_r'left) & tile_d_r(tile_d_r'left-8);
-        pal_i := attr_d_r(4 downto 0) & pel;
+        pel := tile_d_r(tile_d_r'left) & tile_d_r(tile_d_r'left-8) & tile_d_r(tile_d_r'left-16);
+        pal_i := attr_d_r(3 downto 0) & pel;
         pal_rgb := tile_pal(to_integer(unsigned(pal_i)));
         ctl_o.rgb.r <= pal_rgb(0) & "00";
         ctl_o.rgb.g <= pal_rgb(1) & "00";

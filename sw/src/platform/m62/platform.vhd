@@ -96,6 +96,7 @@ architecture SYN of platform is
   signal cpu_d_i        : std_logic_vector(7 downto 0);
   signal cpu_d_o        : std_logic_vector(7 downto 0);
   signal cpu_mem_wr     : std_logic;
+  signal cpu_io_rd      : std_logic;
   signal cpu_io_wr      : std_logic;
   signal cpu_irq        : std_logic;
 
@@ -124,8 +125,6 @@ architecture SYN of platform is
   -- misc signals      
   signal in_cs          : std_logic;
   signal in_d_o         : std_logic_vector(7 downto 0);
-	signal prot_cs        : std_logic;
-  signal prot_d_o       : std_logic_vector(7 downto 0);
   
   -- other signals
   signal rst_platform   : std_logic;
@@ -169,106 +168,29 @@ begin
   --graphics_o.bit8(0)(0) <= rot_en;
   
   -- chip select logic
-  -- ROM $0000-$3FFF
-  rom_cs <=     '1' when STD_MATCH(cpu_a, "00--------------") else '0';
-  -- VRAM $8000-$83FF
-  vram_cs <=    '1' when STD_MATCH(cpu_a, X"8"&"00----------") else '0';
-  -- CRAM $8400-$87FF
-  cram_cs <=    '1' when STD_MATCH(cpu_a, X"8"&"01----------") else '0';
-  -- PROTECTION $8800-$8FFF
-  prot_cs <=    '1' when STD_MATCH(cpu_a, X"8"&"1-----------") else '0';
-  -- SPRITE $C800-$CBFF
-  sprite_cs <=  '1' when STD_MATCH(cpu_a, X"C"&"10----------") else '0';
-  -- INPUTS $D000-$D004 (-$D7FF)
-  in_cs <=      '1' when STD_MATCH(cpu_a, X"D"&"0-----------") else '0';
-  -- RAM $E000-$E7FF
-  wram_cs <=    '1' when STD_MATCH(cpu_a, X"E"&"0-----------") else '0';
+  -- ROM $0000-$7FFF
+  rom_cs <=     '1' when STD_MATCH(cpu_a,  "0---------------") else '0';
+  -- VRAM/CRAM $D000-$DFFF
+  vram_cs <=    '1' when STD_MATCH(cpu_a, X"D"&"0-----------") else '0';
+  cram_cs <=    '1' when STD_MATCH(cpu_a, X"D"&"1-----------") else '0';
+  -- SPRITE $C000-$C0FF
+  sprite_cs <=  '1' when STD_MATCH(cpu_a, X"C0"&   "--------") else '0';
+  -- RAM $E000-$EFFF
+  wram_cs <=    '1' when STD_MATCH(cpu_a, X"E"&"------------") else '0';
 
+  -- INPUTS (I/O) $00-$04
+  in_cs <=      '1' when STD_MATCH(cpu_a(7 downto 0), X"0"&"00--") else 
+                '1' when STD_MATCH(cpu_a(7 downto 0), X"04") else
+                '0';
+  
 	-- memory read mux
-	cpu_d_i <=  rom_d_o when rom_cs = '1' else
+	cpu_d_i <=  in_d_o when (cpu_io_rd = '1' and in_cs = '1') else
+              rom_d_o when rom_cs = '1' else
 							vram_d_o when vram_cs = '1' else
-							cram_d_o when cram_cs = '1' else
-              prot_d_o when prot_cs = '1' else
-              in_d_o when in_cs = '1' else
+							--cram_d_o when cram_cs = '1' else
 							wram_d_o when wram_cs = '1' else
 							(others => '1');
-
-  BLK_BGCONTROL : block
-  
-    signal m52_scroll     : std_logic_vector(7 downto 0);
-    signal m52_bg1xpos    : std_logic_vector(7 downto 0);
-    signal m52_bg1ypos    : std_logic_vector(7 downto 0);
-    signal m52_bg2xpos    : std_logic_vector(7 downto 0);
-    signal m52_bg2ypos    : std_logic_vector(7 downto 0);
-    signal m52_bgcontrol  : std_logic_vector(7 downto 0);
-
-    signal prot_recalc    : std_logic;
-    
-  begin
-    -- handle I/O (writes only)
-    process (clk_sys, rst_sys)
-    begin
-      if rst_sys = '1' then
-        m52_scroll <= (others => '0');
-        m52_bg1xpos <= (others => '0');
-        m52_bg1ypos <= (others => '0');
-        m52_bg2xpos <= (others => '0');
-        m52_bg2ypos <= (others => '0');
-        m52_bgcontrol <= (others => '0');
-        prot_recalc <= '0';
-      elsif rising_edge(clk_sys) then
-        prot_recalc <= '0'; -- default
-        if cpu_clk_en = '1' and cpu_io_wr = '1' then
-          case cpu_a(7 downto 5) is
-            when "000" =>
-              m52_scroll <= cpu_d_o;
-            when "010" =>
-              m52_bg1xpos <= cpu_d_o;
-              prot_recalc <= '1';
-            when "011" =>
-              m52_bg1ypos <= cpu_d_o;
-            when "100" =>
-              m52_bg2xpos <= cpu_d_o;
-            when "101" =>
-              m52_bg2ypos <= cpu_d_o;
-            when "110" =>
-              m52_bgcontrol <= cpu_d_o;
-            when others =>
-              null;
-          end case;
-        end if;
-      end if;
-    end process;
-    
-    graphics_o.bit8(1) <= m52_scroll;
-    graphics_o.bit16(0) <= m52_bg1xpos & m52_bg1ypos;
-    graphics_o.bit16(1) <= m52_bg2xpos & m52_bg2ypos;
-    graphics_o.bit16(2) <= X"00" & m52_bgcontrol;
-    
-    GEN_PROTECTION : if PLATFORM_VARIANT = "mpatrol" generate
-      -- handle protection
-      process (clk_sys, rst_sys)
-        variable popcount : unsigned(2 downto 0);
-      begin
-        if rst_sys = '1' then
-          prot_d_o <= (others => '0');
-        elsif rising_edge(clk_sys) then
-          if prot_recalc = '1' then
-            popcount := (others => '0');
-            for i in 6 downto 0 loop
-              if m52_bg1xpos(i) /= '0' then
-                popcount := popcount + 1;
-              end if;
-            end loop;
-            popcount(0) := popcount(0) xor m52_bg1xpos(7);
-          end if; -- prot_recalc='1'
-        end if; -- rising_edge(clk_sys)
-        prot_d_o <= "00000" & std_logic_vector(popcount);
-      end process;
-    end generate GEN_PROTECTION;
-    
-  end block BLK_BGCONTROL;
-  
+              
   -- memory block write signals 
 	vram_wr <= vram_cs and cpu_mem_wr;
 	cram_wr <= cram_cs and cpu_mem_wr;
@@ -288,7 +210,7 @@ begin
   assert false
     report  "CLK0_FREQ_MHz = " & integer'image(CLK0_FREQ_MHz) & "\n" &
             "CPU_FREQ_MHz = " &  integer'image(CPU_FREQ_MHz) & "\n" &
-            "CPU_CLK_ENA_DIV = " & integer'image(M52_CPU_CLK_ENA_DIVIDE_BY)
+            "CPU_CLK_ENA_DIV = " & integer'image(M62_CPU_CLK_ENA_DIVIDE_BY)
       severity note;
 
   BLK_CPU : block
@@ -298,7 +220,7 @@ begin
     clk_en_inst : entity work.clk_div
       generic map
       (
-        DIVISOR		=> M52_CPU_CLK_ENA_DIVIDE_BY
+        DIVISOR		=> M62_CPU_CLK_ENA_DIVIDE_BY
       )
       port map
       (
@@ -324,7 +246,7 @@ begin
 
         mem_rd 	=> open,
         mem_wr 	=> cpu_mem_wr,
-        io_rd  	=> open,
+        io_rd  	=> cpu_io_rd,
         io_wr  	=> cpu_io_wr,
 
         intreq 	=> cpu_irq,
@@ -373,15 +295,35 @@ begin
   
   BLK_INPUTS : block
   begin
-  
     in_d_o <= inputs_i(0).d when cpu_a(2 downto 0) = "000" else
               inputs_i(1).d when cpu_a(2 downto 0) = "001" else
               inputs_i(2).d when cpu_a(2 downto 0) = "010" else
               inputs_i(3).d when cpu_a(2 downto 0) = "011" else
-              inputs_i(4).d when cpu_a(2 downto 0) = "100" else
-              X"FF";
-  
+              inputs_i(4).d;
   end block BLK_INPUTS;
+  
+  BLK_SCROLL : block
+    signal m62_hscroll  : std_logic_vector(15 downto 0);
+  begin
+    process (clk_sys, rst_sys)
+    begin
+      if rst_sys = '1' then
+        m62_hscroll <= (others => '0');
+      elsif rising_edge(clk_sys) then
+        if cpu_clk_en = '1' and cpu_mem_wr = '1' then
+          case cpu_a is
+            when X"A000" =>
+              m62_hscroll(7 downto 0) <= cpu_d_o;
+            when X"B000" =>
+              m62_hscroll(15 downto 8) <= cpu_d_o;
+            when others =>
+              null;
+          end case;
+        end if; -- cpu_wr
+      end if; -- rising_edge(clk_sys)
+    end process;
+    graphics_o.bit16(0) <= m62_hscroll;
+  end block BLK_SCROLL;
   
   BLK_CPU_ROMS : block
   
@@ -390,23 +332,23 @@ begin
 
   begin
   
-    rom_d_o <=  rom_d(0) when cpu_a(M52_ROM_WIDTHAD+1 downto M52_ROM_WIDTHAD) = "00" else
-                rom_d(1) when cpu_a(M52_ROM_WIDTHAD+1 downto M52_ROM_WIDTHAD) = "01" else
-                rom_d(2) when cpu_a(M52_ROM_WIDTHAD+1 downto M52_ROM_WIDTHAD) = "10" else
+    rom_d_o <=  rom_d(0) when cpu_a(M62_ROM_WIDTHAD+1 downto M62_ROM_WIDTHAD) = "00" else
+                rom_d(1) when cpu_a(M62_ROM_WIDTHAD+1 downto M62_ROM_WIDTHAD) = "01" else
+                rom_d(2) when cpu_a(M62_ROM_WIDTHAD+1 downto M62_ROM_WIDTHAD) = "10" else
                 rom_d(3);
 
-    GEN_CPU_ROMS : for i in M52_ROM'range generate
+    GEN_CPU_ROMS : for i in M62_ROM'range generate
       rom_inst : entity work.sprom
         generic map
         (
           init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" &
-                          M52_ROM(i) & ".hex",
-          widthad_a		=> M52_ROM_WIDTHAD
+                          M62_ROM(i) & ".hex",
+          widthad_a		=> M62_ROM_WIDTHAD
         )
         port map
         (
           clock			=> clk_sys,
-          address		=> cpu_a(M52_ROM_WIDTHAD-1 downto 0),
+          address		=> cpu_a(M62_ROM_WIDTHAD-1 downto 0),
           q					=> rom_d(i)
         );
     end generate GEN_CPU_ROMS;
@@ -415,37 +357,38 @@ begin
   
   BLK_GFX_ROMS : block
   
-    type gfx_rom_d_a is array(0 to 1) of std_logic_vector(7 downto 0);
+    type gfx_rom_d_a is array(M62_CHAR_ROM'range) of std_logic_vector(7 downto 0);
     signal chr_rom_d      : gfx_rom_d_a;
-    signal spr_rom_left   : gfx_rom_d_a;
-    signal spr_rom_right  : gfx_rom_d_a;
+    type spr_rom_d_a is array(M62_SPRITE_ROM'range) of std_logic_vector(7 downto 0);
+    signal spr_rom_left   : spr_rom_d_a;
+    signal spr_rom_right  : spr_rom_d_a;
     
   begin
   
-    GEN_CHAR_ROMS : for i in M52_CHAR_ROM'range generate
+    GEN_CHAR_ROMS : for i in M62_CHAR_ROM'range generate
       char_rom_inst : entity work.sprom
         generic map
         (
           init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" &
-                          M52_CHAR_ROM(i) & ".hex",
-          widthad_a		=> 12
+                          M62_CHAR_ROM(i) & ".hex",
+          widthad_a		=> 13
         )
         port map
         (
           clock			=> clk_video,
-          address		=> tilemap_i(1).tile_a(11 downto 0),
+          address		=> tilemap_i(1).tile_a(12 downto 0),
           q					=> chr_rom_d(i)
         );
     end generate GEN_CHAR_ROMS;
 
-    tilemap_o(1).tile_d(15 downto 0) <= chr_rom_d(0) & chr_rom_d(1);
+    tilemap_o(1).tile_d(23 downto 0) <= chr_rom_d(0) & chr_rom_d(1) & chr_rom_d(2);
 
-    GEN_SPRITE_ROMS : for i in M52_SPRITE_ROM'range generate
+    GEN_SPRITE_ROMS : for i in M62_SPRITE_ROM'range generate
       sprite_rom_inst : entity work.dprom_2r
         generic map
         (
           init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" &
-                          M52_SPRITE_ROM(i) & ".hex",
+                          M62_SPRITE_ROM(i) & ".hex",
           widthad_a		=> 12,
           widthad_b		=> 12
         )
@@ -467,23 +410,6 @@ begin
     sprite_o.d(31 downto 0) <=  spr_rom_left(0) & spr_rom_right(0) & 
                                 spr_rom_left(1) & spr_rom_right(1);
 
-    GEN_BG_ROMS : for i in M52_BG_ROM'range generate
-      bg_rom_inst : entity work.sprom
-        generic map
-        (
-          init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" &
-                          M52_BG_ROM(i) & ".hex",
-          widthad_a		=> 12
-        )
-        port map
-        (
-          clock			=> clk_video,
-          address		=> bitmap_i(1+i).a(11 downto 0),
-          q					=> bitmap_o(1+i).d(7 downto 0)
-        );
-      bitmap_o(1+i).d(15 downto 8) <= (others => '0');
-    end generate GEN_BG_ROMS;
-                   
   end block BLK_GFX_ROMS;
 
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
@@ -491,18 +417,18 @@ begin
     generic map
     (
       init_file		=> "",
-      widthad_a		=> 10
+      widthad_a		=> 11
     )
 		port map
 		(
 			clock_b			=> clk_sys,
-			address_b		=> cpu_a(9 downto 0),
+			address_b		=> cpu_a(10 downto 0),
 			wren_b			=> vram_wr,
 			data_b			=> cpu_d_o,
 			q_b					=> vram_d_o,
 
 			clock_a			=> clk_video,
-			address_a		=> tilemap_i(1).map_a(9 downto 0),
+			address_a		=> tilemap_i(1).map_a(10 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
 			q_a					=> tilemap_o(1).map_d(7 downto 0)
@@ -514,35 +440,35 @@ begin
     generic map
     (
       init_file		=> "",
-      widthad_a		=> 10
+      widthad_a		=> 11
     )
 		port map
 		(
 			clock_b			=> clk_sys,
-			address_b		=> cpu_a(9 downto 0),
+			address_b		=> cpu_a(10 downto 0),
 			wren_b			=> cram_wr,
 			data_b			=> cpu_d_o,
 			q_b					=> cram_d_o,
 
 			clock_a			=> clk_video,
-			address_a		=> tilemap_i(1).attr_a(9 downto 0),
+			address_a		=> tilemap_i(1).attr_a(10 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
 			q_a					=> tilemap_o(1).attr_d(7 downto 0)
 		);
   tilemap_o(1).attr_d(15 downto 8) <= (others => '0');
   
-  GEN_WRAM : if M52_USE_INTERNAL_WRAM generate
+  GEN_WRAM : if M62_USE_INTERNAL_WRAM generate
   
     wram_inst : entity work.spram
       generic map
       (
-      	widthad_a => 11
+      	widthad_a => 12
       )
       port map
       (
         clock				=> clk_sys,
-        address			=> cpu_a(10 downto 0),
+        address			=> cpu_a(11 downto 0),
         data				=> cpu_d_o,
         wren				=> wram_wr,
         q						=> wram_d_o
@@ -553,7 +479,7 @@ begin
   else generate
   
     -- SRAM signals (may or may not be used)
-    sram_o.a <= std_logic_vector(resize(unsigned(cpu_a(10 downto 0)), sram_o.a'length));
+    sram_o.a <= std_logic_vector(resize(unsigned(cpu_a(11 downto 0)), sram_o.a'length));
     sram_o.d <= std_logic_vector(resize(unsigned(cpu_d_o), sram_o.d'length));
     wram_d_o <= sram_i.d(wram_d_o'range);
     sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));

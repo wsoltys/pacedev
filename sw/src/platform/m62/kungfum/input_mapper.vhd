@@ -66,7 +66,7 @@ begin
         -- handle PS/2 inputs
         if (key_down or key_up) = '1' then
           case data(7 downto 0) is
-            -- IN0
+            -- IN0 (SYSTEM)
             when SCANCODE_1 =>
               keybd_v(0).d(0) := key_down;
             when SCANCODE_2 =>
@@ -75,7 +75,7 @@ begin
               keybd_v(0).d(2) := key_down;
             when SCANCODE_5 =>
               keybd_v(0).d(3) := key_down;
-            -- IN1
+            -- IN1 (P1)
             when SCANCODE_RIGHT =>
               keybd_v(1).d(0) := key_down;
             when SCANCODE_LEFT =>
@@ -88,7 +88,7 @@ begin
               keybd_v(1).d(5) := key_down;
             when SCANCODE_LCTRL =>
               keybd_v(1).d(7) := key_down;
-            -- IN2
+            -- IN2 (P2)
             when SCANCODE_6 =>
               keybd_v(1).d(4) := key_down;
             -- special keys
@@ -115,8 +115,8 @@ begin
       inputs(0).d <= jamma_v(0).d and not keybd_v(0).d;
       inputs(1).d <= jamma_v(1).d and not keybd_v(1).d;
       inputs(2).d <= jamma_v(2).d and not keybd_v(2).d;
-      inputs(3).d <= "11111110";  -- 1C/1C, 10/30/50K, 3 lives
-      inputs(4).d <= "11111100";
+      inputs(3).d <= "11111111";  -- DSW1
+      inputs(4).d <= "11110100";  -- DSW2
       -- activate service which is only checked on startup
       --inputs(4).d <= "01111100";
       inputs(NUM_INPUTS-1).d <= keybd_v(NUM_INPUTS-1).d;

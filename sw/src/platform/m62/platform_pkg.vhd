@@ -15,9 +15,9 @@ package platform_pkg is
 	constant M52_VIDEO_H_SIZE				      : integer := 256;
 	constant M52_VIDEO_V_SIZE				      : integer := 256;
 	
-	constant PACE_VIDEO_NUM_BITMAPS		    : natural := 3;
+	constant PACE_VIDEO_NUM_BITMAPS		    : natural := 0;
 	constant PACE_VIDEO_NUM_TILEMAPS	    : natural := 1;
-	constant PACE_VIDEO_NUM_SPRITES 	    : natural := 64;
+	constant PACE_VIDEO_NUM_SPRITES 	    : natural := 8;
 	constant PACE_VIDEO_H_SIZE				    : integer := M52_VIDEO_H_SIZE;
 	constant PACE_VIDEO_V_SIZE				    : integer := M52_VIDEO_V_SIZE;
 	constant PACE_VIDEO_L_CROP            : integer := 8;
@@ -30,14 +30,14 @@ package platform_pkg is
 	-- Platform-specific constants (optional)
 	--
 
-  constant PLATFORM                     : string := "m52";
+  constant PLATFORM                     : string := "m62";
   constant PLATFORM_SRC_DIR             : string := "../../../../../src/platform/" & PLATFORM & "/";
   
 	constant CLK0_FREQ_MHz		            : natural := 
     PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
   constant CPU_FREQ_MHz                 : natural := 3;
   
-	constant M52_CPU_CLK_ENA_DIVIDE_BY    : natural := CLK0_FREQ_MHz / CPU_FREQ_MHz;
+	constant M62_CPU_CLK_ENA_DIVIDE_BY    : natural := CLK0_FREQ_MHz / CPU_FREQ_MHz;
 
 	type pal_rgb_t is array (0 to 2) of std_logic_vector(7 downto 0);
 	type pal_a is array (natural range <>) of pal_rgb_t;

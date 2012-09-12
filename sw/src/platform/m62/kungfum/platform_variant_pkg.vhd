@@ -17,36 +17,38 @@ package platform_variant_pkg is
 	-- Platform-specific constants (optional)
 	--
 
-  constant PLATFORM_VARIANT             : string := "mpatrol";
+  constant PLATFORM_VARIANT             : string := "kungfum";
   constant PLATFORM_VARIANT_SRC_DIR     : string := PLATFORM_SRC_DIR & PLATFORM_VARIANT & "/";
   
   type rom_a is array (natural range <>) of string;
-  constant M52_ROM                      : rom_a(0 to 3) := 
+  constant M62_ROM                      : rom_a(0 to 1) := 
                                           (
-                                            0 => "mpa-1.3m", 
-                                            1 => "mpa-2.3l",
-                                            2 => "mpa-3.3k",
-                                            3 => "mpa-4.3j"
+                                            0 => "a-4e-c.bin", 
+                                            1 => "a-4d-c.bin"
                                           );
-  constant M52_ROM_WIDTHAD              : natural := 12;
+  constant M62_ROM_WIDTHAD              : natural := 14;
 
-  constant M52_CHAR_ROM                 : rom_a(0 to 1) := 
+  constant M62_CHAR_ROM                 : rom_a(0 to 2) := 
                                           (
-                                            0 => "mpe-5.3e", 
-                                            1 => "mpe-4.3f"
-                                          );
-
-  constant M52_SPRITE_ROM               : rom_a(0 to 1) := 
-                                          (
-                                            0 => "mpb-2.3m", 
-                                            1 => "mpb-1.3n"
+                                            0 => "g-4c-a.bin", 
+                                            1 => "g-4d-a.bin",
+                                            2 => "g-4e-a.bin"
                                           );
 
-  constant M52_BG_ROM                   : rom_a(0 to 2) := 
+  constant M62_SPRITE_ROM               : rom_a(0 to 11) := 
                                           (
-                                            2 => "mpe-1.3l",  -- mountains
-                                            1 => "mpe-2.3k",  -- hills
-                                            0 => "mpe-3.3h"   -- cityscape
+                                            0 => "b-4k-.bin", 
+                                            1 => "b-4f-.bin",
+                                            2 => "b-4l-.bin",
+                                            3 => "b-4h-.bin",
+                                            4 => "b-3n-.bin",
+                                            5 => "b-4n-.bin",
+                                            6 => "b-4m-.bin",
+                                            7 => "b-3m-.bin",
+                                            8 => "b-4c-.bin",
+                                            9 => "b-4e-.bin",
+                                            10 => "b-4d-.bin",
+                                            11 => "b-4a-.bin"
                                           );
 
 	constant tile_pal : pal_a(0 to 127) :=

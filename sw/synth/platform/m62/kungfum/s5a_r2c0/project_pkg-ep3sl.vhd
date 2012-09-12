@@ -102,13 +102,13 @@ package project_pkg is
 
   constant S5AR2_HAS_FLOPPY_IF              : boolean := false;
 
-	-- Moon Patrol-specific constants
+	-- Kung Fu Master-specific constants
 			
-	constant M52_USE_INTERNAL_WRAM            : boolean := true;
+	constant M62_USE_INTERNAL_WRAM            : boolean := true;
   
 	-- derived - do not edit
 
-  constant S5AR2_EMULATE_SRAM               : boolean := not M52_USE_INTERNAL_WRAM;
+  constant S5AR2_EMULATE_SRAM               : boolean := not M62_USE_INTERNAL_WRAM;
   constant PACE_HAS_SRAM                    : boolean := S5AR2_EMULATE_SRAM;
   constant PACE_HAS_FLASH                   : boolean := S5AR2_EMULATE_FLASH;
 	
