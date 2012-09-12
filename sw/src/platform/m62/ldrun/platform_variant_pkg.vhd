@@ -17,36 +17,31 @@ package platform_variant_pkg is
 	-- Platform-specific constants (optional)
 	--
 
-  constant PLATFORM_VARIANT             : string := "mpatrol";
+  constant PLATFORM_VARIANT             : string := "ldrun";
   constant PLATFORM_VARIANT_SRC_DIR     : string := PLATFORM_SRC_DIR & PLATFORM_VARIANT & "/";
   
   type rom_a is array (natural range <>) of string;
-  constant M52_ROM                      : rom_a(0 to 3) := 
+  constant M62_ROM                      : rom_a(0 to 3) := 
                                           (
-                                            0 => "mpa-1.3m", 
-                                            1 => "mpa-2.3l",
-                                            2 => "mpa-3.3k",
-                                            3 => "mpa-4.3j"
+                                            0 => "lr-a-4e", 
+                                            1 => "lr-a-4d",
+                                            2 => "lr-a-4b",
+                                            3 => "lr-a-4a"
                                           );
-  constant M52_ROM_WIDTHAD              : natural := 12;
+  constant M62_ROM_WIDTHAD              : natural := 13;
 
-  constant M52_CHAR_ROM                 : rom_a(0 to 1) := 
+  constant M62_CHAR_ROM                 : rom_a(0 to 2) := 
                                           (
-                                            0 => "mpe-5.3e", 
-                                            1 => "mpe-4.3f"
-                                          );
-
-  constant M52_SPRITE_ROM               : rom_a(0 to 1) := 
-                                          (
-                                            0 => "mpb-2.3m", 
-                                            1 => "mpb-1.3n"
+                                            0 => "lr-e-2d", 
+                                            1 => "lr-e-2j",
+                                            2 => "lr-e-2f"
                                           );
 
-  constant M52_BG_ROM                   : rom_a(0 to 2) := 
+  constant M62_SPRITE_ROM               : rom_a(0 to 2) := 
                                           (
-                                            2 => "mpe-1.3l",  -- mountains
-                                            1 => "mpe-2.3k",  -- hills
-                                            0 => "mpe-3.3h"   -- cityscape
+                                            0 => "lr-b-4k", 
+                                            1 => "lr-b-3n",
+                                            2 => "lr-b-4c"
                                           );
 
 	constant tile_pal : pal_a(0 to 127) :=

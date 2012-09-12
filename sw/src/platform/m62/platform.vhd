@@ -313,9 +313,13 @@ begin
         if cpu_clk_en = '1' and cpu_mem_wr = '1' then
           case cpu_a is
             when X"A000" =>
-              m62_hscroll(7 downto 0) <= cpu_d_o;
+              if PLATFORM_VARIANT = "kungfum" then
+                m62_hscroll(7 downto 0) <= cpu_d_o;
+              end if;
             when X"B000" =>
-              m62_hscroll(15 downto 8) <= cpu_d_o;
+              if PLATFORM_VARIANT = "kungfum" then
+                m62_hscroll(15 downto 8) <= cpu_d_o;
+              end if;
             when others =>
               null;
           end case;
@@ -327,7 +331,7 @@ begin
   
   BLK_CPU_ROMS : block
   
-    type rom_d_a is array(0 to 4) of std_logic_vector(7 downto 0);
+    type rom_d_a is array(0 to 3) of std_logic_vector(7 downto 0);
     signal rom_d          : rom_d_a;
 
   begin
