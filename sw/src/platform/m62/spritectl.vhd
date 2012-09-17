@@ -72,7 +72,7 @@ begin
       if clk_ena = '1' then
 
         x := unsigned(reg_i.x) + PACE_VIDEO_PIPELINE_DELAY - 3;
-        y := 254 - unsigned(reg_i.y) - 16;
+        y := 256 - 15 - unsigned(reg_i.y);
         
         if video_ctl.hblank = '1' then
 

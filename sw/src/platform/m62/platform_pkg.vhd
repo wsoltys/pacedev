@@ -12,17 +12,17 @@ package platform_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 
-	constant M52_VIDEO_H_SIZE				      : integer := 256;
-	constant M52_VIDEO_V_SIZE				      : integer := 256;
+	constant M62_VIDEO_H_SIZE				      : integer := 256;
+	constant M62_VIDEO_V_SIZE				      : integer := 256;
 	
 	constant PACE_VIDEO_NUM_BITMAPS		    : natural := 0;
 	constant PACE_VIDEO_NUM_TILEMAPS	    : natural := 1;
-	constant PACE_VIDEO_NUM_SPRITES 	    : natural := 8;
-	constant PACE_VIDEO_H_SIZE				    : integer := M52_VIDEO_H_SIZE;
-	constant PACE_VIDEO_V_SIZE				    : integer := M52_VIDEO_V_SIZE;
-	constant PACE_VIDEO_L_CROP            : integer := 8;
+	constant PACE_VIDEO_NUM_SPRITES 	    : natural := 32;
+	constant PACE_VIDEO_H_SIZE				    : integer := M62_VIDEO_H_SIZE;
+	constant PACE_VIDEO_V_SIZE				    : integer := M62_VIDEO_V_SIZE;
+	constant PACE_VIDEO_L_CROP            : integer := 0;
 	constant PACE_VIDEO_R_CROP            : integer := PACE_VIDEO_L_CROP;
-  constant PACE_VIDEO_PIPELINE_DELAY    : integer := 7;
+  constant PACE_VIDEO_PIPELINE_DELAY    : integer := 5;
 	
 	constant PACE_INPUTS_NUM_BYTES        : integer := 6;
 	
