@@ -393,26 +393,39 @@ begin
         (
           init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" &
                           M62_SPRITE_ROM(i) & ".hex",
-          widthad_a		=> 12,
-          widthad_b		=> 12
+          widthad_a		=> 13,
+          widthad_b		=> 13
         )
         port map
         (
           clock			              => clk_video,
-          address_a(11 downto 5)  => sprite_i.a(11 downto 5),
+          address_a(12 downto 5)  => sprite_i.a(12 downto 5),
           address_a(4)            => '0',
           address_a(3 downto 0)   => sprite_i.a(3 downto 0),
           q_a 			              => spr_rom_left(i),
-          address_b(11 downto 5)  => sprite_i.a(11 downto 5),
+          address_b(12 downto 5)  => sprite_i.a(12 downto 5),
           address_b(4)            => '1',
           address_b(3 downto 0)   => sprite_i.a(3 downto 0),
           q_b                     => spr_rom_right(i)
         );
     end generate GEN_SPRITE_ROMS;
 
-    sprite_o.d(sprite_o.d'left downto 32) <= (others => '0');
-    sprite_o.d(31 downto 0) <=  spr_rom_left(0) & spr_rom_right(0) & 
-                                spr_rom_left(1) & spr_rom_right(1);
+    sprite_o.d(sprite_o.d'left downto 48) <= (others => '0');
+    sprite_o.d(47 downto 0) <=  spr_rom_left(0) & spr_rom_right(0) & 
+                                spr_rom_left(1) & spr_rom_right(1) &
+                                spr_rom_left(2) & spr_rom_right(2)
+                                  when sprite_i.a(14 downto 13) = "00" else
+                                spr_rom_left(3) & spr_rom_right(3) &
+                                spr_rom_left(4) & spr_rom_right(4) &
+                                spr_rom_left(5) & spr_rom_right(5) 
+                                  when sprite_i.a(14 downto 13) = "01" else
+                                spr_rom_left(6) & spr_rom_right(6) &
+                                spr_rom_left(7) & spr_rom_right(7) &
+                                spr_rom_left(8) & spr_rom_right(8) 
+                                  when sprite_i.a(14 downto 13) = "10" else
+                                spr_rom_left(9) & spr_rom_right(9) &
+                                spr_rom_left(10) & spr_rom_right(10) &
+                                spr_rom_left(11) & spr_rom_right(11);
 
   end block BLK_GFX_ROMS;
 

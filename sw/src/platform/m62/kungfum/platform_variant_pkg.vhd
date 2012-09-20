@@ -38,16 +38,16 @@ package platform_variant_pkg is
   constant M62_SPRITE_ROM               : rom_a(0 to 11) := 
                                           (
                                             0 => "b-4k-.bin", 
-                                            1 => "b-4f-.bin",
-                                            2 => "b-4l-.bin",
-                                            3 => "b-4h-.bin",
-                                            4 => "b-3n-.bin",
-                                            5 => "b-4n-.bin",
-                                            6 => "b-4m-.bin",
-                                            7 => "b-3m-.bin",
-                                            8 => "b-4c-.bin",
-                                            9 => "b-4e-.bin",
-                                            10 => "b-4d-.bin",
+                                            3 => "b-4f-.bin",
+                                            6 => "b-4l-.bin",
+                                            9 => "b-4h-.bin",
+                                            1 => "b-3n-.bin",
+                                            4 => "b-4n-.bin",
+                                            7 => "b-4m-.bin",
+                                            10 => "b-3m-.bin",
+                                            2 => "b-4c-.bin",
+                                            5 => "b-4e-.bin",
+                                            8 => "b-4d-.bin",
                                             11 => "b-4a-.bin"
                                           );
 
