@@ -56,13 +56,20 @@ begin
     variable yMat     : boolean;      -- raster is between first and last line of sprite
     variable xMat     : boolean;      -- raster in between left edge and end of line
 
+    variable height     : unsigned(6 downto 0);
 		-- the width of rowCount determines the scanline multipler
 		-- - eg.	(4 downto 0) is 1:1
 		-- 				(5 downto 0) is 2:1 (scan-doubling)
-  	variable rowCount : unsigned(3+PACE_VIDEO_V_SCALE downto 0);
-    alias row         : unsigned(4 downto 0) is 
-                          rowCount(rowCount'left downto rowCount'left-4);
-
+--  	variable rowCount : unsigned(3+PACE_VIDEO_V_SCALE downto 0);
+--    alias row         : unsigned(4 downto 0) is 
+--                          rowCount(rowCount'left downto rowCount'left-4);
+    variable rowCount   : unsigned(height'range);
+    alias row           : unsigned(rowCount'range) is rowCount;
+    -- which part of the sprite is being drawn
+    alias segment       : unsigned(1 downto 0) is rowCount(5 downto 4);
+    
+    variable prom_i     : integer range sprite_prom'range;
+    variable code       : std_logic_vector(9 downto 0);
     variable pal_i      : std_logic_vector(7 downto 0);
 		variable pal_rgb    : pal_rgb_t;
     
@@ -73,6 +80,24 @@ begin
 
         x := unsigned(reg_i.x) - 128 + PACE_VIDEO_PIPELINE_DELAY - 3;
         y := 256 +128 - 15 - unsigned(reg_i.y);
+
+        -- hande sprite height, placement
+        prom_i := to_integer(unsigned(reg_i.n(9 downto 5)));
+        code := reg_i.n(9 downto 0); -- default
+        case sprite_prom(prom_i) is
+          when 1 =>
+            -- double height
+            height := to_unsigned(2*16,height'length);
+            code(0) := segment(0);
+            y := y - 16;
+          when 2 =>
+            -- quadruple height
+            height := to_unsigned(4*16,height'length);
+            code(1 downto 0) := std_logic_vector(segment);
+            y := y - 3*16;
+          when others =>
+            height := to_unsigned(16,height'length);
+        end case;
         
         if video_ctl.hblank = '1' then
 
@@ -86,7 +111,7 @@ begin
             -- start counting sprite row
             rowCount := (others => '0');
             yMat := true;
-          elsif row = "10000" then
+          elsif row = height then
             yMat := false;				
           end if;
 
@@ -114,7 +139,7 @@ begin
           
           if xMat then
             -- shift in next pixel
-            pel := rowStore(rowStore'left) & rowStore(rowStore'left-16) & rowStore(rowStore'left-32);
+            pel := rowStore(rowStore'left-32) & rowStore(rowStore'left-16) & rowStore(rowStore'left);
             rowStore(47 downto 32) := rowStore(46 downto 32) & '0';
             rowStore(31 downto 16) := rowStore(30 downto 16) & '0';
             rowStore(15 downto 0) := rowStore(14 downto 0) & '0';
@@ -123,8 +148,7 @@ begin
         end if;
 
         pal_i := reg_i.colour(4 downto 0) & pel;
-        --pal_rgb := sprite_pal(to_integer(unsigned(pal_i)));
-        pal_rgb := tile_pal(to_integer(unsigned(pal_i)));
+        pal_rgb := sprite_pal(to_integer(unsigned(pal_i)));
         rgb.r <= pal_rgb(0) & "00";
         rgb.g <= pal_rgb(1) & "00";
         rgb.b <= pal_rgb(2) & "00";
@@ -141,7 +165,7 @@ begin
     end if; -- rising_edge(clk)
     
     -- generate sprite data address
-    ctl_o.a(14 downto 5) <= reg_i.n(9 downto 0);
+    ctl_o.a(14 downto 5) <= code;
     ctl_o.a(4) <= '0'; -- dual-port RAM
     if reg_i.yflip = '0' then
       ctl_o.a(3 downto 0) <= std_logic_vector(row(3 downto 0));

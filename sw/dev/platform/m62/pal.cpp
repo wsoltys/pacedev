@@ -736,12 +736,12 @@ static UINT8 color_prom[7*256+512];
 
 char b1[32], b2[32], b3[32];
 
-char *int2bin (unsigned val, char *buf)
+char *int2bin_ex (unsigned val, unsigned bits, char *buf)
 {
 	int i;	
-	for (i=0; i<8; i++)
+	for (i=0; i<bits; i++)
 	{
-		if (val & (1<<(7-i)))
+		if (val & (1<<(bits-1-i)))
 			buf[i] = '1';
 		else
 			buf[i] = '0';
@@ -751,10 +751,26 @@ char *int2bin (unsigned val, char *buf)
 	return (buf);
 }
 
+char *int2bin (unsigned val, char *buf)
+{
+	return (int2bin_ex (val, 8, buf));
+}
+
+UINT8 sprite_prom[32];
+
 int main (int argc, char *argv[])
 {
 	FILE *fp;
 
+	fp = fopen ("kungfum/b-5f-.bin", "rb");
+	fread (sprite_prom, 1, 32, fp);
+	fclose (fp);
+	
+	for (unsigned i=0; i<32; i++)
+		if (sprite_prom[i] != 1)
+			printf ("%d => %d,\n",
+							i, sprite_prom[i]);
+	
 	char *prom_file[] = 
 	{
 		"g-1j-.bin",	// 256 bytes
@@ -762,28 +778,27 @@ int main (int argc, char *argv[])
 		"g-1f-.bin",
 		"b-1n-.bin",
 		"g-1h-.bin",
-		"b-1l-.bin",
-		"b-5f-.bin",	// 512 bytes (only one)
-		"b-6f-.bin"
+		"b-1l-.bin"
+		//"b-5f-.bin",
+		//"b-6f-.bin"
 	};
 
 	UINT8 *p = color_prom;
 	for (unsigned f=0; f<sizeof(prom_file)/sizeof(char *); f++)
 	{
 		char filename[64];
-		int size = (f == 6 ? 512 : 256);
 		
 		sprintf (filename, "kungfum/%s", prom_file[f]);
 		fp = fopen (filename, "rb");
 		if (!fp) exit (0);
-		fread ((void *)p, 1, size, fp);
+		fread ((void *)p, 1, 256, fp);
 		fclose (fp);
-		p += size;
+		p += 256;
 	}
 
 	fprintf (stderr, "Computing...\n");
 
-	palette_t *palette = palette_alloc(256, 1);
+	palette_t *tile_palette = palette_alloc(256, 1);
 		
 	//const UINT8 *color_prom = machine.root_device().memregion("proms")->base();
 	//m62_state *state = machine.driver_data<m62_state>();
@@ -791,32 +806,43 @@ int main (int argc, char *argv[])
 
 	rgb = compute_res_net_all(/*machine,*/ color_prom, &m62_tile_decode_info, &m62_tile_net_info);
 	//palette_set_colors(/*machine,*/ 0x000, rgb, 0x100);
-	for (unsigned i=0; i<palette->numcolors; i++)
-		palette_entry_set_color(palette, i, rgb[i]);
+	for (unsigned i=0; i<tile_palette->numcolors; i++)
+		palette_entry_set_color(tile_palette, i, rgb[i]);
 
 	//auto_free(machine, rgb);
 
-	m62_amplify_contrast(/*machine.*/palette,0);
+	m62_amplify_contrast(/*machine.*/tile_palette,0);
 
-	for (unsigned i=0; i<palette->numcolors; i++)
-		if ((palette->adjusted_color[i] & 0xFFFFFF) !=0)
+	for (unsigned i=0; i<tile_palette->numcolors; i++)
+		if ((tile_palette->adjusted_color[i] & 0xFFFFFF) !=0xFFFFFF)
 			printf ("%d => (0=>\"%s\", 1=>\"%s\", 2=>\"%s\"),  -- %06X\n",
 							i, 
-							int2bin(RGB_RED(palette->adjusted_color[i]),b1), 
-							int2bin(RGB_GREEN(palette->adjusted_color[i]),b2), 
-							int2bin(RGB_BLUE(palette->adjusted_color[i]),b3),
-							palette->adjusted_color[i] & 0xFFFFFF);
+							int2bin(RGB_RED(tile_palette->adjusted_color[i]),b1), 
+							int2bin(RGB_GREEN(tile_palette->adjusted_color[i]),b2), 
+							int2bin(RGB_BLUE(tile_palette->adjusted_color[i]),b3),
+							tile_palette->adjusted_color[i] & 0xFFFFFF);
 
-#if 0
+	palette_t *sprite_palette = palette_alloc(256, 1);
+
 	rgb = compute_res_net_all(/*machine,*/ color_prom, &m62_sprite_decode_info, &m62_sprite_net_info);
 	//palette_set_colors(machine, 0x100, rgb, 0x100);
+	for (unsigned i=0; i<sprite_palette->numcolors; i++)
+		palette_entry_set_color(sprite_palette, i, rgb[i]);
 	//auto_free(machine, rgb);
 
-	m62_amplify_contrast(/*machine.*/&palette,0);
+	m62_amplify_contrast(/*machine.*/sprite_palette,0);
+
+	for (unsigned i=0; i<sprite_palette->numcolors; i++)
+		if ((sprite_palette->adjusted_color[i] & 0xFFFFFF) !=0xFFFFFF)
+			printf ("%d => (0=>\"%s\", 1=>\"%s\", 2=>\"%s\"),  -- %06X\n",
+							i, 
+							int2bin(RGB_RED(sprite_palette->adjusted_color[i]),b1), 
+							int2bin(RGB_GREEN(sprite_palette->adjusted_color[i]),b2), 
+							int2bin(RGB_BLUE(sprite_palette->adjusted_color[i]),b3),
+							sprite_palette->adjusted_color[i] & 0xFFFFFF);
 
 	/* we'll need this at run time */
 	//state->m_sprite_height_prom = color_prom + 0x600;
-#endif
 
 	fprintf (stderr, "Done!\n");
 }
