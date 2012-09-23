@@ -170,11 +170,17 @@ begin
   -- chip select logic
   -- ROM $0000-$7FFF
   rom_cs <=     '1' when STD_MATCH(cpu_a,  "0---------------") else '0';
-  -- VRAM/CRAM $D000-$DFFF
-  vram_cs <=    '1' when STD_MATCH(cpu_a, X"D"&"0-----------") else '0';
-  cram_cs <=    '1' when STD_MATCH(cpu_a, X"D"&"1-----------") else '0';
   -- SPRITE $C000-$C0FF
   sprite_cs <=  '1' when STD_MATCH(cpu_a, X"C0"&   "--------") else '0';
+  -- VRAM/CRAM $D000-$DFFF
+  vram_cs <=    '1' when PLATFORM_VARIANT = "kungfum" and
+                          STD_MATCH(cpu_a, X"D"&"0-----------") else 
+                '1' when STD_MATCH(cpu_a, X"D"&"-----------0") else 
+                '0';
+  cram_cs <=    '1' when PLATFORM_VARIANT = "kungfum" and
+                          STD_MATCH(cpu_a, X"D"&"1-----------") else 
+                '1' when STD_MATCH(cpu_a, X"D"&"-----------1") else 
+                '0';
   -- RAM $E000-$EFFF
   wram_cs <=    '1' when STD_MATCH(cpu_a, X"E"&"------------") else '0';
 
@@ -363,7 +369,7 @@ begin
   
     type gfx_rom_d_a is array(M62_CHAR_ROM'range) of std_logic_vector(7 downto 0);
     signal chr_rom_d      : gfx_rom_d_a;
-    type spr_rom_d_a is array(M62_SPRITE_ROM'range) of std_logic_vector(7 downto 0);
+    type spr_rom_d_a is array(0 to 11) of std_logic_vector(7 downto 0);
     signal spr_rom_left   : spr_rom_d_a;
     signal spr_rom_right  : spr_rom_d_a;
     
@@ -429,51 +435,61 @@ begin
 
   end block BLK_GFX_ROMS;
 
-	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-	vram_inst : entity work.dpram
-    generic map
-    (
-      init_file		=> "",
-      widthad_a		=> 11
-    )
-		port map
-		(
-			clock_b			=> clk_sys,
-			address_b		=> cpu_a(10 downto 0),
-			wren_b			=> vram_wr,
-			data_b			=> cpu_d_o,
-			q_b					=> vram_d_o,
+  BLK_VRAM : block
+    signal vram_a   : std_logic_vector(10 downto 0);
+    alias cram_a    : std_logic_vector(10 downto 0) is vram_a;
+  begin
+  
+    vram_a <= cpu_a(10 downto 0) when PLATFORM_VARIANT = "kungfum" else
+              cpu_a(11 downto 1);
+              
+    -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+    vram_inst : entity work.dpram
+      generic map
+      (
+        init_file		=> "",
+        widthad_a		=> 11
+      )
+      port map
+      (
+        clock_b			=> clk_sys,
+        address_b		=> vram_a,
+        wren_b			=> vram_wr,
+        data_b			=> cpu_d_o,
+        q_b					=> vram_d_o,
 
-			clock_a			=> clk_video,
-			address_a		=> tilemap_i(1).map_a(10 downto 0),
-			wren_a			=> '0',
-			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o(1).map_d(7 downto 0)
-		);
-  tilemap_o(1).map_d(15 downto 8) <= (others => '0');
+        clock_a			=> clk_video,
+        address_a		=> tilemap_i(1).map_a(10 downto 0),
+        wren_a			=> '0',
+        data_a			=> (others => 'X'),
+        q_a					=> tilemap_o(1).map_d(7 downto 0)
+      );
+    tilemap_o(1).map_d(15 downto 8) <= (others => '0');
 
-	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
-	cram_inst : entity work.dpram
-    generic map
-    (
-      init_file		=> "",
-      widthad_a		=> 11
-    )
-		port map
-		(
-			clock_b			=> clk_sys,
-			address_b		=> cpu_a(10 downto 0),
-			wren_b			=> cram_wr,
-			data_b			=> cpu_d_o,
-			q_b					=> cram_d_o,
+    -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
+    cram_inst : entity work.dpram
+      generic map
+      (
+        init_file		=> "",
+        widthad_a		=> 11
+      )
+      port map
+      (
+        clock_b			=> clk_sys,
+        address_b		=> cram_a,
+        wren_b			=> cram_wr,
+        data_b			=> cpu_d_o,
+        q_b					=> cram_d_o,
 
-			clock_a			=> clk_video,
-			address_a		=> tilemap_i(1).attr_a(10 downto 0),
-			wren_a			=> '0',
-			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o(1).attr_d(7 downto 0)
-		);
-  tilemap_o(1).attr_d(15 downto 8) <= (others => '0');
+        clock_a			=> clk_video,
+        address_a		=> tilemap_i(1).attr_a(10 downto 0),
+        wren_a			=> '0',
+        data_a			=> (others => 'X'),
+        q_a					=> tilemap_o(1).attr_d(7 downto 0)
+      );
+    tilemap_o(1).attr_d(15 downto 8) <= (others => '0');
+    
+  end block BLK_VRAM;
   
   GEN_WRAM : if M62_USE_INTERNAL_WRAM generate
   

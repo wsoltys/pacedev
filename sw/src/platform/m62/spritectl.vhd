@@ -77,36 +77,28 @@ begin
 
 		if rising_edge(clk) then
       if clk_ena = '1' then
-
-        x := unsigned(reg_i.x) - 128 + PACE_VIDEO_PIPELINE_DELAY - 3;
-        y := 256 +128 - 15 - unsigned(reg_i.y);
-
-        -- hande sprite height, placement
-        prom_i := to_integer(unsigned(reg_i.n(9 downto 5)));
-        code := reg_i.n(9 downto 0); -- default
-        case sprite_prom(prom_i) is
-          when 1 =>
-            -- double height
-            height := to_unsigned(2*16,height'length);
-            code(0) := segment(0);
-            y := y - 16;
-          when 2 =>
-            -- quadruple height
-            height := to_unsigned(4*16,height'length);
-            code(1 downto 0) := std_logic_vector(segment);
-            y := y - 3*16;
-          when others =>
-            height := to_unsigned(16,height'length);
-        end case;
-        
         if video_ctl.hblank = '1' then
 
-          xMat := false;
-          -- stop sprites wrapping from bottom of screen
-          if y = 0 then
-            yMat := false;
-          end if;
+          x := unsigned(reg_i.x) - 128 + PACE_VIDEO_PIPELINE_DELAY - 3;
+          y := 256 + 128 - 15 - unsigned(reg_i.y);
+
+          -- hande sprite height, placement
+          prom_i := to_integer(unsigned(reg_i.n(9 downto 5)));
+          code := reg_i.n(9 downto 0); -- default
+          case sprite_prom(prom_i) is
+            when 1 =>
+              -- double height
+              height := to_unsigned(2*16,height'length);
+              y := y - 16;
+            when 2 =>
+              -- quadruple height
+              height := to_unsigned(4*16,height'length);
+              y := y - 3*16;
+            when others =>
+              height := to_unsigned(16,height'length);
+          end case;
           
+          -- do this 1st because we don't have many clocks
           if y = unsigned(video_ctl.y) then
             -- start counting sprite row
             rowCount := (others => '0');
@@ -115,6 +107,23 @@ begin
             yMat := false;				
           end if;
 
+          case sprite_prom(prom_i) is
+            when 1 =>
+              -- double height
+              code(0) := segment(0);
+            when 2 =>
+              -- quadruple height
+              code(1 downto 0) := std_logic_vector(segment);
+            when others =>
+              null;
+          end case;
+
+          xMat := false;
+          -- stop sprites wrapping from bottom of screen
+          if y = 0 then
+            yMat := false;
+          end if;
+          
           -- sprites not visible before row 16				
           if ctl_i.ld = '1' then
             if yMat then
