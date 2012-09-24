@@ -20,7 +20,6 @@ package platform_variant_pkg is
 	--
 
   constant PLATFORM_VARIANT             : string := "kungfum";
-  constant PLATFORM_VARIANT_SRC_DIR     : string := PLATFORM_SRC_DIR & PLATFORM_VARIANT & "/";
   
   type rom_a is array (natural range <>) of string;
   constant M62_ROM                      : rom_a(0 to 1) := 
@@ -52,6 +51,9 @@ package platform_variant_pkg is
                                             8 => "b-4d-.bin",
                                             11 => "b-4a-.bin"
                                           );
+
+	type pal_rgb_t is array (0 to 2) of std_logic_vector(7 downto 0);
+	type pal_a is array (natural range <>) of pal_rgb_t;
 
 	constant tile_pal : pal_a(0 to 255) :=
 	(
