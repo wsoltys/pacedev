@@ -758,19 +758,9 @@ char *int2bin (unsigned val, char *buf)
 
 UINT8 sprite_prom[32];
 
-int main (int argc, char *argv[])
-{
-	FILE *fp;
-
-	fp = fopen ("kungfum/b-5f-.bin", "rb");
-	fread (sprite_prom, 1, 32, fp);
-	fclose (fp);
-	
-	for (unsigned i=0; i<32; i++)
-		if (sprite_prom[i] != 1)
-			printf ("%d => %d,\n",
-							i, sprite_prom[i]);
-	
+#if 0
+	#define VARIANT	"kungfum"
+	#define SPRITE_PROM	"b-5f-.bin"
 	char *prom_file[] = 
 	{
 		"g-1j-.bin",	// 256 bytes
@@ -782,13 +772,33 @@ int main (int argc, char *argv[])
 		//"b-5f-.bin",
 		//"b-6f-.bin"
 	};
+	#define MOST_COMMON		0xFFFFFF
+#else
+	#define VARIANT "ldrun"
+	#define SPRITE_PROM	"lr-b-5p"
+	char *prom_file[] = 
+	{
+		"lr-e-3m",
+		"lr-b-1m",
+		"lr-e-3l",
+		"lr-b-1n",
+		"lr-e-3n",
+		"lr-b-1l"
+		//"lr-b-5p"
+	};
+	#define MOST_COMMON		0x030303
+#endif
+
+int main (int argc, char *argv[])
+{
+	FILE *fp;
 
 	UINT8 *p = color_prom;
 	for (unsigned f=0; f<sizeof(prom_file)/sizeof(char *); f++)
 	{
 		char filename[64];
 		
-		sprintf (filename, "kungfum/%s", prom_file[f]);
+		sprintf (filename, "%s/%s", VARIANT, prom_file[f]);
 		fp = fopen (filename, "rb");
 		if (!fp) exit (0);
 		fread ((void *)p, 1, 256, fp);
@@ -798,6 +808,8 @@ int main (int argc, char *argv[])
 
 	fprintf (stderr, "Computing...\n");
 
+	printf ("\nTile palette:\n");
+	
 	palette_t *tile_palette = palette_alloc(256, 1);
 		
 	//const UINT8 *color_prom = machine.root_device().memregion("proms")->base();
@@ -814,13 +826,16 @@ int main (int argc, char *argv[])
 	m62_amplify_contrast(/*machine.*/tile_palette,0);
 
 	for (unsigned i=0; i<tile_palette->numcolors; i++)
-		if ((tile_palette->adjusted_color[i] & 0xFFFFFF) !=0xFFFFFF)
+		if ((tile_palette->adjusted_color[i] & 0xFFFFFF) != MOST_COMMON)
 			printf ("%d => (0=>\"%s\", 1=>\"%s\", 2=>\"%s\"),  -- %06X\n",
 							i, 
 							int2bin(RGB_RED(tile_palette->adjusted_color[i]),b1), 
 							int2bin(RGB_GREEN(tile_palette->adjusted_color[i]),b2), 
 							int2bin(RGB_BLUE(tile_palette->adjusted_color[i]),b3),
 							tile_palette->adjusted_color[i] & 0xFFFFFF);
+			printf ("-- others => X\"%06X\"\n", MOST_COMMON);
+
+	printf ("\nSprite palette:\n");
 
 	palette_t *sprite_palette = palette_alloc(256, 1);
 
@@ -833,7 +848,7 @@ int main (int argc, char *argv[])
 	m62_amplify_contrast(/*machine.*/sprite_palette,0);
 
 	for (unsigned i=0; i<sprite_palette->numcolors; i++)
-		if ((sprite_palette->adjusted_color[i] & 0xFFFFFF) !=0xFFFFFF)
+		if ((sprite_palette->adjusted_color[i] & 0xFFFFFF) != MOST_COMMON)
 			printf ("%d => (0=>\"%s\", 1=>\"%s\", 2=>\"%s\"),  -- %06X\n",
 							i, 
 							int2bin(RGB_RED(sprite_palette->adjusted_color[i]),b1), 
@@ -843,6 +858,19 @@ int main (int argc, char *argv[])
 
 	/* we'll need this at run time */
 	//state->m_sprite_height_prom = color_prom + 0x600;
+
+	printf ("\nSprite height PROM:\n");
+
+	fp = fopen (VARIANT "/" SPRITE_PROM, "rb");
+	if (!fp) exit(0);
+	fread (sprite_prom, 1, 32, fp);
+	fclose (fp);
+	
+	for (unsigned i=0; i<32; i++)
+		if (sprite_prom[i] != 1)
+			printf ("%d => %d,\n",
+							i, sprite_prom[i]);
+	
 
 	fprintf (stderr, "Done!\n");
 }

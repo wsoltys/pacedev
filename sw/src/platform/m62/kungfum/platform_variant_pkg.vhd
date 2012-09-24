@@ -13,6 +13,8 @@ package platform_variant_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 
+	constant M62_VIDEO_H_SIZE				      : integer := 256;
+
 	--
 	-- Platform-specific constants (optional)
 	--

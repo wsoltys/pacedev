@@ -5,6 +5,7 @@ use ieee.std_logic_unsigned.all;
 library work;
 use work.target_pkg.all;
 use work.project_pkg.all;
+use work.platform_variant_pkg.all;
 
 package platform_pkg is
 
@@ -12,7 +13,8 @@ package platform_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 
-	constant M62_VIDEO_H_SIZE				      : integer := 256;
+--	constant M62_VIDEO_H_SIZE				      : integer := 256;
+  constant M62_VIDEO_H_OFFSET           : integer := (512-M62_VIDEO_H_SIZE)/2;
 	constant M62_VIDEO_V_SIZE				      : integer := 256;
 	
 	constant PACE_VIDEO_NUM_BITMAPS		    : natural := 0;
@@ -32,15 +34,13 @@ package platform_pkg is
 
   constant PLATFORM                     : string := "m62";
   constant PLATFORM_SRC_DIR             : string := "../../../../../src/platform/" & PLATFORM & "/";
+  constant PLATFORM_VARIANT_SRC_DIR     : string := PLATFORM_SRC_DIR & PLATFORM_VARIANT & "/";
   
 	constant CLK0_FREQ_MHz		            : natural := 
     PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
   constant CPU_FREQ_MHz                 : natural := 3;
   
 	constant M62_CPU_CLK_ENA_DIVIDE_BY    : natural := CLK0_FREQ_MHz / CPU_FREQ_MHz;
-
-	type pal_rgb_t is array (0 to 2) of std_logic_vector(7 downto 0);
-	type pal_a is array (natural range <>) of pal_rgb_t;
 
   type from_PLATFORM_IO_t is record
     not_used  : std_logic;

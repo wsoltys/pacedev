@@ -193,7 +193,7 @@ begin
 	cpu_d_i <=  in_d_o when (cpu_io_rd = '1' and in_cs = '1') else
               rom_d_o when rom_cs = '1' else
 							vram_d_o when vram_cs = '1' else
-							--cram_d_o when cram_cs = '1' else
+							cram_d_o when cram_cs = '1' else
 							wram_d_o when wram_cs = '1' else
 							(others => '1');
               
