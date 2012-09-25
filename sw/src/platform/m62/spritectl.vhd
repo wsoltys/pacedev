@@ -133,7 +133,7 @@ begin
             end if;
           end if;
               
-        end if;
+        end if; -- hblank='1'
         
         if video_ctl.stb = '1' then
       

@@ -175,11 +175,13 @@ begin
   -- VRAM/CRAM $D000-$DFFF
   vram_cs <=    '1' when PLATFORM_VARIANT = "kungfum" and
                           STD_MATCH(cpu_a, X"D"&"0-----------") else 
-                '1' when STD_MATCH(cpu_a, X"D"&"-----------0") else 
+                '1' when PLATFORM_VARIANT /= "kungfum" and
+                          STD_MATCH(cpu_a, X"D"&"-----------0") else 
                 '0';
   cram_cs <=    '1' when PLATFORM_VARIANT = "kungfum" and
                           STD_MATCH(cpu_a, X"D"&"1-----------") else 
-                '1' when STD_MATCH(cpu_a, X"D"&"-----------1") else 
+                '1' when PLATFORM_VARIANT /= "kungfum" and
+                          STD_MATCH(cpu_a, X"D"&"-----------1") else 
                 '0';
   -- RAM $E000-$EFFF
   wram_cs <=    '1' when STD_MATCH(cpu_a, X"E"&"------------") else '0';
