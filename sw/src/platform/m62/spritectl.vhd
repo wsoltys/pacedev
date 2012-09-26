@@ -156,7 +156,13 @@ begin
 
         end if;
 
-        pal_i := reg_i.colour(4 downto 0) & pel;
+        if PLATFORM_VARIANT = "ldrun" or
+            PLATFORM_VARIANT = "battroad" then
+          pal_i := '0' & reg_i.colour(3 downto 0) & pel;
+        else
+          pal_i := reg_i.colour(4 downto 0) & pel;
+        end if;
+        pal_i := "000" & std_logic_vector(to_unsigned(INDEX,5));
         pal_rgb := sprite_pal(to_integer(unsigned(pal_i)));
         rgb.r <= pal_rgb(0) & "00";
         rgb.g <= pal_rgb(1) & "00";

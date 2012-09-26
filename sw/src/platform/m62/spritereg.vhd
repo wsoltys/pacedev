@@ -33,7 +33,6 @@ begin
         if reg_i.wr = '1' then
           case reg_i.a(2 downto 0) is
             when "000" =>
-              -- kungfum 5 bits, others 4 bits
               reg_o.colour(4 downto 0) <= reg_i.d(4 downto 0);
             when "010" =>
               reg_o.y(7 downto 0) <= reg_i.d;
