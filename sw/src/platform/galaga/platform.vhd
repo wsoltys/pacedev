@@ -391,20 +391,36 @@ begin
     main_int <= main_intreq and main_intena;
     main_intvec <= (others => '0');
     
-    main_rom_inst : entity work.sprom
-      generic map
-      (
-        init_file		=>  VARIANT_ROM_DIR & ROM_VARIANT_SUBDIR & 
-                          "main.hex",
-        widthad_a		=> 14
-      )
-      port map
-      (
-        clock		=> clk_sys,
-        address => main_a(13 downto 0),
-        q				=> mainrom_d_o
-      );
+    BLK_MAIN_CPU_ROMS : block
+    
+      type rom_d_a is array(0 to 3) of std_logic_vector(7 downto 0);
+      signal rom_d          : rom_d_a;
 
+    begin
+    
+      mainrom_d_o <=  rom_d(0) when cpu_a(GALAGA_ROM_WIDTHAD+1 downto GALAGA_ROM_WIDTHAD) = "00" else
+                      rom_d(1) when cpu_a(GALAGA_ROM_WIDTHAD+1 downto GALAGA_ROM_WIDTHAD) = "01" else
+                      rom_d(2) when cpu_a(GALAGA_ROM_WIDTHAD+1 downto GALAGA_ROM_WIDTHAD) = "10" else
+                      rom_d(3);
+
+      GEN_MAIN_CPU_ROMS : for i in GALAGA_ROM'range generate
+        rom_inst : entity work.sprom
+          generic map
+          (
+            init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" & ROM_VARIANT & "/" & 
+                            GALAGA_ROM(i) & ".hex",
+            widthad_a		=> GALAGA_ROM_WIDTHAD
+          )
+          port map
+          (
+            clock			=> clk_sys,
+            address		=> main_a(GALAGA_ROM_WIDTHAD-1 downto 0),
+            q					=> rom_d(i)
+          );
+      end generate GEN_MAIN_CPU_ROMS;
+
+    end block BLK_MAIN_CPU_ROMS;
+    
     -- data latch
     process (clk_sys, rst_sys)
     begin
@@ -479,7 +495,7 @@ begin
     sub_rom_inst : entity work.sprom
       generic map
       (
-        init_file		=> VARIANT_ROM_DIR & ROM_VARIANT_SUBDIR & 
+        init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" & ROM_VARIANT & "/" & 
                         "sub.hex",
         widthad_a		=> 13
       )
@@ -557,7 +573,7 @@ begin
     sub2_rom_inst : entity work.sprom
       generic map
       (
-        init_file		=> VARIANT_ROM_DIR & ROM_VARIANT_SUBDIR & 
+        init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" & ROM_VARIANT & "/" & 
                         "sub2.hex",
         widthad_a		=> 12
       )
@@ -835,7 +851,7 @@ begin
   gfx1_inst : entity work.sprom
     generic map
     (
-      init_file		=> VARIANT_ROM_DIR & "gfx1.hex",
+      init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" &"gfx1.hex",
       widthad_a     => 12
     )
     port map
@@ -849,7 +865,7 @@ begin
   gfx2_inst : entity work.sprom
     generic map
     (
-      init_file		=> VARIANT_ROM_DIR & "gfx2.hex",
+      init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" & "gfx2.hex",
       widthad_a     => 13
     )
     port map
@@ -924,7 +940,7 @@ begin
 	rampf0_inst : entity work.dpram
 		generic map
 		(
-			init_file		=> VARIANT_ROM_DIR & "rampf0.hex",
+			init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" & "rampf0.hex",
 			widthad_a		=> 11
 		)
 		port map
@@ -950,7 +966,7 @@ begin
 	rampf1_inst : entity work.dpram
 		generic map
 		(
-			init_file		=> VARIANT_ROM_DIR & "rampf1.hex",
+			init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" & "rampf1.hex",
 			widthad_a		=> 11
 		)
 		port map
@@ -976,7 +992,7 @@ begin
 	rampf2_inst : entity work.dpram
 		generic map
 		(
-			init_file		=> VARIANT_ROM_DIR & "rampf2.hex",
+			init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" & "rampf2.hex",
 			widthad_a		=> 11
 		)
 		port map
@@ -1002,7 +1018,7 @@ begin
 	rampf3_inst : entity work.dpram
 		generic map
 		(
-			init_file		=> VARIANT_ROM_DIR & "rampf3.hex",
+			init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" & "rampf3.hex",
 			widthad_a		=> 11
 		)
 		port map

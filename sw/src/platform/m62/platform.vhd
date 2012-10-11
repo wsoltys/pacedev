@@ -209,7 +209,7 @@ begin
   sprite_reg_o.clk_ena <= clk_3M072_en;
   sprite_reg_o.a <= cpu_a(7 downto 0);
   sprite_reg_o.d <= cpu_d_o;
-  sprite_reg_o.wr <=  sprite_cs and cpu_mem_wr;
+  sprite_reg_o.wr <= sprite_cs and cpu_mem_wr;
 
   --
   -- COMPONENT INSTANTIATION

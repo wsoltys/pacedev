@@ -110,10 +110,18 @@ begin
           case sprite_prom(prom_i) is
             when 1 =>
               -- double height
-              code(0) := segment(0);
+              if reg_i.yflip = '1' then
+                code(0) := not segment(0);
+              else
+                code(0) := segment(0);
+              end if;
             when 2 =>
               -- quadruple height
-              code(1 downto 0) := std_logic_vector(segment);
+              if reg_i.yflip = '1' then
+                code(1 downto 0) := not std_logic_vector(segment);
+              else
+                code(1 downto 0) := std_logic_vector(segment);
+              end if;
             when others =>
               null;
           end case;
@@ -162,7 +170,7 @@ begin
         else
           pal_i := reg_i.colour(4 downto 0) & pel;
         end if;
-        pal_i := "000" & std_logic_vector(to_unsigned(INDEX,5));
+        --pal_i := "000" & std_logic_vector(to_unsigned(INDEX,5));
         pal_rgb := sprite_pal(to_integer(unsigned(pal_i)));
         rgb.r <= pal_rgb(0) & "00";
         rgb.g <= pal_rgb(1) & "00";
@@ -180,6 +188,7 @@ begin
     end if; -- rising_edge(clk)
     
     -- generate sprite data address
+    ctl_o.a(15) <= '0'; -- unused
     ctl_o.a(14 downto 5) <= code;
     ctl_o.a(4) <= '0'; -- dual-port RAM
     if reg_i.yflip = '0' then

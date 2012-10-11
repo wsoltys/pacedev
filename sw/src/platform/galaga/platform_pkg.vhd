@@ -31,12 +31,10 @@ package platform_pkg is
 	-- Platform-specific constants (optional)
 	--
 
-  constant GALAGA_SOURCE_ROOT_DIR       : string := "../../../../../src/platform/galaga/";
-  constant VARIANT_SOURCE_ROOT_DIR      : string := GALAGA_SOURCE_ROOT_DIR & 
-                                                    PLATFORM_VARIANT & "/";
-  constant VARIANT_ROM_DIR              : string := VARIANT_SOURCE_ROOT_DIR & 
-                                                    "roms/";
-  
+  constant PLATFORM                     : string := "galaga";
+  constant PLATFORM_SRC_DIR             : string := "../../../../../src/platform/" & PLATFORM & "/";
+  constant PLATFORM_VARIANT_SRC_DIR     : string := PLATFORM_SRC_DIR & PLATFORM_VARIANT & "/";
+ 
 	type pal_entry_typ is array (0 to 2) of std_logic_vector(5 downto 0);
 	type pal_typ is array (0 to 127) of pal_entry_typ;
 

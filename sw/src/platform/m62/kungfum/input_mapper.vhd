@@ -116,7 +116,7 @@ begin
       inputs(1).d <= jamma_v(1).d and not keybd_v(1).d;
       inputs(2).d <= jamma_v(2).d and not keybd_v(2).d;
       inputs(3).d <= "11111111";  -- DSW1
-      inputs(4).d <= "11110100";  -- DSW2
+      inputs(4).d <= "11110101";  -- DSW2
       -- activate service which is only checked on startup
       --inputs(4).d <= "01111100";
       inputs(NUM_INPUTS-1).d <= keybd_v(NUM_INPUTS-1).d;
