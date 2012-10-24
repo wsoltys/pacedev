@@ -73,8 +73,7 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic_vector(0 to 3);
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -197,8 +196,8 @@ architecture SYN of PACE is
   signal gnd8_s           : std_logic_vector( 7 downto 0);
 
 	-- changes for PACE
-  alias ext_clk_i             : std_logic is clk_i(0);
-	alias clk_20M							  : std_logic is clk_i(1);
+  alias ext_clk_i             : std_logic is clkrst_i.clk(0);
+	alias clk_20M							  : std_logic is clkrst_i.clk(1);
   signal clk_cnt_q            : unsigned(1 downto 0);
 	signal clk_en_5m37_q			  : std_logic;
 	
@@ -257,7 +256,7 @@ begin
   vdd8_s <= (others => '1');
   gnd8_s <= (others => '0');
 
-	reset_n_s <= not reset_i(0);
+	reset_n_s <= not clkrst_i.rst(0);
 
   -----------------------------------------------------------------------------
   -- The PLL
@@ -288,9 +287,9 @@ begin
   -- Purpose:
   --   Generates the clock enable for the RGB pixel clock.
   --
-  rgb_clk: process (clk_11m_s, reset_i(0))
+  rgb_clk: process (clk_11m_s, clkrst_i.rst(0))
   begin
-    if reset_i(0) = '1' then
+    if clkrst_i.rst(0) = '1' then
       cnt_rgb_q    <= "10";
       clk_en_rgb_q <= '0';
 
@@ -311,9 +310,9 @@ begin
   -- Purpose:
   --   Generates the clock enable for the VGA pixel clock.
   --
-  vga_clk_p: process (clk_22m_s, reset_i(0))
+  vga_clk_p: process (clk_22m_s, clkrst_i.rst(0))
   begin
-    if reset_i(0) = '1' then
+    if clkrst_i.rst(0) = '1' then
       cnt_vga_q    <= "10";
       clk_en_vga_q <= '0';
 
@@ -433,7 +432,7 @@ begin
 	port map
 	(
     clk       	=> clk_20M,
-    reset     	=> reset_i(1),
+    reset     	=> clkrst_i.rst(1),
 
 		-- inputs from PS/2 port
     ps2_clk  		=> ps2_kclk,
