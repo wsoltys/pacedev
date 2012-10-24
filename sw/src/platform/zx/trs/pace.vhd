@@ -15,8 +15,7 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic_vector(0 to 3);
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -62,8 +61,8 @@ end entity PACE;
 
 architecture SYN of PACE is
 
-	alias clk_10M4832				: std_logic is clk_i(0);
-	alias clk_20mhz_s				: std_logic is clk_i(1);
+	alias clk_10M4832				: std_logic is clkrst_i.clk(0);
+	alias clk_20mhz_s				: std_logic is clkrst_i.clk(1);
 	
 	signal reset_n					: std_logic;
 	signal address					: std_logic_vector(16 downto 0);
@@ -97,7 +96,7 @@ architecture SYN of PACE is
 	
 begin
 
-	reset_n <= not reset_i(0);
+	reset_n <= not clkrst_i.rst(0);
 
 	-- external memory logic
 	sram_o.a <= std_logic_vector(resize(unsigned(address), sram_o.a'length));
@@ -111,7 +110,7 @@ begin
 					sram_i.d(data'range) when (ram_cs_n = '0' and oe_n = '0') else 
 					(others => 'Z');
 
-	video_o.clk <= clk_i(1);	-- by convention
+	video_o.clk <= clkrst_i.clk(1);	-- by convention
 
 	assert (not (TRS_LEVEL1_INTERNAL and TRS_EXTERNAL_ROM_RAM))
 		report "Cannot choose both internal and external configurations"

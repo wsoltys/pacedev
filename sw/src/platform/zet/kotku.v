@@ -301,8 +301,8 @@ module kotku (
   ems #(
     .IO_BASE_ADDR (16'h0208)
   ) ems_card (
-    .wb_clk (clk),
-    .wb_rst (rst),
+    .wb_clk_i (clk),
+    .wb_rst_i (rst),
     
     .wb_adr_i (adr[15:1]),
     .wb_dat_i (dat_o),

@@ -62,8 +62,7 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic_vector(0 to 3);
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -157,8 +156,8 @@ architecture SYN of PACE is
   signal audio_pwm        : std_logic;
 
 	-- aliases for PACE
-	alias I_RESET						: std_logic is reset_i(0);
-	alias I_CLK_REF					: std_logic is clk_i(0);
+	alias I_RESET						: std_logic is clkrst_i.rst(0);
+	alias I_CLK_REF					: std_logic is clkrst_i.clk(0);
 	alias O_VIDEO_R					: std_logic_vector(3 downto 0) is video_o.rgb.r(9 downto 6);
 	alias O_VIDEO_G					: std_logic_vector(3 downto 0) is video_o.rgb.g(9 downto 6);
 	alias O_VIDEO_B					: std_logic_vector(3 downto 0) is video_o.rgb.b(9 downto 6);
@@ -220,7 +219,7 @@ begin
       CLK                   => clk_s
       );
 
-	video_o.clk <= clk_i(1);	-- by convention
+	video_o.clk <= clkrst_i.clk(1);	-- by convention
   
   u_scan_doubler : entity work.SCRAMBLE_DBLSCAN
     port map (
@@ -350,8 +349,8 @@ begin
       )
       port map
       (
-        clk     	      => clk_i(0),
-        reset   	      => reset_i(0),
+        clk     	      => clkrst_i.clk(0),
+        reset   	      => clkrst_i.rst(0),
         ps2clk  	      => inputs_i.ps2_kclk,
         ps2data 	      => inputs_i.ps2_kdat,
         jamma			      => inputs_i.jamma_n,
