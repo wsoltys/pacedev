@@ -27,7 +27,7 @@ end entity pace_video_mixer;
   
 architecture SYN of pace_video_mixer is
 
-  alias a2var					: std_logic_vector(15 downto 0) is graphics_i.bit16_1;
+  alias a2var					: std_logic_vector(15 downto 0) is graphics_i.bit16(0);
 	alias gfxmode				: std_logic_vector(3 downto 0) is a2var(11 downto 8);
 					
 begin

@@ -19,8 +19,8 @@ entity inputmapper is
 
     -- inputs from keyboard controller
     reset     : in std_logic;
-    press     : in std_logic;
-    release   : in std_logic;
+    key_down  : in std_logic;
+    key_up    : in std_logic;
     data      : in std_logic_vector(7 downto 0);
     -- inputs from jamma connector
     jamma			: in from_JAMMA_t;
@@ -46,30 +46,30 @@ begin
       inputs(1).d <= (others => '1');
       inputs(2).d <= (others => '1');
     elsif rising_edge (clk) then
-      if (press or release) = '1' then
+      if (key_down or key_up) = '1' then
         case data(7 downto 0) is
           -- IN0
           -- bit6 is vblank
           when SCANCODE_S =>
-               inputs(0).d(5) <= release;
+               inputs(0).d(5) <= key_up;
 
           -- IN1
           when SCANCODE_5 =>
-               inputs(1).d(7) <= release;
+               inputs(1).d(7) <= key_up;
           when SCANCODE_6 =>
-               inputs(1).d(6) <= release;
+               inputs(1).d(6) <= key_up;
           when SCANCODE_7 =>
-               inputs(1).d(5) <= release;
+               inputs(1).d(5) <= key_up;
           when SCANCODE_LCTRL =>
-               inputs(1).d(2) <= release;
+               inputs(1).d(2) <= key_up;
           when SCANCODE_2 =>
-               inputs(1).d(1) <= release;
+               inputs(1).d(1) <= key_up;
           when SCANCODE_1 =>
-               inputs(1).d(0) <= release;
+               inputs(1).d(0) <= key_up;
 
           when others =>
         end case;
-      end if; -- press or release
+      end if; -- key_down or key_up
       if (reset = '1') then
         inputs(0).d <= "10101111";
         inputs(1).d <= (others => '1');

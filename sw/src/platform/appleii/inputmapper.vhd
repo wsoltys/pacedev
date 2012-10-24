@@ -19,8 +19,8 @@ entity inputmapper is
 
 	    -- inputs from keyboard controller
 	    reset     : in std_logic;
-	    press     : in std_logic;
-	    release   : in std_logic;
+	    key_down  : in std_logic;
+	    key_up    : in std_logic;
 	    data      : in std_logic_vector(7 downto 0);
 			-- inputs from jamma interface
 			jamma			: in from_JAMMA_t;
@@ -38,7 +38,7 @@ architecture SYN of inputmapper is
 		
 begin
 
-  latchInputs: process (clk, rst_n, reset, press, release, data)
+  latchInputs: process (clk, rst_n, reset, key_down, key_up, data)
 
     variable key_waiting 	: std_logic;
 		variable key_code			: std_logic_vector(7 downto 0);
@@ -71,14 +71,14 @@ begin
       end if;
 
       -- handle a key make/break
-      if (press or release) = '1' then
+      if (key_down or key_up) = '1' then
       	if data = X"12" or data = X"59" then
-        	shift_r := not release;
+        	shift_r := not key_up;
         elsif data = X"14" then
-        	ctrl_r := not release;
+        	ctrl_r := not key_up;
         else
-          -- handle a keypress (make)
-          if press = '1' then
+          -- handle a keykey_down (make)
+          if key_down = '1' then
 
           	-- normal codes
            	if shift_r = '0' and ctrl_r = '0' then
@@ -269,9 +269,9 @@ begin
             
             key_waiting := '1';
 
-          end if; -- press = '1'
+          end if; -- key_down = '1'
         end if;   -- control & shift
-      end if;     -- (press or release) = '1'
+      end if;     -- (key_down or key_up) = '1'
 
     end if;       -- reset, rising_edge(clk)
 
