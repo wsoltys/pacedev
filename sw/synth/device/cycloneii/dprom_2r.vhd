@@ -8,10 +8,10 @@ ENTITY dprom_2r IS
 	GENERIC
 	(
 		INIT_FILE			: string := "";
-		NUMWORDS_A		: natural;
+		--NUMWORDS_A		: natural;
 		WIDTHAD_A			: natural;
 		WIDTH_A				: natural := 8;
-		NUMWORDS_B		: natural;
+		--NUMWORDS_B		: natural;
 		WIDTHAD_B			: natural;
 		WIDTH_B				: natural := 8;
     outdata_reg_a : string := "UNREGISTERED";
@@ -103,8 +103,8 @@ BEGIN
 		init_file_layout => "PORT_A",
 		intended_device_family => "Cyclone II",
 		lpm_type => "altsyncram",
-		numwords_a => NUMWORDS_A,
-		numwords_b => NUMWORDS_B,
+		numwords_a => 2**WIDTHAD_A,
+		numwords_b => 2**WIDTHAD_B,
 		operation_mode => "BIDIR_DUAL_PORT",
 		outdata_aclr_a => "NONE",
 		outdata_aclr_b => "NONE",

@@ -119,9 +119,7 @@ architecture SYN of target_top is
 	signal async_reset	  : std_logic := '0';
 	signal async_reset_n	: std_logic := '1';
 
-	signal clk_i			    : std_logic_vector(0 to 3);
-  signal reset_i     	  : std_logic_vector(0 to 3);
-
+	signal clkrst_i			  : from_CLKRST_t;
   signal buttons_i      : from_BUTTONS_t;
   signal switches_i     : from_SWITCHES_t;
   signal leds_o         : to_LEDS_t;
@@ -177,8 +175,8 @@ begin
       port map
       (
         inclk0		=> clock_50,
-        c0		    => clk_i(1),    -- 25MHz
-        c1		    => clk_i(0),    -- 100MHz
+        c0		    => clkrst_i.clk(1),    -- 25MHz
+        c1		    => clkrst_i.clk(0),    -- 100MHz
         c2		    => dram_clk_s
       );
       
@@ -199,8 +197,8 @@ begin
       port map
       (
         inclk0  => clock_27,
-        c0      => clk_i(2),
-        c1      => clk_i(3)
+        c0      => clkrst_i.clk(2),
+        c1      => clkrst_i.clk(3)
       );
 
   end block BLK_CLOCKING;
@@ -225,15 +223,15 @@ begin
 	
   GEN_RESETS : for i in 0 to 3 generate
 
-    process (clk_i(i), async_reset)
+    process (clkrst_i.clk(i), async_reset)
       variable rst_r : std_logic_vector(2 downto 0) := (others => '0');
     begin
       if async_reset = '1' then
         rst_r := (others => '1');
-      elsif rising_edge(clk_i(i)) then
+      elsif rising_edge(clkrst_i.clk(i)) then
         rst_r := rst_r(rst_r'left-1 downto 0) & '0';
       end if;
-      reset_i(i) <= rst_r(rst_r'left);
+      clkrst_i.rst(i) <= rst_r(rst_r'left);
     end process;
 
   end generate GEN_RESETS;
@@ -294,7 +292,7 @@ begin
   			clk 				=> clock_50,
 				reset 			=> async_reset,
 				--oe 					=> gc_oe,
-				d 					=> gpio_maple(25),
+				d_i 				=> gpio_maple(25),
 				joystate 		=> gcj
 			);
 
@@ -356,8 +354,8 @@ begin
     fl_rst_n <= '1';
 
     GEN_FLASH : if PACE_HAS_FLASH generate
-      flash_i.d <= fl_dq;
-      fl_dq <=  flash_o.d when (flash_o.cs = '1' and flash_o.we = '1' and flash_o.oe = '0') else 
+      flash_i.d <= std_logic_vector(RESIZE(unsigned(fl_dq),flash_i.d'length));
+      fl_dq <=  flash_o.d(fl_dq'range) when (flash_o.cs = '1' and flash_o.we = '1' and flash_o.oe = '0') else 
                 (others => 'Z');
       fl_addr <= flash_o.a;
       fl_we_n <= not flash_o.we;
@@ -473,16 +471,16 @@ begin
   BLK_VIDEO : block
   begin
 
-		video_i.clk <= clk_i(1);	-- by convention
-		process (clk_i(1), reset_i(1))
+		video_i.clk <= clkrst_i.clk(1);	-- by convention
+		process (clkrst_i.clk(1), clkrst_i.rst(1))
     begin
-      if reset_i(1) = '1' then
+      if clkrst_i.rst(1) = '1' then
         video_i.clk_ena <= '0';
-      elsif rising_edge(clk_i(1)) then
+      elsif rising_edge(clkrst_i.clk(1)) then
         video_i.clk_ena <= not video_i.clk_ena;
       end if;
     end process;
-    video_i.reset <= reset_i(1);
+    video_i.reset <= clkrst_i.rst(1);
     
     vga_clk <= video_o.clk;
     vga_r <= video_o.rgb.r(video_o.rgb.r'left downto video_o.rgb.r'left-3);
@@ -496,7 +494,7 @@ begin
   end block BLK_VIDEO;
 
   BLK_AUDIO : block
-    alias aud_clk    		: std_logic is clk_i(2);
+    alias aud_clk    		: std_logic is clkrst_i.clk(2);
     signal aud_data_l  	: std_logic_vector(audio_o.ldata'range);
     signal aud_data_r  	: std_logic_vector(audio_o.rdata'range);
   begin
@@ -632,8 +630,7 @@ begin
     port map
     (
     	-- clocks and resets
-	  	clk_i							=> clk_i,
-      reset_i          	=> reset_i,
+	  	clkrst_i					=> clkrst_i,
 
       -- misc inputs and outputs
       buttons_i         => buttons_i,
@@ -727,7 +724,7 @@ begin
       );
 
     lcm_clk <= video_o.clk;
-    lcm_grst <= not reset_i(1);
+    lcm_grst <= not clkrst_i.rst(1);
     lcm_dclk	<=	not lcm_clk;
     lcm_shdb	<=	'1';
     lcm_hsync <= video_o.hsync;

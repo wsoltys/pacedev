@@ -19,8 +19,8 @@ entity inputmapper is
 
     -- inputs from keyboard controller
     reset     : in std_logic;
-    press     : in std_logic;
-    release   : in std_logic;
+    key_down  : in std_logic;
+    key_up    : in std_logic;
     data      : in std_logic_vector(7 downto 0);
     -- inputs from jamma connector
     jamma			: in from_JAMMA_t;
@@ -80,66 +80,66 @@ begin
 					jamma_v(3).d(3) := jamma.p(2).button(5);
 					
 					-- handle PS/2 inputs
-          if (press or release) = '1' then
+          if (key_down or key_up) = '1' then
           	case data(7 downto 0) is
             
             	-- IN0 - REG_P1CNT (ACTIVE LOW)
               when SCANCODE_UP =>
-              	keybd_v(0).d(0) := release;
+              	keybd_v(0).d(0) := key_up;
               when SCANCODE_DOWN =>
-                keybd_v(0).d(1) := release;
+                keybd_v(0).d(1) := key_up;
               when SCANCODE_LEFT =>
-                keybd_v(0).d(2) := release;
+                keybd_v(0).d(2) := key_up;
               when SCANCODE_RIGHT =>
-                keybd_v(0).d(3) := release;
+                keybd_v(0).d(3) := key_up;
               when SCANCODE_LCTRL =>
-                keybd_v(0).d(4) := release;
+                keybd_v(0).d(4) := key_up;
               when SCANCODE_LALT =>
-                keybd_v(0).d(5) := release;
+                keybd_v(0).d(5) := key_up;
               when SCANCODE_SPACE =>
-                keybd_v(0).d(6) := release;
+                keybd_v(0).d(6) := key_up;
               when SCANCODE_LSHIFT =>
-                keybd_v(0).d(7) := release;
+                keybd_v(0).d(7) := key_up;
                 
               -- IN1 - REG_P2CNT (ACTIVE LOW)
               when SCANCODE_R =>
-              	keybd_v(1).d(0) := release;
+              	keybd_v(1).d(0) := key_up;
               when SCANCODE_F =>
-                keybd_v(1).d(1) := release;
+                keybd_v(1).d(1) := key_up;
               when SCANCODE_D =>
-                keybd_v(1).d(2) := release;
+                keybd_v(1).d(2) := key_up;
               when SCANCODE_G =>
-                keybd_v(1).d(3) := release;
+                keybd_v(1).d(3) := key_up;
               when SCANCODE_A =>
-                keybd_v(1).d(4) := release;
+                keybd_v(1).d(4) := key_up;
               when SCANCODE_S =>
-                keybd_v(1).d(5) := release;
+                keybd_v(1).d(5) := key_up;
               when SCANCODE_Q =>
-                keybd_v(1).d(6) := release;
+                keybd_v(1).d(6) := key_up;
               when SCANCODE_W =>
-                keybd_v(1).d(7) := release;
+                keybd_v(1).d(7) := key_up;
                 
               -- IN2 - SYSSTAT_A (ACTIVE LOW)
               when SCANCODE_5 =>
-                keybd_v(2).d(0) := release;
+                keybd_v(2).d(0) := key_up;
               when SCANCODE_6 =>
-                keybd_v(2).d(1) := release;
+                keybd_v(2).d(1) := key_up;
               when SCANCODE_9 =>
-                keybd_v(2).d(2) := release;
+                keybd_v(2).d(2) := key_up;
 
               -- IN3 - SYSSTAT_B (ACTIVE LOW)
               when SCANCODE_1 =>
-                keybd_v(3).d(0) := release;
+                keybd_v(3).d(0) := key_up;
               when SCANCODE_Z =>
-                keybd_v(3).d(1) := release;
+                keybd_v(3).d(1) := key_up;
               when SCANCODE_2 =>
-                keybd_v(3).d(2) := release;
+                keybd_v(3).d(2) := key_up;
               when SCANCODE_E =>
-                keybd_v(3).d(3) := release;
+                keybd_v(3).d(3) := key_up;
 
               when others =>
             end case;
-          end if; -- press or release
+          end if; -- key_down or key_up
 
 					-- this is PS/2 reset only
           if (reset = '1') then

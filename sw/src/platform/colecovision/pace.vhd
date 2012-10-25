@@ -81,8 +81,7 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic_vector(0 to 3);
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -221,8 +220,8 @@ architecture SYN of PACE is
   signal gnd_8_s             : std_logic_vector( 7 downto 0);
 
 	-- changes for PACE
-	alias clk_20M							  : std_logic is clk_i(1);
-  alias ext_clk_i             : std_logic is clk_i(0);
+	alias clk_20M							  : std_logic is clkrst_i.clk(1);
+  alias ext_clk_i             : std_logic is clkrst_i.clk(0);
   signal clk_cnt_q            : unsigned(1 downto 0);
 	signal clk_en_5m37_q			  : std_logic;
 	alias clk_21m3_s					  : std_logic is clk_s;
@@ -278,7 +277,7 @@ begin
 
   gnd_8_s   <= (others => '0');
 
-	reset_n_s <= not reset_i(0);
+	reset_n_s <= not clkrst_i.rst(0);
 
   -----------------------------------------------------------------------------
   -- The PLL	24MHz -> 21.333MHz
@@ -508,7 +507,7 @@ begin
 	port map
 	(
     clk       	=> clk_20M,
-    reset     	=> reset_i(1),
+    reset     	=> clkrst_i.rst(1),
 
 		-- inputs from PS/2 port
     ps2_clk  		=> ps2_kclk,

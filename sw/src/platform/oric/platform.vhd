@@ -165,7 +165,7 @@ begin
 	
 	-- use spritedata to expose the softswitches to the graphics core	
 	graphics_o.pal <= (others => (others => '0'));
-	graphics_o.bit8_1 <= (others => '0');
+	graphics_o.bit8(0) <= (others => '0');
 	--graphics_o.bit16_1 <= std_logic_vector(resize(unsigned(a2var), graphics_o.bit16_1'length));
 
   -- SRAM signals (may or may not be used)

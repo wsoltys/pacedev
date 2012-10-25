@@ -176,9 +176,9 @@ begin
 		generic map
 		(
 			init_file		=> "../../../../src/platform/galaxian/roms/gfxrom.hex",
-			numwords_a	=> 4096,
+			--numwords_a	=> 4096,
 			widthad_a		=> 12,
-			numwords_b	=> 1024,
+			--numwords_b	=> 1024,
 			widthad_b		=> 10,
 			width_b			=> 32
 		)

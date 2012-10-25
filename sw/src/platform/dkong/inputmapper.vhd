@@ -19,8 +19,8 @@ entity inputmapper is
 
     -- inputs from keyboard controller
     reset     : in std_logic;
-    press     : in std_logic;
-    release   : in std_logic;
+    key_down  : in std_logic;
+    key_up    : in std_logic;
     data      : in std_logic_vector(7 downto 0);
     -- inputs from jamma connector
     jamma			: in from_JAMMA_t;
@@ -68,38 +68,38 @@ begin
 					jamma_v(2).d(2) := jamma.coin(1);
 
           -- handle PS2 inputs
-          if (press or release) = '1' then
+          if (key_down or key_up) = '1' then
           	case data(7 downto 0) is
             	-- Player 1, 2
               when SCANCODE_UP =>
-            		keybd_v(0).d(0) := release;
-            		keybd_v(1).d(0) := release;
+            		keybd_v(0).d(0) := key_up;
+            		keybd_v(1).d(0) := key_up;
               when SCANCODE_DOWN =>
-                keybd_v(0).d(1) := release;
-                keybd_v(1).d(1) := release;
+                keybd_v(0).d(1) := key_up;
+                keybd_v(1).d(1) := key_up;
               when SCANCODE_LEFT =>
-                keybd_v(0).d(2) := release;
-                keybd_v(1).d(2) := release;
+                keybd_v(0).d(2) := key_up;
+                keybd_v(1).d(2) := key_up;
               when SCANCODE_RIGHT =>
-                keybd_v(0).d(3) := release;
-                keybd_v(1).d(3) := release;
+                keybd_v(0).d(3) := key_up;
+                keybd_v(1).d(3) := key_up;
               when SCANCODE_LCTRL =>
-                keybd_v(0).d(4) := release;
-                keybd_v(1).d(4) := release;
+                keybd_v(0).d(4) := key_up;
+                keybd_v(1).d(4) := key_up;
 							-- other
               when SCANCODE_1 =>
-                keybd_v(2).d(0) := release;
+                keybd_v(2).d(0) := key_up;
               when SCANCODE_2 =>
-                keybd_v(2).d(1) := release;
+                keybd_v(2).d(1) := key_up;
               when SCANCODE_5 =>
-                keybd_v(2).d(2) := release;
+                keybd_v(2).d(2) := key_up;
               -- special keys (active high)
               when SCANCODE_F3 =>
-                keybd_v(3).d(0) := press;
+                keybd_v(3).d(0) := key_down;
               when others =>
 								null;
             end case;
-          end if; -- press or release
+          end if; -- key_down or key_up
 
 					-- this is a PS/2 reset only
           if (reset = '1') then

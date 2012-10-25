@@ -33,8 +33,7 @@ entity platform is
   port
   (
     -- clocking and reset
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -54,11 +53,11 @@ entity platform is
     
     -- graphics
     
-    bitmap_i        : in from_BITMAP_CTL_t;
-    bitmap_o        : out to_BITMAP_CTL_t;
+    bitmap_i        : in from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
+    bitmap_o        : out to_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
     
-    tilemap_i       : in from_TILEMAP_CTL_t;
-    tilemap_o       : out to_TILEMAP_CTL_t;
+    tilemap_i       : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
+    tilemap_o       : out to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
 
     sprite_reg_o    : out to_SPRITE_REG_t;
     sprite_i        : in from_SPRITE_CTL_t;
@@ -101,9 +100,12 @@ architecture SYN of platform is
   -- build options
   constant BUILD_INSYS_SPRITE_RAM   : boolean := false;
   
-	alias clk_25M           : std_logic is clk_i(1);
-	alias clk_video         : std_logic is clk_i(1);
-	alias clk_27M           : std_logic is clk_i(3);
+	alias clk_25M           : std_logic is clkrst_i.clk(1);
+  alias rst_25M           : std_logic is clkrst_i.rst(1);
+	alias clk_video         : std_logic is clkrst_i.clk(1);
+  alias rst_video         : std_logic is clkrst_i.rst(1);
+	alias clk_27M           : std_logic is clkrst_i.clk(3);
+  alias rst_27M           : std_logic is clkrst_i.rst(3);
 	signal clk_12M_ena      : std_logic := '0';
 	
 	signal reset_neogeo_n   : std_logic := '1';
@@ -197,10 +199,10 @@ begin
   -- clocking
   --
   
-  process (clk_25M, reset_i)
+  process (clk_25M, rst_25M)
     variable count : std_logic_vector(2 downto 0) := (others => '0');
   begin
-    if reset_i = '1' then
+    if rst_25M = '1' then
       count := (others => '0');
     elsif rising_edge(clk_25M) then
       clk_12M_ena <= '0'; -- default
@@ -347,7 +349,7 @@ begin
       if rising_edge(clk_video) then
         tile_a_rr <= tile_a_r;
         tile_a_r(17) <= reg_fix;
-        tile_a_r(16 downto 0) <= tilemap_i.tile_a(16 downto 0);
+        tile_a_r(16 downto 0) <= tilemap_i(1).tile_a(16 downto 0);
       end if;
     end process;
     
@@ -359,7 +361,8 @@ begin
     flash_o.we <= '0';
 
     bootdata_d_o <= flash_i.d(7 downto 0) & flash_i.d(7 downto 0);
-    tilemap_o.tile_d <= flash_i.d(7 downto 0);
+    tilemap_o(1).tile_d(tilemap_o(1).tile_d'left downto 8) <= (others => '0');
+    tilemap_o(1).tile_d(7 downto 0) <= flash_i.d(7 downto 0);
 
   end block BLK_FLASH;
   
@@ -385,7 +388,7 @@ begin
   begin
 
     sdram_o.clk <= clk_25M;
-    sdram_o.rst <= reset_i;
+    sdram_o.rst <= rst_25M;
     
     -- map 128KB BIOS, 64KiB RAM, 64KiB SRAM, 4KiB MEMCARD into 1st MiB
     -- map 1MB ROM1 (P1) into 2nd MiB
@@ -402,10 +405,10 @@ begin
     sdram_o.sel <= "00" & not (udsn & ldsn);
     sdram_o.we <= not rwn;
 
-    process (clk_25M, reset_i)
+    process (clk_25M, rst_25M)
       variable cyc_r : std_logic := '0';
     begin
-      if reset_i = '1' then
+      if rst_25M = '1' then
         cyc_r := '0';
       elsif rising_edge(clk_25M) then
         -- assert WB cyc,stb on rising edge of 68k cycle
@@ -460,10 +463,10 @@ begin
   --
 
   -- magic register
-  process (clk_25M, reset_i)
+  process (clk_25M, rst_25M)
     variable ng_reset_cnt : integer range 0 to 4 := 0;
   begin
-    if reset_i = '1' then
+    if rst_25M = '1' then
       reset_neogeo_n <= '0';
       ng_reset_cnt := 0;
       boot_f <= '1';
@@ -493,9 +496,9 @@ begin
   end process;
   
   -- $3A hardware registers process
-  process (clk_25M, reset_i)
+  process (clk_25M, rst_25M)
   begin
-    if reset_i = '1' then
+    if rst_25M = '1' then
       reg_swp <= '0'; -- bios
       reg_fix <= '0'; -- brd
     elsif rising_edge(clk_25M) then
@@ -517,11 +520,11 @@ begin
   --
   -- interrupts
   --
-  process (clk_25M, reset_i)
+  process (clk_25M, rst_25M)
     variable vblank_r : std_logic := '0';
     variable irq_r    : std_logic_vector(1 to 3) := (others => '0');
   begin
-    if reset_i = '1' then
+    if rst_25M = '1' then
       vblank_r := '0';
     elsif rising_edge(clk_25M) then
       if wr_p = '1' then
@@ -592,7 +595,7 @@ begin
   begin
   
     -- vram process
-    process (clk_25M, reset_i)
+    process (clk_25M, reset_neogeo_n)
       variable rwn_r    : std_logic := '0';
       variable vram_mod : std_logic_vector(15 downto 0) := (others => '0');
     begin
@@ -878,7 +881,7 @@ begin
           q_b					=> vram_fix1_d_o,
 
           clock_a			=> clk_video,
-          address_a		=> tilemap_i.map_a(9 downto 0),
+          address_a		=> tilemap_i(1).map_a(9 downto 0),
           wren_a			=> '0',
           data_a			=> (others => 'X'),
           q_a					=> map1_d_o
@@ -903,14 +906,14 @@ begin
           q_b					=> vram_fix2_d_o,
 
           clock_a			=> clk_video,
-          address_a		=> tilemap_i.map_a(7 downto 0),
+          address_a		=> tilemap_i(1).map_a(7 downto 0),
           wren_a			=> '0',
           data_a			=> (others => 'X'),
           q_a					=> map2_d_o
         );
 
-      tilemap_o.map_d <=  map1_d_o(15 downto 0) when tilemap_i.map_a(10) = '0' else 
-                          map2_d_o(15 downto 0);
+      tilemap_o(1).map_d <= map1_d_o(15 downto 0) when tilemap_i(1).map_a(10) = '0' else 
+                            map2_d_o(15 downto 0);
 
     end block BLK_FIXED;
 
@@ -927,12 +930,12 @@ begin
       q_b		      => palram_d_o,
 
       clock_a		  => clk_video,
-      address_a		=> tilemap_i.attr_a(3 downto 0),
+      address_a		=> tilemap_i(1).attr_a(3 downto 0),
       data_a		  => (others => '0'),
       wren_a		  => '0',
       q_a		      => palette
     );
-  tilemap_o.attr_d <= (others => '0');
+  tilemap_o(1).attr_d <= (others => '0');
   
   GEN_PAL_DATA : for i in 0 to 15 generate
     graphics_o.pal(i) <= palette(i*16+15 downto i*16);
@@ -959,7 +962,7 @@ begin
     (
       clk_i             => clk_25M,
       clk_ena           => '1',
-      reset             => reset_i,
+      reset             => rst_25M,
       
       data_in           => d_o(0),
       clk               => d_o(1),
@@ -986,11 +989,10 @@ begin
   -- unused outputs
   --
   
-  bitmap_o <= NULL_TO_BITMAP_CTL;
   sprite_reg_o <= NULL_TO_SPRITE_REG;
   sprite_o <= NULL_TO_SPRITE_CTL;
-  graphics_o.bit8_1 <= (others => '0');
-  graphics_o.bit16_1 <= (others => '0');
+  graphics_o.bit8(0) <= (others => '0');
+  graphics_o.bit16(0) <= (others => '0');
   osd_o <= NULL_TO_OSD;
   snd_o <= NULL_TO_SOUND;
   spi_o <= NULL_TO_SPI;

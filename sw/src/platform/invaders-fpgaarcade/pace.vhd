@@ -73,8 +73,7 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic_vector(0 to 3);
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -173,9 +172,9 @@ architecture SYN of PACE is
 	signal AudioPWM        : std_logic;
 
 	-- for PACE compatibility
-	alias I_RESET					: std_logic is reset_i(0);
-	alias Clk_X1					: std_logic is clk_i(0);	-- 10MHz
-	alias Clk_X2					: std_logic is clk_i(1);	-- 20MHz
+	alias I_RESET					: std_logic is clkrst_i.rst(0);
+	alias Clk_X1					: std_logic is clkrst_i.clk(0);	-- 10MHz
+	alias Clk_X2					: std_logic is clkrst_i.clk(1);	-- 20MHz
 	alias I_PS2_CLK				: std_logic is inputs_i.ps2_kclk;
 	alias I_PS2_DATA			: std_logic is inputs_i.ps2_kdat;
 
@@ -499,7 +498,7 @@ begin
 
 	end block BLOCK_MAIN;
 	
-	video_o.clk <= clk_i(1); -- by convention
+	video_o.clk <= clkrst_i.clk(1); -- by convention
 	
 	-- hook up the video to the output
 	GEN_VIDEO : for i in 9 downto 0 generate
