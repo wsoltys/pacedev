@@ -25,7 +25,7 @@
 
 # project-wide assignments
 # ========================
-set_global_assignment -name LAST_QUARTUS_VERSION "9.1 SP2"
+set_global_assignment -name LAST_QUARTUS_VERSION "10.1 SP1"
 
 # pin & location assignments
 # ==========================
@@ -619,17 +619,22 @@ set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[42] -t
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[43] -to gpio_1[6] -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[44] -to gpio_1[7] -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=58995" -section_id auto_signaltap_0
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
+set_global_assignment -name VHDL_SHOW_LMF_MAPPING_MESSAGES OFF
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sdram_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/tilemapctl_e.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/bitmapctl_e.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/de1/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/tutankhm/platform_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/tutankhm/platform_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/tutankhm/tutankham/platform_variant_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram_1r1w.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/sprom.vhd
@@ -640,6 +645,7 @@ set_global_assignment -name VHDL_FILE ../../../../src/pace/clk_div.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/cpu09/cpu09.vhd
+set_global_assignment -name VHDL_FILE "../../../../src/component/cpu/cpu09/konami-1.vhd"
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/tutankhm/bitmapctl.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_mixer.vhd

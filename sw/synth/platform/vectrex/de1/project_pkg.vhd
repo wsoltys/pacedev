@@ -42,6 +42,8 @@ package project_pkg is
   constant PACE_OSD_YPOS                    : natural := 0;
 
 	-- Vectrex-specific constants
+
+  constant VECTREX_USE_REAL_6809            : boolean := false;
 			
 	-- derived
 	
