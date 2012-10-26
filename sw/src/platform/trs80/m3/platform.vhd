@@ -357,7 +357,7 @@ begin
       end if;
     end if;
   end process;
-  graphics_o.bit8_1(7 downto 2) <= port_ec(7 downto 2);
+  graphics_o.bit8(0)(7 downto 2) <= port_ec(7 downto 2);
 
   assert false
     report  "CLK0_FREQ_MHz=" & integer'image(CLK0_FREQ_MHz) &
@@ -469,14 +469,14 @@ begin
           q_a					=> bitmap_o.d(7 downto 0)
         );
 
-      graphics_o.bit8_1(1 downto 0) <= '0' & mode_r(6);
+      graphics_o.bit8(0)(1 downto 0) <= '0' & mode_r(6);
 
     end block BLK_HIRES;
   end generate GEN_HIRES;
     
   GEN_NO_HIRES : if not TRS80_M3_HIRES_SUPPORT generate
     bitmap_o <= NULL_TO_BITMAP_CTL;
-    graphics_o.bit8_1(1 downto 0) <= "00";
+    graphics_o.bit8(0)(1 downto 0) <= "00";
   end generate GEN_NO_HIRES;
   
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE

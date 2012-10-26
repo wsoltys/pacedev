@@ -20,8 +20,7 @@ entity platform is
   port
   (
     -- clocking and reset
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -41,11 +40,11 @@ entity platform is
 
     -- graphics
     
-    bitmap_i        : in from_BITMAP_CTL_t;
-    bitmap_o        : out to_BITMAP_CTL_t;
+    bitmap_i        : in from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
+    bitmap_o        : out to_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
     
-    tilemap_i       : in from_TILEMAP_CTL_t;
-    tilemap_o       : out to_TILEMAP_CTL_t;
+    tilemap_i       : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
+    tilemap_o       : out to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
 
     sprite_reg_o    : out to_SPRITE_REG_t;
     sprite_i        : in from_SPRITE_CTL_t;
@@ -85,8 +84,8 @@ end platform;
 
 architecture SYN of platform is
 
-	alias clk_30M					: std_logic is clk_i(0);
-	alias clk_video       : std_logic is clk_i(1);
+	alias clk_30M					: std_logic is clkrst_i.clk(0);
+	alias clk_video       : std_logic is clkrst_i.clk(1);
 	signal cpu_reset			: std_logic;
 	
   -- uP signals  
@@ -141,7 +140,7 @@ architecture SYN of platform is
 	
 begin
 
-	cpu_reset <= reset_i or game_reset;
+	cpu_reset <= clkrst_i.rst(0) or game_reset;
 	
 	GEN_EXTERNAL_WRAM : if not PENGO_USE_INTERNAL_WRAM generate
 	
@@ -239,11 +238,10 @@ begin
 	sprite_reg_o.d <= up_datao;
 	sprite_reg_o.wr <= upmemwr and sprite_cs;
 	
-	tilemap_o.attr_d <= std_logic_vector(resize(unsigned(cram_data), tilemap_o.attr_d'length));
-	graphics_o.bit8_1 <= "000000" & palette_bank & clut_bank;
+	tilemap_o(1).attr_d <= std_logic_vector(resize(unsigned(cram_data), tilemap_o(1).attr_d'length));
+	graphics_o.bit8(0) <= "000000" & palette_bank & clut_bank;
 		
   -- unused outputs
-  bitmap_o <= NULL_TO_BITMAP_CTL;
   spi_o <= NULL_TO_SPI;
   ser_o <= NULL_TO_SERIAL;
 	leds_o <= (others => '0');
@@ -260,7 +258,7 @@ begin
 		port map
 		(
 			clk				=> clk_30M,
-			reset			=> reset_i,
+			reset			=> clkrst_i.rst(0),
 			clk_en		=> clk_3M_ena
 		);
 
@@ -324,7 +322,7 @@ begin
 			address_a		=> vram_addr,
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o.map_d(7 downto 0)
+			q_a					=> tilemap_o(1).map_d(7 downto 0)
 		);
 
 	vrammapper_inst : entity work.vramMapper
@@ -332,7 +330,7 @@ begin
 		(
 	    clk     => clk_video,
 
-	    inAddr  => tilemap_i.map_a(11 downto 0),
+	    inAddr  => tilemap_i(1).map_a(11 downto 0),
 	    outAddr => vram_addr
 		);
 
@@ -382,17 +380,18 @@ begin
 		(
 			clock									=> clk_video,
 			address(12)						=> gfx_bank,
-			address(11 downto 0)	=> tilemap_i.tile_a(11 downto 0),
-			q											=> tilemap_o.tile_d
+			address(11 downto 0)	=> tilemap_i(1).tile_a(11 downto 0),
+			q											=> tilemap_o(1).tile_d(7 downto 0)
 		);
-	
+	tilemap_o(1).tile_d(tilemap_o(1).tile_d'left downto 8) <= (others => '0');
+  
 	spriterom_inst : entity work.sprite_rom
 		port map
 		(
 			clock								=> clk_video,
 			address(10)					=> gfx_bank,
 			address(9 downto 0)	=> sprite_i.a(9 downto 0),
-			q										=> sprite_o.d
+			q										=> sprite_o.d(31 downto 0)
 		);
 	
   GEN_INTERNAL_WRAM : if PENGO_USE_INTERNAL_WRAM generate

@@ -14,8 +14,7 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic_vector(0 to 3);
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -61,7 +60,7 @@ end entity PACE;
 
 architecture SYN of PACE is
 
-	alias clk_50M						: std_logic is clk_i(0);
+	alias clk_50M						: std_logic is clkrst_i.clk(0);
 	
 	signal reset_n					: std_logic;
 
@@ -74,7 +73,7 @@ architecture SYN of PACE is
 
 begin
 
-	reset_n <= not reset_i(0);
+	reset_n <= not clkrst_i.rst(0);
 
   ps2_kclk <= inputs_i.ps2_kclk;
   ps2_kdat <= inputs_i.ps2_kdat;
@@ -89,7 +88,7 @@ begin
 
 	-- map inputs
 	
-	video_o.clk <= clk_i(1);	-- by convention
+	video_o.clk <= clkrst_i.clk(1);	-- by convention
 
 	system09_inst : entity work.My_System09
 	  port map

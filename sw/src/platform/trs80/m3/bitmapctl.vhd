@@ -43,8 +43,8 @@ architecture SYN of bitmapCtl_1 is
   alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
   alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
   
-  alias alt_char  : std_logic is graphics_i.bit8_1(3);
-  alias dbl_width : std_logic is graphics_i.bit8_1(2);
+  alias alt_char  : std_logic is graphics_i.bit8(0)(3);
+  alias dbl_width : std_logic is graphics_i.bit8(0)(2);
   
   alias rgb       : RGB_t is ctl_o.rgb;
   
