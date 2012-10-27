@@ -7,14 +7,13 @@ library work;
 use work.pace_pkg.all;
 use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
+use work.platform_pkg.all;
 
 entity pace_video_mixer is
   port
   (
-      bitmap_rgb    : in RGB_t;
-      bitmap_set    : in std_logic;
-      tilemap_rgb   : in RGB_t;
-      tilemap_set   : in std_logic;
+      bitmap_ctl_o  : in from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
+      tilemap_ctl_o : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
       sprite_rgb    : in RGB_t;
       sprite_set    : in std_logic;
       sprite_pri    : in std_logic;
@@ -33,10 +32,10 @@ architecture SYN of pace_video_mixer is
 begin
 
 	rgb_o <=  -- mixed-mode graphics & text
-            bitmap_rgb 	when STD_MATCH(gfxmode, "1-10") and video_ctl_i.y < 160 else
+            bitmap_ctl_o(1).rgb 	when STD_MATCH(gfxmode, "1-10") and video_ctl_i.y < 160 else
             -- full-screen graphics
-            bitmap_rgb 	when STD_MATCH(gfxmode, "1-00") else
+            bitmap_ctl_o(1).rgb 	when STD_MATCH(gfxmode, "1-00") else
             -- everything else
-            tilemap_rgb;
+            tilemap_ctl_o(1).rgb;
 
 end architecture SYN;

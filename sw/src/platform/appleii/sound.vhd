@@ -22,7 +22,8 @@ entity sound is
 
       -- outputs
       sndif_datao        : out    std_logic_vector(7 downto 0);
-      snd_data           : out    std_logic_vector(7 downto 0);
+      snd_data_l         : out    std_logic_vector(7 downto 0);
+      snd_data_r         : out    std_logic_vector(7 downto 0);
       snd_clk            : out    std_logic
   );
 end entity sound;
@@ -60,8 +61,9 @@ begin
         sndif_wr_r := sndif_wr;
       end if;
 
-      	snd_data <= snd_state_r & "0000000";
-       	sndif_datao <= X"00";
+      snd_data_l <= snd_state_r & "0000000";
+      snd_data_r <= snd_state_r & "0000000";
+      sndif_datao <= X"00";
 
     end process;
 
