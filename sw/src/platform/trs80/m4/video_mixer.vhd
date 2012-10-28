@@ -7,14 +7,13 @@ library work;
 use work.pace_pkg.all;
 use work.video_controller_pkg.all;
 use work.sprite_pkg.all;
+use work.platform_pkg.all;
 
 entity pace_video_mixer is
   port
   (
-      bitmap_rgb    : in RGB_t;
-      bitmap_set    : in std_logic;
-      tilemap_rgb   : in RGB_t;
-      tilemap_set   : in std_logic;
+      bitmap_ctl_o  : in from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
+      tilemap_ctl_o : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
       sprite_rgb    : in RGB_t;
       sprite_set    : in std_logic;
       sprite_pri    : in std_logic;
@@ -26,17 +25,17 @@ entity pace_video_mixer is
 end entity pace_video_mixer;
   
 architecture SYN of pace_video_mixer is
-  alias mode : std_logic_vector(1 downto 0) is graphics_i.bit8_1(1 downto 0);
+  alias mode : std_logic_vector(1 downto 0) is graphics_i.bit8(0)(1 downto 0);
 begin
 
-	rgb_o.r <=  tilemap_rgb.r when mode = "00" else
-              bitmap_rgb.r when mode = "11" else
-              tilemap_rgb.r xor bitmap_rgb.r;
-	rgb_o.g <=  tilemap_rgb.g when mode = "00" else
-              bitmap_rgb.g when mode = "11" else
-              tilemap_rgb.g xor bitmap_rgb.g;
-	rgb_o.b <=  tilemap_rgb.b when mode = "00" else
-              bitmap_rgb.b when mode = "11" else
-              tilemap_rgb.b xor bitmap_rgb.b;
+	rgb_o.r <=  tilemap_ctl_o(1).rgb.r when mode = "00" else
+              bitmap_ctl_o(1).rgb.r when mode = "11" else
+              tilemap_ctl_o(1).rgb.r xor bitmap_ctl_o(1).rgb.r;
+	rgb_o.g <=  tilemap_ctl_o(1).rgb.g when mode = "00" else
+              bitmap_ctl_o(1).rgb.g when mode = "11" else
+              tilemap_ctl_o(1).rgb.g xor bitmap_ctl_o(1).rgb.g;
+	rgb_o.b <=  tilemap_ctl_o(1).rgb.b when mode = "00" else
+              bitmap_ctl_o(1).rgb.b when mode = "11" else
+              tilemap_ctl_o(1).rgb.b xor bitmap_ctl_o(1).rgb.b;
 
 end architecture SYN;

@@ -20,8 +20,7 @@ entity platform is
   port
   (
     -- clocking and reset
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -41,11 +40,11 @@ entity platform is
 
     -- graphics
     
-    bitmap_i        : in from_BITMAP_CTL_t;
-    bitmap_o        : out to_BITMAP_CTL_t;
+    bitmap_i        : in from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
+    bitmap_o        : out to_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
     
-    tilemap_i       : in from_TILEMAP_CTL_t;
-    tilemap_o       : out to_TILEMAP_CTL_t;
+    tilemap_i       : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
+    tilemap_o       : out to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
 
     sprite_reg_o    : out to_SPRITE_REG_t;
     sprite_i        : in from_SPRITE_CTL_t;
@@ -106,8 +105,10 @@ architecture SYN of platform is
     );
   end component osd_controller;
 
-	alias clk_20M					: std_logic is clk_i(0);
-	alias clk_video       : std_logic is clk_i(1);
+	alias clk_20M					: std_logic is clkrst_i.clk(0);
+	alias rst_20M					: std_logic is clkrst_i.rst(0);
+	alias clk_video       : std_logic is clkrst_i.clk(1);
+	alias rst_video       : std_logic is clkrst_i.rst(1);
 	
   -- uP signals  
   signal clk_2M_ena			: std_logic;
@@ -190,7 +191,7 @@ architecture SYN of platform is
 	
 begin
 
-	cpu_reset <= reset_i or platform_reset;
+	cpu_reset <= rst_20M or platform_reset;
 	
   -- not used for now
   uPintvec <= (others => '0');
@@ -315,11 +316,11 @@ begin
 
   end process KBD_MUX;
 
-  PROC_DRVSEL : process (clk_20M, clk_2M_ena, reset_i)
+  PROC_DRVSEL : process (clk_20M, rst_20M)
     subtype count_t is integer range 0 to 3999; -- 2ms watchdog
     variable count : count_t := count_t'high;
   begin
-    if reset_i = '1' then
+    if rst_20M = '1' then
       drvsel_r <= (others => '0');
       count := count_t'high;
       z80_wait_n <= '1';
@@ -341,24 +342,26 @@ begin
   end process PROC_DRVSEL;
   
   -- PORT $EC (various)
-  process (clk_20M, clk_2M_ena, reset_i)
+  process (clk_20M, rst_20M)
   begin
-    if reset_i = '1' then
+    if rst_20M = '1' then
       port_ec <= (others => '0');
-    elsif rising_edge(clk_20M) and clk_2M_ena = '1' then
-      if io_addr(7 downto 0) = X"EC" then
-        if upiowr = '1' then
-          port_ec <= up_datao;
+    elsif rising_edge(clk_20M) then
+      if clk_2M_ena = '1' then
+        if io_addr(7 downto 0) = X"EC" then
+          if upiowr = '1' then
+            port_ec <= up_datao;
+          end if;
         end if;
       end if;
     end if;
   end process;
-  graphics_o.bit8_1(7 downto 2) <= port_ec(7 downto 2);
+  graphics_o.bit8(0)(7 downto 2) <= port_ec(7 downto 2);
 
   -- unused outputs
 	sprite_reg_o <= NULL_TO_SPRITE_REG;
 	sprite_o <= NULL_TO_SPRITE_CTL;
-  tilemap_o.attr_d <= std_logic_vector(RESIZE(unsigned(switches_i(7 downto 0)), tilemap_o.attr_d'length));
+  tilemap_o(1).attr_d <= std_logic_vector(RESIZE(unsigned(switches_i(7 downto 0)), tilemap_o(1).attr_d'length));
 	graphics_o.pal <= (others => (others => '0'));
 	ser_o <= NULL_TO_SERIAL;
   spi_o <= NULL_TO_SPI;
@@ -372,7 +375,7 @@ begin
 		port map
 		(
 			clk				=> clk_20M,
-			reset			=> reset_i,
+			reset			=> rst_20M,
 			clk_en		=> clk_2M_ena
 		);
 
@@ -427,9 +430,10 @@ begin
 		port map
 		(
 			clock			=> clk_video,
-			address		=> tilemap_i.tile_a(11 downto 0),
-			q					=> tilemap_o.tile_d
+			address		=> tilemap_i(1).tile_a(11 downto 0),
+			q					=> tilemap_o(1).tile_d(7 downto 0)
 		);
+  tilemap_o(1).tile_d(tilemap_o(1).tile_d'left downto 8) <= (others => '0');
 
   GEN_HIRES: if TRS80_M4_HIRES_SUPPORT generate
 
@@ -511,20 +515,20 @@ begin
           q_b					=> hires_dat_o,
 
           clock_a			=> clk_video,
-          address_a		=> bitmap_i.a(TRS80_M4_HIRES_WIDTHA-1 downto 0),
+          address_a		=> bitmap_i(1).a(TRS80_M4_HIRES_WIDTHA-1 downto 0),
           wren_a			=> '0',
           data_a			=> (others => 'X'),
-          q_a					=> bitmap_o.d(7 downto 0)
+          q_a					=> bitmap_o(1).d(7 downto 0)
         );
 
-      graphics_o.bit8_1(1 downto 0) <= mode_r(1 downto 0);
+      graphics_o.bit8(0)(1 downto 0) <= mode_r(1 downto 0);
 
     end block BLK_HIRES;
   end generate GEN_HIRES;
     
   GEN_NO_HIRES : if not TRS80_M4_HIRES_SUPPORT generate
-    bitmap_o <= NULL_TO_BITMAP_CTL;
-    graphics_o.bit8_1(1 downto 0) <= "00";
+    bitmap_o(1) <= NULL_TO_BITMAP_CTL;
+    graphics_o.bit8(0)(1 downto 0) <= "00";
   end generate GEN_NO_HIRES;
   
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
@@ -544,12 +548,12 @@ begin
 			q_b					=> vram_datao,
 
 			clock_a			=> clk_video,
-			address_a		=> tilemap_i.map_a(9 downto 0),
+			address_a		=> tilemap_i(1).map_a(9 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o.map_d(7 downto 0)
+			q_a					=> tilemap_o(1).map_d(7 downto 0)
 		);
-	tilemap_o.map_d(tilemap_o.map_d'left downto 8) <= (others => '0');
+	tilemap_o(1).map_d(tilemap_o(1).map_d'left downto 8) <= (others => '0');
 
   interrupts_inst : entity work.TRS80_Interrupts                    
     port map
@@ -618,10 +622,10 @@ begin
       
     begin
 
-      process (clk_20M, reset_i)
+      process (clk_20M, rst_20M)
         variable reset_r : std_logic_vector(3 downto 0) := (others => '0');
       begin
-        if reset_i = '1' then
+        if rst_20M = '1' then
           reset_r := (others => '1');
         elsif rising_edge(clk_20M) then
           reset_r := reset_r(reset_r'left-1 downto 0) & platform_reset;
@@ -796,7 +800,7 @@ begin
         flash_o.oe <= '1';
         flash_o.we <= '0';
 
-        rd_data_from_flash_media <= flash_i.d;
+        rd_data_from_flash_media <= flash_i.d(rd_data_from_flash_media'range);
 
         wprt_n <= '0';  -- always write-protected
         
