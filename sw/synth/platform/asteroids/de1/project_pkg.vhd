@@ -20,6 +20,9 @@ package project_pkg is
 	
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
 
+	constant PACE_VIDEO_H_SIZE				        : integer := 1024/2;
+	constant PACE_VIDEO_V_SIZE				        : integer := 768/2;
+
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
   constant PACE_CLK0_DIVIDE_BY              : natural := 25;
   constant PACE_CLK0_MULTIPLY_BY            : natural := 12;  -- 50*12/25 = 24MHz
@@ -27,6 +30,8 @@ package project_pkg is
   constant PACE_CLK1_MULTIPLY_BY            : natural := 4;   -- 50*4/5 = 40MHz
 	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
 	constant PACE_VIDEO_V_SCALE       	      : integer := 1;
+  constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';
+  constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '1';
 
   constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
 

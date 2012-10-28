@@ -20,8 +20,7 @@ entity platform is
   port
   (
     -- clocking and reset
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -41,11 +40,11 @@ entity platform is
 
     -- graphics
     
-    bitmap_i        : in from_BITMAP_CTL_t;
-    bitmap_o        : out to_BITMAP_CTL_t;
+    bitmap_i        : in from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
+    bitmap_o        : out to_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
     
-    tilemap_i       : in from_TILEMAP_CTL_t;
-    tilemap_o       : out to_TILEMAP_CTL_t;
+    tilemap_i       : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
+    tilemap_o       : out to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
 
     sprite_reg_o    : out to_SPRITE_REG_t;
     sprite_i        : in from_SPRITE_CTL_t;
@@ -84,8 +83,10 @@ end platform;
 
 architecture SYN of platform is
 
-	alias clk_30M					: std_logic is clk_i(0);
-	alias clk_video       : std_logic is clk_i(1);
+	alias clk_30M					: std_logic is clkrst_i.clk(0);
+  alias rst_30M         : std_logic is clkrst_i.rst(0);
+	alias clk_video       : std_logic is clkrst_i.clk(1);
+  alias rst_video       : std_logic is clkrst_i.rst(1);
 	
 	signal reset_n				: std_logic;
 	
@@ -117,7 +118,7 @@ architecture SYN of platform is
 	signal hgr1_cs				: std_logic;
 	signal hgr0_cs				: std_logic;
 	signal hgr_wr					: std_logic;
-	alias hgr_data				: std_logic_vector(7 downto 0) is bitmap_o.d;
+	alias hgr_data				: std_logic_vector(7 downto 0) is bitmap_o(1).d(7 downto 0);
 	signal hgr_addr				: std_logic_vector(13 downto 0);
 		                        
   -- RAM signals        
@@ -134,7 +135,7 @@ architecture SYN of platform is
 	
 begin
 
-	reset_n <= not reset_i;
+	reset_n <= not rst_30M;
 	
 	-- ROM $E000-FFFF
 	rom_e_cs <= 	'1' when STD_MATCH(addr_bus, "111-------------") else '0';
@@ -187,11 +188,11 @@ begin
   vram_wr <= not up_rw_n and vram_cs;
 	hgr_wr <= not up_rw_n and (hgr1_cs or hgr0_cs);
 	
-  process (clk_30M, reset_i)
+  process (clk_30M, rst_30M)
   	-- 'softswitch' latches (2 bytes)
   	variable a2var_r    	: std_logic_vector(15 downto 0);
  	begin
-		if reset_i = '1' then
+		if rst_30M = '1' then
     	a2var_r := X"0100"; -- text mode
   	elsif rising_edge (clk_30M) then
 			-- write to C00X sets the LSB bits of a2_var
@@ -212,16 +213,16 @@ begin
 
 	-- flash is the character flash timer
 	-- attr_addr(1 downto 0) is flashing/inverse bits
-	tilemap_o.attr_d(1+2+8-1 downto 0) <= flash & tilemap_i.attr_a(1 downto 0) & X"00";
+	tilemap_o(1).attr_d(1+2+8-1 downto 0) <= flash & tilemap_i(1).attr_a(1 downto 0) & X"00";
 
 	-- HGR $2000-$5FFF has two (2) 8KB pages of hires graphics
 	-- page (a2var(10)) is inverted because hgr memory starts on 8K boundary
-	hgr_addr <= not a2var(10) & bitmap_I.a(hgr_addr'left-1 downto 0);
+	hgr_addr <= not a2var(10) & bitmap_i(1).a(hgr_addr'left-1 downto 0);
 
 	-- use spritedata to expose the softswitches to the graphics core	
 	graphics_o.pal <= (others => (others => '0'));
-	graphics_o.bit8_1 <= (others => '0');
-	graphics_o.bit16_1 <= std_logic_vector(resize(unsigned(a2var), graphics_o.bit16_1'length));
+	graphics_o.bit8(0) <= (others => '0');
+	graphics_o.bit16(0) <= std_logic_vector(resize(unsigned(a2var), graphics_o.bit16(0)'length));
 
   -- SRAM signals (may or may not be used)
   sram_o.a <= std_logic_vector(resize(unsigned(addr_bus), sram_o.a'length));
@@ -255,7 +256,7 @@ begin
 		port map
 		(
 			clk				=> clk_30M,
-			reset			=> reset_i,
+			reset			=> rst_30M,
 			clk_en		=> clk_1M_en
 		);
 
@@ -289,7 +290,7 @@ begin
 		port map
 		(
 	    clk       	=> clk_30M,
-	    reset     	=> reset_i,
+	    reset     	=> rst_30M,
 
 	    -- inputs
 	    --vsync_n   : in     std_logic;
@@ -339,9 +340,10 @@ begin
 		port map
 		(
 			clock			=> clk_video,
-			address		=> tilemap_i.tile_a(10 downto 0),
-			q					=> tilemap_o.tile_d
+			address		=> tilemap_i(1).tile_a(10 downto 0),
+			q					=> tilemap_o(1).tile_d(7 downto 0)
 		);
+  tilemap_o(1).tile_d(tilemap_o(1).tile_d'left downto 8) <= (others => '0');
 	
 	GEN_ONLY_1_HIRES_PAGE : if APPLE_IIPLUS_HIRES_PAGES = 1 generate
 
@@ -420,11 +422,11 @@ begin
 			
 			-- graphics interface
 			clock_a			=> clk_video,
-			address_a		=> tilemap_i.map_a(9 downto 0),
+			address_a		=> tilemap_i(1).map_a(9 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o.map_d(7 downto 0)
+			q_a					=> tilemap_o(1).map_d(7 downto 0)
 		);
-  tilemap_o.map_d(tilemap_o.map_d'left downto 8) <= (others => '0');
+  tilemap_o(1).map_d(tilemap_o(1).map_d'left downto 8) <= (others => '0');
 
 end SYN;

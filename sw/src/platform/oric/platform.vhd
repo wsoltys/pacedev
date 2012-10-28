@@ -20,8 +20,7 @@ entity platform is
   port
   (
     -- clocking and reset
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -41,11 +40,11 @@ entity platform is
 
     -- graphics
     
-    bitmap_i        : in from_BITMAP_CTL_t;
-    bitmap_o        : out to_BITMAP_CTL_t;
+    bitmap_i        : in from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
+    bitmap_o        : out to_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
     
-    tilemap_i       : in from_TILEMAP_CTL_t;
-    tilemap_o       : out to_TILEMAP_CTL_t;
+    tilemap_i       : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
+    tilemap_o       : out to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
 
     sprite_reg_o    : out to_SPRITE_REG_t;
     sprite_i        : in from_SPRITE_CTL_t;
@@ -84,8 +83,10 @@ end platform;
 
 architecture SYN of platform is
 
-	alias clk_32M					: std_logic is clk_i(0);
-	alias clk_video       : std_logic is clk_i(1);
+	alias clk_32M					: std_logic is clkrst_i.clk(0);
+  alias rst_32M         : std_logic is clkrst_i.rst(0);
+	alias clk_video       : std_logic is clkrst_i.clk(1);
+  alias rst_video       : std_logic is clkrst_i.rst(1);
 	
 	signal reset_n				: std_logic;
 
@@ -131,7 +132,7 @@ architecture SYN of platform is
 	
 begin
 
-	reset_n <= not reset_i;
+	reset_n <= not rst_32M;
 
   -- RESET BUTTON on the ORIC is connected to NMI
   cpu_nmi_n <= not buttons_i(1);
@@ -188,9 +189,9 @@ begin
   -- COMPONENT INSTANTIATION
   --
 
-  process (clk_32M, reset_i)
+  process (clk_32M, rst_32M)
   begin
-    if reset_i = '1' then
+    if rst_32M = '1' then
       sys_cycle <= (others => '0');
     elsif rising_edge(clk_32M) then
       clk_4M_ena <= '0';  -- default
@@ -242,9 +243,9 @@ begin
     -- P2 must lead cpu_clk_en by 1 system clock
     -- - and is same frequency as cpu_clk but 50% duty cycle
     -- clk4 goes low on rising edge of P2
-    process (clk_32M, reset_i)
+    process (clk_32M, rst_32M)
     begin
-      if reset_i = '1' then
+      if rst_32M = '1' then
         via6522_p2 <= '1';
         via6522_clk4 <= '0';
       elsif rising_edge(clk_32M) then
@@ -345,11 +346,12 @@ begin
 			
 			-- graphics interface
 			clock_a			=> clk_video,
-			address_a		=> tilemap_i.tile_a(9 downto 0),
+			address_a		=> tilemap_i(1).tile_a(9 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o.tile_d
+			q_a					=> tilemap_o(1).tile_d(7 downto 0)
 		);
+  tilemap_o(1).tile_d(tilemap_o(1).tile_d'left downto 8) <= (others => '0');
 
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 	chr_ram_inst : entity work.dpram
@@ -369,12 +371,12 @@ begin
 			
 			-- graphics interface
 			clock_a			=> clk_video,
-			address_a		=> tilemap_i.map_a(10 downto 0),
+			address_a		=> tilemap_i(1).map_a(10 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o.map_d(7 downto 0)
+			q_a					=> tilemap_o(1).map_d(7 downto 0)
 		);
-  tilemap_o.map_d(tilemap_o.map_d'left downto 8) <= (others => '0');
+  tilemap_o(1).map_d(tilemap_o(1).map_d'left downto 8) <= (others => '0');
 
 --  -- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 --  hgrram_inst : entity work.dpram

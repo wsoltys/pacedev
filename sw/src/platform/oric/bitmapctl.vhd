@@ -12,27 +12,7 @@ use work.platform_pkg.all;
 --	Apple II Bitmap Controller
 --
 
-entity bitmapCtl_1 is          
-  generic
-  (
-    DELAY         : integer
-  );
-  port               
-  (
-    reset					: in std_logic;
-
-    -- video control signals		
-    video_ctl     : in from_VIDEO_CTL_t;
-
-    -- bitmap controller signals
-    ctl_i         : in to_BITMAP_CTL_t;
-    ctl_o         : out from_BITMAP_CTL_t;
-
-    graphics_i    : in to_GRAPHICS_t
-  );
-end bitmapCtl_1;
-
-architecture SYN of bitmapCtl_1 is
+architecture BITMAP_1 of bitmapCtl is
 
   alias clk       : std_logic is video_ctl.clk;
   alias clk_ena   : std_logic is video_ctl.clk_ena;
@@ -143,5 +123,5 @@ begin
 
   end process;
 
-end SYN;
+end BITMAP_1;
 
