@@ -37,7 +37,13 @@ for f in `find platform -path "*/$ppat/$tpat/$fpat"`; do
 		if [ "$rc" -eq "0" ]; then
 			echo "OK";
 		else
-			echo "*** FAILED ($rc) ***"
+		  grep -q "currently NOT SUPPORTED on" detail.log
+		  rc="$?"
+		  if [ "$rc" -eq "0" ]; then
+		    echo "* NOT SUPPORTED *"
+		  else 
+			  echo "*** FAILED ($rc) ***"
+		  fi
 		fi ;;
 	"synt")	echo -n "Synthesizing $f: " 
 		#quartus_map $f --analysis_and_elaboration >> detail.log
