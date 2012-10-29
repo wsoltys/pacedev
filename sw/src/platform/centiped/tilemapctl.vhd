@@ -14,27 +14,7 @@ use work.video_controller_pkg.all;
 --	Tile data is 2 BPP.
 --
 
-entity tilemapCtl_1 is          
-  generic
-  (
-    DELAY       : integer
-  );
-  port               
-  (
-    reset				: in std_logic;
-
-    -- video control signals		
-    video_ctl   : in from_VIDEO_CTL_t;
-
-    -- tilemap controller signals
-    ctl_i       : in to_TILEMAP_CTL_t;
-    ctl_o       : out from_TILEMAP_CTL_t;
-
-    graphics_i  : in to_GRAPHICS_t
-  );
-end entity tilemapCtl_1;
-
-architecture SYN of tilemapCtl_1 is
+architecture TILEMAP_1 of tilemapCtl is
 
   alias clk       : std_logic is video_ctl.clk;
   alias clk_ena   : std_logic is video_ctl.clk_ena;
@@ -44,11 +24,17 @@ architecture SYN of tilemapCtl_1 is
   alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
   alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
   
+  signal map_a    : std_logic_vector(12 downto 0);
+  
 begin
 
+  -- old vram mapper
+  ctl_o.map_a(9 downto 5) <= not map_a(4 downto 0);
+  ctl_o.map_a(4 downto 0) <= map_a(10 downto 6);
+  
 	-- these are constant for a whole line
-	ctl_o.map_a(ctl_o.map_a'left downto 12) <= (others => '0');
-	ctl_o.map_a(11 downto 6) <= not y(8 downto 3);
+	map_a(map_a'left downto 12) <= (others => '0');
+	map_a(11 downto 6) <= not y(8 downto 3);
   ctl_o.tile_a(ctl_o.tile_a'left downto 12) <= (others => '0');
   ctl_o.tile_a(3 downto 1) <=  y(2 downto 0);   	-- each row is 2 bytes
   -- generate attribute RAM address
@@ -71,7 +57,7 @@ begin
 				-- 1st stage of pipeline
 				-- - read tile from tilemap
 				-- - read attribute data
-				ctl_o.map_a(5 downto 0) <= not x(8 downto 3);
+				map_a(5 downto 0) <= not x(8 downto 3);
 			end if;
 			
       -- 2nd stage of pipeline
@@ -112,5 +98,5 @@ begin
 
   end process;
 
-end SYN;
+end TILEMAP_1;
 

@@ -17,7 +17,8 @@ entity Sound is
     sndif_addr        : in    std_logic_vector(15 downto 0);
 
     snd_clk           : out   std_logic;
-    snd_data          : out   std_logic_vector(7 downto 0);
+    snd_data_l        : out   std_logic_vector(7 downto 0);
+    snd_data_r        : out   std_logic_vector(7 downto 0);
     sndif_datao       : out   std_logic_vector(7 downto 0)
 	);
 end Sound;
@@ -28,6 +29,8 @@ architecture SYN of Sound is
 	signal clk_1M5_en		: std_logic;
 	signal sndif_wr_n		: std_logic;
 	
+  signal snd_data     : std_logic_vector(snd_data_l'range);
+  
 begin
 
 	sndif_wr_n <= not sndif_wr;
@@ -65,4 +68,7 @@ begin
 		  CLK       		=> clk_30M
 	  );
      
+  snd_data_l <= snd_data;
+  snd_data_r <= snd_data;
+  
 end SYN;

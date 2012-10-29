@@ -21,8 +21,7 @@ entity platform is
   port
   (
     -- clocking and reset
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -42,11 +41,11 @@ entity platform is
 
     -- graphics
     
-    bitmap_i        : in from_BITMAP_CTL_t;
-    bitmap_o        : out to_BITMAP_CTL_t;
+    bitmap_i        : in from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
+    bitmap_o        : out to_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
     
-    tilemap_i       : in from_TILEMAP_CTL_t;
-    tilemap_o       : out to_TILEMAP_CTL_t;
+    tilemap_i       : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
+    tilemap_o       : out to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
 
     sprite_reg_o    : out to_SPRITE_REG_t;
     sprite_i        : in from_SPRITE_CTL_t;
@@ -86,8 +85,10 @@ end platform;
 
 architecture SYN of platform is
 
-	alias clk_30M					: std_logic is clk_i(0);
-	alias clk_video 			: std_logic is clk_i(1);
+	alias clk_30M					: std_logic is clkrst_i.clk(0);
+  alias rst_30M         : std_logic is clkrst_i.rst(0);
+	alias clk_video 			: std_logic is clkrst_i.clk(1);
+  alias rst_video       : std_logic is clkrst_i.rst(1);
 	
 	signal reset_n				: std_logic;
 	
@@ -109,7 +110,6 @@ architecture SYN of platform is
   -- VRAM signals       
 	signal vram_cs				: std_logic;
 	signal vram_wr				: std_logic;
-	signal vram_addr			: std_logic_vector(9 downto 0);
   signal vram_datao     : std_logic_vector(7 downto 0);
                         
   -- RAM signals        
@@ -141,7 +141,7 @@ architecture SYN of platform is
 	
 begin
 
-	reset_n <= not reset_i;
+	reset_n <= not rst_30M;
 	vblank_n <= not graphics_i.vblank;
 	
   -- centipede A15 & A14 aren't connected on the PCB
@@ -213,8 +213,8 @@ begin
   sprite_reg_o.wr <= not up_rw_n and sprite_cs;
   
 	-- mangle sprite address according to tile layout
-	newTileAddr <=  tilemap_i.tile_a(11 downto 5) & tilemap_i.tile_a(3 downto 1) & 
-                  tilemap_i.tile_a(4) & tilemap_i.tile_a(0);
+	newTileAddr <=  tilemap_i(1).tile_a(11 downto 5) & tilemap_i(1).tile_a(3 downto 1) & 
+                  tilemap_i(1).tile_a(4) & tilemap_i(1).tile_a(0);
 
   -- SRAM signals (may or may not be used)
   sram_o.a <= std_logic_vector(resize(unsigned(addr_bus), sram_o.a'length));
@@ -226,7 +226,7 @@ begin
 	
   -- unused outputs
   flash_o <= NULL_TO_FLASH;
-  bitmap_o <= NULL_TO_BITMAP_CTL;
+  --bitmap_o <= NULL_TO_BITMAP_CTL;
   graphics_o <= NULL_TO_GRAPHICS;
   spi_o <= NULL_TO_SPI;
   ser_o <= NULL_TO_SERIAL;
@@ -246,7 +246,7 @@ begin
 		port map
 		(
 			clk				=> clk_30M,
-			reset			=> reset_i,
+			reset			=> rst_30M,
 			clk_en		=> clk_1M5_ena
 		);
 
@@ -307,22 +307,13 @@ begin
 			q_b					=> vram_datao,
 
 			clock_a			=> clk_video,
-			address_a		=> vram_addr,
+			address_a		=> tilemap_i(1).map_a(9 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o.map_d(7 downto 0)
+			q_a					=> tilemap_o(1).map_d(7 downto 0)
 		);
-	tilemap_o.map_d(15 downto 8) <= (others => '0');
+	tilemap_o(1).map_d(15 downto 8) <= (others => '0');
 	
-	vrammapper_inst : entity work.vramMapper
-		port map
-		(
-	    clk     => clk_video,
-
-	    inAddr  => tilemap_i.map_a(12 downto 0),
-	    outAddr => vram_addr
-		);
-
 	cram0_wr <= cram_wr and not addr_bus(0);
 	
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
@@ -341,10 +332,10 @@ begin
 			q_b							=> cram0_datao,
 			
 			clock_a					=> clk_video,
-			address_a				=> tilemap_i.attr_a(7 downto 1),
+			address_a				=> tilemap_i(1).attr_a(7 downto 1),
 			wren_a					=> '0',
 			data_a					=> (others => 'X'),
-			q_a							=> tilemap_o.attr_d(7 downto 0)
+			q_a							=> tilemap_o(1).attr_d(7 downto 0)
 		);
 
 	cram1_wr <= cram_wr and addr_bus(0);
@@ -365,17 +356,17 @@ begin
 			q_b							=> cram1_datao,
 			
 			clock_a					=> clk_video,
-			address_a				=> tilemap_i.attr_a(7 downto 1),
+			address_a				=> tilemap_i(1).attr_a(7 downto 1),
 			wren_a					=> '0',
 			data_a					=> (others => 'X'),
-			q_a							=> tilemap_o.attr_d(15 downto 8)
+			q_a							=> tilemap_o(1).attr_d(15 downto 8)
 		);
 
 	intgen_inst : entity work.intGen
 		port map
 		(
 	    clk       	=> clk_30M,
-	    reset     	=> reset_i,
+	    reset     	=> rst_30M,
 
 	    -- inputs
 	    vsync_n   	=> vblank_n,
@@ -390,9 +381,9 @@ begin
 		generic map
 		(
 			init_file		=> "../../../../src/platform/centiped/roms/gfxrom.hex",
-			numwords_a	=> 4096,
+			--numwords_a	=> 4096,
 			widthad_a		=> 12,
-			numwords_b	=> 1024,
+			--numwords_b	=> 1024,
 			widthad_b		=> 10,
 			width_b			=> 32
 		)
@@ -400,7 +391,7 @@ begin
 		(
 			clock										=> clk_video,
 			address_a								=> newtileaddr(11 downto 0),
-			q_a											=> tilemap_o.tile_d,
+			q_a											=> tilemap_o(1).tile_d(7 downto 0),
 			
 			address_b								=> sprite_i.a(9 downto 0),
 			q_b(31 downto 24)				=> sprite_o.d(7 downto 0),
