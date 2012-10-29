@@ -12,6 +12,8 @@ package platform_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 
+  constant PACE_PLATFORM_NAME           : string := "vectrex";
+  
 	constant PACE_VIDEO_NUM_BITMAPS 	    : natural := 1;
 	constant PACE_VIDEO_NUM_TILEMAPS 	    : natural := 0;
 	constant PACE_VIDEO_NUM_SPRITES 	    : natural := 0;

@@ -536,7 +536,6 @@ set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controlle
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/platform_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/platform_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/de1/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram_1r1w.vhd
