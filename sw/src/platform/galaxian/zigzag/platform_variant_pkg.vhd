@@ -13,13 +13,15 @@ package platform_variant_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 
+  constant PACE_PLATFORM_NAME           : string := "zigzag";
+
 	constant GALAXIAN_INPUTS_NUM_BYTES    : integer := 4;
 	
 	--
 	-- Platform-specific constants (optional)
 	--
 
-  constant PLATFORM_VARIANT             : string := "zigzag";
+  constant PLATFORM_VARIANT             : string := PACE_PLATFORM_NAME;
   constant PLATFORM_VARIANT_SRC_DIR     : string := PLATFORM_SRC_DIR & PLATFORM_VARIANT & "/";
   
   type rom_a is array (natural range <>) of string;
