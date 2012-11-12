@@ -540,51 +540,70 @@ begin
     graphics_o.bit16(0) <= scroll;
   end process;
   
-  -- GFX1 (foreground characters)
-  gfx1_inst : entity work.sprom
-    generic map
-    (
-      init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" & "gfx1.hex",
-      widthad_a     => 12
-    )
-    port map
-    (
-      clock		=> clk_vid,
-      address => tilemap_i(1).tile_a(11 downto 0),
-      q				=> tilemap_o(1).tile_d(7 downto 0)
-    );
-  tilemap_o(1).tile_d(tilemap_o(1).tile_d'left downto 8) <= (others => '0');
+  BLK_GFX : block
+    type d_a is array (natural range <>) of std_logic_vector(7 downto 0);
+    signal tile_d_o   : d_a(CAPCOM_TILE_ROM'range);
+  begin
+    
+    -- GFX1 (foreground characters)
+    gfx1_inst : entity work.sprom
+      generic map
+      (
+        init_file		  => PLATFORM_VARIANT_SRC_DIR & "roms/" & 
+                            CAPCOM_CHAR_ROM(0) & ".hex",
+        widthad_a     => CAPCOM_CHAR_ROM_WIDTHAD
+      )
+      port map
+      (
+        clock		=> clk_vid,
+        address => tilemap_i(1).tile_a(CAPCOM_CHAR_ROM_WIDTHAD-1 downto 0),
+        q				=> tilemap_o(1).tile_d(7 downto 0)
+      );
+    tilemap_o(1).tile_d(tilemap_o(1).tile_d'left downto 8) <= (others => '0');
+    
+    GEN_TILEROM : for i in CAPCOM_TILE_ROM'range generate
+    begin
+      -- GFX2 (background characters)
+      gfx2_inst : entity work.sprom
+        generic map
+        (
+          init_file		  => PLATFORM_VARIANT_SRC_DIR & "roms/" & 
+                              CAPCOM_TILE_ROM(i) & ".hex",
+          widthad_a     => CAPCOM_TILE_ROM_WIDTHAD
+        )
+        port map
+        (
+          clock		=> clk_vid,
+          address => tilemap_i(2).tile_a(CAPCOM_TILE_ROM_WIDTHAD-1 downto 0),
+          q				=> tile_d_o(i)
+        );
+    end generate GEN_TILEROM;
+
+    tilemap_o(2).tile_d(7 downto 0) <=  tile_d_o(0) when tilemap_i(2).tile_a(15 downto CAPCOM_TILE_ROM_WIDTHAD) = "000" else
+                                        tile_d_o(1) when tilemap_i(2).tile_a(15 downto CAPCOM_TILE_ROM_WIDTHAD) = "001" else
+                                        tile_d_o(2) when tilemap_i(2).tile_a(15 downto CAPCOM_TILE_ROM_WIDTHAD) = "010" else
+                                        tile_d_o(3) when tilemap_i(2).tile_a(15 downto CAPCOM_TILE_ROM_WIDTHAD) = "011" else
+                                        tile_d_o(4) when tilemap_i(2).tile_a(15 downto CAPCOM_TILE_ROM_WIDTHAD) = "100" else
+                                        tile_d_o(5);
+    tilemap_o(2).tile_d(tilemap_o(2).tile_d'left downto 8) <= (others => '0');
+    
+    -- GFX3 (sprite characters)
+    gfx3_inst : entity work.sprom
+      generic map
+      (
+        init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" & "gfx3.hex",
+        widthad_a     => 16
+      )
+      port map
+      (
+        clock		=> clk_vid,
+        address => sprite_i.a(15 downto 0),
+        q				=> sprite_o.d(7 downto 0)
+      );
+    sprite_o.d(sprite_o.d'left downto 8) <= (others => '0');
+
+  end block BLK_GFX;
   
-  -- GFX2 (background characters)
-  gfx2_inst : entity work.sprom
-    generic map
-    (
-      init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" & "gfx2.hex",
-      widthad_a     => 16
-    )
-    port map
-    (
-      clock		=> clk_vid,
-      address => tilemap_i(2).tile_a(15 downto 0),
-      q				=> tilemap_o(2).tile_d(7 downto 0)
-    );
-  tilemap_o(2).tile_d(tilemap_o(2).tile_d'left downto 8) <= (others => '0');
-    
-  -- GFX3 (sprite characters)
-  gfx3_inst : entity work.sprom
-    generic map
-    (
-      init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" & "gfx3.hex",
-      widthad_a     => 16
-    )
-    port map
-    (
-      clock		=> clk_vid,
-      address => sprite_i.a(15 downto 0),
-      q				=> sprite_o.d(7 downto 0)
-    );
-  sprite_o.d(sprite_o.d'left downto 8) <= (others => '0');
-    
   -- VRAM (foreground tile code) $D000-$D3FF
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 	vram_inst : entity work.dpram
