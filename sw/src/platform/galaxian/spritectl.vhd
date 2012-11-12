@@ -150,18 +150,20 @@ begin
 
         -- set pixel transparency based on match
         ctl_o.set <= '0';
-        --if xMat and pel /= "00" then
-        if xMat and yMat and (pal_entry(0)(5 downto 4) /= "00" or
-                              pal_entry(1)(5 downto 4) /= "00" or
-                              pal_entry(2)(5 downto 4) /= "00") then
-          ctl_o.set <= '1';
+        -- no bullets on CKONGG
+        if INDEX < 8 or PLATFORM_VARIANT /= "ckongg" then
+          if xMat and yMat and (pal_entry(0)(5 downto 4) /= "00" or
+                                pal_entry(1)(5 downto 4) /= "00" or
+                                pal_entry(2)(5 downto 4) /= "00") then
+            ctl_o.set <= '1';
+          end if;
         end if;
 
       end if; -- clk_ena='1'
     end if; -- rising_edge(clk)
     
     -- generate sprite data address
-                            --	*code |= ((spriteram[offs + 2] & 0x30) << 2);
+    --	*code |= ((spriteram[offs + 2] & 0x30) << 2);
                             
     if PLATFORM_VARIANT = "ckongg" then
       ctl_o.a(12 downto 11) <= reg_i.colour(5 downto 4);

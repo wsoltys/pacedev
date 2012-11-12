@@ -309,7 +309,7 @@ begin
 
     BLK_MAINROM : block
       type d_a is array (natural range <>) of std_logic_vector(7 downto 0);
-      signal srb_d_o          : d_a(3 to 7);
+      signal srb_d_o          : d_a(CAPCOM_ROM'range);
       signal mainrom_bank_r   : std_logic_vector(1 downto 0);
     begin
 
@@ -327,22 +327,22 @@ begin
       end process;
       
       -- $0000-$3FFF, $4000-$7FFF, $8000-$8FFF (banked)
-      mainrom_d_o <=  srb_d_o(3) when STD_MATCH(main_a, "00--------------") else
-                      srb_d_o(4) when STD_MATCH(main_a, "01--------------") else
-                      srb_d_o(5) when (STD_MATCH(main_a, "10--------------") and 
+      mainrom_d_o <=  srb_d_o(0) when STD_MATCH(main_a, "00--------------") else
+                      srb_d_o(1) when STD_MATCH(main_a, "01--------------") else
+                      srb_d_o(2) when (STD_MATCH(main_a, "10--------------") and 
                         mainrom_bank_r = "00") else
-                      srb_d_o(6) when (STD_MATCH(main_a, "10--------------") and 
+                      srb_d_o(3) when (STD_MATCH(main_a, "10--------------") and 
                         mainrom_bank_r = "01") else
-                      srb_d_o(7);
+                      srb_d_o(4);
                       
-      GEN_MAINROM : for i in 3 to 7 generate
+      GEN_MAINROM : for i in CAPCOM_ROM'range generate
       begin
         main_rom_inst : entity work.sprom
           generic map
           (
-            init_file		=>  VARIANT_ROM_DIR & ROM_VARIANT_SUBDIR & 
-                              "srb-0" & integer'image(i) & ".hex",
-            widthad_a		=> 14
+          init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" &
+                          CAPCOM_ROM(i) & ".hex",
+            widthad_a		=> CAPCOM_ROM_WIDTHAD
           )
           port map
           (
@@ -455,7 +455,7 @@ begin
     sub_rom_inst : entity work.sprom
       generic map
       (
-        init_file		=> VARIANT_ROM_DIR & ROM_VARIANT_SUBDIR & 
+        init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" & 
                         "sub.hex",
         widthad_a		=> 13
       )
@@ -544,50 +544,53 @@ begin
   gfx1_inst : entity work.sprom
     generic map
     (
-      init_file		=> VARIANT_ROM_DIR & "gfx1.hex",
+      init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" & "gfx1.hex",
       widthad_a     => 12
     )
     port map
     (
       clock		=> clk_vid,
       address => tilemap_i(1).tile_a(11 downto 0),
-      q				=> tilemap_o(1).tile_d
+      q				=> tilemap_o(1).tile_d(7 downto 0)
     );
-    
+  tilemap_o(1).tile_d(tilemap_o(1).tile_d'left downto 8) <= (others => '0');
+  
   -- GFX2 (background characters)
   gfx2_inst : entity work.sprom
     generic map
     (
-      init_file		=> VARIANT_ROM_DIR & "gfx2.hex",
+      init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" & "gfx2.hex",
       widthad_a     => 16
     )
     port map
     (
       clock		=> clk_vid,
       address => tilemap_i(2).tile_a(15 downto 0),
-      q				=> tilemap_o(2).tile_d
+      q				=> tilemap_o(2).tile_d(7 downto 0)
     );
+  tilemap_o(2).tile_d(tilemap_o(2).tile_d'left downto 8) <= (others => '0');
     
   -- GFX3 (sprite characters)
   gfx3_inst : entity work.sprom
     generic map
     (
-      init_file		=> VARIANT_ROM_DIR & "gfx3.hex",
+      init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" & "gfx3.hex",
       widthad_a     => 16
     )
     port map
     (
       clock		=> clk_vid,
       address => sprite_i.a(15 downto 0),
-      q				=> sprite_o.d
+      q				=> sprite_o.d(7 downto 0)
     );
+  sprite_o.d(sprite_o.d'left downto 8) <= (others => '0');
     
   -- VRAM (foreground tile code) $D000-$D3FF
 	-- wren_a *MUST* be GND for CYCLONEII_SAFE_WRITE=VERIFIED_SAFE
 	vram_inst : entity work.dpram
 		generic map
 		(
-			init_file		=> VARIANT_ROM_DIR & "vram.hex",
+      init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" & "vram.hex",
 			widthad_a		=> 10
 		)
 		port map
@@ -613,7 +616,7 @@ begin
 	cram_inst : entity work.dpram
 		generic map
 		(
-			init_file		=> VARIANT_ROM_DIR & "cram.hex",
+      init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" & "cram.hex",
 			widthad_a		=> 10
 		)
 		port map
@@ -642,7 +645,7 @@ begin
 	bgram_t_inst : entity work.dpram
 		generic map
 		(
-			init_file		          => VARIANT_ROM_DIR & "bgram_t.hex",
+      init_file		          => PLATFORM_VARIANT_SRC_DIR & "roms/" & "bgram_t.hex",
 			widthad_a		          => 9
 		)
 		port map
@@ -669,7 +672,7 @@ begin
 	bgram_a_inst : entity work.dpram
 		generic map
 		(
-			init_file		          => VARIANT_ROM_DIR & "bgram_a.hex",
+      init_file		          => PLATFORM_VARIANT_SRC_DIR & "roms/" & "bgram_a.hex",
 			widthad_a		          => 9
 		)
 		port map
@@ -730,7 +733,7 @@ begin
   sram_o <= NULL_TO_SRAM;
   --graphics_o <= NULL_TO_GRAPHICS;
   sprite_reg_o <= NULL_TO_SPRITE_REG;
-  sprite_o <= NULL_TO_SPRITE_CTL;
+  --sprite_o <= NULL_TO_SPRITE_CTL;
   --osd_o <= NULL_TO_OSD;
   spi_o <= NULL_TO_SPI;
   ser_o <= NULL_TO_SERIAL;

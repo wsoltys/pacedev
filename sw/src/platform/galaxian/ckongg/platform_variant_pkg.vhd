@@ -14,8 +14,6 @@ package platform_variant_pkg is
 	--
 
   constant PACE_PLATFORM_NAME           : string := "ckongg";
-  
-	constant GALAXIAN_INPUTS_NUM_BYTES    : integer := 4;
 	
 	--
 	-- Platform-specific constants (optional)

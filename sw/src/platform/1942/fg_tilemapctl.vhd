@@ -43,7 +43,7 @@ begin
   process (clk, clk_ena)
 
 		variable x_adj		  : unsigned(x'range);
-    variable tile_d_r   : std_logic_vector(ctl_i.tile_d'range);
+    variable tile_d_r   : std_logic_vector(7 downto 0); --ctl_i.tile_d'range);
 		variable attr_d_r	  : std_logic_vector(7 downto 0);
     variable pel        : std_logic_vector(1 downto 0);
 

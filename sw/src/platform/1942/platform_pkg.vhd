@@ -15,11 +15,13 @@ package platform_pkg is
 
 	constant PACE_VIDEO_NUM_BITMAPS		    : natural := 0;
 	constant PACE_VIDEO_NUM_TILEMAPS 	    : natural := 2;
-	constant PACE_VIDEO_NUM_SPRITES 	    : natural := 32;
+	constant PACE_VIDEO_NUM_SPRITES 	    : natural := 0; --32;
 	constant PACE_VIDEO_H_SIZE				    : integer := 256; -- clipped to 224
 	constant PACE_VIDEO_V_SIZE				    : integer := 256;
+	constant PACE_VIDEO_L_CROP            : integer := 0;
+	constant PACE_VIDEO_R_CROP            : integer := PACE_VIDEO_L_CROP;
   constant PACE_VIDEO_PIPELINE_DELAY    : integer := 3;
-	
+  
   constant PACE_INPUTS_NUM_BYTES        : integer := 4;
 
 	constant CLK0_FREQ_MHz		            : natural := 
@@ -29,11 +31,9 @@ package platform_pkg is
 	-- Platform-specific constants (optional)
 	--
 
-  constant CAPCOM_1942_SOURCE_ROOT_DIR    : string := "../../../../../src/platform/1942/";
-  constant VARIANT_SOURCE_ROOT_DIR        : string := CAPCOM_1942_SOURCE_ROOT_DIR & 
-                                                        PLATFORM_VARIANT & "/";
-  constant VARIANT_ROM_DIR                : string := VARIANT_SOURCE_ROOT_DIR & 
-                                                        "roms/";
+  constant PLATFORM                     : string := "1942";
+  constant PLATFORM_SRC_DIR             : string := "../../../../../src/platform/" & PLATFORM & "/";
+  constant PLATFORM_VARIANT_SRC_DIR     : string := PLATFORM_SRC_DIR & PLATFORM_VARIANT & "/";
   
 	type palette_entry_t is array (0 to 2) of std_logic_vector(5 downto 0);
 	type palette_entry_a is array (0 to 255) of palette_entry_t;
