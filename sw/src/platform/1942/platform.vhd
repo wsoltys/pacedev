@@ -288,7 +288,7 @@ begin
     main_cpu_inst : entity work.Z80                                                
       port map
       (
-        clk			=> clk_cpu,
+        clk			=> '0', --clk_cpu,
         clk_en	=> main_en,
         reset  	=> cpu_reset,                                     
 
@@ -579,13 +579,10 @@ begin
         );
     end generate GEN_TILEROM;
 
-    tilemap_o(2).tile_d(7 downto 0) <=  tile_d_o(0) when tilemap_i(2).tile_a(15 downto CAPCOM_TILE_ROM_WIDTHAD) = "000" else
-                                        tile_d_o(1) when tilemap_i(2).tile_a(15 downto CAPCOM_TILE_ROM_WIDTHAD) = "001" else
-                                        tile_d_o(2) when tilemap_i(2).tile_a(15 downto CAPCOM_TILE_ROM_WIDTHAD) = "010" else
-                                        tile_d_o(3) when tilemap_i(2).tile_a(15 downto CAPCOM_TILE_ROM_WIDTHAD) = "011" else
-                                        tile_d_o(4) when tilemap_i(2).tile_a(15 downto CAPCOM_TILE_ROM_WIDTHAD) = "100" else
-                                        tile_d_o(5);
-    tilemap_o(2).tile_d(tilemap_o(2).tile_d'left downto 8) <= (others => '0');
+    tilemap_o(2).tile_d(23 downto 0) <= tile_d_o(0) & tile_d_o(2) & tile_d_o(4) 
+                                          when tilemap_i(2).tile_a(CAPCOM_TILE_ROM_WIDTHAD) = '0' else
+                                        tile_d_o(1) & tile_d_o(3) & tile_d_o(5);
+    tilemap_o(2).tile_d(tilemap_o(2).tile_d'left downto 24) <= (others => '0');
     
     -- GFX3 (sprite characters)
     gfx3_inst : entity work.sprom

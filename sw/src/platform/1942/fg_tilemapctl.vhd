@@ -11,9 +11,16 @@ use work.video_controller_pkg.all;
 --
 --	1942 Foreground Character Tilemap Controller
 --
---	Tile data is 1 BPP.
---	Attribute data 7:1 is palette entry
---  Attribute data 0 denotes transparency
+--static const gfx_layout charlayout =
+--{
+--	8,8,
+--	RGN_FRAC(1,1),
+--	2,
+--	{ 4, 0 },
+--	{ 0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3 },
+--	{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16 },
+--	16*8
+--};
 --
 
 architecture TILEMAP_1 of tilemapCtl is
@@ -31,13 +38,13 @@ begin
   -- technically, this is actually scroll x
 	-- these are constant for a whole line
   ctl_o.map_a(ctl_o.map_a'left downto 10) <= (others => '0');
-  ctl_o.map_a(4 downto 0) <= not y(7 downto 3);
+  ctl_o.map_a(4 downto 0) <= x(7 downto 3);
   ctl_o.tile_a(ctl_o.tile_a'left downto 12) <= (others => '0');
   ctl_o.tile_a(3 downto 1) <= y(2 downto 0);
 
   -- generate attribute RAM address (same, different memory bank)
   ctl_o.attr_a(ctl_o.map_a'left downto 10) <= (others => '0');
-  ctl_o.attr_a(4 downto 0) <= not y(7 downto 3);
+  ctl_o.attr_a(4 downto 0) <= x(7 downto 3);
   
   -- generate pixel
   process (clk, clk_ena)
@@ -65,8 +72,8 @@ begin
         -- - read tile from tilemap
         -- - read attribute data
         if stb = '1' then
-          ctl_o.map_a(9 downto 5) <= std_logic_vector(x_adj(7 downto 3));
-          ctl_o.attr_a(9 downto 5) <= std_logic_vector(x_adj(7 downto 3));
+          ctl_o.map_a(9 downto 5) <= std_logic_vector(y(7 downto 3));
+          ctl_o.attr_a(9 downto 5) <= std_logic_vector(y(7 downto 3));
         end if;
         
         -- 2nd stage of pipeline
@@ -83,10 +90,10 @@ begin
           if x_adj(1 downto 0) = "10" then
             tile_d_r := ctl_i.tile_d(7 downto 0);
           else
-            tile_d_r := tile_d_r(tile_d_r'left-2 downto 0) & "00";
+            tile_d_r := tile_d_r(tile_d_r'left-1 downto 0) & '0';
           end if;
         end if;
-        pel := tile_d_r(7 downto 6);
+        pel := tile_d_r(3) & tile_d_r(7);
 
         -- extract R,G,B from colour palette
         clut_i := to_integer(unsigned(attr_d_r(4 downto 0)));

@@ -11,9 +11,18 @@ use work.video_controller_pkg.all;
 --
 --	1942 Background Character Tilemap Controller
 --
---	Tile data is 4 BPP.
---	Attribute data 7:1 is palette entry
---  Attribute data 0 denotes transparency
+--static const gfx_layout tilelayout =
+--{
+--	16,16,
+--	RGN_FRAC(1,3),
+--	3,
+--	{ RGN_FRAC(0,3), RGN_FRAC(1,3), RGN_FRAC(2,3) },
+--	{ 0, 1, 2, 3, 4, 5, 6, 7,
+--			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7 },
+--	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+--			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 },
+--	32*8
+--};
 --
 
 architecture TILEMAP_2 of tilemapCtl is
@@ -39,7 +48,7 @@ begin
 	-- these are constant for a whole line
   ctl_o.map_a(ctl_o.map_a'left downto 10) <= (others => '0');
   ctl_o.map_a(9 downto 4) <= not y_adj(8 downto 4) & '0';
-  ctl_o.tile_a(ctl_o.tile_a'left downto 16) <= (others => '0');
+  ctl_o.tile_a(ctl_o.tile_a'left downto 14) <= (others => '0');
 
   -- generate attribute RAM address (next 16 bytes)
   ctl_o.attr_a(ctl_o.map_a'left downto 10) <= (others => '0');
@@ -50,7 +59,7 @@ begin
 
 		variable x_adj		  : unsigned(x'range);
   
-    variable tile_d_r   : std_logic_vector(7 downto 0); --ctl_i.tile_d'range);
+    variable tile_d_r   : std_logic_vector(23 downto 0);
 		variable attr_d_r	  : std_logic_vector(7 downto 0);
     variable pel        : std_logic_vector(2 downto 0);
 
@@ -78,8 +87,8 @@ begin
         
         -- 2nd stage of pipeline
         -- - read tile data from tile ROM
-        ctl_o.tile_a(15) <= ctl_i.attr_d(7);
-        ctl_o.tile_a(14 downto 7) <= ctl_i.map_d(7 downto 0); -- each tile is 128 bytes
+        ctl_o.tile_a(13) <= ctl_i.attr_d(7);
+        ctl_o.tile_a(12 downto 5) <= ctl_i.map_d(7 downto 0);
         if stb = '1' then
           if x_adj(3 downto 0) = "0010" then
             attr_d_r := ctl_i.attr_d(7 downto 0);
@@ -87,34 +96,33 @@ begin
         end if;
         -- attr_d(6) = Y FLIP
         if attr_d_r(6) = '0' then
-          ctl_o.tile_a(6 downto 3) <= y_adj(3 downto 0);
+          ctl_o.tile_a(3 downto 0) <= y_adj(3 downto 0);
         else
-          ctl_o.tile_a(6 downto 3) <= not y_adj(3 downto 0);
+          ctl_o.tile_a(3 downto 0) <= not y_adj(3 downto 0);
         end if;
         -- attr_d(5) = X FLIP
         if attr_d_r(5) = '0' then
-          ctl_o.tile_a(2 downto 0) <= std_logic_vector(x_adj(3 downto 1));
+          ctl_o.tile_a(4) <= x_adj(3);
         else
-          ctl_o.tile_a(2 downto 0) <= not std_logic_vector(x_adj(3 downto 1));
+          ctl_o.tile_a(4) <= not x_adj(3);
         end if;
         
         if stb = '1' then
-          -- latch every 2nd pixel
-          if x_adj(0) = '0' then
+          -- latch every 8 pixels
+          if x_adj(2 downto 0) = "010" then
             -- select tile bank
             -- attr_d(5) = X FLIP
             if attr_d_r(5) = '0' then
-              tile_d_r := ctl_i.tile_d(7 downto 0);
+              tile_d_r := ctl_i.tile_d(23 downto 0);
             else
-              tile_d_r := ctl_i.tile_d(3 downto 0) & ctl_i.tile_d(7 downto 4);
+              -- fixme
+              tile_d_r := ctl_i.tile_d(23 downto 0);
             end if;
           else
-            tile_d_r := "0000" & tile_d_r(7 downto 4);
+            tile_d_r := ctl_i.tile_d(ctl_i.tile_d'left-1 downto 0) & '0';
           end if;
         end if;
-        -- tile_d_r(3) is not used
-        -- we expanded 3BPP data
-        pel := tile_d_r(2 downto 0);
+        pel := tile_d_r(23) & tile_d_r(15) & tile_d_r(7);
         
         clut_i := to_integer(unsigned(attr_d_r(4 downto 0)));
         clut_entry := bg_clut(clut_i);
