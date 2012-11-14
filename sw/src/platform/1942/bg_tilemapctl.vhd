@@ -42,22 +42,23 @@ architecture TILEMAP_2 of tilemapCtl is
 begin
 
   -- scroll register
-  y_adj <= std_logic_vector(to_unsigned(256,y'length) + unsigned(y) - unsigned(scroll(y'range)));
+  --y_adj <= std_logic_vector(to_unsigned(256,y'length) + unsigned(y) - unsigned(scroll(y'range)));
+  y_adj <= y;
   --y_adj <= std_logic_vector(unsigned(y) + unsigned(scroll(y'range)));
     
 	-- these are constant for a whole line
   ctl_o.map_a(ctl_o.map_a'left downto 10) <= (others => '0');
-  ctl_o.map_a(9 downto 4) <= not y_adj(8 downto 4) & '0';
+  ctl_o.map_a(3 downto 0) <= std_logic_vector(y_adj(7 downto 4));
   ctl_o.tile_a(ctl_o.tile_a'left downto 14) <= (others => '0');
 
   -- generate attribute RAM address (next 16 bytes)
   ctl_o.attr_a(ctl_o.map_a'left downto 10) <= (others => '0');
-  ctl_o.attr_a(9 downto 4) <= not y_adj(8 downto 4) & '1';
+  ctl_o.attr_a(3 downto 0) <= std_logic_vector(y_adj(7 downto 4));
   
   -- generate pixel
   process (clk)
 
-		variable x_adj		  : unsigned(x'range);
+		variable x_adj		  : std_logic_vector(x'range);
   
     variable tile_d_r   : std_logic_vector(23 downto 0);
 		variable attr_d_r	  : std_logic_vector(7 downto 0);
@@ -75,14 +76,16 @@ begin
       if clk_ena = '1' then
 
         -- video is clipped left and right (only 224 wide)
-        x_adj := unsigned(x); -- + (256-PACE_VIDEO_H_SIZE)/2;
+        --x_adj := x; -- + (256-PACE_VIDEO_H_SIZE)/2;
+        --x_adj := std_logic_vector(to_unsigned(256,x'length) + unsigned(x) - unsigned(scroll(x'range)));
+        x_adj := std_logic_vector(unsigned(x) + unsigned(scroll(x'range)));
           
         -- 1st stage of pipeline
         -- - read tile from tilemap
         -- - read attribute data
         if stb = '1' then
-          ctl_o.map_a(3 downto 0) <= std_logic_vector(x_adj(7 downto 4));
-          ctl_o.attr_a(3 downto 0) <= std_logic_vector(x_adj(7 downto 4));
+          ctl_o.map_a(9 downto 4) <= x_adj(8 downto 4) & '0';
+          ctl_o.attr_a(9 downto 4) <= x_adj(8 downto 4) & '1';
         end if;
         
         -- 2nd stage of pipeline
@@ -119,7 +122,7 @@ begin
               tile_d_r := ctl_i.tile_d(23 downto 0);
             end if;
           else
-            tile_d_r := ctl_i.tile_d(ctl_i.tile_d'left-1 downto 0) & '0';
+            tile_d_r := tile_d_r(tile_d_r'left-1 downto 0) & '0';
           end if;
         end if;
         pel := tile_d_r(23) & tile_d_r(15) & tile_d_r(7);

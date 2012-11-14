@@ -288,7 +288,7 @@ begin
     main_cpu_inst : entity work.Z80                                                
       port map
       (
-        clk			=> '0', --clk_cpu,
+        clk			=> clk_cpu,
         clk_en	=> main_en,
         reset  	=> cpu_reset,                                     
 
