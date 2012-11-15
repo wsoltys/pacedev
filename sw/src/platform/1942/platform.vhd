@@ -142,7 +142,7 @@ architecture SYN of platform is
   -- latches
   signal inputs_cs      : std_logic;
   signal inputs_d_o     : std_logic_vector(7 downto 0);
-  signal scroll_cs      : std_logic;
+  signal latch_cs       : std_logic;
   
   -- foreground attribute ram
   signal vram_cs        : std_logic;
@@ -234,8 +234,8 @@ begin
 	subrom_cs       <= '1' when STD_MATCH(sub_a,  "000-------------") else '0';
   -- INPUTS $C000-$C004
   inputs_cs       <= '1' when STD_MATCH(cpu_a,       X"C00"&"0---") else '0';
-  -- SCROLL $C802-$C803
-  scroll_cs       <= '1' when STD_MATCH(cpu_a,       X"C80"&"001-") else '0';
+  -- LATCHES $C800-$C807
+  latch_cs        <= '1' when STD_MATCH(cpu_a,       X"C80"&"0---") else '0';
   -- VRAM $D000-$D3FF (foreground tile code)
   vram_cs         <= '1' when STD_MATCH(cpu_a, X"D"&"00----------") else '0';
   -- CRAM $D400-$D7FF (background attribute)
@@ -520,24 +520,34 @@ begin
     end if;
   end process;
   
-  -- video hardware latches
+  -- hardware latches
   process (clk_sys, rst_sys)
-    variable scroll : std_logic_vector(15 downto 0);
+    variable scroll         : std_logic_vector(15 downto 0);
+    variable palette_bank   : std_logic_vector(7 downto 0);
+    variable bankswitch     : std_logic_vector(7 downto 0);
   begin
     if rst_sys = '1' then
       scroll := (others => '0');
     elsif rising_edge(clk_sys) then
       if cpu_sel = MAIN_CPU and cpu_cyc = "11" then
-        if scroll_cs = '1' and cpu_memwr = '1' then
-          if cpu_a(0) = '0' then
-            scroll(7 downto 0) := cpu_d_o;
-          else
-            scroll(15 downto 8) := cpu_d_o;
-          end if; -- cpu_a(0)
-        end if; -- scroll_cs & cpu_memwr
+        if latch_cs = '1' and cpu_memwr = '1' then
+          case cpu_a(2 downto 0) is
+            when "010" =>
+              scroll(7 downto 0) := cpu_d_o;
+            when "011" =>
+              scroll(15 downto 8) := cpu_d_o;
+            when "101" =>
+              palette_bank := cpu_d_o;
+            when "110" =>
+              bankswitch := cpu_d_o;
+            when others =>
+              null;
+          end case;
+        end if; -- latch_cs & cpu_memwr
       end if; -- sel_cpu_MAIN_CPU
     end if;
     graphics_o.bit16(0) <= scroll;
+    graphics_o.bit8(0) <= palette_bank;
   end process;
   
   BLK_GFX : block

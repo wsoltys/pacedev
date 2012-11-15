@@ -34,10 +34,11 @@ architecture TILEMAP_2 of tilemapCtl is
   alias vblank    : std_logic is video_ctl.vblank;
   alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
   alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
-  
-  alias scroll    : std_logic_vector(15 downto 0) is graphics_i.bit16(0);
 
-  signal y_adj    : std_logic_vector(y'range);
+  alias palette_bank  : std_logic_vector(7 downto 0) is graphics_i.bit8(0);
+  alias scroll        : std_logic_vector(15 downto 0) is graphics_i.bit16(0);
+
+  signal y_adj        : std_logic_vector(y'range);
   
 begin
 
@@ -67,6 +68,7 @@ begin
     variable clut_i     : integer range 0 to 63;
     variable clut_entry : bg_clut_entry_t;
     variable pel_i      : integer range 0 to 7;
+    variable pal_v      : std_logic_vector(7 downto 0);
     variable pal_i      : integer range 0 to 255;
     variable pal_entry  : palette_entry_t;
 
@@ -118,8 +120,12 @@ begin
             if attr_d_r(5) = '0' then
               tile_d_r := ctl_i.tile_d(23 downto 0);
             else
-              -- fixme
-              tile_d_r := ctl_i.tile_d(23 downto 0);
+              tile_d_r := ctl_i.tile_d(16) & ctl_i.tile_d(17) & ctl_i.tile_d(18) & ctl_i.tile_d(19) &
+                          ctl_i.tile_d(20) & ctl_i.tile_d(21) & ctl_i.tile_d(22) & ctl_i.tile_d(23) &
+                          ctl_i.tile_d(8) & ctl_i.tile_d(9) & ctl_i.tile_d(10) & ctl_i.tile_d(11) &
+                          ctl_i.tile_d(12) & ctl_i.tile_d(13) & ctl_i.tile_d(14) & ctl_i.tile_d(15) &
+                          ctl_i.tile_d(0) & ctl_i.tile_d(1) & ctl_i.tile_d(2) & ctl_i.tile_d(3) &
+                          ctl_i.tile_d(4) & ctl_i.tile_d(5) & ctl_i.tile_d(6) & ctl_i.tile_d(7);
             end if;
           else
             tile_d_r := tile_d_r(tile_d_r'left-1 downto 0) & '0';
@@ -130,7 +136,8 @@ begin
         clut_i := to_integer(unsigned(attr_d_r(4 downto 0)));
         clut_entry := bg_clut(clut_i);
         pel_i := to_integer(unsigned(pel));
-        pal_i := to_integer(unsigned(clut_entry(pel_i)));
+        pal_v := palette_bank(2 downto 0) & '0' & clut_entry(pel_i);
+        pal_i := to_integer(unsigned(pal_v));
         pal_entry := pal(pal_i);
         ctl_o.rgb.r <= pal_entry(0) & "0000";
         ctl_o.rgb.g <= pal_entry(1) & "0000";
