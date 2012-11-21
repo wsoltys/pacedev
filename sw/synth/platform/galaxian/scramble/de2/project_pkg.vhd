@@ -56,7 +56,7 @@ package project_pkg is
 
   -- DE2 constants which *MUST* be defined
   
-	constant DE2_LCD_LINE2							      : string := " GALAXIAN (VGA) ";
+	constant DE2_LCD_LINE2							      : string := "  CKONGG (VGA)  ";
 
 	-- Galaxian-specific constants
 			
