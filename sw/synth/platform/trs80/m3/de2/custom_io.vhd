@@ -25,6 +25,12 @@ entity custom_io is
     -- 7-segment display
     seg7              : out std_logic_vector(31 downto 0);
     
+    -- SD card
+		sd_dat            : inout std_logic;
+		sd_dat3           : inout std_logic;
+		sd_cmd            : inout std_logic;
+		sd_clk            : out std_logic;
+
     project_i         : out from_PROJECT_IO_t;
     project_o         : in to_PROJECT_IO_t;
     platform_i        : out from_PLATFORM_IO_t;

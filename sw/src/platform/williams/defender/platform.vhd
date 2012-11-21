@@ -290,9 +290,10 @@ begin
 		graphics_o.pal <= palette_r;
 	end process;
 	
-	bitmap_o(1).d <= 	bitmap0_data when bitmap_i(1).a(15) = '0' else
-                    bitmap8_data when bitmap_i(1).a(15 downto 12) = X"8" else
-                    bitmap9_data;
+	bitmap_o(1).d(bitmap_o(1).d'left downto 8) <= (others => '0');
+	bitmap_o(1).d(7 downto 0) <=  bitmap0_data when bitmap_i(1).a(15) = '0' else
+                                bitmap8_data when bitmap_i(1).a(15 downto 12) = X"8" else
+                                bitmap9_data;
 
 	-- irqa interrupt at scanline 240
 	process (clk_20M, rst_20M)

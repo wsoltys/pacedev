@@ -29,6 +29,8 @@ package project_pkg is
   constant PACE_CLK1_MULTIPLY_BY            : natural := 1;  	-- 50*1/2 = 25MHz
 	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
 	constant PACE_VIDEO_V_SCALE       	      : integer := 1;
+  constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '0';
+  constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '0';
 
   --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
   --constant PACE_CLK0_DIVIDE_BY        			: natural := 5;
@@ -37,10 +39,13 @@ package project_pkg is
   --constant PACE_CLK1_MULTIPLY_BY      			: natural := 4;  	-- 50*4/5 = 40MHz
 	--constant PACE_VIDEO_H_SCALE       				: integer := 2;
 	--constant PACE_VIDEO_V_SCALE       				: integer := 2;
-	--constant PACE_ENABLE_ADV724								: std_logic := '0';
 
   constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
   --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;
+
+  constant PACE_HAS_OSD                     : boolean := false;
+  constant PACE_OSD_XPOS                    : natural := 128;
+  constant PACE_OSD_YPOS                    : natural := 176;
 
 	-- DE2 constants which *MUST* be defined
 	
@@ -51,4 +56,12 @@ package project_pkg is
   constant APPLE_II_HIRES_PAGES             : natural := 2;
 	constant USE_VIDEO_VBLANK_INTERRUPT 			: boolean := false;
 	
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

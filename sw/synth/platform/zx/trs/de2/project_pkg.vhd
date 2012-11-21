@@ -15,6 +15,12 @@ package project_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 	
+	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
+	constant PACE_HAS_FLASH                   : boolean := false;
+	constant PACE_HAS_SRAM                    : boolean := false;
+	constant PACE_HAS_SDRAM                   : boolean := false;
+	constant PACE_HAS_SERIAL                  : boolean := false;
+
   -- Reference clock is 50MHz
 	-- PAL
   --constant PACE_CLK0_DIVIDE_BY        : natural := 16;
@@ -50,4 +56,12 @@ package project_pkg is
 	constant TRS_ROM_FILENAME						: string := "trs_rom2.hex";
 	--constant TRS_ROM_FILENAME						: string := "sys80_rom.hex";
 	
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

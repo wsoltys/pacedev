@@ -35,6 +35,8 @@ package project_pkg is
   constant PACE_CLK1_MULTIPLY_BY            : natural := 1;  	-- 50*1/2 = 25MHz
 	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
 	constant PACE_VIDEO_V_SCALE       	      : integer := 1;
+  constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';
+  constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '1';
 
   constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
   --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;

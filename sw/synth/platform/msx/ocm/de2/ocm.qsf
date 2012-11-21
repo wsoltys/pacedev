@@ -25,7 +25,7 @@
 
 # Project-Wide Assignments
 # ========================
-set_global_assignment -name LAST_QUARTUS_VERSION "7.2 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 12.1
 
 # Pin & Location Assignments
 # ==========================
@@ -465,7 +465,7 @@ set_global_assignment -name TOP_LEVEL_ENTITY target_top
 set_global_assignment -name DEVICE EP2C35F672C6
 set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
 set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED"
-set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS OUTPUT DRIVING AN UNSPECIFIED SIGNAL"
+set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS INPUT TRI-STATED"
 set_instance_assignment -name IO_STANDARD LVTTL -to TD_DATA[0]
 set_instance_assignment -name IO_STANDARD LVTTL -to TD_DATA[1]
 set_instance_assignment -name IO_STANDARD LVTTL -to TD_DATA[2]
@@ -496,7 +496,6 @@ set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS INPUT TRI-
 set_global_assignment -name SEED 1
 
 set_parameter -name CYCLONEII_SAFE_WRITE VERIFIED_SAFE
-set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
@@ -510,14 +509,13 @@ set_global_assignment -name REPORT_IO_PATHS_SEPARATELY ON
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
-set_global_assignment -name OPTIMIZE_FAST_CORNER_TIMING ON
+set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
 set_global_assignment -name OPTIMIZE_POWER_DURING_FITTING OFF
 set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
 set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_ASYNCHRONOUS_SIGNAL_PIPELINING ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
-set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_global_assignment -name ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP ON
 set_global_assignment -name ADV_NETLIST_OPT_SYNTH_GATE_RETIME ON
 set_global_assignment -name SAVE_DISK_SPACE OFF
@@ -591,3 +589,5 @@ set_global_assignment -name VHDL_FILE ../../../../../src/platform/msx/ocm/unzip/
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/msx/ocm/unzip/ESEMSX3/pld/src/sound/filter/tapram.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/msx/ocm/emsx_top.vhd
 set_global_assignment -name VHDL_FILE target_top.vhd
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

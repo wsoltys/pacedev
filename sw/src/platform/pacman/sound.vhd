@@ -23,7 +23,8 @@ entity sound is
     sndif_addr        : in    std_logic_vector(15 downto 0);
     
     snd_clk           : out   std_logic;
-    snd_data          : out   std_logic_vector(7 downto 0);
+    snd_data_l        : out   std_logic_vector(7 downto 0);
+    snd_data_r        : out   std_logic_vector(7 downto 0);
     sndif_datao       : out   std_logic_vector(7 downto 0)
   );
 end sound;
@@ -39,8 +40,13 @@ architecture SYN of sound is
   signal snd_pulse  : std_logic;
   signal snd_clock  : std_logic;
 
+  signal snd_data   : std_logic_vector(7 downto 0);
+
 begin
 
+  snd_data_l <= snd_data;
+  snd_data_r <= snd_data;
+  
   process (sysclk, reset)
     -- need a 96kHz pulse
     subtype count_t is integer range 0 to CLK_MHz*1000/96-1;

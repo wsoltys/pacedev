@@ -12,27 +12,7 @@ use work.video_controller_pkg.all;
 --	NES Tilemap Controller
 --
 
-entity tilemapCtl_1 is          
-  generic
-  (
-    DELAY       : integer
-  );
-  port               
-  (
-    reset				: in std_logic;
-
-    -- video control signals		
-    video_ctl   : in from_VIDEO_CTL_t;
-
-    -- tilemap controller signals
-    ctl_i       : in to_TILEMAP_CTL_t;
-    ctl_o       : out from_TILEMAP_CTL_t;
-
-    graphics_i  : in to_GRAPHICS_t
-  );
-end entity tilemapCtl_1;
-
-architecture SYN of tilemapCtl_1 is
+architecture TILEMAP_1 of tilemapCtl is
 
   alias clk       : std_logic is video_ctl.clk;
   alias clk_ena   : std_logic is video_ctl.clk_ena;
@@ -42,7 +22,7 @@ architecture SYN of tilemapCtl_1 is
   alias x         : std_logic_vector(video_ctl.x'range) is video_ctl.x;
   alias y         : std_logic_vector(video_ctl.y'range) is video_ctl.y;
   
-  alias scroll_data : std_logic_vector(7 downto 0) is graphics_i.bit8_1;
+  alias scroll_data : std_logic_vector(7 downto 0) is graphics_i.bit8(0);
   
 	signal attr		: std_logic_vector(1 downto 0);
 
@@ -171,5 +151,5 @@ begin
 
   end process;
 
-end SYN;
+end TILEMAP_1;
 

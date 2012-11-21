@@ -160,7 +160,7 @@ architecture SYN of target_top is
   signal ps2_mclk     : std_logic;
   signal ps2_mdat     : std_logic;
 
-	signal jamma				: JAMMAInputsType;
+  signal inputs_i     : from_INPUTS_t;
 
 	-- maple/dreamcast controller interface
 	signal maple_sense	: std_logic;
@@ -242,19 +242,19 @@ begin
 		gpio_maple(11) <= not maple_oe;
 		maple_sense <= gpio_maple(17); -- and sw(0);
 
-		-- map maple bus to jamma inputs
+		-- map maple bus to jamma_n inputs
 		-- - same mappings as default mappings for MAMED (DCMAME)
-		jamma.coin(1) 				<= mpj.lv(7);		-- MSB of right analogue trigger (0-255)
-		jamma.p(1).start 			<= mpj.start;
-		jamma.p(1).up 				<= mpj.d_up;
-		jamma.p(1).down 			<= mpj.d_down;
-		jamma.p(1).left	 			<= mpj.d_left;
-		jamma.p(1).right 			<= mpj.d_right;
-		jamma.p(1).button(1) 	<= mpj.a;
-		jamma.p(1).button(2) 	<= mpj.x;
-		jamma.p(1).button(3) 	<= mpj.b;
-		jamma.p(1).button(4) 	<= mpj.y;
-		jamma.p(1).button(5)	<= '1';
+		inputs_i.jamma_n.coin(1) 				  <= mpj.lv(7);		-- MSB of right analogue trigger (0-255)
+		inputs_i.jamma_n.p(1).start 			<= mpj.start;
+		inputs_i.jamma_n.p(1).up 				  <= mpj.d_up;
+		inputs_i.jamma_n.p(1).down 			  <= mpj.d_down;
+		inputs_i.jamma_n.p(1).left	 			<= mpj.d_left;
+		inputs_i.jamma_n.p(1).right 			<= mpj.d_right;
+		inputs_i.jamma_n.p(1).button(1) 	<= mpj.a;
+		inputs_i.jamma_n.p(1).button(2) 	<= mpj.x;
+		inputs_i.jamma_n.p(1).button(3) 	<= mpj.b;
+		inputs_i.jamma_n.p(1).button(4) 	<= mpj.y;
+		inputs_i.jamma_n.p(1).button(5)	  <= '1';
 
 	end generate GEN_MAPLE;
 
@@ -271,41 +271,41 @@ begin
 				joystate 		=> gcj
 			);
 
-		-- map gamecube controller to jamma inputs
-		jamma.coin(1) <= not gcj.l;
-		jamma.p(1).start <= not gcj.start;
-		jamma.p(1).up <= not gcj.d_up;
-		jamma.p(1).down <= not gcj.d_down;
-		jamma.p(1).left <= not gcj.d_left;
-		jamma.p(1).right <= not gcj.d_right;
-		jamma.p(1).button(1) <= not gcj.a;
-		jamma.p(1).button(2) <= not gcj.b;
-		jamma.p(1).button(3) <= not gcj.x;
-		jamma.p(1).button(4) <= not gcj.y;
-		jamma.p(1).button(5)	<= not gcj.z;
+		-- map gamecube controller to jamma_n inputs
+		inputs_i.jamma_n.coin(1) <= not gcj.l;
+		inputs_i.jamma_n.p(1).start <= not gcj.start;
+		inputs_i.jamma_n.p(1).up <= not gcj.d_up;
+		inputs_i.jamma_n.p(1).down <= not gcj.d_down;
+		inputs_i.jamma_n.p(1).left <= not gcj.d_left;
+		inputs_i.jamma_n.p(1).right <= not gcj.d_right;
+		inputs_i.jamma_n.p(1).button(1) <= not gcj.a;
+		inputs_i.jamma_n.p(1).button(2) <= not gcj.b;
+		inputs_i.jamma_n.p(1).button(3) <= not gcj.x;
+		inputs_i.amma.p(1).button(4) <= not gcj.y;
+		inputs_i.jamma_n.p(1).button(5)	<= not gcj.z;
 
 	end generate GEN_GAMECUBE;
 	
 	-- not currently wired to any inputs
-	jamma.coin(2) <= '1';
-	jamma.p(2).start <= '1';
-	jamma.service <= '1';
-	jamma.tilt <= '1';
-	jamma.test <= '1';
+	inputs_i.jamma_n.coin(2) <= '1';
+	inputs_i.jamma_n.p(2).start <= '1';
+	inputs_i.jamma_n.service <= '1';
+	inputs_i.jamma_n.tilt <= '1';
+	inputs_i.jamma_n.test <= '1';
 		
-	-- show JAMMA inputs on LED bank
-	--ledr(17) <= not jamma.coin(1);
-	--ledr(16) <= not jamma.coin(2);
-	--ledr(15) <= not jamma.p(1).start;
-	--ledr(14) <= not jamma.p(1).up;
-	--ledr(13) <= not jamma.p(1).down;
-	--ledr(12) <= not jamma.p(1).left;
-	--ledr(11) <= not jamma.p(1).right;
-	--ledr(10) <= not jamma.p(1).button(1);
-	--ledr(9) <= not jamma.p(1).button(2);
-	--ledr(8) <= not jamma.p(1).button(3);
-	--ledr(7) <= not jamma.p(1).button(4);
-	--ledr(6) <= not jamma.p(1).button(5);
+	-- show jamma_n inputs on LED bank
+	--ledr(17) <= not jamma_n.coin(1);
+	--ledr(16) <= not jamma_n.coin(2);
+	--ledr(15) <= not jamma_n.p(1).start;
+	--ledr(14) <= not jamma_n.p(1).up;
+	--ledr(13) <= not jamma_n.p(1).down;
+	--ledr(12) <= not jamma_n.p(1).left;
+	--ledr(11) <= not jamma_n.p(1).right;
+	--ledr(10) <= not jamma_n.p(1).button(1);
+	--ledr(9) <= not jamma_n.p(1).button(2);
+	--ledr(8) <= not jamma_n.p(1).button(3);
+	--ledr(7) <= not jamma_n.p(1).button(4);
+	--ledr(6) <= not jamma_n.p(1).button(5);
 		
 
 	-- default the dipswitches

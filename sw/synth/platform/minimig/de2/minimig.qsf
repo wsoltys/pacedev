@@ -25,7 +25,7 @@
 
 # Project-Wide Assignments
 # ========================
-set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 12.1
 
 # Pin & Location Assignments
 # ==========================
@@ -465,7 +465,7 @@ set_global_assignment -name TOP_LEVEL_ENTITY target_top
 set_global_assignment -name DEVICE EP2C35F672C6
 set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
 set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED"
-set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS OUTPUT DRIVING AN UNSPECIFIED SIGNAL"
+set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS INPUT TRI-STATED"
 set_instance_assignment -name IO_STANDARD LVTTL -to TD_DATA[0]
 set_instance_assignment -name IO_STANDARD LVTTL -to TD_DATA[1]
 set_instance_assignment -name IO_STANDARD LVTTL -to TD_DATA[2]
@@ -550,14 +550,13 @@ set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
-set_global_assignment -name OPTIMIZE_FAST_CORNER_TIMING ON
+set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
 set_global_assignment -name OPTIMIZE_POWER_DURING_FITTING OFF
 set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
 set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_ASYNCHRONOUS_SIGNAL_PIPELINING ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
-set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_global_assignment -name ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP ON
 set_global_assignment -name ADV_NETLIST_OPT_SYNTH_GATE_RETIME ON
 set_global_assignment -name SAVE_DISK_SPACE OFF
@@ -588,3 +587,5 @@ set_instance_assignment -name REPORT_DELAY ON -from * -to dram_cas_n
 set_instance_assignment -name REPORT_DELAY ON -from * -to dram_ras_n
 set_instance_assignment -name REPORT_DELAY ON -from * -to dram_we_n
 set_instance_assignment -name REPORT_DELAY ON -from * -to dram_dq[*]
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top

@@ -25,7 +25,7 @@
 
 # Project-Wide Assignments
 # ========================
-set_global_assignment -name LAST_QUARTUS_VERSION 8.1
+set_global_assignment -name LAST_QUARTUS_VERSION 12.1
 
 # Pin & Location Assignments
 # ==========================
@@ -496,17 +496,13 @@ set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS INPUT TRI-
 set_global_assignment -name SEED 1
 
 set_parameter -name CYCLONEII_SAFE_WRITE VERIFIED_SAFE
-set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name ENABLE_SIGNALTAP ON
 set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
 set_global_assignment -name NUM_PARALLEL_PROCESSORS 2
 set_global_assignment -name SMART_RECOMPILE OFF
-set_instance_assignment -name PARTITION_HIERARCHY c1541_63c6ab44be41fedc7e4dc9a25171f74b1 -to "PACE:pace_inst|c1541_top:\\GEN_1541:c1541_inst|c1541_diskif:c1541_diskif_inst" -section_id "c1541_diskif:c1541_diskif_inst"
 set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id "c1541_diskif:c1541_diskif_inst"
-set_instance_assignment -name PARTITION_HIERARCHY c1541_8473a77373531ff4de856a878225b9561 -to "PACE:pace_inst|c1541_top:\\GEN_1541:c1541_inst|c1541_logic:c1541_logic_inst" -section_id "c1541_logic:c1541_logic_inst"
 set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id "c1541_logic:c1541_logic_inst"
-set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_global_assignment -name SAVE_DISK_SPACE OFF
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
@@ -618,3 +614,12 @@ set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_IN_ENABLE
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ADVANCED_TRIGGER_ENTITY=basic,1," -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL_PIPELINE=1" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ENABLE_ADVANCED_TRIGGER=0" -section_id auto_signaltap_0
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_instance_assignment -name PARTITION_HIERARCHY c1541_63c6ab44be41fedc7e4dc9a25171f74b1 -to "PACE:pace_inst|c1541_top:\\GEN_1541:c1541_inst|c1541_diskif:c1541_diskif_inst" -section_id "c1541_diskif:c1541_diskif_inst"
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id "c1541_diskif:c1541_diskif_inst"
+set_global_assignment -name PARTITION_COLOR 39423 -section_id "c1541_diskif:c1541_diskif_inst"
+set_instance_assignment -name PARTITION_HIERARCHY c1541_8473a77373531ff4de856a878225b9561 -to "PACE:pace_inst|c1541_top:\\GEN_1541:c1541_inst|c1541_logic:c1541_logic_inst" -section_id "c1541_logic:c1541_logic_inst"
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id "c1541_logic:c1541_logic_inst"
+set_global_assignment -name PARTITION_COLOR 52377 -section_id "c1541_logic:c1541_logic_inst"

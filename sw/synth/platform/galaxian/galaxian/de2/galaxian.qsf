@@ -25,7 +25,7 @@
 
 # Project-Wide Assignments
 # ========================
-set_global_assignment -name LAST_QUARTUS_VERSION "9.0 SP2"
+set_global_assignment -name LAST_QUARTUS_VERSION 12.1
 
 # Pin & Location Assignments
 # ==========================
@@ -465,7 +465,7 @@ set_global_assignment -name TOP_LEVEL_ENTITY target_top
 set_global_assignment -name DEVICE EP2C35F672C6
 set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
 set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED"
-set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS OUTPUT DRIVING AN UNSPECIFIED SIGNAL"
+set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS INPUT TRI-STATED"
 set_instance_assignment -name IO_STANDARD LVTTL -to TD_DATA[0]
 set_instance_assignment -name IO_STANDARD LVTTL -to TD_DATA[1]
 set_instance_assignment -name IO_STANDARD LVTTL -to TD_DATA[2]
@@ -499,7 +499,6 @@ set_parameter -name CYCLONEII_SAFE_WRITE VERIFIED_SAFE
 
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
@@ -566,3 +565,5 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwm_chaser.
 set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwmout.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/de2/custom_io.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/de2/target_top.vhd
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top

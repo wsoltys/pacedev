@@ -21,4 +21,12 @@ package platform_pkg is
 	-- Platform-specific constants (optional)
 	--
 
+  type from_PLATFORM_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PLATFORM_IO_t is record
+    not_used  : std_logic;
+  end record;
+
 end;

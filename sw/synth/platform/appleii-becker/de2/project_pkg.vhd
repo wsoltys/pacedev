@@ -12,7 +12,13 @@ package project_pkg is
 	--
 	
 	constant PACE_HAS_PLL										  : boolean := true;
+  constant PACE_HAS_FLASH                   : boolean := false;
+  constant PACE_HAS_SRAM                    : boolean := true;
+  constant PACE_HAS_SDRAM                   : boolean := false;
+  constant PACE_HAS_SERIAL                  : boolean := false;
 	
+	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
+
   -- Reference clock is 24MHz
   constant PACE_CLK0_DIVIDE_BY        		  : natural := 1;
   constant PACE_CLK0_MULTIPLY_BY      		  : natural := 1;  	  -- 50MHz
@@ -26,6 +32,14 @@ package project_pkg is
 	
 	constant DE2_LCD_LINE2							      : string := "APPLEII (BECKER)";
 
-	-- Coco3-specific constants
+	-- AppleII-Becker-specific constants
+
+  type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
 
 end;

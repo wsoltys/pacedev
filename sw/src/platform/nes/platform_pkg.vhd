@@ -4,6 +4,7 @@ use ieee.std_logic_unsigned.all;
 
 library work;
 use work.project_pkg.all;
+use work.target_pkg.all;
 
 package platform_pkg is
 
@@ -16,11 +17,16 @@ package platform_pkg is
 	constant PACE_VIDEO_NUM_SPRITES 	    : natural := 64;
 	constant PACE_VIDEO_H_SIZE				    : integer := 256;
 	constant PACE_VIDEO_V_SIZE				    : integer := 240;
+	constant PACE_VIDEO_L_CROP            : integer := 0;
+	constant PACE_VIDEO_R_CROP            : integer := PACE_VIDEO_L_CROP;
   constant PACE_VIDEO_PIPELINE_DELAY    : integer := 5;
 	
 	constant PACE_INPUTS_NUM_BYTES        : integer := 7;
 	
-	--
+	constant CLK0_FREQ_MHz		            : natural := 
+    PACE_CLKIN0 * PACE_CLK0_MULTIPLY_BY / PACE_CLK0_DIVIDE_BY;
+
+  --
 	-- Platform-specific constants (optional)
 	--
 

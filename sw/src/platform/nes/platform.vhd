@@ -20,8 +20,7 @@ entity platform is
   port
   (
     -- clocking and reset
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -41,11 +40,11 @@ entity platform is
     
     -- graphics
     
-    bitmap_i        : in from_BITMAP_CTL_t;
-    bitmap_o        : out to_BITMAP_CTL_t;
+    bitmap_i        : in from_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
+    bitmap_o        : out to_BITMAP_CTL_a(1 to PACE_VIDEO_NUM_BITMAPS);
     
-    tilemap_i       : in from_TILEMAP_CTL_t;
-    tilemap_o       : out to_TILEMAP_CTL_t;
+    tilemap_i       : in from_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
+    tilemap_o       : out to_TILEMAP_CTL_a(1 to PACE_VIDEO_NUM_TILEMAPS);
 
     sprite_reg_o    : out to_SPRITE_REG_t;
     sprite_i        : in from_SPRITE_CTL_t;
@@ -85,8 +84,10 @@ end platform;
 
 architecture SYN of platform is
 
-	alias clk_21M28				: std_logic is clk_i(0);
-	alias clk_video				: std_logic is clk_i(1);
+	alias clk_21M28				: std_logic is clkrst_i.clk(0);
+	alias rst_21M28				: std_logic is clkrst_i.rst(0);
+	alias clk_video				: std_logic is clkrst_i.clk(1);
+	alias rst_video				: std_logic is clkrst_i.rst(1);
 	
 	signal reset_n				: std_logic;
 	
@@ -172,8 +173,8 @@ architecture SYN of platform is
 	
 begin
 
-	reset_n <= not reset_i;
-	game_reset <= reset_i or cpu_reset;
+	reset_n <= not rst_21M28;
+	game_reset <= rst_21M28 or cpu_reset;
 	game_reset_n <= not game_reset;
 
 	-- SRAM signals always driven		
@@ -217,7 +218,7 @@ begin
 	up_nmi_n <= (not in_vblank) when ppu_ctl1(7) = '1' else '1';
 
 	-- PPU registers
-	process (clk_21M28, clk_1M77_en, reset_i)
+	process (clk_21M28, clk_1M77_en, rst_21M28)
 		variable state_2005 	: std_logic;
 		variable state_2006 	: std_logic;
 		variable vram_buffer	: std_logic_vector(7 downto 0);
@@ -227,7 +228,7 @@ begin
 		variable spr0_hit_r		: std_logic;
 		
 	begin
-		if reset_i = '1' then
+		if rst_21M28 = '1' then
 			in_vblank <= '0';
 			vram_wr <= '0';
 			aram_wr <= '0';
@@ -348,12 +349,12 @@ begin
   sprite_reg_o.clk_ena <= clk_1M77_en;
   
 	-- (sprite) DMA
-	process (clk_21M28, clk_1M77_en, reset_i)
+	process (clk_21M28, clk_1M77_en, rst_21M28)
 		variable dip			: std_logic := '0';
 		variable state		: std_logic := '0';
 		variable dma_data	: std_logic_vector(7 downto 0) := (others => '0');
 	begin
-		if reset_i = '1' then
+		if rst_21M28 = '1' then
 			dip := '0';
 			state := '0';
 		elsif rising_edge(clk_21M28) then
@@ -392,10 +393,10 @@ begin
 	end process;
 
 	-- controller inputs
-	process (clk_21M28, clk_1M77_en, reset_i)
+	process (clk_21M28, clk_1M77_en, rst_21M28)
 		variable joy_reset : std_logic;
 	begin
-		if reset_i = '1' then
+		if rst_21M28 = '1' then
 			joy_reset := '0';
 		elsif rising_edge(clk_21M28) then
 			if clk_1M77_en = '1' then
@@ -429,13 +430,13 @@ begin
 	joy_data(0) <= joypad1(0) when up_addr(0) = '0' else joypad2(0);
 
 	-- DMC
-	process (clk_21M28, clk_1M77_en, reset_i)
+	process (clk_21M28, clk_1M77_en, rst_21M28)
 		variable length_cnt : std_logic_vector(7 downto 0) := (others => '0');
 		variable dmc_mode		: std_logic_vector(1 downto 0) := "00";
 		variable dmc_en			: std_logic := '0';
 		variable dmc_irq		: std_logic := '0';
 	begin
-		if reset_i = '1' then
+		if rst_21M28 = '1' then
 			dmc_en := '0';
 			dmc_irq := '0';
 		elsif rising_edge(clk_21M28) then
@@ -504,7 +505,7 @@ begin
 		port map
 		(
 			clk				=> clk_21M28,
-			reset			=> reset_i,
+			reset			=> rst_21M28,
 			clk_en		=> clk_1M77_en
 		);
 
@@ -586,12 +587,12 @@ begin
 			q_b					=> vram_datao,
 
 			clock_a			=> clk_video,
-			address_a		=> tilemap_i.map_a(10 downto 0),
+			address_a		=> tilemap_i(1).map_a(10 downto 0),
 			wren_a			=> '0',
 			data_a			=> (others => 'X'),
-			q_a					=> tilemap_o.map_d(7 downto 0)
+			q_a					=> tilemap_o(1).map_d(7 downto 0)
 		);
-	tilemap_o.map_d(15 downto 8) <= (others => '0');
+	tilemap_o(1).map_d(15 downto 8) <= (others => '0');
 	--
 	-- *** this actually depends on the cart wiring
 	--
@@ -599,14 +600,14 @@ begin
 		-- eg. Super Mario Bros.
 		mirrored_vram_addr_10 <= vram_addr(10);
 		-- only valid for horizontally scrolling games
-  	graphics_o.bit8_1 <= hscroll;
+  	graphics_o.bit8(0) <= hscroll;
 	end generate GEN_VERTICAL_MIRRORING;
 	
 	GEN_HORIZONTAL_MIRRORING : if NES_MIRROR_HORIZONTAL generate
 		-- eg. Wrecking Crew
 		mirrored_vram_addr_10 <= vram_addr(11);
 		-- only valid for vertically scrolling games
-  	graphics_o.bit8_1 <= vscroll;
+  	graphics_o.bit8(0) <= vscroll;
 	end generate GEN_HORIZONTAL_MIRRORING;
 
 	-- this one block contains attribute RAM for *both* internal tables		
@@ -628,14 +629,14 @@ begin
 			q_b										=> open,
 
 			clock_a								=> clk_video,
-			address_a(6)					=> tilemap_i.attr_a(6),
-			address_a(5 downto 0)	=> tilemap_i.attr_a(5 downto 0),
+			address_a(6)					=> tilemap_i(1).attr_a(6),
+			address_a(5 downto 0)	=> tilemap_i(1).attr_a(5 downto 0),
 			wren_a								=> '0',
 			data_a								=> (others => 'X'),
-			q_a										=> tilemap_o.attr_d(7 downto 0)
+			q_a										=> tilemap_o(1).attr_d(7 downto 0)
 		);
 	-- fudge - pass PPU CTL1 register value to MAPCTL
-	tilemap_o.attr_d(15 downto 8) <= ppu_ctl1;
+	tilemap_o(1).attr_d(15 downto 8) <= ppu_ctl1;
 		
 	prg_rom_inst : entity work.sprom
 		generic map
@@ -655,10 +656,10 @@ begin
 		generic map
 		(
 			init_file		=> "../../../../src/platform/nes/carts/" & NES_CART_NAME & "_chr.hex",
-			numwords_a	=> 8192,
+			--numwords_a	=> 8192,
 			widthad_a		=> 13,
 			width_b			=> 16,
-			numwords_b	=> 4096,
+			--numwords_b	=> 4096,
 			widthad_b		=> 12
 		)
 		port map
@@ -666,8 +667,8 @@ begin
 			clock				=> clk_video,
 			
 			-- tilemap i/f
-			address_a		=> tilemap_i.tile_a(12 downto 0),
-			q_a					=> tilemap_o.tile_d,
+			address_a		=> tilemap_i(1).tile_a(12 downto 0),
+			q_a					=> tilemap_o(1).tile_d(7 downto 0),
 			
 			-- sprite i/f
 			address_b		=> sprite_i.a(11 downto 0),
@@ -679,8 +680,8 @@ begin
 
   -- unused outputs
   flash_o <= NULL_TO_FLASH;
-	bitmap_o.d <= (others => '0');
-	graphics_o.bit16_1 <= (others => '0');
+	--bitmap_o.d <= (others => '0');
+	graphics_o.bit16(0) <= (others => '0');
 	osd_o <= NULL_TO_OSD;
   snd_o <= NULL_TO_SOUND;
 	spi_o <= NULL_TO_SPI;

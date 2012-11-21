@@ -14,8 +14,7 @@ entity PACE is
   port
   (
   	-- clocks and resets
-    clk_i           : in std_logic_vector(0 to 3);
-    reset_i         : in std_logic;
+    clkrst_i        : in from_CLKRST_t;
 
     -- misc I/O
     buttons_i       : in from_BUTTONS_t;
@@ -116,8 +115,9 @@ architecture SYN of PACE is
 		);
 	end component;
 
-	alias clk_50M 		  : std_logic is clk_i(0);
-
+	alias clk_50M 		  : std_logic is clkrst_i.clk(0);
+  alias rst_50M       : std_logic is clkrst_i.rst(0);
+  
 	signal red_s				: std_logic;
 	signal green_s			: std_logic;
 	signal blue_s				: std_logic;
@@ -151,12 +151,12 @@ begin
 			
 		begin
 
-			process (clk_50M, reset_i)
+			process (clk_50M, rst_50M)
 				variable rmw_di			: std_logic_vector(15 downto 0);
 				variable rmw_do			: std_logic_vector(15 downto 0);
 				variable rmw_be			: std_logic_vector(ram0_be_n'range);
 			begin
-				if reset_i = '1' then
+				if rst_50M = '1' then
 					state <= IDLE after DELAY;
 				elsif rising_edge(clk_50M) then
 					case state is
@@ -286,7 +286,7 @@ begin
 			
 			-- Extra Buttons and Switches
 			SWITCH				=> "00000000",
-			BUTTON(3)			=> reset_i,
+			BUTTON(3)			=> rst_50M,
 			BUTTON(2 downto 0) => "000"
 		);
 
