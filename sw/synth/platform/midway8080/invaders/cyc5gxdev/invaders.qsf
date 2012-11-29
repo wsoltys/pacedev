@@ -1,0 +1,410 @@
+# -------------------------------------------------------------------------- #
+#
+# Copyright (C) 1991-2012 Altera Corporation
+# Your use of Altera Corporation's design tools, logic functions 
+# and other software and tools, and its AMPP partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Altera Program License 
+# Subscription Agreement, Altera MegaCore Function License 
+# Agreement, or other applicable license agreement, including, 
+# without limitation, that your use is for the sole purpose of 
+# programming logic devices manufactured by Altera and sold by 
+# Altera or its authorized distributors.  Please refer to the 
+# applicable agreement for further details.
+#
+# -------------------------------------------------------------------------- #
+#
+# Quartus II 64-Bit
+# Version 12.0 Build 263 08/02/2012 Service Pack 2.dp5,2.dp6 SJ Full Version
+# Date created = 17:07:02  November 12, 2012
+#
+# -------------------------------------------------------------------------- #
+#
+# Notes:
+#
+# 1) The default values for assignments are stored in the file:
+#		c5gx_rocky_top_level_assignment_defaults.qdf
+#    If this file doesn't exist, see file:
+#		assignment_defaults.qdf
+#
+# 2) Altera recommends that you do not modify this file. This
+#    file is updated automatically by the Quartus II software
+#    and any changes you make may be lost or overwritten.
+#
+# -------------------------------------------------------------------------- #
+
+
+set_global_assignment -name FAMILY "Cyclone V"
+set_global_assignment -name DEVICE 5CGXFC7D6F31C7ES
+set_global_assignment -name TOP_LEVEL_ENTITY c5gx_rocky_top_level
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION "12.0 SP2.DP5,2.DP6"
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "17:07:02  NOVEMBER 12, 2012"
+set_global_assignment -name LAST_QUARTUS_VERSION 12.1
+set_global_assignment -name EDA_SIMULATION_TOOL "<None>"
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT NONE -section_id eda_simulation
+set_global_assignment -name DEVICE_FILTER_PACKAGE FBGA
+set_global_assignment -name DEVICE_FILTER_PIN_COUNT 896
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"
+set_global_assignment -name QIP_FILE c5gx_rocky_qsys/synthesis/c5gx_rocky_qsys.qip
+set_global_assignment -name BDF_FILE c5gx_rocky_top_level.bdf
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[0] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[0] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[0] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[1] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[1] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[1] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[2] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[2] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[2] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[3] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[3] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[3] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[4] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[4] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[4] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[5] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[5] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[5] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[6] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[6] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[6] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[7] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[7] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[7] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[8] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[8] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[8] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[9] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[9] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[9] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[10] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[10] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[10] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[11] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[11] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[11] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[12] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[12] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[12] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[13] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[13] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[13] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[14] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[14] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[14] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[15] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[15] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[15] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[16] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[16] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[16] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[17] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[17] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[17] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[18] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[18] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[18] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[19] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[19] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[19] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[20] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[20] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[20] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[21] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[21] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[21] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[22] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[22] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[22] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[23] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[23] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[23] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[24] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[24] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[24] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[25] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[25] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[25] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[26] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[26] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[26] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[27] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[27] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[27] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[28] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[28] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[28] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[29] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[29] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[29] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[30] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[30] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[30] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dq[31] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dq[31] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dq[31] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr_dqs[0] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dqs[0] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dqs[0] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr_dqs[1] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dqs[1] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dqs[1] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr_dqs[2] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dqs[2] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dqs[2] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr_dqs[3] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dqs[3] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dqs[3] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr_dqs_n[0] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dqs_n[0] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dqs_n[0] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr_dqs_n[1] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dqs_n[1] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dqs_n[1] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr_dqs_n[2] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dqs_n[2] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dqs_n[2] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr_dqs_n[3] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name INPUT_TERMINATION "PARALLEL 50 OHM WITH CALIBRATION" -to ddr_dqs_n[3] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dqs_n[3] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr_ck -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITHOUT CALIBRATION" -to ddr_ck -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "DIFFERENTIAL 1.5-V SSTL CLASS I" -to ddr_ck_n -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITHOUT CALIBRATION" -to ddr_ck_n -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_a[0] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_a[0] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_a[10] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_a[10] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_a[11] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_a[11] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_a[12] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_a[12] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_a[1] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_a[1] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_a[2] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_a[2] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_a[3] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_a[3] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_a[4] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_a[4] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_a[5] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_a[5] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_a[6] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_a[6] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_a[7] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_a[7] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_a[8] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_a[8] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_a[9] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_a[9] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_ba[0] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_ba[0] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_ba[1] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_ba[1] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_ba[2] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_ba[2] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_cs_n -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_cs_n -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_we_n -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_we_n -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_ras_n -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_ras_n -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_cas_n -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_cas_n -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_odt -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_odt -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_cke -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_cke -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD 1.5V -to ddr_reset_n -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_reset_n -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dm[0] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dm[0] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dm[1] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dm[1] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dm[2] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dm[2] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_dm[3] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to ddr_dm[3] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name GLOBAL_SIGNAL "GLOBAL CLOCK" -to inst|ddr3|pll0|pll_afi_clk -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name GLOBAL_SIGNAL "DUAL-REGIONAL CLOCK" -to inst|ddr3|pll0|pll_addr_cmd_clk -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name GLOBAL_SIGNAL "DUAL-REGIONAL CLOCK" -to inst|ddr3|pll0|pll_avl_clk -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name GLOBAL_SIGNAL "DUAL-REGIONAL CLOCK" -to inst|ddr3|pll0|pll_config_clk -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name GLOBAL_SIGNAL OFF -to inst|ddr3|p0|umemphy|ureset|phy_reset_mem_stable_n -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name GLOBAL_SIGNAL OFF -to inst|ddr3|p0|umemphy|ureset|phy_reset_n -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name GLOBAL_SIGNAL OFF -to inst|ddr3|s0|sequencer_rw_mgr_inst|rw_mgr_inst|rw_mgr_core_inst|rw_soft_reset_n -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name GLOBAL_SIGNAL OFF -to inst|ddr3|p0|umemphy|uread_datapath|reset_n_fifo_write_side[0] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name GLOBAL_SIGNAL OFF -to inst|ddr3|p0|umemphy|uread_datapath|reset_n_fifo_wraddress[0] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name GLOBAL_SIGNAL OFF -to inst|ddr3|p0|umemphy|uread_datapath|reset_n_fifo_write_side[1] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name GLOBAL_SIGNAL OFF -to inst|ddr3|p0|umemphy|uread_datapath|reset_n_fifo_wraddress[1] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name GLOBAL_SIGNAL OFF -to inst|ddr3|p0|umemphy|uread_datapath|reset_n_fifo_write_side[2] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name GLOBAL_SIGNAL OFF -to inst|ddr3|p0|umemphy|uread_datapath|reset_n_fifo_wraddress[2] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name GLOBAL_SIGNAL OFF -to inst|ddr3|p0|umemphy|uread_datapath|reset_n_fifo_write_side[3] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name GLOBAL_SIGNAL OFF -to inst|ddr3|p0|umemphy|uread_datapath|reset_n_fifo_wraddress[3] -tag __c5gx_rocky_qsys_ddr3_p0
+set_instance_assignment -name ENABLE_BENEFICIAL_SKEW_OPTIMIZATION_FOR_NON_GLOBAL_CLOCKS ON -to inst|ddr3 -tag __c5gx_rocky_qsys_ddr3_p0
+set_global_assignment -name UNIPHY_SEQUENCER_DQS_CONFIG_ENABLE ON
+set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
+set_global_assignment -name ECO_REGENERATE_REPORT ON
+set_location_assignment PIN_AJ7 -to ddr_a[12]
+set_location_assignment PIN_AK8 -to ddr_a[11]
+set_location_assignment PIN_AJ8 -to ddr_a[10]
+set_location_assignment PIN_AG11 -to ddr_a[9]
+set_location_assignment PIN_AF11 -to ddr_a[8]
+set_location_assignment PIN_AK11 -to ddr_a[7]
+set_location_assignment PIN_AK10 -to ddr_a[6]
+set_location_assignment PIN_AG14 -to ddr_a[5]
+set_location_assignment PIN_AG13 -to ddr_a[4]
+set_location_assignment PIN_AH12 -to ddr_a[3]
+set_location_assignment PIN_AH11 -to ddr_a[2]
+set_location_assignment PIN_AK12 -to ddr_a[1]
+set_location_assignment PIN_AJ12 -to ddr_a[0]
+set_location_assignment PIN_AJ10 -to ddr_ba[2]
+set_location_assignment PIN_AH10 -to ddr_ba[1]
+set_location_assignment PIN_AH9 -to ddr_ba[0]
+set_location_assignment PIN_AJ27 -to ddr_dm[3]
+set_location_assignment PIN_AJ23 -to ddr_dm[2]
+set_location_assignment PIN_AH19 -to ddr_dm[1]
+set_location_assignment PIN_AE15 -to ddr_dm[0]
+set_location_assignment PIN_AK26 -to ddr_dq[31]
+set_location_assignment PIN_AG24 -to ddr_dq[30]
+set_location_assignment PIN_AD19 -to ddr_dq[29]
+set_location_assignment PIN_AE20 -to ddr_dq[28]
+set_location_assignment PIN_AK25 -to ddr_dq[27]
+set_location_assignment PIN_AH24 -to ddr_dq[26]
+set_location_assignment PIN_AG18 -to ddr_dq[25]
+set_location_assignment PIN_AG19 -to ddr_dq[24]
+set_location_assignment PIN_AK23 -to ddr_dq[23]
+set_location_assignment PIN_AH21 -to ddr_dq[22]
+set_location_assignment PIN_AF18 -to ddr_dq[21]
+set_location_assignment PIN_AF19 -to ddr_dq[20]
+set_location_assignment PIN_AK22 -to ddr_dq[19]
+set_location_assignment PIN_AJ20 -to ddr_dq[18]
+set_location_assignment PIN_AD18 -to ddr_dq[17]
+set_location_assignment PIN_AE18 -to ddr_dq[16]
+set_location_assignment PIN_AH20 -to ddr_dq[15]
+set_location_assignment PIN_AJ19 -to ddr_dq[14]
+set_location_assignment PIN_AF16 -to ddr_dq[13]
+set_location_assignment PIN_AG16 -to ddr_dq[12]
+set_location_assignment PIN_AJ18 -to ddr_dq[11]
+set_location_assignment PIN_AG17 -to ddr_dq[10]
+set_location_assignment PIN_AK16 -to ddr_dq[9]
+set_location_assignment PIN_AK17 -to ddr_dq[8]
+set_location_assignment PIN_AF14 -to ddr_dq[7]
+set_location_assignment PIN_AJ15 -to ddr_dq[6]
+set_location_assignment PIN_AD17 -to ddr_dq[5]
+set_location_assignment PIN_AE17 -to ddr_dq[4]
+set_location_assignment PIN_AH15 -to ddr_dq[3]
+set_location_assignment PIN_AJ14 -to ddr_dq[2]
+set_location_assignment PIN_AE16 -to ddr_dq[1]
+set_location_assignment PIN_AF15 -to ddr_dq[0]
+set_location_assignment PIN_AF9 -to ddr_cas_n
+set_location_assignment PIN_Y13 -to ddr_ck
+set_location_assignment PIN_AA14 -to ddr_ck_n
+set_location_assignment PIN_AK18 -to ddr_cke
+set_location_assignment PIN_Y12 -to ddr_cs_n
+set_location_assignment PIN_Y16 -to ddr_dqs[0]
+set_location_assignment PIN_Y17 -to ddr_dqs[1]
+set_location_assignment PIN_Y20 -to ddr_dqs[2]
+set_location_assignment PIN_AB19 -to ddr_dqs[3]
+set_location_assignment PIN_AA16 -to ddr_dqs_n[0]
+set_location_assignment PIN_Y18 -to ddr_dqs_n[1]
+set_location_assignment PIN_AA20 -to ddr_dqs_n[2]
+set_location_assignment PIN_AC19 -to ddr_dqs_n[3]
+set_location_assignment PIN_AH14 -to ddr_odt
+set_location_assignment PIN_AG9 -to ddr_ras_n
+set_location_assignment PIN_AK21 -to ddr_reset_n
+set_location_assignment PIN_AK5 -to ddr_we_n
+set_global_assignment -name MISC_FILE "C:/altera/QuartusProjects/Customer/Navico/C5GX_Rocky/c5gx_rocky_top_level.dpf"
+set_location_assignment PIN_Y15 -to clk125
+set_location_assignment PIN_H17 -to clk50
+set_location_assignment PIN_AK13 -to ddr_rzq
+set_instance_assignment -name IO_STANDARD "1.5 V" -to ddr_rzq
+set_instance_assignment -name IO_STANDARD LVDS -to clk125
+set_location_assignment PIN_AK7 -to ddr_a[13]
+set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to ddr_a[13]
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ddr_a[13]
+set_location_assignment PIN_C20 -to dvi_out_red[7]
+set_location_assignment PIN_C21 -to dvi_out_red[6]
+set_location_assignment PIN_C19 -to dvi_out_red[5]
+set_location_assignment PIN_D20 -to dvi_out_red[4]
+set_location_assignment PIN_E18 -to dvi_out_red[3]
+set_location_assignment PIN_F19 -to dvi_out_red[2]
+set_location_assignment PIN_F18 -to dvi_out_red[1]
+set_location_assignment PIN_B26 -to dvi_out_red[0]
+set_location_assignment PIN_A20 -to dvi_out_green[7]
+set_location_assignment PIN_A21 -to dvi_out_green[6]
+set_location_assignment PIN_B21 -to dvi_out_green[5]
+set_location_assignment PIN_B22 -to dvi_out_green[4]
+set_location_assignment PIN_D23 -to dvi_out_green[3]
+set_location_assignment PIN_C22 -to dvi_out_green[2]
+set_location_assignment PIN_B23 -to dvi_out_green[1]
+set_location_assignment PIN_A23 -to dvi_out_green[0]
+set_location_assignment PIN_C24 -to dvi_out_blue[7]
+set_location_assignment PIN_B24 -to dvi_out_blue[6]
+set_location_assignment PIN_D25 -to dvi_out_blue[5]
+set_location_assignment PIN_C25 -to dvi_out_blue[4]
+set_location_assignment PIN_C27 -to dvi_out_blue[3]
+set_location_assignment PIN_C26 -to dvi_out_blue[2]
+set_location_assignment PIN_B27 -to dvi_out_blue[1]
+set_location_assignment PIN_A28 -to dvi_out_blue[0]
+set_location_assignment PIN_E20 -to dvi_out_hsync
+set_location_assignment PIN_G22 -to dvi_out_htplg
+set_location_assignment PIN_G21 -to dvi_out_isel
+set_location_assignment PIN_G23 -to dvi_out_pd_n
+set_location_assignment PIN_E22 -to dvi_out_vsync
+set_location_assignment PIN_E21 -to dvi_out_ctl[3]
+set_location_assignment PIN_L20 -to dvi_out_ctl[2]
+set_location_assignment PIN_L19 -to dvi_out_ctl[1]
+set_location_assignment PIN_E26 -to dvi_out_de
+set_location_assignment PIN_F20 -to dvi_out_dken
+set_global_assignment -name QIP_FILE pll.qip
+set_global_assignment -name SIP_FILE pll.sip
+set_location_assignment PIN_A25 -to dvi_out_clock
+set_location_assignment PIN_H19 -to dvi_in_clk
+set_location_assignment PIN_G14 -to dvi_in_data[23]
+set_location_assignment PIN_F14 -to dvi_in_data[22]
+set_location_assignment PIN_F15 -to dvi_in_data[21]
+set_location_assignment PIN_E15 -to dvi_in_data[20]
+set_location_assignment PIN_C16 -to dvi_in_data[19]
+set_location_assignment PIN_C15 -to dvi_in_data[18]
+set_location_assignment PIN_F16 -to dvi_in_data[17]
+set_location_assignment PIN_E16 -to dvi_in_data[16]
+set_location_assignment PIN_K17 -to dvi_in_data[15]
+set_location_assignment PIN_L18 -to dvi_in_data[14]
+set_location_assignment PIN_E11 -to dvi_in_data[13]
+set_location_assignment PIN_D10 -to dvi_in_data[12]
+set_location_assignment PIN_H12 -to dvi_in_data[11]
+set_location_assignment PIN_G12 -to dvi_in_data[10]
+set_location_assignment PIN_E12 -to dvi_in_data[9]
+set_location_assignment PIN_D13 -to dvi_in_data[8]
+set_location_assignment PIN_A13 -to dvi_in_data[7]
+set_location_assignment PIN_B13 -to dvi_in_data[6]
+set_location_assignment PIN_C14 -to dvi_in_data[5]
+set_location_assignment PIN_D14 -to dvi_in_data[4]
+set_location_assignment PIN_C12 -to dvi_in_data[3]
+set_location_assignment PIN_D12 -to dvi_in_data[2]
+set_location_assignment PIN_K18 -to dvi_in_data[1]
+set_location_assignment PIN_K16 -to dvi_in_data[0]
+set_location_assignment PIN_A15 -to dvi_in_de
+set_location_assignment PIN_A14 -to dvi_in_hsync
+set_location_assignment PIN_A16 -to dvi_in_vsync
+set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
+set_global_assignment -name SMART_RECOMPILE ON
+set_global_assignment -name NUM_PARALLEL_PROCESSORS ALL
+set_global_assignment -name OPTIMIZATION_TECHNIQUE SPEED
+set_global_assignment -name SYNTH_TIMING_DRIVEN_SYNTHESIS ON
+set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
+set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
+set_global_assignment -name QIP_FILE pll2.qip
+set_global_assignment -name SIP_FILE pll2.sip
+set_location_assignment PIN_AF29 -to buttons[0]
+set_location_assignment PIN_AF30 -to buttons[1]
+set_location_assignment PIN_AE28 -to buttons[2]
+set_location_assignment PIN_AA26 -to buttons[3]
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
