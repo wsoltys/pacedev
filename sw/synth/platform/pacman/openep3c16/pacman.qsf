@@ -1,0 +1,172 @@
+# copyright (c) 1991-2005 altera corporation
+# your use of altera corporation's design tools, logic functions 
+# and other software and tools, and its ampp partner logic       
+# functions, and any output files any of the foregoing           
+# (including device programming or simulation files), and any    
+# associated documentation or information are expressly subject  
+# to the terms and conditions of the altera program license      
+# subscription agreement, altera megacore function license       
+# agreement, or other applicable license agreement, including,   
+# without limitation, that your use is for the sole purpose of   
+# programming logic devices manufactured by altera and sold by   
+# altera or its authorized distributors.  please refer to the    
+# applicable agreement for further details.
+
+
+# the default values for assignments are stored in the file
+#		pacman_assignment_defaults.qdf
+# if this file doesn't exist, and for assignments not listed, see file
+#		assignment_defaults.qdf
+
+# altera recommends that you do not modify this file. this
+# file is updated automatically by the quartus ii software
+# and any changes you make may be lost or overwritten.
+
+
+# project-wide assignments
+# ========================
+set_global_assignment -name LAST_QUARTUS_VERSION "12.0 SP2"
+
+# pin & location assignments
+# ==========================
+
+# analysis & synthesis assignments
+# ================================
+set_global_assignment -name FAMILY "Cyclone III"
+set_global_assignment -name TOP_LEVEL_ENTITY target_top
+
+# fitter assignments
+# ==================
+set_global_assignment -name DEVICE EP3C16Q240C8
+set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
+set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS INPUT TRI-STATED"
+
+# assembler assignments
+# =====================
+
+set_global_assignment -name SEED 1
+set_instance_assignment -name io_standard lvttl -to clock_50
+set_instance_assignment -name IO_STANDARD LVTTL -to led[0]
+set_instance_assignment -name IO_STANDARD LVTTL -to led[1]
+set_instance_assignment -name IO_STANDARD LVTTL -to led[2]
+set_instance_assignment -name IO_STANDARD LVTTL -to led[3]
+set_instance_assignment -name IO_STANDARD LVTTL -to vga_b[0]
+set_instance_assignment -name IO_STANDARD LVTTL -to vga_b[1]
+set_instance_assignment -name IO_STANDARD LVTTL -to vga_b[2]
+set_instance_assignment -name IO_STANDARD LVTTL -to vga_b[3]
+set_instance_assignment -name IO_STANDARD LVTTL -to vga_g[0]
+set_instance_assignment -name IO_STANDARD LVTTL -to vga_g[1]
+set_instance_assignment -name IO_STANDARD LVTTL -to vga_g[2]
+set_instance_assignment -name IO_STANDARD LVTTL -to vga_g[3]
+set_instance_assignment -name IO_STANDARD LVTTL -to vga_hs
+set_instance_assignment -name IO_STANDARD LVTTL -to vga_r[0]
+set_instance_assignment -name IO_STANDARD LVTTL -to vga_r[1]
+set_instance_assignment -name IO_STANDARD LVTTL -to vga_r[2]
+set_instance_assignment -name IO_STANDARD LVTTL -to vga_r[3]
+set_instance_assignment -name IO_STANDARD LVTTL -to vga_vs
+set_instance_assignment -name IO_STANDARD LVTTL -to speaker
+set_instance_assignment -name IO_STANDARD LVTTL -to joy_up
+set_instance_assignment -name IO_STANDARD LVTTL -to joy_down
+set_instance_assignment -name IO_STANDARD LVTTL -to joy_left
+set_instance_assignment -name IO_STANDARD LVTTL -to joy_right
+set_instance_assignment -name IO_STANDARD LVTTL -to joy_center
+set_instance_assignment -name IO_STANDARD LVTTL -to reset
+set_location_assignment PIN_31 -to clock_50
+set_location_assignment PIN_6 -to reset
+set_location_assignment PIN_146 -to vga_b[3]
+set_location_assignment PIN_159 -to vga_b[2]
+set_location_assignment PIN_144 -to vga_b[1]
+set_location_assignment PIN_145 -to vga_b[0]
+set_location_assignment PIN_142 -to vga_g[3]
+set_location_assignment PIN_143 -to vga_g[2]
+set_location_assignment PIN_137 -to vga_g[1]
+set_location_assignment PIN_139 -to vga_g[0]
+set_location_assignment PIN_134 -to vga_r[3]
+set_location_assignment PIN_135 -to vga_r[2]
+set_location_assignment PIN_131 -to vga_r[1]
+set_location_assignment PIN_132 -to vga_r[0]
+set_location_assignment PIN_93 -to led[0]
+set_location_assignment PIN_98 -to led[1]
+set_location_assignment PIN_100 -to led[2]
+set_location_assignment PIN_106 -to led[3]
+set_location_assignment PIN_161 -to vga_hs
+set_location_assignment PIN_160 -to vga_vs
+set_location_assignment PIN_120 -to speaker
+set_location_assignment PIN_103 -to joy_down
+set_location_assignment PIN_111 -to joy_center
+set_location_assignment PIN_113 -to joy_left
+set_location_assignment PIN_118 -to joy_right
+set_location_assignment PIN_128 -to joy_up
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_global_assignment -name AUTO_SHIFT_REGISTER_RECOGNITION OFF
+set_global_assignment -name ENABLE_ADVANCED_IO_TIMING ON
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name NOMINAL_CORE_SUPPLY_VOLTAGE 1.2V
+set_global_assignment -name USE_CONFIGURATION_DEVICE ON
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sdram_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/tilemapctl_e.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/bitmapctl_e.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
+set_global_assignment -name VHDL_FILE project_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/platform_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/openep3c16/target_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneiii/pll.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneiii/sprom.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneiii/dpram.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneiii/spram.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/clk_div.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_Pack.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_ALU.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_MCode.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_Reg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80se.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/Z80.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/altera_mem.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/tilemapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/spritereg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/spritectl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_array.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_mixer.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/Graphics.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/InputMapper.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/Pacman_Interrupts.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/Pacman_vramMapper.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/platform.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/pacsnd.Vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/sound.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gamecube_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/load_upcounter.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/conversion.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_read2.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_write.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/mfifo.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_bus.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/maple/maple_joy.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/toys/led_chaser.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwm_chaser.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwmout.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/openep3c16/target_top.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/openep3c16/custom_io.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/sound/sigma_delta_dac.vhd
+set_global_assignment -name QIP_FILE pllclk_ez.qip
+set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
+set_global_assignment -name GENERATE_RBF_FILE ON
+
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
