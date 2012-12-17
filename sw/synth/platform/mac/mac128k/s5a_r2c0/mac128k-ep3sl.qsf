@@ -41,7 +41,7 @@
 # ========================
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 9.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "18:03:05  MARCH 10, 2010"
-set_global_assignment -name LAST_QUARTUS_VERSION "10.1 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION "12.0 SP2"
 set_global_assignment -name MISC_FILE "g:/work/vl/mixer_test/mixer_test.dpf"
 set_global_assignment -name SMART_RECOMPILE ON
 
@@ -2254,40 +2254,6 @@ set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_IN_ENABLE
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ADVANCED_TRIGGER_ENTITY=basic,1," -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL_PIPELINE=1" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ENABLE_ADVANCED_TRIGGER=0" -section_id auto_signaltap_0
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg_body.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sdram_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg_body.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/bitmapctl_e.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/tilemapctl_e.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg_body.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/mac/mac128k/platform_variant_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/mac/platform_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/target_pkg_ep3sl.vhd
-set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/pll.vhd
-set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/sprom.vhd
-set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/dpram.vhd
-set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/spram.vhd
-set_global_assignment -name VHDL_FILE "project_pkg-ep3sl.vhd"
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/clk_div.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/mac/bitmapctl.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_mixer.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/Graphics.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/tg68/TG68_fast.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/tg68/TG68.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/component/io/m6522.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/mac/mac128k/platform.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sound.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/mac/inputmapper.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/Inputs.VHD
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/target_top_ep3sl.vhd
-set_global_assignment -name SIGNALTAP_FILE cpu.stp
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[0] -to "PACE:pace_inst|platform:platform_inst|M6522:\\BLK_VIA:via6522_inst|ENA_4" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[1] -to "PACE:pace_inst|platform:platform_inst|M6522:\\BLK_VIA:via6522_inst|I_CA1" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[2] -to "PACE:pace_inst|platform:platform_inst|M6522:\\BLK_VIA:via6522_inst|I_CA2" -section_id auto_signaltap_0
@@ -2468,4 +2434,41 @@ set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=00
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=285" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=19074" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=59064" -section_id auto_signaltap_0
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sdram_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/bitmapctl_e.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/tilemapctl_e.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/mac/mac128k/platform_variant_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/mac/platform_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/target_pkg_ep3sl.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/pll.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/sprom.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/dpram.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/spram.vhd
+set_global_assignment -name VHDL_FILE "project_pkg-ep3sl.vhd"
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/clk_div.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/mac/bitmapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_mixer.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/Graphics.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/tg68/TG68_fast.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/tg68/TG68.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/io/m6522.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/mac/mac128k/platform.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sound.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/mac/inputmapper.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/Inputs.VHD
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/spi_pll.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/io/spi/uni_spi_tx.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/io/spi/uni_spi_rx.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/target_top_ep3sl.vhd
+set_global_assignment -name SIGNALTAP_FILE cpu.stp
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

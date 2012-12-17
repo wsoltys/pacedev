@@ -15,7 +15,7 @@ package project_pkg is
   -- Reference clock is 24MHz
 	constant PACE_HAS_PLL										  : boolean := true;
   --constant PACE_HAS_SRAM                    : boolean := true;
-  constant PACE_HAS_FLASH                   : boolean := false;
+  --constant PACE_HAS_FLASH                   : boolean := false;
   constant PACE_HAS_SDRAM                   : boolean := false;
   constant PACE_HAS_SERIAL                  : boolean := false;
 
@@ -34,11 +34,19 @@ package project_pkg is
   
   constant S5AR2_DOUBLE_VDO_IDCK            : boolean := false;
   
+  constant S5AR2_EMULATED_FLASH_INIT_FILE   : string := "";
+  constant S5AR2_EMULATE_FLASH              : boolean := false;
+  constant S5AR2_EMULATED_FLASH_WIDTH_AD    : natural := 10;
+  constant S5AR2_EMULATED_FLASH_WIDTH       : natural := 8;
+
   constant S5AR2_EMULATE_SRAM               : boolean := true;
   constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 15;
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
 
   constant PACE_HAS_SRAM                    : boolean := S5AR2_EMULATE_SRAM;
+  constant PACE_HAS_FLASH                   : boolean := S5AR2_EMULATE_FLASH;
+
+  constant S5AR2_HAS_FLOPPY_IF              : boolean := false;
 
 	-- BBC-specific constants
 

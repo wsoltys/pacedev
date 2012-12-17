@@ -41,7 +41,7 @@
 # ========================
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 9.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "18:03:05  MARCH 10, 2010"
-set_global_assignment -name LAST_QUARTUS_VERSION "10.1 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION "12.0 SP2"
 set_global_assignment -name MISC_FILE "g:/work/vl/mixer_test/mixer_test.dpf"
 set_global_assignment -name SMART_RECOMPILE ON
 
@@ -963,26 +963,10 @@ set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to vli_data[3] -en
 # end ENTITY(mixer_test)
 # ----------------------
 
-set_global_assignment -name SLD_NODE_CREATOR_ID 110 -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_ENTITY_NAME sld_signaltap -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_INFO=805334528" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STORAGE_QUALIFIER_INVERSION_MASK_LENGTH=0" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ATTRIBUTE_MEM_MODE=OFF" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_FLOW_USE_GENERATED=0" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_BITS=11" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_BUFFER_FULL_STOP=1" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_CURRENT_RESOURCE_WIDTH=1" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL=1" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_IN_ENABLED=0" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ADVANCED_TRIGGER_ENTITY=basic,1," -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL_PIPELINE=1" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ENABLE_ADVANCED_TRIGGER=0" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_POWER_UP_TRIGGER=0" -section_id auto_signaltap_0
 set_location_assignment PIN_J27 -to vid_reset_core_n
 set_location_assignment PIN_K27 -to vid_reset_n
 set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_reset_n
 set_instance_assignment -name IO_STANDARD "1.5 V" -to vid_reset_core_n
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_RAM_BLOCK_TYPE=AUTO" -section_id auto_signaltap_0
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
@@ -2242,22 +2226,6 @@ set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn
 set_instance_assignment -name BOARD_MODEL_TLINE_L_PER_LENGTH 735N -to ddr64_dqsn[0]
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to vid_reset_n
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to vid_reset_core_n
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to "target_top_ep3sl:target_top_ep3sl_inst|PACE:pace_inst|platform:platform_inst|video_o.clk" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[0] -to "target_top_ep3sl:target_top_ep3sl_inst|PACE:pace_inst|platform:platform_inst|video_o.de" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[1] -to "target_top_ep3sl:target_top_ep3sl_inst|PACE:pace_inst|platform:platform_inst|video_o.hsync" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[2] -to "target_top_ep3sl:target_top_ep3sl_inst|PACE:pace_inst|platform:platform_inst|video_o.vsync" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[0] -to "target_top_ep3sl:target_top_ep3sl_inst|PACE:pace_inst|platform:platform_inst|video_o.de" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[1] -to "target_top_ep3sl:target_top_ep3sl_inst|PACE:pace_inst|platform:platform_inst|video_o.hsync" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[2] -to "target_top_ep3sl:target_top_ep3sl_inst|PACE:pace_inst|platform:platform_inst|video_o.vsync" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=3" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=3" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=46465" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=00000000000000000000000000000000000000" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=38" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=32768" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=10333" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=32768" -section_id auto_signaltap_0
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sdram_pkg.vhd
@@ -2289,6 +2257,9 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/video/saa505x.vh
 set_global_assignment -name VHDL_FILE ../../../../src/component/sound/sn76489/sn76489.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/bbcmicro/altera_mem.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/bbcmicro/platform.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2c0/spi_pll.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/spi/uni_spi_tx.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/spi/uni_spi_rx.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/bbcmicro/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2c0/target_top_ep3sl.vhd
@@ -2296,3 +2267,6 @@ set_global_assignment -name QIP_FILE vip_pll.qip
 set_global_assignment -name VHDL_FILE vip_sopc.vhd
 set_global_assignment -name QIP_FILE vip_sopc.qip
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2c0/target_top_vip_ep3sl.vhd
+set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
+set_global_assignment -name VHDL_SHOW_LMF_MAPPING_MESSAGES OFF
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

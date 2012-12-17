@@ -71,6 +71,8 @@ package project_pkg is
   constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 14;
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 16;
     
+  constant S5AR2_HAS_FLOPPY_IF              : boolean := false;
+
 	-- Mac128K constants
 	
 	
