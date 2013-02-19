@@ -1,6 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
+--use ieee.numeric_std.all;
 use work.mce6809_pack.all;
 
 entity mce6809 is
@@ -200,6 +201,7 @@ begin
 			if hold = '0' then
 				-- PC
 				case pc_ctrl is
+				--when incr_pc		=> pc <= std_logic_vector(unsigned(pc) + 1);
 				when incr_pc		=> pc <= pc + 1;
 				when loadhi_pc	=> pc(15 downto 8) <= dbus;
 				when loadlo_pc	=> pc(7 downto 0) <= dbus;
@@ -213,7 +215,7 @@ begin
 					ir(7 downto 0) <= dbus;
 					if dbus = X"10" then
 						ir(9 downto 8) <= "10";
-					elsif ir = X"11" then
+					elsif dbus = X"11" then
 						ir(9 downto 8) <= "11";
 					else
 						ir(9 downto 8) <= "00";
