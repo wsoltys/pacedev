@@ -112,6 +112,13 @@ architecture SYN of mce6309 is
 	signal		left_ctrl			: left_type;
 	signal		right_ctrl		: right_type;
 
+	-- BDM signals
+	signal 		bdm_enabled		: std_logic;
+	signal 		bdm_rdy				: std_logic;
+	signal 		bdm_ir				: std_logic_vector(23 downto 0);
+	signal 		bdm_wr				: std_logic;
+	signal 		bdm_data			: std_logic_vector(15 downto 0);
+         		
 begin
 	--abus		<= abush & abusl;
 
@@ -219,36 +226,37 @@ begin
 			ea			<= (others => '0');
 			post		<= (others => '0');
 		elsif rising_edge(clk) and clken = '1' then
+		
 			if hold = '0' then
 				-- PC
 				case pc_ctrl is
-				--when incr_pc		=> pc <= std_logic_vector(unsigned(pc) + 1);
-				when incr_pc		=> pc <= pc + 1;
-				when loadhi_pc	=> pc(15 downto 8) <= dbus;
-				when loadlo_pc	=> pc(7 downto 0) <= dbus;
-				when load_a_pc	=> pc <= abus;
-				when others			=> pc <= pc;
+					--when incr_pc		=> pc <= std_logic_vector(unsigned(pc) + 1);
+					when incr_pc		=> pc <= pc + 1;
+					when loadhi_pc	=> pc(15 downto 8) <= dbus;
+					when loadlo_pc	=> pc(7 downto 0) <= dbus;
+					when load_a_pc	=> pc <= abus;
+					when others			=> pc <= pc;
 				end case;
 
 				-- IR and IR_page
 				case ir_ctrl is
-				when load_1st_ir =>
-					ir(7 downto 0) <= dbus;
-					if dbus = X"10" then
-						ir(9 downto 8) <= "10";
-					elsif dbus = X"11" then
-						ir(9 downto 8) <= "11";
-					else
-						ir(9 downto 8) <= "00";
-					end if;
-				when load_2nd_ir =>
-					if ir(9 downto 8) /= "00" then
-						ir <= "00" & ir(9 downto 8) & dbus;
-					else
+					when load_1st_ir =>
+						ir(7 downto 0) <= dbus;
+						if dbus = X"10" then
+							ir(9 downto 8) <= "10";
+						elsif dbus = X"11" then
+							ir(9 downto 8) <= "11";
+						else
+							ir(9 downto 8) <= "00";
+						end if;
+					when load_2nd_ir =>
+						if ir(9 downto 8) /= "00" then
+							ir <= "00" & ir(9 downto 8) & dbus;
+						else
+							ir <= ir;
+						end if;
+					when latch_ir =>
 						ir <= ir;
-					end if;
-				when latch_ir =>
-					ir <= ir;
 				end case;
 
 				-- S
@@ -497,25 +505,32 @@ begin
 
   GEN_BDM : if HAS_BDM generate
   begin
-    bdm_inst : entity work.mce6309_bdm
+    bdm_inst : entity work.mce6309_bdmio
       port map
       (
-        bdm_clk   => bdm_clk,
-        bdm_i     => bdm_i,
-        bdm_o     => bdm_o,
-        bdm_oe    => bdm_oe,
+				-- external signals
+        bdm_clk   	=> bdm_clk,
+        bdm_i     	=> bdm_i,
+        bdm_o     	=> bdm_o,
+        bdm_oe    	=> bdm_oe,
   
-        -- registers      
-  			cc	      => cc,
-  			a         => acca,
-  			b         => accb,
-  			dp	      => dp,
-  			x		      => x,
-  			y		      => y,
-  			u		      => u,
-  			s		      => s,
-  			pc	      => pc
+				-- internal signals
+				
+				-- in
+				bdm_enabled	=> bdm_enabled,
+				bdm_rdy			=> bdm_rdy,
+				bdm_ir			=> bdm_ir,
+				
+				-- out
+				bdm_wr			=> bdm_wr,
+				bdm_data		=> bdm_data
       );
   end generate GEN_BDM;
-      
+
+	GEN_NO_BDM : if not HAS_BDM generate
+	begin
+		bdm_wr <= '0';
+		bdm_data <= (others => 'X');
+	end generate GEN_NO_BDM;
+	      
 end architecture SYN;
