@@ -1,15 +1,15 @@
 onerror {resume}
 quietly WaveActivateNextPane {} 0
-add wave -noupdate /mce6809_tb/fail
+add wave -noupdate /mce6309_tb/fail
 add wave -noupdate -divider SYN_CPU
-add wave -noupdate -radix hexadecimal /mce6809_tb/syn_cpu/address
-add wave -noupdate -radix hexadecimal /mce6809_tb/syn_cpu/data_i
-add wave -noupdate -radix hexadecimal /mce6809_tb/syn_cpu/data_o
-add wave -noupdate -radix hexadecimal /mce6809_tb/syn_cpu/acca
-add wave -noupdate -radix hexadecimal /mce6809_tb/syn_cpu/accb
+add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/address
+add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/data_i
+add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/data_o
+add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/acca
+add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/accb
 add wave -noupdate -divider BEH_CPU
-add wave -noupdate -radix hexadecimal /mce6809_tb/beh_cpu/acca
-add wave -noupdate -radix hexadecimal /mce6809_tb/beh_cpu/accb
+add wave -noupdate -radix hexadecimal /mce6309_tb/beh_cpu/acca
+add wave -noupdate -radix hexadecimal /mce6309_tb/beh_cpu/accb
 TreeUpdate [SetDefaultTree]
 WaveRestoreCursors {{Cursor 1} {244297 ps} 0}
 configure wave -namecolwidth 106

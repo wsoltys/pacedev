@@ -2,29 +2,41 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 --use ieee.numeric_std.all;
-use work.mce6809_pack.all;
+use work.mce6309_pack.all;
 
-entity mce6809 is
-	port (
-		clk:        in  std_logic;
-		clken:      in  std_logic;
-		reset:      in  std_logic;
-		rw:         out std_logic;
-		vma:        out std_logic;
-		address:    out std_logic_vector(15 downto 0);
-		data_i: 	  in  std_logic_vector(7 downto 0);
-		data_o:		 	out std_logic_vector(7 downto 0);
-		data_oe:	 	out std_logic;
-		lic:	     	out std_logic;
-		halt:     	in  std_logic;
-		hold:     	in  std_logic;
-		irq:      	in  std_logic;
-		firq:     	in  std_logic;
-		nmi:      	in  std_logic
+entity mce6309 is
+	port 
+	(
+	  -- clocking, reset
+		clk             : in  std_logic;
+		clken           : in  std_logic;
+		reset           : in  std_logic;
+		
+		-- bus signals
+		rw              : out std_logic;
+		vma             : out std_logic;
+		address         : out std_logic_vector(15 downto 0);
+		data_i  	      : in  std_logic_vector(7 downto 0);
+		data_o 		 	    : out std_logic_vector(7 downto 0);
+		data_oe 		    : out std_logic;
+		lic 				    : out std_logic;
+		halt      	    : in  std_logic;
+		hold      	    : in  std_logic;
+		irq       	    : in  std_logic;
+		firq      	    : in  std_logic;
+		nmi       	    : in  std_logic;
+		
+		-- bdm signals
+		bdm_i           : in std_logic;
+		bdm_o           : out std_logic;
+		bdm_oe          : out std_logic;
+		
+		-- misc signals
+		op_fetch        : out std_logic
 	);
-end;
+end entity mce6309;
 
-architecture BEH of mce6809 is
+architecture BEH of mce6309 is
 	constant SIM_DELAY			: time := 1 ns;
 
 	signal mc_cycle					: integer := 0;
@@ -440,5 +452,5 @@ begin
 		end if;
 	end process;
 
-end BEH;
+end architecture BEH;
 

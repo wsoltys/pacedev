@@ -2,29 +2,47 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 --use ieee.numeric_std.all;
-use work.mce6809_pack.all;
+use work.mce6309_pack.all;
 
-entity mce6809 is
-	port (
-		clk:        in  std_logic;
-		clken:      in  std_logic;
-		reset:      in  std_logic;
-		rw:         out std_logic;
-		vma:        out std_logic;
-		address:    out std_logic_vector(15 downto 0);
-		data_i: 	  in  std_logic_vector(7 downto 0);
-		data_o:		 	out std_logic_vector(7 downto 0);
-		data_oe:		out std_logic;
-		lic:				out std_logic;
-		halt:     	in  std_logic;
-		hold:     	in  std_logic;
-		irq:      	in  std_logic;
-		firq:     	in  std_logic;
-		nmi:      	in  std_logic
+entity mce6309 is
+  generic
+  (
+    MODE            : mode_t := M6809;
+    CYCLE_ACCURATE  : boolean := true;
+    HAS_BDM         : boolean := true
+  );
+	port
+	(
+	  -- clocking, reset
+		clk             : in  std_logic;
+		clken           : in  std_logic;
+		reset           : in  std_logic;
+		
+		-- bus signals
+		rw              : out std_logic;
+		vma             : out std_logic;
+		address         : out std_logic_vector(15 downto 0);
+		data_i  	      : in  std_logic_vector(7 downto 0);
+		data_o 		 	    : out std_logic_vector(7 downto 0);
+		data_oe 		    : out std_logic;
+		lic 				    : out std_logic;
+		halt      	    : in  std_logic;
+		hold      	    : in  std_logic;
+		irq       	    : in  std_logic;
+		firq      	    : in  std_logic;
+		nmi       	    : in  std_logic;
+		
+		-- bdm signals
+		bdm_i           : in std_logic;
+		bdm_o           : out std_logic;
+		bdm_oe          : out std_logic;
+		
+		-- misc signals
+		op_fetch        : out std_logic
 	);
-end;
+end entity mce6309;
 
-architecture SYN of mce6809 is
+architecture SYN of mce6309 is
 
 	-- Internal buses
 	signal		dbus					: std_logic_vector(7 downto 0);
@@ -104,42 +122,44 @@ begin
 
 	ir(11 downto 10) <= "00";
 
-	mcode : mce6809_mcode port map (
-		-- Inputs
-		clk						=> clk,
-		clken					=> clken,
-		ir						=> ir,
-		mc_addr				=> mc_addr,
-		dbus					=> dbus,
-		rpost					=> post,
-
-		-- Microcode controls
-		mc_jump				=> mc_jump,
-		mc_jump_addr	=> mc_jump_addr,
-	
-		-- Operational controls
-		alu_ctrl			=> alu_ctrl,
-		alu_igncarry	=> alu_igncarry,
-		mem_read			=> rw,
-		drive_vma			=> drive_vma,
-		drive_data		=> drive_data,
-	
-		-- Register controls
-		pc_ctrl				=> pc_ctrl,
-		ir_ctrl				=> ir_ctrl,
-		s_ctrl				=> s_ctrl,
-		ld						=> ld,
-		lea						=> lea,
-		acc_fromalu		=> acc_fromalu,
-	
-		-- Mux controls
-		dbus_ctrl			=> dbus_ctrl,
-		abus_ctrl			=> abus_ctrl,
-		eabus_ctrl		=> eabus_ctrl,
-		--abusl_ctrl		=> abusl_ctrl,
-		left_ctrl			=> left_ctrl,
-		right_ctrl		=> right_ctrl
-	);
+	mcode : mce6309_mcode 
+	  port map 
+	  (
+  		-- Inputs
+  		clk						=> clk,
+  		clken					=> clken,
+  		ir						=> ir,
+  		mc_addr				=> mc_addr,
+  		dbus					=> dbus,
+  		rpost					=> post,
+  
+  		-- Microcode controls
+  		mc_jump				=> mc_jump,
+  		mc_jump_addr	=> mc_jump_addr,
+  	
+  		-- Operational controls
+  		alu_ctrl			=> alu_ctrl,
+  		alu_igncarry	=> alu_igncarry,
+  		mem_read			=> rw,
+  		drive_vma			=> drive_vma,
+  		drive_data		=> drive_data,
+  	
+  		-- Register controls
+  		pc_ctrl				=> pc_ctrl,
+  		ir_ctrl				=> ir_ctrl,
+  		s_ctrl				=> s_ctrl,
+  		ld						=> ld,
+  		lea						=> lea,
+  		acc_fromalu		=> acc_fromalu,
+  	
+  		-- Mux controls
+  		dbus_ctrl			=> dbus_ctrl,
+  		abus_ctrl			=> abus_ctrl,
+  		eabus_ctrl		=> eabus_ctrl,
+  		--abusl_ctrl		=> abusl_ctrl,
+  		left_ctrl			=> left_ctrl,
+  		right_ctrl		=> right_ctrl
+  	);
 
 	-- Microcode address
 	ma_reg: process(clk, clken, reset)
@@ -474,6 +494,4 @@ begin
 --		cc_out(Flag_H) 
 	end process;
 
-end architecture;
-
-
+end architecture SYN;

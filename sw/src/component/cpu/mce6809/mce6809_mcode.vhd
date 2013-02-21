@@ -135,9 +135,9 @@ library ieee;
 use ieee.std_logic_1164.all;
 --use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
-use work.mce6809_pack.all;
+use work.mce6309_pack.all;
 
-entity mce6809_mcode is
+entity mce6309_mcode is
 	port (
 		-- Inputs
 		clk						: in std_logic;
@@ -174,9 +174,9 @@ entity mce6809_mcode is
 		left_ctrl			: out left_type;
 		right_ctrl		: out right_type
 	);
-end;
+end entity mce6309_mcode;
 
-architecture SYN of mce6809_mcode is
+architecture SYN of mce6309_mcode is
 	type Exg_Ld_Type is array(0 to 15) of Ld_idx;
 	type Exg_Dbus_Type is array(0 to 15) of dbus_type;
 
@@ -565,7 +565,7 @@ begin
 						alu_ctrl			<= alu_op;
 						dbus_ctrl			<= dbus_mem;
 						abus_ctrl			<= abus_ea;
-						if ir(7 downto 4) = X"9" then
+						if ir(7 downto 4) = X"B" then
 							ld(IA) <= '1';
 						else
 							ld(IB)	<= '1';
@@ -618,4 +618,4 @@ begin
 			alu_op <= alu_sub;
 		end if;
 	end process;
-end SYN;
+end architecture SYN;

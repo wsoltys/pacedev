@@ -1,7 +1,10 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 
-package mce6809_pack is
+package mce6309_pack is
+
+  type mode_t is ( M6809, M6803 );
+
 	subtype ld_idx is integer range 0 to 17;
 	subtype ld_type is std_logic_vector(12 downto 0);
 
@@ -69,26 +72,40 @@ package mce6809_pack is
 	type ir_page_type is (ir_page0, ir_page1, ir_page2);
 
 	-- Main CPU component
-	component mce6809 
-		port (
-			clk:        in  std_logic;
-			clken:      in  std_logic;
-			reset:      in  std_logic;
-			rw:         out std_logic;
-			vma:        out std_logic;
-			address:    out std_logic_vector(15 downto 0);
-			data_i: 	  in  std_logic_vector(7 downto 0);
-			data_o:		 	out std_logic_vector(7 downto 0);
-			halt:     	in  std_logic;
-			hold:     	in  std_logic;
-			irq:      	in  std_logic;
-			firq:     	in  std_logic;
-			nmi:      	in  std_logic
+	component mce6309 
+		port 
+		(
+  	  -- clocking, reset
+  		clk             : in  std_logic;
+  		clken           : in  std_logic;
+  		reset           : in  std_logic;
+  		
+  		-- bus signals
+  		rw              : out std_logic;
+  		vma             : out std_logic;
+  		address         : out std_logic_vector(15 downto 0);
+  		data_i  	      : in  std_logic_vector(7 downto 0);
+  		data_o 		 	    : out std_logic_vector(7 downto 0);
+  		data_oe 		    : out std_logic;
+  		lic 				    : out std_logic;
+  		halt      	    : in  std_logic;
+  		hold      	    : in  std_logic;
+  		irq       	    : in  std_logic;
+  		firq      	    : in  std_logic;
+  		nmi       	    : in  std_logic;
+  		
+  		-- bdm signals
+  		bdm_i           : in std_logic;
+  		bdm_o           : out std_logic;
+  		bdm_oe          : out std_logic;
+  		
+  		-- misc signals
+  		op_fetch        : out std_logic
 		);
-	end component;
+	end component mce6309;
 
 	-- Microcode - do not instantiate directly
-	component mce6809_mcode 
+	component mce6309_mcode 
 		port (
 			-- Inputs
 			clk						: in  std_logic;
@@ -125,7 +142,7 @@ package mce6809_pack is
 			left_ctrl			: out left_type;
 			right_ctrl		: out right_type
 		);
-	end component;
+	end component mce6309_mcode;
 
-end;
+end package mce6309_pack;
 

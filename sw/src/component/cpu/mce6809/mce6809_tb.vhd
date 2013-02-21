@@ -2,17 +2,17 @@ library ieee;
 use ieee.std_logic_1164.all;
 --use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
-use work.mce6809_pack.all;
+use work.mce6309_pack.all;
 
-entity mce6809_tb is
+entity mce6309_tb is
 	port (
 		fail:				out  boolean
 	);
-end mce6809_tb;
+end mce6309_tb;
 
-architecture SYN of mce6809_tb is
-	for syn_cpu : mce6809 use entity work.mce6809 (SYN);
-	for beh_cpu : mce6809 use entity work.mce6809 (BEH);
+architecture SYN of mce6309_tb is
+	for syn_cpu : mce6309 use entity work.mce6309 (SYN);
+	for beh_cpu : mce6309 use entity work.mce6309 (BEH);
 
 	subtype MemData_idx is integer range 0 to 65535;
 	subtype MemData_type is std_logic_vector(7 downto 0);
@@ -34,11 +34,58 @@ architecture SYN of mce6809_tb is
 
 	signal match_ext	: std_logic;
 begin
-	syn_cpu : mce6809 port map (clk => clk, clken => '1', reset => reset, data_i => mem_data, data_o => syn_data_o, rw => syn_read,
-		vma => syn_vma, address => syn_addr, halt => '0', hold => '0', irq => '0', firq => '0', nmi => '0');
+	syn_cpu : mce6309
+	  port map 
+	  (
+	    clk       => clk, 
+	    clken     => '1', 
+	    reset     => reset, 
+	    
+	    rw        => syn_read,
+		  vma       => syn_vma, 
+		  address   => syn_addr, 
+	    data_i    => mem_data, 
+	    data_o    => syn_data_o, 
+	    data_oe   => open,
+	    lic       => open,
+		  halt      => '0', 
+		  hold      => '0', 
+		  irq       => '0', 
+		  firq      => '0', 
+		  nmi       => '0',
+		  
+		  bdm_i     => '0',
+		  bdm_o     => open,
+		  bdm_oe    => open,
+		  
+		  op_fetch  => open
+	  );
 
-	beh_cpu : mce6809 port map (clk => clk, clken => '1', reset => reset, data_i => mem_data, data_o => beh_data_o, rw => beh_read,
-		vma => beh_vma, address => beh_addr, halt => '0', hold => '0', irq => '0', firq => '0', nmi => '0');
+	beh_cpu : mce6309 
+	  port map 
+	  (
+	    clk       => clk, 
+	    clken     => '1', 
+	    reset     => reset, 
+	    
+	    rw        => beh_read,
+		  vma       => beh_vma, 
+		  address   => beh_addr, 
+	    data_i    => mem_data, 
+	    data_o    => beh_data_o, 
+	    data_oe   => open,
+		  halt      => '0', 
+		  hold      => '0', 
+		  irq       => '0', 
+		  firq      => '0', 
+		  nmi       => '0',
+		  
+		  bdm_i     => '0',
+		  bdm_o     => open,
+		  bdm_oe    => open,
+		  
+		  op_fetch  => open
+	  );
 
 	-- Check external signals match
 	match_ext <= '0' when beh_vma /= syn_vma or (syn_vma = '1' and beh_read /= syn_read) or (syn_vma = '1' and beh_addr /= syn_addr) else
@@ -70,13 +117,13 @@ begin
 			16#0B#	=>	X"13",	--
 			16#0C#	=>	X"1E",	-- EXG S,U
 			16#0D#	=>	X"43",	--
-			16#0E#	=>	X"1E",	-- EXG A,CC
+			16#0E#	=>	X"1E",	-- EXG A,CC       -- CC all over the place
 			16#0F#	=>	X"8A",	--
 			16#10#	=>	X"1E",	-- EXG B,DP
 			16#11#	=>	X"9B",	--
 			16#12#	=>	X"1E",	-- EXG D,S
 			16#13#	=>	X"04",	--
-			16#14#	=>	X"9B",	-- ADDA -1
+			16#14#	=>	X"9B",	-- ADDA -1        -- is this what is meant?
 			16#15#	=>	X"FF",	--
 			16#16#	=>	X"BB",	-- ADDA #0005h
 			16#17#	=>	X"00",	--
