@@ -33,6 +33,7 @@ entity mce6309 is
 		nmi       	    : in  std_logic;
 		
 		-- bdm signals
+		bdm_clk         : in std_logic;
 		bdm_i           : in std_logic;
 		bdm_o           : out std_logic;
 		bdm_oe          : out std_logic;
@@ -494,4 +495,27 @@ begin
 --		cc_out(Flag_H) 
 	end process;
 
+  GEN_BDM : if HAS_BDM generate
+  begin
+    bdm_inst : entity work.mce6309_bdm
+      port map
+      (
+        bdm_clk   => bdm_clk,
+        bdm_i     => bdm_i,
+        bdm_o     => bdm_o,
+        bdm_oe    => bdm_oe,
+  
+        -- registers      
+  			cc	      => cc,
+  			a         => acca,
+  			b         => accb,
+  			dp	      => dp,
+  			x		      => x,
+  			y		      => y,
+  			u		      => u,
+  			s		      => s,
+  			pc	      => pc
+      );
+  end generate GEN_BDM;
+      
 end architecture SYN;

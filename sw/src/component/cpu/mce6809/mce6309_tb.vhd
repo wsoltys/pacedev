@@ -11,8 +11,8 @@ entity mce6309_tb is
 end mce6309_tb;
 
 architecture SYN of mce6309_tb is
-	for syn_cpu : mce6309 use entity work.mce6309 (SYN);
-	for beh_cpu : mce6309 use entity work.mce6309 (BEH);
+	--for syn_cpu : mce6309 use entity work.mce6309 (SYN);
+	--for beh_cpu : mce6309 use entity work.mce6309 (BEH);
 
 	subtype MemData_idx is integer range 0 to 65535;
 	subtype MemData_type is std_logic_vector(7 downto 0);
@@ -34,7 +34,8 @@ architecture SYN of mce6309_tb is
 
 	signal match_ext	: std_logic;
 begin
-	syn_cpu : mce6309
+
+	syn_cpu : entity work.mce6309(SYN)
 	  port map 
 	  (
 	    clk       => clk, 
@@ -53,7 +54,8 @@ begin
 		  irq       => '0', 
 		  firq      => '0', 
 		  nmi       => '0',
-		  
+
+      bdm_clk   => '0',
 		  bdm_i     => '0',
 		  bdm_o     => open,
 		  bdm_oe    => open,
@@ -61,31 +63,31 @@ begin
 		  op_fetch  => open
 	  );
 
-	beh_cpu : mce6309 
-	  port map 
-	  (
-	    clk       => clk, 
-	    clken     => '1', 
-	    reset     => reset, 
-	    
-	    rw        => beh_read,
-		  vma       => beh_vma, 
-		  address   => beh_addr, 
-	    data_i    => mem_data, 
-	    data_o    => beh_data_o, 
-	    data_oe   => open,
-		  halt      => '0', 
-		  hold      => '0', 
-		  irq       => '0', 
-		  firq      => '0', 
-		  nmi       => '0',
-		  
-		  bdm_i     => '0',
-		  bdm_o     => open,
-		  bdm_oe    => open,
-		  
-		  op_fetch  => open
-	  );
+--	beh_cpu : mce6309 
+--	  port map 
+--	  (
+--	    clk       => clk, 
+--	    clken     => '1', 
+--	    reset     => reset, 
+--	    
+--	    rw        => beh_read,
+--		  vma       => beh_vma, 
+--		  address   => beh_addr, 
+--	    data_i    => mem_data, 
+--	    data_o    => beh_data_o, 
+--	    data_oe   => open,
+--		  halt      => '0', 
+--		  hold      => '0', 
+--		  irq       => '0', 
+--		  firq      => '0', 
+--		  nmi       => '0',
+--		  
+--		  bdm_i     => '0',
+--		  bdm_o     => open,
+--		  bdm_oe    => open,
+--		  
+--		  op_fetch  => open
+--	  );
 
 	-- Check external signals match
 	match_ext <= '0' when beh_vma /= syn_vma or (syn_vma = '1' and beh_read /= syn_read) or (syn_vma = '1' and beh_addr /= syn_addr) else

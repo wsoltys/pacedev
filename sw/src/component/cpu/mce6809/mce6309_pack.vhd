@@ -95,6 +95,7 @@ package mce6309_pack is
   		nmi       	    : in  std_logic;
   		
   		-- bdm signals
+  		bdm_clk         : in std_logic;
   		bdm_i           : in std_logic;
   		bdm_o           : out std_logic;
   		bdm_oe          : out std_logic;

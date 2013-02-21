@@ -138,7 +138,8 @@ use ieee.numeric_std.all;
 use work.mce6309_pack.all;
 
 entity mce6309_mcode is
-	port (
+	port 
+	(
 		-- Inputs
 		clk						: in std_logic;
 		clken					: in std_logic;
@@ -177,6 +178,7 @@ entity mce6309_mcode is
 end entity mce6309_mcode;
 
 architecture SYN of mce6309_mcode is
+
 	type Exg_Ld_Type is array(0 to 15) of Ld_idx;
 	type Exg_Dbus_Type is array(0 to 15) of dbus_type;
 
@@ -225,15 +227,15 @@ begin
 
 		-- Default ALU left input
 		case ir(7 downto 4) is
-		when X"8" | X"9" | X"A" | X"B" | X"4"		=> left_ctrl <= left_a;
-		when X"C" | X"D" | X"E" | X"F" | X"5"		=> left_ctrl <= left_b;
-		when others => left_ctrl <= left_a;
+  		when X"8" | X"9" | X"A" | X"B" | X"4"		=> left_ctrl <= left_a;
+  		when X"C" | X"D" | X"E" | X"F" | X"5"		=> left_ctrl <= left_b;
+  		when others => left_ctrl <= left_a;
 		end case;
 
 		-- Default ALU right input
 		case ir(7 downto 4) is
-		when X"4" | X"5" | X"6" | X"7" => right_ctrl <= right_c1;
-		when others => right_ctrl <= right_dbus;
+  		when X"4" | X"5" | X"6" | X"7" => right_ctrl <= right_c1;
+  		when others => right_ctrl <= right_dbus;
 		end case;
 
 		-- Instruction fetch
@@ -248,10 +250,10 @@ begin
 			ld(IPOST) <= '1';
 
 			case dbus(7 downto 4) is
-			when X"6" | X"A" | X"E" =>
-				mc_jump <= '1';
-				mc_jump_addr <= mc_index0;
-			when others =>
+  			when X"6" | X"A" | X"E" =>
+  				mc_jump <= '1';
+  				mc_jump_addr <= mc_index0;
+  			when others =>
 			end case;
 
 			if (ir(9 downto 8) /= "00") or (ir(7 downto 4) >= X"6" or ir = X"01E") then
@@ -268,11 +270,11 @@ begin
 
 		-- Indexed addressing (TODO PC offset)
 		case index_reg is 
-		when "00" => idxsel <= eabus_x;
-		when "01" => idxsel <= eabus_y;
-		when "10" => idxsel <= eabus_u;
-		when "11" => idxsel <= eabus_s;
-		when others =>
+  		when "00" => idxsel <= eabus_x;
+  		when "01" => idxsel <= eabus_y;
+  		when "10" => idxsel <= eabus_u;
+  		when "11" => idxsel <= eabus_s;
+  		when others =>
 		end case;
 
 --		if std_match(rpost, "1---0100") then	-- No offset
@@ -284,314 +286,323 @@ begin
 		ld(ICC) <= '1';
 
 		case mc_addr is
-		when mc_index0 =>
-			alu_igncarry	<= '1';
-			alu_ctrl <= alu_add;
-			left_ctrl <= left_eal;
-			if std_match(rpost, "1---0100") then	-- No offset
-				mc_jump <= '1';
-				mc_jump_addr <= mc_exec0;	
-			else
-				ld(IEAl) <= '1';
-				if std_match(rpost, "0-------") then	-- 5-bit offset
-					right_ctrl <= right_dbus5;
-					dbus_ctrl <= dbus_post;
-				elsif std_match(rpost, "1---1-00") 			-- 8-bit offset
-				   or std_match(rpost, "1---1-01") then	-- 16-bit offset
-					pc_ctrl <= incr_pc;
-					right_ctrl <= right_dbus;
-					dbus_ctrl <= dbus_mem;
-				elsif std_match(rpost, "1---0110") then	-- A offset
-					right_ctrl <= right_dbus;
-					dbus_ctrl <= dbus_a;
-				elsif std_match(rpost, "1---0101") 			-- B offset
-					 or std_match(rpost, "1---1011") then	-- D offset
-					right_ctrl <= right_dbus;
-					dbus_ctrl <= dbus_b;
-				elsif std_match(rpost, "1--00000") 			-- Post inc +1 
-				   or std_match(rpost, "1--00001") 			-- Post inc +2
-				   or std_match(rpost, "1--00010") 			-- Post dec -1
-				   or std_match(rpost, "1--00011") then	-- Post dec -2
-					right_ctrl <= right_c0;
-				else
-					right_ctrl <= right_dbus;
-					dbus_ctrl <= dbus_mem;
-				end if;
-			end if;
-		when mc_index1 =>
-			alu_ctrl <= alu_add;
-			left_ctrl <= left_eah;
-			if std_match(rpost, "0-------") then	-- 5-bit offset
-				drive_vma	<= '0';
-				right_ctrl <= right_c0;
-			elsif std_match(rpost, "1---1-01") then	-- 16-bit offset
-				pc_ctrl <= incr_pc;
-				right_ctrl <= right_dbus;
-				dbus_ctrl <= dbus_mem;
-			elsif std_match(rpost, "1---1011") then	-- D offset
-				right_ctrl <= right_dbus;
-				dbus_ctrl <= dbus_a;
-			else
-				right_ctrl <= right_c0;
-			end if;
-			ld(IEAh) <= '1';
---			if std_match(rpost, "0-------") then	-- 5-bit offset
-				mc_jump <= '1';
-				mc_jump_addr <= mc_exec0;	
---			elsif std_match(rpost, "1---1000") then	-- 8-bit offset
---			elsif std_match(rpost, "1---1001") then	-- 16-bit offset
---			elsif std_match(rpost, "1---0110") then	-- A offset
---			elsif std_match(rpost, "1---0101") then	-- B offset
---			elsif std_match(rpost, "1---1011") then	-- D offset
---			elsif std_match(rpost, "1--00000") then	-- Post inc +1 
---			elsif std_match(rpost, "1--00001") then	-- Post inc +2
---			elsif std_match(rpost, "1--00010") then	-- Post dec -1
---			elsif std_match(rpost, "1--00011") then	-- Post dec -2
---			elsif std_match(rpost, "1---1100") then	-- PC 8-bit offset
---			elsif std_match(rpost, "1---1101") then	-- PC 16-bit offset
---			elsif std_match(rpost, "1--11111") then	-- Extended indirect
---			end if;
-		when others =>
+  		when mc_index0 =>
+  			alu_igncarry	<= '1';
+  			alu_ctrl <= alu_add;
+  			left_ctrl <= left_eal;
+  			if std_match(rpost, "1---0100") then	-- No offset
+  				mc_jump <= '1';
+  				mc_jump_addr <= mc_exec0;	
+  			else
+  				ld(IEAl) <= '1';
+  				if std_match(rpost, "0-------") then	-- 5-bit offset
+  					right_ctrl <= right_dbus5;
+  					dbus_ctrl <= dbus_post;
+  				elsif std_match(rpost, "1---1-00") 			-- 8-bit offset
+  				   or std_match(rpost, "1---1-01") then	-- 16-bit offset
+  					pc_ctrl <= incr_pc;
+  					right_ctrl <= right_dbus;
+  					dbus_ctrl <= dbus_mem;
+  				elsif std_match(rpost, "1---0110") then	-- A offset
+  					right_ctrl <= right_dbus;
+  					dbus_ctrl <= dbus_a;
+  				elsif std_match(rpost, "1---0101") 			-- B offset
+  					 or std_match(rpost, "1---1011") then	-- D offset
+  					right_ctrl <= right_dbus;
+  					dbus_ctrl <= dbus_b;
+  				elsif std_match(rpost, "1--00000") 			-- Post inc +1 
+  				   or std_match(rpost, "1--00001") 			-- Post inc +2
+  				   or std_match(rpost, "1--00010") 			-- Post dec -1
+  				   or std_match(rpost, "1--00011") then	-- Post dec -2
+  					right_ctrl <= right_c0;
+  				else
+  					right_ctrl <= right_dbus;
+  					dbus_ctrl <= dbus_mem;
+  				end if;
+  			end if;
+  		when mc_index1 =>
+  			alu_ctrl <= alu_add;
+  			left_ctrl <= left_eah;
+  			if std_match(rpost, "0-------") then	-- 5-bit offset
+  				drive_vma	<= '0';
+  				right_ctrl <= right_c0;
+  			elsif std_match(rpost, "1---1-01") then	-- 16-bit offset
+  				pc_ctrl <= incr_pc;
+  				right_ctrl <= right_dbus;
+  				dbus_ctrl <= dbus_mem;
+  			elsif std_match(rpost, "1---1011") then	-- D offset
+  				right_ctrl <= right_dbus;
+  				dbus_ctrl <= dbus_a;
+  			else
+  				right_ctrl <= right_c0;
+  			end if;
+  			ld(IEAh) <= '1';
+--			  if std_match(rpost, "0-------") then	-- 5-bit offset
+				  mc_jump <= '1';
+				  mc_jump_addr <= mc_exec0;	
+--			  elsif std_match(rpost, "1---1000") then	-- 8-bit offset
+--			  elsif std_match(rpost, "1---1001") then	-- 16-bit offset
+--			  elsif std_match(rpost, "1---0110") then	-- A offset
+--			  elsif std_match(rpost, "1---0101") then	-- B offset
+--			  elsif std_match(rpost, "1---1011") then	-- D offset
+--			  elsif std_match(rpost, "1--00000") then	-- Post inc +1 
+--			  elsif std_match(rpost, "1--00001") then	-- Post inc +2
+--			  elsif std_match(rpost, "1--00010") then	-- Post dec -1
+--			  elsif std_match(rpost, "1--00011") then	-- Post dec -2
+--			  elsif std_match(rpost, "1---1100") then	-- PC 8-bit offset
+--			  elsif std_match(rpost, "1---1101") then	-- PC 16-bit offset
+--			  elsif std_match(rpost, "1--11111") then	-- Extended indirect
+--			  end if;
+		  when others =>
 		end case;
 
 		-- Instruction decode
 		if mc_addr /= mc_fetch0 then
 			case ir(11 downto 4) is
-			when X"01" =>
-				case ir(3 downto 0) is
-				when X"2" =>		-- NOP
-					mc_jump <= '1';
-					mc_jump_addr <= mc_fetch0;	
-
-				when X"0" | X"1" =>			-- IR Page 1, Page 2
-															
-				when X"3" =>		-- SYNC
-												 
-				when X"9" =>		-- DAA
-
-				when X"D" =>		-- SEX
-
-				when X"E" =>		-- EXG
-					acc_fromalu <= '0';	-- XXX - Optimise later!
-
-					case mc_addr is
-					when mc_fetch1 =>
-						ld(IPOST) <= '1';
-					when mc_exec0 =>	-- Copy high byte R0 -> EA
-						dbus_ctrl <= exg_dbus_hi(rpost_lo_nib);
-						ld(IEAh) <= '1';
-						drive_vma	<= '0';
-					when mc_exec1 =>	-- Copy low byte R0 -> EA
-						dbus_ctrl <= exg_dbus_lo(rpost_lo_nib);
-						ld(IEAl) <= '1';
-						drive_vma	<= '0';
-					when mc_exec2 =>	-- Copy high byte R1 -> R0
-						dbus_ctrl <= exg_dbus_hi(rpost_hi_nib);
-						case exg_ld_hi(rpost_lo_nib) is
-						when INOREG | ISl | IPCl =>
-						when ISh =>
-							s_ctrl <= loadhi_s;
-						when IPCh =>
-							pc_ctrl <= loadhi_pc;
-						when others =>
-							ld(exg_ld_hi(rpost_lo_nib)) <= '1';
-						end case;
-						drive_vma	<= '0';
-					when mc_exec3 =>	-- Copy low byte R1 -> R0
-						dbus_ctrl <= exg_dbus_lo(rpost_hi_nib);
-						case exg_ld_lo(rpost_lo_nib) is
-						when INOREG | ISh | IPCh =>
-						when ISl =>
-							s_ctrl <= loadlo_s;
-						when IPCl =>
-							pc_ctrl <= loadlo_pc;
-						when others =>
-							ld(exg_ld_lo(rpost_lo_nib)) <= '1';
-						end case;
-						drive_vma	<= '0';
-					when mc_exec4 =>	-- Copy high byte EA -> R1
-						case exg_ld_hi(rpost_hi_nib) is
-						when INOREG | ISl | IPCl =>
-						when ISh =>
-							s_ctrl <= loadhi_s;
-						when IPCh =>
-							pc_ctrl <= loadhi_pc;
-						when others =>
-							ld(exg_ld_hi(rpost_hi_nib)) <= '1';
-						end case;
-						dbus_ctrl <= dbus_eah;
-						drive_vma	<= '0';
-					when mc_exec5 =>	-- Copy low byte EA -> R1
-						case exg_ld_lo(rpost_hi_nib) is
-						when INOREG | ISh | IPCh =>
-						when ISl =>
-							s_ctrl <= loadlo_s;
-						when IPCl =>
-							pc_ctrl <= loadlo_pc;
-						when others =>
-							ld(exg_ld_lo(rpost_hi_nib)) <= '1';
-						end case;
-						dbus_ctrl <= dbus_eal;
-						drive_vma	<= '0';
-						mc_jump				<= '1';
-						mc_jump_addr	<= mc_fetch0;
-					when others =>
-					end case;
-
-				when X"F" =>		-- TFR
-
-				when others =>
-					mc_jump <= '1';
-					mc_jump_addr <= mc_fetch0;	
+			
+  			when X"01" =>
+  				case ir(3 downto 0) is
+  				when X"2" =>		-- NOP
+  					mc_jump <= '1';
+  					mc_jump_addr <= mc_fetch0;	
+  
+  				when X"0" | X"1" =>			-- IR Page 1, Page 2
+  															
+  				when X"3" =>		-- SYNC
+  												 
+  				when X"9" =>		-- DAA
+  
+  				when X"D" =>		-- SEX
+  
+  				when X"E" =>		-- EXG
+  					acc_fromalu <= '0';	-- XXX - Optimise later!
+  
+  					case mc_addr is
+    					when mc_fetch1 =>
+    						ld(IPOST) <= '1';
+    					when mc_exec0 =>	-- Copy high byte R0 -> EA
+    						dbus_ctrl <= exg_dbus_hi(rpost_lo_nib);
+    						ld(IEAh) <= '1';
+    						drive_vma	<= '0';
+    					when mc_exec1 =>	-- Copy low byte R0 -> EA
+    						dbus_ctrl <= exg_dbus_lo(rpost_lo_nib);
+    						ld(IEAl) <= '1';
+    						drive_vma	<= '0';
+    					when mc_exec2 =>	-- Copy high byte R1 -> R0
+    						dbus_ctrl <= exg_dbus_hi(rpost_hi_nib);
+    						case exg_ld_hi(rpost_lo_nib) is
+    						when INOREG | ISl | IPCl =>
+    						when ISh =>
+    							s_ctrl <= loadhi_s;
+    						when IPCh =>
+    							pc_ctrl <= loadhi_pc;
+    						when others =>
+    							ld(exg_ld_hi(rpost_lo_nib)) <= '1';
+  						end case;
+  						drive_vma	<= '0';
+  					when mc_exec3 =>	-- Copy low byte R1 -> R0
+  						dbus_ctrl <= exg_dbus_lo(rpost_hi_nib);
+  						case exg_ld_lo(rpost_lo_nib) is
+    						when INOREG | ISh | IPCh =>
+    						when ISl =>
+    							s_ctrl <= loadlo_s;
+    						when IPCl =>
+    							pc_ctrl <= loadlo_pc;
+    						when others =>
+    							ld(exg_ld_lo(rpost_lo_nib)) <= '1';
+  						end case;
+  						drive_vma	<= '0';
+  					when mc_exec4 =>	-- Copy high byte EA -> R1
+  						case exg_ld_hi(rpost_hi_nib) is
+    						when INOREG | ISl | IPCl =>
+    						when ISh =>
+    							s_ctrl <= loadhi_s;
+    						when IPCh =>
+    							pc_ctrl <= loadhi_pc;
+    						when others =>
+    							ld(exg_ld_hi(rpost_hi_nib)) <= '1';
+  						end case;
+  						dbus_ctrl <= dbus_eah;
+  						drive_vma	<= '0';
+  					when mc_exec5 =>	-- Copy low byte EA -> R1
+  						case exg_ld_lo(rpost_hi_nib) is
+    						when INOREG | ISh | IPCh =>
+    						when ISl =>
+    							s_ctrl <= loadlo_s;
+    						when IPCl =>
+    							pc_ctrl <= loadlo_pc;
+    						when others =>
+    							ld(exg_ld_lo(rpost_hi_nib)) <= '1';
+  						end case;
+  						dbus_ctrl <= dbus_eal;
+  						drive_vma	<= '0';
+  						mc_jump				<= '1';
+  						mc_jump_addr	<= mc_fetch0;
+  					when others =>
+  					end case;
+  
+  				when X"F" =>		-- TFR
+  
+  				when others =>
+  					mc_jump <= '1';
+  					mc_jump_addr <= mc_fetch0;	
 				end case;
 
+      when X"03" =>
+        case ir(3 downto 0) is
+          when X"A" =>                -- ABX
+          when others =>
+        end case;
+        
+			when X"04" | X"05" =>
+				case ir(3 downto 0) is
+  				when X"3" | X"A" | X"C" =>	-- A,B inheren
+  					mc_jump <= '1';
+  					mc_jump_addr <= mc_fetch0;
+  					--pc_ctrl <= latch_pc;
+  					alu_ctrl <= alu_op;
+  					dbus_ctrl <= dbus_alu;
+  					if ir(7 downto 4) = X"4" then
+  						ld(IA) <= '1';
+  					else
+  						ld(IB) <= '1';
+  					end if;
+  				when others =>
+				end case;
+				
 			when X"08" | X"0C" | X"28" | X"2C" | X"38"  =>
 				case ir(3 downto 0) is 
-				when X"0" | X"1" | X"2" | X"4" | X"6" | X"8" | X"9" | X"A" | X"B" =>	-- ALUOP A,B immed
-					--if mc_addr = mc_fetch1 then
-						pc_ctrl <= incr_pc;
-						mc_jump <= '1';
-						mc_jump_addr <= mc_fetch0;
-						--pc_ctrl <= latch_pc;
-						alu_ctrl <= alu_op;
-						dbus_ctrl <= dbus_mem;
-						if ir(7 downto 4) = X"8" then
-							ld(IA) <= '1';
-						else
-							ld(IB) <= '1';
-						end if;
-					--end if;
-				when others =>
+  				when X"0" | X"1" | X"2" | X"4" | X"6" | X"8" | X"9" | X"A" | X"B" =>	-- ALUOP A,B immed
+  					--if mc_addr = mc_fetch1 then
+  						pc_ctrl <= incr_pc;
+  						mc_jump <= '1';
+  						mc_jump_addr <= mc_fetch0;
+  						--pc_ctrl <= latch_pc;
+  						alu_ctrl <= alu_op;
+  						dbus_ctrl <= dbus_mem;
+  						if ir(7 downto 4) = X"8" then
+  							ld(IA) <= '1';
+  						else
+  							ld(IB) <= '1';
+  						end if;
+  					--end if;
+  				when others =>
 				end case;
 
 			when X"09" | X"0D" | X"29" | X"2D" | X"39" =>
 				case ir(3 downto 0) is 
-				when X"0" | X"1" | X"2" | X"4" | X"6" | X"8" | X"9" | X"A" | X"B" =>	-- ALUOP A,B direct
-					case mc_addr is
-					when mc_fetch1 =>
-						--pc_ctrl <= incr_pc;
-						ld(IEAl) <= '1';
-					when mc_exec0 =>
-						dbus_ctrl <= dbus_dp;
-						ld(IEAh) <= '1';
-						drive_vma	<= '0';
-					when mc_exec1 =>
-						mc_jump				<= '1';
-						mc_jump_addr	<= mc_fetch0;
-						alu_ctrl			<= alu_op;
-						dbus_ctrl			<= dbus_mem;
-						abus_ctrl			<= abus_ea;
-						if ir(7 downto 4) = X"9" then
-							ld(IA) <= '1';
-						else
-							ld(IB) <= '1';
-						end if;
-					when others =>
-					end case;
+  				when X"0" | X"1" | X"2" | X"4" | X"6" | X"8" | X"9" | X"A" | X"B" =>	-- ALUOP A,B direct
+  					case mc_addr is
+    					when mc_fetch1 =>
+    						--pc_ctrl <= incr_pc;
+    						ld(IEAl) <= '1';
+    					when mc_exec0 =>
+    						dbus_ctrl <= dbus_dp;
+    						ld(IEAh) <= '1';
+    						drive_vma	<= '0';
+    					when mc_exec1 =>
+    						mc_jump				<= '1';
+    						mc_jump_addr	<= mc_fetch0;
+    						alu_ctrl			<= alu_op;
+    						dbus_ctrl			<= dbus_mem;
+    						abus_ctrl			<= abus_ea;
+    						if ir(7 downto 4) = X"9" then
+    							ld(IA) <= '1';
+    						else
+    							ld(IB) <= '1';
+    						end if;
+    					when others =>
+  					end case;
+  
+  				when X"7" =>																													-- ST A,B direct
+  					case mc_addr is
+    					when mc_fetch1 =>
+    						--pc_ctrl <= incr_pc;
+    						ld(IEAl) <= '1';
+    					when mc_exec0 =>
+    						dbus_ctrl <= dbus_dp;
+    						ld(IEAh) <= '1';
+    						drive_vma	<= '0';
+    					when mc_exec1 =>
+    						mc_jump				<= '1';
+    						mc_jump_addr	<= mc_fetch0;
+    						drive_vma			<= '1';
+    						if ir(7 downto 4) = X"9" then
+    							dbus_ctrl		<= dbus_a;
+    						else
+    							dbus_ctrl		<= dbus_b;
+    						end if;
+    						abus_ctrl			<= abus_ea;
+    					when others =>
+  					end case;
 
-				when X"7" =>																													-- ST A,B direct
-					case mc_addr is
-					when mc_fetch1 =>
-						--pc_ctrl <= incr_pc;
-						ld(IEAl) <= '1';
-					when mc_exec0 =>
-						dbus_ctrl <= dbus_dp;
-						ld(IEAh) <= '1';
-						drive_vma	<= '0';
-					when mc_exec1 =>
-						mc_jump				<= '1';
-						mc_jump_addr	<= mc_fetch0;
-						drive_vma			<= '1';
-						if ir(7 downto 4) = X"9" then
-							dbus_ctrl		<= dbus_a;
-						else
-							dbus_ctrl		<= dbus_b;
-						end if;
-						abus_ctrl			<= abus_ea;
-					when others =>
-					end case;
-
-				when others =>
+				  when others =>
 				end case;
 
 			when X"0A" | X"0E" | X"2A" | X"2E" | X"3A" =>
 				case ir(3 downto 0) is 
-				when X"0" | X"1" | X"2" | X"4" | X"6" | X"8" | X"9" | X"A" | X"B" =>	-- ALUOP A,B index
-					case mc_addr is
-					when mc_fetch1 =>
-						mc_jump				<= '1';
-						mc_jump_addr	<= mc_index0;
-						lea(EAEA)			<= '1';
-						if not std_match(rpost, "1---110-") then	-- PC offset
-							case dbus(6 downto 5) is 
-							when "00" => eabus_ctrl <= eabus_x;
-							when "01" => eabus_ctrl <= eabus_y;
-							when "10" => eabus_ctrl <= eabus_u;
-							when others => eabus_ctrl <= eabus_s; -- "11"
-							end case;
-						else
-							eabus_ctrl <= eabus_pc;
-						end if;
-					when mc_exec0 =>
-						mc_jump				<= '1';
-						mc_jump_addr	<= mc_fetch0;
-						alu_ctrl			<= alu_op;
-						dbus_ctrl			<= dbus_mem;
-						abus_ctrl			<= abus_ea;
-						if ir(7 downto 4) = X"A" then
-							ld(IA) <= '1';
-						else
-							ld(IB) <= '1';
-						end if;
-					when others =>
-					end case;
-				when others =>
+  				when X"0" | X"1" | X"2" | X"4" | X"6" | X"8" | X"9" | X"A" | X"B" =>	-- ALUOP A,B index
+  					case mc_addr is
+    					when mc_fetch1 =>
+    						mc_jump				<= '1';
+    						mc_jump_addr	<= mc_index0;
+    						lea(EAEA)			<= '1';
+    						if not std_match(rpost, "1---110-") then	-- PC offset
+    							case dbus(6 downto 5) is 
+    							when "00" => eabus_ctrl <= eabus_x;
+    							when "01" => eabus_ctrl <= eabus_y;
+    							when "10" => eabus_ctrl <= eabus_u;
+    							when others => eabus_ctrl <= eabus_s; -- "11"
+    							end case;
+    						else
+    							eabus_ctrl <= eabus_pc;
+    						end if;
+    					when mc_exec0 =>
+    						mc_jump				<= '1';
+    						mc_jump_addr	<= mc_fetch0;
+    						alu_ctrl			<= alu_op;
+    						dbus_ctrl			<= dbus_mem;
+    						abus_ctrl			<= abus_ea;
+    						if ir(7 downto 4) = X"A" then
+    							ld(IA) <= '1';
+    						else
+    							ld(IB) <= '1';
+    						end if;
+    					when others =>
+  					end case;
+  				when others =>
 				end case;
 
 			when X"0B" | X"0F" | X"2B" | X"2F" | X"3B" =>
 				case ir(3 downto 0) is 
-				when X"0" | X"1" | X"2" | X"4" | X"6" | X"8" | X"9" | X"A" | X"B" =>	-- ALUOP A,B extended
-					case mc_addr is
-					when mc_fetch1 =>
-						ld(IEAh) <= '1';
-					when mc_exec0 =>
-						pc_ctrl <= incr_pc;
-						ld(IEAl) <= '1';
-					when mc_exec1 =>
-						drive_vma	<= '0';
-					when mc_exec2 =>
-						mc_jump				<= '1';
-						mc_jump_addr	<= mc_fetch0;
-						alu_ctrl			<= alu_op;
-						dbus_ctrl			<= dbus_mem;
-						abus_ctrl			<= abus_ea;
-						if ir(7 downto 4) = X"B" then
-							ld(IA) <= '1';
-						else
-							ld(IB)	<= '1';
-						end if;
-					when others =>
-					end case;
-				when others =>
+  				when X"0" | X"1" | X"2" | X"4" | X"6" | X"8" | X"9" | X"A" | X"B" =>	-- ALUOP A,B extended
+  					case mc_addr is
+    					when mc_fetch1 =>
+    						ld(IEAh) <= '1';
+    					when mc_exec0 =>
+    						pc_ctrl <= incr_pc;
+    						ld(IEAl) <= '1';
+    					when mc_exec1 =>
+    						drive_vma	<= '0';
+    					when mc_exec2 =>
+    						mc_jump				<= '1';
+    						mc_jump_addr	<= mc_fetch0;
+    						alu_ctrl			<= alu_op;
+    						dbus_ctrl			<= dbus_mem;
+    						abus_ctrl			<= abus_ea;
+    						if ir(7 downto 4) = X"B" then
+    							ld(IA) <= '1';
+    						else
+    							ld(IB)	<= '1';
+    						end if;
+    					when others =>
+  					end case;
+  				when others =>
 				end case;
 
-			when X"04" | X"05" =>
-				case ir(3 downto 0) is
-				when X"3" | X"A" | X"C" =>	-- A,B inheren
-					mc_jump <= '1';
-					mc_jump_addr <= mc_fetch0;
-					--pc_ctrl <= latch_pc;
-					alu_ctrl <= alu_op;
-					dbus_ctrl <= dbus_alu;
-					if ir(7 downto 4) = X"4" then
-						ld(IA) <= '1';
-					else
-						ld(IB) <= '1';
-					end if;
-				when others =>
-				end case;
 			when others =>
 			end case;
+			
 		end if;
 	end process;
 
