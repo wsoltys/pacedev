@@ -132,6 +132,7 @@ begin
         bdm_delay(4);
         bdm_send_recv (cmd, data, bdm_mosi, bdm_i);
         bdm_delay(4);
+        cmd := X"32";
         bdm_send_recv (cmd, data, bdm_mosi, bdm_i);
       end process;
       

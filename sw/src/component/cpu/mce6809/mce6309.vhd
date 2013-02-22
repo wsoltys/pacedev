@@ -116,15 +116,16 @@ architecture SYN of mce6309 is
 	signal		right_ctrl		: right_type;
 
 	-- BDM signals
-	signal 		bdm_enabled		: std_logic;
 	signal 		bdm_rdy				: std_logic;
 	signal 		bdm_ir				: std_logic_vector(23 downto 0);
-	signal 		bdm_wr				: std_logic;
-	signal 		bdm_data			: std_logic_vector(23 downto 0);
 
-  signal bdm_cr           : std_logic_vector(7 downto 0);
-  signal bdm_cr_set       : std_logic_vector(7 downto 0);
-  signal bdm_cr_clr       : std_logic_vector(7 downto 0);
+	signal 		bdm_r_sel			: std_logic_vector(3 downto 0);
+	signal 		bdm_r_d_i			: std_logic_vector(15 downto 0);
+	signal 		bdm_r_d_o   	: std_logic_vector(15 downto 0);
+	signal 		bdm_wr				: std_logic;
+	signal 		bdm_cr				: std_logic_vector(7 downto 0);
+	signal 		bdm_cr_set  	: std_logic_vector(7 downto 0);
+	signal 		bdm_cr_clr  	: std_logic_vector(7 downto 0);
   
 begin
 	--abus		<= abush & abusl;
@@ -184,9 +185,13 @@ begin
   		bdm_rdy       => bdm_rdy,
   		bdm_ir        => bdm_ir,
   		
-      bdm_cr        => bdm_cr,
-  		bdm_cr_set    => bdm_cr_set,
-  		bdm_cr_clr    => bdm_cr_clr
+			bdm_r_sel			=> bdm_r_sel,
+	    bdm_r_d_i			=> bdm_r_d_i,
+			bdm_r_d_o   	=> bdm_r_d_o,
+			bdm_wr				=> bdm_wr,
+			bdm_cr_i			=> bdm_cr,
+			bdm_cr_set  	=> bdm_cr_set,
+			bdm_cr_clr  	=> bdm_cr_clr
   	);
 
 	-- Microcode address
@@ -543,17 +548,16 @@ begin
   
 				-- internal signals
 				
-				-- in
-				bdm_enabled	=> bdm_enabled,
+				-- command
 				bdm_rdy			=> bdm_rdy,
 				bdm_ir			=> bdm_ir,
 
-        bdm_cr_o    => bdm_cr,
-        				
-				-- out
+				-- register io
+				bdm_r_sel		=> bdm_r_sel,
+		    bdm_r_d_i		=> bdm_r_d_o,
+				bdm_r_d_o   => bdm_r_d_i,
 				bdm_wr			=> bdm_wr,
-				bdm_data		=> bdm_data,
-				
+				bdm_cr_o		=> bdm_cr,
 				bdm_cr_set  => bdm_cr_set,
 				bdm_cr_clr  => bdm_cr_clr
       );
@@ -561,8 +565,7 @@ begin
 
 	GEN_NO_BDM : if not HAS_BDM generate
 	begin
-		bdm_wr <= '0';
-		bdm_data <= (others => 'X');
+		bdm_rdy <= '0';
 	end generate GEN_NO_BDM;
 	      
 end architecture SYN;

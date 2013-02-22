@@ -145,5 +145,19 @@ package mce6309_pack is
 --		);
 --	end component mce6309_mcode;
 
+	-- BDM registers
+	constant BDM_R_CR						: integer := 0;
+	constant BDM_R_SR						: integer := 1;
+	
+	-- BDM control register bits
+	constant BDM_CR_ENABLE			: integer := 0;
+	constant BDM_CR_HALT_NEXT		: integer := 1;
+	constant BDM_CR_BP_ENABLE		: integer := 2;
+	-- BDM status register bits
+	constant BDM_SR_ENABLED			: integer := 0;
+	constant BDM_SR_HALTED			: integer := 1;
+	constant BDM_SR_BP_ENABLED	: integer := 2;
+	constant BDM_SR_BP_HALTED		: integer := 3;
+
 end package mce6309_pack;
 

@@ -183,9 +183,14 @@ entity mce6309_mcode is
 		bdm_rdy       : in std_logic;
 		bdm_ir        : in std_logic_vector(23 downto 0);
 
-		bdm_cr        : in std_logic_vector(7 downto 0);
-		bdm_cr_set    : out std_logic_vector(7 downto 0);
-		bdm_cr_clr    : out std_logic_vector(7 downto 0)
+		-- register io
+		bdm_r_sel		: in std_logic_vector(3 downto 0);
+    bdm_r_d_i		: in std_logic_vector(15 downto 0);
+		bdm_r_d_o   : out std_logic_vector(15 downto 0);
+		bdm_wr			: in std_logic;
+		bdm_cr_i		: in std_logic_vector(7 downto 0);
+		bdm_cr_set  : out std_logic_vector(7 downto 0);
+		bdm_cr_clr  : out std_logic_vector(7 downto 0)
 	);
 end entity mce6309_mcode;
 
@@ -204,10 +209,6 @@ architecture SYN of mce6309_mcode is
 	constant exg_ld_lo : Exg_Ld_Type := (IB, IXl, IYl, IUl, ISl, IPCl, INOREG, INOREG, INOREG, INOREG,
  		INOREG, INOREG, INOREG, INOREG, INOREG, INOREG);
 
-	alias bdm_enable    : std_logic is bdm_cr(0);
-	alias bdm_halt_next : std_logic is bdm_cr(1);
-	alias bp_enable     : std_logic is bdm_cr(2);
-
 	alias index_indirect : std_logic is rpost(4);
 	alias index_reg		: std_logic_vector(1 downto 0) is rpost(6 downto 5);
 
@@ -217,7 +218,7 @@ architecture SYN of mce6309_mcode is
 begin
 
 	-- CPU microcode
-	mc_table: process(ir, mc_addr, alu_op, dbus, rpost, bdm_cr, bdm_rdy)
+	mc_table: process(ir, mc_addr, alu_op, dbus, rpost, bdm_ir, bdm_cr_i, bdm_rdy)
 		variable rpost_hi_nib : integer;
 		variable rpost_lo_nib : integer;
 	begin
@@ -240,6 +241,9 @@ begin
 		eabus_ctrl		<= eabus_ea;
 		--abusl_ctrl		<= abus_pc;
 
+		bdm_cr_set		<= (others => '0');
+		bdm_cr_clr		<= (others => '0');
+		
 		rpost_hi_nib := to_integer(unsigned(rpost(7 downto 4)));
 		rpost_lo_nib := to_integer(unsigned(rpost(3 downto 0)));
 
@@ -258,11 +262,11 @@ begin
 
 		-- Instruction fetch
 		if mc_addr = mc_fetch0 then
-		  if HAS_BDM and bdm_enable = '1' then
+		  if HAS_BDM and bdm_cr_i(BDM_CR_ENABLE) = '1' then
 	      mc_jump_addr <= mc_fetch0;  -- default
 	      mc_jump <= '1';             -- default
 		    if false then -- breakpoint address?
-		    elsif bdm_halt_next = '1' then
+		    elsif bdm_cr_i(BDM_CR_HALT_NEXT) = '1' then
 		      if bdm_rdy = '1' then
 		        case bdm_ir(23 downto 20) is
   		        when X"3" =>
@@ -273,12 +277,14 @@ begin
               			ir_ctrl <= load_1st_ir;
               			dbus_ctrl <= dbus_mem;
       		          mc_jump <= '0';
+      		          bdm_cr_set(1) <= '1';
       		        -- go
       		        when X"2" =>
               			pc_ctrl <= incr_pc;
               			ir_ctrl <= load_1st_ir;
               			dbus_ctrl <= dbus_mem;
       		          mc_jump <= '0';
+      		          bdm_cr_clr(1) <= '1';
       		        when others =>
       		      end case; -- ir(19..16)
       		    when others =>
@@ -289,6 +295,7 @@ begin
     			pc_ctrl <= incr_pc;
     			ir_ctrl <= load_1st_ir;
     			dbus_ctrl <= dbus_mem;
+    			mc_jump <= '0';
 		    end if;
 		  else
   			pc_ctrl <= incr_pc;
