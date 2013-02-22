@@ -34,6 +34,9 @@ entity mce6309 is
 		
 		-- bdm signals
 		bdm_clk         : in std_logic;
+		bdm_rst         : in std_logic;
+    bdm_mosi        : in std_logic;
+    bdm_miso        : out std_logic;
 		bdm_i           : in std_logic;
 		bdm_o           : out std_logic;
 		bdm_oe          : out std_logic;
@@ -117,8 +120,12 @@ architecture SYN of mce6309 is
 	signal 		bdm_rdy				: std_logic;
 	signal 		bdm_ir				: std_logic_vector(23 downto 0);
 	signal 		bdm_wr				: std_logic;
-	signal 		bdm_data			: std_logic_vector(15 downto 0);
-         		
+	signal 		bdm_data			: std_logic_vector(23 downto 0);
+
+  signal bdm_cr           : std_logic_vector(7 downto 0);
+  signal bdm_cr_set       : std_logic_vector(7 downto 0);
+  signal bdm_cr_clr       : std_logic_vector(7 downto 0);
+  
 begin
 	--abus		<= abush & abusl;
 
@@ -130,7 +137,11 @@ begin
 
 	ir(11 downto 10) <= "00";
 
-	mcode : mce6309_mcode 
+	mcode : entity work.mce6309_mcode 
+	  generic map
+	  (
+	    HAS_BDM       => HAS_BDM
+	  )
 	  port map 
 	  (
   		-- Inputs
@@ -166,7 +177,16 @@ begin
   		eabus_ctrl		=> eabus_ctrl,
   		--abusl_ctrl		=> abusl_ctrl,
   		left_ctrl			=> left_ctrl,
-  		right_ctrl		=> right_ctrl
+  		right_ctrl		=> right_ctrl,
+  		
+  		-- bdm controls
+  		
+  		bdm_rdy       => bdm_rdy,
+  		bdm_ir        => bdm_ir,
+  		
+      bdm_cr        => bdm_cr,
+  		bdm_cr_set    => bdm_cr_set,
+  		bdm_cr_clr    => bdm_cr_clr
   	);
 
 	-- Microcode address
@@ -207,6 +227,7 @@ begin
 	end process;
 
 	-- Generate last instruction cycle signal
+	-- - BDM mode breaks this!!!
 	lic <= '1' when mc_jump = '1' and mc_jump_addr = mc_fetch0 else '0';
 
 	-- Registers
@@ -508,8 +529,14 @@ begin
     bdm_inst : entity work.mce6309_bdmio
       port map
       (
+        clk         => clk,
+        clk_en      => clken,
+        rst         => reset,
+        
 				-- external signals
         bdm_clk   	=> bdm_clk,
+        bdm_mosi    => bdm_mosi,
+        bdm_miso    => bdm_miso,
         bdm_i     	=> bdm_i,
         bdm_o     	=> bdm_o,
         bdm_oe    	=> bdm_oe,
@@ -520,10 +547,15 @@ begin
 				bdm_enabled	=> bdm_enabled,
 				bdm_rdy			=> bdm_rdy,
 				bdm_ir			=> bdm_ir,
-				
+
+        bdm_cr_o    => bdm_cr,
+        				
 				-- out
 				bdm_wr			=> bdm_wr,
-				bdm_data		=> bdm_data
+				bdm_data		=> bdm_data,
+				
+				bdm_cr_set  => bdm_cr_set,
+				bdm_cr_clr  => bdm_cr_clr
       );
   end generate GEN_BDM;
 

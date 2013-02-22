@@ -138,6 +138,10 @@ use ieee.numeric_std.all;
 use work.mce6309_pack.all;
 
 entity mce6309_mcode is
+  generic
+  (
+    HAS_BDM       : boolean := true
+  );
 	port 
 	(
 		-- Inputs
@@ -173,7 +177,15 @@ entity mce6309_mcode is
 		eabus_ctrl		: out eabus_type;
 		--abusl_ctrl		: out abus_type;
 		left_ctrl			: out left_type;
-		right_ctrl		: out right_type
+		right_ctrl		: out right_type;
+		
+		-- bdm controls
+		bdm_rdy       : in std_logic;
+		bdm_ir        : in std_logic_vector(23 downto 0);
+
+		bdm_cr        : in std_logic_vector(7 downto 0);
+		bdm_cr_set    : out std_logic_vector(7 downto 0);
+		bdm_cr_clr    : out std_logic_vector(7 downto 0)
 	);
 end entity mce6309_mcode;
 
@@ -192,14 +204,20 @@ architecture SYN of mce6309_mcode is
 	constant exg_ld_lo : Exg_Ld_Type := (IB, IXl, IYl, IUl, ISl, IPCl, INOREG, INOREG, INOREG, INOREG,
  		INOREG, INOREG, INOREG, INOREG, INOREG, INOREG);
 
+	alias bdm_enable    : std_logic is bdm_cr(0);
+	alias bdm_halt_next : std_logic is bdm_cr(1);
+	alias bp_enable     : std_logic is bdm_cr(2);
+
 	alias index_indirect : std_logic is rpost(4);
 	alias index_reg		: std_logic_vector(1 downto 0) is rpost(6 downto 5);
 
 	signal idxsel			: eabus_type;
 	signal alu_op			:	alu_type;
+	
 begin
+
 	-- CPU microcode
-	mc_table: process(ir, mc_addr, alu_op, dbus, rpost)
+	mc_table: process(ir, mc_addr, alu_op, dbus, rpost, bdm_cr, bdm_rdy)
 		variable rpost_hi_nib : integer;
 		variable rpost_lo_nib : integer;
 	begin
@@ -240,10 +258,44 @@ begin
 
 		-- Instruction fetch
 		if mc_addr = mc_fetch0 then
-			pc_ctrl <= incr_pc;
-			ir_ctrl <= load_1st_ir;
-			dbus_ctrl <= dbus_mem;
-
+		  if HAS_BDM and bdm_enable = '1' then
+	      mc_jump_addr <= mc_fetch0;  -- default
+	      mc_jump <= '1';             -- default
+		    if false then -- breakpoint address?
+		    elsif bdm_halt_next = '1' then
+		      if bdm_rdy = '1' then
+		        case bdm_ir(23 downto 20) is
+  		        when X"3" =>
+      		      case bdm_ir(19 downto 16) is
+    		          -- single step
+      		        when X"1" =>
+              			pc_ctrl <= incr_pc;
+              			ir_ctrl <= load_1st_ir;
+              			dbus_ctrl <= dbus_mem;
+      		          mc_jump <= '0';
+      		        -- go
+      		        when X"2" =>
+              			pc_ctrl <= incr_pc;
+              			ir_ctrl <= load_1st_ir;
+              			dbus_ctrl <= dbus_mem;
+      		          mc_jump <= '0';
+      		        when others =>
+      		      end case; -- ir(19..16)
+      		    when others =>
+      		      null;
+      		  end case; -- ir(23..20)
+  		    end if;
+  		  else
+    			pc_ctrl <= incr_pc;
+    			ir_ctrl <= load_1st_ir;
+    			dbus_ctrl <= dbus_mem;
+		    end if;
+		  else
+  			pc_ctrl <= incr_pc;
+  			ir_ctrl <= load_1st_ir;
+  			dbus_ctrl <= dbus_mem;
+      end if;
+      
 		elsif mc_addr = mc_fetch1 then
 			ir_ctrl <= load_2nd_ir;
 			dbus_ctrl <= dbus_mem;

@@ -32,7 +32,13 @@ architecture SYN of mce6309_tb is
 	signal mem_addr		: std_logic_vector(15 downto 0);
 	signal mem_data		: std_logic_vector(7 downto 0);
 
+  signal bdm_clk    : std_logic;
+  signal bdm_i      : std_logic;
+  signal bdm_o      : std_logic;
+  signal bdm_mosi   : std_logic;
+  
 	signal match_ext	: std_logic;
+
 begin
 
 	syn_cpu : entity work.mce6309(SYN)
@@ -55,14 +61,82 @@ begin
 		  firq      => '0', 
 		  nmi       => '0',
 
-      bdm_clk   => '0',
-		  bdm_i     => '0',
+      bdm_clk   => bdm_clk,
+      bdm_rst   => reset,
+      bdm_mosi  => bdm_mosi,
+      bdm_miso  => open,
+		  bdm_i     => bdm_i,
 		  bdm_o     => open,
 		  bdm_oe    => open,
 		  
 		  op_fetch  => open
 	  );
 
+    BLK_BDM : block
+    
+      procedure bdm_send_recv (
+        variable cmd    : inout std_logic_vector(7 downto 0);
+        variable data   : inout std_logic_vector(15 downto 0);
+        signal bdm_mosi : out std_logic;
+        signal bdm_o    : out std_logic) is
+      begin
+        for i in cmd'range loop
+          wait until falling_edge(bdm_clk);
+          bdm_mosi <= '1';
+          bdm_o <= cmd(cmd'left);
+          cmd := cmd(cmd'left-1 downto 0) & cmd(cmd'left);
+        end loop;
+        for i in data'range loop
+          wait until falling_edge(bdm_clk);
+          bdm_mosi <= '1';
+          bdm_o <= data(data'left);
+          data := data(data'left-1 downto 0) & data(data'left);
+        end loop;
+        bdm_mosi <= '0';
+      end bdm_send_recv;
+
+      procedure bdm_delay (
+        clocks  : in integer) is
+      begin
+        for i in 1 to clocks loop
+          wait until rising_edge(bdm_clk);
+        end loop;
+      end bdm_delay;
+      
+    begin
+    
+      -- generate BDM clock
+      process
+      begin
+        bdm_clk <= '0';
+        wait until reset = '0';
+        loop
+          wait until rising_edge(clk);
+          bdm_clk <= '1';
+          wait until rising_edge(clk);
+          bdm_clk <= '0';
+        end loop;
+      end process;
+
+      -- do some bdm stuff
+      process
+        variable cmd  : std_logic_vector(7 downto 0);
+        variable data : std_logic_vector(15 downto 0);
+      begin
+        bdm_mosi <= '0';
+        bdm_i <= '0';
+        data := X"0000";
+        wait until reset = '0';
+        cmd := X"31";
+        bdm_send_recv (cmd, data, bdm_mosi, bdm_i);
+        bdm_delay(4);
+        bdm_send_recv (cmd, data, bdm_mosi, bdm_i);
+        bdm_delay(4);
+        bdm_send_recv (cmd, data, bdm_mosi, bdm_i);
+      end process;
+      
+    end block BLK_BDM;
+        
 --	beh_cpu : mce6309 
 --	  port map 
 --	  (

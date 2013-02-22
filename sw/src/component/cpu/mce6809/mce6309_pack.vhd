@@ -105,45 +105,45 @@ package mce6309_pack is
 		);
 	end component mce6309;
 
-	-- Microcode - do not instantiate directly
-	component mce6309_mcode 
-		port (
-			-- Inputs
-			clk						: in  std_logic;
-			clken					: in  std_logic;
-			ir						: in std_logic_vector(11 downto 0);
-			mc_addr				: in mc_state_type;
-			dbus					: in std_logic_vector(7 downto 0);
-			rpost					: in std_logic_vector(7 downto 0);
-	
-			-- Microcode controls
-			mc_jump				: out std_logic;
-			mc_jump_addr	: out mc_state_type;
-		
-			-- Operational controls
-			alu_ctrl			:	out alu_type;
-			alu_igncarry	: out std_logic;
-			mem_read			: out std_logic;
-			drive_vma			: out std_logic;
-			drive_data		: out std_logic;
-		
-			-- Register controls
-			pc_ctrl				: out pc_type;
-			ir_ctrl				: out ir_type;
-			s_ctrl				: out s_type;
-			ld						: out ld_type;
-			lea						: out lea_type;
-			acc_fromalu		: out std_logic;
-		
-			-- Mux controls
-			dbus_ctrl			: out dbus_type;
-			abus_ctrl			: out abus_type;
-			eabus_ctrl		: out eabus_type;
-			--abusl_ctrl		: out abus_type;
-			left_ctrl			: out left_type;
-			right_ctrl		: out right_type
-		);
-	end component mce6309_mcode;
+--	-- Microcode - do not instantiate directly
+--	component mce6309_mcode 
+--		port (
+--			-- Inputs
+--			clk						: in  std_logic;
+--			clken					: in  std_logic;
+--			ir						: in std_logic_vector(11 downto 0);
+--			mc_addr				: in mc_state_type;
+--			dbus					: in std_logic_vector(7 downto 0);
+--			rpost					: in std_logic_vector(7 downto 0);
+--	
+--			-- Microcode controls
+--			mc_jump				: out std_logic;
+--			mc_jump_addr	: out mc_state_type;
+--		
+--			-- Operational controls
+--			alu_ctrl			:	out alu_type;
+--			alu_igncarry	: out std_logic;
+--			mem_read			: out std_logic;
+--			drive_vma			: out std_logic;
+--			drive_data		: out std_logic;
+--		
+--			-- Register controls
+--			pc_ctrl				: out pc_type;
+--			ir_ctrl				: out ir_type;
+--			s_ctrl				: out s_type;
+--			ld						: out ld_type;
+--			lea						: out lea_type;
+--			acc_fromalu		: out std_logic;
+--		
+--			-- Mux controls
+--			dbus_ctrl			: out dbus_type;
+--			abus_ctrl			: out abus_type;
+--			eabus_ctrl		: out eabus_type;
+--			--abusl_ctrl		: out abus_type;
+--			left_ctrl			: out left_type;
+--			right_ctrl		: out right_type
+--		);
+--	end component mce6309_mcode;
 
 end package mce6309_pack;
 
