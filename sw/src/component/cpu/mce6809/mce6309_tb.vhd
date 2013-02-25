@@ -92,6 +92,7 @@ begin
           bdm_o <= data(data'left);
           data := data(data'left-1 downto 0) & data(data'left);
         end loop;
+        wait until falling_edge(bdm_clk);
         bdm_mosi <= '0';
       end bdm_send_recv;
 
@@ -127,13 +128,31 @@ begin
         bdm_i <= '0';
         data := X"0000";
         wait until reset = '0';
-        cmd := X"31";
-        bdm_send_recv (cmd, data, bdm_mosi, bdm_i);
+        cmd := X"81";
+        bdm_send_recv (cmd, data, bdm_mosi, bdm_i);   -- step
         bdm_delay(4);
-        bdm_send_recv (cmd, data, bdm_mosi, bdm_i);
+        cmd := X"00";
+        bdm_send_recv (cmd, data, bdm_mosi, bdm_i);   -- read CR
         bdm_delay(4);
-        cmd := X"32";
-        bdm_send_recv (cmd, data, bdm_mosi, bdm_i);
+        cmd := X"02";
+        bdm_send_recv (cmd, data, bdm_mosi, bdm_i);   -- read AP
+        bdm_delay(4);
+        cmd := X"03";
+        bdm_send_recv (cmd, data, bdm_mosi, bdm_i);   -- read BP
+        bdm_delay(4);
+        cmd := X"81";
+        bdm_send_recv (cmd, data, bdm_mosi, bdm_i);   -- step
+        bdm_delay(4);
+        cmd := X"82";
+        bdm_send_recv (cmd, data, bdm_mosi, bdm_i);   -- go
+        bdm_delay(4);
+        wait for 2 us;
+        cmd := X"80";
+        bdm_send_recv (cmd, data, bdm_mosi, bdm_i);   -- break
+        bdm_delay(4);
+        cmd := X"10";
+        data := X"0000";
+        bdm_send_recv (cmd, data, bdm_mosi, bdm_i);   -- LD CR,$00 (disable BDM)
       end process;
       
     end block BLK_BDM;

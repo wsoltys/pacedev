@@ -1,27 +1,25 @@
 --
 -- BDM commands
 --
---  $00       RD BDM status register
+--  $0R       RD BDM register
+--  $1R <nn>  WR BDM register with data <nn>
+--    BDM registers
+--    - $0/1 - CR/SR
 --      -- bit 0 RD=enabled                 WR=enable
 --      -- bit 1 RD=halted                  WR=halt next instruction
 --      -- bit 2 RD=breakpoint enabled      WR=enable
---      -- bit 3 RD=halted on breakpoint    WR=(don't care)
+--      -- bit 3 RD=pc=breakpoint           WR=(don't care)
 --      -- bit 4 RD/WR=auto-increment address pointer on rd
 --      -- bit 5 RD/WR=auto-increment address pointer on wr
 --      -- bit 6 RD/WR=auto-decrement address pointer on rd
 --      -- bit 7 RD/WR=auto-decrement address pointer on wr
---  $01 <nn>  WR BDM control register with data <nn>
---  $02       RD internal address pointer
---  $03 <nn>  WR internal address pointer with <nn>
---  $04       RD breakpoint register
---  $05 <nn>  WR breakpoint register
---  $1R       RD register <R>
---  $1R <nn>  WR register <R> with data <nn>
---  $20       RD data from internal address
---  $21 <n>   WR data to internal address
---  $30       break
---  $31       single step
---  $32       go
+--    - $2 - Internal Address Pointer
+--    - $3 - Breakpoint Register
+--  $2R       RD register <R>
+--  $2R <nn>  WR register <R> with data <nn>
+--  $80       break
+--  $81       single step
+--  $82       go
 --
 
 library ieee;
@@ -45,60 +43,67 @@ entity mce6309_bdmio is
     bdm_oe    	: out std_logic;
 
 		-- internal signals
-		
+
+    -- cpu registers
+    x           : in std_logic_vector(15 downto 0);
+    y           : in std_logic_vector(15 downto 0);
+    u           : in std_logic_vector(15 downto 0);
+    s           : in std_logic_vector(15 downto 0);
+    pc          : in std_logic_vector(15 downto 0);
+    v           : in std_logic_vector(15 downto 0);
+    a           : in std_logic_vector(7 downto 0);
+    b           : in std_logic_vector(7 downto 0);
+    cc          : in std_logic_vector(7 downto 0);
+    dp          : in std_logic_vector(7 downto 0);
+    e           : in std_logic_vector(7 downto 0);
+    f           : in std_logic_vector(7 downto 0);
+    md          : in std_logic_vector(7 downto 0);
+        
 		-- command
 		bdm_rdy			: out std_logic;
 		bdm_ir			: out std_logic_vector(23 downto 0);
-    		
+
+    -- registers
+		bdm_cr_o		: out std_logic_vector(15 downto 0);
+		bdm_sr_o		: out std_logic_vector(15 downto 0);
+    bdm_ap_o    : out std_logic_vector(15 downto 0);
+    bdm_bp_o    : out std_logic_vector(15 downto 0);
+    
 		-- register io
-		bdm_r_sel		: in std_logic_vector(3 downto 0);
     bdm_r_d_i		: in std_logic_vector(15 downto 0);
-		bdm_r_d_o   : out std_logic_vector(15 downto 0);
-		bdm_wr			: in std_logic;
-		bdm_cr_o		: out std_logic_vector(7 downto 0);
-		bdm_cr_set  : in std_logic_vector(7 downto 0);
-		bdm_cr_clr  : in std_logic_vector(7 downto 0)
+		bdm_wr			: in std_logic
 	);
 end entity mce6309_bdmio;
 
 architecture SYN of mce6309_bdmio is
 
-  type state_t is ( S_IDLE, S_READING, S_BUSY, S_WRITING );
+  type state_t is ( S_IDLE, S_READING, S_BUSY, S_WAIT, S_WRITING );
   signal state  : state_t;
 
 	type bdm_r_a is array (natural range <>) of std_logic_vector(15 downto 0);
 	signal bdm_r				: bdm_r_a(0 to 7);
 	
 	-- BDM registers
-	alias bdm_cr       	: std_logic_vector(7 downto 0) is bdm_r(BDM_R_CR)(7 downto 0);
-	alias bdm_sr       	: std_logic_vector(7 downto 0) is bdm_r(BDM_R_SR)(7 downto 0);
+	alias bdm_cr       	: std_logic_vector(bdm_r(BDM_R_CR)'range) is bdm_r(BDM_R_CR);
+	alias bdm_sr       	: std_logic_vector(bdm_r(BDM_R_SR)'range) is bdm_r(BDM_R_SR);
+	alias bdm_ap       	: std_logic_vector(bdm_r(BDM_R_AP)'range) is bdm_r(BDM_R_AP);
+	alias bdm_bp       	: std_logic_vector(bdm_r(BDM_R_BP)'range) is bdm_r(BDM_R_BP);
     
 begin
 
-	process (clk, rst)
-	begin
-		if rst = '1' then
-      bdm_cr <= "00000011";
-		elsif rising_edge(clk) then
-			for i in bdm_cr'range loop
-				if bdm_cr_set(i) = '1' then
-					bdm_cr(i) <= '1';
-				elsif bdm_cr_clr(i) = '1' then
-					bdm_cr(i) <= '0';
-				end if;
-			end loop;
-		end if;
-	end process;
-	
-  process (clk, rst)
+  BDM: process (clk, rst)
     variable bdm_clk_r    : std_logic := '0';
     variable bdm_d_r      : std_logic_vector(bdm_ir'range);
     variable count        : integer range 0 to 31;
-    variable sel					: integer range 0 to 15;
+    variable sel					: integer range 0 to 3;
   begin
     if rst = '1' then
       bdm_clk_r := '0';
       state <= S_IDLE;
+      bdm_cr <= "0000000000000111";
+      bdm_sr <= (others => '0');
+      bdm_ap <= X"3C00";
+      bdm_bp <= X"001E";
       bdm_rdy <= '0';
       bdm_ir <= (others => '0');
       bdm_miso <= '0';
@@ -123,11 +128,75 @@ begin
               count := count + 1;
               if count = 24 then
                 bdm_ir <= bdm_d_r;
-                bdm_rdy <= '1';
                 state <= S_BUSY;
               end if;                            
             end if;
           when S_BUSY =>
+            state <= S_WAIT;                                      -- default
+            -- only 4 registers for now
+            sel := to_integer(unsigned(bdm_d_r(17 downto 16)));   -- default
+            case bdm_d_r(23 downto 20) is
+              when X"0" =>
+                -- read BDM register
+                bdm_d_r(bdm_r(sel)'range) := bdm_r(sel);
+              when X"1" =>
+                -- write BDM register
+                if sel /= BDM_R_SR then
+                  bdm_r(sel) <= bdm_d_r(bdm_r(sel)'range);
+                end if;
+              when X"2" =>
+                -- read CPU registers
+                case bdm_d_r(19 downto 16) is
+                  when X"0" =>
+                    bdm_d_r(15 downto 0) := a & b;
+                  when X"1" =>
+                    bdm_d_r(15 downto 0) := x;
+                  when X"2" =>
+                    bdm_d_r(15 downto 0) := y;
+                  when X"3" =>
+                    bdm_d_r(15 downto 0) := u;
+                  when X"4" =>
+                    bdm_d_r(15 downto 0) := s;
+                  when X"5" =>
+                    bdm_d_r(15 downto 0) := pc;
+                  when X"6" =>
+                    bdm_d_r(15 downto 0) := e & f;
+                  when X"7" =>
+                    bdm_d_r(15 downto 0) := v;
+                  when X"8" =>
+                    bdm_d_r(15 downto 0) := X"00" & a;
+                  when X"9" =>
+                    bdm_d_r(15 downto 0) := X"00" & b;
+                  when X"A" =>
+                    bdm_d_r(15 downto 0) := X"00" & cc;
+                  when X"B" =>
+                    bdm_d_r(15 downto 0) := X"00" & dp;
+                  when X"E" =>
+                    bdm_d_r(15 downto 0) := X"00" & e;
+                  when X"F" =>
+                    bdm_d_r(15 downto 0) := X"00" & f;
+                  when others =>
+                    bdm_d_r(15 downto 0) := (others => '0');
+                end case;
+              when X"8" =>
+                -- execution instructions
+                case bdm_d_r(19 downto 16) is
+                  when X"0" =>
+                    -- break
+                    bdm_cr(BDM_CR_HALT_NEXT) <= '1';
+                    state <= S_IDLE;
+                  when X"2" =>
+                    -- go
+                    bdm_cr(BDM_CR_HALT_NEXT) <= '0';
+                    state <= S_IDLE;
+                  when others =>
+                    null;
+                end case; -- execution instructions
+              when others =>
+                null;
+            end case;
+          when S_WAIT =>
+            bdm_rdy <= '1';
             state <= S_IDLE;  -- *** FUDGE
             if bdm_wr = '1' then
               -- latch write data
@@ -149,18 +218,23 @@ begin
               end if;
             end if;
         end case;
+        -- SR
+        if pc = bdm_bp then
+          bdm_sr(BDM_SR_PC_EQ_BP) <= '1';
+        else
+          bdm_sr(BDM_SR_PC_EQ_BP) <= '0';
+        end if;
+        -- clock edge-detect
         bdm_clk_r := bdm_clk;
       end if; -- clk_en=1
     end if;
 
-		-- output mux
-		sel := to_integer(unsigned(bdm_r_sel));
-	  bdm_r_d_o <= bdm_r(sel);
-	  
-		-- output CR
-		bdm_cr_o <= bdm_cr;
-		
-  end process;
+  end process BDM;
 
+	-- output CR
+	bdm_cr_o <= bdm_cr(bdm_cr_o'range);
+	bdm_sr_o <= bdm_sr(bdm_sr_o'range);
+	bdm_ap_o <= bdm_ap(bdm_ap_o'range);
+	bdm_bp_o <= bdm_bp(bdm_bp_o'range);
     
 end architecture SYN;

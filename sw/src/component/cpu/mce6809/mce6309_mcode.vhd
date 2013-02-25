@@ -183,14 +183,13 @@ entity mce6309_mcode is
 		bdm_rdy       : in std_logic;
 		bdm_ir        : in std_logic_vector(23 downto 0);
 
+		bdm_cr_i		: in std_logic_vector(15 downto 0);
+		bdm_sr_i		: in std_logic_vector(15 downto 0);
+		bdm_ap_i		: in std_logic_vector(15 downto 0);
+
 		-- register io
-		bdm_r_sel		: in std_logic_vector(3 downto 0);
-    bdm_r_d_i		: in std_logic_vector(15 downto 0);
 		bdm_r_d_o   : out std_logic_vector(15 downto 0);
-		bdm_wr			: in std_logic;
-		bdm_cr_i		: in std_logic_vector(7 downto 0);
-		bdm_cr_set  : out std_logic_vector(7 downto 0);
-		bdm_cr_clr  : out std_logic_vector(7 downto 0)
+		bdm_wr			: in std_logic
 	);
 end entity mce6309_mcode;
 
@@ -241,9 +240,6 @@ begin
 		eabus_ctrl		<= eabus_ea;
 		--abusl_ctrl		<= abus_pc;
 
-		bdm_cr_set		<= (others => '0');
-		bdm_cr_clr		<= (others => '0');
-		
 		rpost_hi_nib := to_integer(unsigned(rpost(7 downto 4)));
 		rpost_lo_nib := to_integer(unsigned(rpost(3 downto 0)));
 
@@ -262,14 +258,16 @@ begin
 
 		-- Instruction fetch
 		if mc_addr = mc_fetch0 then
+		
 		  if HAS_BDM and bdm_cr_i(BDM_CR_ENABLE) = '1' then
 	      mc_jump_addr <= mc_fetch0;  -- default
 	      mc_jump <= '1';             -- default
-		    if false then -- breakpoint address?
+	      if bdm_cr_i(BDM_CR_BP_ENABLE) = '1' and bdm_sr_i(BDM_SR_PC_EQ_BP) = '1' then
+	        null;
 		    elsif bdm_cr_i(BDM_CR_HALT_NEXT) = '1' then
 		      if bdm_rdy = '1' then
 		        case bdm_ir(23 downto 20) is
-  		        when X"3" =>
+  		        when X"8" =>
       		      case bdm_ir(19 downto 16) is
     		          -- single step
       		        when X"1" =>
@@ -277,14 +275,6 @@ begin
               			ir_ctrl <= load_1st_ir;
               			dbus_ctrl <= dbus_mem;
       		          mc_jump <= '0';
-      		          bdm_cr_set(1) <= '1';
-      		        -- go
-      		        when X"2" =>
-              			pc_ctrl <= incr_pc;
-              			ir_ctrl <= load_1st_ir;
-              			dbus_ctrl <= dbus_mem;
-      		          mc_jump <= '0';
-      		          bdm_cr_clr(1) <= '1';
       		        when others =>
       		      end case; -- ir(19..16)
       		    when others =>

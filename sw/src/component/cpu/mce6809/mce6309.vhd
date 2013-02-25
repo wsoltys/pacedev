@@ -119,13 +119,12 @@ architecture SYN of mce6309 is
 	signal 		bdm_rdy				: std_logic;
 	signal 		bdm_ir				: std_logic_vector(23 downto 0);
 
-	signal 		bdm_r_sel			: std_logic_vector(3 downto 0);
-	signal 		bdm_r_d_i			: std_logic_vector(15 downto 0);
+	signal 		bdm_cr				: std_logic_vector(15 downto 0);
+	signal 		bdm_sr				: std_logic_vector(15 downto 0);
+	signal 		bdm_ap				: std_logic_vector(15 downto 0);
+
 	signal 		bdm_r_d_o   	: std_logic_vector(15 downto 0);
 	signal 		bdm_wr				: std_logic;
-	signal 		bdm_cr				: std_logic_vector(7 downto 0);
-	signal 		bdm_cr_set  	: std_logic_vector(7 downto 0);
-	signal 		bdm_cr_clr  	: std_logic_vector(7 downto 0);
   
 begin
 	--abus		<= abush & abusl;
@@ -184,14 +183,13 @@ begin
   		
   		bdm_rdy       => bdm_rdy,
   		bdm_ir        => bdm_ir,
-  		
-			bdm_r_sel			=> bdm_r_sel,
-	    bdm_r_d_i			=> bdm_r_d_i,
-			bdm_r_d_o   	=> bdm_r_d_o,
-			bdm_wr				=> bdm_wr,
+
 			bdm_cr_i			=> bdm_cr,
-			bdm_cr_set  	=> bdm_cr_set,
-			bdm_cr_clr  	=> bdm_cr_clr
+			bdm_sr_i			=> bdm_sr,
+			bdm_ap_i			=> bdm_ap,
+  		
+			bdm_r_d_o   	=> bdm_r_d_o,
+			bdm_wr				=> bdm_wr
   	);
 
 	-- Microcode address
@@ -548,18 +546,33 @@ begin
   
 				-- internal signals
 				
+        -- cpu registers
+        x           => x,
+        y           => y,
+        u           => u,
+        s           => s,
+        pc          => pc,
+        v           => (others => '0'),
+        a           => acca,
+        b           => accb,
+        cc          => cc,
+        dp          => dp,
+        e           => (others => '0'),
+        f           => (others => '0'),
+        md          => "00000000",
+    
 				-- command
 				bdm_rdy			=> bdm_rdy,
 				bdm_ir			=> bdm_ir,
 
-				-- register io
-				bdm_r_sel		=> bdm_r_sel,
-		    bdm_r_d_i		=> bdm_r_d_o,
-				bdm_r_d_o   => bdm_r_d_i,
-				bdm_wr			=> bdm_wr,
 				bdm_cr_o		=> bdm_cr,
-				bdm_cr_set  => bdm_cr_set,
-				bdm_cr_clr  => bdm_cr_clr
+				bdm_sr_o		=> bdm_sr,
+				bdm_ap_o		=> bdm_ap,
+				bdm_bp_o		=> open,
+
+				-- register io
+		    bdm_r_d_i		=> bdm_r_d_o,
+				bdm_wr			=> bdm_wr
       );
   end generate GEN_BDM;
 
