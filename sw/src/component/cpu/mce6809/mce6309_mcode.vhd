@@ -262,9 +262,8 @@ begin
 		  if HAS_BDM and bdm_cr_i(BDM_CR_ENABLE) = '1' then
 	      mc_jump_addr <= mc_fetch0;  -- default
 	      mc_jump <= '1';             -- default
-	      if bdm_cr_i(BDM_CR_BP_ENABLE) = '1' and bdm_sr_i(BDM_SR_PC_EQ_BP) = '1' then
-	        null;
-		    elsif bdm_cr_i(BDM_CR_HALT_NEXT) = '1' then
+	      -- need to check step *before* breakpoint
+		    if bdm_cr_i(BDM_CR_HALT_NEXT) = '1' then
 		      if bdm_rdy = '1' then
 		        case bdm_ir(23 downto 20) is
   		        when X"8" =>
@@ -281,6 +280,8 @@ begin
       		      null;
       		  end case; -- ir(23..20)
   		    end if;
+	      elsif bdm_cr_i(BDM_CR_BP_ENABLE) = '1' and bdm_sr_i(BDM_SR_PC_EQ_BP) = '1' then
+	        null;
   		  else
     			pc_ctrl <= incr_pc;
     			ir_ctrl <= load_1st_ir;

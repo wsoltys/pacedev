@@ -2,6 +2,8 @@ library ieee;
 use ieee.std_logic_1164.all;
 --use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
+use std.textio.all;
+
 use work.mce6309_pack.all;
 
 entity mce6309_tb is
@@ -36,6 +38,7 @@ architecture SYN of mce6309_tb is
   signal bdm_i      : std_logic;
   signal bdm_o      : std_logic;
   signal bdm_mosi   : std_logic;
+  signal bdm_miso   : std_logic;
   
 	signal match_ext	: std_logic;
 
@@ -64,7 +67,7 @@ begin
       bdm_clk   => bdm_clk,
       bdm_rst   => reset,
       bdm_mosi  => bdm_mosi,
-      bdm_miso  => open,
+      bdm_miso  => bdm_miso,
 		  bdm_i     => bdm_i,
 		  bdm_o     => open,
 		  bdm_oe    => open,
@@ -75,25 +78,33 @@ begin
     BLK_BDM : block
     
       procedure bdm_send_recv (
-        variable cmd    : inout std_logic_vector(7 downto 0);
-        variable data   : inout std_logic_vector(15 downto 0);
+        variable cmd    	: in std_logic_vector(7 downto 0);
+        variable data_i		: in std_logic_vector(15 downto 0);
+        variable data_o		: out std_logic_vector(15 downto 0);
+        signal bdm_miso : in std_logic;
         signal bdm_mosi : out std_logic;
         signal bdm_o    : out std_logic) is
+        variable osr : std_logic_vector(23 downto 0);
+        variable isr : std_logic_vector(23 downto 0);
       begin
-        for i in cmd'range loop
+      	osr := cmd & data_i;
+        for i in osr'range loop
           wait until falling_edge(bdm_clk);
           bdm_mosi <= '1';
-          bdm_o <= cmd(cmd'left);
-          cmd := cmd(cmd'left-1 downto 0) & cmd(cmd'left);
-        end loop;
-        for i in data'range loop
-          wait until falling_edge(bdm_clk);
-          bdm_mosi <= '1';
-          bdm_o <= data(data'left);
-          data := data(data'left-1 downto 0) & data(data'left);
+          bdm_o <= osr(osr'left);
+          osr := osr(osr'left-1 downto 0) & osr(osr'left);
         end loop;
         wait until falling_edge(bdm_clk);
         bdm_mosi <= '0';
+        
+        wait until rising_edge(bdm_miso);
+        for i in isr'range loop
+					wait until rising_edge(bdm_clk);
+					isr := isr(isr'left-1 downto 0) & bdm_miso;
+				end loop;
+
+				data_o := isr(15 downto 0);
+								
       end bdm_send_recv;
 
       procedure bdm_delay (
@@ -103,6 +114,26 @@ begin
           wait until rising_edge(bdm_clk);
         end loop;
       end bdm_delay;
+
+      procedure dump_regs (
+        signal bdm_miso : in std_logic;
+        signal bdm_mosi : out std_logic;
+        signal bdm_o    : out std_logic) is
+        variable cmd		: std_logic_vector(7 downto 0);
+        variable data_i	: std_logic_vector(15 downto 0) := (others => '0');
+        variable data_o	: std_logic_vector(15 downto 0);
+        variable l			: line;
+      begin
+      	for i in 0 to 15 loop
+      		bdm_delay(2);
+      		if i /= 12 and i /= 13 then
+	      		cmd := X"2" & std_logic_vector(to_unsigned(i,4));
+	      		bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_o);
+	      		write (l, to_integer(unsigned(data_o)));
+	      		writeline (output, l);
+      		end if;
+      	end loop;
+      end dump_regs;
       
     begin
     
@@ -120,40 +151,50 @@ begin
       end process;
 
       -- do some bdm stuff
-      process
-        variable cmd  : std_logic_vector(7 downto 0);
-        variable data : std_logic_vector(15 downto 0);
+      PROC_BDM : process
+        variable cmd  		: std_logic_vector(7 downto 0);
+        variable data_i 	: std_logic_vector(15 downto 0);
+        variable data_o 	: std_logic_vector(15 downto 0);
       begin
         bdm_mosi <= '0';
         bdm_i <= '0';
-        data := X"0000";
+        data_i := X"0000";
         wait until reset = '0';
         cmd := X"81";
-        bdm_send_recv (cmd, data, bdm_mosi, bdm_i);   -- step
+        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_i);   -- step
         bdm_delay(4);
         cmd := X"00";
-        bdm_send_recv (cmd, data, bdm_mosi, bdm_i);   -- read CR
+        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_i);   -- read CR
         bdm_delay(4);
         cmd := X"02";
-        bdm_send_recv (cmd, data, bdm_mosi, bdm_i);   -- read AP
+        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_i);   -- read AP
         bdm_delay(4);
         cmd := X"03";
-        bdm_send_recv (cmd, data, bdm_mosi, bdm_i);   -- read BP
+        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_i);   -- read BP
         bdm_delay(4);
         cmd := X"81";
-        bdm_send_recv (cmd, data, bdm_mosi, bdm_i);   -- step
+        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_i);   -- step
+        bdm_delay(4);
+        cmd := X"12";
+        data_i := X"001E";
+        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_i);   -- set breakpoint
         bdm_delay(4);
         cmd := X"82";
-        bdm_send_recv (cmd, data, bdm_mosi, bdm_i);   -- go
+        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_i);   -- go
         bdm_delay(4);
         wait for 2 us;
         cmd := X"80";
-        bdm_send_recv (cmd, data, bdm_mosi, bdm_i);   -- break
+        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_i);   -- break
         bdm_delay(4);
+        
+        -- dump registers
+        dump_regs (bdm_miso, bdm_mosi, bdm_i);
+        
+        -- disable BDM and continue
         cmd := X"10";
-        data := X"0000";
-        bdm_send_recv (cmd, data, bdm_mosi, bdm_i);   -- LD CR,$00 (disable BDM)
-      end process;
+        data_i := X"0000";
+        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_i);   -- LD CR,$00 (disable BDM)
+      end process PROC_BDM;
       
     end block BLK_BDM;
         

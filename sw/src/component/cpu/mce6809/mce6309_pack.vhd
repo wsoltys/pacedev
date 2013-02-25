@@ -147,9 +147,8 @@ package mce6309_pack is
 
 	-- BDM registers
 	constant BDM_R_CR						: integer := 0;
-	constant BDM_R_SR						: integer := 1;
-	constant BDM_R_AP						: integer := 2;
-	constant BDM_R_BP						: integer := 3;
+	constant BDM_R_AP						: integer := 1;
+	constant BDM_R_BP						: integer := 2;
 	
 	-- BDM control register bits
 	constant BDM_CR_ENABLE			: integer := 0;

@@ -2,6 +2,9 @@ onerror {resume}
 quietly WaveActivateNextPane {} 0
 add wave -noupdate /mce6309_tb/fail
 add wave -noupdate /mce6309_tb/reset
+add wave -noupdate -radix hexadecimal /mce6309_tb/blk_bdm/proc_bdm/cmd
+add wave -noupdate -radix hexadecimal /mce6309_tb/blk_bdm/proc_bdm/data_i
+add wave -noupdate -radix hexadecimal /mce6309_tb/blk_bdm/proc_bdm/data_o
 add wave -noupdate -divider SYN_CPU
 add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/address
 add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/data_i
@@ -25,16 +28,20 @@ add wave -noupdate /mce6309_tb/syn_cpu/gen_bdm/bdm_inst/bdm_clk
 add wave -noupdate /mce6309_tb/syn_cpu/gen_bdm/bdm_inst/bdm_mosi
 add wave -noupdate /mce6309_tb/syn_cpu/gen_bdm/bdm_inst/bdm_i
 add wave -noupdate /mce6309_tb/syn_cpu/gen_bdm/bdm_inst/bdm_miso
+add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/gen_bdm/bdm_inst/bdm/bdm_isr
 add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/gen_bdm/bdm_inst/bdm_ir
 add wave -noupdate /mce6309_tb/syn_cpu/gen_bdm/bdm_inst/bdm_rdy
 add wave -noupdate /mce6309_tb/syn_cpu/gen_bdm/bdm_inst/state
-add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/gen_bdm/bdm_inst/bdm/bdm_d_r
-add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/gen_bdm/bdm_inst/bdm_sr
+add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/gen_bdm/bdm_inst/bdm_cr_o
+add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/gen_bdm/bdm_inst/bdm_sr_o
+add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/gen_bdm/bdm_inst/bdm_ap_o
+add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/gen_bdm/bdm_inst/bdm_bp_o
+add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/gen_bdm/bdm_inst/bdm/bdm_osr
 add wave -noupdate -divider BEH_CPU
 add wave -noupdate -divider BDM
 add wave -noupdate /mce6309_tb/bdm_clk
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {17527374 ps} 0}
+WaveRestoreCursors {{Cursor 1} {46492632 ps} 0}
 configure wave -namecolwidth 106
 configure wave -valuecolwidth 56
 configure wave -justifyvalue left
@@ -49,4 +56,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {0 ps} {25200 ns}
+WaveRestoreZoom {40871189 ps} {48645022 ps}
