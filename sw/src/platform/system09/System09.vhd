@@ -126,6 +126,9 @@ entity My_System09 is
     green_hi    : out std_logic;
     red_lo      : out std_logic;
     red_hi      : out std_logic;
+    hblank      : out std_logic;
+    vblank      : out std_logic;
+    
 --	   buzzer      : out std_logic;
 
 -- Compact Flash
@@ -422,7 +425,11 @@ component vdu
       vga_green_o  : out std_logic;
       vga_blue_o   : out std_logic;
       vga_hsync_o   : out std_logic;
-      vga_vsync_o   : out std_logic
+      vga_vsync_o   : out std_logic;
+      
+      -- added MMc
+      vga_hblank_o  : out std_logic;
+      vga_vblank_o  : out std_logic
    );
 end component;
 
@@ -553,7 +560,10 @@ my_vdu : vdu port map(
       vga_green_o   => vga_green,
       vga_blue_o    => vga_blue,
       vga_hsync_o   => h_drive,
-      vga_vsync_o   => v_drive
+      vga_vsync_o   => v_drive,
+      
+      vga_hblank_o  => hblank,
+      vga_vblank_o  => vblank
    );
 
 ----------------------------------------

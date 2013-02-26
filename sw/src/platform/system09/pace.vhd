@@ -71,6 +71,9 @@ architecture SYN of PACE is
 	signal ram_csn					: std_logic;	
 	signal ram_wrln					: std_logic;
 
+  signal hblank           : std_logic;
+  signal vblank           : std_logic;
+  
 begin
 
 	reset_n <= not clkrst_i.rst(0);
@@ -88,7 +91,7 @@ begin
 
 	-- map inputs
 	
-	video_o.clk <= clkrst_i.clk(1);	-- by convention
+	video_o.clk <= clkrst_i.clk(0);
 
 	system09_inst : entity work.My_System09
 	  port map
@@ -132,6 +135,8 @@ begin
     	green_hi    => video_o.rgb.g(9),
     	red_lo      => video_o.rgb.r(8),
     	red_hi      => video_o.rgb.r(9),
+      hblank      => hblank,
+      vblank      => vblank,
 --	   buzzer      : out std_logic;
 
 			-- Compact Flash
@@ -159,6 +164,10 @@ begin
 			-- timer
     	timer_out    => open
 	 );
+  
+  video_o.hblank <= hblank;
+  video_o.vblank <= vblank;
+  video_o.de <= not (hblank or vblank);
   
   flash_o <= NULL_TO_FLASH;
 	sram_o.a(23 downto 17) <= (others => '0');
