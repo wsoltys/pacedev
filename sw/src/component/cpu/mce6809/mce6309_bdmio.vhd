@@ -123,7 +123,7 @@ begin
             end if;
           when S_READING =>
             -- check bdm_mosi?
-            if bdm_clk = '1' and bdm_clk_r = '0' then
+            if bdm_clk_r = '0' and bdm_clk = '1' then
               bdm_isr := bdm_isr(bdm_isr'left-1 downto 0) & bdm_i;
               count := count + 1;
               if count = 24 then
@@ -188,6 +188,9 @@ begin
                   when X"0" =>
                     -- break
                     bdm_cr(BDM_CR_HALT_NEXT) <= '1';
+                  when X"1" =>
+                    -- step
+                    state <= S_WAIT;
                   when X"2" =>
                     -- go
                     bdm_cr(BDM_CR_HALT_NEXT) <= '0';
@@ -199,18 +202,17 @@ begin
             end case;
           when S_WAIT =>
             bdm_rdy <= '1';
-            state <= S_IDLE;  -- *** FUDGE
-            if bdm_wr = '1' then
+            if true then --bdm_wr = '1' then
               -- latch write data
               bdm_osr := X"00" & bdm_r_d_i;
               count := 0;
               state <= S_WRITING;
             end if;
           when S_WRITING =>
-            if bdm_clk = '0' and bdm_clk_r = '1' then
+            bdm_oe <= '1';
+            if bdm_clk_r = '0' and bdm_clk = '1' then
               -- write BIT and shift
               bdm_o <= bdm_osr(bdm_osr'left);
-              bdm_oe <= '1';
               bdm_osr := bdm_osr(bdm_osr'left-1 downto 0) & '0';
               bdm_miso <= '1';
               count := count + 1;

@@ -3,7 +3,7 @@ use IEEE.std_logic_1164.all;
 
 package mce6309_pack is
 
-  type mode_t is ( M6809, M6803 );
+  type mode_t is ( M6809, M6309, KONAMI );
 
 	subtype ld_idx is integer range 0 to 17;
 	subtype ld_type is std_logic_vector(12 downto 0);
@@ -73,6 +73,10 @@ package mce6309_pack is
 
 	-- Main CPU component
 	component mce6309 
+	  generic
+	  (
+	    MODE            : mode_t := M6809
+	  );
 		port 
 		(
   	  -- clocking, reset

@@ -20,6 +20,8 @@ architecture SYN of mce6309_tb is
 	subtype MemData_type is std_logic_vector(7 downto 0);
 	type Mem_type is array(MemData_idx) of MemData_type;
 
+  constant cpu_mode : mode_t := M6809;
+  
 	signal clk				: std_logic	:= '0';
 	signal reset			: std_logic	:= '1';
 	signal syn_read		: std_logic;
@@ -42,9 +44,53 @@ architecture SYN of mce6309_tb is
   
 	signal match_ext	: std_logic;
 
+	-- converts a std_logic_vector into a hex string.
+	function hstr(slv: std_logic_vector) return string is
+		variable hexlen: integer;
+		variable longslv : std_logic_vector(67 downto 0) := (others => '0');
+		variable hex : string(1 to 16);
+		variable fourbit : std_logic_vector(3 downto 0);
+	begin
+		hexlen := (slv'left+1)/4;
+		if (slv'left+1) mod 4 /= 0 then
+			hexlen := hexlen + 1;
+		end if;
+		longslv(slv'left downto 0) := slv;
+		for i in (hexlen -1) downto 0 loop
+			fourbit := longslv(((i*4)+3) downto (i*4));
+			case fourbit is
+				when "0000" => hex(hexlen -I) := '0';
+				when "0001" => hex(hexlen -I) := '1';
+				when "0010" => hex(hexlen -I) := '2';
+				when "0011" => hex(hexlen -I) := '3';
+				when "0100" => hex(hexlen -I) := '4';
+				when "0101" => hex(hexlen -I) := '5';
+				when "0110" => hex(hexlen -I) := '6';
+				when "0111" => hex(hexlen -I) := '7';
+				when "1000" => hex(hexlen -I) := '8';
+				when "1001" => hex(hexlen -I) := '9';
+				when "1010" => hex(hexlen -I) := 'A';
+				when "1011" => hex(hexlen -I) := 'B';
+				when "1100" => hex(hexlen -I) := 'C';
+				when "1101" => hex(hexlen -I) := 'D';
+				when "1110" => hex(hexlen -I) := 'E';
+				when "1111" => hex(hexlen -I) := 'F';
+				when "ZZZZ" => hex(hexlen -I) := 'z';
+				when "UUUU" => hex(hexlen -I) := 'u';
+				when "XXXX" => hex(hexlen -I) := 'x';
+				when others => hex(hexlen -I) := '?';
+			end case;
+		end loop;
+		return hex(1 to hexlen);
+	end hstr; 
+
 begin
 
 	syn_cpu : entity work.mce6309(SYN)
+	  generic map
+	  (
+	    MODE      => cpu_mode
+	  )
 	  port map 
 	  (
 	    clk       => clk, 
@@ -68,8 +114,8 @@ begin
       bdm_rst   => reset,
       bdm_mosi  => bdm_mosi,
       bdm_miso  => bdm_miso,
-		  bdm_i     => bdm_i,
-		  bdm_o     => open,
+		  bdm_i     => bdm_o,
+		  bdm_o     => bdm_i,
 		  bdm_oe    => open,
 		  
 		  op_fetch  => open
@@ -100,7 +146,7 @@ begin
         wait until rising_edge(bdm_miso);
         for i in isr'range loop
 					wait until rising_edge(bdm_clk);
-					isr := isr(isr'left-1 downto 0) & bdm_miso;
+					isr := isr(isr'left-1 downto 0) & bdm_i;
 				end loop;
 
 				data_o := isr(15 downto 0);
@@ -115,25 +161,56 @@ begin
         end loop;
       end bdm_delay;
 
-      procedure dump_regs (
+      procedure dump_bdm_regs (
         signal bdm_miso : in std_logic;
         signal bdm_mosi : out std_logic;
         signal bdm_o    : out std_logic) is
+        type reg_t is array (natural range <>) of string(1 to 2);
+        constant reg_a  : reg_t(0 to 2) := ("SR", "AP", "BP");
         variable cmd		: std_logic_vector(7 downto 0);
         variable data_i	: std_logic_vector(15 downto 0) := (others => '0');
         variable data_o	: std_logic_vector(15 downto 0);
         variable l			: line;
       begin
-      	for i in 0 to 15 loop
+        write(l, string'("-- BDM registers --"));
+				writeline(OUTPUT, l);
+      	for i in reg_a'range loop
+      		bdm_delay(2);
+      		cmd := X"0" & std_logic_vector(to_unsigned(i,4));
+      		bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_o);
+  				write(l, reg_a(i) & string'(" = $") & hstr(data_o));
+  				writeline(OUTPUT, l);
+      	end loop;
+      end dump_bdm_regs;
+      
+      procedure dump_cpu_regs (
+        signal bdm_miso : in std_logic;
+        signal bdm_mosi : out std_logic;
+        signal bdm_o    : out std_logic) is
+        type reg_t is array (natural range <>) of string(1 to 2);
+        constant reg_a  : reg_t(0 to 15) := 
+                            ("D ", "X ", "Y ", "U ", "S ", "PC", "W ", "V ", 
+                             "A ", "B ", "CC", "DP", "0 ", "0 ", "E ", "F "
+                            );
+        variable cmd		: std_logic_vector(7 downto 0);
+        variable data_i	: std_logic_vector(15 downto 0) := (others => '0');
+        variable data_o	: std_logic_vector(15 downto 0);
+        variable l			: line;
+      begin
+        write(l, string'("-- CPU registers --"));
+				writeline(OUTPUT, l);
+      	for i in reg_a'range loop
       		bdm_delay(2);
       		if i /= 12 and i /= 13 then
-	      		cmd := X"2" & std_logic_vector(to_unsigned(i,4));
-	      		bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_o);
-	      		write (l, to_integer(unsigned(data_o)));
-	      		writeline (output, l);
+      		  if cpu_mode = M6309 or (i/=6 and i/=7 and i<12) then
+  	      		cmd := X"2" & std_logic_vector(to_unsigned(i,4));
+  	      		bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_o);
+      				write(l, reg_a(i) & string'(" = $") & hstr(data_o));
+      				writeline(OUTPUT, l);
+      		  end if;
       		end if;
       	end loop;
-      end dump_regs;
+      end dump_cpu_regs;
       
     begin
     
@@ -157,43 +234,49 @@ begin
         variable data_o 	: std_logic_vector(15 downto 0);
       begin
         bdm_mosi <= '0';
-        bdm_i <= '0';
+        bdm_o <= '0';
         data_i := X"0000";
         wait until reset = '0';
         cmd := X"81";
-        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_i);   -- step
+        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_o);   -- step
         bdm_delay(4);
         cmd := X"00";
-        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_i);   -- read CR
+        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_o);   -- read CR
         bdm_delay(4);
         cmd := X"02";
-        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_i);   -- read AP
+        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_o);   -- read AP
         bdm_delay(4);
         cmd := X"03";
-        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_i);   -- read BP
+        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_o);   -- read BP
         bdm_delay(4);
         cmd := X"81";
-        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_i);   -- step
+        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_o);   -- step
+        bdm_delay(4);
+        
+        dump_bdm_regs (bdm_miso, bdm_mosi, bdm_o);
+        dump_cpu_regs (bdm_miso, bdm_mosi, bdm_o);
+        
         bdm_delay(4);
         cmd := X"12";
         data_i := X"001E";
-        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_i);   -- set breakpoint
+        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_o);   -- set breakpoint
         bdm_delay(4);
         cmd := X"82";
-        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_i);   -- go
+        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_o);   -- go
         bdm_delay(4);
         wait for 2 us;
         cmd := X"80";
-        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_i);   -- break
+        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_o);   -- break
         bdm_delay(4);
         
         -- dump registers
-        dump_regs (bdm_miso, bdm_mosi, bdm_i);
+        dump_bdm_regs (bdm_miso, bdm_mosi, bdm_o);
+        dump_cpu_regs (bdm_miso, bdm_mosi, bdm_o);
         
         -- disable BDM and continue
         cmd := X"10";
         data_i := X"0000";
-        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_i);   -- LD CR,$00 (disable BDM)
+        bdm_send_recv (cmd, data_i, data_o, bdm_miso, bdm_mosi, bdm_o);   -- LD CR,$00 (disable BDM)
       end process PROC_BDM;
       
     end block BLK_BDM;

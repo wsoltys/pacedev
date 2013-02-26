@@ -11,6 +11,13 @@ add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/data_i
 add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/data_o
 add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/acca
 add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/accb
+add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/x
+add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/y
+add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/u
+add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/s
+add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/pc
+add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/cc
+add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/dp
 add wave -noupdate -divider {SYN_CPU MCODE}
 add wave -noupdate /mce6309_tb/syn_cpu/mcode/bdm_rdy
 add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/mcode/bdm_ir
@@ -27,6 +34,8 @@ add wave -noupdate -divider {SYN_CPU BDM}
 add wave -noupdate /mce6309_tb/syn_cpu/gen_bdm/bdm_inst/bdm_clk
 add wave -noupdate /mce6309_tb/syn_cpu/gen_bdm/bdm_inst/bdm_mosi
 add wave -noupdate /mce6309_tb/syn_cpu/gen_bdm/bdm_inst/bdm_i
+add wave -noupdate /mce6309_tb/syn_cpu/bdm_o
+add wave -noupdate /mce6309_tb/syn_cpu/bdm_oe
 add wave -noupdate /mce6309_tb/syn_cpu/gen_bdm/bdm_inst/bdm_miso
 add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/gen_bdm/bdm_inst/bdm/bdm_isr
 add wave -noupdate -radix hexadecimal /mce6309_tb/syn_cpu/gen_bdm/bdm_inst/bdm_ir
@@ -41,7 +50,7 @@ add wave -noupdate -divider BEH_CPU
 add wave -noupdate -divider BDM
 add wave -noupdate /mce6309_tb/bdm_clk
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {46492632 ps} 0}
+WaveRestoreCursors {{Cursor 1} {38128492 ps} 0}
 configure wave -namecolwidth 106
 configure wave -valuecolwidth 56
 configure wave -justifyvalue left
@@ -56,4 +65,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {40871189 ps} {48645022 ps}
+WaveRestoreZoom {0 ps} {210 us}
