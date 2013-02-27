@@ -4,6 +4,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#define WIDTH   8
+
 int main (int argc, char *argv[])
 {
   if (--argc != 1)
@@ -29,9 +31,8 @@ int main (int argc, char *argv[])
   if (stat (bin_file, &sbuf))
     exit (0);
 
-  //printf ("WIDTH=8;\n");
-  printf ("WIDTH=16;\n");
-  sbuf.st_size /= 2;
+  printf ("WIDTH=%d;\n", WIDTH);
+  sbuf.st_size /= (WIDTH/8);
   printf ("DEPTH=%d;\n", sbuf.st_size);
   printf ("ADDRESS_RADIX=UNS;\n");
   printf ("DATA_RADIX=HEX;\n");
@@ -43,9 +44,13 @@ int main (int argc, char *argv[])
     unsigned char byte;
     fread (&byte, sizeof(unsigned char), 1, fp_bin);
     word = byte;
-    fread (&byte, sizeof(unsigned char), 1, fp_bin);
-    word = (word << 8) | byte;
-    printf ("    %-6d : %04X;\n", i, word);
+    #if WIDTH == 8
+      printf ("    %-6d : %02X;\n", i, word);
+    #else
+      fread (&byte, sizeof(unsigned char), 1, fp_bin);
+      word = (word << 8) | byte;
+      printf ("    %-6d : %04X;\n", i, word);
+    #endif
   }
 
   printf ("END;\n");
