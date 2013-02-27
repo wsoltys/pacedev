@@ -230,7 +230,7 @@ begin
   rom_inst : entity work.sprom
     generic map
     (
-      init_file		=> "../../../../../src/platform/system09/roms/kbug_rom.mif",
+      init_file		=> "../../../../../src/test/mce6309/roms/rom1.hex",
       widthad_a		=> 11
     )
     port map
