@@ -400,6 +400,41 @@ begin
 --    
 --  end block BLK_INTERRUPTS;
 
+  GEN_OSD : if PACE_HAS_OSD generate
+    signal osd_clk_en   : std_logic;
+  begin
+  
+    process (clk_40M, cpu_reset)
+    begin
+      if cpu_reset = '1' then
+        osd_clk_en <= '0';
+      elsif rising_edge(clk_40M) then
+        osd_clk_en <= not osd_clk_en;
+      end if;
+    end process;
+    
+    osd_inst : entity work.osd_controller
+      generic map
+      (
+        WIDTH_GPIO  => 8
+      )
+      port map
+      (
+        clk         => clk_40M,
+        clk_en      => osd_clk_en,
+        reset       => cpu_reset,
+
+        osd_key     => inputs_i(8).d(1),
+
+        to_osd      => osd_o,
+        from_osd    => osd_i,
+
+        gpio_i      => (others => '0'),
+        gpio_o      => open
+      );
+
+  end generate GEN_OSD;
+
   leds_o <= (others => '0');
 
   -- unused outputs

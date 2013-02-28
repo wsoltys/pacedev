@@ -2257,45 +2257,6 @@ set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LE
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=4096" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=7748" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=4096" -section_id auto_signaltap_0
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg_body.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sdram_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg_body.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/tilemapctl_e.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/bitmapctl_e.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg_body.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/target_pkg_ep3sl.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/test/mce6309/platform_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/pll.vhd
-set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/sprom.vhd
-set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/dpram.vhd
-set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/spram.vhd
-set_global_assignment -name VHDL_FILE "project_pkg-ep3sl.vhd"
-set_global_assignment -name VHDL_FILE ../../../../src/pace/clk_div.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/trs80/inputmapper.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/cpu09/cpu09s.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/mce6809/mce6309_pack.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/mce6809/mce6309_mcode.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/mce6809/mce6309_bdmio.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/mce6809/mce6309.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/test/mce6309/platform.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/trs80/m1/tilemapctl.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/trs80/m1/video_mixer.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/pace/Graphics.VHD
-set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2c0/spi_pll.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/spi/uni_spi_tx.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/component/io/spi/uni_spi_rx.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2c0/target_top_ep3sl.vhd
-set_global_assignment -name SIGNALTAP_FILE cpu09.stp
-set_global_assignment -name SIGNALTAP_FILE mce6309.stp
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to "PACE:pace_inst|platform:platform_inst|mce6309:\\GEN_CPU:cpu_inst|clk" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[0] -to "PACE:pace_inst|platform:platform_inst|mce6309:\\GEN_CPU:cpu_inst|address[0]" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[1] -to "PACE:pace_inst|platform:platform_inst|mce6309:\\GEN_CPU:cpu_inst|address[10]" -section_id auto_signaltap_0
@@ -2368,4 +2329,51 @@ set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[32] -t
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[33] -to "PACE:pace_inst|platform:platform_inst|mce6309:\\GEN_CPU:cpu_inst|reset" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[34] -to "PACE:pace_inst|platform:platform_inst|mce6309:\\GEN_CPU:cpu_inst|rw" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=36094" -section_id auto_signaltap_0
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sdram_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/sprite_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/tilemapctl_e.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/bitmapctl_e.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/target_pkg_ep3sl.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/test/mce6309/platform_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/pll.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/sprom.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/dpram.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/spram.vhd
+set_global_assignment -name VHDL_FILE "project_pkg-ep3sl.vhd"
+set_global_assignment -name VHDL_FILE ../../../../src/pace/clk_div.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/trs80/inputmapper.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/cpu09/cpu09s.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/mce6809/mce6309_pack.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/mce6809/mce6309_mcode.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/mce6809/mce6309_bdmio.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/mce6809/mce6309.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/test/mce6309/platform.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sound.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/trs80/m1/tilemapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/trs80/m1/video_mixer.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/65xx/cpu65xx_fast.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/65xx/cpu65xx_e.vhd
+set_global_assignment -name VERILOG_FILE ../../../../src/pace/osd/textmode.v
+set_global_assignment -name VERILOG_FILE ../../../../src/pace/osd/oneshot.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/trs80/screenbuffer.v
+set_global_assignment -name VERILOG_FILE ../../../../src/platform/trs80/chargen.v
+set_global_assignment -name VHDL_FILE osd_mem.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/osd/osd_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/Graphics.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2c0/spi_pll.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/spi/uni_spi_tx.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/spi/uni_spi_rx.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2c0/target_top_ep3sl.vhd
+set_global_assignment -name SIGNALTAP_FILE cpu09.stp
+set_global_assignment -name SIGNALTAP_FILE mce6309.stp
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

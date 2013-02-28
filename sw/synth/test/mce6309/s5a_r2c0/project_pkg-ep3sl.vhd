@@ -61,8 +61,8 @@ package project_pkg is
 
   constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
 
-  constant PACE_HAS_OSD                     : boolean := false;
-  constant PACE_OSD_XPOS                    : natural := 0;
+  constant PACE_HAS_OSD                     : boolean := true;
+  constant PACE_OSD_XPOS                    : natural := 84;
   constant PACE_OSD_YPOS                    : natural := 0;
 
   -- S5A-specific constants
