@@ -101,7 +101,8 @@ begin
     if rst = '1' then
       bdm_clk_r := '0';
       state <= S_IDLE;
-      bdm_cr <= "0000000000000111";
+      --bdm_cr <= "0000000000000111";
+      bdm_cr <= "0000000000000110";
       bdm_ap <= X"3C00";
       bdm_bp <= (others => '0');
       bdm_rdy <= '0';

@@ -82,7 +82,7 @@ package project_pkg is
 
 	-- MCE6309-specific constants
 
-  constant TRS80_M1_ROM                     : string := "model1b.hex";    -- v1.3
+  constant MCE6309_USE_CPU09                : boolean := false;
 
   constant TRS80_M1_CHARSET_ROM             : string := "trs80_m1_tile_2.hex";
 

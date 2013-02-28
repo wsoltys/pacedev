@@ -10,6 +10,7 @@ use work.sprite_pkg.all;
 use work.target_pkg.all;
 use work.platform_pkg.all;
 use work.project_pkg.all;
+use work.mce6309_pack.all;
 
 entity platform is
   generic
@@ -118,6 +119,7 @@ architecture SYN of platform is
   alias ram_d_o      	      : std_logic_vector(7 downto 0) is sram_i.d(7 downto 0);
 
   -- interrupt signals
+  signal vector_cs          : std_logic;
 	signal int_cs					    : std_logic;
   signal int_status         : std_logic_vector(7 downto 0);
 
@@ -146,15 +148,17 @@ begin
   sram_o.we <= ram_wr;
 
 	-- memory chip selects
-	rom_cs <= '1' when cpu_a(15 downto 11) = "11111" else '0';
-
+  -- ROM $0000-$07FF
+	rom_cs <= '1' when cpu_a(15 downto 11) = "00000" else '0';
 	-- RDINTSTATUS $37E0-$37E3 (active high)
 	int_cs <= '1' when cpu_a(15 downto 2) = (X"37E" & "00") else '0';
 	-- KEYBOARD $3800-$38FF
 	kbd_cs <= '1' when cpu_a(15 downto 10) = (X"3" & "10") else '0';
 	-- VRAM $3C00-$3FFF
 	vram_cs <= '1' when cpu_a(15 downto 10) = (X"3" & "11") else '0';
-
+  -- VECTORS $FFFE=$FFFF
+  vector_cs <= '1' when cpu_a(15 downto 4) = X"FFF" else '0';
+  
 	-- memory write enables
 	vram_wr <= vram_cs and not cpu_rw;
   
@@ -171,6 +175,7 @@ begin
     mem_d <= 	rom_d_o when rom_cs = '1' else
               kbd_d_o when kbd_cs = '1' else
               vram_d_o when vram_cs = '1' else
+              X"00" when vector_cs = '1' else
               ram_d_o;
     
   end block BLK_RD_MUX;
@@ -204,28 +209,72 @@ begin
 
   cpu_halt <= '0';
   cpu_hold <= '0';
-  
-  cpu_inst : entity work.cpu09
-    generic map
-    (
-      CLK_POL   => '1'
-    )
-    port map 
-    (    
-      clk	      => cpu_clk,
-      clk_en    => cpu_clk_en,
-      rst       => cpu_reset,
-      rw	      => cpu_rw,
-      vma       => cpu_vma,
-      addr      => cpu_a(15 downto 0),
-      data_in   => cpu_d_i,
-      data_out  => cpu_d_o,
-      halt      => cpu_halt,
-      hold      => cpu_hold,
-      irq       => cpu_irq,
-      nmi       => cpu_nmi,
-      firq      => cpu_firq
-    );
+
+  GEN_CPU : if MCE6309_USE_CPU09 generate
+  begin
+    cpu_inst : entity work.cpu09
+      generic map
+      (
+        CLK_POL   => '1'
+      )
+      port map 
+      (    
+        clk	      => cpu_clk,
+        clk_en    => cpu_clk_en,
+        rst       => cpu_reset,
+        rw	      => cpu_rw,
+        vma       => cpu_vma,
+        addr      => cpu_a(15 downto 0),
+        data_in   => cpu_d_i,
+        data_out  => cpu_d_o,
+        halt      => cpu_halt,
+        hold      => cpu_hold,
+        irq       => cpu_irq,
+        nmi       => cpu_nmi,
+        firq      => cpu_firq
+      );
+  else generate
+    cpu_inst : entity work.mce6309
+      generic map
+      (
+        MODE            => M6809,
+        CYCLE_ACCURATE  => true,
+        HAS_BDM         => true
+      )
+      port map
+      (
+        -- clocking, reset
+        clk             => cpu_clk,
+        clken           => cpu_clk_en,
+        reset           => cpu_reset,
+        
+        -- bus signals
+        rw              => cpu_rw,
+        vma             => cpu_vma,
+        address         => cpu_a(15 downto 0),
+        data_i  	      => cpu_d_i,
+        data_o 		 	    => cpu_d_o,
+        data_oe 		    => open,
+        lic 				    => open,
+        halt      	    => cpu_halt,
+        hold      	    => cpu_hold,
+        irq       	    => cpu_irq,
+        firq      	    => cpu_firq,
+        nmi       	    => cpu_nmi,
+        
+        -- bdm signals
+        bdm_clk         => '0',
+        bdm_rst         => '0',
+        bdm_mosi        => '0',
+        bdm_miso        => open,
+        bdm_i           => '0',
+        bdm_o           => open,
+        bdm_oe          => open,
+        
+        -- misc signals
+        op_fetch        => open
+      );
+  end generate GEN_CPU;
   
   rom_inst : entity work.sprom
     generic map

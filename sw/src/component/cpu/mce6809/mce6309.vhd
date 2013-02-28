@@ -135,8 +135,6 @@ begin
 	data_o	<= dbus when drive_data = '1' else (others => 'X');
 	data_oe	<= drive_data;
 
-	ir(11 downto 10) <= "00";
-
 	mcode : entity work.mce6309_mcode 
 	  generic map
 	  (
