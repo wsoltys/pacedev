@@ -14,6 +14,7 @@ package video_controller_pkg is
     PACE_VIDEO_VGA_640x480_60Hz,          -- generic VGA (25.175MHz)
     PACE_VIDEO_VGA_800x600_60Hz,          -- generic VGA (40MHz)
     PACE_VIDEO_VGA_1024x768_60Hz,         -- XVGA (65MHz)
+    PACE_VIDEO_VGA_1366x768_60Hz,         -- (NAVICO ROCKY) (72MHz)
     PACE_VIDEO_VGA_1280x1024_60Hz,        -- SXGA (108MHz)
     PACE_VIDEO_VGA_1680x1050_60Hz,        -- WSXGA+ (147MHz)
     PACE_VIDEO_ARCADE_STD_336x240_60Hz,   -- arcade std resolution (7.16MHz)
