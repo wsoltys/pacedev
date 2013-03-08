@@ -331,7 +331,7 @@ begin
         generic map
         (
           init_file     => ROCKY_EMULATED_FLASH_INIT_FILE,
-          numwords_a    => 2**ROCKY_EMULATED_FLASH_WIDTH_AD,
+          --numwords_a    => 2**ROCKY_EMULATED_FLASH_WIDTH_AD,
           widthad_a			=> ROCKY_EMULATED_FLASH_WIDTH_AD,
           width_a				=> ROCKY_EMULATED_FLASH_WIDTH
         )
@@ -352,7 +352,7 @@ begin
       sram_inst : entity work.spram
         generic map
         (
-          numwords_a		=> 2**ROCKY_EMULATED_SRAM_WIDTH_AD,
+          --numwords_a		=> 2**ROCKY_EMULATED_SRAM_WIDTH_AD,
           widthad_a			=> ROCKY_EMULATED_SRAM_WIDTH_AD,
           width_a				=> ROCKY_EMULATED_SRAM_WIDTH
         )
