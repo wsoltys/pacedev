@@ -245,6 +245,26 @@ begin
     buttons_i <= (others => '0');
     switches_i <= (others => '0');
 
+    BLK_JAMMA : block
+    begin
+      GEN_PLAYER: for i in 1 to 2 generate
+      begin
+        inputs_i.jamma_n.coin(i) <= '1';
+        inputs_i.jamma_n.p(i).start <= '1';
+        inputs_i.jamma_n.p(i).up <= '1';
+        inputs_i.jamma_n.p(i).down <= '1';
+        inputs_i.jamma_n.p(i).left <= '1';
+        inputs_i.jamma_n.p(i).right <= '1';
+        GEN_BUTTON: for j in 1 to 5 generate
+          inputs_i.jamma_n.p(i).button(j) <= '1';
+        end generate GEN_BUTTON;
+      end generate GEN_PLAYER;
+      inputs_i.jamma_n.coin_cnt <= (others => '1');
+      inputs_i.jamma_n.service <= '1';
+      inputs_i.jamma_n.tilt <= '1';
+      inputs_i.jamma_n.test <= '1';
+    end block BLK_JAMMA;
+    
     video_i.clk <= clkrst_i.clk(1);
     video_i.clk_ena <= '1';
     video_i.reset <= clkrst_i.rst(1);
