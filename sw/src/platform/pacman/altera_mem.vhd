@@ -18,7 +18,7 @@ begin
 		generic map
 		(
 			init_file		=> "../../../../src/platform/pacman/roms/pacrom.hex",
-			numwords_a	=> 16384,
+--			numwords_a	=> 16384,
 			widthad_a		=> 14
 		)
 		port map
@@ -56,7 +56,7 @@ begin
 		generic map
 		(
 			init_file		=> "../../../../src/platform/pacman/roms/pacvram.hex",
-			numwords_a	=> 1024,
+--			numwords_a	=> 1024,
 			widthad_a		=> 10
 		)
 		port map
@@ -102,7 +102,7 @@ begin
 	dpram_inst : entity work.dpram
 		generic map
 		(
-			numwords_a	=> 1024,
+--			numwords_a	=> 1024,
 			widthad_a		=> 10
 		)
 		port map
@@ -142,7 +142,7 @@ begin
 		generic map
 		(
 			init_file		=> "../../../../src/platform/pacman/roms/pactile.hex",
-			numwords_a	=> 4096,
+--			numwords_a	=> 4096,
 			widthad_a		=> 12
 		)
 		port map
@@ -174,7 +174,7 @@ begin
 		generic map
 		(
 			init_file		=> "../../../../src/platform/pacman/roms/pacsprite32.hex",
-			numwords_a	=> 1024,
+--			numwords_a	=> 1024,
 			widthad_a		=> 10,
 			width_a			=> 32
 		)
@@ -207,7 +207,7 @@ begin
 	spram_inst : entity work.spram
 		generic map
 		(
-			numwords_a => 1024,
+--			numwords_a => 1024,
 			widthad_a => 10
 		)
 		port map
@@ -241,7 +241,7 @@ begin
     generic map
     (
 			init_file		=> SOUND_ROM_INIT_FILE,
-			numwords_a	=> 256,
+--			numwords_a	=> 256,
 			widthad_a		=> 8
     )
     port map

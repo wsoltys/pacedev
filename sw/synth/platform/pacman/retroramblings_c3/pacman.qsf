@@ -1,0 +1,125 @@
+# copyright (c) 1991-2005 altera corporation
+# your use of altera corporation's design tools, logic functions 
+# and other software and tools, and its ampp partner logic       
+# functions, and any output files any of the foregoing           
+# (including device programming or simulation files), and any    
+# associated documentation or information are expressly subject  
+# to the terms and conditions of the altera program license      
+# subscription agreement, altera megacore function license       
+# agreement, or other applicable license agreement, including,   
+# without limitation, that your use is for the sole purpose of   
+# programming logic devices manufactured by altera and sold by   
+# altera or its authorized distributors.  please refer to the    
+# applicable agreement for further details.
+
+
+# the default values for assignments are stored in the file
+#		pacman_assignment_defaults.qdf
+# if this file doesn't exist, and for assignments not listed, see file
+#		assignment_defaults.qdf
+
+# altera recommends that you do not modify this file. this
+# file is updated automatically by the quartus ii software
+# and any changes you make may be lost or overwritten.
+
+
+# project-wide assignments
+# ========================
+set_global_assignment -name LAST_QUARTUS_VERSION "12.0 SP1"
+
+# pin & location assignments
+# ==========================
+
+# analysis & synthesis assignments
+# ================================
+set_global_assignment -name TOP_LEVEL_ENTITY target_top
+
+# fitter assignments
+# ==================
+set_global_assignment -name FAMILY "Cyclone III"
+set_global_assignment -name DEVICE EP3C25Q240C8
+set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS INPUT TRI-STATED"
+
+# assembler assignments
+# =====================
+
+set_global_assignment -name SEED 1
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.3-V LVTTL"
+
+
+
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_global_assignment -name AUTO_SHIFT_REGISTER_RECOGNITION OFF
+set_global_assignment -name ENABLE_ADVANCED_IO_TIMING ON
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name USE_CONFIGURATION_DEVICE ON
+set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
+set_global_assignment -name GENERATE_RBF_FILE ON
+
+set_global_assignment -name CRC_ERROR_OPEN_DRAIN OFF
+set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
+set_global_assignment -name RESERVE_DATA0_AFTER_CONFIGURATION "USE AS REGULAR IO"
+set_global_assignment -name RESERVE_DATA1_AFTER_CONFIGURATION "USE AS REGULAR IO"
+set_global_assignment -name RESERVE_FLASH_NCE_AFTER_CONFIGURATION "USE AS REGULAR IO"
+set_global_assignment -name RESERVE_DCLK_AFTER_CONFIGURATION "USE AS REGULAR IO"
+set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -rise
+set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -fall
+set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -rise
+set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -fall
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name SMART_RECOMPILE ON
+set_global_assignment -name ENABLE_SIGNALTAP ON
+set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
+set_global_assignment -name VHDL_FILE ../../../../src/target/retroramblings_c3/target_top.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/retroramblings_c3/target_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/retroramblings_c3/custom_io.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sdram_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/tilemapctl_e.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/bitmapctl_e.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_pkg_body.vhd
+set_global_assignment -name VHDL_FILE project_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/platform_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneiii/pll.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneiii/sprom.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneiii/dpram.vhd
+set_global_assignment -name VHDL_FILE ../../../device/cycloneiii/spram.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/clk_div.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/ps2/ps2kbd.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_Pack.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_ALU.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_MCode.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80_Reg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/T80se.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/t80/Z80.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/altera_mem.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/tilemapctl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/spritereg.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pengo/spritectl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/sprite_array.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_mixer.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/Graphics.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/InputMapper.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.VHD
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/Pacman_Interrupts.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/Pacman_vramMapper.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/platform.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/pacsnd.Vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/pacman/sound.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/toys/pwmout.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/sound/sigma_delta_dac.vhd
+set_global_assignment -name QIP_FILE pllclk_ez.qip
+set_global_assignment -name SIGNALTAP_FILE stp1.stp
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
