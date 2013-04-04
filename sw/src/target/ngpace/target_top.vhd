@@ -75,10 +75,13 @@ entity target_top is
     -- Z80 address, data bus
     sda             : out std_logic_vector(15 downto 0);
     sdd             : inout std_logic_vector(7 downto 0);
-    -- Z80 M1/RAM read signal
+    -- Z80 M1/RAM read signal (A17?)
     sdmrd           : out std_logic;
-    -- SDRD0 is the write signal from NEO-D0
+    -- SDRD0 is the write signal from NEO-D0 (A20..19?)
     sdrd            : out std_logic_vector(1 downto 0);
+
+    -- from NEO-D0 (A18?)
+    sdrom           : out std_logic;
     
     -- ADPCM-A ROM address bus
     -- only 23..20,9..8 used
@@ -89,7 +92,7 @@ entity target_top is
     sdpa            : out std_logic_vector(11 downto 8);
     -- ADPCM-B ROM data/address bus
     sdpad           : inout std_logic_vector(7 downto 0);
-    -- PCM bus muliplexing signals
+    -- PCM bus muliplexing signals from YM2610
     sdpoe_n         : out std_logic;
     sdroe_n         : out std_logic;
     sdpmpx          : out std_logic;
@@ -100,7 +103,6 @@ entity target_top is
     slotcs_n        : in std_logic;
 
     -- ????
-    sdrom_unknown   : in std_logic;
     X68kclkb_unknown  : in std_logic;
     pdtact_unknown  : in std_logic;
 
