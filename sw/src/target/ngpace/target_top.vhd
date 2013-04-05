@@ -27,6 +27,7 @@ entity target_top is
     clk_12M         : out std_logic;
     clk_8M          : out std_logic;
     clk_4MB         : out std_logic;
+    m68kclkb        : out std_logic;  -- from NEO-D0
     reset           : out std_logic;
 
     -- 68K bus signals
@@ -46,6 +47,8 @@ entity target_top is
     romwait_n       : in std_logic;
     -- add 0-3 cycle delays for P2 ROM reads
     pwait_n         : in std_logic_vector(1 downto 0);
+    -- dtack config from cartridge
+    pdtack          : in std_logic;
 
     -- $200000-$2FFFFF P2+ROM/Security chip
     -- - any access
@@ -85,7 +88,8 @@ entity target_top is
     
     -- ADPCM-A ROM address bus
     -- only 23..20,9..8 used
-    sdra            : out std_logic_vector(23 downto 8);
+    sdra_23_20      : out std_logic_vector(23 downto 20);
+    sdra_9_8        : out std_logic_vector(9 downto 8);
     -- ADPCM-A ROM data/address bus
     sdrad           : inout std_logic_vector(7 downto 0);
     -- ADPCM-B ROM address bus
@@ -101,10 +105,6 @@ entity target_top is
     -- tied to SYSTEMB on 1-slot boards
     -- goes LOW when slot is in use
     slotcs_n        : in std_logic;
-
-    -- ????
-    X68kclkb_unknown  : in std_logic;
-    pdtact_unknown  : in std_logic;
 
     --
     -- AES Connector (extra 14 pins)
@@ -128,7 +128,18 @@ entity target_top is
 end entity target_top;
 
 architecture SYN of target_top is
-  
-begin
+
+--    attribute altera_attribute : string;
+--    attribute altera_attribute of sdra : signal is "-name VIRTUAL_PIN ON";
     
+begin
+
+  -- ensure cartridge connector bidir lines are not driven
+  d <= (others => 'Z');
+  cr <= (others => 'Z');
+  fix <= (others => 'Z');
+  sdd <= (others => 'Z');
+  sdrad <= (others => 'Z');
+  sdpad <= (others => 'Z');
+  
 end architecture SYN;
