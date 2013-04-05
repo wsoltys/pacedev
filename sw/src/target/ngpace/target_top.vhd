@@ -62,8 +62,8 @@ entity target_top is
     -- - even byte read
     portoeu_n       : out std_logic;
 
-    -- C ROM, S ROM & LO ROM address/data bus???
-    p               : out std_logic_vector(23 downto 0);
+    -- C ROM, S ROM & LO ROM multiplexed address/data bus
+    p               : inout std_logic_vector(23 downto 0);
     
     -- C ROM A(4) line, address latch, data bus
     ca4             : out std_logic;
@@ -73,7 +73,7 @@ entity target_top is
     -- S ROM A(3) line, address latch, data bus
     sa3_2h1         : out std_logic;
     pck2b           : out std_logic;
-    fix             : inout std_logic_vector(7 downto 0);
+    fixd            : inout std_logic_vector(7 downto 0);
     
     -- Z80 address, data bus
     sda             : out std_logic_vector(15 downto 0);
@@ -122,8 +122,168 @@ entity target_top is
     load            : out std_logic;
     h               : out std_logic;
     even            : out std_logic;
+
+    --
+    -- VIDEO output
+    --
     
-    unused          : in std_logic
+    -- VGA output, 1 pix/clk, 30-bit mode
+		vao_clk	  	    : out std_logic;
+		vao_red			    : out std_logic_vector(9 downto 0);
+		vao_green		    : out std_logic_vector(9 downto 0);
+		vao_blue		    : out std_logic_vector(9 downto 0);
+		vao_hsync       : out std_logic;
+		vao_vsync       : out std_logic;
+		vao_blank_n     : out std_logic;
+		vao_sync_n	    : out std_logic;
+		vao_sync_t	    : out std_logic;
+		vao_m1			    : out std_logic;
+		vao_m2			    : out std_logic;
+
+    -- DVI output, 24-bit mode
+		vdo_red			    : out std_logic_vector(7 downto 0);
+		vdo_green		    : out std_logic_vector(7 downto 0);
+		vdo_blue		    : out std_logic_vector(7 downto 0);
+		vdo_idck		    : out std_logic;
+		vdo_hsync		    : out std_logic;
+		vdo_vsync		    : out std_logic;
+		vdo_de			    : out std_logic;
+    
+		vdo_po1			    : in std_logic;
+		vdo_rstn		    : out std_logic;
+
+    -- I2C to the TFP410 (DVI out transmitter)
+    vdo_scl         : inout std_logic;
+    vdo_sda         : inout std_logic;
+    
+    -- I2C on the DVI output connector
+    -- (possibly don't need this)
+		dvo_scl			    : inout std_logic;
+		dvo_sda			    : inout std_logic;
+
+    --
+    --  AUDIO output
+    --
+    
+    -- TBA (SPI DAC?)
+    
+    --
+    --  External memories
+    --  - SM1:  A<-SDA      D->SDD    (on cartridge)
+    --  - SFIX: A<-NEO_IO   D->FIXD   (D only on cartridge)
+    --  - LO:   A<-P        D->P      (on cartridge)
+    --  - BIOS: A<-A        D->D      (on cartridge)
+    --  - SRAM: A<-A        D->D      (on cartridge, but same as BIOS)
+
+    sm1_a           : out std_logic_vector(18 downto 16);
+    --sm1_d           : inout std_logic_vector(15 downto 0);
+    sm1_cs_n        : out std_logic;
+    sm1_oe_n        : out std_logic;
+    sm1_we_n        : out std_logic;
+    
+    sfix_a          : out std_logic_vector(18 downto 0);
+    --sfix_d          : inout std_logic_vector(15 downto 0);
+    sfix_cs_n       : out std_logic;
+    sfix_oe_n       : out std_logic;
+    sfix_we_n       : out std_logic;
+    
+    lo_a            : out std_logic_vector(18 downto 16);
+    --lo_d            : inout std_logic_vector(15 downto 0);
+    lo_cs_n         : out std_logic;
+    lo_oe_n         : out std_logic;
+    lo_we_n         : out std_logic;
+
+    -- *** NOTE: BIOS and SRAM on the same bus!!!
+    bios_a          : out std_logic_vector(18 downto 16);
+    --bios_d          : inout std_logic_vector(15 downto 0);
+    bios_cs_n       : out std_logic;
+    bios_oe_n       : out std_logic;
+    bios_we_n       : out std_logic;
+    
+    --flash_we_n      : out std_logic;
+    
+    --sram_a           : out std_logic_vector(19 downto 0);
+    --sram_d           : inout std_logic_vector(15 downto 0);
+    sram_cs_n        : out std_logic;
+    sram_oe_n        : out std_logic;
+    sram_we_n        : out std_logic;
+    sram_bhe_n       : out std_logic;
+    sram_ble_n       : out std_logic;
+    
+    --
+    --  PS2 (mouse + keyboard)
+    --
+    
+    ps2_kclk        : out std_logic;
+    ps2_kdat        : inout std_logic;
+    ps2_mclk        : out std_logic;
+    ps2_mdat        : inout std_logic;
+    
+    --
+    --  UART/Serial
+    --
+    
+    uart_tx         : out std_logic;
+    uart_rx         : in std_logic;
+    uart_cts        : in std_logic;
+    uart_rts        : out std_logic;
+    
+    --
+    --  SD card
+    --
+
+    sd_dat3         : out std_logic;
+    sd_cmd          : out std_logic;
+    sd_clk          : out std_logic;
+    sd_dat          : inout std_logic;
+    
+    --
+    --  I/O
+    --  - eg. gamecube/dc, Commodate IEC, etc
+    --
+
+    misc_io         : inout std_logic_vector(15 downto 0);
+    
+    --
+    -- ARM communications (SPIx3)
+    --
+    --  SPI0: 
+    --  SPI1: inputs (USB, AESJOY etc)
+    --  SPI2:
+    --
+    
+    spi_clk         : inout std_logic_vector(0 to 2);
+    spi_miso        : inout std_logic_vector(0 to 2);
+    spi_mosi        : inout std_logic_vector(0 to 2);
+    spi_nss         : inout std_logic_vector(0 to 2);
+    
+    --
+    --  CPU socket (if we have the pins)
+    --  - 68K is 40 pins
+    --  - ARM2 is 84-pin PLCC
+    --  - ARM250 is 160 pin
+    --
+    cpu_io          : inout std_logic_vector(39 downto 0);
+    
+    --
+    --  DDR (if we have the pins)
+    --  - 32 bits wide
+    --
+    ddr_odt         : out std_logic_vector(0 downto 0);
+		ddr_clk         : inout std_logic_vector(0 downto 0);
+		ddr_clk_n       : inout std_logic_vector(0 downto 0);
+		ddr_cs_n        : out std_logic_vector(0 downto 0);
+		ddr_cke         : out std_logic_vector(0 downto 0);
+		ddr_a           : out std_logic_vector(12 downto 0);
+		ddr_ba          : out std_logic_vector(2 downto 0);
+		ddr_ras_n       : out std_logic;
+		ddr_cas_n       : out std_logic;
+		ddr_we_n        : out std_logic;
+		ddr_dq          : inout std_logic_vector(31 downto 0);
+		ddr_dqs         : inout std_logic_vector(7 downto 0);
+		ddr_dqsn        : inout std_logic_vector(7 downto 0);
+		ddr_dm          : out std_logic_vector(7 downto 0);
+		ddr_reset_n     : out std_logic
 	);
 end entity target_top;
 
@@ -136,10 +296,23 @@ begin
 
   -- ensure cartridge connector bidir lines are not driven
   d <= (others => 'Z');
+  p <= (others => 'Z');
   cr <= (others => 'Z');
-  fix <= (others => 'Z');
+  fixd <= (others => 'Z');
   sdd <= (others => 'Z');
   sdrad <= (others => 'Z');
   sdpad <= (others => 'Z');
+
+  -- some other bidir lines
+  
+  sd_dat <= 'Z';
+  
+  misc_io <= (others => 'Z');
+  spi_clk <= (others => 'Z');
+  spi_mosi <= (others => 'Z');
+  spi_miso <= (others => 'Z');
+  spi_nss <= (others => 'Z');
+
+  cpu_io <= (others => 'Z');
   
 end architecture SYN;
