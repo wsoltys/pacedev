@@ -175,6 +175,7 @@ entity target_top is
     --  - BIOS: A<-A        D->D      (on cartridge)
     --  - SRAM: A<-A        D->D      (on cartridge, but same as BIOS)
 
+    -- SDA(15..0) only, need extra lines to drive high order bits
     sm1_a           : out std_logic_vector(18 downto 16);
     --sm1_d           : inout std_logic_vector(15 downto 0);
     sm1_cs_n        : out std_logic;
@@ -187,13 +188,15 @@ entity target_top is
     sfix_oe_n       : out std_logic;
     sfix_we_n       : out std_logic;
     
-    lo_a            : out std_logic_vector(18 downto 16);
+    -- enough lines on P for the entire device
+    --lo_a            : out std_logic_vector(18 downto 0);
     --lo_d            : inout std_logic_vector(15 downto 0);
     lo_cs_n         : out std_logic;
     lo_oe_n         : out std_logic;
     lo_we_n         : out std_logic;
 
     -- *** NOTE: BIOS and SRAM on the same bus!!!
+    -- drive these separately for multiple BIOS images
     bios_a          : out std_logic_vector(18 downto 16);
     --bios_d          : inout std_logic_vector(15 downto 0);
     bios_cs_n       : out std_logic;
@@ -202,6 +205,7 @@ entity target_top is
     
     --flash_we_n      : out std_logic;
     
+    -- enough lines on A for the entire device
     --sram_a           : out std_logic_vector(19 downto 0);
     --sram_d           : inout std_logic_vector(15 downto 0);
     sram_cs_n        : out std_logic;
@@ -264,26 +268,41 @@ entity target_top is
     --  - ARM250 is 160 pin
     --
     cpu_io          : inout std_logic_vector(39 downto 0);
+
+    --
+    -- SDRAM (37 pins)
+    --
     
-    --
-    --  DDR (if we have the pins)
-    --  - 32 bits wide
-    --
-    ddr_odt         : out std_logic_vector(0 downto 0);
-		ddr_clk         : inout std_logic_vector(0 downto 0);
-		ddr_clk_n       : inout std_logic_vector(0 downto 0);
-		ddr_cs_n        : out std_logic_vector(0 downto 0);
-		ddr_cke         : out std_logic_vector(0 downto 0);
-		ddr_a           : out std_logic_vector(12 downto 0);
-		ddr_ba          : out std_logic_vector(2 downto 0);
-		ddr_ras_n       : out std_logic;
-		ddr_cas_n       : out std_logic;
-		ddr_we_n        : out std_logic;
-		ddr_dq          : inout std_logic_vector(31 downto 0);
-		ddr_dqs         : inout std_logic_vector(7 downto 0);
-		ddr_dqsn        : inout std_logic_vector(7 downto 0);
-		ddr_dm          : out std_logic_vector(7 downto 0);
-		ddr_reset_n     : out std_logic
+		sdram_clk       : out std_logic;
+		sdram_data      : inout unsigned(15 downto 0);
+		sdram_addr      : out unsigned(12 downto 0);
+		sdram_we_n      : out std_logic;
+		sdram_ras_n     : out std_logic;
+		sdram_cas_n     : out std_logic;
+		sdram_ba        : out std_logic_vector(1 downto 0);
+		sdram_ldqm      : out std_logic;
+		sdram_udqm      : out std_logic
+    
+--    --
+--    --  DDR (if we have 81 spare pins)
+--    --  - 32 bits wide
+--    --
+--    
+--    ddr_odt         : out std_logic_vector(0 downto 0);
+--		ddr_clk         : inout std_logic_vector(0 downto 0);
+--		ddr_clk_n       : inout std_logic_vector(0 downto 0);
+--		ddr_cs_n        : out std_logic_vector(0 downto 0);
+--		ddr_cke         : out std_logic_vector(0 downto 0);
+--		ddr_a           : out std_logic_vector(12 downto 0);
+--		ddr_ba          : out std_logic_vector(2 downto 0);
+--		ddr_ras_n       : out std_logic;
+--		ddr_cas_n       : out std_logic;
+--		ddr_we_n        : out std_logic;
+--		ddr_dq          : inout std_logic_vector(31 downto 0);
+--		ddr_dqs         : inout std_logic_vector(7 downto 0);
+--		ddr_dqsn        : inout std_logic_vector(7 downto 0);
+--		ddr_dm          : out std_logic_vector(7 downto 0);
+--		ddr_reset_n     : out std_logic
 	);
 end entity target_top;
 
@@ -303,11 +322,46 @@ begin
   sdrad <= (others => 'Z');
   sdpad <= (others => 'Z');
 
-  -- some other bidir lines
+  -- memories
+  sm1_a <= (others => 'Z');
+  sm1_cs_n <= '1';
+  sm1_oe_n <= '1';
+  sm1_we_n <= '1';
   
+  sfix_a <= (others => 'Z');
+  sfix_cs_n <= '1';
+  sfix_oe_n <= '1';
+  sfix_we_n <= '1';
+  
+  --lo_a <= (others => 'Z');
+  lo_cs_n <= '1';
+  lo_oe_n <= '1';
+  lo_we_n <= '1';
+
+  bios_a <= (others => 'Z');
+  bios_cs_n <= '1';
+  bios_oe_n <= '1';
+  bios_we_n <= '1';
+  
+  sram_cs_n <= '1';
+  sram_oe_n <= '1';
+  sram_we_n <= '1';
+  sram_bhe_n <= '1';
+  sram_ble_n <= '1';
+
+  ps2_kdat <= 'Z';
+  ps2_mdat <= 'Z';
+
+  uart_tx <= 'Z';
+  uart_rts <= 'Z';
+  
+  sd_dat3 <= 'Z';
+  sd_cmd <= 'Z';
+  sd_clk <= 'Z';
   sd_dat <= 'Z';
   
   misc_io <= (others => 'Z');
+  
   spi_clk <= (others => 'Z');
   spi_mosi <= (others => 'Z');
   spi_miso <= (others => 'Z');
