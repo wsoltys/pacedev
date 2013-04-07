@@ -686,7 +686,7 @@ begin
           generic map
           (
             --init_file		=> "../../../../src/platform/neogeo/roms/vram1.hex",
-            numwords_a	=> 32*32, -- only 32 sprites for now
+            --numwords_a	=> 32*32, -- only 32 sprites for now
             widthad_a		=> 10,
             width_a     => 16
           )
@@ -709,7 +709,7 @@ begin
           generic map
           (
             --init_file		=> "../../../../src/platform/neogeo/roms/vram1.hex",
-            numwords_a	=> 32*32, -- only 32 sprites for now
+            --numwords_a	=> 32*32, -- only 32 sprites for now
             widthad_a		=> 10,
             width_a     => 16
           )
@@ -734,7 +734,7 @@ begin
           generic map
           (
             --init_file		=> "../../../../src/platform/neogeo/roms/vram1.hex",
-            numwords_a	=> 32,  -- only 32 sprites for now
+            --numwords_a	=> 32,  -- only 32 sprites for now
             widthad_a		=> 5,
             width_a     => 16
           )
@@ -759,7 +759,7 @@ begin
           generic map
           (
             --init_file		=> "../../../../src/platform/neogeo/roms/vram1.hex",
-            numwords_a	=> 32,  -- only 32 sprites for now
+            --numwords_a	=> 32,  -- only 32 sprites for now
             widthad_a		=> 5,
             width_a     => 16
           )
@@ -868,7 +868,7 @@ begin
         generic map
         (
           init_file		=> "../../../../src/platform/neogeo/rams/fix1.hex",
-          numwords_a	=> 1024,
+          --numwords_a	=> 1024,
           widthad_a		=> 10,
           width_a     => 16
         )
@@ -893,7 +893,7 @@ begin
         generic map
         (
           init_file		=> "../../../../src/platform/neogeo/rams/fix2.hex",
-          numwords_a	=> 256,
+          --numwords_a	=> 256,
           widthad_a		=> 8,
           width_a     => 16
         )
