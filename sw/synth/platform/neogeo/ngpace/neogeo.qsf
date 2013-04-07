@@ -86,5 +86,10 @@ set_global_assignment -name VHDL_FILE ../de1/testram.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/rtc/upd4990a.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/neogeo/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/i2c/oci2c/i2c_master_bit_ctrl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/i2c/oci2c/i2c_master_byte_ctrl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/i2c/oci2c/i2c_master_top.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/s5a/i2c_sm.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/s5a/dvo_sm.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/ngpace/target_top.vhd
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

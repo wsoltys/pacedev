@@ -221,9 +221,9 @@ entity target_top is
     --  PS2 (mouse + keyboard)
     --
     
-    ps2_kclk        : out std_logic;
+    ps2_kclk        : in std_logic;
     ps2_kdat        : inout std_logic;
-    ps2_mclk        : out std_logic;
+    ps2_mclk        : in std_logic;
     ps2_mdat        : inout std_logic;
     
     --
@@ -338,31 +338,6 @@ architecture SYN of target_top is
   signal target_i     : from_TARGET_IO_t;
   signal target_o     : to_TARGET_IO_t;
 
-  signal sd_dat_i     : std_logic;
-  signal sd_dat_o     : std_logic;
-  signal sd_dat_oe    : std_logic;
-
-  signal misc_io_i    : std_logic_vector(15 downto 0);
-  signal misc_io_o    : std_logic_vector(15 downto 0);
-  signal misc_io_oe   : std_logic_vector(15 downto 0);
-  
-  signal spi_clk_i    : std_logic_vector(0 to 2);
-  signal spi_clk_o    : std_logic_vector(0 to 2);
-  signal spi_clk_oe   : std_logic_vector(0 to 2);
-  signal spi_miso_i   : std_logic_vector(0 to 2);
-  signal spi_miso_o   : std_logic_vector(0 to 2);
-  signal spi_miso_oe  : std_logic_vector(0 to 2);
-  signal spi_mosi_i   : std_logic_vector(0 to 2);
-  signal spi_mosi_o   : std_logic_vector(0 to 2);
-  signal spi_mosi_oe  : std_logic_vector(0 to 2);
-  signal spi_nss_i    : std_logic_vector(0 to 2);
-  signal spi_nss_o    : std_logic_vector(0 to 2);
-  signal spi_nss_oe   : std_logic_vector(0 to 2);
-  
-  signal cpu_io_i     : std_logic_vector(39 downto 0);
-  signal cpu_io_o     : std_logic_vector(39 downto 0);
-  signal cpu_io_oe    : std_logic_vector(39 downto 0);
-  
 begin
 
   BLK_INIT : block
@@ -402,6 +377,16 @@ begin
 
   end generate GEN_RESETS;
 
+  BLK_INPUTS : block
+  begin
+    inputs_i.ps2_kclk <= ps2_kclk;
+    inputs_i.ps2_kdat <= ps2_kdat;
+    ps2_kdat <= 'Z';
+    inputs_i.ps2_mclk <= ps2_mclk;
+    inputs_i.ps2_mdat <= ps2_mdat;
+    ps2_mdat <= 'Z';
+  end block BLK_INPUTS;
+  
   GEN_FLASH : if PACE_HAS_FLASH generate
     alias flash_a18_16  : std_logic_vector(18 downto 16) is sm1_a;
     alias flash_a15_0   : std_logic_vector(15 downto 0) is sda;
@@ -419,8 +404,32 @@ begin
     flash_cs_n <= not flash_o.cs;
     flash_oe_n <= not flash_o.oe;
     flash_we_n <= not flash_o.we;
-  end generate GEN_FLASH;
+
+    -- disable other memories
+    sfix_a <= (others => 'Z');
+    sfix_d15_8 <= (others => 'Z');
+    sfix_cs_n <= '1';
+    sfix_oe_n <= '1';
+    sfix_we_n <= '1';
+    
+    -- P(15..0) only routed to LO
+    lo_a <= (others => 'Z');
+    lo_d15_8 <= (others => 'Z');
+    --lo_d            : inout std_logic_vector(15 downto 0);
+    lo_cs_n <= '1';
+    lo_oe_n <= '1';
+    lo_we_n <= '1';
+
+    -- *** NOTE: BIOS and SRAM on the same bus!!!
+    -- drive these separately for multiple BIOS images
+    bios_a <= (others => 'Z');
+    --bios_d          : inout std_logic_vector(15 downto 0);
+    bios_cs_n <= '1';
+    bios_oe_n <= '1';
+    bios_we_n <= '1';
   
+  end generate GEN_FLASH;
+
   GEN_SRAM : if PACE_HAS_SRAM generate
     alias sram_a    : std_logic_vector(19 downto 0) is a(20 downto 1);
     alias sram_d    : std_logic_vector(15 downto 0) is d(15 downto 0);
@@ -435,12 +444,77 @@ begin
     sram_bhe_n <= not sram_o.be(1);
     sram_ble_n <= not sram_o.be(0);
   end generate GEN_SRAM;
+
+  BLK_UART : block
+  begin
+    uart_tx <= ser_o.txd;
+    ser_i.rxd <= uart_rx;
+    uart_rts <= ser_o.rts;
+    ser_i.cts <= uart_cts;
+  end block BLK_UART;
   
   BLK_VIDEO : block
     type state_t is (IDLE, S1, S2, S3);
     signal state : state_t := IDLE;
   begin
   
+    BLK_DVO_INIT : block
+
+      signal vdo_scl_i      : std_logic := '0';
+      signal vdo_scl_o      : std_logic := '0';
+      signal vdo_scl_oe_n   : std_logic := '0';
+      signal vdo_sda_i      : std_logic := '0';
+      signal vdo_sda_o      : std_logic := '0';
+      signal vdo_sda_oe_n   : std_logic := '0';
+
+      signal ctl            : std_logic_vector(3 downto 1) := (others => '0');
+      
+    begin
+
+      -- VO I2C (init) drivers
+      vdo_scl_i <= vdo_scl;
+      vdo_scl <= vdo_scl_o when vdo_scl_oe_n = '0' else 'Z';
+      vdo_sda_i <= vdo_sda;
+      vdo_sda <= vdo_sda_o when vdo_sda_oe_n = '0' else 'Z';
+    
+      --ctl <= not (dbgio(4) & dbgio(6) & dbgio(7));
+      ctl <= "000";
+
+      dvo_sm : entity work.dvo_init_i2c_sm_controller
+        generic map
+        (
+          clock_speed	=> PACE_CLKIN0,
+          dsel        => '0',
+
+          -- DE generation
+          DE_GEN      => NGPACE_DE_GEN,
+          VS_POL      => NGPACE_VS_POL,
+          HS_POL      => NGPACE_HS_POL,
+          DE_DLY      => NGPACE_DE_DLY,
+          DE_TOP      => NGPACE_DE_TOP,
+          DE_CNT      => NGPACE_DE_CNT,
+          DE_LIN      => NGPACE_DE_LIN
+        )
+        port map
+        (
+          clk					=> clk_ref,
+          clk_ena     => '1',
+          reset				=> clkrst_i.arst,
+
+          -- CTL outputs
+          ctl         => ctl,
+          
+          -- I2C physical interface
+          scl_i  	    => vdo_scl_i,
+          scl_o  	    => vdo_scl_o,
+          scl_oe_n    => vdo_scl_oe_n,
+          sda_i  	    => vdo_sda_i,
+          sda_o  	    => vdo_sda_o,
+          sda_oe_n    => vdo_sda_oe_n
+        );
+
+    end block BLK_DVO_INIT;
+
     video_i.clk <= clkrst_i.clk(1);
     video_i.clk_ena <= '1';
     video_i.reset <= clkrst_i.rst(1);
@@ -640,6 +714,34 @@ begin
     h <= target_o.aes.h;
     even <= target_o.aes.even;
 
+    -- SD card
+    target_i.sd_dat_i <= sd_dat;
+    sd_dat <= target_o.sd_dat_o when target_o.sd_dat_oe = '1' else 'Z';
+    
+    -- MISC IO
+    GEN_MISC_IO : for i in misc_io'range generate
+      target_i.misc_io_i(i) <= misc_io(i);
+      misc_io(i) <= target_o.misc_io_o(i) when target_o.misc_io_oe(i) = '1' else 'Z';
+    end generate GEN_MISC_IO;
+    
+    -- SPI
+    GEN_SPI : for i in spi_clk'range generate
+      target_i.spi_clk_i(i) <= spi_clk(i);
+      spi_clk(i) <= target_o.spi_clk_o(i) when target_o.spi_clk_oe(i) = '1' else 'Z';
+      target_i.spi_miso_i(i) <= spi_miso(i);
+      spi_miso(i) <= target_o.spi_miso_o(i) when target_o.spi_miso_oe(i) = '1' else 'Z';
+      target_i.spi_mosi_i(i) <= spi_mosi(i);
+      spi_mosi(i) <= target_o.spi_mosi_o(i) when target_o.spi_mosi_oe(i) = '1' else 'Z';
+      target_i.spi_nss_i(i) <= spi_nss(i);
+      spi_nss(i) <= target_o.spi_nss_o(i) when target_o.spi_nss_oe(i) = '1' else 'Z';
+    end generate GEN_SPI;
+    
+    -- CPU IO
+    GEN_CPU_IO : for i in cpu_io'range generate
+      target_i.cpu_io_i(i) <= cpu_io(i);
+      cpu_io(i) <= target_o.cpu_io_o(i) when target_o.cpu_io_oe(i) = '1' else 'Z';
+    end generate GEN_CPU_IO;
+    
   end generate GEN_TARGET_IO;
       
 --  pace_inst : entity work.pace
@@ -789,37 +891,5 @@ begin
       target_i          => target_i,
       target_o          => target_o
     );
-
-  --
-  -- inout drivers
-  --
-  
-  -- SD card
-  sd_dat_i <= sd_dat;
-  sd_dat <= sd_dat_o when sd_dat_oe = '1' else 'Z';
-  
-  -- MISC IO
-  GEN_MISC_IO : for i in misc_io'range generate
-    misc_io_i(i) <= misc_io(i);
-    misc_io(i) <= misc_io_o(i) when misc_io_oe(i) = '1' else 'Z';
-  end generate GEN_MISC_IO;
-  
-  -- SPI
-  GEN_SPI : for i in spi_clk'range generate
-    spi_clk_i(i) <= spi_clk(i);
-    spi_clk(i) <= spi_clk_o(i) when spi_clk_oe(i) = '1' else 'Z';
-    spi_miso_i(i) <= spi_miso(i);
-    spi_miso(i) <= spi_miso_o(i) when spi_miso_oe(i) = '1' else 'Z';
-    spi_mosi_i(i) <= spi_mosi(i);
-    spi_mosi(i) <= spi_mosi_o(i) when spi_mosi_oe(i) = '1' else 'Z';
-    spi_nss_i(i) <= spi_nss(i);
-    spi_nss(i) <= spi_nss_o(i) when spi_nss_oe(i) = '1' else 'Z';
-  end generate GEN_SPI;
-  
-  -- CPU IO
-  GEN_CPU_IO : for i in cpu_io'range generate
-    cpu_io_i(i) <= cpu_io(i);
-    cpu_io(i) <= cpu_io_o(i) when cpu_io_oe(i) = '1' else 'Z';
-  end generate GEN_CPU_IO;
 
 end architecture SYN;

@@ -162,13 +162,51 @@ package target_pkg is
   end record;
   
   type from_TARGET_IO_t is record
+  
     mvs             : from_MVS_CONNECTOR_t;
     aes             : from_AES_CONNECTOR_t;
+  
+    -- SD card
+    sd_dat_i        : std_logic;
+    
+    misc_io_i       : std_logic_vector(15 downto 0);
+    
+    spi_clk_i       : std_logic_vector(0 to 2);
+    spi_miso_i      : std_logic_vector(0 to 2);
+    spi_mosi_i      : std_logic_vector(0 to 2);
+    spi_nss_i       : std_logic_vector(0 to 2);
+
+    cpu_io_i        : std_logic_vector(39 downto 0);
+
   end record;
 
   type to_TARGET_IO_t is record
+  
     mvs             : to_MVS_CONNECTOR_t;
     aes             : to_AES_CONNECTOR_t;
+    
+    -- SD card
+    sd_dat3         : std_logic;
+    sd_cmd          : std_logic;
+    sd_clk          : std_logic;
+    sd_dat_o        : std_logic;
+    sd_dat_oe       : std_logic;
+
+    misc_io_o       : std_logic_vector(15 downto 0);
+    misc_io_oe      : std_logic_vector(15 downto 0);
+    
+    spi_clk_o       : std_logic_vector(0 to 2);
+    spi_clk_oe      : std_logic_vector(0 to 2);
+    spi_miso_o      : std_logic_vector(0 to 2);
+    spi_miso_oe     : std_logic_vector(0 to 2);
+    spi_mosi_o      : std_logic_vector(0 to 2);
+    spi_mosi_oe     : std_logic_vector(0 to 2);
+    spi_nss_o       : std_logic_vector(0 to 2);
+    spi_nss_oe      : std_logic_vector(0 to 2);
+
+    cpu_io_o        : std_logic_vector(39 downto 0);
+    cpu_io_oe       : std_logic_vector(39 downto 0);
+
   end record;
 
   --function NULL_TO_TARGET_IO return to_TARGET_IO_t;

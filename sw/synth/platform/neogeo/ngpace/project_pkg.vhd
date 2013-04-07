@@ -38,6 +38,16 @@ package project_pkg is
   constant PACE_OSD_XPOS                    : natural := 0;
   constant PACE_OSD_YPOS                    : natural := 0;
 
+  -- NGPACE-specific constants
+  
+  constant NGPACE_DE_GEN                    : std_logic := '0';
+  constant NGPACE_VS_POL                    : std_logic := '0';
+  constant NGPACE_HS_POL                    : std_logic := '0';
+  constant NGPACE_DE_DLY                    : std_logic_vector(11 downto 0) := X"000";
+  constant NGPACE_DE_TOP                    : std_logic_vector(7 downto 0) := X"00";
+  constant NGPACE_DE_CNT                    : std_logic_vector(11 downto 0) := X"000";
+  constant NGPACE_DE_LIN                    : std_logic_vector(11 downto 0) := X"000";
+  
 	-- NeoGeo-specific constants
 	
   type from_PROJECT_IO_t is record
