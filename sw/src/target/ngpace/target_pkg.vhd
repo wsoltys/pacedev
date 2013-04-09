@@ -102,6 +102,11 @@ package target_pkg is
     sdpmpx          : std_logic;
     sdrmpx          : std_logic;
 
+    -- tied to SYSTEMB on 1-slot boards
+    -- goes LOW when slot is in use
+    slotcs          : std_logic;
+    slotcs_oe       : std_logic;
+    
   end record;
   
   type from_MVS_CONNECTOR_t is record
@@ -134,10 +139,6 @@ package target_pkg is
     -- ADPCM-B ROM data/address bus
     sdpad_i         : std_logic_vector(7 downto 0);
 
-    -- tied to SYSTEMB on 1-slot boards
-    -- goes LOW when slot is in use
-    slotcs_n        : std_logic;
-    
   end record;
   
   type to_AES_CONNECTOR_t is record

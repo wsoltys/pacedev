@@ -104,7 +104,7 @@ entity target_top is
 
     -- tied to SYSTEMB on 1-slot boards
     -- goes LOW when slot is in use
-    slotcs_n        : in std_logic;
+    slotcs          : out std_logic;
 
     --
     -- AES Connector (extra 14 pins)
@@ -695,7 +695,8 @@ begin
 
     -- tied to SYSTEMB on 1-slot boards
     -- goes LOW when slot is in use
-    target_i.mvs.slotcs_n <= slotcs_n;
+    slotcs <= target_o.mvs.slotcs when target_o.mvs.slotcs_oe = '1' else
+              'Z';
 
     --
     -- AES Connector (extra 14 pins)
