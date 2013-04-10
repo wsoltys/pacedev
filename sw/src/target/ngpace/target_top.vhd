@@ -207,15 +207,16 @@ entity target_top is
     bios_we_n       : out std_logic;
     
     --flash_we_n      : out std_logic;
-    
-    -- enough lines on A for the entire device
-    --sram_a           : out std_logic_vector(19 downto 0);
+
+     -- can't use A(19..15) because we're emulating 2 different devices
+    sram_a          : out std_logic_vector(19 downto 15);
     --sram_d           : inout std_logic_vector(15 downto 0);
-    sram_cs_n        : out std_logic;
-    sram_oe_n        : out std_logic;
-    sram_we_n        : out std_logic;
-    sram_bhe_n       : out std_logic;
-    sram_ble_n       : out std_logic;
+    sram_cs_n       : out std_logic;
+    sram_oe_n       : out std_logic;
+    sram_we_n       : out std_logic;
+    sram_bhe_n      : out std_logic;
+    sram_ble_n      : out std_logic;
+    sram_byte_n     : out std_logic;
     
     --
     --  PS2 (mouse + keyboard)
