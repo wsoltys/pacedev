@@ -177,14 +177,14 @@ entity target_top is
 
     -- SDA(15..0) only, need extra lines to drive high order bits
     sm1_a           : out std_logic_vector(18 downto 16);
-    sm1_d15_8       : inout std_logic_vector(15 downto 8);
+    sm1_d           : inout std_logic_vector(15 downto 8);
     --sm1_d           : inout std_logic_vector(15 downto 0);
     sm1_cs_n        : out std_logic;
     sm1_oe_n        : out std_logic;
     sm1_we_n        : out std_logic;
     
     sfix_a          : out std_logic_vector(18 downto 0);
-    sfix_d15_8      : inout std_logic_vector(15 downto 8);
+    sfix_d          : inout std_logic_vector(15 downto 8);
     --sfix_d          : inout std_logic_vector(15 downto 0);
     sfix_cs_n       : out std_logic;
     sfix_oe_n       : out std_logic;
@@ -192,7 +192,7 @@ entity target_top is
     
     -- P(15..0) only routed to LO
     lo_a            : out std_logic_vector(18 downto 16);
-    lo_d15_8        : inout std_logic_vector(15 downto 8);
+    lo_d            : inout std_logic_vector(15 downto 8);
     --lo_d            : inout std_logic_vector(15 downto 0);
     lo_cs_n         : out std_logic;
     lo_oe_n         : out std_logic;
@@ -390,7 +390,7 @@ begin
   GEN_FLASH : if PACE_HAS_FLASH generate
     alias flash_a18_16  : std_logic_vector(18 downto 16) is sm1_a;
     alias flash_a15_0   : std_logic_vector(15 downto 0) is sda;
-    alias flash_d15_8   : std_logic_vector(15 downto 8) is sm1_d15_8;
+    alias flash_d15_8   : std_logic_vector(15 downto 8) is sm1_d;
     alias flash_d7_0    : std_logic_vector(7 downto 0) is sdd;
     alias flash_cs_n    : std_logic is sm1_cs_n;
     alias flash_oe_n    : std_logic is sm1_oe_n;
@@ -407,14 +407,14 @@ begin
 
     -- disable other memories
     sfix_a <= (others => 'Z');
-    sfix_d15_8 <= (others => 'Z');
+    sfix_d <= (others => 'Z');
     sfix_cs_n <= '1';
     sfix_oe_n <= '1';
     sfix_we_n <= '1';
     
     -- P(15..0) only routed to LO
     lo_a <= (others => 'Z');
-    lo_d15_8 <= (others => 'Z');
+    lo_d <= (others => 'Z');
     --lo_d            : inout std_logic_vector(15 downto 0);
     lo_cs_n <= '1';
     lo_oe_n <= '1';
