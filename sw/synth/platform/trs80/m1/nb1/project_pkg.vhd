@@ -29,7 +29,8 @@ package project_pkg is
   constant PACE_CLK1_MULTIPLY_BY            : natural := 29; 	-- 20*20/23 = 25.217391MHz
 	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
 	constant PACE_VIDEO_V_SCALE       	      : integer := 2;
-  constant PACE_ENABLE_ADV724					      : std_logic := '0';
+  constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';
+  constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '1';
 
   --constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
   --constant PACE_CLK0_DIVIDE_BY              : natural := 6;
@@ -60,6 +61,47 @@ package project_pkg is
   constant NB1_INCLK0_INPUT_FREQUENCY       : natural := 50000;   -- 20MHz
 	constant PACE_CLKIN0											: natural := PACE_CLKIN0_REF;
 
-	constant USE_VIDEO_VBLANK_INTERRUPT       : boolean := false;
+	-- TRS-80-specific constants
+	
+  --constant TRS80_M1_ROM                     : string := "level1.hex";
+  --constant TRS80_M1_ROM                     : string := "model1a.hex";    -- v1.2
+  constant TRS80_M1_ROM                     : string := "model1b.hex";    -- v1.3
+  --constant TRS80_M1_ROM                     : string := "m1v13_bartlett.hex";
+  --constant TRS80_M1_ROM                     : string := "sys80.hex";
+  --constant TRS80_M1_ROM                     : string := "lnw80.hex";
+  --constant TRS80_M1_ROM                     : string := "lnw80_bartlett.hex";
+  
+  -- original Model I, no arrow keys
+  --constant TRS80_M1_CHARSET_ROM             : string := "trs80_m1_tile_0.hex";
+  -- standard Model I, no lowercase
+  --constant TRS80_M1_CHARSET_ROM             : string := "trs80_m1_tile_1.hex";
+  -- replacement Model I with lowercase mod
+  constant TRS80_M1_CHARSET_ROM             : string := "trs80_m1_tile_2.hex";
+  --constant TRS80_M1_CHARSET_ROM             : string := "lnw_chr.hex";
+  
+  constant TRS80_M1_ROM_IN_FLASH            : boolean := false;
+
+  constant TRS80_M1_IS_SYSTEM80             : boolean := (TRS80_M1_ROM = "sys80.hex");
+  constant TRS80_M1_IS_LNW80                : boolean := (TRS80_M1_ROM(1 to 5) = "lnw80");
+  --constant TRS80_M1_LNW80_HIRES_WIDTHAD     : natural := 14;    -- 16KiB
+  constant TRS80_M1_LNW80_HIRES_WIDTHAD     : natural := 12;    -- 4KiB
+  constant TRS80_M1_HAS_PCG80               : boolean := (not TRS80_M1_IS_LNW80) and false;
+  constant TRS80_M1_HAS_80GRAFIX            : boolean := (not TRS80_M1_IS_LNW80) and false;
+  constant TRS80_M1_HAS_LE18                : boolean := (not TRS80_M1_IS_LNW80) and false;
+  constant TRS80_M1_LE18_WIDTHAD            : natural := 14;    -- 16KiB
+  --constant TRS80_M1_LE18_WIDTHAD            : natural := 13;    -- 8KiB (half-screen)
+  constant TRS80_M1_FDC_SUPPORT             : boolean := true;
+  constant TRS80_M1_HAS_MIKROKOLOR          : boolean := (not TRS80_M1_IS_LNW80) and false;
+  constant TRS80_M1_HAS_HDD                 : boolean := false;
+  
+	--constant USE_VIDEO_VBLANK_INTERRUPT       : boolean := false;
+	
+ type from_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
+
+  type to_PROJECT_IO_t is record
+    not_used  : std_logic;
+  end record;
 	
 end;

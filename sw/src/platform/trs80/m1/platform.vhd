@@ -378,7 +378,7 @@ begin
 		generic map
 		(
 			init_file		=> "../../../../../src/platform/trs80/m3/roms/trsvram.hex",
-			numwords_a	=> 1024,
+			--numwords_a	=> 1024,
 			widthad_a		=> 10
 		)
 		port map

@@ -85,10 +85,8 @@ architecture SYN of target_top is
 
   -- signals
   
-	signal clk_i			  : std_logic_vector(0 to 3);
   signal init       	: std_logic := '1';
-  signal reset_i     	: std_logic := '1';
-	signal reset_n			: std_logic := '0';
+  signal clkrst_i       : from_CLKRST_t;
 
   signal buttons_i    : from_BUTTONS_t;
   signal switches_i   : from_SWITCHES_t;
@@ -131,6 +129,8 @@ begin
       pll_inclk <= clk_brd;
     end generate GEN_PLL_INCLK_BRD;
     
+    clkrst_i.clk_ref <= pll_inclk;
+
     GEN_PLL : if PACE_HAS_PLL generate
       pll_inst : entity work.pll
         generic map
@@ -149,22 +149,22 @@ begin
         port map
         (
           inclk0  => pll_inclk,
-          c0      => clk_i(0),
-          c1      => clk_i(1)
+          c0      => clkrst_i.clk(0),
+          c1      => clkrst_i.clk(1)
         );
     end generate GEN_PLL;
     
     GEN_NO_PLL : if not PACE_HAS_PLL generate
 
       -- feed input clocks into PACE core
-      clk_i(0) <= clk_ref;
-      clk_i(1) <= clk_brd;
+      clkrst_i.clk(0) <= clk_ref;
+      clkrst_i.clk(1) <= clk_brd;
         
     end generate GEN_NO_PLL;
 
     -- unused clocks on Nanoboard
-    clk_i(2) <= '0';
-    clk_i(3) <= '0';
+    clkrst_i.clk(2) <= '0';
+    clkrst_i.clk(3) <= '0';
 
   end block BLK_CLOCKING;
   
@@ -183,7 +183,24 @@ begin
 		end if;
 	end process;
 	
-	reset_i <= init or not test_button;
+  clkrst_i.arst <= init or not test_button;
+  clkrst_i.arst_n <= not clkrst_i.arst;
+
+  GEN_RESETS : for i in 0 to 3 generate
+  begin
+  
+    process (clkrst_i.clk(i), clkrst_i.arst)
+      variable rst_r : std_logic_vector(2 downto 0) := (others => '0');
+    begin
+      if clkrst_i.arst = '1' then
+        rst_r := (others => '1');
+      elsif rising_edge(clkrst_i.clk(i)) then
+        rst_r := rst_r(rst_r'left-1 downto 0) & '0';
+      end if;
+      clkrst_i.rst(i) <= rst_r(rst_r'left);
+    end process;
+
+  end generate GEN_RESETS;
 
   -- buttons - active low
   buttons_i <= std_logic_vector(to_unsigned(0, buttons_i'length));
@@ -257,7 +274,7 @@ begin
   BLK_VIDEO : block
   begin
 
-		video_i.clk <= clk_i(1);	-- by convention
+		video_i.clk <= clkrst_i.clk(1);	-- by convention
     video_i.clk_ena <= '1';
     
     vga_r <= video_o.rgb.r(video_o.rgb.r'left downto video_o.rgb.r'left-1);
@@ -290,7 +307,7 @@ begin
       (
         CLK      => audio_o.clk,
         DATA     => audio_o.ldata(audio_o.ldata'left downto audio_o.ldata'left-7),
-        RST      => reset_i,
+        RST      => clkrst_i.arst,
         SPI_CS   => audio_spics,
         SPI_DIN  => audio_dout,
         SPI_DOUT => audio_din,
@@ -342,8 +359,7 @@ begin
     port map
     (
     	-- clocks and resets
-	  	clk_i							=> clk_i,
-      reset_i          	=> reset_i,
+	  	clkrst_i					=> clkrst_i,
 
       -- misc inputs and outputs
       buttons_i         => buttons_i,

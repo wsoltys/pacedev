@@ -26,11 +26,20 @@ package target_pkg is
   constant PACE_HAS_SDRAM     : boolean := false;
 																		
   type from_TARGET_IO_t is record
-    not_used  : std_logic;
+    read_data_n         : std_logic;
+    write_protect_n     : std_logic;
+    index_pulse_n       : std_logic;
+    track_zero_n        : std_logic;
+    rclk                : std_logic;
   end record;
 
   type to_TARGET_IO_t is record
-    not_used  : std_logic;
+    ds_n                : std_logic_vector(3 downto 0);
+    motor_on            : std_logic;
+    step_n              : std_logic;
+    direction_select_n  : std_logic;
+    write_gate_n        : std_logic;
+    write_data_n        : std_logic;
   end record;
 
 end;

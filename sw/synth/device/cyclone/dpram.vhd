@@ -8,7 +8,7 @@ ENTITY dpram IS
   GENERIC
   (
     init_file : string := "";
-    numwords_a  : natural;
+    --numwords_a  : natural;
     widthad_a : natural;
     width_a : natural := 8
   );
@@ -91,8 +91,8 @@ BEGIN
 		init_file => init_file,
 		intended_device_family => "Cyclone",
 		lpm_type => "altsyncram",
-		numwords_a => numwords_a,
-		numwords_b => numwords_a,
+		numwords_a => 2**widthad_a,
+		numwords_b => 2**widthad_a,
 		operation_mode => "BIDIR_DUAL_PORT",
 		outdata_aclr_a => "NONE",
 		outdata_aclr_b => "NONE",
