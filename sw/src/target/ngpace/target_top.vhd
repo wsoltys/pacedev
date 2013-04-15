@@ -128,44 +128,41 @@ entity target_top is
     --
     
     -- VGA output, 1 pix/clk, 30-bit mode
-		vao_clk	  	    : out std_logic;
-		vao_red			    : out std_logic_vector(9 downto 0);
-		vao_green		    : out std_logic_vector(9 downto 0);
-		vao_blue		    : out std_logic_vector(9 downto 0);
-		vao_hsync       : out std_logic;
-		vao_vsync       : out std_logic;
+--		vao_clk	  	    : out std_logic;
+--		vao_red			    : out std_logic_vector(9 downto 0);
+--		vao_green		    : out std_logic_vector(9 downto 0);
+--		vao_blue		    : out std_logic_vector(9 downto 0);
+--		vao_hsync       : out std_logic;
+--		vao_vsync       : out std_logic;
 		vao_blank_n     : out std_logic;
 		vao_sync_n	    : out std_logic;
 		vao_sync_t	    : out std_logic;
 		vao_m1			    : out std_logic;
 		vao_m2			    : out std_logic;
 
-    -- DVI output, 24-bit mode
-		vdo_red			    : out std_logic_vector(7 downto 0);
-		vdo_green		    : out std_logic_vector(7 downto 0);
-		vdo_blue		    : out std_logic_vector(7 downto 0);
-		vdo_idck		    : out std_logic;
-		vdo_hsync		    : out std_logic;
-		vdo_vsync		    : out std_logic;
-		vdo_de			    : out std_logic;
+    -- HDMI output
+		vo_clk		      : out std_logic;
+		vo_vsync		    : out std_logic;
+		vo_hsync		    : out std_logic;
+		vo_de			      : out std_logic;
+		vo_red			    : out std_logic_vector(9 downto 0);
+		vo_green		    : out std_logic_vector(9 downto 0);
+		vo_blue		      : out std_logic_vector(9 downto 0);
     
-		vdo_po1			    : in std_logic;
-		vdo_rstn		    : out std_logic;
-
-    -- I2C to the TFP410 (DVI out transmitter)
-    vdo_scl         : inout std_logic;
-    vdo_sda         : inout std_logic;
-    
-    -- I2C on the DVI output connector
-    -- (possibly don't need this)
-		dvo_scl			    : inout std_logic;
-		dvo_sda			    : inout std_logic;
+		hdmi_scl        : inout std_logic;
+		hdmi_sda        : inout std_logic;
+		hdmi_int        : in std_logic;
 
     --
     --  AUDIO output
     --
     
-    -- TBA (SPI DAC?)
+    -- digital audio
+    ao_spdif        : out std_logic;
+    ao_mclk         : out std_logic;
+    ao_i2s          : out std_logic_vector(3 downto 0);
+    ao_lrclk        : out std_logic;
+    ao_sclk         : out std_logic;
     
     --
     --  External memories
@@ -240,10 +237,10 @@ entity target_top is
     --  SD card
     --
 
-    sd_dat3         : out std_logic;
-    sd_cmd          : out std_logic;
     sd_clk          : out std_logic;
+    sd_cmd          : out std_logic;
     sd_dat          : inout std_logic;
+    sd_dat3         : out std_logic;
     
     --
     --  I/O
@@ -267,25 +264,28 @@ entity target_top is
     
     --
     --  CPU socket (if we have the pins)
-    --  - 68K is 40 pins
+    --  - 6809 is 40 pins
+    --  - 68K is 64 pins
     --  - ARM2 is 84-pin PLCC
     --  - ARM250 is 160 pin
     --
-    cpu_io          : inout std_logic_vector(39 downto 0);
+    cpu_io          : inout std_logic_vector(63 downto 0);
 
     --
-    -- SDRAM (37 pins)
+    -- SDRAM 4/8Mx16 (38 pins)
     --
     
 		sdram_clk       : out std_logic;
-		sdram_data      : inout unsigned(15 downto 0);
-		sdram_addr      : out unsigned(12 downto 0);
+		sdram_cke       : out std_logic;
+		sdram_dq        : inout unsigned(15 downto 0);
+		sdram_ba        : out std_logic_vector(1 downto 0);
+		sdram_a         : out unsigned(11 downto 0);
+		sdram_cs_n      : out std_logic;
 		sdram_we_n      : out std_logic;
 		sdram_ras_n     : out std_logic;
 		sdram_cas_n     : out std_logic;
-		sdram_ba        : out std_logic_vector(1 downto 0);
-		sdram_ldqm      : out std_logic;
-		sdram_udqm      : out std_logic
+		sdram_dqlm      : out std_logic;
+		sdram_dqhm      : out std_logic
     
 --    --
 --    --  DDR (if we have 81 spare pins)
@@ -455,28 +455,37 @@ begin
   end block BLK_UART;
   
   BLK_VIDEO : block
+  
+    alias vao_clk     : std_logic is vo_clk;
+    alias vao_hsync   : std_logic is vo_hsync;
+    alias vao_vsync   : std_logic is vo_vsync;
+    alias vao_red     : std_logic_vector(9 downto 0) is vo_red;
+    alias vao_green   : std_logic_vector(9 downto 0) is vo_green;
+    alias vao_blue    : std_logic_vector(9 downto 0) is vo_blue;
+    
     type state_t is (IDLE, S1, S2, S3);
     signal state : state_t := IDLE;
+    
   begin
   
     BLK_DVO_INIT : block
 
-      signal vdo_scl_i      : std_logic := '0';
-      signal vdo_scl_o      : std_logic := '0';
-      signal vdo_scl_oe_n   : std_logic := '0';
-      signal vdo_sda_i      : std_logic := '0';
-      signal vdo_sda_o      : std_logic := '0';
-      signal vdo_sda_oe_n   : std_logic := '0';
+      signal hdmi_scl_i       : std_logic := '0';
+      signal hdmi_scl_o       : std_logic := '0';
+      signal hdmi_scl_oe_n    : std_logic := '0';
+      signal hdmi_sda_i       : std_logic := '0';
+      signal hdmi_sda_o       : std_logic := '0';
+      signal hdmi_sda_oe_n    : std_logic := '0';
 
-      signal ctl            : std_logic_vector(3 downto 1) := (others => '0');
+      signal ctl              : std_logic_vector(3 downto 1) := (others => '0');
       
     begin
 
-      -- VO I2C (init) drivers
-      vdo_scl_i <= vdo_scl;
-      vdo_scl <= vdo_scl_o when vdo_scl_oe_n = '0' else 'Z';
-      vdo_sda_i <= vdo_sda;
-      vdo_sda <= vdo_sda_o when vdo_sda_oe_n = '0' else 'Z';
+      -- HDMI I2C (init) drivers
+      hdmi_scl_i <= hdmi_scl;
+      hdmi_scl <= hdmi_scl_o when hdmi_scl_oe_n = '0' else 'Z';
+      hdmi_sda_i <= hdmi_sda;
+      hdmi_sda <= hdmi_sda_o when hdmi_sda_oe_n = '0' else 'Z';
     
       --ctl <= not (dbgio(4) & dbgio(6) & dbgio(7));
       ctl <= "000";
@@ -506,12 +515,12 @@ begin
           ctl         => ctl,
           
           -- I2C physical interface
-          scl_i  	    => vdo_scl_i,
-          scl_o  	    => vdo_scl_o,
-          scl_oe_n    => vdo_scl_oe_n,
-          sda_i  	    => vdo_sda_i,
-          sda_o  	    => vdo_sda_o,
-          sda_oe_n    => vdo_sda_oe_n
+          scl_i  	    => hdmi_scl_i,
+          scl_o  	    => hdmi_scl_o,
+          scl_oe_n    => hdmi_scl_oe_n,
+          sda_i  	    => hdmi_sda_i,
+          sda_o  	    => hdmi_sda_o,
+          sda_oe_n    => hdmi_sda_oe_n
         );
 
     end block BLK_DVO_INIT;
@@ -521,13 +530,13 @@ begin
     video_i.reset <= clkrst_i.rst(1);
 
     -- DVI (digital) output
-    vdo_idck <= video_o.clk;
-    vdo_red <= video_o.rgb.r(9 downto 2);
-    vdo_green <= video_o.rgb.g(9 downto 2);
-    vdo_blue <= video_o.rgb.b(9 downto 2);
-    vdo_hsync <= video_o.hsync;
-    vdo_vsync <= video_o.vsync;
-    vdo_de <= not (video_o.hblank or video_o.vblank);
+    vo_clk <= video_o.clk;
+    vo_red <= video_o.rgb.r;
+    vo_green <= video_o.rgb.g;
+    vo_blue <= video_o.rgb.b;
+    vo_hsync <= video_o.hsync;
+    vo_vsync <= video_o.vsync;
+    vo_de <= not (video_o.hblank or video_o.vblank);
 
     -- VGA (analogue) output
 		vao_clk <= video_o.clk;
