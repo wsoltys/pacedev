@@ -78,7 +78,7 @@ package project_pkg is
   constant S5AR2_EMULATED_FLASH_WIDTH_AD    : natural := 10;
   constant S5AR2_EMULATED_FLASH_WIDTH       : natural := 8;
 
-  constant S5AR2_HAS_FLOPPY_IF              : boolean := true;
+  constant S5AR2_HAS_FLOPPY_IF              : boolean := false;
 
 	-- TRS-80-specific constants
 
@@ -107,9 +107,9 @@ package project_pkg is
   constant TRS80_M1_HAS_80GRAFIX            : boolean := (not TRS80_M1_IS_LNW80) and false;
   constant TRS80_M1_HAS_LE18                : boolean := (not TRS80_M1_IS_LNW80) and false;
   constant TRS80_M1_LE18_WIDTHAD            : natural := 14;    -- 16KiB
-  constant TRS80_M1_FDC_SUPPORT             : boolean := true;
+  constant TRS80_M1_FDC_SUPPORT             : boolean := false;
   constant TRS80_M1_HAS_HDD                 : boolean := false;
-  constant TRS80_M1_HAS_MIKROKOLOR          : boolean := (not TRS80_M1_IS_LNW80) and true;
+  constant TRS80_M1_HAS_MIKROKOLOR          : boolean := (not TRS80_M1_IS_LNW80) and false;
 	
 	-- derived - do not edit
 
