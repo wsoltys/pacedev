@@ -562,7 +562,6 @@ set_global_assignment -name VHDL_FILE ../../../../src/platform/neogeo/inputmappe
 set_global_assignment -name VHDL_FILE ../../../../src/pace/Inputs.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/tg68/TG68_fast.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/cpu/tg68/TG68.vhd
-set_global_assignment -name QIP_FILE palram.qip
 set_global_assignment -name VHDL_FILE ../../../../src/component/io/gamecube/gc_tx_bit.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/rtc/upd4990a.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/neogeo/platform.vhd
@@ -587,10 +586,11 @@ set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2C_AV_Confi
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/seg7_lut.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2S_LCM_Config.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/i2s_controller.v
-set_global_assignment -name QIP_FILE neogeo_pll.qip
 set_global_assignment -name VHDL_FILE target_top.vhd
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
-set_global_assignment -name QIP_FILE testram.qip
 set_global_assignment -name SIGNALTAP_FILE cpu.stp
 set_global_assignment -name VHDL_FILE ram32x16.vhd
+set_global_assignment -name QIP_FILE palram.qip
+set_global_assignment -name QIP_FILE neogeo_pll.qip
+set_global_assignment -name QIP_FILE testram.qip
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

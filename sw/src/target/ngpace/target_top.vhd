@@ -277,9 +277,11 @@ entity target_top is
     
 		sdram_clk       : out std_logic;
 		sdram_cke       : out std_logic;
-		sdram_dq        : inout unsigned(15 downto 0);
+		--sdram_dq        : inout unsigned(15 downto 0);
+		sdram_dq        : inout std_logic_vector(15 downto 0);
 		sdram_ba        : out std_logic_vector(1 downto 0);
-		sdram_a         : out unsigned(11 downto 0);
+		--sdram_a         : out unsigned(11 downto 0);
+		sdram_a         : out std_logic_vector(11 downto 0);
 		sdram_cs_n      : out std_logic;
 		sdram_we_n      : out std_logic;
 		sdram_ras_n     : out std_logic;
@@ -362,6 +364,14 @@ begin
     clkrst_i.arst_n <= not clkrst_i.arst;
     
   end block BLK_INIT;
+
+  GEN_CLOCKS : block
+  begin
+    clkrst_i.clk(0) <= clk_ref;
+    clkrst_i.clk(1) <= clk_ref;
+    clkrst_i.clk(2) <= clk_ref;
+    clkrst_i.clk(3) <= clk_ref;
+  end block GEN_CLOCKS;
   
   GEN_RESETS : for i in 0 to 3 generate
 
@@ -490,38 +500,38 @@ begin
       --ctl <= not (dbgio(4) & dbgio(6) & dbgio(7));
       ctl <= "000";
 
-      dvo_sm : entity work.dvo_init_i2c_sm_controller
-        generic map
-        (
-          clock_speed	=> PACE_CLKIN0,
-          dsel        => '0',
-
-          -- DE generation
-          DE_GEN      => NGPACE_DE_GEN,
-          VS_POL      => NGPACE_VS_POL,
-          HS_POL      => NGPACE_HS_POL,
-          DE_DLY      => NGPACE_DE_DLY,
-          DE_TOP      => NGPACE_DE_TOP,
-          DE_CNT      => NGPACE_DE_CNT,
-          DE_LIN      => NGPACE_DE_LIN
-        )
-        port map
-        (
-          clk					=> clk_ref,
-          clk_ena     => '1',
-          reset				=> clkrst_i.arst,
-
-          -- CTL outputs
-          ctl         => ctl,
-          
-          -- I2C physical interface
-          scl_i  	    => hdmi_scl_i,
-          scl_o  	    => hdmi_scl_o,
-          scl_oe_n    => hdmi_scl_oe_n,
-          sda_i  	    => hdmi_sda_i,
-          sda_o  	    => hdmi_sda_o,
-          sda_oe_n    => hdmi_sda_oe_n
-        );
+--      dvo_sm : entity work.dvo_init_i2c_sm_controller
+--        generic map
+--        (
+--          clock_speed	=> PACE_CLKIN0,
+--          dsel        => '0',
+--
+--          -- DE generation
+--          DE_GEN      => NGPACE_DE_GEN,
+--          VS_POL      => NGPACE_VS_POL,
+--          HS_POL      => NGPACE_HS_POL,
+--          DE_DLY      => NGPACE_DE_DLY,
+--          DE_TOP      => NGPACE_DE_TOP,
+--          DE_CNT      => NGPACE_DE_CNT,
+--          DE_LIN      => NGPACE_DE_LIN
+--        )
+--        port map
+--        (
+--          clk					=> clk_ref,
+--          clk_ena     => '1',
+--          reset				=> clkrst_i.arst,
+--
+--          -- CTL outputs
+--          ctl         => ctl,
+--          
+--          -- I2C physical interface
+--          scl_i  	    => hdmi_scl_i,
+--          scl_o  	    => hdmi_scl_o,
+--          scl_oe_n    => hdmi_scl_oe_n,
+--          sda_i  	    => hdmi_sda_i,
+--          sda_o  	    => hdmi_sda_o,
+--          sda_oe_n    => hdmi_sda_oe_n
+--        );
 
     end block BLK_DVO_INIT;
 
@@ -754,7 +764,61 @@ begin
     end generate GEN_CPU_IO;
     
   end generate GEN_TARGET_IO;
-      
+
+  BLK_SDRAM : block
+    signal sdram_clk_s  : std_logic;
+  begin
+
+    sdram_clk_s <= clk_ref;
+    sdram_clk <= sdram_clk_s;
+
+    sdram_inst : yadmc
+      generic map
+      (
+        sdram_depth         => 23,
+        sdram_columndepth   => 8,
+        sdram_adrwires      => 12,
+        sdram_bytes_depth   => 1,
+        cache_depth         => 4,
+        --sdram_bits          : natural := (8 << sdram_bytes_depth);
+        sdram_bits          => 16,
+        --cache_linedepth     : natural := sdram_bytes_depth + 1;
+        cache_linedepth     => 2,
+        --cache_linelength    : natural := (4 << cache_linedepth);
+        cache_linelength    => 16,
+        --cache_tagdepth      : natural := sdram_depth - cache_depth - cache_linedepth - 2
+        cache_tagdepth      => 15
+      )
+      port map
+      (
+        -- Wishbone slave interface
+        sys_clk       => sdram_o.clk,
+        sys_rst       => sdram_o.rst,
+        wb_adr_i      => sdram_o.a,
+        wb_dat_i      => sdram_o.d,
+        wb_dat_o      => sdram_i.d,
+        wb_sel_i      => sdram_o.sel,
+        wb_cyc_i      => sdram_o.cyc,
+        wb_stb_i      => sdram_o.stb,
+        wb_we_i       => sdram_o.we,
+        wb_ack_o      => sdram_i.ack,
+
+        -- SDRAM interface
+        sdram_clk     => sdram_clk_s,
+        sdram_cke     => sdram_cke,
+        sdram_cs_n    => sdram_cs_n,
+        sdram_we_n    => sdram_we_n,
+        sdram_cas_n   => sdram_cas_n,
+        sdram_ras_n   => sdram_ras_n,
+        sdram_dqm(1)  => sdram_dqhm,
+        sdram_dqm(0)  => sdram_dqlm,
+        sdram_adr     => sdram_a,
+        sdram_ba(1)   => sdram_ba(1),
+        sdram_ba(0)   => sdram_ba(0),
+        sdram_dq      => sdram_dq
+      );
+  end block BLK_SDRAM;
+  
 --  pace_inst : entity work.pace
 --    port map
 --    (
