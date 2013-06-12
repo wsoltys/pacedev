@@ -99,6 +99,7 @@ architecture SYN of platform is
 
   -- build options
   constant BUILD_INSYS_SPRITE_RAM   : boolean := false;
+  constant N_CORES                  : integer := 4;
   
 	alias clk_25M           : std_logic is clkrst_i.clk(1);
   alias rst_25M           : std_logic is clkrst_i.rst(1);
@@ -108,16 +109,19 @@ architecture SYN of platform is
   alias rst_27M           : std_logic is clkrst_i.rst(3);
 	signal clk_12M_ena      : std_logic := '0';
 	
+  type a_a is array (natural range <>) of std_logic_vector(31 downto 0);
+  type d_a is array (natural range <>) of std_logic_vector(15 downto 0);
+  
 	signal reset_neogeo_n   : std_logic := '1';
-	signal a_ext            : std_logic_vector(31 downto 0) := (others => '0');
-	alias a                 : std_logic_vector(23 downto 1) is a_ext(23 downto 1);
+	signal a_ext            : a_a(0 to N_CORES-1) := (others => (others => '0'));
+	--alias a                 : a_a(1 to N_CORES) is a_ext(1)(23 downto 1);
   signal d_i              : std_logic_vector(15 downto 0) := (others => '0');
-  signal d_o              : std_logic_vector(15 downto 0) := (others => '0');
+  signal d_o              : d_a(0 to N_CORES-1) := (others => (others => '0'));
   signal dtackn           : std_logic := '0';
-  signal asn              : std_logic := '0';
-  signal udsn             : std_logic := '0';
-  signal ldsn             : std_logic := '0';
-  signal rwn              : std_logic := '0';
+  signal asn              : std_logic_vector(0 to N_CORES-1) := (others => '0');
+  signal udsn             : std_logic_vector(0 to N_CORES-1) := (others => '0');
+  signal ldsn             : std_logic_vector(0 to N_CORES-1) := (others => '0');
+  signal rwn              : std_logic_vector(0 to N_CORES-1) := (others => '0');
   signal ipln             : std_logic_vector(2 downto 0) := (others => '1');
   -- write pulse (100MHz) - "fixed" from TG68 core
   signal wr_p             : std_logic;
@@ -193,6 +197,9 @@ architecture SYN of platform is
   signal delayed_dtackn   : std_logic := '1';
   signal sdram_dtackn     : std_logic := '1';
   
+  signal sys_count        : std_logic_vector(3 downto 0);
+  signal core             : integer range 0 to 63;
+  
 begin
 
   --
@@ -213,42 +220,54 @@ begin
     end if;
   end process;
   
+  process (clk_25M, rst_25M)
+  begin
+    if rst_25M = '1' then
+      sys_count <= (others => '0');
+    elsif rising_edge(clk_25M) then
+      if clk_12M_ena = '1' then
+        sys_count <= sys_count + 1;
+        core <= to_integer(unsigned(sys_count(sys_count'left downto 2)));
+      end if;
+    end if;
+  end process;
+  
   --
   -- address decode logic
   --
   
   -- vectors 128 bytes
-  vector_cs   <= '1' when STD_MATCH(a, X"0000" & "0------") else '0';
+  vector_cs   <= '1' when STD_MATCH(a_ext(core), X"0000" & "0------") else '0';
   -- rombank_1 $000000-$0FFFFF (1MiB)
-  rom1_cs     <= '1' when STD_MATCH(a, X"0" & "-------------------") else '0';
+  rom1_cs     <= '1' when STD_MATCH(a_ext(core), X"0" & "-------------------") else '0';
   -- rambank $100000-$10FFFF (64KiB)
-  ram_cs      <= '1' when STD_MATCH(a, X"10" & "---------------") else '0';
+  ram_cs      <= '1' when STD_MATCH(a_ext(core), X"10" & "---------------") else '0';
   -- hardware registers $300000-$3FFFFF
-  reg_cs      <= '1' when STD_MATCH(a, X"3" & "-------------------") else '0';
-  reg_30_cs   <= reg_cs when a(19 downto 17) = "000" else '0';
-  reg_32_cs   <= reg_cs when a(19 downto 17) = "001" else '0';
-  reg_34_cs   <= reg_cs when a(19 downto 17) = "010" else '0';
-  reg_38_cs   <= reg_cs when a(19 downto 17) = "100" else '0';
-  upd4990a_cs <= reg_38_cs when a(7 downto 4) = X"5" else '0';
-  reg_3A_cs   <= reg_cs when a(19 downto 17) = "101" else '0';
-  reg_3C_cs   <= reg_cs when a(19 downto 17) = "110" else '0';
+  reg_cs      <= '1' when STD_MATCH(a_ext(core), X"3" & "-------------------") else '0';
+  reg_30_cs   <= reg_cs when a_ext(core)(19 downto 17) = "000" else '0';
+  reg_32_cs   <= reg_cs when a_ext(core)(19 downto 17) = "001" else '0';
+  reg_34_cs   <= reg_cs when a_ext(core)(19 downto 17) = "010" else '0';
+  reg_38_cs   <= reg_cs when a_ext(core)(19 downto 17) = "100" else '0';
+  upd4990a_cs <= reg_38_cs when a_ext(core)(7 downto 4) = X"5" else '0';
+  reg_3A_cs   <= reg_cs when a_ext(core)(19 downto 17) = "101" else '0';
+  reg_3C_cs   <= reg_cs when a_ext(core)(19 downto 17) = "110" else '0';
   -- palette ram $400000-$401FFF (8KiB)
-  palram_cs   <= '1' when STD_MATCH(a, X"40" & "000------------") else '0';
+  palram_cs   <= '1' when STD_MATCH(a_ext(core), X"40" & "000------------") else '0';
   -- memcard ram $800000-$800FFF (4KiB)
-  memcard_cs  <= '1' when STD_MATCH(a, X"800" & "-----------") else '0';
+  memcard_cs  <= '1' when STD_MATCH(a_ext(core), X"800" & "-----------") else '0';
   -- system_bios $C00000-$C1FFFF (128kiB)
-  bios_cs     <= '1' when STD_MATCH(a, X"C" & "000----------------") else '0';
+  bios_cs     <= '1' when STD_MATCH(a_ext(core), X"C" & "000----------------") else '0';
   -- battery-backed sram $D00000-$D0FFFF (64kiB)
-  sram_cs     <= '1' when STD_MATCH(a, X"D0" & "---------------") else '0';
+  sram_cs     <= '1' when STD_MATCH(a_ext(core), X"D0" & "---------------") else '0';
   -- bootdata $E00000-$EFFFFF (1MiB)
-  bootdata_cs <= '1' when STD_MATCH(a, X"E" & "-------------------") else '0';
+  bootdata_cs <= '1' when STD_MATCH(a_ext(core), X"E" & "-------------------") else '0';
   -- sprite data $F00000-$F7FFFF (512kiB)
-  sprdat_cs   <= '1' when STD_MATCH(a, X"F" & "0------------------") else '0';
+  sprdat_cs   <= '1' when STD_MATCH(a_ext(core), X"F" & "0------------------") else '0';
   -- boot rom $FF0000-$FFFFFF (64kiB)
-  bootrom_cs  <= '1' when STD_MATCH(a, X"FF" & "---------------") else '0';
+  bootrom_cs  <= '1' when STD_MATCH(a_ext(core), X"FF" & "---------------") else '0';
 
   -- writes
-  palram_wr <= wr_p when (palram_cs = '1' and a(12 downto 9) = "0000") else '0';
+  palram_wr <= wr_p when (palram_cs = '1' and a_ext(core)(12 downto 9) = "0000") else '0';
 
   --
   -- wr_p logic
@@ -261,10 +280,10 @@ begin
       wr_p <= '0'; -- default
       if clk_12M_ena = '1' then
         -- leading edge write cycle
-        if wr_r = '0' and asn = '0' and rwn = '0' then
+        if wr_r = '0' and asn(core) = '0' and rwn(core) = '0' then
           wr_p <= '1';
         end if;
-        wr_r := not (asn or rwn);
+        wr_r := not (asn(core) or rwn(core));
       end if;
     end if;
   end process;
@@ -281,17 +300,17 @@ begin
     elsif rising_edge(clk_25M) and clk_12M_ena = '1' then
       delayed_dtackn <= asn_r(2);
       -- de-assertion immediately clears the pipeline
-      if asn = '1' then
+      if asn(core) = '1' then
         asn_r := (others => '1');
       else
-        asn_r := asn_r(asn_r'left-1 downto 0) & asn;
+        asn_r := asn_r(asn_r'left-1 downto 0) & asn(core);
       end if;
     end if;
   end process;
 
   dtackn <= delayed_dtackn when bootdata_f = '1' and bootdata_cs = '1' else
             sdram_dtackn when (bios_cs or ram_cs or sram_cs or memcard_cs or rom1_cs) = '1' else
-            asn;
+            asn(core);
 
   --
   -- read muxes
@@ -353,7 +372,7 @@ begin
       end if;
     end process;
     
-    flash_o.a <=  bootbank & a(19 downto 1) & ldsn when bootdata_f = '1' else
+    flash_o.a <=  bootbank & a_ext(core)(19 downto 1) & ldsn(core) when bootdata_f = '1' else
                   std_logic_vector(resize(unsigned(tile_a_r),flash_o.a'length));
     flash_o.d <= (others => '0');
     flash_o.cs <= '1';
@@ -373,11 +392,11 @@ begin
     -- on-board SRAM
     -- sprite data
     --
-    sram_o.a <= std_logic_vector(resize(unsigned(a(18 downto 1)), sram_o.a'length));
-    sram_o.d <= std_logic_vector(resize(unsigned(d_o), sram_o.d'length));
-    sram_o.be <= "00" & not udsn & not ldsn;
-    sram_o.cs <=  sprdat_cs;
-    sram_o.oe <= rwn;
+    sram_o.a <= std_logic_vector(resize(unsigned(a_ext(core)(18 downto 1)), sram_o.a'length));
+    sram_o.d <= std_logic_vector(resize(unsigned(d_o(core)), sram_o.d'length));
+    sram_o.be <= "00" & not udsn(core) & not ldsn(core);
+    sram_o.cs <= sprdat_cs;
+    sram_o.oe <= rwn(core);
     sram_o.we <= wr_p;
 
     sprdat_d_o <= sram_i.d(sprdat_d_o'range);
@@ -398,12 +417,12 @@ begin
                               "0010" when ram_cs = '1' else
                               "0011" when sram_cs = '1' else
                               "0100" when memcard_cs = '1' else
-                              '1' & a(19 downto 17) when rom1_cs = '1' else
+                              '1' & a_ext(core)(19 downto 17) when rom1_cs = '1' else
                               (others => '1');
-    sdram_o.a(17 downto 2) <= a(16 downto 1);
-    sdram_o.d <= X"0000" & d_o;
-    sdram_o.sel <= "00" & not (udsn & ldsn);
-    sdram_o.we <= not rwn;
+    sdram_o.a(17 downto 2) <= a_ext(core)(16 downto 1);
+    sdram_o.d <= X"0000" & d_o(core);
+    sdram_o.sel <= "00" & not (udsn(core) & ldsn(core));
+    sdram_o.we <= not rwn(core);
 
     process (clk_25M, rst_25M)
       variable cyc_r : std_logic := '0';
@@ -413,7 +432,7 @@ begin
       elsif rising_edge(clk_25M) then
         -- assert WB cyc,stb on rising edge of 68k cycle
         if cyc_r = '0' and ((bios_cs or ram_cs or sram_cs or memcard_cs or rom1_cs) = '1') and 
-            asn = '0' then
+            asn(core) = '0' then
           sdram_o.cyc <= '1';
           sdram_o.stb <= '1';
         -- de-assert WB cyc,stb immediately on ACK from sdram controller
@@ -427,7 +446,7 @@ begin
         elsif clk_12M_ena = '1' then
           sdram_dtackn <= '1';
         end if;
-        cyc_r := not asn;
+        cyc_r := not asn(core);
       end if;
     end process;
     
@@ -476,11 +495,11 @@ begin
         if wr_p = '1' then
 					-- write a '1' to reset the boot flags
 					-- - boot flags can never be set (again)
-          magic_r(1 downto 0) <= magic_r(1 downto 0) and not d_o(1 downto 0);
+          magic_r(1 downto 0) <= magic_r(1 downto 0) and not d_o(core)(1 downto 0);
           -- - other bits can be set or reset as required
-          magic_r(magic_r'left downto 2) <= d_o(d_o'left downto 2);
+          magic_r(magic_r'left downto 2) <= d_o(core)(d_o(core)'left downto 2);
           -- handle write to reset bit
-          if d_o(0) = '1' then
+          if d_o(core)(0) = '1' then
             -- drive neogeo reset
             ng_reset_cnt := ng_reset_cnt'high;
           end if;
@@ -504,11 +523,11 @@ begin
     elsif rising_edge(clk_25M) then
       if reg_3A_cs = '1' then
         if wr_p = '1' then
-          case a(3 downto 1) is
+          case a_ext(core)(3 downto 1) is
             when "001" => -- 00x3
-              reg_swp <= a(4);
+              reg_swp <= a_ext(core)(4);
             when "101" => -- 00xA
-              reg_fix <= a(4);
+              reg_fix <= a_ext(core)(4);
             when others =>
               null;
           end case;
@@ -528,9 +547,9 @@ begin
       vblank_r := '0';
     elsif rising_edge(clk_25M) then
       if wr_p = '1' then
-        if reg_3C_cs = '1' and a(7 downto 1) = "0000110" then
+        if reg_3C_cs = '1' and a_ext(core)(7 downto 1) = "0000110" then
           -- IRQACK - write a '1' to ACK
-          irq_r := irq_r and not (d_o(2) & d_o(1) & d_o(0));
+          irq_r := irq_r and not (d_o(core)(2) & d_o(core)(1) & d_o(core)(0));
         end if;
       end if;
       -- latch interrupt on rising edge vblank
@@ -555,23 +574,30 @@ begin
   -- COMPONENT INSTANTIATION
   --
 
-  tg68_inst : entity work.TG68
-    port map
-    (        
-      clk           => clk_25M,
-      reset         => reset_neogeo_n, -- active low
-      clkena_in     => clk_12M_ena,
-      data_in       => d_i,
-      IPL           => ipln,
-      dtack         => dtackn,
-      addr          => a_ext,
-      data_out      => d_o,
-      as            => asn,
-      uds           => udsn,
-      lds           => ldsn,
-      rw            => rwn
-    );
-
+  GEN_CORES : for i in 0 to N_CORES-1 generate
+    signal ena  : std_logic_vector(0 to N_CORES-1);
+  begin
+  
+    ena(i) <= '1' when core = i else '0';
+    
+    tg68_inst : entity work.TG68
+      port map
+      (        
+        clk           => clk_25M,
+        reset         => reset_neogeo_n, -- active low
+        clkena_in     => ena(i),
+        data_in       => d_i,
+        IPL           => ipln,
+        dtack         => dtackn,
+        addr          => a_ext(i),
+        data_out      => d_o(i),
+        as            => asn(i),
+        uds           => udsn(i),
+        lds           => ldsn(i),
+        rw            => rwn(i)
+      );
+  end generate GEN_CORES;
+  
   BLK_VRAM : block
 
     signal vram_a         : std_logic_vector(15 downto 0) := (others => '0');
@@ -608,28 +634,28 @@ begin
           --if rwn_r = '1' and rwn = '0' then
           if wr_p = '1' then
             -- leading edge write
-            case a(7 downto 1) is
+            case a_ext(core)(7 downto 1) is
               when "0000000" =>
                 -- write vram address register
-                vram_a <= d_o;
+                vram_a <= d_o(core);
               when "0000001" =>
                 -- write vram data register
                 -- $7000-$74FF fixed tile layer
                 --if vram_a(15 downto 11) = "01110" and
                 --    (vram_a(10) = '0' or vram_a(10 downto 8) = "100") then
-                  vram_d_i <= d_o;
+                  vram_d_i <= d_o(core);
                   vram_wr <= '1';
                 --end if;
               when "0000010" =>
                 -- write vram inc register
-                vram_mod := d_o;
+                vram_mod := d_o(core);
               when others =>
                 null;
             end case;
           --elsif rwn_r = '0' and rwn = '1' then
           elsif rwn_r = '1' and wr_p = '0' then
             -- trailing edge write
-            if a(7 downto 1) = "0000001" then
+            if a_ext(core)(7 downto 1) = "0000001" then
               -- bit 15 is not used for auto-inc/dec
               vram_a(14 downto 0) <= vram_a(14 downto 0) + vram_mod(14 downto 0);
             end if;
@@ -964,10 +990,10 @@ begin
       clk_ena           => '1',
       reset             => rst_25M,
       
-      data_in           => d_o(0),
-      clk               => d_o(1),
+      data_in           => d_o(core)(0),
+      clk               => d_o(core)(1),
       c                 => "111",
-      stb               => d_o(2),
+      stb               => d_o(core)(2),
       cs                => upd4990a_cs,
       out_enabl         => '1',
       
@@ -979,8 +1005,8 @@ begin
   process (clk_25M)
   begin
     if rising_edge(clk_25M) then
-      if wr_p = '1' and a(23 downto 20) = X"2" then
-        leds_o(15 downto 0) <= d_o;
+      if wr_p = '1' and a_ext(core)(23 downto 20) = X"2" then
+        leds_o(15 downto 0) <= d_o(core);
       end if;
     end if;
   end process;
