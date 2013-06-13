@@ -95,9 +95,10 @@ set_global_assignment -name VERILOG_FILE ../../../../src/component/memory/yadmc/
 set_global_assignment -name VERILOG_FILE ../../../../src/component/memory/yadmc/rtl/yadmc_dpram.v
 set_global_assignment -name VERILOG_FILE ../../../../src/component/memory/yadmc/rtl/yadmc.v
 set_global_assignment -name SIP_FILE ngpace_pll.sip
-set_global_assignment -name QIP_FILE ngpace_pll.qip
 set_global_assignment -name VHDL_FILE ../../../../src/target/ngpace/target_top.vhd
 set_global_assignment -name SEARCH_PATH "d:\\markm\\pace\\pacedev.net\\sw\\synth\\test\\ngpace\\i_max"
 set_global_assignment -name SDC_FILE i_max.sdc
+set_global_assignment -name QIP_FILE ngpace_pll.qip
+set_global_assignment -name QIP_FILE ngpace_pll/ngpace_pll_0002.qip
 set_global_assignment -name QIP_FILE onchip_ram.qip
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

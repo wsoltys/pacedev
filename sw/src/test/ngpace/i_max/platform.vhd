@@ -100,7 +100,7 @@ architecture SYN of platform is
   -- build options
   constant BUILD_INSYS_SPRITE_RAM   : boolean := false;
   constant N_CORES                  : integer := 32;
-  constant N_RAMS                   : integer := 2;
+  constant N_RAMS                   : integer := 4;
   
 	alias clk_25M           : std_logic is clkrst_i.clk(1);
   alias rst_25M           : std_logic is clkrst_i.rst(1);
@@ -193,8 +193,12 @@ begin
   --
 
   dtackn <= sdram_dtackn;
-  d_i <=  ram_d_o(0) when a_ext(core)(18 downto 17) = "00" else
-          ram_d_o(1) when a_ext(core)(18 downto 17) = "01" else
+  d_i <=  ram_d_o(0) when a_ext(core)(19 downto 17) = "000" else
+          ram_d_o(1) when a_ext(core)(19 downto 17) = "001" else
+          ram_d_o(2) when a_ext(core)(19 downto 17) = "010" else
+          ram_d_o(3) when a_ext(core)(19 downto 17) = "011" else
+--          ram_d_o(4) when a_ext(core)(19 downto 17) = "100" else
+--          ram_d_o(5) when a_ext(core)(19 downto 17) = "101" else
           sdram_i.d(d_i'range);
 
   BLK_SDRAM : block
@@ -314,7 +318,7 @@ begin
     signal we : std_logic_vector(0 to N_RAMS-1);
   begin
     we(i) <= not rwn(core) 
-              when i = to_integer(unsigned(a_ext(core)(18 downto 17)))
+              when i = to_integer(unsigned(a_ext(core)(19 downto 17)))
               else '0';
     ram_inst : onchip_ram
       port map
