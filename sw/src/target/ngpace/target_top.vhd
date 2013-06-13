@@ -366,11 +366,30 @@ begin
   end block BLK_INIT;
 
   GEN_CLOCKS : block
+    component ngpace_pll is
+      port (
+        refclk   : in  std_logic := 'X'; -- clk
+        rst      : in  std_logic := 'X'; -- reset
+        outclk_0 : out std_logic;        -- clk
+        outclk_1 : out std_logic;        -- clk
+        locked   : out std_logic         -- export
+      );
+    end component ngpace_pll;
   begin
-    clkrst_i.clk(0) <= clk_ref;
-    clkrst_i.clk(1) <= clk_ref;
-    clkrst_i.clk(2) <= clk_ref;
-    clkrst_i.clk(3) <= clk_ref;
+
+    pll_inst : ngpace_pll
+      port map
+      (
+        refclk    => clk_ref,
+        rst       => '0',
+        outclk_0  => clkrst_i.clk(0),
+        outclk_1  => clkrst_i.clk(1),
+        locked    => open
+      );
+
+    clkrst_i.clk(2) <= clkrst_i.clk(0);
+    clkrst_i.clk(3) <= clkrst_i.clk(1);
+    
   end block GEN_CLOCKS;
   
   GEN_RESETS : for i in 0 to 3 generate

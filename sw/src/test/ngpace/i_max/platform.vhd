@@ -100,6 +100,7 @@ architecture SYN of platform is
   -- build options
   constant BUILD_INSYS_SPRITE_RAM   : boolean := false;
   constant N_CORES                  : integer := 32;
+  constant N_RAMS                   : integer := 2;
   
 	alias clk_25M           : std_logic is clkrst_i.clk(1);
   alias rst_25M           : std_logic is clkrst_i.rst(1);
@@ -133,6 +134,8 @@ architecture SYN of platform is
   signal sys_count        : std_logic_vector(7 downto 0);
   signal core             : integer range 0 to 63;
   signal ena              : std_logic_vector(0 to N_CORES-1);
+  
+  signal ram_d_o          : d_a(0 to N_RAMS-1);
   
 begin
 
@@ -190,7 +193,9 @@ begin
   --
 
   dtackn <= sdram_dtackn;
-  d_i <=  sdram_i.d(d_i'range);
+  d_i <=  ram_d_o(0) when a_ext(core)(18 downto 17) = "00" else
+          ram_d_o(1) when a_ext(core)(18 downto 17) = "01" else
+          sdram_i.d(d_i'range);
 
   BLK_SDRAM : block
   begin
@@ -294,6 +299,33 @@ begin
         rw            => rwn(i)
       );
   end generate GEN_CORES;
+  
+  GEN_RAM : for i in 0 to N_RAMS-1 generate
+    component onchip_ram
+      PORT
+      (
+        clock		  : IN STD_LOGIC  := '1';
+        address	  : IN STD_LOGIC_VECTOR (15 DOWNTO 0);
+        data		  : IN STD_LOGIC_VECTOR (15 DOWNTO 0);
+        wren		  : IN STD_LOGIC ;
+        q		      : OUT STD_LOGIC_VECTOR (15 DOWNTO 0)
+      );
+    end component;
+    signal we : std_logic_vector(0 to N_RAMS-1);
+  begin
+    we(i) <= not rwn(core) 
+              when i = to_integer(unsigned(a_ext(core)(18 downto 17)))
+              else '0';
+    ram_inst : onchip_ram
+      port map
+      (
+        clock		  => clk_25M,
+        address	  => a_ext(core)(16 downto 1),
+        data		  => d_o(core),
+        wren		  => we(i),
+        q		      => ram_d_o(i)
+      );
+  end generate GEN_RAM;
   
   --
   -- unused outputs
