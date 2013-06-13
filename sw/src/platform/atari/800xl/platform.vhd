@@ -88,25 +88,21 @@ end entity platform;
 architecture SYN of platform is
 
 	alias clk_sys					: std_logic is clkrst_i.clk(0);
+  alias rst_sys         : std_logic is clkrst_i.rst(0);
 	alias clk_video       : std_logic is clkrst_i.clk(1);
 	
   -- uP signals  
-  signal clk_2M_en			: std_logic;
-  signal cpu_a          : std_logic_vector(15 downto 0);
+  signal cpu_clk_en     : std_logic;
+	signal cpu_a_ext			: std_logic_vector(23 downto 0);
+    alias cpu_a					: std_logic_vector(15 downto 0) is cpu_a_ext(15 downto 0);
   signal cpu_d_i        : std_logic_vector(7 downto 0);
   signal cpu_d_o        : std_logic_vector(7 downto 0);
-  signal cpu_mem_rd     : std_logic;
-  signal cpu_mem_wr     : std_logic;
-  signal cpu_io_rd      : std_logic;
-  signal cpu_io_wr      : std_logic;
-  signal cpu_irq        : std_logic;
-  signal cpu_intvec     : std_logic_vector(7 downto 0);
-  signal cpu_intack     : std_logic;
+  signal cpu_rw_n       : std_logic;
+  signal cpu_irq_n      : std_logic;
+  signal cpu_nmi_n      : std_logic;
 
   -- ANTIC signals
-  signal antic_a_i      : std_logic_vector(15 downto 0);
   signal antic_a_o      : std_logic_vector(15 downto 0);
-  signal antic_d_i      : std_logic_vector(7 downto 0);
   signal antic_d_o      : std_logic_vector(7 downto 0);
   signal antic_r_wn     : std_logic;
   signal antic_halt     : std_logic;
@@ -156,19 +152,50 @@ begin
 
 	cpu_reset <= clkrst_i.arst or game_reset;
 
-	-- generate CPU clock (2MHz from 20MHz)
-	clk_en_inst : entity work.clk_div
-		generic map
-		(
-			DIVISOR		=> integer(INVADERS_CPU_CLK_ENA_DIVIDE_BY)
-		)
-		port map
-		(
-			clk			  => clk_sys,
-			reset			=> clkrst_i.arst,
-			clk_en		=> clk_2M_en
-		);
-
+  -- generate 2MHz CPU clock from 20MHz source
+  process (clk_sys, rst_sys)
+    variable count : integer range 0 to 9;
+  begin
+    if rst_sys = '1' then
+      count := 0;
+      cpu_clk_en <= '0';
+    elsif rising_edge(clk_sys) then
+      cpu_clk_en <= '0';  -- default
+      if count = count'high then
+        count := 0;
+        cpu_clk_en <= '1';
+      else
+        count := count + 1;
+      end if;
+    end if;
+  end process;
+  
+  cpu_inst : entity work.T65
+    port map
+    (
+      Mode    		=> "00",	-- 6502
+      Res_n   		=> not cpu_reset,
+      Enable  		=> cpu_clk_en,
+      Clk     		=> clk_sys,
+      Rdy     		=> '1',
+      Abort_n 		=> '1',
+      IRQ_n   		=> cpu_irq_n,
+      NMI_n   		=> cpu_nmi_n,
+      SO_n    		=> '1',
+      R_W_n   		=> cpu_rw_n,
+      Sync    		=> open,
+      EF      		=> open,
+      MF      		=> open,
+      XF      		=> open,
+      ML_n    		=> open,
+      VP_n    		=> open,
+      VDA     		=> open,
+      VPA     		=> open,
+      A       		=> cpu_a_ext,
+      DI      		=> cpu_d_i,
+      DO      		=> cpu_d_o
+    );
+    
   antic_inst : antic
     generic map
     (
@@ -178,30 +205,32 @@ begin
     (
       clk     => clk_sys,
       clk_en  => '1',
+      rst     => clkrst_i.rst(0),
       
       fphi0_i => clk_sys,
       phi0_o  => open,
       phi2_i  => clk_sys,
-      rst     => clkrst_i.rst(0),
+      res_n   => '1',
 
       -- CPU interface
-      a_i     => antic_a_i,
+      a_i     => cpu_a,
       a_o     => antic_a_o,
-      d_i     => antic_d_i,
+      d_i     => cpu_d_o,
       d_o     => antic_d_o,
-      r_wn    => antic_r_wn,
-      halt    => antic_halt,
-      rnmi    => antic_nmi_i,
-      nmi     => antic_nmi_o,
+      r_wn_i  => cpu_rw_n,
+      r_wn_o  => antic_r_wn,
+      halt_n  => antic_halt,
+      rnmi_n  => antic_nmi_i,
+      nmi_n   => antic_nmi_o,
       rdy     => antic_rdy,
       
       -- CTIA/GTIA interface
       an      => antic_an,
 
       -- light pen input
-      lp      => '0',
+      lp_n    => '0',
       -- unused (DRAM refresh)
-      ref     => open
+      ref_n   => open
     );
 		
   -- unused outputs
