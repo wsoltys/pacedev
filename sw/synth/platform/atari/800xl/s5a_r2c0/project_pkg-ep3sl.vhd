@@ -81,13 +81,14 @@ package project_pkg is
   
   constant S5AR2_DOUBLE_VDO_IDCK            : boolean := false;
   
-  constant S5AR2_EMULATE_SRAM               : boolean := false;
+  -- 64KB of RAM
+  constant S5AR2_EMULATE_SRAM               : boolean := true;
   constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 16;
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
 
-  constant S5AR2_EMULATED_FLASH_INIT_FILE   : string := "";
-  constant S5AR2_EMULATE_FLASH              : boolean := false;
-  constant S5AR2_EMULATED_FLASH_WIDTH_AD    : natural := 10;
+  constant S5AR2_EMULATED_FLASH_INIT_FILE   : string := "co61598b.rom.hex";
+  constant S5AR2_EMULATE_FLASH              : boolean := true;
+  constant S5AR2_EMULATED_FLASH_WIDTH_AD    : natural := 14;
   constant S5AR2_EMULATED_FLASH_WIDTH       : natural := 8;
 
   constant S5AR2_HAS_FLOPPY_IF              : boolean := false;
