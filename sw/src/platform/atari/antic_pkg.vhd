@@ -12,6 +12,24 @@ package antic_pkg is
 		CO21698		  -- PAL/SECAM (XL,XE)
 	);
 
+  type antic_dbg_t is record
+    dmactl    : unsigned(7 downto 0);
+    chactl    : unsigned(7 downto 0);
+    dlistl    : unsigned(7 downto 0);
+    dlisth    : unsigned(7 downto 0);
+    hscrol    : unsigned(7 downto 0);
+    vscrol    : unsigned(7 downto 0);
+    pmbase    : unsigned(7 downto 0);
+    chbase    : unsigned(7 downto 0);
+    wsync     : unsigned(7 downto 0);
+    nmien     : unsigned(7 downto 0);
+    nmires    : unsigned(7 downto 0);
+    vcount    : unsigned(7 downto 0);
+    penh      : unsigned(7 downto 0);
+    penv      : unsigned(7 downto 0);
+    nmist     : unsigned(7 downto 0);
+  end record antic_dbg_t;
+  
   component antic is
     generic
     (
@@ -46,8 +64,30 @@ package antic_pkg is
       -- light pen input
       lp_n    : in std_logic;
       -- unused (DRAM refresh)
-      ref_n   : out std_logic
+      ref_n   : out std_logic;
+      
+      -- debug
+      dbg     : out antic_dbg_t
     );
   end component antic;
 	
+  component antic_hexy is
+    generic 
+    (
+      yOffset : integer := 100;
+      xOffset : integer := 100
+    );
+    port 
+    (
+      clk       : in std_logic;
+      clk_ena   : in std_logic;
+      vSync     : in std_logic;
+      hSync     : in std_logic;
+      video     : out std_logic;
+      dim       : out std_logic;
+
+      dbg       : in antic_dbg_t
+    );
+  end component antic_hexy;
+
 end package antic_pkg;
