@@ -52,7 +52,7 @@ end entity antic;
 architecture SYN of antic is
 
   -- WRITE-ONLY registers
-  signal dmactl   : std_logic_vector(5 downto 0);
+  signal dmactl_r : std_logic_vector(5 downto 0);
     -- b5=1 enable instruction fetch DMA
     -- b4=1 1 line P/M resolution
     -- b4=0 2 line P/M resolution
@@ -62,27 +62,27 @@ architecture SYN of antic is
     --         01 narrow playfield DMA (128 colour clocks)
     --         10 standard playfield DMA (160 colour clocks)
     --         11 wide playfield DMA (192 colour clocks)
-  signal chactl   : std_logic_vector(2 downto 0);
+  signal chactl_r : std_logic_vector(2 downto 0);
     -- b2 character vertical reflect
     -- b1 character video invert
     -- b0 character blank (blink)
-  signal dlistl   : std_logic_vector(7 downto 0);
-  signal dlisth   : std_logic_vector(7 downto 0);
-  signal hscrol   : std_logic_vector(3 downto 0);
-  signal vscrol   : std_logic_vector(3 downto 0);
-  signal pmbase   : std_logic_vector(7 downto 3);
-  signal chbase   : std_logic_vector(7 downto 1);
-  signal wsync    : std_logic_vector(0 downto 0);
-  signal nmien    : std_logic_vector(7 downto 6);
+  signal dlistl_r : std_logic_vector(7 downto 0);
+  signal dlisth_r : std_logic_vector(7 downto 0);
+  signal hscrol_r : std_logic_vector(3 downto 0);
+  signal vscrol_r : std_logic_vector(3 downto 0);
+  signal pmbase_r : std_logic_vector(7 downto 3);
+  signal chbase_r : std_logic_vector(7 downto 1);
+  signal wsync_r  : std_logic_vector(0 downto 0);
+  signal nmien_r  : std_logic_vector(7 downto 6);
     -- b7 display list NMI
     -- b6 vertical blank NMI
-  signal nmires   : std_logic_vector(0 downto 0);
+  signal nmires_r : std_logic_vector(0 downto 0);
 
   -- READ-ONLY registers
-  signal vcount   : std_logic_vector(7 downto 0);
-  signal penh     : std_logic_vector(7 downto 0);
-  signal penv     : std_logic_vector(7 downto 0);
-  signal nmist    : std_logic_vector(7 downto 5);
+  signal vcount_r : std_logic_vector(7 downto 0);
+  signal penh_r   : std_logic_vector(7 downto 0);
+  signal penv_r   : std_logic_vector(7 downto 0);
+  signal nmist_r  : std_logic_vector(7 downto 5);
     -- b7 display list NMI
     -- b6 vertical blank NMI
     -- b5 reset button NMI
@@ -93,17 +93,17 @@ begin
   process (clk, rst)
   begin
     if rst = '0' then
-      dmactl <= (others => '0');
-      chactl <= (others => '0');
-      dlistl <= (others => '0');
-      dlisth <= (others => '0');
-      hscrol <= (others => '0');
-      vscrol <= (others => '0');
-      pmbase <= (others => '0');
-      chbase <= (others => '0');
-      wsync <= "0";
-      nmien <= (others => '0');
-      nmires <= "0";
+      dmactl_r <= (others => '0');
+      chactl_r <= (others => '0');
+      dlistl_r <= (others => '0');
+      dlisth_r <= (others => '0');
+      hscrol_r <= (others => '0');
+      vscrol_r <= (others => '0');
+      pmbase_r <= (others => '0');
+      chbase_r <= (others => '0');
+      wsync_r <= "0";
+      nmien_r <= (others => '0');
+      nmires_r <= "0";
     elsif rising_edge(clk) then
       if clk_en = '1' then
         -- (should also sample res_n here)
@@ -112,29 +112,29 @@ begin
             -- register writes
             case a_i(3 downto 0) is
               when X"0" =>
-                dmactl <= d_i(dmactl'range);
+                dmactl_r <= d_i(dmactl_r'range);
               when X"1" =>
-                chactl <= d_i(chactl'range);
+                chactl_r <= d_i(chactl_r'range);
               when X"2" =>
-                dlistl <= d_i;
+                dlistl_r <= d_i;
               when X"3" =>
-                dlisth <= d_i;
+                dlisth_r <= d_i;
               when X"4" =>
-                hscrol <= d_i(hscrol'range);
+                hscrol_r <= d_i(hscrol_r'range);
               when X"5" =>
-                vscrol <= d_i(vscrol'range);
+                vscrol_r <= d_i(vscrol_r'range);
               when X"7" =>
-                pmbase <= d_i(pmbase'range);
+                pmbase_r <= d_i(pmbase_r'range);
               when X"9" =>
-                chbase <= d_i(chbase'range);
+                chbase_r <= d_i(chbase_r'range);
               when X"A" =>
                 -- probably don't need a register
-                wsync <= "1";
+                wsync_r <= "1";
               when X"E" =>
-                nmien <= d_i(nmien'range);
+                nmien_r <= d_i(nmien_r'range);
               when X"F" =>
                 -- probably don't need a register
-                nmires <= d_i(nmires'range);
+                nmires_r <= d_i(nmires_r'range);
               when others =>
                 null;
             end case;
@@ -142,13 +142,13 @@ begin
             -- register reads
             case a_i(3 downto 0) is
               when X"B" =>
-                d_o <= vcount;
+                d_o <= vcount_r;
               when X"C" =>
-                d_o <= penh;
+                d_o <= penh_r;
               when X"D" =>
-                d_o <= penv;
+                d_o <= penv_r;
               when X"F" =>
-                d_o <= nmist & "00000";
+                d_o <= nmist_r & "00000";
               when others =>
                 null;
             end case;
@@ -165,21 +165,21 @@ begin
   
   BLK_DEBUG : block
   begin
-    dbg.dmactl <= RESIZE(unsigned(dmactl),8);
-    dbg.chactl <= RESIZE(unsigned(chactl),8);
-    dbg.dlistl <= RESIZE(unsigned(dlistl),8);
-    dbg.dlisth <= RESIZE(unsigned(dlisth),8);
-    dbg.hscrol <= RESIZE(unsigned(hscrol),8);
-    dbg.vscrol <= RESIZE(unsigned(vscrol),8);
-    dbg.pmbase <= RESIZE(unsigned(pmbase),8);
-    dbg.chbase <= RESIZE(unsigned(chbase),8);
-    dbg.wsync <= RESIZE(unsigned(wsync),8);
-    dbg.nmien <= RESIZE(unsigned(nmien),8);
-    dbg.nmires <= RESIZE(unsigned(nmires),8);
-    dbg.vcount <= RESIZE(unsigned(vcount),8);
-    dbg.penh <= RESIZE(unsigned(penh),8);
-    dbg.penv <= RESIZE(unsigned(penv),8);
-    dbg.nmist <= RESIZE(unsigned(nmist),8);
+    dbg.dmactl <= RESIZE(unsigned(dmactl_r),8);
+    dbg.chactl <= RESIZE(unsigned(chactl_r),8);
+    dbg.dlistl <= RESIZE(unsigned(dlistl_r),8);
+    dbg.dlisth <= RESIZE(unsigned(dlisth_r),8);
+    dbg.hscrol <= RESIZE(unsigned(hscrol_r),8);
+    dbg.vscrol <= RESIZE(unsigned(vscrol_r),8);
+    dbg.pmbase <= RESIZE(unsigned(pmbase_r),8);
+    dbg.chbase <= RESIZE(unsigned(chbase_r),8);
+    dbg.wsync <= RESIZE(unsigned(wsync_r),8);
+    dbg.nmien <= RESIZE(unsigned(nmien_r),8);
+    dbg.nmires <= RESIZE(unsigned(nmires_r),8);
+    dbg.vcount <= RESIZE(unsigned(vcount_r),8);
+    dbg.penh <= RESIZE(unsigned(penh_r),8);
+    dbg.penv <= RESIZE(unsigned(penv_r),8);
+    dbg.nmist <= RESIZE(unsigned(nmist_r),8);
   end block BLK_DEBUG;
   
 end architecture SYN;

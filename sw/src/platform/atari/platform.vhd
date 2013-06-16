@@ -15,6 +15,7 @@ use work.target_pkg.all;
 use work.project_pkg.all;
 use work.platform_pkg.all;
 use work.platform_variant_pkg.all;
+use work.atari_gtia_pkg.all;
 use work.antic_pkg.all;
 
 entity platform is
@@ -100,6 +101,18 @@ architecture SYN of platform is
   signal basic_cs       : std_logic;
   signal basic_d_o      : std_logic_vector(7 downto 0);
   
+  -- GTIA SIGNALS
+  signal gtia_cs        : std_logic;
+  signal gtia_d_o       : std_logic_vector(7 downto 0);
+
+  -- POKEY SIGNALS
+  signal pokey_cs       : std_logic;
+  signal pokey_d_o      : std_logic_vector(7 downto 0);
+
+  -- PIA SIGNALS
+  signal pia_cs         : std_logic;
+  signal pia_d_o        : std_logic_vector(7 downto 0);
+
   -- ANTIC signals
   signal antic_cs       : std_logic;
   signal antic_a_o      : std_logic_vector(15 downto 0);
@@ -147,19 +160,28 @@ begin
   end process;
   
   -- chip selects
-  -- self-test ROM $5000-$57FF
+  -- SELF-TEST ROM $5000-$57FF
   self_cs <=    '1' when STD_MATCH(cpu_a, "01010-----------") else
                 '0';
   -- CARTRIDGE/BASIC $A000-$BFFF
   basic_cs <=   '1' when STD_MATCH(cpu_a, "101-------------") else 
                 '0';
-  -- ANTIC $D400-$D40F (mirrored $D4FF)
-  antic_cs <=   '1' when STD_MATCH(cpu_a, X"D4--") else 
-                '0';
   -- KERNEL ROM $C000-$CFFF & $D800-$FFFF (16KB)
   kernel_cs <=  '1' when STD_MATCH(cpu_a, X"C---") else
                 '1' when STD_MATCH(cpu_a, "11011-----------") else 
                 '1' when STD_MATCH(cpu_a, "111-------------") else 
+                '0';
+  -- GTIA $D000-D0FF
+  gtia_cs <=    '1' when STD_MATCH(cpu_a, X"D0--") else
+                '0';
+  -- POKEY $D200-D2FF
+  pokey_cs <=   '1' when STD_MATCH(cpu_a, X"D2--") else
+                '0';
+  -- PIA $D300-D3FF
+  pia_cs <=     '1' when STD_MATCH(cpu_a, X"D3--") else
+                '0';
+  -- ANTIC $D400-$D40F (mirrored $D4FF)
+  antic_cs <=   '1' when STD_MATCH(cpu_a, X"D4--") else 
                 '0';
   -- RAM (everything else)
   ram_cs <= '1';
@@ -172,6 +194,9 @@ begin
   cpu_d_i <=  self_d_o when self_cs = '1' else
               basic_d_o when basic_cs = '1' else
               kernel_d_o when kernel_cs = '1' else
+              gtia_d_o when gtia_cs = '1' else
+              pokey_d_o when pokey_cs = '1' else
+              pia_d_o when pia_cs = '1' else
               antic_d_o when antic_cs = '1' else
               -- this goes last
               ram_d_o when ram_cs = '1' else
@@ -246,6 +271,100 @@ begin
 			address		=> cpu_a(13 downto 0),
 			q					=> kernel_d_o
 		);
+
+  gtia_inst : atari_gtia
+    generic map
+    (
+      VARIANT	  => CO14805
+    )
+    port map
+    (
+      clk       => clk_sys,
+      clk_en    => cpu_clk_en,
+      rst       => rst_sys,
+
+      osc       => '0',
+      phi2_i    => '0',
+      fphi0_o   => open,
+
+      -- CPU interface
+      a         => cpu_a(4 downto 0),
+      d_i       => cpu_d_o,
+      d_o       => gtia_d_o,
+      cs_n      => not gtia_cs,
+      r_wn      => cpu_r_wn,
+      halt_n    => open,
+      
+      -- CTIA/GTIA interface
+      an        => antic_an,
+
+      -- joystick
+      t         => (others => '1'),
+      -- console
+      s_i       => (others => '1'),
+      s_o       => open,
+      
+      -- video inputs
+      cad3      => '0',
+      pal       => '0',
+      
+      -- RGB output
+      r         => open,
+      g         => open,
+      b         => open,
+      hsync     => open,
+      vsync     => open,
+      de        => open,
+      
+      -- dbg
+      dbg       => open
+    );
+
+  pokey_inst : entity work.ASTEROIDS_POKEY
+    port map 
+    (
+      ADDR      => cpu_a(3 downto 0),
+      DIN       => cpu_d_o,
+      DOUT      => pokey_d_o,
+      DOUT_OE_L => open,
+      RW_L      => cpu_r_wn,
+      CS        => pokey_cs,
+      CS_L      => '0',
+      --
+      AUDIO_OUT => open,
+      --
+      PIN       => (others => '0'),
+      ENA       => cpu_clk_en,
+      CLK       => clk_sys
+    );
+    
+  pia6821_inst : entity work.pia6821
+    port map
+    (	
+      clk       	=> clk_sys,
+      rst       	=> rst_sys,
+      cs        	=> pia_cs,
+      rw        	=> cpu_r_wn,
+      addr      	=> cpu_a(1 downto 0),
+      data_in   	=> cpu_d_o,
+      data_out  	=> pia_d_o,
+      irqa      	=> open,
+      irqb      	=> open,
+      pa_i        => (others => '0'),
+      pa_o				=> open,
+      pa_oe				=> open,
+      ca1       	=> '0',
+      ca2_i      	=> '0',
+      ca2_o				=> open,
+      ca2_oe			=> open,
+      pb_i				=> (others => '0'),
+      pb_o       	=> open,
+      pb_oe				=> open,
+      cb1       	=> '0',
+      cb2_i      	=> '0',
+      cb2_o				=> open,
+      cb2_oe			=> open
+    );
 
   antic_inst : antic
     generic map

@@ -2258,8 +2258,12 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t65/T65_P
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t65/T65_MCode.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t65/T65_ALU.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t65/T65.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/atari/atari_gtia_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/atari/atari_gtia.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/atari/antic.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/atari/antic_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/sound/pokey/asteroids_pokey.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/component/io/pia6821.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/atari/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_integrated_gfx.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/spi_pll.vhd
