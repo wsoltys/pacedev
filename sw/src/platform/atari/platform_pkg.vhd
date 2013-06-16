@@ -32,7 +32,9 @@ package platform_pkg is
 	-- Platform-specific constants (optional)
 	--
 
-  constant ATARI_SOURCE_ROOT_DIR : string := "../../../../../src/platform/atari/";
+  constant ATARI_SOURCE_ROOT_DIR    : string := "../../../../../src/platform/atari/";
+  constant ATARI_ROM_DIR            : string := ATARI_SOURCE_ROOT_DIR & 
+                                                "roms/";
   constant VARIANT_SOURCE_ROOT_DIR  : string := ATARI_SOURCE_ROOT_DIR & 
                                                 PLATFORM_VARIANT & "/";
   constant VARIANT_ROM_DIR          : string := VARIANT_SOURCE_ROOT_DIR &

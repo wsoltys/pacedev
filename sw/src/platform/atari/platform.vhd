@@ -222,7 +222,7 @@ begin
   basic_inst : work.sprom
 		generic map
 		(
-			init_file		=> VARIANT_ROM_DIR & PLATFORM_VARIANT_BASIC_NAME,
+			init_file		=> ATARI_ROM_DIR & PLATFORM_VARIANT_BASIC_NAME,
 			--numwords_a	=> 8192,
 			widthad_a		=> 13
 		)
