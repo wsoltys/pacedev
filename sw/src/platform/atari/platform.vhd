@@ -132,6 +132,11 @@ architecture SYN of platform is
   signal ram_cs         : std_logic;
   signal ram_we         : std_logic;
   signal ram_d_o        : std_logic_vector(7 downto 0);
+
+  -- PORTB register
+  signal portb_r        : std_logic_vector(7 downto 0);
+  signal portb_w        : std_logic_vector(7 downto 0);
+  signal portb_oe       : std_logic_vector(7 downto 0);
   
   -- other signals      
 	signal cpu_reset			: std_logic;
@@ -191,9 +196,10 @@ begin
             '0';
   
   -- read mux
-  cpu_d_i <=  self_d_o when self_cs = '1' else
+  cpu_d_i <=  -- kernel must be enabled as well
+              self_d_o when self_cs = '1' and portb_r(0) = '1' and portb_r(7) = '0' else
               basic_d_o when basic_cs = '1' else
-              kernel_d_o when kernel_cs = '1' else
+              kernel_d_o when kernel_cs = '1' and portb_r(0) = '1' else
               gtia_d_o when gtia_cs = '1' else
               pokey_d_o when pokey_cs = '1' else
               pia_d_o when pia_cs = '1' else
@@ -271,7 +277,8 @@ begin
 			address		=> cpu_a(13 downto 0),
 			q					=> kernel_d_o
 		);
-
+  self_d_o <= kernel_d_o;
+  
   gtia_inst : atari_gtia
     generic map
     (
@@ -357,15 +364,30 @@ begin
       ca2_i      	=> '0',
       ca2_o				=> open,
       ca2_oe			=> open,
-      pb_i				=> (others => '0'),
-      pb_o       	=> open,
-      pb_oe				=> open,
+      pb_i				=> portb_r,
+      pb_o       	=> portb_w,
+      pb_oe				=> portb_oe,
       cb1       	=> '0',
       cb2_i      	=> '0',
       cb2_o				=> open,
       cb2_oe			=> open
     );
 
+  -- PORTB (ROM mapping) register
+  process (clk_sys, rst_sys)
+  begin
+    if rst_sys = '1' then
+      -- enable kernel, disable basic, self-test
+      portb_r <= (others => '1');
+    elsif rising_edge(clk_sys) then
+      for i in 7 downto 0 loop
+        if portb_oe(i) = '1' then
+          portb_r(i) <= portb_w(i);
+        end if;
+      end loop;
+    end if;
+  end process;
+  
   antic_inst : antic
     generic map
     (
