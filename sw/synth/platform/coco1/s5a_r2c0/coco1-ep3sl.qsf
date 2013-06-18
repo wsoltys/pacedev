@@ -41,7 +41,7 @@
 # ========================
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 9.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "18:03:05  MARCH 10, 2010"
-set_global_assignment -name LAST_QUARTUS_VERSION "10.1 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION "12.1 SP1"
 set_global_assignment -name MISC_FILE "g:/work/vl/mixer_test/mixer_test.dpf"
 set_global_assignment -name SMART_RECOMPILE ON
 
@@ -2272,6 +2272,9 @@ set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/a
 set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/atahost_controller.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/atahost_wb_slave.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/atahost_top.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2c0/spi_pll.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/spi/uni_spi_tx.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/io/spi/uni_spi_rx.vhd
 set_global_assignment -name VHDL_FILE custom_io.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/s5a_r2c0/target_top_ep3sl.vhd
 set_global_assignment -name SIGNALTAP_FILE blit.stp

@@ -49,6 +49,13 @@ package project_pkg is
   constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 16;
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
     
+  constant S5AR2_EMULATED_FLASH_INIT_FILE   : string := "";
+  constant S5AR2_EMULATE_FLASH              : boolean := false;
+  constant S5AR2_EMULATED_FLASH_WIDTH_AD    : natural := 14;
+  constant S5AR2_EMULATED_FLASH_WIDTH       : natural := 8;
+
+  constant S5AR2_HAS_FLOPPY_IF              : boolean := false;
+
 	-- Coco1-specific constants
 
   constant COCO1_USE_REAL_6809              : boolean := false;
