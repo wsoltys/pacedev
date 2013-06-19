@@ -114,8 +114,15 @@ begin
       mpl_r <= (others => (others => '0'));
       ppl_r <= (others => (others => '0'));
       trig_r <= (others => (others => '0'));
-      pal_r <= (others => '0');
-      consol_r <= (others => '0');
+      if VARIANT = CO14805 then
+        -- NTSC
+        pal_r <= "00000111";
+      else
+        -- PAL/SECAM?
+        pal_r <= "00000000";
+      end if;
+      -- hack for now (no keys active)
+      consol_r <= "00001111";
     elsif rising_edge(clk) then
       if clk_en = '1' then
         if cs_n = '0' then

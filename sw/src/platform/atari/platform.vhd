@@ -282,6 +282,7 @@ begin
   gtia_inst : atari_gtia
     generic map
     (
+      -- NTSC
       VARIANT	  => CO14805
     )
     port map
@@ -352,7 +353,8 @@ begin
       rst       	=> rst_sys,
       cs        	=> pia_cs,
       rw        	=> cpu_r_wn,
-      addr      	=> cpu_a(1 downto 0),
+      addr(1)     => cpu_a(0),
+      addr(0)     => cpu_a(1),
       data_in   	=> cpu_d_o,
       data_out  	=> pia_d_o,
       irqa      	=> open,
@@ -378,6 +380,7 @@ begin
   begin
     if rst_sys = '1' then
       -- enable kernel, disable basic, self-test
+      -- - the ROM does this too!
       portb_r <= (others => '1');
     elsif rising_edge(clk_sys) then
       for i in 7 downto 0 loop
