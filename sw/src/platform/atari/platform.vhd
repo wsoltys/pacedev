@@ -197,9 +197,9 @@ begin
   
   -- read mux
   cpu_d_i <=  -- kernel must be enabled as well
-              self_d_o when self_cs = '1' and portb_r(0) = '1' and portb_r(7) = '0' else
-              basic_d_o when basic_cs = '1' else
-              kernel_d_o when kernel_cs = '1' and portb_r(0) = '1' else
+              self_d_o when (self_cs = '1' and portb_r(7) = '0' and portb_r(0) = '1') else
+              basic_d_o when (basic_cs = '1' and portb_r(1) = '0') else
+              kernel_d_o when (kernel_cs = '1' and portb_r(0) = '1') else
               gtia_d_o when gtia_cs = '1' else
               pokey_d_o when pokey_cs = '1' else
               pia_d_o when pia_cs = '1' else

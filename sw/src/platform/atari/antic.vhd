@@ -92,7 +92,7 @@ begin
   -- registers
   process (clk, rst)
   begin
-    if rst = '0' then
+    if rst = '1' then
       dmactl_r <= (others => '0');
       chactl_r <= (others => '0');
       dlistl_r <= (others => '0');
@@ -165,21 +165,21 @@ begin
   
   BLK_DEBUG : block
   begin
-    dbg.dmactl <= RESIZE(unsigned(dmactl_r),8);
-    dbg.chactl <= RESIZE(unsigned(chactl_r),8);
-    dbg.dlistl <= RESIZE(unsigned(dlistl_r),8);
-    dbg.dlisth <= RESIZE(unsigned(dlisth_r),8);
-    dbg.hscrol <= RESIZE(unsigned(hscrol_r),8);
-    dbg.vscrol <= RESIZE(unsigned(vscrol_r),8);
-    dbg.pmbase <= RESIZE(unsigned(pmbase_r),8);
-    dbg.chbase <= RESIZE(unsigned(chbase_r),8);
-    dbg.wsync <= RESIZE(unsigned(wsync_r),8);
-    dbg.nmien <= RESIZE(unsigned(nmien_r),8);
-    dbg.nmires <= RESIZE(unsigned(nmires_r),8);
-    dbg.vcount <= RESIZE(unsigned(vcount_r),8);
-    dbg.penh <= RESIZE(unsigned(penh_r),8);
-    dbg.penv <= RESIZE(unsigned(penv_r),8);
-    dbg.nmist <= RESIZE(unsigned(nmist_r),8);
+    dbg.dmactl <= unsigned("00" & dmactl_r);
+    dbg.chactl <= unsigned("00000" & chactl_r);
+    dbg.dlistl <= unsigned(dlistl_r);
+    dbg.dlisth <= unsigned(dlisth_r);
+    dbg.hscrol <= unsigned("0000" & hscrol_r);
+    dbg.vscrol <= unsigned("0000" & vscrol_r);
+    dbg.pmbase <= unsigned(pmbase_r & "000");
+    dbg.chbase <= unsigned(chbase_r & "0");
+    dbg.wsync <= unsigned("0000000" & wsync_r);
+    dbg.nmien <= unsigned(nmien_r & "000000");
+    dbg.nmires <= unsigned("0000000" & nmires_r);
+    dbg.vcount <= unsigned(vcount_r);
+    dbg.penh <= unsigned(penh_r);
+    dbg.penv <= unsigned(penv_r);
+    dbg.nmist <= unsigned(nmist_r & "00000");
   end block BLK_DEBUG;
   
 end architecture SYN;
