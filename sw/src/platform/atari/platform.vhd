@@ -79,9 +79,13 @@ architecture SYN of platform is
 	alias clk_sys					: std_logic is clkrst_i.clk(0);
   alias rst_sys         : std_logic is clkrst_i.rst(0);
 	alias clk_video       : std_logic is clkrst_i.clk(1);
-	
+
+  -- clocks
+  signal clk_high_en    : std_logic;
+  signal clk_colour_en  : std_logic;  
+  signal clk_cpu_en     : std_logic;
+  
   -- uP signals  
-  signal cpu_clk_en     : std_logic;
 	signal cpu_a_ext			: std_logic_vector(23 downto 0);
     alias cpu_a					: std_logic_vector(15 downto 0) is cpu_a_ext(15 downto 0);
   signal cpu_d_i        : std_logic_vector(7 downto 0);
@@ -145,22 +149,48 @@ architecture SYN of platform is
 begin
 
 	cpu_reset <= rst_sys or game_reset;
-
-  -- generate 2MHz CPU clock from 24MHz source
+  
+  -- generate clocks from x16 source
   process (clk_sys, rst_sys)
-    variable count : integer range 0 to 24/2-1;
+    variable count    : std_logic_vector(4 downto 0);
+    variable pal_cnt  : integer range 0 to 4;
   begin
     if rst_sys = '1' then
-      count := 0;
-      cpu_clk_en <= '0';
+      count := (others => '0');
+      pal_cnt := 0;
+      clk_high_en <= '0';
+      clk_colour_en <= '0';
+      clk_cpu_en <= '0';
     elsif rising_edge(clk_sys) then
-      cpu_clk_en <= '0';  -- default
-      if count = count'high then
-        count := 0;
-        cpu_clk_en <= '1';
-      else
-        count := count + 1;
+      -- default values
+      clk_high_en <= '0';
+      clk_colour_en <= '0';
+      clk_cpu_en <= '0';
+      if count(2 downto 0) = "000" then
+        -- 7.15909MHZ (NTSC) / 8.8672375MHz (PAL)
+        clk_high_en <= '1';
+        if count(3) = '0' then
+          -- 3.579545MHz (NTSC) / 4.43361875MHz (PAL)
+          clk_colour_en <= '1';
+          if ATARI_REGION_NTSC then
+            if count(4) = '0' then
+              -- 1.789773MHz (NTSC)
+              clk_cpu_en <= '1';
+            end if;
+          elsif ATARI_REGION_PAL then
+            -- 4.43361875 * 2/5 = 1.773447MHZ (PAL)
+            if pal_cnt = pal_cnt'high then
+              pal_cnt := 0;
+            else
+              if pal_cnt = 0 or pal_cnt = 2 then
+                clk_cpu_en <= '1';
+              end if;
+              pal_cnt := pal_cnt + 1;
+            end if;
+          end if;
+        end if;
       end if;
+      count := count + 1;
     end if;
   end process;
   
@@ -220,7 +250,7 @@ begin
     (
       Mode    		=> "00",	-- 6502
       Res_n   		=> not cpu_reset,
-      Enable  		=> cpu_clk_en,
+      Enable  		=> clk_cpu_en,
       Clk     		=> clk_sys,
       Rdy     		=> '1',
       Abort_n 		=> '1',
@@ -288,7 +318,7 @@ begin
     port map
     (
       clk       => clk_sys,
-      clk_en    => cpu_clk_en,
+      clk_en    => clk_cpu_en,
       rst       => rst_sys,
 
       osc       => '0',
@@ -342,7 +372,7 @@ begin
       AUDIO_OUT => open,
       --
       PIN       => (others => '0'),
-      ENA       => cpu_clk_en,
+      ENA       => clk_cpu_en,
       CLK       => clk_sys
     );
     
