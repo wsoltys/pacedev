@@ -62,6 +62,10 @@ package project_pkg is
 
 	-- Invaders-specific constants
 	
+  -- rotate native video (for VGA monitor)
+  -- - need to change H,V size in platform_pkg.vhd
+  constant INVADERS_ROTATE_VIDEO            : boolean := false;
+
   constant INVADERS_ROM_IN_FLASH            : boolean := false;
   constant PACE_HAS_FLASH                   : boolean := INVADERS_ROM_IN_FLASH;
   
