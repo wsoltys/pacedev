@@ -88,6 +88,11 @@ architecture SYN of atari_gtia is
   
 begin
 
+  -- clocks
+  -- - supplies (in effect) CPU clock to ANTIC
+  -- - FPHI0 has the same phase as PHI2
+  fphi0_o <= phi2_i;
+  
   -- registers
   process (clk, rst)
     variable i  : integer range 0 to 3;
@@ -124,7 +129,7 @@ begin
       -- hack for now (no keys active)
       consol_r <= "00001111";
     elsif rising_edge(clk) then
-      if clk_en = '1' then
+      if phi2_i = '1' then
         if cs_n = '0' then
           i := to_integer(unsigned(a(1 downto 0)));
           if r_wn = '0' then
@@ -209,6 +214,28 @@ begin
 --  halt_n <= '1';
 --  -- NMI (none for now)
 --  nmi_n <= '1';
+  
+  process (clk, rst)
+  begin
+    if rst = '1' then
+    elsif rising_edge(clk) then
+      if osc = '1' then
+        -- generate VSYNC
+        if an = "001" then
+          vsync <= '1';
+        else
+          vsync <= '0';
+        end if;
+        -- generate HSYNC
+        -- - fudge, this is actually HBLANK
+        if an = "010" then
+          hsync <= '1';
+        else
+          hsync <= '0';
+        end if;
+      end if;
+    end if;
+  end process;
   
   BLK_DEBUG : block
   begin

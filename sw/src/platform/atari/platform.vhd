@@ -84,6 +84,8 @@ architecture SYN of platform is
   signal clk_high_en    : std_logic;
   signal clk_colour_en  : std_logic;  
   signal clk_cpu_en     : std_logic;
+  -- generate by GTIA
+  signal clk_fphi0_en   : std_logic;
   
   -- uP signals  
 	signal cpu_a_ext			: std_logic_vector(23 downto 0);
@@ -321,9 +323,9 @@ begin
       clk_en    => clk_cpu_en,
       rst       => rst_sys,
 
-      osc       => '0',
-      phi2_i    => '0',
-      fphi0_o   => open,
+      osc       => clk_colour_en,
+      phi2_i    => clk_cpu_en,
+      fphi0_o   => clk_fphi0_en,
 
       -- CPU interface
       a         => cpu_a(4 downto 0),
@@ -432,9 +434,9 @@ begin
       clk_en  => '1',
       rst     => clkrst_i.rst(0),
       
-      fphi0_i => clk_sys,
+      fphi0_i => clk_fphi0_en,
       phi0_o  => open,
-      phi2_i  => clk_sys,
+      phi2_i  => clk_cpu_en,
       res_n   => '1',
 
       -- CPU interface

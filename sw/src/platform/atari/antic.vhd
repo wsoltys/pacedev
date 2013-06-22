@@ -51,6 +51,9 @@ end entity antic;
 
 architecture SYN of antic is
 
+  constant NTSC : boolean := (VARIANT = CO12296 or VARIANT = CO21697);
+  constant PAL  : boolean := not NTSC;
+  
   -- WRITE-ONLY registers
   signal dmactl_r : std_logic_vector(5 downto 0);
     -- b5=1 enable instruction fetch DMA
@@ -87,6 +90,9 @@ architecture SYN of antic is
     -- b6 vertical blank NMI
     -- b5 reset button NMI
 
+  signal hblank   : std_logic;
+  signal vsync    : std_logic;
+  
 begin
 
   -- registers
@@ -131,6 +137,9 @@ begin
                 -- probably don't need a register
                 wsync_r <= "1";
               when X"E" =>
+                -- reportedly, this must be written by:
+                -- - cycle 7 to enable
+                -- - cycle 8 to disable
                 nmien_r <= d_i(nmien_r'range);
               when X"F" =>
                 -- probably don't need a register
@@ -158,10 +167,93 @@ begin
     end if;
   end process;
 
+  -- video controller
+  process (clk, rst)
+    -- fphi0 is the CPU clock
+    -- - two (2) colour clocks per fphi0 clock
+    variable h        : integer range 0 to 114-1;
+    variable v        : integer range 0 to 312-1; -- 292-1 for NTSC
+    variable vcount   : unsigned(8 downto 0);
+  begin
+    if rst = '1' then
+      h := 0;
+      v := 0;
+      vcount := (others => '0');
+      nmi_n <= '1';
+    elsif rising_edge(clk) then
+      if fphi0_i = '1' then
+        -- h,v video counters
+        if h = h'high then
+          h := 0;
+          if (NTSC and v = 292-1) or v = v'high then
+            v := 0;
+          else
+            v := v + 1;
+          end if; -- v=v'high
+        else
+          h := h + 1;
+        end if; -- h=h'high
+        -- generate VCOUNT
+        -- - updated on cycle 110 (what a PITA!)
+        if h = 110 then
+          if (NTSC and v = 292-1) or v = v'high then
+            vcount := (others => '0');
+          else
+            vcount := vcount + 1;
+          end if;
+        end if;
+        -- generate VBI (NMI)
+        -- - NTSC only (PAL=?)
+        nmi_n <= '1';
+        if h = 0 and v = 248 then
+          if nmien_r(6) = '1' then
+            nmi_n <= '0';
+          end if;
+        end if;
+      end if; --fphi0_i
+    end if;
+    -- assign VCOUNT register
+    vcount_r <= std_logic_vector(vcount(8 downto 1));
+    -- assign HBLANK,VSYNC signals
+    if (NTSC and v >= 251 and v <= 253) or
+        (PAL and v >= 275 and v <= 278) then
+      vsync <= '1';
+    else
+      vsync <= '0';
+    end if;
+    -- same for NTSC/PAL
+    if h >= 34 and h <= 221 then
+      hblank <= '0';
+    else
+      hblank <= '1';
+    end if;
+    -- NOTE: VBLANK = ~(8-247)
+  end process;
+  
   -- HALT (none for now)
   halt_n <= '1';
-  -- NMI (none for now)
-  nmi_n <= '1';
+  
+  BLK_GTIA_IF : block
+  begin
+    process (clk, rst)
+    begin
+      if rst = '1' then
+      elsif rising_edge(clk) then
+        if fphi0_i = '1' then
+          -- assuming VSYNC has priority over HBLANK
+          if vsync = '1' then
+            an <= "001";
+          elsif hblank = '1' then
+            -- normal mode
+            an <= "010";
+          else
+            -- fixme
+            an <= "000";
+          end if;
+        end if; -- fphi0_en
+      end if;
+    end process;
+  end block;
   
   BLK_DEBUG : block
   begin
