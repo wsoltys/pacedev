@@ -216,8 +216,12 @@ begin
 --  nmi_n <= '1';
   
   process (clk, rst)
+    variable hblank_r  : std_logic;
+    variable hsync_cnt  : integer range 0 to 15;
   begin
     if rst = '1' then
+      hblank_r := '0';
+      hsync_cnt := 0;
     elsif rising_edge(clk) then
       if osc = '1' then
         -- generate VSYNC
@@ -227,13 +231,21 @@ begin
           vsync <= '0';
         end if;
         -- generate HSYNC
-        -- - fudge, this is actually HBLANK
-        if an = "010" then
+        if hblank_r = '0' and an(2 downto 1) = "01" then
+          hsync_cnt := hsync_cnt'high;
+        end if;
+        if hsync_cnt > 0 then
           hsync <= '1';
+          hsync_cnt := hsync_cnt - 1;
         else
           hsync <= '0';
-        end if;
-      end if;
+        end if; -- hsync_cnt>0
+        if an(2 downto 1) = "01" then
+          hblank_r := '1';
+        else
+          hblank_r := '0';
+        end if; -- an(2..1)
+      end if; -- osc='1'
     end if;
   end process;
   

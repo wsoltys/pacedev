@@ -90,8 +90,9 @@ architecture SYN of antic is
     -- b6 vertical blank NMI
     -- b5 reset button NMI
 
-  signal hblank   : std_logic;
-  signal vsync    : std_logic;
+  signal hblank       : std_logic;
+  signal background   : std_logic;
+  signal vsync        : std_logic;
   
 begin
 
@@ -214,7 +215,7 @@ begin
     end if;
     -- assign VCOUNT register
     vcount_r <= std_logic_vector(vcount(8 downto 1));
-    -- assign HBLANK,VSYNC signals
+    -- assign BACKGROUND,HBLANK,VSYNC signals
     if (NTSC and v >= 251 and v <= 253) or
         (PAL and v >= 275 and v <= 278) then
       vsync <= '1';
@@ -222,8 +223,26 @@ begin
       vsync <= '0';
     end if;
     -- same for NTSC/PAL
-    if h >= 34 and h <= 221 then
+    -- hblank and background
+    if h >= 17 and h <= 110 then
       hblank <= '0';
+      background <= '0'; -- default
+      case dmactl_r(1 downto 0) is
+        when "01" =>
+          if h <= 31 or h >= 96 then
+            background <= '1';
+          end if;
+        when "10" =>
+          if h <= 23 or h >= 104 then
+            background <= '1';
+          end if;
+        when "11" =>
+          if h <= 21 or h >= 110 then
+            background <= '1';
+          end if;
+        when others =>
+          background <= '0';
+      end case;
     else
       hblank <= '1';
     end if;
@@ -240,15 +259,16 @@ begin
       if rst = '1' then
       elsif rising_edge(clk) then
         if fphi0_i = '1' then
-          -- assuming VSYNC has priority over HBLANK
           if vsync = '1' then
             an <= "001";
+          elsif background = '1' then
+            an <= "000";
           elsif hblank = '1' then
             -- normal mode
             an <= "010";
           else
             -- fixme
-            an <= "000";
+            an <= "111";
           end if;
         end if; -- fphi0_en
       end if;
