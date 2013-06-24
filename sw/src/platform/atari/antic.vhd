@@ -173,7 +173,7 @@ begin
     -- fphi0 is the CPU clock
     -- - two (2) colour clocks per fphi0 clock
     variable h        : integer range 0 to 114-1;
-    variable v        : integer range 0 to 312-1; -- 292-1 for NTSC
+    variable v        : integer range 0 to 312-1; -- 262-1 for NTSC
     variable vcount   : unsigned(8 downto 0);
   begin
     if rst = '1' then
@@ -186,7 +186,7 @@ begin
         -- h,v video counters
         if h = h'high then
           h := 0;
-          if (NTSC and v = 292-1) or v = v'high then
+          if (NTSC and v = 262-1) or v = v'high then
             v := 0;
           else
             v := v + 1;
@@ -197,7 +197,7 @@ begin
         -- generate VCOUNT
         -- - updated on cycle 110 (what a PITA!)
         if h = 110 then
-          if (NTSC and v = 292-1) or v = v'high then
+          if (NTSC and v = 262-1) or v = v'high then
             vcount := (others => '0');
           else
             vcount := vcount + 1;

@@ -3,6 +3,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 
 library work;
+use work.video_controller_pkg.all;
 use work.project_pkg.all;
 use work.target_pkg.all;
 use work.platform_variant_pkg.all;

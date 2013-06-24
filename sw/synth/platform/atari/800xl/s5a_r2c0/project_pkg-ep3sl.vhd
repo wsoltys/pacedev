@@ -22,20 +22,20 @@ package project_pkg is
 	
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
   
---  -- NTSC (315/88=3.579545MHz)
---  -- 16x = 57.272727MHz 
---  -- 24*105/44 = 57.272727MHz
---  constant PACE_CLK0_MULTIPLY_BY            : natural := 50;
---  constant PACE_CLK0_DIVIDE_BY              : natural := 21;    -- 24*50/21 = 57.142875MHz
---  constant PACE_CLK1_MULTIPLY_BY            : natural := 5;
---  constant PACE_CLK1_DIVIDE_BY              : natural := 3;     -- 24*5/3 = 40MHz
-  -- PAL (4.43361875MHz) 
-  -- 16x = 70.9379MHZ
-  -- 24*71/24 = 71MHz
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 71;
-  constant PACE_CLK0_DIVIDE_BY              : natural := 24;    -- 24*71/24 = 71MHz
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 213;
-  constant PACE_CLK1_DIVIDE_BY              : natural := 128;    -- 24*213/128 = 39.937500
+  -- NTSC (315/88=3.579545MHz)
+  -- 16x = 57.272727MHz 
+  -- 24*105/44 = 57.272727MHz
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 50;
+  constant PACE_CLK0_DIVIDE_BY              : natural := 21;    -- 24*50/21 = 57.142875MHz
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 5;
+  constant PACE_CLK1_DIVIDE_BY              : natural := 3;     -- 24*5/3 = 40MHz
+--  -- PAL (4.43361875MHz) 
+--  -- 16x = 70.9379MHZ
+--  -- 24*71/24 = 71MHz
+--  constant PACE_CLK0_MULTIPLY_BY            : natural := 71;
+--  constant PACE_CLK0_DIVIDE_BY              : natural := 24;    -- 24*71/24 = 71MHz
+--  constant PACE_CLK1_MULTIPLY_BY            : natural := 213;
+--  constant PACE_CLK1_DIVIDE_BY              : natural := 128;    -- 24*213/128 = 39.937500
 
   -- this will all go
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
@@ -68,7 +68,7 @@ package project_pkg is
 	-- Atari 800XL-specific constants
 	--
 	
-  constant ATARI_REGION_NTSC                : boolean := false;
+  constant ATARI_REGION_NTSC                : boolean := true;
   constant ATARI_REGION_PAL                 : boolean := not ATARI_REGION_NTSC;
   
   -- derived (do not edit)

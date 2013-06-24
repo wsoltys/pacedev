@@ -52,9 +52,10 @@ package atari_gtia_pkg is
       pal     : in std_logic;
       
       -- RGB output
-      r       : out std_logic_vector(3 downto 0);
-      g       : out std_logic_vector(3 downto 0);
-      b       : out std_logic_vector(3 downto 0);
+      clk_vga : in std_logic;
+      r       : out std_logic_vector(7 downto 0);
+      g       : out std_logic_vector(7 downto 0);
+      b       : out std_logic_vector(7 downto 0);
       hsync   : out std_logic;
       vsync   : out std_logic;
       de      : out std_logic;

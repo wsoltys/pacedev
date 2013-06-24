@@ -147,6 +147,9 @@ architecture SYN of platform is
   -- other signals      
 	signal cpu_reset			: std_logic;
 	alias game_reset			: std_logic is inputs_i(2).d(0);
+
+  -- video
+  signal video_o_s        : to_VIDEO_t;
   
 begin
 
@@ -349,17 +352,21 @@ begin
       pal       => '0',
       
       -- RGB output
-      r         => open,
-      g         => open,
-      b         => open,
-      hsync     => open,
-      vsync     => open,
-      de        => open,
+      clk_vga   => clk_high_en,
+      r         => video_o_s.rgb.r(9 downto 2),
+      g         => video_o_s.rgb.g(9 downto 2),
+      b         => video_o_s.rgb.b(9 downto 2),
+      hsync     => video_o_s.hsync,
+      vsync     => video_o_s.vsync,
+      de        => video_o_s.de,
       
       -- dbg
       dbg       => open
     );
-
+  video_o_s.rgb.r(1 downto 0) <= (others => '0');
+  video_o_s.rgb.g(1 downto 0) <= (others => '0');
+  video_o_s.rgb.b(1 downto 0) <= (others => '0');
+    
   pokey_inst : entity work.ASTEROIDS_POKEY
     port map 
     (
@@ -463,9 +470,6 @@ begin
     );
 
   BLK_TEMP_GRAPHICS : block
-  
-    signal rgb_data			    : RGB_t;
-    signal video_o_s        : to_VIDEO_t;
     
     signal dbg_enable       : std_logic;
     signal dbg_dim          : std_logic;
@@ -474,62 +478,68 @@ begin
   begin
   
     dbg_enable <= '1';
-    rgb_data.r <= (others => '0');
-    rgb_data.g <= (others => '0');
-    rgb_data.b <= (others => '0');
     
     -- mux in antic debug
-    video_o.clk <= video_o_s.clk;
     video_o.rgb.r <= dbg_video & '0' & video_o_s.rgb.r(9 downto 2) when (dbg_enable and dbg_dim) = '1' else video_o_s.rgb.r;
     video_o.rgb.g <= dbg_video & '0' & video_o_s.rgb.g(9 downto 2) when (dbg_enable and dbg_dim) = '1' else video_o_s.rgb.g;
     video_o.rgb.b <= dbg_video & '0' & video_o_s.rgb.b(9 downto 2) when (dbg_enable and dbg_dim) = '1' else video_o_s.rgb.b;
     video_o.hsync <= video_o_s.hsync;
     video_o.vsync <= video_o_s.vsync;
     video_o.de <= video_o_s.de;
-    
-    pace_video_controller_inst : entity work.pace_video_controller
-      generic map
-      (
-        CONFIG		  => PACE_VIDEO_CONTROLLER_TYPE,
-        DELAY       => PACE_VIDEO_PIPELINE_DELAY,
-        H_SIZE      => PACE_VIDEO_H_SIZE,
-        V_SIZE      => PACE_VIDEO_V_SIZE,
-        L_CROP      => PACE_VIDEO_L_CROP,
-        R_CROP      => PACE_VIDEO_R_CROP,
-        H_SCALE     => PACE_VIDEO_H_SCALE,
-        V_SCALE     => PACE_VIDEO_V_SCALE,
-        H_SYNC_POL  => PACE_VIDEO_H_SYNC_POLARITY,
-        V_SYNC_POL  => PACE_VIDEO_V_SYNC_POLARITY,
-        BORDER_RGB  => PACE_VIDEO_BORDER_RGB
-      )
-      port map
-      (
-        -- clocking etc
-        video_i         => video_i,
-        
-        -- register interface
-        reg_i.h_scale	  => "000",
-        reg_i.v_scale 	=> "000",
-        -- video data signals (in)
-        rgb_i		    		=> rgb_data,
 
-        -- video control signals (out)
-        video_ctl_o     => open,
+    GEN_GTIA_VIDEO : if true generate
+      video_o.clk <= clk_sys;
+    else generate
+      signal rgb_data			    : RGB_t;
+    begin
+      pace_video_controller_inst : entity work.pace_video_controller
+        generic map
+        (
+          CONFIG		  => PACE_VIDEO_CONTROLLER_TYPE,
+          DELAY       => PACE_VIDEO_PIPELINE_DELAY,
+          H_SIZE      => PACE_VIDEO_H_SIZE,
+          V_SIZE      => PACE_VIDEO_V_SIZE,
+          L_CROP      => PACE_VIDEO_L_CROP,
+          R_CROP      => PACE_VIDEO_R_CROP,
+          H_SCALE     => PACE_VIDEO_H_SCALE,
+          V_SCALE     => PACE_VIDEO_V_SCALE,
+          H_SYNC_POL  => PACE_VIDEO_H_SYNC_POLARITY,
+          V_SYNC_POL  => PACE_VIDEO_V_SYNC_POLARITY,
+          BORDER_RGB  => PACE_VIDEO_BORDER_RGB
+        )
+        port map
+        (
+          -- clocking etc
+          video_i         => video_i,
+          
+          -- register interface
+          reg_i.h_scale	  => "000",
+          reg_i.v_scale 	=> "000",
+          -- video data signals (in)
+          rgb_i		    		=> rgb_data,
 
-        -- VGA signals (out)
-        video_o     		=> video_o_s
-      );
+          -- video control signals (out)
+          video_ctl_o     => open,
+
+          -- VGA signals (out)
+          video_o     		=> video_o_s
+        );
+      video_o.clk <= video_o_s.clk;
+      rgb_data.r <= (others => '0');
+      rgb_data.g <= (others => '0');
+      rgb_data.b <= (others => '0');
+    end generate GEN_GTIA_VIDEO;
     
     antic_hexy_inst : antic_hexy
       generic map
       (
-        yOffset => 600,
-        xOffset => 200
+        yOffset => 300,
+        xOffset => 100
       )
       port map
       (
         clk       => video_o_s.clk,
-        clk_ena   => '1',
+        clk_ena   => clk_high_en,
         vSync     => video_o_s.vsync,
         hSync     => video_o_s.hsync,
         video     => dbg_video,

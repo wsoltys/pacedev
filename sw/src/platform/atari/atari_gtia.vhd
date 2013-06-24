@@ -45,9 +45,10 @@ entity atari_gtia is
     pal     : in std_logic;
     
     -- RGB output
-    r       : out std_logic_vector(3 downto 0);
-    g       : out std_logic_vector(3 downto 0);
-    b       : out std_logic_vector(3 downto 0);
+    clk_vga : in std_logic;
+    r       : out std_logic_vector(7 downto 0);
+    g       : out std_logic_vector(7 downto 0);
+    b       : out std_logic_vector(7 downto 0);
     hsync   : out std_logic;
     vsync   : out std_logic;
     de      : out std_logic;
@@ -58,6 +59,274 @@ entity atari_gtia is
 end entity atari_gtia;
 
 architecture SYN of atari_gtia is
+
+  type RGB_t is record
+    r : std_logic_vector(9 downto 0);
+    g : std_logic_vector(9 downto 0);
+    b : std_logic_vector(9 downto 0);
+  end record;
+
+  type RGB_a is array (natural range <>) of RGB_t;
+
+  constant palette : RGB_a(0 to 255) :=
+  (
+    000 => (r=>X"00", g=>X"00", b=>X"00"),
+    001 => (r=>X"25", g=>X"25", b=>X"25"),
+    002 => (r=>X"34", g=>X"34", b=>X"34"),
+    003 => (r=>X"4F", g=>X"4F", b=>X"4F"),
+    004 => (r=>X"5B", g=>X"5B", b=>X"5B"),
+    005 => (r=>X"69", g=>X"69", b=>X"69"),
+    006 => (r=>X"7B", g=>X"7B", b=>X"7B"),
+    007 => (r=>X"8A", g=>X"8A", b=>X"8A"),
+    008 => (r=>X"A7", g=>X"A7", b=>X"A7"),
+    009 => (r=>X"B9", g=>X"B9", b=>X"B9"),
+    010 => (r=>X"C5", g=>X"C5", b=>X"C5"),
+    011 => (r=>X"D0", g=>X"D0", b=>X"D0"),
+    012 => (r=>X"D7", g=>X"D7", b=>X"D7"),
+    013 => (r=>X"E1", g=>X"E1", b=>X"E1"),
+    014 => (r=>X"F4", g=>X"F4", b=>X"F4"),
+    015 => (r=>X"FF", g=>X"FF", b=>X"FF"),
+    016 => (r=>X"4C", g=>X"32", b=>X"00"),
+    017 => (r=>X"62", g=>X"3A", b=>X"00"),
+    018 => (r=>X"7B", g=>X"4A", b=>X"00"),
+    019 => (r=>X"9A", g=>X"60", b=>X"00"),
+    020 => (r=>X"B5", g=>X"74", b=>X"00"),
+    021 => (r=>X"CC", g=>X"85", b=>X"00"),
+    022 => (r=>X"E7", g=>X"9E", b=>X"08"),
+    023 => (r=>X"F7", g=>X"AF", b=>X"10"),
+    024 => (r=>X"FF", g=>X"C3", b=>X"18"),
+    025 => (r=>X"FF", g=>X"D0", b=>X"20"),
+    026 => (r=>X"FF", g=>X"D8", b=>X"28"),
+    027 => (r=>X"FF", g=>X"DF", b=>X"30"),
+    028 => (r=>X"FF", g=>X"E6", b=>X"3B"),
+    029 => (r=>X"FF", g=>X"F4", b=>X"40"),
+    030 => (r=>X"FF", g=>X"FA", b=>X"4B"),
+    031 => (r=>X"FF", g=>X"FF", b=>X"50"),
+    032 => (r=>X"99", g=>X"25", b=>X"00"),
+    033 => (r=>X"AA", g=>X"25", b=>X"00"),
+    034 => (r=>X"B4", g=>X"25", b=>X"00"),
+    035 => (r=>X"D3", g=>X"30", b=>X"00"),
+    036 => (r=>X"DD", g=>X"48", b=>X"02"),
+    037 => (r=>X"E2", g=>X"50", b=>X"09"),
+    038 => (r=>X"F4", g=>X"67", b=>X"00"),
+    039 => (r=>X"F4", g=>X"75", b=>X"10"),
+    040 => (r=>X"FF", g=>X"9E", b=>X"10"),
+    041 => (r=>X"FF", g=>X"AC", b=>X"20"),
+    042 => (r=>X"FF", g=>X"BA", b=>X"3A"),
+    043 => (r=>X"FF", g=>X"BF", b=>X"50"),
+    044 => (r=>X"FF", g=>X"C6", b=>X"6D"),
+    045 => (r=>X"FF", g=>X"D5", b=>X"80"),
+    046 => (r=>X"FF", g=>X"E4", b=>X"90"),
+    047 => (r=>X"FF", g=>X"E6", b=>X"99"),
+    048 => (r=>X"98", g=>X"0C", b=>X"0C"),
+    049 => (r=>X"99", g=>X"0C", b=>X"0C"),
+    050 => (r=>X"C2", g=>X"13", b=>X"00"),
+    051 => (r=>X"D3", g=>X"20", b=>X"00"),
+    052 => (r=>X"E2", g=>X"35", b=>X"00"),
+    053 => (r=>X"E3", g=>X"40", b=>X"00"),
+    054 => (r=>X"E4", g=>X"40", b=>X"20"),
+    055 => (r=>X"E5", g=>X"52", b=>X"30"),
+    056 => (r=>X"FD", g=>X"78", b=>X"54"),
+    057 => (r=>X"FF", g=>X"8A", b=>X"6A"),
+    058 => (r=>X"FF", g=>X"98", b=>X"7C"),
+    059 => (r=>X"FF", g=>X"A4", b=>X"8B"),
+    060 => (r=>X"FF", g=>X"B3", b=>X"9E"),
+    061 => (r=>X"FF", g=>X"C2", b=>X"B2"),
+    062 => (r=>X"FF", g=>X"D0", b=>X"BA"),
+    063 => (r=>X"FF", g=>X"D7", b=>X"C0"),
+    064 => (r=>X"99", g=>X"00", b=>X"00"),
+    065 => (r=>X"A9", g=>X"00", b=>X"00"),
+    066 => (r=>X"C2", g=>X"04", b=>X"00"),
+    067 => (r=>X"D3", g=>X"04", b=>X"00"),
+    068 => (r=>X"DA", g=>X"04", b=>X"00"),
+    069 => (r=>X"DB", g=>X"08", b=>X"00"),
+    070 => (r=>X"E4", g=>X"20", b=>X"20"),
+    071 => (r=>X"F6", g=>X"40", b=>X"40"),
+    072 => (r=>X"FB", g=>X"70", b=>X"70"),
+    073 => (r=>X"FB", g=>X"7E", b=>X"7E"),
+    074 => (r=>X"FB", g=>X"8F", b=>X"8F"),
+    075 => (r=>X"FF", g=>X"9F", b=>X"9F"),
+    076 => (r=>X"FF", g=>X"AB", b=>X"AB"),
+    077 => (r=>X"FF", g=>X"B9", b=>X"B9"),
+    078 => (r=>X"FF", g=>X"C9", b=>X"C9"),
+    079 => (r=>X"FF", g=>X"CF", b=>X"CF"),
+    080 => (r=>X"7E", g=>X"00", b=>X"50"),
+    081 => (r=>X"80", g=>X"00", b=>X"50"),
+    082 => (r=>X"80", g=>X"00", b=>X"5F"),
+    083 => (r=>X"95", g=>X"0B", b=>X"74"),
+    084 => (r=>X"AA", g=>X"22", b=>X"88"),
+    085 => (r=>X"BB", g=>X"2F", b=>X"9A"),
+    086 => (r=>X"CE", g=>X"3F", b=>X"AD"),
+    087 => (r=>X"D7", g=>X"5A", b=>X"B6"),
+    088 => (r=>X"E4", g=>X"67", b=>X"C3"),
+    089 => (r=>X"EF", g=>X"72", b=>X"CE"),
+    090 => (r=>X"FB", g=>X"7E", b=>X"DA"),
+    091 => (r=>X"FF", g=>X"8D", b=>X"E1"),
+    092 => (r=>X"FF", g=>X"9D", b=>X"E5"),
+    093 => (r=>X"FF", g=>X"A5", b=>X"E7"),
+    094 => (r=>X"FF", g=>X"AF", b=>X"EA"),
+    095 => (r=>X"FF", g=>X"B8", b=>X"EC"),
+    096 => (r=>X"48", g=>X"00", b=>X"6C"),
+    097 => (r=>X"5C", g=>X"04", b=>X"88"),
+    098 => (r=>X"65", g=>X"0D", b=>X"90"),
+    099 => (r=>X"7B", g=>X"23", b=>X"A7"),
+    100 => (r=>X"93", g=>X"3B", b=>X"BF"),
+    101 => (r=>X"9D", g=>X"45", b=>X"C9"),
+    102 => (r=>X"A7", g=>X"4F", b=>X"D3"),
+    103 => (r=>X"B2", g=>X"5A", b=>X"DE"),
+    104 => (r=>X"BD", g=>X"65", b=>X"E9"),
+    105 => (r=>X"C5", g=>X"6D", b=>X"F1"),
+    106 => (r=>X"CE", g=>X"76", b=>X"FA"),
+    107 => (r=>X"D5", g=>X"83", b=>X"FF"),
+    108 => (r=>X"DA", g=>X"90", b=>X"FF"),
+    109 => (r=>X"DE", g=>X"9C", b=>X"FF"),
+    110 => (r=>X"E2", g=>X"A9", b=>X"FF"),
+    111 => (r=>X"E6", g=>X"B6", b=>X"FF"),
+    112 => (r=>X"1B", g=>X"00", b=>X"70"),
+    113 => (r=>X"22", g=>X"1B", b=>X"8D"),
+    114 => (r=>X"37", g=>X"30", b=>X"A2"),
+    115 => (r=>X"48", g=>X"41", b=>X"B3"),
+    116 => (r=>X"59", g=>X"52", b=>X"C4"),
+    117 => (r=>X"63", g=>X"5C", b=>X"CE"),
+    118 => (r=>X"6F", g=>X"68", b=>X"DA"),
+    119 => (r=>X"7D", g=>X"76", b=>X"E8"),
+    120 => (r=>X"87", g=>X"80", b=>X"F8"),
+    121 => (r=>X"93", g=>X"8C", b=>X"FF"),
+    122 => (r=>X"9D", g=>X"97", b=>X"FF"),
+    123 => (r=>X"A8", g=>X"A3", b=>X"FF"),
+    124 => (r=>X"B3", g=>X"AF", b=>X"FF"),
+    125 => (r=>X"BC", g=>X"B8", b=>X"FF"),
+    126 => (r=>X"C4", g=>X"C1", b=>X"FF"),
+    127 => (r=>X"DA", g=>X"D1", b=>X"FF"),
+    128 => (r=>X"00", g=>X"0D", b=>X"7F"),
+    129 => (r=>X"00", g=>X"12", b=>X"A7"),
+    130 => (r=>X"00", g=>X"18", b=>X"C0"),
+    131 => (r=>X"0A", g=>X"2B", b=>X"D1"),
+    132 => (r=>X"1B", g=>X"4A", b=>X"E3"),
+    133 => (r=>X"2F", g=>X"58", b=>X"F0"),
+    134 => (r=>X"37", g=>X"68", b=>X"FF"),
+    135 => (r=>X"49", g=>X"79", b=>X"FF"),
+    136 => (r=>X"5B", g=>X"85", b=>X"FF"),
+    137 => (r=>X"6D", g=>X"96", b=>X"FF"),
+    138 => (r=>X"7F", g=>X"A3", b=>X"FF"),
+    139 => (r=>X"8C", g=>X"AD", b=>X"FF"),
+    140 => (r=>X"96", g=>X"B4", b=>X"FF"),
+    141 => (r=>X"A8", g=>X"C0", b=>X"FF"),
+    142 => (r=>X"B7", g=>X"CB", b=>X"FF"),
+    143 => (r=>X"C6", g=>X"D6", b=>X"FF"),
+    144 => (r=>X"00", g=>X"29", b=>X"5A"),
+    145 => (r=>X"00", g=>X"38", b=>X"76"),
+    146 => (r=>X"00", g=>X"48", b=>X"92"),
+    147 => (r=>X"00", g=>X"5C", b=>X"AC"),
+    148 => (r=>X"00", g=>X"71", b=>X"C6"),
+    149 => (r=>X"00", g=>X"86", b=>X"D0"),
+    150 => (r=>X"0A", g=>X"9B", b=>X"DF"),
+    151 => (r=>X"1A", g=>X"A8", b=>X"EC"),
+    152 => (r=>X"2B", g=>X"B6", b=>X"FF"),
+    153 => (r=>X"3F", g=>X"C2", b=>X"FF"),
+    154 => (r=>X"45", g=>X"CB", b=>X"FF"),
+    155 => (r=>X"59", g=>X"D3", b=>X"FF"),
+    156 => (r=>X"7F", g=>X"DA", b=>X"FF"),
+    157 => (r=>X"8F", g=>X"DE", b=>X"FF"),
+    158 => (r=>X"A0", g=>X"E2", b=>X"FF"),
+    159 => (r=>X"B0", g=>X"EB", b=>X"FF"),
+    160 => (r=>X"00", g=>X"38", b=>X"39"),
+    161 => (r=>X"00", g=>X"3C", b=>X"48"),
+    162 => (r=>X"00", g=>X"3D", b=>X"5B"),
+    163 => (r=>X"02", g=>X"66", b=>X"7F"),
+    164 => (r=>X"03", g=>X"73", b=>X"83"),
+    165 => (r=>X"00", g=>X"9C", b=>X"AA"),
+    166 => (r=>X"00", g=>X"A1", b=>X"BB"),
+    167 => (r=>X"01", g=>X"A4", b=>X"CC"),
+    168 => (r=>X"03", g=>X"BB", b=>X"FF"),
+    169 => (r=>X"05", g=>X"DA", b=>X"E2"),
+    170 => (r=>X"18", g=>X"E5", b=>X"FF"),
+    171 => (r=>X"34", g=>X"EA", b=>X"FF"),
+    172 => (r=>X"49", g=>X"EF", b=>X"FF"),
+    173 => (r=>X"66", g=>X"F2", b=>X"FF"),
+    174 => (r=>X"84", g=>X"F4", b=>X"FF"),
+    175 => (r=>X"9E", g=>X"F9", b=>X"FF"),
+    176 => (r=>X"00", g=>X"4A", b=>X"00"),
+    177 => (r=>X"00", g=>X"5D", b=>X"00"),
+    178 => (r=>X"00", g=>X"70", b=>X"00"),
+    179 => (r=>X"00", g=>X"8B", b=>X"00"),
+    180 => (r=>X"00", g=>X"A9", b=>X"00"),
+    181 => (r=>X"00", g=>X"BB", b=>X"05"),
+    182 => (r=>X"00", g=>X"BD", b=>X"00"),
+    183 => (r=>X"02", g=>X"D0", b=>X"05"),
+    184 => (r=>X"1A", g=>X"D5", b=>X"40"),
+    185 => (r=>X"5A", g=>X"F1", b=>X"77"),
+    186 => (r=>X"82", g=>X"EF", b=>X"A7"),
+    187 => (r=>X"84", g=>X"ED", b=>X"D1"),
+    188 => (r=>X"89", g=>X"FF", b=>X"ED"),
+    189 => (r=>X"7D", g=>X"FF", b=>X"FF"),
+    190 => (r=>X"93", g=>X"FF", b=>X"FF"),
+    191 => (r=>X"9B", g=>X"FF", b=>X"FF"),
+    192 => (r=>X"22", g=>X"4A", b=>X"03"),
+    193 => (r=>X"27", g=>X"53", b=>X"04"),
+    194 => (r=>X"30", g=>X"64", b=>X"05"),
+    195 => (r=>X"3C", g=>X"77", b=>X"0C"),
+    196 => (r=>X"45", g=>X"8C", b=>X"11"),
+    197 => (r=>X"00", g=>X"B7", b=>X"04"),
+    198 => (r=>X"03", g=>X"C2", b=>X"00"),
+    199 => (r=>X"1F", g=>X"DD", b=>X"00"),
+    200 => (r=>X"3D", g=>X"CD", b=>X"2D"),
+    201 => (r=>X"3D", g=>X"CD", b=>X"30"),
+    202 => (r=>X"58", g=>X"CC", b=>X"40"),
+    203 => (r=>X"60", g=>X"D3", b=>X"50"),
+    204 => (r=>X"A2", g=>X"EC", b=>X"55"),
+    205 => (r=>X"B3", g=>X"F2", b=>X"4A"),
+    206 => (r=>X"BB", g=>X"F6", b=>X"5D"),
+    207 => (r=>X"C4", g=>X"F8", b=>X"70"),
+    208 => (r=>X"2E", g=>X"3F", b=>X"0C"),
+    209 => (r=>X"36", g=>X"4A", b=>X"0F"),
+    210 => (r=>X"40", g=>X"56", b=>X"15"),
+    211 => (r=>X"46", g=>X"5F", b=>X"17"),
+    212 => (r=>X"57", g=>X"77", b=>X"1A"),
+    213 => (r=>X"65", g=>X"85", b=>X"1C"),
+    214 => (r=>X"74", g=>X"93", b=>X"1D"),
+    215 => (r=>X"8F", g=>X"A5", b=>X"25"),
+    216 => (r=>X"AD", g=>X"B7", b=>X"2C"),
+    217 => (r=>X"BC", g=>X"C7", b=>X"30"),
+    218 => (r=>X"C9", g=>X"D5", b=>X"33"),
+    219 => (r=>X"D4", g=>X"E0", b=>X"3B"),
+    220 => (r=>X"E0", g=>X"EC", b=>X"42"),
+    221 => (r=>X"EA", g=>X"F6", b=>X"45"),
+    222 => (r=>X"F0", g=>X"FD", b=>X"47"),
+    223 => (r=>X"F4", g=>X"FF", b=>X"6F"),
+    224 => (r=>X"55", g=>X"24", b=>X"00"),
+    225 => (r=>X"5A", g=>X"2C", b=>X"00"),
+    226 => (r=>X"6C", g=>X"3B", b=>X"00"),
+    227 => (r=>X"79", g=>X"4B", b=>X"00"),
+    228 => (r=>X"B9", g=>X"75", b=>X"00"),
+    229 => (r=>X"BB", g=>X"85", b=>X"00"),
+    230 => (r=>X"C1", g=>X"A1", b=>X"20"),
+    231 => (r=>X"D0", g=>X"B0", b=>X"2F"),
+    232 => (r=>X"DE", g=>X"BE", b=>X"3F"),
+    233 => (r=>X"E6", g=>X"C6", b=>X"45"),
+    234 => (r=>X"ED", g=>X"CD", b=>X"57"),
+    235 => (r=>X"F5", g=>X"DB", b=>X"62"),
+    236 => (r=>X"FB", g=>X"E5", b=>X"69"),
+    237 => (r=>X"FC", g=>X"EE", b=>X"6F"),
+    238 => (r=>X"FD", g=>X"F3", b=>X"77"),
+    239 => (r=>X"FD", g=>X"F3", b=>X"7F"),
+    240 => (r=>X"5C", g=>X"27", b=>X"00"),
+    241 => (r=>X"5C", g=>X"2F", b=>X"00"),
+    242 => (r=>X"71", g=>X"3B", b=>X"00"),
+    243 => (r=>X"7B", g=>X"48", b=>X"00"),
+    244 => (r=>X"B9", g=>X"68", b=>X"20"),
+    245 => (r=>X"BB", g=>X"72", b=>X"20"),
+    246 => (r=>X"C5", g=>X"86", b=>X"29"),
+    247 => (r=>X"D7", g=>X"96", b=>X"33"),
+    248 => (r=>X"E6", g=>X"A4", b=>X"40"),
+    249 => (r=>X"F4", g=>X"B1", b=>X"4B"),
+    250 => (r=>X"FD", g=>X"C1", b=>X"58"),
+    251 => (r=>X"FF", g=>X"CC", b=>X"55"),
+    252 => (r=>X"FF", g=>X"D4", b=>X"61"),
+    253 => (r=>X"FF", g=>X"DD", b=>X"69"),
+    254 => (r=>X"FF", g=>X"E6", b=>X"79"),
+    255 => (r=>X"FF", g=>X"EA", b=>X"98")
+  );
 
   type reg_a is array (natural range <>) of std_logic_vector(7 downto 0);
   
@@ -85,6 +354,13 @@ architecture SYN of atari_gtia is
   signal trig_r   : reg_a(0 to 3);
   signal pal_r    : std_logic_vector(7 downto 0);
   signal consol_r   : std_logic_vector(7 downto 0);
+  
+  -- video
+  signal r_s      : std_logic_vector(7 downto 0);
+  signal g_s      : std_logic_vector(7 downto 0);
+  signal b_s      : std_logic_vector(7 downto 0);
+  signal hsync_s  : std_logic;
+  signal vsync_s  : std_logic;
   
 begin
 
@@ -216,29 +492,37 @@ begin
 --  nmi_n <= '1';
   
   process (clk, rst)
-    variable hblank_r  : std_logic;
+    variable hblank_r   : std_logic;
     variable hsync_cnt  : integer range 0 to 15;
+    variable pal_i      : integer range 0 to 255;
   begin
     if rst = '1' then
       hblank_r := '0';
       hsync_cnt := 0;
     elsif rising_edge(clk) then
       if osc = '1' then
+        -- background
+        if an = "000" then
+          pal_i := to_integer(unsigned(colbk_r));
+          r_s <= palette(pal_i).r;
+          g_s <= palette(pal_i).g;
+          b_s <= palette(pal_i).b;
+        end if;
         -- generate VSYNC
         if an = "001" then
-          vsync <= '1';
+          vsync_s <= '1';
         else
-          vsync <= '0';
+          vsync_s <= '0';
         end if;
         -- generate HSYNC
         if hblank_r = '0' and an(2 downto 1) = "01" then
           hsync_cnt := hsync_cnt'high;
         end if;
         if hsync_cnt > 0 then
-          hsync <= '1';
+          hsync_s <= '1';
           hsync_cnt := hsync_cnt - 1;
         else
-          hsync <= '0';
+          hsync_s <= '0';
         end if; -- hsync_cnt>0
         if an(2 downto 1) = "01" then
           hblank_r := '1';
@@ -248,6 +532,55 @@ begin
       end if; -- osc='1'
     end if;
   end process;
+
+  BLK_DBLSCAN : block
+    signal b_i  : std_logic;
+    signal h_i  : unsigned(7 downto 0);
+    signal h_o  : unsigned(7 downto 0);
+    signal hs_w : unsigned(7 downto 0);
+  begin
+    -- each scanline is 114*2 = 228 clks @~3.5Mhz = ~15kHz
+    process (clk, rst)
+      variable b        : std_logic;
+      variable hsync_r  : std_logic;
+    begin
+      if rst = '1' then
+        b_i <= '0';
+        hsync_r := '0';
+      elsif rising_edge(clk) then
+        if osc = '1' then
+          -- start of line - flip buffer
+          if hsync_s = '1' and hsync_r = '0' then
+            b_i <= not b_i;
+            h_i <= to_unsigned(0,h_i'length);
+            h_o <= to_unsigned(0,h_o'length);
+          else
+            h_i <= h_i + 1;
+            -- save hsync width
+            if hsync_s = '0' and hsync_r = '1' then
+              hs_w <= h_i;
+            end if;
+          end if;
+          hsync_r := hsync_s;
+        end if;
+        if clk_vga = '1' then
+          -- end of line, restart buffer
+          if h_o = 114*2-1 then
+            h_o <= to_unsigned(0,h_o'length);
+          else
+            h_o <= h_o + 1;
+          end if;
+          -- generate hsync
+          if h_o < hs_w then
+            hsync <= '1';
+          else
+            hsync <= '0';
+          end if;
+        end if;
+      end if;
+    end process;
+    vsync <= vsync_s;
+  end block BLK_DBLSCAN;
   
   BLK_DEBUG : block
   begin
