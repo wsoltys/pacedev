@@ -86,6 +86,8 @@ architecture SYN of platform is
   signal clk_cpu_en     : std_logic;
   -- generate by GTIA
   signal clk_fphi0_en   : std_logic;
+  -- only for video debug display
+  signal clk_dbg_en     : std_logic;
   
   -- uP signals  
 	signal cpu_a_ext			: std_logic_vector(23 downto 0);
@@ -166,11 +168,13 @@ begin
       clk_high_en <= '0';
       clk_colour_en <= '0';
       clk_cpu_en <= '0';
+      clk_dbg_en <= '0';
     elsif rising_edge(clk_sys) then
       -- default values
       clk_high_en <= '0';
       clk_colour_en <= '0';
       clk_cpu_en <= '0';
+      clk_dbg_en <= '0';
       if count(2 downto 0) = "000" then
         -- 7.15909MHZ (NTSC) / 8.8672375MHz (PAL)
         clk_high_en <= '1';
@@ -192,8 +196,12 @@ begin
               end if;
               pal_cnt := pal_cnt + 1;
             end if;
-          end if;
-        end if;
+          end if; -- ATARI_REGION
+        end if; -- count(3)=0
+      end if; -- count(2..0)
+      -- debug video
+      if count(0) = '0' then
+        clk_dbg_en <= '1';
       end if;
       count := count + 1;
     end if;
@@ -533,13 +541,13 @@ begin
     antic_hexy_inst : antic_hexy
       generic map
       (
-        yOffset => 300,
-        xOffset => 100
+        yOffset => 232*2,
+        xOffset => 200
       )
       port map
       (
-        clk       => video_o_s.clk,
-        clk_ena   => clk_high_en,
+        clk       => clk_sys,
+        clk_ena   => clk_dbg_en,
         vSync     => video_o_s.vsync,
         hSync     => video_o_s.hsync,
         video     => dbg_video,
