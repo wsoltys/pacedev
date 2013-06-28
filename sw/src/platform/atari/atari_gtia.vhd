@@ -373,7 +373,7 @@ begin
   process (clk, rst)
     variable i  : integer range 0 to 3;
   begin
-    if rst = '0' then
+    if rst = '1' then
       -- WRITE-ONLY
       hposp_r <= (others => (others => '0'));
       hposm_r <= (others => (others => '0'));
@@ -383,7 +383,7 @@ begin
       grafm_r <= (others => '0');
       colpm_r <= (others => (others => '0'));
       colpf_r <= (others => (others => '0'));
-      colbk_r <= (others => '0');
+      colbk_r <= X"7F"; --(others => '0');
       prior_r <= (others => '0');
       vdelay_r <= (others => '0');
       gractl_r <= (others => '0');
@@ -411,11 +411,11 @@ begin
           if r_wn = '0' then
             -- register writes
             case a is
-              when "000--" =>
+              when "00000" | "00001" | "00010" | "00011" =>
                 hposp_r(i) <= d_i;
-              when "001--" =>
+              when "00100" | "00101" | "00110" | "00111" =>
                 hposm_r(i) <= d_i;
-              when "010--" =>
+              when "01000" | "01001" | "01010" | "01011" =>
                 sizep_r(i) <= d_i;
               when "01100" =>
                 sizem_r <= d_i;
@@ -463,15 +463,15 @@ begin
           else
             -- register reads
             case a is
-              when "000--" =>
+              when "00000" | "00001" | "00010" | "00011" =>
                 d_o <= mpf_r(i);
-              when "001--" =>
+              when "00100" | "00101" | "00110" | "00111" =>
                 d_o <= ppf_r(i);
-              when "010--" =>
+              when "01000" | "01001" | "01010" | "01011" =>
                 d_o <= mpl_r(i);
-              when "011--" =>
+              when "01100" | "01101" | "01110" | "01111" =>
                 d_o <= ppl_r(i);
-              when "100--" =>
+              when "10000" | "10001" | "10010" | "10011" =>
                 d_o <= trig_r(i);
               when "10100" =>
                 d_o <= pal_r;
@@ -501,43 +501,58 @@ begin
       hsync_cnt := 0;
     elsif rising_edge(clk) then
       if osc = '1' then
-        -- background
-        if an = "000" then
-          pal_i := to_integer(unsigned(colbk_r));
-          r_s <= palette(pal_i).r;
-          g_s <= palette(pal_i).g;
-          b_s <= palette(pal_i).b;
-        end if;
-        -- generate VSYNC
-        if an = "001" then
-          vsync_s <= '1';
-        else
-          vsync_s <= '0';
-        end if;
-        -- generate HSYNC
-        if hblank_r = '0' and an(2 downto 1) = "01" then
-          hsync_cnt := hsync_cnt'high;
-        end if;
-        if hsync_cnt > 0 then
-          hsync_s <= '1';
-          hsync_cnt := hsync_cnt - 1;
-        else
-          hsync_s <= '0';
-        end if; -- hsync_cnt>0
-        if an(2 downto 1) = "01" then
-          hblank_r := '1';
-        else
-          hblank_r := '0';
-        end if; -- an(2..1)
+        vsync_s <= '0';   -- default
+        case an is
+          -- BACKGROUND
+          when "000" =>
+            pal_i := to_integer(unsigned(colbk_r));
+            r_s <= palette(pal_i).r;
+            g_s <= palette(pal_i).g;
+            b_s <= palette(pal_i).b;
+            hblank_r := '0';
+          -- VSYNC
+          when "001" =>
+            vsync_s <= '1';
+            r_s <= (others => '0');
+            g_s <= (others => '0');
+            b_s <= (others => '0');
+            hblank_r := '0';
+          -- HBLANK/HSYNC
+          when "010" | "011" =>
+            r_s <= (others => '0');
+            g_s <= (others => '0');
+            b_s <= (others => '0');
+            if hblank_r = '0' then
+              hsync_cnt := hsync_cnt'high;
+            end if;
+            if hsync_cnt > 0 then
+              hsync_s <= '1';
+              hsync_cnt := hsync_cnt - 1;
+            else
+              hsync_s <= '0';
+            end if;
+            hblank_r := '1';
+          when others =>
+            r_s <= (others => '0');
+            g_s <= (others => '0');
+            b_s <= (others => '0');
+            hblank_r := '0';
+        end case;
       end if; -- osc='1'
     end if;
   end process;
 
   BLK_DBLSCAN : block
-    signal b_i  : std_logic;
-    signal h_i  : unsigned(7 downto 0);
-    signal h_o  : unsigned(7 downto 0);
-    signal hs_w : unsigned(7 downto 0);
+    signal b_i    : std_logic;
+    signal h_i    : unsigned(7 downto 0);
+    signal h_o    : unsigned(7 downto 0);
+    signal hs_w   : unsigned(7 downto 0);
+    signal r0     : std_logic_vector(7 downto 0);
+    signal g0     : std_logic_vector(7 downto 0);
+    signal b0     : std_logic_vector(7 downto 0);
+    signal r1     : std_logic_vector(7 downto 0);
+    signal g1     : std_logic_vector(7 downto 0);
+    signal b1     : std_logic_vector(7 downto 0);
   begin
     -- each scanline is 114*2 = 228 clks @~3.5Mhz = ~15kHz
     process (clk, rst)
@@ -580,6 +595,41 @@ begin
       end if;
     end process;
     vsync <= vsync_s;
+
+    buf0 : entity work.dblscanbuf
+      port map
+      (
+        clock		            => clk,
+        wraddress		        => std_logic_vector(h_i(7 downto 0)),
+        data(23 downto 16)  => r_s,
+        data(15 downto 8)   => g_s,
+        data(7 downto 0)    => b_s,
+        wren		            => b_i,
+        rdaddress		        => std_logic_vector(h_o(7 downto 0)),
+        q(23 downto 16)     => r0,
+        q(15 downto 8)      => g0,
+        q(7 downto 0)       => b0
+      );
+  
+    buf1 : entity work.dblscanbuf
+      port map
+      (
+        clock		            => clk,
+        wraddress		        => std_logic_vector(h_i(7 downto 0)),
+        data(23 downto 16)  => r_s,
+        data(15 downto 8)   => g_s,
+        data(7 downto 0)    => b_s,
+        wren		            => not b_i,
+        rdaddress		        => std_logic_vector(h_o(7 downto 0)),
+        q(23 downto 16)     => r1,
+        q(15 downto 8)      => g1,
+        q(7 downto 0)       => b1
+      );
+
+    r <= r0 when b_i = '0' else r1;
+    g <= g0 when b_i = '0' else g1;
+    b <= b0 when b_i = '0' else b1;
+    
   end block BLK_DBLSCAN;
   
   BLK_DEBUG : block

@@ -209,43 +209,44 @@ begin
         if h = 0 and v = 248 then
           if nmien_r(6) = '1' then
             nmi_n <= '0';
+            -- TODO: nmist_ff
           end if;
         end if;
       end if; --fphi0_i
-    end if;
+      -- assign BACKGROUND,HBLANK,VSYNC signals
+      if (NTSC and v >= 251 and v <= 253) or
+          (PAL and v >= 275 and v <= 278) then
+        vsync <= '1';
+      else
+        vsync <= '0';
+      end if;
+      -- same for NTSC/PAL
+      -- hblank and background
+      if h >= 17 and h <= 110 then
+        hblank <= '0';
+        background <= '0'; -- default
+        case dmactl_r(1 downto 0) is
+          when "01" =>
+            if h <= 31 or h >= 96 then
+              background <= '1';
+            end if;
+          when "10" =>
+            if h <= 23 or h >= 104 then
+              background <= '1';
+            end if;
+          when "11" =>
+            if h <= 21 or h >= 110 then
+              background <= '1';
+            end if;
+          when others =>
+            background <= '0';
+        end case;
+      else
+        hblank <= '1';
+      end if;
+    end if; -- rising_edge(clk)
     -- assign VCOUNT register
     vcount_r <= std_logic_vector(vcount(8 downto 1));
-    -- assign BACKGROUND,HBLANK,VSYNC signals
-    if (NTSC and v >= 251 and v <= 253) or
-        (PAL and v >= 275 and v <= 278) then
-      vsync <= '1';
-    else
-      vsync <= '0';
-    end if;
-    -- same for NTSC/PAL
-    -- hblank and background
-    if h >= 17 and h <= 110 then
-      hblank <= '0';
-      background <= '0'; -- default
-      case dmactl_r(1 downto 0) is
-        when "01" =>
-          if h <= 31 or h >= 96 then
-            background <= '1';
-          end if;
-        when "10" =>
-          if h <= 23 or h >= 104 then
-            background <= '1';
-          end if;
-        when "11" =>
-          if h <= 21 or h >= 110 then
-            background <= '1';
-          end if;
-        when others =>
-          background <= '0';
-      end case;
-    else
-      hblank <= '1';
-    end if;
     -- NOTE: VBLANK = ~(8-247)
   end process;
   

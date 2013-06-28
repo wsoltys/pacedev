@@ -43,7 +43,7 @@ set_global_assignment -name ORIGINAL_QUARTUS_VERSION 9.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "18:03:05  MARCH 10, 2010"
 set_global_assignment -name LAST_QUARTUS_VERSION "12.1 SP1"
 set_global_assignment -name MISC_FILE "g:/work/vl/mixer_test/mixer_test.dpf"
-set_global_assignment -name SMART_RECOMPILE ON
+set_global_assignment -name SMART_RECOMPILE OFF
 
 # Pin & Location Assignments
 # ==========================
@@ -771,7 +771,7 @@ set_global_assignment -name STRATIXII_CONFIGURATION_DEVICE AUTO
 
 # SignalTap II Assignments
 # ========================
-set_global_assignment -name ENABLE_SIGNALTAP OFF
+set_global_assignment -name ENABLE_SIGNALTAP ON
 set_global_assignment -name USE_SIGNALTAP_FILE video.stp
 
 # Power Estimation Assignments
@@ -2259,6 +2259,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t65/T65_M
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t65/T65_ALU.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t65/T65.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/atari/atari_gtia_pkg.vhd
+set_global_assignment -name VHDL_FILE dblscanbuf.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/atari/atari_gtia.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/atari/antic.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/atari/antic_pkg.vhd
@@ -2272,4 +2273,71 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/io/spi/uni_sp
 set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/target_top_ep3sl.vhd
 set_global_assignment -name SIGNALTAP_FILE cpu.stp
 set_global_assignment -name SIGNALTAP_FILE video.stp
+set_global_assignment -name SLD_NODE_CREATOR_ID 110 -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_ENTITY_NAME sld_signaltap -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to "PACE:pace_inst|platform:platform_inst|atari_gtia:gtia_inst|clk" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_RAM_BLOCK_TYPE=M9K" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_INFO=805334528" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_POWER_UP_TRIGGER=0" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STORAGE_QUALIFIER_INVERSION_MASK_LENGTH=0" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=32768" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ATTRIBUTE_MEM_MODE=OFF" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_FLOW_USE_GENERATED=0" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_BITS=11" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_BUFFER_FULL_STOP=1" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_CURRENT_RESOURCE_WIDTH=1" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL=1" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=32768" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_IN_ENABLED=0" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ADVANCED_TRIGGER_ENTITY=basic,1," -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL_PIPELINE=1" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ENABLE_ADVANCED_TRIGGER=0" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[0] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|an[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[1] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|an[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[2] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|an[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[0] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|an[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[1] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|an[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[2] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|an[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[3] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|dbg.vcount[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[4] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|dbg.vcount[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[5] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|dbg.vcount[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[6] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|dbg.vcount[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[7] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|dbg.vcount[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[8] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|dbg.vcount[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[9] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|dbg.vcount[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[10] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|dbg.vcount[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[3] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|dbg.vcount[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[4] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|dbg.vcount[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[5] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|dbg.vcount[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[6] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|dbg.vcount[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[7] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|dbg.vcount[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[8] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|dbg.vcount[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[9] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|dbg.vcount[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[10] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|dbg.vcount[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[11] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|dmactl_r[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[12] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|dmactl_r[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[13] -to "PACE:pace_inst|platform:platform_inst|atari_gtia:gtia_inst|an[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[14] -to "PACE:pace_inst|platform:platform_inst|atari_gtia:gtia_inst|an[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[15] -to "PACE:pace_inst|platform:platform_inst|atari_gtia:gtia_inst|an[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[16] -to "PACE:pace_inst|platform:platform_inst|atari_gtia:gtia_inst|clk_vga" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[17] -to "PACE:pace_inst|platform:platform_inst|atari_gtia:gtia_inst|hsync" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[18] -to "PACE:pace_inst|platform:platform_inst|atari_gtia:gtia_inst|hsync_s" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[19] -to "PACE:pace_inst|platform:platform_inst|atari_gtia:gtia_inst|osc" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[20] -to "PACE:pace_inst|platform:platform_inst|atari_gtia:gtia_inst|vsync" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[11] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|dmactl_r[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[12] -to "PACE:pace_inst|platform:platform_inst|antic:antic_inst|dmactl_r[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[13] -to "PACE:pace_inst|platform:platform_inst|atari_gtia:gtia_inst|an[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[14] -to "PACE:pace_inst|platform:platform_inst|atari_gtia:gtia_inst|an[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[15] -to "PACE:pace_inst|platform:platform_inst|atari_gtia:gtia_inst|an[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[16] -to "PACE:pace_inst|platform:platform_inst|atari_gtia:gtia_inst|clk_vga" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[17] -to "PACE:pace_inst|platform:platform_inst|atari_gtia:gtia_inst|hsync" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[18] -to "PACE:pace_inst|platform:platform_inst|atari_gtia:gtia_inst|hsync_s" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[19] -to "PACE:pace_inst|platform:platform_inst|atari_gtia:gtia_inst|osc" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[20] -to "PACE:pace_inst|platform:platform_inst|atari_gtia:gtia_inst|vsync" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=21" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=21" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=92" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=34609" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=7310" -section_id auto_signaltap_0
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

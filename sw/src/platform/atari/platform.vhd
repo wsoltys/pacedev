@@ -100,12 +100,10 @@ architecture SYN of platform is
   signal cpu_halt_n     : std_logic;
 
   -- SELF-TEST ROM
-  signal self_en        : std_logic;
   signal self_cs        : std_logic;
   signal self_d_o       : std_logic_vector(7 downto 0);
   
   -- CART/BASIC
-  signal basic_en       : std_logic;
   signal basic_cs       : std_logic;
   signal basic_d_o      : std_logic_vector(7 downto 0);
   
@@ -132,7 +130,6 @@ architecture SYN of platform is
   signal antic_dbg      : antic_dbg_t;
   
   -- KERNEL ROM signals        
-	signal kernel_en			: std_logic;
 	signal kernel_cs			: std_logic;
   signal kernel_d_o     : std_logic_vector(7 downto 0);
 
@@ -250,11 +247,6 @@ begin
               -- this goes last
               ram_d_o when ram_cs = '1' else
               X"FF";
-
-  -- MMU
-  self_en <= kernel_en;
-  basic_en <= '0';
-  kernel_en <= '1';
   
   cpu_irq_n <= '1';
   
