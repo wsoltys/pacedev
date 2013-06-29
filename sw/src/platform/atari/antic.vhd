@@ -113,57 +113,60 @@ begin
       nmires_r <= "0";
     elsif rising_edge(clk) then
       if clk_en = '1' then
-        -- (should also sample res_n here)
-        if STD_MATCH(a_i, X"D4--") then
-          if r_wn_i = '0' then
-            -- register writes
-            case a_i(3 downto 0) is
-              when X"0" =>
-                dmactl_r <= d_i(dmactl_r'range);
-              when X"1" =>
-                chactl_r <= d_i(chactl_r'range);
-              when X"2" =>
-                dlistl_r <= d_i;
-              when X"3" =>
-                dlisth_r <= d_i;
-              when X"4" =>
-                hscrol_r <= d_i(hscrol_r'range);
-              when X"5" =>
-                vscrol_r <= d_i(vscrol_r'range);
-              when X"7" =>
-                pmbase_r <= d_i(pmbase_r'range);
-              when X"9" =>
-                chbase_r <= d_i(chbase_r'range);
-              when X"A" =>
-                -- probably don't need a register
-                wsync_r <= "1";
-              when X"E" =>
-                -- reportedly, this must be written by:
-                -- - cycle 7 to enable
-                -- - cycle 8 to disable
-                nmien_r <= d_i(nmien_r'range);
-              when X"F" =>
-                -- probably don't need a register
-                nmires_r <= d_i(nmires_r'range);
-              when others =>
-                null;
-            end case;
-          else
-            -- register reads
-            case a_i(3 downto 0) is
-              when X"B" =>
-                d_o <= vcount_r;
-              when X"C" =>
-                d_o <= penh_r;
-              when X"D" =>
-                d_o <= penv_r;
-              when X"F" =>
-                d_o <= nmist_r & "00000";
-              when others =>
-                null;
-            end case;
-          end if; -- r_wn_i
-        end if; -- $D4XX
+        -- phi2_i is the CPU clk_en
+        if phi2_i = '1' then
+          -- (should also sample res_n here)
+          if STD_MATCH(a_i, X"D4--") then
+            if r_wn_i = '0' then
+              -- register writes
+              case a_i(3 downto 0) is
+                when X"0" =>
+                  dmactl_r <= d_i(dmactl_r'range);
+                when X"1" =>
+                  chactl_r <= d_i(chactl_r'range);
+                when X"2" =>
+                  dlistl_r <= d_i;
+                when X"3" =>
+                  dlisth_r <= d_i;
+                when X"4" =>
+                  hscrol_r <= d_i(hscrol_r'range);
+                when X"5" =>
+                  vscrol_r <= d_i(vscrol_r'range);
+                when X"7" =>
+                  pmbase_r <= d_i(pmbase_r'range);
+                when X"9" =>
+                  chbase_r <= d_i(chbase_r'range);
+                when X"A" =>
+                  -- probably don't need a register
+                  wsync_r <= "1";
+                when X"E" =>
+                  -- reportedly, this must be written by:
+                  -- - cycle 7 to enable
+                  -- - cycle 8 to disable
+                  nmien_r <= d_i(nmien_r'range);
+                when X"F" =>
+                  -- probably don't need a register
+                  nmires_r <= d_i(nmires_r'range);
+                when others =>
+                  null;
+              end case;
+            else
+              -- register reads
+              case a_i(3 downto 0) is
+                when X"B" =>
+                  d_o <= vcount_r;
+                when X"C" =>
+                  d_o <= penh_r;
+                when X"D" =>
+                  d_o <= penv_r;
+                when X"F" =>
+                  d_o <= nmist_r & "00000";
+                when others =>
+                  null;
+              end case;
+            end if; -- r_wn_i
+          end if; -- $D4XX
+        end if; -- phi2_i (cpu_clk_en)
       end if; -- clk_en
     end if;
   end process;
@@ -222,15 +225,15 @@ begin
       end if;
       -- same for NTSC/PAL
       -- hblank and background
+      background <= '0'; -- default
+      hblank <= '0';
       if h >= 17 and h <= 110 then
-        hblank <= '0';
-        background <= '0'; -- default
         case dmactl_r(1 downto 0) is
           when "01" =>
             if h <= 31 or h >= 96 then
               background <= '1';
             end if;
-          when "10" =>
+          when "10" | "00" =>
             if h <= 23 or h >= 104 then
               background <= '1';
             end if;
@@ -262,11 +265,11 @@ begin
         if fphi0_i = '1' then
           if vsync = '1' then
             an <= "001";
-          elsif background = '1' then
-            an <= "000";
           elsif hblank = '1' then
             -- normal mode
             an <= "010";
+          elsif background = '1' then
+            an <= "000";
           else
             -- fixme
             an <= "111";

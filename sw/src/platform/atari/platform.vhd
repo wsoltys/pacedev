@@ -439,7 +439,7 @@ begin
     (
       clk     => clk_sys,
       clk_en  => '1',
-      rst     => clkrst_i.rst(0),
+      rst     => rst_sys,
       
       fphi0_i => clk_fphi0_en,
       phi0_o  => open,

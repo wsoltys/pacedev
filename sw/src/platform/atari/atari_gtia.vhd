@@ -446,7 +446,7 @@ begin
               when "11001" =>
                 colpf_r(3) <= d_i;
               when "11010" =>
-                colbk_r <= d_i;
+                colbk_r <= X"7F"; --d_i;
               when "11011" =>
                 prior_r <= d_i;
               when "11100" =>
@@ -501,6 +501,7 @@ begin
       hsync_cnt := 0;
     elsif rising_edge(clk) then
       if osc = '1' then
+        hsync_s <= '0';
         vsync_s <= '0';   -- default
         case an is
           -- BACKGROUND
@@ -562,18 +563,21 @@ begin
       if rst = '1' then
         b_i <= '0';
         hsync_r := '0';
+        hs_w <= to_unsigned(0,hs_w'length);
       elsif rising_edge(clk) then
         if osc = '1' then
           -- start of line - flip buffer
-          if hsync_s = '1' and hsync_r = '0' then
+          if hsync_r = '0'  and hsync_s = '1' then
             b_i <= not b_i;
             h_i <= to_unsigned(0,h_i'length);
             h_o <= to_unsigned(0,h_o'length);
           else
             h_i <= h_i + 1;
             -- save hsync width
-            if hsync_s = '0' and hsync_r = '1' then
-              hs_w <= h_i;
+            if hsync_r = '1'  and hsync_s = '0' then
+              if hs_w < h_i then
+                hs_w <= h_i;
+              end if;
             end if;
           end if;
           hsync_r := hsync_s;
