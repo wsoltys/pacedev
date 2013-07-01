@@ -518,7 +518,7 @@ begin
             g_s <= (others => '0');
             b_s <= (others => '0');
             hblank_r := '0';
-          -- HBLANK/HSYNC
+          -- HBLANK/VBLANK/HSYNC
           when "010" | "011" =>
             r_s <= (others => '0');
             g_s <= (others => '0');

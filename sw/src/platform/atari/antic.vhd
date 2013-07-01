@@ -93,6 +93,7 @@ architecture SYN of antic is
   signal hblank       : std_logic;
   signal background   : std_logic;
   signal vsync        : std_logic;
+  signal vblank       : std_logic;
   
 begin
 
@@ -183,6 +184,9 @@ begin
       h := 0;
       v := 0;
       vcount := (others => '0');
+      hblank <= '0';
+      vsync <= '0';
+      vblank <= '0';
       nmi_n <= '1';
     elsif rising_edge(clk) then
       if fphi0_i = '1' then
@@ -216,12 +220,19 @@ begin
           end if;
         end if;
       end if; --fphi0_i
-      -- assign BACKGROUND,HBLANK,VSYNC signals
-      if (NTSC and v >= 251 and v <= 253) or
-          (PAL and v >= 275 and v <= 278) then
-        vsync <= '1';
+      -- assign BACKGROUND,HBLANK,VBLANK,VSYNC signals
+      if (NTSC and v >= 8 and v <= 240) or
+          -- *** fix PAL
+          (PAL and v >= 8 and v <= 240) then
+        vblank <= '0';
       else
-        vsync <= '0';
+        vblank <= '1';
+        if (NTSC and v >= 251 and v <= 253) or
+            (PAL and v >= 275 and v <= 278) then
+          vsync <= '1';
+        else
+          vsync <= '0';
+        end if;
       end if;
       -- same for NTSC/PAL
       -- hblank and background
@@ -250,7 +261,6 @@ begin
     end if; -- rising_edge(clk)
     -- assign VCOUNT register
     vcount_r <= std_logic_vector(vcount(8 downto 1));
-    -- NOTE: VBLANK = ~(8-247)
   end process;
   
   -- HALT (none for now)
@@ -265,7 +275,7 @@ begin
         if fphi0_i = '1' then
           if vsync = '1' then
             an <= "001";
-          elsif hblank = '1' then
+          elsif vblank = '1' or hblank = '1' then
             -- normal mode
             an <= "010";
           elsif background = '1' then
