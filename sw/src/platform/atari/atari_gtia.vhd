@@ -60,6 +60,9 @@ end entity atari_gtia;
 
 architecture SYN of atari_gtia is
 
+  constant NTSC       : boolean := (VARIANT = CO14805);
+  constant PAL_SECAM  : boolean := not NTSC;
+
   type RGB_t is record
     r : std_logic_vector(9 downto 0);
     g : std_logic_vector(9 downto 0);
@@ -383,7 +386,7 @@ begin
       grafm_r <= (others => '0');
       colpm_r <= (others => (others => '0'));
       colpf_r <= (others => (others => '0'));
-      colbk_r <= X"7F"; --(others => '0');
+      colbk_r <= X"82"; --(others => '0');
       prior_r <= (others => '0');
       vdelay_r <= (others => '0');
       gractl_r <= (others => '0');
@@ -395,11 +398,9 @@ begin
       mpl_r <= (others => (others => '0'));
       ppl_r <= (others => (others => '0'));
       trig_r <= (others => (others => '0'));
-      if VARIANT = CO14805 then
-        -- NTSC
+      if NTSC then
         pal_r <= "00000111";
       else
-        -- PAL/SECAM?
         pal_r <= "00000000";
       end if;
       -- hack for now (no keys active)
@@ -446,7 +447,7 @@ begin
               when "11001" =>
                 colpf_r(3) <= d_i;
               when "11010" =>
-                colbk_r <= X"7F"; --d_i;
+                colbk_r <= X"82"; --d_i;
               when "11011" =>
                 prior_r <= d_i;
               when "11100" =>
@@ -493,52 +494,87 @@ begin
   
   process (clk, rst)
     variable hblank_r   : std_logic;
-    variable hsync_cnt  : integer range 0 to 15;
+    variable vsync_r    : std_logic;
+    variable h          : integer range 0 to 227;
+    variable v          : integer range 0 to 312-1;
     variable pal_i      : integer range 0 to 255;
   begin
     if rst = '1' then
       hblank_r := '0';
-      hsync_cnt := 0;
+      vsync_r := '0';
+      h := 0;
+      v := 0;
     elsif rising_edge(clk) then
       if osc = '1' then
+        -- update HCOUNT
+        if hblank_r = '0' and an(2 downto 1) = "01" then
+          h := 222;
+        elsif h = h'high then
+          h := 0;
+        else
+          h := h + 1;
+        end if;
+        if an(2 downto 1) = "01" then
+          hblank_r := '1';
+        else
+          hblank_r := '0';
+        end if;
+        -- update VCOUNT
+        if vsync_r = '0' and an = "001" then
+          if NTSC then
+            v := 251;
+          else
+            v := 275;
+          end if;
+        elsif h = 0 then
+          if (NTSC and v = 262-1) or v = v'high then
+            v := 0;
+          else
+            v := v + 1;
+          end if;
+        end if;
+        if an = "001" then
+          vsync_r := '1';
+        else
+          vsync_r := '0';
+        end if;
+        -- HSYNC, VBLANK
         hsync_s <= '0';
-        vsync_s <= '0';   -- default
-        case an is
-          -- BACKGROUND
-          when "000" =>
-            pal_i := to_integer(unsigned(colbk_r));
-            r_s <= palette(pal_i).r;
-            g_s <= palette(pal_i).g;
-            b_s <= palette(pal_i).b;
-            hblank_r := '0';
-          -- VSYNC
-          when "001" =>
+        if h >= 0 and h <= 15 then
+          hsync_s <= '1';
+        end if;
+        -- handle VBLANK differently b/c generated internally
+        vsync_s <= '0';
+        if (NTSC and (v < 8 or v > 240)) or
+            (PAL_SECAM and (v < 8 or v > 240)) then
+          if an = "001" then
             vsync_s <= '1';
-            r_s <= (others => '0');
-            g_s <= (others => '0');
-            b_s <= (others => '0');
-            hblank_r := '0';
-          -- HBLANK/VBLANK/HSYNC
-          when "010" | "011" =>
-            r_s <= (others => '0');
-            g_s <= (others => '0');
-            b_s <= (others => '0');
-            if hblank_r = '0' then
-              hsync_cnt := hsync_cnt'high;
-            end if;
-            if hsync_cnt > 0 then
-              hsync_s <= '1';
-              hsync_cnt := hsync_cnt - 1;
-            else
-              hsync_s <= '0';
-            end if;
-            hblank_r := '1';
-          when others =>
-            r_s <= (others => '0');
-            g_s <= (others => '0');
-            b_s <= (others => '0');
-            hblank_r := '0';
-        end case;
+          end if;
+          r_s <= (others => '0');
+          g_s <= (others => '0');
+          b_s <= (others => '0');
+        else
+          case an is
+            -- BACKGROUND
+            when "000" =>
+              pal_i := to_integer(unsigned(colbk_r));
+              r_s <= palette(pal_i).r;
+              g_s <= palette(pal_i).g;
+              b_s <= palette(pal_i).b;
+            -- VSYNC (can't happen here)
+            when "001" =>
+              null;
+            -- HBLANK
+            when "010" | "011" =>
+              r_s <= (others => '0');
+              g_s <= (others => '0');
+              b_s <= (others => '0');
+            when others =>
+              r_s <= (others => '0');
+              g_s <= (others => '0');
+              b_s <= (others => '0');
+          end case;
+        end if; -- VBLANK
       end if; -- osc='1'
     end if;
   end process;

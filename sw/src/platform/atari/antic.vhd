@@ -275,7 +275,7 @@ begin
         if fphi0_i = '1' then
           if vsync = '1' then
             an <= "001";
-          elsif vblank = '1' or hblank = '1' then
+          elsif hblank = '1' then
             -- normal mode
             an <= "010";
           elsif background = '1' then
