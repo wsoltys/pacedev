@@ -38,7 +38,6 @@ package antic_pkg is
     port
     (
       clk     : in std_logic;
-      clk_en  : in std_logic;
       rst     : in std_logic;
       
       fphi0_i : in std_logic;

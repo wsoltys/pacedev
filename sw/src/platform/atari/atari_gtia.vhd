@@ -16,7 +16,6 @@ entity atari_gtia is
   port
   (
     clk     : in std_logic;
-    clk_en  : in std_logic;
     rst     : in std_logic;
 
     osc     : in std_logic;
@@ -483,7 +482,7 @@ begin
             end case;
           end if; -- r_wn_i
         end if; -- $D4XX
-      end if; -- clk_en
+      end if; -- phi2_i
     end if;
   end process;
 

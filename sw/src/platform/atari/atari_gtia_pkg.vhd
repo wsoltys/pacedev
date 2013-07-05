@@ -23,7 +23,6 @@ package atari_gtia_pkg is
     port
     (
       clk     : in std_logic;
-      clk_en  : in std_logic;
       rst     : in std_logic;
 
       osc     : in std_logic;

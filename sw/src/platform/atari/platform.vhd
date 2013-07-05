@@ -95,6 +95,7 @@ architecture SYN of platform is
   signal cpu_d_i        : std_logic_vector(7 downto 0);
   signal cpu_d_o        : std_logic_vector(7 downto 0);
   signal cpu_r_wn       : std_logic;
+  signal cpu_rdy        : std_logic;
   signal cpu_irq_n      : std_logic;
   signal cpu_nmi_n      : std_logic;
   signal cpu_halt_n     : std_logic;
@@ -125,7 +126,6 @@ architecture SYN of platform is
   signal antic_d_o      : std_logic_vector(7 downto 0);
   signal antic_r_wn     : std_logic;
   signal antic_nmi_i    : std_logic;
-  signal antic_rdy      : std_logic;
   signal antic_an       : std_logic_vector(2 downto 0);
   signal antic_dbg      : antic_dbg_t;
   
@@ -144,15 +144,15 @@ architecture SYN of platform is
   signal portb_oe       : std_logic_vector(7 downto 0);
   
   -- other signals      
-	signal cpu_reset			: std_logic;
-	alias game_reset			: std_logic is inputs_i(2).d(0);
+	signal platform_rst	  : std_logic;
+	alias soft_rst	      : std_logic is inputs_i(2).d(0);
 
   -- video
   signal video_o_s        : to_VIDEO_t;
   
 begin
 
-	cpu_reset <= rst_sys or game_reset;
+	platform_rst <= rst_sys or soft_rst;
   
   -- generate clocks from x16 source
   process (clk_sys, rst_sys)
@@ -254,10 +254,10 @@ begin
     port map
     (
       Mode    		=> "00",	-- 6502
-      Res_n   		=> not cpu_reset,
+      Res_n   		=> not platform_rst,
       Enable  		=> clk_cpu_en,
       Clk     		=> clk_sys,
-      Rdy     		=> '1',
+      Rdy     		=> cpu_rdy,
       Abort_n 		=> '1',
       IRQ_n   		=> cpu_irq_n,
       NMI_n   		=> cpu_nmi_n,
@@ -323,8 +323,7 @@ begin
     port map
     (
       clk       => clk_sys,
-      clk_en    => clk_cpu_en,
-      rst       => rst_sys,
+      rst       => platform_rst,
 
       osc       => clk_colour_en,
       phi2_i    => clk_cpu_en,
@@ -389,7 +388,7 @@ begin
     port map
     (	
       clk       	=> clk_sys,
-      rst       	=> rst_sys,
+      rst       	=> platform_rst,
       cs        	=> pia_cs,
       rw        	=> cpu_r_wn,
       addr(1)     => cpu_a(0),
@@ -438,8 +437,7 @@ begin
     port map
     (
       clk     => clk_sys,
-      clk_en  => '1',
-      rst     => rst_sys,
+      rst     => platform_rst,
       
       fphi0_i => clk_fphi0_en,
       phi0_o  => open,
@@ -456,7 +454,7 @@ begin
       halt_n  => cpu_halt_n,
       rnmi_n  => antic_nmi_i,
       nmi_n   => cpu_nmi_n,
-      rdy     => antic_rdy,
+      rdy     => cpu_rdy,
       
       -- CTIA/GTIA interface
       an      => antic_an,

@@ -16,7 +16,6 @@ entity antic is
   port
   (
     clk     : in std_logic;
-    clk_en  : in std_logic;
     rst     : in std_logic;
     
     fphi0_i : in std_logic;
@@ -79,8 +78,8 @@ architecture SYN of antic is
   signal nmien_r  : std_logic_vector(7 downto 6);
     -- b7 display list NMI
     -- b6 vertical blank NMI
-  signal nmires_r : std_logic_vector(0 downto 0);
-
+  -- NO REGISTER REQUIRED FOR NMIRES
+  
   -- READ-ONLY registers
   signal vcount_r : std_logic_vector(7 downto 0);
   signal penh_r   : std_logic_vector(7 downto 0);
@@ -88,8 +87,21 @@ architecture SYN of antic is
   signal nmist_r  : std_logic_vector(7 downto 5);
     -- b7 display list NMI
     -- b6 vertical blank NMI
-    -- b5 reset button NMI
+    -- b5 reset button NMI (400/800 only)
 
+  -- RS flip-flops
+  
+  -- NMIST
+  signal dli_set      : std_logic;
+  signal dli_clr      : std_logic;
+  signal vbi_set      : std_logic;
+  signal vbi_clr      : std_logic;
+  
+  -- RDY signal (WSYNC)
+  signal rdy_set      : std_logic;
+  signal rdy_clr      : std_logic;
+
+  -- video signals
   signal hblank       : std_logic;
   signal background   : std_logic;
   signal vsync        : std_logic;
@@ -111,67 +123,109 @@ begin
       chbase_r <= (others => '0');
       wsync_r <= "0";
       nmien_r <= (others => '0');
-      nmires_r <= "0";
     elsif rising_edge(clk) then
-      if clk_en = '1' then
-        -- phi2_i is the CPU clk_en
-        if phi2_i = '1' then
-          -- (should also sample res_n here)
-          if STD_MATCH(a_i, X"D4--") then
-            if r_wn_i = '0' then
-              -- register writes
-              case a_i(3 downto 0) is
-                when X"0" =>
-                  dmactl_r <= d_i(dmactl_r'range);
-                when X"1" =>
-                  chactl_r <= d_i(chactl_r'range);
-                when X"2" =>
-                  dlistl_r <= d_i;
-                when X"3" =>
-                  dlisth_r <= d_i;
-                when X"4" =>
-                  hscrol_r <= d_i(hscrol_r'range);
-                when X"5" =>
-                  vscrol_r <= d_i(vscrol_r'range);
-                when X"7" =>
-                  pmbase_r <= d_i(pmbase_r'range);
-                when X"9" =>
-                  chbase_r <= d_i(chbase_r'range);
-                when X"A" =>
-                  -- probably don't need a register
-                  wsync_r <= "1";
-                when X"E" =>
-                  -- reportedly, this must be written by:
-                  -- - cycle 7 to enable
-                  -- - cycle 8 to disable
-                  nmien_r <= d_i(nmien_r'range);
-                when X"F" =>
-                  -- probably don't need a register
-                  nmires_r <= d_i(nmires_r'range);
-                when others =>
-                  null;
-              end case;
-            else
-              -- register reads
-              case a_i(3 downto 0) is
-                when X"B" =>
-                  d_o <= vcount_r;
-                when X"C" =>
-                  d_o <= penh_r;
-                when X"D" =>
-                  d_o <= penv_r;
-                when X"F" =>
-                  d_o <= nmist_r & "00000";
-                when others =>
-                  null;
-              end case;
-            end if; -- r_wn_i
-          end if; -- $D4XX
-        end if; -- phi2_i (cpu_clk_en)
-      end if; -- clk_en
+      -- defaults
+      rdy_clr <= '0';
+      -- *** TODO: RES (400/800 only)
+      -- phi2_i is the CPU clk_en
+      if phi2_i = '1' then
+        -- (should also sample res_n here)
+        if STD_MATCH(a_i, X"D4--") then
+          if r_wn_i = '0' then
+            -- register writes
+            case a_i(3 downto 0) is
+              when X"0" =>
+                dmactl_r <= d_i(dmactl_r'range);
+              when X"1" =>
+                chactl_r <= d_i(chactl_r'range);
+              when X"2" =>
+                dlistl_r <= d_i;
+              when X"3" =>
+                dlisth_r <= d_i;
+              when X"4" =>
+                hscrol_r <= d_i(hscrol_r'range);
+              when X"5" =>
+                vscrol_r <= d_i(vscrol_r'range);
+              when X"7" =>
+                pmbase_r <= d_i(pmbase_r'range);
+              when X"9" =>
+                chbase_r <= d_i(chbase_r'range);
+              when X"A" =>
+                -- WSYNC de-asserts CPU RDY line
+                rdy_clr <= '1';
+              when X"E" =>
+                -- reportedly, this must be written by:
+                -- - cycle 7 to enable
+                -- - cycle 8 to disable
+                nmien_r <= d_i(nmien_r'range);
+              when others =>
+                null;
+            end case;
+          else
+            -- register reads
+            case a_i(3 downto 0) is
+              when X"B" =>
+                d_o <= vcount_r;
+              when X"C" =>
+                d_o <= penh_r;
+              when X"D" =>
+                d_o <= penv_r;
+              when X"F" =>
+                d_o <= nmist_r & "00000";
+              when others =>
+                null;
+            end case;
+          end if; -- r_wn_i
+        end if; -- $D4XX
+      end if; -- phi2_i (cpu_clk_en)
     end if;
   end process;
 
+  -- RDY
+  process (clk, rst)
+  begin
+    if rst = '1' then
+      rdy <= '1';
+    elsif rising_edge(clk) then
+      if rdy_set = '1' then
+        rdy <= '1';
+      elsif rdy_clr = '1' then
+        rdy <= '0';
+      end if;
+      -- WSYNC register rdy_set
+      -- video controller rdy_clr
+    end if;
+  end process;
+  
+  -- NMIST
+  process (clk, rst)
+  begin
+    if rst = '1' then
+      nmist_r <= (others => '0');
+    elsif rising_edge(clk) then
+      if dli_set = '1' then
+        nmist_r(7) <= '1';
+      elsif dli_clr = '1' then
+        nmist_r(7) <= '0';
+      end if;
+      if vbi_set = '1' then
+        nmist_r(6) <= '1';
+      elsif vbi_clr = '1' then
+        nmist_r(6) <= '0';
+      end if;
+      -- write to NMIRES clears all bits in NMIST
+      if phi2_i = '1' then
+        if STD_MATCH(a_i, X"D4--") then
+          if r_wn_i = '0' then
+            if a_i(3 downto 0) = X"F" then
+              nmist_r <= (others => '0');
+            end if;
+          end if;
+        end if;
+      end if;
+    end if;
+  end process;
+  
   -- video controller
   process (clk, rst)
     -- fphi0 is the CPU clock
@@ -189,6 +243,12 @@ begin
       vblank <= '0';
       nmi_n <= '1';
     elsif rising_edge(clk) then
+      -- defaults
+      rdy_set <= '1';
+      dli_set <= '0';
+      dli_clr <= '0';
+      vbi_set <= '0';
+      vbi_clr <= '0';
       if fphi0_i = '1' then
         -- h,v video counters
         if h = h'high then
@@ -214,10 +274,17 @@ begin
         -- - NTSC only (PAL=?)
         nmi_n <= '1';
         if h = 0 and v = 248 then
+          -- set VBI, reset DLI latchs in NMIST
+          dli_clr <= '1';
+          vbi_set <= '1';
+          -- generate NMI
           if nmien_r(6) = '1' then
             nmi_n <= '0';
-            -- TODO: nmist_ff
           end if;
+        end if;
+        -- resume WSYNC
+        if h = 105 then
+          rdy_set <= '1';
         end if;
       end if; --fphi0_i
       -- assign BACKGROUND,HBLANK,VBLANK,VSYNC signals
@@ -301,7 +368,7 @@ begin
     dbg.chbase <= unsigned(chbase_r & "0");
     dbg.wsync <= unsigned("0000000" & wsync_r);
     dbg.nmien <= unsigned(nmien_r & "000000");
-    dbg.nmires <= unsigned("0000000" & nmires_r);
+    dbg.nmires <= (others => '0');
     dbg.vcount <= unsigned(vcount_r);
     dbg.penh <= unsigned(penh_r);
     dbg.penv <= unsigned(penv_r);
@@ -454,9 +521,9 @@ begin
 			when "101100" => cChar <= "001110"; -- E
 			when "101101" => cChar <= "00" & dbg.nmien(7 downto 4);   
 			when "101110" => cChar <= "011100"; -- S                  
-			when "101111" => cChar <= "00" & dbg.nmist(3 downto 0);   
+			when "101111" => cChar <= "00" & dbg.nmist(7 downto 4);   
 			when "110000" => cChar <= "011011"; -- R                  
-			when "110001" => cChar <= "00" & dbg.nmires(3 downto 0);  
+			when "110001" => cChar <= "00" & dbg.nmires(7 downto 4);  
 			when "110010" => cChar <= "111111"; --                                                    
 			when "110011" => cChar <= "011111"; -- V                
 			when "110100" => cChar <= "001100"; -- C                
