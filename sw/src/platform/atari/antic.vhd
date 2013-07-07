@@ -128,7 +128,7 @@ begin
       rdy_clr <= '0';
       -- *** TODO: RES (400/800 only)
       -- phi2_i is the CPU clk_en
-      if phi2_i = '1' then
+      --if phi2_i = '1' then
         -- (should also sample res_n here)
         if STD_MATCH(a_i, X"D4--") then
           if r_wn_i = '0' then
@@ -177,7 +177,7 @@ begin
             end case;
           end if; -- r_wn_i
         end if; -- $D4XX
-      end if; -- phi2_i (cpu_clk_en)
+      --end if; -- phi2_i (cpu_clk_en)
     end if;
   end process;
 
@@ -244,7 +244,7 @@ begin
       nmi_n <= '1';
     elsif rising_edge(clk) then
       -- defaults
-      rdy_set <= '1';
+      rdy_set <= '0';
       dli_set <= '0';
       dli_clr <= '0';
       vbi_set <= '0';

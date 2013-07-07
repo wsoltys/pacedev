@@ -396,7 +396,6 @@ begin
       ppf_r <= (others => (others => '0'));
       mpl_r <= (others => (others => '0'));
       ppl_r <= (others => (others => '0'));
-      trig_r <= (others => (others => '0'));
       if NTSC then
         pal_r <= "00000111";
       else
@@ -405,9 +404,9 @@ begin
       -- hack for now (no keys active)
       consol_r <= "00001111";
     elsif rising_edge(clk) then
-      if phi2_i = '1' then
+      i := to_integer(unsigned(a(1 downto 0)));
+      --if phi2_i = '1' then
         if cs_n = '0' then
-          i := to_integer(unsigned(a(1 downto 0)));
           if r_wn = '0' then
             -- register writes
             case a is
@@ -482,10 +481,30 @@ begin
             end case;
           end if; -- r_wn_i
         end if; -- $D4XX
-      end if; -- phi2_i
+      --end if; -- phi2_i
     end if;
   end process;
 
+  -- TRIG0-3
+  process (clk, rst)
+  begin
+    if rst = '1' then
+      trig_r <= (others => (0 => '1', others => '0'));
+    elsif rising_edge(clk) then
+      for i in 0 to 3 loop
+        if gractl_r(2) = '1' then
+          -- latched
+          if t(i) = '1' then
+            trig_r(i)(0) <= '0';
+          end if;
+        else
+          -- momentary
+          trig_r(i)(0) <= not t(i);
+        end if;
+      end loop;
+    end if;
+  end process;
+  
 --  -- HALT (none for now)
 --  halt_n <= '1';
 --  -- NMI (none for now)

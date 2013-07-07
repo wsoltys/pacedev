@@ -111,7 +111,8 @@ architecture SYN of platform is
   -- GTIA SIGNALS
   signal gtia_cs        : std_logic;
   signal gtia_d_o       : std_logic_vector(7 downto 0);
-
+  signal gtia_t         : std_logic_vector(3 downto 0);
+  
   -- POKEY SIGNALS
   signal pokey_cs       : std_logic;
   signal pokey_d_o      : std_logic_vector(7 downto 0);
@@ -285,6 +286,11 @@ begin
   sram_o.we <= ram_we;
   sram_o.be <= std_logic_vector(to_unsigned(1,sram_o.be'length));
   
+  -- gtia misc
+  gtia_t(1 downto 0) <= "00";     -- joysticks
+  gtia_t(2) <= '0';               -- hardwired in XL
+  gtia_t(3) <= '0';               -- cartridge ROM mapped
+  
   basic_inst : work.sprom
 		generic map
 		(
@@ -341,7 +347,7 @@ begin
       an        => antic_an,
 
       -- joystick
-      t         => (others => '1'),
+      t         => gtia_t,
       -- console
       s_i       => (others => '1'),
       s_o       => open,
