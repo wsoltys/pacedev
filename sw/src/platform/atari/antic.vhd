@@ -187,13 +187,13 @@ begin
     if rst = '1' then
       rdy <= '1';
     elsif rising_edge(clk) then
+      -- WSYNC register rdy_set
       if rdy_set = '1' then
         rdy <= '1';
+      -- video controller rdy_clr
       elsif rdy_clr = '1' then
         rdy <= '0';
       end if;
-      -- WSYNC register rdy_set
-      -- video controller rdy_clr
     end if;
   end process;
   

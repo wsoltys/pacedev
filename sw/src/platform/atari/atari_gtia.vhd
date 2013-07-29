@@ -385,7 +385,7 @@ begin
       grafm_r <= (others => '0');
       colpm_r <= (others => (others => '0'));
       colpf_r <= (others => (others => '0'));
-      colbk_r <= X"82"; --(others => '0');
+      colbk_r <= (others => '0');
       prior_r <= (others => '0');
       vdelay_r <= (others => '0');
       gractl_r <= (others => '0');
@@ -445,7 +445,7 @@ begin
               when "11001" =>
                 colpf_r(3) <= d_i;
               when "11010" =>
-                colbk_r <= X"82"; --d_i;
+                colbk_r <= d_i;
               when "11011" =>
                 prior_r <= d_i;
               when "11100" =>
