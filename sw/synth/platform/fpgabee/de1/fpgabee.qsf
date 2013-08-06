@@ -26,6 +26,7 @@
 # project-wide assignments
 # ========================
 set_global_assignment -name LAST_QUARTUS_VERSION "12.1 SP1"
+set_global_assignment -name CYCLONEII_M4K_COMPATIBILITY OFF
 
 # pin & location assignments
 # ==========================
@@ -506,6 +507,7 @@ set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS INPUT TRI-
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
 set_global_assignment -name VHDL_SHOW_LMF_MAPPING_MESSAGES OFF
+set_global_assignment -name SEARCH_PATH unisim
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/t80/T80.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/t80/T8080se.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/t80/T80a.vhd
@@ -515,8 +517,22 @@ set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Har
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/t80/T80_MCode.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/t80/T80_Pack.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/t80/T80_Reg.vhd
+set_global_assignment -name VHDL_FILE "../../../../src/platform/fpgabee/unzip/Hardware/sn76489-1.0/sn76489_top-c.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/fpgabee/unzip/Hardware/sn76489-1.0/sn76489_top.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/fpgabee/unzip/Hardware/sn76489-1.0/sn76489_tone-c.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/fpgabee/unzip/Hardware/sn76489-1.0/sn76489_tone.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/fpgabee/unzip/Hardware/sn76489-1.0/sn76489_noise-c.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/fpgabee/unzip/Hardware/sn76489-1.0/sn76489_noise.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/fpgabee/unzip/Hardware/sn76489-1.0/sn76489_latch_ctrl-c.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/fpgabee/unzip/Hardware/sn76489-1.0/sn76489_latch_ctrl.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/fpgabee/unzip/Hardware/sn76489-1.0/sn76489_comp_pack-p.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/fpgabee/unzip/Hardware/sn76489-1.0/sn76489_clock_div-c.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/fpgabee/unzip/Hardware/sn76489-1.0/sn76489_clock_div.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/fpgabee/unzip/Hardware/sn76489-1.0/sn76489_attenuator-c.vhd"
+set_global_assignment -name VHDL_FILE "../../../../src/platform/fpgabee/unzip/Hardware/sn76489-1.0/sn76489_attenuator.vhd"
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/FPGABeeCore/CharRom.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/FPGABeeCore/Crtc6545.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/FPGABeeCore/Dac.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/FPGABeeCore/DiskConstants.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/FPGABeeCore/DiskController.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/FPGABeeCore/DiskControllerMultiplier.vhd
@@ -531,13 +547,15 @@ set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Har
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/FPGABeeCore/ps2interface.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/FPGABeeCore/RamDualPort.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/FPGABeeCore/RamSinglePort.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/FPGABeeCore/RamTrueDualPort.vhd
+set_global_assignment -name VHDL_FILE RamTrueDualPort.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/FPGABeeCore/ScanCodeMapper.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/FPGABeeCore/ScanCodes.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/FPGABeeCore/SDCardController.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/FPGABeeCore/seg7_addr_display.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/FPGABeeCore/seg7_decoder.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/FPGABeeCore/seg7_display.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/FPGABeeCore/StatusPanel.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/FPGABeeCore/StatusCharRom.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/FPGABeeCore/Utils.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/FPGABeeCore/vga_controller_640_60.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/FPGABeeCore/vga_controller_800_60.vhd
@@ -561,8 +579,12 @@ set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2C_AV_Confi
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/seg7_lut.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2S_LCM_Config.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/i2s_controller.v
-set_global_assignment -name SEARCH_PATH unisim
 set_global_assignment -name VHDL_FILE unisim/Vcomponents_pkg.vhd
 set_global_assignment -name VHDL_FILE target_top.vhd
 set_global_assignment -name VHDL_FILE clockcore.vhd
+set_parameter -name CYCLONEII_SAFE_WRITE "\"NO_CHANGE\""
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

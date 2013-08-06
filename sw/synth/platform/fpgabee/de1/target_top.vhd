@@ -73,8 +73,8 @@ entity target_top is
 		i2c_sdat      : inout std_logic;                      --	I2C Data
 		i2c_sclk      : out std_logic;                        --	I2C Clock
 		--////////////////////	PS2		////////////////////////////
-		ps2_dat       : in std_logic;                         --	PS2 Data
-		ps2_clk       : in std_logic;                         --	PS2 Clock
+		ps2_dat       : inout std_logic;                      --	PS2 Data
+		ps2_clk       : inout std_logic;                      --	PS2 Clock
 		--////////////////////	VGA		////////////////////////////
 		vga_hs        : out std_logic;                        --	VGA H_SYNC
 		vga_vs        : out std_logic;                        --	VGA V_SYNC
@@ -102,21 +102,17 @@ architecture SYN of target_top is
   signal rst                            : std_logic;
   
   signal clk_100M                       : std_logic;
-  signal clk_3M375                      : std_logic;
+  signal clk_37M125                     : std_logic;
+  signal clk_3M375_en                   : std_logic;
   signal clk_40M                        : std_logic;
   
-  signal mem_a                          : std_logic_vector(26 downto 1);
-  signal mem_d                          : std_logic_vector(15 downto 0);
-  signal mem_we_n                       : std_logic;
-  signal mem_oe_n                       : std_logic;
-  signal mem_ce_n                       : std_logic;
-  signal mem_lb_n                       : std_logic;
-  signal mem_ub_n                       : std_logic;
-
-  signal flash_ce_n                     : std_logic;
+  signal ram_a                          : std_logic_vector(17 downto 0);
+  signal ram_d_i                        : std_logic_vector(7 downto 0);
+  signal ram_d_o                        : std_logic_vector(7 downto 0);
+  signal ram_wr                         : std_logic;
   
-  signal ps2_clk_io                     : std_logic;
-  signal ps2_dat_io                     : std_logic;
+--  signal ps2_clk_io                     : std_logic;
+--  signal ps2_dat_io                     : std_logic;
   
 	signal seg7                           : std_logic_vector(15 downto 0);
 	
@@ -143,85 +139,101 @@ begin
     port map
     (
       inclk0		=> clock_50,
-      c0		    => clk_3M375,
+      c0		    => clk_37M125,
       c1		    => clk_100M,
       c2		    => clk_40M
     );
+
+  process (clk_37M125, rst)
+    -- 3.375 * 11 = 37.125
+    variable count : integer range 0 to 11-1;
+  begin
+    if rst = '1' then
+      count := 0;
+    elsif rising_edge(clk_37M125) then
+      clk_3M375_en <= '0';  -- default
+      if count = count'high then
+        clk_3M375_en <= '1';
+        count := 0;
+      else
+        count := count + 1;
+      end if;
+    end if;
+  end process;
   
   fpgabee_inst : entity work.FpgaBeeCore
     port map
     ( 
       clock_100_000       => clk_100M,
-      clock_3_375         => clk_3M375,
       clock_40_000        => clk_40M,
-      reset               => rst,
-      butUp               => key(2),
-      butDown             => key(3),
-      seg                 => open,
-      an                  => open,
-      led                 => ledr(7 downto 0),
-      MemWR               => mem_we_n,
-      MemOE               => mem_oe_n,
-      MemAdv              => open,
-      MemClk              => open,
-      MemCE               => mem_ce_n,
-      MemCRE              => open,
-      MemLB               => mem_lb_n,
-      MemUB               => mem_ub_n,
-      FlashCS             => flash_ce_n,
-      FlashRP             => open,
-      MemAdr              => mem_a,
-      MemDB               => mem_d,
-      vgaRed              => vga_r(3 downto 1),
-      vgaGreen            => vga_g(3 downto 1),
-      vgaBlue             => vga_b(3 downto 2),
-      Hsync               => vga_hs,
-      Vsync               => vga_vs,
-      PS2KeyboardData     => ps2_dat_io,
-      PS2KeyboardClk      => ps2_clk_io,
-      speaker             => open,
---      tape_in             : in std_logic;
+      clktb_3_375         => clk_37M125,
+      clken_3_375         => clk_3M375_en,
+      reset               => arst,
+      monitor_key         => key(2),
+      show_status_panel   => key(3),
+      
+      ram_addr            => ram_a,
+      ram_rd_data         => ram_d_i,
+      ram_wr_data         => ram_d_o,
+      ram_wr              => ram_wr,
+      ram_rd              => open,
+      ram_wait            => '0',
+      
+      vga_red             => vga_r(3 downto 2),
+      vga_green           => vga_g(3 downto 2),
+      vga_blue            => vga_b(3 downto 2),
+      vga_hsync           => vga_hs,
+      vga_vsync           => vga_vs,
+      vga_pixel_x         => open,
+      vga_pixel_y         => open,
+
       sd_sclk             => open,
       sd_mosi             => open,
       sd_miso             => '0',
-      sd_ss_n             => open
+      sd_ss_n             => open,
+
+      ps2_keyboard_data   => ps2_dat,
+      ps2_keyboard_clock  => ps2_clk,
+
+      speaker             => open
     );
 
-    -- flash (only 8-bit)
-    fl_dq <= (others => 'Z');
-    fl_addr(21 downto 1) <= mem_a(21 downto 1);
-    fl_addr(0) <= mem_lb_n;
-    fl_we_n <= '1';
-    fl_rst_n <= not arst;
-    fl_oe_n <= '0';
-    fl_ce_n <= flash_ce_n;
+--    -- flash (only 8-bit)
+--    fl_dq <= (others => 'Z');
+--    fl_addr(21 downto 1) <= mem_a(21 downto 1);
+--    fl_addr(0) <= mem_lb_n;
+--    fl_we_n <= '1';
+--    fl_rst_n <= not arst;
+--    fl_oe_n <= '0';
+--    fl_ce_n <= flash_ce_n;
 
     -- sram (16-bit)
-    sram_dq <= mem_d when mem_we_n = '0' else
+    ram_d_i <= sram_dq(ram_d_i'range);
+    sram_dq <= ram_d_o & ram_d_o when ram_wr = '1' else
                 (others => 'Z');
-    sram_addr(17 downto 0) <= mem_a(18 downto 1);
-    sram_ub_n <= mem_ub_n;
-    sram_lb_n <= mem_lb_n;
-    sram_we_n <= mem_we_n;
-    sram_ce_n <= mem_ce_n;
-    sram_oe_n <= mem_oe_n;
+    sram_addr(17 downto 0) <= ram_a(17 downto 0);
+    sram_ub_n <= '1';
+    sram_lb_n <= '0';
+    sram_we_n <= not ram_wr;
+    sram_ce_n <= '0';
+    sram_oe_n <= ram_wr;
     
-    -- flash/sram memory mux
-    mem_d(15 downto 8) <= fl_dq when (flash_ce_n = '0' and mem_ub_n = '0' and mem_we_n = '1') else
-                          sram_dq(15 downto 8) when (mem_ce_n = '0' and mem_we_n = '1') else
-                          (others => '1');
-    mem_d(7 downto 0) <=  fl_dq when (flash_ce_n = '0' and mem_lb_n = '0' and mem_we_n = '1') else
-                          sram_dq(7 downto 0) when (mem_ce_n = '0' and mem_we_n = '1') else
-                          (others => '1');
+--    -- flash/sram memory mux
+--    mem_d(15 downto 8) <= fl_dq when (flash_ce_n = '0' and mem_ub_n = '0' and mem_we_n = '1') else
+--                          sram_dq(15 downto 8) when (mem_ce_n = '0' and mem_we_n = '1') else
+--                          (others => '1');
+--    mem_d(7 downto 0) <=  fl_dq when (flash_ce_n = '0' and mem_lb_n = '0' and mem_we_n = '1') else
+--                          sram_dq(7 downto 0) when (mem_ce_n = '0' and mem_we_n = '1') else
+--                          (others => '1');
 
     -- unused colour bits
-    vga_r(0) <= '0';
-    vga_g(0) <= '0';
+    vga_r(1 downto 0) <= (others => '0');
+    vga_g(1 downto 0) <= (others => '0');
     vga_b(1 downto 0) <= (others => '0');
 
     -- PS/2
-    ps2_clk_io <= ps2_clk;
-    ps2_dat_io <= ps2_dat;
+    --ps2_clk_io <= ps2_clk;
+    --ps2_dat_io <= ps2_dat;
     
 --  BLK_AUDIO : block
 --    alias aud_clk    		: std_logic is clkrst_i.clk(2);
@@ -338,6 +350,7 @@ begin
     end component SEG7_LUT;
 
   begin
+    seg7 <= X"FBEE";
     -- from left to right on the PCB
     seg7_3: SEG7_LUT port map (iDIG => seg7(15 downto 12), oSEG => hex3);
     seg7_2: SEG7_LUT port map (iDIG => seg7(11 downto 8), oSEG => hex2);
