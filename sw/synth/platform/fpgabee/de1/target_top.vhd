@@ -179,9 +179,9 @@ begin
       ram_rd              => open,
       ram_wait            => '0',
       
-      vga_red             => vga_r(3 downto 2),
-      vga_green           => vga_g(3 downto 2),
-      vga_blue            => vga_b(3 downto 2),
+      vga_red             => vga_r(vga_r'left downto vga_r'left-1),
+      vga_green           => vga_g(vga_g'left downto vga_g'left-1),
+      vga_blue            => vga_b(vga_b'left downto vga_b'left-1),
       vga_hsync           => vga_hs,
       vga_vsync           => vga_vs,
       vga_pixel_x         => open,
@@ -226,10 +226,10 @@ begin
 --                          sram_dq(7 downto 0) when (mem_ce_n = '0' and mem_we_n = '1') else
 --                          (others => '1');
 
-    -- unused colour bits
-    vga_r(1 downto 0) <= (others => '0');
-    vga_g(1 downto 0) <= (others => '0');
-    vga_b(1 downto 0) <= (others => '0');
+  -- unused colour bits
+  vga_r(vga_r'left-2 downto 0) <= (others => '0');
+  vga_g(vga_g'left-2 downto 0) <= (others => '0');
+  vga_b(vga_b'left-2 downto 0) <= (others => '0');
 
     -- PS/2
     --ps2_clk_io <= ps2_clk;
