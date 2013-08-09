@@ -194,6 +194,7 @@ begin
   begin
     if rst = '1' then
       count := 0;
+      clk_3M375_en <= '0';
     elsif rising_edge(clk_37M125) then
       clk_3M375_en <= '0';  -- default
       if count = count'high then
@@ -252,7 +253,10 @@ begin
 	-- 0x30000 - 0x3FFFF - 64K PCU ROM/RAM (maps to Microbee Z80 addr 0x0000 when in pcu_mode)
 
   -- memory MUX
-  ram_d_o <= sram_d_o when ram_a(17 downto 15) = "000" else
+  --          32KB @0x00000-0x07FFF
+  ram_d_o <=  sram_d_o when ram_a(17 downto 15) = "000" else
+  --          16KB @0x20000-0x23FFF (Basic 5.10) 
+              rom_d_o when ram_a(17 downto 14) = "1000" else
               (others => '1');
   sram_wr <= ram_wr when ram_a(17 downto 15) = "000" else
               '0';
@@ -282,19 +286,24 @@ begin
                             2 => "bas510c.ic28",
                             3 => "bas510d.ic30"
                           );
+--    constant MBEE_ROM   : rom_a(0 to 1) := 
+--                          (
+--                            0 => "bas522a.rom", 
+--                            1 => "bas522b.rom"
+--                          );
     type rom_d_a is array (natural range <>) of std_logic_vector(7 downto 0);
-    signal rom_device_d_o  : rom_d_a(0 to 3);
+    signal rom_device_d_o  : rom_d_a(MBEE_ROM'range);
   begin
     rom_d_o <=  rom_device_d_o(0) when ram_a(13 downto 12) = "00" else
                 rom_device_d_o(1) when ram_a(13 downto 12) = "01" else
                 rom_device_d_o(2) when ram_a(13 downto 12) = "10" else
                 rom_device_d_o(3);
-    GEN_ROM : for i in 0 to 3 generate
+    GEN_ROM : for i in MBEE_ROM'range generate
     begin
       rom_inst : entity work.sprom
         generic map
         (
-          --init_file     => rom_a(i) & ".hex",
+          init_file     => "../../../../../src/platform/fpgabee/roms/" & MBEE_ROM(i) & ".hex",
           widthad_a			=> 12,
           width_a				=> 8
         )
