@@ -41,7 +41,7 @@
 # ========================
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 9.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "18:03:05  MARCH 10, 2010"
-set_global_assignment -name LAST_QUARTUS_VERSION "12.1 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION "10.1 SP1"
 set_global_assignment -name MISC_FILE "g:/work/vl/mixer_test/mixer_test.dpf"
 set_global_assignment -name SMART_RECOMPILE ON
 
@@ -2236,6 +2236,8 @@ set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_RO
 set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
 set_global_assignment -name VHDL_SHOW_LMF_MAPPING_MESSAGES OFF
 set_global_assignment -name SEARCH_PATH ../de1/unisim
+set_global_assignment -name VHDL_FILE ../../../device/stratixiii/sprom.vhd
+set_global_assignment -name VHDL_FILE ../../../device/stratixiii/spram.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/t80/T80.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/t80/T8080se.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/fpgabee/unzip/Hardware/t80/T80a.vhd

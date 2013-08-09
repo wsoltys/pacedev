@@ -146,10 +146,18 @@ architecture SYN of target_top_ep3sl is
   signal clk_3M375_en   : std_logic;
   signal clk_40M        : std_logic;
   
+  -- MEMORY (ROM+RAM) signals
   signal ram_a          : std_logic_vector(17 downto 0);
   signal ram_d_i        : std_logic_vector(7 downto 0);
   signal ram_d_o        : std_logic_vector(7 downto 0);
   signal ram_wr         : std_logic;
+
+  -- ROM signals
+  signal rom_d_o        : std_logic_vector(7 downto 0);
+  
+  -- SRAM signals
+  signal sram_d_o       : std_logic_vector(7 downto 0);
+  signal sram_wr        : std_logic;
 
   signal ps2_clk        : std_logic;
   signal ps2_dat        : std_logic;
@@ -209,8 +217,8 @@ begin
       show_status_panel   => '1',
       
       ram_addr            => ram_a,
-      ram_rd_data         => ram_d_i,
-      ram_wr_data         => ram_d_o,
+      ram_rd_data         => ram_d_o,
+      ram_wr_data         => ram_d_i,
       ram_wr              => ram_wr,
       ram_rd              => open,
       ram_wait            => '0',
@@ -234,6 +242,71 @@ begin
       speaker             => open
     );
 
+    	-- Access to 256K of off-chip RAM
+	-- 
+	-- 0x00000 - 0x1FFFF = 128K Main Microbee Memory (4 x 32K banks)
+	-- 0x20000 - 0x23FFF - 16K Rom Pack 0 (maps to Microbee Z80 addr 0x8000)
+	-- 0x24000 - 0x27FFF - 16K Rom Pack 1 (maps to Microbee Z80 addr 0xC000)
+	-- 0x28000 - 0x2BFFF - 16K Rom Pack 2 (maps to Microbee Z80 addr 0xC000)
+	-- 0x2C000 - 0x2FFFF - Unused
+	-- 0x30000 - 0x3FFFF - 64K PCU ROM/RAM (maps to Microbee Z80 addr 0x0000 when in pcu_mode)
+
+  -- memory MUX
+  ram_d_o <= sram_d_o when ram_a(17 downto 15) = "000" else
+              (others => '1');
+  sram_wr <= ram_wr when ram_a(17 downto 15) = "000" else
+              '0';
+              
+  sram_inst : entity work.spram
+    generic map
+    (
+      numwords_a		=> 2**15,
+      widthad_a			=> 15,
+      width_a				=> 8
+    )
+    port map
+    (
+      clock		      => clk_37M125,
+      address		    => ram_a(14 downto 0),
+      data		      => ram_d_i,
+      wren		      => sram_wr,
+      q		          => sram_d_o
+    );
+
+  BLK_ROMS : block
+    type rom_a is array (natural range <>) of string;
+    constant MBEE_ROM   : rom_a(0 to 3) := 
+                          (
+                            0 => "bas510a.ic25", 
+                            1 => "bas510b.ic27",
+                            2 => "bas510c.ic28",
+                            3 => "bas510d.ic30"
+                          );
+    type rom_d_a is array (natural range <>) of std_logic_vector(7 downto 0);
+    signal rom_device_d_o  : rom_d_a(0 to 3);
+  begin
+    rom_d_o <=  rom_device_d_o(0) when ram_a(13 downto 12) = "00" else
+                rom_device_d_o(1) when ram_a(13 downto 12) = "01" else
+                rom_device_d_o(2) when ram_a(13 downto 12) = "10" else
+                rom_device_d_o(3);
+    GEN_ROM : for i in 0 to 3 generate
+    begin
+      rom_inst : entity work.sprom
+        generic map
+        (
+          --init_file     => rom_a(i) & ".hex",
+          widthad_a			=> 12,
+          width_a				=> 8
+        )
+        port map
+        (
+          clock		      => clk_37M125,
+          address		    => ram_a(11 downto 0),
+          q		          => rom_device_d_o(i)
+        );
+      end generate GEN_ROM;
+    end block BLK_ROMS;
+    
 --  -- inputs
 --  process (clkrst_i)
 --    variable kdat_r : std_logic_vector(2 downto 0);
@@ -348,29 +421,6 @@ begin
 --    flash_i.d(flash_i.d'left downto S5AR2_EMULATED_FLASH_WIDTH) <= (others => '0');
 --  end generate GEN_FLASH;
   
---  -- emulate some SRAM
---  GEN_SRAM : if S5AR2_EMULATE_SRAM generate
---    signal wren : std_logic := '0';
---  begin
---    wren <= sram_o.cs and sram_o.we;
---    sram_inst : entity work.spram
---      generic map
---      (
---        numwords_a		=> 2**S5AR2_EMULATED_SRAM_WIDTH_AD,
---        widthad_a			=> S5AR2_EMULATED_SRAM_WIDTH_AD,
---        width_a				=> S5AR2_EMULATED_SRAM_WIDTH
---      )
---      port map
---      (
---        clock		      => clkrst_i.clk(0),
---        address		    => sram_o.a(S5AR2_EMULATED_SRAM_WIDTH_AD-1 downto 0),
---        data		      => sram_o.d(S5AR2_EMULATED_SRAM_WIDTH-1 downto 0),
---        wren		      => wren,
---        q		          => sram_i.d(S5AR2_EMULATED_SRAM_WIDTH-1 downto 0)
---      );
---    sram_i.d(sram_i.d'left downto S5AR2_EMULATED_SRAM_WIDTH) <= (others => '0');
---  end generate GEN_SRAM;
-
   BLK_CHASER : block
   begin
     -- flash the led so we know it's alive
