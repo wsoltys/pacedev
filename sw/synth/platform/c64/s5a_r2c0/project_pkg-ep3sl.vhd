@@ -38,6 +38,13 @@ package project_pkg is
   constant S5AR2_EMULATED_SRAM_WIDTH        : natural := 8;
   constant S5AR2_EMULATED_SRAM_WIDTH_AD     : natural := 16;
 
+  constant S5AR2_EMULATED_FLASH_INIT_FILE   : string := "";
+  constant S5AR2_EMULATE_FLASH              : boolean := false;
+  constant S5AR2_EMULATED_FLASH_WIDTH_AD    : natural := 10;
+  constant S5AR2_EMULATED_FLASH_WIDTH       : natural := 8;
+
+  constant S5AR2_HAS_FLOPPY_IF              : boolean := false;
+
 	-- C64-specific constants
 
 	constant C64_HAS_C64								      : boolean := true;

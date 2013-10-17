@@ -270,7 +270,7 @@ begin
       c1		    => open, --clk_NIOS,      -- 72MHz
       c2		    => vid_clk,       -- 24MHz
       c3        => vsi_extclk,    -- 14.4MHz
-      c4		    => uh_clkin1,     -- 12MHz 3V3
+      --c4		    => uh_clkin1,     -- 12MHz 3V3
       locked		=> open --pll_locked
     );
 
