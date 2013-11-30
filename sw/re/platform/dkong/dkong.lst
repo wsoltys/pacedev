@@ -1552,32 +1552,32 @@
 07CB             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 07CB             
 07CB             title_screen_flash:                                             ; DATA XREF: 0000:0754o
-07CB 3A 8A 63                    ld      a, (unk_0_638A)
-07CE FE 00                       cp      #0
-07D0 C2 2D 08                    jp      NZ, loc_0_82D
+07CB 3A 8A 63                    ld      a, (title_flash_tmr_1)
+07CE FE 00                       cp      #0                                      ; time to flash?
+07D0 C2 2D 08                    jp      NZ, loc_0_82D                           ; no, skip
 07D3 3E 60                       ld      a, #0x60 ; '`'
-07D5 32 8A 63                    ld      (unk_0_638A), a
+07D5 32 8A 63                    ld      (title_flash_tmr_1), a                  ; init tmr1
 07D8 0E 5F                       ld      c, #0x5F ; '_'
 07DA             
 07DA             loc_0_7DA:                                                      ; CODE XREF: 0000:0838j
-07DA FE 00                       cp      #0
-07DC CA 3B 08                    jp      Z, loc_0_83B
+07DA FE 00                       cp      #0                                      ; time to flash?
+07DC CA 3B 08                    jp      Z, loc_0_83B                            ; no, skip
 07DF 21 86 7D                    ld      hl, #palette_bank
-07E2 36 00                       ld      (hl), #0
+07E2 36 00                       ld      (hl), #0                                ; palette 0/2
 07E4 79                          ld      a, c
 07E5 CB 07                       rlc     a
 07E7 30 02                       jr      NC, loc_0_7EB
-07E9 36 01                       ld      (hl), #1
+07E9 36 01                       ld      (hl), #1                                ; palette 1/3
 07EB             
 07EB             loc_0_7EB:                                                      ; CODE XREF: 0000:07E7j
 07EB 23                          inc     hl
-07EC 36 00                       ld      (hl), #0
+07EC 36 00                       ld      (hl), #0                                ; palette 0/1
 07EE CB 07                       rlc     a
 07F0 30 02                       jr      NC, loc_0_7F4
-07F2 36 01                       ld      (hl), #1
+07F2 36 01                       ld      (hl), #1                                ; palette 2/3
 07F4             
 07F4             loc_0_7F4:                                                      ; CODE XREF: 0000:07F0j
-07F4 32 8B 63                    ld      (unk_0_638B), a
+07F4 32 8B 63                    ld      (title_flash_tmr_2), a
 07F7 21 08 3D                    ld      hl, #title_screen
 07FA             
 07FA             display_donkey_kong_title:                                      ; CODE XREF: 0000:0809j
@@ -1614,11 +1614,11 @@
 082D             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 082D             
 082D             loc_0_82D:                                                      ; CODE XREF: 0000:07D0j
-082D 3A 8B 63                    ld      a, (unk_0_638B)
+082D 3A 8B 63                    ld      a, (title_flash_tmr_2)
 0830 4F                          ld      c, a
-0831 3A 8A 63                    ld      a, (unk_0_638A)
+0831 3A 8A 63                    ld      a, (title_flash_tmr_1)
 0834 3D                          dec     a
-0835 32 8A 63                    ld      (unk_0_638A), a
+0835 32 8A 63                    ld      (title_flash_tmr_1), a
 0838 C3 DA 07                    jp      loc_0_7DA
 083B             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 083B             
@@ -1627,7 +1627,7 @@
 083E 36 02                       ld      (hl), #2
 0840 23                          inc     hl                                      ; game_sequencer
 0841 34                          inc     (hl)
-0842 21 8A 63                    ld      hl, #unk_0_638A
+0842 21 8A 63                    ld      hl, #title_flash_tmr_1
 0845 36 00                       ld      (hl), #0
 0847 23                          inc     hl
 0848 36 00                       ld      (hl), #0
@@ -6288,7 +6288,7 @@
 2441             
 2441             
 2441             sub_0_2441:                                                     ; CODE XREF: 0000:0D62p
-2441 21 0C 3F                    ld      hl, #byte_0_3F09+3                      ; anti-tamper check?
+2441 21 0C 3F                    ld      hl, #aNINTENDO+1                        ; anti-tamper check?
 2444 3E 5E                       ld      a, #0x5E ; '^'
 2446 06 06                       ld      b, #6
 2448             
@@ -9382,7 +9382,7 @@
 3663 15 37                       .dw aPUSH
 3665 1C 37                       .dw aNAME_REGISTRATION
 3667 30 37                       .dw aNAME
-3669 38 37                       .dw a???
+3669 38 37                       .dw aDASHDASHDASH
 366B 47 37                       .dw aA_B_C_D_E_F_G_H_I_J
 366D 5D 37                       .dw aK_L_M_N_O_P_Q_R_S_T
 366F 73 37                       .dw aU_V_W_X_Y_Z_rub_end
@@ -9397,49 +9397,49 @@
 3681 D2 37                       .dw aINSERT_COIN
 3683 E1 37                       .dw aPLAYER_COIN
 3685 1D 00                       .dw 0x1D
-3687 00 3F                       .dw byte_0_3EFF+1
-3689 09 3F                       .dw byte_0_3F09
-368B 96 76 17 11+aGAME_OVER:     .db 0x96, 0x76, 0x17, 0x11, 0x1D, 0x15, 0x10, 0x10, 0x1F
-368B 1D 15 10 10+                                                                ; DATA XREF: 0000:364Bo
-368B 1F 26 15 22+                .db 0x26, 0x15, 0x22, 0x3F
-3698 94 76 20 1C+aPLAYER:        .db 0x94, 0x76, 0x20, 0x1C, 0x11, 0x29, 0x15, 0x22, 0x10
-3698 11 29 15 22+                                                                ; DATA XREF: 0000:364Fo
-3698 10 30 32 31+                .db 0x30, 0x32, 0x31, 0x3F
-36A5 94 76 20 1C+aPLAYER_:       .db 0x94, 0x76, 0x20, 0x1C, 0x11, 0x29, 0x15, 0x22, 0x10
-36A5 11 29 15 22+                                                                ; DATA XREF: 0000:3651o
-36A5 10 30 33 31+                .db 0x30, 0x33, 0x31, 0x3F
-36B2 80 76 18 19+aHIGH_SCORE:    .db 0x80, 0x76, 0x18, 0x19, 0x17, 0x18, 0x10, 0x23, 0x13
-36B2 17 18 10 23+                                                                ; DATA XREF: 0000:3653o
-36B2 13 1F 22 15+                .db 0x1F, 0x22, 0x15, 0x3F
-36BF 9F 75 13 22+aCREDIT:        .db 0x9F, 0x75, 0x13, 0x22, 0x15, 0x14, 0x19, 0x24, 0x10
-36BF 15 14 19 24+                                                                ; DATA XREF: 0000:3655o
-36BF 10 10 10 10+                .db 0x10, 0x10, 0x10, 0x3F
-36CC 5E 77 18 1F+aHOW_HIGH_CAN_YOU_GET:.db 0x5E, 0x77, 0x18, 0x1F, 0x27, 0x10, 0x18, 0x19, 0x17
-36CC 27 10 18 19+                                                                ; DATA XREF: 0000:3659o
-36CC 17 18 10 13+                .db 0x18, 0x10, 0x13, 0x11, 0x1E, 0x10, 0x29, 0x1F, 0x25
-36CC 11 1E 10 29+                .db 0x10, 0x17, 0x15, 0x24, 0x10, 0xFB, 0x10, 0x3F
-36E6 29 77 1F 1E+aONLY_1_PLAYER_BUTTON:.db 0x29, 0x77, 0x1F, 0x1E, 0x1C, 0x29, 0x10, 1, 0x10
-36E6 1C 29 10 01+                                                                ; DATA XREF: 0000:365Do
-36E6 10 20 1C 11+                .db 0x20, 0x1C, 0x11, 0x29, 0x15, 0x22, 0x10, 0x12, 0x25
-36E6 29 15 22 10+                .db 0x24, 0x24, 0x1F, 0x1E, 0x3F
-36FD 29 77 01 10+a1_OR_2_PLAYERS:.db 0x29, 0x77, 1, 0x10, 0x1F, 0x22, 0x10, 2, 0x10, 0x20
-36FD 1F 22 10 02+                                                                ; DATA XREF: 0000:365Fo
-36FD 10 20 1C 11+                .db 0x1C, 0x11, 0x29, 0x15, 0x22, 0x23, 0x10, 0x12, 0x25
-36FD 29 15 22 23+                .db 0x24, 0x24, 0x1F, 0x1E, 0x3F
-3715 27 76 20 25+aPUSH:          .db 0x27, 0x76, 0x20, 0x25, 0x23, 0x18, 0x3F    ; DATA XREF: 0000:3663o
-371C 06 77 1E 11+aNAME_REGISTRATION:.db 6, 0x77, 0x1E, 0x11, 0x1D, 0x15, 0x10, 0x22, 0x15
-371C 1D 15 10 22+                                                                ; DATA XREF: 0000:3665o
-371C 15 17 19 23+                .db 0x17, 0x19, 0x23, 0x24, 0x22, 0x11, 0x24, 0x19, 0x1F
-371C 24 22 11 24+                .db 0x1E, 0x3F
-3730 88 76 1E 11+aNAME:          .db 0x88, 0x76, 0x1E, 0x11, 0x1D, 0x15, 0x2E, 0x3F
-3730 1D 15 2E 3F                                                                 ; DATA XREF: 0000:3667o
-3738 E9 75 2D 2D+a???:           .db 0xE9, 0x75, 0x2D, 0x2D, 0x2D, 0x10, 0x10, 0x10, 0x10
-3738 2D 10 10 10+                                                                ; DATA XREF: 0000:3669o
-3738 10 10 10 10+                .db 0x10, 0x10, 0x10, 0x10, 0x10, 0x3F
-3747 0B 77 11 10+aA_B_C_D_E_F_G_H_I_J:.db 0xB, 0x77, 0x11, 0x10, 0x12, 0x10, 0x13, 0x10, 0x14
-3747 12 10 13 10+                                                                ; DATA XREF: 0000:366Bo
-3747 14 10 15 10+                .db 0x10, 0x15, 0x10, 0x16, 0x10, 0x17, 0x10, 0x18, 0x10
-3747 16 10 17 10+                .db 0x19, 0x10, 0x1A, 0x3F
+3687 00 3F                       .dw aCOPYRIGHT_1981
+3689 09 3F                       .dw aNINTENDO_OF_AMERICA_INC
+368B 96 76       aGAME_OVER:     .dw VRAM_start+0x296                            ; DATA XREF: 0000:364Bo
+368D 17 11 1D 15+                .db 0x17, 0x11, 0x1D, 0x15, 0x10, 0x10, 0x1F, 0x26, 0x15
+368D 10 10 1F 26+                .db 0x22, 0x3F
+3698 94 76       aPLAYER:        .dw VRAM_start+0x294                            ; DATA XREF: 0000:364Fo
+369A 20 1C 11 29+                .db 0x20, 0x1C, 0x11, 0x29, 0x15, 0x22, 0x10, 0x30, 0x32
+369A 15 22 10 30+                .db 0x31, 0x3F
+36A5 94 76       aPLAYER_:       .dw VRAM_start+0x294                            ; DATA XREF: 0000:3651o
+36A7 20 1C 11 29+                .db 0x20, 0x1C, 0x11, 0x29, 0x15, 0x22, 0x10, 0x30, 0x33
+36A7 15 22 10 30+                .db 0x31, 0x3F
+36B2 80 76       aHIGH_SCORE:    .dw VRAM_start+0x280                            ; DATA XREF: 0000:3653o
+36B4 18 19 17 18+                .db 0x18, 0x19, 0x17, 0x18, 0x10, 0x23, 0x13, 0x1F, 0x22
+36B4 10 23 13 1F+                .db 0x15, 0x3F
+36BF 9F 75       aCREDIT:        .dw VRAM_start+0x19F                            ; DATA XREF: 0000:3655o
+36C1 13 22 15 14+                .db 0x13, 0x22, 0x15, 0x14, 0x19, 0x24, 0x10, 0x10, 0x10
+36C1 19 24 10 10+                .db 0x10, 0x3F
+36CC 5E 77       aHOW_HIGH_CAN_YOU_GET:.dw VRAM_start+0x35E                      ; DATA XREF: 0000:3659o
+36CE 18 1F 27 10+                .db 0x18, 0x1F, 0x27, 0x10, 0x18, 0x19, 0x17, 0x18, 0x10
+36CE 18 19 17 18+                .db 0x13, 0x11, 0x1E, 0x10, 0x29, 0x1F, 0x25, 0x10, 0x17
+36CE 10 13 11 1E+                .db 0x15, 0x24, 0x10, 0xFB, 0x10, 0x3F
+36E6 29 77       aONLY_1_PLAYER_BUTTON:.dw VRAM_start+0x329                      ; DATA XREF: 0000:365Do
+36E8 1F 1E 1C 29+                .db 0x1F, 0x1E, 0x1C, 0x29, 0x10, 1, 0x10, 0x20, 0x1C
+36E8 10 01 10 20+                .db 0x11, 0x29, 0x15, 0x22, 0x10, 0x12, 0x25, 0x24, 0x24
+36E8 1C 11 29 15+                .db 0x1F, 0x1E, 0x3F
+36FD 29 77       a1_OR_2_PLAYERS:.dw VRAM_start+0x329                            ; DATA XREF: 0000:365Fo
+36FF 01 10 1F 22+                .db 1, 0x10, 0x1F, 0x22, 0x10, 2, 0x10, 0x20, 0x1C, 0x11
+36FF 10 02 10 20+                .db 0x29, 0x15, 0x22, 0x23, 0x10, 0x12, 0x25, 0x24, 0x24
+36FF 1C 11 29 15+                .db 0x1F, 0x1E, 0x3F
+3715 27 76       aPUSH:          .dw VRAM_start+0x227                            ; DATA XREF: 0000:3663o
+3717 20 25 23 18+                .db 0x20, 0x25, 0x23, 0x18, 0x3F
+371C 06 77       aNAME_REGISTRATION:.dw VRAM_start+0x306                         ; DATA XREF: 0000:3665o
+371E 1E 11 1D 15+                .db 0x1E, 0x11, 0x1D, 0x15, 0x10, 0x22, 0x15, 0x17, 0x19
+371E 10 22 15 17+                .db 0x23, 0x24, 0x22, 0x11, 0x24, 0x19, 0x1F, 0x1E, 0x3F
+3730 88 76       aNAME:          .dw VRAM_start+0x288                            ; DATA XREF: 0000:3667o
+3732 1E 11 1D 15+                .db 0x1E, 0x11, 0x1D, 0x15, 0x2E, 0x3F
+3738 E9 75       aDASHDASHDASH:  .dw VRAM_start+0x1E9                            ; DATA XREF: 0000:3669o
+373A 2D 2D 2D 10+                .db 0x2D, 0x2D, 0x2D, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10
+373A 10 10 10 10+                .db 0x10, 0x10, 0x10, 0x3F
+3747 0B 77       aA_B_C_D_E_F_G_H_I_J:.dw VRAM_start+0x30B                       ; DATA XREF: 0000:366Bo
+3749 11 10 12 10+                .db 0x11, 0x10, 0x12, 0x10, 0x13, 0x10, 0x14, 0x10, 0x15
+3749 13 10 14 10+                .db 0x10, 0x16, 0x10, 0x17, 0x10, 0x18, 0x10, 0x19, 0x10
+3749 15 10 16 10+                .db 0x1A, 0x3F
 375D 0D 77       aK_L_M_N_O_P_Q_R_S_T:.dw VRAM_start+0x30D                       ; DATA XREF: 0000:366Do
 375F 1B 10 1C 10+                .db 0x1B, 0x10, 0x1C, 0x10, 0x1D, 0x10, 0x1E, 0x10, 0x1F
 375F 1D 10 1E 10+                .db 0x10, 0x20, 0x10, 0x21, 0x10, 0x22, 0x10, 0x23, 0x10
@@ -9912,12 +9912,14 @@
 3EFE             ; End of function sub_0_3EC3
 3EFE             
 3EFE             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
-3EFF 00 5C 76 49+byte_0_3EFF:    .db 0, 0x5C, 0x76, 0x49, 0x4A, 1, 9, 8, 1, 0x3F ; DATA XREF: 0000:3687o
-3F09 7D 77 1E 19+byte_0_3F09:    .db 0x7D, 0x77, 0x1E, 0x19, 0x1E, 0x24, 0x15, 0x1E, 0x14
-3F09 1E 24 15 1E+                                                                ; DATA XREF: 0000:3689o
-3F09 14 1F 10 1F+                                                                ; sub_0_2441o
-3F09 16 10 11 1D+                .db 0x1F, 0x10, 0x1F, 0x16, 0x10, 0x11, 0x1D, 0x15, 0x22
-3F09 15 22 19 13+                .db 0x19, 0x13, 0x11, 0x10, 0x19, 0x1E, 0x13, 0x2B, 0x3F
+3EFF 00                          .db    0 ;  
+3F00 5C 76       aCOPYRIGHT_1981:.dw VRAM_start+0x25C                            ; DATA XREF: 0000:3687o
+3F02 49 4A 01 09+                .db 0x49, 0x4A, 1, 9, 8, 1, 0x3F
+3F09 7D 77       aNINTENDO_OF_AMERICA_INC:.dw VRAM_start+0x37D                   ; DATA XREF: 0000:3689o
+3F0B 1E 19 1E 24+aNINTENDO:      .db 0x1E, 0x19, 0x1E, 0x24, 0x15, 0x1E, 0x14, 0x1F, 0x10
+3F0B 15 1E 14 1F+                                                                ; DATA XREF: sub_0_2441o
+3F0B 10 1F 16 10+                .db 0x1F, 0x16, 0x10, 0x11, 0x1D, 0x15, 0x22, 0x19, 0x13
+3F0B 11 1D 15 22+                .db 0x11, 0x10, 0x19, 0x1E, 0x13, 0x2B, 0x3F
 3F24             
 3F24             ; €€€€€€€€€€€€€€€ S U B R O U T I N E €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
 3F24             
@@ -10716,9 +10718,9 @@
 6388 ??          unk_0_6388:     .ds 1                                           ; DATA XREF: 0000:161Fr
 6388                                                                             ; 0000:1633r ...
 6389 ??          unk_0_6389:     .ds 1
-638A ??          unk_0_638A:     .ds 1                                           ; DATA XREF: 0000:07CBr
+638A ??          title_flash_tmr_1:.ds 1                                         ; DATA XREF: 0000:07CBr
 638A                                                                             ; 0000:07D5w ...
-638B ??          unk_0_638B:     .ds 1
+638B ??          title_flash_tmr_2:.ds 1
 638C ??          bonus_timer:    .ds 1
 638D ??          unk_0_638D:     .ds 1                                           ; DATA XREF: 0000:0B58w
 638D                                                                             ; 0000:0B94r ...
