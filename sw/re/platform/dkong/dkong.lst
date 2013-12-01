@@ -2544,7 +2544,7 @@
 0DA7             
 0DA7             sub_0_DA7:                                                      ; CODE XREF: 0000:0A95p
 0DA7 1A                                                                          ; 0000:0B4Bp ...
-0DA7                             ld      a, (de)                                 ; get flag/tile
+0DA7                             ld      a, (de)                                 ; get flag
 0DA8 32 B3 63                    ld      (unk_0_63B3), a                         ; store for later
 0DAB FE AA                       cp      #0xAA ; 'ª'                             ; done?
 0DAD C8                          ret     Z                                       ; yes, return
@@ -2559,7 +2559,7 @@
 0DB6 D5                          push    de
 0DB7 CD F0 2F                    call    sub_0_2FF0
 0DBA D1                          pop     de
-0DBB 22 AB 63                    ld      (unk_0_63AB), hl
+0DBB 22 AB 63                    ld      (unk_0_63AB), hl                        ; store vram address #1
 0DBE 78                          ld      a, b
 0DBF E6 07                       and     #7
 0DC1 32 B4 63                    ld      (unk_0_63B4), a
@@ -2586,8 +2586,8 @@
 0DE3 D5                          push    de
 0DE4 CD F0 2F                    call    sub_0_2FF0
 0DE7 D1                          pop     de
-0DE8 22 AD 63                    ld      (unk_0_63AD), hl
-0DEB 3A B3 63                    ld      a, (unk_0_63B3)
+0DE8 22 AD 63                    ld      (unk_0_63AD), hl                        ; store vram address #2
+0DEB 3A B3 63                    ld      a, (unk_0_63B3)                         ; flag
 0DEE FE 02                       cp      #2
 0DF0 F2 4F 0E                    jp      P, loc_0_E4F
 0DF3 3A B2 63                    ld      a, (unk_0_63B2)
@@ -2597,12 +2597,12 @@
 0DFC 80                          add     a, b
 0DFD 32 B2 63                    ld      (unk_0_63B2), a
 0E00 3A AF 63                    ld      a, (unk_0_63AF)
-0E03 C6 F0                       add     a, #0xF0 ; 'ð'
-0E05 2A AB 63                    ld      hl, (unk_0_63AB)
-0E08 77                          ld      (hl), a
-0E09 2C                          inc     l
-0E0A D6 30                       sub     #0x30 ; '0'
-0E0C 77                          ld      (hl), a
+0E03 C6 F0                       add     a, #0xF0 ; 'ð'                          ; girder top, no ladder above
+0E05 2A AB 63                    ld      hl, (unk_0_63AB)                        ; vram address
+0E08 77                          ld      (hl), a                                 ; display tile
+0E09 2C                          inc     l                                       ; next row
+0E0A D6 30                       sub     #0x30 ; '0'                             ; ladder
+0E0C 77                          ld      (hl), a                                 ; display tile
 0E0D 3A B3 63                    ld      a, (unk_0_63B3)
 0E10 FE 01                       cp      #1
 0E12 C2 19 0E                    jp      NZ, loc_0_E19
@@ -2615,30 +2615,30 @@
 0E1C D6 08                       sub     #8
 0E1E 32 B2 63                    ld      (unk_0_63B2), a
 0E21 DA 2A 0E                    jp      C, loc_0_E2A
-0E24 2C                          inc     l
-0E25 36 C0                       ld      (hl), #0xC0 ; 'À'
+0E24 2C                          inc     l                                       ; next row
+0E25 36 C0                       ld      (hl), #0xC0 ; 'À'                       ; full ladder tile
 0E27 C3 19 0E                    jp      loc_0_E19
 0E2A             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0E2A             
 0E2A             loc_0_E2A:                                                      ; CODE XREF: sub_0_DA7+7Aj
 0E2A 3A B0 63                    ld      a, (unk_0_63B0)
-0E2D C6 D0                       add     a, #0xD0 ; 'Ð'
-0E2F 2A AD 63                    ld      hl, (unk_0_63AD)
-0E32 77                          ld      (hl), a
+0E2D C6 D0                       add     a, #0xD0 ; 'Ð'                          ; girder top, bottom of ladder
+0E2F 2A AD 63                    ld      hl, (unk_0_63AD)                        ; vram address
+0E32 77                          ld      (hl), a                                 ; display tile
 0E33 3A B3 63                    ld      a, (unk_0_63B3)
 0E36 FE 01                       cp      #1
 0E38 C2 3F 0E                    jp      NZ, loc_0_E3F
-0E3B 2D                          dec     l
-0E3C 36 C0                       ld      (hl), #0xC0 ; 'À'
-0E3E 2C                          inc     l
+0E3B 2D                          dec     l                                       ; previous row
+0E3C 36 C0                       ld      (hl), #0xC0 ; 'À'                       ; full ladder tile
+0E3E 2C                          inc     l                                       ; next row
 0E3F             
 0E3F             loc_0_E3F:                                                      ; CODE XREF: sub_0_DA7+91j
 0E3F 3A B0 63                    ld      a, (unk_0_63B0)
 0E42 FE 00                       cp      #0
 0E44 CA 4B 0E                    jp      Z, loc_0_E4B
-0E47 C6 E0                       add     a, #0xE0 ; 'à'                          ; convert bottom of ladder to girder
-0E49 2C                          inc     l
-0E4A 77                          ld      (hl), a
+0E47 C6 E0                       add     a, #0xE0 ; 'à'                          ; bottom of girder, no ladder below
+0E49 2C                          inc     l                                       ; next row
+0E4A 77                          ld      (hl), a                                 ; display tile
 0E4B             
 0E4B             loc_0_E4B:                                                      ; CODE XREF: sub_0_DA7+9Dj
 0E4B 13                          inc     de
@@ -8320,19 +8320,19 @@
 2FF0                             ld      a, l                                    ; byte2
 2FF1 0F                          rrca    
 2FF2 0F                          rrca    
-2FF3 0F                          rrca                                            ; byte2/8
-2FF4 E6 1F                       and     #31
-2FF6 6F                          ld      l, a                                    ; L=byte2/8
+2FF3 0F                          rrca    
+2FF4 E6 1F                       and     #0x1F                                   ; byte2[7:3] -> [4:0]
+2FF6 6F                          ld      l, a
 2FF7 7C                          ld      a, h                                    ; byte1
-2FF8 2F                          cpl     
+2FF8 2F                          cpl                                             ; ~byte1
 2FF9 E6 F8                       and     #0xF8 ; 'ø'
-2FFB 5F                          ld      e, a
+2FFB 5F                          ld      e, a                                    ; ~byte1[7:3]
 2FFC AF                          xor     a
-2FFD 67                          ld      h, a
-2FFE CB 13                       rl      e
-3000 17                          rla     
-3001 CB 13                       rl      e
-3003 17                          rla     
+2FFD 67                          ld      h, a                                    ; h=0
+2FFE CB 13                       rl      e                                       ; ~byte1[6:3,000,7]
+3000 17                          rla                                             ; ~byte1[7]
+3001 CB 13                       rl      e                                       ; ~byte1[5:3,000,7:6]
+3003 17                          rla                                             ; ~byte1[7:6]
 3004 C6 74                       add     a, #0x74 ; 't'                          ; start of video RAM
 3006 57                          ld      d, a
 3007 19                          add     hl, de                                  ; HL = screen address
