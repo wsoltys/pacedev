@@ -2046,7 +2046,7 @@
 0A8E 3C                          inc     a
 0A8F 32 87 7D                    ld      (palette_bank+1), a                     ; palette bank 2
 0A92 11 0D 38                    ld      de, #draw_data_climb
-0A95 CD A7 0D                    call    sub_0_DA7                               ; get address of ???
+0A95 CD A7 0D                    call    draw_level_background                   ; get address of ???
 0A98 3E 10                       ld      a, #0x10                                ; <space>
 0A9A 32 A3 76                    ld      (VRAM_start+0x2A3), a
 0A9D 32 63 76                    ld      (VRAM_start+0x263), a
@@ -2141,7 +2141,7 @@
 0B43 3E 03                       ld      a, #3                                   ; tmr=3
 0B45 32 82 60                    ld      (digital_snd_tmr_thump), a
 0B48 11 2C 39                    ld      de, #draw_data_bend_girders_1
-0B4B CD A7 0D                    call    sub_0_DA7
+0B4B CD A7 0D                    call    draw_level_background
 0B4E 3E 10                       ld      a, #0x10
 0B50 32 AA 74                    ld      (VRAM_start+0xAA), a
 0B53 32 8A 74                    ld      (VRAM_start+0x8A), a
@@ -2190,7 +2190,7 @@
 0B9D 16 00                       ld      d, #0
 0B9F 19                          add     hl, de
 0BA0 EB                          ex      de, hl
-0BA1 CD A7 0D                    call    sub_0_DA7
+0BA1 CD A7 0D                    call    draw_level_background
 0BA4 21 8D 63                    ld      hl, #unk_0_638D
 0BA7 35                          dec     (hl)
 0BA8 C0                          ret     NZ
@@ -2352,7 +2352,7 @@
 0C9F 21 86 7D                    ld      hl, #palette_bank
 0CA2 36 00                       ld      (hl), #0
 0CA4 23                          inc     hl
-0CA5 36 01                       ld      (hl), #1                                ; select palette bank 1
+0CA5 36 01                       ld      (hl), #1                                ; select palette bank 2
 0CA7 3A 27 62                    ld      a, (level_type)
 0CAA 3D                          dec     a                                       ; barrel level?
 0CAB CA D4 0C                    jp      Z, draw_barrel_level                    ; yes, skip
@@ -2369,7 +2369,7 @@
 0CC6             
 0CC6             draw_level_tilemap:                                             ; CODE XREF: 0000:0CDCj
 0CC6 CD A7 0D                                                                    ; 0000:0CEFj ...
-0CC6                             call    sub_0_DA7                               ; draw screen
+0CC6                             call    draw_level_background                   ; draw screen
 0CC9 3A 27 62                    ld      a, (level_type)
 0CCC FE 04                       cp      #4                                      ; rivets?
 0CCE CC 00 0D                    call    Z, draw_rivets                          ; yes, call
@@ -2507,8 +2507,8 @@
 0D62 CD 41 24                    call    sub_0_2441
 0D65 21 09 60                    ld      hl, #eight_bit_countdown
 0D68 36 40                       ld      (hl), #0x40 ; '@'
-0D6A 23                          inc     hl
-0D6B 34                          inc     (hl)
+0D6A 23                          inc     hl                                      ; main_sequencer
+0D6B 34                          inc     (hl)                                    ; next sequence (2)
 0D6C 21 5C 38                    ld      hl, #kong_normal_spr
 0D6F CD 4E 00                    call    copy_sprites_2_11_data
 0D72 11 00 69                    ld      de, #soft_sprite_ram                    ; sprites 0,1
@@ -2542,230 +2542,232 @@
 0DA7             ; €€€€€€€€€€€€€€€ S U B R O U T I N E €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
 0DA7             
 0DA7             
-0DA7             sub_0_DA7:                                                      ; CODE XREF: 0000:0A95p
+0DA7             draw_level_background:                                          ; CODE XREF: 0000:0A95p
 0DA7 1A                                                                          ; 0000:0B4Bp ...
 0DA7                             ld      a, (de)                                 ; get flag
-0DA8 32 B3 63                    ld      (unk_0_63B3), a                         ; store for later
+0DA8 32 B3 63                    ld      (segment_type), a                       ; store for later
 0DAB FE AA                       cp      #0xAA ; '™'                             ; done?
 0DAD C8                          ret     Z                                       ; yes, return
 0DAE 13                          inc     de                                      ; next table address
 0DAF 1A                          ld      a, (de)                                 ; get byte
-0DB0 67                          ld      h, a                                    ; H=byte1
-0DB1 44                          ld      b, h                                    ; B=byte1
+0DB0 67                          ld      h, a                                    ; H=Y1
+0DB1 44                          ld      b, h                                    ; B=Y1
 0DB2 13                          inc     de                                      ; next table address
 0DB3 1A                          ld      a, (de)                                 ; get byte
-0DB4 6F                          ld      l, a                                    ; L=byte2
-0DB5 4D                          ld      c, l                                    ; C=byte2
+0DB4 6F                          ld      l, a                                    ; L=X1
+0DB5 4D                          ld      c, l                                    ; C=X1
 0DB6 D5                          push    de
-0DB7 CD F0 2F                    call    sub_0_2FF0
+0DB7 CD F0 2F                    call    get_tilemap_addr_from_coords
 0DBA D1                          pop     de
-0DBB 22 AB 63                    ld      (unk_0_63AB), hl                        ; store vram address #1
+0DBB 22 AB 63                    ld      (segment_addr_1), hl                    ; store vram address #1
 0DBE 78                          ld      a, b
 0DBF E6 07                       and     #7
-0DC1 32 B4 63                    ld      (unk_0_63B4), a
+0DC1 32 B4 63                    ld      (tile_byte_1), a
 0DC4 79                          ld      a, c
 0DC5 E6 07                       and     #7
-0DC7 32 AF 63                    ld      (unk_0_63AF), a
-0DCA 13                          inc     de
-0DCB 1A                          ld      a, (de)
-0DCC 67                          ld      h, a
-0DCD 90                          sub     b
-0DCE D2 D3 0D                    jp      NC, loc_0_DD3
-0DD1 ED 44                       neg     
+0DC7 32 AF 63                    ld      (start_tile_index), a
+0DCA 13                          inc     de                                      ; next table entry
+0DCB 1A                          ld      a, (de)                                 ; Y2
+0DCC 67                          ld      h, a                                    ; H=Y2
+0DCD 90                          sub     b                                       ; calc delta Y
+0DCE D2 D3 0D                    jp      NC, loc_0_DD3                           ; no, skip
+0DD1 ED 44                       neg                                             ; delta Y
 0DD3             
-0DD3             loc_0_DD3:                                                      ; CODE XREF: sub_0_DA7+27j
-0DD3 32 B1 63                    ld      (unk_0_63B1), a
-0DD6 13                          inc     de
-0DD7 1A                          ld      a, (de)
-0DD8 6F                          ld      l, a
-0DD9 91                          sub     c
-0DDA 32 B2 63                    ld      (unk_0_63B2), a
-0DDD 1A                          ld      a, (de)
-0DDE E6 07                       and     #7
-0DE0 32 B0 63                    ld      (unk_0_63B0), a
+0DD3             loc_0_DD3:                                                      ; CODE XREF: draw_level_background+27j
+0DD3 32 B1 63                    ld      (dY), a
+0DD6 13                          inc     de                                      ; next entry
+0DD7 1A                          ld      a, (de)                                 ; X2
+0DD8 6F                          ld      l, a                                    ; L=X2
+0DD9 91                          sub     c                                       ; calc delta X
+0DDA 32 B2 63                    ld      (dX), a
+0DDD 1A                          ld      a, (de)                                 ; X2 (again)
+0DDE E6 07                       and     #7                                      ; TILE bits only
+0DE0 32 B0 63                    ld      (end_tile_index), a
 0DE3 D5                          push    de
-0DE4 CD F0 2F                    call    sub_0_2FF0
+0DE4 CD F0 2F                    call    get_tilemap_addr_from_coords
 0DE7 D1                          pop     de
-0DE8 22 AD 63                    ld      (unk_0_63AD), hl                        ; store vram address #2
-0DEB 3A B3 63                    ld      a, (unk_0_63B3)                         ; flag
-0DEE FE 02                       cp      #2
-0DF0 F2 4F 0E                    jp      P, loc_0_E4F
-0DF3 3A B2 63                    ld      a, (unk_0_63B2)
-0DF6 D6 10                       sub     #0x10
+0DE8 22 AD 63                    ld      (segment_addr_2), hl                    ; store vram address #2
+0DEB 3A B3 63                    ld      a, (segment_type)                       ; flag
+0DEE FE 02                       cp      #2                                      ; >=2?
+0DF0 F2 4F 0E                    jp      P, draw_girder_segment                  ; yes, skip
+0DF3             
+0DF3             draw_ladder_segment:
+0DF3 3A B2 63                    ld      a, (dX)
+0DF6 D6 10                       sub     #0x10                                   ; calc starting tile index adjustment
 0DF8 47                          ld      b, a
-0DF9 3A AF 63                    ld      a, (unk_0_63AF)
-0DFC 80                          add     a, b
-0DFD 32 B2 63                    ld      (unk_0_63B2), a
-0E00 3A AF 63                    ld      a, (unk_0_63AF)
+0DF9 3A AF 63                    ld      a, (start_tile_index)
+0DFC 80                          add     a, b                                    ; adjust
+0DFD 32 B2 63                    ld      (dX), a
+0E00 3A AF 63                    ld      a, (start_tile_index)
 0E03 C6 F0                       add     a, #0xF0 ; ''                          ; girder top, no ladder above
-0E05 2A AB 63                    ld      hl, (unk_0_63AB)                        ; vram address
+0E05 2A AB 63                    ld      hl, (segment_addr_1)
 0E08 77                          ld      (hl), a                                 ; display tile
 0E09 2C                          inc     l                                       ; next row
-0E0A D6 30                       sub     #0x30 ; '0'                             ; ladder
-0E0C 77                          ld      (hl), a                                 ; display tile
-0E0D 3A B3 63                    ld      a, (unk_0_63B3)
-0E10 FE 01                       cp      #1
-0E12 C2 19 0E                    jp      NZ, loc_0_E19
-0E15 AF                          xor     a
-0E16 32 B2 63                    ld      (unk_0_63B2), a
+0E0A D6 30                       sub     #0x30 ; '0'                             ; matching ladder tile
+0E0C 77                          ld      (hl), a                                 ; display it
+0E0D 3A B3 63                    ld      a, (segment_type)
+0E10 FE 01                       cp      #1                                      ; broken ladder?
+0E12 C2 19 0E                    jp      NZ, next_tile_in_ladder_segment         ; no, skip
+0E15 AF                          xor     a                                       ; flag end-of-ladder
+0E16 32 B2 63                    ld      (dX), a
 0E19             
-0E19             loc_0_E19:                                                      ; CODE XREF: sub_0_DA7+6Bj
-0E19 3A B2 63                                                                    ; sub_0_DA7+80j
-0E19                             ld      a, (unk_0_63B2)
-0E1C D6 08                       sub     #8
-0E1E 32 B2 63                    ld      (unk_0_63B2), a
-0E21 DA 2A 0E                    jp      C, loc_0_E2A
+0E19             next_tile_in_ladder_segment:                                    ; CODE XREF: draw_level_background+6Bj
+0E19 3A B2 63                                                                    ; draw_level_background+80j
+0E19                             ld      a, (dX)
+0E1C D6 08                       sub     #8                                      ; finished ladder?
+0E1E 32 B2 63                    ld      (dX), a
+0E21 DA 2A 0E                    jp      C, loc_0_E2A                            ; yes, skip
 0E24 2C                          inc     l                                       ; next row
 0E25 36 C0                       ld      (hl), #0xC0 ; '¿'                       ; full ladder tile
-0E27 C3 19 0E                    jp      loc_0_E19
+0E27 C3 19 0E                    jp      next_tile_in_ladder_segment             ; loop for ladder
 0E2A             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 0E2A             
-0E2A             loc_0_E2A:                                                      ; CODE XREF: sub_0_DA7+7Aj
-0E2A 3A B0 63                    ld      a, (unk_0_63B0)
+0E2A             loc_0_E2A:                                                      ; CODE XREF: draw_level_background+7Aj
+0E2A 3A B0 63                    ld      a, (end_tile_index)
 0E2D C6 D0                       add     a, #0xD0 ; '–'                          ; girder top, bottom of ladder
-0E2F 2A AD 63                    ld      hl, (unk_0_63AD)                        ; vram address
-0E32 77                          ld      (hl), a                                 ; display tile
-0E33 3A B3 63                    ld      a, (unk_0_63B3)
-0E36 FE 01                       cp      #1
-0E38 C2 3F 0E                    jp      NZ, loc_0_E3F
-0E3B 2D                          dec     l                                       ; previous row
-0E3C 36 C0                       ld      (hl), #0xC0 ; '¿'                       ; full ladder tile
-0E3E 2C                          inc     l                                       ; next row
+0E2F 2A AD 63                    ld      hl, (segment_addr_2)                    ; vram address
+0E32 77                          ld      (hl), a
+0E33 3A B3 63                    ld      a, (segment_type)
+0E36 FE 01                       cp      #1                                      ; broken ladder?
+0E38 C2 3F 0E                    jp      NZ, loc_0_E3F                           ; no, skip
+0E3B 2D                          dec     l                                       ; row above
+0E3C 36 C0                       ld      (hl), #0xC0 ; '¿'                       ; display full ladder tile
+0E3E 2C                          inc     l                                       ; re-adjust row
 0E3F             
-0E3F             loc_0_E3F:                                                      ; CODE XREF: sub_0_DA7+91j
-0E3F 3A B0 63                    ld      a, (unk_0_63B0)
-0E42 FE 00                       cp      #0
-0E44 CA 4B 0E                    jp      Z, loc_0_E4B
+0E3F             loc_0_E3F:                                                      ; CODE XREF: draw_level_background+91j
+0E3F 3A B0 63                    ld      a, (end_tile_index)
+0E42 FE 00                       cp      #0                                      ; 2nd tile (below) req'd?
+0E44 CA 4B 0E                    jp      Z, loc_0_E4B                            ; no, skip
 0E47 C6 E0                       add     a, #0xE0 ; '‡'                          ; bottom of girder, no ladder below
 0E49 2C                          inc     l                                       ; next row
 0E4A 77                          ld      (hl), a                                 ; display tile
 0E4B             
-0E4B             loc_0_E4B:                                                      ; CODE XREF: sub_0_DA7+9Dj
-0E4B 13                          inc     de
-0E4C C3 A7 0D                    jp      sub_0_DA7
+0E4B             loc_0_E4B:                                                      ; CODE XREF: draw_level_background+9Dj
+0E4B 13                          inc     de                                      ; next entry
+0E4C C3 A7 0D                    jp      draw_level_background                   ; loop through level data
 0E4F             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 0E4F             
-0E4F             loc_0_E4F:                                                      ; CODE XREF: sub_0_DA7+49j
-0E4F 3A B3 63                    ld      a, (unk_0_63B3)
-0E52 FE 02                       cp      #2
-0E54 C2 E8 0E                    jp      NZ, loc_0_EE8
-0E57 3A AF 63                    ld      a, (unk_0_63AF)
-0E5A C6 F0                       add     a, #0xF0 ; ''
-0E5C 32 B5 63                    ld      (unk_0_63B5), a
-0E5F 2A AB 63                    ld      hl, (unk_0_63AB)
+0E4F             draw_girder_segment:                                            ; CODE XREF: draw_level_background+49j
+0E4F 3A B3 63                    ld      a, (segment_type)
+0E52 FE 02                       cp      #2                                      ; girder?
+0E54 C2 E8 0E                    jp      NZ, loc_0_EE8                           ; no, skip
+0E57 3A AF 63                    ld      a, (start_tile_index)
+0E5A C6 F0                       add     a, #0xF0 ; ''                          ; girder top (no ladder above)
+0E5C 32 B5 63                    ld      (current_tile_in_segment), a            ; initialise girder segment tile
+0E5F 2A AB 63                    ld      hl, (segment_addr_1)                    ; 'from' address
 0E62             
-0E62             loc_0_E62:                                                      ; CODE XREF: sub_0_DA7+E5j
-0E62 3A B5 63                                                                    ; sub_0_DA7+125j ...
-0E62                             ld      a, (unk_0_63B5)
-0E65 77                          ld      (hl), a
-0E66 23                          inc     hl
+0E62             next_tile_in_girder_segment:                                    ; CODE XREF: draw_level_background+E5j
+0E62 3A B5 63                                                                    ; draw_level_background+125j ...
+0E62                             ld      a, (current_tile_in_segment)
+0E65 77                          ld      (hl), a                                 ; display it
+0E66 23                          inc     hl                                      ; next row
 0E67 7D                          ld      a, l
-0E68 E6 1F                       and     #0x1F
-0E6A CA 78 0E                    jp      Z, loc_0_E78
-0E6D 3A B5 63                    ld      a, (unk_0_63B5)
-0E70 FE F0                       cp      #0xF0 ; ''
-0E72 CA 78 0E                    jp      Z, loc_0_E78
-0E75 D6 10                       sub     #0x10
-0E77 77                          ld      (hl), a
+0E68 E6 1F                       and     #0x1F                                   ; bottom of screen?
+0E6A CA 78 0E                    jp      Z, loc_0_E78                            ; yes, skip
+0E6D 3A B5 63                    ld      a, (current_tile_in_segment)
+0E70 FE F0                       cp      #0xF0 ; ''                             ; full girder?
+0E72 CA 78 0E                    jp      Z, loc_0_E78                            ; yes, skip
+0E75 D6 10                       sub     #0x10                                   ; get matching bottom piece
+0E77 77                          ld      (hl), a                                 ; display it
 0E78             
-0E78             loc_0_E78:                                                      ; CODE XREF: sub_0_DA7+C3j
-0E78 01 1F 00                                                                    ; sub_0_DA7+CBj
+0E78             loc_0_E78:                                                      ; CODE XREF: draw_level_background+C3j
+0E78 01 1F 00                                                                    ; draw_level_background+CBj
 0E78                             ld      bc, #0x1F
-0E7B 09                          add     hl, bc
-0E7C 3A B1 63                    ld      a, (unk_0_63B1)
-0E7F D6 08                       sub     #8
-0E81 DA CF 0E                    jp      C, loc_0_ECF
-0E84 32 B1 63                    ld      (unk_0_63B1), a
-0E87 3A B2 63                    ld      a, (unk_0_63B2)
-0E8A FE 00                       cp      #0
-0E8C CA 62 0E                    jp      Z, loc_0_E62
-0E8F 3A B5 63                    ld      a, (unk_0_63B5)
-0E92 77                          ld      (hl), a
-0E93 23                          inc     hl
+0E7B 09                          add     hl, bc                                  ; next column
+0E7C 3A B1 63                    ld      a, (dY)
+0E7F D6 08                       sub     #8                                      ; finished? (ignore [2:0])
+0E81 DA CF 0E                    jp      C, loc_0_ECF                            ; yes, skip
+0E84 32 B1 63                    ld      (dY), a
+0E87 3A B2 63                    ld      a, (dX)
+0E8A FE 00                       cp      #0                                      ; angled?
+0E8C CA 62 0E                    jp      Z, next_tile_in_girder_segment          ; no, loop
+0E8F 3A B5 63                    ld      a, (current_tile_in_segment)
+0E92 77                          ld      (hl), a                                 ; display it
+0E93 23                          inc     hl                                      ; next row
 0E94 7D                          ld      a, l
-0E95 E6 1F                       and     #0x1F
-0E97 CA A0 0E                    jp      Z, loc_0_EA0
-0E9A 3A B5 63                    ld      a, (unk_0_63B5)
-0E9D D6 10                       sub     #0x10
-0E9F 77                          ld      (hl), a
+0E95 E6 1F                       and     #0x1F                                   ; bottom of screen?
+0E97 CA A0 0E                    jp      Z, loc_0_EA0                            ; yes, skip
+0E9A 3A B5 63                    ld      a, (current_tile_in_segment)
+0E9D D6 10                       sub     #0x10                                   ; get matching bottom piece
+0E9F 77                          ld      (hl), a                                 ; display it
 0EA0             
-0EA0             loc_0_EA0:                                                      ; CODE XREF: sub_0_DA7+F0j
+0EA0             loc_0_EA0:                                                      ; CODE XREF: draw_level_background+F0j
 0EA0 01 1F 00                    ld      bc, #0x1F
-0EA3 09                          add     hl, bc
-0EA4 3A B1 63                    ld      a, (unk_0_63B1)
-0EA7 D6 08                       sub     #8
-0EA9 DA CF 0E                    jp      C, loc_0_ECF
-0EAC 32 B1 63                    ld      (unk_0_63B1), a
-0EAF 3A B2 63                    ld      a, (unk_0_63B2)
-0EB2 CB 7F                       bit     7, a
-0EB4 C2 D3 0E                    jp      NZ, loc_0_ED3
-0EB7 3A B5 63                    ld      a, (unk_0_63B5)
-0EBA 3C                          inc     a
-0EBB 32 B5 63                    ld      (unk_0_63B5), a
-0EBE FE F8                       cp      #0xF8 ; '¯'
-0EC0 C2 C9 0E                    jp      NZ, loc_0_EC9
-0EC3 23                          inc     hl
-0EC4 3E F0                       ld      a, #0xF0 ; ''
-0EC6 32 B5 63                    ld      (unk_0_63B5), a
+0EA3 09                          add     hl, bc                                  ; next column
+0EA4 3A B1 63                    ld      a, (dY)
+0EA7 D6 08                       sub     #8                                      ; finished? (ignore [2:0])
+0EA9 DA CF 0E                    jp      C, loc_0_ECF                            ; yes, skip
+0EAC 32 B1 63                    ld      (dY), a
+0EAF 3A B2 63                    ld      a, (dX)
+0EB2 CB 7F                       bit     7, a                                    ; sloping up?
+0EB4 C2 D3 0E                    jp      NZ, girder_sloping_down                 ; no, skip
+0EB7 3A B5 63                    ld      a, (current_tile_in_segment)
+0EBA 3C                          inc     a                                       ; next tile
+0EBB 32 B5 63                    ld      (current_tile_in_segment), a
+0EBE FE F8                       cp      #0xF8 ; '¯'                             ; time to wrap tile?
+0EC0 C2 C9 0E                    jp      NZ, loc_0_EC9                           ; no, skip
+0EC3 23                          inc     hl                                      ; next row
+0EC4 3E F0                       ld      a, #0xF0 ; ''                          ; init current tile
+0EC6 32 B5 63                    ld      (current_tile_in_segment), a
 0EC9             
-0EC9             loc_0_EC9:                                                      ; CODE XREF: sub_0_DA7+119j
+0EC9             loc_0_EC9:                                                      ; CODE XREF: draw_level_background+119j
 0EC9 7D                          ld      a, l
-0ECA E6 1F                       and     #0x1F
-0ECC C2 62 0E                    jp      NZ, loc_0_E62
+0ECA E6 1F                       and     #0x1F                                   ; bottom of screen?
+0ECC C2 62 0E                    jp      NZ, next_tile_in_girder_segment         ; no, loop
 0ECF             
-0ECF             loc_0_ECF:                                                      ; CODE XREF: sub_0_DA7+DAj
-0ECF 13                                                                          ; sub_0_DA7+102j ...
-0ECF                             inc     de
-0ED0 C3 A7 0D                    jp      sub_0_DA7
+0ECF             loc_0_ECF:                                                      ; CODE XREF: draw_level_background+DAj
+0ECF 13                                                                          ; draw_level_background+102j ...
+0ECF                             inc     de                                      ; next entry
+0ED0 C3 A7 0D                    jp      draw_level_background                   ; loop for all entries
 0ED3             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 0ED3             
-0ED3             loc_0_ED3:                                                      ; CODE XREF: sub_0_DA7+10Dj
-0ED3 3A B5 63                    ld      a, (unk_0_63B5)
-0ED6 3D                          dec     a
-0ED7 32 B5 63                    ld      (unk_0_63B5), a
-0EDA FE F0                       cp      #0xF0 ; ''
-0EDC F2 E5 0E                    jp      P, loc_0_EE5
-0EDF 2B                          dec     hl
-0EE0 3E F7                       ld      a, #0xF7 ; '˜'
-0EE2 32 B5 63                    ld      (unk_0_63B5), a
+0ED3             girder_sloping_down:                                            ; CODE XREF: draw_level_background+10Dj
+0ED3 3A B5 63                    ld      a, (current_tile_in_segment)
+0ED6 3D                          dec     a                                       ; next tile in sequence is -1
+0ED7 32 B5 63                    ld      (current_tile_in_segment), a
+0EDA FE F0                       cp      #0xF0 ; ''                             ; time to wrap tile?
+0EDC F2 E5 0E                    jp      P, loc_0_EE5                            ; no, skip
+0EDF 2B                          dec     hl                                      ; next row
+0EE0 3E F7                       ld      a, #0xF7 ; '˜'                          ; init current tile
+0EE2 32 B5 63                    ld      (current_tile_in_segment), a
 0EE5             
-0EE5             loc_0_EE5:                                                      ; CODE XREF: sub_0_DA7+135j
-0EE5 C3 62 0E                    jp      loc_0_E62
+0EE5             loc_0_EE5:                                                      ; CODE XREF: draw_level_background+135j
+0EE5 C3 62 0E                    jp      next_tile_in_girder_segment             ; loop
 0EE8             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 0EE8             
-0EE8             loc_0_EE8:                                                      ; CODE XREF: sub_0_DA7+ADj
-0EE8 3A B3 63                    ld      a, (unk_0_63B3)
+0EE8             loc_0_EE8:                                                      ; CODE XREF: draw_level_background+ADj
+0EE8 3A B3 63                    ld      a, (segment_type)                       ; flag
 0EEB FE 03                       cp      #3
 0EED C2 1B 0F                    jp      NZ, loc_0_F1B
-0EF0 2A AB 63                    ld      hl, (unk_0_63AB)
+0EF0 2A AB 63                    ld      hl, (segment_addr_1)
 0EF3 3E B3                       ld      a, #0xB3 ; '≥'
 0EF5 77                          ld      (hl), a
 0EF6 01 20 00                    ld      bc, #0x20 ; ' '
 0EF9 09                          add     hl, bc
-0EFA 3A B1 63                    ld      a, (unk_0_63B1)
+0EFA 3A B1 63                    ld      a, (dY)
 0EFD D6 10                       sub     #0x10
 0EFF             
-0EFF             loc_0_EFF:                                                      ; CODE XREF: sub_0_DA7+16Aj
+0EFF             loc_0_EFF:                                                      ; CODE XREF: draw_level_background+16Aj
 0EFF DA 14 0F                    jp      C, loc_0_F14
-0F02 32 B1 63                    ld      (unk_0_63B1), a
+0F02 32 B1 63                    ld      (dY), a
 0F05 3E B1                       ld      a, #0xB1 ; '±'
 0F07 77                          ld      (hl), a
 0F08 01 20 00                    ld      bc, #0x20 ; ' '
 0F0B 09                          add     hl, bc
-0F0C 3A B1 63                    ld      a, (unk_0_63B1)
+0F0C 3A B1 63                    ld      a, (dY)
 0F0F D6 08                       sub     #8
 0F11 C3 FF 0E                    jp      loc_0_EFF
 0F14             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 0F14             
-0F14             loc_0_F14:                                                      ; CODE XREF: sub_0_DA7+158j
+0F14             loc_0_F14:                                                      ; CODE XREF: draw_level_background+158j
 0F14 3E B2                       ld      a, #0xB2 ; '≤'
 0F16 77                          ld      (hl), a
 0F17 13                          inc     de
-0F18 C3 A7 0D                    jp      sub_0_DA7
+0F18 C3 A7 0D                    jp      draw_level_background
 0F1B             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 0F1B             
-0F1B             loc_0_F1B:                                                      ; CODE XREF: sub_0_DA7+146j
-0F1B 3A B3 63                    ld      a, (unk_0_63B3)
+0F1B             loc_0_F1B:                                                      ; CODE XREF: draw_level_background+146j
+0F1B 3A B3 63                    ld      a, (segment_type)                       ; flag
 0F1E FE 07                       cp      #7
 0F20 F2 CF 0E                    jp      P, loc_0_ECF
 0F23 FE 04                       cp      #4
@@ -2774,33 +2776,33 @@
 0F2A CA 51 0F                    jp      Z, loc_0_F51
 0F2D 3E FE                       ld      a, #0xFE ; '˛'
 0F2F             
-0F2F             loc_0_F2F:                                                      ; CODE XREF: sub_0_DA7+1A7j
-0F2F 32 B5 63                                                                    ; sub_0_DA7+1ACj
-0F2F                             ld      (unk_0_63B5), a
-0F32 2A AB 63                    ld      hl, (unk_0_63AB)
+0F2F             loc_0_F2F:                                                      ; CODE XREF: draw_level_background+1A7j
+0F2F 32 B5 63                                                                    ; draw_level_background+1ACj
+0F2F                             ld      (current_tile_in_segment), a
+0F32 2A AB 63                    ld      hl, (segment_addr_1)
 0F35             
-0F35             loc_0_F35:                                                      ; CODE XREF: sub_0_DA7+19Ej
-0F35 3A B5 63                    ld      a, (unk_0_63B5)
+0F35             loc_0_F35:                                                      ; CODE XREF: draw_level_background+19Ej
+0F35 3A B5 63                    ld      a, (current_tile_in_segment)
 0F38 77                          ld      (hl), a
 0F39 01 20 00                    ld      bc, #0x20 ; ' '
 0F3C 09                          add     hl, bc
-0F3D 3A B1 63                    ld      a, (unk_0_63B1)
+0F3D 3A B1 63                    ld      a, (dY)
 0F40 D6 08                       sub     #8
-0F42 32 B1 63                    ld      (unk_0_63B1), a
+0F42 32 B1 63                    ld      (dY), a
 0F45 D2 35 0F                    jp      NC, loc_0_F35
 0F48 13                          inc     de
-0F49 C3 A7 0D                    jp      sub_0_DA7
+0F49 C3 A7 0D                    jp      draw_level_background
 0F4C             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 0F4C             
-0F4C             erase_straight_girders:                                         ; CODE XREF: sub_0_DA7+17Ej
+0F4C             erase_straight_girders:                                         ; CODE XREF: draw_level_background+17Ej
 0F4C 3E E0                       ld      a, #0xE0 ; '‡'
 0F4E C3 2F 0F                    jp      loc_0_F2F
 0F51             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 0F51             
-0F51             loc_0_F51:                                                      ; CODE XREF: sub_0_DA7+183j
+0F51             loc_0_F51:                                                      ; CODE XREF: draw_level_background+183j
 0F51 3E B0                       ld      a, #0xB0 ; '∞'
 0F53 C3 2F 0F                    jp      loc_0_F2F
-0F53             ; End of function sub_0_DA7
+0F53             ; End of function draw_level_background
 0F53             
 0F56             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 0F56             
@@ -4156,19 +4158,19 @@
 17D3 21 DA 76                    ld      hl, #VRAM_start+0x2DA
 17D6 CD 26 18                    call    clear_14x5_HL
 17D9 11 47 3A                    ld      de, #draw_data_rivet_end1
-17DC CD A7 0D                    call    sub_0_DA7
+17DC CD A7 0D                    call    draw_level_background
 17DF 21 D5 76                    ld      hl, #VRAM_start+0x2D5
 17E2 CD 26 18                    call    clear_14x5_HL
 17E5 11 4D 3A                    ld      de, #draw_data_rivet_end2
-17E8 CD A7 0D                    call    sub_0_DA7
+17E8 CD A7 0D                    call    draw_level_background
 17EB 21 D0 76                    ld      hl, #VRAM_start+0x2D0
 17EE CD 26 18                    call    clear_14x5_HL
 17F1 11 53 3A                    ld      de, #draw_data_rivet_end3
-17F4 CD A7 0D                    call    sub_0_DA7
+17F4 CD A7 0D                    call    draw_level_background
 17F7 21 CB 76                    ld      hl, #VRAM_start+0x2CB
 17FA CD 26 18                    call    clear_14x5_HL
 17FD 11 59 3A                    ld      de, #draw_data_rivet_end4
-1800 CD A7 0D                    call    sub_0_DA7
+1800 CD A7 0D                    call    draw_level_background
 1803 21 5C 38                    ld      hl, #kong_normal_spr
 1806 CD 4E 00                    call    copy_sprites_2_11_data
 1809 21 08 69                    ld      hl, #soft_sprite_ram+8                  ; sprite #2, y coord
@@ -4274,7 +4276,7 @@
 189F 21 C6 76                    ld      hl, #VRAM_start+0x2C6
 18A2 CD 26 18                    call    clear_14x5_HL
 18A5 11 5F 3A                    ld      de, #draw_data_rivet_end5
-18A8 CD A7 0D                    call    sub_0_DA7
+18A8 CD A7 0D                    call    draw_level_background
 18AB 11 04 00                    ld      de, #4
 18AE 01 28 02                    ld      bc, #0x228
 18B1 21 03 69                    ld      hl, #soft_sprite_ram+3                  ; sprite #0, x coord
@@ -7249,7 +7251,7 @@
 2996 C6 0C                       add     a, #0xC
 2998 5F                          ld      e, a
 2999 EB                          ex      de, hl
-299A CD F0 2F                    call    sub_0_2FF0
+299A CD F0 2F                    call    get_tilemap_addr_from_coords
 299D 7E                          ld      a, (hl)
 299E FE B0                       cp      #0xB0 ; '∞'
 29A0 DA AC 29                    jp      C, loc_0_29AC
@@ -7373,7 +7375,7 @@
 2A36 C6 04                       add     a, #4
 2A38 6F                          ld      l, a
 2A39 E5                          push    hl
-2A3A CD F0 2F                    call    sub_0_2FF0
+2A3A CD F0 2F                    call    get_tilemap_addr_from_coords
 2A3D D1                          pop     de
 2A3E 7E                          ld      a, (hl)
 2A3F FE B0                       cp      #0xB0 ; '∞'
@@ -7451,7 +7453,7 @@
 2A9E C6 0C                       add     a, #0xC
 2AA0 6F                          ld      l, a
 2AA1 E5                          push    hl
-2AA2 CD F0 2F                    call    sub_0_2FF0
+2AA2 CD F0 2F                    call    get_tilemap_addr_from_coords
 2AA5 D1                          pop     de
 2AA6 7E                          ld      a, (hl)
 2AA7 FE B0                       cp      #0xB0 ; '∞'
@@ -7645,7 +7647,7 @@
 2B9B             sub_0_2B9B:                                                     ; CODE XREF: sub_0_2B29+11p
 2B9B E5                                                                          ; sub_0_2B29+36p ...
 2B9B                             push    hl
-2B9C CD F0 2F                    call    sub_0_2FF0
+2B9C CD F0 2F                    call    get_tilemap_addr_from_coords
 2B9F D1                          pop     de
 2BA0 7E                          ld      a, (hl)
 2BA1 FE B0                       cp      #0xB0 ; '∞'
@@ -8315,29 +8317,29 @@
 2FF0             ; €€€€€€€€€€€€€€€ S U B R O U T I N E €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
 2FF0             
 2FF0             
-2FF0             sub_0_2FF0:                                                     ; CODE XREF: sub_0_DA7+10p
-2FF0 7D                                                                          ; sub_0_DA7+3Dp ...
-2FF0                             ld      a, l                                    ; byte2
+2FF0             get_tilemap_addr_from_coords:                                   ; CODE XREF: draw_level_background+10p
+2FF0 7D                                                                          ; draw_level_background+3Dp ...
+2FF0                             ld      a, l                                    ; Y pos in bits [7:3]
 2FF1 0F                          rrca    
 2FF2 0F                          rrca    
 2FF3 0F                          rrca    
-2FF4 E6 1F                       and     #0x1F                                   ; byte2[7:3] -> [4:0]
-2FF6 6F                          ld      l, a
-2FF7 7C                          ld      a, h                                    ; byte1
-2FF8 2F                          cpl                                             ; ~byte1
+2FF4 E6 1F                       and     #0x1F                                   ; shift to [4:0]
+2FF6 6F                          ld      l, a                                    ; store as LSB of screen address
+2FF7 7C                          ld      a, h                                    ; X pos in bits [7:3]
+2FF8 2F                          cpl                                             ; mirror
 2FF9 E6 F8                       and     #0xF8 ; '¯'
-2FFB 5F                          ld      e, a                                    ; ~byte1[7:3]
+2FFB 5F                          ld      e, a
 2FFC AF                          xor     a
-2FFD 67                          ld      h, a                                    ; h=0
-2FFE CB 13                       rl      e                                       ; ~byte1[6:3,000,7]
-3000 17                          rla                                             ; ~byte1[7]
-3001 CB 13                       rl      e                                       ; ~byte1[5:3,000,7:6]
-3003 17                          rla                                             ; ~byte1[7:6]
-3004 C6 74                       add     a, #0x74 ; 't'                          ; start of video RAM
-3006 57                          ld      d, a
+2FFD 67                          ld      h, a
+2FFE CB 13                       rl      e
+3000 17                          rla     
+3001 CB 13                       rl      e
+3003 17                          rla                                             ; A=Xpos bits [7:6], E=[5:3]
+3004 C6 74                       add     a, #0x74 ; 't'                          ; add start of VRAM
+3006 57                          ld      d, a                                    ; store
 3007 19                          add     hl, de                                  ; HL = screen address
 3008 C9                          ret     
-3008             ; End of function sub_0_2FF0
+3008             ; End of function get_tilemap_addr_from_coords
 3008             
 3009             
 3009             ; €€€€€€€€€€€€€€€ S U B R O U T I N E €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
@@ -10763,17 +10765,15 @@
 63A8 ??          unk_0_63A8:     .ds 1
 63A9 ??                          .ds 1
 63AA ??                          .ds 1
-63AB ??          unk_0_63AB:     .ds 1
-63AC ??                          .ds 1
-63AD ??          unk_0_63AD:     .ds 1
-63AE ??                          .ds 1
-63AF ??          unk_0_63AF:     .ds 1
-63B0 ??          unk_0_63B0:     .ds 1
-63B1 ??          unk_0_63B1:     .ds 1
-63B2 ??          unk_0_63B2:     .ds 1
-63B3 ??          unk_0_63B3:     .ds 1
-63B4 ??          unk_0_63B4:     .ds 1
-63B5 ??          unk_0_63B5:     .ds 1
+63AB ?? ??       segment_addr_1: .ds 2
+63AD ?? ??       segment_addr_2: .ds 2
+63AF ??          start_tile_index:.ds 1
+63B0 ??          end_tile_index: .ds 1
+63B1 ??          dY:             .ds 1
+63B2 ??          dX:             .ds 1
+63B3 ??          segment_type:   .ds 1
+63B4 ??          tile_byte_1:    .ds 1
+63B5 ??          current_tile_in_segment:.ds 1
 63B6 ??                          .ds 1
 63B7 ??          unk_0_63B7:     .ds 1
 63B8 ??          unk_0_63B8:     .ds 1                                           ; DATA XREF: 0000:0635r
