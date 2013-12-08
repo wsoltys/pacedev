@@ -2907,7 +2907,7 @@
 0FE5 11 07 64                    ld      de, #unk_0_6407
 0FE8 0E 1C                       ld      c, #0x1C                                ; offset of each sprite
 0FEA 06 05                       ld      b, #5                                   ; do 5 sprites
-0FEC CD 2A 12                    call    copy_data_for_B_sprites
+0FEC CD 2A 12                    call    init_data_for_B_sprites
 0FEF 21 F4 3D                    ld      hl, #girders_extra_spr
 0FF2 CD FA 11                    call    init_fireball_sprite
 0FF5 21 00 3E                    ld      hl, #girder_oil_barrel_spr
@@ -2915,16 +2915,16 @@
 0FFB 01 04 00                    ld      bc, #4                                  ; 1 sprite only
 0FFE ED B0                       ldir                                            ; init sprite
 1000 21 0C 3E                    ld      hl, #girder_hammer_locs
-1003 CD A6 11                    call    sub_0_11A6
+1003 CD A6 11                    call    init_hammer_sprites
 1006             
 1006             loc_0_1006:
 1006 21 1B 10                    ld      hl, #cement_unknown_spr
 1009 11 07 67                    ld      de, #unk_0_6707
 100C 01 1C 08                    ld      bc, #0x81C                              ; 8 sprites, offset $1C
-100F CD 2A 12                    call    copy_data_for_B_sprites
+100F CD 2A 12                    call    init_data_for_B_sprites
 1012 11 07 68                    ld      de, #unk_0_6807
 1015 06 02                       ld      b, #2                                   ; 2 sprites to copy
-1017 CD 2A 12                    call    copy_data_for_B_sprites
+1017 CD 2A 12                    call    init_data_for_B_sprites
 101A C9                          ret     
 101A             ; ФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФ
 101B 00 00 02 02 cement_unknown_spr:.db 0, 0, 2, 2                               ; DATA XREF: 0000:1006o
@@ -2934,12 +2934,12 @@
 101F 21 EC 3D                    ld      hl, #fireball_spr
 1022 11 07 64                    ld      de, #unk_0_6407
 1025 01 1C 05                    ld      bc, #0x51C
-1028 CD 2A 12                    call    copy_data_for_B_sprites
+1028 CD 2A 12                    call    init_data_for_B_sprites
 102B CD 86 11                    call    sub_0_1186
 102E 21 18 3E                    ld      hl, #cement_pie_spr
 1031 11 A7 65                    ld      de, #unk_0_65A7
 1034 01 0C 06                    ld      bc, #0x60C
-1037 CD 2A 12                    call    copy_data_for_B_sprites
+1037 CD 2A 12                    call    init_data_for_B_sprites
 103A DD 21 A0 65                 ld      ix, #unk_0_65A0
 103E 21 B8 69                    ld      hl, #soft_sprite_ram+0xB8
 1041 11 10 00                    ld      de, #0x10
@@ -2960,7 +2960,7 @@
 106B 01 18 00                    ld      bc, #0x18
 106E ED B0                       ldir    
 1070 21 10 3E                    ld      hl, #cement_hammer_locs
-1073 CD A6 11                    call    sub_0_11A6
+1073 CD A6 11                    call    init_hammer_sprites
 1076 21 3C 3E                    ld      hl, #cement_obj_spr
 1079 11 0C 6A                    ld      de, #soft_sprite_ram+0x10C
 107C 01 0C 00                    ld      bc, #0xC
@@ -2974,7 +2974,7 @@
 1087 21 EC 3D                    ld      hl, #fireball_spr
 108A 11 07 64                    ld      de, #unk_0_6407
 108D 01 1C 05                    ld      bc, #0x51C
-1090 CD 2A 12                    call    copy_data_for_B_sprites
+1090 CD 2A 12                    call    init_data_for_B_sprites
 1093 CD 86 11                    call    sub_0_1186
 1096 21 00 66                    ld      hl, #unk_0_6600
 1099 11 10 00                    ld      de, #0x10
@@ -3002,11 +3002,11 @@
 10B7 21 64 3E                    ld      hl, #elevator_spr_xy
 10BA 11 03 66                    ld      de, #unk_0_6603
 10BD 01 0E 06                    ld      bc, #0x60E
-10C0 CD EC 11                    call    sub_0_11EC
+10C0 CD EC 11                    call    init_objects_locations
 10C3 21 60 3E                    ld      hl, #elevator_spr
 10C6 11 07 66                    ld      de, #unk_0_6607
 10C9 01 0C 06                    ld      bc, #0x60C
-10CC CD 2A 12                    call    copy_data_for_B_sprites
+10CC CD 2A 12                    call    init_data_for_B_sprites
 10CF DD 21 00 66                 ld      ix, #unk_0_6600
 10D3 21 58 69                    ld      hl, #soft_sprite_ram+0x58
 10D6 06 06                       ld      b, #6
@@ -3042,9 +3042,9 @@
 1131 21 F0 3D                    ld      hl, #fireball_rivet_spr
 1134 11 07 64                    ld      de, #unk_0_6407
 1137 01 1C 05                    ld      bc, #0x51C
-113A CD 2A 12                    call    copy_data_for_B_sprites
+113A CD 2A 12                    call    init_data_for_B_sprites
 113D 21 14 3E                    ld      hl, #rivet_hammer_locs
-1140 CD A6 11                    call    sub_0_11A6
+1140 CD A6 11                    call    init_hammer_sprites
 1143 21 54 3E                    ld      hl, #rivit_obj_spr
 1146 11 0C 6A                    ld      de, #soft_sprite_ram+0x10C
 1149 01 0C 00                    ld      bc, #0xC
@@ -3052,11 +3052,11 @@
 114E 21 82 11                    ld      hl, #rivet_unknown_spr2
 1151 11 A3 64                    ld      de, #unk_0_64A3
 1154 01 1E 02                    ld      bc, #0x21E
-1157 CD EC 11                    call    sub_0_11EC
+1157 CD EC 11                    call    init_objects_locations
 115A 21 7E 11                    ld      hl, #rivet_unknown_spr1
 115D 11 A7 64                    ld      de, #unk_0_64A7
 1160 01 1C 02                    ld      bc, #0x21C
-1163 CD 2A 12                    call    copy_data_for_B_sprites
+1163 CD 2A 12                    call    init_data_for_B_sprites
 1166 DD 21 A0 64                 ld      ix, #unk_0_64A0
 116A DD 36 00 01                 ld      0(ix), #1
 116E DD 36 20 01                 ld      0x20(ix), #1
@@ -3078,7 +3078,7 @@
 1186                             ld      hl, #elevator_bouncing_spr
 1189 11 07 65                    ld      de, #unk_0_6507
 118C 01 0C 0A                    ld      bc, #0xA0C
-118F CD 2A 12                    call    copy_data_for_B_sprites
+118F CD 2A 12                    call    init_data_for_B_sprites
 1192 DD 21 00 65                 ld      ix, #unk_0_6500
 1196 21 80 69                    ld      hl, #soft_sprite_ram+0x80
 1199 06 0A                       ld      b, #0xA
@@ -3093,24 +3093,24 @@
 11A6             ; ллллллллллллллл S U B R O U T I N E ллллллллллллллллллллллллллллллллллллллл
 11A6             
 11A6             
-11A6             sub_0_11A6:                                                     ; CODE XREF: 0000:1003p
+11A6             init_hammer_sprites:                                            ; CODE XREF: 0000:1003p
 11A6 11 83 66                                                                    ; 0000:1073p ...
-11A6                             ld      de, #unk_0_6683
-11A9 01 0E 02                    ld      bc, #0x20E
-11AC CD EC 11                    call    sub_0_11EC
+11A6                             ld      de, #unk_0_6683                         ; object XPOS
+11A9 01 0E 02                    ld      bc, #0x20E                              ; 2 sprites, offset=14
+11AC CD EC 11                    call    init_objects_locations
 11AF 21 08 3E                    ld      hl, #hammer_pickup_spr
-11B2 11 87 66                    ld      de, #unk_0_6687
-11B5 01 0C 02                    ld      bc, #0x20C
-11B8 CD 2A 12                    call    copy_data_for_B_sprites
+11B2 11 87 66                    ld      de, #unk_0_6687                         ; object tile
+11B5 01 0C 02                    ld      bc, #0x20C                              ; 2 sprites, offset inc=0x0C
+11B8 CD 2A 12                    call    init_data_for_B_sprites
 11BB DD 21 80 66                 ld      ix, #unk_0_6680
 11BF DD 36 00 01                 ld      0(ix), #1
 11C3 DD 36 10 01                 ld      0x10(ix), #1
-11C7 21 18 6A                    ld      hl, #soft_sprite_ram+0x118              ; location of hammers in sprite ram
+11C7 21 18 6A                    ld      hl, #soft_sprite_ram+0x118              ; sprite #70
 11CA 06 02                       ld      b, #2
 11CC 11 10 00                    ld      de, #0x10
 11CF CD D3 11                    call    set_B_sprites_data
 11D2 C9                          ret     
-11D2             ; End of function sub_0_11A6
+11D2             ; End of function init_hammer_sprites
 11D2             
 11D3             
 11D3             ; ллллллллллллллл S U B R O U T I N E ллллллллллллллллллллллллллллллллллллллл
@@ -3139,22 +3139,22 @@
 11EC             ; ллллллллллллллл S U B R O U T I N E ллллллллллллллллллллллллллллллллллллллл
 11EC             
 11EC             
-11EC             sub_0_11EC:                                                     ; CODE XREF: 0000:10C0p
+11EC             init_objects_locations:                                         ; CODE XREF: 0000:10C0p
 11EC 7E                                                                          ; 0000:1157p ...
 11EC                             ld      a, (hl)
-11ED 12                          ld      (de), a
-11EE 23                          inc     hl
+11ED 12                          ld      (de), a                                 ; copy byte 1
+11EE 23                          inc     hl                                      ; next source byte
 11EF 1C                          inc     e
-11F0 1C                          inc     e
+11F0 1C                          inc     e                                       ; skips destination byte
 11F1 7E                          ld      a, (hl)
-11F2 12                          ld      (de), a
-11F3 23                          inc     hl
+11F2 12                          ld      (de), a                                 ; copy byte 2
+11F3 23                          inc     hl                                      ; next source byte
 11F4 7B                          ld      a, e
 11F5 81                          add     a, c
-11F6 5F                          ld      e, a
-11F7 10 F3                       djnz    sub_0_11EC
+11F6 5F                          ld      e, a                                    ; add offset to destination
+11F7 10 F3                       djnz    init_objects_locations                  ; loop B times
 11F9 C9                          ret     
-11F9             ; End of function sub_0_11EC
+11F9             ; End of function init_objects_locations
 11F9             
 11FA             
 11FA             ; ллллллллллллллл S U B R O U T I N E ллллллллллллллллллллллллллллллллллллллл
@@ -3196,26 +3196,26 @@
 122A             ; ллллллллллллллл S U B R O U T I N E ллллллллллллллллллллллллллллллллллллллл
 122A             
 122A             
-122A             copy_data_for_B_sprites:                                        ; CODE XREF: 0000:0FECp
+122A             init_data_for_B_sprites:                                        ; CODE XREF: 0000:0FECp
 122A E5                                                                          ; 0000:100Fp ...
 122A                             push    hl
 122B C5                          push    bc
-122C 06 04                       ld      b, #4
+122C 06 04                       ld      b, #4                                   ; 4 bytes/sprite
 122E             
-122E             loc_0_122E:                                                     ; CODE XREF: copy_data_for_B_sprites+8j
+122E             loc_0_122E:                                                     ; CODE XREF: init_data_for_B_sprites+8j
 122E 7E                          ld      a, (hl)
 122F 12                          ld      (de), a
 1230 23                          inc     hl
 1231 1C                          inc     e
 1232 10 FA                       djnz    loc_0_122E                              ; copy data for 1 sprite
 1234 C1                          pop     bc
-1235 E1                          pop     hl
+1235 E1                          pop     hl                                      ; restore source
 1236 7B                          ld      a, e
-1237 81                          add     a, c                                    ; next location
+1237 81                          add     a, c                                    ; next destination
 1238 5F                          ld      e, a
-1239 10 EF                       djnz    copy_data_for_B_sprites                 ; do B sprites
+1239 10 EF                       djnz    init_data_for_B_sprites                 ; do B sprites
 123B C9                          ret     
-123B             ; End of function copy_data_for_B_sprites
+123B             ; End of function init_data_for_B_sprites
 123B             
 123C             ; ФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФ
 123C             
@@ -9786,7 +9786,7 @@
 3DFA 7F 40 01 78+cement_extra_spr:.db 0x7F, 0x40, 1, 0x78, 2, 0                  ; DATA XREF: 0000:1049o
 3E00 27 49 0C F0 girder_oil_barrel_spr:.db 0x27, 0x49, 0xC, 0xF0                 ; DATA XREF: 0000:0FF5o
 3E04 7F 49 0C 88 cement_oil_barrel_spr:.db 0x7F, 0x49, 0xC, 0x88                 ; DATA XREF: 0000:104Fo
-3E08 1E 07 03 09 hammer_pickup_spr:.db 0x1E, 7, 3, 9                             ; DATA XREF: sub_0_11A6+9o
+3E08 1E 07 03 09 hammer_pickup_spr:.db 0x1E, 7, 3, 9                             ; DATA XREF: init_hammer_sprites+9o
 3E0C 24 64 BB C0 girder_hammer_locs:.db 0x24, 0x64, 0xBB, 0xC0                   ; DATA XREF: 0000:1000o
 3E10 23 8D 7B B4 cement_hammer_locs:.db 0x23, 0x8D, 0x7B, 0xB4                   ; DATA XREF: 0000:1070o
 3E14 1B 8C 7C 64 rivet_hammer_locs:.db 0x1B, 0x8C, 0x7C, 0x64                    ; DATA XREF: 0000:113Do
@@ -11494,15 +11494,15 @@
 667D ??                          .ds 1
 667E ??                          .ds 1
 667F ??                          .ds 1
-6680 ??          unk_0_6680:     .ds 1                                           ; DATA XREF: sub_0_11A6+15o
+6680 ??          unk_0_6680:     .ds 1                                           ; DATA XREF: init_hammer_sprites+15o
 6680                                                                             ; sub_0_281D+5o ...
 6681 ??                          .ds 1
 6682 ??                          .ds 1
-6683 ??          unk_0_6683:     .ds 1                                           ; DATA XREF: sub_0_11A6o
+6683 ??          unk_0_6683:     .ds 1                                           ; DATA XREF: init_hammer_spriteso
 6684 ??                          .ds 1
 6685 ??                          .ds 1
 6686 ??                          .ds 1
-6687 ??          unk_0_6687:     .ds 1                                           ; DATA XREF: sub_0_11A6+Co
+6687 ??          unk_0_6687:     .ds 1                                           ; DATA XREF: init_hammer_sprites+Co
 6688 ??                          .ds 1
 6689 ??                          .ds 1
 668A ??                          .ds 1
