@@ -2908,7 +2908,7 @@
 0FE8 0E 1C                       ld      c, #0x1C                                ; offset of each sprite
 0FEA 06 05                       ld      b, #5                                   ; do 5 sprites
 0FEC CD 2A 12                    call    init_data_for_B_sprites
-0FEF 21 F4 3D                    ld      hl, #girders_extra_spr
+0FEF 21 F4 3D                    ld      hl, #girders_fireball_spr
 0FF2 CD FA 11                    call    init_fireball_sprite
 0FF5 21 00 3E                    ld      hl, #girder_oil_barrel_spr
 0FF8 11 FC 69                    ld      de, #soft_sprite_ram+0xFC               ; sprite #63
@@ -2918,7 +2918,7 @@
 1003 CD A6 11                    call    init_hammer_sprites
 1006             
 1006             loc_0_1006:
-1006 21 1B 10                    ld      hl, #cement_unknown_spr
+1006 21 1B 10                    ld      hl, #barrel_init_data
 1009 11 07 67                    ld      de, #unk_0_6707
 100C 01 1C 08                    ld      bc, #0x81C                              ; 8 sprites, offset $1C
 100F CD 2A 12                    call    init_data_for_B_sprites
@@ -2927,43 +2927,43 @@
 1017 CD 2A 12                    call    init_data_for_B_sprites
 101A C9                          ret     
 101A             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-101B 00 00 02 02 cement_unknown_spr:.db 0, 0, 2, 2                               ; DATA XREF: 0000:1006o
+101B 00 00 02 02 barrel_init_data:.db 0, 0, 2, 2                                 ; DATA XREF: 0000:1006o
 101F             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 101F             
 101F             init_l2_cement:                                                 ; DATA XREF: 0000:0FD1o
 101F 21 EC 3D                    ld      hl, #fireball_spr
 1022 11 07 64                    ld      de, #unk_0_6407
-1025 01 1C 05                    ld      bc, #0x51C
+1025 01 1C 05                    ld      bc, #0x51C                              ; 5 sprites, offset 0x1c
 1028 CD 2A 12                    call    init_data_for_B_sprites
-102B CD 86 11                    call    sub_0_1186
+102B CD 86 11                    call    init_spring_sprites
 102E 21 18 3E                    ld      hl, #cement_pie_spr
 1031 11 A7 65                    ld      de, #unk_0_65A7
-1034 01 0C 06                    ld      bc, #0x60C
+1034 01 0C 06                    ld      bc, #0x60C                              ; 6 sprites, offset 0x0c
 1037 CD 2A 12                    call    init_data_for_B_sprites
 103A DD 21 A0 65                 ld      ix, #unk_0_65A0
-103E 21 B8 69                    ld      hl, #soft_sprite_ram+0xB8
-1041 11 10 00                    ld      de, #0x10
-1044 06 06                       ld      b, #6
+103E 21 B8 69                    ld      hl, #soft_sprite_ram+0xB8               ; sprite #46-51
+1041 11 10 00                    ld      de, #0x10                               ; offset 0x10
+1044 06 06                       ld      b, #6                                   ; 6 sprites to init
 1046 CD D3 11                    call    set_B_sprites_data
-1049 21 FA 3D                    ld      hl, #cement_extra_spr
+1049 21 FA 3D                    ld      hl, #cement_fireball_spr
 104C CD FA 11                    call    init_fireball_sprite
 104F 21 04 3E                    ld      hl, #cement_oil_barrel_spr
-1052 11 FC 69                    ld      de, #soft_sprite_ram+0xFC
+1052 11 FC 69                    ld      de, #soft_sprite_ram+0xFC               ; sprite #63
 1055 01 04 00                    ld      bc, #4
-1058 ED B0                       ldir    
+1058 ED B0                       ldir                                            ; init oil barrel sprite
 105A 21 1C 3E                    ld      hl, #cement_ladder_spr
-105D 11 44 69                    ld      de, #soft_sprite_ram+0x44
-1060 01 08 00                    ld      bc, #8
+105D 11 44 69                    ld      de, #soft_sprite_ram+0x44               ; sprite #17-18
+1060 01 08 00                    ld      bc, #8                                  ; 8 bytes = 2 sprits
 1063 ED B0                       ldir    
-1065 21 24 3E                    ld      hl, #cement_conveyer_spr
-1068 11 E4 69                    ld      de, #soft_sprite_ram+0xE4
-106B 01 18 00                    ld      bc, #0x18
+1065 21 24 3E                    ld      hl, #cement_conveyor_spr
+1068 11 E4 69                    ld      de, #soft_sprite_ram+0xE4               ; sprite #57-62
+106B 01 18 00                    ld      bc, #0x18                               ; 0x18 bytes = 6 sprites
 106E ED B0                       ldir    
 1070 21 10 3E                    ld      hl, #cement_hammer_locs
 1073 CD A6 11                    call    init_hammer_sprites
-1076 21 3C 3E                    ld      hl, #cement_obj_spr
-1079 11 0C 6A                    ld      de, #soft_sprite_ram+0x10C
-107C 01 0C 00                    ld      bc, #0xC
+1076 21 3C 3E                    ld      hl, #cement_obj_spr                     ; hat, purse & umbrella
+1079 11 0C 6A                    ld      de, #soft_sprite_ram+0x10C              ; sprites #67-69
+107C 01 0C 00                    ld      bc, #0xC                                ; 12 bytes = 3 sprites
 107F ED B0                       ldir    
 1081 3E 01                       ld      a, #1
 1083 32 B9 62                    ld      (unk_0_62B9), a
@@ -2973,9 +2973,9 @@
 1087             init_l3_elevator:                                               ; DATA XREF: 0000:0FD3o
 1087 21 EC 3D                    ld      hl, #fireball_spr
 108A 11 07 64                    ld      de, #unk_0_6407
-108D 01 1C 05                    ld      bc, #0x51C
+108D 01 1C 05                    ld      bc, #0x51C                              ; 5 sprites, offset 0x1c
 1090 CD 2A 12                    call    init_data_for_B_sprites
-1093 CD 86 11                    call    sub_0_1186
+1093 CD 86 11                    call    init_spring_sprites
 1096 21 00 66                    ld      hl, #unk_0_6600
 1099 11 10 00                    ld      de, #0x10
 109C 3E 01                       ld      a, #1
@@ -2999,22 +2999,22 @@
 10B1 3E 08                       ld      a, #8
 10B3 0D                          dec     c
 10B4 C2 A8 10                    jp      NZ, loc_0_10A8
-10B7 21 64 3E                    ld      hl, #elevator_spr_xy
+10B7 21 64 3E                    ld      hl, #elevator_spr_locs
 10BA 11 03 66                    ld      de, #unk_0_6603
-10BD 01 0E 06                    ld      bc, #0x60E
+10BD 01 0E 06                    ld      bc, #0x60E                              ; 6 sprites, offset #0x0c
 10C0 CD EC 11                    call    init_objects_locations
 10C3 21 60 3E                    ld      hl, #elevator_spr
 10C6 11 07 66                    ld      de, #unk_0_6607
-10C9 01 0C 06                    ld      bc, #0x60C
+10C9 01 0C 06                    ld      bc, #0x60C                              ; 6 sprites, offset 0x0c
 10CC CD 2A 12                    call    init_data_for_B_sprites
 10CF DD 21 00 66                 ld      ix, #unk_0_6600
-10D3 21 58 69                    ld      hl, #soft_sprite_ram+0x58
-10D6 06 06                       ld      b, #6
-10D8 11 10 00                    ld      de, #0x10
+10D3 21 58 69                    ld      hl, #soft_sprite_ram+0x58               ; sprites #22-27
+10D6 06 06                       ld      b, #6                                   ; 6 sprites
+10D8 11 10 00                    ld      de, #0x10                               ; offset 0x10
 10DB CD D3 11                    call    set_B_sprites_data
-10DE 21 48 3E                    ld      hl, #elevator_obj_spr
-10E1 11 0C 6A                    ld      de, #soft_sprite_ram+0x10C
-10E4 01 0C 00                    ld      bc, #0xC
+10DE 21 48 3E                    ld      hl, #elevator_obj_spr                   ; hat, purse & umbrella
+10E1 11 0C 6A                    ld      de, #soft_sprite_ram+0x10C              ; sprites 67-69
+10E4 01 0C 00                    ld      bc, #0xC                                ; 0x0c bytes = 3 sprites
 10E7 ED B0                       ldir    
 10E9 DD 21 00 64                 ld      ix, #unk_0_6400                         ; fireball character data
 10ED DD 36 00 01                 ld      0(ix), #1
@@ -3022,14 +3022,14 @@
 10F5 DD 36 0E 58                 ld      0xE(ix), #0x58 ; 'X'
 10F9 DD 36 05 80                 ld      5(ix), #0x80 ; '€'
 10FD DD 36 0F 80                 ld      0xF(ix), #0x80 ; '€'
-1101 DD 36 20 01                 ld      0x20(ix), #1
+1101 DD 36 20 01                 ld      0x20(ix), #1                            ; 2nd fireball
 1105 DD 36 23 EB                 ld      0x23(ix), #0xEB ; 'ë'
 1109 DD 36 2E EB                 ld      0x2E(ix), #0xEB ; 'ë'
 110D DD 36 25 60                 ld      0x25(ix), #0x60 ; '`'
 1111 DD 36 2F 60                 ld      0x2F(ix), #0x60 ; '`'
-1115 11 70 69                    ld      de, #soft_sprite_ram+0x70
+1115 11 70 69                    ld      de, #soft_sprite_ram+0x70               ; sprite #28-31
 1118 21 21 11                    ld      hl, #elevator_cap_spr
-111B 01 10 00                    ld      bc, #0x10
+111B 01 10 00                    ld      bc, #0x10                               ; 0x10 bytes = 4 sprites
 111E ED B0                       ldir    
 1120 C9                          ret     
 1120             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -3073,22 +3073,22 @@
 1186             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 1186             
 1186             
-1186             sub_0_1186:                                                     ; CODE XREF: 0000:102Bp
+1186             init_spring_sprites:                                            ; CODE XREF: 0000:102Bp
 1186 21 A2 11                                                                    ; 0000:1093p
 1186                             ld      hl, #elevator_bouncing_spr
 1189 11 07 65                    ld      de, #unk_0_6507
 118C 01 0C 0A                    ld      bc, #0xA0C
 118F CD 2A 12                    call    init_data_for_B_sprites
 1192 DD 21 00 65                 ld      ix, #unk_0_6500
-1196 21 80 69                    ld      hl, #soft_sprite_ram+0x80
+1196 21 80 69                    ld      hl, #soft_sprite_ram+0x80               ; sprites 20-29
 1199 06 0A                       ld      b, #0xA
 119B 11 10 00                    ld      de, #0x10
 119E CD D3 11                    call    set_B_sprites_data
 11A1 C9                          ret     
-11A1             ; End of function sub_0_1186
+11A1             ; End of function init_spring_sprites
 11A1             
 11A1             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-11A2 3B 00 02 02 elevator_bouncing_spr:.db 0x3B, 0, 2, 2                         ; DATA XREF: sub_0_1186o
+11A2 3B 00 02 02 elevator_bouncing_spr:.db 0x3B, 0, 2, 2                         ; DATA XREF: init_spring_spriteso
 11A6             
 11A6             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 11A6             
@@ -9782,8 +9782,8 @@
 3DEC 3D 01 03 02 fireball_spr:   .db 0x3D, 1, 3, 2                               ; DATA XREF: 0000:0FE2o
 3DEC                                                                             ; 0000:101Fo ...
 3DF0 4D 01 04 01 fireball_rivet_spr:.db 0x4D, 1, 4, 1                            ; DATA XREF: 0000:1131o
-3DF4 27 70 01 E0+girders_extra_spr:.db 0x27, 0x70, 1, 0xE0, 0, 0                 ; DATA XREF: 0000:0FEFo
-3DFA 7F 40 01 78+cement_extra_spr:.db 0x7F, 0x40, 1, 0x78, 2, 0                  ; DATA XREF: 0000:1049o
+3DF4 27 70 01 E0+girders_fireball_spr:.db 0x27, 0x70, 1, 0xE0, 0, 0              ; DATA XREF: 0000:0FEFo
+3DFA 7F 40 01 78+cement_fireball_spr:.db 0x7F, 0x40, 1, 0x78, 2, 0               ; DATA XREF: 0000:1049o
 3E00 27 49 0C F0 girder_oil_barrel_spr:.db 0x27, 0x49, 0xC, 0xF0                 ; DATA XREF: 0000:0FF5o
 3E04 7F 49 0C 88 cement_oil_barrel_spr:.db 0x7F, 0x49, 0xC, 0x88                 ; DATA XREF: 0000:104Fo
 3E08 1E 07 03 09 hammer_pickup_spr:.db 0x1E, 7, 3, 9                             ; DATA XREF: init_hammer_sprites+9o
@@ -9792,7 +9792,7 @@
 3E14 1B 8C 7C 64 rivet_hammer_locs:.db 0x1B, 0x8C, 0x7C, 0x64                    ; DATA XREF: 0000:113Do
 3E18 4B 0E 04 02 cement_pie_spr: .db 0x4B, 0xE, 4, 2                             ; DATA XREF: 0000:102Eo
 3E1C 23 46 03 68+cement_ladder_spr:.db 0x23, 0x46, 3, 0x68, 0xDB, 0x46, 3, 0x68  ; DATA XREF: 0000:105Ao
-3E24 17 50 00 5C+cement_conveyer_spr:.db 0x17, 0x50, 0, 0x5C, 0xE7, 0xD0, 0, 0x5C, 0x8C, 0x50
+3E24 17 50 00 5C+cement_conveyor_spr:.db 0x17, 0x50, 0, 0x5C, 0xE7, 0xD0, 0, 0x5C, 0x8C, 0x50
 3E24 E7 D0 00 5C+                                                                ; DATA XREF: 0000:1065o
 3E24 8C 50 00 84+                .db 0, 0x84, 0x73, 0xD0, 0, 0x84, 0x17, 0x50, 0, 0xD4
 3E24 73 D0 00 84+                .db 0xE7, 0xD0, 0, 0xD4
@@ -9806,7 +9806,7 @@
 3E54 93 74 0A F0+                                                                ; DATA XREF: 0000:1143o
 3E54 33 75 0A 50                 .db 0x75, 0xA, 0x50
 3E60 44 03 08 04 elevator_spr:   .db 0x44, 3, 8, 4                               ; DATA XREF: 0000:10C3o
-3E64 37 F4 37 C0+elevator_spr_xy:.db 0x37, 0xF4, 0x37, 0xC0, 0x37, 0x8C, 0x77, 0x70, 0x77
+3E64 37 F4 37 C0+elevator_spr_locs:.db 0x37, 0xF4, 0x37, 0xC0, 0x37, 0x8C, 0x77, 0x70, 0x77
 3E64 37 8C 77 70+                                                                ; DATA XREF: 0000:10B7o
 3E64 77 A4 77 D8                 .db 0xA4, 0x77, 0xD8
 3E70             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -11107,7 +11107,7 @@
 64FD ??                          .ds 1
 64FE ??                          .ds 1
 64FF ??                          .ds 1
-6500 ??          unk_0_6500:     .ds 1                                           ; DATA XREF: sub_0_1186+Co
+6500 ??          unk_0_6500:     .ds 1                                           ; DATA XREF: init_spring_sprites+Co
 6500                                                                             ; 0000:28F9o ...
 6501 ??                          .ds 1
 6502 ??                          .ds 1
@@ -11115,7 +11115,7 @@
 6504 ??                          .ds 1
 6505 ??                          .ds 1
 6506 ??                          .ds 1
-6507 ??          unk_0_6507:     .ds 1                                           ; DATA XREF: sub_0_1186+3o
+6507 ??          unk_0_6507:     .ds 1                                           ; DATA XREF: init_spring_sprites+3o
 6508 ??                          .ds 1
 6509 ??                          .ds 1
 650A ??                          .ds 1
