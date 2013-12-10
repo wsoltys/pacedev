@@ -121,13 +121,13 @@
 0038                             ld      de, #4                                  ; every 4th byte
 003B 06 0A                       ld      b, #10                                  ; loop 10 times
 003D             
-003D             loc_0_3D:                                                       ; CODE XREF: sub_0_30+11j
+003D             add_c_sprite_register_xB:                                       ; CODE XREF: sub_0_30+11j
 003D 79                                                                          ; 0000:0D9Ap ...
 003D                             ld      a, c
 003E 86                          add     a, (hl)
 003F 77                          ld      (hl), a                                 ; (HL)+=C
 0040 19                          add     hl, de                                  ; next byte
-0041 10 FA                       djnz    loc_0_3D                                ; loop
+0041 10 FA                       djnz    add_c_sprite_register_xB                ; loop
 0043 C9                          ret     
 0044             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0044             
@@ -225,7 +225,7 @@
 00B5 21 1A 60                    ld      hl, #gen_purpose_timer
 00B8 35                          dec     (hl)                                    ; general purpose timer tick
 00B9 CD 57 00                    call    rand                                    ; randomise
-00BC CD 7B 01                    call    sub_0_17B
+00BC CD 7B 01                    call    check_coin_inserted
 00BF CD E0 00                    call    update_sounds
 00C2 21 D2 00                    ld      hl, #nmi_exit                           ; IRQ resume address
 00C5 E5                          push    hl
@@ -305,7 +305,7 @@
 011C             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 011C             
 011C             
-011C             stop_sound:                                                     ; CODE XREF: sub_0_17B+1Ap
+011C             stop_sound:                                                     ; CODE XREF: check_coin_inserted+1Ap
 011C 06 08                                                                       ; 0000:02B5p ...
 011C                             ld      b, #8
 011E AF                          xor     a
@@ -380,19 +380,19 @@
 017B             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 017B             
 017B             
-017B             sub_0_17B:                                                      ; CODE XREF: 0000:00BCp
+017B             check_coin_inserted:                                            ; CODE XREF: 0000:00BCp
 017B 3A 00 7D                    ld      a, (in2_snd_latch)                      ; read IN2
 017E CB 7F                       bit     7, a                                    ; coin?
-0180 21 03 60                    ld      hl, #unk_0_6003
-0183 C2 89 01                    jp      NZ, loc_0_189                           ; yes, skip
+0180 21 03 60                    ld      hl, #coin_state
+0183 C2 89 01                    jp      NZ, coin_inserted                       ; yes, skip
 0186 36 01                       ld      (hl), #1
 0188 C9                          ret     
 0189             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0189             
-0189             loc_0_189:                                                      ; CODE XREF: sub_0_17B+8j
+0189             coin_inserted:                                                  ; CODE XREF: check_coin_inserted+8j
 0189 7E                          ld      a, (hl)
 018A A7                          and     a
-018B C8                          ret     Z
+018B C8                          ret     Z                                       ; debounce
 018C E5                          push    hl
 018D 3A 05 60                    ld      a, (nmi_sequencer)
 0190 FE 03                       cp      #3                                      ; in credit sequence?
@@ -401,29 +401,29 @@
 0198 3E 03                       ld      a, #3                                   ; tmr = 3
 019A 32 83 60                    ld      (digital_snd_tmr_coin_spring), a
 019D             
-019D             loc_0_19D:                                                      ; CODE XREF: sub_0_17B+17j
+019D             loc_0_19D:                                                      ; CODE XREF: check_coin_inserted+17j
 019D E1                          pop     hl
-019E 36 00                       ld      (hl), #0
+019E 36 00                       ld      (hl), #0                                ; flag coin intersted
 01A0 2B                          dec     hl
-01A1 34                          inc     (hl)
-01A2 11 24 60                    ld      de, #coinage+2
+01A1 34                          inc     (hl)                                    ; inc coins_not_credited
+01A2 11 24 60                    ld      de, #coinage+2                          ; ptr coins/credit
 01A5 1A                          ld      a, (de)
-01A6 96                          sub     (hl)
-01A7 C0                          ret     NZ
-01A8 77                          ld      (hl), a
+01A6 96                          sub     (hl)                                    ; sub coins_not_credited
+01A7 C0                          ret     NZ                                      ; not enough coins for a credit
+01A8 77                          ld      (hl), a                                 ; update coins_not_credited (0)
 01A9 13                          inc     de
-01AA 2B                          dec     hl
-01AB EB                          ex      de, hl
-01AC 1A                          ld      a, (de)
-01AD FE 90                       cp      #0x90 ; ''
-01AF D0                          ret     NC
-01B0 86                          add     a, (hl)
+01AA 2B                          dec     hl                                      ; no_of_credits
+01AB EB                          ex      de, hl                                  ; DE=no_of_credits, HL=credits/coin
+01AC 1A                          ld      a, (de)                                 ; no_of_credits
+01AD FE 90                       cp      #0x90 ; ''                             ; max credits?
+01AF D0                          ret     NC                                      ; yes, take coins and exit
+01B0 86                          add     a, (hl)                                 ; add number of credits per coin
 01B1 27                          daa     
-01B2 12                          ld      (de), a
+01B2 12                          ld      (de), a                                 ; update number of credits
 01B3 11 00 04                    ld      de, #0x400                              ; display_credits_if_attract_mode
 01B6 CD 9F 30                    call    queue_fg_vector_fn
 01B9 C9                          ret     
-01B9             ; End of function sub_0_17B
+01B9             ; End of function check_coin_inserted
 01B9             
 01B9             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 01BA 00 37 00    inital_scores_and_high_score:.db 0, 0x37, 0                     ; DATA XREF: 0000:01C6o
@@ -1602,7 +1602,7 @@
 0813 CD 9F 30                    call    queue_fg_vector_fn
 0816 21 CF 39                    ld      hl, #dk_thrash_right_spr
 0819 CD 4E 00                    call    copy_sprites_2_11_data
-081C CD 24 3F                    call    sub_0_3F24
+081C CD 24 3F                    call    display_tm
 081F 00                          nop     
 0820 21 08 69                    ld      hl, #soft_sprite_ram+8                  ; sprite #2, y coord
 0823 0E 44                       ld      c, #68
@@ -2373,7 +2373,7 @@
 0CC9 3A 27 62                    ld      a, (level_type)
 0CCC FE 04                       cp      #4                                      ; rivets?
 0CCE CC 00 0D                    call    Z, draw_8_rivets                        ; yes, call
-0CD1 C3 A0 3F                    jp      loc_0_3FA0
+0CD1 C3 A0 3F                    jp      init_level_data_tmrs_spr
 0CD4             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0CD4             
 0CD4             draw_barrel_level:                                              ; CODE XREF: 0000:0CABj
@@ -2502,7 +2502,7 @@
 0D5E             
 0D5F             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0D5F             
-0D5F             loc_0_D5F:                                                      ; CODE XREF: 0000:3FA3j
+0D5F             init_level_data_tmrs_spr_cont:                                  ; CODE XREF: 0000:3FA3j
 0D5F CD 56 0F                    call    initialise_level_data_and_timers
 0D62 CD 41 24                    call    sub_0_2441
 0D65 21 09 60                    ld      hl, #eight_bit_countdown
@@ -2516,27 +2516,27 @@
 0D78 ED B0                       ldir                                            ; copy pauline sprite
 0D7A 3A 27 62                    ld      a, (level_type)
 0D7D FE 04                       cp      #4                                      ; rivets?
-0D7F 28 0A                       jr      Z, loc_0_D8B                            ; yes, skip
+0D7F 28 0A                       jr      Z, adj_pauline_kong_for_rivets          ; yes, skip
 0D81 0F                          rrca    
 0D82 0F                          rrca                                            ; level 2/3?
 0D83 D8                          ret     C                                       ; yes, return
-0D84 21 0B 69                    ld      hl, #soft_sprite_ram+0xB                ; sprite #2, x coord
+0D84 21 0B 69                    ld      hl, #soft_sprite_ram+0xB                ; sprite #2 (kong), x coord
 0D87 0E FC                       ld      c, #0xFC ; 'ü'                          ; -4
 0D89 FF                          rst     0x38                                    ; subtract 4 from x coord for 10 sprites
 0D8A C9                          ret     
 0D8B             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0D8B             
-0D8B             loc_0_D8B:                                                      ; CODE XREF: 0000:0D7Fj
-0D8B 21 08 69                    ld      hl, #soft_sprite_ram+8                  ; sprite #2, xcoord
+0D8B             adj_pauline_kong_for_rivets:                                    ; CODE XREF: 0000:0D7Fj
+0D8B 21 08 69                    ld      hl, #soft_sprite_ram+8                  ; sprite #2 (Kong), xcoord
 0D8E 0E 44                       ld      c, #68
 0D90 FF                          rst     0x38                                    ; add 68 to x coord for 10 sprites
 0D91 11 04 00                    ld      de, #4
 0D94 01 10 02                    ld      bc, #0x210
-0D97 21 00 69                    ld      hl, #soft_sprite_ram                    ; sprite #0, y coord
-0D9A CD 3D 00                    call    loc_0_3D
+0D97 21 00 69                    ld      hl, #soft_sprite_ram                    ; sprite #0 (Pauline), y coord
+0D9A CD 3D 00                    call    add_c_sprite_register_xB
 0D9D 01 F8 02                    ld      bc, #0x2F8
-0DA0 21 03 69                    ld      hl, #soft_sprite_ram+3                  ; sprite #0, x coord
-0DA3 CD 3D 00                    call    loc_0_3D
+0DA0 21 03 69                    ld      hl, #soft_sprite_ram+3                  ; sprite #0 (Pauline), x coord
+0DA3 CD 3D 00                    call    add_c_sprite_register_xB
 0DA6 C9                          ret     
 0DA7             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0DA7             
@@ -3039,36 +3039,36 @@
 1131             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1131             
 1131             init_l4_rivets:                                                 ; DATA XREF: 0000:0FD5o
-1131 21 F0 3D                    ld      hl, #fireball_rivet_spr
+1131 21 F0 3D                    ld      hl, #rivet_fireball_spr
 1134 11 07 64                    ld      de, #unk_0_6407
-1137 01 1C 05                    ld      bc, #0x51C
+1137 01 1C 05                    ld      bc, #0x51C                              ; 5 sprites, offset 0x0c
 113A CD 2A 12                    call    init_data_for_B_sprites
 113D 21 14 3E                    ld      hl, #rivet_hammer_locs
 1140 CD A6 11                    call    init_hammer_sprites
-1143 21 54 3E                    ld      hl, #rivit_obj_spr
-1146 11 0C 6A                    ld      de, #soft_sprite_ram+0x10C
-1149 01 0C 00                    ld      bc, #0xC
+1143 21 54 3E                    ld      hl, #rivet_obj_spr
+1146 11 0C 6A                    ld      de, #soft_sprite_ram+0x10C              ; sprite #67-69
+1149 01 0C 00                    ld      bc, #0xC                                ; 0x0c bytes = 3 sprites
 114C ED B0                       ldir    
-114E 21 82 11                    ld      hl, #rivet_unknown_spr2
+114E 21 82 11                    ld      hl, #rivet_unk_obj_locs
 1151 11 A3 64                    ld      de, #unk_0_64A3
-1154 01 1E 02                    ld      bc, #0x21E
+1154 01 1E 02                    ld      bc, #0x21E                              ; 2 sprites, offset 0x20
 1157 CD EC 11                    call    init_objects_locations
-115A 21 7E 11                    ld      hl, #rivet_unknown_spr1
+115A 21 7E 11                    ld      hl, #rivet_unk_sprites
 115D 11 A7 64                    ld      de, #unk_0_64A7
-1160 01 1C 02                    ld      bc, #0x21C
+1160 01 1C 02                    ld      bc, #0x21C                              ; 2 sprites, offset $20
 1163 CD 2A 12                    call    init_data_for_B_sprites
 1166 DD 21 A0 64                 ld      ix, #unk_0_64A0
 116A DD 36 00 01                 ld      0(ix), #1
 116E DD 36 20 01                 ld      0x20(ix), #1
-1172 21 50 69                    ld      hl, #soft_sprite_ram+0x50
-1175 06 02                       ld      b, #2
-1177 11 20 00                    ld      de, #0x20 ; ' '
+1172 21 50 69                    ld      hl, #soft_sprite_ram+0x50               ; sprite #20-21
+1175 06 02                       ld      b, #2                                   ; 2 sprites
+1177 11 20 00                    ld      de, #0x20 ; ' '                         ; offset 0x20
 117A CD D3 11                    call    set_B_sprites_data
 117D C9                          ret     
 117D             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-117E 3F 0C 08 08 rivet_unknown_spr1:.db 0x3F, 0xC, 8, 8                          ; DATA XREF: 0000:115Ao
-117E                                                                             ; Rivets level? Unknown sprites?
-1182 73 50 8D 50 rivet_unknown_spr2:.db 0x73, 0x50, 0x8D, 0x50                   ; DATA XREF: 0000:114Eo
+117E 3F 0C 08 08 rivet_unk_sprites:.db 0x3F, 0xC, 8, 8                           ; DATA XREF: 0000:115Ao
+117E                                                                             ; transparent squares over kong's legs
+1182 73 50 8D 50 rivet_unk_obj_locs:.db 0x73, 0x50, 0x8D, 0x50                   ; DATA XREF: 0000:114Eo
 1186             
 1186             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 1186             
@@ -4276,7 +4276,7 @@
 18AB 11 04 00                    ld      de, #4
 18AE 01 28 02                    ld      bc, #0x228
 18B1 21 03 69                    ld      hl, #soft_sprite_ram+3                  ; sprite #0, x coord
-18B4 CD 3D 00                    call    loc_0_3D
+18B4 CD 3D 00                    call    add_c_sprite_register_xB
 18B7 3E 00                       ld      a, #0
 18B9 32 AF 62                    ld      (unk_0_62AF), a
 18BC 3E 03                       ld      a, #3                                   ; tmr=3
@@ -8483,7 +8483,7 @@
 309F             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 309F             
 309F             
-309F             queue_fg_vector_fn:                                             ; CODE XREF: sub_0_17B+3Bp
+309F             queue_fg_vector_fn:                                             ; CODE XREF: check_coin_inserted+3Bp
 309F E5                                                                          ; 0000:01F7p ...
 309F                             push    hl
 30A0 21 C0 60                    ld      hl, #fg_vector_fn_params
@@ -9781,7 +9781,7 @@
 3DDC 1E 18 0B 3B+                .db 0x18, 0xB, 0x3B, 0x14, 0x18, 0xB, 0x3B
 3DEC 3D 01 03 02 fireball_spr:   .db 0x3D, 1, 3, 2                               ; DATA XREF: 0000:0FE2o
 3DEC                                                                             ; 0000:101Fo ...
-3DF0 4D 01 04 01 fireball_rivet_spr:.db 0x4D, 1, 4, 1                            ; DATA XREF: 0000:1131o
+3DF0 4D 01 04 01 rivet_fireball_spr:.db 0x4D, 1, 4, 1                            ; DATA XREF: 0000:1131o
 3DF4 27 70 01 E0+girders_fireball_spr:.db 0x27, 0x70, 1, 0xE0, 0, 0              ; DATA XREF: 0000:0FEFo
 3DFA 7F 40 01 78+cement_fireball_spr:.db 0x7F, 0x40, 1, 0x78, 2, 0               ; DATA XREF: 0000:1049o
 3E00 27 49 0C F0 girder_oil_barrel_spr:.db 0x27, 0x49, 0xC, 0xF0                 ; DATA XREF: 0000:0FF5o
@@ -9802,7 +9802,7 @@
 3E48 5B 73 0A C8+elevator_obj_spr:.db 0x5B, 0x73, 0xA, 0xC8, 0xE3, 0x74, 0xA, 0x60, 0x1B
 3E48 E3 74 0A 60+                                                                ; DATA XREF: 0000:10DEo
 3E48 1B 75 0A 80                 .db 0x75, 0xA, 0x80
-3E54 DB 73 0A C8+rivit_obj_spr:  .db 0xDB, 0x73, 0xA, 0xC8, 0x93, 0x74, 0xA, 0xF0, 0x33
+3E54 DB 73 0A C8+rivet_obj_spr:  .db 0xDB, 0x73, 0xA, 0xC8, 0x93, 0x74, 0xA, 0xF0, 0x33
 3E54 93 74 0A F0+                                                                ; DATA XREF: 0000:1143o
 3E54 33 75 0A 50                 .db 0x75, 0xA, 0x50
 3E60 44 03 08 04 elevator_spr:   .db 0x44, 3, 8, 4                               ; DATA XREF: 0000:10C3o
@@ -9922,34 +9922,34 @@
 3F24             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 3F24             
 3F24             
-3F24             sub_0_3F24:                                                     ; CODE XREF: 0000:081Cp
+3F24             display_tm:                                                     ; CODE XREF: 0000:081Cp
 3F24 21 AF 74                    ld      hl, #VRAM_start+0xAF
 3F27 11 E0 FF                    ld      de, #0xFFE0
 3F2A 36 9F                       ld      (hl), #0x9F ; 'Ÿ'
 3F2C 19                          add     hl, de
 3F2D 36 9E                       ld      (hl), #0x9E ; ''
 3F2F C9                          ret     
-3F2F             ; End of function sub_0_3F24
+3F2F             ; End of function display_tm
 3F2F             
 3F2F             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 3F30 50 52 4F 47+aProgramWeWouldTeachYou_Tel_toky:.ascii 'PROGRAM,WE WOULD TEACH YOU.*****TEL.TOKYO-JAPAN 044(244)'
 3F30 52 41 4D 2C+                .ascii '2151    EXTENTION 304   SYSTEM DESIGN   IKEGAMI CO. LIM.'
 3FA0             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 3FA0             
-3FA0             loc_0_3FA0:                                                     ; CODE XREF: 0000:0CD1j
-3FA0 CD A6 3F                    call    sub_0_3FA6
-3FA3 C3 5F 0D                    jp      loc_0_D5F
+3FA0             init_level_data_tmrs_spr:                                       ; CODE XREF: 0000:0CD1j
+3FA0 CD A6 3F                    call    fix_retractable_ladders
+3FA3 C3 5F 0D                    jp      init_level_data_tmrs_spr_cont
 3FA6             
 3FA6             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 3FA6             
 3FA6             
-3FA6             sub_0_3FA6:                                                     ; CODE XREF: 0000:3FA0p
+3FA6             fix_retractable_ladders:                                        ; CODE XREF: 0000:3FA0p
 3FA6 3E 02                       ld      a, #2                                   ; ladders for cement pie level
 3FA8 F7                          rst     0x30                                    ; return if level bit not set
 3FA9 06 02                       ld      b, #2
 3FAB 21 6C 77                    ld      hl, #VRAM_start+0x36C
 3FAE             
-3FAE             loc_0_3FAE:                                                     ; CODE XREF: sub_0_3FA6+11j
+3FAE             loc_0_3FAE:                                                     ; CODE XREF: fix_retractable_ladders+11j
 3FAE 36 10                       ld      (hl), #0x10
 3FB0 23                          inc     hl
 3FB1 23                          inc     hl
@@ -9957,7 +9957,7 @@
 3FB4 21 8C 74                    ld      hl, #VRAM_start+0x8C
 3FB7 10 F5                       djnz    loc_0_3FAE
 3FB9 C9                          ret     
-3FB9             ; End of function sub_0_3FA6
+3FB9             ; End of function fix_retractable_ladders
 3FB9             
 3FB9             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 3FBA 00 00 00 00+                .db 0, 0, 0, 0, 0, 0
@@ -9991,10 +9991,10 @@
 6001 ??          no_of_credits:  .ds 1                                           ; DATA XREF: display_credits+5o
 6001                                                                             ; 0000:073Fr ...
 6002 ??                          .ds 1
-6003 ??          unk_0_6003:     .ds 1                                           ; DATA XREF: sub_0_17B+5o
+6003 ??          coin_state:     .ds 1                                           ; DATA XREF: check_coin_inserted+5o
 6004 ??                          .ds 1
 6005 ??          nmi_sequencer:  .ds 1                                           ; DATA XREF: 0000:00C6r
-6005                                                                             ; sub_0_17B+12r ...
+6005                                                                             ; check_coin_inserted+12r ...
 6006 ??                          .ds 1
 6007 ??          attract_mode_flag:.ds 1
 6008 ??          sixteen_bit_countdown_msb:.ds 1                                 ; DATA XREF: return_NOT_16bit_timeouto
@@ -10029,7 +10029,7 @@
 6020                                                                             ; 0000:0922r ...
 6021 ??          bonus_setting:  .ds 1                                           ; DATA XREF: check_and_award_bonus+1Eo
 6021                                                                             ; 7/10/15/20K
-6022 ?? ?? ?? ?? coinage:        .ds 4                                           ; DATA XREF: sub_0_17B+27o
+6022 ?? ?? ?? ?? coinage:        .ds 4                                           ; DATA XREF: check_coin_inserted+27o
 6026 ??          upright:        .ds 1                                           ; DATA XREF: 0000:0087r
 6026                                                                             ; 0000:099Fr ...
 6027 ??                          .ds 1
