@@ -1224,7 +1224,7 @@
 05E9             
 05E9             
 05E9             print_message_A:                                                ; CODE XREF: display_credits+2p
-05E9 21 4B 36                                                                    ; display_start_12P_get_selection+18p
+05E9 21 4B 36                                                                    ; display_start_1P_2P_get_selectio+18p
 05E9                                                                             ; DATA XREF: ...
 05E9                             ld      hl, #message_table
 05EC 87                          add     a, a                                    ; convert entry to offset
@@ -1270,7 +1270,7 @@
 0616             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 0616             
 0616             
-0616             display_credits:                                                ; CODE XREF: display_start_12P_get_selection+1Bp
+0616             display_credits:                                                ; CODE XREF: display_start_1P_2P_get_selectio+1Bp
 0616 3E 05                                                                       ; 0000:141Ep ...
 0616                             ld      a, #5                                   ; "credit"
 0618 CD E9 05                    call    print_message_A
@@ -1434,13 +1434,13 @@
 0701 EF                          rst     0x28                                    ; go!
 0701             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0702 86 09                       .dw cls_and_set_screen_flip                     ; Jump table
-0704 AB 09                       .dw init_ingame_data_p1
-0706 D6 09                       .dw loc_0_9D6
-0708 FE 09                       .dw init_ingame_data_p2
-070A 1B 0A                       .dw display_p2_screen?
-070C 37 0A                       .dw display_p1_screen?
-070E 63 0A                       .dw wait_cls____
-0710 76 0A                       .dw do_intro_sequence
+0704 AB 09                       .dw init_P1_ingame_data
+0706 D6 09                       .dw display_player_I_and_2P_score
+0708 FE 09                       .dw init_P2_ingame_data
+070A 1B 0A                       .dw display_player_II_2UP_and_2P_sco
+070C 37 0A                       .dw display_1UP_and_high_score
+070E 63 0A                       .dw wait_cls_and_check_seen_intro
+0710 76 0A                       .dw vector_on_intro_sequence
 0712 DA 0B                       .dw draw_how_high_can_you_get
 0714 00 00                       .dw 0
 0716 91 0C                       .dw wait_init_and_draw_level
@@ -1733,11 +1733,11 @@
 08B2 3A 0A 60                    ld      a, (main_sequencer)
 08B5 EF                          rst     0x28                                    ; go!
 08B5             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-08B6 BA 08                       .dw loc_0_8BA                                   ; jump table
-08B8 F8 08                       .dw display_start_12P_init_???
+08B6 BA 08                       .dw display_1P_2P_start_screen                  ; jump table
+08B8 F8 08                       .dw process_1P_2P_start
 08BA             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 08BA             
-08BA             loc_0_8BA:                                                      ; DATA XREF: 0000:08B6o
+08BA             display_1P_2P_start_screen:                                     ; DATA XREF: 0000:08B6o
 08BA CD 74 08                    call    clear_visible_area_and_sprites
 08BD AF                          xor     a
 08BE 32 07 60                    ld      (attract_mode_flag), a                  ; clear attract mode flag
@@ -1755,8 +1755,8 @@
 08D5             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 08D5             
 08D5             
-08D5             display_start_12P_get_selection:                                ; CODE XREF: 0000:08F8p
-08D5 06 04                       ld      b, #4
+08D5             display_start_1P_2P_get_selectio:                               ; CODE XREF: 0000:08F8p
+08D5 06 04                       ld      b, #4                                   ; mask for START1
 08D7 1E 09                       ld      e, #return_if_attract_mode+1            ; "ONLY 1 PLAYER BUTTON"
 08D9 3A 01 60                    ld      a, (no_of_credits)
 08DC FE 01                       cp      #1
@@ -1764,7 +1764,7 @@
 08E1 06 0C                       ld      b, #0xC                                 ; mask for START1/START2
 08E3 1C                          inc     e                                       ; "1 or 2 PLAYERS"
 08E4             
-08E4             loc_0_8E4:                                                      ; CODE XREF: display_start_12P_get_selection+9j
+08E4             loc_0_8E4:                                                      ; CODE XREF: display_start_1P_2P_get_selectio+9j
 08E4 3A 1A 60                    ld      a, (gen_purpose_timer)
 08E7 E6 07                       and     #7
 08E9 C2 F3 08                    jp      NZ, loc_0_8F3
@@ -1772,16 +1772,16 @@
 08ED CD E9 05                    call    print_message_A                         ; display
 08F0 CD 16 06                    call    display_credits
 08F3             
-08F3             loc_0_8F3:                                                      ; CODE XREF: display_start_12P_get_selection+14j
+08F3             loc_0_8F3:                                                      ; CODE XREF: display_start_1P_2P_get_selectio+14j
 08F3 3A 00 7D                    ld      a, (in2_snd_latch)                      ; read IN2
 08F6 A0                          and     b                                       ; only START1/START2
 08F7 C9                          ret     
-08F7             ; End of function display_start_12P_get_selection
+08F7             ; End of function display_start_1P_2P_get_selectio
 08F7             
 08F8             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 08F8             
-08F8             display_start_12P_init_???:                                     ; DATA XREF: 0000:08B8o
-08F8 CD D5 08                    call    display_start_12P_get_selection
+08F8             process_1P_2P_start:                                            ; DATA XREF: 0000:08B8o
+08F8 CD D5 08                    call    display_start_1P_2P_get_selectio
 08FB FE 04                       cp      #4                                      ; START1?
 08FD CA 06 09                    jp      Z, start_1_selected                     ; yes, skip
 0900 FE 08                       cp      #8                                      ; START2?
@@ -1790,7 +1790,7 @@
 0906             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0906             
 0906             start_1_selected:                                               ; CODE XREF: 0000:08FDj
-0906 CD 77 09                    call    dec_credits_and_???
+0906 CD 77 09                    call    dec_credits_and_display
 0909 21 48 60                    ld      hl, #p2_level_data
 090C 06 08                       ld      b, #8
 090E AF                          xor     a
@@ -1800,24 +1800,24 @@
 0910 2C                          inc     l
 0911 10 FC                       djnz    loc_0_90F
 0913 21 00 00                    ld      hl, #0
-0916 C3 38 09                    jp      loc_0_938
+0916 C3 38 09                    jp      start_game
 0919             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0919             
 0919             start_2_selected:                                               ; CODE XREF: 0000:0902j
-0919 CD 77 09                    call    dec_credits_and_???
-091C CD 77 09                    call    dec_credits_and_???
+0919 CD 77 09                    call    dec_credits_and_display
+091C CD 77 09                    call    dec_credits_and_display
 091F 11 48 60                    ld      de, #p2_level_data
 0922 3A 20 60                    ld      a, (lives_per_game)
 0925 12                          ld      (de), a
 0926 1C                          inc     e
-0927 21 5E 09                    ld      hl, #0x95E
+0927 21 5E 09                    ld      hl, #game_init_data
 092A 01 07 00                    ld      bc, #7
 092D ED B0                       ldir    
 092F 11 01 01                    ld      de, #0x101                              ; zero_score_or_high_score
 0932 CD 9F 30                    call    queue_fg_vector_fn
 0935 21 00 01                    ld      hl, #0x100                              ; players=2, current_player=1
 0938             
-0938             loc_0_938:                                                      ; CODE XREF: 0000:0916j
+0938             start_game:                                                     ; CODE XREF: 0000:0916j
 0938 22 0E 60                    ld      (current_player_E), hl                  ; players and current player
 093B CD 74 08                    call    clear_visible_area_and_sprites
 093E 11 40 60                    ld      de, #p1_level_data
@@ -1835,7 +1835,8 @@
 095A 32 05 60                    ld      (nmi_sequencer), a
 095D C9                          ret     
 095D             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-095E 01          game_init_data: .db 1                                           ; DATA XREF: 0000:0946o
+095E 01          game_init_data: .db 1                                           ; DATA XREF: 0000:0927o
+095E                                                                             ; 0000:0946o
 095E                                                                             ; Start of game level init data
 095F 65 3A                       .dw level_seq_1
 0961 01 00 00 00                 .db 1, 0, 0, 0
@@ -1861,7 +1862,7 @@
 0977             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 0977             
 0977             
-0977             dec_credits_and_???:                                            ; CODE XREF: 0000:0906p
+0977             dec_credits_and_display:                                        ; CODE XREF: 0000:0906p
 0977 21 01 60                                                                    ; 0000:0919p ...
 0977                             ld      hl, #no_of_credits
 097A 3E 99                       ld      a, #0x99 ; '™'
@@ -1871,7 +1872,7 @@
 097F 11 00 04                    ld      de, #0x400                              ; display_credits_if_attract_mode
 0982 CD 9F 30                    call    queue_fg_vector_fn
 0985 C9                          ret     
-0985             ; End of function dec_credits_and_???
+0985             ; End of function dec_credits_and_display
 0985             
 0986             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0986             
@@ -1901,7 +1902,7 @@
 09AA C9                          ret     
 09AB             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 09AB             
-09AB             init_ingame_data_p1:                                            ; DATA XREF: 0000:0704o
+09AB             init_P1_ingame_data:                                            ; DATA XREF: 0000:0704o
 09AB 21 40 60                    ld      hl, #p1_level_data
 09AE 11 28 62                    ld      de, #lives_left                         ; player_current_data
 09B1 01 08 00                    ld      bc, #8                                  ; 8 bytes to copy
@@ -1927,13 +1928,13 @@
 09D5 C9                          ret     
 09D6             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 09D6             
-09D6             loc_0_9D6:                                                      ; DATA XREF: 0000:0706o
+09D6             display_player_I_and_2P_score:                                  ; DATA XREF: 0000:0706o
 09D6 AF                          xor     a
 09D7 32 86 7D                    ld      (palette_bank), a
 09DA 32 87 7D                    ld      (palette_bank+1), a                     ; palette bank 0
-09DD 11 02 03                    ld      de, #0x302                              ; display_message_02
+09DD 11 02 03                    ld      de, #0x302                              ; display_message_02 "PLAYER (I)"
 09E0 CD 9F 30                    call    queue_fg_vector_fn
-09E3 11 01 02                    ld      de, #0x201                              ; display_score_or_high_score
+09E3 11 01 02                    ld      de, #0x201                              ; display_score_or_high_score (P2)
 09E6 CD 9F 30                    call    queue_fg_vector_fn
 09E9 3E 05                       ld      a, #5
 09EB 32 0A 60                    ld      (main_sequencer), a
@@ -1954,7 +1955,7 @@
 09FD             
 09FE             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 09FE             
-09FE             init_ingame_data_p2:                                            ; DATA XREF: 0000:0708o
+09FE             init_P2_ingame_data:                                            ; DATA XREF: 0000:0708o
 09FE 21 48 60                    ld      hl, #p2_level_data
 0A01 11 28 62                    ld      de, #lives_left                         ; player_current_data
 0A04 01 08 00                    ld      bc, #8                                  ; 8 bytes to copy
@@ -1969,13 +1970,13 @@
 0A1A C9                          ret     
 0A1B             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0A1B             
-0A1B             display_p2_screen?:                                             ; DATA XREF: 0000:070Ao
+0A1B             display_player_II_2UP_and_2P_sco:                               ; DATA XREF: 0000:070Ao
 0A1B AF                          xor     a
 0A1C 32 86 7D                    ld      (palette_bank), a
 0A1F 32 87 7D                    ld      (palette_bank+1), a                     ; palette bank 0
-0A22 11 03 03                    ld      de, #0x303                              ; display_message_03
+0A22 11 03 03                    ld      de, #0x303                              ; display_message_03 "PLAYER (II)"
 0A25 CD 9F 30                    call    queue_fg_vector_fn
-0A28 11 01 02                    ld      de, #0x201                              ; display_score_or_high_score
+0A28 11 01 02                    ld      de, #0x201                              ; display_score_or_high_score (P2)
 0A2B CD 9F 30                    call    queue_fg_vector_fn
 0A2E CD EE 09                    call    display_2UP
 0A31 3E 05                       ld      a, #5
@@ -1983,12 +1984,12 @@
 0A36 C9                          ret     
 0A37             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0A37             
-0A37             display_p1_screen?:                                             ; DATA XREF: 0000:070Co
-0A37 11 04 03                    ld      de, #0x304                              ; display_message_04
+0A37             display_1UP_and_high_score:                                     ; DATA XREF: 0000:070Co
+0A37 11 04 03                    ld      de, #0x304                              ; display_message_04 "HIGH SCORE"
 0A3A CD 9F 30                    call    queue_fg_vector_fn
-0A3D 11 02 02                    ld      de, #0x202                              ; display_score_or_high_score
+0A3D 11 02 02                    ld      de, #0x202                              ; display_score_or_high_score (high)
 0A40 CD 9F 30                    call    queue_fg_vector_fn
-0A43 11 00 02                    ld      de, #0x200                              ; display_score_or_high_score
+0A43 11 00 02                    ld      de, #0x200                              ; display_score_or_high_score (P1)
 0A46 CD 9F 30                    call    queue_fg_vector_fn
 0A49 11 00 06                    ld      de, #0x600                              ; display_lives_and_level
 0A4C CD 9F 30                    call    queue_fg_vector_fn
@@ -2011,14 +2012,14 @@
 0A62             
 0A63             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0A63             
-0A63             wait_cls____:                                                   ; DATA XREF: 0000:070Eo
+0A63             wait_cls_and_check_seen_intro:                                  ; DATA XREF: 0000:070Eo
 0A63 DF                          rst     0x18                                    ; wait for 8-bit countdown
 0A64 CD 74 08                    call    clear_visible_area_and_sprites
 0A67 21 09 60                    ld      hl, #eight_bit_countdown
 0A6A 36 01                       ld      (hl), #1
 0A6C 2C                          inc     l                                       ; game_sequencer
 0A6D 34                          inc     (hl)                                    ; inc
-0A6E 11 2C 62                    ld      de, #unk_0_622C
+0A6E 11 2C 62                    ld      de, #seen_intro
 0A71 1A                          ld      a, (de)
 0A72 A7                          and     a                                       ; already seen intro?
 0A73 C0                          ret     NZ                                      ; no, return
@@ -2026,7 +2027,7 @@
 0A75 C9                          ret     
 0A76             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0A76             
-0A76             do_intro_sequence:                                              ; DATA XREF: 0000:0710o
+0A76             vector_on_intro_sequence:                                       ; DATA XREF: 0000:0710o
 0A76 3A 85 63                    ld      a, (intro_sequencer)
 0A79 EF                          rst     0x28                                    ; go!
 0A79             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -2034,7 +2035,7 @@
 0A7C BF 0A                       .dw loc_0_ABF
 0A7E E8 0A                       .dw loc_0_AE8
 0A80 69 30                       .dw loc_0_3069
-0A82 06 0B                       .dw draw_1st_girder_dformation
+0A82 06 0B                       .dw draw_1st_girder_deformation
 0A84 69 30                       .dw loc_0_3069
 0A86 68 0B                       .dw draw_rest_of_deformations
 0A88 B3 0B                       .dw growl
@@ -2104,7 +2105,7 @@
 0B05 C9                          ret     
 0B06             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0B06             
-0B06             draw_1st_girder_dformation:                                     ; DATA XREF: 0000:0A82o
+0B06             draw_1st_girder_deformation:                                    ; DATA XREF: 0000:0A82o
 0B06 3A 1A 60                    ld      a, (gen_purpose_timer)
 0B09 0F                          rrca    
 0B0A D8                          ret     C
@@ -3337,7 +3338,7 @@
 12F2             copy_current_lvl_data_to_P1:                                    ; DATA XREF: 0000:071Eo
 12F2 CD 1C 01                    call    stop_sound
 12F5 AF                          xor     a
-12F6 32 2C 62                    ld      (unk_0_622C), a
+12F6 32 2C 62                    ld      (seen_intro), a
 12F9 21 28 62                    ld      hl, #lives_left
 12FC 35                          dec     (hl)
 12FD 7E                          ld      a, (hl)
@@ -3386,7 +3387,7 @@
 1344             copy_current_lvl_data_to_P2:                                    ; DATA XREF: 0000:0720o
 1344 CD 1C 01                    call    stop_sound
 1347 AF                          xor     a
-1348 32 2C 62                    ld      (unk_0_622C), a
+1348 32 2C 62                    ld      (seen_intro), a
 134B 21 28 62                    ld      hl, #lives_left
 134E 35                          dec     (hl)
 134F 7E                          ld      a, (hl)
@@ -9367,8 +9368,8 @@
 360F 7B 6C 8B 6C+                .db 0xAB, 0x7C, 0xBB, 0x7C, 0xCB, 0x7C
 364B 8B 36       message_table:  .dw aGAME_OVER                                  ; DATA XREF: print_message_Ao
 364D 01 00                       .dw 1
-364F 98 36                       .dw aPLAYER
-3651 A5 36                       .dw aPLAYER_
+364F 98 36                       .dw aPLAYER_I
+3651 A5 36                       .dw aPLAYER_II
 3653 B2 36                       .dw aHIGH_SCORE
 3655 BF 36                       .dw aCREDIT
 3657 06 00                       .dw 6
@@ -9400,10 +9401,10 @@
 368B 96 76       aGAME_OVER:     .dw VRAM_start+0x296                            ; DATA XREF: 0000:364Bo
 368D 17 11 1D 15+                .db 0x17, 0x11, 0x1D, 0x15, 0x10, 0x10, 0x1F, 0x26, 0x15
 368D 10 10 1F 26+                .db 0x22, 0x3F
-3698 94 76       aPLAYER:        .dw VRAM_start+0x294                            ; DATA XREF: 0000:364Fo
+3698 94 76       aPLAYER_I:      .dw VRAM_start+0x294                            ; DATA XREF: 0000:364Fo
 369A 20 1C 11 29+                .db 0x20, 0x1C, 0x11, 0x29, 0x15, 0x22, 0x10, 0x30, 0x32
 369A 15 22 10 30+                .db 0x31, 0x3F
-36A5 94 76       aPLAYER_:       .dw VRAM_start+0x294                            ; DATA XREF: 0000:3651o
+36A5 94 76       aPLAYER_II:     .dw VRAM_start+0x294                            ; DATA XREF: 0000:3651o
 36A7 20 1C 11 29+                .db 0x20, 0x1C, 0x11, 0x29, 0x15, 0x22, 0x10, 0x30, 0x33
 36A7 15 22 10 30+                .db 0x31, 0x3F
 36B2 80 76       aHIGH_SCORE:    .dw VRAM_start+0x280                            ; DATA XREF: 0000:3653o
@@ -10350,7 +10351,7 @@
 6229                                                                             ; difficulty_timer_tick+15r ...
 6229                                                                             ; keeps incrementing
 622A ?? ??       seq_data:       .ds 2
-622C ??          unk_0_622C:     .ds 1                                           ; DATA XREF: 0000:0A6Eo
+622C ??          seen_intro:     .ds 1                                           ; DATA XREF: 0000:0A6Eo
 622C                                                                             ; 0000:12F6w ...
 622D ??          awarded_bonus_life:.ds 1
 622E ??          unk_0_622E:     .ds 1                                           ; DATA XREF: 0000:0C05r
