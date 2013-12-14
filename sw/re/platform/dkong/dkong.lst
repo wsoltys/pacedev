@@ -60,7 +60,7 @@
 0018             
 0018             
 0018             return_NOT_8bit_timeout:                                        ; CODE XREF: return_NOT_16bit_timeout+4j
-0018 21 09 60                                                                    ; 0000:0A63p ...
+0018 21 09 60                                                                    ; display_1UP+10p ...
 0018                             ld      hl, #eight_bit_countdown
 001B 35                          dec     (hl)
 001C C8                          ret     Z
@@ -2008,8 +2008,6 @@
 0A5D 3E 20                       ld      a, #0x20 ; ' '                          ; 'P'
 0A5F 32 00 77                    ld      (VRAM_start+0x300), a
 0A62 C9                          ret     
-0A62             ; End of function display_1UP
-0A62             
 0A63             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0A63             
 0A63             wait_cls_and_check_seen_intro:                                  ; DATA XREF: 0000:070Eo
@@ -2032,33 +2030,33 @@
 0A79 EF                          rst     0x28                                    ; go!
 0A79             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0A7A 8A 0A                       .dw draw_climb_screen                           ; Jump table
-0A7C BF 0A                       .dw loc_0_ABF
-0A7E E8 0A                       .dw loc_0_AE8
-0A80 69 30                       .dw loc_0_3069
+0A7C BF 0A                       .dw draw_climbing_kong
+0A7E E8 0A                       .dw animate_kong_climbing_ladder
+0A80 69 30                       .dw wait_and_inc_sequence
 0A82 06 0B                       .dw draw_1st_girder_deformation
-0A84 69 30                       .dw loc_0_3069
+0A84 69 30                       .dw wait_and_inc_sequence
 0A86 68 0B                       .dw draw_rest_of_deformations
 0A88 B3 0B                       .dw growl
 0A8A             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0A8A             
-0A8A             draw_climb_screen:                                              ; DATA XREF: 0000:0A7Ao
+0A8A             draw_climb_screen:                                              ; DATA XREF: display_1UP+27o
 0A8A AF                          xor     a
 0A8B 32 86 7D                    ld      (palette_bank), a
 0A8E 3C                          inc     a
 0A8F 32 87 7D                    ld      (palette_bank+1), a                     ; palette bank 2
 0A92 11 0D 38                    ld      de, #draw_data_climb
-0A95 CD A7 0D                    call    draw_level_background                   ; get address of ???
+0A95 CD A7 0D                    call    draw_level_background                   ; draw intro background
 0A98 3E 10                       ld      a, #0x10                                ; <space>
 0A9A 32 A3 76                    ld      (VRAM_start+0x2A3), a
-0A9D 32 63 76                    ld      (VRAM_start+0x263), a
+0A9D 32 63 76                    ld      (VRAM_start+0x263), a                   ; wipe top of ladder
 0AA0 3E D4                       ld      a, #0xD4 ; 'Ô'                          ; half ladder, half girder
 0AA2 32 AA 75                    ld      (VRAM_start+0x1AA), a
 0AA5 AF                          xor     a
-0AA6 32 AF 62                    ld      (unk_0_62AF), a
+0AA6 32 AF 62                    ld      (byte_0_62AF), a
 0AA9 21 B4 38                    ld      hl, #dk_intro_jump_up_data
-0AAC 22 C2 63                    ld      (unk_0_63C2), hl
-0AAF 21 CB 38                    ld      hl, #dk_intro_jump_across_data
-0AB2 22 C4 63                    ld      (unk_0_63C4), hl
+0AAC 22 C2 63                    ld      (ptr_current_jump_up_data), hl          ; store ptr current entry
+0AAF 21 CB 38                    ld      hl, #dk_intro_jump_left_data
+0AB2 22 C4 63                    ld      (ptr_current_jump_left_data), hl        ; store ptr current entry
 0AB5 3E 40                       ld      a, #0x40 ; '@'
 0AB7 32 09 60                    ld      (eight_bit_countdown), a
 0ABA 21 85 63                    ld      hl, #intro_sequencer
@@ -2066,7 +2064,7 @@
 0ABE C9                          ret     
 0ABF             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0ABF             
-0ABF             loc_0_ABF:                                                      ; DATA XREF: 0000:0A7Co
+0ABF             draw_climbing_kong:                                             ; DATA XREF: display_1UP+29o
 0ABF DF                          rst     0x18                                    ; wait for 8-bit countdown
 0AC0 21 8C 38                    ld      hl, #dk_climbing_spr
 0AC3 CD 4E 00                    call    copy_sprites_2_11_data
@@ -2077,7 +2075,7 @@
 0ACF 0E 99                       ld      c, #153
 0AD1 FF                          rst     0x38                                    ; add 153 to x coord for 10 sprites
 0AD2 3E 1F                       ld      a, #0x1F
-0AD4 32 8E 63                    ld      (unk_0_638E), a
+0AD4 32 8E 63                    ld      (byte_0_638E), a
 0AD7 AF                          xor     a
 0AD8 32 0C 69                    ld      (soft_sprite_ram+0xC), a                ; sprite #3, y coord
 0ADB 21 8A 60                    ld      hl, #unk_0_608A
@@ -2089,44 +2087,46 @@
 0AE7 C9                          ret     
 0AE8             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0AE8             
-0AE8             loc_0_AE8:                                                      ; DATA XREF: 0000:0A7Eo
-0AE8 CD 6F 30                    call    sub_0_306F
-0AEB 3A AF 62                    ld      a, (unk_0_62AF)
-0AEE E6 0F                       and     #0xF
-0AF0 CC 4A 30                    call    Z, sub_0_304A
+0AE8             animate_kong_climbing_ladder:                                   ; DATA XREF: display_1UP+2Bo
+0AE8 CD 6F 30                    call    animate_kong_climbing
+0AEB 3A AF 62                    ld      a, (byte_0_62AF)
+0AEE E6 0F                       and     #0xF                                    ; time to wipe ladder?
+0AF0 CC 4A 30                    call    Z, wipe_ladder_as_kong_climbs           ; yes, do so
 0AF3 3A 0B 69                    ld      a, (soft_sprite_ram+0xB)                ; sprite #2, x coord
-0AF6 FE 5D                       cp      #0x5D ; ']'
-0AF8 D0                          ret     NC
+0AF6 FE 5D                       cp      #0x5D ; ']'                             ; done climbing?
+0AF8 D0                          ret     NC                                      ; on, return
 0AF9 3E 20                       ld      a, #0x20 ; ' '
 0AFB 32 09 60                    ld      (eight_bit_countdown), a
-0AFE 21 85 63                    ld      hl, #0x6385
-0B01 34                          inc     (hl)
-0B02 22 C0 63                    ld      (unk_0_63C0), hl
+0AFE 21 85 63                    ld      hl, #intro_sequencer
+0B01 34                          inc     (hl)                                    ; next sequence (3)
+0B02 22 C0 63                    ld      (ptr_current_sequence), hl
 0B05 C9                          ret     
 0B06             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0B06             
-0B06             draw_1st_girder_deformation:                                    ; DATA XREF: 0000:0A82o
+0B06             draw_1st_girder_deformation:                                    ; DATA XREF: display_1UP+2Fo
 0B06 3A 1A 60                    ld      a, (gen_purpose_timer)
-0B09 0F                          rrca    
-0B0A D8                          ret     C
-0B0B 2A C2 63                    ld      hl, (unk_0_63C2)
+0B09 0F                          rrca                                            ; time to animate?
+0B0A D8                          ret     C                                       ; no, return
+0B0B 2A C2 63                    ld      hl, (ptr_current_jump_up_data)
 0B0E 7E                          ld      a, (hl)
-0B0F FE 7F                       cp      #0x7F ; ''
-0B11 CA 1E 0B                    jp      Z, loc_0_B1E
+0B0F FE 7F                       cp      #0x7F ; ''                             ; done jumping up?
+0B11 CA 1E 0B                    jp      Z, draw_pauline_and_kong                ; yes, skip
 0B14 23                          inc     hl
-0B15 22 C2 63                    ld      (unk_0_63C2), hl
+0B15 22 C2 63                    ld      (ptr_current_jump_up_data), hl
 0B18 4F                          ld      c, a
-0B19 21 0B 69                    ld      hl, #0x690B
+0B19 21 0B 69                    ld      hl, #soft_sprite_ram+0xB                ; sprite #2,X coord
 0B1C FF                          rst     0x38
 0B1D C9                          ret     
 0B1E             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0B1E             
-0B1E             loc_0_B1E:                                                      ; CODE XREF: 0000:0B11j
+0B1E             draw_pauline_and_kong:                                          ; CODE XREF: display_1UP+BEj
 0B1E 21 5C 38                    ld      hl, #dk_normal_spr
+0B1E             ; End of function display_1UP
+0B1E             
 0B21 CD 4E 00                    call    copy_sprites_2_11_data
 0B24 11 00 69                    ld      de, #soft_sprite_ram
 0B27 01 08 00                    ld      bc, #8
-0B2A ED B0                       ldir    
+0B2A ED B0                       ldir                                            ; place pauline on girder
 0B2C 21 08 69                    ld      hl, #soft_sprite_ram+8                  ; sprite #2, y coord
 0B2F 0E 50                       ld      c, #0x50 ; 'P'
 0B31 FF                          rst     0x38
@@ -2135,10 +2135,10 @@
 0B37 FF                          rst     0x38
 0B38             
 0B38             loc_0_B38:                                                      ; CODE XREF: 0000:0B40j
-0B38 CD 4A 30                    call    sub_0_304A
-0B3B 3A 8E 63                    ld      a, (unk_0_638E)
-0B3E FE 0A                       cp      #0xA
-0B40 C2 38 0B                    jp      NZ, loc_0_B38
+0B38 CD 4A 30                    call    wipe_ladder_as_kong_climbs
+0B3B 3A 8E 63                    ld      a, (byte_0_638E)
+0B3E FE 0A                       cp      #0xA                                    ; done wiping ladders?
+0B40 C2 38 0B                    jp      NZ, loc_0_B38                           ; no, loop
 0B43 3E 03                       ld      a, #3                                   ; tmr=3
 0B45 32 82 60                    ld      (digital_snd_tmr_thump), a
 0B48 11 2C 39                    ld      de, #draw_data_bend_girders_1
@@ -2147,25 +2147,25 @@
 0B50 32 AA 74                    ld      (VRAM_start+0xAA), a
 0B53 32 8A 74                    ld      (VRAM_start+0x8A), a
 0B56 3E 05                       ld      a, #5
-0B58 32 8D 63                    ld      (unk_0_638D), a
+0B58 32 8D 63                    ld      (next_girder_to_deform), a
 0B5B 3E 20                       ld      a, #0x20 ; ' '
 0B5D 32 09 60                    ld      (eight_bit_countdown), a
-0B60 21 85 63                    ld      hl, #0x6385
+0B60 21 85 63                    ld      hl, #intro_sequencer
 0B63 34                          inc     (hl)
-0B64 22 C0 63                    ld      (unk_0_63C0), hl
+0B64 22 C0 63                    ld      (ptr_current_sequence), hl
 0B67 C9                          ret     
 0B68             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0B68             
-0B68             draw_rest_of_deformations:                                      ; DATA XREF: 0000:0A86o
+0B68             draw_rest_of_deformations:                                      ; DATA XREF: display_1UP+33o
 0B68 3A 1A 60                    ld      a, (gen_purpose_timer)
 0B6B 0F                          rrca    
 0B6C D8                          ret     C
-0B6D 2A C4 63                    ld      hl, (unk_0_63C4)
+0B6D 2A C4 63                    ld      hl, (ptr_current_jump_left_data)
 0B70 7E                          ld      a, (hl)
 0B71 FE 7F                       cp      #0x7F ; ''
 0B73 CA 86 0B                    jp      Z, loc_0_B86
 0B76 23                          inc     hl
-0B77 22 C4 63                    ld      (unk_0_63C4), hl
+0B77 22 C4 63                    ld      (ptr_current_jump_left_data), hl
 0B7A 21 0B 69                    ld      hl, #soft_sprite_ram+0xB                ; sprite #2, x coord
 0B7D 4F                          ld      c, a
 0B7E FF                          rst     0x38
@@ -2176,12 +2176,12 @@
 0B86             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0B86             
 0B86             loc_0_B86:                                                      ; CODE XREF: 0000:0B73j
-0B86 21 CB 38                    ld      hl, #dk_intro_jump_across_data
-0B89 22 C4 63                    ld      (unk_0_63C4), hl
+0B86 21 CB 38                    ld      hl, #dk_intro_jump_left_data
+0B89 22 C4 63                    ld      (ptr_current_jump_left_data), hl
 0B8C 3E 03                       ld      a, #3                                   ; tmr=3
 0B8E 32 82 60                    ld      (digital_snd_tmr_thump), a
 0B91 21 DC 38                    ld      hl, #draw_data_bend_girders_2
-0B94 3A 8D 63                    ld      a, (unk_0_638D)
+0B94 3A 8D 63                    ld      a, (next_girder_to_deform)
 0B97 3D                          dec     a
 0B98 07                          rlca    
 0B99 07                          rlca    
@@ -2192,7 +2192,7 @@
 0B9F 19                          add     hl, de
 0BA0 EB                          ex      de, hl
 0BA1 CD A7 0D                    call    draw_level_background
-0BA4 21 8D 63                    ld      hl, #unk_0_638D
+0BA4 21 8D 63                    ld      hl, #next_girder_to_deform
 0BA7 35                          dec     (hl)
 0BA8 C0                          ret     NZ
 0BA9 3E B0                       ld      a, #0xB0 ; '°'
@@ -2202,7 +2202,7 @@
 0BB2 C9                          ret     
 0BB3             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0BB3             
-0BB3             growl:                                                          ; DATA XREF: 0000:0A88o
+0BB3             growl:                                                          ; DATA XREF: display_1UP+35o
 0BB3 21 8A 60                    ld      hl, #unk_0_608A
 0BB6 3A 09 60                    ld      a, (eight_bit_countdown)
 0BB9 FE 90                       cp      #0x90 ; ''
@@ -2539,9 +2539,11 @@
 0DA0 21 03 69                    ld      hl, #soft_sprite_ram+3                  ; sprite #0 (Pauline), x coord
 0DA3 CD 3D 00                    call    add_c_sprite_register_xB
 0DA6 C9                          ret     
-0DA7             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0DA7             
-0DA7             draw_level_background:                                          ; CODE XREF: 0000:0A95p
+0DA7             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
+0DA7             
+0DA7             
+0DA7             draw_level_background:                                          ; CODE XREF: display_1UP+42p
 0DA7 1A                                                                          ; 0000:0B4Bp ...
 0DA7                             ld      a, (de)                                 ; get flag
 0DA8 32 B3 63                    ld      (segment_type), a                       ; store for later
@@ -2572,7 +2574,7 @@
 0DCE D2 D3 0D                    jp      NC, loc_0_DD3                           ; no, skip
 0DD1 ED 44                       neg                                             ; delta Y
 0DD3             
-0DD3             loc_0_DD3:                                                      ; CODE XREF: 0000:0DCEj
+0DD3             loc_0_DD3:                                                      ; CODE XREF: draw_level_background+27j
 0DD3 32 B1 63                    ld      (dY), a
 0DD6 13                          inc     de                                      ; next entry
 0DD7 1A                          ld      a, (de)                                 ; X2
@@ -2610,8 +2612,8 @@
 0E15 AF                          xor     a                                       ; flag end-of-ladder
 0E16 32 B2 63                    ld      (dX), a
 0E19             
-0E19             next_tile_in_ladder_segment:                                    ; CODE XREF: 0000:0E12j
-0E19 3A B2 63                                                                    ; 0000:0E27j
+0E19             next_tile_in_ladder_segment:                                    ; CODE XREF: draw_level_background+6Bj
+0E19 3A B2 63                                                                    ; draw_level_background+80j
 0E19                             ld      a, (dX)
 0E1C D6 08                       sub     #8                                      ; finished ladder?
 0E1E 32 B2 63                    ld      (dX), a
@@ -2621,7 +2623,7 @@
 0E27 C3 19 0E                    jp      next_tile_in_ladder_segment             ; loop for ladder
 0E2A             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0E2A             
-0E2A             loc_0_E2A:                                                      ; CODE XREF: 0000:0E21j
+0E2A             loc_0_E2A:                                                      ; CODE XREF: draw_level_background+7Aj
 0E2A 3A B0 63                    ld      a, (end_tile_index)
 0E2D C6 D0                       add     a, #0xD0 ; 'Ğ'                          ; girder top, bottom of ladder
 0E2F 2A AD 63                    ld      hl, (segment_addr_2)                    ; vram address
@@ -2633,7 +2635,7 @@
 0E3C 36 C0                       ld      (hl), #0xC0 ; 'À'                       ; display full ladder tile
 0E3E 2C                          inc     l                                       ; re-adjust row
 0E3F             
-0E3F             loc_0_E3F:                                                      ; CODE XREF: 0000:0E38j
+0E3F             loc_0_E3F:                                                      ; CODE XREF: draw_level_background+91j
 0E3F 3A B0 63                    ld      a, (end_tile_index)
 0E42 FE 00                       cp      #0                                      ; 2nd tile (below) req'd?
 0E44 CA 4B 0E                    jp      Z, loc_0_E4B                            ; no, skip
@@ -2641,12 +2643,12 @@
 0E49 2C                          inc     l                                       ; next row
 0E4A 77                          ld      (hl), a                                 ; display tile
 0E4B             
-0E4B             loc_0_E4B:                                                      ; CODE XREF: 0000:0E44j
+0E4B             loc_0_E4B:                                                      ; CODE XREF: draw_level_background+9Dj
 0E4B 13                          inc     de                                      ; next entry
 0E4C C3 A7 0D                    jp      draw_level_background                   ; loop through level data
 0E4F             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0E4F             
-0E4F             draw_girder_segment:                                            ; CODE XREF: 0000:0DF0j
+0E4F             draw_girder_segment:                                            ; CODE XREF: draw_level_background+49j
 0E4F 3A B3 63                    ld      a, (segment_type)
 0E52 FE 02                       cp      #2                                      ; girder?
 0E54 C2 E8 0E                    jp      NZ, draw_conveyor_segment               ; no, skip
@@ -2655,8 +2657,8 @@
 0E5C 32 B5 63                    ld      (current_tile_in_segment), a            ; initialise girder segment tile
 0E5F 2A AB 63                    ld      hl, (segment_addr_1)                    ; 'from' address
 0E62             
-0E62             next_tile_in_girder_segment:                                    ; CODE XREF: 0000:0E8Cj
-0E62 3A B5 63                                                                    ; 0000:0ECCj ...
+0E62             next_tile_in_girder_segment:                                    ; CODE XREF: draw_level_background+E5j
+0E62 3A B5 63                                                                    ; draw_level_background+125j ...
 0E62                             ld      a, (current_tile_in_segment)
 0E65 77                          ld      (hl), a                                 ; display it
 0E66 23                          inc     hl                                      ; next row
@@ -2669,8 +2671,8 @@
 0E75 D6 10                       sub     #0x10                                   ; get matching bottom piece
 0E77 77                          ld      (hl), a                                 ; display it
 0E78             
-0E78             loc_0_E78:                                                      ; CODE XREF: 0000:0E6Aj
-0E78 01 1F 00                                                                    ; 0000:0E72j
+0E78             loc_0_E78:                                                      ; CODE XREF: draw_level_background+C3j
+0E78 01 1F 00                                                                    ; draw_level_background+CBj
 0E78                             ld      bc, #0x1F
 0E7B 09                          add     hl, bc                                  ; next column
 0E7C 3A B1 63                    ld      a, (dY)
@@ -2690,7 +2692,7 @@
 0E9D D6 10                       sub     #0x10                                   ; get matching bottom piece
 0E9F 77                          ld      (hl), a                                 ; display it
 0EA0             
-0EA0             loc_0_EA0:                                                      ; CODE XREF: 0000:0E97j
+0EA0             loc_0_EA0:                                                      ; CODE XREF: draw_level_background+F0j
 0EA0 01 1F 00                    ld      bc, #0x1F
 0EA3 09                          add     hl, bc                                  ; next column
 0EA4 3A B1 63                    ld      a, (dY)
@@ -2709,18 +2711,18 @@
 0EC4 3E F0                       ld      a, #0xF0 ; 'ğ'                          ; init current tile
 0EC6 32 B5 63                    ld      (current_tile_in_segment), a
 0EC9             
-0EC9             loc_0_EC9:                                                      ; CODE XREF: 0000:0EC0j
+0EC9             loc_0_EC9:                                                      ; CODE XREF: draw_level_background+119j
 0EC9 7D                          ld      a, l
 0ECA E6 1F                       and     #0x1F                                   ; bottom of screen?
 0ECC C2 62 0E                    jp      NZ, next_tile_in_girder_segment         ; no, loop
 0ECF             
-0ECF             next_segment:                                                   ; CODE XREF: 0000:0E81j
-0ECF 13                                                                          ; 0000:0EA9j ...
+0ECF             next_segment:                                                   ; CODE XREF: draw_level_background+DAj
+0ECF 13                                                                          ; draw_level_background+102j ...
 0ECF                             inc     de                                      ; next entry
 0ED0 C3 A7 0D                    jp      draw_level_background                   ; loop for all entries
 0ED3             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0ED3             
-0ED3             girder_sloping_down:                                            ; CODE XREF: 0000:0EB4j
+0ED3             girder_sloping_down:                                            ; CODE XREF: draw_level_background+10Dj
 0ED3 3A B5 63                    ld      a, (current_tile_in_segment)
 0ED6 3D                          dec     a                                       ; next tile in sequence is -1
 0ED7 32 B5 63                    ld      (current_tile_in_segment), a
@@ -2730,11 +2732,11 @@
 0EE0 3E F7                       ld      a, #0xF7 ; '÷'                          ; init current tile
 0EE2 32 B5 63                    ld      (current_tile_in_segment), a
 0EE5             
-0EE5             loc_0_EE5:                                                      ; CODE XREF: 0000:0EDCj
+0EE5             loc_0_EE5:                                                      ; CODE XREF: draw_level_background+135j
 0EE5 C3 62 0E                    jp      next_tile_in_girder_segment             ; loop
 0EE8             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0EE8             
-0EE8             draw_conveyor_segment:                                          ; CODE XREF: 0000:0E54j
+0EE8             draw_conveyor_segment:                                          ; CODE XREF: draw_level_background+ADj
 0EE8 3A B3 63                    ld      a, (segment_type)
 0EEB FE 03                       cp      #3                                      ; conveyor?
 0EED C2 1B 0F                    jp      NZ, draw_other_segments                 ; no, skip
@@ -2746,7 +2748,7 @@
 0EFA 3A B1 63                    ld      a, (dY)
 0EFD D6 10                       sub     #0x10                                   ; 2nd last tile?
 0EFF             
-0EFF             next_tile_on_coneyor_segment:                                   ; CODE XREF: 0000:0F11j
+0EFF             next_tile_on_coneyor_segment:                                   ; CODE XREF: draw_level_background+16Aj
 0EFF DA 14 0F                    jp      C, end_of_conveyor_segment              ; yes, skip
 0F02 32 B1 63                    ld      (dY), a
 0F05 3E B1                       ld      a, #0xB1 ; '±'                          ; conveyor tile
@@ -2758,14 +2760,14 @@
 0F11 C3 FF 0E                    jp      next_tile_on_coneyor_segment            ; loop through conveyor
 0F14             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0F14             
-0F14             end_of_conveyor_segment:                                        ; CODE XREF: 0000:0EFFj
+0F14             end_of_conveyor_segment:                                        ; CODE XREF: draw_level_background+158j
 0F14 3E B2                       ld      a, #0xB2 ; '²'                          ; end of conveyor
 0F16 77                          ld      (hl), a                                 ; display it
 0F17 13                          inc     de
 0F18 C3 A7 0D                    jp      draw_level_background                   ; return
 0F1B             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0F1B             
-0F1B             draw_other_segments:                                            ; CODE XREF: 0000:0EEDj
+0F1B             draw_other_segments:                                            ; CODE XREF: draw_level_background+146j
 0F1B 3A B3 63                    ld      a, (segment_type)
 0F1E FE 07                       cp      #7                                      ; valid segment?
 0F20 F2 CF 0E                    jp      P, next_segment                         ; no, continue
@@ -2775,12 +2777,12 @@
 0F2A CA 51 0F                    jp      Z, draw_rivet_level_girder              ; yes, skip
 0F2D 3E FE                       ld      a, #0xFE ; 'ş'                          ; oil barrel stand (conveyor level)
 0F2F             
-0F2F             loc_0_F2F:                                                      ; CODE XREF: 0000:0F4Ej
-0F2F 32 B5 63                                                                    ; 0000:0F53j
+0F2F             loc_0_F2F:                                                      ; CODE XREF: draw_level_background+1A7j
+0F2F 32 B5 63                                                                    ; draw_level_background+1ACj
 0F2F                             ld      (current_tile_in_segment), a
 0F32 2A AB 63                    ld      hl, (segment_addr_1)
 0F35             
-0F35             next_other_segment_tile:                                        ; CODE XREF: 0000:0F45j
+0F35             next_other_segment_tile:                                        ; CODE XREF: draw_level_background+19Ej
 0F35 3A B5 63                    ld      a, (current_tile_in_segment)
 0F38 77                          ld      (hl), a                                 ; display tile
 0F39 01 20 00                    ld      bc, #0x20 ; ' '
@@ -2793,14 +2795,16 @@
 0F49 C3 A7 0D                    jp      draw_level_background
 0F4C             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0F4C             
-0F4C             draw_blank_segment:                                             ; CODE XREF: 0000:0F25j
+0F4C             draw_blank_segment:                                             ; CODE XREF: draw_level_background+17Ej
 0F4C 3E E0                       ld      a, #0xE0 ; 'à'                          ; blank tile
 0F4E C3 2F 0F                    jp      loc_0_F2F
 0F51             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0F51             
-0F51             draw_rivet_level_girder:                                        ; CODE XREF: 0000:0F2Aj
+0F51             draw_rivet_level_girder:                                        ; CODE XREF: draw_level_background+183j
 0F51 3E B0                       ld      a, #0xB0 ; '°'                          ; rivet level girder
 0F53 C3 2F 0F                    jp      loc_0_F2F
+0F53             ; End of function draw_level_background
+0F53             
 0F56             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0F56             
 0F56             initialise_level_data_and_timers:                               ; CODE XREF: 0000:0D5Fp
@@ -3898,7 +3902,7 @@
 1647 EF                          rst     0x28                                    ; go1
 1647             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1648 B6 17                       .dw unk_0_17B6                                  ; Jump table
-164A 69 30                       .dw loc_0_3069
+164A 69 30                       .dw wait_and_inc_sequence
 164C 39 18                       .dw loc_0_1839
 164E 6F 18                       .dw loc_0_186F
 1650 80 18                       .dw loc_0_1880
@@ -3948,7 +3952,7 @@
 1696 AF                          xor     a
 1697 32 24 69                    ld      (soft_sprite_ram+0x24), a
 169A 32 2C 69                    ld      (soft_sprite_ram+0x2C), a
-169D 32 AF 62                    ld      (unk_0_62AF), a
+169D 32 AF 62                    ld      (byte_0_62AF), a
 16A0 C3 62 16                    jp      loc_0_1662
 16A3             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 16A3             
@@ -4007,7 +4011,7 @@
 16F9 AF                          xor     a
 16FA 32 24 69                    ld      (soft_sprite_ram+0x24), a
 16FD 32 2C 69                    ld      (soft_sprite_ram+0x2C), a
-1700 32 AF 62                    ld      (unk_0_62AF), a
+1700 32 AF 62                    ld      (byte_0_62AF), a
 1703 21 88 63                    ld      hl, #unk_0_6388
 1706 34                          inc     (hl)
 1707 C9                          ret     
@@ -4043,7 +4047,7 @@
 1732             
 1732             loc_0_1732:                                                     ; DATA XREF: 0000:1629o
 1732 CD 6F 30                                                                    ; 0000:163Bo
-1732                             call    sub_0_306F
+1732                             call    animate_kong_climbing
 1735 3A 13 69                    ld      a, (soft_sprite_ram+0x13)
 1738 FE 2C                       cp      #0x2C ; ','
 173A D0                          ret     NC
@@ -4064,7 +4068,7 @@
 1757             
 1757             loc_0_1757:                                                     ; DATA XREF: 0000:162Bo
 1757 CD 6F 30                                                                    ; 0000:163Do
-1757                             call    sub_0_306F
+1757                             call    animate_kong_climbing
 175A CD 6C 17                    call    sub_0_176C
 175D 23                          inc     hl
 175E 13                          inc     de
@@ -4181,7 +4185,7 @@
 181B 32 90 63                    ld      (kong_thrash_tmr), a
 181E 21 88 63                    ld      hl, #unk_0_6388
 1821 34                          inc     (hl)
-1822 22 C0 63                    ld      (unk_0_63C0), hl
+1822 22 C0 63                    ld      (ptr_current_sequence), hl
 1825 C9                          ret     
 1826             
 1826             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
@@ -4279,7 +4283,7 @@
 18B1 21 03 69                    ld      hl, #soft_sprite_ram+3                  ; sprite #0, x coord
 18B4 CD 3D 00                    call    add_c_sprite_register_xB
 18B7 3E 00                       ld      a, #0
-18B9 32 AF 62                    ld      (unk_0_62AF), a
+18B9 32 AF 62                    ld      (byte_0_62AF), a
 18BC 3E 03                       ld      a, #3                                   ; tmr=3
 18BE 32 82 60                    ld      (digital_snd_tmr_thump), a
 18C1 21 88 63                    ld      hl, #unk_0_6388
@@ -4288,7 +4292,7 @@
 18C6             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 18C6             
 18C6             loc_0_18C6:                                                     ; DATA XREF: 0000:1652o
-18C6 21 AF 62                    ld      hl, #unk_0_62AF
+18C6 21 AF 62                    ld      hl, #byte_0_62AF
 18C9 35                          dec     (hl)
 18CA CA 3D 19                    jp      Z, loc_0_193D
 18CD 7E                          ld      a, (hl)
@@ -4305,7 +4309,7 @@
 18DF CD 09 30                    call    sub_0_3009
 18E2 F6 20                       or      #0x20 ; ' '
 18E4 77                          ld      (hl), a
-18E5 21 AF 62                    ld      hl, #unk_0_62AF
+18E5 21 AF 62                    ld      hl, #byte_0_62AF
 18E8 7E                          ld      a, (hl)
 18E9 FE E0                       cp      #0xE0 ; 'à'
 18EB C2 10 19                    jp      NZ, loc_0_1910
@@ -7903,7 +7907,7 @@
 2D15             
 2D15             loc_0_2D15:                                                     ; CODE XREF: sub_0_2C8F+8j
 2D15 21 AF 62                                                                    ; sub_0_2C8F+77j
-2D15                             ld      hl, #unk_0_62AF
+2D15                             ld      hl, #byte_0_62AF
 2D18 35                          dec     (hl)
 2D19 C0                          ret     NZ
 2D1A 36 18                       ld      (hl), #0x18
@@ -7934,7 +7938,7 @@
 2D41 35                          dec     (hl)
 2D42 C2 51 2D                    jp      NZ, loc_0_2D51
 2D45 3E 01                       ld      a, #1
-2D47 32 AF 62                    ld      (unk_0_62AF), a
+2D47 32 AF 62                    ld      (byte_0_62AF), a
 2D4A 3A 82 63                    ld      a, (unk_0_6382)
 2D4D 0F                          rrca    
 2D4E DA 83 2D                    jp      C, loc_0_2D83
@@ -8314,8 +8318,8 @@
 2FF0             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 2FF0             
 2FF0             
-2FF0             get_tilemap_addr_from_coords:                                   ; CODE XREF: 0000:0DB7p
-2FF0 7D                                                                          ; 0000:0DE4p ...
+2FF0             get_tilemap_addr_from_coords:                                   ; CODE XREF: draw_level_background+10p
+2FF0 7D                                                                          ; draw_level_background+3Dp ...
 2FF0                             ld      a, l                                    ; Y pos in bits [7:3]
 2FF1 0F                          rrca    
 2FF2 0F                          rrca    
@@ -8400,49 +8404,49 @@
 304A             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 304A             
 304A             
-304A             sub_0_304A:                                                     ; CODE XREF: 0000:0AF0p
+304A             wipe_ladder_as_kong_climbs:                                     ; CODE XREF: display_1UP+9Dp
 304A 11 E0 FF                                                                    ; 0000:0B38p
-304A                             ld      de, #0xFFE0
-304D 3A 8E 63                    ld      a, (unk_0_638E)
+304A                             ld      de, #0xFFE0                             ; column offset
+304D 3A 8E 63                    ld      a, (byte_0_638E)
 3050 4F                          ld      c, a
 3051 06 00                       ld      b, #0
 3053 21 00 76                    ld      hl, #VRAM_start+0x200
-3056 CD 64 30                    call    sub_0_3064
+3056 CD 64 30                    call    copy_tile_from_next_column
 3059 21 C0 75                    ld      hl, #VRAM_start+0x1C0
-305C CD 64 30                    call    sub_0_3064
-305F 21 8E 63                    ld      hl, #unk_0_638E
+305C CD 64 30                    call    copy_tile_from_next_column
+305F 21 8E 63                    ld      hl, #byte_0_638E
 3062 35                          dec     (hl)
 3063 C9                          ret     
-3063             ; End of function sub_0_304A
+3063             ; End of function wipe_ladder_as_kong_climbs
 3063             
 3064             
 3064             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 3064             
 3064             
-3064             sub_0_3064:                                                     ; CODE XREF: sub_0_304A+Cp
-3064 09                                                                          ; sub_0_304A+12p
+3064             copy_tile_from_next_column:                                     ; CODE XREF: wipe_ladder_as_kong_climbs+Cp
+3064 09                                                                          ; wipe_ladder_as_kong_climbs+12p
 3064                             add     hl, bc
 3065 7E                          ld      a, (hl)
 3066 19                          add     hl, de
 3067 77                          ld      (hl), a
 3068 C9                          ret     
-3068             ; End of function sub_0_3064
+3068             ; End of function copy_tile_from_next_column
 3068             
 3069             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 3069             
-3069             loc_0_3069:                                                     ; DATA XREF: 0000:0A80o
-3069 DF                                                                          ; 0000:0A84o ...
+3069             wait_and_inc_sequence:                                          ; DATA XREF: display_1UP+2Do
+3069 DF                                                                          ; display_1UP+31o ...
 3069                             rst     0x18                                    ; wait for 8-bit countdown
-306A 2A C0 63                    ld      hl, (unk_0_63C0)
+306A 2A C0 63                    ld      hl, (ptr_current_sequence)
 306D 34                          inc     (hl)
 306E C9                          ret     
 306F             
 306F             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 306F             
 306F             
-306F             sub_0_306F:                                                     ; CODE XREF: 0000:0AE8p
+306F             animate_kong_climbing:                                          ; CODE XREF: display_1UP+95p
 306F 21 AF 62                                                                    ; 0000:1732p ...
-306F                             ld      hl, #unk_0_62AF
+306F                             ld      hl, #byte_0_62AF
 3072 34                          inc     (hl)
 3073 7E                          ld      a, (hl)
 3074 E6 07                       and     #7
@@ -8452,33 +8456,33 @@
 307C FF                          rst     0x38
 307D 0E 81                       ld      c, #0x81 ; ''
 307F 21 09 69                    ld      hl, #soft_sprite_ram+9                  ; sprite #2, flipy & code
-3082 CD 96 30                    call    sub_0_3096
-3085 21 1D 69                    ld      hl, #soft_sprite_ram+0x1D
-3088 CD 96 30                    call    sub_0_3096
-308B CD 57 00                    call    rand
+3082 CD 96 30                    call    flip_2_tiles
+3085 21 1D 69                    ld      hl, #soft_sprite_ram+0x1D               ; sprite #7, flipy & code
+3088 CD 96 30                    call    flip_2_tiles
+308B CD 57 00                    call    rand                                    ; Pauline kicking legs
 308E E6 80                       and     #0x80 ; '€'
-3090 21 2D 69                    ld      hl, #soft_sprite_ram+0x2D
+3090 21 2D 69                    ld      hl, #soft_sprite_ram+0x2D               ; sprite #11, flipy & code (Pauline)
 3093 AE                          xor     (hl)
 3094 77                          ld      (hl), a
 3095 C9                          ret     
-3095             ; End of function sub_0_306F
+3095             ; End of function animate_kong_climbing
 3095             
 3096             
 3096             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 3096             
 3096             
-3096             sub_0_3096:                                                     ; CODE XREF: sub_0_306F+13p
-3096 06 02                                                                       ; sub_0_306F+19p
+3096             flip_2_tiles:                                                   ; CODE XREF: animate_kong_climbing+13p
+3096 06 02                                                                       ; animate_kong_climbing+19p
 3096                             ld      b, #2
 3098             
-3098             loc_0_3098:                                                     ; CODE XREF: sub_0_3096+6j
+3098             loc_0_3098:                                                     ; CODE XREF: flip_2_tiles+6j
 3098 79                          ld      a, c
 3099 AE                          xor     (hl)
 309A 77                          ld      (hl), a
 309B 19                          add     hl, de
 309C 10 FA                       djnz    loc_0_3098
 309E C9                          ret     
-309E             ; End of function sub_0_3096
+309E             ; End of function flip_2_tiles
 309E             
 309F             
 309F             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
@@ -9470,7 +9474,7 @@
 3806 7C 75                       .dw VRAM_start+0x17C
 3808 01 09 08 01+                .db 1, 9, 8, 1, 0x3F
 380D 02 97 38 68+draw_data_climb:.db 2, 0x97, 0x38, 0x68, 0x38, 2, 0xDF, 0x54, 0x10, 0x54
-380D 38 02 DF 54+                                                                ; DATA XREF: 0000:0A92o
+380D 38 02 DF 54+                                                                ; DATA XREF: display_1UP+3Fo
 380D 10 54 02 EF+                .db 2, 0xEF, 0x6D, 0x20, 0x6D, 2, 0xDF, 0x8E, 0x10, 0x8E
 380D 6D 20 6D 02+                .db 2, 0xEF, 0xAF, 0x20, 0xAF, 2, 0xDF, 0xD0, 0x10, 0xD0
 380D DF 8E 10 8E+                .db 2, 0xEF, 0xF1, 0x10, 0xF1, 0, 0x53, 0x18, 0x53, 0x54
@@ -9484,7 +9488,7 @@
 3856 6C 00 7C                    .db 0x6C, 0, 0x7C
 3859 8F 7F 8E                    .db 0x8F, 0x7F, 0x8E
 385C 47 27 08 50+dk_normal_spr:  .db 0x47, 0x27, 8, 0x50                         ; DATA XREF: animate_kong_and_pauline+74o
-385C 2F A7 08 50+                                                                ; 0000:0B1Eo ...
+385C 2F A7 08 50+                                                                ; display_1UP+CBo ...
 385C 3B 25 08 50+                .db 0x2F, 0xA7, 8, 0x50
 385C 00 70 08 48+                .db 0x3B, 0x25, 8, 0x50
 385C 3B 23 07 40+                .db 0, 0x70, 8, 0x48
@@ -9496,7 +9500,7 @@
 385C                             .db 0, 0x70, 0xA, 0x48
 3884 6F 10 09 23+pauline_spr:    .db 0x6F, 0x10, 9, 0x23
 3884 6F 11 0A 33                 .db 0x6F, 0x11, 0xA, 0x33
-388C 50 34 08 3C dk_climbing_spr:.db 0x50, 0x34, 8, 0x3C                         ; DATA XREF: 0000:0AC0o
+388C 50 34 08 3C dk_climbing_spr:.db 0x50, 0x34, 8, 0x3C                         ; DATA XREF: display_1UP+6Do
 388C                                                                             ; 0000:168Bo ...
 3890 00 35 08 3C                 .db 0, 0x35, 8, 0x3C
 3894 53 32 08 40                 .db 0x53, 0x32, 8, 0x40
@@ -9508,11 +9512,11 @@
 38AC 00 70 08 48                 .db 0, 0x70, 8, 0x48
 38B0 6A 14 0A 48                 .db 0x6A, 0x14, 0xA, 0x48
 38B4 FD FD FD FD+dk_intro_jump_up_data:.db 0xFD, 0xFD, 0xFD, 0xFD, 0xFD, 0xFD, 0xFD, 0xFE, 0xFE
-38B4 FD FD FD FE+                                                                ; DATA XREF: 0000:0AA9o
+38B4 FD FD FD FE+                                                                ; DATA XREF: display_1UP+56o
 38B4 FE FE FE FE+                .db 0xFE, 0xFE, 0xFE, 0xFE, 0xFF, 0xFF, 0xFF, 0xFF, 0
 38B4 FE FF FF FF+                .db 0, 1, 1, 1, 0x7F
-38CB FF FF FF FF+dk_intro_jump_across_data:.db 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0, 0, 1, 0
-38CB FF 00 FF 00+                                                                ; DATA XREF: 0000:0AAFo
+38CB FF FF FF FF+dk_intro_jump_left_data:.db 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0, 0, 1, 0
+38CB FF 00 FF 00+                                                                ; DATA XREF: display_1UP+5Co
 38CB 00 01 00 01+                                                                ; 0000:0B86o
 38CB 01 01 01 01+                .db 1, 1, 1, 1, 1, 0x7F
 38DC 04 7F F0 10+draw_data_bend_girders_2:.db 4, 0x7F, 0xF0, 0x10, 0xF0, 2, 0xDF, 0xF2, 0x70, 0xF8
@@ -10141,7 +10145,7 @@
 6088                                                                             ; 0000:12A8w
 6089 ??          bg_music:       .ds 1                                           ; DATA XREF: 0000:067Aw
 6089                                                                             ; 0000:0CC0w ...
-608A ??          unk_0_608A:     .ds 1                                           ; DATA XREF: 0000:0ADBo
+608A ??          unk_0_608A:     .ds 1                                           ; DATA XREF: display_1UP+88o
 608A                                                                             ; 0000:0BB3o ...
 608B ??          unk_0_608B:     .ds 1                                           ; DATA XREF: update_sounds+1Ao
 608C ??                          .ds 1
@@ -10351,7 +10355,7 @@
 6229                                                                             ; difficulty_timer_tick+15r ...
 6229                                                                             ; keeps incrementing
 622A ?? ??       seq_data:       .ds 2
-622C ??          seen_intro:     .ds 1                                           ; DATA XREF: 0000:0A6Eo
+622C ??          seen_intro:     .ds 1                                           ; DATA XREF: display_1UP+1Bo
 622C                                                                             ; 0000:12F6w ...
 622D ??          awarded_bonus_life:.ds 1
 622E ??          unk_0_622E:     .ds 1                                           ; DATA XREF: 0000:0C05r
@@ -10489,8 +10493,8 @@
 62AC ??          unk_0_62AC:     .ds 1
 62AD ??                          .ds 1
 62AE ??                          .ds 1
-62AF ??          unk_0_62AF:     .ds 1                                           ; DATA XREF: 0000:0AA6w
-62AF                                                                             ; 0000:0AEBr ...
+62AF*??          byte_0_62AF:    .ds 1                                           ; DATA XREF: display_1UP+53w
+62AF*                                                                            ; display_1UP+98r ...
 62B0 ??          unk_0_62B0:     .ds 1                                           ; DATA XREF: 0000:063Ar
 62B0                                                                             ; 0000:0F8Eo ...
 62B0                                                                             ; level timer #1
@@ -10714,8 +10718,8 @@
 6382 ??          unk_0_6382:     .ds 1
 6383 ??          unk_0_6383:     .ds 1                                           ; DATA XREF: 0000:02D1o
 6384 ??          unk_0_6384:     .ds 1                                           ; DATA XREF: difficulty_timer_ticko
-6385 ??          intro_sequencer:.ds 1                                           ; DATA XREF: 0000:0A76r
-6385                                                                             ; 0000:0ABAo ...
+6385 ??          intro_sequencer:.ds 1                                           ; DATA XREF: display_1UP+23r
+6385                                                                             ; display_1UP+67o ...
 6386 ??          unk_0_6386:     .ds 1
 6387 ??          unk_0_6387:     .ds 1
 6388 ??          unk_0_6388:     .ds 1                                           ; DATA XREF: 0000:161Fr
@@ -10725,10 +10729,10 @@
 638A                                                                             ; 0000:07D5w ...
 638B ??          title_flash_tmr_2:.ds 1
 638C ??          bonus_timer:    .ds 1
-638D ??          unk_0_638D:     .ds 1                                           ; DATA XREF: 0000:0B58w
+638D ??          next_girder_to_deform:.ds 1                                     ; DATA XREF: 0000:0B58w
 638D                                                                             ; 0000:0B94r ...
-638E ??          unk_0_638E:     .ds 1                                           ; DATA XREF: 0000:0AD4w
-638E                                                                             ; 0000:0B3Br ...
+638E*??          byte_0_638E:    .ds 1                                           ; DATA XREF: display_1UP+81w
+638E*                                                                            ; 0000:0B3Br ...
 638F ??          unk_0_638F:     .ds 1                                           ; DATA XREF: sub_0_2C03+4Cw
 638F                                                                             ; sub_0_2C8F+8Dr ...
 6390 ??          kong_thrash_tmr:.ds 1                                           ; DATA XREF: animate_kong_and_pauline+2Bo
@@ -10766,15 +10770,23 @@
 63A8 ??          unk_0_63A8:     .ds 1
 63A9 ??                          .ds 1
 63AA ??                          .ds 1
-63AB ?? ??       segment_addr_1: .ds 2
-63AD ?? ??       segment_addr_2: .ds 2
-63AF ??          start_tile_index:.ds 1
-63B0 ??          end_tile_index: .ds 1
-63B1 ??          dY:             .ds 1
-63B2 ??          dX:             .ds 1
-63B3 ??          segment_type:   .ds 1
-63B4 ??          tile_byte_1:    .ds 1
-63B5 ??          current_tile_in_segment:.ds 1
+63AB*?? ??       segment_addr_1: .ds 2                                           ; DATA XREF: draw_level_background+14w
+63AB*                                                                            ; draw_level_background+5Er ...
+63AD*?? ??       segment_addr_2: .ds 2                                           ; DATA XREF: draw_level_background+41w
+63AD*                                                                            ; draw_level_background+88r
+63AF*??          start_tile_index:.ds 1                                          ; DATA XREF: draw_level_background+20w
+63AF*                                                                            ; draw_level_background+52r ...
+63B0*??          end_tile_index: .ds 1                                           ; DATA XREF: draw_level_background+39w
+63B0*                                                                            ; draw_level_background+83r ...
+63B1*??          dY:             .ds 1                                           ; DATA XREF: draw_level_background+2Cw
+63B1*                                                                            ; draw_level_background+D5r ...
+63B2*??          dX:             .ds 1                                           ; DATA XREF: draw_level_background+33w
+63B2*                                                                            ; draw_level_background+4Cr ...
+63B3*??          segment_type:   .ds 1                                           ; DATA XREF: draw_level_background+1w
+63B3*                                                                            ; draw_level_background+44r ...
+63B4*??          tile_byte_1:    .ds 1                                           ; DATA XREF: draw_level_background+1Aw
+63B5*??          current_tile_in_segment:.ds 1                                   ; DATA XREF: draw_level_background+B5w
+63B5*                                                                            ; draw_level_background+BBr ...
 63B6 ??                          .ds 1
 63B7 ??          unk_0_63B7:     .ds 1
 63B8 ??          unk_0_63B8:     .ds 1                                           ; DATA XREF: 0000:0635r
@@ -10786,12 +10798,12 @@
 63BD ??                          .ds 1
 63BE ??                          .ds 1
 63BF ??                          .ds 1
-63C0 ??          unk_0_63C0:     .ds 1
-63C1 ??                          .ds 1
-63C2 ??          unk_0_63C2:     .ds 1
-63C3 ??                          .ds 1
-63C4 ??          unk_0_63C4:     .ds 1
-63C5 ??                          .ds 1
+63C0*?? ??       ptr_current_sequence:.ds 2                                      ; DATA XREF: display_1UP+AFw
+63C0*                                                                            ; 0000:0B64w ...
+63C2*?? ??       ptr_current_jump_up_data:.ds 2                                  ; DATA XREF: display_1UP+59w
+63C2*                                                                            ; display_1UP+B8r ...
+63C4*?? ??       ptr_current_jump_left_data:.ds 2                                ; DATA XREF: display_1UP+5Fw
+63C4*                                                                            ; 0000:0B6Dr ...
 63C6 ??                          .ds 1
 63C7 ??                          .ds 1
 63C8 ??          unk_0_63C8:     .ds 1
@@ -12598,8 +12610,8 @@
 7D83 ??          spritebank:     .ds 1
 7D84 ??          nmi_mask:       .ds 1
 7D85 ??          p8257_drq:      .ds 1
-7D86 ?? ??       palette_bank:   .ds 2                                           ; DATA XREF: 0000:02A8w
-7D86                                                                             ; 0000:0779o ...
+7D86*?? ??       palette_bank:   .ds 2                                           ; DATA XREF: 0000:02A8w
+7D86*                                                                            ; 0000:0779o ...
 7D88 ?? ?? ?? ??+                .ds 0x78
 7D88 ?? ?? ?? ??+; end of 'IO'
 7D88 ?? ?? ?? ??+
