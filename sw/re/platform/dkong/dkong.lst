@@ -1447,8 +1447,8 @@
 0718 3C 12                       .dw init_mario
 071A 7A 19                       .dw gameplay
 071C 7C 12                       .dw died_in_gameplay
-071E F2 12                       .dw copy_current_lvl_data_to_P1
-0720 44 13                       .dw copy_current_lvl_data_to_P2
+071E F2 12                       .dw save_P1_ingame_data
+0720 44 13                       .dw save_P2_ingame_data
 0722 8F 13                       .dw p1_game_over
 0724 A1 13                       .dw p2_game_over
 0726 AA 13                       .dw set_flip_and_current_P2
@@ -1456,7 +1456,7 @@
 072A 1E 14                       .dw draw_name_registered
 072C 86 14                       .dw do_initials_entry
 072E 15 16                       .dw mario_pauline_reunion
-0730 6B 19                       .dw loc_0_196B
+0730 6B 19                       .dw cls_and_set_seq_for_current_play
 0732 00 00                       .dw 0
 0734 00 00                       .dw 0
 0736 00 00                       .dw 0
@@ -3339,7 +3339,7 @@
 12F1 C9                          ret     
 12F2             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 12F2             
-12F2             copy_current_lvl_data_to_P1:                                    ; DATA XREF: 0000:071Eo
+12F2             save_P1_ingame_data:                                            ; DATA XREF: 0000:071Eo
 12F2 CD 1C 01                    call    stop_sound
 12F5 AF                          xor     a
 12F6 32 2C 62                    ld      (seen_intro), a
@@ -3388,7 +3388,7 @@
 1343 C9                          ret     
 1344             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1344             
-1344             copy_current_lvl_data_to_P2:                                    ; DATA XREF: 0000:0720o
+1344             save_P2_ingame_data:                                            ; DATA XREF: 0000:0720o
 1344 CD 1C 01                    call    stop_sound
 1347 AF                          xor     a
 1348 32 2C 62                    ld      (seen_intro), a
@@ -4385,7 +4385,7 @@
 196A C9                          ret     
 196B             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 196B             
-196B             loc_0_196B:                                                     ; DATA XREF: 0000:0730o
+196B             cls_and_set_seq_for_current_play:                               ; DATA XREF: 0000:0730o
 196B CD 52 08                    call    clear_tiles_and_sprites
 196E 3A 0E 60                    ld      a, (current_player_E)                   ; 0/1
 1971 C6 12                       add     a, #18
