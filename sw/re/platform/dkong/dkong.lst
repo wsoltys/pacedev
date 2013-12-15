@@ -2244,7 +2244,7 @@
 0BEA 21 86 7D                    ld      hl, #palette_bank
 0BED 36 01                       ld      (hl), #1
 0BEF 23                          inc     hl
-0BF0 36 00                       ld      (hl), #0
+0BF0 36 00                       ld      (hl), #0                                ; set palette #1
 0BF2 21 8A 60                    ld      hl, #unk_0_608A
 0BF5 36 02                       ld      (hl), #2
 0BF7 23                          inc     hl
@@ -2262,7 +2262,7 @@
 0C11             loc_0_C11:                                                      ; CODE XREF: 0000:0C0Aj
 0C11 3A 2F 62                    ld      a, (unk_0_622F)
 0C14 47                          ld      b, a
-0C15 3A 2A 62                    ld      a, (seq_data)
+0C15 3A 2A 62                    ld      a, (seq_data)                           ; get lsb of sequence ptr
 0C18 B8                          cp      b
 0C19 28 04                       jr      Z, loc_0_C1F
 0C1B 21 2E 62                    ld      hl, #unk_0_622E
@@ -2272,29 +2272,29 @@
 0C1F 32 2F 62                    ld      (unk_0_622F), a
 0C22 3A 2E 62                    ld      a, (unk_0_622E)
 0C25 47                          ld      b, a
-0C26 21 BC 75                    ld      hl, #VRAM_start+0x1BC
+0C26 21 BC 75                    ld      hl, #VRAM_start+0x1BC                   ; display location for kong
 0C29             
 0C29             loc_0_C29:                                                      ; CODE XREF: 0000:0C7Fj
-0C29 0E 50                       ld      c, #0x50 ; 'P'
+0C29 0E 50                       ld      c, #0x50 ; 'P'                          ; 1st tile for kong
 0C2B             
 0C2B             loc_0_C2B:                                                      ; CODE XREF: 0000:0C40j
-0C2B 71                          ld      (hl), c
-0C2C 0C                          inc     c
-0C2D 2B                          dec     hl
-0C2E 71                          ld      (hl), c
-0C2F 0C                          inc     c
-0C30 2B                          dec     hl
-0C31 71                          ld      (hl), c
-0C32 0C                          inc     c
-0C33 2B                          dec     hl
-0C34 71                          ld      (hl), c
+0C2B 71                          ld      (hl), c                                 ; display
+0C2C 0C                          inc     c                                       ; next tile
+0C2D 2B                          dec     hl                                      ; next location
+0C2E 71                          ld      (hl), c                                 ; display
+0C2F 0C                          inc     c                                       ; next tile
+0C30 2B                          dec     hl                                      ; next location
+0C31 71                          ld      (hl), c                                 ; display
+0C32 0C                          inc     c                                       ; next tile
+0C33 2B                          dec     hl                                      ; next location
+0C34 71                          ld      (hl), c                                 ; display
 0C35 79                          ld      a, c
-0C36 FE 67                       cp      #0x67 ; 'g'
-0C38 CA 43 0C                    jp      Z, loc_0_C43
-0C3B 0C                          inc     c
-0C3C 11 23 00                    ld      de, #0x23 ; '#'
-0C3F 19                          add     hl, de
-0C40 C3 2B 0C                    jp      loc_0_C2B
+0C36 FE 67                       cp      #0x67 ; 'g'                             ; last tile?
+0C38 CA 43 0C                    jp      Z, loc_0_C43                            ; yes, skip (exit)
+0C3B 0C                          inc     c                                       ; next tile
+0C3C 11 23 00                    ld      de, #0x23 ; '#'                         ; column offset
+0C3F 19                          add     hl, de                                  ; next column
+0C40 C3 2B 0C                    jp      loc_0_C2B                               ; loop another column
 0C43             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0C43             
 0C43             loc_0_C43:                                                      ; CODE XREF: 0000:0C38j
@@ -2331,7 +2331,7 @@
 0C7D 19                          add     hl, de
 0C7E 05                          dec     b
 0C7F C2 29 0C                    jp      NZ, loc_0_C29
-0C82 11 07 03                    ld      de, #0x307                              ; display_message_07
+0C82 11 07 03                    ld      de, #0x307                              ; display_message_07 "HOW HIGH CAN YOU GET"
 0C85 CD 9F 30                    call    queue_fg_vector_fn
 0C88 21 09 60                    ld      hl, #eight_bit_countdown
 0C8B 36 A0                       ld      (hl), #0xA0 ; ' '
