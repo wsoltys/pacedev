@@ -2846,7 +2846,7 @@
 0F86 C6 28                       add     a, #40                                  ; level * 10 + 40
 0F88 FE 51                       cp      #81                                     ; max?
 0F8A 38 02                       jr      C, loc_0_F8E                            ; no, skip
-0F8C 3E 50                       ld      a, #80                                  ; max out at 80
+0F8C 3E 50                       ld      a, #0x50 ; 'P'                          ; max out at 50(00) (BCD)
 0F8E             
 0F8E             loc_0_F8E:                                                      ; CODE XREF: 0000:0F8Aj
 0F8E 21 B0 62                    ld      hl, #bonus_timer_init_value
@@ -3557,33 +3557,33 @@
 142A 32 0D 60                    ld      (current_player_D), a                   ; player 1
 142D 21 1C 61                    ld      hl, #high_score_tbl_ram+0x1C
 1430 11 22 00                    ld      de, #0x22 ; '"'
-1433 06 05                       ld      b, #5
-1435 3E 01                       ld      a, #1
+1433 06 05                       ld      b, #5                                   ; 5 scores to check
+1435 3E 01                       ld      a, #1                                   ; flag for P1 high score
 1437             
 1437             loc_0_1437:                                                     ; CODE XREF: 0000:143Cj
-1437 BE                          cp      (hl)
-1438 CA 59 14                    jp      Z, loc_0_1459
+1437 BE                          cp      (hl)                                    ; P1 high score?
+1438 CA 59 14                    jp      Z, display_name_registration_msgs       ; yes, skip
 143B 19                          add     hl, de
 143C 10 F9                       djnz    loc_0_1437
 143E 21 1C 61                    ld      hl, #high_score_tbl_ram+0x1C
-1441 06 05                       ld      b, #5
-1443 3E 03                       ld      a, #3
+1441 06 05                       ld      b, #5                                   ; 5 scores to check
+1443 3E 03                       ld      a, #3                                   ; flag for P2 high score
 1445             
 1445             loc_0_1445:                                                     ; CODE XREF: 0000:144Aj
-1445 BE                          cp      (hl)
-1446 CA 4F 14                    jp      Z, loc_0_144F
-1449 19                          add     hl, de
-144A 10 F9                       djnz    loc_0_1445
+1445 BE                          cp      (hl)                                    ; high score?
+1446 CA 4F 14                    jp      Z, registration_set_P2                  ; yes, skip
+1449 19                          add     hl, de                                  ; next score
+144A 10 F9                       djnz    loc_0_1445                              ; loop through table
 144C C3 75 14                    jp      exit_name_entry
 144F             ; 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 144F             
-144F             loc_0_144F:                                                     ; CODE XREF: 0000:1446j
+144F             registration_set_P2:                                            ; CODE XREF: 0000:1446j
 144F 3E 01                       ld      a, #1
 1451 32 0E 60                    ld      (current_player_E), a                   ; player 2
 1454 32 0D 60                    ld      (current_player_D), a                   ; player 2
 1457 3E 00                       ld      a, #0
 1459             
-1459             loc_0_1459:                                                     ; CODE XREF: 0000:1438j
+1459             display_name_registration_msgs:                                 ; CODE XREF: 0000:1438j
 1459 21 26 60                    ld      hl, #upright
 145C B6                          or      (hl)
 145D 32 82 7D                    ld      (flipscreen), a
@@ -3618,7 +3618,7 @@
 148D A7                          and     a
 148E C2 DC 14                    jp      NZ, loc_0_14DC
 1491 32 86 7D                    ld      (palette_bank), a
-1494 32 87 7D                    ld      (palette_bank+1), a
+1494 32 87 7D                    ld      (palette_bank+1), a                     ; set palette 0
 1497 36 01                       ld      (hl), #1
 1499 21 30 60                    ld      hl, #unk_0_6030
 149C 36 0A                       ld      (hl), #0xA
@@ -3633,20 +3633,20 @@
 14AA 23                          inc     hl
 14AB 36 00                       ld      (hl), #0
 14AD 21 E8 75                    ld      hl, #VRAM_start+0x1E8
-14B0 22 36 60                    ld      (unk_0_6036), hl
+14B0 22 36 60                    ld      (word_0_6036), hl
 14B3 21 1C 61                    ld      hl, #high_score_tbl_ram+0x1C
 14B6 3A 0E 60                    ld      a, (current_player_E)                   ; 0/1
 14B9 07                          rlca                                            ; 0/2
 14BA 3C                          inc     a                                       ; 1/3
-14BB 4F                          ld      c, a
-14BC 11 22 00                    ld      de, #0x22 ; '"'
-14BF 06 04                       ld      b, #4
+14BB 4F                          ld      c, a                                    ; P1/P2 high score flag
+14BC 11 22 00                    ld      de, #0x22 ; '"'                         ; score offset
+14BF 06 04                       ld      b, #4                                   ; 4 scores to check
 14C1             
 14C1             loc_0_14C1:                                                     ; CODE XREF: 0000:14C7j
-14C1 7E                          ld      a, (hl)
-14C2 B9                          cp      c
-14C3 CA C9 14                    jp      Z, loc_0_14C9
-14C6 19                          add     hl, de
+14C1 7E                          ld      a, (hl)                                 ; get flag
+14C2 B9                          cp      c                                       ; P1/P2 high score?
+14C3 CA C9 14                    jp      Z, loc_0_14C9                           ; yes, skip
+14C6 19                          add     hl, de                                  ; next entry
 14C7 10 F8                       djnz    loc_0_14C1
 14C9             
 14C9             loc_0_14C9:                                                     ; CODE XREF: 0000:14C3j
@@ -3685,15 +3685,15 @@
 1500 36 0A                       ld      (hl), #0xA
 1502 3A 10 60                    ld      a, (controller_in)                      ; edge-detected inputs
 1505 CB 7F                       bit     7, a                                    ; button pressed?
-1507 C2 46 15                    jp      NZ, jump_pressed                        ; yes, skip
+1507 C2 46 15                    jp      NZ, regi_jump_pressed                   ; yes, skip
 150A E6 03                       and     #3                                      ; left/right only
-150C C2 14 15                    jp      NZ, left_right_pressed                  ; yes, skip
+150C C2 14 15                    jp      NZ, regi_left_right_pressed             ; yes, skip
 150F 3C                          inc     a
 1510 77                          ld      (hl), a
 1511 C3 8A 15                    jp      loc_0_158A
 1514             ; 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 1514             
-1514             left_right_pressed:                                             ; CODE XREF: 0000:150Cj
+1514             regi_left_right_pressed:                                        ; CODE XREF: 0000:150Cj
 1514 05                          dec     b
 1515 CA 1D 15                    jp      Z, loc_0_151D
 1518 78                          ld      a, b
@@ -3727,13 +3727,13 @@
 1543 C3 2D 15                    jp      loc_0_152D
 1546             ; 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 1546             
-1546             jump_pressed:                                                   ; CODE XREF: 0000:1507j
+1546             regi_jump_pressed:                                              ; CODE XREF: 0000:1507j
 1546 3A 35 60                    ld      a, (unk_0_6035)
 1549 FE 1C                       cp      #0x1C
 154B CA 6D 15                    jp      Z, loc_0_156D
 154E FE 1D                       cp      #0x1D
 1550 CA C6 15                    jp      Z, loc_0_15C6
-1553 2A 36 60                    ld      hl, (unk_0_6036)
+1553 2A 36 60                    ld      hl, (word_0_6036)
 1556 01 88 75                    ld      bc, #VRAM_start+0x188
 1559 A7                          and     a
 155A ED 42                       sbc     hl, bc
@@ -3745,12 +3745,12 @@
 1566 09                          add     hl, bc
 1567             
 1567             loc_0_1567:                                                     ; CODE XREF: 0000:1583j
-1567 22 36 60                    ld      (unk_0_6036), hl
+1567 22 36 60                    ld      (word_0_6036), hl
 156A C3 8A 15                    jp      loc_0_158A
 156D             ; 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 156D             
 156D             loc_0_156D:                                                     ; CODE XREF: 0000:154Bj
-156D 2A 36 60                    ld      hl, (unk_0_6036)
+156D 2A 36 60                    ld      hl, (word_0_6036)
 1570 01 20 00                    ld      bc, #0x20 ; ' '
 1573 09                          add     hl, bc
 1574 A7                          and     a
@@ -10057,8 +10057,7 @@
 6033 ??                          .ds 1
 6034 ??          unk_0_6034:     .ds 1                                           ; DATA XREF: 0000:14DCo
 6035 ??          unk_0_6035:     .ds 1
-6036 ??          unk_0_6036:     .ds 1
-6037 ??                          .ds 1
+6036 ?? ??       word_0_6036:    .ds 2
 6038 ??          unk_0_6038:     .ds 1
 6039 ??                          .ds 1
 603A ??          unk_0_603A:     .ds 1
