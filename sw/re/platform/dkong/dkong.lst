@@ -617,7 +617,7 @@
 02D8 28 E3                       jr      Z, main_loop                            ; yes, loop
 02DA 77                          ld      (hl), a                                 ; generate LSB from timer
 02DB CD 7F 03                    call    difficulty_timer_tick
-02DE CD A2 03                    call    sub_0_3A2                               ; do something with a sprite
+02DE CD A2 03                    call    sub_0_3A2                               ; fireball release
 02E1 18 DA                       jr      main_loop
 02E3             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 02E3             
@@ -749,26 +749,26 @@
 037F             
 037F             difficulty_timer_tick:                                          ; CODE XREF: 0000:02DBp
 037F 21 84 63                    ld      hl, #unk_0_6384
-0382 7E                          ld      a, (hl)
-0383 34                          inc     (hl)
-0384 A7                          and     a
-0385 C0                          ret     NZ
+0382 7E                          ld      a, (hl)                                 ; get LSB
+0383 34                          inc     (hl)                                    ; LSB tick
+0384 A7                          and     a                                       ; LSB overflow?
+0385 C0                          ret     NZ                                      ; no, return
 0386 21 81 63                    ld      hl, #unk_0_6381
-0389 7E                          ld      a, (hl)
+0389 7E                          ld      a, (hl)                                 ; get MSB
 038A 47                          ld      b, a
-038B 34                          inc     (hl)
-038C E6 07                       and     #7
-038E C0                          ret     NZ
+038B 34                          inc     (hl)                                    ; MSB tick
+038C E6 07                       and     #7                                      ; expired?
+038E C0                          ret     NZ                                      ; no, return
 038F 78                          ld      a, b
 0390 0F                          rrca    
 0391 0F                          rrca    
 0392 0F                          rrca    
 0393 47                          ld      b, a
 0394 3A 29 62                    ld      a, (level)
-0397 80                          add     a, b
-0398 FE 05                       cp      #5
-039A 38 02                       jr      C, loc_0_39E
-039C 3E 05                       ld      a, #5
+0397 80                          add     a, b                                    ; adjust for level
+0398 FE 05                       cp      #5                                      ; max?
+039A 38 02                       jr      C, loc_0_39E                            ; no, skip
+039C 3E 05                       ld      a, #5                                   ; set to max
 039E             
 039E             loc_0_39E:                                                      ; CODE XREF: difficulty_timer_tick+1Bj
 039E 32 80 63                    ld      (unk_0_6380), a
@@ -1284,15 +1284,15 @@
 062A             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 062A             
 062A             update_bonus_timer:                                             ; DATA XREF: 0000:0311o
-062A A7                          and     a
-062B CA 91 06                    jp      Z, loc_0_691
+062A A7                          and     a                                       ; add bonus to score?
+062B CA 91 06                    jp      Z, loc_0_691                            ; yes, skip
 062E 3A 8C 63                    ld      a, (bonus_timer)
 0631 A7                          and     a                                       ; zero?
-0632 C2 A8 06                    jp      NZ, loc_0_6A8                           ; no, skip
-0635 3A B8 63                    ld      a, (unk_0_63B8)
-0638 A7                          and     a
-0639 C0                          ret     NZ
-063A 3A B0 62                    ld      a, (unk_0_62B0)
+0632 C2 A8 06                    jp      NZ, bonus_timer_tick                    ; no, skip
+0635 3A B8 63                    ld      a, (bonus_timer_expired)
+0638 A7                          and     a                                       ; expired?
+0639 C0                          ret     NZ                                      ; yes, exit
+063A 3A B0 62                    ld      a, (bonus_timer_init_value)             ; initialise bonus timer here
 063D 01 0A 00                    ld      bc, #0xA
 0640             
 0640             loc_0_640:                                                      ; CODE XREF: 0000:0642j
@@ -1320,7 +1320,7 @@
 0664 C2 55 06                    jp      NZ, loc_0_655                           ; no, loop
 0667 3A 8C 63                    ld      a, (bonus_timer)
 066A             
-066A             loc_0_66A:                                                      ; CODE XREF: 0000:06B5j
+066A             display_bonus_timer:                                            ; CODE XREF: 0000:06B5j
 066A 4F                          ld      c, a
 066B E6 0F                       and     #0xF
 066D 47                          ld      b, a                                    ; B=low nibble
@@ -1364,16 +1364,16 @@
 06A5 C3 1C 05                    jp      add_bonus_and_update_high_score
 06A8             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 06A8             
-06A8             loc_0_6A8:                                                      ; CODE XREF: 0000:0632j
+06A8             bonus_timer_tick:                                               ; CODE XREF: 0000:0632j
 06A8 D6 01                       sub     #1
 06AA 20 05                       jr      NZ, loc_0_6B1
-06AC 21 B8 63                    ld      hl, #unk_0_63B8
+06AC 21 B8 63                    ld      hl, #bonus_timer_expired
 06AF 36 01                       ld      (hl), #1
 06B1             
 06B1             loc_0_6B1:                                                      ; CODE XREF: 0000:06AAj
 06B1 27                          daa     
 06B2 32 8C 63                    ld      (bonus_timer), a
-06B5 C3 6A 06                    jp      loc_0_66A
+06B5 C3 6A 06                    jp      display_bonus_timer
 06B8             
 06B8             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 06B8             
@@ -2348,7 +2348,7 @@
 0C92 CD 74 08                    call    clear_visible_area_and_sprites
 0C95 AF                          xor     a
 0C96 32 8C 63                    ld      (bonus_timer), a                        ; init bonus timer
-0C99 11 01 05                    ld      de, #0x501                              ; update_bonus_timer
+0C99 11 01 05                    ld      de, #0x501                              ; update_bonus_timer (tick)
 0C9C CD 9F 30                    call    queue_fg_vector_fn
 0C9F 21 86 7D                    ld      hl, #palette_bank
 0CA2 36 00                       ld      (hl), #0
@@ -2849,7 +2849,7 @@
 0F8C 3E 50                       ld      a, #80                                  ; max out at 80
 0F8E             
 0F8E             loc_0_F8E:                                                      ; CODE XREF: 0000:0F8Aj
-0F8E 21 B0 62                    ld      hl, #unk_0_62B0
+0F8E 21 B0 62                    ld      hl, #bonus_timer_init_value
 0F91 06 03                       ld      b, #3                                   ; 3 timers to initialise
 0F93             
 0F93             loc_0_F93:                                                      ; CODE XREF: 0000:0F95j
@@ -3276,12 +3276,12 @@
 1293 1F                          rra     
 1294 77                          ld      (hl), a
 1295 21 9D 63                    ld      hl, #mario_death_state
-1298 34                          inc     (hl)
+1298 34                          inc     (hl)                                    ; next death_state
 1299 3E 0D                       ld      a, #0xD
-129B 32 9E 63                    ld      (unk_0_639E), a
+129B 32 9E 63                    ld      (death_spin_counter), a
 129E 3E 08                       ld      a, #8
 12A0 32 09 60                    ld      (eight_bit_countdown), a
-12A3 CD BD 30                    call    sub_0_30BD
+12A3 CD BD 30                    call    hide_object_sprites
 12A6 3E 03                       ld      a, #3
 12A8 32 88 60                    ld      (music_something), a
 12AB C9                          ret     
@@ -3291,33 +3291,33 @@
 12AC DF                          rst     0x18                                    ; wait for 8-bit countdown
 12AD 3E 08                       ld      a, #8
 12AF 32 09 60                    ld      (eight_bit_countdown), a
-12B2 21 9E 63                    ld      hl, #unk_0_639E
+12B2 21 9E 63                    ld      hl, #death_spin_counter
 12B5 35                          dec     (hl)
-12B6 CA CB 12                    jp      Z, loc_0_12CB
-12B9 21 4D 69                    ld      hl, #soft_sprite_ram+0x4D
-12BC 7E                          ld      a, (hl)
-12BD 1F                          rra     
-12BE 3E 02                       ld      a, #2
-12C0 1F                          rra     
+12B6 CA CB 12                    jp      Z, finish_death_spin
+12B9 21 4D 69                    ld      hl, #soft_sprite_ram+0x4D               ; sprite #19 (mario)
+12BC 7E                          ld      a, (hl)                                 ; get flipy & code
+12BD 1F                          rra                                             ; lsb to C
+12BE 3E 02                       ld      a, #2                                   ; sprite #1 <<1
+12C0 1F                          rra                                             ; lsb to flipy
 12C1 47                          ld      b, a
 12C2 AE                          xor     (hl)
-12C3 77                          ld      (hl), a
-12C4 2C                          inc     l
+12C3 77                          ld      (hl), a                                 ; invert tile & flipy
+12C4 2C                          inc     l                                       ; flipx & colour
 12C5 78                          ld      a, b
-12C6 E6 80                       and     #0x80 ; '€'                             ; flip mario upside down?
+12C6 E6 80                       and     #0x80 ; '€'                             ; flipy only
 12C8 AE                          xor     (hl)
-12C9 77                          ld      (hl), a
+12C9 77                          ld      (hl), a                                 ; invert flip
 12CA C9                          ret     
 12CB             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 12CB             
-12CB             loc_0_12CB:                                                     ; CODE XREF: 0000:12B6j
-12CB 21 4D 69                    ld      hl, #soft_sprite_ram+0x4D
-12CE 3E F4                       ld      a, #0xF4 ; 'ô'
-12D0 CB 16                       rl      (hl)
-12D2 1F                          rra     
-12D3 77                          ld      (hl), a
+12CB             finish_death_spin:                                              ; CODE XREF: 0000:12B6j
+12CB 21 4D 69                    ld      hl, #soft_sprite_ram+0x4D               ; sprite #19 (mario)
+12CE 3E F4                       ld      a, #0xF4 ; 'ô'                          ; mario dead sprite <<1
+12D0 CB 16                       rl      (hl)                                    ; flipy to C
+12D2 1F                          rra                                             ; restore flipy
+12D3 77                          ld      (hl), a                                 ; update sprite
 12D4 21 9D 63                    ld      hl, #mario_death_state
-12D7 34                          inc     (hl)
+12D7 34                          inc     (hl)                                    ; next state
 12D8 3E 80                       ld      a, #0x80 ; '€'
 12DA 32 09 60                    ld      (eight_bit_countdown), a
 12DD C9                          ret     
@@ -3334,7 +3334,7 @@
 12ED             
 12ED             loc_0_12ED:                                                     ; CODE XREF: 0000:12E9j
 12ED 34                          inc     (hl)
-12EE 2B                          dec     hl
+12EE 2B                          dec     hl                                      ; eight_bit_countdown
 12EF 36 01                       ld      (hl), #1
 12F1 C9                          ret     
 12F2             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -3868,7 +3868,7 @@
 1615             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1615             
 1615             mario_pauline_reunion:                                          ; DATA XREF: 0000:072Eo
-1615 CD BD 30                    call    sub_0_30BD
+1615 CD BD 30                    call    hide_object_sprites
 1618 3A 27 62                    ld      a, (level_type)
 161B 0F                          rrca    
 161C D2 2F 16                    jp      NC, loc_0_162F
@@ -4133,7 +4133,7 @@
 179D             loc_0_179D:                                                     ; CODE XREF: 0000:1796j
 179D 22 2A 62                    ld      (seq_data), hl
 17A0 32 27 62                    ld      (level_type), a
-17A3 11 00 05                    ld      de, #0x500                              ; update_bonus_timer
+17A3 11 00 05                    ld      de, #0x500                              ; update_bonus_timer (add to score)
 17A6 CD 9F 30                    call    queue_fg_vector_fn
 17A9 AF                          xor     a
 17AA 32 88 63                    ld      (unk_0_6388), a
@@ -4373,7 +4373,7 @@
 194E 32 27 62                    ld      (level_type), a
 1951 21 29 62                    ld      hl, #level
 1954 34                          inc     (hl)                                    ; next level counter
-1955 11 00 05                    ld      de, #0x500                              ; update_bonus_timer
+1955 11 00 05                    ld      de, #0x500                              ; update_bonus_timer (add to score)
 1958 CD 9F 30                    call    queue_fg_vector_fn
 195B AF                          xor     a
 195C 32 2E 62                    ld      (height), a
@@ -4650,14 +4650,14 @@
 1AE9 3A 10 60                    ld      a, (controller_in)
 1AEC 1D                          dec     e
 1AED CA F5 1A                    jp      Z, loc_0_1AF5
-1AF0 CB 47                       bit     0, a
-1AF2 C2 8F 1C                    jp      NZ, loc_0_1C8F
+1AF0 CB 47                       bit     0, a                                    ; right?
+1AF2 C2 8F 1C                    jp      NZ, mario_right                         ; yes, skip
 1AF5             
 1AF5             loc_0_1AF5:                                                     ; CODE XREF: sub_0_1AC3+2Aj
 1AF5 15                          dec     d
 1AF6 CA FE 1A                    jp      Z, loc_0_1AFE
-1AF9 CB 4F                       bit     1, a
-1AFB C2 AB 1C                    jp      NZ, loc_0_1CAB
+1AF9 CB 4F                       bit     1, a                                    ; left?
+1AFB C2 AB 1C                    jp      NZ, mario_left                          ; yes, skip
 1AFE             
 1AFE             loc_0_1AFE:                                                     ; CODE XREF: sub_0_1AC3+33j
 1AFE 3A 17 62                    ld      a, (unk_0_6217)
@@ -4672,7 +4672,7 @@
 1B10 01 15 00                    ld      bc, #0x15
 1B13 CD 6E 23                    call    sub_0_236E
 1B16 F5                          push    af
-1B17 21 07 62                    ld      hl, #mario_flipy_sprite_tile
+1B17 21 07 62                    ld      hl, #mario_flipy_tile
 1B1A 7E                          ld      a, (hl)
 1B1B E6 80                       and     #0x80 ; '€'
 1B1D F6 06                       or      #6                                      ; mario climbing character
@@ -4725,13 +4725,13 @@
 1B59 C0                          ret     NZ
 1B5A 3A 18 62                    ld      a, (unk_0_6218)
 1B5D 32 17 62                    ld      (unk_0_6217), a
-1B60 21 07 62                    ld      hl, #mario_flipy_sprite_tile
+1B60 21 07 62                    ld      hl, #mario_flipy_tile
 1B63 7E                          ld      a, (hl)
 1B64 E6 80                       and     #0x80 ; '€'                             ; h-flip mario
 1B66 77                          ld      (hl), a
 1B67 AF                          xor     a
 1B68 32 02 62                    ld      (unk_0_6202), a
-1B6B C3 A6 1D                    jp      loc_0_1DA6
+1B6B C3 A6 1D                    jp      update_mario_sprite_registers
 1B6E             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1B6E             
 1B6E             loc_0_1B6E:                                                     ; CODE XREF: sub_0_1AC3+20j
@@ -4761,10 +4761,10 @@
 1B95 77                          ld      (hl), a
 1B96 32 04 62                    ld      (unk_0_6204), a
 1B99 32 06 62                    ld      (unk_0_6206), a
-1B9C 3A 07 62                    ld      a, (mario_flipy_sprite_tile)
+1B9C 3A 07 62                    ld      a, (mario_flipy_tile)
 1B9F E6 80                       and     #0x80 ; '€'
 1BA1 F6 0E                       or      #0xE                                    ; mario jumping character
-1BA3 32 07 62                    ld      (mario_flipy_sprite_tile), a
+1BA3 32 07 62                    ld      (mario_flipy_tile), a
 1BA6 3A 05 62                    ld      a, (mario_x)
 1BA9 32 0E 62                    ld      (unk_0_620E), a
 1BAC 21 81 60                    ld      hl, #digital_snd_tmr_jump
@@ -4824,7 +4824,7 @@
 1C1D 32 1F 62                    ld      (unk_0_621F), a
 1C20 CD 53 28                    call    sub_0_2853                              ; check for bonus points?
 1C23 A7                          and     a                                       ; any bonus points?
-1C24 CA A6 1D                    jp      Z, loc_0_1DA6                           ; no, exit
+1C24 CA A6 1D                    jp      Z, update_mario_sprite_registers        ; no, exit
 1C27 32 42 63                    ld      (unk_0_6342), a
 1C2A 3E 01                       ld      a, #1                                   ; register bonus
 1C2C 32 40 63                    ld      (show_bonus_state), a
@@ -4834,7 +4834,7 @@
 1C33             loc_0_1C33:                                                     ; CODE XREF: sub_0_1AC3+155j
 1C33 3C                          inc     a
 1C34 CC 54 29                    call    Z, sub_0_2954
-1C37 C3 A6 1D                    jp      loc_0_1DA6
+1C37 C3 A6 1D                    jp      update_mario_sprite_registers
 1C3A             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1C3A             
 1C3A             loc_0_1C3A:                                                     ; CODE XREF: sub_0_1AC3+146j
@@ -4850,7 +4850,7 @@
 1C48 77                          ld      (hl), a
 1C49 2C                          inc     l
 1C4A 10 FC                       djnz    loc_0_1C48
-1C4C C3 A6 1D                    jp      loc_0_1DA6
+1C4C C3 A6 1D                    jp      update_mario_sprite_registers
 1C4F             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1C4F             
 1C4F             loc_0_1C4F:                                                     ; CODE XREF: sub_0_1AC3+178j
@@ -4858,7 +4858,7 @@
 1C52 3A 20 62                    ld      a, (unk_0_6220)
 1C55 EE 01                       xor     #1
 1C57 32 00 62                    ld      (mario_alive_flag), a                   ; set whether mario survives a jump
-1C5A 21 07 62                    ld      hl, #mario_flipy_sprite_tile
+1C5A 21 07 62                    ld      hl, #mario_flipy_tile
 1C5D 7E                          ld      a, (hl)
 1C5E E6 80                       and     #0x80 ; '€'
 1C60 F6 0F                       or      #0xF                                    ; mario landing character
@@ -4870,7 +4870,7 @@
 1C6C 3A 25 62                    ld      a, (unk_0_6225)
 1C6F 3D                          dec     a
 1C70 CC 95 1D                    call    Z, sub_0_1D95
-1C73 C3 A6 1D                    jp      loc_0_1DA6
+1C73 C3 A6 1D                    jp      update_mario_sprite_registers
 1C76             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1C76             
 1C76             loc_0_1C76:                                                     ; CODE XREF: sub_0_1AC3+14Dj
@@ -4878,15 +4878,15 @@
 1C79 21 0E 62                    ld      hl, #unk_0_620E
 1C7C D6 0F                       sub     #0xF
 1C7E BE                          cp      (hl)
-1C7F DA A6 1D                    jp      C, loc_0_1DA6
+1C7F DA A6 1D                    jp      C, update_mario_sprite_registers
 1C82 3E 01                       ld      a, #1
 1C84 32 20 62                    ld      (unk_0_6220), a
 1C87 21 84 60                    ld      hl, #0x6084
 1C8A 36 03                       ld      (hl), #3
-1C8C C3 A6 1D                    jp      loc_0_1DA6
+1C8C C3 A6 1D                    jp      update_mario_sprite_registers
 1C8F             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1C8F             
-1C8F             loc_0_1C8F:                                                     ; CODE XREF: sub_0_1AC3+2Fj
+1C8F             mario_right:                                                    ; CODE XREF: sub_0_1AC3+2Fj
 1C8F 06 01                       ld      b, #1
 1C91 3A 0F 62                    ld      a, (unk_0_620F)
 1C94 A7                          and     a
@@ -4898,10 +4898,10 @@
 1CA1 32 02 62                    ld      (unk_0_6202), a
 1CA4 E6 03                       and     #3
 1CA6 F6 80                       or      #0x80 ; '€'
-1CA8 C3 C2 1C                    jp      loc_0_1CC2
+1CA8 C3 C2 1C                    jp      update_mario_sprite_data
 1CAB             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1CAB             
-1CAB             loc_0_1CAB:                                                     ; CODE XREF: sub_0_1AC3+38j
+1CAB             mario_left:                                                     ; CODE XREF: sub_0_1AC3+38j
 1CAB 06 FF                       ld      b, #0xFF
 1CAD 3A 0F 62                    ld      a, (unk_0_620F)
 1CB0 A7                          and     a
@@ -4913,14 +4913,14 @@
 1CBD 32 02 62                    ld      (unk_0_6202), a
 1CC0 E6 03                       and     #3                                      ; animate mario running
 1CC2             
-1CC2             loc_0_1CC2:                                                     ; CODE XREF: sub_0_1AC3+1E5j
-1CC2 21 07 62                    ld      hl, #mario_flipy_sprite_tile
-1CC5 77                          ld      (hl), a                                 ; set amrio character
+1CC2             update_mario_sprite_data:                                       ; CODE XREF: sub_0_1AC3+1E5j
+1CC2 21 07 62                    ld      hl, #mario_flipy_tile
+1CC5 77                          ld      (hl), a                                 ; set mario character
 1CC6 1F                          rra     
 1CC7 DC 8F 1D                    call    C, sub_0_1D8F
 1CCA 3E 02                       ld      a, #2
 1CCC 32 0F 62                    ld      (unk_0_620F), a
-1CCF C3 A6 1D                    jp      loc_0_1DA6
+1CCF C3 A6 1D                    jp      update_mario_sprite_registers
 1CD2             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1CD2             
 1CD2             loc_0_1CD2:                                                     ; CODE XREF: sub_0_1AC3+1D2j
@@ -4942,7 +4942,7 @@
 1CEB             loc_0_1CEB:                                                     ; CODE XREF: sub_0_1AC3+219j
 1CEB 21 0F 62                    ld      hl, #unk_0_620F
 1CEE 35                          dec     (hl)
-1CEF C3 A6 1D                    jp      loc_0_1DA6
+1CEF C3 A6 1D                    jp      update_mario_sprite_registers
 1CF2             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1CF2             
 1CF2             loc_0_1CF2:                                                     ; CODE XREF: sub_0_1AC3+7Aj
@@ -4991,7 +4991,7 @@
 1D3F             loc_0_1D3F:                                                     ; CODE XREF: sub_0_1AC3+272j
 1D3F 3E 80                                                                       ; sub_0_1AC3+278j
 1D3F                             ld      a, #0x80 ; '€'
-1D41 21 07 62                    ld      hl, #mario_flipy_sprite_tile
+1D41 21 07 62                    ld      hl, #mario_flipy_tile
 1D44 A6                          and     (hl)
 1D45 EE 80                       xor     #0x80 ; '€'                             ; hflip mario
 1D47 B0                          or      b
@@ -5000,7 +5000,7 @@
 1D49             loc_0_1D49:                                                     ; CODE XREF: sub_0_1AC3+2A1j
 1D49 3E 01                       ld      a, #1                                   ; flag mario climbing a ladder
 1D4B 32 15 62                    ld      (mario_climbing), a
-1D4E C3 A6 1D                    jp      loc_0_1DA6
+1D4E C3 A6 1D                    jp      update_mario_sprite_registers
 1D51             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1D51             
 1D51             loc_0_1D51:                                                     ; CODE XREF: sub_0_1AC3+25Cj
@@ -5020,11 +5020,11 @@
 1D67             loc_0_1D67:                                                     ; CODE XREF: sub_0_1AC3+266j
 1D67 3E 06                                                                       ; sub_0_1AC3+26Bj
 1D67                             ld      a, #6                                   ; mario climbing character
-1D69 32 07 62                    ld      (mario_flipy_sprite_tile), a
+1D69 32 07 62                    ld      (mario_flipy_tile), a
 1D6C AF                          xor     a
 1D6D 32 19 62                    ld      (unk_0_6219), a
 1D70 32 15 62                    ld      (mario_climbing), a                     ; flaf not climbing a ladder
-1D73 C3 A6 1D                    jp      loc_0_1DA6
+1D73 C3 A6 1D                    jp      update_mario_sprite_registers
 1D76             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1D76             
 1D76             loc_0_1D76:                                                     ; CODE XREF: sub_0_1AC3+244j
@@ -5075,12 +5075,12 @@
 1DA5             
 1DA6             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1DA6             
-1DA6             loc_0_1DA6:                                                     ; CODE XREF: sub_0_1AC3+A8j
+1DA6             update_mario_sprite_registers:                                  ; CODE XREF: sub_0_1AC3+A8j
 1DA6 21 4C 69                                                                    ; sub_0_1AC3+161j ...
-1DA6                             ld      hl, #soft_sprite_ram+0x4C
+1DA6                             ld      hl, #soft_sprite_ram+0x4C               ; sprite #19
 1DA9 3A 03 62                    ld      a, (mario_y)
 1DAC 77                          ld      (hl), a
-1DAD 3A 07 62                    ld      a, (mario_flipy_sprite_tile)
+1DAD 3A 07 62                    ld      a, (mario_flipy_tile)
 1DB0 2C                          inc     l
 1DB1 77                          ld      (hl), a
 1DB2 3A 08 62                    ld      a, (mario_flipx_colour)
@@ -7744,7 +7744,7 @@
 2C0F A7                          and     a
 2C10 C8                          ret     Z
 2C11 4F                          ld      c, a
-2C12 3A B0 62                    ld      a, (unk_0_62B0)
+2C12 3A B0 62                    ld      a, (bonus_timer_init_value)
 2C15 D6 02                       sub     #2
 2C17 B9                          cp      c
 2C18 DA 7B 2C                    jp      C, loc_0_2C7B
@@ -7764,7 +7764,7 @@
 2C33             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 2C33             
 2C33             loc_0_2C33:                                                     ; CODE XREF: sub_0_2C03+2Aj
-2C33 3A B0 62                    ld      a, (unk_0_62B0)
+2C33 3A B0 62                    ld      a, (bonus_timer_init_value)
 2C36 CB 3F                       srl     a
 2C38 B9                          cp      c
 2C39 DA 41 2C                    jp      C, loc_0_2C41
@@ -7874,7 +7874,7 @@
 2CCC 22 AC 62                    ld      (unk_0_62AC), hl
 2CCF 3E 01                       ld      a, #1
 2CD1 32 93 63                    ld      (barrel_deployment), a
-2CD4 11 01 05                    ld      de, #0x501                              ; update_bonus_timer
+2CD4 11 01 05                    ld      de, #0x501                              ; update_bonus_timer (tick)
 2CD7 CD 9F 30                    call    queue_fg_vector_fn
 2CDA 21 B1 62                    ld      hl, #unk_0_62B1
 2CDD 35                          dec     (hl)
@@ -8192,7 +8192,7 @@
 2F05 DD 36 09 06                 ld      9(ix), #6
 2F09 DD 36 0A 03                 ld      0xA(ix), #3
 2F0D 06 1E                       ld      b, #0x1E
-2F0F 3A 07 62                    ld      a, (mario_flipy_sprite_tile)
+2F0F 3A 07 62                    ld      a, (mario_flipy_tile)
 2F12 CB 27                       sla     a
 2F14 D2 1B 2F                    jp      NC, loc_0_2F1B
 2F17 F6 80                       or      #0x80 ; '€'
@@ -8234,7 +8234,7 @@
 2F64 3A 03 62                    ld      a, (mario_y)
 2F67 ED 44                       neg     
 2F69 DD 77 0E                    ld      0xE(ix), a
-2F6C 3A 07 62                    ld      a, (mario_flipy_sprite_tile)
+2F6C 3A 07 62                    ld      a, (mario_flipy_tile)
 2F6F 32 4D 69                    ld      (soft_sprite_ram+0x4D), a
 2F72 DD 36 00 00                 ld      0(ix), #0
 2F76 3A 89 63                    ld      a, (unk_0_6389)
@@ -8265,7 +8265,7 @@
 2F9B D0                          ret     NC
 2F9C DD 36 09 06                 ld      9(ix), #6
 2FA0 DD 36 0A 03                 ld      0xA(ix), #3
-2FA4 3A 07 62                    ld      a, (mario_flipy_sprite_tile)
+2FA4 3A 07 62                    ld      a, (mario_flipy_tile)
 2FA7 07                          rlca    
 2FA8 3E 3C                       ld      a, #0x3C ; '<'
 2FAA 1F                          rra     
@@ -8302,7 +8302,7 @@
 2FD3 3E 03                       ld      a, #3
 2FD5 32 B9 62                    ld      (unk_0_62B9), a
 2FD8 32 96 63                    ld      (unk_0_6396), a
-2FDB 11 01 05                    ld      de, #0x501                              ; update_bonus_timer
+2FDB 11 01 05                    ld      de, #0x501                              ; update_bonus_timer (tick)
 2FDE CD 9F 30                    call    queue_fg_vector_fn
 2FE1 3A B3 62                    ld      a, (unk_0_62B3)
 2FE4 77                          ld      (hl), a
@@ -8517,29 +8517,29 @@
 30BD             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 30BD             
 30BD             
-30BD             sub_0_30BD:                                                     ; CODE XREF: 0000:12A3p
+30BD             hide_object_sprites:                                            ; CODE XREF: 0000:12A3p
 30BD 21 50 69                                                                    ; 0000:1615p
-30BD                             ld      hl, #soft_sprite_ram+0x50
-30C0 06 02                       ld      b, #2
-30C2 CD E4 30                    call    sub_0_30E4
-30C5 2E 80                       ld      l, #0x80 ; '€'
-30C7 06 0A                       ld      b, #0xA
-30C9 CD E4 30                    call    sub_0_30E4
-30CC 2E B8                       ld      l, #0xB8 ; '¸'
-30CE 06 0B                       ld      b, #0xB
-30D0 CD E4 30                    call    sub_0_30E4
-30D3 21 0C 6A                    ld      hl, #soft_sprite_ram+0x10C
-30D6 06 05                       ld      b, #5
-30D8 C3 E4 30                    jp      sub_0_30E4
-30D8             ; End of function sub_0_30BD
+30BD                             ld      hl, #soft_sprite_ram+0x50               ; sprite #20 (kongs legs)
+30C0 06 02                       ld      b, #2                                   ; 2 sprites to hide
+30C2 CD E4 30                    call    zero_sprite_y_xB
+30C5 2E 80                       ld      l, #0x80 ; '€'                          ; sprite #32 (springs)
+30C7 06 0A                       ld      b, #0xA                                 ; 10 sprites to hide
+30C9 CD E4 30                    call    zero_sprite_y_xB
+30CC 2E B8                       ld      l, #0xB8 ; '¸'                          ; sprite #46 (cement pies & ???)
+30CE 06 0B                       ld      b, #0xB                                 ; 11 sprites to hide
+30D0 CD E4 30                    call    zero_sprite_y_xB
+30D3 21 0C 6A                    ld      hl, #soft_sprite_ram+0x10C              ; sprite #67 (hat, purse, umbrella & hammersx2)
+30D6 06 05                       ld      b, #5                                   ; 5 sprites to hide
+30D8 C3 E4 30                    jp      zero_sprite_y_xB
+30D8             ; End of function hide_object_sprites
 30D8             
 30DB             
 30DB             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 30DB             
 30DB             
 30DB             sub_0_30DB:                                                     ; CODE XREF: 0000:12DFp
-30DB 21 4C 69                    ld      hl, #soft_sprite_ram+0x4C
-30DE 36 00                       ld      (hl), #0
+30DB 21 4C 69                    ld      hl, #soft_sprite_ram+0x4C               ; sprite #19 (Y)
+30DE 36 00                       ld      (hl), #0                                ; hide
 30E0 2E 58                       ld      l, #0x58 ; 'X'
 30E2 06 06                       ld      b, #6
 30E2             ; End of function sub_0_30DB
@@ -8548,17 +8548,17 @@
 30E4             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 30E4             
 30E4             
-30E4             sub_0_30E4:                                                     ; CODE XREF: sub_0_30BD+5p
-30E4 7D                                                                          ; sub_0_30BD+Cp ...
+30E4             zero_sprite_y_xB:                                               ; CODE XREF: hide_object_sprites+5p
+30E4 7D                                                                          ; hide_object_sprites+Cp ...
 30E4                             ld      a, l
 30E5             
-30E5             loc_0_30E5:                                                     ; CODE XREF: sub_0_30E4+6j
+30E5             loc_0_30E5:                                                     ; CODE XREF: zero_sprite_y_xB+6j
 30E5 36 00                       ld      (hl), #0
 30E7 C6 04                       add     a, #4
 30E9 6F                          ld      l, a
 30EA 10 F9                       djnz    loc_0_30E5
 30EC C9                          ret     
-30EC             ; End of function sub_0_30E4
+30EC             ; End of function zero_sprite_y_xB
 30EC             
 30ED             
 30ED             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
@@ -10309,7 +10309,7 @@
 6205 ??          mario_x:        .ds 1                                           ; DATA XREF: sub_0_19DA+13r
 6205                                                                             ; sub_0_1A33+22r ...
 6206 ??          unk_0_6206:     .ds 1
-6207 ??          mario_flipy_sprite_tile:.ds 1                                   ; DATA XREF: sub_0_1AC3+54o
+6207 ??          mario_flipy_tile:.ds 1                                          ; DATA XREF: sub_0_1AC3+54o
 6207                                                                             ; sub_0_1AC3+9Do ...
 6208 ??          mario_flipx_colour:.ds 1
 6209 ??          unk_0_6209:     .ds 1                                           ; DATA XREF: 0000:0FA5o
@@ -10498,7 +10498,7 @@
 62AE ??                          .ds 1
 62AF*??          byte_0_62AF:    .ds 1                                           ; DATA XREF: display_1UP+53w
 62AF*                                                                            ; display_1UP+98r ...
-62B0 ??          unk_0_62B0:     .ds 1                                           ; DATA XREF: 0000:063Ar
+62B0 ??          bonus_timer_init_value:.ds 1                                    ; DATA XREF: 0000:063Ar
 62B0                                                                             ; 0000:0F8Eo ...
 62B0                                                                             ; level timer #1
 62B1 ??          unk_0_62B1:     .ds 1                                           ; DATA XREF: sub_0_2C03+9r
@@ -10757,7 +10757,7 @@
 639C ??                          .ds 1
 639D ??          mario_death_state:.ds 1                                         ; DATA XREF: 0000:127Fr
 639D                                                                             ; 0000:1295o ...
-639E ??          unk_0_639E:     .ds 1                                           ; DATA XREF: 0000:129Bw
+639E ??          death_spin_counter:.ds 1                                        ; DATA XREF: 0000:129Bw
 639E                                                                             ; 0000:12B2o
 639F ??                          .ds 1
 63A0 ??          unk_0_63A0:     .ds 1                                           ; DATA XREF: sub_0_3A2+39w
@@ -10791,7 +10791,7 @@
 63B5*                                                                            ; draw_level_background+BBr ...
 63B6 ??                          .ds 1
 63B7 ??          unk_0_63B7:     .ds 1
-63B8 ??          unk_0_63B8:     .ds 1                                           ; DATA XREF: 0000:0635r
+63B8 ??          bonus_timer_expired:.ds 1                                       ; DATA XREF: 0000:0635r
 63B8                                                                             ; 0000:06ACo
 63B9 ??          unk_0_63B9:     .ds 1
 63BA ??                          .ds 1
