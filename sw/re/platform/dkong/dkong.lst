@@ -1105,15 +1105,15 @@
 056B DD 21 81 77                                                                 ; display_score_or_high_score+11j
 056B                             ld      ix, #VRAM_start+0x381
 056F A7                          and     a
-0570 28 0A                       jr      Z, display_score_HL
+0570 28 0A                       jr      Z, display_score_DE
 0572 DD 21 21 75                 ld      ix, #VRAM_start+0x121
-0576 18 04                       jr      display_score_HL
+0576 18 04                       jr      display_score_DE
 0578             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0578             
 0578             display_score_at_hs_location:                                   ; CODE XREF: display_score_or_high_score+17j
 0578 DD 21 41 76                 ld      ix, #VRAM_start+0x241                   ; screen position for score
 057C             
-057C             display_score_HL:                                               ; CODE XREF: display_player_A_score+5j
+057C             display_score_DE:                                               ; CODE XREF: display_player_A_score+5j
 057C EB                                                                          ; display_player_A_score+Bj ...
 057C                             ex      de, hl
 057D 11 E0 FF                    ld      de, #0xFFE0                             ; column address delta
@@ -3657,7 +3657,7 @@
 14D3 06 00                       ld      b, #0
 14D5 3A 35 60                    ld      a, (unk_0_6035)
 14D8 4F                          ld      c, a
-14D9 CD FA 15                    call    sub_0_15FA                              ; high score initial select sprite
+14D9 CD FA 15                    call    outline_letter                          ; high score initial select sprite
 14DC             
 14DC             loc_0_14DC:                                                     ; CODE XREF: 0000:148Ej
 14DC 21 34 60                    ld      hl, #unk_0_6034
@@ -3715,7 +3715,7 @@
 152D                             ld      (unk_0_6035), a
 1530 4F                          ld      c, a
 1531 06 00                       ld      b, #0
-1533 CD FA 15                    call    sub_0_15FA
+1533 CD FA 15                    call    outline_letter
 1536 C3 8A 15                    jp      loc_0_158A
 1539             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1539             
@@ -3787,8 +3787,8 @@
 15A4 FD 6E 04                    ld      l, 4(iy)
 15A7 FD 66 05                    ld      h, 5(iy)
 15AA E5                          push    hl
-15AB DD E1                       pop     ix
-15AD CD 7C 05                    call    display_score_HL
+15AB DD E1                       pop     ix                                      ; display location
+15AD CD 7C 05                    call    display_score_DE
 15B0 3E 10                       ld      a, #0x10
 15B2 32 32 60                    ld      (unk_0_6032), a
 15B5 C3 F9 15                    jp      locret_0_15F9
@@ -3811,9 +3811,9 @@
 15CB 12                          ld      (de), a
 15CC 21 09 60                    ld      hl, #eight_bit_countdown
 15CF 36 80                       ld      (hl), #0x80 ; '€'
-15D1 23                          inc     hl
-15D2 35                          dec     (hl)
-15D3 06 0C                       ld      b, #0xC
+15D1 23                          inc     hl                                      ; main_sequencer
+15D2 35                          dec     (hl)                                    ; -1
+15D3 06 0C                       ld      b, #0xC                                 ; 12 ...
 15D5 21 E8 75                    ld      hl, #VRAM_start+0x1E8
 15D8 FD 2A 3A 60                 ld      iy, (unk_0_603A)
 15DC 11 E0 FF                    ld      de, #0xFFE0
@@ -3841,7 +3841,7 @@
 15FA             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 15FA             
 15FA             
-15FA             sub_0_15FA:                                                     ; CODE XREF: 0000:14D9p
+15FA             outline_letter:                                                 ; CODE XREF: 0000:14D9p
 15FA D5                                                                          ; 0000:1533p
 15FA                             push    de
 15FB E5                          push    hl
@@ -3849,7 +3849,7 @@
 15FE 21 0F 36                    ld      hl, #letter_coords
 1601 09                          add     hl, bc
 1602 EB                          ex      de, hl
-1603 21 74 69                    ld      hl, #soft_sprite_ram+0x74               ; sprite for initials entry
+1603 21 74 69                    ld      hl, #soft_sprite_ram+0x74               ; sprite #29 for initials entry
 1606 1A                          ld      a, (de)
 1607 13                          inc     de
 1608 77                          ld      (hl), a                                 ; X coordinate
@@ -3863,7 +3863,7 @@
 1612 E1                          pop     hl
 1613 D1                          pop     de
 1614 C9                          ret     
-1614             ; End of function sub_0_15FA
+1614             ; End of function outline_letter
 1614             
 1615             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1615             
@@ -9363,7 +9363,7 @@
 35EF 03 00 00 10+                .db 0x10, 0x10, 0x10, 0x10, 0x3F, 0, 0, 0x43, 0
 360D FC 76                       .dw VRAM_start+0x2FC
 360F 3B 5C 4B 5C+letter_coords:  .db 0x3B, 0x5C, 0x4B, 0x5C, 0x5B, 0x5C, 0x6B, 0x5C, 0x7B
-360F 5B 5C 6B 5C+                                                                ; DATA XREF: sub_0_15FA+4o
+360F 5B 5C 6B 5C+                                                                ; DATA XREF: outline_letter+4o
 360F 7B 5C 8B 5C+                .db 0x5C, 0x8B, 0x5C, 0x9B, 0x5C, 0xAB, 0x5C, 0xBB, 0x5C
 360F 9B 5C AB 5C+                .db 0xCB, 0x5C, 0x3B, 0x6C, 0x4B, 0x6C, 0x5B, 0x6C, 0x6B
 360F BB 5C CB 5C+                .db 0x6C, 0x7B, 0x6C, 0x8B, 0x6C, 0x9B, 0x6C, 0xAB, 0x6C
