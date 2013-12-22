@@ -3655,7 +3655,7 @@
 14CF 19                          add     hl, de
 14D0 22 3A 60                    ld      (unk_0_603A), hl
 14D3 06 00                       ld      b, #0
-14D5 3A 35 60                    ld      a, (unk_0_6035)
+14D5 3A 35 60                    ld      a, (current_initial_char)
 14D8 4F                          ld      c, a
 14D9 CD FA 15                    call    outline_letter                          ; high score initial select sprite
 14DC             
@@ -3702,33 +3702,33 @@
 151D             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 151D             
 151D             loc_0_151D:                                                     ; CODE XREF: 0000:1515j
-151D CB 4F                       bit     1, a
-151F C2 39 15                    jp      NZ, loc_0_1539
-1522 3A 35 60                    ld      a, (unk_0_6035)
-1525 3C                          inc     a
-1526 FE 1E                       cp      #0x1E
-1528 C2 2D 15                    jp      NZ, loc_0_152D
-152B 3E 00                       ld      a, #0
+151D CB 4F                       bit     1, a                                    ; left?
+151F C2 39 15                    jp      NZ, regi_previous_character             ; yes, skip
+1522 3A 35 60                    ld      a, (current_initial_char)
+1525 3C                          inc     a                                       ; next character
+1526 FE 1E                       cp      #0x1E                                   ; last character?
+1528 C2 2D 15                    jp      NZ, loc_0_152D                          ; no, skip
+152B 3E 00                       ld      a, #0                                   ; set to 1st character
 152D             
 152D             loc_0_152D:                                                     ; CODE XREF: 0000:1528j
 152D 32 35 60                                                                    ; 0000:153Ej ...
-152D                             ld      (unk_0_6035), a
-1530 4F                          ld      c, a
+152D                             ld      (current_initial_char), a               ; save new character
+1530 4F                          ld      c, a                                    ; prepare to display
 1531 06 00                       ld      b, #0
 1533 CD FA 15                    call    outline_letter
 1536 C3 8A 15                    jp      loc_0_158A
 1539             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1539             
-1539             loc_0_1539:                                                     ; CODE XREF: 0000:151Fj
-1539 3A 35 60                    ld      a, (unk_0_6035)
-153C D6 01                       sub     #1
-153E F2 2D 15                    jp      P, loc_0_152D
-1541 3E 1D                       ld      a, #0x1D
-1543 C3 2D 15                    jp      loc_0_152D
+1539             regi_previous_character:                                        ; CODE XREF: 0000:151Fj
+1539 3A 35 60                    ld      a, (current_initial_char)
+153C D6 01                       sub     #1                                      ; previous character
+153E F2 2D 15                    jp      P, loc_0_152D                           ; not 0, skip
+1541 3E 1D                       ld      a, #0x1D                                ; set to last character
+1543 C3 2D 15                    jp      loc_0_152D                              ; continue
 1546             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1546             
 1546             regi_jump_pressed:                                              ; CODE XREF: 0000:1507j
-1546 3A 35 60                    ld      a, (unk_0_6035)
+1546 3A 35 60                    ld      a, (current_initial_char)
 1549 FE 1C                       cp      #0x1C
 154B CA 6D 15                    jp      Z, loc_0_156D
 154E FE 1D                       cp      #0x1D
@@ -10056,7 +10056,7 @@
 6032                                                                             ; 0000:15B2w
 6033 ??                          .ds 1
 6034 ??          unk_0_6034:     .ds 1                                           ; DATA XREF: 0000:14DCo
-6035 ??          unk_0_6035:     .ds 1
+6035 ??          current_initial_char:.ds 1
 6036 ?? ??       word_0_6036:    .ds 2
 6038 ??          unk_0_6038:     .ds 1
 6039 ??                          .ds 1
