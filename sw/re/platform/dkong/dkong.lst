@@ -1105,15 +1105,15 @@
 056B DD 21 81 77                                                                 ; display_score_or_high_score+11j
 056B                             ld      ix, #VRAM_start+0x381
 056F A7                          and     a
-0570 28 0A                       jr      Z, display_score_DE
+0570 28 0A                       jr      Z, display_score_HL_at_IX
 0572 DD 21 21 75                 ld      ix, #VRAM_start+0x121
-0576 18 04                       jr      display_score_DE
+0576 18 04                       jr      display_score_HL_at_IX
 0578             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0578             
 0578             display_score_at_hs_location:                                   ; CODE XREF: display_score_or_high_score+17j
 0578 DD 21 41 76                 ld      ix, #VRAM_start+0x241                   ; screen position for score
 057C             
-057C             display_score_DE:                                               ; CODE XREF: display_player_A_score+5j
+057C             display_score_HL_at_IX:                                         ; CODE XREF: display_player_A_score+5j
 057C EB                                                                          ; display_player_A_score+Bj ...
 057C                             ex      de, hl
 057D 11 E0 FF                    ld      de, #0xFFE0                             ; column address delta
@@ -3347,26 +3347,26 @@
 12FC 35                          dec     (hl)
 12FD 7E                          ld      a, (hl)
 12FE 11 40 60                    ld      de, #p1_ingame_data
-1301 01 08 00                    ld      bc, #8
+1301 01 08 00                    ld      bc, #8                                  ; 8 bytes to copy
 1304 ED B0                       ldir    
-1306 A7                          and     a
+1306 A7                          and     a                                       ; mario alive?
 1307             
-1307             loc_0_1307:
+1307             loc_0_1307:                                                     ; yes, skip
 1307 C2 34 13                    jp      NZ, loc_0_1334
 130A 3E 01                       ld      a, #1
 130C 21 B2 60                    ld      hl, #p1_score
-130F CD CA 13                    call    sub_0_13CA
+130F CD CA 13                    call    sub_0_13CA                              ; flag P1 score
 1312 21 D4 76                    ld      hl, #VRAM_start+0x2D4
 1315 3A 0F 60                    ld      a, (two_players)
-1318 A7                          and     a
-1319 28 07                       jr      Z, loc_0_1322
-131B 11 02 03                    ld      de, #0x302                              ; display_message_02
+1318 A7                          and     a                                       ; 2 players?
+1319 28 07                       jr      Z, loc_0_1322                           ; no, skip
+131B 11 02 03                    ld      de, #0x302                              ; display_message_02 "PLAYER (I)"
 131E CD 9F 30                    call    queue_fg_vector_fn
 1321 2B                          dec     hl
 1322             
 1322             loc_0_1322:                                                     ; CODE XREF: 0000:1319j
 1322 CD 26 18                    call    clear_14x5_HL
-1325 11 00 03                    ld      de, #0x300                              ; display_message_00
+1325 11 00 03                    ld      de, #0x300                              ; display_message_00 "GAME OVER"
 1328 CD 9F 30                    call    queue_fg_vector_fn
 132B 21 09 60                    ld      hl, #eight_bit_countdown
 132E 36 C0                       ld      (hl), #0xC0 ; 'À'
@@ -3378,9 +3378,9 @@
 1334             loc_0_1334:                                                     ; CODE XREF: 0000:1307j
 1334 0E 08                       ld      c, #8
 1336 3A 0F 60                    ld      a, (two_players)
-1339 A7                          and     a
-133A CA 3F 13                    jp      Z, loc_0_133F
-133D 0E 17                       ld      c, #0x17
+1339 A7                          and     a                                       ; two players?
+133A CA 3F 13                    jp      Z, loc_0_133F                           ; no, skip
+133D 0E 17                       ld      c, #0x17                                ; next sequence (23)
 133F             
 133F             loc_0_133F:                                                     ; CODE XREF: 0000:133Aj
 133F 79                          ld      a, c
@@ -3396,16 +3396,16 @@
 134E 35                          dec     (hl)
 134F 7E                          ld      a, (hl)
 1350 11 48 60                    ld      de, #p2_ingame_data
-1353 01 08 00                    ld      bc, #8
+1353 01 08 00                    ld      bc, #8                                  ; 8 bytes to copy
 1356 ED B0                       ldir    
-1358 A7                          and     a
-1359 C2 7F 13                    jp      NZ, loc_0_137F
+1358 A7                          and     a                                       ; mario alive?
+1359 C2 7F 13                    jp      NZ, loc_0_137F                          ; yes, skip
 135C 3E 03                       ld      a, #3
 135E 21 B5 60                    ld      hl, #p2_score
-1361 CD CA 13                    call    sub_0_13CA
-1364 11 03 03                    ld      de, #0x303                              ; display_message_03
+1361 CD CA 13                    call    sub_0_13CA                              ; flag P2 score
+1364 11 03 03                    ld      de, #0x303                              ; display_message_03 "PLAYER (II)"
 1367 CD 9F 30                    call    queue_fg_vector_fn
-136A 11 00 03                    ld      de, #0x300                              ; display_message_00
+136A 11 00 03                    ld      de, #0x300                              ; display_message_00 "GAME OVER"
 136D CD 9F 30                    call    queue_fg_vector_fn
 1370 21 D3 76                    ld      hl, #VRAM_start+0x2D3
 1373 CD 26 18                    call    clear_14x5_HL
@@ -3419,9 +3419,9 @@
 137F             loc_0_137F:                                                     ; CODE XREF: 0000:1359j
 137F 0E 17                       ld      c, #0x17                                ; set to switch players?
 1381 3A 40 60                    ld      a, (p1_ingame_data)
-1384 A7                          and     a
-1385 C2 8A 13                    jp      NZ, loc_0_138A
-1388 0E 08                       ld      c, #8
+1384 A7                          and     a                                       ; mario alive P1?
+1385 C2 8A 13                    jp      NZ, loc_0_138A                          ; yes, skip
+1388 0E 08                       ld      c, #8                                   ; next sequence (8)
 138A             
 138A             loc_0_138A:                                                     ; CODE XREF: 0000:1385j
 138A 79                          ld      a, c
@@ -3431,14 +3431,14 @@
 138F             
 138F             p1_game_over:                                                   ; DATA XREF: 0000:0722o
 138F DF                          rst     0x18                                    ; wait for 8-bit countdown
-1390 0E 17                       ld      c, #0x17
+1390 0E 17                       ld      c, #0x17                                ; set to switch players?
 1392 3A 48 60                    ld      a, (p2_ingame_data)
 1395             
 1395             loc_0_1395:                                                     ; CODE XREF: 0000:13A7j
-1395 34                          inc     (hl)
-1396 A7                          and     a
-1397 C2 9C 13                    jp      NZ, loc_0_139C
-139A 0E 14                       ld      c, #0x14
+1395 34                          inc     (hl)                                    ; adjust countdown
+1396 A7                          and     a                                       ; mario alive P2?
+1397 C2 9C 13                    jp      NZ, loc_0_139C                          ; yes, skip
+139A 0E 14                       ld      c, #0x14                                ; next sequence (20)
 139C             
 139C             loc_0_139C:                                                     ; CODE XREF: 0000:1397j
 139C 79                          ld      a, c
@@ -3627,13 +3627,13 @@
 14A1 23                          inc     hl
 14A2 36 10                       ld      (hl), #0x10
 14A4 23                          inc     hl
-14A5 36 1E                       ld      (hl), #0x1E
+14A5 36 1E                       ld      (hl), #30                               ; regi_seconds_cntr
 14A7 23                          inc     hl
-14A8 36 3E                       ld      (hl), #0x3E ; '>'
+14A8 36 3E                       ld      (hl), #62                               ; regi_vblank_cntr
 14AA 23                          inc     hl
-14AB 36 00                       ld      (hl), #0
+14AB 36 00                       ld      (hl), #0                                ; regi_current_char
 14AD 21 E8 75                    ld      hl, #VRAM_start+0x1E8
-14B0 22 36 60                    ld      (word_0_6036), hl
+14B0 22 36 60                    ld      (regi_entry_cursor_loc), hl             ; init cursor loc for 1st character
 14B3 21 1C 61                    ld      hl, #high_score_tbl_ram+0x1C
 14B6 3A 0E 60                    ld      a, (current_player_E)                   ; 0/1
 14B9 07                          rlca                                            ; 0/2
@@ -3650,37 +3650,37 @@
 14C7 10 F8                       djnz    loc_0_14C1
 14C9             
 14C9             loc_0_14C9:                                                     ; CODE XREF: 0000:14C3j
-14C9 22 38 60                    ld      (unk_0_6038), hl                        ; point to high score
+14C9 22 38 60                    ld      (regi_ptr_hs_entry_flag), hl            ; point to high score entry
 14CC 11 F3 FF                    ld      de, #0xFFF3
-14CF 19                          add     hl, de
-14D0 22 3A 60                    ld      (unk_0_603A), hl
+14CF 19                          add     hl, de                                  ; offset for name
+14D0 22 3A 60                    ld      (regi_ptr_hs_entry_name), hl            ; store ptr to name
 14D3 06 00                       ld      b, #0
-14D5 3A 35 60                    ld      a, (current_initial_char)
+14D5 3A 35 60                    ld      a, (regi_current_char)
 14D8 4F                          ld      c, a
 14D9 CD FA 15                    call    outline_letter                          ; high score initial select sprite
 14DC             
 14DC             loc_0_14DC:                                                     ; CODE XREF: 0000:148Ej
-14DC 21 34 60                    ld      hl, #unk_0_6034
-14DF 35                          dec     (hl)
-14E0 C2 FC 14                    jp      NZ, loc_0_14FC
-14E3 36 3E                       ld      (hl), #0x3E ; '>'
-14E5 2B                          dec     hl
-14E6 35                          dec     (hl)
-14E7 CA C6 15                    jp      Z, loc_0_15C6
-14EA 7E                          ld      a, (hl)
+14DC 21 34 60                    ld      hl, #regi_vblank_cntr
+14DF 35                          dec     (hl)                                    ; done another second?
+14E0 C2 FC 14                    jp      NZ, regi_read_controller_input          ; no, skip
+14E3 36 3E                       ld      (hl), #62                               ; reset to roughly 1s
+14E5 2B                          dec     hl                                      ; regi_second_cntr
+14E6 35                          dec     (hl)                                    ; out of time?
+14E7 CA C6 15                    jp      Z, regi_save_hs_name                    ; yes, skip
+14EA 7E                          ld      a, (hl)                                 ; seconds left
 14EB 06 FF                       ld      b, #0xFF
 14ED             
-14ED             loc_0_14ED:                                                     ; CODE XREF: 0000:14F0j
+14ED             reg_show_seconds_left:                                          ; CODE XREF: 0000:14F0j
 14ED 04                          inc     b
 14EE D6 0A                       sub     #0xA
-14F0 D2 ED 14                    jp      NC, loc_0_14ED
-14F3 C6 0A                       add     a, #0xA
-14F5 32 52 75                    ld      (VRAM_start+0x152), a
+14F0 D2 ED 14                    jp      NC, reg_show_seconds_left               ; divide by 10
+14F3 C6 0A                       add     a, #0xA                                 ; fix last subtraction (units)
+14F5 32 52 75                    ld      (VRAM_start+0x152), a                   ; units digit (time left)
 14F8 78                          ld      a, b
-14F9 32 72 75                    ld      (VRAM_start+0x172), a
+14F9 32 72 75                    ld      (VRAM_start+0x172), a                   ; tens digit (time left)
 14FC             
-14FC             loc_0_14FC:                                                     ; CODE XREF: 0000:14E0j
-14FC 21 30 60                    ld      hl, #unk_0_6030
+14FC             regi_read_controller_input:                                     ; CODE XREF: 0000:14E0j
+14FC 21 30 60                    ld      hl, #unk_0_6030                         ; (not used???)
 14FF 46                          ld      b, (hl)
 1500 36 0A                       ld      (hl), #0xA
 1502 3A 10 60                    ld      a, (controller_in)                      ; edge-detected inputs
@@ -3688,7 +3688,7 @@
 1507 C2 46 15                    jp      NZ, regi_jump_pressed                   ; yes, skip
 150A E6 03                       and     #3                                      ; left/right only
 150C C2 14 15                    jp      NZ, regi_left_right_pressed             ; yes, skip
-150F 3C                          inc     a
+150F 3C                          inc     a                                       ; A=1
 1510 77                          ld      (hl), a
 1511 C3 8A 15                    jp      loc_0_158A
 1514             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -3704,7 +3704,7 @@
 151D             loc_0_151D:                                                     ; CODE XREF: 0000:1515j
 151D CB 4F                       bit     1, a                                    ; left?
 151F C2 39 15                    jp      NZ, regi_previous_character             ; yes, skip
-1522 3A 35 60                    ld      a, (current_initial_char)
+1522 3A 35 60                    ld      a, (regi_current_char)
 1525 3C                          inc     a                                       ; next character
 1526 FE 1E                       cp      #0x1E                                   ; last character?
 1528 C2 2D 15                    jp      NZ, loc_0_152D                          ; no, skip
@@ -3712,7 +3712,7 @@
 152D             
 152D             loc_0_152D:                                                     ; CODE XREF: 0000:1528j
 152D 32 35 60                                                                    ; 0000:153Ej ...
-152D                             ld      (current_initial_char), a               ; save new character
+152D                             ld      (regi_current_char), a                  ; save new character
 1530 4F                          ld      c, a                                    ; prepare to display
 1531 06 00                       ld      b, #0
 1533 CD FA 15                    call    outline_letter
@@ -3720,7 +3720,7 @@
 1539             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1539             
 1539             regi_previous_character:                                        ; CODE XREF: 0000:151Fj
-1539 3A 35 60                    ld      a, (current_initial_char)
+1539 3A 35 60                    ld      a, (regi_current_char)
 153C D6 01                       sub     #1                                      ; previous character
 153E F2 2D 15                    jp      P, loc_0_152D                           ; not 0, skip
 1541 3E 1D                       ld      a, #0x1D                                ; set to last character
@@ -3728,110 +3728,112 @@
 1546             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1546             
 1546             regi_jump_pressed:                                              ; CODE XREF: 0000:1507j
-1546 3A 35 60                    ld      a, (current_initial_char)
-1549 FE 1C                       cp      #0x1C
-154B CA 6D 15                    jp      Z, loc_0_156D
-154E FE 1D                       cp      #0x1D
-1550 CA C6 15                    jp      Z, loc_0_15C6
-1553 2A 36 60                    ld      hl, (word_0_6036)
+1546 3A 35 60                    ld      a, (regi_current_char)
+1549 FE 1C                       cp      #0x1C                                   ; RUB?
+154B CA 6D 15                    jp      Z, regi_rub                             ; yes, skip
+154E FE 1D                       cp      #0x1D                                   ; END?
+1550 CA C6 15                    jp      Z, regi_save_hs_name                    ; yes, skip
+1553 2A 36 60                    ld      hl, (regi_entry_cursor_loc)             ; get current location
 1556 01 88 75                    ld      bc, #VRAM_start+0x188
 1559 A7                          and     a
 155A ED 42                       sbc     hl, bc
 155C CA 8A 15                    jp      Z, loc_0_158A
 155F 09                          add     hl, bc
-1560 C6 11                       add     a, #0x11
+1560 C6 11                       add     a, #0x11                                ; convert to 'ascii'
+1562             
+1562             loc_0_1562:                                                     ; display character
 1562 77                          ld      (hl), a
-1563 01 E0 FF                    ld      bc, #0xFFE0
+1563 01 E0 FF                    ld      bc, #0xFFE0                             ; next column
 1566 09                          add     hl, bc
 1567             
-1567             loc_0_1567:                                                     ; CODE XREF: 0000:1583j
-1567 22 36 60                    ld      (word_0_6036), hl
+1567             regi_update_cursor:                                             ; CODE XREF: 0000:1583j
+1567 22 36 60                    ld      (regi_entry_cursor_loc), hl             ; store next location
 156A C3 8A 15                    jp      loc_0_158A
 156D             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 156D             
-156D             loc_0_156D:                                                     ; CODE XREF: 0000:154Bj
-156D 2A 36 60                    ld      hl, (word_0_6036)
-1570 01 20 00                    ld      bc, #0x20 ; ' '
-1573 09                          add     hl, bc
+156D             regi_rub:                                                       ; CODE XREF: 0000:154Bj
+156D 2A 36 60                    ld      hl, (regi_entry_cursor_loc)
+1570 01 20 00                    ld      bc, #0x20 ; ' '                         ; previous column
+1573 09                          add     hl, bc                                  ; adjust
 1574 A7                          and     a
 1575 01 08 76                    ld      bc, #VRAM_start+0x208
-1578 ED 42                       sbc     hl, bc
-157A C2 86 15                    jp      NZ, loc_0_1586
+1578 ED 42                       sbc     hl, bc                                  ; first character?
+157A C2 86 15                    jp      NZ, loc_0_1586                          ; no, skip
 157D 21 E8 75                    ld      hl, #VRAM_start+0x1E8
 1580             
-1580             loc_0_1580:                                                     ; CODE XREF: 0000:1587j
-1580 3E 10                       ld      a, #0x10
-1582 77                          ld      (hl), a
-1583 C3 67 15                    jp      loc_0_1567
+1580             regi_erase_char:                                                ; CODE XREF: 0000:1587j
+1580 3E 10                       ld      a, #0x10                                ; space
+1582 77                          ld      (hl), a                                 ; display
+1583 C3 67 15                    jp      regi_update_cursor
 1586             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1586             
 1586             loc_0_1586:                                                     ; CODE XREF: 0000:157Aj
 1586 09                          add     hl, bc
-1587 C3 80 15                    jp      loc_0_1580
+1587 C3 80 15                    jp      regi_erase_char
 158A             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 158A             
 158A             loc_0_158A:                                                     ; CODE XREF: 0000:1511j
 158A 21 32 60                                                                    ; 0000:151Aj ...
-158A                             ld      hl, #unk_0_6032
+158A                             ld      hl, #byte_0_6032
 158D 35                          dec     (hl)
 158E C2 F9 15                    jp      NZ, locret_0_15F9
-1591 3A 31 60                    ld      a, (unk_0_6031)
+1591 3A 31 60                    ld      a, (byte_0_6031)
 1594 A7                          and     a
 1595 C2 B8 15                    jp      NZ, loc_0_15B8
 1598 3E 01                       ld      a, #1
-159A 32 31 60                    ld      (unk_0_6031), a
+159A 32 31 60                    ld      (byte_0_6031), a
 159D 11 BF 01                    ld      de, #byte_0_1BD+2                       ; empty/dummy score
 15A0             
 15A0             loc_0_15A0:                                                     ; CODE XREF: 0000:15C3j
-15A0 FD 2A 38 60                 ld      iy, (unk_0_6038)                        ; ptr high score
+15A0 FD 2A 38 60                 ld      iy, (regi_ptr_hs_entry_flag)            ; ptr high score
 15A4 FD 6E 04                    ld      l, 4(iy)
 15A7 FD 66 05                    ld      h, 5(iy)
 15AA E5                          push    hl
 15AB DD E1                       pop     ix                                      ; display location
-15AD CD 7C 05                    call    display_score_DE
+15AD CD 7C 05                    call    display_score_HL_at_IX                  ; display new high score in table
 15B0 3E 10                       ld      a, #0x10
-15B2 32 32 60                    ld      (unk_0_6032), a
+15B2 32 32 60                    ld      (byte_0_6032), a
 15B5 C3 F9 15                    jp      locret_0_15F9
 15B8             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 15B8             
 15B8             loc_0_15B8:                                                     ; CODE XREF: 0000:1595j
 15B8 AF                          xor     a
-15B9 32 31 60                    ld      (unk_0_6031), a
-15BC ED 5B 38 60                 ld      de, (unk_0_6038)                        ; point to high score
+15B9 32 31 60                    ld      (byte_0_6031), a
+15BC ED 5B 38 60                 ld      de, (regi_ptr_hs_entry_flag)            ; point to high score
 15C0 13                          inc     de
 15C1 13                          inc     de
 15C2 13                          inc     de
 15C3 C3 A0 15                    jp      loc_0_15A0
 15C6             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 15C6             
-15C6             loc_0_15C6:                                                     ; CODE XREF: 0000:14E7j
+15C6             regi_save_hs_name:                                              ; CODE XREF: 0000:14E7j
 15C6 ED 5B 38 60                                                                 ; 0000:1550j
-15C6                             ld      de, (unk_0_6038)                        ; point to high score
+15C6                             ld      de, (regi_ptr_hs_entry_flag)            ; point to high score
 15CA AF                          xor     a
-15CB 12                          ld      (de), a
+15CB 12                          ld      (de), a                                 ; unflag as P1/P2 high score
 15CC 21 09 60                    ld      hl, #eight_bit_countdown
 15CF 36 80                       ld      (hl), #0x80 ; '€'
 15D1 23                          inc     hl                                      ; main_sequencer
 15D2 35                          dec     (hl)                                    ; -1
-15D3 06 0C                       ld      b, #0xC                                 ; 12 ...
+15D3 06 0C                       ld      b, #0xC                                 ; 12 chars to copy
 15D5 21 E8 75                    ld      hl, #VRAM_start+0x1E8
-15D8 FD 2A 3A 60                 ld      iy, (unk_0_603A)
+15D8 FD 2A 3A 60                 ld      iy, (regi_ptr_hs_entry_name)
 15DC 11 E0 FF                    ld      de, #0xFFE0
 15DF             
 15DF             loc_0_15DF:                                                     ; CODE XREF: 0000:15E6j
-15DF 7E                          ld      a, (hl)
-15E0 FD 77 00                    ld      0(iy), a
-15E3 FD 23                       inc     iy
-15E5 19                          add     hl, de
-15E6 10 F7                       djnz    loc_0_15DF
+15DF 7E                          ld      a, (hl)                                 ; get name character from screen
+15E0 FD 77 00                    ld      0(iy), a                                ; store in hs entry
+15E3 FD 23                       inc     iy                                      ; next position
+15E5 19                          add     hl, de                                  ; next column on screen
+15E6 10 F7                       djnz    loc_0_15DF                              ; loop through 12 chars
 15E8 06 05                       ld      b, #5
-15EA 11 14 03                    ld      de, #0x314                              ; display_message_14
+15EA 11 14 03                    ld      de, #0x314                              ; display_message_14 "REGI TIME"
 15ED             
 15ED             loc_0_15ED:                                                     ; CODE XREF: 0000:15F1j
 15ED CD 9F 30                    call    queue_fg_vector_fn
-15F0 13                          inc     de
-15F1 10 FA                       djnz    loc_0_15ED
-15F3 11 1A 03                    ld      de, #0x31A                              ; display_message_1A
+15F0 13                          inc     de                                      ; next message
+15F1 10 FA                       djnz    loc_0_15ED                              ; display high score table
+15F3 11 1A 03                    ld      de, #0x31A                              ; display_message_1A "YOUR NAME WAS REGISTERED"
 15F6 CD 9F 30                    call    queue_fg_vector_fn
 15F9             
 15F9             locret_0_15F9:                                                  ; CODE XREF: 0000:158Ej
@@ -10051,17 +10053,19 @@
 602F ??                          .ds 1
 6030 ??          unk_0_6030:     .ds 1                                           ; DATA XREF: 0000:1499o
 6030                                                                             ; 0000:14FCo
-6031 ??          unk_0_6031:     .ds 1
-6032 ??          unk_0_6032:     .ds 1                                           ; DATA XREF: 0000:158Ao
-6032                                                                             ; 0000:15B2w
-6033 ??                          .ds 1
-6034 ??          unk_0_6034:     .ds 1                                           ; DATA XREF: 0000:14DCo
-6035 ??          current_initial_char:.ds 1
-6036 ?? ??       word_0_6036:    .ds 2
-6038 ??          unk_0_6038:     .ds 1
-6039 ??                          .ds 1
-603A ??          unk_0_603A:     .ds 1
-603B ??                          .ds 1
+6031*??          byte_0_6031:    .ds 1                                           ; DATA XREF: 0000:1591r
+6031*                                                                            ; 0000:159Aw ...
+6032*??          byte_0_6032:    .ds 1                                           ; DATA XREF: 0000:158Ao
+6032*                                                                            ; 0000:15B2w
+6033 ??          regi_second_cntr:.ds 1
+6034 ??          regi_vblank_cntr:.ds 1                                          ; DATA XREF: 0000:14DCo
+6035 ??          regi_current_char:.ds 1
+6036*?? ??       regi_entry_cursor_loc:.ds 2                                     ; DATA XREF: 0000:14B0w
+6036*                                                                            ; 0000:1553r ...
+6038 ?? ??       regi_ptr_hs_entry_flag:.ds 2                                    ; DATA XREF: 0000:14C9w
+6038                                                                             ; 0000:15A0r ...
+603A ?? ??       regi_ptr_hs_entry_name:.ds 2                                    ; DATA XREF: 0000:14D0w
+603A                                                                             ; 0000:15D8r
 603C ??                          .ds 1
 603D ??                          .ds 1
 603E ??                          .ds 1
