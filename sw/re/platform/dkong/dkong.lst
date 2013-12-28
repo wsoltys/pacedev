@@ -4308,7 +4308,7 @@
 18DB 46                          ld      b, (hl)
 18DC CB A8                       res     5, b
 18DE AF                          xor     a
-18DF CD 09 30                    call    sub_0_3009
+18DF CD 09 30                    call    animate_mario_or_barrel_sprite
 18E2 F6 20                       or      #0x20 ; ' '
 18E4 77                          ld      (hl), a
 18E5 21 AF 62                    ld      hl, #byte_0_62AF
@@ -4731,8 +4731,8 @@
 1B63 7E                          ld      a, (hl)
 1B64 E6 80                       and     #0x80 ; 'Ä'                             ; h-flip mario
 1B66 77                          ld      (hl), a
-1B67 AF                          xor     a
-1B68 32 02 62                    ld      (unk_0_6202), a
+1B67 AF                          xor     a                                       ; animation cell 0
+1B68 32 02 62                    ld      (mario_animation_cell), a
 1B6B C3 A6 1D                    jp      update_mario_sprite_registers
 1B6E             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 1B6E             
@@ -4889,80 +4889,80 @@
 1C8F             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 1C8F             
 1C8F             mario_right:                                                    ; CODE XREF: sub_0_1AC3+2Fj
-1C8F 06 01                       ld      b, #1
-1C91 3A 0F 62                    ld      a, (unk_0_620F)
-1C94 A7                          and     a
-1C95 C2 D2 1C                    jp      NZ, loc_0_1CD2
-1C98 3A 02 62                    ld      a, (unk_0_6202)
+1C8F 06 01                       ld      b, #1                                   ; dY
+1C91 3A 0F 62                    ld      a, (mario_cell_animate_cntr)
+1C94 A7                          and     a                                       ; time for next sprite?
+1C95 C2 D2 1C                    jp      NZ, move_mario_left_right               ; no, skip
+1C98 3A 02 62                    ld      a, (mario_animation_cell)
 1C9B 47                          ld      b, a
-1C9C 3E 05                       ld      a, #5
-1C9E CD 09 30                    call    sub_0_3009
-1CA1 32 02 62                    ld      (unk_0_6202), a
+1C9C 3E 05                       ld      a, #5                                   ; sprite type = mario running right
+1C9E CD 09 30                    call    animate_mario_or_barrel_sprite
+1CA1 32 02 62                    ld      (mario_animation_cell), a               ; update current cell #
 1CA4 E6 03                       and     #3
-1CA6 F6 80                       or      #0x80 ; 'Ä'
-1CA8 C3 C2 1C                    jp      update_mario_sprite_data
+1CA6 F6 80                       or      #0x80 ; 'Ä'                             ; set flipy
+1CA8 C3 C2 1C                    jp      update_mario_lr_sprite_data
 1CAB             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 1CAB             
 1CAB             mario_left:                                                     ; CODE XREF: sub_0_1AC3+38j
-1CAB 06 FF                       ld      b, #0xFF
-1CAD 3A 0F 62                    ld      a, (unk_0_620F)
-1CB0 A7                          and     a
-1CB1 C2 D2 1C                    jp      NZ, loc_0_1CD2
-1CB4 3A 02 62                    ld      a, (unk_0_6202)
+1CAB 06 FF                       ld      b, #0xFF                                ; dY
+1CAD 3A 0F 62                    ld      a, (mario_cell_animate_cntr)
+1CB0 A7                          and     a                                       ; time for next sprite?
+1CB1 C2 D2 1C                    jp      NZ, move_mario_left_right               ; no, skip
+1CB4 3A 02 62                    ld      a, (mario_animation_cell)
 1CB7 47                          ld      b, a
-1CB8 3E 01                       ld      a, #1
-1CBA CD 09 30                    call    sub_0_3009
-1CBD 32 02 62                    ld      (unk_0_6202), a
-1CC0 E6 03                       and     #3                                      ; animate mario running
+1CB8 3E 01                       ld      a, #1                                   ; sprite type = mario running left
+1CBA CD 09 30                    call    animate_mario_or_barrel_sprite
+1CBD 32 02 62                    ld      (mario_animation_cell), a               ; update current cell #
+1CC0 E6 03                       and     #3
 1CC2             
-1CC2             update_mario_sprite_data:                                       ; CODE XREF: sub_0_1AC3+1E5j
+1CC2             update_mario_lr_sprite_data:                                    ; CODE XREF: sub_0_1AC3+1E5j
 1CC2 21 07 62                    ld      hl, #mario_flipy_tile
-1CC5 77                          ld      (hl), a                                 ; set mario character
-1CC6 1F                          rra     
-1CC7 DC 8F 1D                    call    C, sub_0_1D8F
-1CCA 3E 02                       ld      a, #2
-1CCC 32 0F 62                    ld      (unk_0_620F), a
+1CC5 77                          ld      (hl), a                                 ; set mario sprite
+1CC6 1F                          rra                                             ; time to play walking sound?
+1CC7 DC 8F 1D                    call    C, play_walking_sound                   ; yes, call
+1CCA 3E 02                       ld      a, #2                                   ; same sprite for 2 frames
+1CCC 32 0F 62                    ld      (mario_cell_animate_cntr), a
 1CCF C3 A6 1D                    jp      update_mario_sprite_registers
 1CD2             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 1CD2             
-1CD2             loc_0_1CD2:                                                     ; CODE XREF: sub_0_1AC3+1D2j
+1CD2             move_mario_left_right:                                          ; CODE XREF: sub_0_1AC3+1D2j
 1CD2 21 03 62                                                                    ; sub_0_1AC3+1EEj
 1CD2                             ld      hl, #mario_y
 1CD5 7E                          ld      a, (hl)
-1CD6 80                          add     a, b
+1CD6 80                          add     a, b                                    ; add delta value
 1CD7 77                          ld      (hl), a
 1CD8 3A 27 62                    ld      a, (level_type)
-1CDB 3D                          dec     a
-1CDC C2 EB 1C                    jp      NZ, loc_0_1CEB
-1CDF 66                          ld      h, (hl)
+1CDB 3D                          dec     a                                       ; girders?
+1CDC C2 EB 1C                    jp      NZ, loc_0_1CEB                          ; no, skip
+1CDF 66                          ld      h, (hl)                                 ; H=Y
 1CE0 3A 05 62                    ld      a, (mario_x)
-1CE3 6F                          ld      l, a
-1CE4 CD 33 23                    call    sub_0_2333
-1CE7 7D                          ld      a, l
-1CE8 32 05 62                    ld      (mario_x), a
+1CE3 6F                          ld      l, a                                    ; L=X
+1CE4 CD 33 23                    call    adjust_height_on_girders
+1CE7 7D                          ld      a, l                                    ; adjusted X
+1CE8 32 05 62                    ld      (mario_x), a                            ; store
 1CEB             
 1CEB             loc_0_1CEB:                                                     ; CODE XREF: sub_0_1AC3+219j
-1CEB 21 0F 62                    ld      hl, #unk_0_620F
+1CEB 21 0F 62                    ld      hl, #mario_cell_animate_cntr
 1CEE 35                          dec     (hl)
 1CEF C3 A6 1D                    jp      update_mario_sprite_registers
 1CF2             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 1CF2             
 1CF2             loc_0_1CF2:                                                     ; CODE XREF: sub_0_1AC3+7Aj
-1CF2 3A 0F 62                    ld      a, (unk_0_620F)                         ; check timer
+1CF2 3A 0F 62                    ld      a, (mario_cell_animate_cntr)            ; check timer
 1CF5 A7                          and     a                                       ; expired?
 1CF6 C2 8A 1D                    jp      NZ, loc_0_1D8A                          ; no, skip
 1CF9 3E 03                       ld      a, #3
-1CFB 32 0F 62                    ld      (unk_0_620F), a                         ; reset timer
+1CFB 32 0F 62                    ld      (mario_cell_animate_cntr), a            ; reset timer
 1CFE 3E 02                       ld      a, #2
 1D00 C3 11 1D                    jp      loc_0_1D11
 1D03             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 1D03             
 1D03             loc_0_1D03:                                                     ; CODE XREF: sub_0_1AC3+87j
-1D03 3A 0F 62                    ld      a, (unk_0_620F)                         ; check timer
+1D03 3A 0F 62                    ld      a, (mario_cell_animate_cntr)            ; check timer
 1D06 A7                          and     a                                       ; expired?
 1D07 C2 76 1D                    jp      NZ, loc_0_1D76                          ; no, skip
 1D0A 3E 04                       ld      a, #4
-1D0C 32 0F 62                    ld      (unk_0_620F), a                         ; reset timer
+1D0C 32 0F 62                    ld      (mario_cell_animate_cntr), a            ; reset timer
 1D0F 3E FE                       ld      a, #0xFE ; '˛'
 1D11             
 1D11             loc_0_1D11:                                                     ; CODE XREF: sub_0_1AC3+23Dj
@@ -5015,7 +5015,7 @@
 1D59 3A 24 62                    ld      a, (unk_0_6224)
 1D5C EE 01                       xor     #1
 1D5E 32 24 62                    ld      (unk_0_6224), a
-1D61 CC 8F 1D                    call    Z, sub_0_1D8F
+1D61 CC 8F 1D                    call    Z, play_walking_sound
 1D64 C3 49 1D                    jp      loc_0_1D49
 1D67             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 1D67             
@@ -5042,7 +5042,7 @@
 1D8A             
 1D8A             loc_0_1D8A:                                                     ; CODE XREF: sub_0_1AC3+233j
 1D8A 21 0F 62                                                                    ; sub_0_1AC3+2B7j
-1D8A                             ld      hl, #unk_0_620F
+1D8A                             ld      hl, #mario_cell_animate_cntr
 1D8D 35                          dec     (hl)
 1D8E C9                          ret     
 1D8E             ; End of function sub_0_1AC3
@@ -5051,12 +5051,12 @@
 1D8F             ; €€€€€€€€€€€€€€€ S U B R O U T I N E €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
 1D8F             
 1D8F             
-1D8F             sub_0_1D8F:                                                     ; CODE XREF: sub_0_1AC3+204p
+1D8F             play_walking_sound:                                             ; CODE XREF: sub_0_1AC3+204p
 1D8F 3E 03                                                                       ; sub_0_1AC3+29Ep
 1D8F                             ld      a, #3                                   ; tmr=3
 1D91 32 80 60                    ld      (digital_snd_tmr_walk), a
 1D94 C9                          ret     
-1D94             ; End of function sub_0_1D8F
+1D94             ; End of function play_walking_sound
 1D94             
 1D95             
 1D95             ; €€€€€€€€€€€€€€€ S U B R O U T I N E €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
@@ -5513,7 +5513,7 @@
 2004 2D                          dec     l
 2005 2D                          dec     l
 2006 2D                          dec     l
-2007 CD 33 23                    call    sub_0_2333
+2007 CD 33 23                    call    adjust_height_on_girders
 200A 2C                          inc     l
 200B 2C                          inc     l
 200C 2C                          inc     l
@@ -6065,61 +6065,61 @@
 2333             ; €€€€€€€€€€€€€€€ S U B R O U T I N E €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
 2333             
 2333             
-2333             sub_0_2333:                                                     ; CODE XREF: sub_0_1AC3+221p
+2333             adjust_height_on_girders:                                       ; CODE XREF: sub_0_1AC3+221p
 2333 3E 0F                                                                       ; sub_0_1F72+95p ...
 2333                             ld      a, #0xF
-2335 A4                          and     h
-2336 05                          dec     b
-2337 CA 42 23                    jp      Z, loc_0_2342
+2335 A4                          and     h                                       ; Y
+2336 05                          dec     b                                       ; dY=+1?
+2337 CA 42 23                    jp      Z, loc_0_2342                           ; yes, skip
 233A FE 0F                       cp      #0xF
 233C D8                          ret     C
 233D 06 FF                       ld      b, #0xFF
 233F C3 47 23                    jp      loc_0_2347
 2342             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 2342             
-2342             loc_0_2342:                                                     ; CODE XREF: sub_0_2333+4j
+2342             loc_0_2342:                                                     ; CODE XREF: adjust_height_on_girders+4j
 2342 FE 01                       cp      #1
 2344 D0                          ret     NC
 2345 06 01                       ld      b, #1
 2347             
-2347             loc_0_2347:                                                     ; CODE XREF: sub_0_2333+Cj
+2347             loc_0_2347:                                                     ; CODE XREF: adjust_height_on_girders+Cj
 2347 3E F0                       ld      a, #0xF0 ; ''
-2349 BD                          cp      l
+2349 BD                          cp      l                                       ; X
 234A CA 60 23                    jp      Z, loc_0_2360
 234D 3E 4C                       ld      a, #0x4C ; 'L'
-234F BD                          cp      l
+234F BD                          cp      l                                       ; X
 2350 CA 66 23                    jp      Z, loc_0_2366
-2353 7D                          ld      a, l
+2353 7D                          ld      a, l                                    ; X
 2354 CB 6F                       bit     5, a
 2356 CA 5C 23                    jp      Z, loc_0_235C
 2359             
-2359             loc_0_2359:                                                     ; CODE XREF: sub_0_2333+2Fj
+2359             loc_0_2359:                                                     ; CODE XREF: adjust_height_on_girders+2Fj
 2359 90                          sub     b
 235A             
-235A             loc_0_235A:                                                     ; CODE XREF: sub_0_2333+2Aj
-235A 6F                          ld      l, a
+235A             loc_0_235A:                                                     ; CODE XREF: adjust_height_on_girders+2Aj
+235A 6F                          ld      l, a                                    ; adjusted X
 235B C9                          ret     
 235C             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 235C             
-235C             loc_0_235C:                                                     ; CODE XREF: sub_0_2333+23j
-235C 80                                                                          ; sub_0_2333+38j
+235C             loc_0_235C:                                                     ; CODE XREF: adjust_height_on_girders+23j
+235C 80                                                                          ; adjust_height_on_girders+38j
 235C                             add     a, b
 235D C3 5A 23                    jp      loc_0_235A
 2360             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 2360             
-2360             loc_0_2360:                                                     ; CODE XREF: sub_0_2333+17j
+2360             loc_0_2360:                                                     ; CODE XREF: adjust_height_on_girders+17j
 2360 CB 7C                       bit     7, h
 2362 C2 59 23                    jp      NZ, loc_0_2359
 2365 C9                          ret     
 2366             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 2366             
-2366             loc_0_2366:                                                     ; CODE XREF: sub_0_2333+1Dj
+2366             loc_0_2366:                                                     ; CODE XREF: adjust_height_on_girders+1Dj
 2366 7C                          ld      a, h
 2367 FE 98                       cp      #0x98 ; 'ò'
 2369 D8                          ret     C
 236A 7D                          ld      a, l
 236B C3 5C 23                    jp      loc_0_235C
-236B             ; End of function sub_0_2333
+236B             ; End of function adjust_height_on_girders
 236B             
 236E             
 236E             ; €€€€€€€€€€€€€€€ S U B R O U T I N E €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
@@ -6225,7 +6225,7 @@
 23F0 47                          ld      b, a
 23F1 3E 03                       ld      a, #3
 23F3 B1                          or      c
-23F4 CD 09 30                    call    sub_0_3009
+23F4 CD 09 30                    call    animate_mario_or_barrel_sprite
 23F7 1F                          rra     
 23F8 DD CB 08 1E                 rr      8(ix)                                   ; toggle H & V flips
 23FC 1F                          rra     
@@ -8348,18 +8348,18 @@
 3009             ; €€€€€€€€€€€€€€€ S U B R O U T I N E €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
 3009             
 3009             
-3009             sub_0_3009:                                                     ; CODE XREF: 0000:18DFp
+3009             animate_mario_or_barrel_sprite:                                 ; CODE XREF: 0000:18DFp
 3009 57                                                                          ; sub_0_1AC3+1DBp ...
-3009                             ld      d, a
+3009                             ld      d, a                                    ; sprite type
 300A 0F                          rrca    
 300B DA 22 30                    jp      C, loc_0_3022
-300E 0E 93                       ld      c, #0x93 ; 'ì'
+300E 0E 93                       ld      c, #0x93 ; 'ì'                          ; sequence 3,0,1,2
 3010 0F                          rrca    
 3011 0F                          rrca    
 3012 D2 17 30                    jp      NC, loc_0_3017
-3015 0E 6C                       ld      c, #0x6C ; 'l'
+3015 0E 6C                       ld      c, #0x6C ; 'l'                          ; sequence 0,3,2,1
 3017             
-3017             loc_0_3017:                                                     ; CODE XREF: sub_0_3009+9j
+3017             loc_0_3017:                                                     ; CODE XREF: animate_mario_or_barrel_sprite+9j
 3017 07                          rlca    
 3018 DA 31 30                    jp      C, loc_0_3031
 301B 79                          ld      a, c
@@ -8368,39 +8368,39 @@
 301F C3 31 30                    jp      loc_0_3031
 3022             ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 3022             
-3022             loc_0_3022:                                                     ; CODE XREF: sub_0_3009+2j
-3022 0E B4                       ld      c, #0xB4 ; '¥'
+3022             loc_0_3022:                                                     ; CODE XREF: animate_mario_or_barrel_sprite+2j
+3022 0E B4                       ld      c, #0xB4 ; '¥'                          ; sequence 0,1,3,2 (mario left)
 3024 0F                          rrca    
-3025 0F                          rrca    
-3026 D2 2B 30                    jp      NC, loc_0_302B
-3029 0E 1E                       ld      c, #0x1E
+3025 0F                          rrca                                            ; moving sprite left?
+3026 D2 2B 30                    jp      NC, loc_0_302B                          ; yes, skip
+3029 0E 1E                       ld      c, #0x1E                                ; sequence 2,3,1,0 (mario right)
 302B             
-302B             loc_0_302B:                                                     ; CODE XREF: sub_0_3009+1Dj
-302B CB 50                       bit     2, b
-302D CA 31 30                    jp      Z, loc_0_3031
-3030 05                          dec     b
+302B             loc_0_302B:                                                     ; CODE XREF: animate_mario_or_barrel_sprite+1Dj
+302B CB 50                       bit     2, b                                    ; animation cell #
+302D CA 31 30                    jp      Z, loc_0_3031                           ; not special case (not 4)
+3030 05                          dec     b                                       ; 4->3
 3031             
-3031             loc_0_3031:                                                     ; CODE XREF: sub_0_3009+Fj
-3031 79                                                                          ; sub_0_3009+16j ...
+3031             loc_0_3031:                                                     ; CODE XREF: animate_mario_or_barrel_sprite+Fj
+3031 79                                                                          ; animate_mario_or_barrel_sprite+16j ...
 3031                             ld      a, c
 3032 0F                          rrca    
 3033 0F                          rrca    
 3034 4F                          ld      c, a
-3035 E6 03                       and     #3
-3037 B8                          cp      b
-3038 C2 31 30                    jp      NZ, loc_0_3031
+3035 E6 03                       and     #3                                      ; get animation cell in sequence
+3037 B8                          cp      b                                       ; equals current cell?
+3038 C2 31 30                    jp      NZ, loc_0_3031                          ; no, loop to find current cell
 303B 79                          ld      a, c
 303C 0F                          rrca    
 303D 0F                          rrca    
-303E E6 03                       and     #3
-3040 FE 03                       cp      #3
-3042 C0                          ret     NZ
+303E E6 03                       and     #3                                      ; get next animation cell #
+3040 FE 03                       cp      #3                                      ; special case?
+3042 C0                          ret     NZ                                      ; no, return
 3043 CB 92                       res     2, d
 3045 15                          dec     d
 3046 C0                          ret     NZ
-3047 3E 04                       ld      a, #4
+3047 3E 04                       ld      a, #4                                   ; special case animation cell
 3049 C9                          ret     
-3049             ; End of function sub_0_3009
+3049             ; End of function animate_mario_or_barrel_sprite
 3049             
 304A             
 304A             ; €€€€€€€€€€€€€€€ S U B R O U T I N E €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
@@ -9077,7 +9077,7 @@
 33C9 DD 66 0E                    ld      h, 0xE(ix)
 33CC DD 6E 0F                    ld      l, 0xF(ix)
 33CF DD 46 0D                    ld      b, 0xD(ix)
-33D2 CD 33 23                    call    sub_0_2333
+33D2 CD 33 23                    call    adjust_height_on_girders
 33D5 DD 75 0F                    ld      0xF(ix), l
 33D8 C9                          ret     
 33D8             ; End of function sub_0_33C3
@@ -10305,7 +10305,7 @@
 6200 ??          mario_alive_flag:.ds 1                                          ; DATA XREF: return_if_mario_not_aliver
 6200                                                                             ; 0000:0BE3r ...
 6201 ??                          .ds 1
-6202 ??          unk_0_6202:     .ds 1
+6202 ??          mario_animation_cell:.ds 1
 6203 ??          mario_y:        .ds 1                                           ; DATA XREF: animate_kong_and_pauline+D6r
 6203                                                                             ; animate_kong_and_pauline+10Er ...
 6204 ??          unk_0_6204:     .ds 1
@@ -10323,7 +10323,7 @@
 620D ??                          .ds 1
 620E ??          unk_0_620E:     .ds 1                                           ; DATA XREF: sub_0_1AC3+E6w
 620E                                                                             ; sub_0_1AC3+1B6o ...
-620F ??          unk_0_620F:     .ds 1                                           ; DATA XREF: sub_0_1AC3+1CEr
+620F ??          mario_cell_animate_cntr:.ds 1                                   ; DATA XREF: sub_0_1AC3+1CEr
 620F                                                                             ; sub_0_1AC3+1EAr ...
 620F                                                                             ; mario_???
 6210 ??          unk_0_6210:     .ds 1                                           ; DATA XREF: sub_0_1AC3+B0o
