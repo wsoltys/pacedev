@@ -2505,7 +2505,7 @@
 0D5F             
 0D5F             init_level_data_tmrs_spr_cont:                                  ; CODE XREF: 0000:3FA3j
 0D5F CD 56 0F                    call    initialise_level_data_and_timers
-0D62 CD 41 24                    call    sub_0_2441
+0D62 CD 41 24                    call    extract_ladder_data
 0D65 21 09 60                    ld      hl, #eight_bit_countdown
 0D68 36 40                       ld      (hl), #0x40 ; '@'
 0D6A 23                          inc     hl                                      ; main_sequencer
@@ -4637,7 +4637,7 @@
 1ACA 3A 1E 62                    ld      a, (unk_0_621E)
 1ACD A7                          and     a
 1ACE C2 55 1B                    jp      NZ, loc_0_1B55
-1AD1 3A 17 62                    ld      a, (unk_0_6217)
+1AD1 3A 17 62                    ld      a, (hammer_active)
 1AD4 3D                          dec     a
 1AD5 CA E6 1A                    jp      Z, check_left_right_inputs
 1AD8 3A 15 62                    ld      a, (mario_climbing)
@@ -4662,41 +4662,41 @@
 1AFB C2 AB 1C                    jp      NZ, mario_left                          ; yes, skip
 1AFE             
 1AFE             loc_0_1AFE:                                                     ; CODE XREF: handle_mario_movement+33j
-1AFE 3A 17 62                    ld      a, (unk_0_6217)
+1AFE 3A 17 62                    ld      a, (hammer_active)
 1B01 3D                          dec     a
 1B02 C8                          ret     Z
 1B03 3A 05 62                    ld      a, (mario_x)
 1B06 C6 08                       add     a, #8
-1B08 57                          ld      d, a
+1B08 57                          ld      d, a                                    ; d=X+8
 1B09 3A 03 62                    ld      a, (mario_y)
 1B0C F6 03                       or      #3
-1B0E CB 97                       res     2, a
-1B10 01 15 00                    ld      bc, #0x15
-1B13 CD 6E 23                    call    sub_0_236E
+1B0E CB 97                       res     2, a                                    ; a = Y mid-tile
+1B10 01 15 00                    ld      bc, #0x15                               ; maximum number of ladders
+1B13 CD 6E 23                    call    check_if_on_ladder                      ; returns if not on ladder
 1B16 F5                          push    af
 1B17 21 07 62                    ld      hl, #mario_flipy_tile
 1B1A 7E                          ld      a, (hl)
-1B1B E6 80                       and     #0x80 ; '€'
+1B1B E6 80                       and     #0x80 ; '€'                             ; preserve flipy
 1B1D F6 06                       or      #6                                      ; mario climbing character
 1B1F 77                          ld      (hl), a
-1B20 21 1A 62                    ld      hl, #unk_0_621A
+1B20 21 1A 62                    ld      hl, #on_broken_ladder
 1B23 3E 04                       ld      a, #4
-1B25 B9                          cp      c
-1B26 36 01                       ld      (hl), #1                                ; set as broken ladder
-1B28 D2 2C 1B                    jp      NC, loc_0_1B2C
-1B2B 35                          dec     (hl)                                    ; set as normal ladder
+1B25 B9                          cp      c                                       ; broken ladder?
+1B26 36 01                       ld      (hl), #1                                ; default to broken ladder
+1B28 D2 2C 1B                    jp      NC, loc_0_1B2C                          ; yes, skip
+1B2B 35                          dec     (hl)                                    ; flag as normal ladder
 1B2C             
 1B2C             loc_0_1B2C:                                                     ; CODE XREF: handle_mario_movement+65j
 1B2C F1                          pop     af
-1B2D A7                          and     a
-1B2E CA 4E 1B                    jp      Z, loc_0_1B4E
+1B2D A7                          and     a                                       ; bottom of ladder?
+1B2E CA 4E 1B                    jp      Z, loc_0_1B4E                           ; yes, skip
 1B31 7E                          ld      a, (hl)
-1B32 A7                          and     a
-1B33 C0                          ret     NZ
+1B32 A7                          and     a                                       ; broken ladder?
+1B33 C0                          ret     NZ                                      ; yes, exit (can't climb down)
 1B34 2C                          inc     l
-1B35 72                          ld      (hl), d
-1B36 2C                          inc     l                                       ; set top coordinate of ladder
-1B37 70                          ld      (hl), b                                 ; set bottom Y coordinate of ladder
+1B35 72                          ld      (hl), d                                 ; top coord of ladder
+1B36 2C                          inc     l
+1B37 70                          ld      (hl), b                                 ; bottom coord of ladder
 1B38             
 1B38             check_up_down_inputs:                                           ; CODE XREF: handle_mario_movement+19j
 1B38 3A 10 60                    ld      a, (controller_in)
@@ -4706,7 +4706,7 @@
 1B43 A7                          and     a
 1B44 C8                          ret     Z
 1B45             
-1B45             loc_0_1B45:                                                     ; CODE XREF: handle_mario_movement+8Fj
+1B45             check_up_input:                                                 ; CODE XREF: handle_mario_movement+8Fj
 1B45 3A 10 60                    ld      a, (controller_in)
 1B48 CB 57                       bit     2, a                                    ; up?
 1B4A C2 03 1D                    jp      NZ, mario_up                            ; yes, go
@@ -4718,7 +4718,7 @@
 1B4F 70                          ld      (hl), b
 1B50 2C                          inc     l                                       ; set top Y corordinate of ladder
 1B51 72                          ld      (hl), d                                 ; set bottom coordinate of ladder
-1B52 C3 45 1B                    jp      loc_0_1B45
+1B52 C3 45 1B                    jp      check_up_input
 1B55             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1B55             
 1B55             loc_0_1B55:                                                     ; CODE XREF: handle_mario_movement+Bj
@@ -4726,7 +4726,7 @@
 1B58 35                          dec     (hl)
 1B59 C0                          ret     NZ
 1B5A 3A 18 62                    ld      a, (unk_0_6218)
-1B5D 32 17 62                    ld      (unk_0_6217), a
+1B5D 32 17 62                    ld      (hammer_active), a
 1B60 21 07 62                    ld      hl, #mario_flipy_tile
 1B63 7E                          ld      a, (hl)
 1B64 E6 80                       and     #0x80 ; '€'                             ; h-flip mario
@@ -4950,97 +4950,97 @@
 1CF2             mario_down:                                                     ; CODE XREF: handle_mario_movement+7Aj
 1CF2 3A 0F 62                    ld      a, (mario_cell_animate_cntr)            ; check timer
 1CF5 A7                          and     a                                       ; expired?
-1CF6 C2 8A 1D                    jp      NZ, loc_0_1D8A                          ; no, skip
+1CF6 C2 8A 1D                    jp      NZ, dec_climbing_animate_cntr           ; no, skip
 1CF9 3E 03                       ld      a, #3
 1CFB 32 0F 62                    ld      (mario_cell_animate_cntr), a            ; reset timer
-1CFE 3E 02                       ld      a, #2
-1D00 C3 11 1D                    jp      loc_0_1D11
+1CFE 3E 02                       ld      a, #2                                   ; dX = 2 pixels
+1D00 C3 11 1D                    jp      move_mario_up_down
 1D03             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1D03             
 1D03             mario_up:                                                       ; CODE XREF: handle_mario_movement+87j
 1D03 3A 0F 62                    ld      a, (mario_cell_animate_cntr)            ; check timer
 1D06 A7                          and     a                                       ; expired?
-1D07 C2 76 1D                    jp      NZ, loc_0_1D76                          ; no, skip
+1D07 C2 76 1D                    jp      NZ, check_climbing_broken_ladder        ; no, skip
 1D0A 3E 04                       ld      a, #4
 1D0C 32 0F 62                    ld      (mario_cell_animate_cntr), a            ; reset timer
-1D0F 3E FE                       ld      a, #0xFE ; 'ş'
+1D0F 3E FE                       ld      a, #0xFE ; 'ş'                          ; dX = -2 pixels
 1D11             
-1D11             loc_0_1D11:                                                     ; CODE XREF: handle_mario_movement+23Dj
+1D11             move_mario_up_down:                                             ; CODE XREF: handle_mario_movement+23Dj
 1D11 21 05 62                    ld      hl, #mario_x
-1D14 86                          add     a, (hl)
+1D14 86                          add     a, (hl)                                 ; add dX
 1D15 77                          ld      (hl), a
-1D16 47                          ld      b, a
+1D16 47                          ld      b, a                                    ; mario_x
 1D17 3A 22 62                    ld      a, (unk_0_6222)
 1D1A EE 01                       xor     #1
 1D1C 32 22 62                    ld      (unk_0_6222), a
-1D1F C2 51 1D                    jp      NZ, loc_0_1D51
-1D22 78                          ld      a, b
-1D23 C6 08                       add     a, #8
-1D25 21 1C 62                    ld      hl, #unk_0_621C
-1D28 BE                          cp      (hl)                                    ; bottom y coordinate of ladder
-1D29 CA 67 1D                    jp      Z, loc_0_1D67                           ; stop from climbing
+1D1F C2 51 1D                    jp      NZ, centre_on_ladder_and_play_sound
+1D22 78                          ld      a, b                                    ; mario_x
+1D23 C6 08                       add     a, #8                                   ; centre of sprite
+1D25 21 1C 62                    ld      hl, #ladder_bottom_coord
+1D28 BE                          cp      (hl)                                    ; on ladder bottom?
+1D29 CA 67 1D                    jp      Z, stop_climbing                        ; yes, skip
 1D2C 2D                          dec     l
-1D2D 96                          sub     (hl)                                    ; top y coordinate of ladder
-1D2E CA 67 1D                    jp      Z, loc_0_1D67                           ; stop from climbing
-1D31 06 05                       ld      b, #5
-1D33 D6 08                       sub     #8
-1D35 CA 3F 1D                    jp      Z, loc_0_1D3F
-1D38 05                          dec     b
-1D39 D6 04                       sub     #4
-1D3B CA 3F 1D                    jp      Z, loc_0_1D3F
-1D3E 05                          dec     b
+1D2D 96                          sub     (hl)                                    ; on ladder top?
+1D2E CA 67 1D                    jp      Z, stop_climbing                        ; yes, skip
+1D31 06 05                       ld      b, #5                                   ; climbing sprite #1
+1D33 D6 08                       sub     #8                                      ; offset=8?
+1D35 CA 3F 1D                    jp      Z, set_climbing_sprite_data             ; yes, skip
+1D38 05                          dec     b                                       ; climbing sprite #2
+1D39 D6 04                       sub     #4                                      ; offset=12?
+1D3B CA 3F 1D                    jp      Z, set_climbing_sprite_data             ; yes, skip
+1D3E 05                          dec     b                                       ; climbing sprite #3
 1D3F             
-1D3F             loc_0_1D3F:                                                     ; CODE XREF: handle_mario_movement+272j
+1D3F             set_climbing_sprite_data:                                       ; CODE XREF: handle_mario_movement+272j
 1D3F 3E 80                                                                       ; handle_mario_movement+278j
 1D3F                             ld      a, #0x80 ; '€'
 1D41 21 07 62                    ld      hl, #mario_flipy_tile
-1D44 A6                          and     (hl)
-1D45 EE 80                       xor     #0x80 ; '€'                             ; hflip mario
-1D47 B0                          or      b
+1D44 A6                          and     (hl)                                    ; preserve flipy
+1D45 EE 80                       xor     #0x80 ; '€'                             ; invert flipy
+1D47 B0                          or      b                                       ; climbing sprite
 1D48 77                          ld      (hl), a
 1D49             
-1D49             loc_0_1D49:                                                     ; CODE XREF: handle_mario_movement+2A1j
+1D49             set_mario_climbing:                                             ; CODE XREF: handle_mario_movement+2A1j
 1D49 3E 01                       ld      a, #1                                   ; flag mario climbing a ladder
 1D4B 32 15 62                    ld      (mario_climbing), a
 1D4E C3 A6 1D                    jp      update_mario_sprite_registers
 1D51             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1D51             
-1D51             loc_0_1D51:                                                     ; CODE XREF: handle_mario_movement+25Cj
+1D51             centre_on_ladder_and_play_sound:                                ; CODE XREF: handle_mario_movement+25Cj
 1D51 2D                          dec     l
 1D52 2D                          dec     l
-1D53 7E                          ld      a, (hl)
+1D53 7E                          ld      a, (hl)                                 ; mario_y
 1D54 F6 03                       or      #3
 1D56 CB 97                       res     2, a
-1D58 77                          ld      (hl), a
-1D59 3A 24 62                    ld      a, (unk_0_6224)
+1D58 77                          ld      (hl), a                                 ; centre on ladder
+1D59 3A 24 62                    ld      a, (climb_sound_cntr)
 1D5C EE 01                       xor     #1
-1D5E 32 24 62                    ld      (unk_0_6224), a
-1D61 CC 8F 1D                    call    Z, play_walking_sound
-1D64 C3 49 1D                    jp      loc_0_1D49
+1D5E 32 24 62                    ld      (climb_sound_cntr), a                   ; time to play walking sound?
+1D61 CC 8F 1D                    call    Z, play_walking_sound                   ; yes, play
+1D64 C3 49 1D                    jp      set_mario_climbing
 1D67             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1D67             
-1D67             loc_0_1D67:                                                     ; CODE XREF: handle_mario_movement+266j
+1D67             stop_climbing:                                                  ; CODE XREF: handle_mario_movement+266j
 1D67 3E 06                                                                       ; handle_mario_movement+26Bj
 1D67                             ld      a, #6                                   ; mario climbing character
 1D69 32 07 62                    ld      (mario_flipy_tile), a
 1D6C AF                          xor     a
 1D6D 32 19 62                    ld      (unk_0_6219), a
-1D70 32 15 62                    ld      (mario_climbing), a                     ; flaf not climbing a ladder
+1D70 32 15 62                    ld      (mario_climbing), a                     ; flag not climbing a ladder
 1D73 C3 A6 1D                    jp      update_mario_sprite_registers
 1D76             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1D76             
-1D76             loc_0_1D76:                                                     ; CODE XREF: handle_mario_movement+244j
-1D76 3A 1A 62                    ld      a, (unk_0_621A)
-1D79 A7                          and     a
-1D7A CA 8A 1D                    jp      Z, loc_0_1D8A
+1D76             check_climbing_broken_ladder:                                   ; CODE XREF: handle_mario_movement+244j
+1D76 3A 1A 62                    ld      a, (on_broken_ladder)
+1D79 A7                          and     a                                       ; on broken ladder?
+1D7A CA 8A 1D                    jp      Z, dec_climbing_animate_cntr            ; no, skip
 1D7D 32 19 62                    ld      (unk_0_6219), a
-1D80 3A 1C 62                    ld      a, (unk_0_621C)
+1D80 3A 1C 62                    ld      a, (ladder_bottom_coord)
 1D83 D6 13                       sub     #0x13
 1D85 21 05 62                    ld      hl, #mario_x
 1D88 BE                          cp      (hl)
 1D89 D0                          ret     NC
 1D8A             
-1D8A             loc_0_1D8A:                                                     ; CODE XREF: handle_mario_movement+233j
+1D8A             dec_climbing_animate_cntr:                                      ; CODE XREF: handle_mario_movement+233j
 1D8A 21 0F 62                                                                    ; handle_mario_movement+2B7j
 1D8A                             ld      hl, #mario_cell_animate_cntr
 1D8D 35                          dec     (hl)
@@ -5704,7 +5704,7 @@
 216D             
 216D             
 216D             sub_0_216D:                                                     ; CODE XREF: sub_0_1F72+1F5p
-216D CD 6E 23                    call    sub_0_236E
+216D CD 6E 23                    call    check_if_on_ladder
 2170 3D                          dec     a
 2171 C0                          ret     NZ
 2172 78                          ld      a, b
@@ -5848,7 +5848,7 @@
 2230 2C                          inc     l
 2231 CD 43 22                    call    sub_0_2243
 2234 3E 01                       ld      a, #1
-2236 32 1A 62                    ld      (unk_0_621A), a
+2236 32 1A 62                    ld      (on_broken_ladder), a
 2239 C9                          ret     
 223A             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 223A             
@@ -5856,7 +5856,7 @@
 223A 2C                          inc     l
 223B CD 43 22                    call    sub_0_2243
 223E AF                          xor     a
-223F 32 1A 62                    ld      (unk_0_621A), a
+223F 32 1A 62                    ld      (on_broken_ladder), a
 2242 C9                          ret     
 2242             ; End of function sub_0_2207
 2242             
@@ -6125,50 +6125,50 @@
 236E             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 236E             
 236E             
-236E             sub_0_236E:                                                     ; CODE XREF: handle_mario_movement+50p
+236E             check_if_on_ladder:                                             ; CODE XREF: handle_mario_movement+50p
 236E 21 00 63                                                                    ; sub_0_216Dp ...
-236E                             ld      hl, #unk_0_6300
+236E                             ld      hl, #_ladder_data
 2371             
-2371             loc_0_2371:                                                     ; CODE XREF: sub_0_236E+1Ej
-2371 ED B1                       cpir    
-2373 C2 9A 23                    jp      NZ, loc_0_239A
+2371             loc_0_2371:                                                     ; CODE XREF: check_if_on_ladder+1Ej
+2371 ED B1                       cpir                                            ; find ladder on Y coordinate
+2373 C2 9A 23                    jp      NZ, loc_0_239A                          ; none, exit to higher function
 2376 E5                          push    hl
 2377 C5                          push    bc
 2378 01 14 00                    ld      bc, #0x14
-237B 09                          add     hl, bc
+237B 09                          add     hl, bc                                  ; offset to X1
 237C 0C                          inc     c
 237D 5F                          ld      e, a
-237E 7A                          ld      a, d
-237F BE                          cp      (hl)
-2380 CA 8F 23                    jp      Z, loc_0_238F
-2383 09                          add     hl, bc
-2384 BE                          cp      (hl)
-2385 CA 95 23                    jp      Z, loc_0_2395
+237E 7A                          ld      a, d                                    ; mario X (+8)
+237F BE                          cp      (hl)                                    ; match?
+2380 CA 8F 23                    jp      Z, loc_0_238F                           ; yes, skip
+2383 09                          add     hl, bc                                  ; offset to X2
+2384 BE                          cp      (hl)                                    ; match?
+2385 CA 95 23                    jp      Z, loc_0_2395                           ; yes, skip
 2388 57                          ld      d, a
 2389 7B                          ld      a, e
 238A C1                          pop     bc
 238B E1                          pop     hl
-238C C3 71 23                    jp      loc_0_2371
+238C C3 71 23                    jp      loc_0_2371                              ; continue the search
 238F             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 238F             
-238F             loc_0_238F:                                                     ; CODE XREF: sub_0_236E+12j
-238F 09                          add     hl, bc
-2390 3E 01                       ld      a, #1
+238F             loc_0_238F:                                                     ; CODE XREF: check_if_on_ladder+12j
+238F 09                          add     hl, bc                                  ; offset to X2
+2390 3E 01                       ld      a, #1                                   ; flag top of ladder
 2392 C3 98 23                    jp      loc_0_2398
 2395             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 2395             
-2395             loc_0_2395:                                                     ; CODE XREF: sub_0_236E+17j
-2395 AF                          xor     a
-2396 ED 42                       sbc     hl, bc
+2395             loc_0_2395:                                                     ; CODE XREF: check_if_on_ladder+17j
+2395 AF                          xor     a                                       ; flag bottom of ladder
+2396 ED 42                       sbc     hl, bc                                  ; offset to X1
 2398             
-2398             loc_0_2398:                                                     ; CODE XREF: sub_0_236E+24j
+2398             loc_0_2398:                                                     ; CODE XREF: check_if_on_ladder+24j
 2398 C1                          pop     bc
-2399 46                          ld      b, (hl)
+2399 46                          ld      b, (hl)                                 ; get other end of ladder
 239A             
-239A             loc_0_239A:                                                     ; CODE XREF: sub_0_236E+5j
-239A E1                          pop     hl
+239A             loc_0_239A:                                                     ; CODE XREF: check_if_on_ladder+5j
+239A E1                          pop     hl                                      ; if no match, return to higher function
 239B C9                          ret     
-239B             ; End of function sub_0_236E
+239B             ; End of function check_if_on_ladder
 239B             
 239C             
 239C             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
@@ -6292,21 +6292,21 @@
 2441             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 2441             
 2441             
-2441             sub_0_2441:                                                     ; CODE XREF: 0000:0D62p
+2441             extract_ladder_data:                                            ; CODE XREF: 0000:0D62p
 2441 21 0C 3F                    ld      hl, #aNINTENDO+1                        ; anti-tamper check?
 2444 3E 5E                       ld      a, #0x5E ; '^'
 2446 06 06                       ld      b, #6
 2448             
-2448             loc_0_2448:                                                     ; CODE XREF: sub_0_2441+9j
+2448             loc_0_2448:                                                     ; CODE XREF: extract_ladder_data+9j
 2448 86                          add     a, (hl)
 2449 23                          inc     hl
 244A 10 FC                       djnz    loc_0_2448
-244C FD 21 10 63                 ld      iy, #unk_0_6310
+244C FD 21 10 63                 ld      iy, #_broken_ladder_data
 2450 A7                          and     a
 2451 CA 56 24                    jp      Z, loc_0_2456
 2454 FD 23                       inc     iy
 2456             
-2456             loc_0_2456:                                                     ; CODE XREF: sub_0_2441+10j
+2456             loc_0_2456:                                                     ; CODE XREF: extract_ladder_data+10j
 2456 3A 27 62                    ld      a, (level_type)
 2459 3D                          dec     a
 245A 21 E4 3A                    ld      hl, #barrel_level_tilemap_data
@@ -6319,25 +6319,25 @@
 246B CA 71 24                    jp      Z, loc_0_2471
 246E 21 8B 3C                    ld      hl, #rivet_level_tilemap_data
 2471             
-2471             loc_0_2471:                                                     ; CODE XREF: sub_0_2441+1Cj
-2471 DD 21 00 63                                                                 ; sub_0_2441+23j ...
-2471                             ld      ix, #unk_0_6300
-2475 11 05 00                    ld      de, #5
+2471             loc_0_2471:                                                     ; CODE XREF: extract_ladder_data+1Cj
+2471 DD 21 00 63                                                                 ; extract_ladder_data+23j ...
+2471                             ld      ix, #_ladder_data
+2475 11 05 00                    ld      de, #5                                  ; each entry is 5 bytes
 2478             
-2478             loc_0_2478:                                                     ; CODE XREF: sub_0_2441+44j
-2478 7E                                                                          ; sub_0_2441+5Aj ...
-2478                             ld      a, (hl)
-2479 A7                          and     a
-247A CA 88 24                    jp      Z, loc_0_2488
-247D 3D                          dec     a
-247E CA 9E 24                    jp      Z, loc_0_249E
-2481 FE A9                       cp      #0xA9 ; '©'
-2483 C8                          ret     Z
-2484 19                          add     hl, de
-2485 C3 78 24                    jp      loc_0_2478
+2478             next_ladder_or_broken:                                          ; CODE XREF: extract_ladder_data+44j
+2478 7E                                                                          ; extract_ladder_data+5Aj ...
+2478                             ld      a, (hl)                                 ; segment type
+2479 A7                          and     a                                       ; ladder?
+247A CA 88 24                    jp      Z, add_ladder_data                      ; yes, skip
+247D 3D                          dec     a                                       ; broken ladder?
+247E CA 9E 24                    jp      Z, add_broken_ladder_data               ; yes, skip
+2481 FE A9                       cp      #0xA9 ; '©'                             ; end of level data?
+2483 C8                          ret     Z                                       ; yes, return
+2484 19                          add     hl, de                                  ; next entry
+2485 C3 78 24                    jp      next_ladder_or_broken                   ; loop
 2488             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 2488             
-2488             loc_0_2488:                                                     ; CODE XREF: sub_0_2441+39j
+2488             add_ladder_data:                                                ; CODE XREF: extract_ladder_data+39j
 2488 23                          inc     hl
 2489 7E                          ld      a, (hl)
 248A DD 77 00                    ld      0(ix), a
@@ -6350,10 +6350,10 @@
 2495 DD 77 2A                    ld      0x2A(ix), a
 2498 DD 23                       inc     ix
 249A 23                          inc     hl
-249B C3 78 24                    jp      loc_0_2478
+249B C3 78 24                    jp      next_ladder_or_broken
 249E             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 249E             
-249E             loc_0_249E:                                                     ; CODE XREF: sub_0_2441+3Dj
+249E             add_broken_ladder_data:                                         ; CODE XREF: extract_ladder_data+3Dj
 249E 23                          inc     hl
 249F 7E                          ld      a, (hl)
 24A0 FD 77 00                    ld      0(iy), a
@@ -6366,8 +6366,8 @@
 24AB FD 77 2A                    ld      0x2A(iy), a
 24AE FD 23                       inc     iy
 24B0 23                          inc     hl
-24B1 C3 78 24                    jp      loc_0_2478
-24B1             ; End of function sub_0_2441
+24B1 C3 78 24                    jp      next_ladder_or_broken
+24B1             ; End of function extract_ladder_data
 24B1             
 24B4             
 24B4             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
@@ -8184,7 +8184,7 @@
 2EED             loc_0_2EED:                                                     ; CODE XREF: sub_0_2ED4+Fj
 2EED DD 36 0E 00                 ld      0xE(ix), #0
 2EF1 DD 36 0F F0                 ld      0xF(ix), #0xF0 ; 'ğ'
-2EF5 3A 17 62                    ld      a, (unk_0_6217)
+2EF5 3A 17 62                    ld      a, (hammer_active)
 2EF8 0F                          rrca    
 2EF9 D2 97 2F                    jp      NC, loc_0_2F97
 2EFC AF                          xor     a
@@ -8231,7 +8231,7 @@
 2F57 C2 BE 2F                    jp      NZ, loc_0_2FBE
 2F5A AF                          xor     a
 2F5B 32 95 63                    ld      (unk_0_6395), a
-2F5E 32 17 62                    ld      (unk_0_6217), a
+2F5E 32 17 62                    ld      (hammer_active), a
 2F61 DD 77 01                    ld      1(ix), a
 2F64 3A 03 62                    ld      a, (mario_y)
 2F67 ED 44                       neg     
@@ -8657,7 +8657,7 @@
 3155 32 A1 63                    ld      (unk_0_63A1), a
 3158 3E 01                       ld      a, #1
 315A DD 77 08                    ld      8(ix), a
-315D 3A 17 62                    ld      a, (unk_0_6217)
+315D 3A 17 62                    ld      a, (hammer_active)
 3160 FE 01                       cp      #1
 3162 C2 6A 31                    jp      NZ, loc_0_316A
 3165 3E 00                       ld      a, #0
@@ -8991,7 +8991,7 @@
 3352 57                          ld      d, a
 3353 DD 7E 0E                    ld      a, 0xE(ix)
 3356 01 15 00                    ld      bc, #0x15
-3359 CD 6E 23                    call    sub_0_236E
+3359 CD 6E 23                    call    check_if_on_ladder
 335C A7                          and     a
 335D CA 99 33                    jp      Z, loc_0_3399
 3360 DD 70 1F                    ld      0x1F(ix), b
@@ -9612,7 +9612,7 @@
 3AD4 1B C8 23 A0+                .db 0xC8, 0x23, 0xA0, 0x12, 0xF0, 0x1B, 0xC8
 3AE4 02 97 38 68+barrel_level_tilemap_data:.db 2, 0x97, 0x38, 0x68, 0x38, 2, 0x9F, 0x54, 0x10, 0x54
 3AE4 38 02 9F 54+                                                                ; DATA XREF: 0000:0CD4o
-3AE4 10 54 02 DF+                                                                ; sub_0_2441+19o
+3AE4 10 54 02 DF+                                                                ; extract_ladder_data+19o
 3AE4 58 A0 55 02+                .db 2, 0xDF, 0x58, 0xA0, 0x55, 2, 0xEF, 0x6D, 0x20, 0x79
 3AE4 EF 6D 20 79+                .db 2, 0xDF, 0x9A, 0x10, 0x8E, 2, 0xEF, 0xAF, 0x20, 0xBB
 3AE4 02 DF 9A 10+                .db 2, 0xDF, 0xDC, 0x10, 0xD0, 2, 0xFF, 0xF0, 0x80, 0xF7
@@ -9627,7 +9627,7 @@
 3AE4 CB DB CB F3+                .db 0xAA
 3B5D 06 8F 90 70+cement_pie_level_tilemap_data:.db 6, 0x8F, 0x90, 0x70, 0x90, 6, 0x8F, 0x98, 0x70, 0x98
 3B5D 90 06 8F 98+                                                                ; DATA XREF: 0000:0CDFo
-3B5D 70 98 06 8F+                                                                ; sub_0_2441+20o
+3B5D 70 98 06 8F+                                                                ; extract_ladder_data+20o
 3B5D A0 70 A0 00+                .db 6, 0x8F, 0xA0, 0x70, 0xA0, 0, 0x63, 0x18, 0x63, 0x58
 3B5D 63 18 63 58+                .db 0, 0x63, 0x80, 0x63, 0xA8, 0, 0x63, 0xD0, 0x63, 0xF8
 3B5D 00 63 80 63+                .db 0, 0x53, 0x18, 0x53, 0x58, 0, 0x53, 0xA8, 0x53, 0xD0
@@ -9643,7 +9643,7 @@
 3B5D 00 2B 80 2B+                .db 2, 0xEF, 0xF8, 0x10, 0xF8, 0xAA
 3BE5 00 63 18 63+elevator_level_tilemap_data:.db 0, 0x63, 0x18, 0x63, 0x58, 0, 0x63, 0x88, 0x63, 0xD0
 3BE5 58 00 63 88+                                                                ; DATA XREF: 0000:0CFAo
-3BE5 63 D0 00 53+                                                                ; sub_0_2441+27o
+3BE5 63 D0 00 53+                                                                ; extract_ladder_data+27o
 3BE5 18 53 58 00+                .db 0, 0x53, 0x18, 0x53, 0x58, 0, 0x53, 0x88, 0x53, 0xD0
 3BE5 53 88 53 D0+                .db 0, 0xE3, 0x68, 0xE3, 0x90, 0, 0xE3, 0xB8, 0xE3, 0xD0
 3BE5 00 E3 68 E3+                .db 0, 0xCB, 0x90, 0xCB, 0xB0, 0, 0xB3, 0x58, 0xB3, 0x78
@@ -9662,7 +9662,7 @@
 3BE5 68 E0 68 02+                .db 2, 0xEF, 0xF8, 0x10, 0xF8, 0xAA
 3C8B 00 7B 80 7B+rivet_level_tilemap_data:.db 0, 0x7B, 0x80, 0x7B, 0xA8, 0, 0x7B, 0xD0, 0x7B, 0xF8
 3C8B A8 00 7B D0+                                                                ; DATA XREF: 0000:0CC3o
-3C8B 7B F8 00 33+                                                                ; sub_0_2441+2Do
+3C8B 7B F8 00 33+                                                                ; extract_ladder_data+2Do
 3C8B 58 33 80 00+                .db 0, 0x33, 0x58, 0x33, 0x80, 0, 0x53, 0x58, 0x53, 0x80
 3C8B 53 58 53 80+                .db 0, 0xAB, 0x58, 0xAB, 0x80, 0, 0xCB, 0x58, 0xCB, 0x80
 3C8B 00 AB 58 AB+                .db 0, 0x2B, 0x80, 0x2B, 0xA8, 0, 0xD3, 0x80, 0xD3, 0xA8
@@ -9925,7 +9925,7 @@
 3F02 49 4A 01 09+                .db 0x49, 0x4A, 1, 9, 8, 1, 0x3F
 3F09 7D 77       aNINTENDO_OF_AMERICA_INC:.dw VRAM_start+0x37D                   ; DATA XREF: 0000:3689o
 3F0B 1E 19 1E 24+aNINTENDO:      .db 0x1E, 0x19, 0x1E, 0x24, 0x15, 0x1E, 0x14, 0x1F, 0x10
-3F0B 15 1E 14 1F+                                                                ; DATA XREF: sub_0_2441o
+3F0B 15 1E 14 1F+                                                                ; DATA XREF: extract_ladder_datao
 3F0B 10 1F 16 10+                .db 0x1F, 0x16, 0x10, 0x11, 0x1D, 0x15, 0x22, 0x19, 0x13
 3F0B 11 1D 15 22+                .db 0x11, 0x10, 0x19, 0x1E, 0x13, 0x2B, 0x3F
 3F24             
@@ -10334,13 +10334,13 @@
 6214 ??          unk_0_6214:     .ds 1
 6215 ??          mario_climbing: .ds 1
 6216 ??          mario_jumping:  .ds 1
-6217 ??          unk_0_6217:     .ds 1
+6217 ??          hammer_active:  .ds 1
 6218 ??          unk_0_6218:     .ds 1
 6219 ??          unk_0_6219:     .ds 1
-621A ??          unk_0_621A:     .ds 1                                           ; DATA XREF: handle_mario_movement+5Do
+621A ??          on_broken_ladder:.ds 1                                          ; DATA XREF: handle_mario_movement+5Do
 621A                                                                             ; handle_mario_movement+2B3r ...
-621B ??                          .ds 1
-621C ??          unk_0_621C:     .ds 1                                           ; DATA XREF: handle_mario_movement+262o
+621B ??          ladder_top_coord:.ds 1
+621C ??          ladder_bottom_coord:.ds 1                                       ; DATA XREF: handle_mario_movement+262o
 621C                                                                             ; handle_mario_movement+2BDr
 621D ??                          .ds 1
 621E ??          unk_0_621E:     .ds 1                                           ; DATA XREF: handle_mario_movement+7r
@@ -10350,7 +10350,7 @@
 6221 ??          unk_0_6221:     .ds 1
 6222 ??          unk_0_6222:     .ds 1
 6223 ??                          .ds 1
-6224 ??          unk_0_6224:     .ds 1
+6224 ??          climb_sound_cntr:.ds 1
 6225 ??          unk_0_6225:     .ds 1
 6226 ??                          .ds 1
 6227 ??          level_type:     .ds 1                                           ; DATA XREF: sub_0_30+14o
@@ -10587,71 +10587,9 @@
 62FD ??                          .ds 1
 62FE ??                          .ds 1
 62FF ??                          .ds 1
-6300 ??          unk_0_6300:     .ds 1                                           ; DATA XREF: sub_0_236Eo
-6300                                                                             ; sub_0_2441+30o
-6301 ??                          .ds 1
-6302 ??                          .ds 1
-6303 ??                          .ds 1
-6304 ??                          .ds 1
-6305 ??                          .ds 1
-6306 ??                          .ds 1
-6307 ??                          .ds 1
-6308 ??                          .ds 1
-6309 ??                          .ds 1
-630A ??                          .ds 1
-630B ??                          .ds 1
-630C ??                          .ds 1
-630D ??                          .ds 1
-630E ??                          .ds 1
-630F ??                          .ds 1
-6310 ??          unk_0_6310:     .ds 1                                           ; DATA XREF: sub_0_2441+Bo
-6311 ??                          .ds 1
-6312 ??                          .ds 1
-6313 ??                          .ds 1
-6314 ??                          .ds 1
-6315 ??                          .ds 1
-6316 ??                          .ds 1
-6317 ??                          .ds 1
-6318 ??                          .ds 1
-6319 ??                          .ds 1
-631A ??                          .ds 1
-631B ??                          .ds 1
-631C ??                          .ds 1
-631D ??                          .ds 1
-631E ??                          .ds 1
-631F ??                          .ds 1
-6320 ??                          .ds 1
-6321 ??                          .ds 1
-6322 ??                          .ds 1
-6323 ??                          .ds 1
-6324 ??                          .ds 1
-6325 ??                          .ds 1
-6326 ??                          .ds 1
-6327 ??                          .ds 1
-6328 ??                          .ds 1
-6329 ??                          .ds 1
-632A ??                          .ds 1
-632B ??                          .ds 1
-632C ??                          .ds 1
-632D ??                          .ds 1
-632E ??                          .ds 1
-632F ??                          .ds 1
-6330 ??                          .ds 1
-6331 ??                          .ds 1
-6332 ??                          .ds 1
-6333 ??                          .ds 1
-6334 ??                          .ds 1
-6335 ??                          .ds 1
-6336 ??                          .ds 1
-6337 ??                          .ds 1
-6338 ??                          .ds 1
-6339 ??                          .ds 1
-633A ??                          .ds 1
-633B ??                          .ds 1
-633C ??                          .ds 1
-633D ??                          .ds 1
-633E ??                          .ds 1
-633F ??                          .ds 1
+6300 ?? ?? ?? ??+_ladder_data:   .ds 0x10                                        ; DATA XREF: check_if_on_laddero
+6300 ?? ?? ?? ??+                                                                ; extract_ladder_data+30o
+6310 ?? ?? ?? ??+_broken_ladder_data:.ds 0x30                                    ; DATA XREF: extract_ladder_data+Bo
 6340 ??          show_bonus_state:.ds 1
 6341 ??          show_bonus_timer:.ds 1                                          ; DATA XREF: check_and_handle_bonus+Ew
 6341                                                                             ; 0000:1E4Ao
@@ -10816,7 +10754,7 @@
 63CA ??                          .ds 1
 63CB ??                          .ds 1
 63CC ??          attract_movement_entry:.ds 1                                    ; DATA XREF: next_attract_action+3o
-63CD ??                          .ds 1
+63CD ??          attract_movement_timer:.ds 1
 63CE ??                          .ds 1
 63CF ??                          .ds 1
 63D0 ??                          .ds 1
