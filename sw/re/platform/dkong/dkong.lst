@@ -4401,7 +4401,7 @@
 197A             gameplay:                                                       ; DATA XREF: 0000:071Ao
 197A CD BD 1D                    call    check_and_handle_bonus                  ; another jump table
 197D CD 8C 1E                    call    sub_0_1E8C
-1980 CD C3 1A                    call    sub_0_1AC3
+1980 CD C3 1A                    call    handle_mario_movement
 1983 CD 72 1F                    call    sub_0_1F72
 1986 CD 8F 2C                    call    sub_0_2C8F
 1989 CD 03 2C                    call    sub_0_2C03
@@ -4630,7 +4630,7 @@
 1AC3             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 1AC3             
 1AC3             
-1AC3             sub_0_1AC3:                                                     ; CODE XREF: 0000:1980p
+1AC3             handle_mario_movement:                                          ; CODE XREF: 0000:1980p
 1AC3 3A 16 62                    ld      a, (mario_jumping)
 1AC6 3D                          dec     a
 1AC7 CA B2 1B                    jp      Z, loc_0_1BB2
@@ -4639,29 +4639,29 @@
 1ACE C2 55 1B                    jp      NZ, loc_0_1B55
 1AD1 3A 17 62                    ld      a, (unk_0_6217)
 1AD4 3D                          dec     a
-1AD5 CA E6 1A                    jp      Z, loc_0_1AE6
+1AD5 CA E6 1A                    jp      Z, check_left_right_inputs
 1AD8 3A 15 62                    ld      a, (mario_climbing)
 1ADB 3D                          dec     a
-1ADC CA 38 1B                    jp      Z, loc_0_1B38
+1ADC CA 38 1B                    jp      Z, check_up_down_inputs
 1ADF 3A 10 60                    ld      a, (controller_in)
 1AE2 17                          rla                                             ; jump pressed?
-1AE3 DA 6E 1B                    jp      C, loc_0_1B6E                           ; yes, skip
+1AE3 DA 6E 1B                    jp      C, mario_jump                           ; yes, skip
 1AE6             
-1AE6             loc_0_1AE6:                                                     ; CODE XREF: sub_0_1AC3+12j
-1AE6 CD 1F 24                    call    sub_0_241F
+1AE6             check_left_right_inputs:                                        ; CODE XREF: handle_mario_movement+12j
+1AE6 CD 1F 24                    call    check_screen_edges
 1AE9 3A 10 60                    ld      a, (controller_in)
-1AEC 1D                          dec     e
-1AED CA F5 1A                    jp      Z, loc_0_1AF5
+1AEC 1D                          dec     e                                       ; ok to move right?
+1AED CA F5 1A                    jp      Z, loc_0_1AF5                           ; no, skip
 1AF0 CB 47                       bit     0, a                                    ; right?
 1AF2 C2 8F 1C                    jp      NZ, mario_right                         ; yes, skip
 1AF5             
-1AF5             loc_0_1AF5:                                                     ; CODE XREF: sub_0_1AC3+2Aj
-1AF5 15                          dec     d
-1AF6 CA FE 1A                    jp      Z, loc_0_1AFE
+1AF5             loc_0_1AF5:                                                     ; CODE XREF: handle_mario_movement+2Aj
+1AF5 15                          dec     d                                       ; ok to move left?
+1AF6 CA FE 1A                    jp      Z, loc_0_1AFE                           ; no, skip
 1AF9 CB 4F                       bit     1, a                                    ; left?
 1AFB C2 AB 1C                    jp      NZ, mario_left                          ; yes, skip
 1AFE             
-1AFE             loc_0_1AFE:                                                     ; CODE XREF: sub_0_1AC3+33j
+1AFE             loc_0_1AFE:                                                     ; CODE XREF: handle_mario_movement+33j
 1AFE 3A 17 62                    ld      a, (unk_0_6217)
 1B01 3D                          dec     a
 1B02 C8                          ret     Z
@@ -4686,7 +4686,7 @@
 1B28 D2 2C 1B                    jp      NC, loc_0_1B2C
 1B2B 35                          dec     (hl)                                    ; set as normal ladder
 1B2C             
-1B2C             loc_0_1B2C:                                                     ; CODE XREF: sub_0_1AC3+65j
+1B2C             loc_0_1B2C:                                                     ; CODE XREF: handle_mario_movement+65j
 1B2C F1                          pop     af
 1B2D A7                          and     a
 1B2E CA 4E 1B                    jp      Z, loc_0_1B4E
@@ -4698,22 +4698,22 @@
 1B36 2C                          inc     l                                       ; set top coordinate of ladder
 1B37 70                          ld      (hl), b                                 ; set bottom Y coordinate of ladder
 1B38             
-1B38             loc_0_1B38:                                                     ; CODE XREF: sub_0_1AC3+19j
+1B38             check_up_down_inputs:                                           ; CODE XREF: handle_mario_movement+19j
 1B38 3A 10 60                    ld      a, (controller_in)
 1B3B CB 5F                       bit     3, a                                    ; down?
-1B3D C2 F2 1C                    jp      NZ, loc_0_1CF2                          ; yes, go
+1B3D C2 F2 1C                    jp      NZ, mario_down                          ; yes, go
 1B40 3A 15 62                    ld      a, (mario_climbing)
 1B43 A7                          and     a
 1B44 C8                          ret     Z
 1B45             
-1B45             loc_0_1B45:                                                     ; CODE XREF: sub_0_1AC3+8Fj
+1B45             loc_0_1B45:                                                     ; CODE XREF: handle_mario_movement+8Fj
 1B45 3A 10 60                    ld      a, (controller_in)
 1B48 CB 57                       bit     2, a                                    ; up?
-1B4A C2 03 1D                    jp      NZ, loc_0_1D03                          ; yes, go
+1B4A C2 03 1D                    jp      NZ, mario_up                            ; yes, go
 1B4D C9                          ret     
 1B4E             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1B4E             
-1B4E             loc_0_1B4E:                                                     ; CODE XREF: sub_0_1AC3+6Bj
+1B4E             loc_0_1B4E:                                                     ; CODE XREF: handle_mario_movement+6Bj
 1B4E 2C                          inc     l
 1B4F 70                          ld      (hl), b
 1B50 2C                          inc     l                                       ; set top Y corordinate of ladder
@@ -4721,7 +4721,7 @@
 1B52 C3 45 1B                    jp      loc_0_1B45
 1B55             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1B55             
-1B55             loc_0_1B55:                                                     ; CODE XREF: sub_0_1AC3+Bj
+1B55             loc_0_1B55:                                                     ; CODE XREF: handle_mario_movement+Bj
 1B55 21 1E 62                    ld      hl, #unk_0_621E
 1B58 35                          dec     (hl)
 1B59 C0                          ret     NZ
@@ -4736,7 +4736,7 @@
 1B6B C3 A6 1D                    jp      update_mario_sprite_registers
 1B6E             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1B6E             
-1B6E             loc_0_1B6E:                                                     ; CODE XREF: sub_0_1AC3+20j
+1B6E             mario_jump:                                                     ; CODE XREF: handle_mario_movement+20j
 1B6E 3E 01                       ld      a, #1                                   ; start_jump
 1B70 32 16 62                    ld      (mario_jumping), a                      ; set mario jumping
 1B73 21 10 62                    ld      hl, #unk_0_6210
@@ -4749,8 +4749,8 @@
 1B84 DA 8A 1B                    jp      C, loc_0_1B8A                           ; yes, skip
 1B87 01 00 00                    ld      bc, #0
 1B8A             
-1B8A             loc_0_1B8A:                                                     ; CODE XREF: sub_0_1AC3+BAj
-1B8A AF                                                                          ; sub_0_1AC3+C1j
+1B8A             loc_0_1B8A:                                                     ; CODE XREF: handle_mario_movement+BAj
+1B8A AF                                                                          ; handle_mario_movement+C1j
 1B8A                             xor     a
 1B8B 70                          ld      (hl), b
 1B8C 2C                          inc     l
@@ -4774,21 +4774,21 @@
 1BB1 C9                          ret     
 1BB2             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1BB2             
-1BB2             loc_0_1BB2:                                                     ; CODE XREF: sub_0_1AC3+4j
+1BB2             loc_0_1BB2:                                                     ; CODE XREF: handle_mario_movement+4j
 1BB2 DD 21 00 62                 ld      ix, #mario_alive_flag
 1BB6 3A 03 62                    ld      a, (mario_y)
 1BB9 DD 77 0B                    ld      0xB(ix), a                              ; store X position before a jump
 1BBC 3A 05 62                    ld      a, (mario_x)
 1BBF DD 77 0C                    ld      0xC(ix), a                              ; store Y position before a jump
 1BC2 CD 9C 23                    call    sub_0_239C
-1BC5 CD 1F 24                    call    sub_0_241F
+1BC5 CD 1F 24                    call    check_screen_edges
 1BC8 15                          dec     d
 1BC9 C2 F2 1B                    jp      NZ, loc_0_1BF2
 1BCC DD 36 10 00                 ld      0x10(ix), #0
 1BD0 DD 36 11 80                 ld      0x11(ix), #0x80 ; '€'
 1BD4 DD CB 07 FE                 set     7, 7(ix)                                ; h-flip sprite
 1BD8             
-1BD8             loc_0_1BD8:                                                     ; CODE XREF: sub_0_1AC3+13Fj
+1BD8             loc_0_1BD8:                                                     ; CODE XREF: handle_mario_movement+13Fj
 1BD8 3A 20 62                    ld      a, (unk_0_6220)
 1BDB 3D                          dec     a
 1BDC CA EC 1B                    jp      Z, loc_0_1BEC
@@ -4797,12 +4797,12 @@
 1BE5 DD 75 13                    ld      0x13(ix), l
 1BE8 DD 36 14 00                 ld      0x14(ix), #0
 1BEC             
-1BEC             loc_0_1BEC:                                                     ; CODE XREF: sub_0_1AC3+119j
+1BEC             loc_0_1BEC:                                                     ; CODE XREF: handle_mario_movement+119j
 1BEC CD 9C 23                    call    sub_0_239C
 1BEF C3 05 1C                    jp      loc_0_1C05
 1BF2             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1BF2             
-1BF2             loc_0_1BF2:                                                     ; CODE XREF: sub_0_1AC3+106j
+1BF2             loc_0_1BF2:                                                     ; CODE XREF: handle_mario_movement+106j
 1BF2 1D                          dec     e
 1BF3 C2 05 1C                    jp      NZ, loc_0_1C05
 1BF6 DD 36 10 FF                 ld      0x10(ix), #0xFF
@@ -4811,8 +4811,8 @@
 1C02 C3 D8 1B                    jp      loc_0_1BD8
 1C05             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1C05             
-1C05             loc_0_1C05:                                                     ; CODE XREF: sub_0_1AC3+12Cj
-1C05 CD 1C 2B                                                                    ; sub_0_1AC3+130j
+1C05             loc_0_1C05:                                                     ; CODE XREF: handle_mario_movement+12Cj
+1C05 CD 1C 2B                                                                    ; handle_mario_movement+130j
 1C05                             call    sub_0_2B1C
 1C08 3D                          dec     a                                       ; are we jumping?
 1C09 CA 3A 1C                    jp      Z, loc_0_1C3A
@@ -4833,13 +4833,13 @@
 1C2F 32 25 62                    ld      (unk_0_6225), a
 1C32 00                          nop     
 1C33             
-1C33             loc_0_1C33:                                                     ; CODE XREF: sub_0_1AC3+155j
+1C33             loc_0_1C33:                                                     ; CODE XREF: handle_mario_movement+155j
 1C33 3C                          inc     a
 1C34 CC 54 29                    call    Z, sub_0_2954
 1C37 C3 A6 1D                    jp      update_mario_sprite_registers
 1C3A             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1C3A             
-1C3A             loc_0_1C3A:                                                     ; CODE XREF: sub_0_1AC3+146j
+1C3A             loc_0_1C3A:                                                     ; CODE XREF: handle_mario_movement+146j
 1C3A 05                          dec     b
 1C3B CA 4F 1C                    jp      Z, loc_0_1C4F
 1C3E 3C                          inc     a
@@ -4848,14 +4848,14 @@
 1C43 21 10 62                    ld      hl, #0x6210
 1C46 06 05                       ld      b, #5
 1C48             
-1C48             loc_0_1C48:                                                     ; CODE XREF: sub_0_1AC3+187j
+1C48             loc_0_1C48:                                                     ; CODE XREF: handle_mario_movement+187j
 1C48 77                          ld      (hl), a
 1C49 2C                          inc     l
 1C4A 10 FC                       djnz    loc_0_1C48
 1C4C C3 A6 1D                    jp      update_mario_sprite_registers
 1C4F             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1C4F             
-1C4F             loc_0_1C4F:                                                     ; CODE XREF: sub_0_1AC3+178j
+1C4F             loc_0_1C4F:                                                     ; CODE XREF: handle_mario_movement+178j
 1C4F 32 16 62                    ld      (mario_jumping), a
 1C52 3A 20 62                    ld      a, (unk_0_6220)
 1C55 EE 01                       xor     #1
@@ -4875,7 +4875,7 @@
 1C73 C3 A6 1D                    jp      update_mario_sprite_registers
 1C76             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1C76             
-1C76             loc_0_1C76:                                                     ; CODE XREF: sub_0_1AC3+14Dj
+1C76             loc_0_1C76:                                                     ; CODE XREF: handle_mario_movement+14Dj
 1C76 3A 05 62                    ld      a, (mario_x)
 1C79 21 0E 62                    ld      hl, #unk_0_620E
 1C7C D6 0F                       sub     #0xF
@@ -4888,7 +4888,7 @@
 1C8C C3 A6 1D                    jp      update_mario_sprite_registers
 1C8F             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1C8F             
-1C8F             mario_right:                                                    ; CODE XREF: sub_0_1AC3+2Fj
+1C8F             mario_right:                                                    ; CODE XREF: handle_mario_movement+2Fj
 1C8F 06 01                       ld      b, #1                                   ; dY
 1C91 3A 0F 62                    ld      a, (mario_cell_animate_cntr)
 1C94 A7                          and     a                                       ; time for next sprite?
@@ -4903,7 +4903,7 @@
 1CA8 C3 C2 1C                    jp      update_mario_lr_sprite_data
 1CAB             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1CAB             
-1CAB             mario_left:                                                     ; CODE XREF: sub_0_1AC3+38j
+1CAB             mario_left:                                                     ; CODE XREF: handle_mario_movement+38j
 1CAB 06 FF                       ld      b, #0xFF                                ; dY
 1CAD 3A 0F 62                    ld      a, (mario_cell_animate_cntr)
 1CB0 A7                          and     a                                       ; time for next sprite?
@@ -4915,7 +4915,7 @@
 1CBD 32 02 62                    ld      (mario_animation_cell), a               ; update current cell #
 1CC0 E6 03                       and     #3
 1CC2             
-1CC2             update_mario_lr_sprite_data:                                    ; CODE XREF: sub_0_1AC3+1E5j
+1CC2             update_mario_lr_sprite_data:                                    ; CODE XREF: handle_mario_movement+1E5j
 1CC2 21 07 62                    ld      hl, #mario_flipy_tile
 1CC5 77                          ld      (hl), a                                 ; set mario sprite
 1CC6 1F                          rra                                             ; time to play walking sound?
@@ -4925,8 +4925,8 @@
 1CCF C3 A6 1D                    jp      update_mario_sprite_registers
 1CD2             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1CD2             
-1CD2             move_mario_left_right:                                          ; CODE XREF: sub_0_1AC3+1D2j
-1CD2 21 03 62                                                                    ; sub_0_1AC3+1EEj
+1CD2             move_mario_left_right:                                          ; CODE XREF: handle_mario_movement+1D2j
+1CD2 21 03 62                                                                    ; handle_mario_movement+1EEj
 1CD2                             ld      hl, #mario_y
 1CD5 7E                          ld      a, (hl)
 1CD6 80                          add     a, b                                    ; add delta value
@@ -4941,13 +4941,13 @@
 1CE7 7D                          ld      a, l                                    ; adjusted X
 1CE8 32 05 62                    ld      (mario_x), a                            ; store
 1CEB             
-1CEB             loc_0_1CEB:                                                     ; CODE XREF: sub_0_1AC3+219j
+1CEB             loc_0_1CEB:                                                     ; CODE XREF: handle_mario_movement+219j
 1CEB 21 0F 62                    ld      hl, #mario_cell_animate_cntr
 1CEE 35                          dec     (hl)
 1CEF C3 A6 1D                    jp      update_mario_sprite_registers
 1CF2             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1CF2             
-1CF2             loc_0_1CF2:                                                     ; CODE XREF: sub_0_1AC3+7Aj
+1CF2             mario_down:                                                     ; CODE XREF: handle_mario_movement+7Aj
 1CF2 3A 0F 62                    ld      a, (mario_cell_animate_cntr)            ; check timer
 1CF5 A7                          and     a                                       ; expired?
 1CF6 C2 8A 1D                    jp      NZ, loc_0_1D8A                          ; no, skip
@@ -4957,7 +4957,7 @@
 1D00 C3 11 1D                    jp      loc_0_1D11
 1D03             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1D03             
-1D03             loc_0_1D03:                                                     ; CODE XREF: sub_0_1AC3+87j
+1D03             mario_up:                                                       ; CODE XREF: handle_mario_movement+87j
 1D03 3A 0F 62                    ld      a, (mario_cell_animate_cntr)            ; check timer
 1D06 A7                          and     a                                       ; expired?
 1D07 C2 76 1D                    jp      NZ, loc_0_1D76                          ; no, skip
@@ -4965,7 +4965,7 @@
 1D0C 32 0F 62                    ld      (mario_cell_animate_cntr), a            ; reset timer
 1D0F 3E FE                       ld      a, #0xFE ; 'ş'
 1D11             
-1D11             loc_0_1D11:                                                     ; CODE XREF: sub_0_1AC3+23Dj
+1D11             loc_0_1D11:                                                     ; CODE XREF: handle_mario_movement+23Dj
 1D11 21 05 62                    ld      hl, #mario_x
 1D14 86                          add     a, (hl)
 1D15 77                          ld      (hl), a
@@ -4990,8 +4990,8 @@
 1D3B CA 3F 1D                    jp      Z, loc_0_1D3F
 1D3E 05                          dec     b
 1D3F             
-1D3F             loc_0_1D3F:                                                     ; CODE XREF: sub_0_1AC3+272j
-1D3F 3E 80                                                                       ; sub_0_1AC3+278j
+1D3F             loc_0_1D3F:                                                     ; CODE XREF: handle_mario_movement+272j
+1D3F 3E 80                                                                       ; handle_mario_movement+278j
 1D3F                             ld      a, #0x80 ; '€'
 1D41 21 07 62                    ld      hl, #mario_flipy_tile
 1D44 A6                          and     (hl)
@@ -4999,13 +4999,13 @@
 1D47 B0                          or      b
 1D48 77                          ld      (hl), a
 1D49             
-1D49             loc_0_1D49:                                                     ; CODE XREF: sub_0_1AC3+2A1j
+1D49             loc_0_1D49:                                                     ; CODE XREF: handle_mario_movement+2A1j
 1D49 3E 01                       ld      a, #1                                   ; flag mario climbing a ladder
 1D4B 32 15 62                    ld      (mario_climbing), a
 1D4E C3 A6 1D                    jp      update_mario_sprite_registers
 1D51             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1D51             
-1D51             loc_0_1D51:                                                     ; CODE XREF: sub_0_1AC3+25Cj
+1D51             loc_0_1D51:                                                     ; CODE XREF: handle_mario_movement+25Cj
 1D51 2D                          dec     l
 1D52 2D                          dec     l
 1D53 7E                          ld      a, (hl)
@@ -5019,8 +5019,8 @@
 1D64 C3 49 1D                    jp      loc_0_1D49
 1D67             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1D67             
-1D67             loc_0_1D67:                                                     ; CODE XREF: sub_0_1AC3+266j
-1D67 3E 06                                                                       ; sub_0_1AC3+26Bj
+1D67             loc_0_1D67:                                                     ; CODE XREF: handle_mario_movement+266j
+1D67 3E 06                                                                       ; handle_mario_movement+26Bj
 1D67                             ld      a, #6                                   ; mario climbing character
 1D69 32 07 62                    ld      (mario_flipy_tile), a
 1D6C AF                          xor     a
@@ -5029,7 +5029,7 @@
 1D73 C3 A6 1D                    jp      update_mario_sprite_registers
 1D76             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1D76             
-1D76             loc_0_1D76:                                                     ; CODE XREF: sub_0_1AC3+244j
+1D76             loc_0_1D76:                                                     ; CODE XREF: handle_mario_movement+244j
 1D76 3A 1A 62                    ld      a, (unk_0_621A)
 1D79 A7                          and     a
 1D7A CA 8A 1D                    jp      Z, loc_0_1D8A
@@ -5040,19 +5040,19 @@
 1D88 BE                          cp      (hl)
 1D89 D0                          ret     NC
 1D8A             
-1D8A             loc_0_1D8A:                                                     ; CODE XREF: sub_0_1AC3+233j
-1D8A 21 0F 62                                                                    ; sub_0_1AC3+2B7j
+1D8A             loc_0_1D8A:                                                     ; CODE XREF: handle_mario_movement+233j
+1D8A 21 0F 62                                                                    ; handle_mario_movement+2B7j
 1D8A                             ld      hl, #mario_cell_animate_cntr
 1D8D 35                          dec     (hl)
 1D8E C9                          ret     
-1D8E             ; End of function sub_0_1AC3
+1D8E             ; End of function handle_mario_movement
 1D8E             
 1D8F             
 1D8F             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 1D8F             
 1D8F             
-1D8F             play_walking_sound:                                             ; CODE XREF: sub_0_1AC3+204p
-1D8F 3E 03                                                                       ; sub_0_1AC3+29Ep
+1D8F             play_walking_sound:                                             ; CODE XREF: handle_mario_movement+204p
+1D8F 3E 03                                                                       ; handle_mario_movement+29Ep
 1D8F                             ld      a, #3                                   ; tmr=3
 1D91 32 80 60                    ld      (digital_snd_tmr_walk), a
 1D94 C9                          ret     
@@ -5063,7 +5063,7 @@
 1D95             
 1D95             
 1D95             sub_0_1D95:                                                     ; CODE XREF: sub_0_1A33+86p
-1D95 32 25 62                                                                    ; sub_0_1AC3+1ADp
+1D95 32 25 62                                                                    ; handle_mario_movement+1ADp
 1D95                             ld      (unk_0_6225), a
 1D98 3A 27 62                    ld      a, (level_type)
 1D9B 3D                          dec     a
@@ -5077,8 +5077,8 @@
 1DA5             
 1DA6             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1DA6             
-1DA6             update_mario_sprite_registers:                                  ; CODE XREF: sub_0_1AC3+A8j
-1DA6 21 4C 69                                                                    ; sub_0_1AC3+161j ...
+1DA6             update_mario_sprite_registers:                                  ; CODE XREF: handle_mario_movement+A8j
+1DA6 21 4C 69                                                                    ; handle_mario_movement+161j ...
 1DA6                             ld      hl, #soft_sprite_ram+0x4C               ; sprite #19
 1DA9 3A 03 62                    ld      a, (mario_y)
 1DAC 77                          ld      (hl), a
@@ -5770,21 +5770,21 @@
 21CD 77                          ld      (hl), a
 21CE C3 8D 1F                    jp      loc_0_1F8D
 21CE             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-21D1 80 FE       attract_mario_inputs:.dw 0xFE80                                 ; DATA XREF: next_attract_actiono
+21D1 80 FE       attract_mario_inputs:.db 0x80, 0xFE                             ; DATA XREF: next_attract_actiono
 21D1                                                                             ; 1st byte is input, 2nd is timer
-21D3 01 C0                       .dw 0xC001
-21D5 04 50                       .dw 0x5004
-21D7 02 10                       .dw 0x1002
-21D9 82 60                       .dw 0x6082
-21DB 02 10                       .dw 0x1002
-21DD 82 CA                       .dw 0xCA82
-21DF 01 10                       .dw 0x1001
-21E1 81 FF                       .dw 0xFF81
-21E3 02 38                       .dw 0x3802
-21E5 01 80                       .dw 0x8001
-21E7 02 FF                       .dw 0xFF02
-21E9 04 80                       .dw 0x8004
-21EB 04 60                       .dw 0x6004
+21D3 01 C0                       .db 1, 0xC0
+21D5 04 50                       .db 4, 0x50
+21D7 02 10                       .db 2, 0x10
+21D9 82 60                       .db 0x82, 0x60
+21DB 02 10                       .db 2, 0x10
+21DD 82 CA                       .db 0x82, 0xCA
+21DF 01 10                       .db 1, 0x10
+21E1 81 FF                       .db 0x81, 0xFF
+21E3 02 38                       .db 2, 0x38
+21E5 01 80                       .db 1, 0x80
+21E7 02 FF                       .db 2, 0xFF
+21E9 04 80                       .db 4, 0x80
+21EB 04 60                       .db 4, 0x60
 21ED 80                          .db 0x80
 21EE             
 21EE             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
@@ -6065,7 +6065,7 @@
 2333             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 2333             
 2333             
-2333             adjust_height_on_girders:                                       ; CODE XREF: sub_0_1AC3+221p
+2333             adjust_height_on_girders:                                       ; CODE XREF: handle_mario_movement+221p
 2333 3E 0F                                                                       ; sub_0_1F72+95p ...
 2333                             ld      a, #0xF
 2335 A4                          and     h                                       ; Y
@@ -6125,7 +6125,7 @@
 236E             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 236E             
 236E             
-236E             sub_0_236E:                                                     ; CODE XREF: sub_0_1AC3+50p
+236E             sub_0_236E:                                                     ; CODE XREF: handle_mario_movement+50p
 236E 21 00 63                                                                    ; sub_0_216Dp ...
 236E                             ld      hl, #unk_0_6300
 2371             
@@ -6174,8 +6174,8 @@
 239C             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 239C             
 239C             
-239C             sub_0_239C:                                                     ; CODE XREF: sub_0_1AC3+FFp
-239C DD 7E 04                                                                    ; sub_0_1AC3+129p ...
+239C             sub_0_239C:                                                     ; CODE XREF: handle_mario_movement+FFp
+239C DD 7E 04                                                                    ; handle_mario_movement+129p ...
 239C                             ld      a, 4(ix)
 239F DD 86 11                    add     a, 0x11(ix)
 23A2 DD 77 04                    ld      4(ix), a
@@ -6241,7 +6241,7 @@
 2407             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 2407             
 2407             
-2407             sub_0_2407:                                                     ; CODE XREF: sub_0_1AC3+11Cp
+2407             sub_0_2407:                                                     ; CODE XREF: handle_mario_movement+11Cp
 2407 DD 7E 14                                                                    ; sub_0_1F72+151p ...
 2407                             ld      a, 0x14(ix)
 240A 07                          rlca    
@@ -6264,29 +6264,29 @@
 241F             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 241F             
 241F             
-241F             sub_0_241F:                                                     ; CODE XREF: sub_0_1AC3+23p
-241F 11 00 01                                                                    ; sub_0_1AC3+102p ...
-241F                             ld      de, #0x100
+241F             check_screen_edges:                                             ; CODE XREF: handle_mario_movement+23p
+241F 11 00 01                                                                    ; handle_mario_movement+102p ...
+241F                             ld      de, #0x100                              ; flag left=NO, right=OK
 2422 3A 03 62                    ld      a, (mario_y)
-2425 FE 16                       cp      #0x16
-2427 D8                          ret     C
-2428 15                          dec     d
-2429 1C                          inc     e
-242A FE EA                       cp      #0xEA ; 'ê'
-242C D0                          ret     NC
-242D 1D                          dec     e
+2425 FE 16                       cp      #0x16                                   ; left edge?
+2427 D8                          ret     C                                       ; yes, exit
+2428 15                          dec     d                                       ; flag left=OK
+2429 1C                          inc     e                                       ; flag right=NO
+242A FE EA                       cp      #0xEA ; 'ê'                             ; right edge?
+242C D0                          ret     NC                                      ; yes, exit
+242D 1D                          dec     e                                       ; flag right=OK
 242E 3A 27 62                    ld      a, (level_type)
-2431 0F                          rrca    
-2432 D0                          ret     NC
+2431 0F                          rrca                                            ; level type 1/3?
+2432 D0                          ret     NC                                      ; no, exit
 2433 3A 05 62                    ld      a, (mario_x)
 2436 FE 58                       cp      #0x58 ; 'X'
 2438 D0                          ret     NC
 2439 3A 03 62                    ld      a, (mario_y)
 243C FE 6C                       cp      #0x6C ; 'l'
 243E D0                          ret     NC
-243F 14                          inc     d
+243F 14                          inc     d                                       ; flag left=NO
 2440 C9                          ret     
-2440             ; End of function sub_0_241F
+2440             ; End of function check_screen_edges
 2440             
 2441             
 2441             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
@@ -7032,7 +7032,7 @@
 2853             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 2853             
 2853             
-2853             sub_0_2853:                                                     ; CODE XREF: sub_0_1AC3+15Dp
+2853             sub_0_2853:                                                     ; CODE XREF: handle_mario_movement+15Dp
 2853 FD 21 00 62                 ld      iy, #mario_alive_flag
 2857 3A 05 62                    ld      a, (mario_x)
 285A             
@@ -7201,7 +7201,7 @@
 2954             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 2954             
 2954             
-2954             sub_0_2954:                                                     ; CODE XREF: sub_0_1AC3+171p
+2954             sub_0_2954:                                                     ; CODE XREF: handle_mario_movement+171p
 2954 3E 0B                       ld      a, #0xB
 2956 F7                          rst     0x30                                    ; return if level bit not set
 2957 CD 74 29                    call    sub_0_2974
@@ -7529,7 +7529,7 @@
 2B02                             add     a, b
 2B03 32 03 62                    ld      (mario_y), a
 2B06 32 4C 69                    ld      (soft_sprite_ram+0x4C), a
-2B09 CD 1F 24                    call    sub_0_241F
+2B09 CD 1F 24                    call    check_screen_edges
 2B0C 21 03 62                    ld      hl, #mario_y
 2B0F 1D                          dec     e
 2B10 CA 18 2B                    jp      Z, loc_0_2B18
@@ -7552,7 +7552,7 @@
 2B1C             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 2B1C             
 2B1C             
-2B1C             sub_0_2B1C:                                                     ; CODE XREF: sub_0_1AC3+142p
+2B1C             sub_0_2B1C:                                                     ; CODE XREF: handle_mario_movement+142p
 2B1C DD 21 00 62                 ld      ix, #mario_alive_flag
 2B20 CD 29 2B                    call    sub_0_2B29
 2B23 CD AF 29                    call    sub_0_29AF
@@ -8349,7 +8349,7 @@
 3009             
 3009             
 3009             animate_mario_or_barrel_sprite:                                 ; CODE XREF: 0000:18DFp
-3009 57                                                                          ; sub_0_1AC3+1DBp ...
+3009 57                                                                          ; handle_mario_movement+1DBp ...
 3009                             ld      d, a                                    ; sprite type
 300A 0F                          rrca    
 300B DA 22 30                    jp      C, loc_0_3022
@@ -10138,7 +10138,7 @@
 607F ??                          .ds 1
 6080 ??          digital_snd_tmr_walk:.ds 1                                      ; DATA XREF: update_soundso
 6080                                                                             ; stop_sound+6o ...
-6081 ??          digital_snd_tmr_jump:.ds 1                                      ; DATA XREF: sub_0_1AC3+E9o
+6081 ??          digital_snd_tmr_jump:.ds 1                                      ; DATA XREF: handle_mario_movement+E9o
 6082 ??          digital_snd_tmr_thump:.ds 1                                     ; DATA XREF: animate_kong_and_pauline+52w
 6082                                                                             ; 0000:0B45w ...
 6083 ??          digital_snd_tmr_coin_spring:.ds 1
@@ -10312,8 +10312,8 @@
 6205 ??          mario_x:        .ds 1                                           ; DATA XREF: sub_0_19DA+13r
 6205                                                                             ; sub_0_1A33+22r ...
 6206 ??          unk_0_6206:     .ds 1
-6207 ??          mario_flipy_tile:.ds 1                                          ; DATA XREF: sub_0_1AC3+54o
-6207                                                                             ; sub_0_1AC3+9Do ...
+6207 ??          mario_flipy_tile:.ds 1                                          ; DATA XREF: handle_mario_movement+54o
+6207                                                                             ; handle_mario_movement+9Do ...
 6208 ??          mario_flipx_colour:.ds 1
 6209 ??          unk_0_6209:     .ds 1                                           ; DATA XREF: 0000:0FA5o
 6209                                                                             ; init to 4
@@ -10321,12 +10321,12 @@
 620B ??          mario_x_before_jump:.ds 1
 620C ??          mario_y_before_jump:.ds 1
 620D ??                          .ds 1
-620E ??          unk_0_620E:     .ds 1                                           ; DATA XREF: sub_0_1AC3+E6w
-620E                                                                             ; sub_0_1AC3+1B6o ...
-620F ??          mario_cell_animate_cntr:.ds 1                                   ; DATA XREF: sub_0_1AC3+1CEr
-620F                                                                             ; sub_0_1AC3+1EAr ...
+620E ??          unk_0_620E:     .ds 1                                           ; DATA XREF: handle_mario_movement+E6w
+620E                                                                             ; handle_mario_movement+1B6o ...
+620F ??          mario_cell_animate_cntr:.ds 1                                   ; DATA XREF: handle_mario_movement+1CEr
+620F                                                                             ; handle_mario_movement+1EAr ...
 620F                                                                             ; mario_???
-6210 ??          unk_0_6210:     .ds 1                                           ; DATA XREF: sub_0_1AC3+B0o
+6210 ??          unk_0_6210:     .ds 1                                           ; DATA XREF: handle_mario_movement+B0o
 6210                                                                             ; sub_0_1F46+Fw ...
 6211 ??          unk_0_6211:     .ds 1
 6212 ??          unk_0_6212:     .ds 1
@@ -10337,14 +10337,14 @@
 6217 ??          unk_0_6217:     .ds 1
 6218 ??          unk_0_6218:     .ds 1
 6219 ??          unk_0_6219:     .ds 1
-621A ??          unk_0_621A:     .ds 1                                           ; DATA XREF: sub_0_1AC3+5Do
-621A                                                                             ; sub_0_1AC3+2B3r ...
+621A ??          unk_0_621A:     .ds 1                                           ; DATA XREF: handle_mario_movement+5Do
+621A                                                                             ; handle_mario_movement+2B3r ...
 621B ??                          .ds 1
-621C ??          unk_0_621C:     .ds 1                                           ; DATA XREF: sub_0_1AC3+262o
-621C                                                                             ; sub_0_1AC3+2BDr
+621C ??          unk_0_621C:     .ds 1                                           ; DATA XREF: handle_mario_movement+262o
+621C                                                                             ; handle_mario_movement+2BDr
 621D ??                          .ds 1
-621E ??          unk_0_621E:     .ds 1                                           ; DATA XREF: sub_0_1AC3+7r
-621E                                                                             ; sub_0_1AC3+92o ...
+621E ??          unk_0_621E:     .ds 1                                           ; DATA XREF: handle_mario_movement+7r
+621E                                                                             ; handle_mario_movement+92o ...
 621F ??          unk_0_621F:     .ds 1
 6220 ??          unk_0_6220:     .ds 1
 6221 ??          unk_0_6221:     .ds 1
