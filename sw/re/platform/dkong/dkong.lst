@@ -147,13 +147,13 @@
 004E             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 004E             
 004E             
-004E             copy_sprites_2_11_data:                                         ; CODE XREF: animate_kong_and_pauline+4Dp
+004E             copy_kong_sprite_data:                                          ; CODE XREF: animate_kong_and_pauline+4Dp
 004E 11 08 69                                                                    ; animate_kong_and_pauline+77p ...
 004E                             ld      de, #soft_sprite_ram+8                  ; ptr sprite #2
 0051 01 28 00                    ld      bc, #40                                 ; 10 4-byte sprites to copy
 0054 ED B0                       ldir                                            ; copy 40 bytes of sprite data
 0056 C9                          ret     
-0056             ; End of function copy_sprites_2_11_data
+0056             ; End of function copy_kong_sprite_data
 0056             
 0057             
 0057             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
@@ -883,7 +883,7 @@
 0445 21 F7 39                    ld      hl, #dk_thrash_left_spr
 0448             
 0448             do_kong_thrash:                                                 ; CODE XREF: animate_kong_and_pauline+48j
-0448 CD 4E 00                    call    copy_sprites_2_11_data
+0448 CD 4E 00                    call    copy_kong_sprite_data
 044B 3E 03                       ld      a, #3                                   ; tmr=3
 044D 32 82 60                    ld      (digital_snd_tmr_thump), a
 0450             
@@ -908,7 +908,7 @@
 046B A7                          and     a                                       ; deployment in progess?
 046C C2 86 04                    jp      NZ, animate_pauline                     ; no, continue
 046F 21 5C 38                    ld      hl, #dk_normal_spr
-0472 CD 4E 00                    call    copy_sprites_2_11_data
+0472 CD 4E 00                    call    copy_kong_sprite_data
 0475 C3 50 04                    jp      loc_0_450
 0478             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 0478             
@@ -1601,7 +1601,7 @@
 0812 13                          inc     de                                      ; print_message_1F
 0813 CD 9F 30                    call    queue_fg_vector_fn
 0816 21 CF 39                    ld      hl, #dk_thrash_right_spr
-0819 CD 4E 00                    call    copy_sprites_2_11_data
+0819 CD 4E 00                    call    copy_kong_sprite_data
 081C CD 24 3F                    call    display_tm
 081F 00                          nop     
 0820 21 08 69                    ld      hl, #soft_sprite_ram+8                  ; sprite #2, y coord
@@ -2067,7 +2067,7 @@
 0ABF             draw_climbing_kong:                                             ; DATA XREF: display_1UP+29o
 0ABF DF                          rst     0x18                                    ; wait for 8-bit countdown
 0AC0 21 8C 38                    ld      hl, #dk_climbing_spr
-0AC3 CD 4E 00                    call    copy_sprites_2_11_data
+0AC3 CD 4E 00                    call    copy_kong_sprite_data
 0AC6 21 08 69                    ld      hl, #soft_sprite_ram+8                  ; sprite #2, y coord
 0AC9 0E 30                       ld      c, #48
 0ACB FF                          rst     0x38                                    ; add 48 to y coord for 10 sprites
@@ -2123,7 +2123,7 @@
 0B1E 21 5C 38                    ld      hl, #dk_normal_spr
 0B1E             ; End of function display_1UP
 0B1E             
-0B21 CD 4E 00                    call    copy_sprites_2_11_data
+0B21 CD 4E 00                    call    copy_kong_sprite_data
 0B24 11 00 69                    ld      de, #soft_sprite_ram
 0B27 01 08 00                    ld      bc, #8
 0B2A ED B0                       ldir                                            ; place pauline on girder
@@ -2511,7 +2511,7 @@
 0D6A 23                          inc     hl                                      ; main_sequencer
 0D6B 34                          inc     (hl)                                    ; next sequence (2)
 0D6C 21 5C 38                    ld      hl, #dk_normal_spr
-0D6F CD 4E 00                    call    copy_sprites_2_11_data
+0D6F CD 4E 00                    call    copy_kong_sprite_data
 0D72 11 00 69                    ld      de, #soft_sprite_ram                    ; sprites 0,1
 0D75 01 08 00                    ld      bc, #8                                  ; 8 bytes to copy
 0D78 ED B0                       ldir                                            ; copy pauline sprite
@@ -3872,12 +3872,12 @@
 1615             mario_pauline_reunion:                                          ; DATA XREF: 0000:072Eo
 1615 CD BD 30                    call    hide_object_sprites
 1618 3A 27 62                    ld      a, (level_type)
-161B 0F                          rrca    
-161C D2 2F 16                    jp      NC, loc_0_162F
-161F 3A 88 63                    ld      a, (unk_0_6388)
+161B 0F                          rrca                                            ; level 1/3?
+161C D2 2F 16                    jp      NC, loc_0_162F                          ; no, skip
+161F 3A 88 63                    ld      a, (reunion_sequencer)
 1622 EF                          rst     0x28                                    ; go!
 1622             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-1623 54 16                       .dw loc_0_1654                                  ; Jump table
+1623 54 16                       .dw display_heart_and_adjust_kong               ; Jump table
 1625 70 16                       .dw loc_0_1670
 1627 8A 16                       .dw loc_0_168A
 1629 32 17                       .dw loc_0_1732
@@ -3888,7 +3888,7 @@
 162F             loc_0_162F:                                                     ; CODE XREF: 0000:161Cj
 162F 0F                          rrca    
 1630 D2 41 16                    jp      NC, loc_0_1641
-1633 3A 88 63                    ld      a, (unk_0_6388)
+1633 3A 88 63                    ld      a, (reunion_sequencer)
 1636 EF                          rst     0x28                                    ; go!
 1636             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1637 A3 16                       .dw loc_0_16A3                                  ; Jump table
@@ -3900,7 +3900,7 @@
 1641             
 1641             loc_0_1641:                                                     ; CODE XREF: 0000:1630j
 1641 CD BD 1D                    call    check_and_handle_bonus
-1644 3A 88 63                    ld      a, (unk_0_6388)
+1644 3A 88 63                    ld      a, (reunion_sequencer)
 1647 EF                          rst     0x28                                    ; go1
 1647             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1648 B6 17                       .dw unk_0_17B6                                  ; Jump table
@@ -3911,15 +3911,15 @@
 1652 C6 18                       .dw loc_0_18C6
 1654             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1654             
-1654             loc_0_1654:                                                     ; DATA XREF: 0000:1623o
-1654 CD 08 17                    call    sub_0_1708
+1654             display_heart_and_adjust_kong:                                  ; DATA XREF: 0000:1623o
+1654 CD 08 17                    call    display_heart
 1657 21 5C 38                    ld      hl, #dk_normal_spr
-165A CD 4E 00                    call    copy_sprites_2_11_data
+165A CD 4E 00                    call    copy_kong_sprite_data
 165D 3E 20                       ld      a, #0x20 ; ' '
 165F 32 09 60                    ld      (eight_bit_countdown), a
 1662             
 1662             loc_0_1662:                                                     ; CODE XREF: 0000:16A0j
-1662 21 88 63                    ld      hl, #unk_0_6388
+1662 21 88 63                    ld      hl, #reunion_sequencer
 1665 34                          inc     (hl)
 1666 3E 01                       ld      a, #1
 1668 F7                          rst     0x30                                    ; return if level bit not set
@@ -3932,10 +3932,10 @@
 1670             loc_0_1670:                                                     ; DATA XREF: 0000:1625o
 1670 DF                          rst     0x18                                    ; wait for 8-bit countdown
 1671 21 32 39                    ld      hl, #dk_throw_barrel_spr
-1674 CD 4E 00                    call    copy_sprites_2_11_data
+1674 CD 4E 00                    call    copy_kong_sprite_data
 1677 3E 20                       ld      a, #0x20 ; ' '
 1679 32 09 60                    ld      (eight_bit_countdown), a
-167C 21 88 63                    ld      hl, #unk_0_6388
+167C 21 88 63                    ld      hl, #reunion_sequencer
 167F 34                          inc     (hl)
 1680 3E 04                       ld      a, #4
 1682 F7                          rst     0x30                                    ; return if level bit not set
@@ -3948,7 +3948,7 @@
 168A             loc_0_168A:                                                     ; DATA XREF: 0000:1627o
 168A DF                          rst     0x18                                    ; wait for 8-bit countdown
 168B 21 8C 38                    ld      hl, #dk_climbing_spr
-168E CD 4E 00                    call    copy_sprites_2_11_data
+168E CD 4E 00                    call    copy_kong_sprite_data
 1691 3E 66                       ld      a, #0x66 ; 'f'
 1693 32 0C 69                    ld      (soft_sprite_ram+0xC), a                ; sprite #3, y coord
 1696 AF                          xor     a
@@ -3959,15 +3959,15 @@
 16A3             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 16A3             
 16A3             loc_0_16A3:                                                     ; DATA XREF: 0000:1637o
-16A3 CD 08 17                    call    sub_0_1708
+16A3 CD 08 17                    call    display_heart
 16A6 3A 10 69                    ld      a, (soft_sprite_ram+0x10)               ; sprite #4, y coord
 16A9 D6 3B                       sub     #0x3B ; ';'
 16AB 21 5C 38                    ld      hl, #dk_normal_spr
-16AE CD 4E 00                    call    copy_sprites_2_11_data
+16AE CD 4E 00                    call    copy_kong_sprite_data
 16B1 21 08 69                    ld      hl, #soft_sprite_ram+8                  ; sprite #2, y coord
 16B4 4F                          ld      c, a
 16B5 FF                          rst     0x38                                    ; add C to y coord for 10 sprites
-16B6 21 88 63                    ld      hl, #unk_0_6388
+16B6 21 88 63                    ld      hl, #reunion_sequencer
 16B9 34                          inc     (hl)
 16BA C9                          ret     
 16BB             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -4007,27 +4007,27 @@
 16EE             
 16EE             loc_0_16EE:                                                     ; CODE XREF: 0000:16E3j
 16EE 21 8C 38                    ld      hl, #dk_climbing_spr
-16F1 CD 4E 00                    call    copy_sprites_2_11_data
+16F1 CD 4E 00                    call    copy_kong_sprite_data
 16F4 3E 66                       ld      a, #0x66 ; 'f'
 16F6 32 0C 69                    ld      (soft_sprite_ram+0xC), a                ; sprite #4, x coord
 16F9 AF                          xor     a
 16FA 32 24 69                    ld      (soft_sprite_ram+0x24), a
 16FD 32 2C 69                    ld      (soft_sprite_ram+0x2C), a
 1700 32 AF 62                    ld      (byte_0_62AF), a
-1703 21 88 63                    ld      hl, #unk_0_6388
+1703 21 88 63                    ld      hl, #reunion_sequencer
 1706 34                          inc     (hl)
 1707 C9                          ret     
 1708             
 1708             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 1708             
 1708             
-1708             sub_0_1708:                                                     ; CODE XREF: 0000:1654p
+1708             display_heart:                                                  ; CODE XREF: 0000:1654p
 1708 CD 1C 01                                                                    ; 0000:16A3p
 1708                             call    stop_sound
-170B 21 20 6A                    ld      hl, #soft_sprite_ram+0x120
+170B 21 20 6A                    ld      hl, #soft_sprite_ram+0x120              ; sprite #72
 170E 36 80                       ld      (hl), #0x80 ; '€'
 1710 23                          inc     hl
-1711 36 76                       ld      (hl), #0x76 ; 'v'
+1711 36 76                       ld      (hl), #0x76 ; 'v'                       ; heart sprite
 1713 23                          inc     hl
 1714 36 09                       ld      (hl), #9
 1716 23                          inc     hl
@@ -4036,14 +4036,14 @@
 171C 36 13                       ld      (hl), #0x13                             ; pauline, front-on
 171E 21 C4 75                    ld      hl, #VRAM_start+0x1C4
 1721 11 20 00                    ld      de, #0x20 ; ' '
-1724 3E 10                       ld      a, #0x10
-1726 CD 14 05                    call    display_3_tiles_HL
+1724 3E 10                       ld      a, #0x10                                ; space
+1726 CD 14 05                    call    display_3_tiles_HL                      ; display spaces
 1729 21 8A 60                    ld      hl, #unk_0_608A
 172C 36 07                       ld      (hl), #7
 172E 23                          inc     hl
 172F 36 03                       ld      (hl), #3
 1731 C9                          ret     
-1731             ; End of function sub_0_1708
+1731             ; End of function display_heart
 1731             
 1732             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1732             
@@ -4063,7 +4063,7 @@
 174B 32 2C 69                    ld      (soft_sprite_ram+0x2C), a
 174E 21 21 6A                    ld      hl, #soft_sprite_ram+0x121
 1751 34                          inc     (hl)
-1752 21 88 63                    ld      hl, #unk_0_6388
+1752 21 88 63                    ld      hl, #reunion_sequencer
 1755 34                          inc     (hl)
 1756 C9                          ret     
 1757             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -4077,7 +4077,7 @@
 175F CD 83 17                    call    sub_0_1783
 1762 3E 40                       ld      a, #0x40 ; '@'
 1764 32 09 60                    ld      (eight_bit_countdown), a
-1767 21 88 63                    ld      hl, #unk_0_6388
+1767 21 88 63                    ld      hl, #reunion_sequencer
 176A 34                          inc     (hl)
 176B C9                          ret     
 176C             
@@ -4138,7 +4138,7 @@
 17A3 11 00 05                    ld      de, #0x500                              ; update_bonus_timer (add to score)
 17A6 CD 9F 30                    call    queue_fg_vector_fn
 17A9 AF                          xor     a
-17AA 32 88 63                    ld      (unk_0_6388), a
+17AA 32 88 63                    ld      (reunion_sequencer), a
 17AD 21 09 60                    ld      hl, #eight_bit_countdown
 17B0 36 30                       ld      (hl), #0x30 ; '0'
 17B2 23                          inc     hl
@@ -4175,7 +4175,7 @@
 17FD 11 59 3A                    ld      de, #draw_data_rivet_end4
 1800 CD A7 0D                    call    draw_level_background
 1803 21 5C 38                    ld      hl, #dk_normal_spr
-1806 CD 4E 00                    call    copy_sprites_2_11_data
+1806 CD 4E 00                    call    copy_kong_sprite_data
 1809 21 08 69                    ld      hl, #soft_sprite_ram+8                  ; sprite #2, y coord
 180C 0E 44                       ld      c, #68
 180E FF                          rst     0x38                                    ; add 68 to y coord for 10 sprites
@@ -4185,7 +4185,7 @@
 1816 32 09 60                    ld      (eight_bit_countdown), a
 1819 3E 80                       ld      a, #0x80 ; '€'
 181B 32 90 63                    ld      (kong_thrash_tmr), a
-181E 21 88 63                    ld      hl, #unk_0_6388
+181E 21 88 63                    ld      hl, #reunion_sequencer
 1821 34                          inc     (hl)
 1822 22 C0 63                    ld      (ptr_current_sequence), hl
 1825 C9                          ret     
@@ -4228,7 +4228,7 @@
 184E             
 184E             loc_0_184E:                                                     ; CODE XREF: 0000:1849j
 184E EB                          ex      de, hl
-184F CD 4E 00                    call    copy_sprites_2_11_data
+184F CD 4E 00                    call    copy_kong_sprite_data
 1852 21 08 69                    ld      hl, #soft_sprite_ram+8                  ; sprite #2, y coord
 1855 0E 44                       ld      c, #68
 1857 FF                          rst     0x38                                    ; add 68 to y coord for 10 sprites
@@ -4237,13 +4237,13 @@
 1859             
 1859             loc_0_1859:                                                     ; CODE XREF: 0000:183Dj
 1859 21 5C 38                    ld      hl, #dk_normal_spr
-185C CD 4E 00                    call    copy_sprites_2_11_data
+185C CD 4E 00                    call    copy_kong_sprite_data
 185F 21 08 69                    ld      hl, #soft_sprite_ram+8                  ; sprite #2, y coord
 1862 0E 44                       ld      c, #68
 1864 FF                          rst     0x38                                    ; add 68 to y coord for 10 sprites
 1865 3E 20                       ld      a, #0x20 ; ' '
 1867 32 09 60                    ld      (eight_bit_countdown), a
-186A 21 88 63                    ld      hl, #unk_0_6388
+186A 21 88 63                    ld      hl, #reunion_sequencer
 186D 34                          inc     (hl)
 186E C9                          ret     
 186F             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -4251,10 +4251,10 @@
 186F             loc_0_186F:                                                     ; DATA XREF: 0000:164Eo
 186F DF                          rst     0x18                                    ; wait for 8-bit countdown
 1870 21 1F 3A                    ld      hl, #fk_falling_spr
-1873 CD 4E 00                    call    copy_sprites_2_11_data
+1873 CD 4E 00                    call    copy_kong_sprite_data
 1876 3E 03                       ld      a, #3                                   ; tmr=3
 1878 32 84 60                    ld      (digital_snd_tmr_kong_fall), a
-187B 21 88 63                    ld      hl, #unk_0_6388
+187B 21 88 63                    ld      hl, #reunion_sequencer
 187E 34                          inc     (hl)
 187F C9                          ret     
 1880             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -4288,7 +4288,7 @@
 18B9 32 AF 62                    ld      (byte_0_62AF), a
 18BC 3E 03                       ld      a, #3                                   ; tmr=3
 18BE 32 82 60                    ld      (digital_snd_tmr_thump), a
-18C1 21 88 63                    ld      hl, #unk_0_6388
+18C1 21 88 63                    ld      hl, #reunion_sequencer
 18C4 34                          inc     (hl)
 18C5 C9                          ret     
 18C6             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -4379,7 +4379,7 @@
 1958 CD 9F 30                    call    queue_fg_vector_fn
 195B AF                          xor     a
 195C 32 2E 62                    ld      (height), a
-195F 32 88 63                    ld      (unk_0_6388), a
+195F 32 88 63                    ld      (reunion_sequencer), a
 1962 21 09 60                    ld      hl, #eight_bit_countdown
 1965 36 E0                       ld      (hl), #0xE0 ; 'à'
 1967 23                          inc     hl
@@ -4420,7 +4420,7 @@
 19B0 CD FB 03                    call    animate_kong_and_pauline
 19B3 CD 08 28                    call    sub_0_2808
 19B6 CD 1D 28                    call    sub_0_281D
-19B9 CD 57 1E                    call    sub_0_1E57
+19B9 CD 57 1E                    call    check_end_of_level
 19BC CD 07 1A                    call    sub_0_1A07
 19BF CD CB 2F                    call    sub_0_2FCB
 19C2 00                          nop     
@@ -4584,7 +4584,7 @@
 1A82 A7                          and     a
 1A83 C8                          ret     Z
 1A84 36 00                       ld      (hl), #0
-1A86 21 90 62                    ld      hl, #unk_0_6290
+1A86 21 90 62                    ld      hl, #rivets_remaining
 1A89 35                          dec     (hl)
 1A8A 78                          ld      a, b
 1A8B 01 05 00                    ld      bc, #5
@@ -5212,45 +5212,45 @@
 1E57             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 1E57             
 1E57             
-1E57             sub_0_1E57:                                                     ; CODE XREF: 0000:19B9p
+1E57             check_end_of_level:                                             ; CODE XREF: 0000:19B9p
 1E57 3A 27 62                    ld      a, (level_type)
-1E5A CB 57                       bit     2, a
-1E5C C2 80 1E                    jp      NZ, loc_0_1E80
-1E5F 1F                          rra     
+1E5A CB 57                       bit     2, a                                    ; rivet level?
+1E5C C2 80 1E                    jp      NZ, check_end_of_rivet_level            ; yes, skip
+1E5F 1F                          rra                                             ; level 1/3?
 1E60 3A 05 62                    ld      a, (mario_x)
-1E63 DA 7A 1E                    jp      C, loc_0_1E7A
-1E66 FE 51                       cp      #0x51 ; 'Q'
-1E68 D0                          ret     NC
+1E63 DA 7A 1E                    jp      C, check_end_of_girder_or_evelator      ; yes, skip
+1E66 FE 51                       cp      #0x51 ; 'Q'                             ; top of screen?
+1E68 D0                          ret     NC                                      ; no, exit
 1E69 3A 03 62                    ld      a, (mario_y)
-1E6C 17                          rla     
+1E6C 17                          rla                                             ; which side of screen?
 1E6D             
-1E6D             loc_0_1E6D:                                                     ; CODE XREF: sub_0_1E57+26j
-1E6D 3E 00                       ld      a, #0
-1E6F DA 74 1E                    jp      C, loc_0_1E74
-1E72 3E 80                       ld      a, #0x80 ; '€'
+1E6D             face_mario_to_pauline:                                          ; CODE XREF: check_end_of_level+26j
+1E6D 3E 00                       ld      a, #0                                   ; mario sprite facing left
+1E6F DA 74 1E                    jp      C, loc_0_1E74                           ; right side, skip
+1E72 3E 80                       ld      a, #0x80 ; '€'                          ; set mario flip
 1E74             
-1E74             loc_0_1E74:                                                     ; CODE XREF: sub_0_1E57+18j
-1E74 32 4D 69                    ld      (soft_sprite_ram+0x4D), a
-1E77 C3 85 1E                    jp      loc_0_1E85
+1E74             loc_0_1E74:                                                     ; CODE XREF: check_end_of_level+18j
+1E74 32 4D 69                    ld      (soft_sprite_ram+0x4D), a               ; mario tile_flipy
+1E77 C3 85 1E                    jp      exit_game_loop
 1E7A             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1E7A             
-1E7A             loc_0_1E7A:                                                     ; CODE XREF: sub_0_1E57+Cj
-1E7A FE 31                       cp      #0x31 ; '1'
-1E7C D0                          ret     NC
-1E7D C3 6D 1E                    jp      loc_0_1E6D
+1E7A             check_end_of_girder_or_evelator:                                ; CODE XREF: check_end_of_level+Cj
+1E7A FE 31                       cp      #0x31 ; '1'                             ; top of screen?
+1E7C D0                          ret     NC                                      ; no, exit
+1E7D C3 6D 1E                    jp      face_mario_to_pauline
 1E80             ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 1E80             
-1E80             loc_0_1E80:                                                     ; CODE XREF: sub_0_1E57+5j
-1E80 3A 90 62                    ld      a, (unk_0_6290)
-1E83 A7                          and     a
-1E84 C0                          ret     NZ
+1E80             check_end_of_rivet_level:                                       ; CODE XREF: check_end_of_level+5j
+1E80 3A 90 62                    ld      a, (rivets_remaining)
+1E83 A7                          and     a                                       ; done all rivets?
+1E84 C0                          ret     NZ                                      ; no, exit
 1E85             
-1E85             loc_0_1E85:                                                     ; CODE XREF: sub_0_1E57+20j
+1E85             exit_game_loop:                                                 ; CODE XREF: check_end_of_level+20j
 1E85 3E 16                       ld      a, #0x16
-1E87 32 0A 60                    ld      (main_sequencer), a
-1E8A E1                          pop     hl
+1E87 32 0A 60                    ld      (main_sequencer), a                     ; set next sequence
+1E8A E1                          pop     hl                                      ; discard return address
 1E8B C9                          ret     
-1E8B             ; End of function sub_0_1E57
+1E8B             ; End of function check_end_of_level
 1E8B             
 1E8C             
 1E8C             ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
@@ -7935,7 +7935,7 @@
 2D37 5F                          ld      e, a
 2D38 16 00                       ld      d, #0
 2D3A 19                          add     hl, de
-2D3B CD 4E 00                    call    copy_sprites_2_11_data
+2D3B CD 4E 00                    call    copy_kong_sprite_data
 2D3E 21 8F 63                    ld      hl, #unk_0_638F
 2D41 35                          dec     (hl)
 2D42 C2 51 2D                    jp      NZ, loc_0_2D51
@@ -8014,7 +8014,7 @@
 2DCA 1A                          ld      a, (de)
 2DCB DD 77 05                    ld      5(ix), a
 2DCE 21 5C 38                    ld      hl, #dk_normal_spr
-2DD1 CD 4E 00                    call    copy_sprites_2_11_data
+2DD1 CD 4E 00                    call    copy_kong_sprite_data
 2DD4 21 0B 69                    ld      hl, #soft_sprite_ram+0xB                ; sprite #2, x coord
 2DD7 0E FC                       ld      c, #0xFC ; 'ü'                          ; -4
 2DD9 FF                          rst     0x38                                    ; subtract 4 from x coord for 10 sprites
@@ -9532,20 +9532,37 @@
 38DC 04 DF A8 20+                .db 0x68, 4, 0x3F, 0x70, 0x20, 0x70, 2, 0xDF, 0x6E, 0x20
 38DC A8 04 5F B0+                .db 0x79, 0xAA
 392C 02 DF 58 A0+draw_data_bend_girders_1:.db 2, 0xDF, 0x58, 0xA0, 0x55, 0xAA    ; DATA XREF: 0000:0B48o
-3932 00 70 08 44+dk_throw_barrel_spr:.db 0, 0x70, 8, 0x44, 0x2B, 0xAC, 8, 0x4C, 0x3B, 0xAE
-3932 2B AC 08 4C+                                                                ; DATA XREF: 0000:1671o
-3932 3B AE 08 4C+                                                                ; sub_0_2C8F+95o
-3932 3B AF 08 3C+                .db 8, 0x4C, 0x3B, 0xAF, 8, 0x3C, 0x4B, 0xB0, 7, 0x3C
-3932 4B B0 07 3C+                .db 0x4B, 0xAD, 8, 0x4C, 0, 0x70, 8, 0x44, 0, 0x70, 8
-3932 4B AD 08 4C+                .db 0x44, 0, 0x70, 8, 0x44, 0, 0x70, 0xA, 0x44, 0x47, 0x27
-3932 00 70 08 44+                .db 8, 0x4C, 0x2F, 0xA7, 8, 0x4C, 0x3B, 0x25, 8, 0x4C
-3932 00 70 08 44+                .db 0, 0x70, 8, 0x44, 0x3B, 0x23, 7, 0x3C, 0x4B, 0x2A
-3932 00 70 08 44+                .db 8, 0x3C, 0x4B, 0x2B, 8, 0x4C, 0x2B, 0xAA, 8, 0x3C
-3932 00 70 0A 44+                .db 0x2B, 0xAB, 8, 0x4C, 0, 0x70, 0xA, 0x44, 0, 0x70, 8
-3932 47 27 08 4C+                .db 0x44, 0x4B, 0x2C, 8, 0x4C, 0x3B, 0x2E, 8, 0x4C, 0x3B
-3932 2F A7 08 4C+                .db 0x2F, 8, 0x3C, 0x2B, 0x30, 7, 0x3C, 0x2B, 0x2D, 8
-3932 3B 25 08 4C+                .db 0x4C, 0, 0x70, 8, 0x44, 0, 0x70, 8, 0x44, 0, 0x70
-3932 00 70 08 44+                .db 8, 0x44, 0, 0x70, 0xA, 0x44
+3932 00 70 08 44 dk_throw_barrel_spr:.db 0, 0x70, 8, 0x44                        ; DATA XREF: 0000:1671o
+3932                                                                             ; sub_0_2C8F+95o
+3936 2B AC 08 4C                 .db 0x2B, 0xAC, 8, 0x4C
+393A 3B AE 08 4C                 .db 0x3B, 0xAE, 8, 0x4C
+393E 3B AF 08 3C                 .db 0x3B, 0xAF, 8, 0x3C
+3942 4B B0 07 3C                 .db 0x4B, 0xB0, 7, 0x3C
+3946 4B AD 08 4C                 .db 0x4B, 0xAD, 8, 0x4C
+394A 00 70 08 44                 .db 0, 0x70, 8, 0x44
+394E 00 70 08 44                 .db 0, 0x70, 8, 0x44
+3952 00 70 08 44                 .db 0, 0x70, 8, 0x44
+3956 00 70 0A 44                 .db 0, 0x70, 0xA, 0x44
+395A 47 27 08 4C                 .db 0x47, 0x27, 8, 0x4C
+395E 2F A7 08 4C                 .db 0x2F, 0xA7, 8, 0x4C
+3962 3B 25 08 4C                 .db 0x3B, 0x25, 8, 0x4C
+3966 00 70 08 44                 .db 0, 0x70, 8, 0x44
+396A 3B 23 07 3C                 .db 0x3B, 0x23, 7, 0x3C
+396E 4B 2A 08 3C                 .db 0x4B, 0x2A, 8, 0x3C
+3972 4B 2B 08 4C                 .db 0x4B, 0x2B, 8, 0x4C
+3976 2B AA 08 3C                 .db 0x2B, 0xAA, 8, 0x3C
+397A 2B AB 08 4C                 .db 0x2B, 0xAB, 8, 0x4C
+397E 00 70 0A 44                 .db 0, 0x70, 0xA, 0x44
+3982 00 70 08 44                 .db 0, 0x70, 8, 0x44
+3986 4B 2C 08 4C                 .db 0x4B, 0x2C, 8, 0x4C
+398A 3B 2E 08 4C                 .db 0x3B, 0x2E, 8, 0x4C
+398E 3B 2F 08 3C                 .db 0x3B, 0x2F, 8, 0x3C
+3992 2B 30 07 3C                 .db 0x2B, 0x30, 7, 0x3C
+3996 2B 2D 08 4C                 .db 0x2B, 0x2D, 8, 0x4C
+399A 00 70 08 44                 .db 0, 0x70, 8, 0x44
+399E 00 70 08 44                 .db 0, 0x70, 8, 0x44
+39A2 00 70 08 44                 .db 0, 0x70, 8, 0x44
+39A6 00 70 0A 44                 .db 0, 0x70, 0xA, 0x44
 39AA FD FD FD FE+bouncing_spring_data:.db 0xFD, 0xFD, 0xFD, 0xFE, 0xFE, 0xFE, 0xFE, 0xFF, 0xFF
 39AA FE FE FE FF+                                                                ; DATA XREF: sub_0_2E04+98o
 39AA FF 00 FF 00+                                                                ; sub_0_2E04+C4o
@@ -10464,8 +10481,8 @@
 628D ??                          .ds 1
 628E ??                          .ds 1
 628F ??                          .ds 1
-6290 ??          unk_0_6290:     .ds 1                                           ; DATA XREF: sub_0_1A33+53o
-6290                                                                             ; sub_0_1E57+29r
+6290 ??          rivets_remaining:.ds 1                                          ; DATA XREF: sub_0_1A33+53o
+6290                                                                             ; check_end_of_level+29r
 6291 ??          unk_0_6291:     .ds 1
 6292 ??          unk_0_6292:     .ds 1                                           ; DATA XREF: sub_0_1A33+48o
 6293 ??                          .ds 1
@@ -10666,7 +10683,7 @@
 6385                                                                             ; display_1UP+67o ...
 6386 ??          unk_0_6386:     .ds 1
 6387 ??          unk_0_6387:     .ds 1
-6388 ??          unk_0_6388:     .ds 1                                           ; DATA XREF: 0000:161Fr
+6388 ??          reunion_sequencer:.ds 1                                         ; DATA XREF: 0000:161Fr
 6388                                                                             ; 0000:1633r ...
 6389 ??          unk_0_6389:     .ds 1
 638A ??          title_flash_tmr_1:.ds 1                                         ; DATA XREF: 0000:07CBr
