@@ -41,7 +41,7 @@
 # ========================
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION "9.1 SP2"
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "04:30:36  MAY 19, 2010"
-set_global_assignment -name LAST_QUARTUS_VERSION "12.1 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION "10.1 SP1"
 
 # Pin & Location Assignments
 # ==========================
