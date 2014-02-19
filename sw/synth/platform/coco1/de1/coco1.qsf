@@ -25,7 +25,7 @@
 
 # project-wide assignments
 # ========================
-set_global_assignment -name LAST_QUARTUS_VERSION "10.1 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION "12.1 SP1"
 
 # pin & location assignments
 # ==========================
@@ -525,7 +525,6 @@ set_global_assignment -name AUTO_PACKED_REGISTERS_STRATIX NORMAL
 set_global_assignment -name ENABLE_DRC_SETTINGS OFF
 set_global_assignment -name ENABLE_CLOCK_LATENCY ON
 set_instance_assignment -name GLOBAL_SIGNAL ON -from clock_27 -to *
-set_global_assignment -name USE_TIMEQUEST_TIMING_ANALYZER ON
 set_global_assignment -name SDC_FILE coco1.sdc
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
@@ -596,7 +595,7 @@ set_global_assignment -name SIGNALTAP_FILE cpuif.stp
 set_global_assignment -name SIGNALTAP_FILE pia.stp
 set_global_assignment -name SIGNALTAP_FILE cpu09.stp
 set_global_assignment -name SIGNALTAP_FILE idesd.stp
-set_global_assignment -name QIP_FILE sd_rd_fifo.qip
 set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
 set_global_assignment -name VHDL_SHOW_LMF_MAPPING_MESSAGES OFF
+set_global_assignment -name QIP_FILE sd_rd_fifo.qip
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

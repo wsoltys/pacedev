@@ -848,16 +848,16 @@ begin
     if target_rst = '1' then
       hw_r := hw_cart_bank;
       cart_bank <= hw_cart_bank;
-    elsif rising_edge(clk_57M272) then
-      -- MPI switch changed?
-      if hw_cart_bank /= hw_r then
-        cart_bank <= hw_cart_bank;
-      end if;
-      -- software switch accessed?
-      if cpu_clk_n = '0' and cpu_r_wn = '0' and cpu_a = X"FF7F" then
-        cart_bank <= cpu_d_o(cart_bank'range);
-      end if;
-      hw_r := hw_cart_bank;
+--    elsif rising_edge(clk_57M272) then
+--      -- MPI switch changed?
+--      if hw_cart_bank /= hw_r then
+--        cart_bank <= hw_cart_bank;
+--      end if;
+--      -- software switch accessed?
+--      if cpu_clk_n = '0' and cpu_r_wn = '0' and cpu_a = X"FF7F" then
+--        cart_bank <= cpu_d_o(cart_bank'range);
+--      end if;
+--      hw_r := hw_cart_bank;
     end if;
   end process;
   -- show selected slot on the LEDs

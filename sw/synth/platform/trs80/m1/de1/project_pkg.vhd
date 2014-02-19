@@ -83,13 +83,13 @@ package project_pkg is
   constant TRS80_M1_IS_LNW80                : boolean := (TRS80_M1_ROM(1 to 5) = "lnw80");
   --constant TRS80_M1_LNW80_HIRES_WIDTHAD     : natural := 14;    -- 16KiB
   constant TRS80_M1_LNW80_HIRES_WIDTHAD     : natural := 12;    -- 4KiB
-  constant TRS80_M1_HAS_PCG80               : boolean := (not TRS80_M1_IS_LNW80) and false;
-  constant TRS80_M1_HAS_80GRAFIX            : boolean := (not TRS80_M1_IS_LNW80) and false;
+  constant TRS80_M1_HAS_PCG80               : boolean := (not TRS80_M1_IS_LNW80) and true;
+  constant TRS80_M1_HAS_80GRAFIX            : boolean := (not TRS80_M1_IS_LNW80) and true;
   constant TRS80_M1_HAS_LE18                : boolean := (not TRS80_M1_IS_LNW80) and false;
   constant TRS80_M1_LE18_WIDTHAD            : natural := 14;    -- 16KiB
   --constant TRS80_M1_LE18_WIDTHAD            : natural := 13;    -- 8KiB (half-screen)
   constant TRS80_M1_FDC_SUPPORT             : boolean := true;
-  constant TRS80_M1_HAS_MIKROKOLOR          : boolean := (not TRS80_M1_IS_LNW80) and true;
+  constant TRS80_M1_HAS_MIKROKOLOR          : boolean := (not TRS80_M1_IS_LNW80) and false;
   constant TRS80_M1_HAS_HDD                 : boolean := true;
   
   -- derived: do not edit
