@@ -18,8 +18,7 @@
 ; Segment type: Regular
 ; segment 'video'
         .org 0x3C00
-video_ram:.ds 0x400                     ; DATA XREF: update_bullet+84o
-                                        ; update_bullet+91o ...
+video_ram:.ds 0x400
 ; end of 'video'
 
 ; ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
@@ -27,30 +26,18 @@ video_ram:.ds 0x400                     ; DATA XREF: update_bullet+84o
 ; Segment type: Regular
 ; segment 'ram'
         .org 0x4300
-fire_throttle:.ds 1                     ; DATA XREF: handle_fire+5r
-                                        ; handle_fire+Cw ...
-invaders_left:.ds 1                     ; DATA XREF: update_bullet+62r
-                                        ; update_bullet+69w ...
-row_1_invader_addr:.ds 2                ; DATA XREF: animate_invaders+2r
-                                        ; find_end_of_lowest_invader_row+15r ...
-row_2_invader_addr:.ds 2                ; DATA XREF: animate_invaders+13r
-                                        ; find_end_of_lowest_invader_row+Er ...
-row_3_invader_addr:.ds 2                ; DATA XREF: animate_invaders+19r
-                                        ; find_end_of_lowest_invader_row+7r ...
-row_4_invader_addr:.ds 2                ; DATA XREF: animate_invaders+1Fr
-                                        ; find_end_of_lowest_invader_rowr ...
-invader_dir:.ds 1                       ; DATA XREF: code:49DCw
-                                        ; animate_and_move_invaders+3r ...
-ufo_TTL:.ds 1                           ; DATA XREF: check_and_start_ufo+16w
-                                        ; update_ufo+35r ...
-ufo_timer:.ds 1                         ; DATA XREF: update_bullet+C9w
-                                        ; check_and_start_ufor ...
-ufo_dir:.ds 1                           ; DATA XREF: handle_fire+15r
-                                        ; handle_fire+1Aw ...
-                                        ; something with UFO (direction?)
-wave_no:.ds 1                           ; DATA XREF: code:49CFw code:49FCr ...
-no_lives:.ds 1                          ; DATA XREF: update_score_and_chk_bonus_life+1Dr
-                                        ; update_score_and_chk_bonus_life+21w ...
+fire_throttle:.ds 1
+invaders_left:.ds 1
+row_1_invader_addr:.ds 2
+row_2_invader_addr:.ds 2
+row_3_invader_addr:.ds 2
+row_4_invader_addr:.ds 2
+invader_dir:.ds 1
+ufo_TTL:.ds 1
+ufo_timer:.ds 1
+ufo_dir:.ds 1                           ; something with UFO (direction?)
+wave_no:.ds 1
+no_lives:.ds 1
 ; end of 'ram'
 
 ; File Name   : tandy.bin
@@ -61,56 +48,44 @@ no_lives:.ds 1                          ; DATA XREF: update_score_and_chk_bonus_
 ; Segment type: Pure code
 ; segment 'code'
         .org 0x4310
-ufo_active:.db 0                        ; DATA XREF: handle_fire+Fr
-                                        ; update_bullet+C6w ...
-bullet_active:.db 0                     ; DATA XREF: handle_firer
-                                        ; handle_fire+1Fw ...
-unused_4312:.db 0xC9                    ; DATA XREF: code:49C9w code:4AC1w ...
-base_centre:.dw 0x45B0                  ; DATA XREF: handle_fire+23r
-                                        ; check_and_handle_move+17r ...
-unused_4315:.db 1                       ; DATA XREF: code:49C6w
-init_row_1_invader_addr:.dw video_ram+0x40 ; DATA XREF: code:4A1Eo
+ufo_active:.db 0
+bullet_active:.db 0
+unused_4312:.db 0xC9
+base_centre:.dw 0x45B0
+unused_4315:.db 1
+init_row_1_invader_addr:.dw video_ram+0x40
 init_row_2_invader_addr:.dw video_ram+0xC0
 init_row_3_invader_addr:.dw video_ram+0x140
 init_row_4_invader_addr:.dw video_ram+0x1C0
-bullet_addr:.dw video_ram+0x253         ; DATA XREF: handle_fire+2Aw
-                                        ; update_bullet+1r ...
-game_timer:.db 0x60                     ; DATA XREF: code:4F02w code:4F26r ...
-invader_timer:.db 0x2B                  ; DATA XREF: code:4A98w code:4F6Cr ...
-keybd_state:.db 0                       ; DATA XREF: code:49D8w code:4F17r ...
+bullet_addr:.dw video_ram+0x253
+game_timer:.db 0x60
+invader_timer:.db 0x2B
+keybd_state:.db 0
 invader_30pt:.db 0xA0, 0xB6, 0xBF, 0xB9, 0x90, 0x1A, 1, 0x20, 0x86, 0x20, 0x89
-                                        ; DATA XREF: code:4570o code:4A72o
         .db 0x20, 0
 invader_20pt:.db 0x9C, 0xB7, 0xBF, 0xBB, 0xAC, 0x1A, 1, 0x8C, 0x83, 0x20, 0x83
-                                        ; DATA XREF: code:457Co code:4A7Bo
         .db 0x8C, 0
 invader_10pt:.db 0xBE, 0xBB, 0xBF, 0xB7, 0xBD, 0x1A, 1, 0x8C, 0x83, 0x20, 0x83
-                                        ; DATA XREF: code:4588o code:4A84o
         .db 0x8C, 0
-ufo:    .db 0x8C, 0xB7, 0xB7, 0xB7, 0xB7, 0x8C, 0 ; DATA XREF: code:4594o
-                                        ; check_and_start_ufo+2Ao
+ufo:    .db 0x8C, 0xB7, 0xB7, 0xB7, 0xB7, 0x8C, 0
 shield: .db 0xB8, 0xBF, 0xBF, 0xBF, 0xBF, 0xBF, 0xB4, 0x1A, 8, 8, 1, 0x8F
-                                        ; DATA XREF: code:4A4Bo
         .db 0x8F, 0x83, 0x83, 0x83, 0x8F, 0x8F, 0
-player: .db 0xB8, 0xBC, 0xBF, 0xBC, 0xB4, 0 ; DATA XREF: code:4AA1o
+player: .db 0xB8, 0xBC, 0xBF, 0xBC, 0xB4, 0
 explosion:.db 0x82, 0x84, 0x20, 0x88, 0x81, 0x1A, 1, 0x88, 0x81, 0x20, 0x82
-                                        ; DATA XREF: update_bullet+53o
         .db 0x84, 0
         .db    0 ;  
         .db    0 ;  
 blank_space:.db 0x1B, 1, 0x20, 0x20, 0x20, 0x20, 0x20, 0x1A, 1, 0x20, 0x20
-                                        ; DATA XREF: update_bullet+5Co
         .db 0x20, 0x20, 0x20, 0
-aPlay:  .ascii 'PLAY'                   ; DATA XREF: code:4564o
+aPlay:  .ascii 'PLAY'
         .db 9, 0xD6, 0x3C
 aTandyInvaders:.ascii 'TANDY       INVADERS'
         .db 9, 0x54, 0x3D
 aScoreAdvanceTa:.ascii '* SCORE ADVANCE TABLE *'
         .db 0
-aTandyElectroni:.ascii '* TANDY ELECTRONICS *' ; DATA XREF: code:4558o
-                                        ; code:45BBo
+aTandyElectroni:.ascii '* TANDY ELECTRONICS *'
         .db 0
-a30Points:.ascii '<----   30  POINTS'   ; DATA XREF: code:45A0o
+a30Points:.ascii '<----   30  POINTS'
         .db 9, 0x1E, 0x3E
 a20Points:.ascii '<----   20  POINTS'
         .db 9, 0x9E, 0x3E
@@ -118,7 +93,7 @@ a10Points:.ascii '<----   10  POINTS'
         .db 9, 0x1E, 0x3F
 a_Mystery:.ascii '<----   ?   MYSTERY'
         .db 0
-aPressZKeyToMov:.ascii 'PRESS "Z" KEY TO MOVE LEFT' ; DATA XREF: code:45C7o
+aPressZKeyToMov:.ascii 'PRESS "Z" KEY TO MOVE LEFT'
         .db 9, 0x13, 0x3D
 aPressXKeyToMov:.ascii 'PRESS "X" KEY TO MOVE RIGHT'
         .db 9, 0x93, 0x3D
@@ -126,21 +101,20 @@ aPressKeyToFire:.ascii 'PRESS " " KEY TO FIRE !'
         .db 9, 0x13, 0x3E
 aPressRKeyToSta:.ascii 'PRESS "R" KEY TO START'
         .db 0
-aGAMEOVER:.ascii 'G A M E - O V E R'    ; DATA XREF: code:494Bo
+aGAMEOVER:.ascii 'G A M E - O V E R'
         .db 0
 aScore00000High:.ascii '  SCORE  00000                                 HIGH-SCOR'
-                                        ; DATA XREF: code:4544o
         .ascii 'E 00000'
         .db 0
 
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-display_message:                        ; CODE XREF: code:4547p code:455Bp ...
+display_message:
         push    bc
 
-loc_0_44E6:                             ; CODE XREF: display_message+15j
-        ld      a, (hl)                 ; get character
+loc_0_44E6:                             ; get character
+        ld      a, (hl)
         or      a                       ; finished?
         jr      Z, loc_0_4503           ; yes, exit
         cp      #1
@@ -148,25 +122,25 @@ loc_0_44E6:                             ; CODE XREF: display_message+15j
         ld      b, #5                   ; 5 characters to print
         ld      a, #8                   ; backspace
 
-loc_0_44F2:                             ; CODE XREF: display_message+12j
+loc_0_44F2:
         push    de
         call    0x33                    ; display character
         pop     de
         djnz    loc_0_44F2              ; loop
 
-loc_0_44F9:                             ; CODE XREF: display_message+1Cj
-        inc     hl                      ; next character
+loc_0_44F9:                             ; next character
+        inc     hl
         jr      loc_0_44E6              ; loop
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-loc_0_44FC:                             ; CODE XREF: display_message+7j
+loc_0_44FC:
         push    de
         call    0x33                    ; display character
         pop     de
         jr      loc_0_44F9              ; loop
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-loc_0_4503:                             ; CODE XREF: display_message+3j
+loc_0_4503:
         pop     bc
         ret     
 ; End of function display_message
@@ -175,8 +149,7 @@ loc_0_4503:                             ; CODE XREF: display_message+3j
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-display_message_slowly:                 ; CODE XREF: display_message_slowly+11j
-                                        ; code:494Ep
+display_message_slowly:
         ld      a, (hl)                 ; get character
         or      a                       ; done?
         ret     Z                       ; yes, exit
@@ -195,12 +168,12 @@ display_message_slowly:                 ; CODE XREF: display_message_slowly+11j
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-wipe_screen_left_to_right_slow:         ; CODE XREF: code:454Fp code:45AFp ...
+wipe_screen_left_to_right_slow:
         exx     
         ld      hl, #0x3BFF             ; start of video (-1)
         ld      b, #0x40 ; '@'          ; characters/line
 
-loc_0_451E:                             ; CODE XREF: wipe_screen_left_to_right_slow+19j
+loc_0_451E:
         push    bc
         inc     hl                      ; next column
         push    hl
@@ -208,8 +181,8 @@ loc_0_451E:                             ; CODE XREF: wipe_screen_left_to_right_s
         ld      a, #0x20 ; ' '          ; space
         ld      de, #0x40 ; '@'         ; next line address
 
-loc_0_4528:                             ; CODE XREF: wipe_screen_left_to_right_slow+12j
-        ld      (hl), a                 ; display character
+loc_0_4528:                             ; display character
+        ld      (hl), a
         add     hl, de                  ; next line
         djnz    loc_0_4528              ; loop all lines
         call    delay_1_5ms
@@ -234,7 +207,7 @@ START:
         ld      a, #0x20 ; ' '
         ld      (video_ram+0x3FF), a
 
-attract_loop:                           ; CODE XREF: code:45D6j code:4960j
+attract_loop:
         call    wipe_screen_left_to_right_slow
         ld      hl, #video_ram+0x394    ; cursor position
         ld      (0x4020), hl
@@ -287,8 +260,7 @@ loc_0_45AF:
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-check_for_R_key:                        ; CODE XREF: code:45B2p
-                                        ; print_slow_and_check_for_R_key+23p
+check_for_R_key:
         ld      a, (0x3804)             ; read keyboard
         cp      #4                      ; "R"?
         jp      Z, start_game           ; yes, skip
@@ -299,8 +271,7 @@ check_for_R_key:                        ; CODE XREF: code:45B2p
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-compare_video_addresses:                ; CODE XREF: update_bullet+26p
-                                        ; update_bullet+36p ...
+compare_video_addresses:
         push    hl                      ; bullet address
         push    de                      ; video address to check
         ld      a, h
@@ -308,29 +279,28 @@ compare_video_addresses:                ; CODE XREF: update_bullet+26p
         jr      Z, loc_0_45EE           ; yes, continue
         jr      NC, loc_0_45F4          ; continue if bullet below
 
-no_hit:                                 ; CODE XREF: compare_video_addresses+10j
-        xor     a                       ; flag no hit
+no_hit:                                 ; flag no hit
+        xor     a
 
-loc_0_45EB:                             ; CODE XREF: compare_video_addresses+14j
-                                        ; compare_video_addresses+18j
+loc_0_45EB:
         pop     de
         pop     hl
         ret     
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-loc_0_45EE:                             ; CODE XREF: compare_video_addresses+4j
+loc_0_45EE:
         ld      a, l
         cp      e                       ; same address?
         jr      Z, loc_0_45F8           ; yes, continue
         jr      C, no_hit               ; exit if bullet above
 
-loc_0_45F4:                             ; CODE XREF: compare_video_addresses+6j
-        ld      a, #0xFF                ; flag bullet right/below
+loc_0_45F4:                             ; flag bullet right/below
+        ld      a, #0xFF
         jr      loc_0_45EB
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-loc_0_45F8:                             ; CODE XREF: compare_video_addresses+Ej
-        ld      a, #0x20 ; ' '          ; flag bullet match
+loc_0_45F8:                             ; flag bullet match
+        ld      a, #0x20 ; ' '
         jr      loc_0_45EB
 ; End of function compare_video_addresses
 
@@ -338,22 +308,21 @@ loc_0_45F8:                             ; CODE XREF: compare_video_addresses+Ej
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-animate_invaders:                       ; CODE XREF: animate_and_move_invaders+2Bp
-                                        ; code:4B91p
+animate_invaders:
         push    hl
         push    bc
         ld      hl, (row_1_invader_addr)
         ld      b, #0x3F ; '?'          ; characters/line-1
 
-animate_top_row:                        ; CODE XREF: animate_invaders+10j
-        ld      a, (hl)                 ; get character from video
+animate_top_row:                        ; get character from video
+        ld      a, (hl)
         bit     7, a                    ; graphic character?
         jr      Z, loc_0_460B           ; no, skip
         xor     #0xF                    ; invert top 4 pixels
         ld      (hl), a                 ; display
 
-loc_0_460B:                             ; CODE XREF: animate_invaders+Aj
-        inc     hl                      ; next video address
+loc_0_460B:                             ; next video address
+        inc     hl
         djnz    animate_top_row         ; loop thru line
         push    de
         ld      hl, (row_2_invader_addr)
@@ -372,13 +341,12 @@ loc_0_460B:                             ; CODE XREF: animate_invaders+Aj
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-animate_invader_row:                    ; CODE XREF: animate_invaders+16p
-                                        ; animate_invaders+1Cp ...
+animate_invader_row:
         push    hl                      ; invader row addr
         ld      b, #0x40 ; '@'          ; characters/line
 
-loc_0_4628:                             ; CODE XREF: animate_invader_row+15j
-        ld      a, (hl)                 ; get character from video
+loc_0_4628:                             ; get character from video
+        ld      a, (hl)
         cp      #0x8C ; 'Œ'
         jr      Z, loc_0_4636
         cp      #0x83 ; 'ƒ'
@@ -388,13 +356,12 @@ loc_0_4628:                             ; CODE XREF: animate_invader_row+15j
         jr      loc_0_4639
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-loc_0_4636:                             ; CODE XREF: animate_invader_row+6j
-        ld      a, #0x83 ; 'ƒ'          ; 0x8C->0x83
+loc_0_4636:                             ; 0x8C->0x83
+        ld      a, #0x83 ; 'ƒ'
         ld      (hl), a                 ; display
 
-loc_0_4639:                             ; CODE XREF: animate_invader_row+Aj
-                                        ; animate_invader_row+Fj
-        inc     hl                      ; next video address
+loc_0_4639:                             ; next video address
+        inc     hl
         djnz    loc_0_4628              ; loop thru line
         pop     hl
         ret     
@@ -404,8 +371,7 @@ loc_0_4639:                             ; CODE XREF: animate_invader_row+Aj
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-move_video_line_right_HL:               ; CODE XREF: check_and_handle_move+14p
-                                        ; update_ufo+2Ap ...
+move_video_line_right_HL:
         push    hl
         ld      de, #0x3E ; '>'         ; start at right end
         add     hl, de
@@ -419,15 +385,14 @@ move_video_line_right_HL:               ; CODE XREF: check_and_handle_move+14p
         ld      a, #0x20 ; ' '          ; space
         ld      (de), a                 ; display space
 
-loc_0_4650:                             ; CODE XREF: move_video_line_right_HL+Dj
-                                        ; move_video_line_right_HL+1Cj
-        bit     7, (hl)                 ; graphic character left byte?
+loc_0_4650:                             ; graphic character left byte?
+        bit     7, (hl)
         jr      Z, loc_0_4658           ; no, skip
         ld      a, (hl)                 ; get character left byte
         ld      (de), a                 ; display to the right
         ld      (hl), #0x20 ; ' '       ; display space at left-hand byte
 
-loc_0_4658:                             ; CODE XREF: move_video_line_right_HL+14j
+loc_0_4658:
         dec     hl
         dec     de
         djnz    loc_0_4650              ; loop through line
@@ -440,8 +405,7 @@ loc_0_4658:                             ; CODE XREF: move_video_line_right_HL+14
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-move_video_line_left_HL:                ; CODE XREF: check_and_handle_move+2Bp
-                                        ; update_ufo+32p ...
+move_video_line_left_HL:
         push    hl
         push    hl
         pop     de
@@ -453,15 +417,14 @@ move_video_line_left_HL:                ; CODE XREF: check_and_handle_move+2Bp
         ld      a, #0x20 ; ' '          ; space
         ld      (de), a                 ; display space LH byte
 
-loc_0_466E:                             ; CODE XREF: move_video_line_left_HL+9j
-                                        ; move_video_line_left_HL+18j
-        bit     7, (hl)                 ; graphic RH byte?
+loc_0_466E:                             ; graphic RH byte?
+        bit     7, (hl)
         jr      Z, loc_0_4676           ; no, skip
         ld      a, (hl)                 ; get character from video (RH byte)
         ld      (de), a                 ; display LH byte
         ld      (hl), #0x20 ; ' '       ; space RH byte
 
-loc_0_4676:                             ; CODE XREF: move_video_line_left_HL+10j
+loc_0_4676:
         inc     hl
         inc     de
         djnz    loc_0_466E              ; loop thru row
@@ -476,7 +439,7 @@ loc_0_4676:                             ; CODE XREF: move_video_line_left_HL+10
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-add_10_to_score:                        ; CODE XREF: update_score_and_chk_bonus_lifep
+add_10_to_score:
         push    hl
         push    bc
         ld      hl, #video_ram+0x3CC    ; tens digit
@@ -493,8 +456,7 @@ add_10_to_score:                        ; CODE XREF: update_score_and_chk_bonus_
         jr      NZ, loc_0_46A1          ; skip if no carry
         call    zero_score
 
-loc_0_46A1:                             ; CODE XREF: add_10_to_score+8j
-                                        ; add_10_to_score+Ej ...
+loc_0_46A1:
         pop     bc
         pop     hl
         ret     
@@ -504,8 +466,7 @@ loc_0_46A1:                             ; CODE XREF: add_10_to_score+8j
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-add_1_to_score_digit:                   ; CODE XREF: add_10_to_score+5p
-                                        ; add_10_to_score+Bp ...
+add_1_to_score_digit:
         ld      a, (hl)                 ; get score digit
         cp      #0x39 ; '9'             ; 9?
         jr      Z, flag_carry           ; yes, skip
@@ -514,8 +475,8 @@ add_1_to_score_digit:                   ; CODE XREF: add_10_to_score+5p
         ret     
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-flag_carry:                             ; CODE XREF: add_1_to_score_digit+3j
-        ld      (hl), #0x30 ; '0'       ; set to 0
+flag_carry:                             ; set to 0
+        ld      (hl), #0x30 ; '0'
         xor     a                       ; flag carry
         ret     
 ; End of function add_1_to_score_digit
@@ -524,13 +485,12 @@ flag_carry:                             ; CODE XREF: add_1_to_score_digit+3j
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-zero_score:                             ; CODE XREF: add_10_to_score+1Cp
-                                        ; code:49EFp
+zero_score:
         ld      hl, #video_ram+0x3C9    ; score
         ld      b, #5                   ; 5 digits to zap
 
-loc_0_46B5:                             ; CODE XREF: zero_score+8j
-        ld      (hl), #0x30 ; '0'       ; set digit to 0
+loc_0_46B5:                             ; set digit to 0
+        ld      (hl), #0x30 ; '0'
         inc     hl                      ; next digit
         djnz    loc_0_46B5              ; loop thru all score digits
         ret     
@@ -540,8 +500,7 @@ loc_0_46B5:                             ; CODE XREF: zero_score+8j
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-update_score_and_chk_bonus_life:        ; CODE XREF: update_score_and_chk_bonus_life+27j
-                                        ; update_bullet+50p ...
+update_score_and_chk_bonus_life:
         call    add_10_to_score
         ld      hl, #video_ram+0x3CC    ; tens digit of score
         ld      a, (hl)                 ; get digit
@@ -564,8 +523,7 @@ update_score_and_chk_bonus_life:        ; CODE XREF: update_score_and_chk_bonus_
         ld      (no_lives), a
         call    display_lives_left
 
-loc_0_46E2:                             ; CODE XREF: update_score_and_chk_bonus_life+9j
-                                        ; update_score_and_chk_bonus_life+Fj ...
+loc_0_46E2:
         djnz    update_score_and_chk_bonus_life
         ret     
 ; End of function update_score_and_chk_bonus_life
@@ -574,7 +532,7 @@ loc_0_46E2:                             ; CODE XREF: update_score_and_chk_bonus_
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-handle_fire:                            ; CODE XREF: code:4F23p
+handle_fire:
         ld      a, (bullet_active)
         or      a                       ; already fired?
         ret     NZ                      ; yes, return
@@ -590,7 +548,7 @@ handle_fire:                            ; CODE XREF: code:4F23p
         xor     #1                      ; toggle direction
         ld      (ufo_dir), a
 
-loc_0_4702:                             ; CODE XREF: handle_fire+13j
+loc_0_4702:
         ld      a, #1
         ld      (bullet_active), a      ; flag fired
         exx     
@@ -610,8 +568,7 @@ loc_0_4702:                             ; CODE XREF: handle_fire+13j
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-update_bullet:                          ; CODE XREF: update_bullet+ECj
-                                        ; code:4F39p
+update_bullet:
         exx     
         ld      hl, (bullet_addr)
         ld      a, (hl)                 ; get character from video
@@ -628,19 +585,17 @@ update_bullet:                          ; CODE XREF: update_bullet+ECj
         cp      #0x20 ; ' '             ; space?
         jr      NZ, handle_bullet_hit   ; no, skip
 
-display_bullet:                         ; CODE XREF: update_bullet+16j
-                                        ; update_bullet+E0j
-        ld      (hl), #0x5B ; '['       ; display player bullet
+display_bullet:                         ; display player bullet
+        ld      (hl), #0x5B ; '['
 
-loc_0_473A:                             ; CODE XREF: update_bullet+E8j
-        ld      (bullet_addr), hl       ; update bullet address
+loc_0_473A:                             ; update bullet address
+        ld      (bullet_addr), hl
         exx     
         ret     
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-handle_bullet_hit:                      ; CODE XREF: update_bullet+7j
-                                        ; update_bullet+1Aj
-        ld      de, #video_ram+0x40     ; 2nd line on display
+handle_bullet_hit:                      ; 2nd line on display
+        ld      de, #video_ram+0x40
         call    compare_video_addresses
         or      a                       ; bullet in top line now?
         jr      Z, check_and_handle_ufo_hit ; yes, skip
@@ -663,10 +618,10 @@ handle_bullet_hit:                      ; CODE XREF: update_bullet+7j
         jr      C, loc_0_476B           ; 20pt invader character, skip
         dec     b                       ; 10pt invader
 
-loc_0_476B:                             ; CODE XREF: update_bullet+4Cj
+loc_0_476B:
         dec     b
 
-loc_0_476C:                             ; CODE XREF: update_bullet+4Aj
+loc_0_476C:
         call    update_score_and_chk_bonus_life
         ld      hl, #explosion
         call    display_message
@@ -682,32 +637,31 @@ loc_0_476C:                             ; CODE XREF: update_bullet+4Aj
         jr      clear_bullet_active
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-delete_bullet:                          ; CODE XREF: update_bullet+11j
-        ld      de, #0x40 ; '@'         ; characters/line
+delete_bullet:                          ; characters/line
+        ld      de, #0x40 ; '@'
         add     hl, de                  ; next row
         ld      (hl), #0x20 ; ' '       ; display space
 
-clear_bullet_active:                    ; CODE XREF: update_bullet+72j
-                                        ; update_bullet+82j ...
+clear_bullet_active:
         xor     a
         ld      (bullet_active), a      ; clear fired flag
         exx     
         ret     
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-check_and_handle_ufo_hit:               ; CODE XREF: update_bullet+2Aj
-        bit     7, (hl)                 ; graphic character?
+check_and_handle_ufo_hit:               ; graphic character?
+        bit     7, (hl)
         jr      Z, clear_bullet_active  ; no, hit a bomb, exit
         ld      hl, #video_ram
         ld      b, #64                  ; characters/line
 
-loc_0_47A5:                             ; CODE XREF: update_bullet+8Ej
-        bit     7, (hl)                 ; graphic character?
+loc_0_47A5:                             ; graphic character?
+        bit     7, (hl)
         jr      NZ, loc_0_47AC          ; yes, skip
         inc     hl                      ; next video address
         djnz    loc_0_47A5              ; loop thru line
 
-loc_0_47AC:                             ; CODE XREF: update_bullet+8Bj
+loc_0_47AC:
         push    hl
         ld      hl, #video_ram
         call    clear_video_line_HL     ; wipe UFO
@@ -717,8 +671,8 @@ loc_0_47AC:                             ; CODE XREF: update_bullet+8Bj
         xor     a                       ; clear carry
         ld      c, #5                   ; 50 pts
 
-loc_0_47BD:                             ; CODE XREF: update_bullet+A2j
-        add     a, c                    ; multiplier
+loc_0_47BD:                             ; multiplier
+        add     a, c
         djnz    loc_0_47BD              ; calc ufo score
         ld      b, a
         push    af
@@ -731,7 +685,7 @@ loc_0_47BD:                             ; CODE XREF: update_bullet+A2j
         ld      hl, #0
         ld      d, l
 
-loc_0_47D1:                             ; CODE XREF: update_bullet+B6j
+loc_0_47D1:
         add     hl, de
         djnz    loc_0_47D1              ; calc bonus
         ld      a, #0x3C ; '<'
@@ -745,7 +699,7 @@ loc_0_47D1:                             ; CODE XREF: update_bullet+B6j
         jr      clear_bullet_active
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-chk_and_handle_bullet_hits_bomb:        ; CODE XREF: update_bullet+2Ej
+chk_and_handle_bullet_hits_bomb:
         push    hl
         ld      hl, #3                  ; RAND(1-3)
         call    rand
@@ -762,12 +716,12 @@ chk_and_handle_bullet_hits_bomb:        ; CODE XREF: update_bullet+2Ej
         jp      loc_0_473A
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-loc_0_4807:                             ; CODE XREF: handle_fire+30j
+loc_0_4807:
         exx     
         jp      update_bullet
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-handle_shield_hit:                      ; CODE XREF: update_bullet+3Cj
+handle_shield_hit:
         call    erode_shield_from_bullet
         jr      clear_bullet_active
 ; End of function update_bullet
@@ -776,8 +730,7 @@ handle_shield_hit:                      ; CODE XREF: update_bullet+3Cj
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-erode_shield_from_bomb:                 ; CODE XREF: handle_drop_new_bomb+90j
-                                        ; update_bombs+96p
+erode_shield_from_bomb:
         push    hl
         push    bc
         ld      a, (hl)                 ; get character from video
@@ -792,14 +745,13 @@ erode_shield_from_bomb:                 ; CODE XREF: handle_drop_new_bomb+90j
         jr      NZ, loc_0_4822
         ld      a, #0x20 ; ' '
 
-loc_0_4822:                             ; CODE XREF: erode_shield_from_bomb+8j
-                                        ; erode_shield_from_bomb+Ej
+loc_0_4822:
         cp      #0x80 ; '€'
         jr      NZ, loc_0_4828
         ld      a, #0x20 ; ' '
 
-loc_0_4828:                             ; CODE XREF: erode_shield_from_bomb+14j
-        ld      (hl), a                 ; update character
+loc_0_4828:                             ; update character
+        ld      (hl), a
         pop     bc
         pop     hl
         jp      dec_bomb_count
@@ -809,7 +761,7 @@ loc_0_4828:                             ; CODE XREF: erode_shield_from_bomb+14j
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-erode_shield_from_bullet:               ; CODE XREF: update_bullet+EFp
+erode_shield_from_bullet:
         push    hl                      ; bullet address
         push    bc
         ld      a, (hl)                 ; get character from video
@@ -824,14 +776,13 @@ erode_shield_from_bullet:               ; CODE XREF: update_bullet+EFp
         jr      NZ, loc_0_4840          ; no, skip
         ld      a, #0x20 ; ' '
 
-loc_0_4840:                             ; CODE XREF: erode_shield_from_bullet+8j
-                                        ; erode_shield_from_bullet+Ej
-        cp      #0x80 ; '€'             ; blank graphic?
+loc_0_4840:                             ; blank graphic?
+        cp      #0x80 ; '€'
         jr      NZ, loc_0_4846          ; no, skip
         ld      a, #0x20 ; ' '
 
-loc_0_4846:                             ; CODE XREF: erode_shield_from_bullet+14j
-        ld      (hl), a                 ; update character
+loc_0_4846:                             ; update character
+        ld      (hl), a
         pop     bc
         pop     hl
         ret     
@@ -841,8 +792,7 @@ loc_0_4846:                             ; CODE XREF: erode_shield_from_bullet+14
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-find_end_of_lowest_invader_row:         ; CODE XREF: update_bullet+32p
-                                        ; update_bombs+7Dp
+find_end_of_lowest_invader_row:
         ld      hl, (row_4_invader_addr)
         ld      a, h
         or      a                       ; any invaders left in row?
@@ -857,21 +807,20 @@ find_end_of_lowest_invader_row:         ; CODE XREF: update_bullet+32p
         jr      NZ, loc_0_4862          ; yes, continue
         ld      hl, (row_1_invader_addr)
 
-loc_0_4862:                             ; CODE XREF: find_end_of_lowest_invader_row+5j
-                                        ; find_end_of_lowest_invader_row+Cj ...
+loc_0_4862:
         push    de
         push    bc
         ld      de, #63                 ; characters/line-1
         add     hl, de                  ; start at end of line
         ld      b, #63                  ; characters/line-1
 
-loc_0_486A:                             ; CODE XREF: find_end_of_lowest_invader_row+25j
-        bit     7, (hl)                 ; graphic character?
+loc_0_486A:                             ; graphic character?
+        bit     7, (hl)
         jr      NZ, loc_0_4871          ; yes, return
         dec     hl                      ; previous video address
         djnz    loc_0_486A              ; loop thru line
 
-loc_0_4871:                             ; CODE XREF: find_end_of_lowest_invader_row+22j
+loc_0_4871:
         pop     bc
         pop     de
         ret     
@@ -879,19 +828,18 @@ loc_0_4871:                             ; CODE XREF: find_end_of_lowest_invader_
 
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-end_of_wave:                            ; CODE XREF: update_bullet+66j
+end_of_wave:
         jp      new_wave
 
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-check_for_graphic_in_column:            ; CODE XREF: animate_and_move_invaders+Cp
-                                        ; code:4B8Bp
+check_for_graphic_in_column:
         ld      de, #64                 ; characters/line
         ld      b, #13
 
-loc_0_487C:                             ; CODE XREF: check_for_graphic_in_column+Aj
-        bit     7, (hl)                 ; graphic character?
+loc_0_487C:                             ; graphic character?
+        bit     7, (hl)
         jr      NZ, loc_0_4886          ; yes, skip
         add     hl, de                  ; next line
         djnz    loc_0_487C              ; loop thru 13 lines
@@ -899,8 +847,8 @@ loc_0_487C:                             ; CODE XREF: check_for_graphic_in_column
         ret     
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-loc_0_4886:                             ; CODE XREF: check_for_graphic_in_column+7j
-        xor     a                       ; flag match
+loc_0_4886:                             ; flag match
+        xor     a
         ret     
 ; End of function check_for_graphic_in_column
 
@@ -908,7 +856,7 @@ loc_0_4886:                             ; CODE XREF: check_for_graphic_in_column
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-check_and_handle_move:                  ; CODE XREF: code:4F2Bp
+check_and_handle_move:
         ld      a, (0x3808)             ; keyboard
         and     #5                      ; "X" or "Z" pressed?
         ret     Z                       ; no return
@@ -924,12 +872,12 @@ check_and_handle_move:                  ; CODE XREF: code:4F2Bp
         inc     hl                      ; move player right
         ld      (base_centre), hl
 
-loc_0_48A6:                             ; CODE XREF: check_and_handle_move+35j
+loc_0_48A6:
         exx     
         ret     
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-handle_move_left:                       ; CODE XREF: check_and_handle_move+8j
+handle_move_left:
         ret     NZ
         ld      a, (video_ram+0x384)    ; left-most position for base
         bit     7, a                    ; graphic character?
@@ -947,7 +895,7 @@ handle_move_left:                       ; CODE XREF: check_and_handle_move+8j
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-check_and_start_ufo:                    ; CODE XREF: code:4F44p
+check_and_start_ufo:
         ld      a, (ufo_timer)
         inc     a                       ; increment_timer
         ld      (ufo_timer), a
@@ -968,11 +916,11 @@ check_and_start_ufo:                    ; CODE XREF: code:4F44p
         jr      loc_0_48E6
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-loc_0_48E3:                             ; CODE XREF: check_and_start_ufo+1Dj
-        ld      hl, #video_ram+0x3A     ; start on right
+loc_0_48E3:                             ; start on right
+        ld      hl, #video_ram+0x3A
 
-loc_0_48E6:                             ; CODE XREF: check_and_start_ufo+22j
-        ld      (0x4020), hl            ; update cursor position
+loc_0_48E6:                             ; update cursor position
+        ld      (0x4020), hl
         ld      hl, #ufo
         call    display_message
         ld      a, #1                   ; flag on-screen
@@ -985,7 +933,7 @@ loc_0_48E6:                             ; CODE XREF: check_and_start_ufo+22j
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-update_ufo:                             ; CODE XREF: code:4F41p
+update_ufo:
         ld      a, (ufo_active)
         or      a                       ; ufo on-screen?
         ret     Z                       ; no, return
@@ -993,31 +941,30 @@ update_ufo:                             ; CODE XREF: code:4F41p
         ld      hl, #video_ram
         ld      b, #63                  ; characters/line-1
 
-loc_0_4901:                             ; CODE XREF: update_ufo+15j
-        ld      a, (hl)                 ; get character from video
+loc_0_4901:                             ; get character from video
+        ld      a, (hl)
         cp      #0xBB ; '»'
         jr      Z, loc_0_490F           ; yes, alternate
         cp      #0xB7 ; '·'
         jr      Z, loc_0_4913
 
-loc_0_490A:                             ; CODE XREF: update_ufo+1Bj
-                                        ; update_ufo+1Fj
-        inc     hl                      ; next video address
+loc_0_490A:                             ; next video address
+        inc     hl
         djnz    loc_0_4901              ; loop thru line
         jr      move_ufo
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-loc_0_490F:                             ; CODE XREF: update_ufo+Ej
-        ld      (hl), #0xB7 ; '·'       ; display
+loc_0_490F:                             ; display
+        ld      (hl), #0xB7 ; '·'
         jr      loc_0_490A
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-loc_0_4913:                             ; CODE XREF: update_ufo+12j
-        ld      (hl), #0xBB ; '»'       ; display
+loc_0_4913:                             ; display
+        ld      (hl), #0xBB ; '»'
         jr      loc_0_490A
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-move_ufo:                               ; CODE XREF: update_ufo+17j
+move_ufo:
         ld      a, (ufo_dir)
         or      a                       ; left?
         jr      Z, move_ufo_left        ; yes, skip
@@ -1026,30 +973,30 @@ move_ufo:                               ; CODE XREF: update_ufo+17j
         jr      ufo_TTL_tick
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-move_ufo_left:                          ; CODE XREF: update_ufo+25j
+move_ufo_left:
         ld      hl, #video_ram
         call    move_video_line_left_HL
 
-ufo_TTL_tick:                           ; CODE XREF: update_ufo+2Dj
+ufo_TTL_tick:
         ld      a, (ufo_TTL)
         dec     a                       ; ufo still active?
         ld      (ufo_TTL), a
         jr      Z, flag_ufo_inactive    ; no, skip
 
-loc_0_4934:                             ; CODE XREF: update_ufo+44j
+loc_0_4934:
         exx     
         ret     
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-flag_ufo_inactive:                      ; CODE XREF: update_ufo+3Cj
-        xor     a                       ; flag ufo inactive
+flag_ufo_inactive:                      ; flag ufo inactive
+        xor     a
         ld      (ufo_active), a
         jr      loc_0_4934
 ; End of function update_ufo
 
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-game_over:                              ; CODE XREF: code:4AB4j code:4B45j
+game_over:
         ld      sp, #0x428A
         ld      hl, #video_ram+0x19     ; cursor position
         ld      (0x4020), hl
@@ -1067,7 +1014,7 @@ game_over:                              ; CODE XREF: code:4AB4j code:4B45j
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-display_invader_row:                    ; CODE XREF: code:4A78p code:4A81p ...
+display_invader_row:
         push    hl
         push    de
         push    bc
@@ -1078,8 +1025,8 @@ display_invader_row:                    ; CODE XREF: code:4A78p code:4A81p ...
         pop     de
         inc     hl
 
-loc_0_4970:                             ; CODE XREF: display_invader_row+1Cj
-        ld      (0x4020), hl            ; cursor position
+loc_0_4970:                             ; cursor position
+        ld      (0x4020), hl
         push    de
         push    hl
         ex      de, hl
@@ -1099,7 +1046,7 @@ loc_0_4970:                             ; CODE XREF: display_invader_row+1Cj
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-update_invader_row_addresses:           ; CODE XREF: update_bullet+6Fp
+update_invader_row_addresses:
         push    hl
         push    de
         push    bc
@@ -1125,13 +1072,12 @@ update_invader_row_addresses:           ; CODE XREF: update_bullet+6Fp
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-find_1st_invader_on_row:                ; CODE XREF: update_invader_row_addresses+6p
-                                        ; update_invader_row_addresses+Fp ...
+find_1st_invader_on_row:
         push    hl                      ; invader row address
         ld      b, #63                  ; characters/line-1
 
-loc_0_49B3:                             ; CODE XREF: find_1st_invader_on_row+9j
-        ld      a, (hl)                 ; get character from video
+loc_0_49B3:                             ; get character from video
+        ld      a, (hl)
         bit     7, a                    ; graphic?
         inc     hl                      ; next video address
         jr      NZ, loc_0_49BF          ; yes, skip
@@ -1141,15 +1087,15 @@ loc_0_49B3:                             ; CODE XREF: find_1st_invader_on_row+9j
         ret     
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-loc_0_49BF:                             ; CODE XREF: find_1st_invader_on_row+7j
-        pop     hl                      ; invader row address
+loc_0_49BF:                             ; invader row address
+        pop     hl
         add     hl, de                  ; ???
         ret     
 ; End of function find_1st_invader_on_row
 
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-start_game:                             ; CODE XREF: check_for_R_key+5j
+start_game:
         xor     a
         ld      (ufo_timer), a
         ld      (unused_4315), a
@@ -1170,7 +1116,7 @@ start_game:                             ; CODE XREF: check_for_R_key+5j
         call    zero_score
         call    display_GOOD_LUCK
 
-new_wave:                               ; CODE XREF: code:4874j
+new_wave:
         ld      sp, #0x428A
         xor     a
         ld      (bullet_active), a      ; clear fired flag
@@ -1180,7 +1126,7 @@ new_wave:                               ; CODE XREF: code:4874j
         jr      NZ, loc_0_4A06          ; no, skip
         ld      a, #1                   ; reset to 1
 
-loc_0_4A06:                             ; CODE XREF: code:4A02j
+loc_0_4A06:
         ld      (wave_no), a
         and     #6                      ; 2/4/6
         ld      de, #0x40 ; '@'         ; characters/line
@@ -1193,20 +1139,20 @@ loc_0_4A06:                             ; CODE XREF: code:4A02j
         inc     b
         add     hl, de
 
-loc_0_4A1A:                             ; CODE XREF: code:4A16j
+loc_0_4A1A:
         inc     b
         add     hl, de
 
-loc_0_4A1C:                             ; CODE XREF: code:4A14j
+loc_0_4A1C:
         ex      de, hl
 
-calc_invader_row_addr:                  ; CODE XREF: code:4A40j
+calc_invader_row_addr:
         push    bc
         ld      ix, #init_row_1_invader_addr
         ld      iy, #row_1_invader_addr
         ld      b, #4                   ; 4 rows of invaders
 
-loc_0_4A28:                             ; CODE XREF: code:4A3Dj
+loc_0_4A28:
         ld      l, 0(ix)
         ld      h, 1(ix)
         add     hl, de                  ; calc video address for invader row
@@ -1254,8 +1200,8 @@ loc_0_4A28:                             ; CODE XREF: code:4A3Dj
         ld      (invaders_left), a
         ld      (invader_timer), a
 
-init_and_display_player_base:           ; CODE XREF: code:4AD9j
-        ld      hl, #video_ram+0x384    ; cursor position
+init_and_display_player_base:           ; cursor position
+        ld      hl, #video_ram+0x384
         ld      (0x4020), hl
         ld      hl, #player
         call    display_message         ; draw player base
@@ -1264,7 +1210,7 @@ init_and_display_player_base:           ; CODE XREF: code:4AD9j
         jp      init_turn
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-decrement_player_life:                  ; CODE XREF: code:4B2Aj
+decrement_player_life:
         ld      a, (no_lives)
         dec     a                       ; any lives left?
         jp      Z, game_over            ; no, exit
@@ -1285,19 +1231,18 @@ decrement_player_life:                  ; CODE XREF: code:4B2Aj
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-invert_display:                         ; CODE XREF: animate_player_hit+4p
-                                        ; animate_player_hit+Bj ...
+invert_display:
         ld      hl, #video_ram
         ld      bc, #0x400              ; video ram size
 
-loc_0_4AE2:                             ; CODE XREF: invert_display+1Cj
-        ld      a, (hl)                 ; get character
+loc_0_4AE2:                             ; get character
+        ld      a, (hl)
         cp      #0x20 ; ' '             ; space?
         jr      NZ, loc_0_4AE9          ; no, skip
         ld      (hl), #0x80 ; '€'       ; graphic space
 
-loc_0_4AE9:                             ; CODE XREF: invert_display+9j
-        bit     7, (hl)                 ; graphics character?
+loc_0_4AE9:                             ; graphics character?
+        bit     7, (hl)
         jr      Z, loc_0_4AF4           ; no, skip
         ld      a, (hl)                 ; get character
         cpl                             ; invert
@@ -1305,8 +1250,8 @@ loc_0_4AE9:                             ; CODE XREF: invert_display+9j
         res     6, a                    ; 1st block of graphics characters
         ld      (hl), a                 ; display
 
-loc_0_4AF4:                             ; CODE XREF: invert_display+Fj
-        inc     hl                      ; next video address
+loc_0_4AF4:                             ; next video address
+        inc     hl
         dec     bc
         ld      a, b
         or      c
@@ -1318,7 +1263,7 @@ loc_0_4AF4:                             ; CODE XREF: invert_display+Fj
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-get_player_address:                     ; CODE XREF: animate_player_hitp
+get_player_address:
         ld      hl, (base_centre)
         dec     hl
         dec     hl
@@ -1329,22 +1274,22 @@ get_player_address:                     ; CODE XREF: animate_player_hitp
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-animate_base_hit:                       ; CODE XREF: animate_player_hit+8p
+animate_base_hit:
         ld      a, #0xA6 ; '¦'          ; hash graphic
         ld      b, #0                   ; 256 times
 
-loc_0_4B05:                             ; CODE XREF: animate_base_hit+16j
+loc_0_4B05:
         push    bc
         push    hl                      ; player base address
         ld      b, #5                   ; 5 chars to display
         xor     #0x3F ; '?'             ; invert hash
 
-loc_0_4B0B:                             ; CODE XREF: animate_base_hit+Cj
-        ld      (hl), a                 ; display hash
+loc_0_4B0B:                             ; display hash
+        ld      (hl), a
         inc     hl                      ; next video address
         djnz    loc_0_4B0B              ; loop through 5 chars
 
-loc_0_4B0F:                             ; CODE XREF: animate_base_hit+12j
+loc_0_4B0F:
         ex      (sp), hl
         ex      (sp), hl
         ex      (sp), hl
@@ -1360,7 +1305,7 @@ loc_0_4B0F:                             ; CODE XREF: animate_base_hit+12j
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-animate_player_hit:                     ; CODE XREF: code:4B27p
+animate_player_hit:
         call    get_player_address
         push    hl
         call    invert_display
@@ -1371,15 +1316,15 @@ animate_player_hit:                     ; CODE XREF: code:4B27p
 
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-handle_base_hit:                        ; CODE XREF: update_bombs+93j
+handle_base_hit:
         call    animate_player_hit
         jp      decrement_player_life
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-flash_screen_10_times:                  ; CODE XREF: code:4C02j
-        ld      b, #10                  ; 10 times
+flash_screen_10_times:                  ; 10 times
+        ld      b, #10
 
-flash_screen:                           ; CODE XREF: code:4B43j
+flash_screen:
         push    bc
         call    invert_display
         ld      bc, #10000              ; ~140ms
@@ -1394,7 +1339,7 @@ flash_screen:                           ; CODE XREF: code:4B43j
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-animate_and_move_invaders:              ; CODE XREF: code:4F71p
+animate_and_move_invaders:
         push    hl
         push    de
         push    bc
@@ -1415,7 +1360,7 @@ animate_and_move_invaders:              ; CODE XREF: code:4F71p
         call    move_invader_row_right
         call    animate_invaders
 
-move_invaders_down_ret:                 ; CODE XREF: code:4BACj code:4C1Dj ...
+move_invaders_down_ret:
         pop     bc
         pop     de
         pop     hl
@@ -1426,8 +1371,7 @@ move_invaders_down_ret:                 ; CODE XREF: code:4BACj code:4C1Dj ...
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-move_invader_row_right:                 ; CODE XREF: animate_and_move_invaders+16p
-                                        ; animate_and_move_invaders+1Cp ...
+move_invader_row_right:
         ld      a, h
         or      a                       ; any invaders left on this row?
         ret     Z                       ; no, return
@@ -1439,14 +1383,14 @@ move_invader_row_right:                 ; CODE XREF: animate_and_move_invaders+1
 
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-animate_and_move_invaders_left:         ; CODE XREF: animate_and_move_invaders+7j
-        ld      hl, #video_ram+0x40     ; start of 2nd line
+animate_and_move_invaders_left:         ; start of 2nd line
+        ld      hl, #video_ram+0x40
         call    check_for_graphic_in_column
         or      a                       ; inavders reached LHS of screen?
         jr      Z, move_invaders_down   ; yes, skip
         call    animate_invaders
 
-move_invaders_left:                     ; CODE XREF: code:4BC6j
+move_invaders_left:
         ld      hl, (row_4_invader_addr)
         call    move_invader_row_left
         ld      hl, (row_3_invader_addr)
@@ -1460,7 +1404,7 @@ move_invaders_left:                     ; CODE XREF: code:4BC6j
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-move_invader_row_left:                  ; CODE XREF: code:4B97p code:4B9Dp ...
+move_invader_row_left:
         ld      a, h
         or      a                       ; any invaders left on row?
         ret     Z                       ; no, return
@@ -1474,25 +1418,25 @@ move_invader_row_left:                  ; CODE XREF: code:4B97p code:4B9Dp ...
 
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-set_invader_dir_left:                   ; CODE XREF: animate_and_move_invaders+10j
+set_invader_dir_left:
         ld      a, (invader_dir)
         xor     #1                      ; toggle invader direction
         ld      (invader_dir), a
         jp      move_invaders_left
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-move_invaders_down:                     ; CODE XREF: code:4B8Fj
+move_invaders_down:
         ld      a, (bullet_active)
         or      a                       ; fired?
         jr      Z, loc_0_4BD4           ; no, skip
         ld      hl, (bullet_addr)
         ld      (hl), #0x20 ; ' '       ; display space
 
-loc_0_4BD4:                             ; CODE XREF: code:4BCDj
+loc_0_4BD4:
         ld      ix, #row_4_invader_addr
         ld      b, #4                   ; 4 rows to check
 
-loc_0_4BDA:                             ; CODE XREF: code:4BE9j
+loc_0_4BDA:
         ld      l, 0(ix)
         ld      h, 1(ix)                ; hl = invader addr
         ld      a, h
@@ -1505,7 +1449,7 @@ loc_0_4BDA:                             ; CODE XREF: code:4BE9j
         ld      b, #4                   ; 4 rows of invaders
         ld      de, #video_ram+0x380    ; 2nd last line on screen
 
-loc_0_4BF4:                             ; CODE XREF: code:4C0Fj
+loc_0_4BF4:
         ld      l, 0(ix)
         ld      h, 1(ix)                ; HL = invader row addr
         call    get_video_line_below_invaders
@@ -1533,7 +1477,7 @@ loc_0_4BF4:                             ; CODE XREF: code:4C0Fj
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-move_invader_row_down:                  ; CODE XREF: code:4BE2p
+move_invader_row_down:
         push    bc
         push    hl                      ; invader row address
         ld      de, #63                 ; characters/line
@@ -1545,18 +1489,18 @@ move_invader_row_down:                  ; CODE XREF: code:4BE2p
         pop     hl                      ; invader row+1 address
         ld      b, #128                 ; 2 video lines
 
-loc_0_4C3B:                             ; CODE XREF: move_invader_row_down+1Aj
-        ld      a, (de)                 ; get character from video
+loc_0_4C3B:                             ; get character from video
+        ld      a, (de)
         cp      #0x80 ; '€'             ; graphic?
         ld      a, (hl)                 ; get character from invader row
         jr      NC, loc_0_4C45          ; yes, ok to overwrite
         cp      #0x80 ; '€'             ; invader a graphic?
         jr      C, loc_0_4C46           ; no, skip
 
-loc_0_4C45:                             ; CODE XREF: move_invader_row_down+11j
-        ld      (de), a                 ; move character
+loc_0_4C45:                             ; move character
+        ld      (de), a
 
-loc_0_4C46:                             ; CODE XREF: move_invader_row_down+15j
+loc_0_4C46:
         dec     de
         dec     hl
         djnz    loc_0_4C3B              ; loop thru 2 lines
@@ -1572,7 +1516,7 @@ loc_0_4C46:                             ; CODE XREF: move_invader_row_down+15j
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-get_video_line_below_invaders:          ; CODE XREF: code:4BFAp
+get_video_line_below_invaders:
         ld      a, h
         or      a                       ; any invaders left in row?
         ret     Z                       ; no, return
@@ -1587,13 +1531,13 @@ get_video_line_below_invaders:          ; CODE XREF: code:4BFAp
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-check_for_new_high_score:               ; CODE XREF: code:4951p
+check_for_new_high_score:
         ld      hl, #video_ram+0x3C9    ; score
         ld      de, #video_ram+0x3FA    ; high score
         ld      b, #4                   ; 4 digits to compare
 
-loc_0_4C67:                             ; CODE XREF: check_for_new_high_score+10j
-        ld      c, (hl)                 ; get score digit
+loc_0_4C67:                             ; get score digit
+        ld      c, (hl)
         ld      a, (de)                 ; get high score digit
         cp      c                       ; score higher?
         jr      C, update_high_score    ; yes, skip
@@ -1604,8 +1548,8 @@ loc_0_4C67:                             ; CODE XREF: check_for_new_high_score+10
         ret     
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-update_high_score:                      ; CODE XREF: check_for_new_high_score+Bj
-        ld      hl, #video_ram+0x3C9    ; source = score
+update_high_score:                      ; source = score
+        ld      hl, #video_ram+0x3C9
         ld      de, #video_ram+0x3FA    ; destination = high score
         ld      bc, #5                  ; 5 digits to copy
         ldir                            ; copy
@@ -1616,14 +1560,13 @@ update_high_score:                      ; CODE XREF: check_for_new_high_score+B
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-clear_video_line_HL:                    ; CODE XREF: update_bullet+94p
-                                        ; code:4948p ...
+clear_video_line_HL:
         push    bc
         push    de
         ld      b, #64                  ; characters/line
 
-loc_0_4C82:                             ; CODE XREF: clear_video_line_HL+7j
-        ld      (hl), #0x20 ; ' '       ; display space
+loc_0_4C82:                             ; display space
+        ld      (hl), #0x20 ; ' '
         inc     hl                      ; next video address
         djnz    loc_0_4C82              ; clear a line
         pop     de
@@ -1635,12 +1578,12 @@ loc_0_4C82:                             ; CODE XREF: clear_video_line_HL+7j
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-handle_drop_new_bomb:                   ; CODE XREF: code:4F65p
+handle_drop_new_bomb:
         exx     
         ld      b, #4                   ; number of invader rows
         ld      ix, #row_4_invader_addr
 
-loc_0_4C91:                             ; CODE XREF: handle_drop_new_bomb+11j
+loc_0_4C91:
         ld      a, 1(ix)
         or      a                       ; any invaders left on this row?
         jr      NZ, check_and_handle_new_bomb ; yes, continue
@@ -1648,13 +1591,12 @@ loc_0_4C91:                             ; CODE XREF: handle_drop_new_bomb+11j
         dec     ix                      ; next row above
         djnz    loc_0_4C91              ; loop thru all rows
 
-init_bomb_ret:                          ; CODE XREF: handle_drop_new_bomb+3Bj
-                                        ; handle_drop_new_bomb+4Ej ...
+init_bomb_ret:
         exx     
         ret     
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-check_and_handle_new_bomb:              ; CODE XREF: handle_drop_new_bomb+Bj
+check_and_handle_new_bomb:
         ld      hl, (base_centre)
         ld      de, #0xC080
         add     hl, de                  ; base X position
@@ -1669,23 +1611,23 @@ check_and_handle_new_bomb:              ; CODE XREF: handle_drop_new_bomb+Bj
         cp      #1                      ; drop a bomb near the base?
         jr      NZ, random_bomb_x_position ; no, random
 
-loc_0_4CBA:                             ; CODE XREF: handle_drop_new_bomb+84j
-        add     hl, de                  ; calc bomb X position
+loc_0_4CBA:                             ; calc bomb X position
+        add     hl, de
         ld      de, #0xFF80             ; offset of 2 video lines above
 
-loc_0_4CBE:                             ; CODE XREF: handle_drop_new_bomb+39j
-        bit     7, (hl)                 ; invader above bomb position?
+loc_0_4CBE:                             ; invader above bomb position?
+        bit     7, (hl)
         jr      NZ, init_new_bomb       ; yes, continue
         add     hl, de                  ; 2 lines above
         djnz    loc_0_4CBE              ; find invader above
         jr      init_bomb_ret           ; no invaders, no bomb
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-init_new_bomb:                          ; CODE XREF: handle_drop_new_bomb+36j
+init_new_bomb:
         ld      ix, #bomb_tbl
         ld      b, #4
 
-find_free_bomb_entry:                   ; CODE XREF: handle_drop_new_bomb+4Cj
+find_free_bomb_entry:
         ld      a, 1(ix)
         or      a                       ; bomb active?
         jr      Z, loc_0_4CDB           ; no, continue
@@ -1694,7 +1636,7 @@ find_free_bomb_entry:                   ; CODE XREF: handle_drop_new_bomb+4Cj
         jp      init_bomb_ret           ; no free entries, return
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-loc_0_4CDB:                             ; CODE XREF: handle_drop_new_bomb+47j
+loc_0_4CDB:
         call    get_invader_address
         ld      de, #0x82 ; '‚'         ; 2 lines below and 2 chars right
         add     hl, de                  ; centre under invader
@@ -1707,8 +1649,8 @@ loc_0_4CDB:                             ; CODE XREF: handle_drop_new_bomb+47j
         bit     7, e
         jr      Z, check_new_bomb_shield
 
-init_bomb_entry:                        ; CODE XREF: handle_drop_new_bomb+8Aj
-        ld      a, (de)                 ; get character from video
+init_bomb_entry:                        ; get character from video
+        ld      a, (de)
         cp      #0x20 ; ' '             ; space?
         jr      NZ, init_bomb_ret       ; no, exit
         ld      a, (hl)                 ; get bomb character from table
@@ -1719,7 +1661,7 @@ init_bomb_entry:                        ; CODE XREF: handle_drop_new_bomb+8Aj
         jp      init_bomb_ret
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-random_bomb_x_position:                 ; CODE XREF: handle_drop_new_bomb+2Ej
+random_bomb_x_position:
         push    hl
         ld      hl, #64                 ; RAND(1-64)
         call    rand
@@ -1728,8 +1670,8 @@ random_bomb_x_position:                 ; CODE XREF: handle_drop_new_bomb+2Ej
         jr      loc_0_4CBA
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-check_new_bomb_shield:                  ; CODE XREF: handle_drop_new_bomb+66j
-        ex      de, hl                  ; HL = centre under invader
+check_new_bomb_shield:                  ; HL = centre under invader
+        ex      de, hl
         bit     7, (hl)                 ; graphic character?
         ex      de, hl
         jr      Z, init_bomb_entry      ; no, continue
@@ -1744,8 +1686,7 @@ check_new_bomb_shield:                  ; CODE XREF: handle_drop_new_bomb+66j
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-rand:                                   ; CODE XREF: update_bullet+9Ap
-                                        ; update_bullet+D2p ...
+rand:
         push    de
         push    bc
         call    0x14CC                  ; ROM RAND() function
@@ -1759,8 +1700,7 @@ rand:                                   ; CODE XREF: update_bullet+9Ap
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-get_invader_address:                    ; CODE XREF: update_bullet+3Fp
-                                        ; handle_drop_new_bomb+51p
+get_invader_address:
         push    de
         ld      a, (hl)                 ; character at video address
         and     #0x30 ; '0'             ; any pixels on bottom row of cell?
@@ -1768,9 +1708,8 @@ get_invader_address:                    ; CODE XREF: update_bullet+3Fp
         jr      NZ, loc_0_4D32          ; yes, skip (top half of invader)
         add     hl, de                  ; line above (top half of invader)
 
-loc_0_4D32:                             ; CODE XREF: get_invader_address+7j
-                                        ; get_invader_address+Dj
-        bit     7, (hl)                 ; graphic character?
+loc_0_4D32:                             ; graphic character?
+        bit     7, (hl)
         dec     hl                      ; previous video address
         jr      NZ, loc_0_4D32          ; loop until non-graphic
         inc     hl
@@ -1783,22 +1722,22 @@ loc_0_4D32:                             ; CODE XREF: get_invader_address+7j
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-restore_space_characters:               ; CODE XREF: code:4AC4p
+restore_space_characters:
         ld      hl, #video_ram
         ld      bc, #0x3C0              ; 15 lines (all but last)
 
-loc_0_4D41:                             ; CODE XREF: restore_space_characters+16j
-        bit     7, (hl)                 ; graphics character?
+loc_0_4D41:                             ; graphics character?
+        bit     7, (hl)
         jr      Z, loc_0_4D4A           ; no, skip
         ld      a, (hl)                 ; get character
         cp      #0x80 ; '€'             ; graphic space character?
         jr      NZ, loc_0_4D4C          ; no, skip
 
-loc_0_4D4A:                             ; CODE XREF: restore_space_characters+8j
-        ld      (hl), #0x20 ; ' '       ; convert to space character
+loc_0_4D4A:                             ; convert to space character
+        ld      (hl), #0x20 ; ' '
 
-loc_0_4D4C:                             ; CODE XREF: restore_space_characters+Dj
-        inc     hl                      ; next video address
+loc_0_4D4C:                             ; next video address
+        inc     hl
         dec     bc
         ld      a, b
         or      c                       ; done?
@@ -1810,12 +1749,11 @@ loc_0_4D4C:                             ; CODE XREF: restore_space_characters+D
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-delete_bomb:                            ; CODE XREF: update_bombs+20p
-                                        ; update_bombs+60p ...
+delete_bomb:
         xor     a                       ; zero bomb address
         ld      1(ix), a
 
-dec_bomb_count:                         ; CODE XREF: erode_shield_from_bomb+1Bj
+dec_bomb_count:
         ld      a, (unused_4312)
         dec     a                       ; probably supposed to be bomb count
         ld      (unused_4312), a
@@ -1826,25 +1764,24 @@ dec_bomb_count:                         ; CODE XREF: erode_shield_from_bomb+1Bj
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-update_bombs:                           ; CODE XREF: code:4F61p
+update_bombs:
         exx     
         ld      ix, #bomb_tbl
         ld      b, #4                   ; max 4 bombs
 
-loc_0_4D66:                             ; CODE XREF: update_bombs+10j
+loc_0_4D66:
         ld      a, 1(ix)
         or      a                       ; valid address?
         jr      NZ, check_and_update_bomb ; yes, skip
 
-next_bomb:                              ; CODE XREF: update_bombs+23j
-                                        ; update_bombs+4Bj ...
-        call    add_3_to_ix             ; next bomb entry
+next_bomb:                              ; next bomb entry
+        call    add_3_to_ix
         djnz    loc_0_4D66              ; loop thru all bombs
         exx     
         ret     
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-check_and_update_bomb:                  ; CODE XREF: update_bombs+Bj
+check_and_update_bomb:
         ld      l, 0(ix)
         ld      h, 1(ix)                ; bomb address
         ld      a, 2(ix)                ; bomb character
@@ -1854,8 +1791,8 @@ check_and_update_bomb:                  ; CODE XREF: update_bombs+Bj
         jr      next_bomb
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-update_bomb:                            ; CODE XREF: update_bombs+1Ej
-        ld      (hl), #0x20 ; ' '       ; display space
+update_bomb:                            ; display space
+        ld      (hl), #0x20 ; ' '
         ld      de, #64                 ; characters/line
         add     hl, de                  ; next line down
         ld      0(ix), l
@@ -1878,7 +1815,7 @@ update_bomb:                            ; CODE XREF: update_bombs+1Ej
         jr      next_bomb
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-handle_bullet_hit_bomb:                 ; CODE XREF: update_bombs+41j
+handle_bullet_hit_bomb:
         push    hl
         push    af
         ld      hl, #3
@@ -1896,15 +1833,14 @@ handle_bullet_hit_bomb:                 ; CODE XREF: update_bombs+41j
         jr      next_bomb
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-delete_bomb_and_loop:                   ; CODE XREF: update_bombs+3Aj
-                                        ; update_bombs+58j ...
+delete_bomb_and_loop:
         call    delete_bomb
         pop     af
         pop     hl
         jr      next_bomb
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-handle_bomb_destroys_bullet:            ; CODE XREF: update_bombs+5Aj
+handle_bomb_destroys_bullet:
         xor     a
         ld      (bullet_active), a      ; flag inactive
         pop     af
@@ -1914,7 +1850,7 @@ handle_bomb_destroys_bullet:            ; CODE XREF: update_bombs+5Aj
         jr      next_bomb
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-check_and_handle_bomb_hit:              ; CODE XREF: update_bombs+45j
+check_and_handle_bomb_hit:
         ex      de, hl
         call    find_end_of_lowest_invader_row
         call    compare_video_addresses
@@ -1939,7 +1875,7 @@ check_and_handle_bomb_hit:              ; CODE XREF: update_bombs+45j
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-zero_bullet_tbl:                        ; CODE XREF: code:4EFBp
+zero_bullet_tbl:
         ld      hl, #bomb_tbl
         ld      de, #bomb_tbl+1
         ld      bc, #0xC
@@ -1952,14 +1888,14 @@ zero_bullet_tbl:                        ; CODE XREF: code:4EFBp
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-handle_bullet_destroys_bomb:            ; CODE XREF: update_bullet+DAp
+handle_bullet_destroys_bomb:
         push    hl
         exx     
         pop     de
         ld      ix, #bomb_tbl
         ld      b, #4                   ; max bombs
 
-loc_0_4E13:                             ; CODE XREF: handle_bullet_destroys_bomb+1Aj
+loc_0_4E13:
         ld      l, 0(ix)
         ld      h, 1(ix)                ; bomb address
         call    compare_video_addresses
@@ -1968,7 +1904,7 @@ loc_0_4E13:                             ; CODE XREF: handle_bullet_destroys_bomb
         call    add_3_to_ix             ; next bullet data
         djnz    loc_0_4E13              ; loop thru all bullets
 
-loc_0_4E26:                             ; CODE XREF: handle_bullet_destroys_bomb+14j
+loc_0_4E26:
         exx     
         jp      delete_bomb             ; returns
 ; End of function handle_bullet_destroys_bomb
@@ -1977,8 +1913,7 @@ loc_0_4E26:                             ; CODE XREF: handle_bullet_destroys_bomb
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-add_3_to_ix:                            ; CODE XREF: handle_drop_new_bomb+49p
-                                        ; update_bombs+Dp ...
+add_3_to_ix:
         inc     ix
         inc     ix
         inc     ix
@@ -1989,12 +1924,12 @@ add_3_to_ix:                            ; CODE XREF: handle_drop_new_bomb+49p
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-display_GOOD_LUCK:                      ; CODE XREF: code:49F2p
+display_GOOD_LUCK:
         call    wipe_screen_left_to_right_slow
         ld      hl, #video_ram+0x219    ; cursor position
         ld      b, #50                  ; flash 50 times
 
-loc_0_4E39:                             ; CODE XREF: display_GOOD_LUCK+26j
+loc_0_4E39:
         push    bc
         ld      (0x4020), hl            ; current cursor position
         push    hl
@@ -2017,8 +1952,7 @@ loc_0_4E39:                             ; CODE XREF: display_GOOD_LUCK+26j
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-delay_15ms:                             ; CODE XREF: update_bullet+59p
-                                        ; display_GOOD_LUCK+13p ...
+delay_15ms:
         ld      bc, #1000               ; ~15ms
         jp      0x60                    ; delay
 ; End of function delay_15ms
@@ -2027,8 +1961,7 @@ delay_15ms:                             ; CODE XREF: update_bullet+59p
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-delay_1_5ms:                            ; CODE XREF: wipe_screen_left_to_right_slow+14p
-                                        ; code:4F76p
+delay_1_5ms:
         ld      bc, #100                ; ~1.5ms
         jp      0x60                    ; delay
 ; End of function delay_1_5ms
@@ -2037,13 +1970,12 @@ delay_1_5ms:                            ; CODE XREF: wipe_screen_left_to_right_s
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-print_slow_and_check_for_R_key:         ; CODE XREF: code:4567p code:45A3p ...
+print_slow_and_check_for_R_key:
         push    hl                      ; ptr message
         pop     ix
 
-loc_0_4E69:                             ; CODE XREF: print_slow_and_check_for_R_key+18j
-                                        ; print_slow_and_check_for_R_key+28j
-        ld      a, 0(ix)                ; get character
+loc_0_4E69:                             ; get character
+        ld      a, 0(ix)
         or      a                       ; done?
         ret     Z                       ; yes, exit
         cp      #9                      ; cursor position embedded?
@@ -2055,8 +1987,8 @@ loc_0_4E69:                             ; CODE XREF: print_slow_and_check_for_R_
         jr      loc_0_4E69              ; next character
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-loc_0_4E80:                             ; CODE XREF: print_slow_and_check_for_R_key+Aj
-        call    0x33                    ; display character
+loc_0_4E80:                             ; display character
+        call    0x33
         ld      bc, #1280               ; ~20ms
         call    0x60                    ; delay
         call    check_for_R_key
@@ -2068,8 +2000,7 @@ loc_0_4E80:                             ; CODE XREF: print_slow_and_check_for_R_
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
 
-display_lives_left:                     ; CODE XREF: update_score_and_chk_bonus_life+24p
-                                        ; code:49E9p ...
+display_lives_left:
         push    hl
         push    de
         push    bc
@@ -2083,7 +2014,7 @@ display_lives_left:                     ; CODE XREF: update_score_and_chk_bonus_
         jr      Z, wipe_all_ship_icons
         ld      b, a                    ; number of lives
 
-loc_0_4EA5:                             ; CODE XREF: display_lives_left+1Bj
+loc_0_4EA5:
         ld      hl, #base_icon
         call    display_message
         djnz    loc_0_4EA5              ; loop thru all icons
@@ -2095,16 +2026,15 @@ loc_0_4EA5:                             ; CODE XREF: display_lives_left+1Bj
         jr      wipe_ship_icons
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-wipe_all_ship_icons:                    ; CODE XREF: display_lives_left+12j
-        ld      b, #3                   ; max 3 ship icons
+wipe_all_ship_icons:                    ; max 3 ship icons
+        ld      b, #3
 
-wipe_ship_icons:                        ; CODE XREF: display_lives_left+26j
-                                        ; display_lives_left+30j
+wipe_ship_icons:
         ld      hl, #blank_x3
         call    display_message
         djnz    wipe_ship_icons
 
-loc_0_4EC2:                             ; CODE XREF: display_lives_left+24j
+loc_0_4EC2:
         pop     hl
         ld      (0x4020), hl            ; restore cursor position
         pop     af
@@ -2115,18 +2045,15 @@ loc_0_4EC2:                             ; CODE XREF: display_lives_left+24j
 ; End of function display_lives_left
 
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-blank_x3:.db 0x20, 0x20, 0x20, 0        ; DATA XREF: display_lives_left+2Ao
-base_icon:.db 0x88, 0x8E, 0x8C, 0       ; DATA XREF: display_lives_left+15o
-                                        ; handle_drop_new_bomb+5Fo
+blank_x3:.db 0x20, 0x20, 0x20, 0
+base_icon:.db 0x88, 0x8E, 0x8C, 0
 bomb_characters:.db 0x5C ; \            ; bomb characters
         .db 0x56 ; V
         .db 0x2A ; *
-aGoodLuck:.ascii 'GOOD LUCK'            ; DATA XREF: display_GOOD_LUCK+Do
+aGoodLuck:.ascii 'GOOD LUCK'
         .db 0
 blank_x9:.db 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0
-                                        ; DATA XREF: display_GOOD_LUCK+1Bo
-bomb_tbl:.db 0xD1, 0x3E, 0x56           ; DATA XREF: handle_drop_new_bomb+3Do
-                                        ; update_bombs+1o ...
+bomb_tbl:.db 0xD1, 0x3E, 0x56
         .db 0xDF, 0, 0x56
         .db 0x92, 0x3F, 0x56
         .db 0, 0, 0
@@ -2137,14 +2064,14 @@ bomb_tbl:.db 0xD1, 0x3E, 0x56           ; DATA XREF: handle_drop_new_bomb+3Do
         .db    0 ;  
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-init_turn:                              ; CODE XREF: code:4AADj
+init_turn:
         call    zero_bullet_tbl
         xor     a
         ld      (unused_4312), a
         ld      (game_timer), a
 
-game_loop:                              ; CODE XREF: code:4F95j
-        ld      a, (0x3840)             ; read keyboard
+game_loop:                              ; read keyboard
+        ld      a, (0x3840)
         ld      d, a
         ld      bc, #0x200              ; ~7.5ms
         call    0x60                    ; delay
@@ -2161,7 +2088,7 @@ game_loop:                              ; CODE XREF: code:4F95j
         ld      (keybd_state), a        ; store keyboard state
         call    NZ, handle_fire         ; yes, call
 
-loc_0_4F26:                             ; CODE XREF: code:4F15j
+loc_0_4F26:
         ld      a, (game_timer)
         and     #3                      ; time to move player?
         call    Z, check_and_handle_move ; yes, call
@@ -2172,7 +2099,7 @@ loc_0_4F26:                             ; CODE XREF: code:4F15j
         and     #3                      ; time to move bullet?
         call    Z, update_bullet        ; yes, call
 
-loc_0_4F3C:                             ; CODE XREF: code:4F32j
+loc_0_4F3C:
         ld      a, (game_timer)
         and     #7                      ; time to move UFO?
         call    Z, update_ufo           ; yes, call
@@ -2186,7 +2113,7 @@ loc_0_4F3C:                             ; CODE XREF: code:4F32j
         ld      hl, #video_ram
         call    clear_video_line_HL     ; wipe bonus
 
-loc_0_4F5A:                             ; CODE XREF: code:4F4Bj code:4F52j
+loc_0_4F5A:
         nop     
         ld      a, (game_timer)
         and     #0xF                    ; time to update bombs?
@@ -2209,7 +2136,7 @@ loc_0_4F5A:                             ; CODE XREF: code:4F4Bj code:4F52j
         add     a, a
         sub     #1                      ; calc new invader timer
 
-loc_0_4F82:                             ; CODE XREF: code:4F7Aj
+loc_0_4F82:
         ld      (invader_timer), a
         ld      a, (bullet_active)
         or      a                       ; fired?
@@ -2220,7 +2147,7 @@ loc_0_4F82:                             ; CODE XREF: code:4F7Aj
         dec     a
         ld      (fire_throttle), a
 
-loc_0_4F95:                             ; CODE XREF: code:4F89j code:4F8Fj
+loc_0_4F95:
         jp      game_loop
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 aCopyrightC1979:.ascii 'COPYRIGHT (C) 1979, '
