@@ -1,4 +1,4 @@
-asz80 -o ti.rel tandy.asm
+asz80 -l -o ti tandy.asm
 aslink -i ti.rel
 hex2bin ti.ihx
 
