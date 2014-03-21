@@ -10,11 +10,22 @@
 
 ; Processor:        z80
 ; Target assembler: ASxxxx by Alan R. Baldwin v1.5
-       .area   idaseg (ABS)
-       .hd64 ; this is needed only for HD64180
+       		.area   idaseg (ABS)
+					.z80
 
+; build options
+					.define		NO_ROM
+					
 ; modifications
-stack		.equ	0x7fff
+					.ifndef		NO_ROM
+putc			.equ	0x0033
+delay			.equ	0x0060
+prtnum		.equ	0x0faf
+cursor		.equ	0x4020
+					.endif
+					
+codebase	.equ	0x5210
+stack			.equ	0x7fff
 
 ; ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -28,7 +39,7 @@ video_ram:.ds 0x400
 
 ; Segment type: Regular
 ; segment 'ram'
-        .org 0x5200
+        .org codebase-0x0010
 fire_throttle:.ds 1
 invaders_left:.ds 1
 row_1_invader_addr:.ds 2
@@ -38,7 +49,7 @@ row_4_invader_addr:.ds 2
 invader_dir:.ds 1
 ufo_TTL:.ds 1
 ufo_timer:.ds 1
-ufo_dir:.ds 1                           ; something with UFO (direction?)
+ufo_dir:.ds 1
 wave_no:.ds 1
 no_lives:.ds 1
 ; end of 'ram'
@@ -50,7 +61,7 @@ no_lives:.ds 1
 
 ; Segment type: Pure code
 ; segment 'code'
-        .org 0x5210
+        .org codebase
 ufo_active:.db 0
 bullet_active:.db 0
 unused_4312:.db 0xC9
@@ -127,7 +138,7 @@ loc_0_44E6:                             ; get character
 
 loc_0_44F2:
         push    de
-        call    0x33                    ; display character
+        call    putc                    ; display character
         pop     de
         djnz    loc_0_44F2              ; loop
 
@@ -138,7 +149,7 @@ loc_0_44F9:                             ; next character
 
 loc_0_44FC:
         push    de
-        call    0x33                    ; display character
+        call    putc                    ; display character
         pop     de
         jr      loc_0_44F9              ; loop
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -158,9 +169,9 @@ display_message_slowly:
         ret     Z                       ; yes, exit
         push    de
         push    bc
-        call    0x33                    ; display character
+        call    putc                    ; display character
         ld      bc, #8960               ; ~130ms
-        call    0x60                    ; delay
+        call    delay                   ; delay
         pop     bc
         pop     de
         inc     hl                      ; next character
@@ -201,10 +212,10 @@ loc_0_4528:                             ; display character
 START:
         di      
         ld      a, #0xF
-        call    0x33                    ; display character
+        call    putc                    ; display character
         ld      sp, #stack
         ld      hl, #video_ram+0x3C0    ; cursor position
-        ld      (0x4020), hl
+        ld      (cursor), hl
         ld      hl, #aScore00000High    ; "  SCORE  00000                         "...
         call    display_message
         ld      a, #0x20 ; ' '
@@ -213,51 +224,51 @@ START:
 attract_loop:
         call    wipe_screen_left_to_right_slow
         ld      hl, #video_ram+0x394    ; cursor position
-        ld      (0x4020), hl
+        ld      (cursor), hl
         ld      hl, #aTandyElectroni    ; "* TANDY ELECTRONICS *"
         call    display_message
         ld      hl, #video_ram+0x9E     ; cursor position
-        ld      (0x4020), hl
+        ld      (cursor), hl
         ld      hl, #aPlay              ; "PLAY"
         call    print_slow_and_check_for_R_key
         ld      hl, #video_ram+0x192    ; cursor position
-        ld      (0x4020), hl
+        ld      (cursor), hl
         ld      hl, #invader_30pt
         call    display_message
         ld      hl, #video_ram+0x212    ; cursor position
-        ld      (0x4020), hl
+        ld      (cursor), hl
         ld      hl, #invader_20pt
         call    display_message
         ld      hl, #video_ram+0x292    ; cursor poition
-        ld      (0x4020), hl
+        ld      (cursor), hl
         ld      hl, #invader_10pt
         call    display_message
         ld      hl, #video_ram+0x312    ; cursor position
-        ld      (0x4020), hl
+        ld      (cursor), hl
         ld      hl, #ufo
         call    display_message
         ld      hl, #video_ram+0x19E    ; cursor position
-        ld      (0x4020), hl
+        ld      (cursor), hl
         ld      hl, #a30Points          ; "<----   30  POINTS"
         call    print_slow_and_check_for_R_key
         ld      bc, #0xFFFF             ; ~1s
-        call    0x60                    ; delay
-        call    0x60                    ; delay
+        call    delay                   ; delay
+        call    delay                   ; delay
 
 loc_0_45AF:
         call    wipe_screen_left_to_right_slow
         call    check_for_R_key
         ld      hl, #video_ram+0x394
-        ld      (0x4020), hl
+        ld      (cursor), hl
         ld      hl, #aTandyElectroni    ; "* TANDY ELECTRONICS *"
         call    display_message
         ld      hl, #video_ram+0x93
-        ld      (0x4020), hl
+        ld      (cursor), hl
         ld      hl, #aPressZKeyToMov    ; "PRESS \"Z\" KEY TO MOVE LEFT"
         call    print_slow_and_check_for_R_key
         ld      bc, #65535              ; ~1s
-        call    0x60                    ; delay
-        call    0x60                    ; delay
+        call    delay                   ; delay
+        call    delay                   ; delay
         jp      attract_loop
 
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
@@ -613,7 +624,7 @@ handle_bullet_hit:                      ; 2nd line on display
         pop     hl                      ; bullet address
         jp      Z, handle_shield_hit    ; no, must be a shield
         call    get_invader_address
-        ld      (0x4020), hl            ; set cursor position
+        ld      (cursor), hl            ; set cursor position
         ld      a, (hl)                 ; get character from video
         ld      b, #3                   ; default to 30 pts
         cp      #0xA0 ; ' '             ; 30pt invader character?
@@ -682,7 +693,7 @@ loc_0_47BD:                             ; multiplier
         call    update_score_and_chk_bonus_life
         pop     af
         pop     hl
-        ld      (0x4020), hl            ; cursor position
+        ld      (cursor), hl            ; cursor position
         ld      b, #10
         ld      e, a                    ; bonus/10
         ld      hl, #0
@@ -692,10 +703,10 @@ loc_0_47D1:
         add     hl, de
         djnz    loc_0_47D1              ; calc bonus
         ld      a, #0x3C ; '<'
-        call    0x33                    ; display character
-        call    0xFAF                   ; display integer in HL
+        call    putc                    ; display character
+        call    prtnum                  ; display integer in HL
         ld      a, #0x3E ; '>'
-        call    0x33                    ; display character
+        call    putc                    ; display character
         xor     a
         ld      (ufo_active), a         ; flag inactive
         ld      (ufo_timer), a          ; reset timer
@@ -923,7 +934,7 @@ loc_0_48E3:                             ; start on right
         ld      hl, #video_ram+0x3A
 
 loc_0_48E6:                             ; update cursor position
-        ld      (0x4020), hl
+        ld      (cursor), hl
         ld      hl, #ufo
         call    display_message
         ld      a, #1                   ; flag on-screen
@@ -1002,16 +1013,16 @@ flag_ufo_inactive:                      ; flag ufo inactive
 game_over:
         ld      sp, #stack
         ld      hl, #video_ram+0x19     ; cursor position
-        ld      (0x4020), hl
+        ld      (cursor), hl
         ld      hl, #video_ram          ; start of video
         call    clear_video_line_HL
         ld      hl, #aGAMEOVER          ; "G A M E - O V E R"
         call    display_message_slowly
         call    check_for_new_high_score
         ld      bc, #65535              ; ~1s
-        call    0x60                    ; delay
-        call    0x60                    ; delay
-        call    0x60                    ; delay
+        call    delay                   ; delay
+        call    delay                   ; delay
+        call    delay                   ; delay
         jp      attract_loop
 
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
@@ -1029,7 +1040,7 @@ display_invader_row:
         inc     hl
 
 loc_0_4970:                             ; cursor position
-        ld      (0x4020), hl
+        ld      (cursor), hl
         push    de
         push    hl
         ex      de, hl
@@ -1170,22 +1181,22 @@ loc_0_4A28:
         djnz    calc_invader_row_addr
         call    wipe_screen_left_to_right_slow
         ld      hl, #video_ram+0x309    ; cursor position
-        ld      (0x4020), hl
+        ld      (cursor), hl
         ld      hl, #shield             ; shield #1
         push    hl
         call    display_message
         ld      hl, #video_ram+0x317    ; cursor position
-        ld      (0x4020), hl
+        ld      (cursor), hl
         pop     hl
         push    hl                      ; shield #2
         call    display_message
         ld      hl, #video_ram+0x324    ; cursor position
-        ld      (0x4020), hl
+        ld      (cursor), hl
         pop     hl
         push    hl                      ; shield #3
         call    display_message
         ld      hl, #video_ram+0x331    ; cursor position
-        ld      (0x4020), hl
+        ld      (cursor), hl
         pop     hl                      ; shield #4
         call    display_message
         ld      de, #invader_30pt
@@ -1205,7 +1216,7 @@ loc_0_4A28:
 
 init_and_display_player_base:           ; cursor position
         ld      hl, #video_ram+0x384
-        ld      (0x4020), hl
+        ld      (cursor), hl
         ld      hl, #player
         call    display_message         ; draw player base
         ld      hl, #video_ram+0x386
@@ -1226,8 +1237,8 @@ decrement_player_life:
         ld      hl, #video_ram+0x380
         call    clear_video_line_HL
         ld      bc, #65535              ; ~1s
-        call    0x60                    ; delay
-        call    0x60                    ; delay
+        call    delay                   ; delay
+        call    delay                   ; delay
         ld      sp, #stack
         jp      init_and_display_player_base
 
@@ -1331,10 +1342,10 @@ flash_screen:
         push    bc
         call    invert_display
         ld      bc, #10000              ; ~140ms
-        call    0x60                    ; delay
+        call    delay                   ; delay
         call    invert_display
         ld      bc, #10000              ; ~140ms
-        call    0x60                    ; delay
+        call    delay                   ; delay
         pop     bc
         djnz    flash_screen            ; repeat
         jp      game_over
@@ -1688,7 +1699,7 @@ check_new_bomb_shield:                  ; HL = centre under invader
 
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
-
+				.ifndef	NO_ROM
 rand:
         push    de
         push    bc
@@ -1698,6 +1709,7 @@ rand:
         pop     de
         ret     
 ; End of function rand
+				.endif
 
 
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
@@ -1934,13 +1946,13 @@ display_GOOD_LUCK:
 
 loc_0_4E39:
         push    bc
-        ld      (0x4020), hl            ; current cursor position
+        ld      (cursor), hl            ; current cursor position
         push    hl
         ld      hl, #aGoodLuck          ; "GOOD LUCK"
         call    display_message
         call    delay_15ms
         pop     hl                      ; cursor position
-        ld      (0x4020), hl
+        ld      (cursor), hl
         push    hl
         ld      hl, #blank_x9
         call    display_message
@@ -1957,7 +1969,7 @@ loc_0_4E39:
 
 delay_15ms:
         ld      bc, #1000               ; ~15ms
-        jp      0x60                    ; delay
+        jp      delay                   ; delay
 ; End of function delay_15ms
 
 
@@ -1966,7 +1978,7 @@ delay_15ms:
 
 delay_1_5ms:
         ld      bc, #100                ; ~1.5ms
-        jp      0x60                    ; delay
+        jp      delay                   ; delay
 ; End of function delay_1_5ms
 
 
@@ -1985,15 +1997,15 @@ loc_0_4E69:                             ; get character
         jr      NZ, loc_0_4E80          ; no, skip
         ld      l, 1(ix)
         ld      h, 2(ix)                ; cursor position
-        ld      (0x4020), hl            ; set ROM variable
+        ld      (cursor), hl            ; set ROM variable
         call    add_3_to_ix
         jr      loc_0_4E69              ; next character
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
 loc_0_4E80:                             ; display character
-        call    0x33
+        call    putc
         ld      bc, #1280               ; ~20ms
-        call    0x60                    ; delay
+        call    delay                   ; delay
         call    check_for_R_key
         inc     ix                      ; next character
         jr      loc_0_4E69              ; loop
@@ -2008,10 +2020,10 @@ display_lives_left:
         push    de
         push    bc
         push    af
-        ld      hl, (0x4020)            ; current cursor position
+        ld      hl, (cursor)            ; current cursor position
         push    hl
         ld      hl, #video_ram+0x3D0    ; cursor position
-        ld      (0x4020), hl
+        ld      (cursor), hl
         ld      a, (no_lives)
         dec     a                       ; any lives left?
         jr      Z, wipe_all_ship_icons
@@ -2039,7 +2051,7 @@ wipe_ship_icons:
 
 loc_0_4EC2:
         pop     hl
-        ld      (0x4020), hl            ; restore cursor position
+        ld      (cursor), hl            ; restore cursor position
         pop     af
         pop     bc
         pop     de
@@ -2077,7 +2089,7 @@ game_loop:                              ; read keyboard
         ld      a, (0x3840)
         ld      d, a
         ld      bc, #0x200              ; ~7.5ms
-        call    0x60                    ; delay
+        call    delay                   ; delay
         ld      a, (0x3840)             ; read keyboard
         xor     d
         and     #0x80 ; '€'             ; space - changed state?
@@ -2162,6 +2174,84 @@ aCopyrightC1979:.ascii 'COPYRIGHT (C) 1979, '
         .db 0xFC, 0xAF, 0xC9, 0x3A, 0xC4, 0x4E, 0x6F, 0xCB, 0xA6, 0x5A
         .db 0x23, 0x56, 0xCD, 0x82, 0x4E, 0x7B, 0xF, 0xF, 0xF, 0xE6, 0x1F
         .db 0xC5, 0x21, 0xC0, 0x4D, 0x4F, 6, 0, 9, 0x7B
+
+.ifdef NO_ROM
+
+cursor:	.ds			2
+
+putc:
+;				jp			0x0033
+; this is a bit quicker than the ROM routine
+; which gets vectored via the driver mechanism
+; and handles control codes and scrolling
+; - only need to handle 0x08, 0x0F, 0x1A, 0x1B codes
+				push		af
+				push		hl
+				push		de
+				push		bc
+				ld			hl,(cursor)
+				cp			#0x08										; backspace?
+				jr			z,1$										; yes, handle
+				cp			#0x0f										; cursor off?
+				jr			z,9$										; yes, nothing to do
+				cp			#0x1a										; cursor down
+				jr			z,2$										; yes, handle
+				cp			#0x1b										; cursor up
+				jr			z,8$										; yes, handle
+				ld			(hl),a									; display character
+				inc			hl											; advance cursor
+				jr			7$
+1$:			dec			hl
+				ld			a,h
+				and			#0x03
+				or			#0x3c										; make sure on screen
+				ld			h,a
+				ld			(hl),#0x20							; insert space
+				jr			9$
+2$:			ld			de,#0x0040
+				add			hl,de										; next line down
+7$:			ld			a,h
+				cp			#0x40										; off screen?
+				jr			nz,9$
+8$:			ld			de,#0xffc0
+				add			hl,de										; move up 1 line
+9$:			ld			(cursor),hl							; update cursor
+				pop			bc
+				pop			de
+				pop			hl
+				pop			af
+				ret
+
+delay:
+;				jp			0x0060
+; this is an exact copy of the ROM routine
+; each loop is approx. 14.66us on the 
+; 1.77MHz TRS-80 Model I				
+				jp			1$
+1$:			ld			a,a
+				dec			bc
+				ld			a,b
+				or			c
+				jr			nz,1$				
+				ret
+
+prtnum:
+				ld			a,#0x35
+				call		putc
+				call		putc
+				call		putc
+				ret
+
+rand:
+; integer range in HL
+; returns result in HL
+				ld			hl,#0x0001
+				ret
+												
+.endif
+
 ; end of 'code'
 
+				.end		START
+				
 ; end of file
