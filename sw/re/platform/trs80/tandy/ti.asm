@@ -2236,6 +2236,10 @@ delay:
 				ret
 
 prtnum:
+;				jp			0x0faf
+; display integer in HL
+; - values 50,100,150,200,250,300
+; - (hex) $32,$64,$96,$C8,$FA,$12C
 				ld			a,#0x35
 				call		putc
 				call		putc
@@ -2245,7 +2249,16 @@ prtnum:
 rand:
 ; integer range in HL
 ; returns result in HL
-				ld			hl,#0x0001
+; - only need 8-bit for this program
+; - hacky version, seems to run OK
+1$:			ld			a,r											; pseudo-random value
+2$:			cp			l												; outside range?
+				jr			c,3$										; no, OK
+				sub			l												; subtract range
+				jr			2$											; test again
+3$:			inc			a												; 1-based
+				ld			h,0
+				ld			l,a											; store in HL
 				ret
 												
 .endif
