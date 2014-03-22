@@ -14,6 +14,11 @@
 					.z80
 
 ; build options
+;					.define		TRS80
+					.ifndef TRS80
+					.define		MICROBEE
+					.endif
+; optional for TRS-80, mandatory for MICROBEE					
 					.define		NO_ROM
 					
 ; modifications
@@ -23,23 +28,45 @@ delay			.equ	0x0060
 prtnum		.equ	0x0faf
 cursor		.equ	0x4020
 					.endif
-					
-codebase	.equ	0x5210
-stack			.equ	0x7fff
+
+					.ifdef TRS80
+codebase	.equ	0x5200
+					.endif
+					.ifdef MICROBEE
+; .COM file format					
+;codebase	.equ	0x0100			
+; .TAP file format
+codebase	.equ	0x0900
+					.endif		
+;stack			.equ	0x7fff
 
 ; อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
 
 ; Segment type: Regular
 ; segment 'video'
+
+				.ifdef TRS80
         .org 0x3C00
+        .endif
+        .ifdef MICROBEE
+        .org 0xF000
+        .endif
+        
 video_ram:.ds 0x400
 ; end of 'video'
 
+        .org codebase
+
+				.ifdef MICROBEE
+				ld			sp,#stack
+				call		0x8027								; set LORES video
+				jp			START
+				.endif
+        
 ; อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
 
 ; Segment type: Regular
 ; segment 'ram'
-        .org codebase-0x0010
 fire_throttle:.ds 1
 invaders_left:.ds 1
 row_1_invader_addr:.ds 2
@@ -61,7 +88,7 @@ no_lives:.ds 1
 
 ; Segment type: Pure code
 ; segment 'code'
-        .org codebase
+				        
 ufo_active:.db 0
 bullet_active:.db 0
 unused_4312:.db 0xC9
@@ -184,7 +211,7 @@ display_message_slowly:
 
 wipe_screen_left_to_right_slow:
         exx     
-        ld      hl, #0x3BFF             ; start of video (-1)
+        ld      hl, #video_ram-1				; start of video (-1)
         ld      b, #0x40 ; '@'          ; characters/line
 
 loc_0_451E:
@@ -2204,14 +2231,16 @@ putc:
 1$:			dec			hl
 				ld			a,h
 				and			#0x03
-				or			#0x3c										; make sure on screen
+;				or			#0x3c										; make sure on screen
+				or			#0xf0										; make sure on screen
 				ld			h,a
 				ld			(hl),#0x20							; insert space
 				jr			9$
 2$:			ld			de,#0x0040
 				add			hl,de										; next line down
 7$:			ld			a,h
-				cp			#0x40										; off screen?
+;				cp			#0x40										; off screen?
+				cp			#0xf4										; off screen?
 				jr			nz,9$
 8$:			ld			de,#0xffc0
 				add			hl,de										; move up 1 line
@@ -2240,10 +2269,31 @@ prtnum:
 ; display integer in HL
 ; - values 50,100,150,200,250,300
 ; - (hex) $32,$64,$96,$C8,$FA,$12C
-				ld			a,#0x35
+				push		de
+				ld			de,#100
+				xor			a												; zero 100 counter
+1$:			sbc			hl,de
+				jr			c,2$										; negative, done
+				inc			a												; inc 100 counter
+				jr			1$											; loop
+2$:			add			hl,de										; restore HL
+				or			a												; leading zero?
+				jr			z,3$										; yes, no print
+				add			#0x30										; convert to ASCII
 				call		putc
+3$:			ld			de,#10
+				xor			a												; zero 10 counter
+4$:			sbc			hl,de
+				jr			c,5$										; negative, done
+				inc			a												; in 10 counter
+				jr			4$											; loop
+5$:			add			hl,de										; restore HL
+				add			#0x30										; convert to ASCII
 				call		putc
+				ld			a,l											; remainder
+				add			#0x30										; convert to ASCII
 				call		putc
+				pop			de								
 				ret
 
 rand:
@@ -2262,6 +2312,8 @@ rand:
 				ret
 												
 .endif
+
+stack		.equ		.+0x400
 
 ; end of 'code'
 
