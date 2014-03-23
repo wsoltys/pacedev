@@ -29,15 +29,15 @@ prtnum		.equ	0x0faf
 cursor		.equ	0x4020
 					.endif
 
-					.ifdef TRS80
+.ifdef TRS80
 codebase	.equ	0x5200
-					.endif
-					.ifdef MICROBEE
+.endif
+.ifdef MICROBEE
 ; .COM file format					
 ;codebase	.equ	0x0100			
 ; .TAP file format
 codebase	.equ	0x0900
-					.endif		
+.endif		
 ;stack			.equ	0x7fff
 
 ; อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
@@ -45,23 +45,23 @@ codebase	.equ	0x0900
 ; Segment type: Regular
 ; segment 'video'
 
-				.ifdef TRS80
+.ifdef TRS80
         .org 0x3C00
-        .endif
-        .ifdef MICROBEE
+.endif
+.ifdef MICROBEE
         .org 0xF000
-        .endif
+.endif
         
 video_ram:.ds 0x400
 ; end of 'video'
 
         .org codebase
 
-				.ifdef MICROBEE
+.ifdef MICROBEE
 				ld			sp,#stack
 				call		0x8027								; set LORES video
 				jp			START
-				.endif
+.endif
         
 ; อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
 
@@ -119,27 +119,35 @@ explosion:.db 0x82, 0x84, 0x20, 0x88, 0x81, 0x1A, 1, 0x88, 0x81, 0x20, 0x82
 blank_space:.db 0x1B, 1, 0x20, 0x20, 0x20, 0x20, 0x20, 0x1A, 1, 0x20, 0x20
         .db 0x20, 0x20, 0x20, 0
 aPlay:  .ascii 'PLAY'
-        .db 9, 0xD6, 0x3C
+        .db 9
+        .dw video_ram+0x00D6
 aTandyInvaders:.ascii 'TANDY       INVADERS'
-        .db 9, 0x54, 0x3D
+        .db 9
+        .dw video_ram+0x0154
 aScoreAdvanceTa:.ascii '* SCORE ADVANCE TABLE *'
         .db 0
 aTandyElectroni:.ascii '* TANDY ELECTRONICS *'
         .db 0
 a30Points:.ascii '<----   30  POINTS'
-        .db 9, 0x1E, 0x3E
+        .db 9
+        .dw video_ram+0x021E
 a20Points:.ascii '<----   20  POINTS'
-        .db 9, 0x9E, 0x3E
+        .db 9
+        .dw video_ram+0x029E
 a10Points:.ascii '<----   10  POINTS'
-        .db 9, 0x1E, 0x3F
+        .db 9
+        .dw video_ram+0x031E
 a_Mystery:.ascii '<----   ?   MYSTERY'
         .db 0
 aPressZKeyToMov:.ascii 'PRESS "Z" KEY TO MOVE LEFT'
-        .db 9, 0x13, 0x3D
+        .db 9
+        .dw video_ram+0x0113
 aPressXKeyToMov:.ascii 'PRESS "X" KEY TO MOVE RIGHT'
-        .db 9, 0x93, 0x3D
+        .db 9
+        .dw video_ram+0x0193
 aPressKeyToFire:.ascii 'PRESS " " KEY TO FIRE !'
-        .db 9, 0x13, 0x3E
+        .db 9
+        .dw video_ram+0x0213
 aPressRKeyToSta:.ascii 'PRESS "R" KEY TO START'
         .db 0
 aGAMEOVER:.ascii 'G A M E - O V E R'
@@ -302,8 +310,14 @@ loc_0_45AF:
 
 
 check_for_R_key:
+.ifdef TRS80
         ld      a, (0x3804)             ; read keyboard
-        cp      #4                      ; "R"?
+        cp      #4                      ; 'R'?
+.endif
+.ifdef MICROBEE
+				ld			a,#0x52									; 'R'
+				call		testky
+.endif        
         jp      Z, start_game           ; yes, skip
         ret     
 ; End of function check_for_R_key
@@ -898,11 +912,21 @@ loc_0_4886:                             ; flag match
 
 
 check_and_handle_move:
+.ifdef TRS80
         ld      a, (0x3808)             ; keyboard
         and     #5                      ; "X" or "Z" pressed?
         ret     Z                       ; no return
         cp      #4                      ; "Z"?
         jr      NC, handle_move_left    ; yes, skip
+.endif
+.ifdef MICROBEE
+				ld			a,#0x5a									; 'Z'?
+				call		testky
+				jr			z, handle_move_left
+				ld			a,#0x58									; 'X'?
+				call		testky
+				ret			nz
+.endif        
         ld      a, (video_ram+0x3BB)    ; right-most position for base
         bit     7, a                    ; graphic character?
         ret     NZ                      ; yes, return (can't move right)
@@ -1726,7 +1750,7 @@ check_new_bomb_shield:                  ; HL = centre under invader
 
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
 
-				.ifndef	NO_ROM
+.ifndef	NO_ROM
 rand:
         push    de
         push    bc
@@ -1736,7 +1760,7 @@ rand:
         pop     de
         ret     
 ; End of function rand
-				.endif
+.endif
 
 
 ; ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ S U B R O U T I N E ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
@@ -2113,11 +2137,31 @@ init_turn:
         ld      (game_timer), a
 
 game_loop:                              ; read keyboard
+.ifdef TRS80
         ld      a, (0x3840)
+.endif
+.ifdef MICROBEE
+				ld			a, #0x20								; space
+				call		testky
+				ld			a,#0x80
+				jr			z,1$										; space hit
+				xor			a												; not
+1$:				
+.endif        
         ld      d, a
         ld      bc, #0x200              ; ~7.5ms
         call    delay                   ; delay
+.ifdef TRS80        
         ld      a, (0x3840)             ; read keyboard
+.endif
+.ifdef MICROBEE
+				ld			a, #0x20								; space
+				call		testky
+				ld			a,#0x80
+				jr			z,2$										; space hit
+				xor			a												; not
+2$:				
+.endif        
         xor     d
         and     #0x80 ; '€'             ; space - changed state?
         jr      NZ, loc_0_4F26          ; yes, skip
@@ -2255,13 +2299,21 @@ delay:
 ;				jp			0x0060
 ; this is an exact copy of the ROM routine
 ; each loop is approx. 14.66us on the 
-; 1.77MHz TRS-80 Model I				
-				jp			1$
-1$:			ld			a,a
+; 1.77MHz TRS-80 Model I
+.ifdef MICROBEE
+; 1.5x the delay
+				push		bc
+				srl			b
+				rr			c
+				call		1$
+				pop			bc
+.endif
+1$:			jp			2$
+2$:			ld			a,a
 				dec			bc
 				ld			a,b
 				or			c
-				jr			nz,1$				
+				jr			nz,2$				
 				ret
 
 prtnum:
@@ -2311,6 +2363,50 @@ rand:
 				ld			l,a											; store in HL
 				ret
 												
+.endif
+
+.ifdef MICROBEE
+testky:
+; from Wildcards Vol.3
+				push		bc
+				ld			c,a											; save value of key being tested
+				ld			b,a
+				ld			a,#0x12
+				out			(0x0c),a								; select update register (high) of 6845
+				ld			a,b
+				rrca
+				rrca
+				rrca
+				rrca
+				and			#0x03
+				out			(0x0d),a								; set high address of key
+				ld			a,#0x13
+				out			(0x0c),a								; select update register (low) of 6845
+				ld			a,b
+				rlca
+				rlca
+				rlca
+				rlca
+				out			(0x0d),a								; select low address of key
+				ld			a,#0x01
+				out			(0x0b),a								; select ROM read latch on
+				ld			a,#0x10
+				out			(0x0c),a
+				in			a,(0x0d)
+				ld			a,#0x1f
+				out			(0x0c),a
+				out			(0x0d),a
+wait1:	in			a,(0x0c)
+				bit			7,a
+				jr			z,wait1
+				in			a,(0x0c)
+				cpl
+				bit			6,a
+				ld			a,#0x00
+				out			(0x0b),a								; select ROM read latch off
+				ld			a,b											; restore original key code
+				pop			bc					
+				ret
 .endif
 
 stack		.equ		.+0x400
