@@ -315,7 +315,7 @@ check_for_R_key:
         cp      #4                      ; 'R'?
 .endif
 .ifdef MICROBEE
-				ld			a,#0x52									; 'R'
+				ld			a, #18 									; 'R'
 				call		testky
 .endif        
         jp      Z, start_game           ; yes, skip
@@ -632,7 +632,12 @@ update_bullet:
         ld      (hl), #0x20 ; ' '       ; display space
         ld      de, #0xFFC0             ; -64
         add     hl, de                  ; address of row above
+.ifdef TRS80        
         bit     2, h                    ; off the top of the screen?
+.endif
+.ifdef MICROBEE        
+        bit     4, h                    ; off the top of the screen?
+.endif        
         jr      Z, delete_bullet        ; yes, skip
         ld      a, (hl)                 ; get character from video
         cp      #0x80 ; '€'             ; graphic space?
@@ -920,10 +925,10 @@ check_and_handle_move:
         jr      NC, handle_move_left    ; yes, skip
 .endif
 .ifdef MICROBEE
-				ld			a,#0x5a									; 'Z'?
+				ld			a, #26 									; 'Z'?
 				call		testky
 				jr			z, handle_move_left
-				ld			a,#0x58									; 'X'?
+				ld			a, #24 									; 'X'?
 				call		testky
 				ret			nz
 .endif        
@@ -1663,7 +1668,14 @@ init_bomb_ret:
 
 check_and_handle_new_bomb:
         ld      hl, (base_centre)
-        ld      de, #0xC080
+        ; this should work, but doesn't assemble
+;        ld			de, #0xfc80-#video_ram
+.ifdef TRS80        
+        ld			de, #0xC080
+.endif
+.ifdef MICROBEE
+        ld			de, #0x0C80
+.endif        
         add     hl, de                  ; base X position
         ex      de, hl                  ; base X position
         ld      l, 0(ix)
@@ -2141,10 +2153,10 @@ game_loop:                              ; read keyboard
         ld      a, (0x3840)
 .endif
 .ifdef MICROBEE
-				ld			a, #0x20								; space
+				ld			a, #55									; space
 				call		testky
-				ld			a,#0x80
-				jr			z,1$										; space hit
+				ld			a, #0x80
+				jr			z, 1$										; space hit
 				xor			a												; not
 1$:				
 .endif        
@@ -2155,10 +2167,10 @@ game_loop:                              ; read keyboard
         ld      a, (0x3840)             ; read keyboard
 .endif
 .ifdef MICROBEE
-				ld			a, #0x20								; space
+				ld			a, #55									; space
 				call		testky
-				ld			a,#0x80
-				jr			z,2$										; space hit
+				ld			a, #0x80
+				jr			z, 2$										; space hit
 				xor			a												; not
 2$:				
 .endif        
@@ -2234,6 +2246,14 @@ loc_0_4F82:
         ld      (fire_throttle), a
 
 loc_0_4F95:
+.ifdef MICROBEE
+; microbee runs faster
+; - already adjusted the delay routine
+; - but also need to throttle the main loop
+; - 200 looks about right side-by-side
+				ld			bc, #200
+				call		delay
+.endif
         jp      game_loop
 ; ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 aCopyrightC1979:.ascii 'COPYRIGHT (C) 1979, '
