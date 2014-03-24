@@ -1,5 +1,4 @@
  
- 
 ; **********************************************************
 ; 100% relocatable source code for TRS-80 TANDY INVADERS
 ; - reverse-engineered by msmcdoug@gmail.com 2014
@@ -8,13 +7,83 @@
 ; - option to build for MICROBEE
 ; **********************************************************
 
+; TANDY INVADERS was written in 1979 (according to the text embedded in the code),
+; and - impressively - ran on a 4KB TRS-80 Model I (Level II only) computer. As
+; the name suggests, it is a port of the classic arcade game 'Space Invaders'.
+; 
+; Whilst arguably not the best port of Space Invaders for the TRS-80 (that honour
+; would likely go to Adventure International's 'Space Intruders'), it was almost 
+; certainly the first (machine language) version and does a good job of 
+; replicating the spirit of the arcade game, especially considering the chunky
+; graphics of the TRS-80 and the fact that it runs in just 4KB of memory. And no
+; doubt for this reason, the game does not have any sound at all.
+; 
+; The original binary has been disassembled with the unrivalled IDAPro 
+; disassembler and reverse-engineered to the extent that every line of code has 
+; been understood and duly commented. The result is a 100% relocatable source 
+; file that may be assembled to produce the exact binary of the original.
+; 
+; The original game was distributed on cassette and like most early TRS-80 games
+; loads in low memory that was subsequently used by the various Disk Operating
+; Systems of the day. For this reason a lot of TRS-80 games are loaded from disk
+; into high memory and then moved to their original location, overwriting (and
+; hence effectively disabling) the DOS. This source allows the game to be
+; relocated into high memory, and loaded directly from disk and even potentially
+; have a high score load/save game option added.
+; 
+; The game makes use of five (5) TRS-80 Level II ROM routines, and for this reason
+; requires the Level II BASIC ROM vectors to be valid and in place. When running
+; (from high memory) with a DOS loaded, the integer print routine (used when you
+; hit a UFO) crashes for reasons I did not bother to look into - that's left as
+; an exercise for the reader.
+; 
+; In order to circumvent this issue, and also to allow porting to other computers,
+; I've implemented replacement routines that negate the requirement to have a
+; TRS-80 Level II ROM at all. The only 'controversial' routine is the random
+; number generator; the ROM routine is intertwined with the other maths routines
+; and was way overkill for the game. I've implemented a very simple routine based
+; on the Z80 refresh register which appears not to have affected gameplay.
+; 
+; The source contains an option to build the game for the Australian Microbee 
+; computer; unique amongst TRS-80 contemparies in that the video memory and
+; graphics characters map very closely to the TRS-80, making porting much easier
+; than other machines. There are several options for the Microbee output - the
+; most generic being the .BEE format which is a straight binary and most
+; commonly loading and executing at 900h. This same output can be converted to
+; the emulator .TAP format and directly loaded in the uBee512 emulator.
+; 
+; The game source makes for interesting reading and certainly takes what I
+; would consider to be a unique approach to design, most likely due to the 4KB
+; constraint. Rather than keep track of objects in tables in memory for example,
+; it uses the video memory itself to ascertain the state of the game and only 
+; requires a handful of variables. Clever!
+; 
+; Although it made very heavy use of video memory, most of the references were
+; identified and labelled by the disassembler as offsets from the base address.
+; There are, however, a few areas of the code that require special attention
+; when moving the video base address (for the Microbee for example) that are not
+; immediately obvious. I've attempted to use address arithmetic to mitigate
+; this issue, but there is the odd bit test that needs to be revisited should
+; the video be moved again.
+; 
+; The only other TRS-80-specific code was the direct read of the keyboard scan
+; matrix - a really, really nice feature of the TRS-80. These parts of the code
+; have been patched as necessary; you only need to see the hoops that you need
+; to jump through on the Microbee to appreciate how nice and easy it was to read
+; the TRS-80 keyboard!
+; 
+; The source has been formatted for the ASZ80 assembler, primarily because that
+; was one of the built-in options in IDAPro. There's nothing too assembler-
+; specific AFAIK, except perhaps a few expressions for address arithmetic.
+;
+
 ; Processor:        z80
 ; Target assembler: ASxxxx by Alan R. Baldwin v1.5
        		.area   idaseg (ABS)
 					.z80
 
 ; build options
-;					.define		TRS80
+					.define		TRS80
 					.ifndef TRS80
 					.define		MICROBEE
 					.endif
