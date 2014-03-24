@@ -14,7 +14,7 @@
 					.z80
 
 ; build options
-					.define		TRS80
+;					.define		TRS80
 					.ifndef TRS80
 					.define		MICROBEE
 					.endif
