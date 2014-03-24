@@ -18,6 +18,17 @@
 ; graphics of the TRS-80 and the fact that it runs in just 4KB of memory. And no
 ; doubt for this reason, the game does not have any sound at all.
 ; 
+; The game was also hacked and distributed by Dick Smith Electronics in 
+; Australia as "The Space Invader Game". The binary differs by only 189 bytes and 
+; for some inexplicable reason the left/right keys were changed to "2" and "0"
+; which are on opposite sides of the keyboard! A very lazy hack indeed.
+;
+; [Incidentally this is the very reason this file exists. I saw a YouTube video
+;  idly claiming that invaders was written by programmers contracted by Dick
+;  Smith Electronics - I was pretty sure it was a simple hack of Tandy Invaders
+;  and so I went looking to confirm that it was indeed the case. Then I started 
+;  to disassemble the game and it ended up as a port to the Microbee!]
+;
 ; The original binary has been disassembled with the unrivalled IDAPro 
 ; disassembler and reverse-engineered to the extent that every line of code has 
 ; been understood and duly commented. The result is a 100% relocatable source 
