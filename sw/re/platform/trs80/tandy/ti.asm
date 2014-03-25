@@ -94,7 +94,7 @@
 					.z80
 
 ; build options
-					.define		TRS80
+;					.define		TRS80
 					.ifndef TRS80
 					.define		MICROBEE
 					.endif
@@ -132,9 +132,48 @@
         .org codebase
 
 .ifdef MICROBEE
-				ld			sp,#stack
-				call		0x8027								; set LORES video
+				ld			hl,#m6545_data+15
+				ld			b,#16									; 16 registers to init
+1$:			ld			a,b
+				dec			a
+				out			(0x0c),a							; register address
+				ld			a,(hl)
+				out			(0x0d),a							; register data
+				dec			hl
+				djnz		1$
+; setup the LORES character set (copied from ROM 0x8027)
+init_lores:
+				ld			hl,#0xf800						; start of PCG RAM
+				ld			c,#128								; 1st graphic character
+1$:			ld			e,c										; get character
+				ld			d,#0x03								; 3 lines of pixels
+2$:			xor			a											; clear pixel line
+				bit			0,e										; left pixel on?
+				jr			z,3$									; no skip
+				or			#0xf0									; data for left pixel
+3$:			bit			1,e										; right pixel on?
+				jr			z,4$									; no skip
+				or			#0x0f									; data for right pixel
+4$:			ld			b,#5									; 5 raster lines per LORES pixel
+5$:			ld			(hl),a								; store pixel line data
+				inc			hl										; next PCG RAM location
+				djnz		5$										; loop thru 5 raster lines
+				rrc			e
+				rrc			e											; next 2 bits of character
+				dec			d											; next pixel line
+				jr			nz,2$									; loop thru 3 pixel lines
+				ld			(hl),a								; 16th raster scan line
+				inc			hl										; next PCG RAM location
+				inc			c											; done all characters?
+				jr			nz,1$									; no, loop
 				jp			START
+				
+m6545_data:
+; 'mbeeic' from MESS initialises with this data
+				.db			0x6b,0x40,0x51,0x37,0x12,0x09,0x10,0x11
+;				.db			0x48,0x0f,0x6f,0x0f,0x00,0x00,0x00,0x00
+; (0x0A)=0x2f to hide/turn cursor off
+				.db			0x48,0x0f,0x2f,0x0f,0x00,0x00,0x00,0x00
 .endif
         
 ; ===========================================================================
