@@ -132,6 +132,7 @@
         .org codebase
 
 .ifdef MICROBEE
+; setup the 6545 for 64x16 text (cursor hidden/off)
 				ld			hl,#m6545_data+15
 				ld			b,#16									; 16 registers to init
 1$:			ld			a,b
