@@ -18,6 +18,17 @@
 
 uint8_t ram[64*1024];
 
+uint8_t title_data[] =
+{
+	#include "title.c"
+};
+
+uint8_t title_rle_data[] =
+{
+	#include "title_rle.c"
+};
+#define RLE_SIZE (sizeof(title_rle_data)/sizeof(uint8_t))
+
 void main (int argc, char *argv[])
 {
 	struct stat	fs;
@@ -68,11 +79,98 @@ void main (int argc, char *argv[])
 		}
 	}
 
+	// converting to 8-bit
+	fp = fopen ("title.c", "wt");
+	for (y=0; y<192; y++)
+	{
+		for (x=0; x<280/8; x++)
+		{
+			uint8_t byte = 0;
+			for (int i=0; i<8; i++)
+			{
+				if (getpixel (screen, x*8+i, y) != 0)
+					byte |= (1<<(7-i));
+			}
+			fprintf (fp, "0x%02X,", byte);
+		}
+		fprintf (fp, "\n");
+	}
+	fclose (fp);
+		
+	clear_bitmap (screen);
+	for (y=0; y<192; y++)
+	{
+		for (x=0; x<280/8; x++)
+		{
+			uint8_t byte = title_data[y*35+x];
+			
+			for (int i=0; i<8; i++)
+				if (byte & (1<<(7-i)))
+					putpixel (screen, x*8+i, y, 15);
+		}
+	}
+
+	// now RLE it
+	fp = fopen ("title_rle.c", "wt");
+
+	int lc = 0;	
+	int n = 0;
+	while (n < 280/8*192)
+	{
+		unsigned cnt = 0;
+		uint8_t byte = title_data[n];
+		
+		while (n<280/8*192 && (byte == title_data[n]) && cnt < 256)
+		{
+			cnt++;
+			n++;
+		}
+		fprintf (fp, "0x%02X, 0x%02X, ", (uint8_t)cnt, byte);
+		lc += 2;
+		if (lc == 16)
+		{
+			fprintf (fp, "\n");
+			lc = 0;
+		}
+	}
+	fprintf (fp, "\n");
+	fclose (fp);
+
+	// now show the rle version
+	clear_bitmap (screen);
+	x = 0;
+	y = 0;
+	for (n=0; n<RLE_SIZE; n+=2)
+	{
+		unsigned cnt = title_rle_data[n];
+		uint8_t byte = title_rle_data[n+1];
+		
+		if (cnt == 0)
+			cnt+= 256;
+
+		while (cnt--)
+		{
+			for (int i=0; i<8; i++)
+			{
+				if (byte & (1<<(7-i)))
+					putpixel (screen, x*8+i, y, 15);
+			}
+			x++;
+			if (x == 280/8)
+			{
+				x = 0;
+				y++;
+			}
+		}
+	}
+
   while (!key[KEY_ESC]);	  
   while (key[KEY_ESC]);	  
-  
+	  
   allegro_exit ();
-  printf ("addr=0x%04X\n", a);
+  printf ("original=%d\n", a-0x0f00);
+  printf ("280/8*192=%d\n", 280/8*192);
+  printf ("RLE_SIZE=%d\n", RLE_SIZE);
 }
 
 END_OF_MAIN();
