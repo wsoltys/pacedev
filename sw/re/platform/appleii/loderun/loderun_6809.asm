@@ -38,8 +38,7 @@ CPU179			.equ		0xFFD9
 ROMMODE			.equ		0xFFDE
 RAMMODE			.equ		0xFFDF
 
-; cartridge memory
-codebase		.equ		0x8000
+codebase		.equ		0x4000
 .endif
 
 						.org		codebase
@@ -73,31 +72,60 @@ stack				.equ		.-2
 				sta			VRES      							
 				lda			#0x00										; black
 				sta			BRDR      							
-				lda			#0xE1										; screen based at page $38 ($70000) + 16 lines (16*128=2KB)
-				sta			VOFFMSB									; /8 = $E100
+				lda			#0xE0										; screen at page $38
+				sta			VOFFMSB
 				lda			#0x00      							
 				sta			VOFFLSB   							
 				lda			#0x00										; normal display, horiz offset 0
 				sta			HOFF      							
-				sta			RAMMODE									; select RAM mode
-				ldx			#MMUTSK1								; start of bank registers for TASK 1
-				lda			#12											; bank 12 ($18000) RAM and graphics ROM
-				sta			4,x     								
-				lda			#13											; bank 13 ($1A000) program ROM
-				sta			5,x     								
-				lda			#14											; bank 14 ($1C000) program ROM (continued)
-				sta			6,x     								
-				inca														; bank 15 ($1E000) program ROM (continued)
-				sta			7,x     								
+				lda			#0x00
+				sta			PALETTE
+				lda			#0x12
+				sta			PALETTE+1
 				sta			CPU179									; select fast CPU clock (1.79MHz)
+				jsr			gcls
 .endif
 				
 ; start lode runner
 				jsr			display_title
-1$:			jsr			1$
+1$:			bra			1$
+
+gcls:
+				ldx			#0x0000
+				lda			#0x00
+1$:			sta			,x+
+				cmpx		#40*192
+				bne			1$
+				rts
+				
+dtx:		.db			1
+dty:		.db			1
 
 display_title:
-				rts
+				ldy			#title_data
+				ldx			#0x0000									; 2 centres the title screen
+				lda			#35											; 35 bytes/line
+				sta			(dtx)
+				lda			#192										; 192 lines/screen
+				sta			(dty)
+1$:			ldb			,y+											; count
+				lda			,y+											; byte
+2$:			sta			,x+
+				dec			(dtx)										; line byte count
+				tst			(dtx)										; done line?
+				bne			3$											; no, skip
+				pshs		b
+				ldb			#35
+				stb			(dtx)										; reset line byte count
+				ldb			#5
+				abx															; adjust video ptr
+				dec			(dty)										; dec line count
+				puls		b
+3$:			decb														; done count?
+				bne			2$											; no, loop
+				tst			(dty)										; done screen?
+				bne			1$											; no, loop
+4$:			rts
 								
 .include "title.asm"
 
