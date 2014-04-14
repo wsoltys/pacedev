@@ -64,8 +64,9 @@ codebase		.equ		0x5200
 				ld			de,#0xf801
 				ld			bc,#0x07ff
 				ld			(hl),#0x20
-				ldir														; clear graphics screen
-				GFXMOD	0xB3										; 640x240, X-inc on write
+				ldir														; clear text screen
+;				GFXMOD	0xB3										; 640x240, X-inc on write
+				GFXMOD	0xB0										; text-only mode, X-inc on write
 .endif
 
 ; start lode runner				
@@ -113,6 +114,14 @@ display_title_screen: ; $6008
 				ld			a,e											; Y count
 				cp			#192										; finished?
 				jr			nz,1$
+; this is where the apple selects the hires screen				
+				GFXMOD	0xB3										; 640x240, X-inc on write
+				jp			title_wait_for_key
+				
+; $6056
+
+title_wait_for_key: ; $618e
+;				jsr			keybd_flush
 
 XXX:		jr			XXX
 

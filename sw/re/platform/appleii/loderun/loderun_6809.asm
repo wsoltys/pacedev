@@ -115,6 +115,13 @@ display_title_screen: ; $6008
 				bne			2$											; no, loop
 				tst			(dty)										; done screen?
 				bne			1$											; no, loop
+; this is where the apple selects the hires screen				
+				jmp			title_wait_for_key
+
+; $6056
+
+title_wait_for_key: ; $618e
+;				jsr			keybd_flush
 
 XXX:		bra			XXX
 
