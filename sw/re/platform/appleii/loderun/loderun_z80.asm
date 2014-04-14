@@ -70,12 +70,11 @@ codebase		.equ		0x5200
 .endif
 
 ; start lode runner				
-;				jsr			read_paddles
+				call		read_paddles
 ;				lda			#1
 ;				jsr			sub_6359								; examine h/w and check disk sig			
 
 display_title_screen: ; $6008
-
 				call		gcls1
 				ld			hl,#title_data
 				xor			a
@@ -119,11 +118,39 @@ display_title_screen: ; $6008
 				jp			title_wait_for_key
 				
 ; $6056
-
+				xor			a
+; store in zero page
+				ld			a,#5										; number of lives
+				ld			(no_lives),a				
+; do some crap
+				jp			display_title_screen
+				
 title_wait_for_key: ; $618e
 ;				jsr			keybd_flush
+				ld			b,#4
+1$:			push		bc
+				ld			bc,#0xF000
+2$:			ld			a,(paddles_detected)
+				cp			#0xcb										; detected?
+				jr			z,3$										; no, skip
+; check for joystick buttons here				
+3$:			ld			a,(0xf4ff)							; check for any key
+				or			a
+				jr			nz,loc_61f6
+				dec			bc
+				ld			a,b
+				or			c
+				jr			nz,2$
+				pop			bc
+				djnz		1$
+; do some other crap
+; test $A7
+				jp			loc_6056
 
-XXX:		jr			XXX
+loc_61f6:
+; exit to debugger (trs80gp only)				
+break:	ld			a,#4
+				out			(0x47),a
 
 gcls1: ; $7A51
 				ld			c,#240
@@ -138,7 +165,16 @@ gcls1: ; $7A51
 				dec			c
 				jr			nz,1$
 				ret								
-				
+
+read_paddles: ; $8702
+; check for joystick buttons here
+				ld			a, #0xcb								; flag no paddles detected
+				ld			(paddles_detected),a
+				ret
+
+; zero-page registers
+.include "zeropage.asm"
+
 .include "title.asm"
 
 stack		.equ		.+0x400

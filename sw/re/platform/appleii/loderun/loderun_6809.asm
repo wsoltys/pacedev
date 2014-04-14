@@ -86,7 +86,7 @@ stack				.equ		.-2
 .endif
 				
 ; start lode runner
-;				jsr			read_paddles
+				jsr			read_paddles
 ;				lda			#1
 ;				jsr			sub_6359								; examine h/w and check disk sig			
 
@@ -118,12 +118,36 @@ display_title_screen: ; $6008
 ; this is where the apple selects the hires screen				
 				jmp			title_wait_for_key
 
-; $6056
+loc_6056: ; $6056
+				lda			#0
+; store in zero page
+				lda			#5											; number of lives
+				sta			(no_lives)
+; do some crap
+				jmp			display_title_screen
 
 title_wait_for_key: ; $618e
 ;				jsr			keybd_flush
+; *** add 6s timeout here!!!
+1$:			lda			(paddles_detected)
+				cmpa		#0xcb										; detected?
+				beq			3$											; no, skip
+; check for joystick buttons here				
+3$:			ldx			#PIA0
+				ldb			#0											; all columns
+				stb			2,x											; column strobe
+				lda			,x
+				coma														; any key pressed?
+				bne			loc_61f6								; yes, exit
+				bra			1$				
+; do some other crap
+; test $A7
+				jmp			loc_6056
 
-XXX:		bra			XXX
+loc_61f6:
+; hack
+				jsr			gcls1
+break:	bra			break
 
 gcls1: ; $7A51
 				ldx			#0x0000
@@ -132,10 +156,19 @@ gcls1: ; $7A51
 				cmpx		#40*192
 				bne			1$
 				rts
-				
+
+read_paddles: ; $8702
+				lda			#0xcb										; no paddles detected?
+				sta			paddles_detected
+				rts
+								
+; zero-page registers
+.include "zeropage.asm"
+
+; 6809 port-specific variables
 dtx:		.db			1
 dty:		.db			1
-								
+
 .include "title.asm"
 
 				.end		codebase

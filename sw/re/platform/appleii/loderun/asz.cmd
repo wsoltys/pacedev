@@ -1,3 +1,4 @@
+cls
 asz80 -l -o -s loderun_z80.asm
 aslink -i loderun_z80.rel
 hex2bin loderun_z80.ihx
