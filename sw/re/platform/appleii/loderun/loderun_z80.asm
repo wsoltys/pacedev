@@ -31,19 +31,21 @@ codebase		.equ		0x5200
 				out			(130),a
 				.endm
 
-				.macro HRCLS,?a1,?a2
-				ld			c,#240
-a1:			ld			a,c
-				dec			a
-				GFXY
-				ld			b,#80
-				xor			a
-				GFXX
-a2:			djnz		a2
-				dec			c
-				jr			nz,a1
+				.macro BITDBL
+				rlca
+				push		af
+				rl			c
+				pop			af
+				rl			c
 				.endm
-								
+				
+				.macro NIBDBL
+				BITDBL
+				BITDBL
+				BITDBL
+				BITDBL
+				.endm
+
 .endif
 
 				.org		codebase
@@ -67,26 +69,13 @@ a2:			djnz		a2
 .endif
 
 ; start lode runner				
-				call		display_title
-1$:			jr			1$
+;				jsr			read_paddles
+;				lda			#1
+;				jsr			sub_6359								; examine h/w and check disk sig			
 
-				.macro BITDBL
-				rlca
-				push		af
-				rl			c
-				pop			af
-				rl			c
-				.endm
-				
-				.macro NIBDBL
-				BITDBL
-				BITDBL
-				BITDBL
-				BITDBL
-				.endm
-				
-display_title:
-				HRCLS				
+display_title_screen: ; $6008
+
+				call		gcls1
 				ld			hl,#title_data
 				xor			a
 				ld			d,a											; x count
@@ -124,8 +113,23 @@ display_title:
 				ld			a,e											; Y count
 				cp			#192										; finished?
 				jr			nz,1$
-				ret
 
+XXX:		jr			XXX
+
+gcls1: ; $7A51
+				ld			c,#240
+1$:			ld			a,c
+				dec			a
+				GFXY
+				ld			b,#80
+				xor			a
+				GFXX
+2$:			GFXDAT
+				djnz		2$
+				dec			c
+				jr			nz,1$
+				ret								
+				
 .include "title.asm"
 
 stack		.equ		.+0x400

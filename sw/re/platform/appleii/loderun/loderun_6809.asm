@@ -83,25 +83,15 @@ stack				.equ		.-2
 				lda			#0x12
 				sta			PALETTE+1
 				sta			CPU179									; select fast CPU clock (1.79MHz)
-				jsr			gcls
 .endif
 				
 ; start lode runner
-				jsr			display_title
-1$:			bra			1$
+;				jsr			read_paddles
+;				lda			#1
+;				jsr			sub_6359								; examine h/w and check disk sig			
 
-gcls:
-				ldx			#0x0000
-				lda			#0x00
-1$:			sta			,x+
-				cmpx		#40*192
-				bne			1$
-				rts
-				
-dtx:		.db			1
-dty:		.db			1
-
-display_title:
+display_title_screen: ; $6008
+				jsr			gcls1
 				ldy			#title_data
 				ldx			#0x0000									; 2 centres the title screen
 				lda			#35											; 35 bytes/line
@@ -125,7 +115,19 @@ display_title:
 				bne			2$											; no, loop
 				tst			(dty)										; done screen?
 				bne			1$											; no, loop
-4$:			rts
+
+XXX:		bra			XXX
+
+gcls1: ; $7A51
+				ldx			#0x0000
+				lda			#0x00
+1$:			sta			,x+
+				cmpx		#40*192
+				bne			1$
+				rts
+				
+dtx:		.db			1
+dty:		.db			1
 								
 .include "title.asm"
 
