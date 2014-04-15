@@ -128,8 +128,10 @@ loc_6056: ; $6056
 
 title_wait_for_key: ; $618e
 ;				jsr			keybd_flush
-; *** add 6s timeout here!!!
-1$:			lda			(paddles_detected)
+				ldb			#4
+1$:			pshs		b
+				ldy			#0
+2$:			lda			(paddles_detected)
 				cmpa		#0xcb										; detected?
 				beq			3$											; no, skip
 ; check for joystick buttons here				
@@ -139,7 +141,12 @@ title_wait_for_key: ; $618e
 				lda			,x
 				coma														; any key pressed?
 				bne			loc_61f6								; yes, exit
-				bra			1$				
+				leay		-1,y
+				bne			2$
+				puls		b
+				decb														; done?
+				bne			1$											; no, loop
+				
 ; do some other crap
 ; test $A7
 				jmp			loc_6056
