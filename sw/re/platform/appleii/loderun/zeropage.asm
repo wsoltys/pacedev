@@ -1,5 +1,9 @@
 ; zero-page variables
 
+msg_addr:					; $10-$11
+				.dw			0x0000									; for display_message
+msg_char:					; $1E
+				.db			0x00										; for display_message				
 col:							; $85
 				.db			0x00										; for display_message
 row:							; $86

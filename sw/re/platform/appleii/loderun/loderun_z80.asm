@@ -217,12 +217,84 @@ loc_79AD:	; $79AD
 				
 				ret
 
+remap_character: ; $7B2A
+				cp			#0xc1										; <'A'
+				jr			c,1$										; yes, go
+				cp			#0xdB										; <= 'Z'?
+				jr			c,3$										; yes, go
+1$:			ld			b,#0x7c
+				cp			#0xa0										; space?
+				jr			z,2$										; yes, go
+				ld			b,#0xdb
+				cp			#0xbe										; >
+				jr			z,2$
+				inc			b
+				cp			#0xae										; .
+				jr			z,2$
+				inc			b
+				cp			#0xa8										; (
+				jr			z,2$
+				inc			b
+				cp			#0xa9										; )
+				jr			z,2$
+				inc			b
+				cp			#0xaf										; /
+				jr			z,2$
+				inc			b
+				cp			#0xad										; -
+				jr			z,2$
+				inc			b
+				cp			#0xbc										; <
+				jr			z,2$
+				ld			a,#0x10
+				ret
+2$:			ld			a,c
+3$:			sub			#0x7c										; zero-based
+				ret
+			
+display_character: ; $7B64
+				cp			#0x8d										; cr?
+				jr			z,cr										; yes, handle
+				call		remap_character
+				call		display_char_pg1
+				ld			hl,col
+				inc			(hl)
+				ret
+
+cr: ; 7B7D
+				ld			hl,row
+				inc			(hl)
+				xor			a
+				ld			(col),a
+				ret
+				
+display_char_pg1:	; $82AA
+				ld			(msg_char),a						; store character
+				ld			a,(row)
+; stuff
+				ld			a,(col)
+; stuff
+				call		copy_character_to_video
+				ret
+
+copy_character_to_video:
+				ld			a,#11
+				ld			(scanline_cnt),a
+				
+				ret
+								
 display_message:	; $86E0
 				pop			hl
-1$:			ld			a,(hl)
-				inc			hl
-				or			a
-				jr			nz,1$
+1$:			ld			(msg_addr),hl						; store msg ptr
+				ld			a,(hl)									; msg char
+				or			a												; end of msg?
+				jr			z,9$										; yes, exit
+				or			#0x80										; *** FUDGE
+				call		display_character
+				ld			hl,(msg_addr)						; msg ptr
+				inc			hl											; inc
+				jr			1$											; loop
+9$:			inc			hl											; skip NULL
 				push		hl
 				ret
 								
