@@ -32,6 +32,60 @@ uint8_t title_rle_data[] =
 };
 #define RLE_SIZE (sizeof(title_rle_data)/sizeof(uint8_t))
 
+uint8_t tile_data[] =
+{
+	#include "tiles.c"
+};
+
+char *get_char_description (unsigned t)
+{
+	static char *graphic[] =
+	{
+		"space", "brick", "solid", "ladder", "rope", "fall-thru", "end ladder",
+		"gold",
+		"enemy left 0",
+		"player right 0",
+		"solid square",
+		"player left 0", "player left 1", "player left 4", 
+		"player climb 0",
+		"player dig left",
+		"player right 1", "player right 2",
+		"player climb 1",
+		"player fall left", "player fall right",
+		"player swing right 0", "player swing right 1", "player swing right 2", 
+		"player swing left 0", "player swing left 1", "player swing left 2", 
+		"dig spray 0", "dig spray 1", "dig spray 2", "dig spray 3", 
+		"dig brick 0", "dig brick 1", "dig brick 2", "dig brick 3", "dig brick 4", "dig brick 5", 
+		"player dig right",
+		"dig spray 3", "dig spray 5",
+		"enemy right 0", "enemy right 1", "enemy right 2", 
+		"enemy left 0", "enemy left 1",
+		"enemy swing right 0", "enemy swing right 1", "enemy swing right 2", 
+		"enemy swing left 0", "enemy swing left 1", "enemy swing left 2", 
+		"enemy climb 0", "enemy climb 1",
+		"enemy fall right", "enemy fall left",
+		"brick refill 0", "brick refill 1",
+		"enemy respawn 0", "enemy respawn 1"
+	};
+	static char *symbol = ">.()/-<";
+
+	static char ch[64];
+		
+	strcpy (ch, "'?'");
+	if (t < 0x3b)
+		strcpy (ch, graphic[t]);
+	else if (t < 0x45)
+		ch[1] = t - 0x3b + '0';
+	else if (t < 0x5f)
+		ch[1] = t - 0x45 + 'A';
+	else if (t < 0x66)
+		ch[1] = symbol[t-0x5f];
+	else
+		strcpy (ch, "(unknown)");
+		
+	return (ch);		
+}
+
 void main (int argc, char *argv[])
 {
 	FILE *fp;
@@ -186,6 +240,8 @@ void main (int argc, char *argv[])
 
 #ifdef DO_TILES
 
+	fp = fopen ("tiles.c", "wt");
+	
 	for (uint16_t shift=0; shift<7; shift++)
 	{
 		clear_bitmap (screen);
@@ -195,7 +251,7 @@ void main (int argc, char *argv[])
 			uint16_t	sl_tbl = 0xad00;
 			uint16_t	data_tbl = 0xa200 +	shift * 0x100;
 			
-			for (int sl=0; sl<11; sl++)
+			for (unsigned sl=0; sl<11; sl++)
 			{
 				uint8_t		data[3];
 				
@@ -225,7 +281,7 @@ void main (int argc, char *argv[])
 					for (int bit=0; bit<7; bit++)
 					{
 						if (data[byte] & (1<<bit))
-							putpixel (screen, (t%13)*21+byte*7+bit, 8+(t/13)*16+sl, 15);
+							putpixel (screen, (t%16)*16+byte*7+bit, 8+(t/16)*16+sl, 15);
 					}
 				}			
 			}
@@ -235,10 +291,89 @@ void main (int argc, char *argv[])
 		sprintf (buf, "shift=%d", shift);
 		SS_TEXTOUT_CENTRE (screen, font, buf, 280/2, 192-8, 15);
 
-	  while (!key[KEY_ESC]);	  
-	  while (key[KEY_ESC]);	  
+		if ((shift % 2) == 0)
+		{
+			fprintf (fp, "// SHIFT = %d\n\n", shift);
+			
+			for (unsigned t=0; t<0x68; t++)
+			{
+				//fprintf (fp, "// $%02X\n", t);
+				for (unsigned sl=0; sl<11; sl++)
+				{
+					for (int byte=0; byte<2; byte++)
+					{
+						uint8_t data = 0;
+						for (int bit=0; bit<8; bit++)
+						{
+							data <<= 1;
+							if (getpixel (screen, (t%16)*16+byte*8+bit, 8+(t/16)*16+sl))
+								data |= 1;
+						}
+						fprintf (fp, "0x%02X, ", data);
+					}
+				}
+				
+				fprintf (fp, "  // $%02X %s\n", t, get_char_description (t));
+			}
+			fprintf (fp, "\n");
+		}
+
+		
+	  //while (!key[KEY_ESC]);	  
+	  //while (key[KEY_ESC]);	  
 	}
+
+	fclose (fp);
+
+	fp = fopen ("tiles.asm", "wt");
+
+	fprintf (fp, "\ntile_data:\n\n");
 	
+	for (uint16_t shift=0; shift<8; shift+=2)
+	{
+		clear_bitmap (screen);
+
+		fprintf (fp, "; SHIFT = %d\n\n", shift);
+
+		uint8_t *d = &tile_data[shift/2*0x68*2*11];
+				
+		for (unsigned t=0; t<0x68; t++)
+		{
+			fprintf (fp, "        .db     ");
+
+			for (unsigned sl=0; sl<11; sl++)
+			{
+				// render to display
+				for (int byte=0; byte<2; byte++)
+				{
+					for (int bit=0; bit<8; bit++)
+					{
+						if (d[t*2*11+sl*2+byte] & (1<<(7-bit)))
+							putpixel (screen, (t%16)*16+byte*8+bit, 8+(t/16)*16+sl, 15);
+					}
+
+					fprintf (fp, "0x%02X", d[t*2*11+sl*2+byte]);
+					if (sl*2+byte != 10 && sl*2+byte != 21)
+						fprintf (fp, ", ");
+					if (sl*2+byte == 10)
+						fprintf (fp, "\n        .db     ");						
+				}			
+			}
+			
+			fprintf (fp, "  ; $%02X %s\n", t, get_char_description (t));
+		}
+		fprintf (fp, "\n");
+				
+		char buf[128];
+		sprintf (buf, "shift=%d", shift);
+		SS_TEXTOUT_CENTRE (screen, font, buf, 280/2, 192-8, 15);
+		
+	  //while (!key[KEY_ESC]);	  
+	  //while (key[KEY_ESC]);	  
+	}
+
+	fclose (fp);
+		
 #endif // DO_TILES
 	  
   allegro_exit ();

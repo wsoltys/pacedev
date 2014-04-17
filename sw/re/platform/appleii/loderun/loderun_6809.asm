@@ -176,6 +176,7 @@ read_paddles: ; $8702
 dtx:		.db			1
 dty:		.db			1
 
+.include "tiles.asm"
 .include "title.asm"
 
 				.end		codebase

@@ -279,7 +279,7 @@ display_char_pg1:	; $82AA
 
 copy_character_to_video:
 				ld			a,#11
-				ld			(scanline_cnt),a
+;				ld			(scanline_cnt),a
 				
 				ret
 								
@@ -304,10 +304,11 @@ read_paddles: ; $8702
 				ld			(paddles_detected),a
 				ret
 
-; zero-page registers
-.include "zeropage.asm"
+.include "zeropage.asm"									; zero-page registers
 
-.include "title.asm"
+.include "tiles.asm"										; tile graphic data
+
+.include "title.asm"										; title screen RLE data
 
 stack		.equ		.+0x400
 
