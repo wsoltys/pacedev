@@ -12,7 +12,7 @@
 codebase		.equ		0x5200
 
 ; un-comment to pixel-double the display
-.define PIXEL_DOUBLE
+;.define PIXEL_DOUBLE
 
 				; for 'trs80gp -ee' only
 				.macro BREAK
@@ -188,7 +188,7 @@ loc_79AD:	; $79AD
 				call		gcls1
 ;				call		gcls2
 				ld			b,#4										; 4 lines
-				ld			c,#220									; starting row
+				ld			c,#176									; starting row
 1$:			push		bc				
 				ld			a,c
 				GFXY
@@ -248,41 +248,98 @@ remap_character: ; $7B2A
 				jr			z,2$
 				ld			a,#0x10
 				ret
-2$:			ld			a,c
+2$:			ld			a,b
 3$:			sub			#0x7c										; zero-based
 				ret
 			
 display_character: ; $7B64
 				cp			#0x8d										; cr?
 				jr			z,cr										; yes, handle
-				call		remap_character
+				call		remap_character					; returned in A
 				call		display_char_pg1
-				ld			hl,col
-				inc			(hl)
+				ld			hl,#col
+				inc			(hl)										; next column
 				ret
 
 cr: ; 7B7D
-				ld			hl,row
-				inc			(hl)
+				ld			hl,#row
+				inc			(hl)										; next row
 				xor			a
-				ld			(col),a
+				ld			(col),a									; col=0
 				ret
 				
 display_char_pg1:	; $82AA
 				ld			(msg_char),a						; store character
 				ld			a,(row)
-; stuff
+				call		sub_885d								; get scanline in A
+				ld			(scanline),a
 				ld			a,(col)
+				call		calc_col_addr_shift
+				ld			(col_pixel_shift),a
+				ld			a,b
+				ld			(col_addr_offset),a
 ; stuff
-				call		copy_character_to_video
+				call		render_char_in_buffer
+				ld			ix,#char_render_buf
+				ld			hl,#scanline
+				ld			b,#11										; scanlines per char
+1$:			ld			a,(hl)									; scanline
+				GFXY
+				ld			a,(col_addr_offset)
+				GFXX
+				in			a,(130)									; video byte
+				or			(ix+00)									; data byte 1
+.ifdef PIXEL_DOUBLE				
+				NIBDBL
+				push		af
+				ld			a,c
+				GFXDAT
+				pop			af
+				NIBDBL
+				ld			a,c
+.endif				
+				GFXDAT
+				inc			ix
+				in			a,(130)									; video byte
+				or			(ix+00)									; data byte 2
+.ifdef PIXEL_DOUBLE				
+				NIBDBL
+				push		af
+				ld			a,c
+				GFXDAT
+				pop			af
+				NIBDBL
+				ld			a,c
+.endif				
+				GFXDAT
+				inc			ix
+				inc			(hl)										; inc scanline
+				dec			b
+				jp			nz,1$
+;				djnz		1$
 				ret
 
-copy_character_to_video:
-				ld			a,#11
-;				ld			(scanline_cnt),a
-				
+render_char_in_buffer:	; $8438
+				ld			hl,#tile_data
+				ld			de,#(104*11*2)					; bytes per bank
+				ld			a,(col_pixel_shift)			; 0,2,4,6
+				srl			a												; 0,1,2,3
+				jr			z,2$
+				ld			b,a
+1$:			add			hl,de
+				djnz		1$											; find shift bank
+2$:			ld			de,#(11*2)							; bytes per char
+				ld			a,(msg_char)
+				or			a
+				jr			z,4$
+				ld			b,a
+3$:			add			hl,de
+				djnz		3$											; find char
+4$:			ld			de,#char_render_buf
+				ld			bc,#(11*2)							; bytes to copy
+				ldir
 				ret
-								
+				
 display_message:	; $86E0
 				pop			hl
 1$:			ld			(msg_addr),hl						; store msg ptr
@@ -304,9 +361,45 @@ read_paddles: ; $8702
 				ld			(paddles_detected),a
 				ret
 
+sub_885d:	; $885d
+				ld			hl,#row_to_scanline_tbl
+				ld			d,0
+				ld			e,a											; row
+				add			hl,de										; ptr entry for row
+				ld			a,(hl)									; scanline
+				; other stuff
+				ret
+
+calc_col_addr_shift:	; $8868
+				ld			hl,#col_to_addr_tbl
+				ld			d,0
+				ld			e,a											; col
+.ifdef PIXEL_DOUBLE
+				sla			e
+.endif
+				add			hl,de										; ptr entry for col
+				ld			b,(hl)									; addr
+				sla			a												; shift
+.ifdef PIXEL_DOUBLE
+				sla			a
+.endif
+				and			#0x06
+				ret
+								
 .include "zeropage.asm"									; zero-page registers
 
 .include "tiles.asm"										; tile graphic data
+
+row_to_scanline_tbl:	; $1c51
+				.db			0, 11, 22, 33, 44, 55, 66, 77, 88, 99, 110, 121
+				.db			132, 143, 154, 165, 181
+
+col_to_addr_tbl:	; $1c62
+				.db			0, 1, 2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 15, 16
+				.db			17, 18, 20, 21, 22, 23, 25, 26, 27, 28, 30, 31, 32, 33
+; following lines used only for pixel-doubling on TRS-80				
+				.db			35, 36, 37, 38, 40, 41, 42, 43, 45, 46, 47, 48, 50, 51
+				.db			52, 53, 55, 56, 57, 58, 60, 61, 62, 63, 65, 66, 67, 68
 
 .include "title.asm"										; title screen RLE data
 
