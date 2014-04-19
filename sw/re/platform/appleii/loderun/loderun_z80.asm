@@ -12,7 +12,7 @@
 codebase		.equ		0x5200
 
 ; un-comment to pixel-double the display
-;.define PIXEL_DOUBLE
+.define PIXEL_DOUBLE
 
 				; for 'trs80gp -ee' only
 				.macro BREAK
@@ -269,6 +269,7 @@ cr: ; 7B7D
 				ret
 				
 display_char_pg1:	; $82AA
+; *** NEED TO ADD LEFT/RIGHT MASKING!!!
 				ld			(msg_char),a						; store character
 				ld			a,(row)
 				call		sub_885d								; get scanline in A
@@ -287,12 +288,15 @@ display_char_pg1:	; $82AA
 				GFXY
 				ld			a,(col_addr_offset)
 				GFXX
+.ifndef PIXEL_DOUBLE				
 				in			a,(130)									; video byte
 				or			(ix+00)									; data byte 1
-.ifdef PIXEL_DOUBLE				
+.else
+				ld			a,(ix+00)
 				NIBDBL
 				push		af
-				ld			a,c
+				in			a,(130)
+				or			c
 				GFXDAT
 				pop			af
 				NIBDBL
@@ -300,16 +304,19 @@ display_char_pg1:	; $82AA
 .endif				
 				GFXDAT
 				inc			ix
+.ifndef PIXEL_DOUBLE				
 				in			a,(130)									; video byte
 				or			(ix+00)									; data byte 2
-.ifdef PIXEL_DOUBLE				
+.else
+				ld			a,(ix+00)
 				NIBDBL
 				push		af
 				ld			a,c
 				GFXDAT
 				pop			af
 				NIBDBL
-				ld			a,c
+				in			a,(130)
+				or			c
 .endif				
 				GFXDAT
 				inc			ix
@@ -379,11 +386,12 @@ calc_col_addr_shift:	; $8868
 .endif
 				add			hl,de										; ptr entry for col
 				ld			b,(hl)									; addr
-				sla			a												; shift
-.ifdef PIXEL_DOUBLE
-				sla			a
-.endif
+				sla			a												; shift (same for pixel-double)
+.ifndef PIXEL_DOUBLE				
 				and			#0x06
+.else
+				and 		#0x02
+.endif
 				ret
 								
 .include "zeropage.asm"									; zero-page registers
