@@ -212,11 +212,114 @@ loc_79AD:	; $79AD
 				ld			a,#0x00
 				ld			(col),a
 				call		display_message
-				
 				.asciz	"SCORE        MEN    LEVEL   "
-				
+				call		display_no_lives
+				call		display_level
+				ld			bc,0x0000								; add 0
+				jp			update_and_display_score				
+
+display_no_lives:	; $7A70
+				ld			a,(no_lives)
+				ld			b,#16										; col=16
+display_byte:
+				push		af
+				ld			a,b
+				ld			(col),a
+				pop			af
+				call		cnv_byte_to_3_digits
+				ld			a,#16										; row=16
+				ld			(row),a
+				ld			a,(hundreds)
+				call		display_digit
+				ld			a,(tens)
+				call		display_digit
+				ld			a,(units)
+				jp			display_digit
+
+display_level: ; $7A8C
+				ld			a,(level)
+				ld			b,#25										; col=25
+				jr			display_byte
 				ret
 
+update_and_display_score:	; $7A92
+				ld			a,(score_10_1)
+				add			b
+				daa
+				ld			(score_10_1),a
+				ld			a,(score_1000_100)
+				adc			c
+				daa
+				ld			(score_1000_100),a
+				ld			a,(score_100000_10000)
+				adc			#0
+				ld			(score_100000_10000),a
+				ld			a,(score_1000000)
+				adc			#0
+				ld			(score_1000000),a
+				ld			a,#5										; col=5
+				ld			(col),a
+				ld			a,#16										; row=16
+				ld			(row),a
+				ld			a,(score_1000000)
+				call		cnv_bcd_to_2_digits
+				ld			a,(units)
+				call		display_digit
+				ld			a,(score_100000_10000)
+				call		cnv_bcd_to_2_digits
+				ld			a,(tens)				
+				call		display_digit
+				ld			a,(units)
+				call		display_digit
+				ld			a,(score_1000_100)
+				call		cnv_bcd_to_2_digits
+				ld			a,(tens)				
+				call		display_digit
+				ld			a,(units)
+				call		display_digit
+				ld			a,(score_10_1)				
+				call		cnv_bcd_to_2_digits
+				ld			a,(tens)				
+				call		display_digit
+				ld			a,(units)
+				jp			display_digit
+
+cnv_bcd_to_2_digits: ; $7AE9
+				ld			(tens),a
+				and			#0x0f
+				ld			(units),a
+				ld			a,(tens)
+				srl			a
+				srl			a
+				srl			a
+				srl			a
+				ld			(tens),a
+				ret
+				
+cnv_byte_to_3_digits: ; $7AF8
+				ld			ix,#hundreds
+				ld			(ix+00),0								; hundreds
+				ld			(ix+01),0								; tens
+1$:			cp			#100
+				jr			c,2$
+				inc			(ix+00)									; inc hundreds
+				sub			#100
+				jr			nz,1$										; loop counting hundreds
+2$:			cp			#10
+				jr			c,3$
+				inc			(ix+01)									; inc tens
+				sub			#10
+				jr			2$											; loop counting tens
+3$:			ld			(ix+02),a								; store units
+				ret
+
+display_digit: ; $7B15
+				add			#0x3b										; convert to 'ASCII'
+				call		display_char_pg1
+				ld			hl,#col
+				inc			(hl)
+				ret
+																
 remap_character: ; $7B2A
 				cp			#0xc1										; <'A'
 				jr			c,1$										; yes, go
