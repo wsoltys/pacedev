@@ -127,6 +127,10 @@ display_title_screen: ; $6008
 				
 loc_6056:	; $6056
 				xor			a
+				ld			(score_10_1),a
+				ld			(score_1000_100),a
+				ld			(score_100000_10000),a
+				ld			(score_1000000),a
 ; store in zero page
 				ld			a,#5										; number of lives
 				ld			(no_lives),a				
@@ -137,7 +141,9 @@ loc_6056:	; $6056
 				jp			display_title_screen
 
 loc_6099:	; $6099
-				call		loc_79AD
+				call		cls_and_display_game_status
+				ld			b,#1
+				call		sub_6238
 loop:		jp			loop				
 				; other crap				
 				BREAK
@@ -170,6 +176,9 @@ title_wait_for_key: ; $618e
 loc_61f6:
 				BREAK
 
+sub_6238:	; $6238
+				ret
+				
 gcls1: ; $7A51
 				ld			c,#240
 1$:			ld			a,c
@@ -184,7 +193,7 @@ gcls1: ; $7A51
 				jr			nz,1$
 				ret								
 
-loc_79AD:	; $79AD
+cls_and_display_game_status:	; $79AD
 				call		gcls1
 ;				call		gcls2
 				ld			b,#4										; 4 lines
@@ -372,7 +381,6 @@ cr: ; 7B7D
 				ret
 				
 display_char_pg1:	; $82AA
-; *** NEED TO ADD LEFT/RIGHT MASKING!!!
 				ld			(msg_char),a						; store character
 				ld			a,(row)
 				call		sub_885d								; get scanline in A
@@ -380,11 +388,22 @@ display_char_pg1:	; $82AA
 				ld			a,(col)
 				call		calc_col_addr_shift
 				ld			(col_pixel_shift),a
+				ld			hl,#left_char_masks
+				ld			d,0
+				ld			e,a
+				srl			e
+				add			hl,de
+				ld			a,(hl)									; lchar_mask
+				ld			(lchar_mask),a
+				ld			e,#4
+				add			hl,de
+				ld			a,(hl)									; rchar_mask
+				ld			(rchar_mask),a
 				ld			a,b
 				ld			(col_addr_offset),a
-; stuff
 				call		render_char_in_buffer
 				ld			ix,#char_render_buf
+				ld			iy,#lchar_mask
 				ld			hl,#scanline
 				ld			b,#11										; scanlines per char
 1$:			ld			a,(hl)									; scanline
@@ -393,12 +412,14 @@ display_char_pg1:	; $82AA
 				GFXX
 .ifndef PIXEL_DOUBLE				
 				in			a,(130)									; video byte
+				and			(iy+00)									; lchar_mask
 				or			(ix+00)									; data byte 1
 .else
-				ld			a,(ix+00)
+				ld			a,(ix+00)								; data byte 1
 				NIBDBL
 				push		af
-				in			a,(130)
+				in			a,(130)									; video byte
+				and			(iy+00)									; lchar_mask
 				or			c
 				GFXDAT
 				pop			af
@@ -409,6 +430,7 @@ display_char_pg1:	; $82AA
 				inc			ix
 .ifndef PIXEL_DOUBLE				
 				in			a,(130)									; video byte
+				and			(iy+01)									; rchar_mask
 				or			(ix+00)									; data byte 2
 .else
 				ld			a,(ix+00)
@@ -418,7 +440,8 @@ display_char_pg1:	; $82AA
 				GFXDAT
 				pop			af
 				NIBDBL
-				in			a,(130)
+				in			a,(130)									; video_byte
+				and			(iy+01)									; rchar_mask
 				or			c
 .endif				
 				GFXDAT
@@ -429,26 +452,66 @@ display_char_pg1:	; $82AA
 ;				djnz		1$
 				ret
 
+left_char_masks:	; $8328
+.ifndef PIXEL_DOUBLE
+				.db			0x00, 0xc0, 0xf0, 0xfc
+.else
+				.db			0x00, 0xf0
+.endif				
+right_char_masks:	; $832F
+.ifndef PIXEL_DOUBLE
+				.db			0x3f, 0x0f, 0x03, 0x00
+.else
+				.db			0x0f, 0x00
+.endif				
+				
 render_char_in_buffer:	; $8438
-				ld			hl,#tile_data
-				ld			de,#(104*11*2)					; bytes per bank
-				ld			a,(col_pixel_shift)			; 0,2,4,6
-				srl			a												; 0,1,2,3
-				jr			z,2$
-				ld			b,a
-1$:			add			hl,de
-				djnz		1$											; find shift bank
-2$:			ld			de,#(11*2)							; bytes per char
+				ld			hl,#char_bank_tbl
+				ld			a,(col_pixel_shift)			; 0,2,4,6 (same as word offset)
+				ld			d,0
+				ld			e,a
+				add			hl,de
+				ld			e,(hl)
+				inc			hl
+				ld			d,(hl)
+				ex			de,hl										; HL = ptr char bank
+				push		hl
+				ld			hl,#char_offset_tbl
 				ld			a,(msg_char)
-				or			a
-				jr			z,4$
-				ld			b,a
-3$:			add			hl,de
-				djnz		3$											; find char
-4$:			ld			de,#char_render_buf
+				sla			a												; word offset
+				ld			d,0
+				ld			e,a
+				add			hl,de										; ptr char offset entry
+				ld			e,(hl)
+				inc			hl
+				ld			d,(hl)									; DE = offset
+				pop			hl											; ptr char bank
+				add			hl,de
+				ld			de,#char_render_buf
 				ld			bc,#(11*2)							; bytes to copy
 				ldir
 				ret
+
+char_bank_tbl:
+				.dw			#tile_data+0*22*104
+				.dw			#tile_data+1*22*104
+				.dw			#tile_data+2*22*104
+				.dw			#tile_data+3*22*104
+
+char_offset_tbl:
+				.dw			 0*22,  1*22,  2*22,  3*22,  4*22,    5*22,   6*22,   7*22
+				.dw			 8*22,  9*22, 10*22, 11*22, 12*22,   13*22,  14*22,  15*22
+				.dw			16*22, 17*22, 18*22, 19*22, 20*22,   21*22,  22*22,  23*22
+				.dw			24*22, 25*22, 26*22, 27*22, 28*22,   29*22,  30*22,  31*22
+				.dw			32*22, 33*22, 34*22, 35*22, 36*22,   37*22,  38*22,  39*22
+				.dw			40*22, 41*22, 42*22, 43*22, 44*22,   45*22,  46*22,  47*22
+				.dw			48*22, 49*22, 50*22, 51*22, 52*22,   53*22,  54*22,  55*22
+				.dw			56*22, 57*22, 58*22, 59*22, 60*22,   61*22,  62*22,  63*22
+				.dw			64*22, 65*22, 66*22, 67*22, 68*22,   69*22,  70*22,  71*22
+				.dw			72*22, 73*22, 74*22, 75*22, 76*22,   77*22,  78*22,  79*22
+				.dw			80*22, 81*22, 82*22, 83*22, 84*22,   85*22,  86*22,  87*22
+				.dw			88*22, 89*22, 90*22, 91*22, 92*22,   93*22,  94*22,  95*22
+				.dw			96*22, 97*22, 98*22, 99*22, 100*22, 101*22, 102*22, 103*22
 				
 display_message:	; $86E0
 				pop			hl

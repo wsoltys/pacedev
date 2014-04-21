@@ -8,6 +8,10 @@ col_addr_offset:	; $1C
 				.db			0x00										; for display_char_pg1				
 msg_char:					; $1E
 				.db			0x00										; for display_message		
+lchar_mask:				; $50
+				.db			0x00										; for display_char_pg1				
+rchar_mask:				; $51
+				.db			0x00										; for display_char_pg1
 col_pixel_shift:	; $71
 				.db			0x00										; for display_char_pg1						
 col:							; $85
