@@ -143,7 +143,7 @@ loc_6056:	; $6056
 loc_6099:	; $6099
 				call		cls_and_display_game_status
 				ld			b,#1
-				call		sub_6238
+				call		init_read_unpack_display_level
 loop:		jp			loop				
 				; other crap				
 				BREAK
@@ -176,9 +176,17 @@ title_wait_for_key: ; $618e
 loc_61f6:
 				BREAK
 
-sub_6238:	; $6238
+init_read_unpack_display_level:	; $6238
+; heaps of stuff
+				call		read_level_data
+				ld			a,(row)
+				ld			c,a
 				ret
-				
+
+read_level_data:	; $6264
+; copies from disk buffer to low memory ($0D00)
+				ret
+								
 gcls1: ; $7A51
 				ld			c,#240
 1$:			ld			a,c
