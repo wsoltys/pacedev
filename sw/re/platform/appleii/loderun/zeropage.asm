@@ -1,9 +1,13 @@
 ; zero-page variables
 
+; because IX.IY displacements go negative
+pad:								.ds			128
 zero_page:					.ds			256
 
 ; offsets into zero-page
+byte_0							.equ		0x00
 msg_addr						.equ		0x10
+unk_1a							.equ		0x1a
 scanline						.equ		0x1b
 col_addr_offset			.equ		0x1c
 scanline_cnt				.equ		0x1d
@@ -21,8 +25,12 @@ score_1e1_1					.equ		0x8e
 score_1e3_1e2				.equ		0x8f
 score_1e5_1e4				.equ		0x90
 score_1e6						.equ		0x91
+unk_92							.equ		0x92
+no_gold							.equ		0x93
 paddles_detected		.equ		0x85
 no_lives						.equ		0x98
+unk_a2							.equ		0xa2
+unk_a3							.equ		0xa3
 level								.equ		0xa6
 byte_a7							.equ		0xa7
 char_render_buf			.equ		0xdf

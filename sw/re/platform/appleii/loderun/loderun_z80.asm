@@ -12,7 +12,7 @@
 codebase		.equ		0x5200
 
 ; un-comment to pixel-double the display
-;.define PIXEL_DOUBLE
+.define PIXEL_DOUBLE
 
 				; zero-page
 				.macro LD_ZP_r, addr,r
@@ -24,7 +24,13 @@ codebase		.equ		0x5200
 				.macro INC_ZP,addr
 				inc			(ix+addr)
 				.endm
-								
+				.macro DEC_ZP,addr
+				dec			(ix+addr)
+				.endm
+				.macro AND_ZP,addr
+				and			(ix+addr)
+				.endm
+												
 				; for 'trs80gp -ee' only
 				.macro BREAK
 				ld			a,#4
@@ -122,7 +128,7 @@ display_title_screen: ; $6008
 				NIBDBL  		
 				ld					a,c
 .else           		
-				inc					d				
+				inc					d										; dummy inc for 35*2
 .endif				  		
 				GFXDAT  		
 				inc					d										; inc X count
@@ -190,6 +196,7 @@ title_wait_for_key: ; $618e
 				;bne    		
 				ld					b,#1
 				LD_ZP_r			byte_a7,b
+				LD_ZP_r			level,b
 ; do some other crap
 				jp					loc_6056
 
@@ -197,15 +204,78 @@ loc_61f6:
 				BREAK
 
 init_read_unpack_display_level:	; $6238
+				LD_ZP_r			unk_a2,b
+				ld					b,0xff
+				LD_ZP_r			byte_0,b
+				inc					b
+				LD_ZP_r			unk_a3,b
+				LD_ZP_r			no_gold,b
+; stuff				
+				LD_ZP_r			unk_1a,b
+				LD_ZP_r			row,b
 ; heaps of stuff
 				call				read_level_data
 				LD_r_ZP			c,row
+				ld					hl,#level_data_packed
+				ld					de,#level_data_unpacked
+5$:			xor					a
+				LD_ZP_r			col,a								; col=0
+4$:			LD_r_ZP			a,unk_1a						; nibble count
+				srl					a
+				ld					a,(hl)							; source (packed) byte
+				jr					c,1$								; do high nibble
+				and					#0x0f								; low nibble
+				jr					2$
+1$:			srl					a
+				srl					a
+				srl					a
+				srl					a										; high->low nibble
+				INC_ZP			unk_92
+				inc					hl									; source (packed) addr
+2$:			INC_ZP			unk_1a							; inc nibble count
+				LD_r_ZP			b,col
+				cp					#10									; data byte 0-9?
+				jr					c,3$								; yes, valid (skip)
+				xor					a										; invalid, ignore
+3$:			ld					(de),a							; destination (unpacked) byte
+; another copy
+				inc					de									; destination (unpacked) addr
+				INC_ZP			col
+				LD_r_ZP			a,col
+				cp					#28									; last column?
+				jr					c,4$								; no, loop
+				INC_ZP			row
+				LD_r_ZP			a,row
+				cp					#16									; last row?
+				jr					c,5$								; no, loop
+				call				init_and_display_level
 				ret
 
 read_level_data:	; $6264
 ; copies from disk buffer to low memory ($0D00)
 				ret
-								
+
+init_and_display_level: ; $63B3
+				ld					hl,#level_data_unpacked+28*16-1
+				ld					c,#15								; last row
+				LD_ZP_r			row,c
+1$:			ld					c,#27								; last column
+				LD_ZP_r			col,c
+2$:			ld					a,(hl)
+				dec					hl
+				cp					#6									; end-of-screen ladder?
+				jr					nz,8$								; no, skip
+				ld					a,#0								; space
+				jr					8$
+8$:			push				hl
+				call				display_char_pg1
+				pop					hl
+				DEC_ZP			col
+				jp					p,2$
+				DEC_ZP			row
+				jp					p,1$
+				ret
+												
 gcls1: ; $7A51
 				ld			c,#240
 1$:			ld			a,c
@@ -243,7 +313,7 @@ cls_and_display_game_status:	; $79AD
 				pop					bc
 				inc					c
 				djnz				1$
-				ld					a,#0x10
+				ld					a,#16
 				LD_ZP_r			row,a
 				xor					a
 				LD_ZP_r			col,a
@@ -422,9 +492,7 @@ display_char_pg1:	; $82AA
 				ld					a,(hl)							; rchar_mask
 				LD_ZP_r			rchar_mask,a
 				call				render_char_in_buffer
-				push				ix									; save ZP ptr
-				ld					ix,#char_render_buf
-				ld					iy,#lchar_mask
+				ld					hl,#char_render_buf
 				ld					b,#11								; scanlines per char
 				LD_ZP_r			scanline_cnt,a
 1$:			LD_r_ZP			a,scanline
@@ -434,57 +502,52 @@ display_char_pg1:	; $82AA
 				GFXX
 .ifndef PIXEL_DOUBLE				
 				in					a,(130)							; video byte
-				and					(iy+00)							; lchar_mask
-				or					(ix+00)							; data byte 1
+				AND_ZP			lchar_mask
+				or					(hl)								; data byte 1
 .else
-				ld					a,(ix+00)						; data byte 1
+				ld					a,(hl)							; data byte 1
 				NIBDBL  		
 				push				af
 				in					a,(130)							; video byte
-				and					(iy+00)							; lchar_mask
+				AND_ZP			lchar_mask
 				or					c
 				GFXDAT  		
 				pop					af
 				NIBDBL  		
-				ld					a,c
+				in					a,(130)
+				or					c
 .endif				
 				GFXDAT
-				inc					ix
+				inc					hl
 .ifndef PIXEL_DOUBLE				
 				in					a,(130)							; video byte
-				and					(iy+01)							; rchar_mask
-				or					(ix+00)							; data byte 2
+				AND_ZP			rchar_mask
+				or					(hl)								; data byte 2
 .else           		
-				ld					a,(ix+00)
+				ld					a,(hl)
 				NIBDBL  		
-				push				af
-				ld					a,c
-				GFXDAT  		
-				pop					af
-				NIBDBL  		
-				in					a,(130)							; video_byte
-				and					(iy+01)							; rchar_mask
+				in					a,(130)
+				AND_ZP			rchar_mask
 				or					c
 .endif				  		
 				GFXDAT  		
-				inc					ix
+				inc					hl
 				INC_ZP			scanline
 				dec					b										; scanline_cnt
 				jp					nz,1$
-				pop					ix									; restore ZP ptr
 				ret
 
 left_char_masks:	; $8328
 .ifndef PIXEL_DOUBLE
 				.db			0x00, 0xc0, 0xf0, 0xfc
 .else
-				.db			0x00, 0xf0
+				.db			0x00, 0xf0, 0x00, 0x00
 .endif				
 right_char_masks:	; $832F
 .ifndef PIXEL_DOUBLE
 				.db			0x3f, 0x0f, 0x03, 0x00
 .else
-				.db			0x0f, 0x00
+				.db			0x0f, 0x00, 0x00, 0x00
 .endif				
 				
 render_char_in_buffer:	; $8438
@@ -571,21 +634,26 @@ calc_col_addr_shift:	; $8868
 				ld					d,0
 				ld					e,b									; col
 .ifdef PIXEL_DOUBLE
-				sla					e
+				sla					e										; effectively doubling the column
 .endif
 				add					hl,de								; ptr entry for col
 				ld					a,(hl)							; addr
 				push				af
-				sla					a										; shift (same for pixel-double)
+				ld					a,b									; col   = 0,1,2,3,4...
+				sla					a										; shift = 0,2,4,6,0...
 .ifndef PIXEL_DOUBLE				
-				and					#0x06
+				and					#0x06								; shift = 0,2,4,6,0...
 .else
-				and 				#0x02
+				and 				#0x02								; shift = 0,2,0,2,0...
 .endif
 				ld					b,a
 				pop					af
 				ret
-								
+
+; this was in low memory on the apple
+level_data_unpacked:
+				.ds					28*16
+												
 .include "zeropage.asm"									; zero-page registers
 
 .include "tiles.asm"										; tile graphic data
@@ -602,6 +670,7 @@ col_to_addr_tbl:	; $1c62
 				.db			52, 53, 55, 56, 57, 58, 60, 61, 62, 63, 65, 66, 67, 68
 
 .include "title.asm"										; title screen RLE data
+.include "levels.asm"
 
 stack		.equ				.+0x400
 
