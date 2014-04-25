@@ -44,6 +44,8 @@ codebase		.equ		0x4000
 						.org		codebase
 stack				.equ		.-2
 
+start:
+
 .ifdef COCO3
 ; initialise Coco3 hardware
 				ldu			stack
@@ -84,7 +86,10 @@ stack				.equ		.-2
 				sta			PALETTE+1
 				sta			CPU179									; select fast CPU clock (1.79MHz)
 .endif
-				
+			
+				lda			#0x7F
+				tfr			a,dp
+					
 ; start lode runner
 				jsr			read_paddles
 ;				lda			#1
@@ -95,43 +100,58 @@ display_title_screen: ; $6008
 				ldy			#title_data
 				ldx			#0x0000									; 2 centres the title screen
 				lda			#35											; 35 bytes/line
-				sta			(dtx)
+				sta			*col
 				lda			#192										; 192 lines/screen
-				sta			(dty)
+				sta			*row
 1$:			ldb			,y+											; count
 				lda			,y+											; byte
 2$:			sta			,x+
-				dec			(dtx)										; line byte count
-				tst			(dtx)										; done line?
+				dec			*col										; line byte count
+				tst			*col										; done line?
 				bne			3$											; no, skip
 				pshs		b
 				ldb			#35
-				stb			(dtx)										; reset line byte count
+				stb			*col										; reset line byte count
 				ldb			#5
 				abx															; adjust video ptr
-				dec			(dty)										; dec line count
+				dec			*row										; dec line count
 				puls		b
 3$:			decb														; done count?
 				bne			2$											; no, loop
-				tst			(dty)										; done screen?
+				tst			*row										; done screen?
 				bne			1$											; no, loop
 ; this is where the apple selects the hires screen				
 				jmp			title_wait_for_key
 
 loc_6056: ; $6056
 				lda			#0
+				sta			*score_1e1_1
+				sta			*score_1e3_1e2
+				sta			*score_1e5_1e4
+				sta			*score_1e6
 ; store in zero page
 				lda			#5											; number of lives
-				sta			(no_lives)
+				sta			*no_lives
+				lda			*byte_a7
+				lsra
+				beq			loc_6099
 ; do some crap
 				jmp			display_title_screen
+
+loc_6099:	; $6099
+				jsr			cls_and_display_game_status
+; stuff				
+				ldb			#1
+				jsr			init_read_unpack_display_level
+loop:		bra			loop				
+				; other crap				
 
 title_wait_for_key: ; $618e
 ;				jsr			keybd_flush
 				ldb			#4
 1$:			pshs		b
 				ldy			#0
-2$:			lda			(paddles_detected)
+2$:			lda			*paddles_detected
 				cmpa		#0xcb										; detected?
 				beq			3$											; no, skip
 ; check for joystick buttons here				
@@ -145,10 +165,11 @@ title_wait_for_key: ; $618e
 				bne			2$
 				puls		b
 				decb														; done?
-				bne			1$											; no, loop
-				
+				;bne			1$											; no, loop *** FUDGE - shorten
+				ldb			#1
+				stb			*byte_a7
+				stb			*level
 ; do some other crap
-; test $A7
 				jmp			loc_6056
 
 loc_61f6:
@@ -156,27 +177,192 @@ loc_61f6:
 				jsr			gcls1
 break:	bra			break
 
+init_read_unpack_display_level:	; $6238
+				rts
+				
 gcls1: ; $7A51
 				ldx			#0x0000
-				lda			#0x00
+				bra			gcls
+gcls2:
+				ldx			#0x0000								; fix me
+gcls:		lda			#0x00
 1$:			sta			,x+
 				cmpx		#40*192
 				bne			1$
 				rts
 
+cls_and_display_game_status:	; $79AD
+				jsr			gcls1
+				jsr			gcls2
+				ldb			#34											; last column on screen
+				lda			#0xaa										; pattern
+				ldx			#176*40									; screen address
+1$:			sta			0,x           					
+				sta			40,x          					
+				sta			80,x          					
+				sta			120,x										; 4 scanlines of pixels
+				inx															; next video address
+				decb														; done line?
+				bpl			1$											; no, loop
+				lda			#16
+				sta			*row
+				lda			#0
+				sta			*col
+				jsr			display_message
+				.asciz			"SCORE        MEN    LEVEL   "
+				rts
+
+remap_character: ; $7B2A
+				cmpa		#0xc1										; <'A'
+				bcs			1$											; yes, go
+				cmpa		#0xdB										; <= 'Z'?
+				bcs			3$											; yes, go
+1$:			ldb			#0x7c
+				cmpa		#0xa0										; space?
+				beq			2$											; yes, go
+				ldb			#0xdb
+				cmpa		#0xbe										; >
+				beq			2$                  		
+				incb                        		
+				cmpa		#0xae										; .
+				beq			2$                  		
+				incb                        		
+				cmpa		#0xa8										; (
+				beq			2$                  		
+				incb                        		
+				cmpa		#0xa9										; )
+				beq			2$                  		
+				incb                        		
+				cmpa		#0xaf										; /
+				beq			2$                  		
+				incb                        		
+				cmpa		#0xad										; -
+				beq			2$                  		
+				incb                        		
+				cmpa		#0xbc										; <
+				beq			2$                  		
+				lda			#0x10               		
+				rts                         		
+2$:			tfr			b,a                 		
+3$:			suba		#0x7c										; zero-based
+				rts
+			
+display_character: ; $7B64
+				cmpa		#0x8d										; cr?
+				beq			cr											; yes, handle
+				jsr			remap_character					; returned in A
+				jsr			display_char_pg1
+				inc			*col
+				rts
+
+cr: ; 7B7D
+				inc			*row										; next row
+				lda			#0
+				sta			*col										; col=0
+				rts
+
+display_char_pg1:	; $82AA
+				sta			*msg_char
+				ldb			*row
+				jsr			sub_885d								; get scanline in B
+				stb			*scanline
+				ldb			*col
+				jsr			calc_col_addr_shift
+				sta			*col_addr_offset
+				stb			*col_pixel_shift
+; ignore masks for now
+				jsr			render_char_in_buffer
+				ldx			#char_render_buf
+				lda			*scanline
+				ldb			#40
+				mul
+				tfr			d,y
+				ldb			*col_addr_offset
+				leay		b,y
+				ldb			#11
+1$:			lda			0,y
+; lmask here
+				ora			,x+
+				sta			0,y
+				lda			1,y
+; rmask here				
+				ora			,x+
+				sta			1,y
+				leay		40,y
+				decb
+				bne			1$								
+				rts
+
+render_char_in_buffer:	; $8438
+				ldx			#char_bank_tbl
+				lda			*col_pixel_shift				; 0,2,4,6 (same as word offset)
+				ldy			a,x											; ptr entry
+				leax		,y											; entry (X=bank address)
+				lda			*msg_char
+				ldb			#22
+				mul															; offset into bank
+				leax		d,x											; X=ptr char data
+				ldb			#(11*2)
+				ldy			#char_render_buf				; destination
+1$:			lda			,x+
+				sta			,y+
+				decb														; done all bytes?
+				bne			1$											; no, loop
+				rts
+
+char_bank_tbl:
+				.dw			#tile_data+0*22*104
+				.dw			#tile_data+1*22*104
+				.dw			#tile_data+2*22*104
+				.dw			#tile_data+3*22*104
+
+display_message:	; $86E0
+				puls		x
+1$:			stx			*msg_addr								; store msg ptr
+				lda			,x											; msg char
+				beq			9$											; yes, exit
+				ora			#0x80										; *** FUDGE
+				jsr			display_character   		
+				ldx			*msg_addr								; msg ptr
+				inx															; inc
+				bra			1$											; loop
+9$:			inx															; skip NULL
+				pshs		x
+				rts
+
 read_paddles: ; $8702
 				lda			#0xcb										; no paddles detected?
-				sta			paddles_detected
+				sta			*paddles_detected
+				rts
+
+sub_885d:	; $885d
+				ldx			#row_to_scanline_tbl
+				lda			b,x
+				; other stuff
+				tfr			a,b											; B=scanline
+				rts
+
+calc_col_addr_shift:	; $8868
+				ldx			#col_to_addr_tbl
+				lda			b,x											; A=col address
+				aslb
+				andb		#0x06										; B=shift
 				rts
 								
 ; zero-page registers
 .include "zeropage.asm"
 
-; 6809 port-specific variables
-dtx:		.db			1
-dty:		.db			1
-
 .include "tiles.asm"
+
+row_to_scanline_tbl:	; $1c51
+				.db			0, 11, 22, 33, 44, 55, 66, 77, 88, 99, 110, 121
+				.db			132, 143, 154, 165, 181
+
+col_to_addr_tbl:	; $1c62
+				.db			0, 1, 2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 15, 16
+				.db			17, 18, 20, 21, 22, 23, 25, 26, 27, 28, 30, 31, 32, 33
+
 .include "title.asm"
 
-				.end		codebase
+				.end		start
+			

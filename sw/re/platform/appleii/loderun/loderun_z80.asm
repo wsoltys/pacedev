@@ -474,7 +474,7 @@ cr: ; 7B7D
 display_char_pg1:	; $82AA
 				LD_ZP_r			msg_char,a					; store character
 				LD_r_ZP			c,row
-				call				sub_885d						; get scanline in A
+				call				sub_885d						; get scanline in C
 				LD_ZP_r			scanline,c
 				LD_r_ZP			b,col
 				call				calc_col_addr_shift
