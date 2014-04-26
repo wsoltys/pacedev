@@ -343,7 +343,6 @@ display_level: ; $7A8C
 				LD_r_ZP			a,level
 				ld					b,#25								; col=25
 				jr					display_byte
-				ret
 
 update_and_display_score:	; $7A92
 				LD_r_ZP			a,score_1e1_1
@@ -412,7 +411,7 @@ cnv_byte_to_3_digits: ; $7AF8
 				jr					c,3$
 				INC_ZP			tens
 				sub					#10
-				jr					2$									; loop counting tens
+				jr					nz,2$								; loop counting tens
 3$:			LD_ZP_r			units,a							; store units
 				ret
 

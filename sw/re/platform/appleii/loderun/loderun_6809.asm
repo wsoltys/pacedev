@@ -178,8 +178,78 @@ loc_61f6:
 break:	bra			break
 
 init_read_unpack_display_level:	; $6238
+				stb			*unk_a2
+				ldb			#0xff
+				stb			*byte_0
+				incb														; B=0
+				stb			*unk_a3
+				stb			*no_gold
+; stuff				
+				stb			*unk_1a
+				stb			*row
+; heaps of stuff
+				jsr			read_level_data
+				ldb			*row
+				ldx			#level_data_packed
+				ldy			#level_data_unpacked
+5$:			lda			#0
+				sta			*col										; col=0
+4$:			lda			*unk_1a									; nibble count
+				lsra
+				lda			,x											; source (packed) byte
+				bcs			1$											; do high nibble
+				anda		#0x0f										; low nibble
+				bra			2$
+1$:			lsra
+				lsra
+				lsra
+				lsra
+				inc			*unk_92
+				inx															; source (packed) addr
+2$:			inc			*unk_1a									; inc nibble count
+				ldb			*col
+				cmpa		#10											; data byte 0-9?
+				bcs			3$											; yes, valid (skip)
+				lda			#0											; invalid, ignore
+3$:			sta			,y											; destination (unpacked) byte
+; another copy
+				leay		1,y											; destination (unpacked) addr
+				inc			*col
+				lda			*col
+				cmpa		#28											; last column?
+				bcs			4$											; no, loop
+				inc			*row
+				lda			*row
+				cmpa		#16											; last row?
+				bcs			5$											; no, loop
+				jsr			init_and_display_level
+				rts
+
+read_level_data:	; $6264
+; copies from disk buffer to low memory ($0D00)
 				rts
 				
+init_and_display_level: ; $63B3
+				ldx			#level_data_unpacked+28*16-1
+				ldb			#15											; last row
+				stb			*row
+1$:			ldb			#27											; last column
+				stb			*col
+2$:			lda			,x
+				dex
+				cmpa		#6											; end-of-screen ladder?
+				bne			8$											; no, skip
+				lda			#0											; space
+				bra			8$
+8$:			pshs		x
+				jsr			display_char_pg1
+				puls		x
+				dec			*col
+				bpl			2$
+				dec			*row
+				bpl			1$
+				rts
+												
 gcls1: ; $7A51
 				ldx			#0x0000
 				bra			gcls
@@ -210,6 +280,107 @@ cls_and_display_game_status:	; $79AD
 				sta			*col
 				jsr			display_message
 				.asciz			"SCORE        MEN    LEVEL   "
+				jsr			display_no_lives
+				jsr			display_level
+				ldd			#0x0000									; add 0
+				bra			update_and_display_score				
+
+display_no_lives:	; $7A70
+				lda			*no_lives
+				ldb			#16											; col=16
+display_byte:
+				stb			*col
+				jsr			cnv_byte_to_3_digits
+				lda			#16											; row=16
+				sta			*row
+				lda			*hundreds
+				jsr			display_digit
+				lda			*tens
+				jsr			display_digit
+				lda			*units
+				jmp			display_digit
+
+display_level: ; $7A8C
+				lda			*level
+				ldb			#25											; col=25
+				bra			display_byte
+
+update_and_display_score:	; $7A92
+				pshs		a
+				tfr			b,a
+				adda		*score_1e1_1
+				daa     		
+				sta			*score_1e1_1
+				puls		a
+				adca		*score_1e3_1e2
+				daa     		
+				sta			*score_1e3_1e2
+				lda			*score_1e5_1e4
+				adca		#0
+				sta			*score_1e3_1e2
+				lda			*score_1e6
+				adca		#0
+				sta			*score_1e6
+				lda			#5											; col=5
+				sta			*col
+				lda			#16											; row=16
+				sta			*row
+				lda			*score_1e6
+				jsr			cnv_bcd_to_2_digits
+				lda			*units
+				jsr			display_digit
+				lda			*score_1e5_1e4
+				jsr			cnv_bcd_to_2_digits
+				lda			*tens
+				jsr			display_digit
+				lda			*units
+				jsr			display_digit
+				lda			*score_1e3_1e2
+				jsr			cnv_bcd_to_2_digits
+				lda			*tens
+				jsr			display_digit
+				lda			*units
+				jsr			display_digit
+				lda			*score_1e1_1
+				jsr			cnv_bcd_to_2_digits
+				lda			*tens
+				jsr			display_digit
+				lda			*units
+				bra			display_digit
+
+cnv_bcd_to_2_digits: ; $7AE9
+				sta			*tens
+				anda		#0x0f
+				sta			*units
+				lda			*tens
+				lsra
+				lsra
+				lsra
+				lsra
+				sta			*tens
+				rts
+				
+cnv_byte_to_3_digits: ; $7AF8
+				ldb			#0
+				stb			*tens
+				stb			*hundreds
+1$:			cmpa		#100
+				bcs			2$
+				inc			*hundreds
+				suba		#100
+				bne			1$											; loop counting hundreds
+2$:			cmpa		#10
+				bcs			3$
+				inc			*tens
+				suba		#10
+				bne			2$											; loop counting tens
+3$:			sta			*units									; store units
+				rts
+
+display_digit: ; $7B15
+				adda		#0x3b										; convert to 'ASCII'
+				jsr			display_char_pg1
+				inc			*col
 				rts
 
 remap_character: ; $7B2A
@@ -310,6 +481,9 @@ render_char_in_buffer:	; $8438
 				bne			1$											; no, loop
 				rts
 
+char_render_buf:
+				.ds			22
+				
 char_bank_tbl:
 				.dw			#tile_data+0*22*104
 				.dw			#tile_data+1*22*104
@@ -349,6 +523,10 @@ calc_col_addr_shift:	; $8868
 				andb		#0x06										; B=shift
 				rts
 								
+; this was in low memory on the apple
+level_data_unpacked:
+				.ds					28*16
+												
 ; zero-page registers
 .include "zeropage.asm"
 
@@ -363,6 +541,7 @@ col_to_addr_tbl:	; $1c62
 				.db			17, 18, 20, 21, 22, 23, 25, 26, 27, 28, 30, 31, 32, 33
 
 .include "title.asm"
+.include "levels.asm"
 
 				.end		start
 			

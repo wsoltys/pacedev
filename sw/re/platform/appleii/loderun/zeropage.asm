@@ -33,7 +33,7 @@ unk_a2							.equ		0xa2
 unk_a3							.equ		0xa3
 level								.equ		0xa6
 byte_a7							.equ		0xa7
-char_render_buf			.equ		0xdf
+char_render_buf_z		.equ		0xdf
 
 .if 0
 msg_addr:					; $10-$11
