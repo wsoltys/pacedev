@@ -38,6 +38,14 @@ CPU179			.equ		0xFFD9
 ROMMODE			.equ		0xFFDE
 RAMMODE			.equ		0xFFDF
 
+HGR1_MSB		.equ		0x00
+HGR2_MSB		.equ		0x20
+
+						.macro HGR1
+						lda			#0xE0								; screen at page $38
+						sta			VOFFMSB
+						.endm
+						
 codebase		.equ		0x4000
 .endif
 
@@ -97,8 +105,17 @@ start:
 
 display_title_screen: ; $6008
 				jsr			gcls1
+				lda			#0
+				sta			*row
+				sta			*attract_mode
+				lda			#HGR1_MSB
+				sta			*hires_page_msb_1
+				sta			*display_char_page
+; coco code is different now				
 				ldy			#title_data
-				ldx			#0x0000									; 2 centres the title screen
+				lda			*hires_page_msb_1
+				ldb			#0											; 2 centres the title screen
+				tfr			d,x
 				lda			#35											; 35 bytes/line
 				sta			*col
 				lda			#192										; 192 lines/screen
@@ -132,7 +149,7 @@ loc_6056: ; $6056
 ; store in zero page
 				lda			#5											; number of lives
 				sta			*no_lives
-				lda			*byte_a7
+				lda			*attract_mode
 				lsra
 				beq			loc_6099
 ; do some crap
@@ -140,7 +157,8 @@ loc_6056: ; $6056
 
 loc_6099:	; $6099
 				jsr			cls_and_display_game_status
-; stuff				
+				HGR1
+main_game_loop:
 				ldb			#1
 				jsr			init_read_unpack_display_level
 loop:		bra			loop				
@@ -148,7 +166,7 @@ loop:		bra			loop
 
 title_wait_for_key: ; $618e
 ;				jsr			keybd_flush
-				ldb			#4
+				ldb			#4											; timeout
 1$:			pshs		b
 				ldy			#0
 2$:			lda			*paddles_detected
@@ -167,7 +185,7 @@ title_wait_for_key: ; $618e
 				decb														; done?
 				;bne			1$											; no, loop *** FUDGE - shorten
 				ldb			#1
-				stb			*byte_a7
+				stb			*attract_mode
 				stb			*level
 ; do some other crap
 				jmp			loc_6056
@@ -180,7 +198,7 @@ break:	bra			break
 init_read_unpack_display_level:	; $6238
 				stb			*unk_a2
 				ldb			#0xff
-				stb			*byte_0
+				stb			*current_col
 				incb														; B=0
 				stb			*unk_a3
 				stb			*no_gold
@@ -222,14 +240,14 @@ init_read_unpack_display_level:	; $6238
 				lda			*row
 				cmpa		#16											; last row?
 				bcs			5$											; no, loop
-				jsr			init_and_display_level
+				jsr			init_and_draw_level
 				rts
 
 read_level_data:	; $6264
 ; copies from disk buffer to low memory ($0D00)
 				rts
 				
-init_and_display_level: ; $63B3
+init_and_draw_level: ; $63B3
 				ldx			#level_data_unpacked+28*16-1
 				ldb			#15											; last row
 				stb			*row
@@ -242,31 +260,49 @@ init_and_display_level: ; $63B3
 				lda			#0											; space
 				bra			8$
 8$:			pshs		x
-				jsr			display_char_pg1
+				jsr			display_char_pg2
 				puls		x
 				dec			*col
 				bpl			2$
 				dec			*row
 				bpl			1$
+				lda			*current_col
+				bra			draw_level							; BPL!!!
 				rts
-												
+
+draw_level:	; $648B
+				jsr			wipe_or_draw_level
+				rts
+																
 gcls1: ; $7A51
-				ldx			#0x0000
+				lda			#HGR1_MSB
+				ldb			#0
+				tfr			d,x											; start addr
+				adda		#0x20
+				tfr			d,y											; end addr
 				bra			gcls
 gcls2:
-				ldx			#0x0000								; fix me
-gcls:		lda			#0x00
+				lda			#HGR2_MSB
+				ldb			#0
+				tfr			d,x											; start addr
+				adda		#0x20
+				tfr			d,y											; end addr
+gcls:		sty			*byte_a
+				lda			#0x00
 1$:			sta			,x+
-				cmpx		#40*192
+				cmpx		*byte_a
 				bne			1$
 				rts
 
 cls_and_display_game_status:	; $79AD
 				jsr			gcls1
 				jsr			gcls2
-				ldb			#34											; last column on screen
+				lda			*display_char_page			; 0x00/0x20
+				ora			#0x1b
+				ldb			#0x80										; 0x1b80 = offset
+				tfr			d,x				
 				lda			#0xaa										; pattern
-				ldx			#176*40									; screen address
+				ldb			#34											; last column on screen
 1$:			sta			0,x           					
 				sta			40,x          					
 				sta			80,x          					
@@ -379,9 +415,15 @@ cnv_byte_to_3_digits: ; $7AF8
 
 display_digit: ; $7B15
 				adda		#0x3b										; convert to 'ASCII'
+				ldb			*display_char_page
+				cmpb		#HGR2_MSB								; page 2?
+				beq			1$											; yes, skip
 				jsr			display_char_pg1
 				inc			*col
 				rts
+1$:			jsr			display_char_pg2
+				inc			*col
+				rts				
 
 remap_character: ; $7B2A
 				cmpa		#0xc1										; <'A'
@@ -422,7 +464,13 @@ display_character: ; $7B64
 				cmpa		#0x8d										; cr?
 				beq			cr											; yes, handle
 				jsr			remap_character					; returned in A
+				ldb			*display_char_page
+				cmpb		#HGR2_MSB								; page 2?
+				beq			1$											; yes, skip
 				jsr			display_char_pg1
+				inc			*col
+				rts
+1$:			jsr			display_char_pg2
 				inc			*col
 				rts
 
@@ -434,8 +482,15 @@ cr: ; 7B7D
 
 display_char_pg1:	; $82AA
 				sta			*msg_char
+				lda			#HGR1_MSB
+				bra			display_char
+display_char_pg2: ; $82B0
+				sta			*msg_char
+				lda			#HGR2_MSB
+display_char:				
+				sta			*hires_page_msb_1
 				ldb			*row
-				jsr			sub_885d								; get scanline in B
+				jsr			calc_colx5_scanline			; B=scanline
 				stb			*scanline
 				ldb			*col
 				jsr			calc_col_addr_shift
@@ -447,11 +502,12 @@ display_char_pg1:	; $82AA
 				lda			*scanline
 				ldb			#40
 				mul
+				ora			*hires_page_msb_1				; OR-in page address
 				tfr			d,y
 				ldb			*col_addr_offset
 				leay		b,y
 				ldb			#11
-1$:			lda			0,y
+2$:			lda			0,y
 ; lmask here
 				ora			,x+
 				sta			0,y
@@ -461,7 +517,7 @@ display_char_pg1:	; $82AA
 				sta			1,y
 				leay		40,y
 				decb
-				bne			1$								
+				bne			2$
 				rts
 
 render_char_in_buffer:	; $8438
@@ -509,7 +565,7 @@ read_paddles: ; $8702
 				sta			*paddles_detected
 				rts
 
-sub_885d:	; $885d
+calc_colx5_scanline:	; $885d
 				ldx			#row_to_scanline_tbl
 				lda			b,x
 				; other stuff
@@ -522,7 +578,25 @@ calc_col_addr_shift:	; $8868
 				aslb
 				andb		#0x06										; B=shift
 				rts
-								
+
+wipe_or_draw_level:	; $88A2
+; nothing like the 6502 code!
+				lda			#HGR2_MSB
+				clrb
+				tfr			d,x
+				adda		#0x1b
+				orb			#0x80										; end addr (line 176)
+				tfr			d,y
+				sty			*byte_a
+				lda			#HGR1_MSB
+				clrb
+				tfr			d,y
+1$:			lda			,x+
+				sta			,y+
+				cmpx		*byte_a
+				bne			1$
+				rts
+					
 ; this was in low memory on the apple
 level_data_unpacked:
 				.ds					28*16
