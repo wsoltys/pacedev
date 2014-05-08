@@ -9,6 +9,8 @@
 
 .ifdef COCO3
 
+;.define			HAS_TITLE
+						
 ; COCO registers
 PIA0				.equ		0xFF00
 PIA1				.equ		0xFF20
@@ -111,6 +113,7 @@ display_title_screen: ; $6008
 				lda			#HGR1_MSB
 				sta			*hires_page_msb_1
 				sta			*display_char_page
+.ifdef HAS_TITLE
 ; coco code is different now				
 				ldy			#title_data
 				lda			*hires_page_msb_1
@@ -137,7 +140,8 @@ display_title_screen: ; $6008
 				bne			2$											; no, loop
 				tst			*row										; done screen?
 				bne			1$											; no, loop
-; this is where the apple selects the hires screen				
+.endif				
+				HGR1
 				jmp			title_wait_for_key
 
 loc_6056: ; $6056
@@ -178,7 +182,7 @@ title_wait_for_key: ; $618e
 				stb			2,x											; column strobe
 				lda			,x
 				coma														; any key pressed?
-				bne			loc_61f6								; yes, exit
+;				bne			loc_61f6								; yes, exit
 				leay		-1,y
 				bne			2$
 				puls		b
@@ -202,17 +206,29 @@ init_read_unpack_display_level:	; $6238
 				incb														; B=0
 				stb			*unk_a3
 				stb			*no_gold
+				stb			*packed_byte_cnt
 ; stuff				
-				stb			*unk_1a
+				stb			*nibble_cnt
 				stb			*row
 ; heaps of stuff
 				jsr			read_level_data
 				ldb			*row
-				ldx			#level_data_packed
-				ldy			#level_data_unpacked
-5$:			lda			#0
+5$:			ldy			#lsb_row_addr						; table for row LSB entries
+				lda			b,y											; get entry for row
+				sta			*lsb_row_level_data_addr
+				sta			*byte_8
+				ldy			#msb_row_addr_1					; table for MSB entries
+				lda			b,y											; get entry for row
+				sta			*msb_row_level_data_addr
+				ldy			#msb_row_addr_2					; table for MSB entries (#2)
+				lda			b,y											; get entry for row
+				sta			*byte_9
+				ldx			#level_data_packed			; was in disk buffer
+				ldb			*packed_byte_cnt
+				abx															; ptr packed byte
+				lda			#0
 				sta			*col										; col=0
-4$:			lda			*unk_1a									; nibble count
+4$:			lda			*nibble_cnt
 				lsra
 				lda			,x											; source (packed) byte
 				bcs			1$											; do high nibble
@@ -222,23 +238,24 @@ init_read_unpack_display_level:	; $6238
 				lsra
 				lsra
 				lsra
-				inc			*unk_92
+				inc			*packed_byte_cnt
 				inx															; source (packed) addr
-2$:			inc			*unk_1a									; inc nibble count
+2$:			inc			*nibble_cnt
 				ldb			*col
 				cmpa		#10											; data byte 0-9?
 				bcs			3$											; yes, valid (skip)
 				lda			#0											; invalid, ignore
-3$:			sta			,y											; destination (unpacked) byte
-; another copy
-				leay		1,y											; destination (unpacked) addr
+3$:			ldy			*msb_row_level_data_addr
+				sta			b,y											; destination (unpacked) byte
+				ldy			*byte_9
+				sta			b,y											; destination (unpacked) byte 2
 				inc			*col
-				lda			*col
-				cmpa		#28											; last column?
+				ldb			*col
+				cmpb		#28											; last column?
 				bcs			4$											; no, loop
 				inc			*row
-				lda			*row
-				cmpa		#16											; last row?
+				ldb			*row
+				cmpb		#16											; last row?
 				bcs			5$											; no, loop
 				jsr			init_and_draw_level
 				rts
@@ -248,7 +265,7 @@ read_level_data:	; $6264
 				rts
 				
 init_and_draw_level: ; $63B3
-				ldx			#level_data_unpacked+28*16-1
+				ldx			#level_data_unpacked_1+28*16-1
 				ldb			#15											; last row
 				stb			*row
 1$:			ldb			#27											; last column
@@ -597,14 +614,24 @@ wipe_or_draw_level:	; $88A2
 				bne			1$
 				rts
 					
-; this was in low memory on the apple
-level_data_unpacked:
-				.ds					28*16
-												
 ; zero-page registers
 .include "zeropage.asm"
 
-.include "tiles.asm"
+lsb_row_addr:	; $1C05
+					.db		<(ldu1+0*28), <(ldu1+1*28), <(ldu1+2*28), <(ldu1+3*28)
+					.db		<(ldu1+4*28), <(ldu1+5*28), <(ldu1+6*28), <(ldu1+7*28)
+					.db		<(ldu1+8*28), <(ldu1+9*28), <(ldu1+10*28), <(ldu1+11*28)
+					.db		<(ldu1+12*28), <(ldu1+13*28), <(ldu1+14*28), <(ldu1+15*28)
+msb_row_addr_1: ; $1C15
+					.db		>(ldu1+0*28), >(ldu1+1*28), >(ldu1+2*28), >(ldu1+3*28)
+					.db		>(ldu1+4*28), >(ldu1+5*28), >(ldu1+6*28), >(ldu1+7*28)
+					.db		>(ldu1+8*28), >(ldu1+9*28), >(ldu1+10*28), >(ldu1+11*28)
+					.db		>(ldu1+12*28), >(ldu1+13*28), >(ldu1+14*28), >(ldu1+15*28)
+msb_row_addr_2:	; $1C25
+					.db		>(ldu2+0*28), >(ldu2+1*28), >(ldu2+2*28), >(ldu2+3*28)
+					.db		>(ldu2+4*28), >(ldu2+5*28), >(ldu2+6*28), >(ldu2+7*28)
+					.db		>(ldu2+8*28), >(ldu2+9*28), >(ldu2+10*28), >(ldu2+11*28)
+					.db		>(ldu2+12*28), >(ldu2+13*28), >(ldu2+14*28), >(ldu2+15*28)
 
 row_to_scanline_tbl:	; $1c51
 				.db			0, 11, 22, 33, 44, 55, 66, 77, 88, 99, 110, 121
@@ -614,8 +641,29 @@ col_to_addr_tbl:	; $1c62
 				.db			0, 1, 2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 15, 16
 				.db			17, 18, 20, 21, 22, 23, 25, 26, 27, 28, 30, 31, 32, 33
 
-.include "title.asm"
+; 			.nlist
+; .include "tiles.asm"
+; .include "title.asm"
+; .include "levels.asm"
+
+				.nlist
+				
+.include "tiles.asm"
+.ifdef HAS_TITLE
+	.include "title.asm"
+.endif
 .include "levels.asm"
 
+				.list
+
+; this was in low memory on the apple
+				.bndry	512
+level_data_unpacked_1:
+ldu1:
+				.ds			512
+level_data_unpacked_2:
+ldu2:
+				.ds			512
+				
 				.end		start
 			

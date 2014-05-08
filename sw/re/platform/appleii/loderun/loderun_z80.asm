@@ -105,7 +105,7 @@ display_title_screen: ; $6008
 ; stuff         		
 				ld					c,#0
 				LD_ZP_r			row,c								
-				LD_ZP_r			byte_a7,c
+				LD_ZP_r			attract_mode,c
 				ld					a,#0x20							; page 1
 				LD_ZP_r			display_char_page,a
 ; stuff				  		
@@ -159,7 +159,7 @@ loc_6056:	; $6056
 ; store in zero page
 				ld					a,#5								; number of lives
 				LD_ZP_r			no_lives,a
-				LD_r_ZP			a,byte_a7
+				LD_r_ZP			a,attract_mode
 				srl					a
 				jr					z,loc_6099
 ; do some crap  		
@@ -192,10 +192,10 @@ title_wait_for_key: ; $618e
 				jr					nz,2$
 				pop					bc
 				;djnz				1$									; *** FUDGE - shorten
-				LD_r_ZP			a,byte_a7
+				LD_r_ZP			a,attract_mode
 				;bne    		
 				ld					b,#1
-				LD_ZP_r			byte_a7,b
+				LD_ZP_r			attract_mode,b
 				LD_ZP_r			level,b
 ; do some other crap
 				jp					loc_6056
@@ -206,7 +206,7 @@ loc_61f6:
 init_read_unpack_display_level:	; $6238
 				LD_ZP_r			unk_a2,b
 				ld					b,0xff
-				LD_ZP_r			byte_0,b
+				LD_ZP_r			current_col,b
 				inc					b
 				LD_ZP_r			unk_a3,b
 				LD_ZP_r			no_gold,b
@@ -491,7 +491,7 @@ display_char_pg1:	; $82AA
 				ld					a,(hl)							; rchar_mask
 				LD_ZP_r			rchar_mask,a
 				call				render_char_in_buffer
-				ld					hl,#char_render_buf
+				ld					hl,#char_render_buf_z
 				ld					b,#11								; scanlines per char
 				LD_ZP_r			scanline_cnt,a
 1$:			LD_r_ZP			a,scanline
@@ -571,7 +571,7 @@ render_char_in_buffer:	; $8438
 				ld					d,(hl)							; DE = offset
 				pop					hl									; ptr char bank
 				add					hl,de
-				ld					de,#char_render_buf
+				ld					de,#char_render_buf_z
 				ld					bc,#(11*2)					; bytes to copy
 				ldir
 				ret

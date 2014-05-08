@@ -7,42 +7,46 @@ zero_page:						.ds			256
 .endif
 
 ; offsets into zero-page
-current_col						.equ		0x00
-current_row						.equ		0x01
-x_offset_within_tile	.equ		0x02
-y_offset_within_tile	.equ		0x03
-sprite_index					.equ		0x04
-dir										.equ		0x05
-byte_a								.equ		0x0a
-msg_addr							.equ		0x10
-unk_1a								.equ		0x1a
-scanline							.equ		0x1b
-col_addr_offset				.equ		0x1c
-scanline_cnt					.equ		0x1d
-msg_char							.equ		0x1e
-hires_page_msb_1			.equ		0x1f
-lchar_mask						.equ		0x50
-rchar_mask						.equ		0x51
-col_pixel_shift				.equ		0x71
-col										.equ		0x85
-row										.equ		0x86
-display_char_page			.equ		0x87
-hundreds							.equ		0x89
-tens									.equ		0x8a
-units									.equ		0x8b
-score_1e1_1						.equ		0x8e
-score_1e3_1e2					.equ		0x8f
-score_1e5_1e4					.equ		0x90
-score_1e6							.equ		0x91
-unk_92								.equ		0x92
-no_gold								.equ		0x93
-paddles_detected			.equ		0x85
-no_lives							.equ		0x98
-unk_a2								.equ		0xa2
-unk_a3								.equ		0xa3
-level									.equ		0xa6
-attract_mode					.equ		0xa7
-char_render_buf_z			.equ		0xdf
+current_col								.equ		0x00
+current_row								.equ		0x01
+x_offset_within_tile			.equ		0x02
+y_offset_within_tile			.equ		0x03
+sprite_index							.equ		0x04
+dir												.equ		0x05
+lsb_row_level_data_addr		.equ		0x07		; swapped for 6809
+msb_row_level_data_addr		.equ		0x06		; swapped for 6809
+byte_8										.equ		0x09		; swapped for 6809
+byte_9										.equ		0x08		; swapped for 6809
+byte_a										.equ		0x0a
+msg_addr									.equ		0x10
+nibble_cnt								.equ		0x1a
+scanline									.equ		0x1b
+col_addr_offset						.equ		0x1c
+scanline_cnt							.equ		0x1d
+msg_char									.equ		0x1e
+hires_page_msb_1					.equ		0x1f
+lchar_mask								.equ		0x50
+rchar_mask								.equ		0x51
+col_pixel_shift						.equ		0x71
+col												.equ		0x85
+row												.equ		0x86
+display_char_page					.equ		0x87
+hundreds									.equ		0x89
+tens											.equ		0x8a
+units											.equ		0x8b
+score_1e1_1								.equ		0x8e
+score_1e3_1e2							.equ		0x8f
+score_1e5_1e4							.equ		0x90
+score_1e6									.equ		0x91
+packed_byte_cnt						.equ		0x92
+no_gold										.equ		0x93
+paddles_detected					.equ		0x85
+no_lives									.equ		0x98
+unk_a2										.equ		0xa2
+unk_a3										.equ		0xa3
+level											.equ		0xa6
+attract_mode							.equ		0xa7
+char_render_buf_z					.equ		0xdf
 
 .if 0
 msg_addr:					; $10-$11
