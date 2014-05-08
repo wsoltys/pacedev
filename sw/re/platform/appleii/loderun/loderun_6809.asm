@@ -144,7 +144,7 @@ display_title_screen: ; $6008
 				HGR1
 				jmp			title_wait_for_key
 
-loc_6056: ; $6056
+zero_score_and_init_game: ; $6056
 				lda			#0
 				sta			*score_1e1_1
 				sta			*score_1e3_1e2
@@ -155,7 +155,8 @@ loc_6056: ; $6056
 				sta			*no_lives
 				lda			*attract_mode
 				lsra
-				beq			loc_6099
+				;beq			loc_6099
+				bra			loc_6099
 ; do some crap
 				jmp			display_title_screen
 
@@ -165,8 +166,27 @@ loc_6099:	; $6099
 main_game_loop:
 				ldb			#1
 				jsr			init_read_unpack_display_level
-loop:		bra			loop				
-				; other crap				
+				lda			#0
+				lda			*attract_mode
+				lsra
+				beq			1$
+				;jsr			keybd_flush
+				lda			*current_col
+				sta			*col
+				lda			*current_row
+				sta			*row
+				lda			#9											; player
+				jsr			blink_char_and_wait_for_key
+1$:	; $60bf
+				ldb			#0
+; stuff
+in_level_loop:
+				jsr			sub_64bd
+; stuff
+				bra			in_level_loop
+
+next_level:
+				bra			main_game_loop				
 
 title_wait_for_key: ; $618e
 ;				jsr			keybd_flush
@@ -182,27 +202,33 @@ title_wait_for_key: ; $618e
 				stb			2,x											; column strobe
 				lda			,x
 				coma														; any key pressed?
-;				bne			loc_61f6								; yes, exit
+				bne			loc_61f6								; yes, exit
 				leay		-1,y
 				bne			2$
 				puls		b
 				decb														; done?
-				;bne			1$											; no, loop *** FUDGE - shorten
+				bne			1$											; no, loop
 				ldb			#1
 				stb			*attract_mode
 				stb			*level
 ; do some other crap
-				jmp			loc_6056
+				bra			zero_score_and_init_game
 
 loc_61f6:
-; hack
-				jsr			gcls1
-break:	bra			break
+; stuff
+				ldb			#0
+; stuff
+				incb
+				stb			*level
+; stuff
+				lda			#2
+				sta			*attract_mode
+				bra			zero_score_and_init_game														
 
 init_read_unpack_display_level:	; $6238
 				stb			*unk_a2
 				ldb			#0xff
-				stb			*current_col
+				stb			*current_col						; flag no player
 				incb														; B=0
 				stb			*unk_a3
 				stb			*no_gold
@@ -265,23 +291,64 @@ read_level_data:	; $6264
 				rts
 				
 init_and_draw_level: ; $63B3
-				ldx			#level_data_unpacked_1+28*16-1
 				ldb			#15											; last row
 				stb			*row
-1$:			ldb			#27											; last column
+1$:			ldy			#lsb_row_addr
+				lda			b,y											; get lsb of row
+				sta			*lsb_row_level_data_addr
+				sta			*byte_8
+				ldy			#msb_row_addr_1
+				lda			b,y											; get msb of row
+				sta			*msb_row_level_data_addr
+				ldy			#msb_row_addr_2
+				lda			b,y
+				sta			*byte_9
+				ldb			#27											; last column
 				stb			*col
-2$:			lda			,x
-				dex
+2$:			ldx			*msb_row_level_data_addr
+				lda			b,x
 				cmpa		#6											; end-of-screen ladder?
-				bne			8$											; no, skip
-				lda			#0											; space
+				bne			4$											; no, skip
+; stuff				
+3$:			lda			#0
+				ldx			*msb_row_level_data_addr
+				sta			b,x											; update tilemap
+				ldx			*byte_9
+				sta			b,x											; update tilemap
 				bra			8$
-8$:			pshs		x
-				jsr			display_char_pg2
-				puls		x
+4$:			cmpa		#7											; gold?
+				bne			5$											; no, skip
+				inc			*no_gold
+				bra			8$
+5$:			cmpa		#8											; enemy?
+				bne			6$											; no, skip
+				bra			8$											; fudge
+6$:			cmpa		#9											; player?
+				bne			7$											; no, skip
+				tst			*current_col						; already got a player?
+				bpl			3$											; yes, ignore
+				stb			*current_col						; set player column
+				lda			*row
+				sta			*current_row						; set player row
+				lda			#2
+				sta			*x_offset_within_tile
+				sta			*y_offset_within_tile
+				lda			#8
+				sta			*sprite_index
+				lda			#0											; space
+				ldx			*byte_9
+				sta			b,x											; update tilemap
+				lda			#9											; player
+				bra			8$
+7$:			cmpa		#5											; fall-thru?
+				bne			8$											; no, skip
+				lda			#1											; display diggable brick
+8$:			jsr			display_char_pg2
 				dec			*col
+				ldb			*col
 				bpl			2$
 				dec			*row
+				ldb			*row
 				bpl			1$
 				lda			*current_col
 				bra			draw_level							; BPL!!!
@@ -290,7 +357,40 @@ init_and_draw_level: ; $63B3
 draw_level:	; $648B
 				jsr			wipe_or_draw_level
 				rts
-																
+
+sub_64bd: ; $64bd
+				bra			1$
+1$:				
+; stuff
+				jsr			read_controls
+				rts
+
+; Coco Keyboard
+;    7  6  5  4  3  2  1  0
+;	0: G  F  E  D  C  B  A  @
+; 1: O  N  M  L  K  J  I  H
+; 2: W  V  U  T  S  R  Q  P
+; 3: SP RT LT DN UP Z  Y  X
+; 4: '  &  %  $  #  "  !  0
+; 4: 7  6  5  4  3  2  1  0
+; 5: ?  >  =  <  +  *  )  (
+; 6: /  .  _  ,  ;  :  9  8
+; 7: SH             BK CL CR
+
+read_controls:	; $6a12
+				lda			*attract_mode
+				cmpa		#1
+				;beq			loc_68b8
+1$:				
+				ldx			#PIA0
+				ldb			#0xfe										; col0
+				stb			2,x											; column strobe
+				lda			,x
+				coma														; any key pressed?
+				beq			1$
+				jsr			gcls1
+				rts
+																								
 gcls1: ; $7A51
 				lda			#HGR1_MSB
 				ldb			#0
@@ -513,7 +613,13 @@ display_char:
 				jsr			calc_col_addr_shift
 				sta			*col_addr_offset
 				stb			*col_pixel_shift
-; ignore masks for now
+				lsrb
+				ldx			#left_char_masks
+				lda			b,x
+				sta			*lchar_mask
+				ldx			#right_char_masks
+				lda			b,x
+				sta			*rchar_mask
 				jsr			render_char_in_buffer
 				ldx			#char_render_buf
 				lda			*scanline
@@ -525,17 +631,22 @@ display_char:
 				leay		b,y
 				ldb			#11
 2$:			lda			0,y
-; lmask here
+				anda		*lchar_mask
 				ora			,x+
 				sta			0,y
 				lda			1,y
-; rmask here				
+				anda		*rchar_mask
 				ora			,x+
 				sta			1,y
 				leay		40,y
 				decb
 				bne			2$
 				rts
+
+left_char_masks:	; $8328
+				.db			0x00, 0xc0, 0xf0, 0xfc
+right_char_masks:	; $832F
+				.db			0x3f, 0x0f, 0x03, 0x00
 
 render_char_in_buffer:	; $8438
 				ldx			#char_bank_tbl
@@ -577,7 +688,45 @@ display_message:	; $86E0
 				pshs		x
 				rts
 
-read_paddles: ; $8702
+blink_char_and_wait_for_key:	; $8700
+				sta			blink_char
+1$:			lda			#0x68
+				sta			*timer
+				lda			#0											; space
+				ldb			blink_char
+				bne			2$											; not a space, skip
+				lda			#0x0a										; solid square
+2$:			jsr			display_char_pg1
+3$:			ldx			#PIA0
+				ldb			#0											; all columns
+				stb			2,x											; column strobe
+				lda			,x
+				coma														; any key pressed?
+				bne			blink_got_key						; yes, exit
+; read keyboard
+				dec			*timer									; timeout?
+				bne			3$											; no, loop
+				lda			blink_char
+				jsr			display_char_pg1
+				lda			#0x68
+				sta			*timer
+; read keyboard
+4$:
+				dec			*timer								; timeout?
+				bne			4$										; no, loop
+				bra			1$										; loop waiting for key
+
+blink_got_key:
+				pshs		a
+				lda			blink_char
+				jsr			display_char_pg1
+				puls		a
+				rts
+				
+blink_char:
+				.db			6
+								
+read_paddles: ; $87A2
 				lda			#0xcb										; no paddles detected?
 				sta			*paddles_detected
 				rts
