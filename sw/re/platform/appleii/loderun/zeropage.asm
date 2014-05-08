@@ -18,6 +18,10 @@ msb_row_level_data_addr		.equ		0x06		; swapped for 6809
 byte_8										.equ		0x09		; swapped for 6809
 byte_9										.equ		0x08		; swapped for 6809
 byte_a										.equ		0x0a
+lsb_line_addr_pg1					.equ		0x0d		; swapped for 6809
+msb_line_addr_pg1					.equ		0x0c		; swapped for 6809
+lsb_line_addr_pg2					.equ		0x0f		; swapped for 6809
+msb_line_addr_pg2					.equ		0x0e		; swapped for 6809
 msg_addr									.equ		0x10
 nibble_cnt								.equ		0x1a
 scanline									.equ		0x1b

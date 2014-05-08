@@ -363,8 +363,87 @@ sub_64bd: ; $64bd
 1$:				
 ; stuff
 				jsr			read_controls
-				rts
+				cmpa		#0xcc										; 'L'?
+				bne			9$											; no, skip
+				bra			move_right
+9$:			rts
 
+move_right: ; $6645
+				ldb			*current_row
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*lsb_row_level_data_addr
+				sta			*byte_8
+				ldy			#msb_row_addr_1
+				lda			b,y
+				sta			*msb_row_level_data_addr
+				ldy			#msb_row_addr_2
+				lda			b,y
+				sta			*byte_9									; setup tilemap & video addresses
+				ldb			*x_offset_within_tile
+				cmpb		#2
+				bcc			can_move_right
+				ldb			*current_col
+				cmpb		#27											; right-most?
+				beq			9$											; yes, exit
+				incb														; next column
+				ldy			#lsb_row_level_data_addr
+				lda			b,y											; get tile data
+				cmpa		#2											; solid?
+				beq			9$											; yes, exit
+				cmpa		#1											; brick?
+				beq			9$											; yes, exit
+				cmpa		#5											; fall-thru?
+				bne			can_move_right					; no, continue				
+9$:			rts
+
+can_move_right: ; $6674
+				jsr			calc_char_and_addr			; X(msb)=scanline
+				jsr			wipe_char
+				lda			#1
+				sta			*dir										; set direction right
+				;jsr			adjust_y_offset_within_tile
+				inc			*x_offset_within_tile
+				lda			*x_offset_within_tile
+				cmpa		#5
+				bcc			2$
+				ldb			*current_col
+				ldy			*byte_9
+				lda			b,y											; get object from filemap
+				cmpa		#1											; brick?
+				bne			1$											; no, skip
+				lda			#1
+1$:			ldy			#lsb_row_level_data_addr
+				sta			b,y											; update tilemap
+				inc			*current_col						; next tile
+				incb
+				lda			#9											; player
+				sta			b,y											; update tilemap
+				lda			#0
+				sta			*x_offset_within_tile
+				bra			3$
+2$:			jsr			check_for_gold
+3$:			ldb			*current_col
+				ldy			*byte_9
+				lda			b,y											; get object from tilemap
+				cmpa		#4											; rope?
+				beq			4$											; yes, go
+				lda			#8											; 1st sprite index (runner right)
+				ldb			#0x0a										; last sprite index (runner right)								
+				bra			5$
+4$:			lda			#0x0b										; 1st sprite index (swinger right)
+				ldb			#0x0d										; last sprite index (swinger right)
+5$:			jsr			update_sprite_index
+				jmp			draw_sprite				
+
+sprite_to_char_tbl:	; $6968
+				.db 		0xB, 0xC, 0xD, 0x18, 0x19, 0x1A, 0xF, 0x13, 9, 0x10, 0x11, 0x15, 0x16
+				.db 		0x17, 0x25, 0x14, 0xE, 0x12, 0x1B, 0x1B, 0x1C, 0x1C, 0x1D, 0x1D, 0x1E
+				.db 		0x1E, 0, 0, 0, 0, 0x26, 0x26, 0x27, 0x27, 0x1D, 0x1D, 0x1E, 0x1E, 0
+				.db 		0, 0, 0, 0x1F, 0x1F, 0x20, 0x20, 0x21, 0x21, 0x22, 0x22, 0x23, 0x23
+				.db 		0x24, 0x24, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x24, 0x24
+				.db 		0x24, 0x24, 0x24, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 2, 2, 1
+								
 ; Coco Keyboard
 ;    7  6  5  4  3  2  1  0
 ;	0: G  F  E  D  C  B  A  @
@@ -383,12 +462,37 @@ read_controls:	; $6a12
 				;beq			loc_68b8
 1$:				
 				ldx			#PIA0
-				ldb			#0xfe										; col0
+				ldb			~(1<<4)									; col4
 				stb			2,x											; column strobe
-				lda			,x
-				coma														; any key pressed?
-				beq			1$
-				jsr			gcls1
+				lda			,x											; active low
+				bita		#2											; 'L'?
+				bne			2$											; no, skip
+				lda			#0xcc										; 'L'
+2$:				
+				rts
+
+calc_char_and_addr:	; $6b85
+				ldb			*current_col
+				lda			*x_offset_within_tile
+				jsr			calc_x_in_2_pixel_incs
+				stb			*msg_char								; store x_in_2_pixel_incs
+				lda			*current_row
+				ldb			*y_offset_within_tile
+				jsr			calc_scanline						; A=scanline
+				tfr			d,x											; X(msb)=scanline
+				ldb			*sprite_index
+				ldy			#sprite_to_char_tbl
+				lda			b,y											; A=lookup char from sprite
+				ldb			*msg_char								; restore x_in_2_pixel_incs
+				rts
+
+check_for_gold: ; $6b9d
+				rts
+								
+update_sprite_index: ; $6bf4
+				rts
+				
+draw_sprite: ; $6c02
 				rts
 																								
 gcls1: ; $7A51
@@ -438,6 +542,17 @@ cls_and_display_game_status:	; $79AD
 				ldd			#0x0000									; add 0
 				bra			update_and_display_score				
 
+get_line_addr_pgs_1_2: ; $7A3E
+				lda			#40
+				mul
+				stb			*lsb_line_addr_pg1
+				stb			*lsb_line_addr_pg2
+				ora			HGR1_MSB
+				sta			*msb_line_addr_pg1
+				eora		HGR1_MSB | HGR2_MSB
+				sta			*msb_line_addr_pg2
+				rts
+				
 display_no_lives:	; $7A70
 				lda			*no_lives
 				ldb			#16											; col=16
@@ -648,6 +763,47 @@ left_char_masks:	; $8328
 right_char_masks:	; $832F
 				.db			0x3f, 0x0f, 0x03, 0x00
 
+wipe_char:	; $8336
+				exg			d,x				
+				sta			*scanline
+				exg			d,x
+				sta			*msg_char
+				jsr			calc_addr_shift_for_x
+				sta			*col_addr_offset
+				stb			*col_pixel_shift
+				jsr			render_char_in_buffer
+				ldb			#11
+				stb			*scanline_cnt
+				ldb			#0
+				lda			*col_pixel_shift
+wipe_2_byte_char_from_video:
+				ldb			*scanline
+				jsr			get_line_addr_pgs_1_2
+				ldb			*col_addr_offset
+				ldy			#char_render_buf
+				lda			b,y
+				coma
+				ldy			#lsb_line_addr_pg1
+				anda		b,y
+				ldx			#lsb_line_addr_pg2
+				ora			b,x
+				sta			b,y
+				leay		1,y
+				incb
+				ldy			#char_render_buf
+				lda			b,y
+				coma
+				ldy			#lsb_line_addr_pg1
+				anda		b,y
+				ldx			#lsb_line_addr_pg2
+				ora			b,x
+				sta			b,y
+				leay		1,y
+				inc			*scanline
+				dec			*scanline_cnt
+				bne			wipe_2_byte_char_from_video			
+				rts
+				
 render_char_in_buffer:	; $8438
 				ldx			#char_bank_tbl
 				lda			*col_pixel_shift				; 0,2,4,6 (same as word offset)
@@ -745,6 +901,38 @@ calc_col_addr_shift:	; $8868
 				andb		#0x06										; B=shift
 				rts
 
+calc_addr_shift_for_x:	; $8872
+				ldy			#movement_offset_to_addr_tbl
+				lda			b,y
+				pshs		a
+				ldy			#movement_offset_to_shift_tbl
+				lda			b,y
+				tfr			b,a
+				puls		a
+				rts
+				
+calc_scanline: ; $887C
+				pshs		b												; save y_offset_within_tile
+				jsr			calc_colx5_scanline
+				puls		b												; restore y_offset_within_tile
+				ldy			#byte_888a
+				adda		b,y											; A=scanline
+				rts
+
+byte_888a:
+				.db			-5, -3, 0, 2, 4
+								
+calc_x_in_2_pixel_incs: ; $888F
+				pshs		a												; save x_offset_within_tile
+				jsr			calc_colx5_scanline			; B=colx5
+				puls		a												; restore x_offset_within_tile
+				ldy			#byte_889d
+				addb		a,y											; B=x as count of 2-pixel increments
+				rts
+
+byte_889d:
+				.db			-1, -2, 0, 1, 2
+								
 wipe_or_draw_level:	; $88A2
 ; nothing like the 6502 code!
 				lda			#HGR2_MSB
@@ -789,6 +977,27 @@ row_to_scanline_tbl:	; $1c51
 col_to_addr_tbl:	; $1c62
 				.db			0, 1, 2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 15, 16
 				.db			17, 18, 20, 21, 22, 23, 25, 26, 27, 28, 30, 31, 32, 33
+
+movement_offset_to_addr_tbl:	; $1C9A
+				.db 		0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5
+				.db 		5, 6, 6, 6, 6, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 0xA, 0xA, 0xA, 0xA
+				.db 		0xB, 0xB, 0xB, 0xC, 0xC, 0xC, 0xC, 0xD, 0xD, 0xD, 0xE, 0xE, 0xE, 0xE, 0xF
+				.db 		0xF, 0xF, 0x10, 0x10, 0x10, 0x10, 0x11, 0x11, 0x11, 0x12, 0x12, 0x12, 0x12
+				.db 		0x13, 0x13, 0x13, 0x14, 0x14, 0x14, 0x14, 0x15, 0x15, 0x15, 0x16, 0x16
+				.db 		0x16, 0x16, 0x17, 0x17, 0x17, 0x18, 0x18, 0x18, 0x18, 0x19, 0x19, 0x19
+				.db 		0x1A, 0x1A, 0x1A, 0x1A, 0x1B, 0x1B, 0x1B, 0x1C, 0x1C, 0x1C, 0x1C, 0x1D
+				.db 		0x1D, 0x1D, 0x1E, 0x1E, 0x1E, 0x1E, 0x1F, 0x1F, 0x1F, 0x20, 0x20, 0x20
+				.db 		0x20, 0x21, 0x21, 0x21, 0x22, 0x22, 0x22, 0x22, 0x23, 0x23, 0x23, 0x24
+				.db 		0x24, 0x24, 0x24, 0x25, 0x25, 0x25, 0x26, 0x26, 0x26, 0x26, 0x27, 0x27
+				.db 		0x27
+movement_offset_to_shift_tbl:	; $1D26
+				.db 		0, 2, 4, 6, 1, 3, 5, 0, 2, 4, 6, 1, 3, 5, 0, 2, 4, 6, 1, 3
+				.db 		5, 0, 2, 4, 6, 1, 3, 5, 0, 2, 4, 6, 1, 3, 5, 0, 2, 4, 6, 1
+				.db 		3, 5, 0, 2, 4, 6, 1, 3, 5, 0, 2, 4, 6, 1, 3, 5, 0, 2, 4, 6
+				.db 		1, 3, 5, 0, 2, 4, 6, 1, 3, 5, 0, 2, 4, 6, 1, 3, 5, 0, 2, 4
+				.db 		6, 1, 3, 5, 0, 2, 4, 6, 1, 3, 5, 0, 2, 4, 6, 1, 3, 5, 0, 2
+				.db 		4, 6, 1, 3, 5, 0, 2, 4, 6, 1, 3, 5, 0, 2, 4, 6, 1, 3, 5, 0
+				.db 		2, 4, 6, 1, 3, 5, 0, 2, 4, 6, 1, 3, 5, 0, 2, 4, 6, 1, 3, 5
 
 ; 			.nlist
 ; .include "tiles.asm"
