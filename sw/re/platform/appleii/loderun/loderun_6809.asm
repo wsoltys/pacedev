@@ -3,10 +3,19 @@
 ; - ported from the original Apple II version
 ; - by tcdev 2014 msmcdoug@gmail.com
 ;
+				.list		(meb)										; macro expansion binary
+				
        	.area   idaseg (ABS)
 
 .define			COCO3
 .define			DEBUG
+
+						.macro	CLC
+						andcc		#~(1<<0)
+						.endm
+						.macro	SEC
+						orcc		#(1<<0)
+						.endm
 
 .ifdef COCO3
 
@@ -362,6 +371,31 @@ init_and_draw_level: ; $63B3
 
 draw_level:	; $648B
 				jsr			wipe_or_draw_level
+				ldb			#15											; last row
+				stb			*row
+1$:			ldy			#lsb_row_addr
+				lda			b,y
+				sta			lsb_row_level_data_addr
+				ldy			#msb_row_addr_1
+				lda			b,y
+				sta			msb_row_level_data_addr
+				ldb			#27											; last column
+				stb			*col			
+2$:			ldy			msb_row_level_data_addr
+				lda			b,y											; get tilemap data
+				cmpa		#9											; player?
+				beq			3$											; yes, continue
+				cmpa		#8											; enemy?
+				bne			4$											; no, skip
+3$:			lda			#0											; space
+				jsr			display_char_pg2				; wipe player & enemies from bg
+4$:			dec			*col
+				ldb			*col										; done all columns?
+				bpl			2$											; no, loop
+				dec			*row
+				ldb			*row										; done all rows?
+				bpl			1$											; no, loop
+				CLC
 				rts
 
 sub_64bd: ; $64bd
