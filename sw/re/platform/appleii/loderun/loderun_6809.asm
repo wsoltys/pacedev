@@ -422,7 +422,7 @@ move_right: ; $6645
 				sta			*byte_9									; setup tilemap & video addresses
 				ldb			*x_offset_within_tile
 				cmpb		#2
-				bcc			can_move_right
+				bcs			can_move_right
 				ldb			*current_col
 				cmpb		#27											; right-most?
 				beq			9$											; yes, exit
@@ -446,14 +446,14 @@ can_move_right: ; $6674
 				inc			*x_offset_within_tile
 				lda			*x_offset_within_tile
 				cmpa		#5
-				bcc			2$
+				bcs			2$
 				ldb			*current_col
 				ldy			*byte_9
 				lda			b,y											; get object from filemap
 				cmpa		#1											; brick?
 				bne			1$											; no, skip
 				lda			#1
-1$:			ldy			#lsb_row_level_data_addr
+1$:			ldy			*msb_row_level_data_addr
 				sta			b,y											; update tilemap
 				inc			*current_col						; next tile
 				incb
@@ -551,9 +551,20 @@ check_for_gold: ; $6b9d
 				rts
 								
 update_sprite_index: ; $6bf4
+; A=1st, B=last
+				inc			*sprite_index
+				cmpa		*sprite_index
+				bcs			2$
+1$:			sta			*sprite_index				
 				rts
+2$:			cmpb		*sprite_index
+				bcs			1$
+				rts				
 				
 draw_sprite: ; $6c02
+				jsr			calc_char_and_addr
+;				jsr			display_transparent_char
+				jsr			display_char_pg1
 				rts
 																								
 gcls1: ; $7A51
@@ -608,9 +619,9 @@ get_line_addr_pgs_1_2: ; $7A3E
 				mul
 				stb			*lsb_line_addr_pg1
 				stb			*lsb_line_addr_pg2
-				ora			HGR1_MSB
+				ora			#HGR1_MSB
 				sta			*msb_line_addr_pg1
-				eora		HGR1_MSB | HGR2_MSB
+				eora		#(HGR1_MSB | HGR2_MSB)
 				sta			*msb_line_addr_pg2
 				rts
 				
@@ -835,31 +846,32 @@ wipe_char:	; $8336
 				jsr			render_char_in_buffer
 				ldb			#11
 				stb			*scanline_cnt
-				ldb			#0
+;				ldb			#0
+				ldy			#char_render_buf
 				lda			*col_pixel_shift
 wipe_2_byte_char_from_video:
 				ldb			*scanline
 				jsr			get_line_addr_pgs_1_2
+				lda			,y+											; get data from render buffer
+				coma														; invert character data
 				ldb			*col_addr_offset
-				ldy			#char_render_buf
-				lda			b,y
-				coma
-				ldy			#lsb_line_addr_pg1
-				anda		b,y
-				ldx			#lsb_line_addr_pg2
-				ora			b,x
-				sta			b,y
-				leay		1,y
-				incb
-				ldy			#char_render_buf
-				lda			b,y
-				coma
-				ldy			#lsb_line_addr_pg1
-				anda		b,y
-				ldx			#lsb_line_addr_pg2
-				ora			b,x
-				sta			b,y
-				leay		1,y
+				ldx			*msb_line_addr_pg1
+				pshs		x
+				anda		b,x											; mask off character
+				ldx			*msb_line_addr_pg2
+				ora			b,x											; OR-in background
+				puls		x
+				sta			b,x											; update video byte
+				incb														; next byte
+				lda			,y+											; get data from render buffer
+				coma														; invert character data
+				ldx			*msb_line_addr_pg1
+				pshs		x
+				anda		b,x											; mask off character
+				ldx			*msb_line_addr_pg2
+				ora			b,x											; OR-in background
+				puls		x
+				sta			b,x											; update video byte
 				inc			*scanline
 				dec			*scanline_cnt
 				bne			wipe_2_byte_char_from_video			
@@ -966,13 +978,11 @@ calc_col_addr_shift:	; $8868
 				rts
 
 calc_addr_shift_for_x:	; $8872
-				ldy			#movement_offset_to_addr_tbl
-				lda			b,y
-				pshs		a
-				ldy			#movement_offset_to_shift_tbl
-				lda			b,y
-				tfr			a,b											; B=shift
-				puls		a												; A=addr
+				tfr			b,a
+				lsra
+				lsra														; A=addr
+				lslb
+				andb		#7											; B=shift
 				rts
 				
 calc_scanline: ; $887C
@@ -1047,27 +1057,6 @@ row_to_scanline_tbl:	; $1c51
 col_to_addr_tbl:	; $1c62
 				.db			0, 1, 2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 15, 16
 				.db			17, 18, 20, 21, 22, 23, 25, 26, 27, 28, 30, 31, 32, 33
-
-movement_offset_to_addr_tbl:	; $1C9A
-				.db 		0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5
-				.db 		5, 6, 6, 6, 6, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 0xA, 0xA, 0xA, 0xA
-				.db 		0xB, 0xB, 0xB, 0xC, 0xC, 0xC, 0xC, 0xD, 0xD, 0xD, 0xE, 0xE, 0xE, 0xE, 0xF
-				.db 		0xF, 0xF, 0x10, 0x10, 0x10, 0x10, 0x11, 0x11, 0x11, 0x12, 0x12, 0x12, 0x12
-				.db 		0x13, 0x13, 0x13, 0x14, 0x14, 0x14, 0x14, 0x15, 0x15, 0x15, 0x16, 0x16
-				.db 		0x16, 0x16, 0x17, 0x17, 0x17, 0x18, 0x18, 0x18, 0x18, 0x19, 0x19, 0x19
-				.db 		0x1A, 0x1A, 0x1A, 0x1A, 0x1B, 0x1B, 0x1B, 0x1C, 0x1C, 0x1C, 0x1C, 0x1D
-				.db 		0x1D, 0x1D, 0x1E, 0x1E, 0x1E, 0x1E, 0x1F, 0x1F, 0x1F, 0x20, 0x20, 0x20
-				.db 		0x20, 0x21, 0x21, 0x21, 0x22, 0x22, 0x22, 0x22, 0x23, 0x23, 0x23, 0x24
-				.db 		0x24, 0x24, 0x24, 0x25, 0x25, 0x25, 0x26, 0x26, 0x26, 0x26, 0x27, 0x27
-				.db 		0x27
-movement_offset_to_shift_tbl:	; $1D26
-				.db 		0, 2, 4, 6, 1, 3, 5, 0, 2, 4, 6, 1, 3, 5, 0, 2, 4, 6, 1, 3
-				.db 		5, 0, 2, 4, 6, 1, 3, 5, 0, 2, 4, 6, 1, 3, 5, 0, 2, 4, 6, 1
-				.db 		3, 5, 0, 2, 4, 6, 1, 3, 5, 0, 2, 4, 6, 1, 3, 5, 0, 2, 4, 6
-				.db 		1, 3, 5, 0, 2, 4, 6, 1, 3, 5, 0, 2, 4, 6, 1, 3, 5, 0, 2, 4
-				.db 		6, 1, 3, 5, 0, 2, 4, 6, 1, 3, 5, 0, 2, 4, 6, 1, 3, 5, 0, 2
-				.db 		4, 6, 1, 3, 5, 0, 2, 4, 6, 1, 3, 5, 0, 2, 4, 6, 1, 3, 5, 0
-				.db 		2, 4, 6, 1, 3, 5, 0, 2, 4, 6, 1, 3, 5, 0, 2, 4, 6, 1, 3, 5
 
 ; 			.nlist
 ; .include "tiles.asm"
