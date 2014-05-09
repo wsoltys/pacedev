@@ -6,6 +6,7 @@
        	.area   idaseg (ABS)
 
 .define			COCO3
+.define			DEBUG
 
 .ifdef COCO3
 
@@ -45,6 +46,11 @@ HGR2_MSB		.equ		0x20
 
 						.macro HGR1
 						lda			#0xE0								; screen at page $38
+						sta			VOFFMSB
+						.endm
+
+						.macro HGR2
+						lda			#0xE4								; screen at page $39
 						sta			VOFFMSB
 						.endm
 						
@@ -453,10 +459,31 @@ sprite_to_char_tbl:	; $6968
 ; 4: '  &  %  $  #  "  !  0
 ; 4: 7  6  5  4  3  2  1  0
 ; 5: ?  >  =  <  +  *  )  (
-; 6: /  .  _  ,  ;  :  9  8
-; 7: SH             BK CL CR
+; 5: /  .  _  ,  ;  :  9  8
+; 6: SH F2 F1 CT AL BK CL CR
+
+page:		.db			0
 
 read_controls:	; $6a12
+.ifdef DEBUG
+				ldx			#PIA0
+				ldb			#~(1<<0)								; col0
+				stb			2,x											; column strobe
+				lda			,x											; active low
+				bita		#(1<<6)									; <ENTER>?
+				bne			check_attract
+				lda			page
+				coma		
+				sta			page
+				bne			1$
+				HGR1
+				bra			2$
+1$:			HGR2
+2$:			lda			,x											; active low
+				bita		#(1<<6)
+				beq			2$											; wait for key release
+.endif
+check_attract:
 				lda			*attract_mode
 				cmpa		#1
 				;beq			loc_68b8
