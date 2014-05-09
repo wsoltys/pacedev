@@ -523,10 +523,10 @@ check_attract:
 				;beq			loc_68b8
 1$:				
 				ldx			#PIA0
-				ldb			~(1<<4)									; col4
+				ldb			#~(1<<4)								; col4
 				stb			2,x											; column strobe
 				lda			,x											; active low
-				bita		#2											; 'L'?
+				bita		#(1<<1)									; 'L'?
 				bne			2$											; no, skip
 				lda			#0xcc										; 'L'
 2$:				
@@ -537,10 +537,10 @@ calc_char_and_addr:	; $6b85
 				lda			*x_offset_within_tile
 				jsr			calc_x_in_2_pixel_incs
 				stb			*msg_char								; store x_in_2_pixel_incs
-				lda			*current_row
-				ldb			*y_offset_within_tile
-				jsr			calc_scanline						; A=scanline
-				tfr			d,x											; X(msb)=scanline
+				ldb			*current_row
+				lda			*y_offset_within_tile
+				jsr			calc_scanline						; B=scanline
+				tfr			d,x											; X(lsb)=scanline
 				ldb			*sprite_index
 				ldy			#sprite_to_char_tbl
 				lda			b,y											; A=lookup char from sprite
@@ -826,10 +826,10 @@ right_char_masks:	; $832F
 
 wipe_char:	; $8336
 				exg			d,x				
-				sta			*scanline
+				stb			*scanline
 				exg			d,x
 				sta			*msg_char
-				jsr			calc_addr_shift_for_x
+				jsr			calc_addr_shift_for_x		; A=addr, B=shift
 				sta			*col_addr_offset
 				stb			*col_pixel_shift
 				jsr			render_char_in_buffer
@@ -949,10 +949,13 @@ read_paddles: ; $87A2
 				rts
 
 calc_colx5_scanline:	; $885d
-				ldx			#row_to_scanline_tbl
-				lda			b,x
-				; other stuff
-				tfr			a,b											; B=scanline
+; B=row
+				ldy			#row_to_scanline_tbl
+				lda			b,y
+				pshs		a
+				ldy			#col_x_5_tbl
+				lda			b,y											; A=col*5
+				puls		b												; B=scanline
 				rts
 
 calc_col_addr_shift:	; $8868
@@ -968,16 +971,17 @@ calc_addr_shift_for_x:	; $8872
 				pshs		a
 				ldy			#movement_offset_to_shift_tbl
 				lda			b,y
-				tfr			b,a
-				puls		a
+				tfr			a,b											; B=shift
+				puls		a												; A=addr
 				rts
 				
 calc_scanline: ; $887C
-				pshs		b												; save y_offset_within_tile
-				jsr			calc_colx5_scanline
-				puls		b												; restore y_offset_within_tile
+; A=y_offset_within_tile, B=row
+				pshs		a												; save y_offset_within_tile
+				jsr			calc_colx5_scanline			; B=scanline
+				puls		a												; restore y_offset_within_tile
 				ldy			#byte_888a
-				adda		b,y											; A=scanline
+				addb		a,y											; B=scanline
 				rts
 
 byte_888a:
@@ -985,7 +989,8 @@ byte_888a:
 								
 calc_x_in_2_pixel_incs: ; $888F
 				pshs		a												; save x_offset_within_tile
-				jsr			calc_colx5_scanline			; B=colx5
+				jsr			calc_colx5_scanline			; A=colx5
+				tfr			a,b											; B=colx5
 				puls		a												; restore x_offset_within_tile
 				ldy			#byte_889d
 				addb		a,y											; B=x as count of 2-pixel increments
@@ -1030,6 +1035,10 @@ msb_row_addr_2:	; $1C25
 					.db		>(ldu2+4*28), >(ldu2+5*28), >(ldu2+6*28), >(ldu2+7*28)
 					.db		>(ldu2+8*28), >(ldu2+9*28), >(ldu2+10*28), >(ldu2+11*28)
 					.db		>(ldu2+12*28), >(ldu2+13*28), >(ldu2+14*28), >(ldu2+15*28)
+
+col_x_5_tbl:	; $1C35
+					.db 	0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75
+					.db 	80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135
 
 row_to_scanline_tbl:	; $1c51
 				.db			0, 11, 22, 33, 44, 55, 66, 77, 88, 99, 110, 121
