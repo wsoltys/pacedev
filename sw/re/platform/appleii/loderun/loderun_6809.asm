@@ -155,9 +155,11 @@ display_title_screen: ; $6008
 				bne			2$											; no, loop
 				tst			*row										; done screen?
 				bne			1$											; no, loop
-.endif				
 				HGR1
 				jmp			title_wait_for_key
+.else
+				jmp			loc_61f6				
+.endif				
 
 zero_score_and_init_game: ; $6056
 				lda			#0
@@ -198,6 +200,20 @@ main_game_loop:
 in_level_loop:
 				jsr			sub_64bd
 ; stuff
+.if 1
+; delay for Coco
+				ldx			#8000
+9$:			dex
+				bne			9$
+.endif
+.if 0				
+9$:			ldx			#PIA0
+				ldb			#0											; all columns
+				stb			2,x											; column strobe
+				lda			,x
+				coma														; any key pressed?
+				bne			9$											; yes, loop
+.endif				
 				bra			in_level_loop
 
 next_level:
@@ -238,7 +254,7 @@ loc_61f6:
 ; stuff
 				lda			#2
 				sta			*attract_mode
-				bra			zero_score_and_init_game														
+				jmp			zero_score_and_init_game														
 
 init_read_unpack_display_level:	; $6238
 				stb			*unk_a2
@@ -403,10 +419,82 @@ sub_64bd: ; $64bd
 1$:				
 ; stuff
 				jsr			read_controls
-				cmpa		#0xcc										; 'L'?
+				cmpa		#0xc9										; 'I'?
+				bne			2$											; no, skip
+2$:			cmpa		#0xcb										; 'K'?
+				bne			3$											; no, skip
+3$:			cmpa		#0xca										; 'J'?
+				bne			4$											; no, skip
+				jmp			move_left
+4$:			cmpa		#0xcc										; 'L'?
 				bne			9$											; no, skip
-				bra			move_right
+				jmp			move_right
 9$:			rts
+
+move_left: ; 65D3
+				ldb			*current_row
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*lsb_row_level_data_addr
+				sta			*byte_8
+				ldy			#msb_row_addr_1
+				lda			b,y
+				sta			*msb_row_level_data_addr
+				ldy			#msb_row_addr_2
+				lda			b,y
+				sta			*byte_9									; setup tilemap & video addresses
+				ldb			*x_offset_within_tile
+				cmpb		#3
+				bcs			can_move_left
+				ldb			*current_col
+				beq			9$											; left-most? yes, exit
+				decb														; previous column
+				ldy			*msb_row_level_data_addr
+				lda			b,y											; get tile data
+				cmpa		#2											; solid?
+				beq			9$											; yes, exit
+				cmpa		#1											; brick?
+				beq			9$											; yes, exit
+				cmpa		#5											; fall-thru?
+				bne			can_move_left						; no, continue				
+9$:			rts
+				
+can_move_left: ; $6600
+				jsr			calc_char_and_addr			; X(msb)=scanline
+				jsr			wipe_char
+				lda			#-1
+				sta			*dir										; set direction right
+				;jsr			adjust_y_offset_within_tile
+				dec			*x_offset_within_tile
+				bpl			2$
+				ldb			*current_col
+				ldy			*byte_9
+				lda			b,y											; get object from filemap
+				cmpa		#1											; brick?
+				bne			1$											; no, skip
+				lda			#0
+1$:			ldy			*msb_row_level_data_addr
+				sta			b,y											; update tilemap
+				dec			*current_col						; previous tile
+				decb
+				lda			#9											; player
+				sta			b,y											; update tilemap
+				lda			#4
+				sta			*x_offset_within_tile
+				bra			3$
+2$:			jsr			check_for_gold
+3$:			ldb			*current_col
+				ldy			*byte_9
+				lda			b,y											; get object from tilemap
+				cmpa		#4											; rope?
+				beq			4$											; yes, go
+				lda			#0											; 1st sprite index (runner left)
+				ldb			#2											; last sprite index (runner left)								
+				bra			5$
+4$:			lda			#3											; 1st sprite index (swinger left)
+				ldb			#5											; last sprite index (swinger left)
+5$:			jsr			update_sprite_index
+				jmp			draw_sprite				
 
 move_right: ; $6645
 				ldb			*current_row
@@ -427,7 +515,7 @@ move_right: ; $6645
 				cmpb		#27											; right-most?
 				beq			9$											; yes, exit
 				incb														; next column
-				ldy			#lsb_row_level_data_addr
+				ldy			*msb_row_level_data_addr
 				lda			b,y											; get tile data
 				cmpa		#2											; solid?
 				beq			9$											; yes, exit
@@ -452,7 +540,7 @@ can_move_right: ; $6674
 				lda			b,y											; get object from filemap
 				cmpa		#1											; brick?
 				bne			1$											; no, skip
-				lda			#1
+				lda			#0
 1$:			ldy			*msb_row_level_data_addr
 				sta			b,y											; update tilemap
 				inc			*current_col						; next tile
@@ -523,14 +611,35 @@ check_attract:
 				;beq			loc_68b8
 1$:				
 				ldx			#PIA0
-				ldb			#~(1<<4)								; col4
+				ldb			#~(1<<1)								; col1
+				stb			2,x											; columns strobe
+				lda			,x											; active low
+				bita		#(1<<1)									; 'JI?
+				bne			2$											; no, skip
+				lda			#0xc9										; 'I'
+				rts
+2$:			ldb			#~(1<<2)								; col2
+				stb			2,x											; columns strobe
+				lda			,x											; active low
+				bita		#(1<<1)									; 'J'?
+				bne			3$											; no, skip
+				lda			#0xca										; 'J'
+				rts
+3$:			ldb			#~(1<<3)								; col3
+				stb			2,x											; columns strobe
+				lda			,x											; active low
+				bita		#(1<<1)									; 'K'?
+				bne			4$											; no, skip
+				lda			#0xcb										; 'K'
+				rts
+4$:			ldb			#~(1<<4)								; col4
 				stb			2,x											; column strobe
 				lda			,x											; active low
 				bita		#(1<<1)									; 'L'?
-				bne			2$											; no, skip
+				bne			5$											; no, skip
 				lda			#0xcc										; 'L'
-2$:				
 				rts
+5$:			rts
 
 calc_char_and_addr:	; $6b85
 				ldb			*current_col
@@ -563,8 +672,7 @@ update_sprite_index: ; $6bf4
 				
 draw_sprite: ; $6c02
 				jsr			calc_char_and_addr
-;				jsr			display_transparent_char
-				jsr			display_char_pg1
+				jsr			display_transparent_char
 				rts
 																								
 gcls1: ; $7A51
@@ -876,7 +984,54 @@ wipe_2_byte_char_from_video:
 				dec			*scanline_cnt
 				bne			wipe_2_byte_char_from_video			
 				rts
-				
+
+display_transparent_char:	; $83A7
+				exg			d,x											; X(lsb)=scanline
+				stb			*scanline
+				exg			d,x
+				sta			*msg_char								; B=x_in_2_pixel_incs
+				jsr			calc_addr_shift_for_x
+				sta			*col_addr_offset
+				stb			*col_pixel_shift
+				jsr			render_char_in_buffer
+				lda			#11
+				sta			*scanline_cnt
+				lda			#0
+				sta			*byte_52
+				ldx			#char_render_buf
+OR_2_byte_char_to_video:	; $83C3
+				ldb			*scanline
+				jsr			get_line_addr_pgs_1_2				
+				ldb			*col_addr_offset
+				ldy			*msb_line_addr_pg1
+				lda			b,y											; get video byte
+				ldy			*msb_line_addr_pg2
+				eora		b,y											; background
+				anda		,x											; char render buf
+				ora			*byte_52
+				sta			*byte_52
+				lda			,x											; get byte to be rendered
+				ldy			*msb_line_addr_pg1
+				ora			b,y
+				sta			b,y											; update video byte
+				inx															; next render buffer address
+				incb														; next video address
+				lda			b,y
+				ldy			*msb_line_addr_pg2
+				eora		b,y
+				anda		,x
+				ora			*byte_52
+				sta			*byte_52
+				lda			,x											; get byte to be rendered
+				ldy			*msb_line_addr_pg1
+				ora			b,y
+				sta			b,y											; update video byte
+				inx															; next render buffer address
+				inc			*scanline
+				dec			*scanline_cnt
+				bne			OR_2_byte_char_to_video
+				rts
+								
 render_char_in_buffer:	; $8438
 				ldx			#char_bank_tbl
 				lda			*col_pixel_shift				; 0,2,4,6 (same as word offset)

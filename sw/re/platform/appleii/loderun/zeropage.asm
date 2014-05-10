@@ -31,6 +31,7 @@ msg_char									.equ		0x1e
 hires_page_msb_1					.equ		0x1f
 lchar_mask								.equ		0x50
 rchar_mask								.equ		0x51
+byte_52										.equ		0x52
 col_pixel_shift						.equ		0x71
 col												.equ		0x85
 row												.equ		0x86
