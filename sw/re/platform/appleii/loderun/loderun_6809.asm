@@ -206,7 +206,7 @@ in_level_loop:
 9$:			dex
 				bne			9$
 .endif
-.if 0				
+.if 0
 9$:			ldx			#PIA0
 				ldb			#0											; all columns
 				stb			2,x											; column strobe
@@ -421,6 +421,7 @@ sub_64bd: ; $64bd
 				jsr			read_controls
 				cmpa		#0xc9										; 'I'?
 				bne			2$											; no, skip
+				jmp			move_up
 2$:			cmpa		#0xcb										; 'K'?
 				bne			3$											; no, skip
 3$:			cmpa		#0xca										; 'J'?
@@ -445,7 +446,7 @@ move_left: ; 65D3
 				sta			*byte_9									; setup tilemap & video addresses
 				ldb			*x_offset_within_tile
 				cmpb		#3
-				bcs			can_move_left
+				bcc			can_move_left
 				ldb			*current_col
 				beq			9$											; left-most? yes, exit
 				decb														; previous column
@@ -464,7 +465,7 @@ can_move_left: ; $6600
 				jsr			wipe_char
 				lda			#-1
 				sta			*dir										; set direction right
-				;jsr			adjust_y_offset_within_tile
+				jsr			adjust_y_offset_within_tile
 				dec			*x_offset_within_tile
 				bpl			2$
 				ldb			*current_col
@@ -530,7 +531,7 @@ can_move_right: ; $6674
 				jsr			wipe_char
 				lda			#1
 				sta			*dir										; set direction right
-				;jsr			adjust_y_offset_within_tile
+				jsr			adjust_y_offset_within_tile
 				inc			*x_offset_within_tile
 				lda			*x_offset_within_tile
 				cmpa		#5
@@ -563,6 +564,109 @@ can_move_right: ; $6674
 				ldb			#0x0d										; last sprite index (swinger right)
 5$:			jsr			update_sprite_index
 				jmp			draw_sprite				
+
+move_up: ; $66BD
+				ldb			*current_row
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*byte_8
+				ldy			#msb_row_addr_2
+				lda			b,y
+				sta			*byte_9
+				ldb			*current_col
+				ldy			*byte_9
+				lda			b,y											; get object from tilemap
+				cmpa		#3											; ladder?
+				beq			check_move_up						; yes, go
+				ldb			*y_offset_within_tile
+				cmpb		#3											; <3?
+				bcs			cant_move_up						; yes, exit
+				ldb			*current_row
+				ldy			#lsb_row_addr+1					; row below???
+				lda			b,y											; get object from tilemap
+				sta			*byte_8
+				ldy			#msb_row_addr_2+1				; row below?
+				lda			b,y											; get object from tilemap
+				sta			*byte_9
+				ldb			*current_col
+				ldy			*byte_9
+				lda			b,y											; get object from tilemap
+				cmpa		#3											; ladder?
+				beq			can_move_up
+cant_move_up:	; $66EB
+				SEC
+				rts
+				
+check_move_up:	; $66ED				
+				ldb			*y_offset_within_tile
+				cmpb		#3											; >=3?
+				bcc			can_move_up							; yes, go
+				ldb			*current_row
+				beq			cant_move_up						; top row? yes, exit
+				lda			#lsb_row_addr-1
+				lda			b,y
+				sta			*lsb_row_level_data_addr
+				ldy			#msb_row_addr_1-1
+				lda			b,y
+				sta			*msb_row_level_data_addr	; adjust tilemap address to row above
+				ldb			*current_col
+				ldy			*msb_row_level_data_addr
+				lda			b,y											; get object from tilemap
+				cmpa		#1											; brick?
+				beq			cant_move_up						; yes, exit
+				cmpa		#2											; solid?
+				beq			cant_move_up						; yes, exit
+				cmpa		#5											; fall-thru?
+				beq			cant_move_up						; yes, exit
+				
+can_move_up:
+				jsr			calc_char_and_addr
+				jsr			wipe_char
+				ldb			*current_row
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*lsb_row_level_data_addr
+				sta			*byte_8
+				ldy			#msb_row_addr_1
+				lda			b,y
+				sta			*msb_row_level_data_addr
+				ldy			#msb_row_addr_2
+				lda			b,y
+				sta			*byte_9									; setup tilemap and video address
+				jsr			adjust_x_offset_in_tile
+				dec			*y_offset_within_tile
+				bpl			2$											; change tiles? no, skip
+				ldb			*current_col
+				ldy			*byte_9
+				lda			b,y											; get object from tilemap
+				cmpa		#1											; brick?
+				bne			1$											; no, skip
+				lda			#0											; space
+1$:			ldy			*msb_row_level_data_addr
+				lda			b,y
+				dec			*current_row
+				ldb			*current_row
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*lsb_row_level_data_addr
+				ldy			#msb_row_addr_1
+				lda			b,y
+				sta			*msb_row_level_data_addr
+				ldb			*current_col
+				lda			#9											; player
+				ldy			*msb_row_level_data_addr
+				sta			b,y											; update tilemap
+				lda			#4
+				sta			*y_offset_within_tile
+				bra			update_climber_sprite
+2$:			jsr			check_for_gold
+update_climber_sprite:
+				lda			#0x10										; 1st sprite index (climber)
+				ldb			#0x11										; last sprite index (climber)
+				jsr			update_sprite_index
+				jsr			draw_sprite
+				CLC
+				rts
 
 sprite_to_char_tbl:	; $6968
 				.db 		0xB, 0xC, 0xD, 0x18, 0x19, 0x1A, 0xF, 0x13, 9, 0x10, 0x11, 0x15, 0x16
@@ -674,7 +778,29 @@ draw_sprite: ; $6c02
 				jsr			calc_char_and_addr
 				jsr			display_transparent_char
 				rts
-																								
+
+adjust_x_offset_in_tile:	; $6C13
+				lda			*x_offset_within_tile
+				cmpa		#2
+				bcs			1$
+				beq			2$
+				dec			*x_offset_within_tile
+				jmp			check_for_gold
+1$:			inc			*x_offset_within_tile
+				jmp			check_for_gold
+2$:			rts
+
+adjust_y_offset_within_tile: ; $6C26
+				lda			*y_offset_within_tile
+				cmpa		#2
+				bcs			1$
+				beq			2$
+				dec			*y_offset_within_tile
+				jmp			check_for_gold
+1$:			inc			*y_offset_within_tile
+				jmp			check_for_gold				
+2$:			rts
+																																
 gcls1: ; $7A51
 				lda			#HGR1_MSB
 				ldb			#0
@@ -1162,7 +1288,7 @@ calc_x_in_2_pixel_incs: ; $888F
 				rts
 
 byte_889d:
-				.db			-1, -2, 0, 1, 2
+				.db			-2, -1, 0, 1, 2
 								
 wipe_or_draw_level:	; $88A2
 ; nothing like the 6502 code!
