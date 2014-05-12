@@ -582,7 +582,7 @@ move_left: ; 65D3
 9$:			rts
 				
 can_move_left: ; $6600
-				jsr			calc_char_and_addr			; X(msb)=scanline
+				jsr			calc_char_and_addr			; X(lsb)=scanline
 				jsr			wipe_char
 				lda			#-1
 				sta			*dir										; set direction right
@@ -648,7 +648,7 @@ move_right: ; $6645
 9$:			rts
 
 can_move_right: ; $6674
-				jsr			calc_char_and_addr			; X(msb)=scanline
+				jsr			calc_char_and_addr			; X(lsb)=scanline
 				jsr			wipe_char
 				lda			#1
 				sta			*dir										; set direction right
@@ -936,8 +936,8 @@ check_attract:
 5$:			rts
 
 calc_char_and_addr:	; $6b85
-				ldb			*current_col
-				lda			*x_offset_within_tile
+				lda			*current_col
+				ldb			*x_offset_within_tile
 				jsr			calc_x_in_2_pixel_incs
 				stb			*msg_char								; store x_in_2_pixel_incs
 				ldb			*current_row
@@ -951,7 +951,46 @@ calc_char_and_addr:	; $6b85
 				rts
 
 check_for_gold: ; $6b9d
-				rts
+				lda			*x_offset_within_tile
+				cmpa		#2											; offset=2?
+				bne			9$											; no, return
+				lda			*y_offset_within_tile
+				cmpa		#2											; offset=2?
+				bne			9$											; no, return
+				ldb			*current_row
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*byte_8
+				ldy			#msb_row_addr_2
+				lda			b,y
+				sta			*byte_9									; setup tilemap address
+				ldb			*current_col
+				ldy			*byte_9
+				lda			b,y											; get object from tilemap
+				cmpa		#7											; gold?
+				bne			9$											; no, exit
+				;lsr		unk_94
+				dec			*no_gold
+				ldb			*current_row
+				stb			*row
+				ldb			*current_col
+				stb			*col
+				lda			#0											; space
+				ldy			*byte_9
+				sta			b,y											; wipe gold from tilemap
+				jsr			display_char_pg2				; wipe gold from bg page
+				ldb			*row
+				lda			*col
+				jsr			calc_colx5_scanline			; A=col*5, B=scanline
+				tfr			d,x											; X(lsb)=scanline
+				tfr			a,b											; B=x_in_2_pixel_incs
+				lda			#7											; gold
+				jsr			wipe_char								; from video display
+				ldb			#2
+				lda			#0x50										; add 250
+				jsr			update_and_display_score
+				;jsr		sub_87e1								; sound
+9$:			rts
 								
 update_sprite_index: ; $6bf4
 ; A=1st, B=last
@@ -1070,8 +1109,7 @@ display_level: ; $7A8C
 				bra			display_byte
 
 update_and_display_score:	; $7A92
-				pshs		a
-				tfr			b,a
+				pshs		b
 				adda		*score_1e1_1
 				daa     		
 				sta			*score_1e1_1
@@ -1081,9 +1119,11 @@ update_and_display_score:	; $7A92
 				sta			*score_1e3_1e2
 				lda			*score_1e5_1e4
 				adca		#0
-				sta			*score_1e3_1e2
+				daa
+				sta			*score_1e5_1e4
 				lda			*score_1e6
 				adca		#0
+				daa
 				sta			*score_1e6
 				lda			#5											; col=5
 				sta			*col
@@ -1260,6 +1300,7 @@ right_char_masks:	; $832F
 				.db			0x3f, 0x0f, 0x03, 0x00
 
 wipe_char:	; $8336
+; A=char, B=x_in_2_pixel_incs, X(lsb)=scanline
 				exg			d,x				
 				stb			*scanline
 				exg			d,x
@@ -1432,10 +1473,12 @@ read_paddles: ; $87A2
 				rts
 
 calc_colx5_scanline:	; $885d
-; B=row
+; A=col, B=row
+				pshs		a												; save col
 				ldy			#row_to_scanline_tbl
-				lda			b,y
-				pshs		a
+				lda			b,y											; A=scanline
+				puls		b												; B=col
+				pshs		a												; save scanline
 				ldy			#col_x_5_tbl
 				lda			b,y											; A=col*5
 				puls		b												; B=scanline
@@ -1449,6 +1492,7 @@ calc_col_addr_shift:	; $8868
 				rts
 
 calc_addr_shift_for_x:	; $8872
+; B=x_in_2_pixel_incs
 				tfr			b,a
 				lsra
 				lsra														; A=addr
@@ -1469,7 +1513,8 @@ byte_888a:
 				.db			-5, -3, 0, 2, 4
 								
 calc_x_in_2_pixel_incs: ; $888F
-				pshs		a												; save x_offset_within_tile
+; A=col, B=x_offset_within_tile
+				pshs		b												; save x_offset_within_tile
 				jsr			calc_colx5_scanline			; A=colx5
 				tfr			a,b											; B=colx5
 				puls		a												; restore x_offset_within_tile
