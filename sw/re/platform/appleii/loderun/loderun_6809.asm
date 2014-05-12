@@ -200,6 +200,10 @@ main_game_loop:
 in_level_loop:
 				jsr			sub_64bd
 ; stuff
+				lda			*no_gold
+				bne			1$
+				jsr			draw_end_of_screen_ladder
+1$:				
 .if 1
 ; delay for Coco
 				ldx			#8000
@@ -261,7 +265,7 @@ init_read_unpack_display_level:	; $6238
 				ldb			#0xff
 				stb			*current_col						; flag no player
 				incb														; B=0
-				stb			*unk_a3
+				stb			*no_eos_ladder_tiles
 				stb			*no_gold
 				stb			*packed_byte_cnt
 ; stuff				
@@ -340,7 +344,18 @@ init_and_draw_level: ; $63B3
 				lda			b,x
 				cmpa		#6											; end-of-screen ladder?
 				bne			4$											; no, skip
-; stuff				
+				ldb			*no_eos_ladder_tiles
+				cmpb		#0x4d										; max?
+				bcc			3$											; yes, skip
+				inc			*no_eos_ladder_tiles
+				incb
+				lda			*row
+				ldy			#eos_ladder_row
+				sta			b,y											; store row
+				lda			*col
+				ldy			#eos_ladder_col
+				sta			b,y											; store col
+				tfr			a,b											; B=col
 3$:			lda			#0
 				ldx			*msb_row_level_data_addr
 				sta			b,x											; update tilemap
@@ -380,7 +395,7 @@ init_and_draw_level: ; $63B3
 				bpl			2$
 				dec			*row
 				ldb			*row
-				bpl			1$
+				lbpl		1$
 				lda			*current_col
 				bra			draw_level							; BPL!!!
 				rts
@@ -1415,6 +1430,68 @@ char_bank_tbl:
 				.dw			#tile_data+2*22*104
 				.dw			#tile_data+3*22*104
 
+draw_end_of_screen_ladder:	; $8631
+				lda			#0
+				sta			eos_ladder_col					; flag ladder OK
+				ldb			*no_eos_ladder_tiles
+				stb			no_eos_ladder_entries
+1$:			ldb			no_eos_ladder_entries		; done last ladder?
+				beq			9$											; yes, exit
+				ldy			#eos_ladder_col
+				lda			b,y											; get col
+				bmi			8$											; -1?, yes, ignore
+				sta			*col
+				ldy			#eos_ladder_row
+				lda			b,y
+				sta			*row
+				tfr			a,b											; B=row
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*byte_8
+				ldy			#msb_row_addr_1
+				lda			b,y
+				sta			*msb_row_level_data_addr
+				ldy			#msb_row_addr_2
+				lda			b,y
+				sta			*byte_9									; setup tilemap address
+				ldb			*col
+				ldy			*byte_9
+				lda			b,y											; get object from tilemap
+				bne			7$											; not a space, skip
+				lda			#3											; ladder
+				;ldy			*byte_9
+				sta			b,y											; update tilemap
+				ldy			*msb_row_level_data_addr
+				lda			b,y											; get object from tilemap
+				bne			4$											; not a space, skip
+				lda			#3											; ladder
+				sta			b,y											; update tilemap
+4$:			lda			#3											; ladder
+				jsr			display_char_pg2
+				lda			*col
+				ldb			*row
+				jsr			calc_colx5_scanline			; B=scanline
+				tfr			d,x											; X(lsb)=scanline
+				tfr			a,b											; B=col*5=x_in_2_pixel_incs
+				lda			#3											; ladder
+				jsr			display_transparent_char	; update video
+				ldb			no_eos_ladder_entries
+				lda			#0xff
+				ldy			#eos_ladder_col
+				sta			b,y											; flag ladder (tile) drawn
+				bra			8$
+7$:			lda			#1											; flag ladder error
+				sta			eos_ladder_col
+8$:			dec			no_eos_ladder_entries
+				jmp			1$
+9$:			lda			eos_ladder_col					; ladder drawn OK?
+				bne			91$											; no, skip
+				dec			*no_gold								; ???
+91$:		rts
+
+no_eos_ladder_entries:
+				.ds			1
+								
 display_message:	; $86E0
 				puls		x
 1$:			stx			*msg_addr								; store msg ptr
@@ -1545,6 +1622,11 @@ wipe_or_draw_level:	; $88A2
 					
 ; zero-page registers
 .include "zeropage.asm"
+
+eos_ladder_col:	; $C00
+					.ds		0x30
+eos_ladder_row:	; $C30
+					.ds		0x30
 
 lsb_row_addr:	; $1C05
 					.db		<(ldu1+0*28), <(ldu1+1*28), <(ldu1+2*28), <(ldu1+3*28)

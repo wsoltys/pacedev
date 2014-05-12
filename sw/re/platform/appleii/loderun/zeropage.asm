@@ -50,7 +50,7 @@ no_lives									.equ		0x98
 unk_9b										.equ		0x9b
 timer											.equ		0xa1
 unk_a2										.equ		0xa2
-unk_a3										.equ		0xa3
+no_eos_ladder_tiles				.equ		0xa3
 level											.equ		0xa6
 attract_mode							.equ		0xa7
 char_render_buf_z					.equ		0xdf
