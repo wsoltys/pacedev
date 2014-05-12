@@ -391,13 +391,13 @@ draw_level:	; $648B
 				stb			*row
 1$:			ldy			#lsb_row_addr
 				lda			b,y
-				sta			lsb_row_level_data_addr
+				sta			*lsb_row_level_data_addr
 				ldy			#msb_row_addr_1
 				lda			b,y
-				sta			msb_row_level_data_addr
+				sta			*msb_row_level_data_addr
 				ldb			#27											; last column
 				stb			*col			
-2$:			ldy			msb_row_level_data_addr
+2$:			ldy			*msb_row_level_data_addr
 				lda			b,y											; get tilemap data
 				cmpa		#9											; player?
 				beq			3$											; yes, continue
