@@ -424,6 +424,7 @@ sub_64bd: ; $64bd
 				jmp			move_up
 2$:			cmpa		#0xcb										; 'K'?
 				bne			3$											; no, skip
+				jmp			move_down
 3$:			cmpa		#0xca										; 'J'?
 				bne			4$											; no, skip
 				jmp			move_left
@@ -635,7 +636,7 @@ can_move_up:
 				sta			*byte_9									; setup tilemap and video address
 				jsr			adjust_x_offset_in_tile
 				dec			*y_offset_within_tile
-				bpl			2$											; change tiles? no, skip
+				bpl			climber_check_for_gold	; change tiles? no, skip
 				ldb			*current_col
 				ldy			*byte_9
 				lda			b,y											; get object from tilemap
@@ -659,7 +660,8 @@ can_move_up:
 				lda			#4
 				sta			*y_offset_within_tile
 				bra			update_climber_sprite
-2$:			jsr			check_for_gold
+climber_check_for_gold:
+				jsr			check_for_gold
 update_climber_sprite:
 				lda			#0x10										; 1st sprite index (climber)
 				ldb			#0x11										; last sprite index (climber)
@@ -668,6 +670,74 @@ update_climber_sprite:
 				CLC
 				rts
 
+move_down:	; $6766
+				ldb			*y_offset_within_tile
+				cmpb		#2
+				bcs			can_move_down
+				ldb			*current_row
+				cmpb		#15											; bottom row?
+				bcc			cant_move_down					; yes, exit
+				ldy			#lsb_row_addr+1					; row below
+				lda			b,y
+				sta			*lsb_row_level_data_addr
+				ldy			#msb_row_addr_1+1
+				lda			b,y
+				sta			*msb_row_level_data_addr	; adjust tilemap address for row below
+				ldb			*current_col
+				ldy			*msb_row_level_data_addr
+				lda			b,y											; get object from tilemap
+				cmpa		#2											; solid?
+				beq			cant_move_down					; yes, exit
+				cmpa		#1											; brick?
+				bne			can_move_down						; no, go
+cant_move_down:	; $6788
+				SEC															; flag unable to move
+				rts				
+
+can_move_down:	; $678A
+				jsr			calc_char_and_addr
+				jsr			wipe_char
+				ldb			*current_row
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*lsb_row_level_data_addr
+				sta			*byte_8
+				ldy			#msb_row_addr_1
+				lda			b,y
+				sta			*msb_row_level_data_addr
+				ldy			#msb_row_addr_2
+				lda			b,y
+				sta			*byte_9
+				jsr			adjust_x_offset_in_tile
+				inc			*y_offset_within_tile
+				lda			*y_offset_within_tile
+				cmpa		#5											; <5?
+				bcs			2$											; yes, skip
+				ldb			*current_col
+				ldy			*byte_9
+				lda			b,y											; get object from tilemap
+				cmpa		#1											; brick?
+				bne			1$											; no, skip
+				lda			#0
+1$:			ldy			*msb_row_level_data_addr
+				sta			b,y											; update tilemap
+				inc			*current_row						; row below
+				ldb			*current_row
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*lsb_row_level_data_addr
+				ldy			#msb_row_addr_1
+				lda			b,y
+				sta			*msb_row_level_data_addr	; update tilemap address
+				ldb			*current_col
+				lda			#9											; player
+				ldy			*msb_row_level_data_addr
+				sta			b,y											; update tilemap
+				lda			#0
+				sta			*y_offset_within_tile
+				jmp			update_climber_sprite
+2$:			jmp			climber_check_for_gold				
+				
 sprite_to_char_tbl:	; $6968
 				.db 		0xB, 0xC, 0xD, 0x18, 0x19, 0x1A, 0xF, 0x13, 9, 0x10, 0x11, 0x15, 0x16
 				.db 		0x17, 0x25, 0x14, 0xE, 0x12, 0x1B, 0x1B, 0x1C, 0x1C, 0x1D, 0x1D, 0x1E
