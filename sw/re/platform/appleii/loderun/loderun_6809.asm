@@ -514,8 +514,7 @@ fall_check_row_below:	; $654A
 				ldb			*current_row
 				ldy			#lsb_row_addr
 				lda			b,y
-				ldy			*lsb_row_level_data_addr
-				sta			b,y
+				sta			*lsb_row_level_data_addr
 				ldy			#msb_row_addr_1
 				lda			b,y
 				sta			*msb_row_level_data_addr	; setup tilemap address
