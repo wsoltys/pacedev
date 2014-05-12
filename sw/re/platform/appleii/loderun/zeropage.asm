@@ -47,6 +47,7 @@ packed_byte_cnt						.equ		0x92
 no_gold										.equ		0x93
 paddles_detected					.equ		0x85
 no_lives									.equ		0x98
+unk_9b										.equ		0x9b
 timer											.equ		0xa1
 unk_a2										.equ		0xa2
 unk_a3										.equ		0xa3

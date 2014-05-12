@@ -415,20 +415,141 @@ draw_level:	; $648B
 				rts
 
 sub_64bd: ; $64bd
-				bra			1$
-1$:				
+; stuff
+				bra			0$
+0$:
+; $64CD
+				ldb			*current_row
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*byte_8
+				ldy			#msb_row_addr_2
+				lda			b,y
+				sta			*byte_9									; update tilemap addr
+				ldb			*current_col
+				ldy			*byte_9
+				lda			b,y											; get object from tilemap
+				cmpa		#3											; ladder?
+				beq			cant_fall								; yes, exit
+				cmpa		#4											; rope?
+				bne			1$											; no, skip
+				lda			*y_offset_within_tile
+				cmpa		#2
+				beq			cant_fall
+1$:			lda			*y_offset_within_tile
+				cmpa		#2
+				bcs			handle_falling
+				ldb			*current_row
+				cmpb		#15											; bottom row?
+				beq			cant_fall								; yes, skip
+				ldy			#lsb_row_addr+1
+				lda			b,y
+				sta			*lsb_row_level_data_addr
+				sta			*byte_8
+				ldy			#msb_row_addr_1+1
+				lda			b,y
+				sta			*msb_row_level_data_addr
+				ldy			#msb_row_addr_2+1
+				lda			b,y
+				sta			*byte_9									; setup tilemap address to row below
+				ldb			*current_col
+				ldy			*msb_row_level_data_addr
+				lda			b,y											; get object from tilemap
+				cmpa		#0											; space?
+				beq			handle_falling					; yes, go
+				cmpa		#8											; enemy?
+				beq			cant_fall								; yes, go
+				ldy			*byte_9									
+				lda			b,y											; get object from tilemap
+				cmpa		#1											; brick?
+				beq			cant_fall								; yes, go
+				cmpa		#2											; solid?
+				beq			cant_fall								; yes, go
+				cmpa		#3											; ladder?
+				bne			handle_falling					; no, go
+cant_fall:
+				jmp			check_falling_sound				
+				
+handle_falling:	; $6525
+				lda			#0
+				sta			unk_9b
+				jsr			calc_char_and_addr
+				jsr			wipe_char
+				lda			#7											; char=0x13 (fall left)
+				ldb			*dir										; left?
+				bmi			1$											; yes, skip
+				lda			#0x0f										; char=0x0f (fall right)
+1$:			sta			*sprite_index
+				jsr			adjust_x_offset_in_tile
+				inc			*y_offset_within_tile
+				lda			*y_offset_within_tile
+				cmpa		#5											; >=5?
+				bcc			fall_check_row_below		; yes, skip
+				jsr			check_for_gold
+				jmp			draw_sprite
+
+fall_check_row_below:	; $654A
+				lda			#0
+				sta			*y_offset_within_tile
+				ldb			*current_row
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*lsb_row_level_data_addr
+				sta			*byte_8
+				ldy			#msb_row_addr_1
+				lda			b,y
+				sta			*msb_row_level_data_addr
+				ldy			#msb_row_addr_2
+				lda			b,y
+				sta			*byte_9									; setup tilemap address
+				ldb			*current_col
+				ldy			*byte_9
+				lda			b,y											; get object from tilemap				
+				cmpa		#1											; brick?
+				bne			1$											; no, skip
+				lda			#0											; space
+1$:			ldy			*msb_row_level_data_addr
+				sta			b,y											; update tilemap
+				inc			*current_row
+				ldb			*current_row
+				ldy			#lsb_row_addr
+				lda			b,y
+				ldy			*lsb_row_level_data_addr
+				sta			b,y
+				ldy			#msb_row_addr_1
+				lda			b,y
+				sta			*msb_row_level_data_addr	; setup tilemap address
+				ldb			*current_col
+				lda			#9											; player
+				ldy			*msb_row_level_data_addr
+				sta			b,y											; update tilemap
+				jmp			draw_sprite
+
+check_falling_sound:	; $6584
+				
 ; stuff
 				jsr			read_controls
 				cmpa		#0xc9										; 'I'?
-				bne			2$											; no, skip
-				jmp			move_up
-2$:			cmpa		#0xcb										; 'K'?
-				bne			3$											; no, skip
-				jmp			move_down
-3$:			cmpa		#0xca										; 'J'?
-				bne			4$											; no, skip
+				bne			check_down_key					; no, skip
+				jsr			move_up
+				bcs			check_left_key
+				rts
+check_down_key:
+				cmpa		#0xcb										; 'K'?
+				bne			check_dig_left_key
+				jsr			move_down
+				bcs			check_left_key
+				rts
+check_dig_left_key:
+check_dig_right_key:
+; stuff
+check_left_key:
+;				lda			unk_9f
+				cmpa		#0xca										; 'J'?
+				bne			check_right_key					; no, skip
 				jmp			move_left
-4$:			cmpa		#0xcc										; 'L'?
+check_right_key:				
+				cmpa		#0xcc										; 'L'?
 				bne			9$											; no, skip
 				jmp			move_right
 9$:			rts
@@ -667,7 +788,7 @@ update_climber_sprite:
 				ldb			#0x11										; last sprite index (climber)
 				jsr			update_sprite_index
 				jsr			draw_sprite
-				CLC
+				CLC															; flag able to move
 				rts
 
 move_down:	; $6766
