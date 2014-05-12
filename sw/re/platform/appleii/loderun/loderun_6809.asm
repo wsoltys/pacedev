@@ -603,7 +603,7 @@ check_move_up:	; $66ED
 				bcc			can_move_up							; yes, go
 				ldb			*current_row
 				beq			cant_move_up						; top row? yes, exit
-				lda			#lsb_row_addr-1
+				ldy			#lsb_row_addr-1
 				lda			b,y
 				sta			*lsb_row_level_data_addr
 				ldy			#msb_row_addr_1-1
