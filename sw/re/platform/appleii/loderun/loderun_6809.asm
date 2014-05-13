@@ -588,13 +588,22 @@ check_falling_sound:	; $6584
 				rts
 check_down_key:
 				cmpa		#0xcb										; 'K'?
-				bne			check_dig_left_key
+				bne			check_dig_left_key			; no, skip
 				jsr			move_down
 				bcs			check_left_key
 				rts
 check_dig_left_key:
+				cmpa		#0xd5										; U'?
+				bne			check_dig_right_key			; no, skip
+				jsr			dig_left
+				bcs			check_left_key
+				rts
 check_dig_right_key:
-; stuff
+				cmpa		#0xcf										; 'O'?
+				bne			check_left_key					; no, skip
+				jsr			dig_right
+				bcs			check_left_key
+				rts
 check_left_key:
 ;				lda			unk_9f
 				cmpa		#0xca										; 'J'?
@@ -918,7 +927,72 @@ sprite_to_char_tbl:	; $6968
 				.db 		0, 0, 0, 0x1F, 0x1F, 0x20, 0x20, 0x21, 0x21, 0x22, 0x22, 0x23, 0x23
 				.db 		0x24, 0x24, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x24, 0x24
 				.db 		0x24, 0x24, 0x24, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 2, 2, 1
+
+loc_67d8:	; $67D8
+				;jmp			loc_6892
+				rts
+				
+dig_left:	; $67db
+				lda			#0xff
+				;sta			*unk_9c
+				;sta			*unk_9e
+				;sta			*unk_9f
+				lda			#0
+				sta			*digging_sprite
+loc_67e7:
+				ldb			*current_row
+				cmpb		#15											; bottom row?
+				bcc			loc_67d8								; yes, exit
+				incb														; row below
+				jsr			set_row_addr_1_2
+				ldb			*current_col
+				beq			loc_67d8								; left-most edge? yes, exit
+				decb														; column to the left
+				ldy			*msb_row_level_data_addr
+				lda			b,y											; get tilemap data (below, left)
+				cmpa		#1											; brick?
+				bne			loc_67d8								; no, exit
+				ldb			*current_row
+				jsr			set_row_addr_1_2
+				ldb			*current_col
+				decb														; column to the left
+				ldy			*msb_row_level_data_addr
+				lda			b,y											; get tilemap data (left)
+				cmpa		#0											; space?
+				bne			loc_686e								; no, go
+				jsr			calc_char_and_addr
+				jsr			wipe_char
+				jsr			adjust_x_offset_in_tile
+				jsr			adjust_y_offset_within_tile
+				ldb			*digging_sprite
+				ldy			#sprite_to_char_tbl+0x36
+				lda			b,y
+				pshs		a
+				ldy			#sprite_to_char_tbl+0x43
+				lda			b,y
+				puls		b
+				;jsr			sub_87d5
+				ldb			*digging_sprite
+				lda			#0											; sprite=0, tile=$B (running left)
+				cmpb		#6
+				bcc			1$
+				lda			#6
+1$:			sta			*sprite_index
+				jsr			draw_sprite
+				ldb			*digging_sprite
+				cmpb		#0x0c
+; stuff								
+				CLC															; flag
+				rts
+
+loc_686e:	; $686E
+				SEC
+				rts
 								
+dig_right: ; 68a1
+				CLC															; flag
+				rts
+																
 ; Coco Keyboard
 ;    7  6  5  4  3  2  1  0
 ;	0: G  F  E  D  C  B  A  @
@@ -986,7 +1060,22 @@ check_attract:
 				bne			5$											; no, skip
 				lda			#0xcc										; 'L'
 				rts
-5$:			rts
+5$:			ldb			#~(1<<5)								; col5
+				stb			2,x											; column strobe
+				lda			,x											; active low
+				bita		#(1<<2)									; 'U'?
+				bne			6$											; no, skip
+				lda			#0xd5										; 'U'
+				rts
+6$:			ldb			#~(1<<7)								; col7
+				stb			2,x											; column strobe
+				lda			,x											; active low
+				bita		#(1<<1)									; 'O'?
+				bne			7$											; no, skip
+				lda			#0xcf										; 'O'
+				rts
+7$:				
+				rts
 
 calc_char_and_addr:	; $6b85
 				lda			*current_col
@@ -1587,6 +1676,19 @@ read_paddles: ; $87A2
 				sta			*paddles_detected
 				rts
 
+set_row_addr_1_2:	; $884B
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*lsb_row_level_data_addr
+				sta			*byte_8
+				ldy			#msb_row_addr_1
+				lda			b,y
+				sta			*msb_row_level_data_addr
+				ldy			#msb_row_addr_2
+				lda			b,y
+				sta			*byte_9
+				rts
+				
 calc_colx5_scanline:	; $885d
 ; A=col, B=row
 				pshs		a												; save col
