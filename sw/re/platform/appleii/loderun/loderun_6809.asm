@@ -125,6 +125,7 @@ display_title_screen: ; $6008
 				lda			#0
 				sta			*row
 				sta			*attract_mode
+				sta			*level_0_based
 				lda			#HGR1_MSB
 				sta			*hires_page_msb_1
 				sta			*display_char_page
@@ -196,9 +197,10 @@ main_game_loop:
 				jsr			blink_char_and_wait_for_key
 1$:	; $60bf
 				ldb			#0
+				stb			*dig_dir
 ; stuff
 in_level_loop:
-				jsr			sub_64bd
+				jsr			handle_player						; digging, falling, keys
 ; stuff
 				lda			*no_gold
 				bne			1$
@@ -232,7 +234,7 @@ in_level_loop:
 
 next_level:
 				inc			*level									; next level
-				inc			*byte_96
+				inc			*level_0_based					; used for reading level data
 				inc			*no_lives								; extra life
 				bne			3$											; skip if no wrap
 				dec			*no_lives								; =255
@@ -271,13 +273,31 @@ title_wait_for_key: ; $618e
 ; do some other crap
 				lbra		zero_score_and_init_game
 
-loc_61f6:
-; stuff
+loc_61e4:	; $61E4
+				lda			#1
+				;jsr			sub_6359								; disk access
+loc_61e8: ; $61E9
+				;jsr			cls_and_display_high_scores
+				lda			#2
+				sta			*attract_mode
+				jmp			title_wait_for_key				
+
+loc_61f3:	; $61F3
+				jmp			display_title_screen
+				
+loc_61f6: ; $61F6
+; check for 'e' key for editor (not supported)
+				ldx			#PIA0
+				ldb			#~(1<<0)								; col0
+				stb			2,x											; column strobe
+				lda			,x											; active low
+				bita		(1<<6)									; <ENTER>?
+				beq			loc_61e4								; yes, go
 				ldb			#0
-; stuff
+				stb			*level_0_based
 				incb
 				stb			*level
-; stuff
+				;stb			*byte_9d
 				lda			#2
 				sta			*attract_mode
 				jmp			zero_score_and_init_game														
@@ -289,6 +309,7 @@ init_read_unpack_display_level:	; $6238
 				incb														; B=0
 				stb			*no_eos_ladder_tiles
 				stb			*no_gold
+				stb			*dig_sprite
 				stb			*packed_byte_cnt
 ; stuff				
 				stb			*nibble_cnt
@@ -341,6 +362,10 @@ init_read_unpack_display_level:	; $6238
 				cmpb		#16											; last row?
 				bcs			5$											; no, loop
 				jsr			init_and_draw_level
+; stuff
+				ldb			#0
+				stb			*level_0_based				
+; stuff				
 				rts
 
 read_level_data:	; $6264
@@ -467,11 +492,15 @@ draw_level:	; $648B
 				CLC
 				rts
 
-sub_64bd: ; $64bd
-; stuff
-				bra			0$
-0$:
-; $64CD
+handle_player: ; $64bd
+				lda			#1
+				;sta			unk_94
+				lda			*dig_dir
+				beq			not_digging
+				bpl			1$											; digging right
+				jmp			digging_left
+1$:			jmp			digging_right
+not_digging:	; $64CD
 				ldb			*current_row
 				ldy			#lsb_row_addr
 				lda			b,y
@@ -485,11 +514,12 @@ sub_64bd: ; $64bd
 				cmpa		#3											; ladder?
 				beq			cant_fall								; yes, exit
 				cmpa		#4											; rope?
-				bne			1$											; no, skip
+				bne			check_falling						; no, skip
 				lda			*y_offset_within_tile
 				cmpa		#2
 				beq			cant_fall
-1$:			lda			*y_offset_within_tile
+check_falling:	; $64EB				
+				lda			*y_offset_within_tile
 				cmpa		#2
 				bcs			handle_falling
 				ldb			*current_row
@@ -525,7 +555,7 @@ cant_fall:
 				
 handle_falling:	; $6525
 				lda			#0
-				sta			unk_9b
+				sta			*unk_9b
 				jsr			calc_char_and_addr
 				jsr			wipe_char
 				lda			#7											; char=0x13 (fall left)
@@ -578,9 +608,17 @@ fall_check_row_below:	; $654A
 				jmp			draw_sprite
 
 check_falling_sound:	; $6584
-				
-; stuff
+				lda			*unk_9b
+				bne			check_controls
+				lda			#0x64
+				ldb			#8
+				jsr			play_falling_sound
+check_controls:	; $658F				
+				lda			#0x20
+				;sta			*byte_a4
+				sta			*unk_9b
 				jsr			read_controls
+				;lda			*unk_9e
 				cmpa		#0xc9										; 'I'?
 				bne			check_down_key					; no, skip
 				jsr			move_up
@@ -611,9 +649,10 @@ check_left_key:
 				jmp			move_left
 check_right_key:				
 				cmpa		#0xcc										; 'L'?
-				bne			9$											; no, skip
+				bne			no_keys									; no, skip
 				jmp			move_right
-9$:			rts
+no_keys:				
+				rts
 
 move_left: ; 65D3
 				ldb			*current_row
@@ -934,12 +973,12 @@ loc_67d8:	; $67D8
 				
 dig_left:	; $67db
 				lda			#0xff
-				;sta			*unk_9c
+				sta			*dig_dir
 				;sta			*unk_9e
 				;sta			*unk_9f
 				lda			#0
-				sta			*digging_sprite
-loc_67e7:
+				sta			*dig_sprite
+digging_left:
 				ldb			*current_row
 				cmpb		#15											; bottom row?
 				bcc			loc_67d8								; yes, exit
@@ -959,12 +998,12 @@ loc_67e7:
 				ldy			*msb_row_level_data_addr
 				lda			b,y											; get tilemap data (left)
 				cmpa		#0											; space?
-				bne			loc_686e								; no, go
+				lbne		loc_686e								; no, go
 				jsr			calc_char_and_addr
 				jsr			wipe_char
 				jsr			adjust_x_offset_in_tile
 				jsr			adjust_y_offset_within_tile
-				ldb			*digging_sprite
+				ldb			*dig_sprite
 				ldy			#sprite_to_char_tbl+0x36
 				lda			b,y
 				pshs		a
@@ -972,24 +1011,66 @@ loc_67e7:
 				lda			b,y
 				puls		b
 				;jsr			sub_87d5
-				ldb			*digging_sprite
+				ldb			*dig_sprite
 				lda			#0											; sprite=0, tile=$B (running left)
 				cmpb		#6
 				bcc			1$
 				lda			#6
 1$:			sta			*sprite_index
 				jsr			draw_sprite
-				ldb			*digging_sprite
+				ldb			*dig_sprite
 				cmpb		#0x0c
-; stuff								
+				beq			loc_6898
+				cmpb		#0
+				beq			2$
+				ldy			#sprite_to_char_tbl+0x11
+				lda			b,y
+				pshs		a
+				lda			*current_col
+				deca
+				ldb			*current_row
+				jsr			calc_colx5_scanline
+				tfr			d,x											; X(lsb)=scanline
+				tfr			a,b											; B=x_in_2_pixel_incs
+				puls		a												; A=char
+				jsr			wipe_char
+				ldb			*dig_sprite
+2$:			ldy			#sprite_to_char_tbl+0x12
+				lda			b,y
+				pshs		a
+				lda			*current_col				
+				deca
+				sta			*col
+				ldb			*current_row
+				stb			*row
+				jsr			calc_colx5_scanline
+				tfr			d,x											; X(lsb)=scanline
+				tfr			a,b											; B=x_in_2_pixel_incs
+				puls		a												; A=char
+				jsr			display_transparent_char
+				ldb			*dig_sprite
+				ldy			#sprite_to_char_tbl+0x2a
+				lda			b,y
+				inc			*row
+				jsr			display_char_pg1
+				inc			*dig_sprite
 				CLC															; flag
 				rts
 
 loc_686e:	; $686E
 				SEC
 				rts
-								
+
+loc_6898: ; $6898
+				ldb			*current_col
+				decb
+				jmp			loc_6c39
+												
 dig_right: ; 68a1
+				lda			#1
+				sta			*dig_dir
+digging_right:				
+;stuff				
 				CLC															; flag
 				rts
 																
@@ -1170,6 +1251,39 @@ adjust_y_offset_within_tile: ; $6C26
 				jmp			check_for_gold
 1$:			inc			*y_offset_within_tile
 				jmp			check_for_gold				
+2$:			rts
+
+loc_6c39:	; $6C39
+				lda			#0
+				sta			*byte_9c
+				lda			*current_row
+				inca														; row below
+				stb			*col
+				sta			*row
+				exg			a,b											; A=col, B=row
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*lsb_row_level_data_addr
+				ldy			#msb_row_addr_1
+				lda			b,y
+				sta			*msb_row_level_data_addr
+				lda			#0											; space
+				ldb			*col
+				ldy			*msb_row_level_data_addr
+				sta			b,y
+				jsr			display_char_pg1
+				lda			#0											; space
+				jsr			display_char_pg2
+				dec			*row										; row above
+				lda			#0											; space
+				jsr			display_char_pg1
+				inc			*row										; row below
+				ldb			#0xff
+1$:			incb
+				cmpb		#0x1e
+				beq			2$
+;stuff
+				SEC									
 2$:			rts
 																																
 gcls1: ; $7A51
@@ -1391,6 +1505,7 @@ cr: ; 7B7D
 				rts
 
 display_char_pg1:	; $82AA
+; A=char
 				sta			*msg_char
 				lda			#HGR1_MSB
 				bra			display_char
@@ -1485,10 +1600,11 @@ wipe_2_byte_char_from_video:
 				rts
 
 display_transparent_char:	; $83A7
+; A=char, B=x_in_2_pixel_incs, X(lsb)=scanline
 				exg			d,x											; X(lsb)=scanline
 				stb			*scanline
 				exg			d,x
-				sta			*msg_char								; B=x_in_2_pixel_incs
+				sta			*msg_char								
 				jsr			calc_addr_shift_for_x
 				sta			*col_addr_offset
 				stb			*col_pixel_shift
@@ -1676,6 +1792,10 @@ read_paddles: ; $87A2
 				sta			*paddles_detected
 				rts
 
+play_falling_sound:	; $87BA
+; *** TBD
+				rts
+				
 set_row_addr_1_2:	; $884B
 				ldy			#lsb_row_addr
 				lda			b,y

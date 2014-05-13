@@ -46,11 +46,13 @@ score_1e5_1e4							.equ		0x90
 score_1e6									.equ		0x91
 packed_byte_cnt						.equ		0x92
 no_gold										.equ		0x93
-byte_96										.equ		0x96
+level_0_based							.equ		0x96
+byte_9c										.equ		0x9c
 paddles_detected					.equ		0x85
 no_lives									.equ		0x98
 unk_9b										.equ		0x9b
-digging_sprite						.equ		0xa0
+dig_dir										.equ		0x9c
+dig_sprite								.equ		0xa0
 timer											.equ		0xa1
 unk_a2										.equ		0xa2
 no_eos_ladder_tiles				.equ		0xa3
