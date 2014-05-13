@@ -32,6 +32,7 @@ hires_page_msb_1					.equ		0x1f
 lchar_mask								.equ		0x50
 rchar_mask								.equ		0x51
 byte_52										.equ		0x52
+byte_5c										.equ		0x5c
 col_pixel_shift						.equ		0x71
 col												.equ		0x85
 row												.equ		0x86
@@ -45,6 +46,7 @@ score_1e5_1e4							.equ		0x90
 score_1e6									.equ		0x91
 packed_byte_cnt						.equ		0x92
 no_gold										.equ		0x93
+byte_96										.equ		0x96
 paddles_detected					.equ		0x85
 no_lives									.equ		0x98
 unk_9b										.equ		0x9b

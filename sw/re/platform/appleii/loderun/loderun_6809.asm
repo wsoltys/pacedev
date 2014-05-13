@@ -203,7 +203,17 @@ in_level_loop:
 				lda			*no_gold
 				bne			1$
 				jsr			draw_end_of_screen_ladder
-1$:				
+1$:			lda			*current_row
+				bne			2$											; not top row
+				lda			*y_offset_within_tile
+				cmpa		#2
+				bne			2$											; not top of tile
+				lda			*no_gold								; any gold left?
+				beq			next_level							; no, go
+				cmpa		#0xff										; issue with eos ladder?
+				beq			next_level							; yes, go
+2$:				
+				
 .if 1
 ; delay for Coco
 				ldx			#8000
@@ -221,7 +231,19 @@ in_level_loop:
 				bra			in_level_loop
 
 next_level:
-				bra			main_game_loop				
+				inc			*level									; next level
+				inc			*byte_96
+				inc			*no_lives								; extra life
+				bne			3$											; skip if no wrap
+				dec			*no_lives								; =255
+3$:			ldb			#15
+				stb			*byte_5c
+4$:			ldb			#1
+				lda			#0											; add 100
+				jsr			update_and_display_score
+				dec			*byte_5c
+				bne			4$											; add 1500
+				jmp			main_game_loop				
 
 title_wait_for_key: ; $618e
 ;				jsr			keybd_flush
@@ -247,7 +269,7 @@ title_wait_for_key: ; $618e
 				stb			*attract_mode
 				stb			*level
 ; do some other crap
-				bra			zero_score_and_init_game
+				lbra		zero_score_and_init_game
 
 loc_61f6:
 ; stuff
@@ -323,6 +345,22 @@ init_read_unpack_display_level:	; $6238
 
 read_level_data:	; $6264
 ; copies from disk buffer to low memory ($0D00)
+; stuff
+				lda			*level
+				deca
+				adda		#>demo_level_data
+				sta			*msb_line_addr_pg1
+				lda			#<demo_level_data
+				sta			*lsb_line_addr_pg1
+; nothing like original code from here-on in				
+				ldx			*msb_line_addr_pg1
+				ldy			#level_data_packed
+				clrb
+copy_level_data:
+				lda			,x+
+				sta			,y+
+				decb
+				bne			copy_level_data
 				rts
 				
 init_and_draw_level: ; $63B3
@@ -1603,6 +1641,8 @@ byte_889d:
 				.db			-2, -1, 0, 1, 2
 								
 wipe_or_draw_level:	; $88A2
+				jsr			display_no_lives
+				jsr			display_level
 ; nothing like the 6502 code!
 				lda			#HGR2_MSB
 				clrb

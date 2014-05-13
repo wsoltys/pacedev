@@ -8,7 +8,7 @@ if "%1%" == "trs80" goto trs80
 goto bad_sys
 
 :apple
-mess64d apple2e -flop1 LODERUNNER.DSK
+mess64d apple2e %2 -flop1 LODERUNNER.DSK
 goto end
 
 :coco
