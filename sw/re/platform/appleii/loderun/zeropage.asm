@@ -64,6 +64,7 @@ level											.equ		0xa6
 attract_mode							.equ		0xa7
 byte_ac										.equ		0xac
 char_render_buf_z					.equ		0xdf
+zp_fe											.equ		0xfe
 zp_ff											.equ		0xff
 
 .if 0

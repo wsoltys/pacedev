@@ -1258,7 +1258,7 @@ handle_attract_mode:	; $69B8
 ; stuff
 				bra			loc_69d6							; BPL!!
 1$:			lsr			*byte_ac
-				lsr			level_active					; kill player
+				lsr			*level_active					; kill player
 				lda			#1
 				sta			*no_lives
 				rts
@@ -1368,7 +1368,8 @@ read_controls:	; $6a12
 				lda			,x											; active low
 				bita		#(1<<0)									; 'F'?
 				bne			61$											; no, skip
-				lda			0x80										; CTRL-@
+; not useful becuase it's not leading-edge				
+				lda			#0x80										; CTRL-@
 				rts
 61$:		bita		#(1<<1)									; 'N'?
 				bne			7$											; no, skip
