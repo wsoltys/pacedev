@@ -62,7 +62,9 @@ unk_a2										.equ		0xa2
 no_eos_ladder_tiles				.equ		0xa3
 level											.equ		0xa6
 attract_mode							.equ		0xa7
+byte_ac										.equ		0xac
 char_render_buf_z					.equ		0xdf
+zp_ff											.equ		0xff
 
 .if 0
 msg_addr:					; $10-$11

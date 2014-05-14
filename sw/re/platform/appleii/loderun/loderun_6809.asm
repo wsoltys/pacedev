@@ -304,6 +304,7 @@ title_wait_for_key: ; $618e
 				stb			*attract_mode						; set attract mode
 				stb			*level
 				stb			*byte_ac
+				stb			*game_active
 ; do some other crap
 				lbra		zero_score_and_init_game
 
@@ -345,7 +346,7 @@ start_new_game:	; $6201
 				stb			*level_0_based
 				incb
 				stb			*level
-				;stb			*byte_9d
+				stb			*game_active
 				lda			#2
 				sta			*attract_mode
 				jmp			zero_score_and_init_game														
@@ -427,14 +428,32 @@ init_read_unpack_display_level:	; $6238
 
 read_level_data:	; $6264
 ; copies from disk buffer to low memory ($0D00)
-; stuff
+				;sta			byte_b7f4								; disk area = *level_active???
+				lda			*attract_mode
+				lsra														; demo mode?
+				beq			read_attract_mode_levels
+				lda			*level_0_based
+; nothing like original code from here-on in			
+
+	; hack - 1 level only atm
+				anda		#0
+				
+				adda		#>game_level_data
+				sta			*msb_line_addr_pg1
+				lda			#<game_level_data
+				sta			*lsb_line_addr_pg1
+				ldx			*msb_line_addr_pg1
+				ldy			#level_data_packed
+				clrb
+				bra			copy_level_data
+				
+read_attract_mode_levels:
 				lda			*level
 				deca
 				adda		#>demo_level_data
 				sta			*msb_line_addr_pg1
 				lda			#<demo_level_data
 				sta			*lsb_line_addr_pg1
-; nothing like original code from here-on in				
 				ldx			*msb_line_addr_pg1
 				ldy			#level_data_packed
 				clrb
@@ -1342,14 +1361,27 @@ read_controls:	; $6a12
 				bne			6$											; no, skip
 				lda			#0xd5										; 'U'
 				rts
-6$:			ldb			#~(1<<7)								; col7
+6$:			tst			*zp_ff									; CTRL?
+				beq			7$
+				ldb			#~(1<<6)								; col6
+				stb			2,x											; column_strobe
+				lda			,x											; active low
+				bita		#(1<<0)									; 'F'?
+				bne			61$											; no, skip
+				lda			0x80										; CTRL-@
+				rts
+61$:		bita		#(1<<1)									; 'N'?
+				bne			7$											; no, skip
+				lda			#0x9e										; CTRL-^			
+				rts
+7$:			ldb			#~(1<<7)								; col7
 				stb			2,x											; column strobe
 				lda			,x											; active low
 				bita		#(1<<1)									; 'O'?
-				bne			7$											; no, skip
+				bne			8$											; no, skip
 				lda			#0xcf										; 'O'
 				rts
-7$:			clra
+8$:			clra
 .endif
 				rts
 got_key:
@@ -1380,6 +1412,28 @@ key_pressed:	; $6A2B
 				stb			*key_2
 				rts
 
+goto_next_level:	; $6A56
+				inc			*no_lives
+				inc			*level
+				inc			*level_0_based
+				lsr			*level_active						; 'kill' player
+				lsr			*game_active
+				rts
+				
+extra_life:	; $6A61
+				inc			*no_lives
+				bne			1$
+				dec			*no_lives
+1$:			jsr			display_no_lives
+				lsr			*game_active
+				jmp			read_controls
+
+freeze:	; $6A76
+;				jsr			wait_for_key
+				cmpa		#0x9b
+;				bne			freeze
+				jmp			read_controls
+																				
 terminate_game:	; $6A81
 				lda			#1
 				sta			*no_lives
@@ -1388,11 +1442,17 @@ abort_life:	; $6A84
 				rts
 								
 ctl_keys:	; $6B59
+				.db			0x9e										; CTRL-^ (next level)
+				.db			0x80										; CTRL-@ (extra life)
+				.db			0x9b										; ESC (freeze toggle)
 				.db			0x92										; CTRL-R (terminate game)
 				.db			0x81										; CTRL-A (abort life)
 				.db			0
 
 ctl_key_vector_fn:
+				.dw			#goto_next_level
+				.dw			#extra_life
+				.dw			#freeze
 				.dw			#terminate_game
 				.dw			#abort_life
 												
