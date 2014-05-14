@@ -7,9 +7,16 @@
 				
        	.area   idaseg (ABS)
 
-.define			COCO3
+.define			PLATFORM_COCO3
+;.define			PLATFORM_WILLIAMS
+
 .define			DEBUG
 
+START_LEVEL_0_BASED	.equ		1
+
+;
+; 6809 stuff
+;
 						.macro	CLC
 						andcc		#~(1<<0)
 						.endm
@@ -17,7 +24,7 @@
 						orcc		#(1<<0)
 						.endm
 
-.ifdef COCO3
+.ifdef PLATFORM_COCO3
 
 ;.define			HAS_TITLE
 						
@@ -71,8 +78,8 @@ stack				.equ		.-2
 
 start:
 
-.ifdef COCO3
-; initialise Coco3 hardware
+.ifdef PLATFORM_COCO3
+; initialise PLATFORM_COCO3 hardware
 				ldu			stack
 				orcc		#0x50										; disable interrupts
 ; - disable PIA interrupts
@@ -185,6 +192,8 @@ main_game_loop:
 				ldb			#1
 				jsr			init_read_unpack_display_level
 				lda			#0
+				sta			*key_1
+				sta			*key_2
 				lda			*attract_mode
 				lsra
 				beq			1$
@@ -292,8 +301,8 @@ loc_61f6: ; $61F6
 				stb			2,x											; column strobe
 				lda			,x											; active low
 				bita		(1<<6)									; <ENTER>?
-				beq			loc_61e4								; yes, go
-				ldb			#0
+;				beq			loc_61e4								; yes, go
+				ldb			#START_LEVEL_0_BASED
 				stb			*level_0_based
 				incb
 				stb			*level
@@ -346,6 +355,13 @@ init_read_unpack_display_level:	; $6238
 				inx															; source (packed) addr
 2$:			inc			*nibble_cnt
 				ldb			*col
+.if 1
+; wipe enemies from the game
+				cmpa		#8
+				bne			0$
+				lda			#0
+0$:				
+.endif				
 				cmpa		#10											; data byte 0-9?
 				bcs			3$											; yes, valid (skip)
 				lda			#0											; invalid, ignore
@@ -618,7 +634,7 @@ check_controls:	; $658F
 				;sta			*byte_a4
 				sta			*unk_9b
 				jsr			read_controls
-				;lda			*unk_9e
+				lda			*key_1
 				cmpa		#0xc9										; 'I'?
 				bne			check_down_key					; no, skip
 				jsr			move_up
@@ -643,7 +659,7 @@ check_dig_right_key:
 				bcs			check_left_key
 				rts
 check_left_key:
-;				lda			unk_9f
+				lda			*key_2
 				cmpa		#0xca										; 'J'?
 				bne			check_right_key					; no, skip
 				jmp			move_left
@@ -968,14 +984,14 @@ sprite_to_char_tbl:	; $6968
 				.db 		0x24, 0x24, 0x24, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 2, 2, 1
 
 loc_67d8:	; $67D8
-				;jmp			loc_6892
+				jmp			loc_6892
 				rts
 				
 dig_left:	; $67db
 				lda			#0xff
 				sta			*dig_dir
-				;sta			*unk_9e
-				;sta			*unk_9f
+				sta			*key_1
+				sta			*key_2
 				lda			#0
 				sta			*dig_sprite
 digging_left:
@@ -1058,6 +1074,10 @@ digging_left:
 				rts
 
 loc_686e:	; $686E
+; stuff
+loc_6892:	; $6892
+				lda			#0
+				sta			*dig_dir
 				SEC
 				rts
 
@@ -1069,6 +1089,10 @@ loc_6898: ; $6898
 dig_right: ; 68a1
 				lda			#1
 				sta			*dig_dir
+				sta			*key_1
+				sta			*key_2
+				lda			#0x0c
+				sta			*dig_sprite
 digging_right:				
 ;stuff				
 				CLC															; flag
@@ -1111,6 +1135,8 @@ check_attract:
 				lda			*attract_mode
 				cmpa		#1
 				;beq			loc_68b8
+				ldy			#got_key
+				pshs		y												; set return address
 1$:				
 				ldx			#PIA0
 				ldb			#~(1<<1)								; col1
@@ -1155,9 +1181,15 @@ check_attract:
 				bne			7$											; no, skip
 				lda			#0xcf										; 'O'
 				rts
-7$:				
+7$:			clra
 				rts
-
+got_key:
+				tfr			a,b											; B=(apple)key
+				stb			*msg_char
+				stb			*key_1
+				stb			*key_2
+				rts
+				
 calc_char_and_addr:	; $6b85
 				lda			*current_col
 				ldb			*x_offset_within_tile

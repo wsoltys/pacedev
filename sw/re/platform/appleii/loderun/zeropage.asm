@@ -51,6 +51,8 @@ byte_9c										.equ		0x9c
 paddles_detected					.equ		0x85
 no_lives									.equ		0x98
 unk_9b										.equ		0x9b
+key_1											.equ		0x9e
+key_2											.equ		0x9f
 dig_dir										.equ		0x9c
 dig_sprite								.equ		0xa0
 timer											.equ		0xa1
