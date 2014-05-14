@@ -420,12 +420,19 @@ init_read_unpack_display_level:	; $6238
 				cmpb		#16											; last row?
 				bcs			5$											; no, loop
 				jsr			init_and_draw_level
-; stuff
+				bcc			draw_ok
+				lda			*level_0_based
+				beq			jmp_display_title_screen
 				ldb			#0
-				stb			*level_0_based				
-; stuff				
+				;inc			*byte_97
+				decb
+				jmp			init_read_unpack_display_level
+draw_ok:	; $62C3
 				rts
 
+jmp_display_title_screen:	; $62C4
+				jmp			display_title_screen
+				
 read_level_data:	; $6264
 ; copies from disk buffer to low memory ($0D00)
 				;sta			byte_b7f4								; disk area = *level_active???
@@ -435,9 +442,14 @@ read_level_data:	; $6264
 				lda			*level_0_based
 ; nothing like original code from here-on in			
 
-	; hack - 1 level only atm
-				anda		#0
-				
+	; hack - 5 levels only atm
+1$:			cmpa		#5
+				bcs			2$
+				suba		#5
+				bra			1$
+2$:
+	; end of hack
+					
 				adda		#>game_level_data
 				sta			*msb_line_addr_pg1
 				lda			#<game_level_data
@@ -536,7 +548,8 @@ init_and_draw_level: ; $63B3
 				ldb			*row
 				lbpl		1$
 				lda			*current_col
-				bra			draw_level							; BPL!!!
+				bpl			draw_level
+				SEC
 				rts
 
 draw_level:	; $648B
@@ -1314,7 +1327,16 @@ read_controls:	; $6a12
 				coma
 				anda		#(1<<6)									; bit6=CTRL
 				sta			*zp_ff
-				ldb			#~(1<<1)								; col1
+				ldb			#~(1<<0)								; col0
+				stb			2,x											; columns strobe
+				lda			,x											; active low
+				bita		#(1<<6)									; <ENTER>?
+				bne			10$
+				tst			*zp_ff									; CTRL?
+				bne			10$											; no, skip
+				lda			#0x8d										; CTRL-M
+				rts
+10$:		ldb			#~(1<<1)								; col1
 				stb			2,x											; columns strobe
 				lda			,x											; active low
 				bita		#(1<<0)									; 'A'?
@@ -1448,6 +1470,7 @@ ctl_keys:	; $6B59
 				.db			0x9b										; ESC (freeze toggle)
 				.db			0x92										; CTRL-R (terminate game)
 				.db			0x81										; CTRL-A (abort life)
+				.db			0x8d										; CTRL-M (display high scores)
 				.db			0
 
 ctl_key_vector_fn:
@@ -1456,6 +1479,7 @@ ctl_key_vector_fn:
 				.dw			#freeze
 				.dw			#terminate_game
 				.dw			#abort_life
+				.dw			#ctrl_m
 												
 calc_char_and_addr:	; $6b85
 				lda			*current_col
@@ -1585,6 +1609,26 @@ loc_6c39:	; $6C39
 				SEC									
 2$:			rts
 
+ctrl_m:	; $77AC
+				jsr			cls_and_display_high_scores
+				ldb			#5
+0$:			pshs		b
+				ldy			#0
+1$:			ldx			#PIA0
+				ldb			#0											; all columns
+				stb			2,x											; column strobe
+				lda			,x											; active low
+				coma														; active high
+				bne			2$											; key, exit
+				leay		-1,y
+				bne			1$
+				puls		b
+				decb
+				bne			0$
+2$:			HGR1
+; stuff to restore pg2 - critical				
+				rts
+				
 cls_and_display_high_scores:	; $786B
 				jsr			gcls2
 				lda			#HGR2_MSB
