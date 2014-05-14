@@ -10,7 +10,7 @@
 .define			PLATFORM_COCO3
 ;.define			PLATFORM_WILLIAMS
 
-.define			DEBUG
+;.define			DEBUG
 
 START_LEVEL_0_BASED	.equ		0
 
@@ -321,11 +321,11 @@ loc_61de:	; $61DE
 				bne			loc_61f3
 				beq			high_score_screen
 				
-loc_61e4:	; $61E4
+read_and_display_scores:	; $61E4
 				lda			#1
 				;jsr			sub_6359								; disk access
 high_score_screen: ; $61E9
-				;jsr			cls_and_display_high_scores
+				jsr			cls_and_display_high_scores
 				lda			#2
 				sta			*attract_mode
 				jmp			title_wait_for_key				
@@ -339,8 +339,8 @@ check_start_new_game: ; $61F6
 				ldb			#~(1<<0)								; col0
 				stb			2,x											; column strobe
 				lda			,x											; active low
-				bita		(1<<6)									; <ENTER>?
-;				beq			loc_61e4								; yes, go
+				bita		#(1<<6)									; <ENTER>?
+				beq			read_and_display_scores	; yes, go
 start_new_game:	; $6201
 				ldb			#START_LEVEL_0_BASED
 				stb			*level_0_based
@@ -1584,27 +1584,90 @@ loc_6c39:	; $6C39
 ;stuff
 				SEC									
 2$:			rts
-																																
-gcls1: ; $7A51
-				lda			#HGR1_MSB
-				ldb			#0
-				tfr			d,x											; start addr
-				adda		#0x20
-				tfr			d,y											; end addr
-				bra			gcls
-gcls2:
-				lda			#HGR2_MSB
-				ldb			#0
-				tfr			d,x											; start addr
-				adda		#0x20
-				tfr			d,y											; end addr
-gcls:		sty			*byte_a
-				lda			#0x00
-1$:			sta			,x+
-				cmpx		*byte_a
-				bne			1$
-				rts
 
+cls_and_display_high_scores:	; $786B
+				jsr			gcls2
+				lda			#HGR2_MSB
+				sta			*display_char_page
+				lda			#0
+				sta			*col
+				sta			*row
+				jsr			display_message
+				.ascii	"    LODE RUNNER HIGH SCORES\r\r\r"
+				.ascii	"    INITIALS LEVEL  SCORE\r"
+				.ascii	"    -------- ----- --------\r"
+				.db			0
+				lda			#1
+				sta			*byte_55								; counter
+1$:			cmpa		#10											; 10th score?
+				bne			2$											; no, skip
+				lda			#1
+				jsr			display_digit
+				lda			#0
+				jsr			display_digit						; "10"
+				bra			3$
+2$:			lda			#(0x80|0x20)						; space
+				jsr			display_character
+				lda			*byte_55
+				jsr			display_digit
+3$:			jsr			display_message
+				.asciz	".    "
+; *** start of fudge
+				lda			#(0x80|0x4D)
+				jsr			display_character				
+				lda			#(0x80|0x4D)
+				jsr			display_character				
+				lda			#(0x80|0x43)
+				jsr			display_character		
+				jsr			display_message
+				.asciz	"    "		
+				lda			#42
+				jsr			cnv_byte_to_3_digits
+				lda			*hundreds
+				jsr			display_digit
+				lda			*tens
+				jsr			display_digit
+				lda			*units
+				jsr			display_digit
+				jsr			display_message
+				.asciz	"  "
+				lda			#0x31
+				jsr			cnv_bcd_to_2_digits
+				lda			*tens
+				jsr			display_digit
+				lda			*units
+				jsr			display_digit
+				lda			#0x41
+				jsr			cnv_bcd_to_2_digits
+				lda			*tens
+				jsr			display_digit
+				lda			*units
+				jsr			display_digit
+				lda			#0x59
+				jsr			cnv_bcd_to_2_digits
+				lda			*tens
+				jsr			display_digit
+				lda			*units
+				jsr			display_digit
+				lda			#0x26
+				jsr			cnv_bcd_to_2_digits
+				lda			*tens
+				jsr			display_digit
+				lda			*units
+				jsr			display_digit
+; stuff
+				jsr			cr
+				inc			*byte_55								; next score
+				lda			*byte_55
+				cmpa		#11											; done all scores?
+				bcc			done_hs
+				lbra		1$
+done_hs:	; $799A				
+				HGR2
+				lda			#HGR1_MSB
+				sta			*display_char_page				
+				rts
+																																				
 cls_and_display_game_status:	; $79AD
 				jsr			gcls1
 				jsr			gcls2
@@ -1643,6 +1706,26 @@ get_line_addr_pgs_1_2: ; $7A3E
 				sta			*msb_line_addr_pg2
 				rts
 				
+gcls1: ; $7A51
+				lda			#HGR1_MSB
+				ldb			#0
+				tfr			d,x											; start addr
+				adda		#0x20
+				tfr			d,y											; end addr
+				bra			gcls
+gcls2:
+				lda			#HGR2_MSB
+				ldb			#0
+				tfr			d,x											; start addr
+				adda		#0x20
+				tfr			d,y											; end addr
+gcls:		sty			*byte_a
+				lda			#0x00
+1$:			sta			,x+
+				cmpx		*byte_a
+				bne			1$
+				rts
+
 display_no_lives:	; $7A70
 				lda			*no_lives
 				ldb			#16											; col=16
