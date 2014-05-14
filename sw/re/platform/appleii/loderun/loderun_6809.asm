@@ -163,11 +163,16 @@ display_title_screen: ; $6008
 				bne			2$											; no, loop
 				tst			*row										; done screen?
 				bne			1$											; no, loop
+.else				
+				lda			#8
+				sta			*row
+				lda			#2
+				sta			*col
+				jsr			display_message
+				.asciz			"INSERT TITLE SCREEN HERE"
+.endif				
 				HGR1
 				jmp			title_wait_for_key
-.else
-				jmp			loc_61f6				
-.endif				
 
 zero_score_and_init_game: ; $6056
 				lda			#0
@@ -197,7 +202,7 @@ main_game_loop:
 				lda			*attract_mode
 				lsra
 				beq			1$
-				;jsr			keybd_flush
+				jsr			keybd_flush
 				lda			*current_col
 				sta			*col
 				lda			*current_row
@@ -265,15 +270,16 @@ dec_lives:	; $613F
 				;jsr			sub_78e1								; sound stuff
 ; stuff
 				lda			*attract_mode
-				lsra
-				;beq			loc_61d0
+				lsra														; demo mode?
+				beq			loc_61d0								; yes, go
 				lda			*no_lives								; any lives left?
 				bne			next_level_cont					; yes, continue
-; stuff
-; fall-thru to title				
+				;jsr			loc_84c8								; (some high score stuff)
+				jsr			game_over_animation
+				;bcs			check_start_new_game
 				
 title_wait_for_key: ; $618e
-;				jsr			keybd_flush
+				jsr			keybd_flush
 				ldb			#4											; timeout
 1$:			pshs		b
 				ldy			#0
@@ -286,22 +292,38 @@ title_wait_for_key: ; $618e
 				stb			2,x											; column strobe
 				lda			,x
 				coma														; any key pressed?
-				bne			loc_61f6								; yes, exit
+				bne			check_start_new_game		; yes, exit
 				leay		-1,y
 				bne			2$
 				puls		b
 				decb														; done?
 				bne			1$											; no, loop
+				lda			*attract_mode						; in attract mode?
+				bne			loc_61de								; yes, skip
 				ldb			#1
-				stb			*attract_mode
+				stb			*attract_mode						; set attract mode
 				stb			*level
+				stb			*byte_ac
 ; do some other crap
 				lbra		zero_score_and_init_game
 
+loc_61d0:	; $61D0
+				lda			#0
+				;sta			*byte_99
+; reads $C000 (keybd) but not used!?!				
+				ldb			*byte_ac
+				beq			check_start_new_game
+				jmp			title_wait_for_key
+				
+loc_61de:	; $61DE
+				cmpa		#1											; attract mode
+				bne			loc_61f3
+				beq			high_score_screen
+				
 loc_61e4:	; $61E4
 				lda			#1
 				;jsr			sub_6359								; disk access
-loc_61e8: ; $61E9
+high_score_screen: ; $61E9
 				;jsr			cls_and_display_high_scores
 				lda			#2
 				sta			*attract_mode
@@ -310,7 +332,7 @@ loc_61e8: ; $61E9
 loc_61f3:	; $61F3
 				jmp			display_title_screen
 				
-loc_61f6: ; $61F6
+check_start_new_game: ; $61F6
 ; check for 'e' key for editor (not supported)
 				ldx			#PIA0
 				ldb			#~(1<<0)								; col0
@@ -318,6 +340,7 @@ loc_61f6: ; $61F6
 				lda			,x											; active low
 				bita		(1<<6)									; <ENTER>?
 ;				beq			loc_61e4								; yes, go
+start_new_game:	; $6201
 				ldb			#START_LEVEL_0_BASED
 				stb			*level_0_based
 				incb
@@ -1206,6 +1229,24 @@ sprite_to_char_tbl:	; $6968
 				.db 		0x24, 0x24, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x24, 0x24
 				.db 		0x24, 0x24, 0x24, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 2, 2, 1
 
+handle_attract_mode:	; $69B8
+				ldx			#PIA0
+				ldb			#0										; all columns
+				stb			2,x										; column strobe
+				lda			,x										; active low
+				coma													; active high
+				bne			1$										; key pressed, go
+; stuff
+				bra			loc_69d6							; BPL!!
+1$:			lsr			*byte_ac
+				lsr			level_active					; kill player
+				lda			#1
+				sta			*no_lives
+				rts
+
+loc_69d6:	; $69D6
+				rts
+								
 ; Coco Keyboard
 ;    7  6  5  4  3  2  1  0
 ;	0: G  F  E  D  C  B  A  @
@@ -1227,32 +1268,40 @@ read_controls:	; $6a12
 				stb			2,x											; column strobe
 				lda			,x											; active low
 				bita		#(1<<6)									; <ENTER>?
-				bne			check_attract
+				bne			93$
 				lda			page
 				coma		
 				sta			page
-				bne			1$
+				bne			91$
 				HGR1
-				bra			2$
-1$:			HGR2
-2$:			lda			,x											; active low
+				bra			92$
+91$:		HGR2
+92$:		lda			,x											; active low
 				bita		#(1<<6)
-				beq			2$											; wait for key release
+				beq			92$											; wait for key release
+93$:				
 .endif
-check_attract:
 				lda			*attract_mode
 				cmpa		#1
-				;beq			loc_68b8
+				beq			handle_attract_mode
 				ldy			#got_key
 				pshs		y												; set return address
 .ifdef PLATFORM_COCO3				
 1$:				
 				ldx			#PIA0
+				ldb			#~(1<<4)								; col4
+				stb			2,x											; columns strobe
+				lda			,x											; active low
+				coma
+				anda		#(1<<6)									; bit6=CTRL
+				sta			*zp_ff
 				ldb			#~(1<<1)								; col1
 				stb			2,x											; columns strobe
 				lda			,x											; active low
 				bita		#(1<<0)									; 'A'?
 				bne			11$											; no, skip
+				tst			*zp_ff									; CTRL?
+				beq			11$											; no, skip
 				lda			#0x81										; CTRL-A
 				rts
 11$:		bita		#(1<<1)									; 'I'?
@@ -1263,9 +1312,15 @@ check_attract:
 				stb			2,x											; columns strobe
 				lda			,x											; active low
 				bita		#(1<<1)									; 'J'?
-				bne			3$											; no, skip
+				bne			31$											; no, skip
 				lda			#0xca										; 'J'
 				rts
+31$:		bita		#(1<<2)									; 'R'?
+				bne			3$											; no, skip
+				tst			*zp_ff									; CTRL?
+				beq			3$											; no, skip
+				lda			#0x92										; CTRL-R
+				rts				
 3$:			ldb			#~(1<<3)								; col3
 				stb			2,x											; columns strobe
 				lda			,x											; active low
@@ -1333,10 +1388,12 @@ abort_life:	; $6A84
 				rts
 								
 ctl_keys:	; $6B59
+				.db			0x92										; CTRL-R (terminate game)
 				.db			0x81										; CTRL-A (abort life)
 				.db			0
 
 ctl_key_vector_fn:
+				.dw			#terminate_game
 				.dw			#abort_life
 												
 calc_char_and_addr:	; $6b85
@@ -1915,7 +1972,18 @@ draw_end_of_screen_ladder:	; $8631
 
 no_eos_ladder_entries:
 				.ds			1
-								
+
+keybd_flush:	; $869F
+; no such concept on the COCO3
+; - so wait until no keys pressed
+				ldx			#PIA0
+				ldb			#0											; all columns
+1$:			stb			2,x											; column strobe
+				lda			,x											; active low
+				coma														; active high
+				bne			1$											; keys pressed, loop
+				rts
+												
 display_message:	; $86E0
 				puls		x
 1$:			stx			*msg_addr								; store msg ptr
@@ -2062,7 +2130,16 @@ wipe_or_draw_level:	; $88A2
 				cmpx		*byte_a
 				bne			1$
 				rts
-					
+
+game_over_animation:	; $8B1A
+				lda			#8
+				sta			*row
+				lda			#8
+				sta			*col
+				jsr			display_message
+				.asciz			" GAME OVER "
+				rts
+									
 ; zero-page registers
 .include "zeropage.asm"
 
