@@ -12,7 +12,7 @@
 
 .define			DEBUG
 
-START_LEVEL_0_BASED	.equ		1
+START_LEVEL_0_BASED	.equ		0
 
 ;
 ; 6809 stuff
@@ -975,16 +975,8 @@ can_move_down:	; $678A
 				jmp			update_climber_sprite
 2$:			jmp			climber_check_for_gold				
 				
-sprite_to_char_tbl:	; $6968
-				.db 		0xB, 0xC, 0xD, 0x18, 0x19, 0x1A, 0xF, 0x13, 9, 0x10, 0x11, 0x15, 0x16
-				.db 		0x17, 0x25, 0x14, 0xE, 0x12, 0x1B, 0x1B, 0x1C, 0x1C, 0x1D, 0x1D, 0x1E
-				.db 		0x1E, 0, 0, 0, 0, 0x26, 0x26, 0x27, 0x27, 0x1D, 0x1D, 0x1E, 0x1E, 0
-				.db 		0, 0, 0, 0x1F, 0x1F, 0x20, 0x20, 0x21, 0x21, 0x22, 0x22, 0x23, 0x23
-				.db 		0x24, 0x24, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x24, 0x24
-				.db 		0x24, 0x24, 0x24, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 2, 2, 1
-
-loc_67d8:	; $67D8
-				jmp			loc_6892
+cant_dig_left:	; $67D8
+				jmp			finish_dig_left
 				rts
 				
 dig_left:	; $67db
@@ -997,16 +989,16 @@ dig_left:	; $67db
 digging_left:
 				ldb			*current_row
 				cmpb		#15											; bottom row?
-				bcc			loc_67d8								; yes, exit
+				bcc			cant_dig_left								; yes, exit
 				incb														; row below
 				jsr			set_row_addr_1_2
 				ldb			*current_col
-				beq			loc_67d8								; left-most edge? yes, exit
+				beq			cant_dig_left						; left-most edge? yes, exit
 				decb														; column to the left
 				ldy			*msb_row_level_data_addr
 				lda			b,y											; get tilemap data (below, left)
 				cmpa		#1											; brick?
-				bne			loc_67d8								; no, exit
+				bne			cant_dig_left						; no, exit
 				ldb			*current_row
 				jsr			set_row_addr_1_2
 				ldb			*current_col
@@ -1014,7 +1006,7 @@ digging_left:
 				ldy			*msb_row_level_data_addr
 				lda			b,y											; get tilemap data (left)
 				cmpa		#0											; space?
-				lbne		loc_686e								; no, go
+				lbne		abort_dig_left					; no, go
 				jsr			calc_char_and_addr
 				jsr			wipe_char
 				jsr			adjust_x_offset_in_tile
@@ -1073,9 +1065,9 @@ digging_left:
 				CLC															; flag
 				rts
 
-loc_686e:	; $686E
+abort_dig_left:	; $686E
 ; stuff
-loc_6892:	; $6892
+finish_dig_left:	; $6892
 				lda			#0
 				sta			*dig_dir
 				SEC
@@ -1086,6 +1078,9 @@ loc_6898: ; $6898
 				decb
 				jmp			loc_6c39
 												
+cant_dig_right:	; $689E
+				jmp			finish_dig_right
+																				
 dig_right: ; 68a1
 				lda			#1
 				sta			*dig_dir
@@ -1094,10 +1089,105 @@ dig_right: ; 68a1
 				lda			#0x0c
 				sta			*dig_sprite
 digging_right:				
-;stuff				
+				ldb			*current_row
+				cmpb		#15											; bottom row?
+				bcc			cant_dig_right					; yes, exit
+				incb														; row below
+				jsr			set_row_addr_1_2
+				ldb			*current_col
+				cmpb		#27											; right-most edge?
+				bcc			cant_dig_right					; yes, exit
+				incb														; column to the right
+				ldy			*msb_row_level_data_addr
+				lda			b,y											; get tilemap data (below, right)
+				cmpa		#1											; brick?
+				bne			cant_dig_right					; no, exit
+				ldb			*current_row
+				jsr			set_row_addr_1_2
+				ldb			*current_col
+				incb														; column to the right
+				ldy			*msb_row_level_data_addr
+				lda			b,y											; get tilemap data (right)
+				cmpa		#0											; space?
+				lbne		abort_dig_right					; no, go
+				jsr			calc_char_and_addr
+				jsr			wipe_char
+				jsr			adjust_x_offset_in_tile
+				jsr			adjust_y_offset_within_tile
+				ldb			*dig_sprite
+				ldy			#sprite_to_char_tbl+0x2A
+				lda			b,y
+				pshs		a
+				ldy			#sprite_to_char_tbl+0x37
+				lda			b,y
+				puls		b
+				;jsr			sub_87d5
+				ldb			*dig_sprite
+				lda			#8											; sprite=8, tile=9 (running right)
+				cmpb		#0x12
+				bcc			1$
+				lda			#0x0e
+1$:			sta			*sprite_index
+				jsr			draw_sprite
+				ldb			*dig_sprite
+				cmpb		#0x18
+				beq			loc_6962
+				cmpb		#0x0c
+				beq			2$
+				ldy			#sprite_to_char_tbl+0x11
+				lda			b,y
+				pshs		a
+				lda			*current_col
+				inca
+				ldb			*current_row
+				jsr			calc_colx5_scanline
+				tfr			d,x											; X(lsb)=scanline
+				tfr			a,b											; B=x_in_2_pixel_incs
+				puls		a												; A=char
+				jsr			wipe_char
+				ldb			*dig_sprite
+2$:			ldy			#sprite_to_char_tbl+0x12
+				lda			b,y
+				pshs		a
+				lda			*current_col				
+				inca
+				sta			*col
+				ldb			*current_row
+				stb			*row
+				jsr			calc_colx5_scanline
+				tfr			d,x											; X(lsb)=scanline
+				tfr			a,b											; B=x_in_2_pixel_incs
+				puls		a												; A=char
+				jsr			display_transparent_char
+				inc			*row
+				ldb			*dig_sprite
+				ldy			#sprite_to_char_tbl+0x1e
+				lda			b,y
+				jsr			display_char_pg1
+				inc			*dig_sprite
 				CLC															; flag
 				rts
-																
+
+abort_dig_right:	; $6936
+finish_dig_right:	; $695C
+				lda			#0
+				sta			*dig_dir
+				SEC
+				rts
+
+loc_6962: ; $6962
+				ldb			*current_col
+				incb
+				jmp			loc_6c39
+								
+sprite_to_char_tbl:	; $6968
+				.db 		0xB, 0xC, 0xD, 0x18, 0x19, 0x1A, 0xF, 0x13, 9, 0x10, 0x11, 0x15, 0x16
+				.db 		0x17, 0x25, 0x14, 0xE, 0x12, 0x1B, 0x1B, 0x1C, 0x1C, 0x1D, 0x1D, 0x1E
+				.db 		0x1E, 0, 0, 0, 0, 0x26, 0x26, 0x27, 0x27, 0x1D, 0x1D, 0x1E, 0x1E, 0
+				.db 		0, 0, 0, 0x1F, 0x1F, 0x20, 0x20, 0x21, 0x21, 0x22, 0x22, 0x23, 0x23
+				.db 		0x24, 0x24, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x24, 0x24
+				.db 		0x24, 0x24, 0x24, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 2, 2, 1
+
 ; Coco Keyboard
 ;    7  6  5  4  3  2  1  0
 ;	0: G  F  E  D  C  B  A  @
