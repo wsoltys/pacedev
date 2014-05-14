@@ -50,7 +50,9 @@ level_0_based							.equ		0x96
 byte_9c										.equ		0x9c
 paddles_detected					.equ		0x85
 no_lives									.equ		0x98
+level_active							.equ		0x9a
 unk_9b										.equ		0x9b
+game_active								.equ		0x9d
 key_1											.equ		0x9e
 key_2											.equ		0x9f
 dig_dir										.equ		0x9c

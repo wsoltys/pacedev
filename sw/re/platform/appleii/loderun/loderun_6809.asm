@@ -210,6 +210,8 @@ main_game_loop:
 ; stuff
 in_level_loop:
 				jsr			handle_player						; digging, falling, keys
+				lda			*level_active						; alive?
+				beq			dec_lives								; no, exit
 ; stuff
 				lda			*no_gold
 				bne			1$
@@ -254,8 +256,22 @@ next_level:
 				jsr			update_and_display_score
 				dec			*byte_5c
 				bne			4$											; add 1500
+next_level_cont:				
 				jmp			main_game_loop				
 
+dec_lives:	; $613F
+				dec			*no_lives
+				jsr			display_no_lives
+				;jsr			sub_78e1								; sound stuff
+; stuff
+				lda			*attract_mode
+				lsra
+				;beq			loc_61d0
+				lda			*no_lives								; any lives left?
+				bne			next_level_cont					; yes, continue
+; stuff
+; fall-thru to title				
+				
 title_wait_for_key: ; $618e
 ;				jsr			keybd_flush
 				ldb			#4											; timeout
@@ -324,6 +340,8 @@ init_read_unpack_display_level:	; $6238
 				stb			*nibble_cnt
 				stb			*row
 ; heaps of stuff
+				lda			#1
+				sta			*level_active
 				jsr			read_level_data
 				ldb			*row
 5$:			ldy			#lsb_row_addr						; table for row LSB entries
@@ -1227,12 +1245,17 @@ check_attract:
 				;beq			loc_68b8
 				ldy			#got_key
 				pshs		y												; set return address
+.ifdef PLATFORM_COCO3				
 1$:				
 				ldx			#PIA0
 				ldb			#~(1<<1)								; col1
 				stb			2,x											; columns strobe
 				lda			,x											; active low
-				bita		#(1<<1)									; 'JI?
+				bita		#(1<<0)									; 'A'?
+				bne			11$											; no, skip
+				lda			#0x81										; CTRL-A
+				rts
+11$:		bita		#(1<<1)									; 'I'?
 				bne			2$											; no, skip
 				lda			#0xc9										; 'I'
 				rts
@@ -1272,14 +1295,50 @@ check_attract:
 				lda			#0xcf										; 'O'
 				rts
 7$:			clra
+.endif
 				rts
 got_key:
 				tfr			a,b											; B=(apple)key
 				stb			*msg_char
+				bne			key_pressed
+; stuff (but fall thru here)				
+key_pressed:	; $6A2B
+				cmpb		#0xa0										; normal character?
+				bcc			2$											; yes, go
+				stb			*msg_char
+				ldb			#0xff
+1$:			incb
+				ldy			#ctl_keys
+				lda			b,y											; get key entry
+				beq			2$											; done? yes, exit				
+				cmpa		*msg_char								; match?
+				bne			1$											; no, loop
+				ldx			#ctl_key_vector_fn
+				aslb														; entry offset
+				abx
+				ldy			,x
+				pshs		y												; set as return address
+				rts
+2$:			; paddle stuff
+				ldb			*msg_char				
 				stb			*key_1
 				stb			*key_2
 				rts
-				
+
+terminate_game:	; $6A81
+				lda			#1
+				sta			*no_lives
+abort_life:	; $6A84
+				lsr			*level_active
+				rts
+								
+ctl_keys:	; $6B59
+				.db			0x81										; CTRL-A (abort life)
+				.db			0
+
+ctl_key_vector_fn:
+				.dw			#abort_life
+												
 calc_char_and_addr:	; $6b85
 				lda			*current_col
 				ldb			*x_offset_within_tile
