@@ -10,7 +10,7 @@
 .define			PLATFORM_COCO3
 ;.define			PLATFORM_WILLIAMS
 
-;.define			DEBUG
+.define			DEBUG
 
 START_LEVEL_0_BASED	.equ		0
 
@@ -1660,12 +1660,13 @@ check_hole:
 				ldy			#hole_cnt
 				lda			b,y											; get hole counter
 				stb			*byte_88								; save hole#
-				bne			update_hole								; active, go
+				tsta														; 6809 only!
+				bne			update_hole							; active, go
 				jmp			next_hole
 
 update_hole:	; $760f
 				dec			b,y											; dec hole counter
-				beq			loc_7641
+				beq			restore_brick
 				ldy			#hole_col
 				lda			b,y
 				sta			*col
@@ -1682,21 +1683,66 @@ update_hole_tile:	; $7627
 				lda			*col
 				ldb			*row
 				jsr			calc_colx5_scanline		
+				tfr			d,x											; X(lsb)=scanline
+				tfr			a,b											; B=x_in_2_pixel_incs
 				lda			#0											; space
 				jsr			wipe_char
 goto_next_hole: ; $7636				
 				jmp			next_hole
-
 chk_hole_cnt_10:	; $7636
 				cmpa		#10											; counter=10?
 				bne			goto_next_hole					; no, skip
-				lda			#0x38
+				lda			#0x38										; brick refill 1
 				bra			update_hole_tile
 
-loc_7641:	; $7641
+restore_brick:	; $7641
+				ldb			*byte_88								; hole#
+				ldy			#hole_row
+				lda			b,y
+				sta			*row
+				tfr			a,b											; B=row
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*lsb_row_level_data_addr
+				sta			*byte_8
+				ldy			#msb_row_addr_1
+				lda			b,y
+				sta			*msb_row_level_data_addr
+				ldy			#msb_row_addr_2
+				lda			b,y
+				sta			*byte_9									; setup tilemap address
+				ldb			*byte_88								; hole#
+				ldy			#hole_col
+				lda			b,y
+				sta			*col
+				tfr			a,b											; B=col
+				ldy			*msb_row_level_data_addr
+				lda			b,y											; get object from tilemap
+				cmpa		#0											; space?
+				bne			1$											; no, skip
+				jmp			redisplay_brick
+1$:			cmpa		#9											; player?
+				bne			2$											; no, skip
+				lsr			*level_active						; kill player
+2$:			cmpa		#8											; guard?
+				beq			4$											; yes, go
+				cmpa		#7											; gold?	
+				bne			3$											; no, skip
+				dec			*no_gold
+3$:			jmp			redisplay_brick
+4$:
+; guard
+				jmp			next_hole
 
-
-next_hole:
+redisplay_brick:	; $7701				
+				lda			#1											; brick
+				ldy			*msb_row_level_data_addr
+				sta			b,y											; update tilemap
+				jsr			display_char_pg1
+				lda			#1											; brick
+				jsr			display_char_pg2
+				
+next_hole:	; $770D
 				ldb			*byte_88								; hole#
 				decb														; next hole
 				bmi			1$											; done? yes, exit
@@ -2480,8 +2526,12 @@ col_to_addr_tbl:	; $1c62
 				.list
 
 end_of_data	.equ		.
-				
+
 ; this was in low memory on the apple
+
+level_data_packed:
+				.ds		256
+				
 				.bndry	512
 level_data_unpacked_1:
 ldu1:

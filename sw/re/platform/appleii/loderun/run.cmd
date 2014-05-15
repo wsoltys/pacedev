@@ -1,4 +1,7 @@
 @echo off
+set opt=""
+if "%2%" == "debug" set opt="-d"
+if "%2%" == "-d" set opt="-d"
 if "%1%" == "apple" goto apple
 if "%1%" == "apple2" goto apple
 if "%1%" == "coco" goto coco
@@ -12,7 +15,8 @@ mess64d apple2e %2 -flop1 LODERUNNER.DSK
 goto end
 
 :coco
-mess64d coco3 %2 -flop1 LODERUN_6809.DSK
+if "%2%" == "video" set opt=-snapsize 320x192 -aviwrite coco.avi
+mess64d coco3 %opt% -flop1 LODERUN_6809.DSK
 goto end
 
 :neogeo
