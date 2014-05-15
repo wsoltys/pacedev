@@ -74,13 +74,13 @@ codebase		.equ		0x4000
 .endif
 
 						.org		codebase
-stack				.equ		.-2
-
+;stack				.equ		.-2
+stack					.equ		0x8000
 start:
 
 .ifdef PLATFORM_COCO3
 ; initialise PLATFORM_COCO3 hardware
-				ldu			stack
+				ldu			#stack
 				orcc		#0x50										; disable interrupts
 ; - disable PIA interrupts
 				lda			#0x34
@@ -119,7 +119,7 @@ start:
 				sta			CPU179									; select fast CPU clock (1.79MHz)
 .endif
 			
-				lda			#0x7F
+				lda			#0x3F
 				tfr			a,dp
 					
 ; start lode runner
@@ -217,7 +217,7 @@ in_level_loop:
 				jsr			handle_player						; digging, falling, keys
 				lda			*level_active						; alive?
 				beq			dec_lives								; no, exit
-; stuff
+				;jsr			sub_8811
 				lda			*no_gold
 				bne			1$
 				jsr			draw_end_of_screen_ladder
@@ -230,7 +230,13 @@ in_level_loop:
 				beq			next_level							; no, go
 				cmpa		#0xff										; issue with eos ladder?
 				beq			next_level							; yes, go
-2$:				
+2$:			jsr			respawn_guards_and_update_holes
+				lda			*level_active						; alive?
+				beq			dec_lives								; no, exit
+				;jsr			sub_8811
+				;jsr			sub_6c82
+				lda			*level_active						; alive?
+				beq			dec_lives								; no, exit
 				
 .if 1
 ; delay for Coco
@@ -358,12 +364,18 @@ init_read_unpack_display_level:	; $6238
 				incb														; B=0
 				stb			*no_eos_ladder_tiles
 				stb			*no_gold
+; stuff				
 				stb			*dig_sprite
 				stb			*packed_byte_cnt
-; stuff				
 				stb			*nibble_cnt
 				stb			*row
-; heaps of stuff
+				tfr			b,a
+				ldb			#0x1e										; number of holes
+				ldy			#hole_cnt
+7$:			sta			b,y
+				decb
+				bpl			7$											; clear all hole counters
+; stuff
 				lda			#1
 				sta			*level_active
 				jsr			read_level_data
@@ -1062,7 +1074,7 @@ dig_left:	; $67db
 digging_left:
 				ldb			*current_row
 				cmpb		#15											; bottom row?
-				bcc			cant_dig_left								; yes, exit
+				bcc			cant_dig_left						; yes, exit
 				incb														; row below
 				jsr			set_row_addr_1_2
 				ldb			*current_col
@@ -1149,7 +1161,7 @@ finish_dig_left:	; $6892
 loc_6898: ; $6898
 				ldb			*current_col
 				decb
-				jmp			loc_6c39
+				jmp			add_hole_entry
 												
 cant_dig_right:	; $689E
 				jmp			finish_dig_right
@@ -1251,7 +1263,7 @@ finish_dig_right:	; $695C
 loc_6962: ; $6962
 				ldb			*current_col
 				incb
-				jmp			loc_6c39
+				jmp			add_hole_entry
 								
 sprite_to_char_tbl:	; $6968
 				.db 		0xB, 0xC, 0xD, 0x18, 0x19, 0x1A, 0xF, 0x13, 9, 0x10, 0x11, 0x15, 0x16
@@ -1463,13 +1475,32 @@ terminate_game:	; $6A81
 abort_life:	; $6A84
 				lsr			*level_active
 				rts
-								
+
+speed_up:	; $6ABC
+				lda			*game_speed
+; the original source jumps to $6ACD
+; which equates to 1$ in the slow_down routine
+; but it's obviously a cut-n-paste error
+; and makes no difference to the execution
+				beq			1$
+				dec			*game_speed
+1$:			jmp			read_controls
+
+slow_down:	; $6AC5
+				lda			*game_speed
+				cmpa		#0x0f
+				beq			1$
+				inc			*game_speed
+1$:			jmp			read_controls
+												
 ctl_keys:	; $6B59
 				.db			0x9e										; CTRL-^ (next level)
 				.db			0x80										; CTRL-@ (extra life)
 				.db			0x9b										; ESC (freeze toggle)
 				.db			0x92										; CTRL-R (terminate game)
 				.db			0x81										; CTRL-A (abort life)
+				.db			0x88										; CTRL-H (speed up)
+				.db			0x95										; CTRL-U (slow down)
 				.db			0x8d										; CTRL-M (display high scores)
 				.db			0
 
@@ -1479,6 +1510,8 @@ ctl_key_vector_fn:
 				.dw			#freeze
 				.dw			#terminate_game
 				.dw			#abort_life
+				.dw			#speed_up
+				.dw			#slow_down
 				.dw			#ctrl_m
 												
 calc_char_and_addr:	; $6b85
@@ -1576,7 +1609,7 @@ adjust_y_offset_within_tile: ; $6C26
 				jmp			check_for_gold				
 2$:			rts
 
-loc_6c39:	; $6C39
+add_hole_entry:	; $6C39
 				lda			#0
 				sta			*byte_9c
 				lda			*current_row
@@ -1602,13 +1635,74 @@ loc_6c39:	; $6C39
 				jsr			display_char_pg1
 				inc			*row										; row below
 				ldb			#0xff
-1$:			incb
-				cmpb		#0x1e
-				beq			2$
-;stuff
-				SEC									
+1$:			incb														; next hole
+				cmpb		#0x1e										; max?
+				beq			2$											; yes, exit
+				ldy			#hole_cnt
+				lda			b,y											; empty entry?
+				bne			1$											; yes, loop
+				lda			*row
+				ldy			#hole_row								; store row of hole
+				sta			b,y
+				lda			*col
+				ldy			#hole_col								; store col of hole
+				sta			b,y
+				lda			#180										; init counter
+				ldy			#hole_cnt								; store hole counter
+				sta			b,y
+				SEC
 2$:			rts
 
+respawn_guards_and_update_holes: ; $75F4
+; stuff
+1$:			ldb			#0x1e										; number of holes
+check_hole:
+				ldy			#hole_cnt
+				lda			b,y											; get hole counter
+				stb			*byte_88								; save hole#
+				bne			update_hole								; active, go
+				jmp			next_hole
+
+update_hole:	; $760f
+				dec			b,y											; dec hole counter
+				beq			loc_7641
+				ldy			#hole_col
+				lda			b,y
+				sta			*col
+				ldy			#hole_row
+				lda			b,y
+				sta			*row
+				ldy			#hole_cnt
+				lda			b,y
+				cmpa		#20											; counter=20?
+				bne			chk_hole_cnt_10					; no, skip
+				lda			#0x37										; brick re-fill 0
+update_hole_tile:	; $7627
+				jsr			display_char_pg2
+				lda			*col
+				ldb			*row
+				jsr			calc_colx5_scanline		
+				lda			#0											; space
+				jsr			wipe_char
+goto_next_hole: ; $7636				
+				jmp			next_hole
+
+chk_hole_cnt_10:	; $7636
+				cmpa		#10											; counter=10?
+				bne			goto_next_hole					; no, skip
+				lda			#0x38
+				bra			update_hole_tile
+
+loc_7641:	; $7641
+
+
+next_hole:
+				ldb			*byte_88								; hole#
+				decb														; next hole
+				bmi			1$											; done? yes, exit
+				jmp			check_hole							; loop
+1$:			rts				
+								
 ctrl_m:	; $77AC
 				jsr			cls_and_display_high_scores
 				ldb			#5
@@ -1754,14 +1848,14 @@ gcls1: ; $7A51
 				lda			#HGR1_MSB
 				ldb			#0
 				tfr			d,x											; start addr
-				adda		#0x20
+				adda		#0x1E
 				tfr			d,y											; end addr
 				bra			gcls
 gcls2:
 				lda			#HGR2_MSB
 				ldb			#0
 				tfr			d,x											; start addr
-				adda		#0x20
+				adda		#0x1E
 				tfr			d,y											; end addr
 gcls:		sty			*byte_a
 				lda			#0x00
@@ -2335,6 +2429,12 @@ eos_ladder_col:	; $C00
 					.ds		0x30
 eos_ladder_row:	; $C30
 					.ds		0x30
+hole_col:	; $CA0
+					.ds		0x20
+hole_row:	; $CC0
+					.ds		0x20
+hole_cnt:	; $CE0
+					.ds		0x20
 
 lsb_row_addr:	; $1C05
 					.db		<(ldu1+0*28), <(ldu1+1*28), <(ldu1+2*28), <(ldu1+3*28)
@@ -2379,6 +2479,8 @@ col_to_addr_tbl:	; $1c62
 
 				.list
 
+end_of_data	.equ		.
+				
 ; this was in low memory on the apple
 				.bndry	512
 level_data_unpacked_1:
