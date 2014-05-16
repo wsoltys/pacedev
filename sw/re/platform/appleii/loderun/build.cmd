@@ -18,7 +18,7 @@ aslink -t loderun_6809.rel
 @REM * create DSK image
 del loderun_6809.dsk
 copy loderun_6809.bin lr.bin
-file2dsk loderun_6809.dsk lr.bin tiles.bin
+file2dsk loderun_6809.dsk lr.bin tiles.bin lr.bas
 @goto end
 :errcoco
 @echo off
