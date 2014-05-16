@@ -65,6 +65,10 @@ unk_a2										.equ		0xa2
 no_eos_ladder_tiles				.equ		0xa3
 level											.equ		0xa6
 attract_mode							.equ		0xa7
+lsb_demo_inp_ptr					.equ		0xa9		; swapped for 6809
+msb_demo_inp_ptr					.equ		0xa8		; swapped for 6809
+demo_inp_key_1_2					.equ		0xaa
+demo_inp_cnt							.equ		0xab
 byte_ac										.equ		0xac
 char_render_buf_z					.equ		0xdf
 zp_fe											.equ		0xfe
