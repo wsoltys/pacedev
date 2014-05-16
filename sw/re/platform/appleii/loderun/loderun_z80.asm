@@ -208,10 +208,10 @@ init_read_unpack_display_level:	; $6238
 				ld					b,0xff
 				LD_ZP_r			current_col,b
 				inc					b
-				LD_ZP_r			unk_a3,b
+				LD_ZP_r			no_eos_ladder_tiles,b
 				LD_ZP_r			no_gold,b
 ; stuff				
-				LD_ZP_r			unk_1a,b
+				LD_ZP_r			nibble_cnt,b
 				LD_ZP_r			row,b
 ; heaps of stuff
 				call				read_level_data
@@ -220,7 +220,7 @@ init_read_unpack_display_level:	; $6238
 				ld					de,#level_data_unpacked
 5$:			xor					a
 				LD_ZP_r			col,a								; col=0
-4$:			LD_r_ZP			a,unk_1a						; nibble count
+4$:			LD_r_ZP			a,nibble_cnt
 				srl					a
 				ld					a,(hl)							; source (packed) byte
 				jr					c,1$								; do high nibble
@@ -230,9 +230,9 @@ init_read_unpack_display_level:	; $6238
 				srl					a
 				srl					a
 				srl					a										; high->low nibble
-				INC_ZP			unk_92
+				INC_ZP			packed_byte_cnt
 				inc					hl									; source (packed) addr
-2$:			INC_ZP			unk_1a							; inc nibble count
+2$:			INC_ZP			nibble_cnt
 				LD_r_ZP			b,col
 				cp					#10									; data byte 0-9?
 				jr					c,3$								; yes, valid (skip)
@@ -650,6 +650,8 @@ calc_col_addr_shift:	; $8868
 				ret
 
 ; this was in low memory on the apple
+level_data_packed:
+				.ds					256
 level_data_unpacked:
 				.ds					28*16
 												
