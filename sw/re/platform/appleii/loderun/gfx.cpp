@@ -324,8 +324,30 @@ void main (int argc, char *argv[])
 	}
 
 	fclose (fp);
-
+	
 	fp = fopen ("tiles.asm", "wt");
+	FILE *fp2 = fopen ("tiles.bin", "wb");
+
+  uint8_t preamble[6] = "\x00\x00\x00\x00\x00";
+  uint8_t postamble[6] = "\xFF\x00\x00\x00\x00";
+
+  // write pre-amble to load bank register
+#if 1  
+  preamble[1] = 0;
+  preamble[2] = 2;
+  preamble[3] = 0xFF;
+  preamble[4] = 0xA2;             			// MMU bank register for $4000
+  fwrite (preamble, 1, 5, fp2);
+  uint8_t bank[2] = { 0x00, 0x01 };			// 60/1, or $8000 in memory
+  fwrite (bank, 1, 2, fp2);
+#endif
+
+  // write data block
+  preamble[1] = 0x23;
+  preamble[2] = 0xC0;		// 2*11*4*$68
+  preamble[3] = 0x40;
+  preamble[4] = 0x00;   // load at $4000
+  fwrite (preamble, 1, 5, fp2);
 
 	fprintf (fp, "\ntile_data:\n\n");
 	
@@ -353,6 +375,7 @@ void main (int argc, char *argv[])
 					}
 
 					fprintf (fp, "0x%02X", d[t*2*11+sl*2+byte]);
+					fwrite (&d[t*2*11+sl*2+byte], 1, 1, fp2);
 					if (sl*2+byte != 10 && sl*2+byte != 21)
 						fprintf (fp, ", ");
 					if (sl*2+byte == 10)
@@ -372,8 +395,23 @@ void main (int argc, char *argv[])
 	  //while (key[KEY_ESC]);	  
 	}
 
+#if 1
+  // write pre-amble to restore bank register
+  preamble[1] = 0;
+  preamble[2] = 2;
+  preamble[3] = 0xFF;
+  preamble[4] = 0xA2;             // MMU bank register for $4000
+  fwrite (preamble, 1, 5, fp2);
+  bank[0] = 0x3A;									// 58, or $4000 in memory
+  bank[1] = 0x3B;
+  fwrite (bank, 1, 2, fp2);
+#endif
+
+  fwrite (postamble, 1, 5, fp2);
+
 	fclose (fp);
-		
+	fclose (fp2);
+
 #endif // DO_TILES
 	  
   allegro_exit ();

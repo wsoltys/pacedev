@@ -26,7 +26,9 @@ START_LEVEL_0_BASED	.equ		0
 
 .ifdef PLATFORM_COCO3
 
-;.define			HAS_TITLE
+.define			HAS_TITLE
+.define			TILES_EXTERNAL
+;.define			LEVELS_EXTERNAL
 						
 ; COCO registers
 PIA0				.equ		0xFF00
@@ -117,6 +119,16 @@ start:
 				lda			#0x12
 				sta			PALETTE+1
 				sta			CPU179									; select fast CPU clock (1.79MHz)
+				
+.ifdef TILES_EXTERNAL
+; tiles @$8000-$A2BF
+				lda			#0
+				ldx			#(MMUTSK1+4)
+				sta			,x+											; page 0 @$8000-$9FFF
+				inca
+				sta			,x+											; page 1 @$A000-$BFFF
+.endif
+				
 .endif
 			
 				lda			#0x3F
@@ -2516,11 +2528,17 @@ col_to_addr_tbl:	; $1c62
 ; .include "levels.asm"
 
 				.nlist
-				
+
+.ifndef TILES_EXTERNAL				
 .include "tiles.asm"
+.else
+tile_data	.equ	0x8000
+.endif
+
 .ifdef HAS_TITLE
 	.include "title.asm"
 .endif
+
 .include "levels.asm"
 
 				.list
