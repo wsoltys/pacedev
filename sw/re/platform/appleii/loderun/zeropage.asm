@@ -23,6 +23,14 @@ msb_line_addr_pg1					.equ		0x0c		; swapped for 6809
 lsb_line_addr_pg2					.equ		0x0f		; swapped for 6809
 msb_line_addr_pg2					.equ		0x0e		; swapped for 6809
 msg_addr									.equ		0x10
+curr_guard_col						.equ		0x12
+curr_guard_row						.equ		0x13
+curr_guard_sprite					.equ		0x14
+curr_guard_dir						.equ		0x15
+byte_16										.equ		0x16
+curr_guard_x_offset				.equ		0x17
+curr_guard_y_offset				.equ		0x18
+curr_guard								.equ		0x19
 nibble_cnt								.equ		0x1a
 scanline									.equ		0x1b
 col_addr_offset						.equ		0x1c
@@ -43,6 +51,7 @@ hundreds									.equ		0x89
 tens											.equ		0x8a
 units											.equ		0x8b
 game_speed								.equ		0x8c
+no_guards									.equ		0x8d
 score_1e1_1								.equ		0x8e
 score_1e3_1e2							.equ		0x8f
 score_1e5_1e4							.equ		0x90
@@ -61,7 +70,7 @@ key_2											.equ		0x9f
 dig_dir										.equ		0x9c
 dig_sprite								.equ		0xa0
 timer											.equ		0xa1
-unk_a2										.equ		0xa2
+editor_n									.equ		0xa2
 no_eos_ladder_tiles				.equ		0xa3
 level											.equ		0xa6
 attract_mode							.equ		0xa7

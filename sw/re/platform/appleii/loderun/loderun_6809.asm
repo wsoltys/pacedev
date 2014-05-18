@@ -249,10 +249,9 @@ in_level_loop:
 				lda			*level_active						; alive?
 				beq			dec_lives								; no, exit
 				;jsr			sub_8811
-				;jsr			sub_6c82
+				jsr			handle_guards
 				lda			*level_active						; alive?
 				beq			dec_lives								; no, exit
-				
 .if 1
 ; delay for Coco
 				ldx			#8000
@@ -373,24 +372,29 @@ start_new_game:	; $6201
 				jmp			zero_score_and_init_game														
 
 init_read_unpack_display_level:	; $6238
-				stb			*unk_a2
+				stb			*editor_n
 				ldb			#0xff
 				stb			*current_col						; flag no player
 				incb														; B=0
 				stb			*no_eos_ladder_tiles
 				stb			*no_gold
-; stuff				
+				stb			*no_guards
+				stb			*curr_guard
 				stb			*dig_sprite
 				stb			*packed_byte_cnt
 				stb			*nibble_cnt
 				stb			*row
-				tfr			b,a
+				tfr			b,a											; A=0
 				ldb			#0x1e										; number of holes
 				ldy			#hole_cnt
 7$:			sta			b,y
 				decb
 				bpl			7$											; clear all hole counters
-; stuff
+				ldb			#5											; number of guards
+				ldy			#guard_cnt
+8$:			sta			b,y				
+				decb
+				bpl			8$											; zero all guard counters
 				lda			#1
 				sta			*level_active
 				jsr			read_level_data
@@ -424,7 +428,7 @@ init_read_unpack_display_level:	; $6238
 				inx															; source (packed) addr
 2$:			inc			*nibble_cnt
 				ldb			*col
-.if 1
+.if 0
 ; wipe enemies from the game
 				cmpa		#8
 				bne			0$
@@ -544,9 +548,34 @@ init_and_draw_level: ; $63B3
 				bne			5$											; no, skip
 				inc			*no_gold
 				bra			8$
-5$:			cmpa		#8											; enemy?
+5$:			cmpa		#8											; guard?
 				bne			6$											; no, skip
-				bra			8$											; fudge
+				lda			*no_guards
+				cmpa		#5											; max?
+				bcc			3$											; yes, go
+				inc			*no_guards							; add a guard
+				inca
+				ldy			#guard_col
+				exg			a,b											; A=col,B=guard
+				sta			b,y											; set guard column
+				pshs		a
+				lda			*row
+				ldy			#guard_row
+				sta			b,y											; set guard row
+				lda			#0
+				ldy			#byte_c70
+				sta			b,y
+				lda			#2
+				ldy			#guard_x_offset
+				sta			b,y
+				ldy			#guard_y_offset
+				sta			b,y
+				lda			#0
+				ldy			*byte_9
+				puls		b												; B=col
+				sta			b,y											; update tilemap (with space)
+				lda			#8											; guard
+				bra			8$
 6$:			cmpa		#9											; player?
 				bne			7$											; no, skip
 				tst			*current_col						; already got a player?
@@ -570,7 +599,7 @@ init_and_draw_level: ; $63B3
 8$:			jsr			display_char_pg2
 				dec			*col
 				ldb			*col
-				bpl			2$
+				lbpl		2$
 				dec			*row
 				ldb			*row
 				lbpl		1$
@@ -1694,6 +1723,61 @@ add_hole_entry:	; $6C39
 				SEC
 2$:			rts
 
+handle_guards:	; $6C82
+				ldb			*no_guards							; any guards?
+				beq			9$											; no, exit
+; stuff
+				jsr			update_guards
+				lda			*level_active						; player killed?
+				beq			9$											; yes, skip
+; stuff				
+9$:			rts
+
+update_guards:	; $6CDB
+				inc			*curr_guard
+				ldb			*no_guards
+				cmpb		*curr_guard							; max?
+				bcc			1$											; no, skip
+				ldb			#1
+				stb			*curr_guard
+1$:			jsr			copy_guard_to_curr
+				bra			save_guard_and_ret
+				;jmp			loc_6e65				
+
+save_guard_and_ret:	; $6CFB
+				ldb			*curr_guard
+				ldy			#guard_cnt
+				lda			b,y
+				beq			2$
+				jmp			copy_curr_to_guard
+2$:		;jmp			loc_6DB7
+				rts
+
+copy_guard_to_curr:	; $75CE
+				ldb			*curr_guard
+				ldy			#guard_col
+				lda			b,y
+				sta			*curr_guard_col
+				ldy			#guard_row
+				lda			b,y
+				sta			*curr_guard_row
+				ldy			#guard_x_offset
+				lda			b,y
+				sta			*curr_guard_x_offset
+				ldy			#guard_y_offset
+				lda			b,y
+				sta			*curr_guard_y_offset
+				ldy			#guard_sprite
+				lda			b,y
+				sta			*curr_guard_sprite
+				ldy			#guard_dir
+				lda			b,y
+				sta			*curr_guard_dir
+				ldy			#byte_c70
+				lda			b,y
+				sta			*byte_16
+				rts
+				
 respawn_guards_and_update_holes: ; $75F4
 ; stuff
 1$:			ldb			#0x1e										; number of holes
@@ -2571,6 +2655,22 @@ eos_ladder_col:	; $C00
 					.ds		0x30
 eos_ladder_row:	; $C30
 					.ds		0x30
+guard_col:	; $C60
+					.ds		8					
+guard_row:	; $C68
+					.ds		8					
+byte_c70:	; $C70
+					.ds		8					
+guard_x_offset:	; $C78
+					.ds		8					
+guard_y_offset:	; $C80
+					.ds		8					
+guard_sprite:	; $C88
+					.ds		8					
+guard_dir:	; $C90
+					.ds		8					
+guard_cnt:	; $C98
+					.ds		8					
 hole_col:	; $CA0
 					.ds		0x20
 hole_row:	; $CC0
