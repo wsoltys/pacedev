@@ -1741,8 +1741,14 @@ update_guards:	; $6CDB
 				ldb			#1
 				stb			*curr_guard
 1$:			jsr			copy_guard_to_curr
-				bra			save_guard_and_ret
-				;jmp			loc_6e65				
+				lda			*byte_16
+				bmi			check_guard_falling
+				beq			check_guard_falling
+				dec			*byte_16
+				lda			*byte_16
+				cmpa		#13
+				bcc			save_guard_and_ret
+				jmp			loc_6e65				
 
 save_guard_and_ret:	; $6CFB
 				ldb			*curr_guard
@@ -1750,9 +1756,216 @@ save_guard_and_ret:	; $6CFB
 				lda			b,y
 				beq			2$
 				jmp			copy_curr_to_guard
-2$:		;jmp			loc_6DB7
+2$:			jmp			loc_6db7
 				rts
 
+check_guard_falling:	; $6D08
+				ldb			*curr_guard_row
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*byte_8
+				ldy			#msb_row_addr_2
+				lda			b,y
+				sta			*byte_9									; setup tilemap address
+				ldb			*curr_guard_col
+				ldy			*byte_9
+				lda			b,y											; get object from tilemap
+				cmpa		#3											; ladder?
+				beq			2$											; yes, go
+				cmpa		#4											; rope?
+				bne			1$											; no, skip
+				lda			*curr_guard_y_offset
+				cmpa		#2
+				beq			2$											; yes, go
+1$:			lda			*curr_guard_y_offset
+				cmpa		#2
+				bcs			handle_guard_falling
+				ldb			*curr_guard_row
+				cmpb		#15											; bottom row?
+				beq			2$											; yes, go
+				ldy			#(lsb_row_addr+1)
+				lda			b,y											; row below
+				sta			*lsb_row_level_data_addr
+				sta			*byte_8
+				ldy			#msb_row_addr_2
+				lda			b,y
+				sta			*byte_9
+				ldy			#msb_row_addr_1
+				lda			b,y
+				sta			msb_row_level_data_addr	; setup tilemap address
+				lda			*curr_guard_col
+				ldy			*msb_row_level_data_addr
+				lda			b,y											; get object from tilemap
+				cmpa		#0											; space?
+				beq			handle_guard_falling		; yes, go
+				cmpa		#9											; player?
+				beq			handle_guard_falling		; yes, go
+				cmpa		#8											; guard?
+				beq			2$											; yes, go
+				ldy			*byte_9									; get object from tilemap
+				cmpa		#1											; brick?
+				beq			2$											; yes, go
+				cmpa		#2											; solid?
+				beq			2$											; yes, go
+				cmpa		#3											; ladder?
+				bne			handle_guard_falling		; no, go
+2$: ; $6D61
+				jmp			calc_guard_movement
+
+handle_guard_falling:	; $ 6D64
+				jsr			calc_guard_xychar
+				jsr			wipe_char
+				jsr			adjust_guard_x_offset
+				lda			#6											; =char $36 = fall left
+				ldb			*curr_guard_dir					; left?
+				bmi			1$											; yes, skip
+				lda			#0x0d										; =char $35 = fall right
+1$:			sta			*curr_guard_sprite
+				inc			*curr_guard_y_offset
+				lda			*curr_guard_y_offset
+				cmpa		#5
+				bcc			loc_6dc0
+				lda			*curr_guard_y_offset
+				cmpa		#2
+				bne			3$
+				jsr			check_guard_pickup_gold
+				ldb			*curr_guard_row
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*byte_8
+				ldy			#msb_row_addr_2
+				lda			b,y
+				sta			*byte_9									; setup tilemap address
+				ldb			*curr_guard_col
+				ldy			*byte_9
+				lda			b,y											; get tilemap object
+				cmpa		#1											; brick?
+				bne			3$											; no, go
+				lda			*byte_16
+				bpl			2$
+				dec			*no_gold
+2$:			lda			*unk_5f
+				sta			*byte_16
+				lda			#0
+				ldb			#0x75										; add 750
+				jsr			update_and_display_score
+				;jsr			sub_87e1								; sound stuff				
+3$:			jsr			calc_guard_xychar
+				jsr			display_transparent_char
+				jmp			copy_curr_to_guard
+
+loc_6dc0:	; $6DC0
+				lda			#0
+				sta			*curr_guard_y_offset
+				ldb			*curr_guard_row
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*lsb_row_level_data_addr
+				sta			*byte_8
+				ldy			#msb_row_addr_1
+				lda			b,y
+				sta			*msb_row_level_data_addr
+				ldy			#msb_row_addr_2
+				lda			b,y
+				sta			*byte_9									; setup tilemap address
+				ldb			*curr_guard_col
+				ldy			*byte_9
+				lda			b,y											; get object from tilemap
+				cmpa		#1											; brick?
+				bne			1$											; no, skip
+				lda			#0											; space
+1$:			ldy			*msb_row_level_data_addr
+				sta			b,y											; update tilemap				
+				inc			*curr_guard_row					; row below
+				ldb			*curr_guard_row
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*lsb_row_level_data_addr
+				sta			*byte_8
+				ldy			#msb_row_addr_1
+				lda			b,y
+				sta			*msb_row_level_data_addr
+				ldy			#msb_row_addr_2
+				lda			b,y
+				sta			*byte_9									; setup tilemap address
+				ldb			*curr_guard_row
+				ldy			*msb_row_level_data_addr
+				lda			b,y											; get object from tilemap
+				cmpa		#9											; player?
+				bne			2$											; no, skip
+				lsr			*level_active						; kill player
+2$:			ldy			*byte_9
+				lda			b,y											; get object from tilemap
+				cmpa		#1											; brick?
+				bne			loc_6e58								; no, go
+				ldb			*curr_guard_row
+				decb														; row above
+				stb			*row
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*lsb_row_level_data_addr
+				sta			*byte_8
+				ldy			#msb_row_addr_1
+				lda			b,y
+				sta			*msb_row_level_data_addr
+				ldy			#msb_row_addr_2
+				lda			b,y
+				sta			*byte_9									; setup tilemap address
+				ldb			*curr_guard_col
+				stb			*col
+				ldy			*byte_9
+				lda			b,y											; get object from tilemap
+				cmpa		#0											; brick?
+				beq			guard_drop_gold								; yes, go
+				dec			*no_gold
+				jmp			loc_6e46
+				
+guard_drop_gold:	; $6E31
+loc_6e46:	; $6E46
+loc_6e58:	; $6E58
+								
+				rts
+
+loc_6e65:	; $6E65
+				cmpa		#7											; byte_16
+				bcs			calc_guard_movement
+				jsr			calc_guard_xychar
+				jsr			wipe_char
+				ldb			*byte_16
+; stuff				
+				rts
+
+somthing:	; $6E7F 
+				.db			2, 1, 2, 3, 2, 1
+
+calc_guard_movement:	; $6E85
+				rts
+												
+copy_curr_to_guard:	; $75A8
+				ldb			*curr_guard
+				lda			*curr_guard_col
+				ldy			#guard_col
+				sta			b,y
+				lda			*curr_guard_row
+				ldy			#guard_row
+				sta			b,y
+				lda			*curr_guard_x_offset
+				ldy			#guard_x_offset
+				sta			b,y
+				lda			*curr_guard_y_offset
+				ldy			#guard_y_offset
+				sta			b,y
+				lda			*byte_16
+				ldy			#byte_c70
+				sta			b,y
+				lda			*curr_guard_dir
+				ldy			#guard_dir
+				sta			b,y
+				lda			*curr_guard_sprite
+				ldy			#guard_sprite
+				sta			b,y
+				rts
+								
 copy_guard_to_curr:	; $75CE
 				ldb			*curr_guard
 				ldy			#guard_col
