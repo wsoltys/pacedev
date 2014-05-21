@@ -193,6 +193,7 @@ zero_score_and_init_game: ; $6056
 				sta			*score_1e5_1e4
 				sta			*score_1e6
 ; stuff
+				sta			*byte_53
 				sta			*demo_inp_cnt
 				ldy			#attract_move_tbl
 				sty			*msb_demo_inp_ptr
@@ -228,6 +229,8 @@ main_game_loop:
 				ldb			#0
 				stb			*dig_dir
 ; stuff
+				lda			#0x44										; *** FUDGE
+				sta			*byte_5f
 in_level_loop:
 				jsr			handle_player						; digging, falling, keys
 				lda			*level_active						; alive?
@@ -563,7 +566,7 @@ init_and_draw_level: ; $63B3
 				ldy			#guard_row
 				sta			b,y											; set guard row
 				lda			#0
-				ldy			#byte_c70
+				ldy			#guard_state
 				sta			b,y
 				lda			#2
 				ldy			#guard_x_offset
@@ -1010,7 +1013,7 @@ can_move_up:
 				bne			1$											; no, skip
 				lda			#0											; space
 1$:			ldy			*msb_row_level_data_addr
-				lda			b,y
+				sta			b,y
 				dec			*current_row
 				ldb			*current_row
 				ldy			#lsb_row_addr
@@ -1745,14 +1748,14 @@ update_guards:	; $6CDB
 				ldb			#1
 				stb			*curr_guard
 1$:			jsr			copy_guard_to_curr
-				lda			*byte_16
+				lda			*curr_guard_state
 				bmi			check_guard_falling
 				beq			check_guard_falling
-				dec			*byte_16
-				lda			*byte_16
-				cmpa		#13
-				bcc			save_guard_and_ret
-				jmp			loc_6e65				
+				dec			*curr_guard_state
+				lda			*curr_guard_state
+				cmpa		#13											; started wriggling?
+				bcc			save_guard_and_ret			; no, skip
+				jmp			check_wriggle				
 
 save_guard_and_ret:	; $6CFB
 				ldb			*curr_guard
@@ -1791,13 +1794,13 @@ check_guard_falling:	; $6D08
 				lda			b,y											; row below
 				sta			*lsb_row_level_data_addr
 				sta			*byte_8
-				ldy			#msb_row_addr_2
+				ldy			#(msb_row_addr_2+1)
 				lda			b,y
 				sta			*byte_9
-				ldy			#msb_row_addr_1
+				ldy			#(msb_row_addr_1+1)
 				lda			b,y
 				sta			*msb_row_level_data_addr	; setup tilemap address
-				lda			*curr_guard_col
+				ldb			*curr_guard_col
 				ldy			*msb_row_level_data_addr
 				lda			b,y											; get object from tilemap
 				cmpa		#0											; space?
@@ -1806,7 +1809,8 @@ check_guard_falling:	; $6D08
 				beq			handle_guard_falling		; yes, go
 				cmpa		#8											; guard?
 				beq			2$											; yes, go
-				ldy			*byte_9									; get object from tilemap
+				ldy			*byte_9									
+				lda			b,y											; get object from tilemap
 				cmpa		#1											; brick?
 				beq			2$											; yes, go
 				cmpa		#2											; solid?
@@ -1828,7 +1832,7 @@ handle_guard_falling:	; $ 6D64
 				inc			*curr_guard_y_offset
 				lda			*curr_guard_y_offset
 				cmpa		#5
-				bcc			loc_6dc0
+				bcc			guard_fall_into_next_row
 				lda			*curr_guard_y_offset
 				cmpa		#2
 				bne			render_guard_and_ret
@@ -1845,11 +1849,11 @@ handle_guard_falling:	; $ 6D64
 				lda			b,y											; get tilemap object
 				cmpa		#1											; brick?
 				bne			render_guard_and_ret		; no, go
-				lda			*byte_16
+				lda			*curr_guard_state
 				bpl			2$
 				dec			*no_gold
-2$:			lda			*unk_5f
-				sta			*byte_16
+2$:			lda			*byte_5f
+				sta			*curr_guard_state
 				lda			#0
 				ldb			#0x75										; add 750
 				jsr			update_and_display_score
@@ -1860,9 +1864,9 @@ render_guard_and_ret:	; $6DB7
 				jsr			display_transparent_char
 				jmp			copy_curr_to_guard
 
-loc_6dc0:	; $6DC0
+guard_fall_into_next_row:	; $6DC0
 				lda			#0
-				sta			*curr_guard_y_offset
+				sta			*curr_guard_y_offset		; y_offset=0
 				ldb			*curr_guard_row
 				ldy			#lsb_row_addr
 				lda			b,y
@@ -1894,7 +1898,7 @@ loc_6dc0:	; $6DC0
 				ldy			#msb_row_addr_2
 				lda			b,y
 				sta			*byte_9									; setup tilemap address
-				ldb			*curr_guard_row
+				ldb			*curr_guard_col
 				ldy			*msb_row_level_data_addr
 				lda			b,y											; get object from tilemap
 				cmpa		#9											; player?
@@ -1904,6 +1908,9 @@ loc_6dc0:	; $6DC0
 				lda			b,y											; get object from tilemap
 				cmpa		#1											; brick?
 				bne			loc_6e58								; no, go
+				lda			*curr_guard_state
+				bpl			loc_6e58
+; just fallen into a hole				
 				ldb			*curr_guard_row
 				decb														; row above
 				stb			*row
@@ -1920,13 +1927,28 @@ loc_6dc0:	; $6DC0
 				ldb			*curr_guard_col
 				stb			*col
 				ldy			*byte_9
-				lda			b,y											; get object from tilemap
-				cmpa		#0											; brick?
+				lda			b,y											; get object from tilemap (row above)
+				cmpa		#0											; space?
 				beq			guard_drop_gold					; yes, go
-				dec			*no_gold
+				dec			*no_gold								; gold gone forever!
 				jmp			loc_6e46
 				
 guard_drop_gold:	; $6E31
+; B=col
+				lda			#7											; gold
+				ldy			*msb_row_level_data_addr
+				sta			b,y											; update tilemap
+				ldy			*byte_9
+				sta			b,y											; update tilemap
+				jsr			display_char_pg2				; render on bg
+				lda			*col
+				ldb			*row
+				jsr			calc_colx5_scanline
+				tfr			d,x											; X(lsb)=scanline
+				tfr			a,b											; B=x_in_2_pixel_incs
+				lda			#7											; A=char (gold)
+				jsr			display_transparent_char
+				
 loc_6e46:	; $6E46
 				ldb			*curr_guard_row
 				ldy			#lsb_row_addr
@@ -1936,7 +1958,7 @@ loc_6e46:	; $6E46
 				lda			b,y
 				sta			*msb_row_level_data_addr	; setup tilemap address
 				lda			#0
-				sta			*byte_16
+				sta			*curr_guard_state
 				ldb			*curr_guard_col
 loc_6e58:	; $6E58
 				lda			#8											; guard
@@ -1946,20 +1968,20 @@ loc_6e58:	; $6E58
 				jsr			display_transparent_char	; render on screen
 				jmp			copy_curr_to_guard
 
-loc_6e65:	; $6E65
-				cmpa		#7											; byte_16
-				bcs			calc_guard_movement
+check_wriggle:	; $6E65
+				cmpa		#7											; still wriggling?
+				bcs			calc_guard_movement			; no, skip
 				jsr			calc_guard_xychar
 				jsr			wipe_char
-				ldb			*byte_16
-				ldy			#(something-7)
-				lda			b,y
+				ldb			*curr_guard_state
+				ldy			#(wriggle_tbl-7)
+				lda			b,y											; get wriggle x_offset
 				sta			*curr_guard_x_offset
 				jsr			calc_guard_xychar
 				jsr			display_transparent_char	; render on screen
 				jmp			copy_curr_to_guard
 
-something:	; $6E7F 
+wriggle_tbl:	; $6E7F 
 				.db			2, 1, 2, 3, 2, 1
 
 calc_guard_movement:	; $6E85
@@ -2011,7 +2033,8 @@ guard_move_left:	; $6FBC
 				beq			guard_cant_move_left		; yes, exit
 				cmpa		#1											; brick?
 				beq			guard_cant_move_left		; yes, exit
-				ldy			*byte_9									; get object from tilemap
+				ldy			*byte_9									
+				lda			b,y											; get object from tilemap
 				cmpa		#5											; fall-thru?
 				bne			guard_can_move_left
 guard_cant_move_left:	; $6FEE
@@ -2027,7 +2050,7 @@ guard_can_move_left:	; $6FF1
 				bpl			3$
 				jsr			check_guard_drop_gold
 				ldb			*curr_guard_col
-				lda			*byte_9
+				ldy			*byte_9
 				lda			b,y											; get object from tilemap
 				cmpa		#1											; brick?
 				bne			1$											; no, skip
@@ -2108,12 +2131,12 @@ check_guard_pickup_gold:	; $74F7
 				lda			b,y											; get object from tilemap
 				cmpa		#7											; gold?
 				bne			1$											; no, exit
-				lda			*byte_16
+				lda			*curr_guard_state
 				bmi			1$
 				lda			#-1
 				SEC
 				sbca		*byte_53
-				sta			*byte_16
+				sta			*curr_guard_state
 				lda			#0											; space
 				sta			b,y											; remove gold from tilemap
 				ldb			*curr_guard_row
@@ -2124,7 +2147,9 @@ check_guard_pickup_gold:	; $74F7
 				ldb			*row
 				lda			*col
 				jsr			calc_colx5_scanline
-				lda			#7											; gold
+				tfr			d,x											; X(lsb)=scanline
+				tfr			a,b											; B=x_in_2_pixel_incs
+				lda			#7											; A=char (gold)
 				jmp			wipe_char
 1$:			rts
 
@@ -2177,8 +2202,8 @@ copy_curr_to_guard:	; $75A8
 				lda			*curr_guard_y_offset
 				ldy			#guard_y_offset
 				sta			b,y
-				lda			*byte_16
-				ldy			#byte_c70
+				lda			*curr_guard_state
+				ldy			#guard_state
 				sta			b,y
 				lda			*curr_guard_dir
 				ldy			#guard_dir
@@ -2208,9 +2233,9 @@ copy_guard_to_curr:	; $75CE
 				ldy			#guard_dir
 				lda			b,y
 				sta			*curr_guard_dir
-				ldy			#byte_c70
+				ldy			#guard_state
 				lda			b,y
-				sta			*byte_16
+				sta			*curr_guard_state
 				rts
 				
 respawn_guards_and_update_holes: ; $75F4
@@ -3094,7 +3119,7 @@ guard_col:	; $C60
 					.ds		8					
 guard_row:	; $C68
 					.ds		8					
-byte_c70:	; $C70
+guard_state:	; $C70
 					.ds		8					
 guard_x_offset:	; $C78
 					.ds		8					

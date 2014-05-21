@@ -27,7 +27,7 @@ curr_guard_col						.equ		0x12
 curr_guard_row						.equ		0x13
 curr_guard_sprite					.equ		0x14
 curr_guard_dir						.equ		0x15
-byte_16										.equ		0x16
+curr_guard_state					.equ		0x16
 curr_guard_x_offset				.equ		0x17
 curr_guard_y_offset				.equ		0x18
 curr_guard								.equ		0x19
@@ -43,7 +43,7 @@ byte_52										.equ		0x52
 byte_53										.equ		0x53
 byte_55										.equ		0x55
 byte_5c										.equ		0x5c
-unk_5f										.equ		0x5f
+byte_5f										.equ		0x5f
 col_pixel_shift						.equ		0x71
 col												.equ		0x85
 row												.equ		0x86
