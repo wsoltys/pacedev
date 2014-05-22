@@ -193,7 +193,7 @@ zero_score_and_init_game: ; $6056
 				sta			*score_1e5_1e4
 				sta			*score_1e6
 ; stuff
-				sta			*byte_53
+				sta			*guard_respawn_col
 				sta			*demo_inp_cnt
 				ldy			#attract_move_tbl
 				sty			*msb_demo_inp_ptr
@@ -2135,7 +2135,7 @@ check_guard_pickup_gold:	; $74F7
 				bmi			1$
 				lda			#-1
 				SEC
-				sbca		*byte_53
+				sbca		*guard_respawn_col
 				sta			*curr_guard_state
 				lda			#0											; space
 				sta			b,y											; remove gold from tilemap
@@ -2239,8 +2239,14 @@ copy_guard_to_curr:	; $75CE
 				rts
 				
 respawn_guards_and_update_holes: ; $75F4
-; stuff
-1$:			ldb			#0x1e										; number of holes
+				;jsr			check_and_handle_respawn
+				inc			*guard_respawn_col
+				lda			*guard_respawn_col
+				cmpa		#28											; right-most_column?
+				bcs			1$											; no, skip
+				lda			#0
+				sta			*guard_respawn_col			; reset
+1$:			ldb			#0x1e										; max number of holes
 check_hole:
 				ldy			#hole_cnt
 				lda			b,y											; get hole counter
@@ -2313,11 +2319,85 @@ restore_brick:	; $7641
 				beq			4$											; yes, go
 				cmpa		#7											; gold?	
 				bne			3$											; no, skip
-				dec			*no_gold
+				dec			*no_gold								; gold lost forever
 3$:			jmp			redisplay_brick
-4$:
-; guard
+4$:			lda			#1											; brick
+				sta			b,y											; update tilemap
+				ldy			*byte_9
+				sta			b,y											; update tilemap
+				jsr			display_char_pg1				; render on screen
+				lda			#1											; brick
+				jsr			display_char_pg2				; render on bg
+				ldb			*no_guards
+
+check_trapped_guards:	; $768A
+				ldy			#guard_col
+				lda			b,y
+				cmpa		*col										; same column?
+				lbne		check_next_trapped			; no, skip
+				ldy			#guard_row
+				lda			b,y
+				cmpa		*row										; same row?
+				lbne		check_next_trapped			; no, skip
+				ldy			#guard_state
+				lda			b,y											; carrying gold?
+				bpl			1$											; no, skip
+				dec			*no_gold								; gold gone
+1$:			lda			#0x7f
+				sta			b,y											; update guard state				
+				stb			*curr_guard							; make current
+				jsr			copy_guard_to_curr
+				jsr			calc_guard_xychar
+				jsr			wipe_char
+				ldb			*curr_guard
+				lda			#1
+				sta			*row										; guard row=1
+2$:			ldb			*row
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*byte_8
+				ldy			#msb_row_addr_2
+				lda			b,y
+				sta			*byte_9									; setup tilemap address
+				ldb			*guard_respawn_col
+3$:			ldy			*byte_9
+				lda			b,y											; get object from tilemap				
+				cmpa		#0											; space?
+				beq			4$											; yes, skip
+				inc			*guard_respawn_col
+				ldb			*guard_respawn_col
+				cmpb		#28											; right-most column?
+				bcs			3$											; no, try again
+				inc			*row										; next row down
+				lda			#0
+				sta			*guard_respawn_col			; reset
+				bra			2$											; try again
+4$:			tfr			b,a											; A=column
+				ldb			*curr_guard
+				ldy			#guard_col
+				sta			b,y											; set column
+				lda			*row
+				ldy			#guard_row
+				sta			b,y											; set row
+				lda			#20
+				ldy			#guard_cnt
+				sta			b,y											; init count
+				lda			#2
+				ldy			#guard_y_offset
+				sta			b,y
+				ldy			#guard_x_offset
+				sta			b,y
+				lda			#0
+				ldy			#guard_sprite
+				sta			b,y
+				lda			#0
+				ldb			#0x75										; add 75 pts
+				jsr			update_and_display_score
 				jmp			next_hole
+
+check_next_trapped:	; $76FE
+				decb
+				lbne		check_trapped_guards
 
 redisplay_brick:	; $7701				
 				lda			#1											; brick
