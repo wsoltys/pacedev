@@ -43,7 +43,7 @@ byte_52										.equ		0x52
 guard_respawn_col					.equ		0x53
 byte_55										.equ		0x55
 byte_5c										.equ		0x5c
-byte_5f										.equ		0x5f
+guard_trap_cnt_init				.equ		0x5f
 col_pixel_shift						.equ		0x71
 col												.equ		0x85
 row												.equ		0x86
@@ -62,6 +62,7 @@ packed_byte_cnt						.equ		0x92
 no_gold										.equ		0x93
 paddles_detected					.equ		0x95
 level_0_based							.equ		0x96
+unused_97									.equ		0x97
 byte_9c										.equ		0x9c
 no_lives									.equ		0x98
 level_active							.equ		0x9a

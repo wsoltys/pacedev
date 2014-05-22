@@ -192,6 +192,7 @@ zero_score_and_init_game: ; $6056
 				sta			*score_1e3_1e2
 				sta			*score_1e5_1e4
 				sta			*score_1e6
+				sta			*unused_97
 ; stuff
 				sta			*guard_respawn_col
 				sta			*demo_inp_cnt
@@ -228,9 +229,18 @@ main_game_loop:
 1$:	; $60bf
 				ldb			#0
 				stb			*dig_dir
+				;stb			*byte_54
+				lda			*unused_97							; should be 0
+				CLC
+				adca		*no_guards							; should =no_guards
+				tfr			a,b
+				ldy			#x3_tbl
+				lda			b,y											; B=no_guards*3
 ; stuff
-				lda			#0x44										; *** FUDGE
-				sta			*byte_5f
+				ldb			*unused_97							; should be 0
+				ldy			#byte_621d
+				lda			b,y
+				sta			*guard_trap_cnt_init		; should be 1st entry (0x26)
 in_level_loop:
 				jsr			handle_player						; digging, falling, keys
 				lda			*level_active						; alive?
@@ -279,11 +289,10 @@ next_level:
 				dec			*no_lives								; =255
 3$:			ldb			#15
 				stb			*byte_5c
-4$:			ldb			#1
-				lda			#0											; add 100
+4$:			ldd			#0x0100									; add 100 pts
 				jsr			update_and_display_score
 				dec			*byte_5c
-				bne			4$											; add 1500
+				bne			4$											; add 1500 pts
 next_level_cont:				
 				jmp			main_game_loop				
 
@@ -373,6 +382,12 @@ start_new_game:	; $6201
 				lda			#2
 				sta			*attract_mode
 				jmp			zero_score_and_init_game														
+
+x3_tbl:	; $6214
+       .db			0, 3, 6, 9, 12, 15, 18, 21, 24
+byte_621d:	; $6214
+				.db			0x26, 0x26, 0x2E, 0x44, 0x47, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F
+				.db			0x50
 
 init_read_unpack_display_level:	; $6238
 				stb			*editor_n
@@ -567,6 +582,8 @@ init_and_draw_level: ; $63B3
 				sta			b,y											; set guard row
 				lda			#0
 				ldy			#guard_state
+				sta			b,y
+				ldy			#guard_sprite
 				sta			b,y
 				lda			#2
 				ldy			#guard_x_offset
@@ -1638,8 +1655,7 @@ check_for_gold: ; $6b9d
 				tfr			a,b											; B=x_in_2_pixel_incs
 				lda			#7											; gold
 				jsr			wipe_char								; from video display
-				ldb			#2
-				lda			#0x50										; add 250
+				ldd			#0x0250									; add 250 pts
 				jsr			update_and_display_score
 				;jsr		sub_87e1								; sound
 9$:			rts
@@ -1849,13 +1865,13 @@ handle_guard_falling:	; $ 6D64
 				lda			b,y											; get tilemap object
 				cmpa		#1											; brick?
 				bne			render_guard_and_ret		; no, go
+; guard has hit bottom of hole				
 				lda			*curr_guard_state
 				bpl			2$
 				dec			*no_gold
-2$:			lda			*byte_5f
+2$:			lda			*guard_trap_cnt_init
 				sta			*curr_guard_state
-				lda			#0
-				ldb			#0x75										; add 750
+				ldd			#0x0075									; add 75 pts
 				jsr			update_and_display_score
 				;jsr			sub_87e1								; sound stuff				
 
@@ -2239,7 +2255,7 @@ copy_guard_to_curr:	; $75CE
 				rts
 				
 respawn_guards_and_update_holes: ; $75F4
-				;jsr			check_and_handle_respawn
+				jsr			check_and_handle_respawn
 				inc			*guard_respawn_col
 				lda			*guard_respawn_col
 				cmpa		#28											; right-most_column?
@@ -2390,8 +2406,7 @@ check_trapped_guards:	; $768A
 				lda			#0
 				ldy			#guard_sprite
 				sta			b,y
-				lda			#0
-				ldb			#0x75										; add 75 pts
+				ldd			#0x0075									; add 75 pts
 				jsr			update_and_display_score
 				jmp			next_hole
 
@@ -2412,8 +2427,89 @@ next_hole:	; $770D
 				decb														; next hole
 				bmi			1$											; done? yes, exit
 				jmp			check_hole							; loop
-1$:			rts				
-								
+1$:			
+loc_7715:
+				rts				
+
+check_and_handle_respawn:	; $7716
+				ldb			*no_guards
+				beq			loc_7715
+				lda			*curr_guard
+				pshs		a
+loc_771d: ; $771D				
+				ldy			#guard_cnt
+				lda			b,y
+				beq			next_guard
+				stb			*curr_guard
+				jsr			copy_guard_to_curr
+				lda			#0x7f
+				ldy			#guard_state
+				sta			b,y
+				ldy			#guard_col
+				lda			b,y
+				sta			*col
+				ldy			#guard_row
+				lda			b,y
+				sta			*row
+				ldy			#guard_cnt
+				dec			b,y
+				beq			finish_respawn
+				lda			b,y
+				cmpa		#19
+				bne			2$
+				lda			#0x39										; guard respawn 0
+				jsr			display_char_pg2				; render on bg
+				jsr			calc_guard_xychar
+				lda			#0x39										; guard respawn 0
+				jsr			display_transparent_char	; render on screen
+				jmp			3$
+2$:			cmpa		#10
+				bne			next_guard
+				lda			#0x3a										; guard respawn 1				
+				jsr			display_char_pg2				; render on bg
+				jsr			calc_guard_xychar
+				lda			#0x3a										; guard respawn 1
+				jsr			display_transparent_char	; render on screen
+3$:			ldb			*curr_guard
+next_guard: ; $7765
+				decb
+				bne			loc_771d
+				puls		a
+				sta			*curr_guard
+				rts
+
+finish_respawn:	; $776C
+				ldb			*row
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*lsb_row_level_data_addr
+				ldy			#msb_row_addr_1
+				lda			b,y
+				sta			*msb_row_level_data_addr	; setup tilemap address
+				ldb			*curr_guard
+				ldy			#guard_cnt
+				inc			b,y
+				ldb			*col
+				ldy			*msb_row_level_data_addr
+				lda			b,y											; get object from tilemap
+				bne			next_guard							; not a space, exit
+				lda			#8											; guard
+				sta			b,y											; update tilemap
+				lda			#0											; space
+				jsr			display_char_pg2				; render on bg
+				lda			#0
+				ldb			*curr_guard
+				ldy			#guard_state
+				sta			b,y											; init state
+				ldy			#guard_cnt
+				sta			b,y											; init count
+				lda			#8											; guard
+				jsr			display_char_pg1
+				;jsr			sub_87e1								; sound?
+				ldb			*curr_guard
+				jmp			next_guard
+				
+												
 ctrl_m:	; $77AC
 				jsr			cls_and_display_high_scores
 				ldb			#5
@@ -2541,7 +2637,7 @@ cls_and_display_game_status:	; $79AD
 				.asciz			"SCORE        MEN    LEVEL   "
 				jsr			display_no_lives
 				jsr			display_level
-				ldd			#0x0000									; add 0
+				ldd			#0x0000									; add 0 pts
 				bra			update_and_display_score				
 
 get_line_addr_pgs_1_2: ; $7A3E
@@ -2596,7 +2692,8 @@ display_level: ; $7A8C
 				bra			display_byte
 
 update_and_display_score:	; $7A92
-				pshs		b
+				pshs		a
+				tfr			b,a
 				adda		*score_1e1_1
 				daa     		
 				sta			*score_1e1_1
