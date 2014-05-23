@@ -42,6 +42,7 @@ rchar_mask								.equ		0x51
 byte_52										.equ		0x52
 guard_respawn_col					.equ		0x53
 byte_55										.equ		0x55
+byte_56										.equ		0x56
 byte_5c										.equ		0x5c
 guard_trap_cnt_init				.equ		0x5f
 col_pixel_shift						.equ		0x71

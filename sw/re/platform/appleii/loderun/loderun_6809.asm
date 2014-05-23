@@ -2017,7 +2017,7 @@ guard_move_vector_tbl:	; $6E97
 				.dw			#guard_move_up
 				.dw			#guard_move_down
 
-loc_6EA1:                                       ; CODE XREF: ROM:6EB4j
+guard_cant_climb:                                       ; CODE XREF: ROM:6EB4j
         lda     *curr_guard_state
         beq     1$
         bmi     1$
@@ -2029,7 +2029,7 @@ guard_move_up:	; $6EAC
         cmpa    #3
         bcc     guard_can_move_up
         ldb     *curr_guard_row         ; top row?
-        beq     loc_6EA1                ; yes, go
+        beq     guard_cant_climb        ; yes, exit
         decb                            ; row above
         ldy			#lsb_row_addr
         lda			b,y
@@ -2038,16 +2038,16 @@ guard_move_up:	; $6EAC
         lda			b,y
         sta     *msb_row_level_data_addr	; setup tilemap address
         ldb     *curr_guard_col
-        ldy     *lsb_row_level_data_addr
+        ldy     *msb_row_level_data_addr
         lda			b,y											; get object from tilemap (below)
         cmpa    #1											; brick?
-        beq     loc_6EA1								; yes, exit
+        beq     guard_cant_climb				; yes, exit
         cmpa    #2											; solid?
-        beq     loc_6EA1								; yes, exit
+        beq     guard_cant_climb				; yes, exit
         cmpa    #5											; fall-thru?
-        beq     loc_6EA1								; yes, exit
+        beq     guard_cant_climb				; yes, exit
         cmpa    #8											; guard?
-        beq     loc_6EA1								; yes, exit
+        beq     guard_cant_climb				; yes, exit
 
 guard_can_move_up:	; $6ED5
 				jsr     calc_guard_xychar
@@ -2107,7 +2107,80 @@ update_guard_climber_sprite:
         jmp     copy_curr_to_guard
 				
 guard_move_down:	; $6F39
-				rts
+        lda     *curr_guard_y_offset
+        cmpa		#2
+        bcs     guard_can_move_down
+        ldb     *curr_guard_row
+        cmpb		#0x0f										; bottom row?
+        bcc     guard_cant_move_down		; yes, exit
+        incb
+        ldy     #lsb_row_addr
+        lda			b,y
+        sta     *lsb_row_level_data_addr
+        ldy     #msb_row_addr_1
+        lda			b,y
+        sta     *msb_row_level_data_addr	; setup tilemap address
+        ldb     *curr_guard_col
+        ldy     *msb_row_level_data_addr
+        lda			b,y											; get object from tilemap
+        cmpa    #2                      ; solid?
+        beq     guard_cant_move_down    ; yes, skip
+        cmpa    #8                      ; enemy?
+        beq     guard_cant_move_down    ; yes, skip
+        cmpa    #1                      ; brick?
+        bne     guard_can_move_down     ; no, go
+
+guard_cant_move_down:	; $6F60
+        jmp     copy_curr_to_guard
+
+guard_can_move_down:	; $6F63
+        jsr     calc_guard_xychar
+        jsr     wipe_char
+        jsr     adjust_guard_x_offset
+        ldb     *curr_guard_row
+        ldy     #lsb_row_addr
+        lda			b,y
+        sta     *lsb_row_level_data_addr
+        sta     *byte_8
+        ldy     #msb_row_addr_1
+        lda			b,y
+        sta     *msb_row_level_data_addr
+        ldy     #msb_row_addr_2
+        lda			b,y
+        sta     *byte_9									; setup tilemap address
+        inc     *curr_guard_y_offset
+        lda     *curr_guard_y_offset
+        cmpa    #5
+        bcs     3$
+        jsr     check_guard_drop_gold
+        ldb     *curr_guard_col
+        ldy     *byte_9
+        lda			b,y											; get object from tilemap
+        cmpa    #1											; brick?
+        bne     1$											; no, skip
+        lda     #0											; space
+1$:     ldy     *msb_row_level_data_addr
+				sta			b,y											; update tilemap
+        inc     *curr_guard_row
+        ldb     *curr_guard_row
+        ldy     #lsb_row_addr
+        lda			b,y
+        sta     *lsb_row_level_data_addr
+        ldy     #msb_row_addr_1
+        lda			b,y
+        sta     *msb_row_level_data_addr	; setup tilemap address
+        ldb     *curr_guard_col
+        ldy     *msb_row_level_data_addr
+        lda			b,y											; get object from tilemap
+        cmpa    #9                      ; player?
+        bne     2$											; no, skip
+        lsr     level_active						; kill player
+2$:     lda     #8											; guard
+        sta     b,y											; update tilemap
+        lda     #0
+        sta     *curr_guard_y_offset
+        jmp     update_guard_climber_sprite
+3$:     jmp     guard_climber_check_for_gold
 				
 guard_move_left:	; $6FBC
 				ldb			*curr_guard_row
@@ -2269,6 +2342,25 @@ guard_can_move_right:	; $707E
 guard_ai:	; $70D8
 ; A=col, B=row
 ; ret: B=0..4 (direction)
+				sta			*byte_55								; col
+				stb			*byte_56								; row
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*byte_8
+				ldy			#msb_row_addr_2
+				lda			b,y
+				sta			*byte_9									; setup tilemap address
+				ldb			*byte_55
+				ldy			*byte_9
+				lda			b,y											; get object from tilemap
+				cmpa		#1											; brick (ie. trapped)?
+				bne			1$											; no, skip
+				lda			*curr_guard_state
+				beq			1$
+				bmi			1$
+				lda			#3											; UP
+				rts
+1$:							
 				lda			*key_1
 				ldb			#1											; left
 				cmpa		#0xca										; 'J'
