@@ -2026,8 +2026,8 @@ guard_cant_climb:                                       ; CODE XREF: ROM:6EB4j
 								
 guard_move_up:	; $6EAC
         lda     *curr_guard_y_offset
-        cmpa    #3
-        bcc     guard_can_move_up
+        cmpa    #3											; already moving up?
+        bcc     guard_can_move_up				; yes, go
         ldb     *curr_guard_row         ; top row?
         beq     guard_cant_climb        ; yes, exit
         decb                            ; row above
@@ -2064,10 +2064,10 @@ guard_can_move_up:	; $6ED5
         ldy     #msb_row_addr_2
         lda			b,y
         sta     *byte_9									; setup tilemap address
-        dec     *curr_guard_y_offset
-        bpl     guard_climber_check_for_gold
+        dec     *curr_guard_y_offset		; move down
+        bpl     guard_climber_check_for_gold	; same tile? yes, go
         jsr     check_guard_drop_gold
-        ldb     curr_guard_col
+        ldb     *curr_guard_col
         ldy			*byte_9
         lda     b,y											; get object from tilemap
         cmpa    #1                      ; brick?
@@ -2075,7 +2075,7 @@ guard_can_move_up:	; $6ED5
         lda     #0                      ; space
 1$:     ldy			*msb_row_level_data_addr
 				sta			b,y											; update tilemap
-        dec     *curr_guard_row
+        dec     *curr_guard_row					; next row down
         ldb     *curr_guard_row
         ldy     #lsb_row_addr
         lda			b,y
@@ -2100,7 +2100,7 @@ guard_climber_check_for_gold:
 
 update_guard_climber_sprite:
 				lda     #0x0e										; 1st climber sprite
-        ldx     #0x0f										; last cliber sprite
+        ldb     #0x0f										; last cliber sprite
         jsr     update_guard_sprite_index
         jsr     calc_guard_xychar
         jsr     display_transparent_char
