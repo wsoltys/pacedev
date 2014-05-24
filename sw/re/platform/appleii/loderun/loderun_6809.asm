@@ -11,6 +11,7 @@
 ;.define			PLATFORM_WILLIAMS
 
 .define			DEBUG
+;.define			DEBUG_GUARD_COPY
 
 START_LEVEL_0_BASED	.equ		0
 
@@ -1715,7 +1716,7 @@ add_hole_entry:	; $6C39
 				lda			#0											; space
 				ldb			*col
 				ldy			*msb_row_level_data_addr
-				sta			b,y
+				sta			b,y											; update tilemap
 				jsr			display_char_pg1
 				lda			#0											; space
 				jsr			display_char_pg2
@@ -2342,15 +2343,15 @@ guard_can_move_right:	; $707E
 guard_ai:	; $70D8
 ; A=col, B=row
 ; ret: B=0..4 (direction)
-				sta			*byte_55								; col
-				stb			*byte_56								; row
+				sta			*guard_ai_col
+				stb			*guard_ai_row
 				ldy			#lsb_row_addr
 				lda			b,y
 				sta			*byte_8
 				ldy			#msb_row_addr_2
 				lda			b,y
 				sta			*byte_9									; setup tilemap address
-				ldb			*byte_55
+				ldb			*guard_ai_col
 				ldy			*byte_9
 				lda			b,y											; get object from tilemap
 				cmpa		#1											; brick (ie. trapped)?
@@ -2358,9 +2359,10 @@ guard_ai:	; $70D8
 				lda			*curr_guard_state
 				beq			1$
 				bmi			1$
-				lda			#3											; UP
+				ldb			#3											; UP
 				rts
-1$:							
+1$:			
+.ifdef DEBUG_GUARD_COPY		
 				lda			*key_1
 				ldb			#1											; left
 				cmpa		#0xca										; 'J'
@@ -2376,6 +2378,65 @@ guard_ai:	; $70D8
 				beq			9$											; yes, return
 				ldb			#0											; nowhere
 9$:			rts
+.else
+				lda			*guard_ai_row
+				cmpa		*current_row
+				beq			same_row
+				jmp			different_row
+
+same_row:	; $7100
+				lda			*guard_ai_col
+				sta			*target_col
+				cmpa		*current_col
+				bcc			guard_right_of_player
+				
+guard_left_of_player:	; $7108
+				inc			*target_col						; target to the right
+				ldb			*guard_ai_row
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*byte_8
+				ldy			#msb_row_addr_2
+				lda			b,y
+				sta			*byte_9								; setup tilemap address
+				ldb			*target_col
+				ldy			*byte_9
+				lda			b,y										; get object from tilemap (right)
+				cmpa		#3										; ladder?
+				beq			try_next_col_right		; yes, go
+				cmpa		#4										; rope?
+				beq			try_next_col_right		; yes, go
+				ldb			*guard_ai_row
+				cmpb		#15										; bottom row?
+				beq			try_next_col_right		; yes, go
+				ldy			#(lsb_row_addr+1)
+				lda			b,y
+				sta			*byte_8
+				ldy			#(msb_row_addr_2+1)
+				lda			b,y
+				sta			*byte_9								; setup tilemap address (row below)
+				ldb			*target_col
+				ldy			*byte_9
+				lda			b,y										; get object from tilemap (below right)
+				cmpa		#0										; space?
+				beq			different_row					; yes, go
+				cmpa		#5										; fall-thru?
+				beq			different_row					; yes, go
+try_next_col_right:	; $713E
+				lda			*target_col
+				cmpa		*current_col
+				bne			guard_left_of_player	; no, try next column
+				ldb			#2										; RIGHT
+				rts
+				
+guard_right_of_player:	; $7147				
+				ldb			#0
+				rts
+				
+different_row:	; $7186
+				ldb			#0
+				rts				
+.endif				
 				
 calc_guard_xychar:	; $74DF
 				lda			*curr_guard_col
@@ -2807,7 +2868,7 @@ cls_and_display_high_scores:	; $786B
 				.ascii	"    -------- ----- --------\r"
 				.db			0
 				lda			#1
-				sta			*byte_55								; counter
+				sta			*guard_ai_col								; counter
 1$:			cmpa		#10											; 10th score?
 				bne			2$											; no, skip
 				lda			#1
@@ -2817,7 +2878,7 @@ cls_and_display_high_scores:	; $786B
 				bra			3$
 2$:			lda			#(0x80|0x20)						; space
 				jsr			display_character
-				lda			*byte_55
+				lda			*guard_ai_col
 				jsr			display_digit
 3$:			jsr			display_message
 				.asciz	".    "
@@ -2866,8 +2927,8 @@ cls_and_display_high_scores:	; $786B
 				jsr			display_digit
 ; stuff
 				jsr			cr
-				inc			*byte_55								; next score
-				lda			*byte_55
+				inc			*guard_ai_col								; next score
+				lda			*guard_ai_col
 				cmpa		#11											; done all scores?
 				bcc			done_hs
 				lbra		1$
