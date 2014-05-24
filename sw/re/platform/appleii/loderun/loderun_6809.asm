@@ -1700,7 +1700,7 @@ adjust_y_offset_within_tile: ; $6C26
 
 add_hole_entry:	; $6C39
 				lda			#0
-				sta			*byte_9c
+				sta			*dig_dir
 				lda			*current_row
 				inca														; row below
 				stb			*col
