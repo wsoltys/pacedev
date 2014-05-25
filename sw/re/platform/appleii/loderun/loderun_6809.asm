@@ -2002,8 +2002,8 @@ wriggle_tbl:	; $6E7F
 				.db			2, 1, 2, 3, 2, 1
 
 calc_guard_movement:	; $6E85
-				lda			curr_guard_col
-				ldb			curr_guard_row
+				lda			*curr_guard_col
+				ldb			*curr_guard_row
 				jsr			guard_ai
 				aslb
 				ldy			#guard_move_vector_tbl
