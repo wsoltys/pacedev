@@ -2392,88 +2392,196 @@ same_row:	; $7100
 				bcc			guard_right_of_player
 				
 guard_left_of_player:	; $7108
-				inc			*target_col						; target to the right
+				inc			*target_col							; target to the right
 				ldb			*guard_ai_row
 				ldy			#lsb_row_addr
 				lda			b,y
 				sta			*byte_8
 				ldy			#msb_row_addr_2
 				lda			b,y
-				sta			*byte_9								; setup tilemap address
+				sta			*byte_9									; setup tilemap address
 				ldb			*target_col
 				ldy			*byte_9
-				lda			b,y										; get object from tilemap (right)
-				cmpa		#3										; ladder?
-				beq			try_next_col_right		; yes, go
-				cmpa		#4										; rope?
-				beq			try_next_col_right		; yes, go
-				ldb			*guard_ai_row
-				cmpb		#15										; bottom row?
-				beq			try_next_col_right		; yes, go
-				ldy			#(lsb_row_addr+1)
-				lda			b,y
-				sta			*byte_8
-				ldy			#(msb_row_addr_2+1)
-				lda			b,y
-				sta			*byte_9								; setup tilemap address (row below)
-				ldb			*target_col
-				ldy			*byte_9
-				lda			b,y										; get object from tilemap (below right)
-				cmpa		#0										; space?
-				beq			different_row					; yes, go
-				cmpa		#5										; fall-thru?
-				beq			different_row					; yes, go
-try_next_col_right:	; $713E
-				lda			*target_col
-				cmpa		*current_col
-				bne			guard_left_of_player	; no, try next column
-				ldb			#2										; RIGHT
-				rts
-				
-guard_right_of_player:	; $7147				
-				dec			*target_col						; column to left
-				ldb			*guard_ai_row
-				ldy			#lsb_row_addr
-				lda			b,y
-				sta			*byte_8
-				ldy			#msb_row_addr_2
-				lda			b,y
-				sta			*byte_9								; setup tilemap address (left)
-				ldb			*target_col
-				ldy			*byte_9
-				lda			b,y										; get object from tilemap (left)
-				cmpa		#3										; ladder?
-				beq			try_next_col_left			; yes, go
-				cmpa		#4										; rope?
-				beq			try_next_col_left			; yes, go
-				ldb			*guard_ai_row
-				cmpb		#15										; bottom row?
-				beq			try_next_col_left			; yes, go
-				ldy			#(lsb_row_addr+1)
-				lda			b,y
-				sta			*byte_8
-				ldy			#(msb_row_addr_2+1)
-				lda			b,y
-				sta			*byte_9								; setup tilemap address (row below)
-				ldb			*target_col
-				ldy			*byte_9
-				lda			b,y										; get object from tilemap (row below)
-				cmpa		#0										; space?
-				beq			different_row					; yes, go
-				cmpa		#5										; fall-thru?
-				beq			different_row					; yes, go
-try_next_col_left:	; $717D
-				lda			*target_col
-				cmpa		*current_col					; same as player?
-				bne			guard_right_of_player	; no, try next column
-				ldb			#1										; LEFT
+				lda			b,y											; get object from tilemap (right)
+				cmpa		#3											; ladder?
+				beq			try_next_col_right			; yes, go
+				cmpa		#4											; rope?
+				beq			try_next_col_right			; yes, go
+				ldb			*guard_ai_row         	
+				cmpb		#15											; bottom row?
+				beq			try_next_col_right			; yes, go
+				ldy			#(lsb_row_addr+1)     	
+				lda			b,y                   	
+				sta			*byte_8               	
+				ldy			#(msb_row_addr_2+1)   	
+				lda			b,y                   	
+				sta			*byte_9									; setup tilemap address (row below)
+				ldb			*target_col           	
+				ldy			*byte_9               	
+				lda			b,y											; get object from tilemap (below right)
+				cmpa		#0											; space?
+				beq			different_row						; yes, go
+				cmpa		#5											; fall-thru?
+				beq			different_row						; yes, go
+try_next_col_right:	; $713E           	
+				lda			*target_col           	
+				cmpa		*current_col          	
+				bne			guard_left_of_player		; no, try next column
+				ldb			#2											; RIGHT
+				rts                           	
+				                              	
+guard_right_of_player:	; $7147					
+				dec			*target_col							; column to left
+				ldb			*guard_ai_row         	
+				ldy			#lsb_row_addr         	
+				lda			b,y                   	
+				sta			*byte_8               	
+				ldy			#msb_row_addr_2       	
+				lda			b,y                   	
+				sta			*byte_9									; setup tilemap address (left)
+				ldb			*target_col           	
+				ldy			*byte_9               	
+				lda			b,y											; get object from tilemap (left)
+				cmpa		#3											; ladder?
+				beq			try_next_col_left				; yes, go
+				cmpa		#4											; rope?
+				beq			try_next_col_left				; yes, go
+				ldb			*guard_ai_row         	
+				cmpb		#15											; bottom row?
+				beq			try_next_col_left				; yes, go
+				ldy			#(lsb_row_addr+1)     	
+				lda			b,y                   	
+				sta			*byte_8               	
+				ldy			#(msb_row_addr_2+1)   	
+				lda			b,y                   	
+				sta			*byte_9									; setup tilemap address (row below)
+				ldb			*target_col           	
+				ldy			*byte_9               	
+				lda			b,y											; get object from tilemap (row below)
+				cmpa		#0											; space?
+				beq			different_row						; yes, go
+				cmpa		#5											; fall-thru?
+				beq			different_row						; yes, go
+try_next_col_left:	; $717D           	
+				lda			*target_col           	
+				cmpa		*current_col						; same as player?
+				bne			guard_right_of_player		; no, try next column
+				ldb			#1											; LEFT
 				rts
 				
 different_row:	; $7186
-				ldb			#0
+        lda     #0
+        sta     *guard_ai_dir         	; no direction
+        lda     #0xff
+        sta     *byte_59
+        lda     *guard_ai_col
+        ldb     *guard_ai_row
+        jsr     find_accessible_left_right ; how far on this row?
+        ;jsr     guard_ai_up_down
+        ;jsr     guard_ai_left
+        ;jsr     guard_ai_right
+        ldb     *guard_ai_dir
 				rts				
 .endif				
-				
+
+find_accessible_left_right:	; $743E
+; A=col, B=row
+        sta     *accessible_left        ; save col
+        sta     *accessible_right       ; save col (again)
+        stb     *scanline               ; save row
+
+find_accessible_left:	; $7444
+        lda     *accessible_left        ; guard col
+        beq     find_accessible_right   ; left-most col? yes, go
+        ldb     *scanline               ; guard row
+        ldy     #lsb_row_addr
+        lda			b,y
+        sta     *lsb_row_level_data_addr
+        ldy     #msb_row_addr_1
+        lda			b,y
+        sta     *msb_row_level_data_addr ; setup tilemap address
+        ldb     *accessible_left        ; guard col
+        decb                            ; column to left
+        ldy     *msb_row_level_data_addr
+        lda			b,y											; get object from tilemap (left)
+        cmpa    #1                      ; brick?
+        beq     find_accessible_right   ; yes, go
+        cmpa    #2                      ; solid?
+        beq     find_accessible_right   ; yes, go
+        cmpa    #3                      ; ladder?
+        beq     1$											; yes, go
+        cmpa    #4                      ; rope?
+        beq     1$											; yes, go
+        ldb     *scanline               ; guard row
+        cmpb    #15                     ; bottom row?
+        beq     1$											; yes, go
+        ldy     #(lsb_row_addr+1)
+        lda			b,y
+        sta     *byte_8
+        ldy     #(msb_row_addr_2+1)
+        lda			b,y
+        sta     *byte_9                 ; setup tilemap (row below)
+        ldb     *accessible_left
+        decb                            ; below left
+        ldy     *byte_9
+        lda			b,y											; get object from tilemap (below, left)
+        cmpa    #1                      ; brick?
+        beq     1$											; yes, we can walk on it, go
+        cmpa    #2                      ; solid?
+        beq     1$											; yes, we can walk on it, go
+        cmpa    #3                      ; ladder?
+        bne     2$											; no, we can't walk on it, go
+1$:     dec     *accessible_left
+        bpl     find_accessible_left    ; try again
+2$:     dec     *accessible_left
+
+find_accessible_right: ; $7490
+        lda     *accessible_right
+        cmpa    #27                     ; right-most column?
+        beq     3$											; yes, go
+        ldb     *scanline               ; guard row
+        ldy     #lsb_row_addr
+        lda			b,y
+        sta     *lsb_row_level_data_addr
+        ldy     #msb_row_addr_1
+        lda			b,y
+        sta     *msb_row_level_data_addr ; setup tilemap address
+        ldb     *accessible_right
+        incb                            ; column to right
+        ldy     *msb_row_level_data_addr
+        lda			b,y											; get object from tilemap (right)
+        cmpa    #1                      ; brick?
+        beq     3$											; yes, exit
+        cmpa    #2                      ; solid?
+        beq     3$											; yes, exit
+        cmpa    #3                      ; ladder?
+        beq     1$											; yes, go
+        cmpa    #4                      ; rope?
+        beq     1$											; yes, go
+        ldb     *scanline               ; guard row
+        cmpb    #15                     ; bottom row?
+        beq     1$											; yes, go
+        ldy     #(lsb_row_addr+1)
+        lda			b,y
+        sta     *byte_8
+        ldy     #(msb_row_addr_2+1)
+        lda			b,y
+        sta     *byte_9                 ; setup tilemap address (row below)
+        ldb     *accessible_right
+        incb                            ; column to right
+        ldy     *byte_9
+        lda			b,y											; get object from tilemap (below, right)
+        cmpa    #1                      ; brick?
+        beq     1$											; yes, go
+        cmpa    #2                      ; solid?
+        beq     1$											; yes, go
+        cmpa    #3                      ; ladder?
+        bne     2$											; no, go
+1$:     inc     *accessible_right
+        bpl     find_accessible_right   ; try again
+2$:     inc     *accessible_right
+3$:			rts
+								
 calc_guard_xychar:	; $74DF
 				lda			*curr_guard_col
 				ldb			*curr_guard_x_offset

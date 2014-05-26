@@ -44,6 +44,10 @@ guard_respawn_col					.equ		0x53
 guard_ai_col							.equ		0x55
 guard_ai_row							.equ		0x56
 target_col								.equ		0x57
+guard_ai_dir							.equ		0x58
+byte_59										.equ		0x59
+accessible_left						.equ		0x5a
+accessible_right					.equ		0x5b
 byte_5c										.equ		0x5c
 guard_trap_cnt_init				.equ		0x5f
 col_pixel_shift						.equ		0x71
