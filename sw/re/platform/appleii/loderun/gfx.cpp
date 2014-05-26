@@ -16,8 +16,8 @@
     textout_centre_ex(s, f, str, w, h, c, 0);
 #endif
 
-//#define DO_TITLE
-#define DO_TILES
+#define DO_TITLE
+//#define DO_TILES
 
 uint8_t ram[64*1024];
 
@@ -181,7 +181,27 @@ void main (int argc, char *argv[])
 
 	// now RLE it
 	fp = fopen ("title_rle.c", "wt");
+	FILE *fp2 = fopen ("title_rle.bin", "wb");
 
+  uint8_t preamble[6] = "\x00\x00\x00\x00\x00";
+  uint8_t postamble[6] = "\xFF\x00\x00\x00\x00";
+
+  // write pre-amble to load bank register
+  preamble[1] = 0;
+  preamble[2] = 2;
+  preamble[3] = 0xFF;
+  preamble[4] = 0xA2;             			// MMU bank register for $4000
+  fwrite (preamble, 1, 5, fp2);
+  uint8_t bank[2] = { 0x00, 0x01 };			// 60/1, or $8000 in memory
+  fwrite (bank, 1, 2, fp2);
+
+  // write data block
+  preamble[1] = 0x11;
+  preamble[2] = 0x94;		// $1194 bytes
+  preamble[3] = 0x68;
+  preamble[4] = 0x00;   // load at $6800
+  fwrite (preamble, 1, 5, fp2);
+	
 	int lc = 0;	
 	int n = 0;
 	while (n < 280/8*192)
@@ -195,6 +215,9 @@ void main (int argc, char *argv[])
 			n++;
 		}
 		fprintf (fp, "0x%02X, 0x%02X, ", (uint8_t)cnt, byte);
+		uint8_t tmp = (uint8_t)cnt;
+		fwrite (&tmp, 1, 1, fp2);
+		fwrite (&byte, 1, 1, fp2);
 		lc += 2;
 		if (lc == 16)
 		{
@@ -204,6 +227,20 @@ void main (int argc, char *argv[])
 	}
 	fprintf (fp, "\n");
 	fclose (fp);
+
+  // write pre-amble to restore bank register
+  preamble[1] = 0;
+  preamble[2] = 2;
+  preamble[3] = 0xFF;
+  preamble[4] = 0xA2;             // MMU bank register for $4000
+  fwrite (preamble, 1, 5, fp2);
+  bank[0] = 0x3A;									// 58, or $4000 in memory
+  bank[1] = 0x3B;
+  fwrite (bank, 1, 2, fp2);
+
+  fwrite (postamble, 1, 5, fp2);
+
+	fclose (fp2);
 
 	// now show the rle version
 	clear_bitmap (screen);

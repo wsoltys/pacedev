@@ -29,6 +29,7 @@ START_LEVEL_0_BASED	.equ		0
 
 .define			HAS_TITLE
 .define			TILES_EXTERNAL
+.define			TITLE_EXTERNAL
 ;.define			LEVELS_EXTERNAL
 						
 ; COCO registers
@@ -2430,7 +2431,42 @@ try_next_col_right:	; $713E
 				rts
 				
 guard_right_of_player:	; $7147				
-				ldb			#0
+				dec			*target_col						; column to left
+				ldb			*guard_ai_row
+				ldy			#lsb_row_addr
+				lda			b,y
+				sta			*byte_8
+				ldy			#msb_row_addr_2
+				lda			b,y
+				sta			*byte_9								; setup tilemap address (left)
+				ldb			*target_col
+				ldy			*byte_9
+				lda			b,y										; get object from tilemap (left)
+				cmpa		#3										; ladder?
+				beq			try_next_col_left			; yes, go
+				cmpa		#4										; rope?
+				beq			try_next_col_left			; yes, go
+				ldb			*guard_ai_row
+				cmpb		#15										; bottom row?
+				beq			try_next_col_left			; yes, go
+				ldy			#(lsb_row_addr+1)
+				lda			b,y
+				sta			*byte_8
+				ldy			#(msb_row_addr_2+1)
+				lda			b,y
+				sta			*byte_9								; setup tilemap address (row below)
+				ldb			*target_col
+				ldy			*byte_9
+				lda			b,y										; get object from tilemap (row below)
+				cmpa		#0										; space?
+				beq			different_row					; yes, go
+				cmpa		#5										; fall-thru?
+				beq			different_row					; yes, go
+try_next_col_left:	; $717D
+				lda			*target_col
+				cmpa		*current_col					; same as player?
+				bne			guard_right_of_player	; no, try next column
+				ldb			#1										; LEFT
 				rts
 				
 different_row:	; $7186
@@ -3676,13 +3712,17 @@ col_to_addr_tbl:	; $1c62
 				.nlist
 
 .ifndef TILES_EXTERNAL				
-.include "tiles.asm"
+	.include "tiles.asm"
 .else
-tile_data	.equ	0x8000
+	tile_data	.equ	0x8000
 .endif
 
 .ifdef HAS_TITLE
-	.include "title.asm"
+	.ifndef TITLE_EXTERNAL
+		.include "title.asm"
+	.else
+		title_data	.equ	0xA800
+	.endif
 .endif
 
 .include "levels.asm"
