@@ -45,10 +45,12 @@ guard_ai_col							.equ		0x55
 guard_ai_row							.equ		0x56
 target_col								.equ		0x57
 guard_ai_dir							.equ		0x58
-byte_59										.equ		0x59
-accessible_left						.equ		0x5a
-accessible_right					.equ		0x5b
-byte_5c										.equ		0x5c
+guard_ai_best_delta				.equ		0x59
+farthest_left							.equ		0x5a
+farthest_right						.equ		0x5b
+farthest_updown_plyr_row	.equ		0x5c
+byte_5d										.equ		0x5d
+byte_5e										.equ		0x5e
 guard_trap_cnt_init				.equ		0x5f
 col_pixel_shift						.equ		0x71
 col												.equ		0x85
