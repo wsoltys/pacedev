@@ -195,7 +195,7 @@ zero_score_and_init_game: ; $6056
 				sta			*score_1e5_1e4
 				sta			*score_1e6
 				sta			*unused_97
-; stuff
+				sta			*byte_a5
 				sta			*guard_respawn_col
 				sta			*demo_inp_cnt
 				ldy			#attract_move_tbl
@@ -231,14 +231,22 @@ main_game_loop:
 1$:	; $60bf
 				ldb			#0
 				stb			*dig_dir
-				;stb			*byte_54
+				stb			*byte_54
 				lda			*unused_97							; should be 0
 				CLC
 				adca		*no_guards							; should =no_guards
 				tfr			a,b
 				ldy			#x3_tbl
 				lda			b,y											; B=no_guards*3
-; stuff
+				ldy			#byte_6ca7
+				lda			b,y
+				sta			*byte_60
+				leay		1,y
+				lda			b,y
+				sta			*byte_61
+				leay		1,y
+				lda			b,y
+				sta			*byte_62
 				ldb			*unused_97							; should be 0
 				ldy			#byte_621d
 				lda			b,y
@@ -269,7 +277,7 @@ in_level_loop:
 				beq			dec_lives								; no, exit
 .if 1
 ; delay for Coco
-				ldx			#8000
+				ldx			#6000
 9$:			dex
 				bne			9$
 .endif
@@ -302,7 +310,7 @@ dec_lives:	; $613F
 				dec			*no_lives
 				jsr			display_no_lives
 				;jsr			sub_78e1								; sound stuff
-; stuff
+				;jsr			sub_8811								; sound stuff
 				lda			*attract_mode
 				lsra														; demo mode?
 				beq			loc_61d0								; yes, go
@@ -340,7 +348,7 @@ title_wait_for_key: ; $618e
 				stb			*byte_ac
 				stb			*game_active
 ; do some other crap
-				lbra		zero_score_and_init_game
+				jmp			zero_score_and_init_game
 
 loc_61d0:	; $61D0
 				lda			#0
@@ -1217,7 +1225,28 @@ digging_left:
 				rts
 
 abort_dig_left:	; $686E
-; stuff
+				ldb			*current_row
+				incb
+				stb			*row
+				ldb			*current_col
+				decb
+				stb			*col
+				lda			#1											; brick
+				jsr			display_char_pg1
+				ldb			*dig_sprite
+				beq			finish_dig_left
+				decb
+				lda			#sprite_to_char_tbl+0x12
+				pshs		a
+				ldb			*current_row
+				lda			*current_col
+				deca
+				jsr			calc_colx5_scanline
+				tfr			d,x											; X(lsb)=scanline
+				tfr			a,b											; B=x_in_2_pixel_incs
+				puls		a												; A=char
+				jsr			wipe_char
+				
 finish_dig_left:	; $6892
 				lda			#0
 				sta			*dig_dir
@@ -1282,7 +1311,7 @@ digging_right:
 				jsr			draw_sprite
 				ldb			*dig_sprite
 				cmpb		#0x18
-				beq			loc_6962
+				lbeq		loc_6962
 				cmpb		#0x0c
 				beq			2$
 				ldy			#sprite_to_char_tbl+0x11
@@ -1320,6 +1349,30 @@ digging_right:
 				rts
 
 abort_dig_right:	; $6936
+				ldb			*current_row
+				incb
+				stb			*row
+				ldb			*current_col
+				incb
+				stb			*col
+				lda			#1											; brick
+				jsr			display_char_pg1
+				ldb			*dig_sprite
+				cmpb		#0x0c
+				beq			finish_dig_right
+				decb
+				lda			#sprite_to_char_tbl+0x12
+				pshs		a
+				lda			*current_col
+				inca
+				ldb			*current_row
+				jsr			calc_colx5_scanline
+				tfr			d,x											; X(lsb)=scanline
+				tfr			a,b											; B=x_in_2_pixel_incs
+				puls		a												; A=char
+				jsr			wipe_char
+
+
 finish_dig_right:	; $695C
 				lda			#0
 				sta			*dig_dir
@@ -1515,7 +1568,7 @@ got_key:
 				tfr			a,b											; B=(apple)key
 				stb			*msg_char
 				bne			key_pressed
-; stuff (but fall thru here)				
+; fixme - see source
 key_pressed:	; $6A2B
 				cmpb		#0xa0										; normal character?
 				bcc			2$											; yes, go
@@ -1746,13 +1799,42 @@ add_hole_entry:	; $6C39
 
 handle_guards:	; $6C82
 				ldb			*no_guards							; any guards?
-				beq			9$											; no, exit
-; stuff
+				beq			4$											; no, exit
+				inc			*byte_64
+				ldb			*byte_64
+				cmpb		#3
+				bcs			1$
+				ldb			#0
+				stb			*byte_64
+1$:			pshs		b
+				tfr			dp,a
+				ldb			#0x60										; D=&($60)
+				tfr			d,y
+				puls		b
+				lda			b,y											; get entry
+				sta			*byte_63
+2$:			lsr			*byte_63
+				bcc			3$
 				jsr			update_guards
 				lda			*level_active						; player killed?
-				beq			9$											; yes, skip
-; stuff				
-9$:			rts
+				beq			4$											; yes, skip
+3$:			lda			*byte_63
+				bne			2$
+4$:			rts
+
+byte_6ca7:	; $6CA7
+				.db 		0, 0, 0
+        .db 		0, 1, 1
+        .db 		1, 1, 1
+        .db 		1, 3, 1
+        .db 		1, 3, 3
+        .db 		3, 3, 3
+        .db 		3, 3, 7
+        .db 		3, 7, 7
+        .db 		7, 7, 7
+        .db 		7, 7, 0xF
+        .db 		7, 0xF, 0xF
+        .db 		0xF, 0xF, 0xF
 
 guard_sprite_to_char_tbl:	; $6CCB 
 				.db			8, 0x2B, 0x2C, 0x30, 0x31, 0x32, 0x36, 0x28, 0x29, 0x2A, 0x2D, 0x2E, 0x2F
@@ -2478,11 +2560,129 @@ different_row:	; $7186
         ldb     *guard_ai_row
         jsr     find_farthest_left_right ; how far on this row?
         jsr     guard_ai_up_down
-        ;jsr     guard_ai_left
-        ;jsr     guard_ai_right
+        jsr     guard_ai_left
+        jsr     guard_ai_right
         ldb     *guard_ai_dir
 				rts				
 .endif				
+
+locret_71A1:	; $71A1
+				rts
+
+guard_ai_left:	; $71A2
+        lda     *farthest_left          ; left-most column guard can get to on this row
+        cmpa    *guard_ai_col           ; there now?
+        beq     locret_71A1             ; yes, exit
+        ldb     *guard_ai_row
+        cmpb    #15                     ; bottom row?
+        beq     1$											; yes, go (no good)
+        ldy     #(lsb_row_addr+1)
+        lda			b,y
+        sta     *byte_8
+        ldy     #(msb_row_addr_2+1)
+        lda			b,y
+        sta     *byte_9                 ; setup tilemap address (row below)
+        ldb     *farthest_left
+        ldy     *byte_9
+        lda			b,y											; get object from tilemap (below farthest left)
+        cmpa    #1                      ; brick?
+        beq     1$											; yes, go
+        cmpa    #2                      ; solid?
+        beq     1$											; yes, go
+        lda     *farthest_left
+        ldb     *guard_ai_row
+        jsr     find_farthest_down
+        ldb     *farthest_left
+        jsr     calc_row_col_delta
+        cmpa    *guard_ai_best_delta
+        bcc     1$
+        sta     *guard_ai_best_delta
+        lda     #1                      ; LEFT
+        sta     *guard_ai_dir
+1$:     ldb     *guard_ai_row           ; top row?
+        beq     2$											; yes, go
+        ldy     #lsb_row_addr
+        lda			b,y
+        sta     *byte_8
+        ldy     #msb_row_addr_2
+        lda			b,y
+        sta     *byte_9                 ; setup tilemap address
+        ldb     *farthest_left
+        ldy     *byte_9
+        lda			b,y											; get object from tilemap
+        cmpa    #3                      ; ladder?
+        bne     2$											; no, go
+        ldb     *guard_ai_row
+        lda     *farthest_left
+        jsr     find_farthest_up
+        ldb     *farthest_left
+        jsr     calc_row_col_delta
+        cmpa    *guard_ai_best_delta
+        bcc     2$
+        sta     *guard_ai_best_delta
+        lda     #1                      ; LEFT
+        sta     *guard_ai_dir
+2$:     inc     *farthest_left
+        jmp     guard_ai_left
+
+locret_720B:	; $720B
+				rts
+				
+guard_ai_right:	; $720C
+        lda     *farthest_right
+        cmpa    *guard_ai_col           ; left-most column?
+        beq     locret_720B             ; yes, exit
+        ldb     *guard_ai_row
+        cmpb    #15                     ; bottom row?
+        beq     1$											; yes, go
+        ldy     #(lsb_row_addr+1)
+        lda			b,y
+        sta     *byte_8
+        ldy     #(msb_row_addr_2+1)
+        lda			b,y
+        sta     *byte_9                 ; setup tilemap address (row below)
+        ldb     *farthest_right
+        ldy     *byte_9
+        lda			b,y											; get object from tilemap (below)
+        cmpa    #1                      ; brick?
+        beq     1$											; yes, go
+        cmpa    #2                      ; solid?
+        beq     1$											; yes, go
+        lda     *farthest_right
+        ldb     *guard_ai_row
+        jsr     find_farthest_down
+        ldb     *farthest_right
+        jsr     calc_row_col_delta
+        cmpa    *guard_ai_best_delta
+        bcc     1$
+        sta     *guard_ai_best_delta
+        lda     #2                      ; RIGHT
+        sta     *guard_ai_dir
+1$:     ldb     *guard_ai_row           ; top row?
+        beq     2$											; yes, go
+        ldy     #lsb_row_addr
+        lda			b,y
+        sta     *byte_8
+        ldy     #msb_row_addr_2
+        lda			b,y
+        sta     *byte_9                 ; setup tilemap address
+        ldb     *farthest_right
+        ldy     *byte_9
+        lda			b,y											; get object from tilemap address
+        cmpa    #3                      ; ladder?
+        bne     2$											; no, go
+        ldb     *guard_ai_row
+        lda     *farthest_right
+        jsr     find_farthest_up
+        ldb     *farthest_right
+        jsr     calc_row_col_delta
+        cmpa    *guard_ai_best_delta
+        bcs     2$
+        sta     *guard_ai_best_delta
+        lda     #2                      ; RIGHT
+        sta     *guard_ai_dir
+2$:     dec     *farthest_right
+        jmp     guard_ai_right
 
 guard_ai_up_down:	; $7275
         lda     *guard_ai_row
@@ -2528,7 +2728,7 @@ guard_ai_cant_go_down:	; $72A7
         bne     1$											; no, exit
         lda     *guard_ai_col
         ldb     *guard_ai_row
-        ;jsr     find_farthest_up        ; A=farthest row (up)
+        jsr     find_farthest_up        ; A=farthest row (up)
         ldb     *guard_ai_col
         jsr     calc_row_col_delta
         cmpa    *guard_ai_best_delta
@@ -2565,6 +2765,107 @@ calc_row_delta:	; $72EB
         SEC
         sbca    *nibble_cnt             ; delta row
         adda    #100                    ; weighting
+        rts
+
+loc_72FD:	; $72FD
+				lda     *byte_5e								; row
+        rts
+
+find_farthest_up:	; $7300
+        stb     *byte_5e                ; row
+        sta     *byte_5d                ; col
+loc_7304:	; $7304
+        ldy     #lsb_row_addr
+        lda			b,y
+        sta     *byte_8
+        ldy     #msb_row_addr_2
+        lda			b,y
+        sta     *byte_9                 ; setup tilemap address
+        ldb     *byte_5d                ; col
+        ldy     *byte_9
+        lda			b,y											; get object from tilemap
+        cmpa    #3                      ; ladder?
+        bne     loc_72FD                ; no, exit
+        dec     *byte_5e                ; can get to row above
+        ldb     *byte_5d                ; col
+        beq     up_try_right            ; left-most column? yes, go
+        decb                            ; column to left
+        ldy     *byte_9
+        lda			b,y											; get object from tilemap (left)
+        cmpa    #1                      ; brick?
+        beq     1$											; yes, go
+        cmpa    #2                      ; solid?
+        beq     1$											; yes, go
+        cmpa    #3                      ; ladder?
+        beq     1$											; yes, go
+        ldb     *byte_5e                ; row (above)
+        ldy     #lsb_row_addr
+        lda			b,y
+        sta     *byte_8
+        ldy     #msb_row_addr_2
+        lda			b,y
+        sta     *byte_9                 ; setup tilemap address (above)
+        ldb     *byte_5d                ; col
+        decb                            ; column to left
+        ldy     *byte_9
+        lda			b,y											; get object from tilemap (above, left)
+        cmpa    #4                      ; rope?
+        bne     up_try_right            ; no, go
+1$:     lda     *byte_5e                ; row
+        sta     farthest_updown_plyr_row
+        cmpa    *current_row            ; compare with player
+        bcs     farthest_up_is_player_row	; above player - exit
+        beq     farthest_up_is_player_row	; same row as player - exit
+
+up_try_right:	; $734A
+        ldb     *byte_5d                ; col
+        cmpb    #27                     ; right-most?
+        beq     try_next_row_up					; yes, go
+        ldb     *byte_5e                ; row (above)
+        ldy     #(lsb_row_addr+1)
+        lda			b,y
+        sta     *byte_8
+        ldy     #(msb_row_addr_2+1)
+        lda			b,y
+        sta     *byte_9                 ; setup tilemap address
+        ldb     *byte_5d                ; col
+        incb                            ; column to right
+        ldy     *byte_9
+        lda			b,y											; get object from tilemap (right)
+        cmpa    #1                      ; brick?
+        beq     1$											; yes, go
+        cmpa    #2                      ; solid?
+        beq     1$											; yes, go
+        cmpa    #3                      ; ladder?
+        beq     1$											; yes, go
+        ldb     *byte_5e                ; row
+        ldy     #lsb_row_addr
+        lda			b,y
+        sta     *byte_8
+        ldy     #msb_row_addr_2
+        lda			b,y
+        sta     *byte_9                 ; setup tilemap address (row above)
+        ldb     *byte_5d                ; col
+        incb                            ; column to right
+        ldy     *byte_9
+        lda			b,y											; get object from tilemap (right, above)
+        cmpa    #4                      ; rope?
+        bne     try_next_row_up					; no, go
+1$:     lda     *byte_5e                ; row
+        sta     *farthest_updown_plyr_row
+        cmpa    *current_row            ; compare with player
+        bcs     farthest_up_is_player_row	; above player - exit
+        beq     farthest_up_is_player_row	; same row as player - exit
+
+try_next_row_up:	; $738C
+        lda     *byte_5e                ; row
+        cmpa    #1                      ; top row?
+        bcs     1$											; yes, exit
+        jmp     loc_7304                ; loop
+1$:     rts
+
+farthest_up_is_player_row:	; $7397
+        lda     *farthest_updown_plyr_row
         rts
 
 loc_739A:	; $739A
@@ -2665,11 +2966,9 @@ try_next_row_down:	; $742D
         inc     *byte_5e                ; next row down
         lda     *byte_5e                ; row
         cmpa    #16                     ; past bottom of screen?
-        bcc     farthest_down_is_bottom ; yes, exit
+        bcc     1$											; yes, exit
         jmp     loc_73A1                ; loop
-
-farthest_down_is_bottom:	; $7438
-        lda     #15
+1$:     lda     #15
         rts
 
 farthest_down_is_player_row:	; $743B

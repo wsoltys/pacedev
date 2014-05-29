@@ -41,6 +41,7 @@ lchar_mask								.equ		0x50
 rchar_mask								.equ		0x51
 byte_52										.equ		0x52
 guard_respawn_col					.equ		0x53
+byte_54										.equ		0x54
 guard_ai_col							.equ		0x55
 guard_ai_row							.equ		0x56
 target_col								.equ		0x57
@@ -52,6 +53,11 @@ farthest_updown_plyr_row	.equ		0x5c
 byte_5d										.equ		0x5d
 byte_5e										.equ		0x5e
 guard_trap_cnt_init				.equ		0x5f
+byte_60										.equ		0x60
+byte_61										.equ		0x61
+byte_62										.equ		0x62
+byte_63										.equ		0x63
+byte_64										.equ		0x64
 col_pixel_shift						.equ		0x71
 col												.equ		0x85
 row												.equ		0x86
@@ -83,6 +89,7 @@ dig_sprite								.equ		0xa0
 timer											.equ		0xa1
 editor_n									.equ		0xa2
 no_eos_ladder_tiles				.equ		0xa3
+byte_a5										.equ		0xa5
 level											.equ		0xa6
 attract_mode							.equ		0xa7
 lsb_demo_inp_ptr					.equ		0xa9		; swapped for 6809
