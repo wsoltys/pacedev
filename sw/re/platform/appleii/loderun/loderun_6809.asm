@@ -2685,8 +2685,8 @@ guard_ai_right:	; $720C
         jmp     guard_ai_right
 
 guard_ai_up_down:	; $7275
-        lda     *guard_ai_row
-        cmpa    #15                     ; bottom row?
+        ldb     *guard_ai_row
+        cmpb    #15                     ; bottom row?
         beq     guard_ai_cant_go_down   ; yes, go
         ldy     #(lsb_row_addr+1)
         lda			b,y
@@ -2713,7 +2713,7 @@ guard_ai_up_down:	; $7275
         sta     *guard_ai_dir
 
 guard_ai_cant_go_down:	; $72A7
-        lda     *guard_ai_row           ; top row?
+        ldb     *guard_ai_row           ; top row?
         beq     1$											; yes, exit
         ldy     #lsb_row_addr
         lda			b,y
@@ -2812,7 +2812,7 @@ loc_7304:	; $7304
         cmpa    #4                      ; rope?
         bne     up_try_right            ; no, go
 1$:     lda     *byte_5e                ; row
-        sta     farthest_updown_plyr_row
+        sta     *farthest_updown_plyr_row
         cmpa    *current_row            ; compare with player
         bcs     farthest_up_is_player_row	; above player - exit
         beq     farthest_up_is_player_row	; same row as player - exit
@@ -2858,8 +2858,8 @@ up_try_right:	; $734A
         beq     farthest_up_is_player_row	; same row as player - exit
 
 try_next_row_up:	; $738C
-        lda     *byte_5e                ; row
-        cmpa    #1                      ; top row?
+        ldb     *byte_5e                ; row
+        cmpb    #1                      ; top row?
         bcs     1$											; yes, exit
         jmp     loc_7304                ; loop
 1$:     rts
@@ -2964,8 +2964,8 @@ down_try_right:	; $73FB
 
 try_next_row_down:	; $742D
         inc     *byte_5e                ; next row down
-        lda     *byte_5e                ; row
-        cmpa    #16                     ; past bottom of screen?
+        ldb     *byte_5e                ; row
+        cmpb    #16                     ; past bottom of screen?
         bcc     1$											; yes, exit
         jmp     loc_73A1                ; loop
 1$:     lda     #15
