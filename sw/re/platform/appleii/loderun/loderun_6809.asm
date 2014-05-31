@@ -2677,7 +2677,7 @@ guard_ai_right:	; $720C
         ldb     *farthest_right
         jsr     calc_row_col_delta
         cmpa    *guard_ai_best_delta
-        bcs     2$
+        bcc     2$
         sta     *guard_ai_best_delta
         lda     #2                      ; RIGHT
         sta     *guard_ai_dir
@@ -2746,24 +2746,20 @@ calc_row_col_delta:	; $72D4
         cmpb    *curr_guard_col         ; compare column
         bcs     1$											; to the left
         tfr			b,a											; A=col
-        SEC
-        sbca    *curr_guard_col         ; delta col
+        suba   	*curr_guard_col         ; delta col
         rts
 1$:     stb     *nibble_cnt             ; guard_ai_col
         lda     *curr_guard_col
-        SEC
-        sbca    *nibble_cnt             ; delta col
+        suba		*nibble_cnt             ; delta col
         rts
 
 calc_row_delta:	; $72EB
         bcs     1$
-        SEC
-        sbca    *current_row            ; delta row
+        suba		*current_row            ; delta row
         adda    #200                    ; weighting
         rts
 1$:     lda     *current_row
-        SEC
-        sbca    *nibble_cnt             ; delta row
+        suba		*nibble_cnt             ; delta row
         adda    #100                    ; weighting
         rts
 
@@ -3110,8 +3106,7 @@ check_guard_pickup_gold:	; $74F7
 				lda			*curr_guard_state
 				bmi			1$
 				lda			#-1
-				SEC
-				sbca		*guard_respawn_col
+				suba		*guard_respawn_col
 				sta			*curr_guard_state
 				lda			#0											; space
 				sta			b,y											; remove gold from tilemap
