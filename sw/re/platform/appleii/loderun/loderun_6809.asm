@@ -233,11 +233,11 @@ main_game_loop:
 				stb			*dig_dir
 				stb			*byte_54
 				lda			*unused_97							; should be 0
-				CLC
-				adca		*no_guards							; should =no_guards
+				adda		*no_guards							; should =no_guards
 				tfr			a,b
 				ldy			#x3_tbl
-				lda			b,y											; B=no_guards*3
+				lda			b,y											; A=no_guards*3
+				tfr			a,b											; B=no_guards*3
 				ldy			#byte_6ca7
 				lda			b,y
 				sta			*byte_60
