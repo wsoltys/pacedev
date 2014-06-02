@@ -10,7 +10,7 @@
 .define			PLATFORM_COCO3
 ;.define			PLATFORM_WILLIAMS
 
-.define			DEBUG
+;.define			DEBUG
 ;.define			DEBUG_GUARD_COPY
 
 START_LEVEL_0_BASED	.equ		0
@@ -135,7 +135,17 @@ start:
 			
 				lda			#0x3F
 				tfr			a,dp
-					
+
+; values set in loader
+        lda     #6
+        sta     *game_speed
+        lda     #0xff
+        ;sta     *byte_99
+        lda     #0xca
+        sta     *paddles_detected
+        ;lda     #0x4c
+        ;sta     *byte_23
+        					
 ; start lode runner
 				jsr			read_paddles
 ;				lda			#1
@@ -231,7 +241,7 @@ main_game_loop:
 1$:	; $60bf
 				ldb			#0
 				stb			*dig_dir
-				stb			*byte_54
+				stb			*playing_sound          ; no sound playing
 				lda			*unused_97							; should be 0
 				adda		*no_guards							; should =no_guards
 				tfr			a,b
@@ -255,7 +265,7 @@ in_level_loop:
 				jsr			handle_player						; digging, falling, keys
 				lda			*level_active						; alive?
 				beq			dec_lives								; no, exit
-				;jsr			sub_8811
+				jsr			throttle_and_update_sound
 				lda			*no_gold
 				bne			1$
 				jsr			draw_end_of_screen_ladder
@@ -271,16 +281,10 @@ in_level_loop:
 2$:			jsr			respawn_guards_and_update_holes
 				lda			*level_active						; alive?
 				beq			dec_lives								; no, exit
-				;jsr			sub_8811
+				jsr			throttle_and_update_sound
 				jsr			handle_guards
 				lda			*level_active						; alive?
 				beq			dec_lives								; no, exit
-.if 1
-; delay for Coco
-				ldx			#6000
-9$:			dex
-				bne			9$
-.endif
 .if 0
 9$:			ldx			#PIA0
 				ldb			#0											; all columns
@@ -301,6 +305,9 @@ next_level:
 				stb			*farthest_updown_plyr_row
 4$:			ldd			#0x0100									; add 100 pts
 				jsr			update_and_display_score
+				jsr     sub_622a
+				jsr     sub_622a
+				jsr     sub_622a
 				dec			*farthest_updown_plyr_row
 				bne			4$											; add 1500 pts
 next_level_cont:				
@@ -310,7 +317,7 @@ dec_lives:	; $613F
 				dec			*no_lives
 				jsr			display_no_lives
 				;jsr			sub_78e1								; sound stuff
-				;jsr			sub_8811								; sound stuff
+				jsr			throttle_and_update_sound
 				lda			*attract_mode
 				lsra														; demo mode?
 				beq			loc_61d0								; yes, go
@@ -318,7 +325,7 @@ dec_lives:	; $613F
 				bne			next_level_cont					; yes, continue
 				;jsr			loc_84c8								; (some high score stuff)
 				jsr			game_over_animation
-				;bcs			check_start_new_game
+				bcs			check_start_new_game
 				
 title_wait_for_key: ; $618e
 				jsr			keybd_flush
@@ -399,6 +406,16 @@ byte_621d:	; $6214
 				.db			0x26, 0x26, 0x2E, 0x44, 0x47, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F
 				.db			0x50
 
+sub_622a:
+        lda     *farthest_updown_plyr_row
+        asla
+        asla
+        asla
+        asla
+        ldb     #6
+        ;jsr     sub_87d5                ; sound stuff?
+        jmp     throttle_and_update_sound        
+        
 init_read_unpack_display_level:	; $6238
 				stb			*editor_n
 				ldb			#0xff
@@ -730,7 +747,7 @@ cant_fall:
 				
 handle_falling:	; $6525
 				lda			#0
-				sta			*unk_9b
+				sta			*not_falling
 				jsr			calc_char_and_addr
 				jsr			wipe_char
 				lda			#7											; char=0x13 (fall left)
@@ -783,7 +800,7 @@ fall_check_row_below:	; $654A
 				jmp			draw_sprite
 
 check_falling_sound:	; $6584
-				lda			*unk_9b
+				lda			*not_falling
 				bne			check_controls
 				lda			#0x64
 				ldb			#8
@@ -791,7 +808,7 @@ check_falling_sound:	; $6584
 check_controls:	; $658F				
 				lda			#0x20
 				;sta			*byte_a4
-				sta			*unk_9b
+				sta			*not_falling
 				jsr			read_controls
 				lda			*key_1
 				cmpa		#0xc9										; 'I'?
@@ -1398,7 +1415,7 @@ handle_attract_mode:	; $69B8
 				stb			2,x										; column strobe
 				lda			,x										; active low
 				coma													; active high
-				bne			exit_demo							; key pressed, go
+				;bne			exit_demo							; key pressed, go
 				bra			next_demo_inp
 exit_demo:				
 				lsr			*byte_ac
@@ -3468,22 +3485,96 @@ finish_respawn:	; $776C
 ctrl_m:	; $77AC
 				jsr			cls_and_display_high_scores
 				ldb			#5
-0$:			pshs		b
-				ldy			#0
+0$:			ldy			#0
 1$:			ldx			#PIA0
-				ldb			#0											; all columns
-				stb			2,x											; column strobe
+				lda			#0											; all columns
+				sta			2,x											; column strobe
 				lda			,x											; active low
 				coma														; active high
 				bne			2$											; key, exit
 				leay		-1,y
 				bne			1$
-				puls		b
 				decb
 				bne			0$
 2$:			HGR1
-; stuff to restore pg2 - critical				
-				rts
+        jsr     gcls2
+        ldb     #15                     ; 15 rows to draw
+        stb     *row
+3$:     ldy     #lsb_row_addr
+        lda     b,y
+        sta     *byte_8
+        ldy     #msb_row_addr_2
+        lda     b,y
+        sta     *byte_9                 ; setup tilemap address
+        ldb     #27                     ; 28 columns to draw
+        stb     *col
+4$:     ldy     *byte_9
+        lda     b,y                     ; get object from tilemap
+        cmpa    #5                      ; fall-thru?
+        bne     5$                      ; no, skip
+        lda     #1                      ; display brick
+5$:     jsr     display_char_pg2
+        dec     *col
+        ldb     *col
+        bpl     4$                      ; draw row
+        dec     *row
+        ldb     *row
+        bpl     3$                      ; draw all rows
+        ldb     #0x1e                   ; max holes
+6$:     stb     *byte_88
+        ldy     #hole_cnt
+        lda     b,y                     ; hole active?
+        beq     9$                      ; no, skip
+        pshs    a                       ; A=hole_cnt
+        ldy     #hole_row
+        lda     b,y                     ; get row
+        sta     *row
+        ldy     #hole_col
+        lda     b,y                     ; get column
+        sta     *col
+        puls    a                       ; A=hole_cnt
+        cmpa    #0x15
+        bcs     7$                      ; skip
+        lda     #0                      ; space
+        jsr     display_char_pg2        ; render onto background
+        bra     9$
+7$:     cmpa    #0x0b
+        bcs     8$                      ; skip
+        lda     #0x37                   ; brick refill 0
+        jsr     display_char_pg2        ; render onto background
+        bra     9$
+8$:     lda     #0x38                   ; brick refill 1
+        jsr     display_char_pg2        ; render onto background
+9$:     ldb     *byte_88
+        decb
+        bpl     6$                      ; loop all holes
+        ldb     *no_guards              ; any guards?
+        beq     14$                     ; no, exit
+10$:    ldy     #guard_cnt
+        lda     b,y                     ; get guard_cnt
+        stb     *byte_88                ; zero?
+        tsta                            ; 6809 only
+        beq     13$                     ; yes, skip
+        pshs    a                       ; A=guard_cnt
+        ldy     #guard_col
+        lda     b,y
+        sta     *col
+        ldy     #guard_row
+        lda     b,y
+        sta     *row
+        puls    a                       ; A=guard_cnt
+        cmpa    #0x14
+        bcc     13$                     ; skip
+        cmpa    #0x0b
+        bcs     11$                     ; skip
+        lda     #0x39
+        bne     12$                     ; skip
+11$:    lda     #0x3a
+12$:    jsr     display_char_pg2
+13$:    ldb     *byte_88
+        decb
+        bne     10$                     ; loop all guards
+14$:    jmp     read_controls        
 				
 cls_and_display_high_scores:	; $786B
 				jsr			gcls2
@@ -4028,6 +4119,23 @@ keybd_flush:	; $869F
 				coma														; active high
 				bne			1$											; keys pressed, loop
 				rts
+
+delay_180X_scaled:  ; $86B1
+; B=scale entry
+        ldy     #speed_scale_tbl
+        lda     b,y
+        tfr     b,a                     ; B=speed entry
+delay_180X: ; $86B5
+        ldx     #400                    ; original code=#180
+1$:     dex
+        bne     1$
+        decb
+        bne     delay_180X        
+        rts
+
+speed_scale_tbl:  ; $86BE
+        .db     2, 4, 6, 8, 0xA, 0xC, 0xE, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1A, 0x1C
+        .db     0x1E, 0x20
 												
 display_message:	; $86E0
 				puls		x
@@ -4089,7 +4197,28 @@ read_paddles: ; $87A2
 play_falling_sound:	; $87BA
 ; *** TBD
 				rts
-				
+
+throttle_and_update_sound: ; $8811
+        lda     *playing_sound          ; sound playing?
+        beq     loc_8832                ; no, go
+; stuff        
+        SEC
+        rts
+
+loc_8832: ; $8832
+        lda     *not_falling            ; falling?
+        bne     throttle_game_speed     ; no, go
+; stuff
+; - hack: remove me!!!
+        bra     throttle_game_speed        
+        rts
+
+throttle_game_speed:  ; $8844                				
+        ldb     *game_speed
+        jsr     delay_180X_scaled
+        CLC
+        rts
+        
 set_row_addr_1_2:	; $884B
 				ldy			#lsb_row_addr
 				lda			b,y
@@ -4177,12 +4306,15 @@ wipe_or_draw_level:	; $88A2
 				rts
 
 game_over_animation:	; $8B1A
+; hack
 				lda			#8
 				sta			*row
 				lda			#8
 				sta			*col
 				jsr			display_message
 				.asciz			" GAME OVER "
+; end of hack				
+				CLC
 				rts
 
 attract_move_tbl:	; $9B00
