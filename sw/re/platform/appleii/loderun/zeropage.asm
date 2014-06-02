@@ -41,7 +41,7 @@ lchar_mask								.equ		0x50
 rchar_mask								.equ		0x51
 byte_52										.equ		0x52
 guard_respawn_col					.equ		0x53
-byte_54										.equ		0x54
+playing_sound             .equ		0x54
 guard_ai_col							.equ		0x55
 guard_ai_row							.equ		0x56
 target_col								.equ		0x57
@@ -80,7 +80,7 @@ unused_97									.equ		0x97
 dig_dir										.equ		0x9c
 no_lives									.equ		0x98
 level_active							.equ		0x9a
-unk_9b										.equ		0x9b
+not_falling               .equ		0x9b
 game_active								.equ		0x9d
 key_1											.equ		0x9e
 key_2											.equ		0x9f
