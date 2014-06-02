@@ -15,6 +15,22 @@
 
 START_LEVEL_0_BASED	.equ		0
 
+;.define				CHAMPIONSHIP
+
+.ifndef CHAMPIONSHIP
+SCORE_GOLD				.equ	0x0250
+SCORE_LEVEL				.equ	0x0100
+SCORE_LEVEL_MULT	.equ	15
+SCORE_TRAP				.equ	0x0075
+SCORE_KILL				.equ	0x0075
+.else
+SCORE_GOLD				.equ	0x0500
+SCORE_LEVEL				.equ	0x0100
+SCORE_LEVEL_MULT	.equ	20
+SCORE_TRAP				.equ	0x0100
+SCORE_KILL				.equ	0x0100
+.endif
+
 ;
 ; 6809 stuff
 ;
@@ -301,9 +317,9 @@ next_level:
 				inc			*no_lives								; extra life
 				bne			3$											; skip if no wrap
 				dec			*no_lives								; =255
-3$:			ldb			#15
+3$:			ldb			#SCORE_LEVEL_MULT
 				stb			*farthest_updown_plyr_row
-4$:			ldd			#0x0100									; add 100 pts
+4$:			ldd			#SCORE_LEVEL						; add 100 pts
 				jsr			update_and_display_score
 				jsr     sub_622a
 				jsr     sub_622a
@@ -323,7 +339,7 @@ dec_lives:	; $613F
 				beq			loc_61d0								; yes, go
 				lda			*no_lives								; any lives left?
 				bne			next_level_cont					; yes, continue
-				;jsr			loc_84c8								; (some high score stuff)
+				jsr			check_and_update_high_score_tbl
 				jsr			game_over_animation
 				bcs			check_start_new_game
 				
@@ -353,7 +369,7 @@ title_wait_for_key: ; $618e
 				stb			*attract_mode						; set attract mode
 				stb			*level
 				stb			*byte_ac
-				stb			*game_active
+				stb			*no_cheat
 ; do some other crap
 				jmp			zero_score_and_init_game
 
@@ -395,7 +411,8 @@ start_new_game:	; $6201
 				stb			*level_0_based
 				incb
 				stb			*level
-				stb			*game_active
+				ldb			#1											; because we may start on another level
+				stb			*no_cheat
 				lda			#2
 				sta			*attract_mode
 				jmp			zero_score_and_init_game														
@@ -1204,7 +1221,7 @@ digging_left:
 				jsr			draw_sprite
 				ldb			*dig_sprite
 				cmpb		#0x0c
-				beq			loc_6898
+				lbeq		loc_6898
 				cmpb		#0
 				beq			2$
 				ldy			#sprite_to_char_tbl+0x11
@@ -1253,7 +1270,8 @@ abort_dig_left:	; $686E
 				ldb			*dig_sprite
 				beq			finish_dig_left
 				decb
-				lda			#sprite_to_char_tbl+0x12
+				ldy			#(sprite_to_char_tbl+0x12)
+				lda			b,y
 				pshs		a
 				ldb			*current_row
 				lda			*current_col
@@ -1378,7 +1396,8 @@ abort_dig_right:	; $6936
 				cmpb		#0x0c
 				beq			finish_dig_right
 				decb
-				lda			#sprite_to_char_tbl+0x12
+				ldy			#sprite_to_char_tbl+0x12
+				lda			b,y
 				pshs		a
 				lda			*current_col
 				inca
@@ -1388,7 +1407,6 @@ abort_dig_right:	; $6936
 				tfr			a,b											; B=x_in_2_pixel_incs
 				puls		a												; A=char
 				jsr			wipe_char
-
 
 finish_dig_right:	; $695C
 				lda			#0
@@ -1614,7 +1632,7 @@ goto_next_level:	; $6A56
 				inc			*level
 				inc			*level_0_based
 				lsr			*level_active						; 'kill' player
-				lsr			*game_active
+				lsr			*no_cheat
 				rts
 				
 extra_life:	; $6A61
@@ -1622,7 +1640,7 @@ extra_life:	; $6A61
 				bne			1$
 				dec			*no_lives
 1$:			jsr			display_no_lives
-				lsr			*game_active
+				lsr			*no_cheat
 				jmp			read_controls
 
 freeze:	; $6A76
@@ -1727,7 +1745,7 @@ check_for_gold: ; $6b9d
 				tfr			a,b											; B=x_in_2_pixel_incs
 				lda			#7											; gold
 				jsr			wipe_char								; from video display
-				ldd			#0x0250									; add 250 pts
+				ldd			#SCORE_GOLD							; add 250/500 pts
 				jsr			update_and_display_score
 				;jsr		sub_87e1								; sound
 9$:			rts
@@ -1972,7 +1990,7 @@ handle_guard_falling:	; $ 6D64
 				dec			*no_gold
 2$:			lda			*guard_trap_cnt_init
 				sta			*curr_guard_state
-				ldd			#0x0075									; add 75 pts
+				ldd			#SCORE_TRAP							; add 75/100 pts
 				jsr			update_and_display_score
 				;jsr			sub_87e1								; sound stuff				
 
@@ -3378,7 +3396,7 @@ check_trapped_guards:	; $768A
 				lda			#0
 				ldy			#guard_sprite
 				sta			b,y
-				ldd			#0x0075									; add 75 pts
+				ldd			#SCORE_KILL							; add 75/100 pts
 				jsr			update_and_display_score
 				jmp			next_hole
 
@@ -3589,8 +3607,9 @@ cls_and_display_high_scores:	; $786B
 				.ascii	"    -------- ----- --------\r"
 				.db			0
 				lda			#1
-				sta			*guard_ai_col								; counter
-1$:			cmpa		#10											; 10th score?
+				sta			*guard_ai_col						; counter
+display_hs:	; $78D4		
+				cmpa		#10											; 10th score?
 				bne			2$											; no, skip
 				lda			#1
 				jsr			display_digit
@@ -3611,22 +3630,27 @@ cls_and_display_high_scores:	; $786B
         tfr     a,b
         lda     b,y                     ; level, zero?
         bne     4$                      ; no, skip
-        bra     loc_798c
-4$:     lda     *guard_ai_row           ;         
-        
-        
-        
-        
-; *** start of fudge
-				lda			#(0x80|0x4D)
-				jsr			display_character				
-				lda			#(0x80|0x4D)
-				jsr			display_character				
-				lda			#(0x80|0x43)
-				jsr			display_character		
+        lbra    next_hs
+4$:     ldb     *guard_ai_row           ; offset into hs table
+				ldy			#(hs_tbl+0)
+				lda			b,y											; initial #1
+				ora			#(1<<7)
+				jsr			display_character
+        ldb			*guard_ai_row
+        ldy			#(hs_tbl+1)
+        lda			b,y											; initial #2
+        ora			#(1<<7)
+				jsr			display_character
+        ldb			*guard_ai_row
+        ldy			#(hs_tbl+2)
+        lda			b,y											; initial #3
+        ora			#(1<<7)
+				jsr			display_character
 				jsr			display_message
 				.asciz	"    "		
-				lda			#42
+				ldb			*guard_ai_row
+        ldy			#(hs_tbl+3)
+				lda			b,y											; level
 				jsr			cnv_byte_to_3_digits
 				lda			*hundreds
 				jsr			display_digit
@@ -3636,42 +3660,53 @@ cls_and_display_high_scores:	; $786B
 				jsr			display_digit
 				jsr			display_message
 				.asciz	"  "
-				lda			#0x31
+				ldb			*guard_ai_row
+				ldy			#(hs_tbl+4)
+				lda			b,y											; millions
 				jsr			cnv_bcd_to_2_digits
 				lda			*tens
 				jsr			display_digit
 				lda			*units
 				jsr			display_digit
-				lda			#0x41
+				ldb			*guard_ai_row
+				ldy			#(hs_tbl+5)
+				lda			b,y											; hundreds, tens of thousands
 				jsr			cnv_bcd_to_2_digits
 				lda			*tens
 				jsr			display_digit
 				lda			*units
 				jsr			display_digit
-				lda			#0x59
+				ldb			*guard_ai_row
+				ldy			#(hs_tbl+6)
+				lda			b,y											; thousands, hundreds
 				jsr			cnv_bcd_to_2_digits
 				lda			*tens
 				jsr			display_digit
 				lda			*units
 				jsr			display_digit
-				lda			#0x26
+				ldb			*guard_ai_row
+				ldy			#(hs_tbl+7)
+				lda			b,y											; tens, units
 				jsr			cnv_bcd_to_2_digits
 				lda			*tens
 				jsr			display_digit
 				lda			*units
 				jsr			display_digit
-; stuff
+next_hs:	; $788C
 				jsr			cr
-				inc			*guard_ai_col								; next score
+				inc			*guard_ai_col						; next score
 				lda			*guard_ai_col
 				cmpa		#11											; done all scores?
 				bcc			done_hs
-				lbra		1$
+				lbra		display_hs
 done_hs:	; $799A				
 				HGR2
 				lda			#HGR1_MSB
 				sta			*display_char_page				
 				rts
+
+high_score_offset_tbl:	; $79A2
+				.db			0, 0, 8, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38, 0x40, 0x48
 																																				
 cls_and_display_game_status:	; $79AD
 				jsr			gcls1
@@ -4061,6 +4096,113 @@ char_bank_tbl:
 				.dw			#tile_data+2*22*104
 				.dw			#tile_data+3*22*104
 
+check_and_update_high_score_tbl:	; $84C8
+				lda			*no_cheat								; cheating?
+				beq			3$											; yes, skip high score update
+				lda			*score_1e1_1
+				ora			*score_1e3_1e2
+				ora			*score_1e5_1e4
+				ora			*score_1e6							; score = 0?
+				beq			3$											; yes, exit
+; the Apple version checks the disk here				
+				ldb			#1											; 1st high score
+1$:			ldy			#high_score_offset_tbl
+				lda			b,y
+				stb			*guard_ai_row						; 6809 only
+				tfr			a,b											; B=offset
+				lda			*level
+				ldy			#(hs_tbl+3)							; high score level
+				cmpa		b,y											; compare
+				bcs			2$											; lower, skip
+				bne			add_hs_entry
+				lda			*score_1e6
+				ldy			#(hs_tbl+4)							; millions
+				cmpa		b,y											; compare
+				bcs			2$											; lower, skip
+				bne			add_hs_entry
+				lda			*score_1e5_1e4
+				ldy			#(hs_tbl+5)							; hundreds, tens of thousands
+				cmpa		b,y											; compare
+				bcs			2$											; lower, skip
+				bne			add_hs_entry
+				lda			*score_1e3_1e2
+				ldy			#(hs_tbl+6)							; thousands, hundreds
+				cmpa		b,y											; compare
+				bcs			2$											; lower, skip
+				bne			add_hs_entry
+				lda			*score_1e1_1
+				ldy			#(hs_tbl+7)							; tens, units
+				cmpa		b,y											; compare
+				bcs			2$											; lower, skip
+				bne			add_hs_entry
+2$:			ldb			*guard_ai_row						; B=entry index (6809 only)
+				incb														; next high score				
+				cmpb		#11											; done?
+				bcs			1$											; no, loop
+3$:			rts
+
+add_hs_entry:
+				ldb			*guard_ai_row						; 6809 only
+				cmpb		#10											; last entry?
+				beq			3$											; yes, skip
+				stb			*guard_ai_row
+				ldb			#9
+1$:			ldy			#high_score_offset_tbl
+				lda			b,y
+				pshs		b												; B=score index
+				tfr			a,b
+				lda			#8											; 8 bytes to copy
+				sta			*scanline_cnt
+2$:			ldy			#hs_tbl
+				lda			b,y
+				ldy			#(hs_tbl+8)
+				sta			b,y
+				incb
+				dec			*scanline_cnt
+				bne			2$											; copy hs entry
+				puls		b												; B=score index
+				cmpb		*guard_ai_row						; done?
+				beq			3$											; yes, skip
+				decb
+				bne			1$											; loop all entries
+3$:			ldy			#high_score_offset_tbl
+				lda			b,y
+				tfr			a,b											; B=entry
+				lda			#0x20										; space
+				ldy			#hs_tbl
+				sta			b,y
+				leay		1,y
+				sta			b,y
+				leay		1,y
+				sta			b,y											; zap initials
+				lda			*level
+				leay		1,y
+				sta			b,y											; set level
+				lda			*score_1e6
+				leay		1,y
+				sta			b,y											; set millions
+				lda			*score_1e5_1e4
+				leay		1,y
+				sta			b,y											; set hundreds, tens of thousands
+				lda			*score_1e3_1e2
+				leay		1,y
+				sta			b,y											; set thousands, hundreds
+				lda			*score_1e1_1
+				leay		1,y
+				sta			b,y											; set units
+				stb			*byte_69				
+				ldy			#high_score_offset_tbl
+				lda			b,y
+				; self-modifying code here
+				jsr			cls_and_display_high_scores
+				lda			#HGR2_MSB
+				sta			*display_char_page
+				; high score initials entry goes here!!!
+				lda			#HGR1_MSB
+				sta			*display_char_page
+				; apple version checks disk signature here				
+				jmp			title_wait_for_key
+								
 draw_end_of_screen_ladder:	; $8631
 				lda			#0
 				sta			eos_ladder_col					; flag ladder OK
@@ -4140,7 +4282,7 @@ delay_180X_scaled:  ; $86B1
         lda     b,y
         tfr     b,a                     ; B=speed entry
 delay_180X: ; $86B5
-        ldx     #400                    ; original code=#180
+        ldx     #650                    ; original code=#180
 1$:     dex
         bne     1$
         decb
@@ -4443,6 +4585,20 @@ row_to_scanline_tbl:	; $1c51
 col_to_addr_tbl:	; $1c62
 				.db			0, 1, 2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 15, 16
 				.db			17, 18, 20, 21, 22, 23, 25, 26, 27, 28, 30, 31, 32, 33
+
+hs_tbl:	; $1F00
+; 0-2 = initials, 3 = level, 4-7 = score (BCD)
+				.db			0x4d, 0x4d, 0x43, 42, 0x00, 0x04, 0x20, 0x00
+				.db			0, 0, 0, 0, 0, 0, 0, 0				
+				.db			0, 0, 0, 0, 0, 0, 0, 0				
+				.db			0, 0, 0, 0, 0, 0, 0, 0				
+				.db			0, 0, 0, 0, 0, 0, 0, 0				
+				.db			0, 0, 0, 0, 0, 0, 0, 0				
+				.db			0, 0, 0, 0, 0, 0, 0, 0				
+				.db			0, 0, 0, 0, 0, 0, 0, 0				
+				.db			0, 0, 0, 0, 0, 0, 0, 0				
+				.db			0, 0, 0, 0, 0, 0, 0, 0				
+				.db			0, 0, 0, 0, 0, 0, 0, 0				
 
 ; 			.nlist
 ; .include "tiles.asm"

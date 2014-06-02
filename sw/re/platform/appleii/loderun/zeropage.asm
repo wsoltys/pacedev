@@ -58,6 +58,7 @@ byte_61										.equ		0x61
 byte_62										.equ		0x62
 byte_63										.equ		0x63
 byte_64										.equ		0x64
+byte_69										.equ		0x69
 col_pixel_shift						.equ		0x71
 col												.equ		0x85
 row												.equ		0x86
@@ -81,7 +82,7 @@ dig_dir										.equ		0x9c
 no_lives									.equ		0x98
 level_active							.equ		0x9a
 not_falling               .equ		0x9b
-game_active								.equ		0x9d
+no_cheat									.equ		0x9d
 key_1											.equ		0x9e
 key_2											.equ		0x9f
 dig_dir										.equ		0x9c
