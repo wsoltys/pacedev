@@ -3603,6 +3603,20 @@ cls_and_display_high_scores:	; $786B
 				jsr			display_digit
 3$:			jsr			display_message
 				.asciz	".    "
+        ldb     *guard_ai_col           ; score counter
+        ldy     #high_score_offset_tbl
+        lda     b,y
+        sta     *guard_ai_row           ; offset into hs table
+        ldy     #(hs_tbl+3)             ; level offset
+        tfr     a,b
+        lda     b,y                     ; level, zero?
+        bne     4$                      ; no, skip
+        bra     loc_798c
+4$:     lda     *guard_ai_row           ;         
+        
+        
+        
+        
 ; *** start of fudge
 				lda			#(0x80|0x4D)
 				jsr			display_character				
