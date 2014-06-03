@@ -274,7 +274,7 @@ main_game_loop:
 				lda			b,y
 				sta			*byte_62
 				ldb			*unused_97							; should be 0
-				ldy			#byte_621d
+				ldy			#guard_trap_cnt_init_tbl
 				lda			b,y
 				sta			*guard_trap_cnt_init		; should be 1st entry (0x26)
 in_level_loop:
@@ -334,6 +334,7 @@ dec_lives:	; $613F
 				jsr			display_no_lives
 				;jsr			sub_78e1								; sound stuff
 				jsr			throttle_and_update_sound
+				; stuff
 				lda			*attract_mode
 				lsra														; demo mode?
 				beq			loc_61d0								; yes, go
@@ -419,7 +420,7 @@ start_new_game:	; $6201
 
 x3_tbl:	; $6214
        .db			0, 3, 6, 9, 12, 15, 18, 21, 24
-byte_621d:	; $6214
+guard_trap_cnt_init_tbl:	; $6214
 				.db			0x26, 0x26, 0x2E, 0x44, 0x47, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F
 				.db			0x50
 
@@ -703,7 +704,7 @@ draw_level:	; $648B
 
 handle_player: ; $64bd
 				lda			#1
-				;sta			unk_94
+				sta			*enable_collision_detect
 				lda			*dig_dir
 				beq			not_digging
 				bpl			1$											; digging right
@@ -778,7 +779,7 @@ handle_falling:	; $6525
 				cmpa		#5											; >=5?
 				bcc			fall_check_row_below		; yes, skip
 				jsr			check_for_gold
-				jmp			draw_sprite
+				jmp			draw_player_sprite
 
 fall_check_row_below:	; $654A
 				lda			#0
@@ -814,7 +815,7 @@ fall_check_row_below:	; $654A
 				lda			#9											; player
 				ldy			*msb_row_level_data_addr
 				sta			b,y											; update tilemap
-				jmp			draw_sprite
+				jmp			draw_player_sprite
 
 check_falling_sound:	; $6584
 				lda			*not_falling
@@ -926,7 +927,7 @@ can_move_left: ; $6600
 4$:			lda			#3											; 1st sprite index (swinger left)
 				ldb			#5											; last sprite index (swinger left)
 5$:			jsr			update_sprite_index
-				jmp			draw_sprite				
+				jmp			draw_player_sprite				
 
 move_right: ; $6645
 				ldb			*current_row
@@ -994,7 +995,7 @@ can_move_right: ; $6674
 4$:			lda			#0x0b										; 1st sprite index (swinger right)
 				ldb			#0x0d										; last sprite index (swinger right)
 5$:			jsr			update_sprite_index
-				jmp			draw_sprite				
+				jmp			draw_player_sprite				
 
 move_up: ; $66BD
 				ldb			*current_row
@@ -1096,7 +1097,7 @@ update_climber_sprite:
 				lda			#0x10										; 1st sprite index (climber)
 				ldb			#0x11										; last sprite index (climber)
 				jsr			update_sprite_index
-				jsr			draw_sprite
+				jsr			draw_player_sprite
 				CLC															; flag able to move
 				rts
 
@@ -1218,7 +1219,7 @@ digging_left:
 				bcc			1$
 				lda			#6
 1$:			sta			*sprite_index
-				jsr			draw_sprite
+				jsr			draw_player_sprite
 				ldb			*dig_sprite
 				cmpb		#0x0c
 				lbeq		loc_6898
@@ -1343,7 +1344,7 @@ digging_right:
 				bcc			1$
 				lda			#0x0e
 1$:			sta			*sprite_index
-				jsr			draw_sprite
+				jsr			draw_player_sprite
 				ldb			*dig_sprite
 				cmpb		#0x18
 				lbeq		loc_6962
@@ -1728,7 +1729,7 @@ check_for_gold: ; $6b9d
 				lda			b,y											; get object from tilemap
 				cmpa		#7											; gold?
 				bne			9$											; no, exit
-				;lsr		unk_94
+				lsr		  *enable_collision_detect  ; disable
 				dec			*no_gold
 				ldb			*current_row
 				stb			*row
@@ -1761,10 +1762,15 @@ update_sprite_index: ; $6bf4
 				bcs			1$
 				rts				
 				
-draw_sprite: ; $6c02
+draw_player_sprite: ; $6c02
 				jsr			calc_char_and_addr
 				jsr			display_transparent_char
-				rts
+				lda     *collision_detect       ; collision?
+				beq     1$                      ; no, skip
+				lda     *enable_collision_detect  ; enabled?
+				beq     1$                      ; no, skip
+				lsr     *level_active           ; kill player
+1$:			rts
 
 adjust_x_offset_in_tile:	; $6C13
 				lda			*x_offset_within_tile
@@ -2293,7 +2299,7 @@ guard_can_move_down:	; $6F63
         lda			b,y											; get object from tilemap
         cmpa    #9                      ; player?
         bne     2$											; no, skip
-        lsr     level_active						; kill player
+        lsr     *level_active						; kill player
 2$:     lda     #8											; guard
         sta     b,y											; update tilemap
         lda     #0
@@ -4035,7 +4041,7 @@ display_transparent_char:	; $83A7
 				lda			#11
 				sta			*scanline_cnt
 				lda			#0
-				sta			*byte_52
+				sta			*collision_detect       ; initialise
 				ldx			#char_render_buf
 OR_2_byte_char_to_video:	; $83C3
 				ldb			*scanline
@@ -4046,8 +4052,8 @@ OR_2_byte_char_to_video:	; $83C3
 				ldy			*msb_line_addr_pg2
 				eora		b,y											; background
 				anda		,x											; char render buf
-				ora			*byte_52
-				sta			*byte_52
+				ora			*collision_detect
+				sta			*collision_detect
 				lda			,x											; get byte to be rendered
 				ldy			*msb_line_addr_pg1
 				ora			b,y
@@ -4058,8 +4064,8 @@ OR_2_byte_char_to_video:	; $83C3
 				ldy			*msb_line_addr_pg2
 				eora		b,y
 				anda		,x
-				ora			*byte_52
-				sta			*byte_52
+				ora			*collision_detect
+				sta			*collision_detect
 				lda			,x											; get byte to be rendered
 				ldy			*msb_line_addr_pg1
 				ora			b,y

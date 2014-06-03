@@ -39,7 +39,7 @@ msg_char									.equ		0x1e
 hires_page_msb_1					.equ		0x1f
 lchar_mask								.equ		0x50
 rchar_mask								.equ		0x51
-byte_52										.equ		0x52
+collision_detect          .equ		0x52
 guard_respawn_col					.equ		0x53
 playing_sound             .equ		0x54
 guard_ai_col							.equ		0x55
@@ -75,6 +75,7 @@ score_1e5_1e4							.equ		0x90
 score_1e6									.equ		0x91
 packed_byte_cnt						.equ		0x92
 no_gold										.equ		0x93
+enable_collision_detect   .equ    0x94
 paddles_detected					.equ		0x95
 level_0_based							.equ		0x96
 unused_97									.equ		0x97
