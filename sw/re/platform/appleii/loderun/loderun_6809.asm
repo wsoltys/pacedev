@@ -121,14 +121,14 @@ start:
 				sta			FIRQENR   							
 				lda			#0x80										; graphics mode, 60Hz, 1 line/row
 				sta			VMODE     							
-;				lda			#0x7A										; 225 scanlines, 128 bytes/row, 16 colours
 				lda			#0x0C										; 192 scanlines, 40 bytes/row, 2 colours (320x192)
+;				lda			#0x15										; 192 scanlines, 80 bytes/row, 4 colours (320x192)
 				sta			VRES      							
 				lda			#0x00										; black
 				sta			BRDR      							
 				lda			#0xE0										; screen at page $38
 				sta			VOFFMSB
-				lda			#0x00      							
+				lda			#0x00
 				sta			VOFFLSB   							
 				lda			#0x00										; normal display, horiz offset 0
 				sta			HOFF      							
