@@ -340,7 +340,7 @@ dec_lives:	; $613F
 				beq			loc_61d0								; yes, go
 				lda			*no_lives								; any lives left?
 				bne			next_level_cont					; yes, continue
-				jsr			check_and_update_high_score_tbl
+				;jsr			check_and_update_high_score_tbl
 				jsr			game_over_animation
 				bcs			check_start_new_game
 				
@@ -1434,7 +1434,7 @@ handle_attract_mode:	; $69B8
 				stb			2,x										; column strobe
 				lda			,x										; active low
 				coma													; active high
-				;bne			exit_demo							; key pressed, go
+				bne			exit_demo							; key pressed, go
 				bra			next_demo_inp
 exit_demo:				
 				lsr			*byte_ac
@@ -3741,6 +3741,15 @@ cls_and_display_game_status:	; $79AD
 				ldd			#0x0000									; add 0 pts
 				bra			update_and_display_score				
 
+get_line_addr_curr_page:	; $7A31
+; B=scanline
+				lda			#40
+				mul
+				ora			*hires_page_msb_1
+				stb			*lsb_line_addr_pg1
+				sta			*msb_line_addr_pg1
+				rts				
+
 get_line_addr_pgs_1_2: ; $7A3E
 				lda			#40
 				mul
@@ -3765,10 +3774,10 @@ gcls2:
 				tfr			d,x											; start addr
 				adda		#0x1E
 				tfr			d,y											; end addr
-gcls:		sty			*byte_a
+gcls:		sty			*word_a
 				lda			#0x00
 1$:			sta			,x+
-				cmpx		*byte_a
+				cmpx		*word_a
 				bne			1$
 				rts
 
@@ -4457,13 +4466,13 @@ wipe_or_draw_level:	; $88A2
 				adda		#0x1b
 				orb			#0x80										; end addr (line 176)
 				tfr			d,y
-				sty			*byte_a
+				sty			*word_a
 				lda			#HGR1_MSB
 				clrb
 				tfr			d,y
 1$:			lda			,x+
 				sta			,y+
-				cmpx		*byte_a
+				cmpx		*word_a
 				bne			1$
 				rts
 
@@ -4476,16 +4485,149 @@ game_over_animation:	; $8B1A
         lda     game_over_loop_cnt
         cmpa    #100
         bcs     1$
-        jsr     game_over_frame_1_11
+        ;jsr     game_over_frame_1_11
         CLC
 				rts
 
-game_over_frame_1_11: ; $8BCF
-        rts
-        
+game_over_frame_6:	; $8B7A
+        jsr     render_game_over
+        .db 		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0xA, 2, 1, 0
+
+game_over_frame_5_7:	; $8B8B
+        jsr     render_game_over
+        .db 		0, 0, 1, 2, 3, 4, 5, 7, 9, 0xA, 2, 1, 0, 0
+
+game_over_frame_4_8:	; $8B9C
+        jsr     render_game_over
+        .db 		0, 0, 0, 1, 2, 3, 4, 9, 0xA, 2, 1, 0, 0, 0
+
+game_over_frame_3_9:	; $8BAD
+        jsr     render_game_over
+        .db 		0, 0, 0, 0, 1, 2, 3, 0xA, 2, 1, 0, 0, 0, 0
+
+game_over_frame_2_10:	; $8BBE
+        jsr     render_game_over
+        .db 		0, 0, 0, 0, 0, 1, 3, 0xA, 1, 0, 0, 0, 0, 0
+
+game_over_frame_1_11:	; $8BCF
+        jsr     render_game_over
+        .db 		0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0
+
+game_over_frame_16:	; $8BE0
+        jsr     render_game_over
+        .db 		0, 1, 2, 0xA, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
+
+game_over_frame_15_17:	; $8BF1
+        jsr     render_game_over
+        .db 		0, 0, 1, 2, 0xA, 9, 7, 5, 4, 3, 2, 1, 0, 0
+
+game_over_frame_14_18:	; $8C02
+        jsr     render_game_over
+        .db 		0, 0, 0, 1, 2, 0xA, 9, 4, 3, 2, 1, 0, 0, 0
+
+game_over_frame_13_19:	; $8C13
+        jsr     render_game_over
+        .db 		0, 0, 0, 0, 1, 2, 0xA, 3, 2, 1, 0, 0, 0, 0
+
+game_over_frame_12_20:	; $8C24
+        jsr     render_game_over
+				.db 		0, 0, 0, 0, 0, 1, 0xA, 3, 1, 0, 0, 0, 0, 0
+
+game_over_line_data:	; 8C35
+gol1:		.db 		0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80
+				.db 		0x80, 0x80
+gol2:		.db 		0xC0, 0xAA, 0xD5, 0xAA, 0xD5, 0xAA, 0xD5, 0xAA, 0xD5, 0xAA, 0xD5, 0xAA
+				.db 		0xD5, 0x80
+gol3:		.db 		0x90, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80
+				.db 		0x80, 0x82
+gol4:		.db 		0x90, 0xAA, 0xD1, 0xA2, 0xD5, 0xA8, 0x85, 0xA8, 0xC5, 0xA2, 0xD4, 0xA2
+				.db 		0x95, 0x82
+gol5:		.db 		0x90, 0x82, 0x91, 0xA2, 0xC5, 0xA8, 0x80, 0x88, 0xC5, 0xA2, 0x94, 0xA0
+				.db 		0x90, 0x82
+gol6:		.db 		0x90, 0x82, 0x90, 0xA2, 0xC4, 0xA8, 0x80, 0x88, 0xC5, 0xA2, 0x94, 0xA0
+				.db 		0x90, 0x82
+gol7:		.db 		0x90, 0x82, 0x90, 0xA2, 0xC4, 0xA8, 0x81, 0x88, 0xC4, 0xA2, 0xD4, 0xA0
+				.db 		0x95, 0x82
+gol8:		.db 		0x90, 0xA2, 0xD1, 0xA2, 0xC4, 0x88, 0x80, 0x88, 0xC4, 0xA2, 0x84, 0xA0
+				.db 		0x85, 0x82
+gol9:		.db 		0x90, 0x82, 0x91, 0xA2, 0xC4, 0x88, 0x80, 0x88, 0xC4, 0xAA, 0x84, 0xA0
+				.db 		0x85, 0x82
+gol10:	.db 		0x90, 0x82, 0x91, 0xA2, 0xC4, 0x88, 0x80, 0x88, 0xC4, 0x8A, 0x84, 0xA0
+				.db 		0x91, 0x82
+gol11:	.db 		0x90, 0xAA, 0x91, 0xA2, 0xC4, 0xA8, 0x85, 0xA8, 0x85, 0x82, 0xD4, 0xA2
+				.db 		0x91, 0x82
+
+game_over_data_addr_tbl:	; $8CCF
+				.dw			#(gol1-13)
+				.dw			#(gol2-13)
+				.dw			#(gol3-13)
+				.dw			#(gol4-13)
+				.dw			#(gol5-13)
+				.dw			#(gol6-13)
+				.dw			#(gol7-13)
+				.dw			#(gol8-13)
+				.dw			#(gol9-13)
+				.dw			#(gol10-13)
+				.dw			#(gol11-13)
+
+render_game_over:	; $8CE5
+				puls		x
+				stx			*word_a									; data address
+				ldb			#80											; scanline
+				stb			*row
+				bra			loc_8d12
+game_over_do_scanline:
+				jsr			get_line_addr_curr_page	; B=scanline
+				ldy			*word_a
+				lda			,y											; get graphics line #
+				asla														; word offset in table for line data
+				tfr			a,b											; B=offset
+				ldy			#game_over_data_addr_tbl
+				ldx			b,y											; X=address of line data
+				ldb			#13											; starting column
+				ldy			*msb_line_addr_pg1
+1$:			lda			b,x											; data byte
+				sta			b,y											; update screen
+				incb
+				cmpb		#27											; last column?
+				bcs			1$											; no, loop
+; this was after the jump on 6502 due to return address differences				
+				jsr			game_over_anim_tbl_next_byte
+loc_8d12:	; $8D12
+				inc			*row
+				ldb			*row
+				cmpb		#95											; last row?
+				bcs			game_over_do_scanline		; no, loop
+				ldb			game_over_loop_cnt
+				lda			#0xff
+2$:			deca
+				bne			2$											; delay
+				decb														; done?
+				bne			2$											; no, loop
+.ifdef PLATFORM_COCO3				
+				ldx			#PIA0
+				ldb			#0											; all columns
+				stb			2,x											; column strobe
+				lda			,x
+				coma														; any key pressed?
+.endif				
+;				bne			exit_game_over_animation
+				rts
+
+exit_game_over_animation:
+				puls		x												; discard return address
+				SEC
+				rts
+				
 game_over_loop_cnt: ; $8D4B
         .ds     1
-        
+
+game_over_anim_tbl_next_byte:	; $8D4C
+				ldy			*word_a
+				leay		1,y
+				sty			*word_a
+				rts
+       
 attract_move_tbl:	; $9B00
 				.db 		0x16, 0x4C, 0x66, 2, 0x55, 1, 0x66, 2, 0x36, 0x18, 0x55, 1, 0x44, 1
 				.db 		0x66, 0x14, 0x36, 0xD, 0x30, 0x17, 0x60, 8, 0x66, 3, 0x16, 0x16, 0x66

@@ -17,7 +17,7 @@ lsb_row_level_data_addr		.equ		0x07		; swapped for 6809
 msb_row_level_data_addr		.equ		0x06		; swapped for 6809
 byte_8										.equ		0x09		; swapped for 6809
 byte_9										.equ		0x08		; swapped for 6809
-byte_a										.equ		0x0a
+word_a										.equ		0x0a
 lsb_line_addr_pg1					.equ		0x0d		; swapped for 6809
 msb_line_addr_pg1					.equ		0x0c		; swapped for 6809
 lsb_line_addr_pg2					.equ		0x0f		; swapped for 6809
