@@ -4468,17 +4468,24 @@ wipe_or_draw_level:	; $88A2
 				rts
 
 game_over_animation:	; $8B1A
-; hack
-				lda			#8
-				sta			*row
-				lda			#8
-				sta			*col
-				jsr			display_message
-				.asciz			" GAME OVER "
-; end of hack				
-				CLC
+        lda     #1
+        sta     game_over_loop_cnt
+        lda     #HGR1_MSB
+        sta     *hires_page_msb_1
+1$:     jsr     game_over_frame_1_11
+        lda     game_over_loop_cnt
+        cmpa    #100
+        bcs     1$
+        jsr     game_over_frame_1_11
+        CLC
 				rts
 
+game_over_frame_1_11: ; $8BCF
+        rts
+        
+game_over_loop_cnt: ; $8D4B
+        .ds     1
+        
 attract_move_tbl:	; $9B00
 				.db 		0x16, 0x4C, 0x66, 2, 0x55, 1, 0x66, 2, 0x36, 0x18, 0x55, 1, 0x44, 1
 				.db 		0x66, 0x14, 0x36, 0xD, 0x30, 0x17, 0x60, 8, 0x66, 3, 0x16, 0x16, 0x66
