@@ -55,6 +55,16 @@ SCORE_KILL				.equ	0x0100
 ; $E800-$F993   Title Screen Data
 ;
 
+;.define			GFX_1BPP
+;.define			GFX_MONO
+
+.ifndef GFX_1BPP
+	.define		GFX_2BPP
+.endif
+.ifndef GFX_MONO
+	.define		GFX_COLOUR
+.endif
+	
 .define			HAS_TITLE
 .define			TILES_EXTERNAL
 .define			TITLE_EXTERNAL
@@ -90,7 +100,7 @@ ROMMODE			.equ		0xFFDE
 RAMMODE			.equ		0xFFDF
 
 HGR1_MSB		.equ		0x00
-HGR2_MSB		.equ		0x20
+HGR2_MSB		.equ		0x40
 
 						.macro HGR1
 						lda			#0xE0								; screen at page $38
@@ -98,16 +108,50 @@ HGR2_MSB		.equ		0x20
 						.endm
 
 						.macro HGR2
-						lda			#0xE4								; screen at page $39
+						lda			#0xE8								; screen at page $40
 						sta			VOFFMSB
 						.endm
+
+.ifdef GFX_MONO
+					.macro GFX_BYTE
+						lsra												; b0->C
+						rorb												; C->b7
+						asrb												; b7->b7..b6
+						lsra												; b1->C
+						rorb												; C->b7
+						asrb												; b7->b7..b6
+						lsra												; b2->C
+						rorb												; C->b7
+						asrb												; b7->b7..b6
+						lsra												; b3->C
+						rorb												; C->b7
+						asrb												; b7->b7..b6
+					.endm
+.else
+					.macro GFX_NIBBLE
+						pshs		a
+						lsra												; b0->C
+						rorb												; C->b7
+						lsra												; b1->C
+						rorb												; C->b7, b7->b6
+						puls		a
+						lsra												; b0->C
+						rorb												; C->b7, b7..6->b6..5
+						lsra												; b1->C
+						rorb												; C->b7, b7..5->b6..4
+					.endm
+					.macro GFX_BYTE
+						GFX_NIBBLE
+						GFX_NIBBLE
+					.endm
+.endif						
 						
 codebase		.equ		0x8000
-.endif
+stack				.equ		0xC000
+
+.endif	; PLATFORM_COCO3
 
 						.org		codebase
-;stack				.equ		.-2
-stack					.equ		0xC000
 start:
 
 .ifdef PLATFORM_COCO3
@@ -133,8 +177,11 @@ start:
 				sta			FIRQENR   							
 				lda			#0x80										; graphics mode, 60Hz, 1 line/row
 				sta			VMODE     							
+.ifdef GFX_1BPP				
 				lda			#0x0C										; 192 scanlines, 40 bytes/row, 2 colours (320x192)
-;				lda			#0x15										; 192 scanlines, 80 bytes/row, 4 colours (320x192)
+.else				
+				lda			#0x15										; 192 scanlines, 80 bytes/row, 4 colours (320x192)
+.endif				
 				sta			VRES      							
 				lda			#0x00										; black
 				sta			BRDR      							
@@ -144,10 +191,24 @@ start:
 				sta			VOFFLSB   							
 				lda			#0x00										; normal display, horiz offset 0
 				sta			HOFF      							
-				lda			#0x00
-				sta			PALETTE
-				lda			#0x12
-				sta			PALETTE+1
+				ldx			#PALETTE
+.ifdef GFX_1BPP
+				lda			#0x00										; black
+				sta			,x+
+.else
+				lda			#0x00										; black
+				sta			,x+
+				lda			#0x25										; orange (#0x35?)
+				sta			,x+
+				lda			#0x2d										; blue (#0x19?)
+				sta			,x+
+.endif	; GFX_1BPP
+.ifdef GFX_MONO
+				lda			#0x12										; green
+.else				
+				lda			#0x3f										; white
+.endif				
+				sta			,x+
 				sta			CPU179									; select fast CPU clock (1.79MHz)
 				
 .ifdef TILES_EXTERNAL
@@ -157,11 +218,11 @@ start:
 				sta			,x+											; page 2 @$C000-$DFFF
 				inca
 				sta			,x+											; page 3 @$E000-$FFFF
-.endif
+.endif	; TILES_EXTERNAL
 				
-.endif
+.endif	; PLATFORM_COCO3
 			
-				lda			#0x3F
+				lda			#0x7F
 				tfr			a,dp
 
 ; values set in loader
@@ -200,18 +261,33 @@ display_title_screen: ; $6008
 				sta			*row
 1$:			ldb			,y+											; count
 				lda			,y+											; byte
-2$:			sta			,x+
+2$:			pshs		b
+.ifdef GFX_1BPP
+				sta			,x+
+.else
+				pshs		a
+				GFX_BYTE
+				pshs		b
+				GFX_BYTE
+				stb			,x+
+				puls		b
+				stb			,x+
+				puls		a
+.endif				
 				dec			*col										; line byte count
 				tst			*col										; done line?
 				bne			3$											; no, skip
-				pshs		b
 				ldb			#35
 				stb			*col										; reset line byte count
+.ifdef GFX_1BPP				
 				ldb			#5
+.else
+				ldb			#10
+.endif				
 				abx															; adjust video ptr
 				dec			*row										; dec line count
-				puls		b
-3$:			decb														; done count?
+3$:			puls		b
+				decb														; done count?
 				bne			2$											; no, loop
 				tst			*row										; done screen?
 				bne			1$											; no, loop
@@ -222,7 +298,7 @@ display_title_screen: ; $6008
 				sta			*col
 				jsr			display_message
 				.asciz			"INSERT TITLE SCREEN HERE"
-.endif				
+.endif	; HAS_TITLE
 				HGR1
 				jmp			title_wait_for_key
 
@@ -3810,14 +3886,22 @@ gcls1: ; $7A51
 				lda			#HGR1_MSB
 				ldb			#0
 				tfr			d,x											; start addr
+.ifdef GFX_1BPP				
 				adda		#0x1E
+.else
+				adda		#0x3C
+.endif				
 				tfr			d,y											; end addr
 				bra			gcls
 gcls2:
 				lda			#HGR2_MSB
 				ldb			#0
 				tfr			d,x											; start addr
+.ifdef GFX_1BPP				
 				adda		#0x1E
+.else
+				adda		#0x3C
+.endif				
 				tfr			d,y											; end addr
 gcls:		sty			*word_a
 				lda			#0x00

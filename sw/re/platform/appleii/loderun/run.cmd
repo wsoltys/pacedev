@@ -15,8 +15,8 @@ mess64d apple2e %2 -flop1 LODERUNNER.DSK
 goto end
 
 :coco
-if "%2%" == "video" set opt=-snapsize 320x192 -aviwrite coco.avi
-mess64d coco3 %opt% -flop1 LODERUN_6809.DSK
+if "%2%" == "video" set opt=-aviwrite coco.avi
+mess64d coco3 -snapsize 320x192 %opt% -flop1 LODERUN_6809.DSK
 goto end
 
 :neogeo
