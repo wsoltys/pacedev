@@ -17,7 +17,8 @@ as6809 -l -o -s loderun_6809.asm
 aslink -t loderun_6809.rel
 @REM * create DSK image
 del loderun_6809.dsk
-copy loderun_6809.bin lr.bin
+@REM copy loderun_6809.bin lr.bin
+reloc loderun_6809.bin lr.bin
 file2dsk loderun_6809.dsk lr.bin tiles.bin title_rle.bin lr.bas
 @REM file2dsk loderun_6809.dsk lr.bin tiles.bin title_rle.bin lr.bas readme.txt
 @goto end

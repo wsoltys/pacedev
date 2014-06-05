@@ -43,6 +43,18 @@ SCORE_KILL				.equ	0x0100
 
 .ifdef PLATFORM_COCO3
 
+;
+; Memory Map
+; ----------
+; $0000-$3BFF   HGR1
+; $4000-$7BFF   HGR2
+; $7F00-$7FFF   Zero Page
+; $8000-        Program Code & Data
+;      -$BFFF   6809 System Stack
+; $C000-$E3BF   Tile Graphics Data
+; $E800-$F993   Title Screen Data
+;
+
 .define			HAS_TITLE
 .define			TILES_EXTERNAL
 .define			TITLE_EXTERNAL
@@ -90,12 +102,12 @@ HGR2_MSB		.equ		0x20
 						sta			VOFFMSB
 						.endm
 						
-codebase		.equ		0x4000
+codebase		.equ		0x8000
 .endif
 
 						.org		codebase
 ;stack				.equ		.-2
-stack					.equ		0x8000
+stack					.equ		0xC000
 start:
 
 .ifdef PLATFORM_COCO3
@@ -140,11 +152,11 @@ start:
 				
 .ifdef TILES_EXTERNAL
 ; tiles @$8000-$A2BF
-				lda			#0
-				ldx			#(MMUTSK1+4)
-				sta			,x+											; page 0 @$8000-$9FFF
+				lda			#2
+				ldx			#(MMUTSK1+6)
+				sta			,x+											; page 2 @$C000-$DFFF
 				inca
-				sta			,x+											; page 1 @$A000-$BFFF
+				sta			,x+											; page 3 @$E000-$FFFF
 .endif
 				
 .endif
@@ -4687,7 +4699,9 @@ loc_8d12:	; $8D12
 				coma														; any key pressed?
 				beq     5$                      ; no, skip
 				tst     *timer                  ; seen key-up?
-				beq			exit_game_over_animation  ; yes, go
+				bne     5$                      ; no, skip
+				jsr     keybd_flush
+				bra			exit_game_over_animation
 5$:			sta     *timer
 .endif				
 				rts
@@ -4843,14 +4857,14 @@ hs_tbl:	; $1F00
 .ifndef TILES_EXTERNAL				
 	.include "tiles.asm"
 .else
-	tile_data	.equ	0x8000
+	tile_data	.equ	0xC000
 .endif
 
 .ifdef HAS_TITLE
 	.ifndef TITLE_EXTERNAL
 		.include "title.asm"
 	.else
-		title_data	.equ	0xA800
+		title_data	.equ	0xE800
 	.endif
 .endif
 
