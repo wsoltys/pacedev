@@ -16,8 +16,9 @@
     textout_centre_ex(s, f, str, w, h, c, 0);
 #endif
 
-#define DO_TITLE
+//#define DO_TITLE
 //#define DO_TILES
+#define DO_GAMEOVER
 
 uint8_t ram[64*1024];
 
@@ -450,6 +451,73 @@ void main (int argc, char *argv[])
 	fclose (fp2);
 
 #endif // DO_TILES
+
+#ifdef DO_GAMEOVER
+
+	clear_bitmap (screen);
+
+  fp = fopen ("gameover_2bpp.asm", "wt");
+
+  uint8_t game_over[11][13];
+    
+  int a = 0x8C35;
+  for (int l=0; l<11; l++)
+  {
+    // render original line
+    for (int b=0; b<14; b++)
+    {
+      uint8_t data = ram[a+l*14+b];
+      
+      for (int i=0; i<7; i++)
+      {
+        // offset by 6 pixels
+        // 3 to fix 88 vs 91 X offset of byte 11 vs 13
+        if (data & (1<<i))
+          putpixel (screen, 3+b*7+i, l, 15);
+      }
+    }
+
+    fprintf (fp, "gol%d:%s.db     ", l+1, (l<9 ? "   " : "  "));
+    
+    // write 8-bit data to asm file    
+    for (int b=0; b<13; b++)
+    {
+      uint8_t data = 0;
+      
+      for (int i=0; i<8; i++)
+      {
+        data <<= 1;
+        if (getpixel (screen, b*8+i, l))
+          data |= 1;
+      }
+      
+      game_over[l][b] = data;
+      fprintf (fp, "0x%02X%c ", data, (b == 6 || b == 12 ? ' ' : ','));
+      if (b == 6)
+        fprintf (fp, "\n        .db     ");
+    }
+    fprintf (fp, "\n");
+  }
+
+  // display 8-bit data
+  for (int l=0; l<11; l++)
+  {
+    for (int b=0; b<13; b++)
+    {
+      for (int i=0; i<8; i++)
+      {
+        if (game_over[l][b] & (1<<(7-i)))
+          putpixel (screen, b*8+i, 32+l, 15);
+      }
+    }
+  }
+  
+  fclose (fp);
+  
+  while (!key[KEY_ESC]);	  
+	while (key[KEY_ESC]);	  
+
+#endif // DO_GAMEOVER
 	  
   allegro_exit ();
 

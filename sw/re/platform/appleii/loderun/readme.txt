@@ -29,29 +29,28 @@ Floppy Disk or equivalent (Drive Wire, etc)
 
 Keys
 ----
-<I>         UP
-<K>         DOWN
-<J>         LEFT
-<L>         RIGHT
-<U>         DIG LEFT
-<O>         DIG RIGHT
-<CTRL><N>   Next level (cheat)
-<CTRL><F>   Extra life (cheat)
-<ESC>       Freeze (not yet implemented)
-<CTRL><R>   Abort game
-<CTRL><A>   Abort life
-<CTRL><H>   Speed up game (not tested)
-<CTRL><U>   Slow down game (not tested)
-<ENTER>     Display High Scores
+<I>,<UP>      UP
+<K>,<DOWN>    DOWN
+<J>,<LEFT>    LEFT
+<L>,<RIGHT>   RIGHT
+<U>,<Z>       DIG LEFT
+<O>,<X>       DIG RIGHT
+<CTRL><N>     Next level (cheat)
+<CTRL><F>     Extra life (cheat)
+<ESC>         Freeze
+<CTRL><R>     Abort game
+<CTRL><A>     Abort life
+<CTRL><H>     Speed up game (not tested)
+<CTRL><U>     Slow down game (not tested)
+<ENTER>       Display High Scores
 
 Note that using the keys marked as 'cheat' will disqualify you from the high score list.
 
 Yet To Be Implemented (in roughly planned order)
 ---------------------
-* Game Over spinning animation
 * High Score initials entry
-* Circular wipe function at start/end of level
 * 4-colour mode
+* Circular wipe function at start/end of level
 * Inclusion of all 150 levels
 * Sound
 * High Score load/save
@@ -64,5 +63,11 @@ Comments/Suggestions/Bugs
 
 Release History
 ---------------
+v0.2        Playable Demo Release (Beta 2)
+            Added Game Over animation
+            Added Freeze function
+            Fixed Extra Life key detection
+            Added support for arrow,z,x keys
+
 v0.1        Playable Demo Release (Beta 1)
             Monochrome, 5 levels only

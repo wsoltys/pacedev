@@ -340,7 +340,7 @@ dec_lives:	; $613F
 				beq			loc_61d0								; yes, go
 				lda			*no_lives								; any lives left?
 				bne			next_level_cont					; yes, continue
-				;jsr			check_and_update_high_score_tbl
+				jsr			check_and_update_high_score_tbl
 				jsr			game_over_animation
 				bcs			check_start_new_game
 				
@@ -1512,8 +1512,7 @@ read_controls:	; $6a12
 				ldy			#got_key
 				pshs		y												; set return address
 .ifdef PLATFORM_COCO3				
-1$:				
-				ldx			#PIA0
+1$:     ldx			#PIA0
 				ldb			#~(1<<4)								; col4
 				stb			2,x											; columns strobe
 				lda			,x											; active low
@@ -1523,7 +1522,11 @@ read_controls:	; $6a12
 				ldb			#~(1<<0)								; col0
 				stb			2,x											; columns strobe
 				lda			,x											; active low
-				bita		#(1<<6)									; <ENTER>?
+				bita    #(1<<3)                 ; <X>?
+				bne     96$                     ; no, skip
+				lda     #0xcf                   ; 'O'
+				rts
+96$:		bita		#(1<<6)									; <ENTER>?
 				bne			10$
 				tst			*zp_ff									; CTRL?
 				bne			10$											; no, skip
@@ -1546,44 +1549,67 @@ read_controls:	; $6a12
 				stb			2,x											; columns strobe
 				lda			,x											; active low
 				bita		#(1<<1)									; 'J'?
-				bne			31$											; no, skip
+				bne			21$											; no, skip
 				lda			#0xca										; 'J'
 				rts
-31$:		bita		#(1<<2)									; 'R'?
+21$:		bita    #(1<<3)                 ; <Z>
+        bne     26$                     ; no, skip
+        lda     #0xd5                   ; 'U'
+        rts								
+26$:    bita    #(1<<6)                 ; <BREAK>
+        bne     22$                     ; no, skip
+        lda     #0x9b                   ; <ESC>
+        rts								
+22$:    bita		#(1<<2)									; 'R'?
 				bne			3$											; no, skip
-				tst			*zp_ff									; CTRL?
+			  tst			*zp_ff									; CTRL?
 				beq			3$											; no, skip
 				lda			#0x92										; CTRL-R
-				rts				
+				rts
 3$:			ldb			#~(1<<3)								; col3
 				stb			2,x											; columns strobe
 				lda			,x											; active low
 				bita		#(1<<1)									; 'K'?
-				bne			4$											; no, skip
+				bne			33$											; no, skip
 				lda			#0xcb										; 'K'
 				rts
+33$:    bita    #(1<<3)                 ; <UP>?
+        bne     4$                      ; no, skip
+        lda     #0xc9                   ; 'I'
+        rts
 4$:			ldb			#~(1<<4)								; col4
 				stb			2,x											; column strobe
 				lda			,x											; active low
 				bita		#(1<<1)									; 'L'?
-				bne			5$											; no, skip
+				bne			43$											; no, skip
 				lda			#0xcc										; 'L'
 				rts
+43$:    bita    #(1<<3)                 ; <DOWN>?
+        bne     5$                      ; no, skip
+        lda     #0xcb                   ; 'K'
+        rts
 5$:			ldb			#~(1<<5)								; col5
 				stb			2,x											; column strobe
 				lda			,x											; active low
 				bita		#(1<<2)									; 'U'?
-				bne			6$											; no, skip
+				bne			53$											; no, skip
 				lda			#0xd5										; 'U'
 				rts
-6$:			tst			*zp_ff									; CTRL?
-				beq			7$
-				ldb			#~(1<<6)								; col6
+53$:    bita    #(1<<3)                 ; <LEFT>?
+        bne     6$                      ; no, skip
+        lda     #0xca                   ; 'J'
+        rts				
+6$:			ldb			#~(1<<6)								; col6
 				stb			2,x											; column_strobe
 				lda			,x											; active low
+        bita    #(1<<3)                 ; <RIGHT>?
+        bne     60$                     ; no, skip
+        lda     #0xcc                   ; 'L'
+        rts				
+60$:    tst			*zp_ff									; CTRL?
+				beq			7$                      ; no, skip
 				bita		#(1<<0)									; 'F'?
 				bne			61$											; no, skip
-; not useful becuase it's not leading-edge				
 				lda			#0x80										; CTRL-@
 				rts
 61$:		bita		#(1<<1)									; 'N'?
@@ -1634,6 +1660,7 @@ goto_next_level:	; $6A56
 				inc			*level_0_based
 				lsr			*level_active						; 'kill' player
 				lsr			*no_cheat
+        jsr     keybd_flush             ; wait for no keys (6809 only)
 				rts
 				
 extra_life:	; $6A61
@@ -1642,12 +1669,15 @@ extra_life:	; $6A61
 				dec			*no_lives
 1$:			jsr			display_no_lives
 				lsr			*no_cheat
+        jsr     keybd_flush             ; wait for no keys (6809 only)
 				jmp			read_controls
 
 freeze:	; $6A76
-;				jsr			wait_for_key
+        jsr     keybd_flush             ; wait for no keys
+				jsr			wait_for_key
 				cmpa		#0x9b
-;				bne			freeze
+				bne			freeze
+        jsr     keybd_flush             ; wait for no keys (6809 only)
 				jmp			read_controls
 																				
 terminate_game:	; $6A81
@@ -1655,6 +1685,7 @@ terminate_game:	; $6A81
 				sta			*no_lives
 abort_life:	; $6A84
 				lsr			*level_active
+        jsr     keybd_flush             ; wait for no keys (6809 only)
 				rts
 
 speed_up:	; $6ABC
@@ -1665,14 +1696,16 @@ speed_up:	; $6ABC
 ; and makes no difference to the execution
 				beq			1$
 				dec			*game_speed
-1$:			jmp			read_controls
+1$:			jsr     keybd_flush             ; wait for no keys (6809 only)
+        jmp			read_controls
 
 slow_down:	; $6AC5
 				lda			*game_speed
 				cmpa		#0x0f
 				beq			1$
 				inc			*game_speed
-1$:			jmp			read_controls
+1$:			jsr     keybd_flush             ; wait for no keys (6809 only)
+        jmp			read_controls
 												
 ctl_keys:	; $6B59
 				.db			0x9e										; CTRL-^ (next level)
@@ -4291,6 +4324,18 @@ keybd_flush:	; $869F
 				bne			1$											; keys pressed, loop
 				rts
 
+wait_for_key: ; 86A8
+; fudged for FREEZE fn, which only needs <ESC>
+				ldx			#PIA0
+				ldb			#~(1<<2)							  ; column 2
+1$:			stb			2,x											; column strobe
+				lda			,x											; active low
+				coma														; active high
+				bita    #(1<<6)                 ; <BREAK>?
+				beq			1$											; no, loop
+				lda     #0x9b                   ; <ESC>
+				rts
+        
 delay_180X_scaled:  ; $86B1
 ; B=scale entry
         ldy     #speed_scale_tbl
@@ -4479,13 +4524,38 @@ wipe_or_draw_level:	; $88A2
 game_over_animation:	; $8B1A
         lda     #1
         sta     game_over_loop_cnt
+        sta     *timer                  ; 6809 only
         lda     #HGR1_MSB
         sta     *hires_page_msb_1
 1$:     jsr     game_over_frame_1_11
+        jsr     game_over_frame_2_10
+        jsr     game_over_frame_3_9
+        jsr     game_over_frame_4_8
+        jsr     game_over_frame_5_7
+        jsr     game_over_frame_6
+        jsr     game_over_frame_5_7
+        jsr     game_over_frame_4_8
+        jsr     game_over_frame_3_9
+        jsr     game_over_frame_2_10
+        jsr     game_over_frame_1_11
+        jsr     game_over_frame_12_20
+        jsr     game_over_frame_13_19
+        jsr     game_over_frame_14_18
+        jsr     game_over_frame_15_17
+        jsr     game_over_frame_16
+        jsr     game_over_frame_15_17
+        jsr     game_over_frame_14_18
+        jsr     game_over_frame_13_19
+        jsr     game_over_frame_12_20
         lda     game_over_loop_cnt
         cmpa    #100
         bcs     1$
-        ;jsr     game_over_frame_1_11
+        jsr     game_over_frame_1_11
+        jsr     game_over_frame_2_10
+        jsr     game_over_frame_3_9
+        jsr     game_over_frame_4_8
+        jsr     game_over_frame_5_7
+        jsr     game_over_frame_6
         CLC
 				rts
 
@@ -4534,28 +4604,28 @@ game_over_frame_12_20:	; $8C24
 				.db 		0, 0, 0, 0, 0, 1, 0xA, 3, 1, 0, 0, 0, 0, 0
 
 game_over_line_data:	; 8C35
-gol1:		.db 		0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80
-				.db 		0x80, 0x80
-gol2:		.db 		0xC0, 0xAA, 0xD5, 0xAA, 0xD5, 0xAA, 0xD5, 0xAA, 0xD5, 0xAA, 0xD5, 0xAA
-				.db 		0xD5, 0x80
-gol3:		.db 		0x90, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80
-				.db 		0x80, 0x82
-gol4:		.db 		0x90, 0xAA, 0xD1, 0xA2, 0xD5, 0xA8, 0x85, 0xA8, 0xC5, 0xA2, 0xD4, 0xA2
-				.db 		0x95, 0x82
-gol5:		.db 		0x90, 0x82, 0x91, 0xA2, 0xC5, 0xA8, 0x80, 0x88, 0xC5, 0xA2, 0x94, 0xA0
-				.db 		0x90, 0x82
-gol6:		.db 		0x90, 0x82, 0x90, 0xA2, 0xC4, 0xA8, 0x80, 0x88, 0xC5, 0xA2, 0x94, 0xA0
-				.db 		0x90, 0x82
-gol7:		.db 		0x90, 0x82, 0x90, 0xA2, 0xC4, 0xA8, 0x81, 0x88, 0xC4, 0xA2, 0xD4, 0xA0
-				.db 		0x95, 0x82
-gol8:		.db 		0x90, 0xA2, 0xD1, 0xA2, 0xC4, 0x88, 0x80, 0x88, 0xC4, 0xA2, 0x84, 0xA0
-				.db 		0x85, 0x82
-gol9:		.db 		0x90, 0x82, 0x91, 0xA2, 0xC4, 0x88, 0x80, 0x88, 0xC4, 0xAA, 0x84, 0xA0
-				.db 		0x85, 0x82
-gol10:	.db 		0x90, 0x82, 0x91, 0xA2, 0xC4, 0x88, 0x80, 0x88, 0xC4, 0x8A, 0x84, 0xA0
-				.db 		0x91, 0x82
-gol11:	.db 		0x90, 0xAA, 0x91, 0xA2, 0xC4, 0xA8, 0x85, 0xA8, 0x85, 0x82, 0xD4, 0xA2
-				.db 		0x91, 0x82
+gol1:   .db     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00  
+        .db     0x00, 0x00, 0x00, 0x00, 0x00, 0x00  
+gol2:   .db     0x00, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55  
+        .db     0x55, 0x55, 0x55, 0x55, 0x54, 0x00  
+gol3:   .db     0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00  
+        .db     0x00, 0x00, 0x00, 0x00, 0x01, 0x00  
+gol4:   .db     0x01, 0x15, 0x45, 0x45, 0x54, 0x55, 0x01  
+        .db     0x54, 0x51, 0x15, 0x45, 0x51, 0x00  
+gol5:   .db     0x01, 0x10, 0x44, 0x45, 0x44, 0x50, 0x01  
+        .db     0x14, 0x51, 0x14, 0x04, 0x11, 0x00  
+gol6:   .db     0x01, 0x10, 0x04, 0x44, 0x44, 0x50, 0x01  
+        .db     0x14, 0x51, 0x14, 0x04, 0x11, 0x00  
+gol7:   .db     0x01, 0x10, 0x04, 0x44, 0x44, 0x54, 0x01  
+        .db     0x04, 0x51, 0x15, 0x05, 0x51, 0x00  
+gol8:   .db     0x01, 0x11, 0x45, 0x44, 0x44, 0x40, 0x01  
+        .db     0x04, 0x51, 0x10, 0x05, 0x41, 0x00  
+gol9:   .db     0x01, 0x10, 0x44, 0x44, 0x44, 0x40, 0x01  
+        .db     0x04, 0x55, 0x10, 0x05, 0x41, 0x00  
+gol10:  .db     0x01, 0x10, 0x44, 0x44, 0x44, 0x40, 0x01  
+        .db     0x04, 0x54, 0x10, 0x05, 0x11, 0x00  
+gol11:  .db     0x01, 0x15, 0x44, 0x44, 0x44, 0x55, 0x01  
+        .db     0x54, 0x10, 0x15, 0x45, 0x11, 0x00  
 
 game_over_data_addr_tbl:	; $8CCF
 				.dw			#(gol1-13)
@@ -4571,8 +4641,8 @@ game_over_data_addr_tbl:	; $8CCF
 				.dw			#(gol11-13)
 
 render_game_over:	; $8CE5
-				puls		x
-				stx			*word_a									; data address
+				puls		x                       ; data address
+				stx			*word_a
 				ldb			#80											; scanline
 				stb			*row
 				bra			loc_8d12
@@ -4586,10 +4656,11 @@ game_over_do_scanline:
 				ldx			b,y											; X=address of line data
 				ldb			#13											; starting column
 				ldy			*msb_line_addr_pg1
+				leay    -2,y                    ; fix for 8-bit video data (x=88 vs 91)
 1$:			lda			b,x											; data byte
 				sta			b,y											; update screen
 				incb
-				cmpb		#27											; last column?
+				cmpb		#26											; (was 27) last column?
 				bcs			1$											; no, loop
 ; this was after the jump on 6502 due to return address differences				
 				jsr			game_over_anim_tbl_next_byte
@@ -4599,19 +4670,26 @@ loc_8d12:	; $8D12
 				cmpb		#95											; last row?
 				bcs			game_over_do_scanline		; no, loop
 				ldb			game_over_loop_cnt
-				lda			#0xff
-2$:			deca
-				bne			2$											; delay
+2$:			lda			#0xff
+3$:     deca
+				bne			3$											; delay
+				lda     #0x80
+4$:			deca
+				bne     4$
 				decb														; done?
 				bne			2$											; no, loop
+				inc     game_over_loop_cnt
 .ifdef PLATFORM_COCO3				
 				ldx			#PIA0
 				ldb			#0											; all columns
 				stb			2,x											; column strobe
 				lda			,x
 				coma														; any key pressed?
+				beq     5$                      ; no, skip
+				tst     *timer                  ; seen key-up?
+				beq			exit_game_over_animation  ; yes, go
+5$:			sta     *timer
 .endif				
-;				bne			exit_game_over_animation
 				rts
 
 exit_game_over_animation:
