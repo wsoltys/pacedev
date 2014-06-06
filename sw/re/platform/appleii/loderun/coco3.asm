@@ -93,6 +93,15 @@ HGR2_MSB		.equ		0x40
 						GFX_NIBBLE
 					.endm
 .endif						
+
+.ifdef GFX_1BPP
+  VIDEO_BPL     .equ  40
+  VIDEO_RM      .equ  5
+.else
+  VIDEO_BPL     .equ  80
+  VIDEO_RM      .equ  10
+.endif
+APPLE_BPL				.equ	VIDEO_BPL-VIDEO_RM
 						
 ;
 ; Memory Map

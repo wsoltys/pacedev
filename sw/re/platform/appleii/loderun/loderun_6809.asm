@@ -138,14 +138,6 @@ start:
 ;				lda			#1
 ;				jsr			sub_6359								; examine h/w and check disk sig			
 
-.ifdef GFX_1BPP
-  TITLE_BPL     .equ  35
-  TITLE_RM      .equ  5
-.else
-  TITLE_BPL     .equ  70
-  TITLE_RM      .equ  10
-.endif
-
 display_title_screen: ; $6008
 				jsr			gcls1
 				lda			#0
@@ -161,7 +153,7 @@ display_title_screen: ; $6008
 				lda			*hires_page_msb_1
 				ldb			#0											; 2 centres the title screen
 				tfr			d,x
-				lda			#TITLE_BPL
+				lda			#APPLE_BPL
 				sta			*col
 				lda			#192										; 192 lines/screen
 				sta			*row
@@ -184,9 +176,9 @@ display_title_screen: ; $6008
 				dec			*col										; line byte count
 				tst			*col										; done line?
 				bne			3$											; no, skip
-				ldb			#TITLE_BPL
+				ldb			#APPLE_BPL
 				stb			*col										; reset line byte count
-				ldb			#TITLE_RM
+				ldb			#VIDEO_RM
 				abx															; adjust video ptr
 				dec			*row										; dec line count
 3$:			puls		b
@@ -694,7 +686,7 @@ draw_level:	; $648B
 				rts
 
 handle_player: ; $64bd
-				lda			#1
+				lda			#0	; *** HACK
 				sta			*enable_collision_detect
 				lda			*dig_dir
 				beq			not_digging
@@ -3767,7 +3759,7 @@ cls_and_display_game_status:	; $79AD
 
 get_line_addr_curr_page:	; $7A31
 ; B=scanline
-				lda			#40
+				lda			#VIDEO_BPL
 				mul
 				ora			*hires_page_msb_1
 				stb			*lsb_line_addr_pg1
@@ -3775,7 +3767,7 @@ get_line_addr_curr_page:	; $7A31
 				rts				
 
 get_line_addr_pgs_1_2: ; $7A3E
-				lda			#40
+				lda			#VIDEO_BPL
 				mul
 				stb			*lsb_line_addr_pg1
 				stb			*lsb_line_addr_pg2
@@ -4001,7 +3993,7 @@ display_char:
 				jsr			render_char_in_buffer
 				ldx			#char_render_buf
 				lda			*scanline
-				ldb			#40
+				ldb			#VIDEO_BPL
 				mul
 				ora			*hires_page_msb_1				; OR-in page address
 				tfr			d,y
@@ -4009,14 +4001,17 @@ display_char:
 				leay		b,y
 				ldb			#11
 2$:			lda			0,y
-				anda		*lchar_mask
+				;anda		*lchar_mask
 				ora			,x+
 				sta			0,y
 				lda			1,y
-				anda		*rchar_mask
+				;anda		*rchar_mask
 				ora			,x+
 				sta			1,y
-				leay		40,y
+.ifdef GFX_2BPP
+				inx															; *** HACK
+.endif				
+				leay		VIDEO_BPL,y
 				decb
 				bne			2$
 				rts
@@ -4112,10 +4107,19 @@ OR_2_byte_char_to_video:	; $83C3
 				ora			b,y
 				sta			b,y											; update video byte
 				inx															; next render buffer address
+.ifdef GFX_2BPP
+				inx															; ***hack!!!
+.endif				
 				inc			*scanline
 				dec			*scanline_cnt
 				bne			OR_2_byte_char_to_video
 				rts
+
+.ifdef GFX_1BPP
+BPC			.equ		2*11
+.else
+BPC			.equ		3*11
+.endif
 								
 render_char_in_buffer:	; $8438
 				ldx			#char_bank_tbl
@@ -4123,10 +4127,10 @@ render_char_in_buffer:	; $8438
 				ldy			a,x											; ptr entry
 				leax		,y											; entry (X=bank address)
 				lda			*msg_char
-				ldb			#22
+				ldb			#BPC
 				mul															; offset into bank
 				leax		d,x											; X=ptr char data
-				ldb			#(11*2)
+				ldb			#BPC										; no. bytes to copy
 				ldy			#char_render_buf				; destination
 1$:			lda			,x+
 				sta			,y+
@@ -4135,13 +4139,15 @@ render_char_in_buffer:	; $8438
 				rts
 
 char_render_buf:
-				.ds			22
+				.ds			BPC
 				
 char_bank_tbl:
-				.dw			#tile_data+0*22*104
-				.dw			#tile_data+1*22*104
-				.dw			#tile_data+2*22*104
-				.dw			#tile_data+3*22*104
+				.dw			#tile_data+0*BPC*104
+				.dw			#tile_data+1*BPC*104
+.ifdef GFX_1BPP
+				.dw			#tile_data+2*BPC*104
+				.dw			#tile_data+3*BPC*104
+.endif				
 
 check_and_update_high_score_tbl:	; $84C8
 				lda			*no_cheat								; cheating?
@@ -4460,19 +4466,30 @@ calc_colx5_scanline:	; $885d
 				rts
 
 calc_col_addr_shift:	; $8868
+; B=col
 				ldx			#col_to_addr_tbl
 				lda			b,x											; A=col address
 				aslb
+.ifdef GFX_1BPP				
 				andb		#0x06										; B=shift
+.else
+				andb		#0x02										; B=shift
+.endif				
 				rts
 
 calc_addr_shift_for_x:	; $8872
 ; B=x_in_2_pixel_incs
 				tfr			b,a
+.ifdef GFX_1BPP
 				lsra
+.endif				
 				lsra														; A=addr
 				lslb
+.ifdef GFX_1BPP				
 				andb		#7											; B=shift
+.else
+				andb		#3											; B=shift
+.endif				
 				rts
 				
 calc_scanline: ; $887C
@@ -4507,8 +4524,8 @@ wipe_or_draw_level:	; $88A2
 				lda			#HGR2_MSB
 				clrb
 				tfr			d,x
-				adda		#0x1b
-				orb			#0x80										; end addr (line 176)
+				adda		#>(176*VIDEO_BPL)
+				orb			#<(176*VIDEO_BPL)				; end addr (line 176)
 				tfr			d,y
 				sty			*word_a
 				lda			#HGR1_MSB
@@ -4817,8 +4834,13 @@ row_to_scanline_tbl:	; $1c51
 				.db			132, 143, 154, 165, 181
 
 col_to_addr_tbl:	; $1c62
+.ifdef GFX_1BPP
 				.db			0, 1, 2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 15, 16
 				.db			17, 18, 20, 21, 22, 23, 25, 26, 27, 28, 30, 31, 32, 33
+.else
+				.db			0, 2, 5, 7, 10, 12, 15, 17, 20, 22, 25, 27, 30, 32
+				.db			35, 37, 40, 42, 45, 47, 50, 52, 55, 57, 60, 62, 65, 67
+.endif
 
 hs_tbl:	; $1F00
 ; 0-2 = initials, 3 = level, 4-7 = score (BCD)
