@@ -25,7 +25,9 @@
 .ifdef GFX_1BPP
   .include "title_data_m1bpp.asm"
 .else
-  .ifdef GFX_COLOUR
+  .ifdef GFX_MONO
+    .include "title_data_m2bpp.asm"
+  .else
     .include "title_data_c2bpp.asm"
   .endif
 .endif

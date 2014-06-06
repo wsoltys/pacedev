@@ -16,8 +16,8 @@
     textout_centre_ex(s, f, str, w, h, c, 0);
 #endif
 
-//#define DO_TITLE
-#define DO_TILES
+#define DO_TITLE
+//#define DO_TILES
 //#define DO_GAMEOVER
 
 uint8_t ram[64*1024];
@@ -360,68 +360,87 @@ void main (int argc, char *argv[])
 
   colourize (280, 192);
 
-  // now do a 2bpp rle version
-  uint16_t  count = 0;
-  uint8_t   byte = 0;
   uint8_t   rle[16384];
   uint16_t  rle_n = 0;
-  
-  for (int y=0; y<192; y++)
+
+  for (int f=0; f<2; f++)
   {
-    for (int x=0; x<280; x+=4)
+    // now do a 2bpp rle version
+    uint16_t  count = 0;
+    uint8_t   byte = 0;
+   
+    rle_n = 0;
+     
+    for (int y=0; y<192; y++)
     {
-      uint8_t   data;
-      
-      for (int b=0; b<4; b++)
+      for (int x=0; x<280; x+=4)
       {
-        data <<= 2;
-        data |= getpixel (screen, 8+x+b, 192+y) & 0x03;
-      }
-      if (count == 0)
-      {
-        count++;
-        byte = data;
-      }
-      else
-        if (data == byte)
+        uint8_t   data;
+        
+        for (int b=0; b<4; b++)
         {
-          if (++count > 254)
+          data <<= 2;
+          data |= getpixel (screen, 8+x+b, f*192+y) & 0x03;
+        }
+        if (count == 0)
+        {
+          count++;
+          byte = data;
+        }
+        else
+          if (data == byte)
+          {
+            if (++count > 254)
+            {
+              rle[rle_n++] = count;
+              rle[rle_n++] = byte;
+              count = 0;
+              
+              //fprintf (stderr, "overflow!\n");
+            }
+          }
+          else
           {
             rle[rle_n++] = count;
             rle[rle_n++] = byte;
-            count = 0;
-            
-            //fprintf (stderr, "overflow!\n");
+            count = 1;
+            byte = data;
           }
-        }
-        else
-        {
-          rle[rle_n++] = count;
-          rle[rle_n++] = byte;
-          count = 1;
-          byte = data;
-        }
+      }
     }
-#if 0
-    // insert end-of-line?
-    if (count > 0 && byte == 0)
+    if (count > 0)
     {
-      rle[rle_n++] = 0;
-      count = 0;
+      rle[rle_n++] = count;
+      rle[rle_n++] = byte;
     }
-#endif    
-  }
-  if (count > 0)
-  {
-    rle[rle_n++] = count;
-    rle[rle_n++] = byte;
-  }
-
-  uint16_t clr_rle_n = rle_n;
   
-  //while (!key[KEY_ESC]);	  
-  //while (key[KEY_ESC]);	  
+    char *fname[] = 
+    {
+      "title_data_m2bpp.asm", 
+      "title_data_c2bpp.asm" 
+    };
 
+    fprintf (stderr, "%s = %d ($%04X) bytes\n",
+              fname[f], rle_n, rle_n);
+                  
+    fp2 = fopen (fname[f], "wt");
+    for (int n=0; n<rle_n; n++)
+    {
+      if ((n%8) == 0)
+        fprintf (fp2, "    .db  ");
+      fprintf (fp2, "0x%02X", rle[n]);
+      if ((n%8) < 7 && n<rle_n-1)
+        fprintf (fp2, ", ");
+      else
+        fprintf (fp2, "\n");
+    }
+    
+    fclose (fp2);
+    
+    //while (!key[KEY_ESC]);	  
+    //while (key[KEY_ESC]);	  
+  }
+  
   clear_bitmap (screen);
   
   for (n=0; n<rle_n;)
@@ -449,20 +468,6 @@ void main (int argc, char *argv[])
       }
     }
   }
-  
-  fp2 = fopen ("title_data_c2bpp.asm", "wt");
-  for (int n=0; n<rle_n; n++)
-  {
-    if ((n%8) == 0)
-      fprintf (fp2, "    .db  ");
-    fprintf (fp2, "0x%02X", rle[n]);
-    if ((n%8) < 7 && n<rle_n-1)
-      fprintf (fp2, ", ");
-    else
-      fprintf (fp2, "\n");
-  }
-  
-  fclose (fp2);
   
   //while (!key[KEY_ESC]);	  
   //while (key[KEY_ESC]);	  
@@ -725,8 +730,6 @@ void main (int argc, char *argv[])
   fprintf (stderr, "original=%d\n", a-0x0f00);
   fprintf (stderr, "280/8*192=%d\n", 280/8*192);
   fprintf (stderr, "RLE_SIZE=%d ($%04X)\n", RLE_SIZE, RLE_SIZE);
-
-  fprintf (stderr, "4BPP_RLE_SIZE=%d ($%04X)\n", clr_rle_n, clr_rle_n);
 #endif
 
   for (int i=0; i<16; i++)
