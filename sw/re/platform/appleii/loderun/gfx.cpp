@@ -477,6 +477,8 @@ void main (int argc, char *argv[])
 #ifdef DO_TILES
 
 	fp = fopen ("tiles.c", "wt");
+	fp2 = fopen ("tile_data_m2bpp.asm", "wt");
+	FILE *fp3 = fopen ("tile_data_c2bpp.asm", "wt");
 	
 	for (uint16_t shift=0; shift<7; shift++)
 	{
@@ -538,28 +540,86 @@ void main (int argc, char *argv[])
 		if ((shift % 2) == 0)
 		{
 			fprintf (fp, "// SHIFT = %d\n\n", shift);
+			if (shift < 4)
+			{
+				fprintf (fp2, "; SHIFT = %d\n\n", shift);
+				fprintf (fp3, "; SHIFT = %d\n\n", shift);
+			}
 			
 			for (unsigned t=0; t<0x68; t++)
 			{
 				//fprintf (fp, "// $%02X\n", t);
 				for (unsigned sl=0; sl<11; sl++)
 				{
+					if ((sl%4) == 0)
+						if (shift < 4) 
+						{
+							fprintf (fp2, "    .db  ");
+							fprintf (fp3, "    .db  ");
+						}
 					for (int byte=0; byte<2; byte++)
 					{
 						uint8_t data = 0;
+						uint16_t data2 = 0;
+						uint16_t data3 = 0;
+						
 						for (int bit=0; bit<8; bit++)
 						{
 							data <<= 1;
+							data2 <<= 2;
+							data3 <<= 2;
 							if (getpixel (screen, 8+(t%16)*16+byte*8+bit, 8+(t/16)*16+sl))
+							{
 								data |= 1;
+								data2 |= 3;
+							}
+							data3 |= getpixel (screen, 8+(t%16)*16+byte*8+bit, 192+8+(t/16)*16+sl) & 0x03;
+							
 						}
 						fprintf (fp, "0x%02X, ", data);
+						if (shift < 4) 
+						{
+							fprintf (fp2, "0x%02X", data2>>8);
+							fprintf (fp3, "0x%02X", data3>>8);
+							if (byte == 0 || ((sl%4) != 3 ) && sl != 10 )
+							{
+								fprintf (fp2, ", ");
+								fprintf (fp3, ", ");
+							}
+							if (byte == 0)
+							{
+								fprintf (fp2, "0x%02X, ", data2&0xff);
+								fprintf (fp3, "0x%02X, ", data3&0xff);
+							}
+						}
+					}
+					if (shift < 4)
+					{
+						if ((sl%4) == 3)
+						{
+							if (sl/4 == 0)
+							{
+								fprintf (fp2, "  ; $%02X %s", t, get_char_description (t));
+								fprintf (fp3, "  ; $%02X %s", t, get_char_description (t));
+							}
+							fprintf (fp2, "\n");
+							fprintf (fp3, "\n");
+						}
 					}
 				}
-				
 				fprintf (fp, "  // $%02X %s\n", t, get_char_description (t));
+				if (shift < 4) 
+				{
+					fprintf (fp2, "\n\n");
+					fprintf (fp3, "\n\n");
+				}
 			}
 			fprintf (fp, "\n");
+			if (shift < 4) 
+			{
+				fprintf (fp2, "\n");
+				fprintf (fp3, "\n");
+			}
 		}
 		
 	  //while (!key[KEY_ESC]);	  
@@ -567,7 +627,9 @@ void main (int argc, char *argv[])
 	}
 
 	fclose (fp);
-	
+	fclose (fp2);
+	fclose (fp3);
+		
 	fp = fopen ("tile_data_m1bpp.asm", "wt");
 	fp2 = fopen ("tiles.bin", "wb");
 

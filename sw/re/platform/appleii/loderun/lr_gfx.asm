@@ -19,9 +19,9 @@
   .include "tile_data_m1bpp.asm"
 .else
   .ifdef GFX_MONO
-    ;.include "tile_data_m2bpp.asm"
+    .include "tile_data_m2bpp.asm"
   .else
-    ;.include "tile_data_c2bpp.asm"
+    .include "tile_data_c2bpp.asm"
   .endif
 .endif       
         

@@ -106,17 +106,21 @@ HGR2_MSB		.equ		0x40
 ; $E400-$       Title Screen Data
 ;
 
-codebase		.equ		  0x8000
-stack				.equ		  0xC000
+codebase		.equ		  	0x8000
+stack				.equ		  	0xC000
 
 .define	TILES_EXTERNAL
 .ifdef TILES_EXTERNAL
-  tile_data	  .equ	  0xC000
+  tile_data	  .equ	  	0xC000
 .endif
 
 .define	TITLE_EXTERNAL
 .ifdef TITLE_EXTERNAL
-  title_data	.equ	  0xE3C0
+	.ifdef GFX_1BPP
+  	title_data	.equ	  0xE3C0
+ .else
+  	title_data	.equ	  0xE000
+ .endif
 .endif
 
 ;.define			LEVELS_EXTERNAL
