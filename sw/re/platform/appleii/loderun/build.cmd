@@ -8,6 +8,13 @@
 :coco
 cls
 @echo on
+
+@if "%2" == "e" goto extract
+
+as6809 -l -o -s lr_gfx.asm
+@if ERRORLEVEL 1 goto errcoco
+aslink -t lr_gfx.rel
+
 as6809 -l -o -s loderun_6809.asm
 @if ERRORLEVEL 1 goto errcoco
 @REM * cartridge image
@@ -15,13 +22,19 @@ as6809 -l -o -s loderun_6809.asm
 @REM hex2bin loderun_6809.ihx
 @REM * disk basic
 aslink -t loderun_6809.rel
+
 @REM * create DSK image
 del loderun_6809.dsk
 @REM copy loderun_6809.bin lr.bin
 reloc loderun_6809.bin lr.bin
-file2dsk loderun_6809.dsk lr.bin tiles.bin title_rle.bin lr.bas
+file2dsk loderun_6809.dsk lr.bin lr_gfx.bin lr.bas
 @REM file2dsk loderun_6809.dsk lr.bin tiles.bin title_rle.bin lr.bas readme.txt
 @goto end
+
+:extract
+imgtool get coco_jvc_rsdos LODERUN_6809.DSK lr.bas
+@goto end
+
 :errcoco
 @echo off
 echo.

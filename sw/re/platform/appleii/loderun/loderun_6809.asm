@@ -34,121 +34,19 @@ SCORE_KILL				.equ	0x0100
 ;
 ; 6809 stuff
 ;
-						.macro	CLC
-						andcc		#~(1<<0)
-						.endm
-						.macro	SEC
-						orcc		#(1<<0)
-						.endm
+  .macro	CLC
+    andcc		#~(1<<0)
+  .endm
+  .macro	SEC
+    orcc		#(1<<0)
+  .endm
 
 .ifdef PLATFORM_COCO3
 
-;
-; Memory Map
-; ----------
-; $0000-$3BFF   HGR1
-; $4000-$7BFF   HGR2
-; $7F00-$7FFF   Zero Page
-; $8000-        Program Code & Data
-;      -$BFFF   6809 System Stack
-; $C000-$E3BF   Tile Graphics Data
-; $E800-$F993   Title Screen Data
-;
+.include "coco3.asm"
 
-;.define			GFX_1BPP
-;.define			GFX_MONO
-
-.ifndef GFX_1BPP
-	.define		GFX_2BPP
-.endif
-.ifndef GFX_MONO
-	.define		GFX_COLOUR
-.endif
-	
 .define			HAS_TITLE
-.define			TILES_EXTERNAL
-.define			TITLE_EXTERNAL
-;.define			LEVELS_EXTERNAL
 						
-; COCO registers
-PIA0				.equ		0xFF00
-PIA1				.equ		0xFF20
-
-KEYCOL			.equ		PIA0+2
-KEYROW			.equ		PIA0
-
-; GIME registers  	
-INIT0				.equ		0xFF90
-INIT1				.equ		0xFF91
-IRQENR			.equ		0xFF92
-FIRQENR			.equ		0xFF93
-TMRMSB			.equ		0xFF94
-TMRLSB			.equ		0xFF95
-VMODE				.equ		0xFF98
-VRES				.equ		0xFF99
-BRDR				.equ		0xFF9A
-VSC					.equ		0xFF9C
-VOFFMSB			.equ		0xFF9D
-VOFFLSB			.equ		0xFF9E
-HOFF				.equ		0xFF9F
-MMUTSK1			.equ		0xFFA0
-MMUTSK2			.equ		0xFFA8
-PALETTE			.equ		0xFFB0
-CPU089			.equ		0xFFD8
-CPU179			.equ		0xFFD9
-ROMMODE			.equ		0xFFDE
-RAMMODE			.equ		0xFFDF
-
-HGR1_MSB		.equ		0x00
-HGR2_MSB		.equ		0x40
-
-						.macro HGR1
-						lda			#0xE0								; screen at page $38
-						sta			VOFFMSB
-						.endm
-
-						.macro HGR2
-						lda			#0xE8								; screen at page $40
-						sta			VOFFMSB
-						.endm
-
-.ifdef GFX_MONO
-					.macro GFX_BYTE
-						lsra												; b0->C
-						rorb												; C->b7
-						asrb												; b7->b7..b6
-						lsra												; b1->C
-						rorb												; C->b7
-						asrb												; b7->b7..b6
-						lsra												; b2->C
-						rorb												; C->b7
-						asrb												; b7->b7..b6
-						lsra												; b3->C
-						rorb												; C->b7
-						asrb												; b7->b7..b6
-					.endm
-.else
-					.macro GFX_NIBBLE
-						pshs		a
-						lsra												; b0->C
-						rorb												; C->b7
-						lsra												; b1->C
-						rorb												; C->b7, b7->b6
-						puls		a
-						lsra												; b0->C
-						rorb												; C->b7, b7..6->b6..5
-						lsra												; b1->C
-						rorb												; C->b7, b7..5->b6..4
-					.endm
-					.macro GFX_BYTE
-						GFX_NIBBLE
-						GFX_NIBBLE
-					.endm
-.endif						
-						
-codebase		.equ		0x8000
-stack				.equ		0xC000
-
 .endif	; PLATFORM_COCO3
 
 						.org		codebase
@@ -240,6 +138,14 @@ start:
 ;				lda			#1
 ;				jsr			sub_6359								; examine h/w and check disk sig			
 
+.ifdef GFX_1BPP
+  TITLE_BPL     .equ  35
+  TITLE_RM      .equ  5
+.else
+  TITLE_BPL     .equ  70
+  TITLE_RM      .equ  10
+.endif
+
 display_title_screen: ; $6008
 				jsr			gcls1
 				lda			#0
@@ -255,16 +161,17 @@ display_title_screen: ; $6008
 				lda			*hires_page_msb_1
 				ldb			#0											; 2 centres the title screen
 				tfr			d,x
-				lda			#35											; 35 bytes/line
+				lda			#TITLE_BPL
 				sta			*col
 				lda			#192										; 192 lines/screen
 				sta			*row
 1$:			ldb			,y+											; count
 				lda			,y+											; byte
 2$:			pshs		b
-.ifdef GFX_1BPP
+.if 1
 				sta			,x+
 .else
+  ; code for colourizing 2BPP on-the-fly
 				pshs		a
 				GFX_BYTE
 				pshs		b
@@ -277,13 +184,9 @@ display_title_screen: ; $6008
 				dec			*col										; line byte count
 				tst			*col										; done line?
 				bne			3$											; no, skip
-				ldb			#35
+				ldb			#TITLE_BPL
 				stb			*col										; reset line byte count
-.ifdef GFX_1BPP				
-				ldb			#5
-.else
-				ldb			#10
-.endif				
+				ldb			#TITLE_RM
 				abx															; adjust video ptr
 				dec			*row										; dec line count
 3$:			puls		b

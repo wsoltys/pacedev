@@ -16,7 +16,7 @@
     textout_centre_ex(s, f, str, w, h, c, 0);
 #endif
 
-#define DO_TITLE
+//#define DO_TITLE
 #define DO_TILES
 //#define DO_GAMEOVER
 
@@ -44,7 +44,7 @@ char *get_char_description (unsigned t)
 	{
 		"space", "brick", "solid", "ladder", "rope", "fall-thru", "end ladder",
 		"gold",
-		"enemy left 0",
+		"guard left 0",
 		"player right 0",
 		"solid square",
 		"player left 0", "player left 1", "player left 4", 
@@ -59,14 +59,14 @@ char *get_char_description (unsigned t)
 		"dig brick 0", "dig brick 1", "dig brick 2", "dig brick 3", "dig brick 4", "dig brick 5", 
 		"player dig right",
 		"dig spray 3", "dig spray 5",
-		"enemy right 0", "enemy right 1", "enemy right 2", 
-		"enemy left 0", "enemy left 1",
-		"enemy swing right 0", "enemy swing right 1", "enemy swing right 2", 
-		"enemy swing left 0", "enemy swing left 1", "enemy swing left 2", 
-		"enemy climb 0", "enemy climb 1",
-		"enemy fall right", "enemy fall left",
+		"guard right 0", "guard right 1", "guard right 2", 
+		"guard left 0", "guard left 1",
+		"guard swing right 0", "guard swing right 1", "guard swing right 2", 
+		"guard swing left 0", "guard swing left 1", "guard swing left 2", 
+		"guard climb 0", "guard climb 1",
+		"guard fall right", "guard fall left",
 		"brick refill 0", "brick refill 1",
-		"enemy respawn 0", "enemy respawn 1"
+		"guard respawn 0", "guard respawn 1"
 	};
 	static char *symbol = ">.()/-<";
 
@@ -87,9 +87,77 @@ char *get_char_description (unsigned t)
 	return (ch);		
 }
 
+uint8_t m_hires_artifact_map[16];
+
+void colourize (int width, int height)
+{
+  #if 0
+    for (int y=0; y<height; y++)
+      for (int x=0; x<width; x+=2)
+      {
+        uint8_t data = 0;
+        
+        if (getpixel (screen, x, y))
+          data = (1<<1);
+        if (getpixel (screen, x+1, y))
+          data |= (1<<0);
+  
+        putpixel (screen, x, y, data);
+        putpixel (screen, x+1, y, data);
+      }
+  #else
+
+  	/* build hires artifact map */
+  	for (int i=0; i<8; i++)
+  	{
+  		for (int j=0; j<2; j++)
+  		{
+  		  uint8_t c;
+  		  
+  			if (i & 0x02)
+  			{
+  				if ((i & 0x05) != 0)
+  					c = 3;
+  				else
+  					c = j ? 2 : 1;
+  			}
+  			else
+  			{
+  				if ((i & 0x05) == 0x05)
+  					c = j ? 1 : 2;
+  				else
+  					c = 0;
+  			}
+  			m_hires_artifact_map[j*8 + i] = c;
+  		}
+  	}
+
+    for (int y=0; y<height; y++)
+    {
+  		for (int col=0; col<40; col++)
+  		{
+  		  uint32_t  w = 0;
+  		  
+  		  for (int b=0; b<3*7; b++)
+  		  {
+  		    w <<= 1;
+  		    if (getpixel (screen, col*7+(2-b/7)*7+6-b%7, y))
+  		      w |= (1<<0);
+		    }
+		    for (int b=0; b<7; b++)
+		    {
+					uint8_t c = m_hires_artifact_map[((w >> (b + 7-1)) & 0x07) | (((b ^ col) & 0x01) << 3)];
+					
+					putpixel (screen, col*7+7+b, 192+y, c);
+		    }
+		  }
+    }
+  #endif    
+}
+
 void main (int argc, char *argv[])
 {
-	FILE *fp;
+	FILE *fp, *fp2;
 	struct stat	fs;
 	int					fd;
 	
@@ -117,14 +185,26 @@ void main (int argc, char *argv[])
 	install_keyboard ();
 
 	set_color_depth (8);
-	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 280, 192, 0, 0);
+	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 280+40, 2*192, 0, 0);
+
+  PALETTE pal;
+  uint8_t r[] = { 0x00, 255>>2,  20>>2, 255>>2 };
+  uint8_t g[] = { 0x00, 106>>2, 208>>2, 255>>2 };
+  uint8_t b[] = { 0x00,  60>>2, 254>>2, 255>>2 };
+  for (int c=0; c<sizeof(r); c++)
+  {
+    pal[c].r = r[c];
+    pal[c].g = g[c];
+    pal[c].b = b[c];
+  }
+	set_palette_range (pal, 0, 3, 1);
 
 #ifdef DO_TITLE
 
 	clear_bitmap (screen);
 
 	uint16_t x = 0;
-	uint8_t y = 0;
+	uint16_t y = 0;
 	uint16_t a = 0x0f00;
 	
 	while (y < 192)
@@ -144,7 +224,7 @@ void main (int argc, char *argv[])
 		for (unsigned i=0; i<7; i++)
 		{
 			if (byte & (1<<i))
-				putpixel (screen, x, y, 15);
+				putpixel (screen, 8+x, y, 3);
 			x++;
 		}
 	}
@@ -158,7 +238,7 @@ void main (int argc, char *argv[])
 			uint8_t byte = 0;
 			for (int i=0; i<8; i++)
 			{
-				if (getpixel (screen, x*8+i, y) != 0)
+				if (getpixel (screen, 8+x*8+i, y) != 0)
 					byte |= (1<<(7-i));
 			}
 			fprintf (fp, "0x%02X,", byte);
@@ -176,13 +256,13 @@ void main (int argc, char *argv[])
 			
 			for (int i=0; i<8; i++)
 				if (byte & (1<<(7-i)))
-					putpixel (screen, x*8+i, y, 15);
+					putpixel (screen, 8+x*8+i, y, 3);
 		}
 	}
 
 	// now RLE it
 	fp = fopen ("title_rle.c", "wt");
-	FILE *fp2 = fopen ("title_rle.bin", "wb");
+	fp2 = fopen ("title_data_m1bpp.asm", "wt");
 
   uint8_t preamble[6] = "\x00\x00\x00\x00\x00";
   uint8_t postamble[6] = "\xFF\x00\x00\x00\x00";
@@ -192,16 +272,16 @@ void main (int argc, char *argv[])
   preamble[2] = 2;
   preamble[3] = 0xFF;
   preamble[4] = 0xA2;             			// MMU bank register for $4000
-  fwrite (preamble, 1, 5, fp2);
+  //fwrite (preamble, 1, 5, fp2);
   uint8_t bank[2] = { 0x02, 0x03 };			// 62/3, or $C000 in memory
-  fwrite (bank, 1, 2, fp2);
+  //fwrite (bank, 1, 2, fp2);
 
   // write data block
   preamble[1] = 0x11;
   preamble[2] = 0x94;		// $1194 bytes
   preamble[3] = 0x68;
   preamble[4] = 0x00;   // load at $6800
-  fwrite (preamble, 1, 5, fp2);
+  //fwrite (preamble, 1, 5, fp2);
 	
 	int lc = 0;	
 	int n = 0;
@@ -216,15 +296,22 @@ void main (int argc, char *argv[])
 			n++;
 		}
 		fprintf (fp, "0x%02X, 0x%02X, ", (uint8_t)cnt, byte);
-		uint8_t tmp = (uint8_t)cnt;
-		fwrite (&tmp, 1, 1, fp2);
-		fwrite (&byte, 1, 1, fp2);
+		//uint8_t tmp = (uint8_t)cnt;
+		//fwrite (&tmp, 1, 1, fp2);
+		//fwrite (&byte, 1, 1, fp2);
+		if (lc == 0)
+		  fprintf (fp2, "    .db  ");
+		fprintf (fp2, "0x%02X, 0x%02X", (uint8_t)cnt, byte);
 		lc += 2;
 		if (lc == 16)
 		{
 			fprintf (fp, "\n");
+			fprintf (fp2, "\n");
 			lc = 0;
 		}
+		else
+		  if (n<280/8*192-1)
+		    fprintf (fp2, ", ");
 	}
 	fprintf (fp, "\n");
 	fclose (fp);
@@ -234,12 +321,12 @@ void main (int argc, char *argv[])
   preamble[2] = 2;
   preamble[3] = 0xFF;
   preamble[4] = 0xA2;             // MMU bank register for $4000
-  fwrite (preamble, 1, 5, fp2);
+  //fwrite (preamble, 1, 5, fp2);
   bank[0] = 0x3A;									// 58, or $4000 in memory
   bank[1] = 0x3B;
-  fwrite (bank, 1, 2, fp2);
+  //fwrite (bank, 1, 2, fp2);
 
-  fwrite (postamble, 1, 5, fp2);
+  //fwrite (postamble, 1, 5, fp2);
 
 	fclose (fp2);
 
@@ -260,7 +347,7 @@ void main (int argc, char *argv[])
 			for (int i=0; i<8; i++)
 			{
 				if (byte & (1<<(7-i)))
-					putpixel (screen, x*8+i, y, 15);
+					putpixel (screen, 8+x*8+i, y, 3);
 			}
 			x++;
 			if (x == 280/8)
@@ -271,8 +358,114 @@ void main (int argc, char *argv[])
 		}
 	}
 
-  while (!key[KEY_ESC]);	  
-  while (key[KEY_ESC]);	  
+  colourize (280, 192);
+
+  // now do a 2bpp rle version
+  uint16_t  count = 0;
+  uint8_t   byte = 0;
+  uint8_t   rle[16384];
+  uint16_t  rle_n = 0;
+  
+  for (int y=0; y<192; y++)
+  {
+    for (int x=0; x<280; x+=4)
+    {
+      uint8_t   data;
+      
+      for (int b=0; b<4; b++)
+      {
+        data <<= 2;
+        data |= getpixel (screen, 8+x+b, 192+y) & 0x03;
+      }
+      if (count == 0)
+      {
+        count++;
+        byte = data;
+      }
+      else
+        if (data == byte)
+        {
+          if (++count > 254)
+          {
+            rle[rle_n++] = count;
+            rle[rle_n++] = byte;
+            count = 0;
+            
+            //fprintf (stderr, "overflow!\n");
+          }
+        }
+        else
+        {
+          rle[rle_n++] = count;
+          rle[rle_n++] = byte;
+          count = 1;
+          byte = data;
+        }
+    }
+#if 0
+    // insert end-of-line?
+    if (count > 0 && byte == 0)
+    {
+      rle[rle_n++] = 0;
+      count = 0;
+    }
+#endif    
+  }
+  if (count > 0)
+  {
+    rle[rle_n++] = count;
+    rle[rle_n++] = byte;
+  }
+
+  uint16_t clr_rle_n = rle_n;
+  
+  //while (!key[KEY_ESC]);	  
+  //while (key[KEY_ESC]);	  
+
+  clear_bitmap (screen);
+  
+  for (n=0; n<rle_n;)
+  {
+    uint16_t count = rle[n++];
+
+    if (count == 0)
+    {
+      y++;
+      x = 0;
+      continue;
+    }
+      
+    uint8_t byte = rle[n++];
+    
+    for (unsigned c=0; c<count; c++)
+    {
+      for (int b=0; b<4; b++)
+        putpixel (screen, 8+x+b, y, (byte >> ((3-b)*2)) & 0x03);
+      x += 4;
+      if (x == 280)
+      {
+        y++;
+        x = 0;
+      }
+    }
+  }
+  
+  fp2 = fopen ("title_data_c2bpp.asm", "wt");
+  for (int n=0; n<rle_n; n++)
+  {
+    if ((n%8) == 0)
+      fprintf (fp2, "    .db  ");
+    fprintf (fp2, "0x%02X", rle[n]);
+    if ((n%8) < 7 && n<rle_n-1)
+      fprintf (fp2, ", ");
+    else
+      fprintf (fp2, "\n");
+  }
+  
+  fclose (fp2);
+  
+  //while (!key[KEY_ESC]);	  
+  //while (key[KEY_ESC]);	  
 
 #endif // DO_TITLE
 
@@ -319,7 +512,7 @@ void main (int argc, char *argv[])
 					for (int bit=0; bit<7; bit++)
 					{
 						if (data[byte] & (1<<bit))
-							putpixel (screen, (t%16)*16+byte*7+bit, 8+(t/16)*16+sl, 15);
+							putpixel (screen, 8+(t%16)*16+byte*7+bit, 8+(t/16)*16+sl, 3);
 					}
 				}			
 			}
@@ -327,8 +520,16 @@ void main (int argc, char *argv[])
 		
 		char buf[128];
 		sprintf (buf, "shift=%d", shift);
-		SS_TEXTOUT_CENTRE (screen, font, buf, 280/2, 192-8, 15);
+		SS_TEXTOUT_CENTRE (screen, font, buf, 280/2, 192-8, 3);
 
+    if ((shift % 2) == 0)
+    {
+      colourize (280, 8+7*16);
+
+	    //while (!key[KEY_ESC]);	  
+	    //while (key[KEY_ESC]);	  
+    }
+    
 		if ((shift % 2) == 0)
 		{
 			fprintf (fp, "// SHIFT = %d\n\n", shift);
@@ -344,7 +545,7 @@ void main (int argc, char *argv[])
 						for (int bit=0; bit<8; bit++)
 						{
 							data <<= 1;
-							if (getpixel (screen, (t%16)*16+byte*8+bit, 8+(t/16)*16+sl))
+							if (getpixel (screen, 8+(t%16)*16+byte*8+bit, 8+(t/16)*16+sl))
 								data |= 1;
 						}
 						fprintf (fp, "0x%02X, ", data);
@@ -355,7 +556,6 @@ void main (int argc, char *argv[])
 			}
 			fprintf (fp, "\n");
 		}
-
 		
 	  //while (!key[KEY_ESC]);	  
 	  //while (key[KEY_ESC]);	  
@@ -363,7 +563,7 @@ void main (int argc, char *argv[])
 
 	fclose (fp);
 	
-	fp = fopen ("tiles.asm", "wt");
+	fp = fopen ("tile_data_m1bpp.asm", "wt");
 	fp2 = fopen ("tiles.bin", "wb");
 
   uint8_t t_preamble[6] = "\x00\x00\x00\x00\x00";
@@ -387,7 +587,7 @@ void main (int argc, char *argv[])
   t_preamble[4] = 0x00;   // load at $4000
   fwrite (t_preamble, 1, 5, fp2);
 
-	fprintf (fp, "\ntile_data:\n\n");
+	//fprintf (fp, "\ntile_data:\n\n");
 	
 	for (uint16_t shift=0; shift<8; shift+=2)
 	{
@@ -409,7 +609,7 @@ void main (int argc, char *argv[])
 					for (int bit=0; bit<8; bit++)
 					{
 						if (d[t*2*11+sl*2+byte] & (1<<(7-bit)))
-							putpixel (screen, (t%16)*16+byte*8+bit, 8+(t/16)*16+sl, 15);
+							putpixel (screen, 8+(t%16)*16+byte*8+bit, 8+(t/16)*16+sl, 3);
 					}
 
 					fprintf (fp, "0x%02X", d[t*2*11+sl*2+byte]);
@@ -427,7 +627,7 @@ void main (int argc, char *argv[])
 				
 		char buf[128];
 		sprintf (buf, "shift=%d", shift);
-		SS_TEXTOUT_CENTRE (screen, font, buf, 280/2, 192-8, 15);
+		SS_TEXTOUT_CENTRE (screen, font, buf, 280/2, 192-8, 3);
 		
 	  //while (!key[KEY_ESC]);	  
 	  //while (key[KEY_ESC]);	  
@@ -473,7 +673,7 @@ void main (int argc, char *argv[])
         // offset by 6 pixels
         // 3 to fix 88 vs 91 X offset of byte 11 vs 13
         if (data & (1<<i))
-          putpixel (screen, 3+b*7+i, l, 15);
+          putpixel (screen, 8+3+b*7+i, l, 3);
       }
     }
 
@@ -487,7 +687,7 @@ void main (int argc, char *argv[])
       for (int i=0; i<8; i++)
       {
         data <<= 1;
-        if (getpixel (screen, b*8+i, l))
+        if (getpixel (screen, 8+b*8+i, l))
           data |= 1;
       }
       
@@ -507,7 +707,7 @@ void main (int argc, char *argv[])
       for (int i=0; i<8; i++)
       {
         if (game_over[l][b] & (1<<(7-i)))
-          putpixel (screen, b*8+i, 32+l, 15);
+          putpixel (screen, 8+b*8+i, 32+l, 3);
       }
     }
   }
@@ -522,10 +722,17 @@ void main (int argc, char *argv[])
   allegro_exit ();
 
 #ifdef DO_TITLE  
-  printf ("original=%d\n", a-0x0f00);
-  printf ("280/8*192=%d\n", 280/8*192);
-  printf ("RLE_SIZE=%d\n", RLE_SIZE);
+  fprintf (stderr, "original=%d\n", a-0x0f00);
+  fprintf (stderr, "280/8*192=%d\n", 280/8*192);
+  fprintf (stderr, "RLE_SIZE=%d ($%04X)\n", RLE_SIZE, RLE_SIZE);
+
+  fprintf (stderr, "4BPP_RLE_SIZE=%d ($%04X)\n", clr_rle_n, clr_rle_n);
 #endif
+
+  for (int i=0; i<16; i++)
+    fprintf (stderr, "%1d, ", m_hires_artifact_map[i]);
+  fprintf (stderr, "\n");    
+
 }
 
 END_OF_MAIN();
