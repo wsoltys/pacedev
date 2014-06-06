@@ -16,8 +16,8 @@
     textout_centre_ex(s, f, str, w, h, c, 0);
 #endif
 
-#define DO_TITLE
-//#define DO_TILES
+//#define DO_TITLE
+#define DO_TILES
 //#define DO_GAMEOVER
 
 uint8_t ram[64*1024];

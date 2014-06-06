@@ -116,7 +116,7 @@ stack				.equ		  0xC000
 
 .define	TITLE_EXTERNAL
 .ifdef TITLE_EXTERNAL
-  title_data	.equ	  0xE400
+  title_data	.equ	  0xE3C0
 .endif
 
 ;.define			LEVELS_EXTERNAL

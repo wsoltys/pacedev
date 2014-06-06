@@ -9,7 +9,7 @@
 
 .include "coco3.asm"
 
-        ; $4000,$6000
+        ; $4000
         .org    MMUTSK1+2
         .db     0x02, 0x03
 
@@ -18,6 +18,11 @@
 .ifdef GFX_1BPP
   .include "tile_data_m1bpp.asm"
 .else
+  .ifdef GFX_MONO
+    ;.include "tile_data_m2bpp.asm"
+  .else
+    ;.include "tile_data_c2bpp.asm"
+  .endif
 .endif       
         
         .org    title_data & 0x7FFF
