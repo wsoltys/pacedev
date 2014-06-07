@@ -134,7 +134,7 @@ void colourize (int width, int height)
 
     for (int y=0; y<height; y++)
     {
-  		for (int col=0; col<40; col++)
+  		for (int col=0; col<width/7; col++)
   		{
   		  uint32_t  w = 0;
   		  
@@ -185,7 +185,7 @@ void main (int argc, char *argv[])
 	install_keyboard ();
 
 	set_color_depth (8);
-	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 280+40, 2*192, 0, 0);
+	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 8+280*2, 2*192, 0, 0);
 
   PALETTE pal;
   uint8_t r[] = { 0x00, 255>>2,  20>>2, 255>>2 };
@@ -519,7 +519,10 @@ void main (int argc, char *argv[])
 					for (int bit=0; bit<7; bit++)
 					{
 						if (data[byte] & (1<<bit))
-							putpixel (screen, 8+(t%16)*16+byte*7+bit, 8+(t/16)*16+sl, 3);
+						{
+							putpixel (screen, 8+(t%16)*32+byte*7+bit, 8+(t/16)*16+sl, 3);
+							putpixel (screen, 8+(t%16)*32+10+byte*7+bit, 8+(t/16)*16+sl, 3);
+						}
 					}
 				}			
 			}
@@ -531,11 +534,21 @@ void main (int argc, char *argv[])
 
     if ((shift % 2) == 0)
     {
-      colourize (280, 8+7*16);
+      colourize (560, 8+7*16);
 
 	    //while (!key[KEY_ESC]);	  
 	    //while (key[KEY_ESC]);	  
     }
+    
+    // delete 2nd tile
+		for (unsigned t=0; t<0x68; t++)
+			for (unsigned sl=0; sl<11; sl++)
+				for (int byte=0; byte<3; byte++)
+					for (int bit=0; bit<7; bit++)
+					{
+						putpixel (screen, 8+shift+(t%16)*32+10+byte*7+bit, 8+(t/16)*16+sl, 0);
+						putpixel (screen, 8+shift+(t%16)*32+10+byte*7+bit, 192+8+(t/16)*16+sl, 0);
+					}
     
 		if ((shift % 2) == 0)
 		{
@@ -568,12 +581,14 @@ void main (int argc, char *argv[])
 							data <<= 1;
 							data2 <<= 2;
 							data3 <<= 2;
-							if (getpixel (screen, 8+(t%16)*16+byte*8+bit, 8+(t/16)*16+sl))
+							//if (getpixel (screen, 8+(t%16)*16+byte*8+bit, 8+(t/16)*16+sl))
+							if (getpixel (screen, 8+(t%16)*32+byte*8+bit, 8+(t/16)*16+sl))
 							{
 								data |= 1;
 								data2 |= 3;
 							}
-							data3 |= getpixel (screen, 8+(t%16)*16+byte*8+bit, 192+8+(t/16)*16+sl) & 0x03;
+							//data3 |= getpixel (screen, 8+(t%16)*16+byte*8+bit, 192+8+(t/16)*16+sl) & 0x03;
+							data3 |= getpixel (screen, 8+(t%16)*32+byte*8+bit, 192+8+(t/16)*16+sl) & 0x03;
 							
 						}
 						fprintf (fp, "0x%02X, ", data);
@@ -622,6 +637,9 @@ void main (int argc, char *argv[])
 			}
 		}
 		
+		if (shift == 0)
+			save_bmp ("shift0.bmp", screen, pal);
+					
 	  //while (!key[KEY_ESC]);	  
 	  //while (key[KEY_ESC]);	  
 	}
@@ -695,7 +713,7 @@ void main (int argc, char *argv[])
 		char buf[128];
 		sprintf (buf, "shift=%d", shift);
 		SS_TEXTOUT_CENTRE (screen, font, buf, 280/2, 192-8, 3);
-		
+
 	  //while (!key[KEY_ESC]);	  
 	  //while (key[KEY_ESC]);	  
 	}

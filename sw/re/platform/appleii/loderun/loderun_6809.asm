@@ -4009,7 +4009,10 @@ display_char:
 				ora			,x+
 				sta			1,y
 .ifdef GFX_2BPP
-				inx															; *** HACK
+				lda			2,y
+				;anda		*rchar_mask
+				ora			,x+
+				sta			2,y
 .endif				
 				leay		VIDEO_BPL,y
 				decb
