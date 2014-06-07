@@ -12,6 +12,14 @@
 
 ;.define			DEBUG
 ;.define			DEBUG_GUARD_COPY
+;.define			DEBUG_INVINCIBLE
+;.define			DEBUG_NO_BITWISE_COLLISION_DETECT
+
+.macro				KILL_PLAYER
+	.ifndef DEBUG_INVINCIBLE
+				lsr			*level_active
+	.endif
+.endm
 
 START_LEVEL_0_BASED	.equ		0
 
@@ -686,7 +694,7 @@ draw_level:	; $648B
 				rts
 
 handle_player: ; $64bd
-				lda			#0	; *** HACK
+				lda			#1
 				sta			*enable_collision_detect
 				lda			*dig_dir
 				beq			not_digging
@@ -1783,9 +1791,11 @@ draw_player_sprite: ; $6c02
 				jsr			display_transparent_char
 				lda     *collision_detect       ; collision?
 				beq     1$                      ; no, skip
+.ifndef DEBUG_NO_BITWISE_COLLISION_DETECT
 				lda     *enable_collision_detect  ; enabled?
 				beq     1$                      ; no, skip
-				lsr     *level_active           ; kill player
+				KILL_PLAYER
+.endif				
 1$:			rts
 
 adjust_x_offset_in_tile:	; $6C13
@@ -2060,7 +2070,7 @@ guard_fall_into_next_row:	; $6DC0
 				lda			b,y											; get object from tilemap
 				cmpa		#9											; player?
 				bne			2$											; no, skip
-				lsr			*level_active						; kill player
+				KILL_PLAYER
 2$:			ldy			*byte_9
 				lda			b,y											; get object from tilemap
 				cmpa		#1											; brick?
@@ -2229,7 +2239,7 @@ guard_can_move_up:	; $6ED5
         lda			b,y											; get object from tilemap
         cmpa    #9                      ; player?
         bne     2$											; no, skip
-        lsr     *level_active						; kill player
+        KILL_PLAYER
 2$:     lda     #8                      ; enemy
         sta     b,y											; update tilemap
         lda     #4
@@ -2315,7 +2325,7 @@ guard_can_move_down:	; $6F63
         lda			b,y											; get object from tilemap
         cmpa    #9                      ; player?
         bne     2$											; no, skip
-        lsr     *level_active						; kill player
+        KILL_PLAYER
 2$:     lda     #8											; guard
         sta     b,y											; update tilemap
         lda     #0
@@ -2378,7 +2388,7 @@ guard_can_move_left:	; $6FF1
 				lda			b,y											; get object from tilemap (left)
 				cmpa		#9											; player?
 				bne			2$											; no, skip
-				lsr			*level_active						; kill player
+				KILL_PLAYER
 2$:			lda			#8											; guard
 				sta			b,y											; update tilemap
 				lda			#4
@@ -2458,7 +2468,7 @@ guard_can_move_right:	; $707E
 				lda			b,y											; get object from tilemap (right)
 				cmpa		#9											; player?
 				bne			4$											; no, skip
-				lsr			*level_active						; kill player												
+				KILL_PLAYER
 4$:			lda			#8											; guard
 				sta			b,y											; update tilemap
 				lda			#0
@@ -3342,7 +3352,7 @@ restore_brick:	; $7641
 				jmp			redisplay_brick
 1$:			cmpa		#9											; player?
 				bne			2$											; no, skip
-				lsr			*level_active						; kill player
+				KILL_PLAYER
 2$:			cmpa		#8											; guard?
 				beq			4$											; yes, go
 				cmpa		#7											; gold?	
@@ -3737,11 +3747,15 @@ cls_and_display_game_status:	; $79AD
 				ora			#>(176*VIDEO_BPL)
 				ldb			#<(176*VIDEO_BPL)				; offset
 				tfr			d,x				
-.if def GFX_1BPP | def GFX_COLOUR
-				lda			#0xaa										; pattern
-.else				
-				lda			#0xff										; pattern
-.endif				
+.ifdef GFX_1BPP
+				lda			#0xaa
+.else
+	.ifdef GFX_MONO	
+				lda			#0xcc										; pattern
+	.else
+				lda			#0xaa
+	.endif
+.endif
 				ldb			#(APPLE_BPL-1)					; last column on screen
 1$:			sta			0*VIDEO_BPL,x           					
 				sta			1*VIDEO_BPL,x          					

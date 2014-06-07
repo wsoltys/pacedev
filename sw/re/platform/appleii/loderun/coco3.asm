@@ -50,8 +50,8 @@ HGR2_MSB		.equ		0x40
 ; *** LODE RUNNER SPECIFIC CONFIGURATION HERE
 ;
 
-;.define			GFX_1BPP
-;.define			GFX_MONO
+.define			GFX_1BPP
+.define			GFX_MONO
 
 .ifndef GFX_1BPP
 	.define		GFX_2BPP
@@ -94,13 +94,16 @@ HGR2_MSB		.equ		0x40
 					.endm
 .endif						
 
+
+
 .ifdef GFX_1BPP
-  VIDEO_BPL     .equ  40
-  VIDEO_RM      .equ  5
+	VIDEO_BPP			.equ	1
 .else
-  VIDEO_BPL     .equ  80
-  VIDEO_RM      .equ  10
+	VIDEO_BPP			.equ	2
 .endif
+
+VIDEO_BPL     	.equ  VIDEO_BPP*40
+VIDEO_RM				.equ	VIDEO_BPP*5
 APPLE_BPL				.equ	VIDEO_BPL-VIDEO_RM
 						
 ;
@@ -111,8 +114,8 @@ APPLE_BPL				.equ	VIDEO_BPL-VIDEO_RM
 ; $7F00-$7FFF   Zero Page
 ; $8000-        Program Code & Data
 ;      -$BFFF   6809 System Stack
-; $C000-$E3BF   Tile Graphics Data
-; $E400-$       Title Screen Data
+; $C000-$EXXX   Tile Graphics Data
+; $EX00-$       Title Screen Data
 ;
 
 codebase		.equ		  	0x8000
