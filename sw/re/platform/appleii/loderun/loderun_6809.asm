@@ -3734,15 +3734,19 @@ cls_and_display_game_status:	; $79AD
 				jsr			gcls1
 				jsr			gcls2
 				lda			*display_char_page			; 0x00/0x20
-				ora			#0x1b
-				ldb			#0x80										; 0x1b80 = offset
+				ora			#>(176*VIDEO_BPL)
+				ldb			#<(176*VIDEO_BPL)				; offset
 				tfr			d,x				
+.if def GFX_1BPP | def GFX_COLOUR
 				lda			#0xaa										; pattern
-				ldb			#34											; last column on screen
-1$:			sta			0,x           					
-				sta			40,x          					
-				sta			80,x          					
-				sta			120,x										; 4 scanlines of pixels
+.else				
+				lda			#0xff										; pattern
+.endif				
+				ldb			#(APPLE_BPL-1)					; last column on screen
+1$:			sta			0*VIDEO_BPL,x           					
+				sta			1*VIDEO_BPL,x          					
+				sta			2*VIDEO_BPL,x          					
+				sta			3*VIDEO_BPL,x						; 4 scanlines of pixels
 				inx															; next video address
 				decb														; done line?
 				bpl			1$											; no, loop
@@ -3767,6 +3771,7 @@ get_line_addr_curr_page:	; $7A31
 				rts				
 
 get_line_addr_pgs_1_2: ; $7A3E
+; B=scanline
 				lda			#VIDEO_BPL
 				mul
 				stb			*lsb_line_addr_pg1
@@ -3781,22 +3786,14 @@ gcls1: ; $7A51
 				lda			#HGR1_MSB
 				ldb			#0
 				tfr			d,x											; start addr
-.ifdef GFX_1BPP				
-				adda		#0x1E
-.else
-				adda		#0x3C
-.endif				
+				adda		#>(VIDEO_BPL*192)
 				tfr			d,y											; end addr
 				bra			gcls
 gcls2:
 				lda			#HGR2_MSB
 				ldb			#0
 				tfr			d,x											; start addr
-.ifdef GFX_1BPP				
-				adda		#0x1E
-.else
-				adda		#0x3C
-.endif				
+				adda		#>(VIDEO_BPL*192)
 				tfr			d,y											; end addr
 gcls:		sty			*word_a
 				lda			#0x00
@@ -4001,11 +3998,13 @@ display_char:
 				leay		b,y
 				ldb			#11
 2$:			lda			0,y
-				;anda		*lchar_mask
+				anda		*lchar_mask
 				ora			,x+
 				sta			0,y
 				lda			1,y
-				;anda		*rchar_mask
+.ifdef GFX_1BPP				
+				anda		*rchar_mask
+.endif				
 				ora			,x+
 				sta			1,y
 .ifdef GFX_2BPP
@@ -4062,6 +4061,18 @@ wipe_2_byte_char_from_video:
 				ora			b,x											; OR-in background
 				puls		x
 				sta			b,x											; update video byte
+.ifdef GFX_2BPP
+				incb
+				lda			,y+											; get data from render buffer
+				coma														; invert character data
+				ldx			*msb_line_addr_pg1
+				pshs		x
+				anda		b,x											; mask off character
+				ldx			*msb_line_addr_pg2
+				ora			b,x											; OR-in background
+				puls		x
+				sta			b,x											; update video byte
+.endif				
 				inc			*scanline
 				dec			*scanline_cnt
 				bne			wipe_2_byte_char_from_video			
@@ -4111,7 +4122,18 @@ OR_2_byte_char_to_video:	; $83C3
 				sta			b,y											; update video byte
 				inx															; next render buffer address
 .ifdef GFX_2BPP
-				inx															; ***hack!!!
+				incb														; next video address
+				lda			b,y
+				ldy			*msb_line_addr_pg2
+				eora		b,y
+				anda		,x
+				ora			*collision_detect
+				sta			*collision_detect
+				lda			,x											; get byte to be rendered
+				ldy			*msb_line_addr_pg1
+				ora			b,y
+				sta			b,y											; update video byte
+				inx
 .endif				
 				inc			*scanline
 				dec			*scanline_cnt
@@ -4786,51 +4808,51 @@ attract_move_tbl:	; $9B00
 .include "zeropage.asm"
 
 eos_ladder_col:	; $C00
-					.ds		0x30
+				.ds		0x30
 eos_ladder_row:	; $C30
-					.ds		0x30
+				.ds		0x30
 guard_col:	; $C60
-					.ds		8					
+				.ds		8					
 guard_row:	; $C68
-					.ds		8					
+				.ds		8					
 guard_state:	; $C70
-					.ds		8					
+				.ds		8					
 guard_x_offset:	; $C78
-					.ds		8					
+				.ds		8					
 guard_y_offset:	; $C80
-					.ds		8					
+				.ds		8					
 guard_sprite:	; $C88
-					.ds		8					
+				.ds		8					
 guard_dir:	; $C90
-					.ds		8					
+				.ds		8					
 guard_cnt:	; $C98
-					.ds		8					
+				.ds		8					
 hole_col:	; $CA0
-					.ds		0x20
+				.ds		0x20
 hole_row:	; $CC0
-					.ds		0x20
+				.ds		0x20
 hole_cnt:	; $CE0
-					.ds		0x20
+				.ds		0x20
 
 lsb_row_addr:	; $1C05
-					.db		<(ldu1+0*28), <(ldu1+1*28), <(ldu1+2*28), <(ldu1+3*28)
-					.db		<(ldu1+4*28), <(ldu1+5*28), <(ldu1+6*28), <(ldu1+7*28)
-					.db		<(ldu1+8*28), <(ldu1+9*28), <(ldu1+10*28), <(ldu1+11*28)
-					.db		<(ldu1+12*28), <(ldu1+13*28), <(ldu1+14*28), <(ldu1+15*28)
+				.db		<(ldu1+0*28), <(ldu1+1*28), <(ldu1+2*28), <(ldu1+3*28)
+				.db		<(ldu1+4*28), <(ldu1+5*28), <(ldu1+6*28), <(ldu1+7*28)
+				.db		<(ldu1+8*28), <(ldu1+9*28), <(ldu1+10*28), <(ldu1+11*28)
+				.db		<(ldu1+12*28), <(ldu1+13*28), <(ldu1+14*28), <(ldu1+15*28)
 msb_row_addr_1: ; $1C15
-					.db		>(ldu1+0*28), >(ldu1+1*28), >(ldu1+2*28), >(ldu1+3*28)
-					.db		>(ldu1+4*28), >(ldu1+5*28), >(ldu1+6*28), >(ldu1+7*28)
-					.db		>(ldu1+8*28), >(ldu1+9*28), >(ldu1+10*28), >(ldu1+11*28)
-					.db		>(ldu1+12*28), >(ldu1+13*28), >(ldu1+14*28), >(ldu1+15*28)
+				.db		>(ldu1+0*28), >(ldu1+1*28), >(ldu1+2*28), >(ldu1+3*28)
+				.db		>(ldu1+4*28), >(ldu1+5*28), >(ldu1+6*28), >(ldu1+7*28)
+				.db		>(ldu1+8*28), >(ldu1+9*28), >(ldu1+10*28), >(ldu1+11*28)
+				.db		>(ldu1+12*28), >(ldu1+13*28), >(ldu1+14*28), >(ldu1+15*28)
 msb_row_addr_2:	; $1C25
-					.db		>(ldu2+0*28), >(ldu2+1*28), >(ldu2+2*28), >(ldu2+3*28)
-					.db		>(ldu2+4*28), >(ldu2+5*28), >(ldu2+6*28), >(ldu2+7*28)
-					.db		>(ldu2+8*28), >(ldu2+9*28), >(ldu2+10*28), >(ldu2+11*28)
-					.db		>(ldu2+12*28), >(ldu2+13*28), >(ldu2+14*28), >(ldu2+15*28)
+				.db		>(ldu2+0*28), >(ldu2+1*28), >(ldu2+2*28), >(ldu2+3*28)
+				.db		>(ldu2+4*28), >(ldu2+5*28), >(ldu2+6*28), >(ldu2+7*28)
+				.db		>(ldu2+8*28), >(ldu2+9*28), >(ldu2+10*28), >(ldu2+11*28)
+				.db		>(ldu2+12*28), >(ldu2+13*28), >(ldu2+14*28), >(ldu2+15*28)
 
 col_x_5_tbl:	; $1C35
-					.db 	0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75
-					.db 	80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135
+				.db 	0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75
+				.db 	80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135
 
 row_to_scanline_tbl:	; $1c51
 				.db			0, 11, 22, 33, 44, 55, 66, 77, 88, 99, 110, 121
@@ -4868,15 +4890,11 @@ hs_tbl:	; $1F00
 
 .ifndef TILES_EXTERNAL				
 	.include "tiles.asm"
-.else
-	tile_data	.equ	0xC000
 .endif
 
 .ifdef HAS_TITLE
 	.ifndef TITLE_EXTERNAL
 		.include "title.asm"
-	.else
-		title_data	.equ	0xE800
 	.endif
 .endif
 
