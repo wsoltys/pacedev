@@ -49,21 +49,16 @@ SCORE_KILL				.equ	0x0100
     orcc		#(1<<0)
   .endm
 
-.ifdef PLATFORM_COCO3
+.iifdef PLATFORM_COCO3	.include "coco3.asm"
 
-.include "coco3.asm"
-
-.define			HAS_TITLE
-						
-.endif	; PLATFORM_COCO3
-
-						.org		codebase
+				.org		codebase
 start:
-
-.ifdef PLATFORM_COCO3
-; initialise PLATFORM_COCO3 hardware
 				ldu			#stack
 				orcc		#0x50										; disable interrupts
+
+.ifdef PLATFORM_COCO3
+
+; initialise PLATFORM_COCO3 hardware
 ; - disable PIA interrupts
 				lda			#0x34
 				sta			PIA0+1									; PIA0, CA1,2 control
@@ -83,11 +78,11 @@ start:
 				sta			FIRQENR   							
 				lda			#0x80										; graphics mode, 60Hz, 1 line/row
 				sta			VMODE     							
-.ifdef GFX_1BPP				
+	.ifdef GFX_1BPP				
 				lda			#0x0C										; 192 scanlines, 40 bytes/row, 2 colours (320x192)
-.else				
+	.else				
 				lda			#0x15										; 192 scanlines, 80 bytes/row, 4 colours (320x192)
-.endif				
+	.endif				
 				sta			VRES      							
 				lda			#0x00										; black
 				sta			BRDR      							
@@ -98,40 +93,39 @@ start:
 				lda			#0x00										; normal display, horiz offset 0
 				sta			HOFF      							
 				ldx			#PALETTE
-.ifdef GFX_1BPP
+	.ifdef GFX_1BPP
 				lda			#0x00										; black
 				sta			,x+
-.else
+	.else
 				lda			#0x00										; black
 				sta			,x+
 				lda			#0x25										; orange (#0x35?)
 				sta			,x+
 				lda			#0x2d										; blue (#0x19?)
 				sta			,x+
-.endif	; GFX_1BPP
-.ifdef GFX_MONO
+	.endif	; GFX_1BPP
+	.ifdef GFX_MONO
 				lda			#0x12										; green
-.else				
+	.else				
 				lda			#0x3f										; white
-.endif				
+	.endif				
 				sta			,x+
 				sta			CPU179									; select fast CPU clock (1.79MHz)
 				
-.ifdef TILES_EXTERNAL
-; tiles @$8000-$A2BF
+	.ifdef TILES_EXTERNAL
 				lda			#2
 				ldx			#(MMUTSK1+6)
 				sta			,x+											; page 2 @$C000-$DFFF
 				inca
 				sta			,x+											; page 3 @$E000-$FFFF
-.endif	; TILES_EXTERNAL
+	.endif	; TILES_EXTERNAL
 				
 .endif	; PLATFORM_COCO3
 			
-				lda			#0x7F
+				lda			#>ZEROPAGE
 				tfr			a,dp
 
-; values set in loader
+; values set in Apple II loader
         lda     #6
         sta     *game_speed
         lda     #0xff
@@ -1509,7 +1503,7 @@ read_controls:	; $6a12
 				lda			,x											; active low
 				coma
 				anda		#(1<<6)									; bit6=CTRL
-				sta			*zp_ff
+				sta			*zp_de
 				ldb			#~(1<<0)								; col0
 				stb			2,x											; columns strobe
 				lda			,x											; active low
@@ -1519,7 +1513,7 @@ read_controls:	; $6a12
 				rts
 96$:		bita		#(1<<6)									; <ENTER>?
 				bne			10$
-				tst			*zp_ff									; CTRL?
+				tst			*zp_de									; CTRL?
 				bne			10$											; no, skip
 				lda			#0x8d										; CTRL-M
 				rts
@@ -1528,7 +1522,7 @@ read_controls:	; $6a12
 				lda			,x											; active low
 				bita		#(1<<0)									; 'A'?
 				bne			11$											; no, skip
-				tst			*zp_ff									; CTRL?
+				tst			*zp_de									; CTRL?
 				beq			11$											; no, skip
 				lda			#0x81										; CTRL-A
 				rts
@@ -1553,7 +1547,7 @@ read_controls:	; $6a12
         rts								
 22$:    bita		#(1<<2)									; 'R'?
 				bne			3$											; no, skip
-			  tst			*zp_ff									; CTRL?
+			  tst			*zp_de									; CTRL?
 				beq			3$											; no, skip
 				lda			#0x92										; CTRL-R
 				rts
@@ -1597,7 +1591,7 @@ read_controls:	; $6a12
         bne     60$                     ; no, skip
         lda     #0xcc                   ; 'L'
         rts				
-60$:    tst			*zp_ff									; CTRL?
+60$:    tst			*zp_de									; CTRL?
 				beq			7$                      ; no, skip
 				bita		#(1<<0)									; 'F'?
 				bne			61$											; no, skip
@@ -4023,7 +4017,7 @@ display_char:
 				sta			1,y
 .ifdef GFX_2BPP
 				lda			2,y
-				;anda		*rchar_mask
+				anda		*rchar_mask
 				ora			,x+
 				sta			2,y
 .endif				
@@ -4032,10 +4026,17 @@ display_char:
 				bne			2$
 				rts
 
+.ifdef GFX_1BPP
 left_char_masks:	; $8328
 				.db			0x00, 0xc0, 0xf0, 0xfc
 right_char_masks:	; $832F
 				.db			0x3f, 0x0f, 0x03, 0x00
+.else
+left_char_masks:	; $8328
+				.db			0x00, 0xf0
+right_char_masks:	; $832F
+				.db			0x0f, 0x00
+.endif
 
 wipe_char:	; $8336
 ; A=char, B=x_in_2_pixel_incs, X(lsb)=scanline
@@ -4177,9 +4178,6 @@ render_char_in_buffer:	; $8438
 				bne			1$											; no, loop
 				rts
 
-char_render_buf:
-				.ds			BPC
-				
 char_bank_tbl:
 				.dw			#tile_data+0*BPC*104
 				.dw			#tile_data+1*BPC*104
@@ -4525,9 +4523,9 @@ calc_addr_shift_for_x:	; $8872
 				lsra														; A=addr
 				lslb
 .ifdef GFX_1BPP				
-				andb		#7											; B=shift
+				andb		#0x06										; B=shift
 .else
-				andb		#3											; B=shift
+				andb		#0x02										; B=shift
 .endif				
 				rts
 				

@@ -50,8 +50,8 @@ HGR2_MSB		.equ		0x40
 ; *** LODE RUNNER SPECIFIC CONFIGURATION HERE
 ;
 
-.define			GFX_1BPP
-.define			GFX_MONO
+;.define			GFX_1BPP
+;.define			GFX_MONO
 
 .ifndef GFX_1BPP
 	.define		GFX_2BPP
@@ -118,6 +118,7 @@ APPLE_BPL				.equ	VIDEO_BPL-VIDEO_RM
 ; $EX00-$       Title Screen Data
 ;
 
+ZEROPAGE		.equ				0x7f00
 codebase		.equ		  	0x8000
 stack				.equ		  	0xC000
 
@@ -126,6 +127,7 @@ stack				.equ		  	0xC000
   tile_data	  .equ	  	0xC000
 .endif
 
+.define	HAS_TITLE
 .define	TITLE_EXTERNAL
 .ifdef TITLE_EXTERNAL
 	.ifdef GFX_1BPP
