@@ -4003,18 +4003,20 @@ display_char:
 				ora			*hires_page_msb_1				; OR-in page address
 				tfr			d,y
 				ldb			*col_addr_offset
-				leay		b,y
-				ldb			#11
-2$:			lda			0,y
-				anda		*lchar_mask
-				ora			,x+
-				sta			0,y
-				lda			1,y
+				leay		b,y											; video address
+				ldb			#11											; 11 lines
+2$:			lda			0,y											; get 1st byte from video
+				anda		*lchar_mask							; preserve adjacent tile data
+				ora			,x+											; OR-in render byte
+				sta			0,y											; update video
 .ifdef GFX_1BPP				
-				anda		*rchar_mask
+				lda			1,y											; get 2nd byte from video
+				anda		*rchar_mask							; preserve adjacent tile data
+				ora			,x+											; OR-in render byte
+.else
+				lda			,x+											; get render byte				
 .endif				
-				ora			,x+
-				sta			1,y
+				sta			1,y											; update video
 .ifdef GFX_2BPP
 				lda			2,y
 				anda		*rchar_mask
