@@ -24,7 +24,7 @@ So without further ado, I present you Apple II Lode Runner for the TRS-80 Color 
 System Requirements
 -------------------
 TRS-80 Color Computer 3
-512KB RAM (or more)
+128KB RAM (or more)
 Floppy Disk or equivalent (Drive Wire, etc)
 
 Keys
@@ -49,7 +49,6 @@ Note that using the keys marked as 'cheat' will disqualify you from the high sco
 Yet To Be Implemented (in roughly planned order)
 ---------------------
 * High Score initials entry
-* 4-colour mode
 * Circular wipe function at start/end of level
 * Inclusion of all 150 levels
 * Sound
@@ -67,7 +66,10 @@ v0.2        Playable Demo Release (Beta 2)
             Added Game Over animation
             Added Freeze function
             Fixed Extra Life key detection
-            Added support for arrow,z,x keys
+            Added support for ARROW,Z,X keys
+            Added colour mode
+            Support for 128KB machines (untested)
+            Added another 5 levels (now 10 levels)
 
 v0.1        Playable Demo Release (Beta 1)
             Monochrome, 5 levels only

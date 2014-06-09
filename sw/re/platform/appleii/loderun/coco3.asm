@@ -107,15 +107,15 @@ VIDEO_RM				.equ	VIDEO_BPP*5
 APPLE_BPL				.equ	VIDEO_BPL-VIDEO_RM
 						
 ;
-; Memory Map
-; ----------
-; $0000-$3BFF   HGR1
-; $4000-$7BFF   HGR2
-; $7F00-$7FFF   Zero Page
-; $8000-        Program Code & Data
-;      -$BFFF   6809 System Stack
-; $C000-$EXXX   Tile Graphics Data
-; $EX00-$       Title Screen Data
+; Memory Map		Page
+; ------------  ----
+; $0000-$3BFF   $38				HGR1
+; $4000-$7BFF   $39				HGR2
+; $7F00-$7FFF   $39				Zero Page
+; $8000-        $34-$35		Program Code & Data
+;      -$BFFF   $35				6809 System Stack
+; $C000-$EXXX   $36-$37		Tile Graphics Data
+; $EX00-$       $37				Title Screen Data
 ;
 
 ZEROPAGE		.equ				0x7f00
@@ -136,5 +136,9 @@ stack				.equ		  	0xC000
   	title_data	.equ	  0xE000
  .endif
 .endif
+
+; MMU page mappings
+CODEPAGE		.equ				0x34
+GFXPAGE			.equ				0x36
 
 ;.define			LEVELS_EXTERNAL

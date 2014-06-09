@@ -84,7 +84,7 @@ int main (int argc, char *argv[])
   amble[3] = 0xFF;
   amble[4] = 0xA2;             			  // MMU bank register for $4000
   fwrite (amble, sizeof(uint8_t), 5, fp2);
-  uint8_t bank[2] = { 0x00, 0x01 };		// 60/1, or $8000 in memory
+  uint8_t bank[2] = { 0x34, 0x35 };		// page $34/35
   fwrite (bank, sizeof(uint8_t), 2, fp2);
   
   while (1)
@@ -152,7 +152,7 @@ int main (int argc, char *argv[])
 
       static uint8_t ldr[] =
       {
-        0x86, 0x00,         // LDA #0
+        0x86, 0x34,         // LDA #34
         0x8E, 0xFF, 0xA4,   // LDX $FFA4 (MMUTSK1+4 = $8000)
         0xA7, 0x80,         // STA ,X+
         0x4C,               // INCA

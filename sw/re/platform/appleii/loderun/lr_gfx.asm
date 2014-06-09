@@ -11,7 +11,7 @@
 
         ; $4000
         .org    MMUTSK1+2
-        .db     0x02, 0x03
+        .db     GFXPAGE, GFXPAGE+1
 
         .org    tile_data & 0x7FFF
         
