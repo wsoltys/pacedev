@@ -3974,6 +3974,9 @@ cr: ; 7B7D
 				sta			*col										; col=0
 				rts
 
+initial_cnt:  ; $824D
+        .ds     1
+        
 display_char_pg1:	; $82AA
 ; A=char
 				sta			*msg_char
@@ -4262,8 +4265,9 @@ add_hs_entry:
 				bne			1$											; loop all entries
 3$:			ldy			#high_score_offset_tbl
 				lda			b,y
+				stb     *byte_69                ; 6809 only
 				tfr			a,b											; B=entry
-				lda			#0x20										; space
+				lda			#0xa0										; space
 				ldy			#hs_tbl
 				sta			b,y
 				leay		1,y
@@ -4285,19 +4289,152 @@ add_hs_entry:
 				lda			*score_1e1_1
 				leay		1,y
 				sta			b,y											; set units
-				stb			*byte_69				
+				ldb     *byte_69                ; 6809 only
 				ldy			#high_score_offset_tbl
-				lda			b,y
-				; self-modifying code here
+				lda			b,y                     ; offset into the table
+				sta     *zp_de                  ; 6809 only (was self-modifying code)
 				jsr			cls_and_display_high_scores
 				lda			#HGR2_MSB
 				sta			*display_char_page
-				; high score initials entry goes here!!!
+				lda     *byte_69
+        adda    #4
+        sta     *row                    ; set row for initials entry
+        lda     #7
+        sta     *col                    ; set col for initials entry
+        ldb     #0
+        stb     initial_cnt
+        
+next_initial: ; $857F
+        ldb     initial_cnt
+1$:     ldy     #hs_tbl
+        addb    *zp_de                  ; get offset for initial
+        lda     b,y                     ; get initial
+        jsr     remap_character
+        jsr     blink_char_cursor_wait_key
+        cmpa    #0x8d                   ; <ENTER>?
+        beq     done_initials_entry     ; yes, go
+        cmpa    #0x88                   ; <BS>?
+        bne     add_initial             ; no, go
+        lda     initial_cnt             ; 1st initial?
+        beq     beep_and_loop           ; yes, exit
+        dec     initial_cnt
+        dec     *col
+        bra     next_initial            ; loop
+        
+add_initial:  ; $85A3
+        cmpa    #0x95                   ; right arrow?
+        bne     1$                      ; no, skip
+        ldb     initial_cnt
+        cmpb    #2                      ; last initial?
+        beq     beep_and_loop           ; yes, exit
+        inc     *col
+        inc     initial_cnt
+        bra     next_initial
+1$:     cmpa    #0xae                   ; '.'?
+        beq     save_initial            ; yes, go
+        cmpa    #0xa0                   ; space?
+        beq     save_initial            ; yes, go
+        cmpa    #0xc1                   ; alpha?
+        bcs     beep_and_loop           ; no, exit
+        cmpa    #0xdb                   ; alpha?
+        bcc     beep_and_loop           ; no, exit
+
+save_initial: ; $85C6
+        ldy     #hs_tbl
+        ldb     initial_cnt
+        addb    *zp_de                  ; get offset for initial
+        sta     b,y                     ; save initial
+        jsr     display_character
+        inc     initial_cnt
+        lda     initial_cnt
+        cmpa    #3                      ; done 3 initials?
+        bcs     next_initial            ; no, loop
+        dec     initial_cnt
+        dec     *col                    ; stay on 3rd initial
+        jmp     next_initial            ; loop
+
+beep_and_loop:  ; $85E1
+        ;jsr     sound        
+        jmp     next_initial            ; loop
+                				
+done_initials_entry:  ; $85E7
 				lda			#HGR1_MSB
 				sta			*display_char_page
 				; apple version checks disk signature here				
 				jmp			title_wait_for_key
-								
+
+blink_char_cursor_wait_key:
+        sta     blink_char
+1$:     lda     #104                    ; blink ON timer
+        sta     *timer
+        lda     blink_char
+        bne     2$
+        lda     #0x0a                   ; cursor character
+2$:     jsr     display_char_pg2
+3$:     jsr     read_ascii_key          ; 6809 only
+        bne     5$                      ; key_pressed, go
+        dec     *timer
+        bne     3$
+        lda     #0
+        jsr     display_char_pg2
+        lda     #104                    ; blink OFF timer
+        sta     *timer
+4$:     jsr     read_ascii_key          ; 6809 only
+        bne     5$                      ; key_pressed, go
+        dec     *timer
+        bne     4$
+        bra     1$        
+5$:     pshs    a                       ; save key
+        lda     blink_char
+        jsr     display_char_pg2        ; restore screen character
+        puls    a                       ; restore key
+        rts
+
+read_ascii_key: ; 6809 only
+; A=key, Z=pressed/not
+        ldb     #~(1<<6)
+        ldx     #PIA0
+1$:     stb     2,x                     ; column strobe
+        lda     ,x                      ; read row
+        coma                            ; acive high
+        bne     2$                      ; got key, exit
+        asrb                            ; next column
+        cmpb    #-1
+        bne     1$                      ; loop 5 columns
+        clra                            ; flag no key pressed
+        rts
+2$:     comb
+        pshs    b                       ; save column
+        ldb     #-1
+3$:     incb
+        lsra
+        bne     3$                      ; get row count
+        aslb
+        aslb
+        aslb                            ; B=row*8
+        ldx     #ascii_key_mapping
+        abx                             ; key ptr row
+        puls    a                       ; restore column
+        ldb     #-1
+4$:     incb
+        lsra
+        bne     4$                      ; get row count
+        lda     b,x                     ; get ascii code
+        pshs    a
+        jsr     keybd_flush
+        puls    a
+        ora     #(1<<7)                 ; convert to 'Apple' key (and set flag)
+        rts        
+
+ascii_key_mapping:
+        .db     '@, 'A, 'B, 'C, 'D, 'E, 'F, 'G
+        .db     'H, 'I, 'J, 'K, 'L, 'M, 'N, 'O
+        .db     'P, 'Q, 'R, 'S, 'T, 'U, 'V, 'W
+        .db     'X, 'Y, 'Z, 0x00, 0x00, 0x08, 0x15, ' 
+        .db     '0, '1, '2, '3, '4, '5, '6, '7
+        .db     '8, '9, ':, ';, ',, '_, '., '/
+        .db     0x0d, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+                
 draw_end_of_screen_ladder:	; $8631
 				lda			#0
 				sta			eos_ladder_col					; flag ladder OK
