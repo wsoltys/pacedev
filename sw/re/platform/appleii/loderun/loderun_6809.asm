@@ -56,7 +56,7 @@ NUM_LEVELS				.equ	50
 
 				.org		codebase
 start:
-				ldu			#stack
+				lds			#stack
 				orcc		#0x50										; disable interrupts
 
 .ifdef PLATFORM_COCO3
@@ -89,11 +89,15 @@ start:
 				sta			VRES      							
 				lda			#0x00										; black
 				sta			BRDR      							
-				lda			#0xE0										; screen at page $38
+				lda			#0xDF										; screen at page $38
 				sta			VOFFMSB
-				lda			#0x00
+				lda			#0xFF
 				sta			VOFFLSB   							
-				lda			#0x00										; normal display, horiz offset 0
+.ifdef GFX_1BPP				
+				lda			#0x03										; normal display, horiz offset 3
+.else
+				lda			#0x02										; normal display, horiz offset 2
+.endif				
 				sta			HOFF      							
 				ldx			#PALETTE
 	.ifdef GFX_1BPP
@@ -335,7 +339,7 @@ dec_lives:	; $613F
 title_wait_for_key: ; $618e
 				jsr			keybd_flush
 				ldb			#4											; timeout
-1$:			pshs		b
+1$:			stb			*zp_de									; 6809 only
 				ldy			#0
 2$:			lda			*paddles_detected
 				cmpa		#0xcb										; detected?
@@ -349,7 +353,7 @@ title_wait_for_key: ; $618e
 				bne			check_start_new_game		; yes, exit
 				leay		-1,y
 				bne			2$
-				puls		b
+				ldb			*zp_de									; 6809 only
 				decb														; done?
 				bne			1$											; no, loop
 				lda			*attract_mode						; in attract mode?
@@ -359,12 +363,14 @@ title_wait_for_key: ; $618e
 				stb			*level
 				stb			*byte_ac
 				stb			*no_cheat
-; do some other crap
+				ldb			*sound_enabled					; get sound setting
+				stb			*zp_dd									; store - 6809 only
+				sta			*sound_enabled					; mute sound
 				jmp			zero_score_and_init_game
 
 loc_61d0:	; $61D0
-				lda			#0
-				;sta			*byte_99
+				lda			*zp_dd									; restore sound setting
+				sta			*sound_enabled
 ; reads $C000 (keybd) but not used!?!				
 				ldb			*byte_ac
 				beq			check_start_new_game
@@ -3797,6 +3803,8 @@ gcls1: ; $7A51
 				lda			#HGR1_MSB
 				ldb			#0
 				tfr			d,x											; start addr
+; not sure why this doesn't work				
+;				leax		-4,x										; video offset in GIME
 				adda		#>(VIDEO_BPL*192)
 				tfr			d,y											; end addr
 				bra			gcls
@@ -3804,6 +3812,7 @@ gcls2:
 				lda			#HGR2_MSB
 				ldb			#0
 				tfr			d,x											; start addr
+				leax		-4,x										; video offset in GIME
 				adda		#>(VIDEO_BPL*192)
 				tfr			d,y											; end addr
 gcls:		sty			*word_a
@@ -4360,7 +4369,10 @@ beep_and_loop:  ; $85E1
 done_initials_entry:  ; $85E7
 				lda			#HGR1_MSB
 				sta			*display_char_page
-				; apple version checks disk signature here				
+				; apple version checks disk signature here
+				; * bug in Apple II version, stack grows down
+				; * fix it by popping return address
+				puls		x
 				jmp			title_wait_for_key
 
 blink_char_cursor_wait_key:
@@ -4392,13 +4404,15 @@ blink_char_cursor_wait_key:
 
 read_ascii_key: ; 6809 only
 ; A=key, Z=pressed/not
-        ldb     #~(1<<6)
+        ldb     #~(1<<7)
         ldx     #PIA0
 1$:     stb     2,x                     ; column strobe
         lda     ,x                      ; read row
-        coma                            ; acive high
+        coma                            ; active high
+        anda		#0x7f										; no 8th row
         bne     2$                      ; got key, exit
-        asrb                            ; next column
+        SEC
+        rorb                            ; next column
         cmpb    #-1
         bne     1$                      ; loop 5 columns
         clra                            ; flag no key pressed

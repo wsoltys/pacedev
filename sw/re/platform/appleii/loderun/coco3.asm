@@ -37,12 +37,12 @@ HGR1_MSB		.equ		0x00
 HGR2_MSB		.equ		0x40
 
 						.macro HGR1
-						lda			#0xE0								; screen at page $38
+						lda			#0xDF								; screen at page $38
 						sta			VOFFMSB
 						.endm
 
 						.macro HGR2
-						lda			#0xE8								; screen at page $40
+						lda			#0xE7								; screen at page $40
 						sta			VOFFMSB
 						.endm
 
@@ -60,6 +60,11 @@ HGR2_MSB		.equ		0x40
 	.define		GFX_COLOUR
 .endif
 
+; *** These macros are only used for the experimental mode
+; *** where the title screen was colourised on-the-fly
+; *** from the original monochrome tile data
+; *** - no longer used
+;
 .ifdef GFX_MONO
 					.macro GFX_BYTE
 						lsra												; b0->C
@@ -93,8 +98,6 @@ HGR2_MSB		.equ		0x40
 						GFX_NIBBLE
 					.endm
 .endif						
-
-
 
 .ifdef GFX_1BPP
 	VIDEO_BPP			.equ	1

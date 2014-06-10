@@ -48,11 +48,10 @@ Note that using the keys marked as 'cheat' will disqualify you from the high sco
 
 Yet To Be Implemented (in roughly planned order)
 ---------------------
-* High Score initials entry
 * Circular wipe function at start/end of level
-* Inclusion of all 150 levels
 * Sound
 * High Score load/save
+* Inclusion of all 150 levels
 * Support for Championship Lode Runner (+50 levels)
 
 Comments/Suggestions/Bugs
@@ -68,8 +67,10 @@ v0.2        Playable Demo Release (Beta 2)
             Fixed Extra Life key detection
             Added support for ARROW,Z,X keys
             Added colour mode
+            (Better) centred screen
             Support for 128KB machines (untested)
             Added another 5 levels (now 10 levels)
+            Fixed stack bug, possible cause of crash
 
 v0.1        Playable Demo Release (Beta 1)
             Monochrome, 5 levels only

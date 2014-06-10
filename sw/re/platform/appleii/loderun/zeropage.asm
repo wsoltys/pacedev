@@ -81,6 +81,7 @@ level_0_based							.equ		0x96
 unused_97									.equ		0x97
 dig_dir										.equ		0x9c
 no_lives									.equ		0x98
+sound_enabled							.equ		0x99
 level_active							.equ		0x9a
 not_falling               .equ		0x9b
 no_cheat									.equ		0x9d
@@ -99,5 +100,6 @@ msb_demo_inp_ptr					.equ		0xa8		; swapped for 6809
 demo_inp_key_1_2					.equ		0xaa
 demo_inp_cnt							.equ		0xab
 byte_ac										.equ		0xac
-zp_de											.equ		0xde		; added MMc
+zp_dd											.equ		0xdd		; (stored sound setting) added MMc
+zp_de											.equ		0xde		; (temp) added MMc
 char_render_buf						.equ		#ZEROPAGE+0xdf

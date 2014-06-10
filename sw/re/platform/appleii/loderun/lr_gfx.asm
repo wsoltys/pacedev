@@ -36,7 +36,13 @@
     .include "title_data_c2bpp.asm"
   .endif
 .endif
-  
+
+; end of page $37 which appears on HGR1
+; due to video offset in GIME registers
+				.org		0x7ff0
+				.db			0, 0, 0, 0, 0, 0, 0, 0
+				.db			0, 0, 0, 0, 0, 0, 0, 0
+				  
         ; $4000,$6000
         .org    MMUTSK1+2
         .db     0x3A, 0x3B
