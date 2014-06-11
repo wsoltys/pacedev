@@ -11,6 +11,7 @@
 ;.define			PLATFORM_WILLIAMS
 
 ;.define			DEBUG
+.define       DEBUG_DISABLE_DEMO_EXIT
 ;.define			DEBUG_GUARD_COPY
 ;.define			DEBUG_INVINCIBLE
 ;.define			DEBUG_NO_BITWISE_COLLISION_DETECT
@@ -293,14 +294,6 @@ in_level_loop:
 				jsr			handle_guards
 				lda			*level_active						; alive?
 				beq			dec_lives								; no, exit
-.if 0
-9$:			ldx			#PIA0
-				ldb			#0											; all columns
-				stb			2,x											; column strobe
-				lda			,x
-				coma														; any key pressed?
-				bne			9$											; yes, loop
-.endif				
 				bra			in_level_loop
 
 next_level:
@@ -1428,7 +1421,9 @@ handle_attract_mode:	; $69B8
 				stb			2,x										; column strobe
 				lda			,x										; active low
 				coma													; active high
+.ifndef DEBUG_DISABLE_DEMO_EXIT				
 				bne			exit_demo							; key pressed, go
+.endif				
 				bra			next_demo_inp
 exit_demo:				
 				lsr			*byte_ac
@@ -4540,7 +4535,11 @@ delay_180X_scaled:  ; $86B1
         lda     b,y
         tfr     b,a                     ; B=speed entry
 delay_180X: ; $86B5
+.ifdef GFX_1BPP
         ldx     #650                    ; original code=#180
+.else
+        ldx     #550                    ; original code=#180
+.endif        
 1$:     dex
         bne     1$
         decb
