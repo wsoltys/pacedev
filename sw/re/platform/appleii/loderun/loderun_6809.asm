@@ -223,10 +223,11 @@ zero_score_and_init_game: ; $6056
 				sta			*no_lives
 				lda			*attract_mode
 				lsra
-				;beq			loc_6099
-				bra			loc_6099
-; do some crap
-				jmp			display_title_screen
+				beq			loc_6099
+; Apple version checks disk signature here
+loc_6086:	; $6086
+; more Apple-specific stuff here
+; fall thru
 
 loc_6099:	; $6099
 				jsr			cls_and_display_game_status
@@ -3190,7 +3191,36 @@ check_guard_pickup_gold:	; $74F7
 1$:			rts
 
 check_guard_drop_gold:	; $753E
-				rts
+				lda			*curr_guard_state
+				bpl			2$
+				inc			*curr_guard_state
+				bne			2$
+        ldb     *curr_guard_row
+        stb     *row
+        ldy     #lsb_row_addr
+        lda			b,y
+        sta     *byte_8
+        ldy     #msb_row_addr_2
+        lda			b,y
+        sta     *byte_9									; setup tilemap address
+        ldb     *curr_guard_col
+        stb     *col                    ; col
+        ldy     *byte_9
+        lda			b,y											; get object from tilemap
+        cmpa    #0                      ; space?
+        bne     1$											; no, skip
+        lda     #7                      ; gold
+        sta     b,y											; update tilemap
+        jsr     display_char_pg2        ; render onto background
+        ldb     *row
+        lda     *col
+        jsr     calc_colx5_scanline
+				tfr			d,x											; X(lsb)=scanline
+				tfr			a,b											; B=x_in_2_pixel_incs
+        lda     #7                      ; gold
+        jmp     display_transparent_char ; render onto fg
+1$:     dec     *curr_guard_state
+2$:			rts
 
 update_guard_sprite_index:	; $7574
 				inc			*curr_guard_sprite
