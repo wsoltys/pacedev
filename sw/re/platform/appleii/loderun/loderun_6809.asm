@@ -11,7 +11,7 @@
 ;.define			PLATFORM_WILLIAMS
 
 ;.define			DEBUG
-.define       DEBUG_DISABLE_DEMO_EXIT
+;.define      DEBUG_DISABLE_DEMO_EXIT
 ;.define			DEBUG_GUARD_COPY
 ;.define			DEBUG_INVINCIBLE
 ;.define			DEBUG_NO_BITWISE_COLLISION_DETECT
@@ -142,6 +142,10 @@ start:
         sta     *paddles_detected
         ;lda     #0x4c
         ;sta     *byte_23
+; this needs to be done to synchronise
+; the game state machine with the Apple        
+        clra
+        sta			*byte_64
         					
 ; start lode runner
 				jsr			read_paddles
@@ -4568,7 +4572,7 @@ delay_180X: ; $86B5
 .ifdef GFX_1BPP
         ldx     #650                    ; original code=#180
 .else
-        ldx     #550                    ; original code=#180
+        ldx     #575                    ; original code=#180
 .endif        
 1$:     dex
         bne     1$
