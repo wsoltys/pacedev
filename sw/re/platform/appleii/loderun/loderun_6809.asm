@@ -75,7 +75,6 @@ start:
 				sta			INIT0     							
 				lda			#0x00										; slow timer, task 1
 				sta			INIT1     							
-;				lda			#0x08										; VBLANK IRQ
 				lda			#0x00										; no VBLANK IRQ
 				sta			IRQENR    							
 				lda			#0x00										; no FIRQ enabled

@@ -150,6 +150,7 @@ int main (int argc, char *argv[])
       bank[1] = 0x3B;
       fwrite (bank, 1, 2, fp2);
 
+#if 0
       static uint8_t ldr[] =
       {
         0x86, 0x34,         // LDA #34
@@ -169,6 +170,7 @@ int main (int argc, char *argv[])
       amble[4] = 0x00;
       fwrite (amble, sizeof(uint8_t), 5, fp2);
       fwrite (ldr, sizeof(uint8_t), LDR_SIZE, fp2);
+#endif
       
       // write postamble
       exec += offset;
