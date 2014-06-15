@@ -4743,6 +4743,11 @@ byte_889d:
 				.db			-2, -1, 0, 1, 2
 								
 wipe_or_draw_level:	; $88A2
+; $73 = 176/2
+; $74 = 280/2
+; $6D = 170 (numer of circles?)
+; $72 = current circle???
+; $67-$6D, $76-$84
 				jsr			display_no_lives
 				jsr			display_level
 ; nothing like the 6502 code!
