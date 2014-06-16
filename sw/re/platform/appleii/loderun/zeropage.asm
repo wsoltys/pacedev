@@ -61,14 +61,13 @@ byte_64										.equ		0x64
 byte_69										.equ		0x69
 byte_6d                   .equ    0x6d
 col_pixel_shift						.equ		0x71
-r                         .equ    0x72
-y0                        .equ    0x73
-x0                        .equ    0x74
-x16                       .equ    0x75
-x                         .equ    0x76
-y                         .equ    0x77
-re                        .equ    0x78
-re_lsb                    .equ    0x79
+drawing                   .equ    0x72
+r                         .equ    0x74
+y0                        .equ    0x76
+x0                        .equ    0x78
+x                         .equ    0x7a
+y                         .equ    0x7c
+re                        .equ    0x7e
 col												.equ		0x85
 row												.equ		0x86
 display_char_page					.equ		0x87
@@ -101,7 +100,7 @@ dig_sprite								.equ		0xa0
 timer											.equ		0xa1
 editor_n									.equ		0xa2
 no_eos_ladder_tiles				.equ		0xa3
-byte_a5										.equ		0xa5
+wipe_next_time            .equ		0xa5
 level											.equ		0xa6
 attract_mode							.equ		0xa7
 lsb_demo_inp_ptr					.equ		0xa9		; swapped for 6809

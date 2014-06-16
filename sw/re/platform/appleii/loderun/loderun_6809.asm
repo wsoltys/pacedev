@@ -132,146 +132,6 @@ start:
 				lda			#>ZEROPAGE
 				tfr			a,dp
 
-; *** HACK
-0$:     lda     #176/2
-        sta     *y0
-        lda     #280/2
-        sta     *x0
-        lda     #170
-        sta     *byte_6d
-        lda     #0
-        sta     *r
-        jsr     gcls1
-        HGR1
-        ldy     #bits
-        
-1$:        
-        jsr     draw_circle
-        inc     *r
-        lda     *r
-        cmpa    #170
-        bne     1$
-        
-        jsr     keybd_flush             ; wait for no keys
-				ldx     #PIA0
-				ldb     #0                      ; all columns
-2$:		  sta     2,x                     ; column strobe
-				lda     ,x
-				coma                            ; active high
-				beq     2$
-        bra     0$				
-				jmp     bootloader
-
-draw_circle:
-        ldb     *r
-        stb     *x                      ; x=radius
-        lda     #0
-        sta     *y                      ; y=0
-        sta     *x16
-        negb
-        coma                            ; D=-x
-        addd    #1                      ; D=1-x
-        std     *re                     ; radiusError = 1-x
-0$:     lda     *x
-        cmpa    *y
-        blo     9$                      ; while (x >= y)
-
-; plot 8 points here
-        ldb     *x
-        lda     *y
-        jsr     pset1
-
-        ldb     *y
-        lda     *x
-        jsr     pset1
-
-        ldb     *x
-        negb
-        lda     *y
-        jsr     pset1
-
-        ldb     *y
-        negb
-        lda     *x
-        jsr     pset1
-
-        ldb     *x
-        negb
-        lda     *y
-        nega
-        jsr     pset1
-
-        ldb     *y
-        negb
-        lda     *x
-        nega
-        jsr     pset1
-
-        ldb     *x
-        lda     *y
-        nega
-        jsr     pset1
-
-        ldb     *y
-        lda     *x
-        nega
-        jsr     pset1
-; end of plot
-
-        inc     *y                      ; y++
-        ldd     *re
-        bpl     1$                      ; if (radiusError < 0)
-        clra
-        ldb     *y                      ; D=y
-        aslb
-        rola                            ; D=2*y
-        addd    #1                      ; D=2*y+1
-        bra     2$
-1$:     dec     *x                      ; x--
-        clra
-        ldb     *y                      ; D=y
-        subd    *x16                    ; D=y-x
-        addd    #1                      ; D=y-x+1
-        aslb
-        rola                            ; D=2*(y-x+1)
-2$:     addd    *re                     ; radiusError += D
-        std     *re
-        lbra    0$
-9$:     rts
-
-pset1:
-; A=y, B=x
-        adda    *y0                     ; A=y0+y
-        cmpa    #176                    ; y limit?
-        bcc     9$                      ; yes, exit
-        tfr     d,x                     ; X=[y0+y,x]
-; resultant x is 16 bits!
-        clra                            ; D=x        
-        addb    *x0
-        adca    #0                      ; D=x0+x
-        cmpd    #280                    ; x limit?
-        ;bcc     9$                      ; yes, exit
-        exg     d,x                     ; A=y0+y, X=x0+x
-        ldb     #80
-        mul                             ; D=line_addr
-        exg     d,x                     ; X=line_addr, D=x0+x
-;        pshs    b
-        lsra
-        rorb
-        lsra
-        rorb                            ; B=(x0+x)/4
-        abx
-;        puls    b
-;        andb    #3
-;        lda     ,x
-;        ora     b,y
-        lda     #0xff
-        sta     ,x                      ; plot all 8 pixels
-9$:     rts
-
-bits:   .db     (3<<6), (3<<4), (3<<2), (3<<0)
-;bits:   .db     0xff, 0xff, 0xff, 0xff
-                
 ; values set in Apple II loader
 bootloader:
         lda     #6
@@ -358,7 +218,7 @@ zero_score_and_init_game: ; $6056
 				sta			*score_1e5_1e4
 				sta			*score_1e6
 				sta			*unused_97
-				sta			*byte_a5
+				sta			*wipe_next_time         ; draw next time
 				sta			*guard_respawn_col
 				sta			*demo_inp_cnt
 				ldy			#attract_move_tbl
@@ -4884,29 +4744,149 @@ byte_889d:
 				.db			-2, -1, 0, 1, 2
 								
 wipe_or_draw_level:	; $88A2
-; $73 = 176/2
-; $74 = 280/2
-; $6D = 170 (numer of circles?)
-; $72 = current circle???
-; $67-$6D, $76-$84
+0$:     ldd     #176/2
+        std     *y0
+        ldd     #280/2
+        std     *x0
+        lda     *wipe_next_time         ; wiping or drawing?
+        beq     2$                      ; drawing, skip
+        ldd     #170
+        std     *r
+        ldb     #0
+        stb     *drawing
+1$:     jsr     render_wipe_circle
+        dec     *(r+1)
+        bne     1$                      ; do wipe
+2$:     ldd     #1
+        std     *r
+        stb     *wipe_next_time         ; flag wipe next time
+        stb     *drawing
 				jsr			display_no_lives
 				jsr			display_level
-; nothing like the 6502 code!
-				lda			#HGR2_MSB
-				clrb
-				tfr			d,x
-				adda		#>(176*VIDEO_BPL)
-				orb			#<(176*VIDEO_BPL)				; end addr (line 176)
-				tfr			d,y
-				sty			*word_a
-				lda			#HGR1_MSB
-				clrb
-				tfr			d,y
-1$:			lda			,x+
-				sta			,y+
-				cmpx		*word_a
-				bne			1$
-				rts
+3$:     jsr     render_wipe_circle
+        inc     *(r+1)
+        lda     *(r+1)
+        cmpa    #170
+        bne     3$                      ; do draw
+        rts        
+
+render_wipe_circle:
+        ldd     #0
+        std     *y                      ; y=0
+        ldd     *r
+        std     *x                      ; x=radius
+        negb
+        coma                            ; D=-x
+        addd    #1                      ; D=1-x
+        std     *re                     ; radiusError = 1-x
+0$:     ldd     *x
+        cmpd    *y
+        lblo    9$                      ; while (x >= y)
+
+; plot 8 points here
+        ldx     *x
+        ldy     *y
+        jsr     pset1
+
+        ldx     *y
+        ldy     *x
+        jsr     pset1
+
+        ldd     #0
+        subd    *x
+        tfr     d,x
+        ldy     *y
+        jsr     pset1
+
+        ldd     #0
+        subd    *y
+        tfr     d,x
+        ldy     *x
+        jsr     pset1
+
+        ldd     #0
+        subd    *x
+        tfr     d,x
+        ldd     #0
+        subd    *y
+        tfr     d,y
+        jsr     pset1
+
+        ldd     #0
+        subd    *y
+        tfr     d,x
+        ldd     #0
+        subd    *x
+        tfr     d,y
+        jsr     pset1
+
+        ldx     *x
+        ldd     #0
+        subd    *y
+        tfr     d,y
+        jsr     pset1
+
+        ldx     *y
+        ldd     #0
+        subd    *x
+        tfr     d,y
+        jsr     pset1
+; end of plot
+
+        inc     *(y+1)                  ; y++
+        ldd     *re
+        bpl     1$                      ; if (radiusError < 0)
+        ldd     *y                      ; D=y
+        aslb
+        rola                            ; D=2*y
+        addd    #1                      ; D=2*y+1
+        bra     2$
+1$:     ldd     *x
+        subd    #1
+        std     *x                      ; x--
+        ldd     *y                      ; D=y
+        subd    *x                      ; D=y-x
+        addd    #1                      ; D=y-x+1
+        aslb
+        rola                            ; D=2*(y-x+1)
+2$:     addd    *re                     ; radiusError += D
+        std     *re
+        lbra    0$
+9$:     rts
+
+pset1:
+; X=x, Y=y
+        tfr     x,d
+        addd    *x0
+        cmpd    #280                    ; x limit?
+        bcc     9$                      ; yes, exit
+        tfr     d,x                     ; save x
+        tfr     y,d
+        addd    *y0
+        cmpd    #176                    ; y limit?
+        bcc     9$                      ; yes, exit
+        lda     #80
+        mul                             ; D=line_addr
+        tfr     d,y                     ; y=addr
+        tfr     x,d
+        lsra
+        rorb
+        lsra
+        rorb                            ; B=(x0+x)/4
+        tfr     y,x
+        abx
+        lda     *drawing
+        bne     1$                      ; yes, skip
+        clra
+        bra     2$
+1$:     pshs    x
+        tfr     x,d
+				eora		#(HGR1_MSB | HGR2_MSB)
+				tfr     d,x
+        lda     ,x
+        puls    x
+2$:     sta     ,x                      ; plot all 4 pixels
+9$:     rts
 
 game_over_animation:	; $8B1A
         lda     #1
