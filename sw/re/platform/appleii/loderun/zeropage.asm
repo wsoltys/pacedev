@@ -59,7 +59,16 @@ byte_62										.equ		0x62
 byte_63										.equ		0x63
 byte_64										.equ		0x64
 byte_69										.equ		0x69
+byte_6d                   .equ    0x6d
 col_pixel_shift						.equ		0x71
+r                         .equ    0x72
+y0                        .equ    0x73
+x0                        .equ    0x74
+x16                       .equ    0x75
+x                         .equ    0x76
+y                         .equ    0x77
+re                        .equ    0x78
+re_lsb                    .equ    0x79
 col												.equ		0x85
 row												.equ		0x86
 display_char_page					.equ		0x87

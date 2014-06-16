@@ -132,7 +132,148 @@ start:
 				lda			#>ZEROPAGE
 				tfr			a,dp
 
+; *** HACK
+0$:     lda     #176/2
+        sta     *y0
+        lda     #280/2
+        sta     *x0
+        lda     #170
+        sta     *byte_6d
+        lda     #0
+        sta     *r
+        jsr     gcls1
+        HGR1
+        ldy     #bits
+        
+1$:        
+        jsr     draw_circle
+        inc     *r
+        lda     *r
+        cmpa    #170
+        bne     1$
+        
+        jsr     keybd_flush             ; wait for no keys
+				ldx     #PIA0
+				ldb     #0                      ; all columns
+2$:		  sta     2,x                     ; column strobe
+				lda     ,x
+				coma                            ; active high
+				beq     2$
+        bra     0$				
+				jmp     bootloader
+
+draw_circle:
+        ldb     *r
+        stb     *x                      ; x=radius
+        lda     #0
+        sta     *y                      ; y=0
+        sta     *x16
+        negb
+        coma                            ; D=-x
+        addd    #1                      ; D=1-x
+        std     *re                     ; radiusError = 1-x
+0$:     lda     *x
+        cmpa    *y
+        blo     9$                      ; while (x >= y)
+
+; plot 8 points here
+        ldb     *x
+        lda     *y
+        jsr     pset1
+
+        ldb     *y
+        lda     *x
+        jsr     pset1
+
+        ldb     *x
+        negb
+        lda     *y
+        jsr     pset1
+
+        ldb     *y
+        negb
+        lda     *x
+        jsr     pset1
+
+        ldb     *x
+        negb
+        lda     *y
+        nega
+        jsr     pset1
+
+        ldb     *y
+        negb
+        lda     *x
+        nega
+        jsr     pset1
+
+        ldb     *x
+        lda     *y
+        nega
+        jsr     pset1
+
+        ldb     *y
+        lda     *x
+        nega
+        jsr     pset1
+; end of plot
+
+        inc     *y                      ; y++
+        ldd     *re
+        bpl     1$                      ; if (radiusError < 0)
+        clra
+        ldb     *y                      ; D=y
+        aslb
+        rola                            ; D=2*y
+        addd    #1                      ; D=2*y+1
+        bra     2$
+1$:     dec     *x                      ; x--
+        clra
+        ldb     *y                      ; D=y
+        subd    *x16                    ; D=y-x
+        addd    #1                      ; D=y-x+1
+        aslb
+        rola                            ; D=2*(y-x+1)
+2$:     addd    *re                     ; radiusError += D
+        std     *re
+        lbra    0$
+9$:     rts
+
+pset1:
+; A=y, B=x
+        adda    *y0                     ; A=y0+y
+        cmpa    #176                    ; y limit?
+        bcc     9$                      ; yes, exit
+        tfr     d,x                     ; X=[y0+y,x]
+; resultant x is 16 bits!
+        clra                            ; D=x        
+        addb    *x0
+        adca    #0                      ; D=x0+x
+        cmpd    #280                    ; x limit?
+        ;bcc     9$                      ; yes, exit
+        exg     d,x                     ; A=y0+y, X=x0+x
+        ldb     #80
+        mul                             ; D=line_addr
+        exg     d,x                     ; X=line_addr, D=x0+x
+;        pshs    b
+        lsra
+        rorb
+        lsra
+        rorb                            ; B=(x0+x)/4
+        abx
+;        puls    b
+;        andb    #3
+;        lda     ,x
+;        ora     b,y
+        lda     #0xff
+        sta     ,x                      ; plot all 8 pixels
+9$:     rts
+
+bits:   .db     (3<<6), (3<<4), (3<<2), (3<<0)
+;bits:   .db     0xff, 0xff, 0xff, 0xff
+                
 ; values set in Apple II loader
+bootloader:
         lda     #6
         sta     *game_speed
         lda     #0xff

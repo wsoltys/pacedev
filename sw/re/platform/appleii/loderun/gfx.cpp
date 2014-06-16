@@ -18,7 +18,8 @@
 
 //#define DO_TITLE
 //#define DO_TILES
-#define DO_GAMEOVER
+//#define DO_GAMEOVER
+#define DO_CIRCLE
 
 uint8_t ram[64*1024];
 
@@ -829,6 +830,36 @@ void main (int argc, char *argv[])
 	//while (key[KEY_ESC]);	  
 
 #endif // DO_GAMEOVER
+
+#ifdef DO_CIRCLE
+  int x0=280/2, y0=176/2;
+  int x=50, y=0;
+  int radiusError = 1-x;
+  
+  while (x >= y)
+  {
+    fprintf (stderr, "($%02X,$%02X) re=$%04X\n", x, y, radiusError);
+    
+    putpixel (screen, x + x0, y + y0, 15);
+    putpixel (screen, y + x0, x + y0, 15);
+    putpixel (screen, -x + x0, y + y0, 15);
+    putpixel (screen, -y + x0, x + y0, 15);
+    putpixel (screen, -x + x0, -y + y0, 15);
+    putpixel (screen, -y + x0, -x + y0, 15);
+    putpixel (screen, x + x0, -y + y0, 15);
+    putpixel (screen, y + x0, -x + y0, 15);
+    y++;
+    if (radiusError<0)
+    {
+      radiusError += 2 * y + 1;
+    } else {
+      x--;
+      radiusError+= 2 * (y - x + 1);
+    }  }
+  
+  //while (!key[KEY_ESC]);	  
+	//while (key[KEY_ESC]);	  
+#endif
 	  
   allegro_exit ();
 
