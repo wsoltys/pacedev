@@ -62,12 +62,15 @@ byte_69										.equ		0x69
 byte_6d                   .equ    0x6d
 col_pixel_shift						.equ		0x71
 drawing                   .equ    0x72
-r                         .equ    0x74
-y0                        .equ    0x76
-x0                        .equ    0x78
-x                         .equ    0x7a
-y                         .equ    0x7c
-re                        .equ    0x7e
+r                         .equ    0x74	; 6809 only
+y0                        .equ    0x76	; 6809 only
+x0                        .equ    0x78	; 6809 only
+x                         .equ    0x7a	; 6809 only
+y                         .equ    0x7c	; 6809 only
+re                        .equ    0x7e	; 6809 only
+minus_x										.equ		0x80	; 6809 only
+minus_y										.equ		0x82	; 6809 only
+circle_mask								.equ		0x84	; 6809 only
 col												.equ		0x85
 row												.equ		0x86
 display_char_page					.equ		0x87

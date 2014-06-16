@@ -666,7 +666,7 @@ init_and_draw_level: ; $63B3
 				rts
 
 draw_level:	; $648B
-				jsr			wipe_or_draw_level
+				jsr			wipe_and_draw_level
 				ldb			#15											; last row
 				stb			*row
 1$:			ldy			#lsb_row_addr
@@ -4743,7 +4743,7 @@ calc_x_in_2_pixel_incs: ; $888F
 byte_889d:
 				.db			-2, -1, 0, 1, 2
 								
-wipe_or_draw_level:	; $88A2
+wipe_and_draw_level:	; $88A2
 0$:     ldd     #176/2
         std     *y0
         ldd     #280/2
@@ -4783,54 +4783,28 @@ render_wipe_circle:
         cmpd    *y
         lblo    9$                      ; while (x >= y)
 
+.macro	PSET		x,y
+				ldd			x
+				ldx			y
+				jsr			pset
+.endm
+
 ; plot 8 points here
-        ldx     *x
-        ldy     *y
-        jsr     pset1
+				ldd			#0
+				subd		*x
+				std			*minus_x
+				ldd			#0
+				subd		*y
+				std			*minus_y
 
-        ldx     *y
-        ldy     *x
-        jsr     pset1
-
-        ldd     #0
-        subd    *x
-        tfr     d,x
-        ldy     *y
-        jsr     pset1
-
-        ldd     #0
-        subd    *y
-        tfr     d,x
-        ldy     *x
-        jsr     pset1
-
-        ldd     #0
-        subd    *x
-        tfr     d,x
-        ldd     #0
-        subd    *y
-        tfr     d,y
-        jsr     pset1
-
-        ldd     #0
-        subd    *y
-        tfr     d,x
-        ldd     #0
-        subd    *x
-        tfr     d,y
-        jsr     pset1
-
-        ldx     *x
-        ldd     #0
-        subd    *y
-        tfr     d,y
-        jsr     pset1
-
-        ldx     *y
-        ldd     #0
-        subd    *x
-        tfr     d,y
-        jsr     pset1
+				PSET		*x,*y				
+				PSET		*y,*x
+				PSET		*minus_x,*y
+				PSET		*minus_y,*x
+				PSET		*minus_x,*minus_y
+				PSET		*minus_y,*minus_x
+        PSET		*x,*minus_y
+        PSET		*y,*minus_x
 ; end of plot
 
         inc     *(y+1)                  ; y++
@@ -4854,38 +4828,58 @@ render_wipe_circle:
         lbra    0$
 9$:     rts
 
-pset1:
-; X=x, Y=y
-        tfr     x,d
-        addd    *x0
+pset:
+; D=x, X=y
+        addd    *x0											; D=x0+x
         cmpd    #280                    ; x limit?
         bcc     9$                      ; yes, exit
-        tfr     d,x                     ; save x
-        tfr     y,d
-        addd    *y0
+        exg			d,x											; D=y, X=x0+x
+        addd    *y0											; D=y0+y
         cmpd    #176                    ; y limit?
         bcc     9$                      ; yes, exit
-        lda     #80
+        lda     #VIDEO_BPL
         mul                             ; D=line_addr
-        tfr     d,y                     ; y=addr
-        tfr     x,d
+        exg			d,x											; D=x0+x, X=line_addr
         lsra
         rorb
         lsra
         rorb                            ; B=(x0+x)/4
-        tfr     y,x
-        abx
+.ifdef GFX_1BPP
+				stb			*circle_mask
+        lsra
+        rorb                            ; B=(x0+x)/8
+.endif        
+        abx															; X=pixel_addr
         lda     *drawing
-        bne     1$                      ; yes, skip
+        bne     2$                      ; yes, skip
+.ifdef GFX_1BPP
+; optimisation - assumes x0 is even
+				lda			#0xf0
+				ldb			*circle_mask
+				bitb		#(1<<0)
+				bne			1$
+				lda			#0x0f
+1$:			anda		,x
+.else
         clra
-        bra     2$
-1$:     pshs    x
-        tfr     x,d
-				eora		#(HGR1_MSB | HGR2_MSB)
-				tfr     d,x
-        lda     ,x
-        puls    x
-2$:     sta     ,x                      ; plot all 4 pixels
+.endif        
+        bra     4$
+2$:     tfr     x,d											; D=X=pg1
+				eora		#(HGR1_MSB | HGR2_MSB)	; D=pg2
+				tfr			d,y											; Y=pg2
+.ifdef GFX_1BPP				
+; optimisation - assumes x0 is even
+				lda			#0xf0
+				ldb			*circle_mask
+				bitb		#(1<<0)
+				beq			3$
+				lda			#0x0f
+3$:			anda		,y				
+				ora			,x
+.else
+				lda			,y
+.endif
+4$:     sta     ,x                      ; plot all 4 pixels
 9$:     rts
 
 game_over_animation:	; $8B1A

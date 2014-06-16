@@ -9,6 +9,8 @@
 
 .include "coco3.asm"
 
+;.define	ENABLE_SPLASH
+
         ; $4000
         .org    0x4000
 
@@ -33,6 +35,7 @@ start:
         lda     #0x00                   ; black text
         sta     PALETTE+1
 
+.ifdef ENABLE_SPLASH
 ; display splash screen       
         ldx     #splash
         ldy     #0
@@ -58,6 +61,7 @@ wait:   stb     2,x                     ; column strobe
         lda     ,x        
         coma                            ; active high
         beq     wait                    ; wait for key
+.endif
 
         lda     #0x34                   ; code bank
         ldx     #MMUTSK1+4              ; $8000
