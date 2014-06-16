@@ -156,6 +156,31 @@ void colourize (int width, int height)
   #endif    
 }
 
+void pset (int x, int y, int c)
+{
+  if (x<0 || x>279)
+    return;
+  if (y<0 || y>175)
+    return;
+    
+  putpixel (screen, 8+x, 8+y, c);
+  #if 0
+    // 1 pixel either side
+    if (x > 0)
+      putpixel (screen, -1+8+x, 8+y, c);
+    if (x < 279)    
+      putpixel (screen, +1+8+x, 8+y, c);
+  #endif
+  #if 1
+    // all 4 pixels in the same nibble
+    x &= ~3;
+    putpixel (screen, 8+x+0, 8+y, c);
+    putpixel (screen, 8+x+1, 8+y, c);
+    putpixel (screen, 8+x+2, 8+y, c);
+    putpixel (screen, 8+x+3, 8+y, c);
+  #endif
+}
+
 void main (int argc, char *argv[])
 {
 	FILE *fp, *fp2;
@@ -833,32 +858,39 @@ void main (int argc, char *argv[])
 
 #ifdef DO_CIRCLE
   int x0=280/2, y0=176/2;
-  int x=50, y=0;
-  int radiusError = 1-x;
   
-  while (x >= y)
+  for (int r=0; r<2*170; r++)
   {
-    fprintf (stderr, "($%02X,$%02X) re=$%04X\n", x, y, radiusError);
-    
-    putpixel (screen, x + x0, y + y0, 15);
-    putpixel (screen, y + x0, x + y0, 15);
-    putpixel (screen, -x + x0, y + y0, 15);
-    putpixel (screen, -y + x0, x + y0, 15);
-    putpixel (screen, -x + x0, -y + y0, 15);
-    putpixel (screen, -y + x0, -x + y0, 15);
-    putpixel (screen, x + x0, -y + y0, 15);
-    putpixel (screen, y + x0, -x + y0, 15);
-    y++;
-    if (radiusError<0)
+    int x=(r/170 ? 169-(r%170) : r), y=0;
+    int radiusError = 1-x;
+    int c=(r/170 ? 0 : 15);
+    while (x >= y)
     {
-      radiusError += 2 * y + 1;
-    } else {
-      x--;
-      radiusError+= 2 * (y - x + 1);
-    }  }
-  
-  //while (!key[KEY_ESC]);	  
-	//while (key[KEY_ESC]);	  
+      //fprintf (stderr, "($%02X,$%02X) re=$%04X\n", x, y, radiusError);
+
+      pset (x + x0, y + y0, c);
+      pset (y + x0, x + y0, c);
+      pset (-x + x0, y + y0, c);
+      pset (-y + x0, x + y0, c);
+      pset (-x + x0, -y + y0, c);
+      pset (-y + x0, -x + y0, c);
+      pset (x + x0, -y + y0, c);
+      pset (y + x0, -x + y0, c);
+      y++;
+      if (radiusError<0)
+      {
+        radiusError += 2 * y + 1;
+      } else {
+        x--;
+        radiusError+= 2 * (y - x + 1);
+      }  
+    }
+    if (r == 170)
+      rest (500);
+  }
+    
+  while (!key[KEY_ESC]);	  
+	while (key[KEY_ESC]);	  
 #endif
 	  
   allegro_exit ();
