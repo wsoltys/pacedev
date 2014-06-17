@@ -41,7 +41,7 @@ lchar_mask								.equ		0x50
 rchar_mask								.equ		0x51
 collision_detect          .equ		0x52
 guard_respawn_col					.equ		0x53
-playing_sound             .equ		0x54
+sndq_length               .equ		0x54
 guard_ai_col							.equ		0x55
 guard_ai_row							.equ		0x56
 target_col								.equ		0x57

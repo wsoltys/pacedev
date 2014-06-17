@@ -255,7 +255,7 @@ main_game_loop:
 1$:	; $60bf
 				ldb			#0
 				stb			*dig_dir
-				stb			*playing_sound          ; no sound playing
+				stb			*sndq_length            ; no sound playing
 				lda			*unused_97							; should be 0
 				adda		*no_guards							; should =no_guards
 				tfr			a,b
@@ -322,7 +322,11 @@ next_level_cont:
 dec_lives:	; $613F
 				dec			*no_lives
 				jsr			display_no_lives
-				;jsr			sub_78e1								; sound stuff
+				jsr			queue_sound
+        .dw     0x4002, 0x4002, 0x5003, 0x5003, 0x6004, 0x6004, 0x7005, 0x7005, 0x8006
+        .dw     0x8006, 0x9007, 0x9007, 0xA008, 0xA008, 0xB009, 0xB009, 0xC00A, 0xC00A
+        .dw     0xD00B, 0xD00B, 0xE00C, 0xE00C, 0xF00D, 0xF00D
+        .db     0
 				jsr			throttle_and_update_sound
 				; stuff
 				lda			*attract_mode
@@ -814,7 +818,7 @@ check_falling_sound:	; $6584
 				bne			check_controls
 				lda			#0x64
 				ldb			#8
-				jsr			play_falling_sound
+				jsr			play_sound
 check_controls:	; $658F				
 				lda			#0x20
 				;sta			*byte_a4
@@ -1775,7 +1779,9 @@ check_for_gold: ; $6b9d
 				jsr			wipe_char								; from video display
 				ldd			#SCORE_GOLD							; add 250/500 pts
 				jsr			update_and_display_score
-				;jsr		sub_87e1								; sound
+				jsr		  queue_sound
+        .dw     0x4507, 0x5506, 0x4405, 0x5404, 0x4303, 0x5302
+        .db     0
 9$:			rts
 								
 update_sprite_index: ; $6bf4
@@ -2027,7 +2033,9 @@ handle_guard_falling:	; $ 6D64
 				sta			*curr_guard_state
 				ldd			#SCORE_TRAP							; add 75/100 pts
 				jsr			update_and_display_score
-				;jsr			sub_87e1								; sound stuff				
+				jsr			queue_sound
+        .dw     0x2006, 0x3004, 0x4002
+        .db     0
 
 render_guard_and_ret:	; $6DB7				
 				jsr			calc_guard_xychar
@@ -3559,10 +3567,11 @@ finish_respawn:	; $776C
 				sta			b,y											; init count
 				lda			#8											; guard
 				jsr			display_char_pg1
-				;jsr			sub_87e1								; sound?
+				jsr			queue_sound
+        .dw     0x7C02, 0x7803, 0x7404, 0x7005
+        .db     0
 				ldb			*curr_guard
 				jmp			next_guard
-				
 												
 ctrl_m:	; $77AC
 				jsr			cls_and_display_high_scores
@@ -4641,13 +4650,32 @@ read_paddles: ; $87A2
 				sta			*paddles_detected
 				rts
 
-play_falling_sound:	; $87BA
-; *** TBD
+play_sound:	; $87BA
 				rts
 
+queue_sound:  ; $87E1
+        puls    x                       ; return address
+1$:     ldb     #0
+        lda     b,x                     ; get 1st sound byte
+        beq     9$                      ; done - exit
+        inc     *sndq_length
+        ldb     *sndq_length
+        ldy     #sndbuf1
+        sta     b,y                     ; store 1st byte
+        incb
+        lda     b,x                     ; get 2nd sound byte
+        ldy     #sndbuf2
+        sta     b,y                     ; store 2nd byte
+        leax    2,x
+        bra     1$
+9$:     inx
+        pshs    x                       ; restore return address        
+        rts
+        
 throttle_and_update_sound: ; $8811
-        lda     *playing_sound          ; sound playing?
+        lda     *sndq_length            ; sound playing?
         beq     loc_8832                ; no, go
+        bra     loc_8832                ; *** HACK
 ; stuff        
         SEC
         rts
@@ -5201,6 +5229,11 @@ hole_row:	; $CC0
 hole_cnt:	; $CE0
 				.ds		0x20
 
+sndbuf1:  ; $E00
+        .ds   0x80
+sndbuf2:  ; $E80
+        .ds   0x80
+
 lsb_row_addr:	; $1C05
 				.db		<(ldu1+0*28), <(ldu1+1*28), <(ldu1+2*28), <(ldu1+3*28)
 				.db		<(ldu1+4*28), <(ldu1+5*28), <(ldu1+6*28), <(ldu1+7*28)
@@ -5236,8 +5269,8 @@ col_to_addr_tbl:	; $1c62
 
 hs_tbl:	; $1F00
 ; 0-2 = initials, 3 = level, 4-7 = score (BCD)
-				.db			0x4d, 0x4d, 0x43, 42, 0x00, 0x04, 0x20, 0x00
-				.db			0, 0, 0, 0, 0, 0, 0, 0				
+				.db			0xcd, 0xcd, 0xc3, 42, 0x00, 0x04, 0x20, 0x00
+				.db			0xd4, 0xc3, 0xc4, 31, 0x00, 0x04, 0x15, 0x93				
 				.db			0, 0, 0, 0, 0, 0, 0, 0				
 				.db			0, 0, 0, 0, 0, 0, 0, 0				
 				.db			0, 0, 0, 0, 0, 0, 0, 0				
@@ -5274,9 +5307,8 @@ end_of_data	.equ		.
 ; this was in low memory on the apple
 
 level_data_packed:
-				.ds		256
+				.ds		  256
 				
-				.bndry	512
 level_data_unpacked_1:
 ldu1:
 				.ds			512
