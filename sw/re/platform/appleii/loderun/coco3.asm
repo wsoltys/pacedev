@@ -8,6 +8,8 @@ PIA1				.equ		0xFF20
 KEYCOL			.equ		PIA0+2
 KEYROW			.equ		PIA0
 
+SOUND				.equ		PIA1+2
+
 ;
 ; *** GIME registers  	
 ;

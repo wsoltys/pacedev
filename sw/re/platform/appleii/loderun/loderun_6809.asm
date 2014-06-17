@@ -126,7 +126,14 @@ start:
 				inca
 				sta			,x+											; page 3 @$E000-$FFFF
 	.endif	; TILES_EXTERNAL
-				
+
+				clr			*sound_bit
+				lda			SOUND+1									; $FF23
+				ora			#(1<<5)|(1<<4)					; set CB2 as output
+				anda		#~(1<<3)
+;				ora			#(1<<3)									; enable sound
+				sta			SOUND+1
+												
 .endif	; PLATFORM_COCO3
 			
 				lda			#>ZEROPAGE
@@ -427,7 +434,7 @@ sub_622a:
         asla
         asla
         ldb     #6
-        ;jsr     sub_87d5                ; sound stuff?
+        jsr     queue_note
         jmp     throttle_and_update_sound        
         
 init_read_unpack_display_level:	; $6238
@@ -821,7 +828,7 @@ check_falling_sound:	; $6584
 				jsr			play_sound
 check_controls:	; $658F				
 				lda			#0x20
-				;sta			*byte_a4
+				sta			*falling_snd_freq				; init (period)
 				sta			*not_falling
 				jsr			read_controls
 				lda			*key_1
@@ -1208,7 +1215,7 @@ digging_left:
 				ldy			#sprite_to_char_tbl+0x43
 				lda			b,y
 				puls		b
-				;jsr			sub_87d5
+				jsr			queue_note
 				ldb			*dig_sprite
 				lda			#0											; sprite=0, tile=$B (running left)
 				cmpb		#6
@@ -1333,7 +1340,7 @@ digging_right:
 				ldy			#sprite_to_char_tbl+0x37
 				lda			b,y
 				puls		b
-				;jsr			sub_87d5
+				jsr			queue_note
 				ldb			*dig_sprite
 				lda			#8											; sprite=8, tile=9 (running right)
 				cmpb		#0x12
@@ -4401,7 +4408,7 @@ save_initial: ; $85C6
         jmp     next_initial            ; loop
 
 beep_and_loop:  ; $85E1
-        ;jsr     sound        
+        jsr     beep
         jmp     next_initial            ; loop
                 				
 done_initials_entry:  ; $85E7
@@ -4592,7 +4599,23 @@ delay_180X: ; $86B5
 speed_scale_tbl:  ; $86BE
         .db     2, 4, 6, 8, 0xA, 0xC, 0xE, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1A, 0x1C
         .db     0x1E, 0x20
-												
+
+beep:	; $86CE
+				ldb			#0xc0
+				stb			*zp_de
+1$:			ldb			#0x80
+2$:			decb
+				bne			2$
+				lda			*sound_enabled
+				beq			3$
+				lda			*sound_bit
+				sta			SOUND
+				eora		#(1<<1)
+				sta			*sound_bit
+3$:			dec			*zp_de
+				bne			1$										
+				rts
+																
 display_message:	; $86E0
 				puls		x
 1$:			stx			*msg_addr								; store msg ptr
@@ -4651,8 +4674,37 @@ read_paddles: ; $87A2
 				rts
 
 play_sound:	; $87BA
-				rts
+; A=frequency, B=duration
+				sta			*word_a									; frequency
+				stb			*(word_a+1)							; duration
+1$:			lda			*sound_enabled
+				beq			2$											; no, skip
+				lda			*sound_bit
+				sta			SOUND
+				eora		#(1<<1)
+				sta			*sound_bit
+2$:			dec			*sound_cnt
+				bne			3$
+				dec			*(word_a+1)							; duration - done playing?
+				beq			9$											; yes, return
+3$:			decb
+				bne			2$
+				ldb			*word_a									; frequency
+				bra			1$											; loop				
+9$:			rts
 
+queue_note:	; $87D5
+; A=frequency, B=duration
+				pshs		b
+				inc     *sndq_length
+				ldb     *sndq_length
+				ldy			#sndfreq
+				sta			b,y
+				puls		a
+				ldy			#snddur
+				sta			b,y
+				rts
+				
 queue_sound:  ; $87E1
         puls    x                       ; return address
 1$:     ldb     #0
@@ -4660,11 +4712,11 @@ queue_sound:  ; $87E1
         beq     9$                      ; done - exit
         inc     *sndq_length
         ldb     *sndq_length
-        ldy     #sndbuf1
+        ldy     #snddur
         sta     b,y                     ; store 1st byte
         incb
         lda     b,x                     ; get 2nd sound byte
-        ldy     #sndbuf2
+        ldy     #sndfreq
         sta     b,y                     ; store 2nd byte
         leax    2,x
         bra     1$
@@ -4673,19 +4725,38 @@ queue_sound:  ; $87E1
         rts
         
 throttle_and_update_sound: ; $8811
-        lda     *sndq_length            ; sound playing?
+        ldb     *sndq_length            ; sound playing?
         beq     loc_8832                ; no, go
-        bra     loc_8832                ; *** HACK
-; stuff        
-        SEC
+        ldy			#snddur
+        lda			b,y
+        pshs		a
+        ldy			#sndfreq
+        lda			b,y											; A=frequency
+        puls		b												; B=duration
+        jsr			play_sound
+        ldb			*sndq_length
+        dec			*sndq_length
+        lda			*game_speed
+        ldy			#snddur
+        suba		b,y
+        beq			1$
+        bcs			1$
+        tfr			a,b
+        jsr			delay_180X
+1$:     SEC
         rts
 
 loc_8832: ; $8832
         lda     *not_falling            ; falling?
         bne     throttle_game_speed     ; no, go
-; stuff
-; - hack: remove me!!!
-        bra     throttle_game_speed        
+        lda			*falling_snd_freq
+        lsra														; A=frequency (period)
+        inc			*falling_snd_freq
+        ldb			*game_speed
+        incb
+        incb														; B=duration
+        jsr			play_sound
+        CLC
         rts
 
 throttle_game_speed:  ; $8844                				
@@ -5229,9 +5300,9 @@ hole_row:	; $CC0
 hole_cnt:	; $CE0
 				.ds		0x20
 
-sndbuf1:  ; $E00
+snddur:  ; $E00
         .ds   0x80
-sndbuf2:  ; $E80
+sndfreq:  ; $E80
         .ds   0x80
 
 lsb_row_addr:	; $1C05
@@ -5315,6 +5386,8 @@ ldu1:
 level_data_unpacked_2:
 ldu2:
 				.ds			512
+
+end_of_code:
 				
 				.end		start
 			

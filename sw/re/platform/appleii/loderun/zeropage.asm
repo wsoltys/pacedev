@@ -90,19 +90,19 @@ enable_collision_detect   .equ    0x94
 paddles_detected					.equ		0x95
 level_0_based							.equ		0x96
 unused_97									.equ		0x97
-dig_dir										.equ		0x9c
 no_lives									.equ		0x98
 sound_enabled							.equ		0x99
 level_active							.equ		0x9a
 not_falling               .equ		0x9b
+dig_dir										.equ		0x9c
 no_cheat									.equ		0x9d
 key_1											.equ		0x9e
 key_2											.equ		0x9f
-dig_dir										.equ		0x9c
 dig_sprite								.equ		0xa0
 timer											.equ		0xa1
 editor_n									.equ		0xa2
 no_eos_ladder_tiles				.equ		0xa3
+falling_snd_freq					.equ		0xa4
 wipe_next_time            .equ		0xa5
 level											.equ		0xa6
 attract_mode							.equ		0xa7
@@ -111,6 +111,8 @@ msb_demo_inp_ptr					.equ		0xa8		; swapped for 6809
 demo_inp_key_1_2					.equ		0xaa
 demo_inp_cnt							.equ		0xab
 byte_ac										.equ		0xac
+sound_cnt									.equ		0xdb		; 6809 only
+sound_bit									.equ		0xdc		; 6809 only
 zp_dd											.equ		0xdd		; (stored sound setting) added MMc
 zp_de											.equ		0xde		; (temp) added MMc
 char_render_buf						.equ		#ZEROPAGE+0xdf
