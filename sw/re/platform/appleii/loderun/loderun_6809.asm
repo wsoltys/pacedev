@@ -127,12 +127,14 @@ start:
 				sta			,x+											; page 3 @$E000-$FFFF
 	.endif	; TILES_EXTERNAL
 
-				clr			*sound_bit
+				clr			*sound_bits
+.ifdef USE_1BIT_SOUND				
 				lda			SOUND+1									; $FF23
 				ora			#(1<<5)|(1<<4)					; set CB2 as output
 				anda		#~(1<<3)
 ;				ora			#(1<<3)									; enable sound
 				sta			SOUND+1
+.endif				
 												
 .endif	; PLATFORM_COCO3
 			
@@ -334,8 +336,8 @@ dec_lives:	; $613F
         .dw     0x8006, 0x9007, 0x9007, 0xA008, 0xA008, 0xB009, 0xB009, 0xC00A, 0xC00A
         .dw     0xD00B, 0xD00B, 0xE00C, 0xE00C, 0xF00D, 0xF00D
         .db     0
-				jsr			throttle_and_update_sound
-				; stuff
+1$:			jsr			throttle_and_update_sound
+        bcs     1$
 				lda			*attract_mode
 				lsra														; demo mode?
 				beq			loc_61d0								; yes, go
@@ -4601,6 +4603,7 @@ speed_scale_tbl:  ; $86BE
         .db     0x1E, 0x20
 
 beep:	; $86CE
+.ifdef HAS_SOUND
 				ldb			#0xc0
 				stb			*zp_de
 1$:			ldb			#0x80
@@ -4608,12 +4611,13 @@ beep:	; $86CE
 				bne			2$
 				lda			*sound_enabled
 				beq			3$
-				lda			*sound_bit
+				lda			*sound_bits
 				sta			SOUND
-				eora		#(1<<1)
-				sta			*sound_bit
+				eora		#SOUND_MASK
+				sta			*sound_bits
 3$:			dec			*zp_de
 				bne			1$										
+.endif				
 				rts
 																
 display_message:	; $86E0
@@ -4675,14 +4679,15 @@ read_paddles: ; $87A2
 
 play_sound:	; $87BA
 ; A=frequency, B=duration
+.ifdef HAS_SOUND
 				sta			*word_a									; frequency
 				stb			*(word_a+1)							; duration
 1$:			lda			*sound_enabled
 				beq			2$											; no, skip
-				lda			*sound_bit
+				lda			*sound_bits
 				sta			SOUND
 				eora		#(1<<1)
-				sta			*sound_bit
+				sta			*sound_bits
 2$:			dec			*sound_cnt
 				bne			3$
 				dec			*(word_a+1)							; duration - done playing?
@@ -4691,10 +4696,12 @@ play_sound:	; $87BA
 				bne			2$
 				ldb			*word_a									; frequency
 				bra			1$											; loop				
+.endif				
 9$:			rts
 
 queue_note:	; $87D5
 ; A=frequency, B=duration
+.ifdef HAS_SOUND
 				pshs		b
 				inc     *sndq_length
 				ldb     *sndq_length
@@ -4703,6 +4710,7 @@ queue_note:	; $87D5
 				puls		a
 				ldy			#snddur
 				sta			b,y
+.endif				
 				rts
 				
 queue_sound:  ; $87E1
@@ -4710,7 +4718,9 @@ queue_sound:  ; $87E1
 1$:     ldb     #0
         lda     b,x                     ; get 1st sound byte
         beq     9$                      ; done - exit
+.ifdef HAS_SOUND        
         inc     *sndq_length
+.endif        
         ldb     *sndq_length
         ldy     #snddur
         sta     b,y                     ; store 1st byte
@@ -4727,6 +4737,7 @@ queue_sound:  ; $87E1
 throttle_and_update_sound: ; $8811
         ldb     *sndq_length            ; sound playing?
         beq     loc_8832                ; no, go
+.ifdef HAS_SOUND        
         ldy			#snddur
         lda			b,y
         pshs		a
@@ -4743,12 +4754,14 @@ throttle_and_update_sound: ; $8811
         bcs			1$
         tfr			a,b
         jsr			delay_180X
+.endif
 1$:     SEC
         rts
 
 loc_8832: ; $8832
         lda     *not_falling            ; falling?
         bne     throttle_game_speed     ; no, go
+.ifdef HAS_SOUND
         lda			*falling_snd_freq
         lsra														; A=frequency (period)
         inc			*falling_snd_freq
@@ -4758,6 +4771,7 @@ loc_8832: ; $8832
         jsr			play_sound
         CLC
         rts
+.endif
 
 throttle_game_speed:  ; $8844                				
         ldb     *game_speed
