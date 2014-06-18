@@ -48,8 +48,6 @@ Note that using the keys marked as 'cheat' will disqualify you from the high sco
 
 Yet To Be Implemented (in roughly planned order)
 ---------------------
-* Circular wipe function at start/end of level
-* Sound
 * High Score load/save
 * Inclusion of all 150 levels
 * Support for Championship Lode Runner (+50 levels)
@@ -69,8 +67,10 @@ v0.2        Playable Demo Release (Beta 2)
             Added colour mode
             (Better) centred screen
             Support for 128KB machines (untested)
-            Added another 5 levels (now 10 levels)
+            *Added another 5 levels (now 10 levels) ???
             Fixed stack bug, possible cause of crash
+            Added circular wipe function
+            Added sound
 
 v0.1        Playable Demo Release (Beta 1)
             Monochrome, 5 levels only
