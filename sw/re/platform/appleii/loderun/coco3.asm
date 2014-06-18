@@ -8,8 +8,6 @@ PIA1				.equ		0xFF20
 KEYCOL			.equ		PIA0+2
 KEYROW			.equ		PIA0
 
-SOUND				.equ		PIA1+2
-
 ;
 ; *** GIME registers  	
 ;
@@ -142,6 +140,19 @@ stack				.equ		  	0xC000
  .endif
 .endif
 
+.define HAS_SOUND
+.ifdef HAS_SOUND
+  ;.define USE_1BIT_SOUND
+  .ifdef USE_1BIT_SOUND
+    SOUND_ADDR  .equ		PIA1+2
+    SOUND_MASK  .equ    (1<<1)
+  .else
+    .define USE_DAC_SOUND
+    SOUND_ADDR  .equ		PIA1
+    SOUND_MASK  .equ    0xfc
+  .endif
+.endif
+  
 ; MMU page mappings
 CODEPAGE		.equ				0x34
 GFXPAGE			.equ				0x36

@@ -81,11 +81,11 @@ start:
 				sta			FIRQENR   							
 				lda			#0x80										; graphics mode, 60Hz, 1 line/row
 				sta			VMODE     							
-	.ifdef GFX_1BPP				
+	  .ifdef GFX_1BPP				
 				lda			#0x0C										; 192 scanlines, 40 bytes/row, 2 colours (320x192)
-	.else				
+	  .else				
 				lda			#0x15										; 192 scanlines, 80 bytes/row, 4 colours (320x192)
-	.endif				
+	  .endif				
 				sta			VRES      							
 				lda			#0x00										; black
 				sta			BRDR      							
@@ -93,11 +93,11 @@ start:
 				sta			VOFFMSB
 				lda			#0xFF
 				sta			VOFFLSB   							
-.ifdef GFX_1BPP				
+  .ifdef GFX_1BPP				
 				lda			#0x03										; normal display, horiz offset 3
-.else
+  .else
 				lda			#0x02										; normal display, horiz offset 2
-.endif				
+  .endif				
 				sta			HOFF      							
 				ldx			#PALETTE
 	.ifdef GFX_1BPP
@@ -128,13 +128,43 @@ start:
 	.endif	; TILES_EXTERNAL
 
 				clr			*sound_bits
-.ifdef USE_1BIT_SOUND				
-				lda			SOUND+1									; $FF23
+
+  .ifdef HAS_SOUND				
+
+				lda			0xff23
 				ora			#(1<<5)|(1<<4)					; set CB2 as output
-				anda		#~(1<<3)
-;				ora			#(1<<3)									; enable sound
-				sta			SOUND+1
-.endif				
+				ora			#(1<<3)									; enable sound
+				sta			0xff23
+
+    .ifdef USE_1BIT_SOUND				
+				; bit2 sets control/data register
+				lda     0xff23                  ; CRB
+				anda    #~(1<<2)                ; control register
+				sta     0xff23                  ; CRB
+				lda     0xff22                  ; DDRB
+				ora     #(1<<1)                 ; PB1 output
+				sta     0xff22                  ; DDRB
+        ; setup for data register				
+				lda     0xff23                  ; CRB
+				ora     #(1<<2)                 ; data register
+				sta     0xff23                  ; CRB
+    .endif  ; USE_1BIT_SOUND
+
+    .ifdef USE_DAC_SOUND
+				; bit2 sets control/data register
+				lda     0xff21                  ; CRA
+				anda    #~(1<<2)                ; control register
+				sta     0xff21                  ; CRA
+				lda     0xff20                  ; DDRA
+				ora     #0xfc                   ; PA2-7 outputs
+				sta     0xff20                  ; DDRA
+        ; setup for data register				
+				lda     0xff21                  ; CRA
+				ora     #(1<<2)                 ; data register
+				sta     0xff21                  ; CRA
+    .endif  ; USE_DAC_SOUND
+
+  .endif  ; HAS_SOUND
 												
 .endif	; PLATFORM_COCO3
 			
@@ -4612,7 +4642,7 @@ beep:	; $86CE
 				lda			*sound_enabled
 				beq			3$
 				lda			*sound_bits
-				sta			SOUND
+				sta			SOUND_ADDR
 				eora		#SOUND_MASK
 				sta			*sound_bits
 3$:			dec			*zp_de
@@ -4685,8 +4715,8 @@ play_sound:	; $87BA
 1$:			lda			*sound_enabled
 				beq			2$											; no, skip
 				lda			*sound_bits
-				sta			SOUND
-				eora		#(1<<1)
+				sta			SOUND_ADDR
+				eora		#SOUND_MASK
 				sta			*sound_bits
 2$:			dec			*sound_cnt
 				bne			3$

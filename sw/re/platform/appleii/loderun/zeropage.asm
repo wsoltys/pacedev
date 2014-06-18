@@ -112,7 +112,7 @@ demo_inp_key_1_2					.equ		0xaa
 demo_inp_cnt							.equ		0xab
 byte_ac										.equ		0xac
 sound_cnt									.equ		0xdb		; 6809 only
-sound_bit									.equ		0xdc		; 6809 only
+sound_bits								.equ		0xdc		; 6809 only
 zp_dd											.equ		0xdd		; (stored sound setting) added MMc
 zp_de											.equ		0xde		; (temp) added MMc
 char_render_buf						.equ		#ZEROPAGE+0xdf
