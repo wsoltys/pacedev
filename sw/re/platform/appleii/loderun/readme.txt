@@ -40,6 +40,7 @@ Keys
 <ESC>         Freeze
 <CTRL><R>     Abort game
 <CTRL><A>     Abort life
+<CTRL><S>			Toggle sound
 <CTRL><H>     Speed up game (not tested)
 <CTRL><U>     Slow down game (not tested)
 <ENTER>       Display High Scores
