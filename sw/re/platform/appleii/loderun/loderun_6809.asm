@@ -185,7 +185,10 @@ bootloader:
 ; the game state machine with the Apple        
         clra
         sta			*byte_64
-        					
+; this needs to be done too
+        deca
+				sta			*sound_enabled
+				        					
 ; start lode runner
 				jsr			read_paddles
 ;				lda			#1
@@ -350,9 +353,9 @@ next_level:
 				stb			*farthest_updown_plyr_row
 4$:			ldd			#SCORE_LEVEL						; add 100 pts
 				jsr			update_and_display_score
-				jsr     sub_622a
-				jsr     sub_622a
-				jsr     sub_622a
+				jsr     play_score_sound
+				jsr     play_score_sound
+				jsr     play_score_sound
 				dec			*farthest_updown_plyr_row
 				bne			4$											; add 1500 pts
 next_level_cont:				
@@ -370,7 +373,7 @@ dec_lives:	; $613F
         bcs     1$
 				lda			*attract_mode
 				lsra														; demo mode?
-				beq			loc_61d0								; yes, go
+				beq			end_demo								; yes, go
 				lda			*no_lives								; any lives left?
 				bne			next_level_cont					; yes, continue
 				jsr			check_and_update_high_score_tbl
@@ -409,7 +412,7 @@ title_wait_for_key: ; $618e
 				sta			*sound_enabled					; mute sound
 				jmp			zero_score_and_init_game
 
-loc_61d0:	; $61D0
+end_demo:	; $61D0
 				lda			*zp_dd									; restore sound setting
 				sta			*sound_enabled
 ; reads $C000 (keybd) but not used!?!				
@@ -459,7 +462,7 @@ guard_trap_cnt_init_tbl:	; $6214
 				.db			0x26, 0x26, 0x2E, 0x44, 0x47, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F
 				.db			0x50
 
-sub_622a:
+play_score_sound:
         lda     *farthest_updown_plyr_row
         asla
         asla
@@ -1241,12 +1244,12 @@ digging_left:
 				jsr			adjust_x_offset_in_tile
 				jsr			adjust_y_offset_within_tile
 				ldb			*dig_sprite
-				ldy			#sprite_to_char_tbl+0x36
+				ldy			#dig_snd_dur_tbl
 				lda			b,y
 				pshs		a
-				ldy			#sprite_to_char_tbl+0x43
-				lda			b,y
-				puls		b
+				ldy			#dig_snd_freq_tbl
+				lda			b,y											; A=freq
+				puls		b												; B=duration
 				jsr			queue_note
 				ldb			*dig_sprite
 				lda			#0											; sprite=0, tile=$B (running left)
@@ -1366,10 +1369,10 @@ digging_right:
 				jsr			adjust_x_offset_in_tile
 				jsr			adjust_y_offset_within_tile
 				ldb			*dig_sprite
-				ldy			#sprite_to_char_tbl+0x2A
+				ldy			#dig_snd_dur_tbl-12			; dig-right sprite starts @12
 				lda			b,y
 				pshs		a
-				ldy			#sprite_to_char_tbl+0x37
+				ldy			#dig_snd_freq_tbl-12		; dig-right sprite starts @12
 				lda			b,y
 				puls		b
 				jsr			queue_note
@@ -1460,8 +1463,14 @@ sprite_to_char_tbl:	; $6968
 				.db 		0x17, 0x25, 0x14, 0xE, 0x12, 0x1B, 0x1B, 0x1C, 0x1C, 0x1D, 0x1D, 0x1E
 				.db 		0x1E, 0, 0, 0, 0, 0x26, 0x26, 0x27, 0x27, 0x1D, 0x1D, 0x1E, 0x1E, 0
 				.db 		0, 0, 0, 0x1F, 0x1F, 0x20, 0x20, 0x21, 0x21, 0x22, 0x22, 0x23, 0x23
-				.db 		0x24, 0x24, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x24, 0x24
-				.db 		0x24, 0x24, 0x24, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 2, 2, 1
+				.db 		0x24, 0x24
+
+dig_snd_freq_tbl:				
+				.db			0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x24, 0x24
+				.db 		0x24, 0x24, 0x24
+
+dig_snd_dur_tbl:				
+				.db			4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 2, 2, 1
 
 handle_attract_mode:	; $69B8
 				ldx			#PIA0
@@ -1607,9 +1616,15 @@ read_controls:	; $6a12
 				stb			2,x											; columns strobe
 				lda			,x											; active low
 				bita		#(1<<1)									; 'K'?
-				bne			33$											; no, skip
+				bne			32$											; no, skip
 				lda			#0xcb										; 'K'
 				rts
+32$:		bita		#(1<<2)									; 'S'?
+				bne			33$
+				tst			*zp_de									; CTRL?
+				beq			33$											; no, skip
+				lda			#0x93										; CTRL-S
+				rts				
 33$:    bita    #(1<<3)                 ; <UP>?
         bne     4$                      ; no, skip
         lda     #0xc9                   ; 'I'
@@ -1725,6 +1740,13 @@ abort_life:	; $6A84
         jsr     keybd_flush             ; wait for no keys (6809 only)
 				rts
 
+toggle_sound:	; $6A87
+				lda			*sound_enabled
+				eora		#0xff
+				sta			*sound_enabled
+				jsr			keybd_flush
+				rts
+				
 speed_up:	; $6ABC
 				lda			*game_speed
 ; the original source jumps to $6ACD
@@ -1750,6 +1772,7 @@ ctl_keys:	; $6B59
 				.db			0x9b										; ESC (freeze toggle)
 				.db			0x92										; CTRL-R (terminate game)
 				.db			0x81										; CTRL-A (abort life)
+				.db			0x93										; CTRL-S (toggle sound)
 				.db			0x88										; CTRL-H (speed up)
 				.db			0x95										; CTRL-U (slow down)
 				.db			0x8d										; CTRL-M (display high scores)
@@ -1761,9 +1784,10 @@ ctl_key_vector_fn:
 				.dw			#freeze
 				.dw			#terminate_game
 				.dw			#abort_life
+				.dw			#toggle_sound
 				.dw			#speed_up
 				.dw			#slow_down
-				.dw			#ctrl_m
+				.dw			#display_hs_screen
 												
 calc_char_and_addr:	; $6b85
 				lda			*current_col
@@ -3612,7 +3636,7 @@ finish_respawn:	; $776C
 				ldb			*curr_guard
 				jmp			next_guard
 												
-ctrl_m:	; $77AC
+display_hs_screen:	; $77AC
 				jsr			cls_and_display_high_scores
 				ldb			#5
 0$:			ldy			#0
@@ -4635,7 +4659,7 @@ speed_scale_tbl:  ; $86BE
 beep:	; $86CE
 .ifdef HAS_SOUND
 				ldb			#0xc0
-				stb			*zp_de
+				stb			*sound_cnt
 1$:			ldb			#0x80
 2$:			decb
 				bne			2$
@@ -4645,7 +4669,7 @@ beep:	; $86CE
 				sta			SOUND_ADDR
 				eora		#SOUND_MASK
 				sta			*sound_bits
-3$:			dec			*zp_de
+3$:			dec			*sound_cnt
 				bne			1$										
 .endif				
 				rts
@@ -4744,19 +4768,20 @@ queue_note:	; $87D5
 				rts
 				
 queue_sound:  ; $87E1
+; note that freq,dur are reversed wrt Apple
+; due to data defined as words (endianity)
         puls    x                       ; return address
-1$:     ldb     #0
-        lda     b,x                     ; get 1st sound byte
+1$:     lda     ,x                     	; get 1st sound byte
         beq     9$                      ; done - exit
 .ifdef HAS_SOUND        
         inc     *sndq_length
 .endif        
         ldb     *sndq_length
-        ldy     #snddur
+        ldy     #sndfreq
         sta     b,y                     ; store 1st byte
         incb
-        lda     b,x                     ; get 2nd sound byte
-        ldy     #sndfreq
+        lda     1,x                     ; get 2nd sound byte
+        ldy     #snddur
         sta     b,y                     ; store 2nd byte
         leax    2,x
         bra     1$
@@ -4765,8 +4790,8 @@ queue_sound:  ; $87E1
         rts
         
 throttle_and_update_sound: ; $8811
-        ldb     *sndq_length            ; sound playing?
-        beq     loc_8832                ; no, go
+        ldb     *sndq_length            ; sound queued?
+        beq     silent                	; no, go
 .ifdef HAS_SOUND        
         ldy			#snddur
         lda			b,y
@@ -4788,7 +4813,7 @@ throttle_and_update_sound: ; $8811
 1$:     SEC
         rts
 
-loc_8832: ; $8832
+silent: ; $8832
         lda     *not_falling            ; falling?
         bne     throttle_game_speed     ; no, go
 .ifdef HAS_SOUND

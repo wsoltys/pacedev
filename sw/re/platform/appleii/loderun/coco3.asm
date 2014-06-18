@@ -142,7 +142,7 @@ stack				.equ		  	0xC000
 
 .define HAS_SOUND
 .ifdef HAS_SOUND
-  ;.define USE_1BIT_SOUND
+  .define USE_1BIT_SOUND
   .ifdef USE_1BIT_SOUND
     SOUND_ADDR  .equ		PIA1+2
     SOUND_MASK  .equ    (1<<1)
