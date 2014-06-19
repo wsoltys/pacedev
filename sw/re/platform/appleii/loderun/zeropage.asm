@@ -111,8 +111,13 @@ msb_demo_inp_ptr					.equ		0xa8		; swapped for 6809
 demo_inp_key_1_2					.equ		0xaa
 demo_inp_cnt							.equ		0xab
 byte_ac										.equ		0xac
-sound_cnt									.equ		0xdb		; 6809 only
-sound_bits								.equ		0xdc		; 6809 only
-zp_dd											.equ		0xdd		; (stored sound setting) added MMc
+game_over_loop_cnt				.equ		0xd6		; 6809 only
+no_eos_ladder_entries			.equ		0xd7		; 6809 only
+initial_cnt								.equ		0xd8		; 6809 only
+blink_char								.equ		0xd9		; 6809 only
+sound_cnt									.equ		0xda		; 6809 only
+sound_bits								.equ		0xdb		; 6809 only
+sound_setting							.equ		0xdc		; 6809 only
+debug_page								.equ		0xdd		; 6809 only
 zp_de											.equ		0xde		; (temp) added MMc
 char_render_buf						.equ		#ZEROPAGE+0xdf

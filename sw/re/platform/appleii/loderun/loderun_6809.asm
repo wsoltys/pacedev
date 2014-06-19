@@ -55,6 +55,8 @@ NUM_LEVELS				.equ	50
 
 .iifdef PLATFORM_COCO3	.include "coco3.asm"
 
+.include "zeropage.asm"
+
 				.org		codebase
 start:
 				lds			#stack
@@ -409,12 +411,12 @@ title_wait_for_key: ; $618e
 				stb			*byte_ac
 				stb			*no_cheat
 				ldb			*sound_enabled					; get sound setting
-				stb			*zp_dd									; store - 6809 only
+				stb			*sound_setting					; store - 6809 only
 				sta			*sound_enabled					; mute sound
 				jmp			zero_score_and_init_game
 
 end_demo:	; $61D0
-				lda			*zp_dd									; restore sound setting
+				lda			*sound_setting					; restore sound setting
 				sta			*sound_enabled
 ; reads $C000 (keybd) but not used!?!				
 				ldb			*byte_ac
@@ -458,7 +460,7 @@ start_new_game:	; $6201
 				jmp			zero_score_and_init_game														
 
 x3_tbl:	; $6214
-       .db			0, 3, 6, 9, 12, 15, 18, 21, 24
+       	.db			0, 3, 6, 9, 12, 15, 18, 21, 24
 guard_trap_cnt_init_tbl:	; $6214
 				.db			0x26, 0x26, 0x2E, 0x44, 0x47, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F
 				.db			0x50
@@ -1531,8 +1533,6 @@ demo_inp_remap_tbl:	; $6A0B
 ; 5: /  .  _  ,  ;  :  9  8
 ; 6: SH F2 F1 CT AL BK CL CR
 
-page:		.db			0
-
 read_controls:	; $6a12
 .ifdef DEBUG
 				ldx			#PIA0
@@ -1541,9 +1541,9 @@ read_controls:	; $6a12
 				lda			,x											; active low
 				bita		#(1<<6)									; <ENTER>?
 				bne			93$
-				lda			page
+				lda			*debug_page
 				coma		
-				sta			page
+				sta			*debug_page
 				bne			91$
 				HGR1
 				bra			92$
@@ -4085,8 +4085,9 @@ cr: ; 7B7D
 				sta			*col										; col=0
 				rts
 
-initial_cnt:  ; $824D
-        .ds     1
+; moved to direct page
+;initial_cnt:  ; $824D
+;        .ds     1
         
 display_char_pg1:	; $82AA
 ; A=char
@@ -4413,10 +4414,10 @@ add_hs_entry:
         lda     #7
         sta     *col                    ; set col for initials entry
         ldb     #0
-        stb     initial_cnt
+        stb     *initial_cnt
         
 next_initial: ; $857F
-        ldb     initial_cnt
+        ldb     *initial_cnt
 1$:     ldy     #hs_tbl
         addb    *zp_de                  ; get offset for initial
         lda     b,y                     ; get initial
@@ -4426,20 +4427,20 @@ next_initial: ; $857F
         beq     done_initials_entry     ; yes, go
         cmpa    #0x88                   ; <BS>?
         bne     add_initial             ; no, go
-        lda     initial_cnt             ; 1st initial?
+        lda     *initial_cnt            ; 1st initial?
         beq     beep_and_loop           ; yes, exit
-        dec     initial_cnt
+        dec     *initial_cnt
         dec     *col
         bra     next_initial            ; loop
         
 add_initial:  ; $85A3
         cmpa    #0x95                   ; right arrow?
         bne     1$                      ; no, skip
-        ldb     initial_cnt
+        ldb     *initial_cnt
         cmpb    #2                      ; last initial?
         beq     beep_and_loop           ; yes, exit
         inc     *col
-        inc     initial_cnt
+        inc     *initial_cnt
         bra     next_initial
 1$:     cmpa    #0xae                   ; '.'?
         beq     save_initial            ; yes, go
@@ -4452,15 +4453,15 @@ add_initial:  ; $85A3
 
 save_initial: ; $85C6
         ldy     #hs_tbl
-        ldb     initial_cnt
+        ldb     *initial_cnt
         addb    *zp_de                  ; get offset for initial
         sta     b,y                     ; save initial
         jsr     display_character
-        inc     initial_cnt
-        lda     initial_cnt
+        inc     *initial_cnt
+        lda     *initial_cnt
         cmpa    #3                      ; done 3 initials?
         bcs     next_initial            ; no, loop
-        dec     initial_cnt
+        dec     *initial_cnt
         dec     *col                    ; stay on 3rd initial
         jmp     next_initial            ; loop
 
@@ -4478,10 +4479,10 @@ done_initials_entry:  ; $85E7
 				jmp			title_wait_for_key
 
 blink_char_cursor_wait_key:
-        sta     blink_char
+        sta     *blink_char
 1$:     lda     #104                    ; blink ON timer
         sta     *timer
-        lda     blink_char
+        lda     *blink_char
         bne     2$
         lda     #0x0a                   ; cursor character
 2$:     jsr     display_char_pg2
@@ -4499,7 +4500,7 @@ blink_char_cursor_wait_key:
         bne     4$
         bra     1$        
 5$:     pshs    a                       ; save key
-        lda     blink_char
+        lda     *blink_char
         jsr     display_char_pg2        ; restore screen character
         puls    a                       ; restore key
         rts
@@ -4555,8 +4556,8 @@ draw_end_of_screen_ladder:	; $8631
 				lda			#0
 				sta			eos_ladder_col					; flag ladder OK
 				ldb			*no_eos_ladder_tiles
-				stb			no_eos_ladder_entries
-1$:			ldb			no_eos_ladder_entries		; done last ladder?
+				stb			*no_eos_ladder_entries
+1$:			ldb			*no_eos_ladder_entries	; done last ladder?
 				beq			9$											; yes, exit
 				ldy			#eos_ladder_col
 				lda			b,y											; get col
@@ -4596,22 +4597,23 @@ draw_end_of_screen_ladder:	; $8631
 				tfr			a,b											; B=col*5=x_in_2_pixel_incs
 				lda			#3											; ladder
 				jsr			display_transparent_char	; update video
-				ldb			no_eos_ladder_entries
+				ldb			*no_eos_ladder_entries
 				lda			#0xff
 				ldy			#eos_ladder_col
 				sta			b,y											; flag ladder (tile) drawn
 				bra			8$
 7$:			lda			#1											; flag ladder error
 				sta			eos_ladder_col
-8$:			dec			no_eos_ladder_entries
+8$:			dec			*no_eos_ladder_entries
 				jmp			1$
 9$:			lda			eos_ladder_col					; ladder drawn OK?
 				bne			91$											; no, skip
 				dec			*no_gold								; ???
 91$:		rts
 
-no_eos_ladder_entries:
-				.ds			1
+; moved to direct page
+;no_eos_ladder_entries:
+;				.ds			1
 
 keybd_flush:	; $869F
 ; no such concept on the COCO3
@@ -4690,11 +4692,13 @@ display_message:	; $86E0
 				rts
 
 blink_char_and_wait_for_key:	; $8700
-				sta			blink_char
-1$:			lda			#0x68
+; apple was much slower because
+; it also sampled the joysticks
+				sta			*blink_char
+1$:			lda			#0											; was 104
 				sta			*timer
 				lda			#0											; space
-				ldb			blink_char
+				ldb			*blink_char
 				bne			2$											; not a space, skip
 				lda			#0x0a										; solid square
 2$:			jsr			display_char_pg1
@@ -4704,29 +4708,33 @@ blink_char_and_wait_for_key:	; $8700
 				lda			,x
 				coma														; any key pressed?
 				bne			blink_got_key						; yes, exit
-; read keyboard
 				dec			*timer									; timeout?
 				bne			3$											; no, loop
-				lda			blink_char
+				lda			*blink_char
 				jsr			display_char_pg1
-				lda			#0x68
+				lda			#0											; was 104
 				sta			*timer
-; read keyboard
-4$:
-				dec			*timer								; timeout?
-				bne			4$										; no, loop
-				bra			1$										; loop waiting for key
+4$:			ldx			#PIA0
+				ldb			#0											; all columns
+				stb			2,x											; column strobe
+				lda			,x
+				coma														; any key pressed?
+				bne			blink_got_key						; yes, exit
+				dec			*timer									; timeout?
+				bne			4$											; no, loop
+				bra			1$											; loop waiting for key
 
 blink_got_key:
 				pshs		a
-				lda			blink_char
+				lda			*blink_char
 				jsr			display_char_pg1
 				puls		a
 				rts
+
+; moved to direct page				
+;blink_char:
+;				.db			6
 				
-blink_char:
-				.db			6
-								
 read_paddles: ; $87A2
 				lda			#0xcb										; no paddles detected?
 				sta			*paddles_detected
@@ -5052,7 +5060,7 @@ pset:
 
 game_over_animation:	; $8B1A
         lda     #1
-        sta     game_over_loop_cnt
+        sta     *game_over_loop_cnt
         sta     *timer                  ; 6809 only
         lda     #HGR1_MSB
         sta     *hires_page_msb_1
@@ -5076,7 +5084,7 @@ game_over_animation:	; $8B1A
         jsr     game_over_frame_14_18
         jsr     game_over_frame_13_19
         jsr     game_over_frame_12_20
-        lda     game_over_loop_cnt
+        lda     *game_over_loop_cnt
         cmpa    #100
         bcs     1$
         jsr     game_over_frame_1_11
@@ -5245,7 +5253,7 @@ loc_8d12:	; $8D12
 				ldb			*row
 				cmpb		#95											; last row?
 				bcs			game_over_do_scanline		; no, loop
-				ldb			game_over_loop_cnt
+				ldb			*game_over_loop_cnt
 2$:			lda			#0xff
 3$:     deca
 				bne			3$											; delay
@@ -5254,7 +5262,7 @@ loc_8d12:	; $8D12
 				bne     4$
 				decb														; done?
 				bne			2$											; no, loop
-				inc     game_over_loop_cnt
+				inc     *game_over_loop_cnt
 .ifdef PLATFORM_COCO3				
 				ldx			#PIA0
 				ldb			#0											; all columns
@@ -5274,15 +5282,18 @@ exit_game_over_animation:
 				puls		x												; discard return address
 				SEC
 				rts
-				
-game_over_loop_cnt: ; $8D4B
-        .ds     1
+
+; moved to direct page				
+;game_over_loop_cnt: ; $8D4B
+;        .ds     1
 
 game_over_anim_tbl_next_byte:	; $8D4C
 				ldy			*word_a
 				leay		1,y
 				sty			*word_a
 				rts
+
+end_of_code	.equ		.
        
 attract_move_tbl:	; $9B00
 				.db 		0x16, 0x4C, 0x66, 2, 0x55, 1, 0x66, 2, 0x36, 0x18, 0x55, 1, 0x44, 1
@@ -5339,41 +5350,6 @@ attract_move_tbl:	; $9B00
 				.db 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 				.db 		0
 									
-; zero-page registers
-.include "zeropage.asm"
-
-eos_ladder_col:	; $C00
-				.ds		0x30
-eos_ladder_row:	; $C30
-				.ds		0x30
-guard_col:	; $C60
-				.ds		8					
-guard_row:	; $C68
-				.ds		8					
-guard_state:	; $C70
-				.ds		8					
-guard_x_offset:	; $C78
-				.ds		8					
-guard_y_offset:	; $C80
-				.ds		8					
-guard_sprite:	; $C88
-				.ds		8					
-guard_dir:	; $C90
-				.ds		8					
-guard_cnt:	; $C98
-				.ds		8					
-hole_col:	; $CA0
-				.ds		0x20
-hole_row:	; $CC0
-				.ds		0x20
-hole_cnt:	; $CE0
-				.ds		0x20
-
-snddur:  ; $E00
-        .ds   0x80
-sndfreq:  ; $E80
-        .ds   0x80
-
 lsb_row_addr:	; $1C05
 				.db		<(ldu1+0*28), <(ldu1+1*28), <(ldu1+2*28), <(ldu1+3*28)
 				.db		<(ldu1+4*28), <(ldu1+5*28), <(ldu1+6*28), <(ldu1+7*28)
@@ -5442,21 +5418,53 @@ hs_tbl:	; $1F00
 
 				.list
 
-end_of_data	.equ		.
+end_of_rom	.equ		.
 
-; this was in low memory on the apple
+; ***
+; *** RAM
+; ***
 
-level_data_packed:
+				.org		RAMBASE
+				.bndry	256
+				
+eos_ladder_col:	; $C00
+				.ds		0x30
+eos_ladder_row:	; $C30
+				.ds		0x30
+guard_col:	; $C60
+				.ds		8					
+guard_row:	; $C68
+				.ds		8					
+guard_state:	; $C70
+				.ds		8					
+guard_x_offset:	; $C78
+				.ds		8					
+guard_y_offset:	; $C80
+				.ds		8					
+guard_sprite:	; $C88
+				.ds		8					
+guard_dir:	; $C90
+				.ds		8					
+guard_cnt:	; $C98
+				.ds		8					
+hole_col:	; $CA0
+				.ds		0x20
+hole_row:	; $CC0
+				.ds		0x20
+hole_cnt:	; $CE0
+				.ds		0x20
+
+level_data_packed:	; $D00
 				.ds		  256
 				
-level_data_unpacked_1:
-ldu1:
-				.ds			512
-level_data_unpacked_2:
-ldu2:
-				.ds			512
+snddur:  ; $E00
+        .ds   0x80
+sndfreq:  ; $E80
+        .ds   0x80
 
-end_of_code:
-				
+; *** END OF RAM
+
+end_of_ram	.equ		.
+
 				.end		start
-			
+				
