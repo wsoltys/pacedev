@@ -9,12 +9,16 @@
 
 .include "coco3.asm"
 
-;.define	ENABLE_SPLASH
+.define	ENABLE_SPLASH
 
         ; $4000
         .org    0x4000
 
 start:
+; get parameter from BASIC loader
+        jsr     0xb3ed                  ; D=parameter
+        std     param
+        
 				orcc		#0x50										; disable interrupts
         lda     #0x4c
         sta     INIT0
@@ -68,7 +72,15 @@ wait:   stb     2,x                     ; column strobe
         sta     ,x+                     ; switch in code banks
         inca
         sta     ,x+
-        jmp     0x8000                  ; jump to Lode Runner
+        
+; now patch the mono version
+        ldd     param
+        cmpa    #0
+        beq     1$    
+        stb     0x8059                  ; patch palette routine
+1$:     jmp     0x8000                  ; jump to Lode Runner
+
+param:  .dw     0
 
 GREEN_BG          .equ    0
 BLACK_BG          .equ    1
