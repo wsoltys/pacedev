@@ -287,7 +287,8 @@ main_game_loop:
 				lda			*attract_mode
 				lsra
 				beq			1$
-				jsr			keybd_flush
+				; no need to do this with the wipe
+				;jsr			keybd_flush
 				lda			*current_col
 				sta			*col
 				lda			*current_row
@@ -4779,7 +4780,6 @@ queue_sound:  ; $87E1
         ldb     *sndq_length
         ldy     #sndfreq
         sta     b,y                     ; store 1st byte
-        incb
         lda     1,x                     ; get 2nd sound byte
         ldy     #snddur
         sta     b,y                     ; store 2nd byte
