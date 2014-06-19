@@ -397,6 +397,7 @@ title_wait_for_key: ; $618e
 				stb			2,x											; column strobe
 				lda			,x
 				coma														; any key pressed?
+				anda    #0x7f
 				bne			check_start_new_game		; yes, exit
 				leay		-1,y
 				bne			2$
@@ -1481,6 +1482,7 @@ handle_attract_mode:	; $69B8
 				stb			2,x										; column strobe
 				lda			,x										; active low
 				coma													; active high
+				anda    #0x7f
 .ifndef DEBUG_DISABLE_DEMO_EXIT				
 				bne			exit_demo							; key pressed, go
 .endif				
@@ -3646,6 +3648,7 @@ display_hs_screen:	; $77AC
 				sta			2,x											; column strobe
 				lda			,x											; active low
 				coma														; active high
+				anda    #0x7f
 				bne			2$											; key, exit
 				leay		-1,y
 				bne			1$
@@ -4623,6 +4626,7 @@ keybd_flush:	; $869F
 1$:			stb			2,x											; column strobe
 				lda			,x											; active low
 				coma														; active high
+				anda    #0x7f
 				bne			1$											; keys pressed, loop
 				rts
 
@@ -4707,6 +4711,7 @@ blink_char_and_wait_for_key:	; $8700
 				stb			2,x											; column strobe
 				lda			,x
 				coma														; any key pressed?
+				anda    #0x7f
 				bne			blink_got_key						; yes, exit
 				dec			*timer									; timeout?
 				bne			3$											; no, loop
@@ -4719,6 +4724,7 @@ blink_char_and_wait_for_key:	; $8700
 				stb			2,x											; column strobe
 				lda			,x
 				coma														; any key pressed?
+				anda    #0x7f
 				bne			blink_got_key						; yes, exit
 				dec			*timer									; timeout?
 				bne			4$											; no, loop
@@ -5269,6 +5275,7 @@ loc_8d12:	; $8D12
 				stb			2,x											; column strobe
 				lda			,x
 				coma														; any key pressed?
+				anda    #0x7f
 				beq     5$                      ; no, skip
 				tst     *timer                  ; seen key-up?
 				bne     5$                      ; no, skip
@@ -5424,7 +5431,7 @@ end_of_rom	.equ		.
 ; *** RAM
 ; ***
 
-				.org		RAMBASE
+;				.org		RAMBASE
 				.bndry	256
 				
 eos_ladder_col:	; $C00

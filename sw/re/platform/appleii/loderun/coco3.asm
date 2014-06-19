@@ -116,14 +116,15 @@ APPLE_BPL				.equ	VIDEO_BPL-VIDEO_RM
 ; $3F00-$3FFF   $39				Zero Page
 ; $4000-$7BFF   $3A/$3B		HGR2
 ; $7C00-$7FFF		$3B				Level Data 1,2
-; $8000-        $34-$35		Program Code & Data
+; $8000-$B965   $34-$35		Program Code & ROM Data
+; $BA00-$BCFF   $35       RAM
 ;      -$BFFF   $35				6809 System Stack
 ; $C000-$EXXX   $36-$37		Tile Graphics Data
 ; $EX00-$       $37				Title Screen Data
 ;
 
-RAMBASE			.equ				0x3c00
-ZEROPAGE		.equ				0x3f00
+;RAMBASE			.equ				0x3c00
+ZEROPAGE		.equ				0x3c00
 ldu1				.equ				0x7c00
 ldu2				.equ				0x7e00
 codebase		.equ		  	0x8000
