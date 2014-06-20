@@ -11,7 +11,7 @@ This project is the culmination of an attempt that actually started in the 80's 
 
 The port itself is - essentially - a line-by-line hand translation of the 6502 assembler to 6809 assembler. For people that are familar with both processors, it's perhaps not surprising to learn that for the bulk of the code I was able to effect a 1:1 mapping of the instructions from 6502 to 6809. There was some shuffling of the 6502 X,Y registers into the 6809 B register, but for the most part the former weren't used at the same time. The 6502 zero-page area was emulated with the 6809 DP register, although the indexed indirect mode of access on the 6502 zero-page had to be emulated using the Y and B registers on the 6809. Fortunately there is sufficient head-room on the Coco to handle this extra complexity.
 
-Where the port was dramatically changed was the hardware (graphics, keyboard) accesses. The horribly broken nature of the Apple II's video mapping meant that the low-level graphics routines were replaced with simpler graphics data formats and corresponding rendering routines with little in common with the orignal routines. Anything even remotely resembling the Apple II's keyboard controller is also noticably absent on the Coco, so low-level changes had to be implemented there as well. Sound is yet to be coded so I'll defer comment to a later version of these release notes.
+Where the port was dramatically changed was the hardware (graphics, keyboard) accesses. The horribly broken nature of the Apple II's video mapping meant that the low-level graphics routines were replaced with simpler graphics data formats and corresponding rendering routines with little in common with the orignal routines. Anything even remotely resembling the Apple II's keyboard controller is also noticably absent on the Coco, so low-level changes had to be implemented there as well. Sound however was trivial - bit-bashing 1-bit sound is the same on any platform.
 
 Otherwise, I've purposefully made no attempt to optimise or otherwise improve the 6502 code for the 6809. This is, in part, because I reckoned that the port would be easier to debug if the code was a direct translation (and I maintain that it was actually the case). It was also because I wanted to preserve the 'style' and implementation of the actual code itself, as well as the game-play, as a tribute to the original. Here, I think I've also succeeded.
 
@@ -25,7 +25,8 @@ System Requirements
 -------------------
 TRS-80 Color Computer 3
 128KB RAM (or more)
-Floppy Disk or equivalent (Drive Wire, etc)
+Floppy Disk or equivalent (Drive Wire, etc) -or-
+Lode Runner Game cartridge
 
 Keys
 ----
@@ -47,6 +48,11 @@ Keys
 
 Note that using the keys marked as 'cheat' will disqualify you from the high score list.
 
+Special Keys on the title screen ONLY
+-------------------------------------
+<F1>          Toggle RGB/Composite palette
+<F2>          Toggle Green/White for monochrome
+
 Yet To Be Implemented (in roughly planned order)
 ---------------------
 * High Score load/save
@@ -56,7 +62,6 @@ Yet To Be Implemented (in roughly planned order)
 Comments/Suggestions/Bugs
 -------------------------
 * Please send any to the email address at the top of these notes.
-* I'm considering changing/adding the keys for the player. Feel free to comment.
 
 Release History
 ---------------
@@ -72,6 +77,7 @@ v0.2        Playable Demo Release (Beta 2)
             Fixed stack bug, possible cause of crash
             Added circular wipe function
             Added sound
+            Added palette change keys
 
 v0.1        Playable Demo Release (Beta 1)
             Monochrome, 5 levels only

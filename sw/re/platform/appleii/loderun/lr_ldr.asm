@@ -77,9 +77,10 @@ wait:   stb     2,x                     ; column strobe
         
 ; now patch the mono version
         ldd     param
-        cmpa    #0
+        cmpb    #0
         beq     2$    
-        stb     0xc059                  ; patch palette routine
+        lda     #0xcc
+        sta     0xde3c                  ; patch separator line pattern
 2$:     jmp     0xc000                  ; jump to Lode Runner
 
 param:  .dw     0

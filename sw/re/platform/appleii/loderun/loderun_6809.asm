@@ -160,9 +160,9 @@ start:
 				sta			,x+
 	.endif	; GFX_1BPP
 	.ifdef GFX_MONO
-				lda			#0x12										; green
+				lda			#18										  ; green
 	.else				
-				lda			#0x3f										; white
+				lda			#63                     ; white
 	.endif				
 				sta			,x+
 				sta			CPU179									; select fast CPU clock (1.79MHz)
@@ -424,12 +424,12 @@ dec_lives:	; $613F
         bcs     1$
 				lda			*attract_mode
 				lsra														; demo mode?
-				beq			end_demo								; yes, go
+				lbeq		end_demo								; yes, go
 				lda			*no_lives								; any lives left?
 				bne			next_level_cont					; yes, continue
 				jsr			check_and_update_high_score_tbl
 				jsr			game_over_animation
-				bcs			check_start_new_game
+				lbcs		check_start_new_game
 				
 title_wait_for_key: ; $618e
 				jsr			keybd_flush
@@ -438,16 +438,48 @@ title_wait_for_key: ; $618e
 				ldy			#0
 2$:			lda			*paddles_detected
 				cmpa		#0xcb										; detected?
-				beq			3$											; no, skip
-; check for joystick buttons here				
+;				beq			3$											; no, skip
 3$:			ldx			#PIA0
 				ldb			#0											; all columns
 				stb			2,x											; column strobe
 				lda			,x
 				coma														; any key pressed?
 				anda    #0x7f
-				bne			check_start_new_game		; yes, exit
-				leay		-1,y
+				beq     9$                      ; no, skip
+; magic Coco keys here
+        ldb     #~(1<<5)                ; column 5
+        stb     2,x                     ; column strobe
+        lda     ,x
+        coma                            ; active high
+        anda    #0x7f                   ; any key in col5?
+        beq     4$                      ; no, skip
+        bita    #(1<<6)                 ; <F1>?
+        beq     4$                      ; no, skip
+        ldx     #PALETTE
+        lda     1,x                     ; orange
+        eora    #(37^53)                ; toggle RGB/COMP
+        sta     1,x
+        lda     2,x
+        eora    #(45^25)                ; toggle RGB/COMP
+        sta     2,x
+        jsr     keybd_flush
+        bra     9$
+4$:     ldb     #~(1<<6)                ; column 6
+        stb     2,x                     ; column strobe
+        lda     ,x
+        coma                            ; active high
+        anda    #0x7f                   ; any key in col6?
+        beq     8$                      ; no, skip
+        bita    #(1<<6)                 ; <F2>?
+        beq     8$                      ; no, skip
+        ldx     #PALETTE
+        lda     3,x
+        eora    #(18^63)                ; toggle green/white
+        sta     3,x
+        jsr     keybd_flush
+        bra     9$
+8$:			bra     check_start_new_game
+9$:     leay		-1,y
 				bne			2$
 				ldb			*zp_de									; 6809 only
 				decb														; done?

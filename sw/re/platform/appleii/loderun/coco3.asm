@@ -53,7 +53,7 @@ HGR2_MSB		.equ		0x40
 .define       CARTRIDGE
 ;.define			GFX_1BPP
 ;.define			GFX_MONO
-;.define       GFX_RGB
+.define       GFX_RGB
 
 .ifndef GFX_1BPP
 	.define		GFX_2BPP
