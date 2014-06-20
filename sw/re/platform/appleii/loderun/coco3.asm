@@ -37,12 +37,12 @@ HGR1_MSB		.equ		0x00
 HGR2_MSB		.equ		0x40
 
 						.macro HGR1
-						lda			#0xDF								; screen at page $38
+						lda			#(VIDEOPAGE<<2)-1     ; screen at page $38
 						sta			VOFFMSB
 						.endm
 
 						.macro HGR2
-						lda			#0xE7								; screen at page $40
+						lda			#((VIDEOPAGE+2)<<2)-1 ; screen at page $40
 						sta			VOFFMSB
 						.endm
 
@@ -50,14 +50,20 @@ HGR2_MSB		.equ		0x40
 ; *** LODE RUNNER SPECIFIC CONFIGURATION HERE
 ;
 
+.define       CARTRIDGE
 ;.define			GFX_1BPP
 ;.define			GFX_MONO
+;.define       GFX_RGB
 
 .ifndef GFX_1BPP
 	.define		GFX_2BPP
 .endif
 .ifndef GFX_MONO
 	.define		GFX_COLOUR
+.endif
+
+.ifndef GFX_RGB
+  .define   GFX_COMPOSITE
 .endif
 
 ; *** These macros are only used for the experimental mode
@@ -112,36 +118,32 @@ APPLE_BPL				.equ	VIDEO_BPL-VIDEO_RM
 ;
 ; Memory Map		Page
 ; ------------  ----
-; $0000-$3BFF   $38/$39		HGR1
-; $3F00-$3FFF   $39				Zero Page
-; $4000-$7BFF   $3A/$3B		HGR2
-; $7C00-$7FFF		$3B				Level Data 1,2
-; $8000-$B965   $34-$35		Program Code & ROM Data
-; $BA00-$BCFF   $35       RAM
-;      -$BFFF   $35				6809 System Stack
-; $C000-$EXXX   $36-$37		Tile Graphics Data
-; $EX00-$       $37				Title Screen Data
+; $0000-$3BFF   $30-$31		HGR1
+; $3F00-$3FFF   $31				Zero Page
+; $4000-$7BFF   $32-$33		HGR2
+; $7C00-$7FFF		$33				Level Data 1,2
+; $8000-$BXXX   $34-$35		Tile Graphics Data
+; $BX00-$       $35				Title Screen Data
+; $C000-$F965   $36-$37		Program Code & ROM Data
+; $FA00-$FCFF   $37       RAM
+;      -$FE00   $37				6809 System Stack
 ;
 
 ;RAMBASE			.equ				0x3c00
 ZEROPAGE		.equ				0x3c00
 ldu1				.equ				0x7c00
 ldu2				.equ				0x7e00
-codebase		.equ		  	0x8000
-stack				.equ		  	0xC000
-
-.define	TILES_EXTERNAL
-.ifdef TILES_EXTERNAL
-  tile_data	  .equ	  	0xC000
-.endif
+tile_data	  .equ	  	  0x8000
+codebase		.equ		  	0xc000
+stack				.equ		  	0xfe00
 
 .define	HAS_TITLE
 .define	TITLE_EXTERNAL
 .ifdef TITLE_EXTERNAL
 	.ifdef GFX_1BPP
-  	title_data	.equ	  0xE3C0
+  	title_data	.equ	  0xa3c0
  .else
-  	title_data	.equ	  0xE000
+  	title_data	.equ	  0xa000
  .endif
 .endif
 
@@ -159,7 +161,8 @@ stack				.equ		  	0xC000
 .endif
   
 ; MMU page mappings
-CODEPAGE		.equ				0x34
-GFXPAGE			.equ				0x36
+VIDEOPAGE   .equ        0x38
+GFXPAGE			.equ				0x34
+CODEPAGE		.equ				0x36
 
 ;.define			LEVELS_EXTERNAL

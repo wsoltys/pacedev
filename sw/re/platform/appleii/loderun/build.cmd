@@ -31,6 +31,7 @@ aslink -t loderun_6809.rel
 del loderun_6809.dsk
 @REM copy loderun_6809.bin lr.bin
 reloc loderun_6809.bin lr.bin
+copy lr_gfx.bin gfxc4bpp.bin
 file2dsk loderun_6809.dsk lrm4bpp.bin lr.bin gfxm4bpp.bin gfxc4bpp.bin lr_ldr.bin lr.bas
 @REM file2dsk loderun_6809.dsk lr.bin tiles.bin title_rle.bin lr.bas readme.txt
 @goto end

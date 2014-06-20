@@ -69,16 +69,18 @@ wait:   stb     2,x                     ; column strobe
 
         lda     #0x34                   ; code bank
         ldx     #MMUTSK1+4              ; $8000
-        sta     ,x+                     ; switch in code banks
+        ldb     #4
+1$:     sta     ,x+                     ; switch in code,data banks
         inca
-        sta     ,x+
+        decb
+        bne     1$
         
 ; now patch the mono version
         ldd     param
         cmpa    #0
-        beq     1$    
-        stb     0x8059                  ; patch palette routine
-1$:     jmp     0x8000                  ; jump to Lode Runner
+        beq     2$    
+        stb     0xc059                  ; patch palette routine
+2$:     jmp     0xc000                  ; jump to Lode Runner
 
 param:  .dw     0
 

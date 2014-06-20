@@ -13,7 +13,7 @@
         .org    MMUTSK1+2
         .db     GFXPAGE, GFXPAGE+1
 
-        .org    tile_data & 0x7FFF
+        .org    tile_data-0x4000
         
 .ifdef GFX_1BPP
   .include "tile_data_m1bpp.asm"
@@ -25,7 +25,7 @@
   .endif
 .endif       
         
-        .org    title_data & 0x7FFF
+        .org    title_data-0x4000
 
 .ifdef GFX_1BPP
   .include "title_data_m1bpp.asm"
@@ -45,4 +45,4 @@
 				  
         ; $4000,$6000
         .org    MMUTSK1+2
-        .db     0x3A, 0x3B
+        .db     VIDEOPAGE+2, VIDEOPAGE+3

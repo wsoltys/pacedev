@@ -76,7 +76,7 @@ int main (int argc, char *argv[])
   uint16_t  org = 0;
   uint16_t  rel = 0;
   
-  int16_t   offset = 0x4000-0x8000;
+  int16_t   offset = 0x4000-0xc000;
 
   // write pre-amble to load bank register
   amble[1] = 0;
@@ -84,7 +84,7 @@ int main (int argc, char *argv[])
   amble[3] = 0xFF;
   amble[4] = 0xA2;             			  // MMU bank register for $4000
   fwrite (amble, sizeof(uint8_t), 5, fp2);
-  uint8_t bank[2] = { 0x34, 0x35 };		// page $34/35
+  uint8_t bank[2] = { 0x36, 0x37 };		// pages
   fwrite (bank, sizeof(uint8_t), 2, fp2);
   
   while (1)

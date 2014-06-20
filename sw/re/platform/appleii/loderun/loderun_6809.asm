@@ -59,8 +59,50 @@ NUM_LEVELS				.equ	50
 
 				.org		codebase
 start:
-				lds			#stack
 				orcc		#0x50										; disable interrupts
+				
+.ifdef CARTRIDGE
+; switch in 32KB cartridge
+        lda     #0x7f
+        sta     INIT0
+; setup MMU to copy ROM
+        lda     #0x34
+        ldx     #MMUTSK1                ; $0000-
+        ldb     #4
+1$:     sta     ,x+
+        inca
+        decb
+        bne     1$                      ; map pages $34-$37
+; copy ROM into RAM        
+        ldx     #0x8000
+        ldy     #0x0000
+2$:     lda     ,x+
+        sta     ,y+
+        cmpx    #0xff00                 ; done?
+        bne     2$                      ; no, loop
+        ldy     #0x7ff0
+3$:     clr     ,y+
+        cmpy    #0x8000
+        bne     3$                      ; HGR1 rubbish
+; setup MMU mapping
+        lda     #0x34
+        ldx     #MMUTSK1+4              ; $8000-
+        ldb     #4
+4$:     sta     ,x+
+        inca
+        decb
+        bne     4$                      ; map pages $34-37
+        ldx     #MMUTSK1                ; $0000-
+        ldb     #4
+5$:     sta     ,x+
+        inca
+        decb
+        bne     5$                      ; map pages $38-$3B        
+; switch to all-RAM mode
+        sta     RAMMODE        
+.endif				
+				
+				lds			#stack
 
 .ifdef PLATFORM_COCO3
 
@@ -73,8 +115,10 @@ start:
 				sta			PIA1+3									; PIA1, CB1,2 control
 ; - initialise GIME
 				lda			IRQENR									; ACK any pending GIME interrupt
+.ifndef CARTRIDGE				
 				lda			#0x60										; enable GIME MMU,IRQ
 				sta			INIT0     							
+.endif				
 				lda			#0x00										; slow timer, task 1
 				sta			INIT1     							
 				lda			#0x00										; no VBLANK IRQ
@@ -91,7 +135,7 @@ start:
 				sta			VRES      							
 				lda			#0x00										; black
 				sta			BRDR      							
-				lda			#0xDF										; screen at page $38
+				lda			#(VIDEOPAGE<<2)-1       ; screen at page $30
 				sta			VOFFMSB
 				lda			#0xFF
 				sta			VOFFLSB   							
@@ -108,9 +152,11 @@ start:
 	.else
 				lda			#0x00										; black
 				sta			,x+
-				lda			#0x25										; orange (#0x35?)
+    .iifdef GFX_RGB         lda #37			; orange
+    .iifdef GFX_COMPOSITE   lda	#53			; orange
 				sta			,x+
-				lda			#0x2d										; blue (#0x19?)
+    .iifdef GFX_RGB         lda	#45			; blue
+    .iifdef GFX_COMPOSITE   lda	#25			; blue
 				sta			,x+
 	.endif	; GFX_1BPP
 	.ifdef GFX_MONO
@@ -120,14 +166,16 @@ start:
 	.endif				
 				sta			,x+
 				sta			CPU179									; select fast CPU clock (1.79MHz)
-				
-	.ifdef TILES_EXTERNAL
-				lda			#GFXPAGE
-				ldx			#(MMUTSK1+6)
-				sta			,x+											; page 2 @$C000-$DFFF
-				inca
-				sta			,x+											; page 3 @$E000-$FFFF
-	.endif	; TILES_EXTERNAL
+
+  ; configure video MMU
+
+        lda     #VIDEOPAGE
+        ldx     #(MMUTSK1)              ; $0000-
+        ldb     #4
+  6$:   sta     ,x+
+        inca
+        decb
+        bne     6$                      ; map pages $30-$33
 
 				clr			*sound_bits
 
@@ -5410,16 +5458,6 @@ hs_tbl:	; $1F00
 ; .include "levels.asm"
 
 				.nlist
-
-.ifndef TILES_EXTERNAL				
-	.include "tiles.asm"
-.endif
-
-.ifdef HAS_TITLE
-	.ifndef TITLE_EXTERNAL
-		.include "title.asm"
-	.endif
-.endif
 
 .include "levels.asm"
 
