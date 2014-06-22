@@ -18,8 +18,12 @@
 
 #include "vars.h"
 #include "title_data_c2bpp.cpp"
+#include "tile_data_c2bpp.cpp"
 
 ZEROPAGE	zp;
+
+// osd stuff - to be moved
+RLE_SPRITE *tile[0x68];
 
 void gcls (uint8_t page)
 {
@@ -34,19 +38,145 @@ void check_start_new_game (void)
 	fprintf (stderr, "%s()\n", __FUNCTION__);
 }
 
+uint8_t remap_character (uint8_t chr)
+{
+	uint8_t ret = chr;
+
+	// non-alpha	
+	while (chr < 0xc1 || chr > 0xdb)
+	{
+		ret = 0x7c;
+		
+		// space
+		if (chr == 0xa0)
+			break;
+		ret = 0xdb;
+		// >
+		if (chr == 0xbe)
+			break;
+		ret++;
+		// .
+		if (chr == 0xae)
+			break;
+		ret++;
+		// (
+		if (chr == 0xa8)
+			break;
+		ret++;
+		// )
+		if (chr == 0xa9)
+			break;
+		ret++;
+		// /
+		if (chr == 0xaf)
+			break;
+		ret++;
+		// -
+		if (chr == 0xad)
+			break;
+		ret++;
+		// <
+		if (chr == 0xbc)
+			break;
+		// space
+		return (0x10);			
+	}
+
+	return (ret-0x7c);	
+}
+
+void calc_colx5_scanline (uint8_t& scanline)
+{
+	static uint8_t row_to_scanline_tbl[] =
+	{
+		0, 11, 22, 33, 44, 55, 66, 77, 88, 99, 110, 121,
+		132, 143, 154, 165, 181
+	};
+
+	scanline = row_to_scanline_tbl[zp.row];
+}
+
+void display_char_pg (uint8_t page, uint8_t chr)
+{
+	uint8_t scanline;
+	
+	calc_colx5_scanline (scanline);
+	draw_rle_sprite (screen, tile[chr], zp.col*10, scanline);
+}
+
+// osd stuff - moveme
+void display_character (uint8_t chr)
+{
+	if (chr != 0x8d)		
+	{
+		chr = remap_character (chr);
+		display_char_pg (zp.display_char_page, chr);
+		zp.col++;
+	}
+	else
+	{
+		zp.row++;
+		zp.col = 0;
+	}	
+}
+
 void display_message (char *msg)
 {
 	fprintf (stderr, "%s(\"%s\")\n", __FUNCTION__, msg);
+	
+	while (*msg)
+		display_character ((1<<7)|*(msg++));
+}
+
+void display_digit (uint8_t digit)
+{
+	digit += 0x3b;
+	display_char_pg (zp.display_char_page, digit);
+	zp.col++;
 }
 
 void display_no_lives (void)
 {
 	fprintf (stderr, "%s()\n", __FUNCTION__);
+	
+	zp.col = 16;
+	zp.row = 16;
+	
+	display_digit (zp.no_lives / 100);
+	display_digit (zp.no_lives / 10);
+	display_digit (zp.no_lives % 10);
+}
+
+void display_byte (uint8_t col, uint8_t byte)
+{
+	zp.col = col;
+	zp.row = 16;
+	display_digit (byte / 100);
+	display_digit (byte / 10);
+	display_digit (byte % 10);
+}
+
+void display_level (void)
+{
+	fprintf (stderr, "%s()\n", __FUNCTION__);
+	
+	display_byte (25, zp.level);
 }
 
 void update_and_display_score (uint16_t pts)
 {
 	fprintf (stderr, "%s(%d)\n", __FUNCTION__, pts);
+	
+	zp.score += pts;
+	zp.col = 5;
+	zp.row = 16;
+	display_digit (zp.no_lives / 1000000);
+	display_digit (zp.no_lives / 100000);
+	display_digit (zp.no_lives / 10000);
+	display_digit (zp.no_lives / 1000);
+	display_digit (zp.no_lives / 100);
+	display_digit (zp.no_lives / 10);
+	display_digit (zp.no_lives % 10);
 }
 
 void cls_and_display_game_status (void)
@@ -67,8 +197,11 @@ void cls_and_display_game_status (void)
 			putpixel (screen, c*4+n, 179, byte>>((3-n)*2)&3);
 		}
 		
+	zp.row = 16;
+	zp.col = 0;
 	display_message ("SCORE        MEN    LEVEL   ");
 	display_no_lives ();
+	display_level ();
 	update_and_display_score (0);
 }
 	
@@ -207,6 +340,24 @@ void main (int argc, char *argv[])
   }
 	set_palette_range (pal, 0, 3, 1);
 
+	// setup sprites
+	BITMAP *bm = create_bitmap (10, 11);
+	for (int s=0; s<0x68; s++)
+	{
+		for (unsigned y=0; y<11; y++)
+		{
+			for (unsigned x=0; x<10; x++)
+			{
+				uint8_t data = tile_data_c2bpp[s*33+y*3+x/4];
+				data >>= (3-(x%4))*2;
+				data &= 3;
+				putpixel (bm, x, y, data);
+			}
+		}
+		tile[s] = get_rle_sprite (bm);
+	}
+	destroy_bitmap (bm);
+	
 	lode_runner ();
 
   while (!key[KEY_ESC]);	  
