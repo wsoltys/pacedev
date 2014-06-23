@@ -64,13 +64,15 @@ uint8_t ldu2[16][28];
 
 // osd stuff - to be moved
 RLE_SPRITE *tile[0x68];
+BITMAP *pg[2];
+#define HGR1 scroll_screen (0, 0)
+#define HGR2 scroll_screen (0, 192)
 
 void gcls (uint8_t page)
 {
 	fprintf (stderr, "%s(%d)\n", __FUNCTION__, page);
-	
-	if (page == 1)
-		clear_bitmap (screen);
+
+	clear_bitmap (pg[page-1]);
 }
 
 void check_start_new_game (void)
@@ -141,7 +143,9 @@ void display_char_pg (uint8_t page, uint8_t chr)
 	uint8_t scanline;
 	
 	calc_colx5_scanline (scanline);
-	draw_rle_sprite (screen, tile[chr], zp.col*10, scanline);
+	// fudge: fixme
+	rectfill (pg[page-1], zp.col*10, scanline, zp.col*10+9, scanline+10, 0);
+	draw_rle_sprite (pg[page-1], tile[chr], zp.col*10, scanline);
 }
 
 // osd stuff - moveme
@@ -232,10 +236,10 @@ void cls_and_display_game_status (void)
 	for (int c=0; c<2*35; c++)
 		for (int n=0; n<4; n++)
 		{
-			putpixel (screen, c*4+n, 176, byte>>((3-n)*2)&3);
-			putpixel (screen, c*4+n, 177, byte>>((3-n)*2)&3);
-			putpixel (screen, c*4+n, 178, byte>>((3-n)*2)&3);
-			putpixel (screen, c*4+n, 179, byte>>((3-n)*2)&3);
+			putpixel (pg[zp.display_char_page-1], c*4+n, 176, byte>>((3-n)*2)&3);
+			putpixel (pg[zp.display_char_page-1], c*4+n, 177, byte>>((3-n)*2)&3);
+			putpixel (pg[zp.display_char_page-1], c*4+n, 178, byte>>((3-n)*2)&3);
+			putpixel (pg[zp.display_char_page-1], c*4+n, 179, byte>>((3-n)*2)&3);
 		}
 		
 	zp.row = 16;
@@ -266,15 +270,41 @@ void read_level_data (void)
 void wipe_and_draw_level (void)
 {
 	fprintf (stderr, "%s()\n", __FUNCTION__);
+	
+	if (zp.wipe_next_time != 0)
+	{
+		// wiping
+		zp.drawing = 0;
+		// fixme: render circle
+		rectfill (pg[0], 0, 0, 279, 175, 0);
+	}
+	zp.wipe_next_time = 1;
+	zp.drawing = 1;
+	display_no_lives ();
+	display_level ();
+	// fixme: render circle
+	blit (pg[1], pg[0], 0, 0, 0, 0, 280, 176);
 }
 
-void draw_level (void)
+bool draw_level (void)
 {
 	fprintf (stderr, "%s()\n", __FUNCTION__);
 
   //dbg_dump_level ();
   
   wipe_and_draw_level ();
+  
+  // wipe player and enemies from background
+  for (zp.row=15; zp.row != (uint8_t)-1; zp.row--)
+  {
+  	for (zp.col=27; zp.col != (uint8_t)-1; zp.col--)
+  	{
+  		uint8_t tile = ldu1[zp.row][zp.col];
+  		if (tile == TILE_PLAYER || tile == TILE_GUARD)
+  			display_char_pg (2, TILE_SPACE);
+  	}
+  }
+  return (false);
 }
 
 void init_and_draw_level (void)
@@ -408,11 +438,57 @@ void init_read_unpack_display_level (uint8_t editor_n)
   init_and_draw_level ();
 }
 
+uint8_t blink_char_and_wait_for_key (uint8_t chr)
+{
+	fprintf (stderr, "%s()\n", __FUNCTION__);
+	
+	while (1)
+	{
+		display_char_pg (1, chr == 0 ? 0x0a : 0);
+		
+		unsigned timeout = 104;
+		while (!timeout)
+		{
+			if (keypressed ())
+				break;
+			rest (10);
+			timeout--;
+		}
+		if (timeout != 0)
+			break;
+			
+		display_char_pg (1, chr);
+
+		timeout = 104;
+		while (!timeout)
+		{
+			if (keypressed ())
+				break;
+			rest (10);
+			timeout--;
+		}
+		if (timeout != 0)
+			break;
+	}
+	
+	display_char_pg (1, chr);
+	
+	return (readkey () & 0xff);	
+}
+
 void main_game_loop (void)
 {
 	fprintf (stderr, "%s()\n", __FUNCTION__);
 	
 	init_read_unpack_display_level (1);
+	zp.key_1 = 0;
+	zp.key_2 = 0;
+	if ((zp.attract_mode >> 1) != 0)
+	{
+		zp.col = zp.current_col;
+		zp.row = zp.current_row;
+		blink_char_and_wait_for_key (TILE_PLAYER);
+	}
 }
 
 void zero_score_and_init_game (void)
@@ -429,9 +505,7 @@ void zero_score_and_init_game (void)
 	zp.attract_mode >>= 1;
 	
 	cls_and_display_game_status ();
-	// HGR1
-	
-	main_game_loop ();
+	HGR1;
 }
 
 void high_score_screen (void)
@@ -439,7 +513,7 @@ void high_score_screen (void)
 	fprintf (stderr, "%s()\n", __FUNCTION__);
 }
 
-void title_wait_for_key (void)
+bool title_wait_for_key (void)
 {
 	fprintf (stderr, "%s()\n", __FUNCTION__);
 
@@ -449,34 +523,11 @@ void title_wait_for_key (void)
 	while (timeout)
 	{
 		if (keypressed ())
-			break;
+			return (true);
 		rest (10);
 		timeout--;
 	}
-	
-	if (timeout != 0)
-	{
-		check_start_new_game ();
-	}
-	else
-	{
-		if (zp.attract_mode == 0)
-		{
-			// init attract mode
-			zp.attract_mode = 1;
-			zp.level = 1;
-			zp.byte_ac = 1;
-			zp.no_cheat = 1;
-			zp.sound_setting = zp.sound_enabled;
-			zp.sound_enabled = 0;
-			zero_score_and_init_game ();
-		}
-		else
-		{
-			if (zp.attract_mode == 1)
-				high_score_screen ();
-		}
-	}
+	return (false);
 }
 
 void display_title_screen (void)
@@ -502,7 +553,7 @@ void display_title_screen (void)
 		{
 			// put byte - fixme
 			for (int n=0; n<4; n++)
-				putpixel (screen, (2*35-zp.col)*4+n, (192-zp.row), byte>>((3-n)*2)&3);
+				putpixel (pg[zp.display_char_page-1], (2*35-zp.col)*4+n, (192-zp.row), byte>>((3-n)*2)&3);
 			if (--zp.col == 0)
 			{
 				zp.col = 2*35;
@@ -510,8 +561,25 @@ void display_title_screen (void)
 			}
 		}
 	}
-	// HGR1
-	title_wait_for_key ();
+}
+
+void read_and_display_scores (void)
+{
+}
+
+void cls_and_display_high_scores (void)
+{
+	gcls (2);
+	zp.display_char_page = 2;
+	zp.col = 0;
+	zp.row = 0;
+	display_message (	"    LODE RUNNER HIGH SCORES\r\r\r"
+										"    INITIALS LEVEL  SCORE\r"
+										"    -------- ----- --------\r");
+										
+										
+	HGR2;
+	zp.display_char_page = 1;
 }
 
 void lode_runner (void)
@@ -523,6 +591,58 @@ void lode_runner (void)
 	zp.sound_enabled = (uint8_t)-1;
 	
 	display_title_screen ();
+	HGR1;
+
+	while (1)
+	{
+		// hack
+		if (key[KEY_ESC])
+			break;
+
+		bool key = title_wait_for_key ();
+		if (key)
+		{
+			//check_start_new_game ();
+			if ((readkey () & 0xff) == 0x0D)
+			{
+				//read_and_display_scores ();
+					cls_and_display_high_scores ();
+					zp.attract_mode = 2;
+					// jmp title_wait_for_key
+					continue;
+			}
+			zp.level_0_based = 0;
+			zp.level = 1;
+			zp.no_cheat = 1;
+			zp.attract_mode = 2;
+		}
+		else
+		{
+			if (zp.attract_mode == 0)
+			{
+				// init attract mode
+				zp.attract_mode = 1;
+				zp.level = 1;
+				zp.byte_ac = 1;
+				zp.no_cheat = 1;
+				zp.sound_setting = zp.sound_enabled;
+				zp.sound_enabled = 0;
+			}
+			else
+			{
+				if (zp.attract_mode == 1)
+				{
+					//high_score_screen ();
+					cls_and_display_high_scores ();
+					zp.attract_mode = 2;
+					// jmp title_wait_for_key
+					continue;
+				}
+			}
+		}
+		zero_score_and_init_game ();
+		main_game_loop ();
+	}
 }
 
 void main (int argc, char *argv[])
@@ -531,8 +651,18 @@ void main (int argc, char *argv[])
 	install_keyboard ();
 
 	set_color_depth (8);
-	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 280, 192, 0, 0);
+	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 280, 16+2*192, 0, 0); //280, 2*192);
+	fprintf (stderr, "w=%d, h=%d, v_w=%d, v_h=%d\n",
+						SCREEN_W, SCREEN_H, VIRTUAL_W, VIRTUAL_H);
 
+	pg[0] = create_sub_bitmap (screen, 0, 0, 280, 192);
+	pg[1] = create_sub_bitmap (screen, 0, 16+192, 280, 192);
+	if (pg[0] == NULL || pg[1] == NULL)
+	{
+		fprintf (stderr, "create_sub_bitmap (screen) failed!\n");
+		exit (0);
+	}
+	
   PALETTE pal;
   uint8_t r[] = { 0x00, 255>>2,  20>>2, 255>>2 };
   uint8_t g[] = { 0x00, 106>>2, 208>>2, 255>>2 };
@@ -568,6 +698,9 @@ void main (int argc, char *argv[])
   while (!key[KEY_ESC]);	  
 	while (key[KEY_ESC]);	  
 
+	if (pg[0]) destroy_bitmap (pg[0]);
+	if (pg[1]) destroy_bitmap (pg[1]);
+	
   allegro_exit ();
 }
 
