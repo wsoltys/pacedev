@@ -19,8 +19,48 @@
 #include "vars.h"
 #include "title_data_c2bpp.cpp"
 #include "tile_data_c2bpp.cpp"
+#include "level_data.cpp"
+#include "debug.cpp"
+
+typedef enum
+{
+  TILE_SPACE = 0,
+  TILE_BRICK,
+  TILE_SOLID,
+  TILE_LADDER,
+  TILE_ROPE,
+  TILE_FALLTHRU,
+  TILE_EOS_LADDER,
+  TILE_GOLD,
+  TILE_GUARD,
+  TILE_PLAYER
+  
+} E_TILE;
 
 ZEROPAGE	zp;
+
+// RAM
+
+uint8_t eos_ladder_col[0x30];
+uint8_t eos_ladder_row[0x30];
+uint8_t guard_col[8];
+uint8_t guard_row[8];
+uint8_t guard_state[8];
+uint8_t guard_x_offset[8];
+uint8_t guard_y_offset[8];
+uint8_t guard_sprite[8];
+uint8_t guard_dir[8];
+uint8_t guard_cnt[8];
+uint8_t hole_col[0x20];
+uint8_t hole_row[0x20];
+uint8_t hole_cnt[0x20];
+
+uint8_t level_data_packed[256];
+
+uint8_t ldu1[16][28];
+uint8_t ldu2[16][28];
+
+// end of RAM
 
 // osd stuff - to be moved
 RLE_SPRITE *tile[0x68];
@@ -182,6 +222,7 @@ void update_and_display_score (uint16_t pts)
 void cls_and_display_game_status (void)
 {
 	fprintf (stderr, "%s()\n", __FUNCTION__);
+	
 	gcls (1);
 	gcls (2);
 	
@@ -204,10 +245,174 @@ void cls_and_display_game_status (void)
 	display_level ();
 	update_and_display_score (0);
 }
+
+void read_level_data (void)
+{
+	fprintf (stderr, "%s() : level_0_based = %d, level = %d, attract_mode=%d\n", 
+	          __FUNCTION__, zp.level_0_based, zp.level, zp.attract_mode);
+  
+  uint8_t *p;
+  
+  if ((zp.attract_mode >> 1) != 0)
+    p = game_level_data[zp.level_0_based];
+  else
+    p = demo_level_data[zp.level-1];
+    
+  memcpy (level_data_packed, p, 256);
+  
+  dbg_dump_level_packed ();
+}
+
+void wipe_and_draw_level (void)
+{
+	fprintf (stderr, "%s()\n", __FUNCTION__);
+}
+
+void draw_level (void)
+{
+	fprintf (stderr, "%s()\n", __FUNCTION__);
+
+  dbg_dump_level ();
+  
+  wipe_and_draw_level ();
+}
+
+void init_and_draw_level (void)
+{
+	fprintf (stderr, "%s()\n", __FUNCTION__);
+
+  for (zp.row=15; zp.row!=(uint8_t)-1; zp.row--)
+  {
+    for (zp.col=27; zp.col!=(uint8_t)-1; zp.col--)
+    {
+      uint8_t tile = ldu1[zp.row][zp.col];
+      uint8_t display = tile;
+      
+      switch (tile)
+      {
+        case TILE_EOS_LADDER :
+          if (zp.no_eos_ladder_tiles < MAX_EOS_LADDERS)
+          {
+            zp.no_eos_ladder_tiles++;
+            eos_ladder_row[zp.no_eos_ladder_tiles] = zp.row;
+            eos_ladder_col[zp.no_eos_ladder_tiles] = zp.col;
+          }
+          // update tilemap with space
+          ldu1[zp.row][zp.col] = 0;
+          ldu2[zp.row][zp.col] = 0;
+          display = TILE_SPACE;
+          break;
+          
+        case TILE_GOLD:         
+          zp.no_gold++;
+          break;
+          
+        case TILE_GUARD:
+          if (zp.no_guards < MAX_GUARDS)
+          {
+            zp.no_guards++;
+            guard_col[zp.no_guards] = zp.col;
+            guard_row[zp.no_guards] = zp.row;
+            guard_state[zp.no_guards] = 0;
+            guard_sprite[zp.no_guards] = 0;
+            guard_x_offset [zp.no_guards] = 2;
+            guard_y_offset [zp.no_guards] = 2;
+            // wipe from static tilemap
+            ldu2[zp.row][zp.col] = 0;
+          }
+          else
+          {
+            ldu1[zp.row][zp.col] = 0;
+            ldu2[zp.row][zp.col] = 0;
+            display = TILE_SPACE;
+          }
+          break;
+
+        case TILE_PLAYER:
+          if (zp.current_col == (uint8_t)-1)          
+          {
+            zp.current_col = zp.col;
+            zp.current_row = zp.row;
+            zp.x_offset_within_tile = 2;
+            zp.y_offset_within_tile = 2;
+            zp.sprite_index = 8;
+            // wipe from static tilemap
+            ldu2[zp.row][zp.col] = 0;
+          }
+          else
+          {
+            ldu1[zp.row][zp.col] = 0;
+            ldu2[zp.row][zp.col] = 0;
+            display = TILE_SPACE;
+          }
+          break;
+
+        case TILE_FALLTHRU:
+          display = TILE_BRICK;
+          break;
+                              
+        default :
+          break;
+      }
+      
+      display_char_pg (2, display);
+    }
+  }
+  // tbd: check zp.curent_col for player
+  draw_level ();
+}
+
+void init_read_unpack_display_level (uint8_t editor_n)
+{
+	fprintf (stderr, "%s()\n", __FUNCTION__);
 	
+	zp.editor_n = editor_n;
+	zp.current_col = (uint8_t)-1;
+	zp.no_eos_ladder_tiles = 0;
+	zp.no_gold = 0;
+	zp.no_guards = 0;
+	zp.curr_guard = 0;
+	zp.dig_sprite = 0;
+	zp.packed_byte_cnt = 0;
+	zp.nibble_cnt = 0;
+	zp.row = 0;
+	
+	for (unsigned h=0; h<MAX_HOLES; h++)
+	  hole_cnt[h] = 0;
+  for (unsigned g=0; g<MAX_GUARDS; g++)
+    guard_cnt[g] = 0;
+  zp.level_active = 1;
+  
+  read_level_data ();
+  for (zp.row=0; zp.row<16; zp.row++)
+  {
+    for (zp.col=0; zp.col<28; zp.col++)
+    {
+      uint8_t data = level_data_packed[zp.packed_byte_cnt];
+      if (zp.nibble_cnt % 2 == 0)
+        data &= 0x0f;
+      else
+      {
+        data >>= 4;
+        zp.packed_byte_cnt++;
+      }
+      // validate 0-9
+      if (data > 9)
+        data = 0;
+      // write to tilemap        
+      ldu1[zp.row][zp.col] = data;
+      ldu2[zp.row][zp.col] = data;
+      zp.nibble_cnt++;
+    }
+  }
+  init_and_draw_level ();
+}
+
 void main_game_loop (void)
 {
 	fprintf (stderr, "%s()\n", __FUNCTION__);
+	
+	init_read_unpack_display_level (1);
 }
 
 void zero_score_and_init_game (void)

@@ -112,3 +112,7 @@ typedef struct zeropage_t
   uint8_t   char_render_buf;
   
 } ZEROPAGE, *PZEROPAGE;
+
+#define MAX_HOLES         0x1e
+#define MAX_GUARDS        5
+#define MAX_EOS_LADDERS   0x4d
