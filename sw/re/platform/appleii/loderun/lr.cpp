@@ -260,7 +260,7 @@ void read_level_data (void)
     
   memcpy (level_data_packed, p, 256);
   
-  dbg_dump_level_packed ();
+  //dbg_dump_level_packed ();
 }
 
 void wipe_and_draw_level (void)
@@ -272,7 +272,7 @@ void draw_level (void)
 {
 	fprintf (stderr, "%s()\n", __FUNCTION__);
 
-  dbg_dump_level ();
+  //dbg_dump_level ();
   
   wipe_and_draw_level ();
 }
