@@ -25,8 +25,8 @@ BITMAP *pg[2];
 
 #include "lr_osd.h"
 
-#include "title_data_c2bpp.cpp"
-#include "tile_data_c2bpp.cpp"
+extern uint8_t title_data[];
+extern uint8_t tile_data_c2bpp[];
 
 extern void lode_runner (void);
 
@@ -84,6 +84,12 @@ int osd_readkey (void)
 int osd_key (int _key)
 {
   return (key[_key]);
+}
+
+void osd_wipe_char (uint8_t chr, uint8_t x, uint8_t y)
+{
+	// quick hack for now
+	blit (pg[1], pg[0], x, y, x, y, 10, 11);
 }
 
 void osd_display_transparent_char (uint8_t chr, uint8_t x, uint8_t y)
@@ -152,7 +158,7 @@ int main (int argc, char *argv[])
   uint8_t r[] = { 0x00, 255>>2,  20>>2, 255>>2 };
   uint8_t g[] = { 0x00, 106>>2, 208>>2, 255>>2 };
   uint8_t b[] = { 0x00,  60>>2, 254>>2, 255>>2 };
-  for (int c=0; c<sizeof(r); c++)
+  for (unsigned c=0; c<sizeof(r); c++)
   {
     pal[c].r = r[c];
     pal[c].g = g[c];
@@ -187,6 +193,8 @@ int main (int argc, char *argv[])
 	if (pg[1]) destroy_bitmap (pg[1]);
 	
   allegro_exit ();
+  
+  return (0);
 }
 
 END_OF_MAIN()

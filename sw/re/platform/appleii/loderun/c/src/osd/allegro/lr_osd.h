@@ -17,6 +17,7 @@ int osd_keypressed (void);
 void osd_delay (unsigned ms);
 int osd_readkey (void);
 int osd_key (int key);
+void osd_wipe_char (uint8_t chr, uint8_t x, uint8_t y);
 void osd_display_transparent_char (uint8_t chr, uint8_t x, uint8_t y);
 void osd_hgr (uint8_t page);
 #define OSD_HGR1  osd_hgr (0)

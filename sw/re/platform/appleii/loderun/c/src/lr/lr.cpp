@@ -8,8 +8,9 @@
 #include "lr_osd.h"
 
 #include "vars.h"
-#include "level_data.cpp"
-#include "debug.cpp"
+
+extern uint8_t demo_level_data[][256];
+extern uint8_t game_level_data[][256];
 
 typedef enum
 {
@@ -464,6 +465,7 @@ uint8_t blink_char_and_wait_for_key (uint8_t chr)
 
 void wipe_char (uint8_t chr, uint8_t x, uint8_t y)
 {
+	osd_wipe_char (chr, x, y);
 }
 
 void read_controls (void)
@@ -502,6 +504,19 @@ void check_for_gold (void)
 
 void update_sprite_index (uint8_t first, uint8_t last)
 {
+	++zp.sprite_index;
+	if (zp.sprite_index < first || zp.sprite_index > last)
+		zp.sprite_index = first;
+}
+
+void calc_scanline (uint8_t offset, uint8_t row, uint8_t& scanline)
+{
+	uint8_t	byte_888a[] =
+	{
+		(uint8_t)-5, (uint8_t)-3, 0, 2, 4
+	};
+	
+	scanline = row * 11 + byte_888a[offset];
 }
 
 void calc_char_and_addr (uint8_t& chr, uint8_t& x, uint8_t& y)
@@ -517,13 +532,11 @@ void calc_char_and_addr (uint8_t& chr, uint8_t& x, uint8_t& y)
 
   chr = sprite_to_char_tbl[zp.sprite_index];
   x = zp.current_col * 10 + zp.x_offset_within_tile;
-  y = zp.current_row * 11 + zp.y_offset_within_tile;
+  calc_scanline (zp.y_offset_within_tile, zp.current_row, y);
 }
 
 bool move_left (void)
 {
-	fprintf (stderr, "%s()\n", __FUNCTION__);
-
   uint8_t tile;
   uint8_t chr, x, y;
     
@@ -578,6 +591,8 @@ bool dig_right (void)
 
 void display_transparent_char (uint8_t chr, uint8_t x, uint8_t y)
 {
+	//fprintf (stderr, "%s()\n", __FUNCTION__);
+
   osd_display_transparent_char (chr, x, y);
 }
 
@@ -587,7 +602,7 @@ void handle_player (void)
   uint8_t chr, x, y;
 
   zp.enable_collision_detect = 1;
-  if (zp.dig_dir != 0)
+  if (zp.dig_dir == 0)
     goto not_digging;
   if (zp.dig_dir == (uint8_t)-1)
     goto digging_left;
@@ -595,7 +610,6 @@ void handle_player (void)
     goto digging_right;
 
 not_digging:    
-  fprintf (stderr, "not_digging:\n");
   tile = ldu2[zp.current_row][zp.current_col];
   if (tile == TILE_LADDER)
     goto cant_fall;
@@ -623,7 +637,6 @@ check_falling:
     goto handle_falling;
       
 cant_fall:
-  fprintf (stderr, "cant_fall:\n");
   goto check_falling_sound;
     
 handle_falling:
@@ -641,12 +654,10 @@ fall_check_row_below:
   ;    
 
 check_falling_sound:
-  fprintf (stderr, "check_falling_sound:\n");
   if (zp.not_falling == 0)
     ; //play_sound (0x64, 8);
     
 check_controls:
-  fprintf (stderr, "check_controls:\n");
   zp.falling_snd_freq = 0x20;
   zp.not_falling = 0x20;
   read_controls ();
@@ -735,9 +746,6 @@ void main_game_loop (void)
 
 main_game_loop:
   
-  if (osd_key (OSD_KEY_ESC))
-    return;
-  
 	init_read_unpack_display_level (1);
 	zp.key_1 = 0;
 	zp.key_2 = 0;
@@ -759,6 +767,9 @@ main_game_loop:
 
 in_level_loop:
   
+  if (osd_key (OSD_KEY_ESC))
+    return;
+  
   handle_player ();
   if (zp.level_active == 0)
     goto dec_lives;
@@ -776,6 +787,7 @@ in_level_loop:
   //handle_guards ();
   if (zp.level_active == 0)
     goto dec_lives;
+  osd_delay (50);
   goto in_level_loop;
 
 next_level:
@@ -785,7 +797,7 @@ next_level:
     zp.no_lives++;
   for (unsigned i=0; i<SCORE_LEVEL_MULT; i++)
   {
-    //update_and_display_score (SCORE_LEVEL);
+    update_and_display_score (SCORE_LEVEL);
     //play_score_sound ();
     //play_score_sound ();
     //play_score_sound ();
