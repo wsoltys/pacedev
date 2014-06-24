@@ -128,7 +128,7 @@ uint8_t remap_character (uint8_t chr)
 	return (ret-0x7c);	
 }
 
-void calc_colx5_scanline (uint8_t& scanline)
+void calc_colx5_scanline (uint8_t col, uint8_t row, uint8_t& colx5, uint8_t& scanline)
 {
 	static uint8_t row_to_scanline_tbl[] =
 	{
@@ -136,14 +136,22 @@ void calc_colx5_scanline (uint8_t& scanline)
 		132, 143, 154, 165, 181
 	};
 
-	scanline = row_to_scanline_tbl[zp.row];
+	static uint8_t col_x_5_tbl[] =
+	{
+		0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75,
+		80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135
+	};
+
+	scanline = row_to_scanline_tbl[row];
+	colx5 = col_x_5_tbl[col];
 }
 
 void display_char_pg (uint8_t page, uint8_t chr)
 {
+	uint8_t colx5;
 	uint8_t scanline;
 	
-	calc_colx5_scanline (scanline);
+	calc_colx5_scanline (0, zp.row, colx5, scanline);
 	osd_display_char_pg (page, chr, zp.col*10, scanline);
 }
 
@@ -519,6 +527,18 @@ void calc_scanline (uint8_t offset, uint8_t row, uint8_t& scanline)
 	scanline = row * 11 + byte_888a[offset];
 }
 
+void calc_x_in_2_pixel_incs (uint8_t col, uint8_t offset, uint8_t& x)
+{
+	static uint8_t byte_889d[] =
+	{
+		(uint8_t)-2, (uint8_t)-1, 0, 1, 2
+	};
+
+	uint8_t scanline;
+	calc_colx5_scanline (col, 0, x, scanline);
+	x += byte_889d[offset];
+}
+
 void calc_char_and_addr (uint8_t& chr, uint8_t& x, uint8_t& y)
 {
   static uint8_t sprite_to_char_tbl[] =
@@ -530,9 +550,12 @@ void calc_char_and_addr (uint8_t& chr, uint8_t& x, uint8_t& y)
 		0x24, 0x24
 	};
 
-  chr = sprite_to_char_tbl[zp.sprite_index];
-  x = zp.current_col * 10 + zp.x_offset_within_tile;
+	calc_x_in_2_pixel_incs (zp.current_col, zp.x_offset_within_tile, x);
+	// the 6502 original used x/2 for rendering
+	// - we'll use the actual here
+	x *= 2;
   calc_scanline (zp.y_offset_within_tile, zp.current_row, y);
+  chr = sprite_to_char_tbl[zp.sprite_index];
 }
 
 bool move_left (void)
