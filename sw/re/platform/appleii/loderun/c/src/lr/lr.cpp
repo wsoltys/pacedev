@@ -599,6 +599,40 @@ can_move_left:
 
 bool move_right (void)
 {
+  uint8_t tile;
+  uint8_t chr, x, y;
+    
+  if (zp.x_offset_within_tile < 2)
+    goto can_move_right;
+  if (zp.current_col == 27)
+    return (false);
+  tile = ldu1[zp.current_row][zp.current_col+1];
+  if (tile == TILE_SOLID || tile == TILE_BRICK || tile == TILE_FALLTHRU)
+    return (false);
+    
+can_move_right:
+  calc_char_and_addr (chr, x, y);
+  wipe_char (chr, x, y);
+  zp.dir = 1;
+  //adjust_y_offset_within_tile ();
+  if (++zp.x_offset_within_tile >= 5)
+  {
+    tile = ldu2[zp.current_row][zp.current_col];
+    if (tile == TILE_BRICK)
+      tile = TILE_SPACE;
+    ldu1[zp.current_row][zp.current_col] = tile;
+    zp.current_col++;
+    ldu1[zp.current_row][zp.current_col] = TILE_PLAYER;
+    zp.x_offset_within_tile = 0;
+  }
+  else
+    check_for_gold ();
+  tile = ldu2[zp.current_row][zp.current_col];
+  if (tile != TILE_ROPE)
+    update_sprite_index (8, 10);
+  else
+    update_sprite_index (11, 13);
+        
   return (true);
 }
 
