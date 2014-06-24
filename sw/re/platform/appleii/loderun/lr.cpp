@@ -5,20 +5,9 @@
 #include <sys/stat.h>
 #include <memory.h>
 
-#include <allegro.h>
-
-#define ALLEGRO_FULL_VERSION  ((ALLEGRO_VERSION << 4)|(ALLEGRO_SUB_VERSION))
-#if ALLEGRO_FULL_VERSION < 0x42
-  #define SS_TEXTOUT_CENTRE(s,f,str,w,h,c) \
-    textout_centre (s, f, str, w, h, c);
-#else
-  #define SS_TEXTOUT_CENTRE(s,f,str,w,h,c) \
-    textout_centre_ex(s, f, str, w, h, c, 0);
-#endif
+#include "lr_osd.h"
 
 #include "vars.h"
-#include "title_data_c2bpp.cpp"
-#include "tile_data_c2bpp.cpp"
 #include "level_data.cpp"
 #include "debug.cpp"
 
@@ -36,6 +25,23 @@ typedef enum
   TILE_PLAYER
   
 } E_TILE;
+
+#ifdef CHAMPIONSHIP
+  #define SCORE_GOLD				250
+  #define SCORE_LEVEL				100
+  #define SCORE_LEVEL_MULT	15
+  #define SCORE_TRAP				75
+  #define SCORE_KILL				75
+  //#define NUM_LEVELS			  150
+  #define NUM_LEVELS				10
+#else
+  #define SCORE_GOLD				500
+  #define SCORE_LEVEL				100
+  #define SCORE_LEVEL_MULT	20
+  #define SCORE_TRAP				100
+  #define SCORE_KILL				100
+  #define NUM_LEVELS				50
+#endif
 
 ZEROPAGE	zp;
 
@@ -62,17 +68,11 @@ uint8_t ldu2[16][28];
 
 // end of RAM
 
-// osd stuff - to be moved
-RLE_SPRITE *tile[0x68];
-BITMAP *pg[2];
-#define HGR1 scroll_screen (0, 0)
-#define HGR2 scroll_screen (0, 192)
-
 void gcls (uint8_t page)
 {
 	fprintf (stderr, "%s(%d)\n", __FUNCTION__, page);
 
-	clear_bitmap (pg[page-1]);
+  osd_gcls (page);
 }
 
 void check_start_new_game (void)
@@ -143,9 +143,7 @@ void display_char_pg (uint8_t page, uint8_t chr)
 	uint8_t scanline;
 	
 	calc_colx5_scanline (scanline);
-	// fudge: fixme
-	rectfill (pg[page-1], zp.col*10, scanline, zp.col*10+9, scanline+10, 0);
-	draw_rle_sprite (pg[page-1], tile[chr], zp.col*10, scanline);
+	osd_display_char_pg (page, chr, zp.col*10, scanline);
 }
 
 // osd stuff - moveme
@@ -229,18 +227,8 @@ void cls_and_display_game_status (void)
 	
 	gcls (1);
 	gcls (2);
-	
-	// draw separator
-	//uint8_t byte = 0xcc; // mono
-	uint8_t byte = 0xaa;
-	for (int c=0; c<2*35; c++)
-		for (int n=0; n<4; n++)
-		{
-			putpixel (pg[zp.display_char_page-1], c*4+n, 176, byte>>((3-n)*2)&3);
-			putpixel (pg[zp.display_char_page-1], c*4+n, 177, byte>>((3-n)*2)&3);
-			putpixel (pg[zp.display_char_page-1], c*4+n, 178, byte>>((3-n)*2)&3);
-			putpixel (pg[zp.display_char_page-1], c*4+n, 179, byte>>((3-n)*2)&3);
-		}
+
+  osd_draw_separator (zp.display_char_page, 0xaa, 176);
 		
 	zp.row = 16;
 	zp.col = 0;
@@ -275,15 +263,13 @@ void wipe_and_draw_level (void)
 	{
 		// wiping
 		zp.drawing = 0;
-		// fixme: render circle
-		rectfill (pg[0], 0, 0, 279, 175, 0);
+		osd_wipe_circle ();
 	}
 	zp.wipe_next_time = 1;
 	zp.drawing = 1;
 	display_no_lives ();
 	display_level ();
-	// fixme: render circle
-	blit (pg[1], pg[0], 0, 0, 0, 0, 280, 176);
+	osd_draw_circle ();
 }
 
 bool draw_level (void)
@@ -446,12 +432,12 @@ uint8_t blink_char_and_wait_for_key (uint8_t chr)
 	{
 		display_char_pg (1, chr == 0 ? 0x0a : 0);
 		
-		unsigned timeout = 104;
-		while (!timeout)
+		unsigned timeout = 32;
+		while (timeout != 0)
 		{
-			if (keypressed ())
+			if (osd_keypressed ())
 				break;
-			rest (10);
+			osd_delay (10);
 			timeout--;
 		}
 		if (timeout != 0)
@@ -459,12 +445,12 @@ uint8_t blink_char_and_wait_for_key (uint8_t chr)
 			
 		display_char_pg (1, chr);
 
-		timeout = 104;
-		while (!timeout)
+		timeout = 32;
+		while (timeout != 0)
 		{
-			if (keypressed ())
+			if (osd_keypressed ())
 				break;
-			rest (10);
+			osd_delay (10);
 			timeout--;
 		}
 		if (timeout != 0)
@@ -473,13 +459,285 @@ uint8_t blink_char_and_wait_for_key (uint8_t chr)
 	
 	display_char_pg (1, chr);
 	
-	return (readkey () & 0xff);	
+	return (osd_readkey () & 0xff);	
+}
+
+void wipe_char (uint8_t chr, uint8_t x, uint8_t y)
+{
+}
+
+void read_controls (void)
+{
+  zp.key_1 = 0;
+  
+  if (osd_key (OSD_KEY_I))
+    zp.key_1 = 'I';
+  if (osd_key (OSD_KEY_J))
+    zp.key_1 ='J';
+  if (osd_key (OSD_KEY_K))
+    zp.key_1 = 'K';
+  if (osd_key (OSD_KEY_L))
+    zp.key_1 = 'L';
+  if (osd_key (OSD_KEY_U))
+    zp.key_1 = 'U';
+  if (osd_key (OSD_KEY_O))
+    zp.key_1 = 'O';
+    
+  zp.key_2 = zp.key_1;
+}
+
+bool move_up (void)
+{
+  return (true);
+}
+
+bool move_down (void)
+{
+  return (true);
+}
+
+void check_for_gold (void)
+{
+}
+
+void update_sprite_index (uint8_t first, uint8_t last)
+{
+}
+
+void calc_char_and_addr (uint8_t& chr, uint8_t& x, uint8_t& y)
+{
+  static uint8_t sprite_to_char_tbl[] =
+  {
+    0xB, 0xC, 0xD, 0x18, 0x19, 0x1A, 0xF, 0x13, 9, 0x10, 0x11, 0x15, 0x16,
+		0x17, 0x25, 0x14, 0xE, 0x12, 0x1B, 0x1B, 0x1C, 0x1C, 0x1D, 0x1D, 0x1E,
+		0x1E, 0, 0, 0, 0, 0x26, 0x26, 0x27, 0x27, 0x1D, 0x1D, 0x1E, 0x1E, 0,
+		0, 0, 0, 0x1F, 0x1F, 0x20, 0x20, 0x21, 0x21, 0x22, 0x22, 0x23, 0x23,
+		0x24, 0x24
+	};
+
+  chr = sprite_to_char_tbl[zp.sprite_index];
+  x = zp.current_col * 10 + zp.x_offset_within_tile;
+  y = zp.current_row * 11 + zp.y_offset_within_tile;
+}
+
+bool move_left (void)
+{
+	fprintf (stderr, "%s()\n", __FUNCTION__);
+
+  uint8_t tile;
+  uint8_t chr, x, y;
+    
+  if (zp.x_offset_within_tile >= 3)
+    goto can_move_left;
+  if (zp.current_col == 0)
+    return (false);
+  tile = ldu1[zp.current_row][zp.current_col-1];
+  if (tile == TILE_SOLID || tile == TILE_BRICK || tile == TILE_FALLTHRU)
+    return (false);
+    
+can_move_left:
+  calc_char_and_addr (chr, x, y);
+  wipe_char (chr, x, y);
+  zp.dir = (uint8_t)-1;
+  //adjust_y_offset_within_tile ();
+  if (--zp.x_offset_within_tile == (uint8_t)-1)
+  {
+    tile = ldu2[zp.current_row][zp.current_col];
+    if (tile == TILE_BRICK)
+      tile = TILE_SPACE;
+    ldu1[zp.current_row][zp.current_col] = tile;
+    zp.current_col--;
+    ldu1[zp.current_row][zp.current_col] = TILE_PLAYER;
+    zp.x_offset_within_tile = 4;
+  }
+  else
+    check_for_gold ();
+  tile = ldu2[zp.current_row][zp.current_col];
+  if (tile != TILE_ROPE)
+    update_sprite_index (0, 2);
+  else
+    update_sprite_index (3, 5);
+        
+  return (true);
+}
+
+bool move_right (void)
+{
+  return (true);
+}
+
+bool dig_left (void)
+{
+  return (true);
+}
+
+bool dig_right (void)
+{
+  return (true);
+}
+
+void display_transparent_char (uint8_t chr, uint8_t x, uint8_t y)
+{
+  osd_display_transparent_char (chr, x, y);
+}
+
+void handle_player (void)
+{
+  uint8_t tile;
+  uint8_t chr, x, y;
+
+  zp.enable_collision_detect = 1;
+  if (zp.dig_dir != 0)
+    goto not_digging;
+  if (zp.dig_dir == (uint8_t)-1)
+    goto digging_left;
+  else
+    goto digging_right;
+
+not_digging:    
+  fprintf (stderr, "not_digging:\n");
+  tile = ldu2[zp.current_row][zp.current_col];
+  if (tile == TILE_LADDER)
+    goto cant_fall;
+  else 
+  if (tile != TILE_ROPE)
+    goto check_falling;
+  else
+  if (zp.y_offset_within_tile == 2)
+    goto cant_fall;
+    
+check_falling:
+  if (zp.y_offset_within_tile < 2)
+    goto handle_falling;
+  if (zp.current_row == 15)
+    goto cant_fall;
+  tile = ldu1[zp.current_row+1][zp.current_col];
+  if (tile == TILE_SPACE)
+    goto handle_falling;
+  if (tile == TILE_GUARD)
+    goto cant_fall;
+  tile = ldu2[zp.current_row+1][zp.current_col];
+  if (tile == TILE_BRICK || tile == TILE_SOLID)
+    goto cant_fall;
+  if (tile != TILE_LADDER)
+    goto handle_falling;
+      
+cant_fall:
+  fprintf (stderr, "cant_fall:\n");
+  goto check_falling_sound;
+    
+handle_falling:
+  zp.not_falling = 0;
+  calc_char_and_addr (chr, x, y);
+  wipe_char (chr, x, y);
+  zp.sprite_index = (zp.dir == (uint8_t)-1 ? 7 : 15);
+  //adjust_x_offset_within_tile ();
+  if (++zp.y_offset_within_tile >= 5)
+    goto fall_check_row_below;
+  //check_for_gold ();
+  goto draw_player_sprite;
+      
+fall_check_row_below:
+  ;    
+
+check_falling_sound:
+  fprintf (stderr, "check_falling_sound:\n");
+  if (zp.not_falling == 0)
+    ; //play_sound (0x64, 8);
+    
+check_controls:
+  fprintf (stderr, "check_controls:\n");
+  zp.falling_snd_freq = 0x20;
+  zp.not_falling = 0x20;
+  read_controls ();
+  
+check_up_key:  
+  if (zp.key_1 == 'I')
+  {
+    if (!move_up ())
+      goto check_left_key;
+    goto draw_player_sprite;
+  }
+  
+check_down_key:
+  if (zp.key_1 == 'K')
+  {
+    if (!move_down ())
+      goto check_left_key;
+    goto draw_player_sprite;
+  }
+    
+check_dig_left_key:
+  if (zp.key_1 == 'U')
+  {
+    if (!dig_left ())
+      goto check_left_key;      
+    goto draw_player_sprite;
+  }
+    
+check_dig_right_key:
+  if (zp.key_1 == 'O')
+  {
+    if (!dig_right ())
+      goto check_left_key;
+    goto draw_player_sprite;
+  }
+    
+check_left_key:
+  if (zp.key_2 == 'J')
+    if (move_left ())
+      goto draw_player_sprite;
+    
+check_right_key:
+  if (zp.key_2 == 'L')
+    if (move_right ())
+      goto draw_player_sprite;
+      
+no_keys:
+  return;
+
+digging_left:
+  ;
+digging_right:        
+  ;
+  
+draw_player_sprite:
+  calc_char_and_addr (x, y, chr);
+  display_transparent_char (x, y, chr);
+  // collision-detect stuff
 }
 
 void main_game_loop (void)
 {
 	fprintf (stderr, "%s()\n", __FUNCTION__);
-	
+
+  static uint8_t guard_params[][3] =
+  {
+		{ 0, 0, 0 },
+    { 0, 1, 1 },
+    { 1, 1, 1 },
+    { 1, 3, 1 },
+    { 1, 3, 3 },
+    { 3, 3, 3 },
+    { 3, 3, 7 },
+    { 3, 7, 7 },
+    { 7, 7, 7 },
+    { 7, 7, 0xF },
+    { 7, 0xF, 0xF },
+    { 0xF, 0xF, 0xF }
+  };
+
+  static uint8_t guard_trap_cnt_init_tbl[] =
+  {
+    0x26, 0x26, 0x2E, 0x44, 0x47, 0x49, 0x4A, 0x4B, 0x4C, 
+    0x4D, 0x4E, 0x4F, 0x50
+  };
+
+main_game_loop:
+  
+  if (osd_key (OSD_KEY_ESC))
+    return;
+  
 	init_read_unpack_display_level (1);
 	zp.key_1 = 0;
 	zp.key_2 = 0;
@@ -489,6 +747,67 @@ void main_game_loop (void)
 		zp.row = zp.current_row;
 		blink_char_and_wait_for_key (TILE_PLAYER);
 	}
+	zp.dig_dir = 0;
+	zp.sndq_length = 0;
+	// unused_97 should be zero
+	uint8_t data = (zp.unused_97 + zp.no_guards);
+	zp.byte_60 = guard_params[data][0];
+	zp.byte_61 = guard_params[data][1];
+	zp.byte_62 = guard_params[data][2];
+	// unused_97 should be zero
+	zp.guard_trap_cnt_init = guard_trap_cnt_init_tbl[zp.unused_97];
+
+in_level_loop:
+  
+  handle_player ();
+  if (zp.level_active == 0)
+    goto dec_lives;
+  //throttle_and_update_sound ();
+  if (zp.no_gold == 0)
+    ;//draw_end_of_screen_ladder ();
+  if (zp.current_row == 0)
+    if (zp.y_offset_within_tile == 2)
+      if (zp.no_gold == 0 || zp.no_gold == (uint8_t)-1)
+        goto next_level;
+  //respawn_guard_and_update_holes ();
+  if (zp.level_active == 0)
+    goto dec_lives;
+  //throttle_and_update_sound ();
+  //handle_guards ();
+  if (zp.level_active == 0)
+    goto dec_lives;
+  goto in_level_loop;
+
+next_level:
+  zp.level++;
+  zp.level_0_based++;
+  if (zp.no_lives != 255)
+    zp.no_lives++;
+  for (unsigned i=0; i<SCORE_LEVEL_MULT; i++)
+  {
+    //update_and_display_score (SCORE_LEVEL);
+    //play_score_sound ();
+    //play_score_sound ();
+    //play_score_sound ();
+  }
+  goto main_game_loop;
+              
+dec_lives:
+  zp.no_lives--;
+  display_no_lives ();
+  //queue_sound ();      
+  //throttle_and_update_sound ();
+  if ((zp.attract_mode >> 1) == 0)
+    goto end_demo;
+  if (zp.no_lives > 0)
+    goto main_game_loop;
+    
+  //check_and_update_high_score_tbl ();
+  //game_over_animation ();
+  return;
+  
+end_demo:
+  zp.sound_enabled = zp.sound_setting;
 }
 
 void zero_score_and_init_game (void)
@@ -502,10 +821,11 @@ void zero_score_and_init_game (void)
 	zp.demo_inp_cnt = 0;
 	zp.demo_inp_ptr = 0;
 	zp.no_lives = 5;
-	zp.attract_mode >>= 1;
-	
+	if (zp.attract_mode >> 1)
+	  ;
 	cls_and_display_game_status ();
-	HGR1;
+	OSD_HGR1;
+	// main_game_loop ();
 }
 
 void high_score_screen (void)
@@ -518,13 +838,13 @@ bool title_wait_for_key (void)
 	fprintf (stderr, "%s()\n", __FUNCTION__);
 
 	uint16_t  timeout = 5000/10;
-	
-	clear_keybuf ();
+
+  osd_flush_keybd ();	
 	while (timeout)
 	{
-		if (keypressed ())
+		if (osd_keypressed ())
 			return (true);
-		rest (10);
+		osd_delay (10);
 		timeout--;
 	}
 	return (false);
@@ -539,28 +859,8 @@ void display_title_screen (void)
 	zp.level_0_based = 0;
 	//zp.hires_page_msb1
 	zp.display_char_page = 1;
-	
-	// this part needs abstracting (later)
-	uint8_t *ptitle_data = title_data;
-	zp.row = 192;
-	zp.col = 2*35;
-	while (zp.row > 0)
-	{
-		uint8_t count = *(ptitle_data++);
-		uint8_t	byte = *(ptitle_data++);
-		
-		while (count--)
-		{
-			// put byte - fixme
-			for (int n=0; n<4; n++)
-				putpixel (pg[zp.display_char_page-1], (2*35-zp.col)*4+n, (192-zp.row), byte>>((3-n)*2)&3);
-			if (--zp.col == 0)
-			{
-				zp.col = 2*35;
-				zp.row--;
-			}
-		}
-	}
+
+  osd_display_title_screen (zp.display_char_page);
 }
 
 void read_and_display_scores (void)
@@ -577,8 +877,7 @@ void cls_and_display_high_scores (void)
 										"    INITIALS LEVEL  SCORE\r"
 										"    -------- ----- --------\r");
 										
-										
-	HGR2;
+	OSD_HGR2;
 	zp.display_char_page = 1;
 }
 
@@ -591,19 +890,19 @@ void lode_runner (void)
 	zp.sound_enabled = (uint8_t)-1;
 	
 	display_title_screen ();
-	HGR1;
+	OSD_HGR1;
 
 	while (1)
 	{
 		// hack
-		if (key[KEY_ESC])
+		if (osd_key (OSD_KEY_ESC))
 			break;
 
 		bool key = title_wait_for_key ();
 		if (key)
 		{
 			//check_start_new_game ();
-			if ((readkey () & 0xff) == 0x0D)
+			if ((osd_readkey () & 0xff) == 0x0D)
 			{
 				//read_and_display_scores ();
 					cls_and_display_high_scores ();
@@ -645,63 +944,3 @@ void lode_runner (void)
 	}
 }
 
-void main (int argc, char *argv[])
-{
-	allegro_init ();
-	install_keyboard ();
-
-	set_color_depth (8);
-	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 280, 16+2*192, 0, 0); //280, 2*192);
-	fprintf (stderr, "w=%d, h=%d, v_w=%d, v_h=%d\n",
-						SCREEN_W, SCREEN_H, VIRTUAL_W, VIRTUAL_H);
-
-	pg[0] = create_sub_bitmap (screen, 0, 0, 280, 192);
-	pg[1] = create_sub_bitmap (screen, 0, 16+192, 280, 192);
-	if (pg[0] == NULL || pg[1] == NULL)
-	{
-		fprintf (stderr, "create_sub_bitmap (screen) failed!\n");
-		exit (0);
-	}
-	
-  PALETTE pal;
-  uint8_t r[] = { 0x00, 255>>2,  20>>2, 255>>2 };
-  uint8_t g[] = { 0x00, 106>>2, 208>>2, 255>>2 };
-  uint8_t b[] = { 0x00,  60>>2, 254>>2, 255>>2 };
-  for (int c=0; c<sizeof(r); c++)
-  {
-    pal[c].r = r[c];
-    pal[c].g = g[c];
-    pal[c].b = b[c];
-  }
-	set_palette_range (pal, 0, 3, 1);
-
-	// setup sprites
-	BITMAP *bm = create_bitmap (10, 11);
-	for (int s=0; s<0x68; s++)
-	{
-		for (unsigned y=0; y<11; y++)
-		{
-			for (unsigned x=0; x<10; x++)
-			{
-				uint8_t data = tile_data_c2bpp[s*33+y*3+x/4];
-				data >>= (3-(x%4))*2;
-				data &= 3;
-				putpixel (bm, x, y, data);
-			}
-		}
-		tile[s] = get_rle_sprite (bm);
-	}
-	destroy_bitmap (bm);
-	
-	lode_runner ();
-
-  while (!key[KEY_ESC]);	  
-	while (key[KEY_ESC]);	  
-
-	if (pg[0]) destroy_bitmap (pg[0]);
-	if (pg[1]) destroy_bitmap (pg[1]);
-	
-  allegro_exit ();
-}
-
-END_OF_MAIN();
