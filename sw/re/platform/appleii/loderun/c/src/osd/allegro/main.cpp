@@ -102,12 +102,18 @@ void osd_display_transparent_char (uint8_t chr, uint8_t x_div_2, uint8_t y)
 	draw_rle_sprite (pg[0], tile[chr], x_div_2*2, y);
 }
 
+// global to eliminate warning when commented-out
+int ret;
+
 void osd_hgr (uint8_t page)
 {
   if (page == 0)
-    HGR1;
+    ret = HGR1;
   else
-    HGR2;
+    ret = HGR2;
+    
+	//if (ret != 0)
+	//	fprintf (stderr, "* scroll_screen(%d) failed!\n", page);    
 }
 
 void osd_flush_keybd (void)
