@@ -8,10 +8,14 @@ TARGET = lr
 PLATFORM = allegro
 MAKEFILE = makefile
 
-CFLAGS = -I src/osd/$(PLATFORM) -I src/lr -Wall -g
+ALLEGRO = /data/allegro-4.4.2-mingw-3.4.5
+#ALLEGRO_MONOLITH = -monolith
+#ALLEGRO_DEBUG = -debug
+
+CFLAGS = -I $(ALLEGRO)/include -I src/osd/$(PLATFORM) -I src/lr -Wall -g
 
 #LDFLAGS = -mwindows -lalleg
-LDFLAGS = -L /data/allegro-4.4.2-mingw-3.4.5/lib -lalleg
+LDFLAGS = -L $(ALLEGRO)/lib -lallegro-4.4.2$(ALLEGRO_MONOLITH)-mt$(ALLEGRO_DEBUG)
 
 OBJDIR = obj
 
@@ -19,14 +23,23 @@ LR_OBJS = \
 	$(OBJDIR)/lr.o	\
 	$(OBJDIR)/title_data_c2bpp.o	\
 	$(OBJDIR)/tile_data_c2bpp.o	\
-	$(OBJDIR)/level_data.o
+	$(OBJDIR)/level_data.o \
+	$(OBJDIR)/debug.o
 	
 OSD_OBJS = \
 	$(OBJDIR)/main.o
 
 OBJS = $(LR_OBJS) $(OSD_OBJS)
+
+DEPS = $(OBJS:.o=.d)
 	
-all: $(TARGET).exe
+all: $(OBJDIR) $(TARGET).exe
+.PHONY: all
+
+$(OBJDIR):
+	$(MD) -p $(OBJDIR)
+
+-include $(DEPS)
 
 $(OBJDIR)/%.o: src/lr/%.cpp $(MAKEFILE)
 	$(CPP) $(CFLAGS) $(CDEFS) -c $< -o $@

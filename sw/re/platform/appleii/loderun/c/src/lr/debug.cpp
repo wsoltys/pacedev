@@ -18,12 +18,17 @@ void dbg_dump_level_packed (void)
   }
 }
 
-void dbg_dump_level (void)
+void dbg_dump_level (int dyn_or_static)
 {
   for (unsigned r=0; r<16; r++)
   {
     for (unsigned c=0; c<28; c++)
-      fprintf (stderr, "%d ", ldu1[r][c]);
+    {
+      fprintf (stderr, "%d ", 
+                (dyn_or_static == 1
+                  ? ldu1[r][c]
+                  : ldu2[r][c]));
+    }
     fprintf (stderr, "\n");
   }
 }

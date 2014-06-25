@@ -35,8 +35,10 @@ void osd_gcls (uint8_t page)
 	clear_bitmap (pg[page-1]);
 }
 
-void osd_display_char_pg (uint8_t page, uint8_t chr, uint8_t x, uint8_t y)
+void osd_display_char_pg (uint8_t page, uint8_t chr, uint8_t x_div_2, uint8_t y)
 {
+  uint16_t  x = x_div_2 * 2;
+  
 	// fudge: fixme
 	rectfill (pg[page-1], x, y, x+9, y+10, 0);
 	draw_rle_sprite (pg[page-1], tile[chr], x, y);
@@ -86,16 +88,16 @@ int osd_key (int _key)
   return (key[_key]);
 }
 
-void osd_wipe_char (uint8_t chr, uint8_t x, uint8_t y)
+void osd_wipe_char (uint8_t chr, uint8_t x_div_2, uint8_t y)
 {
 	// quick hack for now
-	blit (pg[1], pg[0], x, y, x, y, 10, 11);
+	blit (pg[1], pg[0], x_div_2*2, y, x_div_2*2, y, 10, 11);
 }
 
-void osd_display_transparent_char (uint8_t chr, uint8_t x, uint8_t y)
+void osd_display_transparent_char (uint8_t chr, uint8_t x_div_2, uint8_t y)
 {
   // always page HGR1
-	draw_rle_sprite (pg[0], tile[chr], x, y);
+	draw_rle_sprite (pg[0], tile[chr], x_div_2*2, y);
 }
 
 void osd_hgr (uint8_t page)
@@ -114,7 +116,7 @@ void osd_flush_keybd (void)
 void osd_display_title_screen (uint8_t page)
 {
   uint8_t *ptitle_data = title_data;
-  
+
 	uint8_t row = 192;
 	uint8_t col = 2*35;
 	while (row > 0)
@@ -127,6 +129,7 @@ void osd_display_title_screen (uint8_t page)
 			// put byte - fixme
 			for (int n=0; n<4; n++)
 				putpixel (pg[page-1], (2*35-col)*4+n, (192-row), byte>>((3-n)*2)&3);
+				//pg[page-1]->line[(192-row)][(2*35-col)*4+n] = byte>>((3-n)*2)&3;
 			if (--col == 0)
 			{
 				col = 2*35;
@@ -142,7 +145,12 @@ int main (int argc, char *argv[])
 	install_keyboard ();
 
 	set_color_depth (8);
-	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 280, 16+2*192, 0, 0); //280, 2*192);
+	if (set_gfx_mode (GFX_AUTODETECT_WINDOWED, 280, 16+2*192, 0, 0) < 0)
+	//if (set_gfx_mode (GFX_AUTODETECT_WINDOWED, 320, 200, 1024, 768) < 0)
+  {
+		fprintf (stderr, "set_gfx_mode() failed!\n");
+		exit (0);
+  }
 	fprintf (stderr, "w=%d, h=%d, v_w=%d, v_h=%d\n",
 						SCREEN_W, SCREEN_H, VIRTUAL_W, VIRTUAL_H);
 

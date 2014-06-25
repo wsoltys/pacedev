@@ -6,6 +6,7 @@
 #include <memory.h>
 
 #include "lr_osd.h"
+#include "debug.h"
 
 #include "vars.h"
 
@@ -27,7 +28,7 @@ typedef enum
   
 } E_TILE;
 
-#ifdef CHAMPIONSHIP
+#ifndef CHAMPIONSHIP
   #define SCORE_GOLD				250
   #define SCORE_LEVEL				100
   #define SCORE_LEVEL_MULT	15
@@ -68,6 +69,56 @@ uint8_t ldu1[16][28];
 uint8_t ldu2[16][28];
 
 // end of RAM
+
+static void calc_char_and_addr (uint8_t& chr, uint8_t& x_div_2, uint8_t& y);
+static void check_for_gold (void);
+static void update_sprite_index (uint8_t first, uint8_t last);
+static void gcls (uint8_t page);
+//static void check_start_new_game (void);
+static uint8_t remap_character (uint8_t chr);
+static void calc_colx5_scanline (uint8_t col, uint8_t row, uint8_t& colx5, uint8_t& scanline);
+static void display_char_pg (uint8_t page, uint8_t chr);
+static void display_character (uint8_t chr);
+static void display_message (char *msg);
+static void display_digit (uint8_t digit);
+static void display_no_lives (void);
+static void display_byte (uint8_t col, uint8_t byte);
+static void display_level (void);
+static void update_and_display_score (uint16_t pts);
+static void cls_and_display_game_status (void);
+static void read_level_data (void);
+static void wipe_and_draw_level (void);
+static bool draw_level (void);
+static void init_and_draw_level (void);
+static void init_read_unpack_display_level (uint8_t editor_n);
+static uint8_t blink_char_and_wait_for_key (uint8_t chr);
+static void wipe_char (uint8_t chr, uint8_t x_div_2, uint8_t y);
+static void read_controls (void);
+static void adjust_x_offset_in_tile (void);
+static void adjust_y_offset_within_tile (void);
+static bool move_up (void);
+static bool move_down (void);
+static void check_for_gold (void);
+static void update_sprite_index (uint8_t first, uint8_t last);
+static void calc_scanline (uint8_t offset, uint8_t row, uint8_t& scanline);
+static void calc_x_in_2_pixel_incs (uint8_t col, uint8_t offset, uint8_t& x);
+static void calc_char_and_addr (uint8_t& chr, uint8_t& x_div_2, uint8_t& y);
+static bool move_left (void);
+static bool move_right (void);
+static bool dig_left (void);
+static bool dig_right (void);
+static void display_transparent_char (uint8_t chr, uint8_t x_div_2, uint8_t y);
+static void play_sound (uint8_t freq, uint8_t duration);
+static void handle_player (void);
+static void throttle_and_update_sound (void);
+static void draw_end_of_screen_ladder (void);
+static void main_game_loop (void);
+static void zero_score_and_init_game (void);
+//static void high_score_screen (void);
+static bool title_wait_for_key (void);
+static void display_title_screen (void);
+//static void read_and_display_scores (void);
+static void cls_and_display_high_scores (void);
 
 void gcls (uint8_t page)
 {
@@ -152,7 +203,7 @@ void display_char_pg (uint8_t page, uint8_t chr)
 	uint8_t scanline;
 	
 	calc_colx5_scanline (0, zp.row, colx5, scanline);
-	osd_display_char_pg (page, chr, zp.col*10, scanline);
+	osd_display_char_pg (page, chr, zp.col*5, scanline);
 }
 
 // osd stuff - moveme
@@ -203,6 +254,7 @@ void display_byte (uint8_t col, uint8_t byte)
 	zp.col = col;
 	zp.row = 16;
 	display_digit (byte / 100);
+	byte %= 100;
 	display_digit (byte / 10);
 	display_digit (byte % 10);
 }
@@ -216,18 +268,26 @@ void display_level (void)
 
 void update_and_display_score (uint16_t pts)
 {
-	fprintf (stderr, "%s(%d)\n", __FUNCTION__, pts);
+  uint32_t  score;
+  
+	//fprintf (stderr, "%s(%d)\n", __FUNCTION__, pts);
 	
 	zp.score += pts;
+	score = zp.score;
 	zp.col = 5;
 	zp.row = 16;
-	display_digit (zp.no_lives / 1000000);
-	display_digit (zp.no_lives / 100000);
-	display_digit (zp.no_lives / 10000);
-	display_digit (zp.no_lives / 1000);
-	display_digit (zp.no_lives / 100);
-	display_digit (zp.no_lives / 10);
-	display_digit (zp.no_lives % 10);
+	display_digit (score / 1000000);
+	score %= 1000000;
+	display_digit (score / 100000);
+	score %= 100000;
+	display_digit (score / 10000);
+	score %= 10000;
+	display_digit (score / 1000);
+	score %= 1000;
+	display_digit (score / 100);
+	score %= 100;
+	display_digit (score / 10);
+	display_digit (score % 10);
 }
 
 void cls_and_display_game_status (void)
@@ -471,9 +531,9 @@ uint8_t blink_char_and_wait_for_key (uint8_t chr)
 	return (osd_readkey () & 0xff);	
 }
 
-void wipe_char (uint8_t chr, uint8_t x, uint8_t y)
+void wipe_char (uint8_t chr, uint8_t x_div_2, uint8_t y)
 {
-	osd_wipe_char (chr, x, y);
+	osd_wipe_char (chr, x_div_2, y);
 }
 
 void read_controls (void)
@@ -496,18 +556,128 @@ void read_controls (void)
   zp.key_2 = zp.key_1;
 }
 
+void adjust_x_offset_in_tile (void)
+{
+  if (zp.x_offset_within_tile < 2)
+    zp.x_offset_within_tile++;
+  else if (zp.x_offset_within_tile != 2)
+    zp.x_offset_within_tile--;
+    
+  check_for_gold ();  
+}
+
+void adjust_y_offset_within_tile (void)
+{
+  if (zp.y_offset_within_tile < 2)
+    zp.y_offset_within_tile++;
+  else if (zp.y_offset_within_tile != 2)
+    zp.y_offset_within_tile--;
+    
+  check_for_gold ();  
+}
+
 bool move_up (void)
 {
+  uint8_t chr, x_div_2, y;
+  uint8_t tile;
+  
+  if (ldu2[zp.current_row][zp.current_col] == TILE_LADDER)
+    goto check_move_up;
+  if (zp.y_offset_within_tile < 3)
+    goto cant_move_up;
+  if (ldu2[zp.current_row+1][zp.current_col] == TILE_LADDER)
+    goto can_move_up;
+
+cant_move_up:
+  return (false);
+  
+check_move_up:
+  if (zp.y_offset_within_tile >= 3)
+    goto can_move_up;
+  if (zp.current_row == 0)
+    goto cant_move_up;
+  tile = ldu1[zp.current_row-1][zp.current_col];
+  if (tile == TILE_BRICK || tile == TILE_SOLID || tile == TILE_FALLTHRU)
+    goto cant_move_up;
+  
+can_move_up:
+  calc_char_and_addr (chr, x_div_2, y);
+  wipe_char (chr, x_div_2, y);
+  adjust_x_offset_in_tile ();
+  if (--zp.y_offset_within_tile == (uint8_t)-1)
+  {
+    tile = ldu2[zp.current_row][zp.current_col];
+    if (tile == TILE_BRICK)
+      tile = TILE_SPACE;
+    ldu1[zp.current_row][zp.current_col] = tile;
+    zp.current_row--;
+    ldu1[zp.current_row][zp.current_col] = TILE_PLAYER;
+    zp.y_offset_within_tile = 4;
+  }
+  else
+    check_for_gold ();
+  update_sprite_index (16, 17);        
+  
   return (true);
 }
 
 bool move_down (void)
 {
+  uint8_t chr, x_div_2, y;
+  uint8_t tile;
+
+  if (zp.y_offset_within_tile < 2)
+    goto can_move_down;
+  if (zp.current_row == 15)
+    goto cant_move_down;
+  tile = ldu1[zp.current_row+1][zp.current_col];
+  if (tile != TILE_SOLID && tile != TILE_BRICK)
+    goto can_move_down;
+
+cant_move_down:
+  return (false);
+
+can_move_down:
+  calc_char_and_addr (chr, x_div_2, y);
+  wipe_char (chr, x_div_2, y);
+  adjust_x_offset_in_tile ();
+  if (++zp.y_offset_within_tile >= 5)
+  {
+    tile = ldu2[zp.current_row][zp.current_col];
+    if (tile == TILE_BRICK)
+      tile = TILE_SPACE;
+    ldu1[zp.current_row][zp.current_col] = tile;
+    zp.current_row++;
+    ldu1[zp.current_row][zp.current_col] = TILE_PLAYER;
+    zp.y_offset_within_tile = 0;
+  }
+  else
+    check_for_gold ();
+  update_sprite_index (16, 17);        
+            
   return (true);
 }
 
 void check_for_gold (void)
 {
+  uint8_t x_div_2, scanline;
+  
+  if (zp.x_offset_within_tile != 2 ||
+      zp.y_offset_within_tile != 2)
+    return;
+  if (ldu2[zp.current_row][zp.current_col] != TILE_GOLD)
+    return;
+  zp.enable_collision_detect = 0;
+  zp.no_gold--;
+  //fprintf (stderr, "%s() : no_gold=%d\n", __FUNCTION__, zp.no_gold);
+  zp.row = zp.current_row;
+  zp.col = zp.current_col;
+  ldu2[zp.current_row][zp.current_col] = TILE_SPACE;
+  display_char_pg (2, TILE_SPACE);
+  calc_colx5_scanline (zp.col, zp.row, x_div_2, scanline);
+  wipe_char (TILE_GOLD, x_div_2, scanline);
+  update_and_display_score (SCORE_GOLD);
+  //queue_sound ();
 }
 
 void update_sprite_index (uint8_t first, uint8_t last)
@@ -539,7 +709,7 @@ void calc_x_in_2_pixel_incs (uint8_t col, uint8_t offset, uint8_t& x)
 	x += byte_889d[offset];
 }
 
-void calc_char_and_addr (uint8_t& chr, uint8_t& x, uint8_t& y)
+void calc_char_and_addr (uint8_t& chr, uint8_t& x_div_2, uint8_t& y)
 {
   static uint8_t sprite_to_char_tbl[] =
   {
@@ -550,10 +720,7 @@ void calc_char_and_addr (uint8_t& chr, uint8_t& x, uint8_t& y)
 		0x24, 0x24
 	};
 
-	calc_x_in_2_pixel_incs (zp.current_col, zp.x_offset_within_tile, x);
-	// the 6502 original used x/2 for rendering
-	// - we'll use the actual here
-	x *= 2;
+	calc_x_in_2_pixel_incs (zp.current_col, zp.x_offset_within_tile, x_div_2);
   calc_scanline (zp.y_offset_within_tile, zp.current_row, y);
   chr = sprite_to_char_tbl[zp.sprite_index];
 }
@@ -561,7 +728,7 @@ void calc_char_and_addr (uint8_t& chr, uint8_t& x, uint8_t& y)
 bool move_left (void)
 {
   uint8_t tile;
-  uint8_t chr, x, y;
+  uint8_t chr, x_div_2, y;
     
   if (zp.x_offset_within_tile >= 3)
     goto can_move_left;
@@ -572,10 +739,10 @@ bool move_left (void)
     return (false);
     
 can_move_left:
-  calc_char_and_addr (chr, x, y);
-  wipe_char (chr, x, y);
+  calc_char_and_addr (chr, x_div_2, y);
+  wipe_char (chr, x_div_2, y);
   zp.dir = (uint8_t)-1;
-  //adjust_y_offset_within_tile ();
+  adjust_y_offset_within_tile ();
   if (--zp.x_offset_within_tile == (uint8_t)-1)
   {
     tile = ldu2[zp.current_row][zp.current_col];
@@ -600,7 +767,7 @@ can_move_left:
 bool move_right (void)
 {
   uint8_t tile;
-  uint8_t chr, x, y;
+  uint8_t chr, x_div_2, y;
     
   if (zp.x_offset_within_tile < 2)
     goto can_move_right;
@@ -611,10 +778,10 @@ bool move_right (void)
     return (false);
     
 can_move_right:
-  calc_char_and_addr (chr, x, y);
-  wipe_char (chr, x, y);
+  calc_char_and_addr (chr, x_div_2, y);
+  wipe_char (chr, x_div_2, y);
   zp.dir = 1;
-  //adjust_y_offset_within_tile ();
+  adjust_y_offset_within_tile ();
   if (++zp.x_offset_within_tile >= 5)
   {
     tile = ldu2[zp.current_row][zp.current_col];
@@ -646,17 +813,21 @@ bool dig_right (void)
   return (true);
 }
 
-void display_transparent_char (uint8_t chr, uint8_t x, uint8_t y)
+void display_transparent_char (uint8_t chr, uint8_t x_div_2, uint8_t y)
 {
 	//fprintf (stderr, "%s()\n", __FUNCTION__);
 
-  osd_display_transparent_char (chr, x, y);
+  osd_display_transparent_char (chr, x_div_2, y);
+}
+
+void play_sound (uint8_t freq, uint8_t duration)
+{
 }
 
 void handle_player (void)
 {
   uint8_t tile;
-  uint8_t chr, x, y;
+  uint8_t chr, x_div_2, y;
 
   zp.enable_collision_detect = 1;
   if (zp.dig_dir == 0)
@@ -698,28 +869,35 @@ cant_fall:
     
 handle_falling:
   zp.not_falling = 0;
-  calc_char_and_addr (chr, x, y);
-  wipe_char (chr, x, y);
+  calc_char_and_addr (chr, x_div_2, y);
+  wipe_char (chr, x_div_2, y);
   zp.sprite_index = (zp.dir == (uint8_t)-1 ? 7 : 15);
-  //adjust_x_offset_within_tile ();
+  adjust_x_offset_in_tile ();
   if (++zp.y_offset_within_tile >= 5)
     goto fall_check_row_below;
-  //check_for_gold ();
+  check_for_gold ();
   goto draw_player_sprite;
       
 fall_check_row_below:
-  ;    
+  zp.y_offset_within_tile = 0;
+  tile = ldu2[zp.current_row][zp.current_col];
+  if (tile == TILE_BRICK)
+    tile = TILE_SPACE;
+  ldu1[zp.current_row][zp.current_col] = tile;
+  zp.current_row++;
+  ldu1[zp.current_row][zp.current_col] = TILE_PLAYER;
+  goto draw_player_sprite;
 
 check_falling_sound:
   if (zp.not_falling == 0)
-    ; //play_sound (0x64, 8);
+    play_sound (0x64, 8);
     
-check_controls:
+//check_controls:
   zp.falling_snd_freq = 0x20;
   zp.not_falling = 0x20;
   read_controls ();
   
-check_up_key:  
+//check_up_key:  
   if (zp.key_1 == 'I')
   {
     if (!move_up ())
@@ -727,7 +905,7 @@ check_up_key:
     goto draw_player_sprite;
   }
   
-check_down_key:
+//check_down_key:
   if (zp.key_1 == 'K')
   {
     if (!move_down ())
@@ -735,7 +913,7 @@ check_down_key:
     goto draw_player_sprite;
   }
     
-check_dig_left_key:
+//check_dig_left_key:
   if (zp.key_1 == 'U')
   {
     if (!dig_left ())
@@ -743,7 +921,7 @@ check_dig_left_key:
     goto draw_player_sprite;
   }
     
-check_dig_right_key:
+//check_dig_right_key:
   if (zp.key_1 == 'O')
   {
     if (!dig_right ())
@@ -756,12 +934,12 @@ check_left_key:
     if (move_left ())
       goto draw_player_sprite;
     
-check_right_key:
+//check_right_key:
   if (zp.key_2 == 'L')
     if (move_right ())
       goto draw_player_sprite;
       
-no_keys:
+//no_keys:
   return;
 
 digging_left:
@@ -770,9 +948,47 @@ digging_right:
   ;
   
 draw_player_sprite:
-  calc_char_and_addr (x, y, chr);
-  display_transparent_char (x, y, chr);
+  calc_char_and_addr (x_div_2, y, chr);
+  display_transparent_char (x_div_2, y, chr);
   // collision-detect stuff
+}
+
+void throttle_and_update_sound (void)
+{
+  osd_delay (16);
+}
+
+void draw_end_of_screen_ladder (void)
+{
+	fprintf (stderr, "%s()\n", __FUNCTION__);
+
+  uint8_t x_div_2, scanline;
+
+  // flag ladder OK  
+  eos_ladder_col[0] = 0;
+  for (int n=zp.no_eos_ladder_tiles; n>0; n--)
+  {
+    if (eos_ladder_col[n] == (uint8_t)-1)
+      continue;
+    zp.col = eos_ladder_col[n];
+    zp.row = eos_ladder_row[n];
+    if (ldu2[zp.row][zp.col] != TILE_SPACE)
+    {
+      // flag ladder problem
+      eos_ladder_col[0] = 1;
+      continue;
+    }    
+    ldu2[zp.row][zp.col] = TILE_LADDER;
+    if (ldu1[zp.row][zp.col] == TILE_SPACE)
+      ldu1[zp.row][zp.col] = TILE_LADDER;
+    display_char_pg (2, TILE_LADDER);
+    calc_colx5_scanline (zp.col, zp.row, x_div_2, scanline);
+    display_transparent_char (TILE_LADDER, x_div_2, scanline);
+    // flag tile drawn
+    eos_ladder_col[n] = (uint8_t)-1;
+  }
+  if (eos_ladder_col[0] == 0)
+	  zp.no_gold = (uint8_t)-1;
 }
 
 void main_game_loop (void)
@@ -816,7 +1032,7 @@ main_game_loop:
 	zp.sndq_length = 0;
 	// unused_97 should be zero
 	uint8_t data = (zp.unused_97 + zp.no_guards);
-	zp.byte_60 = guard_params[data][0];
+zp.byte_60 = guard_params[data][0];
 	zp.byte_61 = guard_params[data][1];
 	zp.byte_62 = guard_params[data][2];
 	// unused_97 should be zero
@@ -830,9 +1046,9 @@ in_level_loop:
   handle_player ();
   if (zp.level_active == 0)
     goto dec_lives;
-  //throttle_and_update_sound ();
+  throttle_and_update_sound ();
   if (zp.no_gold == 0)
-    ;//draw_end_of_screen_ladder ();
+    draw_end_of_screen_ladder ();
   if (zp.current_row == 0)
     if (zp.y_offset_within_tile == 2)
       if (zp.no_gold == 0 || zp.no_gold == (uint8_t)-1)
@@ -840,11 +1056,10 @@ in_level_loop:
   //respawn_guard_and_update_holes ();
   if (zp.level_active == 0)
     goto dec_lives;
-  //throttle_and_update_sound ();
+  throttle_and_update_sound ();
   //handle_guards ();
   if (zp.level_active == 0)
     goto dec_lives;
-  osd_delay (50);
   goto in_level_loop;
 
 next_level:
@@ -929,7 +1144,13 @@ void display_title_screen (void)
 	//zp.hires_page_msb1
 	zp.display_char_page = 1;
 
-  osd_display_title_screen (zp.display_char_page);
+  #if 0
+    osd_display_title_screen (zp.display_char_page);
+  #else
+    zp.col = 2;
+    zp.row = 8;
+    display_message ("INSERT TITLE SCREEN HERE");
+  #endif
 }
 
 void read_and_display_scores (void)
