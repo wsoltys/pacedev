@@ -96,7 +96,7 @@ typedef struct zeropage_t
   uint8_t   wipe_next_time;
   uint8_t   level;
   uint8_t   attract_mode;
-  uint16_t  demo_inp_ptr;
+  uint8_t		*demo_inp_ptr;
   uint8_t   demo_inp_key_1_2;
   uint8_t   demo_inp_cnt;
   uint8_t   byte_ac;
@@ -112,6 +112,14 @@ typedef struct zeropage_t
   uint8_t   char_render_buf;
   
 } ZEROPAGE, *PZEROPAGE;
+
+typedef struct hs_entry_t
+{
+	uint8_t		initial[3];
+	uint8_t		level;
+	uint32_t	score;
+	
+} HS_ENTRY, *PHS_ENTRY;
 
 #define MAX_HOLES         0x1e
 #define MAX_GUARDS        5
