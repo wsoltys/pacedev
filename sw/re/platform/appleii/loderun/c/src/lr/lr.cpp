@@ -219,7 +219,7 @@ void display_title_screen (void)
 	//zp.hires_page_msb1
 	zp.display_char_page = 1;
 
-  #if 0
+  #if 1
     osd_display_title_screen (zp.display_char_page);
   #else
     zp.col = 2;
@@ -1245,7 +1245,11 @@ void cls_and_display_game_status (void)
 	gcls (1);
 	gcls (2);
 
-  osd_draw_separator (zp.display_char_page, 0xaa, 176);
+	#ifdef MONO
+  	osd_draw_separator (zp.display_char_page, 0xcc, 176);
+  #else
+  	osd_draw_separator (zp.display_char_page, 0xaa, 176);
+  #endif
 		
 	zp.row = 16;
 	zp.col = 0;

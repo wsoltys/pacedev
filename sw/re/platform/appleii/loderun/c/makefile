@@ -8,12 +8,24 @@ TARGET = lr
 PLATFORM = allegro
 MAKEFILE = makefile
 
+# BUILDOPTS
 STATIC = 1
+MONO = 0
+GREEN = 1
 
 ifeq (,$(STATIC))
   STATIC = 0
 endif
 
+ifeq ($(MONO),1)
+	BUILD_OPTS = -DMONO
+else
+	BUILD_OPTS = -DCOLOUR
+endif
+ifeq ($(GREEN),1)
+	BUILD_OPTS += -DGREEN
+endif
+	
 ifeq ($(PLATFORM),allegro)
   #MINGW_VER = 3.4.5
   MINGW_VER = 4.5.2
@@ -29,7 +41,7 @@ ifeq ($(PLATFORM),allegro)
   OSD_LIBS = -lallegro-4.4.2$(ALLEGRO_MONOLITH)$(ALLEGRO_STATIC)-mt$(ALLEGRO_DEBUG)
 endif
 
-CFLAGS = -I $(OSD_INCDIR) -I src/osd/$(PLATFORM) -I src/lr -Wall -g
+CFLAGS = -I $(OSD_INCDIR) -I src/osd/$(PLATFORM) -I src/lr -Wall -g $(BUILD_OPTS)
 LDFLAGS = -L $(OSD_LIBDIR) $(OSD_LIBS)
 
 ifeq ($(STATIC),1)
@@ -40,7 +52,9 @@ OBJDIR = obj
 
 LR_OBJS = \
 	$(OBJDIR)/lr.o	\
+	$(OBJDIR)/title_data_m2bpp.o	\
 	$(OBJDIR)/title_data_c2bpp.o	\
+	$(OBJDIR)/tile_data_m2bpp.o	\
 	$(OBJDIR)/tile_data_c2bpp.o	\
 	$(OBJDIR)/level_data.o \
 	$(OBJDIR)/debug.o

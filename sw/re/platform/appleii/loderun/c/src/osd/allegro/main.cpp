@@ -27,8 +27,10 @@ BITMAP *pg[2];
 
 #include "lr_osd.h"
 
-extern uint8_t title_data[];
+extern uint8_t tile_data_m2bpp[];
 extern uint8_t tile_data_c2bpp[];
+extern uint8_t title_data_m2bpp[];
+extern uint8_t title_data_c2bpp[];
 
 extern void lode_runner (void);
 
@@ -123,8 +125,12 @@ void osd_flush_keybd (void)
 
 void osd_display_title_screen (uint8_t page)
 {
-  uint8_t *ptitle_data = title_data;
-
+	#ifdef MONO
+  	uint8_t *ptitle_data = title_data_m2bpp;
+	#else
+  	uint8_t *ptitle_data = title_data_c2bpp;
+	#endif
+	
 	uint8_t row = 192;
 	uint8_t col = 2*35;
 	while (row > 0)
@@ -179,6 +185,11 @@ int main (int argc, char *argv[])
     pal[c].r = r[c];
     pal[c].g = g[c];
     pal[c].b = b[c];
+    
+    #if defined(MONO) && defined(GREEN)
+    	if (c == 3)
+    		pal[c].r = pal[c].b = 0;
+    #endif
   }
 	set_palette_range (pal, 0, 3, 1);
 
@@ -190,7 +201,11 @@ int main (int argc, char *argv[])
 		{
 			for (unsigned x=0; x<10; x++)
 			{
-				uint8_t data = tile_data_c2bpp[s*33+y*3+x/4];
+				#ifdef MONO
+					uint8_t data = tile_data_m2bpp[s*33+y*3+x/4];
+				#else
+					uint8_t data = tile_data_c2bpp[s*33+y*3+x/4];
+				#endif
 				data >>= (3-(x%4))*2;
 				data &= 3;
 				putpixel (bm, x, y, data);
