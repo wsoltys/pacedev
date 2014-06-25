@@ -2,12 +2,14 @@
 
 //#define ALLEGRO_STATICLINK
 
-#define OSD_KEY_I     0x09
-#define OSD_KEY_J     0x0a
-#define OSD_KEY_K     0x0b
-#define OSD_KEY_L     0x0c
-#define OSD_KEY_U     0x15
-#define OSD_KEY_O     0x0f
+#define OSD_KEY_I     ('I' & 0x3f)
+#define OSD_KEY_J     ('J' & 0x3f)
+#define OSD_KEY_K     ('K' & 0x3f)
+#define OSD_KEY_L     ('L' & 0x3f)
+#define OSD_KEY_U     ('U' & 0x3f)
+#define OSD_KEY_O     ('O' & 0x3f)
+#define OSD_KEY_X     ('X' & 0x3f)
+#define OSD_KEY_Z     ('Z' & 0x3f)
 #define OSD_KEY_ESC   0x3b
 
 void osd_gcls (uint8_t page);

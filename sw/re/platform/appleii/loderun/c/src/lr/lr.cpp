@@ -84,18 +84,22 @@ static void read_level_data (void);
 static void init_and_draw_level (void);
 static bool draw_level (void);
 static void handle_player (void);
+static void draw_player_sprite (void);
 static bool move_left (void);
 static bool move_right (void);
 static bool move_up (void);
 static bool move_down (void);
 static bool dig_left (void);
+static bool digging_left (void);
 static bool dig_right (void);
+static bool digging_right (void);
 static void read_controls (void);
 static void calc_char_and_addr (uint8_t& chr, uint8_t& x_div_2, uint8_t& y);
 static void check_for_gold (void);
 static void update_sprite_index (uint8_t first, uint8_t last);
 static void adjust_x_offset_in_tile (void);
 static void adjust_y_offset_within_tile (void);
+static void add_hole_entry (uint8_t col);
 static void cls_and_display_high_scores (void);
 static void cls_and_display_game_status (void);
 static void gcls (uint8_t page);
@@ -638,13 +642,23 @@ check_left_key:
   return;
 
 digging_left:
-  ;
-digging_right:        
-  ;
+  digging_left ();
+  return;
+      
+digging_right:
+  digging_right ();
+  return;
   
 draw_player_sprite:
-  calc_char_and_addr (x_div_2, y, chr);
-  display_transparent_char (x_div_2, y, chr);
+  draw_player_sprite ();
+}
+
+void draw_player_sprite (void)
+{
+  uint8_t chr, x_div_2, y;
+  
+  calc_char_and_addr (chr, x_div_2, y);
+  display_transparent_char (chr, x_div_2, y);
   // collision-detect stuff
 }
 
@@ -810,10 +824,90 @@ can_move_down:
 
 bool dig_left (void)
 {
+  zp.dig_dir = (uint8_t)-1;
+  zp.key_1 = (uint8_t)-1;
+  zp.key_2 = (uint8_t)-1;
+  zp.dig_sprite = 0;
+
+  return (digging_left ());
+}
+
+bool digging_left (void)
+{
+  static uint8_t dig_sprite_to_char_tbl[] =
+  {
+    0x1B, 0x1B, 0x1C, 0x1C, 0x1D, 0x1D, 0x1E,
+		0x1E, 0, 0, 0, 0, 0x26, 0x26, 0x27, 0x27, 0x1D, 0x1D, 0x1E, 0x1E, 0,
+		0, 0, 0, 0x1F, 0x1F, 0x20, 0x20, 0x21, 0x21, 0x22, 0x22, 0x23, 0x23,
+		0x24, 0x24
+	};
+
+  uint8_t chr, x_div_2, y;
+  
+  if (zp.current_row == 15)
+    goto cant_dig_left;
+  if (zp.current_col == 0)
+    goto cant_dig_left;
+  if (ldu1[zp.current_row+1][zp.current_col-1] != TILE_BRICK)
+    goto cant_dig_left;
+  if (ldu1[zp.current_row][zp.current_col-1] != TILE_SPACE)
+    goto abort_dig_left;
+  calc_char_and_addr (chr, x_div_2, y);
+  wipe_char (chr, x_div_2, y);
+  adjust_x_offset_in_tile ();
+  adjust_y_offset_within_tile ();
+  // stuff for sound
+  //queue_sound ();  
+  if (zp.dig_sprite >= 6)
+    zp.sprite_index = 0;
+  else
+    zp.sprite_index = 6;
+  draw_player_sprite ();
+  if (zp.dig_sprite == 12)
+  {
+    add_hole_entry (zp.current_col-1);
+    return (false);
+  }
+  if (zp.dig_sprite != 0)
+  {
+    chr = dig_sprite_to_char_tbl[zp.dig_sprite-1];
+    calc_colx5_scanline (zp.current_col-1, zp.current_row, x_div_2, y);
+    wipe_char (chr, x_div_2, y);
+  }
+  chr = dig_sprite_to_char_tbl[zp.dig_sprite];
+  zp.col = zp.current_col-1;
+  zp.row = zp.current_row;
+  calc_colx5_scanline (zp.col, zp.row, x_div_2, y);
+  display_transparent_char (chr, x_div_2, y);
+  chr = dig_sprite_to_char_tbl[zp.dig_sprite+24];
+  zp.row++;
+  display_char_pg (1, chr);  
+  zp.dig_sprite++;
   return (true);
+  
+abort_dig_left:
+  zp.row = zp.current_row+1;
+  zp.col = zp.current_col-1;
+  display_char_pg (1, TILE_BRICK);
+  if (zp.dig_sprite != 0)
+  {
+  	chr = dig_sprite_to_char_tbl[zp.dig_sprite-1];
+  	calc_colx5_scanline (zp.current_col-1, zp.current_row, x_div_2, y);
+    wipe_char (chr, x_div_2, y);    
+  }
+
+cant_dig_left:
+//finish_dig_left:
+  zp.dig_dir = 0;
+  return (false);
 }
 
 bool dig_right (void)
+{
+  return (true);
+}
+
+bool digging_right (void)
 {
   return (true);
 }
@@ -830,9 +924,9 @@ void read_controls (void)
     zp.key_1 = 'K';
   if (osd_key (OSD_KEY_L))
     zp.key_1 = 'L';
-  if (osd_key (OSD_KEY_U))
+  if (osd_key (OSD_KEY_U) || osd_key (OSD_KEY_Z))
     zp.key_1 = 'U';
-  if (osd_key (OSD_KEY_O))
+  if (osd_key (OSD_KEY_O) || osd_key (OSD_KEY_X))
     zp.key_1 = 'O';
     
   zp.key_2 = zp.key_1;
@@ -843,10 +937,7 @@ void calc_char_and_addr (uint8_t& chr, uint8_t& x_div_2, uint8_t& y)
   static uint8_t sprite_to_char_tbl[] =
   {
     0xB, 0xC, 0xD, 0x18, 0x19, 0x1A, 0xF, 0x13, 9, 0x10, 0x11, 0x15, 0x16,
-		0x17, 0x25, 0x14, 0xE, 0x12, 0x1B, 0x1B, 0x1C, 0x1C, 0x1D, 0x1D, 0x1E,
-		0x1E, 0, 0, 0, 0, 0x26, 0x26, 0x27, 0x27, 0x1D, 0x1D, 0x1E, 0x1E, 0,
-		0, 0, 0, 0x1F, 0x1F, 0x20, 0x20, 0x21, 0x21, 0x22, 0x22, 0x23, 0x23,
-		0x24, 0x24
+		0x17, 0x25, 0x14, 0xE, 0x12
 	};
 
 	calc_x_in_2_pixel_incs (zp.current_col, zp.x_offset_within_tile, x_div_2);
@@ -900,6 +991,20 @@ void adjust_y_offset_within_tile (void)
     zp.y_offset_within_tile--;
     
   check_for_gold ();  
+}
+
+void add_hole_entry (uint8_t col)
+{
+  zp.dig_dir = 0;
+  zp.col = col;
+  zp.row = zp.current_row + 1;
+  ldu1[zp.row][zp.col] = TILE_SPACE;
+  display_char_pg (1, TILE_SPACE);
+  display_char_pg (2, TILE_SPACE);
+  zp.row--;
+  display_char_pg (1, TILE_SPACE);
+  zp.row++;
+  // extra stuff
 }
 
 void cls_and_display_high_scores (void)
