@@ -93,8 +93,6 @@ static void zero_score_and_init_game (void);
 static void main_game_loop (void);
 static bool title_wait_for_key (void);
 //static void read_and_display_scores (void);
-//static void high_score_screen (void);
-//static void check_start_new_game (void);
 static void init_read_unpack_display_level (uint8_t editor_n);
 static void read_level_data (void);
 static void init_and_draw_level (void);
@@ -149,60 +147,63 @@ void lode_runner (void)
 	zp.game_speed = 6;
 	zp.byte_64 = 0;
 	zp.sound_enabled = (uint8_t)-1;
-	
+
+display_title_screen:	
 	display_title_screen ();
 	OSD_HGR1;
+	goto title_wait_for_key;
+	
+zero_score_and_init_game:
+	zero_score_and_init_game ();
+	main_game_loop ();
 
-	while (1)
+title_wait_for_key:
+	if (title_wait_for_key ())
+		goto check_start_new_game;
+
+	if (zp.attract_mode != 0)
+		goto loc_61de;
+		
+	// init attract mode
+	zp.attract_mode = 1;
+	zp.level = 1;
+	zp.byte_ac = 1;
+	zp.no_cheat = 1;
+	zp.sound_setting = zp.sound_enabled;
+	zp.sound_enabled = 0;
+	goto zero_score_and_init_game;
+	
+//end_demo:
+	zp.sound_enabled = zp.sound_setting;
+	goto title_wait_for_key;
+	
+loc_61de:
+	if (zp.attract_mode != 1)
+		goto display_title_screen;
+		
+//high_score_screen:
+	cls_and_display_high_scores ();
+	zp.attract_mode = 2;
+	goto title_wait_for_key;
+
+check_start_new_game:
+	// hack for exit
+	if (osd_key (OSD_KEY_ESC))
+		return;
+	if ((osd_readkey () & 0xff) == 0x0D)
 	{
-		// hack
-		if (osd_key (OSD_KEY_ESC))
-			break;
-
-		bool key = title_wait_for_key ();
-		if (key)
-		{
-			//check_start_new_game ();
-			if ((osd_readkey () & 0xff) == 0x0D)
-			{
-				//read_and_display_scores ();
-					cls_and_display_high_scores ();
-					zp.attract_mode = 2;
-					// jmp title_wait_for_key
-					continue;
-			}
-			zp.level_0_based = START_LEVEL_0_BASED;
-			zp.level = zp.level_0_based + 1;
-			zp.no_cheat = 1;
-			zp.attract_mode = 2;
-		}
-		else
-		{
-			if (zp.attract_mode == 0)
-			{
-				// init attract mode
-				zp.attract_mode = 1;
-				zp.level = 1;
-				zp.byte_ac = 1;
-				zp.no_cheat = 1;
-				zp.sound_setting = zp.sound_enabled;
-				zp.sound_enabled = 0;
-			}
-			else
-			{
-				if (zp.attract_mode == 1)
-				{
-					//high_score_screen ();
-					cls_and_display_high_scores ();
-					zp.attract_mode = 2;
-					// jmp title_wait_for_key
-					continue;
-				}
-			}
-		}
-		zero_score_and_init_game ();
-		main_game_loop ();
+		//read_and_display_scores ();
+		cls_and_display_high_scores ();
+		zp.attract_mode = 2;
+		goto title_wait_for_key;
 	}
+
+//start_new_game:
+	zp.level_0_based = START_LEVEL_0_BASED;
+	zp.level = zp.level_0_based + 1;
+	zp.no_cheat = 1;
+	zp.attract_mode = 2;
+	goto zero_score_and_init_game;
 }
 
 void display_title_screen (void)
