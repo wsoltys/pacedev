@@ -5,6 +5,8 @@
 #include <sys/stat.h>
 #include <memory.h>
 
+#define ALLEGRO_STATICLINK
+
 #include <allegro.h>
 
 #define ALLEGRO_FULL_VERSION  ((ALLEGRO_VERSION << 4)|(ALLEGRO_SUB_VERSION))

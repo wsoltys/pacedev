@@ -8,18 +8,34 @@ TARGET = lr
 PLATFORM = allegro
 MAKEFILE = makefile
 
-#MINGW_VER = 3.4.5
-MINGW_VER = 4.5.2
-ALLEGRO = /allegro-4.4.2-mingw-$(MINGW_VER)
-#ALLEGRO_STATIC = -static
-#ALLEGRO_MONOLITH = -monolith
-#ALLEGRO_DEBUG = -debug
+STATIC = 1
 
-CFLAGS = -I $(ALLEGRO)/include -I src/osd/$(PLATFORM) -I src/lr -Wall -g
+ifeq (,$(STATIC))
+  STATIC = 0
+endif
 
-#LDFLAGS = -mwindows -lalleg
-LDFLAGS = -L $(ALLEGRO)/lib -lallegro-4.4.2$(ALLEGRO_MONOLITH)$(ALLEGRO_STATIC)-mt$(ALLEGRO_DEBUG)
+ifeq ($(PLATFORM),allegro)
+  #MINGW_VER = 3.4.5
+  MINGW_VER = 4.5.2
+  ifeq ($(STATIC),1)
+    ALLEGRO_STATIC = -static
+  endif
+  ALLEGRO = /allegro-4.4.2-mingw-$(MINGW_VER)
+  #ALLEGRO_MONOLITH = -monolith
+  #ALLEGRO_DEBUG = -debug
+  
+  OSD_INCDIR = $(ALLEGRO)/include
+  OSD_LIBDIR = $(ALLEGRO)/lib
+  OSD_LIBS = -lallegro-4.4.2$(ALLEGRO_MONOLITH)$(ALLEGRO_STATIC)-mt$(ALLEGRO_DEBUG)
+endif
 
+CFLAGS = -I $(OSD_INCDIR) -I src/osd/$(PLATFORM) -I src/lr -Wall -g
+LDFLAGS = -L $(OSD_LIBDIR) $(OSD_LIBS)
+
+ifeq ($(STATIC),1)
+  LDFLAGS += -lkernel32 -luser32 -lgdi32 -lcomdlg32 -lole32 -ldinput -lddraw -ldxguid -lwinmm -ldsound
+endif
+          
 OBJDIR = obj
 
 LR_OBJS = \
