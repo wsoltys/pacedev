@@ -28,6 +28,22 @@ typedef enum
   
 } E_TILE;
 
+//#define DEBUG
+//#define DEBUG_DISABLE_DEMO_EXIT
+//#define DEBUG_GUARD_COPY
+//#define DEBUG_INVINCIBLE
+//#define DEBUG_NO_BITWISE_COLLISION_DETECT
+
+#ifndef DEBUG_INVINCIBLE
+  #define KILL_PLAYER   zp.level_active >>= 1
+#else
+  #define KILL_PLAYER  
+#endif
+
+#define START_LEVEL_0_BASED 0
+
+//#define CHAMPIONSHIP
+
 #ifndef CHAMPIONSHIP
   #define SCORE_GOLD				250
   #define SCORE_LEVEL				100
@@ -99,7 +115,8 @@ static void check_for_gold (void);
 static void update_sprite_index (uint8_t first, uint8_t last);
 static void adjust_x_offset_in_tile (void);
 static void adjust_y_offset_within_tile (void);
-static void add_hole_entry (uint8_t col);
+static bool add_hole_entry (uint8_t col);
+static void respawn_guards_and_update_holes (void);
 static void cls_and_display_high_scores (void);
 static void cls_and_display_game_status (void);
 static void gcls (uint8_t page);
@@ -154,8 +171,8 @@ void lode_runner (void)
 					// jmp title_wait_for_key
 					continue;
 			}
-			zp.level_0_based = 0;
-			zp.level = 1;
+			zp.level_0_based = START_LEVEL_0_BASED;
+			zp.level = zp.level_0_based + 1;
 			zp.no_cheat = 1;
 			zp.attract_mode = 2;
 		}
@@ -287,7 +304,7 @@ in_level_loop:
     if (zp.y_offset_within_tile == 2)
       if (zp.no_gold == 0 || zp.no_gold == (uint8_t)-1)
         goto next_level;
-  //respawn_guard_and_update_holes ();
+  respawn_guards_and_update_holes ();
   if (zp.level_active == 0)
     goto dec_lives;
   throttle_and_update_sound ();
@@ -369,9 +386,9 @@ void init_read_unpack_display_level (uint8_t editor_n)
 	zp.nibble_cnt = 0;
 	zp.row = 0;
 	
-	for (unsigned h=0; h<MAX_HOLES; h++)
+	for (unsigned h=0; h<=MAX_HOLES; h++)
 	  hole_cnt[h] = 0;
-  for (unsigned g=0; g<MAX_GUARDS; g++)
+  for (unsigned g=0; g<=MAX_GUARDS; g++)
     guard_cnt[g] = 0;
   zp.level_active = 1;
   
@@ -864,10 +881,7 @@ bool digging_left (void)
     zp.sprite_index = 6;
   draw_player_sprite ();
   if (zp.dig_sprite == 12)
-  {
-    add_hole_entry (zp.current_col-1);
-    return (false);
-  }
+    return (add_hole_entry (zp.current_col-1));
   if (zp.dig_sprite != 0)
   {
     chr = dig_sprite_to_char_tbl[zp.dig_sprite-1];
@@ -904,12 +918,79 @@ cant_dig_left:
 
 bool dig_right (void)
 {
-  return (true);
+  zp.dig_dir = 1;
+  zp.key_1 = 1;
+  zp.key_2 = 1;
+  zp.dig_sprite = 12;
+
+  return (digging_right ());
 }
 
 bool digging_right (void)
 {
+  static uint8_t dig_sprite_to_char_tbl[] =
+  {
+    0x1B, 0x1B, 0x1C, 0x1C, 0x1D, 0x1D, 0x1E,
+		0x1E, 0, 0, 0, 0, 0x26, 0x26, 0x27, 0x27, 0x1D, 0x1D, 0x1E, 0x1E, 0,
+		0, 0, 0, 0x1F, 0x1F, 0x20, 0x20, 0x21, 0x21, 0x22, 0x22, 0x23, 0x23,
+		0x24, 0x24
+	};
+
+  uint8_t chr, x_div_2, y;
+  
+  if (zp.current_row == 15)
+    goto cant_dig_right;
+  if (zp.current_col == 27)
+    goto cant_dig_right;
+  if (ldu1[zp.current_row+1][zp.current_col+1] != TILE_BRICK)
+    goto cant_dig_right;
+  if (ldu1[zp.current_row][zp.current_col+1] != TILE_SPACE)
+    goto abort_dig_right;
+  calc_char_and_addr (chr, x_div_2, y);
+  wipe_char (chr, x_div_2, y);
+  adjust_x_offset_in_tile ();
+  adjust_y_offset_within_tile ();
+  // stuff for sound
+  //queue_sound ();  
+  if (zp.dig_sprite >= 18)
+    zp.sprite_index = 8;
+  else
+    zp.sprite_index = 14;
+  draw_player_sprite ();
+  if (zp.dig_sprite == 24)
+    return (add_hole_entry (zp.current_col+1));
+  if (zp.dig_sprite != 12)
+  {
+    chr = dig_sprite_to_char_tbl[zp.dig_sprite-1];
+    calc_colx5_scanline (zp.current_col+1, zp.current_row, x_div_2, y);
+    wipe_char (chr, x_div_2, y);
+  }
+  chr = dig_sprite_to_char_tbl[zp.dig_sprite];
+  zp.col = zp.current_col+1;
+  zp.row = zp.current_row;
+  calc_colx5_scanline (zp.col, zp.row, x_div_2, y);
+  display_transparent_char (chr, x_div_2, y);
+  zp.row++;
+  chr = dig_sprite_to_char_tbl[zp.dig_sprite+12];
+  display_char_pg (1, chr);  
+  zp.dig_sprite++;
   return (true);
+  
+abort_dig_right:
+  zp.row = zp.current_row+1;
+  zp.col = zp.current_col+1;
+  display_char_pg (1, TILE_BRICK);
+  if (zp.dig_sprite != 12)
+  {
+  	chr = dig_sprite_to_char_tbl[zp.dig_sprite-1];
+  	calc_colx5_scanline (zp.current_col+1, zp.current_row, x_div_2, y);
+    wipe_char (chr, x_div_2, y);    
+  }
+
+cant_dig_right:
+//finish_dig_right:
+  zp.dig_dir = 0;
+  return (false);
 }
 
 void read_controls (void)
@@ -919,7 +1000,7 @@ void read_controls (void)
   if (osd_key (OSD_KEY_I))
     zp.key_1 = 'I';
   if (osd_key (OSD_KEY_J))
-    zp.key_1 ='J';
+    zp.key_1 = 'J';
   if (osd_key (OSD_KEY_K))
     zp.key_1 = 'K';
   if (osd_key (OSD_KEY_L))
@@ -993,7 +1074,7 @@ void adjust_y_offset_within_tile (void)
   check_for_gold ();  
 }
 
-void add_hole_entry (uint8_t col)
+bool add_hole_entry (uint8_t col)
 {
   zp.dig_dir = 0;
   zp.col = col;
@@ -1004,7 +1085,67 @@ void add_hole_entry (uint8_t col)
   zp.row--;
   display_char_pg (1, TILE_SPACE);
   zp.row++;
-  // extra stuff
+  
+  for (unsigned n=0; n<MAX_HOLES; n++)
+  {
+    if (hole_cnt[n] != 0)
+      continue;
+    hole_row[n] = zp.row;
+    hole_col[n] = zp.col;
+    hole_cnt[n] = 180;
+    return (true);
+  }
+  return (false);
+}
+
+void respawn_guards_and_update_holes (void)
+{
+  uint8_t chr, x_div_2, y;
+  uint8_t tile;
+  
+  //check_and_handle_respawn ();
+  // more guard stuff
+  
+  for (int n=MAX_HOLES; n>=0; n--)
+  {
+    if (hole_cnt[n] == 0)
+      continue;
+    if (--hole_cnt[n] == 0)
+      goto restore_brick;
+    zp.col = hole_col[n];
+    zp.row = hole_row[n];
+    if (hole_cnt[n] == 20 || hole_cnt[n] == 10)
+    { 
+      chr = (hole_cnt[n] == 20 ? 0x37 : 0x38);
+      display_char_pg (2, chr);
+      calc_colx5_scanline (zp.col, zp.row, x_div_2, y);
+      wipe_char (TILE_SPACE, x_div_2, y);
+    }
+    continue;
+      
+  restore_brick:      
+    zp.row = hole_row[n];
+    zp.col = hole_col[n];
+    tile = ldu1[zp.row][zp.col];
+    if (tile == TILE_SPACE)
+      goto redisplay_brick;
+    if (tile == TILE_PLAYER)
+      KILL_PLAYER;
+    if (tile == TILE_GUARD)
+    {
+      // guard stuff here
+    }
+    if (tile == TILE_GOLD)
+    {
+      zp.no_gold--;
+      goto redisplay_brick;
+    }
+    
+  redisplay_brick:
+    ldu1[zp.row][zp.col] = TILE_BRICK;
+    display_char_pg (1, TILE_BRICK);
+    display_char_pg (2, TILE_BRICK);
+  }
 }
 
 void cls_and_display_high_scores (void)
