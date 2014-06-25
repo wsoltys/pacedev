@@ -8,14 +8,17 @@ TARGET = lr
 PLATFORM = allegro
 MAKEFILE = makefile
 
-ALLEGRO = /data/allegro-4.4.2-mingw-3.4.5
+#MINGW_VER = 3.4.5
+MINGW_VER = 4.5.2
+ALLEGRO = /allegro-4.4.2-mingw-$(MINGW_VER)
+#ALLEGRO_STATIC = -static
 #ALLEGRO_MONOLITH = -monolith
 #ALLEGRO_DEBUG = -debug
 
 CFLAGS = -I $(ALLEGRO)/include -I src/osd/$(PLATFORM) -I src/lr -Wall -g
 
 #LDFLAGS = -mwindows -lalleg
-LDFLAGS = -L $(ALLEGRO)/lib -lallegro-4.4.2$(ALLEGRO_MONOLITH)-mt$(ALLEGRO_DEBUG)
+LDFLAGS = -L $(ALLEGRO)/lib -lallegro-4.4.2$(ALLEGRO_MONOLITH)$(ALLEGRO_STATIC)-mt$(ALLEGRO_DEBUG)
 
 OBJDIR = obj
 
@@ -55,7 +58,6 @@ $(TARGET).exe: $(OBJS)
 	$(LD) $(OBJS) $(LDFLAGS) -o $@
 
 clean:
-	$(RM) -f $(CLEANFILES)
 	@echo Deleting object files...
 	$(RM) -f $(OBJDIR)/*.o
 	@echo Deleting executables...

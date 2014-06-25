@@ -79,7 +79,7 @@ static uint8_t remap_character (uint8_t chr);
 static void calc_colx5_scanline (uint8_t col, uint8_t row, uint8_t& colx5, uint8_t& scanline);
 static void display_char_pg (uint8_t page, uint8_t chr);
 static void display_character (uint8_t chr);
-static void display_message (char *msg);
+static void display_message (const char *msg);
 static void display_digit (uint8_t digit);
 static void display_no_lives (void);
 static void display_byte (uint8_t col, uint8_t byte);
@@ -222,7 +222,7 @@ void display_character (uint8_t chr)
 	}	
 }
 
-void display_message (char *msg)
+void display_message (const char *msg)
 {
 	fprintf (stderr, "%s(\"%s\")\n", __FUNCTION__, msg);
 	
