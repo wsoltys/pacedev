@@ -120,6 +120,8 @@ static void update_sprite_index (uint8_t first, uint8_t last);
 static void adjust_x_offset_in_tile (void);
 static void adjust_y_offset_within_tile (void);
 static bool add_hole_entry (uint8_t col);
+static void handle_guards (void);
+static void update_guards (void);
 static void respawn_guards_and_update_holes (void);
 static void cls_and_display_high_scores (void);
 static void cls_and_display_game_status (void);
@@ -219,7 +221,7 @@ void display_title_screen (void)
 	//zp.hires_page_msb1
 	zp.display_char_page = 1;
 
-  #if 1
+  #if 0
     osd_display_title_screen (zp.display_char_page);
   #else
     zp.col = 2;
@@ -287,9 +289,9 @@ main_game_loop:
 	zp.sndq_length = 0;
 	// unused_97 should be zero
 	uint8_t data = (zp.unused_97 + zp.no_guards);
-zp.byte_60 = guard_params[data][0];
-	zp.byte_61 = guard_params[data][1];
-	zp.byte_62 = guard_params[data][2];
+  zp.byte_60[0] = guard_params[data][0];
+	zp.byte_60[1] = guard_params[data][1];
+	zp.byte_60[2] = guard_params[data][2];
 	// unused_97 should be zero
 	zp.guard_trap_cnt_init = guard_trap_cnt_init_tbl[zp.unused_97];
 
@@ -312,7 +314,7 @@ in_level_loop:
   if (zp.level_active == 0)
     goto dec_lives;
   throttle_and_update_sound ();
-  //handle_guards ();
+  handle_guards ();
   if (zp.level_active == 0)
     goto dec_lives;
   goto in_level_loop;
@@ -1129,6 +1131,74 @@ bool add_hole_entry (uint8_t col)
     return (true);
   }
   return (false);
+}
+
+void handle_guards (void)
+{
+  if (zp.no_guards == 0)
+    return;
+  if (++zp.byte_64 >= 3)
+    zp.byte_64 = 0;
+  zp.byte_63 = zp.byte_60[zp.byte_64];
+  do
+  {
+    uint8_t byte = zp.byte_63;
+    zp.byte_63 >>= 1;
+    if ((byte & 1) == 1)
+    {
+      update_guards ();
+      if (zp.level_active == 0)
+        return;
+    }
+  } while (zp.byte_63);  
+}
+
+void update_guards (void)
+{
+  uint8_t chr, x_div_2, y;
+  uint8_t tile;
+  
+  if (++zp.curr_guard > zp.no_guards)
+    zp.curr_guard = 1;
+  copy_guard_to_curr ();
+  if (zp.curr_guard_state <= 0)
+    goto check_guard_falling;
+  if (--zp.curr_guard_state >= 13)
+    goto save_guard_and_ret;
+  goto check_wriggle;
+
+save_guard_and_ret:
+  if (guard_cnt[zp.curr_guard] != 0)
+  {
+    copy_guard_to_curr ();
+    return;
+  }
+  goto render_guard_and_ret;
+    
+check_guard_falling:
+  tile = ldu2[zp.curr_guard_row][zp.curr_guard_col];
+  if (tile == TILE_LADDER)
+    goto calc_guard_movement;
+  if (tile == TILE_ROPE)
+    if (zp.curr_guard_y_offset == 2)
+      goto calc_guard_movement;
+  if (zp.curr_guard_y_offset < 2)
+    goto handle_guard_falling;
+  if (zp.curr_guard_row == 15)
+    goto calc_guard_movement;
+  tile = ldu1[zp.curr_guard_row+1][zp.curr_guard_col];
+  if (tile == TILE_SPACE || tile == TILE_PLAYER)
+    goto handle_guard_falling;
+  if (tile == TILE_GUARD)
+    goto calc_guard_movement;
+  tile = ldu2[zp.curr_guard_row+1][zp.curr_guard_col];
+  if (tile == TILE_BRICK || tile == TILE_SOLID || tile == TILE_LADDER)
+    goto calc_guard_movement;
+    
+handle_guard_falling:
+  calc_guard_xychar (chr, x_div_2, y);
+  wipe_char (chr, x_div_2, y);
+  adjust_guard_x_offset ();
 }
 
 void respawn_guards_and_update_holes (void)
