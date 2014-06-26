@@ -13,10 +13,10 @@ x_offset_within_tile			.equ		0x02
 y_offset_within_tile			.equ		0x03
 sprite_index							.equ		0x04
 dir												.equ		0x05
-lsb_row_level_data_addr		.equ		0x07		; swapped for 6809
-msb_row_level_data_addr		.equ		0x06		; swapped for 6809
-byte_8										.equ		0x09		; swapped for 6809
-byte_9										.equ		0x08		; swapped for 6809
+lsb_row_lda_dyn						.equ		0x07		; swapped for 6809
+msb_row_lda_dyn						.equ		0x06		; swapped for 6809
+lsb_row_lda_static				.equ		0x09		; swapped for 6809
+msb_row_lda_static				.equ		0x08		; swapped for 6809
 word_a										.equ		0x0a
 lsb_line_addr_pg1					.equ		0x0d		; swapped for 6809
 msb_line_addr_pg1					.equ		0x0c		; swapped for 6809
@@ -74,7 +74,7 @@ circle_mask								.equ		0x84	; 6809 only
 col												.equ		0x85
 row												.equ		0x86
 display_char_page					.equ		0x87
-byte_88										.equ		0x88
+curr_hole									.equ		0x88
 hundreds									.equ		0x89
 tens											.equ		0x8a
 units											.equ		0x8b
@@ -110,7 +110,7 @@ lsb_demo_inp_ptr					.equ		0xa9		; swapped for 6809
 msb_demo_inp_ptr					.equ		0xa8		; swapped for 6809
 demo_inp_key_1_2					.equ		0xaa
 demo_inp_cnt							.equ		0xab
-byte_ac										.equ		0xac
+demo_not_interrupted			.equ		0xac
 game_over_loop_cnt				.equ		0xd6		; 6809 only
 no_eos_ladder_entries			.equ		0xd7		; 6809 only
 initial_cnt								.equ		0xd8		; 6809 only

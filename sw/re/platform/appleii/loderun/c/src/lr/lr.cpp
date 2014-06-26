@@ -122,6 +122,11 @@ static void adjust_y_offset_within_tile (void);
 static bool add_hole_entry (uint8_t col);
 static void handle_guards (void);
 static void update_guards (void);
+static void calc_guard_xychar (uint8_t chr, uint8_t x_div_2, uint8_t y);
+static void adjust_guard_x_offset (void);
+static void adjust_guard_y_offset (void);
+static void copy_curr_to_guard (void);
+static void copy_guard_to_curr (void);
 static void respawn_guards_and_update_holes (void);
 static void cls_and_display_high_scores (void);
 static void cls_and_display_game_status (void);
@@ -1199,6 +1204,50 @@ handle_guard_falling:
   calc_guard_xychar (chr, x_div_2, y);
   wipe_char (chr, x_div_2, y);
   adjust_guard_x_offset ();
+  if (zp.curr_guard_dir == (uint8_t)-1)
+  	zp.curr_guard_sprite = 6;
+ 	else
+  	zp.curr_guard_sprite = 13;
+ 	if (++zp.curr_guard_y_offset >= 5)
+ 		goto guard_fall_into_next_row;
+ 	if (zp.curr_guard_y_offset != 2)
+ 		goto render_guard_and_ret;
+ 	check_guard_pickup_gold ();
+ 	
+}
+
+void calc_guard_xychar (uint8_t chr, uint8_t x_div_2, uint8_t y)
+{
+}
+
+void adjust_guard_x_offset (void)
+{
+}
+
+void adjust_guard_y_offset (void)
+{
+}
+
+void copy_curr_to_guard (void)
+{
+	guard_col[zp.curr_guard] = zp.curr_guard_col;
+	guard_row[zp.curr_guard] = zp.curr_guard_row;
+	guard_x_offset[zp.curr_guard] = zp.curr_guard_x_offset;
+	guard_y_offset[zp.curr_guard] = zp.curr_guard_y_offset;
+	guard_state[zp.curr_guard] = zp.curr_guard_state;
+	guard_dir[zp.curr_guard] = zp.curr_guard_dir;
+	guard_sprite[zp.curr_guard] = zp.curr_guard_sprite;
+}
+
+void copy_guard_to_curr (void)
+{
+	zp.curr_guard_col = guard_col[zp.curr_guard];
+	zp.curr_guard_row = guard_row[zp.curr_guard];
+	zp.curr_guard_x_offset = guard_x_offset[zp.curr_guard];
+	zp.curr_guard_y_offset = guard_y_offset[zp.curr_guard];
+	zp.curr_guard_sprite = guard_sprite[zp.curr_guard];
+	zp.curr_guard_dir = guard_dir[zp.curr_guard];
+	zp.curr_guard_state = guard_state[zp.curr_guard];
 }
 
 void respawn_guards_and_update_holes (void)

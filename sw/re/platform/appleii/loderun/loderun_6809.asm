@@ -489,7 +489,7 @@ title_wait_for_key: ; $618e
 				ldb			#1
 				stb			*attract_mode						; set attract mode
 				stb			*level
-				stb			*byte_ac
+				stb			*demo_not_interrupted
 				stb			*no_cheat
 				ldb			*sound_enabled					; get sound setting
 				stb			*sound_setting					; store - 6809 only
@@ -500,8 +500,8 @@ end_demo:	; $61D0
 				lda			*sound_setting					; restore sound setting
 				sta			*sound_enabled
 ; reads $C000 (keybd) but not used!?!				
-				ldb			*byte_ac
-				beq			check_start_new_game
+				ldb			*demo_not_interrupted		; interrupted?
+				beq			check_start_new_game		; yes, go
 				jmp			title_wait_for_key
 				
 loc_61de:	; $61DE
@@ -584,16 +584,16 @@ init_read_unpack_display_level:	; $6238
 				sta			*level_active
 				jsr			read_level_data
 				ldb			*row
-5$:			ldy			#lsb_row_addr						; table for row LSB entries
+5$:			ldy			#lsb_row_a_tbl					; table for row LSB entries
 				lda			b,y											; get entry for row
-				sta			*lsb_row_level_data_addr
-				sta			*byte_8
-				ldy			#msb_row_addr_1					; table for MSB entries
+				sta			*lsb_row_lda_dyn
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_dyn_tbl			; table for MSB entries
 				lda			b,y											; get entry for row
-				sta			*msb_row_level_data_addr
-				ldy			#msb_row_addr_2					; table for MSB entries (#2)
+				sta			*msb_row_lda_dyn
+				ldy			#msb_row_a_static_tbl		; table for MSB entries (#2)
 				lda			b,y											; get entry for row
-				sta			*byte_9
+				sta			*msb_row_lda_static
 				ldx			#level_data_packed			; was in disk buffer
 				ldb			*packed_byte_cnt
 				abx															; ptr packed byte
@@ -623,9 +623,9 @@ init_read_unpack_display_level:	; $6238
 				cmpa		#10											; data byte 0-9?
 				bcs			3$											; yes, valid (skip)
 				lda			#0											; invalid, ignore
-3$:			ldy			*msb_row_level_data_addr
+3$:			ldy			*msb_row_lda_dyn
 				sta			b,y											; destination (unpacked) byte
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				sta			b,y											; destination (unpacked) byte 2
 				inc			*col
 				ldb			*col
@@ -695,19 +695,19 @@ copy_level_data:
 init_and_draw_level: ; $63B3
 				ldb			#15											; last row
 				stb			*row
-1$:			ldy			#lsb_row_addr
+1$:			ldy			#lsb_row_a_tbl
 				lda			b,y											; get lsb of row
-				sta			*lsb_row_level_data_addr
-				sta			*byte_8
-				ldy			#msb_row_addr_1
+				sta			*lsb_row_lda_dyn
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_dyn_tbl
 				lda			b,y											; get msb of row
-				sta			*msb_row_level_data_addr
-				ldy			#msb_row_addr_2
+				sta			*msb_row_lda_dyn
+				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*byte_9
+				sta			*msb_row_lda_static
 				ldb			#27											; last column
 				stb			*col
-2$:			ldx			*msb_row_level_data_addr
+2$:			ldx			*msb_row_lda_dyn
 				lda			b,x
 				cmpa		#6											; end-of-screen ladder?
 				bne			4$											; no, skip
@@ -724,9 +724,9 @@ init_and_draw_level: ; $63B3
 				sta			b,y											; store col
 				tfr			a,b											; B=col
 3$:			lda			#0
-				ldx			*msb_row_level_data_addr
+				ldx			*msb_row_lda_dyn
 				sta			b,x											; update tilemap
-				ldx			*byte_9
+				ldx			*msb_row_lda_static
 				sta			b,x											; update tilemap
 				bra			8$
 4$:			cmpa		#7											; gold?
@@ -758,7 +758,7 @@ init_and_draw_level: ; $63B3
 				ldy			#guard_y_offset
 				sta			b,y
 				lda			#0
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				puls		b												; B=col
 				sta			b,y											; update tilemap (with space)
 				lda			#8											; guard
@@ -776,7 +776,7 @@ init_and_draw_level: ; $63B3
 				lda			#8
 				sta			*sprite_index
 				lda			#0											; space
-				ldx			*byte_9
+				ldx			*msb_row_lda_static
 				sta			b,x											; update tilemap
 				lda			#9											; player
 				bra			8$
@@ -799,15 +799,15 @@ draw_level:	; $648B
 				jsr			wipe_and_draw_level
 				ldb			#15											; last row
 				stb			*row
-1$:			ldy			#lsb_row_addr
+1$:			ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*lsb_row_level_data_addr
-				ldy			#msb_row_addr_1
+				sta			*lsb_row_lda_dyn
+				ldy			#msb_row_a_dyn_tbl
 				lda			b,y
-				sta			*msb_row_level_data_addr
+				sta			*msb_row_lda_dyn
 				ldb			#27											; last column
 				stb			*col			
-2$:			ldy			*msb_row_level_data_addr
+2$:			ldy			*msb_row_lda_dyn
 				lda			b,y											; get tilemap data
 				cmpa		#9											; player?
 				beq			3$											; yes, continue
@@ -834,14 +834,14 @@ handle_player: ; $64bd
 1$:			jmp			digging_right
 not_digging:	; $64CD
 				ldb			*current_row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*byte_8
-				ldy			#msb_row_addr_2
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*byte_9									; update tilemap addr
+				sta			*msb_row_lda_static									; update tilemap addr
 				ldb			*current_col
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap
 				cmpa		#3											; ladder?
 				beq			cant_fall								; yes, exit
@@ -857,24 +857,24 @@ check_falling:	; $64EB
 				ldb			*current_row
 				cmpb		#15											; bottom row?
 				beq			cant_fall								; yes, skip
-				ldy			#lsb_row_addr+1
+				ldy			#lsb_row_a_tbl+1
 				lda			b,y
-				sta			*lsb_row_level_data_addr
-				sta			*byte_8
-				ldy			#msb_row_addr_1+1
+				sta			*lsb_row_lda_dyn
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_dyn_tbl+1
 				lda			b,y
-				sta			*msb_row_level_data_addr
-				ldy			#msb_row_addr_2+1
+				sta			*msb_row_lda_dyn
+				ldy			#msb_row_a_static_tbl+1
 				lda			b,y
-				sta			*byte_9									; setup tilemap address to row below
+				sta			*msb_row_lda_static									; setup tilemap address to row below
 				ldb			*current_col
-				ldy			*msb_row_level_data_addr
+				ldy			*msb_row_lda_dyn
 				lda			b,y											; get object from tilemap
 				cmpa		#0											; space?
 				beq			handle_falling					; yes, go
 				cmpa		#8											; enemy?
 				beq			cant_fall								; yes, go
-				ldy			*byte_9									
+				ldy			*msb_row_lda_static									
 				lda			b,y											; get object from tilemap
 				cmpa		#1											; brick?
 				beq			cant_fall								; yes, go
@@ -907,35 +907,35 @@ fall_check_row_below:	; $654A
 				lda			#0
 				sta			*y_offset_within_tile
 				ldb			*current_row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*lsb_row_level_data_addr
-				sta			*byte_8
-				ldy			#msb_row_addr_1
+				sta			*lsb_row_lda_dyn
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_dyn_tbl
 				lda			b,y
-				sta			*msb_row_level_data_addr
-				ldy			#msb_row_addr_2
+				sta			*msb_row_lda_dyn
+				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*byte_9									; setup tilemap address
+				sta			*msb_row_lda_static									; setup tilemap address
 				ldb			*current_col
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap				
 				cmpa		#1											; brick?
 				bne			1$											; no, skip
 				lda			#0											; space
-1$:			ldy			*msb_row_level_data_addr
+1$:			ldy			*msb_row_lda_dyn
 				sta			b,y											; update tilemap
 				inc			*current_row
 				ldb			*current_row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*lsb_row_level_data_addr
-				ldy			#msb_row_addr_1
+				sta			*lsb_row_lda_dyn
+				ldy			#msb_row_a_dyn_tbl
 				lda			b,y
-				sta			*msb_row_level_data_addr	; setup tilemap address
+				sta			*msb_row_lda_dyn	; setup tilemap address
 				ldb			*current_col
 				lda			#9											; player
-				ldy			*msb_row_level_data_addr
+				ldy			*msb_row_lda_dyn
 				sta			b,y											; update tilemap
 				jmp			draw_player_sprite
 
@@ -988,23 +988,23 @@ no_keys:
 
 move_left: ; 65D3
 				ldb			*current_row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*lsb_row_level_data_addr
-				sta			*byte_8
-				ldy			#msb_row_addr_1
+				sta			*lsb_row_lda_dyn
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_dyn_tbl
 				lda			b,y
-				sta			*msb_row_level_data_addr
-				ldy			#msb_row_addr_2
+				sta			*msb_row_lda_dyn
+				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*byte_9									; setup tilemap & video addresses
+				sta			*msb_row_lda_static									; setup tilemap & video addresses
 				ldb			*x_offset_within_tile
 				cmpb		#3
 				bcc			can_move_left
 				ldb			*current_col
 				beq			9$											; left-most? yes, exit
 				decb														; previous column
-				ldy			*msb_row_level_data_addr
+				ldy			*msb_row_lda_dyn
 				lda			b,y											; get tile data
 				cmpa		#2											; solid?
 				beq			9$											; yes, exit
@@ -1023,12 +1023,12 @@ can_move_left: ; $6600
 				dec			*x_offset_within_tile
 				bpl			2$
 				ldb			*current_col
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y											; get object from filemap
 				cmpa		#1											; brick?
 				bne			1$											; no, skip
 				lda			#0
-1$:			ldy			*msb_row_level_data_addr
+1$:			ldy			*msb_row_lda_dyn
 				sta			b,y											; update tilemap
 				dec			*current_col						; previous tile
 				decb
@@ -1039,7 +1039,7 @@ can_move_left: ; $6600
 				bra			3$
 2$:			jsr			check_for_gold
 3$:			ldb			*current_col
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap
 				cmpa		#4											; rope?
 				beq			4$											; yes, go
@@ -1053,16 +1053,16 @@ can_move_left: ; $6600
 
 move_right: ; $6645
 				ldb			*current_row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*lsb_row_level_data_addr
-				sta			*byte_8
-				ldy			#msb_row_addr_1
+				sta			*lsb_row_lda_dyn
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_dyn_tbl
 				lda			b,y
-				sta			*msb_row_level_data_addr
-				ldy			#msb_row_addr_2
+				sta			*msb_row_lda_dyn
+				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*byte_9									; setup tilemap & video addresses
+				sta			*msb_row_lda_static									; setup tilemap & video addresses
 				ldb			*x_offset_within_tile
 				cmpb		#2
 				bcs			can_move_right
@@ -1070,7 +1070,7 @@ move_right: ; $6645
 				cmpb		#27											; right-most?
 				beq			9$											; yes, exit
 				incb														; next column
-				ldy			*msb_row_level_data_addr
+				ldy			*msb_row_lda_dyn
 				lda			b,y											; get tile data
 				cmpa		#2											; solid?
 				beq			9$											; yes, exit
@@ -1091,12 +1091,12 @@ can_move_right: ; $6674
 				cmpa		#5
 				bcs			2$
 				ldb			*current_col
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y											; get object from filemap
 				cmpa		#1											; brick?
 				bne			1$											; no, skip
 				lda			#0
-1$:			ldy			*msb_row_level_data_addr
+1$:			ldy			*msb_row_lda_dyn
 				sta			b,y											; update tilemap
 				inc			*current_col						; next tile
 				incb
@@ -1107,7 +1107,7 @@ can_move_right: ; $6674
 				bra			3$
 2$:			jsr			check_for_gold
 3$:			ldb			*current_col
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap
 				cmpa		#4											; rope?
 				beq			4$											; yes, go
@@ -1121,14 +1121,14 @@ can_move_right: ; $6674
 
 move_up: ; $66BD
 				ldb			*current_row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*byte_8
-				ldy			#msb_row_addr_2
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*byte_9
+				sta			*msb_row_lda_static
 				ldb			*current_col
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap
 				cmpa		#3											; ladder?
 				beq			check_move_up						; yes, go
@@ -1136,14 +1136,14 @@ move_up: ; $66BD
 				cmpb		#3											; <3?
 				bcs			cant_move_up						; yes, exit
 				ldb			*current_row
-				ldy			#lsb_row_addr+1					; row below???
+				ldy			#lsb_row_a_tbl+1					; row below???
 				lda			b,y											; get object from tilemap
-				sta			*byte_8
-				ldy			#msb_row_addr_2+1				; row below?
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_static_tbl+1				; row below?
 				lda			b,y											; get object from tilemap
-				sta			*byte_9
+				sta			*msb_row_lda_static
 				ldb			*current_col
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap
 				cmpa		#3											; ladder?
 				beq			can_move_up
@@ -1157,14 +1157,14 @@ check_move_up:	; $66ED
 				bcc			can_move_up							; yes, go
 				ldb			*current_row
 				beq			cant_move_up						; top row? yes, exit
-				ldy			#lsb_row_addr-1
+				ldy			#lsb_row_a_tbl-1
 				lda			b,y
-				sta			*lsb_row_level_data_addr
-				ldy			#msb_row_addr_1-1
+				sta			*lsb_row_lda_dyn
+				ldy			#msb_row_a_dyn_tbl-1
 				lda			b,y
-				sta			*msb_row_level_data_addr	; adjust tilemap address to row above
+				sta			*msb_row_lda_dyn	; adjust tilemap address to row above
 				ldb			*current_col
-				ldy			*msb_row_level_data_addr
+				ldy			*msb_row_lda_dyn
 				lda			b,y											; get object from tilemap
 				cmpa		#1											; brick?
 				beq			cant_move_up						; yes, exit
@@ -1177,38 +1177,38 @@ can_move_up:
 				jsr			calc_char_and_addr
 				jsr			wipe_char
 				ldb			*current_row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*lsb_row_level_data_addr
-				sta			*byte_8
-				ldy			#msb_row_addr_1
+				sta			*lsb_row_lda_dyn
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_dyn_tbl
 				lda			b,y
-				sta			*msb_row_level_data_addr
-				ldy			#msb_row_addr_2
+				sta			*msb_row_lda_dyn
+				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*byte_9									; setup tilemap and video address
+				sta			*msb_row_lda_static									; setup tilemap and video address
 				jsr			adjust_x_offset_in_tile
 				dec			*y_offset_within_tile
 				bpl			climber_check_for_gold	; change tiles? no, skip
 				ldb			*current_col
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap
 				cmpa		#1											; brick?
 				bne			1$											; no, skip
 				lda			#0											; space
-1$:			ldy			*msb_row_level_data_addr
+1$:			ldy			*msb_row_lda_dyn
 				sta			b,y
 				dec			*current_row
 				ldb			*current_row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*lsb_row_level_data_addr
-				ldy			#msb_row_addr_1
+				sta			*lsb_row_lda_dyn
+				ldy			#msb_row_a_dyn_tbl
 				lda			b,y
-				sta			*msb_row_level_data_addr
+				sta			*msb_row_lda_dyn
 				ldb			*current_col
 				lda			#9											; player
-				ldy			*msb_row_level_data_addr
+				ldy			*msb_row_lda_dyn
 				sta			b,y											; update tilemap
 				lda			#4
 				sta			*y_offset_within_tile
@@ -1230,14 +1230,14 @@ move_down:	; $6766
 				ldb			*current_row
 				cmpb		#15											; bottom row?
 				bcc			cant_move_down					; yes, exit
-				ldy			#lsb_row_addr+1					; row below
+				ldy			#lsb_row_a_tbl+1					; row below
 				lda			b,y
-				sta			*lsb_row_level_data_addr
-				ldy			#msb_row_addr_1+1
+				sta			*lsb_row_lda_dyn
+				ldy			#msb_row_a_dyn_tbl+1
 				lda			b,y
-				sta			*msb_row_level_data_addr	; adjust tilemap address for row below
+				sta			*msb_row_lda_dyn	; adjust tilemap address for row below
 				ldb			*current_col
-				ldy			*msb_row_level_data_addr
+				ldy			*msb_row_lda_dyn
 				lda			b,y											; get object from tilemap
 				cmpa		#2											; solid?
 				beq			cant_move_down					; yes, exit
@@ -1251,40 +1251,40 @@ can_move_down:	; $678A
 				jsr			calc_char_and_addr
 				jsr			wipe_char
 				ldb			*current_row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*lsb_row_level_data_addr
-				sta			*byte_8
-				ldy			#msb_row_addr_1
+				sta			*lsb_row_lda_dyn
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_dyn_tbl
 				lda			b,y
-				sta			*msb_row_level_data_addr
-				ldy			#msb_row_addr_2
+				sta			*msb_row_lda_dyn
+				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*byte_9
+				sta			*msb_row_lda_static
 				jsr			adjust_x_offset_in_tile
 				inc			*y_offset_within_tile
 				lda			*y_offset_within_tile
 				cmpa		#5											; <5?
 				bcs			2$											; yes, skip
 				ldb			*current_col
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap
 				cmpa		#1											; brick?
 				bne			1$											; no, skip
 				lda			#0
-1$:			ldy			*msb_row_level_data_addr
+1$:			ldy			*msb_row_lda_dyn
 				sta			b,y											; update tilemap
 				inc			*current_row						; row below
 				ldb			*current_row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*lsb_row_level_data_addr
-				ldy			#msb_row_addr_1
+				sta			*lsb_row_lda_dyn
+				ldy			#msb_row_a_dyn_tbl
 				lda			b,y
-				sta			*msb_row_level_data_addr	; update tilemap address
+				sta			*msb_row_lda_dyn	; update tilemap address
 				ldb			*current_col
 				lda			#9											; player
-				ldy			*msb_row_level_data_addr
+				ldy			*msb_row_lda_dyn
 				sta			b,y											; update tilemap
 				lda			#0
 				sta			*y_offset_within_tile
@@ -1311,7 +1311,7 @@ digging_left:
 				ldb			*current_col
 				beq			cant_dig_left						; left-most edge? yes, exit
 				decb														; column to the left
-				ldy			*msb_row_level_data_addr
+				ldy			*msb_row_lda_dyn
 				lda			b,y											; get tilemap data (below, left)
 				cmpa		#1											; brick?
 				bne			cant_dig_left						; no, exit
@@ -1319,7 +1319,7 @@ digging_left:
 				jsr			set_row_addr_1_2
 				ldb			*current_col
 				decb														; column to the left
-				ldy			*msb_row_level_data_addr
+				ldy			*msb_row_lda_dyn
 				lda			b,y											; get tilemap data (left)
 				cmpa		#0											; space?
 				lbne		abort_dig_left					; no, go
@@ -1355,7 +1355,7 @@ digging_left:
 				ldb			*current_row
 				jsr			calc_colx5_scanline
 				tfr			d,x											; X(lsb)=scanline
-				tfr			a,b											; B=x_in_2_pixel_incs
+				tfr			a,b											; B=x_div_2
 				puls		a												; A=char
 				jsr			wipe_char
 				ldb			*dig_sprite
@@ -1369,7 +1369,7 @@ digging_left:
 				stb			*row
 				jsr			calc_colx5_scanline
 				tfr			d,x											; X(lsb)=scanline
-				tfr			a,b											; B=x_in_2_pixel_incs
+				tfr			a,b											; B=x_div_2
 				puls		a												; A=char
 				jsr			display_transparent_char
 				ldb			*dig_sprite
@@ -1401,7 +1401,7 @@ abort_dig_left:	; $686E
 				deca
 				jsr			calc_colx5_scanline
 				tfr			d,x											; X(lsb)=scanline
-				tfr			a,b											; B=x_in_2_pixel_incs
+				tfr			a,b											; B=x_div_2
 				puls		a												; A=char
 				jsr			wipe_char
 				
@@ -1436,7 +1436,7 @@ digging_right:
 				cmpb		#27											; right-most edge?
 				bcc			cant_dig_right					; yes, exit
 				incb														; column to the right
-				ldy			*msb_row_level_data_addr
+				ldy			*msb_row_lda_dyn
 				lda			b,y											; get tilemap data (below, right)
 				cmpa		#1											; brick?
 				bne			cant_dig_right					; no, exit
@@ -1444,7 +1444,7 @@ digging_right:
 				jsr			set_row_addr_1_2
 				ldb			*current_col
 				incb														; column to the right
-				ldy			*msb_row_level_data_addr
+				ldy			*msb_row_lda_dyn
 				lda			b,y											; get tilemap data (right)
 				cmpa		#0											; space?
 				lbne		abort_dig_right					; no, go
@@ -1480,7 +1480,7 @@ digging_right:
 				ldb			*current_row
 				jsr			calc_colx5_scanline
 				tfr			d,x											; X(lsb)=scanline
-				tfr			a,b											; B=x_in_2_pixel_incs
+				tfr			a,b											; B=x_div_2
 				puls		a												; A=char
 				jsr			wipe_char
 				ldb			*dig_sprite
@@ -1494,7 +1494,7 @@ digging_right:
 				stb			*row
 				jsr			calc_colx5_scanline
 				tfr			d,x											; X(lsb)=scanline
-				tfr			a,b											; B=x_in_2_pixel_incs
+				tfr			a,b											; B=x_div_2
 				puls		a												; A=char
 				jsr			display_transparent_char
 				inc			*row
@@ -1527,7 +1527,7 @@ abort_dig_right:	; $6936
 				ldb			*current_row
 				jsr			calc_colx5_scanline
 				tfr			d,x											; X(lsb)=scanline
-				tfr			a,b											; B=x_in_2_pixel_incs
+				tfr			a,b											; B=x_div_2
 				puls		a												; A=char
 				jsr			wipe_char
 
@@ -1568,7 +1568,7 @@ handle_attract_mode:	; $69B8
 .endif				
 				bra			next_demo_inp
 exit_demo:				
-				lsr			*byte_ac
+				lsr			*demo_not_interrupted	; flag interrupted
 				lsr			*level_active					; kill player
 				lda			#1
 				sta			*no_lives
@@ -1875,8 +1875,8 @@ ctl_key_vector_fn:
 calc_char_and_addr:	; $6b85
 				lda			*current_col
 				ldb			*x_offset_within_tile
-				jsr			calc_x_in_2_pixel_incs
-				stb			*msg_char								; store x_in_2_pixel_incs
+				jsr			calc_x_div_2
+				stb			*msg_char								; store x_div_2
 				ldb			*current_row
 				lda			*y_offset_within_tile
 				jsr			calc_scanline						; B=scanline
@@ -1884,7 +1884,7 @@ calc_char_and_addr:	; $6b85
 				ldb			*sprite_index
 				ldy			#sprite_to_char_tbl
 				lda			b,y											; A=lookup char from sprite
-				ldb			*msg_char								; restore x_in_2_pixel_incs
+				ldb			*msg_char								; restore x_div_2
 				rts
 
 check_for_gold: ; $6b9d
@@ -1895,14 +1895,14 @@ check_for_gold: ; $6b9d
 				cmpa		#2											; offset=2?
 				bne			9$											; no, return
 				ldb			*current_row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*byte_8
-				ldy			#msb_row_addr_2
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*byte_9									; setup tilemap address
+				sta			*msb_row_lda_static									; setup tilemap address
 				ldb			*current_col
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap
 				cmpa		#7											; gold?
 				bne			9$											; no, exit
@@ -1913,14 +1913,14 @@ check_for_gold: ; $6b9d
 				ldb			*current_col
 				stb			*col
 				lda			#0											; space
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				sta			b,y											; wipe gold from tilemap
 				jsr			display_char_pg2				; wipe gold from bg page
 				ldb			*row
 				lda			*col
 				jsr			calc_colx5_scanline			; A=col*5, B=scanline
 				tfr			d,x											; X(lsb)=scanline
-				tfr			a,b											; B=x_in_2_pixel_incs
+				tfr			a,b											; B=x_div_2
 				lda			#7											; gold
 				jsr			wipe_char								; from video display
 				ldd			#SCORE_GOLD							; add 250/500 pts
@@ -1983,15 +1983,15 @@ add_hole_entry:	; $6C39
 				stb			*col
 				sta			*row
 				exg			a,b											; A=col, B=row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*lsb_row_level_data_addr
-				ldy			#msb_row_addr_1
+				sta			*lsb_row_lda_dyn
+				ldy			#msb_row_a_dyn_tbl
 				lda			b,y
-				sta			*msb_row_level_data_addr
+				sta			*msb_row_lda_dyn
 				lda			#0											; space
 				ldb			*col
-				ldy			*msb_row_level_data_addr
+				ldy			*msb_row_lda_dyn
 				sta			b,y											; update tilemap
 				jsr			display_char_pg1
 				lda			#0											; space
@@ -2090,14 +2090,14 @@ save_guard_and_ret:	; $6CFB
 
 check_guard_falling:	; $6D08
 				ldb			*curr_guard_row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*byte_8
-				ldy			#msb_row_addr_2
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*byte_9									; setup tilemap address
+				sta			*msb_row_lda_static									; setup tilemap address
 				ldb			*curr_guard_col
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap
 				cmpa		#3											; ladder?
 				beq			2$											; yes, go
@@ -2112,18 +2112,18 @@ check_guard_falling:	; $6D08
 				ldb			*curr_guard_row
 				cmpb		#15											; bottom row?
 				beq			2$											; yes, go
-				ldy			#(lsb_row_addr+1)
+				ldy			#(lsb_row_a_tbl+1)
 				lda			b,y											; row below
-				sta			*lsb_row_level_data_addr
-				sta			*byte_8
-				ldy			#(msb_row_addr_2+1)
+				sta			*lsb_row_lda_dyn
+				sta			*lsb_row_lda_static
+				ldy			#(msb_row_a_static_tbl+1)
 				lda			b,y
-				sta			*byte_9
-				ldy			#(msb_row_addr_1+1)
+				sta			*msb_row_lda_static
+				ldy			#(msb_row_a_dyn_tbl+1)
 				lda			b,y
-				sta			*msb_row_level_data_addr	; setup tilemap address
+				sta			*msb_row_lda_dyn	; setup tilemap address
 				ldb			*curr_guard_col
-				ldy			*msb_row_level_data_addr
+				ldy			*msb_row_lda_dyn
 				lda			b,y											; get object from tilemap
 				cmpa		#0											; space?
 				beq			handle_guard_falling		; yes, go
@@ -2131,7 +2131,7 @@ check_guard_falling:	; $6D08
 				beq			handle_guard_falling		; yes, go
 				cmpa		#8											; guard?
 				beq			2$											; yes, go
-				ldy			*byte_9									
+				ldy			*msb_row_lda_static									
 				lda			b,y											; get object from tilemap
 				cmpa		#1											; brick?
 				beq			2$											; yes, go
@@ -2160,14 +2160,14 @@ handle_guard_falling:	; $ 6D64
 				bne			render_guard_and_ret
 				jsr			check_guard_pickup_gold
 				ldb			*curr_guard_row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*byte_8
-				ldy			#msb_row_addr_2
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*byte_9									; setup tilemap address
+				sta			*msb_row_lda_static									; setup tilemap address
 				ldb			*curr_guard_col
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y											; get tilemap object
 				cmpa		#1											; brick?
 				bne			render_guard_and_ret		; no, go
@@ -2192,43 +2192,43 @@ guard_fall_into_next_row:	; $6DC0
 				lda			#0
 				sta			*curr_guard_y_offset		; y_offset=0
 				ldb			*curr_guard_row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*lsb_row_level_data_addr
-				sta			*byte_8
-				ldy			#msb_row_addr_1
+				sta			*lsb_row_lda_dyn
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_dyn_tbl
 				lda			b,y
-				sta			*msb_row_level_data_addr
-				ldy			#msb_row_addr_2
+				sta			*msb_row_lda_dyn
+				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*byte_9									; setup tilemap address
+				sta			*msb_row_lda_static									; setup tilemap address
 				ldb			*curr_guard_col
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap
 				cmpa		#1											; brick?
 				bne			1$											; no, skip
 				lda			#0											; space
-1$:			ldy			*msb_row_level_data_addr
+1$:			ldy			*msb_row_lda_dyn
 				sta			b,y											; update tilemap				
 				inc			*curr_guard_row					; row below
 				ldb			*curr_guard_row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*lsb_row_level_data_addr
-				sta			*byte_8
-				ldy			#msb_row_addr_1
+				sta			*lsb_row_lda_dyn
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_dyn_tbl
 				lda			b,y
-				sta			*msb_row_level_data_addr
-				ldy			#msb_row_addr_2
+				sta			*msb_row_lda_dyn
+				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*byte_9									; setup tilemap address
+				sta			*msb_row_lda_static									; setup tilemap address
 				ldb			*curr_guard_col
-				ldy			*msb_row_level_data_addr
+				ldy			*msb_row_lda_dyn
 				lda			b,y											; get object from tilemap
 				cmpa		#9											; player?
 				bne			2$											; no, skip
 				KILL_PLAYER
-2$:			ldy			*byte_9
+2$:			ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap
 				cmpa		#1											; brick?
 				bne			loc_6e58								; no, go
@@ -2238,19 +2238,19 @@ guard_fall_into_next_row:	; $6DC0
 				ldb			*curr_guard_row
 				decb														; row above
 				stb			*row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*lsb_row_level_data_addr
-				sta			*byte_8
-				ldy			#msb_row_addr_1
+				sta			*lsb_row_lda_dyn
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_dyn_tbl
 				lda			b,y
-				sta			*msb_row_level_data_addr
-				ldy			#msb_row_addr_2
+				sta			*msb_row_lda_dyn
+				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*byte_9									; setup tilemap address
+				sta			*msb_row_lda_static									; setup tilemap address
 				ldb			*curr_guard_col
 				stb			*col
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap (row above)
 				cmpa		#0											; space?
 				beq			guard_drop_gold					; yes, go
@@ -2260,33 +2260,33 @@ guard_fall_into_next_row:	; $6DC0
 guard_drop_gold:	; $6E31
 ; B=col
 				lda			#7											; gold
-				ldy			*msb_row_level_data_addr
+				ldy			*msb_row_lda_dyn
 				sta			b,y											; update tilemap
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				sta			b,y											; update tilemap
 				jsr			display_char_pg2				; render on bg
 				lda			*col
 				ldb			*row
 				jsr			calc_colx5_scanline
 				tfr			d,x											; X(lsb)=scanline
-				tfr			a,b											; B=x_in_2_pixel_incs
+				tfr			a,b											; B=x_div_2
 				lda			#7											; A=char (gold)
 				jsr			display_transparent_char
 				
 loc_6e46:	; $6E46
 				ldb			*curr_guard_row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*lsb_row_level_data_addr
-				ldy			#msb_row_addr_1
+				sta			*lsb_row_lda_dyn
+				ldy			#msb_row_a_dyn_tbl
 				lda			b,y
-				sta			*msb_row_level_data_addr	; setup tilemap address
+				sta			*msb_row_lda_dyn	; setup tilemap address
 				lda			#0
 				sta			*curr_guard_state
 				ldb			*curr_guard_col
 loc_6e58:	; $6E58
 				lda			#8											; guard
-				ldy			*msb_row_level_data_addr
+				ldy			*msb_row_lda_dyn
 				sta			b,y											; update tilemap
 				jsr			calc_guard_xychar
 				jsr			display_transparent_char	; render on screen
@@ -2339,14 +2339,14 @@ guard_move_up:	; $6EAC
         ldb     *curr_guard_row         ; top row?
         beq     guard_cant_climb        ; yes, exit
         decb                            ; row above
-        ldy			#lsb_row_addr
+        ldy			#lsb_row_a_tbl
         lda			b,y
-        sta     *lsb_row_level_data_addr
-        ldy     #msb_row_addr_1
+        sta     *lsb_row_lda_dyn
+        ldy     #msb_row_a_dyn_tbl
         lda			b,y
-        sta     *msb_row_level_data_addr	; setup tilemap address
+        sta     *msb_row_lda_dyn	; setup tilemap address
         ldb     *curr_guard_col
-        ldy     *msb_row_level_data_addr
+        ldy     *msb_row_lda_dyn
         lda			b,y											; get object from tilemap (below)
         cmpa    #1											; brick?
         beq     guard_cant_climb				; yes, exit
@@ -2362,37 +2362,37 @@ guard_can_move_up:	; $6ED5
         jsr     wipe_char
         jsr     adjust_guard_x_offset
         ldb     *curr_guard_row
-        ldy     #lsb_row_addr
+        ldy     #lsb_row_a_tbl
         lda			b,y
-        sta     *lsb_row_level_data_addr
-        sta     *byte_8
-        ldy     #msb_row_addr_1
+        sta     *lsb_row_lda_dyn
+        sta     *lsb_row_lda_static
+        ldy     #msb_row_a_dyn_tbl
         lda			b,y
-        sta     *msb_row_level_data_addr
-        ldy     #msb_row_addr_2
+        sta     *msb_row_lda_dyn
+        ldy     #msb_row_a_static_tbl
         lda			b,y
-        sta     *byte_9									; setup tilemap address
+        sta     *msb_row_lda_static									; setup tilemap address
         dec     *curr_guard_y_offset		; move down
         bpl     guard_climber_check_for_gold	; same tile? yes, go
         jsr     check_guard_drop_gold
         ldb     *curr_guard_col
-        ldy			*byte_9
+        ldy			*msb_row_lda_static
         lda     b,y											; get object from tilemap
         cmpa    #1                      ; brick?
         bne     1$											; no, skip
         lda     #0                      ; space
-1$:     ldy			*msb_row_level_data_addr
+1$:     ldy			*msb_row_lda_dyn
 				sta			b,y											; update tilemap
         dec     *curr_guard_row					; next row down
         ldb     *curr_guard_row
-        ldy     #lsb_row_addr
+        ldy     #lsb_row_a_tbl
         lda			b,y
-        sta     *lsb_row_level_data_addr
-        ldy     #msb_row_addr_1
+        sta     *lsb_row_lda_dyn
+        ldy     #msb_row_a_dyn_tbl
         lda			b,y
-        sta     *msb_row_level_data_addr	; setup tilemap address
+        sta     *msb_row_lda_dyn	; setup tilemap address
         ldb     *curr_guard_col
-        ldy     *msb_row_level_data_addr
+        ldy     *msb_row_lda_dyn
         lda			b,y											; get object from tilemap
         cmpa    #9                      ; player?
         bne     2$											; no, skip
@@ -2422,14 +2422,14 @@ guard_move_down:	; $6F39
         cmpb		#0x0f										; bottom row?
         bcc     guard_cant_move_down		; yes, exit
         incb
-        ldy     #lsb_row_addr
+        ldy     #lsb_row_a_tbl
         lda			b,y
-        sta     *lsb_row_level_data_addr
-        ldy     #msb_row_addr_1
+        sta     *lsb_row_lda_dyn
+        ldy     #msb_row_a_dyn_tbl
         lda			b,y
-        sta     *msb_row_level_data_addr	; setup tilemap address
+        sta     *msb_row_lda_dyn	; setup tilemap address
         ldb     *curr_guard_col
-        ldy     *msb_row_level_data_addr
+        ldy     *msb_row_lda_dyn
         lda			b,y											; get object from tilemap
         cmpa    #2                      ; solid?
         beq     guard_cant_move_down    ; yes, skip
@@ -2446,39 +2446,39 @@ guard_can_move_down:	; $6F63
         jsr     wipe_char
         jsr     adjust_guard_x_offset
         ldb     *curr_guard_row
-        ldy     #lsb_row_addr
+        ldy     #lsb_row_a_tbl
         lda			b,y
-        sta     *lsb_row_level_data_addr
-        sta     *byte_8
-        ldy     #msb_row_addr_1
+        sta     *lsb_row_lda_dyn
+        sta     *lsb_row_lda_static
+        ldy     #msb_row_a_dyn_tbl
         lda			b,y
-        sta     *msb_row_level_data_addr
-        ldy     #msb_row_addr_2
+        sta     *msb_row_lda_dyn
+        ldy     #msb_row_a_static_tbl
         lda			b,y
-        sta     *byte_9									; setup tilemap address
+        sta     *msb_row_lda_static									; setup tilemap address
         inc     *curr_guard_y_offset
         lda     *curr_guard_y_offset
         cmpa    #5
         bcs     3$
         jsr     check_guard_drop_gold
         ldb     *curr_guard_col
-        ldy     *byte_9
+        ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap
         cmpa    #1											; brick?
         bne     1$											; no, skip
         lda     #0											; space
-1$:     ldy     *msb_row_level_data_addr
+1$:     ldy     *msb_row_lda_dyn
 				sta			b,y											; update tilemap
         inc     *curr_guard_row
         ldb     *curr_guard_row
-        ldy     #lsb_row_addr
+        ldy     #lsb_row_a_tbl
         lda			b,y
-        sta     *lsb_row_level_data_addr
-        ldy     #msb_row_addr_1
+        sta     *lsb_row_lda_dyn
+        ldy     #msb_row_a_dyn_tbl
         lda			b,y
-        sta     *msb_row_level_data_addr	; setup tilemap address
+        sta     *msb_row_lda_dyn	; setup tilemap address
         ldb     *curr_guard_col
-        ldy     *msb_row_level_data_addr
+        ldy     *msb_row_lda_dyn
         lda			b,y											; get object from tilemap
         cmpa    #9                      ; player?
         bne     2$											; no, skip
@@ -2492,23 +2492,23 @@ guard_can_move_down:	; $6F63
 				
 guard_move_left:	; $6FBC
 				ldb			*curr_guard_row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*lsb_row_level_data_addr
-				sta			*byte_8
-				ldy			#msb_row_addr_1
+				sta			*lsb_row_lda_dyn
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_dyn_tbl
 				lda			b,y
-				sta			*msb_row_level_data_addr
-				ldy			#msb_row_addr_2
+				sta			*msb_row_lda_dyn
+				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*byte_9									; setup tilemap address
+				sta			*msb_row_lda_static									; setup tilemap address
 				ldb			*curr_guard_x_offset
 				cmpb		#3
 				bcc			guard_can_move_left
 				ldb			*curr_guard_col
 				beq			guard_cant_move_left		; left-most column, exit
 				decb														; column to left
-				ldy			*msb_row_level_data_addr
+				ldy			*msb_row_lda_dyn
 				lda			b,y											; get object from tilemap
 				cmpa		#8											; another guard?
 				beq			guard_cant_move_left		; yes, exit
@@ -2516,7 +2516,7 @@ guard_move_left:	; $6FBC
 				beq			guard_cant_move_left		; yes, exit
 				cmpa		#1											; brick?
 				beq			guard_cant_move_left		; yes, exit
-				ldy			*byte_9									
+				ldy			*msb_row_lda_static									
 				lda			b,y											; get object from tilemap
 				cmpa		#5											; fall-thru?
 				bne			guard_can_move_left
@@ -2533,12 +2533,12 @@ guard_can_move_left:	; $6FF1
 				bpl			3$
 				jsr			check_guard_drop_gold
 				ldb			*curr_guard_col
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap
 				cmpa		#1											; brick?
 				bne			1$											; no, skip
 				lda			#0											; space
-1$:			ldy			*msb_row_level_data_addr
+1$:			ldy			*msb_row_lda_dyn
 				sta			b,y											; update tilemap
 				dec			*curr_guard_col
 				decb
@@ -2553,7 +2553,7 @@ guard_can_move_left:	; $6FF1
 				bra			4$
 3$:			jsr			check_guard_pickup_gold
 4$:			ldb			*curr_guard_col
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap
 				cmpa		#4											; rope?
 				beq			5$											; yes, skip
@@ -2569,16 +2569,16 @@ guard_can_move_left:	; $6FF1
 				
 guard_move_right: ; $7047
 				ldb			*curr_guard_row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*lsb_row_level_data_addr
-				sta			*byte_8
-				ldy			#msb_row_addr_1
+				sta			*lsb_row_lda_dyn
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_dyn_tbl
 				lda			b,y
-				sta			*msb_row_level_data_addr
-				ldy			#msb_row_addr_2
+				sta			*msb_row_lda_dyn
+				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*byte_9									; setup tilemap address
+				sta			*msb_row_lda_static									; setup tilemap address
 				lda			*curr_guard_x_offset
 				cmpa		#2
 				bcs			guard_can_move_right
@@ -2586,7 +2586,7 @@ guard_move_right: ; $7047
 				cmpb		#27											; right-most?
 				beq			guard_cant_move_right		; yes, exit
 				incb														; next column
-				ldy			*msb_row_level_data_addr
+				ldy			*msb_row_lda_dyn
 				lda			b,y											; get object from tilemap
 				cmpa		#8											; guard?
 				beq			guard_cant_move_right		; yes, exit
@@ -2594,7 +2594,7 @@ guard_move_right: ; $7047
 				beq			guard_cant_move_right		; yes, exit
 				cmpa		#1											; brick?
 				beq			guard_cant_move_right		; yes, exit
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap
 				cmpa		#5											; fall-thru?
 				bne			guard_can_move_right		; no, continue
@@ -2613,12 +2613,12 @@ guard_can_move_right:	; $707E
 				bcs			5$
 				jsr			check_guard_drop_gold
 				ldb			*curr_guard_col
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y
 				cmpa		#1											; brick?
 				bne			3$
 				lda			#0											; space
-3$:			ldy			*msb_row_level_data_addr
+3$:			ldy			*msb_row_lda_dyn
 				sta			b,y											; update tilemap
 				inc			*curr_guard_col					; next column
 				incb
@@ -2633,7 +2633,7 @@ guard_can_move_right:	; $707E
 				bra			6$
 5$:			jsr			check_guard_pickup_gold
 6$:			ldb			*curr_guard_col
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap
 				cmpa		#4											; rope?
 				beq			7$											; yes, skip
@@ -2652,14 +2652,14 @@ guard_ai:	; $70D8
 ; ret: B=0..4 (direction)
 				sta			*guard_ai_col
 				stb			*guard_ai_row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*byte_8
-				ldy			#msb_row_addr_2
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*byte_9									; setup tilemap address
+				sta			*msb_row_lda_static									; setup tilemap address
 				ldb			*guard_ai_col
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap
 				cmpa		#1											; brick (ie. trapped)?
 				bne			1$											; no, skip
@@ -2700,14 +2700,14 @@ same_row:	; $7100
 guard_left_of_player:	; $7108
 				inc			*target_col							; target to the right
 				ldb			*guard_ai_row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*byte_8
-				ldy			#msb_row_addr_2
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*byte_9									; setup tilemap address
+				sta			*msb_row_lda_static									; setup tilemap address
 				ldb			*target_col
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap (right)
 				cmpa		#3											; ladder?
 				beq			try_next_col_right			; yes, go
@@ -2716,14 +2716,14 @@ guard_left_of_player:	; $7108
 				ldb			*guard_ai_row         	
 				cmpb		#15											; bottom row?
 				beq			try_next_col_right			; yes, go
-				ldy			#(lsb_row_addr+1)     	
+				ldy			#(lsb_row_a_tbl+1)     	
 				lda			b,y                   	
-				sta			*byte_8               	
-				ldy			#(msb_row_addr_2+1)   	
+				sta			*lsb_row_lda_static               	
+				ldy			#(msb_row_a_static_tbl+1)   	
 				lda			b,y                   	
-				sta			*byte_9									; setup tilemap address (row below)
+				sta			*msb_row_lda_static									; setup tilemap address (row below)
 				ldb			*target_col           	
-				ldy			*byte_9               	
+				ldy			*msb_row_lda_static               	
 				lda			b,y											; get object from tilemap (below right)
 				cmpa		#0											; space?
 				beq			different_row						; yes, go
@@ -2739,14 +2739,14 @@ try_next_col_right:	; $713E
 guard_right_of_player:	; $7147					
 				dec			*target_col							; column to left
 				ldb			*guard_ai_row         	
-				ldy			#lsb_row_addr         	
+				ldy			#lsb_row_a_tbl         	
 				lda			b,y                   	
-				sta			*byte_8               	
-				ldy			#msb_row_addr_2       	
+				sta			*lsb_row_lda_static               	
+				ldy			#msb_row_a_static_tbl       	
 				lda			b,y                   	
-				sta			*byte_9									; setup tilemap address (left)
+				sta			*msb_row_lda_static									; setup tilemap address (left)
 				ldb			*target_col           	
-				ldy			*byte_9               	
+				ldy			*msb_row_lda_static               	
 				lda			b,y											; get object from tilemap (left)
 				cmpa		#3											; ladder?
 				beq			try_next_col_left				; yes, go
@@ -2755,14 +2755,14 @@ guard_right_of_player:	; $7147
 				ldb			*guard_ai_row         	
 				cmpb		#15											; bottom row?
 				beq			try_next_col_left				; yes, go
-				ldy			#(lsb_row_addr+1)     	
+				ldy			#(lsb_row_a_tbl+1)     	
 				lda			b,y                   	
-				sta			*byte_8               	
-				ldy			#(msb_row_addr_2+1)   	
+				sta			*lsb_row_lda_static               	
+				ldy			#(msb_row_a_static_tbl+1)   	
 				lda			b,y                   	
-				sta			*byte_9									; setup tilemap address (row below)
+				sta			*msb_row_lda_static									; setup tilemap address (row below)
 				ldb			*target_col           	
-				ldy			*byte_9               	
+				ldy			*msb_row_lda_static               	
 				lda			b,y											; get object from tilemap (row below)
 				cmpa		#0											; space?
 				beq			different_row						; yes, go
@@ -2800,14 +2800,14 @@ guard_ai_left:	; $71A2
         ldb     *guard_ai_row
         cmpb    #15                     ; bottom row?
         beq     1$											; yes, go (no good)
-        ldy     #(lsb_row_addr+1)
+        ldy     #(lsb_row_a_tbl+1)
         lda			b,y
-        sta     *byte_8
-        ldy     #(msb_row_addr_2+1)
+        sta     *lsb_row_lda_static
+        ldy     #(msb_row_a_static_tbl+1)
         lda			b,y
-        sta     *byte_9                 ; setup tilemap address (row below)
+        sta     *msb_row_lda_static                 ; setup tilemap address (row below)
         ldb     *farthest_left
-        ldy     *byte_9
+        ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap (below farthest left)
         cmpa    #1                      ; brick?
         beq     1$											; yes, go
@@ -2825,14 +2825,14 @@ guard_ai_left:	; $71A2
         sta     *guard_ai_dir
 1$:     ldb     *guard_ai_row           ; top row?
         beq     2$											; yes, go
-        ldy     #lsb_row_addr
+        ldy     #lsb_row_a_tbl
         lda			b,y
-        sta     *byte_8
-        ldy     #msb_row_addr_2
+        sta     *lsb_row_lda_static
+        ldy     #msb_row_a_static_tbl
         lda			b,y
-        sta     *byte_9                 ; setup tilemap address
+        sta     *msb_row_lda_static                 ; setup tilemap address
         ldb     *farthest_left
-        ldy     *byte_9
+        ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap
         cmpa    #3                      ; ladder?
         bne     2$											; no, go
@@ -2859,14 +2859,14 @@ guard_ai_right:	; $720C
         ldb     *guard_ai_row
         cmpb    #15                     ; bottom row?
         beq     1$											; yes, go
-        ldy     #(lsb_row_addr+1)
+        ldy     #(lsb_row_a_tbl+1)
         lda			b,y
-        sta     *byte_8
-        ldy     #(msb_row_addr_2+1)
+        sta     *lsb_row_lda_static
+        ldy     #(msb_row_a_static_tbl+1)
         lda			b,y
-        sta     *byte_9                 ; setup tilemap address (row below)
+        sta     *msb_row_lda_static                 ; setup tilemap address (row below)
         ldb     *farthest_right
-        ldy     *byte_9
+        ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap (below)
         cmpa    #1                      ; brick?
         beq     1$											; yes, go
@@ -2884,14 +2884,14 @@ guard_ai_right:	; $720C
         sta     *guard_ai_dir
 1$:     ldb     *guard_ai_row           ; top row?
         beq     2$											; yes, go
-        ldy     #lsb_row_addr
+        ldy     #lsb_row_a_tbl
         lda			b,y
-        sta     *byte_8
-        ldy     #msb_row_addr_2
+        sta     *lsb_row_lda_static
+        ldy     #msb_row_a_static_tbl
         lda			b,y
-        sta     *byte_9                 ; setup tilemap address
+        sta     *msb_row_lda_static                 ; setup tilemap address
         ldb     *farthest_right
-        ldy     *byte_9
+        ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap address
         cmpa    #3                      ; ladder?
         bne     2$											; no, go
@@ -2912,14 +2912,14 @@ guard_ai_up_down:	; $7275
         ldb     *guard_ai_row
         cmpb    #15                     ; bottom row?
         beq     guard_ai_cant_go_down   ; yes, go
-        ldy     #(lsb_row_addr+1)
+        ldy     #(lsb_row_a_tbl+1)
         lda			b,y
-        sta     *byte_8
-        ldy     #(msb_row_addr_2+1)
+        sta     *lsb_row_lda_static
+        ldy     #(msb_row_a_static_tbl+1)
         lda			b,y
-        sta     *byte_9                 ; setup tilemap address (row below)
+        sta     *msb_row_lda_static                 ; setup tilemap address (row below)
         ldb     *guard_ai_col
-        ldy     *byte_9
+        ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap (below)
         cmpa    #1                      ; brick?
         beq     guard_ai_cant_go_down   ; yes, go
@@ -2939,14 +2939,14 @@ guard_ai_up_down:	; $7275
 guard_ai_cant_go_down:	; $72A7
         ldb     *guard_ai_row           ; top row?
         beq     1$											; yes, exit
-        ldy     #lsb_row_addr
+        ldy     #lsb_row_a_tbl
         lda			b,y
-        sta     *byte_8
-        ldy     #msb_row_addr_2
+        sta     *lsb_row_lda_static
+        ldy     #msb_row_a_static_tbl
         lda			b,y
-        sta     *byte_9                 ; setup tilemap address
+        sta     *msb_row_lda_static                 ; setup tilemap address
         ldb     *guard_ai_col
-        ldy     *byte_9
+        ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap
         cmpa    #3                      ; ladder?
         bne     1$											; no, exit
@@ -2995,14 +2995,14 @@ find_farthest_up:	; $7300
         stb     *byte_5e                ; row
         sta     *byte_5d                ; col
 loc_7304:	; $7304
-        ldy     #lsb_row_addr
+        ldy     #lsb_row_a_tbl
         lda			b,y
-        sta     *byte_8
-        ldy     #msb_row_addr_2
+        sta     *lsb_row_lda_static
+        ldy     #msb_row_a_static_tbl
         lda			b,y
-        sta     *byte_9                 ; setup tilemap address
+        sta     *msb_row_lda_static                 ; setup tilemap address
         ldb     *byte_5d                ; col
-        ldy     *byte_9
+        ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap
         cmpa    #3                      ; ladder?
         bne     loc_72FD                ; no, exit
@@ -3010,7 +3010,7 @@ loc_7304:	; $7304
         ldb     *byte_5d                ; col
         beq     up_try_right            ; left-most column? yes, go
         decb                            ; column to left
-        ldy     *byte_9
+        ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap (left)
         cmpa    #1                      ; brick?
         beq     1$											; yes, go
@@ -3019,15 +3019,15 @@ loc_7304:	; $7304
         cmpa    #3                      ; ladder?
         beq     1$											; yes, go
         ldb     *byte_5e                ; row (above)
-        ldy     #lsb_row_addr
+        ldy     #lsb_row_a_tbl
         lda			b,y
-        sta     *byte_8
-        ldy     #msb_row_addr_2
+        sta     *lsb_row_lda_static
+        ldy     #msb_row_a_static_tbl
         lda			b,y
-        sta     *byte_9                 ; setup tilemap address (above)
+        sta     *msb_row_lda_static                 ; setup tilemap address (above)
         ldb     *byte_5d                ; col
         decb                            ; column to left
-        ldy     *byte_9
+        ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap (above, left)
         cmpa    #4                      ; rope?
         bne     up_try_right            ; no, go
@@ -3042,15 +3042,15 @@ up_try_right:	; $734A
         cmpb    #27                     ; right-most?
         beq     try_next_row_up					; yes, go
         ldb     *byte_5e                ; row (above)
-        ldy     #(lsb_row_addr+1)
+        ldy     #(lsb_row_a_tbl+1)
         lda			b,y
-        sta     *byte_8
-        ldy     #(msb_row_addr_2+1)
+        sta     *lsb_row_lda_static
+        ldy     #(msb_row_a_static_tbl+1)
         lda			b,y
-        sta     *byte_9                 ; setup tilemap address
+        sta     *msb_row_lda_static                 ; setup tilemap address
         ldb     *byte_5d                ; col
         incb                            ; column to right
-        ldy     *byte_9
+        ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap (right)
         cmpa    #1                      ; brick?
         beq     1$											; yes, go
@@ -3059,15 +3059,15 @@ up_try_right:	; $734A
         cmpa    #3                      ; ladder?
         beq     1$											; yes, go
         ldb     *byte_5e                ; row
-        ldy     #lsb_row_addr
+        ldy     #lsb_row_a_tbl
         lda			b,y
-        sta     *byte_8
-        ldy     #msb_row_addr_2
+        sta     *lsb_row_lda_static
+        ldy     #msb_row_a_static_tbl
         lda			b,y
-        sta     *byte_9                 ; setup tilemap address (row above)
+        sta     *msb_row_lda_static                 ; setup tilemap address (row above)
         ldb     *byte_5d                ; col
         incb                            ; column to right
-        ldy     *byte_9
+        ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap (right, above)
         cmpa    #4                      ; rope?
         bne     try_next_row_up					; no, go
@@ -3096,28 +3096,28 @@ find_farthest_down:	; $739D
         stb     *byte_5e                ; store row
         sta     *byte_5d                ; store col
 loc_73A1:	; $73A1
-        ldy     #(lsb_row_addr+1)
+        ldy     #(lsb_row_a_tbl+1)
         lda			b,y
-        sta     *byte_8
-        ldy     #(msb_row_addr_2+1)
+        sta     *lsb_row_lda_static
+        ldy     #(msb_row_a_static_tbl+1)
         lda			b,y
-        sta     *byte_9                 ; setup tilemap address (row below)
+        sta     *msb_row_lda_static                 ; setup tilemap address (row below)
         ldb     *byte_5d                ; col
-        ldy     *byte_9
+        ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap
         cmpa    #1                      ; brick?
         beq     loc_739A                ; yes, exit
         cmpa    #2                      ; solid?
         beq     loc_739A                ; yes, exit
         ldb     *byte_5e                ; row
-        ldy     #lsb_row_addr
+        ldy     #lsb_row_a_tbl
         lda			b,y
-        sta     *byte_8
-        ldy     #msb_row_addr_2
+        sta     *lsb_row_lda_static
+        ldy     #msb_row_a_static_tbl
         lda			b,y
-        sta     *byte_9                 ; setup tilemap address
+        sta     *msb_row_lda_static                 ; setup tilemap address
         ldb     *byte_5d                ; col
-        ldy     *byte_9
+        ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap
         cmpa    #0                      ; space (falling)?
         beq     try_next_row_down       ; yes, go
@@ -3125,20 +3125,20 @@ loc_73A1:	; $73A1
                                         ; left-most col?
         beq     down_try_right          ; yes, go
         decb                            ; column to left
-        ldy     *byte_9
+        ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap (left)
         cmpa    #4                      ; rope?
         beq     1$			                ; yes, go
         ldb     *byte_5e                ; row
-        ldy     #(lsb_row_addr+1)
+        ldy     #(lsb_row_a_tbl+1)
         lda			b,y
-        sta     *byte_8
-        ldy     #(msb_row_addr_2+1)
+        sta     *lsb_row_lda_static
+        ldy     #(msb_row_a_static_tbl+1)
         lda			b,y
-        sta     *byte_9                 ; setup tilemap address (row below)
+        sta     *msb_row_lda_static                 ; setup tilemap address (row below)
         ldb     *byte_5d                ; col
         decb                            ; column to left
-        ldy     *byte_9
+        ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap (below, left)
         cmpa    #1                      ; brick?
         beq     1$											; yes, go
@@ -3156,20 +3156,20 @@ down_try_right:	; $73FB
         cmpb    #27                     ; right-most column?
         bcc     try_next_row_down       ; yes, go
         incb                            ; column to right
-        ldy     *byte_9
+        ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap (row/below, right)
         cmpa    #4                      ; rope?
         beq     1$											; yes, go
         ldb     *byte_5e                ; row
-        ldy     #(lsb_row_addr+1)
+        ldy     #(lsb_row_a_tbl+1)
         lda			b,y
-        sta     *byte_8
-        ldy     #(msb_row_addr_2+1)
+        sta     *lsb_row_lda_static
+        ldy     #(msb_row_a_static_tbl+1)
         lda			b,y
-        sta     *byte_9                 ; setup tilemap address (row below)
+        sta     *msb_row_lda_static                 ; setup tilemap address (row below)
         ldb     *byte_5d                ; col
         incb                            ; column to right
-        ldy     *byte_9
+        ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap (below, right)
         cmpa    #1                      ; brick?
         beq     1$											; yes, go
@@ -3205,15 +3205,15 @@ find_farthest_left:	; $7444
         lda     *farthest_left        	; guard col
         beq     find_farthest_right   	; left-most col? yes, go
         ldb     *scanline               ; guard row
-        ldy     #lsb_row_addr
+        ldy     #lsb_row_a_tbl
         lda			b,y
-        sta     *lsb_row_level_data_addr
-        ldy     #msb_row_addr_1
+        sta     *lsb_row_lda_dyn
+        ldy     #msb_row_a_dyn_tbl
         lda			b,y
-        sta     *msb_row_level_data_addr ; setup tilemap address
+        sta     *msb_row_lda_dyn ; setup tilemap address
         ldb     *farthest_left        	; guard col
         decb                            ; column to left
-        ldy     *msb_row_level_data_addr
+        ldy     *msb_row_lda_dyn
         lda			b,y											; get object from tilemap (left)
         cmpa    #1                      ; brick?
         beq     find_farthest_right   	; yes, go
@@ -3226,15 +3226,15 @@ find_farthest_left:	; $7444
         ldb     *scanline               ; guard row
         cmpb    #15                     ; bottom row?
         beq     1$											; yes, go
-        ldy     #(lsb_row_addr+1)
+        ldy     #(lsb_row_a_tbl+1)
         lda			b,y
-        sta     *byte_8
-        ldy     #(msb_row_addr_2+1)
+        sta     *lsb_row_lda_static
+        ldy     #(msb_row_a_static_tbl+1)
         lda			b,y
-        sta     *byte_9                 ; setup tilemap (row below)
+        sta     *msb_row_lda_static                 ; setup tilemap (row below)
         ldb     *farthest_left
         decb                            ; below left
-        ldy     *byte_9
+        ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap (below, left)
         cmpa    #1                      ; brick?
         beq     1$											; yes, we can walk on it, go
@@ -3251,15 +3251,15 @@ find_farthest_right: ; $7490
         cmpa    #27                     ; right-most column?
         beq     3$											; yes, go
         ldb     *scanline               ; guard row
-        ldy     #lsb_row_addr
+        ldy     #lsb_row_a_tbl
         lda			b,y
-        sta     *lsb_row_level_data_addr
-        ldy     #msb_row_addr_1
+        sta     *lsb_row_lda_dyn
+        ldy     #msb_row_a_dyn_tbl
         lda			b,y
-        sta     *msb_row_level_data_addr ; setup tilemap address
+        sta     *msb_row_lda_dyn ; setup tilemap address
         ldb     *farthest_right
         incb                            ; column to right
-        ldy     *msb_row_level_data_addr
+        ldy     *msb_row_lda_dyn
         lda			b,y											; get object from tilemap (right)
         cmpa    #1                      ; brick?
         beq     3$											; yes, exit
@@ -3272,15 +3272,15 @@ find_farthest_right: ; $7490
         ldb     *scanline               ; guard row
         cmpb    #15                     ; bottom row?
         beq     1$											; yes, go
-        ldy     #(lsb_row_addr+1)
+        ldy     #(lsb_row_a_tbl+1)
         lda			b,y
-        sta     *byte_8
-        ldy     #(msb_row_addr_2+1)
+        sta     *lsb_row_lda_static
+        ldy     #(msb_row_a_static_tbl+1)
         lda			b,y
-        sta     *byte_9                 ; setup tilemap address (row below)
+        sta     *msb_row_lda_static                 ; setup tilemap address (row below)
         ldb     *farthest_right
         incb                            ; column to right
-        ldy     *byte_9
+        ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap (below, right)
         cmpa    #1                      ; brick?
         beq     1$											; yes, go
@@ -3296,7 +3296,7 @@ find_farthest_right: ; $7490
 calc_guard_xychar:	; $74DF
 				lda			*curr_guard_col
 				ldb			*curr_guard_x_offset
-				jsr			calc_x_in_2_pixel_incs	; B=x
+				jsr			calc_x_div_2						; B=x
 				stb			*msg_char
 				ldb			*curr_guard_row
 				lda			*curr_guard_y_offset
@@ -3305,7 +3305,7 @@ calc_guard_xychar:	; $74DF
 				ldb			*curr_guard_sprite
 				ldy			#guard_sprite_to_char_tbl
 				lda			b,y											; A=char
-				ldb			*msg_char								; B=x_in_2_pixel_incs		
+				ldb			*msg_char								; B=x_div_2		
 				rts
 
 check_guard_pickup_gold:	; $74F7
@@ -3316,14 +3316,14 @@ check_guard_pickup_gold:	; $74F7
 				cmpa		#2
 				bne			1$
 				ldb			*curr_guard_row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*byte_8
-				ldy			#msb_row_addr_2
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*byte_9									; setup tilemap address
+				sta			*msb_row_lda_static									; setup tilemap address
 				ldb			*curr_guard_col
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap
 				cmpa		#7											; gold?
 				bne			1$											; no, exit
@@ -3343,7 +3343,7 @@ check_guard_pickup_gold:	; $74F7
 				lda			*col
 				jsr			calc_colx5_scanline
 				tfr			d,x											; X(lsb)=scanline
-				tfr			a,b											; B=x_in_2_pixel_incs
+				tfr			a,b											; B=x_div_2
 				lda			#7											; A=char (gold)
 				jmp			wipe_char
 1$:			rts
@@ -3355,15 +3355,15 @@ check_guard_drop_gold:	; $753E
 				bne			2$
         ldb     *curr_guard_row
         stb     *row
-        ldy     #lsb_row_addr
+        ldy     #lsb_row_a_tbl
         lda			b,y
-        sta     *byte_8
-        ldy     #msb_row_addr_2
+        sta     *lsb_row_lda_static
+        ldy     #msb_row_a_static_tbl
         lda			b,y
-        sta     *byte_9									; setup tilemap address
+        sta     *msb_row_lda_static									; setup tilemap address
         ldb     *curr_guard_col
         stb     *col                    ; col
-        ldy     *byte_9
+        ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap
         cmpa    #0                      ; space?
         bne     1$											; no, skip
@@ -3374,7 +3374,7 @@ check_guard_drop_gold:	; $753E
         lda     *col
         jsr     calc_colx5_scanline
 				tfr			d,x											; X(lsb)=scanline
-				tfr			a,b											; B=x_in_2_pixel_incs
+				tfr			a,b											; B=x_div_2
         lda     #7                      ; gold
         jmp     display_transparent_char ; render onto fg
 1$:     dec     *curr_guard_state
@@ -3474,7 +3474,7 @@ respawn_guards_and_update_holes: ; $75F4
 check_hole:
 				ldy			#hole_cnt
 				lda			b,y											; get hole counter
-				stb			*byte_88								; save hole#
+				stb			*curr_hole							; save hole#
 				tsta														; 6809 only!
 				bne			update_hole							; active, go
 				jmp			next_hole
@@ -3499,7 +3499,7 @@ update_hole_tile:	; $7627
 				ldb			*row
 				jsr			calc_colx5_scanline		
 				tfr			d,x											; X(lsb)=scanline
-				tfr			a,b											; B=x_in_2_pixel_incs
+				tfr			a,b											; B=x_div_2
 				lda			#0											; space
 				jsr			wipe_char
 goto_next_hole: ; $7636				
@@ -3511,27 +3511,27 @@ chk_hole_cnt_10:	; $7636
 				bra			update_hole_tile
 
 restore_brick:	; $7641
-				ldb			*byte_88								; hole#
+				ldb			*curr_hole							; hole#
 				ldy			#hole_row
 				lda			b,y
 				sta			*row
 				tfr			a,b											; B=row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*lsb_row_level_data_addr
-				sta			*byte_8
-				ldy			#msb_row_addr_1
+				sta			*lsb_row_lda_dyn
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_dyn_tbl
 				lda			b,y
-				sta			*msb_row_level_data_addr
-				ldy			#msb_row_addr_2
+				sta			*msb_row_lda_dyn
+				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*byte_9									; setup tilemap address
-				ldb			*byte_88								; hole#
+				sta			*msb_row_lda_static			; setup tilemap address
+				ldb			*curr_hole							; hole#
 				ldy			#hole_col
 				lda			b,y
 				sta			*col
 				tfr			a,b											; B=col
-				ldy			*msb_row_level_data_addr
+				ldy			*msb_row_lda_dyn
 				lda			b,y											; get object from tilemap
 				cmpa		#0											; space?
 				bne			1$											; no, skip
@@ -3547,7 +3547,7 @@ restore_brick:	; $7641
 3$:			jmp			redisplay_brick
 4$:			lda			#1											; brick
 				sta			b,y											; update tilemap
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				sta			b,y											; update tilemap
 				jsr			display_char_pg1				; render on screen
 				lda			#1											; brick
@@ -3577,14 +3577,14 @@ check_trapped_guards:	; $768A
 				lda			#1
 				sta			*row										; guard row=1
 2$:			ldb			*row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*byte_8
-				ldy			#msb_row_addr_2
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*byte_9									; setup tilemap address
+				sta			*msb_row_lda_static									; setup tilemap address
 				ldb			*guard_respawn_col
-3$:			ldy			*byte_9
+3$:			ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap				
 				cmpa		#0											; space?
 				beq			4$											; yes, skip
@@ -3624,14 +3624,14 @@ check_next_trapped:	; $76FE
 
 redisplay_brick:	; $7701				
 				lda			#1											; brick
-				ldy			*msb_row_level_data_addr
+				ldy			*msb_row_lda_dyn
 				sta			b,y											; update tilemap
 				jsr			display_char_pg1
 				lda			#1											; brick
 				jsr			display_char_pg2
 				
 next_hole:	; $770D
-				ldb			*byte_88								; hole#
+				ldb			*curr_hole							; hole#
 				decb														; next hole
 				bmi			1$											; done? yes, exit
 				jmp			check_hole							; loop
@@ -3688,17 +3688,17 @@ next_guard: ; $7765
 
 finish_respawn:	; $776C
 				ldb			*row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*lsb_row_level_data_addr
-				ldy			#msb_row_addr_1
+				sta			*lsb_row_lda_dyn
+				ldy			#msb_row_a_dyn_tbl
 				lda			b,y
-				sta			*msb_row_level_data_addr	; setup tilemap address
+				sta			*msb_row_lda_dyn	; setup tilemap address
 				ldb			*curr_guard
 				ldy			#guard_cnt
 				inc			b,y
 				ldb			*col
-				ldy			*msb_row_level_data_addr
+				ldy			*msb_row_lda_dyn
 				lda			b,y											; get object from tilemap
 				bne			next_guard							; not a space, exit
 				lda			#8											; guard
@@ -3738,15 +3738,15 @@ display_hs_screen:	; $77AC
         jsr     gcls2
         ldb     #15                     ; 15 rows to draw
         stb     *row
-3$:     ldy     #lsb_row_addr
+3$:     ldy     #lsb_row_a_tbl
         lda     b,y
-        sta     *byte_8
-        ldy     #msb_row_addr_2
+        sta     *lsb_row_lda_static
+        ldy     #msb_row_a_static_tbl
         lda     b,y
-        sta     *byte_9                 ; setup tilemap address
+        sta     *msb_row_lda_static                 ; setup tilemap address
         ldb     #27                     ; 28 columns to draw
         stb     *col
-4$:     ldy     *byte_9
+4$:     ldy     *msb_row_lda_static
         lda     b,y                     ; get object from tilemap
         cmpa    #5                      ; fall-thru?
         bne     5$                      ; no, skip
@@ -3759,7 +3759,7 @@ display_hs_screen:	; $77AC
         ldb     *row
         bpl     3$                      ; draw all rows
         ldb     #0x1e                   ; max holes
-6$:     stb     *byte_88
+6$:     stb     *curr_hole
         ldy     #hole_cnt
         lda     b,y                     ; hole active?
         beq     9$                      ; no, skip
@@ -3783,14 +3783,14 @@ display_hs_screen:	; $77AC
         bra     9$
 8$:     lda     #0x38                   ; brick refill 1
         jsr     display_char_pg2        ; render onto background
-9$:     ldb     *byte_88
+9$:     ldb     *curr_hole
         decb
         bpl     6$                      ; loop all holes
         ldb     *no_guards              ; any guards?
         beq     14$                     ; no, exit
 10$:    ldy     #guard_cnt
         lda     b,y                     ; get guard_cnt
-        stb     *byte_88                ; zero?
+        stb     *curr_hole              ; (guard #) - zero?
         tsta                            ; 6809 only
         beq     13$                     ; yes, skip
         pshs    a                       ; A=guard_cnt
@@ -3809,8 +3809,8 @@ display_hs_screen:	; $77AC
         bne     12$                     ; skip
 11$:    lda     #0x3a
 12$:    jsr     display_char_pg2
-13$:    ldb     *byte_88
-        decb
+13$:    ldb     *curr_hole							; (guard #)
+        decb														; next guard
         bne     10$                     ; loop all guards
 14$:    jmp     read_controls        
 				
@@ -4242,7 +4242,7 @@ right_char_masks:	; $832F
 .endif
 
 wipe_char:	; $8336
-; A=char, B=x_in_2_pixel_incs, X(lsb)=scanline
+; A=char, B=x_div_2, X(lsb)=scanline
 				exg			d,x				
 				stb			*scanline
 				exg			d,x
@@ -4297,7 +4297,7 @@ wipe_2_byte_char_from_video:
 				rts
 
 display_transparent_char:	; $83A7
-; A=char, B=x_in_2_pixel_incs, X(lsb)=scanline
+; A=char, B=x_div_2, X(lsb)=scanline
 				exg			d,x											; X(lsb)=scanline
 				stb			*scanline
 				exg			d,x
@@ -4650,23 +4650,23 @@ draw_end_of_screen_ladder:	; $8631
 				lda			b,y
 				sta			*row
 				tfr			a,b											; B=row
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*byte_8
-				ldy			#msb_row_addr_1
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_dyn_tbl
 				lda			b,y
-				sta			*msb_row_level_data_addr
-				ldy			#msb_row_addr_2
+				sta			*msb_row_lda_dyn
+				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*byte_9									; setup tilemap address
+				sta			*msb_row_lda_static									; setup tilemap address
 				ldb			*col
-				ldy			*byte_9
+				ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap
 				bne			7$											; not a space, skip
 				lda			#3											; ladder
-				;ldy			*byte_9
+				;ldy			*msb_row_lda_static
 				sta			b,y											; update tilemap
-				ldy			*msb_row_level_data_addr
+				ldy			*msb_row_lda_dyn
 				lda			b,y											; get object from tilemap
 				bne			4$											; not a space, skip
 				lda			#3											; ladder
@@ -4677,7 +4677,7 @@ draw_end_of_screen_ladder:	; $8631
 				ldb			*row
 				jsr			calc_colx5_scanline			; B=scanline
 				tfr			d,x											; X(lsb)=scanline
-				tfr			a,b											; B=col*5=x_in_2_pixel_incs
+				tfr			a,b											; B=col*5=x_div_2
 				lda			#3											; ladder
 				jsr			display_transparent_char	; update video
 				ldb			*no_eos_ladder_entries
@@ -4929,16 +4929,16 @@ throttle_game_speed:  ; $8844
         rts
         
 set_row_addr_1_2:	; $884B
-				ldy			#lsb_row_addr
+				ldy			#lsb_row_a_tbl
 				lda			b,y
-				sta			*lsb_row_level_data_addr
-				sta			*byte_8
-				ldy			#msb_row_addr_1
+				sta			*lsb_row_lda_dyn
+				sta			*lsb_row_lda_static
+				ldy			#msb_row_a_dyn_tbl
 				lda			b,y
-				sta			*msb_row_level_data_addr
-				ldy			#msb_row_addr_2
+				sta			*msb_row_lda_dyn
+				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*byte_9
+				sta			*msb_row_lda_static
 				rts
 				
 calc_colx5_scanline:	; $885d
@@ -4966,7 +4966,7 @@ calc_col_addr_shift:	; $8868
 				rts
 
 calc_addr_shift_for_x:	; $8872
-; B=x_in_2_pixel_incs
+; B=x_div_2
 				tfr			b,a
 .ifdef GFX_1BPP
 				lsra
@@ -4985,24 +4985,24 @@ calc_scanline: ; $887C
 				pshs		a												; save y_offset_within_tile
 				jsr			calc_colx5_scanline			; B=scanline
 				puls		a												; restore y_offset_within_tile
-				ldy			#byte_888a
+				ldy			#lsb_row_lda_static88a
 				addb		a,y											; B=scanline
 				rts
 
-byte_888a:
+lsb_row_lda_static88a:
 				.db			-5, -3, 0, 2, 4
 								
-calc_x_in_2_pixel_incs: ; $888F
+calc_x_div_2: ; $888F
 ; A=col, B=x_offset_within_tile
 				pshs		b												; save x_offset_within_tile
 				jsr			calc_colx5_scanline			; A=colx5
 				tfr			a,b											; B=colx5
 				puls		a												; restore x_offset_within_tile
-				ldy			#byte_889d
+				ldy			#lsb_row_lda_static89d
 				addb		a,y											; B=x as count of 2-pixel increments
 				rts
 
-byte_889d:
+lsb_row_lda_static89d:
 				.db			-2, -1, 0, 1, 2
 								
 wipe_and_draw_level:	; $88A2
@@ -5437,17 +5437,17 @@ attract_move_tbl:	; $9B00
 				.db 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 				.db 		0
 									
-lsb_row_addr:	; $1C05
+lsb_row_a_tbl:	; $1C05
 				.db		<(ldu1+0*28), <(ldu1+1*28), <(ldu1+2*28), <(ldu1+3*28)
 				.db		<(ldu1+4*28), <(ldu1+5*28), <(ldu1+6*28), <(ldu1+7*28)
 				.db		<(ldu1+8*28), <(ldu1+9*28), <(ldu1+10*28), <(ldu1+11*28)
 				.db		<(ldu1+12*28), <(ldu1+13*28), <(ldu1+14*28), <(ldu1+15*28)
-msb_row_addr_1: ; $1C15
+msb_row_a_dyn_tbl: ; $1C15
 				.db		>(ldu1+0*28), >(ldu1+1*28), >(ldu1+2*28), >(ldu1+3*28)
 				.db		>(ldu1+4*28), >(ldu1+5*28), >(ldu1+6*28), >(ldu1+7*28)
 				.db		>(ldu1+8*28), >(ldu1+9*28), >(ldu1+10*28), >(ldu1+11*28)
 				.db		>(ldu1+12*28), >(ldu1+13*28), >(ldu1+14*28), >(ldu1+15*28)
-msb_row_addr_2:	; $1C25
+msb_row_a_static_tbl:	; $1C25
 				.db		>(ldu2+0*28), >(ldu2+1*28), >(ldu2+2*28), >(ldu2+3*28)
 				.db		>(ldu2+4*28), >(ldu2+5*28), >(ldu2+6*28), >(ldu2+7*28)
 				.db		>(ldu2+8*28), >(ldu2+9*28), >(ldu2+10*28), >(ldu2+11*28)
