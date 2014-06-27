@@ -122,7 +122,9 @@ static void adjust_y_offset_within_tile (void);
 static bool add_hole_entry (uint8_t col);
 static void handle_guards (void);
 static void update_guards (void);
-static void calc_guard_xychar (uint8_t chr, uint8_t x_div_2, uint8_t y);
+static void calc_guard_xychar (uint8_t& chr, uint8_t& x_div_2, uint8_t& y);
+static uint8_t guard_ai (uint8_t row, uint8_t col);
+static void check_guard_pickup_gold (void);
 static void adjust_guard_x_offset (void);
 static void adjust_guard_y_offset (void);
 static void copy_curr_to_guard (void);
@@ -1213,10 +1215,116 @@ handle_guard_falling:
  	if (zp.curr_guard_y_offset != 2)
  		goto render_guard_and_ret;
  	check_guard_pickup_gold ();
- 	
+	if (ldu2[zp.curr_guard_row][zp.curr_guard_col] != TILE_BRICK)
+ 		goto render_guard_and_ret;
+	if (zp.curr_guard_state < 0)
+		zp.no_gold--;
+	zp.curr_guard_state = zp.guard_trap_cnt_init;
+	update_and_display_score (SCORE_TRAP);
+	//queue_sound();		
+		
+render_guard_and_ret:
+	calc_guard_xychar (chr, x_div_2, y);
+	display_transparent_char (chr, x_div_2, y);
+	copy_curr_to_guard ();
+	return;
+
+guard_fall_into_next_row:
+	zp.curr_guard_y_offset = 0;
+	tile = ldu2[zp.curr_guard_row][zp.curr_guard_col];
+	if (tile == TILE_BRICK)
+		tile = TILE_SPACE;
+	ldu1[zp.curr_guard_row][zp.curr_guard_col] = tile;
+	zp.curr_guard_row++;
+	if (ldu1[zp.curr_guard_row][zp.curr_guard_col] == TILE_PLAYER)
+		KILL_PLAYER;
+	// guard carrying gold?
+	if (ldu2[zp.curr_guard_row][zp.curr_guard_col] == TILE_BRICK &&
+		zp.curr_guard_state < 0)
+	{
+		// handle guard's gold
+		zp.row = zp.curr_guard_row-1;
+		zp.col = zp.curr_guard_col;
+		if (ldu2[zp.row][zp.col] != TILE_SPACE)
+			zp.no_gold--;
+		else
+		{
+		//guard_drop_gold:
+			ldu1[zp.row][zp.col] = TILE_GOLD;
+			ldu2[zp.row][zp.col] = TILE_GOLD;
+			display_char_pg (2, TILE_GOLD);
+			calc_colx5_scanline (zp.col, zp.row, x_div_2, y);
+			display_transparent_char (TILE_GOLD, x_div_2, y);
+		}
+	
+	//loc_6e46:
+		zp.curr_guard_state = 0;
+	}
+
+//loc_6e58:
+	// update dynamic playfield and display trapped guard
+	ldu1[zp.curr_guard_row][zp.curr_guard_col] = TILE_GUARD;
+	calc_guard_xychar (chr, x_div_2, y);
+	display_transparent_char (chr, x_div_2, y);
+	copy_guard_to_curr ();
+	return;
+	
+check_wriggle:
+	if (zp.curr_guard_state >= 7)
+	{
+		static uint8_t wriggle_tbl[] =
+		{
+			2, 1, 2, 3, 2, 1
+		};
+
+		calc_guard_xychar (chr, x_div_2, y);
+		wipe_char (chr, x_div_2, y);
+		zp.curr_guard_x_offset = wriggle_tbl[zp.curr_guard_state-7];
+		calc_guard_xychar (chr, x_div_2, y);
+		display_transparent_char (chr, x_div_2, y);
+		copy_guard_to_curr ();
+		return;
+	}
+
+#define GUARD_NO_MOVE			0
+#define GUARD_MOVE_LEFT		1
+#define GUARD_MOVE_RIGHT	2
+#define GUARD_MOVE_UP			3
+#define GUARD_MOVE_DOWN		4
+			
+calc_guard_movement:
+	uint8_t	guard_movement = guard_ai (zp.curr_guard_col, zp.curr_guard_row);
+	switch (guard_movement)
+	{
+		case GUARD_MOVE_LEFT :
+			//guard_move_left ();
+			break;
+		case GUARD_MOVE_RIGHT :
+			//guard_move_right ();
+			break;
+		case GUARD_MOVE_UP :
+			//guard_move_up ();
+			break;
+		case GUARD_MOVE_DOWN:
+			//guard_move_down ();
+			break;
+		case GUARD_NO_MOVE :
+		default :
+			copy_guard_to_curr ();
+			break;
+	}
 }
 
-void calc_guard_xychar (uint8_t chr, uint8_t x_div_2, uint8_t y)
+uint8_t guard_ai (uint8_t row, uint8_t col)
+{
+	return (GUARD_NO_MOVE);
+}
+
+void calc_guard_xychar (uint8_t& chr, uint8_t& x_div_2, uint8_t& y)
+{
+}
+
+void check_guard_pickup_gold (void)
 {
 }
 
