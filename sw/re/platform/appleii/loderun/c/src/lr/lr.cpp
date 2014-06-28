@@ -151,7 +151,7 @@ static void play_sound (uint8_t freq, uint8_t duration);
 static void throttle_and_update_sound (void);
 static void calc_colx5_scanline (uint8_t col, uint8_t row, uint8_t& colx5, uint8_t& scanline);
 static void calc_scanline (uint8_t offset, uint8_t row, uint8_t& scanline);
-static void calc_x_in_2_pixel_incs (uint8_t col, uint8_t offset, uint8_t& x);
+static void calc_x_div_2 (uint8_t col, uint8_t offset, uint8_t& x);
 static void wipe_and_draw_level (void);
 
 // end of prototypes
@@ -1063,7 +1063,7 @@ void calc_char_and_addr (uint8_t& chr, uint8_t& x_div_2, uint8_t& y)
 		0x17, 0x25, 0x14, 0xE, 0x12
 	};
 
-	calc_x_in_2_pixel_incs (zp.current_col, zp.x_offset_within_tile, x_div_2);
+	calc_x_div_2 (zp.current_col, zp.x_offset_within_tile, x_div_2);
   calc_scanline (zp.y_offset_within_tile, zp.current_row, y);
   chr = sprite_to_char_tbl[zp.sprite_index];
 }
@@ -1322,6 +1322,15 @@ uint8_t guard_ai (uint8_t row, uint8_t col)
 
 void calc_guard_xychar (uint8_t& chr, uint8_t& x_div_2, uint8_t& y)
 {
+	static uint8_t guard_sprite_to_char_tbl[] =
+	{
+		8, 0x2B, 0x2C, 0x30, 0x31, 0x32, 0x36, 0x28, 0x29, 0x2A, 0x2D, 0x2E, 0x2F,
+		0x35, 0x33, 0x34
+	};
+
+	calc_x_div_2 (zp.curr_guard_col, zp.curr_guard_x_offset, x_div_2);
+	calc_scanline (zp.curr_guard_y_offset, zp.curr_guard_y_offset, y);
+	chr = guard_sprite_to_char_tbl[zp.curr_guard_sprite];
 }
 
 void check_guard_pickup_gold (void)
@@ -1330,10 +1339,30 @@ void check_guard_pickup_gold (void)
 
 void adjust_guard_x_offset (void)
 {
+	if (zp.curr_guard_x_offset < 2)
+	{
+		zp.curr_guard_x_offset++;
+		check_guard_pickup_gold ();
+	}
+	else if (zp.curr_guard_x_offset > 2)
+	{
+		zp.curr_guard_x_offset--;
+		check_guard_pickup_gold ();
+	}
 }
 
 void adjust_guard_y_offset (void)
 {
+	if (zp.curr_guard_y_offset < 2)
+	{
+		zp.curr_guard_y_offset++;
+		check_guard_pickup_gold ();
+	}
+	else if (zp.curr_guard_y_offset > 2)
+	{
+		zp.curr_guard_y_offset--;
+		check_guard_pickup_gold ();
+	}
 }
 
 void copy_curr_to_guard (void)
@@ -1758,7 +1787,7 @@ void calc_scanline (uint8_t offset, uint8_t row, uint8_t& scanline)
 	scanline = row * 11 + byte_888a[offset];
 }
 
-void calc_x_in_2_pixel_incs (uint8_t col, uint8_t offset, uint8_t& x)
+void calc_x_div_2 (uint8_t col, uint8_t offset, uint8_t& x)
 {
 	static uint8_t byte_889d[] =
 	{
