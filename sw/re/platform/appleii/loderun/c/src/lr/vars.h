@@ -82,7 +82,7 @@ typedef struct zeropage_t
   uint8_t   sound_enabled;
   uint8_t   level_active;
   uint8_t   not_falling;
-  uint8_t   dig_dir;
+  int8_t   	dig_dir;
   uint8_t   no_cheat;
   uint8_t   key_1;
   uint8_t   key_2;

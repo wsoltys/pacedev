@@ -30,7 +30,7 @@ typedef enum
 
 //#define DEBUG
 //#define DEBUG_DISABLE_DEMO_EXIT
-//#define DEBUG_GUARD_COPY
+#define DEBUG_GUARD_COPY
 //#define DEBUG_INVINCIBLE
 //#define DEBUG_NO_BITWISE_COLLISION_DETECT
 
@@ -123,8 +123,14 @@ static bool add_hole_entry (uint8_t col);
 static void handle_guards (void);
 static void update_guards (void);
 static void calc_guard_xychar (uint8_t& chr, uint8_t& x_div_2, uint8_t& y);
+static void guard_move_up (void);
+static void guard_move_down (void);
+static void guard_move_left (void);
+static void guard_move_right (void);
 static uint8_t guard_ai (uint8_t row, uint8_t col);
 static void check_guard_pickup_gold (void);
+static void check_guard_drop_gold (void);
+static void update_guard_sprite_index (uint8_t first, uint8_t last);
 static void adjust_guard_x_offset (void);
 static void adjust_guard_y_offset (void);
 static void copy_curr_to_guard (void);
@@ -150,7 +156,7 @@ static uint8_t blink_char_and_wait_for_key (uint8_t chr);
 static void play_sound (uint8_t freq, uint8_t duration);
 static void throttle_and_update_sound (void);
 static void calc_colx5_scanline (uint8_t col, uint8_t row, uint8_t& colx5, uint8_t& scanline);
-static void calc_scanline (uint8_t offset, uint8_t row, uint8_t& scanline);
+static void calc_scanline (uint8_t row, uint8_t offset, uint8_t& scanline);
 static void calc_x_div_2 (uint8_t col, uint8_t offset, uint8_t& x);
 static void wipe_and_draw_level (void);
 
@@ -375,10 +381,6 @@ bool title_wait_for_key (void)
 	return (false);
 }
 
-void read_and_display_scores (void)
-{
-}
-
 void high_score_screen (void)
 {
 	fprintf (stderr, "%s()\n", __FUNCTION__);
@@ -561,7 +563,7 @@ void handle_player (void)
   zp.enable_collision_detect = 1;
   if (zp.dig_dir == 0)
     goto not_digging;
-  if (zp.dig_dir == (uint8_t)-1)
+  if (zp.dig_dir == -1)
     goto digging_left;
   else
     goto digging_right;
@@ -854,7 +856,7 @@ can_move_down:
 
 bool dig_left (void)
 {
-  zp.dig_dir = (uint8_t)-1;
+  zp.dig_dir = -1;
   zp.key_1 = (uint8_t)-1;
   zp.key_2 = (uint8_t)-1;
   zp.dig_sprite = 0;
@@ -1064,7 +1066,7 @@ void calc_char_and_addr (uint8_t& chr, uint8_t& x_div_2, uint8_t& y)
 	};
 
 	calc_x_div_2 (zp.current_col, zp.x_offset_within_tile, x_div_2);
-  calc_scanline (zp.y_offset_within_tile, zp.current_row, y);
+  calc_scanline (zp.current_row, zp.y_offset_within_tile, y);
   chr = sprite_to_char_tbl[zp.sprite_index];
 }
 
@@ -1091,7 +1093,7 @@ void check_for_gold (void)
 
 void update_sprite_index (uint8_t first, uint8_t last)
 {
-	++zp.sprite_index;
+	zp.sprite_index++;
 	if (zp.sprite_index < first || zp.sprite_index > last)
 		zp.sprite_index = first;
 }
@@ -1293,20 +1295,20 @@ check_wriggle:
 #define GUARD_MOVE_DOWN		4
 			
 calc_guard_movement:
-	uint8_t	guard_movement = guard_ai (zp.curr_guard_col, zp.curr_guard_row);
+	uint8_t	guard_movement = guard_ai (zp.curr_guard_row, zp.curr_guard_col);
 	switch (guard_movement)
 	{
 		case GUARD_MOVE_LEFT :
-			//guard_move_left ();
+			guard_move_left ();
 			break;
 		case GUARD_MOVE_RIGHT :
-			//guard_move_right ();
+			guard_move_right ();
 			break;
 		case GUARD_MOVE_UP :
-			//guard_move_up ();
+			guard_move_up ();
 			break;
 		case GUARD_MOVE_DOWN:
-			//guard_move_down ();
+			guard_move_down ();
 			break;
 		case GUARD_NO_MOVE :
 		default :
@@ -1315,8 +1317,127 @@ calc_guard_movement:
 	}
 }
 
+void guard_move_up (void)
+{
+}
+
+void guard_move_down (void)
+{
+}
+
+void guard_move_left (void)
+{
+	uint8_t	chr, x_div_2, y;
+	uint8_t	tile;
+	
+	if (zp.curr_guard_x_offset >= 3)
+		goto guard_can_move_left;
+	if (zp.curr_guard_col == 0)
+		goto guard_cant_move_left;
+	tile = ldu1[zp.curr_guard_row][zp.curr_guard_col-1];
+	if (tile == TILE_GUARD || tile == TILE_SOLID || tile == TILE_BRICK)
+		goto guard_cant_move_left;
+	if (ldu2[zp.curr_guard_row][zp.curr_guard_col-1] != TILE_FALLTHRU)
+		goto guard_can_move_left;
+		
+guard_cant_move_left:
+	copy_curr_to_guard ();
+	return;
+	
+guard_can_move_left:
+	calc_guard_xychar (chr, x_div_2, y);
+	wipe_char (chr, x_div_2, y);
+	adjust_guard_y_offset ();
+	zp.curr_guard_dir = (uint8_t)-1;
+	if (--zp.curr_guard_x_offset == (uint8_t)-1)
+	{
+		check_guard_drop_gold ();
+		tile = ldu2[zp.curr_guard_row][zp.curr_guard_col];
+		if (tile == TILE_BRICK)
+			tile = TILE_SPACE;
+		ldu1[zp.curr_guard_row][zp.curr_guard_col] = tile;
+		zp.curr_guard_col--;
+		if (ldu1[zp.curr_guard_row][zp.curr_guard_col] == TILE_PLAYER)
+			KILL_PLAYER;
+		ldu1[zp.curr_guard_row][zp.curr_guard_col] = TILE_GUARD;
+		zp.curr_guard_x_offset = 4;
+	}
+	else
+		check_guard_pickup_gold ();
+	if (ldu2[zp.curr_guard_row][zp.curr_guard_col] != TILE_ROPE)
+		update_guard_sprite_index (0, 2);
+	else
+		update_guard_sprite_index (3, 5);
+	calc_guard_xychar (chr, x_div_2, y);
+	display_transparent_char (chr, x_div_2, y);
+	copy_curr_to_guard ();
+}
+
+void guard_move_right (void)
+{
+	uint8_t	chr, x_div_2, y;
+	uint8_t	tile;
+	
+	if (zp.curr_guard_x_offset < 2)
+		goto guard_can_move_right;
+	if (zp.curr_guard_col == 27)
+		goto guard_cant_move_right;
+	tile = ldu1[zp.curr_guard_row][zp.curr_guard_col+1];
+	if (tile == TILE_GUARD || tile == TILE_SOLID || tile == TILE_BRICK)
+		goto guard_cant_move_right;
+	if (ldu2[zp.curr_guard_row][zp.curr_guard_col-1] != TILE_FALLTHRU)
+		goto guard_can_move_right;
+		
+guard_cant_move_right:
+	copy_curr_to_guard ();
+	return;
+	
+guard_can_move_right:
+	calc_guard_xychar (chr, x_div_2, y);
+	wipe_char (chr, x_div_2, y);
+	adjust_guard_y_offset ();
+	zp.curr_guard_dir = 1;
+	if (++zp.curr_guard_x_offset >= 5)
+	{
+		check_guard_drop_gold ();
+		tile = ldu2[zp.curr_guard_row][zp.curr_guard_col];
+		if (tile == TILE_BRICK)
+			tile = TILE_SPACE;
+		ldu1[zp.curr_guard_row][zp.curr_guard_col] = tile;
+		zp.curr_guard_col++;
+		if (ldu1[zp.curr_guard_row][zp.curr_guard_col] == TILE_PLAYER)
+			KILL_PLAYER;
+		ldu1[zp.curr_guard_row][zp.curr_guard_col] = TILE_GUARD;
+		zp.curr_guard_x_offset = 0;
+	}
+	else
+		check_guard_pickup_gold ();
+	if (ldu2[zp.curr_guard_row][zp.curr_guard_col] != TILE_ROPE)
+		update_guard_sprite_index (7, 9);
+	else
+		update_guard_sprite_index (10, 12);
+	calc_guard_xychar (chr, x_div_2, y);
+	display_transparent_char (chr, x_div_2, y);
+	copy_curr_to_guard ();
+}
+
 uint8_t guard_ai (uint8_t row, uint8_t col)
 {
+	#ifdef DEBUG_GUARD_COPY
+		if (zp.curr_guard == 2)
+		{
+			switch (zp.key_1)
+			{
+				case 'J' :
+					return (GUARD_MOVE_LEFT);
+				case 'L' :
+					return (GUARD_MOVE_RIGHT);
+				default :
+					break;
+			}
+		}
+	#else
+	#endif
 	return (GUARD_NO_MOVE);
 }
 
@@ -1329,12 +1450,56 @@ void calc_guard_xychar (uint8_t& chr, uint8_t& x_div_2, uint8_t& y)
 	};
 
 	calc_x_div_2 (zp.curr_guard_col, zp.curr_guard_x_offset, x_div_2);
-	calc_scanline (zp.curr_guard_y_offset, zp.curr_guard_y_offset, y);
+	calc_scanline (zp.curr_guard_row, zp.curr_guard_y_offset, y);
 	chr = guard_sprite_to_char_tbl[zp.curr_guard_sprite];
 }
 
 void check_guard_pickup_gold (void)
 {
+	uint8_t	x_div_2, y;
+	
+	if (zp.curr_guard_x_offset != 2 ||
+			zp.curr_guard_y_offset != 2)
+		return;
+	if (ldu2[zp.curr_guard_row][zp.curr_guard_col] != TILE_GOLD)
+		return;
+	if (zp.curr_guard_state < 0)
+		return;
+	zp.curr_guard_state = -1 - zp.guard_respawn_col;
+	ldu2[zp.curr_guard_row][zp.curr_guard_col] = TILE_SPACE;
+	zp.row = zp.curr_guard_row;
+	zp.col = zp.curr_guard_col;
+	display_char_pg (2, TILE_SPACE);
+	calc_colx5_scanline (zp.col, zp.row, x_div_2, y);
+	wipe_char (TILE_GOLD, x_div_2, y);
+}
+
+void check_guard_drop_gold (void)
+{
+	uint8_t	x_div_2, y;
+	
+	if (zp.curr_guard_state >= 0)
+		return;
+	if (++zp.curr_guard_state != 0)
+		return;
+	zp.row = zp.curr_guard_row;
+	zp.col = zp.curr_guard_col;
+	if (ldu2[zp.row][zp.col] == TILE_SPACE)
+	{
+		ldu2[zp.row][zp.col] = TILE_GOLD;
+		display_char_pg (2, TILE_GOLD);
+		calc_colx5_scanline (zp.col, zp.row, x_div_2, y);
+		display_transparent_char (TILE_GOLD, x_div_2, y);
+		return;
+	}
+	zp.curr_guard_state--;
+}
+
+void update_guard_sprite_index (uint8_t first, uint8_t last)
+{
+	zp.curr_guard_sprite++;
+	if (zp.curr_guard_sprite < first || zp.curr_guard_sprite > last)
+		zp.curr_guard_sprite = first;
 }
 
 void adjust_guard_x_offset (void)
@@ -1777,7 +1942,7 @@ void calc_colx5_scanline (uint8_t col, uint8_t row, uint8_t& colx5, uint8_t& sca
 	colx5 = col_x_5_tbl[col];
 }
 
-void calc_scanline (uint8_t offset, uint8_t row, uint8_t& scanline)
+void calc_scanline (uint8_t row, uint8_t offset, uint8_t& scanline)
 {
 	uint8_t	byte_888a[] =
 	{
