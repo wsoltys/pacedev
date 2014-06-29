@@ -2,8 +2,8 @@ typedef struct zeropage_t
 {
   uint8_t   current_col;
   uint8_t   current_row;
-  uint8_t   x_offset_within_tile;
-  uint8_t   y_offset_within_tile;
+  int8_t   	x_offset_within_tile;
+  int8_t   	y_offset_within_tile;
   uint8_t   sprite_index;
   uint8_t   dir;
   uint8_t   lsb_row_level_data_addr;
@@ -21,8 +21,8 @@ typedef struct zeropage_t
   uint8_t   curr_guard_sprite;
   uint8_t   curr_guard_dir;
   int8_t    curr_guard_state;
-  uint8_t   curr_guard_x_offset;
-  uint8_t   curr_guard_y_offset;
+  int8_t   	curr_guard_x_offset;
+  int8_t   	curr_guard_y_offset;
   uint8_t   curr_guard;
   uint8_t   nibble_cnt;
   uint8_t   scanline;

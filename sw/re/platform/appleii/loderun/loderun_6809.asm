@@ -2201,7 +2201,7 @@ guard_fall_into_next_row:	; $6DC0
 				sta			*msb_row_lda_dyn
 				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*msb_row_lda_static									; setup tilemap address
+				sta			*msb_row_lda_static			; setup tilemap address
 				ldb			*curr_guard_col
 				ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap
@@ -2221,7 +2221,7 @@ guard_fall_into_next_row:	; $6DC0
 				sta			*msb_row_lda_dyn
 				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*msb_row_lda_static									; setup tilemap address
+				sta			*msb_row_lda_static			; setup tilemap address
 				ldb			*curr_guard_col
 				ldy			*msb_row_lda_dyn
 				lda			b,y											; get object from tilemap
@@ -2344,7 +2344,7 @@ guard_move_up:	; $6EAC
         sta     *lsb_row_lda_dyn
         ldy     #msb_row_a_dyn_tbl
         lda			b,y
-        sta     *msb_row_lda_dyn	; setup tilemap address
+        sta     *msb_row_lda_dyn				; setup tilemap address
         ldb     *curr_guard_col
         ldy     *msb_row_lda_dyn
         lda			b,y											; get object from tilemap (below)
@@ -2371,8 +2371,8 @@ guard_can_move_up:	; $6ED5
         sta     *msb_row_lda_dyn
         ldy     #msb_row_a_static_tbl
         lda			b,y
-        sta     *msb_row_lda_static									; setup tilemap address
-        dec     *curr_guard_y_offset		; move down
+        sta     *msb_row_lda_static			; setup tilemap address
+        dec     *curr_guard_y_offset		; move up
         bpl     guard_climber_check_for_gold	; same tile? yes, go
         jsr     check_guard_drop_gold
         ldb     *curr_guard_col
@@ -2390,7 +2390,7 @@ guard_can_move_up:	; $6ED5
         sta     *lsb_row_lda_dyn
         ldy     #msb_row_a_dyn_tbl
         lda			b,y
-        sta     *msb_row_lda_dyn	; setup tilemap address
+        sta     *msb_row_lda_dyn				; setup tilemap address
         ldb     *curr_guard_col
         ldy     *msb_row_lda_dyn
         lda			b,y											; get object from tilemap
@@ -2427,13 +2427,13 @@ guard_move_down:	; $6F39
         sta     *lsb_row_lda_dyn
         ldy     #msb_row_a_dyn_tbl
         lda			b,y
-        sta     *msb_row_lda_dyn	; setup tilemap address
+        sta     *msb_row_lda_dyn				; setup tilemap address
         ldb     *curr_guard_col
         ldy     *msb_row_lda_dyn
         lda			b,y											; get object from tilemap
         cmpa    #2                      ; solid?
         beq     guard_cant_move_down    ; yes, skip
-        cmpa    #8                      ; enemy?
+        cmpa    #8                      ; guard?
         beq     guard_cant_move_down    ; yes, skip
         cmpa    #1                      ; brick?
         bne     guard_can_move_down     ; no, go
@@ -2455,7 +2455,7 @@ guard_can_move_down:	; $6F63
         sta     *msb_row_lda_dyn
         ldy     #msb_row_a_static_tbl
         lda			b,y
-        sta     *msb_row_lda_static									; setup tilemap address
+        sta     *msb_row_lda_static			; setup tilemap address
         inc     *curr_guard_y_offset
         lda     *curr_guard_y_offset
         cmpa    #5
@@ -2476,7 +2476,7 @@ guard_can_move_down:	; $6F63
         sta     *lsb_row_lda_dyn
         ldy     #msb_row_a_dyn_tbl
         lda			b,y
-        sta     *msb_row_lda_dyn	; setup tilemap address
+        sta     *msb_row_lda_dyn				; setup tilemap address
         ldb     *curr_guard_col
         ldy     *msb_row_lda_dyn
         lda			b,y											; get object from tilemap
@@ -3360,7 +3360,7 @@ check_guard_drop_gold:	; $753E
         sta     *lsb_row_lda_static
         ldy     #msb_row_a_static_tbl
         lda			b,y
-        sta     *msb_row_lda_static									; setup tilemap address
+        sta     *msb_row_lda_static			; setup tilemap address
         ldb     *curr_guard_col
         stb     *col                    ; col
         ldy     *msb_row_lda_static

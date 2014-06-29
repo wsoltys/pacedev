@@ -70,8 +70,8 @@ uint8_t eos_ladder_row[0x30];
 uint8_t guard_col[8];
 uint8_t guard_row[8];
 uint8_t guard_state[8];
-uint8_t guard_x_offset[8];
-uint8_t guard_y_offset[8];
+int8_t 	guard_x_offset[8];
+int8_t 	guard_y_offset[8];
 uint8_t guard_sprite[8];
 uint8_t guard_dir[8];
 uint8_t guard_cnt[8];
@@ -123,8 +123,10 @@ static bool add_hole_entry (uint8_t col);
 static void handle_guards (void);
 static void update_guards (void);
 static void calc_guard_xychar (uint8_t& chr, uint8_t& x_div_2, uint8_t& y);
+static void guard_cant_climb (void);
 static void guard_move_up (void);
 static void guard_move_down (void);
+static void update_guard_climber_sprite (void);
 static void guard_move_left (void);
 static void guard_move_right (void);
 static uint8_t guard_ai (uint8_t row, uint8_t col);
@@ -231,7 +233,6 @@ void display_title_screen (void)
 	gcls (1);
 	zp.attract_mode = 0;
 	zp.level_0_based = 0;
-	//zp.hires_page_msb1
 	zp.display_char_page = 1;
 
   #if 0
@@ -350,7 +351,7 @@ dec_lives:
   zp.no_lives--;
   display_no_lives ();
   //queue_sound ();      
-  //throttle_and_update_sound ();
+  throttle_and_update_sound ();
   if ((zp.attract_mode >> 1) == 0)
     goto end_demo;
   if (zp.no_lives > 0)
@@ -712,7 +713,7 @@ can_move_left:
   wipe_char (chr, x_div_2, y);
   zp.dir = (uint8_t)-1;
   adjust_y_offset_within_tile ();
-  if (--zp.x_offset_within_tile == (uint8_t)-1)
+  if (--zp.x_offset_within_tile < 0)
   {
     tile = ldu2[zp.current_row][zp.current_col];
     if (tile == TILE_BRICK)
@@ -800,7 +801,7 @@ can_move_up:
   calc_char_and_addr (chr, x_div_2, y);
   wipe_char (chr, x_div_2, y);
   adjust_x_offset_in_tile ();
-  if (--zp.y_offset_within_tile == (uint8_t)-1)
+  if (--zp.y_offset_within_tile < 0)
   {
     tile = ldu2[zp.current_row][zp.current_col];
     if (tile == TILE_BRICK)
@@ -1172,11 +1173,10 @@ void update_guards (void)
   copy_guard_to_curr ();
   if (zp.curr_guard_state <= 0)
     goto check_guard_falling;
-  if (--zp.curr_guard_state >= 13)
-    goto save_guard_and_ret;
-  goto check_wriggle;
+  if (--zp.curr_guard_state < 13)
+  	goto check_wriggle;
 
-save_guard_and_ret:
+//save_guard_and_ret:
   if (guard_cnt[zp.curr_guard] != 0)
   {
     copy_guard_to_curr ();
@@ -1208,7 +1208,7 @@ handle_guard_falling:
   calc_guard_xychar (chr, x_div_2, y);
   wipe_char (chr, x_div_2, y);
   adjust_guard_x_offset ();
-  if (zp.curr_guard_dir == (uint8_t)-1)
+  if (zp.curr_guard_dir < 0)
   	zp.curr_guard_sprite = 6;
  	else
   	zp.curr_guard_sprite = 13;
@@ -1264,11 +1264,11 @@ guard_fall_into_next_row:
 	}
 
 //loc_6e58:
-	// update dynamic playfield and display trapped guard
+	// update dynamic playfield and display guard
 	ldu1[zp.curr_guard_row][zp.curr_guard_col] = TILE_GUARD;
 	calc_guard_xychar (chr, x_div_2, y);
 	display_transparent_char (chr, x_div_2, y);
-	copy_guard_to_curr ();
+	copy_curr_to_guard ();
 	return;
 	
 check_wriggle:
@@ -1317,12 +1317,109 @@ calc_guard_movement:
 	}
 }
 
+void guard_cant_climb (void)
+{
+	if (zp.curr_guard_state > 0)
+		zp.curr_guard_state++;
+	copy_curr_to_guard ();
+}
+
 void guard_move_up (void)
 {
+	uint8_t	chr, x_div_2, y;
+	uint8_t	tile;
+	
+	if (zp.curr_guard_y_offset >= 3)
+		goto guard_can_move_up;
+	if (zp.curr_guard_row == 0)
+	{
+		guard_cant_climb ();
+		return;
+	}
+	tile = ldu1[zp.curr_guard_row-1][zp.curr_guard_col];
+	if (tile == TILE_BRICK || tile == TILE_SOLID || 
+			tile == TILE_FALLTHRU || tile == TILE_GUARD)
+	{
+		guard_cant_climb ();
+		return;
+	}
+
+guard_can_move_up:
+	calc_guard_xychar (chr, x_div_2, y);
+	wipe_char (chr, x_div_2, y);
+	adjust_guard_x_offset ();
+	if (--zp.curr_guard_y_offset >= 0)
+		goto guard_climber_check_for_gold;
+	check_guard_drop_gold ();
+	tile = ldu2[zp.curr_guard_row][zp.curr_guard_col];
+	if (tile == TILE_BRICK)
+		tile = TILE_SPACE;
+	ldu1[zp.curr_guard_row][zp.curr_guard_col] = tile;
+	zp.curr_guard_row--;
+	if (ldu1[zp.curr_guard_row][zp.curr_guard_col] == TILE_PLAYER)
+		KILL_PLAYER;
+	ldu1[zp.curr_guard_row][zp.curr_guard_col] = TILE_GUARD;
+	zp.curr_guard_y_offset = 4;
+	goto update_guard_climber_sprite;
+	
+guard_climber_check_for_gold:
+	check_guard_pickup_gold ();
+	
+update_guard_climber_sprite:
+	update_guard_climber_sprite ();
+}
+
+void update_guard_climber_sprite (void)
+{
+	uint8_t	chr, x_div_2, y;
+
+	update_guard_sprite_index (14, 15);
+	calc_guard_xychar (chr, x_div_2, y);
+	display_transparent_char (chr, x_div_2, y);
+	copy_curr_to_guard ();
 }
 
 void guard_move_down (void)
 {
+	uint8_t	chr, x_div_2, y;
+	uint8_t	tile;
+
+	if (zp.curr_guard_y_offset < 2)
+		goto guard_can_move_down;
+	if (zp.curr_guard_row == 15)
+	{
+		copy_curr_to_guard ();
+		return;
+	}
+	tile = ldu1[zp.curr_guard_row+1][zp.curr_guard_col];
+	if (tile == TILE_SOLID || tile == TILE_GUARD || tile == TILE_BRICK)
+	{
+		copy_curr_to_guard ();
+		return;
+	}
+	
+guard_can_move_down:
+	calc_guard_xychar (chr, x_div_2, y);
+	wipe_char (chr, x_div_2, y);
+	adjust_guard_x_offset ();	
+	if (++zp.curr_guard_y_offset < 5)
+	{
+		// jmp guard_climber_check_for_gold ();
+		check_guard_pickup_gold ();
+		update_guard_climber_sprite ();
+		return;
+	}
+	check_guard_drop_gold ();
+	tile = ldu2[zp.curr_guard_row][zp.curr_guard_col];
+	if (tile == TILE_BRICK)
+		tile = TILE_SPACE;
+	ldu1[zp.curr_guard_row][zp.curr_guard_col] = tile;
+	zp.curr_guard_row++;
+	if (ldu1[zp.curr_guard_row][zp.curr_guard_col] == TILE_PLAYER)
+		KILL_PLAYER;
+	ldu1[zp.curr_guard_row][zp.curr_guard_col] = TILE_GUARD;
+	zp.curr_guard_y_offset = 0;
+	update_guard_climber_sprite ();
 }
 
 void guard_move_left (void)
@@ -1349,7 +1446,7 @@ guard_can_move_left:
 	wipe_char (chr, x_div_2, y);
 	adjust_guard_y_offset ();
 	zp.curr_guard_dir = (uint8_t)-1;
-	if (--zp.curr_guard_x_offset == (uint8_t)-1)
+	if (--zp.curr_guard_x_offset < 0)
 	{
 		check_guard_drop_gold ();
 		tile = ldu2[zp.curr_guard_row][zp.curr_guard_col];
@@ -1426,10 +1523,23 @@ uint8_t guard_ai (uint8_t row, uint8_t col)
 	#ifdef DEBUG_GUARD_COPY
 		if (zp.curr_guard == 2)
 		{
+			if (osd_key (OSD_KEY_Z))
+				fprintf (stderr, "state=%d, x=%d.%d, y=%d.%d (d=%d,s=%d) +1(d=%d,s=%d)\n",
+									zp.curr_guard_state,
+									zp.curr_guard_col, zp.curr_guard_x_offset,
+									zp.curr_guard_row, zp.curr_guard_y_offset,
+									ldu1[zp.curr_guard_row][zp.curr_guard_col],
+									ldu2[zp.curr_guard_row][zp.curr_guard_col],
+									ldu1[zp.curr_guard_row+1][zp.curr_guard_col],
+									ldu2[zp.curr_guard_row+1][zp.curr_guard_col]);
 			switch (zp.key_1)
 			{
+				case 'I' :
+					return (GUARD_MOVE_UP);
 				case 'J' :
 					return (GUARD_MOVE_LEFT);
+				case 'K' :
+					return (GUARD_MOVE_DOWN);
 				case 'L' :
 					return (GUARD_MOVE_RIGHT);
 				default :
@@ -1558,8 +1668,10 @@ void respawn_guards_and_update_holes (void)
   uint8_t tile;
   
   //check_and_handle_respawn ();
-  // more guard stuff
-  
+
+  if (++zp.guard_respawn_col == 28)
+  	zp.guard_respawn_col = 0;
+  	
   for (int n=MAX_HOLES; n>=0; n--)
   {
     if (hole_cnt[n] == 0)
@@ -1954,9 +2066,9 @@ void calc_scanline (uint8_t row, uint8_t offset, uint8_t& scanline)
 
 void calc_x_div_2 (uint8_t col, uint8_t offset, uint8_t& x)
 {
-	static uint8_t byte_889d[] =
+	static int8_t byte_889d[] =
 	{
-		(uint8_t)-2, (uint8_t)-1, 0, 1, 2
+		-2, -1, 0, 1, 2
 	};
 
 	uint8_t scanline;
