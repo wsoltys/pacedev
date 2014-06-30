@@ -138,6 +138,7 @@ static void adjust_guard_y_offset (void);
 static void copy_curr_to_guard (void);
 static void copy_guard_to_curr (void);
 static void respawn_guards_and_update_holes (void);
+static void check_and_handle_respawn (void);
 static void cls_and_display_high_scores (void);
 static void cls_and_display_game_status (void);
 static void gcls (uint8_t page);
@@ -1667,7 +1668,7 @@ void respawn_guards_and_update_holes (void)
   uint8_t chr, x_div_2, y;
   uint8_t tile;
   
-  //check_and_handle_respawn ();
+  check_and_handle_respawn ();
 
   if (++zp.guard_respawn_col == 28)
   	zp.guard_respawn_col = 0;
@@ -1699,7 +1700,42 @@ void respawn_guards_and_update_holes (void)
       KILL_PLAYER;
     if (tile == TILE_GUARD)
     {
-      // guard stuff here
+    	ldu1[zp.row][zp.col] = TILE_BRICK;
+    	ldu2[zp.row][zp.col] = TILE_BRICK;
+    	display_char_pg (1, TILE_BRICK);
+    	display_char_pg (2, TILE_BRICK);
+
+    	//check_trapped_guards:
+    	for (unsigned g=zp.no_guards; g>0; g--)
+    	{
+    		if (guard_col[g] != zp.col ||
+    				guard_row[g] != zp.row)
+    			continue;
+    		if (guard_state[g] < 0)
+    			zp.no_gold--;
+    		guard_state[g] = 0x7f;
+    		zp.curr_guard = g;
+    		copy_guard_to_curr ();
+    		calc_guard_xychar (chr, x_div_2, y);
+    		wipe_char (chr, x_div_2, y);
+    		zp.row = 1;
+    		while (ldu2[zp.row][zp.guard_respawn_col] != TILE_SPACE)
+    		{
+    			if (++zp.guard_respawn_col == 28)
+    			{
+    				zp.row++;
+    				zp.guard_respawn_col = 0;
+    			}
+    		}
+    		guard_col[g] = zp.guard_respawn_col;
+    		guard_row[g] = zp.row;
+    		guard_cnt[g] = 20;
+    		guard_y_offset[g] = 2;
+    		guard_x_offset[g] = 2;
+    		guard_sprite[g] = 0;
+    		update_and_display_score (SCORE_KILL);
+    		goto next_hole;
+    	}
     }
     if (tile == TILE_GOLD)
     {
@@ -1711,7 +1747,55 @@ void respawn_guards_and_update_holes (void)
     ldu1[zp.row][zp.col] = TILE_BRICK;
     display_char_pg (1, TILE_BRICK);
     display_char_pg (2, TILE_BRICK);
+    
+  next_hole:
+  	;
   }
+}
+
+void check_and_handle_respawn (void)
+{
+	uint8_t	curr_guard = zp.curr_guard;
+	uint8_t	chr, x_div_2, y;
+	
+	for (unsigned g=zp.no_guards; g>0; g--)
+	{
+		if (guard_cnt[g] == 0)
+			continue;
+		zp.curr_guard = g;
+		copy_guard_to_curr ();
+		guard_state[g] = 0x7f;
+		zp.col = guard_col[g];
+		zp.row = guard_row[g];
+		if (--guard_cnt[g] == 0)
+		{
+			// finish_respawn:
+			guard_cnt[g]++;
+			if (ldu1[zp.row][zp.col] == TILE_SPACE)
+			{
+				ldu1[zp.row][zp.col] = TILE_GUARD;
+				display_char_pg (2, TILE_SPACE);
+				guard_state[g] = 0;
+				guard_cnt[g] = 0;
+				display_char_pg (1, TILE_GUARD);
+				//queue_sound ();
+			}
+		}
+		else if (guard_cnt[g] == 19)
+		{
+			display_char_pg (2, 0x39);
+			calc_guard_xychar (chr, x_div_2, y);
+			display_transparent_char (0x39, x_div_2, y);
+		}
+		else if (guard_cnt[g] == 10)
+		{
+			display_char_pg (2, 0x3a);
+			calc_guard_xychar (chr, x_div_2, y);
+			display_transparent_char (0x3a, x_div_2, y);
+		}
+	}
+	
+	zp.curr_guard = curr_guard;
 }
 
 void cls_and_display_high_scores (void)
