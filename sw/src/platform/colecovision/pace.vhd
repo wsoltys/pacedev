@@ -220,7 +220,8 @@ architecture SYN of PACE is
   signal gnd_8_s             : std_logic_vector( 7 downto 0);
 
 	-- changes for PACE
-	alias clk_20M							  : std_logic is clkrst_i.clk(1);
+	--alias clk_20M							  : std_logic is clkrst_i.clk(1);
+  signal clk_20M              : std_logic;
   alias ext_clk_i             : std_logic is clkrst_i.clk(0);
   signal clk_cnt_q            : unsigned(1 downto 0);
 	signal clk_en_5m37_q			  : std_logic;
@@ -288,10 +289,11 @@ begin
     port map 
     (
       inclk0  => pll_inclk_s(0),
-      c0      => pll_clk_s(0)
+      c0      => pll_clk_s(0),
+      c1      => pll_clk_s(1)
     );
   clk_s <= pll_clk_s(0);
-
+  clk_20M <= pll_clk_s(1);
   -----------------------------------------------------------------------------
   -- Process clk_cnt
   --
@@ -426,30 +428,27 @@ begin
   -----------------------------------------------------------------------------
   -- VRAM
   -----------------------------------------------------------------------------
-  --vram_b : altsyncram
-  --  generic map (
-  --    operation_mode => "SINGLE_PORT",
-  --    width_a        => 8,
-  --    widthad_a      => 14,
-  --    outdata_reg_a  => "UNREGISTERED",
-  --    init_file      => "UNUSED"
-  --  )
-  --  port map (
-  --    wren_a    => vram_we_s,
-  --    address_a => vram_a_s,
-  --    clock0    => clk_s,
-  --    data_a    => vram_d_from_cv_s,
-  --    q_a       => vram_d_to_cv_s
-  --  );
+  vram_b : entity work.spram
+    generic map (
+      numwords_a		=> 16384,
+      widthad_a      => 14
+    )
+    port map (
+      wren      => vram_we_s,
+      address   => vram_a_s,
+      clock     => clk_s,
+      data      => vram_d_from_cv_s,
+      q         => vram_d_to_cv_s
+    );
 
 	-- use external SRAM for video ram
-	sram_o.we <= vram_we_s;
-	sram_o.a <= std_logic_vector(resize(unsigned(vram_a_s), sram_o.a'length));
-	sram_o.d <= std_logic_vector(resize(unsigned(vram_d_from_cv_s), sram_o.d'length)) when vram_we_s = '1' else (others => 'Z');
-	vram_d_to_cv_s <= sram_i.d(vram_d_to_cv_s'range);
-	sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
-	sram_o.oe <= not vram_we_s;
-	sram_o.cs <= '1';
+--	sram_o.we <= vram_we_s;
+--	sram_o.a <= std_logic_vector(resize(unsigned(vram_a_s), sram_o.a'length));
+--	sram_o.d <= std_logic_vector(resize(unsigned(vram_d_from_cv_s), sram_o.d'length)) when vram_we_s = '1' else (others => 'Z');
+--	vram_d_to_cv_s <= sram_i.d(vram_d_to_cv_s'range);
+--	sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
+--	sram_o.oe <= not vram_we_s;
+--	sram_o.cs <= '1';
 
   -----------------------------------------------------------------------------
   -- Process cart_if
