@@ -47,12 +47,15 @@ architecture SYN of target_top is
            JOY1 :     out std_logic_vector(5 downto 0);
            SWITCHES : out std_logic_vector(1 downto 0);
            BUTTONS : out std_logic_vector(1 downto 0);
-           CORE_TYPE : in std_logic_vector(7 downto 0)
+           clk       : in std_logic;
+           ps2_clk   : out std_logic;
+           ps2_data  : out std_logic
            );
    end component user_io;
 
-  signal init       	: std_logic := '1';  
+  signal init       	  : std_logic := '1';  
   signal clock_50       : std_logic;
+  signal clock_12k      : std_logic;
   
   signal clkrst_i       : from_CLKRST_t;
   signal buttons_i      : from_BUTTONS_t;
@@ -83,6 +86,9 @@ architecture SYN of target_top is
   signal switches       : std_logic_vector(1 downto 0);
   signal buttons        : std_logic_vector(1 downto 0);
   
+  signal ps2dat         : std_logic;
+  signal ps2clk         : std_logic;
+  
 --//********************
 
 begin
@@ -102,7 +108,8 @@ begin
         (
           inclk0  => CLOCK_27(0),
           c0      => clock_50,  -- master clock
-          c1      => clkrst_i.clk(1)  -- video clock
+          c1      => clkrst_i.clk(1),  -- video clock
+          c2      => clock_12k  -- ps2 clock
         );
 		  clkrst_i.clk(0)<=clock_50;
 
@@ -155,7 +162,9 @@ begin
           JOY1 => joystick2,
           SWITCHES => switches,
           BUTTONS => buttons,
-          CORE_TYPE => X"a2"            -- PACE core type
+          clk => clock_12k,
+          ps2_clk => ps2clk,
+          ps2_data => ps2dat
           );
 
        switches_i(0) <= switches(0);
@@ -190,6 +199,12 @@ begin
 	inputs_i.jamma_n.service <= '1';
 	inputs_i.jamma_n.tilt <= '1';
 	inputs_i.jamma_n.test <= '1';
+  
+  -- ps2
+  inputs_i.ps2_kclk <= ps2clk;
+	inputs_i.ps2_kdat <= ps2dat;
+  inputs_i.ps2_mclk <= '0';
+  inputs_i.ps2_mdat <= '0';
 		
   BLK_VIDEO : block
   begin
