@@ -2657,7 +2657,7 @@ guard_ai:	; $70D8
 				sta			*lsb_row_lda_static
 				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*msb_row_lda_static									; setup tilemap address
+				sta			*msb_row_lda_static			; setup tilemap address
 				ldb			*guard_ai_col
 				ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap
@@ -2705,7 +2705,7 @@ guard_left_of_player:	; $7108
 				sta			*lsb_row_lda_static
 				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*msb_row_lda_static									; setup tilemap address
+				sta			*msb_row_lda_static			; setup tilemap address
 				ldb			*target_col
 				ldy			*msb_row_lda_static
 				lda			b,y											; get object from tilemap (right)
@@ -2721,7 +2721,7 @@ guard_left_of_player:	; $7108
 				sta			*lsb_row_lda_static               	
 				ldy			#(msb_row_a_static_tbl+1)   	
 				lda			b,y                   	
-				sta			*msb_row_lda_static									; setup tilemap address (row below)
+				sta			*msb_row_lda_static			; setup tilemap address (row below)
 				ldb			*target_col           	
 				ldy			*msb_row_lda_static               	
 				lda			b,y											; get object from tilemap (below right)
@@ -2760,7 +2760,7 @@ guard_right_of_player:	; $7147
 				sta			*lsb_row_lda_static               	
 				ldy			#(msb_row_a_static_tbl+1)   	
 				lda			b,y                   	
-				sta			*msb_row_lda_static									; setup tilemap address (row below)
+				sta			*msb_row_lda_static			; setup tilemap address (row below)
 				ldb			*target_col           	
 				ldy			*msb_row_lda_static               	
 				lda			b,y											; get object from tilemap (row below)

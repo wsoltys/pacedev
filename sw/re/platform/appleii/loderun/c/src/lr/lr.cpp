@@ -30,7 +30,7 @@ typedef enum
 
 //#define DEBUG
 //#define DEBUG_DISABLE_DEMO_EXIT
-#define DEBUG_GUARD_COPY
+//#define DEBUG_GUARD_COPY
 //#define DEBUG_INVINCIBLE
 //#define DEBUG_NO_BITWISE_COLLISION_DETECT
 
@@ -1548,6 +1548,58 @@ uint8_t guard_ai (uint8_t row, uint8_t col)
 			}
 		}
 	#else
+	
+  uint8_t tile;
+  
+	zp.guard_ai_col = col;
+	zp.guard_ai_row = row;
+	// if stuck in a hole, move UP
+	if (ldu2[zp.guard_ai_row][zp.guard_ai_col] == TILE_BRICK)
+	  if (zp.curr_guard_state > 0)
+	    return (GUARD_MOVE_UP);
+
+  if (zp.guard_ai_row != zp.current_row)
+    goto different_row;
+    
+//same_row:    
+  zp.target_col = zp.guard_ai_col;
+  if (zp.target_col >= zp.current_col)
+    goto guard_right_of_player;
+    
+//guard_left_of_player:
+  while (zp.target_col != zp.current_col)
+  {
+    zp.target_col++;
+    tile = ldu2[zp.guard_ai_row][zp.target_col];
+    if (tile == TILE_LADDER ||
+        tile == TILE_ROPE ||
+        zp.guard_ai_row == 15)
+      continue;
+      
+    tile = ldu2[zp.guard_ai_row+1][zp.target_col];
+    if (tile == TILE_SPACE || tile == TILE_FALLTHRU)
+      goto different_row;
+  }
+  return (GUARD_MOVE_RIGHT);
+
+guard_right_of_player:
+  while (zp.target_col != zp.current_col)
+  {
+    zp.target_col--;
+    tile = ldu2[zp.guard_ai_row][zp.target_col];
+    if (tile == TILE_LADDER ||
+        tile == TILE_ROPE ||
+        zp.guard_ai_row == 15)
+      continue;
+      
+    tile = ldu2[zp.guard_ai_row+1][zp.target_col];
+    if (tile == TILE_SPACE || tile == TILE_FALLTHRU)
+      goto different_row;
+  }
+  return (GUARD_MOVE_LEFT);
+  
+different_row:
+	
 	#endif
 	return (GUARD_NO_MOVE);
 }
