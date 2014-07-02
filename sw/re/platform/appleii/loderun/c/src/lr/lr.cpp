@@ -122,6 +122,13 @@ static void adjust_y_offset_within_tile (void);
 static bool add_hole_entry (uint8_t col);
 static void handle_guards (void);
 static void update_guards (void);
+static void guard_ai_left (void);
+static void guard_ai_right (void);
+static void guard_ai_up_down (void);
+static uint8_t calc_row_col_delta (uint8_t col, uint8_t farthest);
+static uint8_t find_farthest_up (uint8_t row, uint8_t col);
+static uint8_t find_farthest_down (uint8_t row, uint8_t col);
+static void find_farthest_left_right (uint8_t row, uint8_t col);
 static void calc_guard_xychar (uint8_t& chr, uint8_t& x_div_2, uint8_t& y);
 static void guard_cant_climb (void);
 static void guard_move_up (void);
@@ -1547,6 +1554,7 @@ uint8_t guard_ai (uint8_t row, uint8_t col)
 					break;
 			}
 		}
+		return (GUARD_NO_MOVE);
 	#else
 	
   uint8_t tile;
@@ -1571,8 +1579,7 @@ uint8_t guard_ai (uint8_t row, uint8_t col)
   {
     zp.target_col++;
     tile = ldu2[zp.guard_ai_row][zp.target_col];
-    if (tile == TILE_LADDER ||
-        tile == TILE_ROPE ||
+    if (tile == TILE_LADDER || tile == TILE_ROPE ||
         zp.guard_ai_row == 15)
       continue;
       
@@ -1587,8 +1594,7 @@ guard_right_of_player:
   {
     zp.target_col--;
     tile = ldu2[zp.guard_ai_row][zp.target_col];
-    if (tile == TILE_LADDER ||
-        tile == TILE_ROPE ||
+    if (tile == TILE_LADDER || tile == TILE_ROPE ||
         zp.guard_ai_row == 15)
       continue;
       
@@ -1599,9 +1605,257 @@ guard_right_of_player:
   return (GUARD_MOVE_LEFT);
   
 different_row:
-	
+	zp.guard_ai_dir = GUARD_NO_MOVE;
+	zp.guard_ai_best_delta = 0xff;
+	find_farthest_left_right (zp.guard_ai_row, zp.guard_ai_col);
+	guard_ai_up_down ();
+	guard_ai_left ();
+	guard_ai_right ();
+
+	return (zp.guard_ai_dir);	
+		
 	#endif
-	return (GUARD_NO_MOVE);
+}
+
+void guard_ai_left (void)
+{
+	uint8_t	tile;
+	uint8_t	farthest, delta;
+		
+	while (zp.farthest_left != zp.guard_ai_col)
+	{
+		if (zp.guard_ai_row != 15)
+		{
+			tile = ldu2[zp.guard_ai_row+1][zp.farthest_left];
+			if (!(tile == TILE_BRICK || tile == TILE_SOLID))
+			{
+				farthest = find_farthest_down (zp.guard_ai_row, zp.farthest_left);
+				delta = calc_row_col_delta (zp.farthest_left, farthest);
+				if (delta < zp.guard_ai_best_delta)
+				{
+					zp.guard_ai_best_delta = delta;
+					zp.guard_ai_dir = GUARD_MOVE_LEFT;
+				}
+			}
+		}
+		if (zp.guard_ai_row != 0)
+		{
+			if (ldu2[zp.guard_ai_row][zp.farthest_left] == TILE_LADDER)
+			{
+				farthest = find_farthest_up (zp.guard_ai_row, zp.farthest_left);
+				delta = calc_row_col_delta (zp.farthest_left, farthest);
+				if (delta < zp.guard_ai_best_delta)
+				{
+					zp.guard_ai_best_delta = delta;
+					zp.guard_ai_dir = GUARD_MOVE_LEFT;
+				}
+			}
+		}
+		zp.farthest_left++;
+	}	
+}
+
+void guard_ai_right (void)
+{
+	uint8_t	tile;
+	uint8_t	farthest, delta;
+		
+	while (zp.farthest_right != zp.guard_ai_col)
+	{
+		if (zp.guard_ai_row != 15)
+		{
+			tile = ldu2[zp.guard_ai_row+1][zp.farthest_right];
+			if (!(tile == TILE_BRICK || tile == TILE_SOLID))
+			{
+				farthest = find_farthest_down (zp.guard_ai_row, zp.farthest_right);
+				delta = calc_row_col_delta (zp.farthest_right, farthest);
+				if (delta < zp.guard_ai_best_delta)
+				{
+					zp.guard_ai_best_delta = delta;
+					zp.guard_ai_dir = GUARD_MOVE_RIGHT;
+				}
+			}
+		}
+		if (zp.guard_ai_row != 0)
+		{
+			if (ldu2[zp.guard_ai_row][zp.farthest_right] == TILE_LADDER)
+			{
+				farthest = find_farthest_up (zp.guard_ai_row, zp.farthest_right);
+				delta = calc_row_col_delta (zp.farthest_right, farthest);
+				if (delta < zp.guard_ai_best_delta)
+				{
+					zp.guard_ai_best_delta = delta;
+					zp.guard_ai_dir = GUARD_MOVE_RIGHT;
+				}
+			}
+		}
+		zp.farthest_right--;
+	}	
+}
+
+void guard_ai_up_down (void)
+{
+	uint8_t	tile;
+	uint8_t	farthest, delta;
+	
+	if (zp.guard_ai_row == 15)
+		goto guard_ai_cant_go_down;
+	tile = ldu2[zp.guard_ai_row+1][zp.guard_ai_col];
+	if (tile == TILE_BRICK || tile == TILE_SOLID)
+		goto guard_ai_cant_go_down;
+	farthest = find_farthest_down (zp.guard_ai_row, zp.guard_ai_col);
+	delta = calc_row_col_delta (zp.guard_ai_col, farthest);
+	if (delta < zp.guard_ai_best_delta)
+	{
+		zp.guard_ai_best_delta = delta;
+		zp.guard_ai_dir = GUARD_MOVE_DOWN;
+	}
+	
+guard_ai_cant_go_down:
+	if (zp.guard_ai_row == 0)
+		return;
+	if (ldu2[zp.guard_ai_row][zp.guard_ai_col] != TILE_LADDER)
+		return;
+	farthest = find_farthest_up (zp.guard_ai_row, zp.guard_ai_col);
+	delta = calc_row_col_delta (zp.guard_ai_col, farthest);
+	if (delta < zp.guard_ai_best_delta)
+	{
+		zp.guard_ai_best_delta = delta;
+		zp.guard_ai_dir = GUARD_MOVE_UP;
+	}
+}
+
+uint8_t calc_row_col_delta (uint8_t col, uint8_t farthest)
+{
+	if (farthest == zp.current_row)
+	{
+		if (col >= zp.curr_guard_col)
+			return (col - zp.curr_guard_col);
+		else
+			return (zp.curr_guard_col - col);
+	}
+	else
+	if (farthest > zp.current_row)
+		return (farthest - zp.current_row + 200);
+	else
+		return (zp.current_row - farthest + 100);
+}
+
+uint8_t find_farthest_up (uint8_t row, uint8_t col)
+{
+	uint8_t	tile;
+
+	do
+	{	
+		if (ldu2[row][col] != TILE_LADDER)
+			return (row);
+		row--;
+		if (col == 0)
+			goto up_try_right;
+		tile = ldu2[row+1][col-1];
+		if (!(tile == TILE_BRICK || tile == TILE_SOLID || tile == TILE_LADDER))
+			if (ldu2[row][col-1] != TILE_ROPE)
+				goto up_try_right;
+		if ((zp.farthest_updown_plyr_row = row) <= zp.current_row)
+			return (zp.farthest_updown_plyr_row);
+			
+	up_try_right:
+		if (col == 27)
+			continue;
+		tile = ldu2[row+1][col+1];
+		if (!(tile == TILE_BRICK || tile == TILE_SOLID || tile == TILE_LADDER))
+			if (ldu2[row][col+1] != TILE_ROPE)
+				continue;
+		if ((zp.farthest_updown_plyr_row = row) <= zp.current_row)
+			return (zp.farthest_updown_plyr_row);
+			
+	} while (row > 0);	
+	
+	return (row);
+}
+
+uint8_t find_farthest_down (uint8_t row, uint8_t col)
+{
+	uint8_t	tile;
+	
+	do
+	{
+		uint8_t	bug_row;
+		
+		tile = ldu2[row+1][col];
+		if (tile == TILE_BRICK || tile == TILE_SOLID)
+			return (row);
+		if (ldu2[bug_row=row][col] == TILE_SPACE)
+			continue;
+		if (col == 0)
+			goto down_try_right;
+		if (ldu2[row][col-1] != TILE_ROPE)
+		{
+			tile = ldu2[bug_row=row+1][col-1];
+			if (!(tile == TILE_BRICK || tile == TILE_SOLID || tile == TILE_LADDER))
+				goto down_try_right;
+		}
+		if ((zp.farthest_updown_plyr_row = row) >= zp.current_row)
+			return (zp.farthest_updown_plyr_row);
+				
+	down_try_right:
+		if (col == 27)
+			continue;
+		if (ldu2[bug_row][col+1] != TILE_ROPE)
+		{
+			tile = ldu2[row+1][col+1];
+			if (!(tile == TILE_BRICK || tile == TILE_LADDER || tile == TILE_SOLID))
+				continue;
+		}
+		if ((zp.farthest_updown_plyr_row = row) >= zp.current_row)
+			return (zp.farthest_updown_plyr_row);
+
+	} while (++row < 16);
+	
+	return (15);
+}
+
+void find_farthest_left_right (uint8_t row, uint8_t col)
+{
+	uint8_t	tile;
+	
+	zp.farthest_left = col;
+	zp.farthest_right = col;
+	zp.scanline = row;
+	
+//find_farthest_left:
+	while (zp.farthest_left != 0)
+	{
+		tile = ldu1[zp.scanline][zp.farthest_left-1];
+		if (tile == TILE_BRICK || tile == TILE_SOLID)
+			break;
+		zp.farthest_left--;
+		if (tile == TILE_LADDER || tile == TILE_ROPE ||
+				zp.scanline == 15)
+			continue;
+		tile = ldu2[zp.scanline+1][zp.farthest_left];
+		if (tile == TILE_BRICK || tile == TILE_SOLID || tile == TILE_LADDER)
+			continue;
+		else
+			break;
+	}		
+		
+//find_farthest_right:
+	while (zp.farthest_right != 27)
+	{
+		tile = ldu2[zp.scanline][zp.farthest_right+1];
+		if (tile == TILE_BRICK || tile == TILE_SOLID)
+			break;
+		zp.farthest_right++;
+		if (tile == TILE_LADDER || tile == TILE_ROPE ||
+				zp.scanline == 15)
+			continue;
+		tile = ldu2[zp.scanline+1][zp.farthest_right];
+		if (tile == TILE_BRICK || tile == TILE_SOLID || tile == TILE_LADDER)
+			continue;
+		else
+			break;
+	}
 }
 
 void calc_guard_xychar (uint8_t& chr, uint8_t& x_div_2, uint8_t& y)

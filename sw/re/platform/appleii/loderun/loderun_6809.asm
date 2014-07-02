@@ -2805,7 +2805,7 @@ guard_ai_left:	; $71A2
         sta     *lsb_row_lda_static
         ldy     #(msb_row_a_static_tbl+1)
         lda			b,y
-        sta     *msb_row_lda_static                 ; setup tilemap address (row below)
+        sta     *msb_row_lda_static     ; setup tilemap address (row below)
         ldb     *farthest_left
         ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap (below farthest left)
@@ -2830,7 +2830,7 @@ guard_ai_left:	; $71A2
         sta     *lsb_row_lda_static
         ldy     #msb_row_a_static_tbl
         lda			b,y
-        sta     *msb_row_lda_static                 ; setup tilemap address
+        sta     *msb_row_lda_static     ; setup tilemap address
         ldb     *farthest_left
         ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap
@@ -2864,7 +2864,7 @@ guard_ai_right:	; $720C
         sta     *lsb_row_lda_static
         ldy     #(msb_row_a_static_tbl+1)
         lda			b,y
-        sta     *msb_row_lda_static                 ; setup tilemap address (row below)
+        sta     *msb_row_lda_static     ; setup tilemap address (row below)
         ldb     *farthest_right
         ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap (below)
@@ -2917,7 +2917,7 @@ guard_ai_up_down:	; $7275
         sta     *lsb_row_lda_static
         ldy     #(msb_row_a_static_tbl+1)
         lda			b,y
-        sta     *msb_row_lda_static                 ; setup tilemap address (row below)
+        sta     *msb_row_lda_static     ; setup tilemap address (row below)
         ldb     *guard_ai_col
         ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap (below)
@@ -2944,7 +2944,7 @@ guard_ai_cant_go_down:	; $72A7
         sta     *lsb_row_lda_static
         ldy     #msb_row_a_static_tbl
         lda			b,y
-        sta     *msb_row_lda_static                 ; setup tilemap address
+        sta     *msb_row_lda_static     ; setup tilemap address
         ldb     *guard_ai_col
         ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap
@@ -3000,7 +3000,7 @@ loc_7304:	; $7304
         sta     *lsb_row_lda_static
         ldy     #msb_row_a_static_tbl
         lda			b,y
-        sta     *msb_row_lda_static                 ; setup tilemap address
+        sta     *msb_row_lda_static     ; setup tilemap address
         ldb     *byte_5d                ; col
         ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap
@@ -3024,7 +3024,7 @@ loc_7304:	; $7304
         sta     *lsb_row_lda_static
         ldy     #msb_row_a_static_tbl
         lda			b,y
-        sta     *msb_row_lda_static                 ; setup tilemap address (above)
+        sta     *msb_row_lda_static     ; setup tilemap address (above)
         ldb     *byte_5d                ; col
         decb                            ; column to left
         ldy     *msb_row_lda_static
@@ -3047,7 +3047,7 @@ up_try_right:	; $734A
         sta     *lsb_row_lda_static
         ldy     #(msb_row_a_static_tbl+1)
         lda			b,y
-        sta     *msb_row_lda_static                 ; setup tilemap address
+        sta     *msb_row_lda_static     ; setup tilemap address
         ldb     *byte_5d                ; col
         incb                            ; column to right
         ldy     *msb_row_lda_static
@@ -3064,7 +3064,7 @@ up_try_right:	; $734A
         sta     *lsb_row_lda_static
         ldy     #msb_row_a_static_tbl
         lda			b,y
-        sta     *msb_row_lda_static                 ; setup tilemap address (row above)
+        sta     *msb_row_lda_static     ; setup tilemap address (row above)
         ldb     *byte_5d                ; col
         incb                            ; column to right
         ldy     *msb_row_lda_static
@@ -3082,7 +3082,8 @@ try_next_row_up:	; $738C
         cmpb    #1                      ; top row?
         bcs     1$											; yes, exit
         jmp     loc_7304                ; loop
-1$:     rts
+1$:     lda			*byte_5e
+				rts
 
 farthest_up_is_player_row:	; $7397
         lda     *farthest_updown_plyr_row
@@ -3101,7 +3102,7 @@ loc_73A1:	; $73A1
         sta     *lsb_row_lda_static
         ldy     #(msb_row_a_static_tbl+1)
         lda			b,y
-        sta     *msb_row_lda_static                 ; setup tilemap address (row below)
+        sta     *msb_row_lda_static     ; setup tilemap address (row below)
         ldb     *byte_5d                ; col
         ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap
@@ -3115,7 +3116,7 @@ loc_73A1:	; $73A1
         sta     *lsb_row_lda_static
         ldy     #msb_row_a_static_tbl
         lda			b,y
-        sta     *msb_row_lda_static                 ; setup tilemap address
+        sta     *msb_row_lda_static     ; setup tilemap address
         ldb     *byte_5d                ; col
         ldy     *msb_row_lda_static
         lda			b,y											; get object from tilemap
@@ -3135,7 +3136,7 @@ loc_73A1:	; $73A1
         sta     *lsb_row_lda_static
         ldy     #(msb_row_a_static_tbl+1)
         lda			b,y
-        sta     *msb_row_lda_static                 ; setup tilemap address (row below)
+        sta     *msb_row_lda_static     ; setup tilemap address (row below)
         ldb     *byte_5d                ; col
         decb                            ; column to left
         ldy     *msb_row_lda_static
@@ -3166,7 +3167,7 @@ down_try_right:	; $73FB
         sta     *lsb_row_lda_static
         ldy     #(msb_row_a_static_tbl+1)
         lda			b,y
-        sta     *msb_row_lda_static                 ; setup tilemap address (row below)
+        sta     *msb_row_lda_static     ; setup tilemap address (row below)
         ldb     *byte_5d                ; col
         incb                            ; column to right
         ldy     *msb_row_lda_static
@@ -3210,7 +3211,7 @@ find_farthest_left:	; $7444
         sta     *lsb_row_lda_dyn
         ldy     #msb_row_a_dyn_tbl
         lda			b,y
-        sta     *msb_row_lda_dyn ; setup tilemap address
+        sta     *msb_row_lda_dyn 				; setup tilemap address
         ldb     *farthest_left        	; guard col
         decb                            ; column to left
         ldy     *msb_row_lda_dyn
@@ -3231,7 +3232,7 @@ find_farthest_left:	; $7444
         sta     *lsb_row_lda_static
         ldy     #(msb_row_a_static_tbl+1)
         lda			b,y
-        sta     *msb_row_lda_static                 ; setup tilemap (row below)
+        sta     *msb_row_lda_static     ; setup tilemap (row below)
         ldb     *farthest_left
         decb                            ; below left
         ldy     *msb_row_lda_static
@@ -3256,7 +3257,7 @@ find_farthest_right: ; $7490
         sta     *lsb_row_lda_dyn
         ldy     #msb_row_a_dyn_tbl
         lda			b,y
-        sta     *msb_row_lda_dyn ; setup tilemap address
+        sta     *msb_row_lda_dyn 				; setup tilemap address
         ldb     *farthest_right
         incb                            ; column to right
         ldy     *msb_row_lda_dyn
@@ -3277,7 +3278,7 @@ find_farthest_right: ; $7490
         sta     *lsb_row_lda_static
         ldy     #(msb_row_a_static_tbl+1)
         lda			b,y
-        sta     *msb_row_lda_static                 ; setup tilemap address (row below)
+        sta     *msb_row_lda_static     ; setup tilemap address (row below)
         ldb     *farthest_right
         incb                            ; column to right
         ldy     *msb_row_lda_static
