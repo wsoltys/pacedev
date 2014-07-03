@@ -1,11 +1,23 @@
+# platform options
+
+#PLATFORM = allegro
+#PLATFORM = neogeo
+
+ifeq (,$(PLATFORM))
+	PLATFORM = allegro
+endif
+
 # compiler, linker and utilities
-CC = g++
+ifeq ($(PLATFORM),neogeo)
+	CC = gcc
+else
+	CC = gcc
+endif
 CPP = g++
 LD = gcc
 RM = rm
 MD = mkdir
 TARGET = lr
-PLATFORM = allegro
 MAKEFILE = makefile
 
 # BUILDOPTS
@@ -25,6 +37,10 @@ endif
 ifeq ($(GREEN),1)
 	BUILD_OPTS += -DGREEN
 endif
+
+# defaults
+CFLAGS =
+LDFLAGS =
 	
 ifeq ($(PLATFORM),allegro)
   #MINGW_VER = 3.4.5
@@ -41,14 +57,24 @@ ifeq ($(PLATFORM),allegro)
   OSD_LIBS = -lallegro-4.4.2$(ALLEGRO_MONOLITH)$(ALLEGRO_STATIC)-mt$(ALLEGRO_DEBUG)
 endif
 
-CFLAGS = -I $(OSD_INCDIR) -I src/osd/$(PLATFORM) -I src/lr -Wall -g $(BUILD_OPTS)
-LDFLAGS = -L $(OSD_LIBDIR) $(OSD_LIBS)
+ifeq ($(PLATFORM),neogeo)
+	NEODEV = /projects/neokong/neogeo/neodev
+	OSD_INCDIR = $(NEODEV)/m68k/include
+	OSD_LIBS = $(NEODEV)/m68k/lib
+	
+	CFLAGS += -O3 -fomit-frame-pointer -ffast-math -fno-builtin -nostartfiles -nodefaultlibs -D__cd__
+	LDFLAGS += -m68000 -Wl,-Tsrc/osd/$(PLATFORM)/neocd.x -linput -lvideo -lc -lgcc
+
+endif
+
+CFLAGS += -I $(OSD_INCDIR) -I src/osd/$(PLATFORM) -I src/lr -Wall -g $(BUILD_OPTS)
+LDFLAGS += -L $(OSD_LIBDIR) $(OSD_LIBS)
 
 ifeq ($(STATIC),1)
   LDFLAGS += -lkernel32 -luser32 -lgdi32 -lcomdlg32 -lole32 -ldinput -lddraw -ldxguid -lwinmm -ldsound
 endif
           
-OBJDIR = obj
+OBJDIR = obj/$(PLATFORM)
 
 LR_OBJS = \
 	$(OBJDIR)/lr.o	\
@@ -74,8 +100,8 @@ $(OBJDIR):
 
 -include $(DEPS)
 
-$(OBJDIR)/%.o: src/lr/%.cpp $(MAKEFILE)
-	$(CPP) $(CFLAGS) $(CDEFS) -c $< -o $@
+$(OBJDIR)/%.o: src/lr/%.c $(MAKEFILE)
+	$(CC) $(CFLAGS) $(CDEFS) -c $< -o $@
 
 $(OBJDIR)/%.o: src/osd/$(PLATFORM)/%.cpp
 	$(CPP) $(CFLAGS) $(CDEFS) -c $< -o $@

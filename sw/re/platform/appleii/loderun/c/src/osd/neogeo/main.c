@@ -32,7 +32,7 @@ extern uint8_t tile_data_c2bpp[];
 extern uint8_t title_data_m2bpp[];
 extern uint8_t title_data_c2bpp[];
 
-extern "C" void lode_runner (void);
+extern void lode_runner (void);
 
 void osd_gcls (uint8_t page)
 {

@@ -10,6 +10,10 @@
 
 #include "vars.h"
 
+#ifndef _c_plus_plus
+typedef uint8_t bool;
+#endif
+
 extern uint8_t demo_level_data[][256];
 extern uint8_t game_level_data[][256];
 
