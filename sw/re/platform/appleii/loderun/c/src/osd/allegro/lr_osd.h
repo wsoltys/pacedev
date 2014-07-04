@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _LR_OSD_H_
+#define _LR_OSD_H_
 
 //#define ALLEGRO_STATICLINK
 
@@ -11,6 +12,8 @@
 #define OSD_KEY_X     ('X' & 0x3f)
 #define OSD_KEY_Z     ('Z' & 0x3f)
 #define OSD_KEY_ESC   0x3b
+
+#define OSD_PRINTF(format...)		fprintf (stderr,format)
 
 #ifdef __cplusplus
 extern "C"
@@ -36,4 +39,6 @@ void osd_display_title_screen (uint8_t page);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

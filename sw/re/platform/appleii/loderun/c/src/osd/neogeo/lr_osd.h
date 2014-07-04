@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _LR_OSD_H_
+#define _LR_OSD_H_
 
 //#define ALLEGRO_STATICLINK
 
@@ -11,6 +12,8 @@
 #define OSD_KEY_X     ('X' & 0x3f)
 #define OSD_KEY_Z     ('Z' & 0x3f)
 #define OSD_KEY_ESC   0x3b
+
+#define OSD_PRINTF(format...)
 
 void osd_gcls (uint8_t page);
 void osd_display_char_pg (uint8_t page, uint8_t chr, uint8_t x, uint8_t y);
@@ -28,3 +31,5 @@ void osd_hgr (uint8_t page);
 #define OSD_HGR2  osd_hgr (1)
 void osd_flush_keybd (void);
 void osd_display_title_screen (uint8_t page);
+
+#endif

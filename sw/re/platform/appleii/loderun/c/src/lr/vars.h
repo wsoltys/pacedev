@@ -19,7 +19,7 @@ typedef struct zeropage_t
   uint8_t   curr_guard_col;
   uint8_t   curr_guard_row;
   uint8_t   curr_guard_sprite;
-  uint8_t   curr_guard_dir;
+  int8_t    curr_guard_dir;
   int8_t    curr_guard_state;
   int8_t   	curr_guard_x_offset;
   int8_t   	curr_guard_y_offset;

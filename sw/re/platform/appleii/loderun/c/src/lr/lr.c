@@ -1,10 +1,10 @@
-#include <stdio.h>
+#ifndef NO_STDIO
+  #include <stdio.h>
+#endif
 #include <stdlib.h>
-#include <ctype.h>
-#include <stdint.h>
-#include <sys/stat.h>
-#include <memory.h>
+#include <string.h>
 
+#include "osd_types.h"
 #include "lr_osd.h"
 #include "debug.h"
 
@@ -12,8 +12,8 @@
 
 #ifndef __cplusplus
   typedef uint8_t bool;
-  #define true    1
   #define false   0
+  #define true    1
 #endif
 
 extern uint8_t demo_level_data[][256];
@@ -75,7 +75,7 @@ uint8_t eos_ladder_col[0x30];
 uint8_t eos_ladder_row[0x30];
 uint8_t guard_col[8];
 uint8_t guard_row[8];
-uint8_t guard_state[8];
+int8_t  guard_state[8];
 int8_t 	guard_x_offset[8];
 int8_t 	guard_y_offset[8];
 uint8_t guard_sprite[8];
@@ -180,7 +180,7 @@ static void wipe_and_draw_level (void);
 
 void lode_runner (void)
 {
-	fprintf (stderr, "%s()\n", __FUNCTION__);
+	OSD_PRINTF ("%s()\n", __FUNCTION__);
 
 	zp.game_speed = 6;
 	zp.byte_64 = 0;
@@ -242,7 +242,7 @@ check_start_new_game:
 
 void display_title_screen (void)
 {
-	fprintf (stderr, "%s()\n", __FUNCTION__);
+	OSD_PRINTF ("%s()\n", __FUNCTION__);
 
 	gcls (1);
 	zp.attract_mode = 0;
@@ -260,7 +260,7 @@ void display_title_screen (void)
 
 void zero_score_and_init_game (void)
 {
-	fprintf (stderr, "%s()\n", __FUNCTION__);
+	OSD_PRINTF ("%s()\n", __FUNCTION__);
 	
 	zp.score = 0;
 	zp.unused_97 = 0;
@@ -278,10 +278,6 @@ void zero_score_and_init_game (void)
 
 void main_game_loop (void)
 {
-  unsigned i;
-  
-	fprintf (stderr, "%s()\n", __FUNCTION__);
-
   static uint8_t guard_params[][3] =
   {
 		{ 0, 0, 0 },
@@ -304,6 +300,11 @@ void main_game_loop (void)
     0x4D, 0x4E, 0x4F, 0x50
   };
 
+	uint8_t   data;
+  unsigned  i;
+  
+	OSD_PRINTF ("%s()\n", __FUNCTION__);
+
 main_game_loop:
   
 	init_read_unpack_display_level (1);
@@ -318,7 +319,7 @@ main_game_loop:
 	zp.dig_dir = 0;
 	zp.sndq_length = 0;
 	// unused_97 should be zero
-	uint8_t data = (zp.unused_97 + zp.no_guards);
+	data = (zp.unused_97 + zp.no_guards);
   zp.byte_60[0] = guard_params[data][0];
 	zp.byte_60[1] = guard_params[data][1];
 	zp.byte_60[2] = guard_params[data][2];
@@ -383,9 +384,11 @@ end_demo:
 
 bool title_wait_for_key (void)
 {
-	fprintf (stderr, "%s()\n", __FUNCTION__);
+	uint16_t  timeout;
 
-	uint16_t  timeout = 5000/10;
+	OSD_PRINTF ("%s()\n", __FUNCTION__);
+
+	timeout = 5000/10;
 
   osd_flush_keybd ();	
 	while (timeout)
@@ -400,14 +403,14 @@ bool title_wait_for_key (void)
 
 void high_score_screen (void)
 {
-	fprintf (stderr, "%s()\n", __FUNCTION__);
+	OSD_PRINTF ("%s()\n", __FUNCTION__);
 }
 
 void init_read_unpack_display_level (uint8_t editor_n)
 {
   unsigned h, g;
   
-	fprintf (stderr, "%s()\n", __FUNCTION__);
+	OSD_PRINTF ("%s()\n", __FUNCTION__);
 	
 	zp.editor_n = editor_n;
 	zp.current_col = (uint8_t)-1;
@@ -453,10 +456,10 @@ void init_read_unpack_display_level (uint8_t editor_n)
 
 void read_level_data (void)
 {
-	fprintf (stderr, "%s() : level_0_based = %d, level = %d, attract_mode=%d\n", 
-	          __FUNCTION__, zp.level_0_based, zp.level, zp.attract_mode);
-  
   uint8_t *p;
+  
+	OSD_PRINTF ("%s() : level_0_based = %d, level = %d, attract_mode=%d\n", 
+	          __FUNCTION__, zp.level_0_based, zp.level, zp.attract_mode);
   
   if ((zp.attract_mode >> 1) != 0)
     p = game_level_data[zp.level_0_based];
@@ -470,7 +473,7 @@ void read_level_data (void)
 
 void init_and_draw_level (void)
 {
-	fprintf (stderr, "%s()\n", __FUNCTION__);
+	OSD_PRINTF ("%s()\n", __FUNCTION__);
 
   for (zp.row=15; zp.row!=(uint8_t)-1; zp.row--)
   {
@@ -555,7 +558,7 @@ void init_and_draw_level (void)
 
 bool draw_level (void)
 {
-	fprintf (stderr, "%s()\n", __FUNCTION__);
+	OSD_PRINTF ("%s()\n", __FUNCTION__);
 
   //dbg_dump_level ();
   
@@ -1545,7 +1548,7 @@ uint8_t guard_ai (uint8_t row, uint8_t col)
 		if (zp.curr_guard == 2)
 		{
 			if (osd_key (OSD_KEY_Z))
-				fprintf (stderr, "state=%d, x=%d.%d, y=%d.%d (d=%d,s=%d) +1(d=%d,s=%d)\n",
+				OSD_PRINTF ("state=%d, x=%d.%d, y=%d.%d (d=%d,s=%d) +1(d=%d,s=%d)\n",
 									zp.curr_guard_state,
 									zp.curr_guard_col, zp.curr_guard_x_offset,
 									zp.curr_guard_row, zp.curr_guard_y_offset,
@@ -2146,18 +2149,21 @@ void cls_and_display_high_scores (void)
 		}
 		if (hs_tbl[n-1].level != 0)
 		{
+			uint32_t score;
+			uint8_t byte;
+
 			display_message (".    ");
 			display_character (0x80|hs_tbl[n-1].initial[0]);
 			display_character (0x80|hs_tbl[n-1].initial[1]);
 			display_character (0x80|hs_tbl[n-1].initial[2]);
 			display_message ("    ");
-			uint8_t byte = hs_tbl[n-1].level;
+			byte = hs_tbl[n-1].level;
 			display_digit (byte/100);
 			byte %= 100;
 			display_digit (byte/10);
 			display_digit (byte%10);
 			display_message ("  ");
-			uint32_t score = hs_tbl[n-1].score;
+			score = hs_tbl[n-1].score;
 			display_digit (score/10000000);
 			score %= 10000000;
 			display_digit (score/1000000);
@@ -2182,7 +2188,7 @@ void cls_and_display_high_scores (void)
 
 void cls_and_display_game_status (void)
 {
-	fprintf (stderr, "%s()\n", __FUNCTION__);
+	OSD_PRINTF ("%s()\n", __FUNCTION__);
 	
 	gcls (1);
 	gcls (2);
@@ -2203,14 +2209,14 @@ void cls_and_display_game_status (void)
 
 void gcls (uint8_t page)
 {
-	fprintf (stderr, "%s(%d)\n", __FUNCTION__, page);
+	OSD_PRINTF ("%s(%d)\n", __FUNCTION__, page);
 
   osd_gcls (page);
 }
 
 void display_no_lives (void)
 {
-	fprintf (stderr, "%s()\n", __FUNCTION__);
+	OSD_PRINTF ("%s()\n", __FUNCTION__);
 	
 	zp.col = 16;
 	zp.row = 16;
@@ -2232,7 +2238,7 @@ void display_byte (uint8_t col, uint8_t byte)
 
 void display_level (void)
 {
-	fprintf (stderr, "%s()\n", __FUNCTION__);
+	OSD_PRINTF ("%s()\n", __FUNCTION__);
 	
 	display_byte (25, zp.level);
 }
@@ -2241,7 +2247,7 @@ void update_and_display_score (uint16_t pts)
 {
   uint32_t  score;
   
-	//fprintf (stderr, "%s(%d)\n", __FUNCTION__, pts);
+	//OSD_PRINTF ("%s(%d)\n", __FUNCTION__, pts);
 	
 	zp.score += pts;
 	score = zp.score;
@@ -2351,7 +2357,7 @@ void wipe_char (uint8_t chr, uint8_t x_div_2, uint8_t y)
 
 void display_transparent_char (uint8_t chr, uint8_t x_div_2, uint8_t y)
 {
-	//fprintf (stderr, "%s()\n", __FUNCTION__);
+	//OSD_PRINTF ("%s()\n", __FUNCTION__);
 
   osd_display_transparent_char (chr, x_div_2, y);
 }
@@ -2361,7 +2367,7 @@ void draw_end_of_screen_ladder (void)
   uint8_t x_div_2, y;
   int     n;
   
-	fprintf (stderr, "%s()\n", __FUNCTION__);
+	OSD_PRINTF ("%s()\n", __FUNCTION__);
 
   // flag ladder OK  
   eos_ladder_col[0] = 0;
@@ -2392,7 +2398,7 @@ void draw_end_of_screen_ladder (void)
 
 void display_message (const char *msg)
 {
-	fprintf (stderr, "%s(\"%s\")\n", __FUNCTION__, msg);
+	OSD_PRINTF ("%s(\"%s\")\n", __FUNCTION__, msg);
 	
 	while (*msg)
 		display_character ((1<<7)|*(msg++));
@@ -2400,13 +2406,15 @@ void display_message (const char *msg)
 
 uint8_t blink_char_and_wait_for_key (uint8_t chr)
 {
-	fprintf (stderr, "%s()\n", __FUNCTION__);
+	OSD_PRINTF ("%s()\n", __FUNCTION__);
 	
 	while (1)
 	{
+		unsigned timeout;
+
 		display_char_pg (1, chr == 0 ? 0x0a : 0);
 		
-		unsigned timeout = 32;
+		timeout = 32;
 		while (timeout != 0)
 		{
 			if (osd_keypressed ())
@@ -2487,7 +2495,7 @@ void calc_x_div_2 (uint8_t col, uint8_t offset, uint8_t *x)
 
 void wipe_and_draw_level (void)
 {
-	fprintf (stderr, "%s()\n", __FUNCTION__);
+	OSD_PRINTF ("%s()\n", __FUNCTION__);
 	
 	if (zp.wipe_next_time != 0)
 	{

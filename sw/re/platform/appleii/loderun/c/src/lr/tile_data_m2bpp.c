@@ -1,4 +1,4 @@
-#include <stdint.h>
+#include "osd_types.h"
 
 uint8_t tile_data_m2bpp[] =
 {

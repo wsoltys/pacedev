@@ -8,11 +8,7 @@ ifeq (,$(PLATFORM))
 endif
 
 # compiler, linker and utilities
-ifeq ($(PLATFORM),neogeo)
-	CC = gcc
-else
-	CC = gcc
-endif
+CC = gcc
 CPP = g++
 LD = gcc
 RM = rm
@@ -38,10 +34,6 @@ ifeq ($(GREEN),1)
 	BUILD_OPTS += -DGREEN
 endif
 
-# defaults
-CFLAGS =
-LDFLAGS =
-	
 ifeq ($(PLATFORM),allegro)
   #MINGW_VER = 3.4.5
   MINGW_VER = 4.5.2
@@ -55,6 +47,12 @@ ifeq ($(PLATFORM),allegro)
   OSD_INCDIR = $(ALLEGRO)/include
   OSD_LIBDIR = $(ALLEGRO)/lib
   OSD_LIBS = -lallegro-4.4.2$(ALLEGRO_MONOLITH)$(ALLEGRO_STATIC)-mt$(ALLEGRO_DEBUG)
+  
+  OSD_CFLAGS = -Wall -g
+  ifeq ($(STATIC),1)
+    OSD_LDFLAGS = -lkernel32 -luser32 -lgdi32 -lcomdlg32 -lole32 -ldinput -lddraw -ldxguid -lwinmm -ldsound
+  endif
+          
 endif
 
 ifeq ($(PLATFORM),neogeo)
@@ -62,18 +60,14 @@ ifeq ($(PLATFORM),neogeo)
 	OSD_INCDIR = $(NEODEV)/m68k/include
 	OSD_LIBS = $(NEODEV)/m68k/lib
 	
-	CFLAGS += -O3 -fomit-frame-pointer -ffast-math -fno-builtin -nostartfiles -nodefaultlibs -D__cd__
-	LDFLAGS += -m68000 -Wl,-Tsrc/osd/$(PLATFORM)/neocd.x -linput -lvideo -lc -lgcc
-
+	OSD_CFLAGS = -m68000 -O3 -Wall -fomit-frame-pointer -ffast-math -fno-builtin -nostartfiles -nodefaultlibs 
+	OSD_CFLAGS += -DNO_STDIO -D__cd__
+	OSD_LDFLAGS = -m68000 -Wl,-Tsrc/osd/$(PLATFORM)/neocd.x -linput -lvideo -lc -lgcc
 endif
 
-CFLAGS += -I $(OSD_INCDIR) -I src/osd/$(PLATFORM) -I src/lr -Wall -g $(BUILD_OPTS)
-LDFLAGS += -L $(OSD_LIBDIR) $(OSD_LIBS)
+CFLAGS = -I $(OSD_INCDIR) -I src/osd/$(PLATFORM) -I src/lr $(OSD_CFLAGS) $(BUILD_OPTS)
+LDFLAGS = -L $(OSD_LIBDIR) $(OSD_LIBS) $(OSD_LDFLAGS)
 
-ifeq ($(STATIC),1)
-  LDFLAGS += -lkernel32 -luser32 -lgdi32 -lcomdlg32 -lole32 -ldinput -lddraw -ldxguid -lwinmm -ldsound
-endif
-          
 OBJDIR = obj/$(PLATFORM)
 
 LR_OBJS = \
