@@ -16,8 +16,8 @@
   #define true    1
 #endif
 
-extern uint8_t demo_level_data[][256];
-extern uint8_t game_level_data[][256];
+extern const uint8_t demo_level_data[][256];
+extern const uint8_t game_level_data[][256];
 
 typedef enum
 {
@@ -95,7 +95,7 @@ HS_ENTRY	hs_tbl[10] =
 	{ { 'M', 'M', 'C' }, 42, 314159 },
 };
 
-extern uint8_t attract_move_tbl[];
+extern const uint8_t attract_move_tbl[];
 
 // end of RAM
 
@@ -278,7 +278,7 @@ void zero_score_and_init_game (void)
 
 void main_game_loop (void)
 {
-  static uint8_t guard_params[][3] =
+  static const uint8_t guard_params[][3] =
   {
 		{ 0, 0, 0 },
     { 0, 1, 1 },
@@ -294,7 +294,7 @@ void main_game_loop (void)
     { 0xF, 0xF, 0xF }
   };
 
-  static uint8_t guard_trap_cnt_init_tbl[] =
+  static const uint8_t guard_trap_cnt_init_tbl[] =
   {
     0x26, 0x26, 0x2E, 0x44, 0x47, 0x49, 0x4A, 0x4B, 0x4C, 
     0x4D, 0x4E, 0x4F, 0x50
@@ -456,7 +456,7 @@ void init_read_unpack_display_level (uint8_t editor_n)
 
 void read_level_data (void)
 {
-  uint8_t *p;
+  const uint8_t *p;
   
 	OSD_PRINTF ("%s() : level_0_based = %d, level = %d, attract_mode=%d\n", 
 	          __FUNCTION__, zp.level_0_based, zp.level, zp.attract_mode);
@@ -888,7 +888,7 @@ bool dig_left (void)
 
 bool digging_left (void)
 {
-  static uint8_t dig_sprite_to_char_tbl[] =
+  static const uint8_t dig_sprite_to_char_tbl[] =
   {
     0x1B, 0x1B, 0x1C, 0x1C, 0x1D, 0x1D, 0x1E,
 		0x1E, 0, 0, 0, 0, 0x26, 0x26, 0x27, 0x27, 0x1D, 0x1D, 0x1E, 0x1E, 0,
@@ -965,7 +965,7 @@ bool dig_right (void)
 
 bool digging_right (void)
 {
-  static uint8_t dig_sprite_to_char_tbl[] =
+  static const uint8_t dig_sprite_to_char_tbl[] =
   {
     0x1B, 0x1B, 0x1C, 0x1C, 0x1D, 0x1D, 0x1E,
 		0x1E, 0, 0, 0, 0, 0x26, 0x26, 0x27, 0x27, 0x1D, 0x1D, 0x1E, 0x1E, 0,
@@ -1081,7 +1081,7 @@ void read_controls (void)
 
 void calc_char_and_addr (uint8_t *chr, uint8_t *x_div_2, uint8_t *y)
 {
-  static uint8_t sprite_to_char_tbl[] =
+  static const uint8_t sprite_to_char_tbl[] =
   {
     0xB, 0xC, 0xD, 0x18, 0x19, 0x1A, 0xF, 0x13, 9, 0x10, 0x11, 0x15, 0x16,
 		0x17, 0x25, 0x14, 0xE, 0x12
@@ -1876,7 +1876,7 @@ void find_farthest_left_right (uint8_t row, uint8_t col)
 
 void calc_guard_xychar (uint8_t *chr, uint8_t *x_div_2, uint8_t *y)
 {
-	static uint8_t guard_sprite_to_char_tbl[] =
+	static const uint8_t guard_sprite_to_char_tbl[] =
 	{
 		8, 0x2B, 0x2C, 0x30, 0x31, 0x32, 0x36, 0x28, 0x29, 0x2A, 0x2D, 0x2E, 0x2F,
 		0x35, 0x33, 0x34
@@ -2455,13 +2455,13 @@ void throttle_and_update_sound (void)
 
 void calc_colx5_scanline (uint8_t col, uint8_t row, uint8_t *colx5, uint8_t *scanline)
 {
-	static uint8_t row_to_scanline_tbl[] =
+	static const uint8_t row_to_scanline_tbl[] =
 	{
 		0, 11, 22, 33, 44, 55, 66, 77, 88, 99, 110, 121,
 		132, 143, 154, 165, 181
 	};
 
-	static uint8_t col_x_5_tbl[] =
+	static const uint8_t col_x_5_tbl[] =
 	{
 		0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75,
 		80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135
@@ -2510,7 +2510,7 @@ void wipe_and_draw_level (void)
 	osd_draw_circle ();
 }
 
-uint8_t attract_move_tbl[] =
+uint8_t const attract_move_tbl[] =
 {
 	0x16, 0x4C, 0x66, 2, 0x55, 1, 0x66, 2, 0x36, 0x18, 0x55, 1, 0x44, 1,
 	0x66, 0x14, 0x36, 0xD, 0x30, 0x17, 0x60, 8, 0x66, 3, 0x16, 0x16, 0x66,

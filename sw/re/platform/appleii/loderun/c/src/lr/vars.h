@@ -94,7 +94,7 @@ typedef struct zeropage_t
   uint8_t   wipe_next_time;
   uint8_t   level;
   uint8_t   attract_mode;
-  uint8_t		*demo_inp_ptr;
+  const uint8_t	*demo_inp_ptr;
   uint8_t   demo_inp_key_1_2;
   uint8_t   demo_inp_cnt;
   uint8_t   byte_ac;

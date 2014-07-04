@@ -14,6 +14,7 @@ CPP = g++
 LD = gcc
 RM = rm
 MD = mkdir
+OBJC = objcopy
 TARGET = lr
 MAKEFILE = makefile
 
@@ -62,18 +63,20 @@ ifeq ($(PLATFORM),neogeo)
 
 	NEODEV = 
 
+	#OUTPUT = cd
+	OUTPUT = cart
 	EXT = bin
+	ROM = 202-p1.p1
 
 	OSD_INCDIR = $(NEODEV)/m68k/include
 	OSD_LIBS = $(NEODEV)/m68k/lib
 	
 	OSD_ASFLAGS = -m68000 --register-prefix-optional 
 	OSD_CFLAGS = -m68000 -O3 -Wall -fomit-frame-pointer -ffast-math -fno-builtin -nodefaultlibs 
-	OSD_CFLAGS += -DNO_STDIO -D__cd__
-	OSD_LDFLAGS = -m68000 -nostartfiles -Wl,-Tsrc/osd/$(PLATFORM)/neocd.x -linput -lvideo -lc -lgcc
+	OSD_CFLAGS += -DNO_STDIO -D__$(OUTPUT)__
+	OSD_LDFLAGS = -m68000 -nostartfiles -Wl,-Map=$(TARGET).$(OUTPUT).map,-cref,-Tsrc/osd/$(PLATFORM)/neo$(OUTPUT).x -linput -lvideo -lc -lgcc
 
-	#PLATFORM_OBJS = $(OBJDIR)/crt0_cart.o
-	PLATFORM_OBJS = $(OBJDIR)/crt0_cd.o
+	PLATFORM_OBJS = $(OBJDIR)/crt0_$(OUTPUT).o
 	
 endif
 
@@ -99,13 +102,19 @@ OBJS = $(LR_OBJS) $(OSD_OBJS) $(PLATFORM_OBJS)
 
 DEPS = $(OBJS:.o=.d)
 	
-all: $(OBJDIR) $(TARGET).$(EXT)
+all: $(OBJDIR) $(ROM) $(TARGET).$(EXT)
 .PHONY: all
 
 $(OBJDIR):
 	$(MD) -p $(OBJDIR)
 
 -include $(DEPS)
+
+$(ROM): $(TARGET).$(EXT)
+	$(OBJC) --gap-fill=0x00 --pad-to=0x20000 -R .data -O binary $< $@
+	@romwak /f $@ >nul:
+	@romwak /p $@ $@ 1024 255 >nul:
+	@copy $(ROM) roms\puzzledp
 
 $(OBJDIR)/%.o: src/osd/$(PLATFORM)/%.s $(MAKEFILE)
 	$(AS) $(ASFLAGS) $< -o $@

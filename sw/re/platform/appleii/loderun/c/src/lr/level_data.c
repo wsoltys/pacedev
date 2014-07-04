@@ -1,6 +1,6 @@
 #include "osd_types.h"
 
-uint8_t demo_level_data[][256] =
+const uint8_t demo_level_data[][256] =
 {
   // demo level 001
   {

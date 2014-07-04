@@ -1,14 +1,16 @@
 #include <stdlib.h>
+#include <video.h>
+#include <input.h>
 
 // osd stuff
 
 #include "osd_types.h"
 #include "lr_osd.h"
 
-extern uint8_t tile_data_m2bpp[];
-extern uint8_t tile_data_c2bpp[];
-extern uint8_t title_data_m2bpp[];
-extern uint8_t title_data_c2bpp[];
+extern const uint8_t tile_data_m2bpp[];
+extern const uint8_t tile_data_c2bpp[];
+extern const uint8_t title_data_m2bpp[];
+extern const uint8_t title_data_c2bpp[];
 
 extern void lode_runner (void);
 
@@ -165,76 +167,25 @@ void osd_display_title_screen (uint8_t page)
 int main (int argc, char *argv[])
 {
 #if 0
-	allegro_init ();
-	install_keyboard ();
-
-	set_color_depth (8);
-	if (set_gfx_mode (GFX_AUTODETECT_WINDOWED, 280, 16+2*192, 0, 0) < 0)
-	//if (set_gfx_mode (GFX_AUTODETECT_WINDOWED, 320, 200, 1024, 768) < 0)
-  {
-		fprintf (stderr, "set_gfx_mode() failed!\n");
-		exit (0);
-  }
-	fprintf (stderr, "w=%d, h=%d, v_w=%d, v_h=%d\n",
-						SCREEN_W, SCREEN_H, VIRTUAL_W, VIRTUAL_H);
-
-	pg[0] = create_sub_bitmap (screen, 0, 0, 280, 192);
-	pg[1] = create_sub_bitmap (screen, 0, 16+192, 280, 192);
-	if (pg[0] == NULL || pg[1] == NULL)
-	{
-		fprintf (stderr, "create_sub_bitmap (screen) failed!\n");
-		exit (0);
-	}
-	
-  PALETTE pal;
   uint8_t r[] = { 0x00, 255>>2,  20>>2, 255>>2 };
   uint8_t g[] = { 0x00, 106>>2, 208>>2, 255>>2 };
   uint8_t b[] = { 0x00,  60>>2, 254>>2, 255>>2 };
-  for (unsigned c=0; c<sizeof(r); c++)
-  {
-    pal[c].r = r[c];
-    pal[c].g = g[c];
-    pal[c].b = b[c];
-    
     #if defined(MONO) && defined(GREEN)
     	if (c == 3)
     		pal[c].r = pal[c].b = 0;
     #endif
-  }
-	set_palette_range (pal, 0, 3, 1);
-
-	// setup sprites
-	BITMAP *bm = create_bitmap (10, 11);
-	for (int s=0; s<0x68; s++)
-	{
-		for (unsigned y=0; y<11; y++)
-		{
-			for (unsigned x=0; x<10; x++)
-			{
-				#ifdef MONO
-					uint8_t data = tile_data_m2bpp[s*33+y*3+x/4];
-				#else
-					uint8_t data = tile_data_c2bpp[s*33+y*3+x/4];
-				#endif
-				data >>= (3-(x%4))*2;
-				data &= 3;
-				putpixel (bm, x, y, data);
-			}
-		}
-		tile[s] = get_rle_sprite (bm);
-	}
-	destroy_bitmap (bm);
-
-	lode_runner ();
-
-  //while (!key[KEY_ESC]);	  
-	//while (key[KEY_ESC]);	  
-
-	if (pg[0]) destroy_bitmap (pg[0]);
-	if (pg[1]) destroy_bitmap (pg[1]);
-	
-  allegro_exit ();
 #endif
+
+	while (1)
+	{
+		clear_fix();
+		clear_spr();
+		_vbl_count = 0;
+		textoutf (13, 12, 0, 0, "LODE RUNNER");
+		wait_vbl();
+	}
+	
+	lode_runner ();
   
   return (0);
 }
