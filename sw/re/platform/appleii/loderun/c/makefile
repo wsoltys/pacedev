@@ -8,6 +8,7 @@ ifeq (,$(PLATFORM))
 endif
 
 # compiler, linker and utilities
+AS = as
 CC = gcc
 CPP = g++
 LD = gcc
@@ -43,7 +44,9 @@ ifeq ($(PLATFORM),allegro)
   ALLEGRO = /allegro-4.4.2-mingw-$(MINGW_VER)
   #ALLEGRO_MONOLITH = -monolith
   #ALLEGRO_DEBUG = -debug
-  
+
+	EXT = exe
+	  
   OSD_INCDIR = $(ALLEGRO)/include
   OSD_LIBDIR = $(ALLEGRO)/lib
   OSD_LIBS = -lallegro-4.4.2$(ALLEGRO_MONOLITH)$(ALLEGRO_STATIC)-mt$(ALLEGRO_DEBUG)
@@ -56,17 +59,27 @@ ifeq ($(PLATFORM),allegro)
 endif
 
 ifeq ($(PLATFORM),neogeo)
+
 	NEODEV = 
+
+	EXT = bin
+
 	OSD_INCDIR = $(NEODEV)/m68k/include
 	OSD_LIBS = $(NEODEV)/m68k/lib
 	
-	OSD_CFLAGS = -m68000 -O3 -Wall -fomit-frame-pointer -ffast-math -fno-builtin -nostartfiles -nodefaultlibs 
+	OSD_ASFLAGS = -m68000 --register-prefix-optional 
+	OSD_CFLAGS = -m68000 -O3 -Wall -fomit-frame-pointer -ffast-math -fno-builtin -nodefaultlibs 
 	OSD_CFLAGS += -DNO_STDIO -D__cd__
-	OSD_LDFLAGS = -m68000 -Wl,-Tsrc/osd/$(PLATFORM)/neocd.x -linput -lvideo -lc -lgcc
+	OSD_LDFLAGS = -m68000 -nostartfiles -Wl,-Tsrc/osd/$(PLATFORM)/neocd.x -linput -lvideo -lc -lgcc
+
+	#PLATFORM_OBJS = $(OBJDIR)/crt0_cart.o
+	PLATFORM_OBJS = $(OBJDIR)/crt0_cd.o
+	
 endif
 
-CFLAGS = -I $(OSD_INCDIR) -I src/osd/$(PLATFORM) -I src/lr $(OSD_CFLAGS) $(BUILD_OPTS)
-LDFLAGS = -L $(OSD_LIBDIR) $(OSD_LIBS) $(OSD_LDFLAGS)
+	ASFLAGS = -I src/osd/$(PLATFORM) $(OSD_ASFLAGS)
+	CFLAGS = -I $(OSD_INCDIR) -I src/osd/$(PLATFORM) -I src/lr $(OSD_CFLAGS) $(BUILD_OPTS)
+	LDFLAGS = -L $(OSD_LIBDIR) $(OSD_LIBS) $(OSD_LDFLAGS)
 
 OBJDIR = obj/$(PLATFORM)
 
@@ -82,11 +95,11 @@ LR_OBJS = \
 OSD_OBJS = \
 	$(OBJDIR)/main.o
 
-OBJS = $(LR_OBJS) $(OSD_OBJS)
+OBJS = $(LR_OBJS) $(OSD_OBJS) $(PLATFORM_OBJS)
 
 DEPS = $(OBJS:.o=.d)
 	
-all: $(OBJDIR) $(TARGET).exe
+all: $(OBJDIR) $(TARGET).$(EXT)
 .PHONY: all
 
 $(OBJDIR):
@@ -94,7 +107,13 @@ $(OBJDIR):
 
 -include $(DEPS)
 
+$(OBJDIR)/%.o: src/osd/$(PLATFORM)/%.s $(MAKEFILE)
+	$(AS) $(ASFLAGS) $< -o $@
+
 $(OBJDIR)/%.o: src/lr/%.c $(MAKEFILE)
+	$(CC) $(CFLAGS) $(CDEFS) -c $< -o $@
+
+$(OBJDIR)/%.o: src/osd/$(PLATFORM)/%.c $(MAKEFILE)
 	$(CC) $(CFLAGS) $(CDEFS) -c $< -o $@
 
 $(OBJDIR)/%.o: src/osd/$(PLATFORM)/%.cpp
@@ -103,7 +122,7 @@ $(OBJDIR)/%.o: src/osd/$(PLATFORM)/%.cpp
 %.o: %.c
 	$(CC) $(CFLAGS) $(CDEFS) -c $< -o $@
 
-$(TARGET).exe: $(OBJS)
+$(TARGET).$(EXT): $(OBJS)
 	@echo Linking $@...
 	$(LD) $(OBJS) $(LDFLAGS) -o $@
 
@@ -111,4 +130,4 @@ clean:
 	@echo Deleting object files...
 	$(RM) -f $(OBJDIR)/*.o
 	@echo Deleting executables...
-	$(RM) -f $(TARGET).exe
+	$(RM) -f $(TARGET).$(EXT)
