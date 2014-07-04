@@ -58,7 +58,7 @@ ifeq ($(PLATFORM),allegro)
 endif
 
 ifeq ($(PLATFORM),neogeo)
-	NEODEV = /projects/neokong/neogeo/neodev
+	NEODEV = 
 	OSD_INCDIR = $(NEODEV)/m68k/include
 	OSD_LIBS = $(NEODEV)/m68k/lib
 	
