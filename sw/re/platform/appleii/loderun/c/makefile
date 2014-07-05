@@ -110,11 +110,19 @@ $(OBJDIR):
 
 -include $(DEPS)
 
-$(ROM): $(TARGET).$(EXT)
+$(ROM): $(TARGET).$(EXT) 202-c1.c1 202-c2.c2
 	$(OBJC) --gap-fill=0x00 --pad-to=0x20000 -R .data -O binary $< $@
 	@romwak /f $@ >nul:
 	@romwak /p $@ $@ 1024 255 >nul:
 	@copy $(ROM) roms\puzzledp
+
+%.c1 : %.bin
+	@romwak /p $< $@ 1024 255 > nul:
+	@copy $@ roms\puzzledp
+
+%.c2 : %.bin
+	@romwak /p $< $@ 1024 255 > nul:
+	@copy $@ roms\puzzledp
 
 $(OBJDIR)/%.o: src/osd/$(PLATFORM)/%.s $(MAKEFILE)
 	$(AS) $(ASFLAGS) $< -o $@
@@ -140,3 +148,5 @@ clean:
 	$(RM) -f $(OBJDIR)/*.o
 	@echo Deleting executables...
 	$(RM) -f $(TARGET).$(EXT)
+	@echo Deleting ROMS...
+	$(RM) -f 202-c*.c*

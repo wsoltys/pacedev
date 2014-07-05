@@ -164,6 +164,8 @@ void osd_display_title_screen (uint8_t page)
 #endif
 }
 
+TILEMAP map[28];
+
 int main (int argc, char *argv[])
 {
 #if 0
@@ -180,15 +182,30 @@ int main (int argc, char *argv[])
 	{
 		{{ 0x0000, 0x199F, 0x30FF, 0x4F00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }}
 	};
+
+	unsigned tm, t;
 	
+	// build tilemap
+	for (tm=0; tm<28; tm++)
+	{
+		for (t=0; t<18; t++)
+		{
+			map[tm].tiles[t].block_number = 256 + (t*28+tm) % 0x68;
+			map[tm].tiles[t].attributes = 0;
+		}
+	}
+		
 	while (1)
 	{
 		setpalette(0, 1, (const PPALETTE)pal);
 		clear_fix();
 		clear_spr();
 		_vbl_count = 0;
-		textoutf (13, 12, 0, 0, "LODE RUNNER");
+		textoutf (13, 20, 0, 0, "LODE RUNNER");
 		wait_vbl();
+
+		set_current_sprite(32);
+		write_sprite_data((320-280)/2, 0, 15, 255, 63, 28, (const PTILEMAP)&map[0]);
 		
 		lode_runner ();
 	}
