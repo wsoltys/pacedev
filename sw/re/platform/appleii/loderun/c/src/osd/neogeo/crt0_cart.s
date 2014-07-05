@@ -30,7 +30,7 @@ ENTRY_POINT4	= _dummy_config_handler
 CDDA_FLAG 		= 0
 GUID			= 0x1234
 DEBUG_DIPS		= 0x10E000
-LOGO_START		= 1
+LOGO_START		= 0
 
 	.include	"common_crt0_cart.s"
 

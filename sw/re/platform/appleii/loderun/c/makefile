@@ -72,9 +72,9 @@ ifeq ($(PLATFORM),neogeo)
 	OSD_LIBS = $(NEODEV)/m68k/lib
 	
 	OSD_ASFLAGS = -m68000 --register-prefix-optional 
-	OSD_CFLAGS = -m68000 -O3 -Wall -fomit-frame-pointer -ffast-math -fno-builtin -nodefaultlibs 
+	OSD_CFLAGS = -m68000 -O3 -Wall -fomit-frame-pointer -ffast-math -fno-builtin
 	OSD_CFLAGS += -DNO_STDIO -D__$(OUTPUT)__
-	OSD_LDFLAGS = -m68000 -nostartfiles -Wl,-Map=$(TARGET).$(OUTPUT).map,-cref,-Tsrc/osd/$(PLATFORM)/neo$(OUTPUT).x -linput -lvideo -lc -lgcc
+	OSD_LDFLAGS = -m68000 -nostartfiles -nodefaultlibs -Wl,-Map=$(TARGET).$(OUTPUT).map,-cref,-Tsrc/osd/$(PLATFORM)/neo$(OUTPUT).x -linput -lvideo -lc -lgcc
 
 	PLATFORM_OBJS = $(OBJDIR)/crt0_$(OUTPUT).o
 	
@@ -98,7 +98,7 @@ LR_OBJS = \
 OSD_OBJS = \
 	$(OBJDIR)/main.o
 
-OBJS = $(LR_OBJS) $(OSD_OBJS) $(PLATFORM_OBJS)
+OBJS = $(PLATFORM_OBJS) $(LR_OBJS) $(OSD_OBJS)
 
 DEPS = $(OBJS:.o=.d)
 	

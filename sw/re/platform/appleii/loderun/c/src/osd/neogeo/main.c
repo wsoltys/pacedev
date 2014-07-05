@@ -176,16 +176,22 @@ int main (int argc, char *argv[])
     #endif
 #endif
 
+	static const PALETTE pal[] =
+	{
+		{{ 0x0000, 0x199F, 0x30FF, 0x4F00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }}
+	};
+	
 	while (1)
 	{
+		setpalette(0, 1, (const PPALETTE)pal);
 		clear_fix();
 		clear_spr();
 		_vbl_count = 0;
 		textoutf (13, 12, 0, 0, "LODE RUNNER");
 		wait_vbl();
+		
+		lode_runner ();
 	}
-	
-	lode_runner ();
   
   return (0);
 }
