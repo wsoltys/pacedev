@@ -20,6 +20,8 @@ entity target_top is
       SPI_SCK : in std_logic;
       SPI_DI : in std_logic;
       SPI_DO : out std_logic;
+      SPI_SS2 : in std_logic;
+      SPI_SS3 : in std_logic;
       CONF_DATA0 : in std_logic;
       --////////////////////////	Speaker		////////////////////////
       AUDIO_L           : out std_logic;
@@ -52,10 +54,20 @@ architecture SYN of target_top is
            ps2_data  : out std_logic
            );
    end component user_io;
+   
+  component osd
+    port (
+      pclk, sck, ss, sdi, hs_in, vs_in : in std_logic;
+      red_in, blue_in, green_in : in std_logic_vector(5 downto 0);
+      red_out, blue_out, green_out : out std_logic_vector(5 downto 0);
+      hs_out, vs_out : out std_logic
+    );
+  end component osd;
 
   signal init       	  : std_logic := '1';  
   signal clock_50       : std_logic;
   signal clock_12k      : std_logic;
+  signal osd_clk        : std_logic;
   
   signal clkrst_i       : from_CLKRST_t;
   signal buttons_i      : from_BUTTONS_t;
@@ -114,6 +126,17 @@ begin
 		  clkrst_i.clk(0)<=clock_50;
 
     end generate GEN_PLL;
+    
+    -- OSD clock derived from video clock
+    pllosd : entity work.clk_div
+      generic map (
+        scale_factor => 1
+      )
+      port map (
+        clk_in => clkrst_i.clk(1),
+        reset => '0',
+        clk_out => osd_clk
+    );
     
   end block BLK_CLOCKING;
 	
@@ -213,11 +236,23 @@ begin
     video_i.clk_ena <= '1';
     video_i.reset <= clkrst_i.rst(1);
     
-    VGA_R <= video_o.rgb.r(video_o.rgb.r'left downto video_o.rgb.r'left-5);
-    VGA_G <= video_o.rgb.g(video_o.rgb.g'left downto video_o.rgb.g'left-5);
-    VGA_B <= video_o.rgb.b(video_o.rgb.b'left downto video_o.rgb.b'left-5);
-    VGA_HS <= video_o.hsync;
-    VGA_VS <= video_o.vsync;
+    osd_inst : osd
+      port map (
+        pclk => osd_clk,
+        sdi => SPI_DI,
+        sck => SPI_SCK,
+        ss => SPI_SS3,
+        red_in => video_o.rgb.r(video_o.rgb.r'left downto video_o.rgb.r'left-5),
+        green_in => video_o.rgb.g(video_o.rgb.g'left downto video_o.rgb.g'left-5),
+        blue_in => video_o.rgb.b(video_o.rgb.b'left downto video_o.rgb.b'left-5),
+        hs_in => not video_o.hsync,
+        vs_in => not video_o.vsync,
+        red_out => VGA_R,
+        green_out => VGA_G,
+        blue_out => VGA_B,
+        hs_out => VGA_HS,
+        vs_out => VGA_VS
+      );
  
   end block BLK_VIDEO;
 
