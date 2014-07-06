@@ -428,27 +428,36 @@ begin
   -----------------------------------------------------------------------------
   -- VRAM
   -----------------------------------------------------------------------------
-  vram_b : entity work.spram
-    generic map (
-      numwords_a		=> 16384,
-      widthad_a      => 14
-    )
-    port map (
-      wren      => vram_we_s,
-      address   => vram_a_s,
-      clock     => clk_s,
-      data      => vram_d_from_cv_s,
-      q         => vram_d_to_cv_s
-    );
+  
+  GEN_VRAM : if not PACE_HAS_SRAM generate
+  
+    vram_b : entity work.spram
+      generic map (
+        numwords_a		=> 16384,
+        widthad_a      => 14
+      )
+      port map (
+        wren      => vram_we_s,
+        address   => vram_a_s,
+        clock     => clk_s,
+        data      => vram_d_from_cv_s,
+        q         => vram_d_to_cv_s
+      );
 
-	-- use external SRAM for video ram
---	sram_o.we <= vram_we_s;
---	sram_o.a <= std_logic_vector(resize(unsigned(vram_a_s), sram_o.a'length));
---	sram_o.d <= std_logic_vector(resize(unsigned(vram_d_from_cv_s), sram_o.d'length)) when vram_we_s = '1' else (others => 'Z');
---	vram_d_to_cv_s <= sram_i.d(vram_d_to_cv_s'range);
---	sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
---	sram_o.oe <= not vram_we_s;
---	sram_o.cs <= '1';
+  end generate GEN_VRAM;
+  
+  GEN_EXTERNAL_VRAM : if PACE_HAS_SRAM generate
+  
+    -- use external SRAM for video ram
+    sram_o.we <= vram_we_s;
+    sram_o.a <= std_logic_vector(resize(unsigned(vram_a_s), sram_o.a'length));
+    sram_o.d <= std_logic_vector(resize(unsigned(vram_d_from_cv_s), sram_o.d'length)) when vram_we_s = '1' else (others => 'Z');
+    vram_d_to_cv_s <= sram_i.d(vram_d_to_cv_s'range);
+    sram_o.be <= std_logic_vector(to_unsigned(1, sram_o.be'length));
+    sram_o.oe <= not vram_we_s;
+    sram_o.cs <= '1';
+  
+  end generate GEN_EXTERNAL_VRAM;
 
   -----------------------------------------------------------------------------
   -- Process cart_if
