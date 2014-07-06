@@ -37,32 +37,64 @@ int main (int argc, char *argv[])
 		{
 			for (unsigned r=0; r<8; r++)
 			{
-				uint16_t i = t*3*11+(q%2)*3*8+r*3+(1-(q/2))*2;
+				unsigned row = (q%2)*8+r;
 				uint16_t data = 0;
-
-				// extract 16 bits for single row of quadrant
-				if ((r < 11-8) || ((q%2) == 0))
+				
+				if (row==0 || row==4 || row==8 || row==10 || row==12)
+					row += 1;
+					//data = 0;
+				//else
 				{
-					// 1st byte
-					data = tile_data_c2bpp[i];
-					// 2nd byte
-					data <<= 8;
-					if (q > 1)
-						data |= tile_data_c2bpp[i+1];
+					static unsigned actual_row[] =
+					{
+						0, 0, 1, 2, 0, 3, 4, 5, 0, 6, 0, 7, 0, 8, 9, 10
+					};
+					
+					row = actual_row[row];
+
+					uint16_t i = t*3*11+3*row;
+	
+					// extract 10 bits for single row of quadrant
+					if (row < 11)
+					{
+						if (q > 1)
+						{
+							data = tile_data_m2bpp[i];
+							data <<= 2;
+							data |= tile_data_m2bpp[i+1] >> 6;
+						}
+						else
+						{
+							data = tile_data_m2bpp[i+1] & 0x3f;
+							data <<= 4;
+							data |= tile_data_m2bpp[i+2] >> 4;
+							//data <<= 6;
+						}
+					}
 				}
+				
+				// pixels drawn for a 10-pixel wide sprite
+				uint8_t horiz_reduct[] =
+				{ 
+					1,0,1,1,1,0,1,0,	1,1,1,0,1,0,1,0 
+				};
 				
 				// extract bitplanes
 				uint8_t plane[2];
 				for (unsigned b=0; b<8; b++)
 					for (unsigned p=0; p<2; p++)
 					{
-						plane[p] = (plane[p] << 1) | data & 0x01;
-						data >>= 1;
+						plane[p] <<= 1;
+						if (horiz_reduct[15-((q/2)*8+b)] == 1)
+						{
+							plane[p] |= data & 0x01;
+							data >>= 1;
+						}
 					}
 
 				// write mvs rom files
 				fwrite (&plane[0], 1, 1, c1);				
-				fwrite (&plane[2], 1, 1, c1);
+				fwrite (&plane[1], 1, 1, c1);
 				fwrite (&zero, 1, 1, c2);
 				fwrite (&zero, 1, 1, c2);
 			}

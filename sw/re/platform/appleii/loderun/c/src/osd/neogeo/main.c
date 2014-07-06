@@ -197,6 +197,8 @@ int main (int argc, char *argv[])
 		
 	while (1)
 	{
+		unsigned yz = 175;
+		
 		setpalette(0, 1, (const PPALETTE)pal);
 		clear_fix();
 		clear_spr();
@@ -204,8 +206,28 @@ int main (int argc, char *argv[])
 		textoutf (13, 20, 0, 0, "LODE RUNNER");
 		wait_vbl();
 
-		set_current_sprite(32);
-		write_sprite_data((320-280)/2, 0, 15, 255, 63, 28, (const PTILEMAP)&map[0]);
+		do
+		{
+		  // only reads presses, not releases!
+		  unsigned i = poll_joystick(PORT1, READ_BIOS_CHANGE);
+		  if (i & JOY_UP)
+		  {
+		  	if (yz > 0)
+		  		yz--;
+		  }
+		  else
+		  if (i & JOY_DOWN)
+		  {
+		  	if (yz < 255)
+		  		yz++;
+		  }
+
+  		textoutf(0, 27, 1, 0, "YZ=%d", yz);
+
+			set_current_sprite(32);
+			write_sprite_data((320-280)/2, 0, 9, yz, 63, 28, (const PTILEMAP)&map[0]);
+
+		}	while (1);
 		
 		lode_runner ();
 	}
