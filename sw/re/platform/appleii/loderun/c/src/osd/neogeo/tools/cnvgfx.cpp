@@ -40,14 +40,15 @@ int main (int argc, char *argv[])
 				unsigned row = (q%2)*8+r;
 				uint16_t data = 0;
 				
-				if (row==0 || row==4 || row==8 || row==10 || row==12)
-					row += 1;
-					//data = 0;
-				//else
+				//if (row==0 || row==4 || row==8 || row==10 || row==12)
+				if (row==3 || row==5 || row==7 || row==11 || row==15)
+					data = 0;
+				else
 				{
 					static unsigned actual_row[] =
 					{
-						0, 0, 1, 2, 0, 3, 4, 5, 0, 6, 0, 7, 0, 8, 9, 10
+						//0, 0, 1, 2, 0, 3, 4, 5, 0, 6, 0, 7, 0, 8, 9, 10
+						0, 1, 2, 0, 3, 0, 4, 0, 5, 6, 7, 0, 8, 9, 10, 0
 					};
 					
 					row = actual_row[row];

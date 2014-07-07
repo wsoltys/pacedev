@@ -109,7 +109,7 @@ int ret;
 
 void osd_hgr (uint8_t page)
 {
-  if (page == 0)
+  if (page == 1)
     ret = HGR1;
   else
     ret = HGR2;
