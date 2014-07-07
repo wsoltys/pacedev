@@ -257,6 +257,7 @@ begin
   ps2_kdat <= inputs_i.ps2_kdat;
   
   flash_o <= NULL_TO_FLASH;
+  
   spi_o <= NULL_TO_SPI;
   ser_o <= NULL_TO_SERIAL;
 	leds_o <= (others => '0');
@@ -281,7 +282,7 @@ begin
 	reset_n_s <= not clkrst_i.rst(0);
 
   -----------------------------------------------------------------------------
-  -- The PLL	24MHz -> 21.333MHz
+  -- The PLL	40MHz -> 21.333MHz
   -----------------------------------------------------------------------------
   pll_inclk_s(1) <= '0';
   pll_inclk_s(0) <= ext_clk_i;
@@ -495,19 +496,28 @@ begin
   -----------------------------------------------------------------------------
   -- CART ROM (16K)
   -----------------------------------------------------------------------------
-  cart_rom : entity work.sprom
-    generic map
-		(
-			numwords_a		=> 16384,
-      widthad_a     => 14,
-			init_file			=> "../../../../src/platform/colecovision/roms/carts/" & CV_CART_NAME
-    )
-    port map 
-		(
-      clock    			=> clk_s,
-      address 			=> cart_a_s(13 downto 0),
-      q       			=> cart_d_s
-    );
+    
+  GEN_ROM : if not MIST_DATA_IO_ENABLED generate
+    cart_rom : entity work.sprom
+      generic map
+      (
+        numwords_a		=> 16384,
+        widthad_a     => 14,
+        init_file			=> "../../../../src/platform/colecovision/roms/carts/" & CV_CART_NAME
+      )
+      port map 
+      (
+        clock    			=> clk_s,
+        address 			=> cart_a_s(13 downto 0),
+        q       			=> cart_d_s
+      );
+  end generate GEN_ROM;
+ 
+  GEN_DATAIO : if MIST_DATA_IO_ENABLED generate
+    target_o.clk <= clk_s;
+    target_o.a <= cart_a_s;
+    cart_d_s   <= target_i.q;
+  end generate GEN_DATAIO;
   --
 
 	-- PS/2 keyboard interface

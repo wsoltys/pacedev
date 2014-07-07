@@ -18,14 +18,15 @@ constant PACE_CLKIN0      : natural := 27;
 constant PACE_HAS_SPI     : boolean := false;
 
 	--
-	-- DE1-specific constants
+	-- MiST-specific
 	--
   type from_TARGET_IO_t is record
-    not_used  : std_logic;
+    q	        : std_logic_vector(7 downto 0);
   end record;
 
   type to_TARGET_IO_t is record
-    not_used  : std_logic;
+    a					: std_logic_vector(14 downto 0);
+		clk       : std_logic;
   end record;
   
  end;

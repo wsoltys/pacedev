@@ -38,6 +38,10 @@ package project_pkg is
 	--constant CV_CART_NAME								      : string := "qbert.hex";
 	--constant CV_CART_NAME								      : string := "frogger.hex";
 	--constant CV_CART_NAME								      : string := "smurf.hex";
+  
+  -- MiST-specific constants
+  constant MIST_DATA_IO_ENABLED             : boolean := true;
+  
 					
   type from_PROJECT_IO_t is record
     not_used  : std_logic;

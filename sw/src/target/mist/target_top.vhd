@@ -42,18 +42,19 @@ end target_top;
 
 architecture SYN of target_top is
 
-  component user_io
+  component user_io_w
     port ( SPI_CLK, SPI_SS_IO, SPI_MOSI :in std_logic;
            SPI_MISO : out std_logic;
            JOY0 :     out std_logic_vector(5 downto 0);
            JOY1 :     out std_logic_vector(5 downto 0);
            SWITCHES : out std_logic_vector(1 downto 0);
            BUTTONS : out std_logic_vector(1 downto 0);
+           status : out std_logic_vector(7 downto 0);
            clk       : in std_logic;
            ps2_clk   : out std_logic;
            ps2_data  : out std_logic
            );
-   end component user_io;
+   end component user_io_w;
    
   component osd
     port (
@@ -63,6 +64,19 @@ architecture SYN of target_top is
       hs_out, vs_out : out std_logic
     );
   end component osd;
+  
+  component data_io is
+    port(sck: in std_logic;
+         ss: in std_logic;
+         sdi: in std_logic;
+         downloading: out std_logic;
+         size: out std_logic_vector(15 downto 0);
+         clk: in std_logic;
+         we: in std_logic;
+         a: in std_logic_vector(14 downto 0);
+         din: in std_logic_vector(7 downto 0);
+         dout: out std_logic_vector(7 downto 0));
+  end component;
 
   signal init       	  : std_logic := '1';  
   signal clock_50       : std_logic;
@@ -97,9 +111,14 @@ architecture SYN of target_top is
   signal joystick2      : std_logic_vector(5 downto 0);
   signal switches       : std_logic_vector(1 downto 0);
   signal buttons        : std_logic_vector(1 downto 0);
+  signal status         : std_logic_vector(7 downto 0);
   
   signal ps2dat         : std_logic;
   signal ps2clk         : std_logic;
+  
+  signal downl          : std_logic := '0';
+  signal size           : std_logic_vector(15 downto 0) := (others=>'0');
+  signal forceReset     : std_logic := '0';
   
 --//********************
 
@@ -133,7 +152,7 @@ begin
         scale_factor => 1
       )
       port map (
-        clk_in => clkrst_i.clk(1),
+        clk_in => target_o.clk,
         reset => '0',
         clk_out => osd_clk
     );
@@ -155,7 +174,7 @@ begin
 		end if;
 	end process;
 
-  clkrst_i.arst <= init;
+  clkrst_i.arst <= init or forceReset or status(0);
   clkrst_i.arst_n <= not clkrst_i.arst;
 
   GEN_RESETS : for i in 0 to 3 generate
@@ -174,7 +193,7 @@ begin
   end generate GEN_RESETS;
 
       -- inputs
-      user_io_d : user_io
+      user_io_d : user_io_w
         port map
         (
           SPI_CLK => SPI_SCK,
@@ -185,6 +204,7 @@ begin
           JOY1 => joystick2,
           SWITCHES => switches,
           BUTTONS => buttons,
+          status => status,
           clk => clock_12k,
           ps2_clk => ps2clk,
           ps2_data => ps2dat
@@ -228,6 +248,21 @@ begin
 	inputs_i.ps2_kdat <= ps2dat;
   inputs_i.ps2_mclk <= '0';
   inputs_i.ps2_mdat <= '0';
+  
+  -- use flash interface for our data_io
+  GEN_DATA_IO : if MIST_DATA_IO_ENABLED generate
+    data_io_inst: data_io
+      port map(SPI_SCK, SPI_SS2, SPI_DI, downl, size, target_o.clk, '0', target_o.a(14 downto 0), (others=>'0'), target_i.q(7 downto 0));
+  end generate GEN_DATA_IO;
+    
+  process(size, downl)
+  begin
+    if(downl = '0') then
+      forceReset <= '0';
+    else
+      forceReset <= '1';
+    end if;
+  end process;
 		
   BLK_VIDEO : block
   begin
