@@ -14,7 +14,7 @@ int main (int argc, char *argv[])
 
 	// copy 1st 256 characters from original file
 	FILE *fp1 = fopen ("202-c1.c1", "rb");
-	FILE *fp2 = fopen ("202-c2.c1", "rb");
+	FILE *fp2 = fopen ("202-c2.c2", "rb");
 	for (unsigned i=0; i<256*64; i++)
 	{
 		uint8_t	byte;
