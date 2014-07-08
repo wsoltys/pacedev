@@ -129,7 +129,7 @@ set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name GENERATE_RBF_FILE ON
-set_global_assignment -name VHDL_FILE ../../../../src/target/mist/clk_div.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/pace/clk_div.vhd
 set_global_assignment -name VERILOG_FILE user_io_w.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/mist/data_io_ram.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/mist/data_io.v

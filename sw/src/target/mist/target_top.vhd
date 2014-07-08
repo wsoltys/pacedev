@@ -148,14 +148,14 @@ begin
     
     -- OSD clock derived from video clock
     GEN_PLL_OSD : if MIST_OSD_ENABLED generate
-      pllosd : entity work.clk_div_mist
+      pllosd : entity work.clk_div
         generic map (
-          scale_factor => 1
+          DIVISOR => 2
         )
         port map (
-          clk_in => target_o.clk,
+          clk => target_o.clk,
           reset => '0',
-          clk_out => osd_clk
+          clk_en => osd_clk
       );
     end generate GEN_PLL_OSD;
     
