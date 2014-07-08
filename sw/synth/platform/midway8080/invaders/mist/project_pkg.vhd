@@ -45,13 +45,17 @@ package project_pkg is
 	
   -- rotate native video (for VGA monitor)
   -- - need to change H,V size in platform_pkg.vhd
-  constant INVADERS_ROTATE_VIDEO            : boolean := false;
+  constant INVADERS_ROTATE_VIDEO            : boolean := true;
 
   constant INVADERS_ROM_IN_FLASH            : boolean := false;
   constant PACE_HAS_FLASH                   : boolean := INVADERS_ROM_IN_FLASH;
   
 	constant INVADERS_USE_INTERNAL_WRAM       : boolean := true;		
 	constant USE_VIDEO_VBLANK_INTERRUPT       : boolean := false;
+  
+    -- MiST-specific constants
+  constant MIST_DATA_IO_ENABLED             : boolean := false;
+  constant MIST_OSD_ENABLED                 : boolean := false;
 	
   type from_PROJECT_IO_t is record
     not_used  : std_logic;

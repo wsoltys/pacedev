@@ -19,7 +19,7 @@ begin
 		generic map
 		(
 			init_file		=> ROM_0_NAME,
-			--numwords_a	=> 8192,
+			numwords_a	=> 8192,
 			widthad_a		=> 13
 		)
     port map
@@ -51,7 +51,7 @@ begin
 		generic map
 		(
 			init_file		=> ROM_1_NAME,
-			--numwords_a	=> 4096,
+			numwords_a	=> 4096,
 			widthad_a		=> 12
 		)
     port map
@@ -90,7 +90,7 @@ begin
 		generic map
 		(
 			init_file => VRAM_NAME,
-			--numwords_a => 8192,
+			numwords_a => 8192,
 			widthad_a => 13
 		)
     port map
@@ -130,7 +130,7 @@ begin
 	spram_inst : entity work.spram
 		generic map
 		(
-			--numwords_a => 1024,
+			numwords_a => 1024,
 			widthad_a => 10
 		)
 		port map
