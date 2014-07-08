@@ -17,7 +17,7 @@ begin
 		generic map
 		(
 			init_file		=> "../../../../src/platform/galaxian/roms/galxrom.hex",
---			numwords_a	=> 16384,
+			numwords_a	=> 16384,
 			widthad_a		=> 14
 		)
 		port map
@@ -56,7 +56,7 @@ begin
     generic map
     (
       init_file		=> "../../../../src/platform/galaxian/roms/galxvram.hex",
- --     numwords_a	=> 1024,
+      numwords_a	=> 1024,
       widthad_a		=> 10
     )
     port map
@@ -112,7 +112,7 @@ begin
 	cram0_inst : entity work.dpram
 		generic map
 		(
---			numwords_a	=> 128,
+			numwords_a	=> 128,
 			widthad_a		=> 7
 		)
 		port map
@@ -134,7 +134,7 @@ begin
 	cram1_inst : entity work.dpram
 		generic map
 		(
---			numwords_a	=> 128,
+			numwords_a	=> 128,
 			widthad_a		=> 7
 		)
 		port map
@@ -213,7 +213,7 @@ begin
   wram_inst : entity work.spram
     generic map
     (
- --   	numwords_a => 2048,
+    	numwords_a => 2048,
     	widthad_a => 11
     )
     port map

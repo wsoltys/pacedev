@@ -44,6 +44,10 @@ package project_pkg is
 			
   constant GALAXIAN_USE_INTERNAL_WRAM       : boolean := true;
   constant GALAXIAN_USE_VIDEO_VBLANK        : boolean := true;
+  
+    -- MiST-specific constants
+  constant MIST_DATA_IO_ENABLED             : boolean := false;
+  constant MIST_OSD_ENABLED                 : boolean := false;
 	
   type from_PROJECT_IO_t is record
     not_used  : std_logic;

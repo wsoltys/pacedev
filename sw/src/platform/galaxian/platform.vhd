@@ -470,6 +470,7 @@ begin
         (
           init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" &
                           GALAXIAN_ROM(i) & ".hex",
+          numwords_a  => 0, -- not needed
           widthad_a		=> GALAXIAN_ROM_WIDTHAD
         )
         port map
@@ -490,6 +491,7 @@ begin
         (
           init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" &
                           GALAXIAN_EXTRA_ROM(i) & ".hex",
+          numwords_a  => 0, -- not needed
           widthad_a		=> GALAXIAN_ROM_WIDTHAD
         )
         port map
@@ -591,6 +593,7 @@ begin
         (
           init_file		=> PLATFORM_VARIANT_SRC_DIR & "roms/" &
                           GALAXIAN_TILE_ROM(i) & ".hex",
+          numwords_a  => 0, -- not needed
           widthad_a		=> GALAXIAN_TILE_ROM_WIDTHAD
         )
         port map
@@ -704,6 +707,7 @@ begin
     wram_inst : entity work.spram
       generic map
       (
+        numwords_a  => 0, -- not needed
       	widthad_a => GALAXIAN_WRAM_WIDTHAD
       )
       port map
