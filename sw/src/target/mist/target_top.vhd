@@ -147,15 +147,17 @@ begin
     end generate GEN_PLL;
     
     -- OSD clock derived from video clock
-    pllosd : entity work.clk_div
-      generic map (
-        scale_factor => 1
-      )
-      port map (
-        clk_in => target_o.clk,
-        reset => '0',
-        clk_out => osd_clk
-    );
+    GEN_PLL_OSD : if MIST_OSD_ENABLED generate
+      pllosd : entity work.clk_div_mist
+        generic map (
+          scale_factor => 1
+        )
+        port map (
+          clk_in => target_o.clk,
+          reset => '0',
+          clk_out => osd_clk
+      );
+    end generate GEN_PLL_OSD;
     
   end block BLK_CLOCKING;
 	
@@ -271,23 +273,31 @@ begin
     video_i.clk_ena <= '1';
     video_i.reset <= clkrst_i.rst(1);
     
-    osd_inst : osd
-      port map (
-        pclk => osd_clk,
-        sdi => SPI_DI,
-        sck => SPI_SCK,
-        ss => SPI_SS3,
-        red_in => video_o.rgb.r(video_o.rgb.r'left downto video_o.rgb.r'left-5),
-        green_in => video_o.rgb.g(video_o.rgb.g'left downto video_o.rgb.g'left-5),
-        blue_in => video_o.rgb.b(video_o.rgb.b'left downto video_o.rgb.b'left-5),
-        hs_in => not video_o.hsync,
-        vs_in => not video_o.vsync,
-        red_out => VGA_R,
-        green_out => VGA_G,
-        blue_out => VGA_B,
-        hs_out => VGA_HS,
-        vs_out => VGA_VS
-      );
+    GEN_OSD : if MIST_OSD_ENABLED generate
+      osd_inst : osd
+        port map (
+          pclk => osd_clk,
+          sdi => SPI_DI,
+          sck => SPI_SCK,
+          ss => SPI_SS3,
+          red_in => video_o.rgb.r(video_o.rgb.r'left downto video_o.rgb.r'left-5),
+          green_in => video_o.rgb.g(video_o.rgb.g'left downto video_o.rgb.g'left-5),
+          blue_in => video_o.rgb.b(video_o.rgb.b'left downto video_o.rgb.b'left-5),
+          hs_in => not video_o.hsync,
+          vs_in => not video_o.vsync,
+          red_out => VGA_R,
+          green_out => VGA_G,
+          blue_out => VGA_B,
+          hs_out => VGA_HS,
+          vs_out => VGA_VS
+        );
+    else generate
+      VGA_R <= video_o.rgb.r(video_o.rgb.r'left downto video_o.rgb.r'left-5);
+      VGA_G <= video_o.rgb.g(video_o.rgb.g'left downto video_o.rgb.g'left-5);
+      VGA_B <= video_o.rgb.b(video_o.rgb.b'left downto video_o.rgb.b'left-5);
+      VGA_HS <= video_o.hsync;
+      VGA_VS <= video_o.vsync;
+    end generate GEN_OSD;
  
   end block BLK_VIDEO;
 

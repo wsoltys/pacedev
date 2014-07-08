@@ -6,7 +6,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity clk_div is
+entity clk_div_mist is
     generic (
         -- scale_factor = clk_in/clk_out*2
         scale_factor : integer
@@ -16,9 +16,9 @@ entity clk_div is
         reset  : in  STD_LOGIC;
         clk_out: out STD_LOGIC
     );
-end clk_div;
+end clk_div_mist;
 
-architecture rtl of clk_div is
+architecture rtl of clk_div_mist is
     constant maxcount : integer := scale_factor-1;
     signal temporal: STD_LOGIC;
     signal counter : integer range 0 to maxcount := 0;

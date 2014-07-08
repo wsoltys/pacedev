@@ -41,7 +41,7 @@ package project_pkg is
   
   -- MiST-specific constants
   constant MIST_DATA_IO_ENABLED             : boolean := true;
-  
+  constant MIST_OSD_ENABLED                 : boolean := true;
 					
   type from_PROJECT_IO_t is record
     not_used  : std_logic;

@@ -29,6 +29,8 @@ module user_io #(parameter STRLEN=0) (
 	input      		SPI_SS_IO,
 	output     		reg SPI_MISO,
 	input      		SPI_MOSI,
+    
+  input [7:0] 	core_type,
 	
 	output [5:0] 	JOY0,
 	output [5:0] 	JOY1,
@@ -61,7 +63,7 @@ assign BUTTONS = but_sw[1:0];
 assign SWITCHES = but_sw[3:2];
 
 // this variant of user_io is for 8 bit cores (type == a4) only
-wire [7:0] core_type = 8'ha4;
+//wire [7:0] core_type = 8'ha4;
 
 // drive MISO only when transmitting core id
 always@(negedge SPI_CLK or posedge SPI_SS_IO) begin

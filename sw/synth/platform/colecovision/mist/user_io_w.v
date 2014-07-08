@@ -32,6 +32,8 @@ user_io #(.STRLEN(CONF_STR_LEN)) user_io(
    .SPI_SS_IO   	(SPI_SS_IO		),
    .SPI_MISO    	(SPI_MISO			),   // tristate handling inside user_io
    .SPI_MOSI    	(SPI_MOSI			),
+   
+   .core_type    (8'ha4),
 
    .SWITCHES 		(SWITCHES		),
    .BUTTONS 		(BUTTONS			),
