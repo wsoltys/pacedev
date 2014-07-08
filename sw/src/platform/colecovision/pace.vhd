@@ -574,6 +574,24 @@ begin
           elsif ps2_keys_s(2) = '1' then
             -- KEY 4
             key_v := cv_key_4_c;
+          elsif ps2_keys_s(3) = '1' then
+            -- KEY 5
+            key_v := cv_key_5_c;  
+          elsif ps2_keys_s(14) = '1' then
+            -- KEY 6
+            key_v := cv_key_6_c;  
+          elsif ps2_keys_s(5) = '1' then
+            -- KEY 7
+            key_v := cv_key_7_c;  
+          elsif ps2_keys_s(1) = '1' then
+            -- KEY 8
+            key_v := cv_key_8_c;
+          elsif ps2_keys_s(11) = '1' then
+            -- KEY 9
+            key_v := cv_key_9_c;
+          elsif ps2_keys_s(10) = '1' then
+            -- KEY 0
+            key_v := cv_key_0_c;         
           elsif ps2_keys_s(9) = '1' then
             -- KEY *
             key_v := cv_key_asterisk_c;
