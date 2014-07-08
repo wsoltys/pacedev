@@ -75,7 +75,7 @@ const uint8_t demo_level_data[][256] =
   }
 };
 
-uint8_t game_level_data[][256] =
+const uint8_t game_level_data[][256] =
 {
 
   // level 001

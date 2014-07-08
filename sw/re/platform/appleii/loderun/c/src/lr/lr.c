@@ -466,8 +466,6 @@ void read_level_data (void)
   else
     p = demo_level_data[zp.level-1];
 
-    p = demo_level_data[zp.level-1];
-    
   memcpy (level_data_packed, p, 256);
   
   //dbg_dump_level_packed ();

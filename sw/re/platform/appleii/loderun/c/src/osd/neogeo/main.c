@@ -13,8 +13,9 @@ extern const uint8_t title_data_m2bpp[];
 extern const uint8_t title_data_c2bpp[];
 
 TILEMAP map[2][28];
-unsigned sprite[2] = { 32, 64 };
+const unsigned page_sprite[2] = { 32, 64 };
 unsigned _page = 0;
+unsigned tile_base;
 
 #define XOFF  ((320-280)/2)
 #define XZ	  9
@@ -29,9 +30,9 @@ void osd_gcls (uint8_t page)
 	
 	for (tm=0; tm<28; tm++)
 		for (t=0; t<18; t++)
-			map[page-1][tm].tiles[t].block_number = 256;
-	set_current_sprite (sprite[page-1]);
-	if (page == _page)
+			map[page-1][tm].tiles[t].block_number = tile_base;
+	set_current_sprite (page_sprite[page-1]);
+	//if (page == _page)
 		write_sprite_data(XOFF+0, 0, XZ, YZ, CLIP, 28, (const PTILEMAP)map[page-1]);
 }
 
@@ -41,9 +42,9 @@ void osd_display_char_pg (uint8_t page, uint8_t chr, uint8_t x_div_2, uint8_t y)
   uint16_t  addr = ((32*page)+(x_div_2/5))*64 + (y/11)*2;
 
   *vram = addr;
-  *(vram+1) = chr;
+  *(vram+1) = tile_base+chr;
 
-	map[page-1][x_div_2/5].tiles[y/11].block_number = 256 + chr;
+	map[page-1][x_div_2/5].tiles[y/11].block_number = tile_base + chr;
 	//set_current_sprite (32);
 	//if (page == _page)
 	//	write_sprite_data((320-280)/2, 0, XZ, YZ, 63, 28, (const PTILEMAP)map[page-1]);
@@ -77,8 +78,8 @@ void osd_wipe_circle (void)
 	
 	for (tm=0; tm<28; tm++)
 		for (t=0; t<16; t++)
-			map[0][tm].tiles[t].block_number = 256;
-	set_current_sprite (sprite[0]);
+			map[0][tm].tiles[t].block_number = tile_base;
+	set_current_sprite (page_sprite[0]);
 	write_sprite_data(XOFF+0, 0, XZ, YZ, CLIP, 28, (const PTILEMAP)map[0]);
 
 #if 0
@@ -94,7 +95,7 @@ void osd_draw_circle (void)
 	for (tm=0; tm<28; tm++)
 		for (t=0; t<16; t++)
 			map[0][tm].tiles[t].block_number = map[1][tm].tiles[t].block_number;
-	set_current_sprite (sprite[0]);
+	set_current_sprite (page_sprite[0]);
 	write_sprite_data(XOFF+0, 0, XZ, YZ, CLIP, 28, (const PTILEMAP)map[0]);
 	
 #if 0
@@ -172,7 +173,7 @@ void osd_display_transparent_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, 
   // set sprite tile, attrib
 	addr = (100+sprite)*64;
 	*vram = addr;
-	*(vram+1) = chr;
+	*(vram+1) = tile_base+chr;
 	*(vram+1) = 0;
 
   // set position
@@ -181,9 +182,9 @@ void osd_display_transparent_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, 
   *(vram+1) = 	
 #else
   TILEMAP stm;
-  if (sprite >= 0)
+  if (sprite >= 0 && sprite < 6)
   {
-    stm.tiles[0].block_number = 256+chr;
+    stm.tiles[0].block_number = tile_base+chr;
     set_current_sprite (100+sprite);
     write_sprite_data (XOFF+x_div_2*2, y, XZ, YZ, 1, 1, (const PTILEMAP)&stm);
   }
@@ -197,9 +198,13 @@ void osd_display_transparent_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, 
 
 void osd_hgr (uint8_t page)
 {
+	change_sprite_pos (page_sprite[_page-1], XOFF, 255, 0);
+
 	_page = page;
-	set_current_sprite (sprite[page-1]);
-	write_sprite_data(XOFF+0, 0, XZ, YZ, CLIP, 28, (const PTILEMAP)map[page-1]);
+	//set_current_sprite (page_sprite[page-1]);
+	//write_sprite_data(XOFF+0, 0, XZ, YZ, CLIP, 28, (const PTILEMAP)map[page-1]);
+
+	change_sprite_pos (page_sprite[_page-1], XOFF, 0, CLIP);
 
 	//textoutf(0, 27, 0, 0, "HGR=%d", page);
 	
@@ -255,23 +260,42 @@ void osd_display_title_screen (uint8_t page)
 
 int main (int argc, char *argv[])
 {
-#if 0
-  uint8_t r[] = { 0x00, 255>>2,  20>>2, 255>>2 };
-  uint8_t g[] = { 0x00, 106>>2, 208>>2, 255>>2 };
-  uint8_t b[] = { 0x00,  60>>2, 254>>2, 255>>2 };
-    #if defined(MONO) && defined(GREEN)
-    	if (c == 3)
-    		pal[c].r = pal[c].b = 0;
-    #endif
-#endif
+	// transparent, orange, blue, white/green
+  const uint8_t r[] = { 0x00>>3, 255>>3,  20>>3, 
+  	#if defined(MONO) && defined(GREEN)
+  											0
+  	#else
+  											255>>3 
+  	#endif
+  										};
+  const uint8_t g[] = { 0x00>>3, 106>>3, 208>>3, 255>>3 };
+  const uint8_t b[] = { 0x00>>3,  60>>3, 254>>3, 
+  	#if defined(MONO) && defined(GREEN)
+  											0
+  	#else
+  											255>>3 
+  	#endif
+  										};
 
-	static const PALETTE pal[] =
-	{
-		{{ 0x0000, 0x199F, 0x30FF, 0x7FFF, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }}
-	};
-
-	unsigned m, tm, t, s;
+	PALETTE 	pal;
+	unsigned	c;
+	unsigned 	m, tm, t, s;
 	
+	for (c=0; c<4; c++)
+	{
+		uint16_t	pe = 0;
+						
+		pe |= (r[c]&(1<<0)) << 14;
+		pe |= (g[c]&(1<<0)) << 13;
+		pe |= (b[c]&(1<<0)) << 12;
+		pe |= (r[c]&0x1E) << 7;
+		pe |= (g[c]&0x1E) << 3;
+		pe |= (b[c]&0x1E) >> 1;
+		
+		pal.color[c] = pe;
+	}
+	setpalette(0, 1, (const PPALETTE)&pal);
+
 	// build tilemaps
 	for (m=0; m<2; m++)
 	{
@@ -279,7 +303,7 @@ int main (int argc, char *argv[])
 		{
 			for (t=0; t<32; t++)
 			{
-				map[m][tm].tiles[t].block_number = 256+0;
+				map[m][tm].tiles[t].block_number = tile_base+0;
 				map[m][tm].tiles[t].attributes = 0;
 			}
 		}
@@ -293,7 +317,7 @@ int main (int argc, char *argv[])
     
     for (t=0; t<32; t++)
     {
-      stm.tiles[t].block_number = 256+0;
+      stm.tiles[t].block_number = tile_base+0;
       stm.tiles[t].attributes = 0;
     }
     set_current_sprite (100+s);
@@ -302,7 +326,6 @@ int main (int argc, char *argv[])
   
 	while (1)
 	{
-		setpalette(0, 1, (const PPALETTE)pal);
 		clear_fix();
 		clear_spr();
 
@@ -310,6 +333,13 @@ int main (int argc, char *argv[])
 		//_vbl_count = 0;
 		//wait_vbl();
 
+		tile_base = 256;
+		#ifndef MONO
+			tile_base += 128;
+		#endif
+		
+		_page = 0;
+		
 		lode_runner ();
 	}
   

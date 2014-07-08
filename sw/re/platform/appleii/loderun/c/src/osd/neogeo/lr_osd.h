@@ -13,7 +13,10 @@
 #define OSD_KEY_Z     ('Z' & 0x3f)
 #define OSD_KEY_ESC   0x3b
 
-#define OSD_PRINTF(format...) textoutf (0, 27, 0, 0, format)
+#include <video.h>
+
+#define OSD_PRINTF(format...)
+//#define OSD_PRINTF(format...) textoutf (0, 27, 0, 0, format)
 
 void osd_gcls (uint8_t page);
 void osd_display_char_pg (uint8_t page, uint8_t chr, uint8_t x, uint8_t y);
