@@ -156,8 +156,11 @@ int osd_key (int _key)
 	return (0);
 }
 
-void osd_wipe_char (uint8_t chr, uint8_t x_div_2, uint8_t y)
+void osd_wipe_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, uint8_t y)
 {
+	if (sprite < 0)
+		osd_display_char_pg (1, 0, x_div_2, y);
+
 #if 0
 	// quick hack for now
 	blit (pg[1], pg[0], x_div_2*2, y, x_div_2*2, y, 10, 11);
@@ -185,6 +188,9 @@ void osd_display_transparent_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, 
   if (sprite >= 0 && sprite < 6)
   {
     stm.tiles[0].block_number = tile_base+chr;
+    stm.tiles[0].attributes = 0;
+    stm.tiles[1].block_number = tile_base;
+    stm.tiles[1].attributes = 0;
     set_current_sprite (100+sprite);
     write_sprite_data (XOFF+x_div_2*2, y, XZ, YZ, 1, 1, (const PTILEMAP)&stm);
   }
