@@ -13,7 +13,7 @@
 #define OSD_KEY_Z     ('Z' & 0x3f)
 #define OSD_KEY_ESC   0x3b
 
-#define OSD_PRINTF(format...)
+#define OSD_PRINTF(format...) textoutf (0, 27, 0, 0, format)
 
 void osd_gcls (uint8_t page);
 void osd_display_char_pg (uint8_t page, uint8_t chr, uint8_t x, uint8_t y);
@@ -25,10 +25,10 @@ void osd_delay (unsigned ms);
 int osd_readkey (void);
 int osd_key (int key);
 void osd_wipe_char (uint8_t chr, uint8_t x_div_2, uint8_t y);
-void osd_display_transparent_char (uint8_t chr, uint8_t x_div_2, uint8_t y);
+void osd_display_transparent_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, uint8_t y);
 void osd_hgr (uint8_t page);
-#define OSD_HGR1  osd_hgr (0)
-#define OSD_HGR2  osd_hgr (1)
+#define OSD_HGR1  osd_hgr (1)
+#define OSD_HGR2  osd_hgr (2)
 void osd_flush_keybd (void);
 void osd_display_title_screen (uint8_t page);
 

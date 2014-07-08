@@ -165,7 +165,7 @@ static void display_character (uint8_t chr);
 static void cr (void);
 static void display_char_pg (uint8_t page, uint8_t chr);
 static void wipe_char (uint8_t chr, uint8_t x_div_2, uint8_t y);
-static void display_transparent_char (uint8_t chr, uint8_t x_div_2, uint8_t y);
+static void display_transparent_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, uint8_t y);
 static void draw_end_of_screen_ladder (void);
 static void display_message (const char *msg);
 static uint8_t blink_char_and_wait_for_key (uint8_t chr);
@@ -465,6 +465,8 @@ void read_level_data (void)
     p = game_level_data[zp.level_0_based];
   else
     p = demo_level_data[zp.level-1];
+
+    p = demo_level_data[zp.level-1];
     
   memcpy (level_data_packed, p, 256);
   
@@ -712,7 +714,7 @@ void draw_player_sprite (void)
   uint8_t chr, x_div_2, y;
   
   calc_char_and_addr (&chr, &x_div_2, &y);
-  display_transparent_char (chr, x_div_2, y);
+  display_transparent_char (0, chr, x_div_2, y);
   // collision-detect stuff
 }
 
@@ -929,7 +931,7 @@ bool digging_left (void)
   zp.col = zp.current_col-1;
   zp.row = zp.current_row;
   calc_colx5_scanline (zp.col, zp.row, &x_div_2, &y);
-  display_transparent_char (chr, x_div_2, y);
+  display_transparent_char (0, chr, x_div_2, y);
   chr = dig_sprite_to_char_tbl[zp.dig_sprite+24];
   zp.row++;
   display_char_pg (1, chr);  
@@ -1006,7 +1008,7 @@ bool digging_right (void)
   zp.col = zp.current_col+1;
   zp.row = zp.current_row;
   calc_colx5_scanline (zp.col, zp.row, &x_div_2, &y);
-  display_transparent_char (chr, x_div_2, y);
+  display_transparent_char (0, chr, x_div_2, y);
   zp.row++;
   chr = dig_sprite_to_char_tbl[zp.dig_sprite+12];
   display_char_pg (1, chr);  
@@ -1251,7 +1253,7 @@ handle_guard_falling:
 		
 render_guard_and_ret:
 	calc_guard_xychar (&chr, &x_div_2, &y);
-	display_transparent_char (chr, x_div_2, y);
+	display_transparent_char (zp.curr_guard, chr, x_div_2, y);
 	copy_curr_to_guard ();
 	return;
 
@@ -1280,7 +1282,7 @@ guard_fall_into_next_row:
 			ldu2[zp.row][zp.col] = TILE_GOLD;
 			display_char_pg (2, TILE_GOLD);
 			calc_colx5_scanline (zp.col, zp.row, &x_div_2, &y);
-			display_transparent_char (TILE_GOLD, x_div_2, y);
+			display_transparent_char (-1, TILE_GOLD, x_div_2, y);
 		}
 	
 	//loc_6e46:
@@ -1291,7 +1293,7 @@ guard_fall_into_next_row:
 	// update dynamic playfield and display guard
 	ldu1[zp.curr_guard_row][zp.curr_guard_col] = TILE_GUARD;
 	calc_guard_xychar (&chr, &x_div_2, &y);
-	display_transparent_char (chr, x_div_2, y);
+	display_transparent_char (zp.curr_guard, chr, x_div_2, y);
 	copy_curr_to_guard ();
 	return;
 	
@@ -1307,7 +1309,7 @@ check_wriggle:
 		wipe_char (chr, x_div_2, y);
 		zp.curr_guard_x_offset = wriggle_tbl[zp.curr_guard_state-7];
 		calc_guard_xychar (&chr, &x_div_2, &y);
-		display_transparent_char (chr, x_div_2, y);
+		display_transparent_char (zp.curr_guard, chr, x_div_2, y);
 		copy_guard_to_curr ();
 		return;
 	}
@@ -1399,7 +1401,7 @@ void update_guard_climber_sprite (void)
 
 	update_guard_sprite_index (14, 15);
 	calc_guard_xychar (&chr, &x_div_2, &y);
-	display_transparent_char (chr, x_div_2, y);
+	display_transparent_char (zp.curr_guard, chr, x_div_2, y);
 	copy_curr_to_guard ();
 }
 
@@ -1490,7 +1492,7 @@ guard_can_move_left:
 	else
 		update_guard_sprite_index (3, 5);
 	calc_guard_xychar (&chr, &x_div_2, &y);
-	display_transparent_char (chr, x_div_2, y);
+	display_transparent_char (zp.curr_guard, chr, x_div_2, y);
 	copy_curr_to_guard ();
 }
 
@@ -1538,7 +1540,7 @@ guard_can_move_right:
 	else
 		update_guard_sprite_index (10, 12);
 	calc_guard_xychar (&chr, &x_div_2, &y);
-	display_transparent_char (chr, x_div_2, y);
+	display_transparent_char (zp.curr_guard, chr, x_div_2, y);
 	copy_curr_to_guard ();
 }
 
@@ -1922,7 +1924,7 @@ void check_guard_drop_gold (void)
 		ldu2[zp.row][zp.col] = TILE_GOLD;
 		display_char_pg (2, TILE_GOLD);
 		calc_colx5_scanline (zp.col, zp.row, &x_div_2, &y);
-		display_transparent_char (TILE_GOLD, x_div_2, y);
+		display_transparent_char (-1, TILE_GOLD, x_div_2, y);
 		return;
 	}
 	zp.curr_guard_state--;
@@ -2111,13 +2113,13 @@ void check_and_handle_respawn (void)
 		{
 			display_char_pg (2, 0x39);
 			calc_guard_xychar (&chr, &x_div_2, &y);
-			display_transparent_char (0x39, x_div_2, y);
+			display_transparent_char (zp.curr_guard, 0x39, x_div_2, y);
 		}
 		else if (guard_cnt[g] == 10)
 		{
 			display_char_pg (2, 0x3a);
 			calc_guard_xychar (&chr, &x_div_2, &y);
-			display_transparent_char (0x3a, x_div_2, y);
+			display_transparent_char (zp.curr_guard, 0x3a, x_div_2, y);
 		}
 	}
 	
@@ -2355,11 +2357,11 @@ void wipe_char (uint8_t chr, uint8_t x_div_2, uint8_t y)
 	osd_wipe_char (chr, x_div_2, y);
 }
 
-void display_transparent_char (uint8_t chr, uint8_t x_div_2, uint8_t y)
+void display_transparent_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, uint8_t y)
 {
 	//OSD_PRINTF ("%s()\n", __FUNCTION__);
 
-  osd_display_transparent_char (chr, x_div_2, y);
+  osd_display_transparent_char (sprite, chr, x_div_2, y);
 }
 
 void draw_end_of_screen_ladder (void)
@@ -2388,7 +2390,7 @@ void draw_end_of_screen_ladder (void)
       ldu1[zp.row][zp.col] = TILE_LADDER;
     display_char_pg (2, TILE_LADDER);
     calc_colx5_scanline (zp.col, zp.row, &x_div_2, &y);
-    display_transparent_char (TILE_LADDER, x_div_2, y);
+    display_transparent_char (-1, TILE_LADDER, x_div_2, y);
     // flag tile drawn
     eos_ladder_col[n] = (uint8_t)-1;
   }

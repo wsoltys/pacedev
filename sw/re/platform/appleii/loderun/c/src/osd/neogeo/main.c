@@ -13,10 +13,13 @@ extern const uint8_t title_data_m2bpp[];
 extern const uint8_t title_data_c2bpp[];
 
 TILEMAP map[2][28];
+unsigned sprite[2] = { 32, 64 };
 unsigned _page = 0;
 
-#define XZ	9
-#define YZ	175
+#define XOFF  ((320-280)/2)
+#define XZ	  9
+#define YZ	  175
+#define CLIP  34
 
 extern void lode_runner (void);
 
@@ -27,17 +30,23 @@ void osd_gcls (uint8_t page)
 	for (tm=0; tm<28; tm++)
 		for (t=0; t<18; t++)
 			map[page-1][tm].tiles[t].block_number = 256;
+	set_current_sprite (sprite[page-1]);
 	if (page == _page)
-		write_sprite_data((320-280)/2, 0, XZ, YZ, 63, 28, (const PTILEMAP)map[page-1]);
+		write_sprite_data(XOFF+0, 0, XZ, YZ, CLIP, 28, (const PTILEMAP)map[page-1]);
 }
 
 void osd_display_char_pg (uint8_t page, uint8_t chr, uint8_t x_div_2, uint8_t y)
 {
+	uint16_t  *vram = (uint16_t *)0x3C0000;
+  uint16_t  addr = ((32*page)+(x_div_2/5))*64 + (y/11)*2;
+
+  *vram = addr;
+  *(vram+1) = chr;
+
 	map[page-1][x_div_2/5].tiles[y/11].block_number = 256 + chr;
-		
-	set_current_sprite (32);
-	if (page == _page)
-		write_sprite_data((320-280)/2, 0, XZ, YZ, 63, 28, (const PTILEMAP)map[page-1]);
+	//set_current_sprite (32);
+	//if (page == _page)
+	//	write_sprite_data((320-280)/2, 0, XZ, YZ, 63, 28, (const PTILEMAP)map[page-1]);
 		
 #if 0
   uint16_t  x = x_div_2 * 2;
@@ -69,7 +78,8 @@ void osd_wipe_circle (void)
 	for (tm=0; tm<28; tm++)
 		for (t=0; t<16; t++)
 			map[0][tm].tiles[t].block_number = 256;
-	write_sprite_data((320-280)/2, 0, XZ, YZ, 63, 28, (const PTILEMAP)map[0]);
+	set_current_sprite (sprite[0]);
+	write_sprite_data(XOFF+0, 0, XZ, YZ, CLIP, 28, (const PTILEMAP)map[0]);
 
 #if 0
   // fixme
@@ -84,7 +94,8 @@ void osd_draw_circle (void)
 	for (tm=0; tm<28; tm++)
 		for (t=0; t<16; t++)
 			map[0][tm].tiles[t].block_number = map[1][tm].tiles[t].block_number;
-	write_sprite_data((320-280)/2, 0, XZ, YZ, 63, 28, (const PTILEMAP)map[0]);
+	set_current_sprite (sprite[0]);
+	write_sprite_data(XOFF+0, 0, XZ, YZ, CLIP, 28, (const PTILEMAP)map[0]);
 	
 #if 0
   // fixme
@@ -101,7 +112,7 @@ void osd_delay (unsigned ms)
 {
 	unsigned t;
 	
-	for (t=0; t<2000; t++)
+	for (t=0; t<4000; t++)
 		;
 #if 0
   rest (ms);
@@ -152,22 +163,45 @@ void osd_wipe_char (uint8_t chr, uint8_t x_div_2, uint8_t y)
 #endif
 }
 
-void osd_display_transparent_char (uint8_t chr, uint8_t x_div_2, uint8_t y)
+void osd_display_transparent_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, uint8_t y)
 {
+#if 0  
+	uint16_t  *vram = (uint16_t *)0x3C0000;
+  uint16_t  addr;
+
+  // set sprite tile, attrib
+	addr = (100+sprite)*64;
+	*vram = addr;
+	*(vram+1) = chr;
+	*(vram+1) = 0;
+
+  // set position
+  addr = 0x8200+100+sprite;
+  *vram = addr;
+  *(vram+1) = 	
+#else
+  TILEMAP stm;
+  if (sprite >= 0)
+  {
+    stm.tiles[0].block_number = 256+chr;
+    set_current_sprite (100+sprite);
+    write_sprite_data (XOFF+x_div_2*2, y, XZ, YZ, 1, 1, (const PTILEMAP)&stm);
+  }
+#endif
+  
 #if 0
   // always page HGR1
 	draw_rle_sprite (pg[0], tile[chr], x_div_2*2, y);
 #endif
 }
 
-// global to eliminate warning when commented-out
-int ret;
-
 void osd_hgr (uint8_t page)
 {
 	_page = page;
-	set_current_sprite (32);
-	write_sprite_data((320-280)/2, 0, XZ, YZ, 63, 28, (const PTILEMAP)map[page-1]);
+	set_current_sprite (sprite[page-1]);
+	write_sprite_data(XOFF+0, 0, XZ, YZ, CLIP, 28, (const PTILEMAP)map[page-1]);
+
+	//textoutf(0, 27, 0, 0, "HGR=%d", page);
 	
 #if 0
   if (page == 1)
@@ -236,58 +270,46 @@ int main (int argc, char *argv[])
 		{{ 0x0000, 0x199F, 0x30FF, 0x7FFF, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }}
 	};
 
-	unsigned m, tm, t;
+	unsigned m, tm, t, s;
 	
 	// build tilemaps
 	for (m=0; m<2; m++)
 	{
 		for (tm=0; tm<28; tm++)
 		{
-			for (t=0; t<18; t++)
+			for (t=0; t<32; t++)
 			{
-				//map[m][tm].tiles[t].block_number = 256 + (t*28+tm) % 0x68;
+				map[m][tm].tiles[t].block_number = 256+0;
 				map[m][tm].tiles[t].attributes = 0;
 			}
 		}
 	}
-				
+
+  // setup 'sprite' sprites
+  for (s=0; s<6; s++)
+  {
+    TILEMAP   stm;
+    unsigned  t;
+    
+    for (t=0; t<32; t++)
+    {
+      stm.tiles[t].block_number = 256+0;
+      stm.tiles[t].attributes = 0;
+    }
+    set_current_sprite (100+s);
+		write_sprite_data(0, 0, XZ, YZ, 1, 1, (const PTILEMAP)&stm);
+  }
+  
 	while (1)
 	{
-		unsigned yz = 175;
-		
 		setpalette(0, 1, (const PPALETTE)pal);
 		clear_fix();
 		clear_spr();
-		_vbl_count = 0;
+
 		//textoutf (13, 20, 0, 0, "LODE RUNNER");
-		wait_vbl();
+		//_vbl_count = 0;
+		//wait_vbl();
 
-#if 0
-		do
-		{
-		  // only reads presses, not releases!
-		  unsigned i = poll_joystick(PORT1, READ_BIOS_CHANGE);
-		  if (i & JOY_UP)
-		  {
-		  	if (yz > 0)
-		  		yz--;
-		  }
-		  else
-		  if (i & JOY_DOWN)
-		  {
-		  	if (yz < 255)
-		  		yz++;
-		  }
-
-  		textoutf(0, 27, 0, 0, "YZ=%d", yz);
-
-			set_current_sprite(32);
-			write_sprite_data((320-280)/2, 0, 9, yz, 63, 28, (const PTILEMAP)&map[0]);
-			wait_vbl();
-
-		}	while (1);
-#endif
-		
 		lode_runner ();
 	}
   
