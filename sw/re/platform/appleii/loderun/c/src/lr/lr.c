@@ -558,6 +558,8 @@ void init_and_draw_level (void)
 
 bool draw_level (void)
 {
+  unsigned g = 0;
+  
 	OSD_PRINTF ("%s()\n", __FUNCTION__);
 
   //dbg_dump_level ();
@@ -565,13 +567,22 @@ bool draw_level (void)
   wipe_and_draw_level ();
   
   // wipe player and enemies from background
+  // *** ADD SPRITES
   for (zp.row=15; zp.row != (uint8_t)-1; zp.row--)
   {
   	for (zp.col=27; zp.col != (uint8_t)-1; zp.col--)
   	{
   		uint8_t tile = ldu1[zp.row][zp.col];
   		if (tile == TILE_PLAYER || tile == TILE_GUARD)
+		  {
   			display_char_pg (2, TILE_SPACE);
+  			// *** FOR SPRITES
+  			display_char_pg (1, TILE_SPACE);
+  			if (tile == TILE_PLAYER)
+  			  display_transparent_char (0, TILE_PLAYER, zp.col*5, zp.row*11);
+  		  else if (tile == TILE_GUARD)
+  		    display_transparent_char (++g, TILE_GUARD, zp.col*5, zp.row*11);
+  		}
   	}
   }
   return (false);
@@ -886,16 +897,24 @@ bool dig_left (void)
   return (digging_left ());
 }
 
+static const uint8_t dig_spray_to_char_tbl[] =
+{
+  // dig spray
+  0x1B, 0x1B, 0x1C, 0x1C, 0x1D, 0x1D, 0x1E, 0x1E, 
+  0, 0, 0, 0, 
+  0x26, 0x26, 0x27, 0x27, 0x1D, 0x1D, 0x1E, 0x1E, 
+  0, 0, 0, 0
+};
+
+static const uint8_t dig_brick_to_char_tbl[] =
+{
+  // dig brick
+  0x1F, 0x1F, 0x20, 0x20, 0x21, 0x21, 0x22, 0x22, 0x23, 0x23,
+	0x24, 0x24
+};
+
 bool digging_left (void)
 {
-  static const uint8_t dig_sprite_to_char_tbl[] =
-  {
-    0x1B, 0x1B, 0x1C, 0x1C, 0x1D, 0x1D, 0x1E,
-		0x1E, 0, 0, 0, 0, 0x26, 0x26, 0x27, 0x27, 0x1D, 0x1D, 0x1E, 0x1E, 0,
-		0, 0, 0, 0x1F, 0x1F, 0x20, 0x20, 0x21, 0x21, 0x22, 0x22, 0x23, 0x23,
-		0x24, 0x24
-	};
-
   uint8_t chr, x_div_2, y;
   
   if (zp.current_row == 15)
@@ -921,30 +940,35 @@ bool digging_left (void)
     return (add_hole_entry (zp.current_col-1));
   if (zp.dig_sprite != 0)
   {
-    chr = dig_sprite_to_char_tbl[zp.dig_sprite-1];
+    // wipe the spray
+    chr = dig_spray_to_char_tbl[zp.dig_sprite-1];
     calc_colx5_scanline (zp.current_col-1, zp.current_row, &x_div_2, &y);
-    wipe_char (0, chr, x_div_2, y);
+    wipe_char (-1, chr, x_div_2, y);
   }
-  chr = dig_sprite_to_char_tbl[zp.dig_sprite];
+  // render new spray
+  chr = dig_spray_to_char_tbl[zp.dig_sprite];
   zp.col = zp.current_col-1;
   zp.row = zp.current_row;
   calc_colx5_scanline (zp.col, zp.row, &x_div_2, &y);
-  display_transparent_char (0, chr, x_div_2, y);
-  chr = dig_sprite_to_char_tbl[zp.dig_sprite+24];
+  display_transparent_char (-1, chr, x_div_2, y);
+  // render new partially-dug brick
+  chr = dig_brick_to_char_tbl[zp.dig_sprite];
   zp.row++;
   display_char_pg (1, chr);  
   zp.dig_sprite++;
   return (true);
   
 abort_dig_left:
+  // restore the brick
   zp.row = zp.current_row+1;
   zp.col = zp.current_col-1;
   display_char_pg (1, TILE_BRICK);
   if (zp.dig_sprite != 0)
   {
-  	chr = dig_sprite_to_char_tbl[zp.dig_sprite-1];
+    // wipe the spray
+  	chr = dig_spray_to_char_tbl[zp.dig_sprite-1];
   	calc_colx5_scanline (zp.current_col-1, zp.current_row, &x_div_2, &y);
-    wipe_char (0, chr, x_div_2, y);    
+    wipe_char (-1, chr, x_div_2, y);    
   }
 
 cant_dig_left:
@@ -965,14 +989,6 @@ bool dig_right (void)
 
 bool digging_right (void)
 {
-  static const uint8_t dig_sprite_to_char_tbl[] =
-  {
-    0x1B, 0x1B, 0x1C, 0x1C, 0x1D, 0x1D, 0x1E,
-		0x1E, 0, 0, 0, 0, 0x26, 0x26, 0x27, 0x27, 0x1D, 0x1D, 0x1E, 0x1E, 0,
-		0, 0, 0, 0x1F, 0x1F, 0x20, 0x20, 0x21, 0x21, 0x22, 0x22, 0x23, 0x23,
-		0x24, 0x24
-	};
-
   uint8_t chr, x_div_2, y;
   
   if (zp.current_row == 15)
@@ -998,17 +1014,20 @@ bool digging_right (void)
     return (add_hole_entry (zp.current_col+1));
   if (zp.dig_sprite != 12)
   {
-    chr = dig_sprite_to_char_tbl[zp.dig_sprite-1];
+    // wipe the spray
+    chr = dig_spray_to_char_tbl[zp.dig_sprite-1];
     calc_colx5_scanline (zp.current_col+1, zp.current_row, &x_div_2, &y);
-    wipe_char (0, chr, x_div_2, y);
+    wipe_char (-1, chr, x_div_2, y);
   }
-  chr = dig_sprite_to_char_tbl[zp.dig_sprite];
+  // render new spray
+  chr = dig_spray_to_char_tbl[zp.dig_sprite];
   zp.col = zp.current_col+1;
   zp.row = zp.current_row;
   calc_colx5_scanline (zp.col, zp.row, &x_div_2, &y);
-  display_transparent_char (0, chr, x_div_2, y);
+  display_transparent_char (-1, chr, x_div_2, y);
+  // render new partially-dug brick
   zp.row++;
-  chr = dig_sprite_to_char_tbl[zp.dig_sprite+12];
+  chr = dig_brick_to_char_tbl[zp.dig_sprite-12];
   display_char_pg (1, chr);  
   zp.dig_sprite++;
   return (true);
@@ -1019,9 +1038,10 @@ abort_dig_right:
   display_char_pg (1, TILE_BRICK);
   if (zp.dig_sprite != 12)
   {
-  	chr = dig_sprite_to_char_tbl[zp.dig_sprite-1];
+    // wipe the spray
+  	chr = dig_spray_to_char_tbl[zp.dig_sprite-1];
   	calc_colx5_scanline (zp.current_col+1, zp.current_row, &x_div_2, &y);
-    wipe_char (0, chr, x_div_2, y);    
+    wipe_char (-1, chr, x_div_2, y);    
   }
 
 cant_dig_right:
@@ -2020,7 +2040,7 @@ void respawn_guards_and_update_holes (void)
     if (tile == TILE_SPACE)
       goto redisplay_brick;
     if (tile == TILE_PLAYER)
-      KILL_PLAYER;
+      zp.level_active >>= 1;
     if (tile == TILE_GUARD)
     {
       unsigned  g;
@@ -2103,7 +2123,9 @@ void check_and_handle_respawn (void)
 				display_char_pg (2, TILE_SPACE);
 				guard_state[g] = 0;
 				guard_cnt[g] = 0;
-				display_char_pg (1, TILE_GUARD);
+				// *** FOR SPRITES
+				//display_char_pg (1, TILE_GUARD);
+				display_transparent_char (zp.curr_guard, TILE_GUARD, zp.col*5, zp.row*11);
 				//queue_sound ();
 			}
 		}
@@ -2440,6 +2462,9 @@ uint8_t blink_char_and_wait_for_key (uint8_t chr)
 	}
 	
 	display_char_pg (1, chr);
+	// *** FOR SPRITES
+	if (chr == TILE_PLAYER)
+	  display_char_pg (1, TILE_SPACE);
 	
 	return (osd_readkey () & 0xff);	
 }
@@ -2510,7 +2535,7 @@ void wipe_and_draw_level (void)
 	osd_draw_circle ();
 }
 
-static const uint8_t attract_move_tbl[] =
+const uint8_t attract_move_tbl[] =
 {
 	0x16, 0x4C, 0x66, 2, 0x55, 1, 0x66, 2, 0x36, 0x18, 0x55, 1, 0x44, 1,
 	0x66, 0x14, 0x36, 0xD, 0x30, 0x17, 0x60, 8, 0x66, 3, 0x16, 0x16, 0x66,

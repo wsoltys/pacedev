@@ -92,13 +92,13 @@ int osd_key (int _key)
   return (key[_key]);
 }
 
-void osd_wipe_char (uint8_t chr, uint8_t x_div_2, uint8_t y)
+void osd_wipe_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, uint8_t y)
 {
 	// quick hack for now
 	blit (pg[1], pg[0], x_div_2*2, y, x_div_2*2, y, 10, 11);
 }
 
-void osd_display_transparent_char (uint8_t chr, uint8_t x_div_2, uint8_t y)
+void osd_display_transparent_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, uint8_t y)
 {
   // always page HGR1
 	draw_rle_sprite (pg[0], tile[chr], x_div_2*2, y);

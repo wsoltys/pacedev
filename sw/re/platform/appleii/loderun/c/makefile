@@ -21,7 +21,7 @@ MAKEFILE = makefile
 # BUILDOPTS
 STATIC = 1
 MONO = 0
-GREEN = 0
+GREEN = 1
 
 ifeq (,$(STATIC))
   STATIC = 0

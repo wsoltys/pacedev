@@ -14,7 +14,6 @@ extern const uint8_t title_data_c2bpp[];
 
 TILEMAP map[2][28];
 const unsigned page_sprite[2] = { 32, 64 };
-unsigned _page = 0;
 unsigned tile_base;
 
 #define XOFF  ((320-280)/2)
@@ -185,7 +184,9 @@ void osd_display_transparent_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, 
   *(vram+1) = 	
 #else
   TILEMAP stm;
-  if (sprite >= 0 && sprite < 6)
+  if (sprite < 0)
+    osd_display_char_pg (1, chr, x_div_2, y);
+  else
   {
     stm.tiles[0].block_number = tile_base+chr;
     stm.tiles[0].attributes = 0;
@@ -204,16 +205,13 @@ void osd_display_transparent_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, 
 
 void osd_hgr (uint8_t page)
 {
-	change_sprite_pos (page_sprite[_page-1], XOFF, 255, 0);
+	change_sprite_pos (page_sprite[(page^3)-1], 0, 255, 0);
 
-	_page = page;
 	//set_current_sprite (page_sprite[page-1]);
 	//write_sprite_data(XOFF+0, 0, XZ, YZ, CLIP, 28, (const PTILEMAP)map[page-1]);
 
-	change_sprite_pos (page_sprite[_page-1], XOFF, 0, CLIP);
+	change_sprite_pos (page_sprite[page-1], XOFF, 0, CLIP);
 
-	//textoutf(0, 27, 0, 0, "HGR=%d", page);
-	
 #if 0
   if (page == 1)
     ret = HGR1;
@@ -227,9 +225,8 @@ void osd_hgr (uint8_t page)
 
 void osd_flush_keybd (void)
 {
-#if 0
-	clear_keybuf ();
-#endif
+	while (poll_joystick(PORT1, READ_DIRECT) != 0)
+	  ;
 }
 
 void osd_display_title_screen (uint8_t page)
@@ -343,8 +340,6 @@ int main (int argc, char *argv[])
 		#ifndef MONO
 			tile_base += 128;
 		#endif
-		
-		_page = 0;
 		
 		lode_runner ();
 	}
