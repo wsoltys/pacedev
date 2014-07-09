@@ -149,7 +149,7 @@ void osd_delay (unsigned ms)
 {
 	unsigned t;
 	
-	for (t=0; t<4000; t++)
+	for (t=0; t<8000; t++)
 		;
 #if 0
   rest (ms);

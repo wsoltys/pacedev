@@ -1211,7 +1211,7 @@ void update_guards (void)
   uint8_t chr, x_div_2, y;
   uint8_t tile;
 	uint8_t	guard_movement;
-  
+
   if (++zp.curr_guard > zp.no_guards)
     zp.curr_guard = 1;
   copy_guard_to_curr ();
@@ -1223,7 +1223,7 @@ void update_guards (void)
 //save_guard_and_ret:
   if (guard_cnt[zp.curr_guard] != 0)
   {
-    copy_guard_to_curr ();
+    copy_curr_to_guard ();
     return;
   }
   goto render_guard_and_ret;
@@ -1328,7 +1328,7 @@ check_wriggle:
 		zp.curr_guard_x_offset = wriggle_tbl[zp.curr_guard_state-7];
 		calc_guard_xychar (&chr, &x_div_2, &y);
 		display_transparent_char (zp.curr_guard, chr, x_div_2, y);
-		copy_guard_to_curr ();
+		copy_curr_to_guard ();
 		return;
 	}
 
@@ -1910,7 +1910,7 @@ void calc_guard_xychar (uint8_t *chr, uint8_t *x_div_2, uint8_t *y)
 void check_guard_pickup_gold (void)
 {
 	uint8_t	x_div_2, y;
-	
+
 	if (zp.curr_guard_x_offset != 2 ||
 			zp.curr_guard_y_offset != 2)
 		return;
@@ -2029,7 +2029,8 @@ void respawn_guards_and_update_holes (void)
       chr = (hole_cnt[n] == 20 ? 0x37 : 0x38);
       display_char_pg (2, chr);
       calc_colx5_scanline (zp.col, zp.row, &x_div_2, &y);
-      wipe_char (-1, TILE_SPACE, x_div_2, y);
+      //wipe_char (-1, TILE_SPACE, x_div_2, y);
+      display_char_pg (1, chr);
     }
     continue;
       

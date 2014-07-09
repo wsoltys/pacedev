@@ -2247,7 +2247,7 @@ guard_fall_into_next_row:	; $6DC0
 				sta			*msb_row_lda_dyn
 				ldy			#msb_row_a_static_tbl
 				lda			b,y
-				sta			*msb_row_lda_static									; setup tilemap address
+				sta			*msb_row_lda_static			; setup tilemap address
 				ldb			*curr_guard_col
 				stb			*col
 				ldy			*msb_row_lda_static
@@ -2280,7 +2280,7 @@ loc_6e46:	; $6E46
 				sta			*lsb_row_lda_dyn
 				ldy			#msb_row_a_dyn_tbl
 				lda			b,y
-				sta			*msb_row_lda_dyn	; setup tilemap address
+				sta			*msb_row_lda_dyn				; setup tilemap address
 				lda			#0
 				sta			*curr_guard_state
 				ldb			*curr_guard_col
