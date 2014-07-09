@@ -12,14 +12,16 @@ extern const uint8_t tile_data_c2bpp[];
 extern const uint8_t title_data_m2bpp[];
 extern const uint8_t title_data_c2bpp[];
 
-TILEMAP map[2][28];
-const unsigned page_sprite[2] = { 32, 64 };
+TILEMAP map[3][28];
+const unsigned page_sprite[3] = { 32, 64, 96 };
 unsigned tile_base;
 
-#define XOFF  ((320-280)/2)
-#define XZ	  9
-#define YZ	  175
-#define CLIP  34
+#define XOFF          ((320-280)/2)
+#define YOFF          ((224-192)/2)
+#define XZ	          9
+#define YZ	          175
+#define CLIP          16
+#define SPRITE_BASE   128
 
 extern void lode_runner (void);
 
@@ -28,25 +30,37 @@ void osd_gcls (uint8_t page)
 	unsigned tm, t;
 	
 	for (tm=0; tm<28; tm++)
-		for (t=0; t<18; t++)
-			map[page-1][tm].tiles[t].block_number = tile_base;
-	set_current_sprite (page_sprite[page-1]);
-	//if (page == _page)
-		write_sprite_data(XOFF+0, 0, XZ, YZ, CLIP, 28, (const PTILEMAP)map[page-1]);
+		for (t=0; t<32; t++)
+			map[page][tm].tiles[t].block_number = tile_base;
+	set_current_sprite (page_sprite[page]);
+	write_sprite_data (XOFF, YOFF, XZ, YZ, CLIP, 28, (const PTILEMAP)map[page]);
+
+  // extra tilemap for status display
+	if (page == 1)
+  {
+  	for (tm=0; tm<28; tm++)
+  		for (t=0; t<32; t++)
+  			map[0][tm].tiles[t].block_number = tile_base;
+  	set_current_sprite (page_sprite[0]);
+  	write_sprite_data (XOFF, YOFF+176, XZ, YZ, CLIP, 28, (const PTILEMAP)map[0]);
+  }
 }
 
 void osd_display_char_pg (uint8_t page, uint8_t chr, uint8_t x_div_2, uint8_t y)
 {
 	uint16_t  *vram = (uint16_t *)0x3C0000;
-  uint16_t  addr = ((32*page)+(x_div_2/5))*64 + (y/11)*2;
 
-  *vram = addr;
+  if (page == 1 && y >= 176)
+  {
+    page = 0;
+    y -= 176;
+  }
+
+  *vram = ((32*(page+1))+(x_div_2/5))*64 + (y/11)*2;
   *(vram+1) = tile_base+chr;
 
-	map[page-1][x_div_2/5].tiles[y/11].block_number = tile_base + chr;
-	//set_current_sprite (32);
-	//if (page == _page)
-	//	write_sprite_data((320-280)/2, 0, XZ, YZ, 63, 28, (const PTILEMAP)map[page-1]);
+  // update tilemap
+	map[page][x_div_2/5].tiles[y/11].block_number = tile_base + chr;
 		
 #if 0
   uint16_t  x = x_div_2 * 2;
@@ -77,9 +91,9 @@ void osd_wipe_circle (void)
 	
 	for (tm=0; tm<28; tm++)
 		for (t=0; t<16; t++)
-			map[0][tm].tiles[t].block_number = tile_base;
-	set_current_sprite (page_sprite[0]);
-	write_sprite_data(XOFF+0, 0, XZ, YZ, CLIP, 28, (const PTILEMAP)map[0]);
+			map[1][tm].tiles[t].block_number = tile_base;
+	set_current_sprite (page_sprite[1]);
+	write_sprite_data(XOFF, YOFF, XZ, YZ, CLIP, 28, (const PTILEMAP)map[1]);
 
 #if 0
   // fixme
@@ -93,9 +107,9 @@ void osd_draw_circle (void)
 	
 	for (tm=0; tm<28; tm++)
 		for (t=0; t<16; t++)
-			map[0][tm].tiles[t].block_number = map[1][tm].tiles[t].block_number;
-	set_current_sprite (page_sprite[0]);
-	write_sprite_data(XOFF+0, 0, XZ, YZ, CLIP, 28, (const PTILEMAP)map[0]);
+			map[1][tm].tiles[t].block_number = map[2][tm].tiles[t].block_number;
+	set_current_sprite (page_sprite[1]);
+	write_sprite_data(XOFF, YOFF, XZ, YZ, CLIP, 28, (const PTILEMAP)map[1]);
 	
 #if 0
   // fixme
@@ -192,8 +206,8 @@ void osd_display_transparent_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, 
     stm.tiles[0].attributes = 0;
     stm.tiles[1].block_number = tile_base;
     stm.tiles[1].attributes = 0;
-    set_current_sprite (100+sprite);
-    write_sprite_data (XOFF+x_div_2*2, y, XZ, YZ, 1, 1, (const PTILEMAP)&stm);
+    set_current_sprite (SPRITE_BASE+sprite);
+    write_sprite_data (XOFF+x_div_2*2, YOFF+y, XZ, YZ, 1, 1, (const PTILEMAP)&stm);
   }
 #endif
   
@@ -205,12 +219,18 @@ void osd_display_transparent_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, 
 
 void osd_hgr (uint8_t page)
 {
-	change_sprite_pos (page_sprite[(page^3)-1], 0, 255, 0);
-
-	//set_current_sprite (page_sprite[page-1]);
-	//write_sprite_data(XOFF+0, 0, XZ, YZ, CLIP, 28, (const PTILEMAP)map[page-1]);
-
-	change_sprite_pos (page_sprite[page-1], XOFF, 0, CLIP);
+  if (page == 1)
+  {
+  	change_sprite_pos (page_sprite[2], 0, 255, 0);
+  	change_sprite_pos (page_sprite[1], XOFF, YOFF, CLIP);
+  	change_sprite_pos (page_sprite[0], XOFF, YOFF+176, CLIP);
+  }
+  else
+  {
+  	change_sprite_pos (page_sprite[1], 0, 255, 0);
+  	change_sprite_pos (page_sprite[0], XOFF, YOFF+176, 0);
+  	change_sprite_pos (page_sprite[2], XOFF, YOFF, CLIP);
+  }
 
 #if 0
   if (page == 1)
@@ -300,7 +320,7 @@ int main (int argc, char *argv[])
 	setpalette(0, 1, (const PPALETTE)&pal);
 
 	// build tilemaps
-	for (m=0; m<2; m++)
+	for (m=0; m<3; m++)
 	{
 		for (tm=0; tm<28; tm++)
 		{
@@ -323,7 +343,7 @@ int main (int argc, char *argv[])
       stm.tiles[t].block_number = tile_base+0;
       stm.tiles[t].attributes = 0;
     }
-    set_current_sprite (100+s);
+    set_current_sprite (SPRITE_BASE+s);
 		write_sprite_data(0, 0, XZ, YZ, 1, 1, (const PTILEMAP)&stm);
   }
   
