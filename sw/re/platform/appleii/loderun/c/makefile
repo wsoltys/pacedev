@@ -63,15 +63,21 @@ ifeq ($(PLATFORM),neogeo)
 
 	NEODEV = 
 
-	#OUTPUT = cd
-	OUTPUT = cart
+	OUTPUT = cd
+	#OUTPUT = cart
 	EXT = bin
-	ROM = 202-p1.p1
-
+	
+	ifeq ($(OUTPUT),cart)
+		PRG = 202-p1.p1
+	endif
+	ifeq ($(OUTPUT),cd)
+		PRG = PB_PROG.PRG
+	endif
+	
 	OSD_INCDIR = $(NEODEV)/m68k/include
 	OSD_LIBS = $(NEODEV)/m68k/lib
 	
-	OSD_ASFLAGS = -m68000 --register-prefix-optional 
+	OSD_ASFLAGS = -m68000 --register-prefix-optional --defsym __$(OUTPUT)__=1
 	OSD_CFLAGS = -m68000 -O3 -Wall -fomit-frame-pointer -ffast-math -fno-builtin
 	OSD_CFLAGS += -DNO_STDIO -D__$(OUTPUT)__
 	OSD_LDFLAGS = -m68000 -nostartfiles -nodefaultlibs -Wl,-Map=$(TARGET).$(OUTPUT).map,-cref,-Tsrc/osd/$(PLATFORM)/neo$(OUTPUT).x -linput -lvideo -lc -lgcc
@@ -102,7 +108,7 @@ OBJS = $(PLATFORM_OBJS) $(LR_OBJS) $(OSD_OBJS)
 
 DEPS = $(OBJS:.o=.d)
 	
-all: $(OBJDIR) $(ROM) $(TARGET).$(EXT)
+all: $(OBJDIR) $(PRG) $(TARGET).$(EXT)
 .PHONY: all
 
 $(OBJDIR):
@@ -110,11 +116,13 @@ $(OBJDIR):
 
 -include $(DEPS)
 
-$(ROM): $(TARGET).$(EXT) 202-c1.c1 202-c2.c2
+ifeq ($(OUTPUT),cart)
+
+$(PRG): $(TARGET).$(EXT) 202-c1.c1 202-c2.c2
 	$(OBJC) --gap-fill=0x00 --pad-to=0x20000 -R .data -O binary $< $@
 	@romwak /f $@ >nul:
 	@romwak /p $@ $@ 1024 255 >nul:
-	@copy $(ROM) roms\puzzledp
+	@copy $@ roms\puzzledp
 
 %.c1 : %.bin
 	@romwak /p $< $@ 1024 255 > nul:
@@ -123,6 +131,17 @@ $(ROM): $(TARGET).$(EXT) 202-c1.c1 202-c2.c2
 %.c2 : %.bin
 	@romwak /p $< $@ 1024 255 > nul:
 	@copy $@ roms\puzzledp
+
+else
+
+$(PRG): $(TARGET).$(EXT)
+	$(OBJC) -O binary $< $@
+	@copy $@ cds\puzzledp
+	@copy PB_CHR.SPR cds\puzzledp
+	$(RM) -f $(TARGET).iso
+	mkisofs -iso-level 1 -o $(TARGET).iso -pad -N -V "$(TARGET)" cds\puzzledp
+
+endif
 
 $(OBJDIR)/%.o: src/osd/$(PLATFORM)/%.s $(MAKEFILE)
 	$(AS) $(ASFLAGS) $< -o $@
@@ -149,4 +168,5 @@ clean:
 	@echo Deleting executables...
 	$(RM) -f $(TARGET).$(EXT)
 	@echo Deleting ROMS...
+	$(RM) -f $(PRG)
 	$(RM) -f 202-c*.c*

@@ -28,31 +28,39 @@ ENTRY_POINT4	= _dummy_config_handler
 
 ************************ Definitions *************************
 CDDA_FLAG 		= 0
-GUID			= 0x1234
+GUID					= 0x1234
 DEBUG_DIPS		= 0x10E000
-LOGO_START		= 1
+LOGO_START		= 0
 
 	.include	"common_crt0_cd.s"
 
 * Names MUST be 16 characters long
 *           <---------------->
 _jp_config:
-	.ascii	"NEO THUNDER     "
-	.long	0xFFFFFFFF
-	.word	0x0364
-	.byte	0x14, 0x13, 0x24, 0x01
-
 _us_config:
-	.ascii	"NEO THUNDER     "
-	.long	0xFFFFFFFF
-	.word	0x0364
-	.byte	0x14, 0x13, 0x24, 0x01
-
 _sp_config:
-	.ascii	"NEO THUNDER     "
-	.long	0xFFFFFFFF
-	.word	0x0364
-	.byte	0x14, 0x13, 0x24, 0x01
+	.ascii	"LODE RUNNER     "
+    .word     0xffff
+    .word     0xffff
+    .byte     0xff
+    .byte     0xff
+    .byte     0x02                | colour/mono
+    .byte     0x02                | mono colour
+    .byte     0x00
+    .byte     0x00
+    .byte     0x00
+    .byte     0x00
+    .byte     0x00
+    .byte     0x00
+    .byte     0x00
+    .byte     0x00
+* item names are 12 characters    
+    .ascii    "COLOUR/MONO "      | item 5
+    .ascii    "COLOUR      "
+    .ascii    "MONOCHROME  "
+    .ascii    "MONO COLOR  "      | item 6
+    .ascii    "GREEN       "
+    .ascii    "WHITE       "
 	
 	.align	4
 

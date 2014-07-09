@@ -16,7 +16,6 @@ int main (int argc, char *argv[])
 {
 	FILE *c1 = fopen ("202-c1.bin", "wb");
 	FILE *c2 = fopen ("202-c2.bin", "wb");
-	FILE *spr = fopen ("PB_CHR.SPR","wb");
 
 	// copy 1st 256 characters from original file
 	FILE *fp1 = fopen ("202-c1.c1", "rb");
@@ -113,5 +112,24 @@ int main (int argc, char *argv[])
 		
 	fclose (c1);
 	fclose (c2);
-	fclose (spr);
+
+  // merge to SPR for CD
+  c1 = fopen ("202-c1.bin", "rb");
+  c2 = fopen ("202-c2.bin", "rb");
+  FILE *spr = fopen ("PB_CHR.SPR", "wb");
+  uint16_t w1, w2;
+  fread (&w1, 1, 2, c1);
+  fread (&w2, 1, 2, c2);
+  while (!feof (c1))
+  {
+    fwrite (&w1, 1, 2, spr);
+    fwrite (&w2, 1, 2, spr);
+    
+    fread (&w1, 1, 2, c1);
+    fread (&w2, 1, 2, c2);
+  }
+  fclose (spr);
+  fclose (c2);
+  fclose (c1);
+
 }
