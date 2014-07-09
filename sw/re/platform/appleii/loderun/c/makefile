@@ -144,7 +144,7 @@ $(PRG): $(TARGET).$(EXT)
 endif
 
 $(OBJDIR)/%.o: src/osd/$(PLATFORM)/%.s $(MAKEFILE)
-	$(AS) $(ASFLAGS) $< -o $@
+	$(AS) -a=$*.lst $(ASFLAGS) $< -o $@
 
 $(OBJDIR)/%.o: src/lr/%.c $(MAKEFILE)
 	$(CC) $(CFLAGS) $(CDEFS) -c $< -o $@
