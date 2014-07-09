@@ -49,7 +49,7 @@ int main (int argc, char *argv[])
 					uint16_t data = 0;
 					
 					//if (row==0 || row==4 || row==8 || row==10 || row==12)
-					if (t > 0x67 || row==3 || row==5 || row==7 || row==11 || row==15)
+					if (t > 0x68 || row==3 || row==5 || row==7 || row==11 || row==15)
 						data = 0;
 					else
 					{

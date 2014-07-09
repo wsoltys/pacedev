@@ -37,22 +37,30 @@ LOGO_START		= 0
 * Names MUST be 16 characters long
 *           <---------------->
 _jp_config:
-	.ascii	"SPRITE TEST JP  "
-	.long	0xFFFFFFFF
-	.word	0x0364
-	.byte	0x14, 0x13, 0x24, 0x01
-
 _us_config:
-	.ascii	"SPRITE TEST US  "
-	.long	0xFFFFFFFF
-	.word	0x0364
-	.byte	0x14, 0x13, 0x24, 0x01
-
 _sp_config:
-	.ascii	"SPRITE TEST SP  "
-	.long	0xFFFFFFFF
-	.word	0x0364
-	.byte	0x14, 0x13, 0x24, 0x01
+	.ascii	"LODE RUNNER     "
+    .word     0xffff
+    .word     0xffff
+    .byte     0xff
+    .byte     0xff
+    .byte     0x02                | colour/mono
+    .byte     0x02                | mono colour
+    .byte     0x00
+    .byte     0x00
+    .byte     0x00
+    .byte     0x00
+    .byte     0x00
+    .byte     0x00
+    .byte     0x00
+    .byte     0x00
+* item names are 12 characters    
+    .ascii    "COLOUR/MONO "      | item 5
+    .ascii    "COLOUR      "
+    .ascii    "MONOCHROME  "
+    .ascii    "MONO COLOR  "      | item 6
+    .ascii    "GREEN       "
+    .ascii    "WHITE       "
 	
 	.align	4
 

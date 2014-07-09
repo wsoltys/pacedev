@@ -37,7 +37,7 @@ typedef enum
 //#define DEBUG
 //#define DEBUG_DISABLE_DEMO_EXIT
 //#define DEBUG_GUARD_COPY
-#define DEBUG_INVINCIBLE
+//#define DEBUG_INVINCIBLE
 //#define DEBUG_NO_BITWISE_COLLISION_DETECT
 
 #ifndef DEBUG_INVINCIBLE
@@ -2429,7 +2429,7 @@ void display_message (const char *msg)
 uint8_t blink_char_and_wait_for_key (uint8_t chr)
 {
 	OSD_PRINTF ("%s()\n", __FUNCTION__);
-	
+
 	while (1)
 	{
 		unsigned timeout;

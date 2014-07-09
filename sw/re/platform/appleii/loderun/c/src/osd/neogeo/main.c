@@ -16,18 +16,25 @@ TILEMAP map[3][28];
 const unsigned page_sprite[3] = { 32, 64, 96 };
 unsigned tile_base;
 
-#define XOFF          ((320-280)/2)
-#define YOFF          ((224-192)/2)
-#define XZ	          9
-#define YZ	          175
-#define CLIP          16
-#define SPRITE_BASE   128
+#define DIP_COLOUR      0
+#define DIP_MONO        1
+#define DIP_MONO_GREEN  0
+#define DIP_MONO_WHITE  1
+
+#define XOFF            ((320-280)/2)
+#define YOFF            ((224-192)/2)
+#define XZ	            9
+#define YZ	            175
+#define CLIP            16
+#define NEO_SPRITE(s)   (128+(s))
+
+#define TILE_SEPARATOR  0x68
 
 extern void lode_runner (void);
 
 void osd_gcls (uint8_t page)
 {
-	unsigned tm, t;
+	unsigned tm, t, s;
 	
 	for (tm=0; tm<28; tm++)
 		for (t=0; t<32; t++)
@@ -42,7 +49,11 @@ void osd_gcls (uint8_t page)
   		for (t=0; t<32; t++)
   			map[0][tm].tiles[t].block_number = tile_base;
   	set_current_sprite (page_sprite[0]);
-  	write_sprite_data (XOFF, YOFF+176, XZ, YZ, CLIP, 28, (const PTILEMAP)map[0]);
+  	write_sprite_data (XOFF, YOFF+176-6, XZ, YZ, 2, 28, (const PTILEMAP)map[0]);
+  	
+  	// and finally the sprites
+  	for (s=0; s<6; s++)
+  	  change_sprite_pos (NEO_SPRITE(s), 0, 255, 0);
   }
 }
 
@@ -53,7 +64,7 @@ void osd_display_char_pg (uint8_t page, uint8_t chr, uint8_t x_div_2, uint8_t y)
   if (page == 1 && y >= 176)
   {
     page = 0;
-    y -= 176;
+    y -= (176-11);
   }
 
   *vram = ((32*(page+1))+(x_div_2/5))*64 + (y/11)*2;
@@ -73,6 +84,18 @@ void osd_display_char_pg (uint8_t page, uint8_t chr, uint8_t x_div_2, uint8_t y)
 
 void osd_draw_separator (uint8_t page, uint8_t byte, uint8_t y)
 {  	
+	uint16_t  *vram = (uint16_t *)0x3C0000;
+  unsigned t;
+  
+  for (t=0; t<28; t++)
+  {
+    *vram = ((32*(0+1))+t)*64;
+    *(vram+1) = tile_base+TILE_SEPARATOR;
+
+    // update tilemap
+  	map[0][t].tiles[0].block_number = tile_base + TILE_SEPARATOR;
+  }
+  
 #if 0
 	for (int c=0; c<2*35; c++)
 		for (int n=0; n<4; n++)
@@ -206,7 +229,7 @@ void osd_display_transparent_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, 
     stm.tiles[0].attributes = 0;
     stm.tiles[1].block_number = tile_base;
     stm.tiles[1].attributes = 0;
-    set_current_sprite (SPRITE_BASE+sprite);
+    set_current_sprite (NEO_SPRITE(sprite));
     write_sprite_data (XOFF+x_div_2*2, YOFF+y, XZ, YZ, 1, 1, (const PTILEMAP)&stm);
   }
 #endif
@@ -223,12 +246,18 @@ void osd_hgr (uint8_t page)
   {
   	change_sprite_pos (page_sprite[2], 0, 255, 0);
   	change_sprite_pos (page_sprite[1], XOFF, YOFF, CLIP);
-  	change_sprite_pos (page_sprite[0], XOFF, YOFF+176, CLIP);
+  	change_sprite_pos (page_sprite[0], XOFF, YOFF+176-6, 2);
   }
   else
   {
+    unsigned s;
+
+  	// hide the sprites
+  	for (s=0; s<6; s++)
+  	  change_sprite_pos (NEO_SPRITE(s), 0, 255, 0);
+
   	change_sprite_pos (page_sprite[1], 0, 255, 0);
-  	change_sprite_pos (page_sprite[0], XOFF, YOFF+176, 0);
+  	change_sprite_pos (page_sprite[0], XOFF, YOFF+176-6, 0);
   	change_sprite_pos (page_sprite[2], XOFF, YOFF, CLIP);
   }
 
@@ -283,22 +312,15 @@ void osd_display_title_screen (uint8_t page)
 
 int main (int argc, char *argv[])
 {
+  uint8_t *dips = (uint8_t *)0x10FD84;
+  
+  uint8_t colour_mono = *(dips+6);
+  uint8_t mono_colour = *(dips+7);
+
 	// transparent, orange, blue, white/green
-  const uint8_t r[] = { 0x00>>3, 255>>3,  20>>3, 
-  	#if defined(MONO) && defined(GREEN)
-  											0
-  	#else
-  											255>>3 
-  	#endif
-  										};
+  const uint8_t r[] = { 0x00>>3, 255>>3,  20>>3, 255>>3 };
   const uint8_t g[] = { 0x00>>3, 106>>3, 208>>3, 255>>3 };
-  const uint8_t b[] = { 0x00>>3,  60>>3, 254>>3, 
-  	#if defined(MONO) && defined(GREEN)
-  											0
-  	#else
-  											255>>3 
-  	#endif
-  										};
+  const uint8_t b[] = { 0x00>>3,  60>>3, 254>>3, 255>>3 };
 
 	PALETTE 	pal;
 	unsigned	c;
@@ -307,14 +329,19 @@ int main (int argc, char *argv[])
 	for (c=0; c<4; c++)
 	{
 		uint16_t	pe = 0;
-						
-		pe |= (r[c]&(1<<0)) << 14;
+
+    if (c < 3 ||
+        colour_mono == DIP_COLOUR ||
+        mono_colour == DIP_MONO_WHITE)
+    {
+  		pe |= (r[c]&(1<<0)) << 14;
+  		pe |= (r[c]&0x1E) << 7;
+  		pe |= (b[c]&(1<<0)) << 12;
+  		pe |= (b[c]&0x1E) >> 1;
+    }
 		pe |= (g[c]&(1<<0)) << 13;
-		pe |= (b[c]&(1<<0)) << 12;
-		pe |= (r[c]&0x1E) << 7;
 		pe |= (g[c]&0x1E) << 3;
-		pe |= (b[c]&0x1E) >> 1;
-		
+  		
 		pal.color[c] = pe;
 	}
 	setpalette(0, 1, (const PPALETTE)&pal);
@@ -343,10 +370,10 @@ int main (int argc, char *argv[])
       stm.tiles[t].block_number = tile_base+0;
       stm.tiles[t].attributes = 0;
     }
-    set_current_sprite (SPRITE_BASE+s);
+    set_current_sprite (NEO_SPRITE(s));
 		write_sprite_data(0, 0, XZ, YZ, 1, 1, (const PTILEMAP)&stm);
   }
-  
+
 	while (1)
 	{
 		clear_fix();
@@ -357,9 +384,8 @@ int main (int argc, char *argv[])
 		//wait_vbl();
 
 		tile_base = 256;
-		#ifndef MONO
+    if (colour_mono == DIP_COLOUR)
 			tile_base += 128;
-		#endif
 		
 		lode_runner ();
 	}
