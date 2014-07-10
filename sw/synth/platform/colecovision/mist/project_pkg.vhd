@@ -13,7 +13,7 @@ package project_pkg is
 	-- PACE constants which *MUST* be defined
 	--
 	
-  -- Reference clock is 24MHz
+  -- Reference clock is 27MHz
   constant PACE_HAS_PLL                     : boolean := true;
   constant PACE_HAS_SRAM                    : boolean := false;
   constant PACE_HAS_FLASH                   : boolean := false;
@@ -24,10 +24,10 @@ package project_pkg is
 
   constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_NONE;
 
-  constant PACE_CLK0_DIVIDE_BY              : natural := 6;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 5;  		-- 24*5/6 = 20MHz
-  constant PACE_CLK1_DIVIDE_BY              : natural := 1;
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 1;  		-- 24MHz
+  constant PACE_CLK0_DIVIDE_BY              : natural := 27;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 20;  		-- 27*20/27 = 20MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 27;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 24;  		-- 24MHz
   constant PACE_VIDEO_H_SCALE       	      : integer := 2;
   constant PACE_VIDEO_V_SCALE       	      : integer := 2;
   constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';

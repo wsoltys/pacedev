@@ -220,9 +220,8 @@ architecture SYN of PACE is
   signal gnd_8_s             : std_logic_vector( 7 downto 0);
 
 	-- changes for PACE
-	--alias clk_20M							  : std_logic is clkrst_i.clk(1);
-  signal clk_20M              : std_logic;
-  alias ext_clk_i             : std_logic is clkrst_i.clk(0);
+	alias clk_20M							  : std_logic is clkrst_i.clk(0);
+  alias ext_clk_i             : std_logic is clkrst_i.clk(1);
   signal clk_cnt_q            : unsigned(1 downto 0);
 	signal clk_en_5m37_q			  : std_logic;
 	alias clk_21m3_s					  : std_logic is clk_s;
@@ -282,7 +281,7 @@ begin
 	reset_n_s <= not clkrst_i.rst(0);
 
   -----------------------------------------------------------------------------
-  -- The PLL	40MHz -> 21.333MHz
+  -- The PLL	24MHz -> 21.333MHz
   -----------------------------------------------------------------------------
   pll_inclk_s(1) <= '0';
   pll_inclk_s(0) <= ext_clk_i;
@@ -290,11 +289,9 @@ begin
     port map 
     (
       inclk0  => pll_inclk_s(0),
-      c0      => pll_clk_s(0),
-      c1      => pll_clk_s(1)
+      c0      => pll_clk_s(0)
     );
   clk_s <= pll_clk_s(0);
-  clk_20M <= pll_clk_s(1);
   -----------------------------------------------------------------------------
   -- Process clk_cnt
   --

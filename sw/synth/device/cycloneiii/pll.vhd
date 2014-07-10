@@ -20,7 +20,13 @@ ENTITY pll IS
     CLK1_DIVIDE_BY          : natural := 1;
     CLK1_DUTY_CYCLE         : natural := 50;
     CLK1_MULTIPLY_BY        : natural := 1;
-    CLK1_PHASE_SHIFT        : string := "0"
+    CLK1_PHASE_SHIFT        : string := "0";
+    
+    -- CLK2
+    CLK2_DIVIDE_BY          : natural := 1;
+    CLK2_DUTY_CYCLE         : natural := 50;
+    CLK2_MULTIPLY_BY        : natural := 1;
+    CLK2_PHASE_SHIFT        : string := "0"
   );
 	PORT
 	(
@@ -144,10 +150,10 @@ BEGIN
 		clk1_duty_cycle => CLK1_DUTY_CYCLE,
 		clk1_multiply_by => CLK1_MULTIPLY_BY,
 		clk1_phase_shift => "0",
-		clk2_divide_by => CLK0_DIVIDE_BY,
-		clk2_duty_cycle => CLK0_DUTY_CYCLE,
-		clk2_multiply_by => CLK0_MULTIPLY_BY,
-		clk2_phase_shift => CLK0_PHASE_SHIFT,
+		clk2_divide_by => CLK2_DIVIDE_BY,
+		clk2_duty_cycle => CLK2_DUTY_CYCLE,
+		clk2_multiply_by => CLK2_MULTIPLY_BY,
+		clk2_phase_shift => CLK2_PHASE_SHIFT,
 		compensate_clock => "CLK0",
 		inclk0_input_frequency => INCLK0_INPUT_FREQUENCY,
 		intended_device_family => "Cyclone III",

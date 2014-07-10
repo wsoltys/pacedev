@@ -79,7 +79,6 @@ architecture SYN of target_top is
   end component;
 
   signal init       	  : std_logic := '1';  
-  signal clock_50       : std_logic;
   signal clock_12k      : std_logic;
   signal osd_clk        : std_logic;
   
@@ -130,21 +129,46 @@ begin
 
   BLK_CLOCKING : block
   begin
-    clkrst_i.clk_ref <= CLOCK_27(0);
   
+    clkrst_i.clk_ref <= CLOCK_27(0);
+
     GEN_PLL : if PACE_HAS_PLL generate
     
-      pll_27_inst : entity work.pllclk_ez --entity work.pllclk_ez  --entity work.pll
+      pll_27_inst : entity work.pll
+        generic map
+        (
+          -- INCLK0
+          INCLK0_INPUT_FREQUENCY  => 37037,
+    
+          -- CLK0
+          CLK0_DIVIDE_BY          => PACE_CLK0_DIVIDE_BY,
+          CLK0_MULTIPLY_BY        => PACE_CLK0_MULTIPLY_BY,
+      
+          -- CLK1
+          CLK1_DIVIDE_BY          => PACE_CLK1_DIVIDE_BY,
+          CLK1_MULTIPLY_BY        => PACE_CLK1_MULTIPLY_BY,
+          
+          -- CLK2
+          CLK2_DIVIDE_BY          => 2250,
+          CLK2_MULTIPLY_BY        => 1
+        )
         port map
         (
           inclk0  => CLOCK_27(0),
-          c0      => clock_50,  -- master clock
-          c1      => clkrst_i.clk(1),  -- video clock
-          c2      => clock_12k  -- ps2 clock
+          c0      => clkrst_i.clk(0),
+          c1      => clkrst_i.clk(1),
+          c2      => clock_12k
         );
-		  clkrst_i.clk(0)<=clock_50;
 
     end generate GEN_PLL;
+    
+    GEN_NO_PLL : if not PACE_HAS_PLL generate
+
+      -- feed input clocks into PACE core
+      clkrst_i.clk(0) <= CLOCK_27(0);
+      clkrst_i.clk(1) <= CLOCK_27(1);
+        
+    end generate GEN_NO_PLL;
     
     -- OSD clock derived from video clock
     GEN_PLL_OSD : if MIST_OSD_ENABLED generate
@@ -163,10 +187,10 @@ begin
 	
   -- FPGA STARTUP
 	-- should extend power-on reset if registers init to '0'
-	process (clock_50)
+	process (CLOCK_27(0))
 		variable count : std_logic_vector (11 downto 0) := (others => '0');
 	begin
-		if rising_edge(clock_50) then
+		if rising_edge(CLOCK_27(0)) then
 			if count = X"FFF" then
 				init <= '0';
 			else
