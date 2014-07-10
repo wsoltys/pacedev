@@ -252,7 +252,7 @@ void display_title_screen (void)
 	zp.level_0_based = 0;
 	zp.display_char_page = 1;
 
-  #if 0
+  #if 1
     osd_display_title_screen (zp.display_char_page);
   #else
     zp.col = 2;

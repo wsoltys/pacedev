@@ -6,37 +6,131 @@
 #include "../../../lr/title_data_c2bpp.c"
 #include "../../../lr/title_data_m2bpp.c"
 
-const uint8_t *tile_data[] =
-{
-	tile_data_m2bpp,
-	tile_data_c2bpp
-};
+uint8_t vbm[280*192];
 
-int main (int argc, char *argv[])
-{
-	FILE *c1 = fopen ("202-c1.bin", "wb");
-	FILE *c2 = fopen ("202-c2.bin", "wb");
+uint8_t	zero = 0;
 
-	// copy 1st 256 characters from original file
-	FILE *fp1 = fopen ("202-c1.c1", "rb");
-	FILE *fp2 = fopen ("202-c2.c2", "rb");
-	for (unsigned i=0; i<256*64; i++)
+FILE *c1 = fopen ("202-c1.bin", "wb");
+FILE *c2 = fopen ("202-c2.bin", "wb");
+
+void do_tiles (unsigned set)
+{
+	const uint8_t *tile_data[] =
 	{
-		uint8_t	byte;
-		
-		fread (&byte, 1, 1, fp1);
-		fwrite (&byte, 1, 1, c1);
-		fread (&byte, 1, 1, fp2);
-		fwrite (&byte, 1, 1, c2);
+		tile_data_m2bpp,
+		tile_data_c2bpp
+	};
+	
+	for (unsigned t=0; t<0x80; t++)
+	{
+		// 3 1	== 	2 0			4 quadrants
+		// 4 2			3	1
+		for (unsigned q=0; q<4; q++)
+		{
+			for (unsigned r=0; r<8; r++)
+			{
+				unsigned row = (q%2)*8+r;
+				uint16_t data = 0;
+				
+				//if (row==0 || row==4 || row==8 || row==10 || row==12)
+				if (t > 0x68 || row==3 || row==5 || row==7 || row==11 || row==15)
+					data = 0;
+				else
+				{
+					static unsigned actual_row[] =
+					{
+						//0, 0, 1, 2, 0, 3, 4, 5, 0, 6, 0, 7, 0, 8, 9, 10
+						0, 1, 2, 0, 3, 0, 4, 0, 5, 6, 7, 0, 8, 9, 10, 0
+					};
+					
+					row = actual_row[row];
+
+					uint16_t i = t*3*11+3*row;
+	
+					// extract 10 bits for single row of quadrant
+					if (row < 11)
+					{
+						if (q > 1)
+						{
+							data = tile_data[set][i];
+							data <<= 2;
+							data |= tile_data[set][i+1] >> 6;
+						}
+						else
+						{
+							data = tile_data[set][i+1] & 0x3f;
+							data <<= 4;
+							data |= tile_data[set][i+2] >> 4;
+							//data <<= 6;
+						}
+					}
+				}
+				
+				// pixels drawn for a 10-pixel wide sprite
+				uint8_t horiz_reduct[] =
+				{ 
+					1,0,1,1,1,0,1,0,	1,1,1,0,1,0,1,0 
+				};
+				
+				// extract bitplanes
+				uint8_t plane[2];
+				for (unsigned b=0; b<8; b++)
+					for (unsigned p=0; p<2; p++)
+					{
+						plane[p] <<= 1;
+						if (horiz_reduct[15-((q/2)*8+b)] == 1)
+						{
+							plane[p] |= data & 0x01;
+							data >>= 1;
+						}
+					}
+
+				// write mvs rom files
+				fwrite (&plane[0], 1, 1, c1);				
+				fwrite (&plane[1], 1, 1, c1);
+				fwrite (&zero, 1, 1, c2);
+				fwrite (&zero, 1, 1, c2);
+			}
+		}
 	}
-	fclose (fp1);
-	fclose (fp2);
+}
 
-	uint8_t	zero = 0;
+void do_title (unsigned set)
+{
+	const uint8_t *title_data[] =
+	{
+		title_data_m2bpp,
+		title_data_c2bpp
+	};
+	
+	// now do title tiles
+	unsigned row = 0;
+	unsigned n = 0;
+	unsigned v = 0;
+	
+	while (row < 192)
+	{
+		unsigned count = title_data[set][n++];
+		uint8_t byte = title_data[set][n++];
+		
+		//if (count == 0)
+		//	count = 256;
+		while (count--)
+		{
+			for (unsigned p=0; p<4; p++, byte<<=2)
+				vbm[v++] = (byte >> 6) & 3;
+			if (v % 280 == 0)
+				row++;
+		}
+	}
+	fprintf (stderr, "title_data_c2bpp=%d, n=%d, v=%d\n", 
+						sizeof(title_data_c2bpp), n, v);
 
-	for (unsigned set=0; set<2; set++)
-	{		
-		for (unsigned t=0; t<0x80; t++)
+	// now make 10x16 tiles
+	unsigned t = 0;
+	for (unsigned x=0; x<28; x++)
+	{
+		for (unsigned y=0; y<192/16; y++)
 		{
 			// 3 1	== 	2 0			4 quadrants
 			// 4 2			3	1
@@ -46,39 +140,14 @@ int main (int argc, char *argv[])
 				{
 					unsigned row = (q%2)*8+r;
 					uint16_t data = 0;
-					
-					//if (row==0 || row==4 || row==8 || row==10 || row==12)
-					if (t > 0x68 || row==3 || row==5 || row==7 || row==11 || row==15)
-						data = 0;
-					else
+
+					uint16_t i = y*16*280 + row*280 + x*10 + (1-(q/2))*5;
+										
+					// extract 5 pixles for single row of quadrant
+					for (unsigned p=0; p<5; p++)
 					{
-						static unsigned actual_row[] =
-						{
-							//0, 0, 1, 2, 0, 3, 4, 5, 0, 6, 0, 7, 0, 8, 9, 10
-							0, 1, 2, 0, 3, 0, 4, 0, 5, 6, 7, 0, 8, 9, 10, 0
-						};
-						
-						row = actual_row[row];
-	
-						uint16_t i = t*3*11+3*row;
-		
-						// extract 10 bits for single row of quadrant
-						if (row < 11)
-						{
-							if (q > 1)
-							{
-								data = tile_data[set][i];
-								data <<= 2;
-								data |= tile_data[set][i+1] >> 6;
-							}
-							else
-							{
-								data = tile_data[set][i+1] & 0x3f;
-								data <<= 4;
-								data |= tile_data[set][i+2] >> 4;
-								//data <<= 6;
-							}
-						}
+						data <<= 2;
+						data |= vbm[i++];
 					}
 					
 					// pixels drawn for a 10-pixel wide sprite
@@ -107,9 +176,47 @@ int main (int argc, char *argv[])
 					fwrite (&zero, 1, 1, c2);
 				}
 			}
+			t++;
 		}
 	}
+	fprintf (stderr, "#tiles=%d\n", t);
+	
+	for (; t<384; t++)
+	{
+		for (unsigned b=0; b<4*8; b++)
+		{
+			fwrite (&zero, 1, 1, c1);
+			fwrite (&zero, 1, 1, c1);
+			fwrite (&zero, 1, 1, c2);
+			fwrite (&zero, 1, 1, c2);
+		}
+	}
+}
+
+int main (int argc, char *argv[])
+{
+	// copy 1st 256 characters from original file
+	FILE *fp1 = fopen ("202-c1.c1", "rb");
+	FILE *fp2 = fopen ("202-c2.c2", "rb");
+	for (unsigned i=0; i<256*64; i++)
+	{
+		uint8_t	byte;
 		
+		fread (&byte, 1, 1, fp1);
+		fwrite (&byte, 1, 1, c1);
+		fread (&byte, 1, 1, fp2);
+		fwrite (&byte, 1, 1, c2);
+	}
+	fclose (fp1);
+	fclose (fp2);
+
+	// do tiles
+	for (unsigned set=0; set<2; set++)
+	{
+		do_tiles (set);
+		do_title (set);
+	}
+	
 	fclose (c1);
 	fclose (c2);
 

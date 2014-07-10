@@ -240,8 +240,16 @@ void osd_display_transparent_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, 
 #endif
 }
 
+static uint8_t osd_hgr_skip;
+
 void osd_hgr (uint8_t page)
 {
+	if (osd_hgr_skip)
+	{
+		osd_hgr_skip = 0;
+		return;
+	}
+		
   if (page == 1)
   {
   	change_sprite_pos (page_sprite[2], 0, 255, 0);
@@ -280,6 +288,26 @@ void osd_flush_keybd (void)
 
 void osd_display_title_screen (uint8_t page)
 {
+	unsigned tm, t;
+	unsigned n = 0;
+
+	change_sprite_pos (page_sprite[0], XOFF, YOFF+176-6, 0);
+	change_sprite_pos (page_sprite[2], 0, 255, 0);
+	
+	for (tm=0; tm<28; tm++)
+	{
+		for (t=0; t<12; t++)
+		{
+			map[1][tm].tiles[t].block_number = tile_base+128+n;
+			map[1][tm].tiles[t].attributes = 0;
+			n++;
+		}
+	}
+	set_current_sprite (page_sprite[1]);
+	write_sprite_data (XOFF, YOFF, XZ, 255, 12, 28, (const PTILEMAP)map[1]);
+
+	osd_hgr_skip = 1;
+		
 #if 0
 	#ifdef MONO
   	uint8_t *ptitle_data = title_data_m2bpp;
@@ -385,8 +413,9 @@ int main (int argc, char *argv[])
 
 		tile_base = 256;
     if (colour_mono == DIP_COLOUR)
-			tile_base += 128;
-		
+			tile_base += 512;
+
+		osd_hgr_skip = 0;		
 		lode_runner ();
 	}
   
