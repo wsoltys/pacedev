@@ -142,7 +142,7 @@ void osd_draw_circle (void)
 
 int osd_keypressed (void)
 {
-	return (poll_joystick(PORT1, READ_DIRECT) != 0);
+	return ((poll_joystick(PORT1, READ_DIRECT) &0x3FF) != 0);
 }
 
 void osd_delay (unsigned ms)
@@ -274,8 +274,8 @@ void osd_hgr (uint8_t page)
 
 void osd_flush_keybd (void)
 {
-	while (poll_joystick(PORT1, READ_DIRECT) != 0)
-	  ;
+	while (osd_keypressed ())
+		;
 }
 
 void osd_display_title_screen (uint8_t page)

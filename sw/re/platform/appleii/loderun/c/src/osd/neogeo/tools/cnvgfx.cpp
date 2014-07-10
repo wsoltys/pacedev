@@ -122,6 +122,8 @@ int main (int argc, char *argv[])
   fread (&w2, 1, 2, c2);
   while (!feof (c1))
   {
+  	w1 = (w1 >> 8) | (w1 << 8);
+  	w2 = (w2 >> 8) | (w2 << 8);
     fwrite (&w1, 1, 2, spr);
     fwrite (&w2, 1, 2, spr);
     

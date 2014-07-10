@@ -63,9 +63,12 @@ ifeq ($(PLATFORM),neogeo)
 
 	NEODEV = 
 
-	OUTPUT = cd
-	#OUTPUT = cart
+	#OUTPUT = cd
 	EXT = bin
+	
+	ifeq ($(OUTPUT),)
+		OUTPUT = cart
+	endif
 	
 	ifeq ($(OUTPUT),cart)
 		PRG = 202-p1.p1
@@ -134,7 +137,7 @@ $(PRG): $(TARGET).$(EXT) 202-c1.c1 202-c2.c2
 
 else
 
-$(PRG): $(TARGET).$(EXT)
+$(PRG): $(TARGET).$(EXT) PB_CHR.SPR
 	$(OBJC) -O binary $< $@
 	@copy $@ cds\puzzledp
 	@copy PB_CHR.SPR cds\puzzledp
@@ -144,19 +147,19 @@ $(PRG): $(TARGET).$(EXT)
 endif
 
 $(OBJDIR)/%.o: src/osd/$(PLATFORM)/%.s $(MAKEFILE)
-	$(AS) -a=$*.lst $(ASFLAGS) $< -o $@
+	$(AS) -ahls=$*.lst $(ASFLAGS) $< -o $@
 
 $(OBJDIR)/%.o: src/lr/%.c $(MAKEFILE)
-	$(CC) $(CFLAGS) $(CDEFS) -Wa,-ahl=$*.lst -c $< -o $@
+	$(CC) $(CFLAGS) $(CDEFS) -Wa,-ahls=$*.lst -c $< -o $@
 
 $(OBJDIR)/%.o: src/osd/$(PLATFORM)/%.c $(MAKEFILE)
-	$(CC) $(CFLAGS) $(CDEFS) -c $< -o $@
+	$(CC) $(CFLAGS) $(CDEFS) -Wa,-ahls=$*.lst -c $< -o $@
 
 $(OBJDIR)/%.o: src/osd/$(PLATFORM)/%.cpp
-	$(CPP) $(CFLAGS) $(CDEFS) -c $< -o $@
+	$(CPP) $(CFLAGS) $(CDEFS) -Wa,-ahls=$*.lst -c $< -o $@
 
 %.o: %.c
-	$(CC) $(CFLAGS) $(CDEFS) -c $< -o $@
+	$(CC) $(CFLAGS) $(CDEFS) -Wa,-ahls=$*.lst -c $< -o $@
 
 $(TARGET).$(EXT): $(OBJS)
 	@echo Linking $@...
