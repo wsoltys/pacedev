@@ -147,7 +147,7 @@ $(OBJDIR)/%.o: src/osd/$(PLATFORM)/%.s $(MAKEFILE)
 	$(AS) -a=$*.lst $(ASFLAGS) $< -o $@
 
 $(OBJDIR)/%.o: src/lr/%.c $(MAKEFILE)
-	$(CC) $(CFLAGS) $(CDEFS) -c $< -o $@
+	$(CC) $(CFLAGS) $(CDEFS) -Wa,-ahl=$*.lst -c $< -o $@
 
 $(OBJDIR)/%.o: src/osd/$(PLATFORM)/%.c $(MAKEFILE)
 	$(CC) $(CFLAGS) $(CDEFS) -c $< -o $@
