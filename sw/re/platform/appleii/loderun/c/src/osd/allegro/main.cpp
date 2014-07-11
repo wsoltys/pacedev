@@ -153,6 +153,25 @@ void osd_display_title_screen (uint8_t page)
 	}
 }
 
+void osd_game_over_frame (const uint8_t *game_over_frame, const uint8_t gol[][26])
+{
+  for (int l=0; l<14; l++)
+  {
+    uint8_t wl = game_over_frame[l];
+    
+    for (int p=0; p<26; p++)
+    {
+      uint8_t byte = gol[wl][p];
+
+      for (int b=0; b<4; b++)
+      {
+        putpixel (pg[0], 13*7+p*4+b, 80+l, (byte>>6) & 3);
+        byte <<= 2;
+      }
+    }
+  }
+}
+
 int main (int argc, char *argv[])
 {
 	allegro_init ();
