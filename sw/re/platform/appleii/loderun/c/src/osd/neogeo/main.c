@@ -50,11 +50,10 @@ void osd_gcls (uint8_t page)
   			map[0][tm].tiles[t].block_number = tile_base;
   	set_current_sprite (page_sprite[0]);
   	write_sprite_data (XOFF, YOFF+176-6, XZ, YZ, 2, 28, (const PTILEMAP)map[0]);
-  	
-  	// and finally the sprites
-  	for (s=0; s<6; s++)
-  	  change_sprite_pos (NEO_SPRITE(s), 0, 255, 0);
   }
+	// and finally the sprites
+	for (s=0; s<6+1; s++)
+	  change_sprite_pos (NEO_SPRITE(s), 0, 255, 0);
 }
 
 void osd_display_char_pg (uint8_t page, uint8_t chr, uint8_t x_div_2, uint8_t y)
@@ -147,13 +146,13 @@ int osd_keypressed (void)
 
 void osd_delay (unsigned ms)
 {
-	unsigned t;
-	
-	for (t=0; t<8000; t++)
-		;
-#if 0
-  rest (ms);
-#endif
+	while (ms--)
+	{
+		unsigned t;
+
+		for (t=0; t<512; t++)
+			;
+	}
 }
 
 int osd_readkey (void)
@@ -346,12 +345,10 @@ void osd_game_over_frame (uint8_t frame, const uint8_t game_over_frame[][14], co
     for (tm=0; tm<7; tm++)
     {
       stm[tm].tiles[0].block_number = tile_base+512+frame*8+tm;
-      stm[tm].tiles[0].attributes = 0;
+      stm[tm].tiles[0].attributes = (1<<8)|0;
     }
     set_current_sprite (NEO_SPRITE(6)+tm);
-		write_sprite_data(13*7, 80, 15, 255, 1, 7, (const PTILEMAP)stm);
-
-    osd_delay (1);
+		write_sprite_data(XOFF+13*7-4, YOFF+80, 15, 255, 1, 7, (const PTILEMAP)stm);
 }
 
 int main (int argc, char *argv[])
@@ -366,29 +363,35 @@ int main (int argc, char *argv[])
   const uint8_t g[] = { 0x00>>3, 106>>3, 208>>3, 255>>3 };
   const uint8_t b[] = { 0x00>>3,  60>>3, 254>>3, 255>>3 };
 
-	PALETTE 	pal;
-	unsigned	c;
+	PALETTE 	pal[2];
+	unsigned	p, c;
 	unsigned 	m, tm, t, s;
-	
-	for (c=0; c<4; c++)
-	{
-		uint16_t	pe = 0;
 
-    if (c < 3 ||
-        colour_mono == DIP_COLOUR ||
-        mono_colour == DIP_MONO_WHITE)
-    {
-  		pe |= (r[c]&(1<<0)) << 14;
-  		pe |= (r[c]&0x1E) << 7;
-  		pe |= (b[c]&(1<<0)) << 12;
-  		pe |= (b[c]&0x1E) >> 1;
-    }
-		pe |= (g[c]&(1<<0)) << 13;
-		pe |= (g[c]&0x1E) << 3;
-  		
-		pal.color[c] = pe;
+	for (p=0; p<2; p++)
+	{	
+		for (c=0; c<4; c++)
+		{
+			uint16_t	pe = 0;
+	
+	    if (c < 3 ||
+	        colour_mono == DIP_COLOUR ||
+	        mono_colour == DIP_MONO_WHITE)
+	    {
+	  		pe |= (r[c]&(1<<0)) << 14;
+	  		pe |= (r[c]&0x1E) << 7;
+	  		pe |= (b[c]&(1<<0)) << 12;
+	  		pe |= (b[c]&0x1E) >> 1;
+	    }
+			pe |= (g[c]&(1<<0)) << 13;
+			pe |= (g[c]&0x1E) << 3;
+
+			if (p < 1 || c < 3)	  		
+				pal[p].color[c] = pe;
+			else
+				pal[p].color[c] = 0;
+		}
 	}
-	setpalette(0, 1, (const PPALETTE)&pal);
+	setpalette(0, 2, (const PPALETTE)&pal);
 
 	// build tilemaps
 	for (m=0; m<3; m++)
@@ -428,7 +431,7 @@ int main (int argc, char *argv[])
       for (t=0; t<32; t++)
       {
         stm.tiles[t].block_number = tile_base+0;
-        stm.tiles[t].attributes = 0;
+        stm.tiles[t].attributes = (1<<8)|0;
       }
     }
     set_current_sprite (NEO_SPRITE(6)+tm);

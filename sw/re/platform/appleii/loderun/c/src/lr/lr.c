@@ -50,6 +50,7 @@ typedef enum
 #endif
 
 #define START_LEVEL_0_BASED 0
+#define NO_LIVES						5
 
 //#define CHAMPIONSHIP
 
@@ -178,7 +179,7 @@ STATIC void calc_colx5_scanline (uint8_t col, uint8_t row, uint8_t *colx5, uint8
 STATIC void calc_scanline (uint8_t row, uint8_t offset, uint8_t *scanline);
 STATIC void calc_x_div_2 (uint8_t col, uint8_t offset, uint8_t *x);
 STATIC void wipe_and_draw_level (void);
-STATIC void game_over_animation (void);
+STATIC uint8_t game_over_animation (void);
 
 // end of prototypes
 
@@ -192,7 +193,6 @@ void lode_runner (void)
 
 display_title_screen:	
 	display_title_screen ();
-	game_over_animation ();
 	OSD_HGR1;
 	goto title_wait_for_key;
 	
@@ -273,7 +273,7 @@ void zero_score_and_init_game (void)
 	zp.guard_respawn_col = 0;
 	zp.demo_inp_cnt = 0;
 	zp.demo_inp_ptr = attract_move_tbl;
-	zp.no_lives = 5;
+	zp.no_lives = NO_LIVES;
 	if (zp.attract_mode >> 1)
 	  ;
 	cls_and_display_game_status ();
@@ -2541,7 +2541,7 @@ void wipe_and_draw_level (void)
 	osd_draw_circle ();
 }
 
-void game_over_animation (void)
+uint8_t game_over_animation (void)
 {
   // note that there are 11 frames
   // each frame is 14 scanlines high
@@ -2622,37 +2622,32 @@ void game_over_animation (void)
     }
   };
       
-  unsigned i;
+	static const uint8_t frame[] =
+	{
+		1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1, 7, 8, 9, 10, 11, 10, 9, 8, 7
+	};
+  	
+  uint8_t		game_over_loop_count = 1;
+	unsigned 	f;
   
-  for (i=0; i<100; i++)
+  while (game_over_loop_count < 100)
   {
-    osd_game_over_frame (1-1, game_over_frame, go);
-    osd_game_over_frame (2-1, game_over_frame, go);
-    osd_game_over_frame (3-1, game_over_frame, go);
-    osd_game_over_frame (4-1, game_over_frame, go);
-    osd_game_over_frame (5-1, game_over_frame, go);
-    osd_game_over_frame (6-1, game_over_frame, go);
-    osd_game_over_frame (5-1, game_over_frame, go);
-    osd_game_over_frame (4-1, game_over_frame, go);
-    osd_game_over_frame (3-1, game_over_frame, go);
-    osd_game_over_frame (2-1, game_over_frame, go);
-    osd_game_over_frame (1-1, game_over_frame, go);
-    osd_game_over_frame (12-6, game_over_frame, go);
-    osd_game_over_frame (13-6, game_over_frame, go);
-    osd_game_over_frame (14-6, game_over_frame, go);
-    osd_game_over_frame (15-6, game_over_frame, go);
-    osd_game_over_frame (16-6, game_over_frame, go);
-    osd_game_over_frame (15-6, game_over_frame, go);
-    osd_game_over_frame (14-6, game_over_frame, go);
-    osd_game_over_frame (13-6, game_over_frame, go);
-    osd_game_over_frame (12-6, game_over_frame, go);
+  	for (f=0; f<sizeof(frame); f++)
+  	{
+	    osd_game_over_frame (frame[f]-1, game_over_frame, go);
+	    osd_delay (game_over_loop_count++);
+	    if (osd_keypressed ())
+	    	return (1);
+	  }
   }
-  osd_game_over_frame (1-1, game_over_frame, go);
-  osd_game_over_frame (2-1, game_over_frame, go);
-  osd_game_over_frame (3-1, game_over_frame, go);
-  osd_game_over_frame (4-1, game_over_frame, go);
-  osd_game_over_frame (5-1, game_over_frame, go);
-  osd_game_over_frame (6-1, game_over_frame, go);
+
+	for (f=0; f<6; f++)
+	{
+    osd_game_over_frame (frame[f-1], game_over_frame, go);
+    osd_delay (game_over_loop_count++);
+  }
+  
+  return (0);
 }
 
 const uint8_t attract_move_tbl[] =

@@ -286,7 +286,7 @@ void do_gameover (unsigned set)
     {
       for (unsigned b=0; b<26; b++)
       {
-        uint8_t data = go[f][b];
+        uint8_t data = go[game_over_frame[f][l]][b];
         for (unsigned p=0; p<4; p++)
         {
           vbm[l*8*16+b*4+p] = (data >> 6) & 3;
@@ -305,15 +305,24 @@ void do_gameover (unsigned set)
 				for (unsigned r=0; r<8; r++)
 				{
 					unsigned row = (q%2)*8+r;
-					uint16_t data = 0;
+					unsigned col = (1-(q/2))*8;
 
-					uint16_t i = row*16*8 + t*16 + (1-(q/2))*8;
+					uint16_t i = row*16*8 + t*16 + col;
+					uint16_t data = 0;
 										
 					// extract 8 pixles for single row of quadrant
 					for (unsigned p=0; p<8; p++)
 					{
+						// original = 14*7=98 pixels wide
+						// = 98/16 = 6+2pel tiles wide
 						data <<= 2;
-						data |= vbm[i++];
+						if (vbm[i] == 0 && 
+								(t<6 || (t==6 && col<2)) && 
+								row < 14)
+							data |= 3;
+						else
+							data |= vbm[i];
+						i++;
 					}
 					
 					// extract bitplanes
