@@ -42,7 +42,9 @@ ifeq ($(PLATFORM),allegro)
   ifeq ($(STATIC),1)
     ALLEGRO_STATIC = -static
   endif
-  ALLEGRO = /allegro-4.4.2-mingw-$(MINGW_VER)
+  ifeq ($(ALLEGRO),)
+    ALLEGRO = /allegro-4.4.2-mingw-$(MINGW_VER)
+  endif
   #ALLEGRO_MONOLITH = -monolith
   #ALLEGRO_DEBUG = -debug
 
@@ -61,7 +63,9 @@ endif
 
 ifeq ($(PLATFORM),neogeo)
 
-	NEODEV = 
+  ifeq ($(NEODEV),)
+	  NEODEV = 
+  endif
 
 	#OUTPUT = cd
 	EXT = bin

@@ -338,6 +338,10 @@ void osd_display_title_screen (uint8_t page)
 #endif
 }
 
+void osd_game_over_frame (const uint8_t *game_over_frame, const uint8_t gol[][26])
+{
+}
+
 int main (int argc, char *argv[])
 {
   uint8_t *dips = (uint8_t *)0x10FD84;

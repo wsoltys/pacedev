@@ -34,5 +34,6 @@ void osd_hgr (uint8_t page);
 #define OSD_HGR2  osd_hgr (2)
 void osd_flush_keybd (void);
 void osd_display_title_screen (uint8_t page);
+void osd_game_over_frame (const uint8_t *game_over_frame, const uint8_t gol[][26]);
 
 #endif
