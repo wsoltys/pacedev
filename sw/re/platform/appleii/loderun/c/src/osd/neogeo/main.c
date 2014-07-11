@@ -338,8 +338,20 @@ void osd_display_title_screen (uint8_t page)
 #endif
 }
 
-void osd_game_over_frame (const uint8_t *game_over_frame, const uint8_t gol[][26])
+void osd_game_over_frame (uint8_t frame, const uint8_t game_over_frame[][14], const uint8_t gol[][26])
 {
+    TILEMAP stm[7];
+    unsigned tm;
+
+    for (tm=0; tm<7; tm++)
+    {
+      stm[tm].tiles[0].block_number = tile_base+512+frame*8+tm;
+      stm[tm].tiles[0].attributes = 0;
+    }
+    set_current_sprite (NEO_SPRITE(6)+tm);
+		write_sprite_data(13*7, 80, 15, 255, 1, 7, (const PTILEMAP)stm);
+
+    osd_delay (1);
 }
 
 int main (int argc, char *argv[])
@@ -406,6 +418,23 @@ int main (int argc, char *argv[])
 		write_sprite_data(0, 0, XZ, YZ, 1, 1, (const PTILEMAP)&stm);
   }
 
+  // setup 'gameover' sprites
+  {
+    TILEMAP stm;
+    unsigned tm, t;
+
+    for (tm=0; tm<7; tm++)
+    {
+      for (t=0; t<32; t++)
+      {
+        stm.tiles[t].block_number = tile_base+0;
+        stm.tiles[t].attributes = 0;
+      }
+    }
+    set_current_sprite (NEO_SPRITE(6)+tm);
+		write_sprite_data(0, 0, 15, 255, 1, 7, (const PTILEMAP)&stm);
+  }
+
 	while (1)
 	{
 		clear_fix();
@@ -417,7 +446,7 @@ int main (int argc, char *argv[])
 
 		tile_base = 256;
     if (colour_mono == DIP_COLOUR)
-			tile_base += 512;
+			tile_base += 640;
 
 		osd_hgr_skip = 0;		
 		lode_runner ();

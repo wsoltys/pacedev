@@ -2563,7 +2563,7 @@ void game_over_animation (void)
     { 0, 1, 2, 0xA, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 },   // 16
   };
 
-  static const uint8_t gol[][26] =
+  static const uint8_t go[][26] =
   {
     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  
       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  
@@ -2624,35 +2624,35 @@ void game_over_animation (void)
       
   unsigned i;
   
-  for (i=0; i<2; i++)
+  for (i=0; i<100; i++)
   {
-    osd_game_over_frame (game_over_frame[1-1], gol);
-    osd_game_over_frame (game_over_frame[2-1], gol);
-    osd_game_over_frame (game_over_frame[3-1], gol);
-    osd_game_over_frame (game_over_frame[4-1], gol);
-    osd_game_over_frame (game_over_frame[5-1], gol);
-    osd_game_over_frame (game_over_frame[6-1], gol);
-    osd_game_over_frame (game_over_frame[5-1], gol);
-    osd_game_over_frame (game_over_frame[4-1], gol);
-    osd_game_over_frame (game_over_frame[3-1], gol);
-    osd_game_over_frame (game_over_frame[2-1], gol);
-    osd_game_over_frame (game_over_frame[1-1], gol);
-    osd_game_over_frame (game_over_frame[12-6], gol);
-    osd_game_over_frame (game_over_frame[13-6], gol);
-    osd_game_over_frame (game_over_frame[14-6], gol);
-    osd_game_over_frame (game_over_frame[15-6], gol);
-    osd_game_over_frame (game_over_frame[16-6], gol);
-    osd_game_over_frame (game_over_frame[15-6], gol);
-    osd_game_over_frame (game_over_frame[14-6], gol);
-    osd_game_over_frame (game_over_frame[13-6], gol);
-    osd_game_over_frame (game_over_frame[12-6], gol);
+    osd_game_over_frame (1-1, game_over_frame, go);
+    osd_game_over_frame (2-1, game_over_frame, go);
+    osd_game_over_frame (3-1, game_over_frame, go);
+    osd_game_over_frame (4-1, game_over_frame, go);
+    osd_game_over_frame (5-1, game_over_frame, go);
+    osd_game_over_frame (6-1, game_over_frame, go);
+    osd_game_over_frame (5-1, game_over_frame, go);
+    osd_game_over_frame (4-1, game_over_frame, go);
+    osd_game_over_frame (3-1, game_over_frame, go);
+    osd_game_over_frame (2-1, game_over_frame, go);
+    osd_game_over_frame (1-1, game_over_frame, go);
+    osd_game_over_frame (12-6, game_over_frame, go);
+    osd_game_over_frame (13-6, game_over_frame, go);
+    osd_game_over_frame (14-6, game_over_frame, go);
+    osd_game_over_frame (15-6, game_over_frame, go);
+    osd_game_over_frame (16-6, game_over_frame, go);
+    osd_game_over_frame (15-6, game_over_frame, go);
+    osd_game_over_frame (14-6, game_over_frame, go);
+    osd_game_over_frame (13-6, game_over_frame, go);
+    osd_game_over_frame (12-6, game_over_frame, go);
   }
-  osd_game_over_frame (game_over_frame[1-1], gol);
-  osd_game_over_frame (game_over_frame[2-1], gol);
-  osd_game_over_frame (game_over_frame[3-1], gol);
-  osd_game_over_frame (game_over_frame[4-1], gol);
-  osd_game_over_frame (game_over_frame[5-1], gol);
-  osd_game_over_frame (game_over_frame[6-1], gol);
+  osd_game_over_frame (1-1, game_over_frame, go);
+  osd_game_over_frame (2-1, game_over_frame, go);
+  osd_game_over_frame (3-1, game_over_frame, go);
+  osd_game_over_frame (4-1, game_over_frame, go);
+  osd_game_over_frame (5-1, game_over_frame, go);
+  osd_game_over_frame (6-1, game_over_frame, go);
 }
 
 const uint8_t attract_move_tbl[] =
