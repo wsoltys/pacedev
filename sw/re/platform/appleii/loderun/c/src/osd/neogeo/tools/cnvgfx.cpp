@@ -117,8 +117,8 @@ void do_title (unsigned set)
 		//	count = 256;
 		while (count--)
 		{
-			for (unsigned p=0; p<4; p++, byte<<=2)
-				vbm[v++] = (byte >> 6) & 3;
+			for (unsigned p=0; p<4; p++)
+				vbm[v++] = (byte >> (6-p*2)) & 3;
 			if (v % 280 == 0)
 				row++;
 		}

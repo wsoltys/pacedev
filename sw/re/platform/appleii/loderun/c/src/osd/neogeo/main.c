@@ -298,7 +298,10 @@ void osd_display_title_screen (uint8_t page)
 	{
 		for (t=0; t<12; t++)
 		{
-			map[1][tm].tiles[t].block_number = tile_base+128+n;
+		  unsigned w = t;
+		  
+		  //if (t < 6) w=t+6; else w=t-6;
+			map[1][tm].tiles[t].block_number = tile_base+128+tm*12+w;
 			map[1][tm].tiles[t].attributes = 0;
 			n++;
 		}
