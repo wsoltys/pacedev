@@ -2543,6 +2543,11 @@ void wipe_and_draw_level (void)
 
 void game_over_animation (void)
 {
+  // note that there are 11 frames
+  // each frame is 14 scanlines high
+  // and 26*4=104 pixels = 6.5=7 NG tiles wide
+  // ng requires 11*7=77 tiles
+  // or use NG flipping/scaling?
   static const uint8_t game_over_frame[][14] =
   {
     { 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0 },     // 1,11
