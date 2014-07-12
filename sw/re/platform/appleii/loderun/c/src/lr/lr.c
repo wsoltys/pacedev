@@ -170,6 +170,7 @@ STATIC void cr (void);
 STATIC void display_char_pg (uint8_t page, uint8_t chr);
 STATIC void wipe_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, uint8_t y);
 STATIC void display_transparent_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, uint8_t y);
+STATIC uint8_t check_and_update_high_score_tbl (void);
 STATIC void draw_end_of_screen_ladder (void);
 STATIC void display_message (const char *msg);
 STATIC uint8_t blink_char_and_wait_for_key (uint8_t chr);
@@ -379,7 +380,8 @@ dec_lives:
   if (zp.no_lives > 0)
     goto main_game_loop;
     
-  //check_and_update_high_score_tbl ();
+  if (check_and_update_high_score_tbl ())
+  	return;
   game_over_animation ();
   return;
   
@@ -2388,6 +2390,10 @@ void display_transparent_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, uint
 	//OSD_PRINTF ("%s()\n", __FUNCTION__);
 
   osd_display_transparent_char (sprite, chr, x_div_2, y);
+}
+
+uint8_t check_and_update_high_score_tbl (void)
+{
 }
 
 void draw_end_of_screen_ladder (void)
