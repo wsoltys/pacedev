@@ -2,6 +2,7 @@
 
 #PLATFORM = allegro
 #PLATFORM = neogeo
+#PLATFORM = amigaos
 
 ifeq (,$(PLATFORM))
 	PLATFORM = allegro
@@ -9,9 +10,14 @@ endif
 
 # compiler, linker and utilities
 AS = as
-CC = gcc
+ifneq ($(PLATFORM),amigaos)
+	CC = gcc
+	LD = gcc
+else
+	CC = m68k-amigaos-gcc
+	LD = m68k-amigaos-gcc
+endif
 CPP = g++
-LD = gcc
 RM = rm
 MD = mkdir
 OBJC = objcopy
@@ -48,7 +54,7 @@ ifeq ($(PLATFORM),allegro)
   #ALLEGRO_MONOLITH = -monolith
   #ALLEGRO_DEBUG = -debug
 
-	EXT = exe
+	FQTN = $(TARGET).exe
 	  
   OSD_INCDIR = $(ALLEGRO)/include
   OSD_LIBDIR = $(ALLEGRO)/lib
@@ -68,7 +74,7 @@ ifeq ($(PLATFORM),neogeo)
   endif
 
 	#OUTPUT = cd
-	EXT = bin
+	FQTN = $(TARGET).bin
 	
 	ifeq ($(OUTPUT),)
 		OUTPUT = cart
@@ -90,6 +96,20 @@ ifeq ($(PLATFORM),neogeo)
 	OSD_LDFLAGS = -m68000 -nostartfiles -nodefaultlibs -Wl,-Map=$(TARGET).$(OUTPUT).map,-cref,-Tsrc/osd/$(PLATFORM)/neo$(OUTPUT).x -linput -lvideo -lc -lgcc
 
 	PLATFORM_OBJS = $(OBJDIR)/crt0_$(OUTPUT).o
+	
+endif
+
+ifeq ($(PLATFORM),amigaos)
+
+	M68KGCC = /usr/local/amiga
+	
+	FQTN = $(TARGET)
+	
+	OSD_INCDIR = $(M68KGCC)/include/g++-3
+	OSD_LIBS = $(M68KGCC)/lib/gcc/m68k-amigaos/3.4.0
+	
+	OSD_CFLAGS =
+	OSD_LDFLAGS =
 	
 endif
 
@@ -115,7 +135,7 @@ OBJS = $(PLATFORM_OBJS) $(LR_OBJS) $(OSD_OBJS)
 
 DEPS = $(OBJS:.o=.d)
 	
-all: $(OBJDIR) $(PRG) $(TARGET).$(EXT)
+all: $(OBJDIR) $(PRG) $(FQTN)
 .PHONY: all
 
 $(OBJDIR):
@@ -125,7 +145,7 @@ $(OBJDIR):
 
 ifeq ($(OUTPUT),cart)
 
-$(PRG): $(TARGET).$(EXT) 202-c1.c1 202-c2.c2
+$(PRG): $(FQTN) 202-c1.c1 202-c2.c2
 	$(OBJC) --gap-fill=0x00 --pad-to=0x20000 -R .data -O binary $< $@
 	@romwak /f $@ >nul:
 	@romwak /p $@ $@ 1024 255 >nul:
@@ -141,7 +161,7 @@ $(PRG): $(TARGET).$(EXT) 202-c1.c1 202-c2.c2
 
 else
 
-$(PRG): $(TARGET).$(EXT) PB_CHR.SPR
+$(PRG): $(FQTN) PB_CHR.SPR
 	$(OBJC) -O binary $< $@
 	@copy $@ cds\puzzledp
 	@copy PB_CHR.SPR cds\puzzledp
@@ -165,7 +185,7 @@ $(OBJDIR)/%.o: src/osd/$(PLATFORM)/%.cpp
 %.o: %.c
 	$(CC) $(CFLAGS) $(CDEFS) -Wa,-ahls=$*.lst -c $< -o $@
 
-$(TARGET).$(EXT): $(OBJS)
+$(FQTN): $(OBJS)
 	@echo Linking $@...
 	$(LD) $(OBJS) $(LDFLAGS) -o $@
 
@@ -173,7 +193,7 @@ clean:
 	@echo Deleting object files...
 	$(RM) -f $(OBJDIR)/*.o
 	@echo Deleting executables...
-	$(RM) -f $(TARGET).$(EXT)
+	$(RM) -f $(FQTN)
 	@echo Deleting ROMS...
 	$(RM) -f $(PRG)
 	$(RM) -f 202-c*.c*
