@@ -1,9 +1,3 @@
-#ifndef NO_STDIO
-  #include <stdio.h>
-#endif
-//#include <stdlib.h>
-//#include <string.h>
-
 #include "osd_types.h"
 #include "lr_osd.h"
 #include "debug.h"
@@ -2394,6 +2388,7 @@ void display_transparent_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, uint
 
 uint8_t check_and_update_high_score_tbl (void)
 {
+	return (0);
 }
 
 void draw_end_of_screen_ladder (void)

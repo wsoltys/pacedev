@@ -1,7 +1,13 @@
 #ifndef _LR_OSD_H_
 #define _LR_OSD_H_
 
-//#define ALLEGRO_STATICLINK
+// we can't #include genesis.h here
+// - because TILE_SPACE is #defined
+#include "config.h"
+#include "asm.h"
+#include "types.h"
+#include "sys.h"
+#include "memory.h"
 
 #define OSD_KEY_I     ('I' & 0x3f)
 #define OSD_KEY_J     ('J' & 0x3f)

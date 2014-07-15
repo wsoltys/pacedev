@@ -11,12 +11,17 @@ endif
 
 # compiler, linker and utilities
 AS = as
-ifneq ($(PLATFORM),amigaos)
-	CC = gcc
-	LD = gcc
-else
+ifeq ($(PLATFORM),amigaos)
 	CC = m68k-amigaos-gcc
 	LD = m68k-amigaos-gcc
+else
+	CC = gcc
+	ifeq ($(PLATFORM),genesis)
+		LD = ld
+		SIZEBND = sizebnd
+	else
+		LD = gcc
+	endif
 endif
 CPP = g++
 RM = rm
@@ -57,7 +62,7 @@ ifeq ($(PLATFORM),allegro)
 
 	FQTN = $(TARGET).exe
 	  
-  OSD_INCDIR = $(ALLEGRO)/include
+  OSD_INCS = -I $(ALLEGRO)/include
   OSD_LIBDIR = $(ALLEGRO)/lib
   OSD_LIBS = -lallegro-4.4.2$(ALLEGRO_MONOLITH)$(ALLEGRO_STATIC)-mt$(ALLEGRO_DEBUG)
   
@@ -88,12 +93,12 @@ ifeq ($(PLATFORM),neogeo)
 		PRG = PB_PROG.PRG
 	endif
 	
-	OSD_INCDIR = $(NEODEV)/m68k/include
+	OSD_INCS = -I $(NEODEV)/m68k/include
 	OSD_LIBS = $(NEODEV)/m68k/lib
 	
 	OSD_ASFLAGS = -m68000 --register-prefix-optional --defsym __$(OUTPUT)__=1
 	OSD_CFLAGS = -m68000 -O3 -Wall -fomit-frame-pointer -ffast-math -fno-builtin
-	OSD_CFLAGS += -DNO_STDIO -D__$(OUTPUT)__
+	OSD_CFLAGS += -D__$(OUTPUT)__
 	OSD_LDFLAGS = -m68000 -nostartfiles -nodefaultlibs -Wl,-Map=$(TARGET).$(OUTPUT).map,-cref,-Tsrc/osd/$(PLATFORM)/neo$(OUTPUT).x -linput -lvideo -lc -lgcc
 
 	PLATFORM_OBJS = $(OBJDIR)/crt0_$(OUTPUT).o
@@ -106,7 +111,7 @@ ifeq ($(PLATFORM),amigaos)
 	
 	FQTN = $(TARGET)
 	
-	OSD_INCDIR = $(M68KGCC)/include/g++-3
+	OSD_INCS = -I $(M68KGCC)/include/g++-3
 	OSD_LIBS = $(M68KGCC)/lib/gcc/m68k-amigaos/3.4.0
 	
 	OSD_CFLAGS =
@@ -121,16 +126,18 @@ ifeq ($(PLATFORM),genesis)
 
 	FQTN = $(TARGET).bin
 	
-	OSD_INCDIR = $(GDK)/inc
+	OSD_INCS = -I $(GDK)/inc -I $(GDK)/res
 	OSD_LIBS = $(GDK)/lib
 
 	OSD_CFLAGS = -m68000 -O1 -Wall -fno-builtin -fomit-frame-pointer
-	OSD_LDFLAGS = -T $(GDK)/md.ld -nostdlib $(OSD_LIBS)/libmd.a $(OSD_LIBS)/libgcc.a
+	OSD_LDFLAGS = -n -T $(GDK)/md.ld -nostdlib $(OSD_LIBS)/libmd.a $(OSD_LIBS)/libgcc.a
+
+	PLATFORM_OBJS = $(OBJDIR)/sega.o
 
 endif
 
 	ASFLAGS = -I src/osd/$(PLATFORM) $(OSD_ASFLAGS)
-	CFLAGS = -I $(OSD_INCDIR) -I src/osd/$(PLATFORM) -I src/lr $(OSD_CFLAGS) $(BUILD_OPTS)
+	CFLAGS = $(OSD_INCS) -I src/osd/$(PLATFORM) -I src/lr $(OSD_CFLAGS) $(BUILD_OPTS)
 	LDFLAGS = -L $(OSD_LIBDIR) $(OSD_LIBS) $(OSD_LDFLAGS)
 
 OBJDIR = obj/$(PLATFORM)
@@ -201,9 +208,30 @@ $(OBJDIR)/%.o: src/osd/$(PLATFORM)/%.cpp
 %.o: %.c
 	$(CC) $(CFLAGS) $(CDEFS) -Wa,-ahls=$*.lst -c $< -o $@
 
+ifeq ($(PLATFORM),genesis)
+
+$(OBJDIR)/sega.o: $(GDK)/src/boot/sega.s out/rom_head.bin
+	$(CC) $(FLAGS) -c $< -o $@
+
+out/rom_head.bin: $(OBJDIR)/rom_head.o
+	$(LD) -T $(GDK)/md.ld -nostdlib --oformat binary -o $@ $<
+
+$(OBJDIR)/rom_head.o: $(GDK)/src/boot/rom_head.c
+	$(CC) $(CFLAGS) -Wa,-ahls=$*.lst -c $< -o $@
+
+$(FQTN): $(OBJS)
+	@echo Linking $@...
+	$(CC) $(OBJS) $(LDFLAGS) -o $(TARGET).out
+	$(OBJC) -O binary $(TARGET).out $(FQTN)
+	$(SIZEBND) $(FQTN) -sizealign 131072
+
+else
+
 $(FQTN): $(OBJS)
 	@echo Linking $@...
 	$(LD) $(OBJS) $(LDFLAGS) -o $@
+
+endif
 
 clean:
 	@echo Deleting object files...

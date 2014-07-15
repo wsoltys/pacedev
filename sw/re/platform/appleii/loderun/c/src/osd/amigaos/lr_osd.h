@@ -1,6 +1,8 @@
 #ifndef _LR_OSD_H_
 #define _LR_OSD_H_
 
+#include <stdio.h>
+
 //#define ALLEGRO_STATICLINK
 
 #define OSD_KEY_I     ('I' & 0x3f)

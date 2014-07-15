@@ -153,11 +153,11 @@ void osd_display_title_screen (uint8_t page)
 	}
 }
 
-void osd_game_over_frame (const uint8_t *game_over_frame, const uint8_t gol[][26])
+void osd_game_over_frame (uint8_t frame, const uint8_t game_over_frame[][14], const uint8_t gol[][26])
 {
   for (int l=0; l<14; l++)
   {
-    uint8_t wl = game_over_frame[l];
+    uint8_t wl = game_over_frame[frame][l];
     
     for (int p=0; p<26; p++)
     {

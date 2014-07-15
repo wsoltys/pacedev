@@ -1,7 +1,3 @@
-#ifndef NO_STDIO
-  #include <stdio.h>
-#endif
-#include <stdlib.h>
 
 #include "osd_types.h"
 #include "lr_osd.h"

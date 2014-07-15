@@ -1,10 +1,7 @@
-#include <genesis.h>
-
-//#include <stdlib.h>
-
 // osd stuff
 
 #include "osd_types.h"
+#include <genesis.h>
 #include "lr_osd.h"
 
 extern const uint8_t tile_data_m2bpp[];
