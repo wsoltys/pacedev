@@ -3,6 +3,7 @@
 #PLATFORM = allegro
 #PLATFORM = neogeo
 #PLATFORM = amigaos
+#PLATFORM = genesis
 
 ifeq (,$(PLATFORM))
 	PLATFORM = allegro
@@ -111,6 +112,21 @@ ifeq ($(PLATFORM),amigaos)
 	OSD_CFLAGS =
 	OSD_LDFLAGS =
 	
+endif
+
+ifeq ($(PLATFORM),genesis)
+
+	GDK = /SGDK
+	GDK_WIN = \SGDK
+
+	FQTN = $(TARGET).bin
+	
+	OSD_INCDIR = $(GDK)/inc
+	OSD_LIBS = $(GDK)/lib
+
+	OSD_CFLAGS = -m68000 -O1 -Wall -fno-builtin -fomit-frame-pointer
+	OSD_LDFLAGS = -T $(GDK)/md.ld -nostdlib $(OSD_LIBS)/libmd.a $(OSD_LIBS)/libgcc.a
+
 endif
 
 	ASFLAGS = -I src/osd/$(PLATFORM) $(OSD_ASFLAGS)
