@@ -52,7 +52,7 @@ void osd_gcls (uint8_t page)
   	write_sprite_data (XOFF, YOFF+176-6, XZ, YZ, 2, 28, (const PTILEMAP)map[0]);
   }
 	// and finally the sprites
-	for (s=0; s<6+1; s++)
+	for (s=0; s<14; s++)
 	  change_sprite_pos (NEO_SPRITE(s), 0, 255, 0);
 }
 
@@ -170,19 +170,21 @@ int osd_key (int _key)
 	port1 = poll_joystick(PORT1, READ_DIRECT);
 	switch (_key)
 	{
-		case OSD_KEY_I :
+		case LR_KEY_I :
 			return ((port1 & JOY_UP) != 0);
-		case OSD_KEY_J :
+		case LR_KEY_J :
+		case LR_KEY_BS :
 			return ((port1 & JOY_LEFT) != 0);
-		case OSD_KEY_K :
+		case LR_KEY_K :
 			return ((port1 & JOY_DOWN) != 0);
-		case OSD_KEY_L :
+		case LR_KEY_L :
+		case LR_KEY_RIGHT :
 			return ((port1 & JOY_RIGHT) != 0);
-		case OSD_KEY_U :
-		case OSD_KEY_Z :
+		case LR_KEY_U :
+		case LR_KEY_Z :
 			return ((port1 & JOY_A) != 0);
-		case OSD_KEY_O :
-		case OSD_KEY_X :
+		case LR_KEY_O :
+		case LR_KEY_X :
 			return ((port1 & JOY_B) != 0);
 		default :
 			break;
@@ -339,16 +341,27 @@ void osd_display_title_screen (uint8_t page)
 
 void osd_game_over_frame (uint8_t frame, const uint8_t game_over_frame[][14], const uint8_t gol[][26])
 {
-    TILEMAP stm[7];
-    unsigned tm;
+  TILEMAP stm[7];
+  unsigned tm;
 
-    for (tm=0; tm<7; tm++)
-    {
-      stm[tm].tiles[0].block_number = tile_base+512+frame*8+tm;
-      stm[tm].tiles[0].attributes = (1<<8)|0;
-    }
-    set_current_sprite (NEO_SPRITE(6)+tm);
-		write_sprite_data(XOFF+13*7-4, YOFF+80, 15, 255, 1, 7, (const PTILEMAP)stm);
+  for (tm=0; tm<7; tm++)
+  {
+    stm[tm].tiles[0].block_number = tile_base+512+frame*8+tm;
+    stm[tm].tiles[0].attributes = (1<<8)|0;
+  }
+  set_current_sprite (NEO_SPRITE(6)+tm);
+	write_sprite_data(XOFF+13*7-4, YOFF+80, 15, 255, 1, 7, (const PTILEMAP)stm);
+}
+
+void osd_load_high_scores (PHS_ENTRY hs_tbl)
+{
+	memcpy (hs_tbl[0].initial, "MMC", 3);
+	hs_tbl[0].level = 42;
+	hs_tbl[0].score = 314159;
+}
+
+void osd_save_high_scores (PHS_ENTRY hs_tbl)
+{
 }
 
 int main (int argc, char *argv[])
@@ -452,6 +465,7 @@ int main (int argc, char *argv[])
 			tile_base += 640;
 
 		osd_hgr_skip = 0;		
+		
 		lode_runner ();
 	}
   

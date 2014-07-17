@@ -44,7 +44,7 @@ typedef enum
 #endif
 
 #define START_LEVEL_0_BASED 0
-#define NO_LIVES						5
+#define NO_LIVES						1
 
 //#define CHAMPIONSHIP
 
@@ -165,7 +165,9 @@ STATIC void display_char_pg (uint8_t page, uint8_t chr);
 STATIC void wipe_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, uint8_t y);
 STATIC void display_transparent_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, uint8_t y);
 STATIC uint8_t check_and_update_high_score_tbl (void);
+STATIC uint8_t blink_char_cursor_wait_key (uint8_t chr);
 STATIC void draw_end_of_screen_ladder (void);
+STATIC void beep (void);
 STATIC void display_message (const char *msg);
 STATIC uint8_t blink_char_and_wait_for_key (uint8_t chr);
 STATIC void play_sound (uint8_t freq, uint8_t duration);
@@ -220,6 +222,7 @@ loc_61de:
 		goto display_title_screen;
 
 read_and_display_scores:
+	osd_load_high_scores (hs_tbl);
 //high_score_screen:
 	cls_and_display_high_scores ();
 	zp.attract_mode = 2;
@@ -227,9 +230,9 @@ read_and_display_scores:
 
 check_start_new_game:
 	// hack for exit
-	if (osd_key (OSD_KEY_ESC))
+	if (osd_key (LR_KEY_ESC))
 		return;
-	if ((osd_readkey () & 0xff) == 0x0D)
+	if ((osd_readkey ()) == LR_KEY_CR)
 		goto read_and_display_scores;
 
 //start_new_game:
@@ -328,7 +331,8 @@ main_game_loop:
 
 in_level_loop:
   
-  if (osd_key (OSD_KEY_ESC))
+  // hack for exit
+  if (osd_key (LR_KEY_ESC))
     return;
   
   handle_player ();
@@ -568,7 +572,6 @@ bool draw_level (void)
   wipe_and_draw_level ();
   
   // wipe player and enemies from background
-  // *** ADD SPRITES
   for (zp.row=15; zp.row != (uint8_t)-1; zp.row--)
   {
   	for (zp.col=27; zp.col != (uint8_t)-1; zp.col--)
@@ -577,12 +580,13 @@ bool draw_level (void)
   		if (tile == TILE_PLAYER || tile == TILE_GUARD)
 		  {
   			display_char_pg (2, TILE_SPACE);
-  			// *** FOR SPRITES
-  			display_char_pg (1, TILE_SPACE);
-  			if (tile == TILE_PLAYER)
-  			  display_transparent_char (0, TILE_PLAYER, zp.col*5, zp.row*11);
-  		  else if (tile == TILE_GUARD)
-  		    display_transparent_char (++g, TILE_GUARD, zp.col*5, zp.row*11);
+  			#ifdef HAS_HWSPRITES
+	  			display_char_pg (1, TILE_SPACE);
+	  			if (tile == TILE_PLAYER)
+	  			  display_transparent_char (0, TILE_PLAYER, zp.col*5, zp.row*11);
+	  		  else if (tile == TILE_GUARD)
+	  		    display_transparent_char (++g, TILE_GUARD, zp.col*5, zp.row*11);
+		    #endif
   		}
   	}
   }
@@ -1084,17 +1088,17 @@ void read_controls (void)
 	
   zp.key_1 = 0;
   
-  if (osd_key (OSD_KEY_I))
+  if (osd_key (LR_KEY_I))
     zp.key_1 = 'I';
-  if (osd_key (OSD_KEY_J))
+  if (osd_key (LR_KEY_J))
     zp.key_1 = 'J';
-  if (osd_key (OSD_KEY_K))
+  if (osd_key (LR_KEY_K))
     zp.key_1 = 'K';
-  if (osd_key (OSD_KEY_L))
+  if (osd_key (LR_KEY_L))
     zp.key_1 = 'L';
-  if (osd_key (OSD_KEY_U) || osd_key (OSD_KEY_Z))
+  if (osd_key (LR_KEY_U) || osd_key (LR_KEY_Z))
     zp.key_1 = 'U';
-  if (osd_key (OSD_KEY_O) || osd_key (OSD_KEY_X))
+  if (osd_key (LR_KEY_O) || osd_key (LR_KEY_X))
     zp.key_1 = 'O';
     
   zp.key_2 = zp.key_1;
@@ -2125,9 +2129,11 @@ void check_and_handle_respawn (void)
 				display_char_pg (2, TILE_SPACE);
 				guard_state[g] = 0;
 				guard_cnt[g] = 0;
-				// *** FOR SPRITES
-				//display_char_pg (1, TILE_GUARD);
-				display_transparent_char (zp.curr_guard, TILE_GUARD, zp.col*5, zp.row*11);
+				#ifndef HAS_HWSPRITES
+					display_char_pg (1, TILE_GUARD);
+				#else
+					display_transparent_char (zp.curr_guard, TILE_GUARD, zp.col*5, zp.row*11);
+				#endif
 				//queue_sound ();
 			}
 		}
@@ -2388,6 +2394,98 @@ void display_transparent_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, uint
 
 uint8_t check_and_update_high_score_tbl (void)
 {
+	unsigned	n;
+	uint8_t		chr;
+	
+	if (zp.no_cheat == 0)
+		return (0);
+	
+	if (zp.score == 0)
+		return (0);
+		
+	for (n=0; n<10; n++)
+	{
+		if (zp.level >= hs_tbl[n].level)
+			break;
+		if (zp.score >= hs_tbl[n].score)
+			break;
+	}
+	if (n == 10)
+		return (0);
+
+//add_hs_entry:
+	if (n < 9)
+	{
+		unsigned i;
+		
+		for (i=9; i>n; i--)
+			hs_tbl[i] = hs_tbl[i-1];
+	}
+	memset (hs_tbl[n].initial, ' ', 3);
+	hs_tbl[n].level = zp.level;
+	hs_tbl[n].score = zp.score;
+	cls_and_display_high_scores ();
+	zp.display_char_page = 2;
+	zp.row = n + 4;
+	zp.col = 7;
+	zp.initial_cnt = 0;
+	
+	while (1)
+	{
+		uint8_t	key;
+		
+		chr = remap_character (hs_tbl[n].initial[zp.initial_cnt]);
+		key = blink_char_cursor_wait_key (chr);
+		if (key == LR_KEY_CR)
+			break;
+		if (key == LR_KEY_BS)
+		{
+			if (zp.initial_cnt == 0)
+				beep ();
+			else
+			{
+				zp.initial_cnt--;
+				zp.col--;
+			}			
+			continue;
+		}
+		//add_initial:
+		if (key == LR_KEY_RIGHT)
+		{
+			if (zp.initial_cnt == 2)
+				beep ();
+			else
+			{
+				zp.initial_cnt++;
+				zp.col++;
+			}
+			continue;
+		}
+		if (key == LR_KEY_PERIOD ||
+				key == LR_KEY_SPACE ||
+				(key >= LR_KEY_A && key <= LR_KEY_Z))
+		{
+			//save_initial:
+			hs_tbl[n].initial[zp.initial_cnt] = key;
+			display_character (key);
+			if (zp.initial_cnt < 2)
+			{
+				zp.initial_cnt++;
+				zp.col++;
+			}
+		}
+		else
+			beep ();
+	}
+	
+	//done_initials_entry:
+	zp.display_char_page = 1;
+		
+	return (1);
+}
+
+uint8_t blink_char_cursor_wait_key (uint8_t chr)
+{
 	return (0);
 }
 
@@ -2423,6 +2521,10 @@ void draw_end_of_screen_ladder (void)
   }
   if (eos_ladder_col[0] == 0)
 	  zp.no_gold = (uint8_t)-1;
+}
+
+void beep (void)
+{
 }
 
 void display_message (const char *msg)
@@ -2469,10 +2571,11 @@ uint8_t blink_char_and_wait_for_key (uint8_t chr)
 	}
 	
 	display_char_pg (1, chr);
-	// *** FOR SPRITES
-	if (chr == TILE_PLAYER)
-	  display_char_pg (1, TILE_SPACE);
-	
+	#ifdef HAS_HWSPRITES
+		if (chr == TILE_PLAYER)
+		  display_char_pg (1, TILE_SPACE);
+	#endif
+		
 	return (osd_readkey () & 0xff);	
 }
 

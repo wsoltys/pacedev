@@ -111,14 +111,6 @@ typedef struct zeropage_t
   
 } ZEROPAGE, *PZEROPAGE;
 
-typedef struct hs_entry_t
-{
-	uint8_t		initial[3];
-	uint8_t		level;
-	uint32_t	score;
-	
-} HS_ENTRY, *PHS_ENTRY;
-
 #define MAX_HOLES         0x1e
 #define MAX_GUARDS        5
 #define MAX_EOS_LADDERS   0x4d
