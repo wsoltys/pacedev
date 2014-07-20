@@ -227,9 +227,9 @@ void osd_display_transparent_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, 
   else
   {
     stm.tiles[0].block_number = tile_base+chr;
-    stm.tiles[0].attributes = 0;
+    stm.tiles[0].attributes = 16<<8;
     stm.tiles[1].block_number = tile_base;
-    stm.tiles[1].attributes = 0;
+    stm.tiles[1].attributes = 16<<8;
     set_current_sprite (NEO_SPRITE(sprite));
     write_sprite_data (XOFF+x_div_2*2, YOFF+y, XZ, YZ, 1, 1, (const PTILEMAP)&stm);
   }
@@ -300,7 +300,7 @@ void osd_display_title_screen (uint8_t page)
 		for (t=0; t<12; t++)
 		{
 			map[1][tm].tiles[t].block_number = tile_base+128+n;
-			map[1][tm].tiles[t].attributes = 0;
+			map[1][tm].tiles[t].attributes = 16<<8;
 			n++;
 		}
 	}
@@ -347,7 +347,7 @@ void osd_game_over_frame (uint8_t frame, const uint8_t game_over_frame[][14], co
   for (tm=0; tm<7; tm++)
   {
     stm[tm].tiles[0].block_number = tile_base+512+frame*8+tm;
-    stm[tm].tiles[0].attributes = (1<<8)|0;
+    stm[tm].tiles[0].attributes = (17<<8)|0;
   }
   set_current_sprite (NEO_SPRITE(6)+tm);
 	write_sprite_data(XOFF+13*7-4, YOFF+80, 15, 255, 1, 7, (const PTILEMAP)stm);
@@ -404,7 +404,7 @@ int main (int argc, char *argv[])
 				pal[p].color[c] = 0;
 		}
 	}
-	setpalette(0, 2, (const PPALETTE)&pal);
+	setpalette(16, 2, (const PPALETTE)&pal);
 
 	// build tilemaps
 	for (m=0; m<3; m++)
@@ -414,7 +414,7 @@ int main (int argc, char *argv[])
 			for (t=0; t<32; t++)
 			{
 				map[m][tm].tiles[t].block_number = tile_base+0;
-				map[m][tm].tiles[t].attributes = 0;
+				map[m][tm].tiles[t].attributes = 16<<8;
 			}
 		}
 	}
@@ -428,7 +428,7 @@ int main (int argc, char *argv[])
     for (t=0; t<32; t++)
     {
       stm.tiles[t].block_number = tile_base+0;
-      stm.tiles[t].attributes = 0;
+      stm.tiles[t].attributes = 16<<8;
     }
     set_current_sprite (NEO_SPRITE(s));
 		write_sprite_data(0, 0, XZ, YZ, 1, 1, (const PTILEMAP)&stm);
@@ -444,7 +444,7 @@ int main (int argc, char *argv[])
       for (t=0; t<32; t++)
       {
         stm.tiles[t].block_number = tile_base+0;
-        stm.tiles[t].attributes = (1<<8)|0;
+        stm.tiles[t].attributes = (17<<8)|0;
       }
     }
     set_current_sprite (NEO_SPRITE(6)+tm);
@@ -456,6 +456,63 @@ int main (int argc, char *argv[])
 		clear_fix();
 		clear_spr();
 
+		// display some eye-catcher stuff
+		if (0)
+		{
+			static const uint16_t max_330_mega[2][15] =
+			{
+				{
+					0x05, 0x07, 0x09, 0x0B, 0x0D, 0x0F, 0x15, 0x17, 0x19, 0x1B, 0x1D, 0x1F, 0x5E, 0x60, 0x7D
+				},
+				{
+					0x06, 0x08, 0x0A, 0x0C, 0x0E, 0x14, 0x16, 0x18, 0x1A, 0x1C, 0x1E, 0x40, 0x5F, 0x7C, 0x7E
+				}
+			};
+			
+			static const uint16_t pro_gear_spec[2][17] =
+			{
+				{
+					0x7F, 0x9A, 0x9C, 0x9E, 0xFF, 0xBB, 0xBD, 0xBF, 0xDA, 0xDC, 0xDE, 0xFA, 0xFC, 0x100, 0x102, 0x104, 0x106
+				},
+				{
+					0x99, 0x9B, 0x9D, 0x9F, 0xBA, 0xBC, 0xBE, 0xD9, 0xDB, 0xDD, 0xDF, 0xFB, 0xFD, 0x101, 0x103, 0x105, 0x107
+				}
+			};
+
+			static const uint16_t eye_catcher_pal[] = 
+			{
+				0x0000, 0x0fff, 0x0ddd, 0x0aaa, 0x7555, 0x0000, 0x0000, 0x0000,
+				0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
+			};
+
+			PALETTE pal;						
+			volatile uint16_t  *vram = (uint16_t *)0x3C0000;
+			// skip top 2 lines, left column
+		  uint16_t  addr = 0x7000+(12*32+16);
+			unsigned n;
+
+			for (n=0; n<16; n++)
+				pal.color[n] = eye_catcher_pal[n];
+			setpalette (15, 1, (const PPALETTE)&pal);
+			
+			*(vram+2) = 1;
+			for (n=0; n<17; n++)
+			{		
+				*vram = addr;
+				if (n == 0 || n == 16)
+					*vram = addr+2;
+				else
+				{
+					*(vram+1) = 0xf000 | max_330_mega[0][n-1];
+					*(vram+1) = 0xf000 | max_330_mega[1][n-1];
+				}
+				*(vram+1) = 0xf000 | pro_gear_spec[0][n];
+				*(vram+1) = 0xf000 | pro_gear_spec[1][n];
+
+				addr+=32;
+			}
+		}
+				
 		//textoutf (13, 20, 0, 0, "LODE RUNNER");
 		//_vbl_count = 0;
 		//wait_vbl();
@@ -471,3 +528,4 @@ int main (int argc, char *argv[])
   
   return (0);
 }
+
