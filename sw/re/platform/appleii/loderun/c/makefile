@@ -168,11 +168,14 @@ $(OBJDIR):
 
 ifeq ($(OUTPUT),cart)
 
-$(PRG): $(FQTN) 202-c1.c1 202-c2.c2
+$(PRG): $(FQTN) 202-s1.s1 202-c1.c1 202-c2.c2
 	$(OBJC) --gap-fill=0x00 --pad-to=0x20000 -R .data -O binary $< $@
 	@romwak /f $@ >nul:
 	@romwak /p $@ $@ 1024 255 >nul:
 	@copy $@ roms\puzzledp
+
+%.s1 : %.bin
+	@copy $< roms\puzzledp\$@
 
 %.c1 : %.bin
 	@romwak /p $< $@ 1024 255 > nul:
@@ -241,3 +244,4 @@ clean:
 	@echo Deleting ROMS...
 	$(RM) -f $(PRG)
 	$(RM) -f 202-c*.c*
+	$(RM) -f 202-s*.s*

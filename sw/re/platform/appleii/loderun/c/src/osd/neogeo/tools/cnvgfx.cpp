@@ -31,13 +31,13 @@ void do_fix (void)
 		for (int x=0; x<strlen(text); x++)
 		{
 			uint8_t t = toupper(text[x]) - 'A' + 0x45;
-			uint16_t data = tile_data_m2bpp[t*11*3+y*3+0];
-			data = (data << 8) | tile_data_m2bpp[t*11*3+y*3+1];
-			data = (data << 8) | tile_data_m2bpp[t*11*3+y*3+2];
+			uint32_t data = tile_data_c2bpp[t*11*3+y*3+0];
+			data = (data << 8) | tile_data_c2bpp[t*11*3+y*3+1];
+			data = (data << 8) | tile_data_c2bpp[t*11*3+y*3+2];
 				
 			for (int p=0; p<10; p++)
 			{
-				if (data & (3<<14))
+				if (data & (3<<22))
 					vfl[2+y][10+x*10+p] = 1;
 				data <<= 2;
 			}
@@ -53,34 +53,43 @@ void do_fix (void)
 		{ 0x06, 0x08, 0x0A, 0x0C, 0x0E, 0x14, 0x16, 0x18, 0x1A, 0x1C, 0x1E, 0x40, 0x5F, 0x7C, 0x7E }
 	};
 
+	static const uint16_t pro_gear_spec[2][17] =
+	{
+		{ 0x7F, 0x9A, 0x9C, 0x9E, 0xFF, 0xBB, 0xBD, 0xBF, 0xDA, 0xDC, 0xDE, 0xFA, 0xFC, 0x100, 0x102, 0x104, 0x106 },
+		{ 0x99, 0x9B, 0x9D, 0x9F, 0xBA, 0xBC, 0xBE, 0xD9, 0xDB, 0xDD, 0xDF, 0xFB, 0xFD, 0x101, 0x103, 0x105, 0x107 }
+	};
+
 	int n = 0;
 	for (int t=0; t<128*1024/32; t++)
 	{
+		uint32_t buf32[32];
+
+		fread (buf32, 1, 32, fp);
+
 		// render tile 'n'
-		if (n < 30 && t == max_330_mega[n%2][n/2])
+		if (t != 0xfff &&
+				(n < 30 && t == max_330_mega[n%2][n/2])) // ||
+				//n >= 30 && m < 34 && t == pro_gear_spec[m%2][m/2]))
 		{
 			for (int c=0; c<4; c++)
+			{
 				for (int r=0; r<8; r++)
 				{
 					unsigned x = (n/2)*8+(1-(c/2))*4+(c%2)*2;
 					// do 2 pixels from each column
 					uint8_t data = 0;
-					if (vfl[(n%2)*8+r][x+0])
-						data |= 0x10;
 					if (vfl[(n%2)*8+r][x+1])
+						data |= 0x10;
+					if (vfl[(n%2)*8+r][x+0])
 						data |= 0x01;
 						
 					fwrite (&data, 1, 1, s1);
 				}
+			}
 			n++;
 		}
 		else
-		{
-			uint32_t buf32[32];
-			
-			fread (buf32, 1, 32, fp);
 			fwrite (buf32, 1, 32, s1);
-		}
 	}
 	
 	fclose (fp);
