@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "../../../lr/tile_data_c2bpp.c"
 #include "../../../lr/tile_data_m2bpp.c"
@@ -13,6 +14,78 @@ uint8_t	zero = 0;
 
 FILE *c1 = fopen ("202-c1.bin", "wb");
 FILE *c2 = fopen ("202-c2.bin", "wb");
+
+void do_fix (void)
+{
+	// 15*8 = 120 pixels
+	// "RETROPORTS" = 10*10 = 100 pixels
+	// left/right margin = 10 pixels
+	// height = 2*8=16 
+	// top/bottom margin = 2/3 pixels
+	uint8_t vfl[16][8*15];
+	const char *text = "RETROPORTS";
+
+	// render into 1-bit memory
+	memset (vfl, 0, 16*8*15);	
+	for (int y=0; y<11; y++)
+		for (int x=0; x<strlen(text); x++)
+		{
+			uint8_t t = toupper(text[x]) - 'A' + 0x45;
+			uint16_t data = tile_data_m2bpp[t*11*3+y*3+0];
+			data = (data << 8) | tile_data_m2bpp[t*11*3+y*3+1];
+			data = (data << 8) | tile_data_m2bpp[t*11*3+y*3+2];
+				
+			for (int p=0; p<10; p++)
+			{
+				if (data & (3<<14))
+					vfl[2+y][10+x*10+p] = 1;
+				data <<= 2;
+			}
+		}
+		
+	// now patch SFIX ROM
+	FILE *fp = fopen ("202-s1.s1", "rb");
+	FILE *s1 = fopen ("202-s1.bin", "wb");
+
+	static const uint16_t max_330_mega[2][15] =
+	{
+		{ 0x05, 0x07, 0x09, 0x0B, 0x0D, 0x0F, 0x15, 0x17, 0x19, 0x1B, 0x1D, 0x1F, 0x5E, 0x60, 0x7D },
+		{ 0x06, 0x08, 0x0A, 0x0C, 0x0E, 0x14, 0x16, 0x18, 0x1A, 0x1C, 0x1E, 0x40, 0x5F, 0x7C, 0x7E }
+	};
+
+	int n = 0;
+	for (int t=0; t<128*1024/32; t++)
+	{
+		// render tile 'n'
+		if (n < 30 && t == max_330_mega[n%2][n/2])
+		{
+			for (int c=0; c<4; c++)
+				for (int r=0; r<8; r++)
+				{
+					unsigned x = (n/2)*8+(1-(c/2))*4+(c%2)*2;
+					// do 2 pixels from each column
+					uint8_t data = 0;
+					if (vfl[(n%2)*8+r][x+0])
+						data |= 0x10;
+					if (vfl[(n%2)*8+r][x+1])
+						data |= 0x01;
+						
+					fwrite (&data, 1, 1, s1);
+				}
+			n++;
+		}
+		else
+		{
+			uint32_t buf32[32];
+			
+			fread (buf32, 1, 32, fp);
+			fwrite (buf32, 1, 32, s1);
+		}
+	}
+	
+	fclose (fp);
+	fclose (s1);
+}
 
 void do_tiles (unsigned set)
 {
@@ -375,6 +448,8 @@ int main (int argc, char *argv[])
 	fclose (fp1);
 	fclose (fp2);
 
+	do_fix ();
+	
 	// do tiles
 	for (unsigned set=0; set<2; set++)
 	{
