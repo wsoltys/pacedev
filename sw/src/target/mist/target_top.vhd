@@ -118,6 +118,8 @@ architecture SYN of target_top is
   signal downl          : std_logic := '0';
   signal size           : std_logic_vector(15 downto 0) := (others=>'0');
   signal forceReset     : std_logic := '0';
+  signal cart_a         : std_logic_vector(14 downto 0);
+  signal cart_d         : std_logic_vector(7 downto 0);
   
 --//********************
 
@@ -172,15 +174,16 @@ begin
     
     -- OSD clock derived from video clock
     GEN_PLL_OSD : if MIST_OSD_ENABLED generate
-      pllosd : entity work.clk_div
-        generic map (
-          DIVISOR => 2
-        )
-        port map (
-          clk => target_o.clk,
-          reset => '0',
-          clk_en => osd_clk
-      );
+--      pllosd : entity work.clk_div
+--        generic map (
+--          DIVISOR => 2
+--        )
+--        port map (
+--          clk => target_o.clk,
+--          reset => '0',
+--          clk_en => osd_clk
+--      );
+      osd_clk <= target_o.clk;
     end generate GEN_PLL_OSD;
     
   end block BLK_CLOCKING;
@@ -278,17 +281,22 @@ begin
   -- use flash interface for our data_io
   GEN_DATA_IO : if MIST_DATA_IO_ENABLED generate
     data_io_inst: data_io
-      port map(SPI_SCK, SPI_SS2, SPI_DI, downl, size, target_o.clk, '0', target_o.a(14 downto 0), (others=>'0'), target_i.q(7 downto 0));
-  end generate GEN_DATA_IO;
+      port map(SPI_SCK, SPI_SS2, SPI_DI, downl, size, target_o.clk, '0', cart_a, (others=>'0'), cart_d);
     
-  process(size, downl)
-  begin
-    if(downl = '0') then
-      forceReset <= '0';
-    else
-      forceReset <= '1';
-    end if;
-  end process;
+    process(downl)
+    begin
+      if(downl = '0') then
+        cart_a <= target_o.a(14 downto 0);
+        target_i.q(7 downto 0) <= cart_d;
+        forceReset <= '0';
+      else
+        cart_a <= target_o.a(14 downto 0);
+        target_i.q(7 downto 0) <= x"FF";
+        forceReset <= '1';
+      end if;
+    end process;
+  
+  end generate GEN_DATA_IO;
 		
   BLK_VIDEO : block
   begin
