@@ -457,7 +457,7 @@ int main (int argc, char *argv[])
 		clear_spr();
 
 		// display some eye-catcher stuff
-		if (0)
+		if (1)
 		{
 			static const uint16_t max_330_mega[2][15] =
 			{
@@ -511,6 +511,22 @@ int main (int argc, char *argv[])
 
 				addr+=32;
 			}
+
+      addr = 0x7000+(16*32)+22;			
+			for (n=0; n<16; n++)
+			{
+			  *vram = addr;
+			  *(vram+1) = 0xf000 | 0x7B; //(0x20+n);
+			  if ((addr%2) == 0)
+			    addr++;
+			  else
+			    addr += 31;
+			}
+			
+			// (C)
+			addr = 0x7469;
+			*vram = addr;
+			*(vram+1) = 0xF000 | 0x7B;
 		}
 				
 		//textoutf (13, 20, 0, 0, "LODE RUNNER");
