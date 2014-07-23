@@ -22,14 +22,18 @@ void do_fix (void)
 	// left/right margin = 10 pixels
 	// height = 2*8=16 
 	// top/bottom margin = 2/3 pixels
-	uint8_t vfl[16][8*15];
+	uint8_t vfl[24][8*15];
 	const char *text = "RETROPORTS";
 
 	// render into 1-bit memory
-	memset (vfl, 0, 16*8*15);	
+	memset (vfl, 0, 24*8*15);	
 	for (int y=0; y<11; y++)
 		for (int x=0; x<strlen(text); x++)
 		{
+			int c = x % 5;
+			int r = x / 5;
+			int lm = (10*8 - 5*10) / 2;
+			
 			uint8_t t = toupper(text[x]) - 'A' + 0x45;
 			uint32_t data = tile_data_c2bpp[t*11*3+y*3+0];
 			data = (data << 8) | tile_data_c2bpp[t*11*3+y*3+1];
@@ -38,7 +42,7 @@ void do_fix (void)
 			for (int p=0; p<10; p++)
 			{
 				if (data & (3<<22))
-					vfl[2+y][10+x*10+p] = 1;
+					vfl[2+r*11+y][lm+c*10+p] = 1;
 				data <<= 2;
 			}
 		}
@@ -59,6 +63,13 @@ void do_fix (void)
 		{ 0x99, 0x9B, 0x9D, 0x9F, 0xBA, 0xBC, 0xBE, 0xD9, 0xDB, 0xDD, 0xDF, 0xFB, 0xFD, 0x101, 0x103, 0x105, 0x107 }
 	};
 
+	static const uint16_t SNK[3][10] = 
+	{
+		{ 0x200, 0x201, 0x202, 0x203, 0x204, 0x205, 0x206, 0x207, 0x208, 0x209 },
+		{ 0x20A, 0x20B, 0x20C, 0x20D, 0x20E, 0x20F, 0x214, 0x215, 0x216, 0x217 },
+		{ 0x218, 0x219, 0x21A, 0x21B, 0x21C, 0x21D, 0x21E, 0x21F, 0x240, 0x25E }
+	};
+
 	int n = 0;
 	for (int t=0; t<128*1024/32; t++)
 	{
@@ -67,21 +78,29 @@ void do_fix (void)
 		fread (buf32, 1, 32, fp);
 
 		// render tile 'n'
-		if (t != 0xfff &&
-				(n < 30 && t == max_330_mega[n%2][n/2])) // ||
+		if (n<30 && t == SNK[n/10][n%10])
+		//if ((n < 30 && t == max_330_mega[n%2][n/2]))
 				//n >= 30 && m < 34 && t == pro_gear_spec[m%2][m/2]))
 		{
 			for (int c=0; c<4; c++)
 			{
 				for (int r=0; r<8; r++)
 				{
-					unsigned x = (n/2)*8+(1-(c/2))*4+(c%2)*2;
+					//unsigned x = (n/2)*8+(1-(c/2))*4+(c%2)*2;
+					unsigned x = (n%10)*8+(1-(c/2))*4+(c%2)*2;
 					// do 2 pixels from each column
 					uint8_t data = 0;
-					if (vfl[(n%2)*8+r][x+1])
-						data |= 0x10;
-					if (vfl[(n%2)*8+r][x+0])
-						data |= 0x01;
+					#if 0
+						if (vfl[(n%2)*8+r][x+1])
+							data |= 0x10;
+						if (vfl[(n%2)*8+r][x+0])
+							data |= 0x01;
+					#else
+						if (vfl[(n/10)*8+r][x+1])
+							data |= 0x50;
+						if (vfl[(n/10)*8+r][x+0])
+							data |= 0x05;
+					#endif
 						
 					fwrite (&data, 1, 1, s1);
 				}

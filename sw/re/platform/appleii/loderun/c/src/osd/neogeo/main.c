@@ -457,7 +457,7 @@ int main (int argc, char *argv[])
 		clear_spr();
 
 		// display some eye-catcher stuff
-		if (1)
+		if (0)
 		{
 			static const uint16_t max_330_mega[2][15] =
 			{
@@ -479,9 +479,16 @@ int main (int argc, char *argv[])
 				}
 			};
 
+			static const uint16_t SNK[3][10] = 
+			{
+				{ 0x200, 0x201, 0x202, 0x203, 0x204, 0x205, 0x206, 0x207, 0x208, 0x209 },
+				{ 0x20A, 0x20B, 0x20C, 0x20D, 0x20E, 0x20F, 0x214, 0x215, 0x216, 0x217 },
+				{ 0x218, 0x219, 0x21A, 0x21B, 0x21C, 0x21D, 0x21E, 0x21F, 0x240, 0x25E }
+			};
+			
 			static const uint16_t eye_catcher_pal[] = 
 			{
-				0x0000, 0x0fff, 0x0ddd, 0x0aaa, 0x7555, 0x0000, 0x0000, 0x0000,
+				0x0000, 0x0fff, 0x0ddd, 0x0aaa, 0x7555, 0x306E, 0x0000, 0x0000,
 				0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
 			};
 
@@ -512,15 +519,14 @@ int main (int argc, char *argv[])
 				addr+=32;
 			}
 
-      addr = 0x7000+(16*32)+22;			
-			for (n=0; n<16; n++)
+      addr = 0x71F6;
+			for (n=0; n<3*10; n++)
 			{
 			  *vram = addr;
-			  *(vram+1) = 0xf000 | 0x7B; //(0x20+n);
-			  if ((addr%2) == 0)
-			    addr++;
-			  else
-			    addr += 31;
+			  *(vram+1) = 0xF000 | SNK[n/10][n%10];
+		    addr += 32;
+			  if ((n%10) == 9)
+			    addr += - 10*32 + 1;
 			}
 			
 			// (C)
