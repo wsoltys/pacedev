@@ -8,7 +8,6 @@ ENTITY spram IS
 	GENERIC
 	(
 		init_file			: string := "";
-		numwords_a		: natural;
 		widthad_a			: natural;
 		width_a				: natural := 8;
     outdata_reg_a : string := "UNREGISTERED"

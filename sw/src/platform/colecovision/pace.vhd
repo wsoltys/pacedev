@@ -392,7 +392,7 @@ begin
   bios_b : entity work.sprom
     generic map
 		(
-			numwords_a		=> 8192,
+			--numwords_a		=> 8192,
       widthad_a     => 13,
 			init_file			=> "../../../../src/platform/colecovision/roms/bios.hex"
     )
@@ -411,7 +411,7 @@ begin
   cpu_ram_b : entity work.spram
     generic map 
 		(
-			numwords_a		=> 1024,
+			--numwords_a		=> 1024,
       widthad_a     => 10
     )
     port map
@@ -431,7 +431,7 @@ begin
   
     vram_b : entity work.spram
       generic map (
-        numwords_a		=> 16384,
+        --numwords_a		=> 16384,
         widthad_a      => 14
       )
       port map (
@@ -498,7 +498,7 @@ begin
     cart_rom : entity work.sprom
       generic map
       (
-        numwords_a		=> 16384,
+        --numwords_a		=> 16384,
         widthad_a     => 14,
         init_file			=> "../../../../src/platform/colecovision/roms/carts/" & CV_CART_NAME
       )
@@ -544,7 +544,7 @@ begin
                      but_up_s, but_down_s, but_left_s, but_right_s,
                      but_x_s, but_y_s,
                      but_sel_s, but_start_s,
-                     but_tl_s, but_tr_s)
+                     but_tl_s, but_tr_s, inputs_i.jamma_n.p(1).up)
     variable key_v : natural range cv_keys_t'range;
   begin
     -- quadrature device not implemented
@@ -603,19 +603,16 @@ begin
         ctrl_p3_s(idx) <= cv_keys_c(key_v)(3);
         ctrl_p4_s(idx) <= cv_keys_c(key_v)(4);
 
-        --if but_tl_s(idx-1) = '1' then
-          ctrl_p6_s(idx) <= not ps2_keys_s(0);
-        --else
-        --  ctrl_p6_s(idx) <= '1';
-        --end if;
+        -- KEY X
+        ctrl_p6_s(idx) <= not ps2_keys_s(0) and inputs_i.jamma_n.p(1).button(2); -- button 2
 
       elsif ctrl_p5_s(idx) = '1' and ctrl_p8_s(idx) = '0' then
         -- joystick and left button enabled -----------------------------------
-        ctrl_p1_s(idx) <= not ps2_joy_s(0);	-- up
-        ctrl_p2_s(idx) <= not ps2_joy_s(1); -- down
-        ctrl_p3_s(idx) <= not ps2_joy_s(2); -- left
-        ctrl_p4_s(idx) <= not ps2_joy_s(3); -- right
-        ctrl_p6_s(idx) <= not ps2_joy_s(4); -- button
+        ctrl_p1_s(idx) <= not ps2_joy_s(0) and inputs_i.jamma_n.p(1).up;	-- up
+        ctrl_p2_s(idx) <= not ps2_joy_s(1) and inputs_i.jamma_n.p(1).down; -- down
+        ctrl_p3_s(idx) <= not ps2_joy_s(2) and inputs_i.jamma_n.p(1).left; -- left
+        ctrl_p4_s(idx) <= not ps2_joy_s(3) and inputs_i.jamma_n.p(1).right; -- right
+        ctrl_p6_s(idx) <= not ps2_joy_s(4) and inputs_i.jamma_n.p(1).button(1); -- button 1
 
       else
         -- nothing active -----------------------------------------------------
