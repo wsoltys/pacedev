@@ -134,7 +134,6 @@ set_global_assignment -name VERILOG_FILE user_io_w.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/mist/data_io_ram.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/mist/data_io.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/mist/osd.v
-set_global_assignment -name QIP_FILE pllclk_ez.qip
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/pace/stubs/sdram_pkg.vhd

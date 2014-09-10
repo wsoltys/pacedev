@@ -286,12 +286,12 @@ begin
     process(downl)
     begin
       if(downl = '0') then
-        cart_a <= target_o.a(14 downto 0);
-        target_i.q(7 downto 0) <= cart_d;
+        cart_a <= target_o.a;
+        target_i.q <= cart_d;
         forceReset <= '0';
       else
-        cart_a <= target_o.a(14 downto 0);
-        target_i.q(7 downto 0) <= x"FF";
+        cart_a <= target_o.a;
+        target_i.q <= x"FF";
         forceReset <= '1';
       end if;
     end process;

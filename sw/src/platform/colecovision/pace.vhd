@@ -539,22 +539,16 @@ begin
   -- Purpose:
   --   Maps the gamepad signals to the controller buses of the console.
   --
-  pad_ctrl: process (ctrl_p5_s, ctrl_p8_s,
-                     but_a_s, but_b_s,
-                     but_up_s, but_down_s, but_left_s, but_right_s,
-                     but_x_s, but_y_s,
-                     but_sel_s, but_start_s,
-                     but_tl_s, but_tr_s, inputs_i.jamma_n.p(1).up)
+  pad_ctrl: process (ctrl_p5_s, ctrl_p8_s)
     variable key_v : natural range cv_keys_t'range;
   begin
     -- quadrature device not implemented
     ctrl_p7_s          <= "11";
     ctrl_p9_s          <= "11";
 
-    for idx in 1 to 1 loop -- was 2
+    for idx in 1 to 2 loop -- was 2
       if    ctrl_p5_s(idx) = '0' and ctrl_p8_s(idx) = '1' then
         -- keys and right button enabled --------------------------------------
-        -- keys not fully implemented
 
         key_v := cv_key_none_c;
 
