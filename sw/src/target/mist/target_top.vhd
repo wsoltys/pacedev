@@ -42,23 +42,50 @@ end target_top;
 
 architecture SYN of target_top is
 
-  component user_io_w
+  constant CONF_STR : string := "COLECO;COL;O1,Enable Scanlines,no,yes;";
+
+  function to_slv(s: string) return std_logic_vector is 
+    constant ss: string(1 to s'length) := s; 
+    variable rval: std_logic_vector(1 to 8 * s'length); 
+    variable p: integer; 
+    variable c: integer; 
+  
+  begin 
+    for i in ss'range loop
+      p := 8 * i;
+      c := character'pos(ss(i));
+      rval(p - 7 to p) := std_logic_vector(to_unsigned(c,8)); 
+    end loop; 
+    return rval; 
+
+  end function; 
+
+
+
+  component user_io
+    generic ( STRLEN : integer := 0 );
+  
     port ( SPI_CLK, SPI_SS_IO, SPI_MOSI :in std_logic;
            SPI_MISO : out std_logic;
-           JOY0 :     out std_logic_vector(5 downto 0);
-           JOY1 :     out std_logic_vector(5 downto 0);
+           conf_str : in std_logic_vector(8*STRLEN-1 downto 0);
+           joystick_0 : out std_logic_vector(5 downto 0);
+           joystick_1 : out std_logic_vector(5 downto 0);
+           joystick_analog_0 : out std_logic_vector(15 downto 0);
+           joystick_analog_1 : out std_logic_vector(15 downto 0);
+           status:    out std_logic_vector(7 downto 0);
            SWITCHES : out std_logic_vector(1 downto 0);
            BUTTONS : out std_logic_vector(1 downto 0);
-           status : out std_logic_vector(7 downto 0);
-           clk       : in std_logic;
-           ps2_clk   : out std_logic;
-           ps2_data  : out std_logic
-           );
-   end component user_io_w;
+           sd_sdhc : in std_logic;
+           ps2_clk : in std_logic;
+           ps2_kbd_clk : out std_logic;
+           ps2_kbd_data : out std_logic
+         );
+
+  end component user_io;
    
   component osd
     port (
-      pclk, sck, ss, sdi, hs_in, vs_in : in std_logic;
+      pclk, sck, ss, sdi, hs_in, vs_in, scanline_ena_h : in std_logic;
       red_in, blue_in, green_in : in std_logic_vector(5 downto 0);
       red_out, blue_out, green_out : out std_logic_vector(5 downto 0);
       hs_out, vs_out : out std_logic
@@ -221,28 +248,32 @@ begin
 
   end generate GEN_RESETS;
 
-      -- inputs
-      user_io_d : user_io_w
-        port map
-        (
-          SPI_CLK => SPI_SCK,
-          SPI_SS_IO => CONF_DATA0,
-          SPI_MISO => SPI_DO,
-          SPI_MOSI => SPI_DI,
-          JOY0 => joystick,
-          JOY1 => joystick2,
-          SWITCHES => switches,
-          BUTTONS => buttons,
-          status => status,
-          clk => clock_12k,
-          ps2_clk => ps2clk,
-          ps2_data => ps2dat
-          );
+  -- inputs
+  user_io_d : user_io
+    generic map (STRLEN => CONF_STR'length)
+    
+    port map ( 
+      SPI_CLK => SPI_SCK,
+      SPI_SS_IO => CONF_DATA0,    
+      SPI_MISO => SPI_DO,    
+      SPI_MOSI => SPI_DI,       
+      conf_str => to_slv(CONF_STR),
+      status => status,   
+      joystick_0 => joystick,   
+      joystick_1 => joystick2,
+      SWITCHES => switches,   
+      BUTTONS => buttons,
+      sd_sdhc => '1',
+      ps2_clk => clock_12k,
+      ps2_kbd_clk => ps2clk,
+      ps2_kbd_data => ps2dat
+    );
 
-       switches_i(0) <= switches(0);
-       switches_i(1) <= switches(1);
 
-       GEN_NO_JAMMA : if PACE_JAMMA = PACE_JAMMA_NONE generate
+    switches_i(0) <= switches(0);
+    switches_i(1) <= switches(1);
+
+    GEN_NO_JAMMA : if PACE_JAMMA = PACE_JAMMA_NONE generate
 		inputs_i.jamma_n.coin(1) <= not buttons(0);
 		inputs_i.jamma_n.p(1).start <= not buttons(1);
 		inputs_i.jamma_n.p(1).up <= not joystick(3);
@@ -317,6 +348,7 @@ begin
           blue_in => video_o.rgb.b(video_o.rgb.b'left downto video_o.rgb.b'left-5),
           hs_in => not video_o.hsync,
           vs_in => not video_o.vsync,
+          scanline_ena_h => status(1),
           red_out => VGA_R,
           green_out => VGA_G,
           blue_out => VGA_B,
