@@ -65,6 +65,9 @@ Comments/Suggestions/Bugs
 
 Release History
 ---------------
+v0.3				Playable Demo Release (Bets 3)
+						Fixed GAME OVER animation for MONOCHROME mode
+
 v0.2        Playable Demo Release (Beta 2)
             Added Game Over animation
             Added Freeze function

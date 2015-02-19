@@ -80,7 +80,7 @@ wait:   stb     2,x                     ; column strobe
         cmpb    #0
         beq     2$    
         lda     #0xcc
-        sta     0xde3c                  ; patch separator line pattern
+        sta     0xddfa                  ; patch separator line pattern
 2$:     jmp     0xc000                  ; jump to Lode Runner
 
 param:  .dw     0
@@ -97,7 +97,7 @@ WHITE_ON_BLACK    .equ    (1<<7)|WHITE_TEXT|BLACK_BG
 splash:
 ;       .ascii  "12345678901234567890123456789012345678901234567890123456789012345678901234567890"
         .db     WHITE_ON_BLACK
-        .ascii  "              Apple II Lode Runner for the TRS-80 Color Computer 3      (Beta2) "
+        .ascii  "              Apple II Lode Runner for the TRS-80 Color Computer 3      (Beta3) "
         .db     BLACK_ON_GREEN
         .ascii  "                                                                                "
         .ascii  "The game Lode Runner itself should need no introduction, having received        "

@@ -18,8 +18,8 @@
 
 //#define DO_TITLE
 //#define DO_TILES
-//#define DO_GAMEOVER
-#define DO_CIRCLE
+#define DO_GAMEOVER
+//#define DO_CIRCLE
 
 uint8_t ram[64*1024];
 
@@ -811,30 +811,37 @@ void main (int argc, char *argv[])
     fprintf (fp, "\n");
   }
 
-	colourize (280, 192);
-
-	for (int l=0; l<11; l++)
+	int y_offset;
+	for (int c=0; c<2; c++)
 	{
-    fprintf (fp2, "gol%d:%s.db     ", l+1, (l<9 ? "   " : "  "));
+		if (c > 0)
+			colourize (280, 192);
 
-    // write 8-bit data to asm file    
-    for (int b=0; b<2*13; b++)
-    {
-      uint8_t data = 0;
-      
-      for (int i=0; i<4; i++)
-      {
-        data <<= 2;
-        data |= getpixel (screen, 8+b*4+i, 192+l) & 0x03;
-      }
-      
-      fprintf (fp2, "0x%02X%c ", data, ((b%8 == 7) || b==25 ? ' ' : ','));
-      if (b%8 == 7)
-        fprintf (fp2, "\n        .db     ");
-    }
-    fprintf (fp2, "\n");
-  }
+		y_offset = (c == 0 ? 0 : 192);
+		
+		for (int l=0; l<11; l++)
+		{
+	    fprintf (fp2, "gol%d:%s.db     ", l+1, (l<9 ? "   " : "  "));
 	
+	    // write 8-bit data to asm file    
+	    for (int b=0; b<2*13; b++)
+	    {
+	      uint8_t data = 0;
+	      
+	      for (int i=0; i<4; i++)
+	      {
+	        data <<= 2;
+	        data |= getpixel (screen, 8+b*4+i, y_offset+l) & 0x03;
+	      }
+	      
+	      fprintf (fp2, "0x%02X%c ", data, ((b%8 == 7) || b==25 ? ' ' : ','));
+	      if (b%8 == 7)
+	        fprintf (fp2, "\n        .db     ");
+	    }
+	    fprintf (fp2, "\n");
+	  }
+	}
+		
   // display 8-bit data
   for (int l=0; l<11; l++)
   {
@@ -851,8 +858,8 @@ void main (int argc, char *argv[])
   fclose (fp);
   fclose (fp2);
   
-  //while (!key[KEY_ESC]);	  
-	//while (key[KEY_ESC]);	  
+  while (!key[KEY_ESC]);	  
+	while (key[KEY_ESC]);	  
 
 #endif // DO_GAMEOVER
 

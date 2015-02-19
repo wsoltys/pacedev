@@ -50,8 +50,11 @@ HGR2_MSB		.equ		0x40
 ; *** LODE RUNNER SPECIFIC CONFIGURATION HERE
 ;
 
-.define       CARTRIDGE
+;.define       CARTRIDGE
 ;.define			GFX_1BPP
+; The MONO build is only used to generate graphics
+; - the COLOUR version of the code is always run
+; - the loader patches the line character
 ;.define			GFX_MONO
 .define       GFX_RGB
 
@@ -122,20 +125,37 @@ APPLE_BPL				.equ	VIDEO_BPL-VIDEO_RM
 ; $3F00-$3FFF   $31				Zero Page
 ; $4000-$7BFF   $32-$33		HGR2
 ; $7C00-$7FFF		$33				Level Data 1,2
-; $8000-$BXXX   $34-$35		Tile Graphics Data
-; $BX00-$       $35				Title Screen Data
+; $8000-$9AXX   $34				Tile Graphics Data
+; $A000-$BXXX		$35				Title Screen, Game Over Data
 ; $C000-$F965   $36-$37		Program Code & ROM Data
 ; $FA00-$FCFF   $37       RAM
 ;      -$FE00   $37				6809 System Stack
 ;
 
 ;RAMBASE			.equ				0x3c00
-ZEROPAGE		.equ				0x3c00
-ldu1				.equ				0x7c00
-ldu2				.equ				0x7e00
-tile_data	  .equ	  	  0x8000
-codebase		.equ		  	0xc000
-stack				.equ		  	0xfe00
+ZEROPAGE				.equ			0x3c00
+ldu1						.equ			0x7c00
+ldu2						.equ			0x7e00
+tile_data	  		.equ	  	0x8000
+gameover_data		.equ			0xbc00
+.ifdef GFX_1BPP
+	GO_BPL				.equ			13
+.else
+	GO_BPL				.equ			26
+.endif
+gol1						.equ			0xbc00+0*GO_BPL
+gol2						.equ			0xbc00+1*GO_BPL
+gol3						.equ			0xbc00+2*GO_BPL
+gol4						.equ			0xbc00+3*GO_BPL
+gol5						.equ			0xbc00+4*GO_BPL
+gol6						.equ			0xbc00+5*GO_BPL
+gol7						.equ			0xbc00+6*GO_BPL
+gol8						.equ			0xbc00+7*GO_BPL
+gol9						.equ			0xbc00+8*GO_BPL
+gol10						.equ			0xbc00+9*GO_BPL
+gol11						.equ			0xbc00+10*GO_BPL
+codebase				.equ		  0xc000
+stack						.equ		  0xfe00
 
 .define	HAS_TITLE
 .define	TITLE_EXTERNAL

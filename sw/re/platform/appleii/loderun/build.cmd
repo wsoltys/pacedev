@@ -31,6 +31,8 @@ aslink -t loderun_6809.rel
 del loderun_6809.dsk
 @REM copy loderun_6809.bin lr.bin
 reloc loderun_6809.bin lr.bin
+@REM * this only copies the COLOUR version of the graphics
+@REM * - for MONO, re-build with GX_MONO and copy lr_gfx.bin by hand to gfxm2bpp.bin
 copy lr_gfx.bin gfxc4bpp.bin
 @REM file2dsk loderun_6809.dsk lr.bin gfxm4bpp.bin gfxc4bpp.bin lr_ldr.bin lr.bas readme.txt
 file2dsk loderun_6809.dsk lr.bin gfxm4bpp.bin gfxc4bpp.bin lr_ldr.bin lr.bas

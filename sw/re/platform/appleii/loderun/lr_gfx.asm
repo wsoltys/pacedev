@@ -37,6 +37,18 @@
   .endif
 .endif
 
+				.org		gameover_data-0x4000
+
+.ifdef GFX_1BPP
+  .include "gameover_data_m1bpp.asm"
+.else
+  .ifdef GFX_MONO
+    .include "gameover_data_m2bpp.asm"
+  .else
+    .include "gameover_data_c2bpp.asm"
+  .endif
+.endif
+
 ; end of page $37 which appears on HGR1
 ; due to video offset in GIME registers
 				.org		0x7ff0
