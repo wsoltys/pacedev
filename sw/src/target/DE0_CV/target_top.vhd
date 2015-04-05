@@ -67,7 +67,7 @@ entity target_top is
 		gpio_0        : inout std_logic_vector(35 downto 0);  --	GPIO Connection 0
 		gpio_1        : inout std_logic_vector(35 downto 0);  --	GPIO Connection 1
 		--      /////// FPGA RESET ///////
-		RESET_N	      : in std_logic                          --        FPGA Reset
+		RESET_N	      : in std_logic                          --    FPGA Reset button
 		
 		);
 	
@@ -113,6 +113,25 @@ architecture SYN of target_top is
 	signal default_gpio_1_oe  : std_logic_vector(gpio_1'range) := (others => 'Z');
 	signal seg7               : std_logic_vector(15 downto 0);
 	
+	component pll5_50 is
+		generic (
+		REF_CLK  : in string  := "50.0 MHz";
+		NUM_CLKS : in integer := 4;
+		CLK0 	 : in string  := "20.000000 MHz";
+		CLK1 	 : in string  := "40.000000 MHz";
+		CLK2 	 : in string  := "18.421052 MHz";
+		CLK3 	 : in string  := "10.000000 MHz"
+		);
+		port (
+			refclk   : in  std_logic := 'X'; -- clk
+			rst      : in  std_logic := 'X'; -- reset
+			outclk_0 : out std_logic;        -- clk
+			outclk_1 : out std_logic;        -- clk
+			outclk_2 : out std_logic;        -- clk
+			outclk_3 : out std_logic         -- clk
+		);
+	end component pll5_50;
+
 begin
 	
 	BLK_CLOCKING : block
@@ -120,28 +139,18 @@ begin
 		clkrst_i.clk_ref <= clock_50;
 		
 		GEN_PLL : if PACE_HAS_PLL generate
-			
-			pll_50_inst : entity work.pll
-			generic map
-				(
-				-- INCLK0
-				INCLK0_INPUT_FREQUENCY  => 20000,
-				
-				-- CLK0
-				CLK0_DIVIDE_BY          => PACE_CLK0_DIVIDE_BY,
-				CLK0_MULTIPLY_BY        => PACE_CLK0_MULTIPLY_BY,
-				
-				-- CLK1
-				CLK1_DIVIDE_BY          => PACE_CLK1_DIVIDE_BY,
-				CLK1_MULTIPLY_BY        => PACE_CLK1_MULTIPLY_BY
-				)
-			port map
-				(
-				inclk0  => clock_50,
-				c0      => clkrst_i.clk(0),
-				c1      => clkrst_i.clk(1)
-				);
-			
+			pll_50_inst : pll5_50
+--			generic map (
+--				CLK0     => "30.000000 MHz"	-- Default clocks (above) can easily be overwridden 
+--			)
+			port map (
+				refclk   => clock_50,
+				rst      => not RESET_N,
+				outclk_0 => clkrst_i.clk(0),
+				outclk_1 => clkrst_i.clk(1),
+				outclk_2 => clkrst_i.clk(2),
+				outclk_3 => clkrst_i.clk(3)
+			);
 		end generate GEN_PLL;
 		
 		GEN_NO_PLL : if not PACE_HAS_PLL generate
@@ -151,28 +160,6 @@ begin
 			clkrst_i.clk(1) <= clock_50;
 			
 		end generate GEN_NO_PLL;
-		
-		pll_27_inst : entity work.pll
-		generic map
-			(
-			-- INCLK0
-			INCLK0_INPUT_FREQUENCY  => 37037,
-			
-			-- CLK0 - 18M432Hz for audio
-			CLK0_DIVIDE_BY          => 22,
-			CLK0_MULTIPLY_BY        => 15,
-			
-			-- CLK1 - not used
-			CLK1_DIVIDE_BY          => 1,
-			CLK1_MULTIPLY_BY        => 1
-			)
-		port map
-			(
-			inclk0  => clock_50,
-			c0      => clkrst_i.clk(2),
-			c1      => clkrst_i.clk(3)
-			);
-		
 	end block BLK_CLOCKING;
 	
 	-- FPGA STARTUP
@@ -190,7 +177,7 @@ begin
 		end if;
 	end process;
 	
-	clkrst_i.arst <= init or not key(0);
+	clkrst_i.arst <= init or not RESET_N;
 	clkrst_i.arst_n <= not clkrst_i.arst;
 	
 	GEN_RESETS : for i in 0 to 3 generate

@@ -546,6 +546,17 @@ set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
 set_global_assignment -name VHDL_SHOW_LMF_MAPPING_MESSAGES OFF
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SD_DAT[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SD_DAT[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SD_DAT[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SD_DAT[3]
+set_location_assignment PIN_K9 -to SD_DAT[0]
+set_location_assignment PIN_D12 -to SD_DAT[1]
+set_location_assignment PIN_E12 -to SD_DAT[2]
+set_location_assignment PIN_C11 -to SD_DAT[3]
+set_global_assignment -name QIP_FILE ../../../../device/cyclonev/pll5_50_0002.qip
+set_global_assignment -name VERILOG_FILE ../../../../device/cyclonev/pll5_50_0002.v
+set_global_assignment -name VHDL_FILE ../../../../device/cyclonev/pll5_50.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/DE0_CV/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/DE0_CV/target_top.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/DE0_CV/custom_io.vhd
@@ -606,12 +617,4 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/io/gamecube/g
 set_global_assignment -name VHDL_FILE ../../../../../src/component/toys/led_chaser.vhd
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/seg7_lut.v
 set_global_assignment -name VERILOG_FILE ../../../../../src/target/de2/i2s_controller.v
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SD_DAT[0]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SD_DAT[1]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SD_DAT[2]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SD_DAT[3]
-set_location_assignment PIN_K9 -to SD_DAT[0]
-set_location_assignment PIN_D12 -to SD_DAT[1]
-set_location_assignment PIN_E12 -to SD_DAT[2]
-set_location_assignment PIN_C11 -to SD_DAT[3]
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
