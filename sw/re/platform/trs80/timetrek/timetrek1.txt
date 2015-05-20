@@ -1,0 +1,2221 @@
+; Time Trek disassembly.
+; 
+; --------------------------------------------------------
+; Relocation detected from 70b7 to 40b7 [0f50 bytes]; new entry 416d
+; 40b7 - 5006 [0f50]
+; 8007 - 8015 [000f]
+d_quadrant_map	equ	00000h
+i_quadrant_map	equ	00005h
+d_rand_seed	equ	00040h
+i_rand_seed	equ	00045h
+d_level		equ	00042h
+i_level		equ	00047h
+d_cur_quadrant	equ	00043h
+i_cur_quadrant	equ	00048h
+d_stardate	equ	00044h
+i_stardate	equ	00049h
+d_klingons0	equ	00047h
+i_klingons0	equ	0004ch
+d_klingons	equ	00048h
+i_klingons	equ	0004dh
+d_bases0	equ	00049h
+i_bases0	equ	0004eh
+d_bases		equ	0004ah
+i_bases		equ	0004fh
+d_klingon_damages	equ	0004bh
+i_klingon_damages	equ	00050h
+d_pos_enterprise	equ	0004eh
+i_pos_enterprise	equ	00053h
+d_pos_starbase	equ	0004fh
+i_pos_starbase	equ	00054h
+d_pos_stars	equ	00050h
+i_pos_stars	equ	00055h
+d_pos_klingons	equ	00055h
+i_pos_klingons	equ	0005ah
+d_pos_blkhole	equ	00058h
+i_pos_blkhole	equ	0005dh
+d_imp_damage	equ	00059h
+i_imp_damage	equ	0005eh
+d_warp_damage	equ	0005ah
+i_warp_damage	equ	0005fh
+d_lrs_damage	equ	0005bh
+i_lrs_damage	equ	00060h
+d_shield_damage	equ	0005ch
+i_shield_damage	equ	00061h
+d_phaser_damage	equ	0005dh
+i_phaser_damage	equ	00062h
+d_ship_nrg	equ	0005eh
+i_ship_nrg	equ	00063h
+d_shields	equ	0005fh
+i_shields	equ	00064h
+d_photons	equ	00060h
+i_photons	equ	00065h
+d_starbase_damage	equ	00061h
+i_starbase_damage	equ	00066h
+d_sos_starbase_qpos	equ	00064h
+i_sos_starbase_qpos	equ	00069h
+srs_line0	equ	03c80h
+srs_line1	equ	03cc0h
+
+		org	04000h
+quadrant_map:	defs	64			; 4000:
+rand_seed:	defs	2			; 4040:
+level:		defs	1			; 4042:
+cur_quadrant:	defs	1			; 4043:
+stardate:	defs	3			; 4044:
+klingons0:	defs	1			; 4047:
+klingons:	defs	1			; 4048:
+bases0:		defs	1			; 4049:
+bases:		defs	1			; 404a:
+klingon_damages:
+		defs	3			; 404b:
+pos_enterprise:	defs	1			; 404e:
+pos_starbase:	defs	1			; 404f:
+pos_stars:	defs	5			; 4050:
+pos_klingons:	defs	3			; 4055:
+pos_blkhole:	defs	1			; 4058:
+imp_damage:	defs	1			; 4059:
+warp_damage:	defs	1			; 405a:
+lrs_damage:	defs	1			; 405b:
+shield_damage:	defs	1			; 405c:
+phaser_damage:	defs	1			; 405d:
+ship_nrg:	defs	1			; 405e:
+shields:	defs	1			; 405f:
+photons:	defs	1			; 4060:
+starbase_damage:
+		defs	1			; 4061:
+
+		org	04064h
+sos_starbase_qpos:
+		defs	1			; 4064:
+sos_starbase_ttl:
+		defs	1			; 4065:
+stack1		equ	0408bh
+
+		org	040b7h
+stack2:		word	klingon_thread
+mtitle:		ascii	')))TIME TREK(((',0
+mcopy:		ascii	'COPYRIGHT 1978 JOSHUA LAVINSKY',0
+mlevel:		ascii	'WHAT LEVEL DO YOU WISH TO PLAY (1-10)? ',0
+mmiss1:		ascii	'YOUR MISSION:',0
+mmiss2:		ascii	'DESTROY THE FLEET OF',0
+mmiss3:		ascii	' BEFORE THEY DESTROY THE',0
+mmiss4:		ascii	' FEDERATION STARBASES',0
+mmiss5:		ascii	'GOOD LUCK!',0
+; Display title, copyright.
+entry_point:	ld	sp,stack1		; 416d: 31 8b 40      1.@
+		ld	ix,3ffbh		; 4170: dd 21 fb 3f   .!.?
+		ld	iy,stack2		; 4174: fd 21 b7 40   .!.@
+		call	cls			; 4178: cd 8d 4f      ..O
+		ld	hl,mtitle		; 417b: 21 b9 40      !.@
+		ld	bc,3c19h		; 417e: 01 19 3c      ..<
+		call	str_hl_at_bc		; 4181: cd 4f 4f      .OO
+		ld	bc,3fe2h		; 4184: 01 e2 3f      ..?
+		call	str_hl_at_bc		; 4187: cd 4f 4f      .OO
+; Cute - clear $4000 - $407F to 0.
+		xor	a			; 418a: af            .
+_418b:		ld	(bc),a			; 418b: 02            .
+		inc	c			; 418c: 0c            .
+		jp	p,_418b			; 418d: f2 8b 41      ..A
+; Initialize some globals; IX=3FFB at this point
+		ld	(ix+i_photons),03h	; 4190: dd 36 65 03   .6e.
+		ld	(ix+i_ship_nrg),100	; 4194: dd 36 63 64   .6cd
+		ld	(ix+i_shields),100	; 4198: dd 36 64 64   .6dd
+; Odd saving, but display level prompt
+		ld	d,b			; 419c: 50            P
+		ld	bc,srs_line0		; 419d: 01 80 3c      ..<
+		call	str_hl_at_bc		; 41a0: cd 4f 4f      .OO
+		call	getint_HL		; 41a3: cd 16 4e      ..N
+; Level in HL; start over if <= 0 or >= 11
+		ld	a,l			; 41a6: 7d            }
+		or	a			; 41a7: b7            .
+		jr	z,entry_point		; 41a8: 28 c3         (.
+		cp	0bh			; 41aa: fe 0b         ..
+		jr	nc,entry_point		; 41ac: 30 bf         0.
+; So, level is in 3FFB+47=4042
+		ld	(ix+i_level),l		; 41ae: dd 75 47      .uG
+gen_galaxy:	xor	a			; 41b1: af            .
+		ld	(ix+i_bases0),a		; 41b2: dd 77 4e      .wN
+		ld	e,a			; 41b5: 5f            _
+		ld	c,a			; 41b6: 4f            O
+; E loops 0 to 63 as current quadrant.
+; C counts Klingons.
+; B holds quadrant parameters.
+; Quadrant has a 3/130 chance of a black hole. 1.48 average per galaxy.
+; 4/131 chance of a magnetic storm. 1.95 average per galaxy.
+gen_quad:	ld	a,82h			; 41b7: 3e 82         >.
+		ld	b,00h			; 41b9: 06 00         ..
+		call	rand			; 41bb: cd 9a 4f      ..O
+		rla				; 41be: 17            .
+		rr	b			; 41bf: cb 18         ..
+		ld	a,83h			; 41c1: 3e 83         >.
+		call	rand			; 41c3: cd 9a 4f      ..O
+		rla				; 41c6: 17            .
+		rr	b			; 41c7: cb 18         ..
+		srl	b			; 41c9: cb 38         .8
+; Stars.  Very nearly even chance of 2 to 5.
+		ld	a,1fh			; 41cb: 3e 1f         >.
+		call	rand			; 41cd: cd 9a 4f      ..O
+		or	b			; 41d0: b0            .
+		and	78h			; 41d1: e6 78         .x
+		ld	b,a			; 41d3: 47            G
+; If current klingons * 10 / quad num <= level then no klingons here.
+; Given LdivH, I think we'll never start with klingons in quadrant 0.
+; And always have klingons in quadrant 1.
+		ld	l,0ah			; 41d4: 2e 0a         ..
+		ld	h,c			; 41d6: 61            a
+		call	HxL			; 41d7: cd ef 4f      ..O
+		ld	h,e			; 41da: 63            c
+		call	LdivH			; 41db: cd da 4f      ..O
+		sub	(ix+i_level)		; 41de: dd 96 47      ..G
+		jr	nc,no_klingons		; 41e1: 30 0f         0.
+; Klingons chosen as rand(rand(3)).
+; 11/18 for 1, 5/18 for 2 and 2/18 for 3.
+		ld	a,03h			; 41e3: 3e 03         >.
+		call	rand			; 41e5: cd 9a 4f      ..O
+		call	rand			; 41e8: cd 9a 4f      ..O
+		ld	h,a			; 41eb: 67            g
+		rlca				; 41ec: 07            .
+		or	b			; 41ed: b0            .
+		ld	b,a			; 41ee: 47            G
+		ld	a,h			; 41ef: 7c            |
+		add	a,c			; 41f0: 81            .
+		ld	c,a			; 41f1: 4f            O
+; 19/146 chance of a starbase; about 13%.  We'll average 8.3 in the galaxy.
+no_klingons:	ld	a,92h			; 41f2: 3e 92         >.
+		call	rand			; 41f4: cd 9a 4f      ..O
+		rla				; 41f7: 17            .
+		jr	nc,no_starbase		; 41f8: 30 04         0.
+		inc	b			; 41fa: 04            .
+		inc	(ix+i_bases0)		; 41fb: dd 34 4e      .4N
+no_starbase:	ld	a,b			; 41fe: 78            x
+		ld	(de),a			; 41ff: 12            .
+		inc	e			; 4200: 1c            .
+		ld	a,e			; 4201: 7b            {
+		cp	40h			; 4202: fe 40         .@
+		jr	nz,gen_quad		; 4204: 20 b1          .
+		ld	e,47h			; 4206: 1e 47         .G
+		ld	a,c			; 4208: 79            y
+		ld	(de),a			; 4209: 12            .
+		inc	e			; 420a: 1c            .
+		ld	(de),a			; 420b: 12            .
+		inc	e			; 420c: 1c            .
+		ld	a,(de)			; 420d: 1a            .
+		inc	e			; 420e: 1c            .
+		ld	(de),a			; 420f: 12            .
+; Only 6 to 12 starbases are acceptable.  Start over if not.
+		cp	06h			; 4210: fe 06         ..
+		jr	c,gen_galaxy		; 4212: 38 9d         8.
+		cp	0dh			; 4214: fe 0d         ..
+		jr	nc,gen_galaxy		; 4216: 30 99         0.
+; Pick random starting quadrant for Enterprise.
+		ld	a,3fh			; 4218: 3e 3f         >?
+		call	rand			; 421a: cd 9a 4f      ..O
+		ld	e,a			; 421d: 5f            _
+		call	cls			; 421e: cd 8d 4f      ..O
+		ld	b,3ch			; 4221: 06 3c         .<
+		ld	hl,mmiss1		; 4223: 21 10 41      !.A
+		call	str_hl_at_bc		; 4226: cd 4f 4f      .OO
+		ld	c,82h			; 4229: 0e 82         ..
+		call	str_hl_at_bc		; 422b: cd 4f 4f      .OO
+		ld	a,(ix+i_klingons0)	; 422e: dd 7e 4c      .~L
+		call	print_a			; 4231: cd 57 4f      .WO
+		ld	hl,mkships		; 4234: 21 a8 44      !.D
+		call	str_hl_at_bc		; 4237: cd 4f 4f      .OO
+		ld	hl,mmiss3		; 423a: 21 33 41      !3A
+		call	str_hl_at_bc		; 423d: cd 4f 4f      .OO
+		ld	a,(ix+i_bases0)		; 4240: dd 7e 4e      .~N
+		ld	c,c2h			; 4243: 0e c2         ..
+		call	print_a			; 4245: cd 57 4f      .WO
+		call	str_hl_at_bc		; 4248: cd 4f 4f      .OO
+		ld	bc,3d6ch		; 424b: 01 6c 3d      .l=
+		call	str_hl_at_bc		; 424e: cd 4f 4f      .OO
+		call	getchar			; 4251: cd 39 4e      .9N
+		ld	ix,quadrant_map		; 4254: dd 21 00 40   .!.@
+; Initialize the position of everything in the quadrant (at DE, of course)
+; Also displays the black hole warning as needed.
+quad_init:	push	de			; 4258: d5            .
+		ld	(ix+d_cur_quadrant),e	; 4259: dd 73 43      .sC
+		ld	e,4eh			; 425c: 1e 4e         .N
+_425e:		ld	a,7fh			; 425e: 3e 7f         >.
+		call	rand			; 4260: cd 9a 4f      ..O
+		rlca				; 4263: 07            .
+		ld	(de),a			; 4264: 12            .
+		and	1fh			; 4265: e6 1f         ..
+		jr	z,_425e			; 4267: 28 f5         (.
+		ld	hl,pos_enterprise	; 4269: 21 4e 40      !N@
+_426c:		ld	a,l			; 426c: 7d            }
+		cp	e			; 426d: bb            .
+		jr	z,_4277			; 426e: 28 07         (.
+		ld	a,(de)			; 4270: 1a            .
+		cp	(hl)			; 4271: be            .
+		jr	z,_425e			; 4272: 28 ea         (.
+		inc	l			; 4274: 2c            ,
+		jr	_426c			; 4275: 18 f5         ..
+
+_4277:		inc	e			; 4277: 1c            .
+		ld	a,e			; 4278: 7b            {
+		cp	59h			; 4279: fe 59         .Y
+		jr	nz,_425e		; 427b: 20 e1          .
+		pop	de			; 427d: d1            .
+		call	cls			; 427e: cd 8d 4f      ..O
+		ld	a,(de)			; 4281: 1a            .
+		and	60h			; 4282: e6 60         .`
+		cp	20h			; 4284: fe 20         . 
+		jr	nz,get_command		; 4286: 20 08          .
+		ld	hl,mblkhole		; 4288: 21 5a 44      !ZD
+		ld	b,3ch			; 428b: 06 3c         .<
+		call	str_hl_at_bc		; 428d: cd 4f 4f      .OO
+get_command:	call	draw_srs		; 4290: cd f8 42      ..B
+nd_get_command:	ld	hl,mcommand		; 4293: 21 88 44      !.D
+		ld	bc,3ff6h		; 4296: 01 f6 3f      ..?
+		call	str_hl_at_bc		; 4299: cd 4f 4f      .OO
+		dec	c			; 429c: 0d            .
+		call	getchar			; 429d: cd 39 4e      .9N
+		sub	31h			; 42a0: d6 31         .1
+		jp	z,cmd_status		; 42a2: ca 03 45      ..E
+		jr	c,nd_get_command	; 42a5: 38 ec         8.
+		cp	07h			; 42a7: fe 07         ..
+		jr	nc,nd_get_command	; 42a9: 30 e8         0.
+		push	af			; 42ab: f5            .
+		ld	c,c0h			; 42ac: 0e c0         ..
+		call	clreol			; 42ae: cd 0c 4e      ..N
+		ld	bc,3c40h		; 42b1: 01 40 3c      .@<
+		call	clreol			; 42b4: cd 0c 4e      ..N
+		pop	af			; 42b7: f1            .
+		cp	05h			; 42b8: fe 05         ..
+		jr	nc,_42e1		; 42ba: 30 25         0%
+		ld	hl,mwarp		; 42bc: 21 7d 45      !}E
+		push	de			; 42bf: d5            .
+		ld	e,a			; 42c0: 5f            _
+		ld	d,e			; 42c1: 53            S
+_42c2:		ld	bc,3c00h		; 42c2: 01 00 3c      ..<
+		call	str_hl_at_bc		; 42c5: cd 4f 4f      .OO
+		dec	d			; 42c8: 15            .
+		jr	nz,_42c2		; 42c9: 20 f7          .
+		ld	hl,minop		; 42cb: 21 04 44      !.D
+		call	str_hl_at_bc		; 42ce: cd 4f 4f      .OO
+		call	clreol			; 42d1: cd 0c 4e      ..N
+s_noover:	ld	b,40h			; 42d4: 06 40         .@
+		ld	a,e			; 42d6: 7b            {
+		add	a,59h			; 42d7: c6 59         .Y
+		ld	c,a			; 42d9: 4f            O
+		ld	a,(bc)			; 42da: 0a            .
+		cp	100			; 42db: fe 64         .d
+		ld	a,e			; 42dd: 7b            {
+		pop	de			; 42de: d1            .
+		jr	nc,nd_get_command	; 42df: 30 b2         0.
+_42e1:		dec	a			; 42e1: 3d            =
+		jp	z,cmd_warp		; 42e2: ca d0 45      ..E
+		dec	a			; 42e5: 3d            =
+		jp	z,cmd_lrs		; 42e6: ca 1e 46      ..F
+		dec	a			; 42e9: 3d            =
+		jp	z,cmd_shield		; 42ea: ca a3 45      ..E
+		dec	a			; 42ed: 3d            =
+		jp	z,cmd_phaser		; 42ee: ca f1 46      ..F
+		dec	a			; 42f1: 3d            =
+		jp	z,cmd_photon		; 42f2: ca 3c 47      .<G
+		jp	cmd_destruct		; 42f5: c3 bc 46      ..F
+
+; Draws the short range scanners plus checks a number of
+; game ending conditions or something.  Not fully understood.
+; First we erase the area save for the frame.
+draw_srs:	ld	hl,srs_line0		; 42f8: 21 80 3c      !.<
+		ld	bc,aa95h		; 42fb: 01 95 aa      ...
+_42fe:		ld	a,2dh			; 42fe: 3e 2d         >-
+		ld	(hl),a			; 4300: 77            w
+		inc	l			; 4301: 2c            ,
+		ld	a,l			; 4302: 7d            }
+		cp	c0h			; 4303: fe c0         ..
+		jr	nz,_42fe		; 4305: 20 f7          .
+_4307:		ld	(hl),c			; 4307: 71            q
+_4308:		inc	hl			; 4308: 23            #
+		ld	a,80h			; 4309: 3e 80         >.
+		ld	(hl),a			; 430b: 77            w
+		ld	a,l			; 430c: 7d            }
+		and	3fh			; 430d: e6 3f         .?
+		jr	nz,_4308		; 430f: 20 f7          .
+		dec	hl			; 4311: 2b            +
+		ld	(hl),b			; 4312: 70            p
+		inc	hl			; 4313: 23            #
+		ld	a,l			; 4314: 7d            }
+		cp	c0h			; 4315: fe c0         ..
+		jr	nz,_4307		; 4317: 20 ee          .
+		ld	a,h			; 4319: 7c            |
+		cp	3eh			; 431a: fe 3e         .>
+		jr	nz,_4307		; 431c: 20 e9          .
+_431e:		ld	a,2dh			; 431e: 3e 2d         >-
+		ld	(hl),a			; 4320: 77            w
+		inc	l			; 4321: 2c            ,
+		jr	nz,_431e		; 4322: 20 fa          .
+; Display the Enterprise herself.
+disp_srs_ships:	ld	a,(ix+d_pos_enterprise)	; 4324: dd 7e 4e      .~N
+		call	pos2scrn		; 4327: cd 80 4f      ..O
+		ld	hl,bige			; 432a: 21 4e 44      !ND
+		call	str_hl_at_bc		; 432d: cd 4f 4f      .OO
+; Draw starbases.
+		ld	e,(ix+d_cur_quadrant)	; 4330: dd 5e 43      .^C
+		ld	d,40h			; 4333: 16 40         .@
+		ld	a,(de)			; 4335: 1a            .
+		and	01h			; 4336: e6 01         ..
+		jr	z,no_starbase		; 4338: 28 09         (.
+		ld	a,(ix+d_pos_starbase)	; 433a: dd 7e 4f      .~O
+		call	pos2scrn		; 433d: cd 80 4f      ..O
+		call	str_hl_at_bc		; 4340: cd 4f 4f      .OO
+; Draw stars
+no_starbase:	ld	a,(de)			; 4343: 1a            .
+		and	18h			; 4344: e6 18         ..
+		rrca				; 4346: 0f            .
+		rrca				; 4347: 0f            .
+		rrca				; 4348: 0f            .
+		push	de			; 4349: d5            .
+		add	a,51h			; 434a: c6 51         .Q
+		ld	e,a			; 434c: 5f            _
+_434d:		ld	a,(de)			; 434d: 1a            .
+		call	pos2scrn		; 434e: cd 80 4f      ..O
+		ld	a,2eh			; 4351: 3e 2e         >.
+		ld	(bc),a			; 4353: 02            .
+		dec	e			; 4354: 1d            .
+		ld	a,e			; 4355: 7b            {
+		cp	4fh			; 4356: fe 4f         .O
+		jr	nz,_434d		; 4358: 20 f3          .
+; Draw Klingons
+		pop	de			; 435a: d1            .
+		ld	a,(de)			; 435b: 1a            .
+		and	06h			; 435c: e6 06         ..
+		rrca				; 435e: 0f            .
+		push	de			; 435f: d5            .
+		add	a,54h			; 4360: c6 54         .T
+		ld	e,a			; 4362: 5f            _
+_4363:		ld	a,e			; 4363: 7b            {
+		cp	54h			; 4364: fe 54         .T
+		jr	z,_4375			; 4366: 28 0d         (.
+		ld	a,(de)			; 4368: 1a            .
+		call	pos2scrn		; 4369: cd 80 4f      ..O
+		ld	hl,klingon		; 436c: 21 56 44      !VD
+		call	str_hl_at_bc		; 436f: cd 4f 4f      .OO
+		dec	e			; 4372: 1d            .
+		jr	_4363			; 4373: 18 ee         ..
+
+_4375:		pop	de			; 4375: d1            .
+		jp	draw_stats		; 4376: c3 9f 4d      ..M
+
+no_more_starbases:
+		ld	bc,3f00h		; 4379: 01 00 3f      ..?
+		ld	hl,mlaststard		; 437c: 21 29 44      !)D
+		call	str_hl_at_bc		; 437f: cd 4f 4f      .OO
+		ld	d,00h			; 4382: 16 00         ..
+		ld	hl,mconq		; 4384: 21 c0 44      !.D
+		jr	game_done		; 4387: 18 4e         .N
+
+; I think that's right.  H needs to be zero, though.  But it seems likely.
+ent_dead:	push	hl			; 4389: e5            .
+		ld	bc,3f00h		; 438a: 01 00 3f      ..?
+		ld	hl,mthee		; 438d: 21 10 44      !.D
+		call	str_hl_at_bc		; 4390: cd 4f 4f      .OO
+		pop	hl			; 4393: e1            .
+		call	str_hl_at_bc		; 4394: cd 4f 4f      .OO
+		ld	d,00h			; 4397: 16 00         ..
+		ld	hl,mconq		; 4399: 21 c0 44      !.D
+		jr	game_done		; 439c: 18 39         .9
+
+LdivB:		push	bc			; 439e: c5            .
+		xor	a			; 439f: af            .
+		jp	_4fde			; 43a0: c3 de 4f      ..O
+
+; I'm guessing a bit on some of the variables, but here's the score calc:
+; (((((B1 * 32) % 256[maybe]) / B0) * L) % 256) * 24) % 256[maybe]) / S
+; 
+; Where:
+;    B0 - initial number of starbases
+;    B1 - starbases left at end of game
+;    S  - stardates used
+;    L  - level selected (1 - 10, of course)
+; 
+; Seems rife with overlows
+; 
+victory:	ld	l,(ix+d_bases)		; 43a3: dd 6e 4a      .nJ
+		ld	h,00h			; 43a6: 26 00         &.
+		add	hl,hl			; 43a8: 29            )
+		add	hl,hl			; 43a9: 29            )
+		add	hl,hl			; 43aa: 29            )
+		add	hl,hl			; 43ab: 29            )
+		add	hl,hl			; 43ac: 29            )
+		ld	b,(ix+d_bases0)		; 43ad: dd 46 49      .FI
+		call	LdivB			; 43b0: cd 9e 43      ..C
+		ld	h,(ix+d_level)		; 43b3: dd 66 42      .fB
+		call	HxL			; 43b6: cd ef 4f      ..O
+		ld	h,18h			; 43b9: 26 18         &.
+		call	HxL			; 43bb: cd ef 4f      ..O
+		ld	b,(ix+d_stardate)	; 43be: dd 46 44      .FD
+		call	LdivB			; 43c1: cd 9e 43      ..C
+		ld	d,a			; 43c4: 57            W
+		ld	bc,3f00h		; 43c5: 01 00 3f      ..?
+		ld	hl,mkillall		; 43c8: 21 91 44      !.D
+		call	str_hl_at_bc		; 43cb: cd 4f 4f      .OO
+		ld	a,(ix+d_klingons0)	; 43ce: dd 7e 47      .~G
+		call	print_a			; 43d1: cd 57 4f      .WO
+		call	str_hl_at_bc		; 43d4: cd 4f 4f      .OO
+game_done:	ld	e,04h			; 43d7: 1e 04         ..
+_43d9:		call	clreol			; 43d9: cd 0c 4e      ..N
+		dec	e			; 43dc: 1d            .
+		jr	nz,_43d9		; 43dd: 20 fa          .
+		ld	bc,3f50h		; 43df: 01 50 3f      .P?
+		call	str_hl_at_bc		; 43e2: cd 4f 4f      .OO
+		ld	hl,mthefed		; 43e5: 21 d2 44      !.D
+		ld	c,40h			; 43e8: 0e 40         .@
+		call	str_hl_at_bc		; 43ea: cd 4f 4f      .OO
+		ld	c,65h			; 43ed: 0e 65         .e
+		call	str_hl_at_bc		; 43ef: cd 4f 4f      .OO
+		ld	a,d			; 43f2: 7a            z
+		call	print_a			; 43f3: cd 57 4f      .WO
+		ld	c,ech			; 43f6: 0e ec         ..
+		call	str_hl_at_bc		; 43f8: cd 4f 4f      .OO
+_43fb:		ld	a,(3808h)		; 43fb: 3a 08 38      :.8
+		or	a			; 43fe: b7            .
+		jr	z,_43fb			; 43ff: 28 fa         (.
+		jp	entry_point		; 4401: c3 6d 41      .mA
+
+minop:		ascii	' INOPERABLE',0
+mthee:		ascii	'THE ENTERPRISE HAS BEEN ',0
+mlaststard:	ascii	'THE LAST '
+mstard:		ascii	'STARBASE HAS BEEN '
+mdestroy:	ascii	'DESTROYED',0
+bige:		ascii	'"V"',0
+starbase:	ascii	'+O+',0
+klingon:	ascii	'<*>',0
+mblkhole:	ascii	'SENSORS DETECT A BLACK HOLE IN THIS QUADRANT!',0
+mcommand:	ascii	'COMMAND?',0
+mkillall:	ascii	'YOU HAVE DESTROYED ALL',0
+mkships:	ascii	' KLINGON SHIPS',0
+msaved:		ascii	'IS SAVED',0
+mconq:		ascii	'WILL BE CONQUERED',0
+mthefed:	ascii	'THE FEDERATION ',0
+mscore:		ascii	'YOUR SCORE IS',0
+mreplay:	ascii	'CARE TO PLAY AGAIN?'
+; Ooops - overlap with previous message and code
+cmd_status:	nop				; 4503: 00            .
+		call	cls			; 4504: cd 8d 4f      ..O
+		ld	b,3ch			; 4507: 06 3c         .<
+		ld	a,(ix+d_klingons)	; 4509: dd 7e 48      .~H
+		call	print_a			; 450c: cd 57 4f      .WO
+		ld	hl,mkleft		; 450f: 21 4b 45      !KE
+		call	str_hl_at_bc		; 4512: cd 4f 4f      .OO
+		ld	c,20h			; 4515: 0e 20         . 
+		ld	a,(ix+d_bases)		; 4517: dd 7e 4a      .~J
+		call	print_a			; 451a: cd 57 4f      .WO
+		call	str_hl_at_bc		; 451d: cd 4f 4f      .OO
+		ld	c,c0h			; 4520: 0e c0         ..
+		call	str_hl_at_bc		; 4522: cd 4f 4f      .OO
+		ld	bc,3d40h		; 4525: 01 40 3d      .@=
+		push	de			; 4528: d5            .
+		ld	e,59h			; 4529: 1e 59         .Y
+_452b:		call	str_hl_at_bc		; 452b: cd 4f 4f      .OO
+		ld	a,c			; 452e: 79            y
+		and	c0h			; 452f: e6 c0         ..
+		add	a,18h			; 4531: c6 18         ..
+		ld	c,a			; 4533: 4f            O
+		ld	a,(de)			; 4534: 1a            .
+		call	print_a			; 4535: cd 57 4f      .WO
+		ld	a,25h			; 4538: 3e 25         >%
+		ld	(bc),a			; 453a: 02            .
+		inc	bc			; 453b: 03            .
+		call	clreol			; 453c: cd 0c 4e      ..N
+		inc	de			; 453f: 13            .
+		ld	a,e			; 4540: 7b            {
+		cp	5eh			; 4541: fe 5e         .^
+		jr	nz,_452b		; 4543: 20 e6          .
+		pop	de			; 4545: d1            .
+		call	getchar			; 4546: cd 39 4e      .9N
+		jr	_45b7			; 4549: 18 6c         .l
+
+mkleft:		ascii	' KLINGONS LEFT',0
+mbleft:		ascii	' BASES LEFT',0
+mdamage:	ascii	'DAMAGE',0
+mimpulse:	ascii	'IMPULSE ENGINES',0
+mwarp:		ascii	'WARP ENGINES',0
+mscan:		ascii	'SCANNERS',0
+mshield:	ascii	'SHIELDS',0
+mphase:		ascii	'PHASERS',0
+cmd_shield:	ld	bc,3c00h		; 45a3: 01 00 3c      ..<
+		ld	hl,mpctetos		; 45a6: 21 ba 45      !.E
+		call	str_hl_at_bc		; 45a9: cd 4f 4f      .OO
+		call	getint_HL		; 45ac: cd 16 4e      ..N
+		ld	a,l			; 45af: 7d            }
+		cp	65h			; 45b0: fe 65         .e
+		jr	nc,cmd_shield		; 45b2: 30 ef         0.
+		ld	(ix+d_shields),a	; 45b4: dd 77 5f      .w_
+_45b7:		jp	get_command		; 45b7: c3 90 42      ..B
+
+mpctetos:	ascii	'% '
+metos:		ascii	'ENERGY TO SHIELDS? ',0
+cmd_warp:	ld	bc,3c00h		; 45d0: 01 00 3c      ..<
+		push	bc			; 45d3: c5            .
+		call	clreol			; 45d4: cd 0c 4e      ..N
+		pop	bc			; 45d7: c1            .
+		ld	hl,msetcor		; 45d8: 21 0d 46      !.F
+		call	str_hl_at_bc		; 45db: cd 4f 4f      .OO
+		call	getchar			; 45de: cd 39 4e      .9N
+		jr	z,_45fe			; 45e1: 28 1b         (.
+		cp	38h			; 45e3: fe 38         .8
+		jr	nc,cmd_warp		; 45e5: 30 e9         0.
+		sub	30h			; 45e7: d6 30         .0
+		jr	c,cmd_warp		; 45e9: 38 e5         8.
+		ld	h,a			; 45eb: 67            g
+		call	getchar			; 45ec: cd 39 4e      .9N
+		jr	z,_45fe			; 45ef: 28 0d         (.
+		cp	38h			; 45f1: fe 38         .8
+		jr	nc,cmd_warp		; 45f3: 30 db         0.
+		sub	30h			; 45f5: d6 30         .0
+		jr	c,cmd_warp		; 45f7: 38 d7         8.
+		rlca				; 45f9: 07            .
+		rlca				; 45fa: 07            .
+		rlca				; 45fb: 07            .
+		or	h			; 45fc: b4            .
+		cp	e			; 45fd: bb            .
+_45fe:		jp	z,nd_get_command	; 45fe: ca 93 42      ..B
+		ld	e,a			; 4601: 5f            _
+		ld	iy,stack2		; 4602: fd 21 b7 40   .!.@
+		ld	(ix+d_starbase_damage),00h; 4606: dd 36 61 00   .6a.
+		jp	quad_init		; 460a: c3 58 42      .XB
+
+msetcor:	ascii	'SET COURSE FOR? ',0
+cmd_lrs:	call	cls			; 461e: cd 8d 4f      ..O
+		ld	hl,mlrscan		; 4621: 21 ac 46      !.F
+		ld	b,3ch			; 4624: 06 3c         .<
+		call	str_hl_at_bc		; 4626: cd 4f 4f      .OO
+		push	de			; 4629: d5            .
+		ld	e,30h			; 462a: 1e 30         .0
+		ld	hl,3c85h		; 462c: 21 85 3c      !.<
+		ld	c,c0h			; 462f: 0e c0         ..
+_4631:		ld	a,e			; 4631: 7b            {
+		ld	(bc),a			; 4632: 02            .
+		ld	(hl),a			; 4633: 77            w
+		ld	a,l			; 4634: 7d            }
+		add	a,08h			; 4635: c6 08         ..
+		ld	l,a			; 4637: 6f            o
+		inc	bc			; 4638: 03            .
+		push	de			; 4639: d5            .
+		push	hl			; 463a: e5            .
+		ld	a,(ix+d_cur_quadrant)	; 463b: dd 7e 43      .~C
+		ld	h,a			; 463e: 67            g
+		and	07h			; 463f: e6 07         ..
+		ld	l,a			; 4641: 6f            o
+		ld	a,e			; 4642: 7b            {
+		sub	30h			; 4643: d6 30         .0
+		rlca				; 4645: 07            .
+		rlca				; 4646: 07            .
+		rlca				; 4647: 07            .
+		ld	e,a			; 4648: 5f            _
+_4649:		ld	a,aah			; 4649: 3e aa         >.
+		ld	(bc),a			; 464b: 02            .
+		push	bc			; 464c: c5            .
+		ld	a,(de)			; 464d: 1a            .
+		and	01h			; 464e: e6 01         ..
+		jr	nz,_4668		; 4650: 20 16          .
+		ld	a,e			; 4652: 7b            {
+		and	07h			; 4653: e6 07         ..
+		sub	l			; 4655: 95            .
+		jr	nc,_465a		; 4656: 30 02         0.
+		neg				; 4658: ed 44         .D
+_465a:		cp	02h			; 465a: fe 02         ..
+		jr	nc,_468e		; 465c: 30 30         00
+		ld	a,e			; 465e: 7b            {
+		sub	h			; 465f: 94            .
+		jr	nc,_4664		; 4660: 30 02         0.
+		neg				; 4662: ed 44         .D
+_4664:		cp	0ah			; 4664: fe 0a         ..
+		jr	nc,_468e		; 4666: 30 26         0&
+_4668:		inc	bc			; 4668: 03            .
+		inc	bc			; 4669: 03            .
+		ld	a,e			; 466a: 7b            {
+		cp	h			; 466b: bc            .
+		jr	nz,_4672		; 466c: 20 04          .
+		ld	a,45h			; 466e: 3e 45         >E
+		ld	(bc),a			; 4670: 02            .
+		inc	bc			; 4671: 03            .
+_4672:		ld	a,(de)			; 4672: 1a            .
+		and	01h			; 4673: e6 01         ..
+		jr	z,_467c			; 4675: 28 05         (.
+		ld	a,42h			; 4677: 3e 42         >B
+		inc	bc			; 4679: 03            .
+		ld	(bc),a			; 467a: 02            .
+		inc	bc			; 467b: 03            .
+_467c:		ld	a,(de)			; 467c: 1a            .
+		bit	6,a			; 467d: cb 77         .w
+		jr	z,_4687			; 467f: 28 06         (.
+		ld	a,4dh			; 4681: 3e 4d         >M
+		inc	bc			; 4683: 03            .
+		ld	(bc),a			; 4684: 02            .
+		jr	_468e			; 4685: 18 07         ..
+
+_4687:		ld	a,(de)			; 4687: 1a            .
+		and	06h			; 4688: e6 06         ..
+		rrca				; 468a: 0f            .
+		call	print_a			; 468b: cd 57 4f      .WO
+_468e:		pop	bc			; 468e: c1            .
+		inc	e			; 468f: 1c            .
+		ld	a,c			; 4690: 79            y
+		add	a,08h			; 4691: c6 08         ..
+		jr	nc,_4696		; 4693: 30 01         0.
+		inc	b			; 4695: 04            .
+_4696:		ld	c,a			; 4696: 4f            O
+		and	3fh			; 4697: e6 3f         .?
+		dec	a			; 4699: 3d            =
+		jr	nz,_4649		; 469a: 20 ad          .
+		pop	hl			; 469c: e1            .
+		pop	de			; 469d: d1            .
+		dec	bc			; 469e: 0b            .
+		inc	e			; 469f: 1c            .
+		ld	a,e			; 46a0: 7b            {
+		cp	38h			; 46a1: fe 38         .8
+		jr	nz,_4631		; 46a3: 20 8c          .
+		pop	de			; 46a5: d1            .
+		call	getchar			; 46a6: cd 39 4e      .9N
+_46a9:		jp	get_command		; 46a9: c3 90 42      ..B
+
+mlrscan:	ascii	'LONG RANGE SCAN',0
+cmd_destruct:	ld	bc,3c00h		; 46bc: 01 00 3c      ..<
+		ld	hl,mconfirm		; 46bf: 21 e7 46      !.F
+		call	str_hl_at_bc		; 46c2: cd 4f 4f      .OO
+		call	getint_HL		; 46c5: cd 16 4e      ..N
+		ld	a,l			; 46c8: 7d            }
+		cp	7bh			; 46c9: fe 7b         .{
+		jr	nz,_46a9		; 46cb: 20 dc          .
+		ld	c,(ix+d_pos_enterprise)	; 46cd: dd 4e 4e      .NN
+		ld	b,40h			; 46d0: 06 40         .@
+		ld	a,ffh			; 46d2: 3e ff         >.
+		call	_487f			; 46d4: cd 7f 48      ..H
+		ld	a,(de)			; 46d7: 1a            .
+		and	06h			; 46d8: e6 06         ..
+		rrca				; 46da: 0f            .
+		sub	(ix+d_klingons)		; 46db: dd 96 48      ..H
+		jp	z,victory		; 46de: ca a3 43      ..C
+enterprise_destroyed:
+		ld	hl,mdestroy		; 46e1: 21 44 44      !DD
+		jp	ent_dead		; 46e4: c3 89 43      ..C
+
+mconfirm:	ascii	'CONFIRM? ',0
+cmd_phaser:	ld	bc,3c08h		; 46f1: 01 08 3c      ..<
+		ld	hl,mat			; 46f4: 21 0c 47      !.G
+		call	str_hl_at_bc		; 46f7: cd 4f 4f      .OO
+		dec	bc			; 46fa: 0b            .
+		call	phaser_pct		; 46fb: cd 10 47      ..G
+		call	print_a			; 46fe: cd 57 4f      .WO
+		ld	a,25h			; 4701: 3e 25         >%
+		ld	(bc),a			; 4703: 02            .
+		inc	bc			; 4704: 03            .
+		call	clreol			; 4705: cd 0c 4e      ..N
+		ld	c,20h			; 4708: 0e 20         . 
+		jr	_4756			; 470a: 18 4a         .J
+
+mat:		ascii	'AT ',0
+; Phaser power is 100 - (2/3 * shields)
+phaser_pct:	ld	l,(ix+d_shields)	; 4710: dd 6e 5f      .n_
+		sla	l			; 4713: cb 25         .%
+		ld	h,03h			; 4715: 26 03         &.
+		call	LdivH			; 4717: cd da 4f      ..O
+		ld	a,100			; 471a: 3e 64         >d
+		sub	l			; 471c: 95            .
+		ld	h,a			; 471d: 67            g
+		ret				; 471e: c9            .
+
+mnopt:		ascii	'PHOTON TUBES EMPTY',0
+mdegree:	ascii	'DEGREES? ',0
+cmd_photon:	ld	bc,3c00h		; 473c: 01 00 3c      ..<
+		ld	a,(ix+d_photons)	; 473f: dd 7e 60      .~`
+		or	a			; 4742: b7            .
+		jr	nz,_4751		; 4743: 20 0c          .
+		ld	hl,mnopt		; 4745: 21 1f 47      !.G
+		call	str_hl_at_bc		; 4748: cd 4f 4f      .OO
+		call	clreol			; 474b: cd 0c 4e      ..N
+		jp	nd_get_command		; 474e: c3 93 42      ..B
+
+_4751:		dec	(ix+d_photons)		; 4751: dd 35 60      .5`
+		ld	h,00h			; 4754: 26 00         &.
+_4756:		push	hl			; 4756: e5            .
+		ld	hl,mdegree		; 4757: 21 32 47      !2G
+		call	str_hl_at_bc		; 475a: cd 4f 4f      .OO
+; compute BC as a vector in direction of input angle
+		call	getint_HL		; 475d: cd 16 4e      ..N
+		srl	h			; 4760: cb 3c         .<
+		rr	l			; 4762: cb 1d         ..
+		ex	de,hl			; 4764: eb            .
+		ld	a,e			; 4765: 7b            {
+		call	angle_cosine		; 4766: cd 7e 47      .~G
+		ld	b,a			; 4769: 47            G
+		ld	a,e			; 476a: 7b            {
+		add	a,2dh			; 476b: c6 2d         .-
+		call	angle_cosine		; 476d: cd 7e 47      .~G
+		ld	c,a			; 4770: 4f            O
+		ld	a,(ix+d_pos_enterprise)	; 4771: dd 7e 4e      .~N
+		pop	hl			; 4774: e1            .
+		call	draw_shot		; 4775: cd cf 48      ..H
+		call	c,ship_hit		; 4778: dc aa 47      ..G
+		jp	nd_get_command		; 477b: c3 93 42      ..B
+
+; Returns cosine(A) in H
+; This uses approximation that sin(X) ~ X
+; Since angle is in 2*degrees, the result is
+; is not the actual cosine by cosine(X)*90/PI
+; But this is good enough for producing a vector
+; which points in the direction of the angle
+angle_cosine:	ld	l,a			; 477e: 6f            o
+		ld	h,5ah			; 477f: 26 5a         &Z
+		call	LdivH			; 4781: cd da 4f      ..O
+		ld	a,h			; 4784: 7c            |
+		sub	2dh			; 4785: d6 2d         .-
+		bit	0,l			; 4787: cb 45         .E
+		ret	nz			; 4789: c0            .
+		neg				; 478a: ed 44         .D
+		ret				; 478c: c9            .
+
+; Normalizes B,C into HL,DE. (HL=delta x, DE=delta Y)
+; look at the calling context to figure out which is which.
+; the 'ret po' is a clever way to detect the 'overflow' because it uses
+; signed versions of HL,DE.
+normalize_BC:	ld	l,b			; 478d: 68            h
+		xor	a			; 478e: af            .
+		bit	7,l			; 478f: cb 7d         .}
+		jr	z,dx_positive		; 4791: 28 01         (.
+		cpl				; 4793: 2f            /
+dx_positive:	ld	h,a			; 4794: 67            g
+		add	hl,hl			; 4795: 29            )
+		ld	e,c			; 4796: 59            Y
+		xor	a			; 4797: af            .
+		bit	7,e			; 4798: cb 7b         .{
+		jr	z,dy_positive		; 479a: 28 01         (.
+		cpl				; 479c: 2f            /
+dy_positive:	ld	d,a			; 479d: 57            W
+keep_shifting:	add	hl,hl			; 479e: 29            )
+		ex	de,hl			; 479f: eb            .
+		add	hl,hl			; 47a0: 29            )
+		ex	de,hl			; 47a1: eb            .
+		ld	a,d			; 47a2: 7a            z
+		or	a			; 47a3: b7            .
+		ret	po			; 47a4: e0            .
+		ld	a,h			; 47a5: 7c            |
+		or	a			; 47a6: b7            .
+		ret	po			; 47a7: e0            .
+		jr	keep_shifting		; 47a8: 18 f4         ..
+
+; Something in the quadrant has been hit
+; HL points to its qpos.
+; (4062) contains the phaser/photon flag and the distance
+; HL is loaded so L is the flag and H the distance
+; Then (roughly) sqrt( 2 * (2*L/(H/4)) ) is computed.
+; and put in C--this is the force of the hit.
+; if L/H == 0 then it becomes 255--this makes a photon torp
+; have a strong impact
+ship_hit:	push	hl			; 47aa: e5            .
+		ld	hl,(starbase_damage+1)	; 47ab: 2a 62 40      *b@
+		srl	h			; 47ae: cb 3c         .<
+		srl	h			; 47b0: cb 3c         .<
+		sla	l			; 47b2: cb 25         .%
+		call	LdivH			; 47b4: cd da 4f      ..O
+		or	a			; 47b7: b7            .
+		jr	nz,_47bb		; 47b8: 20 01          .
+		cpl				; 47ba: 2f            /
+_47bb:		pop	hl			; 47bb: e1            .
+		ld	c,00h			; 47bc: 0e 00         ..
+; Simple sum_reduce loop finds C such that C(C-1)/2 > A
+; By the quadractic formula C = (1 +- sqrt( 1 + 8C ) ) / 2
+; This is approximately sqrt( 2*C )
+sum_reduce:	inc	c			; 47be: 0c            .
+		sub	c			; 47bf: 91            .
+		jr	nc,sum_reduce		; 47c0: 30 fc         0.
+		ld	a,l			; 47c2: 7d            }
+		sub	4eh			; 47c3: d6 4e         .N
+		jr	nz,not_bige_hit		; 47c5: 20 5b          [
+		push	bc			; 47c7: c5            .
+		ld	bc,3c64h		; 47c8: 01 64 3c      .d<
+		ld	hl,mehit		; 47cb: 21 06 48      !.H
+		call	str_hl_at_bc		; 47ce: cd 4f 4f      .OO
+		pop	bc			; 47d1: c1            .
+		ld	h,(ix+d_level)		; 47d2: dd 66 42      .fB
+		inc	h			; 47d5: 24            $
+		srl	h			; 47d6: cb 3c         .<
+		ld	l,c			; 47d8: 69            i
+		call	HxL			; 47d9: cd ef 4f      ..O
+		ld	c,a			; 47dc: 4f            O
+		ld	hl,pos_blkhole		; 47dd: 21 58 40      !X@
+; Enterprise is hit!  Above we computed (level+1)/2 * shot_power
+; The loop below will randomly apply the calculated damaged C
+damage_systems:	inc	hl			; 47e0: 23            #
+		ld	a,c			; 47e1: 79            y
+		rlca				; 47e2: 07            .
+		call	rand			; 47e3: cd 9a 4f      ..O
+		add	a,(hl)			; 47e6: 86            .
+		ld	(hl),a			; 47e7: 77            w
+		ld	a,l			; 47e8: 7d            }
+		cp	5dh			; 47e9: fe 5d         .]
+		jr	nz,damage_systems	; 47eb: 20 f3          .
+; Gets L=ship_ngr, H=shields
+		ld	hl,(ship_nrg)		; 47ed: 2a 5e 40      *^@
+		ld	a,l			; 47f0: 7d            }
+		sub	c			; 47f1: 91            .
+		jr	c,_4815			; 47f2: 38 21         8!
+		ld	l,a			; 47f4: 6f            o
+		ld	a,h			; 47f5: 7c            |
+		or	a			; 47f6: b7            .
+; If no shields power, you die
+		jr	z,_4815			; 47f7: 28 1c         (.
+; Load A with shield damage, if >100% then set shield power to 0
+		ld	a,(ix+d_shield_damage)	; 47f9: dd 7e 5c      .~\
+		cp	100			; 47fc: fe 64         .d
+; If hit C > ship_ngr, you die
+		jr	c,_4802			; 47fe: 38 02         8.
+		ld	h,00h			; 4800: 26 00         &.
+_4802:		ld	(ship_nrg),hl		; 4802: 22 5e 40      "^@
+		ret				; 4805: c9            .
+
+mehit:		ascii	'ENTERPRISE HIT',0
+_4815:		ld	a,(srs_line1)		; 4815: 3a c0 3c      :.<
+		rla				; 4818: 17            .
+		ld	hl,pos_enterprise	; 4819: 21 4e 40      !N@
+		call	c,explosion_at_hl	; 481c: dc 74 48      .tH
+		jp	enterprise_destroyed	; 481f: c3 e1 46      ..F
+
+; if position pointer is bige+1, then a starbase is hit
+not_bige_hit:	dec	a			; 4822: 3d            =
+		jr	nz,klingon_hit		; 4823: 20 23          #
+; Add C to (starbase_damage).  If > 12 starbase is destroyed
+		ld	a,(ix+d_starbase_damage); 4825: dd 7e 61      .~a
+		add	a,c			; 4828: 81            .
+		ld	(ix+d_starbase_damage),a; 4829: dd 77 61      .wa
+		cp	0ch			; 482c: fe 0c         ..
+		ret	c			; 482e: d8            .
+		ld	a,(srs_line1)		; 482f: 3a c0 3c      :.<
+		rla				; 4832: 17            .
+		jr	nc,destroy_base_at_DE	; 4833: 30 08         0.
+		call	explosion_at_hl		; 4835: cd 74 48      .tH
+		ex	de,hl			; 4838: eb            .
+		dec	(hl)			; 4839: 35            5
+		call	draw_srs		; 483a: cd f8 42      ..B
+; Reset starbase bit in this quadrant
+destroy_base_at_DE:
+		ld	a,(de)			; 483d: 1a            .
+		res	0,a			; 483e: cb 87         ..
+		ld	(de),a			; 4840: 12            .
+		dec	(ix+d_bases)		; 4841: dd 35 4a      .5J
+		jp	z,no_more_starbases	; 4844: ca 79 43      .yC
+		ret				; 4847: c9            .
+
+; Klingon damage table is 10 bytes before klingon position table
+; If Klingon damage > 10 the klingon is killed
+; This makes them slighly weaker than starbases
+klingon_hit:	ld	b,l			; 4848: 45            E
+		ld	a,l			; 4849: 7d            }
+		sub	0ah			; 484a: d6 0a         ..
+		ld	l,a			; 484c: 6f            o
+		ld	a,(hl)			; 484d: 7e            ~
+		add	a,c			; 484e: 81            .
+		ld	(hl),a			; 484f: 77            w
+		cp	0ah			; 4850: fe 0a         ..
+		ret	c			; 4852: d8            .
+		ld	iy,stack2		; 4853: fd 21 b7 40   .!.@
+		ld	l,b			; 4857: 68            h
+		push	hl			; 4858: e5            .
+		call	explosion_at_hl		; 4859: cd 74 48      .tH
+		pop	hl			; 485c: e1            .
+		ld	b,l			; 485d: 45            E
+dec_klingon:	ld	a,(de)			; 485e: 1a            .
+		sub	02h			; 485f: d6 02         ..
+		ld	(de),a			; 4861: 12            .
+; Move the last klingon in the position list to replace the first one
+; Note that the damage table is not altered.  This could benefit
+; or hurt the player depending on the breaks
+		rrca				; 4862: 0f            .
+		and	03h			; 4863: e6 03         ..
+		add	a,55h			; 4865: c6 55         .U
+		ld	l,a			; 4867: 6f            o
+		ld	a,(hl)			; 4868: 7e            ~
+		ld	l,b			; 4869: 68            h
+		ld	(hl),a			; 486a: 77            w
+; Decrement global klingon count, perhaps causing victory
+		dec	(ix+d_klingons)		; 486b: dd 35 48      .5H
+		jp	z,victory		; 486e: ca a3 43      ..C
+		jp	draw_srs		; 4871: c3 f8 42      ..B
+
+explosion_at_hl:
+		ld	c,(hl)			; 4874: 4e            N
+		ld	b,0ah			; 4875: 06 0a         ..
+		ld	a,1ch			; 4877: 3e 1c         >.
+		call	rand			; 4879: cd 9a 4f      ..O
+		add	a,08h			; 487c: c6 08         ..
+		scf				; 487e: 37            7
+_487f:		push	de			; 487f: d5            .
+		push	af			; 4880: f5            .
+		ld	a,c			; 4881: 79            y
+		call	coord_to_xy		; 4882: cd b2 4c      ..L
+		ld	hl,0000h		; 4885: 21 00 00      !..
+		push	bc			; 4888: c5            .
+_4889:		ld	a,h			; 4889: 7c            |
+		call	rand			; 488a: cd 9a 4f      ..O
+		ld	b,h			; 488d: 44            D
+		srl	b			; 488e: cb 38         .8
+		sub	b			; 4890: 90            .
+		add	a,d			; 4891: 82            .
+		ld	b,a			; 4892: 47            G
+		ld	a,l			; 4893: 7d            }
+		call	rand			; 4894: cd 9a 4f      ..O
+		ld	c,l			; 4897: 4d            M
+		srl	c			; 4898: cb 39         .9
+		sub	c			; 489a: 91            .
+		add	a,e			; 489b: 83            .
+		ld	c,a			; 489c: 4f            O
+		call	check_xy_in_srs		; 489d: cd a1 4c      ..L
+		push	hl			; 48a0: e5            .
+		call	c,flipBC		; 48a1: dc ce 4f      ..O
+		pop	hl			; 48a4: e1            .
+		xor	a			; 48a5: af            .
+		out	(ffh),a			; 48a6: d3 ff         ..
+_48a8:		dec	a			; 48a8: 3d            =
+		jr	nz,_48a8		; 48a9: 20 fd          .
+		pop	af			; 48ab: f1            .
+		dec	a			; 48ac: 3d            =
+		jr	nz,_48ca		; 48ad: 20 1b          .
+		inc	h			; 48af: 24            $
+		pop	bc			; 48b0: c1            .
+		dec	b			; 48b1: 05            .
+		jr	z,_48cd			; 48b2: 28 19         (.
+		ld	a,05h			; 48b4: 3e 05         >.
+		bit	0,c			; 48b6: cb 41         .A
+		jr	nz,_48bf		; 48b8: 20 05          .
+		ld	a,08h			; 48ba: 3e 08         >.
+		call	rand			; 48bc: cd 9a 4f      ..O
+_48bf:		out	(ffh),a			; 48bf: d3 ff         ..
+		push	bc			; 48c1: c5            .
+		ld	a,h			; 48c2: 7c            |
+		and	03h			; 48c3: e6 03         ..
+		jr	nz,_48c8		; 48c5: 20 01          .
+		inc	l			; 48c7: 2c            ,
+_48c8:		ld	a,05h			; 48c8: 3e 05         >.
+_48ca:		push	af			; 48ca: f5            .
+		jr	_4889			; 48cb: 18 bc         ..
+
+_48cd:		pop	de			; 48cd: d1            .
+		ret				; 48ce: c9            .
+
+; Fire a phaser or a photon shot
+; if H=0 a photon else a phaser
+; if H > 127 the shot is a tracer so draw no tail
+; A is the start pos, and C the angle.
+draw_shot:	push	af			; 48cf: f5            .
+		ld	(ix+62h),h		; 48d0: dd 74 62      .tb
+		call	coord_to_xy		; 48d3: cd b2 4c      ..L
+		ld	h,e			; 48d6: 63            c
+		xor	a			; 48d7: af            .
+		ld	e,a			; 48d8: 5f            _
+		ld	l,a			; 48d9: 6f            o
+		ld	(weapon_x),de		; 48da: ed 53 92 49   .S.I
+		ld	(weapon_y),hl		; 48de: 22 94 49      ".I
+		ex	(sp),hl			; 48e1: e3            .
+		push	de			; 48e2: d5            .
+		push	hl			; 48e3: e5            .
+		ld	(ix+63h),a		; 48e4: dd 77 63      .wc
+		call	normalize_BC		; 48e7: cd 8d 47      ..G
+		ld	(weapon_dx),hl		; 48ea: 22 8e 49      ".I
+		ld	(weapon_dy),de		; 48ed: ed 53 90 49   .S.I
+		pop	de			; 48f1: d1            .
+keep_drawing_shot:
+		push	de			; 48f2: d5            .
+		call	extend_shot		; 48f3: cd 40 49      .@I
+		pop	de			; 48f6: d1            .
+; This branch means the shot moved out of range
+		jr	nc,shot_hit_something	; 48f7: 30 15         0.
+		push	bc			; 48f9: c5            .
+		push	de			; 48fa: d5            .
+		call	xy2scrnbit		; 48fb: cd af 4f      ..O
+		call	doesHLhit		; 48fe: cd 70 4c      .pL
+		pop	de			; 4901: d1            .
+		pop	bc			; 4902: c1            .
+		jr	z,shot_hit_something	; 4903: 28 09         (.
+		ld	a,(ix+62h)		; 4905: dd 7e 62      .~b
+		or	a			; 4908: b7            .
+		call	z,resetBC		; 4909: cc 85 49      ..I
+		jr	keep_drawing_shot	; 490c: 18 e4         ..
+
+shot_hit_something:
+		pop	de			; 490e: d1            .
+		ex	(sp),hl			; 490f: e3            .
+		push	af			; 4910: f5            .
+		ld	a,(ix+62h)		; 4911: dd 7e 62      .~b
+; Avoid doing erase_tail if the weapon flag is 0 or ff
+		inc	a			; 4914: 3c            <
+		jr	z,_4938			; 4915: 28 21         (!
+		dec	a			; 4917: 3d            =
+		jr	z,_4935			; 4918: 28 1b         (.
+		ld	(weapon_x),de		; 491a: ed 53 92 49   .S.I
+		ld	(weapon_y),hl		; 491e: 22 94 49      ".I
+		ld	d,(ix+63h)		; 4921: dd 56 63      .Vc
+erase_tail:	push	de			; 4924: d5            .
+		call	extend_shot		; 4925: cd 40 49      .@I
+		pop	de			; 4928: d1            .
+		ld	a,(srs_line1)		; 4929: 3a c0 3c      :.<
+		rla				; 492c: 17            .
+		jr	nc,_4938		; 492d: 30 09         0.
+		call	resetBC			; 492f: cd 85 49      ..I
+		dec	d			; 4932: 15            .
+		jr	nz,erase_tail		; 4933: 20 ef          .
+_4935:		call	disp_srs_ships		; 4935: cd 24 43      .$C
+_4938:		ld	e,(ix+d_cur_quadrant)	; 4938: dd 5e 43      .^C
+		ld	d,40h			; 493b: 16 40         .@
+		pop	af			; 493d: f1            .
+		pop	hl			; 493e: e1            .
+		ret				; 493f: c9            .
+
+; extend_shot adds to the phaser/photon line
+extend_shot:	ld	de,(weapon_dx)		; 4940: ed 5b 8e 49   .[.I
+		ld	hl,(weapon_x)		; 4944: 2a 92 49      *.I
+		add	hl,de			; 4947: 19            .
+		push	de			; 4948: d5            .
+		push	hl			; 4949: e5            .
+		ld	b,h			; 494a: 44            D
+		ld	de,(weapon_dy)		; 494b: ed 5b 90 49   .[.I
+		ld	hl,(weapon_y)		; 494f: 2a 94 49      *.I
+		add	hl,de			; 4952: 19            .
+		ld	c,h			; 4953: 4c            L
+		call	check_xy_in_srs		; 4954: cd a1 4c      ..L
+		jr	nc,shot_outside_srs	; 4957: 30 1b         0.
+		push	hl			; 4959: e5            .
+		ld	a,(srs_line1)		; 495a: 3a c0 3c      :.<
+		cpl				; 495d: 2f            /
+		or	(ix+62h)		; 495e: dd b6 62      ..b
+		call	p,flipBC		; 4961: f4 ce 4f      ..O
+		pop	hl			; 4964: e1            .
+		push	bc			; 4965: c5            .
+		ld	bc,(starbase_damage+1)	; 4966: ed 4b 62 40   .Kb@
+		inc	b			; 496a: 04            .
+		call	periodic		; 496b: cd 46 4b      .FK
+		ld	(starbase_damage+1),bc	; 496e: ed 43 62 40   .Cb@
+		scf				; 4972: 37            7
+		pop	bc			; 4973: c1            .
+shot_outside_srs:
+		ld	(weapon_dy),de		; 4974: ed 53 90 49   .S.I
+		ld	(weapon_y),hl		; 4978: 22 94 49      ".I
+		pop	hl			; 497b: e1            .
+		pop	de			; 497c: d1            .
+		ld	(weapon_dx),de		; 497d: ed 53 8e 49   .S.I
+		ld	(weapon_x),hl		; 4981: 22 92 49      ".I
+		ret				; 4984: c9            .
+
+; Clear the pixel at (B,C).  Seems to expect that it is a graphics char already.
+resetBC:	call	xy2scrnbit		; 4985: cd af 4f      ..O
+		set	7,(hl)			; 4988: cb fe         ..
+		cpl				; 498a: 2f            /
+		and	(hl)			; 498b: a6            .
+		ld	(hl),a			; 498c: 77            w
+		ret				; 498d: c9            .
+
+weapon_dx:	word	0000h
+weapon_dy:	word	0000h
+weapon_x:	word	0000h
+weapon_y:	word	0000h
+; This is the starting point for the klingon thread
+; Until we get to time $0f (about 7.5 seconds), the klingons
+; are inactive
+klingon_thread:	call	periodic		; 4996: cd 46 4b      .FK
+		ld	a,(stardate)		; 4999: 3a 44 40      :D@
+		or	a			; 499c: b7            .
+		jr	nz,klingon_AI		; 499d: 20 07          .
+		ld	a,(stardate+2)		; 499f: 3a 46 40      :F@
+		cp	0fh			; 49a2: fe 0f         ..
+		jr	c,klingon_thread	; 49a4: 38 f0         8.
+klingon_AI:	dec	sp			; 49a6: 3b            ;
+		dec	sp			; 49a7: 3b            ;
+		ld	de,klingon_damages	; 49a8: 11 4b 40      .K@
+		xor	a			; 49ab: af            .
+		ld	(de),a			; 49ac: 12            .
+		inc	e			; 49ad: 1c            .
+		ld	(de),a			; 49ae: 12            .
+		inc	e			; 49af: 1c            .
+		ld	(de),a			; 49b0: 12            .
+		ld	e,(ix+d_cur_quadrant)	; 49b1: dd 5e 43      .^C
+; klingon loop.  Delay about 256 ms before considering
+; the next action of the klingons
+klingon_loop:	ld	b,80h			; 49b4: 06 80         ..
+_49b6:		call	periodic		; 49b6: cd 46 4b      .FK
+		dec	b			; 49b9: 05            .
+		jr	nz,_49b6		; 49ba: 20 fa          .
+; This condition here is, essentially, to decide if a starbase
+; should be attacked.  This is possible if no base is under attack
+; (ttl at (4065) is zero) or if one of the low 4 bits of the time
+; is set. That implies every 8 seconds a large series of attempts.
+		ld	a,(ix+46h)		; 49bc: dd 7e 46      .~F
+		and	0fh			; 49bf: e6 0f         ..
+		or	(ix+65h)		; 49c1: dd b6 65      ..e
+		jr	nz,consider_phasers	; 49c4: 20 2f          /
+; Attack starbase.  Choose a random quadrant HL.  If it happens
+; to be the current quadrant or does not contain a starbase,
+; skip the attempted attack. Otherwise, store qpos of the starbase
+; at (ix+64h)
+		push	de			; 49c6: d5            .
+; Cute; ld a,d is 'ld a,40h' because DE is in the zero page
+		ld	a,d			; 49c7: 7a            z
+		call	rand			; 49c8: cd 9a 4f      ..O
+		dec	a			; 49cb: 3d            =
+		ld	l,a			; 49cc: 6f            o
+		cp	e			; 49cd: bb            .
+		jr	z,consider_phasers_1	; 49ce: 28 24         ($
+		ld	h,d			; 49d0: 62            b
+		ld	a,(hl)			; 49d1: 7e            ~
+		bit	0,a			; 49d2: cb 47         .G
+		jr	z,consider_phasers_1	; 49d4: 28 1e         (.
+		ld	(ix+d_sos_starbase_qpos),l; 49d6: dd 75 64      .ud
+; Look for a klingon not in the current quadrant and warp him
+; to the sos starbase.  Initialize the time to live counter
+; to between 10 to 45.
+find_attacker:	ld	a,d			; 49d9: 7a            z
+		call	rand			; 49da: cd 9a 4f      ..O
+		dec	a			; 49dd: 3d            =
+		cp	e			; 49de: bb            .
+		jr	z,find_attacker		; 49df: 28 f8         (.
+		ld	e,a			; 49e1: 5f            _
+		call	try_warp_DE_HL		; 49e2: cd ac 4a      ..J
+		ld	a,(hl)			; 49e5: 7e            ~
+		and	06h			; 49e6: e6 06         ..
+		jr	z,find_attacker		; 49e8: 28 ef         (.
+		ld	a,23h			; 49ea: 3e 23         >#
+		call	rand			; 49ec: cd 9a 4f      ..O
+		add	a,14h			; 49ef: c6 14         ..
+		ld	(ix+65h),a		; 49f1: dd 77 65      .we
+consider_phasers_1:
+		pop	de			; 49f4: d1            .
+; Consider a phaser attack if there are klingons in the
+; current quadrant.  If there is only one klingon in the
+; quadrant there is a 1/40 chance it will run away.
+consider_phasers:
+		ld	a,(de)			; 49f5: 1a            .
+		and	06h			; 49f6: e6 06         ..
+		jr	z,klingon_loop		; 49f8: 28 ba         (.
+		sub	02h			; 49fa: d6 02         ..
+		ld	a,28h			; 49fc: 3e 28         >(
+		call	z,rand			; 49fe: cc 9a 4f      ..O
+		dec	a			; 4a01: 3d            =
+		jr	nz,target_federation	; 4a02: 20 38          8
+; At this poin the klingon wants to leave the quadrant
+		ld	a,(srs_line1)		; 4a04: 3a c0 3c      :.<
+		rla				; 4a07: 17            .
+		jr	nc,leave_quadrant	; 4a08: 30 25         0%
+; The SRS is up so the klingon must navigate to leave the quadrant.
+		push	de			; 4a0a: d5            .
+		ld	h,d			; 4a0b: 62            b
+		ld	l,55h			; 4a0c: 2e 55         .U
+; Move klingon at (HL) by adding/subtracting 30, 31, 32
+keep_moving:	ld	a,03h			; 4a0e: 3e 03         >.
+		call	rand			; 4a10: cd 9a 4f      ..O
+		add	a,1eh			; 4a13: c6 1e         ..
+		ld	e,a			; 4a15: 5f            _
+		ld	a,(ix+d_pos_enterprise)	; 4a16: dd 7e 4e      .~N
+		sub	(hl)			; 4a19: 96            .
+		ld	a,(hl)			; 4a1a: 7e            ~
+		jr	c,_4a20			; 4a1b: 38 03         8.
+		sub	e			; 4a1d: 93            .
+		jr	_4a21			; 4a1e: 18 01         ..
+
+_4a20:		add	a,e			; 4a20: 83            .
+_4a21:		jr	c,klingon_escaped	; 4a21: 38 06         8.
+		ld	e,a			; 4a23: 5f            _
+		call	try_move_klingon	; 4a24: cd 88 4a      ..J
+		jr	keep_moving		; 4a27: 18 e5         ..
+
+klingon_escaped:
+		ld	d,(hl)			; 4a29: 56            V
+		ld	e,(hl)			; 4a2a: 5e            ^
+		call	ship_d2e		; 4a2b: cd c6 4c      ..L
+		pop	de			; 4a2e: d1            .
+leave_quadrant:	ld	a,d			; 4a2f: 7a            z
+		call	rand			; 4a30: cd 9a 4f      ..O
+		ld	l,a			; 4a33: 6f            o
+		call	try_warp_DE_HL		; 4a34: cd ac 4a      ..J
+		jr	z,leave_quadrant	; 4a37: 28 f6         (.
+		jp	klingon_loop		; 4a39: c3 b4 49      ..I
+
+; Attempt to fire upon the big E then the starbase if any
+target_federation:
+		ld	b,(ix+d_pos_enterprise)	; 4a3c: dd 46 4e      .FN
+		call	attack_on_B		; 4a3f: cd bd 4a      ..J
+		ld	a,(de)			; 4a42: 1a            .
+		and	01h			; 4a43: e6 01         ..
+		jp	z,klingon_loop		; 4a45: ca b4 49      ..I
+		ld	b,(ix+d_pos_starbase)	; 4a48: dd 46 4f      .FO
+		call	attack_on_B		; 4a4b: cd bd 4a      ..J
+		ld	a,0ch			; 4a4e: 3e 0c         >.
+		call	rand			; 4a50: cd 9a 4f      ..O
+		dec	a			; 4a53: 3d            =
+		jr	nz,to_klingon_loop	; 4a54: 20 2f          /
+; This is where we try to warp another klingon to the current quadrant
+; 1 in 12 chance of getting here
+; Another tricky ld a,40h
+		ld	a,d			; 4a56: 7a            z
+		call	rand			; 4a57: cd 9a 4f      ..O
+		dec	a			; 4a5a: 3d            =
+		cp	e			; 4a5b: bb            .
+		jr	z,to_klingon_loop	; 4a5c: 28 27         ('
+; A is a random quadrant different from the current
+		ld	h,d			; 4a5e: 62            b
+		ld	l,a			; 4a5f: 6f            o
+		ex	de,hl			; 4a60: eb            .
+		call	try_warp_DE_HL		; 4a61: cd ac 4a      ..J
+		ex	de,hl			; 4a64: eb            .
+		jr	z,to_klingon_loop	; 4a65: 28 1e         (.
+; A klingon is going to warp into the quadrant.
+; Get (HL) pointing to the new klingon's position
+		ld	a,(de)			; 4a67: 1a            .
+		and	06h			; 4a68: e6 06         ..
+		rrca				; 4a6a: 0f            .
+		add	a,54h			; 4a6b: c6 54         .T
+		ld	l,a			; 4a6d: 6f            o
+		push	de			; 4a6e: d5            .
+find_warpin_space:
+		ld	a,41h			; 4a6f: 3e 41         >A
+		call	rand			; 4a71: cd 9a 4f      ..O
+		add	a,deh			; 4a74: c6 de         ..
+		ld	e,a			; 4a76: 5f            _
+		ld	d,8ch			; 4a77: 16 8c         ..
+		push	hl			; 4a79: e5            .
+		call	ship_d2e		; 4a7a: cd c6 4c      ..L
+		pop	hl			; 4a7d: e1            .
+		jr	nz,find_warpin_space	; 4a7e: 20 ef          .
+		ld	(hl),e			; 4a80: 73            s
+		pop	de			; 4a81: d1            .
+		call	draw_srs		; 4a82: cd f8 42      ..B
+to_klingon_loop:
+		jp	klingon_loop		; 4a85: c3 b4 49      ..I
+
+; Try to move the klingon to at current pos (HL) to E.
+; It looks like a klingon can die if it accidentally runs
+; into a black hole! (4058 is black hole position)
+; ship_d2e must conditionally set E to the next or prev position.
+try_move_klingon:
+		ld	d,(hl)			; 4a88: 56            V
+		push	hl			; 4a89: e5            .
+		call	ship_d2e		; 4a8a: cd c6 4c      ..L
+		ld	a,l			; 4a8d: 7d            }
+		jr	z,move_klingon		; 4a8e: 28 0b         (.
+		ld	e,d			; 4a90: 5a            Z
+		cp	58h			; 4a91: fe 58         .X
+		jr	nz,move_klingon		; 4a93: 20 06          .
+		ld	sp,stack2		; 4a95: 31 b7 40      1.@
+		jp	dec_klingon		; 4a98: c3 5e 48      .^H
+
+; Move klingon at (HL) qpos to BC screen location
+; E is the destination qpos and (HL) is updated
+; There is also a 60-period (~120 ms) delay after the move
+move_klingon:	ld	hl,klingon		; 4a9b: 21 56 44      !VD
+		call	str_hl_at_bc		; 4a9e: cd 4f 4f      .OO
+		pop	hl			; 4aa1: e1            .
+		ld	(hl),e			; 4aa2: 73            s
+		ld	b,3ch			; 4aa3: 06 3c         .<
+_4aa5:		call	periodic		; 4aa5: cd 46 4b      .FK
+		dec	b			; 4aa8: 05            .
+		jr	nz,_4aa5		; 4aa9: 20 fa          .
+		ret				; 4aab: c9            .
+
+; If possible, warp a klingon from quad (DE) to (HL)
+; On return, nz means did warp, z means did not
+try_warp_DE_HL:	ld	a,(hl)			; 4aac: 7e            ~
+		and	06h			; 4aad: e6 06         ..
+		cp	06h			; 4aaf: fe 06         ..
+		ret	z			; 4ab1: c8            .
+		ld	a,(de)			; 4ab2: 1a            .
+		and	06h			; 4ab3: e6 06         ..
+		ret	z			; 4ab5: c8            .
+		ld	a,(de)			; 4ab6: 1a            .
+		dec	a			; 4ab7: 3d            =
+		dec	a			; 4ab8: 3d            =
+		ld	(de),a			; 4ab9: 12            .
+		inc	(hl)			; 4aba: 34            4
+		inc	(hl)			; 4abb: 34            4
+		ret				; 4abc: c9            .
+
+; Get a klingon to attack on location B
+; First compute (10-level)/2 and put random value in C
+; If random > klingons, return.  So klingons more aggressive
+; at higher levels.
+; The rhythm here is: take a shot.  If you're 'close', take
+; another shot and return. Otherwise move closer.  If you
+; can't move anymore, take another shot and return
+; Otherwise go to the top of the loop
+attack_on_B:	ld	a,10h			; 4abd: 3e 10         >.
+		sub	(ix+d_level)		; 4abf: dd 96 42      ..B
+		rra				; 4ac2: 1f            .
+		call	rand			; 4ac3: cd 9a 4f      ..O
+		ld	c,a			; 4ac6: 4f            O
+		ld	a,(de)			; 4ac7: 1a            .
+		and	06h			; 4ac8: e6 06         ..
+		rrca				; 4aca: 0f            .
+		cp	c			; 4acb: b9            .
+		ret	c			; 4acc: d8            .
+; Get HL pointing to chosen klingon.
+		ld	a,c			; 4acd: 79            y
+		add	a,54h			; 4ace: c6 54         .T
+		ld	l,a			; 4ad0: 6f            o
+		ld	h,d			; 4ad1: 62            b
+		push	bc			; 4ad2: c5            .
+fire_and_move:	ld	a,(hl)			; 4ad3: 7e            ~
+		pop	bc			; 4ad4: c1            .
+		push	bc			; 4ad5: c5            .
+		push	hl			; 4ad6: e5            .
+		call	coord_to_xy		; 4ad7: cd b2 4c      ..L
+		ex	de,hl			; 4ada: eb            .
+		ld	a,b			; 4adb: 78            x
+		call	coord_to_xy		; 4adc: cd b2 4c      ..L
+; DE is X,Y of klingon, HL is X,Y of target
+		ld	a,e			; 4adf: 7b            {
+		sub	l			; 4ae0: 95            .
+		rlca				; 4ae1: 07            .
+		ld	c,a			; 4ae2: 4f            O
+		ld	a,d			; 4ae3: 7a            z
+		sub	h			; 4ae4: 94            .
+		ld	b,a			; 4ae5: 47            G
+		pop	hl			; 4ae6: e1            .
+; Now BC is a vector in the target direction
+		ld	a,(srs_line1)		; 4ae7: 3a c0 3c      :.<
+		rla				; 4aea: 17            .
+; This shot happens only if we're not on SRS.  Stay on SRS!
+		jr	nc,find_and_take_shot	; 4aeb: 30 3c         0<
+; This chunk computes D = ABS(B) + ABS(C), a simple distance.
+		ld	a,b			; 4aed: 78            x
+		bit	7,b			; 4aee: cb 78         .x
+		jr	z,_4af3			; 4af0: 28 01         (.
+		cpl				; 4af2: 2f            /
+_4af3:		ld	d,a			; 4af3: 57            W
+		ld	a,c			; 4af4: 79            y
+		bit	7,c			; 4af5: cb 79         .y
+		jr	z,_4afa			; 4af7: 28 01         (.
+		cpl				; 4af9: 2f            /
+_4afa:		add	a,d			; 4afa: 82            .
+		ld	d,a			; 4afb: 57            W
+		ld	a,36h			; 4afc: 3e 36         >6
+		call	rand			; 4afe: cd 9a 4f      ..O
+		add	a,0ah			; 4b01: c6 0a         ..
+; if D < rand(11..64) take a shot
+; in essense, shoot again if we're close enough and return
+		cp	d			; 4b03: ba            .
+		jr	nc,find_and_take_shot	; 4b04: 30 23         0#
+		push	bc			; 4b06: c5            .
+		ld	a,(hl)			; 4b07: 7e            ~
+; Now look at moving closer to the target
+; Based on looking at B/2 then C/2 create a new position in A
+		rlc	b			; 4b08: cb 00         ..
+		jr	z,_4b14			; 4b0a: 28 08         (.
+		jr	c,_4b12			; 4b0c: 38 04         8.
+		inc	a			; 4b0e: 3c            <
+		inc	a			; 4b0f: 3c            <
+		jr	_4b14			; 4b10: 18 02         ..
+
+_4b12:		dec	a			; 4b12: 3d            =
+		dec	a			; 4b13: 3d            =
+_4b14:		rlc	c			; 4b14: cb 01         ..
+		jr	z,_4b20			; 4b16: 28 08         (.
+		jr	c,_4b1e			; 4b18: 38 04         8.
+		add	a,20h			; 4b1a: c6 20         . 
+		jr	_4b20			; 4b1c: 18 02         ..
+
+_4b1e:		sub	20h			; 4b1e: d6 20         . 
+_4b20:		ld	e,a			; 4b20: 5f            _
+; E is the new position, try to move there.
+; If we do move, go and try again
+; Otherwise, we fall through to take a shot which will be the
+; return of attack_on_B.
+		call	try_move_klingon	; 4b21: cd 88 4a      ..J
+		pop	bc			; 4b24: c1            .
+		ld	a,d			; 4b25: 7a            z
+		cp	e			; 4b26: bb            .
+		jr	nz,fire_and_move	; 4b27: 20 aa          .
+; By using tracer shots, see if klingon at (HL) can hit a fed target
+; by shooting the the direction of BC.
+; The tracer is a success if it hits either a starbase or
+; or the big e.  The cp 50h is a location-based check on this
+; If the tracer works a real shot is fired.  Klingon phasers
+; use the Enterprise's phaser %age; so low shields pose a risk
+; to your starbases.
+find_and_take_shot:
+		ld	a,(hl)			; 4b29: 7e            ~
+		pop	de			; 4b2a: d1            .
+		push	af			; 4b2b: f5            .
+; Change this to ld h,01 or ld h,0 to get visible tracer shots
+		ld	h,ffh			; 4b2c: 26 ff         &.
+		push	bc			; 4b2e: c5            .
+		call	draw_shot		; 4b2f: cd cf 48      ..H
+		pop	bc			; 4b32: c1            .
+		ld	a,l			; 4b33: 7d            }
+		pop	hl			; 4b34: e1            .
+		ret	nc			; 4b35: d0            .
+		cp	50h			; 4b36: fe 50         .P
+		ret	nc			; 4b38: d0            .
+		push	hl			; 4b39: e5            .
+		call	phaser_pct		; 4b3a: cd 10 47      ..G
+		pop	af			; 4b3d: f1            .
+		call	draw_shot		; 4b3e: cd cf 48      ..H
+		ret	nc			; 4b41: d0            .
+		jp	ship_hit		; 4b42: c3 aa 47      ..G
+
+		nop				; 4b45: 00            .
+; A lot gets done here.  Looks like we context switch to another thread
+; if the time is right.  Otherwise we generally update the display with
+; things that change like stardates, energy to shield warnings, quadrant,
+; starbase destroyed and so on.
+; 4045,46 seems to track the time.
+; Most of the time we simply delay 4ms and context switch.
+; But once a second we do the processing here.
+; Gotta crunch the numbers, but it works out to 95 seconds per stardate.
+; I can almost bet that it'll really be 100 or 60 seconds per stardate.
+; PNP: I read the timer as 2 milliseconds so a stardate is 48 seconds
+; 4045 - counts 2 milliseconds (aprox)
+; 4046 - counts 512 milliseconds (about half second)
+; 4044 - counts stardates (95 * 512 ms = 48 seconds).
+; (45,46) only count from 0 to $5eff
+periodic:	ex	af,af'			; 4b46: 08            .
+		exx				; 4b47: d9            .
+		ld	(_4b4e+2),sp		; 4b48: ed 73 50 4b   .sPK
+		ld	sp,iy			; 4b4c: fd f9         ..
+_4b4e:		ld	iy,0000h		; 4b4e: fd 21 00 00   .!..
+		ld	a,ffh			; 4b52: 3e ff         >.
+; PNP: dec a = 4 tstates, jr nz = 12 tstates if taken
+; so loop takes 16*256=4080 tstates or about 2ms at 2 MHz
+; or 2.3 ms at 1.77 MHz
+unit_delay:	dec	a			; 4b54: 3d            =
+		jr	nz,unit_delay		; 4b55: 20 fd          .
+		inc	(ix+45h)		; 4b57: dd 34 45      .4E
+		ret	nz			; 4b5a: c0            .
+		ld	a,(ix+46h)		; 4b5b: dd 7e 46      .~F
+		inc	a			; 4b5e: 3c            <
+		cp	5fh			; 4b5f: fe 5f         ._
+		jr	nz,_4b67		; 4b61: 20 04          .
+		xor	a			; 4b63: af            .
+		inc	(ix+d_stardate)		; 4b64: dd 34 44      .4D
+_4b67:		ld	(ix+46h),a		; 4b67: dd 77 46      .wF
+		push	hl			; 4b6a: e5            .
+		push	bc			; 4b6b: c5            .
+		push	de			; 4b6c: d5            .
+		and	03h			; 4b6d: e6 03         ..
+		ld	e,(ix+d_cur_quadrant)	; 4b6f: dd 5e 43      .^C
+		ld	d,40h			; 4b72: 16 40         .@
+		jr	nz,_4b7d		; 4b74: 20 07          .
+		ld	a,(srs_line1)		; 4b76: 3a c0 3c      :.<
+		or	a			; 4b79: b7            .
+		call	m,draw_stats		; 4b7a: fc 9f 4d      ..M
+_4b7d:		ld	bc,3f84h		; 4b7d: 01 84 3f      ..?
+		ld	a,(bc)			; 4b80: 0a            .
+		cp	45h			; 4b81: fe 45         .E
+		call	z,clreol		; 4b83: cc 0c 4e      ..N
+		jr	z,_4b99			; 4b86: 28 11         (.
+		ld	a,(shields)		; 4b88: 3a 5f 40      :_@
+		or	a			; 4b8b: b7            .
+		jr	nz,_4b99		; 4b8c: 20 0b          .
+		ld	hl,metos		; 4b8e: 21 bc 45      !.E
+		call	str_hl_at_bc		; 4b91: cd 4f 4f      .OO
+		dec	bc			; 4b94: 0b            .
+		dec	bc			; 4b95: 0b            .
+		ld	a,21h			; 4b96: 3e 21         >!
+		ld	(bc),a			; 4b98: 02            .
+_4b99:		call	repair			; 4b99: cd 36 4c      .6L
+; Point BC at 4 chars past middle of second from bottom line.
+; Now check for a starbase SOS reports.  This can disable the
+; message, decrement the TTL and even destroy the starbase
+		ld	c,a4h			; 4b9c: 0e a4         ..
+		ld	hl,(sos_starbase_qpos)	; 4b9e: 2a 64 40      *d@
+		ld	a,e			; 4ba1: 7b            {
+		ld	e,l			; 4ba2: 5d            ]
+		sub	l			; 4ba3: 95            .
+		jr	z,cancel_sos		; 4ba4: 28 0a         (.
+		ld	a,(de)			; 4ba6: 1a            .
+		and	01h			; 4ba7: e6 01         ..
+		jr	z,cancel_sos		; 4ba9: 28 05         (.
+		ld	a,(de)			; 4bab: 1a            .
+		and	06h			; 4bac: e6 06         ..
+		jr	nz,continue_alert	; 4bae: 20 04          .
+; A is zero here
+cancel_sos:	ld	(sos_starbase_ttl),a	; 4bb0: 32 65 40      2e@
+		ld	h,a			; 4bb3: 67            g
+; H is either zero (no alert) or contents of sos_starbase_ttl
+continue_alert:	ld	a,h			; 4bb4: 7c            |
+		or	a			; 4bb5: b7            .
+		jr	z,check_docked		; 4bb6: 28 2d         (-
+; decrement starbase ttl counter
+		dec	(ix+65h)		; 4bb8: dd 35 65      .5e
+		jr	nz,display_starbase_sos	; 4bbb: 20 0b          .
+		ld	hl,mstard		; 4bbd: 21 32 44      !2D
+		call	str_hl_at_bc		; 4bc0: cd 4f 4f      .OO
+		call	destroy_base_at_DE	; 4bc3: cd 3d 48      .=H
+		jr	check_docked		; 4bc6: 18 1d         ..
+
+display_starbase_sos:
+		ld	a,(bc)			; 4bc8: 0a            .
+		cp	20h			; 4bc9: fe 20         . 
+; Check for space to alternate flashing SOS display
+		jr	nz,_4be2		; 4bcb: 20 15          .
+		ld	hl,msos			; 4bcd: 21 29 4c      !)L
+		call	str_hl_at_bc		; 4bd0: cd 4f 4f      .OO
+		ld	a,e			; 4bd3: 7b            {
+		and	07h			; 4bd4: e6 07         ..
+		call	print_a			; 4bd6: cd 57 4f      .WO
+		ld	a,e			; 4bd9: 7b            {
+		and	38h			; 4bda: e6 38         .8
+		rrca				; 4bdc: 0f            .
+		rrca				; 4bdd: 0f            .
+		rrca				; 4bde: 0f            .
+		call	print_a			; 4bdf: cd 57 4f      .WO
+_4be2:		call	clreol			; 4be2: cd 0c 4e      ..N
+; Check if enterprise is currently docked--if so, display message
+check_docked:	ld	bc,3c40h		; 4be5: 01 40 3c      .@<
+		ld	e,(ix+d_cur_quadrant)	; 4be8: dd 5e 43      .^C
+		ld	a,(de)			; 4beb: 1a            .
+		and	01h			; 4bec: e6 01         ..
+		jr	z,_4c13			; 4bee: 28 23         (#
+		ld	hl,(pos_enterprise)	; 4bf0: 2a 4e 40      *N@
+		ld	a,h			; 4bf3: 7c            |
+		sub	l			; 4bf4: 95            .
+		jr	c,_4bfb			; 4bf5: 38 04         8.
+		cp	20h			; 4bf7: fe 20         . 
+		jr	z,_4c03			; 4bf9: 28 08         (.
+_4bfb:		ld	a,l			; 4bfb: 7d            }
+		sub	h			; 4bfc: 94            .
+		jr	c,_4c13			; 4bfd: 38 14         8.
+		cp	20h			; 4bff: fe 20         . 
+		jr	nz,_4c13		; 4c01: 20 10          .
+_4c03:		ld	a,(bc)			; 4c03: 0a            .
+		cp	45h			; 4c04: fe 45         .E
+		ld	hl,mdocked		; 4c06: 21 17 4c      !.L
+		call	nz,str_hl_at_bc		; 4c09: c4 4f 4f      .OO
+		call	repair			; 4c0c: cd 36 4c      .6L
+; load up docked enterprise with 3 photon torps
+		ld	(ix+d_photons),03h	; 4c0f: dd 36 60 03   .6`.
+; finish_periodic
+_4c13:		pop	de			; 4c13: d1            .
+		pop	bc			; 4c14: c1            .
+		pop	hl			; 4c15: e1            .
+		ret				; 4c16: c9            .
+
+mdocked:	ascii	'ENTERPRISE DOCKED',0
+msos:		ascii	'SOS-STARBASE',0
+; Repair damage.  Seems rather random; but I'd guess that if bit 7 of C
+; is set, it means we're docked and guarantee 4 times faster repair and
+; ship's energy replenishment.  Thing is, C appears to result from message
+; display by the caller!
+repair:		ld	hl,imp_damage		; 4c36: 21 59 40      !Y@
+_4c39:		ld	a,8bh			; 4c39: 3e 8b         >.
+		call	rand			; 4c3b: cd 9a 4f      ..O
+		ld	a,(hl)			; 4c3e: 7e            ~
+		jp	p,_4c46			; 4c3f: f2 46 4c      .FL
+		sub	01h			; 4c42: d6 01         ..
+		jr	c,_4c4e			; 4c44: 38 08         8.
+_4c46:		bit	7,c			; 4c46: cb 79         .y
+		jr	nz,_4c4f		; 4c48: 20 05          .
+		sub	04h			; 4c4a: d6 04         ..
+		jr	nc,_4c4f		; 4c4c: 30 01         0.
+_4c4e:		xor	a			; 4c4e: af            .
+_4c4f:		ld	(hl),a			; 4c4f: 77            w
+		inc	hl			; 4c50: 23            #
+		ld	a,l			; 4c51: 7d            }
+		cp	5eh			; 4c52: fe 5e         .^
+		jr	nz,_4c39		; 4c54: 20 e3          .
+		ld	a,8bh			; 4c56: 3e 8b         >.
+		call	rand			; 4c58: cd 9a 4f      ..O
+		jp	p,_4c5f			; 4c5b: f2 5f 4c      ._L
+		inc	(hl)			; 4c5e: 34            4
+_4c5f:		bit	7,c			; 4c5f: cb 79         .y
+		jr	nz,_4c67		; 4c61: 20 04          .
+		ld	a,(hl)			; 4c63: 7e            ~
+		add	a,04h			; 4c64: c6 04         ..
+		ld	(hl),a			; 4c66: 77            w
+_4c67:		ld	a,(hl)			; 4c67: 7e            ~
+		cp	65h			; 4c68: fe 65         .e
+		jr	c,_4c6e			; 4c6a: 38 02         8.
+		ld	a,100			; 4c6c: 3e 64         >d
+_4c6e:		ld	(hl),a			; 4c6e: 77            w
+		ret				; 4c6f: c9            .
+
+; HL points to the screen.  We map to a position and check for collision
+; with an object in the quadrant.  Then we figure out what, if anything,
+; we hit and then return XXXX.....
+; (The 3CC0 base of short range scan goes to 1E60, hence the 60!)
+doesHLhit:	push	hl			; 4c70: e5            .
+		srl	h			; 4c71: cb 3c         .<
+		rr	l			; 4c73: cb 1d         ..
+		ld	a,l			; 4c75: 7d            }
+		sub	60h			; 4c76: d6 60         .`
+		ld	e,a			; 4c78: 5f            _
+		call	ship_fits		; 4c79: cd dc 4c      ..L
+		ld	a,(hl)			; 4c7c: 7e            ~
+		pop	de			; 4c7d: d1            .
+		jr	z,_4c9f			; 4c7e: 28 1f         (.
+		call	pos2scrn		; 4c80: cd 80 4f      ..O
+		ld	a,l			; 4c83: 7d            }
+		cp	50h			; 4c84: fe 50         .P
+		jr	c,_4c95			; 4c86: 38 0d         8.
+		cp	55h			; 4c88: fe 55         .U
+		jr	c,_4c90			; 4c8a: 38 04         8.
+		cp	58h			; 4c8c: fe 58         .X
+		jr	nz,_4c95		; 4c8e: 20 05          .
+_4c90:		ld	a,e			; 4c90: 7b            {
+		sub	c			; 4c91: 91            .
+		ret	z			; 4c92: c8            .
+		jr	_4c9f			; 4c93: 18 0a         ..
+
+_4c95:		ld	a,e			; 4c95: 7b            {
+		sub	c			; 4c96: 91            .
+		ret	c			; 4c97: d8            .
+		cp	03h			; 4c98: fe 03         ..
+		jr	nc,_4c9f		; 4c9a: 30 03         0.
+		xor	a			; 4c9c: af            .
+		scf				; 4c9d: 37            7
+		ret				; 4c9e: c9            .
+
+_4c9f:		or	a			; 4c9f: b7            .
+		ret				; 4ca0: c9            .
+
+; Returns nc if x,y outside of SRS, c otherwise
+check_xy_in_srs:
+		inc	b			; 4ca1: 04            .
+		jp	m,_4cb0			; 4ca2: fa b0 4c      ..L
+		dec	b			; 4ca5: 05            .
+		jr	z,_4cb0			; 4ca6: 28 08         (.
+		ld	a,c			; 4ca8: 79            y
+		cp	09h			; 4ca9: fe 09         ..
+		jr	c,_4cb0			; 4cab: 38 03         8.
+		cp	21h			; 4cad: fe 21         .!
+		ret	c			; 4caf: d8            .
+_4cb0:		xor	a			; 4cb0: af            .
+		ret				; 4cb1: c9            .
+
+; Takes coordinate in A and returns (pixel) coordinate X,Y in DE
+; A = Ay | Ax (Ay is three bits, Ax is 5 bits)
+; D = 4 * Ax + 2
+; E = 3*Ay + 10
+; The resulting position is the bottom left of the cell
+coord_to_xy:	ld	e,a			; 4cb2: 5f            _
+		and	1fh			; 4cb3: e6 1f         ..
+		rlca				; 4cb5: 07            .
+		inc	a			; 4cb6: 3c            <
+		rlca				; 4cb7: 07            .
+		ld	d,a			; 4cb8: 57            W
+		ld	a,e			; 4cb9: 7b            {
+		and	e0h			; 4cba: e6 e0         ..
+		rlca				; 4cbc: 07            .
+		rlca				; 4cbd: 07            .
+		rlca				; 4cbe: 07            .
+		ld	e,a			; 4cbf: 5f            _
+		rlca				; 4cc0: 07            .
+		add	a,e			; 4cc1: 83            .
+		add	a,0ah			; 4cc2: c6 0a         ..
+		ld	e,a			; 4cc4: 5f            _
+		ret				; 4cc5: c9            .
+
+; Like ship_fits, but E is checked for position validity (and if not, return
+; as a collision with with L = 0).  Otherwise, clear screen position D and
+; check for collision at E as in ship_fits.
+ship_d2e:	ld	a,e			; 4cc6: 7b            {
+		ld	l,00h			; 4cc7: 2e 00         ..
+		and	1fh			; 4cc9: e6 1f         ..
+		jr	z,s_overlap		; 4ccb: 28 5d         (]
+		cp	1fh			; 4ccd: fe 1f         ..
+		jr	z,s_overlap		; 4ccf: 28 59         (Y
+		ld	a,d			; 4cd1: 7a            z
+		call	pos2scrn		; 4cd2: cd 80 4f      ..O
+		ld	a,80h			; 4cd5: 3e 80         >.
+		ld	(bc),a			; 4cd7: 02            .
+		inc	bc			; 4cd8: 03            .
+		ld	(bc),a			; 4cd9: 02            .
+		inc	bc			; 4cda: 03            .
+		ld	(bc),a			; 4cdb: 02            .
+; Check quadrant to see if a ship at position E would collide with anything.
+; Ships at position D are ruled out.  If there is a collision, Z is clear,
+; BC is screen location of position D and $4000 + L is what we hit.
+; Otherwise, Z is set and BC is the screen location of E.
+ship_fits:	ld	hl,klingon_damages+2	; 4cdc: 21 4d 40      !M@
+		call	shpOVship		; 4cdf: cd 37 4d      .7M
+		jr	z,s_overlap		; 4ce2: 28 46         (F
+		ld	b,h			; 4ce4: 44            D
+		ld	c,(ix+d_cur_quadrant)	; 4ce5: dd 4e 43      .NC
+		ld	a,(bc)			; 4ce8: 0a            .
+		and	01h			; 4ce9: e6 01         ..
+		jr	z,_4cf2			; 4ceb: 28 05         (.
+		call	shpOVship		; 4ced: cd 37 4d      .7M
+		jr	z,s_overlap		; 4cf0: 28 38         (8
+_4cf2:		ld	a,(bc)			; 4cf2: 0a            .
+		ld	l,4fh			; 4cf3: 2e 4f         .O
+		and	18h			; 4cf5: e6 18         ..
+		rrca				; 4cf7: 0f            .
+		rrca				; 4cf8: 0f            .
+		rrca				; 4cf9: 0f            .
+		inc	a			; 4cfa: 3c            <
+		inc	a			; 4cfb: 3c            <
+		ld	b,a			; 4cfc: 47            G
+_4cfd:		call	shpOVstar		; 4cfd: cd 30 4d      .0M
+		jr	z,s_overlap		; 4d00: 28 28         ((
+		dec	b			; 4d02: 05            .
+		jr	nz,_4cfd		; 4d03: 20 f8          .
+		ld	b,h			; 4d05: 44            D
+		ld	a,(bc)			; 4d06: 0a            .
+		ld	l,54h			; 4d07: 2e 54         .T
+		and	06h			; 4d09: e6 06         ..
+		rrca				; 4d0b: 0f            .
+		ld	b,a			; 4d0c: 47            G
+		jr	z,_4d17			; 4d0d: 28 08         (.
+_4d0f:		call	shpOVship		; 4d0f: cd 37 4d      .7M
+		jr	z,s_overlap		; 4d12: 28 16         (.
+		dec	b			; 4d14: 05            .
+		jr	nz,_4d0f		; 4d15: 20 f8          .
+_4d17:		ld	b,h			; 4d17: 44            D
+		ld	l,57h			; 4d18: 2e 57         .W
+		ld	a,(bc)			; 4d1a: 0a            .
+		and	20h			; 4d1b: e6 20         . 
+		jr	z,_4d24			; 4d1d: 28 05         (.
+		call	shpOVstar		; 4d1f: cd 30 4d      .0M
+		jr	z,s_overlap		; 4d22: 28 06         (.
+_4d24:		ld	a,e			; 4d24: 7b            {
+		call	pos2scrn		; 4d25: cd 80 4f      ..O
+		xor	a			; 4d28: af            .
+		ret				; 4d29: c9            .
+
+s_overlap:	ld	a,d			; 4d2a: 7a            z
+		call	pos2scrn		; 4d2b: cd 80 4f      ..O
+		inc	a			; 4d2e: 3c            <
+		ret				; 4d2f: c9            .
+
+; Return z flag set if pos (hl+1) is == E or E + 1
+; Essentially, does the ship at (hl+1) hit the star at E.
+shpOVstar:	inc	hl			; 4d30: 23            #
+		ld	a,(hl)			; 4d31: 7e            ~
+		cp	e			; 4d32: bb            .
+		ret	z			; 4d33: c8            .
+		dec	a			; 4d34: 3d            =
+		cp	e			; 4d35: bb            .
+		ret				; 4d36: c9            .
+
+; Return z flag set if pos (hl+1) is == E - 1, E or E + 1 but not D
+; In other words, does the ship (hl+1) overlap with the ship at E.
+; But D is ruled out, perhaps to not compare the ship with itself?
+shpOVship:	inc	hl			; 4d37: 23            #
+		ld	a,(hl)			; 4d38: 7e            ~
+		cp	d			; 4d39: ba            .
+		jr	z,_4d45			; 4d3a: 28 09         (.
+		cp	e			; 4d3c: bb            .
+		ret	z			; 4d3d: c8            .
+		inc	a			; 4d3e: 3c            <
+		cp	e			; 4d3f: bb            .
+		ret	z			; 4d40: c8            .
+		sub	02h			; 4d41: d6 02         ..
+		cp	e			; 4d43: bb            .
+		ret				; 4d44: c9            .
+
+_4d45:		or	a			; 4d45: b7            .
+		ret				; 4d46: c9            .
+
+mstardate:	ascii	'STARDATE',0
+mquadrant:	ascii	'QUADRANT',0
+msldeng:	ascii	'SHIELD ENERGY',0
+mshpeng:	ascii	'SHIPS ENERGY',0
+mphoton:	ascii	'PHOTON TORPS',0
+mcond:		ascii	'CONDITION ',0
+mgreen:		ascii	'GREEN ',0
+myellow:	ascii	'YELLOW',0
+mred:		ascii	'RED!',0
+; Current quandrant must be in E
+; Show stardate
+draw_stats:	ld	bc,3f00h		; 4d9f: 01 00 3f      ..?
+		ld	hl,mstardate		; 4da2: 21 47 4d      !GM
+		call	str_hl_at_bc		; 4da5: cd 4f 4f      .OO
+		ld	a,(ix+d_stardate)	; 4da8: dd 7e 44      .~D
+		call	print_a			; 4dab: cd 57 4f      .WO
+; Show current quadrant
+		ld	c,18h			; 4dae: 0e 18         ..
+		call	str_hl_at_bc		; 4db0: cd 4f 4f      .OO
+		ld	a,e			; 4db3: 7b            {
+		and	07h			; 4db4: e6 07         ..
+		call	print_a			; 4db6: cd 57 4f      .WO
+		ld	a,e			; 4db9: 7b            {
+		rrca				; 4dba: 0f            .
+		rrca				; 4dbb: 0f            .
+		rrca				; 4dbc: 0f            .
+		and	07h			; 4dbd: e6 07         ..
+		call	print_a			; 4dbf: cd 57 4f      .WO
+; Show shield energy
+		ld	c,2dh			; 4dc2: 0e 2d         .-
+		call	str_hl_at_bc		; 4dc4: cd 4f 4f      .OO
+		ld	a,(ix+d_shields)	; 4dc7: dd 7e 5f      .~_
+		call	print_a			; 4dca: cd 57 4f      .WO
+		ld	a,25h			; 4dcd: 3e 25         >%
+		ld	(bc),a			; 4dcf: 02            .
+		inc	bc			; 4dd0: 03            .
+		call	clreol			; 4dd1: cd 0c 4e      ..N
+; Show ship energy
+		call	str_hl_at_bc		; 4dd4: cd 4f 4f      .OO
+		ld	a,(ix+d_ship_nrg)	; 4dd7: dd 7e 5e      .~^
+		call	print_a			; 4dda: cd 57 4f      .WO
+		ld	a,25h			; 4ddd: 3e 25         >%
+		ld	(bc),a			; 4ddf: 02            .
+		ld	a,20h			; 4de0: 3e 20         > 
+		inc	bc			; 4de2: 03            .
+		ld	(bc),a			; 4de3: 02            .
+; Show photon torpedos
+		ld	c,58h			; 4de4: 0e 58         .X
+		call	str_hl_at_bc		; 4de6: cd 4f 4f      .OO
+		ld	a,(ix+d_photons)	; 4de9: dd 7e 60      .~`
+		call	print_a			; 4dec: cd 57 4f      .WO
+; Show condition (alert) status.
+;   Red if any klingons in the quadrant
+;   Yellow if ship's energy is <= 40%
+;   Green, otherwise.
+		ld	c,6dh			; 4def: 0e 6d         .m
+		call	str_hl_at_bc		; 4df1: cd 4f 4f      .OO
+		ld	hl,mgreen		; 4df4: 21 8c 4d      !.M
+		ld	a,(ix+d_ship_nrg)	; 4df7: dd 7e 5e      .~^
+		cp	29h			; 4dfa: fe 29         .)
+		jr	nc,_4e01		; 4dfc: 30 03         0.
+		ld	hl,myellow		; 4dfe: 21 93 4d      !.M
+_4e01:		ld	a,(de)			; 4e01: 1a            .
+		and	06h			; 4e02: e6 06         ..
+		jr	z,_4e09			; 4e04: 28 03         (.
+		ld	hl,mred			; 4e06: 21 9a 4d      !.M
+_4e09:		jp	str_hl_at_bc		; 4e09: c3 4f 4f      .OO
+
+; Clear from BC to end of display line with spaces.
+; BC ends up pointing to last char on line; A munged.
+clreol:		ld	a,20h			; 4e0c: 3e 20         > 
+		ld	(bc),a			; 4e0e: 02            .
+		inc	bc			; 4e0f: 03            .
+		ld	a,c			; 4e10: 79            y
+		and	3fh			; 4e11: e6 3f         .?
+		jr	nz,clreol		; 4e13: 20 f7          .
+		ret				; 4e15: c9            .
+
+; Input integer to HL, display on screen at BC.  Preserves DE.
+getint_HL:	push	de			; 4e16: d5            .
+		push	bc			; 4e17: c5            .
+		call	clreol			; 4e18: cd 0c 4e      ..N
+		pop	bc			; 4e1b: c1            .
+		push	bc			; 4e1c: c5            .
+_4e1d:		call	getchar			; 4e1d: cd 39 4e      .9N
+		jr	nz,_4e1d		; 4e20: 20 fb          .
+		pop	bc			; 4e22: c1            .
+; XXX - does pop bc clear carry or do we know it to be cleared?
+		sbc	hl,hl			; 4e23: ed 62         .b
+; Read (BC) as ASCII int into HL.  Note how 'A' could mean 17.
+atoibchl:	ld	a,(bc)			; 4e25: 0a            .
+		sub	30h			; 4e26: d6 30         .0
+		jr	nc,_4e2c		; 4e28: 30 02         0.
+		pop	de			; 4e2a: d1            .
+		ret				; 4e2b: c9            .
+
+; HL = HL * 10 + A.
+_4e2c:		add	hl,hl			; 4e2c: 29            )
+		push	hl			; 4e2d: e5            .
+		add	hl,hl			; 4e2e: 29            )
+		add	hl,hl			; 4e2f: 29            )
+		pop	de			; 4e30: d1            .
+		add	hl,de			; 4e31: 19            .
+		ld	d,00h			; 4e32: 16 00         ..
+		ld	e,a			; 4e34: 5f            _
+		add	hl,de			; 4e35: 19            .
+		inc	bc			; 4e36: 03            .
+		jr	atoibchl		; 4e37: 18 ec         ..
+
+; Read a character from keyboard, display at BC.  Return Z if 'enter'.
+; Seems like it actually moves and displays the enterprise as needed.
+; Possibly only gets numbers.
+getchar:	push	hl			; 4e39: e5            .
+		push	de			; 4e3a: d5            .
+		ld	d,ffh			; 4e3b: 16 ff         ..
+_4e3d:		call	periodic		; 4e3d: cd 46 4b      .FK
+		ld	a,(ix+45h)		; 4e40: dd 7e 45      .~E
+		and	3fh			; 4e43: e6 3f         .?
+		ld	a,(3840h)		; 4e45: 3a 40 38      :@8
+		ld	l,a			; 4e48: 6f            o
+		jp	nz,_4f06		; 4e49: c2 06 4f      ..O
+		and	78h			; 4e4c: e6 78         .x
+		jr	z,_4e54			; 4e4e: 28 04         (.
+		ld	a,(srs_line1)		; 4e50: 3a c0 3c      :.<
+		or	a			; 4e53: b7            .
+_4e54:		jp	p,_4f06			; 4e54: f2 06 4f      ..O
+		push	de			; 4e57: d5            .
+		push	hl			; 4e58: e5            .
+		push	bc			; 4e59: c5            .
+		ld	a,(ix+d_imp_damage)	; 4e5a: dd 7e 59      .~Y
+		cp	100			; 4e5d: fe 64         .d
+		jr	c,_4ea3			; 4e5f: 38 42         8B
+		ld	hl,mimpulse		; 4e61: 21 6d 45      !mE
+		ld	bc,3c40h		; 4e64: 01 40 3c      .@<
+		call	str_hl_at_bc		; 4e67: cd 4f 4f      .OO
+		ld	hl,minop		; 4e6a: 21 04 44      !.D
+		call	str_hl_at_bc		; 4e6d: cd 4f 4f      .OO
+		call	clreol			; 4e70: cd 0c 4e      ..N
+		jp	_4f03			; 4e73: c3 03 4f      ..O
+
+mswallow:	ascii	'SWOLLOWED BY A BLACK HOLE!',0
+mburnt:		ascii	'BURNT TO A CRISP!',0
+_4ea3:		ld	e,(ix+d_pos_enterprise)	; 4ea3: dd 5e 4e      .^N
+		ld	d,e			; 4ea6: 53            S
+		bit	6,l			; 4ea7: cb 75         .u
+		jr	z,_4eac			; 4ea9: 28 01         (.
+		inc	e			; 4eab: 1c            .
+_4eac:		bit	5,l			; 4eac: cb 6d         .m
+		jr	z,_4eb1			; 4eae: 28 01         (.
+		dec	e			; 4eb0: 1d            .
+_4eb1:		bit	4,l			; 4eb1: cb 65         .e
+		jr	z,_4ebb			; 4eb3: 28 06         (.
+		ld	a,e			; 4eb5: 7b            {
+		add	a,20h			; 4eb6: c6 20         . 
+		jr	c,_4ebb			; 4eb8: 38 01         8.
+		ld	e,a			; 4eba: 5f            _
+_4ebb:		bit	3,l			; 4ebb: cb 5d         .]
+		jr	z,_4ec5			; 4ebd: 28 06         (.
+		ld	a,e			; 4ebf: 7b            {
+		sub	20h			; 4ec0: d6 20         . 
+		jr	c,_4ec5			; 4ec2: 38 01         8.
+		ld	e,a			; 4ec4: 5f            _
+_4ec5:		call	ship_d2e		; 4ec5: cd c6 4c      ..L
+		jr	z,_4efa			; 4ec8: 28 30         (0
+		ld	a,l			; 4eca: 7d            }
+		cp	58h			; 4ecb: fe 58         .X
+		jr	nz,_4ed5		; 4ecd: 20 06          .
+		ld	hl,mswallow		; 4ecf: 21 76 4e      !vN
+		jp	ent_dead		; 4ed2: c3 89 43      ..C
+
+_4ed5:		cp	55h			; 4ed5: fe 55         .U
+		jr	nc,_4efd		; 4ed7: 30 24         0$
+		cp	50h			; 4ed9: fe 50         .P
+		jr	c,_4efd			; 4edb: 38 20         8 
+		ld	a,(hl)			; 4edd: 7e            ~
+		call	pos2scrn		; 4ede: cd 80 4f      ..O
+		ld	a,2ah			; 4ee1: 3e 2a         >*
+		ld	(bc),a			; 4ee3: 02            .
+_4ee4:		ld	a,0bh			; 4ee4: 3e 0b         >.
+		call	rand			; 4ee6: cd 9a 4f      ..O
+		out	(ffh),a			; 4ee9: d3 ff         ..
+		xor	a			; 4eeb: af            .
+_4eec:		dec	a			; 4eec: 3d            =
+		jr	nz,_4eec		; 4eed: 20 fd          .
+		dec	d			; 4eef: 15            .
+		jr	nz,_4ee4		; 4ef0: 20 f2          .
+		ld	hl,mburnt		; 4ef2: 21 91 4e      !.N
+		out	(ffh),a			; 4ef5: d3 ff         ..
+		jp	ent_dead		; 4ef7: c3 89 43      ..C
+
+_4efa:		ld	(ix+d_pos_enterprise),e	; 4efa: dd 73 4e      .sN
+_4efd:		ld	hl,bige			; 4efd: 21 4e 44      !ND
+		call	str_hl_at_bc		; 4f00: cd 4f 4f      .OO
+_4f03:		pop	bc			; 4f03: c1            .
+		pop	hl			; 4f04: e1            .
+		pop	de			; 4f05: d1            .
+_4f06:		ld	a,l			; 4f06: 7d            }
+		or	d			; 4f07: b2            .
+		xor	d			; 4f08: aa            .
+		ld	d,l			; 4f09: 55            U
+		dec	a			; 4f0a: 3d            =
+		jr	z,_4f4a			; 4f0b: 28 3d         (=
+		dec	a			; 4f0d: 3d            =
+		jr	nz,_4f1e		; 4f0e: 20 0e          .
+		dec	bc			; 4f10: 0b            .
+		ld	a,(bc)			; 4f11: 0a            .
+		cp	20h			; 4f12: fe 20         . 
+		inc	bc			; 4f14: 03            .
+		jp	z,_4e3d			; 4f15: ca 3d 4e      .=N
+		dec	bc			; 4f18: 0b            .
+		ld	a,20h			; 4f19: 3e 20         > 
+		ld	(bc),a			; 4f1b: 02            .
+		jr	_4f4a			; 4f1c: 18 2c         .,
+
+_4f1e:		ld	hl,(_4f4d)		; 4f1e: 2a 4d 4f      *MO
+		ld	a,(3810h)		; 4f21: 3a 10 38      :.8
+		ld	(_4f4d),a		; 4f24: 32 4d 4f      2MO
+		or	l			; 4f27: b5            .
+		xor	l			; 4f28: ad            .
+		ld	e,00h			; 4f29: 1e 00         ..
+_4f2b:		rrc	a			; 4f2b: cb 0f         ..
+		jr	c,_4f45			; 4f2d: 38 16         8.
+		inc	de			; 4f2f: 13            .
+		jr	nz,_4f2b		; 4f30: 20 f9          .
+		ld	e,08h			; 4f32: 1e 08         ..
+		ld	a,(3820h)		; 4f34: 3a 20 38      : 8
+		ld	(_4f4e),a		; 4f37: 32 4e 4f      2NO
+		or	h			; 4f3a: b4            .
+		xor	h			; 4f3b: ac            .
+		and	03h			; 4f3c: e6 03         ..
+		jp	z,_4e3d			; 4f3e: ca 3d 4e      .=N
+		rrca				; 4f41: 0f            .
+		jr	c,_4f45			; 4f42: 38 01         8.
+		inc	e			; 4f44: 1c            .
+_4f45:		ld	a,e			; 4f45: 7b            {
+		add	a,30h			; 4f46: c6 30         .0
+		ld	(bc),a			; 4f48: 02            .
+		inc	bc			; 4f49: 03            .
+_4f4a:		pop	de			; 4f4a: d1            .
+		pop	hl			; 4f4b: e1            .
+		ret				; 4f4c: c9            .
+
+_4f4d:		nop				; 4f4d: 00            .
+_4f4e:		nop				; 4f4e: 00            .
+str_hl_at_bc:	ld	a,(hl)			; 4f4f: 7e            ~
+		inc	hl			; 4f50: 23            #
+		or	a			; 4f51: b7            .
+		ret	z			; 4f52: c8            .
+		ld	(bc),a			; 4f53: 02            .
+		inc	bc			; 4f54: 03            .
+		jr	str_hl_at_bc		; 4f55: 18 f8         ..
+
+; Display A in decimal at (BC)
+print_a:	push	de			; 4f57: d5            .
+		push	hl			; 4f58: e5            .
+		inc	bc			; 4f59: 03            .
+		ld	e,30h			; 4f5a: 1e 30         .0
+		ld	l,a			; 4f5c: 6f            o
+		ld	h,100			; 4f5d: 26 64         &d
+		call	LdivH			; 4f5f: cd da 4f      ..O
+		or	a			; 4f62: b7            .
+		jr	z,_4f68			; 4f63: 28 03         (.
+		add	a,e			; 4f65: 83            .
+		ld	(bc),a			; 4f66: 02            .
+		inc	bc			; 4f67: 03            .
+_4f68:		ld	d,l			; 4f68: 55            U
+		ld	l,h			; 4f69: 6c            l
+		ld	h,0ah			; 4f6a: 26 0a         &.
+		call	LdivH			; 4f6c: cd da 4f      ..O
+		or	a			; 4f6f: b7            .
+		jr	nz,_4f76		; 4f70: 20 04          .
+		add	a,d			; 4f72: 82            .
+		jr	z,_4f79			; 4f73: 28 04         (.
+		xor	a			; 4f75: af            .
+_4f76:		add	a,e			; 4f76: 83            .
+		ld	(bc),a			; 4f77: 02            .
+		inc	bc			; 4f78: 03            .
+_4f79:		ld	a,h			; 4f79: 7c            |
+		add	a,e			; 4f7a: 83            .
+		ld	(bc),a			; 4f7b: 02            .
+		inc	bc			; 4f7c: 03            .
+		pop	hl			; 4f7d: e1            .
+		pop	de			; 4f7e: d1            .
+		ret				; 4f7f: c9            .
+
+; BC = 3CC0h + A * 2; Basicially translates a coordinate to the screen position.
+pos2scrn:	push	hl			; 4f80: e5            .
+		ld	bc,srs_line1		; 4f81: 01 c0 3c      ..<
+		ld	h,00h			; 4f84: 26 00         &.
+		ld	l,a			; 4f86: 6f            o
+		add	hl,hl			; 4f87: 29            )
+		add	hl,bc			; 4f88: 09            .
+		ld	b,h			; 4f89: 44            D
+		ld	c,l			; 4f8a: 4d            M
+		pop	hl			; 4f8b: e1            .
+		ret				; 4f8c: c9            .
+
+cls:		ld	bc,3c00h		; 4f8d: 01 00 3c      ..<
+_4f90:		ld	a,20h			; 4f90: 3e 20         > 
+		ld	(bc),a			; 4f92: 02            .
+		inc	bc			; 4f93: 03            .
+		ld	a,b			; 4f94: 78            x
+		cp	40h			; 4f95: fe 40         .@
+		jr	nz,_4f90		; 4f97: 20 f7          .
+		ret				; 4f99: c9            .
+
+; Get pseudo-random number from 1 to A.  Uses seed * 257 + 101 which
+; does have a period of 65536.  That is, will generate all values.  Decent.
+rand:		push	hl			; 4f9a: e5            .
+		push	bc			; 4f9b: c5            .
+		ld	hl,(rand_seed)		; 4f9c: 2a 40 40      *@@
+		ld	b,l			; 4f9f: 45            E
+		ld	c,65h			; 4fa0: 0e 65         .e
+		add	hl,bc			; 4fa2: 09            .
+		ld	(rand_seed),hl		; 4fa3: 22 40 40      "@@
+		ld	l,a			; 4fa6: 6f            o
+		call	HxL			; 4fa7: cd ef 4f      ..O
+		ld	a,h			; 4faa: 7c            |
+		inc	a			; 4fab: 3c            <
+		pop	bc			; 4fac: c1            .
+		pop	hl			; 4fad: e1            .
+		ret				; 4fae: c9            .
+
+; Take X,Y from B,C.  Computes bit to set in char in A and HL
+; pointing to the screen location to mask.  I haven't absolutely
+; verified this, but it must be close.
+xy2scrnbit:	push	bc			; 4faf: c5            .
+		ld	l,c			; 4fb0: 69            i
+		ld	h,03h			; 4fb1: 26 03         &.
+		call	LdivH			; 4fb3: cd da 4f      ..O
+		ld	l,b			; 4fb6: 68            h
+		sla	l			; 4fb7: cb 25         .%
+		rra				; 4fb9: 1f            .
+		rr	l			; 4fba: cb 1d         ..
+		rra				; 4fbc: 1f            .
+		rr	l			; 4fbd: cb 1d         ..
+		rl	h			; 4fbf: cb 14         ..
+		ld	c,h			; 4fc1: 4c            L
+		add	a,3ch			; 4fc2: c6 3c         .<
+		ld	h,a			; 4fc4: 67            g
+		ld	a,80h			; 4fc5: 3e 80         >.
+		inc	c			; 4fc7: 0c            .
+_4fc8:		rlca				; 4fc8: 07            .
+		dec	c			; 4fc9: 0d            .
+		jr	nz,_4fc8		; 4fca: 20 fc          .
+		pop	bc			; 4fcc: c1            .
+		ret				; 4fcd: c9            .
+
+; compliment pixel (B,C).  Note how it wipes out a non-graphics character but
+; otherwise flips the state of the pixel.
+flipBC:		call	xy2scrnbit		; 4fce: cd af 4f      ..O
+		bit	7,(hl)			; 4fd1: cb 7e         .~
+		jr	z,_4fd6			; 4fd3: 28 01         (.
+		xor	(hl)			; 4fd5: ae            .
+_4fd6:		set	7,a			; 4fd6: cb ff         ..
+		ld	(hl),a			; 4fd8: 77            w
+		ret				; 4fd9: c9            .
+
+; A = L = L / H; H = L % H
+; If H == 0 returns A = L = 255, H = L
+LdivH:		push	bc			; 4fda: c5            .
+		ld	b,h			; 4fdb: 44            D
+		xor	a			; 4fdc: af            .
+		ld	h,a			; 4fdd: 67            g
+_4fde:		ld	c,a			; 4fde: 4f            O
+		ld	a,08h			; 4fdf: 3e 08         >.
+_4fe1:		add	hl,hl			; 4fe1: 29            )
+		sbc	hl,bc			; 4fe2: ed 42         .B
+		inc	hl			; 4fe4: 23            #
+		jr	nc,_4fe9		; 4fe5: 30 02         0.
+		add	hl,bc			; 4fe7: 09            .
+		dec	hl			; 4fe8: 2b            +
+_4fe9:		dec	a			; 4fe9: 3d            =
+		jr	nz,_4fe1		; 4fea: 20 f5          .
+		pop	bc			; 4fec: c1            .
+		ld	a,l			; 4fed: 7d            }
+		ret				; 4fee: c9            .
+
+; Compute A = H * L (and also HL = H * L).
+HxL:		push	bc			; 4fef: c5            .
+		ld	c,l			; 4ff0: 4d            M
+		xor	a			; 4ff1: af            .
+		ld	b,a			; 4ff2: 47            G
+		ld	l,a			; 4ff3: 6f            o
+		ld	a,08h			; 4ff4: 3e 08         >.
+_4ff6:		add	hl,hl			; 4ff6: 29            )
+		jr	nc,_4ffa		; 4ff7: 30 01         0.
+		add	hl,bc			; 4ff9: 09            .
+_4ffa:		dec	a			; 4ffa: 3d            =
+		jr	nz,_4ff6		; 4ffb: 20 f9          .
+		ld	a,l			; 4ffd: 7d            }
+		pop	bc			; 4ffe: c1            .
+		ret				; 4fff: c9            .
+
+		nop				; 5000: 00            .
+		dec	d			; 5001: 15            .
+		add	a,b			; 5002: 80            .
+		jp	c,f30bh			; 5003: da 0b f3      ...
+		ld	hl,0000h		; 5006: 21 00 00      !..
+
+		org	08007h
+		or	a			; 8007: b7            .
+		ld	(hl),b			; 8008: 70            p
+		ld	de,stack2		; 8009: 11 b7 40      ..@
+		ld	bc,0f50h		; 800c: 01 50 0f      .P.
+		ldir				; 800f: ed b0         ..
+		jp	entry_point		; 8011: c3 6d 41      .mA
+
+		nop				; 8014: 00            .
+		ccf				; 8015: 3f            ?
+_end		equ	*
+
+		end	entry_point
