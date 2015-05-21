@@ -1,0 +1,499 @@
+title "Time Trek disassembly."
+title ""
+title "--------------------------------------------------------"
+
+# You'll see "srs_line1" referenced quite a bit.  Many routines use it to tell
+# if the short range scan is up.  If the high bit is set, it is a graphics character
+# indicating that the short range scan is active.
+3c80 loc srs_line0
+3cc0 loc srs_line1
+# I'm making a small leap, but I'd say that the quadrant map is at 4000h
+# which is practically always pointed to by IX.  Of course, 4000h is generally
+# a "zero page" area.  And very often "DE" points there (i.e., D has 40h).
+# Quite a bit of code where (IX+43) (current quadrant) is put into E thereby
+# making it so (DE) contains the information on that quadrant.
+# Each quadrant is a single byte with each bit denoting what it contains:
+#
+#  bit 0   - starbase
+#  bit 1+2 - count of 0 to 3 klingons (4055 - 4057 is their positions in the quadrant)
+#  bit 3+4 - count of 2 to 5 stars (4050 - 4054 is their positions in the quadrant)
+#  bit 5   - black hole in quadrant
+#  bit 6   - magnetic storm in quadrant
+#
+#
+# XXX - pos_klingons is off by one 'cause I think stars go from 2 to 5.  And there's
+# the black hole after the klingons at 4058, I think.
+# Yes, I've seen 5 stars so I should adjust
+#
+# The table ends at 403f as there are 64 quadrants in an 8 x 8 map
+4000 datastart
+	loc quadrant_map $40
+	loc rand_seed 2
+#
+# level is from 1 to 10
+4042 loc level 1
+4043 loc cur_quadrant 1
+4044 loc stardate 3
+4047 loc klingons0 1
+4048 loc klingons 1
+4049 loc bases0 1
+404a loc bases 1
+404b loc klingon_damages 3
+404e loc pos_enterprise 1
+404f loc pos_starbase 1
+4050 loc pos_stars 5
+4055 loc pos_klingons 3
+4058 loc pos_blkhole 1
+4059 loc imp_damage 1
+405a loc warp_damage 1
+405b loc lrs_damage 1
+405c loc shield_damage 1
+405d loc phaser_damage 1
+405e loc ship_nrg 1
+405f loc shields 1
+4060 loc photons 1
+4061 loc starbase_damage 1
+4064 loc sos_starbase_qpos 1
+4065 loc sos_starbase_ttl 1
+
+# Looping/reflexive way to parlay the locations above into index equates.
+
+load %1 0
+repeat $65 {
+	load %2 $4000
+	add %2 %1
+	haslabel %0 %2
+	if %0
+		stclr
+		stlab %2
+		stget %0
+		context index 1
+		%1 equf d_%s %0
+		load %3 %1
+		add %3 $4000
+		subtract %3 $3ffb
+		context index 0
+		%3 equf i_%s %0
+	endif
+	add %1 1
+}
+
+# For readibilty, display byte constant 100 in decimal.
+context byte 0 1
+0064 equ 100
+
+#
+408b loc stack1
+#
+40b7 
+	dataend
+$ word stack2
+$ asciiz mtitle
+$ asciiz mcopy
+$ asciiz mlevel
+$ asciiz mmiss1
+$ asciiz mmiss2
+$ asciiz mmiss3
+$ asciiz mmiss4
+$ asciiz mmiss5
+$ sub entry_point
+$ com "Display title, copyright."
+4164 context 0
+418a com "Cute - clear $4000 - $407F to 0."
+4190 com "Initialize some globals; IX=3FFB at this point"
+419c com "Odd saving, but display level prompt"
+41a6 com "Level in HL; start over if <= 0 or >= 11"
+41ae com "So, level is in 3FFB+47=4042"
+41b1 lab gen_galaxy
+41b7 lab gen_quad
+	com "E loops 0 to 63 as current quadrant."
+	com "C counts Klingons."
+	com "B holds quadrant parameters."
+	com "Quadrant has a 3/130 chance of a black hole. 1.48 average per galaxy."
+	com "4/131 chance of a magnetic storm. 1.95 average per galaxy."
+41cb com "Stars.  Very nearly even chance of 2 to 5."
+41d4 com "If current klingons * 10 / quad num <= level then no klingons here."
+	com "Given LdivH, I think we'll never start with klingons in quadrant 0."
+	com "And always have klingons in quadrant 1."
+41e3 com "Klingons chosen as rand(rand(3))."
+	com "11/18 for 1, 5/18 for 2 and 2/18 for 3."
+41f2 lab no_klingons
+	com "19/146 chance of a starbase; about 13%.  We'll average 8.3 in the galaxy."
+41fe lab no_starbase
+4210 com "Only 6 to 12 starbases are acceptable.  Start over if not."
+4218 com "Pick random starting quadrant for Enterprise."
+4258 lab quad_init
+	context 1
+	com "Initialize the position of everything in the quadrant (at DE, of course)"
+	com "Also displays the black hole warning as needed."
+4290 lab get_command
+4293 lab nd_get_command
+42f8 sub draw_srs
+42f8 com "Draws the short range scanners plus checks a number of"
+42f8 com "game ending conditions or something.  Not fully understood."
+42f8 com "First we erase the area save for the frame."
+4324 com "Display the Enterprise herself."
+4330 com "Draw starbases."
+4343 lab no_starbase
+4343 com "Draw stars"
+435a com "Draw Klingons"
+4379 lab no_more_starbases
+4389 lab ent_dead
+# not entirely sure about this one!
+439e sub LdivB
+4389 com "I think that's right.  H needs to be zero, though.  But it seems likely."
+43a3 lab victory
+43a3 com "I'm guessing a bit on some of the variables, but here's the score calc:"
+43a3 com "(((((B1 * 32) % 256[maybe]) / B0) * L) % 256) * 24) % 256[maybe]) / S"
+43a3 com ""
+43a3 com "Where:"
+43a3 com "   B0 - initial number of starbases"
+43a3 com "   B1 - starbases left at end of game"
+43a3 com "   S  - stardates used"
+43a3 com "   L  - level selected (1 - 10, of course)"
+43a3 com ""
+43a3 com "Seems rife with overlows"
+43a3 com ""
+43d7 lab game_done
+# Various ascii messages.
+4404 asciiz minop
+$ asciiz mthee
+$ ascii 4431 mlaststard
+$ ascii 4443 mstard
+$ asciiz mdestroy
+$ asciiz bige
+$ asciiz starbase
+$ asciiz klingon
+$ asciiz mblkhole
+$ asciiz mcommand
+$ asciiz mkillall
+$ asciiz mkships
+$ asciiz msaved
+$ asciiz mconq
+$ asciiz mthefed
+$ asciiz mscore
+44f0 ascii 4502 mreplay
+4503 lab cmd_status
+4503 com "Ooops - overlap with previous message and code"
+# ??
+454b asciiz mkleft
+$ asciiz mbleft
+$ asciiz mdamage
+$ asciiz mimpulse
+$ asciiz mwarp
+$ asciiz mscan
+$ asciiz mshield
+$ asciiz mphase
+# ??
+45a3 sub cmd_shield
+45ba ascii 45bb mpctetos
+$ asciiz metos
+$ sub cmd_warp
+# ??
+460d asciiz msetcor
+$ sub cmd_lrs
+46ac asciiz mlrscan
+$ sub cmd_destruct
+46e7 asciiz mconfirm
+$ sub cmd_phaser
+4710 sub phaser_pct
+4710 com "Phaser power is 100 - (2/3 * shields)"
+# ??
+470c asciiz mat
+471f asciiz mnopt
+$ asciiz mdegree
+$ sub cmd_photon
+# ??
+4806 asciiz mehit
+485e lab dec_klingon
+4985 sub resetBC
+4985 com "Clear the pixel at (B,C).  Seems to expect that it is a graphics char already."
+#
+4996 lab klingon_thread
+#
+4b46 sub periodic
+4b46 com "A lot gets done here.  Looks like we context switch to another thread"
+4b46 com "if the time is right.  Otherwise we generally update the display with"
+4b46 com "things that change like stardates, energy to shield warnings, quadrant,"
+4b46 com "starbase destroyed and so on."
+4b46 com "4045,46 seems to track the time."
+4b46 com "Most of the time we simply delay 4ms and context switch."
+4b46 com "But once a second we do the processing here."
+4b46 com "Gotta crunch the numbers, but it works out to 95 seconds per stardate."
+4b46 com "I can almost bet that it'll really be 100 or 60 seconds per stardate."
+# ??
+4c17 asciiz mdocked
+$ asciiz msos
+4c36 sub repair
+4c36 com "Repair damage.  Seems rather random; but I'd guess that if bit 7 of C"
+4c36 com "is set, it means we're docked and guarantee 4 times faster repair and"
+4c36 com "ship's energy replenishment.  Thing is, C appears to result from message"
+4c36 com "display by the caller!"
+4c70 sub doesHLhit
+4c70 com "HL points to the screen.  We map to a position and check for collision"
+4c70 com "with an object in the quadrant.  Then we figure out what, if anything,"
+4c70 com "we hit and then return XXXX....."
+4c70 com "(The 3CC0 base of short range scan goes to 1E60, hence the 60!)"
+# ??
+4cc6 sub ship_d2e
+4cc6 com "Like ship_fits, but E is checked for position validity (and if not, return"
+4cc6 com "as a collision with with L = 0).  Otherwise, clear screen position D and"
+4cc6 com "check for collision at E as in ship_fits."
+4cdc sub ship_fits
+4cdc com "Check quadrant to see if a ship at position E would collide with anything."
+4cdc com "Ships at position D are ruled out.  If there is a collision, Z is clear,"
+4cdc com "BC is screen location of position D and $4000 + L is what we hit."
+4cdc com "Otherwise, Z is set and BC is the screen location of E."
+42d4 lab s_noover
+4d2a lab s_overlap
+4d30 sub shpOVstar
+4d30 com "Return z flag set if pos (hl+1) is == E or E + 1"
+4d30 com "Essentially, does the ship at (hl+1) hit the star at E."
+4d37 sub shpOVship
+4d37 com "Return z flag set if pos (hl+1) is == E - 1, E or E + 1 but not D"
+4d37 com "In other words, does the ship (hl+1) overlap with the ship at E."
+4d37 com "But D is ruled out, perhaps to not compare the ship with itself?"
+4d47 asciiz mstardate
+$ asciiz mquadrant
+$ asciiz msldeng
+$ asciiz mshpeng
+$ asciiz mphoton
+$ asciiz mcond
+$ asciiz mgreen
+$ asciiz myellow
+$ asciiz mred
+4d9f sub draw_stats
+4d9f com "Current quandrant must be in E"
+4d9f com "Show stardate"
+4dae com "Show current quadrant"
+4dc2 com "Show shield energy"
+4dd4 com "Show ship energy"
+4de4 com "Show photon torpedos"
+4def com "Show condition (alert) status."
+4def com "  Red if any klingons in the quadrant"
+4def com "  Yellow if ship's energy is <= 40%"
+4def com "  Green, otherwise."
+4e0c sub clreol
+4e0c com "Clear from BC to end of display line with spaces."
+4e0c com "BC ends up pointing to last char on line; A munged."
+4e16 sub getint_HL
+4e16 com "Input integer to HL, display on screen at BC.  Preserves DE."
+4e23 com "XXX - does pop bc clear carry or do we know it to be cleared?"
+4e25 lab atoibchl
+4e25 com "Read (BC) as ASCII int into HL.  Note how 'A' could mean 17."
+4e2c com "HL = HL * 10 + A."
+4e39 sub getchar
+4e39 com "Read a character from keyboard, display at BC.  Return Z if 'enter'."
+4e39 com "Seems like it actually moves and displays the enterprise as needed."
+4e39 com "Possibly only gets numbers."
+4e76 asciiz mswallow
+$ asciiz mburnt
+# ??
+4f4f sub str_hl_at_bc
+4f57 sub print_a
+4f57 com "Display A in decimal at (BC)"
+4f80 sub pos2scrn
+4f80 com "BC = 3CC0h + A * 2; Basicially translates a coordinate to the screen position."
+4f8d sub cls
+4f9a sub rand
+4f9a com "Get pseudo-random number from 1 to A.  Uses seed * 257 + 101 which"
+	com "does have a period of 65536.  That is, will generate all values.  Decent."
+4faf sub xy2scrnbit
+4faf com "Take X,Y from B,C.  Computes bit to set in char in A and HL"
+4faf com "pointing to the screen location to mask.  I haven't absolutely"
+4faf com "verified this, but it must be close."
+4fce sub flipBC
+4fce com "compliment pixel (B,C).  Note how it wipes out a non-graphics character but"
+4fce com "otherwise flips the state of the pixel."
+4fda sub LdivH
+	com "A = L = L / H; H = L % H"
+	com "If H == 0 returns A = L = 255, H = L"
+4fef sub HxL
+4fef com "Compute A = H * L (and also HL = H * L)."
+4324 lab disp_srs_ships
+475d com "compute BC as a vector in direction of input angle"
+477e lab angle_cosine
+477e com "Returns cosine(A) in H"
+477e com "This uses approximation that sin(X) ~ X"
+477e com "Since angle is in 2*degrees, the result is"
+477e com "is not the actual cosine by cosine(X)*90/PI"
+477e com "But this is good enough for producing a vector"
+477e com "which points in the direction of the angle"
+478d lab normalize_BC
+478d com "Normalizes B,C into HL,DE. (HL=delta x, DE=delta Y)"
+478d com "look at the calling context to figure out which is which."
+478d com "the 'ret po' is a clever way to detect the 'overflow' because it uses"
+478d com "signed versions of HL,DE."
+4794 lab dx_positive
+479d lab dy_positive
+479e lab keep_shifting
+48cf com "Fire a phaser or a photon shot"
+48cf com "if H=0 a photon else a phaser"
+48cf com "if H > 127 the shot is a tracer so draw no tail"
+48cf com "A is the start pos, and C the angle."
+48cf lab draw_shot
+48f2 lab keep_drawing_shot
+48f7 com "This branch means the shot moved out of range"
+490e lab shot_hit_something
+4924 lab erase_tail
+4940 com "extend_shot adds to the phaser/photon line"
+4940 lab extend_shot
+4974 lab shot_outside_srs
+498e word weapon_dx
+4990 word weapon_dy
+4992 word weapon_x
+4994 word weapon_y
+4cb2 lab coord_to_xy
+4cb2 com "Takes coordinate in A and returns (pixel) coordinate X,Y in DE"
+4cb2 com "A = Ay | Ax (Ay is three bits, Ax is 5 bits)"
+4cb2 com "D = 4 * Ax + 2"
+4cb2 com "E = 3*Ay + 10"
+4cb2 com "The resulting position is the bottom left of the cell"
+4ca1 lab check_xy_in_srs
+4ca1 com "Returns nc if x,y outside of SRS, c otherwise"
+47aa lab ship_hit
+47aa com "Something in the quadrant has been hit"
+47aa com "HL points to its qpos."
+47aa com "(4062) contains the phaser/photon flag and the distance"
+47aa com "HL is loaded so L is the flag and H the distance"
+47aa com "Then (roughly) sqrt( 2 * (2*L/(H/4)) ) is computed."
+47aa com "and put in C--this is the force of the hit."
+47aa com "if L/H == 0 then it becomes 255--this makes a photon torp"
+47aa com "have a strong impact".
+47be lab sum_reduce
+47be com "Simple sum_reduce loop finds C such that C(C-1)/2 > A"
+47be com "By the quadractic formula C = (1 +- sqrt( 1 + 8C ) ) / 2"
+47be com "This is approximately sqrt( 2*C )"
+47e0 lab damage_systems
+47e0 com "Enterprise is hit!  Above we computed (level+1)/2 * shot_power"
+47e0 com "The loop below will randomly apply the calculated damaged C"
+40e0 com "to each of the ship's systems"
+47ed com "Gets L=ship_ngr, H=shields"
+47fe com "If hit C > ship_ngr, you die"
+47f7 com "If no shields power, you die"
+47f9 com "Load A with shield damage, if >100% then set shield power to 0"
+4822 lab not_bige_hit
+4822 com "if position pointer is bige+1, then a starbase is hit"
+4825 com "Add C to (starbase_damage).  If > 12 starbase is destroyed"
+483d lab destroy_base_at_DE
+483d com "Reset starbase bit in this quadrant"
+4848 lab klingon_hit
+4848 com "Klingon damage table is 10 bytes before klingon position table"
+4848 com "If Klingon damage > 10 the klingon is killed"
+4848 com "This makes them slighly weaker than starbases"
+4862 com "Move the last klingon in the position list to replace the first one"
+4862 com "Note that the damage table is not altered.  This could benefit"
+4862 com "or hurt the player depending on the breaks".
+486b com "Decrement global klingon count, perhaps causing victory"
+4874 lab explosion_at_hl
+46e1 lab enterprise_destroyed
+4a3c lab target_federation
+4a3c com "Attempt to fire upon the big E then the starbase if any"
+4abd lab attack_on_B
+4abd com "Get a klingon to attack on location B"
+4b29 lab find_and_take_shot
+4b29 com "By using tracer shots, see if klingon at (HL) can hit a fed target"
+4b29 com "by shooting the the direction of BC."
+4b29 com "The tracer is a success if it hits either a starbase or"
+4b29 com "or the big e.  The cp 50h is a location-based check on this"
+4b29 com "If the tracer works a real shot is fired.  Klingon phasers"
+4b29 com "use the Enterprise's phaser %age; so low shields pose a risk"
+4b29 com "to your starbases."
+4b2c com "Change this to ld h,01 or ld h,0 to get visible tracer shots"
+4996 com "This is the starting point for the klingon thread"
+4996 com "Until we get to time $0f (about 7.5 seconds), the klingons"
+4996 com "are inactive"
+49a6 lab klingon_AI
+4914 com "Avoid doing erase_tail if the weapon flag is 0 or ff"
+4aac lab try_warp_DE_HL
+4aac com "If possible, warp a klingon from quad (DE) to (HL)"
+4aac com "On return, nz means did warp, z means did not"
+4a9b lab move_klingon
+4a9b com "Move klingon at (HL) qpos to BC screen location"
+4a9b com "E is the destination qpos and (HL) is updated"
+4a9b com "There is also a 60-period (~120 ms) delay after the move"
+49b4 lab klingon_loop
+49b4 com "klingon loop.  Delay about 256 ms before considering"
+49b4 com "the next action of the klingons".
+49bc com "This condition here is, essentially, to decide if a starbase"
+49bc com "should be attacked.  This is possible if no base is under attack"
+49bc com "(ttl at (4065) is zero) or if one of the low 4 bits of the time"
+49bc com "is set. That implies every 8 seconds a large series of attempts."
+49c6 com "Attack starbase.  Choose a random quadrant HL.  If it happens"
+49c6 com "to be the current quadrant or does not contain a starbase,"
+49c6 com "skip the attempted attack. Otherwise, store qpos of the starbase"
+49c6 com "at (ix+64h)".
+49c7 com "Cute; ld a,d is 'ld a,40h' because DE is in the zero page"
+49d9 lab find_attacker
+49d9 com "Look for a klingon not in the current quadrant and warp him"
+49d9 com "to the sos starbase.  Initialize the time to live counter"
+49d9 com "to between 10 to 45."
+49f4 lab consider_phasers_1
+49f5 lab consider_phasers
+49f5 com "Consider a phaser attack if there are klingons in the"
+49f5 com "current quadrant.  If there is only one klingon in the"
+49f5 com "quadrant there is a 1/40 chance it will run away."
+4a2f lab leave_quadrant
+4a04 com "At this poin the klingon wants to leave the quadrant"
+4a0a com "The SRS is up so the klingon must navigate to leave the quadrant."
+4a0e lab keep_moving
+4a0e com "Move klingon at (HL) by adding/subtracting 30, 31, 32"
+4a03 com "The klingon moves away from the big E's line of fire"
+4a29 lab klingon_escaped
+4a88 lab try_move_klingon
+4a88 com "Try to move the klingon to at current pos (HL) to E."
+4a88 com "It looks like a klingon can die if it accidentally runs"
+4a88 com "into a black hole! (4058 is black hole position)"
+4a88 com "ship_d2e must conditionally set E to the next or prev position."
+4a56 com "This is where we try to warp another klingon to the current quadrant".
+4a56 com "1 in 12 chance of getting here"
+4a56 com "Another tricky ld a,40h"
+4a5e com "A is a random quadrant different from the current"
+4a67 com "A klingon is going to warp into the quadrant."
+4a67 com "Get (HL) pointing to the new klingon's position"
+4a6f lab find_warpin_space
+4a85 lab to_klingon_loop
+4ad3 lab fire_and_move
+4b46 com "PNP: I read the timer as 2 milliseconds so a stardate is 48 seconds"
+4b46 com "4045 - counts 2 milliseconds (aprox)"
+4b46 com "4046 - counts 512 milliseconds (about half second)"
+4b46 com "4044 - counts stardates (95 * 512 ms = 48 seconds)."
+4b46 com "(45,46) only count from 0 to $5eff"
+4b54 lab unit_delay
+4b54 com "PNP: dec a = 4 tstates, jr nz = 12 tstates if taken"
+4b54 com "so loop takes 16*256=4080 tstates or about 2ms at 2 MHz"
+4b54 com "or 2.3 ms at 1.77 MHz"
+4b9c com "Point BC at 4 chars past middle of second from bottom line."
+4b9c com "Now check for a starbase SOS reports.  This can disable the"
+4b9c com "message, decrement the TTL and even destroy the starbase"
+4bb0 lab cancel_sos
+4bb0 com "A is zero here"
+4bb4 lab continue_alert
+4bb4 com "H is either zero (no alert) or contents of sos_starbase_ttl"
+4bb8 com "decrement starbase ttl counter"
+4bc8 lab display_starbase_sos
+4bcb com "Check for space to alternate flashing SOS display"
+4be5 lab check_docked
+4be5 com "Check if enterprise is currently docked--if so, display message"
+4c0f com "load up docked enterprise with 3 photon torps"
+4c13 com finish_periodic
+4abd com "First compute (10-level)/2 and put random value in C"
+4abd com "If random > klingons, return.  So klingons more aggressive"
+4abd com "at higher levels."
+4abd com "The rhythm here is: take a shot.  If you're 'close', take"
+4abd com "another shot and return. Otherwise move closer.  If you"
+4abd com "can't move anymore, take another shot and return"
+4abd com "Otherwise go to the top of the loop".
+4acd com "Get HL pointing to chosen klingon."
+4adf com "DE is X,Y of klingon, HL is X,Y of target"
+4ae7 com "Now BC is a vector in the target direction"
+4aeb com "This shot happens only if we're not on SRS.  Stay on SRS!"
+4aed com "This chunk computes D = ABS(B) + ABS(C), a simple distance."
+4b03 com "if D < rand(11..64) take a shot"
+4b03 com "in essense, shoot again if we're close enough and return"
+4b08 com "Now look at moving closer to the target"
+4b08 com "Based on looking at B/2 then C/2 create a new position in A"
+4b21 com "E is the new position, try to move there."
+4b21 com "If we do move, go and try again"
+4b21 com "Otherwise, we fall through to take a shot which will be the"
+4b21 com "return of attack_on_B."
