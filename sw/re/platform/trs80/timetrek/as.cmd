@@ -1,4 +1,4 @@
-asz80 -l -o -s timetrek timetrek.asm
+asz80 -l -o -s timetrek timetrek1.asm
 aslink -i timetrek.rel
 hex2bin timetrek.ihx
 REM * TRS-80 .CMD file format
