@@ -11,6 +11,9 @@
 ; Input	MD5   :	59D3C587DDC97074E36E88F23E677079
 ; Input	CRC32 :	66E0325A
 
+.define	TRS80
+; .define PURE
+; .define MICROBEE
 
 ; Processor	  : z80	[]
 ; Target assembler: ASxxxx by Alan R. Baldwin v1.5
@@ -21,7 +24,8 @@
 
 ; Segment type:	Regular
 		.org 0x3C00
-video:		.ds 0x400
+video:		.ds 0x400					; DATA XREF: RAM:loc_42C2o
+								; RAM:cmd_shieldo ...
 ; end of 'video_seg'
 
 ; File Name   :	E:\Projects\pace\pacedev.net\sw\re\platform\trs80\timetrek\timetrek.bin
@@ -31,48 +35,56 @@ video:		.ds 0x400
 
 ; Segment type:	Regular
 		.org 0x4000
-quadrant_map:	.ds 0x40
-rand_seed:	.ds 2
+quadrant_map:	.ds 0x40					; DATA XREF: RAM:4170t
+								; RAM:4254o ...
+rand_seed:	.ds 2						; DATA XREF: rand+2r
+								; rand+9w
 level:		.ds 1
 cur_quadrant:	.ds 1
-stardate:	.ds 3
+stardate:	.ds 3						; DATA XREF: RAM:4999r
+								; RAM:499Fr
 klingons0:	.ds 1
 klingons:	.ds 1
 bases0:		.ds 1
 bases:		.ds 1
-klingon_damages:.ds 3
-pos_enterprise:	.ds 1
+klingon_damages:.ds 3						; DATA XREF: RAM:49A8o
+								; ship_fitso
+pos_enterprise:	.ds 1						; DATA XREF: RAM:4269o
+								; ship_hit+6Fo	...
 pos_starbase:	.ds 1
 pos_stars:	.ds 5
 pos_klingons:	.ds 3
-pos_blkhole:	.ds 1
-imp_damage:	.ds 1
+pos_blkhole:	.ds 1						; DATA XREF: ship_hit+33o
+imp_damage:	.ds 1						; DATA XREF: repairo
 warp_damage:	.ds 1
 lrs_damage:	.ds 1
 shield_damage:	.ds 1
 phaser_damage:	.ds 1
-ship_nrg:	.ds 1
-shields:	.ds 1
+ship_nrg:	.ds 1						; DATA XREF: ship_hit+43r
+								; ship_hit:loc_4802w
+shields:	.ds 1						; DATA XREF: RAM:4B88r
 photons:	.ds 1
 starbase_damage:.ds 1
-word_4062:	.ds 2
-sos_starbase_qpos:.ds 1
-sos_starbase_ttl:.ds 1
+word_4062:	.ds 2						; DATA XREF: ship_hit+1r
+								; extend_shot+26r ...
+sos_starbase_qpos:.ds 1						; DATA XREF: RAM:4B9Er
+sos_starbase_ttl:.ds 1						; DATA XREF: RAM:cancel_sosw
 		.ds 0x25
-stack1:		.ds 1
+stack1:		.ds 1						; DATA XREF: RAM:entry_pointo
 		.ds 0x2B
-stack2:		.dw klingon_thread
-aTimeTrek:	.ascii ')))TIME TREK((('
+stack2:		.dw klingon_thread				; DATA XREF: RAM:4174o
+								; RAM:4602o ...
+aTimeTrek:	.ascii ')))TIME TREK((('                        ; DATA XREF: RAM:417Bo
 		.db 0
 aCopyright1978J:.ascii 'COPYRIGHT 1978 JOSHUA LAVINSKY'
 		.db 0
 aWhatLevelDoYou:.ascii 'WHAT LEVEL DO YOU WISH TO PLAY (1-10)? '
 		.db 0
-aYourMission:	.ascii 'YOUR MISSION:'
+aYourMission:	.ascii 'YOUR MISSION:'                          ; DATA XREF: RAM:4223o
 		.db 0
 aDestroyTheFlee:.ascii 'DESTROY THE FLEET OF'
 		.db 0
-aBeforeTheyDest:.ascii ' BEFORE THEY DESTROY THE'
+aBeforeTheyDest:.ascii ' BEFORE THEY DESTROY THE'               ; DATA XREF: RAM:423Ao
 		.db 0
 aFederationStar:.ascii ' FEDERATION STARBASES'
 		.db 0
@@ -80,9 +92,10 @@ aGoodLuck:	.ascii 'GOOD LUCK!'
 		.db 0
 ; ---------------------------------------------------------------------------
 
-entry_point:
+entry_point:							; CODE XREF: RAM:41A8j
+								; RAM:41ACj ...
 		ld	sp, #stack1
-		ld	ix, #0x3FFB
+		ld	ix, #quadrant_map-5			; *PATCH* 0x3FFB
 		ld	iy, #stack2
 		call	cls					; clear	screen
 		ld	hl, #aTimeTrek				; ")))TIME TREK((("
@@ -90,12 +103,16 @@ entry_point:
 		call	str_hl_at_bc
 		ld	bc, # video+0x3E2
 		call	str_hl_at_bc				; copyright
+; assumes BC now points	to start of variable space
+.ifndef	PURE
+  ld bc,#quadrant_map
+.endif
 		xor	a					; clear	$4000-$407F
 
-loc_418B:							; display on screen
-		ld	(bc), a
+loc_418B:							; CODE XREF: RAM:418Dj
+		ld	(bc), a					; clear	location
 		inc	c					; next location
-		jp	P, loc_418B
+		jp	P, loc_418B				; loop
 ; Initialize some globals; IX=3FFB at this point
 		ld	0x65(ix), #3
 		ld	0x63(ix), #100				; ship_nrg
@@ -112,7 +129,8 @@ loc_418B:							; display on screen
 		jr	NC, entry_point				; yes, start over
 		ld	0x47(ix), l				; level
 
-gen_galaxy:
+gen_galaxy:							; CODE XREF: RAM:4212j
+								; RAM:4216j
 		xor	a
 
 loc_41B2:							; bases0
@@ -126,7 +144,7 @@ loc_41B2:							; bases0
 ; Quadrant has a 3/130 chance of a black hole. 1.48 average per	galaxy.
 ; 4/131	chance of a magnetic storm. 1.95 average per galaxy.
 
-gen_quad:
+gen_quad:							; CODE XREF: RAM:4204j
 		ld	a, #130
 		ld	b, #0
 		call	rand
@@ -168,7 +186,7 @@ gen_quad:
 
 ; 19/146 chance	of a starbase; about 13%.  We'll average 8.3 in the galaxy.
 
-no_klingons:
+no_klingons:							; CODE XREF: RAM:41E1j
 		ld	a, #146
 		call	rand
 		rla
@@ -176,7 +194,7 @@ no_klingons:
 		inc	b
 		inc	0x4E(ix)				; bases0
 
-no_starbase:
+no_starbase:							; CODE XREF: RAM:41F8j
 		ld	a, b
 		ld	(de), a
 		inc	e
@@ -225,12 +243,13 @@ no_starbase:
 ; Initialize the position of everything	in the quadrant	(at DE,	of course)
 ; Also displays	the black hole warning as needed.
 
-quad_init:
+quad_init:							; CODE XREF: RAM:460Aj
 		push	de
 		ld	0x43(ix), e				; cur_quadrant
 		ld	e, #78
 
-loc_425E:
+loc_425E:							; CODE XREF: RAM:4267j
+								; RAM:4272j ...
 		ld	a, #127
 		call	rand
 		rlca
@@ -239,7 +258,7 @@ loc_425E:
 		jr	Z, loc_425E
 		ld	hl, #pos_enterprise
 
-loc_426C:
+loc_426C:							; CODE XREF: RAM:4275j
 		ld	a, l
 		cp	e
 		jr	Z, loc_4277
@@ -250,7 +269,7 @@ loc_426C:
 		jr	loc_426C
 ; ---------------------------------------------------------------------------
 
-loc_4277:
+loc_4277:							; CODE XREF: RAM:426Ej
 		inc	e
 		ld	a, e
 		cp	#0x59 ;	'Y'
@@ -265,46 +284,48 @@ loc_4277:
 		ld	b, #0x3C ; '<'
 		call	str_hl_at_bc
 
-get_command:
+get_command:							; CODE XREF: RAM:4286j
+								; RAM:loc_45B7j ...
 		call	draw_srs
 
-nd_get_command:							; "COMMAND?"
-		ld	hl, #aCommand
+nd_get_command:							; CODE XREF: RAM:42A5j
+								; RAM:42A9j ...
+		ld	hl, #aCommand				; "COMMAND?"
 		ld	bc, # video+0x3F6
 		call	str_hl_at_bc
 		dec	c
-		call	getchar
-		sub	#0x31 ;	'1'
-		jp	Z, cmd_status
-		jr	C, nd_get_command
-		cp	#7
-		jr	NC, nd_get_command
-		push	af
+		call	getchar					; get command key
+		sub	#0x31 ;	'1'                             ; convert to 0-6
+		jp	Z, cmd_status				; 1=STATUS, go
+		jr	C, nd_get_command			; invalid, loop
+		cp	#7					; valid?
+		jr	NC, nd_get_command			; no, loop
+		push	af					; command
 		ld	c, #0xC0 ; 'À'
 		call	clreol
 		ld	bc, # video+0x40
 		call	clreol
-		pop	af
-		cp	#5
-		jr	NC, loc_42E1
+		pop	af					; command
+		cp	#5					; 6/7?
+		jr	NC, loc_42E1				; yes, skip
 		ld	hl, #aWarpEngines			; "WARP	ENGINES"
 		push	de
-		ld	e, a
-		ld	d, e
+		ld	e, a					; E=command
+		ld	d, e					; D=command
 
-loc_42C2:
+loc_42C2:							; CODE XREF: RAM:42C9j
 		ld	bc, #video
-		call	str_hl_at_bc
+		call	str_hl_at_bc				; display warp/scanner/shield/phaser
 		dec	d
-		jr	NZ, loc_42C2
+		jr	NZ, loc_42C2				; loop until command found
 		ld	hl, #aInoperable			; " INOPERABLE"
 		call	str_hl_at_bc
 		call	clreol
 
-s_noover:
-		ld	b, #0x40 ; '@'
+s_noover:							; *PATCH* #0x40
+		ld	b, >quadrant_map
 		ld	a, e
-		add	a, #0x59 ; 'Y'
+		add	a, #0x59 ; 'Y'                          ; imp_damage
 		ld	c, a
 		ld	a, (bc)
 		cp	#100
@@ -312,7 +333,7 @@ s_noover:
 		pop	de
 		jr	NC, nd_get_command
 
-loc_42E1:
+loc_42E1:							; CODE XREF: RAM:42BAj
 		dec	a
 		jp	Z, cmd_warp
 		dec	a
@@ -331,11 +352,12 @@ loc_42E1:
 ; game ending conditions or something.	Not fully understood.
 ; First	we erase the area save for the frame.
 
-draw_srs:
+draw_srs:							; CODE XREF: RAM:get_commandp
+								; ship_hit+90p	...
 		ld	hl, # video+0x80
 		ld	bc, #0xAA95
 
-loc_42FE:
+loc_42FE:							; CODE XREF: draw_srs+Dj
 		ld	a, #0x2D ; '-'
 		ld	(hl), a
 		inc	l
@@ -343,10 +365,11 @@ loc_42FE:
 		cp	#0xC0 ;	'À'
 		jr	NZ, loc_42FE
 
-loc_4307:
+loc_4307:							; CODE XREF: draw_srs+1Fj
+								; draw_srs+24j
 		ld	(hl), c
 
-loc_4308:
+loc_4308:							; CODE XREF: draw_srs+17j
 		inc	hl
 		ld	a, #0x80 ; '€'
 		ld	(hl), a
@@ -363,7 +386,7 @@ loc_4308:
 		cp	#0x3E ;	'>'
 		jr	NZ, loc_4307
 
-loc_431E:
+loc_431E:							; CODE XREF: draw_srs+2Aj
 		ld	a, #0x2D ; '-'
 		ld	(hl), a
 		inc	l
@@ -375,13 +398,13 @@ loc_431E:
 
 ; Display the Enterprise herself.
 
-disp_srs_ships:
+disp_srs_ships:							; CODE XREF: draw_shot:loc_4935p
 		ld	a, 0x4E(ix)				; pos_enterprise
 		call	pos2scrn
 		ld	hl, #aV					; "\"V\""
 		call	str_hl_at_bc
 		ld	e, 0x43(ix)				; cur_quadrant
-		ld	d, #0x40 ; '@'
+		ld	d, >quadrant_map			; *PATCH* #0x40
 		ld	a, (de)
 		and	#1
 		jr	Z, no_starbase_l
@@ -391,7 +414,7 @@ disp_srs_ships:
 
 ; Draw stars
 
-no_starbase_l:
+no_starbase_l:							; CODE XREF: disp_srs_ships+14j
 		ld	a, (de)
 		and	#0x18
 		rrca
@@ -401,7 +424,7 @@ no_starbase_l:
 		add	a, #0x51 ; 'Q'
 		ld	e, a
 
-loc_434D:
+loc_434D:							; CODE XREF: disp_srs_ships+34j
 		ld	a, (de)
 		call	pos2scrn
 		ld	a, #0x2E ; '.'
@@ -419,7 +442,7 @@ loc_434D:
 		add	a, #0x54 ; 'T'
 		ld	e, a
 
-loc_4363:
+loc_4363:							; CODE XREF: disp_srs_ships+4Fj
 		ld	a, e
 		cp	#0x54 ;	'T'
 		jr	Z, loc_4375
@@ -431,7 +454,7 @@ loc_4363:
 		jr	loc_4363
 ; ---------------------------------------------------------------------------
 
-loc_4375:
+loc_4375:							; CODE XREF: disp_srs_ships+42j
 		pop	de
 		jp	draw_stats
 ; End of function disp_srs_ships
@@ -439,7 +462,7 @@ loc_4375:
 ; ---------------------------------------------------------------------------
 ; START	OF FUNCTION CHUNK FOR ship_hit
 
-no_more_starbases:
+no_more_starbases:						; CODE XREF: ship_hit+9Aj
 		ld	bc, # video+0x300
 		ld	hl, #aTheLastStarbaseHasBeenDestroyed	; "THE LAST STARBASE HAS BEEN DESTROYED"
 		call	str_hl_at_bc
@@ -450,7 +473,8 @@ no_more_starbases:
 ; ---------------------------------------------------------------------------
 ; START	OF FUNCTION CHUNK FOR getchar
 
-ent_dead:
+ent_dead:							; CODE XREF: ship_hit-C6j
+								; getchar+99j ...
 		push	hl
 		ld	bc, # video+0x300
 		ld	hl, #aTheEnterpriseHasBeen		; "THE ENTERPRISE HAS BEEN "
@@ -465,7 +489,8 @@ ent_dead:
 ; =============== S U B	R O U T	I N E =======================================
 
 
-LdivB:
+LdivB:								; CODE XREF: ship_hit-3FAp
+								; ship_hit-3E9p
 		push	bc
 		xor	a
 		jp	loc_4FDE
@@ -485,8 +510,9 @@ LdivB:
 ;
 ; START	OF FUNCTION CHUNK FOR ship_hit
 
-victory:							; bases
-		ld	l, 0x4A(ix)
+victory:							; CODE XREF: RAM:46DEj
+								; ship_hit+C4j
+		ld	l, 0x4A(ix)				; bases
 		ld	h, #0
 		add	hl, hl
 		add	hl, hl
@@ -511,10 +537,11 @@ victory:							; bases
 ; END OF FUNCTION CHUNK	FOR ship_hit
 ; START	OF FUNCTION CHUNK FOR getchar
 
-game_done:
+game_done:							; CODE XREF: ship_hit-423j
+								; getchar-A9Dj
 		ld	e, #4
 
-loc_43D9:
+loc_43D9:							; CODE XREF: getchar-A5Cj
 		call	clreol
 		dec	e
 		jr	NZ, loc_43D9
@@ -530,45 +557,52 @@ loc_43D9:
 		ld	c, #0xEC ; 'ì'
 		call	str_hl_at_bc
 
-loc_43FB:							; keyboard row with 'Y'
-		ld	a, (0x3808)
+loc_43FB:							; CODE XREF: getchar-A3Aj
+		ld	a, (0x3808)				; keyboard row with 'Y'
 		or	a					; any key pressed?
 		jr	Z, loc_43FB				; no, loop
 		jp	entry_point
 ; END OF FUNCTION CHUNK	FOR getchar
 ; ---------------------------------------------------------------------------
-aInoperable:	.ascii ' INOPERABLE'
+aInoperable:	.ascii ' INOPERABLE'                            ; DATA XREF: RAM:42CBo
+								; getchar+31o
 		.db 0
-aTheEnterpriseHasBeen:.ascii 'THE ENTERPRISE HAS BEEN '
+aTheEnterpriseHasBeen:.ascii 'THE ENTERPRISE HAS BEEN '         ; DATA XREF: getchar-AACo
 		.db 0
 aTheLastStarbaseHasBeenDestroyed:.ascii	'THE LAST STARBASE HAS BEEN DESTROYED'
+								; DATA XREF: ship_hit-42Eo
+								; RAM:4BBDo
 		.db 0
-aV:		.ascii '"V"'
+aV:		.ascii '"V"'                                    ; DATA XREF: disp_srs_ships+6o
+								; getchar:loc_4EFDo
 		.db 0
 aO:		.ascii '+O+'
 		.db 0
-klingon:	.ascii '<*>'
+klingon:	.ascii '<*>'                                    ; DATA XREF: disp_srs_ships+48o
+								; try_move_klingon:move_klingono
 		.db 0
 aSensorsDetectABlackHoleInThisQu:.ascii	'SENSORS DETECT A BLACK HOLE IN THIS QUADRANT!'
+								; DATA XREF: RAM:4288o
 		.db 0
-aCommand:	.ascii 'COMMAND?'
+aCommand:	.ascii 'COMMAND?'                               ; DATA XREF: RAM:nd_get_commando
 		.db 0
-aYouHaveDestroyedAll:.ascii 'YOU HAVE DESTROYED ALL'
+aYouHaveDestroyedAll:.ascii 'YOU HAVE DESTROYED ALL'            ; DATA XREF: ship_hit-3E2o
 		.db 0
-aKlingonShips:	.ascii ' KLINGON SHIPS'
+aKlingonShips:	.ascii ' KLINGON SHIPS'                         ; DATA XREF: RAM:4234o
 		.db 0
 aIsSaved:	.ascii 'IS SAVED'
 		.db 0
-aWillBeConquered:.ascii	'WILL BE CONQUERED'
+aWillBeConquered:.ascii	'WILL BE CONQUERED'                     ; DATA XREF: ship_hit-426o
+								; getchar-AA0o
 		.db 0
-aTheFederation:	.ascii 'THE FEDERATION '
+aTheFederation:	.ascii 'THE FEDERATION '                        ; DATA XREF: getchar-A54o
 		.db 0
 aYourScoreIs:	.ascii 'YOUR SCORE IS'
 		.db 0
 aCareToPlayAgain:.ascii	'CARE TO PLAY AGAIN?'
 ; ---------------------------------------------------------------------------
 
-cmd_status:
+cmd_status:							; CODE XREF: RAM:42A2j
 		nop
 		call	cls
 		ld	b, #0x3C ; '<'
@@ -586,7 +620,7 @@ cmd_status:
 		push	de
 		ld	e, #0x59 ; 'Y'
 
-loc_452B:
+loc_452B:							; CODE XREF: RAM:4543j
 		call	str_hl_at_bc
 		ld	a, c
 		and	#0xC0 ;	'À'
@@ -606,15 +640,15 @@ loc_452B:
 		call	getchar
 		jr	loc_45B7
 ; ---------------------------------------------------------------------------
-aKlingonsLeft:	.ascii ' KLINGONS LEFT'
+aKlingonsLeft:	.ascii ' KLINGONS LEFT'                         ; DATA XREF: RAM:450Fo
 		.db 0
 aBasesLeft:	.ascii ' BASES LEFT'
 		.db 0
 aDamage:	.ascii 'DAMAGE'
 		.db 0
-aImpulseEngines:.ascii 'IMPULSE ENGINES'
+aImpulseEngines:.ascii 'IMPULSE ENGINES'                        ; DATA XREF: getchar+28o
 		.db 0
-aWarpEngines:	.ascii 'WARP ENGINES'
+aWarpEngines:	.ascii 'WARP ENGINES'                           ; DATA XREF: RAM:42BCo
 		.db 0
 aScanners:	.ascii 'SCANNERS'
 		.db 0
@@ -624,7 +658,8 @@ aPhasers:	.ascii 'PHASERS'
 		.db 0
 ; ---------------------------------------------------------------------------
 
-cmd_shield:
+cmd_shield:							; CODE XREF: RAM:42EAj
+								; RAM:45B2j
 		ld	bc, #video
 		ld	hl, #aEnergyToShields			; "% ENERGY TO SHIELDS?	"
 		call	str_hl_at_bc
@@ -634,14 +669,16 @@ cmd_shield:
 		jr	NC, cmd_shield
 		ld	0x5F(ix), a				; shields
 
-loc_45B7:
+loc_45B7:							; CODE XREF: RAM:4549j
 		jp	get_command
 ; ---------------------------------------------------------------------------
-aEnergyToShields:.ascii	'% ENERGY TO SHIELDS? '
+aEnergyToShields:.ascii	'% ENERGY TO SHIELDS? '                 ; DATA XREF: RAM:45A6o
+								; RAM:4B8Eo
 		.db 0
 ; ---------------------------------------------------------------------------
 
-cmd_warp:
+cmd_warp:							; CODE XREF: RAM:42E2j
+								; RAM:45E5j ...
 		ld	bc, #video
 		push	bc
 		call	clreol
@@ -667,18 +704,19 @@ cmd_warp:
 		or	h
 		cp	e
 
-loc_45FE:
+loc_45FE:							; CODE XREF: RAM:45E1j
+								; RAM:45EFj
 		jp	Z, nd_get_command
 		ld	e, a
 		ld	iy, #stack2
 		ld	0x61(ix), #0				; starbase_damage
 		jp	quad_init
 ; ---------------------------------------------------------------------------
-aSetCourseFor:	.ascii 'SET COURSE FOR? '
+aSetCourseFor:	.ascii 'SET COURSE FOR? '                       ; DATA XREF: RAM:45D8o
 		.db 0
 ; ---------------------------------------------------------------------------
 
-cmd_lrs:
+cmd_lrs:							; CODE XREF: RAM:42E6j
 		call	cls
 		ld	hl, #aLongRangeScan			; "LONG	RANGE SCAN"
 		ld	b, #0x3C ; '<'
@@ -688,7 +726,7 @@ cmd_lrs:
 		ld	hl, # video+0x85
 		ld	c, #0xC0 ; 'À'
 
-loc_4631:
+loc_4631:							; CODE XREF: RAM:46A3j
 		ld	a, e
 		ld	(bc), a
 		ld	(hl), a
@@ -709,7 +747,7 @@ loc_4631:
 		rlca
 		ld	e, a
 
-loc_4649:
+loc_4649:							; CODE XREF: RAM:469Aj
 		ld	a, #0xAA ; 'ª'
 		ld	(bc), a
 		push	bc
@@ -722,7 +760,7 @@ loc_4649:
 		jr	NC, loc_465A
 		neg
 
-loc_465A:
+loc_465A:							; CODE XREF: RAM:4656j
 		cp	#2
 		jr	NC, loc_468E
 		ld	a, e
@@ -730,11 +768,11 @@ loc_465A:
 		jr	NC, loc_4664
 		neg
 
-loc_4664:
+loc_4664:							; CODE XREF: RAM:4660j
 		cp	#0xA
 		jr	NC, loc_468E
 
-loc_4668:
+loc_4668:							; CODE XREF: RAM:4650j
 		inc	bc
 		inc	bc
 		ld	a, e
@@ -744,7 +782,7 @@ loc_4668:
 		ld	(bc), a
 		inc	bc
 
-loc_4672:
+loc_4672:							; CODE XREF: RAM:466Cj
 		ld	a, (de)
 		and	#1
 		jr	Z, loc_467C
@@ -753,7 +791,7 @@ loc_4672:
 		ld	(bc), a
 		inc	bc
 
-loc_467C:
+loc_467C:							; CODE XREF: RAM:4675j
 		ld	a, (de)
 		bit	6, a
 		jr	Z, loc_4687
@@ -763,13 +801,14 @@ loc_467C:
 		jr	loc_468E
 ; ---------------------------------------------------------------------------
 
-loc_4687:
+loc_4687:							; CODE XREF: RAM:467Fj
 		ld	a, (de)
 		and	#6
 		rrca
 		call	print_a
 
-loc_468E:
+loc_468E:							; CODE XREF: RAM:465Cj
+								; RAM:4666j ...
 		pop	bc
 		inc	e
 		ld	a, c
@@ -777,7 +816,7 @@ loc_468E:
 		jr	NC, loc_4696
 		inc	b
 
-loc_4696:
+loc_4696:							; CODE XREF: RAM:4693j
 		ld	c, a
 		and	#0x3F ;	'?'
 		dec	a
@@ -792,14 +831,14 @@ loc_4696:
 		pop	de
 		call	getchar
 
-loc_46A9:
+loc_46A9:							; CODE XREF: RAM:46CBj
 		jp	get_command
 ; ---------------------------------------------------------------------------
-aLongRangeScan:	.ascii 'LONG RANGE SCAN'
+aLongRangeScan:	.ascii 'LONG RANGE SCAN'                        ; DATA XREF: RAM:4621o
 		.db 0
 ; ---------------------------------------------------------------------------
 
-cmd_destruct:
+cmd_destruct:							; CODE XREF: RAM:42F5j
 		ld	bc, #video
 		ld	hl, #aConfirm				; "CONFIRM? "
 		call	str_hl_at_bc
@@ -808,7 +847,7 @@ cmd_destruct:
 		cp	#0x7B ;	'{'
 		jr	NZ, loc_46A9
 		ld	c, 0x4E(ix)				; pos_enterprise
-		ld	b, #0x40 ; '@'
+		ld	b, >quadrant_map			; *PATCH* #0x40
 		ld	a, #0xFF
 		call	sub_487F
 		ld	a, (de)
@@ -818,16 +857,16 @@ cmd_destruct:
 		jp	Z, victory
 ; START	OF FUNCTION CHUNK FOR ship_hit
 
-enterprise_destroyed:
+enterprise_destroyed:						; CODE XREF: ship_hit+75j
 		ld	hl, # aTheLastStarbaseHasBeenDestroyed+0x1B
 		jp	ent_dead
 ; END OF FUNCTION CHUNK	FOR ship_hit
 ; ---------------------------------------------------------------------------
-aConfirm:	.ascii 'CONFIRM? '
+aConfirm:	.ascii 'CONFIRM? '                              ; DATA XREF: RAM:46BFo
 		.db 0
 ; ---------------------------------------------------------------------------
 
-cmd_phaser:
+cmd_phaser:							; CODE XREF: RAM:42EEj
 		ld	bc, # video+8
 		ld	hl, #aAt				; "AT "
 		call	str_hl_at_bc
@@ -841,13 +880,14 @@ cmd_phaser:
 		ld	c, #0x20 ; ' '
 		jr	loc_4756
 ; ---------------------------------------------------------------------------
-aAt:		.ascii 'AT '
+aAt:		.ascii 'AT '                                    ; DATA XREF: RAM:46F4o
 		.db 0
 
 ; =============== S U B	R O U T	I N E =======================================
 
 
-phaser_pct:
+phaser_pct:							; CODE XREF: RAM:46FBp
+								; attack_on_B+7Dp
 		ld	l, 0x5F(ix)				; shields
 		sla	l
 		ld	h, #3
@@ -859,13 +899,13 @@ phaser_pct:
 ; End of function phaser_pct
 
 ; ---------------------------------------------------------------------------
-aPhotonTubesEmpty:.ascii 'PHOTON TUBES EMPTY'
+aPhotonTubesEmpty:.ascii 'PHOTON TUBES EMPTY'                   ; DATA XREF: RAM:4745o
 		.db 0
-aDegrees:	.ascii 'DEGREES? '
+aDegrees:	.ascii 'DEGREES? '                              ; DATA XREF: RAM:4757o
 		.db 0
 ; ---------------------------------------------------------------------------
 
-cmd_photon:
+cmd_photon:							; CODE XREF: RAM:42F2j
 		ld	bc, #video
 		ld	a, 0x60(ix)				; photons
 		or	a
@@ -876,11 +916,11 @@ cmd_photon:
 		jp	nd_get_command
 ; ---------------------------------------------------------------------------
 
-loc_4751:							; photons
-		dec	0x60(ix)
+loc_4751:							; CODE XREF: RAM:4743j
+		dec	0x60(ix)				; photons
 		ld	h, #0
 
-loc_4756:
+loc_4756:							; CODE XREF: RAM:470Aj
 		push	hl
 		ld	hl, #aDegrees				; "DEGREES? "
 		call	str_hl_at_bc
@@ -911,7 +951,8 @@ loc_4756:
 ; But this is good enough for producing	a vector
 ; which	points in the direction	of the angle
 
-angle_cosine:
+angle_cosine:							; CODE XREF: RAM:4766p
+								; RAM:476Dp
 		ld	l, a
 		ld	h, #0x5A ; 'Z'
 		call	LdivH
@@ -931,14 +972,14 @@ angle_cosine:
 ; the 'ret po' is a clever way to detect the 'overflow' because it uses
 ; signed versions of HL,DE.
 
-normalize_BC:
+normalize_BC:							; CODE XREF: draw_shot+18p
 		ld	l, b
 		xor	a
 		bit	7, l
 		jr	Z, dx_positive
 		cpl
 
-dx_positive:
+dx_positive:							; CODE XREF: normalize_BC+4j
 		ld	h, a
 		add	hl, hl
 		ld	e, c
@@ -947,10 +988,10 @@ dx_positive:
 		jr	Z, dy_positive
 		cpl
 
-dy_positive:
+dy_positive:							; CODE XREF: normalize_BC+Dj
 		ld	d, a
 
-keep_shifting:
+keep_shifting:							; CODE XREF: normalize_BC+1Bj
 		add	hl, hl
 		ex	de, hl
 		add	hl, hl
@@ -976,7 +1017,8 @@ keep_shifting:
 ; if L/H == 0 then it becomes 255--this	makes a	photon torp
 ; have a strong	impact
 
-ship_hit:
+ship_hit:							; CODE XREF: RAM:4778p
+								; attack_on_B+85j
 
 ; FUNCTION CHUNK AT 4379 SIZE 00000010 BYTES
 ; FUNCTION CHUNK AT 43A3 SIZE 00000034 BYTES
@@ -992,7 +1034,7 @@ ship_hit:
 		jr	NZ, loc_47BB
 		cpl
 
-loc_47BB:
+loc_47BB:							; CODE XREF: ship_hit+Ej
 		pop	hl
 		ld	c, #0
 
@@ -1000,7 +1042,7 @@ loc_47BB:
 ; By the quadractic formula C =	(1 +- sqrt( 1 +	8C ) ) / 2
 ; This is approximately	sqrt( 2*C )
 
-sum_reduce:
+sum_reduce:							; CODE XREF: ship_hit+16j
 		inc	c
 		sub	c
 		jr	NC, sum_reduce
@@ -1023,7 +1065,7 @@ sum_reduce:
 ; Enterprise is	hit!  Above we computed	(level+1)/2 * shot_power
 ; The loop below will randomly apply the calculated damaged C
 
-damage_systems:
+damage_systems:							; CODE XREF: ship_hit+41j
 		inc	hl
 		ld	a, c
 		rlca
@@ -1050,25 +1092,26 @@ damage_systems:
 		jr	C, loc_4802
 		ld	h, #0
 
-loc_4802:
+loc_4802:							; CODE XREF: ship_hit+54j
 		ld	(ship_nrg), hl
 		ret
 ; ---------------------------------------------------------------------------
-aEnterpriseHit:	.ascii 'ENTERPRISE HIT'
+aEnterpriseHit:	.ascii 'ENTERPRISE HIT'                         ; DATA XREF: ship_hit+21o
 		.db 0
 ; ---------------------------------------------------------------------------
 
-loc_4815:
+loc_4815:							; CODE XREF: ship_hit+48j
+								; ship_hit+4Dj
 		ld	a, (video+0xC0)
 		rla
-		ld	hl, #0x404E
+		ld	hl, #pos_enterprise
 		call	C, explosion_at_hl
 		jp	enterprise_destroyed
 ; ---------------------------------------------------------------------------
 
 ; if position pointer is bige+1, then a	starbase is hit
 
-not_bige_hit:
+not_bige_hit:							; CODE XREF: ship_hit+1Bj
 		dec	a
 		jr	NZ, klingon_hit
 ; Add C	to (starbase_damage).  If > 12 starbase	is destroyed
@@ -1087,7 +1130,8 @@ not_bige_hit:
 
 ; Reset	starbase bit in	this quadrant
 
-destroy_base_at_DE:
+destroy_base_at_DE:						; CODE XREF: ship_hit+89j
+								; RAM:4BC3p
 		ld	a, (de)
 		res	0, a
 		ld	(de), a
@@ -1100,7 +1144,7 @@ destroy_base_at_DE:
 ; If Klingon damage > 10 the klingon is	killed
 ; This makes them slighly weaker than starbases
 
-klingon_hit:
+klingon_hit:							; CODE XREF: ship_hit+79j
 		ld	b, l
 		ld	a, l
 		sub	#10
@@ -1117,7 +1161,7 @@ klingon_hit:
 		pop	hl
 		ld	b, l
 
-dec_klingon:
+dec_klingon:							; CODE XREF: try_move_klingon+10j
 		ld	a, (de)
 		sub	#2
 		ld	(de), a
@@ -1141,7 +1185,8 @@ dec_klingon:
 ; =============== S U B	R O U T	I N E =======================================
 
 
-explosion_at_hl:
+explosion_at_hl:						; CODE XREF: ship_hit+72p
+								; ship_hit+8Bp	...
 		ld	c, (hl)
 		ld	b, #0xA
 		ld	a, #0x1C
@@ -1154,7 +1199,7 @@ explosion_at_hl:
 ; =============== S U B	R O U T	I N E =======================================
 
 
-sub_487F:
+sub_487F:							; CODE XREF: RAM:46D4p
 		push	de
 		push	af
 		ld	a, c
@@ -1162,7 +1207,7 @@ sub_487F:
 		ld	hl, #0
 		push	bc
 
-loc_4889:
+loc_4889:							; CODE XREF: sub_487F+4Cj
 		ld	a, h
 		call	rand
 		ld	b, h
@@ -1184,7 +1229,7 @@ loc_4889:
 		xor	a
 		out	(0xFF),	a
 
-loc_48A8:
+loc_48A8:							; CODE XREF: sub_487F+2Aj
 		dec	a
 		jr	NZ, loc_48A8
 		pop	af
@@ -1200,7 +1245,7 @@ loc_48A8:
 		ld	a, #8
 		call	rand
 
-loc_48BF:
+loc_48BF:							; CODE XREF: sub_487F+39j
 		out	(0xFF),	a
 		push	bc
 		ld	a, h
@@ -1208,15 +1253,15 @@ loc_48BF:
 		jr	NZ, loc_48C8
 		inc	l
 
-loc_48C8:
+loc_48C8:							; CODE XREF: sub_487F+46j
 		ld	a, #5
 
-loc_48CA:
+loc_48CA:							; CODE XREF: sub_487F+2Ej
 		push	af
 		jr	loc_4889
 ; ---------------------------------------------------------------------------
 
-loc_48CD:
+loc_48CD:							; CODE XREF: sub_487F+33j
 		pop	de
 		ret
 ; End of function sub_487F
@@ -1229,7 +1274,8 @@ loc_48CD:
 ; if H > 127 the shot is a tracer so draw no tail
 ; A is the start pos, and C the	angle.
 
-draw_shot:
+draw_shot:							; CODE XREF: RAM:4775p
+								; attack_on_B+72p ...
 		push	af
 		ld	0x62(ix), h
 		call	coord_to_xy
@@ -1248,7 +1294,7 @@ draw_shot:
 		ld	(weapon_dy), de
 		pop	de
 
-keep_drawing_shot:
+keep_drawing_shot:						; CODE XREF: draw_shot+3Dj
 		push	de
 		call	extend_shot
 		pop	de
@@ -1267,7 +1313,8 @@ keep_drawing_shot:
 		jr	keep_drawing_shot
 ; ---------------------------------------------------------------------------
 
-shot_hit_something:
+shot_hit_something:						; CODE XREF: draw_shot+28j
+								; draw_shot+34j
 		pop	de
 		ex	(sp), hl
 		push	af
@@ -1281,7 +1328,7 @@ shot_hit_something:
 		ld	(weapon_y), hl
 		ld	d, 0x63(ix)
 
-erase_tail:
+erase_tail:							; CODE XREF: draw_shot+64j
 		push	de
 		call	extend_shot
 		pop	de
@@ -1292,12 +1339,13 @@ erase_tail:
 		dec	d
 		jr	NZ, erase_tail
 
-loc_4935:
+loc_4935:							; CODE XREF: draw_shot+49j
 		call	disp_srs_ships
 
-loc_4938:							; cur_quadrant
-		ld	e, 0x43(ix)
-		ld	d, #0x40 ; '@'
+loc_4938:							; CODE XREF: draw_shot+46j
+								; draw_shot+5Ej
+		ld	e, 0x43(ix)				; cur_quadrant
+		ld	d, >quadrant_map			; *PATCH* #0x40
 		pop	af
 		pop	hl
 		ret
@@ -1308,7 +1356,8 @@ loc_4938:							; cur_quadrant
 
 ; extend_shot adds to the phaser/photon	line
 
-extend_shot:
+extend_shot:							; CODE XREF: draw_shot+24p
+								; draw_shot+56p
 		ld	de, (weapon_dx)
 		ld	hl, (weapon_x)
 		add	hl, de
@@ -1335,7 +1384,7 @@ extend_shot:
 		scf
 		pop	bc
 
-shot_outside_srs:
+shot_outside_srs:						; CODE XREF: extend_shot+17j
 		ld	(weapon_dy), de
 		ld	(weapon_y), hl
 		pop	hl
@@ -1350,7 +1399,8 @@ shot_outside_srs:
 
 ; Clear	the pixel at (B,C).  Seems to expect that it is	a graphics char	already.
 
-resetBC:
+resetBC:							; CODE XREF: draw_shot+3Ap
+								; draw_shot+60p
 		call	xy2scrnbit
 		set	7, (hl)
 		cpl
@@ -1360,17 +1410,22 @@ resetBC:
 ; End of function resetBC
 
 ; ---------------------------------------------------------------------------
-weapon_dx:	.dw 0
-weapon_dy:	.dw 0
-weapon_x:	.dw 0
-weapon_y:	.dw 0
+weapon_dx:	.dw 0						; DATA XREF: draw_shot+1Bw
+								; extend_shotr	...
+weapon_dy:	.dw 0						; DATA XREF: draw_shot+1Ew
+								; extend_shot+Br ...
+weapon_x:	.dw 0						; DATA XREF: draw_shot+Bw
+								; draw_shot+4Bw ...
+weapon_y:	.dw 0						; DATA XREF: draw_shot+Fw
+								; draw_shot+4Fw ...
 ; ---------------------------------------------------------------------------
 
 ; This is the starting point for the klingon thread
 ; Until	we get to time $0f (about 7.5 seconds),	the klingons
 ; are inactive
 
-klingon_thread:
+klingon_thread:							; CODE XREF: RAM:49A4j
+								; DATA XREF: RAM:stack2o
 		call	periodic
 		ld	a, (stardate)
 		or	a
@@ -1379,7 +1434,7 @@ klingon_thread:
 		cp	#0xF
 		jr	C, klingon_thread
 
-klingon_AI:
+klingon_AI:							; CODE XREF: RAM:499Dj
 		dec	sp
 		dec	sp
 		ld	de, #klingon_damages
@@ -1394,10 +1449,11 @@ klingon_AI:
 ; klingon loop.	 Delay about 256 ms before considering
 ; the next action of the klingons
 
-klingon_loop:
+klingon_loop:							; CODE XREF: RAM:49F8j
+								; RAM:4A39j ...
 		ld	b, #0x80 ; '€'
 
-loc_49B6:
+loc_49B6:							; CODE XREF: RAM:49BAj
 		call	periodic
 		dec	b
 		jr	NZ, loc_49B6
@@ -1416,6 +1472,9 @@ loc_49B6:
 		push	de
 ; Cute;	ld a,d is 'ld a,40h' because DE is in the zero page
 		ld	a, d
+.ifndef	PURE
+  ld a,64
+.endif
 		call	rand
 		dec	a
 		ld	l, a
@@ -1431,8 +1490,12 @@ loc_49B6:
 ; to the sos starbase.	Initialize the time to live counter
 ; to between 10	to 45.
 
-find_attacker:
+find_attacker:							; CODE XREF: RAM:49DFj
+								; RAM:49E8j
 		ld	a, d
+.ifndef	PURE
+  ld a,64
+.endif
 		call	rand
 		dec	a
 		cp	e
@@ -1447,14 +1510,15 @@ find_attacker:
 		add	a, #0x14
 		ld	0x65(ix), a
 
-consider_phasers_1:
+consider_phasers_1:						; CODE XREF: RAM:49CEj
+								; RAM:49D4j
 		pop	de
 
 ; Consider a phaser attack if there are	klingons in the
 ; current quadrant.  If	there is only one klingon in the
 ; quadrant there is a 1/40 chance it will run away.
 
-consider_phasers:
+consider_phasers:						; CODE XREF: RAM:49C4j
 		ld	a, (de)
 		and	#6
 		jr	Z, klingon_loop
@@ -1474,7 +1538,7 @@ consider_phasers:
 
 ; Move klingon at (HL) by adding/subtracting 30, 31, 32
 
-keep_moving:
+keep_moving:							; CODE XREF: RAM:4A27j
 		ld	a, #3
 		call	rand
 		add	a, #0x1E
@@ -1487,24 +1551,28 @@ keep_moving:
 		jr	loc_4A21
 ; ---------------------------------------------------------------------------
 
-loc_4A20:
+loc_4A20:							; CODE XREF: RAM:4A1Bj
 		add	a, e
 
-loc_4A21:
+loc_4A21:							; CODE XREF: RAM:4A1Ej
 		jr	C, klingon_escaped
 		ld	e, a
 		call	try_move_klingon
 		jr	keep_moving
 ; ---------------------------------------------------------------------------
 
-klingon_escaped:
+klingon_escaped:						; CODE XREF: RAM:loc_4A21j
 		ld	d, (hl)
 		ld	e, (hl)
 		call	ship_d2e
 		pop	de
 
-leave_quadrant:
+leave_quadrant:							; CODE XREF: RAM:4A08j
+								; RAM:4A37j
 		ld	a, d
+.ifndef	PURE
+  ld a,64
+.endif
 		call	rand
 		ld	l, a
 		call	try_warp_DE_HL
@@ -1514,8 +1582,8 @@ leave_quadrant:
 
 ; Attempt to fire upon the big E then the starbase if any
 
-target_federation:						; pos_enterprise
-		ld	b, 0x4E(ix)
+target_federation:						; CODE XREF: RAM:4A02j
+		ld	b, 0x4E(ix)				; pos_enterprise
 		call	attack_on_B
 		ld	a, (de)
 		and	#1
@@ -1530,6 +1598,9 @@ target_federation:						; pos_enterprise
 ; 1 in 12 chance of getting here
 ; Another tricky ld a,40h
 		ld	a, d
+.ifndef	PURE
+  ld a,64
+.endif
 		call	rand
 		dec	a
 		cp	e
@@ -1548,7 +1619,7 @@ target_federation:						; pos_enterprise
 		ld	l, a
 		push	de
 
-find_warpin_space:
+find_warpin_space:						; CODE XREF: RAM:4A7Ej
 		ld	a, #0x41 ; 'A'
 		call	rand
 		add	a, #0xDE ; 'Þ'
@@ -1562,7 +1633,8 @@ find_warpin_space:
 		pop	de
 		call	draw_srs
 
-to_klingon_loop:
+to_klingon_loop:						; CODE XREF: RAM:4A54j
+								; RAM:4A5Cj ...
 		jp	klingon_loop
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -1572,7 +1644,8 @@ to_klingon_loop:
 ; into a black hole! (4058 is black hole position)
 ; ship_d2e must	conditionally set E to the next	or prev	position.
 
-try_move_klingon:
+try_move_klingon:						; CODE XREF: RAM:4A24p
+								; attack_on_B+64p
 		ld	d, (hl)
 		push	hl
 		call	ship_d2e
@@ -1589,14 +1662,15 @@ try_move_klingon:
 ; E is the destination qpos and	(HL) is	updated
 ; There	is also	a 60-period (~120 ms) delay after the move
 
-move_klingon:							; "<*>"
-		ld	hl, #klingon
+move_klingon:							; CODE XREF: try_move_klingon+6j
+								; try_move_klingon+Bj
+		ld	hl, #klingon				; "<*>"
 		call	str_hl_at_bc
 		pop	hl
 		ld	(hl), e
 		ld	b, #0x3C ; '<'
 
-loc_4AA5:
+loc_4AA5:							; CODE XREF: try_move_klingon+21j
 		call	periodic
 		dec	b
 		jr	NZ, loc_4AA5
@@ -1609,7 +1683,8 @@ loc_4AA5:
 ; If possible, warp a klingon from quad	(DE) to	(HL)
 ; On return, nz	means did warp,	z means	did not
 
-try_warp_DE_HL:
+try_warp_DE_HL:							; CODE XREF: RAM:49E2p
+								; RAM:4A34p ...
 		ld	a, (hl)
 		and	#6
 		cp	#6
@@ -1638,7 +1713,8 @@ try_warp_DE_HL:
 ; can't move anymore, take another shot and return
 ; Otherwise go to the top of the loop
 
-attack_on_B:
+attack_on_B:							; CODE XREF: RAM:4A3Fp
+								; RAM:4A4Bp
 		ld	a, #0x10
 		sub	0x42(ix)				; level
 		rra
@@ -1656,7 +1732,7 @@ attack_on_B:
 		ld	h, d
 		push	bc
 
-fire_and_move:
+fire_and_move:							; CODE XREF: attack_on_B+6Aj
 		ld	a, (hl)
 		pop	bc
 		push	bc
@@ -1685,14 +1761,14 @@ fire_and_move:
 		jr	Z, loc_4AF3
 		cpl
 
-loc_4AF3:
+loc_4AF3:							; CODE XREF: attack_on_B+33j
 		ld	d, a
 		ld	a, c
 		bit	7, c
 		jr	Z, loc_4AFA
 		cpl
 
-loc_4AFA:
+loc_4AFA:							; CODE XREF: attack_on_B+3Aj
 		add	a, d
 		ld	d, a
 		ld	a, #0x36 ; '6'
@@ -1714,11 +1790,12 @@ loc_4AFA:
 		jr	loc_4B14
 ; ---------------------------------------------------------------------------
 
-loc_4B12:
+loc_4B12:							; CODE XREF: attack_on_B+4Fj
 		dec	a
 		dec	a
 
-loc_4B14:
+loc_4B14:							; CODE XREF: attack_on_B+4Dj
+								; attack_on_B+53j
 		rlc	c
 		jr	Z, loc_4B20
 		jr	C, loc_4B1E
@@ -1726,10 +1803,11 @@ loc_4B14:
 		jr	loc_4B20
 ; ---------------------------------------------------------------------------
 
-loc_4B1E:
+loc_4B1E:							; CODE XREF: attack_on_B+5Bj
 		sub	#0x20 ;	' '
 
-loc_4B20:
+loc_4B20:							; CODE XREF: attack_on_B+59j
+								; attack_on_B+5Fj
 		ld	e, a
 ; E is the new position, try to	move there.
 ; If we	do move, go and	try again
@@ -1749,7 +1827,8 @@ loc_4B20:
 ; use the Enterprise's phaser %age; so low shields pose a risk
 ; to your starbases.
 
-find_and_take_shot:
+find_and_take_shot:						; CODE XREF: attack_on_B+2Ej
+								; attack_on_B+47j
 		ld	a, (hl)
 		pop	de
 		push	af
@@ -1790,13 +1869,14 @@ find_and_take_shot:
 ; 4044 - counts	stardates (95 *	512 ms = 48 seconds).
 ; (45,46) only count from 0 to $5eff
 
-periodic:
+periodic:							; CODE XREF: extend_shot+2Bp
+								; RAM:klingon_threadp ...
 		ex	af, af'
 		exx
 		ld	(loc_4B4E+2), sp
 		ld	sp, iy
 
-loc_4B4E:
+loc_4B4E:							; DATA XREF: RAM:4B48w
 		ld	iy, #0
 		ld	a, #0xFF
 
@@ -1804,7 +1884,7 @@ loc_4B4E:
 ; so loop takes	16*256=4080 tstates or about 2ms at 2 MHz
 ; or 2.3 ms at 1.77 MHz
 
-unit_delay:
+unit_delay:							; CODE XREF: RAM:4B55j
 		dec	a
 		jr	NZ, unit_delay
 		inc	0x45(ix)
@@ -1816,20 +1896,20 @@ unit_delay:
 		xor	a
 		inc	0x44(ix)				; stardate
 
-loc_4B67:
+loc_4B67:							; CODE XREF: RAM:4B61j
 		ld	0x46(ix), a
 		push	hl
 		push	bc
 		push	de
 		and	#3
 		ld	e, 0x43(ix)				; cur_quadrant
-		ld	d, #0x40 ; '@'
+		ld	d, >quadrant_map			; *PATCH*
 		jr	NZ, loc_4B7D
 		ld	a, (video+0xC0)
 		or	a
 		call	M, draw_stats
 
-loc_4B7D:
+loc_4B7D:							; CODE XREF: RAM:4B74j
 		ld	bc, # video+0x384
 		ld	a, (bc)
 		cp	#0x45 ;	'E'
@@ -1845,7 +1925,8 @@ loc_4B7D:
 		ld	a, #0x21 ; '!'
 		ld	(bc), a
 
-loc_4B99:
+loc_4B99:							; CODE XREF: RAM:4B86j
+								; RAM:4B8Cj
 		call	repair
 ; Point	BC at 4	chars past middle of second from bottom	line.
 ; Now check for	a starbase SOS reports.	 This can disable the
@@ -1865,13 +1946,14 @@ loc_4B99:
 
 ; A is zero here
 
-cancel_sos:
+cancel_sos:							; CODE XREF: RAM:4BA4j
+								; RAM:4BA9j
 		ld	(sos_starbase_ttl), a
 		ld	h, a
 
 ; H is either zero (no alert) or contents of sos_starbase_ttl
 
-continue_alert:
+continue_alert:							; CODE XREF: RAM:4BAEj
 		ld	a, h
 		or	a
 		jr	Z, check_docked
@@ -1884,7 +1966,7 @@ continue_alert:
 		jr	check_docked
 ; ---------------------------------------------------------------------------
 
-display_starbase_sos:
+display_starbase_sos:						; CODE XREF: RAM:4BBBj
 		ld	a, (bc)
 		cp	#0x20 ;	' '
 ; Check	for space to alternate flashing	SOS display
@@ -1901,12 +1983,13 @@ display_starbase_sos:
 		rrca
 		call	print_a
 
-loc_4BE2:
+loc_4BE2:							; CODE XREF: RAM:4BCBj
 		call	clreol
 
 ; Check	if enterprise is currently docked--if so, display message
 
-check_docked:
+check_docked:							; CODE XREF: RAM:4BB6j
+								; RAM:4BC6j
 		ld	bc, # video+0x40
 		ld	e, 0x43(ix)				; cur_quadrant
 		ld	a, (de)
@@ -1919,14 +2002,14 @@ check_docked:
 		cp	#0x20 ;	' '
 		jr	Z, loc_4C03
 
-loc_4BFB:
+loc_4BFB:							; CODE XREF: RAM:4BF5j
 		ld	a, l
 		sub	h
 		jr	C, loc_4C13
 		cp	#0x20 ;	' '
 		jr	NZ, loc_4C13
 
-loc_4C03:
+loc_4C03:							; CODE XREF: RAM:4BF9j
 		ld	a, (bc)
 		cp	#0x45 ;	'E'
 		ld	hl, #aEnterpriseDocked			; "ENTERPRISE DOCKED"
@@ -1937,15 +2020,16 @@ loc_4C03:
 
 ; finish_periodic
 
-loc_4C13:
+loc_4C13:							; CODE XREF: RAM:4BEEj
+								; RAM:4BFDj ...
 		pop	de
 		pop	bc
 		pop	hl
 		ret
 ; ---------------------------------------------------------------------------
-aEnterpriseDocked:.ascii 'ENTERPRISE DOCKED'
+aEnterpriseDocked:.ascii 'ENTERPRISE DOCKED'                    ; DATA XREF: RAM:4C06o
 		.db 0
-aSosStarbase:	.ascii 'SOS-STARBASE'
+aSosStarbase:	.ascii 'SOS-STARBASE'                           ; DATA XREF: RAM:4BCDo
 		.db 0
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -1955,10 +2039,11 @@ aSosStarbase:	.ascii 'SOS-STARBASE'
 ; ship's energy replenishment.  Thing is, C appears to result from message
 ; display by the caller!
 
-repair:
+repair:								; CODE XREF: RAM:loc_4B99p
+								; RAM:4C0Cp
 		ld	hl, #imp_damage
 
-loc_4C39:
+loc_4C39:							; CODE XREF: repair+1Ej
 		ld	a, #0x8B ; '‹'
 		call	rand
 		ld	a, (hl)
@@ -1966,16 +2051,17 @@ loc_4C39:
 		sub	#1
 		jr	C, loc_4C4E
 
-loc_4C46:
+loc_4C46:							; CODE XREF: repair+9j
 		bit	7, c
 		jr	NZ, loc_4C4F
 		sub	#4
 		jr	NC, loc_4C4F
 
-loc_4C4E:
+loc_4C4E:							; CODE XREF: repair+Ej
 		xor	a
 
-loc_4C4F:
+loc_4C4F:							; CODE XREF: repair+12j
+								; repair+16j
 		ld	(hl), a
 		inc	hl
 		ld	a, l
@@ -1986,20 +2072,20 @@ loc_4C4F:
 		jp	P, loc_4C5F
 		inc	(hl)
 
-loc_4C5F:
+loc_4C5F:							; CODE XREF: repair+25j
 		bit	7, c
 		jr	NZ, loc_4C67
 		ld	a, (hl)
 		add	a, #4
 		ld	(hl), a
 
-loc_4C67:
+loc_4C67:							; CODE XREF: repair+2Bj
 		ld	a, (hl)
 		cp	#0x65 ;	'e'
 		jr	C, loc_4C6E
 		ld	a, #0x64 ; 'd'
 
-loc_4C6E:
+loc_4C6E:							; CODE XREF: repair+34j
 		ld	(hl), a
 		ret
 ; End of function repair
@@ -2012,7 +2098,7 @@ loc_4C6E:
 ; we hit and then return XXXX.....
 ; (The 3CC0 base of short range	scan goes to 1E60, hence the 60!)
 
-doesHLhit:
+doesHLhit:							; CODE XREF: draw_shot+2Fp
 		push	hl
 		srl	h
 		rr	l
@@ -2032,14 +2118,15 @@ doesHLhit:
 		cp	#0x58 ;	'X'
 		jr	NZ, loc_4C95
 
-loc_4C90:
+loc_4C90:							; CODE XREF: doesHLhit+1Aj
 		ld	a, e
 		sub	c
 		ret	Z
 		jr	loc_4C9F
 ; ---------------------------------------------------------------------------
 
-loc_4C95:
+loc_4C95:							; CODE XREF: doesHLhit+16j
+								; doesHLhit+1Ej
 		ld	a, e
 		sub	c
 		ret	C
@@ -2050,7 +2137,8 @@ loc_4C95:
 		ret
 ; ---------------------------------------------------------------------------
 
-loc_4C9F:
+loc_4C9F:							; CODE XREF: doesHLhit+Ej
+								; doesHLhit+23j ...
 		or	a
 		ret
 ; End of function doesHLhit
@@ -2061,7 +2149,8 @@ loc_4C9F:
 ;
 ; Returns nc if	x,y outside of SRS, c otherwise
 
-check_xy_in_srs:
+check_xy_in_srs:						; CODE XREF: sub_487F+1Ep
+								; extend_shot+14p
 		inc	b
 		jp	M, loc_4CB0
 		dec	b
@@ -2072,7 +2161,8 @@ check_xy_in_srs:
 		cp	#0x21 ;	'!'
 		ret	C
 
-loc_4CB0:
+loc_4CB0:							; CODE XREF: check_xy_in_srs+1j
+								; check_xy_in_srs+5j ...
 		xor	a
 		ret
 ; End of function check_xy_in_srs
@@ -2086,7 +2176,8 @@ loc_4CB0:
 ; E = 3*Ay + 10
 ; The resulting	position is the	bottom left of the cell
 
-coord_to_xy:
+coord_to_xy:							; CODE XREF: sub_487F+3p
+								; draw_shot+4p	...
 		ld	e, a
 		and	#0x1F
 		rlca
@@ -2113,7 +2204,8 @@ coord_to_xy:
 ; as a collision with with L = 0).  Otherwise, clear screen position D and
 ; check	for collision at E as in ship_fits.
 
-ship_d2e:
+ship_d2e:							; CODE XREF: RAM:4A2Bp
+								; RAM:4A7Ap ...
 		ld	a, e
 		ld	l, #0
 		and	#0x1F
@@ -2138,7 +2230,7 @@ ship_d2e:
 ; BC is	screen location	of position D and $4000	+ L is what we hit.
 ; Otherwise, Z is set and BC is	the screen location of E.
 
-ship_fits:
+ship_fits:							; CODE XREF: doesHLhit+9p
 		ld	hl, # klingon_damages+2
 		call	shpOVship
 		jr	Z, s_overlap
@@ -2150,7 +2242,7 @@ ship_fits:
 		call	shpOVship
 		jr	Z, s_overlap
 
-loc_4CF2:
+loc_4CF2:							; CODE XREF: ship_fits+Fj
 		ld	a, (bc)
 		ld	l, #0x4F ; 'O'
 		and	#0x18
@@ -2161,7 +2253,7 @@ loc_4CF2:
 		inc	a
 		ld	b, a
 
-loc_4CFD:
+loc_4CFD:							; CODE XREF: ship_fits+27j
 		call	shpOVstar
 		jr	Z, s_overlap
 		dec	b
@@ -2174,13 +2266,13 @@ loc_4CFD:
 		ld	b, a
 		jr	Z, loc_4D17
 
-loc_4D0F:
+loc_4D0F:							; CODE XREF: ship_fits+39j
 		call	shpOVship
 		jr	Z, s_overlap
 		dec	b
 		jr	NZ, loc_4D0F
 
-loc_4D17:
+loc_4D17:							; CODE XREF: ship_fits+31j
 		ld	b, h
 		ld	l, #0x57 ; 'W'
 		ld	a, (bc)
@@ -2189,14 +2281,15 @@ loc_4D17:
 		call	shpOVstar
 		jr	Z, s_overlap
 
-loc_4D24:
+loc_4D24:							; CODE XREF: ship_fits+41j
 		ld	a, e
 		call	pos2scrn
 		xor	a
 		ret
 ; ---------------------------------------------------------------------------
 
-s_overlap:
+s_overlap:							; CODE XREF: ship_d2e+5j
+								; ship_d2e+9j ...
 		ld	a, d
 		call	pos2scrn
 		inc	a
@@ -2209,7 +2302,8 @@ s_overlap:
 ; Return z flag	set if pos (hl+1) is ==	E or E + 1
 ; Essentially, does the	ship at	(hl+1) hit the star at E.
 
-shpOVstar:
+shpOVstar:							; CODE XREF: ship_fits:loc_4CFDp
+								; ship_fits+43p
 		inc	hl
 		ld	a, (hl)
 		cp	e
@@ -2226,7 +2320,8 @@ shpOVstar:
 ; In other words, does the ship	(hl+1) overlap with the	ship at	E.
 ; But D	is ruled out, perhaps to not compare the ship with itself?
 
-shpOVship:
+shpOVship:							; CODE XREF: ship_fits+3p
+								; ship_fits+11p ...
 		inc	hl
 		ld	a, (hl)
 		cp	d
@@ -2241,13 +2336,13 @@ shpOVship:
 		ret
 ; ---------------------------------------------------------------------------
 
-loc_4D45:
+loc_4D45:							; CODE XREF: shpOVship+3j
 		or	a
 		ret
 ; End of function shpOVship
 
 ; ---------------------------------------------------------------------------
-aStardate:	.ascii 'STARDATE'
+aStardate:	.ascii 'STARDATE'                               ; DATA XREF: draw_stats+3o
 		.db 0
 aQuadrant:	.ascii 'QUADRANT'
 		.db 0
@@ -2259,17 +2354,18 @@ aPhotonTorps:	.ascii 'PHOTON TORPS'
 		.db 0
 aCondition:	.ascii 'CONDITION '
 		.db 0
-aGreen:		.ascii 'GREEN '
+aGreen:		.ascii 'GREEN '                                 ; DATA XREF: draw_stats+55o
 		.db 0
-aYellow:	.ascii 'YELLOW'
+aYellow:	.ascii 'YELLOW'                                 ; DATA XREF: draw_stats+5Fo
 		.db 0
-aRed:		.ascii 'RED!'
+aRed:		.ascii 'RED!'                                   ; DATA XREF: draw_stats+67o
 		.db 0
 
 ; =============== S U B	R O U T	I N E =======================================
 
 
-draw_stats:
+draw_stats:							; CODE XREF: disp_srs_ships+52j
+								; RAM:4B7Ap
 		ld	bc, # video+0x300
 		ld	hl, #aStardate				; "STARDATE"
 		call	str_hl_at_bc
@@ -2322,13 +2418,13 @@ draw_stats:
 		jr	NC, loc_4E01
 		ld	hl, #aYellow				; "YELLOW"
 
-loc_4E01:
+loc_4E01:							; CODE XREF: draw_stats+5Dj
 		ld	a, (de)
 		and	#6
 		jr	Z, loc_4E09
 		ld	hl, #aRed				; "RED!"
 
-loc_4E09:
+loc_4E09:							; CODE XREF: draw_stats+65j
 		jp	str_hl_at_bc
 ; End of function draw_stats
 
@@ -2338,7 +2434,8 @@ loc_4E09:
 ; Clear	from BC	to end of display line with spaces.
 ; BC ends up pointing to last char on line; A munged.
 
-clreol:
+clreol:								; CODE XREF: RAM:42AEp
+								; RAM:42B4p ...
 		ld	a, #0x20 ; ' '
 		ld	(bc), a
 		inc	bc
@@ -2353,14 +2450,15 @@ clreol:
 
 ; Input	integer	to HL, display on screen at BC.	Preserves DE
 
-getint_HL:
+getint_HL:							; CODE XREF: RAM:41A3p
+								; RAM:45ACp ...
 		push	de
 		push	bc
 		call	clreol
 		pop	bc
 		push	bc
 
-loc_4E1D:
+loc_4E1D:							; CODE XREF: getint_HL+Aj
 		call	getchar
 		jr	NZ, loc_4E1D				; loop until <ENTER>
 		pop	bc
@@ -2368,8 +2466,8 @@ loc_4E1D:
 
 ; Read (BC) as ASCII int into HL.  Note	how 'A' could mean 17.
 
-atoibchl:							; get digit
-		ld	a, (bc)
+atoibchl:							; CODE XREF: getint_HL+21j
+		ld	a, (bc)					; get digit
 		sub	#0x30 ;	'0'                             ; convert ascii to decimal
 		jr	NC, loc_4E2C				; valid	digit, continue
 		pop	de
@@ -2378,8 +2476,8 @@ atoibchl:							; get digit
 
 ; HL = HL * 10 + A.
 
-loc_4E2C:							; =HL*2
-		add	hl, hl
+loc_4E2C:							; CODE XREF: getint_HL+12j
+		add	hl, hl					; =HL*2
 		push	hl
 		add	hl, hl					; =HL*4
 		add	hl, hl					; =HL*8
@@ -2399,7 +2497,8 @@ loc_4E2C:							; =HL*2
 ; Seems	like it	actually moves and displays the	enterprise as needed.
 ; Possibly only	gets numbers.
 
-getchar:
+getchar:							; CODE XREF: RAM:4251p
+								; RAM:429Dp ...
 
 ; FUNCTION CHUNK AT 4389 SIZE 00000015 BYTES
 ; FUNCTION CHUNK AT 43D7 SIZE 0000002D BYTES
@@ -2408,7 +2507,8 @@ getchar:
 		push	de
 		ld	d, #0xFF
 
-loc_4E3D:
+loc_4E3D:							; CODE XREF: getchar+DCj
+								; getchar+105j
 		call	periodic
 		ld	a, 0x45(ix)
 		and	#0x3F ;	'?'
@@ -2420,7 +2520,7 @@ loc_4E3D:
 		ld	a, (video+0xC0)
 		or	a
 
-loc_4E54:
+loc_4E54:							; CODE XREF: getchar+15j
 		jp	P, loc_4F06
 		push	de
 		push	hl
@@ -2436,25 +2536,25 @@ loc_4E54:
 		call	clreol
 		jp	loc_4F03
 ; ---------------------------------------------------------------------------
-aSwollowedByABlackHole:.ascii 'SWOLLOWED BY A BLACK HOLE!'
+aSwollowedByABlackHole:.ascii 'SWOLLOWED BY A BLACK HOLE!'      ; DATA XREF: getchar+96o
 		.db 0
-aBurntToACrisp:	.ascii 'BURNT TO A CRISP!'
+aBurntToACrisp:	.ascii 'BURNT TO A CRISP!'                      ; DATA XREF: getchar+B9o
 		.db 0
 ; ---------------------------------------------------------------------------
 
-loc_4EA3:							; pos_enterprise
-		ld	e, 0x4E(ix)
+loc_4EA3:							; CODE XREF: getchar+26j
+		ld	e, 0x4E(ix)				; pos_enterprise
 		ld	d, e
 		bit	6, l
 		jr	Z, loc_4EAC
 		inc	e
 
-loc_4EAC:
+loc_4EAC:							; CODE XREF: getchar+70j
 		bit	5, l
 		jr	Z, loc_4EB1
 		dec	e
 
-loc_4EB1:
+loc_4EB1:							; CODE XREF: getchar+75j
 		bit	4, l
 		jr	Z, loc_4EBB
 		ld	a, e
@@ -2462,7 +2562,8 @@ loc_4EB1:
 		jr	C, loc_4EBB
 		ld	e, a
 
-loc_4EBB:
+loc_4EBB:							; CODE XREF: getchar+7Aj
+								; getchar+7Fj
 		bit	3, l
 		jr	Z, loc_4EC5
 		ld	a, e
@@ -2470,7 +2571,8 @@ loc_4EBB:
 		jr	C, loc_4EC5
 		ld	e, a
 
-loc_4EC5:
+loc_4EC5:							; CODE XREF: getchar+84j
+								; getchar+89j
 		call	ship_d2e
 		jr	Z, loc_4EFA
 		ld	a, l
@@ -2480,7 +2582,7 @@ loc_4EC5:
 		jp	ent_dead
 ; ---------------------------------------------------------------------------
 
-loc_4ED5:
+loc_4ED5:							; CODE XREF: getchar+94j
 		cp	#0x55 ;	'U'
 		jr	NC, loc_4EFD
 		cp	#0x50 ;	'P'
@@ -2490,13 +2592,13 @@ loc_4ED5:
 		ld	a, #0x2A ; '*'
 		ld	(bc), a
 
-loc_4EE4:
+loc_4EE4:							; CODE XREF: getchar+B7j
 		ld	a, #0xB
 		call	rand
 		out	(0xFF),	a
 		xor	a
 
-loc_4EEC:
+loc_4EEC:							; CODE XREF: getchar+B4j
 		dec	a
 		jr	NZ, loc_4EEC
 		dec	d
@@ -2506,19 +2608,21 @@ loc_4EEC:
 		jp	ent_dead
 ; ---------------------------------------------------------------------------
 
-loc_4EFA:							; pos_enterprise
-		ld	0x4E(ix), e
+loc_4EFA:							; CODE XREF: getchar+8Fj
+		ld	0x4E(ix), e				; pos_enterprise
 
-loc_4EFD:							; "\"V\""
-		ld	hl, #aV
+loc_4EFD:							; CODE XREF: getchar+9Ej
+								; getchar+A2j
+		ld	hl, #aV					; "\"V\""
 		call	str_hl_at_bc
 
-loc_4F03:
+loc_4F03:							; CODE XREF: getchar+3Aj
 		pop	bc
 		pop	hl
 		pop	de
 
-loc_4F06:
+loc_4F06:							; CODE XREF: getchar+10j
+								; getchar:loc_4E54j
 		ld	a, l
 		or	d
 		xor	d
@@ -2538,7 +2642,7 @@ loc_4F06:
 		jr	loc_4F4A
 ; ---------------------------------------------------------------------------
 
-loc_4F1E:
+loc_4F1E:							; CODE XREF: getchar+D5j
 		ld	hl, (word_4F4D)
 		ld	a, (0x3810)				; read keyboard
 		ld	(word_4F4D), a
@@ -2546,7 +2650,7 @@ loc_4F1E:
 		xor	l
 		ld	e, #0
 
-loc_4F2B:
+loc_4F2B:							; CODE XREF: getchar+F7j
 		rrc	a
 		jr	C, loc_4F45
 		inc	de
@@ -2562,25 +2666,29 @@ loc_4F2B:
 		jr	C, loc_4F45
 		inc	e
 
-loc_4F45:
+loc_4F45:							; CODE XREF: getchar+F4j
+								; getchar+109j
 		ld	a, e
 		add	a, #0x30 ; '0'
 		ld	(bc), a
 		inc	bc
 
-loc_4F4A:
+loc_4F4A:							; CODE XREF: getchar+D2j
+								; getchar+E3j
 		pop	de
 		pop	hl
 		ret
 ; End of function getchar
 
 ; ---------------------------------------------------------------------------
-word_4F4D:	.dw 0
+word_4F4D:	.dw 0						; DATA XREF: getchar:loc_4F1Er
+								; getchar+EBw ...
 
 ; =============== S U B	R O U T	I N E =======================================
 
 
-str_hl_at_bc:
+str_hl_at_bc:							; CODE XREF: RAM:4181p
+								; RAM:4187p ...
 		ld	a, (hl)
 		inc	hl
 		or	a
@@ -2596,7 +2704,8 @@ str_hl_at_bc:
 ;
 ; ; Display A in decimal at (BC)
 
-print_a:
+print_a:							; CODE XREF: RAM:4231p
+								; RAM:4245p ...
 		push	de
 		push	hl
 		inc	bc
@@ -2610,7 +2719,7 @@ print_a:
 		ld	(bc), a
 		inc	bc
 
-loc_4F68:
+loc_4F68:							; CODE XREF: print_a+Cj
 		ld	d, l
 		ld	l, h
 		ld	h, #10
@@ -2621,12 +2730,12 @@ loc_4F68:
 		jr	Z, loc_4F79
 		xor	a
 
-loc_4F76:
+loc_4F76:							; CODE XREF: print_a+19j
 		add	a, e
 		ld	(bc), a
 		inc	bc
 
-loc_4F79:
+loc_4F79:							; CODE XREF: print_a+1Cj
 		ld	a, h
 		add	a, e
 		ld	(bc), a
@@ -2642,7 +2751,8 @@ loc_4F79:
 ;
 ; ; BC = 3CC0h + A * 2;	Basicially translates a	coordinate to the screen position.
 
-pos2scrn:
+pos2scrn:							; CODE XREF: disp_srs_ships+3p
+								; disp_srs_ships+19p ...
 		push	hl
 		ld	bc, # video+0xC0
 		ld	h, #0
@@ -2659,11 +2769,12 @@ pos2scrn:
 ; =============== S U B	R O U T	I N E =======================================
 
 
-cls:
+cls:								; CODE XREF: RAM:4178p
+								; RAM:421Ep ...
 		ld	bc, #video				; start	of screen
 
-clc:								; space
-		ld	a, #0x20 ; ' '
+clc:								; CODE XREF: cls+Aj
+		ld	a, #0x20 ; ' '                          ; space
 		ld	(bc), a					; set character
 		inc	bc					; next location
 		ld	a, b
@@ -2679,7 +2790,8 @@ clc:								; space
 ; Get pseudo-random number from	1 to A.	 Uses seed * 257 + 101 which
 ; does have a period of	65536.	That is, will generate all values.  Decent.
 
-rand:
+rand:								; CODE XREF: RAM:41BBp
+								; RAM:41C3p ...
 		push	hl
 		push	bc
 		ld	hl, (rand_seed)
@@ -2703,7 +2815,8 @@ rand:
 ; pointing to the screen location to mask.  I haven't absolutely
 ; verified this, but it	must be	close.
 
-xy2scrnbit:
+xy2scrnbit:							; CODE XREF: draw_shot+2Cp
+								; resetBCp ...
 		push	bc
 		ld	l, c
 		ld	h, #3
@@ -2721,7 +2834,7 @@ xy2scrnbit:
 		ld	a, #0x80 ; '€'
 		inc	c
 
-loc_4FC8:
+loc_4FC8:							; CODE XREF: xy2scrnbit+1Bj
 		rlca
 		dec	c
 		jr	NZ, loc_4FC8
@@ -2735,13 +2848,14 @@ loc_4FC8:
 ; compliment pixel (B,C).  Note	how it wipes out a non-graphics	character but
 ; otherwise flips the state of the pixel.
 
-flipBC:
+flipBC:								; CODE XREF: sub_487F+22p
+								; extend_shot+21p
 		call	xy2scrnbit
 		bit	7, (hl)
 		jr	Z, loc_4FD6
 		xor	(hl)
 
-loc_4FD6:
+loc_4FD6:							; CODE XREF: flipBC+5j
 		set	7, a
 		ld	(hl), a
 		ret
@@ -2753,17 +2867,18 @@ loc_4FD6:
 ; A = L	= L / H; H = L % H
 ; If H == 0 returns A =	L = 255, H = L
 
-LdivH:
+LdivH:								; CODE XREF: RAM:41DBp
+								; phaser_pct+7p ...
 		push	bc
 		ld	b, h
 		xor	a
 		ld	h, a
 
-loc_4FDE:
+loc_4FDE:							; CODE XREF: LdivB+2j
 		ld	c, a
 		ld	a, #8
 
-loc_4FE1:
+loc_4FE1:							; CODE XREF: LdivH+10j
 		add	hl, hl
 		sbc	hl, bc
 		inc	hl
@@ -2771,7 +2886,7 @@ loc_4FE1:
 		add	hl, bc
 		dec	hl
 
-loc_4FE9:
+loc_4FE9:							; CODE XREF: LdivH+Bj
 		dec	a
 		jr	NZ, loc_4FE1
 		pop	bc
@@ -2783,7 +2898,8 @@ loc_4FE9:
 
 ; Compute A = H	* L (and also HL = H * L).
 
-HxL:
+HxL:								; CODE XREF: RAM:41D7p
+								; ship_hit-3F4p ...
 		push	bc
 		ld	c, l
 		xor	a
@@ -2791,12 +2907,12 @@ HxL:
 		ld	l, a
 		ld	a, #8
 
-loc_4FF6:
+loc_4FF6:							; CODE XREF: RAM:4FFBj
 		add	hl, hl
 		jr	NC, loc_4FFA
 		add	hl, bc
 
-loc_4FFA:
+loc_4FFA:							; CODE XREF: RAM:4FF7j
 		dec	a
 		jr	NZ, loc_4FF6
 		ld	a, l
