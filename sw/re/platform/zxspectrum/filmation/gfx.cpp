@@ -35,6 +35,11 @@ void main (int argc, char *argv[])
 	fread (&ram[16384-27], sizeof(uint8_t), fs.st_size, fp);
 	fclose (fp);
 
+	fp = fopen ("knightlore.bin", "wb");
+	// write the relevant areas
+	fwrite (&ram[0x6108], 0xd8f3-0x6108, 1, fp);
+	fclose (fp);
+
   // parse the map
 
   unsigned p = 0x6248;
