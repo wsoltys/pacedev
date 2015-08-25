@@ -16,6 +16,9 @@
     textout_centre_ex(s, f, str, w, h, c, 0);
 #endif
 
+//#define DO_PARSE_MAP
+#define DO_GA
+
 uint8_t ram[64*1024];
 
 void main (int argc, char *argv[])
@@ -40,6 +43,7 @@ void main (int argc, char *argv[])
 	fwrite (&ram[0x6108], 0xd8f3-0x6108, 1, fp);
 	fclose (fp);
 
+#ifdef DO_PARSE_MAP
   // parse the map
 
   unsigned p = 0x6248;
@@ -86,6 +90,36 @@ void main (int argc, char *argv[])
     if (++n == 128)
       break;
   }
+#endif
+
+#ifdef DO_GA
+	// sort the list of sprite graphics addresses
+	unsigned short ga[256];
+	unsigned short iga = 0;
+	unsigned nga = (0x728A - 0x7112) / 2;
+	fprintf (stdout, "nga=%d\n", nga);
+	for (unsigned i=0; i<nga; i++)
+	{
+		unsigned short a = ram[0x7112+i*2+1];
+		a = (a<<8) | ram[0x7112+i*2];
+		
+		// now put it in place
+		unsigned j;
+		for (j=0; j<iga; j++)
+			if (a <= ga[j])
+				break;
+		if (i > 0 && a == ga[j]) continue;
+		
+		// move up
+		for (unsigned k=iga+1; k>j; k--)
+			ga[k] = ga[k-1];
+		ga[j] = a;
+		iga++;
+	}
+	
+	for (unsigned i=0; i<iga; i++)
+		fprintf (stderr, "$%04X\n", ga[i]);
+#endif
 
   exit (0);
 
