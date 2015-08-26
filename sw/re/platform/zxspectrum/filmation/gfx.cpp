@@ -16,10 +16,100 @@
     textout_centre_ex(s, f, str, w, h, c, 0);
 #endif
 
+//#define DO_ASCII
 //#define DO_PARSE_MAP
-#define DO_GA
+//#define DO_GA
+#define DO_FONT
+//#define DO_SPRITE_DATA
+//#define DO_SPRITE_TABLE
+//#define DO_BLOCK_DATA
+//#define DO_BG_DATA
 
+const char *to_ascii = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.© %";
 uint8_t ram[64*1024];
+uint8_t ascii[64*1024];
+unsigned widest = 0;
+unsigned highest = 0;
+FILE *fpdbg;
+
+static void plot_character (unsigned ch, unsigned cx, unsigned cy, unsigned c)
+{
+  for (unsigned y=0; y<8; y++)
+  {
+    unsigned char d = ram[0x6108+ch*8+y];
+    
+    for (unsigned b=0; b<8; b++)
+    {
+      if (d & (1<<7))
+        putpixel (screen, cx+b, cy+y, c);
+      d <<= 1;
+    }
+  }
+}
+
+static void plot_ascii_character (unsigned ch, unsigned cx, unsigned cy, unsigned c)
+{
+  unsigned i;
+  
+  for (i=0; to_ascii[i]; i++)
+    if (to_ascii[i] == ch)
+      break;
+      
+  if (i == 40)
+    return;
+    
+  plot_character (i, cx, cy, c);    
+}
+
+static unsigned plot_sprite_data (unsigned s, unsigned f, unsigned p, unsigned px, unsigned py, unsigned c, unsigned &w, unsigned &h)
+{          
+  w = ram[p++] & 0x3f;
+  h = ram[p++];
+
+  if (w > widest)
+    widest = w;
+  if (h > highest)
+    highest = h;
+
+  fprintf (fpdbg, "SPR=%03d A=$%04X (X=%02d,Y=%02d)\n", 
+            s, p-2, w, h);
+        
+  for (unsigned y=0; y<h; y++)
+    for (unsigned x=0; x<w; x++)
+    {
+      // skip mask
+      p++;
+      unsigned char d = ram[p++];
+      for (unsigned b=0; b<8; b++)
+      {
+        if (d & (1<<7))
+          if (f & (1<<6))
+            if (f & (1<<7))
+              putpixel (screen, px+(w*8-(x*8+b)), py+y, 3);
+            else
+              putpixel (screen, px+(w*8-(x*8+b)), py+(h-y), 2);
+          else
+            if (f & (1<<7))
+              putpixel (screen, px+x*8+b, py+y, 1);
+            else
+              putpixel (screen, px+x*8+b, py+(h-y), 7);
+                
+        d <<= 1;
+      }
+    }
+
+  w *= 8;    
+  return (p);
+}
+
+void plot_sprite (unsigned s, unsigned f, unsigned x, unsigned y, unsigned c, unsigned &w, unsigned &h)
+{
+  // get sprite data address from table
+  unsigned p = ram[0x7112+s*2+1];
+  p = (p<<8) | ram[0x7112+s*2];
+  
+  plot_sprite_data (s, f, p, x, y, 3, w, h);
+}
 
 void main (int argc, char *argv[])
 {
@@ -28,7 +118,12 @@ void main (int argc, char *argv[])
 	int					fd;
 	
 	char				buf[1024];
-	
+
+  unsigned t;
+  unsigned w, h;
+
+  fpdbg = fopen ("debug.txt", "wt");
+  	
 	fp = fopen ("knightlore.sna", "rb");
 	if (!fp)
 		exit (0);
@@ -42,6 +137,21 @@ void main (int argc, char *argv[])
 	// write the relevant areas
 	fwrite (&ram[0x6108], 0xd8f3-0x6108, 1, fp);
 	fclose (fp);
+
+#ifdef DO_ASCII
+  fp2 = fopen ("knightlore.asc", "wb");
+  for (unsigned p=0x6108; p<0xd8f3; p++)
+  {
+    unsigned char c = ram[p] & 0x7f;
+    if (c < 40)
+      ascii[p] = to_ascii[c];
+    else
+      ascii[p] = ' ';
+  }
+	// write the relevant areas
+	fwrite (&ascii[0x6108], 0xd8f3-0x6108, 1, fp);
+  fclose (fp2);
+#endif
 
 #ifdef DO_PARSE_MAP
   // parse the map
@@ -121,8 +231,6 @@ void main (int argc, char *argv[])
 		fprintf (stderr, "$%04X\n", ga[i]);
 #endif
 
-  exit (0);
-
 	allegro_init ();
 	install_keyboard ();
 
@@ -130,23 +238,164 @@ void main (int argc, char *argv[])
 	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 320, 192, 0, 0);
 
   PALETTE pal;
-  uint8_t r[] = { 0x00, 255>>2,  20>>2, 255>>2 };
-  uint8_t g[] = { 0x00, 106>>2, 208>>2, 255>>2 };
-  uint8_t b[] = { 0x00,  60>>2, 254>>2, 255>>2 };
-  for (int c=0; c<sizeof(r); c++)
+  for (int c=0; c<16; c++)
   {
-    pal[c].r = r[c];
-    pal[c].g = g[c];
-    pal[c].b = b[c];
+    pal[c].r = (c&(1<<1) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
+    pal[c].g = (c&(1<<2) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
+    pal[c].b = (c&(1<<0) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
   }
-	set_palette_range (pal, 0, 3, 1);
+	set_palette_range (pal, 0, 7, 1);
 
+
+#ifdef DO_FONT
 	clear_bitmap (screen);
-
+  for (unsigned c=0; c<40; c++)
+  {
+      plot_character (c, (c%16)*16, (c/16)*16, 7);
+  }
   while (!key[KEY_ESC]);	  
 	while (key[KEY_ESC]);	  
 
+	clear_bitmap (screen);
+	const char *msg[] = 
+	{
+	  "THIS IS THE FONT FROM A MYSTERY GAME",
+	  "FROM A Z80 PLATFORM",
+	  "THAT I AM CURRENTLY EVALUATING FOR",
+	  "A POSSIBLE PORT TO",
+	  "THE COLOR COMPUTER 3",
+	  ""
+	};
+
+  for (unsigned m=0; *msg[m]; m++)
+  {
+    for (unsigned c=0; msg[m][c]; c++)
+      plot_ascii_character (msg[m][c], (320-strlen(msg[m])*8)/2 + c*8, 16+m*16, m+2);
+  }	
+  while (!key[KEY_ESC]);	  
+	while (key[KEY_ESC]);	  
+
+#endif
+
+
+#ifdef DO_SPRITE_DATA
+	unsigned p = 0x728C;
+  unsigned s = 0;
+  for (s=0; p<0xAE98; s++)
+  {
+    if (s%16 == 0)
+	    clear_bitmap (screen);
+
+    // there's a gap in the sprite data
+    if (p == 0x7D98)
+      p += 12;
+
+    p = plot_sprite_data (s, p, (s%8)*40, ((s%16)/8)*64, 3, w, h);
+
+    if (s%16 == 15)
+    {
+      while (!key[KEY_ESC]);	  
+    	while (key[KEY_ESC]);	  
+    }
+  }
+  while (!key[KEY_ESC]);	  
+	while (key[KEY_ESC]);	  
+#endif
+
+#ifdef DO_SPRITE_TABLE
+  t = 0x7112;
+  unsigned s = 0;
+  for (s=0; t<0x728A; s++, t+=2)
+  {
+    if (s%16 == 0)
+	    clear_bitmap (screen);
+
+    plot_sprite (s, 0, (s%8)*40, ((s%16)/8)*64, 3, w, h);
+
+    if (s%16 == 15)
+    {
+      while (!key[KEY_ESC]);	  
+    	while (key[KEY_ESC]);	  
+    }
+  }
+#endif
+
+#ifdef DO_BLOCK_DATA
+  t = 0x6C0B;
+  unsigned e = 0;
+  for (e=0; t<0x6CE2; e++)
+  {
+    unsigned n = 0;
+    unsigned sw, sh, iw=0, ih=0;
+        
+    if (e%8 == 0)
+      clear_bitmap (screen);
+    while (ram[t] != 0)    
+    {
+      unsigned s = ram[t++];
+      unsigned w = ram[t++];
+      unsigned h = ram[t++];
+      unsigned z = ram[t++];
+      unsigned f = ram[t++];
+      unsigned o = ram[t++];
+      
+      plot_sprite (s, f, (e%8)*40, ih, 3, sw, sh);
+      ih += sh;
+    }
+    t++;
+
+    if (e%8 == 7)
+    {    
+      while (!key[KEY_ESC]);	  
+    	while (key[KEY_ESC]);	  
+    }
+  }
+  while (!key[KEY_ESC]);	  
+	while (key[KEY_ESC]);	  
+#endif
+
+#ifdef DO_BG_DATA
+  t = 0x6D12;
+  unsigned e = 0;
+  for (e=0; t<0x6FF2; e++)
+  {
+    unsigned n = 0;
+    unsigned sw, sh, iw=0, ih=0;
+    
+    //if (e%8 == 0)
+      clear_bitmap (screen);
+    while (ram[t] != 0)    
+    {
+      unsigned s = ram[t++];
+      unsigned x = ram[t++];
+      unsigned y = ram[t++];
+      unsigned z = ram[t++];
+      unsigned w = ram[t++];
+      unsigned d = ram[t++];
+      unsigned h = ram[t++];
+      unsigned f = ram[t++];
+      
+      plot_sprite (s, f, (e%8)*40+iw, 0, 3, sw, sh);
+      iw += sw; ih += sh;
+    }
+    t++;
+
+    //if (e%8 == 7)
+    {    
+      while (!key[KEY_ESC]);	  
+    	while (key[KEY_ESC]);	  
+    }
+  }
+  while (!key[KEY_ESC]);	  
+	while (key[KEY_ESC]);	  
+#endif
+
+  fclose (fpdbg);
+  
   allegro_exit ();
+
+  //fprintf (stdout, "w=%d\n", widest);
+  //fprintf (stdout, "h=%d\n", highest);
 }
 
 END_OF_MAIN();
