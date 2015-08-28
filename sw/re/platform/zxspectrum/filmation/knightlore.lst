@@ -32,8 +32,8 @@ SCRATCH:5BA6 ??		 old_user_input_method:ds 1
 SCRATCH:5BA7 ??				 ds 1
 SCRATCH:5BA8 ??		 unk_5BA8:	 ds 1						 ; DATA	XREF: lose_life:start_menuo
 SCRATCH:5BA8										 ; sub_D59F+1w	...
-SCRATCH:5BA9 ??		 unk_5BA9:	 ds 1
-SCRATCH:5BAA ??				 ds 1
+SCRATCH:5BA9 ??	??	 tmp_SP:	 ds 2						 ; DATA	XREF: RAM:D763w
+SCRATCH:5BA9										 ; RAM:D80Cr
 SCRATCH:5BAB ??	??	 word_5BAB:	 ds 2						 ; DATA	XREF: sub_C87Ar
 SCRATCH:5BAB										 ; sub_CA70+12r ...
 SCRATCH:5BAD ??		 unk_5BAD:	 ds 1
@@ -2117,7 +2117,7 @@ RAM:7102 78 B0 38 00+		     db	78h, 0B0h, 38h,	0, 0, 0, 0, 0
 RAM:710A 48 B8 98 F0+		     db	48h, 0B8h, 98h,	0F0h, 0, 0, 0, 0
 RAM:7112	     ; Pointers	to Sprite Graphics
 RAM:7112 8A 72 8A 72+sprite_tbl:     dw	spr_nul, spr_nul, byte_9ACA, byte_9C04,	byte_7FB0, byte_80A2
-RAM:7112 CA 9A 04 9C+								     ; DATA XREF: sub_D6EF+6o
+RAM:7112 CA 9A 04 9C+								     ; DATA XREF: flip_sprite+6o
 RAM:7112 B0 7F A2 80+		     dw	spr_008, byte_7E08, byte_8A0C, byte_8A0C, byte_9EB8
 RAM:7112 AA 77 08 7E+		     dw	byte_9FB4, byte_A046, byte_9946, byte_9A08, byte_9C92
 RAM:7112 0C 8A 0C 8A+		     dw	byte_922E, byte_9290, byte_92F2, byte_9354, byte_92F2
@@ -8646,7 +8646,7 @@ RAM:CD33
 RAM:CD33
 RAM:CD33	     sub_CD33:							     ; CODE XREF: sub_CD4D+4p
 RAM:CD33 CD C9 D6		     call    sub_D6C9
-RAM:CD36 CD EF D6		     call    sub_D6EF
+RAM:CD36 CD EF D6		     call    flip_sprite
 RAM:CD39 DD 7E 1A		     ld	     a,	(ix+1Ah)
 RAM:CD3C E6 07			     and     7
 RAM:CD3E 1A			     ld	     a,	(de)
@@ -9610,7 +9610,7 @@ RAM:D24C
 RAM:D24C
 RAM:D24C	     transfer_sprite_and_print:					     ; CODE XREF: display_panel+12p
 RAM:D24C									     ; display_panel+15p ...
-RAM:D24C CD 37 D2		     call    transfer_sprite
+RAM:D24C CD 37 D2		     call    transfer_sprite			     ; copy to scratchpad
 RAM:D24F E5			     push    hl
 RAM:D250 CD 18 D7		     call    print_sprite
 RAM:D253 E1			     pop     hl
@@ -10088,22 +10088,22 @@ RAM:D4F9
 RAM:D4F9	     ; =============== S U B R O U T I N E =======================================
 RAM:D4F9
 RAM:D4F9
-RAM:D4F9	     sub_D4F9:							     ; CODE XREF: sub_D6EF+18Fp
+RAM:D4F9	     HL_equals_DE_x_A:						     ; CODE XREF: flip_sprite+18Fp
 RAM:D4F9 C5			     push    bc
 RAM:D4FA 21 00 00		     ld	     hl, 0
 RAM:D4FD 06 08			     ld	     b,	8
 RAM:D4FF
-RAM:D4FF	     loc_D4FF:							     ; CODE XREF: sub_D4F9:loc_D504j
+RAM:D4FF	     loc_D4FF:							     ; CODE XREF: HL_equals_DE_x_A:loc_D504j
 RAM:D4FF 29			     add     hl, hl
 RAM:D500 07			     rlca
 RAM:D501 30 01			     jr	     nc, loc_D504
 RAM:D503 19			     add     hl, de
 RAM:D504
-RAM:D504	     loc_D504:							     ; CODE XREF: sub_D4F9+8j
+RAM:D504	     loc_D504:							     ; CODE XREF: HL_equals_DE_x_A+8j
 RAM:D504 10 F9			     djnz    loc_D4FF
 RAM:D506 C1			     pop     bc
 RAM:D507 C9			     ret
-RAM:D507	     ; End of function sub_D4F9
+RAM:D507	     ; End of function HL_equals_DE_x_A
 RAM:D507
 RAM:D508
 RAM:D508	     ; =============== S U B R O U T I N E =======================================
@@ -10527,11 +10527,12 @@ RAM:D6EC FE C0			     cp	     0C0h ; 'À'
 RAM:D6EE C9			     ret
 RAM:D6EE	     ; End of function sub_D6C9
 RAM:D6EE
+RAM:D6EF	     ; Flips sprite data (H,V) if required in-place
 RAM:D6EF
 RAM:D6EF	     ; =============== S U B R O U T I N E =======================================
 RAM:D6EF
 RAM:D6EF
-RAM:D6EF	     sub_D6EF:							     ; CODE XREF: sub_CD33+3p
+RAM:D6EF	     flip_sprite:						     ; CODE XREF: sub_CD33+3p
 RAM:D6EF									     ; RAM:print_spritep
 RAM:D6EF
 RAM:D6EF	     ; FUNCTION	CHUNK AT RAM:D865 SIZE 00000079	BYTES
@@ -10546,11 +10547,11 @@ RAM:D6FA 23			     inc     hl
 RAM:D6FB 56			     ld	     d,	(hl)				     ; DE = sprite address
 RAM:D6FC 1A			     ld	     a,	(de)				     ; width
 RAM:D6FD A7			     and     a					     ; null sprite?
-RAM:D6FE C2 65 D8		     jp	     nz, loc_D865			     ; no, skip
+RAM:D6FE C2 65 D8		     jp	     nz, vflip_sprite_data		     ; no, skip
 RAM:D701 33			     inc     sp
 RAM:D702 33			     inc     sp					     ; exit from caller
 RAM:D703 C9			     ret
-RAM:D703	     ; End of function sub_D6EF
+RAM:D703	     ; End of function flip_sprite
 RAM:D703
 RAM:D704
 RAM:D704	     ; =============== S U B R O U T I N E =======================================
@@ -10573,10 +10574,10 @@ RAM:D717
 RAM:D718
 RAM:D718	     print_sprite:						     ; CODE XREF: print_lives_gfx+14p
 RAM:D718									     ; multiple_print_sprite+3p ...
-RAM:D718 CD EF D6		     call    sub_D6EF
-RAM:D71B DD 7E 1A		     ld	     a,	(ix+1Ah)
-RAM:D71E E6 07			     and     7
-RAM:D720 28 4D			     jr	     z,	loc_D76F
+RAM:D718 CD EF D6		     call    flip_sprite
+RAM:D71B DD 7E 1A		     ld	     a,	(ix+1Ah)			     ; X
+RAM:D71E E6 07			     and     7					     ; bit offset?
+RAM:D720 28 4D			     jr	     z,	loc_D76F			     ; no, skip
 RAM:D722 07			     rlca
 RAM:D723 E6 0E			     and     0Eh
 RAM:D725 F6 F0			     or	     0F0h ; 'ð'
@@ -10597,11 +10598,11 @@ RAM:D738 ED 44			     neg
 RAM:D73A C6 50			     add     a,	50h ; 'P'
 RAM:D73C
 RAM:D73C	     loc_D73C:							     ; CODE XREF: RAM:D77Ej
-RAM:D73C 32 AD D7		     ld	     (byte_D7AD), a
+RAM:D73C 32 AD D7		     ld	     (loc_D7AC+1), a			     ; self-modifying code
 RAM:D73F 78			     ld	     a,	b
 RAM:D740 2F			     cpl
 RAM:D741 C6 22			     add     a,	22h ; '"'
-RAM:D743 32 01 D8		     ld	     (byte_D801), a
+RAM:D743 32 01 D8		     ld	     (loc_D800+1), a
 RAM:D746 1A			     ld	     a,	(de)
 RAM:D747 13			     inc     de
 RAM:D748 DD 77 19		     ld	     (ix+19h), a
@@ -10616,7 +10617,7 @@ RAM:D75A	     loc_D75A:							     ; CODE XREF: RAM:D750j
 RAM:D75A DD 4E 1A		     ld	     c,	(ix+1Ah)
 RAM:D75D DD 46 1B		     ld	     b,	(ix+1Bh)
 RAM:D760 CD 11 D8		     call    calc_screen_buffer_addr
-RAM:D763 ED 73 A9 5B		     ld	     (unk_5BA9), sp
+RAM:D763 ED 73 A9 5B		     ld	     (tmp_SP), sp
 RAM:D767 EB			     ex	     de, hl
 RAM:D768 F9			     ld	     sp, hl
 RAM:D769 EB			     ex	     de, hl
@@ -10653,139 +10654,139 @@ RAM:D78C 2F			     db	 2Fh ; /
 RAM:D78D B2			     db	0B2h ; ²
 RAM:D78E 02			     db	   2
 RAM:D78F 03			     db	   3
-RAM:D790 D1			     db	0D1h ; Ñ
-RAM:D791 0A			     db	 0Ah
-RAM:D792 2F			     db	 2Fh ; /
-RAM:D793 B3			     db	0B3h ; ³
-RAM:D794 2F			     db	 2Fh ; /
-RAM:D795 B2			     db	0B2h ; ²
-RAM:D796 02			     db	   2
-RAM:D797 03			     db	   3
-RAM:D798 D1			     db	0D1h ; Ñ
-RAM:D799 0A			     db	 0Ah
-RAM:D79A 2F			     db	 2Fh ; /
-RAM:D79B B3			     db	0B3h ; ³
-RAM:D79C 2F			     db	 2Fh ; /
-RAM:D79D B2			     db	0B2h ; ²
-RAM:D79E 02			     db	   2
-RAM:D79F 03			     db	   3
-RAM:D7A0 D1			     db	0D1h ; Ñ
-RAM:D7A1 0A			     db	 0Ah
-RAM:D7A2 2F			     db	 2Fh ; /
-RAM:D7A3 B3			     db	0B3h ; ³
-RAM:D7A4 2F			     db	 2Fh ; /
-RAM:D7A5 B2			     db	0B2h ; ²
-RAM:D7A6 02			     db	   2
-RAM:D7A7 C3			     db	0C3h ; Ã
-RAM:D7A8 FF			     db	0FFh
-RAM:D7A9 D7			     db	0D7h ; ×
+RAM:D790	     ; ---------------------------------------------------------------------------
+RAM:D790
+RAM:D790	     loc_D790:							     ; CODE XREF: RAM:loc_D7ACj
+RAM:D790 D1			     pop     de
+RAM:D791 0A			     ld	     a,	(bc)
+RAM:D792 2F			     cpl
+RAM:D793 B3			     or	     e
+RAM:D794 2F			     cpl
+RAM:D795 B2			     or	     d
+RAM:D796 02			     ld	     (bc), a
+RAM:D797 03			     inc     bc
+RAM:D798 D1			     pop     de
+RAM:D799 0A			     ld	     a,	(bc)
+RAM:D79A 2F			     cpl
+RAM:D79B B3			     or	     e
+RAM:D79C 2F			     cpl
+RAM:D79D B2			     or	     d
+RAM:D79E 02			     ld	     (bc), a
+RAM:D79F 03			     inc     bc
+RAM:D7A0 D1			     pop     de
+RAM:D7A1 0A			     ld	     a,	(bc)
+RAM:D7A2 2F			     cpl
+RAM:D7A3 B3			     or	     e
+RAM:D7A4 2F			     cpl
+RAM:D7A5 B2			     or	     d
+RAM:D7A6 02			     ld	     (bc), a
+RAM:D7A7 C3 FF D7		     jp	     loc_D7FF
 RAM:D7AA	     ; ---------------------------------------------------------------------------
 RAM:D7AA
 RAM:D7AA	     loc_D7AA:							     ; CODE XREF: RAM:D76Dj
+RAM:D7AA									     ; RAM:D809j
 RAM:D7AA 08			     ex	     af, af'
 RAM:D7AB 0A			     ld	     a,	(bc)
-RAM:D7AB	     ; ---------------------------------------------------------------------------
-RAM:D7AC 18			     db	 18h
-RAM:D7AD E2	     byte_D7AD:	     db	0E2h					     ; DATA XREF: RAM:loc_D73Cw
-RAM:D7AE D1			     db	0D1h ; Ñ
-RAM:D7AF 6B			     db	 6Bh ; k
-RAM:D7B0 A6			     db	0A6h ; ¦
-RAM:D7B1 6A			     db	 6Ah ; j
-RAM:D7B2 AE			     db	0AEh ; ®
-RAM:D7B3 2F			     db	 2Fh ; /
-RAM:D7B4 02			     db	   2
-RAM:D7B5 03			     db	   3
-RAM:D7B6 24			     db	 24h ; $
-RAM:D7B7 6B			     db	 6Bh ; k
-RAM:D7B8 0A			     db	 0Ah
-RAM:D7B9 A6			     db	0A6h ; ¦
-RAM:D7BA 6A			     db	 6Ah ; j
-RAM:D7BB AE			     db	0AEh ; ®
-RAM:D7BC 2F			     db	 2Fh ; /
-RAM:D7BD 25			     db	 25h ; %
-RAM:D7BE D1			     db	0D1h ; Ñ
-RAM:D7BF 6B			     db	 6Bh ; k
-RAM:D7C0 A6			     db	0A6h ; ¦
-RAM:D7C1 6A			     db	 6Ah ; j
-RAM:D7C2 AE			     db	0AEh ; ®
-RAM:D7C3 2F			     db	 2Fh ; /
-RAM:D7C4 02			     db	   2
-RAM:D7C5 03			     db	   3
-RAM:D7C6 24			     db	 24h ; $
-RAM:D7C7 6B			     db	 6Bh ; k
-RAM:D7C8 0A			     db	 0Ah
-RAM:D7C9 A6			     db	0A6h ; ¦
-RAM:D7CA 6A			     db	 6Ah ; j
-RAM:D7CB AE			     db	0AEh ; ®
-RAM:D7CC 2F			     db	 2Fh ; /
-RAM:D7CD 25			     db	 25h ; %
-RAM:D7CE D1			     db	0D1h ; Ñ
-RAM:D7CF 6B			     db	 6Bh ; k
-RAM:D7D0 A6			     db	0A6h ; ¦
-RAM:D7D1 6A			     db	 6Ah ; j
-RAM:D7D2 AE			     db	0AEh ; ®
-RAM:D7D3 2F			     db	 2Fh ; /
-RAM:D7D4 02			     db	   2
-RAM:D7D5 03			     db	   3
-RAM:D7D6 24			     db	 24h ; $
-RAM:D7D7 6B			     db	 6Bh ; k
-RAM:D7D8 0A			     db	 0Ah
-RAM:D7D9 A6			     db	0A6h ; ¦
-RAM:D7DA 6A			     db	 6Ah ; j
-RAM:D7DB AE			     db	0AEh ; ®
-RAM:D7DC 2F			     db	 2Fh ; /
-RAM:D7DD 25			     db	 25h ; %
-RAM:D7DE D1			     db	0D1h ; Ñ
-RAM:D7DF 6B			     db	 6Bh ; k
-RAM:D7E0 A6			     db	0A6h ; ¦
-RAM:D7E1 6A			     db	 6Ah ; j
-RAM:D7E2 AE			     db	0AEh ; ®
-RAM:D7E3 2F			     db	 2Fh ; /
-RAM:D7E4 02			     db	   2
-RAM:D7E5 03			     db	   3
-RAM:D7E6 24			     db	 24h ; $
-RAM:D7E7 6B			     db	 6Bh ; k
-RAM:D7E8 0A			     db	 0Ah
-RAM:D7E9 A6			     db	0A6h ; ¦
-RAM:D7EA 6A			     db	 6Ah ; j
-RAM:D7EB AE			     db	0AEh ; ®
-RAM:D7EC 2F			     db	 2Fh ; /
-RAM:D7ED 25			     db	 25h ; %
-RAM:D7EE D1			     db	0D1h ; Ñ
-RAM:D7EF 6B			     db	 6Bh ; k
-RAM:D7F0 A6			     db	0A6h ; ¦
-RAM:D7F1 6A			     db	 6Ah ; j
-RAM:D7F2 AE			     db	0AEh ; ®
-RAM:D7F3 2F			     db	 2Fh ; /
-RAM:D7F4 02			     db	   2
-RAM:D7F5 03			     db	   3
-RAM:D7F6 24			     db	 24h ; $
-RAM:D7F7 6B			     db	 6Bh ; k
-RAM:D7F8 0A			     db	 0Ah
-RAM:D7F9 A6			     db	0A6h ; ¦
-RAM:D7FA 6A			     db	 6Ah ; j
-RAM:D7FB AE			     db	0AEh ; ®
-RAM:D7FC 2F			     db	 2Fh ; /
-RAM:D7FD 25			     db	 25h ; %
-RAM:D7FE 02			     db	   2
-RAM:D7FF 79			     db	 79h ; y
-RAM:D800 C6			     db	0C6h ; Æ
-RAM:D801 1E	     byte_D801:	     db	1Eh					     ; DATA XREF: RAM:D743w
-RAM:D802 4F			     db	 4Fh ; O
-RAM:D803 78			     db	 78h ; x
-RAM:D804 CE			     db	0CEh ; Î
-RAM:D805 00			     db	   0
-RAM:D806 47			     db	 47h ; G
-RAM:D807 08			     db	   8
-RAM:D808 3D			     db	 3Dh ; =
-RAM:D809 C2			     db	0C2h ; Â
-RAM:D80A AA			     db	0AAh ; ª
-RAM:D80B D7			     db	0D7h ; ×
-RAM:D80C ED			     db	0EDh ; í
-RAM:D80D 7B			     db	 7Bh ; {
-RAM:D80E A9			     db	0A9h ; ©
-RAM:D80F 5B			     db	 5Bh ; [
-RAM:D810 C9			     db	0C9h ; É
+RAM:D7AC
+RAM:D7AC	     loc_D7AC:							     ; DATA XREF: RAM:loc_D73Cw
+RAM:D7AC 18 E2			     jr	     loc_D790				     ; patched
+RAM:D7AE	     ; ---------------------------------------------------------------------------
+RAM:D7AE D1			     pop     de
+RAM:D7AF 6B			     ld	     l,	e
+RAM:D7B0 A6			     and     (hl)
+RAM:D7B1 6A			     ld	     l,	d
+RAM:D7B2 AE			     xor     (hl)
+RAM:D7B3 2F			     cpl
+RAM:D7B4 02			     ld	     (bc), a
+RAM:D7B5 03			     inc     bc
+RAM:D7B6 24			     inc     h
+RAM:D7B7 6B			     ld	     l,	e
+RAM:D7B8 0A			     ld	     a,	(bc)
+RAM:D7B9 A6			     and     (hl)
+RAM:D7BA 6A			     ld	     l,	d
+RAM:D7BB AE			     xor     (hl)
+RAM:D7BC 2F			     cpl
+RAM:D7BD 25			     dec     h
+RAM:D7BE D1			     pop     de
+RAM:D7BF 6B			     ld	     l,	e
+RAM:D7C0 A6			     and     (hl)
+RAM:D7C1 6A			     ld	     l,	d
+RAM:D7C2 AE			     xor     (hl)
+RAM:D7C3 2F			     cpl
+RAM:D7C4 02			     ld	     (bc), a
+RAM:D7C5 03			     inc     bc
+RAM:D7C6 24			     inc     h
+RAM:D7C7 6B			     ld	     l,	e
+RAM:D7C8 0A			     ld	     a,	(bc)
+RAM:D7C9 A6			     and     (hl)
+RAM:D7CA 6A			     ld	     l,	d
+RAM:D7CB AE			     xor     (hl)
+RAM:D7CC 2F			     cpl
+RAM:D7CD 25			     dec     h
+RAM:D7CE D1			     pop     de
+RAM:D7CF 6B			     ld	     l,	e
+RAM:D7D0 A6			     and     (hl)
+RAM:D7D1 6A			     ld	     l,	d
+RAM:D7D2 AE			     xor     (hl)
+RAM:D7D3 2F			     cpl
+RAM:D7D4 02			     ld	     (bc), a
+RAM:D7D5 03			     inc     bc
+RAM:D7D6 24			     inc     h
+RAM:D7D7 6B			     ld	     l,	e
+RAM:D7D8 0A			     ld	     a,	(bc)
+RAM:D7D9 A6			     and     (hl)
+RAM:D7DA 6A			     ld	     l,	d
+RAM:D7DB AE			     xor     (hl)
+RAM:D7DC 2F			     cpl
+RAM:D7DD 25			     dec     h
+RAM:D7DE D1			     pop     de
+RAM:D7DF 6B			     ld	     l,	e
+RAM:D7E0 A6			     and     (hl)
+RAM:D7E1 6A			     ld	     l,	d
+RAM:D7E2 AE			     xor     (hl)
+RAM:D7E3 2F			     cpl
+RAM:D7E4 02			     ld	     (bc), a
+RAM:D7E5 03			     inc     bc
+RAM:D7E6 24			     inc     h
+RAM:D7E7 6B			     ld	     l,	e
+RAM:D7E8 0A			     ld	     a,	(bc)
+RAM:D7E9 A6			     and     (hl)
+RAM:D7EA 6A			     ld	     l,	d
+RAM:D7EB AE			     xor     (hl)
+RAM:D7EC 2F			     cpl
+RAM:D7ED 25			     dec     h
+RAM:D7EE D1			     pop     de
+RAM:D7EF 6B			     ld	     l,	e
+RAM:D7F0 A6			     and     (hl)
+RAM:D7F1 6A			     ld	     l,	d
+RAM:D7F2 AE			     xor     (hl)
+RAM:D7F3 2F			     cpl
+RAM:D7F4 02			     ld	     (bc), a
+RAM:D7F5 03			     inc     bc
+RAM:D7F6 24			     inc     h
+RAM:D7F7 6B			     ld	     l,	e
+RAM:D7F8 0A			     ld	     a,	(bc)
+RAM:D7F9 A6			     and     (hl)
+RAM:D7FA 6A			     ld	     l,	d
+RAM:D7FB AE			     xor     (hl)
+RAM:D7FC 2F			     cpl
+RAM:D7FD 25			     dec     h
+RAM:D7FE 02			     ld	     (bc), a
+RAM:D7FF
+RAM:D7FF	     loc_D7FF:							     ; CODE XREF: RAM:D7A7j
+RAM:D7FF 79			     ld	     a,	c
+RAM:D800
+RAM:D800	     loc_D800:							     ; DATA XREF: RAM:D743w
+RAM:D800 C6 1E			     add     a,	1Eh				     ; patched
+RAM:D802 4F			     ld	     c,	a
+RAM:D803 78			     ld	     a,	b
+RAM:D804 CE 00			     adc     a,	0
+RAM:D806 47			     ld	     b,	a
+RAM:D807 08			     ex	     af, af'
+RAM:D808 3D			     dec     a
+RAM:D809 C2 AA D7		     jp	     nz, loc_D7AA
+RAM:D80C ED 7B A9 5B		     ld	     sp, (tmp_SP)
+RAM:D810 C9			     ret
 RAM:D811
 RAM:D811	     ; =============== S U B R O U T I N E =======================================
 RAM:D811
@@ -10872,85 +10873,85 @@ RAM:D864	     ; End of function calc_attrib_addr
 RAM:D864
 RAM:D865	     ; ---------------------------------------------------------------------------
 RAM:D865	     ; DE = sprite data	address
-RAM:D865	     ; START OF	FUNCTION CHUNK FOR sub_D6EF
+RAM:D865	     ; START OF	FUNCTION CHUNK FOR flip_sprite
 RAM:D865
-RAM:D865	     loc_D865:							     ; CODE XREF: sub_D6EF+Fj
+RAM:D865	     vflip_sprite_data:						     ; CODE XREF: flip_sprite+Fj
 RAM:D865 D5			     push    de					     ; sprite data address
 RAM:D866 1A			     ld	     a,	(de)				     ; width
-RAM:D867 DD AE 07		     xor     (ix+7)
+RAM:D867 DD AE 07		     xor     (ix+7)				     ; same Vflip as stored?
 RAM:D86A E6 80			     and     80h ; '€'
-RAM:D86C 28 34			     jr	     z,	loc_D8A2
+RAM:D86C 28 34			     jr	     z,	loc_D8A2			     ; yes, skip
 RAM:D86E 1A			     ld	     a,	(de)				     ; width
-RAM:D86F EE 80			     xor     80h ; '€'
-RAM:D871 12			     ld	     (de), a
-RAM:D872 07			     rlca
+RAM:D86F EE 80			     xor     80h ; '€'                               ; toggle Vflip
+RAM:D871 12			     ld	     (de), a				     ; store updated flag
+RAM:D872 07			     rlca					     ; *2
 RAM:D873 E6 1E			     and     1Eh
-RAM:D875 47			     ld	     b,	a
+RAM:D875 47			     ld	     b,	a				     ; B = width x 2 (data+mask)
 RAM:D876 13			     inc     de
-RAM:D877 1A			     ld	     a,	(de)
+RAM:D877 1A			     ld	     a,	(de)				     ; height
 RAM:D878 4F			     ld	     c,	a
-RAM:D879 13			     inc     de
+RAM:D879 13			     inc     de					     ; sprite data
 RAM:D87A D5			     push    de
 RAM:D87B 58			     ld	     e,	b
-RAM:D87C 16 00			     ld	     d,	0
-RAM:D87E CD F9 D4		     call    sub_D4F9
-RAM:D881 D1			     pop     de
-RAM:D882 19			     add     hl, de
-RAM:D883 EB			     ex	     de, hl
-RAM:D884 78			     ld	     a,	b
-RAM:D885 CD F2 D4		     call    add_HL_A
-RAM:D888 1B			     dec     de
-RAM:D889 2B			     dec     hl
-RAM:D88A CB 39			     srl     c
+RAM:D87C 16 00			     ld	     d,	0				     ; DE = width x 2
+RAM:D87E CD F9 D4		     call    HL_equals_DE_x_A			     ; HL = width x 2 x	height
+RAM:D881 D1			     pop     de					     ; sprite data
+RAM:D882 19			     add     hl, de				     ; skip sprite data	(including mask	bytes)
+RAM:D883 EB			     ex	     de, hl				     ; DE=end of sprite	data, HL=sprite	data
+RAM:D884 78			     ld	     a,	b				     ; width x 2
+RAM:D885 CD F2 D4		     call    add_HL_A				     ; HL=sprite data +	width x	2
+RAM:D888 1B			     dec     de					     ; last byte of sprite data
+RAM:D889 2B			     dec     hl					     ; (height+1) x width x 2 -	1
+RAM:D88A CB 39			     srl     c					     ; height /	2
 RAM:D88C
-RAM:D88C	     loc_D88C:							     ; CODE XREF: sub_D6EF+1B1j
-RAM:D88C C5			     push    bc
+RAM:D88C	     loc_D88C:							     ; CODE XREF: flip_sprite+1B1j
+RAM:D88C C5			     push    bc					     ; B=widthx2, C=height/2
 RAM:D88D
-RAM:D88D	     loc_D88D:							     ; CODE XREF: sub_D6EF+1A5j
-RAM:D88D 1A			     ld	     a,	(de)
-RAM:D88E 4E			     ld	     c,	(hl)
-RAM:D88F 77			     ld	     (hl), a
+RAM:D88D	     vflip_sprite_line_pair:					     ; CODE XREF: flip_sprite+1A5j
+RAM:D88D 1A			     ld	     a,	(de)				     ; sprite data byte	from end
+RAM:D88E 4E			     ld	     c,	(hl)				     ; sprite data from	start
+RAM:D88F 77			     ld	     (hl), a				     ; store end data at start
 RAM:D890 79			     ld	     a,	c
-RAM:D891 12			     ld	     (de), a
-RAM:D892 2B			     dec     hl
-RAM:D893 1B			     dec     de
-RAM:D894 10 F7			     djnz    loc_D88D
+RAM:D891 12			     ld	     (de), a				     ; store start data	at end
+RAM:D892 2B			     dec     hl					     ; next start byte
+RAM:D893 1B			     dec     de					     ; next end	byte
+RAM:D894 10 F7			     djnz    vflip_sprite_line_pair		     ; flip sprite and mask data for line pair
 RAM:D896 C1			     pop     bc
 RAM:D897 78			     ld	     a,	b
 RAM:D898 CD F2 D4		     call    add_HL_A
 RAM:D89B 78			     ld	     a,	b
-RAM:D89C CD F2 D4		     call    add_HL_A
-RAM:D89F 0D			     dec     c
-RAM:D8A0 20 EA			     jr	     nz, loc_D88C
+RAM:D89C CD F2 D4		     call    add_HL_A				     ; next line
+RAM:D89F 0D			     dec     c					     ; done all	lines?
+RAM:D8A0 20 EA			     jr	     nz, loc_D88C			     ; no, loop
 RAM:D8A2
-RAM:D8A2	     loc_D8A2:							     ; CODE XREF: sub_D6EF+17Dj
-RAM:D8A2 D1			     pop     de
+RAM:D8A2	     loc_D8A2:							     ; CODE XREF: flip_sprite+17Dj
+RAM:D8A2 D1			     pop     de					     ; sprite data address
 RAM:D8A3 D5			     push    de
-RAM:D8A4 1A			     ld	     a,	(de)
-RAM:D8A5 DD AE 07		     xor     (ix+7)
+RAM:D8A4 1A			     ld	     a,	(de)				     ; width (bytes)
+RAM:D8A5 DD AE 07		     xor     (ix+7)				     ; same Hflip as stored?
 RAM:D8A8 E6 40			     and     40h ; '@'
-RAM:D8AA 28 30			     jr	     z,	loc_D8DC
-RAM:D8AC 1A			     ld	     a,	(de)
-RAM:D8AD EE 40			     xor     40h ; '@'
-RAM:D8AF 12			     ld	     (de), a
-RAM:D8B0 E6 0F			     and     0Fh
+RAM:D8AA 28 30			     jr	     z,	loc_D8DC			     ; yes, skip
+RAM:D8AC 1A			     ld	     a,	(de)				     ; width
+RAM:D8AD EE 40			     xor     40h ; '@'                               ; toggle Hflip flag
+RAM:D8AF 12			     ld	     (de), a				     ; store updated flag
+RAM:D8B0 E6 0F			     and     0Fh				     ; width
 RAM:D8B2 47			     ld	     b,	a
 RAM:D8B3 4F			     ld	     c,	a
 RAM:D8B4 13			     inc     de
-RAM:D8B5 1A			     ld	     a,	(de)
+RAM:D8B5 1A			     ld	     a,	(de)				     ; height
 RAM:D8B6 08			     ex	     af, af'
-RAM:D8B7 13			     inc     de
-RAM:D8B8 EB			     ex	     de, hl
+RAM:D8B7 13			     inc     de					     ; sprite data
+RAM:D8B8 EB			     ex	     de, hl				     ; HL=sprite data
 RAM:D8B9 E5			     push    hl
 RAM:D8BA D9			     exx
-RAM:D8BB E1			     pop     hl
+RAM:D8BB E1			     pop     hl					     ; HL'=sprite data
 RAM:D8BC 06 F1			     ld	     b,	0F1h ; 'ñ'
 RAM:D8BE D9			     exx
 RAM:D8BF
-RAM:D8BF	     loc_D8BF:							     ; CODE XREF: sub_D6EF+1DBj
-RAM:D8BF									     ; sub_D6EF+1EBj
+RAM:D8BF	     loc_D8BF:							     ; CODE XREF: flip_sprite+1DBj
+RAM:D8BF									     ; flip_sprite+1EBj
 RAM:D8BF D9			     exx
-RAM:D8C0 4E			     ld	     c,	(hl)
+RAM:D8C0 4E			     ld	     c,	(hl)				     ; sprite data byte
 RAM:D8C1 0A			     ld	     a,	(bc)
 RAM:D8C2 5F			     ld	     e,	a
 RAM:D8C3 23			     inc     hl
@@ -10963,7 +10964,7 @@ RAM:D8C9 D9			     exx
 RAM:D8CA 10 F3			     djnz    loc_D8BF
 RAM:D8CC 41			     ld	     b,	c
 RAM:D8CD
-RAM:D8CD	     loc_D8CD:							     ; CODE XREF: sub_D6EF+1E3j
+RAM:D8CD	     loc_D8CD:							     ; CODE XREF: flip_sprite+1E3j
 RAM:D8CD D1			     pop     de
 RAM:D8CE 73			     ld	     (hl), e
 RAM:D8CF 23			     inc     hl
@@ -10978,11 +10979,11 @@ RAM:D8D9 41			     ld	     b,	c
 RAM:D8DA 18 E3			     jr	     loc_D8BF
 RAM:D8DC	     ; ---------------------------------------------------------------------------
 RAM:D8DC
-RAM:D8DC	     loc_D8DC:							     ; CODE XREF: sub_D6EF+1BBj
-RAM:D8DC									     ; sub_D6EF+1E7j
+RAM:D8DC	     loc_D8DC:							     ; CODE XREF: flip_sprite+1BBj
+RAM:D8DC									     ; flip_sprite+1E7j
 RAM:D8DC D1			     pop     de
 RAM:D8DD C9			     ret
-RAM:D8DD	     ; END OF FUNCTION CHUNK FOR sub_D6EF
+RAM:D8DD	     ; END OF FUNCTION CHUNK FOR flip_sprite
 RAM:D8DD	     ; ---------------------------------------------------------------------------
 RAM:D8DE 43 4F 50 59+aCopyright1984A_c_g_:.ascii 'COPYRIGHT 1984 A.C.G.'
 RAM:D8DE 52 49 47 48+; end of 'RAM'
