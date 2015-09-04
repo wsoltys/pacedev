@@ -21,7 +21,7 @@
 //#define DO_GA
 #define DO_FONT
 //#define DO_SPRITE_DATA
-//#define DO_SPRITE_TABLE
+#define DO_SPRITE_TABLE
 //#define DO_BLOCK_DATA
 //#define DO_BG_DATA
 
@@ -290,7 +290,7 @@ void main (int argc, char *argv[])
     if (p == 0x7D98)
       p += 12;
 
-    p = plot_sprite_data (s, p, (s%8)*40, ((s%16)/8)*64, 3, w, h);
+    p = plot_sprite_data (s, 0, p, (s%8)*40, ((s%16)/8)*64, 3, w, h);
 
     if (s%16 == 15)
     {
