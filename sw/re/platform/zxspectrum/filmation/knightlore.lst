@@ -34,10 +34,12 @@ SCRATCH:5BA8 ??		 unk_5BA8:	 ds 1						 ; DATA	XREF: lose_life:start_menuo
 SCRATCH:5BA8										 ; sub_D59F+1w	...
 SCRATCH:5BA9 ??	??	 tmp_SP:	 ds 2						 ; DATA	XREF: RAM:D763w
 SCRATCH:5BA9										 ; RAM:D80Cr
-SCRATCH:5BAB ??	??	 word_5BAB:	 ds 2						 ; DATA	XREF: sub_C87Ar
+SCRATCH:5BAB ??		 room_size_X:	 ds 1						 ; DATA	XREF: sub_C87Ar
 SCRATCH:5BAB										 ; sub_CA70+12r ...
-SCRATCH:5BAD ??		 screen_attr:	 ds 1
-SCRATCH:5BAE ??		 byte_5BAE:	 ds 1						 ; DATA	XREF: RAM:C667r
+SCRATCH:5BAC ??		 room_size_Y:	 ds 1						 ; DATA	XREF: sub_CD08+Br
+SCRATCH:5BAC										 ; sub_D320+6r	...
+SCRATCH:5BAD ??		 unk_5BAD:	 ds 1
+SCRATCH:5BAE ??		 room_size_Z:	 ds 1						 ; DATA	XREF: RAM:C667r
 SCRATCH:5BAE										 ; RAM:C6F4r ...
 SCRATCH:5BAF ??		 byte_5BAF:	 ds 1						 ; DATA	XREF: RAM:C6E1w
 SCRATCH:5BAF										 ; sub_D1E6+16w
@@ -214,6 +216,7 @@ SCRATCH:5C45 ??				 ds 1
 SCRATCH:5C46 ??				 ds 1
 SCRATCH:5C47 ??				 ds 1
 SCRATCH:5C48 ??		 byte_5C48:	 ds 1						 ; DATA	XREF: RAM:B8DDr
+SCRATCH:5C48										 ; sub_C591o
 SCRATCH:5C49 ??				 ds 1
 SCRATCH:5C4A ??				 ds 1
 SCRATCH:5C4B ??				 ds 1
@@ -277,7 +280,7 @@ SCRATCH:5C84 ??				 ds 1
 SCRATCH:5C85 ??				 ds 1
 SCRATCH:5C86 ??				 ds 1
 SCRATCH:5C87 ??				 ds 1
-SCRATCH:5C88 ??				 ds 1
+SCRATCH:5C88 ??		 unk_5C88:	 ds 1						 ; DATA	XREF: retrieve_screeno
 SCRATCH:5C89 ??				 ds 1
 SCRATCH:5C8A ??				 ds 1
 SCRATCH:5C8B ??				 ds 1
@@ -1482,13 +1485,15 @@ RAM:6230 3C 42 99 A1+		     db	3Ch, 42h, 99h, 0A1h, 0A1h, 99h,	42h, 3Ch     ; '(
 RAM:6238 00 00 00 00+		     db	0, 0, 0, 0, 0, 0, 0, 0			     ; ' '
 RAM:6240 00 62 64 08+		     db	0, 62h,	64h, 8,	10h, 26h, 46h, 0	     ; '%'
 RAM:6248	     ; room size table
-RAM:6248 40 40 80		     db	64, 64,	128				     ; 0
+RAM:6248 40 40 80    room_size_tbl:  db	64, 64,	128				     ; DATA XREF: retrieve_screen+40o
+RAM:6248									     ; 0
 RAM:624B 20 40 80		     db	32, 64,	128				     ; 1
 RAM:624E 40 20 80		     db	64, 32,	128				     ; 2
 RAM:6251	     ; locations
-RAM:6251 00 19 03		     db	0, 25, 3				     ; id=0
-RAM:6254 00 01 0C FF+		     db	0, 1, 12, 255, 7, 16, 80, 144, 17, 81, 145, 10,	74
-RAM:6254 07 10 50 90+		     db	6, 138,	2, 66, 130, 200, 193, 192, 168,	201
+RAM:6251 00 19 03    location_tbl:   db	0, 25, 3				     ; DATA XREF: retrieve_screen+6o
+RAM:6251									     ; id=0
+RAM:6254 00 01 0C FF+		     db	0, 1, 0Ch, 0FFh, 7, 10h, 50h, 90h, 11h,	51h, 91h, 0Ah
+RAM:6254 07 10 50 90+		     db	4Ah, 6,	8Ah, 2,	42h, 82h, 0C8h,	0C1h, 0C0h, 0A8h, 0C9h
 RAM:626B 01 14 14		     db	1, 20, 20				     ; id=1
 RAM:626E 01 03 0D FF+		     db	1, 3, 0Dh, 0FFh, 3, 2Bh, 2Ch, 13h, 14h,	23h, 6Bh, 6Ch
 RAM:626E 03 2B 2C 13+		     db	53h, 54h, 40h, 1Ch, 48h, 28h
@@ -1860,7 +1865,8 @@ RAM:6BB5 2B 25 1D 22+		     db	2Ch, 13h, 14h, 60h, 5Bh
 RAM:6BC5 FF 0B 06		     db	255, 11, 6				     ; id=255
 RAM:6BC8 02 03 0C FF+		     db	2, 3, 0Ch, 0FFh, 2Bh, 2Eh, 35h,	37h, 3Eh
 RAM:6BD1	     ; Block Types
-RAM:6BD1 0B 6C			     dw	block					     ; 0 block 07 block
+RAM:6BD1 0B 6C	     block_type_tbl: dw	block					     ; DATA XREF: retrieve_screen+3o
+RAM:6BD1									     ; 0 block 07 block
 RAM:6BD3 3C 6C			     dw	fire					     ; 1 sprite	b0 (fire)
 RAM:6BD5 43 6C			     dw	ball_ud_y				     ; 2 sprite	b2 (ball) [up/down]
 RAM:6BD7 66 6C			     dw	rock					     ; 3 block 06 rock
@@ -1896,7 +1902,7 @@ RAM:6C0B	     ; +2 = depth (y)
 RAM:6C0B	     ; +3 = height (z)
 RAM:6C0B	     ; +4 = flags (see code)
 RAM:6C0B	     ' +5 = offsets (see code)
-RAM:6C0B 07 08 08 0C+block:	     db	7, 8, 8, 0Ch, 10h, 0, 0			     ; DATA XREF: RAM:6BD1o
+RAM:6C0B 07 08 08 0C+block:	     db	7, 8, 8, 0Ch, 10h, 0, 0			     ; DATA XREF: RAM:block_type_tblo
 RAM:6C12 07 08 08 0C+block_high:     db	7, 8, 8, 0Ch, 10h, 30h,	0		     ; DATA XREF: RAM:6BE7o
 RAM:6C19 36 08 08 0C+block_ew:	     db	36h, 8,	8, 0Ch,	10h, 0,	0		     ; DATA XREF: RAM:6BEDo
 RAM:6C20 37 08 08 0C+block_ns:	     db	37h, 8,	8, 0Ch,	10h, 0,	0		     ; DATA XREF: RAM:6BEFo
@@ -1928,7 +1934,8 @@ RAM:6CCD A4 05 05 0C+repel_spell:    db	0A4h, 5, 5, 0Ch, 10h, 0, 0		     ; DATA 
 RAM:6CD4 08 0C 01 20+gate_ud_1:	     db	8, 0Ch,	1, 20h,	50h, 1,	0		     ; DATA XREF: RAM:6C05o
 RAM:6CDB 08 01 0C 20+gate_ud_2:	     db	8, 1, 0Ch, 20h,	10h, 2,	0		     ; DATA XREF: RAM:6C07o
 RAM:6CE2	     ; Background Types	Pointers
-RAM:6CE2 12 6D			     dw	arch_n					     ; 0 Arch north
+RAM:6CE2 12 6D	     background_type_tbl:dw arch_n				     ; DATA XREF: retrieve_screen+64o
+RAM:6CE2									     ; 0 Arch north
 RAM:6CE4 23 6D			     dw	arch_e					     ; 1 arch east
 RAM:6CE6 45 6D			     dw	arch_s					     ; 2 arch south
 RAM:6CE8 67 6D			     dw	arch_w					     ; 3 arch west
@@ -1962,7 +1969,7 @@ RAM:6D12	     ; +5 = depth (y)
 RAM:6D12	     ; +6 = height (z)
 RAM:6D12	     ; +7 = flags (see code)
 RAM:6D12 02 8D C4 80+arch_n:	     db	2, 8Dh,	0C4h, 80h, 3, 5, 28h, 50h, 3, 73h, 0C4h, 80h
-RAM:6D12 03 05 28 50+								     ; DATA XREF: RAM:6CE2o
+RAM:6D12 03 05 28 50+								     ; DATA XREF: RAM:background_type_tblo
 RAM:6D12 03 73 C4 80+		     db	3, 5, 28h, 50h,	0
 RAM:6D23 02 C4 73 80+arch_e:	     db	2, 0C4h, 73h, 80h, 5, 3, 28h, 10h, 3, 0C4h, 8Dh, 80h
 RAM:6D23 05 03 28 10+								     ; DATA XREF: RAM:6CE4o
@@ -2080,7 +2087,7 @@ RAM:6FF2	     ; +5 current X
 RAM:6FF2	     ; +6 current Y
 RAM:6FF2	     ; +7 current Z
 RAM:6FF2	     ; +8 current screen
-RAM:6FF2 00 88 80 A4+byte_6FF2:	     db	0, 88h,	80h, 0A4h, 6Dh,	0, 0, 0		     ; DATA XREF: init_objectso
+RAM:6FF2 00 88 80 A4+object_tbl:     db	0, 88h,	80h, 0A4h, 6Dh,	0, 0, 0		     ; DATA XREF: init_objectso
 RAM:6FFA 00 00 80 80+		     db	0, 0, 80h, 80h,	8Ch, 27h, 0, 0
 RAM:7002 00 00 00 88+		     db	0, 0, 0, 88h, 78h, 0B0h, 0D0h, 0
 RAM:700A 00 00 00 00+		     db	0, 0, 0, 0, 78h, 88h, 80h, 0Ah
@@ -2118,40 +2125,41 @@ RAM:7102 78 B0 38 00+		     db	78h, 0B0h, 38h,	0, 0, 0, 0, 0
 RAM:710A 48 B8 98 F0+		     db	48h, 0B8h, 98h,	0F0h, 0, 0, 0, 0
 RAM:7112	     ; Pointers	to Sprite Graphics
 RAM:7112 8A 72 8A 72+sprite_tbl:     dw	spr_nul, spr_nul, byte_9ACA, byte_9C04,	spr_023, spr_024
-RAM:7112 CA 9A 04 9C+								     ; DATA XREF: flip_sprite+6o
-RAM:7112 B0 7F A2 80+		     dw	spr_008, spr_020, byte_8A0C, byte_8A0C,	byte_9EB8, byte_9FB4
-RAM:7112 AA 77 08 7E+		     dw	byte_A046, byte_9946, byte_9A08, byte_9C92, byte_922E
-RAM:7112 0C 8A 0C 8A+		     dw	byte_9290, byte_92F2, byte_9354, byte_92F2, byte_9290
-RAM:7112 B8 9E B4 9F+		     dw	spr_009, spr_002, byte_93B6, byte_9418,	byte_947A, byte_94DC
-RAM:7112 46 A0 46 99+		     dw	byte_947A, byte_9418, spr_005, spr_004,	byte_8F42, byte_8FD4
-RAM:7112 08 9A 92 9C+		     dw	byte_8CEE, byte_8EB0, byte_8CEE, byte_8FD4, byte_8E18
-RAM:7112 2E 92 90 92+		     dw	byte_953E, byte_9066, byte_8D80, byte_9196, byte_90FE
-RAM:7112 F2 92 54 93+		     dw	byte_9196, byte_8D80, byte_9668, byte_95D0, byte_A0B4
-RAM:7112 F2 92 90 92+		     dw	byte_A116, byte_A178, byte_A1DA, byte_A178, byte_A116
-RAM:7112 94 78 04 74+		     dw	spr_020, spr_020, byte_A23C, byte_A29E,	byte_A300, byte_A362
-RAM:7112 B6 93 18 94+		     dw	byte_A300, byte_A29E, spr_020, spr_003,	byte_A3C4, byte_A474
-RAM:7112 7A 94 DC 94+		     dw	byte_A524, byte_A5D4, byte_A524, byte_A474, byte_A95C
-RAM:7112 7A 94 18 94+		     dw	byte_AA0C, byte_A8A6, byte_A7F0, byte_A73A, byte_A684
-RAM:7112 3C 76 B0 75+		     dw	byte_A73A, byte_A7F0, byte_AABC, byte_AB72, byte_882A
-RAM:7112 42 8F D4 8F+		     dw	byte_88A4, byte_8918, byte_8992, byte_8BF4, byte_8B0A
-RAM:7112 EE 8C B0 8E+		     dw	spr_010, spr_011, byte_87A6, byte_87E8,	spr_000, spr_020
-RAM:7112 EE 8C D4 8F+		     dw	byte_AC28, byte_ACEA, byte_ADB2, byte_AE98, byte_84A0
-RAM:7112 18 8E 3E 95+		     dw	byte_8514, spr_022, byte_859A, byte_8626, byte_8694
-RAM:7112 66 90 80 8D+		     dw	byte_8726, spr_021, byte_84A0, byte_8514, spr_022, byte_859A
-RAM:7112 96 91 FE 90+		     dw	byte_8626, byte_8694, byte_8726, spr_030, spr_030, spr_029
-RAM:7112 96 91 80 8D+		     dw	spr_030, spr_029, spr_028, spr_027, spr_026, spr_025
-RAM:7112 68 96 D0 95+		     dw	spr_025, spr_026, spr_027, spr_028, spr_029, spr_030
-RAM:7112 B4 A0 16 A1+		     dw	spr_029, spr_030, byte_9700, byte_97C2,	byte_9884, spr_030
-RAM:7112 78 A1 DA A1+		     dw	spr_029, spr_028, spr_019, spr_017, spr_018, spr_014
-RAM:7112 78 A1 16 A1+		     dw	spr_015, spr_016, spr_021, byte_9D54, byte_9E5E, spr_020
-RAM:7112 08 7E 08 7E+		     dw	byte_922E, byte_9290, byte_92F2, byte_9354, byte_92F2
-RAM:7112 3C A2 9E A2+		     dw	byte_9290, spr_005, spr_004, byte_93B6,	byte_9418, byte_947A
-RAM:7112 00 A3 62 A3+		     dw	byte_94DC, byte_947A, byte_9418, spr_013, spr_012, spr_030
-RAM:7112 00 A3 9E A2+		     dw	spr_029, spr_028, spr_029, spr_030, spr_029, spr_028
-RAM:7112 08 7E E6 74+		     dw	spr_029, byte_84A0, byte_8514, spr_022,	byte_859A, byte_8626
-RAM:7112 C4 A3 74 A4+		     dw	byte_8694, byte_8726, spr_021, spr_010,	spr_011, spr_006
-RAM:7112 24 A5 D4 A5+		     dw	spr_007, spr_010, spr_011, spr_006, spr_007, spr_030
-RAM:7112 24 A5 74 A4+		     dw	spr_029, spr_001, spr_030
+RAM:7112 CA 9A 04 9C+								     ; DATA XREF: init_objects+21o
+RAM:7112 B0 7F A2 80+								     ; flip_sprite+6o
+RAM:7112 AA 77 08 7E+		     dw	spr_008, spr_020, byte_8A0C, byte_8A0C,	byte_9EB8, byte_9FB4
+RAM:7112 0C 8A 0C 8A+		     dw	byte_A046, byte_9946, byte_9A08, byte_9C92, byte_922E
+RAM:7112 B8 9E B4 9F+		     dw	byte_9290, byte_92F2, byte_9354, byte_92F2, byte_9290
+RAM:7112 46 A0 46 99+		     dw	spr_009, spr_002, byte_93B6, byte_9418,	byte_947A, byte_94DC
+RAM:7112 08 9A 92 9C+		     dw	byte_947A, byte_9418, spr_005, spr_004,	byte_8F42, byte_8FD4
+RAM:7112 2E 92 90 92+		     dw	byte_8CEE, byte_8EB0, byte_8CEE, byte_8FD4, byte_8E18
+RAM:7112 F2 92 54 93+		     dw	byte_953E, byte_9066, byte_8D80, byte_9196, byte_90FE
+RAM:7112 F2 92 90 92+		     dw	byte_9196, byte_8D80, byte_9668, byte_95D0, byte_A0B4
+RAM:7112 94 78 04 74+		     dw	byte_A116, byte_A178, byte_A1DA, byte_A178, byte_A116
+RAM:7112 B6 93 18 94+		     dw	spr_020, spr_020, byte_A23C, byte_A29E,	byte_A300, byte_A362
+RAM:7112 7A 94 DC 94+		     dw	byte_A300, byte_A29E, spr_020, spr_003,	byte_A3C4, byte_A474
+RAM:7112 7A 94 18 94+		     dw	byte_A524, byte_A5D4, byte_A524, byte_A474, byte_A95C
+RAM:7112 3C 76 B0 75+		     dw	byte_AA0C, byte_A8A6, byte_A7F0, byte_A73A, byte_A684
+RAM:7112 42 8F D4 8F+		     dw	byte_A73A, byte_A7F0, byte_AABC, byte_AB72, byte_882A
+RAM:7112 EE 8C B0 8E+		     dw	byte_88A4, byte_8918, byte_8992, byte_8BF4, byte_8B0A
+RAM:7112 EE 8C D4 8F+		     dw	spr_010, spr_011, byte_87A6, byte_87E8,	spr_000, spr_020
+RAM:7112 18 8E 3E 95+		     dw	byte_AC28, byte_ACEA, byte_ADB2, byte_AE98, byte_84A0
+RAM:7112 66 90 80 8D+		     dw	byte_8514, spr_022, byte_859A, byte_8626, byte_8694
+RAM:7112 96 91 FE 90+		     dw	byte_8726, spr_021, byte_84A0, byte_8514, spr_022, byte_859A
+RAM:7112 96 91 80 8D+		     dw	byte_8626, byte_8694, byte_8726, spr_030, spr_030, spr_029
+RAM:7112 68 96 D0 95+		     dw	spr_030, spr_029, spr_028, spr_027, spr_026, spr_025
+RAM:7112 B4 A0 16 A1+		     dw	spr_025, spr_026, spr_027, spr_028, spr_029, spr_030
+RAM:7112 78 A1 DA A1+		     dw	spr_029, spr_030, byte_9700, byte_97C2,	byte_9884, spr_030
+RAM:7112 78 A1 16 A1+		     dw	spr_029, spr_028, spr_019, spr_017, spr_018, spr_014
+RAM:7112 08 7E 08 7E+		     dw	spr_015, spr_016, spr_021, byte_9D54, byte_9E5E, spr_020
+RAM:7112 3C A2 9E A2+		     dw	byte_922E, byte_9290, byte_92F2, byte_9354, byte_92F2
+RAM:7112 00 A3 62 A3+		     dw	byte_9290, spr_005, spr_004, byte_93B6,	byte_9418, byte_947A
+RAM:7112 00 A3 9E A2+		     dw	byte_94DC, byte_947A, byte_9418, spr_013, spr_012, spr_030
+RAM:7112 08 7E E6 74+		     dw	spr_029, spr_028, spr_029, spr_030, spr_029, spr_028
+RAM:7112 C4 A3 74 A4+		     dw	spr_029, byte_84A0, byte_8514, spr_022,	byte_859A, byte_8626
+RAM:7112 24 A5 D4 A5+		     dw	byte_8694, byte_8726, spr_021, spr_010,	spr_011, spr_006
+RAM:7112 24 A5 74 A4+		     dw	spr_007, spr_010, spr_011, spr_006, spr_007, spr_030
+RAM:7112 5C A9 0C AA+		     dw	spr_029, spr_001, spr_030
 RAM:728A	     ; Sprite Graphics Data
 RAM:728A	     ; +0 width
 RAM:728A	     ; +1 height
@@ -3787,7 +3795,7 @@ RAM:AF94 32 BA 5B		     ld	     (lives), a
 RAM:AF97 21 A0 5B		     ld	     hl, seed_1
 RAM:AF9A 3A A2 5B		     ld	     a,	(seed_2)
 RAM:AF9D 86			     add     a,	(hl)
-RAM:AF9E 77			     ld	     (hl), a
+RAM:AF9E 77			     ld	     (hl), a				     ; update seed
 RAM:AF9F CD 5F D5		     call    clear_scrn				     ; colour is bright	yellow on black
 RAM:AFA2 CD 0C BD		     call    do_menu_selection
 RAM:AFA5 11 0E B2		     ld	     de, start_game_tune
@@ -3890,7 +3898,7 @@ RAM:B042 A7			     and     a
 RAM:B043 28 2F			     jr	     z,	loc_B074
 RAM:B045 AF			     xor     a
 RAM:B046 32 B7 5B		     ld	     (unk_5BB7), a
-RAM:B049 3A AD 5B		     ld	     a,	(screen_attr)			     ; attribute
+RAM:B049 3A AD 5B		     ld	     a,	(unk_5BAD)			     ; attribute
 RAM:B04C CD 56 D5		     call    fill_attr
 RAM:B04F CD 4E BF		     call    display_objects
 RAM:B052 CD EF D2		     call    colour_panel
@@ -4556,11 +4564,11 @@ RAM:B544	     shuffle_objects_required:					     ; CODE XREF: lose_life-217Fp
 RAM:B544 3A A0 5B		     ld	     a,	(seed_1)
 RAM:B547 E6 03			     and     3
 RAM:B549 F6 04			     or	     4
-RAM:B54B 4F			     ld	     c,	a
+RAM:B54B 4F			     ld	     c,	a				     ; random 4-7
 RAM:B54C
 RAM:B54C	     loc_B54C:							     ; CODE XREF: shuffle_objects_required+1Fj
-RAM:B54C 06 0D			     ld	     b,	0Dh
-RAM:B54E FD 21 7D C2		     ld	     iy, byte_C27D
+RAM:B54C 06 0D			     ld	     b,	13				     ; 14 items	(13 swaps)
+RAM:B54E FD 21 7D C2		     ld	     iy, objects_required
 RAM:B552 FD 5E 00		     ld	     e,	(iy+0)
 RAM:B555
 RAM:B555	     loc_B555:							     ; CODE XREF: shuffle_objects_required+19j
@@ -5659,7 +5667,7 @@ RAM:BCCA	     ; =============== S U B R O U T I N E ============================
 RAM:BCCA
 RAM:BCCA
 RAM:BCCA	     display_day:						     ; CODE XREF: RAM:B062p
-RAM:BCCA 3A AD 5B		     ld	     a,	(screen_attr)
+RAM:BCCA 3A AD 5B		     ld	     a,	(unk_5BAD)
 RAM:BCCD 2F			     cpl
 RAM:BCCE C6 02			     add     a,	2
 RAM:BCD0 E6 07			     and     7
@@ -6555,12 +6563,12 @@ RAM:C274
 RAM:C274	     ret_next_obj_required:					     ; CODE XREF: RAM:B90Dp
 RAM:C274									     ; RAM:C249p
 RAM:C274 3A BB 5B		     ld	     a,	(objects_put_in_caldron)
-RAM:C277 21 7D C2		     ld	     hl, byte_C27D
+RAM:C277 21 7D C2		     ld	     hl, objects_required
 RAM:C27A C3 F2 D4		     jp	     add_HL_A
 RAM:C27A	     ; End of function ret_next_obj_required
 RAM:C27A
 RAM:C27A	     ; ---------------------------------------------------------------------------
-RAM:C27D 00 01 02 03+byte_C27D:	     db	0, 1, 2, 3, 4, 5, 6, 3			     ; DATA XREF: shuffle_objects_required+Ao
+RAM:C27D 00 01 02 03+objects_required:db 0, 1, 2, 3, 4,	5, 6, 3			     ; DATA XREF: shuffle_objects_required+Ao
 RAM:C27D 04 05 06 03+								     ; ret_next_obj_required+3o
 RAM:C27D 05 00 06 01+		     db	5, 0, 6, 1, 2, 4
 RAM:C28B	     ; ---------------------------------------------------------------------------
@@ -6873,12 +6881,14 @@ RAM:C479 DD 36 1B 09		     ld	     (ix+1Bh), 9			     ; Y
 RAM:C47D C9			     ret
 RAM:C47D	     ; End of function print_sun
 RAM:C47D
+RAM:C47E	     ; loops through the object	table
+RAM:C47E	     ; copying start X,Y,Z,screen to current
 RAM:C47E
 RAM:C47E	     ; =============== S U B R O U T I N E =======================================
 RAM:C47E
 RAM:C47E
 RAM:C47E	     init_objects:						     ; CODE XREF: lose_life-2176p
-RAM:C47E 21 F2 6F		     ld	     hl, byte_6FF2
+RAM:C47E 21 F2 6F		     ld	     hl, object_tbl
 RAM:C481 3A A0 5B		     ld	     a,	(seed_1)
 RAM:C484 5F			     ld	     e,	a
 RAM:C485 ED 5F			     ld	     a,	r
@@ -6889,24 +6899,24 @@ RAM:C489	     loc_C489:							     ; CODE XREF: init_objects+29j
 RAM:C489 7B			     ld	     a,	e
 RAM:C48A E6 07			     and     7
 RAM:C48C F6 60			     or	     60h ; '`'
-RAM:C48E 77			     ld	     (hl), a
-RAM:C48F 23			     inc     hl
+RAM:C48E 77			     ld	     (hl), a				     ; object graphic no.
+RAM:C48F 23			     inc     hl					     ; HL=ptr Start X position
 RAM:C490 1C			     inc     e
 RAM:C491 D5			     push    de
-RAM:C492 EB			     ex	     de, hl
+RAM:C492 EB			     ex	     de, hl				     ; DE=ptr Start X position
 RAM:C493 21 04 00		     ld	     hl, 4
-RAM:C496 19			     add     hl, de
-RAM:C497 EB			     ex	     de, hl
+RAM:C496 19			     add     hl, de				     ; HL=ptr Current X
+RAM:C497 EB			     ex	     de, hl				     ; DE = ptr	Current	X
 RAM:C498 01 04 00		     ld	     bc, 4
-RAM:C49B ED B0			     ldir
+RAM:C49B ED B0			     ldir					     ; copy Start X,Y,Z,screen to Current
 RAM:C49D EB			     ex	     de, hl
-RAM:C49E E5			     push    hl
-RAM:C49F 01 12 71		     ld	     bc, 7112h
+RAM:C49E E5			     push    hl					     ; save ptr	next Current
+RAM:C49F 01 12 71		     ld	     bc, sprite_tbl			     ; end of object table
 RAM:C4A2 A7			     and     a
-RAM:C4A3 ED 42			     sbc     hl, bc
+RAM:C4A3 ED 42			     sbc     hl, bc				     ; done table?
 RAM:C4A5 E1			     pop     hl
 RAM:C4A6 D1			     pop     de
-RAM:C4A7 38 E0			     jr	     c,	loc_C489
+RAM:C4A7 38 E0			     jr	     c,	loc_C489			     ; no, loop
 RAM:C4A9 C9			     ret
 RAM:C4A9	     ; End of function init_objects
 RAM:C4A9
@@ -7173,7 +7183,7 @@ RAM:C591	     ; =============== S U B R O U T I N E ============================
 RAM:C591
 RAM:C591
 RAM:C591	     sub_C591:							     ; CODE XREF: sub_D1E6+6p
-RAM:C591 FD 21 48 5C		     ld	     iy, 5C48h
+RAM:C591 FD 21 48 5C		     ld	     iy, byte_5C48
 RAM:C595
 RAM:C595	     loc_C595:							     ; CODE XREF: sub_C591+34j
 RAM:C595 FD 7E 00		     ld	     a,	(iy+0)
@@ -7327,7 +7337,7 @@ RAM:C661 21 AF 5B		     ld	     hl, 5BAFh
 RAM:C664 7E			     ld	     a,	(hl)
 RAM:C665 A7			     and     a
 RAM:C666 C0			     ret     nz
-RAM:C667 3A AE 5B		     ld	     a,	(byte_5BAE)
+RAM:C667 3A AE 5B		     ld	     a,	(room_size_Z)
 RAM:C66A DD BE 03		     cp	     (ix+3)
 RAM:C66D 28 3E			     jr	     z,	loc_C6AD
 RAM:C66F C6 1F			     add     a,	1Fh
@@ -7414,7 +7424,7 @@ RAM:C6EA	     loc_C6EA:							     ; CODE XREF: RAM:C6CEj
 RAM:C6EA DD 36 0B 02		     ld	     (ix+0Bh), 2
 RAM:C6EE CD 67 B4		     call    sub_B467
 RAM:C6F1 CD 00 C7		     call    sub_C700
-RAM:C6F4 3A AE 5B		     ld	     a,	(byte_5BAE)
+RAM:C6F4 3A AE 5B		     ld	     a,	(room_size_Z)
 RAM:C6F7 C6 1F			     add     a,	1Fh
 RAM:C6F9 DD BE 03		     cp	     (ix+3)
 RAM:C6FC 30 94			     jr	     nc, sub_C692
@@ -7690,7 +7700,7 @@ RAM:C87A
 RAM:C87A
 RAM:C87A	     sub_C87A:							     ; CODE XREF: sub_C00E+Bp
 RAM:C87A									     ; RAM:C850p
-RAM:C87A 2A AB 5B		     ld	     hl, (word_5BAB)
+RAM:C87A 2A AB 5B		     ld	     hl, (room_size_X)
 RAM:C87D 7D			     ld	     a,	l
 RAM:C87E DD 96 04		     sub     (ix+4)
 RAM:C881 6F			     ld	     l,	a
@@ -8064,7 +8074,7 @@ RAM:CA5A	     ; =============== S U B R O U T I N E ============================
 RAM:CA5A
 RAM:CA5A
 RAM:CA5A	     sub_CA5A:							     ; CODE XREF: sub_CB45+1Bp
-RAM:CA5A 3A AE 5B		     ld	     a,	(byte_5BAE)
+RAM:CA5A 3A AE 5B		     ld	     a,	(room_size_Z)
 RAM:CA5D 57			     ld	     d,	a
 RAM:CA5E
 RAM:CA5E	     loc_CA5E:							     ; CODE XREF: sub_CA5A+13j
@@ -8092,7 +8102,7 @@ RAM:CA76 DD CB 07 46		     bit     0,	(ix+7)
 RAM:CA7A C8			     ret     z
 RAM:CA7B DD CB 07 86		     res     0,	(ix+7)
 RAM:CA7F 01 92 CA		     ld	     bc, 0CA92h
-RAM:CA82 2A AB 5B		     ld	     hl, (word_5BAB)
+RAM:CA82 2A AB 5B		     ld	     hl, (room_size_X)
 RAM:CA85 E5			     push    hl
 RAM:CA86 C3 17 CA		     jp	     loc_CA17
 RAM:CA86	     ; End of function sub_CA70
@@ -8586,7 +8596,7 @@ RAM:CCE0 E6 F0			     and     0F0h ; 'ð'
 RAM:CCE2 C0			     ret     nz
 RAM:CCE3 DD CB 07 46		     bit     0,	(ix+7)
 RAM:CCE7 C0			     ret     nz
-RAM:CCE8 3A AB 5B		     ld	     a,	(word_5BAB)
+RAM:CCE8 3A AB 5B		     ld	     a,	(room_size_X)
 RAM:CCEB 47			     ld	     b,	a
 RAM:CCEC
 RAM:CCEC	     loc_CCEC:							     ; CODE XREF: sub_CCDD+28j
@@ -8620,7 +8630,7 @@ RAM:CD0B E6 F0			     and     0F0h ; 'ð'
 RAM:CD0D C0			     ret     nz
 RAM:CD0E DD CB 07 46		     bit     0,	(ix+7)
 RAM:CD12 C0			     ret     nz
-RAM:CD13 3A AC 5B		     ld	     a,	(word_5BAB+1)
+RAM:CD13 3A AC 5B		     ld	     a,	(room_size_Y)
 RAM:CD16 47			     ld	     b,	a
 RAM:CD17
 RAM:CD17	     loc_CD17:							     ; CODE XREF: sub_CD08+28j
@@ -9395,7 +9405,7 @@ RAM:D12A	     ; FUNCTION	CHUNK AT RAM:BA22 SIZE 00000079	BYTES
 RAM:D12A	     ; FUNCTION	CHUNK AT RAM:BAAB SIZE 00000027	BYTES
 RAM:D12A
 RAM:D12A 21 61 D1		     ld	     hl, unk_D161
-RAM:D12D 11 08 5C		     ld	     de, 5C08h
+RAM:D12D 11 08 5C		     ld	     de, byte_5C08
 RAM:D130 D5			     push    de
 RAM:D131 DD E1			     pop     ix
 RAM:D133 01 40 00		     ld	     bc, 40h ; '@'
@@ -9508,19 +9518,19 @@ RAM:D1C6 32 71 D1		     ld	     (byte_D171), a
 RAM:D1C9 3E 22			     ld	     a,	22h ; '"'
 RAM:D1CB 32 91 D1		     ld	     (byte_D191), a
 RAM:D1CE 3A A0 5B		     ld	     a,	(seed_1)
-RAM:D1D1 E6 03			     and     3
+RAM:D1D1 E6 03			     and     3					     ; random 0-3
 RAM:D1D3 6F			     ld	     l,	a
 RAM:D1D4 26 00			     ld	     h,	0
-RAM:D1D6 01 E2 D1		     ld	     bc, 0D1E2h
-RAM:D1D9 09			     add     hl, bc
-RAM:D1DA 7E			     ld	     a,	(hl)
+RAM:D1D6 01 E2 D1		     ld	     bc, start_locations
+RAM:D1D9 09			     add     hl, bc				     ; offset to random	entry
+RAM:D1DA 7E			     ld	     a,	(hl)				     ; start location
 RAM:D1DB 32 69 D1		     ld	     (byte_D169), a
 RAM:D1DE 32 89 D1		     ld	     (byte_D189), a
 RAM:D1E1 C9			     ret
 RAM:D1E1	     ; End of function init_start_location
 RAM:D1E1
 RAM:D1E1	     ; ---------------------------------------------------------------------------
-RAM:D1E2 2F 44 B3 8F start_locations:db	2Fh, 44h, 0B3h,	8Fh
+RAM:D1E2 2F 44 B3 8F start_locations:db	2Fh, 44h, 0B3h,	8Fh			     ; DATA XREF: init_start_location+25o
 RAM:D1E6
 RAM:D1E6	     ; =============== S U B R O U T I N E =======================================
 RAM:D1E6
@@ -9715,10 +9725,10 @@ RAM:D320	     ; =============== S U B R O U T I N E ============================
 RAM:D320
 RAM:D320
 RAM:D320	     sub_D320:							     ; CODE XREF: sub_D1E6+12p
-RAM:D320 3A AB 5B		     ld	     a,	(word_5BAB)
+RAM:D320 3A AB 5B		     ld	     a,	(room_size_X)
 RAM:D323 D6 02			     sub     2
 RAM:D325 6F			     ld	     l,	a
-RAM:D326 3A AC 5B		     ld	     a,	(word_5BAB+1)
+RAM:D326 3A AC 5B		     ld	     a,	(room_size_Y)
 RAM:D329 D6 02			     sub     2
 RAM:D32B 67			     ld	     h,	a
 RAM:D32C DD 7E 01		     ld	     a,	(ix+1)
@@ -9841,99 +9851,99 @@ RAM:D3C6	     ; =============== S U B R O U T I N E ============================
 RAM:D3C6
 RAM:D3C6
 RAM:D3C6	     retrieve_screen:						     ; CODE XREF: sub_D1E6+Cp
-RAM:D3C6 11 88 5C		     ld	     de, 5C88h
-RAM:D3C9 01 D1 6B		     ld	     bc, 6BD1h
-RAM:D3CC 21 51 62		     ld	     hl, 6251h
+RAM:D3C6 11 88 5C		     ld	     de, unk_5C88
+RAM:D3C9 01 D1 6B		     ld	     bc, block_type_tbl			     ; end of location table
+RAM:D3CC 21 51 62		     ld	     hl, location_tbl
 RAM:D3CF
-RAM:D3CF	     loc_D3CF:							     ; CODE XREF: retrieve_screen+1Aj
-RAM:D3CF 7E			     ld	     a,	(hl)
+RAM:D3CF	     find_location:						     ; CODE XREF: retrieve_screen+1Aj
+RAM:D3CF 7E			     ld	     a,	(hl)				     ; get location ID
 RAM:D3D0 23			     inc     hl
-RAM:D3D1 DD BE 08		     cp	     (ix+8)
-RAM:D3D4 28 1A			     jr	     z,	loc_D3F0
-RAM:D3D6 7E			     ld	     a,	(hl)
-RAM:D3D7 CD F2 D4		     call    add_HL_A
+RAM:D3D1 DD BE 08		     cp	     (ix+8)				     ; same as ???
+RAM:D3D4 28 1A			     jr	     z,	loc_D3F0			     ; yes, exit
+RAM:D3D6 7E			     ld	     a,	(hl)				     ; get entry size
+RAM:D3D7 CD F2 D4		     call    add_HL_A				     ; ptr next	entry
 RAM:D3DA A7			     and     a
-RAM:D3DB ED 42			     sbc     hl, bc
-RAM:D3DD 30 03			     jr	     nc, loc_D3E2
+RAM:D3DB ED 42			     sbc     hl, bc				     ; end of location table?
+RAM:D3DD 30 03			     jr	     nc, loc_D3E2			     ; yes, exit
 RAM:D3DF 09			     add     hl, bc
-RAM:D3E0 18 ED			     jr	     loc_D3CF
+RAM:D3E0 18 ED			     jr	     find_location
 RAM:D3E2	     ; ---------------------------------------------------------------------------
 RAM:D3E2
 RAM:D3E2	     loc_D3E2:							     ; CODE XREF: retrieve_screen+17j
 RAM:D3E2									     ; retrieve_screen+28j ...
-RAM:D3E2 21 08 61		     ld	     hl, 6108h
+RAM:D3E2 21 08 61		     ld	     hl, font				     ; start of	program	data
 RAM:D3E5 A7			     and     a
-RAM:D3E6 ED 52			     sbc     hl, de
-RAM:D3E8 C8			     ret     z
-RAM:D3E9 06 20			     ld	     b,	20h ; ' '
+RAM:D3E6 ED 52			     sbc     hl, de				     ; done?
+RAM:D3E8 C8			     ret     z					     ; yes, exit
+RAM:D3E9 06 20			     ld	     b,	32				     ; 32 bytes	to clear
 RAM:D3EB CD 08 D5		     call    zero_DE
 RAM:D3EE 18 F2			     jr	     loc_D3E2
 RAM:D3F0	     ; ---------------------------------------------------------------------------
 RAM:D3F0
 RAM:D3F0	     loc_D3F0:							     ; CODE XREF: retrieve_screen+Ej
-RAM:D3F0 46			     ld	     b,	(hl)
+RAM:D3F0 46			     ld	     b,	(hl)				     ; get entry size
 RAM:D3F1 23			     inc     hl
-RAM:D3F2 7E			     ld	     a,	(hl)
-RAM:D3F3 E6 07			     and     7
-RAM:D3F5 F6 40			     or	     40h ; '@'
-RAM:D3F7 32 AD 5B		     ld	     (screen_attr), a
+RAM:D3F2 7E			     ld	     a,	(hl)				     ; get attributes
+RAM:D3F3 E6 07			     and     7					     ; mask off	unused bits
+RAM:D3F5 F6 40			     or	     40h ; '@'                               ; bright ON
+RAM:D3F7 32 AD 5B		     ld	     (unk_5BAD), a			     ; store
 RAM:D3FA D5			     push    de
-RAM:D3FB EB			     ex	     de, hl
-RAM:D3FC 1A			     ld	     a,	(de)
-RAM:D3FD 13			     inc     de
+RAM:D3FB EB			     ex	     de, hl				     ; DE=attributes
+RAM:D3FC 1A			     ld	     a,	(de)				     ; get attributes
+RAM:D3FD 13			     inc     de					     ; ptr background type
 RAM:D3FE 0F			     rrca
 RAM:D3FF 0F			     rrca
 RAM:D400 0F			     rrca
-RAM:D401 E6 1F			     and     1Fh
-RAM:D403 4F			     ld	     c,	a
+RAM:D401 E6 1F			     and     1Fh				     ; get room	size
+RAM:D403 4F			     ld	     c,	a				     ; C=room size
 RAM:D404 87			     add     a,	a
-RAM:D405 81			     add     a,	c
-RAM:D406 21 48 62		     ld	     hl, 6248h
-RAM:D409 CD F2 D4		     call    add_HL_A
-RAM:D40C 7E			     ld	     a,	(hl)
+RAM:D405 81			     add     a,	c				     ; A=room size x3
+RAM:D406 21 48 62		     ld	     hl, room_size_tbl
+RAM:D409 CD F2 D4		     call    add_HL_A				     ; ptr entry
+RAM:D40C 7E			     ld	     a,	(hl)				     ; room size X
 RAM:D40D 23			     inc     hl
-RAM:D40E 32 AB 5B		     ld	     (word_5BAB), a
-RAM:D411 7E			     ld	     a,	(hl)
+RAM:D40E 32 AB 5B		     ld	     (room_size_X), a
+RAM:D411 7E			     ld	     a,	(hl)				     ; room size Y
 RAM:D412 23			     inc     hl
-RAM:D413 32 AC 5B		     ld	     (word_5BAB+1), a
-RAM:D416 7E			     ld	     a,	(hl)
-RAM:D417 32 AE 5B		     ld	     (byte_5BAE), a
+RAM:D413 32 AC 5B		     ld	     (room_size_Y), a
+RAM:D416 7E			     ld	     a,	(hl)				     ; room size Z
+RAM:D417 32 AE 5B		     ld	     (room_size_Z), a
 RAM:D41A 05			     dec     b
-RAM:D41B 05			     dec     b
+RAM:D41B 05			     dec     b					     ; adjust entry size
 RAM:D41C EB			     ex	     de, hl
 RAM:D41D D1			     pop     de
 RAM:D41E
 RAM:D41E	     loc_D41E:							     ; CODE XREF: retrieve_screen+81j
-RAM:D41E 7E			     ld	     a,	(hl)
-RAM:D41F 23			     inc     hl
-RAM:D420 FE FF			     cp	     0FFh
-RAM:D422 28 28			     jr	     z,	loc_D44C
+RAM:D41E 7E			     ld	     a,	(hl)				     ; get background type
+RAM:D41F 23			     inc     hl					     ; next entry
+RAM:D420 FE FF			     cp	     0FFh				     ; done all	background types?
+RAM:D422 28 28			     jr	     z,	loc_D44C			     ; yes, exit
 RAM:D424 C5			     push    bc
 RAM:D425 E5			     push    hl
 RAM:D426 6F			     ld	     l,	a
 RAM:D427 26 00			     ld	     h,	0
-RAM:D429 29			     add     hl, hl
-RAM:D42A 01 E2 6C		     ld	     bc, 6CE2h
-RAM:D42D 09			     add     hl, bc
+RAM:D429 29			     add     hl, hl				     ; word offset
+RAM:D42A 01 E2 6C		     ld	     bc, background_type_tbl
+RAM:D42D 09			     add     hl, bc				     ; ptr entry
 RAM:D42E 7E			     ld	     a,	(hl)
 RAM:D42F 23			     inc     hl
 RAM:D430 66			     ld	     h,	(hl)
-RAM:D431 6F			     ld	     l,	a
+RAM:D431 6F			     ld	     l,	a				     ; HL=ptr to background object
 RAM:D432
 RAM:D432	     loc_D432:							     ; CODE XREF: retrieve_screen+7Dj
-RAM:D432 01 08 00		     ld	     bc, 8
-RAM:D435 ED B0			     ldir
+RAM:D432 01 08 00		     ld	     bc, 8				     ; 8 bytes/entry
+RAM:D435 ED B0			     ldir					     ; copy
 RAM:D437 DD 7E 08		     ld	     a,	(ix+8)
 RAM:D43A 12			     ld	     (de), a
 RAM:D43B 13			     inc     de
-RAM:D43C 06 17			     ld	     b,	17h
+RAM:D43C 06 17			     ld	     b,	23
 RAM:D43E CD 08 D5		     call    zero_DE
 RAM:D441 7E			     ld	     a,	(hl)
-RAM:D442 A7			     and     a
-RAM:D443 20 ED			     jr	     nz, loc_D432
+RAM:D442 A7			     and     a					     ; done object?
+RAM:D443 20 ED			     jr	     nz, loc_D432			     ; no, loop
 RAM:D445 E1			     pop     hl
 RAM:D446 C1			     pop     bc
-RAM:D447 10 D5			     djnz    loc_D41E
+RAM:D447 10 D5			     djnz    loc_D41E				     ; done location? no, loop
 RAM:D449 C3 E2 D3		     jp	     loc_D3E2
 RAM:D44C	     ; ---------------------------------------------------------------------------
 RAM:D44C
@@ -10024,7 +10034,7 @@ RAM:D4B9 86			     add     a,	(hl)
 RAM:D4BA 23			     inc     hl
 RAM:D4BB E6 FC			     and     0FCh ; 'ü'
 RAM:D4BD 5F			     ld	     e,	a
-RAM:D4BE 3A AE 5B		     ld	     a,	(byte_5BAE)
+RAM:D4BE 3A AE 5B		     ld	     a,	(room_size_Z)
 RAM:D4C1 83			     add     a,	e
 RAM:D4C2 FD 77 03		     ld	     (iy+3), a
 RAM:D4C5 C5			     push    bc
