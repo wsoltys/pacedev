@@ -19,6 +19,8 @@
 // pandora: run msys.bat and cd to this directory
 //          g++ kl.cpp -o kl -lallegro-4.4.2-md
 
+#include "kldat.c"
+
 void print_text_single_colour ()
 {
 }
