@@ -16,12 +16,17 @@
     textout_centre_ex(s, f, str, w, h, c, 0);
 #endif
 
+// neogeo:  d:\mingw_something\setenv.bat
+//          g++ gfx.cpp -o xgf -lalleg
+
+#define DO_C_DATA
+
 //#define DO_ASCII
 //#define DO_PARSE_MAP
 //#define DO_GA
-#define DO_FONT
+//#define DO_FONT
 //#define DO_SPRITE_DATA
-#define DO_SPRITE_TABLE
+//#define DO_SPRITE_TABLE
 //#define DO_BLOCK_DATA
 //#define DO_BG_DATA
 
@@ -137,6 +142,27 @@ void main (int argc, char *argv[])
 	// write the relevant areas
 	fwrite (&ram[0x6108], 0xd8f3-0x6108, 1, fp);
 	fclose (fp);
+
+#ifdef DO_C_DATA
+  fp2 = fopen ("data.c", "wt");
+  
+  // font
+  unsigned p = 0x6108;
+  char *font = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.© %";
+  fprintf (fp2, "uint8_t kl_font[][8] = \n{\n" );
+  for (int c=0; c<40; c++)
+  {
+    fprintf (fp2, "  { ");
+    for (int b=0; b<8; b++)
+    {
+      fprintf (fp2, "0x%02X, ", ram[p]);
+      p++;
+    }
+    fprintf (fp2, "},  // '%c'\n", font[c]);
+  }
+  fprintf (fp2, "};\n");  
+  fclose (fp2);
+#endif
 
 #ifdef DO_ASCII
   fp2 = fopen ("knightlore.asc", "wb");

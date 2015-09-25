@@ -21,16 +21,52 @@
 
 #include "kldat.c"
 
+uint8_t from_ascii (char ch)
+{
+  const char *chrset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.© %";
+  for (uint8_t i=0; chrset[i]; i++)
+    if (chrset[i] == ch)
+      return (i);
+      
+    return ((uint8_t)-1);
+}
+
+// start of prototypes
+
+static void print_text (uint8_t x, uint8_t y, char *str);
+
+// end of prototypes
+
 void print_text_single_colour ()
 {
 }
 
-void print_text_std_font (char *str)
+void print_text_std_font (uint8_t x, uint8_t y, char *str)
 {
+  print_text (x, y, str);
 }
 
-void print_text ()
+void print_text (uint8_t x, uint8_t y, char *str)
 {
+  for (unsigned c=0; *str; c++)
+  {
+    uint8_t ascii = (uint8_t)*(str++);
+    uint8_t code = from_ascii (ascii);
+    
+    for (unsigned l=0; l<8; l++)
+    {
+      uint8_t d = kl_font[code][l];
+      if (d == (uint8_t)-1)
+        break;
+      
+      for (unsigned b=0; b<8; b++)
+      {
+        if (d & (1<<7))
+          putpixel (screen, x+c*8+b, y+l, 15);
+        d <<= 1;
+      }
+    }  
+  }
 }
 
 void main (int argc, char *argv[])
@@ -54,17 +90,17 @@ void main (int argc, char *argv[])
 	clear_bitmap (screen);
 	const char *msg[] = 
 	{
-	  "THIS IS THE FONT FROM A MYSTERY GAME",
-	  "FROM A Z80 PLATFORM",
-	  "THAT I AM CURRENTLY EVALUATING FOR",
-	  "A POSSIBLE PORT TO",
+	  "THIS IS THE FONT FROM A MYSTERY",
+	  "GAME FROM A Z80 PLATFORM",
+	  "THAT I AM CURRENTLY EVALUATING",
+	  "FOR A POSSIBLE PORT TO",
 	  "THE COLOR COMPUTER 3",
 	  ""
 	};
 
   for (unsigned m=0; *msg[m]; m++)
   {
-    print_text_std_font ((char *)msg[m]);
+    print_text_std_font (0, m*12, (char *)msg[m]);
   }	
   while (!key[KEY_ESC]);	  
 	while (key[KEY_ESC]);	  
