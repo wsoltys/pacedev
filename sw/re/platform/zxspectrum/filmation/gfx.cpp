@@ -148,7 +148,7 @@ void main (int argc, char *argv[])
   
   // font
   unsigned p = 0x6108;
-  char *font = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.© %";
+  const char *font = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.© %";
   fprintf (fp2, "uint8_t kl_font[][8] = \n{\n" );
   for (int c=0; c<40; c++)
   {
@@ -160,9 +160,55 @@ void main (int argc, char *argv[])
     }
     fprintf (fp2, "},  // '%c'\n", font[c]);
   }
-  fprintf (fp2, "};\n");  
+  fprintf (fp2, "};\n\n");  
+
+  // menu_xy
+  p = 0xbdaa;
+  fprintf (fp2, "uint8_t menu_xy[] = \n{\n" );
+  for (int xy=0; xy<16; xy++)
+  {
+    if ((xy%8) == 0)
+      fprintf (fp2, "  ");
+    fprintf (fp2, "0x%02X", ram[p++]);
+    if ((xy%8) != 7 || xy < 15)
+      fprintf (fp2, ", ");
+    if ((xy%8) == 7)
+      fprintf (fp2, "\n");
+  }
+  fprintf (fp2, "};\n\n");
+
+  // menu_text
+  fprintf (fp2, "const char *menu_text[] = \n{\n");
+  while (p < 0xBE31)
+  {
+    fprintf (fp2, "  \"");
+    do
+    {
+      fprintf (fp2, "%c", to_ascii[ram[p]&0x7f]);
+    } while (ram[p++] < 128);
+    fprintf (fp2, "\"");
+    if (p < 0xBE31)
+      fprintf (fp2, ", ");
+    fprintf (fp2, "\n");  
+  }
+  fprintf (fp2, "};\n\n");
+
+  // border_data
+  p = 0xd2cf;
+  fprintf (fp2, "uint8_t border_data[][4] =\n{\n");
+  fprintf (fp2, "  // sprite index, flags, x, y\n");
+  for (int i=0; i<8; i++)
+  {
+    fprintf (fp2, "  { 0x%02X, 0x%02X, 0x%02X, 0x%02X }%c\n",
+              ram[p], ram[p+1], ram[p+2], ram[p+3],
+              (i<7 ? ',' : ' '));
+    p += 4;
+  }
+  fprintf (fp2, "};\n\n");
+
   fclose (fp2);
-#endif
+
+#else
 
 #ifdef DO_ASCII
   fp2 = fopen ("knightlore.asc", "wb");
@@ -419,6 +465,8 @@ void main (int argc, char *argv[])
   fclose (fpdbg);
   
   allegro_exit ();
+
+#endif // DO_C_DATA
 
   //fprintf (stdout, "w=%d\n", widest);
   //fprintf (stdout, "h=%d\n", highest);

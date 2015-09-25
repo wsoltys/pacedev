@@ -31,14 +31,38 @@ uint8_t from_ascii (char ch)
     return ((uint8_t)-1);
 }
 
+// start of variables
+typedef struct
+{
+  uint8_t index;
+  uint8_t flags;
+  uint8_t x;
+  uint8_t y;
+
+} SPRITE_SCRATCHPAD_T, *PSPRITE_SCRATCHPAD_T;
+static SPRITE_SCRATCHPAD_T sprite_scratchpad;
+
 // start of prototypes
 
 static void print_text (uint8_t x, uint8_t y, char *str);
+static void do_menu_selection (void);
+static void flash_menu (void);
+static void display_menu (void);
+static void display_text_list (uint8_t *xy, char *text_list[], uint8_t n);
+static void multiple_print_sprite (uint8_t dx, uint8_t dy, uint8_t n);
+static uint8_t *transfer_sprite (uint8_t *psprite);
+static uint8_t *transfer_sprite_and_print (uint8_t *psprite);
+static void print_border (void);
+static void clear_scrn (void);
+static void clr_screen_buffer (void);
+static void flip_sprite (void);
+static void print_sprite (void);
 
 // end of prototypes
 
-void print_text_single_colour ()
+void print_text_single_colour (uint8_t x, uint8_t y, char *str)
 {
+  print_text (x, y, str);
 }
 
 void print_text_std_font (uint8_t x, uint8_t y, char *str)
@@ -69,6 +93,124 @@ void print_text (uint8_t x, uint8_t y, char *str)
   }
 }
 
+uint8_t lives;
+
+void knight_lore (void)
+{
+START_AF6C:
+
+MAIN_AF88:
+
+  lives = 5;
+
+  clear_scrn ();
+  do_menu_selection ();
+}
+
+// $BD0C
+void do_menu_selection (void)
+{
+  clr_screen_buffer ();
+  display_menu ();
+  flash_menu ();
+menu_loop:
+  display_menu ();
+  flash_menu ();
+  //goto menu_loop;
+}
+
+// $BD89
+void flash_menu (void)
+{
+}
+
+// $BEB3
+void display_menu (void)
+{
+  display_text_list (menu_xy, (char **)menu_text, 8);
+  print_border ();
+}
+
+// $BEBF
+void display_text_list (uint8_t *xy, char *text_list[], uint8_t n)
+{
+  for (unsigned i=0; i<n; i++, xy+=2)
+    print_text_single_colour (*xy, 191-*(xy+1), text_list[i]);
+}
+
+// $BEE4
+void multiple_print_sprite (uint8_t dx, uint8_t dy, uint8_t n)
+{
+  for (unsigned i=0; i<n; n++)
+  {
+    print_sprite ();
+    sprite_scratchpad.x += dx;
+    sprite_scratchpad.y += dy;
+  }
+}
+
+// $D237
+uint8_t *transfer_sprite (uint8_t *psprite)
+{
+  sprite_scratchpad.index = *(psprite++);
+  sprite_scratchpad.flags = *(psprite++);
+  sprite_scratchpad.x = *(psprite++);
+  sprite_scratchpad.y = *(psprite++);
+
+  return (psprite);
+}
+
+// $D24C
+uint8_t *transfer_sprite_and_print (uint8_t *psprite)
+{
+  uint8_t *p = transfer_sprite (psprite);
+  print_sprite ();
+
+  return (p);
+}
+
+// $D296
+void print_border (void)
+{
+  uint8_t *p = (uint8_t *)border_data;
+  p = transfer_sprite_and_print (p);
+  p = transfer_sprite_and_print (p);
+  p = transfer_sprite_and_print (p);
+  p = transfer_sprite_and_print (p);
+  p = transfer_sprite (p);
+  multiple_print_sprite (0, 8, 24);
+  p = transfer_sprite (p);
+  multiple_print_sprite (0, 8, 24);
+  p = transfer_sprite (p);
+  multiple_print_sprite (1, 0, 128);
+  p = transfer_sprite (p);
+  multiple_print_sprite (1, 0, 128);
+}
+
+// $D55F
+void clear_scrn (void)
+{
+	clear_bitmap (screen);
+}
+
+// $D567
+void clr_screen_buffer (void)
+{
+}
+
+// $D6EF
+void flip_sprite (void)
+{
+}
+
+// $D718
+void print_sprite (void)
+{
+  flip_sprite ();
+
+  // lookup sprite
+}
+
 void main (int argc, char *argv[])
 {
 	allegro_init ();
@@ -88,20 +230,8 @@ void main (int argc, char *argv[])
 	set_palette_range (pal, 0, 15, 1);
 
 	clear_bitmap (screen);
-	const char *msg[] = 
-	{
-	  "THIS IS THE FONT FROM A MYSTERY",
-	  "GAME FROM A Z80 PLATFORM",
-	  "THAT I AM CURRENTLY EVALUATING",
-	  "FOR A POSSIBLE PORT TO",
-	  "THE COLOR COMPUTER 3",
-	  ""
-	};
+  knight_lore ();
 
-  for (unsigned m=0; *msg[m]; m++)
-  {
-    print_text_std_font (0, m*12, (char *)msg[m]);
-  }	
   while (!key[KEY_ESC]);	  
 	while (key[KEY_ESC]);	  
 
