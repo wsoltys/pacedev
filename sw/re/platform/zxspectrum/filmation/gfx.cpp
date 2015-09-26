@@ -16,6 +16,9 @@
     textout_centre_ex(s, f, str, w, h, c, 0);
 #endif
 
+// pandora: run msys.bat and cd to this directory
+//          g++ kl.cpp -o kl -lallegro-4.4.2-md
+
 // neogeo:  d:\mingw_something\setenv.bat
 //          g++ gfx.cpp -o xgf -lalleg
 
@@ -161,6 +164,89 @@ void main (int argc, char *argv[])
     fprintf (fp2, "},  // '%c'\n", font[c]);
   }
   fprintf (fp2, "};\n\n");  
+
+  // create table of sprite addresses
+  uint16_t sprite_a[132];
+  unsigned sprite_n = 0;
+  p = 0x728C;
+  while (p < 0xAF6C)
+  {
+    if (p == 0x7D98)
+      p += 12;
+
+    unsigned w = ram[p+0] & 0x3f;
+    unsigned h = ram[p+1];
+    
+    //fprintf (stderr, "spr_%03d=$%04X\n", sprite_n, p);
+    sprite_a[sprite_n++] = p;
+
+    if (w==0 && h==0)
+    {
+      p += 2;
+      continue;
+    }
+
+    p += 2 + w*h*2;    
+  }
+  //fprintf (stderr, "sprite_n=%d\n", sprite_n);
+
+  // sprite_tbl
+  fprintf (fp2, "uint8_t *sprite_tbl[] =\n{\n");
+  unsigned n = 0;
+  for (p=0x7112; p<0x728A; p+=2, n++)
+  {
+    char label[16];
+
+    uint16_t a = ram[p+1];
+    a = (a<<8) | ram[p];
+    if (a == 0x728A)
+      strcpy (label, "spr_nul");
+    else
+    {
+      // find entry in lookup
+      unsigned i;
+      for (i=0; i<sprite_n; i++)
+      {
+        if (sprite_a[i] == a)
+          break;
+      }
+      if (i < sprite_n)
+        sprintf (label, "spr_%03d", i);
+      else
+        strcpy (label, "(ERROR)");
+    }
+    if ((n%6) == 0)
+      fprintf (fp2, "  ");
+    fprintf (fp2, "%s, ", label);
+    if ((n%6) == 5)
+      fprintf (fp2, "\n");
+  }
+  fprintf (fp2, "\n};\n\n");
+
+  // sprite graphics
+  fprintf (fp2, "uint8_t spr_nul[] =\n{\n  0, 0\n};\n\n");
+  p = 0x728C;
+  sprite_n = 0;
+  while (p < 0xAF6C)
+  {
+    if (p == 0x7D98)
+      p += 12;
+
+    unsigned w = ram[p+0] & 0x3f;
+    unsigned h = ram[p+1];
+    
+    fprintf (fp2, "uint8_t spr_%03d[] =\n{\n  %d, %d,\n",
+              sprite_n++, w, h);
+    unsigned i;
+    p += 2;
+    for (unsigned i=0; i<w*h*2; i++, p++)
+    {
+      if ((i%8)==0) fprintf (fp2, "  ");
+      fprintf (fp2, "0x%02X, ", ram[p]);
+      if ((i%8)==7) fprintf (fp2, "\n");
+    }
+    fprintf (fp2, "\n};\n\n");
+  }
 
   // menu_xy
   p = 0xbdaa;

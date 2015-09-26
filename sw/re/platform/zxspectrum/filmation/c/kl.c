@@ -55,7 +55,7 @@ static uint8_t *transfer_sprite_and_print (uint8_t *psprite);
 static void print_border (void);
 static void clear_scrn (void);
 static void clr_screen_buffer (void);
-static void flip_sprite (void);
+static uint8_t *flip_sprite (void);
 static void print_sprite (void);
 
 // end of prototypes
@@ -141,7 +141,7 @@ void display_text_list (uint8_t *xy, char *text_list[], uint8_t n)
 // $BEE4
 void multiple_print_sprite (uint8_t dx, uint8_t dy, uint8_t n)
 {
-  for (unsigned i=0; i<n; n++)
+  for (unsigned i=0; i<n; i++)
   {
     print_sprite ();
     sprite_scratchpad.x += dx;
@@ -178,13 +178,13 @@ void print_border (void)
   p = transfer_sprite_and_print (p);
   p = transfer_sprite_and_print (p);
   p = transfer_sprite (p);
-  multiple_print_sprite (0, 8, 24);
+  multiple_print_sprite (8, 0, 24);
   p = transfer_sprite (p);
-  multiple_print_sprite (0, 8, 24);
+  multiple_print_sprite (8, 0, 24);
   p = transfer_sprite (p);
-  multiple_print_sprite (1, 0, 128);
+  multiple_print_sprite (0, 1, 128);
   p = transfer_sprite (p);
-  multiple_print_sprite (1, 0, 128);
+  multiple_print_sprite (0, 1, 128);
 }
 
 // $D55F
@@ -198,17 +198,74 @@ void clr_screen_buffer (void)
 {
 }
 
+#define REV(d) (((d&1)<<7)|((d&2)<<5)|((d&4)<<3)|((d&8)<<1)|((d&16)>>1)|((d&32)>>3)|((d&64)>>5)|((d&128)>>7))
+//#define REV(d) d
+
 // $D6EF
-void flip_sprite (void)
+uint8_t *flip_sprite (void)
 {
+  uint8_t *psprite = sprite_tbl[sprite_scratchpad.index];
+  
+  uint8_t vflip = (sprite_scratchpad.flags ^ (*psprite)) & 0x80;
+  uint8_t hflip = (sprite_scratchpad.flags ^ (*psprite)) & 0x40;
+
+  uint8_t w = psprite[0] & 0x3f;
+  uint8_t h = psprite[1];
+
+  if (vflip)
+  {
+    for (unsigned x=0; x<w; x++)
+      for (unsigned y=0; y<h/2; y++)
+      {
+        uint8_t t = psprite[3+2*(y*w+x)];
+        psprite[3+2*(y*w+x)] = psprite[3+2*((h-1-y)*w+x)];
+        psprite[3+2*((h-1-y)*w+x)] = t;
+      }
+    *psprite ^= 0x80;
+  }
+
+  if (hflip)
+  {
+    for (unsigned y=0; y<h; y++)
+      for (unsigned x=0; x<w/2; x++)
+      {
+        uint8_t t = psprite[3+2*(y*w+x)];
+        psprite[3+2*(y*w+x)] = REV(psprite[3+2*(y*w+w-1-x)]);
+        psprite[3+2*(y*w+w-1-x)] = REV(t);
+      }
+    *psprite ^= 0x40;
+  }
+
+  return (psprite);
 }
 
 // $D718
 void print_sprite (void)
 {
-  flip_sprite ();
+  uint8_t *psprite;
 
-  // lookup sprite
+  // references sprite_scratchpad
+  psprite = flip_sprite ();
+
+  uint8_t w = *(psprite++) & 0x3f;
+  uint8_t h = *(psprite++);
+
+  for (unsigned y=0; y<h; y++)
+  {
+    for (unsigned x=0; x<w; x++)
+    {
+      // skip mask
+      psprite++;
+
+      uint8_t d = *(psprite++);
+      for (unsigned b=0; b<8; b++)
+      {
+        if (d & (1<<7))
+          putpixel (screen, sprite_scratchpad.x+x*8+b, sprite_scratchpad.y+y, 15);
+        d <<= 1;
+      }
+    }
+  }
 }
 
 void main (int argc, char *argv[])
