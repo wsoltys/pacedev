@@ -248,9 +248,48 @@ void main (int argc, char *argv[])
     fprintf (fp2, "\n};\n\n");
   }
 
+  // audio data
+  p = 0xb20e;
+  for (int i=0; i<4; i++)
+  {
+    const char *label[] =
+    {
+      "start_game",
+      "game_over",
+      "game_complete",
+      "menu"
+    };
+    fprintf (fp2, "uint8_t %s_tune[] = \n{\n", label[i]);
+    unsigned n=0;
+    do
+    {
+      if ((n%8)==0) fprintf (fp2, "  ");
+      fprintf (fp2, "0x%02X", ram[p]);
+      if (ram[p]!=0xff) fprintf (fp2, ", ");
+      if ((n%8)==7 || ram[p]==0xff) fprintf (fp2, "\n");
+      n++;
+    } while (ram[p++] != 0xff);
+    fprintf (fp2, "};\n\n");
+  }
+
+  // menu colours
+  p = 0xbda2;
+  fprintf (fp2, "uint8_t menu_colours[] = \n{\n");
+  for (int i=0; i<8; i++)
+  {
+    if ((i%8) == 0)
+      fprintf (fp2, "  ");
+    fprintf (fp2, "0x%02X", ram[p++]);
+    if ((i%8) == 7)
+      fprintf (fp2, "\n");
+    else
+      fprintf (fp2, ", ");
+  }
+  fprintf (fp2, "};\n\n");
+
   // menu_xy
   p = 0xbdaa;
-  fprintf (fp2, "uint8_t menu_xy[] = \n{\n" );
+  fprintf (fp2, "uint8_t menu_xy[] = \n{\n");
   for (int xy=0; xy<16; xy++)
   {
     if ((xy%8) == 0)
@@ -276,6 +315,24 @@ void main (int argc, char *argv[])
     if (p < 0xBE31)
       fprintf (fp2, ", ");
     fprintf (fp2, "\n");  
+  }
+  fprintf (fp2, "};\n\n");
+
+  // start locations
+  p = 0xd1e2;
+  fprintf (fp2, "uint8_t start_locations[] = \n{\n");
+  fprintf (fp2, "  0x%02X, 0x%02X, 0x%02X, 0x%02X\n",
+            ram[p+0], ram[p+1], ram[p+2], ram[p+3]);
+  fprintf (fp2, "};\n\n");
+
+  // panel data
+  p = 0xd27e;
+  fprintf (fp2, "uint8_t panel_data[] = \n{\n");
+  for (unsigned i=0; i<6; i++)
+  {
+    fprintf (fp2, "  0x%02X, 0x%02X, 0x%02X, 0x%02X,\n",
+              ram[p+0], ram[p+1], ram[p+2], ram[p+3]);
+    p += 4;
   }
   fprintf (fp2, "};\n\n");
 

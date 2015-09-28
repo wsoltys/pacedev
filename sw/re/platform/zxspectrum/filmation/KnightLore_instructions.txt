@@ -1,0 +1,201 @@
+THE SPECTRUM GAMES DATABASE
+
+KNIGHTLORE
+
+PUBLISHER
+Ultimate Play The Game (A.C.G.)
+
+AUTHORS
+Chris and Tim Stamper
+
+YEAR
+December 1984
+
+CATEGORY
+Arcade Adventure
+
+CONTROLS
+CONTROLS:
+
+KEYBOARD CONTROLS
+LEFT Your Adventurer will turn left using the Z,C,B and M keys.
+
+RIGHT Your Adventurer will turn right using the X,V,N, and SYMBOL
+SHIFT.
+
+MOVE FORWARD Your Adventurer will move forward using any key on
+the second row A,S,D,F. etc.
+
+JUMP Your Adventurer will jump using any key on the third row
+Q,W,E,R, etc.
+
+PICK UP/DROP Your Adventurer can pick up or drop an object using
+the 1-0 keys.
+
+PAUSE The whole game can be paused by using the Caps Shift or
+Space/break keys.
+
+JOYSTICK CONTROLS
+Your Adventurer can be fully controlled by using the KEMPSTON
+INTERFACE, CURSOR CONTROLLED INTERFACE or the SINCLAIR INTERFACE
+II and joystick, by replacing the LEFT, RIGHT, FORWARD, JUMP and
+PICK UP/DROP commands.
+
+
+INSTRUCTIONS
+The game Knightlore is set in a dark castle where you, the
+sabreman have to rid yourself from the curse of the werewolf. 
+The only way to do this is to find 6 objects and drop them into
+the wizard`s cauldron to create a remedy.  The games gimmic, and
+arguably it`s selling point, was it`s forced 3D isometric
+perspective that gave the rooms a more realistic look.
+
+The inlay card doesn`t actually HAVE any instructions, just lots
+of riddles.  As with all Ultimate games, the user had to use his
+brain to work out what to do.  The object of the game is for you
+to first find the wizard of the castle and enter the room he is
+in when you are in your sabreman form. Out of the cauldron an
+item will appear.  Your mission is to then hunt out this object
+and place it into the cauldron.  Once this has been done, another
+object that you will have to search out and return will appear. 
+Once you have done this 6 times you will have ridden the
+werewolf`s curse from your body.  Be quick! You only have 40 days
+and nights to complete the spell.
+
+
+INLAY CARD TEXT
+
+THE WEREWULF
+
+My journey`s end is near; as the last few ebbs of daylight dance
+fleetingly in the cooling twilight, and then suddenly dart off
+to chase the red sinking sun.
+
+Behind me I feel night`s dark icy fingers slither up long looming
+shadows, hiding behind large mounds and boulders, watching my
+every move... silently waiting...
+
+For days I have journeyed from the realms of the junglewulf to
+"KNIGHT LORE" castle to seek the old dying wizard and ask for his
+help to free me from this deathly curse... For countless nights
+I have slept chained to tress to keep my deathly curse at bay,
+but now I am here...
+
+My footsteps echo around the damp mossy walls of the large
+chamber, as I enter through the open main gateway, colossal doors
+judder open in an untouched groaning symphony, beckoning me
+forward on my quest.
+
+I sense the old wizard`s gaze playing upon me, encapsulated
+within the labyrinth of traps and tests, to keep out all but the
+most persistent of unwanted guests who seek an audience with the
+great wizard MELKHIOR.
+
+Suddenly a cool blue mist starts to ebb forth from the cracks in
+the ancient stone-work. As it does so it begins to take form and
+become a powerful swimming swirling vortex of energy.
+
+Over all the noise can be heard the chanting and singing of long
+forgotten tunes, all sung in a blur of forgetfulness.
+
+THE MIST TUNES
+
+THE WIZARD`S OLDER NOW THAN ALL
+HIS HELP YOU SEEK WITHIN THIS WALL
+FOR FORTY DAYS YOUR QUEST MAY LAST
+LOCATE THE POTION, MAKE IT FAST
+THIS HIDEOUS SPELL UPON YOUR SOUL
+TO LOSE ITS HOLD MUST BE YOUR GOAL
+BEWARE, THE TRAPS FROM HERE BEGIN
+THE CAULDRON TELLS WHAT MUST GO IN
+TO BREAK THE CURSE AND MAKE THE SPELL
+TO SAVE YOURSELF AND MAKE YOU WELL.
+
+The mist suddenly ceases its action and dissipates as quickly as
+it came. I drop to the floor and with full knowledge of the old
+wizard I begin my quest.  Dimly lit tortches light the massive
+stone walls, their tired flickering flames never seeming to
+penetrate the inky darkness for more than a few feet... 
+crystaline Merkyls, hideous Hobgoblins, stand frozen on huge
+monoliths, glittering in the cool trembling moonlight. 
+Encapsulated by the old wizard long ago, they await their fate
+in an un-ending task of defence, silent and stoney.  This is to
+be their last everlasting fate as guardians of KNIGHTLORE castle,
+until the ultimate death of the old sorcerer...  The moon has
+risen quickly and in the fulless of its cool blue light, I become
+a Werewulf...  My fate is now all too clear, I have but forty
+days and forty nights to find the old wizard and seek his help
+and magical instruction, before my tourmented
+soul becomes forever a werewulf.
+
+
+                KNIGHTLORE FEATURES
+                -------------------
+
+KNIGHT LORE features filmation (C) a unique process whereby you
+have complete freedom within the confines of your imagination to
+do as you wish with any of the objects found within KNIGHT LORE.
+
+Filmation (C)       Stairways
+Sabreman            Doorways
+Metamorphic Change  Portcullis
+Gargoyles           Jump Button
+Wizard Melkhior     Materialization
+Magic Spells        Continuous Pause
+Traps               Collection feature
+Tests               Sundial Face Clock
+3D scenario         Spell Ingredients
+Monsters            Ingredient Display
+Dungeons            3 Dimensional Movement
+Castle              Moving flooways
+Impalers            Different levels
+Ball Chains         Extra Lives
+Blocks              Parapets
+Rover               Balconies
+Chalices            Surfing Demons
+Boots               Caged Mosters
+Caskets             Hidden Treasures
+Chests              Suberb Graphics
+Diamonds            Amazing Animation
+Potions             Status Scrolls
+Tables              Day Display
+Werewulf            Sun
+                    Moon
+
+
+
+CHEATS
+Infinite lives      53567,0
+Infinite time       50206,0
+No metamorphosis    50084,201
+Objects needed      49759,1 to 10
+
+SEQUELS/PREQUELS
+Knightlore was the sequal to 2 games. These were Underwurlde and
+Sabrewulf.  Alien8, among others, could also be regarded as a
+sequal to Knightlore as it was the followup game from Ultimate
+and used the same game engine, albeit improved.
+
+
+SCORES RECEIVED
+CRASH Issue 12, p16: 94%
+
+URL
+ftp.dcc.uchile.cl/pub/OS/sinclair/snapshots/k
+
+GENERAL FACTS
+Knightlore was, and still is regarded as a ground breaking piece
+of software.  The game got rave reviews everywhere with people
+bowled over with the graphics and new style of gameplay.
+Apparently Chris and Tim Stamper, authors of the game were heard
+to mention in a RARE (sorry about that!) interview that they had
+the routine/game engine up and running for months and could have
+released it BEFORE Sabre Wulf, but if they did that Sabre Wulf
+wouldn`t have sold very well.  According to the Stampers, the
+Spectrum world was just not ready for Knightlore until then.
+
+
+NOTES
+The game originally went on release back in 1984/85 at the price
+of 9.99. Mastertronic bought the budget rights to the game, and
+in 1987, released it on their 1.99 budget label, Ricochet.

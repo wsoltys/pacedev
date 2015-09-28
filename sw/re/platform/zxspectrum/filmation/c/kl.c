@@ -45,13 +45,19 @@ static SPRITE_SCRATCHPAD_T sprite_scratchpad;
 // start of prototypes
 
 static void print_text (uint8_t x, uint8_t y, char *str);
+static void play_audio_wait_key (uint8_t *audio_data);
+static void play_audio (uint8_t *audio_data);
+static void shuffle_objects_required (void);
+static uint8_t read_key (uint8_t row);
 static void do_menu_selection (void);
 static void flash_menu (void);
 static void display_menu (void);
-static void display_text_list (uint8_t *xy, char *text_list[], uint8_t n);
+static void display_text_list (uint8_t *clours, uint8_t *xy, char *text_list[], uint8_t n);
 static void multiple_print_sprite (uint8_t dx, uint8_t dy, uint8_t n);
+static void init_start_location (void);
 static uint8_t *transfer_sprite (uint8_t *psprite);
 static uint8_t *transfer_sprite_and_print (uint8_t *psprite);
+static void display_panel (void);
 static void print_border (void);
 static void clear_scrn (void);
 static void clr_screen_buffer (void);
@@ -93,6 +99,7 @@ void print_text (uint8_t x, uint8_t y, char *str)
   }
 }
 
+uint8_t seed_1;
 uint8_t lives;
 
 void knight_lore (void)
@@ -105,18 +112,109 @@ MAIN_AF88:
 
   clear_scrn ();
   do_menu_selection ();
+  play_audio (start_game_tune);
+  shuffle_objects_required ();
+  init_start_location ();
+  //init_sun ();
+  //init_objects ();
+  //lose_life ();
+  //update_objects ();
+
+  // *** REMOVE ME
+	clear_bitmap (screen);
+
+game_loop:
+  
+  //display_objects ();
+  //colour_panel ();
+  //colour_sun_moon ();
+  display_panel ();
+  //display_frame ();
+  //display_day ();
+  //print_days ();
+  //print_lives_gfx ();
+  //print_lives ();
+  //update_screen ();
+
+  //goto game_loop;
+  ;
+}
+
+// $B2B6
+void play_audio_wait_key (uint8_t *audio_data)
+{
+  // check somethin here
+  while (1)
+  {
+    if (read_key (0))
+      return;
+    // keep playing audio
+  }
+}
+
+// $B2CF
+void play_audio (uint8_t *audio_data)
+{
+}
+
+// $B544
+void shuffle_objects_required (void)
+{
+}
+
+// $B5F7
+uint8_t read_key (uint8_t row)
+{
+  int8_t val = 0;
+
+  switch (row)
+  {
+    case 0 :
+      return (keypressed ());
+      break;
+    case 0xEF :
+      // 6,7,8,9,0
+      if (key[KEY_0]) val |= (1<<0);
+      if (key[KEY_9]) val |= (1<<1);
+      if (key[KEY_8]) val |= (1<<2);
+      if (key[KEY_7]) val |= (1<<3);
+      if (key[KEY_6]) val |= (1<<4);
+      break;
+    case 0xF7 :
+      // 5,4,3,2,1
+      if (key[KEY_1]) val |= (1<<0);
+      if (key[KEY_2]) val |= (1<<1);
+      if (key[KEY_3]) val |= (1<<2);
+      if (key[KEY_4]) val |= (1<<3);
+      if (key[KEY_5]) val |= (1<<4);
+    default :
+      break;
+  }
+  return (val);
 }
 
 // $BD0C
 void do_menu_selection (void)
 {
+  uint8_t key;
+
   clr_screen_buffer ();
   display_menu ();
   flash_menu ();
 menu_loop:
   display_menu ();
+  play_audio_wait_key (menu_tune);
+  // 5,4,3,2,1
+  key = read_key (0xF7);
+  // do input method stuff here
+  // 6,7,8,9,0
+  key = read_key (0xEF);
+  // start game?
+  if (key & (1<<0))
+    return;
+  seed_1++;
   flash_menu ();
-  //goto menu_loop;
+  goto menu_loop;
 }
 
 // $BD89
@@ -127,12 +225,12 @@ void flash_menu (void)
 // $BEB3
 void display_menu (void)
 {
-  display_text_list (menu_xy, (char **)menu_text, 8);
+  display_text_list (menu_colours, menu_xy, (char **)menu_text, 8);
   print_border ();
 }
 
 // $BEBF
-void display_text_list (uint8_t *xy, char *text_list[], uint8_t n)
+void display_text_list (uint8_t *colours, uint8_t *xy, char *text_list[], uint8_t n)
 {
   for (unsigned i=0; i<n; i++, xy+=2)
     print_text_single_colour (*xy, 191-*(xy+1), text_list[i]);
@@ -147,6 +245,11 @@ void multiple_print_sprite (uint8_t dx, uint8_t dy, uint8_t n)
     sprite_scratchpad.x += dx;
     sprite_scratchpad.y += dy;
   }
+}
+
+// $D1B1
+void init_start_location (void)
+{
 }
 
 // $D237
@@ -167,6 +270,20 @@ uint8_t *transfer_sprite_and_print (uint8_t *psprite)
   print_sprite ();
 
   return (p);
+}
+
+// $D255
+void display_panel (void)
+{
+  uint8_t *p = (uint8_t *)panel_data;
+  p = transfer_sprite (p);
+  multiple_print_sprite (16, (uint8_t)-8, 5);
+  p = transfer_sprite_and_print (p);
+  p = transfer_sprite_and_print (p);
+  p = transfer_sprite (p);
+  multiple_print_sprite (16, 8, 5);
+  p = transfer_sprite_and_print (p);
+  p = transfer_sprite_and_print (p);
 }
 
 // $D296
@@ -261,7 +378,7 @@ void print_sprite (void)
       for (unsigned b=0; b<8; b++)
       {
         if (d & (1<<7))
-          putpixel (screen, sprite_scratchpad.x+x*8+b, sprite_scratchpad.y+y, 15);
+          putpixel (screen, sprite_scratchpad.x+x*8+b, 191-(sprite_scratchpad.y+y), 15);
         d <<= 1;
       }
     }
