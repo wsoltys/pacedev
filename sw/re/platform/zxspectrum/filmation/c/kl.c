@@ -32,6 +32,11 @@ uint8_t from_ascii (char ch)
 }
 
 // start of variables
+
+uint8_t seed_1;
+uint8_t lives;
+uint8_t *gfxbase_8x8;
+
 typedef struct
 {
   uint8_t index;
@@ -42,15 +47,21 @@ typedef struct
 } SPRITE_SCRATCHPAD_T, *PSPRITE_SCRATCHPAD_T;
 static SPRITE_SCRATCHPAD_T sprite_scratchpad;
 
+// end of variables
+
 // start of prototypes
 
-static void print_text (uint8_t x, uint8_t y, char *str);
 static void play_audio_wait_key (uint8_t *audio_data);
 static void play_audio (uint8_t *audio_data);
 static void shuffle_objects_required (void);
 static uint8_t read_key (uint8_t row);
+static void display_day (void);
 static void do_menu_selection (void);
 static void flash_menu (void);
+static void print_text_single_colour (uint8_t x, uint8_t y, char *str);
+static void print_text_std_font (uint8_t x, uint8_t y, char *str);
+static void print_text_raw (uint8_t x, uint8_t y, uint8_t *str);
+static void print_text (uint8_t x, uint8_t y, char *str);
 static void display_menu (void);
 static void display_text_list (uint8_t *clours, uint8_t *xy, char *text_list[], uint8_t n);
 static void multiple_print_sprite (uint8_t dx, uint8_t dy, uint8_t n);
@@ -65,42 +76,6 @@ static uint8_t *flip_sprite (void);
 static void print_sprite (void);
 
 // end of prototypes
-
-void print_text_single_colour (uint8_t x, uint8_t y, char *str)
-{
-  print_text (x, y, str);
-}
-
-void print_text_std_font (uint8_t x, uint8_t y, char *str)
-{
-  print_text (x, y, str);
-}
-
-void print_text (uint8_t x, uint8_t y, char *str)
-{
-  for (unsigned c=0; *str; c++)
-  {
-    uint8_t ascii = (uint8_t)*(str++);
-    uint8_t code = from_ascii (ascii);
-    
-    for (unsigned l=0; l<8; l++)
-    {
-      uint8_t d = kl_font[code][l];
-      if (d == (uint8_t)-1)
-        break;
-      
-      for (unsigned b=0; b<8; b++)
-      {
-        if (d & (1<<7))
-          putpixel (screen, x+c*8+b, y+l, 15);
-        d <<= 1;
-      }
-    }  
-  }
-}
-
-uint8_t seed_1;
-uint8_t lives;
 
 void knight_lore (void)
 {
@@ -130,7 +105,7 @@ game_loop:
   //colour_sun_moon ();
   display_panel ();
   //display_frame ();
-  //display_day ();
+  display_day ();
   //print_days ();
   //print_lives_gfx ();
   //print_lives ();
@@ -193,6 +168,15 @@ uint8_t read_key (uint8_t row)
   return (val);
 }
 
+// $BCCA
+void display_day (void)
+{
+  // stick attribute at front
+  gfxbase_8x8 = (uint8_t *)days_font;
+  // fudge to skip attribute for now
+  print_text_raw (114, 15, (days_txt+1));
+}
+
 // $BD0C
 void do_menu_selection (void)
 {
@@ -222,6 +206,66 @@ void flash_menu (void)
 {
 }
 
+// $BE31
+void print_text_single_colour (uint8_t x, uint8_t y, char *str)
+{
+  gfxbase_8x8 = (uint8_t *)kl_font;
+  print_text (x, y, str);
+}
+
+// $BE45
+void print_text_std_font (uint8_t x, uint8_t y, char *str)
+{
+  gfxbase_8x8 = (uint8_t *)kl_font;
+  print_text (x, y, str);
+}
+
+void print_text_raw (uint8_t x, uint8_t y, uint8_t *str)
+{
+  for (unsigned c=0; ; c++, str++)
+  {
+    uint8_t code = *str & 0x7f;
+
+    for (unsigned l=0; l<8; l++)
+    {
+      uint8_t d = gfxbase_8x8[code*8+l];
+      
+      for (unsigned b=0; b<8; b++)
+      {
+        if (d & (1<<7))
+          putpixel (screen, x+c*8+b, 191-y+l, 15);
+        d <<= 1;
+      }
+    }  
+    if (*str & (1<<7))
+      break;
+  }
+}
+
+// $BE4C
+void print_text (uint8_t x, uint8_t y, char *str)
+{
+  for (unsigned c=0; *str; c++)
+  {
+    uint8_t ascii = (uint8_t)*(str++);
+    uint8_t code = from_ascii (ascii);
+    
+    for (unsigned l=0; l<8; l++)
+    {
+      uint8_t d = gfxbase_8x8[code*8+l];
+      if (d == (uint8_t)-1)
+        break;
+      
+      for (unsigned b=0; b<8; b++)
+      {
+        if (d & (1<<7))
+          putpixel (screen, x+c*8+b, 191-y+l, 15);
+        d <<= 1;
+      }
+    }  
+  }
+}
+
 // $BEB3
 void display_menu (void)
 {
@@ -233,7 +277,7 @@ void display_menu (void)
 void display_text_list (uint8_t *colours, uint8_t *xy, char *text_list[], uint8_t n)
 {
   for (unsigned i=0; i<n; i++, xy+=2)
-    print_text_single_colour (*xy, 191-*(xy+1), text_list[i]);
+    print_text_single_colour (*xy, *(xy+1), text_list[i]);
 }
 
 // $BEE4

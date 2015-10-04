@@ -272,6 +272,32 @@ void main (int argc, char *argv[])
     fprintf (fp2, "};\n\n");
   }
 
+  // days_txt
+  p = 0xbce7;
+  fprintf (fp2, "uint8_t days_txt[] = \n{\n  ");
+  for (unsigned i=0; i<5;i++)
+  {
+    fprintf (fp2, "0x%02x", ram[p++]);
+    if (i<4) fprintf (fp2, ", ");
+  }
+  fprintf (fp2, "\n};\n\n");
+
+  // days_font
+  p = 0xbcec;
+  fprintf (fp2, "uint8_t days_font[][8] = \n{\n");
+  for (int i=0; p<0xbd0c; i++)
+  {
+    if ((i%8) == 0)
+      fprintf (fp2, "  ");
+    fprintf (fp2, "0x%02X", ram[p++]);
+    if (p<0xbd0c)
+      fprintf (fp2, ", ");
+    if ((i%8) == 7)
+      fprintf (fp2, "\n");
+  }
+  fprintf (fp2, "};\n\n");
+
+
   // menu colours
   p = 0xbda2;
   fprintf (fp2, "uint8_t menu_colours[] = \n{\n");
