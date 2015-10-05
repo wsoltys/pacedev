@@ -58,7 +58,7 @@ SCRATCH:5BB6 ??		 tmp_attrib:	 ds 1
 SCRATCH:5BB7 ??		 unk_5BB7:	 ds 1
 SCRATCH:5BB8 ??		 unk_5BB8:	 ds 1
 SCRATCH:5BB9 ??		 days:		 ds 1						 ; DATA	XREF: lose_life-16E9o
-SCRATCH:5BB9										 ; display_frame:inc_dayso
+SCRATCH:5BB9										 ; print_days+3o ...
 SCRATCH:5BBA ??		 lives:		 ds 1						 ; DATA	XREF: lose_life-2196w
 SCRATCH:5BBA										 ; print_liveso ...
 SCRATCH:5BBB ??		 objects_put_in_caldron:ds 1					 ; DATA	XREF: lose_life-16BCo
@@ -2675,8 +2675,8 @@ RAM:B04F CD 4E BF		     call    display_objects
 RAM:B052 CD EF D2		     call    colour_panel
 RAM:B055 CD 0D D3		     call    colour_sun_moon
 RAM:B058 CD 55 D2		     call    display_panel
-RAM:B05B DD 21 4D C4		     ld	     ix, 0C44Dh
-RAM:B05F CD A4 C3		     call    display_frame
+RAM:B05B DD 21 4D C4		     ld	     ix, sun_moon_scratchpad
+RAM:B05F CD A4 C3		     call    display_sun_moon_frame
 RAM:B062 CD CA BC		     call    display_day
 RAM:B065 CD 66 BC		     call    print_days
 RAM:B068 CD 7A BC		     call    print_lives_gfx
@@ -4119,7 +4119,7 @@ RAM:BA22	     ; ----------------------------------------------------------------
 RAM:BA22	     ; START OF	FUNCTION CHUNK FOR lose_life
 RAM:BA22
 RAM:BA22	     game_over:							     ; CODE XREF: RAM:B5E0j
-RAM:BA22									     ; display_frame+7Fj ...
+RAM:BA22									     ; display_sun_moon_frame+7Fj ...
 RAM:BA22 3A C3 5B		     ld	     a,	(byte_5BC3)
 RAM:BA25 A7			     and     a
 RAM:BA26 C2 AB BA		     jp	     nz, game_complete_msg
@@ -4359,9 +4359,9 @@ RAM:BC66	     ; =============== S U B R O U T I N E ============================
 RAM:BC66
 RAM:BC66
 RAM:BC66	     print_days:						     ; CODE XREF: RAM:B065p
-RAM:BC66									     ; display_frame+82p
+RAM:BC66									     ; display_sun_moon_frame+82p
 RAM:BC66 21 E2 D9		     ld	     hl, 0D9E2h
-RAM:BC69 11 B9 5B		     ld	     de, 5BB9h
+RAM:BC69 11 B9 5B		     ld	     de, days
 RAM:BC6C 06 01			     ld	     b,	1
 RAM:BC6E CD AE BC		     call    print_BCD_number
 RAM:BC71 21 EF 5A		     ld	     hl, 5AEFh
@@ -4379,8 +4379,8 @@ RAM:BC7A	     print_lives_gfx:						     ; CODE XREF: RAM:B068p
 RAM:BC7A DD 21 DB BF		     ld	     ix, sprite_scratchpad
 RAM:BC7E DD 36 00 8C		     ld	     (ix+0), 8Ch ; 'Œ'                       ; sprite index
 RAM:BC82 DD 36 07 00		     ld	     (ix+7), 0
-RAM:BC86 DD 36 1A 10		     ld	     (ix+1Ah), 10h			     ; X
-RAM:BC8A DD 36 1B 20		     ld	     (ix+1Bh), 20h ; ' '                     ; Y
+RAM:BC86 DD 36 1A 10		     ld	     (ix+1Ah), 16			     ; X
+RAM:BC8A DD 36 1B 20		     ld	     (ix+1Bh), 32			     ; Y
 RAM:BC8E CD 18 D7		     call    print_sprite
 RAM:BC91 3E 47			     ld	     a,	47h ; 'G'
 RAM:BC93 11 42 5A		     ld	     de, 5A42h
@@ -5543,16 +5543,16 @@ RAM:C3A4
 RAM:C3A4	     ; =============== S U B R O U T I N E =======================================
 RAM:C3A4
 RAM:C3A4
-RAM:C3A4	     display_frame:						     ; CODE XREF: RAM:B05Fp
+RAM:C3A4	     display_sun_moon_frame:					     ; CODE XREF: RAM:B05Fp
 RAM:C3A4 3A C3 5B		     ld	     a,	(byte_5BC3)
 RAM:C3A7 A7			     and     a
 RAM:C3A8 C0			     ret     nz
 RAM:C3A9 DD 7E 1A		     ld	     a,	(ix+1Ah)			     ; X
-RAM:C3AC FE E1			     cp	     0E1h ; 'á'
-RAM:C3AE 28 4F			     jr	     z,	loc_C3FF
+RAM:C3AC FE E1			     cp	     225
+RAM:C3AE 28 4F			     jr	     z,	toggle_day_night
 RAM:C3B0 DD 7E 1A		     ld	     a,	(ix+1Ah)			     ; X
-RAM:C3B3 C6 10			     add     a,	10h
-RAM:C3B5 21 40 C4		     ld	     hl, byte_C440
+RAM:C3B3 C6 10			     add     a,	16
+RAM:C3B5 21 40 C4		     ld	     hl, sun_moon_yoff
 RAM:C3B8 0F			     rrca
 RAM:C3B9 0F			     rrca
 RAM:C3BA E6 0F			     and     0Fh
@@ -5560,8 +5560,8 @@ RAM:C3BC CD F2 D4		     call    add_HL_A				     ; ptr entry
 RAM:C3BF 7E			     ld	     a,	(hl)				     ; get entry
 RAM:C3C0 DD 77 1B		     ld	     (ix+1Bh), a			     ; Y
 RAM:C3C3
-RAM:C3C3	     loc_C3C3:							     ; CODE XREF: display_frame+8Bj
-RAM:C3C3 01 06 1F		     ld	     bc, 1F06h
+RAM:C3C3	     display_frame:						     ; CODE XREF: display_sun_moon_frame+8Bj
+RAM:C3C3 01 06 1F		     ld	     bc, 1F06h				     ; 31 lines, 6 bytes
 RAM:C3C6 21 0A D9		     ld	     hl, 0D90Ah
 RAM:C3C9 C5			     push    bc
 RAM:C3CA E5			     push    hl
@@ -5574,10 +5574,10 @@ RAM:C3D2 CD 18 D7		     call    print_sprite
 RAM:C3D5 DD 21 DB BF		     ld	     ix, sprite_scratchpad
 RAM:C3D9 DD 36 07 00		     ld	     (ix+7), 0
 RAM:C3DD DD 36 00 5A		     ld	     (ix+0), 5Ah ; 'Z'
-RAM:C3E1 DD 36 1A B8		     ld	     (ix+1Ah), 0B8h ; '¸'                    ; X
+RAM:C3E1 DD 36 1A B8		     ld	     (ix+1Ah), 184			     ; X
 RAM:C3E5 DD 36 1B 00		     ld	     (ix+1Bh), 0			     ; Y
 RAM:C3E9 CD 18 D7		     call    print_sprite
-RAM:C3EC DD 36 1A D0		     ld	     (ix+1Ah), 0D0h ; 'Ð'                    ; X
+RAM:C3EC DD 36 1A D0		     ld	     (ix+1Ah), 208			     ; X
 RAM:C3F0 DD 36 00 BA		     ld	     (ix+0), 0BAh ; 'º'
 RAM:C3F4 CD 18 D7		     call    print_sprite
 RAM:C3F7 E1			     pop     hl
@@ -5586,15 +5586,15 @@ RAM:C3F9 11 F7 57		     ld	     de, 57F7h
 RAM:C3FC C3 7C D6		     jp	     wipe_something
 RAM:C3FF	     ; ---------------------------------------------------------------------------
 RAM:C3FF
-RAM:C3FF	     loc_C3FF:							     ; CODE XREF: display_frame+Aj
-RAM:C3FF DD 7E 00		     ld	     a,	(ix+0)
-RAM:C402 EE 01			     xor     1
+RAM:C3FF	     toggle_day_night:						     ; CODE XREF: display_sun_moon_frame+Aj
+RAM:C3FF DD 7E 00		     ld	     a,	(ix+0)				     ; index
+RAM:C402 EE 01			     xor     1					     ; toggle sun/moon
 RAM:C404 DD 77 00		     ld	     (ix+0), a
 RAM:C407 CD 0D D3		     call    colour_sun_moon
-RAM:C40A DD 36 1A B0		     ld	     (ix+1Ah), 0B0h ; '°'                    ; X
+RAM:C40A DD 36 1A B0		     ld	     (ix+1Ah), 176			     ; X
 RAM:C40E 3E 01			     ld	     a,	1
 RAM:C410 32 B1 5B		     ld	     (byte_5BB1), a
-RAM:C413 3A 4D C4		     ld	     a,	(byte_C44D)
+RAM:C413 3A 4D C4		     ld	     a,	(sun_moon_scratchpad)
 RAM:C416 E6 01			     and     1
 RAM:C418 C0			     ret     nz
 RAM:C419
@@ -5609,15 +5609,15 @@ RAM:C423 CA 22 BA		     jp	     z,	game_over
 RAM:C426 CD 66 BC		     call    print_days
 RAM:C429 01 78 00		     ld	     bc, 78h ; 'x'
 RAM:C42C CD 32 C4		     call    sub_C432
-RAM:C42F C3 C3 C3		     jp	     loc_C3C3
-RAM:C42F	     ; End of function display_frame
+RAM:C42F C3 C3 C3		     jp	     display_frame
+RAM:C42F	     ; End of function display_sun_moon_frame
 RAM:C42F
 RAM:C432
 RAM:C432	     ; =============== S U B R O U T I N E =======================================
 RAM:C432
 RAM:C432
 RAM:C432	     sub_C432:							     ; CODE XREF: RAM:C1EBp
-RAM:C432									     ; display_frame+88p
+RAM:C432									     ; display_sun_moon_frame+88p
 RAM:C432 CD 26 D8		     call    BC_to_attr_addr_in_DE
 RAM:C435 CD 11 D8		     call    calc_screen_buffer_addr
 RAM:C438 69			     ld	     l,	c
@@ -5627,19 +5627,19 @@ RAM:C43D C3 7C D6		     jp	     wipe_something
 RAM:C43D	     ; End of function sub_C432
 RAM:C43D
 RAM:C43D	     ; ---------------------------------------------------------------------------
-RAM:C440 05 06 07 08+byte_C440:	     db	5, 6, 7, 8, 9, 0Ah, 0Ah, 9, 8, 7, 6, 5,	5    ; DATA XREF: display_frame+11o
-RAM:C44D 00 00 00 00+byte_C44D:	     db	0, 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,	0, 0
-RAM:C44D 00 00 00 00+								     ; DATA XREF: display_frame+6Fr
-RAM:C44D 00 00 00 00+								     ; init_suno ...
+RAM:C440 05 06 07 08+sun_moon_yoff:  db	5, 6, 7, 8, 9, 0Ah, 0Ah, 9, 8, 7, 6, 5,	5    ; DATA XREF: display_sun_moon_frame+11o
+RAM:C44D 00 00 00 00+sun_moon_scratchpad:db 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0
+RAM:C44D 00 00 00 00+								     ; DATA XREF: RAM:B05Bo
+RAM:C44D 00 00 00 00+								     ; display_sun_moon_frame+6Fr ...
 RAM:C44D 00 00 00 00+		     db	0, 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0
 RAM:C46D
 RAM:C46D	     ; =============== S U B R O U T I N E =======================================
 RAM:C46D
 RAM:C46D
 RAM:C46D	     init_sun:							     ; CODE XREF: lose_life-2179p
-RAM:C46D DD 21 4D C4		     ld	     ix, byte_C44D
+RAM:C46D DD 21 4D C4		     ld	     ix, sun_moon_scratchpad
 RAM:C471 DD 36 00 58		     ld	     (ix+0), 58h ; 'X'                       ; sprite index
-RAM:C475 DD 36 1A B0		     ld	     (ix+1Ah), 0B0h ; '°'                    ; X
+RAM:C475 DD 36 1A B0		     ld	     (ix+1Ah), 176			     ; X
 RAM:C479 DD 36 1B 09		     ld	     (ix+1Bh), 9			     ; Y
 RAM:C47D C9			     ret
 RAM:C47D	     ; End of function init_sun
@@ -8181,7 +8181,7 @@ RAM:D139 32 B1 5B		     ld	     (byte_5BB1), a
 RAM:D13C 21 BA 5B		     ld	     hl, lives
 RAM:D13F 35			     dec     (hl)				     ; decrement life
 RAM:D140 FA 22 BA		     jp	     m,	game_over			     ; any left? no, exit
-RAM:D143 3A 4D C4		     ld	     a,	(byte_C44D)
+RAM:D143 3A 4D C4		     ld	     a,	(sun_moon_scratchpad)
 RAM:D146 0F			     rrca
 RAM:D147 0F			     rrca
 RAM:D148 0F			     rrca
@@ -8458,14 +8458,14 @@ RAM:D2EF
 RAM:D2EF	     colour_panel:						     ; CODE XREF: RAM:B052p
 RAM:D2EF AF			     xor     a
 RAM:D2F0 21 B6 5A		     ld	     hl, 5AB6h
-RAM:D2F3 01 03 01		     ld	     bc, 103h
+RAM:D2F3 01 03 01		     ld	     bc, 103h				     ; 1 byte, 3 lines
 RAM:D2F6 CD 15 C5		     call    fill_window
 RAM:D2F9 21 BD 5A		     ld	     hl, 5ABDh
-RAM:D2FC 01 03 01		     ld	     bc, 103h
+RAM:D2FC 01 03 01		     ld	     bc, 103h				     ; 1 byte, 3 lines
 RAM:D2FF CD 15 C5		     call    fill_window
 RAM:D302 3E 42			     ld	     a,	42h ; 'B'
 RAM:D304 21 97 5A		     ld	     hl, 5A97h
-RAM:D307 01 04 06		     ld	     bc, 604h
+RAM:D307 01 04 06		     ld	     bc, 604h				     ; 6 bytes,	4 lines
 RAM:D30A C3 15 C5		     jp	     fill_window
 RAM:D30A	     ; End of function colour_panel
 RAM:D30A
@@ -8474,16 +8474,16 @@ RAM:D30D	     ; =============== S U B R O U T I N E ============================
 RAM:D30D
 RAM:D30D
 RAM:D30D	     colour_sun_moon:						     ; CODE XREF: RAM:B055p
-RAM:D30D									     ; display_frame+63p
-RAM:D30D 3A 4D C4		     ld	     a,	(byte_C44D)
+RAM:D30D									     ; display_sun_moon_frame+63p
+RAM:D30D 3A 4D C4		     ld	     a,	(sun_moon_scratchpad)		     ; index
 RAM:D310 E6 01			     and     1
-RAM:D312 3E 46			     ld	     a,	46h ; 'F'
+RAM:D312 3E 46			     ld	     a,	46h ; 'F'                            ; attribute
 RAM:D314 28 01			     jr	     z,	loc_D317
 RAM:D316 3C			     inc     a
 RAM:D317
 RAM:D317	     loc_D317:							     ; CODE XREF: colour_sun_moon+7j
 RAM:D317 21 B8 5A		     ld	     hl, 5AB8h
-RAM:D31A 01 02 04		     ld	     bc, 402h
+RAM:D31A 01 02 04		     ld	     bc, 402h				     ; 4 bytes,	2 lines
 RAM:D31D C3 15 C5		     jp	     fill_window
 RAM:D31D	     ; End of function colour_sun_moon
 RAM:D31D
@@ -9199,7 +9199,7 @@ RAM:D67C	     ; =============== S U B R O U T I N E ============================
 RAM:D67C
 RAM:D67C
 RAM:D67C	     wipe_something:						     ; CODE XREF: display_objects+54p
-RAM:D67C									     ; display_frame+58j ...
+RAM:D67C									     ; display_sun_moon_frame+58j ...
 RAM:D67C C5			     push    bc
 RAM:D67D D5			     push    de
 RAM:D67E E5			     push    hl

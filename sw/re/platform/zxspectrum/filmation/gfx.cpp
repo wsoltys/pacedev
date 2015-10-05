@@ -344,6 +344,18 @@ void main (int argc, char *argv[])
   }
   fprintf (fp2, "};\n\n");
 
+  // sun_moon_yoff
+  p = 0xc440;
+  fprintf (fp2, "uint8_t sun_moon_yoff[] = \n{\n");
+  for (unsigned i=0; p<0xc44d; i++, p++)
+  {
+    if (i%8==0) fprintf (fp2, "  ");
+    fprintf (fp2, "0x%02X", ram[p]);
+    if (p<0xc44d-1) fprintf (fp2, ", ");
+    if (i%8==7) fprintf (fp2, "\n");
+  }
+  fprintf (fp2, "\n};\n\n");
+
   // start locations
   p = 0xd1e2;
   fprintf (fp2, "uint8_t start_locations[] = \n{\n");

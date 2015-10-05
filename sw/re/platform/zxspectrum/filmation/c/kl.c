@@ -33,9 +33,10 @@ uint8_t from_ascii (char ch)
 
 // start of variables
 
-uint8_t seed_1;
-uint8_t lives;
-uint8_t *gfxbase_8x8;
+uint8_t seed_1;               // $5BA0
+uint8_t days;                 // $5BB9
+uint8_t lives;                // $5BBA
+uint8_t *gfxbase_8x8;         // $5BC7
 
 typedef struct
 {
@@ -44,8 +45,9 @@ typedef struct
   uint8_t x;
   uint8_t y;
 
-} SPRITE_SCRATCHPAD_T, *PSPRITE_SCRATCHPAD_T;
-static SPRITE_SCRATCHPAD_T sprite_scratchpad;
+} SPRITE_SCRATCHPAD, *PSPRITE_SCRATCHPAD;
+static SPRITE_SCRATCHPAD sprite_scratchpad;
+static SPRITE_SCRATCHPAD sun_moon_scratchpad;
 
 // end of variables
 
@@ -55,6 +57,10 @@ static void play_audio_wait_key (uint8_t *audio_data);
 static void play_audio (uint8_t *audio_data);
 static void shuffle_objects_required (void);
 static uint8_t read_key (uint8_t row);
+static void print_days (void);
+static void print_lives_gfx (void);
+static void print_lives (void);
+static void print_bcd_number (uint8_t x, uint8_t y, uint8_t *bcd, uint8_t n);
 static void display_day (void);
 static void do_menu_selection (void);
 static void flash_menu (void);
@@ -62,18 +68,21 @@ static void print_text_single_colour (uint8_t x, uint8_t y, char *str);
 static void print_text_std_font (uint8_t x, uint8_t y, char *str);
 static void print_text_raw (uint8_t x, uint8_t y, uint8_t *str);
 static void print_text (uint8_t x, uint8_t y, char *str);
+static uint8_t print_8x8 (uint8_t x, uint8_t y, uint8_t code);
 static void display_menu (void);
 static void display_text_list (uint8_t *clours, uint8_t *xy, char *text_list[], uint8_t n);
-static void multiple_print_sprite (uint8_t dx, uint8_t dy, uint8_t n);
+static void multiple_print_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t dx, uint8_t dy, uint8_t n);
+static void display_sun_moon_frame (PSPRITE_SCRATCHPAD scratchpad);
+static void init_sun (void);
 static void init_start_location (void);
-static uint8_t *transfer_sprite (uint8_t *psprite);
-static uint8_t *transfer_sprite_and_print (uint8_t *psprite);
+static uint8_t *transfer_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t *psprite);
+static uint8_t *transfer_sprite_and_print (PSPRITE_SCRATCHPAD scratchpad, uint8_t *psprite);
 static void display_panel (void);
 static void print_border (void);
 static void clear_scrn (void);
 static void clr_screen_buffer (void);
-static uint8_t *flip_sprite (void);
-static void print_sprite (void);
+static uint8_t *flip_sprite (PSPRITE_SCRATCHPAD scratchpad);
+static void print_sprite (PSPRITE_SCRATCHPAD scratchpad);
 
 // end of prototypes
 
@@ -90,7 +99,7 @@ MAIN_AF88:
   play_audio (start_game_tune);
   shuffle_objects_required ();
   init_start_location ();
-  //init_sun ();
+  init_sun ();
   //init_objects ();
   //lose_life ();
   //update_objects ();
@@ -104,15 +113,17 @@ game_loop:
   //colour_panel ();
   //colour_sun_moon ();
   display_panel ();
-  //display_frame ();
+  display_sun_moon_frame (&sun_moon_scratchpad);
   display_day ();
-  //print_days ();
-  //print_lives_gfx ();
-  //print_lives ();
+  print_days ();
+  print_lives_gfx ();
+  print_lives ();
   //update_screen ();
 
-  //goto game_loop;
-  ;
+  if (key[KEY_ESC])
+    return;
+
+  goto game_loop;
 }
 
 // $B2B6
@@ -168,6 +179,43 @@ uint8_t read_key (uint8_t row)
   return (val);
 }
 
+// $BC66
+void print_days (void)
+{
+  print_bcd_number (122, 7, &days, 1);
+}
+
+// $BC7A
+void print_lives_gfx (void)
+{
+  sprite_scratchpad.index = 0x8c;
+  sprite_scratchpad.flags = 0;
+  sprite_scratchpad.x = 16;
+  sprite_scratchpad.y = 32;
+  print_sprite (&sprite_scratchpad);
+  // fill_de ();
+  // fill_de ();
+}
+
+// $BCA3
+void print_lives (void)
+{
+  print_bcd_number (32, 39, &lives, 1);
+}
+
+// $BCAE
+void print_bcd_number (uint8_t x, uint8_t y, uint8_t *bcd, uint8_t n)
+{
+  gfxbase_8x8 = (uint8_t *)kl_font;
+  for (unsigned i=0; i<n; i++, bcd++)
+  {
+    uint8_t code = (*bcd) >> 4;
+    x = print_8x8 (x, y, code);
+    code = (*bcd) & 0x0f;
+    x = print_8x8 (x, y, code);
+  }
+}
+
 // $BCCA
 void display_day (void)
 {
@@ -220,6 +268,7 @@ void print_text_std_font (uint8_t x, uint8_t y, char *str)
   print_text (x, y, str);
 }
 
+// $BE4C
 void print_text_raw (uint8_t x, uint8_t y, uint8_t *str)
 {
   for (unsigned c=0; ; c++, str++)
@@ -266,6 +315,25 @@ void print_text (uint8_t x, uint8_t y, char *str)
   }
 }
 
+// $BE7F
+uint8_t print_8x8 (uint8_t x, uint8_t y, uint8_t code)
+{
+  for (unsigned l=0; l<8; l++)
+  {
+    uint8_t d = gfxbase_8x8[code*8+l];
+    if (d == (uint8_t)-1)
+      break;
+    
+    for (unsigned b=0; b<8; b++)
+    {
+      if (d & (1<<7))
+        putpixel (screen, x+b, 191-y+l, 15);
+      d <<= 1;
+    }
+  }  
+  return (x+8);
+}
+
 // $BEB3
 void display_menu (void)
 {
@@ -281,14 +349,70 @@ void display_text_list (uint8_t *colours, uint8_t *xy, char *text_list[], uint8_
 }
 
 // $BEE4
-void multiple_print_sprite (uint8_t dx, uint8_t dy, uint8_t n)
+void multiple_print_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t dx, uint8_t dy, uint8_t n)
 {
   for (unsigned i=0; i<n; i++)
   {
-    print_sprite ();
-    sprite_scratchpad.x += dx;
-    sprite_scratchpad.y += dy;
+    print_sprite (scratchpad);
+    scratchpad->x += dx;
+    scratchpad->y += dy;
   }
+}
+
+// $C3A4
+void display_sun_moon_frame (PSPRITE_SCRATCHPAD scratchpad)
+{
+  uint8_t x;
+
+  // check a byte
+
+  if (scratchpad->x == 225)
+    goto toggle_day_night;
+
+  // adjust Y coordinate
+  x = scratchpad->x + 16;
+  scratchpad->y = sun_moon_yoff[(x>>2)&0x0f];
+  print_sprite (scratchpad);
+
+display_frame:
+  sprite_scratchpad.index = 0x5a;
+  sprite_scratchpad.flags = 0;
+  sprite_scratchpad.x = 184;
+  sprite_scratchpad.y = 0;
+  print_sprite (&sprite_scratchpad);
+  sprite_scratchpad.x = 208;
+  sprite_scratchpad.index = 0xba;
+  print_sprite (&sprite_scratchpad);
+  // wipe something
+  return;
+
+toggle_day_night:
+  scratchpad->index ^= 1;
+  //colour_sun_moon ();
+  scratchpad->x = 176;
+  // if just changed to moon, exit
+  if (scratchpad->index & 1)
+    return;
+
+inc_days:
+  // BCD arithmetic
+  days++;
+  if ((days & 0x0f) == 10)
+    days += 6;
+  if (days == 64)
+    //game_over ();
+    ;
+  print_days ();
+  // something
+  goto display_frame;  
+}
+
+// $C46D
+void init_sun (void)
+{
+  sun_moon_scratchpad.index = 0x58;
+  sun_moon_scratchpad.x = 176;
+  sun_moon_scratchpad.y = 9;
 }
 
 // $D1B1
@@ -297,21 +421,21 @@ void init_start_location (void)
 }
 
 // $D237
-uint8_t *transfer_sprite (uint8_t *psprite)
+uint8_t *transfer_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t *psprite)
 {
-  sprite_scratchpad.index = *(psprite++);
-  sprite_scratchpad.flags = *(psprite++);
-  sprite_scratchpad.x = *(psprite++);
-  sprite_scratchpad.y = *(psprite++);
+  scratchpad->index = *(psprite++);
+  scratchpad->flags = *(psprite++);
+  scratchpad->x = *(psprite++);
+  scratchpad->y = *(psprite++);
 
   return (psprite);
 }
 
 // $D24C
-uint8_t *transfer_sprite_and_print (uint8_t *psprite)
+uint8_t *transfer_sprite_and_print (PSPRITE_SCRATCHPAD scratchpad, uint8_t *psprite)
 {
-  uint8_t *p = transfer_sprite (psprite);
-  print_sprite ();
+  uint8_t *p = transfer_sprite (scratchpad, psprite);
+  print_sprite (scratchpad);
 
   return (p);
 }
@@ -320,32 +444,32 @@ uint8_t *transfer_sprite_and_print (uint8_t *psprite)
 void display_panel (void)
 {
   uint8_t *p = (uint8_t *)panel_data;
-  p = transfer_sprite (p);
-  multiple_print_sprite (16, (uint8_t)-8, 5);
-  p = transfer_sprite_and_print (p);
-  p = transfer_sprite_and_print (p);
-  p = transfer_sprite (p);
-  multiple_print_sprite (16, 8, 5);
-  p = transfer_sprite_and_print (p);
-  p = transfer_sprite_and_print (p);
+  p = transfer_sprite (&sprite_scratchpad, p);
+  multiple_print_sprite (&sprite_scratchpad, 16, (uint8_t)-8, 5);
+  p = transfer_sprite_and_print (&sprite_scratchpad, p);
+  p = transfer_sprite_and_print (&sprite_scratchpad, p);
+  p = transfer_sprite (&sprite_scratchpad, p);
+  multiple_print_sprite (&sprite_scratchpad, 16, 8, 5);
+  p = transfer_sprite_and_print (&sprite_scratchpad, p);
+  p = transfer_sprite_and_print (&sprite_scratchpad, p);
 }
 
 // $D296
 void print_border (void)
 {
   uint8_t *p = (uint8_t *)border_data;
-  p = transfer_sprite_and_print (p);
-  p = transfer_sprite_and_print (p);
-  p = transfer_sprite_and_print (p);
-  p = transfer_sprite_and_print (p);
-  p = transfer_sprite (p);
-  multiple_print_sprite (8, 0, 24);
-  p = transfer_sprite (p);
-  multiple_print_sprite (8, 0, 24);
-  p = transfer_sprite (p);
-  multiple_print_sprite (0, 1, 128);
-  p = transfer_sprite (p);
-  multiple_print_sprite (0, 1, 128);
+  p = transfer_sprite_and_print (&sprite_scratchpad, p);
+  p = transfer_sprite_and_print (&sprite_scratchpad, p);
+  p = transfer_sprite_and_print (&sprite_scratchpad, p);
+  p = transfer_sprite_and_print (&sprite_scratchpad, p);
+  p = transfer_sprite (&sprite_scratchpad, p);
+  multiple_print_sprite (&sprite_scratchpad, 8, 0, 24);
+  p = transfer_sprite (&sprite_scratchpad, p);
+  multiple_print_sprite (&sprite_scratchpad, 8, 0, 24);
+  p = transfer_sprite (&sprite_scratchpad, p);
+  multiple_print_sprite (&sprite_scratchpad, 0, 1, 128);
+  p = transfer_sprite (&sprite_scratchpad, p);
+  multiple_print_sprite (&sprite_scratchpad, 0, 1, 128);
 }
 
 // $D55F
@@ -363,12 +487,12 @@ void clr_screen_buffer (void)
 //#define REV(d) d
 
 // $D6EF
-uint8_t *flip_sprite (void)
+uint8_t *flip_sprite (PSPRITE_SCRATCHPAD scratchpad)
 {
-  uint8_t *psprite = sprite_tbl[sprite_scratchpad.index];
+  uint8_t *psprite = sprite_tbl[scratchpad->index];
   
-  uint8_t vflip = (sprite_scratchpad.flags ^ (*psprite)) & 0x80;
-  uint8_t hflip = (sprite_scratchpad.flags ^ (*psprite)) & 0x40;
+  uint8_t vflip = (scratchpad->flags ^ (*psprite)) & 0x80;
+  uint8_t hflip = (scratchpad->flags ^ (*psprite)) & 0x40;
 
   uint8_t w = psprite[0] & 0x3f;
   uint8_t h = psprite[1];
@@ -401,12 +525,12 @@ uint8_t *flip_sprite (void)
 }
 
 // $D718
-void print_sprite (void)
+void print_sprite (PSPRITE_SCRATCHPAD scratchpad)
 {
   uint8_t *psprite;
 
   // references sprite_scratchpad
-  psprite = flip_sprite ();
+  psprite = flip_sprite (scratchpad);
 
   uint8_t w = *(psprite++) & 0x3f;
   uint8_t h = *(psprite++);
@@ -422,7 +546,7 @@ void print_sprite (void)
       for (unsigned b=0; b<8; b++)
       {
         if (d & (1<<7))
-          putpixel (screen, sprite_scratchpad.x+x*8+b, 191-(sprite_scratchpad.y+y), 15);
+          putpixel (screen, scratchpad->x+x*8+b, 191-(scratchpad->y+y), 15);
         d <<= 1;
       }
     }
