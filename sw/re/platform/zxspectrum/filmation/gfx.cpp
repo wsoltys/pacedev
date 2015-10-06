@@ -22,14 +22,14 @@
 // neogeo:  d:\mingw_something\setenv.bat
 //          g++ gfx.cpp -o xgf -lalleg
 
-#define DO_C_DATA
+//#define DO_C_DATA
 
 //#define DO_ASCII
 //#define DO_PARSE_MAP
 //#define DO_GA
 //#define DO_FONT
 //#define DO_SPRITE_DATA
-//#define DO_SPRITE_TABLE
+#define DO_SPRITE_TABLE
 //#define DO_BLOCK_DATA
 //#define DO_BG_DATA
 

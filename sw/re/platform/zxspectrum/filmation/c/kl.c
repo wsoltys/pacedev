@@ -19,6 +19,9 @@
 // pandora: run msys.bat and cd to this directory
 //          g++ kl.cpp -o kl -lallegro-4.4.2-md
 
+// neogeo:  d:\mingw_something\setenv.bat
+//          g++ gfx.cpp -o xgf -lalleg
+
 #include "kldat.c"
 
 uint8_t from_ascii (char ch)
@@ -33,10 +36,11 @@ uint8_t from_ascii (char ch)
 
 // start of variables
 
-uint8_t seed_1;               // $5BA0
-uint8_t days;                 // $5BB9
-uint8_t lives;                // $5BBA
-uint8_t *gfxbase_8x8;         // $5BC7
+uint8_t seed_1;                   // $5BA0
+uint8_t days;                     // $5BB9
+uint8_t lives;                    // $5BBA
+uint8_t *gfxbase_8x8;             // $5BC7
+uint8_t objects_carried[3][4];    // $5BDC
 
 typedef struct
 {
@@ -72,6 +76,7 @@ static uint8_t print_8x8 (uint8_t x, uint8_t y, uint8_t code);
 static void display_menu (void);
 static void display_text_list (uint8_t *clours, uint8_t *xy, char *text_list[], uint8_t n);
 static void multiple_print_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t dx, uint8_t dy, uint8_t n);
+static void display_objects (void);
 static void display_sun_moon_frame (PSPRITE_SCRATCHPAD scratchpad);
 static void init_sun (void);
 static void init_start_location (void);
@@ -109,7 +114,7 @@ MAIN_AF88:
 
 game_loop:
   
-  //display_objects ();
+  display_objects ();
   //colour_panel ();
   //colour_sun_moon ();
   display_panel ();
@@ -356,6 +361,28 @@ void multiple_print_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t dx, uint8_t d
     print_sprite (scratchpad);
     scratchpad->x += dx;
     scratchpad->y += dy;
+  }
+}
+
+// $BF4E
+void display_objects (void)
+{
+  objects_carried[0][0] = 0x60;
+  objects_carried[1][0] = 0x61;
+  objects_carried[2][0] = 0x62;
+  
+  for (unsigned i=0; i<3; i++)
+  {
+    uint8_t x = ((255-(3-i))+3)*24+16  +24;
+    
+    sprite_scratchpad.x = x;
+    sprite_scratchpad.y = 0;
+
+    if (objects_carried[i][0] != 0)
+    {
+      sprite_scratchpad.index = objects_carried[i][0];
+      print_sprite (&sprite_scratchpad);
+    }
   }
 }
 
