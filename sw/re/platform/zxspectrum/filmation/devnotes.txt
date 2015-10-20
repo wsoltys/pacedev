@@ -1,0 +1,4 @@
+Running in MESS0166
+===================
+
+mess64d spectrum -w -d -dump knightlore.sna
