@@ -23,7 +23,7 @@ SCRATCH:5BA0 ??		 seed_1:	 ds 1						 ; DATA	XREF: RAM:STARTo
 SCRATCH:5BA0										 ; RAM:AF7Aw ...
 SCRATCH:5BA1 ??				 ds 1
 SCRATCH:5BA2 ??	??	 seed_2:	 ds 2						 ; DATA	XREF: lose_life-2190r
-SCRATCH:5BA2										 ; lose_life:game_loopr ...
+SCRATCH:5BA2										 ; lose_life:onscreen_loopr ...
 SCRATCH:5BA4		 ; bit	 3 : directional
 SCRATCH:5BA4		 ; bit 2-1 : 00=keybd, 01=kempston, 10=cursor, 11=i/f-ii
 SCRATCH:5BA4 ??		 user_input_method:ds 1						 ; DATA	XREF: do_menu_selection+26r
@@ -45,7 +45,7 @@ SCRATCH:5BAD ??		 curr_room_attrib:ds 1
 SCRATCH:5BAE ??		 room_size_Z:	 ds 1						 ; DATA	XREF: RAM:C667r
 SCRATCH:5BAE										 ; RAM:C6F4r ...
 SCRATCH:5BAF ??		 byte_5BAF:	 ds 1						 ; DATA	XREF: RAM:C6E1w
-SCRATCH:5BAF										 ; update_objects+16w
+SCRATCH:5BAF										 ; build_screen_objects+16w
 SCRATCH:5BB0 ??		 byte_5BB0:	 ds 1						 ; DATA	XREF: RAM:C676r
 SCRATCH:5BB0										 ; RAM:C686w ...
 SCRATCH:5BB1 ??		 byte_5BB1:	 ds 1						 ; DATA	XREF: sub_C306r
@@ -156,11 +156,11 @@ SCRATCH:5C04 ??				 ds 1
 SCRATCH:5C05 ??				 ds 1
 SCRATCH:5C06 ??				 ds 1
 SCRATCH:5C07 ??				 ds 1
-SCRATCH:5C08		 ; table of objects to draw
+SCRATCH:5C08		 ; table of objects to draw (40	max)
 SCRATCH:5C08		 ; 00,01 sprites for player
 SCRATCH:5C08		 ;
 SCRATCH:5C08 ??		 graphics_object_tbl:ds	1					 ; DATA	XREF: lose_life-2167o
-SCRATCH:5C08										 ; RAM:B619r ...
+SCRATCH:5C08										 ; RAM:B078o ...
 SCRATCH:5C09 ??		 unk_5C09:	 ds 1						 ; DATA	XREF: RAM:loc_B5C4r
 SCRATCH:5C09										 ; RAM:loc_B66Er
 SCRATCH:5C0A ??		 unk_5C0A:	 ds 1						 ; DATA	XREF: RAM:B5D3r
@@ -169,7 +169,7 @@ SCRATCH:5C0B ??				 ds 1
 SCRATCH:5C0C ??				 ds 1
 SCRATCH:5C0D ??				 ds 1
 SCRATCH:5C0E ??				 ds 1
-SCRATCH:5C0F ??		 unk_5C0F:	 ds 1						 ; DATA	XREF: reset_something+5o
+SCRATCH:5C0F ??		 unk_5C0F:	 ds 1						 ; DATA	XREF: reset_object_???_flag+5o
 SCRATCH:5C0F										 ; RAM:B936r
 SCRATCH:5C10 ??		 unk_5C10:	 ds 1						 ; DATA	XREF: RAM:B62Cr
 SCRATCH:5C10										 ; sub_B8A9r ...
@@ -212,9 +212,9 @@ SCRATCH:5C48		 ; +16-17 ptr object table entry
 SCRATCH:5C48		 ; +18-31 zeroed
 SCRATCH:5C48 ??	?? ?? ??+objs_here:	 ds 32						 ; DATA	XREF: RAM:B8DDr
 SCRATCH:5C48 ??	?? ?? ??+								 ; find_objs_in_locationo ...
-SCRATCH:5C68 ??	?? ?? ??+byte_5C68:	 ds 32
+SCRATCH:5C68 ??	?? ?? ??+byte_5C68:	 ds 32						 ; DATA	XREF: sub_B8A9+6o
 SCRATCH:5C88 ??	?? ?? ??+byte_5C88:	 ds 32						 ; DATA	XREF: find_objs_in_location:loc_C583o
-SCRATCH:5C88 ??	?? ?? ??+								 ; update_objects_here+2Eo ...
+SCRATCH:5C88 ??	?? ?? ??+								 ; find_objects_here+2Eo ...
 SCRATCH:5CA8 ??	?? ?? ??+		 ds 1120
 SCRATCH:5CA8 ??	?? ?? ??+; end of 'SCRATCH'
 SCRATCH:5CA8 ??	?? ?? ??+
@@ -2586,13 +2586,13 @@ RAM:AFAE CD B1 D1		     call    init_start_location
 RAM:AFB1 CD 6D C4		     call    init_sun
 RAM:AFB4 CD 7E C4		     call    init_objects
 RAM:AFB7
-RAM:AFB7	     loc_AFB7:							     ; CODE XREF: RAM:B082j
+RAM:AFB7	     player_dies:						     ; CODE XREF: RAM:B082j
 RAM:AFB7 CD 2A D1		     call    lose_life
 RAM:AFBA
-RAM:AFBA	     loc_AFBA:							     ; CODE XREF: RAM:CAF0j
-RAM:AFBA CD E6 D1		     call    update_objects
+RAM:AFBA	     game_loop:							     ; CODE XREF: RAM:CAF0j
+RAM:AFBA CD E6 D1		     call    build_screen_objects
 RAM:AFBD
-RAM:AFBD	     game_loop:							     ; CODE XREF: RAM:B085j
+RAM:AFBD	     onscreen_loop:						     ; CODE XREF: RAM:B085j
 RAM:AFBD 3A A2 5B		     ld	     a,	(seed_2)
 RAM:AFC0 32 BC 5B		     ld	     (byte_5BBC), a
 RAM:AFC3 DD 21 08 5C		     ld	     ix, graphics_object_tbl		     ; start of	table
@@ -2651,7 +2651,7 @@ RAM:B00D 32 A5 5B		     ld	     (seed_3), a
 RAM:B010 21 B2 5B		     ld	     hl, unk_5BB2
 RAM:B013 CB C6			     set     0,	(hl)
 RAM:B015 CD 0E D5		     call    sub_D50E				     ; some audio stuff
-RAM:B018 CD A9 B8		     call    sub_B8A9				     ; stars???
+RAM:B018 CD A9 B8		     call    sub_B8A9
 RAM:B01B CD 62 CE		     call    list_objects_to_draw		     ; builds a	list of	screen objects
 RAM:B01E CD 9F D5		     call    render_dynamic_objects		     ; screen, sun/moon, etc
 RAM:B021 3A C5 5B		     ld	     a,	(byte_5BC5)
@@ -2694,31 +2694,31 @@ RAM:B065 CD 66 BC		     call    print_days
 RAM:B068 CD 7A BC		     call    print_lives_gfx
 RAM:B06B CD A3 BC		     call    print_lives
 RAM:B06E CD 6F D5		     call    update_screen			     ; copy to display
-RAM:B071 CD 88 B0		     call    reset_something
+RAM:B071 CD 88 B0		     call    reset_object_???_flag
 RAM:B074
 RAM:B074	     loc_B074:							     ; CODE XREF: RAM:B043j
 RAM:B074 AF			     xor     a
 RAM:B075 32 C5 5B		     ld	     (byte_5BC5), a
-RAM:B078 DD 21 08 5C		     ld	     ix, 5C08h
-RAM:B07C DD 7E 00		     ld	     a,	(ix+0)
-RAM:B07F DD B6 20		     or	     (ix+20h)
-RAM:B082 CA B7 AF		     jp	     z,	loc_AFB7
-RAM:B085 C3 BD AF		     jp	     game_loop
+RAM:B078 DD 21 08 5C		     ld	     ix, graphics_object_tbl
+RAM:B07C DD 7E 00		     ld	     a,	(ix+0)				     ; player sprite half
+RAM:B07F DD B6 20		     or	     (ix+20h)				     ; player other sprite half
+RAM:B082 CA B7 AF		     jp	     z,	player_dies			     ; both null? yes, lose a life
+RAM:B085 C3 BD AF		     jp	     onscreen_loop
 RAM:B088
 RAM:B088	     ; =============== S U B R O U T I N E =======================================
 RAM:B088
 RAM:B088
-RAM:B088	     reset_something:						     ; CODE XREF: RAM:B071p
-RAM:B088 06 28			     ld	     b,	40				     ; # bytes to reset
-RAM:B08A 11 20 00		     ld	     de, 20h ; ' '                           ; every $20 bytes
-RAM:B08D 21 0F 5C		     ld	     hl, unk_5C0F
+RAM:B088	     reset_object_???_flag:					     ; CODE XREF: RAM:B071p
+RAM:B088 06 28			     ld	     b,	40				     ; max #objects in draw table
+RAM:B08A 11 20 00		     ld	     de, 32				     ; object size
+RAM:B08D 21 0F 5C		     ld	     hl, unk_5C0F			     ; offset to flags
 RAM:B090
-RAM:B090	     loc_B090:							     ; CODE XREF: reset_something+Bj
-RAM:B090 CB AE			     res     5,	(hl)				     ; reset bit
-RAM:B092 19			     add     hl, de				     ; next byte to reset
+RAM:B090	     loc_B090:							     ; CODE XREF: reset_object_???_flag+Bj
+RAM:B090 CB AE			     res     5,	(hl)				     ; reset flag=???
+RAM:B092 19			     add     hl, de				     ; next entry
 RAM:B093 10 FB			     djnz    loc_B090				     ; loop until done
 RAM:B095 C9			     ret
-RAM:B095	     ; End of function reset_something
+RAM:B095	     ; End of function reset_object_???_flag
 RAM:B095
 RAM:B095	     ; ---------------------------------------------------------------------------
 RAM:B096 CB C2 CB C2+off_B096:	     dw	do_nothing, do_nothing,	loc_C73C, loc_C722, loc_C73C
@@ -3885,9 +3885,9 @@ RAM:B8A9
 RAM:B8A9
 RAM:B8A9	     sub_B8A9:							     ; CODE XREF: RAM:B018p
 RAM:B8A9 3A 10 5C		     ld	     a,	(unk_5C10)
-RAM:B8AC FE 88			     cp	     88h ; 'ˆ'
+RAM:B8AC FE 88			     cp	     136
 RAM:B8AE C0			     ret     nz
-RAM:B8AF 11 68 5C		     ld	     de, 5C68h
+RAM:B8AF 11 68 5C		     ld	     de, byte_5C68
 RAM:B8B2 1A			     ld	     a,	(de)
 RAM:B8B3 A7			     and     a
 RAM:B8B4 C0			     ret     nz
@@ -5876,7 +5876,7 @@ RAM:C525
 RAM:C525	     ; =============== S U B R O U T I N E =======================================
 RAM:C525
 RAM:C525
-RAM:C525	     find_objs_in_location:					     ; CODE XREF: update_objects+Fp
+RAM:C525	     find_objs_in_location:					     ; CODE XREF: build_screen_objects+Fp
 RAM:C525 11 48 5C		     ld	     de, objs_here
 RAM:C528 D9			     exx
 RAM:C529 FD 21 F2 6F		     ld	     iy, object_tbl
@@ -5959,10 +5959,10 @@ RAM:C591
 RAM:C591	     ; =============== S U B R O U T I N E =======================================
 RAM:C591
 RAM:C591
-RAM:C591	     update_objects_here:					     ; CODE XREF: update_objects+6p
+RAM:C591	     find_objects_here:						     ; CODE XREF: build_screen_objects+6p
 RAM:C591 FD 21 48 5C		     ld	     iy, objs_here
 RAM:C595
-RAM:C595	     loc_C595:							     ; CODE XREF: update_objects_here+34j
+RAM:C595	     loc_C595:							     ; CODE XREF: find_objects_here+34j
 RAM:C595 FD 7E 00		     ld	     a,	(iy+0)				     ; get graphic no.
 RAM:C598 A7			     and     a					     ; null?
 RAM:C599 28 1C			     jr	     z,	loc_C5B7			     ; yes, skip
@@ -5983,7 +5983,7 @@ RAM:C5B1 ED B0			     ldir					     ; copy x, y, z
 RAM:C5B3 FD 7E 08		     ld	     a,	(iy+8)				     ; screen
 RAM:C5B6 12			     ld	     (de), a				     ; store as	current
 RAM:C5B7
-RAM:C5B7	     loc_C5B7:							     ; CODE XREF: update_objects_here+8j
+RAM:C5B7	     loc_C5B7:							     ; CODE XREF: find_objects_here+8j
 RAM:C5B7 01 20 00		     ld	     bc, 32
 RAM:C5BA FD 09			     add     iy, bc				     ; next entry in 'here' table
 RAM:C5BC FD E5			     push    iy
@@ -5993,7 +5993,7 @@ RAM:C5C2 A7			     and     a
 RAM:C5C3 ED 42			     sbc     hl, bc				     ; past end	of table?
 RAM:C5C5 38 CE			     jr	     c,	loc_C595			     ; no, loop
 RAM:C5C7 C9			     ret
-RAM:C5C7	     ; End of function update_objects_here
+RAM:C5C7	     ; End of function find_objects_here
 RAM:C5C7
 RAM:C5C8	     ; ---------------------------------------------------------------------------
 RAM:C5C8
@@ -6941,7 +6941,7 @@ RAM:CAE5 32 91 D1		     ld	     (byte_D191), a
 RAM:CAE8 3E 78			     ld	     a,	78h ; 'x'
 RAM:CAEA 32 61 D1		     ld	     (byte_D161), a
 RAM:CAED 32 81 D1		     ld	     (byte_D181), a
-RAM:CAF0 C3 BA AF		     jp	     loc_AFBA
+RAM:CAF0 C3 BA AF		     jp	     game_loop
 RAM:CAF3	     ; ---------------------------------------------------------------------------
 RAM:CAF3
 RAM:CAF3	     loc_CAF3:							     ; DATA XREF: RAM:CA94o
@@ -8043,7 +8043,7 @@ RAM:D12A
 RAM:D12A	     ; =============== S U B R O U T I N E =======================================
 RAM:D12A
 RAM:D12A
-RAM:D12A	     lose_life:							     ; CODE XREF: lose_life:loc_AFB7p
+RAM:D12A	     lose_life:							     ; CODE XREF: lose_life:player_diesp
 RAM:D12A
 RAM:D12A	     ; FUNCTION	CHUNK AT RAM:AF7F SIZE 00000065	BYTES
 RAM:D12A	     ; FUNCTION	CHUNK AT RAM:BA22 SIZE 00000079	BYTES
@@ -8079,6 +8079,7 @@ RAM:D160 C9			     ret
 RAM:D160	     ; End of function lose_life
 RAM:D160
 RAM:D160	     ; ---------------------------------------------------------------------------
+RAM:D161	     ; scratchpad? for player sprite objects?
 RAM:D161 00	     byte_D161:	     db	0					     ; DATA XREF: RAM:CADCr
 RAM:D161									     ; RAM:CAEAw ...
 RAM:D162 00			     db	   0
@@ -8183,13 +8184,13 @@ RAM:D1E6
 RAM:D1E6	     ; =============== S U B R O U T I N E =======================================
 RAM:D1E6
 RAM:D1E6
-RAM:D1E6	     update_objects:						     ; CODE XREF: lose_life:loc_AFBAp
+RAM:D1E6	     build_screen_objects:					     ; CODE XREF: lose_life:game_loopp
 RAM:D1E6 3A B2 5B		     ld	     a,	(unk_5BB2)
 RAM:D1E9 A7			     and     a
 RAM:D1EA 28 03			     jr	     z,	loc_D1EF
-RAM:D1EC CD 91 C5		     call    update_objects_here
+RAM:D1EC CD 91 C5		     call    find_objects_here
 RAM:D1EF
-RAM:D1EF	     loc_D1EF:							     ; CODE XREF: update_objects+4j
+RAM:D1EF	     loc_D1EF:							     ; CODE XREF: build_screen_objects+4j
 RAM:D1EF CD 67 D5		     call    clr_screen_buffer
 RAM:D1F2 CD C6 D3		     call    retrieve_screen
 RAM:D1F5 CD 25 C5		     call    find_objs_in_location
@@ -8206,11 +8207,11 @@ RAM:D210 E6 01			     and     1
 RAM:D212 32 C0 5B		     ld	     (byte_5BC0), a
 RAM:D215 CD 19 D2		     call    loc_D219
 RAM:D218 C9			     ret
-RAM:D218	     ; End of function update_objects
+RAM:D218	     ; End of function build_screen_objects
 RAM:D218
 RAM:D219	     ; ---------------------------------------------------------------------------
 RAM:D219
-RAM:D219	     loc_D219:							     ; CODE XREF: update_objects+2Fp
+RAM:D219	     loc_D219:							     ; CODE XREF: build_screen_objects+2Fp
 RAM:D219 3A 10 5C		     ld	     a,	(unk_5C10)
 RAM:D21C 4F			     ld	     c,	a
 RAM:D21D 0F			     rrca
@@ -8229,7 +8230,7 @@ RAM:D22D 32 35 D2		     ld	     (byte_D235), a			     ; self-modifying code
 RAM:D230 01 E8 5B		     ld	     bc, unk_5BE8
 RAM:D233 09			     add     hl, bc
 RAM:D233	     ; ---------------------------------------------------------------------------
-RAM:D234 CB			     db	0CBh ; Ë
+RAM:D234 CB			     db	0CBh ; Ë				     ; SET n,(HL)
 RAM:D235 C6	     byte_D235:	     db	0C6h					     ; DATA XREF: RAM:D22Dw
 RAM:D236	     ; ---------------------------------------------------------------------------
 RAM:D236 C9			     ret
@@ -8373,7 +8374,7 @@ RAM:D320
 RAM:D320	     ; =============== S U B R O U T I N E =======================================
 RAM:D320
 RAM:D320
-RAM:D320	     sub_D320:							     ; CODE XREF: update_objects+12p
+RAM:D320	     sub_D320:							     ; CODE XREF: build_screen_objects+12p
 RAM:D320 3A AB 5B		     ld	     a,	(room_size_X)
 RAM:D323 D6 02			     sub     2
 RAM:D325 6F			     ld	     l,	a
@@ -8499,7 +8500,7 @@ RAM:D3C6
 RAM:D3C6	     ; =============== S U B R O U T I N E =======================================
 RAM:D3C6
 RAM:D3C6
-RAM:D3C6	     retrieve_screen:						     ; CODE XREF: update_objects+Cp
+RAM:D3C6	     retrieve_screen:						     ; CODE XREF: build_screen_objects+Cp
 RAM:D3C6 11 88 5C		     ld	     de, byte_5C88
 RAM:D3C9 01 D1 6B		     ld	     bc, block_type_tbl			     ; end of location table
 RAM:D3CC 21 51 62		     ld	     hl, location_tbl
