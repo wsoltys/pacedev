@@ -47,7 +47,8 @@ package pace_pkg is
     PACE_TARGET_S5L_A0_EP4C,
     PACE_TARGET_S5L_A0_EP3SL,
     PACE_TARGET_NAVICO_ROCKY,
-    PACE_TARGET_NGPACE
+    PACE_TARGET_NGPACE,
+    PACE_TARGET_S6M_A0
   );
 
 	type PACEFpgaVendor_t is
