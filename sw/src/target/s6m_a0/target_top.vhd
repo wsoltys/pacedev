@@ -253,137 +253,6 @@ architecture SYN of target_top is
   signal pll_locked     : std_logic := '0';
 
   -- clocks
-
---component  vid_pll0_0002
---
---port(
---    refclk   : in    std_logic                     := '0';  
---    rst      : in    std_logic                     := '0';  
---	 outclk_0 : out   std_logic;      
---    outclk_1 : out   std_logic;     
---	 outclk_2 : out   std_logic; 
---    locked   : out   std_logic
---);
---end component;
---
---component GPIO_PLL_clkctrl is
---	port (
---		inclk  : in  std_logic := 'X'; -- inclk
---		outclk : out std_logic         -- outclk
---	);
---end component GPIO_PLL_clkctrl;
---
---component usb_pll_0002 is
---	port (
---		refclk   : in  std_logic := '0'; -- clk
---		rst      : in  std_logic := '0'; -- reset
---		outclk_0 : out std_logic;        -- clk
---		locked   : out std_logic         -- export
---	);
---end component usb_pll_0002;
-
---signal vid_clk  : std_logic := '0';
---signal clock_NIOS : std_logic := '0';
---signal vdo_red_r : std_logic_vector(7 downto 0) := (others => '0');
---signal vdo_green_r  : std_logic_vector(7 downto 0) := (others => '0');
---signal vdo_blue_r : std_logic_vector(7 downto 0) := (others => '0');
---signal vao_red_r : std_logic_vector(7 downto 0) := (others => '0');
---signal vao_green_r  : std_logic_vector(7 downto 0) := (others => '0');
---signal vao_blue_r : std_logic_vector(7 downto 0) := (others => '0');
---signal refclk_usb : std_logic := '0';
---constant ONBOARD_CLOCK_SPEED  : integer :=  24000000;
---constant NIOS_CLOCK_SPEED                 : integer := 72500000;
---constant UMLEN								: integer := 3;	-- Unmeta chain length
---type um_colour_t is array(UMLEN downto 0) of std_logic_vector(7 downto 0);
-----
-----	subtype cycle_t is std_logic_vector(15 downto 0);
-----	type cycle_arr_t is array(UMLEN downto 1) of cycle_t;
-----
-----  signal pll_locked           : std_logic := '0';
-----  signal       pll_0_locked_export : std_logic := '0';
-----  signal init_n               : std_logic := '0';
-----  signal reset                : std_logic := '1';
---    signal reset_n              : std_logic := '0';
---	 -- video source select PIO output
---	 signal vid_select		      : std_logic_vector(7 downto 0);
---	 alias vid1_select		      : std_logic_vector(1 downto 0) is vid_select(1 downto 0);
-----  signal ip_reset_n           : std_logic := '0';
-----  signal vid_reset_r          : std_logic := '0';
-----  
-----  signal clk_NIOS             : std_logic := '0';
-----  signal clk_ip	              : std_logic := '0';
-----  signal system_interrupts		: std_logic_vector(15 downto 0) := (others => '0');
-----  signal base_cycles				  : cycle_t;
---  signal pio_outvid_o  : std_logic_vector(7 downto 0);
---		alias vpio_dvo_hsync_xor		: std_logic is pio_outvid_o(1);
---		alias vpio_dvo_vsync_xor		: std_logic is pio_outvid_o(3);
---	 signal dvi_eep_i2c_scl_i : std_logic := '0';
---	 signal dvi_eep_i2c_scl_o : std_logic := '0';
---	 signal dvi_eep_i2c_scl_oe_n : std_logic := '0';
---	 signal dvi_eep_i2c_sda_i : std_logic := '0';
---	 signal dvi_eep_i2c_sda_o : std_logic := '0';
---	 signal dvi_eep_i2c_sda_oe_n : std_logic := '0';
---	 signal vai_i2c_scl_i : std_logic := '0';
---	 signal vai_i2c_scl_o : std_logic := '0';
---	 signal vai_i2c_scl_oe_n : std_logic := '0';
---	 signal vai_i2c_sda_i : std_logic := '0';
---	 signal vai_i2c_sda_o : std_logic := '0';
---	 signal vai_i2c_sda_oe_n : std_logic := '0';
---	 -- Video out
---  signal vdo_red_s			    : std_logic_vector(7 downto 0);
---  signal vdo_green_s		    : std_logic_vector(7 downto 0);
---  signal vdo_blue_s			    : std_logic_vector(7 downto 0);
---  signal vdo_hsync_s        : std_logic := '0';
---  signal vdo_vsync_s        : std_logic := '0';
---  signal vdo_de_s				    : std_logic;
---
---  signal vdo_scl_i : std_logic := '0';
---  signal vdo_scl_o : std_logic := '0';
---  signal vdo_scl_oe_n : std_logic := '0';
---  signal vdo_sda_i : std_logic := '0';
---  signal vdo_sda_o : std_logic := '0';
---  signal vdo_sda_oe_n : std_logic := '0';
---  signal vdo_clk  : std_logic := '0';
---	 -- DDC signals
---  signal ddc_master_chipselect              : std_logic;
---  signal ddc_master_address                 : std_logic_vector(9 downto 0);
---  signal ddc_master_readdata                : std_logic_vector(7 downto 0);
---  signal ddc_master_read                    : std_logic;
---  signal ddc_master_waitrequest             : std_logic;
---  signal ddc_slave_chipselect               : std_logic;
---  signal ddc_slave_address                  : std_logic_vector(9 downto 0);
---  signal ddc_slave_writedata                : std_logic_vector(7 downto 0);
---  signal ddc_slave_write                    : std_logic;
---  signal ddc_slave_waitrequest              : std_logic;
---  	 -- DDC signals
---  signal ddc_master_write                    : std_logic;
---  signal sdvo_hdmi_edid_slave_chipselect : std_logic;
---  signal sdvo_hdmi_edid_slave_address                  : std_logic_vector(9 downto 0);
---  signal sdvo_hdmi_edid_slave_writedata                : std_logic_vector(7 downto 0);
---  signal sdvo_hdmi_edid_slave_write                    : std_logic;
---  signal sdvo_hdmi_edid_slave_waitrequest              : std_logic;
---  --PIO(s)
---  signal dvi_eep_pio_in                     : std_logic_vector(7 downto 0);
---  signal dvi_eep_pio_out                    : std_logic_vector(7 downto 0); 
---  signal vi_0_pio_in :  std_logic_vector(7 downto 0);
---  signal vi_0_pio_out :  std_logic_vector(7 downto 0);
---  signal vi_1_pio_in :  std_logic_vector(7 downto 0);
---  signal vi_1_pio_out :  std_logic_vector(7 downto 0);
---  signal vo_pio_in :  std_logic_vector(7 downto 0);
---  signal vo_pio_out :  std_logic_vector(7 downto 0); 
---   signal vid2_data			    : std_logic_vector(23 downto 0);
---	signal vid2_hsync			    : std_logic;
---	signal vid2_vsync			    : std_logic;
---	signal vid2_de				    : std_logic;
---	signal vid2_locked		    : std_logic;
---	signal vid2_clk				    : std_logic;
---	signal vid1_data			    : std_logic_vector(23 downto 0);
---	signal vid1_hsync			    : std_logic;
---	signal vid1_vsync			    : std_logic;
---	signal vid1_de				    : std_logic;
---	signal vid1_locked		    : std_logic;
---	signal vid1_clk				    : std_logic;
-
   signal clkrst_i       : from_CLKRST_t;
   signal buttons_i    	: from_BUTTONS_t;
   signal switches_i   	: from_SWITCHES_t;
@@ -425,10 +294,13 @@ begin
 
   clkrst_i.arst <= init; -- or not vid_reset_n;
 	clkrst_i.arst_n <= not clkrst_i.arst;
+  -- for the EP4C-derived logic
+  reset <= init;
+  reset_n <= not reset;
 
   BLK_CLOCKING : block
   
-  component pll is
+  component pll_40_65 is
     port (
       refclk   : in  std_logic := '0'; --  refclk.clk
       rst      : in  std_logic := '0'; --   reset.reset
@@ -437,7 +309,7 @@ begin
       outclk_2 : out std_logic;        -- outclk2.clk
       locked   : out std_logic         --  locked.export
     );
-  end component pll;
+  end component pll_40_65;
 
   begin
 
@@ -445,7 +317,7 @@ begin
     
     GEN_PLL : if PACE_HAS_PLL generate
     
-      pll_inst : pll
+      pll_inst : pll_40_65
 --        generic map
 --        (
 --          -- INCLK0
@@ -462,21 +334,20 @@ begin
         port map
         (
           refclk      => clk_24M,
+          rst         => reset,
           outclk_0    => clkrst_i.clk(0),
           outclk_1    => clkrst_i.clk(1),
           outclk_2    => vdo_clk_x2,
           locked      => pll_locked
         );
     
-    end generate GEN_PLL;
-	
-    GEN_NO_PLL : if not PACE_HAS_PLL generate
+    else generate
 
       -- feed input clocks into PACE core
       clkrst_i.clk(0) <= clk_24M;
       clkrst_i.clk(1) <= clk_24M;
         
-    end generate GEN_NO_PLL;
+    end generate GEN_PLL;
 
   end block BLK_CLOCKING;
 
