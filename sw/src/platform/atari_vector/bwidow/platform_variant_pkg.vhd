@@ -21,14 +21,19 @@ package platform_variant_pkg is
   constant PLATFORM_VARIANT_SRC_DIR     : string := PLATFORM_SRC_DIR & PLATFORM_VARIANT & "/";
   
   type rom_a is array (natural range <>) of string;
-  constant BWIDOW_ROM                   : rom_a(0 to 4) := 
+  constant BWIDOW_ROM                   : rom_a(0 to 9) := 
                                           (
-                                            0 => "galmidw.u", 
-                                            1 => "galmidw.v",
-                                            2 => "galmidw.w",
-                                            3 => "galmidw.y",
-                                            4 => "7l"
+                                            0 => "pgma", 
+                                            1 => "pgmb",
+                                            2 => "pgmc",
+                                            3 => "pgmd",
+                                            4 => "pgme",
+                                            5 => "pgmf",
+                                            6 => "veca",
+                                            7 => "vecb",
+                                            8 => "vecc",
+                                            9 => "vecd"
                                           );
-  constant BWIDOW_ROM_WIDTHAD           : natural := 11;
+  constant BWIDOW_ROM_WIDTHAD           : natural := 12;
 
 end package platform_variant_pkg;
