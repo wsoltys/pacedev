@@ -660,7 +660,7 @@ begin
 		generic map
 		(
 			init_file			=> CHAR_ROM_FILE,
-			numwords_a		=> 2048,
+			--numwords_a		=> 2048,
 			widthad_a			=> 11
 		)                               
     port map

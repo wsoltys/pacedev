@@ -782,7 +782,7 @@ begin
 		generic map
 		(
 			init_file		=> COCO1_ROM_DIR & COCO1_BASIC_ROM,
-			numwords_a	=> 8192,
+			--numwords_a	=> 8192,
 			widthad_a		=> 13
 		)
   	port map
@@ -798,7 +798,7 @@ begin
 			generic map
 			(
 				init_file		=> COCO1_ROM_DIR & COCO1_EXTENDED_BASIC_ROM,
-				numwords_a	=> 8192,
+				--numwords_a	=> 8192,
 				widthad_a		=> 13
 			)
 	  	port map
@@ -816,7 +816,7 @@ begin
 			generic map
 			(
 				init_file		=> COCO1_ROM_DIR & COCO1_CART_NAME,
-				numwords_a	=> 2**COCO1_CART_WIDTHAD,
+				--numwords_a	=> 2**COCO1_CART_WIDTHAD,
 				widthad_a		=> COCO1_CART_WIDTHAD
 			)
 	  	port map
