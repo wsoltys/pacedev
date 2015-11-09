@@ -2228,6 +2228,7 @@ set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to vid_reset_n
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to vid_reset_core_n
 set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
 set_global_assignment -name VHDL_SHOW_LMF_MAPPING_MESSAGES OFF
+set_global_assignment -name SEARCH_PATH unisim
 set_global_assignment -name SDC_FILE "invaders-ep3sl.sdc"
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg_body.vhd
@@ -2271,8 +2272,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/platform/atari_vector/b
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/atari_vector/bwidow/unzip/bwidow/pokey.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/atari_vector/bwidow/unzip/bwidow/ram2k.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/atari_vector/bwidow/unzip/bwidow/vecrom.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/platform/atari_vector/platform.vhd
-set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/atari_vector/pace.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/s5a_r2c0/spi_pll.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/io/spi/uni_spi_tx.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/io/spi/uni_spi_rx.vhd
@@ -2282,5 +2282,4 @@ set_global_assignment -name QIP_FILE vip_1024x768.qip
 set_global_assignment -name QIP_FILE vip_sopc.qip
 set_global_assignment -name QIP_FILE ep4c_sopc_system.qip
 set_global_assignment -name QIP_FILE spi_pll.qip
-set_global_assignment -name SEARCH_PATH unisim
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
