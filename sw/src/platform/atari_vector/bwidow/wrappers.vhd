@@ -233,7 +233,7 @@ begin
   spram_inst : entity work.spram
 		generic map
 		(
-			numwords_a	=> 2048,
+			--numwords_a	=> 2048,
 			widthad_a		=> 11
 		)
     port map 

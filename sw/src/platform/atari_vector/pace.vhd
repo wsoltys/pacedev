@@ -229,7 +229,7 @@ begin
 	vram_inst : entity work.dpram
 		generic map
 		(
-			numwords_a				=> 32768,
+			--numwords_a				=> 32768,
 			widthad_a					=> 15
   -- pragma translate_off
       ,init_file         => "null32k.hex"

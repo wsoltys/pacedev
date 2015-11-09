@@ -300,7 +300,7 @@ begin
 
   BLK_CLOCKING : block
   
-  component pll_40_65 is
+  component pll is
     port (
       refclk   : in  std_logic := '0'; --  refclk.clk
       rst      : in  std_logic := '0'; --   reset.reset
@@ -309,7 +309,7 @@ begin
       outclk_2 : out std_logic;        -- outclk2.clk
       locked   : out std_logic         --  locked.export
     );
-  end component pll_40_65;
+  end component pll;
 
   begin
 
@@ -317,7 +317,7 @@ begin
     
     GEN_PLL : if PACE_HAS_PLL generate
     
-      pll_inst : pll_40_65
+      pll_inst : pll
 --        generic map
 --        (
 --          -- INCLK0
