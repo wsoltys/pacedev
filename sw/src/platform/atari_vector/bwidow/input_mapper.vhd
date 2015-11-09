@@ -68,31 +68,46 @@ begin
 					jamma_v(1).d(5) := jamma.p(1).start;
 					jamma_v(1).d(6) := jamma.p(2).start;
 
+  --psxbuttons(15 downto 0): 
+  --15:SQUARE 14:CROSS 13:CIRCLE 12:TRIANGLE 11:R1 10:L1 9:R2 8:L2 
+  --7:LEFT 6:DOWN 5:RIGHT 4:UP 3:START 2:X 1:X 0:SELECT
+  --buttons(12 downto 0): COINAUX COINL COINR START2 START1 FD FU FL FR MU MD ML MR
+
           -- handle PS2 inputs
           if (key_down or key_up) = '1' then
           	case data(7 downto 0) is
             	-- IN0
-              when SCANCODE_LCTRL =>
-            		keybd_v(0).d(0) := key_up;
-              when SCANCODE_RIGHT =>
-                keybd_v(0).d(1) := key_up;
+              when SCANCODE_3 =>
+            		keybd_v(1).d(12-8) := key_up;
               when SCANCODE_5 =>
+                keybd_v(1).d(11-8) := key_up;
+              when SCANCODE_6 =>
+                keybd_v(1).d(10-8) := key_up;
+              when SCANCODE_2 =>
+                keybd_v(1).d(9-8) := key_up;
+              when SCANCODE_1 =>
+                keybd_v(1).d(8-8) := key_up;
+              when SCANCODE_Z =>
+                keybd_v(0).d(7) := key_up;
+              when SCANCODE_W =>
+                keybd_v(0).d(6) := key_up;
+              when SCANCODE_A =>
+                keybd_v(0).d(5) := key_up;
+              when SCANCODE_S =>
+                keybd_v(0).d(4) := key_up;
+              when SCANCODE_UP =>
+                keybd_v(0).d(3) := key_up;
+              when SCANCODE_DOWN =>
                 keybd_v(0).d(2) := key_up;
               when SCANCODE_LEFT =>
-                keybd_v(0).d(3) := key_up;
-              when SCANCODE_UP =>
-                keybd_v(0).d(4) := key_up;
-              when SCANCODE_1 =>
-                keybd_v(0).d(5) := key_up;
-              when SCANCODE_LALT =>
-                keybd_v(0).d(6) := key_up;
-              --when SCANCODE_I =>
-              --  keybd_v(0)(7) := key_up;
+                keybd_v(0).d(1) := key_up;
+              when SCANCODE_RIGHT =>
+                keybd_v(0).d(0) := key_up;
 							-- special keys
 							when SCANCODE_F3 =>
-								keybd_v(1).d(0) := key_down;
+								keybd_v(2).d(0) := key_down;
 							when SCANCODE_F4 =>
-								keybd_v(1).d(1) := key_down;
+								keybd_v(2).d(1) := key_down;
               when others =>
 								null;
             end case;

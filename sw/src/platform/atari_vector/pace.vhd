@@ -95,9 +95,9 @@ architecture SYN of PACE is
 	signal vram_q								: std_logic_vector(7 downto 0);
 	signal pixel_data						: std_logic_vector(7 downto 0);
 
-	signal mapped_inputs				: from_MAPPED_INPUTS_t(0 to 1);
-	alias game_reset						: std_logic is mapped_inputs(1).d(0);				
-	alias toggle_erase					: std_logic is mapped_inputs(1).d(1);
+	signal mapped_inputs				: from_MAPPED_INPUTS_t(0 to 2);
+	alias game_reset						: std_logic is mapped_inputs(2).d(0);				
+	alias toggle_erase					: std_logic is mapped_inputs(2).d(1);
 	signal cpu_reset						: std_logic;
 	signal erase								: std_logic;
 
@@ -206,10 +206,6 @@ begin
 		end if;
 	end process;
 
-	-- construct the pixel address and data value
-	--vram_addr(5 downto 0) <= x_vector(9 downto 4);
-	--vram_addr(14 downto 6) <= not y_vector(9 downto 1);
-		
   atari_vector_inst : entity work.bwidow 
     port map 
     (
@@ -227,8 +223,8 @@ begin
   --psxbuttons(15 downto 0): 
   --15:SQUARE 14:CROSS 13:CIRCLE 12:TRIANGLE 11:R1 10:L1 9:R2 8:L2 
   --7:LEFT 6:DOWN 5:RIGHT 4:UP 3:START 2:X 1:X 0:SELECT
-  --buttons(14 downto 0): COINAUX COINL COINR START2 START1 FD FU FL FR MU MD ML MR
-  buttons <= (others => '0');
+  --buttons(12 downto 0): COINAUX COINL COINR START2 START1 FD FU FL FR MU MD ML MR
+  buttons <= mapped_inputs(1).d(6 downto 0) & mapped_inputs(0).d;
 
 	vram_inst : entity work.dpram
 		generic map
