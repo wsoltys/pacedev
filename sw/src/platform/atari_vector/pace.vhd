@@ -86,14 +86,14 @@ architecture SYN of PACE is
   signal beam_on              : std_logic;
   signal beam_ena             : std_logic;
 	signal vid_addr							: std_logic_vector(15 downto 0);
-	signal vid_q								: std_logic_vector(15 downto 0);
+	signal vid_q								: std_logic_vector(23 downto 0);
 	
 	-- video ram signals
 	signal vram_addr						: std_logic_vector(14 downto 0);
-	signal vram_data						: std_logic_vector(7 downto 0);
+	signal vram_data						: std_logic_vector(23 downto 0);
 	signal vram_wren						: std_logic;
-	signal vram_q								: std_logic_vector(7 downto 0);
-	signal pixel_data						: std_logic_vector(7 downto 0);
+	signal vram_q								: std_logic_vector(23 downto 0);
+	signal pixel_data						: std_logic_vector(23 downto 0);
 
 	signal mapped_inputs				: from_MAPPED_INPUTS_t(0 to 2);
 	alias game_reset						: std_logic is mapped_inputs(2).d(0);				
@@ -135,7 +135,8 @@ begin
 	process (clk_24M, reset_n)
 		variable state 				: integer range 0 to 4;
     variable beam_ena_r 	: std_logic := '0';
-		variable count				: std_logic_vector(15 downto 0);
+		variable count				: std_logic_vector(18 downto 0);
+    variable pel          : std_logic_vector(1 downto 0);
 	begin
 		if reset_n = '0' then
 			state := 0;
@@ -150,18 +151,19 @@ begin
 			
 				when 0 =>
 					-- prepare to draw a pixel if it's on
-					if beam_on = '1' and beam_ena_r = '0' and beam_ena = '1' then
-						vram_addr(5 downto 0) <= xval(9 downto 4);
-						vram_addr(14 downto 6) <= not yval(9 downto 1);
-						case xval(3 downto 1) is
-							when "000" =>		pixel_data <= "00000001";
-							when "001" =>		pixel_data <= "00000010";
-							when "010" =>		pixel_data <= "00000100";
-							when "011" =>		pixel_data <= "00001000";
-							when "100" =>		pixel_data <= "00010000";
-							when "101" =>		pixel_data <= "00100000";
-							when "110" =>		pixel_data <= "01000000";
-							when others =>	pixel_data <= "10000000";
+					--if beam_on = '1' and beam_ena_r = '0' and beam_ena = '1' then
+					if beam_on = '1' and beam_ena = '1' then
+						vram_addr(14 downto 6) <= 256 + not xval(9 downto 1);
+						vram_addr(BWIDOW_H_BITS-4 downto 0) <= 32 + yval(9 downto 4);
+						case yval(3 downto 1) is
+							when "000" =>		pixel_data <= "000000000000000000000" & rgb;
+							when "001" =>		pixel_data <= "000000000000000000" & rgb & "000";
+							when "010" =>		pixel_data <= "000000000000000" & rgb & "000000";
+							when "011" =>		pixel_data <= "000000000000" & rgb & "000000000";
+							when "100" =>		pixel_data <= "000000000" & rgb & "000000000000";
+							when "101" =>		pixel_data <= "000000" & rgb & "000000000000000";
+							when "110" =>		pixel_data <= "000" & rgb & "000000000000000000";
+							when others =>	pixel_data <=      rgb & "000000000000000000000";
 						end case;
 						-- only draw if beam intensity is non-zero
 						if zval(7 downto 4) /= "0000" then
@@ -230,7 +232,8 @@ begin
 		generic map
 		(
 			--numwords_a				=> 32768,
-			widthad_a					=> 15
+			widthad_a					=> 15,
+      width_a           => 24
   -- pragma translate_off
       ,init_file         => "null32k.hex"
   -- pragma translate_on
@@ -242,7 +245,7 @@ begin
 			address_a					=> vid_addr(14 downto 0),
 			wren_a						=> '0',
 			data_a						=> (others => 'X'),
-			q_a								=> vid_q(7 downto 0),
+			q_a								=> vid_q,
 			
 			-- vector-generator interface
 			clock_b						=> clk_24M,

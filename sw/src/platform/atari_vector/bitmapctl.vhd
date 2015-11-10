@@ -32,7 +32,7 @@ begin
   -- generate pixel
   process (clk)
 
-		variable pel : std_logic;
+		variable pel : std_logic_vector(2 downto 0);
 		
   begin
   	if rising_edge(clk) and clk_ena = '1' then
@@ -43,30 +43,30 @@ begin
 				-- - read bitmap data
 				ctl_o.a(5 downto 0) <= x(8 downto 3);
 
-				-- each byte contains information for 8 pixels
+				-- each 24-bit word contains information for 8 pixels, 3bpp
 				case x(2 downto 0) is
 	        when "000" =>
-	          pel := ctl_i.d(6);
+	          pel := ctl_i.d(20 downto 18);
 	        when "001" =>
-	          pel := ctl_i.d(7);
+	          pel := ctl_i.d(23 downto 21);
 	        when "010" =>
-	          pel := ctl_i.d(0);
+	          pel := ctl_i.d(2 downto 0);
 	        when "011" =>
-	          pel := ctl_i.d(1);
+	          pel := ctl_i.d(5 downto 3);
 	        when "100" =>
-	          pel := ctl_i.d(2);
+	          pel := ctl_i.d(8 downto 6);
 	        when "101" =>
-	          pel := ctl_i.d(3);
+	          pel := ctl_i.d(11 downto 9);
 	        when "110" =>
-	          pel := ctl_i.d(4);
+	          pel := ctl_i.d(14 downto 12);
 	        when others =>
-	          pel := ctl_i.d(5);
+	          pel := ctl_i.d(17 downto 15);
 				end case;
 
 				-- slight blue tinge
-				rgb.r <= (rgb.r'left-2 => '0', others => pel);
-				rgb.g <= (rgb.g'left-2 => '0', others => pel);
-				rgb.b <= (others => pel);
+				rgb.r <= (others => pel(2));
+				rgb.g <= (others => pel(1));
+				rgb.b <= (others => pel(0));
 				
 			end if; -- hblank = '0'
 				

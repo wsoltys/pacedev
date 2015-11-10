@@ -81,7 +81,7 @@ package video_controller_pkg is
     y         : std_logic_vector(10 downto 0);
   end record;
   
-  subtype BITMAP_D_t is std_logic_vector(15 downto 0);
+  subtype BITMAP_D_t is std_logic_vector(23 downto 0);
   subtype BITMAP_A_t is std_logic_vector(15 downto 0);
   
   type to_BITMAP_CTL_t is record
