@@ -872,43 +872,39 @@ RAM:6FF2	     ; +5 current X
 RAM:6FF2	     ; +6 current Y
 RAM:6FF2	     ; +7 current Z
 RAM:6FF2	     ; +8 current screen
-RAM:6FF2 00 88 80 A4+object_tbl:     db	0, 88h,	80h, 0A4h, 6Dh,	0, 0, 0		     ; DATA XREF: init_objectso
-RAM:6FF2 6D 00 00 00								     ; find_objs_in_location+4o
-RAM:6FFA 00 00 80 80+		     db	0, 0, 80h, 80h,	8Ch, 27h, 0, 0
-RAM:7002 00 00 00 88+		     db	0, 0, 0, 88h, 78h, 0B0h, 0D0h, 0
-RAM:700A 00 00 00 00+		     db	0, 0, 0, 0, 78h, 88h, 80h, 0Ah
-RAM:7012 00 00 00 00+		     db	0, 0, 0, 0, 0, 78h, 88h, 80h
-RAM:701A BA 00 00 00+		     db	0BAh, 0, 0, 0, 0, 0, 88h, 78h
-RAM:7022 B0 42 00 00+		     db	0B0h, 42h, 0, 0, 0, 0, 0, 88h
-RAM:702A B8 BC 8D 00+		     db	0B8h, 0BCh, 8Dh, 0, 0, 0, 0, 0
-RAM:7032 A8 A8 80 FF+		     db	0A8h, 0A8h, 80h, 0FFh, 0, 0, 0,	0
-RAM:703A 00 80 80 80+		     db	0, 80h,	80h, 80h, 87h, 0, 0, 0
-RAM:7042 00 00 78 B8+		     db	0, 0, 78h, 0B8h, 80h, 0F3h, 0, 0
-RAM:704A 00 00 00 A8+		     db	0, 0, 0, 0A8h, 68h, 0B0h, 0A8h,	0
-RAM:7052 00 00 00 00+		     db	0, 0, 0, 0, 0B8h, 48h, 0B0h, 0D2h
-RAM:705A 00 00 00 00+		     db	0, 0, 0, 0, 0, 48h, 48h, 80h
-RAM:7062 00 00 00 00+		     db	0, 0, 0, 0, 0, 0, 88h, 0B8h
-RAM:706A 80 22 00 00+		     db	80h, 22h, 0, 0,	0, 0, 0, 0B8h
-RAM:7072 B8 B0 7A 00+		     db	0B8h, 0B0h, 7Ah, 0, 0, 0, 0, 0
-RAM:707A B8 B8 80 F9+		     db	0B8h, 0B8h, 80h, 0F9h, 0, 0, 0,	0
-RAM:7082 00 88 98 B0+		     db	0, 88h,	98h, 0B0h, 0D6h, 0, 0, 0
-RAM:708A 00 00 78 88+		     db	0, 0, 78h, 88h,	0B0h, 0E8h, 0, 0
-RAM:7092 00 00 00 78+		     db	0, 0, 0, 78h, 78h, 0B0h, 0F6h, 0
-RAM:709A 00 00 00 00+		     db	0, 0, 0, 0, 88h, 78h, 8Ch, 0Fh
-RAM:70A2 00 00 00 00+		     db	0, 0, 0, 0, 0, 0B8h, 0B8h, 80h
-RAM:70AA 6F 00 00 00+		     db	6Fh, 0,	0, 0, 0, 0, 48h, 0B8h
-RAM:70B2 A4 FD 00 00+		     db	0A4h, 0FDh, 0, 0, 0, 0,	0, 78h
-RAM:70BA 78 B0 08 00+		     db	78h, 0B0h, 8, 0, 0, 0, 0, 0
-RAM:70C2 88 88 A4 BB+		     db	88h, 88h, 0A4h,	0BBh, 0, 0, 0, 0
-RAM:70CA 00 78 78 B0+		     db	0, 78h,	78h, 0B0h, 0DFh, 0, 0, 0
-RAM:70D2 00 00 80 80+		     db	0, 0, 80h, 80h,	80h, 5Eh, 0, 0
-RAM:70DA 00 00 00 78+		     db	0, 0, 0, 78h, 88h, 0B0h, 0B4h, 0
-RAM:70E2 00 00 00 00+		     db	0, 0, 0, 0, 78h, 78h, 0B0h, 4
-RAM:70EA 00 00 00 00+		     db	0, 0, 0, 0, 0, 48h, 0B8h, 80h
-RAM:70F2 74 00 00 00+		     db	74h, 0,	0, 0, 0, 0, 80h, 80h
-RAM:70FA 80 40 00 00+		     db	80h, 40h, 0, 0,	0, 0, 0, 68h
-RAM:7102 78 B0 38 00+		     db	78h, 0B0h, 38h,	0, 0, 0, 0, 0
-RAM:710A 48 B8 98 F0+		     db	48h, 0B8h, 98h,	0F0h, 0, 0, 0, 0
+RAM:6FF2 00 88 80 A4+object_tbl:     db	0, 88h,	80h, 0A4h, 6Dh,	0, 0, 0, 0	     ; DATA XREF: init_objectso
+RAM:6FF2 6D 00 00 00+								     ; find_objs_in_location+4o
+RAM:6FFB 00 80 80 8C+		     db	0, 80h,	80h, 8Ch, 27h, 0, 0, 0,	0
+RAM:7004 00 88 78 B0+		     db	0, 88h,	78h, 0B0h, 0D0h, 0, 0, 0, 0
+RAM:700D 00 78 88 80+		     db	0, 78h,	88h, 80h, 0Ah, 0, 0, 0,	0
+RAM:7016 00 78 88 80+		     db	0, 78h,	88h, 80h, 0BAh,	0, 0, 0, 0
+RAM:701F 00 88 78 B0+		     db	0, 88h,	78h, 0B0h, 42h,	0, 0, 0, 0
+RAM:7028 00 88 B8 BC+		     db	0, 88h,	0B8h, 0BCh, 8Dh, 0, 0, 0, 0
+RAM:7031 00 A8 A8 80+		     db	0, 0A8h, 0A8h, 80h, 0FFh, 0, 0,	0, 0
+RAM:703A 00 80 80 80+		     db	0, 80h,	80h, 80h, 87h, 0, 0, 0,	0
+RAM:7043 00 78 B8 80+		     db	0, 78h,	0B8h, 80h, 0F3h, 0, 0, 0, 0
+RAM:704C 00 A8 68 B0+		     db	0, 0A8h, 68h, 0B0h, 0A8h, 0, 0,	0, 0
+RAM:7055 00 B8 48 B0+		     db	0, 0B8h, 48h, 0B0h, 0D2h, 0, 0,	0, 0
+RAM:705E 00 48 48 80+		     db	0, 48h,	48h, 80h, 0, 0,	0, 0, 0
+RAM:7067 00 88 B8 80+		     db	0, 88h,	0B8h, 80h, 22h,	0, 0, 0, 0
+RAM:7070 00 B8 B8 B0+		     db	0, 0B8h, 0B8h, 0B0h, 7Ah, 0, 0,	0, 0
+RAM:7079 00 B8 B8 80+		     db	0, 0B8h, 0B8h, 80h, 0F9h, 0, 0,	0, 0
+RAM:7082 00 88 98 B0+		     db	0, 88h,	98h, 0B0h, 0D6h, 0, 0, 0, 0
+RAM:708B 00 78 88 B0+		     db	0, 78h,	88h, 0B0h, 0E8h, 0, 0, 0, 0
+RAM:7094 00 78 78 B0+		     db	0, 78h,	78h, 0B0h, 0F6h, 0, 0, 0, 0
+RAM:709D 00 88 78 8C+		     db	0, 88h,	78h, 8Ch, 0Fh, 0, 0, 0,	0
+RAM:70A6 00 B8 B8 80+		     db	0, 0B8h, 0B8h, 80h, 6Fh, 0, 0, 0, 0
+RAM:70AF 00 48 B8 A4+		     db	0, 48h,	0B8h, 0A4h, 0FDh, 0, 0,	0, 0
+RAM:70B8 00 78 78 B0+		     db	0, 78h,	78h, 0B0h, 8, 0, 0, 0, 0
+RAM:70C1 00 88 88 A4+		     db	0, 88h,	88h, 0A4h, 0BBh, 0, 0, 0, 0
+RAM:70CA 00 78 78 B0+		     db	0, 78h,	78h, 0B0h, 0DFh, 0, 0, 0, 0
+RAM:70D3 00 80 80 80+		     db	0, 80h,	80h, 80h, 5Eh, 0, 0, 0,	0
+RAM:70DC 00 78 88 B0+		     db	0, 78h,	88h, 0B0h, 0B4h, 0, 0, 0, 0
+RAM:70E5 00 78 78 B0+		     db	0, 78h,	78h, 0B0h, 4, 0, 0, 0, 0
+RAM:70EE 00 48 B8 80+		     db	0, 48h,	0B8h, 80h, 74h,	0, 0, 0, 0
+RAM:70F7 00 80 80 80+		     db	0, 80h,	80h, 80h, 40h, 0, 0, 0,	0
+RAM:7100 00 68 78 B0+		     db	0, 68h,	78h, 0B0h, 38h,	0, 0, 0, 0
+RAM:7109 00 48 B8 98+		     db	0, 48h,	0B8h, 98h, 0F0h, 0, 0, 0, 0
 RAM:7112	     ; Pointers	to Sprite Graphics
 RAM:7112 8A 72 8A 72+sprite_tbl:     dw	spr_nul, spr_nul, spr_071, spr_072, spr_023, spr_024
 RAM:7112 CA 9A 04 9C+								     ; DATA XREF: init_objects+21o
@@ -5669,7 +5665,7 @@ RAM:C485 ED 5F			     ld	     a,	r
 RAM:C487 83			     add     a,	e
 RAM:C488 5F			     ld	     e,	a
 RAM:C489
-RAM:C489	     loc_C489:							     ; CODE XREF: init_objects+29j
+RAM:C489	     init_obj_loop:						     ; CODE XREF: init_objects+29j
 RAM:C489 7B			     ld	     a,	e
 RAM:C48A E6 07			     and     7
 RAM:C48C F6 60			     or	     60h ; '`'
@@ -5690,7 +5686,7 @@ RAM:C4A2 A7			     and     a
 RAM:C4A3 ED 42			     sbc     hl, bc				     ; done table?
 RAM:C4A5 E1			     pop     hl
 RAM:C4A6 D1			     pop     de
-RAM:C4A7 38 E0			     jr	     c,	loc_C489			     ; no, loop
+RAM:C4A7 38 E0			     jr	     c,	init_obj_loop			     ; no, loop
 RAM:C4A9 C9			     ret
 RAM:C4A9	     ; End of function init_objects
 RAM:C4A9

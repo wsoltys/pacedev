@@ -22,14 +22,14 @@
 // neogeo:  d:\mingw_something\setenv.bat
 //          g++ gfx.cpp -o xgf -lalleg
 
-//#define DO_C_DATA
+#define DO_C_DATA
 
 //#define DO_ASCII
 //#define DO_PARSE_MAP
 //#define DO_GA
 //#define DO_FONT
 //#define DO_SPRITE_DATA
-#define DO_SPRITE_TABLE
+//#define DO_SPRITE_TABLE
 //#define DO_BLOCK_DATA
 //#define DO_BG_DATA
 
@@ -164,6 +164,18 @@ void main (int argc, char *argv[])
     fprintf (fp2, "},  // '%c'\n", font[c]);
   }
   fprintf (fp2, "};\n\n");  
+
+  // create object table
+  p = 0x6FF2;
+  fprintf (fp2, "OBJ9 object_tbl[] = \n{\n");
+  while (p < 0x7112)
+  {
+    fprintf (fp2, "  { ");
+    for (int m=0; m<9; m++)
+      fprintf (fp2, "0x%02X%s ", ram[p++], (m<8 ? ",":""));
+    fprintf (fp2, "},\n");
+  }
+  fprintf (fp2, "};\n\n");
 
   // create table of sprite addresses
   uint16_t sprite_a[132];

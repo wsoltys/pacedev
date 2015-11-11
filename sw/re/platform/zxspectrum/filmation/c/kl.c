@@ -17,10 +17,60 @@
 #endif
 
 // pandora: run msys.bat and cd to this directory
-//          g++ kl.cpp -o kl -lallegro-4.4.2-md
+//          g++ kl.c -o kl -lallegro-4.4.2-md
 
 // neogeo:  d:\mingw_something\setenv.bat
-//          g++ gfx.cpp -o xgf -lalleg
+//          g++ kl.c -o kl -lalleg
+
+typedef struct
+{
+  // object size = 32 bytes
+  uint8_t   graphic_no;
+  uint8_t   filler1[6];
+  uint8_t   flags;
+
+} OBJ8, *POBJ8;
+
+typedef struct
+{
+  uint8_t   graphic_no;
+  uint8_t   start_x;
+  uint8_t   start_y;
+  uint8_t   start_z;
+  uint8_t   start_scrn;
+  uint8_t   curr_x;
+  uint8_t   curr_y;
+  uint8_t   curr_z;
+  uint8_t   curr_scrn;
+
+} OBJ9, *POBJ9;
+
+typedef struct
+{
+  uint8_t   graphic_no;
+  uint8_t   x;
+  uint8_t   y;
+  uint8_t   z;
+  uint8_t   zzz1;
+  uint8_t   zzz2;
+  uint8_t   zzz3;
+  uint8_t   flags;
+  uint8_t   scrn;
+  uint8_t   pad1[7];
+  // original a pointer, now an index
+  uint16_t  ptr_obj_tbl_entry;
+  uint8_t   pad2[14];
+
+} OBJ32, *POBJ32;
+
+typedef struct
+{
+  uint8_t index;
+  uint8_t flags;
+  uint8_t x;
+  uint8_t y;
+
+} SPRITE_SCRATCHPAD, *PSPRITE_SCRATCHPAD;
 
 #include "kldat.c"
 
@@ -36,22 +86,18 @@ uint8_t from_ascii (char ch)
 
 // start of variables
 
-uint8_t seed_1;                   // $5BA0
-uint8_t days;                     // $5BB9
-uint8_t lives;                    // $5BBA
-uint8_t *gfxbase_8x8;             // $5BC7
-uint8_t objects_carried[3][4];    // $5BDC
-
-typedef struct
-{
-  uint8_t index;
-  uint8_t flags;
-  uint8_t x;
-  uint8_t y;
-
-} SPRITE_SCRATCHPAD, *PSPRITE_SCRATCHPAD;
-static SPRITE_SCRATCHPAD sprite_scratchpad;
-static SPRITE_SCRATCHPAD sun_moon_scratchpad;
+static uint8_t seed_1;                                // $5BA0
+static uint8_t days;                                  // $5BB9
+static uint8_t lives;                                 // $5BBA
+static uint8_t *gfxbase_8x8;                          // $5BC7
+static uint8_t objects_carried[3][4];                 // $5BDC
+static OBJ32 graphics_object_tbl[40];                 // $5C08
+static OBJ32 *objs_here = &graphics_object_tbl[2];    // $5C48
+static SPRITE_SCRATCHPAD sprite_scratchpad;           // $BFDB
+static SPRITE_SCRATCHPAD sun_moon_scratchpad;         // $C44D
+static uint8_t objects_to_draw[48];                   // $CE8B
+static uint8_t start_loc_1;                           // $D169
+static uint8_t start_loc_2;                           // $D189
 
 // end of variables
 
@@ -79,10 +125,16 @@ static void multiple_print_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t dx, ui
 static void display_objects (void);
 static void display_sun_moon_frame (PSPRITE_SCRATCHPAD scratchpad);
 static void init_sun (void);
+static void init_objects (void);
+static void find_objects_here (void);
+static void find_objs_in_location (void);
+static void list_objects_to_draw (void);
 static void init_start_location (void);
+static void build_screen_objects (void);
 static uint8_t *transfer_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t *psprite);
 static uint8_t *transfer_sprite_and_print (PSPRITE_SCRATCHPAD scratchpad, uint8_t *psprite);
 static void display_panel (void);
+static void retrieve_screen (void);
 static void print_border (void);
 static void clear_scrn (void);
 static void clr_screen_buffer (void);
@@ -105,14 +157,21 @@ MAIN_AF88:
   shuffle_objects_required ();
   init_start_location ();
   init_sun ();
-  //init_objects ();
+  init_objects ();
+
+player_dies:
   //lose_life ();
-  //update_objects ();
+
+game_loop:
+  build_screen_objects ();
 
   // *** REMOVE ME
 	clear_bitmap (screen);
 
-game_loop:
+onscreen_loop:
+
+  list_objects_to_draw ();
+  //render_dynamic_objects ();
   
   display_objects ();
   //colour_panel ();
@@ -128,7 +187,7 @@ game_loop:
   if (key[KEY_ESC])
     return;
 
-  goto game_loop;
+  goto onscreen_loop;
 }
 
 // $B2B6
@@ -442,9 +501,77 @@ void init_sun (void)
   sun_moon_scratchpad.y = 9;
 }
 
+// $C47E
+#define NUM_OBJS (sizeof(object_tbl)/sizeof(OBJ9))
+void init_objects (void)
+{
+  uint8_t r = seed_1;
+  r += rand() & 255;
+  for (unsigned i=0; i<NUM_OBJS; i++)
+  {
+    object_tbl[i].graphic_no = (r & 7) | 0x60;
+    object_tbl[i].curr_x = object_tbl[i].start_x;
+    object_tbl[i].curr_y = object_tbl[i].start_y;
+    object_tbl[i].curr_z = object_tbl[i].start_z;
+    object_tbl[i].curr_scrn = object_tbl[i].start_scrn;
+    r++;
+  }
+}
+
+// $C525
+void find_objs_in_location (void)
+{
+}
+
+// $C591
+void find_objects_here (void)
+{
+  for (unsigned i=0; i<2; i++)
+  {
+    if (objs_here[i].graphic_no != 0)
+    {
+      // set data in object table
+      uint8_t index = objs_here[i].ptr_obj_tbl_entry;
+      object_tbl[index].graphic_no = objs_here[i].graphic_no;
+      object_tbl[index].curr_x = objs_here[i].x;
+      object_tbl[index].curr_y = objs_here[i].y;
+      object_tbl[index].curr_z = objs_here[i].z;
+      object_tbl[index].curr_scrn = objs_here[i].scrn;
+    }
+  }
+}
+
+// $CE62
+void list_objects_to_draw (void)
+{
+  unsigned n = 0;
+
+  for (unsigned i=0; i<40; i++)
+  {
+    if ((graphics_object_tbl[i].graphic_no != 0) &&
+        (graphics_object_tbl[i].flags & (1<<4)))
+      objects_to_draw[n++] = i;
+  }
+  objects_to_draw[n] = 0xff;
+}
+
 // $D1B1
 void init_start_location (void)
 {
+  // stuff
+  uint8_t s = start_locations[seed_1 & 3];
+
+  start_loc_1 = s;
+  start_loc_2 = s;
+}
+
+// $D1E6
+void build_screen_objects (void)
+{
+  find_objects_here ();
+  clr_screen_buffer ();
+  retrieve_screen ();
+  find_objs_in_location ();
 }
 
 // $D237
@@ -497,6 +624,11 @@ void print_border (void)
   multiple_print_sprite (&sprite_scratchpad, 0, 1, 128);
   p = transfer_sprite (&sprite_scratchpad, p);
   multiple_print_sprite (&sprite_scratchpad, 0, 1, 128);
+}
+
+// $D3C6
+void retrieve_screen (void)
+{
 }
 
 // $D55F
