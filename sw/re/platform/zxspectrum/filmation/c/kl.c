@@ -92,7 +92,8 @@ static uint8_t lives;                                 // $5BBA
 static uint8_t *gfxbase_8x8;                          // $5BC7
 static uint8_t objects_carried[3][4];                 // $5BDC
 static OBJ32 graphics_object_tbl[40];                 // $5C08
-static OBJ32 *objs_here = &graphics_object_tbl[2];    // $5C48
+static OBJ32 *special_objs_here = 
+              &graphics_objs_tbl[2];                  // $5C48
 static SPRITE_SCRATCHPAD sprite_scratchpad;           // $BFDB
 static SPRITE_SCRATCHPAD sun_moon_scratchpad;         // $C44D
 static uint8_t objects_to_draw[48];                   // $CE8B
@@ -125,9 +126,9 @@ static void multiple_print_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t dx, ui
 static void display_objects (void);
 static void display_sun_moon_frame (PSPRITE_SCRATCHPAD scratchpad);
 static void init_sun (void);
-static void init_objects (void);
-static void find_objects_here (void);
-static void find_objs_in_location (void);
+static void init_special_objects (void);
+static void update_special_objs (void);
+static void find_special_objs_here (void);
 static void list_objects_to_draw (void);
 static void init_start_location (void);
 static void build_screen_objects (void);
@@ -154,10 +155,13 @@ MAIN_AF88:
   clear_scrn ();
   do_menu_selection ();
   play_audio (start_game_tune);
+  // randomise order of required objects
   shuffle_objects_required ();
+  // randomise player start location
   init_start_location ();
   init_sun ();
-  init_objects ();
+  // randomise special object locations
+  init_special_objects ();
 
 player_dies:
   //lose_life ();
@@ -502,41 +506,49 @@ void init_sun (void)
 }
 
 // $C47E
-#define NUM_OBJS (sizeof(object_tbl)/sizeof(OBJ9))
-void init_objects (void)
+// places soecial objects into fixed list of rooms
+// - starting object is random
+#define NUM_OBJS (sizeof(special_objs_tbl)/sizeof(OBJ9))
+void init_special_objects (void)
 {
   uint8_t r = seed_1;
   r += rand() & 255;
   for (unsigned i=0; i<NUM_OBJS; i++)
   {
-    object_tbl[i].graphic_no = (r & 7) | 0x60;
-    object_tbl[i].curr_x = object_tbl[i].start_x;
-    object_tbl[i].curr_y = object_tbl[i].start_y;
-    object_tbl[i].curr_z = object_tbl[i].start_z;
-    object_tbl[i].curr_scrn = object_tbl[i].start_scrn;
+    // special objects $60-$67
+    // diamond, poison, boot, chalice, cup, bottle, crystal ball, extra life
+    special_objs_tbl[i].graphic_no = (r & 7) | 0x60;
+    special_objs_tbl[i].curr_x = special_objs_tbl[i].start_x;
+    special_objs_tbl[i].curr_y = special_objs_tbl[i].start_y;
+    special_objs_tbl[i].curr_z = special_objs_tbl[i].start_z;
+    special_objs_tbl[i].curr_scrn = special_objs_tbl[i].start_scrn;
     r++;
   }
 }
 
 // $C525
-void find_objs_in_location (void)
+void find_special_objs_here (void)
 {
 }
 
 // $C591
-void find_objects_here (void)
+// updates special_objs_tbl with current data (coords etc)
+// - traverses special_objs_here table
+// - writes to special_objs_tbl
+
+void update_special_objs (void)
 {
   for (unsigned i=0; i<2; i++)
   {
-    if (objs_here[i].graphic_no != 0)
+    if (special_objs_here[i].graphic_no != 0)
     {
       // set data in object table
-      uint8_t index = objs_here[i].ptr_obj_tbl_entry;
-      object_tbl[index].graphic_no = objs_here[i].graphic_no;
-      object_tbl[index].curr_x = objs_here[i].x;
-      object_tbl[index].curr_y = objs_here[i].y;
-      object_tbl[index].curr_z = objs_here[i].z;
-      object_tbl[index].curr_scrn = objs_here[i].scrn;
+      uint8_t index = special_objs_here[i].ptr_obj_tbl_entry;
+      special_objs_tbl[index].graphic_no = special_objs_here[i].graphic_no;
+      special_objs_tbl[index].curr_x = special_objs_here[i].x;
+      special_objs_tbl[index].curr_y = special_objs_here[i].y;
+      special_objs_tbl[index].curr_z = special_objs_here[i].z;
+      special_objs_tbl[index].curr_scrn = special_objs_here[i].scrn;
     }
   }
 }
@@ -568,10 +580,12 @@ void init_start_location (void)
 // $D1E6
 void build_screen_objects (void)
 {
-  find_objects_here ();
+  // save state in special_objs_tbl
+  update_special_objs ();
   clr_screen_buffer ();
   retrieve_screen ();
-  find_objs_in_location ();
+  // find special objects in new room
+  find_special_objs_here ();
 }
 
 // $D237
