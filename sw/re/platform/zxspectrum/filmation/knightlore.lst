@@ -6951,13 +6951,13 @@ RAM:CAD3 E1			     pop     hl
 RAM:CAD4 11 61 D1		     ld	     de, 0D161h
 RAM:CAD7 01 40 00		     ld	     bc, 40h ; '@'
 RAM:CADA ED B0			     ldir
-RAM:CADC 3A 61 D1		     ld	     a,	(byte_D161)
+RAM:CADC 3A 61 D1		     ld	     a,	(plyr_spr_1_scratchpad)
 RAM:CADF 32 71 D1		     ld	     (byte_D171), a
-RAM:CAE2 3A 81 D1		     ld	     a,	(byte_D181)
+RAM:CAE2 3A 81 D1		     ld	     a,	(plyr_spr_2_scratchpad)
 RAM:CAE5 32 91 D1		     ld	     (byte_D191), a
 RAM:CAE8 3E 78			     ld	     a,	78h ; 'x'
-RAM:CAEA 32 61 D1		     ld	     (byte_D161), a
-RAM:CAED 32 81 D1		     ld	     (byte_D181), a
+RAM:CAEA 32 61 D1		     ld	     (plyr_spr_1_scratchpad), a
+RAM:CAED 32 81 D1		     ld	     (plyr_spr_2_scratchpad), a
 RAM:CAF0 C3 BA AF		     jp	     game_loop
 RAM:CAF3	     ; ---------------------------------------------------------------------------
 RAM:CAF3
@@ -8066,7 +8066,7 @@ RAM:D12A	     ; FUNCTION	CHUNK AT RAM:AF7F SIZE 00000065	BYTES
 RAM:D12A	     ; FUNCTION	CHUNK AT RAM:BA22 SIZE 00000079	BYTES
 RAM:D12A	     ; FUNCTION	CHUNK AT RAM:BAAB SIZE 00000027	BYTES
 RAM:D12A
-RAM:D12A 21 61 D1		     ld	     hl, byte_D161
+RAM:D12A 21 61 D1		     ld	     hl, plyr_spr_1_scratchpad
 RAM:D12D 11 08 5C		     ld	     de, graphic_objs_tbl
 RAM:D130 D5			     push    de
 RAM:D131 DD E1			     pop     ix
@@ -8097,7 +8097,7 @@ RAM:D160	     ; End of function lose_life
 RAM:D160
 RAM:D160	     ; ---------------------------------------------------------------------------
 RAM:D161	     ; scratchpad? for player sprite objects?
-RAM:D161 00	     byte_D161:	     db	0					     ; DATA XREF: RAM:CADCr
+RAM:D161 00	     plyr_spr_1_scratchpad:db 0					     ; DATA XREF: RAM:CADCr
 RAM:D161									     ; RAM:CAEAw ...
 RAM:D162 00			     db	   0
 RAM:D163 00			     db	   0
@@ -8131,7 +8131,7 @@ RAM:D17D 00			     db	   0
 RAM:D17E 00			     db	   0
 RAM:D17F 00			     db	   0
 RAM:D180 00			     db	   0
-RAM:D181 00	     byte_D181:	     db	0					     ; DATA XREF: RAM:CAE2r
+RAM:D181 00	     plyr_spr_2_scratchpad:db 0					     ; DATA XREF: RAM:CAE2r
 RAM:D181									     ; RAM:CAEDw ...
 RAM:D182 00			     db	   0
 RAM:D183 00			     db	   0
@@ -8165,18 +8165,18 @@ RAM:D19D 00			     db	   0
 RAM:D19E 00			     db	   0
 RAM:D19F 00			     db	   0
 RAM:D1A0 00			     db	   0
-RAM:D1A1 78 80 80 80+byte_D1A1:	     db	78h, 80h, 80h, 80h, 5, 5, 17h, 1Ch	     ; DATA XREF: init_start_locationo
+RAM:D1A1 78 80 80 80+plyr_spr_init_data:db 78h,	80h, 80h, 80h, 5, 5, 17h, 1Ch	     ; DATA XREF: init_start_locationo
 RAM:D1A9 78 80 80 8C+		     db	78h, 80h, 80h, 8Ch, 5, 5, 0, 1Eh
 RAM:D1B1
 RAM:D1B1	     ; =============== S U B R O U T I N E =======================================
 RAM:D1B1
 RAM:D1B1
 RAM:D1B1	     init_start_location:					     ; CODE XREF: lose_life-217Cp
-RAM:D1B1 21 A1 D1		     ld	     hl, byte_D1A1
-RAM:D1B4 11 61 D1		     ld	     de, byte_D161
+RAM:D1B1 21 A1 D1		     ld	     hl, plyr_spr_init_data
+RAM:D1B4 11 61 D1		     ld	     de, plyr_spr_1_scratchpad
 RAM:D1B7 01 08 00		     ld	     bc, 8
 RAM:D1BA ED B0			     ldir
-RAM:D1BC 11 81 D1		     ld	     de, byte_D181
+RAM:D1BC 11 81 D1		     ld	     de, plyr_spr_2_scratchpad
 RAM:D1BF 01 08 00		     ld	     bc, 8
 RAM:D1C2 ED B0			     ldir
 RAM:D1C4 3E 12			     ld	     a,	12h

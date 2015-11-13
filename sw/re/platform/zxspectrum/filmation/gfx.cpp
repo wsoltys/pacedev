@@ -368,6 +368,18 @@ void main (int argc, char *argv[])
   }
   fprintf (fp2, "\n};\n\n");
 
+  // player sprite init data
+  p = 0xd1a1;
+  fprintf (fp2, "uint8_t plyr_spr_init_data[] = \n{\n");
+  for (unsigned i=0; p<0xd1b1; i++, p++)
+  {
+    if (i%8==0) fprintf (fp2, "  ");
+    fprintf (fp2, "0x%02X", ram[p]);
+    if (p<0xd1b1-1) fprintf (fp2, ", ");
+    if (i%8==7) fprintf (fp2, "\n");
+  }
+  fprintf (fp2, "\n};\n\n");
+
   // start locations
   p = 0xd1e2;
   fprintf (fp2, "uint8_t start_locations[] = \n{\n");

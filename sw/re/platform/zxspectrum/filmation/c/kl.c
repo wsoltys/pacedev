@@ -91,14 +91,14 @@ static uint8_t days;                                  // $5BB9
 static uint8_t lives;                                 // $5BBA
 static uint8_t *gfxbase_8x8;                          // $5BC7
 static uint8_t objects_carried[3][4];                 // $5BDC
-static OBJ32 graphics_object_tbl[40];                 // $5C08
+static OBJ32 graphic_objs_tbl[40];                    // $5C08
 static OBJ32 *special_objs_here = 
-              &graphics_objs_tbl[2];                  // $5C48
+              &graphic_objs_tbl[2];                   // $5C48
 static SPRITE_SCRATCHPAD sprite_scratchpad;           // $BFDB
 static SPRITE_SCRATCHPAD sun_moon_scratchpad;         // $C44D
 static uint8_t objects_to_draw[48];                   // $CE8B
-static uint8_t start_loc_1;                           // $D169
-static uint8_t start_loc_2;                           // $D189
+static OBJ32 plyr_spr_1_scratchpad;                   // $D161
+static OBJ32 plyr_spr_2_scratchpad;                   // $D181
 
 // end of variables
 
@@ -139,6 +139,7 @@ static void retrieve_screen (void);
 static void print_border (void);
 static void clear_scrn (void);
 static void clr_screen_buffer (void);
+static void render_dynamic_objects (void);
 static uint8_t *flip_sprite (PSPRITE_SCRATCHPAD scratchpad);
 static void print_sprite (PSPRITE_SCRATCHPAD scratchpad);
 
@@ -167,6 +168,7 @@ player_dies:
   //lose_life ();
 
 game_loop:
+  // populate graphic_objs_tbl[]
   build_screen_objects ();
 
   // *** REMOVE ME
@@ -174,8 +176,9 @@ game_loop:
 
 onscreen_loop:
 
+  // populate objects_to_draw[]
   list_objects_to_draw ();
-  //render_dynamic_objects ();
+  render_dynamic_objects ();
   
   display_objects ();
   //colour_panel ();
@@ -506,9 +509,9 @@ void init_sun (void)
 }
 
 // $C47E
-// places soecial objects into fixed list of rooms
+// places special objects into fixed list of rooms
 // - starting object is random
-#define NUM_OBJS (sizeof(special_objs_tbl)/sizeof(OBJ9))
+#define NUM_OBJS (sizeof(special_objs_here)/sizeof(OBJ9))
 void init_special_objects (void)
 {
   uint8_t r = seed_1;
@@ -560,8 +563,8 @@ void list_objects_to_draw (void)
 
   for (unsigned i=0; i<40; i++)
   {
-    if ((graphics_object_tbl[i].graphic_no != 0) &&
-        (graphics_object_tbl[i].flags & (1<<4)))
+    if ((graphic_objs_tbl[i].graphic_no != 0) &&
+        (graphic_objs_tbl[i].flags & (1<<4)))
       objects_to_draw[n++] = i;
   }
   objects_to_draw[n] = 0xff;
@@ -570,11 +573,15 @@ void list_objects_to_draw (void)
 // $D1B1
 void init_start_location (void)
 {
-  // stuff
+  memcpy ((uint8_t *)&plyr_spr_1_scratchpad, plyr_spr_init_data+0, 8);
+  memcpy ((uint8_t *)&plyr_spr_2_scratchpad, plyr_spr_init_data+8, 8);
+  plyr_spr_1_scratchpad.pad1[1] = 0x12;
+  plyr_spr_2_scratchpad.pad1[1] = 0x22;
   uint8_t s = start_locations[seed_1 & 3];
-
-  start_loc_1 = s;
-  start_loc_2 = s;
+  // start_loc_1
+  plyr_spr_1_scratchpad.scrn = s;
+  // start_loc_2
+  plyr_spr_2_scratchpad.scrn = s;
 }
 
 // $D1E6
@@ -653,6 +660,11 @@ void clear_scrn (void)
 
 // $D567
 void clr_screen_buffer (void)
+{
+}
+
+// $D59F 
+void render_dynamic_objects (void)
 {
 }
 
