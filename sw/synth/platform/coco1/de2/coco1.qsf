@@ -25,7 +25,7 @@
 
 # Project-Wide Assignments
 # ========================
-set_global_assignment -name LAST_QUARTUS_VERSION "10.1 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION "12.1 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -465,7 +465,7 @@ set_global_assignment -name TOP_LEVEL_ENTITY target_top
 set_global_assignment -name DEVICE EP2C35F672C6
 set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
 set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED"
-set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS OUTPUT DRIVING AN UNSPECIFIED SIGNAL"
+set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS INPUT TRI-STATED"
 set_instance_assignment -name IO_STANDARD LVTTL -to TD_DATA[0]
 set_instance_assignment -name IO_STANDARD LVTTL -to TD_DATA[1]
 set_instance_assignment -name IO_STANDARD LVTTL -to TD_DATA[2]
@@ -652,7 +652,6 @@ set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controlle
 set_global_assignment -name VHDL_FILE ../../../../src/pace/video/video_controller_pkg_body.vhd
 set_global_assignment -name VHDL_FILE project_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/platform_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../../../src/platform/coco1/platform_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/de2/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../device/cycloneii/dpram_1r1w.vhd
@@ -695,6 +694,19 @@ set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/I2S_LCM_Conf
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/i2s_controller.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/LCD_Controller.v
 set_global_assignment -name VERILOG_FILE ../../../../src/target/de2/LCD_TEST.v
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/ud_cnt.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/ro_cnt.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/atahost_wb_slave.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/atahost_top.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/atahost_pio_tctrl.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/ocidec1/atahost_controller.vhd
+set_global_assignment -name VHDL_FILE ../de1/sd_pll.vhd
+set_global_assignment -name VHDL_FILE ../de1/sd_rd_fifo.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/sd/sd_if.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/sd/sd_datif.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/sd/sd_cmdif.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/sd/sd_busif.vhd
+set_global_assignment -name VHDL_FILE ../../../../src/component/diskio/idesd.vhd
 set_global_assignment -name VHDL_FILE custom_io.vhd
 set_global_assignment -name VHDL_FILE ../../../../src/target/de2/target_top.vhd
 set_global_assignment -name SIGNALTAP_FILE cpuif.stp

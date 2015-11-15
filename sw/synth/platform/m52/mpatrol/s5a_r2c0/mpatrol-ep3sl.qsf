@@ -41,7 +41,7 @@
 # ========================
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 9.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "18:03:05  MARCH 10, 2010"
-set_global_assignment -name LAST_QUARTUS_VERSION "12.1 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 15.0.2
 set_global_assignment -name SMART_RECOMPILE ON
 
 # Pin & Location Assignments
@@ -418,13 +418,13 @@ set_global_assignment -name TIMEQUEST_DO_CCPP_REMOVAL ON
 
 # Analysis & Synthesis Assignments
 # ================================
-set_global_assignment -name FAMILY "Stratix III"
+set_global_assignment -name FAMILY "Cyclone V"
 set_global_assignment -name TOP_LEVEL_ENTITY target_top_ep3sl
 set_global_assignment -name STRATIXII_OPTIMIZATION_TECHNIQUE SPEED
 
 # Fitter Assignments
 # ==================
-set_global_assignment -name DEVICE EP3SL70F780C3
+set_global_assignment -name DEVICE 5CGXFC7C7F23C8
 set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.3-V LVCMOS"
 set_global_assignment -name CRC_ERROR_OPEN_DRAIN OFF
 set_global_assignment -name DEVICE_MIGRATION_LIST "EP3SL70F780C3,EP3SL110F780C3,EP3SL50F780C3"
@@ -785,7 +785,6 @@ set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 
 # Incremental Compilation Assignments
 # ===================================
-set_global_assignment -name RAPID_RECOMPILE_MODE OFF
 
 # Advanced I/O Timing Assignments
 # ===============================
