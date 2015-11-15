@@ -848,6 +848,7 @@ begin
     if target_rst = '1' then
       hw_r := hw_cart_bank;
       cart_bank <= hw_cart_bank;
+----    the following code breaks everything!?!
 --    elsif rising_edge(clk_57M272) then
 --      -- MPI switch changed?
 --      if hw_cart_bank /= hw_r then

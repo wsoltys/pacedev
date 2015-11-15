@@ -185,6 +185,8 @@ begin
   BLK_CLOCKING : block
   begin
   
+    clkrst_i.clk_ref <= clock_50;
+    
     GEN_PLL : if PACE_HAS_PLL generate
     
       pll_50_inst : entity work.pll
