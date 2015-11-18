@@ -24,6 +24,14 @@
 
 typedef struct
 {
+  uint8_t   x;
+  uint8_t   y;
+  uint8_t   z;
+  
+} ROOM_SIZE_T, *PROOM_SIZE_T;
+  
+typedef struct
+{
   // object size = 32 bytes
   uint8_t   graphic_no;
   uint8_t   filler1[6];
@@ -87,6 +95,10 @@ uint8_t from_ascii (char ch)
 // start of variables
 
 static uint8_t seed_1;                                // $5BA0
+static uint8_t room_size_X;                           // $5BAB
+static uint8_t room_size_Y;                           // $5BAC
+static uint8_t curr_room_attrib;                      // $5BAD
+static uint8_t room_size_Z;                           // $5BAE
 static uint8_t days;                                  // $5BB9
 static uint8_t lives;                                 // $5BBA
 static uint8_t *gfxbase_8x8;                          // $5BC7
@@ -582,6 +594,8 @@ void init_start_location (void)
   plyr_spr_1_scratchpad.scrn = s;
   // start_loc_2
   plyr_spr_2_scratchpad.scrn = s;
+  
+  fprintf (stderr, "%s(): start_location=%d\n", __FUNCTION__, s);
 }
 
 // $D1E6
@@ -650,6 +664,46 @@ void print_border (void)
 // $D3C6
 void retrieve_screen (void)
 {
+  unsigned p = 0;
+  for (unsigned i=0; ; i++)
+  {
+    if (location_tbl[p] == plyr_spr_1_scratchpad.scrn)
+      break;
+    if (i == 255)
+    {
+      // bad_player_location
+      // - can't really happen with 255 locations
+      exit (-1);
+    }
+    p += 1 + location_tbl[p+1];
+  }
+  
+  // found_screen
+  //fprintf (stderr, "%s(): location=%d\n", __FUNCTION__, location_tbl[p]);
+  
+  uint8_t id = location_tbl[p++];
+  uint8_t size = location_tbl[p++];
+  uint8_t attr = location_tbl[p++];
+
+  // get attribute, set BRIGHT  
+  curr_room_attrib = (attr & 7) | 0x40;
+
+  uint8_t room_size = (attr >> 3) & 0x1F;
+  room_size_X = room_size_tbl[room_size].x;
+  room_size_Y = room_size_tbl[room_size].y;
+  room_size_Z = room_size_tbl[room_size].z;
+
+  while (1)
+  {
+  next_bg_obj:
+    
+    // get background type
+    uint8_t bg_type = location_tbl[p++];
+    if (bg_type = 0xFF)
+      break;
+      
+      
+  }
 }
 
 // $D55F

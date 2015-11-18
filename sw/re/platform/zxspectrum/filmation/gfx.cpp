@@ -165,6 +165,42 @@ void main (int argc, char *argv[])
   }
   fprintf (fp2, "};\n\n");  
 
+  // room size table
+  p = 0x6248;
+  fprintf (fp2, "ROOM_SIZE_T room_size_tbl[] = \n{\n");
+  while (p < 0x6251)
+  {
+    fprintf (fp2, "  { %02d, %02d, %02d }",
+              ram[p], ram[p+1], ram[p+2]);
+    if (p < 0x6251-3)
+      fprintf (fp2, ",");
+    fprintf (fp2, "\n");
+    p += 3;
+  }
+  fprintf (fp2, "};\n\n");
+  
+  // location table
+  p = 0x6251;
+  fprintf (fp2, "uint8_t location_tbl[] = \n{\n");
+  while (p < 0x6BD1)
+  {
+    uint8_t n = ram[p+1];
+    fprintf (fp2, "  %d, %d, %d,\n",
+              ram[p], ram[p+1], ram[p+2]);
+    p += 3;
+    for (unsigned i=0; i<n-2; i++)
+    {
+      if ((i%8)==0)
+        fprintf (fp2, "  ");
+      fprintf (fp2, "0x%02X", ram[p++]);
+      if (p < 0x6BD1)
+        fprintf (fp2, ", ");
+      if ((i%8)==7 || i==n-3)
+        fprintf (fp2, "\n");
+    }
+  }
+  fprintf (fp2, "};\n\n");
+
   // create object table
   p = 0x6FF2;
   fprintf (fp2, "OBJ9 object_tbl[] = \n{\n");
