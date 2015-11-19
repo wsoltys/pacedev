@@ -60,7 +60,15 @@ typedef struct
   uint8_t   pad1[7];
   // original a pointer, now an index
   uint16_t  ptr_obj_tbl_entry;
-  uint8_t   pad2[14];
+  uint8_t   pad2[6];
+  uint8_t   off24;
+  uint8_t   off25;
+  uint8_t   off26;
+  uint8_t   off27;
+  uint8_t   off28;
+  uint8_t   off29;
+  uint8_t   off30;
+  uint8_t   off31;
 
 } OBJ32, *POBJ32;
 
@@ -88,6 +96,8 @@ uint8_t from_ascii (char ch)
 // start of variables
 
 static uint8_t seed_1;                                // $5BA0
+static uint16_t seed_2;                               // $5BA2
+static uint8_t seed_3;                                // $5BA5
 static uint8_t room_size_X;                           // $5BAB
 static uint8_t room_size_Y;                           // $5BAC
 static uint8_t curr_room_attrib;                      // $5BAD
@@ -136,6 +146,7 @@ static void init_sun (void);
 static void init_special_objects (void);
 static void update_special_objs (void);
 static void find_special_objs_here (void);
+static void save_sprite_somethings (POBJ32 p_obj);
 static void list_objects_to_draw (void);
 static void init_start_location (void);
 static void build_screen_objects (void);
@@ -202,6 +213,30 @@ game_loop:
 
 onscreen_loop:
 
+  POBJ32 p_obj = graphic_objs_tbl;
+  for (unsigned i=0; i<40; i++, p_obj++)
+  {
+    adj_sprite_loop:
+      
+    save_sprite_somethings (p_obj);
+
+    //p_obj->graphic_no;
+    // *** call per-sprite routine
+        
+    // update seed_3
+    uint8_t r = rand ();
+    seed_3 += r;
+  }
+
+  // update seed_2, 3
+  seed_2++;
+  // this was originally [HL] where HL=seed2
+  seed_3 += rand ();
+  seed_3 += seed_2;           // add a,l
+  seed_3 += (seed_2 >> 8);    // add a,h
+
+  // some other stuff
+    
   // populate objects_to_draw[]
   list_objects_to_draw ();
   render_dynamic_objects ();
@@ -618,6 +653,15 @@ void update_special_objs (void)
   }
 }
 
+// $CE49
+void save_sprite_somethings (POBJ32 p_obj)
+{
+  p_obj->off28 = p_obj->off24;
+  p_obj->off29 = p_obj->off25;
+  p_obj->off30 = p_obj->off26;
+  p_obj->off31 = p_obj->off27;
+}
+
 // $CE62
 void list_objects_to_draw (void)
 {
@@ -842,6 +886,13 @@ void render_dynamic_objects (void)
   {
     POBJ32 p_obj = &graphic_objs_tbl[objects_to_draw[i]];
     
+    #if 0
+    // check ??? flag
+    if ((p_obj->flags & (1<<5)) == 0)
+      continue;
+    p_obj->flags &= ~(1<<5);
+    #endif
+              
     // fudge - just render the bloody thing!
     transfer_sprite_and_print (&sprite_scratchpad, (uint8_t *)p_obj);
   }

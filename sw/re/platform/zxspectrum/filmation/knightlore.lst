@@ -166,10 +166,10 @@ SCRATCH:5C08		 ; +0 graphic no.
 SCRATCH:5C08		 ; +1 x
 SCRATCH:5C08		 ; +2 y
 SCRATCH:5C08		 ; +3 z
-SCRATCH:5C08		 ; +4 5?
-SCRATCH:5C08		 ; +5 5?
-SCRATCH:5C08		 ; +6 12?
-SCRATCH:5C08		 ; +7 20? (bit4=draw)
+SCRATCH:5C08		 ; +4 width
+SCRATCH:5C08		 ; +5 depth
+SCRATCH:5C08		 ; +6 height
+SCRATCH:5C08		 ; +7 flags (bit4=draw)
 SCRATCH:5C08		 ; +8 screen
 SCRATCH:5C08		 ; +9-15 zeroed
 SCRATCH:5C08		 ; +16-17 ptr object table entry
@@ -5921,13 +5921,13 @@ RAM:C548 23			     inc     hl					     ; ptr current X, Y, Z
 RAM:C549 01 03 00		     ld	     bc, 3				     ; 3 entries (bytes) to copy
 RAM:C54C ED B0			     ldir					     ; copy to objs_here
 RAM:C54E EB			     ex	     de, hl
-RAM:C54F 36 05			     ld	     (hl), 5				     ; ? = 5
+RAM:C54F 36 05			     ld	     (hl), 5				     ; width = 5
 RAM:C551 23			     inc     hl
-RAM:C552 36 05			     ld	     (hl), 5				     ; ? = 5
+RAM:C552 36 05			     ld	     (hl), 5				     ; depth = 5
 RAM:C554 23			     inc     hl
-RAM:C555 36 0C			     ld	     (hl), 12				     ; ? = 12
+RAM:C555 36 0C			     ld	     (hl), 12				     ; height =	12
 RAM:C557 23			     inc     hl
-RAM:C558 36 14			     ld	     (hl), 20				     ; ? = 20
+RAM:C558 36 14			     ld	     (hl), 14h				     ; flags = $14 (bit4=draw)
 RAM:C55A 23			     inc     hl
 RAM:C55B EB			     ex	     de, hl
 RAM:C55C 7E			     ld	     a,	(hl)				     ; get current screen
@@ -7564,14 +7564,14 @@ RAM:CE49	     ; =============== S U B R O U T I N E ============================
 RAM:CE49
 RAM:CE49
 RAM:CE49	     sub_CE49:							     ; CODE XREF: lose_life-2158p
-RAM:CE49 DD 7E 18		     ld	     a,	(ix+18h)
-RAM:CE4C DD 77 1C		     ld	     (ix+1Ch), a
-RAM:CE4F DD 7E 19		     ld	     a,	(ix+19h)
-RAM:CE52 DD 77 1D		     ld	     (ix+1Dh), a
-RAM:CE55 DD 7E 1A		     ld	     a,	(ix+1Ah)			     ; X
-RAM:CE58 DD 77 1E		     ld	     (ix+1Eh), a
-RAM:CE5B DD 7E 1B		     ld	     a,	(ix+1Bh)			     ; Y
-RAM:CE5E DD 77 1F		     ld	     (ix+1Fh), a
+RAM:CE49 DD 7E 18		     ld	     a,	(ix+24)
+RAM:CE4C DD 77 1C		     ld	     (ix+28), a
+RAM:CE4F DD 7E 19		     ld	     a,	(ix+25)
+RAM:CE52 DD 77 1D		     ld	     (ix+29), a
+RAM:CE55 DD 7E 1A		     ld	     a,	(ix+26)
+RAM:CE58 DD 77 1E		     ld	     (ix+30), a
+RAM:CE5B DD 7E 1B		     ld	     a,	(ix+27)
+RAM:CE5E DD 77 1F		     ld	     (ix+31), a
 RAM:CE61 C9			     ret
 RAM:CE61	     ; End of function sub_CE49
 RAM:CE61
