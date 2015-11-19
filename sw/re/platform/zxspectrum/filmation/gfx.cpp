@@ -201,9 +201,91 @@ void main (int argc, char *argv[])
   }
   fprintf (fp2, "};\n\n");
 
+  // block type table
+
+  typedef struct
+  {
+    char        label[32];
+    uint16_t    addr;
+    
+  } BLKTYP_T, *PBLKTYP_T;
+
+  static BLKTYP_T blktyp[] =
+  {
+    { "block", 0 },
+    { "fire", 0 },
+    { "ball_ud_y", 0 },
+    { "rock", 0 },
+    { "gargoyle", 0 },
+    { "spike", 0 },
+    { "chest", 0 },
+    { "table", 0 },
+    { "guard_ew", 0 },
+    { "ghost", 0 },
+    { "fire_ns", 0 },
+    { "block_high", 0 },
+    { "ball_ud_xy", 0 },
+    { "guard_square", 0 },
+    { "block_ew", 0 },
+    { "block_ns", 0 },
+    { "moveable_block", 0 },
+    { "spike_high", 0 },
+    { "spike_ball_fall", 0 },
+    { "spike_ball_high_fall", 0 },
+    { "fire_ew", 0 },
+    { "dropping_block", 0 },
+    { "collapsing_block", 0 },
+    { "ball_bounce", 0 },
+    { "ball_ud", 0 },
+    { "repel_spell", 0 },
+    { "gate_ud_1", 0 },
+    { "gate_ud_2", 0 },
+    { "ball_ud_x", 0 }
+  };
+
+  p = 0x6BD1;
+  unsigned n = 0;
+  for (n=0; p<0x6C0B; n++, p+=2)
+  {
+    blktyp[n].addr = ram[p+1];
+    blktyp[n].addr = (blktyp[n].addr<<8) | ram[p];
+  }
+  while (p < 0x6CE2)
+  {
+    unsigned i;
+    
+    // find address
+    for (i=0; i<n; i++)
+      if (p == blktyp[i].addr)
+        break;
+    if (i == n)
+      fprintf (stderr, "ERR: block_type addr=$%04X\n", p);
+
+    // do table entry
+    fprintf (fp2, "uint8_t %s[] = \n{\n", blktyp[i].label);
+    do
+    {
+      fprintf (fp2, "  0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X,\n",
+                ram[p], ram[p+1], ram[p+2], ram[p+3], ram[p+4], ram[p+5]);
+      p += 6;
+      
+    } while (ram[p] != 0);
+    fprintf (fp2, "  0");
+    p++;
+    fprintf (fp2,"\n};\n\n");
+  }
+
+  fprintf (fp2, "uint8_t *block_type_tbl[] = \n{\n");
+  for (unsigned i=0; i<n; i++)
+  {
+    fprintf (fp2, "  %s%s\n", blktyp[i].label,
+      (i<n-1 ? "," : ""));
+  }
+  fprintf (fp2, "};\n\n");
+  
   // create object table
   p = 0x6FF2;
-  fprintf (fp2, "OBJ9 object_tbl[] = \n{\n");
+  fprintf (fp2, "OBJ9 special_objs_tbl[] = \n{\n");
   while (p < 0x7112)
   {
     fprintf (fp2, "  { ");
@@ -240,7 +322,7 @@ void main (int argc, char *argv[])
 
   // sprite_tbl
   fprintf (fp2, "uint8_t *sprite_tbl[] =\n{\n");
-  unsigned n = 0;
+  n = 0;
   for (p=0x7112; p<0x728A; p+=2, n++)
   {
     char label[16];
