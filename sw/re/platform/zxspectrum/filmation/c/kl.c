@@ -22,6 +22,8 @@
 // neogeo:  d:\mingw_something\setenv.bat
 //          g++ kl.c -o kl -lalleg
 
+#pragma pack(1)
+
 typedef struct
 {
   uint8_t   x;
@@ -30,15 +32,6 @@ typedef struct
   
 } ROOM_SIZE_T, *PROOM_SIZE_T;
   
-typedef struct
-{
-  // object size = 32 bytes
-  uint8_t   graphic_no;
-  uint8_t   filler1[6];
-  uint8_t   flags;
-
-} OBJ8, *POBJ8;
-
 typedef struct
 {
   uint8_t   graphic_no;
@@ -59,9 +52,9 @@ typedef struct
   uint8_t   x;
   uint8_t   y;
   uint8_t   z;
-  uint8_t   zzz1;
-  uint8_t   zzz2;
-  uint8_t   zzz3;
+  uint8_t   width;
+  uint8_t   depth;
+  uint8_t   height;
   uint8_t   flags;
   uint8_t   scrn;
   uint8_t   pad1[7];
@@ -106,6 +99,8 @@ static uint8_t objects_carried[3][4];                 // $5BDC
 static OBJ32 graphic_objs_tbl[40];                    // $5C08
 static OBJ32 *special_objs_here = 
               &graphic_objs_tbl[2];                   // $5C48
+static OBJ32 *other_objs_here =
+              &graphic_objs_tbl[4];                   // $5C88
 static SPRITE_SCRATCHPAD sprite_scratchpad;           // $BFDB
 static SPRITE_SCRATCHPAD sun_moon_scratchpad;         // $C44D
 static uint8_t objects_to_draw[48];                   // $CE8B
@@ -156,6 +151,25 @@ static uint8_t *flip_sprite (PSPRITE_SCRATCHPAD scratchpad);
 static void print_sprite (PSPRITE_SCRATCHPAD scratchpad);
 
 // end of prototypes
+
+void dump_graphic_objs_tbl (void)
+{
+  fprintf (stderr, "%s():\n", __FUNCTION__);
+  
+  for (unsigned i=0; i<40; i++)
+  {
+    fprintf (stderr, "%02d: graphic_no=%02d, x=%d, y=%d, z=%d, width=%d, depth=%d, height=%d, flags=$%02X\n",
+              i,
+              graphic_objs_tbl[i].graphic_no,
+              graphic_objs_tbl[i].x,
+              graphic_objs_tbl[i].y,
+              graphic_objs_tbl[i].z,
+              graphic_objs_tbl[i].width,
+              graphic_objs_tbl[i].depth,
+              graphic_objs_tbl[i].height,
+              graphic_objs_tbl[i].flags);
+  }
+}
 
 void knight_lore (void)
 {
@@ -544,6 +558,42 @@ void init_special_objects (void)
 // $C525
 void find_special_objs_here (void)
 {
+  POBJ32 p_special_obj = special_objs_here;
+  uint8_t n_special_objs_here = 0;
+ 
+  fprintf (stderr, "%s():\n", __FUNCTION__);
+  
+  for (unsigned i=0; i<32; i++)
+  {
+    if (special_objs_tbl[i].graphic_no == 0)
+      continue;
+    if (special_objs_tbl[i].curr_scrn != plyr_spr_1_scratchpad.scrn)
+      continue;
+      
+    p_special_obj->graphic_no = special_objs_tbl[i].graphic_no;
+    p_special_obj->x = special_objs_tbl[i].curr_x;
+    p_special_obj->y = special_objs_tbl[i].curr_y;
+    p_special_obj->z = special_objs_tbl[i].curr_z;
+    p_special_obj->width = 5;
+    p_special_obj->depth = 5;
+    p_special_obj->height = 20;
+    p_special_obj->flags = 0x14;
+    p_special_obj->scrn = special_objs_tbl[i].curr_scrn;
+    memset (&p_special_obj->pad1, 0, 7);
+    p_special_obj->ptr_obj_tbl_entry = i;
+    memset (&p_special_obj->pad2, 0, 14);
+    
+    n_special_objs_here++;
+  }
+
+  fprintf (stderr, "  n_special_objs_here=%d\n", n_special_objs_here);
+
+  // wipe rest of the special_objs_here table  
+  for (; n_special_objs_here<2; n_special_objs_here++)
+  {
+    memset (p_special_obj, 0, 32);
+    p_special_obj++;
+  }
 }
 
 // $C591
@@ -573,6 +623,8 @@ void list_objects_to_draw (void)
 {
   unsigned n = 0;
 
+  //fprintf (stderr, "%s():\n", __FUNCTION__);
+  
   for (unsigned i=0; i<40; i++)
   {
     if ((graphic_objs_tbl[i].graphic_no != 0) &&
@@ -580,6 +632,8 @@ void list_objects_to_draw (void)
       objects_to_draw[n++] = i;
   }
   objects_to_draw[n] = 0xff;
+  
+  //fprintf (stderr, "  n=%d\n", n);
 }
 
 // $D1B1
@@ -664,7 +718,11 @@ void print_border (void)
 // $D3C6
 void retrieve_screen (void)
 {
+  POBJ32 p_other_objs = other_objs_here;
   unsigned p = 0;
+  
+  fprintf (stderr, "%s():\n", __FUNCTION__);
+  
   for (unsigned i=0; ; i++)
   {
     if (location_tbl[p] == plyr_spr_1_scratchpad.scrn)
@@ -678,13 +736,15 @@ void retrieve_screen (void)
     p += 1 + location_tbl[p+1];
   }
   
-  // found_screen
+found_screen:
   //fprintf (stderr, "%s(): location=%d\n", __FUNCTION__, location_tbl[p]);
   
   uint8_t id = location_tbl[p++];
   uint8_t size = location_tbl[p++];
   uint8_t attr = location_tbl[p++];
 
+  fprintf (stderr, "id=%d, size=%d, attr=$%02X\n", id, size, attr);
+  
   // get attribute, set BRIGHT  
   curr_room_attrib = (attr & 7) | 0x40;
 
@@ -693,17 +753,75 @@ void retrieve_screen (void)
   room_size_Y = room_size_tbl[room_size].y;
   room_size_Z = room_size_tbl[room_size].z;
 
-  while (1)
+  fprintf (stderr, "room size = (%d,%d,%d)\n",
+            room_size_X, room_size_Y, room_size_Z);
+
+  // bytes remaining in location table
+  size -= 2;
+  
+  // do the background objects
+  for (; size && location_tbl[p] != 0xFF; size--, p++)
   {
-  next_bg_obj:
+    next_bg_obj:
     
     // get background type
-    uint8_t bg_type = location_tbl[p++];
-    if (bg_type = 0xFF)
-      break;
+    uint8_t *p_bg_obj = background_type_tbl[location_tbl[p]];
+
+    fprintf (stderr, "BG:%d\n", location_tbl[p]);
+
+    for (; *p_bg_obj != 0; p_bg_obj+=8)
+    {    
+      next_bj_obj_sprite:
+        
+      // copy sprite,x,y,z,w,d,h,flags
+      memcpy ((uint8_t *)p_other_objs, p_bg_obj, 8);
+      // set screen (location)
+      p_other_objs->scrn = plyr_spr_1_scratchpad.scrn;
+      // zero everything else
+      memset (&p_other_objs->pad1, 0, 23);
       
-      
+      p_other_objs++;
+    };
   }
+
+  // skip 0xFF
+  if (size)
+    size--;
+      
+  // do the foreground objects
+  for (; size; )
+  {
+    uint8_t count = (location_tbl[p] & 7) + 1;
+    uint8_t block = location_tbl[p] >> 3;
+    uint8_t loc = location_tbl[p+1];
+    size--;
+    p += 2;
+        
+    for (; count; count--)
+    {
+      uint8_t *p_fg_obj = block_type_tbl[block];
+
+      for (; p_fg_obj[0]!=0; p_fg_obj+=8)
+      {
+        p_other_objs->graphic_no = p_fg_obj[0];
+        p_other_objs->width = p_fg_obj[1];
+        p_other_objs->depth = p_fg_obj[2];
+        p_other_objs->height = p_fg_obj[3];
+        p_other_objs->flags = p_fg_obj[4];
+        p_other_objs->scrn = plyr_spr_1_scratchpad.scrn;
+        // more copying here, including offsets
+        //??? = p_fg_obj[5];
+        
+        // zero everything else        
+        memset (&p_other_objs->pad1, 0, 23);
+        
+        p_other_objs++;
+      }
+    }
+  }
+  
+  fprintf (stderr, "n_other_objs = %d\n",
+            p_other_objs - other_objs_here);
 }
 
 // $D55F
@@ -720,6 +838,13 @@ void clr_screen_buffer (void)
 // $D59F 
 void render_dynamic_objects (void)
 {
+  for (unsigned i=0; objects_to_draw[i] != 0xFF; i++)
+  {
+    POBJ32 p_obj = &graphic_objs_tbl[objects_to_draw[i]];
+    
+    // fudge - just render the bloody thing!
+    transfer_sprite_and_print (&sprite_scratchpad, (uint8_t *)p_obj);
+  }
 }
 
 #define REV(d) (((d&1)<<7)|((d&2)<<5)|((d&4)<<3)|((d&8)<<1)|((d&16)>>1)|((d&32)>>3)|((d&64)>>5)|((d&128)>>7))

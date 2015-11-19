@@ -283,6 +283,75 @@ void main (int argc, char *argv[])
   }
   fprintf (fp2, "};\n\n");
   
+  // background type table
+  
+  static BLKTYP_T bgtyp[] =
+  {
+    { "arch_n", 0 },
+    { "arch_e", 0 },
+    { "arch_s", 0 },
+    { "arch_w", 0 },
+    { "tree_arch_n", 0 },
+    { "tree_arch_e", 0 },
+    { "tree_arch_s", 0 },
+    { "tree_arch_w", 0 },
+    { "gate_n", 0 },
+    { "gate_e", 0 },
+    { "gate_s", 0 },
+    { "gate_w", 0 },
+    { "wall_size_1", 0 },
+    { "wall_size_2", 0 },
+    { "wall_size_3", 0 },
+    { "tree_room_size_1", 0 },
+    { "tree_filler_w", 0 },
+    { "tree_filler_n", 0 },
+    { "wizard", 0 },
+    { "cauldron", 0 },
+    { "high_arch_e", 0 },
+    { "high_arch_s", 0 },
+    { "high_arch_e_base", 0 },
+    { "high_arch_s_base", 0 }
+  };
+  
+  p = 0x6CE2;
+  for (n=0; p<0x6D12; n++, p+=2)
+  {
+    bgtyp[n].addr = ram[p+1];
+    bgtyp[n].addr = (bgtyp[n].addr<<8) | ram[p];
+  }
+  while (p < 0x6FF2)
+  {
+    unsigned i;
+    
+    // find address
+    for (i=0; i<n; i++)
+      if (p == bgtyp[i].addr)
+        break;
+    if (i == n)
+      fprintf (stderr, "ERR: bg_type addr=$%04X\n", p);
+
+    // do table entry
+    fprintf (fp2, "uint8_t %s[] = \n{\n", bgtyp[i].label);
+    do
+    {
+      fprintf (fp2, "  0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X,\n",
+                ram[p], ram[p+1], ram[p+2], ram[p+3], ram[p+4], ram[p+5], ram[p+6], ram[p+7]);
+      p += 8;
+      
+    } while (ram[p] != 0);
+    fprintf (fp2, "  0");
+    p++;
+    fprintf (fp2,"\n};\n\n");
+  }
+
+  fprintf (fp2, "uint8_t *background_type_tbl[] = \n{\n");
+  for (unsigned i=0; i<n; i++)
+  {
+    fprintf (fp2, "  %s%s\n", bgtyp[i].label,
+      (i<n-1 ? "," : ""));
+  }
+  fprintf (fp2, "};\n\n");
+  
   // create object table
   p = 0x6FF2;
   fprintf (fp2, "OBJ9 special_objs_tbl[] = \n{\n");
