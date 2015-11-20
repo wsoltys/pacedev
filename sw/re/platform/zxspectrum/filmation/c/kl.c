@@ -504,6 +504,7 @@ void display_objects (void)
     
     sprite_scratchpad.x = x;
     sprite_scratchpad.y = 0;
+    sprite_scratchpad.flags = (1<<4);
 
     if (objects_carried[i][0] != 0)
     {
@@ -576,7 +577,7 @@ void init_sun (void)
 void init_special_objects (void)
 {
   uint8_t r = seed_1;
-  r += rand() & 255;
+  r += rand() & 0xFF;
   for (unsigned i=0; i<NUM_OBJS; i++)
   {
     // special objects $60-$67
@@ -771,10 +772,9 @@ void retrieve_screen (void)
   {
     if (location_tbl[p] == plyr_spr_1_scratchpad.scrn)
       break;
-    if (i == 255)
+    if (i == 666) // *** FIXME
     {
       // bad_player_location
-      // - can't really happen with 255 locations
       exit (-1);
     }
     p += 1 + location_tbl[p+1];
@@ -866,6 +866,8 @@ found_screen:
   
   fprintf (stderr, "n_other_objs = %d\n",
             p_other_objs - other_objs_here);
+            
+  dump_graphic_objs_tbl();
 }
 
 // $D55F
@@ -894,7 +896,14 @@ void render_dynamic_objects (void)
     #endif
               
     // fudge - just render the bloody thing!
-    transfer_sprite_and_print (&sprite_scratchpad, (uint8_t *)p_obj);
+    #if 1
+      //transfer_sprite_and_print (&sprite_scratchpad, (uint8_t *)p_obj);
+      sprite_scratchpad.index = p_obj->graphic_no;
+      sprite_scratchpad.x = p_obj->x;
+      sprite_scratchpad.y = p_obj->y;
+      sprite_scratchpad.flags = p_obj->flags;
+      print_sprite (&sprite_scratchpad);
+    #endif
   }
 }
 
@@ -943,6 +952,8 @@ uint8_t *flip_sprite (PSPRITE_SCRATCHPAD scratchpad)
 void print_sprite (PSPRITE_SCRATCHPAD scratchpad)
 {
   uint8_t *psprite;
+
+  //fprintf (stderr, "(%d,%d)\n", scratchpad->x, scratchpad->y);
 
   // references sprite_scratchpad
   psprite = flip_sprite (scratchpad);
