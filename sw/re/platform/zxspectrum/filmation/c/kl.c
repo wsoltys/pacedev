@@ -894,16 +894,29 @@ void render_dynamic_objects (void)
       continue;
     p_obj->flags &= ~(1<<5);
     #endif
-              
-    // fudge - just render the bloody thing!
-    #if 1
-      //transfer_sprite_and_print (&sprite_scratchpad, (uint8_t *)p_obj);
-      sprite_scratchpad.index = p_obj->graphic_no;
-      sprite_scratchpad.x = p_obj->x;
-      sprite_scratchpad.y = p_obj->y;
-      sprite_scratchpad.flags = p_obj->flags;
-      print_sprite (&sprite_scratchpad);
-    #endif
+
+    if (i == 0 || i == 1)
+    {              
+      fprintf (stderr, "print_sprite(#%d:%d)(%d,%d,%d)\n",
+                i, objects_to_draw[i],
+                p_obj->graphic_no,
+                p_obj->x,
+                p_obj->y);
+
+      // fudge - just render the bloody thing!
+      #if 1
+        //transfer_sprite_and_print (&sprite_scratchpad, (uint8_t *)p_obj);
+        sprite_scratchpad.index = p_obj->graphic_no;
+        sprite_scratchpad.x = p_obj->x;
+        sprite_scratchpad.y = p_obj->y;
+        sprite_scratchpad.flags = p_obj->flags;
+        fprintf (stderr, "print_sprite(%d,%d,%d,)\n",
+                  sprite_scratchpad.index,
+                  sprite_scratchpad.x,
+                  sprite_scratchpad.y);
+        print_sprite (&sprite_scratchpad);
+      #endif
+    }
   }
 }
 

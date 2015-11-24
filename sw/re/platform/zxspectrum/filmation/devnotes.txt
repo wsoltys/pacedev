@@ -2,3 +2,9 @@ Running in MESS0166
 ===================
 
 mess64d spectrum -w -d -dump knightlore.sna
+
+PROGRAM NOTES
+=============
+
+max 4 arches per location
+arches MUST be defined FIRST
