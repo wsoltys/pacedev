@@ -2715,34 +2715,38 @@ RAM:B096 3C C7 22 C7+								     ; DATA XREF: lose_life-2152o
 RAM:B096 3C C7 22 C7+		     dw	adj_6_7, adj_6_7, adj_8, adj_9,	adj_10,	adj_11,	adj_12_13_14_15
 RAM:B096 E3 C4 E3 C4+		     dw	adj_12_13_14_15, adj_12_13_14_15, adj_12_13_14_15, loc_C823
 RAM:B096 5E C6 BD C6+		     dw	loc_C823, loc_C823, loc_C823, loc_C823,	loc_C823, loc_B7A3
-RAM:B096 E8 C4 ED C4+		     dw	loc_B7E7, loc_C823, loc_C823, loc_C823,	loc_C823, loc_C823
-RAM:B096 F2 C4 F2 C4+		     dw	loc_C823, loc_B9A5, loc_B9A5, loc_CDDA,	loc_CDDA, loc_CDDA
+RAM:B096 E8 C4 ED C4+		     dw	adj_23,	loc_C823, loc_C823, loc_C823, loc_C823,	loc_C823
+RAM:B096 F2 C4 F2 C4+		     dw	loc_C823, adj_30_31_158_159, adj_30_31_158_159,	loc_CDDA
 RAM:B096 F2 C4 F2 C4+		     dw	loc_CDDA, loc_CDDA, loc_CDDA, loc_CDDA,	loc_CDDA, loc_CDDA
 RAM:B096 23 C8 23 C8+		     dw	loc_CDDA, loc_CDDA, loc_CDDA, loc_CDDA,	loc_CDDA, loc_CDDA
-RAM:B096 23 C8 23 C8+		     dw	loc_CDDA, loc_C828, loc_C828, loc_C828,	loc_C828, loc_C828
-RAM:B096 23 C8 23 C8+		     dw	loc_C828, loc_B6B9, loc_B6B1, loc_C828,	loc_C828, loc_C828
-RAM:B096 A3 B7 E7 B7+		     dw	loc_C828, loc_C828, loc_C828, loc_C4AA,	loc_B7A9, loc_CDDF
+RAM:B096 23 C8 23 C8+		     dw	loc_CDDA, loc_CDDA, loc_CDDA, loc_C828,	loc_C828, loc_C828
+RAM:B096 23 C8 23 C8+		     dw	loc_C828, loc_C828, loc_C828, loc_B6B9,	loc_B6B1, loc_C828
+RAM:B096 A3 B7 E7 B7+		     dw	loc_C828, loc_C828, loc_C828, loc_C828,	loc_C828, loc_C4AA
+RAM:B096 23 C8 23 C8+		     dw	loc_B7A9, loc_CDDF, loc_CDDF, loc_CDDF,	loc_CDDF, loc_CDDF
 RAM:B096 23 C8 23 C8+		     dw	loc_CDDF, loc_CDDF, loc_CDDF, loc_CDDF,	loc_CDDF, loc_CDDF
-RAM:B096 23 C8 23 C8+		     dw	loc_CDDF, loc_CDDF, loc_CDDF, loc_CDDF,	loc_CDDF, loc_CDDF
-RAM:B096 23 C8 23 C8+		     dw	loc_CDDF, loc_CDDF, loc_CDDF, loc_C5C8,	loc_C5C8, loc_C5C8
-RAM:B096 A5 B9 A5 B9+		     dw	loc_C5C8, loc_C4C3, loc_C4B6, loc_B7ED,	loc_B7ED, loc_C506
-RAM:B096 DA CD DA CD+		     dw	loc_C506, loc_C506, loc_B683, loc_C337,	loc_C337, loc_C337
-RAM:B096 DA CD DA CD+		     dw	loc_C337, loc_C28B, loc_C28B, loc_C28B,	loc_C28B, loc_C28B
-RAM:B096 DA CD DA CD+		     dw	loc_C28B, loc_C28B, loc_C1AB, loc_C1F1,	loc_C1F1, loc_C1F1
-RAM:B096 DA CD DA CD+		     dw	loc_C1F1, loc_C1F1, loc_C1F1, loc_C1F1,	loc_B95E, loc_BF2B
-RAM:B096 DA CD DA CD+		     dw	loc_BF2B, loc_BF2B, loc_BF2B, loc_BF2B,	loc_BF2B, loc_BF2B
-RAM:B096 DA CD DA CD+		     dw	loc_BF3F, loc_BEFE, loc_BEFE, loc_BEFE,	loc_BEFE, loc_BEFE
-RAM:B096 DA CD DA CD+		     dw	loc_BEFE, loc_BEFE, loc_BF11, sub_C4D3,	sub_C4D3, sub_C4D3
-RAM:B096 DA CD DA CD+		     dw	loc_B566, loc_B566, loc_B566, no_adjust, no_adjust
+RAM:B096 23 C8 23 C8+		     dw	loc_CDDF, loc_CDDF, loc_CDDF, loc_CDDF,	loc_CDDF, loc_C5C8
+RAM:B096 A5 B9 A5 B9+		     dw	loc_C5C8, loc_C5C8, loc_C5C8, loc_C4C3,	loc_C4B6, loc_B7ED
+RAM:B096 DA CD DA CD+		     dw	loc_B7ED, loc_C506, loc_C506, loc_C506,	loc_B683, loc_C337
+RAM:B096 DA CD DA CD+		     dw	loc_C337, loc_C337, loc_C337, loc_C28B,	loc_C28B, loc_C28B
+RAM:B096 DA CD DA CD+		     dw	loc_C28B, loc_C28B, loc_C28B, loc_C28B,	loc_C1AB, loc_C1F1
+RAM:B096 DA CD DA CD+		     dw	loc_C1F1, loc_C1F1, loc_C1F1, loc_C1F1,	loc_C1F1, loc_C1F1
+RAM:B096 DA CD DA CD+		     dw	loc_B95E, loc_BF2B, loc_BF2B, loc_BF2B,	loc_BF2B, loc_BF2B
+RAM:B096 DA CD DA CD+		     dw	loc_BF2B, loc_BF2B, loc_BF3F, loc_BEFE,	loc_BEFE, loc_BEFE
+RAM:B096 DA CD DA CD+		     dw	loc_BEFE, loc_BEFE, loc_BEFE, loc_BEFE,	loc_BF11, sub_C4D3
+RAM:B096 DA CD DA CD+		     dw	sub_C4D3, sub_C4D3, loc_B566, loc_B566,	loc_B566, no_adjust
 RAM:B096 28 C8 28 C8+		     dw	no_adjust, no_adjust, no_adjust, no_adjust, no_adjust
-RAM:B096 28 C8 28 C8+		     dw	loc_B99C, loc_B99F, loc_B6A2, loc_B6F9,	loc_B6F9, loc_B6F9
-RAM:B096 28 C8 28 C8+		     dw	loc_B6F9, loc_B6F9, loc_B6F9, loc_B73C,	loc_B73C, loc_B6F9
-RAM:B096 B9 B6 B1 B6+		     dw	loc_B6F9, loc_B6F9, loc_B6F9, loc_B6F9,	loc_B6F9, loc_B9A5
-RAM:B096 28 C8 28 C8+		     dw	loc_B9A5, loc_B8DA, loc_B8DA, loc_B8DA,	loc_B8DA, loc_B92C
-RAM:B096 28 C8 28 C8+		     dw	loc_B92C, loc_B92C, loc_B92C, loc_B923,	loc_B923, loc_B923
-RAM:B096 28 C8 28 C8+		     dw	loc_B923, loc_B923, loc_B923, loc_B923,	loc_B923, loc_B83F
-RAM:B096 AA C4 A9 B7+		     dw	loc_B83F, loc_B865, loc_B865, loc_B80F,	loc_B80F, loc_B5FF
-RAM:B096 DF CD DF CD+		     dw	loc_B5FF, loc_BF2B, loc_BF37, no_adjust, loc_BF37
+RAM:B096 28 C8 28 C8+		     dw	no_adjust, loc_B99C, loc_B99F, loc_B6A2, adj_144_to_149_152_to_157
+RAM:B096 28 C8 28 C8+		     dw	adj_144_to_149_152_to_157, adj_144_to_149_152_to_157
+RAM:B096 B9 B6 B1 B6+		     dw	adj_144_to_149_152_to_157, adj_144_to_149_152_to_157
+RAM:B096 28 C8 28 C8+		     dw	adj_144_to_149_152_to_157, loc_B73C, loc_B73C, adj_144_to_149_152_to_157
+RAM:B096 28 C8 28 C8+		     dw	adj_144_to_149_152_to_157, adj_144_to_149_152_to_157
+RAM:B096 28 C8 28 C8+		     dw	adj_144_to_149_152_to_157, adj_144_to_149_152_to_157
+RAM:B096 AA C4 A9 B7+		     dw	adj_144_to_149_152_to_157, adj_30_31_158_159, adj_30_31_158_159
+RAM:B096 DF CD DF CD+		     dw	loc_B8DA, loc_B8DA, loc_B8DA, loc_B8DA,	loc_B92C, loc_B92C
+RAM:B096 DF CD DF CD+		     dw	loc_B92C, loc_B92C, loc_B923, loc_B923,	loc_B923, loc_B923
+RAM:B096 DF CD DF CD+		     dw	loc_B923, loc_B923, loc_B923, loc_B923,	loc_B83F, loc_B83F
+RAM:B096 DF CD DF CD+		     dw	loc_B865, loc_B865, loc_B80F, loc_B80F,	loc_B5FF, loc_B5FF
+RAM:B096 DF CD DF CD+		     dw	loc_BF2B, loc_BF37, no_adjust, loc_BF37
 RAM:B20E	     ;
 RAM:B20E	     ; Audio Tunes
 RAM:B20E	     ;
@@ -3610,8 +3614,9 @@ RAM:B6EF DD 77 09		     ld	     (ix+9), a				     ; modifeid	code
 RAM:B6F2 DD 36 0B 01		     ld	     (ix+0Bh), 1
 RAM:B6F6 C3 AF B5		     jp	     loc_B5AF
 RAM:B6F9	     ; ---------------------------------------------------------------------------
+RAM:B6F9	     ; gaurd and wizard	(bottom	half)
 RAM:B6F9
-RAM:B6F9	     loc_B6F9:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
+RAM:B6F9	     adj_144_to_149_152_to_157:					     ; DATA XREF: RAM:adj_sprite_jmp_tblo
 RAM:B6F9 CD DD C4		     call    sub_C4DD
 RAM:B6FC DD 7E 09		     ld	     a,	(ix+9)
 RAM:B6FF DD B6 0A		     or	     (ix+0Ah)
@@ -3758,8 +3763,9 @@ RAM:B7E0 21 BF 5B		     ld	     hl, 5BBFh
 RAM:B7E3 36 00			     ld	     (hl), 0
 RAM:B7E5 18 F2			     jr	     loc_B7D9
 RAM:B7E7	     ; ---------------------------------------------------------------------------
+RAM:B7E7	     ; spikes
 RAM:B7E7
-RAM:B7E7	     loc_B7E7:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
+RAM:B7E7	     adj_23:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
 RAM:B7E7 CD 5C B8		     call    sub_B85C
 RAM:B7EA C3 E3 C4		     jp	     adj_6_7
 RAM:B7ED	     ; ---------------------------------------------------------------------------
@@ -3828,9 +3834,9 @@ RAM:B85C
 RAM:B85C
 RAM:B85C	     sub_B85C:							     ; CODE XREF: RAM:loc_B7A3p
 RAM:B85C									     ; RAM:loc_B7A9p ...
-RAM:B85C DD 7E 0D		     ld	     a,	(ix+0Dh)
+RAM:B85C DD 7E 0D		     ld	     a,	(ix+13)
 RAM:B85F F6 A0			     or	     0A0h ; ' '
-RAM:B861 DD 77 0D		     ld	     (ix+0Dh), a
+RAM:B861 DD 77 0D		     ld	     (ix+13), a
 RAM:B864 C9			     ret
 RAM:B864	     ; End of function sub_B85C
 RAM:B864
@@ -4040,8 +4046,9 @@ RAM:B99F	     loc_B99F:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
 RAM:B99F 21 E8 0C		     ld	     hl, 0CE8h
 RAM:B9A2 C3 2B C7		     jp	     set_pixel_adj
 RAM:B9A5	     ; ---------------------------------------------------------------------------
+RAM:B9A5	     ; guard and wizard	(top half)
 RAM:B9A5
-RAM:B9A5	     loc_B9A5:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
+RAM:B9A5	     adj_30_31_158_159:						     ; DATA XREF: RAM:adj_sprite_jmp_tblo
 RAM:B9A5 CD 10 C5		     call    sub_C510
 RAM:B9A8 CD 00 C7		     call    sub_C700
 RAM:B9AB CD CC B9		     call    sub_B9CC
@@ -5737,7 +5744,7 @@ RAM:C4DD
 RAM:C4DD	     ; =============== S U B R O U T I N E =======================================
 RAM:C4DD
 RAM:C4DD
-RAM:C4DD	     sub_C4DD:							     ; CODE XREF: RAM:loc_B6F9p
+RAM:C4DD	     sub_C4DD:							     ; CODE XREF: RAM:adj_144_to_149_152_to_157p
 RAM:C4DD									     ; sub_C306+82p ...
 RAM:C4DD 21 F4 FA		     ld	     hl, 0FAF4h				     ; -6, -12
 RAM:C4DD	     ; End of function sub_C4DD
@@ -5748,6 +5755,7 @@ RAM:C4E0	     jp_set_pixel_adj:						     ; CODE XREF: sub_C4D3+3j
 RAM:C4E0									     ; sub_C4D8+3j ...
 RAM:C4E0 C3 2B C7		     jp	     set_pixel_adj
 RAM:C4E0	     ; END OF FUNCTION CHUNK FOR sub_C4D8
+RAM:C4E3	     ; blocks
 RAM:C4E3
 RAM:C4E3	     ; =============== S U B R O U T I N E =======================================
 RAM:C4E3
@@ -5759,10 +5767,12 @@ RAM:C4E6 18 F8			     jr	     jp_set_pixel_adj
 RAM:C4E6	     ; End of function adj_6_7
 RAM:C4E6
 RAM:C4E8	     ; ---------------------------------------------------------------------------
+RAM:C4E8	     ; bricks
 RAM:C4E8
 RAM:C4E8	     adj_10:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
 RAM:C4E8 21 EC FF		     ld	     hl, 0FFECh				     ; -1, -20
 RAM:C4EB 18 F3			     jr	     jp_set_pixel_adj
+RAM:C4ED	     ; bricks
 RAM:C4ED
 RAM:C4ED	     ; =============== S U B R O U T I N E =======================================
 RAM:C4ED
@@ -5774,6 +5784,7 @@ RAM:C4ED 21 F4 FE		     ld	     hl, 0FEF4h				     ; -2, -12
 RAM:C4F0 18 EE			     jr	     jp_set_pixel_adj
 RAM:C4F0	     ; End of function adj_11
 RAM:C4F0
+RAM:C4F2	     ; bricks
 RAM:C4F2
 RAM:C4F2	     ; =============== S U B R O U T I N E =======================================
 RAM:C4F2
@@ -5831,7 +5842,7 @@ RAM:C510
 RAM:C510	     ; =============== S U B R O U T I N E =======================================
 RAM:C510
 RAM:C510
-RAM:C510	     sub_C510:							     ; CODE XREF: RAM:loc_B9A5p
+RAM:C510	     sub_C510:							     ; CODE XREF: RAM:adj_30_31_158_159p
 RAM:C510 21 F4 03		     ld	     hl, 3F4h				     ; +3, -12
 RAM:C513 18 CB			     jr	     jp_set_pixel_adj
 RAM:C513	     ; End of function sub_C510
@@ -6103,6 +6114,7 @@ RAM:C65B 07			     db	   7
 RAM:C65C F8			     db	0F8h ; ø
 RAM:C65D 08			     db	   8
 RAM:C65E	     ; ---------------------------------------------------------------------------
+RAM:C65E	     ; portculis
 RAM:C65E
 RAM:C65E	     adj_8:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
 RAM:C65E CD DD C4		     call    sub_C4DD
@@ -6170,6 +6182,7 @@ RAM:C6B3 DD CB 00 C6		     set     0,	(ix+0)
 RAM:C6B7 DD 36 0B 01		     ld	     (ix+0Bh), 1
 RAM:C6BB 18 D4			     jr	     loc_C691
 RAM:C6BD	     ; ---------------------------------------------------------------------------
+RAM:C6BD	     ; portculis
 RAM:C6BD
 RAM:C6BD	     adj_9:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
 RAM:C6BD CD DD C4		     call    sub_C4DD
@@ -6225,6 +6238,7 @@ RAM:C721 C9			     ret
 RAM:C721	     ; End of function sub_C700
 RAM:C721
 RAM:C722	     ; ---------------------------------------------------------------------------
+RAM:C722	     ; arch (far side)
 RAM:C722
 RAM:C722	     adj_3_5:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
 RAM:C722 DD CB 07 76		     bit     6,	(ix+7)				     ; hflip?
@@ -6252,6 +6266,7 @@ RAM:C737	     loc_C737:							     ; CODE XREF: RAM:C747j
 RAM:C737 21 01 FD		     ld	     hl, 0FD01h				     ; -3, +1
 RAM:C73A 18 10			     jr	     loc_C74C
 RAM:C73C	     ; ---------------------------------------------------------------------------
+RAM:C73C	     ; arch (near side)
 RAM:C73C
 RAM:C73C	     adj_2_4:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
 RAM:C73C DD CB 07 76		     bit     6,	(ix+7)				     ; hflip?

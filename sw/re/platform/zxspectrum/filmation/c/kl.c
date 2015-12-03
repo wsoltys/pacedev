@@ -130,6 +130,9 @@ static void play_audio_wait_key (uint8_t *audio_data);
 static void play_audio (uint8_t *audio_data);
 static void shuffle_objects_required (void);
 static uint8_t read_key (uint8_t row);
+static void adj_144_to_149_152_to_157 (POBJ32 p_obj);
+static void adj_23 (POBJ32 p_obj);
+static void adj_30_31_158_159 (POBJ32 p_obj);
 static void print_days (void);
 static void print_lives_gfx (void);
 static void print_lives (void);
@@ -236,7 +239,6 @@ game_loop:
 onscreen_loop:
 
   POBJ32 p_obj = graphic_objs_tbl;
-  POBJ32 p_next_obj = p_obj + 1;
   
   for (unsigned i=0; i<40; i++, p_obj++)
   {
@@ -249,46 +251,11 @@ onscreen_loop:
     #endif
     extern adjfn_t adj_sprite_jump_tbl[];
     
-    if (p_obj->graphic_no > 23)
+    if (p_obj->graphic_no > 170)
       adj_not_implemented (p_obj);
     else
       adj_sprite_jump_tbl[p_obj->graphic_no] (p_obj);
 
-#if 0      
-    // *** call per-sprite routine
-    switch (p_obj->graphic_no)
-    {
-      // spikes
-      case 23 :
-        // call sub_B85C
-        set_pixel_adj (p_obj, -8, -16);
-        break;
-
-      // guard & wizard (top half)
-      case 30 : case 31 :
-      case 158 : case 159 :
-        set_pixel_adj (p_obj, 3, -12);
-        // call sub_CB45 - move?
-        // other stuff
-        p_next_obj->off09 = p_obj->off09;
-        p_next_obj->off10 = p_obj->off10;
-        p_next_obj->x = p_obj->x;
-        p_next_obj->y = p_obj->y;
-        // call sub_b76c
-        break;
-
-      // guard and wizard (bottom half)        
-      case 144 : case 145 : case 146 : case 147 : case 148 : case 149 :
-      case 152 : case 153 : case 154 : case 155 : case 156 : case 157 :
-        set_pixel_adj (p_obj, -6, -12);
-        break;
-                        
-      default :
-        set_pixel_adj (p_obj, 0, 0);
-        break;
-    }
-#endif
-        
     // update seed_3
     uint8_t r = rand ();
     seed_3 += r;
@@ -354,30 +321,177 @@ onscreen_loop:
 // $B096
 adjfn_t adj_sprite_jump_tbl[] =
 {
-  no_adjust,
-  no_adjust,
-  adj_2_4,              // stone arch near side
-  adj_3_5,              // stone arch far side
-  adj_2_4,              // tree arch near side
-  adj_3_5,              // tree arch far side
-  adj_6_7,
-  adj_6_7,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_10,               // bricks
-  adj_11,               // more bricks
-  adj_12_13_14_15,      // even more bricks
-  adj_12_13_14_15,      // even more bricks
-  adj_12_13_14_15,      // even more bricks
-  adj_12_13_14_15,      // even more bricks
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
+  no_adjust,                    // (unused)
+  no_adjust,                    // (unused)
+  adj_2_4,                      // stone arch (near side)
+  adj_3_5,                      // stone arch (far side)
+  adj_2_4,                      // tree arch (near side)
+  adj_3_5,                      // tree arch (far side)
+  adj_6_7,                      // rock & block
+  adj_6_7,                      // rock & block
+  adj_not_implemented,          
+  adj_not_implemented,          
+  adj_10,                       // bricks
+  adj_11,                       // more bricks
+  adj_12_13_14_15,              // even more bricks
+  adj_12_13_14_15,              // even more bricks
+  adj_12_13_14_15,              // even more bricks
+  adj_12_13_14_15,              // even more bricks
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
-  adj_23,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_23,                       // spikes
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_30_31_158_159,            // guard & wizard (top half)
+  adj_30_31_158_159,            // guard & wizard (top half)
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,  // 40
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,  // 50
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,  // 60
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,  // 70
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,  // 80
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,  // 90
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,  // 100
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,  // 110
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,  // 120
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,  // 130
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,  // 140
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  adj_not_implemented,  // 150
+  adj_not_implemented,
+  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  adj_30_31_158_159,            // guard & wizard (top half)
+  adj_30_31_158_159,            // guard & wizard (top half)
+  adj_not_implemented,  // 160
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,  // 170
       
   adj_not_implemented
 };
@@ -433,6 +547,38 @@ uint8_t read_key (uint8_t row)
       break;
   }
   return (val);
+}
+
+// $B6F7
+// guard & wizard (bottom half)
+void adj_144_to_149_152_to_157 (POBJ32 p_obj)
+{
+  set_pixel_adj (p_obj, -6, -12); // this is in a sub
+  // other stuff
+}
+
+// $B7E7
+// spikes
+void adj_23 (POBJ32 p_obj)
+{
+  // call sub_B85C
+  adj_6_7 (p_obj);
+}
+
+// $B9A5
+// guard & wizard (top half)
+void adj_30_31_158_159 (POBJ32 p_obj)
+{
+  POBJ32 p_next_obj = p_obj + 1;
+  
+  set_pixel_adj (p_obj, 3, -12);
+  // call sub_CB45 - move?
+  // other stuff
+  p_next_obj->off09 = p_obj->off09;
+  p_next_obj->off10 = p_obj->off10;
+  p_next_obj->x = p_obj->x;
+  p_next_obj->y = p_obj->y;
+  // call sub_b76c
 }
 
 // $BC66
@@ -722,8 +868,10 @@ void init_special_objects (void)
 }
 
 // $C4E8
+// rock & block
 void adj_6_7 (POBJ32 p_obj)
 {
+  set_pixel_adj (p_obj, -8, -16);
 }
 
 // $C4E8
@@ -808,7 +956,7 @@ void update_special_objs (void)
 }
 
 // $C722
-// stone/tree arch far side
+// stone/tree arch (far side)
 void adj_3_5 (POBJ32 p_obj)
 {
   if ((p_obj->flags & FLAG_HFLIP) == 0)
@@ -825,7 +973,7 @@ void set_pixel_adj (POBJ32 p_obj, int8_t h, int8_t l)
 }
 
 // $C7C3
-// stone/tree arch near side
+// stone/tree arch (near side)
 void adj_2_4 (POBJ32 p_obj)
 {
   if ((p_obj->flags & FLAG_HFLIP) == 0)
