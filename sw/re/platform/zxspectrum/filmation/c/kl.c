@@ -24,6 +24,10 @@
 
 #pragma pack(1)
 
+#define FLAG_VFLIP  (1<<7)
+#define FLAG_HFLIP  (1<<6)
+#define FLAG_DRAW   (1<<4)
+
 typedef struct
 {
   uint8_t   x;
@@ -57,29 +61,30 @@ typedef struct
   uint8_t   height;
   uint8_t   flags;
   uint8_t   scrn;
-  uint8_t   pad1[7];
-  // original a pointer, now an index
+  uint8_t   off09;
+  uint8_t   off10;
+  uint8_t   off11;
+  uint8_t   off12;
+  uint8_t   off13;
+  uint8_t   off14;
+  uint8_t   off15;
+  // originally a pointer, now an index
   uint16_t  ptr_obj_tbl_entry;
-  uint8_t   pad2[6];
+  int8_t    pixel_x_adj;
+  int8_t    pixel_y_adj;
+  uint8_t   pad2[4];
   uint8_t   off24;
   uint8_t   off25;
-  uint8_t   off26;
-  uint8_t   off27;
+  uint8_t   pixel_x;
+  uint8_t   pixel_y;
   uint8_t   off28;
   uint8_t   off29;
-  uint8_t   off30;
-  uint8_t   off31;
+  uint8_t   old_pixel_x;
+  uint8_t   old_pixel_y;
 
-} OBJ32, *POBJ32;
+} OBJ32, SPRITE_SCRATCHPAD, *POBJ32, *PSPRITE_SCRATCHPAD;
 
-typedef struct
-{
-  uint8_t index;
-  uint8_t flags;
-  uint8_t x;
-  uint8_t y;
-
-} SPRITE_SCRATCHPAD, *PSPRITE_SCRATCHPAD;
+typedef void (*adjfn_t)(POBJ32 p_obj);
 
 #include "kldat.c"
 
@@ -141,13 +146,22 @@ static void display_menu (void);
 static void display_text_list (uint8_t *clours, uint8_t *xy, char *text_list[], uint8_t n);
 static void multiple_print_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t dx, uint8_t dy, uint8_t n);
 static void display_objects (void);
+static void no_adjust (POBJ32 p_obj);
 static void display_sun_moon_frame (PSPRITE_SCRATCHPAD scratchpad);
 static void init_sun (void);
 static void init_special_objects (void);
 static void update_special_objs (void);
+static void adj_6_7 (POBJ32 p_obj);
+static void adj_10 (POBJ32 p_obj);
+static void adj_11 (POBJ32 p_obj);
+static void adj_12_13_14_15 (POBJ32 p_obj);
 static void find_special_objs_here (void);
+static void adj_3_5 (POBJ32 p_obj);
+static void set_pixel_adj (POBJ32 p_obj, int8_t h, int8_t l);
+static void adj_2_4 (POBJ32 p_obj);
 static void save_sprite_somethings (POBJ32 p_obj);
 static void list_objects_to_draw (void);
+static void calc_display_order_and_render (void);
 static void init_start_location (void);
 static void build_screen_objects (void);
 static uint8_t *transfer_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t *psprite);
@@ -158,7 +172,10 @@ static void print_border (void);
 static void clear_scrn (void);
 static void clr_screen_buffer (void);
 static void render_dynamic_objects (void);
+static void loc_D653 (void);
+static void calc_pixel_XY (POBJ32 p_obj);
 static uint8_t *flip_sprite (PSPRITE_SCRATCHPAD scratchpad);
+static void calc_pixel_XY_and_render (POBJ32 p_obj);
 static void print_sprite (PSPRITE_SCRATCHPAD scratchpad);
 
 // end of prototypes
@@ -180,6 +197,11 @@ void dump_graphic_objs_tbl (void)
               graphic_objs_tbl[i].height,
               graphic_objs_tbl[i].flags);
   }
+}
+
+void adj_not_implemented (POBJ32 obj)
+{
+  // place-holder
 }
 
 void knight_lore (void)
@@ -214,14 +236,58 @@ game_loop:
 onscreen_loop:
 
   POBJ32 p_obj = graphic_objs_tbl;
+  POBJ32 p_next_obj = p_obj + 1;
+  
   for (unsigned i=0; i<40; i++, p_obj++)
   {
     adj_sprite_loop:
       
     save_sprite_somethings (p_obj);
 
-    //p_obj->graphic_no;
+    #ifndef arraylen
+      #define arraylen(n) (sizeof(n) / sizeof((n)[0]))
+    #endif
+    extern adjfn_t adj_sprite_jump_tbl[];
+    
+    if (p_obj->graphic_no > 23)
+      adj_not_implemented (p_obj);
+    else
+      adj_sprite_jump_tbl[p_obj->graphic_no] (p_obj);
+
+#if 0      
     // *** call per-sprite routine
+    switch (p_obj->graphic_no)
+    {
+      // spikes
+      case 23 :
+        // call sub_B85C
+        set_pixel_adj (p_obj, -8, -16);
+        break;
+
+      // guard & wizard (top half)
+      case 30 : case 31 :
+      case 158 : case 159 :
+        set_pixel_adj (p_obj, 3, -12);
+        // call sub_CB45 - move?
+        // other stuff
+        p_next_obj->off09 = p_obj->off09;
+        p_next_obj->off10 = p_obj->off10;
+        p_next_obj->x = p_obj->x;
+        p_next_obj->y = p_obj->y;
+        // call sub_b76c
+        break;
+
+      // guard and wizard (bottom half)        
+      case 144 : case 145 : case 146 : case 147 : case 148 : case 149 :
+      case 152 : case 153 : case 154 : case 155 : case 156 : case 157 :
+        set_pixel_adj (p_obj, -6, -12);
+        break;
+                        
+      default :
+        set_pixel_adj (p_obj, 0, 0);
+        break;
+    }
+#endif
         
     // update seed_3
     uint8_t r = rand ();
@@ -237,7 +303,6 @@ onscreen_loop:
 
   // some other stuff
     
-  // populate objects_to_draw[]
   list_objects_to_draw ();
   render_dynamic_objects ();
   
@@ -255,8 +320,67 @@ onscreen_loop:
   if (key[KEY_ESC])
     return;
 
+  if (key[KEY_N])
+  {
+    plyr_spr_1_scratchpad.scrn += 16;
+    plyr_spr_2_scratchpad.scrn += 16;
+    goto game_loop;
+  }
+  
+  if (key[KEY_S])
+  {
+    plyr_spr_1_scratchpad.scrn -= 16;
+    plyr_spr_2_scratchpad.scrn -= 16;
+    goto game_loop;
+  }
+  
+  if (key[KEY_E])
+  {
+    plyr_spr_1_scratchpad.scrn += 1;
+    plyr_spr_2_scratchpad.scrn += 1;
+    goto game_loop;
+  }
+  
+  if (key[KEY_W])
+  {
+    plyr_spr_1_scratchpad.scrn -= 1;
+    plyr_spr_2_scratchpad.scrn -= 1;
+    goto game_loop;
+  }
+
   goto onscreen_loop;
 }
+
+// $B096
+adjfn_t adj_sprite_jump_tbl[] =
+{
+  no_adjust,
+  no_adjust,
+  adj_2_4,              // stone arch near side
+  adj_3_5,              // stone arch far side
+  adj_2_4,              // tree arch near side
+  adj_3_5,              // tree arch far side
+  adj_6_7,
+  adj_6_7,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_10,               // bricks
+  adj_11,               // more bricks
+  adj_12_13_14_15,      // even more bricks
+  adj_12_13_14_15,      // even more bricks
+  adj_12_13_14_15,      // even more bricks
+  adj_12_13_14_15,      // even more bricks
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_23,
+      
+  adj_not_implemented
+};
 
 // $B2B6
 void play_audio_wait_key (uint8_t *audio_data)
@@ -320,10 +444,10 @@ void print_days (void)
 // $BC7A
 void print_lives_gfx (void)
 {
-  sprite_scratchpad.index = 0x8c;
+  sprite_scratchpad.graphic_no = 0x8c;
   sprite_scratchpad.flags = 0;
-  sprite_scratchpad.x = 16;
-  sprite_scratchpad.y = 32;
+  sprite_scratchpad.pixel_x = 16;
+  sprite_scratchpad.pixel_y = 32;
   print_sprite (&sprite_scratchpad);
   // fill_de ();
   // fill_de ();
@@ -486,8 +610,8 @@ void multiple_print_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t dx, uint8_t d
   for (unsigned i=0; i<n; i++)
   {
     print_sprite (scratchpad);
-    scratchpad->x += dx;
-    scratchpad->y += dy;
+    scratchpad->pixel_x += dx;
+    scratchpad->pixel_y += dy;
   }
 }
 
@@ -502,16 +626,22 @@ void display_objects (void)
   {
     uint8_t x = ((255-(3-i))+3)*24+16  +24;
     
-    sprite_scratchpad.x = x;
-    sprite_scratchpad.y = 0;
+    sprite_scratchpad.pixel_x = x;
+    sprite_scratchpad.pixel_y = 0;
     sprite_scratchpad.flags = (1<<4);
 
     if (objects_carried[i][0] != 0)
     {
-      sprite_scratchpad.index = objects_carried[i][0];
+      sprite_scratchpad.graphic_no = objects_carried[i][0];
       print_sprite (&sprite_scratchpad);
     }
   }
+}
+
+// $C2CB
+void no_adjust (POBJ32 p_obj)
+{
+  // do nothing
 }
 
 // $C3A4
@@ -521,32 +651,32 @@ void display_sun_moon_frame (PSPRITE_SCRATCHPAD scratchpad)
 
   // check a byte
 
-  if (scratchpad->x == 225)
+  if (scratchpad->pixel_x == 225)
     goto toggle_day_night;
 
   // adjust Y coordinate
-  x = scratchpad->x + 16;
+  x = scratchpad->pixel_x + 16;
   scratchpad->y = sun_moon_yoff[(x>>2)&0x0f];
   print_sprite (scratchpad);
 
 display_frame:
-  sprite_scratchpad.index = 0x5a;
+  sprite_scratchpad.graphic_no = 0x5a;
   sprite_scratchpad.flags = 0;
-  sprite_scratchpad.x = 184;
-  sprite_scratchpad.y = 0;
+  sprite_scratchpad.pixel_x = 184;
+  sprite_scratchpad.pixel_y = 0;
   print_sprite (&sprite_scratchpad);
-  sprite_scratchpad.x = 208;
-  sprite_scratchpad.index = 0xba;
+  sprite_scratchpad.pixel_x = 208;
+  sprite_scratchpad.graphic_no = 0xba;
   print_sprite (&sprite_scratchpad);
   // wipe something
   return;
 
 toggle_day_night:
-  scratchpad->index ^= 1;
+  scratchpad->graphic_no ^= 1;
   //colour_sun_moon ();
-  scratchpad->x = 176;
+  scratchpad->pixel_x = 176;
   // if just changed to moon, exit
-  if (scratchpad->index & 1)
+  if (scratchpad->graphic_no & 1)
     return;
 
 inc_days:
@@ -565,9 +695,9 @@ inc_days:
 // $C46D
 void init_sun (void)
 {
-  sun_moon_scratchpad.index = 0x58;
-  sun_moon_scratchpad.x = 176;
-  sun_moon_scratchpad.y = 9;
+  sun_moon_scratchpad.graphic_no = 0x58;
+  sun_moon_scratchpad.pixel_x = 176;
+  sun_moon_scratchpad.pixel_y = 9;
 }
 
 // $C47E
@@ -589,6 +719,29 @@ void init_special_objects (void)
     special_objs_tbl[i].curr_scrn = special_objs_tbl[i].start_scrn;
     r++;
   }
+}
+
+// $C4E8
+void adj_6_7 (POBJ32 p_obj)
+{
+}
+
+// $C4E8
+void adj_10 (POBJ32 p_obj)
+{
+  set_pixel_adj (p_obj, -1, -20);
+}
+
+// $C4ED
+void adj_11 (POBJ32 p_obj)
+{
+  set_pixel_adj (p_obj, -2, -12);
+}
+
+// $C4F2
+void adj_12_13_14_15 (POBJ32 p_obj)
+{
+  set_pixel_adj (p_obj, -4, -8);
 }
 
 // $C525
@@ -615,9 +768,9 @@ void find_special_objs_here (void)
     p_special_obj->height = 20;
     p_special_obj->flags = 0x14;
     p_special_obj->scrn = special_objs_tbl[i].curr_scrn;
-    memset (&p_special_obj->pad1, 0, 7);
+    memset (&p_special_obj->off09, 0, 7);  // *** FIXME
     p_special_obj->ptr_obj_tbl_entry = i;
-    memset (&p_special_obj->pad2, 0, 14);
+    memset (&p_special_obj->pad2, 0, 12); // *** FIXME
     
     n_special_objs_here++;
   }
@@ -654,13 +807,56 @@ void update_special_objs (void)
   }
 }
 
+// $C722
+// stone/tree arch far side
+void adj_3_5 (POBJ32 p_obj)
+{
+  if ((p_obj->flags & FLAG_HFLIP) == 0)
+    set_pixel_adj (p_obj, -3, -9);
+  else
+    set_pixel_adj (p_obj, -2, -7);
+}
+
+// $C72B
+void set_pixel_adj (POBJ32 p_obj, int8_t h, int8_t l)
+{
+  p_obj->pixel_x_adj = l;
+  p_obj->pixel_y_adj = h;
+}
+
+// $C7C3
+// stone/tree arch near side
+void adj_2_4 (POBJ32 p_obj)
+{
+  if ((p_obj->flags & FLAG_HFLIP) == 0)
+  {
+    // tree arch
+    if (p_obj->graphic_no == 4)
+      set_pixel_adj (p_obj, -3, 1);
+    else
+      set_pixel_adj (p_obj, -3, -7);
+    p_obj->off10 = p_obj->y + 13;
+    p_obj->off09 = p_obj->x;
+    p_obj->off11 = p_obj->z;
+    // call sub_c7db
+    // call loc_c785
+  }
+  else
+  {
+    set_pixel_adj (p_obj, -2, -17);
+    p_obj->off09 = p_obj->x + 13;
+    p_obj->off10 = p_obj->y;
+    // jp loc_c760
+  }
+}
+
 // $CE49
 void save_sprite_somethings (POBJ32 p_obj)
 {
   p_obj->off28 = p_obj->off24;
   p_obj->off29 = p_obj->off25;
-  p_obj->off30 = p_obj->off26;
-  p_obj->off31 = p_obj->off27;
+  p_obj->old_pixel_x = p_obj->pixel_x;
+  p_obj->old_pixel_y = p_obj->pixel_y;
 }
 
 // $CE62
@@ -674,11 +870,30 @@ void list_objects_to_draw (void)
   {
     if ((graphic_objs_tbl[i].graphic_no != 0) &&
         (graphic_objs_tbl[i].flags & (1<<4)))
+    {
+      fprintf (stderr, "[%02d]=%02d(graphic_no=$%02X,flags=$%02X)\n",
+                n, i, graphic_objs_tbl[i].graphic_no, graphic_objs_tbl[i].flags);
       objects_to_draw[n++] = i;
+    }
   }
   objects_to_draw[n] = 0xff;
-  
+
   //fprintf (stderr, "  n=%d\n", n);
+}
+
+// $CEBB
+void calc_display_order_and_render (void)
+{
+  for (unsigned i=0; objects_to_draw[i] != 0xFF; i++)
+  {
+    POBJ32 p_obj = &graphic_objs_tbl[objects_to_draw[i]];
+    #if 0
+    if (p_obj->graphic_no == 23)
+      p_obj->flags &= ~(1<<4);
+    else 
+    #endif     
+      calc_pixel_XY_and_render (p_obj);
+  }
 }
 
 // $D1B1
@@ -686,8 +901,8 @@ void init_start_location (void)
 {
   memcpy ((uint8_t *)&plyr_spr_1_scratchpad, plyr_spr_init_data+0, 8);
   memcpy ((uint8_t *)&plyr_spr_2_scratchpad, plyr_spr_init_data+8, 8);
-  plyr_spr_1_scratchpad.pad1[1] = 0x12;
-  plyr_spr_2_scratchpad.pad1[1] = 0x22;
+  //plyr_spr_1_scratchpad.pad1[1] = 0x12; // *** FIXME
+  //plyr_spr_2_scratchpad.pad1[1] = 0x22; // *** FIXME
   uint8_t s = start_locations[seed_1 & 3];
   // start_loc_1
   plyr_spr_1_scratchpad.scrn = s;
@@ -711,10 +926,10 @@ void build_screen_objects (void)
 // $D237
 uint8_t *transfer_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t *psprite)
 {
-  scratchpad->index = *(psprite++);
+  scratchpad->graphic_no = *(psprite++);
   scratchpad->flags = *(psprite++);
-  scratchpad->x = *(psprite++);
-  scratchpad->y = *(psprite++);
+  scratchpad->pixel_x = *(psprite++);
+  scratchpad->pixel_y = *(psprite++);
 
   return (psprite);
 }
@@ -813,7 +1028,7 @@ found_screen:
 
     fprintf (stderr, "BG:%d\n", location_tbl[p]);
 
-    for (; *p_bg_obj != 0; p_bg_obj+=8)
+    for (; *p_bg_obj!=0; p_bg_obj+=8)
     {    
       next_bj_obj_sprite:
         
@@ -822,7 +1037,7 @@ found_screen:
       // set screen (location)
       p_other_objs->scrn = plyr_spr_1_scratchpad.scrn;
       // zero everything else
-      memset (&p_other_objs->pad1, 0, 23);
+      memset (&p_other_objs->off09, 0, 23);
       
       p_other_objs++;
     };
@@ -831,34 +1046,46 @@ found_screen:
   // skip 0xFF
   if (size)
     size--;
-      
+  p++;
+  
   // do the foreground objects
   for (; size; )
   {
     uint8_t count = (location_tbl[p] & 7) + 1;
     uint8_t block = location_tbl[p] >> 3;
-    uint8_t loc = location_tbl[p+1];
+
     size--;
-    p += 2;
-        
-    for (; count; count--)
+    p++;
+              
+    for (; count; p++, count--, size--)
     {
       uint8_t *p_fg_obj = block_type_tbl[block];
+      uint8_t loc = location_tbl[p];
 
-      for (; p_fg_obj[0]!=0; p_fg_obj+=8)
+      for (; *p_fg_obj!=0; p_fg_obj+=6)
       {
+        uint8_t x1, y1, z1;
+        
         p_other_objs->graphic_no = p_fg_obj[0];
         p_other_objs->width = p_fg_obj[1];
         p_other_objs->depth = p_fg_obj[2];
         p_other_objs->height = p_fg_obj[3];
         p_other_objs->flags = p_fg_obj[4];
         p_other_objs->scrn = plyr_spr_1_scratchpad.scrn;
-        // more copying here, including offsets
-        //??? = p_fg_obj[5];
+        
+        // X = x*16 + x1*8 + 72
+        x1 = (p_fg_obj[5] << 3) & 8;  // x8
+        p_other_objs->x = ((loc << 4) & 0x70) + x1 + 72;
+        // Y = y*16 + y1*8 + 72
+        y1 = (p_fg_obj[5] << 2) & 8;  // x8
+        p_other_objs->y = ((loc << 1) & 0x70) + y1 + 72;
+        // Z = z*12 + z1*4 + room_size_Z
+        z1 = p_fg_obj[5] & 0xFC;      // x4
+        p_other_objs->z = ((loc >> 6) & 3) * 12 + z1 + room_size_Z;
         
         // zero everything else        
-        memset (&p_other_objs->pad1, 0, 23);
-        
+        memset (&p_other_objs->off09, 0, 23);
+
         p_other_objs++;
       }
     }
@@ -884,6 +1111,8 @@ void clr_screen_buffer (void)
 // $D59F 
 void render_dynamic_objects (void)
 {
+  loc_D653 ();
+  #if 0
   for (unsigned i=0; objects_to_draw[i] != 0xFF; i++)
   {
     POBJ32 p_obj = &graphic_objs_tbl[objects_to_draw[i]];
@@ -894,30 +1123,22 @@ void render_dynamic_objects (void)
       continue;
     p_obj->flags &= ~(1<<5);
     #endif
-
-    if (i == 0 || i == 1)
-    {              
-      fprintf (stderr, "print_sprite(#%d:%d)(%d,%d,%d)\n",
-                i, objects_to_draw[i],
-                p_obj->graphic_no,
-                p_obj->x,
-                p_obj->y);
-
-      // fudge - just render the bloody thing!
-      #if 1
-        //transfer_sprite_and_print (&sprite_scratchpad, (uint8_t *)p_obj);
-        sprite_scratchpad.index = p_obj->graphic_no;
-        sprite_scratchpad.x = p_obj->x;
-        sprite_scratchpad.y = p_obj->y;
-        sprite_scratchpad.flags = p_obj->flags;
-        fprintf (stderr, "print_sprite(%d,%d,%d,)\n",
-                  sprite_scratchpad.index,
-                  sprite_scratchpad.x,
-                  sprite_scratchpad.y);
-        print_sprite (&sprite_scratchpad);
-      #endif
-    }
   }
+  #endif
+}
+
+// $D653
+void loc_D653 (void)
+{
+  calc_display_order_and_render ();
+  // other stuff
+}
+
+// $D6C9
+void calc_pixel_XY (POBJ32 p_obj)
+{
+  p_obj->pixel_x = p_obj->x + p_obj->y - 128 + p_obj->pixel_x_adj;
+  p_obj->pixel_y = ((p_obj->y - p_obj->x + 128) >> 1) + p_obj->z - 104 + p_obj->pixel_y_adj;
 }
 
 #define REV(d) (((d&1)<<7)|((d&2)<<5)|((d&4)<<3)|((d&8)<<1)|((d&16)>>1)|((d&32)>>3)|((d&64)>>5)|((d&128)>>7))
@@ -926,10 +1147,10 @@ void render_dynamic_objects (void)
 // $D6EF
 uint8_t *flip_sprite (PSPRITE_SCRATCHPAD scratchpad)
 {
-  uint8_t *psprite = sprite_tbl[scratchpad->index];
+  uint8_t *psprite = sprite_tbl[scratchpad->graphic_no];
   
-  uint8_t vflip = (scratchpad->flags ^ (*psprite)) & 0x80;
-  uint8_t hflip = (scratchpad->flags ^ (*psprite)) & 0x40;
+  uint8_t vflip = (scratchpad->flags ^ (*psprite)) & FLAG_VFLIP;
+  uint8_t hflip = (scratchpad->flags ^ (*psprite)) & FLAG_HFLIP;
 
   uint8_t w = psprite[0] & 0x3f;
   uint8_t h = psprite[1];
@@ -949,16 +1170,37 @@ uint8_t *flip_sprite (PSPRITE_SCRATCHPAD scratchpad)
   if (hflip)
   {
     for (unsigned y=0; y<h; y++)
-      for (unsigned x=0; x<w/2; x++)
+    {
+      unsigned x;
+      
+      for (x=0; x<w/2; x++)
       {
         uint8_t t = psprite[3+2*(y*w+x)];
         psprite[3+2*(y*w+x)] = REV(psprite[3+2*(y*w+w-1-x)]);
         psprite[3+2*(y*w+w-1-x)] = REV(t);
       }
+      if (w & 1)
+        psprite[3+2*(y*w+x)] = REV(psprite[3+2*(y*w+x)]);
+      }
     *psprite ^= 0x40;
   }
 
   return (psprite);
+}
+
+// $D704
+void calc_pixel_XY_and_render (POBJ32 p_obj)
+{
+  // flag don't draw
+  p_obj->flags &= ~(1<<4);
+  
+  calc_pixel_XY (p_obj);
+  
+  //if (p_obj->graphic_no == 10)
+  {
+    //fprintf (stderr, "%s($%02X)\n", __FUNCTION__, p_obj->graphic_no);
+    print_sprite (p_obj);
+  }
 }
 
 // $D718
@@ -985,7 +1227,7 @@ void print_sprite (PSPRITE_SCRATCHPAD scratchpad)
       for (unsigned b=0; b<8; b++)
       {
         if (d & (1<<7))
-          putpixel (screen, scratchpad->x+x*8+b, 191-(scratchpad->y+y), 15);
+          putpixel (screen, scratchpad->pixel_x+x*8+b, 191-(scratchpad->pixel_y+y), 15);
         d <<= 1;
       }
     }

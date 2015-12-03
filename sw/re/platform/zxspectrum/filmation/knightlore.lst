@@ -78,7 +78,7 @@ SCRATCH:5BBC										 ; lose_life-2160o ...
 SCRATCH:5BBD ??		 byte_5BBD:	 ds 1						 ; DATA	XREF: RAM:B868r
 SCRATCH:5BBD										 ; RAM:B873w ...
 SCRATCH:5BBE ??		 unk_5BBE:	 ds 1						 ; DATA	XREF: RAM:B028r
-SCRATCH:5BBE										 ; wtf_adjust_object_coords_wtf+1w ...
+SCRATCH:5BBE										 ; calc_display_order_and_render+1w ...
 SCRATCH:5BBF ??		 unk_5BBF:	 ds 1						 ; DATA	XREF: RAM:B7BAo
 SCRATCH:5BBF										 ; build_screen_objects+1Fw
 SCRATCH:5BC0 ??		 byte_5BC0:	 ds 1						 ; DATA	XREF: RAM:B7AFr
@@ -98,10 +98,10 @@ SCRATCH:5BC7 ??	??	 gfxbase_8x8:	 ds 2
 SCRATCH:5BC9 ??		 unk_5BC9:	 ds 1
 SCRATCH:5BCA ??		 unk_5BCA:	 ds 1
 SCRATCH:5BCB ??	??	 tmp_objects_to_draw:ds	2
-SCRATCH:5BCD ??	??	 word_5BCD:	 ds 2						 ; DATA	XREF: wtf_adjust_object_coords_wtf+19w
-SCRATCH:5BCD										 ; wtf_adjust_object_coords_wtf+10Aw ...
-SCRATCH:5BCF ??	??	 word_5BCF:	 ds 2						 ; DATA	XREF: wtf_adjust_object_coords_wtf+2Ew
-SCRATCH:5BCF										 ; wtf_adjust_object_coords_wtf:loc_CFA5r ...
+SCRATCH:5BCD ??	??	 word_5BCD:	 ds 2						 ; DATA	XREF: calc_display_order_and_render+19w
+SCRATCH:5BCD										 ; calc_display_order_and_render+10Aw ...
+SCRATCH:5BCF ??	??	 word_5BCF:	 ds 2						 ; DATA	XREF: calc_display_order_and_render+2Ew
+SCRATCH:5BCF										 ; calc_display_order_and_render:d_3467121516r	...
 SCRATCH:5BD1 ??		 unk_5BD1:	 ds 1						 ; DATA	XREF: play_audio_wait_keyo
 SCRATCH:5BD2 ??		 directional:	 ds 1						 ; DATA	XREF: do_menu_selection+4Bo
 SCRATCH:5BD3 ??		 byte_5BD3:	 ds 1						 ; DATA	XREF: sub_C00E+1Aw
@@ -2710,10 +2710,10 @@ RAM:B095 C9			     ret
 RAM:B095	     ; End of function reset_object_???_flag
 RAM:B095
 RAM:B095	     ; ---------------------------------------------------------------------------
-RAM:B096 CB C2 CB C2+adj_sprite_jmp_tbl:dw no_adjust, no_adjust, adj_2_4_arch_left, loc_C722, adj_2_4_arch_left
+RAM:B096 CB C2 CB C2+adj_sprite_jmp_tbl:dw no_adjust, no_adjust, adj_2_4, adj_3_5, adj_2_4, adj_3_5
 RAM:B096 3C C7 22 C7+								     ; DATA XREF: lose_life-2152o
-RAM:B096 3C C7 22 C7+		     dw	loc_C722, sub_C4E3, sub_C4E3, loc_C65E,	loc_C6BD, loc_C4E8
-RAM:B096 E3 C4 E3 C4+		     dw	sub_C4ED, sub_C4F2, sub_C4F2, sub_C4F2,	sub_C4F2, loc_C823
+RAM:B096 3C C7 22 C7+		     dw	adj_6_7, adj_6_7, adj_8, adj_9,	adj_10,	adj_11,	adj_12_13_14_15
+RAM:B096 E3 C4 E3 C4+		     dw	adj_12_13_14_15, adj_12_13_14_15, adj_12_13_14_15, loc_C823
 RAM:B096 5E C6 BD C6+		     dw	loc_C823, loc_C823, loc_C823, loc_C823,	loc_C823, loc_B7A3
 RAM:B096 E8 C4 ED C4+		     dw	loc_B7E7, loc_C823, loc_C823, loc_C823,	loc_C823, loc_C823
 RAM:B096 F2 C4 F2 C4+		     dw	loc_C823, loc_B9A5, loc_B9A5, loc_CDDA,	loc_CDDA, loc_CDDA
@@ -3464,7 +3464,7 @@ RAM:B5FE
 RAM:B5FF	     ; ---------------------------------------------------------------------------
 RAM:B5FF
 RAM:B5FF	     loc_B5FF:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
-RAM:B5FF CD F2 C4		     call    sub_C4F2
+RAM:B5FF CD F2 C4		     call    adj_12_13_14_15
 RAM:B602 DD 6E 09		     ld	     l,	(ix+9)
 RAM:B605 DD 66 0A		     ld	     h,	(ix+0Ah)
 RAM:B608 E5			     push    hl
@@ -3540,13 +3540,13 @@ RAM:B681 18 E5			     jr	     loc_B668
 RAM:B683	     ; ---------------------------------------------------------------------------
 RAM:B683
 RAM:B683	     loc_B683:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
-RAM:B683 CD E3 C4		     call    sub_C4E3
+RAM:B683 CD E3 C4		     call    adj_6_7
 RAM:B686 DD CB 0D 5E		     bit     3,	(ix+0Dh)
 RAM:B68A C8			     ret     z
 RAM:B68B DD CB 0D 9E		     res     3,	(ix+0Dh)
 RAM:B68F DD 36 0B 00		     ld	     (ix+0Bh), 0
 RAM:B693 CD 00 C7		     call    sub_C700
-RAM:B696 DD CB 0C 56		     bit     2,	(ix+0Ch)
+RAM:B696 DD CB 0C 56		     bit     2,	(ix+12)
 RAM:B69A 20 03			     jr	     nz, loc_B69F
 RAM:B69C CD 51 B4		     call    sub_B451
 RAM:B69F
@@ -3555,7 +3555,7 @@ RAM:B69F C3 92 C6		     jp	     sub_C692
 RAM:B6A2	     ; ---------------------------------------------------------------------------
 RAM:B6A2
 RAM:B6A2	     loc_B6A2:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
-RAM:B6A2 CD E3 C4		     call    sub_C4E3
+RAM:B6A2 CD E3 C4		     call    adj_6_7
 RAM:B6A5 DD CB 0D 5E		     bit     3,	(ix+0Dh)
 RAM:B6A9 C8			     ret     z
 RAM:B6AA DD 36 00 B8		     ld	     (ix+0), 0B8h ; '¸'
@@ -3577,7 +3577,7 @@ RAM:B6BF 7C			     ld	     a,	h
 RAM:B6C0 32 E0 B6		     ld	     (loc_B6DE+2), a			     ; IX+2/1
 RAM:B6C3 7D			     ld	     a,	l
 RAM:B6C4 32 F1 B6		     ld	     (loc_B6EF+2), a			     ; IX+10/9
-RAM:B6C7 CD E3 C4		     call    sub_C4E3
+RAM:B6C7 CD E3 C4		     call    adj_6_7
 RAM:B6CA DD E5			     push    ix
 RAM:B6CC C1			     pop     bc
 RAM:B6CD 79			     ld	     a,	c
@@ -3664,7 +3664,7 @@ RAM:B749 DD 77 09		     ld	     (ix+9), a
 RAM:B74C DD 77 29		     ld	     (ix+29h), a
 RAM:B74F CD 6C B7		     call    sub_B76C
 RAM:B752 CD 00 C7		     call    sub_C700
-RAM:B755 DD CB 0C 46		     bit     0,	(ix+0Ch)
+RAM:B755 DD CB 0C 46		     bit     0,	(ix+12)
 RAM:B759 28 08			     jr	     z,	loc_B763
 RAM:B75B DD 7E 0D		     ld	     a,	(ix+0Dh)
 RAM:B75E EE 01			     xor     1
@@ -3724,7 +3724,7 @@ RAM:B7A9	     ; ----------------------------------------------------------------
 RAM:B7A9
 RAM:B7A9	     loc_B7A9:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
 RAM:B7A9 CD 5C B8		     call    sub_B85C
-RAM:B7AC CD E3 C4		     call    sub_C4E3
+RAM:B7AC CD E3 C4		     call    adj_6_7
 RAM:B7AF 3A C0 5B		     ld	     a,	(byte_5BC0)
 RAM:B7B2 A7			     and     a
 RAM:B7B3 C0			     ret     nz
@@ -3744,7 +3744,7 @@ RAM:B7CD	     ; ----------------------------------------------------------------
 RAM:B7CD
 RAM:B7CD	     loc_B7CD:							     ; CODE XREF: RAM:B7B8j
 RAM:B7CD CD 00 C7		     call    sub_C700
-RAM:B7D0 DD CB 0C 56		     bit     2,	(ix+0Ch)
+RAM:B7D0 DD CB 0C 56		     bit     2,	(ix+12)
 RAM:B7D4 20 06			     jr	     nz, loc_B7DC
 RAM:B7D6 CD 51 B4		     call    sub_B451
 RAM:B7D9
@@ -3761,11 +3761,11 @@ RAM:B7E7	     ; ----------------------------------------------------------------
 RAM:B7E7
 RAM:B7E7	     loc_B7E7:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
 RAM:B7E7 CD 5C B8		     call    sub_B85C
-RAM:B7EA C3 E3 C4		     jp	     sub_C4E3
+RAM:B7EA C3 E3 C4		     jp	     adj_6_7
 RAM:B7ED	     ; ---------------------------------------------------------------------------
 RAM:B7ED
 RAM:B7ED	     loc_B7ED:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
-RAM:B7ED CD F2 C4		     call    sub_C4F2
+RAM:B7ED CD F2 C4		     call    adj_12_13_14_15
 RAM:B7F0 DD 36 0B 01		     ld	     (ix+0Bh), 1
 RAM:B7F4 DD CB 0D 46		     bit     0,	(ix+0Dh)
 RAM:B7F8 3E 02			     ld	     a,	2
@@ -3776,13 +3776,13 @@ RAM:B7FE	     loc_B7FE:							     ; CODE XREF: RAM:B7FAj
 RAM:B7FE DD 77 09		     ld	     (ix+9), a
 RAM:B801 CD 5D B4		     call    sub_B45D
 RAM:B804 CD 00 C7		     call    sub_C700
-RAM:B807 DD CB 0C 46		     bit     0,	(ix+0Ch)
+RAM:B807 DD CB 0C 46		     bit     0,	(ix+12)
 RAM:B80B 3E 01			     ld	     a,	1
 RAM:B80D 18 20			     jr	     loc_B82F
 RAM:B80F	     ; ---------------------------------------------------------------------------
 RAM:B80F
 RAM:B80F	     loc_B80F:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
-RAM:B80F CD F2 C4		     call    sub_C4F2
+RAM:B80F CD F2 C4		     call    adj_12_13_14_15
 RAM:B812 DD 36 0B 01		     ld	     (ix+0Bh), 1
 RAM:B816 DD CB 0D 4E		     bit     1,	(ix+0Dh)
 RAM:B81A 3E 02			     ld	     a,	2
@@ -3793,7 +3793,7 @@ RAM:B820	     loc_B820:							     ; CODE XREF: RAM:B81Cj
 RAM:B820 DD 77 0A		     ld	     (ix+0Ah), a
 RAM:B823 CD 62 B4		     call    sub_B462
 RAM:B826 CD 00 C7		     call    sub_C700
-RAM:B829 DD CB 0C 4E		     bit     1,	(ix+0Ch)
+RAM:B829 DD CB 0C 4E		     bit     1,	(ix+12)
 RAM:B82D 3E 02			     ld	     a,	2
 RAM:B82F
 RAM:B82F	     loc_B82F:							     ; CODE XREF: RAM:B80Dj
@@ -3808,7 +3808,7 @@ RAM:B83D 18 17			     jr	     loc_B856
 RAM:B83F	     ; ---------------------------------------------------------------------------
 RAM:B83F
 RAM:B83F	     loc_B83F:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
-RAM:B83F CD F2 C4		     call    sub_C4F2
+RAM:B83F CD F2 C4		     call    adj_12_13_14_15
 RAM:B842 3A BC 5B		     ld	     a,	(byte_5BBC)
 RAM:B845 E6 01			     and     1
 RAM:B847 C8			     ret     z
@@ -3837,7 +3837,7 @@ RAM:B864
 RAM:B865	     ; ---------------------------------------------------------------------------
 RAM:B865
 RAM:B865	     loc_B865:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
-RAM:B865 CD F2 C4		     call    sub_C4F2
+RAM:B865 CD F2 C4		     call    adj_12_13_14_15
 RAM:B868 3A BD 5B		     ld	     a,	(byte_5BBD)
 RAM:B86B A7			     and     a
 RAM:B86C 20 08			     jr	     nz, loc_B876
@@ -3851,7 +3851,7 @@ RAM:B879 CD 51 B4		     call    sub_B451
 RAM:B87C DD CB 0D 56		     bit     2,	(ix+0Dh)
 RAM:B880 20 12			     jr	     nz, loc_B894
 RAM:B882 CD 00 C7		     call    sub_C700
-RAM:B885 DD CB 0C 56		     bit     2,	(ix+0Ch)
+RAM:B885 DD CB 0C 56		     bit     2,	(ix+12)
 RAM:B889 28 07			     jr	     z,	loc_B892
 RAM:B88B DD CB 0D D6		     set     2,	(ix+0Dh)
 RAM:B88F CD 2E B4		     call    sub_B42E
@@ -4038,7 +4038,7 @@ RAM:B99F	     ; ----------------------------------------------------------------
 RAM:B99F
 RAM:B99F	     loc_B99F:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
 RAM:B99F 21 E8 0C		     ld	     hl, 0CE8h
-RAM:B9A2 C3 2B C7		     jp	     set_18_19_HL
+RAM:B9A2 C3 2B C7		     jp	     set_pixel_adj
 RAM:B9A5	     ; ---------------------------------------------------------------------------
 RAM:B9A5
 RAM:B9A5	     loc_B9A5:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
@@ -4076,7 +4076,7 @@ RAM:B9E0	     ; ----------------------------------------------------------------
 RAM:B9E0
 RAM:B9E0	     loc_B9E0:							     ; DATA XREF: RAM:off_B9D8o
 RAM:B9E0 21 FE 00		     ld	     hl, 0FEh ;	'þ'
-RAM:B9E3 DD CB 0C 46		     bit     0,	(ix+0Ch)
+RAM:B9E3 DD CB 0C 46		     bit     0,	(ix+12)
 RAM:B9E7 C8			     ret     z
 RAM:B9E8 21 00 02		     ld	     hl, 200h
 RAM:B9EB
@@ -4096,7 +4096,7 @@ RAM:B9FB	     ; ----------------------------------------------------------------
 RAM:B9FB
 RAM:B9FB	     loc_B9FB:							     ; DATA XREF: RAM:B9DAo
 RAM:B9FB 21 00 02		     ld	     hl, 200h
-RAM:B9FE DD CB 0C 4E		     bit     1,	(ix+0Ch)
+RAM:B9FE DD CB 0C 4E		     bit     1,	(ix+12)
 RAM:BA02 C8			     ret     z
 RAM:BA03 21 02 00		     ld	     hl, 2
 RAM:BA06 18 E3			     jr	     loc_B9EB
@@ -4104,7 +4104,7 @@ RAM:BA08	     ; ----------------------------------------------------------------
 RAM:BA08
 RAM:BA08	     loc_BA08:							     ; DATA XREF: RAM:B9DCo
 RAM:BA08 21 02 00		     ld	     hl, 2
-RAM:BA0B DD CB 0C 46		     bit     0,	(ix+0Ch)
+RAM:BA0B DD CB 0C 46		     bit     0,	(ix+12)
 RAM:BA0F C8			     ret     z
 RAM:BA10 21 00 FE		     ld	     hl, 0FE00h
 RAM:BA13 18 D6			     jr	     loc_B9EB
@@ -4112,7 +4112,7 @@ RAM:BA15	     ; ----------------------------------------------------------------
 RAM:BA15
 RAM:BA15	     loc_BA15:							     ; DATA XREF: RAM:B9DEo
 RAM:BA15 21 00 FE		     ld	     hl, 0FE00h
-RAM:BA18 DD CB 0C 4E		     bit     1,	(ix+0Ch)
+RAM:BA18 DD CB 0C 4E		     bit     1,	(ix+12)
 RAM:BA1C C8			     ret     z
 RAM:BA1D 21 FE 00		     ld	     hl, 0FEh ;	'þ'
 RAM:BA20 18 C9			     jr	     loc_B9EB
@@ -5453,10 +5453,10 @@ RAM:C306
 RAM:C306 3A B1 5B		     ld	     a,	(byte_5BB1)
 RAM:C309 A7			     and     a
 RAM:C30A C8			     ret     z
-RAM:C30B DD 7E 0C		     ld	     a,	(ix+0Ch)
+RAM:C30B DD 7E 0C		     ld	     a,	(ix+12)
 RAM:C30E E6 F0			     and     0F0h ; 'ð'
 RAM:C310 C0			     ret     nz
-RAM:C311 DD CB 0C 5E		     bit     3,	(ix+0Ch)
+RAM:C311 DD CB 0C 5E		     bit     3,	(ix+12)
 RAM:C315 C0			     ret     nz
 RAM:C316 33			     inc     sp
 RAM:C317 33			     inc     sp
@@ -5469,12 +5469,12 @@ RAM:C327 DD 19			     add     ix, de
 RAM:C329 DD 36 00 01		     ld	     (ix+0), 1
 RAM:C32D CD 92 C6		     call    sub_C692
 RAM:C330 DD E1			     pop     ix
-RAM:C332 CD ED C4		     call    sub_C4ED
+RAM:C332 CD ED C4		     call    adj_11
 RAM:C335 18 20			     jr	     loc_C357
 RAM:C337	     ; ---------------------------------------------------------------------------
 RAM:C337
 RAM:C337	     loc_C337:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
-RAM:C337 CD ED C4		     call    sub_C4ED
+RAM:C337 CD ED C4		     call    adj_11
 RAM:C33A DD CB 0D 76		     bit     6,	(ix+0Dh)
 RAM:C33E 28 09			     jr	     z,	loc_C349
 RAM:C340 3A C3 5B		     ld	     a,	(byte_5BC3)
@@ -5687,14 +5687,14 @@ RAM:C4A9
 RAM:C4AA	     ; ---------------------------------------------------------------------------
 RAM:C4AA
 RAM:C4AA	     loc_C4AA:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
-RAM:C4AA CD E3 C4		     call    sub_C4E3
+RAM:C4AA CD E3 C4		     call    adj_6_7
 RAM:C4AD CD F3 C9		     call    loc_C9F3
 RAM:C4B0 CD E9 B3		     call    sub_B3E9
 RAM:C4B3 C3 AF B5		     jp	     loc_B5AF
 RAM:C4B6	     ; ---------------------------------------------------------------------------
 RAM:C4B6
 RAM:C4B6	     loc_C4B6:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
-RAM:C4B6 CD E3 C4		     call    sub_C4E3
+RAM:C4B6 CD E3 C4		     call    adj_6_7
 RAM:C4B9 CD 00 C7		     call    sub_C700
 RAM:C4BC CD A1 C1		     call    sub_C1A1
 RAM:C4BF C8			     ret     z
@@ -5702,7 +5702,7 @@ RAM:C4C0 C3 32 C2		     jp	     loc_C232
 RAM:C4C3	     ; ---------------------------------------------------------------------------
 RAM:C4C3
 RAM:C4C3	     loc_C4C3:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
-RAM:C4C3 CD E3 C4		     call    sub_C4E3
+RAM:C4C3 CD E3 C4		     call    adj_6_7
 RAM:C4C6
 RAM:C4C6	     loc_C4C6:							     ; CODE XREF: RAM:loc_C1EEj
 RAM:C4C6 CD 00 C7		     call    sub_C700
@@ -5716,8 +5716,8 @@ RAM:C4D3
 RAM:C4D3
 RAM:C4D3	     sub_C4D3:							     ; CODE XREF: RAM:loc_C1ABp
 RAM:C4D3									     ; DATA XREF: RAM:adj_sprite_jmp_tblo
-RAM:C4D3 21 F8 FE		     ld	     hl, 0FEF8h
-RAM:C4D6 18 08			     jr	     loc_C4E0
+RAM:C4D3 21 F8 FE		     ld	     hl, 0FEF8h				     ; -2, -8
+RAM:C4D6 18 08			     jr	     jp_set_pixel_adj
 RAM:C4D6	     ; End of function sub_C4D3
 RAM:C4D6
 RAM:C4D8
@@ -5730,7 +5730,7 @@ RAM:C4D8
 RAM:C4D8	     ; FUNCTION	CHUNK AT RAM:C4E0 SIZE 00000003	BYTES
 RAM:C4D8
 RAM:C4D8 21 F4 FC		     ld	     hl, 0FCF4h				     ; -4, -12
-RAM:C4DB 18 03			     jr	     loc_C4E0
+RAM:C4DB 18 03			     jr	     jp_set_pixel_adj
 RAM:C4DB	     ; End of function sub_C4D8
 RAM:C4DB
 RAM:C4DD
@@ -5744,45 +5744,45 @@ RAM:C4DD	     ; End of function sub_C4DD
 RAM:C4DD
 RAM:C4E0	     ; START OF	FUNCTION CHUNK FOR sub_C4D8
 RAM:C4E0
-RAM:C4E0	     loc_C4E0:							     ; CODE XREF: sub_C4D3+3j
+RAM:C4E0	     jp_set_pixel_adj:						     ; CODE XREF: sub_C4D3+3j
 RAM:C4E0									     ; sub_C4D8+3j ...
-RAM:C4E0 C3 2B C7		     jp	     set_18_19_HL
+RAM:C4E0 C3 2B C7		     jp	     set_pixel_adj
 RAM:C4E0	     ; END OF FUNCTION CHUNK FOR sub_C4D8
 RAM:C4E3
 RAM:C4E3	     ; =============== S U B R O U T I N E =======================================
 RAM:C4E3
 RAM:C4E3
-RAM:C4E3	     sub_C4E3:							     ; CODE XREF: RAM:loc_B683p
+RAM:C4E3	     adj_6_7:							     ; CODE XREF: RAM:loc_B683p
 RAM:C4E3									     ; RAM:loc_B6A2p ...
 RAM:C4E3 21 F0 F8		     ld	     hl, 0F8F0h				     ; -8, -16
-RAM:C4E6 18 F8			     jr	     loc_C4E0
-RAM:C4E6	     ; End of function sub_C4E3
+RAM:C4E6 18 F8			     jr	     jp_set_pixel_adj
+RAM:C4E6	     ; End of function adj_6_7
 RAM:C4E6
 RAM:C4E8	     ; ---------------------------------------------------------------------------
 RAM:C4E8
-RAM:C4E8	     loc_C4E8:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
+RAM:C4E8	     adj_10:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
 RAM:C4E8 21 EC FF		     ld	     hl, 0FFECh				     ; -1, -20
-RAM:C4EB 18 F3			     jr	     loc_C4E0
+RAM:C4EB 18 F3			     jr	     jp_set_pixel_adj
 RAM:C4ED
 RAM:C4ED	     ; =============== S U B R O U T I N E =======================================
 RAM:C4ED
 RAM:C4ED
-RAM:C4ED	     sub_C4ED:							     ; CODE XREF: sub_C306+2Cp
+RAM:C4ED	     adj_11:							     ; CODE XREF: sub_C306+2Cp
 RAM:C4ED									     ; sub_C306:loc_C337p
 RAM:C4ED									     ; DATA XREF: ...
-RAM:C4ED 21 F4 FE		     ld	     hl, 0FEF4h				     ; -2, -8
-RAM:C4F0 18 EE			     jr	     loc_C4E0
-RAM:C4F0	     ; End of function sub_C4ED
+RAM:C4ED 21 F4 FE		     ld	     hl, 0FEF4h				     ; -2, -12
+RAM:C4F0 18 EE			     jr	     jp_set_pixel_adj
+RAM:C4F0	     ; End of function adj_11
 RAM:C4F0
 RAM:C4F2
 RAM:C4F2	     ; =============== S U B R O U T I N E =======================================
 RAM:C4F2
 RAM:C4F2
-RAM:C4F2	     sub_C4F2:							     ; CODE XREF: RAM:loc_B5FFp
+RAM:C4F2	     adj_12_13_14_15:						     ; CODE XREF: RAM:loc_B5FFp
 RAM:C4F2									     ; RAM:loc_B7EDp ...
 RAM:C4F2 21 F8 FC		     ld	     hl, 0FCF8h				     ; -4, -8
-RAM:C4F5 18 E9			     jr	     loc_C4E0
-RAM:C4F5	     ; End of function sub_C4F2
+RAM:C4F5 18 E9			     jr	     jp_set_pixel_adj
+RAM:C4F5	     ; End of function adj_12_13_14_15
 RAM:C4F5
 RAM:C4F7
 RAM:C4F7	     ; =============== S U B R O U T I N E =======================================
@@ -5790,7 +5790,7 @@ RAM:C4F7
 RAM:C4F7
 RAM:C4F7	     sub_C4F7:							     ; CODE XREF: RAM:loc_CDDAp
 RAM:C4F7 21 F4 F8		     ld	     hl, 0F8F4h				     ; -8, -12
-RAM:C4FA 18 E4			     jr	     loc_C4E0
+RAM:C4FA 18 E4			     jr	     jp_set_pixel_adj
 RAM:C4FA	     ; End of function sub_C4F7
 RAM:C4FA
 RAM:C4FC
@@ -5800,7 +5800,7 @@ RAM:C4FC
 RAM:C4FC	     sub_C4FC:							     ; CODE XREF: RAM:B7A6j
 RAM:C4FC									     ; RAM:loc_C828p
 RAM:C4FC 21 F4 F9		     ld	     hl, 0F9F4h				     ; -7, -12
-RAM:C4FF 18 DF			     jr	     loc_C4E0
+RAM:C4FF 18 DF			     jr	     jp_set_pixel_adj
 RAM:C4FF	     ; End of function sub_C4FC
 RAM:C4FF
 RAM:C501
@@ -5809,7 +5809,7 @@ RAM:C501
 RAM:C501
 RAM:C501	     sub_C501:							     ; CODE XREF: RAM:loc_CDDFp
 RAM:C501 21 F4 F4		     ld	     hl, 0F4F4h				     ; -12, -12
-RAM:C504 18 DA			     jr	     loc_C4E0
+RAM:C504 18 DA			     jr	     jp_set_pixel_adj
 RAM:C504	     ; End of function sub_C501
 RAM:C504
 RAM:C506	     ; ---------------------------------------------------------------------------
@@ -5817,14 +5817,14 @@ RAM:C506
 RAM:C506	     loc_C506:							     ; CODE XREF: RAM:loc_B99Cj
 RAM:C506									     ; DATA XREF: RAM:adj_sprite_jmp_tblo
 RAM:C506 21 F0 F4		     ld	     hl, 0F4F0h				     ; -12, -16
-RAM:C509 18 D5			     jr	     loc_C4E0
+RAM:C509 18 D5			     jr	     jp_set_pixel_adj
 RAM:C50B
 RAM:C50B	     ; =============== S U B R O U T I N E =======================================
 RAM:C50B
 RAM:C50B
 RAM:C50B	     sub_C50B:							     ; CODE XREF: RAM:loc_B73Cp
 RAM:C50B 21 F4 07		     ld	     hl, 7F4h				     ; +7, -12
-RAM:C50E 18 D0			     jr	     loc_C4E0
+RAM:C50E 18 D0			     jr	     jp_set_pixel_adj
 RAM:C50E	     ; End of function sub_C50B
 RAM:C50E
 RAM:C510
@@ -5833,7 +5833,7 @@ RAM:C510
 RAM:C510
 RAM:C510	     sub_C510:							     ; CODE XREF: RAM:loc_B9A5p
 RAM:C510 21 F4 03		     ld	     hl, 3F4h				     ; +3, -12
-RAM:C513 18 CB			     jr	     loc_C4E0
+RAM:C513 18 CB			     jr	     jp_set_pixel_adj
 RAM:C513	     ; End of function sub_C510
 RAM:C513
 RAM:C515	     ; B = width (bytes)
@@ -5999,7 +5999,7 @@ RAM:C5CB CD 00 C7		     call    sub_C700
 RAM:C5CE DD 7E 09		     ld	     a,	(ix+9)
 RAM:C5D1 DD B6 0A		     or	     (ix+0Ah)
 RAM:C5D4 28 07			     jr	     z,	loc_C5DD
-RAM:C5D6 DD 7E 0C		     ld	     a,	(ix+0Ch)
+RAM:C5D6 DD 7E 0C		     ld	     a,	(ix+12)
 RAM:C5D9 E6 03			     and     3
 RAM:C5DB 28 20			     jr	     z,	loc_C5FD
 RAM:C5DD
@@ -6104,7 +6104,7 @@ RAM:C65C F8			     db	0F8h ; ø
 RAM:C65D 08			     db	   8
 RAM:C65E	     ; ---------------------------------------------------------------------------
 RAM:C65E
-RAM:C65E	     loc_C65E:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
+RAM:C65E	     adj_8:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
 RAM:C65E CD DD C4		     call    sub_C4DD
 RAM:C661 21 AF 5B		     ld	     hl, byte_5BAF
 RAM:C664 7E			     ld	     a,	(hl)
@@ -6171,7 +6171,7 @@ RAM:C6B7 DD 36 0B 01		     ld	     (ix+0Bh), 1
 RAM:C6BB 18 D4			     jr	     loc_C691
 RAM:C6BD	     ; ---------------------------------------------------------------------------
 RAM:C6BD
-RAM:C6BD	     loc_C6BD:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
+RAM:C6BD	     adj_9:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
 RAM:C6BD CD DD C4		     call    sub_C4DD
 RAM:C6C0 DD CB 0D FE		     set     7,	(ix+0Dh)
 RAM:C6C4 3A 14 5C		     ld	     a,	(unk_5C14)
@@ -6182,7 +6182,7 @@ RAM:C6CD A7			     and     a
 RAM:C6CE F2 EA C6		     jp	     p,	loc_C6EA
 RAM:C6D1 DD 35 0B		     dec     (ix+0Bh)
 RAM:C6D4 CD 00 C7		     call    sub_C700
-RAM:C6D7 DD CB 0C 56		     bit     2,	(ix+0Ch)
+RAM:C6D7 DD CB 0C 56		     bit     2,	(ix+12)
 RAM:C6DB 28 B5			     jr	     z,	sub_C692
 RAM:C6DD CD 89 B4		     call    sub_B489
 RAM:C6E0
@@ -6226,26 +6226,26 @@ RAM:C721	     ; End of function sub_C700
 RAM:C721
 RAM:C722	     ; ---------------------------------------------------------------------------
 RAM:C722
-RAM:C722	     loc_C722:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
-RAM:C722 DD CB 07 76		     bit     6,	(ix+7)
-RAM:C726 20 0A			     jr	     nz, loc_C732
+RAM:C722	     adj_3_5:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
+RAM:C722 DD CB 07 76		     bit     6,	(ix+7)				     ; hflip?
+RAM:C726 20 0A			     jr	     nz, loc_C732			     ; yes, go
 RAM:C728 21 F7 FD		     ld	     hl, 0FDF7h				     ; -3, -9
 RAM:C72B
 RAM:C72B	     ; =============== S U B R O U T I N E =======================================
 RAM:C72B
 RAM:C72B
-RAM:C72B	     set_18_19_HL:						     ; CODE XREF: RAM:B9A2j
-RAM:C72B									     ; sub_C4D8:loc_C4E0j ...
-RAM:C72B DD 75 12		     ld	     (ix+18), l
-RAM:C72E DD 74 13		     ld	     (ix+19), h
+RAM:C72B	     set_pixel_adj:						     ; CODE XREF: RAM:B9A2j
+RAM:C72B									     ; sub_C4D8:jp_set_pixel_adjj ...
+RAM:C72B DD 75 12		     ld	     (ix+18), l				     ; pixel_x adjust
+RAM:C72E DD 74 13		     ld	     (ix+19), h				     ; pixel_y adjust
 RAM:C731 C9			     ret
-RAM:C731	     ; End of function set_18_19_HL
+RAM:C731	     ; End of function set_pixel_adj
 RAM:C731
 RAM:C732	     ; ---------------------------------------------------------------------------
 RAM:C732
 RAM:C732	     loc_C732:							     ; CODE XREF: RAM:C726j
 RAM:C732 21 F9 FE		     ld	     hl, 0FEF9h				     ; -2, -7
-RAM:C735 18 F4			     jr	     set_18_19_HL
+RAM:C735 18 F4			     jr	     set_pixel_adj
 RAM:C737	     ; ---------------------------------------------------------------------------
 RAM:C737
 RAM:C737	     loc_C737:							     ; CODE XREF: RAM:C747j
@@ -6253,16 +6253,16 @@ RAM:C737 21 01 FD		     ld	     hl, 0FD01h				     ; -3, +1
 RAM:C73A 18 10			     jr	     loc_C74C
 RAM:C73C	     ; ---------------------------------------------------------------------------
 RAM:C73C
-RAM:C73C	     adj_2_4_arch_left:						     ; DATA XREF: RAM:adj_sprite_jmp_tblo
-RAM:C73C DD CB 07 76		     bit     6,	(ix+7)
-RAM:C740 20 2A			     jr	     nz, loc_C76C
+RAM:C73C	     adj_2_4:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
+RAM:C73C DD CB 07 76		     bit     6,	(ix+7)				     ; hflip?
+RAM:C740 20 2A			     jr	     nz, loc_C76C			     ; yes, go
 RAM:C742 DD 7E 00		     ld	     a,	(ix+0)				     ; graphic no.
 RAM:C745 FE 04			     cp	     4					     ; tree arch?
 RAM:C747 28 EE			     jr	     z,	loc_C737			     ; yes, exit
 RAM:C749 21 F9 FD		     ld	     hl, 0FDF9h				     ; -3, -7
 RAM:C74C
 RAM:C74C	     loc_C74C:							     ; CODE XREF: RAM:C73Aj
-RAM:C74C CD 2B C7		     call    set_18_19_HL
+RAM:C74C CD 2B C7		     call    set_pixel_adj
 RAM:C74F DD 7E 02		     ld	     a,	(ix+2)				     ; Y
 RAM:C752 C6 0D			     add     a,	13				     ; add 13
 RAM:C754 DD 77 0A		     ld	     (ix+10), a				     ; =Y+13
@@ -6278,8 +6278,8 @@ RAM:C769 C3 85 C7		     jp	     loc_C785
 RAM:C76C	     ; ---------------------------------------------------------------------------
 RAM:C76C
 RAM:C76C	     loc_C76C:							     ; CODE XREF: RAM:C740j
-RAM:C76C 21 EF FE		     ld	     hl, 0FEEFh				     ; -2, -16
-RAM:C76F CD 2B C7		     call    set_18_19_HL
+RAM:C76C 21 EF FE		     ld	     hl, 0FEEFh				     ; -2, -17
+RAM:C76F CD 2B C7		     call    set_pixel_adj
 RAM:C772 DD 7E 01		     ld	     a,	(ix+1)				     ; X
 RAM:C775 D6 0D			     sub     13
 RAM:C777 DD 77 09		     ld	     (ix+9), a
@@ -6442,10 +6442,10 @@ RAM:C855									     ; RAM:C878j
 RAM:C855 DD CB 27 CE		     set     1,	(ix+27h)
 RAM:C859 CD A1 C9		     call    sub_C9A1
 RAM:C85C DD CB 27 8E		     res     1,	(ix+27h)
-RAM:C860 DD 7E 0C		     ld	     a,	(ix+0Ch)
+RAM:C860 DD 7E 0C		     ld	     a,	(ix+12)
 RAM:C863 D6 10			     sub     10h
 RAM:C865 38 03			     jr	     c,	loc_C86A
-RAM:C867 DD 77 0C		     ld	     (ix+0Ch), a
+RAM:C867 DD 77 0C		     ld	     (ix+12), a
 RAM:C86A
 RAM:C86A	     loc_C86A:							     ; CODE XREF: RAM:C865j
 RAM:C86A C3 92 C6		     jp	     sub_C692
@@ -6574,10 +6574,10 @@ RAM:C8FD	     loc_C8FD:							     ; CODE XREF: sub_C89F+58j
 RAM:C8FD 79			     ld	     a,	c
 RAM:C8FE E6 03			     and     3
 RAM:C900 C8			     ret     z
-RAM:C901 DD 7E 0C		     ld	     a,	(ix+0Ch)
+RAM:C901 DD 7E 0C		     ld	     a,	(ix+12)
 RAM:C904 E6 F0			     and     0F0h ; 'ð'
 RAM:C906 C0			     ret     nz
-RAM:C907 DD CB 0C 5E		     bit     3,	(ix+0Ch)
+RAM:C907 DD CB 0C 5E		     bit     3,	(ix+12)
 RAM:C90B C0			     ret     nz
 RAM:C90C CB 51			     bit     2,	c
 RAM:C90E 20 05			     jr	     nz, loc_C915
@@ -6625,15 +6625,15 @@ RAM:C948
 RAM:C948	     sub_C948:							     ; CODE XREF: RAM:C84Ap
 RAM:C948 CB 59			     bit     3,	c
 RAM:C94A C8			     ret     z
-RAM:C94B DD 7E 0C		     ld	     a,	(ix+0Ch)
+RAM:C94B DD 7E 0C		     ld	     a,	(ix+12)
 RAM:C94E E6 F0			     and     0F0h ; 'ð'
 RAM:C950 C0			     ret     nz
-RAM:C951 DD CB 0C 5E		     bit     3,	(ix+0Ch)
+RAM:C951 DD CB 0C 5E		     bit     3,	(ix+12)
 RAM:C955 C0			     ret     nz
 RAM:C956 DD 7E 0B		     ld	     a,	(ix+0Bh)
 RAM:C959 3C			     inc     a
 RAM:C95A F8			     ret     m
-RAM:C95B DD CB 0C DE		     set     3,	(ix+0Ch)
+RAM:C95B DD CB 0C DE		     set     3,	(ix+12)
 RAM:C95F DD 36 0B 08		     ld	     (ix+0Bh), 8
 RAM:C963 C5			     push    bc
 RAM:C964 CD 41 B4		     call    sub_B441
@@ -6646,10 +6646,10 @@ RAM:C969	     ; =============== S U B R O U T I N E ============================
 RAM:C969
 RAM:C969
 RAM:C969	     sub_C969:							     ; CODE XREF: RAM:C84Dp
-RAM:C969 DD 7E 0C		     ld	     a,	(ix+0Ch)
+RAM:C969 DD 7E 0C		     ld	     a,	(ix+12)
 RAM:C96C E6 F0			     and     0F0h ; 'ð'
 RAM:C96E 20 0A			     jr	     nz, loc_C97A
-RAM:C970 DD CB 0C 5E		     bit     3,	(ix+0Ch)
+RAM:C970 DD CB 0C 5E		     bit     3,	(ix+12)
 RAM:C974 20 04			     jr	     nz, loc_C97A
 RAM:C976 CB 51			     bit     2,	c
 RAM:C978 28 1A			     jr	     z,	loc_C994
@@ -6700,9 +6700,9 @@ RAM:C9A5 28 04			     jr	     z,	loc_C9AB
 RAM:C9A7 DD 36 0B 02		     ld	     (ix+0Bh), 2
 RAM:C9AB
 RAM:C9AB	     loc_C9AB:							     ; CODE XREF: sub_C9A1+4j
-RAM:C9AB DD CB 0C 5E		     bit     3,	(ix+0Ch)
+RAM:C9AB DD CB 0C 5E		     bit     3,	(ix+12)
 RAM:C9AF 20 0B			     jr	     nz, loc_C9BC
-RAM:C9B1 DD 7E 0C		     ld	     a,	(ix+0Ch)
+RAM:C9B1 DD 7E 0C		     ld	     a,	(ix+12)
 RAM:C9B4 E6 F0			     and     0F0h ; 'ð'
 RAM:C9B6 20 04			     jr	     nz, loc_C9BC
 RAM:C9B8 CB 51			     bit     2,	c
@@ -6733,12 +6733,12 @@ RAM:C9D6 FC 51 B4		     call    m,	sub_B451
 RAM:C9D9 CD 45 CB		     call    sub_CB45
 RAM:C9DC CD 70 CA		     call    sub_CA70
 RAM:C9DF CD 06 C7		     call    loc_C706
-RAM:C9E2 DD CB 0C 56		     bit     2,	(ix+0Ch)
+RAM:C9E2 DD CB 0C 56		     bit     2,	(ix+12)
 RAM:C9E6 28 0B			     jr	     z,	loc_C9F3
 RAM:C9E8 3A C1 5B		     ld	     a,	(byte_5BC1)
 RAM:C9EB A7			     and     a
 RAM:C9EC F2 F3 C9		     jp	     p,	loc_C9F3
-RAM:C9EF DD CB 0C 9E		     res     3,	(ix+0Ch)
+RAM:C9EF DD CB 0C 9E		     res     3,	(ix+12)
 RAM:C9F3
 RAM:C9F3	     loc_C9F3:							     ; CODE XREF: RAM:C29Fp
 RAM:C9F3									     ; RAM:C4ADp ...
@@ -6840,7 +6840,7 @@ RAM:CA5E DD 7E 03		     ld	     a,	(ix+3)
 RAM:CA61 84			     add     a,	h
 RAM:CA62 BA			     cp	     d
 RAM:CA63 D0			     ret     nc
-RAM:CA64 DD CB 0C D6		     set     2,	(ix+0Ch)
+RAM:CA64 DD CB 0C D6		     set     2,	(ix+12)
 RAM:CA68 7C			     ld	     a,	h
 RAM:CA69 CD 89 CA		     call    sub_CA89
 RAM:CA6C 67			     ld	     h,	a
@@ -6853,13 +6853,13 @@ RAM:CA70	     ; =============== S U B R O U T I N E ============================
 RAM:CA70
 RAM:CA70
 RAM:CA70	     sub_CA70:							     ; CODE XREF: sub_C9A1+3Bp
-RAM:CA70 DD 7E 0C		     ld	     a,	(ix+0Ch)
+RAM:CA70 DD 7E 0C		     ld	     a,	(ix+12)
 RAM:CA73 E6 F0			     and     0F0h ; 'ð'
 RAM:CA75 C0			     ret     nz
 RAM:CA76 DD CB 07 46		     bit     0,	(ix+7)
 RAM:CA7A C8			     ret     z
 RAM:CA7B DD CB 07 86		     res     0,	(ix+7)
-RAM:CA7F 01 92 CA		     ld	     bc, off_CA92
+RAM:CA7F 01 92 CA		     ld	     bc, screen_move_tbl
 RAM:CA82 2A AB 5B		     ld	     hl, (room_size_X)
 RAM:CA85 E5			     push    hl
 RAM:CA86 C3 17 CA		     jp	     loc_CA17
@@ -6883,13 +6883,13 @@ RAM:CA91 C9			     ret
 RAM:CA91	     ; End of function sub_CA89
 RAM:CA91
 RAM:CA91	     ; ---------------------------------------------------------------------------
-RAM:CA92 9A CA	     off_CA92:	     dw	loc_CA9A				     ; DATA XREF: sub_CA70+Fo
-RAM:CA94 F3 CA			     dw	loc_CAF3
-RAM:CA96 0E CB			     dw	loc_CB0E
-RAM:CA98 29 CB			     dw	loc_CB29
+RAM:CA92 9A CA	     screen_move_tbl:dw	screen_west				     ; DATA XREF: sub_CA70+Fo
+RAM:CA94 F3 CA			     dw	screen_east
+RAM:CA96 0E CB			     dw	screen_north
+RAM:CA98 29 CB			     dw	screen_south
 RAM:CA9A	     ; ---------------------------------------------------------------------------
 RAM:CA9A
-RAM:CA9A	     loc_CA9A:							     ; DATA XREF: RAM:off_CA92o
+RAM:CA9A	     screen_west:						     ; DATA XREF: RAM:screen_move_tblo
 RAM:CA9A E1			     pop     hl
 RAM:CA9B 3E 80			     ld	     a,	80h ; '€'
 RAM:CA9D 95			     sub     l
@@ -6900,20 +6900,20 @@ RAM:CAA5 DD 86 04		     add     a,	(ix+4)				     ; add width
 RAM:CAA8 BD			     cp	     l
 RAM:CAA9 D0			     ret     nc
 RAM:CAAA DD 36 01 00		     ld	     (ix+1), 0				     ; X
-RAM:CAAE DD 7E 08		     ld	     a,	(ix+8)
+RAM:CAAE DD 7E 08		     ld	     a,	(ix+8)				     ; screen
 RAM:CAB1 6F			     ld	     l,	a
-RAM:CAB2 3D			     dec     a
+RAM:CAB2 3D			     dec     a					     ; screen to the west
 RAM:CAB3
-RAM:CAB3	     loc_CAB3:							     ; CODE XREF: RAM:CB0Cj
-RAM:CAB3 E6 0F			     and     0Fh
+RAM:CAB3	     screen_e_w:						     ; CODE XREF: RAM:CB0Cj
+RAM:CAB3 E6 0F			     and     0Fh				     ; low nibble
 RAM:CAB5 67			     ld	     h,	a
 RAM:CAB6 7D			     ld	     a,	l
-RAM:CAB7 E6 F0			     and     0F0h ; 'ð'
-RAM:CAB9 B4			     or	     h
+RAM:CAB7 E6 F0			     and     0F0h ; 'ð'                              ; high nibble - don't change row
+RAM:CAB9 B4			     or	     h					     ; same row	- wraps???
 RAM:CABA
-RAM:CABA	     loc_CABA:							     ; CODE XREF: RAM:CB27j
+RAM:CABA	     exit_screen:						     ; CODE XREF: RAM:CB27j
 RAM:CABA									     ; RAM:CB42j
-RAM:CABA DD 77 08		     ld	     (ix+8), a
+RAM:CABA DD 77 08		     ld	     (ix+8), a				     ; store new screen
 RAM:CABD DD 7E 0C		     ld	     a,	(ix+12)
 RAM:CAC0 F6 30			     or	     30h ; '0'
 RAM:CAC2 DD 77 0C		     ld	     (ix+12), a
@@ -6940,7 +6940,7 @@ RAM:CAED 32 81 D1		     ld	     (plyr_spr_2_scratchpad), a		     ; graphic no.
 RAM:CAF0 C3 BA AF		     jp	     game_loop
 RAM:CAF3	     ; ---------------------------------------------------------------------------
 RAM:CAF3
-RAM:CAF3	     loc_CAF3:							     ; DATA XREF: RAM:CA94o
+RAM:CAF3	     screen_east:						     ; DATA XREF: RAM:CA94o
 RAM:CAF3 E1			     pop     hl
 RAM:CAF4 7D			     ld	     a,	l
 RAM:CAF5 C6 80			     add     a,	80h ; '€'
@@ -6951,13 +6951,13 @@ RAM:CAFE DD 96 04		     sub     (ix+4)
 RAM:CB01 BD			     cp	     l
 RAM:CB02 D8			     ret     c
 RAM:CB03 DD 36 01 FF		     ld	     (ix+1), 0FFh
-RAM:CB07 DD 7E 08		     ld	     a,	(ix+8)
+RAM:CB07 DD 7E 08		     ld	     a,	(ix+8)				     ; screen
 RAM:CB0A 6F			     ld	     l,	a
-RAM:CB0B 3C			     inc     a
-RAM:CB0C 18 A5			     jr	     loc_CAB3
+RAM:CB0B 3C			     inc     a					     ; screen to the east
+RAM:CB0C 18 A5			     jr	     screen_e_w
 RAM:CB0E	     ; ---------------------------------------------------------------------------
 RAM:CB0E
-RAM:CB0E	     loc_CB0E:							     ; DATA XREF: RAM:CA96o
+RAM:CB0E	     screen_north:						     ; DATA XREF: RAM:CA96o
 RAM:CB0E E1			     pop     hl
 RAM:CB0F 7C			     ld	     a,	h
 RAM:CB10 C6 80			     add     a,	80h ; '€'
@@ -6968,12 +6968,12 @@ RAM:CB19 DD 96 05		     sub     (ix+5)
 RAM:CB1C BC			     cp	     h
 RAM:CB1D D8			     ret     c
 RAM:CB1E DD 36 02 FF		     ld	     (ix+2), 0FFh
-RAM:CB22 DD 7E 08		     ld	     a,	(ix+8)
-RAM:CB25 C6 10			     add     a,	10h
-RAM:CB27 18 91			     jr	     loc_CABA
+RAM:CB22 DD 7E 08		     ld	     a,	(ix+8)				     ; screen
+RAM:CB25 C6 10			     add     a,	16				     ; screen to the north
+RAM:CB27 18 91			     jr	     exit_screen
 RAM:CB29	     ; ---------------------------------------------------------------------------
 RAM:CB29
-RAM:CB29	     loc_CB29:							     ; DATA XREF: RAM:CA98o
+RAM:CB29	     screen_south:						     ; DATA XREF: RAM:CA98o
 RAM:CB29 E1			     pop     hl
 RAM:CB2A 3E 80			     ld	     a,	80h ; '€'
 RAM:CB2C 94			     sub     h
@@ -6984,9 +6984,9 @@ RAM:CB34 DD 86 05		     add     a,	(ix+5)
 RAM:CB37 BC			     cp	     h
 RAM:CB38 D0			     ret     nc
 RAM:CB39 DD 36 02 00		     ld	     (ix+2), 0
-RAM:CB3D DD 7E 08		     ld	     a,	(ix+8)
-RAM:CB40 D6 10			     sub     10h
-RAM:CB42 C3 BA CA		     jp	     loc_CABA
+RAM:CB3D DD 7E 08		     ld	     a,	(ix+8)				     ; screen
+RAM:CB40 D6 10			     sub     16					     ; screen to the south
+RAM:CB42 C3 BA CA		     jp	     exit_screen
 RAM:CB45
 RAM:CB45	     ; =============== S U B R O U T I N E =======================================
 RAM:CB45
@@ -6996,9 +6996,9 @@ RAM:CB45									     ; sub_C9A1+38p
 RAM:CB45 DD CB 07 4E		     bit     1,	(ix+7)
 RAM:CB49 C0			     ret     nz
 RAM:CB4A DD CB 07 CE		     set     1,	(ix+7)
-RAM:CB4E DD 7E 0C		     ld	     a,	(ix+0Ch)
+RAM:CB4E DD 7E 0C		     ld	     a,	(ix+12)
 RAM:CB51 E6 F8			     and     0F8h ; 'ø'
-RAM:CB53 DD 77 0C		     ld	     (ix+0Ch), a
+RAM:CB53 DD 77 0C		     ld	     (ix+12), a
 RAM:CB56 2E 00			     ld	     l,	0
 RAM:CB58 4D			     ld	     c,	l
 RAM:CB59 DD 7E 0B		     ld	     a,	(ix+0Bh)
@@ -7274,7 +7274,7 @@ RAM:CCDD	     ; =============== S U B R O U T I N E ============================
 RAM:CCDD
 RAM:CCDD
 RAM:CCDD	     sub_CCDD:							     ; CODE XREF: sub_CB45+2Cp
-RAM:CCDD DD 7E 0C		     ld	     a,	(ix+0Ch)
+RAM:CCDD DD 7E 0C		     ld	     a,	(ix+12)
 RAM:CCE0 E6 F0			     and     0F0h ; 'ð'
 RAM:CCE2 C0			     ret     nz
 RAM:CCE3 DD CB 07 46		     bit     0,	(ix+7)
@@ -7293,7 +7293,7 @@ RAM:CCF6	     loc_CCF6:							     ; CODE XREF: sub_CCDD+15j
 RAM:CCF6 DD 86 04		     add     a,	(ix+4)
 RAM:CCF9 B8			     cp	     b
 RAM:CCFA 38 0B			     jr	     c,	locret_CD07
-RAM:CCFC DD CB 0C C6		     set     0,	(ix+0Ch)
+RAM:CCFC DD CB 0C C6		     set     0,	(ix+12)
 RAM:CD00 79			     ld	     a,	c
 RAM:CD01 CD 89 CA		     call    sub_CA89
 RAM:CD04 4F			     ld	     c,	a
@@ -7589,37 +7589,37 @@ RAM:CE8A
 RAM:CE8A	     ; ---------------------------------------------------------------------------
 RAM:CE8B 00 00 00 00+objects_to_draw:db	0, 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,	0, 0
 RAM:CE8B 00 00 00 00+								     ; DATA XREF: list_objects_to_draw+Bo
-RAM:CE8B 00 00 00 00+								     ; wtf_adjust_object_coords_wtf:loc_CEC3o ...
+RAM:CE8B 00 00 00 00+								     ; calc_display_order_and_render:loc_CEC3o	...
 RAM:CE8B 00 00 00 00+		     db	0, 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,	0, 0
 RAM:CE8B 00 00 00 00+		     db	0, 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0
 RAM:CEBB
 RAM:CEBB	     ; =============== S U B R O U T I N E =======================================
 RAM:CEBB
 RAM:CEBB
-RAM:CEBB	     wtf_adjust_object_coords_wtf:				     ; CODE XREF: render_dynamic_objects:loc_D653p
+RAM:CEBB	     calc_display_order_and_render:				     ; CODE XREF: render_dynamic_objects:loc_D653p
 RAM:CEBB AF			     xor     a
 RAM:CEBC 32 BE 5B		     ld	     (unk_5BBE), a
 RAM:CEBF DD E5			     push    ix
 RAM:CEC1 FD E5			     push    iy
 RAM:CEC3
-RAM:CEC3	     loc_CEC3:							     ; CODE XREF: wtf_adjust_object_coords_wtf+11Aj
-RAM:CEC3									     ; wtf_adjust_object_coords_wtf+157j
+RAM:CEC3	     loc_CEC3:							     ; CODE XREF: calc_display_order_and_render+11Aj
+RAM:CEC3									     ; calc_display_order_and_render+157j
 RAM:CEC3 11 8B CE		     ld	     de, objects_to_draw
 RAM:CEC6
-RAM:CEC6	     loc_CEC6:							     ; CODE XREF: wtf_adjust_object_coords_wtf+14j
+RAM:CEC6	     loc_CEC6:							     ; CODE XREF: calc_display_order_and_render+14j
 RAM:CEC6 1A			     ld	     a,	(de)				     ; graphic no.
 RAM:CEC7 13			     inc     de
 RAM:CEC8 FE FF			     cp	     0FFh				     ; end of list?
 RAM:CECA CA 15 D0		     jp	     z,	loc_D015			     ; yes, exit
-RAM:CECD CB 7F			     bit     7,	a
-RAM:CECF 20 F5			     jr	     nz, loc_CEC6
+RAM:CECD CB 7F			     bit     7,	a				     ; already rendered?
+RAM:CECF 20 F5			     jr	     nz, loc_CEC6			     ; yes, skip
 RAM:CED1 CD B5 D3		     call    get_ptr_object
 RAM:CED4 ED 53 CD 5B		     ld	     (word_5BCD), de
 RAM:CED8 E5			     push    hl
 RAM:CED9 DD E1			     pop     ix					     ; IX=ptr graphic object table entry #1
 RAM:CEDB
-RAM:CEDB	     loc_CEDB:							     ; CODE XREF: wtf_adjust_object_coords_wtf+29j
-RAM:CEDB									     ; wtf_adjust_object_coords_wtf+3Bj ...
+RAM:CEDB	     loc_CEDB:							     ; CODE XREF: calc_display_order_and_render+29j
+RAM:CEDB									     ; calc_display_order_and_render+3Bj ...
 RAM:CEDB 1A			     ld	     a,	(de)				     ; next object graphic no.
 RAM:CEDC 13			     inc     de
 RAM:CEDD FE FF			     cp	     0FFh				     ; end of list?
@@ -7629,9 +7629,9 @@ RAM:CEE4 20 F5			     jr	     nz, loc_CEDB
 RAM:CEE6 CD B5 D3		     call    get_ptr_object
 RAM:CEE9 ED 53 CF 5B		     ld	     (word_5BCF), de
 RAM:CEED E5			     push    hl
-RAM:CEEE FD E1			     pop     iy					     ; IY=ptr graphic object table entry #2
+RAM:CEEE FD E1			     pop     iy					     ; HL,IY=ptr graphic object	table entry #2
 RAM:CEF0 DD E5			     push    ix
-RAM:CEF2 C1			     pop     bc					     ; BC=ptr graphic object table entry #1
+RAM:CEF2 C1			     pop     bc					     ; IX,BC=ptr graphic object	table entry #1
 RAM:CEF3 A7			     and     a
 RAM:CEF4 ED 42			     sbc     hl, bc				     ; same objects?
 RAM:CEF6 28 E3			     jr	     z,	loc_CEDB			     ; yes, loop
@@ -7650,10 +7650,10 @@ RAM:CF11 95			     sub     l					     ; Z2-(Z1+H1)
 RAM:CF12 38 01			     jr	     c,	loc_CF15
 RAM:CF14 0C			     inc     c
 RAM:CF15
-RAM:CF15	     loc_CF15:							     ; CODE XREF: wtf_adjust_object_coords_wtf+57j
+RAM:CF15	     loc_CF15:							     ; CODE XREF: calc_display_order_and_render+57j
 RAM:CF15 0C			     inc     c
 RAM:CF16
-RAM:CF16	     loc_CF16:							     ; CODE XREF: wtf_adjust_object_coords_wtf+4Aj
+RAM:CF16	     loc_CF16:							     ; CODE XREF: calc_display_order_and_render+4Aj
 RAM:CF16 FD 7E 02		     ld	     a,	(iy+2)				     ; Y2
 RAM:CF19 FD 86 05		     add     a,	(iy+5)				     ; add depth (D2)
 RAM:CF1C 6F			     ld	     l,	a
@@ -7671,17 +7671,17 @@ RAM:CF34 79			     ld	     a,	c
 RAM:CF35 38 02			     jr	     c,	loc_CF39
 RAM:CF37 C6 03			     add     a,	3
 RAM:CF39
-RAM:CF39	     loc_CF39:							     ; CODE XREF: wtf_adjust_object_coords_wtf+7Aj
+RAM:CF39	     loc_CF39:							     ; CODE XREF: calc_display_order_and_render+7Aj
 RAM:CF39 C6 03			     add     a,	3
 RAM:CF3B 4F			     ld	     c,	a
 RAM:CF3C
-RAM:CF3C	     loc_CF3C:							     ; CODE XREF: wtf_adjust_object_coords_wtf+69j
+RAM:CF3C	     loc_CF3C:							     ; CODE XREF: calc_display_order_and_render+69j
 RAM:CF3C FD 7E 01		     ld	     a,	(iy+1)				     ; X2
-RAM:CF3F FD 86 04		     add     a,	(iy+4)				     ; add width (W1)
+RAM:CF3F FD 86 04		     add     a,	(iy+4)				     ; add width (W2)
 RAM:CF42 6F			     ld	     l,	a
 RAM:CF43 DD 7E 01		     ld	     a,	(ix+1)				     ; X1
 RAM:CF46 DD 96 04		     sub     (ix+4)				     ; sub W1
-RAM:CF49 95			     sub     l					     ; X1-W1-(X2+W1)
+RAM:CF49 95			     sub     l					     ; X1-W1-(X2+W2)
 RAM:CF4A 30 16			     jr	     nc, loc_CF62
 RAM:CF4C DD 7E 01		     ld	     a,	(ix+1)				     ; X1
 RAM:CF4F DD 86 04		     add     a,	(ix+4)				     ; add W1
@@ -7693,89 +7693,89 @@ RAM:CF5A 79			     ld	     a,	c
 RAM:CF5B 38 02			     jr	     c,	loc_CF5F
 RAM:CF5D C6 09			     add     a,	9
 RAM:CF5F
-RAM:CF5F	     loc_CF5F:							     ; CODE XREF: wtf_adjust_object_coords_wtf+A0j
+RAM:CF5F	     loc_CF5F:							     ; CODE XREF: calc_display_order_and_render+A0j
 RAM:CF5F C6 09			     add     a,	9
 RAM:CF61 4F			     ld	     c,	a
 RAM:CF62
-RAM:CF62	     loc_CF62:							     ; CODE XREF: wtf_adjust_object_coords_wtf+8Fj
+RAM:CF62	     loc_CF62:							     ; CODE XREF: calc_display_order_and_render+8Fj
 RAM:CF62 69			     ld	     l,	c
 RAM:CF63 01 69 CF		     ld	     bc, off_CF69			     ; jump table
 RAM:CF66 C3 DB AF		     jp	     jump_to_tbl_entry
 RAM:CF66	     ; ---------------------------------------------------------------------------
-RAM:CF69 9F CF	     off_CF69:	     dw	loc_CF9F				     ; DATA XREF: wtf_adjust_object_coords_wtf+A8o
-RAM:CF6B 9F CF			     dw	loc_CF9F
-RAM:CF6D 9F CF			     dw	loc_CF9F
-RAM:CF6F A5 CF			     dw	loc_CFA5
-RAM:CF71 A5 CF			     dw	loc_CFA5
-RAM:CF73 9F CF			     dw	loc_CF9F
-RAM:CF75 A5 CF			     dw	loc_CFA5
-RAM:CF77 A5 CF			     dw	loc_CFA5
-RAM:CF79 9F CF			     dw	loc_CF9F
-RAM:CF7B 9F CF			     dw	loc_CF9F
-RAM:CF7D A2 CF			     dw	loc_CFA2
-RAM:CF7F A2 CF			     dw	loc_CFA2
-RAM:CF81 A5 CF			     dw	loc_CFA5
-RAM:CF83 E1 CF			     dw	loc_CFE1
-RAM:CF85 A2 CF			     dw	loc_CFA2
-RAM:CF87 A5 CF			     dw	loc_CFA5
-RAM:CF89 A5 CF			     dw	loc_CFA5
-RAM:CF8B 9F CF			     dw	loc_CF9F
-RAM:CF8D 9F CF			     dw	loc_CF9F
-RAM:CF8F A2 CF			     dw	loc_CFA2
-RAM:CF91 A2 CF			     dw	loc_CFA2
-RAM:CF93 9F CF			     dw	loc_CF9F
-RAM:CF95 A2 CF			     dw	loc_CFA2
-RAM:CF97 A2 CF			     dw	loc_CFA2
-RAM:CF99 9F CF			     dw	loc_CF9F
-RAM:CF9B 9F CF			     dw	loc_CF9F
-RAM:CF9D 9F CF			     dw	loc_CF9F
+RAM:CF69 9F CF	     off_CF69:	     dw	go_again_1				     ; DATA XREF: calc_display_order_and_render+A8o
+RAM:CF6B 9F CF			     dw	go_again_1
+RAM:CF6D 9F CF			     dw	go_again_1
+RAM:CF6F A5 CF			     dw	d_3467121516
+RAM:CF71 A5 CF			     dw	d_3467121516
+RAM:CF73 9F CF			     dw	go_again_1
+RAM:CF75 A5 CF			     dw	d_3467121516
+RAM:CF77 A5 CF			     dw	d_3467121516
+RAM:CF79 9F CF			     dw	go_again_1
+RAM:CF7B 9F CF			     dw	go_again_1
+RAM:CF7D A2 CF			     dw	go_again_2
+RAM:CF7F A2 CF			     dw	go_again_2
+RAM:CF81 A5 CF			     dw	d_3467121516
+RAM:CF83 E1 CF			     dw	d_13
+RAM:CF85 A2 CF			     dw	go_again_2
+RAM:CF87 A5 CF			     dw	d_3467121516
+RAM:CF89 A5 CF			     dw	d_3467121516
+RAM:CF8B 9F CF			     dw	go_again_1
+RAM:CF8D 9F CF			     dw	go_again_1
+RAM:CF8F A2 CF			     dw	go_again_2
+RAM:CF91 A2 CF			     dw	go_again_2
+RAM:CF93 9F CF			     dw	go_again_1
+RAM:CF95 A2 CF			     dw	go_again_2
+RAM:CF97 A2 CF			     dw	go_again_2
+RAM:CF99 9F CF			     dw	go_again_1
+RAM:CF9B 9F CF			     dw	go_again_1
+RAM:CF9D 9F CF			     dw	go_again_1
 RAM:CF9F	     ; ---------------------------------------------------------------------------
 RAM:CF9F
-RAM:CF9F	     loc_CF9F:							     ; DATA XREF: wtf_adjust_object_coords_wtf:off_CF69o
-RAM:CF9F									     ; wtf_adjust_object_coords_wtf+B0o ...
+RAM:CF9F	     go_again_1:						     ; DATA XREF: calc_display_order_and_render:off_CF69o
+RAM:CF9F									     ; calc_display_order_and_render+B0o ...
 RAM:CF9F C3 DB CE		     jp	     loc_CEDB
 RAM:CFA2	     ; ---------------------------------------------------------------------------
 RAM:CFA2
-RAM:CFA2	     loc_CFA2:							     ; DATA XREF: wtf_adjust_object_coords_wtf+C2o
-RAM:CFA2									     ; wtf_adjust_object_coords_wtf+C4o ...
+RAM:CFA2	     go_again_2:						     ; DATA XREF: calc_display_order_and_render+C2o
+RAM:CFA2									     ; calc_display_order_and_render+C4o ...
 RAM:CFA2 C3 DB CE		     jp	     loc_CEDB
 RAM:CFA5	     ; ---------------------------------------------------------------------------
 RAM:CFA5
-RAM:CFA5	     loc_CFA5:							     ; DATA XREF: wtf_adjust_object_coords_wtf+B4o
-RAM:CFA5									     ; wtf_adjust_object_coords_wtf+B6o ...
-RAM:CFA5 2A CF 5B		     ld	     hl, (word_5BCF)
-RAM:CFA8 2B			     dec     hl
-RAM:CFA9 4E			     ld	     c,	(hl)
+RAM:CFA5	     d_3467121516:						     ; DATA XREF: calc_display_order_and_render+B4o
+RAM:CFA5									     ; calc_display_order_and_render+B6o ...
+RAM:CFA5 2A CF 5B		     ld	     hl, (word_5BCF)			     ; object following	obj#2
+RAM:CFA8 2B			     dec     hl					     ; ptr obj#2
+RAM:CFA9 4E			     ld	     c,	(hl)				     ; index
 RAM:CFAA 11 1A D0		     ld	     de, byte_D01A
 RAM:CFAD
-RAM:CFAD	     loc_CFAD:							     ; CODE XREF: wtf_adjust_object_coords_wtf+FBj
+RAM:CFAD	     loc_CFAD:							     ; CODE XREF: calc_display_order_and_render+FBj
 RAM:CFAD 1A			     ld	     a,	(de)
-RAM:CFAE FE FF			     cp	     0FFh
-RAM:CFB0 28 06			     jr	     z,	loc_CFB8
-RAM:CFB2 B9			     cp	     c
-RAM:CFB3 28 19			     jr	     z,	loc_CFCE
-RAM:CFB5 13			     inc     de
-RAM:CFB6 18 F5			     jr	     loc_CFAD
+RAM:CFAE FE FF			     cp	     0FFh				     ; empty entry?
+RAM:CFB0 28 06			     jr	     z,	loc_CFB8			     ; yes, go
+RAM:CFB2 B9			     cp	     c					     ; already listed?
+RAM:CFB3 28 19			     jr	     z,	loc_CFCE			     ; yes, go
+RAM:CFB5 13			     inc     de					     ; next entry
+RAM:CFB6 18 F5			     jr	     loc_CFAD				     ; loop
 RAM:CFB8	     ; ---------------------------------------------------------------------------
 RAM:CFB8
-RAM:CFB8	     loc_CFB8:							     ; CODE XREF: wtf_adjust_object_coords_wtf+F5j
-RAM:CFB8 79			     ld	     a,	c
-RAM:CFB9 12			     ld	     (de), a
-RAM:CFBA 13			     inc     de
+RAM:CFB8	     loc_CFB8:							     ; CODE XREF: calc_display_order_and_render+F5j
+RAM:CFB8 79			     ld	     a,	c				     ; index
+RAM:CFB9 12			     ld	     (de), a				     ; add to list
+RAM:CFBA 13			     inc     de					     ; next entry
 RAM:CFBB 3E FF			     ld	     a,	0FFh
-RAM:CFBD 12			     ld	     (de), a
+RAM:CFBD 12			     ld	     (de), a				     ; flag empty
 RAM:CFBE FD E5			     push    iy
-RAM:CFC0 DD E1			     pop     ix
-RAM:CFC2 2A CF 5B		     ld	     hl, (word_5BCF)
-RAM:CFC5 22 CD 5B		     ld	     (word_5BCD), hl
+RAM:CFC0 DD E1			     pop     ix					     ; obj#2=obj#1
+RAM:CFC2 2A CF 5B		     ld	     hl, (word_5BCF)			     ; object following	obj#2
+RAM:CFC5 22 CD 5B		     ld	     (word_5BCD), hl			     ; set to object following #1
 RAM:CFC8 11 8B CE		     ld	     de, objects_to_draw
-RAM:CFCB C3 DB CE		     jp	     loc_CEDB
+RAM:CFCB C3 DB CE		     jp	     loc_CEDB				     ; go again
 RAM:CFCE	     ; ---------------------------------------------------------------------------
 RAM:CFCE
-RAM:CFCE	     loc_CFCE:							     ; CODE XREF: wtf_adjust_object_coords_wtf+F8j
+RAM:CFCE	     loc_CFCE:							     ; CODE XREF: calc_display_order_and_render+F8j
 RAM:CFCE 21 8B CE		     ld	     hl, objects_to_draw
 RAM:CFD1
-RAM:CFD1	     loc_CFD1:							     ; CODE XREF: wtf_adjust_object_coords_wtf+11Ej
+RAM:CFD1	     loc_CFD1:							     ; CODE XREF: calc_display_order_and_render+11Ej
 RAM:CFD1 7E			     ld	     a,	(hl)				     ; graphic_no
 RAM:CFD2 23			     inc     hl
 RAM:CFD3 FE FF			     cp	     0FFh				     ; end of list?
@@ -7783,54 +7783,54 @@ RAM:CFD5 CA C3 CE		     jp	     z,	loc_CEC3			     ; yes, exit
 RAM:CFD8 B9			     cp	     c					     ; what we're looking for?
 RAM:CFD9 20 F6			     jr	     nz, loc_CFD1			     ; no, loop
 RAM:CFDB FD E5			     push    iy
-RAM:CFDD DD E1			     pop     ix
+RAM:CFDD DD E1			     pop     ix					     ; obj#2=obj#1
 RAM:CFDF 18 22			     jr	     loc_D003
 RAM:CFE1	     ; ---------------------------------------------------------------------------
 RAM:CFE1
-RAM:CFE1	     loc_CFE1:							     ; DATA XREF: wtf_adjust_object_coords_wtf+C8o
-RAM:CFE1 DD 7E 00		     ld	     a,	(ix+0)
+RAM:CFE1	     d_13:							     ; DATA XREF: calc_display_order_and_render+C8o
+RAM:CFE1 DD 7E 00		     ld	     a,	(ix+0)				     ; obj#1 graphic no.
 RAM:CFE4 D6 60			     sub     60h ; '`'
-RAM:CFE6 FE 07			     cp	     7
-RAM:CFE8 30 06			     jr	     nc, loc_CFF0
-RAM:CFEA DD 36 00 BB		     ld	     (ix+0), 0BBh ; '»'
+RAM:CFE6 FE 07			     cp	     7					     ; special object?
+RAM:CFE8 30 06			     jr	     nc, loc_CFF0			     ; no, skip
+RAM:CFEA DD 36 00 BB		     ld	     (ix+0), 0BBh ; '»'                      ; set to twinkle sprite
 RAM:CFEE 18 0D			     jr	     loc_CFFD
 RAM:CFF0	     ; ---------------------------------------------------------------------------
 RAM:CFF0
-RAM:CFF0	     loc_CFF0:							     ; CODE XREF: wtf_adjust_object_coords_wtf+12Dj
-RAM:CFF0 FD 7E 00		     ld	     a,	(iy+0)
+RAM:CFF0	     loc_CFF0:							     ; CODE XREF: calc_display_order_and_render+12Dj
+RAM:CFF0 FD 7E 00		     ld	     a,	(iy+0)				     ; object #2 graphic no.
 RAM:CFF3 D6 60			     sub     60h ; '`'
-RAM:CFF5 FE 07			     cp	     7
-RAM:CFF7 30 04			     jr	     nc, loc_CFFD
-RAM:CFF9 FD 36 00 BB		     ld	     (iy+0), 0BBh ; '»'
+RAM:CFF5 FE 07			     cp	     7					     ; special object?
+RAM:CFF7 30 04			     jr	     nc, loc_CFFD			     ; no, skip
+RAM:CFF9 FD 36 00 BB		     ld	     (iy+0), 0BBh ; '»'                      ; set to twinkle sprite
 RAM:CFFD
-RAM:CFFD	     loc_CFFD:							     ; CODE XREF: wtf_adjust_object_coords_wtf+133j
-RAM:CFFD									     ; wtf_adjust_object_coords_wtf+13Cj
-RAM:CFFD C3 DB CE		     jp	     loc_CEDB
+RAM:CFFD	     loc_CFFD:							     ; CODE XREF: calc_display_order_and_render+133j
+RAM:CFFD									     ; calc_display_order_and_render+13Cj
+RAM:CFFD C3 DB CE		     jp	     loc_CEDB				     ; go again
 RAM:D000	     ; ---------------------------------------------------------------------------
 RAM:D000
-RAM:D000	     loc_D000:							     ; CODE XREF: wtf_adjust_object_coords_wtf+24j
+RAM:D000	     loc_D000:							     ; CODE XREF: calc_display_order_and_render+24j
 RAM:D000 2A CD 5B		     ld	     hl, (word_5BCD)
 RAM:D003
-RAM:D003	     loc_D003:							     ; CODE XREF: wtf_adjust_object_coords_wtf+124j
+RAM:D003	     loc_D003:							     ; CODE XREF: calc_display_order_and_render+124j
 RAM:D003 2B			     dec     hl					     ; back to entry we're searching for
-RAM:D004 CB FE			     set     7,	(hl)
+RAM:D004 CB FE			     set     7,	(hl)				     ; flag as rendered
 RAM:D006 3E FF			     ld	     a,	0FFh
-RAM:D008 32 1A D0		     ld	     (byte_D01A), a
+RAM:D008 32 1A D0		     ld	     (byte_D01A), a			     ; set entry to empty
 RAM:D00B 21 BE 5B		     ld	     hl, unk_5BBE
 RAM:D00E 34			     inc     (hl)
-RAM:D00F CD 04 D7		     call    sub_D704				     ; this does some rendering!!!
-RAM:D012 C3 C3 CE		     jp	     loc_CEC3
+RAM:D00F CD 04 D7		     call    calc_pixel_XY_and_render		     ; this does some rendering!!!
+RAM:D012 C3 C3 CE		     jp	     loc_CEC3				     ; next object
 RAM:D015	     ; ---------------------------------------------------------------------------
 RAM:D015
-RAM:D015	     loc_D015:							     ; CODE XREF: wtf_adjust_object_coords_wtf+Fj
+RAM:D015	     loc_D015:							     ; CODE XREF: calc_display_order_and_render+Fj
 RAM:D015 FD E1			     pop     iy
 RAM:D017 DD E1			     pop     ix
 RAM:D019 C9			     ret
-RAM:D019	     ; End of function wtf_adjust_object_coords_wtf
+RAM:D019	     ; End of function calc_display_order_and_render
 RAM:D019
 RAM:D019	     ; ---------------------------------------------------------------------------
-RAM:D01A FF	     byte_D01A:	     db	0FFh					     ; DATA XREF: wtf_adjust_object_coords_wtf+EFo
-RAM:D01A									     ; wtf_adjust_object_coords_wtf+14Dw
+RAM:D01A FF	     byte_D01A:	     db	0FFh					     ; DATA XREF: calc_display_order_and_render+EFo
+RAM:D01A									     ; calc_display_order_and_render+14Dw
 RAM:D01B FF			     db	0FFh
 RAM:D01C FF			     db	0FFh
 RAM:D01D FF			     db	0FFh
@@ -8477,8 +8477,8 @@ RAM:D3B5
 RAM:D3B5	     ; =============== S U B R O U T I N E =======================================
 RAM:D3B5
 RAM:D3B5
-RAM:D3B5	     get_ptr_object:						     ; CODE XREF: wtf_adjust_object_coords_wtf+16p
-RAM:D3B5									     ; wtf_adjust_object_coords_wtf+2Bp ...
+RAM:D3B5	     get_ptr_object:						     ; CODE XREF: calc_display_order_and_render+16p
+RAM:D3B5									     ; calc_display_order_and_render+2Bp ...
 RAM:D3B5 C5			     push    bc
 RAM:D3B6 E6 7F			     and     7Fh ; ''
 RAM:D3B8 6F			     ld	     l,	a
@@ -9053,7 +9053,7 @@ RAM:D653	     ; ----------------------------------------------------------------
 RAM:D653
 RAM:D653	     loc_D653:							     ; CODE XREF: render_dynamic_objects+Aj
 RAM:D653									     ; render_dynamic_objects+1Dj
-RAM:D653 CD BB CE		     call    wtf_adjust_object_coords_wtf
+RAM:D653 CD BB CE		     call    calc_display_order_and_render
 RAM:D656 CD 97 C3		     call    print_sun_moon
 RAM:D659 CD 45 BF		     call    display_objects_carried
 RAM:D65C 21 A8 5B		     ld	     hl, unk_5BA8
@@ -9227,19 +9227,19 @@ RAM:D704
 RAM:D704	     ; =============== S U B R O U T I N E =======================================
 RAM:D704
 RAM:D704
-RAM:D704	     sub_D704:							     ; CODE XREF: wtf_adjust_object_coords_wtf+154p
-RAM:D704 DD 7E 00		     ld	     a,	(ix+0)
-RAM:D707 FE 01			     cp	     1
-RAM:D709 20 05			     jr	     nz, loc_D710
-RAM:D70B DD 36 00 00		     ld	     (ix+0), 0
+RAM:D704	     calc_pixel_XY_and_render:					     ; CODE XREF: calc_display_order_and_render+154p
+RAM:D704 DD 7E 00		     ld	     a,	(ix+0)				     ; graphic no.
+RAM:D707 FE 01			     cp	     1					     ; flagged as ???
+RAM:D709 20 05			     jr	     nz, loc_D710			     ; no, continue
+RAM:D70B DD 36 00 00		     ld	     (ix+0), 0				     ; set to null
 RAM:D70F C9			     ret
 RAM:D710	     ; ---------------------------------------------------------------------------
 RAM:D710
-RAM:D710	     loc_D710:							     ; CODE XREF: sub_D704+5j
+RAM:D710	     loc_D710:							     ; CODE XREF: calc_pixel_XY_and_render+5j
 RAM:D710 DD CB 07 A6		     res     4,	(ix+7)				     ; flag don't draw
 RAM:D714 CD C9 D6		     call    calc_pixel_XY
 RAM:D717 D0			     ret     nc					     ; off bottom of screen, skip
-RAM:D717	     ; End of function sub_D704
+RAM:D717	     ; End of function calc_pixel_XY_and_render
 RAM:D717
 RAM:D718
 RAM:D718	     print_sprite:						     ; CODE XREF: print_lives_gfx+14p
