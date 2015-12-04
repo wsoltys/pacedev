@@ -130,7 +130,11 @@ static void play_audio_wait_key (uint8_t *audio_data);
 static void play_audio (uint8_t *audio_data);
 static void shuffle_objects_required (void);
 static uint8_t read_key (uint8_t row);
+static void adj_91 (POBJ32 p_obj);
+static void adj_143 (POBJ32 p_obj);
 static void adj_144_to_149_152_to_157 (POBJ32 p_obj);
+static void adj_63 (POBJ32 p_obj);
+static void adj_150_151 (POBJ32 p_obj);
 static void adj_22 (POBJ32 p_obj);
 static void adj_23 (POBJ32 p_obj);
 static void adj_30_31_158_159 (POBJ32 p_obj);
@@ -158,9 +162,10 @@ static void update_special_objs (void);
 static void adj_6_7 (POBJ32 p_obj);
 static void adj_10 (POBJ32 p_obj);
 static void adj_11 (POBJ32 p_obj);
-static void adj_12_13_14_15 (POBJ32 p_obj);
+static void adj_12_to_15 (POBJ32 p_obj);
 static void sub_C4FC (POBJ32 p_obj);
 static void find_special_objs_here (void);
+static void adj_80_to_83 (POBJ32 p_obj);
 static void adj_3_5 (POBJ32 p_obj);
 static void set_pixel_adj (POBJ32 p_obj, int8_t h, int8_t l);
 static void adj_2_4 (POBJ32 p_obj);
@@ -207,6 +212,25 @@ void dump_graphic_objs_tbl (void)
 void adj_not_implemented (POBJ32 obj)
 {
   // place-holder
+
+  static bool printed[256];
+  static bool inited = false;
+  
+  if (!inited)
+  {
+    memset (printed, false, 256);
+    inited = true;
+  }
+      
+  if (!printed[obj->graphic_no])
+  {
+    fprintf (stderr, "%s(%d=$%02X) @$%04X\n",
+              __FUNCTION__,
+              obj->graphic_no, 
+              obj->graphic_no,
+              0xB096+2*obj->graphic_no);
+    printed[obj->graphic_no] = true;
+  }
 }
 
 void knight_lore (void)
@@ -323,7 +347,7 @@ onscreen_loop:
     
     while (keypressed ())
       readkey ();
-    fprintf (stderr, "Enter 3-digit room#: ");
+    fprintf (stderr, "Done (000-003) room# ");
     for (unsigned i=0; i<3; i++)
     {
       int c;
@@ -359,10 +383,10 @@ adjfn_t adj_sprite_jump_tbl[] =
   adj_not_implemented,          
   adj_10,                       // bricks
   adj_11,                       // more bricks
-  adj_12_13_14_15,              // even more bricks
-  adj_12_13_14_15,              // even more bricks
-  adj_12_13_14_15,              // even more bricks
-  adj_12_13_14_15,              // even more bricks
+  adj_12_to_15,                 // even more bricks
+  adj_12_to_15,                 // even more bricks
+  adj_12_to_15,                 // even more bricks
+  adj_12_to_15,                 // even more bricks
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
@@ -410,7 +434,7 @@ adjfn_t adj_sprite_jump_tbl[] =
   adj_not_implemented,  // 60
   adj_not_implemented,
   adj_not_implemented,
-  adj_not_implemented,
+  adj_63,               // spiked ball
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
@@ -427,10 +451,10 @@ adjfn_t adj_sprite_jump_tbl[] =
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
-  adj_not_implemented,  // 80
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
+  adj_80_to_83,         // ghost
+  adj_80_to_83,         // ghost
+  adj_80_to_83,         // ghost
+  adj_80_to_83,         // ghost
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
@@ -438,7 +462,7 @@ adjfn_t adj_sprite_jump_tbl[] =
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,  // 90
-  adj_not_implemented,
+  adj_91,               // block (high?)
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
@@ -490,15 +514,15 @@ adjfn_t adj_sprite_jump_tbl[] =
   adj_not_implemented,  // 140
   adj_not_implemented,
   adj_not_implemented,
-  adj_not_implemented,
+  adj_143,                      // another block
   adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
   adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
   adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
   adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
   adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
   adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
-  adj_not_implemented,  // 150
-  adj_not_implemented,
+  adj_150_151,                  // guard 2 (top half)
+  adj_150_151,                  // guard 2 (top half)
   adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
   adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
   adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
@@ -575,12 +599,45 @@ uint8_t read_key (uint8_t row)
   return (val);
 }
 
+// $B683
+// block (high?)
+void adj_91 (POBJ32 p_obj)
+{
+  adj_6_7 (p_obj);
+  // other stuff
+}
+
+// $B6A2
+// another block
+void adj_143 (POBJ32 p_obj)
+{
+  adj_6_7 (p_obj);
+  // other stuff
+}
+
 // $B6F7
 // guard & wizard (bottom half)
 void adj_144_to_149_152_to_157 (POBJ32 p_obj)
 {
   set_pixel_adj (p_obj, -6, -12); // this is in a sub
   // other stuff
+}
+
+// $B7A9
+// spiked ball
+void adj_63 (POBJ32 p_obj)
+{
+  // sub_B85C
+  adj_6_7 (p_obj);
+  // other stuff
+}
+
+// $B7C3
+// guard 2 top half
+void adj_150_151 (POBJ32 p_obj)
+{
+  set_pixel_adj (p_obj, 7, -12);
+  // heaps of other stuff  
 }
 
 // $B7A3
@@ -901,6 +958,12 @@ void init_special_objects (void)
   }
 }
 
+// $C4DD
+void sub_C4DD (POBJ32 p_obj)
+{
+  set_pixel_adj (p_obj, -6, -12);
+}
+
 // $C4E8
 // rock & block
 void adj_6_7 (POBJ32 p_obj)
@@ -921,7 +984,7 @@ void adj_11 (POBJ32 p_obj)
 }
 
 // $C4F2
-void adj_12_13_14_15 (POBJ32 p_obj)
+void adj_12_to_15 (POBJ32 p_obj)
 {
   set_pixel_adj (p_obj, -4, -8);
 }
@@ -995,6 +1058,14 @@ void update_special_objs (void)
   }
 }
 
+// $C5C8
+// ghost
+void adj_80_to_83 (POBJ32 p_obj)
+{
+  sub_C4DD (p_obj);
+  // heaps of other stuff
+}
+
 // $C722
 // stone/tree arch (far side)
 void adj_3_5 (POBJ32 p_obj)
@@ -1059,8 +1130,8 @@ void list_objects_to_draw (void)
     if ((graphic_objs_tbl[i].graphic_no != 0) &&
         (graphic_objs_tbl[i].flags & (1<<4)))
     {
-      fprintf (stderr, "[%02d]=%02d(graphic_no=$%02X,flags=$%02X)\n",
-                n, i, graphic_objs_tbl[i].graphic_no, graphic_objs_tbl[i].flags);
+      //fprintf (stderr, "[%02d]=%02d(graphic_no=$%02X,flags=$%02X)\n",
+      //          n, i, graphic_objs_tbl[i].graphic_no, graphic_objs_tbl[i].flags);
       objects_to_draw[n++] = i;
     }
   }
@@ -1180,11 +1251,17 @@ void retrieve_screen (void)
       p_47 = p;    
     if (location_tbl[p] == plyr_spr_1_scratchpad.scrn)
       break;
-    if (location_tbl[p] == 255) // *** FIXME
+    if (location_tbl[p] > plyr_spr_1_scratchpad.scrn ||
+        location_tbl[p] == 255) // *** FIXME
     {
-      plyr_spr_1_scratchpad.scrn = 47;
-      plyr_spr_2_scratchpad.scrn = 47;
+      #if 0
+        plyr_spr_1_scratchpad.scrn = 47;
+        plyr_spr_2_scratchpad.scrn = 47;
       p = p_47;
+      #else
+        plyr_spr_1_scratchpad.scrn = location_tbl[p];
+        plyr_spr_2_scratchpad.scrn = location_tbl[p];
+      #endif
       break;
       // bad_player_location
       exit (-1);
