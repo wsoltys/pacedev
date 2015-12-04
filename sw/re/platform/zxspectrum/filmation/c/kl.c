@@ -131,6 +131,7 @@ static void play_audio (uint8_t *audio_data);
 static void shuffle_objects_required (void);
 static uint8_t read_key (uint8_t row);
 static void adj_144_to_149_152_to_157 (POBJ32 p_obj);
+static void adj_22 (POBJ32 p_obj);
 static void adj_23 (POBJ32 p_obj);
 static void adj_30_31_158_159 (POBJ32 p_obj);
 static void print_days (void);
@@ -158,6 +159,7 @@ static void adj_6_7 (POBJ32 p_obj);
 static void adj_10 (POBJ32 p_obj);
 static void adj_11 (POBJ32 p_obj);
 static void adj_12_13_14_15 (POBJ32 p_obj);
+static void sub_C4FC (POBJ32 p_obj);
 static void find_special_objs_here (void);
 static void adj_3_5 (POBJ32 p_obj);
 static void set_pixel_adj (POBJ32 p_obj, int8_t h, int8_t l);
@@ -367,7 +369,7 @@ adjfn_t adj_sprite_jump_tbl[] =
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
-  adj_not_implemented,
+  adj_22,                       // gargoyle
   adj_23,                       // spikes
   adj_not_implemented,
   adj_not_implemented,
@@ -579,6 +581,14 @@ void adj_144_to_149_152_to_157 (POBJ32 p_obj)
 {
   set_pixel_adj (p_obj, -6, -12); // this is in a sub
   // other stuff
+}
+
+// $B7A3
+// gargoyle
+void adj_22 (POBJ32 p_obj)
+{
+  // call sub_B85C
+  adj_6_7 (p_obj);
 }
 
 // $B7E7
@@ -914,6 +924,12 @@ void adj_11 (POBJ32 p_obj)
 void adj_12_13_14_15 (POBJ32 p_obj)
 {
   set_pixel_adj (p_obj, -4, -8);
+}
+
+// $C4FC
+void sub_C4FC (POBJ32 p_obj)
+{
+  set_pixel_adj (p_obj, -7, -12);
 }
 
 // $C525

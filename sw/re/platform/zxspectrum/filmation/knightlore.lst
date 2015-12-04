@@ -2714,7 +2714,7 @@ RAM:B096 CB C2 CB C2+adj_sprite_jmp_tbl:dw no_adjust, no_adjust, adj_2_4, adj_3_
 RAM:B096 3C C7 22 C7+								     ; DATA XREF: lose_life-2152o
 RAM:B096 3C C7 22 C7+		     dw	adj_6_7, adj_6_7, adj_8, adj_9,	adj_10,	adj_11,	adj_12_13_14_15
 RAM:B096 E3 C4 E3 C4+		     dw	adj_12_13_14_15, adj_12_13_14_15, adj_12_13_14_15, loc_C823
-RAM:B096 5E C6 BD C6+		     dw	loc_C823, loc_C823, loc_C823, loc_C823,	loc_C823, loc_B7A3
+RAM:B096 5E C6 BD C6+		     dw	loc_C823, loc_C823, loc_C823, loc_C823,	loc_C823, adj_22
 RAM:B096 E8 C4 ED C4+		     dw	adj_23,	loc_C823, loc_C823, loc_C823, loc_C823,	loc_C823
 RAM:B096 F2 C4 F2 C4+		     dw	loc_C823, adj_30_31_158_159, adj_30_31_158_159,	loc_CDDA
 RAM:B096 F2 C4 F2 C4+		     dw	loc_CDDA, loc_CDDA, loc_CDDA, loc_CDDA,	loc_CDDA, loc_CDDA
@@ -3722,7 +3722,7 @@ RAM:B7A1	     ; End of function sub_B76C
 RAM:B7A1
 RAM:B7A3	     ; ---------------------------------------------------------------------------
 RAM:B7A3
-RAM:B7A3	     loc_B7A3:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
+RAM:B7A3	     adj_22:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
 RAM:B7A3 CD 5C B8		     call    sub_B85C
 RAM:B7A6 C3 FC C4		     jp	     sub_C4FC
 RAM:B7A9	     ; ---------------------------------------------------------------------------
@@ -3832,7 +3832,7 @@ RAM:B85C
 RAM:B85C	     ; =============== S U B R O U T I N E =======================================
 RAM:B85C
 RAM:B85C
-RAM:B85C	     sub_B85C:							     ; CODE XREF: RAM:loc_B7A3p
+RAM:B85C	     sub_B85C:							     ; CODE XREF: RAM:adj_22p
 RAM:B85C									     ; RAM:loc_B7A9p ...
 RAM:B85C DD 7E 0D		     ld	     a,	(ix+13)
 RAM:B85F F6 A0			     or	     0A0h ; ' '
