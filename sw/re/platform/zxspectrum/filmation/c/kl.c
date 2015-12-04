@@ -315,6 +315,30 @@ onscreen_loop:
     goto game_loop;
   }
 
+  if (key[KEY_G])
+  {
+    uint8_t scrn = 0;
+    
+    while (keypressed ())
+      readkey ();
+    fprintf (stderr, "Enter 3-digit room#: ");
+    for (unsigned i=0; i<3; i++)
+    {
+      int c;
+      do
+      {
+        c = readkey () & 0xff;
+      } while (!isdigit(c));
+      
+      fprintf (stderr, "%c", c);
+      scrn = (scrn * 10) + c - '0';
+    }
+    fprintf (stderr, "\n");
+    plyr_spr_1_scratchpad.scrn = scrn;
+    plyr_spr_2_scratchpad.scrn = scrn;
+    goto game_loop;
+  }
+
   goto onscreen_loop;
 }
 
@@ -1133,10 +1157,19 @@ void retrieve_screen (void)
   
   for (unsigned i=0; ; i++)
   {
+    static unsigned p_47 = 0;
+
+    // fudge: save this for invalid screens
+    if (location_tbl[p] == 47)
+      p_47 = p;    
     if (location_tbl[p] == plyr_spr_1_scratchpad.scrn)
       break;
-    if (i == 666) // *** FIXME
+    if (location_tbl[p] == 255) // *** FIXME
     {
+      plyr_spr_1_scratchpad.scrn = 47;
+      plyr_spr_2_scratchpad.scrn = 47;
+      p = p_47;
+      break;
       // bad_player_location
       exit (-1);
     }
