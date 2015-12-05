@@ -130,13 +130,22 @@ static void play_audio_wait_key (uint8_t *audio_data);
 static void play_audio (uint8_t *audio_data);
 static void shuffle_objects_required (void);
 static uint8_t read_key (uint8_t row);
+static void adj_182_183 (POBJ32 p_obj);
 static void adj_91 (POBJ32 p_obj);
 static void adj_143 (POBJ32 p_obj);
+static void adj_55 (POBJ32 p_obj);
+static void adj_54 (POBJ32 p_obj);
 static void adj_144_to_149_152_to_157 (POBJ32 p_obj);
 static void adj_63 (POBJ32 p_obj);
 static void adj_150_151 (POBJ32 p_obj);
 static void adj_22 (POBJ32 p_obj);
 static void adj_23 (POBJ32 p_obj);
+static void adj_86_87 (POBJ32 p_obj);
+static void adj_180_181 (POBJ32 p_obj);
+static void adj_178_179 (POBJ32 p_obj);
+static void adj_164_to_167 (POBJ32 p_obj);
+static void adj_141 (POBJ32 p_obj);
+static void adj_142 (POBJ32 p_obj);
 static void adj_30_31_158_159 (POBJ32 p_obj);
 static void print_days (void);
 static void print_lives_gfx (void);
@@ -158,15 +167,23 @@ static void no_adjust (POBJ32 p_obj);
 static void display_sun_moon_frame (PSPRITE_SCRATCHPAD scratchpad);
 static void init_sun (void);
 static void init_special_objects (void);
+static void adj_62 (POBJ32 p_obj);
+static void adj_85 (POBJ32 p_obj);
+static void adj_84 (POBJ32 p_obj);
 static void adj_128_to_130 (POBJ32 p_obj);
 static void adj_6_7 (POBJ32 p_obj);
 static void adj_10 (POBJ32 p_obj);
 static void adj_11 (POBJ32 p_obj);
 static void adj_12_to_15 (POBJ32 p_obj);
+static void sub_C4D8 (POBJ32 p_obj);
+static void sub_C4DD (POBJ32 p_obj);
 static void sub_C4FC (POBJ32 p_obj);
+static void adj_88_to_90 (POBJ32 p_obj);
 static void find_special_objs_here (void);
 static void update_special_objs (void);
 static void adj_80_to_83 (POBJ32 p_obj);
+static void adj_8 (POBJ32 p_obj);
+static void adj_9 (POBJ32 p_obj);
 static void adj_3_5 (POBJ32 p_obj);
 static void set_pixel_adj (POBJ32 p_obj, int8_t h, int8_t l);
 static void adj_2_4 (POBJ32 p_obj);
@@ -278,7 +295,7 @@ onscreen_loop:
     #endif
     extern adjfn_t adj_sprite_jump_tbl[];
     
-    if (p_obj->graphic_no > 170)
+    if (p_obj->graphic_no > 187)
       adj_not_implemented (p_obj);
     else
       adj_sprite_jump_tbl[p_obj->graphic_no] (p_obj);
@@ -380,8 +397,8 @@ adjfn_t adj_sprite_jump_tbl[] =
   adj_3_5,                      // tree arch (far side)
   adj_6_7,                      // rock & block
   adj_6_7,                      // rock & block
-  adj_not_implemented,          
-  adj_not_implemented,          
+  adj_8,                        // portculis
+  adj_9,                        // another portculis
   adj_10,                       // bricks
   adj_11,                       // more bricks
   adj_12_to_15,                 // even more bricks
@@ -426,15 +443,15 @@ adjfn_t adj_sprite_jump_tbl[] =
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
+  adj_54,               // yet another block
+  adj_55,               // yet another block
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,  // 60
   adj_not_implemented,
-  adj_not_implemented,
+  adj_62,               // another block
   adj_63,               // spiked ball
   adj_not_implemented,
   adj_not_implemented,
@@ -456,13 +473,13 @@ adjfn_t adj_sprite_jump_tbl[] =
   adj_80_to_83,         // ghost
   adj_80_to_83,         // ghost
   adj_80_to_83,         // ghost
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,  // 90
+  adj_84,               // table
+  adj_85,               // chest
+  adj_86_87,            // another fire
+  adj_86_87,            // another fire
+  adj_88_to_90,         // sun
+  adj_88_to_90,         // moon
+  adj_88_to_90,         // frame
   adj_91,               // block (high?)
   adj_not_implemented,
   adj_not_implemented,
@@ -513,8 +530,8 @@ adjfn_t adj_sprite_jump_tbl[] =
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,  // 140
-  adj_not_implemented,
-  adj_not_implemented,
+  adj_141,                      // cauldron (bottom)
+  adj_142,                      // cauldron (top)
   adj_143,                      // another block
   adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
   adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
@@ -536,14 +553,29 @@ adjfn_t adj_sprite_jump_tbl[] =
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
+  adj_164_to_167,       // twinkles
+  adj_164_to_167,       // twinkles
+  adj_164_to_167,       // twinkles
+  adj_164_to_167,       // twinkles
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,  // 170
-      
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_178_179,          // another ball
+  adj_178_179,          // another ball
+  adj_180_181,          // fire
+  adj_180_181,          // fire
+  adj_182_183,          // ball (high)
+  adj_182_183,          // ball (high)
+  adj_not_implemented,
+  adj_not_implemented,
+  adj_not_implemented,
   adj_not_implemented
 };
 
@@ -600,6 +632,14 @@ uint8_t read_key (uint8_t row)
   return (val);
 }
 
+// $B5FF
+// ball (high)
+void adj_182_183 (POBJ32 p_obj)
+{
+  adj_12_to_15 (p_obj);
+  // other stuff
+}
+
 // $B683
 // block (high?)
 void adj_91 (POBJ32 p_obj)
@@ -614,6 +654,24 @@ void adj_143 (POBJ32 p_obj)
 {
   adj_6_7 (p_obj);
   // other stuff
+}
+
+// $B6B1
+// yet another block
+void adj_55 (POBJ32 p_obj)
+{
+  // some stuff
+  adj_6_7 (p_obj);
+  // other stuff (in common with below)
+}
+
+// $B6B9
+// yet another block
+void adj_54 (POBJ32 p_obj)
+{
+  // some stuff
+  adj_6_7 (p_obj);
+  // other stuff (in common with above)
 }
 
 // $B6F7
@@ -655,6 +713,53 @@ void adj_23 (POBJ32 p_obj)
 {
   // call sub_B85C
   adj_6_7 (p_obj);
+}
+
+// $B7ED
+// another fire
+void adj_86_87 (POBJ32 p_obj)
+{
+  adj_12_to_15 (p_obj);
+  // other stuff
+}
+
+// $B808
+// fire
+void adj_180_181 (POBJ32 p_obj)
+{
+  adj_12_to_15 (p_obj);
+  // other stuff
+}
+
+// $B865
+// another ball
+void adj_178_179 (POBJ32 p_obj)
+{
+  adj_12_to_15 (p_obj);
+  // other stuff
+}
+
+// $B92C
+// twinkles
+void adj_164_to_167 (POBJ32 p_obj)
+{
+  sub_C4D8 (p_obj);
+  // other stuff
+}
+
+// $B99C
+// cauldron (bottom)
+void adj_141 (POBJ32 p_obj)
+{
+  // sun, moon, frame
+  adj_88_to_90 (p_obj);
+}
+
+// $B99F
+// cauldron (top)
+void adj_142 (POBJ32 p_obj)
+{
+  set_pixel_adj (p_obj, 12, -24);
 }
 
 // $B9A5
@@ -959,11 +1064,41 @@ void init_special_objects (void)
   }
 }
 
+// $C4AA
+// another block
+void adj_62 (POBJ32 p_obj)
+{
+  adj_6_7 (p_obj);
+  // other stuff
+}
+
+// $C4B6
+// chest
+void adj_85 (POBJ32 p_obj)
+{
+  adj_6_7 (p_obj);
+  // other stuff
+}
+
+// $C4C3
+// table
+void adj_84 (POBJ32 p_obj)
+{
+  adj_6_7 (p_obj);
+  // other stuff
+}
+
 // $C4D3
 // tree wall
 void adj_128_to_130 (POBJ32 p_obj)
 {
   set_pixel_adj (p_obj, -2, -8);
+}
+
+// $C4D8
+void sub_C4D8 (POBJ32 p_obj)
+{
+  set_pixel_adj (p_obj, -4, -12);
 }
 
 // $C4DD
@@ -1001,6 +1136,13 @@ void adj_12_to_15 (POBJ32 p_obj)
 void sub_C4FC (POBJ32 p_obj)
 {
   set_pixel_adj (p_obj, -7, -12);
+}
+
+// $C506
+// sun, moon, frame
+void adj_88_to_90 (POBJ32 p_obj)
+{
+  set_pixel_adj (p_obj, -12, -16);
 }
 
 // $C525
@@ -1069,6 +1211,22 @@ void update_special_objs (void)
 // $C5C8
 // ghost
 void adj_80_to_83 (POBJ32 p_obj)
+{
+  sub_C4DD (p_obj);
+  // heaps of other stuff
+}
+
+// $C65E
+// portculis
+void adj_8 (POBJ32 p_obj)
+{
+  sub_C4DD (p_obj);
+  // heaps of other stuff
+}
+
+// $C6BD
+// another portculis
+void adj_9 (POBJ32 p_obj)
 {
   sub_C4DD (p_obj);
   // heaps of other stuff
