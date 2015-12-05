@@ -158,13 +158,14 @@ static void no_adjust (POBJ32 p_obj);
 static void display_sun_moon_frame (PSPRITE_SCRATCHPAD scratchpad);
 static void init_sun (void);
 static void init_special_objects (void);
-static void update_special_objs (void);
+static void adj_128_to_130 (POBJ32 p_obj);
 static void adj_6_7 (POBJ32 p_obj);
 static void adj_10 (POBJ32 p_obj);
 static void adj_11 (POBJ32 p_obj);
 static void adj_12_to_15 (POBJ32 p_obj);
 static void sub_C4FC (POBJ32 p_obj);
 static void find_special_objs_here (void);
+static void update_special_objs (void);
 static void adj_80_to_83 (POBJ32 p_obj);
 static void adj_3_5 (POBJ32 p_obj);
 static void set_pixel_adj (POBJ32 p_obj, int8_t h, int8_t l);
@@ -499,9 +500,9 @@ adjfn_t adj_sprite_jump_tbl[] =
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,  // 130
+  adj_128_to_130,               // tree wall
+  adj_128_to_130,               // tree wall
+  adj_128_to_130,               // tree wall
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
@@ -956,6 +957,13 @@ void init_special_objects (void)
     special_objs_tbl[i].curr_scrn = special_objs_tbl[i].start_scrn;
     r++;
   }
+}
+
+// $C4D3
+// tree wall
+void adj_128_to_130 (POBJ32 p_obj)
+{
+  set_pixel_adj (p_obj, -2, -8);
 }
 
 // $C4DD

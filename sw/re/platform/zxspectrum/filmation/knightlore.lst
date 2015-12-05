@@ -2838,9 +2838,9 @@ RAM:B18E FE BE			     dw	loc_BEFE
 RAM:B190 FE BE			     dw	loc_BEFE
 RAM:B192 FE BE			     dw	loc_BEFE
 RAM:B194 11 BF			     dw	loc_BF11
-RAM:B196 D3 C4			     dw	sub_C4D3
-RAM:B198 D3 C4			     dw	sub_C4D3
-RAM:B19A D3 C4			     dw	sub_C4D3
+RAM:B196 D3 C4			     dw	adj_128_to_130
+RAM:B198 D3 C4			     dw	adj_128_to_130
+RAM:B19A D3 C4			     dw	adj_128_to_130
 RAM:B19C 66 B5			     dw	loc_B566
 RAM:B19E 66 B5			     dw	loc_B566
 RAM:B1A0 66 B5			     dw	loc_B566
@@ -5397,7 +5397,7 @@ RAM:C1AA
 RAM:C1AB	     ; ---------------------------------------------------------------------------
 RAM:C1AB
 RAM:C1AB	     loc_C1AB:							     ; DATA XREF: RAM:B164o
-RAM:C1AB CD D3 C4		     call    sub_C4D3
+RAM:C1AB CD D3 C4		     call    adj_128_to_130
 RAM:C1AE DD E5			     push    ix
 RAM:C1B0 FD E1			     pop     iy
 RAM:C1B2 DD 21 08 5C		     ld	     ix, graphic_objs_tbl
@@ -5891,11 +5891,11 @@ RAM:C4D3
 RAM:C4D3	     ; =============== S U B R O U T I N E =======================================
 RAM:C4D3
 RAM:C4D3
-RAM:C4D3	     sub_C4D3:							     ; CODE XREF: RAM:loc_C1ABp
+RAM:C4D3	     adj_128_to_130:						     ; CODE XREF: RAM:loc_C1ABp
 RAM:C4D3									     ; DATA XREF: RAM:B196o ...
 RAM:C4D3 21 F8 FE		     ld	     hl, 0FEF8h				     ; -2, -8
 RAM:C4D6 18 08			     jr	     jp_set_pixel_adj
-RAM:C4D6	     ; End of function sub_C4D3
+RAM:C4D6	     ; End of function adj_128_to_130
 RAM:C4D6
 RAM:C4D8
 RAM:C4D8	     ; =============== S U B R O U T I N E =======================================
@@ -5921,7 +5921,7 @@ RAM:C4DD	     ; End of function sub_C4DD
 RAM:C4DD
 RAM:C4E0	     ; START OF	FUNCTION CHUNK FOR sub_C4D8
 RAM:C4E0
-RAM:C4E0	     jp_set_pixel_adj:						     ; CODE XREF: sub_C4D3+3j
+RAM:C4E0	     jp_set_pixel_adj:						     ; CODE XREF: adj_128_to_130+3j
 RAM:C4E0									     ; sub_C4D8+3j ...
 RAM:C4E0 C3 2B C7		     jp	     set_pixel_adj
 RAM:C4E0	     ; END OF FUNCTION CHUNK FOR sub_C4D8
