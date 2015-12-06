@@ -24,6 +24,8 @@
 
 #pragma pack(1)
 
+//#define ENABLE_MASK
+
 #define FLAG_VFLIP  (1<<7)
 #define FLAG_HFLIP  (1<<6)
 #define FLAG_DRAW   (1<<4)
@@ -224,6 +226,22 @@ void dump_graphic_objs_tbl (void)
               graphic_objs_tbl[i].depth,
               graphic_objs_tbl[i].height,
               graphic_objs_tbl[i].flags);
+  }
+}
+
+void dump_special_objs_tbl (void)
+{
+  fprintf (stderr, "%s():\n", __FUNCTION__);
+  
+  for (unsigned i=0; i<32; i++)
+  {
+    fprintf (stderr, "%02d: graphic_no=%02d, x=%d, y=%d, z=%d, start_scrn=$%02X\n",
+              i,
+              special_objs_tbl[i].graphic_no,
+              special_objs_tbl[i].start_x,
+              special_objs_tbl[i].start_y,
+              special_objs_tbl[i].start_z,
+              special_objs_tbl[i].start_scrn);
   }
 }
 
@@ -1058,7 +1076,7 @@ void init_sun (void)
 // $C47E
 // places special objects into fixed list of rooms
 // - starting object is random
-#define NUM_OBJS (sizeof(special_objs_here)/sizeof(OBJ9))
+#define NUM_OBJS (sizeof(special_objs_tbl)/sizeof(OBJ9))
 void init_special_objects (void)
 {
   uint8_t r = seed_1;
@@ -1074,6 +1092,8 @@ void init_special_objects (void)
     special_objs_tbl[i].curr_scrn = special_objs_tbl[i].start_scrn;
     r++;
   }
+
+  //dump_special_objs_tbl ();
 }
 
 // $C4AA
@@ -1163,13 +1183,15 @@ void find_special_objs_here (void)
   POBJ32 p_special_obj = special_objs_here;
   uint8_t n_special_objs_here = 0;
  
-  fprintf (stderr, "%s():\n", __FUNCTION__);
+  fprintf (stderr, "%s(): screen=%d\n", 
+            __FUNCTION__,
+            graphic_objs_tbl[0].scrn);
   
-  for (unsigned i=0; i<32; i++)
+  for (unsigned i=0; i<32; i++, p_special_obj++)
   {
     if (special_objs_tbl[i].graphic_no == 0)
       continue;
-    if (special_objs_tbl[i].curr_scrn != plyr_spr_1_scratchpad.scrn)
+    if (special_objs_tbl[i].curr_scrn != graphic_objs_tbl[0].scrn)
       continue;
       
     p_special_obj->graphic_no = special_objs_tbl[i].graphic_no;
@@ -1676,8 +1698,10 @@ void print_sprite (PSPRITE_SCRATCHPAD scratchpad)
       uint8_t d = *(psprite++);
       for (unsigned b=0; b<8; b++)
       {
+#ifdef ENABLE_MASK
         if (m & (1<<7))
           putpixel (screen, scratchpad->pixel_x+x*8+b, 191-(scratchpad->pixel_y+y), 0);
+#endif
         if (d & (1<<7))
           putpixel (screen, scratchpad->pixel_x+x*8+b, 191-(scratchpad->pixel_y+y), 15);
         m <<= 1;
