@@ -24,7 +24,7 @@
 
 #pragma pack(1)
 
-//#define ENABLE_MASK
+#define ENABLE_MASK
 
 #define FLAG_VFLIP  (1<<7)
 #define FLAG_HFLIP  (1<<6)
@@ -75,12 +75,12 @@ typedef struct
   int8_t    pixel_x_adj;
   int8_t    pixel_y_adj;
   uint8_t   pad2[4];
-  uint8_t   off24;
-  uint8_t   off25;
+  uint8_t   data_width_bytes;
+  uint8_t   data_height_lines;
   uint8_t   pixel_x;
   uint8_t   pixel_y;
-  uint8_t   off28;
-  uint8_t   off29;
+  uint8_t   old_data_width_bytes;
+  uint8_t   old_data_height_lines;
   uint8_t   old_pixel_x;
   uint8_t   old_pixel_y;
 
@@ -110,7 +110,7 @@ static uint8_t room_size_Y;                           // $5BAC
 static uint8_t curr_room_attrib;                      // $5BAD
 static uint8_t room_size_Z;                           // $5BAE
 static uint8_t days;                                  // $5BB9
-static uint8_t lives;                                 // $5BBA
+static int8_t lives;                                  // $5BBA
 static uint8_t *gfxbase_8x8;                          // $5BC7
 static uint8_t objects_carried[3][4];                 // $5BDC
 static OBJ32 graphic_objs_tbl[40];                    // $5C08
@@ -165,6 +165,9 @@ static void display_menu (void);
 static void display_text_list (uint8_t *clours, uint8_t *xy, char *text_list[], uint8_t n);
 static void multiple_print_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t dx, uint8_t dy, uint8_t n);
 static void display_objects (void);
+static void adj_120_to_126 (POBJ32 p_obj);
+static void adj_103 (POBJ32 p_obj);
+static void adj_96_to_102 (POBJ32 p_obj);
 static void no_adjust (POBJ32 p_obj);
 static void display_sun_moon_frame (PSPRITE_SCRATCHPAD scratchpad);
 static void init_sun (void);
@@ -189,9 +192,10 @@ static void adj_9 (POBJ32 p_obj);
 static void adj_3_5 (POBJ32 p_obj);
 static void set_pixel_adj (POBJ32 p_obj, int8_t h, int8_t l);
 static void adj_2_4 (POBJ32 p_obj);
-static void save_sprite_somethings (POBJ32 p_obj);
+static void save_2d_info (POBJ32 p_obj);
 static void list_objects_to_draw (void);
 static void calc_display_order_and_render (void);
+static int lose_life (void);
 static void init_start_location (void);
 static void build_screen_objects (void);
 static uint8_t *transfer_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t *psprite);
@@ -289,7 +293,7 @@ MAIN_AF88:
   init_special_objects ();
 
 player_dies:
-  //lose_life ();
+  lose_life ();
 
 game_loop:
   // populate graphic_objs_tbl[]
@@ -306,7 +310,7 @@ onscreen_loop:
   {
     adj_sprite_loop:
       
-    save_sprite_somethings (p_obj);
+    save_2d_info (p_obj);
 
     #ifndef arraylen
       #define arraylen(n) (sizeof(n) / sizeof((n)[0]))
@@ -351,30 +355,26 @@ onscreen_loop:
 
   if (key[KEY_N])
   {
-    plyr_spr_1_scratchpad.scrn += 16;
-    plyr_spr_2_scratchpad.scrn += 16;
-    goto game_loop;
+    graphic_objs_tbl[0].scrn += 16;
+    goto exit_screen;
   }
   
   if (key[KEY_S])
   {
-    plyr_spr_1_scratchpad.scrn -= 16;
-    plyr_spr_2_scratchpad.scrn -= 16;
-    goto game_loop;
+    graphic_objs_tbl[0].scrn -= 16;
+    goto exit_screen;
   }
   
   if (key[KEY_E])
   {
-    plyr_spr_1_scratchpad.scrn += 1;
-    plyr_spr_2_scratchpad.scrn += 1;
-    goto game_loop;
+    graphic_objs_tbl[0].scrn += 1;
+    goto exit_screen;
   }
   
   if (key[KEY_W])
   {
-    plyr_spr_1_scratchpad.scrn -= 1;
-    plyr_spr_2_scratchpad.scrn -= 1;
-    goto game_loop;
+    graphic_objs_tbl[0].scrn -= 1;
+    goto exit_screen;
   }
 
   if (key[KEY_G])
@@ -396,9 +396,8 @@ onscreen_loop:
       scrn = (scrn * 10) + c - '0';
     }
     fprintf (stderr, "\n");
-    plyr_spr_1_scratchpad.scrn = scrn;
-    plyr_spr_2_scratchpad.scrn = scrn;
-    goto game_loop;
+    graphic_objs_tbl[0].scrn = scrn;
+    goto exit_screen;
   }
 
   if (key[KEY_P])
@@ -407,13 +406,20 @@ onscreen_loop:
     
     fprintf (stderr, "s_no=%d, start_scrn=%d\n", 
               s_no, special_objs_tbl[s_no].start_scrn);
-    plyr_spr_1_scratchpad.scrn = special_objs_tbl[s_no].start_scrn;
-    plyr_spr_2_scratchpad.scrn = special_objs_tbl[s_no].start_scrn;
+    graphic_objs_tbl[0].scrn = special_objs_tbl[s_no].start_scrn;
     s_no = (s_no + 1) % 32;
-    goto game_loop;
+    goto exit_screen;
   }
     
   goto onscreen_loop;
+
+// *** THIS IS A FUDGE  
+exit_screen:
+  graphic_objs_tbl[1].scrn = graphic_objs_tbl[0].scrn;
+  memcpy (&plyr_spr_1_scratchpad, &graphic_objs_tbl[0], sizeof(POBJ32));
+  memcpy (&plyr_spr_2_scratchpad, &graphic_objs_tbl[1], sizeof(POBJ32));
+  goto game_loop;
+  
 }
 
 // $B096
@@ -425,10 +431,10 @@ adjfn_t adj_sprite_jump_tbl[] =
   adj_3_5,                      // stone arch (far side)
   adj_2_4,                      // tree arch (near side)
   adj_3_5,                      // tree arch (far side)
-  adj_6_7,                      // rock & block
-  adj_6_7,                      // rock & block
-  adj_8,                        // portculis
-  adj_9,                        // another portculis
+  adj_6_7,                      // rock
+  adj_6_7,                      // block
+  adj_8,                        // portcullis
+  adj_9,                        // another portcullis
   adj_10,                       // bricks
   adj_11,                       // more bricks
   adj_12_to_15,                 // even more bricks
@@ -449,8 +455,8 @@ adjfn_t adj_sprite_jump_tbl[] =
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
-  adj_30_31_158_159,            // guard & wizard (top half)
-  adj_30_31_158_159,            // guard & wizard (top half)
+  adj_30_31_158_159,            // guard (top half)
+  adj_30_31_158_159,            // guard (top half)
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
@@ -473,16 +479,16 @@ adjfn_t adj_sprite_jump_tbl[] =
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
-  adj_54,               // yet another block
-  adj_55,               // yet another block
+  adj_54,                       // yet another block
+  adj_55,                       // yet another block
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,  // 60
   adj_not_implemented,
-  adj_62,               // another block
-  adj_63,               // spiked ball
+  adj_62,                       // another block
+  adj_63,                       // spiked ball
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
@@ -499,30 +505,30 @@ adjfn_t adj_sprite_jump_tbl[] =
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
-  adj_80_to_83,         // ghost
-  adj_80_to_83,         // ghost
-  adj_80_to_83,         // ghost
-  adj_80_to_83,         // ghost
-  adj_84,               // table
-  adj_85,               // chest
-  adj_86_87,            // another fire
-  adj_86_87,            // another fire
-  adj_88_to_90,         // sun
-  adj_88_to_90,         // moon
-  adj_88_to_90,         // frame
-  adj_91,               // block (high?)
+  adj_80_to_83,                 // ghost
+  adj_80_to_83,                 // ghost
+  adj_80_to_83,                 // ghost
+  adj_80_to_83,                 // ghost
+  adj_84,                       // table
+  adj_85,                       // chest
+  adj_86_87,                    // another fire
+  adj_86_87,                    // another fire
+  adj_88_to_90,                 // sun
+  adj_88_to_90,                 // moon
+  adj_88_to_90,                 // frame
+  adj_91,                       // block (high?)
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,  // 100
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
+  adj_96_to_102,                // diamond
+  adj_96_to_102,                // poison
+  adj_96_to_102,                // boot
+  adj_96_to_102,                // chalice
+  adj_96_to_102,                // cup
+  adj_96_to_102,                // bottle
+  adj_96_to_102,                // crystal ball
+  adj_103,                      // extra life
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
@@ -539,13 +545,13 @@ adjfn_t adj_sprite_jump_tbl[] =
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
-  adj_not_implemented,  // 120
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
+  adj_120_to_126,               // player appear sparkles
+  adj_120_to_126,               // player appear sparkles
+  adj_120_to_126,               // player appear sparkles
+  adj_120_to_126,               // player appear sparkles
+  adj_120_to_126,               // player appear sparkles
+  adj_120_to_126,               // player appear sparkles
+  adj_120_to_126,               // player appear sparkles
   adj_not_implemented,
   adj_128_to_130,               // tree wall
   adj_128_to_130,               // tree wall
@@ -577,16 +583,16 @@ adjfn_t adj_sprite_jump_tbl[] =
   adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
   adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
   adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
-  adj_30_31_158_159,            // guard & wizard (top half)
-  adj_30_31_158_159,            // guard & wizard (top half)
+  adj_30_31_158_159,            // wizard (top half)
+  adj_30_31_158_159,            // wizard (top half)
   adj_not_implemented,  // 160
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
-  adj_164_to_167,       // twinkles
-  adj_164_to_167,       // twinkles
-  adj_164_to_167,       // twinkles
-  adj_164_to_167,       // twinkles
+  adj_164_to_167,               // twinkles
+  adj_164_to_167,               // twinkles
+  adj_164_to_167,               // twinkles
+  adj_164_to_167,               // twinkles
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,  // 170
@@ -597,12 +603,12 @@ adjfn_t adj_sprite_jump_tbl[] =
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
-  adj_178_179,          // another ball
-  adj_178_179,          // another ball
-  adj_180_181,          // fire
-  adj_180_181,          // fire
-  adj_182_183,          // ball (high)
-  adj_182_183,          // ball (high)
+  adj_178_179,                  // another ball
+  adj_178_179,                  // another ball
+  adj_180_181,                  // fire
+  adj_180_181,                  // fire
+  adj_182_183,                  // ball (high)
+  adj_182_183,                  // ball (high)
   adj_not_implemented,
   adj_not_implemented,
   adj_not_implemented,
@@ -612,7 +618,7 @@ adjfn_t adj_sprite_jump_tbl[] =
 // $B2B6
 void play_audio_wait_key (uint8_t *audio_data)
 {
-  // check somethin here
+  // check something here
   while (1)
   {
     if (read_key (0))
@@ -829,7 +835,7 @@ void print_lives_gfx (void)
 // $BCA3
 void print_lives (void)
 {
-  print_bcd_number (32, 39, &lives, 1);
+  print_bcd_number (32, 39, (uint8_t *)&lives, 1);
 }
 
 // $BCAE
@@ -1011,6 +1017,34 @@ void display_objects (void)
   }
 }
 
+// $BEFE
+void adj_120_to_126 (POBJ32 p_obj)
+{
+  sub_C4D8 (p_obj);
+#if 0  
+  if ((~seed_2 & 1) != 0)
+    return;
+  graphic_objs_tbl[0].graphic_no++;
+  // other stuff
+#endif  
+}
+
+// $C1AB
+// extra life
+void adj_103 (POBJ32 p_obj)
+{
+  adj_128_to_130 (p_obj);
+  // more stuff
+}
+  
+// $C28B
+// special objects
+void adj_96_to_102 (POBJ32 p_obj)
+{
+  sub_C4D8 (p_obj);
+  // more stuff
+}
+  
 // $C2CB
 void no_adjust (POBJ32 p_obj)
 {
@@ -1310,10 +1344,10 @@ void adj_2_4 (POBJ32 p_obj)
 }
 
 // $CE49
-void save_sprite_somethings (POBJ32 p_obj)
+void save_2d_info (POBJ32 p_obj)
 {
-  p_obj->off28 = p_obj->off24;
-  p_obj->off29 = p_obj->off25;
+  p_obj->old_data_width_bytes = p_obj->data_width_bytes;
+  p_obj->old_data_height_lines = p_obj->data_height_lines;
   p_obj->old_pixel_x = p_obj->pixel_x;
   p_obj->old_pixel_y = p_obj->pixel_y;
 }
@@ -1353,6 +1387,21 @@ void calc_display_order_and_render (void)
     #endif     
       calc_pixel_XY_and_render (p_obj);
   }
+}
+
+// $D12A
+int lose_life (void)
+{
+  memcpy ((void *)&graphic_objs_tbl[0], (void *)&plyr_spr_1_scratchpad, sizeof(OBJ32));
+  memcpy ((void *)&graphic_objs_tbl[1], (void *)&plyr_spr_2_scratchpad, sizeof(OBJ32));
+  //byte_5BB1 = 0;
+  if (--lives < 0)
+    return (-1);
+
+  // some stuff with sun/moon scratchpad
+      
+  // just for the hell of it
+  return (lives);  
 }
 
 // $D1B1
@@ -1449,18 +1498,18 @@ void retrieve_screen (void)
     // fudge: save this for invalid screens
     if (location_tbl[p] == 47)
       p_47 = p;    
-    if (location_tbl[p] == plyr_spr_1_scratchpad.scrn)
+    if (location_tbl[p] == graphic_objs_tbl[0].scrn)
       break;
-    if (location_tbl[p] > plyr_spr_1_scratchpad.scrn ||
+    if (location_tbl[p] > graphic_objs_tbl[0].scrn ||
         location_tbl[p] == 255) // *** FIXME
     {
       #if 0
-        plyr_spr_1_scratchpad.scrn = 47;
-        plyr_spr_2_scratchpad.scrn = 47;
+        graphic_objs_tbl[0].scrn = 47;
+        graphic_objs_tbl[1].scrn = 47;
       p = p_47;
       #else
-        plyr_spr_1_scratchpad.scrn = location_tbl[p];
-        plyr_spr_2_scratchpad.scrn = location_tbl[p];
+        graphic_objs_tbl[0].scrn = location_tbl[p];
+        graphic_objs_tbl[1].scrn = location_tbl[p];
       #endif
       break;
       // bad_player_location

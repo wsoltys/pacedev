@@ -146,11 +146,21 @@ SCRATCH:5C08		 ; +3 z
 SCRATCH:5C08		 ; +4 width
 SCRATCH:5C08		 ; +5 depth
 SCRATCH:5C08		 ; +6 height
-SCRATCH:5C08		 ; +7 flags (bit4=draw)
+SCRATCH:5C08		 ; +7 flags (7=vflip,6=hflip,4=draw)
 SCRATCH:5C08		 ; +8 screen
 SCRATCH:5C08		 ; +9-15 zeroed
 SCRATCH:5C08		 ; +16-17 ptr object table entry
-SCRATCH:5C08		 ; +18-31 zeroed
+SCRATCH:5C08		 ; +18 pixel X adjustment
+SCRATCH:5C08		 ; +19 pixel Y adjustment
+SCRATCH:5C08		 ; +20-23 ???
+SCRATCH:5C08		 ; +24 sprite data width (bytes)
+SCRATCH:5C08		 ; +25 sprite data height (lines)
+SCRATCH:5C08		 ; +26 pixel X
+SCRATCH:5C08		 ; +27 pixel Y
+SCRATCH:5C08		 ; +28 old sprite data width (bytes)
+SCRATCH:5C08		 ; +29 old sprite data height (lines)
+SCRATCH:5C08		 ; +30 old pixel X
+SCRATCH:5C08		 ; +31 old pixel Y
 SCRATCH:5C08		 ;
 SCRATCH:5C08 ??		 graphic_objs_tbl:ds 1						 ; DATA	XREF: lose_life-2167o
 SCRATCH:5C08										 ; RAM:B078o ...
@@ -2592,7 +2602,7 @@ RAM:AFCA 21 BC 5B		     ld	     hl, byte_5BBC
 RAM:AFCD 34			     inc     (hl)
 RAM:AFCE 21 E4 AF		     ld	     hl, ret_from_tbl_jp
 RAM:AFD1 E5			     push    hl					     ; set return address
-RAM:AFD2 CD 49 CE		     call    sub_CE49
+RAM:AFD2 CD 49 CE		     call    save_2d_info
 RAM:AFD5
 RAM:AFD5	     loc_AFD5:							     ; CODE XREF: RAM:BF1Ej
 RAM:AFD5 DD 6E 00		     ld	     l,	(ix+0)				     ; sprite graphic to render
@@ -2711,37 +2721,38 @@ RAM:B095	     ; End of function reset_object_???_flag
 RAM:B095
 RAM:B095	     ; ---------------------------------------------------------------------------
 RAM:B096 CB C2	     adj_sprite_jmp_tbl:dw no_adjust				     ; DATA XREF: lose_life-2152o
-RAM:B098 CB C2			     dw	no_adjust
-RAM:B09A 3C C7			     dw	adj_2_4
-RAM:B09C 22 C7			     dw	adj_3_5
-RAM:B09E 3C C7			     dw	adj_2_4
-RAM:B0A0 22 C7			     dw	adj_3_5
-RAM:B0A2 E3 C4			     dw	adj_6_7
-RAM:B0A4 E3 C4			     dw	adj_6_7
-RAM:B0A6 5E C6			     dw	adj_8
-RAM:B0A8 BD C6			     dw	adj_9
-RAM:B0AA E8 C4			     dw	adj_10
-RAM:B0AC ED C4			     dw	adj_11
-RAM:B0AE F2 C4			     dw	adj_12_to_15
-RAM:B0B0 F2 C4			     dw	adj_12_to_15
-RAM:B0B2 F2 C4			     dw	adj_12_to_15
-RAM:B0B4 F2 C4			     dw	adj_12_to_15
+RAM:B096									     ; (unused)
+RAM:B098 CB C2			     dw	no_adjust				     ; (unused)
+RAM:B09A 3C C7			     dw	adj_2_4					     ; stone arch (near	side)
+RAM:B09C 22 C7			     dw	adj_3_5					     ; stone arch (far side)
+RAM:B09E 3C C7			     dw	adj_2_4					     ; tree arch (near side)
+RAM:B0A0 22 C7			     dw	adj_3_5					     ; tree arch (far side)
+RAM:B0A2 E3 C4			     dw	adj_6_7					     ; rock
+RAM:B0A4 E3 C4			     dw	adj_6_7					     ; block
+RAM:B0A6 5E C6			     dw	adj_8					     ; portcullis
+RAM:B0A8 BD C6			     dw	adj_9					     ; another portcullis
+RAM:B0AA E8 C4			     dw	adj_10					     ; bricks
+RAM:B0AC ED C4			     dw	adj_11					     ; more bricks
+RAM:B0AE F2 C4			     dw	adj_12_to_15				     ; even more bricks
+RAM:B0B0 F2 C4			     dw	adj_12_to_15				     ; even more bricks
+RAM:B0B2 F2 C4			     dw	adj_12_to_15				     ; even more bricks
+RAM:B0B4 F2 C4			     dw	adj_12_to_15				     ; even more bricks
 RAM:B0B6 23 C8			     dw	loc_C823
 RAM:B0B8 23 C8			     dw	loc_C823
 RAM:B0BA 23 C8			     dw	loc_C823
 RAM:B0BC 23 C8			     dw	loc_C823
 RAM:B0BE 23 C8			     dw	loc_C823
 RAM:B0C0 23 C8			     dw	loc_C823
-RAM:B0C2 A3 B7			     dw	adj_22
-RAM:B0C4 E7 B7			     dw	adj_23
+RAM:B0C2 A3 B7			     dw	adj_22					     ; gargoyle
+RAM:B0C4 E7 B7			     dw	adj_23					     ; spikes
 RAM:B0C6 23 C8			     dw	loc_C823
 RAM:B0C8 23 C8			     dw	loc_C823
 RAM:B0CA 23 C8			     dw	loc_C823
 RAM:B0CC 23 C8			     dw	loc_C823
 RAM:B0CE 23 C8			     dw	loc_C823
 RAM:B0D0 23 C8			     dw	loc_C823
-RAM:B0D2 A5 B9			     dw	adj_30_31_158_159
-RAM:B0D4 A5 B9			     dw	adj_30_31_158_159
+RAM:B0D2 A5 B9			     dw	adj_30_31_158_159			     ; guard (top half)
+RAM:B0D4 A5 B9			     dw	adj_30_31_158_159			     ; guard (top half)
 RAM:B0D6 DA CD			     dw	loc_CDDA
 RAM:B0D8 DA CD			     dw	loc_CDDA
 RAM:B0DA DA CD			     dw	loc_CDDA
@@ -2806,14 +2817,14 @@ RAM:B14E 37 C3			     dw	loc_C337
 RAM:B150 37 C3			     dw	loc_C337
 RAM:B152 37 C3			     dw	loc_C337
 RAM:B154 37 C3			     dw	loc_C337
-RAM:B156 8B C2			     dw	loc_C28B
-RAM:B158 8B C2			     dw	loc_C28B
-RAM:B15A 8B C2			     dw	loc_C28B
-RAM:B15C 8B C2			     dw	loc_C28B
-RAM:B15E 8B C2			     dw	loc_C28B
-RAM:B160 8B C2			     dw	loc_C28B
-RAM:B162 8B C2			     dw	loc_C28B
-RAM:B164 AB C1			     dw	loc_C1AB
+RAM:B156 8B C2			     dw	adj_96_to_102				     ; diamond
+RAM:B158 8B C2			     dw	adj_96_to_102				     ; poison
+RAM:B15A 8B C2			     dw	adj_96_to_102				     ; boot
+RAM:B15C 8B C2			     dw	adj_96_to_102				     ; chalice
+RAM:B15E 8B C2			     dw	adj_96_to_102				     ; cup
+RAM:B160 8B C2			     dw	adj_96_to_102				     ; bottle
+RAM:B162 8B C2			     dw	adj_96_to_102				     ; crystal ball
+RAM:B164 AB C1			     dw	adj_103					     ; extra life
 RAM:B166 F1 C1			     dw	loc_C1F1
 RAM:B168 F1 C1			     dw	loc_C1F1
 RAM:B16A F1 C1			     dw	loc_C1F1
@@ -2830,13 +2841,13 @@ RAM:B17E 2B BF			     dw	loc_BF2B
 RAM:B180 2B BF			     dw	loc_BF2B
 RAM:B182 2B BF			     dw	loc_BF2B
 RAM:B184 3F BF			     dw	loc_BF3F
-RAM:B186 FE BE			     dw	loc_BEFE
-RAM:B188 FE BE			     dw	loc_BEFE
-RAM:B18A FE BE			     dw	loc_BEFE
-RAM:B18C FE BE			     dw	loc_BEFE
-RAM:B18E FE BE			     dw	loc_BEFE
-RAM:B190 FE BE			     dw	loc_BEFE
-RAM:B192 FE BE			     dw	loc_BEFE
+RAM:B186 FE BE			     dw	adj_120_to_126				     ; player appears sparkles
+RAM:B188 FE BE			     dw	adj_120_to_126
+RAM:B18A FE BE			     dw	adj_120_to_126
+RAM:B18C FE BE			     dw	adj_120_to_126
+RAM:B18E FE BE			     dw	adj_120_to_126
+RAM:B190 FE BE			     dw	adj_120_to_126
+RAM:B192 FE BE			     dw	adj_120_to_126
 RAM:B194 11 BF			     dw	loc_BF11
 RAM:B196 D3 C4			     dw	adj_128_to_130
 RAM:B198 D3 C4			     dw	adj_128_to_130
@@ -2868,8 +2879,8 @@ RAM:B1CA F9 B6			     dw	adj_144_to_149_152_to_157
 RAM:B1CC F9 B6			     dw	adj_144_to_149_152_to_157
 RAM:B1CE F9 B6			     dw	adj_144_to_149_152_to_157
 RAM:B1D0 F9 B6			     dw	adj_144_to_149_152_to_157
-RAM:B1D2 A5 B9			     dw	adj_30_31_158_159
-RAM:B1D4 A5 B9			     dw	adj_30_31_158_159
+RAM:B1D2 A5 B9			     dw	adj_30_31_158_159			     ; wizard (top half)
+RAM:B1D4 A5 B9			     dw	adj_30_31_158_159			     ; wizard (top half)
 RAM:B1D6 DA B8			     dw	loc_B8DA
 RAM:B1D8 DA B8			     dw	loc_B8DA
 RAM:B1DA DA B8			     dw	loc_B8DA
@@ -3172,7 +3183,7 @@ RAM:B419	     ; =============== S U B R O U T I N E ============================
 RAM:B419
 RAM:B419
 RAM:B419	     sub_B419:							     ; CODE XREF: RAM:BF0Bp
-RAM:B419 DD 7E 00		     ld	     a,	(ix+0)
+RAM:B419 DD 7E 00		     ld	     a,	(ix+0)				     ; player sprite graphic no.
 RAM:B41C 07			     rlca
 RAM:B41D 07			     rlca
 RAM:B41E E6 1F			     and     1Fh
@@ -4977,8 +4988,9 @@ RAM:BEFD C9			     ret
 RAM:BEFD	     ; End of function multiple_print_sprite
 RAM:BEFD
 RAM:BEFE	     ; ---------------------------------------------------------------------------
+RAM:BEFE	     ; player appear sparkles
 RAM:BEFE
-RAM:BEFE	     loc_BEFE:							     ; DATA XREF: RAM:B186o
+RAM:BEFE	     adj_120_to_126:						     ; DATA XREF: RAM:B186o
 RAM:BEFE									     ; RAM:B188o ...
 RAM:BEFE CD D8 C4		     call    sub_C4D8
 RAM:BF01 3A A2 5B		     ld	     a,	(seed_2)
@@ -4986,7 +4998,7 @@ RAM:BF04 2F			     cpl
 RAM:BF05 E6 01			     and     1
 RAM:BF07 C0			     ret     nz
 RAM:BF08 DD 34 00		     inc     (ix+0)
-RAM:BF0B CD 19 B4		     call    sub_B419
+RAM:BF0B CD 19 B4		     call    sub_B419				     ; make a sound?
 RAM:BF0E C3 92 C6		     jp	     sub_C692
 RAM:BF11	     ; ---------------------------------------------------------------------------
 RAM:BF11
@@ -5396,7 +5408,7 @@ RAM:C1AA	     ; End of function sub_C1A1
 RAM:C1AA
 RAM:C1AB	     ; ---------------------------------------------------------------------------
 RAM:C1AB
-RAM:C1AB	     loc_C1AB:							     ; DATA XREF: RAM:B164o
+RAM:C1AB	     adj_103:							     ; DATA XREF: RAM:B164o
 RAM:C1AB CD D3 C4		     call    adj_128_to_130
 RAM:C1AE DD E5			     push    ix
 RAM:C1B0 FD E1			     pop     iy
@@ -5523,7 +5535,7 @@ RAM:C27D 04 05 06 03+								     ; ret_next_obj_required+3o
 RAM:C27D 05 00 06 01+		     db	5, 0, 6, 1, 2, 4
 RAM:C28B	     ; ---------------------------------------------------------------------------
 RAM:C28B
-RAM:C28B	     loc_C28B:							     ; DATA XREF: RAM:B156o
+RAM:C28B	     adj_96_to_102:						     ; DATA XREF: RAM:B156o
 RAM:C28B									     ; RAM:B158o ...
 RAM:C28B CD D8 C4		     call    sub_C4D8
 RAM:C28E CD 00 C7		     call    sub_C700
@@ -5891,7 +5903,7 @@ RAM:C4D3
 RAM:C4D3	     ; =============== S U B R O U T I N E =======================================
 RAM:C4D3
 RAM:C4D3
-RAM:C4D3	     adj_128_to_130:						     ; CODE XREF: RAM:loc_C1ABp
+RAM:C4D3	     adj_128_to_130:						     ; CODE XREF: RAM:adj_103p
 RAM:C4D3									     ; DATA XREF: RAM:B196o ...
 RAM:C4D3 21 F8 FE		     ld	     hl, 0FEF8h				     ; -2, -8
 RAM:C4D6 18 08			     jr	     jp_set_pixel_adj
@@ -6323,7 +6335,7 @@ RAM:C692
 RAM:C692	     sub_C692:							     ; CODE XREF: RAM:B5B2j
 RAM:C692									     ; RAM:loc_B69Fj ...
 RAM:C692 DD 7E 07		     ld	     a,	(ix+7)				     ; flags
-RAM:C695 F6 30			     or	     30h ; '0'
+RAM:C695 F6 30			     or	     30h ; '0'                               ; ??? | DRAW
 RAM:C697 DD 77 07		     ld	     (ix+7), a
 RAM:C69A C3 4D CD		     jp	     sub_CD4D
 RAM:C69A	     ; End of function sub_C692
@@ -7536,17 +7548,17 @@ RAM:CD33	     sub_CD33:							     ; CODE XREF: sub_CD4D+4p
 RAM:CD33 CD C9 D6		     call    calc_pixel_XY
 RAM:CD36 CD EF D6		     call    flip_sprite
 RAM:CD39 DD 7E 1A		     ld	     a,	(ix+26)				     ; pixel X
-RAM:CD3C E6 07			     and     7					     ; bit offset
-RAM:CD3E 1A			     ld	     a,	(de)
-RAM:CD3F 13			     inc     de
+RAM:CD3C E6 07			     and     7					     ; bit offset (discard result)
+RAM:CD3E 1A			     ld	     a,	(de)				     ; ptr sprite data (width)
+RAM:CD3F 13			     inc     de					     ; ptr height
 RAM:CD40 28 01			     jr	     z,	loc_CD43
 RAM:CD42 3C			     inc     a
 RAM:CD43
 RAM:CD43	     loc_CD43:							     ; CODE XREF: sub_CD33+Dj
 RAM:CD43 E6 0F			     and     0Fh
-RAM:CD45 DD 77 18		     ld	     (ix+24), a
+RAM:CD45 DD 77 18		     ld	     (ix+24), a				     ; sprite data width (bytes)
 RAM:CD48 1A			     ld	     a,	(de)
-RAM:CD49 DD 77 19		     ld	     (ix+25), a
+RAM:CD49 DD 77 19		     ld	     (ix+25), a				     ; sprite data height
 RAM:CD4C C9			     ret
 RAM:CD4C	     ; End of function sub_CD33
 RAM:CD4C
@@ -7735,17 +7747,17 @@ RAM:CE49
 RAM:CE49	     ; =============== S U B R O U T I N E =======================================
 RAM:CE49
 RAM:CE49
-RAM:CE49	     sub_CE49:							     ; CODE XREF: lose_life-2158p
-RAM:CE49 DD 7E 18		     ld	     a,	(ix+24)
+RAM:CE49	     save_2d_info:						     ; CODE XREF: lose_life-2158p
+RAM:CE49 DD 7E 18		     ld	     a,	(ix+24)				     ; data width (bytes)
 RAM:CE4C DD 77 1C		     ld	     (ix+28), a
-RAM:CE4F DD 7E 19		     ld	     a,	(ix+25)
+RAM:CE4F DD 7E 19		     ld	     a,	(ix+25)				     ; data height (lines)
 RAM:CE52 DD 77 1D		     ld	     (ix+29), a
 RAM:CE55 DD 7E 1A		     ld	     a,	(ix+26)				     ; pixel X
 RAM:CE58 DD 77 1E		     ld	     (ix+30), a
 RAM:CE5B DD 7E 1B		     ld	     a,	(ix+27)				     ; pixel Y
 RAM:CE5E DD 77 1F		     ld	     (ix+31), a
 RAM:CE61 C9			     ret
-RAM:CE61	     ; End of function sub_CE49
+RAM:CE61	     ; End of function save_2d_info
 RAM:CE61
 RAM:CE62
 RAM:CE62	     ; =============== S U B R O U T I N E =======================================
