@@ -704,7 +704,7 @@ void adj_150_151 (POBJ32 p_obj)
 void adj_22 (POBJ32 p_obj)
 {
   // call sub_B85C
-  adj_6_7 (p_obj);
+  sub_C4FC (p_obj);
 }
 
 // $B7E7
@@ -1660,14 +1660,15 @@ void print_sprite (PSPRITE_SCRATCHPAD scratchpad)
   {
     for (unsigned x=0; x<w; x++)
     {
-      // skip mask
-      psprite++;
-
+      uint8_t m = *(psprite++);
       uint8_t d = *(psprite++);
       for (unsigned b=0; b<8; b++)
       {
+        if (m & (1<<7))
+          putpixel (screen, scratchpad->pixel_x+x*8+b, 191-(scratchpad->pixel_y+y), 0);
         if (d & (1<<7))
           putpixel (screen, scratchpad->pixel_x+x*8+b, 191-(scratchpad->pixel_y+y), 15);
+        m <<= 1;
         d <<= 1;
       }
     }
