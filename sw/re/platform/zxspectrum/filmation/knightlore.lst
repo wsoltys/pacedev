@@ -2800,7 +2800,7 @@ RAM:B142 ED B7			     dw	adj_86_87				     ; another fire
 RAM:B144 ED B7			     dw	adj_86_87				     ; another fire
 RAM:B146 06 C5			     dw	adj_88_to_90				     ; sun
 RAM:B148 06 C5			     dw	adj_88_to_90				     ; moon
-RAM:B14A 06 C5			     dw	adj_88_to_90				     ; frame
+RAM:B14A 06 C5			     dw	adj_88_to_90				     ; frame (left)
 RAM:B14C 83 B6			     dw	adj_91
 RAM:B14E 37 C3			     dw	loc_C337
 RAM:B150 37 C3			     dw	loc_C337
@@ -8353,9 +8353,9 @@ RAM:D1BC 11 81 D1		     ld	     de, plyr_spr_2_scratchpad
 RAM:D1BF 01 08 00		     ld	     bc, 8
 RAM:D1C2 ED B0			     ldir
 RAM:D1C4 3E 12			     ld	     a,	12h
-RAM:D1C6 32 71 D1		     ld	     (byte_D171), a			     ; plyr_spr_1 (byte	16)
+RAM:D1C6 32 71 D1		     ld	     (byte_D171), a			     ; plyr_spr_1_scratchpad (byte 16)
 RAM:D1C9 3E 22			     ld	     a,	22h ; '"'
-RAM:D1CB 32 91 D1		     ld	     (byte_D191), a			     ; plyr_spr_2 (byte	16)
+RAM:D1CB 32 91 D1		     ld	     (byte_D191), a			     ; plyr_spr_2_scratchpad (byte 16)
 RAM:D1CE 3A A0 5B		     ld	     a,	(seed_1)
 RAM:D1D1 E6 03			     and     3					     ; random 0-3
 RAM:D1D3 6F			     ld	     l,	a

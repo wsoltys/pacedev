@@ -383,6 +383,18 @@ onscreen_loop:
     goto game_loop;
   }
 
+  if (key[KEY_P])
+  {
+    static unsigned s_no = 0;
+    
+    fprintf (stderr, "s_no=%d, start_scrn=%d\n", 
+              s_no, special_objs_tbl[s_no].start_scrn);
+    plyr_spr_1_scratchpad.scrn = special_objs_tbl[s_no].start_scrn;
+    plyr_spr_2_scratchpad.scrn = special_objs_tbl[s_no].start_scrn;
+    s_no = (s_no + 1) % 32;
+    goto game_loop;
+  }
+    
   goto onscreen_loop;
 }
 
