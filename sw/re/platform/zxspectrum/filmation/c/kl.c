@@ -64,9 +64,9 @@ typedef struct
   uint8_t   height;
   uint8_t   flags;
   uint8_t   scrn;
-  uint8_t   off09;
-  uint8_t   off10;
-  uint8_t   off11;
+  uint8_t   d_x;
+  uint8_t   d_y;
+  uint8_t   d_z;
   uint8_t   off12;
   uint8_t   off13;
   uint8_t   off14;
@@ -80,6 +80,7 @@ typedef struct
   uint8_t   data_height_lines;
   uint8_t   pixel_x;
   uint8_t   pixel_y;
+  // used for wiping the sprite
   uint8_t   old_data_width_bytes;
   uint8_t   old_data_height_lines;
   uint8_t   old_pixel_x;
@@ -808,8 +809,8 @@ void adj_30_31_158_159 (POBJ32 p_obj)
   set_pixel_adj (p_obj, 3, -12);
   // call sub_CB45 - move?
   // other stuff
-  p_next_obj->off09 = p_obj->off09;
-  p_next_obj->off10 = p_obj->off10;
+  p_next_obj->d_x = p_obj->d_x;
+  p_next_obj->d_y = p_obj->d_y;
   p_next_obj->x = p_obj->x;
   p_next_obj->y = p_obj->y;
   // call sub_b76c
@@ -1238,7 +1239,7 @@ void find_special_objs_here (void)
     p_special_obj->height = 20;
     p_special_obj->flags = 0x14;
     p_special_obj->scrn = special_objs_tbl[i].curr_scrn;
-    memset (&p_special_obj->off09, 0, 7);  // *** FIXME
+    memset (&p_special_obj->d_x, 0, 7);  // *** FIXME
     p_special_obj->ptr_obj_tbl_entry = i;
     memset (&p_special_obj->pad2, 0, 12); // *** FIXME
     
@@ -1329,17 +1330,17 @@ void adj_2_4 (POBJ32 p_obj)
       set_pixel_adj (p_obj, -3, 1);
     else
       set_pixel_adj (p_obj, -3, -7);
-    p_obj->off10 = p_obj->y + 13;
-    p_obj->off09 = p_obj->x;
-    p_obj->off11 = p_obj->z;
+    p_obj->d_y = p_obj->y + 13;
+    p_obj->d_x = p_obj->x;
+    p_obj->d_z = p_obj->z;
     // call sub_c7db
     // call loc_c785
   }
   else
   {
     set_pixel_adj (p_obj, -2, -17);
-    p_obj->off09 = p_obj->x + 13;
-    p_obj->off10 = p_obj->y;
+    p_obj->d_x = p_obj->x + 13;
+    p_obj->d_y = p_obj->y;
     // jp loc_c760
   }
 }
@@ -1561,7 +1562,7 @@ found_screen:
       // set screen (location)
       p_other_objs->scrn = plyr_spr_1_scratchpad.scrn;
       // zero everything else
-      memset (&p_other_objs->off09, 0, 23);
+      memset (&p_other_objs->d_x, 0, 23);
       
       p_other_objs++;
     };
@@ -1608,7 +1609,7 @@ found_screen:
         p_other_objs->z = ((loc >> 6) & 3) * 12 + z1 + room_size_Z;
         
         // zero everything else        
-        memset (&p_other_objs->off09, 0, 23);
+        memset (&p_other_objs->d_x, 0, 23);
 
         p_other_objs++;
       }
