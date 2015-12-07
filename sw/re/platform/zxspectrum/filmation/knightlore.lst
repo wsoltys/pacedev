@@ -39,7 +39,7 @@ SCRATCH:5BA9 ??	??	 tmp_SP:	 ds 2						 ; DATA	XREF: RAM:D763w
 SCRATCH:5BA9										 ; RAM:D80Cr
 SCRATCH:5BAB ??		 room_size_X:	 ds 1						 ; DATA	XREF: sub_C87Ar
 SCRATCH:5BAB										 ; sub_CA70+12r ...
-SCRATCH:5BAC ??		 room_size_Y:	 ds 1						 ; DATA	XREF: sub_CD08+Br
+SCRATCH:5BAC ??		 room_size_Y:	 ds 1						 ; DATA	XREF: adj_dY_for_out_of_bounds+Br
 SCRATCH:5BAC										 ; adjust_plyr_xyz_for_room_size+6r ...
 SCRATCH:5BAD ??		 curr_room_attrib:ds 1
 SCRATCH:5BAE ??		 room_size_Z:	 ds 1						 ; DATA	XREF: RAM:C667r
@@ -151,7 +151,8 @@ SCRATCH:5C08		 ; +8 screen
 SCRATCH:5C08		 ; +9 dX
 SCRATCH:5C08		 ; +10 dY
 SCRATCH:5C08		 ; +11 dZ
-SCRATCH:5C08		 ; +12-15 ???
+SCRATCH:5C08		 ; +12 2=Z,1=Y,0=X adj for out of bounds
+SCRATCH:5C08		 ; +13-15 ???
 SCRATCH:5C08		 ; +16-17 ptr object table entry
 SCRATCH:5C08		 ; +18 pixel X adjustment
 SCRATCH:5C08		 ; +19 pixel Y adjustment
@@ -2542,7 +2543,7 @@ RAM:AF92 3E 05			     ld	     a,	5				     ; 5 lives to start
 RAM:AF94 32 BA 5B		     ld	     (lives), a
 RAM:AF97 21 A0 5B		     ld	     hl, seed_1
 RAM:AF9A 3A A2 5B		     ld	     a,	(seed_2)
-RAM:AF9D 86			     add     a,	(hl)
+RAM:AF9D 86			     add     a,	(hl)				     ; seed_1 += seed_2
 RAM:AF9E 77			     ld	     (hl), a				     ; update seed
 RAM:AF9F CD 5F D5		     call    clear_scrn				     ; colour is bright	yellow on black
 RAM:AFA2 CD 0C BD		     call    do_menu_selection
@@ -2564,7 +2565,7 @@ RAM:AFBD 3A A2 5B		     ld	     a,	(seed_2)
 RAM:AFC0 32 BC 5B		     ld	     (byte_5BBC), a
 RAM:AFC3 DD 21 08 5C		     ld	     ix, graphic_objs_tbl		     ; start of	table
 RAM:AFC7
-RAM:AFC7	     adj_sprite_loop:						     ; CODE XREF: RAM:AFFEj
+RAM:AFC7	     update_sprite_loop:					     ; CODE XREF: RAM:AFFEj
 RAM:AFC7 31 A0 5B		     ld	     sp, seed_1				     ; init stack
 RAM:AFCA 21 BC 5B		     ld	     hl, byte_5BBC
 RAM:AFCD 34			     inc     (hl)
@@ -2574,7 +2575,7 @@ RAM:AFD2 CD 49 CE		     call    save_2d_info
 RAM:AFD5
 RAM:AFD5	     loc_AFD5:							     ; CODE XREF: RAM:BF1Ej
 RAM:AFD5 DD 6E 00		     ld	     l,	(ix+0)				     ; sprite graphic to render
-RAM:AFD8 01 96 B0		     ld	     bc, adj_sprite_jmp_tbl
+RAM:AFD8 01 96 B0		     ld	     bc, upd_sprite_jmp_tbl
 RAM:AFDB
 RAM:AFDB	     jump_to_tbl_entry:						     ; CODE XREF: RAM:B588j
 RAM:AFDB									     ; sub_B9CC+9j ...
@@ -2603,7 +2604,7 @@ RAM:AFF6 01 08 61		     ld	     bc, font				     ; end of table
 RAM:AFF9 A7			     and     a
 RAM:AFFA ED 42			     sbc     hl, bc				     ; past end	of table?
 RAM:AFFC 30 02			     jr	     nc, loc_B000			     ; yes, exit
-RAM:AFFE 18 C7			     jr	     adj_sprite_loop			     ; loop
+RAM:AFFE 18 C7			     jr	     update_sprite_loop			     ; loop
 RAM:B000	     ; ---------------------------------------------------------------------------
 RAM:B000
 RAM:B000	     loc_B000:							     ; CODE XREF: RAM:AFFCj
@@ -2626,7 +2627,7 @@ RAM:B024 A7			     and     a
 RAM:B025 C4 54 B4		     call    nz, sub_B454
 RAM:B028 3A BE 5B		     ld	     a,	(rendered_objs_cnt)
 RAM:B02B ED 44			     neg
-RAM:B02D C6 06			     add     a,	6
+RAM:B02D C6 06			     add     a,	6				     ; calculate delay loop value
 RAM:B02F 47			     ld	     b,	a
 RAM:B030 FA 3F B0		     jp	     m,	loc_B03F
 RAM:B033 28 0A			     jr	     z,	loc_B03F
@@ -2688,39 +2689,39 @@ RAM:B095 C9			     ret
 RAM:B095	     ; End of function reset_object_???_flag
 RAM:B095
 RAM:B095	     ; ---------------------------------------------------------------------------
-RAM:B096 CB C2	     adj_sprite_jmp_tbl:dw no_adjust				     ; DATA XREF: lose_life-2152o
+RAM:B096 CB C2	     upd_sprite_jmp_tbl:dw no_update				     ; DATA XREF: lose_life-2152o
 RAM:B096									     ; *
-RAM:B098 CB C2			     dw	no_adjust				     ; * (unused)
-RAM:B09A 3C C7			     dw	adj_2_4					     ;	 stone arch (near side)
-RAM:B09C 22 C7			     dw	adj_3_5					     ; * stone arch (far side)
-RAM:B09E 3C C7			     dw	adj_2_4					     ;	 tree arch (near side)
-RAM:B0A0 22 C7			     dw	adj_3_5					     ; * tree arch (far	side)
-RAM:B0A2 E3 C4			     dw	adj_6_7					     ; * rock
-RAM:B0A4 E3 C4			     dw	adj_6_7					     ; * block
-RAM:B0A6 5E C6			     dw	adj_8					     ;	 portcullis (stationary)
-RAM:B0A8 BD C6			     dw	adj_9					     ;	 portcullis (moving)
-RAM:B0AA E8 C4			     dw	adj_10					     ; * bricks
-RAM:B0AC ED C4			     dw	adj_11					     ; * more bricks
-RAM:B0AE F2 C4			     dw	adj_12_to_15				     ; * even more bricks
-RAM:B0B0 F2 C4			     dw	adj_12_to_15				     ; * even more bricks
-RAM:B0B2 F2 C4			     dw	adj_12_to_15				     ; * even more bricks
-RAM:B0B4 F2 C4			     dw	adj_12_to_15				     ; * even more bricks
+RAM:B098 CB C2			     dw	no_update				     ; * (unused)
+RAM:B09A 3C C7			     dw	upd_2_4					     ;	 stone arch (near side)
+RAM:B09C 22 C7			     dw	upd_3_5					     ; * stone arch (far side)
+RAM:B09E 3C C7			     dw	upd_2_4					     ;	 tree arch (near side)
+RAM:B0A0 22 C7			     dw	upd_3_5					     ; * tree arch (far	side)
+RAM:B0A2 E3 C4			     dw	upd_6_7					     ; * rock
+RAM:B0A4 E3 C4			     dw	upd_6_7					     ; * block
+RAM:B0A6 5E C6			     dw	upd_8					     ;	 portcullis (stationary)
+RAM:B0A8 BD C6			     dw	upd_9					     ;	 portcullis (moving)
+RAM:B0AA E8 C4			     dw	upd_10					     ; * bricks
+RAM:B0AC ED C4			     dw	upd_11					     ; * more bricks
+RAM:B0AE F2 C4			     dw	upd_12_to_15				     ; * even more bricks
+RAM:B0B0 F2 C4			     dw	upd_12_to_15				     ; * even more bricks
+RAM:B0B2 F2 C4			     dw	upd_12_to_15				     ; * even more bricks
+RAM:B0B4 F2 C4			     dw	upd_12_to_15				     ; * even more bricks
 RAM:B0B6 23 C8			     dw	loc_C823
 RAM:B0B8 23 C8			     dw	loc_C823
 RAM:B0BA 23 C8			     dw	loc_C823
 RAM:B0BC 23 C8			     dw	loc_C823
 RAM:B0BE 23 C8			     dw	loc_C823
 RAM:B0C0 23 C8			     dw	loc_C823
-RAM:B0C2 A3 B7			     dw	adj_22					     ;	 gargoyle
-RAM:B0C4 E7 B7			     dw	adj_23					     ;	 spikes
+RAM:B0C2 A3 B7			     dw	upd_22					     ;	 gargoyle
+RAM:B0C4 E7 B7			     dw	upd_23					     ;	 spikes
 RAM:B0C6 23 C8			     dw	loc_C823
 RAM:B0C8 23 C8			     dw	loc_C823
 RAM:B0CA 23 C8			     dw	loc_C823
 RAM:B0CC 23 C8			     dw	loc_C823
 RAM:B0CE 23 C8			     dw	loc_C823
 RAM:B0D0 23 C8			     dw	loc_C823
-RAM:B0D2 A5 B9			     dw	adj_30_31_158_159			     ;	 guard (top half)
-RAM:B0D4 A5 B9			     dw	adj_30_31_158_159			     ;	 guard (top half)
+RAM:B0D2 A5 B9			     dw	upd_30_31_158_159			     ;	 guard (top half)
+RAM:B0D4 A5 B9			     dw	upd_30_31_158_159			     ;	 guard (top half)
 RAM:B0D6 DA CD			     dw	loc_CDDA
 RAM:B0D8 DA CD			     dw	loc_CDDA
 RAM:B0DA DA CD			     dw	loc_CDDA
@@ -2743,16 +2744,16 @@ RAM:B0FA 28 C8			     dw	loc_C828
 RAM:B0FC 28 C8			     dw	loc_C828
 RAM:B0FE 28 C8			     dw	loc_C828
 RAM:B100 28 C8			     dw	loc_C828
-RAM:B102 B9 B6			     dw	adj_54					     ;	 yet another block
-RAM:B104 B1 B6			     dw	adj_55					     ;	 yet another block
+RAM:B102 B9 B6			     dw	upd_54					     ;	 yet another block
+RAM:B104 B1 B6			     dw	upd_55					     ;	 yet another block
 RAM:B106 28 C8			     dw	loc_C828
 RAM:B108 28 C8			     dw	loc_C828
 RAM:B10A 28 C8			     dw	loc_C828
 RAM:B10C 28 C8			     dw	loc_C828
 RAM:B10E 28 C8			     dw	loc_C828
 RAM:B110 28 C8			     dw	loc_C828
-RAM:B112 AA C4			     dw	adj_62					     ;	 another block
-RAM:B114 A9 B7			     dw	adj_63					     ;	 spiked	ball
+RAM:B112 AA C4			     dw	upd_62					     ;	 another block
+RAM:B114 A9 B7			     dw	upd_63					     ;	 spiked	ball
 RAM:B116 DF CD			     dw	loc_CDDF
 RAM:B118 DF CD			     dw	loc_CDDF
 RAM:B11A DF CD			     dw	loc_CDDF
@@ -2769,30 +2770,30 @@ RAM:B12E DF CD			     dw	loc_CDDF
 RAM:B130 DF CD			     dw	loc_CDDF
 RAM:B132 DF CD			     dw	loc_CDDF
 RAM:B134 DF CD			     dw	loc_CDDF
-RAM:B136 C8 C5			     dw	adj_80_to_83				     ;	 ghost
-RAM:B138 C8 C5			     dw	adj_80_to_83				     ;	 ghost
-RAM:B13A C8 C5			     dw	adj_80_to_83				     ;	 ghost
-RAM:B13C C8 C5			     dw	adj_80_to_83				     ;	 ghost
-RAM:B13E C3 C4			     dw	adj_84					     ;	 table
-RAM:B140 B6 C4			     dw	adj_85					     ;	 chest
-RAM:B142 ED B7			     dw	adj_86_87				     ;	 another fire
-RAM:B144 ED B7			     dw	adj_86_87				     ;	 another fire
-RAM:B146 06 C5			     dw	adj_88_to_90				     ; * sun
-RAM:B148 06 C5			     dw	adj_88_to_90				     ; * moon
-RAM:B14A 06 C5			     dw	adj_88_to_90				     ; * frame (left)
-RAM:B14C 83 B6			     dw	adj_91					     ;	 block (high?)
+RAM:B136 C8 C5			     dw	upd_80_to_83				     ;	 ghost
+RAM:B138 C8 C5			     dw	upd_80_to_83				     ;	 ghost
+RAM:B13A C8 C5			     dw	upd_80_to_83				     ;	 ghost
+RAM:B13C C8 C5			     dw	upd_80_to_83				     ;	 ghost
+RAM:B13E C3 C4			     dw	upd_84					     ;	 table
+RAM:B140 B6 C4			     dw	upd_85					     ;	 chest
+RAM:B142 ED B7			     dw	upd_86_87				     ;	 another fire
+RAM:B144 ED B7			     dw	upd_86_87				     ;	 another fire
+RAM:B146 06 C5			     dw	upd_88_to_90				     ; * sun
+RAM:B148 06 C5			     dw	upd_88_to_90				     ; * moon
+RAM:B14A 06 C5			     dw	upd_88_to_90				     ; * frame (left)
+RAM:B14C 83 B6			     dw	upd_91					     ;	 block (high?)
 RAM:B14E 37 C3			     dw	loc_C337
 RAM:B150 37 C3			     dw	loc_C337
 RAM:B152 37 C3			     dw	loc_C337
 RAM:B154 37 C3			     dw	loc_C337
-RAM:B156 8B C2			     dw	adj_96_to_102				     ;	 diamond
-RAM:B158 8B C2			     dw	adj_96_to_102				     ;	 poison
-RAM:B15A 8B C2			     dw	adj_96_to_102				     ;	 boot
-RAM:B15C 8B C2			     dw	adj_96_to_102				     ;	 chalice
-RAM:B15E 8B C2			     dw	adj_96_to_102				     ;	 cup
-RAM:B160 8B C2			     dw	adj_96_to_102				     ;	 bottle
-RAM:B162 8B C2			     dw	adj_96_to_102				     ;	 crystal ball
-RAM:B164 AB C1			     dw	adj_103					     ;	 extra life
+RAM:B156 8B C2			     dw	upd_96_to_102				     ;	 diamond
+RAM:B158 8B C2			     dw	upd_96_to_102				     ;	 poison
+RAM:B15A 8B C2			     dw	upd_96_to_102				     ;	 boot
+RAM:B15C 8B C2			     dw	upd_96_to_102				     ;	 chalice
+RAM:B15E 8B C2			     dw	upd_96_to_102				     ;	 cup
+RAM:B160 8B C2			     dw	upd_96_to_102				     ;	 bottle
+RAM:B162 8B C2			     dw	upd_96_to_102				     ;	 crystal ball
+RAM:B164 AB C1			     dw	upd_103					     ;	 extra life
 RAM:B166 F1 C1			     dw	loc_C1F1
 RAM:B168 F1 C1			     dw	loc_C1F1
 RAM:B16A F1 C1			     dw	loc_C1F1
@@ -2809,54 +2810,54 @@ RAM:B17E 2B BF			     dw	loc_BF2B
 RAM:B180 2B BF			     dw	loc_BF2B
 RAM:B182 2B BF			     dw	loc_BF2B
 RAM:B184 3F BF			     dw	loc_BF3F
-RAM:B186 FE BE			     dw	adj_120_to_126				     ;	 player	appears	sparkles
-RAM:B188 FE BE			     dw	adj_120_to_126
-RAM:B18A FE BE			     dw	adj_120_to_126
-RAM:B18C FE BE			     dw	adj_120_to_126
-RAM:B18E FE BE			     dw	adj_120_to_126
-RAM:B190 FE BE			     dw	adj_120_to_126
-RAM:B192 FE BE			     dw	adj_120_to_126
+RAM:B186 FE BE			     dw	upd_120_to_126				     ;	 player	appears	sparkles
+RAM:B188 FE BE			     dw	upd_120_to_126
+RAM:B18A FE BE			     dw	upd_120_to_126
+RAM:B18C FE BE			     dw	upd_120_to_126
+RAM:B18E FE BE			     dw	upd_120_to_126
+RAM:B190 FE BE			     dw	upd_120_to_126
+RAM:B192 FE BE			     dw	upd_120_to_126
 RAM:B194 11 BF			     dw	loc_BF11
-RAM:B196 D3 C4			     dw	adj_128_to_130				     ; * tree wall
-RAM:B198 D3 C4			     dw	adj_128_to_130				     ; * tree wall
-RAM:B19A D3 C4			     dw	adj_128_to_130				     ; * tree wall
+RAM:B196 D3 C4			     dw	upd_128_to_130				     ; * tree wall
+RAM:B198 D3 C4			     dw	upd_128_to_130				     ; * tree wall
+RAM:B19A D3 C4			     dw	upd_128_to_130				     ; * tree wall
 RAM:B19C 66 B5			     dw	loc_B566
 RAM:B19E 66 B5			     dw	loc_B566
 RAM:B1A0 66 B5			     dw	loc_B566
-RAM:B1A2 CB C2			     dw	no_adjust
-RAM:B1A4 CB C2			     dw	no_adjust
-RAM:B1A6 CB C2			     dw	no_adjust
-RAM:B1A8 CB C2			     dw	no_adjust
-RAM:B1AA CB C2			     dw	no_adjust
-RAM:B1AC CB C2			     dw	no_adjust
-RAM:B1AE CB C2			     dw	no_adjust
-RAM:B1B0 9C B9			     dw	adj_141					     ; * cauldron (bottom)
-RAM:B1B2 9F B9			     dw	adj_142					     ; * cauldron (top)
-RAM:B1B4 A2 B6			     dw	adj_143					     ;	 another block
-RAM:B1B6 F9 B6			     dw	adj_144_to_149_152_to_157		     ;	 guard & wizard	(bottom	half)
-RAM:B1B8 F9 B6			     dw	adj_144_to_149_152_to_157
-RAM:B1BA F9 B6			     dw	adj_144_to_149_152_to_157
-RAM:B1BC F9 B6			     dw	adj_144_to_149_152_to_157
-RAM:B1BE F9 B6			     dw	adj_144_to_149_152_to_157
-RAM:B1C0 F9 B6			     dw	adj_144_to_149_152_to_157
-RAM:B1C2 3C B7			     dw	adj_150_151				     ;	 another guard (top half)
-RAM:B1C4 3C B7			     dw	adj_150_151
-RAM:B1C6 F9 B6			     dw	adj_144_to_149_152_to_157
-RAM:B1C8 F9 B6			     dw	adj_144_to_149_152_to_157
-RAM:B1CA F9 B6			     dw	adj_144_to_149_152_to_157
-RAM:B1CC F9 B6			     dw	adj_144_to_149_152_to_157
-RAM:B1CE F9 B6			     dw	adj_144_to_149_152_to_157
-RAM:B1D0 F9 B6			     dw	adj_144_to_149_152_to_157
-RAM:B1D2 A5 B9			     dw	adj_30_31_158_159			     ;	 wizard	(top half)
-RAM:B1D4 A5 B9			     dw	adj_30_31_158_159			     ;	 wizard	(top half)
+RAM:B1A2 CB C2			     dw	no_update
+RAM:B1A4 CB C2			     dw	no_update
+RAM:B1A6 CB C2			     dw	no_update
+RAM:B1A8 CB C2			     dw	no_update
+RAM:B1AA CB C2			     dw	no_update
+RAM:B1AC CB C2			     dw	no_update
+RAM:B1AE CB C2			     dw	no_update
+RAM:B1B0 9C B9			     dw	upd_141					     ; * cauldron (bottom)
+RAM:B1B2 9F B9			     dw	upd_142					     ; * cauldron (top)
+RAM:B1B4 A2 B6			     dw	upd_143					     ;	 another block
+RAM:B1B6 F9 B6			     dw	upd_144_to_149_152_to_157		     ;	 guard & wizard	(bottom	half)
+RAM:B1B8 F9 B6			     dw	upd_144_to_149_152_to_157
+RAM:B1BA F9 B6			     dw	upd_144_to_149_152_to_157
+RAM:B1BC F9 B6			     dw	upd_144_to_149_152_to_157
+RAM:B1BE F9 B6			     dw	upd_144_to_149_152_to_157
+RAM:B1C0 F9 B6			     dw	upd_144_to_149_152_to_157
+RAM:B1C2 3C B7			     dw	upd_150_151				     ;	 another guard (top half)
+RAM:B1C4 3C B7			     dw	upd_150_151
+RAM:B1C6 F9 B6			     dw	upd_144_to_149_152_to_157
+RAM:B1C8 F9 B6			     dw	upd_144_to_149_152_to_157
+RAM:B1CA F9 B6			     dw	upd_144_to_149_152_to_157
+RAM:B1CC F9 B6			     dw	upd_144_to_149_152_to_157
+RAM:B1CE F9 B6			     dw	upd_144_to_149_152_to_157
+RAM:B1D0 F9 B6			     dw	upd_144_to_149_152_to_157
+RAM:B1D2 A5 B9			     dw	upd_30_31_158_159			     ;	 wizard	(top half)
+RAM:B1D4 A5 B9			     dw	upd_30_31_158_159			     ;	 wizard	(top half)
 RAM:B1D6 DA B8			     dw	loc_B8DA
 RAM:B1D8 DA B8			     dw	loc_B8DA
 RAM:B1DA DA B8			     dw	loc_B8DA
 RAM:B1DC DA B8			     dw	loc_B8DA
-RAM:B1DE 2C B9			     dw	adj_164_to_167				     ;	 sparkles
-RAM:B1E0 2C B9			     dw	adj_164_to_167
-RAM:B1E2 2C B9			     dw	adj_164_to_167
-RAM:B1E4 2C B9			     dw	adj_164_to_167
+RAM:B1DE 2C B9			     dw	upd_164_to_167				     ;	 sparkles
+RAM:B1E0 2C B9			     dw	upd_164_to_167
+RAM:B1E2 2C B9			     dw	upd_164_to_167
+RAM:B1E4 2C B9			     dw	upd_164_to_167
 RAM:B1E6 23 B9			     dw	loc_B923
 RAM:B1E8 23 B9			     dw	loc_B923
 RAM:B1EA 23 B9			     dw	loc_B923
@@ -2867,15 +2868,15 @@ RAM:B1F2 23 B9			     dw	loc_B923
 RAM:B1F4 23 B9			     dw	loc_B923
 RAM:B1F6 3F B8			     dw	loc_B83F
 RAM:B1F8 3F B8			     dw	loc_B83F
-RAM:B1FA 65 B8			     dw	adj_178_179				     ;	 another ball
-RAM:B1FC 65 B8			     dw	adj_178_179				     ;	 another ball
-RAM:B1FE 0F B8			     dw	adj_180_181				     ;	 fire
-RAM:B200 0F B8			     dw	adj_180_181				     ;	 fire
-RAM:B202 FF B5			     dw	adj_182_183				     ;	 yet another ball
-RAM:B204 FF B5			     dw	adj_182_183				     ;	 yet another ball
+RAM:B1FA 65 B8			     dw	upd_178_179				     ;	 another ball
+RAM:B1FC 65 B8			     dw	upd_178_179				     ;	 another ball
+RAM:B1FE 0F B8			     dw	upd_180_181				     ;	 fire
+RAM:B200 0F B8			     dw	upd_180_181				     ;	 fire
+RAM:B202 FF B5			     dw	upd_182_183				     ;	 yet another ball
+RAM:B204 FF B5			     dw	upd_182_183				     ;	 yet another ball
 RAM:B206 2B BF			     dw	loc_BF2B
 RAM:B208 37 BF			     dw	loc_BF37
-RAM:B20A CB C2			     dw	no_adjust
+RAM:B20A CB C2			     dw	no_update
 RAM:B20C 37 BF			     dw	loc_BF37
 RAM:B20E	     ;
 RAM:B20E	     ; Audio Tunes
@@ -3238,7 +3239,7 @@ RAM:B45D
 RAM:B45D	     ; =============== S U B R O U T I N E =======================================
 RAM:B45D
 RAM:B45D
-RAM:B45D	     sub_B45D:							     ; CODE XREF: RAM:adj_54p
+RAM:B45D	     sub_B45D:							     ; CODE XREF: RAM:upd_54p
 RAM:B45D									     ; RAM:B801p
 RAM:B45D DD 7E 01		     ld	     a,	(ix+1)
 RAM:B460 18 F2			     jr	     sub_B454
@@ -3248,7 +3249,7 @@ RAM:B462
 RAM:B462	     ; =============== S U B R O U T I N E =======================================
 RAM:B462
 RAM:B462
-RAM:B462	     sub_B462:							     ; CODE XREF: RAM:adj_55p
+RAM:B462	     sub_B462:							     ; CODE XREF: RAM:upd_55p
 RAM:B462									     ; RAM:B823p
 RAM:B462 DD 7E 02		     ld	     a,	(ix+2)
 RAM:B465 18 ED			     jr	     sub_B454
@@ -3539,7 +3540,7 @@ RAM:B5AC 32 C5 5B		     ld	     (byte_5BC5), a
 RAM:B5AF
 RAM:B5AF	     loc_B5AF:							     ; CODE XREF: RAM:B6F6j
 RAM:B5AF									     ; RAM:C4B3j
-RAM:B5AF CD 00 C7		     call    sub_C700
+RAM:B5AF CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:B5B2 C3 92 C6		     jp	     set_wipe_and_draw_flags
 RAM:B5B5	     ; ---------------------------------------------------------------------------
 RAM:B5B5
@@ -3598,15 +3599,15 @@ RAM:B5FE	     ; End of function read_port
 RAM:B5FE
 RAM:B5FF	     ; ---------------------------------------------------------------------------
 RAM:B5FF
-RAM:B5FF	     adj_182_183:						     ; DATA XREF: RAM:B202o
+RAM:B5FF	     upd_182_183:						     ; DATA XREF: RAM:B202o
 RAM:B5FF									     ; RAM:B204o
-RAM:B5FF CD F2 C4		     call    adj_12_to_15
+RAM:B5FF CD F2 C4		     call    upd_12_to_15
 RAM:B602 DD 6E 09		     ld	     l,	(ix+9)
 RAM:B605 DD 66 0A		     ld	     h,	(ix+0Ah)
 RAM:B608 E5			     push    hl
 RAM:B609 DD 7E 0B		     ld	     a,	(ix+0Bh)
 RAM:B60C 32 C2 5B		     ld	     (byte_5BC2), a
-RAM:B60F CD 00 C7		     call    sub_C700
+RAM:B60F CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:B612 E1			     pop     hl
 RAM:B613 DD 75 09		     ld	     (ix+9), l
 RAM:B616 DD 74 0A		     ld	     (ix+0Ah), h
@@ -3676,13 +3677,13 @@ RAM:B681 18 E5			     jr	     loc_B668
 RAM:B683	     ; ---------------------------------------------------------------------------
 RAM:B683	     ; block (high?)
 RAM:B683
-RAM:B683	     adj_91:							     ; DATA XREF: RAM:B14Co
-RAM:B683 CD E3 C4		     call    adj_6_7
+RAM:B683	     upd_91:							     ; DATA XREF: RAM:B14Co
+RAM:B683 CD E3 C4		     call    upd_6_7
 RAM:B686 DD CB 0D 5E		     bit     3,	(ix+0Dh)
 RAM:B68A C8			     ret     z
 RAM:B68B DD CB 0D 9E		     res     3,	(ix+0Dh)
-RAM:B68F DD 36 0B 00		     ld	     (ix+0Bh), 0
-RAM:B693 CD 00 C7		     call    sub_C700
+RAM:B68F DD 36 0B 00		     ld	     (ix+11), 0
+RAM:B693 CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:B696 DD CB 0C 56		     bit     2,	(ix+12)
 RAM:B69A 20 03			     jr	     nz, loc_B69F
 RAM:B69C CD 51 B4		     call    sub_B451
@@ -3691,21 +3692,21 @@ RAM:B69F	     loc_B69F:							     ; CODE XREF: RAM:B69Aj
 RAM:B69F C3 92 C6		     jp	     set_wipe_and_draw_flags
 RAM:B6A2	     ; ---------------------------------------------------------------------------
 RAM:B6A2
-RAM:B6A2	     adj_143:							     ; DATA XREF: RAM:B1B4o
-RAM:B6A2 CD E3 C4		     call    adj_6_7
+RAM:B6A2	     upd_143:							     ; DATA XREF: RAM:B1B4o
+RAM:B6A2 CD E3 C4		     call    upd_6_7
 RAM:B6A5 DD CB 0D 5E		     bit     3,	(ix+0Dh)
 RAM:B6A9 C8			     ret     z
 RAM:B6AA DD 36 00 B8		     ld	     (ix+0), 0B8h ; '¸'
 RAM:B6AE C3 2B BF		     jp	     loc_BF2B
 RAM:B6B1	     ; ---------------------------------------------------------------------------
 RAM:B6B1
-RAM:B6B1	     adj_55:							     ; DATA XREF: RAM:B104o
+RAM:B6B1	     upd_55:							     ; DATA XREF: RAM:B104o
 RAM:B6B1 CD 62 B4		     call    sub_B462
 RAM:B6B4 21 0A 02		     ld	     hl, 20Ah
 RAM:B6B7 18 06			     jr	     loc_B6BF
 RAM:B6B9	     ; ---------------------------------------------------------------------------
 RAM:B6B9
-RAM:B6B9	     adj_54:							     ; DATA XREF: RAM:B102o
+RAM:B6B9	     upd_54:							     ; DATA XREF: RAM:B102o
 RAM:B6B9 CD 5D B4		     call    sub_B45D
 RAM:B6BC 21 09 01		     ld	     hl, 109h
 RAM:B6BF
@@ -3714,7 +3715,7 @@ RAM:B6BF 7C			     ld	     a,	h
 RAM:B6C0 32 E0 B6		     ld	     (loc_B6DE+2), a			     ; IX+2/1
 RAM:B6C3 7D			     ld	     a,	l
 RAM:B6C4 32 F1 B6		     ld	     (loc_B6EF+2), a			     ; IX+10/9
-RAM:B6C7 CD E3 C4		     call    adj_6_7
+RAM:B6C7 CD E3 C4		     call    upd_6_7
 RAM:B6CA DD E5			     push    ix
 RAM:B6CC C1			     pop     bc
 RAM:B6CD 79			     ld	     a,	c
@@ -3749,7 +3750,7 @@ RAM:B6F6 C3 AF B5		     jp	     loc_B5AF
 RAM:B6F9	     ; ---------------------------------------------------------------------------
 RAM:B6F9	     ; gaurd and wizard	(bottom	half)
 RAM:B6F9
-RAM:B6F9	     adj_144_to_149_152_to_157:					     ; DATA XREF: RAM:B1B6o
+RAM:B6F9	     upd_144_to_149_152_to_157:					     ; DATA XREF: RAM:B1B6o
 RAM:B6F9									     ; RAM:B1B8o ...
 RAM:B6F9 CD DD C4		     call    adj_m6_m12
 RAM:B6FC DD 7E 09		     ld	     a,	(ix+9)
@@ -3791,7 +3792,7 @@ RAM:B736 DD CB 00 9E		     res     3,	(ix+0)
 RAM:B73A 18 F4			     jr	     loc_B730
 RAM:B73C	     ; ---------------------------------------------------------------------------
 RAM:B73C
-RAM:B73C	     adj_150_151:						     ; DATA XREF: RAM:B1C2o
+RAM:B73C	     upd_150_151:						     ; DATA XREF: RAM:B1C2o
 RAM:B73C									     ; RAM:B1C4o
 RAM:B73C CD 0B C5		     call    sub_C50B
 RAM:B73F DD CB 0D 46		     bit     0,	(ix+0Dh)
@@ -3803,7 +3804,7 @@ RAM:B749	     loc_B749:							     ; CODE XREF: RAM:B745j
 RAM:B749 DD 77 09		     ld	     (ix+9), a
 RAM:B74C DD 77 29		     ld	     (ix+29h), a
 RAM:B74F CD 6C B7		     call    sub_B76C
-RAM:B752 CD 00 C7		     call    sub_C700
+RAM:B752 CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:B755 DD CB 0C 46		     bit     0,	(ix+12)
 RAM:B759 28 08			     jr	     z,	loc_B763
 RAM:B75B DD 7E 0D		     ld	     a,	(ix+0Dh)
@@ -3857,15 +3858,15 @@ RAM:B7A1	     ; End of function sub_B76C
 RAM:B7A1
 RAM:B7A3	     ; ---------------------------------------------------------------------------
 RAM:B7A3
-RAM:B7A3	     adj_22:							     ; DATA XREF: RAM:B0C2o
+RAM:B7A3	     upd_22:							     ; DATA XREF: RAM:B0C2o
 RAM:B7A3 CD 5C B8		     call    sub_B85C
 RAM:B7A6 C3 FC C4		     jp	     sub_C4FC
 RAM:B7A9	     ; ---------------------------------------------------------------------------
 RAM:B7A9	     ; spiked ball
 RAM:B7A9
-RAM:B7A9	     adj_63:							     ; DATA XREF: RAM:B114o
+RAM:B7A9	     upd_63:							     ; DATA XREF: RAM:B114o
 RAM:B7A9 CD 5C B8		     call    sub_B85C
-RAM:B7AC CD E3 C4		     call    adj_6_7
+RAM:B7AC CD E3 C4		     call    upd_6_7
 RAM:B7AF 3A C0 5B		     ld	     a,	(byte_5BC0)
 RAM:B7B2 A7			     and     a
 RAM:B7B3 C0			     ret     nz
@@ -3884,7 +3885,7 @@ RAM:B7CC C9			     ret
 RAM:B7CD	     ; ---------------------------------------------------------------------------
 RAM:B7CD
 RAM:B7CD	     loc_B7CD:							     ; CODE XREF: RAM:B7B8j
-RAM:B7CD CD 00 C7		     call    sub_C700
+RAM:B7CD CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:B7D0 DD CB 0C 56		     bit     2,	(ix+12)
 RAM:B7D4 20 06			     jr	     nz, loc_B7DC
 RAM:B7D6 CD 51 B4		     call    sub_B451
@@ -3901,14 +3902,14 @@ RAM:B7E5 18 F2			     jr	     loc_B7D9
 RAM:B7E7	     ; ---------------------------------------------------------------------------
 RAM:B7E7	     ; spikes
 RAM:B7E7
-RAM:B7E7	     adj_23:							     ; DATA XREF: RAM:B0C4o
+RAM:B7E7	     upd_23:							     ; DATA XREF: RAM:B0C4o
 RAM:B7E7 CD 5C B8		     call    sub_B85C
-RAM:B7EA C3 E3 C4		     jp	     adj_6_7
+RAM:B7EA C3 E3 C4		     jp	     upd_6_7
 RAM:B7ED	     ; ---------------------------------------------------------------------------
 RAM:B7ED
-RAM:B7ED	     adj_86_87:							     ; DATA XREF: RAM:B142o
+RAM:B7ED	     upd_86_87:							     ; DATA XREF: RAM:B142o
 RAM:B7ED									     ; RAM:B144o
-RAM:B7ED CD F2 C4		     call    adj_12_to_15
+RAM:B7ED CD F2 C4		     call    upd_12_to_15
 RAM:B7F0 DD 36 0B 01		     ld	     (ix+0Bh), 1
 RAM:B7F4 DD CB 0D 46		     bit     0,	(ix+0Dh)
 RAM:B7F8 3E 02			     ld	     a,	2
@@ -3918,15 +3919,15 @@ RAM:B7FE
 RAM:B7FE	     loc_B7FE:							     ; CODE XREF: RAM:B7FAj
 RAM:B7FE DD 77 09		     ld	     (ix+9), a
 RAM:B801 CD 5D B4		     call    sub_B45D
-RAM:B804 CD 00 C7		     call    sub_C700
+RAM:B804 CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:B807 DD CB 0C 46		     bit     0,	(ix+12)
 RAM:B80B 3E 01			     ld	     a,	1
 RAM:B80D 18 20			     jr	     loc_B82F
 RAM:B80F	     ; ---------------------------------------------------------------------------
 RAM:B80F
-RAM:B80F	     adj_180_181:						     ; DATA XREF: RAM:B1FEo
+RAM:B80F	     upd_180_181:						     ; DATA XREF: RAM:B1FEo
 RAM:B80F									     ; RAM:B200o
-RAM:B80F CD F2 C4		     call    adj_12_to_15
+RAM:B80F CD F2 C4		     call    upd_12_to_15
 RAM:B812 DD 36 0B 01		     ld	     (ix+0Bh), 1
 RAM:B816 DD CB 0D 4E		     bit     1,	(ix+0Dh)
 RAM:B81A 3E 02			     ld	     a,	2
@@ -3936,7 +3937,7 @@ RAM:B820
 RAM:B820	     loc_B820:							     ; CODE XREF: RAM:B81Cj
 RAM:B820 DD 77 0A		     ld	     (ix+0Ah), a
 RAM:B823 CD 62 B4		     call    sub_B462
-RAM:B826 CD 00 C7		     call    sub_C700
+RAM:B826 CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:B829 DD CB 0C 4E		     bit     1,	(ix+12)
 RAM:B82D 3E 02			     ld	     a,	2
 RAM:B82F
@@ -3953,7 +3954,7 @@ RAM:B83F	     ; ----------------------------------------------------------------
 RAM:B83F
 RAM:B83F	     loc_B83F:							     ; DATA XREF: RAM:B1F6o
 RAM:B83F									     ; RAM:B1F8o
-RAM:B83F CD F2 C4		     call    adj_12_to_15
+RAM:B83F CD F2 C4		     call    upd_12_to_15
 RAM:B842 3A BC 5B		     ld	     a,	(byte_5BBC)
 RAM:B845 E6 01			     and     1
 RAM:B847 C8			     ret     z
@@ -3971,8 +3972,8 @@ RAM:B85C
 RAM:B85C	     ; =============== S U B R O U T I N E =======================================
 RAM:B85C
 RAM:B85C
-RAM:B85C	     sub_B85C:							     ; CODE XREF: RAM:adj_22p
-RAM:B85C									     ; RAM:adj_63p ...
+RAM:B85C	     sub_B85C:							     ; CODE XREF: RAM:upd_22p
+RAM:B85C									     ; RAM:upd_63p ...
 RAM:B85C DD 7E 0D		     ld	     a,	(ix+13)
 RAM:B85F F6 A0			     or	     0A0h ; ' '
 RAM:B861 DD 77 0D		     ld	     (ix+13), a
@@ -3981,9 +3982,9 @@ RAM:B864	     ; End of function sub_B85C
 RAM:B864
 RAM:B865	     ; ---------------------------------------------------------------------------
 RAM:B865
-RAM:B865	     adj_178_179:						     ; DATA XREF: RAM:B1FAo
+RAM:B865	     upd_178_179:						     ; DATA XREF: RAM:B1FAo
 RAM:B865									     ; RAM:B1FCo
-RAM:B865 CD F2 C4		     call    adj_12_to_15
+RAM:B865 CD F2 C4		     call    upd_12_to_15
 RAM:B868 3A BD 5B		     ld	     a,	(byte_5BBD)
 RAM:B86B A7			     and     a
 RAM:B86C 20 08			     jr	     nz, loc_B876
@@ -3996,7 +3997,7 @@ RAM:B876 CD 85 B9		     call    sub_B985
 RAM:B879 CD 51 B4		     call    sub_B451
 RAM:B87C DD CB 0D 56		     bit     2,	(ix+0Dh)
 RAM:B880 20 12			     jr	     nz, loc_B894
-RAM:B882 CD 00 C7		     call    sub_C700
+RAM:B882 CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:B885 DD CB 0C 56		     bit     2,	(ix+12)
 RAM:B889 28 07			     jr	     z,	loc_B892
 RAM:B88B DD CB 0D D6		     set     2,	(ix+0Dh)
@@ -4009,7 +4010,7 @@ RAM:B894	     ; ----------------------------------------------------------------
 RAM:B894
 RAM:B894	     loc_B894:							     ; CODE XREF: RAM:B880j
 RAM:B894 DD 36 0B 03		     ld	     (ix+0Bh), 3
-RAM:B898 CD 00 C7		     call    sub_C700
+RAM:B898 CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:B89B 3A BD 5B		     ld	     a,	(byte_5BBD)
 RAM:B89E DD BE 03		     cp	     (ix+3)
 RAM:B8A1 30 EF			     jr	     nc, loc_B892
@@ -4051,7 +4052,7 @@ RAM:B8DD 3A 48 5C		     ld	     a,	(special_objs_here)
 RAM:B8E0 A7			     and     a					     ; null?
 RAM:B8E1 C2 5E B9		     jp	     nz, loc_B95E			     ; no, skip
 RAM:B8E4 DD CB 07 CE		     set     1,	(ix+7)
-RAM:B8E8 CD 00 C7		     call    sub_C700
+RAM:B8E8 CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:B8EB CD 8C B9		     call    loc_B98C
 RAM:B8EE DD 7E 03		     ld	     a,	(ix+3)
 RAM:B8F1 FE A0			     cp	     0A0h ; ' '
@@ -4088,7 +4089,7 @@ RAM:B926 DD 36 00 A0		     ld	     (ix+0), 0A0h ; ' '
 RAM:B92A 18 EA			     jr	     loc_B916
 RAM:B92C	     ; ---------------------------------------------------------------------------
 RAM:B92C
-RAM:B92C	     adj_164_to_167:						     ; DATA XREF: RAM:B1DEo
+RAM:B92C	     upd_164_to_167:						     ; DATA XREF: RAM:B1DEo
 RAM:B92C									     ; RAM:B1E0o ...
 RAM:B92C CD D8 C4		     call    sub_C4D8
 RAM:B92F DD 7E 08		     ld	     a,	(ix+8)				     ; plyr_spr_1 screen
@@ -4107,7 +4108,7 @@ RAM:B942 01 04 04		     ld	     bc, 404h
 RAM:B945
 RAM:B945	     loc_B945:							     ; CODE XREF: RAM:B940j
 RAM:B945 CD 65 B9		     call    sub_B965
-RAM:B948 CD 00 C7		     call    sub_C700
+RAM:B948 CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:B94B CD 8C B9		     call    loc_B98C
 RAM:B94E DD 7E 08		     ld	     a,	(ix+8)				     ; plyr_spr_1 X
 RAM:B951 FE 88			     cp	     136				     ; cauldron	room?
@@ -4181,20 +4182,20 @@ RAM:B99B	     ; End of function sub_B985
 RAM:B99B
 RAM:B99C	     ; ---------------------------------------------------------------------------
 RAM:B99C
-RAM:B99C	     adj_141:							     ; DATA XREF: RAM:B1B0o
-RAM:B99C C3 06 C5		     jp	     adj_88_to_90
+RAM:B99C	     upd_141:							     ; DATA XREF: RAM:B1B0o
+RAM:B99C C3 06 C5		     jp	     upd_88_to_90
 RAM:B99F	     ; ---------------------------------------------------------------------------
 RAM:B99F
-RAM:B99F	     adj_142:							     ; DATA XREF: RAM:B1B2o
+RAM:B99F	     upd_142:							     ; DATA XREF: RAM:B1B2o
 RAM:B99F 21 E8 0C		     ld	     hl, 0CE8h				     ; +12, -24
 RAM:B9A2 C3 2B C7		     jp	     set_pixel_adj
 RAM:B9A5	     ; ---------------------------------------------------------------------------
 RAM:B9A5	     ; guard and wizard	(top half)
 RAM:B9A5
-RAM:B9A5	     adj_30_31_158_159:						     ; DATA XREF: RAM:B0D2o
+RAM:B9A5	     upd_30_31_158_159:						     ; DATA XREF: RAM:B0D2o
 RAM:B9A5									     ; RAM:B0D4o ...
 RAM:B9A5 CD 10 C5		     call    sub_C510
-RAM:B9A8 CD 00 C7		     call    sub_C700
+RAM:B9A8 CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:B9AB CD CC B9		     call    sub_B9CC
 RAM:B9AE DD 75 09		     ld	     (ix+9), l
 RAM:B9B1 DD 75 29		     ld	     (ix+29h), l
@@ -4959,7 +4960,7 @@ RAM:BEFD
 RAM:BEFE	     ; ---------------------------------------------------------------------------
 RAM:BEFE	     ; player appear sparkles
 RAM:BEFE
-RAM:BEFE	     adj_120_to_126:						     ; DATA XREF: RAM:B186o
+RAM:BEFE	     upd_120_to_126:						     ; DATA XREF: RAM:B186o
 RAM:BEFE									     ; RAM:B188o ...
 RAM:BEFE CD D8 C4		     call    sub_C4D8
 RAM:BF01 3A A2 5B		     ld	     a,	(seed_2)
@@ -5377,8 +5378,8 @@ RAM:C1AA	     ; End of function sub_C1A1
 RAM:C1AA
 RAM:C1AB	     ; ---------------------------------------------------------------------------
 RAM:C1AB
-RAM:C1AB	     adj_103:							     ; DATA XREF: RAM:B164o
-RAM:C1AB CD D3 C4		     call    adj_128_to_130
+RAM:C1AB	     upd_103:							     ; DATA XREF: RAM:B164o
+RAM:C1AB CD D3 C4		     call    upd_128_to_130
 RAM:C1AE DD E5			     push    ix
 RAM:C1B0 FD E1			     pop     iy
 RAM:C1B2 DD 21 08 5C		     ld	     ix, graphic_objs_tbl
@@ -5448,7 +5449,7 @@ RAM:C22C	     loc_C22C:							     ; CODE XREF: RAM:C229j
 RAM:C22C DD 77 0B		     ld	     (ix+0Bh), a
 RAM:C22F
 RAM:C22F	     loc_C22F:							     ; CODE XREF: RAM:C243j
-RAM:C22F CD 00 C7		     call    sub_C700
+RAM:C22F CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:C232
 RAM:C232	     loc_C232:							     ; CODE XREF: RAM:loc_B962j
 RAM:C232									     ; RAM:C2A2j ...
@@ -5504,10 +5505,10 @@ RAM:C27D 04 05 06 03+								     ; ret_next_obj_required+3o
 RAM:C27D 05 00 06 01+		     db	5, 0, 6, 1, 2, 4
 RAM:C28B	     ; ---------------------------------------------------------------------------
 RAM:C28B
-RAM:C28B	     adj_96_to_102:						     ; DATA XREF: RAM:B156o
+RAM:C28B	     upd_96_to_102:						     ; DATA XREF: RAM:B156o
 RAM:C28B									     ; RAM:B158o ...
 RAM:C28B CD D8 C4		     call    sub_C4D8
-RAM:C28E CD 00 C7		     call    sub_C700
+RAM:C28E CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:C291 DD CB 0D 46		     bit     0,	(ix+13)
 RAM:C295 20 04			     jr	     nz, loc_C29B
 RAM:C297 CD A1 C1		     call    sub_C1A1
@@ -5553,7 +5554,7 @@ RAM:C2C6 20 FB			     jr	     nz, loc_C2C3
 RAM:C2C8 15			     dec     d
 RAM:C2C9 20 DC			     jr	     nz, loc_C2A7
 RAM:C2CB
-RAM:C2CB	     no_adjust:							     ; DATA XREF: RAM:adj_sprite_jmp_tblo
+RAM:C2CB	     no_update:							     ; DATA XREF: RAM:upd_sprite_jmp_tblo
 RAM:C2CB									     ; RAM:B098o ...
 RAM:C2CB C9			     ret
 RAM:C2CB	     ; End of function sub_C2A5
@@ -5626,13 +5627,13 @@ RAM:C327 DD 19			     add     ix, de
 RAM:C329 DD 36 00 01		     ld	     (ix+0), 1
 RAM:C32D CD 92 C6		     call    set_wipe_and_draw_flags
 RAM:C330 DD E1			     pop     ix
-RAM:C332 CD ED C4		     call    adj_11
+RAM:C332 CD ED C4		     call    upd_11
 RAM:C335 18 20			     jr	     loc_C357
 RAM:C337	     ; ---------------------------------------------------------------------------
 RAM:C337
 RAM:C337	     loc_C337:							     ; DATA XREF: RAM:B14Eo
 RAM:C337									     ; RAM:B150o ...
-RAM:C337 CD ED C4		     call    adj_11
+RAM:C337 CD ED C4		     call    upd_11
 RAM:C33A DD CB 0D 76		     bit     6,	(ix+0Dh)
 RAM:C33E 28 09			     jr	     z,	loc_C349
 RAM:C340 3A C3 5B		     ld	     a,	(byte_5BC3)
@@ -5844,26 +5845,26 @@ RAM:C4A9	     ; End of function init_special_objects
 RAM:C4A9
 RAM:C4AA	     ; ---------------------------------------------------------------------------
 RAM:C4AA
-RAM:C4AA	     adj_62:							     ; DATA XREF: RAM:B112o
-RAM:C4AA CD E3 C4		     call    adj_6_7
+RAM:C4AA	     upd_62:							     ; DATA XREF: RAM:B112o
+RAM:C4AA CD E3 C4		     call    upd_6_7
 RAM:C4AD CD F3 C9		     call    loc_C9F3
 RAM:C4B0 CD E9 B3		     call    sub_B3E9
 RAM:C4B3 C3 AF B5		     jp	     loc_B5AF
 RAM:C4B6	     ; ---------------------------------------------------------------------------
 RAM:C4B6
-RAM:C4B6	     adj_85:							     ; DATA XREF: RAM:B140o
-RAM:C4B6 CD E3 C4		     call    adj_6_7
-RAM:C4B9 CD 00 C7		     call    sub_C700
+RAM:C4B6	     upd_85:							     ; DATA XREF: RAM:B140o
+RAM:C4B6 CD E3 C4		     call    upd_6_7
+RAM:C4B9 CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:C4BC CD A1 C1		     call    sub_C1A1
 RAM:C4BF C8			     ret     z
 RAM:C4C0 C3 32 C2		     jp	     loc_C232
 RAM:C4C3	     ; ---------------------------------------------------------------------------
 RAM:C4C3
-RAM:C4C3	     adj_84:							     ; DATA XREF: RAM:B13Eo
-RAM:C4C3 CD E3 C4		     call    adj_6_7
+RAM:C4C3	     upd_84:							     ; DATA XREF: RAM:B13Eo
+RAM:C4C3 CD E3 C4		     call    upd_6_7
 RAM:C4C6
 RAM:C4C6	     loc_C4C6:							     ; CODE XREF: RAM:loc_C1EEj
-RAM:C4C6 CD 00 C7		     call    sub_C700
+RAM:C4C6 CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:C4C9 CD A1 C1		     call    sub_C1A1
 RAM:C4CC C8			     ret     z
 RAM:C4CD CD F3 C9		     call    loc_C9F3
@@ -5872,11 +5873,11 @@ RAM:C4D3
 RAM:C4D3	     ; =============== S U B R O U T I N E =======================================
 RAM:C4D3
 RAM:C4D3
-RAM:C4D3	     adj_128_to_130:						     ; CODE XREF: RAM:adj_103p
+RAM:C4D3	     upd_128_to_130:						     ; CODE XREF: RAM:upd_103p
 RAM:C4D3									     ; DATA XREF: RAM:B196o ...
 RAM:C4D3 21 F8 FE		     ld	     hl, 0FEF8h				     ; -2, -8
 RAM:C4D6 18 08			     jr	     jp_set_pixel_adj
-RAM:C4D6	     ; End of function adj_128_to_130
+RAM:C4D6	     ; End of function upd_128_to_130
 RAM:C4D6
 RAM:C4D8
 RAM:C4D8	     ; =============== S U B R O U T I N E =======================================
@@ -5895,14 +5896,14 @@ RAM:C4DD
 RAM:C4DD	     ; =============== S U B R O U T I N E =======================================
 RAM:C4DD
 RAM:C4DD
-RAM:C4DD	     adj_m6_m12:						     ; CODE XREF: RAM:adj_144_to_149_152_to_157p
+RAM:C4DD	     adj_m6_m12:						     ; CODE XREF: RAM:upd_144_to_149_152_to_157p
 RAM:C4DD									     ; sub_C306+82p ...
 RAM:C4DD 21 F4 FA		     ld	     hl, 0FAF4h				     ; -6, -12
 RAM:C4DD	     ; End of function adj_m6_m12
 RAM:C4DD
 RAM:C4E0	     ; START OF	FUNCTION CHUNK FOR sub_C4D8
 RAM:C4E0
-RAM:C4E0	     jp_set_pixel_adj:						     ; CODE XREF: adj_128_to_130+3j
+RAM:C4E0	     jp_set_pixel_adj:						     ; CODE XREF: upd_128_to_130+3j
 RAM:C4E0									     ; sub_C4D8+3j ...
 RAM:C4E0 C3 2B C7		     jp	     set_pixel_adj
 RAM:C4E0	     ; END OF FUNCTION CHUNK FOR sub_C4D8
@@ -5911,16 +5912,16 @@ RAM:C4E3
 RAM:C4E3	     ; =============== S U B R O U T I N E =======================================
 RAM:C4E3
 RAM:C4E3
-RAM:C4E3	     adj_6_7:							     ; CODE XREF: RAM:adj_91p
-RAM:C4E3									     ; RAM:adj_143p ...
+RAM:C4E3	     upd_6_7:							     ; CODE XREF: RAM:upd_91p
+RAM:C4E3									     ; RAM:upd_143p ...
 RAM:C4E3 21 F0 F8		     ld	     hl, 0F8F0h				     ; -8, -16
 RAM:C4E6 18 F8			     jr	     jp_set_pixel_adj
-RAM:C4E6	     ; End of function adj_6_7
+RAM:C4E6	     ; End of function upd_6_7
 RAM:C4E6
 RAM:C4E8	     ; ---------------------------------------------------------------------------
 RAM:C4E8	     ; bricks
 RAM:C4E8
-RAM:C4E8	     adj_10:							     ; DATA XREF: RAM:B0AAo
+RAM:C4E8	     upd_10:							     ; DATA XREF: RAM:B0AAo
 RAM:C4E8 21 EC FF		     ld	     hl, 0FFECh				     ; -1, -20
 RAM:C4EB 18 F3			     jr	     jp_set_pixel_adj
 RAM:C4ED	     ; bricks
@@ -5928,23 +5929,23 @@ RAM:C4ED
 RAM:C4ED	     ; =============== S U B R O U T I N E =======================================
 RAM:C4ED
 RAM:C4ED
-RAM:C4ED	     adj_11:							     ; CODE XREF: sub_C306+2Cp
+RAM:C4ED	     upd_11:							     ; CODE XREF: sub_C306+2Cp
 RAM:C4ED									     ; sub_C306:loc_C337p
 RAM:C4ED									     ; DATA XREF: ...
 RAM:C4ED 21 F4 FE		     ld	     hl, 0FEF4h				     ; -2, -12
 RAM:C4F0 18 EE			     jr	     jp_set_pixel_adj
-RAM:C4F0	     ; End of function adj_11
+RAM:C4F0	     ; End of function upd_11
 RAM:C4F0
 RAM:C4F2	     ; bricks
 RAM:C4F2
 RAM:C4F2	     ; =============== S U B R O U T I N E =======================================
 RAM:C4F2
 RAM:C4F2
-RAM:C4F2	     adj_12_to_15:						     ; CODE XREF: RAM:adj_182_183p
-RAM:C4F2									     ; RAM:adj_86_87p ...
+RAM:C4F2	     upd_12_to_15:						     ; CODE XREF: RAM:upd_182_183p
+RAM:C4F2									     ; RAM:upd_86_87p ...
 RAM:C4F2 21 F8 FC		     ld	     hl, 0FCF8h				     ; -4, -8
 RAM:C4F5 18 E9			     jr	     jp_set_pixel_adj
-RAM:C4F5	     ; End of function adj_12_to_15
+RAM:C4F5	     ; End of function upd_12_to_15
 RAM:C4F5
 RAM:C4F7
 RAM:C4F7	     ; =============== S U B R O U T I N E =======================================
@@ -5976,7 +5977,7 @@ RAM:C504	     ; End of function sub_C501
 RAM:C504
 RAM:C506	     ; ---------------------------------------------------------------------------
 RAM:C506
-RAM:C506	     adj_88_to_90:						     ; CODE XREF: RAM:adj_141j
+RAM:C506	     upd_88_to_90:						     ; CODE XREF: RAM:upd_141j
 RAM:C506									     ; DATA XREF: RAM:B146o ...
 RAM:C506 21 F0 F4		     ld	     hl, 0F4F0h				     ; -12, -16
 RAM:C509 18 D5			     jr	     jp_set_pixel_adj
@@ -5984,7 +5985,7 @@ RAM:C50B
 RAM:C50B	     ; =============== S U B R O U T I N E =======================================
 RAM:C50B
 RAM:C50B
-RAM:C50B	     sub_C50B:							     ; CODE XREF: RAM:adj_150_151p
+RAM:C50B	     sub_C50B:							     ; CODE XREF: RAM:upd_150_151p
 RAM:C50B 21 F4 07		     ld	     hl, 7F4h				     ; +7, -12
 RAM:C50E 18 D0			     jr	     jp_set_pixel_adj
 RAM:C50E	     ; End of function sub_C50B
@@ -5993,7 +5994,7 @@ RAM:C510
 RAM:C510	     ; =============== S U B R O U T I N E =======================================
 RAM:C510
 RAM:C510
-RAM:C510	     sub_C510:							     ; CODE XREF: RAM:adj_30_31_158_159p
+RAM:C510	     sub_C510:							     ; CODE XREF: RAM:upd_30_31_158_159p
 RAM:C510 21 F4 03		     ld	     hl, 3F4h				     ; +3, -12
 RAM:C513 18 CB			     jr	     jp_set_pixel_adj
 RAM:C513	     ; End of function sub_C510
@@ -6156,10 +6157,10 @@ RAM:C5C7
 RAM:C5C8	     ; ---------------------------------------------------------------------------
 RAM:C5C8	     ; ghost
 RAM:C5C8
-RAM:C5C8	     adj_80_to_83:						     ; DATA XREF: RAM:B136o
+RAM:C5C8	     upd_80_to_83:						     ; DATA XREF: RAM:B136o
 RAM:C5C8									     ; RAM:B138o ...
 RAM:C5C8 CD DD C4		     call    adj_m6_m12
-RAM:C5CB CD 00 C7		     call    sub_C700
+RAM:C5CB CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:C5CE DD 7E 09		     ld	     a,	(ix+9)
 RAM:C5D1 DD B6 0A		     or	     (ix+0Ah)
 RAM:C5D4 28 07			     jr	     z,	loc_C5DD
@@ -6269,7 +6270,7 @@ RAM:C65D 08			     db	   8
 RAM:C65E	     ; ---------------------------------------------------------------------------
 RAM:C65E	     ; portcullis (static)
 RAM:C65E
-RAM:C65E	     adj_8:							     ; DATA XREF: RAM:B0A6o
+RAM:C65E	     upd_8:							     ; DATA XREF: RAM:B0A6o
 RAM:C65E CD DD C4		     call    adj_m6_m12
 RAM:C661 21 AF 5B		     ld	     hl, portcullis_moving
 RAM:C664 7E			     ld	     a,	(hl)
@@ -6337,63 +6338,63 @@ RAM:C6BB 18 D4			     jr	     loc_C691
 RAM:C6BD	     ; ---------------------------------------------------------------------------
 RAM:C6BD	     ; portcullis (moving)
 RAM:C6BD
-RAM:C6BD	     adj_9:							     ; DATA XREF: RAM:B0A8o
+RAM:C6BD	     upd_9:							     ; DATA XREF: RAM:B0A8o
 RAM:C6BD CD DD C4		     call    adj_m6_m12
 RAM:C6C0 DD CB 0D FE		     set     7,	(ix+13)
 RAM:C6C4 3A 14 5C		     ld	     a,	(graphic_objs_tbl+0Ch)
 RAM:C6C7 E6 F0			     and     0F0h ; 'ð'
 RAM:C6C9 C0			     ret     nz
-RAM:C6CA DD 7E 0B		     ld	     a,	(ix+11)				     ; objZ
-RAM:C6CD A7			     and     a
-RAM:C6CE F2 EA C6		     jp	     p,	loc_C6EA
-RAM:C6D1 DD 35 0B		     dec     (ix+11)
-RAM:C6D4 CD 00 C7		     call    sub_C700
-RAM:C6D7 DD CB 0C 56		     bit     2,	(ix+12)
-RAM:C6DB 28 B5			     jr	     z,	set_wipe_and_draw_flags
-RAM:C6DD CD 89 B4		     call    sub_B489
+RAM:C6CA DD 7E 0B		     ld	     a,	(ix+11)				     ; dZ
+RAM:C6CD A7			     and     a					     ; up?
+RAM:C6CE F2 EA C6		     jp	     p,	move_portcullis_up		     ; yes, go
+RAM:C6D1 DD 35 0B		     dec     (ix+11)				     ; accelerate speed?
+RAM:C6D4 CD 00 C7		     call    dec_dZ_and_update_XYZ
+RAM:C6D7 DD CB 0C 56		     bit     2,	(ix+12)				     ; out of bounds?
+RAM:C6DB 28 B5			     jr	     z,	set_wipe_and_draw_flags		     ; no, go
+RAM:C6DD CD 89 B4		     call    sub_B489				     ; audio?
 RAM:C6E0
-RAM:C6E0	     loc_C6E0:							     ; CODE XREF: RAM:C6FEj
+RAM:C6E0	     stop_portcullis:						     ; CODE XREF: RAM:C6FEj
 RAM:C6E0 AF			     xor     a					     ; flag not	moving
 RAM:C6E1 32 AF 5B		     ld	     (portcullis_moving), a
 RAM:C6E4 DD CB 00 86		     res     0,	(ix+0)				     ; graphic_no=8
 RAM:C6E8 18 A8			     jr	     set_wipe_and_draw_flags
 RAM:C6EA	     ; ---------------------------------------------------------------------------
 RAM:C6EA
-RAM:C6EA	     loc_C6EA:							     ; CODE XREF: RAM:C6CEj
-RAM:C6EA DD 36 0B 02		     ld	     (ix+11), 2
-RAM:C6EE CD 67 B4		     call    sub_B467
-RAM:C6F1 CD 00 C7		     call    sub_C700
+RAM:C6EA	     move_portcullis_up:					     ; CODE XREF: RAM:C6CEj
+RAM:C6EA DD 36 0B 02		     ld	     (ix+11), 2				     ; dZ
+RAM:C6EE CD 67 B4		     call    sub_B467				     ; audio?
+RAM:C6F1 CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:C6F4 3A AE 5B		     ld	     a,	(room_size_Z)
 RAM:C6F7 C6 1F			     add     a,	31
-RAM:C6F9 DD BE 03		     cp	     (ix+3)				     ; Z
-RAM:C6FC 30 94			     jr	     nc, set_wipe_and_draw_flags
-RAM:C6FE 18 E0			     jr	     loc_C6E0
+RAM:C6F9 DD BE 03		     cp	     (ix+3)				     ; objZ < room height+31?
+RAM:C6FC 30 94			     jr	     nc, set_wipe_and_draw_flags	     ; yes, go
+RAM:C6FE 18 E0			     jr	     stop_portcullis
 RAM:C700
 RAM:C700	     ; =============== S U B R O U T I N E =======================================
 RAM:C700
 RAM:C700
-RAM:C700	     sub_C700:							     ; CODE XREF: RAM:loc_B5AFp
+RAM:C700	     dec_dZ_and_update_XYZ:					     ; CODE XREF: RAM:loc_B5AFp
 RAM:C700									     ; RAM:B60Fp ...
-RAM:C700 DD 35 0B		     dec     (ix+11)
-RAM:C703 CD 45 CB		     call    sub_CB45
+RAM:C700 DD 35 0B		     dec     (ix+11)				     ; dec dZ?
+RAM:C703 CD 45 CB		     call    adj_for_out_of_bounds
 RAM:C706
-RAM:C706	     loc_C706:							     ; CODE XREF: sub_C9A1+3Ep
+RAM:C706	     add_dXYZ:							     ; CODE XREF: sub_C9A1+3Ep
 RAM:C706 DD 7E 01		     ld	     a,	(ix+1)				     ; X
-RAM:C709 DD 86 09		     add     a,	(ix+9)
-RAM:C70C DD 77 01		     ld	     (ix+1), a				     ; X
+RAM:C709 DD 86 09		     add     a,	(ix+9)				     ; dX
+RAM:C70C DD 77 01		     ld	     (ix+1), a				     ; X+=dX
 RAM:C70F DD 7E 02		     ld	     a,	(ix+2)				     ; Y
-RAM:C712 DD 86 0A		     add     a,	(ix+10)
-RAM:C715 DD 77 02		     ld	     (ix+2), a
-RAM:C718 DD 7E 03		     ld	     a,	(ix+3)
-RAM:C71B DD 86 0B		     add     a,	(ix+11)
-RAM:C71E DD 77 03		     ld	     (ix+3), a
+RAM:C712 DD 86 0A		     add     a,	(ix+10)				     ; dY
+RAM:C715 DD 77 02		     ld	     (ix+2), a				     ; y+=dY
+RAM:C718 DD 7E 03		     ld	     a,	(ix+3)				     ; Z
+RAM:C71B DD 86 0B		     add     a,	(ix+11)				     ; dZ
+RAM:C71E DD 77 03		     ld	     (ix+3), a				     ; Z+=dZ
 RAM:C721 C9			     ret
-RAM:C721	     ; End of function sub_C700
+RAM:C721	     ; End of function dec_dZ_and_update_XYZ
 RAM:C721
 RAM:C722	     ; ---------------------------------------------------------------------------
 RAM:C722	     ; arch (far side)
 RAM:C722
-RAM:C722	     adj_3_5:							     ; DATA XREF: RAM:B09Co
+RAM:C722	     upd_3_5:							     ; DATA XREF: RAM:B09Co
 RAM:C722									     ; RAM:B0A0o
 RAM:C722 DD CB 07 76		     bit     6,	(ix+7)				     ; hflip?
 RAM:C726 20 0A			     jr	     nz, adj_3_5_hflip			     ; yes, go
@@ -6416,19 +6417,19 @@ RAM:C732 21 F9 FE		     ld	     hl, 0FEF9h				     ; -2, -7
 RAM:C735 18 F4			     jr	     set_pixel_adj
 RAM:C737	     ; ---------------------------------------------------------------------------
 RAM:C737
-RAM:C737	     loc_C737:							     ; CODE XREF: RAM:C747j
+RAM:C737	     adj_m3_p1:							     ; CODE XREF: RAM:C747j
 RAM:C737 21 01 FD		     ld	     hl, 0FD01h				     ; -3, +1
 RAM:C73A 18 10			     jr	     loc_C74C
 RAM:C73C	     ; ---------------------------------------------------------------------------
 RAM:C73C	     ; arch (near side)
 RAM:C73C
-RAM:C73C	     adj_2_4:							     ; DATA XREF: RAM:B09Ao
+RAM:C73C	     upd_2_4:							     ; DATA XREF: RAM:B09Ao
 RAM:C73C									     ; RAM:B09Eo
 RAM:C73C DD CB 07 76		     bit     6,	(ix+7)				     ; hflip?
 RAM:C740 20 2A			     jr	     nz, adj_2_4_hflip			     ; yes, go
 RAM:C742 DD 7E 00		     ld	     a,	(ix+0)				     ; graphic no.
 RAM:C745 FE 04			     cp	     4					     ; tree arch?
-RAM:C747 28 EE			     jr	     z,	loc_C737			     ; yes, exit
+RAM:C747 28 EE			     jr	     z,	adj_m3_p1			     ; yes, exit
 RAM:C749 21 F9 FD		     ld	     hl, 0FDF9h				     ; -3, -7
 RAM:C74C
 RAM:C74C	     loc_C74C:							     ; CODE XREF: RAM:C73Aj
@@ -6902,9 +6903,9 @@ RAM:C9CE DD 77 0B		     ld	     (ix+0Bh), a
 RAM:C9D1 32 C1 5B		     ld	     (byte_5BC1), a
 RAM:C9D4 C6 02			     add     a,	2
 RAM:C9D6 FC 51 B4		     call    m,	sub_B451
-RAM:C9D9 CD 45 CB		     call    sub_CB45
+RAM:C9D9 CD 45 CB		     call    adj_for_out_of_bounds
 RAM:C9DC CD 70 CA		     call    sub_CA70
-RAM:C9DF CD 06 C7		     call    loc_C706
+RAM:C9DF CD 06 C7		     call    add_dXYZ
 RAM:C9E2 DD CB 0C 56		     bit     2,	(ix+12)
 RAM:C9E6 28 0B			     jr	     z,	loc_C9F3
 RAM:C9E8 3A C1 5B		     ld	     a,	(byte_5BC1)
@@ -7003,22 +7004,22 @@ RAM:CA5A
 RAM:CA5A	     ; =============== S U B R O U T I N E =======================================
 RAM:CA5A
 RAM:CA5A
-RAM:CA5A	     sub_CA5A:							     ; CODE XREF: sub_CB45+1Bp
+RAM:CA5A	     adj_dZ_for_out_of_bounds:					     ; CODE XREF: adj_for_out_of_bounds+1Bp
 RAM:CA5A 3A AE 5B		     ld	     a,	(room_size_Z)
 RAM:CA5D 57			     ld	     d,	a
 RAM:CA5E
-RAM:CA5E	     loc_CA5E:							     ; CODE XREF: sub_CA5A+13j
-RAM:CA5E DD 7E 03		     ld	     a,	(ix+3)
-RAM:CA61 84			     add     a,	h
-RAM:CA62 BA			     cp	     d
-RAM:CA63 D0			     ret     nc
+RAM:CA5E	     loc_CA5E:							     ; CODE XREF: adj_dZ_for_out_of_bounds+13j
+RAM:CA5E DD 7E 03		     ld	     a,	(ix+3)				     ; Z
+RAM:CA61 84			     add     a,	h				     ; Z+=dZ
+RAM:CA62 BA			     cp	     d					     ; >= room height?
+RAM:CA63 D0			     ret     nc					     ; yes, return
 RAM:CA64 DD CB 0C D6		     set     2,	(ix+12)
-RAM:CA68 7C			     ld	     a,	h
-RAM:CA69 CD 89 CA		     call    sub_CA89
-RAM:CA6C 67			     ld	     h,	a
-RAM:CA6D 20 EF			     jr	     nz, loc_CA5E
+RAM:CA68 7C			     ld	     a,	h				     ; Z+dZ
+RAM:CA69 CD 89 CA		     call    adj_d_for_out_of_bounds
+RAM:CA6C 67			     ld	     h,	a				     ; new dZ
+RAM:CA6D 20 EF			     jr	     nz, loc_CA5E			     ; check again
 RAM:CA6F C9			     ret
-RAM:CA6F	     ; End of function sub_CA5A
+RAM:CA6F	     ; End of function adj_dZ_for_out_of_bounds
 RAM:CA6F
 RAM:CA70
 RAM:CA70	     ; =============== S U B R O U T I N E =======================================
@@ -7037,22 +7038,24 @@ RAM:CA85 E5			     push    hl
 RAM:CA86 C3 17 CA		     jp	     loc_CA17
 RAM:CA86	     ; End of function sub_CA70
 RAM:CA86
+RAM:CA89	     ; adjust dX/dY/dZ when out	of bounds
+RAM:CA89	     ; A = dX/dY/dZ
 RAM:CA89
 RAM:CA89	     ; =============== S U B R O U T I N E =======================================
 RAM:CA89
 RAM:CA89
-RAM:CA89	     sub_CA89:							     ; CODE XREF: sub_CA5A+Fp
+RAM:CA89	     adj_d_for_out_of_bounds:					     ; CODE XREF: adj_dZ_for_out_of_bounds+Fp
 RAM:CA89									     ; sub_CB9A+40p ...
-RAM:CA89 A7			     and     a
-RAM:CA8A C8			     ret     z
-RAM:CA8B F2 90 CA		     jp	     p,	loc_CA90
+RAM:CA89 A7			     and     a					     ; zero?
+RAM:CA8A C8			     ret     z					     ; yes, exit
+RAM:CA8B F2 90 CA		     jp	     p,	loc_CA90			     ; skip if >0
 RAM:CA8E 3C			     inc     a
 RAM:CA8F 3C			     inc     a
 RAM:CA90
-RAM:CA90	     loc_CA90:							     ; CODE XREF: sub_CA89+2j
+RAM:CA90	     loc_CA90:							     ; CODE XREF: adj_d_for_out_of_bounds+2j
 RAM:CA90 3D			     dec     a
 RAM:CA91 C9			     ret
-RAM:CA91	     ; End of function sub_CA89
+RAM:CA91	     ; End of function adj_d_for_out_of_bounds
 RAM:CA91
 RAM:CA91	     ; ---------------------------------------------------------------------------
 RAM:CA92 9A CA	     screen_move_tbl:dw	screen_west				     ; DATA XREF: sub_CA70+Fo
@@ -7163,64 +7166,64 @@ RAM:CB45
 RAM:CB45	     ; =============== S U B R O U T I N E =======================================
 RAM:CB45
 RAM:CB45
-RAM:CB45	     sub_CB45:							     ; CODE XREF: sub_C700+3p
+RAM:CB45	     adj_for_out_of_bounds:					     ; CODE XREF: dec_dZ_and_update_XYZ+3p
 RAM:CB45									     ; sub_C9A1+38p
 RAM:CB45 DD CB 07 4E		     bit     1,	(ix+7)
 RAM:CB49 C0			     ret     nz
 RAM:CB4A DD CB 07 CE		     set     1,	(ix+7)
 RAM:CB4E DD 7E 0C		     ld	     a,	(ix+12)
-RAM:CB51 E6 F8			     and     0F8h ; 'ø'
+RAM:CB51 E6 F8			     and     0F8h ; 'ø'                              ; clear X,Y,Z OOB
 RAM:CB53 DD 77 0C		     ld	     (ix+12), a
 RAM:CB56 2E 00			     ld	     l,	0
 RAM:CB58 4D			     ld	     c,	l
-RAM:CB59 DD 7E 0B		     ld	     a,	(ix+0Bh)
-RAM:CB5C A7			     and     a
+RAM:CB59 DD 7E 0B		     ld	     a,	(ix+11)				     ; dZ
+RAM:CB5C A7			     and     a					     ; zero?
 RAM:CB5D 67			     ld	     h,	a
-RAM:CB5E 28 0A			     jr	     z,	loc_CB6A
-RAM:CB60 CD 5A CA		     call    sub_CA5A
-RAM:CB63 7C			     ld	     a,	h
-RAM:CB64 A7			     and     a
-RAM:CB65 28 03			     jr	     z,	loc_CB6A
+RAM:CB5E 28 0A			     jr	     z,	loc_CB6A			     ; yes, skip
+RAM:CB60 CD 5A CA		     call    adj_dZ_for_out_of_bounds
+RAM:CB63 7C			     ld	     a,	h				     ; new dZ
+RAM:CB64 A7			     and     a					     ; zero?
+RAM:CB65 28 03			     jr	     z,	loc_CB6A			     ; yes, skip
 RAM:CB67 CD 38 CC		     call    sub_CC38
 RAM:CB6A
-RAM:CB6A	     loc_CB6A:							     ; CODE XREF: sub_CB45+19j
-RAM:CB6A									     ; sub_CB45+20j
-RAM:CB6A DD 7E 09		     ld	     a,	(ix+9)
-RAM:CB6D A7			     and     a
+RAM:CB6A	     loc_CB6A:							     ; CODE XREF: adj_for_out_of_bounds+19j
+RAM:CB6A									     ; adj_for_out_of_bounds+20j
+RAM:CB6A DD 7E 09		     ld	     a,	(ix+9)				     ; dX
+RAM:CB6D A7			     and     a					     ; zero?
 RAM:CB6E 4F			     ld	     c,	a
-RAM:CB6F 28 0A			     jr	     z,	loc_CB7B
-RAM:CB71 CD DD CC		     call    sub_CCDD
-RAM:CB74 79			     ld	     a,	c
-RAM:CB75 A7			     and     a
-RAM:CB76 28 03			     jr	     z,	loc_CB7B
+RAM:CB6F 28 0A			     jr	     z,	loc_CB7B			     ; yes, skip
+RAM:CB71 CD DD CC		     call    adj_dX_for_out_of_bounds
+RAM:CB74 79			     ld	     a,	c				     ; new dX
+RAM:CB75 A7			     and     a					     ; zero?
+RAM:CB76 28 03			     jr	     z,	loc_CB7B			     ; yes, skip
 RAM:CB78 CD 9A CB		     call    sub_CB9A
 RAM:CB7B
-RAM:CB7B	     loc_CB7B:							     ; CODE XREF: sub_CB45+2Aj
-RAM:CB7B									     ; sub_CB45+31j
-RAM:CB7B DD 7E 0A		     ld	     a,	(ix+0Ah)
-RAM:CB7E A7			     and     a
+RAM:CB7B	     loc_CB7B:							     ; CODE XREF: adj_for_out_of_bounds+2Aj
+RAM:CB7B									     ; adj_for_out_of_bounds+31j
+RAM:CB7B DD 7E 0A		     ld	     a,	(ix+10)				     ; dY
+RAM:CB7E A7			     and     a					     ; zero?
 RAM:CB7F 6F			     ld	     l,	a
-RAM:CB80 28 0A			     jr	     z,	loc_CB8C
-RAM:CB82 CD 08 CD		     call    sub_CD08
-RAM:CB85 7D			     ld	     a,	l
-RAM:CB86 A7			     and     a
-RAM:CB87 28 03			     jr	     z,	loc_CB8C
+RAM:CB80 28 0A			     jr	     z,	loc_CB8C			     ; yes, skip
+RAM:CB82 CD 08 CD		     call    adj_dY_for_out_of_bounds
+RAM:CB85 7D			     ld	     a,	l				     ; new dY
+RAM:CB86 A7			     and     a					     ; zero?
+RAM:CB87 28 03			     jr	     z,	loc_CB8C			     ; yes, skip
 RAM:CB89 CD E9 CB		     call    sub_CBE9
 RAM:CB8C
-RAM:CB8C	     loc_CB8C:							     ; CODE XREF: sub_CB45+3Bj
-RAM:CB8C									     ; sub_CB45+42j
-RAM:CB8C DD 71 09		     ld	     (ix+9), c
-RAM:CB8F DD 75 0A		     ld	     (ix+0Ah), l
-RAM:CB92 DD 74 0B		     ld	     (ix+0Bh), h
+RAM:CB8C	     loc_CB8C:							     ; CODE XREF: adj_for_out_of_bounds+3Bj
+RAM:CB8C									     ; adj_for_out_of_bounds+42j
+RAM:CB8C DD 71 09		     ld	     (ix+9), c				     ; new dX
+RAM:CB8F DD 75 0A		     ld	     (ix+10), l				     ; new dY
+RAM:CB92 DD 74 0B		     ld	     (ix+11), h				     ; new dZ
 RAM:CB95 DD CB 07 8E		     res     1,	(ix+7)
 RAM:CB99 C9			     ret
-RAM:CB99	     ; End of function sub_CB45
+RAM:CB99	     ; End of function adj_for_out_of_bounds
 RAM:CB99
 RAM:CB9A
 RAM:CB9A	     ; =============== S U B R O U T I N E =======================================
 RAM:CB9A
 RAM:CB9A
-RAM:CB9A	     sub_CB9A:							     ; CODE XREF: sub_CB45+33p
+RAM:CB9A	     sub_CB9A:							     ; CODE XREF: adj_for_out_of_bounds+33p
 RAM:CB9A FD 21 08 5C		     ld	     iy, graphic_objs_tbl
 RAM:CB9E 06 28			     ld	     b,	40				     ; max objects
 RAM:CBA0
@@ -7252,7 +7255,7 @@ RAM:CBD6 FD 77 09		     ld	     (iy+9), a
 RAM:CBD9
 RAM:CBD9	     loc_CBD9:							     ; CODE XREF: sub_CB9A+37j
 RAM:CBD9 79			     ld	     a,	c
-RAM:CBDA CD 89 CA		     call    sub_CA89
+RAM:CBDA CD 89 CA		     call    adj_d_for_out_of_bounds
 RAM:CBDD 4F			     ld	     c,	a
 RAM:CBDE C8			     ret     z
 RAM:CBDF 18 CE			     jr	     loc_CBAF
@@ -7270,7 +7273,7 @@ RAM:CBE9
 RAM:CBE9	     ; =============== S U B R O U T I N E =======================================
 RAM:CBE9
 RAM:CBE9
-RAM:CBE9	     sub_CBE9:							     ; CODE XREF: sub_CB45+44p
+RAM:CBE9	     sub_CBE9:							     ; CODE XREF: adj_for_out_of_bounds+44p
 RAM:CBE9 FD 21 08 5C		     ld	     iy, graphic_objs_tbl
 RAM:CBED 06 28			     ld	     b,	40				     ; max objects
 RAM:CBEF
@@ -7302,7 +7305,7 @@ RAM:CC25 FD 77 0A		     ld	     (iy+10), a
 RAM:CC28
 RAM:CC28	     loc_CC28:							     ; CODE XREF: sub_CBE9+37j
 RAM:CC28 7D			     ld	     a,	l
-RAM:CC29 CD 89 CA		     call    sub_CA89
+RAM:CC29 CD 89 CA		     call    adj_d_for_out_of_bounds
 RAM:CC2C 6F			     ld	     l,	a
 RAM:CC2D C8			     ret     z
 RAM:CC2E 18 CE			     jr	     loc_CBFE
@@ -7320,7 +7323,7 @@ RAM:CC38
 RAM:CC38	     ; =============== S U B R O U T I N E =======================================
 RAM:CC38
 RAM:CC38
-RAM:CC38	     sub_CC38:							     ; CODE XREF: sub_CB45+22p
+RAM:CC38	     sub_CC38:							     ; CODE XREF: adj_for_out_of_bounds+22p
 RAM:CC38 FD 21 08 5C		     ld	     iy, graphic_objs_tbl
 RAM:CC3C 06 28			     ld	     b,	40				     ; max objects
 RAM:CC3E
@@ -7364,7 +7367,7 @@ RAM:CC8D
 RAM:CC8D	     loc_CC8D:							     ; CODE XREF: sub_CC38+3Bj
 RAM:CC8D									     ; sub_CC38+4Dj
 RAM:CC8D 7C			     ld	     a,	h
-RAM:CC8E CD 89 CA		     call    sub_CA89
+RAM:CC8E CD 89 CA		     call    adj_d_for_out_of_bounds
 RAM:CC91 67			     ld	     h,	a
 RAM:CC92 C8			     ret     z
 RAM:CC93 18 B8			     jr	     loc_CC4D
@@ -7445,7 +7448,7 @@ RAM:CCDD
 RAM:CCDD	     ; =============== S U B R O U T I N E =======================================
 RAM:CCDD
 RAM:CCDD
-RAM:CCDD	     sub_CCDD:							     ; CODE XREF: sub_CB45+2Cp
+RAM:CCDD	     adj_dX_for_out_of_bounds:					     ; CODE XREF: adj_for_out_of_bounds+2Cp
 RAM:CCDD DD 7E 0C		     ld	     a,	(ix+12)
 RAM:CCE0 E6 F0			     and     0F0h ; 'ð'
 RAM:CCE2 C0			     ret     nz
@@ -7454,32 +7457,32 @@ RAM:CCE7 C0			     ret     nz
 RAM:CCE8 3A AB 5B		     ld	     a,	(room_size_X)
 RAM:CCEB 47			     ld	     b,	a
 RAM:CCEC
-RAM:CCEC	     loc_CCEC:							     ; CODE XREF: sub_CCDD+28j
-RAM:CCEC DD 7E 01		     ld	     a,	(ix+1)
-RAM:CCEF 81			     add     a,	c
-RAM:CCF0 D6 80			     sub     80h ; '€'
+RAM:CCEC	     loc_CCEC:							     ; CODE XREF: adj_dX_for_out_of_bounds+28j
+RAM:CCEC DD 7E 01		     ld	     a,	(ix+1)				     ; X
+RAM:CCEF 81			     add     a,	c				     ; +dX
+RAM:CCF0 D6 80			     sub     128
 RAM:CCF2 30 02			     jr	     nc, loc_CCF6
 RAM:CCF4 ED 44			     neg
 RAM:CCF6
-RAM:CCF6	     loc_CCF6:							     ; CODE XREF: sub_CCDD+15j
-RAM:CCF6 DD 86 04		     add     a,	(ix+4)
-RAM:CCF9 B8			     cp	     b
-RAM:CCFA 38 0B			     jr	     c,	locret_CD07
+RAM:CCF6	     loc_CCF6:							     ; CODE XREF: adj_dX_for_out_of_bounds+15j
+RAM:CCF6 DD 86 04		     add     a,	(ix+4)				     ; X+dX+width
+RAM:CCF9 B8			     cp	     b					     ; < room width?
+RAM:CCFA 38 0B			     jr	     c,	dX_ok				     ; yes, skip
 RAM:CCFC DD CB 0C C6		     set     0,	(ix+12)
-RAM:CD00 79			     ld	     a,	c
-RAM:CD01 CD 89 CA		     call    sub_CA89
-RAM:CD04 4F			     ld	     c,	a
-RAM:CD05 20 E5			     jr	     nz, loc_CCEC
+RAM:CD00 79			     ld	     a,	c				     ; dX
+RAM:CD01 CD 89 CA		     call    adj_d_for_out_of_bounds
+RAM:CD04 4F			     ld	     c,	a				     ; new dX
+RAM:CD05 20 E5			     jr	     nz, loc_CCEC			     ; check again
 RAM:CD07
-RAM:CD07	     locret_CD07:						     ; CODE XREF: sub_CCDD+1Dj
+RAM:CD07	     dX_ok:							     ; CODE XREF: adj_dX_for_out_of_bounds+1Dj
 RAM:CD07 C9			     ret
-RAM:CD07	     ; End of function sub_CCDD
+RAM:CD07	     ; End of function adj_dX_for_out_of_bounds
 RAM:CD07
 RAM:CD08
 RAM:CD08	     ; =============== S U B R O U T I N E =======================================
 RAM:CD08
 RAM:CD08
-RAM:CD08	     sub_CD08:							     ; CODE XREF: sub_CB45+3Dp
+RAM:CD08	     adj_dY_for_out_of_bounds:					     ; CODE XREF: adj_for_out_of_bounds+3Dp
 RAM:CD08 DD 7E 0C		     ld	     a,	(ix+12)
 RAM:CD0B E6 F0			     and     0F0h ; 'ð'
 RAM:CD0D C0			     ret     nz
@@ -7488,26 +7491,26 @@ RAM:CD12 C0			     ret     nz
 RAM:CD13 3A AC 5B		     ld	     a,	(room_size_Y)
 RAM:CD16 47			     ld	     b,	a
 RAM:CD17
-RAM:CD17	     loc_CD17:							     ; CODE XREF: sub_CD08+28j
+RAM:CD17	     loc_CD17:							     ; CODE XREF: adj_dY_for_out_of_bounds+28j
 RAM:CD17 DD 7E 02		     ld	     a,	(ix+2)				     ; Y
-RAM:CD1A 85			     add     a,	l
+RAM:CD1A 85			     add     a,	l				     ; +dY
 RAM:CD1B D6 80			     sub     128
 RAM:CD1D 30 02			     jr	     nc, loc_CD21
 RAM:CD1F ED 44			     neg
 RAM:CD21
-RAM:CD21	     loc_CD21:							     ; CODE XREF: sub_CD08+15j
-RAM:CD21 DD 86 05		     add     a,	(ix+5)				     ; depth
-RAM:CD24 B8			     cp	     b
-RAM:CD25 38 0B			     jr	     c,	locret_CD32
+RAM:CD21	     loc_CD21:							     ; CODE XREF: adj_dY_for_out_of_bounds+15j
+RAM:CD21 DD 86 05		     add     a,	(ix+5)				     ; Y+dY+depth
+RAM:CD24 B8			     cp	     b					     ; < room depth?
+RAM:CD25 38 0B			     jr	     c,	locret_CD32			     ; yes, skip
 RAM:CD27 DD CB 0C CE		     set     1,	(ix+12)
-RAM:CD2B 7D			     ld	     a,	l
-RAM:CD2C CD 89 CA		     call    sub_CA89
-RAM:CD2F 6F			     ld	     l,	a
-RAM:CD30 20 E5			     jr	     nz, loc_CD17
+RAM:CD2B 7D			     ld	     a,	l				     ; dY
+RAM:CD2C CD 89 CA		     call    adj_d_for_out_of_bounds
+RAM:CD2F 6F			     ld	     l,	a				     ; new dY
+RAM:CD30 20 E5			     jr	     nz, loc_CD17			     ; check again
 RAM:CD32
-RAM:CD32	     locret_CD32:						     ; CODE XREF: sub_CD08+1Dj
+RAM:CD32	     locret_CD32:						     ; CODE XREF: adj_dY_for_out_of_bounds+1Dj
 RAM:CD32 C9			     ret
-RAM:CD32	     ; End of function sub_CD08
+RAM:CD32	     ; End of function adj_dY_for_out_of_bounds
 RAM:CD32
 RAM:CD33
 RAM:CD33	     ; =============== S U B R O U T I N E =======================================

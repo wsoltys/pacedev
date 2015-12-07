@@ -26,10 +26,16 @@
 
 #define ENABLE_MASK
 
+// byte offset 7 flags
 #define FLAG_VFLIP  (1<<7)
 #define FLAG_HFLIP  (1<<6)
 #define FLAG_WIPE   (1<<5)
 #define FLAG_DRAW   (1<<4)
+
+// byte offset 12 flags
+#define FLAG_Z_OOB  (1<<2)
+#define FLAG_Y_OOB  (1<<1)
+#define FLAG_X_OOB  (1<<0)
 
 typedef struct
 {
@@ -64,11 +70,11 @@ typedef struct
   uint8_t   height;
   uint8_t   flags;
   uint8_t   scrn;
-  uint8_t   d_x;
-  uint8_t   d_y;
-  uint8_t   d_z;
-  uint8_t   off12;
-  uint8_t   off13;
+  int8_t    d_x;
+  int8_t    d_y;
+  int8_t    d_z;
+  uint8_t   flags12;
+  uint8_t   flags13;
   uint8_t   off14;
   uint8_t   off15;
   // originally a pointer, now an index
@@ -107,6 +113,9 @@ uint8_t from_ascii (char ch)
 static uint8_t seed_1;                                // $5BA0
 static uint16_t seed_2;                               // $5BA2
 static uint8_t seed_3;                                // $5BA5
+
+// cleared each game
+static uint8_t objs_wiped_cnt;                        // $5BA8
 static uint8_t room_size_X;                           // $5BAB
 static uint8_t room_size_Y;                           // $5BAC
 static uint8_t curr_room_attrib;                      // $5BAD
@@ -137,23 +146,23 @@ static void play_audio_wait_key (uint8_t *audio_data);
 static void play_audio (uint8_t *audio_data);
 static void shuffle_objects_required (void);
 static uint8_t read_key (uint8_t row);
-static void adj_182_183 (POBJ32 p_obj);
-static void adj_91 (POBJ32 p_obj);
-static void adj_143 (POBJ32 p_obj);
-static void adj_55 (POBJ32 p_obj);
-static void adj_54 (POBJ32 p_obj);
-static void adj_144_to_149_152_to_157 (POBJ32 p_obj);
-static void adj_63 (POBJ32 p_obj);
-static void adj_150_151 (POBJ32 p_obj);
-static void adj_22 (POBJ32 p_obj);
-static void adj_23 (POBJ32 p_obj);
-static void adj_86_87 (POBJ32 p_obj);
-static void adj_180_181 (POBJ32 p_obj);
-static void adj_178_179 (POBJ32 p_obj);
-static void adj_164_to_167 (POBJ32 p_obj);
-static void adj_141 (POBJ32 p_obj);
-static void adj_142 (POBJ32 p_obj);
-static void adj_30_31_158_159 (POBJ32 p_obj);
+static void upd_182_183 (POBJ32 p_obj);
+static void upd_91 (POBJ32 p_obj);
+static void upd_143 (POBJ32 p_obj);
+static void upd_55 (POBJ32 p_obj);
+static void upd_54 (POBJ32 p_obj);
+static void upd_144_to_149_152_to_157 (POBJ32 p_obj);
+static void upd_63 (POBJ32 p_obj);
+static void upd_150_151 (POBJ32 p_obj);
+static void upd_22 (POBJ32 p_obj);
+static void upd_23 (POBJ32 p_obj);
+static void upd_86_87 (POBJ32 p_obj);
+static void upd_180_181 (POBJ32 p_obj);
+static void upd_178_179 (POBJ32 p_obj);
+static void upd_164_to_167 (POBJ32 p_obj);
+static void upd_141 (POBJ32 p_obj);
+static void upd_142 (POBJ32 p_obj);
+static void upd_30_31_158_159 (POBJ32 p_obj);
 static void print_days (void);
 static void print_lives_gfx (void);
 static void print_lives (void);
@@ -170,34 +179,41 @@ static void display_menu (void);
 static void display_text_list (uint8_t *clours, uint8_t *xy, char *text_list[], uint8_t n);
 static void multiple_print_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t dx, uint8_t dy, uint8_t n);
 static void display_objects (void);
-static void adj_120_to_126 (POBJ32 p_obj);
-static void adj_103 (POBJ32 p_obj);
-static void adj_96_to_102 (POBJ32 p_obj);
+static void upd_120_to_126 (POBJ32 p_obj);
+static void upd_103 (POBJ32 p_obj);
+static void upd_96_to_102 (POBJ32 p_obj);
 static void no_adjust (POBJ32 p_obj);
 static void display_sun_moon_frame (PSPRITE_SCRATCHPAD scratchpad);
 static void init_sun (void);
 static void init_special_objects (void);
-static void adj_62 (POBJ32 p_obj);
-static void adj_85 (POBJ32 p_obj);
-static void adj_84 (POBJ32 p_obj);
-static void adj_128_to_130 (POBJ32 p_obj);
-static void adj_6_7 (POBJ32 p_obj);
-static void adj_10 (POBJ32 p_obj);
-static void adj_11 (POBJ32 p_obj);
-static void adj_12_to_15 (POBJ32 p_obj);
+static void upd_62 (POBJ32 p_obj);
+static void upd_85 (POBJ32 p_obj);
+static void upd_84 (POBJ32 p_obj);
+static void upd_128_to_130 (POBJ32 p_obj);
+static void upd_6_7 (POBJ32 p_obj);
+static void upd_10 (POBJ32 p_obj);
+static void upd_11 (POBJ32 p_obj);
+static void upd_12_to_15 (POBJ32 p_obj);
 static void sub_C4D8 (POBJ32 p_obj);
-static void adj_m6_m12 (POBJ32 p_obj);
+static void upd_m6_m12 (POBJ32 p_obj);
 static void sub_C4FC (POBJ32 p_obj);
-static void adj_88_to_90 (POBJ32 p_obj);
+static void upd_88_to_90 (POBJ32 p_obj);
 static void find_special_objs_here (void);
 static void update_special_objs (void);
-static void adj_80_to_83 (POBJ32 p_obj);
-static void adj_8 (POBJ32 p_obj);
+static void upd_80_to_83 (POBJ32 p_obj);
+static void upd_8 (POBJ32 p_obj);
 static void set_wipe_and_draw_flags (POBJ32 p_obj);
-static void adj_9 (POBJ32 p_obj);
-static void adj_3_5 (POBJ32 p_obj);
+static void upd_9 (POBJ32 p_obj);
+static void dec_dZ_and_update_XYZ (POBJ32 p_obj);
+static void add_dXYZ (POBJ32 p_obj);
+static void upd_3_5 (POBJ32 p_obj);
 static void set_pixel_adj (POBJ32 p_obj, int8_t h, int8_t l);
-static void adj_2_4 (POBJ32 p_obj);
+static void upd_2_4 (POBJ32 p_obj);
+static int8_t adj_dZ_for_out_of_bounds (POBJ32 p_obj, int8_t d_z);
+static int8_t adj_d_for_out_of_bounds (int8_t d);
+static void adj_for_out_of_bounds (POBJ32 p_obj);
+static int8_t adj_dX_for_out_of_bounds (POBJ32 p_obj, int8_t d_x);
+static int8_t adj_dY_for_out_of_bounds (POBJ32 p_obj, int8_t d_y);
 static void save_2d_info (POBJ32 p_obj);
 static void list_objects_to_draw (void);
 static void calc_display_order_and_render (void);
@@ -255,7 +271,7 @@ void dump_special_objs_tbl (void)
   }
 }
 
-void adj_not_implemented (POBJ32 obj)
+void upd_not_implemented (POBJ32 obj)
 {
   // place-holder
 
@@ -285,8 +301,11 @@ START_AF6C:
 
 MAIN_AF88:
 
+  //build_lookup_tbls ();
   lives = 5;
 
+  // update seed
+  seed_1 += seed_2;
   clear_scrn ();
   do_menu_selection ();
   play_audio (start_game_tune);
@@ -314,19 +333,19 @@ onscreen_loop:
   
   for (unsigned i=0; i<40; i++, p_obj++)
   {
-    adj_sprite_loop:
+    update_sprite_loop:
       
     save_2d_info (p_obj);
 
     #ifndef arraylen
       #define arraylen(n) (sizeof(n) / sizeof((n)[0]))
     #endif
-    extern adjfn_t adj_sprite_jump_tbl[];
+    extern adjfn_t upd_sprite_jump_tbl[];
     
     if (p_obj->graphic_no > 187)
-      adj_not_implemented (p_obj);
+      upd_not_implemented (p_obj);
     else
-      adj_sprite_jump_tbl[p_obj->graphic_no] (p_obj);
+      upd_sprite_jump_tbl[p_obj->graphic_no] (p_obj);
 
     // update seed_3
     uint8_t r = rand ();
@@ -341,20 +360,37 @@ onscreen_loop:
   seed_3 += (seed_2 >> 8);    // add a,h
 
   // some other stuff
-    
+
+  //init_cauldron_bubbles ();
   list_objects_to_draw ();
   render_dynamic_objects ();
   
-  display_objects ();
-  //colour_panel ();
-  //colour_sun_moon ();
-  display_panel ();
-  display_sun_moon_frame (&sun_moon_scratchpad);
-  display_day ();
-  print_days ();
-  print_lives_gfx ();
-  print_lives ();
-  //update_screen ();
+game_delay:
+  // last to-do  
+
+  if (initial_rendering)
+  {
+    initial_rendering = 0;
+    //fill_attr();
+    display_objects ();
+    //colour_panel ();
+    //colour_sun_moon ();
+    display_panel ();
+    display_sun_moon_frame (&sun_moon_scratchpad);
+    display_day ();
+    print_days ();
+    print_lives_gfx ();
+    print_lives ();
+    //update_screen ();
+  }
+
+  if (graphic_objs_tbl[0].graphic_no == 0 &&
+      graphic_objs_tbl[1].graphic_no == 0)
+    goto player_dies;
+
+/////////////////////////////////
+// start of development hook
+/////////////////////////////////
 
   if (key[KEY_ESC])
     return;
@@ -389,7 +425,7 @@ onscreen_loop:
     
     while (keypressed ())
       readkey ();
-    fprintf (stderr, "Done (000-003) room# ");
+    fprintf (stderr, "GOTO: ");
     for (unsigned i=0; i<3; i++)
     {
       int c;
@@ -421,6 +457,10 @@ onscreen_loop:
   {
     dump_graphic_objs_tbl ();
   }
+
+/////////////////////////////////
+// end of development hook
+/////////////////////////////////
     
   goto onscreen_loop;
 
@@ -434,196 +474,196 @@ exit_screen:
 }
 
 // $B096
-adjfn_t adj_sprite_jump_tbl[] =
+adjfn_t upd_sprite_jump_tbl[] =
 {
   no_adjust,                    // (unused)
   no_adjust,                    // (unused)
-  adj_2_4,                      // stone arch (near side)
-  adj_3_5,                      // stone arch (far side)
-  adj_2_4,                      // tree arch (near side)
-  adj_3_5,                      // tree arch (far side)
-  adj_6_7,                      // rock
-  adj_6_7,                      // block
-  adj_8,                        // portcullis
-  adj_9,                        // another portcullis
-  adj_10,                       // bricks
-  adj_11,                       // more bricks
-  adj_12_to_15,                 // even more bricks
-  adj_12_to_15,                 // even more bricks
-  adj_12_to_15,                 // even more bricks
-  adj_12_to_15,                 // even more bricks
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_22,                       // gargoyle
-  adj_23,                       // spikes
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_30_31_158_159,            // guard (top half)
-  adj_30_31_158_159,            // guard (top half)
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,  // 40
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,  // 50
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_54,                       // yet another block
-  adj_55,                       // yet another block
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,  // 60
-  adj_not_implemented,
-  adj_62,                       // another block
-  adj_63,                       // spiked ball
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,  // 70
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_80_to_83,                 // ghost
-  adj_80_to_83,                 // ghost
-  adj_80_to_83,                 // ghost
-  adj_80_to_83,                 // ghost
-  adj_84,                       // table
-  adj_85,                       // chest
-  adj_86_87,                    // another fire
-  adj_86_87,                    // another fire
-  adj_88_to_90,                 // sun
-  adj_88_to_90,                 // moon
-  adj_88_to_90,                 // frame
-  adj_91,                       // block (high?)
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_96_to_102,                // diamond
-  adj_96_to_102,                // poison
-  adj_96_to_102,                // boot
-  adj_96_to_102,                // chalice
-  adj_96_to_102,                // cup
-  adj_96_to_102,                // bottle
-  adj_96_to_102,                // crystal ball
-  adj_103,                      // extra life
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,  // 110
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_120_to_126,               // player appear sparkles
-  adj_120_to_126,               // player appear sparkles
-  adj_120_to_126,               // player appear sparkles
-  adj_120_to_126,               // player appear sparkles
-  adj_120_to_126,               // player appear sparkles
-  adj_120_to_126,               // player appear sparkles
-  adj_120_to_126,               // player appear sparkles
-  adj_not_implemented,
-  adj_128_to_130,               // tree wall
-  adj_128_to_130,               // tree wall
-  adj_128_to_130,               // tree wall
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,  // 140
-  adj_141,                      // cauldron (bottom)
-  adj_142,                      // cauldron (top)
-  adj_143,                      // another block
-  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
-  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
-  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
-  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
-  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
-  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
-  adj_150_151,                  // guard 2 (top half)
-  adj_150_151,                  // guard 2 (top half)
-  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
-  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
-  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
-  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
-  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
-  adj_144_to_149_152_to_157,    // guard & wizard (bottom half)
-  adj_30_31_158_159,            // wizard (top half)
-  adj_30_31_158_159,            // wizard (top half)
-  adj_not_implemented,  // 160
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_164_to_167,               // twinkles
-  adj_164_to_167,               // twinkles
-  adj_164_to_167,               // twinkles
-  adj_164_to_167,               // twinkles
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,  // 170
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_178_179,                  // another ball
-  adj_178_179,                  // another ball
-  adj_180_181,                  // fire
-  adj_180_181,                  // fire
-  adj_182_183,                  // ball (high)
-  adj_182_183,                  // ball (high)
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented,
-  adj_not_implemented
+  upd_2_4,                      // stone arch (near side)
+  upd_3_5,                      // stone arch (far side)
+  upd_2_4,                      // tree arch (near side)
+  upd_3_5,                      // tree arch (far side)
+  upd_6_7,                      // rock
+  upd_6_7,                      // block
+  upd_8,                        // portcullis
+  upd_9,                        // another portcullis
+  upd_10,                       // bricks
+  upd_11,                       // more bricks
+  upd_12_to_15,                 // even more bricks
+  upd_12_to_15,                 // even more bricks
+  upd_12_to_15,                 // even more bricks
+  upd_12_to_15,                 // even more bricks
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_22,                       // gargoyle
+  upd_23,                       // spikes
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_30_31_158_159,            // guard (top half)
+  upd_30_31_158_159,            // guard (top half)
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,  // 40
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,  // 50
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_54,                       // yet another block
+  upd_55,                       // yet another block
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,  // 60
+  upd_not_implemented,
+  upd_62,                       // another block
+  upd_63,                       // spiked ball
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,  // 70
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_80_to_83,                 // ghost
+  upd_80_to_83,                 // ghost
+  upd_80_to_83,                 // ghost
+  upd_80_to_83,                 // ghost
+  upd_84,                       // table
+  upd_85,                       // chest
+  upd_86_87,                    // another fire
+  upd_86_87,                    // another fire
+  upd_88_to_90,                 // sun
+  upd_88_to_90,                 // moon
+  upd_88_to_90,                 // frame
+  upd_91,                       // block (high?)
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_96_to_102,                // diamond
+  upd_96_to_102,                // poison
+  upd_96_to_102,                // boot
+  upd_96_to_102,                // chalice
+  upd_96_to_102,                // cup
+  upd_96_to_102,                // bottle
+  upd_96_to_102,                // crystal ball
+  upd_103,                      // extra life
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,  // 110
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_120_to_126,               // player appear sparkles
+  upd_120_to_126,               // player appear sparkles
+  upd_120_to_126,               // player appear sparkles
+  upd_120_to_126,               // player appear sparkles
+  upd_120_to_126,               // player appear sparkles
+  upd_120_to_126,               // player appear sparkles
+  upd_120_to_126,               // player appear sparkles
+  upd_not_implemented,
+  upd_128_to_130,               // tree wall
+  upd_128_to_130,               // tree wall
+  upd_128_to_130,               // tree wall
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,  // 140
+  upd_141,                      // cauldron (bottom)
+  upd_142,                      // cauldron (top)
+  upd_143,                      // another block
+  upd_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  upd_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  upd_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  upd_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  upd_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  upd_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  upd_150_151,                  // guard 2 (top half)
+  upd_150_151,                  // guard 2 (top half)
+  upd_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  upd_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  upd_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  upd_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  upd_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  upd_144_to_149_152_to_157,    // guard & wizard (bottom half)
+  upd_30_31_158_159,            // wizard (top half)
+  upd_30_31_158_159,            // wizard (top half)
+  upd_not_implemented,  // 160
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_164_to_167,               // twinkles
+  upd_164_to_167,               // twinkles
+  upd_164_to_167,               // twinkles
+  upd_164_to_167,               // twinkles
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,  // 170
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_178_179,                  // another ball
+  upd_178_179,                  // another ball
+  upd_180_181,                  // fire
+  upd_180_181,                  // fire
+  upd_182_183,                  // ball (high)
+  upd_182_183,                  // ball (high)
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented,
+  upd_not_implemented
 };
 
 // $B2B6
@@ -681,49 +721,49 @@ uint8_t read_key (uint8_t row)
 
 // $B5FF
 // ball (high)
-void adj_182_183 (POBJ32 p_obj)
+void upd_182_183 (POBJ32 p_obj)
 {
-  adj_12_to_15 (p_obj);
+  upd_12_to_15 (p_obj);
   // other stuff
 }
 
 // $B683
 // block (high?)
-void adj_91 (POBJ32 p_obj)
+void upd_91 (POBJ32 p_obj)
 {
-  adj_6_7 (p_obj);
+  upd_6_7 (p_obj);
   // other stuff
 }
 
 // $B6A2
 // another block
-void adj_143 (POBJ32 p_obj)
+void upd_143 (POBJ32 p_obj)
 {
-  adj_6_7 (p_obj);
+  upd_6_7 (p_obj);
   // other stuff
 }
 
 // $B6B1
 // yet another block
-void adj_55 (POBJ32 p_obj)
+void upd_55 (POBJ32 p_obj)
 {
   // some stuff
-  adj_6_7 (p_obj);
+  upd_6_7 (p_obj);
   // other stuff (in common with below)
 }
 
 // $B6B9
 // yet another block
-void adj_54 (POBJ32 p_obj)
+void upd_54 (POBJ32 p_obj)
 {
   // some stuff
-  adj_6_7 (p_obj);
+  upd_6_7 (p_obj);
   // other stuff (in common with above)
 }
 
 // $B6F7
 // guard & wizard (bottom half)
-void adj_144_to_149_152_to_157 (POBJ32 p_obj)
+void upd_144_to_149_152_to_157 (POBJ32 p_obj)
 {
   set_pixel_adj (p_obj, -6, -12); // this is in a sub
   // other stuff
@@ -731,16 +771,16 @@ void adj_144_to_149_152_to_157 (POBJ32 p_obj)
 
 // $B7A9
 // spiked ball
-void adj_63 (POBJ32 p_obj)
+void upd_63 (POBJ32 p_obj)
 {
   // sub_B85C
-  adj_6_7 (p_obj);
+  upd_6_7 (p_obj);
   // other stuff
 }
 
 // $B7C3
 // guard 2 top half
-void adj_150_151 (POBJ32 p_obj)
+void upd_150_151 (POBJ32 p_obj)
 {
   set_pixel_adj (p_obj, 7, -12);
   // heaps of other stuff  
@@ -748,7 +788,7 @@ void adj_150_151 (POBJ32 p_obj)
 
 // $B7A3
 // gargoyle
-void adj_22 (POBJ32 p_obj)
+void upd_22 (POBJ32 p_obj)
 {
   // call sub_B85C
   sub_C4FC (p_obj);
@@ -756,39 +796,39 @@ void adj_22 (POBJ32 p_obj)
 
 // $B7E7
 // spikes
-void adj_23 (POBJ32 p_obj)
+void upd_23 (POBJ32 p_obj)
 {
   // call sub_B85C
-  adj_6_7 (p_obj);
+  upd_6_7 (p_obj);
 }
 
 // $B7ED
 // another fire
-void adj_86_87 (POBJ32 p_obj)
+void upd_86_87 (POBJ32 p_obj)
 {
-  adj_12_to_15 (p_obj);
+  upd_12_to_15 (p_obj);
   // other stuff
 }
 
 // $B808
 // fire
-void adj_180_181 (POBJ32 p_obj)
+void upd_180_181 (POBJ32 p_obj)
 {
-  adj_12_to_15 (p_obj);
+  upd_12_to_15 (p_obj);
   // other stuff
 }
 
 // $B865
 // another ball
-void adj_178_179 (POBJ32 p_obj)
+void upd_178_179 (POBJ32 p_obj)
 {
-  adj_12_to_15 (p_obj);
+  upd_12_to_15 (p_obj);
   // other stuff
 }
 
 // $B92C
 // twinkles
-void adj_164_to_167 (POBJ32 p_obj)
+void upd_164_to_167 (POBJ32 p_obj)
 {
   sub_C4D8 (p_obj);
   // other stuff
@@ -796,22 +836,22 @@ void adj_164_to_167 (POBJ32 p_obj)
 
 // $B99C
 // cauldron (bottom)
-void adj_141 (POBJ32 p_obj)
+void upd_141 (POBJ32 p_obj)
 {
   // sun, moon, frame
-  adj_88_to_90 (p_obj);
+  upd_88_to_90 (p_obj);
 }
 
 // $B99F
 // cauldron (top)
-void adj_142 (POBJ32 p_obj)
+void upd_142 (POBJ32 p_obj)
 {
   set_pixel_adj (p_obj, 12, -24);
 }
 
 // $B9A5
 // guard & wizard (top half)
-void adj_30_31_158_159 (POBJ32 p_obj)
+void upd_30_31_158_159 (POBJ32 p_obj)
 {
   POBJ32 p_next_obj = p_obj + 1;
   
@@ -1029,7 +1069,7 @@ void display_objects (void)
 }
 
 // $BEFE
-void adj_120_to_126 (POBJ32 p_obj)
+void upd_120_to_126 (POBJ32 p_obj)
 {
   sub_C4D8 (p_obj);
 #if 0  
@@ -1042,15 +1082,15 @@ void adj_120_to_126 (POBJ32 p_obj)
 
 // $C1AB
 // extra life
-void adj_103 (POBJ32 p_obj)
+void upd_103 (POBJ32 p_obj)
 {
-  adj_128_to_130 (p_obj);
+  upd_128_to_130 (p_obj);
   // more stuff
 }
   
 // $C28B
 // special objects
-void adj_96_to_102 (POBJ32 p_obj)
+void upd_96_to_102 (POBJ32 p_obj)
 {
   sub_C4D8 (p_obj);
   // more stuff
@@ -1143,31 +1183,31 @@ void init_special_objects (void)
 
 // $C4AA
 // another block
-void adj_62 (POBJ32 p_obj)
+void upd_62 (POBJ32 p_obj)
 {
-  adj_6_7 (p_obj);
+  upd_6_7 (p_obj);
   // other stuff
 }
 
 // $C4B6
 // chest
-void adj_85 (POBJ32 p_obj)
+void upd_85 (POBJ32 p_obj)
 {
-  adj_6_7 (p_obj);
+  upd_6_7 (p_obj);
   // other stuff
 }
 
 // $C4C3
 // table
-void adj_84 (POBJ32 p_obj)
+void upd_84 (POBJ32 p_obj)
 {
-  adj_6_7 (p_obj);
+  upd_6_7 (p_obj);
   // other stuff
 }
 
 // $C4D3
 // tree wall
-void adj_128_to_130 (POBJ32 p_obj)
+void upd_128_to_130 (POBJ32 p_obj)
 {
   set_pixel_adj (p_obj, -2, -8);
 }
@@ -1186,25 +1226,25 @@ void adj_m6_m12 (POBJ32 p_obj)
 
 // $C4E8
 // rock & block
-void adj_6_7 (POBJ32 p_obj)
+void upd_6_7 (POBJ32 p_obj)
 {
   set_pixel_adj (p_obj, -8, -16);
 }
 
 // $C4E8
-void adj_10 (POBJ32 p_obj)
+void upd_10 (POBJ32 p_obj)
 {
   set_pixel_adj (p_obj, -1, -20);
 }
 
 // $C4ED
-void adj_11 (POBJ32 p_obj)
+void upd_11 (POBJ32 p_obj)
 {
   set_pixel_adj (p_obj, -2, -12);
 }
 
 // $C4F2
-void adj_12_to_15 (POBJ32 p_obj)
+void upd_12_to_15 (POBJ32 p_obj)
 {
   set_pixel_adj (p_obj, -4, -8);
 }
@@ -1217,7 +1257,7 @@ void sub_C4FC (POBJ32 p_obj)
 
 // $C506
 // sun, moon, frame
-void adj_88_to_90 (POBJ32 p_obj)
+void upd_88_to_90 (POBJ32 p_obj)
 {
   set_pixel_adj (p_obj, -12, -16);
 }
@@ -1289,7 +1329,7 @@ void update_special_objs (void)
 
 // $C5C8
 // ghost
-void adj_80_to_83 (POBJ32 p_obj)
+void upd_80_to_83 (POBJ32 p_obj)
 {
   adj_m6_m12 (p_obj);
   // heaps of other stuff
@@ -1297,7 +1337,7 @@ void adj_80_to_83 (POBJ32 p_obj)
 
 // $C65E
 // portcullis (stationary)
-void adj_8 (POBJ32 p_obj)
+void upd_8 (POBJ32 p_obj)
 {
   uint8_t r;
 
@@ -1305,7 +1345,7 @@ void adj_8 (POBJ32 p_obj)
   if (portcullis_moving)
     return;
   if (p_obj->z == room_size_Z ||
-      p_obj->z <= room_size_Z+31)
+      p_obj->z <= (room_size_Z+31))
   {
     // 1-in-32 chance of starting to move up
     if ((seed_3 & 0x1F) != 0)
@@ -1326,7 +1366,7 @@ void adj_8 (POBJ32 p_obj)
     }
     portcullis_move_cnt = r + 1;
     p_obj->graphic_no |= (1<<0);
-    p_obj->d_z = (uint8_t)-1;
+    p_obj->d_z = -1;
   }    
 
   portcullis_moving++;
@@ -1341,18 +1381,56 @@ void set_wipe_and_draw_flags (POBJ32 p_obj)
 }
 
 // $C6BD
-// another portculis
-void adj_9 (POBJ32 p_obj)
+// portcullis (moving)
+void upd_9 (POBJ32 p_obj)
 {
   //fprintf (stderr, "%s()\n", __FUNCTION__);
   
   adj_m6_m12 (p_obj);
-  // heaps of other stuff
+  p_obj->flags13 |= (1<<7);
+  // stuff
+  if (p_obj->d_z < 0)
+  {
+    p_obj->d_z--;
+    dec_dZ_and_update_XYZ (p_obj);
+    if (p_obj->flags12 & FLAG_Z_OOB)
+    {
+      //sub_B489 ();
+    stop_portcullis:
+      portcullis_moving = 0;
+      // set graphic_no to 8
+      p_obj->graphic_no &= ~(1<<0);
+    }
+  }
+  else
+  {
+    p_obj->d_z = 2;
+    dec_dZ_and_update_XYZ (p_obj);
+    if (p_obj->z > room_size_Z+31)
+      goto stop_portcullis;    
+  }
+  set_wipe_and_draw_flags (p_obj);
+}
+
+// $C700
+void dec_dZ_and_update_XYZ (POBJ32 p_obj)
+{
+  p_obj->d_z--;
+  adj_for_out_of_bounds (p_obj);
+  add_dXYZ (p_obj);  
+}
+
+// $C706
+void add_dXYZ (POBJ32 p_obj)
+{
+  p_obj->x += p_obj->d_x;
+  p_obj->y += p_obj->d_y;
+  p_obj->z += p_obj->d_z;
 }
 
 // $C722
 // stone/tree arch (far side)
-void adj_3_5 (POBJ32 p_obj)
+void upd_3_5 (POBJ32 p_obj)
 {
   if ((p_obj->flags & FLAG_HFLIP) == 0)
     set_pixel_adj (p_obj, -3, -9);
@@ -1369,7 +1447,7 @@ void set_pixel_adj (POBJ32 p_obj, int8_t h, int8_t l)
 
 // $C7C3
 // stone/tree arch (near side)
-void adj_2_4 (POBJ32 p_obj)
+void upd_2_4 (POBJ32 p_obj)
 {
   if ((p_obj->flags & FLAG_HFLIP) == 0)
   {
@@ -1391,6 +1469,85 @@ void adj_2_4 (POBJ32 p_obj)
     p_obj->d_y = p_obj->y;
     // jp loc_c760
   }
+}
+
+// $CA5A
+int8_t adj_dZ_for_out_of_bounds (POBJ32 p_obj, int8_t d_z)
+{
+  do
+  {
+    if ((p_obj->z + d_z) >= room_size_Z)
+      return (d_z);
+    p_obj->flags12 |= FLAG_Z_OOB;
+    d_z = adj_d_for_out_of_bounds (d_z);
+    
+  } while (d_z != 0);
+}
+
+// $CA89
+int8_t adj_d_for_out_of_bounds (int8_t d)
+{
+  if (d == 0)
+    return (d);
+  if (d < 0)
+    return (d+1);
+  else
+    return (d-1);
+}
+
+// $CB45
+void adj_for_out_of_bounds (POBJ32 p_obj)
+{
+  int8_t d_x, d_y, d_z;
+
+  if (p_obj->flags & (1<<1))
+    return;
+    
+  p_obj->flags |= (1<<1);
+  p_obj->flags12 &= ~(FLAG_Z_OOB|FLAG_Y_OOB|FLAG_X_OOB);
+  d_y = 0;
+  d_x = 0;
+
+  d_z = p_obj->d_z;  
+  if (p_obj->d_z != 0)
+  {
+    d_z = adj_dZ_for_out_of_bounds (p_obj, d_z);
+    if (d_z != 0)
+      ; // do some stuff
+  }
+
+  d_y = p_obj->d_y;  
+  if (p_obj->d_y != 0)
+  {
+    d_y = adj_dY_for_out_of_bounds (p_obj, d_y);
+    if (d_y != 0)
+      ; // do some stuff
+  }
+
+  d_z = p_obj->d_z;
+  if (p_obj->d_x != 0)
+  {
+    d_x = adj_dX_for_out_of_bounds (p_obj, d_x);
+    if (d_x != 0)
+      ; // do some stuff
+  }
+  
+  p_obj->d_x = d_x;
+  p_obj->d_y = d_y;
+  p_obj->d_z = d_z;
+  p_obj->flags &= ~(1<<1);
+}
+
+// $CCDD
+int8_t adj_dX_for_out_of_bounds (POBJ32 p_obj, int8_t d_x)
+{
+  return (d_x);
+}
+
+// $CD08
+int8_t adj_dY_for_out_of_bounds (POBJ32 p_obj, int8_t d_y)
+{
+  return (d_y);
 }
 
 // $CE49
