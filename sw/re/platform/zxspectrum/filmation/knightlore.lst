@@ -165,43 +165,8 @@ SCRATCH:5C08		 ; +29 old sprite data height (lines)
 SCRATCH:5C08		 ; +30 old pixel X
 SCRATCH:5C08		 ; +31 old pixel Y
 SCRATCH:5C08		 ;
-SCRATCH:5C08 ??		 graphic_objs_tbl:ds 1						 ; DATA	XREF: lose_life-2167o
-SCRATCH:5C08										 ; RAM:B078o ...
-SCRATCH:5C09 ??		 unk_5C09:	 ds 1						 ; DATA	XREF: RAM:loc_B5C4r
-SCRATCH:5C09										 ; RAM:loc_B66Er ...
-SCRATCH:5C0A ??		 unk_5C0A:	 ds 1						 ; DATA	XREF: RAM:B5D3r
-SCRATCH:5C0A										 ; RAM:B655r
-SCRATCH:5C0B ??				 ds 1
-SCRATCH:5C0C ??				 ds 1
-SCRATCH:5C0D ??				 ds 1
-SCRATCH:5C0E ??				 ds 1
-SCRATCH:5C0F ??		 unk_5C0F:	 ds 1						 ; DATA	XREF: reset_object_???_flag+5o
-SCRATCH:5C0F										 ; RAM:B936r
-SCRATCH:5C10 ??		 unk_5C10:	 ds 1						 ; DATA	XREF: RAM:B62Cr
-SCRATCH:5C10										 ; init_cauldron_bubblesr ...
-SCRATCH:5C11 ??				 ds 1
-SCRATCH:5C12 ??				 ds 1
-SCRATCH:5C13 ??				 ds 1
-SCRATCH:5C14 ??		 unk_5C14:	 ds 1						 ; DATA	XREF: RAM:C6C4r
-SCRATCH:5C15 ??				 ds 1
-SCRATCH:5C16 ??				 ds 1
-SCRATCH:5C17 ??				 ds 1
-SCRATCH:5C18 ??				 ds 1
-SCRATCH:5C19 ??				 ds 1
-SCRATCH:5C1A ??				 ds 1
-SCRATCH:5C1B ??				 ds 1
-SCRATCH:5C1C ??				 ds 1
-SCRATCH:5C1D ??				 ds 1
-SCRATCH:5C1E ??				 ds 1
-SCRATCH:5C1F ??				 ds 1
-SCRATCH:5C20 ??				 ds 1
-SCRATCH:5C21 ??				 ds 1
-SCRATCH:5C22 ??				 ds 1
-SCRATCH:5C23 ??				 ds 1
-SCRATCH:5C24 ??				 ds 1
-SCRATCH:5C25 ??				 ds 1
-SCRATCH:5C26 ??				 ds 1
-SCRATCH:5C27 ??				 ds 1
+SCRATCH:5C08 ??	?? ?? ??+graphic_objs_tbl:ds 20h					 ; DATA	XREF: lose_life-2167o
+SCRATCH:5C08 ??	?? ?? ??+								 ; RAM:B078o ...
 SCRATCH:5C28 ??	?? ?? ??+		 ds 32
 SCRATCH:5C48		 ;
 SCRATCH:5C48		 ; special object sprites (max=2)
@@ -2713,7 +2678,7 @@ RAM:B088
 RAM:B088	     reset_object_???_flag:					     ; CODE XREF: RAM:B071p
 RAM:B088 06 28			     ld	     b,	40				     ; max #objects in draw table
 RAM:B08A 11 20 00		     ld	     de, 32				     ; object size
-RAM:B08D 21 0F 5C		     ld	     hl, unk_5C0F			     ; offset to flags
+RAM:B08D 21 0F 5C		     ld	     hl,  graphic_objs_tbl+7		     ; offset to flags
 RAM:B090
 RAM:B090	     loc_B090:							     ; CODE XREF: reset_object_???_flag+Bj
 RAM:B090 CB AE			     res     5,	(hl)				     ; reset flag=???
@@ -3594,7 +3559,7 @@ RAM:B5C2 18 D2			     jr	     loc_B596
 RAM:B5C4	     ; ---------------------------------------------------------------------------
 RAM:B5C4
 RAM:B5C4	     loc_B5C4:							     ; CODE XREF: RAM:B56Ej
-RAM:B5C4 3A 09 5C		     ld	     a,	(unk_5C09)			     ; plyr_spr_1 X
+RAM:B5C4 3A 09 5C		     ld	     a,	(graphic_objs_tbl+1)		     ; plyr_spr_1 X
 RAM:B5C7 DD 96 01		     sub     (ix+1)				     ; object X
 RAM:B5CA F2 CF B5		     jp	     p,	loc_B5CF
 RAM:B5CD ED 44			     neg					     ; abs(delta x)
@@ -3602,7 +3567,7 @@ RAM:B5CF
 RAM:B5CF	     loc_B5CF:							     ; CODE XREF: RAM:B5CAj
 RAM:B5CF FE 06			     cp	     6					     ; less than 6?
 RAM:B5D1 30 10			     jr	     nc, loc_B5E3			     ; no, skip
-RAM:B5D3 3A 0A 5C		     ld	     a,	(unk_5C0A)			     ; plyr_spr_1 Y
+RAM:B5D3 3A 0A 5C		     ld	     a,	(graphic_objs_tbl+2)		     ; plyr_spr_1 Y
 RAM:B5D6 DD 96 02		     sub     (ix+2)				     ; object Y
 RAM:B5D9 F2 DE B5		     jp	     p,	loc_B5DE
 RAM:B5DC ED 44			     neg					     ; abs(delta y)
@@ -3655,7 +3620,7 @@ RAM:B626
 RAM:B626	     loc_B626:							     ; CODE XREF: RAM:B622j
 RAM:B626 32 5D B6		     ld	     (loc_B65D), a
 RAM:B629 32 76 B6		     ld	     (loc_B676), a
-RAM:B62C 3A 10 5C		     ld	     a,	(unk_5C10)			     ; plyr_spr_1 screen
+RAM:B62C 3A 10 5C		     ld	     a,	(graphic_objs_tbl+8)		     ; plyr_spr_1 screen
 RAM:B62F E6 01			     and     1
 RAM:B631 3E 04			     ld	     a,	4
 RAM:B633 28 07			     jr	     z,	loc_B63C
@@ -3677,7 +3642,7 @@ RAM:B64F	     loc_B64F:							     ; CODE XREF: RAM:B649j
 RAM:B64F ED 5F			     ld	     a,	r
 RAM:B651 E6 01			     and     1
 RAM:B653 28 19			     jr	     z,	loc_B66E
-RAM:B655 3A 0A 5C		     ld	     a,	(unk_5C0A)
+RAM:B655 3A 0A 5C		     ld	     a,	(graphic_objs_tbl+2)
 RAM:B658 DD BE 02		     cp	     (ix+2)
 RAM:B65B 3E 02			     ld	     a,	2
 RAM:B65D
@@ -3696,7 +3661,7 @@ RAM:B66B C3 56 B8		     jp	     loc_B856
 RAM:B66E	     ; ---------------------------------------------------------------------------
 RAM:B66E
 RAM:B66E	     loc_B66E:							     ; CODE XREF: RAM:B653j
-RAM:B66E 3A 09 5C		     ld	     a,	(unk_5C09)
+RAM:B66E 3A 09 5C		     ld	     a,	(graphic_objs_tbl+1)
 RAM:B671 DD BE 01		     cp	     (ix+1)
 RAM:B674 3E 02			     ld	     a,	2
 RAM:B676
@@ -4055,7 +4020,7 @@ RAM:B8A9	     ; =============== S U B R O U T I N E ============================
 RAM:B8A9
 RAM:B8A9
 RAM:B8A9	     init_cauldron_bubbles:					     ; CODE XREF: RAM:B018p
-RAM:B8A9 3A 10 5C		     ld	     a,	(unk_5C10)			     ; plyr_spr_1 screen
+RAM:B8A9 3A 10 5C		     ld	     a,	(graphic_objs_tbl+8)		     ; plyr_spr_1 screen
 RAM:B8AC FE 88			     cp	     136				     ; cauldron	room?
 RAM:B8AE C0			     ret     nz					     ; no, exit
 RAM:B8AF 11 68 5C		     ld	     de, byte_5C68			     ; special_objs_here[1]
@@ -4129,7 +4094,7 @@ RAM:B92C CD D8 C4		     call    sub_C4D8
 RAM:B92F DD 7E 08		     ld	     a,	(ix+8)				     ; plyr_spr_1 screen
 RAM:B932 FE 88			     cp	     136				     ; cauldron	room?
 RAM:B934 28 0C			     jr	     z,	loc_B942			     ; yes, go
-RAM:B936 3A 0F 5C		     ld	     a,	(unk_5C0F)
+RAM:B936 3A 0F 5C		     ld	     a,	(graphic_objs_tbl+7)
 RAM:B939 CB 47			     bit     0,	a
 RAM:B93B 28 05			     jr	     z,	loc_B942
 RAM:B93D 01 01 01		     ld	     bc, 101h
@@ -4165,7 +4130,7 @@ RAM:B965
 RAM:B965
 RAM:B965	     sub_B965:							     ; CODE XREF: RAM:B5F2p
 RAM:B965									     ; RAM:loc_B945p
-RAM:B965 21 09 5C		     ld	     hl, unk_5C09			     ; plyr_spr_1 X
+RAM:B965 21 09 5C		     ld	     hl,  graphic_objs_tbl+1		     ; plyr_spr_1 X
 RAM:B968 DD 7E 01		     ld	     a,	(ix+1)				     ; object X
 RAM:B96B 96			     sub     (hl)
 RAM:B96C 23			     inc     hl					     ; plyr_spr_1 Y
@@ -6320,7 +6285,7 @@ RAM:C676 3A B0 5B		     ld	     a,	(portcullis_move_cnt)
 RAM:C679 FE 04			     cp	     4					     ; moved less than 4 times?
 RAM:C67B 38 08			     jr	     c,	init_portcullis_down		     ; yes, move immediately
 RAM:C67D 3A A5 5B		     ld	     a,	(seed_3)
-RAM:C680 E6 1F			     and     1Fh				     ; 1in8 chance?
+RAM:C680 E6 1F			     and     1Fh				     ; 1in32 chance?
 RAM:C682 C0			     ret     nz					     ; no, return
 RAM:C683 F6 80			     or	     80h ; '€'                               ; arbitrarily large count
 RAM:C685
@@ -6364,7 +6329,7 @@ RAM:C6AD
 RAM:C6AD	     init_portcullis_up:					     ; CODE XREF: RAM:C66Dj
 RAM:C6AD									     ; RAM:C674j
 RAM:C6AD 3A A5 5B		     ld	     a,	(seed_3)
-RAM:C6B0 E6 1F			     and     1Fh				     ; 1in8 chance?
+RAM:C6B0 E6 1F			     and     1Fh				     ; 1in32 chance?
 RAM:C6B2 C0			     ret     nz					     ; yes, exit
 RAM:C6B3 DD CB 00 C6		     set     0,	(ix+0)				     ; graphic_no=9
 RAM:C6B7 DD 36 0B 01		     ld	     (ix+11), 1				     ; dZ=1 (up)
@@ -6374,14 +6339,14 @@ RAM:C6BD	     ; portcullis (moving)
 RAM:C6BD
 RAM:C6BD	     adj_9:							     ; DATA XREF: RAM:B0A8o
 RAM:C6BD CD DD C4		     call    adj_m6_m12
-RAM:C6C0 DD CB 0D FE		     set     7,	(ix+0Dh)
-RAM:C6C4 3A 14 5C		     ld	     a,	(unk_5C14)
+RAM:C6C0 DD CB 0D FE		     set     7,	(ix+13)
+RAM:C6C4 3A 14 5C		     ld	     a,	(graphic_objs_tbl+0Ch)
 RAM:C6C7 E6 F0			     and     0F0h ; 'ð'
 RAM:C6C9 C0			     ret     nz
-RAM:C6CA DD 7E 0B		     ld	     a,	(ix+0Bh)
+RAM:C6CA DD 7E 0B		     ld	     a,	(ix+11)				     ; objZ
 RAM:C6CD A7			     and     a
 RAM:C6CE F2 EA C6		     jp	     p,	loc_C6EA
-RAM:C6D1 DD 35 0B		     dec     (ix+0Bh)
+RAM:C6D1 DD 35 0B		     dec     (ix+11)
 RAM:C6D4 CD 00 C7		     call    sub_C700
 RAM:C6D7 DD CB 0C 56		     bit     2,	(ix+12)
 RAM:C6DB 28 B5			     jr	     z,	set_wipe_and_draw_flags
@@ -8408,7 +8373,7 @@ RAM:D202 32 BD 5B		     ld	     (byte_5BBD), a
 RAM:D205 32 BF 5B		     ld	     (unk_5BBF), a
 RAM:D208 3E 01			     ld	     a,	1				     ; flag initial rendering of screen
 RAM:D20A 32 B7 5B		     ld	     (initial_rendering), a
-RAM:D20D 3A 10 5C		     ld	     a,	(unk_5C10)			     ; plyr_spr_1 screen
+RAM:D20D 3A 10 5C		     ld	     a,	(graphic_objs_tbl+8)		     ; plyr_spr_1 screen
 RAM:D210 E6 01			     and     1
 RAM:D212 32 C0 5B		     ld	     (byte_5BC0), a
 RAM:D215 CD 19 D2		     call    flag_room_visited
@@ -8418,7 +8383,7 @@ RAM:D218
 RAM:D219	     ; ---------------------------------------------------------------------------
 RAM:D219
 RAM:D219	     flag_room_visited:						     ; CODE XREF: build_screen_objects+2Fp
-RAM:D219 3A 10 5C		     ld	     a,	(unk_5C10)			     ; plyr_spr_1_screen
+RAM:D219 3A 10 5C		     ld	     a,	(graphic_objs_tbl+8)		     ; plyr_spr_1_screen
 RAM:D21C 4F			     ld	     c,	a
 RAM:D21D 0F			     rrca
 RAM:D21E 0F			     rrca

@@ -111,6 +111,9 @@ static uint8_t room_size_X;                           // $5BAB
 static uint8_t room_size_Y;                           // $5BAC
 static uint8_t curr_room_attrib;                      // $5BAD
 static uint8_t room_size_Z;                           // $5BAE
+static uint8_t portcullis_moving;                     // $5BAF
+static uint8_t portcullis_move_cnt;                   // $5BB0
+static uint8_t initial_rendering;                     // $5BB7
 static uint8_t days;                                  // $5BB9
 static int8_t lives;                                  // $5BBA
 static uint8_t *gfxbase_8x8;                          // $5BC7
@@ -183,13 +186,14 @@ static void adj_10 (POBJ32 p_obj);
 static void adj_11 (POBJ32 p_obj);
 static void adj_12_to_15 (POBJ32 p_obj);
 static void sub_C4D8 (POBJ32 p_obj);
-static void sub_C4DD (POBJ32 p_obj);
+static void adj_m6_m12 (POBJ32 p_obj);
 static void sub_C4FC (POBJ32 p_obj);
 static void adj_88_to_90 (POBJ32 p_obj);
 static void find_special_objs_here (void);
 static void update_special_objs (void);
 static void adj_80_to_83 (POBJ32 p_obj);
 static void adj_8 (POBJ32 p_obj);
+static void set_wipe_and_draw_flags (POBJ32 p_obj);
 static void adj_9 (POBJ32 p_obj);
 static void adj_3_5 (POBJ32 p_obj);
 static void set_pixel_adj (POBJ32 p_obj, int8_t h, int8_t l);
@@ -411,6 +415,11 @@ onscreen_loop:
     graphic_objs_tbl[0].scrn = special_objs_tbl[s_no].start_scrn;
     s_no = (s_no + 1) % 32;
     goto exit_screen;
+  }
+    
+  if (key[KEY_D])
+  {
+    dump_graphic_objs_tbl ();
   }
     
   goto onscreen_loop;
@@ -1170,7 +1179,7 @@ void sub_C4D8 (POBJ32 p_obj)
 }
 
 // $C4DD
-void sub_C4DD (POBJ32 p_obj)
+void adj_m6_m12 (POBJ32 p_obj)
 {
   set_pixel_adj (p_obj, -6, -12);
 }
@@ -1282,23 +1291,62 @@ void update_special_objs (void)
 // ghost
 void adj_80_to_83 (POBJ32 p_obj)
 {
-  sub_C4DD (p_obj);
+  adj_m6_m12 (p_obj);
   // heaps of other stuff
 }
 
 // $C65E
-// portculis
+// portcullis (stationary)
 void adj_8 (POBJ32 p_obj)
 {
-  sub_C4DD (p_obj);
-  // heaps of other stuff
+  uint8_t r;
+
+  adj_m6_m12 (p_obj);
+  if (portcullis_moving)
+    return;
+  if (p_obj->z == room_size_Z ||
+      p_obj->z <= room_size_Z+31)
+  {
+    // 1-in-32 chance of starting to move up
+    if ((seed_3 & 0x1F) != 0)
+      return;
+    p_obj->graphic_no |= (1<<0);
+    p_obj->d_z = 1;
+  }
+  else
+  {
+    if (portcullis_move_cnt < 4)
+      r = portcullis_move_cnt;
+    else
+    {
+      // 1-in-32 chance of moving down
+      if ((seed_3 & 0x1F) != 0)
+        return;
+      r = 0x80;
+    }
+    portcullis_move_cnt = r + 1;
+    p_obj->graphic_no |= (1<<0);
+    p_obj->d_z = (uint8_t)-1;
+  }    
+
+  portcullis_moving++;
+  set_wipe_and_draw_flags (p_obj);
+}
+
+// $C692
+void set_wipe_and_draw_flags (POBJ32 p_obj)
+{
+  p_obj->flags |= (FLAG_WIPE|FLAG_DRAW);
+  // do some other stuff & return
 }
 
 // $C6BD
 // another portculis
 void adj_9 (POBJ32 p_obj)
 {
-  sub_C4DD (p_obj);
+  //fprintf (stderr, "%s()\n", __FUNCTION__);
+  
+  adj_m6_m12 (p_obj);
   // heaps of other stuff
 }
 
@@ -1425,12 +1473,20 @@ void init_start_location (void)
 // $D1E6
 void build_screen_objects (void)
 {
+  // stuff
+  
   // save state in special_objs_tbl
   update_special_objs ();
   clr_screen_buffer ();
   retrieve_screen ();
   // find special objects in new room
   find_special_objs_here ();
+  // adjust_plyr_xyz_for_room_size
+  portcullis_moving = 0;
+  portcullis_move_cnt = 0;
+  // stuff
+  initial_rendering = 1;
+  // stuff
 }
 
 // $D237
