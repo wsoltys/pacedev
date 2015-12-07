@@ -28,6 +28,7 @@
 
 #define FLAG_VFLIP  (1<<7)
 #define FLAG_HFLIP  (1<<6)
+#define FLAG_WIPE   (1<<5)
 #define FLAG_DRAW   (1<<4)
 
 typedef struct
