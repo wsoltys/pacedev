@@ -37,6 +37,9 @@
 #define FLAG_Y_OOB  (1<<1)
 #define FLAG_X_OOB  (1<<0)
 
+// byte offset 13 flags
+#define FLAG_UP     (1<<2)
+
 typedef struct
 {
   uint8_t   x;
@@ -125,6 +128,7 @@ static uint8_t portcullis_move_cnt;                   // $5BB0
 static uint8_t initial_rendering;                     // $5BB7
 static uint8_t days;                                  // $5BB9
 static int8_t lives;                                  // $5BBA
+static uint8_t ball_bounce_height;                    // $5BBD
 static uint8_t *gfxbase_8x8;                          // $5BC7
 static uint8_t objects_carried[3][4];                 // $5BDC
 static OBJ32 graphic_objs_tbl[40];                    // $5C08
@@ -145,6 +149,7 @@ static OBJ32 plyr_spr_2_scratchpad;                   // $D181
 static void play_audio_wait_key (uint8_t *audio_data);
 static void play_audio (uint8_t *audio_data);
 static void shuffle_objects_required (void);
+static void object_fall (POBJ32 p_obj);
 static uint8_t read_key (uint8_t row);
 static void upd_182_183 (POBJ32 p_obj);
 static void upd_91 (POBJ32 p_obj);
@@ -158,8 +163,10 @@ static void upd_22 (POBJ32 p_obj);
 static void upd_23 (POBJ32 p_obj);
 static void upd_86_87 (POBJ32 p_obj);
 static void upd_180_181 (POBJ32 p_obj);
+static void sub_B85C (POBJ32 p_obj);
 static void upd_178_179 (POBJ32 p_obj);
 static void upd_164_to_167 (POBJ32 p_obj);
+static void toggle_next_prev_sprite (POBJ32 p_obj);
 static void upd_141 (POBJ32 p_obj);
 static void upd_142 (POBJ32 p_obj);
 static void upd_30_31_158_159 (POBJ32 p_obj);
@@ -180,6 +187,7 @@ static void display_text_list (uint8_t *clours, uint8_t *xy, char *text_list[], 
 static void multiple_print_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t dx, uint8_t dy, uint8_t n);
 static void display_objects (void);
 static void upd_120_to_126 (POBJ32 p_obj);
+static bool is_obj_moving (POBJ32 p_obj);
 static void upd_103 (POBJ32 p_obj);
 static void upd_96_to_102 (POBJ32 p_obj);
 static void no_adjust (POBJ32 p_obj);
@@ -209,6 +217,7 @@ static void add_dXYZ (POBJ32 p_obj);
 static void upd_3_5 (POBJ32 p_obj);
 static void set_pixel_adj (POBJ32 p_obj, int8_t h, int8_t l);
 static void upd_2_4 (POBJ32 p_obj);
+static void clear_dX_dY (POBJ32 p_obj);
 static int8_t adj_dZ_for_out_of_bounds (POBJ32 p_obj, int8_t d_z);
 static int8_t adj_d_for_out_of_bounds (int8_t d);
 static void adj_for_out_of_bounds (POBJ32 p_obj);
@@ -367,6 +376,7 @@ onscreen_loop:
   
 game_delay:
   // last to-do  
+  rest (100);
 
   if (initial_rendering)
   {
@@ -654,8 +664,8 @@ adjfn_t upd_sprite_jump_tbl[] =
   upd_not_implemented,
   upd_not_implemented,
   upd_not_implemented,
-  upd_178_179,                  // another ball
-  upd_178_179,                  // another ball
+  upd_178_179,                  // ball up/down
+  upd_178_179,                  // ball up/down
   upd_180_181,                  // fire
   upd_180_181,                  // fire
   upd_182_183,                  // ball (high)
@@ -686,6 +696,13 @@ void play_audio (uint8_t *audio_data)
 // $B544
 void shuffle_objects_required (void)
 {
+}
+
+// $B5AF
+void object_fall (POBJ32 p_obj)
+{
+  dec_dZ_and_update_XYZ (p_obj);
+  set_wipe_and_draw_flags (p_obj);
 }
 
 // $B5F7
@@ -744,21 +761,32 @@ void upd_143 (POBJ32 p_obj)
 }
 
 // $B6B1
-// yet another block
+// block (moving NS)
 void upd_55 (POBJ32 p_obj)
 {
-  // some stuff
+  if (p_obj->graphic_no == 54)
+    /*gen_audio_X (p_obj)*/;
+  else
+    /*gen_audio_Y (p_obj)*/;
+    
   upd_6_7 (p_obj);
-  // other stuff (in common with below)
+  
+  // generate random movement dependant on IX
+  // (the memory address of the object in the
+  // graphic_objs_tbl)
+  
+  
 }
 
 // $B6B9
-// yet another block
+// block (moving EW)
 void upd_54 (POBJ32 p_obj)
 {
-  // some stuff
-  upd_6_7 (p_obj);
-  // other stuff (in common with above)
+  // original code generates appropriate audio,
+  // and then jumps to a routine for 54/55
+  // that uses self-modifying code
+  // - we'll just jump and handle in-line
+  upd_55 (p_obj);
 }
 
 // $B6F7
@@ -790,7 +818,7 @@ void upd_150_151 (POBJ32 p_obj)
 // gargoyle
 void upd_22 (POBJ32 p_obj)
 {
-  // call sub_B85C
+  sub_B85C (p_obj);
   sub_C4FC (p_obj);
 }
 
@@ -798,7 +826,7 @@ void upd_22 (POBJ32 p_obj)
 // spikes
 void upd_23 (POBJ32 p_obj)
 {
-  // call sub_B85C
+  sub_B85C (p_obj);
   upd_6_7 (p_obj);
 }
 
@@ -818,12 +846,39 @@ void upd_180_181 (POBJ32 p_obj)
   // other stuff
 }
 
+// $B85C
+void sub_B85C (POBJ32 p_obj)
+{
+  p_obj->flags13 |= (1<<7)|(1<<5);
+}
+
 // $B865
 // another ball
 void upd_178_179 (POBJ32 p_obj)
 {
   upd_12_to_15 (p_obj);
-  // other stuff
+  if (ball_bounce_height == 0)
+    ball_bounce_height = p_obj->z + 32;
+  toggle_next_prev_sprite (p_obj);
+  // sub_B451 // audio
+  if ((p_obj->flags13 & FLAG_UP) == 0)
+  {
+    dec_dZ_and_update_XYZ (p_obj);
+    if (p_obj->flags12 & FLAG_Z_OOB)
+    {
+      p_obj->flags13 |= FLAG_UP;
+      //sub_B42E() // audio
+    }
+  }
+  else
+  {
+    p_obj->d_z = 3;
+    dec_dZ_and_update_XYZ (p_obj);
+    if (p_obj->z >= ball_bounce_height)
+      p_obj->flags13 &= ~(FLAG_UP);
+  }
+  sub_B85C (p_obj);
+  set_wipe_and_draw_flags (p_obj);
 }
 
 // $B92C
@@ -832,6 +887,12 @@ void upd_164_to_167 (POBJ32 p_obj)
 {
   sub_C4D8 (p_obj);
   // other stuff
+}
+
+// $B985
+void toggle_next_prev_sprite (POBJ32 p_obj)
+{
+  p_obj->graphic_no ^= (1<<0);
 }
 
 // $B99C
@@ -1080,6 +1141,12 @@ void upd_120_to_126 (POBJ32 p_obj)
 #endif  
 }
 
+// $C1A1
+bool is_obj_moving (POBJ32 p_obj)
+{
+  return ((p_obj->d_x | p_obj->d_y | p_obj->d_z) != 0);
+}
+
 // $C1AB
 // extra life
 void upd_103 (POBJ32 p_obj)
@@ -1186,7 +1253,9 @@ void init_special_objects (void)
 void upd_62 (POBJ32 p_obj)
 {
   upd_6_7 (p_obj);
-  // other stuff
+  clear_dX_dY (p_obj);
+  //sub_B3E9(); // audio
+  object_fall (p_obj);
 }
 
 // $C4B6
@@ -1194,7 +1263,13 @@ void upd_62 (POBJ32 p_obj)
 void upd_85 (POBJ32 p_obj)
 {
   upd_6_7 (p_obj);
-  // other stuff
+  dec_dZ_and_update_XYZ (p_obj);
+  if (!is_obj_moving (p_obj))
+    return;
+
+  // jp loc_C232
+  //sub_B467(); // audio
+  set_wipe_and_draw_flags (p_obj);    
 }
 
 // $C4C3
@@ -1202,7 +1277,14 @@ void upd_85 (POBJ32 p_obj)
 void upd_84 (POBJ32 p_obj)
 {
   upd_6_7 (p_obj);
-  // other stuff
+  dec_dZ_and_update_XYZ (p_obj);
+  if (!is_obj_moving (p_obj))
+    return;
+  clear_dX_dY (p_obj);
+
+  // jp loc_C232
+  //sub_B467(); // audio
+  set_wipe_and_draw_flags (p_obj);    
 }
 
 // $C4D3
@@ -1471,6 +1553,13 @@ void upd_2_4 (POBJ32 p_obj)
   }
 }
 
+// $C9F3
+void clear_dX_dY (POBJ32 p_obj)
+{
+  p_obj->d_x = 0;
+  p_obj->d_y = 0;
+}
+
 // $CA5A
 int8_t adj_dZ_for_out_of_bounds (POBJ32 p_obj, int8_t d_z)
 {
@@ -1641,6 +1730,7 @@ void build_screen_objects (void)
   // adjust_plyr_xyz_for_room_size
   portcullis_moving = 0;
   portcullis_move_cnt = 0;
+  ball_bounce_height = 0;
   // stuff
   initial_rendering = 1;
   // stuff
@@ -1702,6 +1792,7 @@ void print_border (void)
 void retrieve_screen (void)
 {
   POBJ32 p_other_objs = other_objs_here;
+  unsigned n_other_objs = 0;
   unsigned p = 0;
   
   fprintf (stderr, "%s():\n", __FUNCTION__);
@@ -1778,6 +1869,7 @@ found_screen:
       memset (&p_other_objs->d_x, 0, 23);
       
       p_other_objs++;
+      n_other_objs++;
     };
   }
 
@@ -1825,12 +1917,16 @@ found_screen:
         memset (&p_other_objs->d_x, 0, 23);
 
         p_other_objs++;
+        n_other_objs++;
       }
     }
   }
   
-  fprintf (stderr, "n_other_objs = %d\n",
-            p_other_objs - other_objs_here);
+  fprintf (stderr, "n_other_objs = %d\n", n_other_objs);
+
+  // clear the rest of the table
+  for (; n_other_objs<40-4; n_other_objs++)
+    memset (p_other_objs++, 0, sizeof(OBJ32));
             
   dump_graphic_objs_tbl();
 }
