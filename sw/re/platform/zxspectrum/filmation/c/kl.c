@@ -540,8 +540,8 @@ adjfn_t upd_sprite_jump_tbl[] =
   upd_not_implemented,
   upd_not_implemented,
   upd_not_implemented,
-  upd_54,                       // yet another block
-  upd_55,                       // yet another block
+  upd_54,                       // block (moving EW)
+  upd_55,                       // block (moving NS)
   upd_not_implemented,
   upd_not_implemented,
   upd_not_implemented,
@@ -761,9 +761,12 @@ void upd_143 (POBJ32 p_obj)
 }
 
 // $B6B1
-// block (moving NS)
+// block (moving NS) (eg. room 29)
 void upd_55 (POBJ32 p_obj)
 {
+  uint8_t r;
+  uint8_t x_y;
+  
   if (p_obj->graphic_no == 54)
     /*gen_audio_X (p_obj)*/;
   else
@@ -774,8 +777,32 @@ void upd_55 (POBJ32 p_obj)
   // generate random movement dependant on IX
   // (the memory address of the object in the
   // graphic_objs_tbl)
-  
-  
+  // PUSH IX; POP BC -> use C
+  // fudge for now
+  r = rand ();
+  r = seed_2 + ((r >> 1) & 0x10);
+  if (r & (1<<4))
+    r = ~r;
+  r &= 0x0F;
+  x_y = (p_obj->graphic_no == 54 ? p_obj->x : p_obj->y);
+  x_y = (x_y + 8) & 0x0F;
+  if (x_y == r)
+    set_wipe_and_draw_flags (p_obj);
+  else
+  {
+    int8_t d;
+    
+    if (x_y < r)
+      d = 1;
+    else
+      d = -1;
+    if (p_obj->graphic_no == 54)
+      p_obj->d_x = d;
+    else
+      p_obj->d_y = d;
+    p_obj->d_z = 1;
+    object_fall (p_obj);      
+  }
 }
 
 // $B6B9
@@ -1891,11 +1918,16 @@ found_screen:
               
     for (; count; p++, count--, size--)
     {
+      // LOC = |  Z  |   Y   |   X   |
+      //       | 7 6 | 5 4 3 | 2 1 0 |
       uint8_t *p_fg_obj = block_type_tbl[block];
       uint8_t loc = location_tbl[p];
 
       for (; *p_fg_obj!=0; p_fg_obj+=6)
       {
+        // OFF = |      Z1     | Y1| X1|
+        //       | 7 6 5 4 3 2 | 1 | 0 |
+        
         uint8_t x1, y1, z1;
         
         p_other_objs->graphic_no = p_fg_obj[0];
@@ -1918,8 +1950,8 @@ found_screen:
         // zero everything else        
         memset (&p_other_objs->d_x, 0, 23);
 
-        // debug: don't include 62
-        //if (p_other_objs->graphic_no != 62)
+        // debug: (don't) include 62
+        //if (p_other_objs->graphic_no == 23)
         {
           p_other_objs++;
           n_other_objs++;
@@ -2036,7 +2068,7 @@ void calc_pixel_XY_and_render (POBJ32 p_obj)
   
   calc_pixel_XY (p_obj);
   
-  //if (p_obj->graphic_no == 10)
+  if (p_obj->graphic_no == 7)
   {
     //fprintf (stderr, "%s($%02X)\n", __FUNCTION__, p_obj->graphic_no);
     print_sprite (p_obj);

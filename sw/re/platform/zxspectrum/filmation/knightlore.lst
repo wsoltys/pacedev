@@ -2872,8 +2872,8 @@ RAM:B1FA 65 B8			     dw	upd_178_179				     ;	 ball up/down
 RAM:B1FC 65 B8			     dw	upd_178_179				     ;	 ball up/down
 RAM:B1FE 0F B8			     dw	upd_180_181				     ;	 fire
 RAM:B200 0F B8			     dw	upd_180_181				     ;	 fire
-RAM:B202 FF B5			     dw	upd_182_183				     ;	 yet another ball
-RAM:B204 FF B5			     dw	upd_182_183				     ;	 yet another ball
+RAM:B202 FF B5			     dw	upd_182_183				     ;	 ball (bouncing	around)
+RAM:B204 FF B5			     dw	upd_182_183				     ;	 ball (bouncing	around)
 RAM:B206 2B BF			     dw	loc_BF2B
 RAM:B208 37 BF			     dw	loc_BF37
 RAM:B20A CB C2			     dw	no_update
@@ -3110,7 +3110,7 @@ RAM:B3E9
 RAM:B3E9	     ; =============== S U B R O U T I N E =======================================
 RAM:B3E9
 RAM:B3E9
-RAM:B3E9	     sub_B3E9:							     ; CODE XREF: RAM:C4B0p
+RAM:B3E9	     audio_B3E9:						     ; CODE XREF: RAM:C4B0p
 RAM:B3E9 3A A2 5B		     ld	     a,	(seed_2)
 RAM:B3EC E6 07			     and     7
 RAM:B3EE 6F			     ld	     l,	a
@@ -3120,10 +3120,10 @@ RAM:B3F4 09			     add     hl, bc				     ; ptr entry
 RAM:B3F5 46			     ld	     b,	(hl)
 RAM:B3F6 0E 04			     ld	     c,	4
 RAM:B3F8 C3 E6 B4		     jp	     toggle_FE_bit4_xC
-RAM:B3F8	     ; End of function sub_B3E9
+RAM:B3F8	     ; End of function audio_B3E9
 RAM:B3F8
 RAM:B3F8	     ; ---------------------------------------------------------------------------
-RAM:B3FB A0 B0 C0 90+byte_B3FB:	     db	0A0h, 0B0h, 0C0h, 90h, 0A0h, 0E0h, 80h,	60h  ; DATA XREF: sub_B3E9+8o
+RAM:B3FB A0 B0 C0 90+byte_B3FB:	     db	0A0h, 0B0h, 0C0h, 90h, 0A0h, 0E0h, 80h,	60h  ; DATA XREF: audio_B3E9+8o
 RAM:B403
 RAM:B403	     ; =============== S U B R O U T I N E =======================================
 RAM:B403
@@ -3373,7 +3373,7 @@ RAM:B4E2 0F			     rrca
 RAM:B4E3 E6 0F			     and     0Fh
 RAM:B4E5 4F			     ld	     c,	a
 RAM:B4E6
-RAM:B4E6	     toggle_FE_bit4_xC:						     ; CODE XREF: sub_B3E9+Fj
+RAM:B4E6	     toggle_FE_bit4_xC:						     ; CODE XREF: audio_B3E9+Fj
 RAM:B4E6									     ; sub_B403+Fp ...
 RAM:B4E6 CD ED B4		     call    toggle_FE_bit4
 RAM:B4E9 0D			     dec     c
@@ -3611,7 +3611,7 @@ RAM:B60C 32 C2 5B		     ld	     (byte_5BC2), a
 RAM:B60F CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:B612 E1			     pop     hl
 RAM:B613 DD 75 09		     ld	     (ix+9), l
-RAM:B616 DD 74 0A		     ld	     (ix+0Ah), h
+RAM:B616 DD 74 0A		     ld	     (ix+10), h
 RAM:B619 3A 08 5C		     ld	     a,	(graphic_objs_tbl)
 RAM:B61C D6 10			     sub     10h
 RAM:B61E FE 20			     cp	     20h ; ' '
@@ -5852,7 +5852,7 @@ RAM:C4AA
 RAM:C4AA	     upd_62:							     ; DATA XREF: RAM:B112o
 RAM:C4AA CD E3 C4		     call    upd_6_7
 RAM:C4AD CD F3 C9		     call    clear_dX_dY
-RAM:C4B0 CD E9 B3		     call    sub_B3E9				     ; audio?
+RAM:C4B0 CD E9 B3		     call    audio_B3E9				     ; audio?
 RAM:C4B3 C3 AF B5		     jp	     object_fall
 RAM:C4B6	     ; ---------------------------------------------------------------------------
 RAM:C4B6
