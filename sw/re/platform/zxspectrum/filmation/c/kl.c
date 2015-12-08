@@ -668,8 +668,8 @@ adjfn_t upd_sprite_jump_tbl[] =
   upd_178_179,                  // ball up/down
   upd_180_181,                  // fire
   upd_180_181,                  // fire
-  upd_182_183,                  // ball (high)
-  upd_182_183,                  // ball (high)
+  upd_182_183,                  // ball (bouncing around)
+  upd_182_183,                  // ball (bouncing around)
   upd_not_implemented,
   upd_not_implemented,
   upd_not_implemented,
@@ -853,7 +853,7 @@ void sub_B85C (POBJ32 p_obj)
 }
 
 // $B865
-// another ball
+// ball up/down (eg. room 33)
 void upd_178_179 (POBJ32 p_obj)
 {
   upd_12_to_15 (p_obj);
@@ -1249,7 +1249,7 @@ void init_special_objects (void)
 }
 
 // $C4AA
-// another block
+// another block (eg. room 8)
 void upd_62 (POBJ32 p_obj)
 {
   upd_6_7 (p_obj);
@@ -1259,7 +1259,7 @@ void upd_62 (POBJ32 p_obj)
 }
 
 // $C4B6
-// chest
+// chest (eg. room 33)
 void upd_85 (POBJ32 p_obj)
 {
   upd_6_7 (p_obj);
@@ -1273,7 +1273,7 @@ void upd_85 (POBJ32 p_obj)
 }
 
 // $C4C3
-// table
+// table (eg. room 10)
 void upd_84 (POBJ32 p_obj)
 {
   upd_6_7 (p_obj);
@@ -1418,7 +1418,7 @@ void upd_80_to_83 (POBJ32 p_obj)
 }
 
 // $C65E
-// portcullis (stationary)
+// portcullis (stationary) (eg. room 9)
 void upd_8 (POBJ32 p_obj)
 {
   uint8_t r;
@@ -1463,7 +1463,7 @@ void set_wipe_and_draw_flags (POBJ32 p_obj)
 }
 
 // $C6BD
-// portcullis (moving)
+// portcullis (moving) (eg. room 9)
 void upd_9 (POBJ32 p_obj)
 {
   //fprintf (stderr, "%s()\n", __FUNCTION__);
@@ -1565,12 +1565,14 @@ int8_t adj_dZ_for_out_of_bounds (POBJ32 p_obj, int8_t d_z)
 {
   do
   {
-    if ((p_obj->z + d_z) >= room_size_Z)
+    if ((uint8_t)(p_obj->z + d_z) >= room_size_Z)
       return (d_z);
     p_obj->flags12 |= FLAG_Z_OOB;
     d_z = adj_d_for_out_of_bounds (d_z);
     
   } while (d_z != 0);
+  
+  return (d_z);
 }
 
 // $CA89
@@ -1613,14 +1615,14 @@ void adj_for_out_of_bounds (POBJ32 p_obj)
       ; // do some stuff
   }
 
-  d_z = p_obj->d_z;
+  d_x = p_obj->d_x;
   if (p_obj->d_x != 0)
   {
     d_x = adj_dX_for_out_of_bounds (p_obj, d_x);
     if (d_x != 0)
       ; // do some stuff
   }
-  
+
   p_obj->d_x = d_x;
   p_obj->d_y = d_y;
   p_obj->d_z = d_z;
@@ -1916,8 +1918,12 @@ found_screen:
         // zero everything else        
         memset (&p_other_objs->d_x, 0, 23);
 
-        p_other_objs++;
-        n_other_objs++;
+        // debug: don't include 62
+        //if (p_other_objs->graphic_no != 62)
+        {
+          p_other_objs++;
+          n_other_objs++;
+        }
       }
     }
   }
