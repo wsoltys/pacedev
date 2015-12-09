@@ -9364,7 +9364,7 @@ RAM:D6C9									     ; sub_CD33p ...
 RAM:D6C9 DD 7E 01		     ld	     a,	(ix+1)				     ; X
 RAM:D6CC DD 86 02		     add     a,	(ix+2)				     ; add Y
 RAM:D6CF D6 80			     sub     128
-RAM:D6D1 DD 86 12		     add     a,	(ix+18)
+RAM:D6D1 DD 86 12		     add     a,	(ix+18)				     ; add pixel_x_adj
 RAM:D6D4 DD 77 1A		     ld	     (ix+26), a				     ; pixel X
 RAM:D6D7 DD 7E 02		     ld	     a,	(ix+2)				     ; Y
 RAM:D6DA DD 96 01		     sub     (ix+1)				     ; subtract	X
@@ -9372,7 +9372,7 @@ RAM:D6DD C6 80			     add     a,	128
 RAM:D6DF CB 3F			     srl     a
 RAM:D6E1 DD 86 03		     add     a,	(ix+3)				     ; Z
 RAM:D6E4 D6 68			     sub     104
-RAM:D6E6 DD 86 13		     add     a,	(ix+19)
+RAM:D6E6 DD 86 13		     add     a,	(ix+19)				     ; pixel_y_adj
 RAM:D6E9 DD 77 1B		     ld	     (ix+27), a				     ; pixel Y
 RAM:D6EC FE C0			     cp	     192				     ; bottom line of screen?
 RAM:D6EE C9			     ret
