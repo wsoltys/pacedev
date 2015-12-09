@@ -2573,7 +2573,7 @@ RAM:AFCE 21 E4 AF		     ld	     hl, ret_from_tbl_jp
 RAM:AFD1 E5			     push    hl					     ; set return address
 RAM:AFD2 CD 49 CE		     call    save_2d_info
 RAM:AFD5
-RAM:AFD5	     loc_AFD5:							     ; CODE XREF: RAM:BF1Ej
+RAM:AFD5	     jump_to_upd_object:					     ; CODE XREF: RAM:BF1Ej
 RAM:AFD5 DD 6E 00		     ld	     l,	(ix+0)				     ; sprite graphic to render
 RAM:AFD8 01 96 B0		     ld	     bc, upd_sprite_jmp_tbl
 RAM:AFDB
@@ -2706,93 +2706,93 @@ RAM:B0AE F2 C4			     dw	upd_12_to_15				     ; * even more bricks
 RAM:B0B0 F2 C4			     dw	upd_12_to_15				     ; * even more bricks
 RAM:B0B2 F2 C4			     dw	upd_12_to_15				     ; * even more bricks
 RAM:B0B4 F2 C4			     dw	upd_12_to_15				     ; * even more bricks
-RAM:B0B6 23 C8			     dw	loc_C823
-RAM:B0B8 23 C8			     dw	loc_C823
-RAM:B0BA 23 C8			     dw	loc_C823
-RAM:B0BC 23 C8			     dw	loc_C823
-RAM:B0BE 23 C8			     dw	loc_C823
-RAM:B0C0 23 C8			     dw	loc_C823
+RAM:B0B6 23 C8			     dw	upd_16_to_21_24_to_29			     ;	 human legs
+RAM:B0B8 23 C8			     dw	upd_16_to_21_24_to_29
+RAM:B0BA 23 C8			     dw	upd_16_to_21_24_to_29
+RAM:B0BC 23 C8			     dw	upd_16_to_21_24_to_29
+RAM:B0BE 23 C8			     dw	upd_16_to_21_24_to_29
+RAM:B0C0 23 C8			     dw	upd_16_to_21_24_to_29
 RAM:B0C2 A3 B7			     dw	upd_22					     ; * gargoyle
 RAM:B0C4 E7 B7			     dw	upd_23					     ; * spikes
-RAM:B0C6 23 C8			     dw	loc_C823
-RAM:B0C8 23 C8			     dw	loc_C823
-RAM:B0CA 23 C8			     dw	loc_C823
-RAM:B0CC 23 C8			     dw	loc_C823
-RAM:B0CE 23 C8			     dw	loc_C823
-RAM:B0D0 23 C8			     dw	loc_C823
+RAM:B0C6 23 C8			     dw	upd_16_to_21_24_to_29
+RAM:B0C8 23 C8			     dw	upd_16_to_21_24_to_29
+RAM:B0CA 23 C8			     dw	upd_16_to_21_24_to_29
+RAM:B0CC 23 C8			     dw	upd_16_to_21_24_to_29
+RAM:B0CE 23 C8			     dw	upd_16_to_21_24_to_29
+RAM:B0D0 23 C8			     dw	upd_16_to_21_24_to_29
 RAM:B0D2 A5 B9			     dw	upd_30_31_158_159			     ;	 guard (top half)
 RAM:B0D4 A5 B9			     dw	upd_30_31_158_159			     ;	 guard (top half)
-RAM:B0D6 DA CD			     dw	loc_CDDA
-RAM:B0D8 DA CD			     dw	loc_CDDA
-RAM:B0DA DA CD			     dw	loc_CDDA
-RAM:B0DC DA CD			     dw	loc_CDDA
-RAM:B0DE DA CD			     dw	loc_CDDA
-RAM:B0E0 DA CD			     dw	loc_CDDA
-RAM:B0E2 DA CD			     dw	loc_CDDA
-RAM:B0E4 DA CD			     dw	loc_CDDA
-RAM:B0E6 DA CD			     dw	loc_CDDA
-RAM:B0E8 DA CD			     dw	loc_CDDA
-RAM:B0EA DA CD			     dw	loc_CDDA
-RAM:B0EC DA CD			     dw	loc_CDDA
-RAM:B0EE DA CD			     dw	loc_CDDA
-RAM:B0F0 DA CD			     dw	loc_CDDA
-RAM:B0F2 DA CD			     dw	loc_CDDA
-RAM:B0F4 DA CD			     dw	loc_CDDA
-RAM:B0F6 28 C8			     dw	loc_C828
-RAM:B0F8 28 C8			     dw	loc_C828
-RAM:B0FA 28 C8			     dw	loc_C828
-RAM:B0FC 28 C8			     dw	loc_C828
-RAM:B0FE 28 C8			     dw	loc_C828
-RAM:B100 28 C8			     dw	loc_C828
+RAM:B0D6 DA CD			     dw	upd_32_to_47				     ;	 player	(top half)
+RAM:B0D8 DA CD			     dw	upd_32_to_47
+RAM:B0DA DA CD			     dw	upd_32_to_47
+RAM:B0DC DA CD			     dw	upd_32_to_47
+RAM:B0DE DA CD			     dw	upd_32_to_47
+RAM:B0E0 DA CD			     dw	upd_32_to_47
+RAM:B0E2 DA CD			     dw	upd_32_to_47
+RAM:B0E4 DA CD			     dw	upd_32_to_47
+RAM:B0E6 DA CD			     dw	upd_32_to_47
+RAM:B0E8 DA CD			     dw	upd_32_to_47
+RAM:B0EA DA CD			     dw	upd_32_to_47
+RAM:B0EC DA CD			     dw	upd_32_to_47
+RAM:B0EE DA CD			     dw	upd_32_to_47
+RAM:B0F0 DA CD			     dw	upd_32_to_47
+RAM:B0F2 DA CD			     dw	upd_32_to_47
+RAM:B0F4 DA CD			     dw	upd_32_to_47
+RAM:B0F6 28 C8			     dw	upd_48_to_53_56_to_61			     ;	 wulf legs
+RAM:B0F8 28 C8			     dw	upd_48_to_53_56_to_61
+RAM:B0FA 28 C8			     dw	upd_48_to_53_56_to_61
+RAM:B0FC 28 C8			     dw	upd_48_to_53_56_to_61
+RAM:B0FE 28 C8			     dw	upd_48_to_53_56_to_61
+RAM:B100 28 C8			     dw	upd_48_to_53_56_to_61
 RAM:B102 B9 B6			     dw	upd_54					     ; * block (moving EW)
 RAM:B104 B1 B6			     dw	upd_55					     ; * block (moving NS)
-RAM:B106 28 C8			     dw	loc_C828
-RAM:B108 28 C8			     dw	loc_C828
-RAM:B10A 28 C8			     dw	loc_C828
-RAM:B10C 28 C8			     dw	loc_C828
-RAM:B10E 28 C8			     dw	loc_C828
-RAM:B110 28 C8			     dw	loc_C828
+RAM:B106 28 C8			     dw	upd_48_to_53_56_to_61
+RAM:B108 28 C8			     dw	upd_48_to_53_56_to_61
+RAM:B10A 28 C8			     dw	upd_48_to_53_56_to_61
+RAM:B10C 28 C8			     dw	upd_48_to_53_56_to_61
+RAM:B10E 28 C8			     dw	upd_48_to_53_56_to_61
+RAM:B110 28 C8			     dw	upd_48_to_53_56_to_61
 RAM:B112 AA C4			     dw	upd_62					     ; * another block
 RAM:B114 A9 B7			     dw	upd_63					     ; * spiked	ball
-RAM:B116 DF CD			     dw	loc_CDDF
-RAM:B118 DF CD			     dw	loc_CDDF
-RAM:B11A DF CD			     dw	loc_CDDF
-RAM:B11C DF CD			     dw	loc_CDDF
-RAM:B11E DF CD			     dw	loc_CDDF
-RAM:B120 DF CD			     dw	loc_CDDF
-RAM:B122 DF CD			     dw	loc_CDDF
-RAM:B124 DF CD			     dw	loc_CDDF
-RAM:B126 DF CD			     dw	loc_CDDF
-RAM:B128 DF CD			     dw	loc_CDDF
-RAM:B12A DF CD			     dw	loc_CDDF
-RAM:B12C DF CD			     dw	loc_CDDF
-RAM:B12E DF CD			     dw	loc_CDDF
-RAM:B130 DF CD			     dw	loc_CDDF
-RAM:B132 DF CD			     dw	loc_CDDF
-RAM:B134 DF CD			     dw	loc_CDDF
+RAM:B116 DF CD			     dw	upd_64_to_79				     ;	 player	(wulf top half)
+RAM:B118 DF CD			     dw	upd_64_to_79
+RAM:B11A DF CD			     dw	upd_64_to_79
+RAM:B11C DF CD			     dw	upd_64_to_79
+RAM:B11E DF CD			     dw	upd_64_to_79
+RAM:B120 DF CD			     dw	upd_64_to_79
+RAM:B122 DF CD			     dw	upd_64_to_79
+RAM:B124 DF CD			     dw	upd_64_to_79
+RAM:B126 DF CD			     dw	upd_64_to_79
+RAM:B128 DF CD			     dw	upd_64_to_79
+RAM:B12A DF CD			     dw	upd_64_to_79
+RAM:B12C DF CD			     dw	upd_64_to_79
+RAM:B12E DF CD			     dw	upd_64_to_79
+RAM:B130 DF CD			     dw	upd_64_to_79
+RAM:B132 DF CD			     dw	upd_64_to_79
+RAM:B134 DF CD			     dw	upd_64_to_79
 RAM:B136 C8 C5			     dw	upd_80_to_83				     ; * ghost
 RAM:B138 C8 C5			     dw	upd_80_to_83				     ; * ghost
 RAM:B13A C8 C5			     dw	upd_80_to_83				     ; * ghost
 RAM:B13C C8 C5			     dw	upd_80_to_83				     ; * ghost
 RAM:B13E C3 C4			     dw	upd_84					     ; * table
 RAM:B140 B6 C4			     dw	upd_85					     ; * chest
-RAM:B142 ED B7			     dw	upd_86_87				     ;	 another fire
-RAM:B144 ED B7			     dw	upd_86_87				     ;	 another fire
+RAM:B142 ED B7			     dw	upd_86_87				     ; * fire (EW)
+RAM:B144 ED B7			     dw	upd_86_87				     ; * fire (EW)
 RAM:B146 06 C5			     dw	upd_88_to_90				     ; * sun
 RAM:B148 06 C5			     dw	upd_88_to_90				     ; * moon
 RAM:B14A 06 C5			     dw	upd_88_to_90				     ; * frame (left)
-RAM:B14C 83 B6			     dw	upd_91					     ;	 block (high?)
+RAM:B14C 83 B6			     dw	upd_91					     ; * block (dropping)
 RAM:B14E 37 C3			     dw	loc_C337
 RAM:B150 37 C3			     dw	loc_C337
 RAM:B152 37 C3			     dw	loc_C337
 RAM:B154 37 C3			     dw	loc_C337
-RAM:B156 8B C2			     dw	upd_96_to_102				     ;	 diamond
-RAM:B158 8B C2			     dw	upd_96_to_102				     ;	 poison
-RAM:B15A 8B C2			     dw	upd_96_to_102				     ;	 boot
-RAM:B15C 8B C2			     dw	upd_96_to_102				     ;	 chalice
-RAM:B15E 8B C2			     dw	upd_96_to_102				     ;	 cup
-RAM:B160 8B C2			     dw	upd_96_to_102				     ;	 bottle
-RAM:B162 8B C2			     dw	upd_96_to_102				     ;	 crystal ball
+RAM:B156 8B C2			     dw	upd_96_to_102				     ; * diamond
+RAM:B158 8B C2			     dw	upd_96_to_102				     ; * poison
+RAM:B15A 8B C2			     dw	upd_96_to_102				     ; * boot
+RAM:B15C 8B C2			     dw	upd_96_to_102				     ; * chalice
+RAM:B15E 8B C2			     dw	upd_96_to_102				     ; * cup
+RAM:B160 8B C2			     dw	upd_96_to_102				     ; * bottle
+RAM:B162 8B C2			     dw	upd_96_to_102				     ; * crystal ball
 RAM:B164 AB C1			     dw	upd_103					     ;	 extra life
 RAM:B166 F1 C1			     dw	loc_C1F1
 RAM:B168 F1 C1			     dw	loc_C1F1
@@ -2810,14 +2810,14 @@ RAM:B17E 2B BF			     dw	loc_BF2B
 RAM:B180 2B BF			     dw	loc_BF2B
 RAM:B182 2B BF			     dw	loc_BF2B
 RAM:B184 3F BF			     dw	loc_BF3F
-RAM:B186 FE BE			     dw	upd_120_to_126				     ;	 player	appears	sparkles
-RAM:B188 FE BE			     dw	upd_120_to_126
-RAM:B18A FE BE			     dw	upd_120_to_126
-RAM:B18C FE BE			     dw	upd_120_to_126
-RAM:B18E FE BE			     dw	upd_120_to_126
-RAM:B190 FE BE			     dw	upd_120_to_126
-RAM:B192 FE BE			     dw	upd_120_to_126
-RAM:B194 11 BF			     dw	loc_BF11
+RAM:B186 FE BE			     dw	upd_120_to_126				     ; * player	appears	sparkles
+RAM:B188 FE BE			     dw	upd_120_to_126				     ; * player	appears	sparkles
+RAM:B18A FE BE			     dw	upd_120_to_126				     ; * player	appears	sparkles
+RAM:B18C FE BE			     dw	upd_120_to_126				     ; * player	appears	sparkles
+RAM:B18E FE BE			     dw	upd_120_to_126				     ; * player	appears	sparkles
+RAM:B190 FE BE			     dw	upd_120_to_126				     ; * player	appears	sparkles
+RAM:B192 FE BE			     dw	upd_120_to_126				     ; * player	appears	sparkles
+RAM:B194 11 BF			     dw	upd_127					     ; * last player appears sparkle
 RAM:B196 D3 C4			     dw	upd_128_to_130				     ; * tree wall
 RAM:B198 D3 C4			     dw	upd_128_to_130				     ; * tree wall
 RAM:B19A D3 C4			     dw	upd_128_to_130				     ; * tree wall
@@ -2868,10 +2868,10 @@ RAM:B1F2 23 B9			     dw	loc_B923
 RAM:B1F4 23 B9			     dw	loc_B923
 RAM:B1F6 3F B8			     dw	loc_B83F
 RAM:B1F8 3F B8			     dw	loc_B83F
-RAM:B1FA 65 B8			     dw	upd_178_179				     ;	 ball up/down
-RAM:B1FC 65 B8			     dw	upd_178_179				     ;	 ball up/down
-RAM:B1FE 0F B8			     dw	upd_180_181				     ;	 fire
-RAM:B200 0F B8			     dw	upd_180_181				     ;	 fire
+RAM:B1FA 65 B8			     dw	upd_178_179				     ; * ball up/down
+RAM:B1FC 65 B8			     dw	upd_178_179				     ; * ball up/down
+RAM:B1FE 0F B8			     dw	upd_180_181				     ; * fire (NS)
+RAM:B200 0F B8			     dw	upd_180_181				     ; * fire (NS)
 RAM:B202 FF B5			     dw	upd_182_183				     ;	 ball (bouncing	around)
 RAM:B204 FF B5			     dw	upd_182_183				     ;	 ball (bouncing	around)
 RAM:B206 2B BF			     dw	loc_BF2B
@@ -3128,7 +3128,7 @@ RAM:B403
 RAM:B403	     ; =============== S U B R O U T I N E =======================================
 RAM:B403
 RAM:B403
-RAM:B403	     sub_B403:							     ; CODE XREF: sub_C306:loc_BF31p
+RAM:B403	     gen_audio_graphic_no_rom:					     ; CODE XREF: sub_C306:loc_BF31p
 RAM:B403									     ; sub_C2A5+18p
 RAM:B403 DD 7E 00		     ld	     a,	(ix+0)				     ; sprite index
 RAM:B406 2F			     cpl
@@ -3136,7 +3136,7 @@ RAM:B407 E6 1F			     and     1Fh
 RAM:B409 5F			     ld	     e,	a
 RAM:B40A 21 34 12		     ld	     hl, 1234h
 RAM:B40D
-RAM:B40D	     loc_B40D:							     ; CODE XREF: sub_B403+13j
+RAM:B40D	     loc_B40D:							     ; CODE XREF: gen_audio_graphic_no_rom+13j
 RAM:B40D 7E			     ld	     a,	(hl)
 RAM:B40E 23			     inc     hl
 RAM:B40F 47			     ld	     b,	a
@@ -3145,13 +3145,13 @@ RAM:B412 CD E6 B4		     call    toggle_FE_bit4_xC
 RAM:B415 1D			     dec     e
 RAM:B416 20 F5			     jr	     nz, loc_B40D
 RAM:B418 C9			     ret
-RAM:B418	     ; End of function sub_B403
+RAM:B418	     ; End of function gen_audio_graphic_no_rom
 RAM:B418
 RAM:B419
 RAM:B419	     ; =============== S U B R O U T I N E =======================================
 RAM:B419
 RAM:B419
-RAM:B419	     sub_B419:							     ; CODE XREF: RAM:BF0Bp
+RAM:B419	     gen_audio_graphic_no:					     ; CODE XREF: RAM:BF0Bp
 RAM:B419 DD 7E 00		     ld	     a,	(ix+0)				     ; player sprite graphic no.
 RAM:B41C 07			     rlca
 RAM:B41D 07			     rlca
@@ -3159,7 +3159,7 @@ RAM:B41E E6 1F			     and     1Fh
 RAM:B420 F6 03			     or	     3
 RAM:B422 4F			     ld	     c,	a
 RAM:B423
-RAM:B423	     loc_B423:							     ; CODE XREF: sub_B419+12j
+RAM:B423	     loc_B423:							     ; CODE XREF: gen_audio_graphic_no+12j
 RAM:B423 79			     ld	     a,	c
 RAM:B424 07			     rlca
 RAM:B425 07			     rlca
@@ -3168,18 +3168,18 @@ RAM:B427 CD ED B4		     call    toggle_FE_bit4
 RAM:B42A 0D			     dec     c
 RAM:B42B 20 F6			     jr	     nz, loc_B423
 RAM:B42D C9			     ret
-RAM:B42D	     ; End of function sub_B419
+RAM:B42D	     ; End of function gen_audio_graphic_no
 RAM:B42D
 RAM:B42E
 RAM:B42E	     ; =============== S U B R O U T I N E =======================================
 RAM:B42E
 RAM:B42E
-RAM:B42E	     sub_B42E:							     ; CODE XREF: RAM:B64Cp
+RAM:B42E	     gen_audio_rom:						     ; CODE XREF: RAM:B64Cp
 RAM:B42E									     ; RAM:B837p ...
 RAM:B42E 21 00 00		     ld	     hl, 0
 RAM:B431 1E 04			     ld	     e,	4
 RAM:B433
-RAM:B433	     loc_B433:							     ; CODE XREF: sub_B42E+10j
+RAM:B433	     loc_B433:							     ; CODE XREF: gen_audio_rom+10j
 RAM:B433 0E 03			     ld	     c,	3
 RAM:B435 7E			     ld	     a,	(hl)
 RAM:B436 23			     inc     hl
@@ -3189,7 +3189,7 @@ RAM:B43A CD E6 B4		     call    toggle_FE_bit4_xC
 RAM:B43D 1D			     dec     e
 RAM:B43E 20 F3			     jr	     nz, loc_B433
 RAM:B440 C9			     ret
-RAM:B440	     ; End of function sub_B42E
+RAM:B440	     ; End of function gen_audio_rom
 RAM:B440
 RAM:B441
 RAM:B441	     ; =============== S U B R O U T I N E =======================================
@@ -3374,7 +3374,7 @@ RAM:B4E3 E6 0F			     and     0Fh
 RAM:B4E5 4F			     ld	     c,	a
 RAM:B4E6
 RAM:B4E6	     toggle_FE_bit4_xC:						     ; CODE XREF: audio_B3E9+Fj
-RAM:B4E6									     ; sub_B403+Fp ...
+RAM:B4E6									     ; gen_audio_graphic_no_rom+Fp ...
 RAM:B4E6 CD ED B4		     call    toggle_FE_bit4
 RAM:B4E9 0D			     dec     c
 RAM:B4EA 20 FA			     jr	     nz, toggle_FE_bit4_xC
@@ -3385,7 +3385,7 @@ RAM:B4ED
 RAM:B4ED	     ; =============== S U B R O U T I N E =======================================
 RAM:B4ED
 RAM:B4ED
-RAM:B4ED	     toggle_FE_bit4:						     ; CODE XREF: sub_B419+Ep
+RAM:B4ED	     toggle_FE_bit4:						     ; CODE XREF: gen_audio_graphic_no+Ep
 RAM:B4ED									     ; sub_B441+9p ...
 RAM:B4ED 3E 10			     ld	     a,	10h				     ; EAR output
 RAM:B4EF D3 FE			     out     (0FEh), a				     ; enable
@@ -3493,7 +3493,7 @@ RAM:B566	     ; ----------------------------------------------------------------
 RAM:B566
 RAM:B566	     loc_B566:							     ; DATA XREF: RAM:B19Co
 RAM:B566									     ; RAM:B19Eo ...
-RAM:B566 CD D8 C4		     call    sub_C4D8
+RAM:B566 CD D8 C4		     call    adj_m4_m12
 RAM:B569 DD 7E 03		     ld	     a,	(ix+3)				     ; Z
 RAM:B56C FE A4			     cp	     164
 RAM:B56E 30 54			     jr	     nc, loc_B5C4
@@ -3638,7 +3638,7 @@ RAM:B642 DD 77 0B		     ld	     (ix+11), a
 RAM:B645 3A C2 5B		     ld	     a,	(byte_5BC2)
 RAM:B648 A7			     and     a
 RAM:B649 F2 4F B6		     jp	     p,	loc_B64F
-RAM:B64C CD 2E B4		     call    sub_B42E
+RAM:B64C CD 2E B4		     call    gen_audio_rom
 RAM:B64F
 RAM:B64F	     loc_B64F:							     ; CODE XREF: RAM:B649j
 RAM:B64F ED 5F			     ld	     a,	r
@@ -3680,13 +3680,13 @@ RAM:B683	     ; block (high?)
 RAM:B683
 RAM:B683	     upd_91:							     ; DATA XREF: RAM:B14Co
 RAM:B683 CD E3 C4		     call    upd_6_7
-RAM:B686 DD CB 0D 5E		     bit     3,	(ix+0Dh)
+RAM:B686 DD CB 0D 5E		     bit     3,	(ix+13)
 RAM:B68A C8			     ret     z
-RAM:B68B DD CB 0D 9E		     res     3,	(ix+0Dh)
-RAM:B68F DD 36 0B 00		     ld	     (ix+11), 0
+RAM:B68B DD CB 0D 9E		     res     3,	(ix+13)
+RAM:B68F DD 36 0B 00		     ld	     (ix+11), 0				     ; dZ=0
 RAM:B693 CD 00 C7		     call    dec_dZ_and_update_XYZ
-RAM:B696 DD CB 0C 56		     bit     2,	(ix+12)
-RAM:B69A 20 03			     jr	     nz, loc_B69F
+RAM:B696 DD CB 0C 56		     bit     2,	(ix+12)				     ; Z OOB?
+RAM:B69A 20 03			     jr	     nz, loc_B69F			     ; yes, skip
 RAM:B69C CD 51 B4		     call    gen_audio_Z
 RAM:B69F
 RAM:B69F	     loc_B69F:							     ; CODE XREF: RAM:B69Aj
@@ -3909,47 +3909,48 @@ RAM:B7E7	     upd_23:							     ; DATA XREF: RAM:B0C4o
 RAM:B7E7 CD 5C B8		     call    sub_B85C
 RAM:B7EA C3 E3 C4		     jp	     upd_6_7
 RAM:B7ED	     ; ---------------------------------------------------------------------------
-RAM:B7ED	     ; fire
+RAM:B7ED	     ; fire (moving EW)
 RAM:B7ED
 RAM:B7ED	     upd_86_87:							     ; DATA XREF: RAM:B142o
 RAM:B7ED									     ; RAM:B144o
 RAM:B7ED CD F2 C4		     call    upd_12_to_15
-RAM:B7F0 DD 36 0B 01		     ld	     (ix+11), 1
-RAM:B7F4 DD CB 0D 46		     bit     0,	(ix+13)
+RAM:B7F0 DD 36 0B 01		     ld	     (ix+11), 1				     ; pre-load	dZ=1
+RAM:B7F4 DD CB 0D 46		     bit     0,	(ix+13)				     ; moving east?
 RAM:B7F8 3E 02			     ld	     a,	2
-RAM:B7FA 20 02			     jr	     nz, loc_B7FE
+RAM:B7FA 20 02			     jr	     nz, loc_B7FE			     ; yes, skip
 RAM:B7FC ED 44			     neg
 RAM:B7FE
 RAM:B7FE	     loc_B7FE:							     ; CODE XREF: RAM:B7FAj
-RAM:B7FE DD 77 09		     ld	     (ix+9), a
+RAM:B7FE DD 77 09		     ld	     (ix+9), a				     ; dX=+/-2
 RAM:B801 CD 5D B4		     call    gen_audio_X
 RAM:B804 CD 00 C7		     call    dec_dZ_and_update_XYZ
-RAM:B807 DD CB 0C 46		     bit     0,	(ix+12)
+RAM:B807 DD CB 0C 46		     bit     0,	(ix+12)				     ; X OOB?
 RAM:B80B 3E 01			     ld	     a,	1
 RAM:B80D 18 20			     jr	     loc_B82F
 RAM:B80F	     ; ---------------------------------------------------------------------------
+RAM:B80F	     ; fire (moving NS)
 RAM:B80F
 RAM:B80F	     upd_180_181:						     ; DATA XREF: RAM:B1FEo
 RAM:B80F									     ; RAM:B200o
 RAM:B80F CD F2 C4		     call    upd_12_to_15
-RAM:B812 DD 36 0B 01		     ld	     (ix+11), 1
-RAM:B816 DD CB 0D 4E		     bit     1,	(ix+13)
+RAM:B812 DD 36 0B 01		     ld	     (ix+11), 1				     ; dZ=1
+RAM:B816 DD CB 0D 4E		     bit     1,	(ix+13)				     ; moving north?
 RAM:B81A 3E 02			     ld	     a,	2
-RAM:B81C 20 02			     jr	     nz, loc_B820
+RAM:B81C 20 02			     jr	     nz, loc_B820			     ; yes, skip
 RAM:B81E ED 44			     neg
 RAM:B820
 RAM:B820	     loc_B820:							     ; CODE XREF: RAM:B81Cj
-RAM:B820 DD 77 0A		     ld	     (ix+10), a
+RAM:B820 DD 77 0A		     ld	     (ix+10), a				     ; dY=+/-2
 RAM:B823 CD 62 B4		     call    gen_audio_Y
 RAM:B826 CD 00 C7		     call    dec_dZ_and_update_XYZ
-RAM:B829 DD CB 0C 4E		     bit     1,	(ix+12)
+RAM:B829 DD CB 0C 4E		     bit     1,	(ix+12)				     ; Y OOB?
 RAM:B82D 3E 02			     ld	     a,	2
 RAM:B82F
 RAM:B82F	     loc_B82F:							     ; CODE XREF: RAM:B80Dj
 RAM:B82F 28 09			     jr	     z,	loc_B83A
-RAM:B831 DD AE 0D		     xor     (ix+13)
+RAM:B831 DD AE 0D		     xor     (ix+13)				     ; toggle bit 1/2
 RAM:B834 DD 77 0D		     ld	     (ix+13), a
-RAM:B837 CD 2E B4		     call    sub_B42E
+RAM:B837 CD 2E B4		     call    gen_audio_rom
 RAM:B83A
 RAM:B83A	     loc_B83A:							     ; CODE XREF: RAM:loc_B82Fj
 RAM:B83A CD 85 B9		     call    toggle_next_prev_sprite
@@ -4006,7 +4007,7 @@ RAM:B882 CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:B885 DD CB 0C 56		     bit     2,	(ix+12)				     ; Z OOB?
 RAM:B889 28 07			     jr	     z,	loc_B892			     ; no, skip
 RAM:B88B DD CB 0D D6		     set     2,	(ix+13)				     ; set dir=up
-RAM:B88F CD 2E B4		     call    sub_B42E				     ; audio?
+RAM:B88F CD 2E B4		     call    gen_audio_rom			     ; audio?
 RAM:B892
 RAM:B892	     loc_B892:							     ; CODE XREF: RAM:B889j
 RAM:B892									     ; RAM:B8A1j ...
@@ -4041,7 +4042,7 @@ RAM:B8BD 01 12 00		     ld	     bc, 18				     ; 18 bytes	to copy
 RAM:B8C0 D5			     push    de
 RAM:B8C1 DD E1			     pop     ix					     ; save destination
 RAM:B8C3 ED B0			     ldir					     ; copy
-RAM:B8C5 C3 D8 C4		     jp	     sub_C4D8
+RAM:B8C5 C3 D8 C4		     jp	     adj_m4_m12
 RAM:B8C5	     ; End of function init_cauldron_bubbles
 RAM:B8C5
 RAM:B8C5	     ; ---------------------------------------------------------------------------
@@ -4052,7 +4053,7 @@ RAM:B8DA	     ; ----------------------------------------------------------------
 RAM:B8DA
 RAM:B8DA	     loc_B8DA:							     ; DATA XREF: RAM:B1D6o
 RAM:B8DA									     ; RAM:B1D8o ...
-RAM:B8DA CD D8 C4		     call    sub_C4D8
+RAM:B8DA CD D8 C4		     call    adj_m4_m12
 RAM:B8DD 3A 48 5C		     ld	     a,	(special_objs_here)
 RAM:B8E0 A7			     and     a					     ; null?
 RAM:B8E1 C2 5E B9		     jp	     nz, loc_B95E			     ; no, skip
@@ -4089,14 +4090,14 @@ RAM:B923	     ; ----------------------------------------------------------------
 RAM:B923
 RAM:B923	     loc_B923:							     ; DATA XREF: RAM:B1E6o
 RAM:B923									     ; RAM:B1E8o ...
-RAM:B923 CD D8 C4		     call    sub_C4D8
+RAM:B923 CD D8 C4		     call    adj_m4_m12
 RAM:B926 DD 36 00 A0		     ld	     (ix+0), 0A0h ; ' '
 RAM:B92A 18 EA			     jr	     loc_B916
 RAM:B92C	     ; ---------------------------------------------------------------------------
 RAM:B92C
 RAM:B92C	     upd_164_to_167:						     ; DATA XREF: RAM:B1DEo
 RAM:B92C									     ; RAM:B1E0o ...
-RAM:B92C CD D8 C4		     call    sub_C4D8
+RAM:B92C CD D8 C4		     call    adj_m4_m12
 RAM:B92F DD 7E 08		     ld	     a,	(ix+8)				     ; plyr_spr_1 screen
 RAM:B932 FE 88			     cp	     136				     ; cauldron	room?
 RAM:B934 28 0C			     jr	     z,	loc_B942			     ; yes, go
@@ -4967,28 +4968,28 @@ RAM:BEFE	     ; player appear sparkles
 RAM:BEFE
 RAM:BEFE	     upd_120_to_126:						     ; DATA XREF: RAM:B186o
 RAM:BEFE									     ; RAM:B188o ...
-RAM:BEFE CD D8 C4		     call    sub_C4D8
+RAM:BEFE CD D8 C4		     call    adj_m4_m12
 RAM:BF01 3A A2 5B		     ld	     a,	(seed_2)
 RAM:BF04 2F			     cpl
 RAM:BF05 E6 01			     and     1
 RAM:BF07 C0			     ret     nz
-RAM:BF08 DD 34 00		     inc     (ix+0)
-RAM:BF0B CD 19 B4		     call    sub_B419				     ; make a sound?
+RAM:BF08 DD 34 00		     inc     (ix+0)				     ; next sprite
+RAM:BF0B CD 19 B4		     call    gen_audio_graphic_no		     ; make a sound?
 RAM:BF0E C3 92 C6		     jp	     set_wipe_and_draw_flags
 RAM:BF11	     ; ---------------------------------------------------------------------------
 RAM:BF11
-RAM:BF11	     loc_BF11:							     ; DATA XREF: RAM:B194o
-RAM:BF11 CD D8 C4		     call    sub_C4D8
-RAM:BF14 DD CB 0D B6		     res     6,	(ix+0Dh)
-RAM:BF18 DD 7E 10		     ld	     a,	(ix+10h)
+RAM:BF11	     upd_127:							     ; DATA XREF: RAM:B194o
+RAM:BF11 CD D8 C4		     call    adj_m4_m12
+RAM:BF14 DD CB 0D B6		     res     6,	(ix+13)
+RAM:BF18 DD 7E 10		     ld	     a,	(ix+16)
 RAM:BF1B DD 77 00		     ld	     (ix+0), a
-RAM:BF1E C3 D5 AF		     jp	     loc_AFD5
+RAM:BF1E C3 D5 AF		     jp	     jump_to_upd_object
 RAM:BF21	     ; ---------------------------------------------------------------------------
 RAM:BF21	     ; START OF	FUNCTION CHUNK FOR sub_C306
 RAM:BF21
-RAM:BF21	     loc_BF21:							     ; CODE XREF: sub_C306+40j
+RAM:BF21	     init_sparkles:						     ; CODE XREF: sub_C306+40j
 RAM:BF21									     ; RAM:C83Bj ...
-RAM:BF21 DD 36 00 70		     ld	     (ix+0), 70h ; 'p'                       ; twinkly transform
+RAM:BF21 DD 36 00 70		     ld	     (ix+0), 112			     ; twinkly transform
 RAM:BF25 DD CB 07 CE		     set     1,	(ix+7)
 RAM:BF29 18 06			     jr	     loc_BF31
 RAM:BF29	     ; END OF FUNCTION CHUNK FOR sub_C306
@@ -4996,12 +4997,12 @@ RAM:BF2B	     ; ----------------------------------------------------------------
 RAM:BF2B
 RAM:BF2B	     loc_BF2B:							     ; CODE XREF: RAM:B6AEj
 RAM:BF2B									     ; DATA XREF: RAM:B176o ...
-RAM:BF2B CD D8 C4		     call    sub_C4D8
+RAM:BF2B CD D8 C4		     call    adj_m4_m12
 RAM:BF2E DD 34 00		     inc     (ix+0)
 RAM:BF31	     ; START OF	FUNCTION CHUNK FOR sub_C306
 RAM:BF31
 RAM:BF31	     loc_BF31:							     ; CODE XREF: sub_C306-3DDj
-RAM:BF31 CD 03 B4		     call    sub_B403
+RAM:BF31 CD 03 B4		     call    gen_audio_graphic_no_rom
 RAM:BF34 C3 92 C6		     jp	     set_wipe_and_draw_flags
 RAM:BF34	     ; END OF FUNCTION CHUNK FOR sub_C306
 RAM:BF37	     ; ---------------------------------------------------------------------------
@@ -5013,7 +5014,7 @@ RAM:BF3A DD 66 11		     ld	     h,	(ix+17)
 RAM:BF3D 36 00			     ld	     (hl), 0
 RAM:BF3F
 RAM:BF3F	     loc_BF3F:							     ; DATA XREF: RAM:B184o
-RAM:BF3F CD D8 C4		     call    sub_C4D8
+RAM:BF3F CD D8 C4		     call    adj_m4_m12
 RAM:BF42 C3 5E B9		     jp	     loc_B95E
 RAM:BF45
 RAM:BF45	     ; =============== S U B R O U T I N E =======================================
@@ -5397,7 +5398,7 @@ RAM:C1C5 FD E5			     push    iy
 RAM:C1C7 DD E1			     pop     ix
 RAM:C1C9 30 23			     jr	     nc, loc_C1EE
 RAM:C1CB DD CB 00 DE		     set     3,	(ix+0)
-RAM:C1CF CD D8 C4		     call    sub_C4D8
+RAM:C1CF CD D8 C4		     call    adj_m4_m12
 RAM:C1D2 DD 6E 10		     ld	     l,	(ix+16)
 RAM:C1D5 DD 66 11		     ld	     h,	(ix+17)
 RAM:C1D8 36 00			     ld	     (hl), 0
@@ -5416,7 +5417,7 @@ RAM:C1F1	     ; ----------------------------------------------------------------
 RAM:C1F1
 RAM:C1F1	     loc_C1F1:							     ; DATA XREF: RAM:B166o
 RAM:C1F1									     ; RAM:B168o ...
-RAM:C1F1 CD D8 C4		     call    sub_C4D8
+RAM:C1F1 CD D8 C4		     call    adj_m4_m12
 RAM:C1F4 DD 7E 01		     ld	     a,	(ix+1)
 RAM:C1F7 D6 80			     sub     80h ; '€'
 RAM:C1F9 28 07			     jr	     z,	loc_C202
@@ -5512,7 +5513,7 @@ RAM:C28B	     ; ----------------------------------------------------------------
 RAM:C28B
 RAM:C28B	     upd_96_to_102:						     ; DATA XREF: RAM:B156o
 RAM:C28B									     ; RAM:B158o ...
-RAM:C28B CD D8 C4		     call    sub_C4D8
+RAM:C28B CD D8 C4		     call    adj_m4_m12
 RAM:C28E CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:C291 DD CB 0D 46		     bit     0,	(ix+13)
 RAM:C295 20 04			     jr	     nz, loc_C29B
@@ -5548,7 +5549,7 @@ RAM:C2B8 0B			     dec     bc
 RAM:C2B9 78			     ld	     a,	b
 RAM:C2BA B1			     or	     c
 RAM:C2BB 20 F0			     jr	     nz, loc_C2AD
-RAM:C2BD CD 03 B4		     call    sub_B403
+RAM:C2BD CD 03 B4		     call    gen_audio_graphic_no_rom
 RAM:C2C0 01 00 20		     ld	     bc, 2000h
 RAM:C2C3
 RAM:C2C3	     loc_C2C3:							     ; CODE XREF: sub_C2A5+21j
@@ -5644,7 +5645,7 @@ RAM:C33E 28 09			     jr	     z,	loc_C349
 RAM:C340 3A C3 5B		     ld	     a,	(byte_5BC3)
 RAM:C343 A7			     and     a
 RAM:C344 20 03			     jr	     nz, loc_C349
-RAM:C346 C3 21 BF		     jp	     loc_BF21
+RAM:C346 C3 21 BF		     jp	     init_sparkles
 RAM:C349	     ; ---------------------------------------------------------------------------
 RAM:C349
 RAM:C349	     loc_C349:							     ; CODE XREF: sub_C306+38j
@@ -5888,14 +5889,14 @@ RAM:C4D8
 RAM:C4D8	     ; =============== S U B R O U T I N E =======================================
 RAM:C4D8
 RAM:C4D8
-RAM:C4D8	     sub_C4D8:							     ; CODE XREF: RAM:loc_B566p
+RAM:C4D8	     adj_m4_m12:						     ; CODE XREF: RAM:loc_B566p
 RAM:C4D8									     ; init_cauldron_bubbles+1Cj ...
 RAM:C4D8
 RAM:C4D8	     ; FUNCTION	CHUNK AT RAM:C4E0 SIZE 00000003	BYTES
 RAM:C4D8
 RAM:C4D8 21 F4 FC		     ld	     hl, 0FCF4h				     ; -4, -12
 RAM:C4DB 18 03			     jr	     jp_set_pixel_adj
-RAM:C4DB	     ; End of function sub_C4D8
+RAM:C4DB	     ; End of function adj_m4_m12
 RAM:C4DB
 RAM:C4DD
 RAM:C4DD	     ; =============== S U B R O U T I N E =======================================
@@ -5906,12 +5907,12 @@ RAM:C4DD									     ; sub_C306+82p ...
 RAM:C4DD 21 F4 FA		     ld	     hl, 0FAF4h				     ; -6, -12
 RAM:C4DD	     ; End of function adj_m6_m12
 RAM:C4DD
-RAM:C4E0	     ; START OF	FUNCTION CHUNK FOR sub_C4D8
+RAM:C4E0	     ; START OF	FUNCTION CHUNK FOR adj_m4_m12
 RAM:C4E0
 RAM:C4E0	     jp_set_pixel_adj:						     ; CODE XREF: upd_128_to_130+3j
-RAM:C4E0									     ; sub_C4D8+3j ...
+RAM:C4E0									     ; adj_m4_m12+3j ...
 RAM:C4E0 C3 2B C7		     jp	     set_pixel_adj
-RAM:C4E0	     ; END OF FUNCTION CHUNK FOR sub_C4D8
+RAM:C4E0	     ; END OF FUNCTION CHUNK FOR adj_m4_m12
 RAM:C4E3	     ; blocks
 RAM:C4E3
 RAM:C4E3	     ; =============== S U B R O U T I N E =======================================
@@ -5956,17 +5957,17 @@ RAM:C4F7
 RAM:C4F7	     ; =============== S U B R O U T I N E =======================================
 RAM:C4F7
 RAM:C4F7
-RAM:C4F7	     sub_C4F7:							     ; CODE XREF: RAM:loc_CDDAp
+RAM:C4F7	     adj_m8_m12:						     ; CODE XREF: RAM:upd_32_to_47p
 RAM:C4F7 21 F4 F8		     ld	     hl, 0F8F4h				     ; -8, -12
 RAM:C4FA 18 E4			     jr	     jp_set_pixel_adj
-RAM:C4FA	     ; End of function sub_C4F7
+RAM:C4FA	     ; End of function adj_m8_m12
 RAM:C4FA
 RAM:C4FC
 RAM:C4FC	     ; =============== S U B R O U T I N E =======================================
 RAM:C4FC
 RAM:C4FC
 RAM:C4FC	     adj_m7_m12:						     ; CODE XREF: RAM:B7A6j
-RAM:C4FC									     ; RAM:loc_C828p
+RAM:C4FC									     ; RAM:upd_48_to_53_56_to_61p
 RAM:C4FC 21 F4 F9		     ld	     hl, 0F9F4h				     ; -7, -12
 RAM:C4FF 18 DF			     jr	     jp_set_pixel_adj
 RAM:C4FF	     ; End of function adj_m7_m12
@@ -5975,10 +5976,10 @@ RAM:C501
 RAM:C501	     ; =============== S U B R O U T I N E =======================================
 RAM:C501
 RAM:C501
-RAM:C501	     sub_C501:							     ; CODE XREF: RAM:loc_CDDFp
+RAM:C501	     adj_m12_m12:						     ; CODE XREF: RAM:upd_64_to_79p
 RAM:C501 21 F4 F4		     ld	     hl, 0F4F4h				     ; -12, -12
 RAM:C504 18 DA			     jr	     jp_set_pixel_adj
-RAM:C504	     ; End of function sub_C501
+RAM:C504	     ; End of function adj_m12_m12
 RAM:C504
 RAM:C506	     ; ---------------------------------------------------------------------------
 RAM:C506
@@ -6396,7 +6397,7 @@ RAM:C72B	     ; =============== S U B R O U T I N E ============================
 RAM:C72B
 RAM:C72B
 RAM:C72B	     set_pixel_adj:						     ; CODE XREF: RAM:B9A2j
-RAM:C72B									     ; sub_C4D8:jp_set_pixel_adjj ...
+RAM:C72B									     ; adj_m4_m12:jp_set_pixel_adjj ...
 RAM:C72B DD 75 12		     ld	     (ix+18), l				     ; pixel_x adjust
 RAM:C72E DD 74 13		     ld	     (ix+19), h				     ; pixel_y adjust
 RAM:C731 C9			     ret
@@ -6570,25 +6571,27 @@ RAM:C822 C9			     ret
 RAM:C822	     ; End of function sub_C7FE
 RAM:C822
 RAM:C823	     ; ---------------------------------------------------------------------------
+RAM:C823	     ; human legs
 RAM:C823
-RAM:C823	     loc_C823:							     ; DATA XREF: RAM:B0B6o
+RAM:C823	     upd_16_to_21_24_to_29:					     ; DATA XREF: RAM:B0B6o
 RAM:C823									     ; RAM:B0B8o ...
 RAM:C823 CD DD C4		     call    adj_m6_m12
-RAM:C826 18 03			     jr	     loc_C82B
+RAM:C826 18 03			     jr	     upd_player_bottom
 RAM:C828	     ; ---------------------------------------------------------------------------
+RAM:C828	     ; wulf legs
 RAM:C828
-RAM:C828	     loc_C828:							     ; DATA XREF: RAM:B0F6o
+RAM:C828	     upd_48_to_53_56_to_61:					     ; DATA XREF: RAM:B0F6o
 RAM:C828									     ; RAM:B0F8o ...
 RAM:C828 CD FC C4		     call    adj_m7_m12
 RAM:C82B
-RAM:C82B	     loc_C82B:							     ; CODE XREF: RAM:C826j
-RAM:C82B DD CB 0D 76		     bit     6,	(ix+0Dh)
+RAM:C82B	     upd_player_bottom:						     ; CODE XREF: RAM:C826j
+RAM:C82B DD CB 0D 76		     bit     6,	(ix+13)
 RAM:C82F 28 0D			     jr	     z,	loc_C83E
 RAM:C831 3A C3 5B		     ld	     a,	(byte_5BC3)
 RAM:C834 A7			     and     a
 RAM:C835 20 07			     jr	     nz, loc_C83E
 RAM:C837 DD CB 2D F6		     set     6,	(ix+2Dh)
-RAM:C83B C3 21 BF		     jp	     loc_BF21
+RAM:C83B C3 21 BF		     jp	     init_sparkles
 RAM:C83E	     ; ---------------------------------------------------------------------------
 RAM:C83E
 RAM:C83E	     loc_C83E:							     ; CODE XREF: RAM:C82Fj
@@ -6617,11 +6620,11 @@ RAM:C86A C3 92 C6		     jp	     set_wipe_and_draw_flags
 RAM:C86D	     ; ---------------------------------------------------------------------------
 RAM:C86D
 RAM:C86D	     loc_C86D:							     ; CODE XREF: RAM:C853j
-RAM:C86D DD 7E 0B		     ld	     a,	(ix+0Bh)
-RAM:C870 A7			     and     a
-RAM:C871 FA 55 C8		     jp	     m,	loc_C855
+RAM:C86D DD 7E 0B		     ld	     a,	(ix+11)				     ; dZ
+RAM:C870 A7			     and     a					     ; <0?
+RAM:C871 FA 55 C8		     jp	     m,	loc_C855			     ; yes, go
 RAM:C874 AF			     xor     a
-RAM:C875 DD 77 0B		     ld	     (ix+0Bh), a
+RAM:C875 DD 77 0B		     ld	     (ix+11), a				     ; dZ=0
 RAM:C878 18 DB			     jr	     loc_C855
 RAM:C87A
 RAM:C87A	     ; =============== S U B R O U T I N E =======================================
@@ -7634,28 +7637,30 @@ RAM:CDD8 18 E2			     jr	     loc_CDBC
 RAM:CDD8	     ; End of function sub_CD4D
 RAM:CDD8
 RAM:CDDA	     ; ---------------------------------------------------------------------------
+RAM:CDDA	     ; player (human top half)
 RAM:CDDA
-RAM:CDDA	     loc_CDDA:							     ; DATA XREF: RAM:B0D6o
+RAM:CDDA	     upd_32_to_47:						     ; DATA XREF: RAM:B0D6o
 RAM:CDDA									     ; RAM:B0D8o ...
-RAM:CDDA CD F7 C4		     call    sub_C4F7
-RAM:CDDD 18 03			     jr	     loc_CDE2
+RAM:CDDA CD F7 C4		     call    adj_m8_m12
+RAM:CDDD 18 03			     jr	     upd_player_top
 RAM:CDDF	     ; ---------------------------------------------------------------------------
+RAM:CDDF	     ; player (wulf top	half)
 RAM:CDDF
-RAM:CDDF	     loc_CDDF:							     ; DATA XREF: RAM:B116o
+RAM:CDDF	     upd_64_to_79:						     ; DATA XREF: RAM:B116o
 RAM:CDDF									     ; RAM:B118o ...
-RAM:CDDF CD 01 C5		     call    sub_C501
+RAM:CDDF CD 01 C5		     call    adj_m12_m12
 RAM:CDE2
-RAM:CDE2	     loc_CDE2:							     ; CODE XREF: RAM:CDDDj
+RAM:CDE2	     upd_player_top:						     ; CODE XREF: RAM:CDDDj
 RAM:CDE2 3A C3 5B		     ld	     a,	(byte_5BC3)
 RAM:CDE5 A7			     and     a
 RAM:CDE6 20 07			     jr	     nz, loc_CDEF
-RAM:CDE8 DD CB 0D 76		     bit     6,	(ix+0Dh)
-RAM:CDEC C2 21 BF		     jp	     nz, loc_BF21
+RAM:CDE8 DD CB 0D 76		     bit     6,	(ix+13)
+RAM:CDEC C2 21 BF		     jp	     nz, init_sparkles
 RAM:CDEF
 RAM:CDEF	     loc_CDEF:							     ; CODE XREF: RAM:CDE6j
 RAM:CDEF DD E5			     push    ix
 RAM:CDF1 D1			     pop     de
-RAM:CDF2 21 E0 FF		     ld	     hl, 0FFE0h
+RAM:CDF2 21 E0 FF		     ld	     hl, 0FFE0h				     ; -32
 RAM:CDF5 19			     add     hl, de
 RAM:CDF6 E5			     push    hl
 RAM:CDF7 FD E1			     pop     iy
@@ -8328,9 +8333,9 @@ RAM:D1BA ED B0			     ldir
 RAM:D1BC 11 81 D1		     ld	     de, plyr_spr_2_scratchpad
 RAM:D1BF 01 08 00		     ld	     bc, 8
 RAM:D1C2 ED B0			     ldir
-RAM:D1C4 3E 12			     ld	     a,	12h
+RAM:D1C4 3E 12			     ld	     a,	18				     ; graphic_no (player top half)
 RAM:D1C6 32 71 D1		     ld	     (byte_D171), a			     ; plyr_spr_1_scratchpad (byte 16)
-RAM:D1C9 3E 22			     ld	     a,	22h ; '"'
+RAM:D1C9 3E 22			     ld	     a,	34				     ; graphic_no (player bottom half)
 RAM:D1CB 32 91 D1		     ld	     (byte_D191), a			     ; plyr_spr_2_scratchpad (byte 16)
 RAM:D1CE 3A A0 5B		     ld	     a,	(seed_1)
 RAM:D1D1 E6 03			     and     3					     ; random 0-3

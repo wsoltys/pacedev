@@ -38,8 +38,11 @@
 #define FLAG_X_OOB      (1<<0)
 
 // byte offset 13 flags
-#define FLAG_UP         (1<<2)
-#define FLAG_DROPPING   (1<<2)
+#define FLAG_TRIGGERED  (1<<3)    // dropping block
+#define FLAG_UP         (1<<2)    // bouncing ball
+#define FLAG_DROPPING   (1<<2)    // spiked ball
+#define FLAG_EAST       (1<<0)    // EW fire
+#define FLAG_NORTH      (1<<1)    // NS fire
 
 typedef struct
 {
@@ -82,7 +85,11 @@ typedef struct
   uint8_t   off14;
   uint8_t   off15;
   // originally a pointer, now an index
-  uint16_t  ptr_obj_tbl_entry;
+  union
+  {
+    uint16_t  ptr_obj_tbl_entry;
+    uint16_t  plyr_graphic_no;
+  };  
   int8_t    pixel_x_adj;
   int8_t    pixel_y_adj;
   uint8_t   pad2[4];
@@ -118,7 +125,7 @@ static uint8_t seed_1;                                // $5BA0
 static uint16_t seed_2;                               // $5BA2
 static uint8_t seed_3;                                // $5BA5
 
-// cleared each game
+// cleared each game ($5BA8-$6107)
 static uint8_t objs_wiped_cnt;                        // $5BA8
 static uint8_t room_size_X;                           // $5BAB
 static uint8_t room_size_Y;                           // $5BAC
@@ -132,6 +139,7 @@ static int8_t lives;                                  // $5BBA
 static uint8_t ball_bounce_height;                    // $5BBD
 static uint8_t is_spike_ball_dropping;                // $5BBF
 static uint8_t disable_spike_ball_drop;               // $5BC0
+static uint8_t byte_5BC3;                             // $5BC3
 static uint8_t *gfxbase_8x8;                          // $5BC7
 static uint8_t objects_carried[3][4];                 // $5BDC
 static uint8_t room_visited[32];                      // $5BE8
@@ -140,6 +148,7 @@ static OBJ32 *special_objs_here =
               &graphic_objs_tbl[2];                   // $5C48
 static OBJ32 *other_objs_here =
               &graphic_objs_tbl[4];                   // $5C88
+              
 static SPRITE_SCRATCHPAD sprite_scratchpad;           // $BFDB
 static SPRITE_SCRATCHPAD sun_moon_scratchpad;         // $C44D
 static uint8_t objects_to_draw[48];                   // $CE8B
@@ -189,8 +198,11 @@ static uint8_t print_8x8 (uint8_t x, uint8_t y, uint8_t code);
 static void display_menu (void);
 static void display_text_list (uint8_t *clours, uint8_t *xy, char *text_list[], uint8_t n);
 static void multiple_print_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t dx, uint8_t dy, uint8_t n);
+static void init_sparkles (POBJ32 p_obj);
 static void display_objects (void);
 static void upd_120_to_126 (POBJ32 p_obj);
+static void adj_m8_m12 (POBJ32 p_obj);
+static void upd_127 (POBJ32 p_obj);
 static bool is_obj_moving (POBJ32 p_obj);
 static void upd_103 (POBJ32 p_obj);
 static void gen_audio_XYZ_wipe_and_draw (POBJ32 p_obj);
@@ -207,9 +219,10 @@ static void upd_6_7 (POBJ32 p_obj);
 static void upd_10 (POBJ32 p_obj);
 static void upd_11 (POBJ32 p_obj);
 static void upd_12_to_15 (POBJ32 p_obj);
-static void sub_C4D8 (POBJ32 p_obj);
+static void adj_m4_m12 (POBJ32 p_obj);
 static void upd_m6_m12 (POBJ32 p_obj);
 static void adj_m7_m12 (POBJ32 p_obj);
+static void adj_m12_m12 (POBJ32 p_obj);
 static void upd_88_to_90 (POBJ32 p_obj);
 static void find_special_objs_here (void);
 static void update_special_objs (void);
@@ -224,12 +237,18 @@ static void add_dXYZ (POBJ32 p_obj);
 static void upd_3_5 (POBJ32 p_obj);
 static void set_pixel_adj (POBJ32 p_obj, int8_t h, int8_t l);
 static void upd_2_4 (POBJ32 p_obj);
+static void upd_16_to_21_24_to_29 (POBJ32 p_obj);
+static void upd_48_to_53_56_to_61 (POBJ32 p_obj);
+static void upd_player_legs (POBJ32 p_obj);
 static void clear_dX_dY (POBJ32 p_obj);
 static int8_t adj_dZ_for_out_of_bounds (POBJ32 p_obj, int8_t d_z);
 static int8_t adj_d_for_out_of_bounds (int8_t d);
 static void adj_for_out_of_bounds (POBJ32 p_obj);
 static int8_t adj_dX_for_out_of_bounds (POBJ32 p_obj, int8_t d_x);
 static int8_t adj_dY_for_out_of_bounds (POBJ32 p_obj, int8_t d_y);
+static void upd_32_to_47 (POBJ32 p_obj);
+static void upd_64_to_79 (POBJ32 p_obj);
+static void upd_player_top (POBJ32 p_obj);
 static void save_2d_info (POBJ32 p_obj);
 static void list_objects_to_draw (void);
 static void calc_display_order_and_render (void);
@@ -322,6 +341,13 @@ START_AF6C:
 
 MAIN_AF88:
 
+  {
+    // fudge fudge fudge
+    // clear variables $5BA8-$6107
+    uint8_t *p = (uint8_t *)&objs_wiped_cnt;
+    while (p < (uint8_t *)&sprite_scratchpad)
+      *(p++) = 0;
+  }
   //build_lookup_tbls ();
   lives = 5;
 
@@ -408,6 +434,9 @@ game_delay:
     print_lives_gfx ();
     print_lives ();
     //update_screen ();
+    
+    //while (!(key[KEY_ESC]||key[KEY_SPACE]));
+    //while (key[KEY_SPACE]);
   }
 
   if (graphic_objs_tbl[0].graphic_no == 0 &&
@@ -518,52 +547,52 @@ adjfn_t upd_sprite_jump_tbl[] =
   upd_12_to_15,                 // even more bricks
   upd_12_to_15,                 // even more bricks
   upd_12_to_15,                 // even more bricks
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
+  upd_16_to_21_24_to_29,        // human legs
+  upd_16_to_21_24_to_29,        // human legs
+  upd_16_to_21_24_to_29,        // human legs
+  upd_16_to_21_24_to_29,        // human legs
+  upd_16_to_21_24_to_29,        // human legs
+  upd_16_to_21_24_to_29,        // human legs
   upd_22,                       // gargoyle
   upd_23,                       // spikes
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
+  upd_16_to_21_24_to_29,        // human legs
+  upd_16_to_21_24_to_29,        // human legs
+  upd_16_to_21_24_to_29,        // human legs
+  upd_16_to_21_24_to_29,        // human legs
+  upd_16_to_21_24_to_29,        // human legs
+  upd_16_to_21_24_to_29,        // human legs
   upd_30_31_158_159,            // guard (top half)
   upd_30_31_158_159,            // guard (top half)
   upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,  // 40
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,  // 50
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
+  upd_32_to_47,                 // player (top half)
+  upd_32_to_47,                 // player (top half)
+  upd_32_to_47,                 // player (top half)
+  upd_32_to_47,                 // player (top half)
+  upd_32_to_47,                 // player (top half)
+  upd_32_to_47,                 // player (top half)
+  upd_32_to_47,                 // player (top half)
+  upd_32_to_47,                 // player (top half)
+  upd_32_to_47,                 // player (top half)
+  upd_32_to_47,                 // player (top half)
+  upd_32_to_47,                 // player (top half)
+  upd_32_to_47,                 // player (top half)
+  upd_32_to_47,                 // player (top half)
+  upd_32_to_47,                 // player (top half)
+  upd_32_to_47,                 // player (top half)
+  upd_48_to_53_56_to_61,        // wulf legs
+  upd_48_to_53_56_to_61,        // wulf legs
+  upd_48_to_53_56_to_61,        // wulf legs
+  upd_48_to_53_56_to_61,        // wulf legs
+  upd_48_to_53_56_to_61,        // wulf legs
+  upd_48_to_53_56_to_61,        // wulf legs
   upd_54,                       // block (moving EW)
   upd_55,                       // block (moving NS)
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,  // 60
-  upd_not_implemented,
+  upd_48_to_53_56_to_61,        // wulf legs
+  upd_48_to_53_56_to_61,        // wulf legs
+  upd_48_to_53_56_to_61,        // wulf legs
+  upd_48_to_53_56_to_61,        // wulf legs
+  upd_48_to_53_56_to_61,        // wulf legs
+  upd_48_to_53_56_to_61,        // wulf legs
   upd_62,                       // another block
   upd_63,                       // spiked ball
   upd_not_implemented,
@@ -588,8 +617,8 @@ adjfn_t upd_sprite_jump_tbl[] =
   upd_80_to_83,                 // ghost
   upd_84,                       // table
   upd_85,                       // chest
-  upd_86_87,                    // another fire
-  upd_86_87,                    // another fire
+  upd_86_87,                    // fire (EW)
+  upd_86_87,                    // fire (EW)
   upd_88_to_90,                 // sun
   upd_88_to_90,                 // moon
   upd_88_to_90,                 // frame
@@ -629,7 +658,7 @@ adjfn_t upd_sprite_jump_tbl[] =
   upd_120_to_126,               // player appear sparkles
   upd_120_to_126,               // player appear sparkles
   upd_120_to_126,               // player appear sparkles
-  upd_not_implemented,
+  upd_127,                      // last player appears sparkle
   upd_128_to_130,               // tree wall
   upd_128_to_130,               // tree wall
   upd_128_to_130,               // tree wall
@@ -682,8 +711,8 @@ adjfn_t upd_sprite_jump_tbl[] =
   upd_not_implemented,
   upd_178_179,                  // ball up/down
   upd_178_179,                  // ball up/down
-  upd_180_181,                  // fire
-  upd_180_181,                  // fire
+  upd_180_181,                  // fire (NS)
+  upd_180_181,                  // fire (NS)
   upd_182_183,                  // ball (bouncing around)
   upd_182_183,                  // ball (bouncing around)
   upd_not_implemented,
@@ -761,11 +790,19 @@ void upd_182_183 (POBJ32 p_obj)
 }
 
 // $B683
-// block (high?)
+// block (dropping) (eg. room 0)
+// *** UNTESTED
 void upd_91 (POBJ32 p_obj)
 {
   upd_6_7 (p_obj);
-  // other stuff
+  if ((p_obj->flags13 & FLAG_TRIGGERED) == 0)
+    return;
+  p_obj->flags13 &= ~FLAG_TRIGGERED;
+  p_obj->d_z = 0;
+  dec_dZ_and_update_XYZ (p_obj);
+  if ((p_obj->flags12 & FLAG_Z_OOB) == 0)
+    /*gen_audio_Z (p_obj)*/;
+  set_wipe_and_draw_flags (p_obj);
 }
 
 // $B6A2
@@ -900,19 +937,47 @@ void upd_23 (POBJ32 p_obj)
 }
 
 // $B7ED
-// another fire
+// fire (moving EW) (eg. room 147)
 void upd_86_87 (POBJ32 p_obj)
 {
   upd_12_to_15 (p_obj);
-  // other stuff
+  p_obj->d_z = 1;
+  if ((p_obj->flags13 & FLAG_EAST) != 0)
+    p_obj->d_x = 2;
+  else
+    p_obj->d_x = -2;
+  //gen_audio_X (p_obj);
+  dec_dZ_and_update_XYZ (p_obj);
+  if ((p_obj->flags12 & FLAG_X_OOB) != 0)
+  {
+    p_obj->flags13 ^= FLAG_EAST;
+    //gen_audio_rom ();
+  }
+  toggle_next_prev_sprite (p_obj);
+  sub_B85C (p_obj);
+  set_wipe_and_draw_flags (p_obj);
 }
 
 // $B808
-// fire
+// fire (moving NS) (eg. room 14)
 void upd_180_181 (POBJ32 p_obj)
 {
   upd_12_to_15 (p_obj);
-  // other stuff
+  p_obj->d_z = 1;
+  if ((p_obj->flags13 & FLAG_NORTH) != 0)
+    p_obj->d_y = 2;
+  else
+    p_obj->d_y = -2;
+  //gen_audio_Y (p_obj);
+  dec_dZ_and_update_XYZ (p_obj);
+  if ((p_obj->flags12 & FLAG_Y_OOB) != 0)
+  {
+    p_obj->flags13 ^= FLAG_NORTH;
+    //gen_audio_rom ();
+  }
+  toggle_next_prev_sprite (p_obj);
+  sub_B85C (p_obj);
+  set_wipe_and_draw_flags (p_obj);
 }
 
 // $B85C
@@ -954,7 +1019,7 @@ void upd_178_179 (POBJ32 p_obj)
 // twinkles
 void upd_164_to_167 (POBJ32 p_obj)
 {
-  sub_C4D8 (p_obj);
+  adj_m4_m12 (p_obj);
   // other stuff
 }
 
@@ -1175,6 +1240,15 @@ void multiple_print_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t dx, uint8_t d
   }
 }
 
+// $BF21
+void init_sparkles (POBJ32 p_obj)
+{
+  p_obj->graphic_no = 112;
+  p_obj->flags |= (1<<1);   // ???
+  //gen_audio_graphic_no_rom (p_obj);
+  set_wipe_and_draw_flags (p_obj);
+}
+
 // $BF4E
 void display_objects (void)
 {
@@ -1199,15 +1273,27 @@ void display_objects (void)
 }
 
 // $BEFE
+// player appears sparkles
 void upd_120_to_126 (POBJ32 p_obj)
 {
-  sub_C4D8 (p_obj);
-#if 0  
+  adj_m4_m12 (p_obj);
   if ((~seed_2 & 1) != 0)
     return;
-  graphic_objs_tbl[0].graphic_no++;
-  // other stuff
-#endif  
+  p_obj->graphic_no++;
+  //gen_audio_graphic_no (p_obj);
+  set_wipe_and_draw_flags (p_obj);
+}
+
+// $BF11
+// last player appears sparkle
+void upd_127 (POBJ32 p_obj)
+{
+  adj_m4_m12 (p_obj);
+  // no idea what the rest of this does???
+  p_obj->flags13 &= ~(1<<6);
+  // for player (only), this stores the graphic_no
+  p_obj->graphic_no = p_obj->plyr_graphic_no;
+  upd_sprite_jump_tbl[p_obj->graphic_no] (p_obj);
 }
 
 // $C1A1
@@ -1233,10 +1319,18 @@ void gen_audio_XYZ_wipe_and_draw (POBJ32 p_obj)
 
 // $C28B
 // special objects
+// *** UNTESTED
 void upd_96_to_102 (POBJ32 p_obj)
 {
-  sub_C4D8 (p_obj);
-  // more stuff
+  adj_m4_m12 (p_obj);
+  dec_dZ_and_update_XYZ (p_obj);
+  // what does this flag represent?
+  if ((p_obj->flags13 & (1<<0)) == 0)
+    if (!is_obj_moving (p_obj))
+      return;
+  p_obj->flags13 &= ~(1<<0);
+  clear_dX_dY (p_obj);
+  gen_audio_XYZ_wipe_and_draw (p_obj);
 }
   
 // $C2CB
@@ -1365,7 +1459,7 @@ void upd_128_to_130 (POBJ32 p_obj)
 }
 
 // $C4D8
-void sub_C4D8 (POBJ32 p_obj)
+void adj_m4_m12 (POBJ32 p_obj)
 {
   set_pixel_adj (p_obj, -4, -12);
 }
@@ -1401,10 +1495,22 @@ void upd_12_to_15 (POBJ32 p_obj)
   set_pixel_adj (p_obj, -4, -8);
 }
 
+// $C4F7
+void adj_m8_m12 (POBJ32 p_obj)
+{
+  set_pixel_adj (p_obj, -8, -12);
+}
+
 // $C4FC
 void adj_m7_m12 (POBJ32 p_obj)
 {
   set_pixel_adj (p_obj, -7, -12);
+}
+
+// $C501
+void adj_m12_m12 (POBJ32 p_obj)
+{
+  set_pixel_adj (p_obj, -12, -12);
 }
 
 // $C506
@@ -1669,6 +1775,41 @@ void upd_2_4 (POBJ32 p_obj)
   }
 }
 
+// $C823
+// human legs
+void upd_16_to_21_24_to_29 (POBJ32 p_obj)
+{
+  adj_m6_m12 (p_obj);
+  upd_player_legs (p_obj);  
+}
+
+// $C828
+// wulf legs
+void upd_48_to_53_56_to_61 (POBJ32 p_obj)
+{
+  adj_m7_m12 (p_obj);
+  upd_player_legs (p_obj);
+}
+
+// $C82B
+// handles human and wulf legs
+void upd_player_legs (POBJ32 p_obj)
+{
+  POBJ32 p_next_obj = p_obj+1;
+  
+  if ((p_obj->flags13 & (1<<6)) != 0 &&
+      byte_5BC3 == 0)
+  {
+    p_next_obj->flags13 |= (1<<6);
+    init_sparkles (p_obj);
+  }
+  else
+  {
+    // heaps of shit
+    set_wipe_and_draw_flags (p_obj);
+  }
+}
+
 // $C9F3
 void clear_dX_dY (POBJ32 p_obj)
 {
@@ -1783,6 +1924,36 @@ int8_t adj_dY_for_out_of_bounds (POBJ32 p_obj, int8_t d_y)
   return (d_y);
 }
 
+// $CDDA
+// player (top half)
+void upd_32_to_47 (POBJ32 p_obj)
+{
+  adj_m8_m12 (p_obj);
+  upd_player_top (p_obj);
+}
+
+// $CDDF
+// player (wulf half)
+void upd_64_to_79 (POBJ32 p_obj)
+{
+  adj_m12_m12 (p_obj);
+  upd_player_top (p_obj);
+}
+
+// $CDDA
+void upd_player_top (POBJ32 p_obj)
+{
+  if (byte_5BC3 == 0 &&
+      (p_obj->flags13 & (1<<6)) != 0)
+    init_sparkles (p_obj);
+  else
+  {
+    // heaps of shit
+    // this is a fudge - remove me!
+    set_wipe_and_draw_flags (p_obj);
+  }
+}
+
 // $CE49
 void save_2d_info (POBJ32 p_obj)
 {
@@ -1849,8 +2020,9 @@ void init_start_location (void)
 {
   memcpy ((uint8_t *)&plyr_spr_1_scratchpad, plyr_spr_init_data+0, 8);
   memcpy ((uint8_t *)&plyr_spr_2_scratchpad, plyr_spr_init_data+8, 8);
-  //plyr_spr_1_scratchpad.pad1[1] = 0x12; // *** FIXME
-  //plyr_spr_2_scratchpad.pad1[1] = 0x22; // *** FIXME
+  // set graphic_no for player sprites (after sparkles)
+  plyr_spr_1_scratchpad.plyr_graphic_no = 18;   // legs
+  plyr_spr_2_scratchpad.plyr_graphic_no = 34;   // top half
   uint8_t s = start_locations[seed_1 & 3];
   // start_loc_1
   plyr_spr_1_scratchpad.scrn = s;
