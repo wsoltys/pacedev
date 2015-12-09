@@ -245,13 +245,15 @@ static void print_sprite (PSPRITE_SCRATCHPAD scratchpad);
 
 // end of prototypes
 
-void dump_graphic_objs_tbl (void)
+void dump_graphic_objs_tbl (int start, int end)
 {
+  unsigned i = (start == -1 ? 0 : start);
+  
   fprintf (stderr, "%s():\n", __FUNCTION__);
   
-  for (unsigned i=0; i<40; i++)
+  for (; i<end && i<40; i++)
   {
-    fprintf (stderr, "%02d: graphic_no=%02d, x=%d, y=%d, z=%d, width=%d, depth=%d, height=%d, flags=$%02X\n",
+    fprintf (stderr, "%02d: graphic_no=%02d, (%3d,%3d,%3d) %02dx%02dx%02d, f=$%02X @(%02d,%02d)\n",
               i,
               graphic_objs_tbl[i].graphic_no,
               graphic_objs_tbl[i].x,
@@ -260,7 +262,9 @@ void dump_graphic_objs_tbl (void)
               graphic_objs_tbl[i].width,
               graphic_objs_tbl[i].depth,
               graphic_objs_tbl[i].height,
-              graphic_objs_tbl[i].flags);
+              graphic_objs_tbl[i].flags,
+              graphic_objs_tbl[i].pixel_x,
+              graphic_objs_tbl[i].pixel_y);
   }
 }
 
@@ -354,7 +358,11 @@ onscreen_loop:
     if (p_obj->graphic_no > 187)
       upd_not_implemented (p_obj);
     else
-      upd_sprite_jump_tbl[p_obj->graphic_no] (p_obj);
+    {
+      // debug only - 7 only
+      //if (p_obj->graphic_no == 7)
+        upd_sprite_jump_tbl[p_obj->graphic_no] (p_obj);
+    }
 
     // update seed_3
     uint8_t r = rand ();
@@ -465,7 +473,7 @@ game_delay:
     
   if (key[KEY_D])
   {
-    dump_graphic_objs_tbl ();
+    dump_graphic_objs_tbl (-1, -1);
   }
 
 /////////////////////////////////
@@ -1381,7 +1389,7 @@ void find_special_objs_here (void)
             __FUNCTION__,
             graphic_objs_tbl[0].scrn);
   
-  for (unsigned i=0; i<32; i++, p_special_obj++)
+  for (unsigned i=0; i<32; i++)
   {
     if (special_objs_tbl[i].graphic_no == 0)
       continue;
@@ -1401,6 +1409,7 @@ void find_special_objs_here (void)
     p_special_obj->ptr_obj_tbl_entry = i;
     memset (&p_special_obj->pad2, 0, 12); // *** FIXME
     
+    p_special_obj++;
     n_special_objs_here++;
   }
 
@@ -1952,6 +1961,7 @@ found_screen:
 
         // debug: (don't) include 62
         //if (p_other_objs->graphic_no == 23)
+        //if (0)
         {
           p_other_objs++;
           n_other_objs++;
@@ -1966,7 +1976,7 @@ found_screen:
   for (; n_other_objs<40-4; n_other_objs++)
     memset (p_other_objs++, 0, sizeof(OBJ32));
             
-  dump_graphic_objs_tbl();
+  dump_graphic_objs_tbl(-1, -1);
 }
 
 // $D55F
@@ -2068,10 +2078,16 @@ void calc_pixel_XY_and_render (POBJ32 p_obj)
   
   calc_pixel_XY (p_obj);
   
-  if (p_obj->graphic_no == 7)
+  // debug only
+  //if (p_obj->graphic_no != 2 && p_obj->graphic_no != 3)
+  //if (p_obj->graphic_no == 7)
   {
-    //fprintf (stderr, "%s($%02X)\n", __FUNCTION__, p_obj->graphic_no);
     print_sprite (p_obj);
+
+    //uint8_t i = p_obj - graphic_objs_tbl;
+    //dump_graphic_objs_tbl (i, i+1);
+    //while (!key[KEY_SPACE]);
+    //while (key[KEY_SPACE]);
   }
 }
 
