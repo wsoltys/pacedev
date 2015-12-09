@@ -22,6 +22,8 @@
 // neogeo:  d:\mingw_something\setenv.bat
 //          g++ kl.c -o kl -lalleg
 
+#define NOT_TESTED      fprintf (stderr, "*** NOT TESTED ***\n")
+
 #pragma pack(1)
 
 #define ENABLE_MASK
@@ -136,6 +138,7 @@ static uint8_t portcullis_move_cnt;                   // $5BB0
 static uint8_t initial_rendering;                     // $5BB7
 static uint8_t days;                                  // $5BB9
 static int8_t lives;                                  // $5BBA
+static uint8_t fire_seed;                             // $5BBC
 static uint8_t ball_bounce_height;                    // $5BBD
 static uint8_t is_spike_ball_dropping;                // $5BBF
 static uint8_t disable_spike_ball_drop;               // $5BC0
@@ -176,9 +179,12 @@ static void upd_22 (POBJ32 p_obj);
 static void upd_23 (POBJ32 p_obj);
 static void upd_86_87 (POBJ32 p_obj);
 static void upd_180_181 (POBJ32 p_obj);
+static void upd_176_177 (POBJ32 p_obj);
 static void sub_B85C (POBJ32 p_obj);
 static void upd_178_179 (POBJ32 p_obj);
+static void upd_168_to_175 (POBJ32 p_obj);
 static void upd_164_to_167 (POBJ32 p_obj);
+static void upd_111 (POBJ32 p_obj);
 static void toggle_next_prev_sprite (POBJ32 p_obj);
 static void upd_141 (POBJ32 p_obj);
 static void upd_142 (POBJ32 p_obj);
@@ -199,6 +205,9 @@ static void display_menu (void);
 static void display_text_list (uint8_t *clours, uint8_t *xy, char *text_list[], uint8_t n);
 static void multiple_print_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t dx, uint8_t dy, uint8_t n);
 static void init_sparkles (POBJ32 p_obj);
+static void upd_112_to_118_184 (POBJ32 p_obj);
+static void upd_185_187 (POBJ32 p_obj);
+static void upd_119 (POBJ32 p_obj);
 static void display_objects (void);
 static void upd_120_to_126 (POBJ32 p_obj);
 static void adj_m8_m12 (POBJ32 p_obj);
@@ -207,7 +216,7 @@ static bool is_obj_moving (POBJ32 p_obj);
 static void upd_103 (POBJ32 p_obj);
 static void gen_audio_XYZ_wipe_and_draw (POBJ32 p_obj);
 static void upd_96_to_102 (POBJ32 p_obj);
-static void no_adjust (POBJ32 p_obj);
+static void no_update (POBJ32 p_obj);
 static void display_sun_moon_frame (PSPRITE_SCRATCHPAD scratchpad);
 static void init_sun (void);
 static void init_special_objects (void);
@@ -376,12 +385,15 @@ game_loop:
 
 onscreen_loop:
 
+  fire_seed = seed_2;
+  
   POBJ32 p_obj = graphic_objs_tbl;
   
   for (unsigned i=0; i<40; i++, p_obj++)
   {
     update_sprite_loop:
-      
+
+    fire_seed++;      
     save_2d_info (p_obj);
 
     #ifndef arraylen
@@ -531,8 +543,8 @@ exit_screen:
 // $B096
 adjfn_t upd_sprite_jump_tbl[] =
 {
-  no_adjust,                    // (unused)
-  no_adjust,                    // (unused)
+  no_update,                    // (unused)
+  no_update,                    // (unused)
   upd_2_4,                      // stone arch (near side)
   upd_3_5,                      // stone arch (far side)
   upd_2_4,                      // tree arch (near side)
@@ -642,15 +654,15 @@ adjfn_t upd_sprite_jump_tbl[] =
   upd_not_implemented,
   upd_not_implemented,
   upd_not_implemented,  // 110
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
+  upd_111,                      // sparkles
+  upd_112_to_118_184,           // sparkles
+  upd_112_to_118_184,           // sparkles
+  upd_112_to_118_184,           // sparkles
+  upd_112_to_118_184,           // sparkles
+  upd_112_to_118_184,           // sparkles
+  upd_112_to_118_184,           // sparkles
+  upd_112_to_118_184,           // sparkles
+  upd_119,                      // sparkles
   upd_120_to_126,               // player appear sparkles
   upd_120_to_126,               // player appear sparkles
   upd_120_to_126,               // player appear sparkles
@@ -665,13 +677,13 @@ adjfn_t upd_sprite_jump_tbl[] =
   upd_not_implemented,
   upd_not_implemented,
   upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,  // 140
+  no_update,
+  no_update,
+  no_update,
+  no_update,
+  no_update,
+  no_update,
+  no_update,
   upd_141,                      // cauldron (bottom)
   upd_142,                      // cauldron (top)
   upd_143,                      // another block
@@ -699,26 +711,26 @@ adjfn_t upd_sprite_jump_tbl[] =
   upd_164_to_167,               // twinkles
   upd_164_to_167,               // twinkles
   upd_164_to_167,               // twinkles
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,  // 170
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
+  upd_168_to_175,               // diamond
+  upd_168_to_175,               // poison
+  upd_168_to_175,               // boot
+  upd_168_to_175,               // chalice
+  upd_168_to_175,               // cup
+  upd_168_to_175,               // bottle
+  upd_168_to_175,               // crystal ball
+  upd_168_to_175,               // extra life
+  upd_176_177,                  // fire (stationary) (not used)
+  upd_176_177,                  // fire (stationary) (not used)
   upd_178_179,                  // ball up/down
   upd_178_179,                  // ball up/down
   upd_180_181,                  // fire (NS)
   upd_180_181,                  // fire (NS)
   upd_182_183,                  // ball (bouncing around)
   upd_182_183,                  // ball (bouncing around)
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented
+  upd_112_to_118_184,           // sparkles
+  upd_185_187,                  // sparkles
+  no_update,
+  upd_185_187                   // sparkles
 };
 
 // $B2B6
@@ -980,6 +992,22 @@ void upd_180_181 (POBJ32 p_obj)
   set_wipe_and_draw_flags (p_obj);
 }
 
+// $B83F
+// fire (stationary) (not used)
+void upd_176_177 (POBJ32 p_obj)
+{
+  NOT_TESTED;
+  
+  upd_12_to_15 (p_obj);
+  if ((fire_seed & (1<<0)) == 0)
+    return;
+  // randomise HFLIP
+  p_obj->flags ^= seed_3 & FLAG_HFLIP;
+  toggle_next_prev_sprite (p_obj);
+  sub_B85C (p_obj);
+  set_wipe_and_draw_flags (p_obj);
+}
+  
 // $B85C
 void sub_B85C (POBJ32 p_obj)
 {
@@ -1015,12 +1043,33 @@ void upd_178_179 (POBJ32 p_obj)
   set_wipe_and_draw_flags (p_obj);
 }
 
+// $B923
+// special objects (#2)
+// - when they are put into the cauldron???
+// *** UNTESTED
+void upd_168_to_175 (POBJ32 p_obj)
+{
+  adj_m4_m12 (p_obj);
+  p_obj->graphic_no = 160;  // sparkles
+  set_wipe_and_draw_flags (p_obj);
+}
+
 // $B92C
 // twinkles
 void upd_164_to_167 (POBJ32 p_obj)
 {
   adj_m4_m12 (p_obj);
   // other stuff
+}
+
+// $B95E
+// sparkles
+void upd_111 (POBJ32 p_obj)
+{
+  NOT_TESTED;
+
+  p_obj->graphic_no = 1;  // invalid
+  gen_audio_XYZ_wipe_and_draw (p_obj);
 }
 
 // $B985
@@ -1249,6 +1298,39 @@ void init_sparkles (POBJ32 p_obj)
   set_wipe_and_draw_flags (p_obj);
 }
 
+// $BF2B
+// sparkles
+void upd_112_to_118_184 (POBJ32 p_obj)
+{
+  NOT_TESTED;
+
+  adj_m4_m12 (p_obj);
+  p_obj->graphic_no++;
+  //gen_audio_graphic_no_rom (p_obj);
+  set_wipe_and_draw_flags (p_obj);
+}
+
+// $BF37
+// sparkles (object in cauldron???)
+void upd_185_187 (POBJ32 p_obj)
+{
+  NOT_TESTED;
+
+  // zap the graphic_no so the object no longer appears  
+  graphic_objs_tbl[p_obj->ptr_obj_tbl_entry].graphic_no = 0;
+  upd_119 (p_obj);
+}
+
+// $BF3F
+// sparkles
+void upd_119 (POBJ32 p_obj)
+{
+  NOT_TESTED;
+
+  adj_m4_m12 (p_obj);
+  upd_111 (p_obj);
+}
+
 // $BF4E
 void display_objects (void)
 {
@@ -1334,7 +1416,7 @@ void upd_96_to_102 (POBJ32 p_obj)
 }
   
 // $C2CB
-void no_adjust (POBJ32 p_obj)
+void no_update (POBJ32 p_obj)
 {
   // do nothing
 }
