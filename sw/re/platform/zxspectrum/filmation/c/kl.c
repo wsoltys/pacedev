@@ -61,7 +61,7 @@ typedef struct
   uint8_t   curr_z;
   uint8_t   curr_scrn;
 
-} OBJ9, *POBJ9;
+} SPECOBJ, *PSPECOBJ;
 
 typedef struct
 {
@@ -153,7 +153,7 @@ static OBJ32 plyr_spr_2_scratchpad;                   // $D181
 static void play_audio_wait_key (uint8_t *audio_data);
 static void play_audio (uint8_t *audio_data);
 static void shuffle_objects_required (void);
-static void object_fall (POBJ32 p_obj);
+static void dec_dZ_wipe_and_draw (POBJ32 p_obj);
 static uint8_t read_key (uint8_t row);
 static void upd_182_183 (POBJ32 p_obj);
 static void upd_91 (POBJ32 p_obj);
@@ -193,6 +193,7 @@ static void display_objects (void);
 static void upd_120_to_126 (POBJ32 p_obj);
 static bool is_obj_moving (POBJ32 p_obj);
 static void upd_103 (POBJ32 p_obj);
+static void gen_audio_XYZ_wipe_and_draw (POBJ32 p_obj);
 static void upd_96_to_102 (POBJ32 p_obj);
 static void no_adjust (POBJ32 p_obj);
 static void display_sun_moon_frame (PSPRITE_SCRATCHPAD scratchpad);
@@ -208,11 +209,13 @@ static void upd_11 (POBJ32 p_obj);
 static void upd_12_to_15 (POBJ32 p_obj);
 static void sub_C4D8 (POBJ32 p_obj);
 static void upd_m6_m12 (POBJ32 p_obj);
-static void sub_C4FC (POBJ32 p_obj);
+static void adj_m7_m12 (POBJ32 p_obj);
 static void upd_88_to_90 (POBJ32 p_obj);
 static void find_special_objs_here (void);
 static void update_special_objs (void);
 static void upd_80_to_83 (POBJ32 p_obj);
+static void calc_ghost_sprite (POBJ32 p_obj);
+static int8_t get_delta_from_tbl (unsigned i);
 static void upd_8 (POBJ32 p_obj);
 static void set_wipe_and_draw_flags (POBJ32 p_obj);
 static void upd_9 (POBJ32 p_obj);
@@ -712,7 +715,7 @@ void shuffle_objects_required (void)
 }
 
 // $B5AF
-void object_fall (POBJ32 p_obj)
+void dec_dZ_wipe_and_draw (POBJ32 p_obj)
 {
   dec_dZ_and_update_XYZ (p_obj);
   set_wipe_and_draw_flags (p_obj);
@@ -813,7 +816,7 @@ void upd_55 (POBJ32 p_obj)
     else
       p_obj->d_y = d;
     p_obj->d_z = 1;
-    object_fall (p_obj);      
+    dec_dZ_wipe_and_draw (p_obj);      
   }
 }
 
@@ -885,7 +888,7 @@ void upd_150_151 (POBJ32 p_obj)
 void upd_22 (POBJ32 p_obj)
 {
   sub_B85C (p_obj);
-  sub_C4FC (p_obj);
+  adj_m7_m12 (p_obj);
 }
 
 // $B7E7
@@ -1221,6 +1224,13 @@ void upd_103 (POBJ32 p_obj)
   // more stuff
 }
   
+// $C232
+void gen_audio_XYZ_wipe_and_draw (POBJ32 p_obj)
+{
+  //gen_audio_XYZ (p_obj);
+  set_wipe_and_draw_flags (p_obj);    
+}
+
 // $C28B
 // special objects
 void upd_96_to_102 (POBJ32 p_obj)
@@ -1294,7 +1304,7 @@ void init_sun (void)
 // $C47E
 // places special objects into fixed list of rooms
 // - starting object is random
-#define NUM_OBJS (sizeof(special_objs_tbl)/sizeof(OBJ9))
+#define NUM_OBJS (sizeof(special_objs_tbl)/sizeof(SPECOBJ))
 void init_special_objects (void)
 {
   uint8_t r = seed_1;
@@ -1321,7 +1331,7 @@ void upd_62 (POBJ32 p_obj)
   upd_6_7 (p_obj);
   clear_dX_dY (p_obj);
   //sub_B3E9(); // audio
-  object_fall (p_obj);
+  dec_dZ_wipe_and_draw (p_obj);
 }
 
 // $C4B6
@@ -1332,10 +1342,7 @@ void upd_85 (POBJ32 p_obj)
   dec_dZ_and_update_XYZ (p_obj);
   if (!is_obj_moving (p_obj))
     return;
-
-  // jp loc_C232
-  //sub_B467(); // audio
-  set_wipe_and_draw_flags (p_obj);    
+  gen_audio_XYZ_wipe_and_draw (p_obj);    
 }
 
 // $C4C3
@@ -1347,10 +1354,7 @@ void upd_84 (POBJ32 p_obj)
   if (!is_obj_moving (p_obj))
     return;
   clear_dX_dY (p_obj);
-
-  // jp loc_C232
-  //sub_B467(); // audio
-  set_wipe_and_draw_flags (p_obj);    
+  gen_audio_XYZ_wipe_and_draw (p_obj);
 }
 
 // $C4D3
@@ -1398,7 +1402,7 @@ void upd_12_to_15 (POBJ32 p_obj)
 }
 
 // $C4FC
-void sub_C4FC (POBJ32 p_obj)
+void adj_m7_m12 (POBJ32 p_obj)
 {
   set_pixel_adj (p_obj, -7, -12);
 }
@@ -1477,11 +1481,55 @@ void update_special_objs (void)
 }
 
 // $C5C8
-// ghost
+// ghost (eg. room 1)
 void upd_80_to_83 (POBJ32 p_obj)
 {
   adj_m6_m12 (p_obj);
-  // heaps of other stuff
+  dec_dZ_and_update_XYZ (p_obj);
+  if ((p_obj->d_x == 0 && p_obj->d_y == 0) ||
+      ((p_obj->flags12 & (FLAG_Y_OOB|FLAG_X_OOB)) != 0))
+  {
+    p_obj->d_x = get_delta_from_tbl ((seed_3 & 3) + 4);
+    p_obj->d_y = get_delta_from_tbl ((seed_2 & 3) + 4);
+    calc_ghost_sprite (p_obj);
+    //gen_audio_XYZ ();
+  }
+  toggle_next_prev_sprite (p_obj);
+  // jp loc_B856
+  sub_B85C (p_obj);
+  set_wipe_and_draw_flags (p_obj);
+}
+
+// $C603
+void calc_ghost_sprite (POBJ32 p_obj)
+{
+  if (abs(p_obj->d_x) < abs(p_obj->d_y))
+  {
+    if (p_obj->d_y < 0)
+      p_obj->graphic_no &= ~(1<<1);   // 80/81
+    else
+      p_obj->graphic_no |= (1<<1);    // 82/83
+    p_obj->flags &= ~FLAG_HFLIP;
+  }
+  else
+  {
+    if (p_obj->d_x < 0)
+      p_obj->graphic_no |= (1<<1);    // 82/83
+    else
+      p_obj->graphic_no &= ~(1<<1);   // 80/81
+    p_obj->flags |= FLAG_HFLIP;
+  }
+}
+
+// $C645
+int8_t get_delta_from_tbl (unsigned i)
+{
+  static int8_t delta_tbl[] =
+  {
+    -1, 1, -2, 2, -3, 3, -4, 4, -5, 5, -6, 6, -7, 7, -8, 8
+  };
+  
+  return (delta_tbl[i]);
 }
 
 // $C65E
@@ -1537,14 +1585,15 @@ void upd_9 (POBJ32 p_obj)
   
   adj_m6_m12 (p_obj);
   p_obj->flags13 |= (1<<7);
-  // stuff
+  if ((graphic_objs_tbl[0].flags12 & 0xF0) != 0)
+    return;
   if (p_obj->d_z < 0)
   {
     p_obj->d_z--;
     dec_dZ_and_update_XYZ (p_obj);
     if (p_obj->flags12 & FLAG_Z_OOB)
     {
-      //sub_B489 ();
+      //gen_audio_rnd();
     stop_portcullis:
       portcullis_moving = 0;
       // set graphic_no to 8
@@ -1699,12 +1748,38 @@ void adj_for_out_of_bounds (POBJ32 p_obj)
 // $CCDD
 int8_t adj_dX_for_out_of_bounds (POBJ32 p_obj, int8_t d_x)
 {
+  if ((p_obj->flags12 & 0xF0) != 0)
+    return (d_x);
+  if ((p_obj->flags & (1<<0)) != 0)
+    return (d_x);
+  do
+  {
+    if (abs(p_obj->x + d_x - 128) + p_obj->width < room_size_X)
+      return (d_x);
+    p_obj->flags12 |= FLAG_X_OOB;
+    d_x = adj_d_for_out_of_bounds (d_x);
+    
+  } while (d_x != 0);
+    
   return (d_x);
 }
 
 // $CD08
 int8_t adj_dY_for_out_of_bounds (POBJ32 p_obj, int8_t d_y)
 {
+  if ((p_obj->flags12 & 0xF0) != 0)
+    return (d_y);
+  if ((p_obj->flags & (1<<0)) != 0)
+    return (d_y);
+  do
+  {
+    if (abs(p_obj->y + d_y - 128) + p_obj->depth < room_size_Y)
+      return (d_y);
+    p_obj->flags12 |= FLAG_Y_OOB;
+    d_y = adj_d_for_out_of_bounds (d_y);
+    
+  } while (d_y != 0);
+    
   return (d_y);
 }
 
