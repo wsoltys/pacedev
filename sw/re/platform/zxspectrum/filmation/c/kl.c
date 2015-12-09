@@ -27,18 +27,19 @@
 #define ENABLE_MASK
 
 // byte offset 7 flags
-#define FLAG_VFLIP  (1<<7)
-#define FLAG_HFLIP  (1<<6)
-#define FLAG_WIPE   (1<<5)
-#define FLAG_DRAW   (1<<4)
+#define FLAG_VFLIP      (1<<7)
+#define FLAG_HFLIP      (1<<6)
+#define FLAG_WIPE       (1<<5)
+#define FLAG_DRAW       (1<<4)
 
 // byte offset 12 flags
-#define FLAG_Z_OOB  (1<<2)
-#define FLAG_Y_OOB  (1<<1)
-#define FLAG_X_OOB  (1<<0)
+#define FLAG_Z_OOB      (1<<2)
+#define FLAG_Y_OOB      (1<<1)
+#define FLAG_X_OOB      (1<<0)
 
 // byte offset 13 flags
-#define FLAG_UP     (1<<2)
+#define FLAG_UP         (1<<2)
+#define FLAG_DROPPING   (1<<2)
 
 typedef struct
 {
@@ -129,8 +130,11 @@ static uint8_t initial_rendering;                     // $5BB7
 static uint8_t days;                                  // $5BB9
 static int8_t lives;                                  // $5BBA
 static uint8_t ball_bounce_height;                    // $5BBD
+static uint8_t is_spike_ball_dropping;                // $5BBF
+static uint8_t disable_spike_ball_drop;               // $5BC0
 static uint8_t *gfxbase_8x8;                          // $5BC7
 static uint8_t objects_carried[3][4];                 // $5BDC
+static uint8_t room_visited[32];                      // $5BE8
 static OBJ32 graphic_objs_tbl[40];                    // $5C08
 static OBJ32 *special_objs_here = 
               &graphic_objs_tbl[2];                   // $5C48
@@ -229,6 +233,7 @@ static void calc_display_order_and_render (void);
 static int lose_life (void);
 static void init_start_location (void);
 static void build_screen_objects (void);
+static void flag_room_visited (void);
 static uint8_t *transfer_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t *psprite);
 static uint8_t *transfer_sprite_and_print (PSPRITE_SCRATCHPAD scratchpad, uint8_t *psprite);
 static void display_panel (void);
@@ -783,11 +788,10 @@ void upd_55 (POBJ32 p_obj)
   upd_6_7 (p_obj);
   
   // generate random movement dependant on IX
-  // (the memory address of the object in the
-  // graphic_objs_tbl)
+  // - the memory address of the object in the
+  // graphic_objs_tbl: base=$5C08
   // PUSH IX; POP BC -> use C
-  // fudge for now
-  r = rand ();
+  r = (0x5C08 + (p_obj - graphic_objs_tbl) * sizeof(OBJ32)) & 0xFF;
   r = seed_2 + ((r >> 1) & 0x10);
   if (r & (1<<4))
     r = ~r;
@@ -814,7 +818,7 @@ void upd_55 (POBJ32 p_obj)
 }
 
 // $B6B9
-// block (moving EW)
+// block (moving EW) (eg. room 45)
 void upd_54 (POBJ32 p_obj)
 {
   // original code generates appropriate audio,
@@ -833,12 +837,39 @@ void upd_144_to_149_152_to_157 (POBJ32 p_obj)
 }
 
 // $B7A9
-// spiked ball
+// spiked ball (eg. room 18)
+// - randomly drop to the floor (and stay there)
+// - drop immediately in even-numbered rooms!
 void upd_63 (POBJ32 p_obj)
 {
-  // sub_B85C
+  sub_B85C (p_obj);
   upd_6_7 (p_obj);
-  // other stuff
+  if (disable_spike_ball_drop != 0)
+    return;
+  if ((p_obj->flags13 & FLAG_DROPPING) == 0)
+  {
+    if (is_spike_ball_dropping != 0)
+      return;
+    // 1-in-16 chance of starting to drop
+    if (seed_3 >= 16)
+      return;
+    p_obj->flags13 |= (1<<2);
+    is_spike_ball_dropping = 1;
+  }
+  else
+  {
+    dec_dZ_and_update_XYZ (p_obj);
+    if ((p_obj->flags12 & FLAG_Z_OOB) == 0)
+    {
+      //gen_audio_Z (p_obj);
+    }
+    else
+    {
+      p_obj->flags13 &= ~FLAG_DROPPING;
+      is_spike_ball_dropping = 0; 
+    }
+    set_wipe_and_draw_flags (p_obj);
+  }
 }
 
 // $B7C3
@@ -1771,7 +1802,16 @@ void build_screen_objects (void)
   ball_bounce_height = 0;
   // stuff
   initial_rendering = 1;
-  // stuff
+  // spiked balls don't drop immediately in odd-numbered rooms
+  disable_spike_ball_drop = graphic_objs_tbl[0].scrn & 1;
+  flag_room_visited ();
+}
+
+// $D219
+void flag_room_visited (void)
+{
+  uint8_t scrn = graphic_objs_tbl[0].scrn;
+  room_visited[scrn>>3] |= 1<<(scrn&7);
 }
 
 // $D237

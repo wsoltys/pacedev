@@ -79,9 +79,9 @@ SCRATCH:5BBD ??		 ball_bounce_height:ds 1					 ; DATA	XREF: RAM:B868r
 SCRATCH:5BBD										 ; RAM:B873w ...
 SCRATCH:5BBE ??		 rendered_objs_cnt:ds 1						 ; DATA	XREF: RAM:B028r
 SCRATCH:5BBE										 ; calc_display_order_and_render+1w ...
-SCRATCH:5BBF ??		 unk_5BBF:	 ds 1						 ; DATA	XREF: RAM:B7BAo
-SCRATCH:5BBF										 ; build_screen_objects+1Fw
-SCRATCH:5BC0 ??		 byte_5BC0:	 ds 1						 ; DATA	XREF: RAM:B7AFr
+SCRATCH:5BBF ??		 is_spike_ball_dropping:ds 1					 ; DATA	XREF: RAM:B7BAo
+SCRATCH:5BBF										 ; RAM:B7E0o ...
+SCRATCH:5BC0 ??		 disable_spike_ball_drop:ds 1					 ; DATA	XREF: RAM:B7AFr
 SCRATCH:5BC0										 ; sub_C00E+137w ...
 SCRATCH:5BC1 ??		 byte_5BC1:	 ds 1						 ; DATA	XREF: sub_C9A1+30w
 SCRATCH:5BC1										 ; sub_C9A1+47r
@@ -3216,10 +3216,10 @@ RAM:B451
 RAM:B451	     ; =============== S U B R O U T I N E =======================================
 RAM:B451
 RAM:B451
-RAM:B451	     sub_B451:							     ; CODE XREF: RAM:B69Cp
+RAM:B451	     gen_audio_Z:						     ; CODE XREF: RAM:B69Cp
 RAM:B451									     ; RAM:B7D6p ...
 RAM:B451 DD 7E 03		     ld	     a,	(ix+3)				     ; Z
-RAM:B451	     ; End of function sub_B451
+RAM:B451	     ; End of function gen_audio_Z
 RAM:B451
 RAM:B454
 RAM:B454	     ; =============== S U B R O U T I N E =======================================
@@ -3687,7 +3687,7 @@ RAM:B68F DD 36 0B 00		     ld	     (ix+11), 0
 RAM:B693 CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:B696 DD CB 0C 56		     bit     2,	(ix+12)
 RAM:B69A 20 03			     jr	     nz, loc_B69F
-RAM:B69C CD 51 B4		     call    sub_B451
+RAM:B69C CD 51 B4		     call    gen_audio_Z
 RAM:B69F
 RAM:B69F	     loc_B69F:							     ; CODE XREF: RAM:B69Aj
 RAM:B69F C3 92 C6		     jp	     set_wipe_and_draw_flags
@@ -3870,38 +3870,38 @@ RAM:B7A9
 RAM:B7A9	     upd_63:							     ; DATA XREF: RAM:B114o
 RAM:B7A9 CD 5C B8		     call    sub_B85C
 RAM:B7AC CD E3 C4		     call    upd_6_7
-RAM:B7AF 3A C0 5B		     ld	     a,	(byte_5BC0)
+RAM:B7AF 3A C0 5B		     ld	     a,	(disable_spike_ball_drop)
 RAM:B7B2 A7			     and     a
 RAM:B7B3 C0			     ret     nz
-RAM:B7B4 DD CB 0D 56		     bit     2,	(ix+13)
-RAM:B7B8 20 13			     jr	     nz, loc_B7CD
-RAM:B7BA 21 BF 5B		     ld	     hl, unk_5BBF
+RAM:B7B4 DD CB 0D 56		     bit     2,	(ix+13)				     ; is this one dropping?
+RAM:B7B8 20 13			     jr	     nz, spiked_ball_drop		     ; yes, go
+RAM:B7BA 21 BF 5B		     ld	     hl, is_spike_ball_dropping
 RAM:B7BD 7E			     ld	     a,	(hl)
-RAM:B7BE A7			     and     a
-RAM:B7BF C0			     ret     nz
+RAM:B7BE A7			     and     a					     ; is another ball already dropping?
+RAM:B7BF C0			     ret     nz					     ; yes, exit
 RAM:B7C0 3A A5 5B		     ld	     a,	(seed_3)
-RAM:B7C3 FE 10			     cp	     16
+RAM:B7C3 FE 10			     cp	     16					     ; 1-in-16 chance
 RAM:B7C5 D0			     ret     nc
-RAM:B7C6 DD CB 0D D6		     set     2,	(ix+13)
-RAM:B7CA 36 01			     ld	     (hl), 1
+RAM:B7C6 DD CB 0D D6		     set     2,	(ix+13)				     ; flag this one as	dropping
+RAM:B7CA 36 01			     ld	     (hl), 1				     ; flag a spike ball dropping
 RAM:B7CC C9			     ret
 RAM:B7CD	     ; ---------------------------------------------------------------------------
 RAM:B7CD
-RAM:B7CD	     loc_B7CD:							     ; CODE XREF: RAM:B7B8j
+RAM:B7CD	     spiked_ball_drop:						     ; CODE XREF: RAM:B7B8j
 RAM:B7CD CD 00 C7		     call    dec_dZ_and_update_XYZ
-RAM:B7D0 DD CB 0C 56		     bit     2,	(ix+12)
-RAM:B7D4 20 06			     jr	     nz, loc_B7DC
-RAM:B7D6 CD 51 B4		     call    sub_B451
+RAM:B7D0 DD CB 0C 56		     bit     2,	(ix+12)				     ; Z OOB? (hit the floor?)
+RAM:B7D4 20 06			     jr	     nz, loc_B7DC			     ; yes, go
+RAM:B7D6 CD 51 B4		     call    gen_audio_Z
 RAM:B7D9
-RAM:B7D9	     loc_B7D9:							     ; CODE XREF: RAM:B7E5j
+RAM:B7D9	     draw_spiked_ball:						     ; CODE XREF: RAM:B7E5j
 RAM:B7D9 C3 92 C6		     jp	     set_wipe_and_draw_flags
 RAM:B7DC	     ; ---------------------------------------------------------------------------
 RAM:B7DC
 RAM:B7DC	     loc_B7DC:							     ; CODE XREF: RAM:B7D4j
-RAM:B7DC DD CB 0D 96		     res     2,	(ix+0Dh)
-RAM:B7E0 21 BF 5B		     ld	     hl, 5BBFh
-RAM:B7E3 36 00			     ld	     (hl), 0
-RAM:B7E5 18 F2			     jr	     loc_B7D9
+RAM:B7DC DD CB 0D 96		     res     2,	(ix+13)				     ; flag this no longer dropping
+RAM:B7E0 21 BF 5B		     ld	     hl, is_spike_ball_dropping
+RAM:B7E3 36 00			     ld	     (hl), 0				     ; flag no spiked balls dropping
+RAM:B7E5 18 F2			     jr	     draw_spiked_ball
 RAM:B7E7	     ; ---------------------------------------------------------------------------
 RAM:B7E7	     ; spikes
 RAM:B7E7
@@ -3998,7 +3998,7 @@ RAM:B873 32 BD 5B		     ld	     (ball_bounce_height), a
 RAM:B876
 RAM:B876	     loc_B876:							     ; CODE XREF: RAM:B86Cj
 RAM:B876 CD 85 B9		     call    toggle_next_prev_sprite		     ; toggle 178/179
-RAM:B879 CD 51 B4		     call    sub_B451				     ; audio?
+RAM:B879 CD 51 B4		     call    gen_audio_Z			     ; audio?
 RAM:B87C DD CB 0D 56		     bit     2,	(ix+13)				     ; dir=up?
 RAM:B880 20 12			     jr	     nz, ball_up			     ; yes, skip
 RAM:B882 CD 00 C7		     call    dec_dZ_and_update_XYZ
@@ -5307,7 +5307,7 @@ RAM:C141
 RAM:C141	     loc_C141:							     ; CODE XREF: sub_C00E+64j
 RAM:C141 21 D8 5B		     ld	     hl, unk_5BD8
 RAM:C144 AF			     xor     a
-RAM:C145 32 C0 5B		     ld	     (byte_5BC0), a
+RAM:C145 32 C0 5B		     ld	     (disable_spike_ball_drop),	a
 RAM:C148 FD 7E 00		     ld	     a,	(iy+0)
 RAM:C14B 77			     ld	     (hl), a
 RAM:C14C 23			     inc     hl
@@ -5403,7 +5403,7 @@ RAM:C1D8 36 00			     ld	     (hl), 0
 RAM:C1DA 21 BA 5B		     ld	     hl, lives
 RAM:C1DD 34			     inc     (hl)				     ; extra life!
 RAM:C1DE AF			     xor     a
-RAM:C1DF 32 C0 5B		     ld	     (byte_5BC0), a
+RAM:C1DF 32 C0 5B		     ld	     (disable_spike_ball_drop),	a
 RAM:C1E2 CD A3 B4		     call    toggle_FE_bit4_x16
 RAM:C1E5 CD A3 BC		     call    print_lives
 RAM:C1E8 01 20 20		     ld	     bc, 2020h
@@ -6906,7 +6906,7 @@ RAM:C9CD 3D			     dec     a
 RAM:C9CE DD 77 0B		     ld	     (ix+0Bh), a
 RAM:C9D1 32 C1 5B		     ld	     (byte_5BC1), a
 RAM:C9D4 C6 02			     add     a,	2
-RAM:C9D6 FC 51 B4		     call    m,	sub_B451
+RAM:C9D6 FC 51 B4		     call    m,	gen_audio_Z
 RAM:C9D9 CD 45 CB		     call    adj_for_out_of_bounds
 RAM:C9DC CD 70 CA		     call    sub_CA70
 RAM:C9DF CD 06 C7		     call    add_dXYZ
@@ -8377,12 +8377,12 @@ RAM:D1FB AF			     xor     a					     ; flag not	moving
 RAM:D1FC 32 AF 5B		     ld	     (portcullis_moving), a
 RAM:D1FF 32 B0 5B		     ld	     (portcullis_move_cnt), a
 RAM:D202 32 BD 5B		     ld	     (ball_bounce_height), a
-RAM:D205 32 BF 5B		     ld	     (unk_5BBF), a
+RAM:D205 32 BF 5B		     ld	     (is_spike_ball_dropping), a
 RAM:D208 3E 01			     ld	     a,	1				     ; flag initial rendering of screen
 RAM:D20A 32 B7 5B		     ld	     (initial_rendering), a
 RAM:D20D 3A 10 5C		     ld	     a,	(graphic_objs_tbl+8)		     ; plyr_spr_1 screen
 RAM:D210 E6 01			     and     1
-RAM:D212 32 C0 5B		     ld	     (byte_5BC0), a
+RAM:D212 32 C0 5B		     ld	     (disable_spike_ball_drop),	a
 RAM:D215 CD 19 D2		     call    flag_room_visited
 RAM:D218 C9			     ret
 RAM:D218	     ; End of function build_screen_objects
