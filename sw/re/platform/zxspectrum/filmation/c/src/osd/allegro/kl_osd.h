@@ -5,7 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "kldat.h"
+
 //#define ALLEGRO_STATICLINK
+
+#define DBGPRINTF(format...)		fprintf(stderr, format)
 
 // 0=27, 1=28...
 #define OSD_KEY_0     (27+'0'-'0')

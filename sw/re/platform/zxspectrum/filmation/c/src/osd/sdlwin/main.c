@@ -1,3 +1,5 @@
+#include <SDL.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -5,23 +7,13 @@
 #include <sys/stat.h>
 #include <memory.h>
 
-#include <allegro.h>
-
-#define ALLEGRO_FULL_VERSION  ((ALLEGRO_VERSION << 4)|(ALLEGRO_SUB_VERSION))
-#if ALLEGRO_FULL_VERSION < 0x42
-  #define SS_TEXTOUT_CENTRE(s,f,str,w,h,c) \
-    textout_centre (s, f, str, w, h, c);
-#else
-  #define SS_TEXTOUT_CENTRE(s,f,str,w,h,c) \
-    textout_centre_ex(s, f, str, w, h, c, 0);
-#endif
-
 // pandora: run msys.bat and cd to this directory
 //          g++ kl.c -o kl -lallegro-4.4.2-md
 
 // neogeo:  d:\mingw_something\setenv.bat
 //          g++ kl.c -o kl -lalleg
 
+#include "kl_osd.h"
 #include "kldat.h"
 
 #define ENABLE_MASK
@@ -29,29 +21,39 @@
 extern void knight_lore (void);
 extern uint8_t *flip_sprite (POBJ32 p_obj);
 
+static SDL_Window *window = NULL;
+static SDL_Surface *surface = NULL;
+static SDL_Renderer *renderer = NULL;
+
+static const uint8_t *key = NULL;
+
 void osd_cls (void)
 {
-	clear_bitmap (screen);
+  SDL_SetRenderDrawColor (renderer, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
+	SDL_RenderClear (renderer);
+	SDL_RenderPresent (renderer);
 }
 
 void osd_delay (unsigned ms)
 {
-  rest (ms);
+  SDL_Delay (ms);
 }
 
 int osd_key (int _key)
 {
-  return (key[_key]);
+  return (key[_key]);    
 }
 
 int osd_keypressed (void)
 {
-  return (keypressed ());
+  fprintf (stderr, "%s()\n", __FUNCTION__);
+  return (key[SDLK_z]);
 }
 
 int osd_readkey (void)
 {
-  return (readkey ());
+  fprintf (stderr, "%s()\n", __FUNCTION__);
+  return (key[SDLK_0]);
 }
 
 void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t *str)
@@ -69,13 +71,14 @@ void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t *st
       for (b=0; b<8; b++)
       {
         if (d & (1<<7))
-          putpixel (screen, x+c*8+b, 191-y+l, 15);
+          SDL_RenderDrawPoint (renderer, x+c*8+b, 191-y+l);
         d <<= 1;
       }
     }  
     if (*str & (1<<7))
       break;
   }
+  SDL_RenderPresent (renderer);
 }
 
 static uint8_t from_ascii (char ch)
@@ -108,11 +111,12 @@ void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, char *str)
       for (b=0; b<8; b++)
       {
         if (d & (1<<7))
-          putpixel (screen, x+c*8+b, 191-y+l, 15);
+          SDL_RenderDrawPoint (renderer, x+c*8+b, 191-y+l);
         d <<= 1;
       }
     }  
   }
+  SDL_RenderPresent (renderer);
 }
 
 uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code)
@@ -128,10 +132,11 @@ uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code)
     for (b=0; b<8; b++)
     {
       if (d & (1<<7))
-        putpixel (screen, x+b, 191-y+l, 15);
+        SDL_RenderDrawPoint (renderer, x+b, 191-y+l);
       d <<= 1;
     }
   }  
+  SDL_RenderPresent (renderer);
   return (x+8);
 }
 
@@ -139,7 +144,7 @@ void osd_print_sprite (POBJ32 p_obj)
 {
   uint8_t *psprite;
 
-  //DBGPRINTF("(%d,%d)\n", p_obj->x, p_obj->y);
+  //fprintf (stderr, "(%d,%d)\n", p_obj->x, p_obj->y);
 
   // references p_obj
   psprite = flip_sprite (p_obj);
@@ -159,27 +164,86 @@ void osd_print_sprite (POBJ32 p_obj)
       {
 #ifdef ENABLE_MASK
         if (m & (1<<7))
-          putpixel (screen, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y), 0);
+        {
+          SDL_SetRenderDrawColor (renderer, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
+          SDL_RenderDrawPoint (renderer, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y));
+        }
+          
 #endif
         if (d & (1<<7))
-          putpixel (screen, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y), 15);
+        {
+          SDL_SetRenderDrawColor (renderer, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
+          SDL_RenderDrawPoint (renderer, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y));
+        }
         m <<= 1;
         d <<= 1;
       }
     }
   }
+  SDL_RenderPresent (renderer);
 }
 
-void main (int argc, char *argv[])
+int event_handler (void *unused)
 {
-  int c;
+  SDL_Event event;
   
-	allegro_init ();
-	install_keyboard ();
+  while (1)
+  {
+    if (SDL_WaitEvent (&event))
+    {
+      switch (event.type)
+      {
+        case SDL_QUIT:
+          break;
+      }
+    }
+  }
+  exit (0);
+}
 
-	set_color_depth (8);
-	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 256, 192, 0, 0);
+int main (int argc, char *argv[])
+{
+  if (SDL_Init (SDL_INIT_VIDEO) < 0)
+  {
+    fprintf (stderr, "SDL_Init() failed: %s\n", SDL_GetError ());
+    exit (0);
+  }
 
+  window = SDL_CreateWindow( "Knight Lore", 
+                              SDL_WINDOWPOS_UNDEFINED, 
+                              SDL_WINDOWPOS_UNDEFINED, 
+                              256, 192, 
+                              SDL_WINDOW_SHOWN ); 
+  if (window == NULL) 
+  { 
+    fprintf (stderr, "SDL_CreateWindow() failed: %s\n", SDL_GetError()); 
+    exit (0);
+  }
+
+  //surface = SDL_GetWindowSurface (window); 
+  //SDL_FillRect (surface, NULL, 
+  //              SDL_MapRGB (surface->format, 0xFF, 0xFF, 0xFF ));
+  //SDL_UpdateWindowSurface (window);
+  
+  renderer = SDL_CreateRenderer (window, -1, SDL_RENDERER_ACCELERATED);
+  if (renderer == NULL)
+  {
+    fprintf (stderr, "SDL_CreateRenderer() failed: %s\n", SDL_GetError()); 
+    exit (0);
+  }
+      
+  key = SDL_GetKeyboardState (NULL);
+
+  SDL_Thread *event_thread = SDL_CreateThread (event_handler, "eh", NULL);
+
+	osd_cls ();
+  knight_lore ();
+
+  SDL_DestroyWindow (window);
+  SDL_Quit ();
+  return (0);
+  
+#if 0  
   // spectrum palette
   PALETTE pal;
   for (c=0; c<16; c++)
@@ -189,14 +253,5 @@ void main (int argc, char *argv[])
     pal[c].b = (c&(1<<0) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
   }
 	set_palette_range (pal, 0, 15, 1);
-
-	clear_bitmap (screen);
-  knight_lore ();
-
-  while (!key[KEY_ESC]);	  
-	while (key[KEY_ESC]);	  
-
-  allegro_exit ();
+#endif
 }
-
-END_OF_MAIN();

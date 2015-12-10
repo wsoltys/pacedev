@@ -1,3 +1,6 @@
+#ifndef __KL_DAT_H__
+#define __KL_DAT_H__
+
 #include <unistd.h>
 
 typedef struct
@@ -82,3 +85,5 @@ extern uint8_t plyr_spr_init_data[];
 extern uint8_t start_locations[];
 extern uint8_t panel_data[];
 extern uint8_t border_data[][4];
+
+#endif // __KL_DAT_H__

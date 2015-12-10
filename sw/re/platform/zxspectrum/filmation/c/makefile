@@ -1,6 +1,7 @@
 # platform options
 
 #PLATFORM = allegro
+#PLATFORM = sdlwin
 #PLATFORM = neogeo
 #PLATFORM = amigaos
 #PLATFORM = genesis
@@ -32,8 +33,6 @@ MAKEFILE = makefile
 
 # BUILDOPTS
 STATIC = 1
-MONO = 0
-GREEN = 1
 
 ifeq (,$(STATIC))
   STATIC = 0
@@ -66,6 +65,18 @@ ifeq ($(PLATFORM),allegro)
     OSD_LDFLAGS = -lkernel32 -luser32 -lgdi32 -lcomdlg32 -lole32 -ldinput -lddraw -ldxguid -lwinmm -ldsound
   endif
           
+endif
+
+ifeq ($(PLATFORM),sdlwin)
+
+	FQTN = $(TARGET).exe
+	  
+  SDL_DIR = d:/mingw_something/SDL2-2.0.3
+  OSD_INCS = -I $(SDL_DIR)/i686-w64-mingw32/include/SDL2
+  OSD_LIBDIR = $(SDL_DIR)/i686-w64-mingw32/lib
+  OSD_LIBS = -lmingw32 -lSDL2main -lSDL2
+  
+  OSD_CFLAGS = -Wall -Wno-unused-label -g -w -Wl,-subsystem,console
 endif
 
 ifeq ($(PLATFORM),neogeo)

@@ -5,11 +5,10 @@
 #include <sys/stat.h>
 #include <memory.h>
 
-#define NOT_TESTED      fprintf (stderr, "*** %s(): NOT TESTED ***\n", __FUNCTION__)
+#define DBGPRINTF_FN    DBGPRINTF ("%s():\n", __FUNCTION__)
+#define NOT_TESTED      DBGPRINTF ("*** %s(): NOT TESTED ***\n", __FUNCTION__)
 
 #pragma pack(1)
-
-#define ENABLE_MASK
 
 // byte offset 7 flags
 #define FLAG_VFLIP      (1<<7)
@@ -29,8 +28,8 @@
 #define FLAG_EAST       (1<<0)    // EW fire
 #define FLAG_NORTH      (1<<1)    // NS fire
 
-#include "kldat.h"
 #include "kl_osd.h"
+#include "kldat.h"
 
 typedef void (*adjfn_t)(POBJ32 p_obj);
 
@@ -210,11 +209,11 @@ void dump_graphic_objs_tbl (int start, int end)
 {
   unsigned i = (start == -1 ? 0 : start);
   
-  fprintf (stderr, "%s():\n", __FUNCTION__);
+  DBGPRINTF_FN;
   
   for (; i<end && i<40; i++)
   {
-    fprintf (stderr, "%02d: graphic_no=%02d, (%3d,%3d,%3d) %02dx%02dx%02d, f=$%02X @(%02d,%02d)\n",
+    DBGPRINTF ("%02d: graphic_no=%02d, (%3d,%3d,%3d) %02dx%02dx%02d, f=$%02X @(%02d,%02d)\n",
               i,
               graphic_objs_tbl[i].graphic_no,
               graphic_objs_tbl[i].x,
@@ -233,11 +232,11 @@ void dump_special_objs_tbl (void)
 {
   unsigned i;
   
-  fprintf (stderr, "%s():\n", __FUNCTION__);
+  DBGPRINTF_FN;
   
   for (i=0; i<32; i++)
   {
-    fprintf (stderr, "%02d: graphic_no=%02d, x=%d, y=%d, z=%d, start_scrn=$%02X\n",
+    DBGPRINTF ("%02d: graphic_no=%02d, x=%d, y=%d, z=%d, start_scrn=$%02X\n",
               i,
               special_objs_tbl[i].graphic_no,
               special_objs_tbl[i].start_x,
@@ -262,7 +261,7 @@ void upd_not_implemented (POBJ32 obj)
       
   if (!printed[obj->graphic_no])
   {
-    fprintf (stderr, "%s(%d=$%02X) @$%04X\n",
+    DBGPRINTF ("%s(%d=$%02X) @$%04X\n",
               __FUNCTION__,
               obj->graphic_no, 
               obj->graphic_no,
@@ -273,6 +272,8 @@ void upd_not_implemented (POBJ32 obj)
 
 void knight_lore (void)
 {
+  DBGPRINTF_FN;
+  
 START_AF6C:
 
 MAIN_AF88:
@@ -421,7 +422,7 @@ game_delay:
         
     while (osd_keypressed ())
       osd_readkey ();
-    fprintf (stderr, "GOTO: ");
+    DBGPRINTF ("GOTO: ");
     for (i=0; i<3; i++)
     {
       int c;
@@ -430,10 +431,10 @@ game_delay:
         c = osd_readkey () & 0xff;
       } while (!isdigit(c));
       
-      fprintf (stderr, "%c", c);
+      DBGPRINTF ("%c", c);
       scrn = (scrn * 10) + c - '0';
     }
-    fprintf (stderr, "\n");
+    DBGPRINTF ("\n");
     graphic_objs_tbl[0].scrn = scrn;
     goto exit_screen;
   }
@@ -442,7 +443,7 @@ game_delay:
   {
     static unsigned s_no = 0;
     
-    fprintf (stderr, "s_no=%d, start_scrn=%d\n", 
+    DBGPRINTF ("s_no=%d, start_scrn=%d\n", 
               s_no, special_objs_tbl[s_no].start_scrn);
     graphic_objs_tbl[0].scrn = special_objs_tbl[s_no].start_scrn;
     s_no = (s_no + 1) % 32;
@@ -1636,7 +1637,7 @@ void find_special_objs_here (void)
   uint8_t n_special_objs_here = 0;
   unsigned i;
    
-  fprintf (stderr, "%s(): screen=%d\n", 
+  DBGPRINTF ("%s(): screen=%d\n", 
             __FUNCTION__,
             graphic_objs_tbl[0].scrn);
   
@@ -1664,7 +1665,7 @@ void find_special_objs_here (void)
     n_special_objs_here++;
   }
 
-  fprintf (stderr, "  n_special_objs_here=%d\n", n_special_objs_here);
+  DBGPRINTF ("  n_special_objs_here=%d\n", n_special_objs_here);
 
   // wipe rest of the special_objs_here table  
   for (; n_special_objs_here<2; n_special_objs_here++)
@@ -1799,7 +1800,7 @@ void set_wipe_and_draw_flags (POBJ32 p_obj)
 // portcullis (moving) (eg. room 9)
 void upd_9 (POBJ32 p_obj)
 {
-  //fprintf (stderr, "%s()\n", __FUNCTION__);
+  //DBGPRINTF_FN;
   
   adj_m6_m12 (p_obj);
   p_obj->flags13 |= (1<<7);
@@ -2081,21 +2082,21 @@ void list_objects_to_draw (void)
   unsigned n = 0;
   unsigned i;
   
-  //fprintf (stderr, "%s():\n", __FUNCTION__);
+  //DBGPRINTF_FN;
   
   for (i=0; i<40; i++)
   {
     if ((graphic_objs_tbl[i].graphic_no != 0) &&
         (graphic_objs_tbl[i].flags & (1<<4)))
     {
-      //fprintf (stderr, "[%02d]=%02d(graphic_no=$%02X,flags=$%02X)\n",
+      //DBGPRINTF ("[%02d]=%02d(graphic_no=$%02X,flags=$%02X)\n",
       //          n, i, graphic_objs_tbl[i].graphic_no, graphic_objs_tbl[i].flags);
       objects_to_draw[n++] = i;
     }
   }
   objects_to_draw[n] = 0xff;
 
-  //fprintf (stderr, "  n=%d\n", n);
+  //DBGPRINTF ("  n=%d\n", n);
 }
 
 // $CEBB
@@ -2144,7 +2145,7 @@ void init_start_location (void)
   // start_loc_2
   plyr_spr_2_scratchpad.scrn = s;
   
-  fprintf (stderr, "%s(): start_location=%d\n", __FUNCTION__, s);
+  DBGPRINTF ("%s(): start_location=%d\n", __FUNCTION__, s);
 }
 
 // $D1E6
@@ -2240,7 +2241,7 @@ void retrieve_screen (void)
   uint8_t size;
   uint8_t attr;
     
-  fprintf (stderr, "%s():\n", __FUNCTION__);
+  DBGPRINTF_FN;
   
   for (i=0; ; i++)
   {
@@ -2270,13 +2271,13 @@ void retrieve_screen (void)
   }
   
 found_screen:
-  //fprintf (stderr, "%s(): location=%d\n", __FUNCTION__, location_tbl[p]);
+  //DBGPRINTF ("%s(): location=%d\n", __FUNCTION__, location_tbl[p]);
   
   id = location_tbl[p++];
   size = location_tbl[p++];
   attr = location_tbl[p++];
 
-  fprintf (stderr, "id=%d, size=%d, attr=$%02X\n", id, size, attr);
+  DBGPRINTF ("id=%d, size=%d, attr=$%02X\n", id, size, attr);
   
   // get attribute, set BRIGHT  
   curr_room_attrib = (attr & 7) | 0x40;
@@ -2286,7 +2287,7 @@ found_screen:
   room_size_Y = room_size_tbl[room_size].y;
   room_size_Z = room_size_tbl[room_size].z;
 
-  fprintf (stderr, "room size = (%d,%d,%d)\n",
+  DBGPRINTF ("room size = (%d,%d,%d)\n",
             room_size_X, room_size_Y, room_size_Z);
 
   // bytes remaining in location table
@@ -2302,7 +2303,7 @@ found_screen:
     // get background type
     p_bg_obj = background_type_tbl[location_tbl[p]];
 
-    fprintf (stderr, "BG:%d\n", location_tbl[p]);
+    DBGPRINTF ("BG:%d\n", location_tbl[p]);
 
     for (; *p_bg_obj!=0; p_bg_obj+=8)
     {    
@@ -2379,7 +2380,7 @@ found_screen:
     }
   }
   
-  fprintf (stderr, "n_other_objs = %d\n", n_other_objs);
+  DBGPRINTF ("n_other_objs = %d\n", n_other_objs);
 
   // clear the rest of the table
   for (; n_other_objs<40-4; n_other_objs++)
