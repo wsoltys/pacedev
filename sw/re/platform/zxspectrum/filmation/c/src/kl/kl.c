@@ -62,17 +62,17 @@ static uint8_t *gfxbase_8x8;                          // $5BC7
 static uint8_t objects_carried[3][4];                 // $5BDC
 static uint8_t room_visited[32];                      // $5BE8
 static OBJ32 graphic_objs_tbl[40];                    // $5C08
-static OBJ32 *special_objs_here = 
+static POBJ32 special_objs_here = 
               &graphic_objs_tbl[2];                   // $5C48
-static OBJ32 *other_objs_here =
+static POBJ32 other_objs_here =
               &graphic_objs_tbl[4];                   // $5C88
               
-static SPRITE_SCRATCHPAD sprite_scratchpad;           // $BFDB
+static OBJ32 sprite_scratchpad;                       // $BFDB
 static uint8_t objects_required[] =                   // $C27D
 {
   0, 1, 2, 3, 4, 5, 6, 3, 5, 0, 6, 1, 2, 4
 };
-static SPRITE_SCRATCHPAD sun_moon_scratchpad;         // $C44D
+static OBJ32 sun_moon_scratchpad;                     // $C44D
 static uint8_t objects_to_draw[48];                   // $CE8B
 static OBJ32 plyr_spr_1_scratchpad;                   // $D161
 static OBJ32 plyr_spr_2_scratchpad;                   // $D181
@@ -125,7 +125,7 @@ static void print_text (uint8_t x, uint8_t y, char *str);
 static uint8_t print_8x8 (uint8_t x, uint8_t y, uint8_t code);
 static void display_menu (void);
 static void display_text_list (uint8_t *clours, uint8_t *xy, char *text_list[], uint8_t n);
-static void multiple_print_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t dx, uint8_t dy, uint8_t n);
+static void multiple_print_sprite (POBJ32 p_obj, uint8_t dx, uint8_t dy, uint8_t n);
 static void init_sparkles (POBJ32 p_obj);
 static void upd_112_to_118_184 (POBJ32 p_obj);
 static void upd_185_187 (POBJ32 p_obj);
@@ -143,7 +143,7 @@ static void upd_96_to_102 (POBJ32 p_obj);
 static void no_update (POBJ32 p_obj);
 static void prepare_final_animation (void);
 static void upd_92_to_95 (POBJ32 p_obj);
-static void display_sun_moon_frame (PSPRITE_SCRATCHPAD scratchpad);
+static void display_sun_moon_frame (POBJ32 p_obj);
 static void init_sun (void);
 static void init_special_objects (void);
 static void upd_62 (POBJ32 p_obj);
@@ -190,8 +190,8 @@ static int lose_life (void);
 static void init_start_location (void);
 static void build_screen_objects (void);
 static void flag_room_visited (void);
-static uint8_t *transfer_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t *psprite);
-static uint8_t *transfer_sprite_and_print (PSPRITE_SCRATCHPAD scratchpad, uint8_t *psprite);
+static uint8_t *transfer_sprite (POBJ32 p_obj, uint8_t *psprite);
+static uint8_t *transfer_sprite_and_print (POBJ32 p_obj, uint8_t *psprite);
 static void display_panel (void);
 static void retrieve_screen (void);
 static void print_border (void);
@@ -200,9 +200,9 @@ static void clr_screen_buffer (void);
 static void render_dynamic_objects (void);
 static void loc_D653 (void);
 static void calc_pixel_XY (POBJ32 p_obj);
-uint8_t *flip_sprite (PSPRITE_SCRATCHPAD scratchpad);
+uint8_t *flip_sprite (POBJ32 p_obj);
 static void calc_pixel_XY_and_render (POBJ32 p_obj);
-static void print_sprite (PSPRITE_SCRATCHPAD scratchpad);
+static void print_sprite (POBJ32 p_obj);
 
 // end of prototypes
 
@@ -1218,15 +1218,15 @@ void display_text_list (uint8_t *colours, uint8_t *xy, char *text_list[], uint8_
 }
 
 // $BEE4
-void multiple_print_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t dx, uint8_t dy, uint8_t n)
+void multiple_print_sprite (POBJ32 p_obj, uint8_t dx, uint8_t dy, uint8_t n)
 {
   unsigned i;
   
   for (i=0; i<n; i++)
   {
-    print_sprite (scratchpad);
-    scratchpad->pixel_x += dx;
-    scratchpad->pixel_y += dy;
+    print_sprite (p_obj);
+    p_obj->pixel_x += dx;
+    p_obj->pixel_y += dy;
   }
 }
 
@@ -1448,19 +1448,19 @@ void upd_92_to_95 (POBJ32 p_obj)
 }
 
 // $C3A4
-void display_sun_moon_frame (PSPRITE_SCRATCHPAD scratchpad)
+void display_sun_moon_frame (POBJ32 p_obj)
 {
   uint8_t x;
 
   // check a byte
 
-  if (scratchpad->pixel_x == 225)
+  if (p_obj->pixel_x == 225)
     goto toggle_day_night;
 
   // adjust Y coordinate
-  x = scratchpad->pixel_x + 16;
-  scratchpad->y = sun_moon_yoff[(x>>2)&0x0f];
-  print_sprite (scratchpad);
+  x = p_obj->pixel_x + 16;
+  p_obj->y = sun_moon_yoff[(x>>2)&0x0f];
+  print_sprite (p_obj);
 
 display_frame:
   sprite_scratchpad.graphic_no = 0x5a;
@@ -1475,11 +1475,11 @@ display_frame:
   return;
 
 toggle_day_night:
-  scratchpad->graphic_no ^= 1;
+  p_obj->graphic_no ^= 1;
   //colour_sun_moon ();
-  scratchpad->pixel_x = 176;
+  p_obj->pixel_x = 176;
   // if just changed to moon, exit
-  if (scratchpad->graphic_no & 1)
+  if (p_obj->graphic_no & 1)
     return;
 
 inc_days:
@@ -2177,21 +2177,21 @@ void flag_room_visited (void)
 }
 
 // $D237
-uint8_t *transfer_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t *psprite)
+uint8_t *transfer_sprite (POBJ32 p_obj, uint8_t *psprite)
 {
-  scratchpad->graphic_no = *(psprite++);
-  scratchpad->flags = *(psprite++);
-  scratchpad->pixel_x = *(psprite++);
-  scratchpad->pixel_y = *(psprite++);
+  p_obj->graphic_no = *(psprite++);
+  p_obj->flags = *(psprite++);
+  p_obj->pixel_x = *(psprite++);
+  p_obj->pixel_y = *(psprite++);
 
   return (psprite);
 }
 
 // $D24C
-uint8_t *transfer_sprite_and_print (PSPRITE_SCRATCHPAD scratchpad, uint8_t *psprite)
+uint8_t *transfer_sprite_and_print (POBJ32 p_obj, uint8_t *psprite)
 {
-  uint8_t *p = transfer_sprite (scratchpad, psprite);
-  print_sprite (scratchpad);
+  uint8_t *p = transfer_sprite (p_obj, psprite);
+  print_sprite (p_obj);
 
   return (p);
 }
@@ -2436,12 +2436,12 @@ void calc_pixel_XY (POBJ32 p_obj)
 //#define REV(d) d
 
 // $D6EF
-uint8_t *flip_sprite (PSPRITE_SCRATCHPAD scratchpad)
+uint8_t *flip_sprite (POBJ32 p_obj)
 {
-  uint8_t *psprite = sprite_tbl[scratchpad->graphic_no];
+  uint8_t *psprite = sprite_tbl[p_obj->graphic_no];
   
-  uint8_t vflip = (scratchpad->flags ^ (*psprite)) & FLAG_VFLIP;
-  uint8_t hflip = (scratchpad->flags ^ (*psprite)) & FLAG_HFLIP;
+  uint8_t vflip = (p_obj->flags ^ (*psprite)) & FLAG_VFLIP;
+  uint8_t hflip = (p_obj->flags ^ (*psprite)) & FLAG_HFLIP;
 
   uint8_t w = psprite[0] & 0x3f;
   uint8_t h = psprite[1];
@@ -2501,7 +2501,7 @@ void calc_pixel_XY_and_render (POBJ32 p_obj)
 }
 
 // $D718
-void print_sprite (PSPRITE_SCRATCHPAD scratchpad)
+void print_sprite (POBJ32 p_obj)
 {
-  osd_print_sprite (scratchpad);
+  osd_print_sprite (p_obj);
 }

@@ -25,7 +25,7 @@
 #include "kldat.h"
 
 extern void knight_lore (void);
-extern uint8_t *flip_sprite (PSPRITE_SCRATCHPAD scratchpad);
+extern uint8_t *flip_sprite (POBJ32 p_obj);
 
 void osd_cls (void)
 {
@@ -133,14 +133,14 @@ uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code)
   return (x+8);
 }
 
-void osd_print_sprite (PSPRITE_SCRATCHPAD scratchpad)
+void osd_print_sprite (POBJ32 p_obj)
 {
   uint8_t *psprite;
 
-  //fprintf (stderr, "(%d,%d)\n", scratchpad->x, scratchpad->y);
+  //fprintf (stderr, "(%d,%d)\n", p_obj->x, p_obj->y);
 
-  // references sprite_scratchpad
-  psprite = flip_sprite (scratchpad);
+  // references p_obj
+  psprite = flip_sprite (p_obj);
 
   uint8_t w = *(psprite++) & 0x3f;
   uint8_t h = *(psprite++);
@@ -157,10 +157,10 @@ void osd_print_sprite (PSPRITE_SCRATCHPAD scratchpad)
       {
 #ifdef ENABLE_MASK
         if (m & (1<<7))
-          putpixel (screen, scratchpad->pixel_x+x*8+b, 191-(scratchpad->pixel_y+y), 0);
+          putpixel (screen, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y), 0);
 #endif
         if (d & (1<<7))
-          putpixel (screen, scratchpad->pixel_x+x*8+b, 191-(scratchpad->pixel_y+y), 15);
+          putpixel (screen, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y), 15);
         m <<= 1;
         d <<= 1;
       }

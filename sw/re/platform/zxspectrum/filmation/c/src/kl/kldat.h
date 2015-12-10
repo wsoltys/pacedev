@@ -59,7 +59,7 @@ typedef struct
   uint8_t   old_pixel_x;
   uint8_t   old_pixel_y;
 
-} OBJ32, SPRITE_SCRATCHPAD, *POBJ32, *PSPRITE_SCRATCHPAD;
+} OBJ32, *POBJ32;
 
 extern uint8_t kl_font[][8];
 extern ROOM_SIZE_T room_size_tbl[];
