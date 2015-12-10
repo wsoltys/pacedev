@@ -183,7 +183,6 @@ static void upd_10 (POBJ32 p_obj);
 static void upd_11 (POBJ32 p_obj);
 static void upd_12_to_15 (POBJ32 p_obj);
 static void adj_m4_m12 (POBJ32 p_obj);
-static void upd_m6_m12 (POBJ32 p_obj);
 static void adj_m7_m12 (POBJ32 p_obj);
 static void adj_m12_m12 (POBJ32 p_obj);
 static void upd_88_to_90 (POBJ32 p_obj);

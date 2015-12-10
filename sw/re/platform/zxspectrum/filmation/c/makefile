@@ -53,9 +53,13 @@ ifeq ($(PLATFORM),allegro)
 
 	FQTN = $(TARGET).exe
 	  
-  OSD_INCS = -I $(ALLEGRO)/include
-  OSD_LIBDIR = $(ALLEGRO)/lib
-  OSD_LIBS = -lallegro-4.4.2$(ALLEGRO_MONOLITH)$(ALLEGRO_STATIC)-mt$(ALLEGRO_DEBUG)
+  #OSD_INCS = -I $(ALLEGRO)/include
+  #OSD_LIBDIR = $(ALLEGRO)/lib
+  #OSD_LIBS = -lallegro-4.4.2$(ALLEGRO_MONOLITH)$(ALLEGRO_STATIC)-mt$(ALLEGRO_DEBUG)
+  MINGW_DIR = d:/mingw_somthing
+  OSD_INCS = -I $(MINGW_DIR)/include/allegro
+  OSD_LIBDIR = $(MINGW_DIR)/lib
+  OSD_LIBS = -lalleg
   
   OSD_CFLAGS = -Wall -Wno-unused-label -g
   ifeq ($(STATIC),1)

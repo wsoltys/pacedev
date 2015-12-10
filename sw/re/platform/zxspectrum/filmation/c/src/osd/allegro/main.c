@@ -22,10 +22,12 @@
 // neogeo:  d:\mingw_something\setenv.bat
 //          g++ kl.c -o kl -lalleg
 
-extern "C" void knight_lore (void);
+extern void knight_lore (void);
 
 void main (int argc, char *argv[])
 {
+  int c;
+  
 	allegro_init ();
 	install_keyboard ();
 
@@ -34,7 +36,7 @@ void main (int argc, char *argv[])
 
   // spectrum palette
   PALETTE pal;
-  for (int c=0; c<16; c++)
+  for (c=0; c<16; c++)
   {
     pal[c].r = (c&(1<<1) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
     pal[c].g = (c&(1<<2) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);

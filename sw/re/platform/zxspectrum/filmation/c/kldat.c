@@ -2,6 +2,7 @@
 
 #include "kldat.h"
 
+#if 0
 uint8_t kl_font[][8] = 
 {
   { 0x38, 0x6C, 0xD6, 0xD6, 0xD6, 0xD6, 0x6C, 0x38, },  // '0'
@@ -45,8 +46,18 @@ uint8_t kl_font[][8] =
   { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, },  // ' '
   { 0x00, 0x62, 0x64, 0x08, 0x10, 0x26, 0x46, 0x00, },  // '%'
 };
+#endif
 
-ROOM_SIZE_T room_size_tbl[] = 
+typedef struct
+{
+  uint8_t   x;
+  uint8_t   y;
+  uint8_t   z;
+  
+} ZROOM_SIZE_T, *PZROOM_SIZE_T;
+  
+
+ZROOM_SIZE_T room_size_tbl[] = 
 {
   { 64, 64, 128 },
   { 32, 64, 128 },
