@@ -487,12 +487,12 @@ void main (int argc, char *argv[])
   for (int i=0; p<0xbd0c; i++)
   {
     if ((i%8) == 0)
-      fprintf (fp2, "  ");
+      fprintf (fp2, "  { ");
     fprintf (fp2, "0x%02X", ram[p++]);
     if (p<0xbd0c)
       fprintf (fp2, ", ");
     if ((i%8) == 7)
-      fprintf (fp2, "\n");
+      fprintf (fp2, " }\n");
   }
   fprintf (fp2, "};\n\n");
 
