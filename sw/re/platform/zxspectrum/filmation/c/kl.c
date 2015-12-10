@@ -22,7 +22,7 @@
 // neogeo:  d:\mingw_something\setenv.bat
 //          g++ kl.c -o kl -lalleg
 
-#define NOT_TESTED      fprintf (stderr, "*** NOT TESTED ***\n")
+#define NOT_TESTED      fprintf (stderr, "*** %s(): NOT TESTED ***\n", __FUNCTION__)
 
 #pragma pack(1)
 
@@ -138,11 +138,13 @@ static uint8_t portcullis_move_cnt;                   // $5BB0
 static uint8_t initial_rendering;                     // $5BB7
 static uint8_t days;                                  // $5BB9
 static int8_t lives;                                  // $5BBA
+static uint8_t objects_put_in_cauldron;               // $5BBB
 static uint8_t fire_seed;                             // $5BBC
 static uint8_t ball_bounce_height;                    // $5BBD
 static uint8_t is_spike_ball_dropping;                // $5BBF
 static uint8_t disable_spike_ball_drop;               // $5BC0
 static uint8_t byte_5BC3;                             // $5BC3
+static uint8_t byte_5BC4;                             // $5BC4
 static uint8_t *gfxbase_8x8;                          // $5BC7
 static uint8_t objects_carried[3][4];                 // $5BDC
 static uint8_t room_visited[32];                      // $5BE8
@@ -153,6 +155,10 @@ static OBJ32 *other_objs_here =
               &graphic_objs_tbl[4];                   // $5C88
               
 static SPRITE_SCRATCHPAD sprite_scratchpad;           // $BFDB
+static uint8_t objects_required[] =                   // $C27D
+{
+  0, 1, 2, 3, 4, 5, 6, 3, 5, 0, 6, 1, 2, 4
+};
 static SPRITE_SCRATCHPAD sun_moon_scratchpad;         // $C44D
 static uint8_t objects_to_draw[48];                   // $CE8B
 static OBJ32 plyr_spr_1_scratchpad;                   // $D161
@@ -165,6 +171,7 @@ static OBJ32 plyr_spr_2_scratchpad;                   // $D181
 static void play_audio_wait_key (uint8_t *audio_data);
 static void play_audio (uint8_t *audio_data);
 static void shuffle_objects_required (void);
+static void upd_131_to_133 (POBJ32 p_obj);
 static void dec_dZ_wipe_and_draw (POBJ32 p_obj);
 static uint8_t read_key (uint8_t row);
 static void upd_182_183 (POBJ32 p_obj);
@@ -182,10 +189,12 @@ static void upd_180_181 (POBJ32 p_obj);
 static void upd_176_177 (POBJ32 p_obj);
 static void sub_B85C (POBJ32 p_obj);
 static void upd_178_179 (POBJ32 p_obj);
+static void upd_160_to_163 (POBJ32 p_obj);
 static void upd_168_to_175 (POBJ32 p_obj);
 static void upd_164_to_167 (POBJ32 p_obj);
 static void upd_111 (POBJ32 p_obj);
 static void toggle_next_prev_sprite (POBJ32 p_obj);
+static void next_graphic_no_mod_4 (POBJ32 p_obj);
 static void upd_141 (POBJ32 p_obj);
 static void upd_142 (POBJ32 p_obj);
 static void upd_30_31_158_159 (POBJ32 p_obj);
@@ -214,9 +223,13 @@ static void adj_m8_m12 (POBJ32 p_obj);
 static void upd_127 (POBJ32 p_obj);
 static bool is_obj_moving (POBJ32 p_obj);
 static void upd_103 (POBJ32 p_obj);
+static void upd_104_to_110 (POBJ32 p_obj);
+static uint8_t ret_next_obj_required (void);
 static void gen_audio_XYZ_wipe_and_draw (POBJ32 p_obj);
 static void upd_96_to_102 (POBJ32 p_obj);
 static void no_update (POBJ32 p_obj);
+static void prepare_final_animation (void);
+static void upd_92_to_95 (POBJ32 p_obj);
 static void display_sun_moon_frame (PSPRITE_SCRATCHPAD scratchpad);
 static void init_sun (void);
 static void init_special_objects (void);
@@ -575,7 +588,6 @@ adjfn_t upd_sprite_jump_tbl[] =
   upd_16_to_21_24_to_29,        // human legs
   upd_30_31_158_159,            // guard (top half)
   upd_30_31_158_159,            // guard (top half)
-  upd_not_implemented,
   upd_32_to_47,                 // player (top half)
   upd_32_to_47,                 // player (top half)
   upd_32_to_47,                 // player (top half)
@@ -607,22 +619,22 @@ adjfn_t upd_sprite_jump_tbl[] =
   upd_48_to_53_56_to_61,        // wulf legs
   upd_62,                       // another block
   upd_63,                       // spiked ball
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,  // 70
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
+  upd_64_to_79,                 // player (wulf top half)
+  upd_64_to_79,                 // player (wulf top half)
+  upd_64_to_79,                 // player (wulf top half)
+  upd_64_to_79,                 // player (wulf top half)
+  upd_64_to_79,                 // player (wulf top half)
+  upd_64_to_79,                 // player (wulf top half)
+  upd_64_to_79,                 // player (wulf top half)
+  upd_64_to_79,                 // player (wulf top half)
+  upd_64_to_79,                 // player (wulf top half)
+  upd_64_to_79,                 // player (wulf top half)
+  upd_64_to_79,                 // player (wulf top half)
+  upd_64_to_79,                 // player (wulf top half)
+  upd_64_to_79,                 // player (wulf top half)
+  upd_64_to_79,                 // player (wulf top half)
+  upd_64_to_79,                 // player (wulf top half)
+  upd_64_to_79,                 // player (wulf top half)
   upd_80_to_83,                 // ghost
   upd_80_to_83,                 // ghost
   upd_80_to_83,                 // ghost
@@ -635,10 +647,10 @@ adjfn_t upd_sprite_jump_tbl[] =
   upd_88_to_90,                 // moon
   upd_88_to_90,                 // frame
   upd_91,                       // block (high?)
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
+  upd_92_to_95,                 // human/wulf transform
+  upd_92_to_95,                 // human/wulf transform
+  upd_92_to_95,                 // human/wulf transform
+  upd_92_to_95,                 // human/wulf transform
   upd_96_to_102,                // diamond
   upd_96_to_102,                // poison
   upd_96_to_102,                // boot
@@ -647,13 +659,13 @@ adjfn_t upd_sprite_jump_tbl[] =
   upd_96_to_102,                // bottle
   upd_96_to_102,                // crystal ball
   upd_103,                      // extra life
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,  // 110
+  upd_104_to_110,               // diamond
+  upd_104_to_110,               // poison
+  upd_104_to_110,               // boot
+  upd_104_to_110,               // chalice
+  upd_104_to_110,               // cup
+  upd_104_to_110,               // bottle
+  upd_104_to_110,               // crystal ball
   upd_111,                      // sparkles
   upd_112_to_118_184,           // sparkles
   upd_112_to_118_184,           // sparkles
@@ -674,9 +686,9 @@ adjfn_t upd_sprite_jump_tbl[] =
   upd_128_to_130,               // tree wall
   upd_128_to_130,               // tree wall
   upd_128_to_130,               // tree wall
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
+  upd_131_to_133,               // more sparkles
+  upd_131_to_133,               // more sparkles
+  upd_131_to_133,               // more sparkles
   no_update,
   no_update,
   no_update,
@@ -703,10 +715,10 @@ adjfn_t upd_sprite_jump_tbl[] =
   upd_144_to_149_152_to_157,    // guard & wizard (bottom half)
   upd_30_31_158_159,            // wizard (top half)
   upd_30_31_158_159,            // wizard (top half)
-  upd_not_implemented,  // 160
-  upd_not_implemented,
-  upd_not_implemented,
-  upd_not_implemented,
+  upd_160_to_163,               // even more sparkles
+  upd_160_to_163,               // even more sparkles
+  upd_160_to_163,               // even more sparkles
+  upd_160_to_163,               // even more sparkles
   upd_164_to_167,               // twinkles
   upd_164_to_167,               // twinkles
   upd_164_to_167,               // twinkles
@@ -753,6 +765,15 @@ void play_audio (uint8_t *audio_data)
 // $B544
 void shuffle_objects_required (void)
 {
+}
+
+// $B566
+void upd_131_to_133 (POBJ32 p_obj)
+{
+  NOT_TESTED;
+  
+  adj_m4_m12 (p_obj);
+  // complicated stuff
 }
 
 // $B5AF
@@ -1043,12 +1064,51 @@ void upd_178_179 (POBJ32 p_obj)
   set_wipe_and_draw_flags (p_obj);
 }
 
+
+// $B8DA
+// more sparkles
+void upd_160_to_163 (POBJ32 p_obj)
+{
+  NOT_TESTED;
+  
+  adj_m4_m12 (p_obj);
+  
+  if (special_objs_here != 0)
+    upd_111 (p_obj);
+  else
+  {
+    p_obj->flags |= (1<<1);
+    dec_dZ_and_update_XYZ (p_obj);
+    next_graphic_no_mod_4 (p_obj);
+    if (p_obj->z < 160)
+      p_obj->d_z = 2;
+    else
+    {
+      p_obj->d_z = 1;
+      if ((graphic_objs_tbl[0].graphic_no - 48) < 16)
+      {
+        // wulf - no hint for next object
+        p_obj->graphic_no |= (1<<2);
+        p_obj->flags &= ~(1<<1);
+      }
+      else
+      {
+        // human - show next object required
+        if ((p_obj->graphic_no & 3) == 0)
+          p_obj->graphic_no = ret_next_obj_required () | 168;
+      }
+    }
+    set_wipe_and_draw_flags (p_obj);
+  }
+}
+
 // $B923
 // special objects (#2)
 // - when they are put into the cauldron???
-// *** UNTESTED
 void upd_168_to_175 (POBJ32 p_obj)
 {
+  NOT_TESTED;
+  
   adj_m4_m12 (p_obj);
   p_obj->graphic_no = 160;  // sparkles
   set_wipe_and_draw_flags (p_obj);
@@ -1076,6 +1136,13 @@ void upd_111 (POBJ32 p_obj)
 void toggle_next_prev_sprite (POBJ32 p_obj)
 {
   p_obj->graphic_no ^= (1<<0);
+}
+
+// $B98C
+void next_graphic_no_mod_4 (POBJ32 p_obj)
+{
+  p_obj->graphic_no = (p_obj->graphic_no & 0xFC) | 
+                      ((p_obj->graphic_no+1) & 3);
 }
 
 // $B99C
@@ -1391,7 +1458,69 @@ void upd_103 (POBJ32 p_obj)
   upd_128_to_130 (p_obj);
   // more stuff
 }
+
+// $C1F1
+// special objects (dropped in cauldron room?)
+void upd_104_to_110 (POBJ32 p_obj)
+{
+  NOT_TESTED;
   
+  adj_m4_m12 (p_obj);
+  
+  // move towards centre of room
+  if (p_obj->x == 128)
+    p_obj->d_x = 0;
+  else if (p_obj->x < 128)
+    p_obj->d_x = 1;
+  else
+    p_obj->d_x = -1;
+  if (p_obj->y == 128)
+    p_obj->d_y = 0;
+  else if (p_obj->y < 128)
+    p_obj->d_y = 1;
+  else
+    p_obj->d_y = -1;
+    
+  if (p_obj->x != 128 ||
+      p_obj->y != 128)
+  {
+    if (p_obj->z < 152)
+      p_obj->d_z = 2;
+    else
+      p_obj->d_z = 1;
+  }
+  else
+  {
+  centre_of_room:
+    if (p_obj->z <= 128)
+    {
+    add_obj_to_cauldron:
+      p_obj->z = 128;
+      if ((p_obj->graphic_no & 7) == ret_next_obj_required ())
+      {
+        objects_put_in_cauldron++;
+        //sub_C2A5 ();
+        if (objects_put_in_cauldron == 14)
+          prepare_final_animation ();
+      }
+      byte_5BC4 = 0;
+      graphic_objs_tbl[p_obj->ptr_obj_tbl_entry].graphic_no = 0;
+      upd_111 (p_obj);
+      return;
+    }
+    else
+      p_obj->flags |= (1<<1);
+  }
+  dec_dZ_and_update_XYZ (p_obj);
+  gen_audio_XYZ_wipe_and_draw (p_obj);
+}
+
+// $C274
+uint8_t ret_next_obj_required (void)
+{
+  return (objects_required[objects_put_in_cauldron]);
+}
+
 // $C232
 void gen_audio_XYZ_wipe_and_draw (POBJ32 p_obj)
 {
@@ -1419,6 +1548,27 @@ void upd_96_to_102 (POBJ32 p_obj)
 void no_update (POBJ32 p_obj)
 {
   // do nothing
+}
+
+// $C2CC
+void prepare_final_animation (void)
+{
+  NOT_TESTED;
+}
+
+// $C337
+// human/wulf transform
+void upd_92_to_95 (POBJ32 p_obj)
+{
+  NOT_TESTED;
+  
+  upd_11 (p_obj);
+  if ((p_obj->flags13 & (1<<6)) == 1 &&
+      byte_5BC3 == 0)
+    init_sparkles (p_obj);
+  else
+  {
+  }
 }
 
 // $C3A4
