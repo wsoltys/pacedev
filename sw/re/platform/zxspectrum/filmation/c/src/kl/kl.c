@@ -46,75 +46,16 @@
 #define FLAG_EAST       (1<<0)    // EW fire
 #define FLAG_NORTH      (1<<1)    // NS fire
 
-typedef struct
-{
-  uint8_t   x;
-  uint8_t   y;
-  uint8_t   z;
-  
-} ROOM_SIZE_T, *PROOM_SIZE_T;
-  
-typedef struct
-{
-  uint8_t   graphic_no;
-  uint8_t   start_x;
-  uint8_t   start_y;
-  uint8_t   start_z;
-  uint8_t   start_scrn;
-  uint8_t   curr_x;
-  uint8_t   curr_y;
-  uint8_t   curr_z;
-  uint8_t   curr_scrn;
-
-} SPECOBJ, *PSPECOBJ;
-
-typedef struct
-{
-  uint8_t   graphic_no;
-  uint8_t   x;
-  uint8_t   y;
-  uint8_t   z;
-  uint8_t   width;
-  uint8_t   depth;
-  uint8_t   height;
-  uint8_t   flags;
-  uint8_t   scrn;
-  int8_t    d_x;
-  int8_t    d_y;
-  int8_t    d_z;
-  uint8_t   flags12;
-  uint8_t   flags13;
-  uint8_t   off14;
-  uint8_t   off15;
-  // originally a pointer, now an index
-  union
-  {
-    uint16_t  ptr_obj_tbl_entry;
-    uint16_t  plyr_graphic_no;
-  };  
-  int8_t    pixel_x_adj;
-  int8_t    pixel_y_adj;
-  uint8_t   pad2[4];
-  uint8_t   data_width_bytes;
-  uint8_t   data_height_lines;
-  uint8_t   pixel_x;
-  uint8_t   pixel_y;
-  // used for wiping the sprite
-  uint8_t   old_data_width_bytes;
-  uint8_t   old_data_height_lines;
-  uint8_t   old_pixel_x;
-  uint8_t   old_pixel_y;
-
-} OBJ32, SPRITE_SCRATCHPAD, *POBJ32, *PSPRITE_SCRATCHPAD;
+#include "kldat.h"
 
 typedef void (*adjfn_t)(POBJ32 p_obj);
-
-#include "kldat.c"
 
 uint8_t from_ascii (char ch)
 {
   const char *chrset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.© %";
-  for (uint8_t i=0; chrset[i]; i++)
+  uint8_t i;
+  
+  for (i=0; chrset[i]; i++)
     if (chrset[i] == ch)
       return (i);
       
@@ -221,7 +162,7 @@ static void display_objects (void);
 static void upd_120_to_126 (POBJ32 p_obj);
 static void adj_m8_m12 (POBJ32 p_obj);
 static void upd_127 (POBJ32 p_obj);
-static bool is_obj_moving (POBJ32 p_obj);
+static uint8_t is_obj_moving (POBJ32 p_obj);
 static void upd_103 (POBJ32 p_obj);
 static void upd_104_to_110 (POBJ32 p_obj);
 static uint8_t ret_next_obj_required (void);
@@ -319,9 +260,11 @@ void dump_graphic_objs_tbl (int start, int end)
 
 void dump_special_objs_tbl (void)
 {
+  unsigned i;
+  
   fprintf (stderr, "%s():\n", __FUNCTION__);
   
-  for (unsigned i=0; i<32; i++)
+  for (i=0; i<32; i++)
   {
     fprintf (stderr, "%02d: graphic_no=%02d, x=%d, y=%d, z=%d, start_scrn=$%02X\n",
               i,
@@ -337,13 +280,13 @@ void upd_not_implemented (POBJ32 obj)
 {
   // place-holder
 
-  static bool printed[256];
-  static bool inited = false;
+  static uint8_t printed[256];
+  static uint8_t inited = 0;
   
   if (!inited)
   {
-    memset (printed, false, 256);
-    inited = true;
+    memset (printed, 0, 256);
+    inited = 1;
   }
       
   if (!printed[obj->graphic_no])
@@ -353,7 +296,7 @@ void upd_not_implemented (POBJ32 obj)
               obj->graphic_no, 
               obj->graphic_no,
               0xB096+2*obj->graphic_no);
-    printed[obj->graphic_no] = true;
+    printed[obj->graphic_no] = 1;
   }
 }
 
@@ -401,8 +344,9 @@ onscreen_loop:
   fire_seed = seed_2;
   
   POBJ32 p_obj = graphic_objs_tbl;
-  
-  for (unsigned i=0; i<40; i++, p_obj++)
+  unsigned i;
+    
+  for (i=0; i<40; i++, p_obj++)
   {
     update_sprite_loop:
 
@@ -502,11 +446,12 @@ game_delay:
   if (key[KEY_G])
   {
     uint8_t scrn = 0;
-    
+    unsigned i;
+        
     while (keypressed ())
       readkey ();
     fprintf (stderr, "GOTO: ");
-    for (unsigned i=0; i<3; i++)
+    for (i=0; i<3; i++)
     {
       int c;
       do
@@ -1203,8 +1148,10 @@ void print_lives (void)
 // $BCAE
 void print_bcd_number (uint8_t x, uint8_t y, uint8_t *bcd, uint8_t n)
 {
+  unsigned i;
+  
   gfxbase_8x8 = (uint8_t *)kl_font;
-  for (unsigned i=0; i<n; i++, bcd++)
+  for (i=0; i<n; i++, bcd++)
   {
     uint8_t code = (*bcd) >> 4;
     x = print_8x8 (x, y, code);
@@ -1268,15 +1215,17 @@ void print_text_std_font (uint8_t x, uint8_t y, char *str)
 // $BE4C
 void print_text_raw (uint8_t x, uint8_t y, uint8_t *str)
 {
-  for (unsigned c=0; ; c++, str++)
+  unsigned c, l, b;
+  
+  for (c=0; ; c++, str++)
   {
     uint8_t code = *str & 0x7f;
 
-    for (unsigned l=0; l<8; l++)
+    for (l=0; l<8; l++)
     {
       uint8_t d = gfxbase_8x8[code*8+l];
       
-      for (unsigned b=0; b<8; b++)
+      for (b=0; b<8; b++)
       {
         if (d & (1<<7))
           putpixel (screen, x+c*8+b, 191-y+l, 15);
@@ -1291,18 +1240,20 @@ void print_text_raw (uint8_t x, uint8_t y, uint8_t *str)
 // $BE4C
 void print_text (uint8_t x, uint8_t y, char *str)
 {
-  for (unsigned c=0; *str; c++)
+  unsigned c, l, b;
+  
+  for (c=0; *str; c++)
   {
     uint8_t ascii = (uint8_t)*(str++);
     uint8_t code = from_ascii (ascii);
     
-    for (unsigned l=0; l<8; l++)
+    for (l=0; l<8; l++)
     {
       uint8_t d = gfxbase_8x8[code*8+l];
       if (d == (uint8_t)-1)
         break;
       
-      for (unsigned b=0; b<8; b++)
+      for (b=0; b<8; b++)
       {
         if (d & (1<<7))
           putpixel (screen, x+c*8+b, 191-y+l, 15);
@@ -1315,13 +1266,15 @@ void print_text (uint8_t x, uint8_t y, char *str)
 // $BE7F
 uint8_t print_8x8 (uint8_t x, uint8_t y, uint8_t code)
 {
-  for (unsigned l=0; l<8; l++)
+  unsigned l, b;
+  
+  for (l=0; l<8; l++)
   {
     uint8_t d = gfxbase_8x8[code*8+l];
     if (d == (uint8_t)-1)
       break;
     
-    for (unsigned b=0; b<8; b++)
+    for (b=0; b<8; b++)
     {
       if (d & (1<<7))
         putpixel (screen, x+b, 191-y+l, 15);
@@ -1341,14 +1294,18 @@ void display_menu (void)
 // $BEBF
 void display_text_list (uint8_t *colours, uint8_t *xy, char *text_list[], uint8_t n)
 {
-  for (unsigned i=0; i<n; i++, xy+=2)
+  unsigned i;
+  
+  for (i=0; i<n; i++, xy+=2)
     print_text_single_colour (*xy, *(xy+1), text_list[i]);
 }
 
 // $BEE4
 void multiple_print_sprite (PSPRITE_SCRATCHPAD scratchpad, uint8_t dx, uint8_t dy, uint8_t n)
 {
-  for (unsigned i=0; i<n; i++)
+  unsigned i;
+  
+  for (i=0; i<n; i++)
   {
     print_sprite (scratchpad);
     scratchpad->pixel_x += dx;
@@ -1401,11 +1358,13 @@ void upd_119 (POBJ32 p_obj)
 // $BF4E
 void display_objects (void)
 {
+  unsigned i;
+  
   objects_carried[0][0] = 0x60;
   objects_carried[1][0] = 0x61;
   objects_carried[2][0] = 0x62;
   
-  for (unsigned i=0; i<3; i++)
+  for (i=0; i<3; i++)
   {
     uint8_t x = ((255-(3-i))+3)*24+16  +24;
     
@@ -1446,7 +1405,7 @@ void upd_127 (POBJ32 p_obj)
 }
 
 // $C1A1
-bool is_obj_moving (POBJ32 p_obj)
+uint8_t is_obj_moving (POBJ32 p_obj)
 {
   return ((p_obj->d_x | p_obj->d_y | p_obj->d_z) != 0);
 }
@@ -1630,12 +1589,13 @@ void init_sun (void)
 // $C47E
 // places special objects into fixed list of rooms
 // - starting object is random
-#define NUM_OBJS (sizeof(special_objs_tbl)/sizeof(SPECOBJ))
 void init_special_objects (void)
 {
   uint8_t r = seed_1;
+  unsigned i;
+  
   r += rand() & 0xFF;
-  for (unsigned i=0; i<NUM_OBJS; i++)
+  for (i=0; i<32; i++)
   {
     // special objects $60-$67
     // diamond, poison, boot, chalice, cup, bottle, crystal ball, extra life
@@ -1757,12 +1717,13 @@ void find_special_objs_here (void)
 {
   POBJ32 p_special_obj = special_objs_here;
   uint8_t n_special_objs_here = 0;
- 
+  unsigned i;
+   
   fprintf (stderr, "%s(): screen=%d\n", 
             __FUNCTION__,
             graphic_objs_tbl[0].scrn);
   
-  for (unsigned i=0; i<32; i++)
+  for (i=0; i<32; i++)
   {
     if (special_objs_tbl[i].graphic_no == 0)
       continue;
@@ -1803,7 +1764,9 @@ void find_special_objs_here (void)
 
 void update_special_objs (void)
 {
-  for (unsigned i=0; i<2; i++)
+  unsigned i;
+  
+  for (i=0; i<2; i++)
   {
     if (special_objs_here[i].graphic_no != 0)
     {
@@ -2199,10 +2162,11 @@ void save_2d_info (POBJ32 p_obj)
 void list_objects_to_draw (void)
 {
   unsigned n = 0;
-
+  unsigned i;
+  
   //fprintf (stderr, "%s():\n", __FUNCTION__);
   
-  for (unsigned i=0; i<40; i++)
+  for (i=0; i<40; i++)
   {
     if ((graphic_objs_tbl[i].graphic_no != 0) &&
         (graphic_objs_tbl[i].flags & (1<<4)))
@@ -2220,7 +2184,9 @@ void list_objects_to_draw (void)
 // $CEBB
 void calc_display_order_and_render (void)
 {
-  for (unsigned i=0; objects_to_draw[i] != 0xFF; i++)
+  unsigned i;
+  
+  for (i=0; objects_to_draw[i] != 0xFF; i++)
   {
     POBJ32 p_obj = &graphic_objs_tbl[objects_to_draw[i]];
     #if 0
@@ -2351,10 +2317,15 @@ void retrieve_screen (void)
   POBJ32 p_other_objs = other_objs_here;
   unsigned n_other_objs = 0;
   unsigned p = 0;
-  
+  unsigned i;
+
+  uint8_t id;
+  uint8_t size;
+  uint8_t attr;
+    
   fprintf (stderr, "%s():\n", __FUNCTION__);
   
-  for (unsigned i=0; ; i++)
+  for (i=0; ; i++)
   {
     static unsigned p_47 = 0;
 
@@ -2384,9 +2355,9 @@ void retrieve_screen (void)
 found_screen:
   //fprintf (stderr, "%s(): location=%d\n", __FUNCTION__, location_tbl[p]);
   
-  uint8_t id = location_tbl[p++];
-  uint8_t size = location_tbl[p++];
-  uint8_t attr = location_tbl[p++];
+  id = location_tbl[p++];
+  size = location_tbl[p++];
+  attr = location_tbl[p++];
 
   fprintf (stderr, "id=%d, size=%d, attr=$%02X\n", id, size, attr);
   
@@ -2407,10 +2378,12 @@ found_screen:
   // do the background objects
   for (; size && location_tbl[p] != 0xFF; size--, p++)
   {
+    uint8_t *p_bg_obj;
+
     next_bg_obj:
     
     // get background type
-    uint8_t *p_bg_obj = background_type_tbl[location_tbl[p]];
+    p_bg_obj = background_type_tbl[location_tbl[p]];
 
     fprintf (stderr, "BG:%d\n", location_tbl[p]);
 
@@ -2556,10 +2529,12 @@ uint8_t *flip_sprite (PSPRITE_SCRATCHPAD scratchpad)
   uint8_t w = psprite[0] & 0x3f;
   uint8_t h = psprite[1];
 
+  unsigned x, y;
+
   if (vflip)
   {
-    for (unsigned x=0; x<w; x++)
-      for (unsigned y=0; y<h/2; y++)
+    for (x=0; x<w; x++)
+      for (y=0; y<h/2; y++)
       {
         uint8_t t = psprite[3+2*(y*w+x)];
         psprite[3+2*(y*w+x)] = psprite[3+2*((h-1-y)*w+x)];
@@ -2570,10 +2545,8 @@ uint8_t *flip_sprite (PSPRITE_SCRATCHPAD scratchpad)
 
   if (hflip)
   {
-    for (unsigned y=0; y<h; y++)
+    for (y=0; y<h; y++)
     {
-      unsigned x;
-      
       for (x=0; x<w/2; x++)
       {
         uint8_t t = psprite[3+2*(y*w+x)];
@@ -2623,13 +2596,15 @@ void print_sprite (PSPRITE_SCRATCHPAD scratchpad)
   uint8_t w = *(psprite++) & 0x3f;
   uint8_t h = *(psprite++);
 
-  for (unsigned y=0; y<h; y++)
+  unsigned x, y, b;
+  
+  for (y=0; y<h; y++)
   {
-    for (unsigned x=0; x<w; x++)
+    for (x=0; x<w; x++)
     {
       uint8_t m = *(psprite++);
       uint8_t d = *(psprite++);
-      for (unsigned b=0; b<8; b++)
+      for (b=0; b<8; b++)
       {
 #ifdef ENABLE_MASK
         if (m & (1<<7))
@@ -2643,32 +2618,3 @@ void print_sprite (PSPRITE_SCRATCHPAD scratchpad)
     }
   }
 }
-
-void main (int argc, char *argv[])
-{
-	allegro_init ();
-	install_keyboard ();
-
-	set_color_depth (8);
-	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 256, 192, 0, 0);
-
-  // spectrum palette
-  PALETTE pal;
-  for (int c=0; c<16; c++)
-  {
-    pal[c].r = (c&(1<<1) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
-    pal[c].g = (c&(1<<2) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
-    pal[c].b = (c&(1<<0) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
-  }
-	set_palette_range (pal, 0, 15, 1);
-
-	clear_bitmap (screen);
-  knight_lore ();
-
-  while (!key[KEY_ESC]);	  
-	while (key[KEY_ESC]);	  
-
-  allegro_exit ();
-}
-
-END_OF_MAIN();
