@@ -5,23 +5,6 @@
 #include <sys/stat.h>
 #include <memory.h>
 
-#include <allegro.h>
-
-#define ALLEGRO_FULL_VERSION  ((ALLEGRO_VERSION << 4)|(ALLEGRO_SUB_VERSION))
-#if ALLEGRO_FULL_VERSION < 0x42
-  #define SS_TEXTOUT_CENTRE(s,f,str,w,h,c) \
-    textout_centre (s, f, str, w, h, c);
-#else
-  #define SS_TEXTOUT_CENTRE(s,f,str,w,h,c) \
-    textout_centre_ex(s, f, str, w, h, c, 0);
-#endif
-
-// pandora: run msys.bat and cd to this directory
-//          g++ kl.c -o kl -lallegro-4.4.2-md
-
-// neogeo:  d:\mingw_something\setenv.bat
-//          g++ kl.c -o kl -lalleg
-
 #define NOT_TESTED      fprintf (stderr, "*** %s(): NOT TESTED ***\n", __FUNCTION__)
 
 #pragma pack(1)
@@ -47,20 +30,9 @@
 #define FLAG_NORTH      (1<<1)    // NS fire
 
 #include "kldat.h"
+#include "kl_osd.h"
 
 typedef void (*adjfn_t)(POBJ32 p_obj);
-
-uint8_t from_ascii (char ch)
-{
-  const char *chrset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.© %";
-  uint8_t i;
-  
-  for (i=0; chrset[i]; i++)
-    if (chrset[i] == ch)
-      return (i);
-      
-    return ((uint8_t)-1);
-}
 
 // start of variables
 
@@ -228,7 +200,7 @@ static void clr_screen_buffer (void);
 static void render_dynamic_objects (void);
 static void loc_D653 (void);
 static void calc_pixel_XY (POBJ32 p_obj);
-static uint8_t *flip_sprite (PSPRITE_SCRATCHPAD scratchpad);
+uint8_t *flip_sprite (PSPRITE_SCRATCHPAD scratchpad);
 static void calc_pixel_XY_and_render (POBJ32 p_obj);
 static void print_sprite (PSPRITE_SCRATCHPAD scratchpad);
 
@@ -336,7 +308,7 @@ game_loop:
   build_screen_objects ();
 
   // *** REMOVE ME
-	clear_bitmap (screen);
+	osd_cls ();
 
 onscreen_loop:
 
@@ -386,7 +358,7 @@ onscreen_loop:
   
 game_delay:
   // last to-do  
-  rest (100);
+  osd_delay (100);
 
   if (initial_rendering)
   {
@@ -415,47 +387,47 @@ game_delay:
 // start of development hook
 /////////////////////////////////
 
-  if (key[KEY_ESC])
+  if (osd_key(OSD_KEY_ESC))
     return;
 
-  if (key[KEY_N])
+  if (osd_key(OSD_KEY_N))
   {
     graphic_objs_tbl[0].scrn += 16;
     goto exit_screen;
   }
   
-  if (key[KEY_S])
+  if (osd_key(OSD_KEY_S))
   {
     graphic_objs_tbl[0].scrn -= 16;
     goto exit_screen;
   }
   
-  if (key[KEY_E])
+  if (osd_key(OSD_KEY_E))
   {
     graphic_objs_tbl[0].scrn += 1;
     goto exit_screen;
   }
   
-  if (key[KEY_W])
+  if (osd_key(OSD_KEY_W))
   {
     graphic_objs_tbl[0].scrn -= 1;
     goto exit_screen;
   }
 
-  if (key[KEY_G])
+  if (osd_key(OSD_KEY_G))
   {
     uint8_t scrn = 0;
     unsigned i;
         
-    while (keypressed ())
-      readkey ();
+    while (osd_keypressed ())
+      osd_readkey ();
     fprintf (stderr, "GOTO: ");
     for (i=0; i<3; i++)
     {
       int c;
       do
       {
-        c = readkey () & 0xff;
+        c = osd_readkey () & 0xff;
       } while (!isdigit(c));
       
       fprintf (stderr, "%c", c);
@@ -466,7 +438,7 @@ game_delay:
     goto exit_screen;
   }
 
-  if (key[KEY_P])
+  if (osd_key(OSD_KEY_P))
   {
     static unsigned s_no = 0;
     
@@ -477,7 +449,7 @@ game_delay:
     goto exit_screen;
   }
     
-  if (key[KEY_D])
+  if (osd_key(OSD_KEY_D))
   {
     dump_graphic_objs_tbl (-1, -1);
   }
@@ -735,23 +707,23 @@ uint8_t read_key (uint8_t row)
   switch (row)
   {
     case 0 :
-      return (keypressed ());
+      return (osd_keypressed ());
       break;
     case 0xEF :
       // 6,7,8,9,0
-      if (key[KEY_0]) val |= (1<<0);
-      if (key[KEY_9]) val |= (1<<1);
-      if (key[KEY_8]) val |= (1<<2);
-      if (key[KEY_7]) val |= (1<<3);
-      if (key[KEY_6]) val |= (1<<4);
+      if (osd_key(OSD_KEY_0)) val |= (1<<0);
+      if (osd_key(OSD_KEY_9)) val |= (1<<1);
+      if (osd_key(OSD_KEY_8)) val |= (1<<2);
+      if (osd_key(OSD_KEY_7)) val |= (1<<3);
+      if (osd_key(OSD_KEY_6)) val |= (1<<4);
       break;
     case 0xF7 :
       // 5,4,3,2,1
-      if (key[KEY_1]) val |= (1<<0);
-      if (key[KEY_2]) val |= (1<<1);
-      if (key[KEY_3]) val |= (1<<2);
-      if (key[KEY_4]) val |= (1<<3);
-      if (key[KEY_5]) val |= (1<<4);
+      if (osd_key(OSD_KEY_1)) val |= (1<<0);
+      if (osd_key(OSD_KEY_2)) val |= (1<<1);
+      if (osd_key(OSD_KEY_3)) val |= (1<<2);
+      if (osd_key(OSD_KEY_4)) val |= (1<<3);
+      if (osd_key(OSD_KEY_5)) val |= (1<<4);
     default :
       break;
   }
@@ -1214,73 +1186,19 @@ void print_text_std_font (uint8_t x, uint8_t y, char *str)
 // $BE4C
 void print_text_raw (uint8_t x, uint8_t y, uint8_t *str)
 {
-  unsigned c, l, b;
-  
-  for (c=0; ; c++, str++)
-  {
-    uint8_t code = *str & 0x7f;
-
-    for (l=0; l<8; l++)
-    {
-      uint8_t d = gfxbase_8x8[code*8+l];
-      
-      for (b=0; b<8; b++)
-      {
-        if (d & (1<<7))
-          putpixel (screen, x+c*8+b, 191-y+l, 15);
-        d <<= 1;
-      }
-    }  
-    if (*str & (1<<7))
-      break;
-  }
+  osd_print_text_raw (gfxbase_8x8, x, y, str);
 }
 
 // $BE4C
 void print_text (uint8_t x, uint8_t y, char *str)
 {
-  unsigned c, l, b;
-  
-  for (c=0; *str; c++)
-  {
-    uint8_t ascii = (uint8_t)*(str++);
-    uint8_t code = from_ascii (ascii);
-    
-    for (l=0; l<8; l++)
-    {
-      uint8_t d = gfxbase_8x8[code*8+l];
-      if (d == (uint8_t)-1)
-        break;
-      
-      for (b=0; b<8; b++)
-      {
-        if (d & (1<<7))
-          putpixel (screen, x+c*8+b, 191-y+l, 15);
-        d <<= 1;
-      }
-    }  
-  }
+  osd_print_text (gfxbase_8x8, x, y, str);
 }
 
 // $BE7F
 uint8_t print_8x8 (uint8_t x, uint8_t y, uint8_t code)
 {
-  unsigned l, b;
-  
-  for (l=0; l<8; l++)
-  {
-    uint8_t d = gfxbase_8x8[code*8+l];
-    if (d == (uint8_t)-1)
-      break;
-    
-    for (b=0; b<8; b++)
-    {
-      if (d & (1<<7))
-        putpixel (screen, x+b, 191-y+l, 15);
-      d <<= 1;
-    }
-  }  
-  return (x+8);
+  return (osd_print_8x8 (gfxbase_8x8, x, y, code));
 }
 
 // $BEB3
@@ -2473,7 +2391,7 @@ found_screen:
 // $D55F
 void clear_scrn (void)
 {
-	clear_bitmap (screen);
+	osd_cls ();
 }
 
 // $D567
@@ -2585,35 +2503,5 @@ void calc_pixel_XY_and_render (POBJ32 p_obj)
 // $D718
 void print_sprite (PSPRITE_SCRATCHPAD scratchpad)
 {
-  uint8_t *psprite;
-
-  //fprintf (stderr, "(%d,%d)\n", scratchpad->x, scratchpad->y);
-
-  // references sprite_scratchpad
-  psprite = flip_sprite (scratchpad);
-
-  uint8_t w = *(psprite++) & 0x3f;
-  uint8_t h = *(psprite++);
-
-  unsigned x, y, b;
-  
-  for (y=0; y<h; y++)
-  {
-    for (x=0; x<w; x++)
-    {
-      uint8_t m = *(psprite++);
-      uint8_t d = *(psprite++);
-      for (b=0; b<8; b++)
-      {
-#ifdef ENABLE_MASK
-        if (m & (1<<7))
-          putpixel (screen, scratchpad->pixel_x+x*8+b, 191-(scratchpad->pixel_y+y), 0);
-#endif
-        if (d & (1<<7))
-          putpixel (screen, scratchpad->pixel_x+x*8+b, 191-(scratchpad->pixel_y+y), 15);
-        m <<= 1;
-        d <<= 1;
-      }
-    }
-  }
+  osd_print_sprite (scratchpad);
 }
