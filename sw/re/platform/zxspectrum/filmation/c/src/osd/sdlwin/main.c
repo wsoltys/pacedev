@@ -14,7 +14,7 @@
 //          g++ kl.c -o kl -lalleg
 
 #include "kl_osd.h"
-#include "kldat.h"
+#include "kl_dat.h"
 
 #define ENABLE_MASK
 

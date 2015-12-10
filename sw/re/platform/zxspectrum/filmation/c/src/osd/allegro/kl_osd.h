@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "kldat.h"
+#include "kl_dat.h"
 
 //#define ALLEGRO_STATICLINK
 

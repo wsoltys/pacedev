@@ -7,7 +7,7 @@
 
 #include <SDL_keycode.h>
 
-#include "kldat.h"
+#include "kl_dat.h"
 
 #define DBGPRINTF(format...)		fprintf(stderr, format)
 

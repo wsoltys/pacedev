@@ -22,7 +22,8 @@
 // neogeo:  d:\mingw_something\setenv.bat
 //          g++ kl.c -o kl -lalleg
 
-#include "kldat.h"
+#include "kl_osd.h"
+#include "kl_dat.h"
 
 #define ENABLE_MASK
 

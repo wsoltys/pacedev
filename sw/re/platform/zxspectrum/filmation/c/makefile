@@ -69,7 +69,7 @@ endif
 
 ifeq ($(PLATFORM),sdlwin)
 
-	FQTN = $(TARGET).exe
+	FQTN = $(TARGET)_$(PLATFORM).exe
 	  
   SDL_DIR = d:/mingw_something/SDL2-2.0.3
   OSD_INCS = -I $(SDL_DIR)/i686-w64-mingw32/include/SDL2
@@ -150,7 +150,7 @@ OBJDIR = obj/$(PLATFORM)
 
 KL_OBJS = \
 	$(OBJDIR)/kl.o	\
-	$(OBJDIR)/kldat.o
+	$(OBJDIR)/kl_dat.o
 	
 OSD_OBJS = \
 	$(OBJDIR)/main.o

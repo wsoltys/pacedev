@@ -29,7 +29,7 @@
 #define FLAG_NORTH      (1<<1)    // NS fire
 
 #include "kl_osd.h"
-#include "kldat.h"
+#include "kl_dat.h"
 
 typedef void (*adjfn_t)(POBJ32 p_obj);
 
