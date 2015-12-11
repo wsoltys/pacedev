@@ -2578,7 +2578,7 @@ RAM:AFD5 DD 6E 00		     ld	     l,	(ix+0)				     ; sprite graphic to render
 RAM:AFD8 01 96 B0		     ld	     bc, upd_sprite_jmp_tbl
 RAM:AFDB
 RAM:AFDB	     jump_to_tbl_entry:						     ; CODE XREF: RAM:B588j
-RAM:AFDB									     ; sub_B9CC+9j ...
+RAM:AFDB									     ; move_guard_wizard_NSEW+9j ...
 RAM:AFDB 26 00			     ld	     h,	0
 RAM:AFDD 29			     add     hl, hl				     ; word offset
 RAM:AFDE 09			     add     hl, bc				     ; get ptr jump entry
@@ -2720,8 +2720,8 @@ RAM:B0CA 23 C8			     dw	upd_16_to_21_24_to_29
 RAM:B0CC 23 C8			     dw	upd_16_to_21_24_to_29
 RAM:B0CE 23 C8			     dw	upd_16_to_21_24_to_29
 RAM:B0D0 23 C8			     dw	upd_16_to_21_24_to_29
-RAM:B0D2 A5 B9			     dw	upd_30_31_158_159			     ;	 guard (top half)
-RAM:B0D4 A5 B9			     dw	upd_30_31_158_159			     ;	 guard (top half)
+RAM:B0D2 A5 B9			     dw	upd_30_31_158_159			     ; * guard (moving NSEW) (top half)
+RAM:B0D4 A5 B9			     dw	upd_30_31_158_159			     ; * guard (moving NSEW) (top half)
 RAM:B0D6 DA CD			     dw	upd_32_to_47				     ;	 player	(top half)
 RAM:B0D8 DA CD			     dw	upd_32_to_47
 RAM:B0DA DA CD			     dw	upd_32_to_47
@@ -2848,8 +2848,8 @@ RAM:B1CA F9 B6			     dw	upd_144_to_149_152_to_157
 RAM:B1CC F9 B6			     dw	upd_144_to_149_152_to_157
 RAM:B1CE F9 B6			     dw	upd_144_to_149_152_to_157
 RAM:B1D0 F9 B6			     dw	upd_144_to_149_152_to_157
-RAM:B1D2 A5 B9			     dw	upd_30_31_158_159			     ;	 wizard	(top half)
-RAM:B1D4 A5 B9			     dw	upd_30_31_158_159			     ;	 wizard	(top half)
+RAM:B1D2 A5 B9			     dw	upd_30_31_158_159			     ; * wizard	(top half)
+RAM:B1D4 A5 B9			     dw	upd_30_31_158_159			     ; * wizard	(top half)
 RAM:B1D6 DA B8			     dw	upd_160_163				     ; * sparkles (showing next	object required)
 RAM:B1D8 DA B8			     dw	upd_160_163
 RAM:B1DA DA B8			     dw	upd_160_163
@@ -3756,49 +3756,49 @@ RAM:B6F9
 RAM:B6F9	     upd_144_to_149_152_to_157:					     ; DATA XREF: RAM:B1B6o
 RAM:B6F9									     ; RAM:B1B8o ...
 RAM:B6F9 CD DD C4		     call    adj_m6_m12
-RAM:B6FC DD 7E 09		     ld	     a,	(ix+9)
-RAM:B6FF DD B6 0A		     or	     (ix+0Ah)
-RAM:B702 C8			     ret     z
+RAM:B6FC DD 7E 09		     ld	     a,	(ix+9)				     ; dX
+RAM:B6FF DD B6 0A		     or	     (ix+10)				     ; dX & dY both 0?
+RAM:B702 C8			     ret     z					     ; yes, exit
 RAM:B703 CD AD B4		     call    loc_B4AD
-RAM:B706 DD 7E 09		     ld	     a,	(ix+9)
-RAM:B709 DD BE 0A		     cp	     (ix+0Ah)
-RAM:B70C 38 18			     jr	     c,	loc_B726
-RAM:B70E CB 7F			     bit     7,	a
-RAM:B710 20 0E			     jr	     nz, loc_B720
-RAM:B712 DD CB 00 DE		     set     3,	(ix+0)
+RAM:B706 DD 7E 09		     ld	     a,	(ix+9)				     ; dX
+RAM:B709 DD BE 0A		     cp	     (ix+10)				     ; dX<dY?
+RAM:B70C 38 18			     jr	     c,	loc_B726			     ; yes, go
+RAM:B70E CB 7F			     bit     7,	a				     ; dX<0?
+RAM:B710 20 0E			     jr	     nz, loc_B720			     ; yes, go
+RAM:B712 DD CB 00 DE		     set     3,	(ix+0)				     ; graphic_no
 RAM:B716
 RAM:B716	     loc_B716:							     ; CODE XREF: RAM:B724j
-RAM:B716 DD CB 07 B6		     res     6,	(ix+7)				     ; hflip
+RAM:B716 DD CB 07 B6		     res     6,	(ix+7)				     ; clr hflip
 RAM:B71A
 RAM:B71A	     loc_B71A:							     ; CODE XREF: RAM:B734j
-RAM:B71A CD 7F C9		     call    loc_C97F
+RAM:B71A CD 7F C9		     call    animate_guard_wizard_legs
 RAM:B71D C3 92 C6		     jp	     set_wipe_and_draw_flags
 RAM:B720	     ; ---------------------------------------------------------------------------
 RAM:B720
 RAM:B720	     loc_B720:							     ; CODE XREF: RAM:B710j
-RAM:B720 DD CB 00 9E		     res     3,	(ix+0)
+RAM:B720 DD CB 00 9E		     res     3,	(ix+0)				     ; graphic_no
 RAM:B724 18 F0			     jr	     loc_B716
 RAM:B726	     ; ---------------------------------------------------------------------------
 RAM:B726
 RAM:B726	     loc_B726:							     ; CODE XREF: RAM:B70Cj
-RAM:B726 DD CB 0A 7E		     bit     7,	(ix+0Ah)
-RAM:B72A 28 0A			     jr	     z,	loc_B736
-RAM:B72C DD CB 00 DE		     set     3,	(ix+0)
+RAM:B726 DD CB 0A 7E		     bit     7,	(ix+10)				     ; dY<0?
+RAM:B72A 28 0A			     jr	     z,	loc_B736			     ; no, go
+RAM:B72C DD CB 00 DE		     set     3,	(ix+0)				     ; graphic_no
 RAM:B730
 RAM:B730	     loc_B730:							     ; CODE XREF: RAM:B73Aj
-RAM:B730 DD CB 07 F6		     set     6,	(ix+7)				     ; hflip
+RAM:B730 DD CB 07 F6		     set     6,	(ix+7)				     ; set hflip
 RAM:B734 18 E4			     jr	     loc_B71A
 RAM:B736	     ; ---------------------------------------------------------------------------
 RAM:B736
 RAM:B736	     loc_B736:							     ; CODE XREF: RAM:B72Aj
-RAM:B736 DD CB 00 9E		     res     3,	(ix+0)
+RAM:B736 DD CB 00 9E		     res     3,	(ix+0)				     ; graphic_no
 RAM:B73A 18 F4			     jr	     loc_B730
 RAM:B73C	     ; ---------------------------------------------------------------------------
 RAM:B73C
 RAM:B73C	     upd_150_151:						     ; DATA XREF: RAM:B1C2o
 RAM:B73C									     ; RAM:B1C4o
 RAM:B73C CD 0B C5		     call    sub_C50B
-RAM:B73F DD CB 0D 46		     bit     0,	(ix+0Dh)
+RAM:B73F DD CB 0D 46		     bit     0,	(ix+13)
 RAM:B743 3E 02			     ld	     a,	2
 RAM:B745 20 02			     jr	     nz, loc_B749
 RAM:B747 ED 44			     neg
@@ -3806,7 +3806,7 @@ RAM:B749
 RAM:B749	     loc_B749:							     ; CODE XREF: RAM:B745j
 RAM:B749 DD 77 09		     ld	     (ix+9), a
 RAM:B74C DD 77 29		     ld	     (ix+29h), a
-RAM:B74F CD 6C B7		     call    sub_B76C
+RAM:B74F CD 6C B7		     call    set_guard_wizard_sprite
 RAM:B752 CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:B755 DD CB 0C 46		     bit     0,	(ix+12)
 RAM:B759 28 08			     jr	     z,	loc_B763
@@ -3822,42 +3822,42 @@ RAM:B76C
 RAM:B76C	     ; =============== S U B R O U T I N E =======================================
 RAM:B76C
 RAM:B76C
-RAM:B76C	     sub_B76C:							     ; CODE XREF: RAM:B74Fp
+RAM:B76C	     set_guard_wizard_sprite:					     ; CODE XREF: RAM:B74Fp
 RAM:B76C									     ; RAM:B9C6p
-RAM:B76C DD 7E 09		     ld	     a,	(ix+9)
-RAM:B76F DD B6 0A		     or	     (ix+0Ah)
-RAM:B772 C8			     ret     z
-RAM:B773 DD 7E 09		     ld	     a,	(ix+9)
-RAM:B776 DD BE 0A		     cp	     (ix+0Ah)
-RAM:B779 38 13			     jr	     c,	loc_B78E
-RAM:B77B CB 7F			     bit     7,	a
-RAM:B77D 20 09			     jr	     nz, loc_B788
-RAM:B77F DD CB 00 C6		     set     0,	(ix+0)
+RAM:B76C DD 7E 09		     ld	     a,	(ix+9)				     ; dX
+RAM:B76F DD B6 0A		     or	     (ix+10)				     ; dY - both zero?
+RAM:B772 C8			     ret     z					     ; yes, exit
+RAM:B773 DD 7E 09		     ld	     a,	(ix+9)				     ; dX
+RAM:B776 DD BE 0A		     cp	     (ix+10)				     ; dX<dY?
+RAM:B779 38 13			     jr	     c,	loc_B78E			     ; yes, go
+RAM:B77B CB 7F			     bit     7,	a				     ; dX<0?
+RAM:B77D 20 09			     jr	     nz, loc_B788			     ; yes, go
+RAM:B77F DD CB 00 C6		     set     0,	(ix+0)				     ; sprite 31/159
 RAM:B783
-RAM:B783	     loc_B783:							     ; CODE XREF: sub_B76C+20j
-RAM:B783 DD CB 07 B6		     res     6,	(ix+7)				     ; hflip
+RAM:B783	     loc_B783:							     ; CODE XREF: set_guard_wizard_sprite+20j
+RAM:B783 DD CB 07 B6		     res     6,	(ix+7)				     ; clear hflip
 RAM:B787 C9			     ret
 RAM:B788	     ; ---------------------------------------------------------------------------
 RAM:B788
-RAM:B788	     loc_B788:							     ; CODE XREF: sub_B76C+11j
-RAM:B788 DD CB 00 86		     res     0,	(ix+0)
+RAM:B788	     loc_B788:							     ; CODE XREF: set_guard_wizard_sprite+11j
+RAM:B788 DD CB 00 86		     res     0,	(ix+0)				     ; sprite 30/158
 RAM:B78C 18 F5			     jr	     loc_B783
 RAM:B78E	     ; ---------------------------------------------------------------------------
 RAM:B78E
-RAM:B78E	     loc_B78E:							     ; CODE XREF: sub_B76C+Dj
-RAM:B78E DD CB 0A 7E		     bit     7,	(ix+0Ah)
-RAM:B792 28 09			     jr	     z,	loc_B79D
-RAM:B794 DD CB 00 C6		     set     0,	(ix+0)
+RAM:B78E	     loc_B78E:							     ; CODE XREF: set_guard_wizard_sprite+Dj
+RAM:B78E DD CB 0A 7E		     bit     7,	(ix+10)				     ; dY<0?
+RAM:B792 28 09			     jr	     z,	loc_B79D			     ; no, go
+RAM:B794 DD CB 00 C6		     set     0,	(ix+0)				     ; sprite 31/139
 RAM:B798
-RAM:B798	     loc_B798:							     ; CODE XREF: sub_B76C+35j
-RAM:B798 DD CB 07 F6		     set     6,	(ix+7)				     ; hflip
+RAM:B798	     loc_B798:							     ; CODE XREF: set_guard_wizard_sprite+35j
+RAM:B798 DD CB 07 F6		     set     6,	(ix+7)				     ; set hflip
 RAM:B79C C9			     ret
 RAM:B79D	     ; ---------------------------------------------------------------------------
 RAM:B79D
-RAM:B79D	     loc_B79D:							     ; CODE XREF: sub_B76C+26j
-RAM:B79D DD CB 00 86		     res     0,	(ix+0)
+RAM:B79D	     loc_B79D:							     ; CODE XREF: set_guard_wizard_sprite+26j
+RAM:B79D DD CB 00 86		     res     0,	(ix+0)				     ; sprite 30/158
 RAM:B7A1 18 F5			     jr	     loc_B798
-RAM:B7A1	     ; End of function sub_B76C
+RAM:B7A1	     ; End of function set_guard_wizard_sprite
 RAM:B7A1
 RAM:B7A3	     ; ---------------------------------------------------------------------------
 RAM:B7A3
@@ -4205,80 +4205,80 @@ RAM:B9A5	     ; guard and wizard	(top half)
 RAM:B9A5
 RAM:B9A5	     upd_30_31_158_159:						     ; DATA XREF: RAM:B0D2o
 RAM:B9A5									     ; RAM:B0D4o ...
-RAM:B9A5 CD 10 C5		     call    sub_C510
+RAM:B9A5 CD 10 C5		     call    adj_p3_m12
 RAM:B9A8 CD 00 C7		     call    dec_dZ_and_update_XYZ
-RAM:B9AB CD CC B9		     call    sub_B9CC
-RAM:B9AE DD 75 09		     ld	     (ix+9), l
-RAM:B9B1 DD 75 29		     ld	     (ix+29h), l
-RAM:B9B4 DD 74 0A		     ld	     (ix+0Ah), h
-RAM:B9B7 DD 74 2A		     ld	     (ix+2Ah), h
-RAM:B9BA DD 7E 01		     ld	     a,	(ix+1)
-RAM:B9BD DD 77 21		     ld	     (ix+21h), a
-RAM:B9C0 DD 7E 02		     ld	     a,	(ix+2)
-RAM:B9C3 DD 77 22		     ld	     (ix+22h), a
-RAM:B9C6 CD 6C B7		     call    sub_B76C
+RAM:B9AB CD CC B9		     call    move_guard_wizard_NSEW
+RAM:B9AE DD 75 09		     ld	     (ix+9), l				     ; dX
+RAM:B9B1 DD 75 29		     ld	     (ix+29h), l			     ; next obj	dX
+RAM:B9B4 DD 74 0A		     ld	     (ix+0Ah), h			     ; dY
+RAM:B9B7 DD 74 2A		     ld	     (ix+2Ah), h			     ; next obj	dY
+RAM:B9BA DD 7E 01		     ld	     a,	(ix+1)				     ; X
+RAM:B9BD DD 77 21		     ld	     (ix+21h), a			     ; copy to next obj	X
+RAM:B9C0 DD 7E 02		     ld	     a,	(ix+2)				     ; Y
+RAM:B9C3 DD 77 22		     ld	     (ix+22h), a			     ; copy to next obj	Y
+RAM:B9C6 CD 6C B7		     call    set_guard_wizard_sprite
 RAM:B9C9 C3 56 B8		     jp	     loc_B856
 RAM:B9CC
 RAM:B9CC	     ; =============== S U B R O U T I N E =======================================
 RAM:B9CC
 RAM:B9CC
-RAM:B9CC	     sub_B9CC:							     ; CODE XREF: RAM:B9ABp
-RAM:B9CC 01 D8 B9		     ld	     bc, off_B9D8			     ; jump table
-RAM:B9CF DD 7E 0D		     ld	     a,	(ix+0Dh)
-RAM:B9D2 E6 03			     and     3
+RAM:B9CC	     move_guard_wizard_NSEW:					     ; CODE XREF: RAM:B9ABp
+RAM:B9CC 01 D8 B9		     ld	     bc, guard_NSEW_tbl			     ; jump table
+RAM:B9CF DD 7E 0D		     ld	     a,	(ix+13)
+RAM:B9D2 E6 03			     and     3					     ; direction (N/S/E/W)
 RAM:B9D4 6F			     ld	     l,	a
 RAM:B9D5 C3 DB AF		     jp	     jump_to_tbl_entry
-RAM:B9D5	     ; End of function sub_B9CC
+RAM:B9D5	     ; End of function move_guard_wizard_NSEW
 RAM:B9D5
 RAM:B9D5	     ; ---------------------------------------------------------------------------
-RAM:B9D8 E0 B9	     off_B9D8:	     dw	loc_B9E0				     ; DATA XREF: sub_B9CCo
-RAM:B9DA FB B9			     dw	loc_B9FB
-RAM:B9DC 08 BA			     dw	loc_BA08
-RAM:B9DE 15 BA			     dw	loc_BA15
+RAM:B9D8 E0 B9	     guard_NSEW_tbl: dw	guard_W					     ; DATA XREF: move_guard_wizard_NSEWo
+RAM:B9DA FB B9			     dw	guard_N
+RAM:B9DC 08 BA			     dw	guard_E
+RAM:B9DE 15 BA			     dw	guard_S
 RAM:B9E0	     ; ---------------------------------------------------------------------------
 RAM:B9E0
-RAM:B9E0	     loc_B9E0:							     ; DATA XREF: RAM:off_B9D8o
-RAM:B9E0 21 FE 00		     ld	     hl, 0FEh ;	'þ'
-RAM:B9E3 DD CB 0C 46		     bit     0,	(ix+12)
-RAM:B9E7 C8			     ret     z
-RAM:B9E8 21 00 02		     ld	     hl, 200h
+RAM:B9E0	     guard_W:							     ; DATA XREF: RAM:guard_NSEW_tblo
+RAM:B9E0 21 FE 00		     ld	     hl, 0FEh ;	'þ'                          ; dY=0, dX=-2
+RAM:B9E3 DD CB 0C 46		     bit     0,	(ix+12)				     ; X OOB?
+RAM:B9E7 C8			     ret     z					     ; no, exit
+RAM:B9E8 21 00 02		     ld	     hl, 200h				     ; dY=2, dX=0
 RAM:B9EB
-RAM:B9EB	     loc_B9EB:							     ; CODE XREF: RAM:BA06j
+RAM:B9EB	     next_guard_dir:						     ; CODE XREF: RAM:BA06j
 RAM:B9EB									     ; RAM:BA13j ...
-RAM:B9EB DD 7E 0D		     ld	     a,	(ix+0Dh)
+RAM:B9EB DD 7E 0D		     ld	     a,	(ix+13)				     ; direction
 RAM:B9EE 4F			     ld	     c,	a
 RAM:B9EF 3C			     inc     a
-RAM:B9F0 E6 03			     and     3
+RAM:B9F0 E6 03			     and     3					     ; relevant	bits
 RAM:B9F2 47			     ld	     b,	a
 RAM:B9F3 79			     ld	     a,	c
 RAM:B9F4 E6 FC			     and     0FCh ; 'ü'
-RAM:B9F6 B0			     or	     b
-RAM:B9F7 DD 77 0D		     ld	     (ix+0Dh), a
+RAM:B9F6 B0			     or	     b					     ; inc lowest 2 bits (mod 4)
+RAM:B9F7 DD 77 0D		     ld	     (ix+13), a
 RAM:B9FA C9			     ret
 RAM:B9FB	     ; ---------------------------------------------------------------------------
 RAM:B9FB
-RAM:B9FB	     loc_B9FB:							     ; DATA XREF: RAM:B9DAo
-RAM:B9FB 21 00 02		     ld	     hl, 200h
-RAM:B9FE DD CB 0C 4E		     bit     1,	(ix+12)
-RAM:BA02 C8			     ret     z
-RAM:BA03 21 02 00		     ld	     hl, 2
-RAM:BA06 18 E3			     jr	     loc_B9EB
+RAM:B9FB	     guard_N:							     ; DATA XREF: RAM:B9DAo
+RAM:B9FB 21 00 02		     ld	     hl, 200h				     ; dY=+2, dX=0
+RAM:B9FE DD CB 0C 4E		     bit     1,	(ix+12)				     ; Y OOB?
+RAM:BA02 C8			     ret     z					     ; no, exit
+RAM:BA03 21 02 00		     ld	     hl, 2				     ; dY=0, dX=+2
+RAM:BA06 18 E3			     jr	     next_guard_dir
 RAM:BA08	     ; ---------------------------------------------------------------------------
 RAM:BA08
-RAM:BA08	     loc_BA08:							     ; DATA XREF: RAM:B9DCo
-RAM:BA08 21 02 00		     ld	     hl, 2
-RAM:BA0B DD CB 0C 46		     bit     0,	(ix+12)
-RAM:BA0F C8			     ret     z
-RAM:BA10 21 00 FE		     ld	     hl, 0FE00h
-RAM:BA13 18 D6			     jr	     loc_B9EB
+RAM:BA08	     guard_E:							     ; DATA XREF: RAM:B9DCo
+RAM:BA08 21 02 00		     ld	     hl, 2				     ; dY=0, dX=+2
+RAM:BA0B DD CB 0C 46		     bit     0,	(ix+12)				     ; X OOB?
+RAM:BA0F C8			     ret     z					     ; no, exit
+RAM:BA10 21 00 FE		     ld	     hl, 0FE00h				     ; dY=-2, dX=0
+RAM:BA13 18 D6			     jr	     next_guard_dir
 RAM:BA15	     ; ---------------------------------------------------------------------------
 RAM:BA15
-RAM:BA15	     loc_BA15:							     ; DATA XREF: RAM:B9DEo
-RAM:BA15 21 00 FE		     ld	     hl, 0FE00h
-RAM:BA18 DD CB 0C 4E		     bit     1,	(ix+12)
-RAM:BA1C C8			     ret     z
-RAM:BA1D 21 FE 00		     ld	     hl, 0FEh ;	'þ'
-RAM:BA20 18 C9			     jr	     loc_B9EB
+RAM:BA15	     guard_S:							     ; DATA XREF: RAM:B9DEo
+RAM:BA15 21 00 FE		     ld	     hl, 0FE00h				     ; dY=-2, dX=0
+RAM:BA18 DD CB 0C 4E		     bit     1,	(ix+12)				     ; Y OOB?
+RAM:BA1C C8			     ret     z					     ; no, exit
+RAM:BA1D 21 FE 00		     ld	     hl, 0FEh ;	'þ'                          ; dY=0, dX=-2
+RAM:BA20 18 C9			     jr	     next_guard_dir
 RAM:BA22	     ; ---------------------------------------------------------------------------
 RAM:BA22	     ; START OF	FUNCTION CHUNK FOR lose_life
 RAM:BA22
@@ -6008,10 +6008,10 @@ RAM:C510
 RAM:C510	     ; =============== S U B R O U T I N E =======================================
 RAM:C510
 RAM:C510
-RAM:C510	     sub_C510:							     ; CODE XREF: RAM:upd_30_31_158_159p
+RAM:C510	     adj_p3_m12:						     ; CODE XREF: RAM:upd_30_31_158_159p
 RAM:C510 21 F4 03		     ld	     hl, 3F4h				     ; +3, -12
 RAM:C513 18 CB			     jr	     jp_set_pixel_adj
-RAM:C513	     ; End of function sub_C510
+RAM:C513	     ; End of function adj_p3_m12
 RAM:C513
 RAM:C515	     ; B = width (bytes)
 RAM:C515	     ; C = height (lines)
@@ -6836,14 +6836,14 @@ RAM:C97A C5			     push    bc
 RAM:C97B CD BB B4		     call    loc_B4BB
 RAM:C97E C1			     pop     bc
 RAM:C97F
-RAM:C97F	     loc_C97F:							     ; CODE XREF: RAM:loc_B71Ap
+RAM:C97F	     animate_guard_wizard_legs:					     ; CODE XREF: RAM:loc_B71Ap
 RAM:C97F									     ; sub_C969+36j
-RAM:C97F DD 7E 00		     ld	     a,	(ix+0)
+RAM:C97F DD 7E 00		     ld	     a,	(ix+0)				     ; graphic_no
 RAM:C982 5F			     ld	     e,	a
-RAM:C983 3C			     inc     a
+RAM:C983 3C			     inc     a					     ; next sprite
 RAM:C984 E6 07			     and     7
-RAM:C986 FE 06			     cp	     6
-RAM:C988 20 01			     jr	     nz, loc_C98B
+RAM:C986 FE 06			     cp	     6					     ; wrap?
+RAM:C988 20 01			     jr	     nz, loc_C98B			     ; no, skip
 RAM:C98A AF			     xor     a
 RAM:C98B
 RAM:C98B	     loc_C98B:							     ; CODE XREF: sub_C969+1Fj
@@ -6851,7 +6851,7 @@ RAM:C98B 57			     ld	     d,	a
 RAM:C98C 7B			     ld	     a,	e
 RAM:C98D E6 F8			     and     0F8h ; 'ø'
 RAM:C98F B2			     or	     d
-RAM:C990 DD 77 00		     ld	     (ix+0), a
+RAM:C990 DD 77 00		     ld	     (ix+0), a				     ; update sprite
 RAM:C993 C9			     ret
 RAM:C994	     ; ---------------------------------------------------------------------------
 RAM:C994
@@ -6862,7 +6862,7 @@ RAM:C999 FE 02			     cp	     2
 RAM:C99B C8			     ret     z
 RAM:C99C FE 04			     cp	     4
 RAM:C99E C8			     ret     z
-RAM:C99F 18 DE			     jr	     loc_C97F
+RAM:C99F 18 DE			     jr	     animate_guard_wizard_legs
 RAM:C99F	     ; End of function sub_C969
 RAM:C99F
 RAM:C9A1
