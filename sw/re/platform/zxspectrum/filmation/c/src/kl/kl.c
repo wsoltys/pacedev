@@ -1828,9 +1828,7 @@ void upd_80_to_83 (POBJ32 p_obj)
     //gen_audio_XYZ ();
   }
   toggle_next_prev_sprite (p_obj);
-  // jp loc_B856
-  sub_B85C (p_obj);
-  set_wipe_and_draw_flags (p_obj);
+  loc_B856 (p_obj);
 }
 
 // $C603
