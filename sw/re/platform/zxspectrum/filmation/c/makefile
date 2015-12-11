@@ -40,6 +40,9 @@ ifeq (,$(STATIC))
 endif
 
 ifeq ($(PLATFORM),allegro)
+
+  # $(MINGDIR)/setenv.bat
+
   #MINGW_VER = 3.4.5
   MINGW_VER = 4.5.2
   ifeq ($(STATIC),1)
@@ -69,6 +72,8 @@ endif
 
 ifeq ($(PLATFORM),sdlwin)
 
+  # $(MINGDIR)/setenv.bat
+
 	FQTN = $(TARGET)_$(PLATFORM).exe
 	  
   SDL_DIR = $(MINGDIR)/SDL2-2.0.3
@@ -81,8 +86,11 @@ endif
 
 ifeq ($(PLATFORM),neogeo)
 
+  # $(NEODEV)/setenv.bat
+  # mame 
+  
   ifeq ($(NEODEV),)
-	  NEODEV = 
+	  NEODEV = /devkit/neodev
   endif
 
 	#OUTPUT = cd
@@ -130,6 +138,9 @@ endif
 
 ifeq ($(PLATFORM),genesis)
 
+  # $(GDK)/sentenv.bat
+  # gens.exe (load rom "kl.bin")
+  
 	GDK = /devkit/SGDK
 	GDK_WIN = \devkit\SGDK
 

@@ -48,7 +48,7 @@ typedef struct
   {
     uint16_t  ptr_obj_tbl_entry;
     uint16_t  plyr_graphic_no;
-  };  
+  } u;  
   int8_t    pixel_x_adj;
   int8_t    pixel_y_adj;
   uint8_t   pad2[4];

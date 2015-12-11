@@ -270,8 +270,13 @@ void upd_not_implemented (POBJ32 obj)
   }
 }
 
+extern adjfn_t upd_sprite_jump_tbl[];
+
 void knight_lore (void)
 {
+  POBJ32 p_obj;
+  unsigned i;
+
   DBGPRINTF_FN;
   
 START_AF6C:
@@ -315,12 +320,12 @@ onscreen_loop:
 
   fire_seed = seed_2;
   
-  POBJ32 p_obj = graphic_objs_tbl;
-  unsigned i;
-    
+  p_obj = graphic_objs_tbl;
   for (i=0; i<40; i++, p_obj++)
   {
-    update_sprite_loop:
+    uint8_t r;
+
+  update_sprite_loop:
 
     fire_seed++;      
     save_2d_info (p_obj);
@@ -328,7 +333,6 @@ onscreen_loop:
     #ifndef arraylen
       #define arraylen(n) (sizeof(n) / sizeof((n)[0]))
     #endif
-    extern adjfn_t upd_sprite_jump_tbl[];
     
     if (p_obj->graphic_no > 187)
       upd_not_implemented (p_obj);
@@ -340,7 +344,7 @@ onscreen_loop:
     }
 
     // update seed_3
-    uint8_t r = rand ();
+    r = rand ();
     seed_3 += r;
   }
 
@@ -1259,7 +1263,7 @@ void upd_185_187 (POBJ32 p_obj)
   NOT_TESTED;
 
   // zap the graphic_no so the object no longer appears  
-  graphic_objs_tbl[p_obj->ptr_obj_tbl_entry].graphic_no = 0;
+  graphic_objs_tbl[p_obj->u.ptr_obj_tbl_entry].graphic_no = 0;
   upd_119 (p_obj);
 }
 
@@ -1318,7 +1322,7 @@ void upd_127 (POBJ32 p_obj)
   // no idea what the rest of this does???
   p_obj->flags13 &= ~(1<<6);
   // for player (only), this stores the graphic_no
-  p_obj->graphic_no = p_obj->plyr_graphic_no;
+  p_obj->graphic_no = p_obj->u.plyr_graphic_no;
   upd_sprite_jump_tbl[p_obj->graphic_no] (p_obj);
 }
 
@@ -1381,7 +1385,7 @@ void upd_104_to_110 (POBJ32 p_obj)
           prepare_final_animation ();
       }
       byte_5BC4 = 0;
-      graphic_objs_tbl[p_obj->ptr_obj_tbl_entry].graphic_no = 0;
+      graphic_objs_tbl[p_obj->u.ptr_obj_tbl_entry].graphic_no = 0;
       upd_111 (p_obj);
       return;
     }
@@ -1658,7 +1662,7 @@ void find_special_objs_here (void)
     p_special_obj->flags = 0x14;
     p_special_obj->scrn = special_objs_tbl[i].curr_scrn;
     memset (&p_special_obj->d_x, 0, 7);  // *** FIXME
-    p_special_obj->ptr_obj_tbl_entry = i;
+    p_special_obj->u.ptr_obj_tbl_entry = i;
     memset (&p_special_obj->pad2, 0, 12); // *** FIXME
     
     p_special_obj++;
@@ -1689,7 +1693,7 @@ void update_special_objs (void)
     if (special_objs_here[i].graphic_no != 0)
     {
       // set data in object table
-      uint8_t index = special_objs_here[i].ptr_obj_tbl_entry;
+      uint8_t index = special_objs_here[i].u.ptr_obj_tbl_entry;
       special_objs_tbl[index].graphic_no = special_objs_here[i].graphic_no;
       special_objs_tbl[index].curr_x = special_objs_here[i].x;
       special_objs_tbl[index].curr_y = special_objs_here[i].y;
@@ -2134,12 +2138,14 @@ int lose_life (void)
 // $D1B1
 void init_start_location (void)
 {
+  uint8_t s;
+
   memcpy ((uint8_t *)&plyr_spr_1_scratchpad, plyr_spr_init_data+0, 8);
   memcpy ((uint8_t *)&plyr_spr_2_scratchpad, plyr_spr_init_data+8, 8);
   // set graphic_no for player sprites (after sparkles)
-  plyr_spr_1_scratchpad.plyr_graphic_no = 18;   // legs
-  plyr_spr_2_scratchpad.plyr_graphic_no = 34;   // top half
-  uint8_t s = start_locations[seed_1 & 3];
+  plyr_spr_1_scratchpad.u.plyr_graphic_no = 18;   // legs
+  plyr_spr_2_scratchpad.u.plyr_graphic_no = 34;   // top half
+  s = start_locations[seed_1 & 3];
   // start_loc_1
   plyr_spr_1_scratchpad.scrn = s;
   // start_loc_2
@@ -2234,6 +2240,7 @@ void retrieve_screen (void)
 {
   POBJ32 p_other_objs = other_objs_here;
   unsigned n_other_objs = 0;
+  uint8_t room_size;
   unsigned p = 0;
   unsigned i;
 
@@ -2282,7 +2289,7 @@ found_screen:
   // get attribute, set BRIGHT  
   curr_room_attrib = (attr & 7) | 0x40;
 
-  uint8_t room_size = (attr >> 3) & 0x1F;
+  room_size = (attr >> 3) & 0x1F;
   room_size_X = room_size_tbl[room_size].x;
   room_size_Y = room_size_tbl[room_size].y;
   room_size_Z = room_size_tbl[room_size].z;

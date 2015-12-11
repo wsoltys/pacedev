@@ -210,7 +210,7 @@ int main (int argc, char *argv[])
 
 	while (1)
 	{
-    VDP_drawText("LODE RUNNER (SEGA)", 10, 13);
+    VDP_drawText("KNIGHT LORE (SEGA)", 10, 13);
 
 		knight_lore ();
 	}
