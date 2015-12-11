@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <stdint.h>
-#include <sys/stat.h>
-#include <memory.h>
+//#include <sys/stat.h>
+//#include <memory.h>
 
 #define DBGPRINTF_FN    DBGPRINTF ("%s():\n", __FUNCTION__)
 #define NOT_TESTED      DBGPRINTF ("*** %s(): NOT TESTED ***\n", __FUNCTION__)
@@ -28,6 +27,7 @@
 #define FLAG_EAST       (1<<0)    // EW fire
 #define FLAG_NORTH      (1<<1)    // NS fire
 
+#include "osd_types.h"
 #include "kl_osd.h"
 #include "kl_dat.h"
 

@@ -1,7 +1,7 @@
 #ifndef __KL_DAT_H__
 #define __KL_DAT_H__
 
-#include <unistd.h>
+#include "osd_types.h"
 
 typedef struct
 {

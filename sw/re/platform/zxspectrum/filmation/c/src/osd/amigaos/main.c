@@ -1,197 +1,173 @@
-//#include <stdlib.h>
 
 // osd stuff
 
 #include "osd_types.h"
-#include "lr_osd.h"
+#include "kl_osd.h"
 
-extern const uint8_t tile_data_m2bpp[];
-extern const uint8_t tile_data_c2bpp[];
-extern const uint8_t title_data_m2bpp[];
-extern const uint8_t title_data_c2bpp[];
+#define ENABLE_MASK
 
-extern void lode_runner (void);
+extern void knight_lore (void);
+extern uint8_t *flip_sprite (POBJ32 p_obj);
 
-void osd_gcls (uint8_t page)
+void osd_cls (void)
 {
-}
-
-void osd_display_char_pg (uint8_t page, uint8_t chr, uint8_t x_div_2, uint8_t y)
-{
-#if 0
-  uint16_t  x = x_div_2 * 2;
-  
-	// fudge: fixme
-	rectfill (pg[page-1], x, y, x+9, y+10, 0);
-	draw_rle_sprite (pg[page-1], tile[chr], x, y);
-#endif
-}
-
-void osd_draw_separator (uint8_t page, uint8_t byte, uint8_t y)
-{  	
-#if 0
-	for (int c=0; c<2*35; c++)
-		for (int n=0; n<4; n++)
-		{
-			putpixel (pg[page-1], c*4+n, y+0, byte>>((3-n)*2)&3);
-			putpixel (pg[page-1], c*4+n, y+1, byte>>((3-n)*2)&3);
-			putpixel (pg[page-1], c*4+n, y+2, byte>>((3-n)*2)&3);
-			putpixel (pg[page-1], c*4+n, y+3, byte>>((3-n)*2)&3);
-		}
-#endif
-}		
-
-void osd_wipe_circle (void)
-{
-#if 0
-  // fixme
-  rectfill (pg[0], 0, 0, 279, 175, 0);
-#endif
-}
-
-void osd_draw_circle (void)
-{
-#if 0
-  // fixme
-	blit (pg[1], pg[0], 0, 0, 0, 0, 280, 176);
-#endif
-}
-
-int osd_keypressed (void)
-{
-	return (0);
+	#if 0
+	clear_bitmap (screen);
+	#endif
 }
 
 void osd_delay (unsigned ms)
 {
-	while (ms--)
-	{
-		unsigned t;
-
-		for (t=0; t<512; t++)
-			;
-	}
-}
-
-int osd_readkey (void)
-{
-#if 0
-  return (readkey ());
-#endif
-	return (0);
+	#if 0
+  rest (ms);
+	#endif
 }
 
 int osd_key (int _key)
 {
-#if 0
-	DWORD port1;
-	
-	port1 = poll_joystick(PORT1, READ_DIRECT);
-	switch (_key)
-	{
-		case OSD_KEY_I :
-			return ((port1 & JOY_UP) != 0);
-		case OSD_KEY_J :
-			return ((port1 & JOY_LEFT) != 0);
-		case OSD_KEY_K :
-			return ((port1 & JOY_DOWN) != 0);
-		case OSD_KEY_L :
-			return ((port1 & JOY_RIGHT) != 0);
-		case OSD_KEY_U :
-		case OSD_KEY_Z :
-			return ((port1 & JOY_A) != 0);
-		case OSD_KEY_O :
-		case OSD_KEY_X :
-			return ((port1 & JOY_B) != 0);
-		default :
-			break;
-	};
-#endif	
-	return (0);
-}
-
-void osd_wipe_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, uint8_t y)
-{
-#if 0
-	// quick hack for now
-	blit (pg[1], pg[0], x_div_2*2, y, x_div_2*2, y, 10, 11);
-#endif
-}
-
-void osd_display_transparent_char (int8_t sprite, uint8_t chr, uint8_t x_div_2, uint8_t y)
-{
-#if 0
-  // always page HGR1
-	draw_rle_sprite (pg[0], tile[chr], x_div_2*2, y);
-#endif
-}
-
-void osd_hgr (uint8_t page)
-{
-#if 0
-  if (page == 1)
-    ret = HGR1;
-  else
-    ret = HGR2;
-    
-	//if (ret != 0)
-	//	fprintf (stderr, "* scroll_screen(%d) failed!\n", page);    
-#endif
-}
-
-void osd_flush_keybd (void)
-{
-	while (osd_keypressed ())
-		;
-}
-
-void osd_display_title_screen (uint8_t page)
-{
-#if 0
-	#ifdef MONO
-  	uint8_t *ptitle_data = title_data_m2bpp;
-	#else
-  	uint8_t *ptitle_data = title_data_c2bpp;
+	#if 0
+  return (key[_key]);
 	#endif
-	
-	uint8_t row = 192;
-	uint8_t col = 2*35;
-	while (row > 0)
-	{
-		uint8_t count = *(ptitle_data++);
-		uint8_t	byte = *(ptitle_data++);
-		
-		while (count--)
-		{
-			// put byte - fixme
-			for (int n=0; n<4; n++)
-				putpixel (pg[page-1], (2*35-col)*4+n, (192-row), byte>>((3-n)*2)&3);
-				//pg[page-1]->line[(192-row)][(2*35-col)*4+n] = byte>>((3-n)*2)&3;
-			if (--col == 0)
-			{
-				col = 2*35;
-				row--;
-			}
-		}
-	}
-#endif
 }
 
-void osd_game_over_frame (uint8_t frame, const uint8_t game_over_frame[][14], const uint8_t gol[][26])
+int osd_keypressed (void)
 {
-#if 0
-  TILEMAP stm[7];
-  unsigned tm;
-
-  for (tm=0; tm<7; tm++)
-  {
-    stm[tm].tiles[0].block_number = tile_base+512+frame*8+tm;
-    stm[tm].tiles[0].attributes = (1<<8)|0;
-  }
-  set_current_sprite (NEO_SPRITE(6)+tm);
-	write_sprite_data(XOFF+13*7-4, YOFF+80, 15, 255, 1, 7, (const PTILEMAP)stm);
-#endif
+	#if 0
+  return (keypressed ());
+	#endif
 }
+
+int osd_readkey (void)
+{
+	#if 0
+  return (readkey ());
+	#endif
+}
+
+void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t *str)
+{
+	#if 0
+  unsigned c, l, b;
+  
+  for (c=0; ; c++, str++)
+  {
+    uint8_t code = *str & 0x7f;
+
+    for (l=0; l<8; l++)
+    {
+      uint8_t d = gfxbase_8x8[code*8+l];
+      
+      for (b=0; b<8; b++)
+      {
+        if (d & (1<<7))
+          putpixel (screen, x+c*8+b, 191-y+l, 15);
+        d <<= 1;
+      }
+    }  
+    if (*str & (1<<7))
+      break;
+  }
+	#endif
+}
+
+static uint8_t from_ascii (char ch)
+{
+  const char *chrset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.© %";
+  uint8_t i;
+  
+  for (i=0; chrset[i]; i++)
+    if (chrset[i] == ch)
+      return (i);
+      
+    return ((uint8_t)-1);
+}
+
+void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, char *str)
+{
+	#if 0
+  unsigned c, l, b;
+  
+  for (c=0; *str; c++)
+  {
+    uint8_t ascii = (uint8_t)*(str++);
+    uint8_t code = from_ascii (ascii);
+    
+    for (l=0; l<8; l++)
+    {
+      uint8_t d = gfxbase_8x8[code*8+l];
+      if (d == (uint8_t)-1)
+        break;
+      
+      for (b=0; b<8; b++)
+      {
+        if (d & (1<<7))
+          putpixel (screen, x+c*8+b, 191-y+l, 15);
+        d <<= 1;
+      }
+    }  
+  }
+	#endif
+}
+
+uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code)
+{
+	#if 0
+  unsigned l, b;
+  
+  for (l=0; l<8; l++)
+  {
+    uint8_t d = gfxbase_8x8[code*8+l];
+    if (d == (uint8_t)-1)
+      break;
+    
+    for (b=0; b<8; b++)
+    {
+      if (d & (1<<7))
+        putpixel (screen, x+b, 191-y+l, 15);
+      d <<= 1;
+    }
+  }  
+	#endif
+  return (x+8);
+}
+
+void osd_print_sprite (POBJ32 p_obj)
+{
+	#if 0
+  uint8_t *psprite;
+
+  //DBGPRINTF("(%d,%d)\n", p_obj->x, p_obj->y);
+
+  // references p_obj
+  psprite = flip_sprite (p_obj);
+
+  uint8_t w = *(psprite++) & 0x3f;
+  uint8_t h = *(psprite++);
+
+  unsigned x, y, b;
+  
+  for (y=0; y<h; y++)
+  {
+    for (x=0; x<w; x++)
+    {
+      uint8_t m = *(psprite++);
+      uint8_t d = *(psprite++);
+      for (b=0; b<8; b++)
+      {
+#ifdef ENABLE_MASK
+        if (m & (1<<7))
+          putpixel (screen, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y), 0);
+#endif
+        if (d & (1<<7))
+          putpixel (screen, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y), 15);
+        m <<= 1;
+        d <<= 1;
+      }
+    }
+  }
+  #endif
+}
+
 
 int main (int argc, char *argv[])
 {
@@ -236,7 +212,7 @@ int main (int argc, char *argv[])
 	{
 		//textoutf (13, 20, 0, 0, "LODE RUNNER");
 
-		lode_runner ();
+		knight_lore ();
 	}
   
   return (0);
