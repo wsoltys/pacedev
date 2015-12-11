@@ -24,7 +24,7 @@
 #define FLAG_TRIGGERED  (1<<3)    // dropping block
 #define FLAG_UP         (1<<2)    // bouncing ball
 #define FLAG_DROPPING   (1<<2)    // spiked ball
-#define FLAG_EAST       (1<<0)    // EW fire
+#define FLAG_EAST       (1<<0)    // EW fire, EW guard
 #define FLAG_NORTH      (1<<1)    // NS fire
 #define MASK_DIR        0x03      // NSEW guard & wizard
 
@@ -632,8 +632,8 @@ adjfn_t upd_sprite_jump_tbl[] =
   upd_144_to_149_152_to_157,    // guard & wizard (bottom half)
   upd_144_to_149_152_to_157,    // guard & wizard (bottom half)
   upd_144_to_149_152_to_157,    // guard & wizard (bottom half)
-  upd_150_151,                  // guard 2 (top half)
-  upd_150_151,                  // guard 2 (top half)
+  upd_150_151,                  // guard (EW)
+  upd_150_151,                  // guard (EW)
   upd_144_to_149_152_to_157,    // guard & wizard (bottom half)
   upd_144_to_149_152_to_157,    // guard & wizard (bottom half)
   upd_144_to_149_152_to_157,    // guard & wizard (bottom half)
@@ -835,7 +835,7 @@ void upd_144_to_149_152_to_157 (POBJ32 p_obj)
   set_pixel_adj (p_obj, -6, -12);
   if (p_obj->d_x == 0 && p_obj->d_y == 0)
     return;
-  // B4AD
+  //gen_guard_wizard_audio (p_obj);
   if ((uint8_t)p_obj->d_x < (uint8_t)p_obj->d_y)
   {
     if (p_obj->d_y < 0)
@@ -916,11 +916,22 @@ void upd_63 (POBJ32 p_obj)
 }
 
 // $B7C3
-// guard 2 top half
+// guard (EW) (eg. room 1)
 void upd_150_151 (POBJ32 p_obj)
 {
+  POBJ32 p_next_obj = p_obj+1;
+  
   set_pixel_adj (p_obj, 7, -12);
-  // heaps of other stuff  
+  p_obj->d_x = 2;
+  if (p_obj->flags13 & FLAG_EAST)
+    p_obj->d_x = -p_obj->d_x;
+  p_next_obj->d_x = p_obj->d_x;
+  set_guard_wizard_sprite (p_obj);
+  dec_dZ_and_update_XYZ (p_obj);
+  if (p_obj->flags12 & FLAG_X_OOB)
+    p_obj->flags13 ^= FLAG_EAST;
+  p_next_obj->x = p_obj->x;
+  loc_B856 (p_obj);
 }
 
 // $B7A3

@@ -2811,16 +2811,16 @@ RAM:B180 2B BF			     dw	upd_112_to_118_184
 RAM:B182 2B BF			     dw	upd_112_to_118_184
 RAM:B184 3F BF			     dw	upd_119					     ;	 sparkles
 RAM:B186 FE BE			     dw	upd_120_to_126				     ; * player	appears	sparkles
-RAM:B188 FE BE			     dw	upd_120_to_126				     ; * player	appears	sparkles
-RAM:B18A FE BE			     dw	upd_120_to_126				     ; * player	appears	sparkles
-RAM:B18C FE BE			     dw	upd_120_to_126				     ; * player	appears	sparkles
-RAM:B18E FE BE			     dw	upd_120_to_126				     ; * player	appears	sparkles
-RAM:B190 FE BE			     dw	upd_120_to_126				     ; * player	appears	sparkles
-RAM:B192 FE BE			     dw	upd_120_to_126				     ; * player	appears	sparkles
+RAM:B188 FE BE			     dw	upd_120_to_126				     ;	 "
+RAM:B18A FE BE			     dw	upd_120_to_126				     ;	 "
+RAM:B18C FE BE			     dw	upd_120_to_126				     ;	 "
+RAM:B18E FE BE			     dw	upd_120_to_126				     ;	 "
+RAM:B190 FE BE			     dw	upd_120_to_126				     ;	 "
+RAM:B192 FE BE			     dw	upd_120_to_126				     ;	 "
 RAM:B194 11 BF			     dw	upd_127					     ; * last player appears sparkle
 RAM:B196 D3 C4			     dw	upd_128_to_130				     ; * tree wall
-RAM:B198 D3 C4			     dw	upd_128_to_130				     ; * tree wall
-RAM:B19A D3 C4			     dw	upd_128_to_130				     ; * tree wall
+RAM:B198 D3 C4			     dw	upd_128_to_130				     ;	 "
+RAM:B19A D3 C4			     dw	upd_128_to_130				     ;	 "
 RAM:B19C 66 B5			     dw	upd_131_to_133				     ; more sparkles
 RAM:B19E 66 B5			     dw	upd_131_to_133
 RAM:B1A0 66 B5			     dw	upd_131_to_133
@@ -2834,22 +2834,22 @@ RAM:B1AE CB C2			     dw	no_update
 RAM:B1B0 9C B9			     dw	upd_141					     ; * cauldron (bottom)
 RAM:B1B2 9F B9			     dw	upd_142					     ; * cauldron (top)
 RAM:B1B4 A2 B6			     dw	upd_143					     ;	 another block
-RAM:B1B6 F9 B6			     dw	upd_144_to_149_152_to_157		     ;	 guard & wizard	(bottom	half)
-RAM:B1B8 F9 B6			     dw	upd_144_to_149_152_to_157
-RAM:B1BA F9 B6			     dw	upd_144_to_149_152_to_157
-RAM:B1BC F9 B6			     dw	upd_144_to_149_152_to_157
-RAM:B1BE F9 B6			     dw	upd_144_to_149_152_to_157
-RAM:B1C0 F9 B6			     dw	upd_144_to_149_152_to_157
-RAM:B1C2 3C B7			     dw	upd_150_151				     ;	 another guard (top half)
-RAM:B1C4 3C B7			     dw	upd_150_151
-RAM:B1C6 F9 B6			     dw	upd_144_to_149_152_to_157
-RAM:B1C8 F9 B6			     dw	upd_144_to_149_152_to_157
-RAM:B1CA F9 B6			     dw	upd_144_to_149_152_to_157
-RAM:B1CC F9 B6			     dw	upd_144_to_149_152_to_157
-RAM:B1CE F9 B6			     dw	upd_144_to_149_152_to_157
-RAM:B1D0 F9 B6			     dw	upd_144_to_149_152_to_157
+RAM:B1B6 F9 B6			     dw	upd_144_to_149_152_to_157		     ; * guard & wizard	(bottom	half)
+RAM:B1B8 F9 B6			     dw	upd_144_to_149_152_to_157		     ;	 "
+RAM:B1BA F9 B6			     dw	upd_144_to_149_152_to_157		     ;	 "
+RAM:B1BC F9 B6			     dw	upd_144_to_149_152_to_157		     ;	 "
+RAM:B1BE F9 B6			     dw	upd_144_to_149_152_to_157		     ;	 "
+RAM:B1C0 F9 B6			     dw	upd_144_to_149_152_to_157		     ;	 "
+RAM:B1C2 3C B7			     dw	upd_150_151				     ; * guard (EW) (top half)
+RAM:B1C4 3C B7			     dw	upd_150_151				     ;	 "
+RAM:B1C6 F9 B6			     dw	upd_144_to_149_152_to_157		     ;	 "
+RAM:B1C8 F9 B6			     dw	upd_144_to_149_152_to_157		     ;	 "
+RAM:B1CA F9 B6			     dw	upd_144_to_149_152_to_157		     ;	 "
+RAM:B1CC F9 B6			     dw	upd_144_to_149_152_to_157		     ;	 "
+RAM:B1CE F9 B6			     dw	upd_144_to_149_152_to_157		     ;	 "
+RAM:B1D0 F9 B6			     dw	upd_144_to_149_152_to_157		     ;	 "
 RAM:B1D2 A5 B9			     dw	upd_30_31_158_159			     ; * wizard	(top half)
-RAM:B1D4 A5 B9			     dw	upd_30_31_158_159			     ; * wizard	(top half)
+RAM:B1D4 A5 B9			     dw	upd_30_31_158_159			     ;	 "
 RAM:B1D6 DA B8			     dw	upd_160_163				     ; * sparkles (showing next	object required)
 RAM:B1D8 DA B8			     dw	upd_160_163
 RAM:B1DA DA B8			     dw	upd_160_163
@@ -3331,10 +3331,10 @@ RAM:B4A8 01 18 50		     ld	     bc, 5018h
 RAM:B4AB 18 39			     jr	     toggle_FE_bit4_xC
 RAM:B4AD	     ; ---------------------------------------------------------------------------
 RAM:B4AD
-RAM:B4AD	     loc_B4AD:							     ; CODE XREF: RAM:B703p
-RAM:B4AD DD 7E 00		     ld	     a,	(ix+0)
-RAM:B4B0 E6 01			     and     1
-RAM:B4B2 C0			     ret     nz
+RAM:B4AD	     gen_guard_wizard_audio:					     ; CODE XREF: RAM:B703p
+RAM:B4AD DD 7E 00		     ld	     a,	(ix+0)				     ; graphic_no
+RAM:B4B0 E6 01			     and     1					     ; even?
+RAM:B4B2 C0			     ret     nz					     ; no, exit
 RAM:B4B3 06 80			     ld	     b,	80h ; '€'
 RAM:B4B5 3A A2 5B		     ld	     a,	(seed_2)
 RAM:B4B8 2F			     cpl
@@ -3353,16 +3353,16 @@ RAM:B4C6
 RAM:B4C6	     loc_B4C6:							     ; CODE XREF: toggle_FE_bit4_x16+16j
 RAM:B4C6 CB 4F			     bit     1,	a
 RAM:B4C8 28 07			     jr	     z,	loc_B4D1
-RAM:B4CA DD 7E 03		     ld	     a,	(ix+3)
+RAM:B4CA DD 7E 03		     ld	     a,	(ix+3)				     ; Z
 RAM:B4CD 2F			     cpl
 RAM:B4CE CB 3F			     srl     a
 RAM:B4D0 47			     ld	     b,	a
 RAM:B4D1
 RAM:B4D1	     loc_B4D1:							     ; CODE XREF: toggle_FE_bit4_x16+25j
-RAM:B4D1 DD 7E 01		     ld	     a,	(ix+1)
+RAM:B4D1 DD 7E 01		     ld	     a,	(ix+1)				     ; X
 RAM:B4D4 CB 3F			     srl     a
 RAM:B4D6 4F			     ld	     c,	a
-RAM:B4D7 DD 7E 02		     ld	     a,	(ix+2)
+RAM:B4D7 DD 7E 02		     ld	     a,	(ix+2)				     ; Y
 RAM:B4DA ED 44			     neg
 RAM:B4DC CB 3F			     srl     a
 RAM:B4DE 81			     add     a,	c
@@ -3759,7 +3759,7 @@ RAM:B6F9 CD DD C4		     call    adj_m6_m12
 RAM:B6FC DD 7E 09		     ld	     a,	(ix+9)				     ; dX
 RAM:B6FF DD B6 0A		     or	     (ix+10)				     ; dX & dY both 0?
 RAM:B702 C8			     ret     z					     ; yes, exit
-RAM:B703 CD AD B4		     call    loc_B4AD
+RAM:B703 CD AD B4		     call    gen_guard_wizard_audio
 RAM:B706 DD 7E 09		     ld	     a,	(ix+9)				     ; dX
 RAM:B709 DD BE 0A		     cp	     (ix+10)				     ; dX<dY?
 RAM:B70C 38 18			     jr	     c,	loc_B726			     ; yes, go
@@ -3794,29 +3794,30 @@ RAM:B736	     loc_B736:							     ; CODE XREF: RAM:B72Aj
 RAM:B736 DD CB 00 9E		     res     3,	(ix+0)				     ; graphic_no
 RAM:B73A 18 F4			     jr	     loc_B730
 RAM:B73C	     ; ---------------------------------------------------------------------------
+RAM:B73C	     ; guard (EW)
 RAM:B73C
 RAM:B73C	     upd_150_151:						     ; DATA XREF: RAM:B1C2o
 RAM:B73C									     ; RAM:B1C4o
-RAM:B73C CD 0B C5		     call    sub_C50B
-RAM:B73F DD CB 0D 46		     bit     0,	(ix+13)
+RAM:B73C CD 0B C5		     call    adj_p7_m12
+RAM:B73F DD CB 0D 46		     bit     0,	(ix+13)				     ; E or W?
 RAM:B743 3E 02			     ld	     a,	2
-RAM:B745 20 02			     jr	     nz, loc_B749
+RAM:B745 20 02			     jr	     nz, loc_B749			     ; E, skip
 RAM:B747 ED 44			     neg
 RAM:B749
 RAM:B749	     loc_B749:							     ; CODE XREF: RAM:B745j
-RAM:B749 DD 77 09		     ld	     (ix+9), a
-RAM:B74C DD 77 29		     ld	     (ix+29h), a
+RAM:B749 DD 77 09		     ld	     (ix+9), a				     ; dX=+/-2
+RAM:B74C DD 77 29		     ld	     (ix+29h), a			     ; and for botton half
 RAM:B74F CD 6C B7		     call    set_guard_wizard_sprite
 RAM:B752 CD 00 C7		     call    dec_dZ_and_update_XYZ
-RAM:B755 DD CB 0C 46		     bit     0,	(ix+12)
-RAM:B759 28 08			     jr	     z,	loc_B763
-RAM:B75B DD 7E 0D		     ld	     a,	(ix+0Dh)
-RAM:B75E EE 01			     xor     1
-RAM:B760 DD 77 0D		     ld	     (ix+0Dh), a
+RAM:B755 DD CB 0C 46		     bit     0,	(ix+12)				     ; X OOB?
+RAM:B759 28 08			     jr	     z,	loc_B763			     ; no, skip
+RAM:B75B DD 7E 0D		     ld	     a,	(ix+13)
+RAM:B75E EE 01			     xor     1					     ; toggle direction
+RAM:B760 DD 77 0D		     ld	     (ix+13), a
 RAM:B763
 RAM:B763	     loc_B763:							     ; CODE XREF: RAM:B759j
-RAM:B763 DD 7E 01		     ld	     a,	(ix+1)
-RAM:B766 DD 77 21		     ld	     (ix+21h), a
+RAM:B763 DD 7E 01		     ld	     a,	(ix+1)				     ; X
+RAM:B766 DD 77 21		     ld	     (ix+21h), a			     ; copy to bottom half
 RAM:B769 C3 56 B8		     jp	     loc_B856
 RAM:B76C
 RAM:B76C	     ; =============== S U B R O U T I N E =======================================
@@ -5999,10 +6000,10 @@ RAM:C50B
 RAM:C50B	     ; =============== S U B R O U T I N E =======================================
 RAM:C50B
 RAM:C50B
-RAM:C50B	     sub_C50B:							     ; CODE XREF: RAM:upd_150_151p
+RAM:C50B	     adj_p7_m12:						     ; CODE XREF: RAM:upd_150_151p
 RAM:C50B 21 F4 07		     ld	     hl, 7F4h				     ; +7, -12
 RAM:C50E 18 D0			     jr	     jp_set_pixel_adj
-RAM:C50E	     ; End of function sub_C50B
+RAM:C50E	     ; End of function adj_p7_m12
 RAM:C50E
 RAM:C510
 RAM:C510	     ; =============== S U B R O U T I N E =======================================
