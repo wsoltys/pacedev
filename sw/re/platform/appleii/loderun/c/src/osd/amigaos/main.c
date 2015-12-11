@@ -193,6 +193,17 @@ void osd_game_over_frame (uint8_t frame, const uint8_t game_over_frame[][14], co
 #endif
 }
 
+void osd_load_high_scores (PHS_ENTRY hs_tbl)
+{
+	memcpy (hs_tbl[0].initial, "MMC", 3);
+	hs_tbl[0].level = 42;
+	hs_tbl[0].score = 314159;
+}
+
+void osd_save_high_scores (PHS_ENTRY hs_tbl)
+{
+}
+
 int main (int argc, char *argv[])
 {
 	#if 0
