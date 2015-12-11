@@ -25,6 +25,7 @@ else
 	endif
 endif
 CPP = g++
+ECHO = @echo
 RM = rm
 MD = mkdir
 OBJC = objcopy
@@ -55,9 +56,8 @@ ifeq ($(PLATFORM),allegro)
   #OSD_INCS = -I $(ALLEGRO)/include
   #OSD_LIBDIR = $(ALLEGRO)/lib
   #OSD_LIBS = -lallegro-4.4.2$(ALLEGRO_MONOLITH)$(ALLEGRO_STATIC)-mt$(ALLEGRO_DEBUG)
-  MINGW_DIR = d:/mingw_somthing
-  OSD_INCS = -I $(MINGW_DIR)/include/allegro
-  OSD_LIBDIR = $(MINGW_DIR)/lib
+  OSD_INCS = -I $(MINGDIR)/include/allegro
+  OSD_LIBDIR = $(MINGDIR)/lib
   OSD_LIBS = -lalleg
   
   OSD_CFLAGS = -Wall -Wno-unused-label -g
@@ -71,7 +71,7 @@ ifeq ($(PLATFORM),sdlwin)
 
 	FQTN = $(TARGET)_$(PLATFORM).exe
 	  
-  SDL_DIR = d:/mingw_something/SDL2-2.0.3
+  SDL_DIR = $(MINGDIR)/SDL2-2.0.3
   OSD_INCS = -I $(SDL_DIR)/i686-w64-mingw32/include/SDL2
   OSD_LIBDIR = $(SDL_DIR)/i686-w64-mingw32/lib
   OSD_LIBS = -lmingw32 -lSDL2main -lSDL2
@@ -113,6 +113,9 @@ endif
 
 ifeq ($(PLATFORM),amigaos)
 
+  # run cygwin(64) terminal icon
+  # run winaue, load congifuration 'mmc'
+  
 	M68KGCC = /usr/local/amiga
 	
 	FQTN = $(TARGET)
@@ -127,15 +130,15 @@ endif
 
 ifeq ($(PLATFORM),genesis)
 
-	GDK = /SGDK
-	GDK_WIN = \SGDK
+	GDK = /devkit/SGDK
+	GDK_WIN = \devkit\SGDK
 
 	FQTN = $(TARGET).bin
 	
 	OSD_INCS = -I $(GDK)/inc -I $(GDK)/res
 	OSD_LIBS = $(GDK)/lib
 
-	OSD_CFLAGS = -m68000 -O1 -Wall -fno-builtin -fomit-frame-pointer
+	OSD_CFLAGS = -m68000 -O1 -Wall -Wno-unused-label -fno-builtin -fomit-frame-pointer
 	OSD_LDFLAGS = -n -T $(GDK)/md.ld -nostdlib $(OSD_LIBS)/libmd.a $(OSD_LIBS)/libgcc.a
 
 	PLATFORM_OBJS = $(OBJDIR)/sega.o
@@ -165,6 +168,9 @@ all: $(OBJDIR) $(PRG) $(FQTN)
 $(OBJDIR):
 	$(MD) -p $(OBJDIR)
 
+out:
+	$(MD) -p $@
+  
 -include $(DEPS)
 
 ifeq ($(OUTPUT),cart)
@@ -224,7 +230,7 @@ $(OBJDIR)/rom_head.o: $(GDK)/src/boot/rom_head.c
 	$(CC) $(CFLAGS) -Wa,-ahls=$*.lst -c $< -o $@
 
 $(FQTN): $(OBJS)
-	@echo Linking $@...
+	$(ECHO) Linking $@...
 	$(CC) $(OBJS) $(LDFLAGS) -o $(TARGET).out
 	$(OBJC) -O binary $(TARGET).out $(FQTN)
 	$(SIZEBND) $(FQTN) -sizealign 131072
@@ -232,17 +238,17 @@ $(FQTN): $(OBJS)
 else
 
 $(FQTN): $(OBJS)
-	@echo Linking $@...
+	$(ECHO) Linking $@...
 	$(LD) $(OBJS) $(LDFLAGS) -o $@
 
 endif
 
 clean:
-	@echo Deleting object files...
+	$(ECHO) Deleting object files...
 	$(RM) -f $(OBJDIR)/*.o
-	@echo Deleting executables...
+	$(ECHO) Deleting executables...
 	$(RM) -f $(FQTN)
-	@echo Deleting ROMS...
+	$(ECHO) Deleting ROMS...
 	$(RM) -f $(PRG)
 	$(RM) -f 202-c*.c*
 	$(RM) -f 202-s*.s*
