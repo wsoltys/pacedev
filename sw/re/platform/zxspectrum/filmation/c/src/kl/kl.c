@@ -26,6 +26,7 @@
 #define FLAG_DROPPING   (1<<2)    // spiked ball
 #define FLAG_EAST       (1<<0)    // EW fire
 #define FLAG_NORTH      (1<<1)    // NS fire
+#define MASK_DIR        0x03      // NSEW guard & wizard
 
 #include "osd_types.h"
 #include "kl_osd.h"
@@ -92,6 +93,7 @@ static void upd_143 (POBJ32 p_obj);
 static void upd_55 (POBJ32 p_obj);
 static void upd_54 (POBJ32 p_obj);
 static void upd_144_to_149_152_to_157 (POBJ32 p_obj);
+static void set_guard_wizard_sprite (POBJ32 p_obj);
 static void upd_63 (POBJ32 p_obj);
 static void upd_150_151 (POBJ32 p_obj);
 static void upd_22 (POBJ32 p_obj);
@@ -99,6 +101,7 @@ static void upd_23 (POBJ32 p_obj);
 static void upd_86_87 (POBJ32 p_obj);
 static void upd_180_181 (POBJ32 p_obj);
 static void upd_176_177 (POBJ32 p_obj);
+static void loc_B856 (POBJ32 p_obj);
 static void sub_B85C (POBJ32 p_obj);
 static void upd_178_179 (POBJ32 p_obj);
 static void upd_160_to_163 (POBJ32 p_obj);
@@ -110,6 +113,7 @@ static void next_graphic_no_mod_4 (POBJ32 p_obj);
 static void upd_141 (POBJ32 p_obj);
 static void upd_142 (POBJ32 p_obj);
 static void upd_30_31_158_159 (POBJ32 p_obj);
+static void move_guard_wizard_NSEW (POBJ32 p_obj, int8_t *dx, int8_t *dy);
 static void print_days (void);
 static void print_lives_gfx (void);
 static void print_lives (void);
@@ -173,6 +177,7 @@ static void upd_2_4 (POBJ32 p_obj);
 static void upd_16_to_21_24_to_29 (POBJ32 p_obj);
 static void upd_48_to_53_56_to_61 (POBJ32 p_obj);
 static void upd_player_legs (POBJ32 p_obj);
+static void animate_guard_wizard_legs (POBJ32 p_obj);
 static void clear_dX_dY (POBJ32 p_obj);
 static int8_t adj_dZ_for_out_of_bounds (POBJ32 p_obj, int8_t d_z);
 static int8_t adj_d_for_out_of_bounds (int8_t d);
@@ -524,6 +529,7 @@ adjfn_t upd_sprite_jump_tbl[] =
   upd_32_to_47,                 // player (top half)
   upd_32_to_47,                 // player (top half)
   upd_32_to_47,                 // player (top half)
+  upd_32_to_47,                 // player (top half)
   upd_48_to_53_56_to_61,        // wulf legs
   upd_48_to_53_56_to_61,        // wulf legs
   upd_48_to_53_56_to_61,        // wulf legs
@@ -826,8 +832,51 @@ void upd_54 (POBJ32 p_obj)
 // guard & wizard (bottom half)
 void upd_144_to_149_152_to_157 (POBJ32 p_obj)
 {
-  set_pixel_adj (p_obj, -6, -12); // this is in a sub
-  // other stuff
+  set_pixel_adj (p_obj, -6, -12);
+  if (p_obj->d_x == 0 && p_obj->d_y == 0)
+    return;
+  // B4AD
+  if ((uint8_t)p_obj->d_x < (uint8_t)p_obj->d_y)
+  {
+    if (p_obj->d_y < 0)
+      p_obj->graphic_no |= (1<<3);
+    else
+      p_obj->graphic_no &= ~(1<<3);
+    p_obj->flags |= FLAG_HFLIP;
+  }
+  else
+  {
+    if (p_obj->d_x < 0)
+      p_obj->graphic_no &= ~(1<<3);
+    else
+      p_obj->graphic_no |= (1<<3);
+    p_obj->flags &= ~FLAG_HFLIP;
+  }
+  animate_guard_wizard_legs (p_obj);
+  set_wipe_and_draw_flags (p_obj);
+}
+
+// $B76C
+void set_guard_wizard_sprite (POBJ32 p_obj)
+{
+  if (p_obj->d_x == 0 && p_obj->d_y == 0)
+    return;
+  if ((uint8_t)p_obj->d_x < (uint8_t)p_obj->d_y)
+  {
+    if (p_obj->d_y < 0)
+      p_obj->graphic_no |= (1<<0);
+    else
+      p_obj->graphic_no &= ~(1<<0);
+    p_obj->flags |= FLAG_HFLIP;
+  }
+  else 
+  {
+    if (p_obj->d_x < 0)
+      p_obj->graphic_no &= ~(1<<0);
+    else
+      p_obj->graphic_no |= (1<<0);
+    p_obj->flags &= ~FLAG_HFLIP;
+  }
 }
 
 // $B7A9
@@ -946,6 +995,13 @@ void upd_176_177 (POBJ32 p_obj)
   // randomise HFLIP
   p_obj->flags ^= seed_3 & FLAG_HFLIP;
   toggle_next_prev_sprite (p_obj);
+  sub_B85C (p_obj);
+  set_wipe_and_draw_flags (p_obj);
+}
+
+// $B856
+void loc_B856 (POBJ32 p_obj)
+{
   sub_B85C (p_obj);
   set_wipe_and_draw_flags (p_obj);
 }
@@ -1082,19 +1138,73 @@ void upd_142 (POBJ32 p_obj)
 }
 
 // $B9A5
-// guard & wizard (top half)
+// guard (moving NSEW) & wizard (top half) (eg. room 46)
 void upd_30_31_158_159 (POBJ32 p_obj)
 {
-  POBJ32 p_next_obj = p_obj + 1;
+  POBJ32  p_next_obj = p_obj + 1;
+  int8_t  d_x, d_y;
   
   set_pixel_adj (p_obj, 3, -12);
-  // call sub_CB45 - move?
-  // other stuff
-  p_next_obj->d_x = p_obj->d_x;
-  p_next_obj->d_y = p_obj->d_y;
+  dec_dZ_and_update_XYZ (p_obj);
+  move_guard_wizard_NSEW (p_obj, &d_x, &d_y);
+  p_obj->d_x = d_x;
+  p_next_obj->d_x = d_x;
+  p_obj->d_y = d_y;
+  p_next_obj->d_y = d_y;
   p_next_obj->x = p_obj->x;
   p_next_obj->y = p_obj->y;
-  // call sub_b76c
+  set_guard_wizard_sprite (p_obj);
+  loc_B856 (p_obj);
+}
+
+// $B9CC
+void move_guard_wizard_NSEW (POBJ32 p_obj, int8_t *dx, int8_t *dy)
+{
+  uint8_t dir = p_obj->flags13 & MASK_DIR;
+  
+  switch (dir)
+  {
+    case 0 :
+      // W
+      *dx = -2;
+      *dy = 0;
+      if ((p_obj->flags12 & FLAG_X_OOB) == 0)
+        return;
+      *dx = 0;
+      *dy = 2;
+      break;
+    case 1 :
+      // N
+      *dx = 0;
+      *dy = 2;
+      if ((p_obj->flags12 & FLAG_Y_OOB) == 0)
+        return;
+      *dx = 2;
+      *dy = 0;
+      break;
+    case 2 :
+      // E
+      *dx = 2;
+      *dy = 0;
+      if ((p_obj->flags12 & FLAG_X_OOB) == 0)
+        return;
+      *dx = 0;
+      *dy = -2;
+      break;
+    default :
+      // S
+      *dx = 0;
+      *dy = -2;
+      if ((p_obj->flags12 & FLAG_Y_OOB) == 0)
+        return;
+      *dx = -2;
+      *dy = 0;
+      break;
+  }
+  
+  next_guard_dir:
+  p_obj->flags13 = ((p_obj->flags13 & ~MASK_DIR) |
+                    ((p_obj->flags13+1) & MASK_DIR));
 }
 
 // $BC66
@@ -1925,6 +2035,16 @@ void upd_player_legs (POBJ32 p_obj)
     // heaps of shit
     set_wipe_and_draw_flags (p_obj);
   }
+}
+
+// $C97F
+void animate_guard_wizard_legs (POBJ32 p_obj)
+{
+  uint8_t cel = (p_obj->graphic_no + 1) & 7;
+
+  if (cel == 6)
+    cel = 0;
+  p_obj->graphic_no = (p_obj->graphic_no & 0xF8) | cel;
 }
 
 // $C9F3
