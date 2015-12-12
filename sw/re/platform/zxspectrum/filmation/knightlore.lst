@@ -85,7 +85,7 @@ SCRATCH:5BC0 ??		 disable_spike_ball_drop:ds 1					 ; DATA	XREF: RAM:B7AFr
 SCRATCH:5BC0										 ; sub_C00E+137w ...
 SCRATCH:5BC1 ??		 byte_5BC1:	 ds 1						 ; DATA	XREF: sub_C9A1+30w
 SCRATCH:5BC1										 ; sub_C9A1+47r
-SCRATCH:5BC2 ??		 ball_dZ_tmp:	 ds 1						 ; DATA	XREF: RAM:B60Cw
+SCRATCH:5BC2 ??		 tmp_bouncing_ball_dZ:ds 1					 ; DATA	XREF: RAM:B60Cw
 SCRATCH:5BC2										 ; RAM:B645r
 SCRATCH:5BC3 ??		 byte_5BC3:	 ds 1						 ; DATA	XREF: init_cauldron_bubbles+Cr
 SCRATCH:5BC3										 ; lose_life:game_overr ...
@@ -2872,12 +2872,12 @@ RAM:B1FA 65 B8			     dw	upd_178_179				     ; * ball up/down
 RAM:B1FC 65 B8			     dw	upd_178_179				     ; * ball up/down
 RAM:B1FE 0F B8			     dw	upd_180_181				     ; * fire (NS)
 RAM:B200 0F B8			     dw	upd_180_181				     ; * fire (NS)
-RAM:B202 FF B5			     dw	upd_182_183				     ;	 ball (bouncing	around)
-RAM:B204 FF B5			     dw	upd_182_183				     ;	 ball (bouncing	around)
+RAM:B202 FF B5			     dw	upd_182_183				     ; * ball (bouncing	around)
+RAM:B204 FF B5			     dw	upd_182_183				     ;	 "
 RAM:B206 2B BF			     dw	upd_112_to_118_184			     ; * sparkles
-RAM:B208 37 BF			     dw	upd_185_187				     ;	 sparkles
+RAM:B208 37 BF			     dw	upd_185_187				     ; * sparkles
 RAM:B20A CB C2			     dw	no_update
-RAM:B20C 37 BF			     dw	upd_185_187				     ;	 sparkles
+RAM:B20C 37 BF			     dw	upd_185_187				     ; * sparkles
 RAM:B20E	     ;
 RAM:B20E	     ; Audio Tunes
 RAM:B20E	     ;
@@ -3599,8 +3599,8 @@ RAM:B5FE	     ; End of function read_port
 RAM:B5FE
 RAM:B5FF	     ; ---------------------------------------------------------------------------
 RAM:B5FF	     ; ball (bouncing around)
-RAM:B5FF	     ; - bounces towards wulf
-RAM:B5FF	     ; - bounces away from human
+RAM:B5FF	     ; - bounces towards human
+RAM:B5FF	     ; - bounces away from wulf
 RAM:B5FF
 RAM:B5FF	     upd_182_183:						     ; DATA XREF: RAM:B202o
 RAM:B5FF									     ; RAM:B204o
@@ -3609,14 +3609,14 @@ RAM:B602 DD 6E 09		     ld	     l,	(ix+9)				     ; dX
 RAM:B605 DD 66 0A		     ld	     h,	(ix+10)				     ; dY
 RAM:B608 E5			     push    hl
 RAM:B609 DD 7E 0B		     ld	     a,	(ix+11)				     ; dZ
-RAM:B60C 32 C2 5B		     ld	     (ball_dZ_tmp), a			     ; tmp store
+RAM:B60C 32 C2 5B		     ld	     (tmp_bouncing_ball_dZ), a		     ; tmp store
 RAM:B60F CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:B612 E1			     pop     hl
 RAM:B613 DD 75 09		     ld	     (ix+9), l				     ; preserve	old dX
 RAM:B616 DD 74 0A		     ld	     (ix+10), h				     ; preserve	old dY
 RAM:B619 3A 08 5C		     ld	     a,	(graphic_objs_tbl)		     ; plyr graphic_no
 RAM:B61C D6 10			     sub     10h
-RAM:B61E FE 20			     cp	     20h ; ' '                               ; human?
+RAM:B61E FE 20			     cp	     20h ; ' '                               ; wulf?
 RAM:B620 3E 30			     ld	     a,	30h ; '0'                            ; jr nc,___
 RAM:B622 30 02			     jr	     nc, loc_B626			     ; yes, skip
 RAM:B624 C6 08			     add     a,	8				     ; jr,c___
@@ -3636,8 +3636,8 @@ RAM:B63C
 RAM:B63C	     loc_B63C:							     ; CODE XREF: RAM:B633j
 RAM:B63C DD CB 0C 56		     bit     2,	(ix+12)				     ; Z OOB?
 RAM:B640 28 26			     jr	     z,	loc_B668			     ; no, skip
-RAM:B642 DD 77 0B		     ld	     (ix+11), a				     ; dZ=random
-RAM:B645 3A C2 5B		     ld	     a,	(ball_dZ_tmp)			     ; old dZ
+RAM:B642 DD 77 0B		     ld	     (ix+11), a				     ; new dZ
+RAM:B645 3A C2 5B		     ld	     a,	(tmp_bouncing_ball_dZ)		     ; old dZ
 RAM:B648 A7			     and     a					     ; >=0?
 RAM:B649 F2 4F B6		     jp	     p,	loc_B64F			     ; yes, skip
 RAM:B64C CD 2E B4		     call    gen_audio_rom

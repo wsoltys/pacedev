@@ -56,6 +56,7 @@ static uint8_t fire_seed;                             // $5BBC
 static uint8_t ball_bounce_height;                    // $5BBD
 static uint8_t is_spike_ball_dropping;                // $5BBF
 static uint8_t disable_spike_ball_drop;               // $5BC0
+static int8_t tmp_bouncing_ball_dZ;                   // $5BC2
 static uint8_t byte_5BC3;                             // $5BC3
 static uint8_t byte_5BC4;                             // $5BC4
 static uint8_t *gfxbase_8x8;                          // $5BC7
@@ -743,22 +744,63 @@ uint8_t read_key (uint8_t row)
 }
 
 // $B5FF
-// ball (bouncing around)
-// - bounces towards wulf
-// - bounces away from human
+// ball (bouncing around) (eg. room 8)
+// - bounces towards human
+// - bounces away from wulf
 void upd_182_183 (POBJ32 p_obj)
 {
+  int8_t  d_x, d_y, d_z;
+  uint8_t away = 1;
+  
   NOT_TESTED;
   
   upd_12_to_15 (p_obj);
-  // other stuff
+  d_x = p_obj->d_x;
+  d_y = p_obj->d_y;
+  tmp_bouncing_ball_dZ = p_obj->d_z;
+  dec_dZ_and_update_XYZ (p_obj);
+  // preserve old dX,dY
+  p_obj->d_x = d_x;
+  p_obj->d_y = d_y;
+  // this was originally self-modifying code,
+  // alternating between jr c & jr nc
+  // in two (2) locations...
+  // just use a boolean variable instead
+  if ((graphic_objs_tbl[0].graphic_no - 0x10) < 0x20)
+    away = 0;
+  // bouncing height depends on screen ID
+  if ((graphic_objs_tbl[0].scrn & 1) == 0)
+    d_z = 4;
+  else
+    d_z = (seed_3 & 3) + 4;
+  if ((p_obj->flags12 & FLAG_Z_OOB) != 0)
+  {
+    p_obj->d_z = d_z;
+    if (tmp_bouncing_ball_dZ < 0)
+      /*gen_audio_rom ()*/;
+    if ((rand () & 1) == 0)
+    {
+      int8_t s = ((graphic_objs_tbl[0].x - p_obj->x < 0) ? -1 : 1);
+      p_obj->d_x = (away ? -2*s : 2*s);
+      p_obj->d_y = 0;
+    }
+    else
+    {
+      int8_t s = ((graphic_objs_tbl[0].y - p_obj->y < 0) ? -1 : 1);
+      p_obj->d_x = 0;
+      p_obj->d_y = (away ? -2*s : 2*s);
+    }
+  }
+  toggle_next_prev_sprite (p_obj);
+  loc_B856 (p_obj);
 }
 
 // $B683
 // block (dropping) (eg. room 0)
-// *** UNTESTED
 void upd_91 (POBJ32 p_obj)
 {
+  NOT_TESTED;
+  
   upd_6_7 (p_obj);
   if ((p_obj->flags13 & FLAG_TRIGGERED) == 0)
     return;
