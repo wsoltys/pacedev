@@ -108,6 +108,7 @@ static void upd_160_to_163 (POBJ32 p_obj);
 static void upd_168_to_175 (POBJ32 p_obj);
 static void upd_164_to_167 (POBJ32 p_obj);
 static void upd_111 (POBJ32 p_obj);
+static void move_towards_plyr (POBJ32 p_obj, int8_t d_x, int8_t d_y);
 static void toggle_next_prev_sprite (POBJ32 p_obj);
 static void next_graphic_no_mod_4 (POBJ32 p_obj);
 static void upd_141 (POBJ32 p_obj);
@@ -742,9 +743,13 @@ uint8_t read_key (uint8_t row)
 }
 
 // $B5FF
-// ball (high)
+// ball (bouncing around)
+// - bounces towards wulf
+// - bounces away from human
 void upd_182_183 (POBJ32 p_obj)
 {
+  NOT_TESTED;
+  
   upd_12_to_15 (p_obj);
   // other stuff
 }
@@ -769,8 +774,13 @@ void upd_91 (POBJ32 p_obj)
 // another block
 void upd_143 (POBJ32 p_obj)
 {
+  NOT_TESTED;
+  
   upd_6_7 (p_obj);
-  // other stuff
+  if ((p_obj->flags13 & (1<<3)) == 0)
+    return;
+  p_obj->graphic_no = 184;
+  upd_112_to_118_184 (p_obj);
 }
 
 // $B6B1
@@ -1103,11 +1113,26 @@ void upd_168_to_175 (POBJ32 p_obj)
 }
 
 // $B92C
-// twinkles
+// repel spell (eg. room 94)
 void upd_164_to_167 (POBJ32 p_obj)
 {
+  int8_t  d_x, d_y;
+  
   adj_m4_m12 (p_obj);
-  // other stuff
+  if (p_obj->scrn != 136 && 
+      (graphic_objs_tbl[0].flags & (1<<0)) != 0)
+    d_x = d_y = 1;
+  else
+    d_x = d_y = 4;
+  move_towards_plyr (p_obj, d_x, d_y);
+  dec_dZ_and_update_XYZ (p_obj);
+  next_graphic_no_mod_4 (p_obj);
+  if (p_obj->scrn == 136)
+  {
+    if ((graphic_objs_tbl[0].graphic_no - 0x10) >= 0x40)
+      p_obj->graphic_no = 1;  // invalid
+  }
+  gen_audio_XYZ_wipe_and_draw (p_obj);
 }
 
 // $B95E
@@ -1118,6 +1143,17 @@ void upd_111 (POBJ32 p_obj)
 
   p_obj->graphic_no = 1;  // invalid
   gen_audio_XYZ_wipe_and_draw (p_obj);
+}
+
+// $B965
+void move_towards_plyr (POBJ32 p_obj, int8_t d_x, int8_t d_y)
+{
+  if (p_obj->x >= graphic_objs_tbl[0].x)
+    d_x = -d_x;
+  p_obj->d_x = d_x;
+  if (p_obj->y >= graphic_objs_tbl[0].y)
+    d_y = -d_y;
+  p_obj->d_y = d_y;
 }
 
 // $B985
