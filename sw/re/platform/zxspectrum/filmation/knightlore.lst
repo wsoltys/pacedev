@@ -33,6 +33,9 @@ SCRATCH:5BA5										 ; RAM:AFEBw ...
 SCRATCH:5BA6 ??		 tmp_input_method:ds 1						 ; DATA	XREF: do_menu_selection+29w
 SCRATCH:5BA6										 ; do_menu_selection:check_for_start_gameo
 SCRATCH:5BA7 ??				 ds 1
+SCRATCH:5BA8		 ;
+SCRATCH:5BA8		 ; variables from here are wiped each game
+SCRATCH:5BA8		 ;
 SCRATCH:5BA8 ??		 objs_wiped_cnt: ds 1						 ; DATA	XREF: lose_life:start_menuo
 SCRATCH:5BA8										 ; render_dynamic_objects+1w ...
 SCRATCH:5BA9 ??	??	 tmp_SP:	 ds 2						 ; DATA	XREF: RAM:D763w
@@ -66,7 +69,7 @@ SCRATCH:5BB5 ??		 user_input:	 ds 1						 ; DATA	XREF: MAYBE_check_pickup_drop+6
 SCRATCH:5BB5										 ; check_user_input+104w
 SCRATCH:5BB6 ??		 tmp_attrib:	 ds 1
 SCRATCH:5BB7 ??		 initial_rendering:ds 1
-SCRATCH:5BB8 ??		 supress_border: ds 1
+SCRATCH:5BB8 ??		 suppress_border:ds 1
 SCRATCH:5BB9 ??		 days:		 ds 1						 ; DATA	XREF: lose_life-16E9o
 SCRATCH:5BB9										 ; print_days+3o ...
 SCRATCH:5BBA ??		 lives:		 ds 1						 ; DATA	XREF: lose_life-2196w
@@ -95,7 +98,8 @@ SCRATCH:5BC5 ??		 byte_5BC5:	 ds 1						 ; DATA	XREF: RAM:B021r
 SCRATCH:5BC5										 ; RAM:B075w ...
 SCRATCH:5BC6 ??		 unk_5BC6:	 ds 1
 SCRATCH:5BC7 ??	??	 gfxbase_8x8:	 ds 2
-SCRATCH:5BC9 ??		 unk_5BC9:	 ds 1
+SCRATCH:5BC9 ??		 unk_5BC9:	 ds 1						 ; DATA	XREF: sub_BC10+3Ew
+SCRATCH:5BC9										 ; sub_BC10+44o
 SCRATCH:5BCA ??		 unk_5BCA:	 ds 1
 SCRATCH:5BCB ??	??	 tmp_objects_to_draw:ds	2
 SCRATCH:5BCD ??	??	 word_5BCD:	 ds 2						 ; DATA	XREF: calc_display_order_and_render+19w
@@ -2538,7 +2542,7 @@ RAM:AF88	     main:							     ; CODE XREF: RAM:AF7Dj
 RAM:AF88 CD 9E D6		     call    build_lookup_tbls			     ; for bit reversal	& shifting
 RAM:AF8B AF			     xor     a
 RAM:AF8C 32 B2 5B		     ld	     (unk_5BB2), a
-RAM:AF8F 32 6D D1		     ld	     (byte_D16D), a
+RAM:AF8F 32 6D D1		     ld	     (byte_D16D), a			     ; plyr_spr_1_scratchpad (flags12)
 RAM:AF92 3E 05			     ld	     a,	5				     ; 5 lives to start
 RAM:AF94 32 BA 5B		     ld	     (lives), a
 RAM:AF97 21 A0 5B		     ld	     hl, seed_1
@@ -2662,7 +2666,7 @@ RAM:B065 CD 66 BC		     call    print_days
 RAM:B068 CD 7A BC		     call    print_lives_gfx
 RAM:B06B CD A3 BC		     call    print_lives
 RAM:B06E CD 6F D5		     call    update_screen			     ; copy to display
-RAM:B071 CD 88 B0		     call    reset_object_???_flag
+RAM:B071 CD 88 B0		     call    reset_objs_wipe_flag
 RAM:B074
 RAM:B074	     loc_B074:							     ; CODE XREF: RAM:B043j
 RAM:B074 AF			     xor     a
@@ -2676,17 +2680,17 @@ RAM:B088
 RAM:B088	     ; =============== S U B R O U T I N E =======================================
 RAM:B088
 RAM:B088
-RAM:B088	     reset_object_???_flag:					     ; CODE XREF: RAM:B071p
+RAM:B088	     reset_objs_wipe_flag:					     ; CODE XREF: RAM:B071p
 RAM:B088 06 28			     ld	     b,	40				     ; max #objects in draw table
 RAM:B08A 11 20 00		     ld	     de, 32				     ; object size
 RAM:B08D 21 0F 5C		     ld	     hl,  graphic_objs_tbl+7		     ; offset to flags
 RAM:B090
-RAM:B090	     loc_B090:							     ; CODE XREF: reset_object_???_flag+Bj
+RAM:B090	     loc_B090:							     ; CODE XREF: reset_objs_wipe_flag+Bj
 RAM:B090 CB AE			     res     5,	(hl)				     ; reset flag=???
 RAM:B092 19			     add     hl, de				     ; next entry
 RAM:B093 10 FB			     djnz    loc_B090				     ; loop until done
 RAM:B095 C9			     ret
-RAM:B095	     ; End of function reset_object_???_flag
+RAM:B095	     ; End of function reset_objs_wipe_flag
 RAM:B095
 RAM:B095	     ; ---------------------------------------------------------------------------
 RAM:B096 CB C2	     upd_sprite_jmp_tbl:dw no_update				     ; DATA XREF: lose_life-2152o
@@ -2850,7 +2854,7 @@ RAM:B1CE F9 B6			     dw	upd_144_to_149_152_to_157		     ;	 "
 RAM:B1D0 F9 B6			     dw	upd_144_to_149_152_to_157		     ;	 "
 RAM:B1D2 A5 B9			     dw	upd_30_31_158_159			     ; * wizard	(top half)
 RAM:B1D4 A5 B9			     dw	upd_30_31_158_159			     ;	 "
-RAM:B1D6 DA B8			     dw	upd_160_163				     ; * sparkles (showing next	object required)
+RAM:B1D6 DA B8			     dw	upd_160_163				     ; * cauldron bubbles
 RAM:B1D8 DA B8			     dw	upd_160_163				     ;	 "
 RAM:B1DA DA B8			     dw	upd_160_163				     ;	 "
 RAM:B1DC DA B8			     dw	upd_160_163				     ;	 "
@@ -4347,6 +4351,10 @@ RAM:BA8D 11 18 B2		     ld	     de, game_over_tune
 RAM:BA90 CD BE B2		     call    play_audio_until_keypress
 RAM:BA93 06 08			     ld	     b,	8				     ; how long	to wait
 RAM:BA95 CD 9B BA		     call    wait_for_key_release
+RAM:BA98	     ;
+RAM:BA98	     ; the stack has at	least 1	return address on it
+RAM:BA98	     ; but the main game loop re-init's the stack each iteration
+RAM:BA98	     ;
 RAM:BA98 C3 7F AF		     jp	     start_menu
 RAM:BA98	     ; END OF FUNCTION CHUNK FOR lose_life
 RAM:BA9B
@@ -4382,7 +4390,7 @@ RAM:BAB5 21 D8 BA		     ld	     hl, byte_BAD8
 RAM:BAB8 11 E4 BA		     ld	     de, the_potion_casts
 RAM:BABB 06 06			     ld	     b,	6
 RAM:BABD AF			     xor     a
-RAM:BABE 32 B8 5B		     ld	     (supress_border), a
+RAM:BABE 32 B8 5B		     ld	     (suppress_border),	a
 RAM:BAC1 CD BF BE		     call    display_text_list
 RAM:BAC4 11 39 B2		     ld	     de, game_complete_tune
 RAM:BAC7 CD CF B2		     call    play_audio
@@ -4506,7 +4514,7 @@ RAM:BC4B CE 00			     adc     a,	0
 RAM:BC4D 27			     daa
 RAM:BC4E 32 C9 5B		     ld	     (unk_5BC9), a
 RAM:BC51 21 E6 E4		     ld	     hl, 0E4E6h
-RAM:BC54 11 C9 5B		     ld	     de, 5BC9h
+RAM:BC54 11 C9 5B		     ld	     de, unk_5BC9
 RAM:BC57 06 01			     ld	     b,	1
 RAM:BC59 1A			     ld	     a,	(de)
 RAM:BC5A A7			     and     a
@@ -4634,7 +4642,7 @@ RAM:BD0C
 RAM:BD0C
 RAM:BD0C	     do_menu_selection:						     ; CODE XREF: lose_life-2188p
 RAM:BD0C AF			     xor     a
-RAM:BD0D 32 B8 5B		     ld	     (supress_border), a
+RAM:BD0D 32 B8 5B		     ld	     (suppress_border),	a
 RAM:BD10 21 A2 BD		     ld	     hl, menu_colours
 RAM:BD13 06 08			     ld	     b,	8				     ; # menu entries
 RAM:BD15
@@ -4939,11 +4947,11 @@ RAM:BECE CD 31 BE		     call    print_text_single_colour
 RAM:BED1 E1			     pop     hl
 RAM:BED2 C1			     pop     bc
 RAM:BED3 10 EA			     djnz    display_text_list			     ; loop through list of messages
-RAM:BED5 3A B8 5B		     ld	     a,	(supress_border)
+RAM:BED5 3A B8 5B		     ld	     a,	(suppress_border)
 RAM:BED8 A7			     and     a					     ; show border?
 RAM:BED9 C0			     ret     nz					     ; no, return
 RAM:BEDA 3C			     inc     a
-RAM:BEDB 32 B8 5B		     ld	     (supress_border), a
+RAM:BEDB 32 B8 5B		     ld	     (suppress_border),	a
 RAM:BEDE CD 96 D2		     call    print_border
 RAM:BEE1 C3 6F D5		     jp	     update_screen
 RAM:BEE1	     ; End of function display_text_list
@@ -8542,10 +8550,10 @@ RAM:D30D
 RAM:D30D
 RAM:D30D	     colour_sun_moon:						     ; CODE XREF: RAM:B055p
 RAM:D30D									     ; display_sun_moon_frame+63p
-RAM:D30D 3A 4D C4		     ld	     a,	(sun_moon_scratchpad)		     ; index
-RAM:D310 E6 01			     and     1
+RAM:D30D 3A 4D C4		     ld	     a,	(sun_moon_scratchpad)		     ; graphic_no
+RAM:D310 E6 01			     and     1					     ; sun?
 RAM:D312 3E 46			     ld	     a,	46h ; 'F'                            ; attribute
-RAM:D314 28 01			     jr	     z,	loc_D317
+RAM:D314 28 01			     jr	     z,	loc_D317			     ; yes, skip
 RAM:D316 3C			     inc     a
 RAM:D317
 RAM:D317	     loc_D317:							     ; CODE XREF: colour_sun_moon+7j

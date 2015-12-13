@@ -5,7 +5,8 @@
 //#include <memory.h>
 
 #define DBGPRINTF_FN    DBGPRINTF ("%s():\n", __FUNCTION__)
-#define NOT_TESTED      DBGPRINTF ("*** %s(): NOT TESTED ***\n", __FUNCTION__)
+#define UNTESTED        DBGPRINTF ("*** %s(): UNTESTED ***\n", __FUNCTION__)
+#define UNIMPLEMENTED   DBGPRINTF ("*** %s(): UNMIPLEMENTED ***\n", __FUNCTION__)
 
 #pragma pack(1)
 
@@ -28,6 +29,8 @@
 #define FLAG_NORTH      (1<<1)    // NS fire
 #define MASK_DIR        0x03      // NSEW guard & wizard
 
+#define CAULDRON_SCREEN 136
+
 #include "osd_types.h"
 #include "kl_osd.h"
 #include "kl_dat.h"
@@ -38,28 +41,51 @@ typedef void (*adjfn_t)(POBJ32 p_obj);
 
 static uint8_t seed_1;                                // $5BA0
 static uint16_t seed_2;                               // $5BA2
+static uint8_t user_input_method;                     // $5BA4
 static uint8_t seed_3;                                // $5BA5
+static uint8_t tmp_input_method;                      // $5BA6
 
 // cleared each game ($5BA8-$6107)
 static uint8_t objs_wiped_cnt;                        // $5BA8
+// uint16_t tmp_SP                                    // $5BA9
 static uint8_t room_size_X;                           // $5BAB
 static uint8_t room_size_Y;                           // $5BAC
 static uint8_t curr_room_attrib;                      // $5BAD
 static uint8_t room_size_Z;                           // $5BAE
 static uint8_t portcullis_moving;                     // $5BAF
 static uint8_t portcullis_move_cnt;                   // $5BB0
+static uint8_t byte_5BB1;                             // $5BB1
+static uint8_t unk_5BB2;                              // $5BB2
+static uint8_t byte_5BB3;                             // $5BB3
+static uint8_t byte_5BB4;                             // $5BB4
+static uint8_t user_input;                            // $5BB5
+static uint8_t tmp_attrib;                            // $5BB6
 static uint8_t initial_rendering;                     // $5BB7
+static uint8_t suppress_border;                       // $5BB8
 static uint8_t days;                                  // $5BB9
 static int8_t lives;                                  // $5BBA
 static uint8_t objects_put_in_cauldron;               // $5BBB
 static uint8_t fire_seed;                             // $5BBC
 static uint8_t ball_bounce_height;                    // $5BBD
+static uint8_t rendered_objs_cnt;                     // $5BBE
 static uint8_t is_spike_ball_dropping;                // $5BBF
 static uint8_t disable_spike_ball_drop;               // $5BC0
+static uint8_t byte_5BC1;                             // $5BC1
 static int8_t tmp_bouncing_ball_dZ;                   // $5BC2
 static uint8_t byte_5BC3;                             // $5BC3
 static uint8_t byte_5BC4;                             // $5BC4
+static uint8_t byte_5BC5;                             // $5BC5
+static uint8_t unk_5BC6;                              // $5BC6
 static uint8_t *gfxbase_8x8;                          // $5BC7
+static uint8_t unk_5BC9;                              // $5BC9
+static uint8_t unk_5BCA;                              // $5BCA
+static uint8_t *tmp_objects_to_draw;                  // $5BCB
+static uint8_t *word_5BCD;                            // $5BCD
+static uint8_t *word_5BCF;                            // $5BCF
+static uint8_t unk_5BD1;                              // $5BD1
+static uint8_t directional;                           // $5BD2
+static uint8_t byte_5BD3;                             // $5BD3
+static uint8_t unk_5BD8;                              // $5BD8
 static uint8_t objects_carried[3][4];                 // $5BDC
 static uint8_t room_visited[32];                      // $5BE8
 static OBJ32 graphic_objs_tbl[40];                    // $5C08
@@ -69,6 +95,7 @@ static POBJ32 other_objs_here =
               &graphic_objs_tbl[4];                   // $5C88
               
 static OBJ32 sprite_scratchpad;                       // $BFDB
+// fixme this should be auto-generated and stored in kl_dat.c
 static uint8_t objects_required[] =                   // $C27D
 {
   0, 1, 2, 3, 4, 5, 6, 3, 5, 0, 6, 1, 2, 4
@@ -82,7 +109,9 @@ static OBJ32 plyr_spr_2_scratchpad;                   // $D181
 
 // start of prototypes
 
+static void reset_objs_wipe_flag (void);
 static void play_audio_wait_key (uint8_t *audio_data);
+static void play_audio_until_keypress (uint8_t *audio_data);
 static void play_audio (uint8_t *audio_data);
 static void shuffle_objects_required (void);
 static void upd_131_to_133 (POBJ32 p_obj);
@@ -105,6 +134,7 @@ static void upd_176_177 (POBJ32 p_obj);
 static void loc_B856 (POBJ32 p_obj);
 static void sub_B85C (POBJ32 p_obj);
 static void upd_178_179 (POBJ32 p_obj);
+static void init_cauldron_bubbles (void);
 static void upd_160_to_163 (POBJ32 p_obj);
 static void upd_168_to_175 (POBJ32 p_obj);
 static void upd_164_to_167 (POBJ32 p_obj);
@@ -116,6 +146,7 @@ static void upd_141 (POBJ32 p_obj);
 static void upd_142 (POBJ32 p_obj);
 static void upd_30_31_158_159 (POBJ32 p_obj);
 static void move_guard_wizard_NSEW (POBJ32 p_obj, int8_t *dx, int8_t *dy);
+static void game_over (void);
 static void print_days (void);
 static void print_lives_gfx (void);
 static void print_lives (void);
@@ -201,10 +232,13 @@ static uint8_t *transfer_sprite_and_print (POBJ32 p_obj, uint8_t *psprite);
 static void display_panel (void);
 static void retrieve_screen (void);
 static void print_border (void);
+static void colour_panel (void);
+static void colour_sun_moon (void);
+static void fill_attr (uint8_t attr);
 static void clear_scrn (void);
 static void clr_screen_buffer (void);
+static void update_screen (void);
 static void render_dynamic_objects (void);
-static void loc_D653 (void);
 static void calc_pixel_XY (POBJ32 p_obj);
 uint8_t *flip_sprite (POBJ32 p_obj);
 static void calc_pixel_XY_and_render (POBJ32 p_obj);
@@ -288,7 +322,23 @@ void knight_lore (void)
   
 START_AF6C:
 
-MAIN_AF88:
+  // the original code initialises seed_1
+  // with [$5C78] (uninitialised RAM)
+  // - under MESS using knightlore.sna
+  //   that value is $00
+    
+  {
+    // fudge fudge fudge
+    // clear variables $5BA0-$6107
+    uint8_t *p = (uint8_t *)&seed_1;
+    while (p < (uint8_t *)&sprite_scratchpad)
+      *(p++) = 0;
+      
+    seed_1 = 0x00;    // to match MESS emulation
+    goto MAIN_AF88;
+  }
+  
+START_MENU_AF7F:
 
   {
     // fudge fudge fudge
@@ -297,27 +347,34 @@ MAIN_AF88:
     while (p < (uint8_t *)&sprite_scratchpad)
       *(p++) = 0;
   }
-  //build_lookup_tbls ();
-  lives = 5;
 
+MAIN_AF88:
+
+  //build_lookup_tbls ();
+  unk_5BB2 = 0;
+  plyr_spr_1_scratchpad.flags12 = 0;
+  lives = 5;
   // update seed
   seed_1 += seed_2;
   clear_scrn ();
   do_menu_selection ();
   play_audio (start_game_tune);
-  // randomise order of required objects
   shuffle_objects_required ();
-  // randomise player start location
+  // randomise
   init_start_location ();
   init_sun ();
-  // randomise special object locations
+  // randomise
   init_special_objects ();
 
 player_dies:
-  lose_life ();
+  // call lose_life()->jp game_over()->jp start_menu
+  // leaves a return address on the stack
+  // - but update_sprite_loop re-init's the stack ptr
+  //   each operation, so doesn't matter
+  if (lose_life () < 0)
+    goto START_MENU_AF7F;
 
 game_loop:
-  // populate graphic_objs_tbl[]
   build_screen_objects ();
 
   // *** REMOVE ME
@@ -334,13 +391,12 @@ onscreen_loop:
 
   update_sprite_loop:
 
+    // the Z80 code re-init'd SP here!
+    
     fire_seed++;      
     save_2d_info (p_obj);
 
-    #ifndef arraylen
-      #define arraylen(n) (sizeof(n) / sizeof((n)[0]))
-    #endif
-    
+    // added sanity-checking
     if (p_obj->graphic_no > 187)
       upd_not_implemented (p_obj);
     else
@@ -351,6 +407,7 @@ onscreen_loop:
     }
 
     // update seed_3
+    // original code uses the Z80 refresh (R) register
     r = rand ();
     seed_3 += r;
   }
@@ -362,12 +419,17 @@ onscreen_loop:
   seed_3 += seed_2;           // add a,l
   seed_3 += (seed_2 >> 8);    // add a,h
 
-  // some other stuff
-
-  //init_cauldron_bubbles ();
+  unk_5BB2 |= (1<<0);
+  //sub_D50E ();              // audio
+  init_cauldron_bubbles ();
   list_objects_to_draw ();
   render_dynamic_objects ();
-  
+  if (byte_5BC5 != 0)
+    /*gen_audio_B454 ()*/;
+
+  // calc game delay loop
+  // using rendered_objs_cnt
+      
 game_delay:
   // last to-do  
   osd_delay (100);
@@ -375,22 +437,21 @@ game_delay:
   if (initial_rendering)
   {
     initial_rendering = 0;
-    //fill_attr();
+    fill_attr (curr_room_attrib);
     display_objects ();
-    //colour_panel ();
-    //colour_sun_moon ();
+    colour_panel ();
+    colour_sun_moon ();
     display_panel ();
     display_sun_moon_frame (&sun_moon_scratchpad);
     display_day ();
     print_days ();
     print_lives_gfx ();
     print_lives ();
-    //update_screen ();
-    
-    //while (!(key[KEY_ESC]||key[KEY_SPACE]));
-    //while (key[KEY_SPACE]);
+    update_screen ();
+    reset_objs_wipe_flag ();
   }
 
+  byte_5BC5 = 0;
   if (graphic_objs_tbl[0].graphic_no == 0 &&
       graphic_objs_tbl[1].graphic_no == 0)
     goto player_dies;
@@ -479,6 +540,15 @@ exit_screen:
   memcpy (&plyr_spr_2_scratchpad, &graphic_objs_tbl[1], sizeof(POBJ32));
   goto game_loop;
   
+}
+
+// $B088
+void reset_objs_wipe_flag (void)
+{
+  unsigned i;
+  
+  for (i=0; i<40; i++)
+    graphic_objs_tbl[i].flags &= ~FLAG_WIPE;
 }
 
 // $B096
@@ -677,6 +747,8 @@ adjfn_t upd_sprite_jump_tbl[] =
 // $B2B6
 void play_audio_wait_key (uint8_t *audio_data)
 {
+  UNIMPLEMENTED;
+  
   // check something here
   while (1)
   {
@@ -686,20 +758,40 @@ void play_audio_wait_key (uint8_t *audio_data)
   }
 }
 
+// $B2BE
+void play_audio_until_keypress (uint8_t *audio_data)
+{
+  UNIMPLEMENTED;
+}
+
 // $B2CF
 void play_audio (uint8_t *audio_data)
 {
+  UNIMPLEMENTED;
 }
 
 // $B544
 void shuffle_objects_required (void)
 {
+  uint8_t r = (seed_3 & 3) | 4;
+    
+  UNTESTED;
+  
+  for (; r; r--)
+  {
+    uint8_t e = objects_required[0];
+    unsigned i;
+    
+    for (i=0; i<13; i++)
+      objects_required[i] = objects_required[i+1];
+    objects_required[i] = e;
+  }  
 }
 
 // $B566
 void upd_131_to_133 (POBJ32 p_obj)
 {
-  NOT_TESTED;
+  UNIMPLEMENTED;
   
   adj_m4_m12 (p_obj);
   // complicated stuff
@@ -752,7 +844,7 @@ void upd_182_183 (POBJ32 p_obj)
   int8_t  d_x, d_y, d_z;
   uint8_t away = 1;
   
-  NOT_TESTED;
+  UNTESTED;
   
   upd_12_to_15 (p_obj);
   d_x = p_obj->d_x;
@@ -799,7 +891,7 @@ void upd_182_183 (POBJ32 p_obj)
 // block (dropping) (eg. room 0)
 void upd_91 (POBJ32 p_obj)
 {
-  NOT_TESTED;
+  UNTESTED;
   
   upd_6_7 (p_obj);
   if ((p_obj->flags13 & FLAG_TRIGGERED) == 0)
@@ -816,7 +908,7 @@ void upd_91 (POBJ32 p_obj)
 // another block
 void upd_143 (POBJ32 p_obj)
 {
-  NOT_TESTED;
+  UNTESTED;
   
   upd_6_7 (p_obj);
   if ((p_obj->flags13 & (1<<3)) == 0)
@@ -1050,7 +1142,7 @@ void upd_180_181 (POBJ32 p_obj)
 // fire (stationary) (not used)
 void upd_176_177 (POBJ32 p_obj)
 {
-  NOT_TESTED;
+  UNTESTED;
   
   upd_12_to_15 (p_obj);
   if ((fire_seed & (1<<0)) == 0)
@@ -1103,13 +1195,37 @@ void upd_178_179 (POBJ32 p_obj)
   sub_B85C (p_obj);
   set_wipe_and_draw_flags (p_obj);
 }
+/// *** FIX ME - in kl_dat
+uint8_t cauldron_bubbles[] =
+{
+  0xa0, 0x80, 0x80, 0x80, 0x05, 0x05, 0x0c, 0x10,
+  0xb4, 0x00, 0x00, 0x00, 0x00, 0xa0, 0x00, 0x00, 
+  0x00, 0x00
+};
 
+// $B8A9
+void init_cauldron_bubbles (void)
+{
+  UNTESTED;
+  
+  // cauldron room only
+  if (graphic_objs_tbl[0].scrn != CAULDRON_SCREEN)
+    return;
+  // already initialised?
+  if (special_objs_here[1].graphic_no != 0)
+    return;
+  // *** what does this mean???
+  if (byte_5BC3 != 0)
+    return;
+  memcpy (&special_objs_here[1], cauldron_bubbles, 18);
+  adj_m4_m12 (&special_objs_here[1]);
+}
 
 // $B8DA
-// more sparkles
+// cauldron bubbles
 void upd_160_to_163 (POBJ32 p_obj)
 {
-  NOT_TESTED;
+  UNTESTED;
   
   adj_m4_m12 (p_obj);
   
@@ -1147,7 +1263,7 @@ void upd_160_to_163 (POBJ32 p_obj)
 // - when they are put into the cauldron???
 void upd_168_to_175 (POBJ32 p_obj)
 {
-  NOT_TESTED;
+  UNTESTED;
   
   adj_m4_m12 (p_obj);
   p_obj->graphic_no = 160;  // sparkles
@@ -1161,7 +1277,7 @@ void upd_164_to_167 (POBJ32 p_obj)
   int8_t  d_x, d_y;
   
   adj_m4_m12 (p_obj);
-  if (p_obj->scrn != 136 && 
+  if (p_obj->scrn != CAULDRON_SCREEN && 
       (graphic_objs_tbl[0].flags & (1<<0)) != 0)
     d_x = d_y = 1;
   else
@@ -1169,7 +1285,7 @@ void upd_164_to_167 (POBJ32 p_obj)
   move_towards_plyr (p_obj, d_x, d_y);
   dec_dZ_and_update_XYZ (p_obj);
   next_graphic_no_mod_4 (p_obj);
-  if (p_obj->scrn == 136)
+  if (p_obj->scrn == CAULDRON_SCREEN)
   {
     if ((graphic_objs_tbl[0].graphic_no - 0x10) >= 0x40)
       p_obj->graphic_no = 1;  // invalid
@@ -1181,7 +1297,7 @@ void upd_164_to_167 (POBJ32 p_obj)
 // sparkles
 void upd_111 (POBJ32 p_obj)
 {
-  NOT_TESTED;
+  UNTESTED;
 
   p_obj->graphic_no = 1;  // invalid
   gen_audio_XYZ_wipe_and_draw (p_obj);
@@ -1296,6 +1412,12 @@ void move_guard_wizard_NSEW (POBJ32 p_obj, int8_t *dx, int8_t *dy)
                     ((p_obj->flags13+1) & MASK_DIR));
 }
 
+// $BA22
+void game_over (void)
+{
+  UNIMPLEMENTED;
+}
+
 // $BC66
 void print_days (void)
 {
@@ -1305,6 +1427,8 @@ void print_days (void)
 // $BC7A
 void print_lives_gfx (void)
 {
+  UNIMPLEMENTED;
+
   sprite_scratchpad.graphic_no = 0x8c;
   sprite_scratchpad.flags = 0;
   sprite_scratchpad.pixel_x = 16;
@@ -1371,6 +1495,7 @@ menu_loop:
 // $BD89
 void flash_menu (void)
 {
+  UNIMPLEMENTED;
 }
 
 // $BE31
@@ -1447,7 +1572,7 @@ void init_sparkles (POBJ32 p_obj)
 // sparkles
 void upd_112_to_118_184 (POBJ32 p_obj)
 {
-  NOT_TESTED;
+  UNTESTED;
 
   adj_m4_m12 (p_obj);
   p_obj->graphic_no++;
@@ -1459,7 +1584,7 @@ void upd_112_to_118_184 (POBJ32 p_obj)
 // sparkles (object in cauldron???)
 void upd_185_187 (POBJ32 p_obj)
 {
-  NOT_TESTED;
+  UNTESTED;
 
   // zap the graphic_no so the object no longer appears  
   graphic_objs_tbl[p_obj->u.ptr_obj_tbl_entry].graphic_no = 0;
@@ -1470,7 +1595,7 @@ void upd_185_187 (POBJ32 p_obj)
 // sparkles
 void upd_119 (POBJ32 p_obj)
 {
-  NOT_TESTED;
+  UNTESTED;
 
   adj_m4_m12 (p_obj);
   upd_111 (p_obj);
@@ -1535,6 +1660,8 @@ uint8_t is_obj_moving (POBJ32 p_obj)
 // extra life
 void upd_103 (POBJ32 p_obj)
 {
+  UNIMPLEMENTED;
+
   upd_128_to_130 (p_obj);
   // more stuff
 }
@@ -1543,7 +1670,8 @@ void upd_103 (POBJ32 p_obj)
 // special objects (dropped in cauldron room?)
 void upd_104_to_110 (POBJ32 p_obj)
 {
-  NOT_TESTED;
+  UNIMPLEMENTED;
+  UNTESTED;
   
   adj_m4_m12 (p_obj);
   
@@ -1610,9 +1738,10 @@ void gen_audio_XYZ_wipe_and_draw (POBJ32 p_obj)
 
 // $C28B
 // special objects
-// *** UNTESTED
 void upd_96_to_102 (POBJ32 p_obj)
 {
+  UNTESTED;
+  
   adj_m4_m12 (p_obj);
   dec_dZ_and_update_XYZ (p_obj);
   // what does this flag represent?
@@ -1633,14 +1762,14 @@ void no_update (POBJ32 p_obj)
 // $C2CC
 void prepare_final_animation (void)
 {
-  NOT_TESTED;
+  UNIMPLEMENTED;
 }
 
 // $C337
 // human/wulf transform
 void upd_92_to_95 (POBJ32 p_obj)
 {
-  NOT_TESTED;
+  UNIMPLEMENTED;
   
   upd_11 (p_obj);
   if ((p_obj->flags13 & (1<<6)) == 1 &&
@@ -1656,7 +1785,10 @@ void display_sun_moon_frame (POBJ32 p_obj)
 {
   uint8_t x;
 
-  // check a byte
+  UNIMPLEMENTED;
+
+  if (byte_5BC3 != 0)
+    return;
 
   if (p_obj->pixel_x == 225)
     goto toggle_day_night;
@@ -1680,7 +1812,7 @@ display_frame:
 
 toggle_day_night:
   p_obj->graphic_no ^= 1;
-  //colour_sun_moon ();
+  colour_sun_moon ();
   p_obj->pixel_x = 176;
   // if just changed to moon, exit
   if (p_obj->graphic_no & 1)
@@ -1993,8 +2125,10 @@ void upd_8 (POBJ32 p_obj)
 // $C692
 void set_wipe_and_draw_flags (POBJ32 p_obj)
 {
+  UNIMPLEMENTED;
+
   p_obj->flags |= (FLAG_WIPE|FLAG_DRAW);
-  // do some other stuff & return
+  // sub_CD4D
 }
 
 // $C6BD
@@ -2067,6 +2201,8 @@ void set_pixel_adj (POBJ32 p_obj, int8_t h, int8_t l)
 // stone/tree arch (near side)
 void upd_2_4 (POBJ32 p_obj)
 {
+  UNIMPLEMENTED;
+
   if ((p_obj->flags & FLAG_HFLIP) == 0)
   {
     // tree arch
@@ -2111,6 +2247,8 @@ void upd_player_legs (POBJ32 p_obj)
 {
   POBJ32 p_next_obj = p_obj+1;
   
+  UNIMPLEMENTED;
+
   if ((p_obj->flags13 & (1<<6)) != 0 &&
       byte_5BC3 == 0)
   {
@@ -2170,6 +2308,8 @@ int8_t adj_d_for_out_of_bounds (int8_t d)
 // $CB45
 void adj_for_out_of_bounds (POBJ32 p_obj)
 {
+  UNIMPLEMENTED;
+
   int8_t d_x, d_y, d_z;
 
   if (p_obj->flags & (1<<1))
@@ -2330,15 +2470,19 @@ void calc_display_order_and_render (void)
 // $D12A
 int lose_life (void)
 {
+  UNIMPLEMENTED;
+
   memcpy ((void *)&graphic_objs_tbl[0], (void *)&plyr_spr_1_scratchpad, sizeof(OBJ32));
   memcpy ((void *)&graphic_objs_tbl[1], (void *)&plyr_spr_2_scratchpad, sizeof(OBJ32));
-  //byte_5BB1 = 0;
+  byte_5BB1 = 0;
   if (--lives < 0)
-    return (-1);
+    game_over ();
+  else
+  {
+    // some stuff with sun/moon scratchpad
+  }
 
-  // some stuff with sun/moon scratchpad
-      
-  // just for the hell of it
+  // caller needs this value
   return (lives);  
 }
 
@@ -2364,19 +2508,19 @@ void init_start_location (void)
 // $D1E6
 void build_screen_objects (void)
 {
-  // stuff
-  
-  // save state in special_objs_tbl
-  update_special_objs ();
+  UNIMPLEMENTED;
+
+  if (unk_5BB2 != 0)
+    update_special_objs ();
+    
   clr_screen_buffer ();
   retrieve_screen ();
-  // find special objects in new room
   find_special_objs_here ();
   // adjust_plyr_xyz_for_room_size
   portcullis_moving = 0;
   portcullis_move_cnt = 0;
   ball_bounce_height = 0;
-  // stuff
+  is_spike_ball_dropping = 0;
   initial_rendering = 1;
   // spiked balls don't drop immediately in odd-numbered rooms
   disable_spike_ball_drop = graphic_objs_tbl[0].scrn & 1;
@@ -2440,6 +2584,26 @@ void print_border (void)
   multiple_print_sprite (&sprite_scratchpad, 0, 1, 128);
   p = transfer_sprite (&sprite_scratchpad, p);
   multiple_print_sprite (&sprite_scratchpad, 0, 1, 128);
+}
+
+// $D2EF
+void colour_panel (void)
+{
+  // A=$00, HL=$5AB6, BC=$0103, jp fill_window
+  // A=$00, HL=$5ABD, BC=$0103, jp fill_window
+  // A=$42, HL=$5A97, BC=$0604, jp fill_window
+}
+
+// $D30D
+void colour_sun_moon (void)
+{
+  // fills frame attr memory with
+  // $46 for sun
+  // $47 for moon
+  uint8_t attr = 0x46;
+  if ((sun_moon_scratchpad.graphic_no & 1) != 0)
+    attr++;
+  // HL=$5AB8, BC=$0402, jp fill_window
 }
 
 // $D3C6
@@ -2603,6 +2767,13 @@ found_screen:
   dump_graphic_objs_tbl(-1, -1);
 }
 
+// $D556
+void fill_attr (uint8_t attr)
+{
+  // fills the entire attribute memory
+  // with the 'attr' parameter
+}
+
 // $D55F
 void clear_scrn (void)
 {
@@ -2614,30 +2785,72 @@ void clr_screen_buffer (void)
 {
 }
 
+// $D56F
+void update_screen (void)
+{
+  // HL=$0D8F3, DE-$57E0, BC=$20C0
+  // copies screen buffer to Spectrum video memory
+  // - presumably
+  // - I think the screen buffer includes attribute memory?
+}
+
 // $D59F 
 void render_dynamic_objects (void)
 {
-  loc_D653 ();
-  #if 0
-  for (unsigned i=0; objects_to_draw[i] != 0xFF; i++)
+  UNIMPLEMENTED;
+  
+  objs_wiped_cnt = 0;
+  if (initial_rendering == 0)
   {
-    POBJ32 p_obj = &graphic_objs_tbl[objects_to_draw[i]];
+    uint8_t i;
     
-    #if 0
-    // check ??? flag
-    if ((p_obj->flags & (1<<5)) == 0)
-      continue;
-    p_obj->flags &= ~(1<<5);
-    #endif
-  }
-  #endif
-}
+    tmp_objects_to_draw = objects_to_draw;
+    
+    while ((i = *(tmp_objects_to_draw++)) != 0xFF)
+    {
+      POBJ32 p_obj = &graphic_objs_tbl[i];
+      
+      if ((p_obj->flags & FLAG_WIPE) == 0)
+        continue;
+      p_obj->flags &= ~FLAG_WIPE;
 
-// $D653
-void loc_D653 (void)
-{
+      c = (p_obj->pixel_x < p_obj->old_pixel_x 
+            ? p_obj->pixel_x 
+            : p_obj->old_pixel_x);    // left extremity
+      e = ((p_obj->old_pixel_x >> 3) & 0x1F) + p_obj->old_data_width;
+      a = ((p_obj->pixel_x >> 3) & 0x1F) + p_obj->data_width;
+      e = (a < e ? e : a);            // right extremity
+      b = (c>>3) & 0x1F;              // left extremity byte address
+      h = e - b;                      // number of bytes to wipe/line
+      
+      if (p_obj->pixel_y < p_obj->old_pixel_y)
+        ; // *** BUG
+      else
+        b = p_obj->old_pixel_y;
+      e = p_obj->old_pixel_y + p_obj->old_pixel_data_height;
+      a = p_obj->pixel_y + p_obj->pixel_data_height;
+      if (a < e)
+        a = e;                        // highest point
+      l = a - b;                      // number of lines to wipe
+      if (b >= 192)
+        continue;
+
+      a += l - 192;
+      if (a < 0)
+        l = a + l;
+      //BC_to_attr_addr_in_DE ();
+      //calc_screen_buffer_addr (BC);
+      
+      objs_wiped+cnt++;
+      
+      //fill_window (0);
+    }
+  }
+
+loc_D653:
   calc_display_order_and_render ();
   // other stuff
+  
 }
 
 // $D6C9

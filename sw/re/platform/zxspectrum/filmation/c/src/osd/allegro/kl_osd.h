@@ -9,8 +9,6 @@
 
 //#define ALLEGRO_STATICLINK
 
-#define DBGPRINTF(format...)		fprintf(stderr, format)
-
 // 0=27, 1=28...
 #define OSD_KEY_0     (27+'0'-'0')
 #define OSD_KEY_1     (27+'1'-'0')
@@ -41,7 +39,7 @@
 #define OSD_KEY_Z     ('Z' & 0x3f)
 #define OSD_KEY_ESC   0x3b
 
-#define OSD_PRINTF(format...)		fprintf (stderr,format)
+#define DBGPRINTF(format...)		fprintf(stderr, format)
 
 #ifdef __cplusplus
 extern "C"
