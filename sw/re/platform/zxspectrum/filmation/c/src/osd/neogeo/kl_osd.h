@@ -43,7 +43,7 @@
 //#define OSD_PRINTF(format...) textoutf (0, 27, 0, 0, format)
 
 #define abs(v)        ((v)<0?-(v):(v))
-  
+
 void osd_cls (void);
 void osd_delay (unsigned ms);
 int osd_key (int _key);
@@ -53,5 +53,6 @@ void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t *st
 void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, char *str);
 uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code);
 void osd_print_sprite (POBJ32 p_obj);
+void osd_fill_window ()
 
 #endif // __KL_OSD_H__

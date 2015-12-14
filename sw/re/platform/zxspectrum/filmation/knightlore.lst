@@ -3867,6 +3867,7 @@ RAM:B7A1 18 F5			     jr	     loc_B798
 RAM:B7A1	     ; End of function set_guard_wizard_sprite
 RAM:B7A1
 RAM:B7A3	     ; ---------------------------------------------------------------------------
+RAM:B7A3	     ; gargoyle
 RAM:B7A3
 RAM:B7A3	     upd_22:							     ; DATA XREF: RAM:B0C2o
 RAM:B7A3 CD 5C B8		     call    sub_B85C
@@ -3987,8 +3988,8 @@ RAM:B85C
 RAM:B85C
 RAM:B85C	     sub_B85C:							     ; CODE XREF: RAM:upd_22p
 RAM:B85C									     ; RAM:upd_63p ...
-RAM:B85C DD 7E 0D		     ld	     a,	(ix+13)
-RAM:B85F F6 A0			     or	     0A0h ; ' '
+RAM:B85C DD 7E 0D		     ld	     a,	(ix+13)				     ; immunity???
+RAM:B85F F6 A0			     or	     0A0h ; ' '                              ; set bits 7,5
 RAM:B861 DD 77 0D		     ld	     (ix+13), a
 RAM:B864 C9			     ret
 RAM:B864	     ; End of function sub_B85C
@@ -6025,6 +6026,7 @@ RAM:C510 21 F4 03		     ld	     hl, 3F4h				     ; +3, -12
 RAM:C513 18 CB			     jr	     jp_set_pixel_adj
 RAM:C513	     ; End of function adj_p3_m12
 RAM:C513
+RAM:C515	     ; HL = starting location
 RAM:C515	     ; B = width (bytes)
 RAM:C515	     ; C = height (lines)
 RAM:C515
@@ -7256,11 +7258,11 @@ RAM:CBB2 30 2D			     jr	     nc, loc_CBE1
 RAM:CBB4 DD CB 0C C6		     set     0,	(ix+12)
 RAM:CBB8 DD 7E 0D		     ld	     a,	(ix+13)
 RAM:CBBB 0F			     rrca
-RAM:CBBC E6 40			     and     40h ; '@'
+RAM:CBBC E6 40			     and     40h ; '@'                               ; was bit 7
 RAM:CBBE FD B6 0D		     or	     (iy+13)
 RAM:CBC1 FD 77 0D		     ld	     (iy+13), a
 RAM:CBC4 07			     rlca
-RAM:CBC5 E6 40			     and     40h ; '@'
+RAM:CBC5 E6 40			     and     40h ; '@'                               ; was bit 5
 RAM:CBC7 DD B6 0D		     or	     (ix+13)
 RAM:CBCA DD 77 0D		     ld	     (ix+13), a
 RAM:CBCD FD CB 07 56		     bit     2,	(iy+7)
@@ -7356,11 +7358,11 @@ RAM:CC50 30 43			     jr	     nc, loc_CC95			     ; next entry
 RAM:CC52 DD CB 0C D6		     set     2,	(ix+12)				     ; Z OOB?
 RAM:CC56 DD 7E 0D		     ld	     a,	(ix+13)
 RAM:CC59 0F			     rrca
-RAM:CC5A E6 40			     and     40h ; '@'
+RAM:CC5A E6 40			     and     40h ; '@'                               ; was bit 7
 RAM:CC5C FD B6 0D		     or	     (iy+13)
 RAM:CC5F FD 77 0D		     ld	     (iy+13), a
 RAM:CC62 07			     rlca
-RAM:CC63 E6 40			     and     40h ; '@'
+RAM:CC63 E6 40			     and     40h ; '@'                               ; was bit 5
 RAM:CC65 DD B6 0D		     or	     (ix+13)
 RAM:CC68 DD 77 0D		     ld	     (ix+13), a
 RAM:CC6B FD CB 0D DE		     set     3,	(iy+13)
@@ -7723,7 +7725,7 @@ RAM:CE36 E6 F8			     and     0F8h ; 'ø'
 RAM:CE38 F6 06			     or	     6					     ; wrap
 RAM:CE3A
 RAM:CE3A	     loc_CE3A:							     ; CODE XREF: RAM:CE47j
-RAM:CE3A DD 36 0D 08		     ld	     (ix+13), 8
+RAM:CE3A DD 36 0D 08		     ld	     (ix+13), 8				     ; set bit 3
 RAM:CE3E 18 E2			     jr	     loc_CE22
 RAM:CE40	     ; ---------------------------------------------------------------------------
 RAM:CE40
@@ -9186,10 +9188,10 @@ RAM:D5FA E6 1F			     and     1Fh				     ; old/pixel X byte	address
 RAM:D5FC 47			     ld	     b,	a
 RAM:D5FD 7B			     ld	     a,	e
 RAM:D5FE 90			     sub     b
-RAM:D5FF 67			     ld	     h,	a
+RAM:D5FF 67			     ld	     h,	a				     ; H=number	of bytes to wipe
 RAM:D600 DD 7E 1B		     ld	     a,	(ix+27)				     ; pixel Y
-RAM:D603 DD 96 1F		     sub     (ix+31)				     ; old pixel Y
-RAM:D606 38 46			     jr	     c,	loc_D64E
+RAM:D603 DD 96 1F		     sub     (ix+31)				     ; pixel Y < old pixel Y?
+RAM:D606 38 46			     jr	     c,	loc_D64E			     ; yes, go
 RAM:D608 DD 46 1F		     ld	     b,	(ix+31)				     ; old pixel Y
 RAM:D60B
 RAM:D60B	     loc_D60B:							     ; CODE XREF: render_dynamic_objects+B2j
@@ -9485,7 +9487,7 @@ RAM:D763 ED 73 A9 5B		     ld	     (tmp_SP), sp
 RAM:D767 EB			     ex	     de, hl
 RAM:D768 F9			     ld	     sp, hl
 RAM:D769 EB			     ex	     de, hl
-RAM:D76A DD 7E 19		     ld	     a,	(ix+19h)
+RAM:D76A DD 7E 19		     ld	     a,	(ix+25)
 RAM:D76D 18 3B			     jr	     loc_D7AA
 RAM:D76F	     ; ---------------------------------------------------------------------------
 RAM:D76F
@@ -9493,7 +9495,7 @@ RAM:D76F	     loc_D76F:							     ; CODE XREF: RAM:D720j
 RAM:D76F 1A			     ld	     a,	(de)
 RAM:D770 13			     inc     de
 RAM:D771 E6 0F			     and     0Fh
-RAM:D773 DD 77 18		     ld	     (ix+18h), a
+RAM:D773 DD 77 18		     ld	     (ix+24), a
 RAM:D776 47			     ld	     b,	a
 RAM:D777 87			     add     a,	a
 RAM:D778 87			     add     a,	a

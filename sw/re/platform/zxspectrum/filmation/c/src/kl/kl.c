@@ -194,6 +194,7 @@ static void adj_m4_m12 (POBJ32 p_obj);
 static void adj_m7_m12 (POBJ32 p_obj);
 static void adj_m12_m12 (POBJ32 p_obj);
 static void upd_88_to_90 (POBJ32 p_obj);
+static void fill_window (uint8_t x_byte, uint8_t y_line, uint8_t width_bytes, uint8_t height_lines);
 static void find_special_objs_here (void);
 static void update_special_objs (void);
 static void upd_80_to_83 (POBJ32 p_obj);
@@ -378,7 +379,7 @@ game_loop:
   build_screen_objects ();
 
   // *** REMOVE ME
-	osd_cls ();
+	osd_clear_scrn ();
 
 onscreen_loop:
 
@@ -1965,6 +1966,14 @@ void upd_88_to_90 (POBJ32 p_obj)
   set_pixel_adj (p_obj, -12, -16);
 }
 
+// $C515
+// the original used screen buffer address
+// instead of x_byte & y_line
+void fill_window (uint8_t x_byte, uint8_t y_line, uint8_t width_bytes, uint8_t height_lines)
+{
+  osd_fill_window (x_byte, y_line, width_bytes, height_lines);
+}
+
 // $C525
 void find_special_objs_here (void)
 {
@@ -2777,7 +2786,7 @@ void fill_attr (uint8_t attr)
 // $D55F
 void clear_scrn (void)
 {
-	osd_cls ();
+	osd_clear_scrn ();
 }
 
 // $D567
@@ -2809,41 +2818,52 @@ void render_dynamic_objects (void)
     while ((i = *(tmp_objects_to_draw++)) != 0xFF)
     {
       POBJ32 p_obj = &graphic_objs_tbl[i];
-      
+      int a,b,c,d,e,h,l;
+            
       if ((p_obj->flags & FLAG_WIPE) == 0)
         continue;
       p_obj->flags &= ~FLAG_WIPE;
 
+      DBGPRINTF ("wiping object %d\n", p_obj->graphic_no);
+      
       c = (p_obj->pixel_x < p_obj->old_pixel_x 
             ? p_obj->pixel_x 
             : p_obj->old_pixel_x);    // left extremity
-      e = ((p_obj->old_pixel_x >> 3) & 0x1F) + p_obj->old_data_width;
-      a = ((p_obj->pixel_x >> 3) & 0x1F) + p_obj->data_width;
+      e = ((p_obj->old_pixel_x >> 3) & 0x1F) + p_obj->old_data_width_bytes;
+      a = ((p_obj->pixel_x >> 3) & 0x1F) + p_obj->data_width_bytes;
       e = (a < e ? e : a);            // right extremity
       b = (c>>3) & 0x1F;              // left extremity byte address
       h = e - b;                      // number of bytes to wipe/line
+
+      DBGPRINTF ("e(%d)-b(%d)=h(%d)\n", e, b, h);
+
+      DBGPRINTF ("pixel_y=%d, old_pixel_y=%d\n",
+                  p_obj->pixel_y, p_obj->old_pixel_y);
+      if (p_obj->pixel_y != p_obj->old_pixel_y)
+        exit (0);
       
-      if (p_obj->pixel_y < p_obj->old_pixel_y)
-        ; // *** BUG
-      else
-        b = p_obj->old_pixel_y;
-      e = p_obj->old_pixel_y + p_obj->old_pixel_data_height;
-      a = p_obj->pixel_y + p_obj->pixel_data_height;
-      if (a < e)
-        a = e;                        // highest point
+      b = (p_obj->pixel_y < p_obj->old_pixel_y
+            ? p_obj->pixel_y
+            : p_obj->old_pixel_y);    // lowest point
+      e = p_obj->old_pixel_y + p_obj->old_data_height_lines;
+      a = p_obj->pixel_y + p_obj->data_height_lines;
+      a = (a < e ? e : a);            // highest point
       l = a - b;                      // number of lines to wipe
-      if (b >= 192)
+      if (b >= 192)                   // completely off-screen
         continue;
 
-      a += l - 192;
-      if (a < 0)
-        l = a + l;
+      a = b + l - 192;                // lowest + lines - 192
+      if (a >= 0)                     // half off screen
+        l = -a + l;                   // adjust number of lines to wipe
+
+      DBGPRINTF ("a(%d)-b(%d)=l(%d)\n", a, b, l);
+
       //BC_to_attr_addr_in_DE ();
       //calc_screen_buffer_addr (BC);
       
-      objs_wiped+cnt++;
+      objs_wiped_cnt++;
       
-      //fill_window (0);
+      fill_window (c>>3, b, h, l);
     }
   }
 

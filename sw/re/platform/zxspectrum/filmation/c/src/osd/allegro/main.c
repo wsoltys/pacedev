@@ -30,14 +30,19 @@
 extern void knight_lore (void);
 extern uint8_t *flip_sprite (POBJ32 p_obj);
 
-void osd_cls (void)
+void osd_delay (unsigned ms)
+{
+  rest (ms);
+}
+
+void osd_clear_scrn (void)
 {
 	clear_bitmap (screen);
 }
 
-void osd_delay (unsigned ms)
+int osd_readkey (void)
 {
-  rest (ms);
+  return (readkey ());
 }
 
 int osd_key (int _key)
@@ -48,11 +53,6 @@ int osd_key (int _key)
 int osd_keypressed (void)
 {
   return (keypressed ());
-}
-
-int osd_readkey (void)
-{
-  return (readkey ());
 }
 
 void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t *str)
@@ -134,6 +134,20 @@ uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code)
     }
   }  
   return (x+8);
+}
+
+void osd_fill_window (uint8_t x_byte, uint8_t y_line, uint8_t width_bytes, uint8_t height_lines)
+{
+  DBGPRINTF ("%s(%d,%d-%dx%d):\n", __FUNCTION__,
+              (unsigned)x_byte<<3, y_line,
+              (unsigned)width_bytes<<3, height_lines);
+  
+  rectfill (screen, 
+            (unsigned)x_byte<<3, 
+            y_line, 
+            ((unsigned)(x_byte)<<3) + ((unsigned)(width_bytes)<<3) - 1, 
+            y_line + height_lines -1, 
+            3);
 }
 
 void osd_print_sprite (POBJ32 p_obj)
