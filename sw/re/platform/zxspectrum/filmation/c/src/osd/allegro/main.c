@@ -27,6 +27,8 @@
 
 #define ENABLE_MASK
 
+static BITMAP *scrn_buf;
+
 extern void knight_lore (void);
 extern uint8_t *flip_sprite (POBJ32 p_obj);
 
@@ -38,6 +40,11 @@ void osd_delay (unsigned ms)
 void osd_clear_scrn (void)
 {
 	clear_bitmap (screen);
+}
+
+void osd_clr_screen_buffer (void)
+{
+  clear_bitmap (scrn_buf);
 }
 
 int osd_readkey (void)
@@ -70,7 +77,7 @@ void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t *st
       for (b=0; b<8; b++)
       {
         if (d & (1<<7))
-          putpixel (screen, x+c*8+b, 191-y+l, 15);
+          putpixel (scrn_buf, x+c*8+b, 191-y+l, 15);
         d <<= 1;
       }
     }  
@@ -109,7 +116,7 @@ void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, char *str)
       for (b=0; b<8; b++)
       {
         if (d & (1<<7))
-          putpixel (screen, x+c*8+b, 191-y+l, 15);
+          putpixel (scrn_buf, x+c*8+b, 191-y+l, 15);
         d <<= 1;
       }
     }  
@@ -129,25 +136,27 @@ uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code)
     for (b=0; b<8; b++)
     {
       if (d & (1<<7))
-        putpixel (screen, x+b, 191-y+l, 15);
+        putpixel (scrn_buf, x+b, 191-y+l, 15);
       d <<= 1;
     }
   }  
   return (x+8);
 }
 
-void osd_fill_window (uint8_t x_byte, uint8_t y_line, uint8_t width_bytes, uint8_t height_lines)
+void osd_fill_window (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines)
 {
   DBGPRINTF ("%s(%d,%d-%dx%d):\n", __FUNCTION__,
-              (unsigned)x_byte<<3, y_line,
-              (unsigned)width_bytes<<3, height_lines);
+              x, y, width_bytes<<3, height_lines);
   
-  rectfill (screen, 
-            (unsigned)x_byte<<3, 
-            y_line, 
-            ((unsigned)(x_byte)<<3) + ((unsigned)(width_bytes)<<3) - 1, 
-            y_line + height_lines -1, 
-            3);
+  rectfill (scrn_buf, x, y, 
+            x + (width_bytes<<3) - 1, 
+            y + height_lines - 1, 
+            0);
+}
+
+void osd_update_screen (void)
+{
+  blit (scrn_buf, screen, 0, 0, 0, 0, 256, 192);
 }
 
 void osd_print_sprite (POBJ32 p_obj)
@@ -174,10 +183,10 @@ void osd_print_sprite (POBJ32 p_obj)
       {
 #ifdef ENABLE_MASK
         if (m & (1<<7))
-          putpixel (screen, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y), 0);
+          putpixel (scrn_buf, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y), 0);
 #endif
         if (d & (1<<7))
-          putpixel (screen, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y), 15);
+          putpixel (scrn_buf, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y), 15);
         m <<= 1;
         d <<= 1;
       }
@@ -195,6 +204,8 @@ void main (int argc, char *argv[])
 	set_color_depth (8);
 	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 256, 192, 0, 0);
 
+  scrn_buf = create_bitmap (256, 192);
+  
   // spectrum palette
   PALETTE pal;
   for (c=0; c<16; c++)
@@ -205,6 +216,7 @@ void main (int argc, char *argv[])
   }
 	set_palette_range (pal, 0, 15, 1);
 
+	clear_bitmap (scrn_buf);
 	clear_bitmap (screen);
   knight_lore ();
 

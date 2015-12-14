@@ -5,8 +5,13 @@
 //#include <memory.h>
 
 #define DBGPRINTF_FN    DBGPRINTF ("%s():\n", __FUNCTION__)
-#define UNTESTED        DBGPRINTF ("*** %s(): UNTESTED ***\n", __FUNCTION__)
-#define UNIMPLEMENTED   DBGPRINTF ("*** %s(): UNMIPLEMENTED ***\n", __FUNCTION__)
+//#define UNTESTED        DBGPRINTF ("*** %s(): UNTESTED ***\n", __FUNCTION__)
+#define UNTESTED        
+//#define UNIMPLEMENTED   DBGPRINTF ("*** %s(): UNMIPLEMENTED ***\n", __FUNCTION__)
+#define UNIMPLEMENTED   
+
+// build options - all disabled for 'production' build
+//#define BUILD_OPT_DISABLE_WIPE
 
 #pragma pack(1)
 
@@ -194,7 +199,7 @@ static void adj_m4_m12 (POBJ32 p_obj);
 static void adj_m7_m12 (POBJ32 p_obj);
 static void adj_m12_m12 (POBJ32 p_obj);
 static void upd_88_to_90 (POBJ32 p_obj);
-static void fill_window (uint8_t x_byte, uint8_t y_line, uint8_t width_bytes, uint8_t height_lines);
+static void fill_window (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines);
 static void find_special_objs_here (void);
 static void update_special_objs (void);
 static void upd_80_to_83 (POBJ32 p_obj);
@@ -1536,6 +1541,7 @@ void display_menu (void)
 {
   display_text_list (menu_colours, menu_xy, (char **)menu_text, 8);
   print_border ();
+  update_screen ();
 }
 
 // $BEBF
@@ -1969,9 +1975,11 @@ void upd_88_to_90 (POBJ32 p_obj)
 // $C515
 // the original used screen buffer address
 // instead of x_byte & y_line
-void fill_window (uint8_t x_byte, uint8_t y_line, uint8_t width_bytes, uint8_t height_lines)
+void fill_window (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines)
 {
-  osd_fill_window (x_byte, y_line, width_bytes, height_lines);
+  // x starts on a byte boundary
+  x &= 0xF8;
+  osd_fill_window (x, y, width_bytes, height_lines);
 }
 
 // $C525
@@ -2134,10 +2142,17 @@ void upd_8 (POBJ32 p_obj)
 // $C692
 void set_wipe_and_draw_flags (POBJ32 p_obj)
 {
+  uint8_t   *p_sprite;
+  
   UNIMPLEMENTED;
 
   p_obj->flags |= (FLAG_WIPE|FLAG_DRAW);
   // sub_CD4D
+  // snd somewhere in there is
+  calc_pixel_XY (p_obj);
+  p_sprite = flip_sprite (p_obj);
+  p_obj->data_width_bytes = (*(p_sprite++) & 0x3f) + 1;
+  p_obj->data_height_lines = *(p_sprite++);
 }
 
 // $C6BD
@@ -2756,8 +2771,8 @@ found_screen:
         // zero everything else        
         memset (&p_other_objs->d_x, 0, 23);
 
-        // debug: (don't) include 62
-        //if (p_other_objs->graphic_no == 23)
+        // debug ONLY
+        //if (p_other_objs->graphic_no == 182)
         //if (0)
         {
           p_other_objs++;
@@ -2792,6 +2807,7 @@ void clear_scrn (void)
 // $D567
 void clr_screen_buffer (void)
 {
+  osd_clr_screen_buffer ();
 }
 
 // $D56F
@@ -2799,8 +2815,7 @@ void update_screen (void)
 {
   // HL=$0D8F3, DE-$57E0, BC=$20C0
   // copies screen buffer to Spectrum video memory
-  // - presumably
-  // - I think the screen buffer includes attribute memory?
+  osd_update_screen ();
 }
 
 // $D59F 
@@ -2824,24 +2839,15 @@ void render_dynamic_objects (void)
         continue;
       p_obj->flags &= ~FLAG_WIPE;
 
-      DBGPRINTF ("wiping object %d\n", p_obj->graphic_no);
-      
       c = (p_obj->pixel_x < p_obj->old_pixel_x 
             ? p_obj->pixel_x 
             : p_obj->old_pixel_x);    // left extremity
-      e = ((p_obj->old_pixel_x >> 3) & 0x1F) + p_obj->old_data_width_bytes;
-      a = ((p_obj->pixel_x >> 3) & 0x1F) + p_obj->data_width_bytes;
+      e = (p_obj->old_pixel_x >> 3) + p_obj->old_data_width_bytes;
+      a = (p_obj->pixel_x >> 3) + p_obj->data_width_bytes;
       e = (a < e ? e : a);            // right extremity
-      b = (c>>3) & 0x1F;              // left extremity byte address
+      b = (c >> 3);                   // left extremity byte address
       h = e - b;                      // number of bytes to wipe/line
 
-      DBGPRINTF ("e(%d)-b(%d)=h(%d)\n", e, b, h);
-
-      DBGPRINTF ("pixel_y=%d, old_pixel_y=%d\n",
-                  p_obj->pixel_y, p_obj->old_pixel_y);
-      if (p_obj->pixel_y != p_obj->old_pixel_y)
-        exit (0);
-      
       b = (p_obj->pixel_y < p_obj->old_pixel_y
             ? p_obj->pixel_y
             : p_obj->old_pixel_y);    // lowest point
@@ -2851,19 +2857,18 @@ void render_dynamic_objects (void)
       l = a - b;                      // number of lines to wipe
       if (b >= 192)                   // completely off-screen
         continue;
-
       a = b + l - 192;                // lowest + lines - 192
       if (a >= 0)                     // half off screen
-        l = -a + l;                   // adjust number of lines to wipe
-
-      DBGPRINTF ("a(%d)-b(%d)=l(%d)\n", a, b, l);
+        l -= a;                       // adjust number of lines to wipe
 
       //BC_to_attr_addr_in_DE ();
       //calc_screen_buffer_addr (BC);
       
       objs_wiped_cnt++;
       
-      fill_window (c>>3, b, h, l);
+      #ifndef BUILD_OPT_DISABLE_WIPE
+        fill_window (c, b, h, l);
+      #endif
     }
   }
 
