@@ -148,9 +148,9 @@ void osd_fill_window (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_
   DBGPRINTF ("%s(%d,%d-%dx%d):\n", __FUNCTION__,
               x, y, width_bytes<<3, height_lines);
   
-  rectfill (scrn_buf, x, y, 
+  rectfill (scrn_buf, x, 191-y, 
             x + (width_bytes<<3) - 1, 
-            y + height_lines - 1, 
+            191 - (y + height_lines - 1), 
             0);
 }
 

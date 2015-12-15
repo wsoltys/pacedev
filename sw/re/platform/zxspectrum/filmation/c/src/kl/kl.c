@@ -175,6 +175,8 @@ static void display_objects (void);
 static void upd_120_to_126 (POBJ32 p_obj);
 static void adj_m8_m12 (POBJ32 p_obj);
 static void upd_127 (POBJ32 p_obj);
+static uint8_t chk_pickup_drop (void);
+static void sub_C00E (POBJ32 p_obj);
 static uint8_t is_obj_moving (POBJ32 p_obj);
 static void upd_103 (POBJ32 p_obj);
 static void upd_104_to_110 (POBJ32 p_obj);
@@ -183,7 +185,9 @@ static void gen_audio_XYZ_wipe_and_draw (POBJ32 p_obj);
 static void upd_96_to_102 (POBJ32 p_obj);
 static void no_update (POBJ32 p_obj);
 static void prepare_final_animation (void);
+static int sub_C306 (POBJ32 p_obj);
 static void upd_92_to_95 (POBJ32 p_obj);
+static void rand_legs_sprite (POBJ32 p_obj);
 static void display_sun_moon_frame (POBJ32 p_obj);
 static void init_sun (void);
 static void init_special_objects (void);
@@ -216,6 +220,7 @@ static void upd_2_4 (POBJ32 p_obj);
 static void upd_16_to_21_24_to_29 (POBJ32 p_obj);
 static void upd_48_to_53_56_to_61 (POBJ32 p_obj);
 static void upd_player_legs (POBJ32 p_obj);
+static uint8_t chk_plyr_OOB (POBJ32 p_obj);
 static void animate_guard_wizard_legs (POBJ32 p_obj);
 static void clear_dX_dY (POBJ32 p_obj);
 static int8_t adj_dZ_for_out_of_bounds (POBJ32 p_obj, int8_t d_z);
@@ -229,6 +234,7 @@ static void upd_player_top (POBJ32 p_obj);
 static void save_2d_info (POBJ32 p_obj);
 static void list_objects_to_draw (void);
 static void calc_display_order_and_render (void);
+static void check_user_input (void);
 static int lose_life (void);
 static void init_start_location (void);
 static void build_screen_objects (void);
@@ -435,7 +441,10 @@ onscreen_loop:
 
   // calc game delay loop
   // using rendered_objs_cnt
-      
+
+  // *** REMOVE ME
+  update_screen ();
+        
 game_delay:
   // last to-do  
   osd_delay (100);
@@ -1657,6 +1666,54 @@ void upd_127 (POBJ32 p_obj)
   upd_sprite_jump_tbl[p_obj->graphic_no] (p_obj);
 }
 
+// $BFFB
+uint8_t chk_pickup_drop (void)
+{
+  return (user_input & (1<<4));
+}
+
+// $C00E
+void sub_C00E (POBJ32 p_obj)
+{
+  uint8_t   z;
+  uint8_t   carry;
+  
+  UNIMPLEMENTED;
+  UNTESTED;
+  
+  if (byte_5BB3 != 0)
+  {
+    if (chk_pickup_drop() != 0)
+      return;
+    byte_5BB3 == 0;
+    return;
+  }
+
+  if (chk_pickup_drop () == 0)
+    return;
+  if (chk_plyr_OOB (p_obj) == 0)
+    return;
+  if ((p_obj->flags12 & (1<<3)) != 0)
+    return;
+  if ((p_obj->flags12 & (1<<2)) == 0)
+    return;
+  byte_5BD3 = 0;
+  z = p_obj->z;     // save
+  p_obj->z += 12;
+  // carry = sub_B4FD
+  p_obj->z = z;     // restore
+  if (carry != 0)
+    byte_5BD3 = 1;
+  // audio
+  byte_5BB3 = 1;
+  byte_5BB4 = 1;
+  p_obj->width += 4;
+  p_obj->depth += 4;
+  p_obj->height += 4;
+  // some special object stuff
+  
+}
+
 // $C1A1
 uint8_t is_obj_moving (POBJ32 p_obj)
 {
@@ -1772,6 +1829,32 @@ void prepare_final_animation (void)
   UNIMPLEMENTED;
 }
 
+// $C306
+int sub_C306 (POBJ32 p_obj)
+{
+  POBJ32 p_next_obj = p_obj+1;
+  
+  if (byte_5BB1 == 0)
+    return (1);
+  if ((p_obj->flags12 & 0x0F) != 0)
+    return (1);
+  if ((p_obj->flags12 & (1<<3)) != 0)
+    return (1);
+    
+  // the original Z80 code incremented the stack twice
+  // so we didn't return to the caller
+  // - but here we return 0 instead
+
+  byte_5BB1 = p_obj->graphic_no;
+  p_obj->u.plyr_graphic_no = 8;
+  p_next_obj->graphic_no = 1;
+  set_wipe_and_draw_flags (p_next_obj);
+  upd_11 (p_obj);
+  rand_legs_sprite (p_obj);
+  
+  return (0);
+}
+
 // $C337
 // human/wulf transform
 void upd_92_to_95 (POBJ32 p_obj)
@@ -1785,6 +1868,18 @@ void upd_92_to_95 (POBJ32 p_obj)
   else
   {
   }
+}
+
+// $C357
+void rand_legs_sprite (POBJ32 p_obj)
+{
+  uint8_t r = rand ();    // was Z80 R register
+  r = ((r + seed_3) & 3) | 92;
+  if (r == p_obj->graphic_no)
+    r ^= (1<<0);
+  p_obj->graphic_no = r;
+  p_obj->flags ^= FLAG_HFLIP;
+  set_wipe_and_draw_flags (p_obj);
 }
 
 // $C3A4
@@ -2281,9 +2376,28 @@ void upd_player_legs (POBJ32 p_obj)
   }
   else
   {
+    if (!sub_C306 (p_obj))
+      return;
+    check_user_input ();
+    sub_C00E (p_obj);
+      
+      
     // heaps of shit
-    set_wipe_and_draw_flags (p_obj);
   }
+}
+
+// $C87A
+uint8_t chk_plyr_OOB (POBJ32 p_obj)
+{
+  UNTESTED;
+  
+  // original Z80 code returns NC, C
+  if (abs(p_obj->x - 128) > (room_size_X - p_obj->width))
+    return (0);
+  if (abs(p_obj->y - 128) > (room_size_Y - p_obj->depth))
+    return (0);
+    
+  return (1);
 }
 
 // $C97F
@@ -2489,6 +2603,39 @@ void calc_display_order_and_render (void)
     #endif     
       calc_pixel_XY_and_render (p_obj);
   }
+}
+
+// $D022
+void check_user_input (void)
+{
+  if (byte_5BC3 != 0 || byte_5BC4 != 0)
+    goto finished_input;
+
+  // handle various input methods here
+  goto keyboard;
+  
+keyboard:
+  user_input = 0;
+  if (osd_key(OSD_KEY_Z) || osd_key(OSD_KEY_C) || osd_key(OSD_KEY_B) || osd_key(OSD_KEY_M))
+    user_input |= (1<<0);
+  if (osd_key(OSD_KEY_X) || osd_key(OSD_KEY_V) || osd_key(OSD_KEY_N))
+    user_input |= (1<<1);
+  if (osd_key(OSD_KEY_A) || osd_key(OSD_KEY_S) || osd_key(OSD_KEY_D) || osd_key(OSD_KEY_F) ||
+      osd_key(OSD_KEY_G) || osd_key(OSD_KEY_H) || osd_key(OSD_KEY_J) || osd_key(OSD_KEY_K) ||
+      osd_key(OSD_KEY_L))
+    user_input |= (1<<2);
+  if (osd_key(OSD_KEY_Q) || osd_key(OSD_KEY_W) || osd_key(OSD_KEY_E) || osd_key(OSD_KEY_R) ||
+      osd_key(OSD_KEY_T) || osd_key(OSD_KEY_Y) || osd_key(OSD_KEY_U) || osd_key(OSD_KEY_I) ||
+      osd_key(OSD_KEY_O) || osd_key(OSD_KEY_P))
+    user_input |= (1<<3);
+  if (osd_key(OSD_KEY_1) || osd_key(OSD_KEY_2) || osd_key(OSD_KEY_3) || osd_key(OSD_KEY_4) ||
+      osd_key(OSD_KEY_5) || osd_key(OSD_KEY_6) || osd_key(OSD_KEY_7) || osd_key(OSD_KEY_8) ||
+      osd_key(OSD_KEY_9) || osd_key(OSD_KEY_0))
+    user_input |= (1<<4);
+
+finished_input:
+  // something sets bit 5 here?!?
+  ;
 }
 
 // $D12A
