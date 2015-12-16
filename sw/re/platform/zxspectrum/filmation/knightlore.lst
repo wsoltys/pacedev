@@ -3199,10 +3199,10 @@ RAM:B441
 RAM:B441	     ; =============== S U B R O U T I N E =======================================
 RAM:B441
 RAM:B441
-RAM:B441	     sub_B441:							     ; CODE XREF: handle_jump+1Cp
+RAM:B441	     gen_audio_20h:						     ; CODE XREF: handle_jump+1Cp
 RAM:B441 0E 20			     ld	     c,	20h ; ' '
 RAM:B443
-RAM:B443	     loc_B443:							     ; CODE XREF: sub_B441+Dj
+RAM:B443	     loc_B443:							     ; CODE XREF: gen_audio_20h+Dj
 RAM:B443 79			     ld	     a,	c
 RAM:B444 0F			     rrca
 RAM:B445 0F			     rrca
@@ -3214,7 +3214,7 @@ RAM:B44A CD ED B4		     call    toggle_FE_bit4
 RAM:B44D 0D			     dec     c
 RAM:B44E 20 F3			     jr	     nz, loc_B443
 RAM:B450 C9			     ret
-RAM:B450	     ; End of function sub_B441
+RAM:B450	     ; End of function gen_audio_20h
 RAM:B450
 RAM:B451
 RAM:B451	     ; =============== S U B R O U T I N E =======================================
@@ -3345,7 +3345,7 @@ RAM:B4B8 2F			     cpl
 RAM:B4B9 18 0B			     jr	     loc_B4C6
 RAM:B4BB	     ; ---------------------------------------------------------------------------
 RAM:B4BB
-RAM:B4BB	     loc_B4BB:							     ; CODE XREF: handle_forward+12p
+RAM:B4BB	     gen_audio_60h:						     ; CODE XREF: handle_forward+12p
 RAM:B4BB DD 7E 00		     ld	     a,	(ix+0)				     ; graphic_no
 RAM:B4BE E6 01			     and     1
 RAM:B4C0 C0			     ret     nz
@@ -3390,7 +3390,7 @@ RAM:B4ED	     ; =============== S U B R O U T I N E ============================
 RAM:B4ED
 RAM:B4ED
 RAM:B4ED	     toggle_FE_bit4:						     ; CODE XREF: gen_audio_graphic_no+Ep
-RAM:B4ED									     ; sub_B441+9p ...
+RAM:B4ED									     ; gen_audio_20h+9p ...
 RAM:B4ED 3E 10			     ld	     a,	10h				     ; EAR output
 RAM:B4EF D3 FE			     out     (0FEh), a				     ; enable
 RAM:B4F1 78			     ld	     a,	b
@@ -6828,7 +6828,7 @@ RAM:C95A F8			     ret     m					     ; return if was <-1
 RAM:C95B DD CB 0C DE		     set     3,	(ix+12)
 RAM:C95F DD 36 0B 08		     ld	     (ix+11), 8				     ; dZ=8?
 RAM:C963 C5			     push    bc
-RAM:C964 CD 41 B4		     call    sub_B441
+RAM:C964 CD 41 B4		     call    gen_audio_20h
 RAM:C967 C1			     pop     bc
 RAM:C968 C9			     ret
 RAM:C968	     ; End of function handle_jump
@@ -6849,7 +6849,7 @@ RAM:C97A
 RAM:C97A	     loc_C97A:							     ; CODE XREF: handle_forward+5j
 RAM:C97A									     ; handle_forward+Bj
 RAM:C97A C5			     push    bc
-RAM:C97B CD BB B4		     call    loc_B4BB
+RAM:C97B CD BB B4		     call    gen_audio_60h
 RAM:C97E C1			     pop     bc
 RAM:C97F
 RAM:C97F	     animate_guard_wizard_legs:					     ; CODE XREF: RAM:loc_B71Ap
@@ -6986,7 +6986,7 @@ RAM:CA31	     ; End of function get_player_dir
 RAM:CA31
 RAM:CA31	     ; ---------------------------------------------------------------------------
 RAM:CA32 3A CA	     off_CA32:	     dw	move_plyr_W				     ; DATA XREF: move_player+19o
-RAM:CA32									     ; dX -= 3 (N)
+RAM:CA32									     ; dX -= 3
 RAM:CA34 43 CA			     dw	move_plyr_E				     ; dX += 3
 RAM:CA36 4A CA			     dw	move_plyr_N				     ; dY += 3
 RAM:CA38 53 CA			     dw	move_plyr_S				     ; dY -= 3

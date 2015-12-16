@@ -21,6 +21,18 @@
 #define OSD_KEY_8     (27+'8'-'0')
 #define OSD_KEY_9     (27+'9'-'0')
 
+// 0=37, 1=38...
+#define OSD_KEY_0_PAD (37+'0'-'0')
+#define OSD_KEY_1_PAD (37+'1'-'0')
+#define OSD_KEY_2_PAD (37+'2'-'0')
+#define OSD_KEY_3_PAD (37+'3'-'0')
+#define OSD_KEY_4_PAD (37+'4'-'0')
+#define OSD_KEY_5_PAD (37+'5'-'0')
+#define OSD_KEY_6_PAD (37+'6'-'0')
+#define OSD_KEY_7_PAD (37+'7'-'0')
+#define OSD_KEY_8_PAD (37+'8'-'0')
+#define OSD_KEY_9_PAD (37+'9'-'0')
+
 // A=1, B=2...
 #define OSD_KEY_A     ('A' & 0x3f)
 #define OSD_KEY_B     ('B' & 0x3f)

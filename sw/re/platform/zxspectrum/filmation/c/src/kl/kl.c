@@ -2386,7 +2386,7 @@ void upd_player_bottom (POBJ32 p_obj)
   POBJ32    p_next_obj = p_obj+1;
   uint8_t   inp;
     
-  UNIMPLEMENTED;
+  UNTESTED;
 
   if ((p_obj->flags13 & (1<<6)) != 0 &&
       byte_5BC3 == 0)
@@ -2408,7 +2408,7 @@ void upd_player_bottom (POBJ32 p_obj)
       if (p_obj->d_z >= 0)
         p_obj->d_z = 0;
     p_next_obj->flags |= FLAG_Y_OOB;
-    sub_C9A1 (p_obj, 0);                // does the moving
+    sub_C9A1 (p_obj, inp);               // does the moving
     p_next_obj->flags &= ~FLAG_Y_OOB;
     if (p_obj->flags12 >= 16)
       p_obj->flags12 -= 16;
@@ -2458,10 +2458,10 @@ void handle_left_right (POBJ32 p_obj, uint8_t inp)
     //loc_B4C1 ();
   }
   p_obj->flags13 |= 2;
-  if ((inp & INP_RIGHT) != 0 &&
-      (p_obj->flags & FLAG_HFLIP) != 0 ||
-      (inp & INP_RIGHT) == 0 &&
-      (p_obj->flags & FLAG_HFLIP) == 0)
+  if (((inp & INP_RIGHT) != 0 &&
+      (p_obj->flags & FLAG_HFLIP) != 0) ||
+      ((inp & INP_RIGHT) == 0 &&
+      (p_obj->flags & FLAG_HFLIP) == 0))
     p_obj->graphic_no ^= 8;
   p_obj->flags ^= FLAG_HFLIP;
   // set sprite for top half
@@ -2474,7 +2474,7 @@ void handle_left_right (POBJ32 p_obj, uint8_t inp)
 // $C948
 void handle_jump (POBJ32 p_obj, uint8_t inp)
 {
-  UNIMPLEMENTED;
+  UNTESTED;
   
   if ((inp & INP_JUMP) == 0)
     return;
@@ -2492,7 +2492,7 @@ void handle_jump (POBJ32 p_obj, uint8_t inp)
 // $C969
 void handle_forward (POBJ32 p_obj, uint8_t inp)
 {
-  UNIMPLEMENTED;
+  UNTESTED;
   
   if ((p_obj->flags12 & 0xF0) == 0 &&
       (p_obj->flags12 & (1<<3)) == 0 &&
@@ -2519,7 +2519,7 @@ void animate_guard_wizard_legs (POBJ32 p_obj)
 }
 
 // $C9A1
-void sub_C9A1 (POBJ32 p_obj, uint8_t c)
+void sub_C9A1 (POBJ32 p_obj, uint8_t inp)
 {
   UNIMPLEMENTED;
   
@@ -2527,9 +2527,9 @@ void sub_C9A1 (POBJ32 p_obj, uint8_t c)
     p_obj->d_z = 2;
   if ((p_obj->flags12 & (1<<3)) != 0 ||
       (p_obj->flags12 & 0xF0) != 0 ||
-      (c & (1<<2)) != 0)
+      (inp & INP_FORWARD) != 0)
     move_player (p_obj);
-  if (p_obj->d_z < 0 || (c & (1<<3)) == 0)
+  if (p_obj->d_z < 0 || (inp & INP_JUMP) == 0)
     p_obj->d_z--;
   p_obj->d_z--;
   byte_5BC1 = p_obj->d_z;
@@ -2549,6 +2549,10 @@ void clear_dX_dY (POBJ32 p_obj)
 // $C9FB
 void move_player (POBJ32 p_obj)
 {
+  DBGPRINTF_FN;
+  
+  UNTESTED;
+  
   p_obj->d_x += p_obj->d_x_adj;
   p_obj->d_y += p_obj->d_y_adj;
   p_obj->d_x_adj = 0;
