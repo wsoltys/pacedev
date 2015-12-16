@@ -221,8 +221,14 @@ static void upd_16_to_21_24_to_29 (POBJ32 p_obj);
 static void upd_48_to_53_56_to_61 (POBJ32 p_obj);
 static void upd_player_legs (POBJ32 p_obj);
 static uint8_t chk_plyr_OOB (POBJ32 p_obj);
+static void sub_C89F (POBJ32 p_obj);
+static void sub_C948 (POBJ32 p_obj);
+static void sub_C969 (POBJ32 p_obj);
 static void animate_guard_wizard_legs (POBJ32 p_obj);
+static void sub_C9A1 (POBJ32 p_obj, uint8_t c);
 static void clear_dX_dY (POBJ32 p_obj);
+static void move_player (POBJ32 p_obj);
+static void get_player_dir (POBJ32 p_obj);
 static int8_t adj_dZ_for_out_of_bounds (POBJ32 p_obj, int8_t d_z);
 static int8_t adj_d_for_out_of_bounds (int8_t d);
 static void adj_for_out_of_bounds (POBJ32 p_obj);
@@ -2376,13 +2382,23 @@ void upd_player_legs (POBJ32 p_obj)
   }
   else
   {
+    // the original Z80 code popped the return address
     if (!sub_C306 (p_obj))
       return;
     check_user_input ();
     sub_C00E (p_obj);
-      
-      
-    // heaps of shit
+    sub_C89F (p_obj);
+    sub_C948 (p_obj);
+    sub_C969 (p_obj);
+    if (chk_plyr_OOB (p_obj) == 0)
+      if (p_obj->d_z >= 0)
+        p_obj->d_z = 0;
+    p_next_obj->flags |= FLAG_Y_OOB;
+    sub_C9A1 (p_obj, 0);
+    p_next_obj->flags &= ~FLAG_Y_OOB;
+    if (p_obj->flags12 >= 16)
+      p_obj->flags12 -= 16;
+    set_wipe_and_draw_flags (p_obj);
   }
 }
 
@@ -2400,6 +2416,48 @@ uint8_t chk_plyr_OOB (POBJ32 p_obj)
   return (1);
 }
 
+// $C89F
+void sub_C89F (POBJ32 p_obj)
+{
+  UNIMPLEMENTED;
+  
+  // checks user input method
+  
+  if ((p_obj->flags13 & 7) != 0)
+  {
+    p_obj->flags13--;
+    return;
+  }
+
+  // WTF??  
+}
+
+// $C948
+void sub_C948 (POBJ32 p_obj)
+{
+  UNIMPLEMENTED;
+}
+
+// $C969
+void sub_C969 (POBJ32 p_obj)
+{
+  UNIMPLEMENTED;
+  
+  if ((p_obj->flags12 & 0xF0) == 0 &&
+      (p_obj->flags12 & (1<<3)) == 0 &&
+      // if bit 2,c==Z
+      0)
+  {
+    uint8_t n = p_obj->graphic_no & 7;
+    if (n == 2 || n == 4)
+      return;
+  }
+  else
+    /*loc_B4BB ()*/;  // audio
+
+  animate_guard_wizard_legs (p_obj);
+}
+
 // $C97F
 void animate_guard_wizard_legs (POBJ32 p_obj)
 {
@@ -2410,11 +2468,65 @@ void animate_guard_wizard_legs (POBJ32 p_obj)
   p_obj->graphic_no = (p_obj->graphic_no & 0xF8) | cel;
 }
 
+// $C9A1
+void sub_C9A1 (POBJ32 p_obj, uint8_t c)
+{
+  UNIMPLEMENTED;
+  
+  if (byte_5BC4 != 0)
+    p_obj->d_z = 2;
+  if ((p_obj->flags12 & (1<<3)) != 0 ||
+      (p_obj->flags12 & 0xF0) != 0 ||
+      (c & (1<<2)) != 0)
+    move_player (p_obj);
+  if (p_obj->d_z < 0 || (c & (1<<3)) == 0)
+    p_obj->d_z--;
+  p_obj->d_z--;
+  byte_5BC1 = p_obj->d_z;
+  
+  // more stuff I couldn't be bothered with atm
+}
+
 // $C9F3
 void clear_dX_dY (POBJ32 p_obj)
 {
   p_obj->d_x = 0;
   p_obj->d_y = 0;
+}
+
+// $C9FB
+void move_player (POBJ32 p_obj)
+{
+  p_obj->d_x += p_obj->d_x_adj;
+  p_obj->d_y += p_obj->d_y_adj;
+  p_obj->d_x_adj = 0;
+  p_obj->d_y_adj = 0;
+  
+  switch (get_player_dir (p_obj))
+  {
+    case 0 :
+      p_obj->d_x -= 3;
+      break;
+    case 1 :
+      p_obj->d_x += 3;
+      break;
+    case 2 :
+      p_obj->d_y += 3;
+      break;
+    case 3:
+      p_obj->d_y -= 3;
+    default :
+      break;
+  }
+}
+
+// $CA1E
+void get_player_dir (POBJ32 p_obj)
+{
+  uint8_t l = (p_obj->flags>>2) & 0x10;
+  uint8_t a = (p_obj->graphic_no & 8) | l;
+  
+  return ((a>>3) & 3);
 }
 
 // $CA5A
