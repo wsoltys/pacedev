@@ -15,26 +15,34 @@
 
 #pragma pack(1)
 
-// byte offset 7 flags
-#define FLAG_VFLIP      (1<<7)
-#define FLAG_HFLIP      (1<<6)
-#define FLAG_WIPE       (1<<5)
-#define FLAG_DRAW       (1<<4)
-
-// byte offset 12 flags
-#define FLAG_Z_OOB      (1<<2)
-#define FLAG_Y_OOB      (1<<1)
-#define FLAG_X_OOB      (1<<0)
-
-// byte offset 13 flags
-#define FLAG_TRIGGERED  (1<<3)    // dropping block
-#define FLAG_UP         (1<<2)    // bouncing ball
-#define FLAG_DROPPING   (1<<2)    // spiked ball
-#define FLAG_EAST       (1<<0)    // EW fire, EW guard
-#define FLAG_NORTH      (1<<1)    // NS fire
-#define MASK_DIR        0x03      // NSEW guard & wizard
-
-#define CAULDRON_SCREEN 136
+// user input
+#define INP_LEFT          (1<<0)
+#define INP_RIGHT         (1<<1)
+#define INP_FORWARD       (1<<2)
+#define INP_JUMP          (1<<3)
+#define INP_PICKUP_DROP   (1<<4)
+                          
+// byte offset 7 flags    
+#define FLAG_VFLIP        (1<<7)
+#define FLAG_HFLIP        (1<<6)
+#define FLAG_WIPE         (1<<5)
+#define FLAG_DRAW         (1<<4)
+                          
+// byte offset 12 flags   
+#define FLAG_JUMPING      (1<<3)
+#define FLAG_Z_OOB        (1<<2)
+#define FLAG_Y_OOB        (1<<1)
+#define FLAG_X_OOB        (1<<0)
+                          
+// byte offset 13 flags   
+#define FLAG_TRIGGERED    (1<<3)    // dropping block
+#define FLAG_UP           (1<<2)    // bouncing ball
+#define FLAG_DROPPING     (1<<2)    // spiked ball
+#define FLAG_EAST         (1<<0)    // EW fire, EW guard
+#define FLAG_NORTH        (1<<1)    // NS fire
+#define MASK_DIR          0x03      // NSEW guard & wizard
+                          
+#define CAULDRON_SCREEN   136
 
 #include "osd_types.h"
 #include "kl_osd.h"
@@ -61,7 +69,7 @@ static uint8_t portcullis_moving;                     // $5BAF
 static uint8_t portcullis_move_cnt;                   // $5BB0
 static uint8_t byte_5BB1;                             // $5BB1
 static uint8_t unk_5BB2;                              // $5BB2
-static uint8_t byte_5BB3;                             // $5BB3
+static uint8_t pickup_drop_pressed;                   // $5BB3
 static uint8_t byte_5BB4;                             // $5BB4
 static uint8_t user_input;                            // $5BB5
 static uint8_t tmp_attrib;                            // $5BB6
@@ -176,7 +184,7 @@ static void upd_120_to_126 (POBJ32 p_obj);
 static void adj_m8_m12 (POBJ32 p_obj);
 static void upd_127 (POBJ32 p_obj);
 static uint8_t chk_pickup_drop (void);
-static void sub_C00E (POBJ32 p_obj);
+static void handle_pickup_drop (POBJ32 p_obj);
 static uint8_t is_obj_moving (POBJ32 p_obj);
 static void upd_103 (POBJ32 p_obj);
 static void upd_104_to_110 (POBJ32 p_obj);
@@ -219,16 +227,16 @@ static void set_pixel_adj (POBJ32 p_obj, int8_t h, int8_t l);
 static void upd_2_4 (POBJ32 p_obj);
 static void upd_16_to_21_24_to_29 (POBJ32 p_obj);
 static void upd_48_to_53_56_to_61 (POBJ32 p_obj);
-static void upd_player_legs (POBJ32 p_obj);
+static void upd_player_bottom (POBJ32 p_obj);
 static uint8_t chk_plyr_OOB (POBJ32 p_obj);
-static void sub_C89F (POBJ32 p_obj);
-static void sub_C948 (POBJ32 p_obj);
-static void sub_C969 (POBJ32 p_obj);
+static void handle_left_right (POBJ32 p_obj, uint8_t inp);
+static void handle_jump (POBJ32 p_obj, uint8_t inp);
+static void handle_forward (POBJ32 p_obj, uint8_t inp);
 static void animate_guard_wizard_legs (POBJ32 p_obj);
 static void sub_C9A1 (POBJ32 p_obj, uint8_t c);
 static void clear_dX_dY (POBJ32 p_obj);
 static void move_player (POBJ32 p_obj);
-static void get_player_dir (POBJ32 p_obj);
+static uint8_t get_player_dir (POBJ32 p_obj);
 static int8_t adj_dZ_for_out_of_bounds (POBJ32 p_obj, int8_t d_z);
 static int8_t adj_d_for_out_of_bounds (int8_t d);
 static void adj_for_out_of_bounds (POBJ32 p_obj);
@@ -240,7 +248,7 @@ static void upd_player_top (POBJ32 p_obj);
 static void save_2d_info (POBJ32 p_obj);
 static void list_objects_to_draw (void);
 static void calc_display_order_and_render (void);
-static void check_user_input (void);
+static uint8_t check_user_input (void);
 static int lose_life (void);
 static void init_start_location (void);
 static void build_screen_objects (void);
@@ -1679,24 +1687,29 @@ uint8_t chk_pickup_drop (void)
 }
 
 // $C00E
-void sub_C00E (POBJ32 p_obj)
+void handle_pickup_drop (POBJ32 p_obj)
 {
   uint8_t   z;
   uint8_t   carry;
   
   UNIMPLEMENTED;
   UNTESTED;
-  
-  if (byte_5BB3 != 0)
+
+  // registered as pressed?  
+  if (pickup_drop_pressed != 0)
   {
+    // yes, still pressed?
     if (chk_pickup_drop() != 0)
       return;
-    byte_5BB3 == 0;
+    // flag as no longer pressed
+    pickup_drop_pressed = 0;
     return;
   }
 
+  // actually pressed?
   if (chk_pickup_drop () == 0)
     return;
+  // out-of-bounds?
   if (chk_plyr_OOB (p_obj) == 0)
     return;
   if ((p_obj->flags12 & (1<<3)) != 0)
@@ -1711,7 +1724,7 @@ void sub_C00E (POBJ32 p_obj)
   if (carry != 0)
     byte_5BD3 = 1;
   // audio
-  byte_5BB3 = 1;
+  pickup_drop_pressed = 1;
   byte_5BB4 = 1;
   p_obj->width += 4;
   p_obj->depth += 4;
@@ -2355,7 +2368,7 @@ void upd_2_4 (POBJ32 p_obj)
 void upd_16_to_21_24_to_29 (POBJ32 p_obj)
 {
   adj_m6_m12 (p_obj);
-  upd_player_legs (p_obj);  
+  upd_player_bottom (p_obj);  
 }
 
 // $C828
@@ -2363,15 +2376,16 @@ void upd_16_to_21_24_to_29 (POBJ32 p_obj)
 void upd_48_to_53_56_to_61 (POBJ32 p_obj)
 {
   adj_m7_m12 (p_obj);
-  upd_player_legs (p_obj);
+  upd_player_bottom (p_obj);
 }
 
 // $C82B
 // handles human and wulf legs
-void upd_player_legs (POBJ32 p_obj)
+void upd_player_bottom (POBJ32 p_obj)
 {
-  POBJ32 p_next_obj = p_obj+1;
-  
+  POBJ32    p_next_obj = p_obj+1;
+  uint8_t   inp;
+    
   UNIMPLEMENTED;
 
   if ((p_obj->flags13 & (1<<6)) != 0 &&
@@ -2385,16 +2399,16 @@ void upd_player_legs (POBJ32 p_obj)
     // the original Z80 code popped the return address
     if (!sub_C306 (p_obj))
       return;
-    check_user_input ();
-    sub_C00E (p_obj);
-    sub_C89F (p_obj);
-    sub_C948 (p_obj);
-    sub_C969 (p_obj);
+    inp = check_user_input ();
+    handle_pickup_drop (p_obj);
+    handle_left_right (p_obj, inp);
+    handle_jump (p_obj, inp);
+    handle_forward (p_obj, inp);
     if (chk_plyr_OOB (p_obj) == 0)
       if (p_obj->d_z >= 0)
         p_obj->d_z = 0;
     p_next_obj->flags |= FLAG_Y_OOB;
-    sub_C9A1 (p_obj, 0);
+    sub_C9A1 (p_obj, 0);                // does the moving
     p_next_obj->flags &= ~FLAG_Y_OOB;
     if (p_obj->flags12 >= 16)
       p_obj->flags12 -= 16;
@@ -2403,6 +2417,7 @@ void upd_player_legs (POBJ32 p_obj)
 }
 
 // $C87A
+// returns 0 (NC) if OOB
 uint8_t chk_plyr_OOB (POBJ32 p_obj)
 {
   UNTESTED;
@@ -2412,14 +2427,17 @@ uint8_t chk_plyr_OOB (POBJ32 p_obj)
     return (0);
   if (abs(p_obj->y - 128) > (room_size_Y - p_obj->depth))
     return (0);
-    
+
+  // OK
   return (1);
 }
 
 // $C89F
-void sub_C89F (POBJ32 p_obj)
+void handle_left_right (POBJ32 p_obj, uint8_t inp)
 {
-  UNIMPLEMENTED;
+  POBJ32  p_next_obj = p_obj+1;
+  
+  UNTESTED;
   
   // checks user input method
   
@@ -2428,25 +2446,57 @@ void sub_C89F (POBJ32 p_obj)
     p_obj->flags13--;
     return;
   }
-
-  // WTF??  
+  // left or right?
+  if ((inp & (INP_LEFT|INP_RIGHT)) == 0)
+    return;
+  if ((p_obj->flags12 & 0xF0) != 0)
+    return;
+  if ((p_obj->flags12 & (1<<3)) != 0)
+    return;
+  if ((inp & INP_FORWARD) == 0)
+  {
+    //loc_B4C1 ();
+  }
+  p_obj->flags13 |= 2;
+  if ((inp & INP_RIGHT) != 0 &&
+      (p_obj->flags & FLAG_HFLIP) != 0 ||
+      (inp & INP_RIGHT) == 0 &&
+      (p_obj->flags & FLAG_HFLIP) == 0)
+    p_obj->graphic_no ^= 8;
+  p_obj->flags ^= FLAG_HFLIP;
+  // set sprite for top half
+  p_next_obj->graphic_no = p_obj->graphic_no + 16;
+  // where does HFLIP get set for top half?
+  // *** FUDGE - remove me!!!!
+  //p_next_obj->flags ^= FLAG_HFLIP;
 }
 
 // $C948
-void sub_C948 (POBJ32 p_obj)
+void handle_jump (POBJ32 p_obj, uint8_t inp)
 {
   UNIMPLEMENTED;
+  
+  if ((inp & INP_JUMP) == 0)
+    return;
+  if ((p_obj->flags12 & 0xF0) != 0)
+    return;
+  if ((p_obj->flags12 & (1<<3)) != 0)
+    return;
+  if (p_obj->d_z < -1)
+    return;
+  p_obj->flags12 |= (1<<3);
+  p_obj->d_z = 8;
+  //sub_B441 (); audio
 }
 
 // $C969
-void sub_C969 (POBJ32 p_obj)
+void handle_forward (POBJ32 p_obj, uint8_t inp)
 {
   UNIMPLEMENTED;
   
   if ((p_obj->flags12 & 0xF0) == 0 &&
       (p_obj->flags12 & (1<<3)) == 0 &&
-      // if bit 2,c==Z
-      0)
+      (inp & INP_FORWARD) == 0)
   {
     uint8_t n = p_obj->graphic_no & 7;
     if (n == 2 || n == 4)
@@ -2485,6 +2535,8 @@ void sub_C9A1 (POBJ32 p_obj, uint8_t c)
   byte_5BC1 = p_obj->d_z;
   
   // more stuff I couldn't be bothered with atm
+  
+  clear_dX_dY (p_obj);
 }
 
 // $C9F3
@@ -2504,16 +2556,16 @@ void move_player (POBJ32 p_obj)
   
   switch (get_player_dir (p_obj))
   {
-    case 0 :
+    case 0 :  // W
       p_obj->d_x -= 3;
       break;
-    case 1 :
+    case 1 :  // E
       p_obj->d_x += 3;
       break;
-    case 2 :
+    case 2 :  // N
       p_obj->d_y += 3;
       break;
-    case 3:
+    case 3:   // S
       p_obj->d_y -= 3;
     default :
       break;
@@ -2521,7 +2573,8 @@ void move_player (POBJ32 p_obj)
 }
 
 // $CA1E
-void get_player_dir (POBJ32 p_obj)
+// returns 0-3 (WENS)
+uint8_t get_player_dir (POBJ32 p_obj)
 {
   uint8_t l = (p_obj->flags>>2) & 0x10;
   uint8_t a = (p_obj->graphic_no & 8) | l;
@@ -2718,7 +2771,7 @@ void calc_display_order_and_render (void)
 }
 
 // $D022
-void check_user_input (void)
+uint8_t check_user_input (void)
 {
   if (byte_5BC3 != 0 || byte_5BC4 != 0)
     goto finished_input;
@@ -2729,25 +2782,27 @@ void check_user_input (void)
 keyboard:
   user_input = 0;
   if (osd_key(OSD_KEY_Z) || osd_key(OSD_KEY_C) || osd_key(OSD_KEY_B) || osd_key(OSD_KEY_M))
-    user_input |= (1<<0);
+    user_input |= INP_LEFT;
   if (osd_key(OSD_KEY_X) || osd_key(OSD_KEY_V) || osd_key(OSD_KEY_N))
-    user_input |= (1<<1);
+    user_input |= INP_RIGHT;
   if (osd_key(OSD_KEY_A) || osd_key(OSD_KEY_S) || osd_key(OSD_KEY_D) || osd_key(OSD_KEY_F) ||
       osd_key(OSD_KEY_G) || osd_key(OSD_KEY_H) || osd_key(OSD_KEY_J) || osd_key(OSD_KEY_K) ||
       osd_key(OSD_KEY_L))
-    user_input |= (1<<2);
+    user_input |= INP_FORWARD;
   if (osd_key(OSD_KEY_Q) || osd_key(OSD_KEY_W) || osd_key(OSD_KEY_E) || osd_key(OSD_KEY_R) ||
       osd_key(OSD_KEY_T) || osd_key(OSD_KEY_Y) || osd_key(OSD_KEY_U) || osd_key(OSD_KEY_I) ||
       osd_key(OSD_KEY_O) || osd_key(OSD_KEY_P))
-    user_input |= (1<<3);
+    user_input |= INP_JUMP;
   if (osd_key(OSD_KEY_1) || osd_key(OSD_KEY_2) || osd_key(OSD_KEY_3) || osd_key(OSD_KEY_4) ||
       osd_key(OSD_KEY_5) || osd_key(OSD_KEY_6) || osd_key(OSD_KEY_7) || osd_key(OSD_KEY_8) ||
       osd_key(OSD_KEY_9) || osd_key(OSD_KEY_0))
-    user_input |= (1<<4);
+    user_input |= INP_PICKUP_DROP;
 
 finished_input:
   // something sets bit 5 here?!?
   ;
+  
+  return (user_input);
 }
 
 // $D12A

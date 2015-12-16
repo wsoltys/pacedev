@@ -41,8 +41,8 @@ typedef struct
   int8_t    d_z;
   uint8_t   flags12;
   uint8_t   flags13;
-  uint8_t   off14;
-  uint8_t   off15;
+  uint8_t   d_x_adj;
+  uint8_t   d_y_adj;
   // originally a pointer, now an index
   union
   {
