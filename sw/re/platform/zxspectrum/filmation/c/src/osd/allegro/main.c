@@ -143,20 +143,25 @@ uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code)
   return (x+8);
 }
 
-void osd_fill_window (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines)
+void osd_fill_window (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines, uint8_t c)
 {
-  DBGPRINTF ("%s(%d,%d-%dx%d):\n", __FUNCTION__,
-              x, y, width_bytes<<3, height_lines);
+  DBGPRINTF ("%s(%d,%d-%dx%d,%d):\n", __FUNCTION__,
+              x, y, width_bytes<<3, height_lines, c);
   
   rectfill (scrn_buf, x, 191-y, 
             x + (width_bytes<<3) - 1, 
             191 - (y + height_lines - 1), 
-            0);
+            c);
 }
 
 void osd_update_screen (void)
 {
   blit (scrn_buf, screen, 0, 0, 0, 0, 256, 192);
+}
+
+void osd_blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines)
+{
+  blit (scrn_buf, screen, x, y, x, y, width_bytes<<3, height_lines);
 }
 
 void osd_print_sprite (POBJ32 p_obj)

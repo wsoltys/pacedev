@@ -78,8 +78,9 @@ int osd_keypressed (void);
 void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t *str);
 void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, char *str);
 uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code);
-void osd_fill_window (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines);
+void osd_fill_window (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines, uint8_t c);
 void osd_update_screen (void);
+void osd_blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines);
 void osd_print_sprite (POBJ32 p_obj);
 
 #ifdef __cplusplus
