@@ -7536,7 +7536,7 @@ RAM:CD33
 RAM:CD33	     ; =============== S U B R O U T I N E =======================================
 RAM:CD33
 RAM:CD33
-RAM:CD33	     calc_display_pos_size:					     ; CODE XREF: set_draw_objs_overlapped+4p
+RAM:CD33	     calc_2d_info:						     ; CODE XREF: set_draw_objs_overlapped+4p
 RAM:CD33 CD C9 D6		     call    calc_pixel_XY
 RAM:CD36 CD EF D6		     call    flip_sprite
 RAM:CD39 DD 7E 1A		     ld	     a,	(ix+26)				     ; pixel X
@@ -7546,13 +7546,13 @@ RAM:CD3F 13			     inc     de					     ; ptr height
 RAM:CD40 28 01			     jr	     z,	loc_CD43
 RAM:CD42 3C			     inc     a
 RAM:CD43
-RAM:CD43	     loc_CD43:							     ; CODE XREF: calc_display_pos_size+Dj
+RAM:CD43	     loc_CD43:							     ; CODE XREF: calc_2d_info+Dj
 RAM:CD43 E6 0F			     and     0Fh
 RAM:CD45 DD 77 18		     ld	     (ix+24), a				     ; sprite data width (bytes)
 RAM:CD48 1A			     ld	     a,	(de)
 RAM:CD49 DD 77 19		     ld	     (ix+25), a				     ; sprite data height
 RAM:CD4C C9			     ret
-RAM:CD4C	     ; End of function calc_display_pos_size
+RAM:CD4C	     ; End of function calc_2d_info
 RAM:CD4C
 RAM:CD4D
 RAM:CD4D	     ; =============== S U B R O U T I N E =======================================
@@ -7561,7 +7561,7 @@ RAM:CD4D
 RAM:CD4D	     set_draw_objs_overlapped:					     ; CODE XREF: set_wipe_and_draw_flags+8j
 RAM:CD4D									     ; RAM:CE2Fp
 RAM:CD4D FD 21 08 5C		     ld	     iy, graphic_objs_tbl
-RAM:CD51 CD 33 CD		     call    calc_display_pos_size
+RAM:CD51 CD 33 CD		     call    calc_2d_info
 RAM:CD54 06 28			     ld	     b,	40				     ; max objects
 RAM:CD56 DD 7E 1A		     ld	     a,	(ix+26)				     ; pixelX
 RAM:CD59 0F			     rrca
@@ -9381,7 +9381,7 @@ RAM:D6C9	     ; =============== S U B R O U T I N E ============================
 RAM:D6C9
 RAM:D6C9
 RAM:D6C9	     calc_pixel_XY:						     ; CODE XREF: handle_pickup_drop+F3p
-RAM:D6C9									     ; calc_display_pos_sizep ...
+RAM:D6C9									     ; calc_2d_infop ...
 RAM:D6C9 DD 7E 01		     ld	     a,	(ix+1)				     ; X
 RAM:D6CC DD 86 02		     add     a,	(ix+2)				     ; add Y
 RAM:D6CF D6 80			     sub     128
@@ -9404,7 +9404,7 @@ RAM:D6EF
 RAM:D6EF	     ; =============== S U B R O U T I N E =======================================
 RAM:D6EF
 RAM:D6EF
-RAM:D6EF	     flip_sprite:						     ; CODE XREF: calc_display_pos_size+3p
+RAM:D6EF	     flip_sprite:						     ; CODE XREF: calc_2d_info+3p
 RAM:D6EF									     ; RAM:print_spritep
 RAM:D6EF
 RAM:D6EF	     ; FUNCTION	CHUNK AT RAM:D865 SIZE 00000079	BYTES

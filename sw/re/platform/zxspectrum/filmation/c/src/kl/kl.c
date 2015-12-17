@@ -120,6 +120,17 @@ static uint8_t objects_to_draw[48];                   // $CE8B
 static OBJ32 plyr_spr_1_scratchpad;                   // $D161
 static OBJ32 plyr_spr_2_scratchpad;                   // $D181
 
+typedef struct
+{
+  uint8_t   x;              // pixel
+  uint8_t   y;              // pixel
+  uint8_t   width_bytes;
+  uint8_t   height_lines;
+
+} OBJ_WIPED, *POBJ_WIPED;
+
+OBJ_WIPED objs_wiped_stack[MAX_OBJS];
+
 // end of variables
 
 // start of prototypes
@@ -181,6 +192,7 @@ static void init_sparkles (POBJ32 p_obj);
 static void upd_112_to_118_184 (POBJ32 p_obj);
 static void upd_185_187 (POBJ32 p_obj);
 static void upd_119 (POBJ32 p_obj);
+static void display_objects_carried (void);
 static void display_objects (void);
 static void upd_120_to_126 (POBJ32 p_obj);
 static void adj_m8_m12 (POBJ32 p_obj);
@@ -198,6 +210,7 @@ static void prepare_final_animation (void);
 static int sub_C306 (POBJ32 p_obj);
 static void upd_92_to_95 (POBJ32 p_obj);
 static void rand_legs_sprite (POBJ32 p_obj);
+static void print_sun_moon (void);
 static void display_sun_moon_frame (POBJ32 p_obj);
 static void init_sun (void);
 static void init_special_objects (void);
@@ -244,7 +257,7 @@ static int8_t adj_d_for_out_of_bounds (int8_t d);
 static void adj_for_out_of_bounds (POBJ32 p_obj);
 static int8_t adj_dX_for_out_of_bounds (POBJ32 p_obj, int8_t d_x);
 static int8_t adj_dY_for_out_of_bounds (POBJ32 p_obj, int8_t d_y);
-static void calc_display_pos_size (POBJ32 p_obj);
+static void calc_2d_info (POBJ32 p_obj);
 static void set_draw_objs_overlapped (POBJ32 p_obj);
 static void upd_32_to_47 (POBJ32 p_obj);
 static void upd_64_to_79 (POBJ32 p_obj);
@@ -462,7 +475,7 @@ onscreen_loop:
   // using rendered_objs_cnt
 
   // *** REMOVE ME
-  update_screen ();
+  //update_screen ();
         
 game_delay:
   // last to-do  
@@ -1638,6 +1651,15 @@ void upd_119 (POBJ32 p_obj)
   upd_111 (p_obj);
 }
 
+// $BF45
+void display_objects_carried (void)
+{
+  if (byte_5BB4 == 0)
+    return;
+  byte_5BB4 = 0;
+  display_objects ();
+}
+
 // $BF4E
 void display_objects (void)
 {
@@ -1911,6 +1933,17 @@ void rand_legs_sprite (POBJ32 p_obj)
   p_obj->graphic_no = r;
   p_obj->flags ^= FLAG_HFLIP;
   set_wipe_and_draw_flags (p_obj);
+}
+
+// $C397
+void print_sun_moon (void)
+{
+  POBJ32 p_obj = &sun_moon_scratchpad;
+  
+  if ((seed_2 & 7) != 0)
+    return;
+  p_obj->pixel_x++;
+  display_sun_moon_frame (p_obj);
 }
 
 // $C3A4
@@ -2555,7 +2588,7 @@ void clear_dX_dY (POBJ32 p_obj)
 // $C9FB
 void move_player (POBJ32 p_obj)
 {
-  DBGPRINTF_FN;
+  //DBGPRINTF_FN;
   
   UNTESTED;
   
@@ -2701,8 +2734,8 @@ int8_t adj_dY_for_out_of_bounds (POBJ32 p_obj, int8_t d_y)
   return (d_y);
 }
 
-// $CDD3
-void calc_display_pos_size (POBJ32 p_obj)
+// $CD33
+void calc_2d_info (POBJ32 p_obj)
 {
   uint8_t *psprite;
   
@@ -2721,7 +2754,7 @@ void set_draw_objs_overlapped (POBJ32 p_obj)
   unsigned  i;
   uint8_t   a,d,e,h,l;
   
-  calc_display_pos_size (p_obj);
+  calc_2d_info (p_obj);
   
   l = p_obj->pixel_x >> 3;
   h = p_obj->old_pixel_x >> 3;
@@ -3280,9 +3313,11 @@ void render_dynamic_objects (void)
       if (a >= 0)                     // half off screen
         l -= a;                       // adjust number of lines to wipe
 
-      //BC_to_attr_addr_in_DE ();
-      //calc_screen_buffer_addr (BC);
-      
+      // this was done on the Z80 CPU stack
+      objs_wiped_stack[objs_wiped_cnt].x = c;
+      objs_wiped_stack[objs_wiped_cnt].y = b;
+      objs_wiped_stack[objs_wiped_cnt].width_bytes = h;
+      objs_wiped_stack[objs_wiped_cnt].height_lines = l;
       objs_wiped_cnt++;
       
       #ifndef BUILD_OPT_DISABLE_WIPE
@@ -3293,8 +3328,18 @@ void render_dynamic_objects (void)
 
 loc_D653:
   calc_display_order_and_render ();
-  // other stuff
+  print_sun_moon ();
+  display_objects_carried ();
+  rendered_objs_cnt += objs_wiped_cnt;
   
+  while (objs_wiped_cnt)
+  {
+    objs_wiped_cnt--;
+    blit_to_screen (objs_wiped_stack[objs_wiped_cnt].x,
+                    objs_wiped_stack[objs_wiped_cnt].y,
+                    objs_wiped_stack[objs_wiped_cnt].width_bytes,
+                    objs_wiped_stack[objs_wiped_cnt].height_lines);
+  }
 }
 
 // $D67C
