@@ -5640,8 +5640,8 @@ RAM:C30A C8			     ret     z
 RAM:C30B DD 7E 0C		     ld	     a,	(ix+12)
 RAM:C30E E6 F0			     and     0F0h ; 'ð'
 RAM:C310 C0			     ret     nz
-RAM:C311 DD CB 0C 5E		     bit     3,	(ix+12)
-RAM:C315 C0			     ret     nz
+RAM:C311 DD CB 0C 5E		     bit     3,	(ix+12)				     ; already jumping?
+RAM:C315 C0			     ret     nz					     ; yes, exit
 RAM:C316 33			     inc     sp
 RAM:C317 33			     inc     sp
 RAM:C318 DD 7E 00		     ld	     a,	(ix+0)				     ; graphic_no
@@ -6322,7 +6322,7 @@ RAM:C692									     ; RAM:loc_B69Fj ...
 RAM:C692 DD 7E 07		     ld	     a,	(ix+7)				     ; flags
 RAM:C695 F6 30			     or	     30h ; '0'                               ; set WIPE & DRAW
 RAM:C697 DD 77 07		     ld	     (ix+7), a
-RAM:C69A C3 4D CD		     jp	     sub_CD4D
+RAM:C69A C3 4D CD		     jp	     set_draw_objs_overlapped
 RAM:C69A	     ; End of function set_wipe_and_draw_flags
 RAM:C69A
 RAM:C69D
@@ -6695,8 +6695,8 @@ RAM:C8A9 28 47			     jr	     z,	loc_C8F2
 RAM:C8AB DD 7E 0C		     ld	     a,	(ix+12)
 RAM:C8AE E6 F0			     and     0F0h ; 'ð'
 RAM:C8B0 C0			     ret     nz
-RAM:C8B1 DD CB 0C 56		     bit     2,	(ix+12)
-RAM:C8B5 C8			     ret     z
+RAM:C8B1 DD CB 0C 56		     bit     2,	(ix+12)				     ; Z OOB?
+RAM:C8B5 C8			     ret     z					     ; no, exit
 RAM:C8B6 CB 41			     bit     0,	c
 RAM:C8B8 20 04			     jr	     nz, loc_C8BE
 RAM:C8BA CB 51			     bit     2,	c
@@ -6769,8 +6769,8 @@ RAM:C900 C8			     ret     z					     ; no, return
 RAM:C901 DD 7E 0C		     ld	     a,	(ix+12)
 RAM:C904 E6 F0			     and     0F0h ; 'ð'
 RAM:C906 C0			     ret     nz
-RAM:C907 DD CB 0C 5E		     bit     3,	(ix+12)
-RAM:C90B C0			     ret     nz
+RAM:C907 DD CB 0C 5E		     bit     3,	(ix+12)				     ; already jumping?
+RAM:C90B C0			     ret     nz					     ; yes, exit
 RAM:C90C CB 51			     bit     2,	c				     ; forward?
 RAM:C90E 20 05			     jr	     nz, loc_C915			     ; yes, skip
 RAM:C910 C5			     push    bc
@@ -6820,12 +6820,12 @@ RAM:C94A C8			     ret     z					     ; no, exit
 RAM:C94B DD 7E 0C		     ld	     a,	(ix+12)
 RAM:C94E E6 F0			     and     0F0h ; 'ð'
 RAM:C950 C0			     ret     nz
-RAM:C951 DD CB 0C 5E		     bit     3,	(ix+12)
-RAM:C955 C0			     ret     nz
+RAM:C951 DD CB 0C 5E		     bit     3,	(ix+12)				     ; already jumping?
+RAM:C955 C0			     ret     nz					     ; yes, exit
 RAM:C956 DD 7E 0B		     ld	     a,	(ix+11)				     ; dZ
 RAM:C959 3C			     inc     a
 RAM:C95A F8			     ret     m					     ; return if was <-1
-RAM:C95B DD CB 0C DE		     set     3,	(ix+12)
+RAM:C95B DD CB 0C DE		     set     3,	(ix+12)				     ; flag jumping
 RAM:C95F DD 36 0B 08		     ld	     (ix+11), 8				     ; dZ=8?
 RAM:C963 C5			     push    bc
 RAM:C964 CD 41 B4		     call    gen_audio_20h
@@ -6841,8 +6841,8 @@ RAM:C969	     handle_forward:						     ; CODE XREF: RAM:C84Dp
 RAM:C969 DD 7E 0C		     ld	     a,	(ix+12)
 RAM:C96C E6 F0			     and     0F0h ; 'ð'
 RAM:C96E 20 0A			     jr	     nz, loc_C97A
-RAM:C970 DD CB 0C 5E		     bit     3,	(ix+12)
-RAM:C974 20 04			     jr	     nz, loc_C97A
+RAM:C970 DD CB 0C 5E		     bit     3,	(ix+12)				     ; already jumping?
+RAM:C974 20 04			     jr	     nz, loc_C97A			     ; yes, skip
 RAM:C976 CB 51			     bit     2,	c				     ; forward?
 RAM:C978 28 1A			     jr	     z,	loc_C994			     ; no, go
 RAM:C97A
@@ -6892,13 +6892,13 @@ RAM:C9A5 28 04			     jr	     z,	loc_C9AB
 RAM:C9A7 DD 36 0B 02		     ld	     (ix+11), 2				     ; dZ=2
 RAM:C9AB
 RAM:C9AB	     loc_C9AB:							     ; CODE XREF: sub_C9A1+4j
-RAM:C9AB DD CB 0C 5E		     bit     3,	(ix+12)
-RAM:C9AF 20 0B			     jr	     nz, loc_C9BC
+RAM:C9AB DD CB 0C 5E		     bit     3,	(ix+12)				     ; already jumping?
+RAM:C9AF 20 0B			     jr	     nz, loc_C9BC			     ; yes, skip
 RAM:C9B1 DD 7E 0C		     ld	     a,	(ix+12)
 RAM:C9B4 E6 F0			     and     0F0h ; 'ð'
 RAM:C9B6 20 04			     jr	     nz, loc_C9BC
-RAM:C9B8 CB 51			     bit     2,	c
-RAM:C9BA 28 05			     jr	     z,	loc_C9C1
+RAM:C9B8 CB 51			     bit     2,	c				     ; forward?
+RAM:C9BA 28 05			     jr	     z,	loc_C9C1			     ; no, skip
 RAM:C9BC
 RAM:C9BC	     loc_C9BC:							     ; CODE XREF: sub_C9A1+Ej
 RAM:C9BC									     ; sub_C9A1+15j
@@ -6930,7 +6930,7 @@ RAM:C9E6 28 0B			     jr	     z,	clear_dX_dY			     ; no, go
 RAM:C9E8 3A C1 5B		     ld	     a,	(byte_5BC1)
 RAM:C9EB A7			     and     a
 RAM:C9EC F2 F3 C9		     jp	     p,	clear_dX_dY
-RAM:C9EF DD CB 0C 9E		     res     3,	(ix+12)
+RAM:C9EF DD CB 0C 9E		     res     3,	(ix+12)				     ; clear jumping flag
 RAM:C9F3
 RAM:C9F3	     clear_dX_dY:						     ; CODE XREF: RAM:C29Fp
 RAM:C9F3									     ; RAM:C4ADp ...
@@ -7258,7 +7258,7 @@ RAM:CBAF
 RAM:CBAF	     loc_CBAF:							     ; CODE XREF: sub_CB9A+45j
 RAM:CBAF CD 9D CC		     call    sub_CC9D
 RAM:CBB2 30 2D			     jr	     nc, loc_CBE1
-RAM:CBB4 DD CB 0C C6		     set     0,	(ix+12)
+RAM:CBB4 DD CB 0C C6		     set     0,	(ix+12)				     ; set X OOB
 RAM:CBB8 DD 7E 0D		     ld	     a,	(ix+13)
 RAM:CBBB 0F			     rrca
 RAM:CBBC E6 40			     and     40h ; '@'                               ; was bit 7
@@ -7308,7 +7308,7 @@ RAM:CBFE
 RAM:CBFE	     loc_CBFE:							     ; CODE XREF: sub_CBE9+45j
 RAM:CBFE CD B2 CC		     call    sub_CCB2
 RAM:CC01 30 2D			     jr	     nc, loc_CC30			     ; next entry
-RAM:CC03 DD CB 0C CE		     set     1,	(ix+12)
+RAM:CC03 DD CB 0C CE		     set     1,	(ix+12)				     ; set Y OOB
 RAM:CC07 DD 7E 0D		     ld	     a,	(ix+13)
 RAM:CC0A 0F			     rrca
 RAM:CC0B E6 40			     and     40h ; '@'
@@ -7358,7 +7358,7 @@ RAM:CC4D
 RAM:CC4D	     loc_CC4D:							     ; CODE XREF: sub_CC38+5Bj
 RAM:CC4D CD C7 CC		     call    sub_CCC7
 RAM:CC50 30 43			     jr	     nc, loc_CC95			     ; next entry
-RAM:CC52 DD CB 0C D6		     set     2,	(ix+12)				     ; Z OOB?
+RAM:CC52 DD CB 0C D6		     set     2,	(ix+12)				     ; set Z OOB
 RAM:CC56 DD 7E 0D		     ld	     a,	(ix+13)
 RAM:CC59 0F			     rrca
 RAM:CC5A E6 40			     and     40h ; '@'                               ; was bit 7
@@ -7488,7 +7488,7 @@ RAM:CCF6	     loc_CCF6:							     ; CODE XREF: adj_dX_for_out_of_bounds+15j
 RAM:CCF6 DD 86 04		     add     a,	(ix+4)				     ; X+dX+width
 RAM:CCF9 B8			     cp	     b					     ; < room width?
 RAM:CCFA 38 0B			     jr	     c,	dX_ok				     ; yes, skip
-RAM:CCFC DD CB 0C C6		     set     0,	(ix+12)
+RAM:CCFC DD CB 0C C6		     set     0,	(ix+12)				     ; set X OOB
 RAM:CD00 79			     ld	     a,	c				     ; dX
 RAM:CD01 CD 89 CA		     call    adj_d_for_out_of_bounds
 RAM:CD04 4F			     ld	     c,	a				     ; new dX
@@ -7522,7 +7522,7 @@ RAM:CD21	     loc_CD21:							     ; CODE XREF: adj_dY_for_out_of_bounds+15j
 RAM:CD21 DD 86 05		     add     a,	(ix+5)				     ; Y+dY+depth
 RAM:CD24 B8			     cp	     b					     ; < room depth?
 RAM:CD25 38 0B			     jr	     c,	dY_ok				     ; yes, skip
-RAM:CD27 DD CB 0C CE		     set     1,	(ix+12)
+RAM:CD27 DD CB 0C CE		     set     1,	(ix+12)				     ; set Y OOB
 RAM:CD2B 7D			     ld	     a,	l				     ; dY
 RAM:CD2C CD 89 CA		     call    adj_d_for_out_of_bounds
 RAM:CD2F 6F			     ld	     l,	a				     ; new dY
@@ -7536,111 +7536,111 @@ RAM:CD33
 RAM:CD33	     ; =============== S U B R O U T I N E =======================================
 RAM:CD33
 RAM:CD33
-RAM:CD33	     sub_CD33:							     ; CODE XREF: sub_CD4D+4p
+RAM:CD33	     calc_display_pos_size:					     ; CODE XREF: set_draw_objs_overlapped+4p
 RAM:CD33 CD C9 D6		     call    calc_pixel_XY
 RAM:CD36 CD EF D6		     call    flip_sprite
 RAM:CD39 DD 7E 1A		     ld	     a,	(ix+26)				     ; pixel X
-RAM:CD3C E6 07			     and     7					     ; bit offset (discard result)
+RAM:CD3C E6 07			     and     7					     ; bit offset
 RAM:CD3E 1A			     ld	     a,	(de)				     ; ptr sprite data (width)
 RAM:CD3F 13			     inc     de					     ; ptr height
 RAM:CD40 28 01			     jr	     z,	loc_CD43
 RAM:CD42 3C			     inc     a
 RAM:CD43
-RAM:CD43	     loc_CD43:							     ; CODE XREF: sub_CD33+Dj
+RAM:CD43	     loc_CD43:							     ; CODE XREF: calc_display_pos_size+Dj
 RAM:CD43 E6 0F			     and     0Fh
 RAM:CD45 DD 77 18		     ld	     (ix+24), a				     ; sprite data width (bytes)
 RAM:CD48 1A			     ld	     a,	(de)
 RAM:CD49 DD 77 19		     ld	     (ix+25), a				     ; sprite data height
 RAM:CD4C C9			     ret
-RAM:CD4C	     ; End of function sub_CD33
+RAM:CD4C	     ; End of function calc_display_pos_size
 RAM:CD4C
 RAM:CD4D
 RAM:CD4D	     ; =============== S U B R O U T I N E =======================================
 RAM:CD4D
 RAM:CD4D
-RAM:CD4D	     sub_CD4D:							     ; CODE XREF: set_wipe_and_draw_flags+8j
+RAM:CD4D	     set_draw_objs_overlapped:					     ; CODE XREF: set_wipe_and_draw_flags+8j
 RAM:CD4D									     ; RAM:CE2Fp
 RAM:CD4D FD 21 08 5C		     ld	     iy, graphic_objs_tbl
-RAM:CD51 CD 33 CD		     call    sub_CD33
+RAM:CD51 CD 33 CD		     call    calc_display_pos_size
 RAM:CD54 06 28			     ld	     b,	40				     ; max objects
-RAM:CD56 DD 7E 1A		     ld	     a,	(ix+26)				     ; pixel X
+RAM:CD56 DD 7E 1A		     ld	     a,	(ix+26)				     ; pixelX
 RAM:CD59 0F			     rrca
 RAM:CD5A 0F			     rrca
 RAM:CD5B 0F			     rrca
-RAM:CD5C E6 1F			     and     1Fh
+RAM:CD5C E6 1F			     and     1Fh				     ; byte address
 RAM:CD5E 6F			     ld	     l,	a
-RAM:CD5F DD 7E 1E		     ld	     a,	(ix+30)
+RAM:CD5F DD 7E 1E		     ld	     a,	(ix+30)				     ; old pixelX
 RAM:CD62 0F			     rrca
 RAM:CD63 0F			     rrca
 RAM:CD64 0F			     rrca
-RAM:CD65 E6 1F			     and     1Fh
+RAM:CD65 E6 1F			     and     1Fh				     ; bytes address
 RAM:CD67 67			     ld	     h,	a
 RAM:CD68 BD			     cp	     l
 RAM:CD69 38 01			     jr	     c,	loc_CD6C
 RAM:CD6B 7D			     ld	     a,	l
 RAM:CD6C
-RAM:CD6C	     loc_CD6C:							     ; CODE XREF: sub_CD4D+1Cj
-RAM:CD6C 5F			     ld	     e,	a
-RAM:CD6D 7D			     ld	     a,	l
-RAM:CD6E DD 86 18		     add     a,	(ix+24)
+RAM:CD6C	     loc_CD6C:							     ; CODE XREF: set_draw_objs_overlapped+1Cj
+RAM:CD6C 5F			     ld	     e,	a				     ; left extremity (byte address)
+RAM:CD6D 7D			     ld	     a,	l				     ; byte address
+RAM:CD6E DD 86 18		     add     a,	(ix+24)				     ; + data width (bytes)
 RAM:CD71 6F			     ld	     l,	a
-RAM:CD72 7C			     ld	     a,	h
-RAM:CD73 DD 86 1C		     add     a,	(ix+28)
+RAM:CD72 7C			     ld	     a,	h				     ; old byte	address
+RAM:CD73 DD 86 1C		     add     a,	(ix+28)				     ; + old data width	bytes
 RAM:CD76 BD			     cp	     l
 RAM:CD77 30 01			     jr	     nc, loc_CD7A
 RAM:CD79 7D			     ld	     a,	l
 RAM:CD7A
-RAM:CD7A	     loc_CD7A:							     ; CODE XREF: sub_CD4D+2Aj
-RAM:CD7A 93			     sub     e
+RAM:CD7A	     loc_CD7A:							     ; CODE XREF: set_draw_objs_overlapped+2Aj
+RAM:CD7A 93			     sub     e					     ; combined	width old & new
 RAM:CD7B 57			     ld	     d,	a
 RAM:CD7C DD 7E 1B		     ld	     a,	(ix+27)				     ; pixel Y
-RAM:CD7F DD BE 1F		     cp	     (ix+31)
+RAM:CD7F DD BE 1F		     cp	     (ix+31)				     ; old pixelY
 RAM:CD82 38 03			     jr	     c,	loc_CD87
-RAM:CD84 DD 7E 1F		     ld	     a,	(ix+31)
+RAM:CD84 DD 7E 1F		     ld	     a,	(ix+31)				     ; old pixelY
 RAM:CD87
-RAM:CD87	     loc_CD87:							     ; CODE XREF: sub_CD4D+35j
-RAM:CD87 6F			     ld	     l,	a
+RAM:CD87	     loc_CD87:							     ; CODE XREF: set_draw_objs_overlapped+35j
+RAM:CD87 6F			     ld	     l,	a				     ; lowest Y
 RAM:CD88 DD 7E 1B		     ld	     a,	(ix+27)				     ; pixel Y
-RAM:CD8B DD 86 19		     add     a,	(ix+25)
+RAM:CD8B DD 86 19		     add     a,	(ix+25)				     ; + data height (lines)
 RAM:CD8E 67			     ld	     h,	a
-RAM:CD8F DD 7E 1F		     ld	     a,	(ix+31)
-RAM:CD92 DD 86 1D		     add     a,	(ix+29)
+RAM:CD8F DD 7E 1F		     ld	     a,	(ix+31)				     ; old pixelY
+RAM:CD92 DD 86 1D		     add     a,	(ix+29)				     ; + old data height (lines)
 RAM:CD95 BC			     cp	     h
 RAM:CD96 30 01			     jr	     nc, loc_CD99
 RAM:CD98 7C			     ld	     a,	h
 RAM:CD99
-RAM:CD99	     loc_CD99:							     ; CODE XREF: sub_CD4D+49j
+RAM:CD99	     loc_CD99:							     ; CODE XREF: set_draw_objs_overlapped+49j
 RAM:CD99 95			     sub     l
-RAM:CD9A 67			     ld	     h,	a
+RAM:CD9A 67			     ld	     h,	a				     ; combined	height (lines)
 RAM:CD9B
-RAM:CD9B	     loc_CD9B:							     ; CODE XREF: sub_CD4D+7Cj
-RAM:CD9B FD 7E 00		     ld	     a,	(iy+0)
-RAM:CD9E A7			     and     a
-RAM:CD9F 28 21			     jr	     z,	loc_CDC2
-RAM:CDA1 FD CB 07 66		     bit     4,	(iy+7)
-RAM:CDA5 20 1B			     jr	     nz, loc_CDC2
+RAM:CD9B	     loc_CD9B:							     ; CODE XREF: set_draw_objs_overlapped+7Cj
+RAM:CD9B FD 7E 00		     ld	     a,	(iy+0)				     ; graphic_no
+RAM:CD9E A7			     and     a					     ; null?
+RAM:CD9F 28 21			     jr	     z,	loc_CDC2			     ; yes, skip
+RAM:CDA1 FD CB 07 66		     bit     4,	(iy+7)				     ; DRAW flag already set?
+RAM:CDA5 20 1B			     jr	     nz, loc_CDC2			     ; yes, skip
 RAM:CDA7 FD 7E 1A		     ld	     a,	(iy+26)				     ; pixel X
 RAM:CDAA 0F			     rrca
 RAM:CDAB 0F			     rrca
 RAM:CDAC 0F			     rrca
-RAM:CDAD E6 1F			     and     1Fh
-RAM:CDAF 93			     sub     e
-RAM:CDB0 38 1A			     jr	     c,	loc_CDCC
-RAM:CDB2 BA			     cp	     d
+RAM:CDAD E6 1F			     and     1Fh				     ; byte address of pixel
+RAM:CDAF 93			     sub     e					     ; < left extremity	(to the	left)?
+RAM:CDB0 38 1A			     jr	     c,	loc_CDCC			     ; yes, go
+RAM:CDB2 BA			     cp	     d					     ; < right extermity (overlapping)?
 RAM:CDB3
-RAM:CDB3	     loc_CDB3:							     ; CODE XREF: sub_CD4D+84j
-RAM:CDB3 30 0D			     jr	     nc, loc_CDC2
+RAM:CDB3	     loc_CDB3:							     ; CODE XREF: set_draw_objs_overlapped+84j
+RAM:CDB3 30 0D			     jr	     nc, loc_CDC2			     ; no, skip
 RAM:CDB5 FD 7E 1B		     ld	     a,	(iy+27)				     ; pixel Y
-RAM:CDB8 95			     sub     l
-RAM:CDB9 38 18			     jr	     c,	loc_CDD3
-RAM:CDBB BC			     cp	     h
+RAM:CDB8 95			     sub     l					     ; < lowest	Y (below)?
+RAM:CDB9 38 18			     jr	     c,	loc_CDD3			     ; yes, go
+RAM:CDBB BC			     cp	     h					     ; < height	(overlapping)?
 RAM:CDBC
-RAM:CDBC	     loc_CDBC:							     ; CODE XREF: sub_CD4D+8Bj
-RAM:CDBC 30 04			     jr	     nc, loc_CDC2
-RAM:CDBE FD CB 07 E6		     set     4,	(iy+7)
+RAM:CDBC	     loc_CDBC:							     ; CODE XREF: set_draw_objs_overlapped+8Bj
+RAM:CDBC 30 04			     jr	     nc, loc_CDC2			     ; no, skip
+RAM:CDBE FD CB 07 E6		     set     4,	(iy+7)				     ; set DRAW	flag
 RAM:CDC2
-RAM:CDC2	     loc_CDC2:							     ; CODE XREF: sub_CD4D+52j
-RAM:CDC2									     ; sub_CD4D+58j ...
+RAM:CDC2	     loc_CDC2:							     ; CODE XREF: set_draw_objs_overlapped+52j
+RAM:CDC2									     ; set_draw_objs_overlapped+58j ...
 RAM:CDC2 D9			     exx
 RAM:CDC3 11 20 00		     ld	     de, 32				     ; entry size
 RAM:CDC6 FD 19			     add     iy, de				     ; next entry
@@ -7649,17 +7649,17 @@ RAM:CDC9 10 D0			     djnz    loc_CD9B
 RAM:CDCB C9			     ret
 RAM:CDCC	     ; ---------------------------------------------------------------------------
 RAM:CDCC
-RAM:CDCC	     loc_CDCC:							     ; CODE XREF: sub_CD4D+63j
+RAM:CDCC	     loc_CDCC:							     ; CODE XREF: set_draw_objs_overlapped+63j
 RAM:CDCC ED 44			     neg
-RAM:CDCE FD BE 18		     cp	     (iy+24)
+RAM:CDCE FD BE 18		     cp	     (iy+24)				     ; data width (bytes)
 RAM:CDD1 18 E0			     jr	     loc_CDB3
 RAM:CDD3	     ; ---------------------------------------------------------------------------
 RAM:CDD3
-RAM:CDD3	     loc_CDD3:							     ; CODE XREF: sub_CD4D+6Cj
+RAM:CDD3	     loc_CDD3:							     ; CODE XREF: set_draw_objs_overlapped+6Cj
 RAM:CDD3 ED 44			     neg
-RAM:CDD5 FD BE 19		     cp	     (iy+25)
+RAM:CDD5 FD BE 19		     cp	     (iy+25)				     ; data height (lines)
 RAM:CDD8 18 E2			     jr	     loc_CDBC
-RAM:CDD8	     ; End of function sub_CD4D
+RAM:CDD8	     ; End of function set_draw_objs_overlapped
 RAM:CDD8
 RAM:CDDA	     ; ---------------------------------------------------------------------------
 RAM:CDDA	     ; player (human top half)
@@ -7674,6 +7674,9 @@ RAM:CDDF
 RAM:CDDF	     upd_64_to_79:						     ; DATA XREF: RAM:B116o
 RAM:CDDF									     ; RAM:B118o ...
 RAM:CDDF CD 01 C5		     call    adj_m12_m12
+RAM:CDE2	     ;
+RAM:CDE2	     ; copies most information from bottom half	object
+RAM:CDE2	     ; handles randomly	looking	around
 RAM:CDE2
 RAM:CDE2	     upd_player_top:						     ; CODE XREF: RAM:CDDDj
 RAM:CDE2 3A C3 5B		     ld	     a,	(byte_5BC3)
@@ -7684,33 +7687,33 @@ RAM:CDEC C2 21 BF		     jp	     nz, init_sparkles
 RAM:CDEF
 RAM:CDEF	     loc_CDEF:							     ; CODE XREF: RAM:CDE6j
 RAM:CDEF DD E5			     push    ix
-RAM:CDF1 D1			     pop     de
+RAM:CDF1 D1			     pop     de					     ; DE=top
 RAM:CDF2 21 E0 FF		     ld	     hl, 0FFE0h				     ; -32
 RAM:CDF5 19			     add     hl, de
-RAM:CDF6 E5			     push    hl
+RAM:CDF6 E5			     push    hl					     ; HL=bottom
 RAM:CDF7 FD E1			     pop     iy					     ; IY=player bottom	half
-RAM:CDF9 13			     inc     de
-RAM:CDFA 23			     inc     hl
+RAM:CDF9 13			     inc     de					     ; DE=top+1
+RAM:CDFA 23			     inc     hl					     ; HL=bottom+1
 RAM:CDFB 01 07 00		     ld	     bc, 7
-RAM:CDFE ED B0			     ldir					     ; copy x,y,z,w,d,h,scrn
+RAM:CDFE ED B0			     ldir					     ; copy x,y,z,w,d,h,flags
 RAM:CE00 DD 36 06 00		     ld	     (ix+6), 0				     ; height (top)
 RAM:CE04 DD CB 07 CE		     set     1,	(ix+7)
 RAM:CE08 DD 7E 0D		     ld	     a,	(ix+13)
-RAM:CE0B E6 0F			     and     0Fh
-RAM:CE0D 28 05			     jr	     z,	loc_CE14
+RAM:CE0B E6 0F			     and     0Fh				     ; look around counter
+RAM:CE0D 28 05			     jr	     z,	loc_CE14			     ; maybe look around again?
 RAM:CE0F DD 35 0D		     dec     (ix+13)
 RAM:CE12 18 13			     jr	     loc_CE27
 RAM:CE14	     ; ---------------------------------------------------------------------------
 RAM:CE14
 RAM:CE14	     loc_CE14:							     ; CODE XREF: RAM:CE0Dj
-RAM:CE14 3A A5 5B		     ld	     a,	(seed_3)
-RAM:CE17 FE 02			     cp	     2
-RAM:CE19 38 18			     jr	     c,	loc_CE33
-RAM:CE1B FE FE			     cp	     0FEh ; 'þ'
-RAM:CE1D 30 21			     jr	     nc, loc_CE40
-RAM:CE1F FD 7E 00		     ld	     a,	(iy+0)				     ; graphic_no (top half)
+RAM:CE14 3A A5 5B		     ld	     a,	(seed_3)			     ; look in a random	direction
+RAM:CE17 FE 02			     cp	     2					     ; one way?
+RAM:CE19 38 18			     jr	     c,	loc_CE33			     ; yes, go
+RAM:CE1B FE FE			     cp	     0FEh ; 'þ'                              ; other way?
+RAM:CE1D 30 21			     jr	     nc, loc_CE40			     ; yes, go
+RAM:CE1F FD 7E 00		     ld	     a,	(iy+0)				     ; straight	ahead
 RAM:CE22
-RAM:CE22	     loc_CE22:							     ; CODE XREF: RAM:CE3Ej
+RAM:CE22	     set_top_sprite:						     ; CODE XREF: RAM:CE3Ej
 RAM:CE22 C6 10			     add     a,	16
 RAM:CE24 DD 77 00		     ld	     (ix+0), a				     ; graphic_no (top half)
 RAM:CE27
@@ -7718,24 +7721,24 @@ RAM:CE27	     loc_CE27:							     ; CODE XREF: RAM:CE12j
 RAM:CE27 FD 7E 03		     ld	     a,	(iy+3)				     ; Z (bottom half)
 RAM:CE2A C6 0C			     add     a,	12				     ; directly	above
 RAM:CE2C DD 77 03		     ld	     (ix+3), a				     ; store in	top half
-RAM:CE2F CD 4D CD		     call    sub_CD4D
+RAM:CE2F CD 4D CD		     call    set_draw_objs_overlapped
 RAM:CE32 C9			     ret
 RAM:CE33	     ; ---------------------------------------------------------------------------
 RAM:CE33
 RAM:CE33	     loc_CE33:							     ; CODE XREF: RAM:CE19j
 RAM:CE33 FD 7E 00		     ld	     a,	(iy+0)				     ; graphic_no (bottom half)
 RAM:CE36 E6 F8			     and     0F8h ; 'ø'
-RAM:CE38 F6 06			     or	     6					     ; wrap
+RAM:CE38 F6 06			     or	     6					     ; look one	way
 RAM:CE3A
 RAM:CE3A	     loc_CE3A:							     ; CODE XREF: RAM:CE47j
-RAM:CE3A DD 36 0D 08		     ld	     (ix+13), 8				     ; set bit 3
-RAM:CE3E 18 E2			     jr	     loc_CE22
+RAM:CE3A DD 36 0D 08		     ld	     (ix+13), 8				     ; look for	8 iterations
+RAM:CE3E 18 E2			     jr	     set_top_sprite
 RAM:CE40	     ; ---------------------------------------------------------------------------
 RAM:CE40
 RAM:CE40	     loc_CE40:							     ; CODE XREF: RAM:CE1Dj
 RAM:CE40 FD 7E 00		     ld	     a,	(iy+0)
 RAM:CE43 E6 F8			     and     0F8h ; 'ø'
-RAM:CE45 F6 07			     or	     7
+RAM:CE45 F6 07			     or	     7					     ; look the	other way
 RAM:CE47 18 F1			     jr	     loc_CE3A
 RAM:CE49
 RAM:CE49	     ; =============== S U B R O U T I N E =======================================
@@ -9378,7 +9381,7 @@ RAM:D6C9	     ; =============== S U B R O U T I N E ============================
 RAM:D6C9
 RAM:D6C9
 RAM:D6C9	     calc_pixel_XY:						     ; CODE XREF: handle_pickup_drop+F3p
-RAM:D6C9									     ; sub_CD33p ...
+RAM:D6C9									     ; calc_display_pos_sizep ...
 RAM:D6C9 DD 7E 01		     ld	     a,	(ix+1)				     ; X
 RAM:D6CC DD 86 02		     add     a,	(ix+2)				     ; add Y
 RAM:D6CF D6 80			     sub     128
@@ -9401,7 +9404,7 @@ RAM:D6EF
 RAM:D6EF	     ; =============== S U B R O U T I N E =======================================
 RAM:D6EF
 RAM:D6EF
-RAM:D6EF	     flip_sprite:						     ; CODE XREF: sub_CD33+3p
+RAM:D6EF	     flip_sprite:						     ; CODE XREF: calc_display_pos_size+3p
 RAM:D6EF									     ; RAM:print_spritep
 RAM:D6EF
 RAM:D6EF	     ; FUNCTION	CHUNK AT RAM:D865 SIZE 00000079	BYTES
